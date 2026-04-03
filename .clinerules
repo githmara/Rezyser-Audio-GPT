@@ -5,3 +5,10 @@
 # ZASADY WYKONYWANIA KODU
 - ABSOLUTNY ZAKAZ: Pod żadnym pozorem nie uruchamiaj serwera aplikacji (nie wolno Ci robić `streamlit run` ani odpalać plików `.bat`) po zakończeniu zadania.
 - DOZWOLONE: Możesz używać komendy `runtime\python.exe -c "twój kod"` do testowania izolowanych logik czy regexów, jeśli nie wymagają interakcji i kończą się natychmiast.
+### 🛠️ Obsługa błędów i środowiska:
+
+1. **Folder `runtime`**: Jest to folder LOKALNY, zignorowany przez `.gitignore`. Istnieje tylko w głównym katalogu projektu na komputerze użytkownika. Nigdy nie zakładaj, że znajdziesz go w tymczasowych folderach `worktrees` lub na GitHubie.
+2. **Błędy składni JSON**: Narzędzie `editor` jest wrażliwe na znaki specjalne. Jeśli otrzymasz błąd `Tool call arguments could not be parsed as JSON`, oznacza to, że Twoja próba edycji zawiera niezaescapowane cudzysłowy lub znaki nowej linii. 
+   - **ZAKAZ**: Nie próbuj naprawiać tego błędu poprzez pisanie skryptów `_patch.py` czy `_combine.py`. 
+   - **NAKAZ**: Spróbuj edytować mniejszy fragment kodu lub użyj prostszej zamiany `old_text` na `new_text` bez skomplikowanych znaków specjalnych.
+3. **Zasada "Stop-on-Fail"**: Jeśli narzędzie edycji lub komenda terminala zawiedzie więcej niż 2 razy z rzędu, masz absolutny zakaz szukania „kreatywnych obejść”. Musisz przerwać pracę, opisać problem i czekać na instrukcję użytkownika.
