@@ -1,0 +1,6 @@
+streamlit
+openai
+python-dotenv
+python-docx
+langdetect
+num2words

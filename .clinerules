@@ -1,0 +1,7 @@
+# ŚRODOWISKO I ŚCIEŻKI
+- Projekt korzysta z wbudowanego, przenośnego środowiska. Twój Python znajduje się w folderze `runtime`.
+- ZAWSZE używaj ścieżki `runtime\python.exe` do wywoływania Pythona (nie używaj systemowego `python`).
+
+# ZASADY WYKONYWANIA KODU
+- ABSOLUTNY ZAKAZ: Pod żadnym pozorem nie uruchamiaj serwera aplikacji (nie wolno Ci robić `streamlit run` ani odpalać plików `.bat`) po zakończeniu zadania.
+- DOZWOLONE: Możesz używać komendy `runtime\python.exe -c "twój kod"` do testowania izolowanych logik czy regexów, jeśli nie wymagają interakcji i kończą się natychmiast.

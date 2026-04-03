@@ -1,0 +1,17 @@
+# Środowisko przenośne (nie wrzucamy całego Pythona do Gita, waży za dużo!)
+runtime/
+
+# Pliki tymczasowe i cache
+__pycache__/
+*.pyc
+temp_*.jsonl
+
+# Środowisko i klucze API (KRYTYCZNE)
+*.env
+golden_key.env
+
+# Foldery z danymi użytkownika (skrypty, lore, streszczenia)
+skrypty/
+
+# Skrypty uruchomieniowe dla wersji Portable
+*.bat
