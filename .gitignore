@@ -15,3 +15,5 @@ skrypty/
 
 # Skrypty uruchomieniowe dla wersji Portable
 *.bat
+# Ustawienia lokalnego edytora
+.vscode/
