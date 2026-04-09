@@ -3,6 +3,7 @@
 runtime/
 # Ignorujemy wirtualne środowiska tworzone przez deweloperów
 venv/
+.venv/
 env/
 
 # --- PLIKI TYMCZASOWE I CACHE ---

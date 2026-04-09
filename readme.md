@@ -54,9 +54,29 @@ Aplikacja jest w pełni przenośna i gotowa do działania na systemach Windows b
 
 Niniejszy dokument to jedynie zarys architektoniczny projektu. Aby poznać zaawansowane techniki powstrzymywania halucynacji AI, instrukcje instalacji kompatybilnych syntezatorów mowy dla Windows i Apple oraz kompletny poradnik obsługi, **zapoznaj się z plikiem `instrukcja.txt`**.
 
-**Dla programistów (Jak zacząć pracę z kodem):**
-1. Sklonuj repozytorium na swój dysk.
-2. Uruchom plik `skonfiguruj_dev.bat`, aby automatycznie utworzyć środowisko wirtualne i pobrać zależności.
-3. Uruchom plik `uruchom_rezysera.bat`.
+### Dla programistów (Jak zacząć pracę z kodem)
 
-*Uwaga: Skrypty do budowania wydań (`buduj_wydanie.py`) wymagają specjalnego folderu `runtime/` z wersją przenośną Pythona, który nie jest częścią tego repozytorium.*
+**Windows:**
+1. Sklonuj repozytorium na swój dysk.
+2. Uruchom plik `skonfiguruj_dev.bat`, aby automatycznie utworzyć wirtualne środowisko i pobrać zależności.
+3. Uruchom plik `Uruchom_Rezysera.bat`.
+
+**macOS / Linux:**
+1. Sklonuj repozytorium i otwórz terminal w jego folderze.
+2. Wykonaj komendę `chmod +x *.sh`, aby nadać skryptom uprawnienia do uruchamiania.
+3. Wykonaj komendę `./skonfiguruj_dev.sh`, aby automatycznie utworzyć wirtualne środowisko i pobrać zależności.
+4. Uruchom aplikację komendą `./Uruchom_Rezysera.sh`.
+
+---
+
+### Dla użytkowników końcowych (Zwykłe użytkowanie)
+
+**Windows:**
+1. Pobierz najnowsze wydanie z zakładki Releases (paczka oznaczona jako *Latest*).
+2. Wypakuj pobrany plik ZIP: kliknij go prawym przyciskiem myszy (lub użyj klawisza aplikacji), wybierz "Wyodrębnij wszystkie..." (lub "Wypakuj pliki", zależnie od programu) i pozostaw domyślne ustawienia, aby utworzył się nowy folder. Możesz też pobrać i uruchomić instalator, aby wypakować pliki automatycznie do wybranego folderu.
+3. Wejdź do wypakowanego folderu, przeczytaj plik `instrukcja.txt` i uruchom `Uruchom_Rezysera.bat`. Miłej zabawy!
+
+**macOS / Linux:**
+Z powodu różnic w architekturze systemów, proces instalacji wygląda identycznie jak dla programistów. Pobierz kod źródłowy projektu (jako ZIP lub klonując repozytorium), otwórz terminal w pobranym folderze, nadaj uprawnienia (`chmod +x *.sh`) i użyj skryptów `.sh` do pierwszej instalacji oraz późniejszego uruchamiania.
+
+> **Ważna uwaga dla deweloperów:** Skrypty do automatycznego budowania wydań (`buduj_wydanie.py` oraz pliki `.iss`) służą wyłącznie do tworzenia paczek dla systemu Windows. Wymagają one specjalnego folderu `runtime/` z przenośną wersją Pythona. Folder ten celowo nie jest częścią tego repozytorium.

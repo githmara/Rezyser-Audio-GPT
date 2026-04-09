@@ -1,14 +1,16 @@
-# ŚRODOWISKO I ŚCIEŻKI
-- Projekt korzysta z wbudowanego, przenośnego środowiska. Twój Python znajduje się w folderze `runtime`.
-- ZAWSZE używaj ścieżki `runtime\python.exe` do wywoływania Pythona (nie używaj systemowego `python`).
+# ŚRODOWISKO I ŚCIEŻKI (ZUNIFIKOWANE)
+- Ten projekt ZAWSZE korzysta z wirtualnego środowiska Pythona (lokalnie jest to zazwyczaj `.venv` lub `venv`). 
+- Wszelkie instalacje pakietów (`pip install`) oraz wywoływanie skryptów do testów musisz wykonywać w ramach aktywnego środowiska wirtualnego.
+- **ZASADA PRZETRWANIA DLA AGENTA**: Jeśli zauważysz, że wirtualne środowisko (venv lub .venv) nie istnieje, NIE PANIKUJ i nie zgłaszaj błędu. Zamiast tego natychmiast uruchom skrypt ./skonfiguruj_dev.sh (jeśli jesteś na Linuxie) lub użyj natywnej komendy python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt, aby samodzielnie wygenerować sobie środowisko do pracy. Dopiero potem przystąp do wykonywania zadań.
+- **KRYTYCZNE ZABEZPIECZENIE:** Jeśli w głównym katalogu widzisz folder o nazwie `runtime/`, MASZ CAŁKOWITY ZAKAZ jego używania, modyfikowania i wywoływania z niego Pythona. Jest to pasywny folder (payload) zawierający wersję przenośną, wykorzystywany wyłącznie przez skrypt budujący wydanie. 
 
 # ZASADY WYKONYWANIA KODU
-- ABSOLUTNY ZAKAZ: Pod żadnym pozorem nie uruchamiaj serwera aplikacji (nie wolno Ci robić `streamlit run` ani odpalać plików `.bat`) po zakończeniu zadania.
-- DOZWOLONE: Możesz używać komendy `runtime\python.exe -c "twój kod"` do testowania izolowanych logik czy regexów, jeśli nie wymagają interakcji i kończą się natychmiast.
-### 🛠️ Obsługa błędów i środowiska:
+- ABSOLUTNY ZAKAZ: Pod żadnym pozorem nie uruchamiaj serwera aplikacji (nie wolno Ci robić `streamlit run` ani odpalać plików `.bat` czy `.sh`) po zakończeniu zadania.
+- DOZWOLONE: Możesz używać wywołań Pythona z flagą `-c` (np. `python -c "twój kod"`) do testowania izolowanych logik czy regexów, jeśli nie wymagają interakcji i kończą się natychmiast.
 
-1. **Folder `runtime`**: Jest to folder LOKALNY, zignorowany przez `.gitignore`. Istnieje tylko w głównym katalogu projektu na komputerze użytkownika. Nigdy nie zakładaj, że znajdziesz go w tymczasowych folderach `worktrees` lub na GitHubie.
-2. **Błędy składni JSON**: Narzędzie `editor` jest wrażliwe na znaki specjalne. Jeśli otrzymasz błąd `Tool call arguments could not be parsed as JSON`, oznacza to, że Twoja próba edycji zawiera niezaescapowane cudzysłowy lub znaki nowej linii. 
-   - **ZAKAZ**: Nie próbuj naprawiać tego błędu poprzez pisanie skryptów `_patch.py` czy `_combine.py`. 
-   - **NAKAZ**: Spróbuj edytować mniejszy fragment kodu lub użyj prostszej zamiany `old_text` na `new_text` bez skomplikowanych znaków specjalnych.
-3. **Zasada "Stop-on-Fail"**: Jeśli narzędzie edycji lub komenda terminala zawiedzie więcej niż 2 razy z rzędu, masz absolutny zakaz szukania „kreatywnych obejść”. Musisz przerwać pracę, opisać problem i czekać na instrukcję użytkownika.
+### 🛠️ Obsługa błędów i środowiska:
+1. **Błędy składni JSON**: Narzędzie `editor` jest wrażliwe na znaki specjalne. Jeśli otrzymasz błąd `Tool call arguments could not be parsed as JSON`, oznacza to, że Twoja próba edycji zawiera niezaescapowane cudzysłowy lub znaki nowej linii.
+- **ZAKAZ**: Nie próbuj naprawiać tego błędu poprzez pisanie skryptów `_patch.py` czy `_combine.py`.
+- **NAKAZ**: Spróbuj edytować mniejszy fragment kodu lub użyj prostszej zamiany `old_text` na `new_text` bez skomplikowanych znaków specjalnych.
+
+2. **Zasada "Stop-on-Fail"**: Jeśli narzędzie edycji lub komenda terminala zawiedzie więcej niż 2 razy z rzędu, masz absolutny zakaz szukania „kreatywnych obejść”. Musisz przerwać pracę, opisać problem i czekać na instrukcję użytkownika.
