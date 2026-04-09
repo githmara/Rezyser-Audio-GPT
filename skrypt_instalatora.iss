@@ -16,7 +16,7 @@ PrivilegesRequired=lowest
 OutputDir=.
 
 [Files]
-Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git\*,.vscode\*,.cline\*,__pycache__\*,skrypty\*,runtime\__pycache__\*,*.env,*.pyc,*.md,*.iss,*.zip,buduj_wydanie.py,requirements.txt,.clinerules,.gitignore"
+Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git\*,.vscode\*,.cline\*,__pycache__\*,skrypty\*,runtime\__pycache__\*,pages\__pycache__\*,venv\*,.venv\*,env\*,*.env,*.pyc,*.md,*.iss,*.sh,Rezyser_Audio_*.zip,Rezyser_Audio_*.exe,buduj_wydanie.py,requirements.txt,.clinerules,.gitignore,skonfiguruj_dev.bat"
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

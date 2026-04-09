@@ -16,19 +16,27 @@ nazwa_zip = f"Rezyser_Audio_v{wersja}_Portable.zip"
 KATALOG_ZRODLOWY = "."
 
 # 2. Definiowanie wykluczeń
-IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '__pycache__', 'skrypty'}
-IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'buduj_wydanie.py', 'skrypt_instalatora.iss', 'golden_key.env', nazwa_zip, 'skonfiguruj_dev.bat'}
-IGNOROWANE_ROZSZERZENIA = {'.env', '.pyc', '.md'}
+IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '__pycache__', 'skrypty', 'venv', '.venv', 'env'}
+IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'buduj_wydanie.py', 'skrypt_instalatora.iss', 'golden_key.env', 'skonfiguruj_dev.bat'}
+IGNOROWANE_ROZSZERZENIA = {'.env', '.pyc', '.md', '.sh'}
 
 def czy_ignorowac(sciezka, nazwa_pliku):
     czesci_sciezki = sciezka.replace('\\', '/').split('/')
     if any(ignorowany in czesci_sciezki for ignorowany in IGNOROWANE_FOLDERY):
         return True
+    
     if nazwa_pliku in IGNOROWANE_PLIKI:
         return True
+        
     _, ext = os.path.splitext(nazwa_pliku)
     if ext.lower() in IGNOROWANE_ROZSZERZENIA:
         return True
+        
+    # --- SMART FILTER: Ochrona runtime/ ---
+    # Ignorujemy pliki .exe i .zip TYLKO jeśli leżą bezpośrednio w głównym folderze ('.')
+    if sciezka == KATALOG_ZRODLOWY and ext.lower() in {'.exe', '.zip'}:
+        return True
+        
     return False
 
 # 3. Budowanie wersji Portable (ZIP)
