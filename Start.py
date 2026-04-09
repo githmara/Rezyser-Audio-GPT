@@ -29,7 +29,7 @@ def _otworz_notatnik():
     # Otwiera Notatnik w tle, nie blokując serwera Streamlit
     subprocess.Popen(["notepad.exe", env_path_abs])
 
-st.title("🎬 Witaj w Reżyserze Audio GPT (Wersja 10.0 - Publiczna Beta)")
+st.title("🎬 Witaj w Reżyserze Audio GPT (Wersja 11.0 - Publiczna Beta)")
 st.markdown("""
 To jest Twoje zintegrowane, hybrydowe studio nagraniowe. Zamiast uruchamiać skrypty osobno, **wybierz narzędzie z menu po lewej stronie**:
 

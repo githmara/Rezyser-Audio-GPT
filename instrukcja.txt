@@ -1,15 +1,33 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 10 - Pierwsza Publiczna Beta)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 11.0 - Publiczna Beta)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
 Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota) oraz narzędzia do budowania struktury pliku (Architekt Audiobooków). Wszystkie trzy narzędzia dostępne są w jednym oknie przeglądarki.
 
 
-KROK 1: Pierwsze uruchomienie
+KROK 1: Pierwsze uruchomienie (Cross-Platform)
 
-Aplikacja jest w pełni przenośna i gotowa do działania. Po prostu wejdź do folderu i uruchom plik Uruchom_Rezysera.bat (klikając w niego dwukrotnie, enterem lub tworząc do niego skrót, np. na pulpicie). Otworzy się czarne okno terminala, a po chwili w Twojej przeglądarce internetowej automatycznie załaduje się interfejs Reżysera. Gdy skończysz pracę, po prostu zamknij czarne okno terminala oraz przeglądarkę (np. skrótem Alt+F4).
+Aplikacja jest w pełni przenośna i gotowa do działania na systemie Windows. Po prostu wejdź do folderu i uruchom plik Uruchom_Rezysera.bat (klikając w niego dwukrotnie lub tworząc do niego skrót na pulpicie). Otworzy się czarne okno terminala, a po chwili w przeglądarce załaduje się interfejs Reżysera. Gdy skończysz pracę, zamknij okno terminala i przeglądarkę.
 
-Zapora systemu Windows: Przy pierwszym uruchomieniu system wyświetla okienko Zapory systemu Windows z pytaniem, czy zezwolić aplikacji na dostęp do sieci. Kliknij "Zezwól na dostęp" (lub "Allow access") — bez tego kroku narzędzia nie będą mogły komunikować się z serwerami OpenAI ani poprawnie uruchomić lokalnego serwera aplikacji. Jeśli przypadkowo klikniesz "Anuluj", możesz zmienić tę decyzję w Panelu sterowania → System i zabezpieczenia → Zapora systemu Windows Defender → Zezwalaj aplikacji lub funkcji na dostęp przez Zaporę systemu Windows Defender.
+Ważne: Folder runtime/ jest częścią wyłącznie gotowych paczek dla systemu Windows pobieranych z zakładki Releases na GitHubie. Zawiera izolowane środowisko Pythona gotowe do użycia bez instalacji. Jeśli klonujesz repozytorium, tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
+
+--- Dla Programistów (Windows — repozytorium Git) ---
+
+1. Sklonuj repozytorium na swój dysk.
+2. Uruchom plik skonfiguruj_dev.bat. Skrypt automatycznie utworzy wirtualne środowisko Pythona (venv) i zainstaluje wszystkie wymagane zależności z pliku requirements.txt.
+3. Uruchom plik Uruchom_Rezysera.bat — skrypt automatycznie wykryje folder venv i uruchomi aplikację.
+
+--- Dla Programistów i zwykłych użytkowników (macOS / Linux) ---
+
+1. Sklonuj repozytorium na swój dysk.
+2. Otwórz terminal w folderze projektu i nadaj skryptom uprawnienia do wykonania: chmod +x *.sh
+3. Uruchom skrypt konfiguracyjny: ./skonfiguruj_dev.sh — skrypt utworzy środowisko venv i zainstaluje zależności.
+4. Uruchom aplikację: ./Uruchom_Rezysera.sh
+
+Uprawnienia sieciowe i zapora (Firewall)
+Windows: Przy pierwszym uruchomieniu system wyświetla okienko Zapory systemu Windows z pytaniem, czy zezwolić aplikacji na dostęp do sieci. Kliknij "Zezwól na dostęp" (lub "Allow access") — bez tego kroku narzędzia nie będą mogły komunikować się z serwerami OpenAI ani poprawnie uruchomić lokalnego serwera aplikacji. Jeśli przypadkowo klikniesz "Anuluj", możesz zmienić tę decyzję w Panelu sterowania → System i zabezpieczenia → Zapora systemu Windows Defender → Zezwalaj aplikacji lub funkcji na dostęp przez Zaporę systemu Windows Defender.
+macOS: System może wyświetlić okienko z zapytaniem, czy program (często opisany po prostu jako Python) może akceptować nadchodzące połączenia sieciowe. Należy zezwolić na dostęp, aby interfejs przeglądarkowy mógł się uruchomić. W razie pomyłki możesz to zmienić w Ustawieniach systemowych → Sieć → Zapora sieciowa (Opcje).
+Linux: W większości standardowych dystrybucji lokalny serwer uruchomi się "po cichu", bez żadnych graficznych powiadomień. Zazwyczaj nie musisz podejmować żadnych działań. Jeśli jednak korzystasz z samodzielnie i rygorystycznie skonfigurowanego firewalla (np. ufw lub iptables), upewnij się, że ruch na lokalnym interfejsie (localhost) nie jest blokowany.
 
 Co zobaczysz po uruchomieniu: Na stronie głównej aplikacji znajdziesz sekcję "System Check". Jeśli klucz API nie jest jeszcze skonfigurowany, zobaczysz żółte ostrzeżenie informujące, że moduły oparte na AI (Reżyseria, Tłumacz) nie będą działać — darmowe funkcje lokalne (akcenty, Architekt) są jednak aktywne od razu. Konfigurację klucza opisuje kolejny krok.
 
@@ -20,11 +38,10 @@ Aby sztuczna inteligencja mogła działać, potrzebuje dostępu do serwerów Ope
 
 1. Załóż konto na platform.openai.com i doładuj konto w zakładce Billing.
 2. Wygeneruj klucz w zakładce API Keys (zaczyna się od sk-proj-). Uwaga: klucz jest wyświetlany tylko raz — w momencie tworzenia. Jeśli zamkniesz okno bez skopiowania, przepada bezpowrotnie i trzeba będzie go zastrzec (opcja revoke secret key) i wygenerować nowy. Skopiuj go od razu, zanim cokolwiek klikniesz.
-3. Na stronie głównej aplikacji kliknij przycisk "Wygeneruj plik golden_key.env". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu — bez żadnych pułapek z rozszerzeniami.
-4. Znajdź wygenerowany plik golden_key.env w folderze aplikacji. Kliknij go prawym przyciskiem myszy (lub naciśnij klawisz aplikacji na klawiaturze), by otworzyć menu kontekstowe, a następnie wybierz "Otwórz za pomocą" i wskaż Notatnik. Jeśli pojawi się monit systemu Windows z pytaniem, jak otworzyć plik, wybierz "Więcej aplikacji" i odszukaj Notatnik na liście.
-5. W otwartym pliku zobaczysz linię OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój skopiowany klucz bezpośrednio po znaku równości (bez spacji). Zapisz plik i odśwież stronę w przeglądarce.
+3. Na stronie głównej aplikacji kliknij przycisk "Wygeneruj plik golden_key.env". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu — bez żadnych pułapek z rozszerzeniami i otworzy Notatnik z szablonem gotowym do edycji.
+4. W otwartym pliku zobaczysz linię OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój skopiowany klucz bezpośrednio po znaku równości (bez spacji). Zapisz plik i odśwież stronę w przeglądarce.
 
-Wskazówka: Po odświeżeniu aplikacja ponownie sprawdzi plik i wyświetli zielony komunikat w sekcji "System Check" — oznacza to, że wszystkie moduły AI są gotowe do pracy.
+Wskazówka: Po odświeżeniu aplikacja ponownie sprawdzi plik i wyświetli zielony komunikat w sekcji "System Check" — oznacza to, że wszystkie moduły AI są gotowe do pracy. W przeciwnym wypadku jasno ci powie, co jest nie tak i pozwoli otworzyć notatnik, aby szybko dało się naprawić błąd.
 
 
 KROK 3: Główne Studio Reżyserskie
@@ -59,7 +76,7 @@ Jak używać Reżyserii?
 
 - Księga Świata (Pasek boczny): Tu wpisujesz zasady uniwersum. Każdy projekt ma teraz własną Księgę powiązaną z nazwą pliku — jeśli Twój plik historii to np. emilia_heist_audiobook.txt, Księga Świata zapisze się jako skrypty/emilia_heist_audiobook.md. Dlatego kolejność jest ważna: najpierw wpisz nazwę pliku projektu w sekcji "1. Zarządzanie historią", a dopiero potem możesz zapisać Księgę. Przycisk "Zapisz Księgę na stałe" pozostaje wyszarzony, dopóki nie podasz nazwy. Wczytanie istniejącego projektu przyciskiem "Wczytaj plik do pamięci" automatycznie załaduje też odpowiadający mu plik .md — nie musisz robić nic ręcznie. Uwaga: Bez wypełnionej Księgi Świata aplikacja zablokuje wysyłanie zapytań do AI — to celowe zabezpieczenie, które chroni Cię przed generowaniem tekstu bez żadnych zasad.
 - Pamięć Długotrwała (Pasek boczny): Drugie pole w pasku bocznym. Tu AI automatycznie zapisuje streszczenie fabuły, gdy pamięć zaczyna się przepełniać. Możesz też wpisać tu własne notatki ręcznie — model potraktuje je jako "co już wiem" przed przeczytaniem bieżącej sceny.
-- Tryb Burzy Mózgów: Wpisz luźny pomysł, a AI da Ci 3 opcje rozwoju fabuły. Dla każdej opcji od razu wygeneruje gotowy blok "--- SZKIC PROMPTU ---". Po wybraniu jednej z nich wklej ten prompt do Trybu Skryptu lub Audiobooka. Pamięć fabuły nie zmienia się podczas Burzy — możesz eksperymentować bez ryzyka!
+- Tryb Burzy Mózgów: Wpisz luźny pomysł, a AI da Ci 3 opcje rozwoju fabuły. Dla każdej opcji od razu wygeneruje gotowy blok "--- SZKIC PROMPTU ---". Po wybraniu jednej z nich wklej ten prompt do Trybu Skryptu lub Audiobooka i wprowadź ewentualne uwagi lub informacje dla modelu. Pamięć fabuły nie zmienia się podczas Burzy — możesz eksperymentować bez ryzyka!
 - Tryb Surowego Skryptu: Wklejasz tu "Szkic Promptu" wygenerowany w Burzy Mózgów. AI napisze długi fragment z pełnymi tagami [Speaker X: Imię - emocja] dla dialogów i efektami [SFX: ...] dla dźwięków. Tekst automatycznie dopisuje się do Twojego pliku (np. nowa_scena.txt) w folderze skrypty/.
 - Tryb Tradycyjnego Audiobooka: Tryb dla pisarzy. AI generuje czystą prozę literacką — zero tagów, zero fonetyki, klasyczne dialogi wplecione w narrację. Tekst dopisuje się do pliku tak samo jak w Trybie Skryptu.
 - Automatyczne tworzenie postaci: Skrypt jest zaprogramowany tak, by samoczynnie tworzyć nowe tagi [Speaker], jeśli fabuła wymaga nowej postaci. Wskazówka: Jeśli AI stworzy fajną postać, skopiuj jej tag i wklej do Księgi Świata, by model zapamiętał ją na stałe!
@@ -165,7 +182,19 @@ Tryb 2: Tryb Reżysera / Akcenty (Darmowy - Działa lokalnie)
 
 Narzędzie do "psucia" tekstu. Wymusza na syntezatorach łamany polski.
 
-Zintegrowane menu rozwijane Trybu Reżysera pozwala wybrać akcent bezpośrednio z jednej listy. Dostępne opcje to: Islandzki (Gudrun - OneCore, eSpeak; uwaga: Vocalizer nie posiada tego języka!), Włoski (Alice - Vocalizer/Apple, Elsa - OneCore), Fiński (Satu - Vocalizer/Apple, Heidi - OneCore), a także dwie opcje czyszczenia bez akcentu: "Żaden (Czyszczenie BEZ normalizacji liczb)" oraz "Żaden (Czyszczenie Z normalizacją liczb)". Opcja z normalizacją liczb automatycznie zamienia cyfry na ich słowny zapis (np. 15 staje się piętnaście) przed przetworzeniem — dzięki temu NVDA czyta liczby płynnie, a jeśli tekst ma wymuszony akcent, liczba też go dostanie, bez żadnych wyjątków.
+Zintegrowane menu rozwijane Trybu Reżysera pozwala wybrać akcent bezpośrednio z jednej listy. Dostępne opcje to:
+Angielski (Samantha / Mark — Vocalizer/Apple, Zira / Hazel — OneCore)
+Francuski (Thomas / Amelie — Vocalizer/Apple, Julie — OneCore)
+Niemiecki (Markus / Stefan — Vocalizer/Apple, Hedda / Katja — OneCore)
+Hiszpański (Jorge / Monica — Vocalizer/Apple, Helena — OneCore)
+Islandzki (Gudrun — OneCore, eSpeak; uwaga: Vocalizer nie posiada tego języka!)
+Włoski (Alice / Luca — Vocalizer/Apple, Elsa — OneCore)
+Fiński (Satu / Mikko — Vocalizer/Apple, Heidi — OneCore)
+A także dwie opcje czyszczenia bez akcentu:
+"Żaden (Czyszczenie BEZ normalizacji liczb)"
+"Żaden (Czyszczenie Z normalizacją liczb)"
+Opcja z normalizacją liczb automatycznie zamienia cyfry na ich słowny zapis (np. 15 staje się "piętnaście") przed przetworzeniem — dzięki temu NVDA czyta liczby płynnie, a jeśli tekst ma wymuszony akcent, liczba też go dostanie, bez żadnych wyjątków.
+Zapytacie pewnie, czy syntezator będzie umiał odmieniać tak znormalizowane liczby w zależności od kontekstu? Odpowiedź brzmi: nie. I jest to celowy feature. Jak powszechnie wiadomo: "język polski być trudny" — a obcokrajowiec kaleczący naszą gramatykę tylko dodaje autentyczności łamanemu akcentowi!
 
 Naprawiacz Tagów (NOWOŚĆ w wersji 9): Na końcu listy znajdziesz dodatkową opcję — Naprawiacz Tagów. Nie stosuje żadnych reguł fonetycznych ani czyszczenia. Robi jedną rzecz: wstrzykuje do pliku podany przez Ciebie dwuliterowy kod języka ISO (np. "fi" dla fińskiego, "en" dla angielskiego). Przydaje się, gdy masz już gotowy plik — np. przetłumaczony wcześniej przez Tłumacza AI — ale z jakiegoś powodu wyszedł z błędnym albo brakującym tagiem językowym. Zamiast tłumaczyć go od nowa, po prostu uruchamiasz Naprawiacz z właściwym kodem ISO i po chwili masz poprawny plik.
 
@@ -202,7 +231,7 @@ Vocalizer nie jest wbudowany w system Windows — to płatne dodatki do NVDA dys
 - Pobieranie głosów: Sam sterownik to za mało — po jego instalacji NVDA domyślnie wyświetli błąd ładowania syntezatora. By temu zaradzić, musisz osobno pobrać paczki z głosami, których zamierzasz używać (np. polska Ewa do płynnego czytania kontrolek systemowych oraz fińska Satu do akcentów w Poliglocie).
 Uwaga: Tylko pamiętaj o włączeniu automatycznej zmiany języka po zamknięciu podstrony, by się nie rozczarować potem!
 - Szybka instalacja: Pobrane pliki to pakiety wtyczek NVDA (mają rozszerzenie .nvda-addon). Nie musisz szukać ich instalacji przez NVDA -> Narzędzia -> Add-on Store. Jeśli NVDA jest włączone, po prostu "otwórz" te pliki w zwykły sposób (naciskając Enter). Windows może ukryć ich rozszerzenie, ale dymek podpowiedzi poprawnie odczyta je jako "Plik pakietu wtyczki NVDA". Czytnik sam zapyta, czy chcesz zainstalować dodatek.
-Po zainstalowaniu sterownika i głosów oraz ponownym uruchomieniu czytnika, Vocalizer pojawi się na liście syntezatorów w ustawieniach NVDA.
+Po zainstalowaniu sterownika i głosów oraz ponownym uruchomieniu czytnika, Vocalizer pojawi się na liście syntezatorów w ustawieniach NVDA i nie powinien wyświetlać błędów.
 
 Microsoft OneCore
 Darmowe głosy wbudowane w system Windows (Mobile Voices). Dobry kompromis między jakością a dostępnością języków. Oferuje wysoką jakość i posiada wsparcie dla języka islandzkiego (Gudrun), fińskiego (Heidi) oraz włoskiego (Elsa). Uwaga: OneCore natywnie NIE obsługuje automatycznego przełączania języka na podstawie tagów lang (chyba że używasz wbudowanego w system czytnika ekranu narrator) — patrz sekcja poniżej.
@@ -273,7 +302,7 @@ Tę część musisz bezwzględnie zamknąć w JEDNYM bloku kodu Markdown (użyj 
 3. Używaj podwójnego hashtagu (##) dla podsekcji.
 4. Używaj myślników (-) do tworzenia czytelnych list.
 5. Używaj podwójnych gwiazdek (**tekst**), by pogrubić absolutne, nienaruszalne zasady (np. **Bohater NIGDY nie kłamie**).
-6. Opisz psychologię postaci, ich największe wady i motywacje. W przypadku postaci dodaj informacje o akcencie i tonie głosu w tagu, np. [Speaker 1: Imię] - sepleni i akcent francuski.
+6. Opisz psychologię postaci, ich największe wady i motywacje. W przypadku postaci obcojęzycznych, dodaj informację o akcencie bezpośrednio przy tagu, np. `[Speaker 1: Imię] - sepleni i ma akcent francuski`. **Wskazówka techniczna:** Użycie słowa kluczowego `akcent` jest bezwzględnie wymagane, ponieważ to na jego podstawie zewnętrzny skrypt aplikacji automatycznie wykrywa i nakłada poprawne reguły fonetyczne na dialogi danej postaci.
 CZĘŚĆ 2: REKOMENDACJA TRYBU
 Tę część umieść POZA blokiem kodu, jako zwykły tekst pod spodem. Doradź mi, który z trybów mojej aplikacji będzie najlepszy do realizacji tego pomysłu: 🎬 Tryb Surowego Skryptu (słuchowiska, SFX, fonetyka), czy 📖 Tryb Tradycyjnego Audiobooka (klasyczna proza literacka)."
 
@@ -319,9 +348,6 @@ Architekt Audiobooków nie zapisuje już wynikowego pliku zawsze pod tą samą n
 
 Funkcje zachowane bez zmian z wersji 8
 
-Narzędzie naprawcze napraw_api.bat 
-Do folderu aplikacji dołączono gotowe narzędzie pomocnicze napraw_api.bat. Skrypt automatycznie wykrywa i naprawia najczęstszy błąd konfiguracyjny — sytuację, gdy Notatnik zapisał plik klucza jako golden_key.env.txt zamiast golden_key.env. Narzędzie sprawdza istnienie pliku, weryfikuje jego zawartość i zmienia nazwę bez żadnej ręcznej ingerencji użytkownika.
-
 Powrót do formatu .txt dla plików projektów (ZMIANA)
 Pliki projektów i streszczenia zapisują się teraz w formacie .txt zamiast .md (Markdown). Eksperyment z formatem .md jako psychologiczną barierą przed edycją okazał się nieskuteczny — AI często notorycznie łamie zasadę anti-closure i często lepiej edytować plik na bieżąco i potem przeładowywać pamięć, by AI, w miarę możliwości, nie dostawało ukrytego przyzwolenia na łamanie zakazu. Format .txt jest bardziej intuicyjny i czytelny dla każdego.
 
@@ -363,9 +389,29 @@ Mapa Cięć (Tryb Skryptu) — zastąpiona panelem zarządzania Aktami i Scenami
 Adaptacja Skryptu na Audiobooka (Tryb Skryptu) — usunięta z powodów finansowych. Przepływ pracy generował trzy osobne koszty: generowanie skryptu, potencjalne streszczowanie przy przepełnieniu pamięci, a na końcu ponowne generowanie całości jako prozy audiobookowej. Zalecamy pisanie bezpośrednio w Trybie Tradycyjnego Audiobooka od samego początku.
 
 
-Nowe funkcje i zmiany w wersji 10 (Pierwsza Publiczna Beta)
+Funkcje z wersji 10.0 (zachowane bez zmian w wersji 11.0)
 
 - Automatyczny generator pliku konfiguracyjnego golden_key.env wbudowany prosto w główny interfejs aplikacji. Użytkownik nie musi już ręcznie tworzyć pliku ani martwić się pułapką rozszerzenia .txt — wystarczy jeden klik przycisku "Wygeneruj plik golden_key.env" dostępnego na stronie głównej, a system tworzy czysty, gotowy plik we właściwym miejscu.
 - Całkowite usunięcie przestarzałego skryptu napraw_api.bat, który nie jest już potrzebny. Problem, który ten skrypt rozwiązywał (błędne rozszerzenie pliku nadawane przez Notatnik), jest teraz całkowicie wyeliminowany dzięki wbudowanemu generatorowi.
 - Dodanie oficjalnej dokumentacji dotyczącej ograniczeń dostępności (Accessibility) związanych z odświeżaniem komponentów Reacta i wymową linków przez NVDA. Sekcja wskazówek dla użytkowników czytników ekranu zawiera teraz nowy punkt 4, który szczerze wyjaśnia, dlaczego pozycje w menu bocznym są czytane z angielskim akcentem i że jest to nieuniknione ograniczenie architektury frameworku Streamlit, a nie błąd aplikacji.
 - Wieloksiążkowość Księgi Świata — każdy projekt ma teraz własny plik lore (NOWOŚĆ). Dawniej istniał jeden, wspólny plik moje_lore.md, który był ładowany przy każdym uruchomieniu aplikacji — niezależnie od tego, nad którym projektem pracujesz. Od wersji 10 Księga Świata jest ściśle powiązana z nazwą pliku projektu: jeśli Twoja fabuła to skrypty/emilia_heist_audiobook.txt, to jej Księga to skrypty/emilia_heist_audiobook.md. Przycisk "Zapisz Księgę na stałe" jest wyszarzony, dopóki nie wpiszesz nazwy pliku w sekcji "1. Zarządzanie historią" — kolejność jest tu celowa i wymuszana przez interfejs. Kliknięcie "Wczytaj plik do pamięci" automatycznie ładuje odpowiadający plik .md z dysku, o ile istnieje. Zmiana ma też praktyczny wymiar organizacyjny: możesz teraz prowadzić kilka projektów jednocześnie, a każdy będzie miał swoje własne, odizolowane zasady świata i listę postaci — bez ryzyka, że Emilia z napadu na skarbiec nagle wyląduje w kosmicznej operze.
+
+
+
+Nowe funkcje i zmiany w wersji 11.0
+
+- Nowe akcenty w Poliglocie (NOWOŚĆ — cztery nowe języki europejskie). Do menu Trybu Reżysera dodano cztery nowe opcje fonetycznego "psucia" tekstu: Angielski (Samantha / Mark / Zira / Hazel), Francuski (Thomas / Amelie / Julie), Niemiecki (Stefan / Markus / Katja / Hedda), Hiszpański (Jorge / Monica / Helena). Każdy nowy akcent automatycznie wstrzykuje odpowiedni kod ISO (en, fr, de, es) do generowanego pliku .html lub .docx — NVDA od razu użyje właściwego głosu dla przetworzonego tekstu.
+
+- Cross-platform: Wsparcie dla macOS i Linux (ZMIANA dokumentacji). Sekcja "Pierwsze uruchomienie" została gruntownie przepisana. Teraz rozróżnia trzy ścieżki: użytkownicy końcowi Windows pobierają gotową paczkę ZIP z zakładki Releases i uruchamiają Uruchom_Rezysera.bat; programiści Windows konfigurują środowisko przez skonfiguruj_dev.bat; użytkownicy macOS i Linux konfigurują środowisko przez ./skonfiguruj_dev.sh i uruchamiają ./Uruchom_Rezysera.sh.
+
+- Folder runtime/ — wyjaśnienie statusu (DOKUMENTACJA). Sekcja "Pierwsze uruchomienie" zawiera teraz jawne wyjaśnienie, że folder runtime/ (środowisko Pythona dla paczek ZIP) jest dystrybuowany wyłącznie w gotowych paczkach dla systemu Windows z zakładki Releases. W repozytorium Git ten folder nie istnieje i być nie powinien.
+
+- Aktualizacja imion syntezatorów w menu Poligloty (ZMIANA). Zaktualizowano nazwy głosów w menu selectbox dla istniejących języków: Włoski ma teraz również Luca (Vocalizer), Fiński ma teraz również Mikko (Vocalizer). Islandzki zachował nazwę bez znaków diakrytycznych (Gudrun zamiast Gudrun ze znakiem eth) dla lepszej kompatybilności.
+
+
+Funkcje zachowane bez zmian z wersji 10
+
+- Automatyczny generator pliku golden_key.env wbudowany w interfejs.
+- Wieloksiążkowość Księgi Świata (każdy projekt ma własny plik .md z zasadami świata).
+- Odporny na awarie mechanizm wznawiania tłumaczenia (zapis do .jsonl).
+- Naprawiacz Tagów w Trybie Reżysera (wstrzykiwanie kodu ISO).

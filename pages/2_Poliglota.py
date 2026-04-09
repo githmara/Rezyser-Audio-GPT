@@ -117,6 +117,45 @@ def akcent_finski(text):
     text = text.replace('g', 'k').replace('G', 'K')
     return sklej_pojedyncze_litery(text)
 
+def akcent_angielski(text):
+    text = usun_polskie_znaki(text)
+    text = text.replace('szcz', 'shch').replace('Szcz', 'Shch').replace('SZCZ', 'SHCH')
+    text = text.replace('sz', 'sh').replace('Sz', 'Sh')
+    text = text.replace('cz', 'ch').replace('Cz', 'Ch')
+    text = text.replace('rz', 'zh').replace('Rz', 'Zh')
+    text = text.replace('ch', 'h').replace('Ch', 'H')
+    text = text.replace('w', 'v').replace('W', 'V')
+    return sklej_pojedyncze_litery(text)
+
+def akcent_francuski(text):
+    text = usun_polskie_znaki(text)
+    text = text.replace('ch', 'sh').replace('Ch', 'Sh')
+    text = text.replace('sz', 'sh').replace('Sz', 'Sh')
+    text = text.replace('cz', 'tch').replace('Cz', 'Tch')
+    text = text.replace('rz', 'j').replace('Rz', 'J')
+    text = text.replace('h', '').replace('H', '')
+    text = text.replace('r', 'gh').replace('R', 'Gh')
+    text = text.replace('w', 'v').replace('W', 'V')
+    return sklej_pojedyncze_litery(text)
+
+def akcent_niemiecki(text):
+    text = usun_polskie_znaki(text)
+    text = text.replace('sz', 'sch').replace('Sz', 'Sch')
+    text = text.replace('cz', 'tsch').replace('Cz', 'Tsch')
+    text = text.replace('rz', 'rsch').replace('Rz', 'Rsch')
+    text = text.replace('w', 'v').replace('W', 'V')
+    text = text.replace('v', 'f').replace('V', 'F')
+    return sklej_pojedyncze_litery(text)
+
+def akcent_hiszpanski(text):
+    text = usun_polskie_znaki(text)
+    text = text.replace('sz', 's').replace('Sz', 'S')
+    text = text.replace('cz', 'ch').replace('Cz', 'Ch')
+    text = text.replace('rz', 'r').replace('Rz', 'R')
+    text = text.replace('w', 'b').replace('W', 'B')
+    text = text.replace('v', 'b').replace('V', 'B')
+    return sklej_pojedyncze_litery(text)
+
 def procesuj_z_ochrona_tagow(text, funkcja_akcentu):
     parts = re.split(r'(<[^>]+>)', text)
     for i in range(0, len(parts), 2): 
@@ -225,8 +264,12 @@ else:
             "Żaden (Czyszczenie BEZ normalizacji liczb)",
             "Żaden (Czyszczenie Z normalizacją liczb)",
             "Islandzki (np. Guðrún / eSpeak)",
-            "Włoski (np. Alice / Elsa)",
-            "Fiński (np. Satu / Heidi)",
+            "Angielski (np. Samantha / Mark / Zira / Hazel)",
+            "Francuski (np. Thomas / Amelie / Julie)",
+            "Niemiecki (np. Stefan / Markus / Katja / Hedda)",
+            "Hiszpański (np. Jorge / Monica / Helena)",
+            "Włoski (np. Alice / Luca / Elsa)",
+            "Fiński (np. Satu / Mikko / Heidi)",
             "🔧 Naprawiacz Tagów (Tylko wstrzyknięcie kodu ISO)"
         )
     )
@@ -407,6 +450,17 @@ Zwróć **wyłącznie** przetłumaczony tekst — nic więcej."""
                 base_name = f"akcent_{oryginalna_nazwa}_{safe_lang}"
                 iso_code = "pl"
                 
+                if "Angielski" in target_lang:
+                    iso_code = "en"
+                elif "Francuski" in target_lang:
+                    iso_code = "fr"
+                elif "Niemiecki" in target_lang:
+                    iso_code = "de"
+                elif "Hiszpa" in target_lang:
+                    iso_code = "es"
+                else:
+                    iso_code = "pl"
+
             if "Naprawiacz" not in target_lang:
                 try:
                     detected_lang = detect(content)
@@ -424,6 +478,18 @@ Zwróć **wyłącznie** przetłumaczony tekst — nic więcej."""
                 elif "Fiński" in target_lang:
                     content = oczysc_tekst_tts(content, z_normalizacja=True)
                     result_text = procesuj_z_ochrona_tagow(content, akcent_finski)
+                elif "Angielski" in target_lang:
+                    content = oczysc_tekst_tts(content, z_normalizacja=True)
+                    result_text = procesuj_z_ochrona_tagow(content, akcent_angielski)
+                elif "Francuski" in target_lang:
+                    content = oczysc_tekst_tts(content, z_normalizacja=True)
+                    result_text = procesuj_z_ochrona_tagow(content, akcent_francuski)
+                elif "Niemiecki" in target_lang:
+                    content = oczysc_tekst_tts(content, z_normalizacja=True)
+                    result_text = procesuj_z_ochrona_tagow(content, akcent_niemiecki)
+                elif "Hiszpa" in target_lang:
+                    content = oczysc_tekst_tts(content, z_normalizacja=True)
+                    result_text = procesuj_z_ochrona_tagow(content, akcent_hiszpanski)
                 elif "Żaden" in target_lang:
                     if "BEZ" in target_lang:
                         result_text = oczysc_tekst_tts(content, z_normalizacja=False)
@@ -443,6 +509,10 @@ Zwróć **wyłącznie** przetłumaczony tekst — nic więcej."""
                                 if "Islandzki" in target_lang: run.text = procesuj_z_ochrona_tagow(oczysc_tekst_tts(run.text, True), akcent_islandzki)
                                 elif "Włoski" in target_lang: run.text = procesuj_z_ochrona_tagow(oczysc_tekst_tts(run.text, True), akcent_wloski)
                                 elif "Fiński" in target_lang: run.text = procesuj_z_ochrona_tagow(oczysc_tekst_tts(run.text, True), akcent_finski)
+                                elif "Angielski" in target_lang: run.text = procesuj_z_ochrona_tagow(oczysc_tekst_tts(run.text, True), akcent_angielski)
+                                elif "Francuski" in target_lang: run.text = procesuj_z_ochrona_tagow(oczysc_tekst_tts(run.text, True), akcent_francuski)
+                                elif "Niemiecki" in target_lang: run.text = procesuj_z_ochrona_tagow(oczysc_tekst_tts(run.text, True), akcent_niemiecki)
+                                elif "Hiszpa" in target_lang: run.text = procesuj_z_ochrona_tagow(oczysc_tekst_tts(run.text, True), akcent_hiszpanski)
                                 elif "Żaden" in target_lang and "Naprawiacz" not in target_lang: 
                                     run.text = oczysc_tekst_tts(run.text, "BEZ" not in target_lang)
                                 
