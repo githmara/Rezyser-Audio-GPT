@@ -53,3 +53,10 @@ Aplikacja jest w pełni przenośna i gotowa do działania na systemach Windows b
 ## 📖 Pełna Dokumentacja i Obieg Pracy
 
 Niniejszy dokument to jedynie zarys architektoniczny projektu. Aby poznać zaawansowane techniki powstrzymywania halucynacji AI, instrukcje instalacji kompatybilnych syntezatorów mowy dla Windows i Apple oraz kompletny poradnik obsługi, **zapoznaj się z plikiem `instrukcja.txt`**.
+
+**Dla programistów (Jak zacząć pracę z kodem):**
+1. Sklonuj repozytorium na swój dysk.
+2. Uruchom plik `skonfiguruj_dev.bat`, aby automatycznie utworzyć środowisko wirtualne i pobrać zależności.
+3. Uruchom plik `uruchom_rezysera.bat`.
+
+*Uwaga: Skrypty do budowania wydań (`buduj_wydanie.py`) wymagają specjalnego folderu `runtime/` z wersją przenośną Pythona, który nie jest częścią tego repozytorium.*

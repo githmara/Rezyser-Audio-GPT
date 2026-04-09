@@ -1,19 +1,29 @@
-# Środowisko przenośne (nie wrzucamy całego Pythona do Gita, waży za dużo!)
+# --- ŚRODOWISKO I BIBLIOTEKI ---
+# Ignorujemy ciężki folder runtime (lokalny Python), którego nie wysyłamy na GitHub 
 runtime/
+# Ignorujemy wirtualne środowiska tworzone przez deweloperów
+venv/
+env/
 
-# Pliki tymczasowe i cache
+# --- PLIKI TYMCZASOWE I CACHE ---
+# Czyścimy cache Pythona we wszystkich podfolderach (również w /pages) 
 __pycache__/
 *.pyc
+# Pliki tymczasowe tłumacza
 temp_*.jsonl
 
-# Środowisko i klucze API (KRYTYCZNE)
+# --- DANE UŻYTKOWNIKA I KLUCZE (KRYTYCZNE) ---
+# Folder ze skryptami i historiami użytkownika 
+skrypty/
+# Klucz API i pliki środowiskowe (nigdy nie publikujemy!) 
 *.env
 golden_key.env
 
-# Foldery z danymi użytkownika (skrypty, lore, streszczenia)
-skrypty/
+# --- ARTEFAKTY WYDANIA (BUILD) ---
+# Ignorujemy gotowe paczki ZIP i instalatory EXE, by nie zaśmiecać repozytorium
+*.zip
+*.exe
 
-# Skrypty uruchomieniowe dla wersji Portable
-*.bat
-# Ustawienia lokalnego edytora
+# --- USTAWIENIA EDYTORA ---
 .vscode/
+.cline/
