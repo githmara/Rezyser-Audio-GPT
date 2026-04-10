@@ -1,20 +1,24 @@
-# ŚRODOWISKO I ŚCIEŻKI (ZUNIFIKOWANE)
-- Ten projekt ZAWSZE korzysta z wirtualnego środowiska Pythona (lokalnie jest to zazwyczaj `.venv` lub `venv`). 
-- Wszelkie instalacje pakietów (`pip install`) oraz wywoływanie skryptów do testów musisz wykonywać w ramach aktywnego środowiska wirtualnego.
-- **ZASADA PRZETRWANIA DLA AGENTA**: Jeśli zauważysz, że wirtualne środowisko (venv lub .venv) nie istnieje, NIE PANIKUJ i nie zgłaszaj błędu. Zamiast tego natychmiast uruchom skrypt ./skonfiguruj_dev.sh (jeśli jesteś na Linuxie) lub użyj natywnej komendy python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt, aby samodzielnie wygenerować sobie środowisko do pracy. Dopiero potem przystąp do wykonywania zadań.
-- **KRYTYCZNE ZABEZPIECZENIE:** Jeśli w głównym katalogu widzisz folder o nazwie `runtime/`, MASZ CAŁKOWITY ZAKAZ jego używania, modyfikowania i wywoływania z niego Pythona. Jest to pasywny folder (payload) zawierający wersję przenośną, wykorzystywany wyłącznie przez skrypt budujący wydanie. 
+# ŚRODOWISKO I ARCHITEKTURA (MIGRACJA NA WXPYTHON)
+- Projekt przechodzi pełną migrację z frameworka Streamlit (web) na wxPython (natywne GUI desktopowe), z naciskiem na maksymalną dostępność dla czytników ekranu (A11y, np. NVDA).
+- ZMIEŃ PARADYGMAT: Odchodzimy od kodu proceduralnego pisanego od góry do dołu. Pisz kod obiektowy. Rozdzielaj logikę na klasy (np. dziedziczące po `wx.Frame`, `wx.Panel`).
+- ACCESSIBILITY FIRST: Zawsze dbaj o intuicyjną nawigację z klawiatury. Używaj Sizerów (`wx.BoxSizer`, itp.) i wstrzymuj się z tworzeniem własnych, niestandardowych kontrolek, jeśli systemowe (np. `wx.TextCtrl`, `wx.Button`) spełniają zadanie.
 
-# ZASADY WYKONYWANIA KODU
-- ABSOLUTNY ZAKAZ: Pod żadnym pozorem nie uruchamiaj testowo aplikacji GUI ani głównej pętli zdarzeń (`app.MainLoop()`). Ponieważ terminal jest zablokowany, otwarcie okna aplikacji spowoduje trwałe zawieszenie Twojego procesu (będziesz czekał w nieskończoność na zamknięcie okna przez użytkownika). Jeśli musisz przetestować logikę, testuj tylko czyste funkcje lub izoluj kod od GUI.
-- DOZWOLONE: Możesz używać wywołań Pythona z flagą `-c` (np. `python -c "twój kod"`) do testowania izolowanych logik czy regexów, jeśli nie wymagają interakcji i kończą się natychmiast.
-- NOWY PARADYGMAT: Projekt migruje ze Streamlita na wxPython. Przestań myśleć liniowo. Używaj programowania obiektowego. Twórz klasy dziedziczące po `wx.Frame` i `wx.Panel`. Zamiast folderu `pages/` ze Streamlita, podziel aplikację na logiczne moduły Pythona (np. `gui_main.py`, `gui_rezyser.py`, `gui_poliglota.py`).
-- ACCESSIBILITY FIRST: Zawsze przypisuj odpowiednie etykiety do kontrolek. Używaj Sizerów (`wx.BoxSizer`, `wx.GridBagSizer`), aby interfejs skalował się poprawnie i zachowywał logiczną kolejność tabulacji dla czytników ekranu.
+# ZARZĄDZANIE TERMINALEM I TESTOWANIEM (KRYTYCZNE PUŁAPKI)
+- Masz pełny dostęp do terminala systemowego i plików, ale MUSISZ przestrzegać poniższych reguł bezpieczeństwa:
+1. PROBLEM PIERWSZEGO TERMINALA: Pierwsze otwarcie terminala w sesji (zwłaszcza na Windows/Bash) często wiąże się z automatyczną aktywacją środowiska wirtualnego, co "zjada" lub ukrywa output Twojej pierwszej komendy.
+   -> ROZWIĄZANIE: Kiedy uruchamiasz pierwszy skrypt testowy w nowym zadaniu, ZAWSZE przekierowuj jego wyjście do tymczasowego pliku tekstowego (np. `python test.py > _output.txt 2>&1`). Następnie odczytaj ten plik natywnym narzędziem `read_file`.
+2. ZAKAZ BLOKOWANIA TERMINALA: Pod żadnym pozorem nie uruchamiaj aplikacji GUI w sposób ciągły (np. `python main.py` z aktywnym `app.MainLoop()`). Spowoduje to całkowite zawieszenie Twojego procesu (będziesz czekał w nieskończoność, aż użytkownik ręcznie zamknie okno).
+   -> ROZWIĄZANIE: Jeśli musisz przetestować logikę w Pythonie, wykonuj wyłącznie testy jednostkowe lub izolowane fragmenty logiki (np. `python -c "..."`), które kończą się natychmiast i zwracają wynik.
+3. KRYTYCZNE ZABEZPIECZENIE: Masz CAŁKOWITY ZAKAZ używania, modyfikowania i uruchamiania czegokolwiek z folderu `runtime/`. Jest to folder dystrybucyjny. Używaj tylko lokalnego środowiska wirtualnego.
 
-### 🛠️ Obsługa błędów i środowiska:
-1. **Błędy składni JSON**: Narzędzie `editor` jest wrażliwe na znaki specjalne. Jeśli otrzymasz błąd `Tool call arguments could not be parsed as JSON`, oznacza to, że Twoja próba edycji zawiera niezaescapowane cudzysłowy lub znaki nowej linii.
-- **ZAKAZ**: Nie próbuj naprawiać tego błędu poprzez pisanie skryptów `_patch.py` czy `_combine.py`.
-- **NAKAZ**: Spróbuj edytować mniejszy fragment kodu lub użyj prostszej zamiany `old_text` na `new_text` bez skomplikowanych znaków specjalnych.
+# ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
+- Narzędzie Cline może bezgłośnie "zamrozić się" (brak błędu, tylko przycisk "Cancel"), jeśli próba zapisu do pliku (lub odpowiedź modelu) drastycznie przekroczy limit tokenów na jedno uderzenie API.
+1. PRACA ETAPOWA: Nigdy nie próbuj przepisać całego, potężnego pliku (np. `1_Rezyseria.py`) w jednym kroku. Zawsze pytaj użytkownika o zgodę na podział na mniejsze moduły.
+2. DELTA UPDATES: Gdy zmieniasz niewielki fragment w bardzo długim pliku, używaj wbudowanych, precyzyjnych narzędzi edycji, zamiast wypisywać całą zawartość pliku na nowo poprzez komendę `write_file`.
+3. Jeśli użytkownik prosi o duży refaktor, podziel go np. tak:
+   - Krok 1: Struktura klasy i UI (bez funkcji).
+   - Krok 2: Podpięcie pierwszych zdarzeń (Events).
+   - Krok 3: Przeniesienie skomplikowanej logiki z dawnego systemu (np. operacje na API OpenAI).
 
-2. **Zasada "Stop-on-Fail"**: Jeśli narzędzie edycji lub komenda terminala zawiedzie więcej niż 2 razy z rzędu, masz absolutny zakaz szukania „kreatywnych obejść”. Musisz przerwać pracę, opisać problem i czekać na instrukcję użytkownika.
-3. **Kodowanie i Polskie Znaki (KRYTYCZNE)**: Projekt używa języka polskiego i kodowania UTF-8. Jeśli napotkasz problem z edycją plików zawierających polskie znaki diakrytyczne (ą, ę, ł, ó, ś, ć, ż, ź, ń) lub problem z końcami linii (CRLF vs LF), MASZ ABSOLUTNY ZAKAZ usuwania polskich znaków (zastępowania ich odpowiednikami ASCII) jako "obejścia" problemu. Twoje modyfikacje MUSZĄ zachować poprawną polską ortografię. Jeśli wbudowany `editor` zawodzi, użyj skryptu Pythona do podmiany, pamiętając o `encoding='utf-8'`, lub użyj unikalnych fragmentów ASCII jako kotwic.
-4. **Czystość Repozytorium (KRYTYCZNE)**: Jeśli zmuszony jesteś utworzyć JAKIEKOLWIEK pliki tymczasowe do diagnozy lub patchowania kodu (np. `_patch.py`, `_test.py`, `fp.py`), masz BEZWZGLĘDNY OBOWIĄZEK usunąć je przed uznaniem zadania za zakończone. Ponieważ Twój terminal systemowy jest ZABLOKOWANY przez serwer Kanban, MASZ ZAKAZ pisania skryptów czyszczących w Pythonie oraz zakaz używania komend powłoki (rm/del). Używaj WYŁĄCZNIE swoich natywnych, wbudowanych narzędzi plikowych (akcja delete_file / edytor) do ich usunięcia.
+# SPRZĄTANIE (HIGIENA REPOZYTORIUM)
+- Zawsze usuwaj wszystkie pliki tymczasowe (np. `_output.txt`, pliki testowe py), które utworzyłeś w trakcie zadania. Kiedy ogłaszasz koniec pracy, katalog główny musi być czysty i wolny od Twoich "śladów".
