@@ -5,8 +5,10 @@
 - **KRYTYCZNE ZABEZPIECZENIE:** Jeśli w głównym katalogu widzisz folder o nazwie `runtime/`, MASZ CAŁKOWITY ZAKAZ jego używania, modyfikowania i wywoływania z niego Pythona. Jest to pasywny folder (payload) zawierający wersję przenośną, wykorzystywany wyłącznie przez skrypt budujący wydanie. 
 
 # ZASADY WYKONYWANIA KODU
-- ABSOLUTNY ZAKAZ: Pod żadnym pozorem nie uruchamiaj serwera aplikacji (nie wolno Ci robić `streamlit run` ani odpalać plików `.bat` czy `.sh`) po zakończeniu zadania.
+- ABSOLUTNY ZAKAZ: Pod żadnym pozorem nie uruchamiaj testowo aplikacji GUI ani głównej pętli zdarzeń (`app.MainLoop()`). Ponieważ terminal jest zablokowany, otwarcie okna aplikacji spowoduje trwałe zawieszenie Twojego procesu (będziesz czekał w nieskończoność na zamknięcie okna przez użytkownika). Jeśli musisz przetestować logikę, testuj tylko czyste funkcje lub izoluj kod od GUI.
 - DOZWOLONE: Możesz używać wywołań Pythona z flagą `-c` (np. `python -c "twój kod"`) do testowania izolowanych logik czy regexów, jeśli nie wymagają interakcji i kończą się natychmiast.
+- NOWY PARADYGMAT: Projekt migruje ze Streamlita na wxPython. Przestań myśleć liniowo. Używaj programowania obiektowego. Twórz klasy dziedziczące po `wx.Frame` i `wx.Panel`. Zamiast folderu `pages/` ze Streamlita, podziel aplikację na logiczne moduły Pythona (np. `gui_main.py`, `gui_rezyser.py`, `gui_poliglota.py`).
+- ACCESSIBILITY FIRST: Zawsze przypisuj odpowiednie etykiety do kontrolek. Używaj Sizerów (`wx.BoxSizer`, `wx.GridBagSizer`), aby interfejs skalował się poprawnie i zachowywał logiczną kolejność tabulacji dla czytników ekranu.
 
 ### 🛠️ Obsługa błędów i środowiska:
 1. **Błędy składni JSON**: Narzędzie `editor` jest wrażliwe na znaki specjalne. Jeśli otrzymasz błąd `Tool call arguments could not be parsed as JSON`, oznacza to, że Twoja próba edycji zawiera niezaescapowane cudzysłowy lub znaki nowej linii.

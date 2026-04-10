@@ -1,4 +1,4 @@
-streamlit
+wxpython
 openai
 python-dotenv
 python-docx
