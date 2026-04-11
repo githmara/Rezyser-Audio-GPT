@@ -16,6 +16,7 @@
 5. POLSKIE ZNAKI W TERMINALU: Git Bash obsługuje polskie diakrytyki bez żadnych problemów. Używaj ich śmiało we wszystkich komendach, w tym w komunikatach commitów.
 6. GIT COMMIT — DOZWOLONY FORMAT: `git commit -m "tytuł" -m "opis"` (dwa osobne flagi `-m`). ZAKAZ używania wieloliniowych stringów (heredoc, `$'...'`, itp.) — powodują błędy w Git Bash na Windows.
 7. GIT STATUS PRZED COMMITEM: Przed każdym `git add` i `git commit` ZAWSZE uruchom najpierw `git status`, aby zobaczyć pełny stan repozytorium. Użytkownik mógł dokonać lokalnych zmian, których nie powinieneś nadpisywać ani przypadkowo wciągać do commita.
+8. FLAGA `--no-pager`: Komendy git, które mogą uruchomić stronnicowanie (pager), np. `git diff`, `git log`, `git show`, ZAWSZE wykonuj z flagą `--no-pager` (np. `git --no-pager diff`). Brak tej flagi powoduje wejście w tryb interaktywny (less), który blokuje terminal i generuje artefakty w outputcie wymagające ręcznego wciśnięcia spacji/q przez użytkownika.
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
 - Narzędzie Cline może bezgłośnie "zamrozić się" (brak błędu, tylko przycisk "Cancel"), jeśli próba zapisu do pliku (lub odpowiedź modelu) drastycznie przekroczy limit tokenów na jedno uderzenie API.
