@@ -2,13 +2,13 @@
 
 **Hybrydowe Studio Nagraniowe dla Słuchowisk i Audiobooków**
 
-Zestaw przenośnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów. Projekt został od podstaw zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy (TTS) oraz lokalnymi silnikami czytników ekranu (takimi jak NVDA czy VoiceOver).
+Zestaw przenośnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
 
 ---
 
 ## 🚀 Główne Moduły
 
-Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota) oraz narzędzia do budowania struktury pliku (Architekt Audiobooków). Wszystkie trzy narzędzia dostępne są w jednym oknie przeglądarki.
+Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota) oraz narzędzia do budowania struktury pliku (Architekt Audiobooków). Wszystkie trzy narzędzia dostępne są w jednym oknie programu i przełączane przyciskami na pasku narzędzi lub skrótami klawiaturowymi (Ctrl+1 / Ctrl+2 / Ctrl+3).
 
 ### 1. Reżyseria (Kreator AI)
 * **Wieloprojektowa Księga Świata:** System automatycznie ładuje w tle dedykowane zasady uniwersum (`.md`) na podstawie aktywnego pliku źródłowego, zapewniając pełną izolację (zero-click context loading).
@@ -45,8 +45,8 @@ Jest to fundamentalne ograniczenie obecnej generacji sztucznej inteligencji. Z t
 Aplikacja jest w pełni przenośna i gotowa do działania na systemach Windows bez konieczności globalnej instalacji środowiska.
 
 1. Sklonuj repozytorium lub pobierz paczkę ZIP.
-2. Uruchom plik `Uruchom_Rezysera.bat`. Otworzy się okno terminala, a po chwili w przeglądarce internetowej automatycznie załaduje się główny interfejs.
-3. **Konfiguracja API:** Przy pierwszym uruchomieniu aplikacja zasygnalizuje brak klucza. Użyj wbudowanego w stronę główną generatora, by utworzyć bezpieczny plik `golden_key.env`, otwórz go w Notatniku i wklej swój klucz (zaczynający się od `sk-proj-`).
+2. Uruchom plik `Uruchom_Rezysera.bat`. Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu. Nie musisz otwierać żadnej przeglądarki.
+3. **Konfiguracja API:** Przy pierwszym uruchomieniu aplikacja zasygnalizuje brak klucza w sekcji System Check. Kliknij widoczny przycisk, by wygenerować plik `golden_key.env`, otwórz go w edytorze tekstu i wklej swój klucz (zaczynający się od `sk-proj-`).
 
 ---
 
@@ -59,13 +59,13 @@ Niniejszy dokument to jedynie zarys architektoniczny projektu. Aby poznać zaawa
 **Windows:**
 1. Sklonuj repozytorium na swój dysk.
 2. Uruchom plik `skonfiguruj_dev.bat`, aby automatycznie utworzyć wirtualne środowisko i pobrać zależności.
-3. Uruchom plik `Uruchom_Rezysera.bat`.
+3. Uruchom aplikację komendą `python main.py` lub przez plik `uruchom_rezysera_dev.bat`.
 
 **macOS / Linux:**
 1. Sklonuj repozytorium i otwórz terminal w jego folderze.
 2. Wykonaj komendę `chmod +x *.sh`, aby nadać skryptom uprawnienia do uruchamiania.
 3. Wykonaj komendę `./skonfiguruj_dev.sh`, aby automatycznie utworzyć wirtualne środowisko i pobrać zależności.
-4. Uruchom aplikację komendą `./Uruchom_Rezysera.sh`.
+4. Uruchom aplikację komendą `python main.py` lub `./uruchom_rezysera.sh`.
 
 ---
 

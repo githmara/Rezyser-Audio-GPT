@@ -1,7 +1,9 @@
-# ŚRODOWISKO I ARCHITEKTURA (MIGRACJA NA WXPYTHON)
-- Projekt przechodzi pełną migrację z frameworka Streamlit (web) na wxPython (natywne GUI desktopowe), z naciskiem na maksymalną dostępność dla czytników ekranu (A11y, np. NVDA).
-- ZMIEŃ PARADYGMAT: Odchodzimy od kodu proceduralnego pisanego od góry do dołu. Pisz kod obiektowy. Rozdzielaj logikę na klasy (np. dziedziczące po `wx.Frame`, `wx.Panel`).
+# ŚRODOWISKO I ARCHITEKTURA (WXPYTHON)
+- Projekt jest w pełni oparty o framework wxPython (natywne GUI desktopowe), z naciskiem na maksymalną dostępność dla czytników ekranu (A11y, np. NVDA). Pliki Streamlit (`Start.py`, `pages/*.py`) pozostają w repozytorium jako dokumentacja historyczna, ale NIE SĄ AKTYWNE — punkt wejścia to `main.py`.
+- KOD OBIEKTOWY: Logika podzielona na klasy dziedziczące po `wx.Frame` (`main.py`) i `wx.Panel` (`gui_*.py`). Unikaj kodu proceduralnego.
 - ACCESSIBILITY FIRST: Zawsze dbaj o intuicyjną nawigację z klawiatury. Używaj Sizerów (`wx.BoxSizer`, itp.) i wstrzymuj się z tworzeniem własnych, niestandardowych kontrolek, jeśli systemowe (np. `wx.TextCtrl`, `wx.Button`) spełniają zadanie.
+- PLIKI METADANYCH PROJEKTÓW: Folder `runtime/skrypty/` przechowuje pliki `<nazwa_projektu>.mode` (tryb twórczy: Skrypt=1 / Audiobook=2). Jest to celowe — ukrywa pliki konfiguracyjne przed zwykłymi użytkownikami końcowymi na Windows (folder `runtime/` traktowany jak folder systemowy aplikacji, niewidoczny dla użytkownika końcowego instalatora NSIS).
+- KOMUNIKACJA Z UŻYTKOWNIKIEM (A11y): Krótkie jednorazowe powiadomienia (sukcesy, błędy walidacji) → `wx.MessageBox`. Długie komunikaty techniczne (błędy API, treści do skopiowania) → dialog `wx.Dialog` z `wx.TextCtrl` (TE_READONLY) i przyciskiem „Zamknij". Unikaj wzorca „aktualizuj etykietę i ustaw fokus" jako głównego sposobu notyfikowania użytkownika.
 
 # ZARZĄDZANIE TERMINALEM I TESTOWANIEM (KRYTYCZNE PUŁAPKI)
 - Masz pełny dostęp do terminala systemowego i plików, ale MUSISZ przestrzegać poniższych reguł bezpieczeństwa:
@@ -9,16 +11,19 @@
    -> ROZWIĄZANIE: Kiedy uruchamiasz pierwszy skrypt testowy w nowym zadaniu, ZAWSZE przekierowuj jego wyjście do tymczasowego pliku tekstowego (np. `python test.py > _output.txt 2>&1`). Następnie odczytaj ten plik natywnym narzędziem `read_file`.
 2. ZAKAZ BLOKOWANIA TERMINALA: Pod żadnym pozorem nie uruchamiaj aplikacji GUI w sposób ciągły (np. `python main.py` z aktywnym `app.MainLoop()`). Spowoduje to całkowite zawieszenie Twojego procesu (będziesz czekał w nieskończoność, aż użytkownik ręcznie zamknie okno).
    -> ROZWIĄZANIE: Jeśli musisz przetestować logikę w Pythonie, wykonuj wyłącznie testy jednostkowe lub izolowane fragmenty logiki (np. `python -c "..."`), które kończą się natychmiast i zwracają wynik.
-3. KRYTYCZNE ZABEZPIECZENIE: Masz CAŁKOWITY ZAKAZ używania, modyfikowania i uruchamiania czegokolwiek z folderu `runtime/`. Jest to folder dystrybucyjny. Używaj tylko lokalnego środowiska wirtualnego.
+3. KRYTYCZNE ZABEZPIECZENIE: Masz CAŁKOWITY ZAKAZ uruchamiania czegokolwiek z folderu `runtime/` do testowania kodu. Modyfikacje folderu `runtime/` (np. instalacja/odinstalowanie pakietów pip) są dopuszczalne WYŁĄCZNIE gdy użytkownik wprost o to poprosi. Do codziennego testowania używaj tylko lokalnego środowiska wirtualnego (`.venv`).
+4. UNIKAJ ZNAKU `!` w komendach przekazywanych do Git Bash — powoduje błąd `event not found`. Nie używaj go wewnątrz cudzysłowów w poleceniach shell.
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
 - Narzędzie Cline może bezgłośnie "zamrozić się" (brak błędu, tylko przycisk "Cancel"), jeśli próba zapisu do pliku (lub odpowiedź modelu) drastycznie przekroczy limit tokenów na jedno uderzenie API.
-1. PRACA ETAPOWA: Nigdy nie próbuj przepisać całego, potężnego pliku (np. `1_Rezyseria.py`) w jednym kroku. Zawsze pytaj użytkownika o zgodę na podział na mniejsze moduły.
+1. PRACA ETAPOWA: Nigdy nie próbuj przepisać całego, potężnego pliku (np. `gui_rezyser.py`) w jednym kroku. Zawsze pytaj użytkownika o zgodę na podział na mniejsze moduły.
 2. DELTA UPDATES: Gdy zmieniasz niewielki fragment w bardzo długim pliku, używaj wbudowanych, precyzyjnych narzędzi edycji, zamiast wypisywać całą zawartość pliku na nowo poprzez komendę `write_file`.
 3. Jeśli użytkownik prosi o duży refaktor, podziel go np. tak:
    - Krok 1: Struktura klasy i UI (bez funkcji).
    - Krok 2: Podpięcie pierwszych zdarzeń (Events).
-   - Krok 3: Przeniesienie skomplikowanej logiki z dawnego systemu (np. operacje na API OpenAI).
+   - Krok 3: Przeniesienie skomplikowanej logiki (np. operacje na API OpenAI).
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze usuwaj wszystkie pliki tymczasowe (np. `_output.txt`, pliki testowe py), które utworzyłeś w trakcie zadania. Kiedy ogłaszasz koniec pracy, katalog główny musi być czysty i wolny od Twoich "śladów".
+- WERYFIKACJA PRZEZ GIT STATUS: Po zakończeniu sprzątania ZAWSZE uruchom `git status` i sprawdź sekcję "Untracked files". Każdy plik tam wymieniony, który nie jest częścią projektu (tzn. nie jest to: `main.py`, skrypty GUI, pliki `.bat`/`.sh`, `.clinerules`, `requirements.txt`, itp.), musi zostać usunięty z dysku przed ogłoszeniem końca pracy.
+- JEDEN COMMIT NA KONIEC: Nie commituj pośrednich zmian. Jeden zbiorczy commit zostanie wykonany dopiero gdy użytkownik wyda takie polecenie.

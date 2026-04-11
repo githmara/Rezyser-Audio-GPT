@@ -30,5 +30,5 @@ pause
 exit /b
 
 :uruchom
-%PYTHON_EXE% -m streamlit run "%APP_DIR%Start.py"
+"%PYTHON_EXE%" "%APP_DIR%main.py"
 pause

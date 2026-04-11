@@ -1,0 +1,254 @@
+"""
+gui_konwerter.py – Panel modułu „Architekt Audiobooków".
+
+Zastępuje pages/3_Konwerter.py (Streamlit).
+Dziedziczy po wx.Panel; podpinany do MainFrame z main.py.
+"""
+
+import os
+import re
+
+import docx
+import wx
+
+
+class KonwerterPanel(wx.Panel):
+    """
+    Panel narzędzia „Architekt Audiobooków".
+
+    Funkcjonalność:
+        - Przyjmuje ścieżkę do pliku .txt lub .docx
+        - Przetwarza tekst: czyści HTML/Markdown, wykrywa nagłówki
+          (Czołówka, Rozdział, Prolog, Epilog, Akt) i sceny
+        - Zapisuje wynik jako architektura_<oryginalna_nazwa>.docx
+          w tym samym katalogu co plik źródłowy
+        - Sukces / błąd raportuje przez wx.MessageBox (A11y)
+    """
+
+    TOOL_DESCRIPTION = (
+        "Ten moduł służy do przygotowania architektury pliku dla czytników ekranu "
+        "(nawigacja klawiszami 1 i h po nagłówkach) oraz ElevenLabs. "
+        "Zmienia słowa kluczowe (Czołówka, Akt, Rozdział, Prolog, Epilog) na Nagłówki "
+        "pierwszego poziomu, pozostawiając całą resztę skryptu bez zmian."
+    )
+
+    def __init__(self, parent: wx.Window) -> None:
+        super().__init__(parent, style=wx.TAB_TRAVERSAL)
+        self.SetName("Panel Architekta Audiobooków")
+
+        self._build_ui()
+        self._bind_events()
+
+    # ------------------------------------------------------------------
+    # Budowanie interfejsu
+    # ------------------------------------------------------------------
+    def _build_ui(self) -> None:
+        main_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # --- Nagłówek narzędzia ---
+        heading = wx.StaticText(self, label="📄  Architekt Audiobooków")
+        heading_font = heading.GetFont()
+        heading_font.SetPointSize(16)
+        heading_font.MakeBold()
+        heading.SetFont(heading_font)
+
+        # --- Opis narzędzia ---
+        description = wx.TextCtrl(
+            self,
+            value=self.TOOL_DESCRIPTION,
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
+        )
+        # Upodabniamy tło pola do tła głównego okna, żeby nie wyglądało jak pole do wpisywania
+        description.SetBackgroundColour(self.GetBackgroundColour())
+
+        # --- Separator ---
+        separator = wx.StaticLine(self)
+
+        # --- Etykieta + pole wejściowe na nazwę / ścieżkę pliku ---
+        lbl_file = wx.StaticText(
+            self,
+            label="Nazwa lub pełna ścieżka pliku źródłowego\n"
+                  "(np. plik .txt, .html, .md lub dokument .docx):",
+        )
+
+        self._txt_file = wx.TextCtrl(
+            self,
+            style=wx.TE_PROCESS_ENTER,
+            name="Pole ścieżki pliku źródłowego",
+        )
+        self._txt_file.SetHint("Wpisz ścieżkę do pliku (tekstowy, HTML, MD, DOCX)…")
+
+        self._btn_browse = wx.Button(self, label="Przeglądaj…")
+        self._btn_browse.SetToolTip(
+            "Otwiera systemowe okno wyboru pliku .txt lub .docx"
+        )
+
+        # Poziomy sizer: pole tekstowe (rozszerzalne) + przycisk po prawej
+        file_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        file_row_sizer.Add(
+            self._txt_file,
+            proportion=1,
+            flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
+            border=6,
+        )
+        file_row_sizer.Add(
+            self._btn_browse,
+            flag=wx.ALIGN_CENTER_VERTICAL,
+        )
+
+        # --- Przycisk akcji ---
+        self._btn_build = wx.Button(
+            self,
+            label="Buduj Architekturę dla ElevenLabs",
+        )
+        self._btn_build.SetToolTip(
+            "Przetwarza plik i zapisuje architektura_<nazwa>.docx obok pliku źródłowego"
+        )
+
+        # --- Złożenie layoutu ---
+        main_sizer.Add(heading,       flag=wx.ALL, border=16)
+        main_sizer.Add(description,   flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=16)
+        main_sizer.Add(separator,     flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=16)
+        main_sizer.Add(lbl_file,      flag=wx.LEFT | wx.TOP | wx.RIGHT, border=16)
+        main_sizer.Add(
+            file_row_sizer,
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+            border=8,
+        )
+        main_sizer.Add(
+            self._btn_build,
+            flag=wx.LEFT | wx.TOP | wx.BOTTOM,
+            border=16,
+        )
+
+        self.SetSizer(main_sizer)
+
+    # ------------------------------------------------------------------
+    # Podpięcie zdarzeń
+    # ------------------------------------------------------------------
+    def _bind_events(self) -> None:
+        self._btn_build.Bind(wx.EVT_BUTTON, self._on_build)
+        self._btn_browse.Bind(wx.EVT_BUTTON, self._on_browse)
+        # Enter w polu tekstowym też uruchamia akcję
+        self._txt_file.Bind(wx.EVT_TEXT_ENTER, self._on_build)
+
+    # ------------------------------------------------------------------
+    # Otwieranie okna wyboru pliku
+    # ------------------------------------------------------------------
+    def _on_browse(self, _event: wx.Event) -> None:
+        """Otwiera systemowy dialog wyboru pliku i wstawia ścieżkę do pola."""
+        with wx.FileDialog(
+            self,
+            message="Wybierz plik źródłowy",
+            wildcard="Wszystkie obsługiwane pliki (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*",
+            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
+        ) as dlg:
+            if dlg.ShowModal() == wx.ID_OK:
+                self._txt_file.SetValue(dlg.GetPath())
+                self._txt_file.SetFocus()
+
+    # ------------------------------------------------------------------
+    # Logika przetwarzania (przeniesiona z 3_Konwerter.py)
+    # ------------------------------------------------------------------
+    def _on_build(self, _event: wx.Event) -> None:
+        """Obsługuje kliknięcie przycisku „Buduj Architekturę"."""
+        file_name = self._txt_file.GetValue().strip()
+
+        # --- Walidacja wejścia ---
+        if not file_name:
+            wx.MessageBox(
+                "Podaj nazwę lub ścieżkę pliku źródłowego.",
+                "Brak pliku",
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_file.SetFocus()
+            return
+
+        if not os.path.exists(file_name):
+            wx.MessageBox(
+                f"Nie znaleziono pliku:\n{file_name}",
+                "Plik nie istnieje",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            self._txt_file.SetFocus()
+            return
+
+        # --- Odczyt pliku źródłowego ---
+        try:
+            if file_name.lower().endswith(".docx"):
+                doc_in = docx.Document(file_name)
+                tekst = "\n".join(p.text for p in doc_in.paragraphs)
+            else:
+                with open(file_name, "r", encoding="utf-8") as fh:
+                    tekst = fh.read()
+        except Exception as exc:
+            wx.MessageBox(
+                f"Błąd podczas odczytu pliku:\n{exc}",
+                "Błąd odczytu",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+
+        # --- Przetwarzanie treści ---
+        nowy_doc = docx.Document()
+        nowy_doc.core_properties.author = "Reżyser"
+        nowy_doc.core_properties.comments = ""
+
+        for linia in tekst.splitlines():
+            linia = linia.strip()
+            if not linia:
+                continue
+
+            # Usuwanie tagów HTML
+            linia = re.sub(r'<[^>]+>', '', linia).strip()
+            if not linia:
+                continue
+
+            # Usuwanie znaczników nagłówków Markdown (np. ### lub ####)
+            linia = re.sub(r'^#+\s*', '', linia)
+
+            # Detekcja nagłówków głównych (tnących plik na rozdziały w ElevenLabs)
+            if re.match(
+                r"^[=\-\s]*(Czołówka|Rozdział|Prolog|Epilog|Akt)",
+                linia,
+                re.IGNORECASE,
+            ):
+                czysty = re.sub(r'^[=\-\s]+|[=\-\s]+$', '', linia)
+                nowy_doc.add_heading(czysty, level=1)
+
+            # Detekcja scen (pogrubiony tekst, bez wpisu w spisie treści)
+            elif re.match(r"^[=\-\s]*Scena", linia, re.IGNORECASE):
+                czysty = re.sub(r'^[=\-\s]+|[=\-\s]+$', '', linia)
+                p = nowy_doc.add_paragraph()
+                run = p.add_run(czysty)
+                run.bold = True
+
+            else:
+                nowy_doc.add_paragraph(linia)
+
+        # --- Zapis pliku wynikowego ---
+        katalog = os.path.dirname(os.path.abspath(file_name))
+        oryginalna_nazwa = os.path.splitext(os.path.basename(file_name))[0]
+        out_name = os.path.join(katalog, f"architektura_{oryginalna_nazwa}.docx")
+
+        try:
+            nowy_doc.save(out_name)
+        except Exception as exc:
+            wx.MessageBox(
+                f"Błąd podczas zapisu pliku wynikowego:\n{exc}",
+                "Błąd zapisu",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+
+        wx.MessageBox(
+            f"Perfetto! Nagłówki pierwszego poziomu zostały ustawione.\n\n"
+            f"Plik zapisano jako:\n{out_name}",
+            "Sukces",
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
