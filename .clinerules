@@ -13,6 +13,9 @@
    -> ROZWIĄZANIE: Jeśli musisz przetestować logikę w Pythonie, wykonuj wyłącznie testy jednostkowe lub izolowane fragmenty logiki (np. `python -c "..."`), które kończą się natychmiast i zwracają wynik.
 3. KRYTYCZNE ZABEZPIECZENIE: Masz CAŁKOWITY ZAKAZ uruchamiania czegokolwiek z folderu `runtime/` do testowania kodu. Modyfikacje folderu `runtime/` (np. instalacja/odinstalowanie pakietów pip) są dopuszczalne WYŁĄCZNIE gdy użytkownik wprost o to poprosi. Do codziennego testowania używaj tylko lokalnego środowiska wirtualnego (`.venv`).
 4. UNIKAJ ZNAKU `!` w komendach przekazywanych do Git Bash — powoduje błąd `event not found`. Nie używaj go wewnątrz cudzysłowów w poleceniach shell.
+5. POLSKIE ZNAKI W TERMINALU: Git Bash obsługuje polskie diakrytyki bez żadnych problemów. Używaj ich śmiało we wszystkich komendach, w tym w komunikatach commitów.
+6. GIT COMMIT — DOZWOLONY FORMAT: `git commit -m "tytuł" -m "opis"` (dwa osobne flagi `-m`). ZAKAZ używania wieloliniowych stringów (heredoc, `$'...'`, itp.) — powodują błędy w Git Bash na Windows.
+7. GIT STATUS PRZED COMMITEM: Przed każdym `git add` i `git commit` ZAWSZE uruchom najpierw `git status`, aby zobaczyć pełny stan repozytorium. Użytkownik mógł dokonać lokalnych zmian, których nie powinieneś nadpisywać ani przypadkowo wciągać do commita.
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
 - Narzędzie Cline może bezgłośnie "zamrozić się" (brak błędu, tylko przycisk "Cancel"), jeśli próba zapisu do pliku (lub odpowiedź modelu) drastycznie przekroczy limit tokenów na jedno uderzenie API.

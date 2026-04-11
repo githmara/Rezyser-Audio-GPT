@@ -18,7 +18,7 @@ KATALOG_ZRODLOWY = "."
 # 2. Definiowanie wykluczeń
 IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '__pycache__', 'skrypty', 'venv', '.venv', 'env'}
 IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'buduj_wydanie.py', 'skrypt_instalatora.iss', 'golden_key.env', 'skonfiguruj_dev.bat', 'uruchom_rezysera_dev.bat'}
-IGNOROWANE_ROZSZERZENIA = {'.env', '.pyc', '.md', '.sh'}
+IGNOROWANE_ROZSZERZENIA = {'.env', '.pyc', '.md', '.sh', '.jsonl'}
 
 def czy_ignorowac(sciezka, nazwa_pliku):
     czesci_sciezki = sciezka.replace('\\', '/').split('/')
