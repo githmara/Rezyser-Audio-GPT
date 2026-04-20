@@ -4,11 +4,39 @@ import subprocess
 import sys
 
 # --- STRAŻNIK (GUARD CLAUSE) ---
-if not os.path.exists("runtime") or not os.path.exists(os.path.join("runtime", "python.exe")):
+sciezka_python = os.path.join("runtime", "python.exe")
+
+# 1. Sprawdzenie, czy plik w ogóle istnieje
+if not os.path.exists("runtime") or not os.path.exists(sciezka_python):
     print("❌ BŁĄD KRYTYCZNY: Nie znaleziono folderu 'runtime/' z lokalnym środowiskiem Pythona!")
     print("Repozytorium Git nie zawiera bibliotek uruchomieniowych.")
     print("Zanim zbudujesz wydanie, musisz umieścić przenośnego Pythona w folderze 'runtime'.")
     sys.exit(1)
+
+# 2. Walidacja, czy to faktycznie działający interpreter Pythona
+print("🔍 Sprawdzanie środowiska uruchomieniowego...")
+try:
+    # Próbujemy wywołać prostą komendę, która zwróci tekst "OK"
+    wynik = subprocess.run(
+        [sciezka_python, "-c", "print('OK')"],
+        capture_output=True,
+        text=True,
+        timeout=3  # Zabezpieczenie przed zawieszeniem
+    )
+
+    if "OK" not in wynik.stdout:
+        print("❌ BŁĄD KRYTYCZNY: Plik 'runtime/python.exe' istnieje, ale nie zachowuje się jak Python!")
+        print("Upewnij się, że umieszczono prawidłową wersję Portable, a nie instalator lub inny program.")
+        sys.exit(1)
+
+except subprocess.TimeoutExpired:
+    print("❌ BŁĄD KRYTYCZNY: Plik 'runtime/python.exe' przestał odpowiadać (Timeout). To prawdopodobnie nie jest Python.")
+    sys.exit(1)
+except Exception as e:
+    print(f"❌ BŁĄD KRYTYCZNY: Nie można uruchomić 'runtime/python.exe'. Szczegóły błędu: {e}")
+    sys.exit(1)
+
+print("✅ Środowisko Pythona zweryfikowane pomyślnie.\n")
 
 # 1. Pobieranie danych wejściowych
 wersja = input("Podaj numer wersji do zbudowania (np. 10.1): ").strip()
