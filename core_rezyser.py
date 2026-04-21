@@ -173,7 +173,7 @@ def zastosuj_akcenty_uniwersalne(tekst: str, lore_text: str) -> str:
         "wloski":    akcent_wloski,
         "finski":    akcent_finski,
     }
-    # <GENEROWANY_SLOWNIK_AKCENTOW_END>
+# <GENEROWANY_SLOWNIK_AKCENTOW_END>
 
     # ── 2. Podział skryptu po tagach i aplikacja akcentów ──
     fragmenty = re.split(r"(\[[^\]]+\])", tekst)

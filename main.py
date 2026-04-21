@@ -144,9 +144,10 @@ class HomePanel(wx.Panel):
         )
         self._btn_odswiez.SetToolTip(
             "Skanuje dictionaries/*/akcenty/ i regeneruje wrappery akcent_* "
-            "w core_poliglota.py oraz gui_rezyser.py. Po udanym odświeżeniu "
+            "w core_poliglota.py oraz core_rezyser.py. Po udanym odświeżeniu "
             "należy uruchomić aplikację ponownie."
         )
+
         self.Bind(wx.EVT_BUTTON, self._on_odswiez_rezysera, self._btn_odswiez)
         main_sizer.Add(self._btn_odswiez, flag=wx.ALL, border=16)
 
@@ -378,7 +379,8 @@ class HomePanel(wx.Panel):
         if raport["errors"]:
             tytul  = "Odśwież akcenty Reżysera – BŁĄD"
             header = "⛔ Generator napotkał błędy – patrz log poniżej."
-        elif raport["core_changed"] or raport["gui_changed"]:
+        elif raport["core_changed"] or raport["rezyser_changed"]:
+
             tytul  = "Odśwież akcenty Reżysera – Sukces"
             n = len(raport["akcenty"])
             header = (

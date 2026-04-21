@@ -14,13 +14,20 @@ i regeneruje DWA fragmenty kodu:
 
 * W ``core_poliglota.py`` – definicje ``akcent_<id>(tekst)`` między markerami
   ``# <GENEROWANE_AKCENTY_REZYSERA_START>`` / ``...END``.
-* W ``gui_rezyser.py`` – blok importów + słownik ``_AKCENT_FUNCS`` między
+* W ``core_rezyser.py`` – blok importów + słownik ``_AKCENT_FUNCS`` między
   własnymi markerami.
+
+Historia: do refaktoru 13.0/Etap 5 drugi cel generatora był w ``gui_rezyser.py``
+(silnik fonetyczny żył tam jako metoda klasy). Po wydzieleniu silnika do
+``core_rezyser.zastosuj_akcenty_uniwersalne`` (funkcja wolnostojąca) markery
+wędrują do ``core_rezyser.py`` – z inną głębokością wcięcia dispatchera
+(4 spacje zamiast 8).
 
 Dzięki temu lingwista dodaje YAML, klika jeden przycisk – reszta jest
 automatyczna. Tryb Poligloty NIE wymaga tego kroku (odczytuje YAML-e
 dynamicznie przez ``core_poliglota.lista_wariantow(...)``), ale tryb
 Reżysera aplikuje akcenty punktowo po nazwie i potrzebuje tych wrapperów.
+
 
 Bezpieczeństwo:
   * Skrypt jest IDEMPOTENTNY – ponowne wywołanie bez zmian YAML drukuje
@@ -63,20 +70,24 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 # do poniższej listy.
 OBSLUGIWANE_JEZYKI = ("pl",)
 
-CORE_PATH        = os.path.join(ROOT, "core_poliglota.py")
-GUI_REZYSER_PATH = os.path.join(ROOT, "gui_rezyser.py")
+CORE_POLIGLOTA_PATH = os.path.join(ROOT, "core_poliglota.py")
+CORE_REZYSER_PATH   = os.path.join(ROOT, "core_rezyser.py")
 
 # Markery w core_poliglota.py (aliasy akcent_*)
-CORE_MARK_START = "# <GENEROWANE_AKCENTY_REZYSERA_START>"
-CORE_MARK_END   = "# <GENEROWANE_AKCENTY_REZYSERA_END>"
+CORE_POLI_MARK_START = "# <GENEROWANE_AKCENTY_REZYSERA_START>"
+CORE_POLI_MARK_END   = "# <GENEROWANE_AKCENTY_REZYSERA_END>"
 
-# Markery w gui_rezyser.py – blok importu
-GUI_IMP_START = "# <GENEROWANE_IMPORTY_AKCENTOW_START>"
-GUI_IMP_END   = "# <GENEROWANE_IMPORTY_AKCENTOW_END>"
+# Markery w core_rezyser.py – blok importu (na poziomie modułu, bez wcięcia)
+REZ_IMP_START = "# <GENEROWANE_IMPORTY_AKCENTOW_START>"
+REZ_IMP_END   = "# <GENEROWANE_IMPORTY_AKCENTOW_END>"
 
-# Markery w gui_rezyser.py – słownik dispatchera (wcięcie 8 spacji – ciało metody)
-GUI_DISP_START = "# <GENEROWANY_SLOWNIK_AKCENTOW_START>"
-GUI_DISP_END   = "# <GENEROWANY_SLOWNIK_AKCENTOW_END>"
+# Markery w core_rezyser.py – słownik dispatchera.
+# W ``core_rezyser.zastosuj_akcenty_uniwersalne`` (funkcja wolnostojąca, nie
+# metoda klasy) ciało ma wcięcie 4 spacji – dlatego dispatcher dostaje również
+# 4 spacje (wcześniej, gdy silnik był metodą w ``gui_rezyser``, było to 8).
+REZ_DISP_START = "# <GENEROWANY_SLOWNIK_AKCENTOW_START>"
+REZ_DISP_END   = "# <GENEROWANY_SLOWNIK_AKCENTOW_END>"
+
 
 
 # =============================================================================
@@ -165,11 +176,12 @@ def _generuj_aliasy_core(akcenty: list[dict]) -> str:
     return "\n".join(bloki) + "\n"
 
 
-def _generuj_imports_gui(akcenty: list[dict]) -> str:
-    """Zwraca treść między markerami imports w ``gui_rezyser.py``.
+def _generuj_imports_rezyser(akcenty: list[dict]) -> str:
+    """Zwraca treść między markerami imports w ``core_rezyser.py``.
 
-    Zachowuje oryginalną kolejność akcentów (z `kolejnosc`), co ma znaczenie
+    Zachowuje oryginalną kolejność akcentów (z ``kolejnosc``), co ma znaczenie
     jedynie kosmetyczne – Python akceptuje dowolny porządek wewnątrz krotki.
+    Importy są na poziomie modułu, więc nie mają wcięcia.
     """
     if not akcenty:
         return "# (brak akcentów – folder dictionaries/pl/akcenty/ jest pusty)\n"
@@ -180,23 +192,26 @@ def _generuj_imports_gui(akcenty: list[dict]) -> str:
     return "\n".join(linie) + "\n"
 
 
-def _generuj_dispatcher_gui(akcenty: list[dict]) -> str:
-    """Zwraca treść między markerami dispatchera w ``gui_rezyser.py``.
+def _generuj_dispatcher_rezyser(akcenty: list[dict]) -> str:
+    """Zwraca treść między markerami dispatchera w ``core_rezyser.py``.
 
-    Blok ma wcięcie 8 spacji (ciało metody ``zastosuj_akcenty_uniwersalne``).
-    Wyrównujemy klucze kolonami dla czytelności – identycznie jak w oryginale.
+    Blok ma wcięcie **4 spacji** – dispatcher jest lokalną zmienną w ciele
+    funkcji wolnostojącej ``zastosuj_akcenty_uniwersalne``. Wyrównujemy klucze
+    kolonami dla czytelności – identycznie jak w dawnej wersji dla
+    ``gui_rezyser.py`` (tam było 8 spacji, bo był to kod w metodzie klasy).
     """
     if not akcenty:
-        return "        _AKCENT_FUNCS: dict[str, object] = {}   # brak akcentów\n"
+        return "    _AKCENT_FUNCS: dict[str, object] = {}   # brak akcentów\n"
 
     szerokosc = max(len(akc["id"]) for akc in akcenty)
-    linie = ["        _AKCENT_FUNCS = {"]
+    linie = ["    _AKCENT_FUNCS = {"]
     for akc in akcenty:
         klucz  = f'"{akc["id"]}":'
         spacje = " " * (szerokosc + 3 - len(klucz))   # 3 = cudzysłowy + dwukropek
-        linie.append(f'            {klucz}{spacje}akcent_{akc["id"]},')
-    linie.append("        }")
+        linie.append(f'        {klucz}{spacje}akcent_{akc["id"]},')
+    linie.append("    }")
     return "\n".join(linie) + "\n"
+
 
 
 # =============================================================================
@@ -254,7 +269,7 @@ def uruchom(on_log: LogCallback = print) -> dict:
     """Publiczne API generatora – używane z CLI i z GUI (HomePanel).
 
     Skanuje foldery ``dictionaries/<jezyk>/akcenty/`` i regeneruje bloki
-    wrapperów między markerami w ``core_poliglota.py`` i ``gui_rezyser.py``.
+    wrapperów między markerami w ``core_poliglota.py`` i ``core_rezyser.py``.
 
     Args:
         on_log: Callback wywoływany na każdej linii raportu. Domyślnie
@@ -262,16 +277,16 @@ def uruchom(on_log: LogCallback = print) -> dict:
 
     Returns:
         Słownik-raport z kluczami:
-            ``akcenty``      – lista ``id`` wykrytych akcentów,
-            ``core_changed`` – czy zmieniono ``core_poliglota.py``,
-            ``gui_changed``  – czy zmieniono ``gui_rezyser.py``,
-            ``errors``       – lista błędów (pusta lista = sukces).
+            ``akcenty``         – lista ``id`` wykrytych akcentów,
+            ``core_changed``    – czy zmieniono ``core_poliglota.py``,
+            ``rezyser_changed`` – czy zmieniono ``core_rezyser.py``,
+            ``errors``          – lista błędów (pusta lista = sukces).
     """
     raport = {
-        "akcenty":      [],
-        "core_changed": False,
-        "gui_changed":  False,
-        "errors":       [],
+        "akcenty":         [],
+        "core_changed":    False,
+        "rezyser_changed": False,
+        "errors":          [],
     }
 
     on_log("=" * 60)
@@ -312,8 +327,12 @@ def uruchom(on_log: LogCallback = print) -> dict:
     on_log("\n1) Aktualizacja core_poliglota.py")
     try:
         raport["core_changed"] = _zaktualizuj_plik(
-            CORE_PATH,
-            [(CORE_MARK_START, CORE_MARK_END, _generuj_aliasy_core(unikalne))],
+            CORE_POLIGLOTA_PATH,
+            [(
+                CORE_POLI_MARK_START,
+                CORE_POLI_MARK_END,
+                _generuj_aliasy_core(unikalne),
+            )],
             on_log,
         )
     except RuntimeError as exc:
@@ -321,25 +340,28 @@ def uruchom(on_log: LogCallback = print) -> dict:
         raport["errors"].append(f"core_poliglota.py: {exc}")
         return raport
 
-    on_log("\n2) Aktualizacja gui_rezyser.py")
+    on_log("\n2) Aktualizacja core_rezyser.py")
     try:
-        raport["gui_changed"] = _zaktualizuj_plik(
-            GUI_REZYSER_PATH,
+        raport["rezyser_changed"] = _zaktualizuj_plik(
+            CORE_REZYSER_PATH,
             [
-                (GUI_IMP_START,  GUI_IMP_END,  _generuj_imports_gui(unikalne)),
-                (GUI_DISP_START, GUI_DISP_END, _generuj_dispatcher_gui(unikalne)),
+                (REZ_IMP_START,  REZ_IMP_END,
+                 _generuj_imports_rezyser(unikalne)),
+                (REZ_DISP_START, REZ_DISP_END,
+                 _generuj_dispatcher_rezyser(unikalne)),
             ],
             on_log,
         )
     except RuntimeError as exc:
         on_log(f"  [BLAD] {exc}")
-        raport["errors"].append(f"gui_rezyser.py: {exc}")
+        raport["errors"].append(f"core_rezyser.py: {exc}")
         return raport
 
     on_log("\n" + "=" * 60)
     on_log("Gotowe. Uruchom aplikacje ponownie, by zobaczyc nowe akcenty.")
     on_log("=" * 60)
     return raport
+
 
 
 def main() -> int:

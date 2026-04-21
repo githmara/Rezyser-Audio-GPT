@@ -1,27 +1,34 @@
 """
-gui_rezyser.py – Panel modułu „Reżyser" (Główna scena twórcza).
+gui_rezyser.py – Cienka warstwa widoku panelu „Reżyser" (wxPython).
 
-Zastępuje pages/1_Rezyseria.py (Streamlit).
-Dziedziczy po wx.Panel; podpinany do MainFrame z main.py.
+Po refaktorze 13.0 plik zawiera WYŁĄCZNIE:
+    • Definicje widgetów wxPython (budowane przez metody ``_zbuduj_*``).
+    • Handlery zdarzeń GUI (``_on_*``).
+    • Worker-threads przekazujące pracę do :mod:`rezyser_ai`
+      (``_wyslij_worker``, ``_tytuly_worker``).
+    • Property-shimy (``full_story``, ``summary_text``, …) delegujące do
+      ``self._projekt``.
 
-Zaimplementowane funkcje:
-    - Stan pamięci w atrybutach instancji (odpowiednik st.session_state)
-    - Dwukolumnowy layout: sidebar (Księga Świata + Pamięć) | obszar roboczy
-    - Panel Zarządzania Strukturą (dynamicznie ukrywany/pokazywany):
-        • Prolog, Epilog – wspólne dla trybów Skrypt i Audiobook
-        • Wstaw Akt N + Scena 1 automatycznie (tryb Skrypt)
-        • Wstaw Rozdział N (tryb Audiobook)
-    - Panel Postprodukcji (tylko tryb Audiobook):
-        • Nadaj Tytuły Rozdziałom (AI) – wątek tła + wx.Gauge + CallAfter
-    - Pełna integracja OpenAI gpt-4o: _wyslij_worker (threading + wx.CallAfter)
-    - Silnik fonetyczny: zastosuj_akcenty_uniwersalne (gui_poliglota)
-    - Postprodukcja: _tytuly_worker (gpt-4o-mini, iteracja po rozdziałach)
+Logika biznesowa (stan projektu, przepisy, wywołania OpenAI) żyje w:
+    • :mod:`core_rezyser`     – ``ProjektRezysera`` + silnik fonetyczny.
+    • :mod:`przepisy_rezysera` – loader YAML-i z ``dictionaries/pl/rezyser/``.
+    • :mod:`rezyser_ai`       – ``generuj_fragment``, ``nadaj_tytuly_rozdzialom``.
+
+Panel dziedziczy po :class:`wx.Panel`; podpinany do ``MainFrame`` z ``main.py``.
+
+Główne sekcje UI (zobacz metody ``_zbuduj_*``):
+    • BLOK A – nagłówek + opis narzędzia.
+    • BLOK B – pole nazwy pliku + przyciski wczytaj/wyczyść/reset.
+    • BLOK C – sidebar: Księga Świata + Pamięć Długotrwała (lewa kolumna).
+    • BLOK D – obszar roboczy (prawa kolumna, kompozycja pod-bloków).
+    • BLOK E – panel struktury (Prolog/Epilog/Akt/Scena/Rozdział).
+    • BLOK F – panel postprodukcji (tytułowanie rozdziałów AI).
+    • BLOK G – wskaźnik okna kontekstowego AI (Gauge + status).
 """
 
 from __future__ import annotations
 
 import os
-import re
 import threading
 
 import openai
@@ -35,37 +42,27 @@ import core_rezyser as cr
 import przepisy_rezysera as pr
 import rezyser_ai as rai
 
-# Reguły fonetyczne są teraz w ``core_rezyser`` (przeniesione z
-# ``gui_rezyser`` w ramach Etapu 2). Importy akcentów w blokach
-# GENEROWANE_IMPORTY_AKCENTOW_* zostały przeniesione tam i są generowane
-# przez ``odswiez_rezysera.py``. Ten plik ich już bezpośrednio nie używa.
-# <GENEROWANE_IMPORTY_AKCENTOW_START>
-from core_poliglota import (
-    akcent_islandzki,
-    akcent_angielski,
-    akcent_francuski,
-    akcent_niemiecki,
-    akcent_hiszpanski,
-    akcent_wloski,
-    akcent_finski,
-)
-# <GENEROWANE_IMPORTY_AKCENTOW_END>
 
 
 class RezyserPanel(wx.Panel):
-    """
-    Panel modułu „Reżyser Audio GPT".
+    """Panel modułu „Reżyser Audio GPT" — cienka warstwa widoku wxPython.
 
-    Obsługuje trzy tryby pracy z AI (OpenAI gpt-4o):
-        - Burza Mózgów  – planowanie fabuły, 3 opcje + prompty (BEZ zapisu)
-        - Skrypt        – surowy skrypt dźwiękowy [SFX] + [Postać] (ZAPIS)
-        - Audiobook     – tradycyjna proza literacka (ZAPIS)
+    Trzy tryby pracy (AI OpenAI gpt-4o) wczytywane są dynamicznie z YAML-i
+    (``dictionaries/pl/rezyser/``) przez :mod:`przepisy_rezysera`:
 
-    Stan sesji przechowywany w atrybutach instancji (odpowiednik
-    st.session_state ze Streamlita).
+        * Burza Mózgów – planowanie fabuły, 3 opcje + prompty (BEZ zapisu).
+        * Skrypt       – surowy skrypt dźwiękowy [SFX] + [Postać] (ZAPIS).
+        * Audiobook    – tradycyjna proza literacka (ZAPIS).
 
-    Wywołania OpenAI API realizowane będą w wątku tła (threading.Thread)
-    z wynikami przez wx.CallAfter — implementacja w kolejnym etapie.
+    Dodanie nowego trybu = nowy plik YAML + restart aplikacji. Kod
+    Pythona nie wymaga zmian.
+
+    Stan projektu (historia, streszczenie, Księga Świata, liczniki) żyje
+    w ``self._projekt`` (:class:`core_rezyser.ProjektRezysera`); atrybuty
+    typu ``self.full_story`` są property-shimami delegującymi do modelu.
+
+    Wywołania OpenAI realizowane są w wątkach tła (``threading.Thread``)
+    z wynikami przekazywanymi do GUI przez ``wx.CallAfter``.
     """
 
     TOOL_DESCRIPTION = (
@@ -82,97 +79,8 @@ class RezyserPanel(wx.Panel):
     ENV_FILENAME = "golden_key.env"
     SKRYPTY_DIR  = "skrypty"
 
-    # Etykiety trybów pracy wyświetlane w RadioBox
-    TRYBY_PRACY = [
-        "Burza Mózgów (Planowanie, BEZ zapisu do pliku)",
-        "Skrypt (Audio-gra, fonetyka, ZAPIS DO PLIKU)",
-        "Audiobook (Proza, rozdziały, ZAPIS DO PLIKU)",
-    ]
-
-    # ------------------------------------------------------------------
-    # Szablony promptów systemowych
-    # Użycie: .format(world_context=world_context) przy budowaniu payload
-    # ------------------------------------------------------------------
-    PROMPT_BURZA_BASE = (
-        "# Rola: Kreatywny Architekt Opowieści (Showrunner)\n\n"
-        "> **KRYTYCZNY ZAKAZ:** W tym trybie NIE PISZESZ gotowego tekstu skryptu ani "
-        "rozdziałów. Generujesz 3 opcje rozwoju fabuły i szkice promptów.\n\n"
-        "### \U0001f30d Żelazne Zasady Świata:\n"
-        "{world_context}\n\n"
-        "### \u2699\ufe0f Algorytm Pracy:\n"
-        "1. **LOGIKA I KONSEKWENCJA:** Opcje muszą być spójne z Księgą Świata i opierać się "
-        "na akcjach bohaterów. Zakaz tanich cudów i \"deus ex machina\" (chyba że świat na to "
-        "wyraźnie pozwala).\n"
-        "2. **ESKALACJA LUB KONKLUZJA:** - DOMYŚLNIE: Komplikuj fabułę i zmuszaj bohaterów "
-        "do trudnych decyzji.\n"
-        "   - WYJĄTEK (WENTYL BEZPIECZEŃSTWA): Jeśli użytkownik wprost prosi o zakończenie, "
-        "finał lub epilog, Twoim zadaniem jest wygenerować opcje satysfakcjonującego, "
-        "logicznego domknięcia wątków, bez wprowadzania nowych zagrożeń na siłę.\n"
-        "3. **TRZY RÓŻNE ŚCIEŻKI:** Generuj 3 różnorodne podejścia do sceny "
-        "(np. fizyczne, psychologiczne, kompromisowe).\n\n"
-        "Format wyjściowy MUSI wyglądać dokładnie tak.\n"
-        "UWAGA: Zmienną do wypełnienia przez Ciebie jest tylko [CEL SCENY]. Linijkę "
-        "\"[Reżyserze: ...]\" oraz \"[DYREKTYWA]: ...\" masz przepisać DOSŁOWNIE, "
-        "słowo w słowo! Absolutny zakaz wymyślania tam własnych porad!\n\n"
-        "**OPCJA 1: [Krótki tytuł]**\n"
-        "[Logiczny opis tego, co się wydarzy]\n"
-        "```text\n"
-        "--- SZKIC PROMPTU (ZMODYFIKUJ PRZED WYSŁANIEM!) ---\n"
-        "[CEL SCENY]: [Szczegółowy opis akcji/dialogu, który wymyśliłeś na podstawie Opcji 1]\n\n"
-        "[Reżyserze: dopisz tutaj własne pomysły, szczegóły przejścia między scenami lub "
-        "specyficzne detale, które chcesz usłyszeć/zobaczyć]\n"
-        "[DYREKTYWA]: Wygeneruj DŁUGI tekst, realizując cel. "
-        "Trzymaj się żelaznych zasad wybranego trybu!\n"
-        "```\n"
-        "(Powtórz ten sam, rygorystyczny format dla Opcji 2 i 3).\n"
-    )
-
-    PROMPT_SKRYPT = (
-        "# Rola: Reżyser Słuchowisk i Inżynier Dźwięku (Audio-Play / Foley Script)\n\n"
-        "Piszesz **WYŁĄCZNIE po polsku**. "
-        "Twój output to **SUROWY SKRYPT DŹWIĘKOWY** pozbawiony narratora.\n\n"
-        "### \U0001f30d Żelazne Zasady Świata i Akcentów:\n"
-        "{world_context}\n\n"
-        "### \U0001f399\ufe0f Zasady Formatu (MUSISZ ICH PRZESTRZEGAĆ W 100%):\n"
-        "1. **TYLKO DWA TAGI (KRYTYCZNE):** Używasz WYŁĄCZNIE tagów:\n"
-        "   - `[SFX: <opis>]` dla efektów dźwiękowych tła i akcji.\n"
-        "   - `[Imię Postaci: emocja i rodzaj oddechu]` dla dialogów.\n"
-        "   **ABSOLUTNY ZAKAZ UŻYWANIA NARRATORA.** Każdy tag musi być w nowej linii.\n"
-        "2. **CZYSTA FIZYKA W SFX:** Tagi SFX służą do syntezy w generatorach dźwięku. "
-        "Zakaz poezji i metafor. Pisz czysto fizycznie "
-        "(np. `[SFX: Głośny brzęk tłuczonego szkła]`).\n"
-        "3. **ZWIĘZŁOŚĆ SFX:** Zawartość tagu `[SFX: ...]` może mieć maksymalnie 10 słów.\n"
-        "4. **NATURALNOŚĆ FONETYCZNA:** Wplataj naturalne wdechy i westchnienia prosto "
-        "w tekst dialogu postaci (`hh...`, `khh...`).\n"
-        "5. **DOMYKANIE SCEN:** - DOMYŚLNIE (ANTI-CLOSURE): Urywaj scenę w środku akcji "
-        "lub dialogu.\n"
-        "   - WYJĄTEK (FINAŁ/EPILOG): Jeśli to koniec historii, wygaś scenę odpowiednio "
-        "(np. cichym dźwiękiem tła, ciszą).\n"
-    )
-
-    PROMPT_AUDIOBOOK = (
-        "# Rola: Pisarz Bestsellerów (Tradycyjna Proza)\n\n"
-        "Piszesz **WYŁĄCZNIE po polsku**. "
-        "Twój output to **W 100% SUROWY TEKST LITERACKI**.\n\n"
-        "> **STYL LITERACKI:** Jesteś w trybie książki. Zero tagów audio `[SFX]`, zero tagów "
-        "`[Speaker]`. Dialogi wplataj naturalnie w bogatą narrację z użyciem myślników "
-        "(np. *— Nie możesz tego zrobić — powiedziała.*).\n\n"
-        "### \U0001f30d Żelazne Zasady Świata:\n"
-        "{world_context}\n\n"
-        "### \U0001f4d6 Zasady Trybu Audiobooka:\n"
-        "1. **GĘSTA, KLASYCZNA PROZA:** Skup się na głębokich opisach, sensoryce "
-        "i psychologii postaci. Pisz długie akapity. Pokaż, zamiast tylko opisywać.\n"
-        "2. **CZYSTOŚĆ TEKSTU:** Gładki język literacki — bezwzględny zakaz wstawiania "
-        "tagów z nawiasami kwadratowymi.\n"
-        "3. **ABSOLUTNY ZAKAZ MARKDOWNU:** Żadnych nagłówków (typu \"Rozdział 1\", "
-        "\"Scena 2\"), tytułów, ani list punktowanych.\n"
-        "4. **DOMYKANIE SCEN:** - DOMYŚLNIE (ANTI-CLOSURE): Urwij tekst bez domykania "
-        "sceny, by utrzymać płynność.\n"
-        "   - WYJĄTEK (FINAŁ/EPILOG): Jeśli to zakończenie, wygaś narrację "
-        "w satysfakcjonujący, literacki sposób.\n"
-    )
-
     def __init__(self, parent: wx.Window) -> None:
+
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
         self.SetName("Panel Reżysera Audio GPT")
 
@@ -326,30 +234,74 @@ class RezyserPanel(wx.Panel):
                     self._api_dostepne = False
 
     # ------------------------------------------------------------------
-    # Budowanie interfejsu
+    # Budowanie interfejsu (kompozer)
     # ------------------------------------------------------------------
-    def _build_ui(self) -> None:
-        """
-        Buduje cały interfejs panelu.
+    # Refaktor 13.0/4F: dawniej monolityczny ``_build_ui`` został podzielony
+    # na prywatne metody ``_zbuduj_*``, jedna na każdy logiczny blok.
+    # Każda taka metoda:
+    #   1. Tworzy swoje widżety jako bezpośrednie dzieci ``self`` lub
+    #      dedykowanego sub-panelu (``self._pnl_struktura`` /
+    #      ``self._pnl_postprodukcja``).
+    #   2. Zwraca gotowy ``wx.BoxSizer`` z logicznym rozmieszczeniem.
+    # Dzięki temu:
+    #   * Każdy blok UI można przeczytać osobno (~30-50 linii).
+    #   * Łatwiej eksperymentować z układem w konkretnej sekcji bez
+    #     ryzyka, że zepsuje się reszta.
+    #   * Tab order zachowany, bo kolejność WYWOŁAŃ metod pozostaje
+    #     identyczna z oryginałem (widżety są tworzone w tej samej
+    #     kolejności co przed refaktorem).
+    # ------------------------------------------------------------------
 
-        Kluczowa zasada A11y: wszystkie widżety są bezpośrednimi dziećmi
-        RezyserPanel (bez zagnieżdżonych wx.Panel). Dzięki temu kolejność
-        tabulatora = kolejność tworzenia widżetów, co pozwala zachować
-        logiczny przepływ nawigacji niezależnie od wizualnego rozmieszczenia
-        w sizerach.
+    def _build_ui(self) -> None:
+        """Buduje cały interfejs panelu poprzez wywołanie metod ``_zbuduj_*``.
+
+        A11y: wszystkie widżety są bezpośrednimi dziećmi RezyserPanel
+        (poza dwoma sub-panelami struktury i postprodukcji). Kolejność
+        tabulatora = kolejność tworzenia widżetów w poszczególnych
+        ``_zbuduj_*``.
 
         Pożądana kolejność Tab:
-            opis → nazwa_pliku → wczytaj → wyczyść
+            opis → nazwa_pliku → wczytaj → wyczyść → hard_reset
             → ksiega_swiata → zapisz_ksiege
             → pamiec_dlugotrwala → zapisz_pamiec
-            → radiobox_trybu → pelna_historia → instrukcje → wyslij
+            → radiobox_trybu → [przyciski struktury]
+            → podgląd_historii → instrukcje → wyslij
+            → [przycisk postprodukcji] → wskaźnik_pamięci_modelu
         """
         BORDER = 8
 
-        # ══════════════════════════════════════════════════════════════
-        # BLOK A – Nagłówek i opis (poza kolejką Tab: StaticText)
-        # ══════════════════════════════════════════════════════════════
+        # Kolejność wywołań ≡ kolejność tworzenia widżetów ≡ tab order.
+        # UWAGA: pasek pliku (BLOK B) MUSI być utworzony PRZED sidebarem (BLOK C),
+        # bo w kolejności tabulatora: nazwa_pliku → wczytaj → wyczyść → hard_reset
+        # → ksiega_swiata → zapisz_ksiege → pamiec → zapisz_pamiec. Sidebar
+        # wizualnie jest w LEWEJ kolumnie, ale jego widgety tworzone są
+        # dopiero w trzeciej kolejności.
+        top_sizer         = self._zbuduj_naglowek(BORDER)
+        pasek_pliku_sizer = self._zbuduj_pasek_pliku(BORDER)
+        sidebar_sizer     = self._zbuduj_sidebar(BORDER)
+        main_area_sizer   = self._zbuduj_obszar_roboczy(BORDER, pasek_pliku_sizer)
 
+        # Pionowy separator między lewą a prawą kolumną.
+        v_sep = wx.StaticLine(self, style=wx.LI_VERTICAL)
+
+
+        two_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        two_col_sizer.Add(sidebar_sizer,   proportion=1, flag=wx.EXPAND | wx.ALL, border=4)
+        two_col_sizer.Add(v_sep,                         flag=wx.EXPAND | wx.TOP | wx.BOTTOM,
+                          border=8)
+        two_col_sizer.Add(main_area_sizer, proportion=3, flag=wx.EXPAND | wx.ALL, border=4)
+
+        root_sizer = wx.BoxSizer(wx.VERTICAL)
+        root_sizer.Add(top_sizer,     flag=wx.EXPAND)
+        root_sizer.Add(two_col_sizer, proportion=1, flag=wx.EXPAND)
+
+        self.SetSizer(root_sizer)
+
+    # ------------------------------------------------------------------
+    # BLOK A – Nagłówek panelu (tytuł + opis narzędzia + separator)
+    # ------------------------------------------------------------------
+    def _zbuduj_naglowek(self, BORDER: int) -> wx.BoxSizer:
+        """Buduje nagłówek Reżysera (tytuł + opis narzędzia + separator)."""
         heading = wx.StaticText(
             self,
             label="🎬  Reżyser Audio GPT – Hybrydowe Studio Twórcze",
@@ -369,10 +321,25 @@ class RezyserPanel(wx.Panel):
         self._description.SetBackgroundColour(self.GetBackgroundColour())
         self._description.SetMinSize((-1, 110))
 
-        # ══════════════════════════════════════════════════════════════
-        # BLOK B – Pole nazwy pliku + przyciski wczytaj/wyczyść
-        # ══════════════════════════════════════════════════════════════
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(heading, flag=wx.ALL, border=BORDER)
+        sizer.Add(
+            self._description,
+            flag=wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
+            border=BORDER,
+        )
+        sizer.Add(
+            wx.StaticLine(self),
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
+            border=BORDER,
+        )
+        return sizer
 
+    # ------------------------------------------------------------------
+    # BLOK B – Pole nazwy pliku + przyciski wczytaj / wyczyść / reset
+    # ------------------------------------------------------------------
+    def _zbuduj_pasek_pliku(self, BORDER: int) -> wx.BoxSizer:
+        """Buduje pasek: etykieta + pole nazwy pliku + 3 przyciski (wiersz)."""
         lbl_file = wx.StaticText(
             self,
             label="Nazwa pliku projektu (bez rozszerzenia, np. kroniki_arkonii):",
@@ -416,23 +383,36 @@ class RezyserPanel(wx.Panel):
             "Używaj przy zmianie projektu lub zupełnie nowej historii."
         )
 
-        # ══════════════════════════════════════════════════════════════
-        # BLOK C – Sidebar: Księga Świata + Pamięć Długotrwała
-        # (TAB 5–8; wizualnie w lewej kolumnie)
-        # ══════════════════════════════════════════════════════════════
+        file_row = wx.BoxSizer(wx.HORIZONTAL)
+        file_row.Add(self._txt_file_name,     proportion=1, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
+        file_row.Add(self._btn_load,          flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        file_row.Add(self._btn_clear_current, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        file_row.Add(self._btn_hard_reset,    flag=wx.ALIGN_CENTER_VERTICAL)
 
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_file, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
+        sizer.Add(file_row, flag=wx.EXPAND | wx.ALL,          border=BORDER)
+        return sizer
+
+    # ------------------------------------------------------------------
+    # BLOK C – Sidebar: Księga Świata + Pamięć Długotrwała (lewa kolumna)
+    # ------------------------------------------------------------------
+    def _zbuduj_sidebar(self, BORDER: int) -> wx.BoxSizer:
+        """Buduje sidebar (lewą kolumnę): Księga Świata + Pamięć Długotrwała.
+
+        Uwaga: sidebar jest tworzony JAKO TRZECI (po nagłówku i pasku pliku),
+        by zachować tab order: nazwa_pliku → wczytaj → ... → ksiega_swiata.
+        Wizualnie pojawia się jednak w lewej kolumnie two_col_sizer.
+        """
         lbl_sb_heading = wx.StaticText(self, label="📖 Pasek Boczny projektu")
         sbf = lbl_sb_heading.GetFont()
         sbf.SetPointSize(11)
         sbf.MakeBold()
         lbl_sb_heading.SetFont(sbf)
 
-        lbl_ksiega = wx.StaticText(
-            self,
-            label="Księga Świata – Zasady i Postacie:",
-        )
+        lbl_ksiega = wx.StaticText(self, label="Księga Świata – Zasady i Postacie:")
 
-        # ── [TAB 5] Ksiega Swiata – duże pole wieloliniowe ────────────
+        # ── [TAB 6] Księga Świata – duże pole wieloliniowe ────────────
         self._txt_ksiega_swiata = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE,
@@ -448,19 +428,16 @@ class RezyserPanel(wx.Panel):
             "Zapis na dysk wymaga podania nazwy pliku projektu."
         )
 
-        # ── [TAB 6] Zapisz Ksiege ─────────────────────────────────────
+        # ── [TAB 7] Zapisz Księgę ─────────────────────────────────────
         self._btn_zapisz_ksiege = wx.Button(self, label="💾 Zapisz Księgę na stałe")
         self._btn_zapisz_ksiege.SetToolTip(
             "Zapisuje Księgę Świata do pliku: skrypty/<nazwa>.md\n"
             "Wymaga podania nazwy pliku projektu."
         )
 
-        lbl_pamiec = wx.StaticText(
-            self,
-            label="🧠 Pamięć Długotrwała (Streszczenie):",
-        )
+        lbl_pamiec = wx.StaticText(self, label="🧠 Pamięć Długotrwała (Streszczenie):")
 
-        # ── [TAB 7] Pamięć Długotrwała ────────────────────────────────
+        # ── [TAB 8] Pamięć Długotrwała ────────────────────────────────
         self._txt_pamiec = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE,
@@ -475,25 +452,102 @@ class RezyserPanel(wx.Panel):
             "Pozwala kontynuować historię bez ograniczeń okna kontekstowego modelu."
         )
 
-        # ── [TAB 8] Zapisz Streszczenie ──────────────────────────────
+        # ── [TAB 9] Zapisz Streszczenie ──────────────────────────────
         self._btn_zapisz_pamiec = wx.Button(self, label="💾 Zapisz Streszczenie")
         self._btn_zapisz_pamiec.SetToolTip(
             "Zapisuje streszczenie do pliku: skrypty/<nazwa>_streszczenie.txt\n"
             "Po zapisie możesz bezpiecznie wyczyścić pamięć bieżącą."
         )
 
-        # ══════════════════════════════════════════════════════════════
-        # BLOK D – Główny obszar roboczy
-        # (TAB 9–12; wizualnie w prawej kolumnie)
-        # ══════════════════════════════════════════════════════════════
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_sb_heading, flag=wx.ALL, border=BORDER)
+        sizer.Add(lbl_ksiega,     flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
+        sizer.Add(
+            self._txt_ksiega_swiata,
+            proportion=2,
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+            border=BORDER,
+        )
+        sizer.Add(self._btn_zapisz_ksiege, flag=wx.ALL, border=BORDER)
+        sizer.Add(
+            wx.StaticLine(self),
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
+            border=BORDER,
+        )
+        sizer.Add(lbl_pamiec, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
+        sizer.Add(
+            self._txt_pamiec,
+            proportion=1,
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+            border=BORDER,
+        )
+        sizer.Add(self._btn_zapisz_pamiec, flag=wx.ALL, border=BORDER)
+        return sizer
 
+    # ------------------------------------------------------------------
+    # BLOK D – Obszar roboczy (prawa kolumna, kompozycja)
+    # ------------------------------------------------------------------
+    def _zbuduj_obszar_roboczy(
+        self,
+        BORDER: int,
+        pasek_pliku_sizer: wx.BoxSizer,
+    ) -> wx.BoxSizer:
+        """Buduje prawą kolumnę: pasek pliku + tryb + struktura + wskaźnik pamięci
+        + podgląd historii + instrukcje + postprodukcja.
+
+        Args:
+            BORDER:             Wspólna wartość marginesu w pikselach.
+            pasek_pliku_sizer:  Gotowy sizer paska pliku, zbudowany wcześniej
+                                przez ``_zbuduj_pasek_pliku`` — sidebar musi
+                                być utworzony MIĘDZY paskiem pliku a resztą
+                                obszaru roboczego, więc pasek_pliku przychodzi
+                                z zewnątrz.
+
+        A11y: kolejność tworzenia widżetów wewnątrz tej metody to
+        RadioBox → panel struktury → podgląd historii → instrukcje →
+        panel postprodukcji → wskaźnik pamięci. To wyznacza tab order
+        DALSZEJ części obszaru roboczego (po pasku pliku i sidebarze).
+        """
         lbl_main_heading = wx.StaticText(self, label="🎬 Obszar Roboczy")
         mf = lbl_main_heading.GetFont()
         mf.SetPointSize(11)
         mf.MakeBold()
         lbl_main_heading.SetFont(mf)
 
-        # ── [TAB 9] RadioBox trybu pracy ─────────────────────────────
+        # Kolejność wywołań = kolejność tworzenia widżetów = tab order.
+        # Pasek pliku jest już gotowy (przekazany z ``_build_ui``), tworzymy tu:
+        # tryb → struktura → podgląd → instrukcje → postprodukcja → wskaźnik.
+        radiobox_sizer      = self._zbuduj_radiobox_trybu(BORDER)
+        panel_struktury     = self._zbuduj_panel_struktury(BORDER)
+        podglad_sizer       = self._zbuduj_podglad_historii(BORDER)
+        pole_instrukcji     = self._zbuduj_pole_instrukcji(BORDER)
+        panel_postprodukcji = self._zbuduj_panel_postprodukcji(BORDER)
+        wskaznik_sizer      = self._zbuduj_wskaznik_pamieci_modelu(BORDER)
+
+
+        sep = lambda: wx.StaticLine(self)   # noqa: E731 - krótka fabryka separatorów
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_main_heading, flag=wx.ALL, border=BORDER)
+        sizer.Add(pasek_pliku_sizer, flag=wx.EXPAND)
+        sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        sizer.Add(radiobox_sizer, flag=wx.EXPAND)
+        sizer.Add(panel_struktury, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        sizer.Add(wskaznik_sizer, flag=wx.EXPAND)
+        sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        sizer.Add(podglad_sizer, proportion=1, flag=wx.EXPAND)
+        sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        sizer.Add(pole_instrukcji, flag=wx.EXPAND)
+        sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        sizer.Add(panel_postprodukcji, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        return sizer
+
+    # ------------------------------------------------------------------
+    # BLOK D.1 – RadioBox wyboru trybu pracy
+    # ------------------------------------------------------------------
+    def _zbuduj_radiobox_trybu(self, BORDER: int) -> wx.BoxSizer:
+        """Buduje RadioBox z trybami pracy załadowanymi z YAML-i."""
         # Etykiety pobierane dynamicznie z YAML-i w ``dictionaries/pl/rezyser/``.
         # Zbiorczy commit wersji 13.0 zawiera ten folder, więc w środowisku
         # wydawniczym ``self._przepisy`` jest zawsze niepuste.
@@ -511,17 +565,18 @@ class RezyserPanel(wx.Panel):
             "Audiobook     – tradycyjna proza literacka (zapisywana do pliku)."
         )
 
-        # ══════════════════════════════════════════════════════════════
-        # BLOK E – Panel Zarządzania Strukturą (dynamicznie ukrywany)
-        # Tworzony TU (po _rb_mode), by Tab order był poprawny:
-        #   RadioBox → [przyciski struktury] → podgląd historii → instrukcje
-        # ══════════════════════════════════════════════════════════════
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self._rb_mode, flag=wx.EXPAND | wx.ALL, border=BORDER)
+        return sizer
+
+    # ------------------------------------------------------------------
+    # BLOK E – Panel Zarządzania Strukturą (dynamicznie ukrywany)
+    # ------------------------------------------------------------------
+    def _zbuduj_panel_struktury(self, BORDER: int) -> wx.Panel:
+        """Buduje ``self._pnl_struktura`` z przyciskami Prolog/Epilog/Rozdział/Akt/Scena."""
         self._pnl_struktura = wx.Panel(self)
 
-        lbl_struktura = wx.StaticText(
-            self._pnl_struktura,
-            label="✂️ Zarządzanie Strukturą",
-        )
+        lbl_struktura = wx.StaticText(self._pnl_struktura, label="✂️ Zarządzanie Strukturą")
         sf = lbl_struktura.GetFont()
         sf.SetPointSize(10)
         sf.MakeBold()
@@ -577,28 +632,33 @@ class RezyserPanel(wx.Panel):
             "Dostępny wyłącznie w trybie Skryptu."
         )
 
-        _prolog_epilog_row = wx.BoxSizer(wx.HORIZONTAL)
-        _prolog_epilog_row.Add(self._btn_prolog, flag=wx.RIGHT, border=6)
-        _prolog_epilog_row.Add(self._btn_epilog)
+        prolog_epilog_row = wx.BoxSizer(wx.HORIZONTAL)
+        prolog_epilog_row.Add(self._btn_prolog, flag=wx.RIGHT, border=6)
+        prolog_epilog_row.Add(self._btn_epilog)
 
-        _akt_scena_row = wx.BoxSizer(wx.HORIZONTAL)
-        _akt_scena_row.Add(self._btn_akt, flag=wx.RIGHT, border=6)
-        _akt_scena_row.Add(self._btn_scena)
+        akt_scena_row = wx.BoxSizer(wx.HORIZONTAL)
+        akt_scena_row.Add(self._btn_akt, flag=wx.RIGHT, border=6)
+        akt_scena_row.Add(self._btn_scena)
 
-        _sizer_struktura = wx.BoxSizer(wx.VERTICAL)
-        _sizer_struktura.Add(lbl_struktura,       flag=wx.ALL,                          border=BORDER)
-        _sizer_struktura.Add(_prolog_epilog_row,  flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,  border=BORDER)
-        _sizer_struktura.Add(self._btn_rozdzial,  flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,  border=BORDER)
-        _sizer_struktura.Add(_akt_scena_row,      flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,  border=BORDER)
-        self._pnl_struktura.SetSizer(_sizer_struktura)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_struktura,      flag=wx.ALL,                         border=BORDER)
+        sizer.Add(prolog_epilog_row,  flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        sizer.Add(self._btn_rozdzial, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        sizer.Add(akt_scena_row,      flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        self._pnl_struktura.SetSizer(sizer)
+        return self._pnl_struktura
 
-        # ── Podgląd pełnej historii ───────────────────────────────────
+    # ------------------------------------------------------------------
+    # BLOK E.1 – Podgląd pełnej historii (TextCtrl read-only)
+    # ------------------------------------------------------------------
+    def _zbuduj_podglad_historii(self, BORDER: int) -> wx.BoxSizer:
+        """Buduje podgląd ``full_story`` (TextCtrl read-only) + etykietę."""
         lbl_full_story = wx.StaticText(
             self,
             label="Bieżąca historia w pamięci (tylko do odczytu – nawiguj strzałkami):",
         )
 
-        # ── [TAB 10] Podgląd full_story – duże pole Read-Only ────────
+        # ── [TAB] Podgląd full_story ──────────────────────────────────
         self._txt_full_story = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE | wx.TE_READONLY,
@@ -606,7 +666,21 @@ class RezyserPanel(wx.Panel):
         )
         self._txt_full_story.SetHint("(pamięć jest pusta – wczytaj projekt lub zacznij nowy)")
 
-        # ── Instrukcje ────────────────────────────────────────────────
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_full_story, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
+        sizer.Add(
+            self._txt_full_story,
+            proportion=1,
+            flag=wx.EXPAND | wx.ALL,
+            border=BORDER,
+        )
+        return sizer
+
+    # ------------------------------------------------------------------
+    # BLOK E.2 – Pole instrukcji dla AI + przycisk Wyślij
+    # ------------------------------------------------------------------
+    def _zbuduj_pole_instrukcji(self, BORDER: int) -> wx.BoxSizer:
+        """Buduje etykietę + pole instrukcji dla AI + przycisk 'Wyślij'."""
         lbl_user_input = wx.StaticText(
             self,
             label=(
@@ -615,7 +689,7 @@ class RezyserPanel(wx.Panel):
             ),
         )
 
-        # ── [TAB 11] Pole instrukcji od użytkownika ──────────────────
+        # ── [TAB] Pole instrukcji ─────────────────────────────────────
         self._txt_user_input = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE,
@@ -627,23 +701,27 @@ class RezyserPanel(wx.Panel):
         )
         self._txt_user_input.SetMinSize((-1, 100))
 
-        # ── [TAB 12] Wyślij do AI ─────────────────────────────────────
+        # ── [TAB] Wyślij do AI ────────────────────────────────────────
         self._btn_wyslij = wx.Button(self, label="Wyślij do AI")
         self._btn_wyslij.SetToolTip(
             "Wysyła instrukcje do modelu gpt-4o i dopisuje odpowiedź do historii.\n"
             "Wymaga aktywnego klucza API i uzupełnionej Księgi Świata."
         )
 
-        # ══════════════════════════════════════════════════════════════
-        # BLOK F – Panel Postprodukcji (dynamicznie ukrywany)
-        # Wyświetlany NA SAMYM DOLE obszaru roboczego, pod przyciskiem Wyślij.
-        # ══════════════════════════════════════════════════════════════
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_user_input,       flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
+        sizer.Add(self._txt_user_input, flag=wx.EXPAND | wx.ALL,          border=BORDER)
+        sizer.Add(self._btn_wyslij,     flag=wx.LEFT | wx.BOTTOM | wx.TOP, border=BORDER)
+        return sizer
+
+    # ------------------------------------------------------------------
+    # BLOK F – Panel Postprodukcji (dynamicznie ukrywany)
+    # ------------------------------------------------------------------
+    def _zbuduj_panel_postprodukcji(self, BORDER: int) -> wx.Panel:
+        """Buduje ``self._pnl_postprodukcja`` (tytułowanie rozdziałów AI)."""
         self._pnl_postprodukcja = wx.Panel(self)
 
-        lbl_postprod = wx.StaticText(
-            self._pnl_postprodukcja,
-            label="🎛️ Postprodukcja",
-        )
+        lbl_postprod = wx.StaticText(self._pnl_postprodukcja, label="🎛️ Postprodukcja")
         pf = lbl_postprod.GetFont()
         pf.SetPointSize(10)
         pf.MakeBold()
@@ -673,21 +751,24 @@ class RezyserPanel(wx.Panel):
         self._lbl_postprod_status = wx.StaticText(self._pnl_postprodukcja, label="")
         self._lbl_postprod_status.Hide()
 
-        _sizer_postprod = wx.BoxSizer(wx.VERTICAL)
-        _sizer_postprod.Add(lbl_postprod,              flag=wx.ALL,                                   border=BORDER)
-        _sizer_postprod.Add(lbl_tytuly_info,           flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,           border=BORDER)
-        _sizer_postprod.Add(self._btn_tytuly_ai,       flag=wx.LEFT | wx.BOTTOM,                      border=BORDER)
-        _sizer_postprod.Add(
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_postprod,              flag=wx.ALL,                              border=BORDER)
+        sizer.Add(lbl_tytuly_info,           flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,      border=BORDER)
+        sizer.Add(self._btn_tytuly_ai,       flag=wx.LEFT | wx.BOTTOM,                 border=BORDER)
+        sizer.Add(
             self._gauge_postprod,
             flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
             border=BORDER,
         )
-        _sizer_postprod.Add(self._lbl_postprod_status, flag=wx.LEFT | wx.BOTTOM,                      border=BORDER)
-        self._pnl_postprodukcja.SetSizer(_sizer_postprod)
+        sizer.Add(self._lbl_postprod_status, flag=wx.LEFT | wx.BOTTOM,                 border=BORDER)
+        self._pnl_postprodukcja.SetSizer(sizer)
+        return self._pnl_postprodukcja
 
-        # ══════════════════════════════════════════════════════════════
-        # BLOK G – Wskaźnik przepełnienia okna kontekstowego AI
-        # ══════════════════════════════════════════════════════════════
+    # ------------------------------------------------------------------
+    # BLOK G – Wskaźnik okna kontekstowego AI (Gauge + status)
+    # ------------------------------------------------------------------
+    def _zbuduj_wskaznik_pamieci_modelu(self, BORDER: int) -> wx.BoxSizer:
+        """Buduje wskaźnik pamięci modelu (nagłówek + Gauge + status read-only)."""
         lbl_kontekst = wx.StaticText(
             self,
             label="🧠 Pamięć Modelu (Stan Okna Kontekstowego):",
@@ -710,137 +791,20 @@ class RezyserPanel(wx.Panel):
         self._lbl_kontekst_status.SetBackgroundColour(self.GetBackgroundColour())
         self._lbl_kontekst_status.SetMinSize((-1, 60))
 
-        # ══════════════════════════════════════════════════════════════
-        # BUDOWANIE SIZERÓW (układ wizualny – niezależny od Tab order)
-        # ══════════════════════════════════════════════════════════════
-
-        # ── Górna część: nagłówek + opis + separator ──────────────────
-        top_sizer = wx.BoxSizer(wx.VERTICAL)
-        top_sizer.Add(heading,            flag=wx.ALL,                    border=BORDER)
-        top_sizer.Add(
-            self._description,
-            flag=wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND,
-            border=BORDER,
-        )
-        top_sizer.Add(
-            wx.StaticLine(self),
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
-            border=BORDER,
-        )
-
-        # ── Lewa kolumna – Sidebar ────────────────────────────────────
-        sidebar_sizer = wx.BoxSizer(wx.VERTICAL)
-        sidebar_sizer.Add(lbl_sb_heading,          flag=wx.ALL,                   border=BORDER)
-        sidebar_sizer.Add(lbl_ksiega,              flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
-        sidebar_sizer.Add(
-            self._txt_ksiega_swiata,
-            proportion=2,
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-            border=BORDER,
-        )
-        sidebar_sizer.Add(self._btn_zapisz_ksiege, flag=wx.ALL,                   border=BORDER)
-        sidebar_sizer.Add(
-            wx.StaticLine(self),
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
-            border=BORDER,
-        )
-        sidebar_sizer.Add(lbl_pamiec,              flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
-        sidebar_sizer.Add(
-            self._txt_pamiec,
-            proportion=1,
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-            border=BORDER,
-        )
-        sidebar_sizer.Add(self._btn_zapisz_pamiec, flag=wx.ALL,                   border=BORDER)
-
-        # ── Prawa kolumna – Obszar roboczy ────────────────────────────
-        main_area_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        # Wiersz: pole nazwy pliku + przyciski
-        file_row = wx.BoxSizer(wx.HORIZONTAL)
-        file_row.Add(
-            self._txt_file_name,
-            proportion=1,
-            flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
-            border=6,
-        )
-        file_row.Add(self._btn_load,          flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
-        file_row.Add(self._btn_clear_current, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
-        file_row.Add(self._btn_hard_reset,    flag=wx.ALIGN_CENTER_VERTICAL)
-
-        main_area_sizer.Add(lbl_main_heading, flag=wx.ALL,                            border=BORDER)
-        main_area_sizer.Add(lbl_file,         flag=wx.LEFT | wx.RIGHT | wx.TOP,        border=BORDER)
-        main_area_sizer.Add(file_row,         flag=wx.EXPAND | wx.ALL,                 border=BORDER)
-        main_area_sizer.Add(
-            wx.StaticLine(self),
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
-            border=BORDER,
-        )
-        main_area_sizer.Add(self._rb_mode,        flag=wx.EXPAND | wx.ALL,                 border=BORDER)
-        main_area_sizer.Add(self._pnl_struktura,  flag=wx.EXPAND | wx.LEFT | wx.RIGHT,     border=BORDER)
-        main_area_sizer.Add(
-            wx.StaticLine(self),
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
-            border=BORDER,
-        )
-        main_area_sizer.Add(lbl_kontekst,         flag=wx.LEFT | wx.RIGHT | wx.TOP,        border=BORDER)
-        main_area_sizer.Add(
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_kontekst, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
+        sizer.Add(
             self._gauge_kontekst,
             flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
             border=BORDER,
         )
-        main_area_sizer.Add(
+        sizer.Add(
             self._lbl_kontekst_status,
             flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
             border=BORDER,
         )
-        main_area_sizer.Add(
-            wx.StaticLine(self),
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
-            border=BORDER,
-        )
-        main_area_sizer.Add(lbl_full_story,       flag=wx.LEFT | wx.RIGHT | wx.TOP,        border=BORDER)
-        main_area_sizer.Add(
-            self._txt_full_story,
-            proportion=1,
-            flag=wx.EXPAND | wx.ALL,
-            border=BORDER,
-        )
-        main_area_sizer.Add(
-            wx.StaticLine(self),
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
-            border=BORDER,
-        )
-        main_area_sizer.Add(lbl_user_input,   flag=wx.LEFT | wx.RIGHT | wx.TOP,        border=BORDER)
-        main_area_sizer.Add(
-            self._txt_user_input,
-            flag=wx.EXPAND | wx.ALL,
-            border=BORDER,
-        )
-        main_area_sizer.Add(self._btn_wyslij, flag=wx.LEFT | wx.BOTTOM | wx.TOP,       border=BORDER)
-        main_area_sizer.Add(
-            wx.StaticLine(self),
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
-            border=BORDER,
-        )
-        main_area_sizer.Add(self._pnl_postprodukcja, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        return sizer
 
-        # ── Pionowy separator między kolumnami ────────────────────────
-        v_sep = wx.StaticLine(self, style=wx.LI_VERTICAL)
-
-        # ── Dwukolumnowy sizer (sidebar proportion=1 | main proportion=3) ──
-        two_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        two_col_sizer.Add(sidebar_sizer,   proportion=1, flag=wx.EXPAND | wx.ALL,     border=4)
-        two_col_sizer.Add(v_sep,                         flag=wx.EXPAND | wx.TOP | wx.BOTTOM,
-                          border=8)
-        two_col_sizer.Add(main_area_sizer, proportion=3, flag=wx.EXPAND | wx.ALL,     border=4)
-
-        # ── Złożenie pełnego layoutu ──────────────────────────────────
-        root_sizer = wx.BoxSizer(wx.VERTICAL)
-        root_sizer.Add(top_sizer,     flag=wx.EXPAND)
-        root_sizer.Add(two_col_sizer, proportion=1, flag=wx.EXPAND)
-
-        self.SetSizer(root_sizer)
 
     # ------------------------------------------------------------------
     # Podpięcie zdarzeń
@@ -1404,107 +1368,10 @@ class RezyserPanel(wx.Panel):
             )
 
     # ------------------------------------------------------------------
-    # Silnik fonetyczny (integracja z gui_poliglota)
-    # ------------------------------------------------------------------
-    def zastosuj_akcenty_uniwersalne(self, tekst: str, lore_text: str) -> str:
-        """Aplikuje akcenty fonetyczne z Księgi Świata na tekst skryptu.
-
-        Parsuje Księgę Świata w poszukiwaniu bloków [Postać: akcent X],
-        a następnie stosuje odpowiednią funkcję z gui_poliglota na każdym
-        fragmencie tekstu wypowiadanym przez tę postać (między tagami).
-        """
-        # 1. Wyciąganie mapowania postaci → akcent z Księgi Świata
-        akcenty_map: dict[str, dict] = {}
-        postacie_bloki = re.split(r"\[([^:\]\-]+).*?\]", lore_text)
-
-        for i in range(1, len(postacie_bloki), 2):
-            imie = postacie_bloki[i].strip().lower()
-            opis = postacie_bloki[i + 1].lower() if i + 1 < len(postacie_bloki) else ""
-
-            akcent_match = re.search(
-                r"akcent\s+([a-zńśźżćłó]+)|([a-zńśźżćłó]+)\s+akcent", opis
-            )
-            nazwa_akcentu = (
-                (akcent_match.group(1) or akcent_match.group(2))
-                if akcent_match
-                else None
-            )
-            reguly_lore = re.findall(
-                r"[\"']([a-ząćęłńóśźż])[\"']\s+na\s+[\"']([a-ząćęłńóśźż])[\"']",
-                opis,
-                re.IGNORECASE,
-            )
-            if nazwa_akcentu or reguly_lore:
-                akcenty_map[imie] = {"nazwa": nazwa_akcentu, "reguly": reguly_lore}
-
-        if not akcenty_map:
-            return tekst
-
-        # Pomocnicza: usuwa polskie znaki z nazwy akcentu (na potrzeby klucza mapy)
-        def _usun_pl(nazwa: str) -> str:
-            for k, v in {
-                "ą": "a", "ę": "e", "ł": "l", "ó": "o",
-                "ś": "s", "ć": "c", "ń": "n", "ż": "z", "ź": "z",
-            }.items():
-                nazwa = nazwa.replace(k, v)
-            return nazwa.strip()
-
-        # Mapa: znormalizowana nazwa akcentu → funkcja fonetyczna z core_poliglota.
-        # Blok generowany automatycznie przez ``odswiez_rezysera.py`` po każdym
-        # dodaniu nowego pliku YAML w dictionaries/<język>/akcenty/.
-        # <GENEROWANY_SLOWNIK_AKCENTOW_START>
-        _AKCENT_FUNCS = {
-            "islandzki": akcent_islandzki,
-            "angielski": akcent_angielski,
-            "francuski": akcent_francuski,
-            "niemiecki": akcent_niemiecki,
-            "hiszpanski":akcent_hiszpanski,
-            "wloski":    akcent_wloski,
-            "finski":    akcent_finski,
-        }
-# <GENEROWANY_SLOWNIK_AKCENTOW_END>
-
-        # 2. Podział skryptu po tagach i aplikacja akcentów
-        fragmenty = re.split(r"(\[[^\]]+\])", tekst)
-        nowe_fragmenty: list[str] = []
-        current_speaker: str | None = None
-
-        for frag in fragmenty:
-            if frag.startswith("[") and frag.endswith("]"):
-                nowe_fragmenty.append(frag)
-                m = re.match(r"^\[([^:\]\-]+)", frag)
-                current_speaker = m.group(1).strip().lower() if m else None
-            else:
-                dialog = frag
-                if current_speaker and dialog.strip():
-                    dopasowane_dane = next(
-                        (d for k, d in akcenty_map.items()
-                         if k in current_speaker or current_speaker in k),
-                        None,
-                    )
-                    if dopasowane_dane:
-                        zmodyfikowano = False
-                        if dopasowane_dane["nazwa"]:
-                            znorm = _usun_pl(dopasowane_dane["nazwa"])
-                            fn = _AKCENT_FUNCS.get(znorm)
-                            if fn:
-                                dialog = fn(dialog)
-                                zmodyfikowano = True
-                        if not zmodyfikowano and dopasowane_dane["reguly"]:
-                            for z, na in dopasowane_dane["reguly"]:
-                                dialog = (
-                                    dialog
-                                    .replace(z.lower(), na.lower())
-                                    .replace(z.upper(), na.upper())
-                                )
-                nowe_fragmenty.append(dialog)
-
-        return "".join(nowe_fragmenty)
-
-    # ------------------------------------------------------------------
     # Wyświetlanie błędów AI (krótkie → MessageBox; długie → dialog)
     # ------------------------------------------------------------------
     def _wyswietl_blad_ai(self, tresc_bledu: str, custom_msg: str | None = None) -> None:
+
         """Wyświetla błąd AI – krótki przez MessageBox, długi przez dialog z polem do skopiowania.
 
         Args:
