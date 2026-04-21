@@ -11,6 +11,7 @@ import wx
 
 import odswiez_rezysera
 from gui_konwerter import KonwerterPanel
+from gui_manager_regul import ManagerRegulPanel
 from gui_poliglota import PoliglotaPanel
 from gui_rezyser import RezyserPanel
 
@@ -18,11 +19,12 @@ from gui_rezyser import RezyserPanel
 # ---------------------------------------------------------------------------
 # Identyfikatory menu
 # ---------------------------------------------------------------------------
-ID_HOME           = wx.NewIdRef()
-ID_TOOL_REZYSER   = wx.NewIdRef()
-ID_TOOL_POLIGLOTA = wx.NewIdRef()
-ID_TOOL_KONWERTER = wx.NewIdRef()
-ID_EXIT           = wx.NewIdRef()
+ID_HOME            = wx.NewIdRef()
+ID_TOOL_REZYSER    = wx.NewIdRef()
+ID_TOOL_POLIGLOTA  = wx.NewIdRef()
+ID_TOOL_KONWERTER  = wx.NewIdRef()
+ID_TOOL_MANAGER    = wx.NewIdRef()   # Manager Reguł – nowość w 13.0
+ID_EXIT            = wx.NewIdRef()
 
 
 # ---------------------------------------------------------------------------
@@ -67,12 +69,14 @@ class HomePanel(wx.Panel):
             value=(
                 "To jest Twoje zintegrowane studio nagraniowe.\n"
                 "Wybierz narzędzie z paska przycisków lub z menu Narzędzia:\n\n"
-                "  \u2022  Reżyser    \u2013  Pisz skrypty i prozę z AI;"
+                "  \u2022  Reżyser       \u2013  Pisz skrypty i prozę z AI;"
                 " dynamicznie zarządzaj Księgą Świata.\n"
-                "  \u2022  Poliglota  \u2013  Nakładaj twarde akcenty pod lokalne"
-                " syntezatory (NVDA/Vocalizer) i tłumacz teksty.\n"
-                "  \u2022  Konwerter  \u2013  Szybko twórz profesjonalne pliki Word"
-                " z nagłówkami poziomu 1."
+                "  \u2022  Poliglota     \u2013  Nakładaj twarde akcenty pod"
+                " lokalne syntezatory (NVDA/Vocalizer) i tłumacz teksty.\n"
+                "  \u2022  Konwerter     \u2013  Szybko twórz profesjonalne"
+                " pliki Word z nagłówkami poziomu 1.\n"
+                "  \u2022  Manager Reguł \u2013  Przeglądaj i twórz reguły"
+                " słownikowe bez wchodzenia w pliki YAML ręcznie."
             ),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
         )
@@ -126,10 +130,14 @@ class HomePanel(wx.Panel):
         tools_info = wx.TextCtrl(
             self,
             value=(
-                "Po dodaniu nowego pliku YAML w dictionaries/<język>/akcenty/ "
-                "kliknij przycisk poniżej, aby udostępnić nowy akcent również "
-                "w Trybie Reżysera (Poliglota wykrywa YAML-e automatycznie).\n"
-                "Po pomyślnym odświeżeniu uruchom aplikację ponownie."
+                'Chcesz dodać nowy akcent, szyfr albo tryb Reżysera?\n'
+                'Otwórz Manager Reguł (Ctrl+4) – znajdziesz tam drzewo '
+                'wszystkich plików YAML w dictionaries/ oraz kreator, który '
+                'sam utworzy szablon lub wygeneruje prompt dla chatbota AI.\n\n'
+                'Po dodaniu nowego AKCENTU kliknij dodatkowo przycisk '
+                '„Odśwież akcenty Reżysera z YAML" poniżej – pozwoli to '
+                'Trybowi Reżysera zauważyć nowy akcent (Poliglota wykrywa '
+                'YAML-e automatycznie). Po odświeżeniu uruchom aplikację ponownie.'
             ),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
             name="Opis narzędzi słownikowych",
@@ -137,6 +145,20 @@ class HomePanel(wx.Panel):
         tools_info.SetBackgroundColour(self.GetBackgroundColour())
         main_sizer.Add(tools_info, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND,
                        border=16)
+
+        # --- Pasek z dwoma przyciskami skrótu ---
+        tools_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self._btn_open_manager = wx.Button(
+            self, label="📚 Otwórz Manager Reguł",
+            name="Przycisk Otwórz Manager Reguł",
+        )
+        self._btn_open_manager.SetToolTip(
+            "Przechodzi do Managera Reguł – eksploratora plików YAML "
+            "i kreatora nowych akcentów / trybów / szyfrów (Ctrl+4)."
+        )
+        self.Bind(wx.EVT_BUTTON, self._on_open_manager, self._btn_open_manager)
+        tools_btn_sizer.Add(self._btn_open_manager, flag=wx.RIGHT, border=8)
 
         self._btn_odswiez = wx.Button(
             self, label="🔄 Odśwież akcenty Reżysera z YAML",
@@ -147,11 +169,26 @@ class HomePanel(wx.Panel):
             "w core_poliglota.py oraz core_rezyser.py. Po udanym odświeżeniu "
             "należy uruchomić aplikację ponownie."
         )
-
         self.Bind(wx.EVT_BUTTON, self._on_odswiez_rezysera, self._btn_odswiez)
-        main_sizer.Add(self._btn_odswiez, flag=wx.ALL, border=16)
+        tools_btn_sizer.Add(self._btn_odswiez)
+
+        main_sizer.Add(tools_btn_sizer, flag=wx.ALL, border=16)
 
         self.SetSizer(main_sizer)
+
+    # ------------------------------------------------------------------
+    # Handler: przejście do Managera Reguł (przycisk w sekcji
+    # „Narzędzia słownikowe" – wykorzystuje MainFrame._on_manager)
+    # ------------------------------------------------------------------
+    def _on_open_manager(self, _event: wx.Event) -> None:
+        """Przełącza aplikację na panel Managera Reguł.
+
+        Zakładamy, że HomePanel jest osadzony w MainFrame – znajdujemy go
+        przez GetTopLevelParent i wywołujemy jego publiczny handler.
+        """
+        top = self.GetTopLevelParent()
+        if hasattr(top, "_on_manager"):
+            top._on_manager(_event)   # noqa: SLF001 – świadome użycie
 
     # ------------------------------------------------------------------
     # Logika walidacji golden_key.env
@@ -494,6 +531,12 @@ class MainFrame(wx.Frame):
             "&Konwerter\tCtrl+3",
             "Otwiera moduł Konwertera – tworzenie plików Word",
         )
+        item_manager = menu_tools.Append(
+            ID_TOOL_MANAGER,
+            "&Manager Reguł\tCtrl+4",
+            "Otwiera Managera Reguł – eksplorator plików YAML "
+            "w dictionaries/ i kreator nowych akcentów / trybów / szyfrów",
+        )
 
         # --- Menu: Plik ------------------------------------------------
         menu_file = wx.Menu()
@@ -557,9 +600,20 @@ class MainFrame(wx.Frame):
             "Moduł Konwertera (Ctrl+3): Twórz pliki Word z nagłówkami"
         )
 
+        self._btn_manager = wx.Button(
+            self._root_panel,
+            id=ID_TOOL_MANAGER,
+            label="📚  &Manager Reguł",
+        )
+        self._btn_manager.SetToolTip(
+            "Manager Reguł (Ctrl+4): Eksploruj pliki YAML w dictionaries/, "
+            "twórz nowe akcenty, szyfry i tryby (szablon lub prompt dla AI)"
+        )
+
         btn_sizer.Add(self._btn_rezyser,   flag=wx.ALL, border=4)
         btn_sizer.Add(self._btn_poliglota, flag=wx.ALL, border=4)
         btn_sizer.Add(self._btn_konwerter, flag=wx.ALL, border=4)
+        btn_sizer.Add(self._btn_manager,   flag=wx.ALL, border=4)
 
         # Separator poziomy
         separator = wx.StaticLine(self._root_panel)
@@ -579,6 +633,7 @@ class MainFrame(wx.Frame):
         # Kolejność tabulacji: przyciski w logicznej kolejności
         self._btn_rezyser.MoveBeforeInTabOrder(self._btn_poliglota)
         self._btn_poliglota.MoveBeforeInTabOrder(self._btn_konwerter)
+        self._btn_konwerter.MoveBeforeInTabOrder(self._btn_manager)
 
     # ------------------------------------------------------------------
     # Podpięcie zdarzeń
@@ -586,15 +641,17 @@ class MainFrame(wx.Frame):
     def _bind_events(self) -> None:
         # Menu
         self.Bind(wx.EVT_MENU, self._on_home,       id=ID_HOME)
-        self.Bind(wx.EVT_MENU, self._on_rezyser,   id=ID_TOOL_REZYSER)
+        self.Bind(wx.EVT_MENU, self._on_rezyser,    id=ID_TOOL_REZYSER)
         self.Bind(wx.EVT_MENU, self._on_poliglota,  id=ID_TOOL_POLIGLOTA)
         self.Bind(wx.EVT_MENU, self._on_konwerter,  id=ID_TOOL_KONWERTER)
+        self.Bind(wx.EVT_MENU, self._on_manager,    id=ID_TOOL_MANAGER)
         self.Bind(wx.EVT_MENU, self._on_exit,       id=ID_EXIT)
 
         # Przyciski (te same identyfikatory → te same handlery przez EVT_BUTTON)
         self.Bind(wx.EVT_BUTTON, self._on_rezyser,   id=ID_TOOL_REZYSER)
-        self.Bind(wx.EVT_BUTTON, self._on_poliglota,  id=ID_TOOL_POLIGLOTA)
-        self.Bind(wx.EVT_BUTTON, self._on_konwerter,  id=ID_TOOL_KONWERTER)
+        self.Bind(wx.EVT_BUTTON, self._on_poliglota, id=ID_TOOL_POLIGLOTA)
+        self.Bind(wx.EVT_BUTTON, self._on_konwerter, id=ID_TOOL_KONWERTER)
+        self.Bind(wx.EVT_BUTTON, self._on_manager,   id=ID_TOOL_MANAGER)
 
         self.Bind(wx.EVT_CLOSE, self._on_close)
 
@@ -615,8 +672,10 @@ class MainFrame(wx.Frame):
             self._current_panel = RezyserPanel(self._root_panel)
         elif name == "Poliglota":
             self._current_panel = PoliglotaPanel(self._root_panel)
-        else:  # "Konwerter"
+        elif name == "Konwerter":
             self._current_panel = KonwerterPanel(self._root_panel)
+        else:  # "Manager Reguł"
+            self._current_panel = ManagerRegulPanel(self._root_panel)
         self._content_area.Add(self._current_panel, proportion=1, flag=wx.EXPAND)
 
         # Odśwież layout (A11y)
@@ -644,9 +703,10 @@ class MainFrame(wx.Frame):
     def _update_button_states(self, active_name: str) -> None:
         """Wizualnie wyróżnia aktywny przycisk narzędzia (bold)."""
         mapping = {
-            "Reżyser":   self._btn_rezyser,
-            "Poliglota": self._btn_poliglota,
-            "Konwerter": self._btn_konwerter,
+            "Reżyser":       self._btn_rezyser,
+            "Poliglota":     self._btn_poliglota,
+            "Konwerter":     self._btn_konwerter,
+            "Manager Reguł": self._btn_manager,
         }
         for tool_name, btn in mapping.items():
             font = btn.GetFont()
@@ -669,6 +729,9 @@ class MainFrame(wx.Frame):
 
     def _on_konwerter(self, _event: wx.Event) -> None:
         self._switch_tool("Konwerter")
+
+    def _on_manager(self, _event: wx.Event) -> None:
+        self._switch_tool("Manager Reguł")
 
     def _on_exit(self, _event: wx.Event) -> None:
         self.Close()
