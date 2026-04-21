@@ -878,10 +878,16 @@ class RezyserPanel(wx.Panel):
     def _refresh_ui_state(self) -> None:
         """Aktualizuje stan Enabled/Disabled przycisków na podstawie stanu pamięci.
 
+        Refaktor 13.0: większość obliczeń (``pamiec_zajeta``, ``ma_prolog``,
+        ``ma_epilog``, ``ostatnia_linia_to_naglowek``, ``epilog_ma_tresc``)
+        została przeniesiona do properties w ``core_rezyser.ProjektRezysera``.
+        Dzięki temu ta metoda stała się czytelniejsza: odpowiada wyłącznie
+        za mapowanie stanu modelu na ``Enable/Disable/Show/Hide`` widżetów.
+
         Na końcu zawsze wywołuje self.Layout(), by okno poprawnie przeliczyło
         rozmiary po ewentualnym ukryciu lub pokazaniu paneli struktury i postprodukcji.
         """
-        pamiec_zajeta = bool(self.full_story.strip() or self.summary_text.strip())
+        pamiec_zajeta = self._projekt.pamiec_zajeta
         pamiec_pusta  = not pamiec_zajeta
         nazwa_podana  = bool(self._txt_file_name.GetValue().strip())
         streszczenie_wpisane = bool(self._txt_pamiec.GetValue().strip())
@@ -913,12 +919,8 @@ class RezyserPanel(wx.Panel):
         self._btn_zapisz_pamiec.Enable(nazwa_podana and streszczenie_wpisane)
 
         # ── Wyślij do AI ──────────────────────────────────────────────
-        # Sprawdź czy po nagłówku Epilogu jest już treść (zakończona historia)
-        _epilog_ref   = re.search(r'(?i)\bepilog\b', self.full_story)
-        _epilog_ma_tresc = (
-            _epilog_ref is not None
-            and len(self.full_story[_epilog_ref.end():].strip()) > 0
-        )
+        # Epilog z treścią = historia zakończona, dalsze dopisywanie zablokowane.
+        _epilog_ma_tresc = self._projekt.epilog_ma_tresc
 
         if not self._api_dostepne:
             self._btn_wyslij.Disable()
@@ -935,24 +937,12 @@ class RezyserPanel(wx.Panel):
         # DYNAMICZNA WIDOCZNOŚĆ – Panel Zarządzania Strukturą
         # ══════════════════════════════════════════════════════════════
 
-        # Oblicz wspólne warunki dla przycisków struktury
-        _prolog_juz_jest  = bool(re.search(r'(?i)\bprolog\b',  self.full_story))
-        _epilog_juz_jest  = bool(re.search(r'(?i)\bepilog\b',  self.full_story))
+        # Wspólne warunki dla przycisków struktury (wszystkie z modelu).
+        _prolog_juz_jest   = self._projekt.ma_prolog
+        _epilog_juz_jest   = self._projekt.ma_epilog
         _historia_niepusta = bool(self.full_story.strip())
+        _blokada = self._projekt.ostatnia_linia_to_naglowek or _epilog_juz_jest
 
-        _ostatnia_linia = ""
-        for _linia in reversed(self.full_story.splitlines()):
-            if _linia.strip():
-                _ostatnia_linia = _linia.strip()
-                break
-
-        _konczy_sie_naglowkiem = bool(
-            re.match(
-                r'(?i)^(rozdzia[łl]\s+\d+|akt\s+\d+|scena\s+\d+|prolog|epilog)\s*$',
-                _ostatnia_linia,
-            )
-        ) if _ostatnia_linia else False
-        _blokada = _konczy_sie_naglowkiem or _epilog_juz_jest
 
         if tryb_idx == 0:
             # Tryb Burza Mózgów – ukryj cały panel struktury
@@ -1272,15 +1262,17 @@ class RezyserPanel(wx.Panel):
             )
 
     # ------------------------------------------------------------------
-    # Wysyłanie do AI (stub – logika OpenAI w kolejnym etapie)
+    # Wysyłanie do AI
     # ------------------------------------------------------------------
     def _on_wyslij(self, _event: wx.Event) -> None:
-        """
-        Obsługuje przycisk 'Wyślij do AI'.
+        """Obsługuje przycisk 'Wyślij do AI'.
 
-        Aktualny etap: walidacja danych wejściowych + stub odpowiedzi.
-        Pełna implementacja wywołań OpenAI gpt-4o (w wątku tła
-        z wx.CallAfter) zostanie dodana w kolejnym etapie pracy.
+        Refaktor 13.0: cała logika budowy promptów, wywołania OpenAI,
+        detekcji odrzucenia i ekstrakcji streszczenia żyje teraz w
+        :mod:`rezyser_ai` (``generuj_fragment``). Ta metoda tylko
+        waliduje dane wejściowe z GUI, ustawia ``self._projekt`` w znany
+        stan (``world_lore``, ``nazwa_pliku``) i odpala wątek tła
+        z gotowym ``SnapshotProjektu`` + wybranym ``PrzepisRezysera``.
         """
         if not self._api_dostepne:
             wx.MessageBox(
@@ -1303,14 +1295,23 @@ class RezyserPanel(wx.Panel):
             self._txt_user_input.SetFocus()
             return
 
-        nazwa      = self._txt_file_name.GetValue().strip()
-        tryb_idx   = self._rb_mode.GetSelection()
-        tryb_zapisu = tryb_idx in (1, 2)  # Skrypt lub Audiobook
+        nazwa       = self._txt_file_name.GetValue().strip()
+        przepis     = self._aktualny_przepis()
+        if przepis is None:
+            wx.MessageBox(
+                "Nie udało się załadować żadnego trybu pracy z YAML.\n"
+                "Uruchom odswiez_rezysera.py lub sprawdź dictionaries/pl/rezyser/.",
+                "Brak przepisów",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+        tryb_zapisu = przepis.zapis_do_pliku
 
         if tryb_zapisu and not nazwa:
             wx.MessageBox(
                 "Podaj nazwę pliku projektu, zanim wygenerujesz tekst do zapisu.\n"
-                "(Tryb Skryptu i Audiobooka wymagają nazwy.)",
+                f"(Tryb '{przepis.etykieta}' wymaga nazwy pliku.)",
                 "Brak nazwy pliku",
                 wx.OK | wx.ICON_WARNING,
                 self,
@@ -1330,9 +1331,11 @@ class RezyserPanel(wx.Panel):
             self._txt_ksiega_swiata.SetFocus()
             return
 
-        # Ochrona przed generowaniem streszczenia w trybie zapisu do pliku
-        slowa_kluczowe = ["streszcz", "streść", "podsumuj", "podsumowanie"]
-        if tryb_zapisu and any(s in user_text.lower() for s in slowa_kluczowe):
+        # Ochrona przed generowaniem streszczenia w trybie zapisu do pliku.
+        # Słowa kluczowe bierzemy z YAML-a (``slowa_wyzwalajace.streszczenie``)
+        # – lingwista może je rozszerzyć o "podsumuj", "streść" itp.
+        slowa_streszczenia = przepis.slowa_wyzwalajace.get("streszczenie", [])
+        if tryb_zapisu and any(s in user_text.lower() for s in slowa_streszczenia):
             wx.MessageBox(
                 "Próbujesz wygenerować streszczenie w trybie zapisu do pliku!\n"
                 "To mogłoby uszkodzić Twoją historię.\n\n"
@@ -1343,24 +1346,31 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        # Zablokuj przycisk, wyczyść pole instrukcji, przekaż snapshot stanu do wątku
+        # Synchronizujemy stan modelu z aktualnymi wartościami kontrolek,
+        # zanim zrobimy snapshot dla wątku tła:
+        #   • Księga Świata mogła zostać zmodyfikowana po ostatnim "Zapisz Księgę";
+        #   • nazwa_pliku mogła nie być jeszcze ustawiona w modelu, jeśli user
+        #     dopiero wpisał ją do pola (bez "Wczytaj historię").
+        self._projekt.world_lore = world_context
+        if nazwa and self._projekt.nazwa_pliku != nazwa:
+            self._projekt.nazwa_pliku = nazwa
+
+        # Zablokuj przycisk, wyczyść pole instrukcji
         self._btn_wyslij.Disable()
         self._txt_user_input.SetValue("")
-
-        # Snapshot stanu pamięci – bezpieczne przekazanie do wątku tła (GIL-safe)
-        full_story_snap = self.full_story
-        summary_snap    = self.summary_text
-
         self._refresh_ui_state()
+
+        # Snapshot niezmiennego stanu dla wątku tła (GIL-safe).
+        snapshot = self._projekt.snapshot()
 
         t = threading.Thread(
             target=self._wyslij_worker,
-            args=(user_text, nazwa, tryb_idx, tryb_zapisu, world_context,
-                  full_story_snap, summary_snap),
+            args=(przepis, snapshot, user_text, nazwa, tryb_zapisu),
             daemon=True,
         )
         self._worker_thread = t
         t.start()
+
 
     # ------------------------------------------------------------------
     # Pomocnicza metoda zapisu do pliku projektu (thin wrapper)
@@ -1535,232 +1545,103 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Aktualizacja wskaźnika przepełnienia okna kontekstowego AI
     # ------------------------------------------------------------------
+    # Mapa poziom zagrożenia → kolor wskaźnika pamięci modelu.
+    # Trzymana poza metodą, by nie tworzyć obiektu wx.Colour przy każdym
+    # odświeżeniu UI. Kolory zgodne z dotychczasową wersją (zielony/
+    # pomarańczowy/czerwony), tylko teraz mapowane przez poziom z
+    # ``core_rezyser.StatusPamieciModelu`` zamiast progiem na sztywno.
+    _KOLORY_POZIOMOW = {
+        cr.POZIOM_CZYSTA:     (0, 128, 0),
+        cr.POZIOM_OK:         (0, 128, 0),
+        cr.POZIOM_OSTRZEZENIE:(180, 100, 0),
+        cr.POZIOM_ALARM:      (180, 0, 0),
+    }
+
     def _aktualizuj_pamiec_modelu(self) -> None:
-        """Odświeża wskaźnik pamięci modelu (kontekst okna AI) na podstawie full_story.
+        """Odświeża wskaźnik pamięci modelu (kontekst okna AI).
 
-        Odpowiednik funkcji aktualizuj_pasek_postepu() z 1_Rezyseria.py (Streamlit).
-        Wywoływana automatycznie przez _refresh_ui_state() przy każdej zmianie stanu.
+        Refaktor 13.0: obliczenia progów i komunikatów są w
+        ``ProjektRezysera.status_pamieci_modelu()``. Ta metoda tylko
+        mapuje wynik (procent + komunikat + poziom) na widżety wxPython.
         """
-        LIMIT   = 200_000
-        ALARM   = 175_000
-        OSTRZEZ = 150_000
-        total   = len(self.full_story)
+        status = self._projekt.status_pamieci_modelu()
+        r, g, b = self._KOLORY_POZIOMOW.get(status.poziom, (0, 0, 0))
+        self._gauge_kontekst.SetValue(status.procent)
+        self._lbl_kontekst_status.SetValue(status.komunikat)
+        self._lbl_kontekst_status.SetForegroundColour(wx.Colour(r, g, b))
 
-        if total == 0:
-            pct    = 0
-            msg    = "🟢 Pamięć czysta. Maszyna gotowa na nową historię."
-            colour = wx.Colour(0, 128, 0)
-        elif total >= ALARM:
-            pct    = min(int(total / LIMIT * 100), 100)
-            msg    = (
-                f"🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {total} z {LIMIT} znaków.\n"
-                "JAK KONTYNUOWAĆ: W Burzy Mózgów wpisz 'streszczenie', kliknij "
-                "'Zapisz Streszczenie', potem 'Wyczyść bieżącą (zostaw Streszczenie)'."
-            )
-            colour = wx.Colour(180, 0, 0)
-        elif total >= OSTRZEZ:
-            pct    = int(total / LIMIT * 100)
-            msg    = (
-                f"⚠️ STAN OSTRZEGAWCZY: Zużyto {total} z {LIMIT} znaków. "
-                "Pamięć się zapełnia – wkrótce konieczne będzie wygenerowanie streszczenia."
-            )
-            colour = wx.Colour(180, 100, 0)
-        else:
-            pct    = int(total / LIMIT * 100)
-            msg    = f"🟢 Zużycie pamięci: {total} / {LIMIT} znaków. Bezpieczny bufor."
-            colour = wx.Colour(0, 128, 0)
-
-        self._gauge_kontekst.SetValue(pct)
-        self._lbl_kontekst_status.SetValue(msg)
-        self._lbl_kontekst_status.SetForegroundColour(colour)
 
     # ------------------------------------------------------------------
-    # Wątek tła – główna logika AI  (ŻADNYCH wx.* bezpośrednio!)
+    # Wątek tła – główna logika AI (ŻADNYCH wx.* bezpośrednio!)
     # ------------------------------------------------------------------
     def _wyslij_worker(
         self,
+        przepis: pr.PrzepisRezysera,
+        snapshot: cr.SnapshotProjektu,
         user_text: str,
         nazwa: str,
-        tryb_idx: int,
         tryb_zapisu: bool,
-        world_context: str,
-        full_story: str,
-        summary_text: str,
     ) -> None:
-        """Buduje payload, wywołuje OpenAI gpt-4o i przekazuje wyniki przez wx.CallAfter.
+        """Wywołuje ``rezyser_ai.generuj_fragment`` i rozsyła wyniki przez wx.CallAfter.
 
-        Parametry ``full_story`` i ``summary_text`` to migawki stanu
-        przekazane przed uruchomieniem wątku – bezpieczne wobec GIL.
-        Wszelka modyfikacja UI odbywa się WYŁĄCZNIE przez wx.CallAfter.
+        Refaktor 13.0: cała warstwa budowy payloadu OpenAI, wybierania
+        sufiksów kontekstowych, detekcji odrzucenia i ekstrakcji
+        ``<STRESZCZENIE>`` została wydzielona do :mod:`rezyser_ai`.
+        Tu zostaje tylko „cienki kontroler": przeniesienie wyniku
+        z wątku tła z powrotem do GUI (zapis do pliku / okno dialogowe /
+        komunikat błędu).
+
+        Args:
+            przepis:     Aktualnie wybrany tryb pracy (Burza / Skrypt /
+                         Audiobook) załadowany z YAML-a.
+            snapshot:    Niezmienny snapshot stanu projektu (``full_story``,
+                         ``summary_text``, ``world_lore``, ``nazwa``).
+            user_text:   Treść instrukcji użytkownika z pola „Instrukcje".
+            nazwa:       Nazwa projektu (do dopisania do pliku po odpowiedzi).
+            tryb_zapisu: Odpowiednik ``przepis.zapis_do_pliku`` — powielony
+                         jako argument, by nie musieć dodatkowo czytać z
+                         ``przepis`` w workerze (drobna optymalizacja).
         """
-        _total_chars = len(full_story)
-        _OSTRZEZENIE = 150_000
-        _ALARM       = 175_000
-        slowa_kluczowe = ["streszcz", "streść", "podsumuj", "podsumowanie"]
-
-        # ── Budowanie aktywnego system promptu ────────────────────────
-        if tryb_idx == 0:  # Burza Mózgów
-            active_prompt = self.PROMPT_BURZA_BASE.format(world_context=world_context)
-            if any(s in user_text.lower() for s in slowa_kluczowe):
-                active_prompt += (
-                    "\n\n[TRYB WYMUSZONEGO STRESZCZENIA]: Użytkownik ręcznie zażądał "
-                    "zapisania stanu fabuły! Zanim wygenerujesz Opcje, MUSISZ na samej "
-                    "górze wygenerować streszczenie zamknięte w tagach "
-                    "<STRESZCZENIE> tutaj tekst </STRESZCZENIE>. "
-                    "Streszczenie musi zawierać TRZY obowiązkowe elementy:\n"
-                    "1. Zwięzłe podsumowanie dotychczasowych wydarzeń.\n"
-                    "2. Sekcję [OSTATNIA SCENA]: dokładna kopia (słowo w słowo) ostatnich "
-                    "2-3 akapitów przesłanego tekstu.\n"
-                    "3. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji."
-                )
-            elif _total_chars < _OSTRZEZENIE:
-                active_prompt += (
-                    "\n\n[TRYB OPTYMALIZACJI]: Pamięć jest pojemna. NIE GENERUJ żadnego "
-                    "streszczenia dotychczasowej fabuły. Przejdź od razu do generowania "
-                    "3 Opcji i promptów."
-                )
-            else:
-                active_prompt += (
-                    "\n\n[TRYB ALARMOWY - ZBLIŻA SIĘ KONIEC PAMIĘCI]: Pamięć jest prawie "
-                    "pełna! Zanim wygenerujesz Opcje, MUSISZ na samej górze wygenerować "
-                    "streszczenie zamknięte w tagach "
-                    "<STRESZCZENIE> tutaj tekst </STRESZCZENIE>. "
-                    "Streszczenie musi zawierać TRZY obowiązkowe elementy:\n"
-                    "1. Zwięzłe podsumowanie dotychczasowych wydarzeń.\n"
-                    "2. Sekcję [OSTATNIA SCENA]: dokładna kopia (słowo w słowo) ostatnich "
-                    "2-3 akapitów przesłanego tekstu.\n"
-                    "3. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji."
-                )
-
-        elif tryb_idx == 1:  # Skrypt
-            active_prompt = self.PROMPT_SKRYPT.format(world_context=world_context)
-            if not full_story.strip() or "[" not in full_story:
-                active_prompt += (
-                    "\n\n[TRYB STARTOWY - PUSTA PAMIĘĆ]: Zaczynasz zupełnie nową historię!\n"
-                    "1. AUDIO-EKSPOZYCJA (KRYTYCZNE): Ponieważ brak narratora, MUSISZ "
-                    "zbudować kontekst akcją. Scena nie może dziać się w próżni. Rozpocznij "
-                    "od wejścia postaci w przestrzeń.\n"
-                    "2. EKSPOZYCJA W DIALOGU: Postacie w pierwszych kwestiach muszą w "
-                    "naturalny sposób zdradzić, GDZIE są i KIM dla siebie są.\n"
-                    "3. ZAKAZ JASNOWIDZENIA: Komentowanie czyjegoś głosu dopiero po jego "
-                    "usłyszeniu."
-                )
-            else:
-                active_prompt += (
-                    "\n\n[TRYB KONTYNUACJI]: Kontynuujesz trwającą scenę. Utrzymaj naturalną "
-                    "płynność akcji i napięcie. Zamiast narratora, regularnie wplataj opisy "
-                    "przestrzeni i ruchu postaci za pomocą surowych tagów [SFX: ...] "
-                    "pomiędzy dialogami."
-                )
-
-        else:  # Audiobook (tryb_idx == 2)
-            active_prompt = self.PROMPT_AUDIOBOOK.format(world_context=world_context)
-
-        # ── Budowanie payload_messages ────────────────────────────────
-        payload_messages: list[dict] = [
-            {"role": "system", "content": active_prompt},
-        ]
-        if summary_text.strip():
-            payload_messages.append({
-                "role": "assistant",
-                "content": f"[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:\n{summary_text}",
-            })
-        if full_story.strip():
-            payload_messages.append({
-                "role": "assistant",
-                "content": f"[OBECNA FABUŁA]:\n{full_story}",
-            })
-
-        # ── PRZYPOMNIENIE KRYTYCZNE doczepiane do instrukcji użytkownika ─
-        user_content = user_text
-        if tryb_idx == 1:
-            user_content += (
-                "\n\n(PRZYPOMNIENIE KRYTYCZNE: Tryb AUDIO-PLAY/FOLEY. Używaj TYLKO tagów "
-                "[SFX: ...] oraz [Postać: ...]. ZERO NARRATORA! Tagi SFX: max 10 słów, "
-                "czysta akustyka. ZABRONIONE jest rozwiązywanie problemów na końcu tekstu! "
-                "Zastosuj BRUTALNY ANTI-CLOSURE: urwij scenę w ułamku sekundy, gdy dzieje "
-                "się coś złego. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)"
-            )
-        elif tryb_idx == 2:
-            user_content += (
-                "\n\n(PRZYPOMNIENIE KRYTYCZNE: Tryb KSIĄŻKI. Zero tagów audio/głosowych. "
-                "Długa, gęsta proza z dialogami po myślnikach. Zakaz Markdownu i nagłówków. "
-                "BRUTALNY ANTI-CLOSURE: urwij tekst w środku napięcia lub w połowie akcji, "
-                "chyba że to wyraźny finał historii.)"
-            )
-        else:  # Burza Mózgów
-            user_content += (
-                "\n\n(PRZYPOMNIENIE KRYTYCZNE: Generujesz tylko 3 opcje + prompty. Opcje "
-                "logiczne i uziemione. Komplikuj fabułę, CHYBA ŻE użytkownik wyraźnie prosi "
-                "o Epilog lub zakończenie – wtedy ładnie domknij historię. Opcje NIE MOGĄ "
-                "kończyć się pełnym sukcesem bez konsekwencji!)"
-            )
-        payload_messages.append({"role": "user", "content": user_content})
-
-        # ── Wywołanie OpenAI API ──────────────────────────────────────
         try:
-            response = self._client.chat.completions.create(
-                model="gpt-4o",
-                messages=payload_messages,
-                temperature=0.85,
+            wynik = rai.generuj_fragment(
+                klient=self._client,
+                przepis=przepis,
+                snapshot=snapshot,
+                user_text=user_text,
+                on_postep=None,  # pasek postępu w _on_wyslij nie jest jeszcze wpięty
             )
-            response_text: str = response.choices[0].message.content
         except openai.RateLimitError:
             wx.CallAfter(
                 self._on_wyslij_error,
                 "Brak kredytów OpenAI! Doładuj konto i spróbuj ponownie.",
             )
             return
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._on_wyslij_error, str(exc))
             return
 
-        # ── Post-processing ───────────────────────────────────────────
-        if tryb_idx == 1:  # Skrypt – silnik fonetyczny
-            response_text = self.zastosuj_akcenty_uniwersalne(response_text, world_context)
-
-        if tryb_idx == 0:  # Burza Mózgów – wyciągnięcie <STRESZCZENIE>
-            _match = re.search(
-                r"<STRESZCZENIE>(.*?)</STRESZCZENIE>",
-                response_text,
-                re.DOTALL | re.IGNORECASE,
+        # AI odrzuciło prompt – NIE zapisujemy nic do pliku historii.
+        if wynik.odrzucone:
+            wx.CallAfter(
+                self._on_wyslij_error,
+                "AI odrzuciło prompt (wykryto tag [ODRZUCENIE_AI]).\n"
+                "Tekst NIE zostanie zapisany do pliku historii.\n"
+                "Możesz zmodyfikować instrukcję i spróbować ponownie.",
             )
-            if _match:
-                nowe_streszczenie = _match.group(1).strip()
-                response_text = re.sub(
-                    r"<STRESZCZENIE>.*?</STRESZCZENIE>",
-                    "",
-                    response_text,
-                    flags=re.DOTALL | re.IGNORECASE,
-                ).strip()
-                wx.CallAfter(self._on_wyslij_zapisz_streszczenie, nowe_streszczenie)
+            return
 
-        # ── Zapis do pliku lub wyświetlenie odpowiedzi ────────────────
+        # Streszczenie wyciągnięte w Burzy Mózgów – aktualizujemy Pamięć Długotrwałą.
+        if wynik.nowe_streszczenie:
+            wx.CallAfter(
+                self._on_wyslij_zapisz_streszczenie, wynik.nowe_streszczenie,
+            )
+
+        # Zapis do pliku (Skrypt / Audiobook) lub dialog-only (Burza Mózgów).
         if tryb_zapisu:
-            refusal_kw = [
-                "jako model językowy", "as an ai",
-                "nie mogę spełnić tej prośby", "nie mogę wygenerować",
-                "narusza zasady", "zasady bezpieczeństwa",
-            ]
-            if any(kw in response_text.lower() for kw in refusal_kw):
-                wx.CallAfter(
-                    self._on_wyslij_error,
-                    "AI odrzuciło prompt przez filtry bezpieczeństwa!\n"
-                    "Tekst NIE ZOSTANIE zapisany.",
-                )
-                return
-            # Blokada zapisu po epilogu
-            _ep_idx = full_story.find("Epilog")
-            if _ep_idx != -1 and len(full_story[_ep_idx + len("Epilog"):].strip()) > 0:
-                wx.CallAfter(
-                    self._on_wyslij_error,
-                    "Epilog ma już treść – nie można dopisywać kolejnych fragmentów "
-                    "po zakończeniu historii.",
-                )
-                return
-            wx.CallAfter(self._on_wyslij_done_zapis, response_text, nazwa)
+            wx.CallAfter(self._on_wyslij_done_zapis, wynik.tekst_odpowiedzi, nazwa)
         else:
-            wx.CallAfter(self._on_wyslij_done_burza, response_text)
+            wx.CallAfter(self._on_wyslij_done_burza, wynik.tekst_odpowiedzi)
+
 
     # ------------------------------------------------------------------
     # Callbacki _wyslij_worker (wywołania przez wx.CallAfter – wątek GUI)
@@ -1830,10 +1711,17 @@ class RezyserPanel(wx.Panel):
         dlg.Destroy()
 
     # ------------------------------------------------------------------
-    # Wstawianie Prologu
+    # Helper: wspólna walidacja nazwy projektu dla operacji strukturalnych
     # ------------------------------------------------------------------
-    def _on_wstaw_prolog(self, _event: wx.Event) -> None:
-        """Wstawia nagłówek 'Prolog' do historii i pliku projektu."""
+    def _wymagaj_nazwy_lub_alert(self) -> str | None:
+        """Zwraca ``nazwa`` z pola lub ``None`` (po pokazaniu alertu i ustawieniu fokusa).
+
+        Refaktor 13.0: wcześniej każda z pięciu metod ``_on_wstaw_*``
+        powtarzała identycznych 10 linii walidacji. Teraz jedno wywołanie
+        na początku handlera załatwia sprawę. Dodatkowo, po odnalezieniu
+        nazwy synchronizujemy ją z ``self._projekt.nazwa_pliku``, by
+        ``ProjektRezysera._wymagaj_nazwy()`` mógł przejść bez wyjątku.
+        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
@@ -1843,146 +1731,154 @@ class RezyserPanel(wx.Panel):
                 self,
             )
             self._txt_file_name.SetFocus()
-            return
+            return None
+        if self._projekt.nazwa_pliku != nazwa:
+            self._projekt.nazwa_pliku = nazwa
+        return nazwa
 
-        header_text = "Prolog\n\n"
-        self.full_story += header_text
+    def _po_wstawieniu_struktury(self, tytul: str, komunikat: str) -> None:
+        """Wspólny „post-wstawienie": odśwież UI, zapisz tryb, pokaż MessageBox.
+
+        Używane przez wszystkie pięć handlerów ``_on_wstaw_*``. Nie
+        odczytuje już wartości z ``ProjektRezysera`` – te wywołane wcześniej
+        przez delegację ``self._projekt.wstaw_*()`` zaktualizowały stan.
+        """
         self._txt_full_story.SetValue(self.full_story)
-        # mode="w" – Prolog zaczyna historię od zera; nadpisuje istniejący plik
-        # aby uniknąć artefaktów z poprzednich sesji (np. "testProlog").
-        self._dopisz_do_pliku(nazwa, header_text, mode="w")
         self._zapisz_tryb_projektu()
         self._refresh_ui_state()
-        wx.MessageBox(
-            "Wstawiono nagłówek: Prolog.\n\nRozpocznij pisanie treści prologu.",
+        wx.MessageBox(komunikat, tytul, wx.OK | wx.ICON_INFORMATION, self)
+
+    # ------------------------------------------------------------------
+    # Wstawianie Prologu
+    # ------------------------------------------------------------------
+    def _on_wstaw_prolog(self, _event: wx.Event) -> None:
+        """Wstawia nagłówek 'Prolog' do historii i pliku projektu.
+
+        Deleguje do ``self._projekt.wstaw_prolog()`` – cała logika
+        (``full_story += header``, mode="w" dla pliku, licznik) żyje
+        w ``core_rezyser.ProjektRezysera``.
+        """
+        if self._wymagaj_nazwy_lub_alert() is None:
+            return
+        try:
+            self._projekt.wstaw_prolog()
+        except Exception as exc:  # noqa: BLE001
+            wx.MessageBox(
+                f"Błąd wstawiania Prologu:\n{exc}",
+                "Błąd zapisu",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+        self._po_wstawieniu_struktury(
             "Prolog wstawiony",
-            wx.OK | wx.ICON_INFORMATION,
-            self,
+            "Wstawiono nagłówek: Prolog.\n\nRozpocznij pisanie treści prologu.",
         )
 
     # ------------------------------------------------------------------
     # Wstawianie Epilogu
     # ------------------------------------------------------------------
     def _on_wstaw_epilog(self, _event: wx.Event) -> None:
-        """Wstawia nagłówek 'Epilog' na końcu historii i pliku projektu."""
-        nazwa = self._txt_file_name.GetValue().strip()
-        if not nazwa:
+        """Wstawia nagłówek 'Epilog' na końcu historii i pliku projektu.
+
+        Deleguje do ``self._projekt.wstaw_epilog()``.
+        """
+        if self._wymagaj_nazwy_lub_alert() is None:
+            return
+        try:
+            self._projekt.wstaw_epilog()
+        except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                "Podaj nazwę pliku projektu przed wstawianiem struktury.",
-                "Brak nazwy",
-                wx.OK | wx.ICON_WARNING,
+                f"Błąd wstawiania Epilogu:\n{exc}",
+                "Błąd zapisu",
+                wx.OK | wx.ICON_ERROR,
                 self,
             )
-            self._txt_file_name.SetFocus()
             return
-
-        header_text = "\n\nEpilog\n\n"
-        self.full_story += header_text
-        self._txt_full_story.SetValue(self.full_story)
-        self._dopisz_do_pliku(nazwa, header_text)
-        self._zapisz_tryb_projektu()
-        self._refresh_ui_state()
-        wx.MessageBox(
-            "Wstawiono nagłówek: Epilog.\n\nDalsze generowanie treści po Epilogu jest zablokowane.",
+        self._po_wstawieniu_struktury(
             "Epilog wstawiony",
-            wx.OK | wx.ICON_INFORMATION,
-            self,
+            "Wstawiono nagłówek: Epilog.\n\n"
+            "Dalsze generowanie treści po Epilogu jest zablokowane.",
         )
 
     # ------------------------------------------------------------------
     # Wstawianie cięcia Rozdziału (Audiobook)
     # ------------------------------------------------------------------
     def _on_wstaw_rozdzial(self, _event: wx.Event) -> None:
-        """Wstawia nagłówek 'Rozdział N' do historii i pliku (tryb Audiobook)."""
-        nazwa = self._txt_file_name.GetValue().strip()
-        if not nazwa:
+        """Wstawia nagłówek 'Rozdział N' do historii i pliku (tryb Audiobook).
+
+        Deleguje do ``self._projekt.wstaw_rozdzial()`` – licznik
+        ``chapter_counter`` jest inkrementowany wewnątrz modelu.
+        """
+        if self._wymagaj_nazwy_lub_alert() is None:
+            return
+        try:
+            naglowek = self._projekt.wstaw_rozdzial()
+        except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                "Podaj nazwę pliku projektu przed wstawianiem struktury.",
-                "Brak nazwy",
-                wx.OK | wx.ICON_WARNING,
+                f"Błąd wstawiania rozdziału:\n{exc}",
+                "Błąd zapisu",
+                wx.OK | wx.ICON_ERROR,
                 self,
             )
-            self._txt_file_name.SetFocus()
             return
-
-        naglowek       = f"Rozdział {self.chapter_counter}"
-        content_to_add = f"\n\n{naglowek}\n\n"
-        self.full_story += content_to_add
-        self.chapter_counter += 1
-        self._txt_full_story.SetValue(self.full_story)
-        self._dopisz_do_pliku(nazwa, content_to_add)
-        self._zapisz_tryb_projektu()
-        self._refresh_ui_state()
-        wx.MessageBox(
-            f"Wstawiono nagłówek: {naglowek}.",
+        self._po_wstawieniu_struktury(
             "Cięcie rozdziału wstawione",
-            wx.OK | wx.ICON_INFORMATION,
-            self,
+            f"Wstawiono nagłówek: {naglowek}.",
         )
 
     # ------------------------------------------------------------------
     # Wstawianie Aktu (Skrypt)
     # ------------------------------------------------------------------
     def _on_wstaw_akt(self, _event: wx.Event) -> None:
-        """Wstawia 'Akt N' + automatycznie 'Scena 1' (tryb Skrypt)."""
-        nazwa = self._txt_file_name.GetValue().strip()
-        if not nazwa:
+        """Wstawia 'Akt N' + automatycznie 'Scena 1' (tryb Skrypt).
+
+        Deleguje do ``self._projekt.wstaw_akt()`` – metoda zwraca
+        krotkę ``(akt, scena)``, licznik aktów inkrementuje, licznik
+        scen ustawia na 2 (bo Scena 1 została właśnie wstawiona).
+        """
+        if self._wymagaj_nazwy_lub_alert() is None:
+            return
+        try:
+            akt_nag, scena_nag = self._projekt.wstaw_akt()
+        except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                "Podaj nazwę pliku projektu przed wstawianiem struktury.",
-                "Brak nazwy",
-                wx.OK | wx.ICON_WARNING,
+                f"Błąd wstawiania aktu:\n{exc}",
+                "Błąd zapisu",
+                wx.OK | wx.ICON_ERROR,
                 self,
             )
-            self._txt_file_name.SetFocus()
             return
-
-        akt_naglowek   = f"Akt {self.akt_counter}"
-        scena_naglowek = "Scena 1"
-        content_to_add = f"\n\n{akt_naglowek}\n\n{scena_naglowek}\n\n"
-        self.full_story += content_to_add
-        self.akt_counter   += 1
-        self.scena_counter  = 2   # Scena 1 już wstawiona – następna to Scena 2
-        self._txt_full_story.SetValue(self.full_story)
-        self._dopisz_do_pliku(nazwa, content_to_add)
-        self._zapisz_tryb_projektu()
-        self._refresh_ui_state()
-        wx.MessageBox(
-            f"Wstawiono: {akt_naglowek} oraz {scena_naglowek}.",
+        self._po_wstawieniu_struktury(
             "Akt wstawiony",
-            wx.OK | wx.ICON_INFORMATION,
-            self,
+            f"Wstawiono: {akt_nag} oraz {scena_nag}.",
         )
 
     # ------------------------------------------------------------------
     # Wstawianie Sceny (Skrypt)
     # ------------------------------------------------------------------
     def _on_wstaw_scena(self, _event: wx.Event) -> None:
-        """Wstawia 'Scena N' do historii i pliku (tryb Skrypt)."""
-        nazwa = self._txt_file_name.GetValue().strip()
-        if not nazwa:
+        """Wstawia 'Scena N' do historii i pliku (tryb Skrypt).
+
+        Deleguje do ``self._projekt.wstaw_scena()``.
+        """
+        if self._wymagaj_nazwy_lub_alert() is None:
+            return
+        try:
+            scena_nag = self._projekt.wstaw_scena()
+        except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                "Podaj nazwę pliku projektu przed wstawianiem struktury.",
-                "Brak nazwy",
-                wx.OK | wx.ICON_WARNING,
+                f"Błąd wstawiania sceny:\n{exc}",
+                "Błąd zapisu",
+                wx.OK | wx.ICON_ERROR,
                 self,
             )
-            self._txt_file_name.SetFocus()
             return
-
-        scena_naglowek = f"Scena {self.scena_counter}"
-        content_to_add = f"\n\n{scena_naglowek}\n\n"
-        self.full_story += content_to_add
-        self.scena_counter += 1
-        self._txt_full_story.SetValue(self.full_story)
-        self._dopisz_do_pliku(nazwa, content_to_add)
-        self._zapisz_tryb_projektu()
-        self._refresh_ui_state()
-        wx.MessageBox(
-            f"Wstawiono nagłówek: {scena_naglowek}.",
+        self._po_wstawieniu_struktury(
             "Scena wstawiona",
-            wx.OK | wx.ICON_INFORMATION,
-            self,
+            f"Wstawiono nagłówek: {scena_nag}.",
         )
+
 
     # ------------------------------------------------------------------
     # Postprodukcja – Nadaj Tytuły Rozdziałom (stub)
@@ -2053,79 +1949,48 @@ class RezyserPanel(wx.Panel):
     # Wątek tła – generowanie tytułów (ŻADNYCH wx.* bezpośrednio!)
     # ------------------------------------------------------------------
     def _tytuly_worker(self, pelny_tekst: str) -> None:
-        """Iteruje po rozdziałach pliku projektu i generuje tytuły via gpt-4o-mini."""
-        # Uwaga: ł wpisany dosłownie – w raw-string \u0142 NIE byłby interpretowany
-        wzorzec   = r"(?i)\n*(Prolog|Rozdział \d+|Epilog)\n*"
-        fragmenty = re.split(wzorzec, pelny_tekst)
+        """Wywołuje ``rezyser_ai.nadaj_tytuly_rozdzialom`` i rozsyła wyniki.
 
-        if len(fragmenty) <= 1:
+        Refaktor 13.0: cała iteracja po rozdziałach, wywołania OpenAI
+        i logika obsługi RateLimitError / innych wyjątków została
+        przeniesiona do :func:`rezyser_ai.nadaj_tytuly_rozdzialom`.
+        Tutaj zostaje tylko: wybór przepisu z YAML-a, przekazanie
+        callbacka postępu przez ``wx.CallAfter`` i finalna prezentacja
+        wyników (pełnych lub częściowych przy błędzie).
+        """
+        if self._przepis_tytuly is None:
             wx.CallAfter(
                 self._on_tytuly_error,
-                "Nie znaleziono tagów struktury (Prolog / Rozdział N / Epilog) w pliku.\n"
-                "Wstaw cięcia rozdziałów przed nadaniem tytułów.",
+                "Nie znaleziono przepisu 'tytuly' w YAML "
+                "(dictionaries/pl/rezyser/postprod_tytuly.yaml).\n"
+                "Bez niego postprodukcja tytułów rozdziałów jest niedostępna.",
             )
             return
 
-        tytuly: list[str] = []
-        total   = len(range(1, len(fragmenty), 2))
-        current = 0
+        def _cb(msg: str, percent: int) -> None:
+            # Callback tłumaczący progress z rezyser_ai na wx.CallAfter –
+            # bezpieczne modyfikowanie GUI z wątku tła.
+            wx.CallAfter(self._update_tytuly_progress, msg, percent)
 
-        for i in range(1, len(fragmenty), 2):
-            naglowek = fragmenty[i].strip()
-            tresc    = fragmenty[i + 1].strip() if i + 1 < len(fragmenty) else ""
-            current += 1
-            percent  = int(current / total * 100)
+        wynik = rai.nadaj_tytuly_rozdzialom(
+            klient=self._client,
+            przepis_tytuly=self._przepis_tytuly,
+            pelny_tekst=pelny_tekst,
+            on_postep=_cb,
+        )
 
+        if wynik.przerwano_bledem:
+            # Przerwanie błędem – pokazujemy blad + ewentualne
+            # częściowe tytuły wygenerowane przed awarią.
             wx.CallAfter(
-                self._update_tytuly_progress,
-                f"Tytułowanie: {naglowek} ({current}/{total})…",
-                percent,
+                self._on_tytuly_error,
+                wynik.blad or "Nieznany błąd podczas tytułowania.",
+                list(wynik.tytuly),
             )
+            return
 
-            if len(tresc) < 50:
-                tytuly.append(f"{naglowek}: (Fragment zbyt krótki)")
-                continue
+        wx.CallAfter(self._show_titles_dialog, "\n".join(wynik.tytuly))
 
-            probka = tresc[:6000]
-            prompt_tytul = (
-                f"Oto treść fragmentu książki ({naglowek}). "
-                "Wymyśl JEDEN krótki, chwytliwy i literacki tytuł bez cudzysłowów.\n\n"
-                f"TREŚĆ:\n{probka}"
-            )
-
-            try:
-                resp = self._client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": (
-                                "Jesteś wybitnym redaktorem. "
-                                "Odpowiadasz wyłącznie samym tytułem."
-                            ),
-                        },
-                        {"role": "user", "content": prompt_tytul},
-                    ],
-                    temperature=0.7,
-                )
-                tytul_out = resp.choices[0].message.content.strip()
-                tytuly.append(f"{naglowek}: {tytul_out}")
-            except openai.RateLimitError:
-                tytuly.append(f"{naglowek}: (Błąd – brak kredytów API)")
-                # A11y: częściowe tytuły w czytelnym dialogu zamiast w alercie błędowym
-                wx.CallAfter(
-                    self._show_titles_dialog,
-                    "⚠️ BRAK KREDYTÓW OpenAI! Przerwano po częściowych wynikach:\n\n"
-                    + "\n".join(tytuly),
-                )
-                return
-            except Exception as exc:
-                tytuly.append(f"{naglowek}: (Błąd – {exc})")
-                # Przekaż kopię listy częściowych tytułów – jak w Streamlit (wyswietl_blad_ai + st.markdown)
-                wx.CallAfter(self._on_tytuly_error, str(exc), tytuly[:])
-                return
-
-        wx.CallAfter(self._show_titles_dialog, "\n".join(tytuly))
 
     # ------------------------------------------------------------------
     # Callbacki _tytuly_worker (wywołania przez wx.CallAfter – wątek GUI)
