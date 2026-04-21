@@ -9,6 +9,7 @@ import subprocess
 
 import wx
 
+import odswiez_rezysera
 from gui_konwerter import KonwerterPanel
 from gui_poliglota import PoliglotaPanel
 from gui_rezyser import RezyserPanel
@@ -109,6 +110,45 @@ class HomePanel(wx.Panel):
         self._action_btn.Hide()
         self.Bind(wx.EVT_BUTTON, self._on_action_btn, self._action_btn)
         main_sizer.Add(self._action_btn, flag=wx.LEFT | wx.BOTTOM, border=16)
+
+        # --- Sekcja: Narzędzia słownikowe (dla lingwistów) ---
+        main_sizer.Add(
+            wx.StaticLine(self), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8
+        )
+
+        heading_tools = wx.StaticText(self, label="Narzędzia słownikowe")
+        font_t = heading_tools.GetFont()
+        font_t.SetPointSize(13)
+        font_t.MakeBold()
+        heading_tools.SetFont(font_t)
+        main_sizer.Add(heading_tools, flag=wx.TOP | wx.LEFT | wx.RIGHT, border=16)
+
+        tools_info = wx.TextCtrl(
+            self,
+            value=(
+                "Po dodaniu nowego pliku YAML w dictionaries/<język>/akcenty/ "
+                "kliknij przycisk poniżej, aby udostępnić nowy akcent również "
+                "w Trybie Reżysera (Poliglota wykrywa YAML-e automatycznie).\n"
+                "Po pomyślnym odświeżeniu uruchom aplikację ponownie."
+            ),
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
+            name="Opis narzędzi słownikowych",
+        )
+        tools_info.SetBackgroundColour(self.GetBackgroundColour())
+        main_sizer.Add(tools_info, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND,
+                       border=16)
+
+        self._btn_odswiez = wx.Button(
+            self, label="🔄 Odśwież akcenty Reżysera z YAML",
+            name="Przycisk Odśwież akcenty Reżysera z YAML",
+        )
+        self._btn_odswiez.SetToolTip(
+            "Skanuje dictionaries/*/akcenty/ i regeneruje wrappery akcent_* "
+            "w core_poliglota.py oraz gui_rezyser.py. Po udanym odświeżeniu "
+            "należy uruchomić aplikację ponownie."
+        )
+        self.Bind(wx.EVT_BUTTON, self._on_odswiez_rezysera, self._btn_odswiez)
+        main_sizer.Add(self._btn_odswiez, flag=wx.ALL, border=16)
 
         self.SetSizer(main_sizer)
 
@@ -311,6 +351,83 @@ class HomePanel(wx.Panel):
                 self,
             )
 
+    # ------------------------------------------------------------------
+    # Handler: Odśwież akcenty Reżysera z YAML
+    # ------------------------------------------------------------------
+    def _on_odswiez_rezysera(self, _event: wx.Event) -> None:
+        """Skanuje dictionaries/ i regeneruje wrappery akcent_* w module Reżysera.
+
+        Zbiera log generatora do listy, a potem pokazuje go w dialogu
+        z polem TextCtrl (dostępne dla NVDA – Ctrl+A, Ctrl+C kopiuje całość).
+        Przy sukcesie informuje o konieczności ponownego uruchomienia
+        aplikacji; przy błędzie wyświetla pełną treść błędu.
+        """
+        linie: list[str] = []
+        try:
+            raport = odswiez_rezysera.uruchom(on_log=linie.append)
+        except Exception as exc:  # noqa: BLE001
+            wx.MessageBox(
+                f"Wystąpił nieoczekiwany błąd:\n{exc}",
+                "Błąd odświeżania akcentów",
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+
+        # Zbuduj nagłówek dialogu w zależności od wyniku
+        if raport["errors"]:
+            tytul  = "Odśwież akcenty Reżysera – BŁĄD"
+            header = "⛔ Generator napotkał błędy – patrz log poniżej."
+        elif raport["core_changed"] or raport["gui_changed"]:
+            tytul  = "Odśwież akcenty Reżysera – Sukces"
+            n = len(raport["akcenty"])
+            header = (
+                f"✅ Zmodyfikowano pliki dla {n} akcentów.\n"
+                "Aby nowe akcenty pojawiły się w Trybie Reżysera, "
+                "uruchom aplikację ponownie."
+            )
+        else:
+            tytul  = "Odśwież akcenty Reżysera – Bez zmian"
+            n = len(raport["akcenty"])
+            header = (
+                f"ℹ️ Brak zmian. Wykryto {n} akcentów – wrappery są już aktualne."
+            )
+
+        self._pokaz_raport_dialog(tytul, header, "\n".join(linie))
+
+    def _pokaz_raport_dialog(
+        self, tytul: str, header: str, tresc_logu: str,
+    ) -> None:
+        """Wyświetla raport generatora w dialogu z polem do skopiowania.
+
+        Dialog jest w pełni dostępny z klawiatury i NVDA: pole TextCtrl
+        (TE_READONLY) odczytuje treść linia po linii strzałkami, Ctrl+A
+        + Ctrl+C kopiuje wszystko do schowka.
+        """
+        dlg = wx.Dialog(self, title=tytul, size=(640, 420))
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        lbl_head = wx.StaticText(dlg, label=header)
+        lbl_copy = wx.StaticText(
+            dlg,
+            label="Pełny log (Ctrl+A, Ctrl+C kopiuje do schowka):",
+        )
+        txt = wx.TextCtrl(
+            dlg, value=tresc_logu,
+            style=wx.TE_MULTILINE | wx.TE_READONLY,
+            name="Log generatora akcentów Reżysera",
+        )
+        btn_ok = wx.Button(dlg, wx.ID_OK, label="Zamknij")
+
+        sizer.Add(lbl_head, flag=wx.ALL,                                       border=8)
+        sizer.Add(lbl_copy, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,               border=8)
+        sizer.Add(txt,      proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        sizer.Add(btn_ok,   flag=wx.ALL | wx.ALIGN_RIGHT,                      border=8)
+        dlg.SetSizer(sizer)
+        txt.SetFocus()
+        dlg.ShowModal()
+        dlg.Destroy()
+
 
 # ---------------------------------------------------------------------------
 # Główne okno aplikacji
@@ -325,7 +442,7 @@ class MainFrame(wx.Frame):
     """
 
     TITLE   = "Reżyser Audio GPT"
-    VERSION = "12.0 – Wersja Wydawnicza"
+    VERSION = "13.0 – Wersja Wydawnicza"
 
     def __init__(self) -> None:
         super().__init__(

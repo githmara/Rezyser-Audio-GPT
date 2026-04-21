@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+#  OCZYSZCZENIE TEKSTU BEZ NORMALIZACJI LICZB
+#  Wariant dla tekstów technicznych (daty, kody, numeracja), gdzie cyfr
+#  NIE zamieniamy na słowa.
+# -----------------------------------------------------------------------------
+id: oczyszczenie_bez_liczb
+etykieta: "Żaden (Czyszczenie BEZ normalizacji liczb)"
+opis: |
+  Nie nakłada akcentu fonetycznego. Uruchamia oczyszczanie tekstu pod
+  syntezator mowy, ale ZACHOWUJE cyfry w oryginalnej formie. Używaj dla
+  tekstów technicznych, gdzie zapis „123” jest ważniejszy niż „sto
+  dwadzieścia trzy”.
+iso: pl
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

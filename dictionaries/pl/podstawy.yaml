@@ -1,0 +1,52 @@
+# =============================================================================
+#  PODSTAWY JĘZYKA POLSKIEGO
+# =============================================================================
+#
+#  Ten plik zawiera wspólne dane wykorzystywane przez WSZYSTKIE akcenty
+#  i szyfry w podfolderach akcenty/ i szyfry/.
+#
+#  Edytuj OSTROŻNIE – zmiana tutaj wpływa na każdy akcent z flagą
+#  `usun_polskie_znaki: true` oraz na szyfr Cezara.
+# =============================================================================
+
+id: podstawy
+jezyk: pl
+etykieta: "Polski – podstawy fonetyczne"
+opis: |
+  Bazowe reguły dla języka polskiego:
+    1. Transliteracja polskich diakrytyków (ą→on, ę→en, ł→l, ó→u, ś→s,
+       ć→c, ń→n, ż→z, ź→z) – używana jako pierwszy krok przez większość
+       akcentów fonetycznych, gdy syntezator mowy nie obsługuje polskich
+       znaków specjalnych.
+    2. Alfabet polski (35 liter, wielkie) – używany przez szyfr Cezara.
+
+# -----------------------------------------------------------------------------
+# Zamiana polskich znaków diakrytycznych na odpowiedniki łacińskie.
+# Wykonywana PRZED listą `zamiany` danego akcentu (jeśli ten ma włączone
+# `usun_polskie_znaki: true`).
+# -----------------------------------------------------------------------------
+polskie_znaki:
+  - { wzor: "ą", zamiana: "on" }
+  - { wzor: "ę", zamiana: "en" }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ó", zamiana: "u"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "On" }
+  - { wzor: "Ę", zamiana: "En" }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ó", zamiana: "U"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+
+# -----------------------------------------------------------------------------
+# Alfabet polski – 35 wielkich liter, bez znaków białych.
+# Używany przez szyfr Cezara (plik szyfry/cezar.yaml).
+# -----------------------------------------------------------------------------
+alfabet: "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSTUVWXYZŹŻ"

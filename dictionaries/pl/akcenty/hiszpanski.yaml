@@ -1,0 +1,30 @@
+# -----------------------------------------------------------------------------
+#  AKCENT HISZPAŃSKI
+#  Dla syntezatorów: Jorge / Monica / Helena (hiszpański TTS).
+# -----------------------------------------------------------------------------
+id: hiszpanski
+etykieta: "Hiszpański (np. Jorge / Monica / Helena)"
+opis: |
+  Upodabnia polski tekst do hiszpańskiej wymowy: „sz”→„s”, „cz”→„ch”,
+  „rz”→„r”, a zarówno „w” jak i „v” zamienia na „b” (tak jak
+  w iberyjskim hiszpańskim).
+iso: es
+kategoria: akcent
+kolejnosc: 70
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  - { wzor: "sz", zamiana: "s"  }
+  - { wzor: "Sz", zamiana: "S"  }
+  - { wzor: "cz", zamiana: "ch" }
+  - { wzor: "Cz", zamiana: "Ch" }
+  - { wzor: "rz", zamiana: "r"  }
+  - { wzor: "Rz", zamiana: "R"  }
+  - { wzor: "w",  zamiana: "b"  }
+  - { wzor: "W",  zamiana: "B"  }
+  - { wzor: "v",  zamiana: "b"  }
+  - { wzor: "V",  zamiana: "B"  }

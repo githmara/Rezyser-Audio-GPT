@@ -1,0 +1,34 @@
+# -----------------------------------------------------------------------------
+#  AKCENT FRANCUSKI
+#  Dla syntezatorów: Thomas / Amelie / Julie (francuski TTS).
+# -----------------------------------------------------------------------------
+id: francuski
+etykieta: "Francuski (np. Thomas / Amelie / Julie)"
+opis: |
+  Upodabnia polski tekst do francuskiej wymowy: „ch”→„sh”, „sz”→„sh”,
+  „cz”→„tch”, „rz”→„j”, „h” niemalże znika, „r”→„gh” (francuskie
+  gardłowe R), „w”→„v”.
+iso: fr
+kategoria: akcent
+kolejnosc: 50
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  - { wzor: "ch", zamiana: "sh"  }
+  - { wzor: "Ch", zamiana: "Sh"  }
+  - { wzor: "sz", zamiana: "sh"  }
+  - { wzor: "Sz", zamiana: "Sh"  }
+  - { wzor: "cz", zamiana: "tch" }
+  - { wzor: "Cz", zamiana: "Tch" }
+  - { wzor: "rz", zamiana: "j"   }
+  - { wzor: "Rz", zamiana: "J"   }
+  - { wzor: "h",  zamiana: ""    }
+  - { wzor: "H",  zamiana: ""    }
+  - { wzor: "r",  zamiana: "gh"  }
+  - { wzor: "R",  zamiana: "Gh"  }
+  - { wzor: "w",  zamiana: "v"   }
+  - { wzor: "W",  zamiana: "V"   }

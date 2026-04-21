@@ -1,0 +1,32 @@
+# -----------------------------------------------------------------------------
+#  AKCENT ISLANDZKI
+#  Upodabnia polski tekst do islandzkiej wymowy (syntezator Guðrún / eSpeak).
+# -----------------------------------------------------------------------------
+id: islandzki
+etykieta: "Islandzki (np. Guðrún / eSpeak)"
+opis: |
+  Upodabnia polski tekst do islandzkiej wymowy: miękczy syczenie,
+  zmienia „w” na „v”. Zaprojektowany pod syntezator mowy Guðrún lub
+  eSpeak ustawiony na język islandzki.
+iso: is
+kategoria: akcent
+kolejnosc: 30
+
+# --- Pipeline przetwarzania ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Właściwe zamiany fonetyczne (kolejność: dwuznaki PRZED jednoznakami) ---
+zamiany:
+  - { wzor: "ch", zamiana: "h"  }
+  - { wzor: "Ch", zamiana: "H"  }
+  - { wzor: "cz", zamiana: "ts" }
+  - { wzor: "Cz", zamiana: "Ts" }
+  - { wzor: "sz", zamiana: "s"  }
+  - { wzor: "Sz", zamiana: "S"  }
+  - { wzor: "c",  zamiana: "ts" }
+  - { wzor: "C",  zamiana: "Ts" }
+  - { wzor: "w",  zamiana: "v"  }
+  - { wzor: "W",  zamiana: "V"  }

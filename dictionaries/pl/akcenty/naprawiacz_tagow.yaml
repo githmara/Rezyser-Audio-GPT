@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  NAPRAWIACZ TAGÓW (tryb specjalny)
+#  Nie modyfikuje treści – wstrzykuje tylko kod ISO języka do pliku wynikowego.
+# -----------------------------------------------------------------------------
+id: naprawiacz_tagow
+etykieta: "🔧 Naprawiacz Tagów (Tylko wstrzyknięcie kodu ISO)"
+opis: |
+  Ten „akcent” NIE modyfikuje treści tekstu ani jego fonetyki.
+  Jedynie wstrzykuje kod ISO języka do pliku wynikowego:
+    - HTML: atrybut lang="..." w znaczniku <html>
+    - DOCX: element <w:lang w:val="..."/> dla każdego biegu tekstu
+  Dzięki temu czytnik ekranu (NVDA/JAWS) poprawnie przełączy
+  głos syntezatora na właściwy język.
+
+  Kod ISO podawany jest ręcznie w GUI (pole „Kod ISO”), nie pochodzi
+  z tego pliku – dlatego wartość `iso` jest tu pusta.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Tryb specjalny – NIE uruchamia żadnego etapu przetwarzania tekstu.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

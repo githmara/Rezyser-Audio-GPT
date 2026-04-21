@@ -1,0 +1,23 @@
+# -----------------------------------------------------------------------------
+#  AKCENT WŁOSKI
+#  Dla syntezatorów: Alice / Luca / Elsa (włoski TTS).
+# -----------------------------------------------------------------------------
+id: wloski
+etykieta: "Włoski (np. Alice / Luca / Elsa)"
+opis: |
+  Upodabnia polski tekst do włoskiej wymowy: zamienia „y” na „i”,
+  „w” na „v”. Zachowuje charakterystyczną melodię włoską.
+iso: it
+kategoria: akcent
+kolejnosc: 80
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  - { wzor: "y", zamiana: "i" }
+  - { wzor: "Y", zamiana: "I" }
+  - { wzor: "w", zamiana: "v" }
+  - { wzor: "W", zamiana: "V" }

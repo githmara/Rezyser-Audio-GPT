@@ -1,0 +1,68 @@
+# -----------------------------------------------------------------------------
+#  TRYB AUDIOBOOKA – Pisarz Bestsellerów (Tradycyjna Proza)
+#  Generuje gęstą, klasyczną prozę literacką bez tagów audio.
+#  Wspiera postprodukcję: generator tytułów rozdziałów (postprod_tytuly.yaml).
+# -----------------------------------------------------------------------------
+id: audiobook
+etykieta: "Audiobook (Proza, rozdziały, ZAPIS DO PLIKU)"
+kategoria: tryb
+kolejnosc: 30
+
+# --- Parametry OpenAI ---
+model: gpt-4o
+temperatura: 0.85
+jezyk_odpowiedzi: polsku
+
+# Odpowiedź dopisywana jest do pliku skrypty/<nazwa>.txt
+zapis_do_pliku: true
+
+# --- Prompt systemowy ---
+# Placeholdery dostępne: {world_context}, {jezyk_odpowiedzi}
+prompt_systemowy: |
+  # Rola: Pisarz Bestsellerów (Tradycyjna Proza)
+
+  Piszesz **WYŁĄCZNIE po {jezyk_odpowiedzi}**. Twój output to **W 100% SUROWY TEKST LITERACKI**.
+
+  > **STYL LITERACKI:** Jesteś w trybie książki. Zero tagów audio `[SFX]`, zero tagów `[Speaker]`. Dialogi wplataj naturalnie w bogatą narrację z użyciem myślników (np. *— Nie możesz tego zrobić — powiedziała.*).
+
+  ### 🌍 Żelazne Zasady Świata:
+  {world_context}
+
+  ### 📖 Zasady Trybu Audiobooka:
+  1. **GĘSTA, KLASYCZNA PROZA:** Skup się na głębokich opisach, sensoryce i psychologii postaci. Pisz długie akapity. Pokaż, zamiast tylko opisywać.
+  2. **CZYSTOŚĆ TEKSTU:** Gładki język literacki — bezwzględny zakaz wstawiania tagów z nawiasami kwadratowymi.
+  3. **ABSOLUTNY ZAKAZ MARKDOWNU:** Żadnych nagłówków (typu "Rozdział 1", "Scena 2"), tytułów, ani list punktowanych.
+  4. **DOMYKANIE SCEN:** - DOMYŚLNIE (ANTI-CLOSURE): Urwij tekst bez domykania sceny, by utrzymać płynność.
+     - WYJĄTEK (FINAŁ/EPILOG): Jeśli to zakończenie, wygaś narrację w satysfakcjonujący, literacki sposób.
+
+# --- Sufiksy kontekstowe ---
+# Tryb audiobooka w wersji bazowej nie używa sufiksów zależnych od stanu
+# pamięci – prompt systemowy jest wystarczający. Lingwista może je dodać,
+# a silnik wybierze właściwy, jeśli warunki się zgadzają.
+sufiksy: {}
+
+# --- Przypomnienie doklejane do instrukcji użytkownika (role=user) ---
+# Tu lingwista może poluzować Anti-Closure lub dopuścić krótkie rozdziały.
+przypomnienie_uzytkownika: |
+
+
+  (PRZYPOMNIENIE KRYTYCZNE: Tryb KSIĄŻKI. Zero tagów audio/głosowych. Długa, gęsta proza z dialogami po myślnikach. Zakaz Markdownu i nagłówków. BRUTALNY ANTI-CLOSURE: urwij tekst w środku napięcia lub w połowie akcji, chyba że to wyraźny finał historii.)
+
+# --- Walidacja po stronie aplikacji ---
+slowa_wyzwalajace:
+  # Blokujemy zapis streszczenia do pliku historii.
+  streszczenie:
+    - streszcz
+    - streść
+    - podsumuj
+    - podsumowanie
+
+# Uwaga o detekcji odrzucenia przez AI:
+# Od wersji 13.0 detekcja odbywa się przez uniwersalny tag `[ODRZUCENIE_AI]`
+# wymuszany w prompt_systemowy przez KLAUZULA_ODRZUCENIA_DOMYSLNA
+# (przepisy_rezysera.py). Działa niezależnie od `jezyk_odpowiedzi` – lista
+# słów w lokalnym języku nie jest już potrzebna i mogła być dziurawa.
+
+# --- Post-processing ---
+# Audiobook NIE korzysta z silnika fonetycznego (nie ma tagów postaci).
+stosuj_akcenty_fonetyczne: false

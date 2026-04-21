@@ -1,0 +1,45 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUKCJA: NADAJ TYTUŁY ROZDZIAŁOM (AI)
+#  Narzędzie dla trybu Audiobook: iteruje po rozdziałach zapisanego pliku
+#  projektu i generuje dla każdego krótki, literacki tytuł.
+#  Domyślnie używa taniego modelu (gpt-4o-mini), bo zadanie jest proste.
+# -----------------------------------------------------------------------------
+id: tytuly
+etykieta: "Nadaj Tytuły Rozdziałom (AI)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- Parametry OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: polsku
+
+# --- Prompt systemowy ---
+prompt_systemowy: |
+  Jesteś wybitnym redaktorem. Odpowiadasz wyłącznie samym tytułem.
+
+# --- Szablon instrukcji użytkownika (role=user) ---
+# Placeholdery: {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Oto treść fragmentu książki ({naglowek}). Wymyśl JEDEN krótki, chwytliwy i literacki tytuł bez cudzysłowów.
+
+  TREŚĆ:
+  {probka}
+
+# --- Parametry iteracji po pliku projektu ---
+# Regex dzielący plik na nagłówki struktury + treści. Grupa przechwytująca
+# musi wyciągać SAM nagłówek ("Prolog" / "Rozdział 7" / "Epilog"). Separator
+# \n* z przodu i tyłu pozwala wielokrotne puste linie wokół nagłówków.
+regex_podzial_rozdzialow: "(?i)\\n*(Prolog|Rozdział \\d+|Epilog)\\n*"
+
+# Fragmenty krótsze niż to otrzymują status "(Fragment zbyt krótki)" zamiast
+# wywołania AI (oszczędność kredytów + unikanie bezsensownych tytułów).
+min_dlugosc_fragmentu: 50
+
+# Maksymalna długość próbki tekstu przekazywanej modelowi w jednym zapytaniu.
+# AI widzi początek rozdziału – to wystarcza do wymyślenia tytułu.
+max_dlugosc_probki: 6000
+
+# Komunikaty pokazywane w oknie wyników:
+etykieta_fragment_zbyt_krotki: "(Fragment zbyt krótki)"
+etykieta_bled_brak_kredytow: "(Błąd – brak kredytów API)"

@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  OCZYSZCZENIE TEKSTU Z NORMALIZACJĄ LICZB
+#  Domyślny wariant "Żaden akcent" – tylko sprząta tekst pod czytnik ekranu.
+# -----------------------------------------------------------------------------
+id: oczyszczenie
+etykieta: "Żaden (Czyszczenie Z normalizacją liczb)"
+opis: |
+  Nie nakłada akcentu fonetycznego. Uruchamia wyłącznie procedurę
+  oczyszczania tekstu pod syntezator mowy (usuwa bełkot typu „khh”,
+  gwiazdki, hashtagi, nagromadzenie kropek) oraz zamienia cyfry na słowa
+  (np. „123” → „sto dwadzieścia trzy”).
+iso: pl
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

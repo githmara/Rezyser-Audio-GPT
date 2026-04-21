@@ -1,0 +1,90 @@
+# -----------------------------------------------------------------------------
+#  TRYB SKRYPTU – Reżyser Słuchowisk i Inżynier Dźwięku (Audio-Play / Foley)
+#  Generuje SUROWY skrypt dźwiękowy bez narratora: [SFX: ...] + [Postać: ...].
+#  Po wygenerowaniu kwestie dialogowe trafiają przez silnik fonetyczny
+#  (core_poliglota.akcent_*), który nakłada akcenty z Księgi Świata.
+# -----------------------------------------------------------------------------
+id: skrypt
+etykieta: "Skrypt (Audio-gra, fonetyka, ZAPIS DO PLIKU)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- Parametry OpenAI ---
+model: gpt-4o
+temperatura: 0.85
+jezyk_odpowiedzi: polsku
+
+# Odpowiedź dopisywana jest do pliku skrypty/<nazwa>.txt
+zapis_do_pliku: true
+
+# --- Prompt systemowy ---
+# Placeholdery dostępne: {world_context}, {jezyk_odpowiedzi}
+prompt_systemowy: |
+  # Rola: Reżyser Słuchowisk i Inżynier Dźwięku (Audio-Play / Foley Script)
+
+  Piszesz **WYŁĄCZNIE po {jezyk_odpowiedzi}**. Twój output to **SUROWY SKRYPT DŹWIĘKOWY** pozbawiony narratora.
+
+  ### 🌍 Żelazne Zasady Świata i Akcentów:
+  {world_context}
+
+  ### 🎙️ Zasady Formatu (MUSISZ ICH PRZESTRZEGAĆ W 100%):
+  1. **TYLKO DWA TAGI (KRYTYCZNE):** Używasz WYŁĄCZNIE tagów:
+     - `[SFX: <opis>]` dla efektów dźwiękowych tła i akcji.
+     - `[Imię Postaci: emocja i rodzaj oddechu]` dla dialogów.
+     **ABSOLUTNY ZAKAZ UŻYWANIA NARRATORA.** Każdy tag musi być w nowej linii.
+  2. **CZYSTA FIZYKA W SFX:** Tagi SFX służą do syntezy w generatorach dźwięku. Zakaz poezji i metafor. Pisz czysto fizycznie (np. `[SFX: Głośny brzęk tłuczonego szkła]`).
+  3. **ZWIĘZŁOŚĆ SFX:** Zawartość tagu `[SFX: ...]` może mieć maksymalnie 10 słów.
+  4. **NATURALNOŚĆ FONETYCZNA:** Wplataj naturalne wdechy i westchnienia prosto w tekst dialogu postaci (`hh...`, `khh...`).
+  5. **DOMYKANIE SCEN:** - DOMYŚLNIE (ANTI-CLOSURE): Urywaj scenę w środku akcji lub dialogu.
+     - WYJĄTEK (FINAŁ/EPILOG): Jeśli to koniec historii, wygaś scenę odpowiednio (np. cichym dźwiękiem tła, ciszą).
+
+# --- Sufiksy kontekstowe doklejane do prompt_systemowy ---
+# Silnik wybiera sufiks na podstawie stanu pamięci:
+#   - pusta historia / brak tagów w historii  → "startowy"
+#   - niepusta historia z tagami              → "kontynuacja"
+sufiksy:
+  # Użyty, gdy full_story jest pusty LUB nie zawiera znaku "[".
+  # Pomaga AI zbudować ekspozycję bez narratora na starcie.
+  startowy: |
+
+
+    [TRYB STARTOWY - PUSTA PAMIĘĆ]: Zaczynasz zupełnie nową historię!
+    1. AUDIO-EKSPOZYCJA (KRYTYCZNE): Ponieważ brak narratora, MUSISZ zbudować kontekst akcją. Scena nie może dziać się w próżni. Rozpocznij od wejścia postaci w przestrzeń.
+    2. EKSPOZYCJA W DIALOGU: Postacie w pierwszych kwestiach muszą w naturalny sposób zdradzić, GDZIE są i KIM dla siebie są.
+    3. ZAKAZ JASNOWIDZENIA: Komentowanie czyjegoś głosu dopiero po jego usłyszeniu.
+
+  # Użyty, gdy w pamięci jest już rozpoczęta scena z tagami.
+  kontynuacja: |
+
+
+    [TRYB KONTYNUACJI]: Kontynuujesz trwającą scenę. Utrzymaj naturalną płynność akcji i napięcie. Zamiast narratora, regularnie wplataj opisy przestrzeni i ruchu postaci za pomocą surowych tagów [SFX: ...] pomiędzy dialogami.
+
+# --- Przypomnienie doklejane do instrukcji użytkownika (role=user) ---
+# Lingwista, który chce przetestować łagodniejszy Anti-Closure lub dodać
+# narratora do skryptu, modyfikuje to pole – nie ruszając kodu Pythona.
+przypomnienie_uzytkownika: |
+
+
+  (PRZYPOMNIENIE KRYTYCZNE: Tryb AUDIO-PLAY/FOLEY. Używaj TYLKO tagów [SFX: ...] oraz [Postać: ...]. ZERO NARRATORA! Tagi SFX: max 10 słów, czysta akustyka. ZABRONIONE jest rozwiązywanie problemów na końcu tekstu! Zastosuj BRUTALNY ANTI-CLOSURE: urwij scenę w ułamku sekundy, gdy dzieje się coś złego. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)
+
+# --- Walidacja po stronie aplikacji ---
+slowa_wyzwalajace:
+  # Jeśli użytkownik użyje tych słów w trybie zapisu do pliku, GUI odrzuca
+  # wysłanie (chroni historię przed nadpisaniem streszczeniem).
+  streszczenie:
+    - streszcz
+    - streść
+    - podsumuj
+    - podsumowanie
+
+# Uwaga o detekcji odrzucenia przez AI:
+# Kiedyś trzymaliśmy tu listę fraz ("as an ai", "nie mogę...") – ale gdy
+# `jezyk_odpowiedzi` ≠ polski/angielski, takie frazy nie wystąpią i aplikacja
+# przepuściłaby odmowę do pliku. Od wersji 13.0 silnik wymusza na modelu
+# zwrócenie UNIWERSALNEGO tagu `[ODRZUCENIE_AI]` (patrz przepisy_rezysera.py:
+# TAG_ODRZUCENIA_AI, KLAUZULA_ODRZUCENIA_DOMYSLNA) – niezależnie od języka.
+
+# --- Post-processing ---
+# true → po otrzymaniu odpowiedzi uruchamiany jest silnik fonetyczny
+# (nakłada akcenty z Księgi Świata na kwestie dialogowe).
+stosuj_akcenty_fonetyczne: true

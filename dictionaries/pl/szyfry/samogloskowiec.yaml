@@ -1,0 +1,61 @@
+# -----------------------------------------------------------------------------
+#  SZYFR: SAMOGŁOSKOWIEC
+#  Zamienia każdą samogłoskę na 'o' (lub 'O'), zachowując zmiękczenia.
+# -----------------------------------------------------------------------------
+id: samogloskowiec
+etykieta: "Samogłoskowiec (Wszystko dudni na 'O')"
+opis: |
+  Efekt „gdzie się nie obejrzysz – same O”. Algorytm w trzech krokach:
+    1. „i” przed samogłoską (np. w „kasia”, „dzień” gdy „i” zmiękcza)
+       jest redukowane – zostawiamy tylko diakrytyczną formę spółgłoski
+       (dzi→dź, ci→ć, ni→ń, si→ś, zi→ź).
+    2. „i” przed spółgłoską lub na końcu wyrazu jest zachowywane, ale
+       poprzedzająca spółgłoska otrzymuje diakrytyk (dzi→dźi, ni→ńi, …).
+    3. Wszystkie samogłoski zamieniane są na „o” (lub „O”).
+
+  Dzięki tej kolejności „dzień” → „dźoń” (a nie „dźooń”).
+iso: pl
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# -----------------------------------------------------------------------------
+# Krok 1: „i” przed samogłoską znika – zostaje sam diakrytyk
+# (wszystkie wzory to REGEX – używają lookaheadów (?=...)).
+# -----------------------------------------------------------------------------
+zmiekszenia_przed_samogloska:
+  - { wzor: 'dzi(?=[aąeęoóuyAĄEĘOÓUY])', zamiana: "dź" }
+  - { wzor: 'ci(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "ć"  }
+  - { wzor: 'ni(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "ń"  }
+  - { wzor: 'si(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "ś"  }
+  - { wzor: 'zi(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "ź"  }
+  - { wzor: 'Dzi(?=[aąeęoóuyAĄEĘOÓUY])', zamiana: "Dź" }
+  - { wzor: 'Ci(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "Ć"  }
+  - { wzor: 'Ni(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "Ń"  }
+  - { wzor: 'Si(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "Ś"  }
+  - { wzor: 'Zi(?=[aąeęoóuyAĄEĘOÓUY])',  zamiana: "Ź"  }
+
+# -----------------------------------------------------------------------------
+# Krok 2: „i” w pozostałych pozycjach zostaje, ale dodajemy diakrytyk
+# (zwykłe zamiany string-by-string, BEZ regexa).
+# -----------------------------------------------------------------------------
+zmiekszenia_przed_spolgloska:
+  - { wzor: "dzi", zamiana: "dźi" }
+  - { wzor: "ci",  zamiana: "ći"  }
+  - { wzor: "ni",  zamiana: "ńi"  }
+  - { wzor: "si",  zamiana: "śi"  }
+  - { wzor: "zi",  zamiana: "źi"  }
+  - { wzor: "Dzi", zamiana: "Dźi" }
+  - { wzor: "Ci",  zamiana: "Ći"  }
+  - { wzor: "Ni",  zamiana: "Ńi"  }
+  - { wzor: "Si",  zamiana: "Śi"  }
+  - { wzor: "Zi",  zamiana: "Źi"  }
+
+# -----------------------------------------------------------------------------
+# Krok 3: zamiana samogłosek.
+# `samogloski_*` to listy znaków dla regex character-class.
+# -----------------------------------------------------------------------------
+samogloski_male:             "aeiyuąęó"
+samogloski_wielkie:          "AEIYUĄĘÓ"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"

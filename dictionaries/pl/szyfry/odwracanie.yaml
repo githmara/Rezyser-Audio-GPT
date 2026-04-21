@@ -1,0 +1,42 @@
+# -----------------------------------------------------------------------------
+#  SZYFR: ODWRACACZ TEKSTU
+#  Rozwija skrótowce i czyta każde zdanie wspak.
+# Inspiracja: misja z "The traitors. Zdrajcy"
+# -----------------------------------------------------------------------------
+id: odwracanie
+etykieta: "Odwracacz Tekstu (Czytanie wspak z wielką literą)"
+opis: |
+  Najpierw rozwija popularne polskie skrótowce (m.in. → „między innymi”,
+  np. → „na przykład”, dr → „doktor”, itp.). Dzięki temu po odwróceniu
+  tekst nadal brzmi sensownie, bez absurdalnych „.nim” zamiast „m.in.”.
+  Następnie odwraca każde zdanie znak po znaku, zachowując znak
+  interpunkcyjny na końcu i kapitalizację pierwszej litery.
+iso: pl
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# -----------------------------------------------------------------------------
+# Rozwinięcia skrótowców – zapis REGEX (wyrażenie regularne).
+# Każda para {wzor, zamiana} stosowana jest przed odwróceniem.
+# Aby dodać nowy skrótowiec, po prostu dopisz kolejną linię.
+# -----------------------------------------------------------------------------
+rozwiniecia:
+  - { wzor: '\bm\.\s*in\.?,?\b', zamiana: "między innymi"     }
+  - { wzor: '\bmi\.in\.?\b',     zamiana: "między innymi"     }
+  - { wzor: '\bnp\.?,?\s',       zamiana: "na przykład "      }
+  - { wzor: '\bn\.\s*p\.\b',     zamiana: "na przykład"       }
+  - { wzor: '\btzw\.?,?\s',      zamiana: "tak zwany "        }
+  - { wzor: '\btzn\.?,?\s',      zamiana: "to znaczy "        }
+  - { wzor: '\btj\.?,?\b',       zamiana: "to jest"           }
+  - { wzor: '\bitd\.?,?\b',      zamiana: "i tak dalej"       }
+  - { wzor: '\bitp\.?,?\b',      zamiana: "i tym podobne"     }
+  - { wzor: '\bww\.?,?\s',       zamiana: "wyżej wymieniony " }
+  - { wzor: '\bjw\.?,?\s',       zamiana: "jak wyżej "        }
+  - { wzor: '\bdr\.?\s',         zamiana: "doktor "           }
+  - { wzor: '\bprof\.?\s',       zamiana: "profesor "         }
+  - { wzor: '\bmgr\.?\s',        zamiana: "magister "         }
+  - { wzor: '\binż\.?\s',        zamiana: "inżynier "         }
+  - { wzor: '\bul\.?,?\s',       zamiana: "ulica "            }
+  - { wzor: '\bal\.?,?\s',       zamiana: "aleja "            }
+  - { wzor: '\bpl\.?,?\s',       zamiana: "plac "             }

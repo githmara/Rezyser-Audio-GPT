@@ -1,0 +1,32 @@
+# -----------------------------------------------------------------------------
+#  AKCENT ANGIELSKI
+#  Dla syntezatorów: Samantha / Mark / Zira / Hazel (angielski TTS).
+# -----------------------------------------------------------------------------
+id: angielski
+etykieta: "Angielski (np. Samantha / Mark / Zira / Hazel)"
+opis: |
+  Upodabnia polski tekst do angielskiej wymowy: „sz”→„sh”, „cz”→„ch”,
+  „rz”→„zh” (jak „zh” w „measure”), „ch”→„h”, „w”→„v”.
+iso: en
+kategoria: akcent
+kolejnosc: 40
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  - { wzor: "szcz", zamiana: "shch" }
+  - { wzor: "Szcz", zamiana: "Shch" }
+  - { wzor: "SZCZ", zamiana: "SHCH" }
+  - { wzor: "sz",   zamiana: "sh"   }
+  - { wzor: "Sz",   zamiana: "Sh"   }
+  - { wzor: "cz",   zamiana: "ch"   }
+  - { wzor: "Cz",   zamiana: "Ch"   }
+  - { wzor: "rz",   zamiana: "zh"   }
+  - { wzor: "Rz",   zamiana: "Zh"   }
+  - { wzor: "ch",   zamiana: "h"    }
+  - { wzor: "Ch",   zamiana: "H"    }
+  - { wzor: "w",    zamiana: "v"    }
+  - { wzor: "W",    zamiana: "V"    }

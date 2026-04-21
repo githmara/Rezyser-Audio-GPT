@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  SZYFR: JĄKANIE / USZKODZONY ROBOT
+#  Dokleja powtórzenia pierwszych liter słowa oddzielone myślnikami.
+# -----------------------------------------------------------------------------
+id: jakanie
+etykieta: "Silne Jąkanie / Uszkodzony Robot"
+opis: |
+  Dla każdego słowa o długości >= `min_dlugosc_slowa` losuje liczbę
+  powtórzeń pierwszej (lub dwóch pierwszych) liter i dokleja je
+  z myślnikami: „komputer” → „ko-ko-ko-komputer”, „ja” → „ja”.
+
+  Jeśli druga litera słowa jest spółgłoską (nie występuje w stringu
+  `samogloski`), zająknięcie zawiera DWIE pierwsze litery – to daje
+  bardziej naturalne brzmienie (np. „prysznic” → „pr-pr-prysznic”).
+iso: pl
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Parametry algorytmu
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Samogłoski – jeśli drugi znak słowa należy do tego zbioru, powtarzamy
+# tylko pierwszą literę. W przeciwnym razie – dwie pierwsze.
+samogloski: "aeiouyąęóAEIOUYĄĘÓ"

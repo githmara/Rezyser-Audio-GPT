@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+#  SZYFR: ZEPSUTY TELEFON / WĘŻOWY DIALEKT
+#  Wydłuża syczenie: każde "s", "z" lub "sz" staje się "sssssz".
+# Inspiracja: Snecko ze Slay The Spire
+# -----------------------------------------------------------------------------
+id: waz
+etykieta: "Zepsuty Telefon (Wężowy dialekt, podmiana głosek)"
+opis: |
+  Inspirowane Snecko z gry „Slay the Spire”. Każde wystąpienie „s”, „z”
+  lub dwuznaku „sz” (niezależnie od wielkości liter) jest losowo
+  wydłużane w syk o długości od `min_syk` do `max_syk` znaków.
+  Dla „sz” dodawane jest „z” na końcu: „ssss…z”.
+iso: pl
+kategoria: szyfr
+kolejnosc: 30
+algorytm: waz
+
+# Parametry algorytmu
+min_syk: 4
+max_syk: 8
+
+# Regex łapiący znaki do wydłużenia (case-insensitive).
+# Dwuznak sz MUSI być jako pierwszy w alternatywie, żeby być złapany
+# zanim regex trafi na samo "s".
+wzor_syku: "(?i)(sz|s|z)"

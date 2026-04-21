@@ -1,0 +1,37 @@
+# -----------------------------------------------------------------------------
+#  AKCENT FIŃSKI
+#  Dla syntezatorów: Satu / Mikko / Heidi (fiński TTS).
+# -----------------------------------------------------------------------------
+id: finski
+etykieta: "Fiński (np. Satu / Mikko / Heidi)"
+opis: |
+  Upodabnia polski tekst do fińskiej wymowy: ubezdźwięcznia spółgłoski
+  (b→p, d→t, g→k), tłumi syczenie, zamienia „w” na „v”.
+iso: fi
+kategoria: akcent
+kolejnosc: 90
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  - { wzor: "ch", zamiana: "h"  }
+  - { wzor: "Ch", zamiana: "H"  }
+  - { wzor: "cz", zamiana: "ts" }
+  - { wzor: "Cz", zamiana: "Ts" }
+  - { wzor: "sz", zamiana: "s"  }
+  - { wzor: "Sz", zamiana: "S"  }
+  - { wzor: "rz", zamiana: "r"  }
+  - { wzor: "Rz", zamiana: "R"  }
+  - { wzor: "c",  zamiana: "ts" }
+  - { wzor: "C",  zamiana: "Ts" }
+  - { wzor: "w",  zamiana: "v"  }
+  - { wzor: "W",  zamiana: "V"  }
+  - { wzor: "b",  zamiana: "p"  }
+  - { wzor: "B",  zamiana: "P"  }
+  - { wzor: "d",  zamiana: "t"  }
+  - { wzor: "D",  zamiana: "T"  }
+  - { wzor: "g",  zamiana: "k"  }
+  - { wzor: "G",  zamiana: "K"  }

@@ -1,0 +1,30 @@
+# -----------------------------------------------------------------------------
+#  AKCENT NIEMIECKI
+#  Dla syntezatorów: Stefan / Markus / Katja / Hedda (niemiecki TTS).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "Niemiecki (np. Stefan / Markus / Katja / Hedda)"
+opis: |
+  Upodabnia polski tekst do niemieckiej wymowy: „sz”→„sch”,
+  „cz”→„tsch”, „rz”→„rsch”, „w”→„v”, następnie „v”→„f”
+  (niemieckie bezdźwięczne „v”).
+iso: de
+kategoria: akcent
+kolejnosc: 60
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  - { wzor: "sz", zamiana: "sch"  }
+  - { wzor: "Sz", zamiana: "Sch"  }
+  - { wzor: "cz", zamiana: "tsch" }
+  - { wzor: "Cz", zamiana: "Tsch" }
+  - { wzor: "rz", zamiana: "rsch" }
+  - { wzor: "Rz", zamiana: "Rsch" }
+  - { wzor: "w",  zamiana: "v"    }
+  - { wzor: "W",  zamiana: "V"    }
+  - { wzor: "v",  zamiana: "f"    }
+  - { wzor: "V",  zamiana: "F"    }

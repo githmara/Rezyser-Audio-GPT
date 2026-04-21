@@ -1,0 +1,17 @@
+# -----------------------------------------------------------------------------
+#  SZYFR: TYPOGLIKEMIA
+#  Miesza litery w środku każdego słowa (pierwsza i ostatnia zostają).
+# -----------------------------------------------------------------------------
+id: typoglikemia
+etykieta: "Typoglikemia (Wymieszany środek słów)"
+opis: |
+  Zjawisko psycholingwistyczne: jeśli pierwsza i ostatnia litera słowa
+  są poprawne, człowiek nadal czyta tekst płynnie, mimo że środek jest
+  pomieszany. Słowa krótsze niż `min_dlugosc_slowa` nie są zmieniane.
+iso: pl
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Parametry algorytmu
+min_dlugosc_slowa: 4

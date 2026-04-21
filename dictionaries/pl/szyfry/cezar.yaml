@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  SZYFR: CEZARA
+#  Klasyczny szyfr przesuwający każdą literę o zadaną liczbę pozycji
+#  w alfabecie polskim (35 liter).
+# -----------------------------------------------------------------------------
+id: cezar
+etykieta: "Szyfr Cezara (przesunięcie alfabetu PL)"
+opis: |
+  Klasyczny szyfr Cezara: każda litera jest przesuwana o N pozycji
+  w alfabecie polskim (AĄBC…ŻŹ, 35 znaków, bez spacji). Znaki spoza
+  alfabetu (cyfry, interpunkcja) pozostają niezmienione.
+
+  Przesunięcie podawane jest przez użytkownika w GUI (pole „Przesunięcie
+  szyfru Cezara”). Wartość 0 oznacza „losuj w zakresie 1..34”.
+iso: pl
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# Alfabet pobierany jest z dictionaries/pl/podstawy.yaml (klucz: alfabet).
+# Jeśli chcesz użyć innego alfabetu (np. bez polskich znaków), odkomentuj
+# poniższą linię i wpisz własny zbiór wielkich liter:
+# alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+# Zakres dopuszczalnych przesunięć w GUI (SpinCtrl).
+min_przesuniecie: -35
+max_przesuniecie: 35

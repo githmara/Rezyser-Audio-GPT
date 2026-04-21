@@ -28,15 +28,28 @@ import openai
 from dotenv import load_dotenv
 
 import wx
-from gui_poliglota import (
-    akcent_angielski,
-    akcent_finski,
-    akcent_francuski,
-    akcent_hiszpanski,
+
+# Refaktor wersji 13.0: logika modelu, przepisy i silnik AI są wydzielone
+# z tego pliku. Panel zostaje cienką warstwą widoku wxPython.
+import core_rezyser as cr
+import przepisy_rezysera as pr
+import rezyser_ai as rai
+
+# Reguły fonetyczne są teraz w ``core_rezyser`` (przeniesione z
+# ``gui_rezyser`` w ramach Etapu 2). Importy akcentów w blokach
+# GENEROWANE_IMPORTY_AKCENTOW_* zostały przeniesione tam i są generowane
+# przez ``odswiez_rezysera.py``. Ten plik ich już bezpośrednio nie używa.
+# <GENEROWANE_IMPORTY_AKCENTOW_START>
+from core_poliglota import (
     akcent_islandzki,
+    akcent_angielski,
+    akcent_francuski,
     akcent_niemiecki,
+    akcent_hiszpanski,
     akcent_wloski,
+    akcent_finski,
 )
+# <GENEROWANE_IMPORTY_AKCENTOW_END>
 
 
 class RezyserPanel(wx.Panel):
@@ -163,15 +176,24 @@ class RezyserPanel(wx.Panel):
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
         self.SetName("Panel Reżysera Audio GPT")
 
-        # ── Stan pamięci (odpowiednik st.session_state z 1_Rezyseria.py) ──
-        self.full_story: str = ""            # bieżąca fabuła w pamięci
-        self.chapter_counter: int = 1        # licznik rozdziałów (Audiobook)
-        self.akt_counter: int = 1            # licznik aktów (Skrypt)
-        self.scena_counter: int = 1          # licznik scen (Skrypt)
-        self.zapisana_nazwa_pliku: str = ""  # aktywna nazwa projektu (bez .txt)
-        self.last_response: str = ""         # ostatnia odpowiedź AI
-        self.summary_text: str = ""          # Pamięć Długotrwała (Streszczenie)
-        self.world_lore: str = ""            # Księga Świata (zasady i postacie)
+        # ── Model danych: stan projektu, I/O, liczniki, silnik fonetyczny ──
+        # Refaktor 13.0: cały stan trzymany w core_rezyser.ProjektRezysera.
+        # Atrybuty full_story / summary_text / world_lore / liczniki /
+        # zapisana_nazwa_pliku / last_response są @property delegującymi do
+        # self._projekt – dzięki temu istniejący kod typu
+        # ``self.full_story += tekst`` nadal działa, ale dane są trzymane
+        # w jednym miejscu (ProjektRezysera) i dostępne dla wątku tła AI
+        # przez ``self._projekt.snapshot()``.
+        self._projekt: cr.ProjektRezysera = cr.ProjektRezysera()
+
+        # ── Przepisy twórcze załadowane z YAML-i (dictionaries/pl/rezyser/) ─
+        # Kolejność jest zgodna z dawnym TRYBY_PRACY:
+        # indeks 0 = Burza, 1 = Skrypt, 2 = Audiobook. Dynamika RadioBox
+        # w ``_build_ui`` używa ``p.etykieta`` dla każdego przepisu.
+        self._przepisy: list[pr.PrzepisRezysera] = pr.lista_trybow("pl")
+        self._przepis_tytuly: pr.PrzepisRezysera | None = pr.zaladuj_przepis(
+            "tytuly", kategoria="postprodukcja",
+        )
 
         # ── Klient OpenAI ──────────────────────────────────────────────────
         self._client = None
@@ -185,6 +207,105 @@ class RezyserPanel(wx.Panel):
 
         # NVDA odczyta opis narzędzia jako pierwsze po otwarciu panelu
         wx.CallAfter(self._description.SetFocus)
+
+    # ------------------------------------------------------------------
+    # Helper: wskazuje przepis dla aktualnie zaznaczonego trybu w RadioBox
+    # ------------------------------------------------------------------
+    def _aktualny_przepis(self) -> pr.PrzepisRezysera | None:
+        """Zwraca :class:`PrzepisRezysera` odpowiadający zaznaczonemu trybowi.
+
+        Użyteczne dla wątku tła AI (``_wyslij_worker``) – eliminuje
+        konieczność pracy z indeksem trybu (0/1/2) i pozwala korzystać
+        z pól YAML-a typu ``zapis_do_pliku``, ``stosuj_akcenty_fonetyczne``.
+
+        Returns:
+            Pierwszy przepis odpowiadający ``self._rb_mode.GetSelection()``
+            lub ``None``, gdy lista ``self._przepisy`` jest pusta (brak YAML-i).
+        """
+        if not self._przepisy:
+            return None
+        idx = self._rb_mode.GetSelection()
+        if 0 <= idx < len(self._przepisy):
+            return self._przepisy[idx]
+        return None
+
+    # ==================================================================
+    # SHIMY WŁAŚCIWOŚCI delegujące do self._projekt
+    # ------------------------------------------------------------------
+    # Po refaktorze 13.0 prawdziwy stan projektu żyje w ``self._projekt``
+    # (instancja ``core_rezyser.ProjektRezysera``). Aby nie zmieniać setek
+    # miejsc w tym pliku, które czytają/piszą ``self.full_story`` itp.,
+    # każdy dawny atrybut jest tu @property z getter'em i setter'em
+    # delegującym do ``self._projekt.*``. Operacje typu
+    # ``self.full_story += tekst`` działają naturalnie: Python wywołuje
+    # getter (by przeczytać bieżącą wartość), konkatenuje i wywołuje setter.
+    # ==================================================================
+
+    @property
+    def full_story(self) -> str:
+        return self._projekt.full_story
+
+    @full_story.setter
+    def full_story(self, value: str) -> None:
+        self._projekt.full_story = value
+
+    @property
+    def summary_text(self) -> str:
+        return self._projekt.summary_text
+
+    @summary_text.setter
+    def summary_text(self, value: str) -> None:
+        self._projekt.summary_text = value
+
+    @property
+    def world_lore(self) -> str:
+        return self._projekt.world_lore
+
+    @world_lore.setter
+    def world_lore(self, value: str) -> None:
+        self._projekt.world_lore = value
+
+    @property
+    def chapter_counter(self) -> int:
+        return self._projekt.chapter_counter
+
+    @chapter_counter.setter
+    def chapter_counter(self, value: int) -> None:
+        self._projekt.chapter_counter = value
+
+    @property
+    def akt_counter(self) -> int:
+        return self._projekt.akt_counter
+
+    @akt_counter.setter
+    def akt_counter(self, value: int) -> None:
+        self._projekt.akt_counter = value
+
+    @property
+    def scena_counter(self) -> int:
+        return self._projekt.scena_counter
+
+    @scena_counter.setter
+    def scena_counter(self, value: int) -> None:
+        self._projekt.scena_counter = value
+
+    @property
+    def zapisana_nazwa_pliku(self) -> str:
+        # Pole w ProjektRezysera nazywa się ``nazwa_pliku`` – shim mapuje
+        # starą polską nazwę na nową (krótszą).
+        return self._projekt.nazwa_pliku
+
+    @zapisana_nazwa_pliku.setter
+    def zapisana_nazwa_pliku(self, value: str) -> None:
+        self._projekt.nazwa_pliku = value
+
+    @property
+    def last_response(self) -> str:
+        return self._projekt.last_response
+
+    @last_response.setter
+    def last_response(self, value: str) -> None:
+        self._projekt.last_response = value
 
     # ------------------------------------------------------------------
     # Inicjowanie klienta OpenAI
@@ -373,10 +494,13 @@ class RezyserPanel(wx.Panel):
         lbl_main_heading.SetFont(mf)
 
         # ── [TAB 9] RadioBox trybu pracy ─────────────────────────────
+        # Etykiety pobierane dynamicznie z YAML-i w ``dictionaries/pl/rezyser/``.
+        # Zbiorczy commit wersji 13.0 zawiera ten folder, więc w środowisku
+        # wydawniczym ``self._przepisy`` jest zawsze niepuste.
         self._rb_mode = wx.RadioBox(
             self,
             label="Tryb pracy:",
-            choices=self.TRYBY_PRACY,
+            choices=[p.etykieta for p in self._przepisy],
             majorDimension=1,
             style=wx.RA_SPECIFY_COLS,
             name="Wybór trybu pracy AI",
@@ -921,7 +1045,13 @@ class RezyserPanel(wx.Panel):
     # Wczytywanie historii z pliku
     # ------------------------------------------------------------------
     def _on_load(self, _event: wx.Event) -> None:
-        """Wczytuje istniejący plik projektu z folderu skrypty/."""
+        """Wczytuje istniejący plik projektu z folderu skrypty/.
+
+        Deleguje do ``self._projekt.wczytaj()`` – cała logika I/O, analizy
+        liczników i reguły Nieskończonej Pamięci (streszczenie priorytet
+        nad full_story) żyje w ``core_rezyser.ProjektRezysera``. GUI tylko
+        synchronizuje kontrolki UI ze stanem projektu i pokazuje status.
+        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
@@ -933,15 +1063,11 @@ class RezyserPanel(wx.Panel):
             self._txt_file_name.SetFocus()
             return
 
-        app_dir      = os.path.dirname(os.path.abspath(__file__))
-        skrypty      = os.path.join(app_dir, self.SKRYPTY_DIR)
-        filepath     = os.path.join(skrypty, f"{nazwa}.txt")
-        summary_path = os.path.join(skrypty, f"{nazwa}_streszczenie.txt")
-        lore_path    = os.path.join(skrypty, f"{nazwa}.md")
-
-        if not os.path.exists(filepath):
+        try:
+            wynik = self._projekt.wczytaj(nazwa)
+        except FileNotFoundError as exc:
             wx.MessageBox(
-                f"Nie znaleziono pliku:\n{filepath}\n\n"
+                f"Nie znaleziono pliku:\n{exc}\n\n"
                 "Jeśli zaczynasz nową historię — po prostu zacznij pisać.\n"
                 "Plik zostanie utworzony automatycznie przy pierwszym wysłaniu do AI.",
                 "Plik nie istnieje",
@@ -949,11 +1075,7 @@ class RezyserPanel(wx.Panel):
                 self,
             )
             return
-
-        try:
-            with open(filepath, "r", encoding="utf-8") as fh:
-                content = fh.read()
-        except Exception as exc:
+        except OSError as exc:
             wx.MessageBox(
                 f"Błąd odczytu pliku:\n{exc}",
                 "Błąd odczytu",
@@ -962,63 +1084,29 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        # Analiza struktury pliku → ustawienie liczników
-        chapter_nums  = [int(m) for m in re.findall(r"(?i)\brozdzia[łl]\s+(\d+)", content)]
-        akt_nums      = [int(m) for m in re.findall(r"(?i)\bakt\s+(\d+)", content)]
-        ostatni_split = re.split(r"(?i)\bakt\s+\d+", content)
-        ostatni_frag  = ostatni_split[-1] if ostatni_split else content
-        scena_nums    = [int(m) for m in re.findall(r"(?i)\bscena\s+(\d+)", ostatni_frag)]
+        # Synchronizuj kontrolki UI ze stanem projektu (właściwości @property
+        # już przekierowały odczyt do self._projekt.*).
+        self._txt_ksiega_swiata.SetValue(self.world_lore)
+        self._txt_pamiec.SetValue(self.summary_text)
+        self._txt_full_story.SetValue(self.full_story)
 
-        self.chapter_counter = (max(chapter_nums) + 1) if chapter_nums else 1
-        self.akt_counter     = (max(akt_nums)     + 1) if akt_nums     else 1
-        self.scena_counter   = (max(scena_nums)   + 1) if scena_nums   else 1
+        # Jeśli projekt miał zapisany tryb twórczy w pliku .mode – ustaw RadioBox
+        if wynik.saved_mode in (1, 2):
+            self._rb_mode.SetSelection(wynik.saved_mode)
 
-        # Wczytaj Księgę Świata dla projektu (jeśli istnieje)
-        if os.path.exists(lore_path):
-            try:
-                with open(lore_path, "r", encoding="utf-8") as fh:
-                    self.world_lore = fh.read()
-                self._txt_ksiega_swiata.SetValue(self.world_lore)
-            except Exception:
-                pass
-
-        # Logika Nieskończonej Pamięci: streszczenie priorytet > pełna historia
-        if os.path.exists(summary_path):
-            try:
-                with open(summary_path, "r", encoding="utf-8") as fh:
-                    self.summary_text = fh.read()
-                self._txt_pamiec.SetValue(self.summary_text)
-            except Exception:
-                pass
-            self.full_story = ""
-            lore_info = f" Wczytano też Księgę: skrypty/{nazwa}.md." if os.path.exists(lore_path) else ""
+        # Komunikat statusu: Nieskończona Pamięć vs. zwykłe wczytanie
+        lore_info = f" Wczytano też Księgę: skrypty/{nazwa}.md." if wynik.czy_ksiega_swiata else ""
+        if wynik.czy_streszczenie:
             status_msg = (
                 f"Wczytano streszczenie projektu '{nazwa}'.{lore_info}\n"
                 "Pamięć bieżąca pozostaje pusta (tryb Nieskończonej Pamięci).\n"
                 "Możesz kontynuować historię — AI operuje na streszczeniu."
             )
         else:
-            self.full_story = content
-            self.summary_text = ""
-            lore_info = f" Wczytano też Księgę: skrypty/{nazwa}.md." if os.path.exists(lore_path) else ""
             status_msg = (
-                f"Wczytano historię '{nazwa}' ({len(content)} znaków).{lore_info}"
+                f"Wczytano historię '{nazwa}' ({wynik.liczba_znakow} znaków).{lore_info}"
             )
 
-        # Wczytaj tryb twórczy z pliku .mode (jeśli istnieje) i ustaw RadioBox
-        # Pliki metadanych .mode trzymane w runtime/skrypty/ (ukryte przed end-userami)
-        mode_path = os.path.join(app_dir, "runtime", self.SKRYPTY_DIR, f"{nazwa}.mode")
-        if os.path.exists(mode_path):
-            try:
-                with open(mode_path, "r", encoding="utf-8") as fh:
-                    saved_mode = int(fh.read().strip())
-                if saved_mode in (1, 2):
-                    self._rb_mode.SetSelection(saved_mode)
-            except Exception:
-                pass  # Cichy fail – plik .mode nie jest krytyczny
-
-        self.zapisana_nazwa_pliku = nazwa
-        self._txt_full_story.SetValue(self.full_story)
         self._refresh_ui_state()
         wx.MessageBox(status_msg, "Wczytano projekt", wx.OK | wx.ICON_INFORMATION, self)
 
@@ -1028,15 +1116,12 @@ class RezyserPanel(wx.Panel):
     def _on_clear_current(self, _event: wx.Event) -> None:
         """Czyści WYŁĄCZNIE bieżącą fabułę (full_story) i ostatnią odpowiedź AI.
 
-        Zachowane: liczniki rozdziałów/aktów/scen, nazwa pliku, Księga Świata,
+        Deleguje do ``self._projekt.wyczysc_biezaca()`` – zachowane zostają:
+        liczniki rozdziałów/aktów/scen, nazwa pliku, Księga Świata,
         Streszczenie (Pamięć Długotrwała), zapamiętany tryb twórczy.
         Dzięki temu użytkownik może kontynuować projekt od razu po wyczyszczeniu.
         """
-        self.full_story    = ""
-        self.last_response = ""
-        # NIE zmieniamy: chapter_counter, akt_counter, scena_counter,
-        # zapisana_nazwa_pliku, world_lore, summary_text
-
+        self._projekt.wyczysc_biezaca()
         self._txt_full_story.SetValue("")
 
         self._refresh_ui_state()
@@ -1065,15 +1150,8 @@ class RezyserPanel(wx.Panel):
         if odp != wx.YES:
             return
 
-        # Wyzeruj cały stan pamięci
-        self.full_story           = ""
-        self.summary_text         = ""
-        self.world_lore           = ""
-        self.chapter_counter      = 1
-        self.akt_counter          = 1
-        self.scena_counter        = 1
-        self.zapisana_nazwa_pliku = ""
-        self.last_response        = ""
+        # Wyzeruj cały stan pamięci (jedno wywołanie zamiast 8 linii).
+        self._projekt.twardy_reset()
 
         # Wyczyść wszystkie kontrolki UI
         self._txt_file_name.SetValue("")
@@ -1096,7 +1174,11 @@ class RezyserPanel(wx.Panel):
     # Zapis Księgi Świata
     # ------------------------------------------------------------------
     def _on_zapisz_ksiege(self, _event: wx.Event) -> None:
-        """Zapisuje Księgę Świata do pliku skrypty/<nazwa>.md."""
+        """Zapisuje Księgę Świata do pliku skrypty/<nazwa>.md.
+
+        Deleguje do ``self._projekt.zapisz_ksiege_swiata()`` – metoda
+        aktualizuje także ``self.world_lore`` przez property-shim.
+        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
@@ -1119,22 +1201,18 @@ class RezyserPanel(wx.Panel):
             self._txt_ksiega_swiata.SetFocus()
             return
 
-        app_dir   = os.path.dirname(os.path.abspath(__file__))
-        skrypty   = os.path.join(app_dir, self.SKRYPTY_DIR)
-        os.makedirs(skrypty, exist_ok=True)
-        lore_path = os.path.join(skrypty, f"{nazwa}.md")
-
+        # Upewnij się, że projekt zna nazwę (walidacja _wymagaj_nazwy w core).
+        if self._projekt.nazwa_pliku != nazwa:
+            self._projekt.nazwa_pliku = nazwa
         try:
-            with open(lore_path, "w", encoding="utf-8") as fh:
-                fh.write(tresc)
-            self.world_lore = tresc
+            self._projekt.zapisz_ksiege_swiata(tresc)
             wx.MessageBox(
                 f"Księga Świata zapisana: skrypty/{nazwa}.md",
                 "Księga zapisana",
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 f"Błąd zapisu Księgi Świata:\n{exc}",
                 "Błąd zapisu",
@@ -1146,7 +1224,11 @@ class RezyserPanel(wx.Panel):
     # Zapis Streszczenia (Pamięci Długotrwałej)
     # ------------------------------------------------------------------
     def _on_zapisz_pamiec(self, _event: wx.Event) -> None:
-        """Zapisuje streszczenie do pliku skrypty/<nazwa>_streszczenie.txt."""
+        """Zapisuje streszczenie do pliku skrypty/<nazwa>_streszczenie.txt.
+
+        Deleguje do ``self._projekt.zapisz_streszczenie()`` – metoda
+        aktualizuje także ``self.summary_text`` przez property-shim.
+        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
@@ -1169,15 +1251,11 @@ class RezyserPanel(wx.Panel):
             self._txt_pamiec.SetFocus()
             return
 
-        app_dir      = os.path.dirname(os.path.abspath(__file__))
-        skrypty      = os.path.join(app_dir, self.SKRYPTY_DIR)
-        os.makedirs(skrypty, exist_ok=True)
-        summary_path = os.path.join(skrypty, f"{nazwa}_streszczenie.txt")
-
+        # Upewnij się, że projekt zna nazwę (walidacja _wymagaj_nazwy w core).
+        if self._projekt.nazwa_pliku != nazwa:
+            self._projekt.nazwa_pliku = nazwa
         try:
-            with open(summary_path, "w", encoding="utf-8") as fh:
-                fh.write(tresc)
-            self.summary_text = tresc
+            self._projekt.zapisz_streszczenie(tresc)
             wx.MessageBox(
                 f"Streszczenie zapisane: skrypty/{nazwa}_streszczenie.txt\n\n"
                 "Możesz teraz bezpiecznie wyczyścić pamięć bieżącą.",
@@ -1185,7 +1263,7 @@ class RezyserPanel(wx.Panel):
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 f"Błąd zapisu streszczenia:\n{exc}",
                 "Błąd zapisu",
@@ -1285,26 +1363,29 @@ class RezyserPanel(wx.Panel):
         t.start()
 
     # ------------------------------------------------------------------
-    # Pomocnicza metoda zapisu do pliku projektu
+    # Pomocnicza metoda zapisu do pliku projektu (thin wrapper)
     # ------------------------------------------------------------------
     def _dopisz_do_pliku(self, nazwa: str, content: str, mode: str = "a") -> None:
-        """Zapisuje tekst do pliku skrypty/<nazwa>.txt.
+        """Thin wrapper: deleguje do ``self._projekt.dopisz_do_pliku_historii``.
+
+        Zachowany dla kompatybilności z istniejącymi wywołaniami w
+        ``_on_wstaw_*`` i ``_on_wyslij_done_zapis``. Błędy I/O zostaną
+            obsłużone przez wx.MessageBox, tak jak dotychczas – bo
+        ProjektRezysera.dopisz_do_pliku_historii propaguje wyjątki.
 
         Args:
-            nazwa:   Nazwa projektu bez rozszerzenia.
+            nazwa:   Nazwa projektu (tylko dla spójności API – w praktyce
+                     ``ProjektRezysera`` używa własnego ``nazwa_pliku``).
             content: Treść do zapisania.
-            mode:    Tryb otwarcia pliku: ``"a"`` (dopisz, domyślnie) lub
-                     ``"w"`` (nadpisz). Prolog używa ``"w"``, aby mieć pewność,
-                     że plik zaczyna się czysto, bez artefaktów z poprzednich sesji.
+            mode:    ``"a"`` (dopisz) lub ``"w"`` (nadpisz – dla Prologu).
         """
-        app_dir  = os.path.dirname(os.path.abspath(__file__))
-        skrypty  = os.path.join(app_dir, self.SKRYPTY_DIR)
-        os.makedirs(skrypty, exist_ok=True)
-        filepath = os.path.join(skrypty, f"{nazwa}.txt")
+        # Upewnij się, że projekt ma ustawioną nazwę pliku – niezbędne dla
+        # walidacji w ProjektRezysera._wymagaj_nazwy().
+        if self._projekt.nazwa_pliku != nazwa:
+            self._projekt.nazwa_pliku = nazwa
         try:
-            with open(filepath, mode, encoding="utf-8") as fh:
-                fh.write(content)
-        except Exception as exc:
+            self._projekt.dopisz_do_pliku_historii(content, mode=mode)
+        except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 f"Błąd zapisu do pliku:\n{exc}",
                 "Błąd zapisu",
@@ -1358,16 +1439,20 @@ class RezyserPanel(wx.Panel):
                 nazwa = nazwa.replace(k, v)
             return nazwa.strip()
 
-        # Mapa: znormalizowana nazwa akcentu → funkcja fonetyczna z gui_poliglota
+        # Mapa: znormalizowana nazwa akcentu → funkcja fonetyczna z core_poliglota.
+        # Blok generowany automatycznie przez ``odswiez_rezysera.py`` po każdym
+        # dodaniu nowego pliku YAML w dictionaries/<język>/akcenty/.
+        # <GENEROWANY_SLOWNIK_AKCENTOW_START>
         _AKCENT_FUNCS = {
-            "islandzki":  akcent_islandzki,
-            "wloski":     akcent_wloski,
-            "finski":     akcent_finski,
-            "angielski":  akcent_angielski,
-            "francuski":  akcent_francuski,
-            "niemiecki":  akcent_niemiecki,
-            "hiszpanski": akcent_hiszpanski,
+            "islandzki": akcent_islandzki,
+            "angielski": akcent_angielski,
+            "francuski": akcent_francuski,
+            "niemiecki": akcent_niemiecki,
+            "hiszpanski":akcent_hiszpanski,
+            "wloski":    akcent_wloski,
+            "finski":    akcent_finski,
         }
+# <GENEROWANY_SLOWNIK_AKCENTOW_END>
 
         # 2. Podział skryptu po tagach i aplikacja akcentów
         fragmenty = re.split(r"(\[[^\]]+\])", tekst)
@@ -2104,28 +2189,22 @@ class RezyserPanel(wx.Panel):
         dlg.Destroy()
 
     # ------------------------------------------------------------------
-    # Zapis trybu twórczego do pliku metadanych projektu
+    # Zapis trybu twórczego do pliku metadanych projektu (thin wrapper)
     # ------------------------------------------------------------------
     def _zapisz_tryb_projektu(self) -> None:
-        """Zapisuje aktualny tryb twórczy (Skrypt=1 / Audiobook=2) do pliku .mode.
+        """Thin wrapper: deleguje do ``self._projekt.zapisz_tryb_tworczy``.
 
-        Plik ``skrypty/<nazwa>.mode`` przywraca właściwy tryb po ponownym
-        wczytaniu projektu i zapobiega przypadkowej zmianie trybu na RadioBoxie.
-        Cichy fail – metadata nie jest krytyczna dla działania programu.
+        Plik ``runtime/skrypty/<nazwa>.mode`` przywraca właściwy tryb po
+        ponownym wczytaniu projektu. Cichy fail – metadata nie jest
+        krytyczna dla działania programu.
         """
         nazwa    = self._txt_file_name.GetValue().strip()
         tryb_idx = self._rb_mode.GetSelection()
-        if not nazwa or tryb_idx not in (1, 2):
+        if not nazwa:
             return
-        app_dir     = os.path.dirname(os.path.abspath(__file__))
-        runtime_dir = os.path.join(app_dir, "runtime")
-        if not os.path.exists(runtime_dir):
-            print(f"[INFO] Folder 'runtime/' nie istnieje – zostanie utworzony: {runtime_dir}")
-        meta_dir  = os.path.join(runtime_dir, self.SKRYPTY_DIR)
-        os.makedirs(meta_dir, exist_ok=True)
-        mode_path = os.path.join(meta_dir, f"{nazwa}.mode")
-        try:
-            with open(mode_path, "w", encoding="utf-8") as fh:
-                fh.write(str(tryb_idx))
-        except Exception:
-            pass
+        # Upewnij się, że projekt zna nazwę przed zapisem – nawet gdy
+        # użytkownik dopiero co wpisał nazwę w pole i nie wczytał jeszcze
+        # projektu z dysku.
+        if self._projekt.nazwa_pliku != nazwa:
+            self._projekt.nazwa_pliku = nazwa
+        self._projekt.zapisz_tryb_tworczy(tryb_idx)
