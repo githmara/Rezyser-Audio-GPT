@@ -37,6 +37,12 @@ import core_poliglota
 import tlumacz_ai
 
 
+# TODO(13.1, multi-language): zastąp stałą polem instancji
+# ``self._jezyk_aktywny`` wyliczanym po wczytaniu pliku przez
+# ``core_poliglota.wykryj_jezyk_zrodlowy(self._file_content)`` – dziś
+# zawsze zwraca "pl" bo `dictionaries/` ma tylko jedną wersję językową,
+# ale gdy powstanie drugi `dictionaries/<kod>/`, hardkod stanie się
+# wąskim gardłem multilingual content.
 JEZYK_BAZOWY = "pl"   # docelowo konfigurowalne w menu Ustawienia
 
 
@@ -646,6 +652,13 @@ class PoliglotaPanel(wx.Panel):
     # Miękkie ostrzeżenie o języku źródłowym
     # ------------------------------------------------------------------
     def _maybe_ostrzez_o_jezyku_zrodla(self) -> None:
+        # TODO(13.1, multi-language): zastąp bezpośrednie `detect()` na
+        # `core_poliglota.wykryj_jezyk_zrodlowy()` – funkcja robi to samo,
+        # ale dodatkowo waliduje wynik wobec dostępnych folderów w
+        # ``dictionaries/`` i zwraca sensowny fallback. Wtedy zamiast
+        # ostrzegać użytkownika o „niepasującym języku" będziemy mogli
+        # PRZEŁĄCZYĆ `self._jezyk_aktywny` na wykryty kod i uruchomić
+        # właściwy pipeline słowników.
         try:
             if detect(self._file_content) != JEZYK_BAZOWY:
                 ostrzezenie = (

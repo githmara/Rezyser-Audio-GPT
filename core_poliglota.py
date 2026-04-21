@@ -61,6 +61,17 @@ from docx.oxml.shared import OxmlElement
 
 from num2words import num2words
 
+# ``langdetect`` jest niedeterministyczny z założenia – ustawiamy seed, żeby
+# w testach i walidacji dostawać powtarzalny wynik. Import leniwy: do funkcji
+# ``wykryj_jezyk_zrodlowy`` – nigdzie indziej w module z niego nie korzystamy.
+try:
+    from langdetect import detect as _ld_detect, LangDetectException as _LdErr
+    from langdetect import DetectorFactory as _LdFactory
+    _LdFactory.seed = 0
+except ImportError:                                             # pragma: no cover
+    _ld_detect = None       # type: ignore[assignment]
+    _LdErr = Exception      # type: ignore[misc,assignment]
+
 
 # =============================================================================
 # Ścieżki, stałe i cache
@@ -272,6 +283,103 @@ def wariant_po_etykiecie(tryb: str, jezyk: str, etykieta: str) -> dict | None:
         if cfg.get("etykieta") == etykieta:
             return cfg
     return None
+
+
+# =============================================================================
+# Publiczne API – detekcja języka tekstu źródłowego (multi-language ready)
+# =============================================================================
+#
+# Kontekst: dziś GUI Poligloty hardkoduje ``JEZYK_BAZOWY = "pl"`` i wywołuje
+# ``langdetect.detect()`` tylko do ostrzegania użytkownika. Gdy powstaną
+# drugie, trzecie `dictionaries/<kod>/`, GUI będzie musiał podmienić hardkod
+# na wynik :func:`wykryj_jezyk_zrodlowy` – infrastruktura jest już gotowa.
+
+def dostepne_jezyki_bazowe() -> list[str]:
+    """Zwraca posortowaną listę kodów języków z folderów w ``dictionaries/``.
+
+    Każdy folder musi zawierać plik ``podstawy.yaml`` – w przeciwnym razie
+    zostaje pominięty (jest „niekompletnym" językiem, bo silnik Cezara
+    potrzebuje jego alfabetu).
+
+    Returns:
+        np. ``["pl"]`` dziś, a po dodaniu ``dictionaries/en/`` → ``["en", "pl"]``.
+    """
+    if not os.path.isdir(DICTIONARIES_DIR):
+        return []
+    wynik: list[str] = []
+    for nazwa in sorted(os.listdir(DICTIONARIES_DIR)):
+        sciezka_jezyka = os.path.join(DICTIONARIES_DIR, nazwa)
+        if not os.path.isdir(sciezka_jezyka):
+            continue
+        if os.path.isfile(os.path.join(sciezka_jezyka, "podstawy.yaml")):
+            wynik.append(nazwa)
+    return wynik
+
+
+# Minimalna długość tekstu, przy której uznajemy ``langdetect`` za wiarygodny.
+# Krótsze fragmenty często trafiają na „en" albo „af" bo model trenowany na
+# Wikipedii ma przewagę angielskich słów (nawet w polskim tekście).
+_MIN_TEKST_DLA_DETEKCJI = 20
+
+
+def wykryj_jezyk_zrodlowy(
+    tekst: str,
+    *,
+    fallback: str = "pl",
+    dostepne: list[str] | None = None,
+) -> str:
+    """Wykrywa kod języka tekstu; waliduje wynik wobec ``dictionaries/``.
+
+    Funkcja jest „konserwatywna" – zwraca ``fallback`` w każdym z wypadków,
+    w których wynik langdetect byłby niemiarodajny:
+
+      1. ``langdetect`` nie zostało zainstalowane (brak importu na starcie),
+      2. ``tekst`` jest za krótki (<``_MIN_TEKST_DLA_DETEKCJI`` znaków
+         po strip),
+      3. ``langdetect`` rzuca ``LangDetectException`` (tekst bez liter,
+         same emotikony itp.),
+      4. wykryty kod NIE ma swojego folderu w ``dictionaries/`` – nawet
+         jeśli langdetect trafił, silnik nie ma reguł dla tego języka,
+         więc GUI musi pozostać przy języku, który ma działające słowniki.
+
+    Dzięki punktowi (4) funkcja jest „multi-language ready": dziś zawsze
+    zwraca ``"pl"`` (bo to jedyny dostępny język), ale gdy powstanie
+    ``dictionaries/en/``, zacznie zwracać ``"en"`` dla angielskich tekstów.
+
+    Args:
+        tekst:    Tekst do zbadania (zwykle wczytana zawartość pliku).
+        fallback: Co zwrócić, gdy detekcja się nie powiedzie lub wynik nie
+                  ma swojego folderu w ``dictionaries/`` (domyślnie ``"pl"``).
+        dostepne: Opcjonalna lista dozwolonych kodów. Jeśli ``None`` – funkcja
+                  sama zawoła :func:`dostepne_jezyki_bazowe`. Zdefiniowanie
+                  pozwala GUI odfiltrować języki, które akurat są wyłączone.
+
+    Returns:
+        Dwuliterowy kod ISO 639-1 (np. ``"pl"``, ``"en"``, ``"de"``).
+
+    Example:
+        >>> wykryj_jezyk_zrodlowy("Ala ma kota, a kot ma Alę i wychodzą razem.")
+        'pl'
+        >>> wykryj_jezyk_zrodlowy("???")          # za krótki + brak liter
+        'pl'
+        >>> wykryj_jezyk_zrodlowy("Hello world")  # „en" nie ma folderu
+        'pl'
+    """
+    if _ld_detect is None:
+        return fallback
+
+    if not isinstance(tekst, str) or len(tekst.strip()) < _MIN_TEKST_DLA_DETEKCJI:
+        return fallback
+
+    try:
+        kod_wykryty = _ld_detect(tekst)
+    except _LdErr:
+        return fallback
+
+    if dostepne is None:
+        dostepne = dostepne_jezyki_bazowe()
+
+    return kod_wykryty if kod_wykryty in dostepne else fallback
 
 
 # =============================================================================
