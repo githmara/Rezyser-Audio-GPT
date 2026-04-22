@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 12.0 - Release Candidate)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.0 - Release Candidate)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -188,6 +188,7 @@ Narzędzie do "psucia" tekstu. Wymusza na syntezatorach łamany polski.
 
 Zintegrowane menu rozwijane Trybu Reżysera pozwala wybrać akcent bezpośrednio z jednej listy. Dostępne opcje to:
 Angielski (Samantha / Mark — Vocalizer/Apple, Zira / Hazel — OneCore)
+Rosyjski (Milena — Vocalizer/Apple, Irina / Pavel / Yuri — OneCore, eSpeak)
 Francuski (Thomas / Amelie — Vocalizer/Apple, Julie — OneCore)
 Niemiecki (Markus / Stefan — Vocalizer/Apple, Hedda / Katja — OneCore)
 Hiszpański (Jorge / Monica — Vocalizer/Apple, Helena — OneCore)
@@ -443,3 +444,25 @@ Funkcje zachowane bez zmian z wersji 11.0
 - Odporny na awarie mechanizm wznawiania tłumaczenia (zapis do .jsonl).
 - Naprawiacz Tagów w Trybie Reżysera (wstrzykiwanie kodu ISO).
 - Wszystkie funkcje AI: Burza Mózgów, Skrypt, Audiobook, Akumulator Fabuły, Nieskończona Pamięć, Nadawanie Tytułów.
+
+
+Nowe funkcje i zmiany w wersji 13.0 — Release Candidate
+
+- Akcent rosyjski w Poliglocie (NOWOŚĆ — ósmy język europejski w menu Trybu Reżysera). Do listy rozwijanej „Tryb Reżysera / Akcenty" dołącza opcja „Rosyjski (np. Milena / Irina / Yuri / Pavel)". W przeciwieństwie do pozostałych akcentów, które tylko „psują" polski tekst na poziomie liter łacińskich (np. „sz" → „sh", „w" → „v"), akcent rosyjski wykonuje pełną transliterację polskiego tekstu na cyrylicę — dzięki temu rosyjskojęzyczne głosy syntezatora TTS (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") mają po czym „wymawiać" słowa. Wzbogacono mapowanie o jotowane samogłoski („ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю"), polskie zmiękczenia si/ci/ni/zi + samogłoska (np. „ciocia" → „цёця"), a także rosyjskie dwuznaki specjalne: „ść" / „szcz" → „щ", „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х".
+
+  Uwaga fonetyczna: Akcent nie jest rosyjską transliteracją akademicką (ISO 9, GOST, BGN/PCGN). Celem jest wyłącznie brzmieniowe upodobnienie polskiego tekstu do rosyjskiego — dla potrzeb syntezy mowy, nie do poważnej transliteracji nazw własnych. Dla tej drugiej pracy używaj dedykowanych narzędzi językoznawczych.
+
+  Kod języka dla pliku wynikowego: „ru" (ISO 639-1). NVDA z włączoną opcją „Automatycznie zmieniaj język, gdy wspierane" natychmiast przełączy się na rosyjski głos.
+
+- Uwaga o „ź": W rosyjskim nie ma dokładnego odpowiednika polskiego „ź", więc ten znak normalizujemy do „ж" — podobnie jak „ż". Część dialektów północnorosyjskich i białoruski wymawia „ź" bliżej „зь", ale z perspektywy syntezatora mowy różnica jest pomijalna. Gdyby lingwista uznał, że preferuje „зь", może samodzielnie podmienić tę jedną regułę w pliku `dictionaries/pl/akcenty/rosyjski.yaml` — silnik ładuje YAML-e dynamicznie, więc nie wymaga to przekompilowania aplikacji.
+
+Funkcje zachowane bez zmian z wersji 12.0
+
+- Natywne GUI desktopowe oparte o wxPython (bez przeglądarki, bez serwera lokalnego).
+- Pasek nawigacji z klawiszami skrótów Ctrl+0/1/2/3.
+- Pełna optymalizacja pod czytniki ekranu (NVDA, VoiceOver) — polskie nazwy dostępnościowe, poprawna kolejność tabulatora.
+- Ochrona trybu twórczego przed przypadkową zmianą w trakcie pracy.
+- Twardy Reset projektu jednym kliknięciem w Reżyserze.
+- Automatyczne wczytywanie trybu twórczego z pliku metadanych projektu.
+- Wszystkie akcenty z poprzednich wersji (Angielski, Francuski, Niemiecki, Hiszpański, Włoski, Fiński, Islandzki) oraz Naprawiacz Tagów.
+- Pełne funkcje AI: Burza Mózgów, Skrypt, Audiobook, Akumulator Fabuły, Nieskończona Pamięć, Nadawanie Tytułów.

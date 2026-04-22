@@ -1,0 +1,206 @@
+# -----------------------------------------------------------------------------
+#  AKCENT ROSYJSKI
+#  Dla syntezatorów: Milena / Irina / Yuri / Pavel (rosyjski TTS).
+# -----------------------------------------------------------------------------
+id: rosyjski
+etykieta: "Rosyjski (np. Milena / Irina / Yuri / Pavel)"
+opis: |
+  Transliteruje polski tekst do cyrylicy z rosyjską wymową – dzięki temu
+  rosyjski syntezator mowy (NVDA → Vocalizer Milena, eSpeak „ru", OneCore
+  Irina/Pavel/Yuri) będzie w stanie odczytać polski tekst głosem rosyjskim.
+
+  Mapowanie:
+    - dwuznaki polskie → pojedyncze litery cyrylicy:
+        „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х",
+        „ść" → „щ", „szcz" → „щ", „dż" → „дж", „dz" → „дз";
+    - jotowane „j" + samogłoska → pojedyncze litery jotowane:
+        „ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю", „ji" → „и";
+    - „j" bez samogłoski po → „й";
+    - polskie zmiękczenia si/ci/ni/zi + samogłoska → rosyjskie jotowane
+        („siano" → „сяно", „nie" → „не", „ciocia" → „цёця", …);
+    - „ń", „ś", „ć" bez samogłoski po → litera + miękki znak „ь";
+    - nosowe „ą" → „он", „ę" → „ен";
+    - „ź" → „ж" (niektóre dialekty normalizują do „зь"; z perspektywy
+        syntezatora mowy różnica jest pomijalna, dlatego zostajemy przy
+        wariancie prostszym, identycznym z „ż");
+    - resztę liter łacińskich odwzorowujemy 1:1 w cyrylicy.
+
+  UWAGA dla językoznawców: Ten akcent nie jest rosyjską transliteracją
+  akademicką (ISO 9, GOST, BGN/PCGN). Celem jest wyłącznie brzmieniowe
+  upodobnienie polskiego tekstu do rosyjskiego, tak by syntezator TTS
+  wymówił go z rosyjskim akcentem. Do poprawnej transliteracji nazw
+  własnych używaj dedykowanych narzędzi.
+iso: ru
+kategoria: akcent
+kolejnosc: 45
+
+# --- Pipeline przetwarzania ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+# Nie usuwamy polskich diakrytyków „latynizująco" – zrobimy to ręcznie
+# w sekcji `zamiany`, zamieniając je na litery cyrylicy.
+usun_polskie_znaki: false
+# Scalanie pojedynczych liter łacińskich jest bezsensowne po transliteracji
+# na cyrylicę (regex w `sklej_pojedyncze_litery` szuka klasy [a-z]).
+skleja_pojedyncze_litery: false
+
+# -----------------------------------------------------------------------------
+# KOLEJNOŚĆ ZAMIAN – KRYTYCZNA:
+#   1. Trójznaki i dwuznaki spółgłoskowe (szcz, ść, sz, cz, rz, ch, dż, dz)
+#   2. Zmiękczenia si/ci/ni/zi + samogłoska
+#   3. Jotowane „j" + samogłoska (ja, je, jo, ju, ji)
+#   4. Pozostałe „j" → „й"
+#   5. Polskie diakrytyki jednoliterowe (ą, ę, ł, ó, ś, ć, ń, ż, ź)
+#   6. Łacińskie litery → cyrylica
+# Dwuznaki PRZED jednoznakami – inaczej zamiana „s" → „с" rozwali „sz", „ś".
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Trójznaki i dwuznaki spółgłoskowe polskie ---
+  - { wzor: "szcz", zamiana: "щ"  }
+  - { wzor: "Szcz", zamiana: "Щ"  }
+  - { wzor: "SZCZ", zamiana: "Щ"  }
+  - { wzor: "ść",   zamiana: "щ"  }
+  - { wzor: "Ść",   zamiana: "Щ"  }
+  - { wzor: "sz",   zamiana: "ш"  }
+  - { wzor: "Sz",   zamiana: "Ш"  }
+  - { wzor: "SZ",   zamiana: "Ш"  }
+  - { wzor: "cz",   zamiana: "ч"  }
+  - { wzor: "Cz",   zamiana: "Ч"  }
+  - { wzor: "CZ",   zamiana: "Ч"  }
+  - { wzor: "rz",   zamiana: "ж"  }
+  - { wzor: "Rz",   zamiana: "Ж"  }
+  - { wzor: "RZ",   zamiana: "Ж"  }
+  - { wzor: "ch",   zamiana: "х"  }
+  - { wzor: "Ch",   zamiana: "Х"  }
+  - { wzor: "CH",   zamiana: "Х"  }
+  - { wzor: "dż",   zamiana: "дж" }
+  - { wzor: "Dż",   zamiana: "Дж" }
+  - { wzor: "dź",   zamiana: "джь" }
+  - { wzor: "Dź",   zamiana: "Джь" }
+  - { wzor: "dz",   zamiana: "дз" }
+  - { wzor: "Dz",   zamiana: "Дз" }
+
+  # --- 2. Zmiękczenia si/ci/ni/zi + samogłoska ---
+  - { wzor: "sia",  zamiana: "ся" }
+  - { wzor: "Sia",  zamiana: "Ся" }
+  - { wzor: "sie",  zamiana: "се" }
+  - { wzor: "Sie",  zamiana: "Се" }
+  - { wzor: "sio",  zamiana: "сё" }
+  - { wzor: "Sio",  zamiana: "Сё" }
+  - { wzor: "siu",  zamiana: "сю" }
+  - { wzor: "Siu",  zamiana: "Сю" }
+
+  - { wzor: "cia",  zamiana: "ця" }
+  - { wzor: "Cia",  zamiana: "Ця" }
+  - { wzor: "cie",  zamiana: "це" }
+  - { wzor: "Cie",  zamiana: "Це" }
+  - { wzor: "cio",  zamiana: "цё" }
+  - { wzor: "Cio",  zamiana: "Цё" }
+  - { wzor: "ciu",  zamiana: "цю" }
+  - { wzor: "Ciu",  zamiana: "Цю" }
+
+  - { wzor: "nia",  zamiana: "ня" }
+  - { wzor: "Nia",  zamiana: "Ня" }
+  - { wzor: "nie",  zamiana: "не" }
+  - { wzor: "Nie",  zamiana: "Не" }
+  - { wzor: "nio",  zamiana: "нё" }
+  - { wzor: "Nio",  zamiana: "Нё" }
+  - { wzor: "niu",  zamiana: "ню" }
+  - { wzor: "Niu",  zamiana: "Ню" }
+
+  - { wzor: "zia",  zamiana: "зя" }
+  - { wzor: "Zia",  zamiana: "Зя" }
+  - { wzor: "zie",  zamiana: "зе" }
+  - { wzor: "Zie",  zamiana: "Зе" }
+  - { wzor: "zio",  zamiana: "зё" }
+  - { wzor: "Zio",  zamiana: "Зё" }
+  - { wzor: "ziu",  zamiana: "зю" }
+  - { wzor: "Ziu",  zamiana: "Зю" }
+
+  # --- 3. Jotowane „j" + samogłoska ---
+  - { wzor: "ja",   zamiana: "я"  }
+  - { wzor: "Ja",   zamiana: "Я"  }
+  - { wzor: "je",   zamiana: "е"  }
+  - { wzor: "Je",   zamiana: "Е"  }
+  - { wzor: "jo",   zamiana: "ё"  }
+  - { wzor: "Jo",   zamiana: "Ё"  }
+  - { wzor: "ju",   zamiana: "ю"  }
+  - { wzor: "Ju",   zamiana: "Ю"  }
+  - { wzor: "ji",   zamiana: "и"  }
+  - { wzor: "Ji",   zamiana: "И"  }
+
+  # --- 4. Pozostałe „j" → „й" ---
+  - { wzor: "j",    zamiana: "й"  }
+  - { wzor: "J",    zamiana: "Й"  }
+
+  # --- 5. Polskie znaki diakrytyczne (jednoliterowe) ---
+  - { wzor: "ą",    zamiana: "он" }
+  - { wzor: "Ą",    zamiana: "Он" }
+  - { wzor: "ę",    zamiana: "ен" }
+  - { wzor: "Ę",    zamiana: "Ен" }
+  - { wzor: "ł",    zamiana: "л"  }
+  - { wzor: "Ł",    zamiana: "Л"  }
+  - { wzor: "ó",    zamiana: "у"  }
+  - { wzor: "Ó",    zamiana: "У"  }
+  - { wzor: "ś",    zamiana: "сь" }
+  - { wzor: "Ś",    zamiana: "Сь" }
+  - { wzor: "ć",    zamiana: "ць" }
+  - { wzor: "Ć",    zamiana: "Ць" }
+  - { wzor: "ń",    zamiana: "нь" }
+  - { wzor: "Ń",    zamiana: "Нь" }
+  - { wzor: "ż",    zamiana: "ж"  }
+  - { wzor: "Ż",    zamiana: "Ж"  }
+  - { wzor: "ź",    zamiana: "ж"  }
+  - { wzor: "Ź",    zamiana: "Ж"  }
+
+  # --- 6. Łacińskie litery → cyrylica ---
+  - { wzor: "a",    zamiana: "а"  }
+  - { wzor: "A",    zamiana: "А"  }
+  - { wzor: "b",    zamiana: "б"  }
+  - { wzor: "B",    zamiana: "Б"  }
+  - { wzor: "c",    zamiana: "ц"  }
+  - { wzor: "C",    zamiana: "Ц"  }
+  - { wzor: "d",    zamiana: "д"  }
+  - { wzor: "D",    zamiana: "Д"  }
+  - { wzor: "e",    zamiana: "е"  }
+  - { wzor: "E",    zamiana: "Е"  }
+  - { wzor: "f",    zamiana: "ф"  }
+  - { wzor: "F",    zamiana: "Ф"  }
+  - { wzor: "g",    zamiana: "г"  }
+  - { wzor: "G",    zamiana: "Г"  }
+  - { wzor: "h",    zamiana: "х"  }
+  - { wzor: "H",    zamiana: "Х"  }
+  - { wzor: "i",    zamiana: "и"  }
+  - { wzor: "I",    zamiana: "И"  }
+  - { wzor: "k",    zamiana: "к"  }
+  - { wzor: "K",    zamiana: "К"  }
+  - { wzor: "l",    zamiana: "л"  }
+  - { wzor: "L",    zamiana: "Л"  }
+  - { wzor: "m",    zamiana: "м"  }
+  - { wzor: "M",    zamiana: "М"  }
+  - { wzor: "n",    zamiana: "н"  }
+  - { wzor: "N",    zamiana: "Н"  }
+  - { wzor: "o",    zamiana: "о"  }
+  - { wzor: "O",    zamiana: "О"  }
+  - { wzor: "p",    zamiana: "п"  }
+  - { wzor: "P",    zamiana: "П"  }
+  - { wzor: "q",    zamiana: "к"  }
+  - { wzor: "Q",    zamiana: "К"  }
+  - { wzor: "r",    zamiana: "р"  }
+  - { wzor: "R",    zamiana: "Р"  }
+  - { wzor: "s",    zamiana: "с"  }
+  - { wzor: "S",    zamiana: "С"  }
+  - { wzor: "t",    zamiana: "т"  }
+  - { wzor: "T",    zamiana: "Т"  }
+  - { wzor: "u",    zamiana: "у"  }
+  - { wzor: "U",    zamiana: "У"  }
+  - { wzor: "v",    zamiana: "в"  }
+  - { wzor: "V",    zamiana: "В"  }
+  - { wzor: "w",    zamiana: "в"  }
+  - { wzor: "W",    zamiana: "В"  }
+  - { wzor: "x",    zamiana: "кс" }
+  - { wzor: "X",    zamiana: "Кс" }
+  - { wzor: "y",    zamiana: "ы"  }
+  - { wzor: "Y",    zamiana: "Ы"  }
+  - { wzor: "z",    zamiana: "з"  }
+  - { wzor: "Z",    zamiana: "З"  }

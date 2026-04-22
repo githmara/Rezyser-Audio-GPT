@@ -454,6 +454,11 @@ def akcent_angielski(tekst: str) -> str:
     return zastosuj_reguly_fonetyczne(tekst, "angielski")
 
 
+def akcent_rosyjski(tekst: str) -> str:
+    """Alias: reguły fonetyczne akcentu ``rosyjski`` (z ``dictionaries/pl/akcenty/rosyjski.yaml``)."""
+    return zastosuj_reguly_fonetyczne(tekst, "rosyjski")
+
+
 def akcent_francuski(tekst: str) -> str:
     """Alias: reguły fonetyczne akcentu ``francuski`` (z ``dictionaries/pl/akcenty/francuski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "francuski")

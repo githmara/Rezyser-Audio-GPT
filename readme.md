@@ -18,7 +18,7 @@ Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń 
 ### 2. Poliglota (AI Translator & TTS Accents)
 * **Bezpieczny Tłumacz:** Długie teksty są automatycznie dzielone na bloki do 10 000 znaków i tłumaczone sekwencyjnie. Każdy blok jest natychmiast zapisywany do ukrytego pliku `.jsonl`. Wznowienie po wyczerpaniu limitów API jest w pełni automatyczne.
 * **Automatyzacja NVDA:** Tłumaczenia zapisywane są jako gotowe pliki `.html` z wbudowanym tagiem językowym lub pliki `.docx` z tagami wstrzykniętymi bezpośrednio do struktury XML. 
-* **Lokalne Akcenty:** Możliwość celowego wymuszania łamanego akcentu dla lokalnych syntezatorów (Vocalizer, eSpeak, OneCore) dzięki zaawansowanym regułom regex.
+* **Lokalne Akcenty:** Możliwość celowego wymuszania łamanego akcentu dla lokalnych syntezatorów (Vocalizer, eSpeak, OneCore) dzięki zaawansowanym regułom regex. Obsługiwane akcenty: angielski, rosyjski (z transliteracją na cyrylicę), francuski, niemiecki, hiszpański, włoski, fiński, islandzki.
 * **Naprawiacz Tagów:** Bezinwazyjnie wstrzykuje podany dwuliterowy kod języka ISO do istniejących plików.
 
 ### 3. Konwerter / Architekt Audiobooków
