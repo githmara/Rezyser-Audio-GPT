@@ -30,6 +30,125 @@
    - Krok 2: Podpięcie pierwszych zdarzeń (Events).
    - Krok 3: Przeniesienie skomplikowanej logiki (np. operacje na API OpenAI).
 
+# WIELOJĘZYCZNOŚĆ I TŁUMACZENIA INTERFEJSU
+
+## Wersjonowanie i roadmapa
+
+- Projekt jest po wersji **13.0** (język bazowy: polski). Każdy kolejny obsługiwany język to wersja **minor** (13.1 → język 1, 13.2 → język 2, itd.). Gdy plik `TODO_skrotowce_wielojezyczne.md` zostanie wyczyszczony ze wszystkich języków, następuje skok do wersji **14.0** — plik TODO można wtedy usunąć z repozytorium.
+
+## Bezpieczna kolejność wdrażania (dla każdego nowego języka)
+
+1. **Język bazowy — treści.** Komplet plików w `dictionaries/<kod>/`:
+   - `podstawy.yaml` (alfabet + ewentualna transliteracja znaków diakrytycznych),
+   - `szyfry/` — te same **6 algorytmów** co w `dictionaries/pl/szyfry/` (`cezar.yaml`, `jakanie.yaml`, `odwracanie.yaml` z rozwinięciami skrótowców, `samogloskowiec.yaml`, `typoglikemia.yaml`, `waz.yaml`),
+   - `akcenty/` — **wszystkie akcenty poza natywnym** (patrz reguła niżej).
+   Zakończ **smoke testem** ze zdaniami z sekcji 6 pliku `TODO_skrotowce_wielojezyczne.md` (silnik wykrywa język, szyfry rozwijają skrótowce zgodnie z oczekiwaniami, kod ISO w pliku wynikowym jest właściwy).
+2. **Tłumaczenie interfejsu** — etykiety przycisków, nagłówki paneli, komunikaty walidacji ładowane z `i18n/<kod>/ui.yaml`.
+3. **Tłumaczenie dokumentacji/instrukcji** — skrypt autotłumaczący z zachowaniem parametrów dynamicznych (patrz niżej).
+4. **Odznaczenie języka** w `TODO_skrotowce_wielojezyczne.md` (pozycja w sekcji 3.x + odhaczenie zdań smoketestowych w sekcji 6).
+5. **Release** jako kolejna wersja 13.x (pierwszy nowy język → 13.1, drugi → 13.2, itd.).
+
+## Szyfry i akcenty — reguła natywności
+
+- Każdy język bazowy dostaje te same **6 algorytmów (szyfrów)** co język polski — struktura folderów `dictionaries/<kod>/szyfry/` jest identyczna.
+- Akcenty: dla każdego języka bazowego generowane są **wszystkie akcenty z wyjątkiem natywnego**. Przykład: dla treści fińskich dostępny jest akcent polski, angielski, rosyjski itd. — ale **NIE** fiński. Dla treści polskich NIE ma akcentu polskiego.
+
+## Struktura YAML dla tłumaczeń UI (parametry dynamiczne)
+
+- Plik wzorcowy: `i18n/pl/ui.yaml`. Pozostałe języki: `i18n/<kod>/ui.yaml` — ten sam schemat kluczy, tylko przetłumaczone wartości.
+- Parametry dynamiczne (nie do tłumaczenia) oznaczamy składnią `{nazwa_parametru}` (Python `str.format`). Podwojone klamry `{{nazwa_parametru}}` stosujemy **tylko wtedy**, gdy ten sam string przechodzi przez dwa kolejne etapy `.format()` (np. szablon dokumentacji → potem znów podmieniany w GUI) i pierwszy etap ma zostawić placeholder w spokoju.
+- **Konwencje nazw parametrów** (zawsze `snake_case`, zgodne z faktycznymi wzorcami z kodu — patrz `grep -nE 'f"[^"]*\{' gui_*.py main.py`):
+  - `{nazwa_projektu}` / `{nazwa_pliku}` / `{sciezka_pliku}` — identyfikatory zasobów na dysku,
+  - `{liczba_znakow}` / `{liczba_akcentow}` / `{liczba_plikow}` — wartości liczbowe w raportach,
+  - `{numer_rozdzialu}` / `{numer_aktu}` / `{numer_sceny}` — liczniki z Trybu Reżysera,
+  - `{min_przesuniecie}` / `{max_przesuniecie}` / `{wylosowane_przesuniecie}` — zakresy i wyniki Szyfru Cezara,
+  - `{tytul_trybu}` / `{etykieta_przepisu}` — nazwy aktywnego trybu Reżysera,
+  - `{wersja}` / `{nazwa_narzedzia}` — tytuł głównego okna,
+  - `{tresc_bledu}` — wyjątek przekazany z warstwy silnika (bez tłumaczenia).
+- Przykład wzorca (realne etykiety z obecnego kodu po migracji do i18n):
+  ```yaml
+  # main.py — pasek tytułu i raport odśwież akcenty
+  app_title_z_narzedziem:       "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
+  raport_sukces_akcentow:       "✅ Zmodyfikowano pliki dla {liczba_akcentow} akcentów."
+  komunikat_klucz_za_krotki:    "⚠️ Klucz wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow})."
+
+  # gui_rezyser.py — dynamiczne etykiety przycisków (zmieniają się w locie)
+  btn_wstaw_rozdzial:           "✂️ Wstaw cięcie (Rozdział {numer_rozdzialu})"
+  btn_wstaw_akt:                "🎭 Wstaw Akt {numer_aktu}"
+  btn_wstaw_scene:              "🎬 Wstaw Scenę {numer_sceny}"
+
+  # gui_poliglota.py — etykiety zależne od ustawień
+  lbl_przesuniecie_cezara:      "Przesunięcie szyfru Cezara (0 = losowe, zakres {min_przesuniecie}…{max_przesuniecie}):"
+  info_plik_wczytany:           "Plik wczytany: {nazwa_pliku}  ({liczba_znakow} znaków)."
+  ```
+  Tłumaczenie fińskie / angielskie / rosyjskie zachowuje `{numer_rozdzialu}`,
+  `{nazwa_pliku}`, `{liczba_znakow}`, `{min_przesuniecie}` itd. bez zmiany —
+  LLM dostaje do przetłumaczenia wyłącznie tekst otaczający.
+- **Czego NIE tłumaczyć (oprócz `{…}`)** — literały techniczne muszą zostać 1:1, nawet jeśli brzmią jak słowa:
+  - **nazwy plików / katalogów**: `golden_key.env`, `skrypty/`, `dictionaries/`, `runtime/`, `i18n/`, `requirements.txt`, `main.py`, `core_poliglota.py`, itp.,
+  - **rozszerzenia**: `.md`, `.yaml`, `.txt`, `.docx`, `.env`, `.mode`,
+  - **emoji i znaki statusu**: `🎬 📄 📚 🌍 ✅ ⚠️ 🚨 ℹ️ ✂️ 🎭 🔄 📝` — zachowane dokładnie tam, gdzie są,
+  - **nazwy modułów i funkcji**: `OPENAI_API_KEY=`, `wx.MessageBox`, `core_rezyser.py::dostepne_jezyki_bazowe`, itp.,
+  - **nazwy własne czytników ekranu**: `NVDA`, `Vocalizer`, `Orca`.
+- **ZAKAZ hardkodowania etykiet GUI** bezpośrednio w plikach `gui_*.py`. Każda widoczna dla użytkownika etykieta musi być ładowana przez mechanizm i18n.
+
+## Konwencje wxPython w plikach i18n (akceleratory, skróty, tooltipy)
+
+wxPython ma dwa zapisy, które wyglądają jak literówki, ale są funkcjonalnie
+krytyczne — tłumacz (człowiek lub LLM) musi wiedzieć, jak je traktować:
+
+1. **Akcelerator menu/przycisku — ampersand `&`**. Znak `&` przed literą
+   (np. `"&Reżyser"`, `"&Poliglota"`) podkreśla ją w GUI i robi skrótem
+   Alt+litera. W tłumaczeniu MUSIMY przesunąć `&` na literę, która
+   faktycznie występuje w przetłumaczonym słowie i nie koliduje z innymi
+   akceleratorami tego menu/paska:
+   ```yaml
+   # polski
+   btn_rezyser:   "🎬  &Reżyser"
+   btn_poliglota: "🌍  &Poliglota"
+   # angielski (inne litery, bo „Reżyser" → „Director", „Poliglota" → „Polyglot")
+   btn_rezyser:   "🎬  &Director"
+   btn_poliglota: "🌍  Pol&yglot"     # R/P zajęte gdzie indziej
+   ```
+   Znak `&` **nie jest** parametrem dynamicznym — zostaje w pliku i18n
+   i jest tłumaczony razem z etykietą. W komentarzu klucza YAML warto
+   odnotować, jakie litery są zajęte w pozostałych akceleratorach menu.
+
+2. **Skrót klawiszowy w menu — `\tCtrl+…` / `\tAlt+…`**. W etykietach menu
+   wxPython rozpoznaje znak tabulatora `\t` jako separator między nazwą
+   a skrótem klawiszowym (`"Strona &główna\tCtrl+0"`). `Ctrl`, `Alt`,
+   `Shift` oraz cyfry/litery funkcyjne pozostają **literalnie** takie same
+   we wszystkich językach — nie tłumaczymy ich na „Strg" (niemiecki) ani
+   „Cmd" (macOS). Jeżeli skrót jest cyfrowy (Ctrl+1…Ctrl+4), zostaje
+   globalny; jeśli literowy (np. Ctrl+S), litera pozostaje ta sama co
+   w oryginale (żeby muscle memory użytkownika nie ucierpiała).
+
+3. **Tooltip vs etykieta — dwa osobne klucze i18n**. `SetLabel` i
+   `SetToolTip` mają osobne wpisy w `i18n/<kod>/ui.yaml` (bo często
+   tooltip jest zdaniem pełnym, a label — krótkim hasłem). Przykład:
+   ```yaml
+   btn_manager_label:   "📚  &Manager Reguł"
+   btn_manager_tooltip: "Manager Reguł ({skrot}): Eksploruj pliki YAML w dictionaries/, twórz nowe akcenty, szyfry i tryby."
+   ```
+   Uwaga: tooltipy w `main.py` mają dynamiczny fragment ze skrótem w nawiasie
+   (`(Ctrl+4)`) — przy i18n taki nawias powinien być oddzielnym parametrem
+   `{skrot}`, żeby łatwiej było w przyszłości zmienić skrót bez ruszania
+   tekstu tłumaczenia.
+
+4. **Długie komunikaty techniczne** (błędy odczytu pliku, raporty
+   generatora) zachowują w tłumaczeniu **wszystkie znaki `\n`** z oryginału
+   — GUI używa ich do łamania linii w `wx.MessageBox` i w dialogach
+   `wx.TextCtrl (TE_READONLY)`. Zmiana liczby linii zmieni wygląd dialogu.
+
+## Skrypt autotłumaczący dokumentację
+
+- `tlumacz_ai.py` (lub dedykowany nowy skrypt) przy tłumaczeniu dokumentacji/instrukcji MUSI:
+  1. Parsować wejściowy YAML/TXT.
+  2. Wyodrębniać i **zamrażać** parametry dynamiczne (`{…}`) — nie przekazywać ich do LLM.
+  3. Scalać przetłumaczony tekst z zachowanymi parametrami.
+  4. Zapisywać wynik do `i18n/<kod>/` lub odpowiedniego katalogu dokumentacji.
+- Skrypt jest niezależny od silnika Poligloty i może być uruchamiany jednorazowo (batch) przed releasem danej wersji 13.x.
+
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze usuwaj wszystkie pliki tymczasowe (np. `_output.txt`, pliki testowe py), które utworzyłeś w trakcie zadania. Kiedy ogłaszasz koniec pracy, katalog główny musi być czysty i wolny od Twoich "śladów".
 - WERYFIKACJA PRZEZ GIT STATUS: Po zakończeniu sprzątania ZAWSZE uruchom `git status` i sprawdź sekcję "Untracked files". Każdy plik tam wymieniony, który nie jest częścią projektu (tzn. nie jest to: `main.py`, skrypty GUI, pliki `.bat`/`.sh`, `.clinerules`, `requirements.txt`, itp.), musi zostać usunięty z dysku przed ogłoszeniem końca pracy.

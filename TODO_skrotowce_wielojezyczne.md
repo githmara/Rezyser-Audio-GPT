@@ -178,26 +178,69 @@ trzeba by dopisać regexy od zera. Wstępne podpowiedzi:
   - [ ] `núm.` → `número`
   - [ ] `pág.` → `página`
 
-## 4. Strategia wdrażania
+## 4. Strategia wdrażania (spójna z `.clinerules`)
 
-1. **Jeden język na raz.** Wrzucenie kilkunastu YAML-i w jednym commicie
-   utrudnia przegląd i testowanie. Lepiej dokładać pojedynczo (najlepiej
-   z krótkim smoke testem przed merge do `main`).
+Dla każdego nowego języka stosujemy 5-etapowy schemat — ten sam, który
+opisuje sekcja „Bezpieczna kolejność wdrażania" w `.clinerules`. Kolejność
+jest nieprzypadkowa: najpierw weryfikujemy, że treści w nowym języku
+w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
+(i tokeny LLM) w tłumaczenie warstwy UI i dokumentacji.
 
-2. **Pełna struktura folderu języka:**
+1. **Język bazowy — treści.** Utwórz komplet plików w `dictionaries/<kod>/`:
    ```
    dictionaries/<kod>/
-   ├── podstawy.yaml           # alfabet + (ew.) transliteracja diakrytyków
-   ├── akcenty/                # placeholder, może być pusty
-   └── szyfry/
-       └── odwracanie.yaml     # <- tutaj żyją rozwinięcia
+   ├── podstawy.yaml               # alfabet + ewentualna transliteracja
+   ├── akcenty/                    # WSZYSTKIE akcenty poza natywnym
+   │   ├── angielski.yaml          #   (dla <kod>=fi: pl/en/ru/... ALE NIE fi)
+   │   ├── polski.yaml
+   │   └── ...
+   └── szyfry/                     # te same 6 algorytmów co dictionaries/pl/szyfry/
+       ├── cezar.yaml
+       ├── jakanie.yaml
+       ├── odwracanie.yaml         # <- tutaj rozwinięcia skrótowców z notebooka
+       ├── samogloskowiec.yaml
+       ├── typoglikemia.yaml
+       └── waz.yaml
    ```
-   Bez `podstawy.yaml` silnik nie wykryje języka.
+   Bez `podstawy.yaml` silnik nie wykryje języka (autodetekcja w
+   `core_poliglota.py::dostepne_jezyki_bazowe`). Zakończ etap
+   **smoke testem** z sekcji 6 tego pliku — puść wybrane zdania przez
+   `_algo_odwracanie` i zweryfikuj, czy wynik pokrywa się z kolumną
+   „oczekiwany wynik silnika".
 
-3. **Szybki sprawdzian w GUI.** Po dodaniu języka `python main.py`,
-   Poliglota → Tryb Szyfranta → wybór nowego języka bazowego.
-   Ma się pojawić Odwracacz, rozwinięcia mają zadziałać, kod ISO
-   w pliku wynikowym ma być poprawny.
+2. **Tłumaczenie interfejsu.** Dodaj `i18n/<kod>/ui.yaml` (etykiety
+   przycisków, nagłówki paneli, komunikaty walidacji) — ten sam schemat
+   kluczy co `i18n/pl/ui.yaml`, tylko przetłumaczone wartości.
+   Parametry dynamiczne (`{nazwa_projektu}`, `{n}`, `{procent}`, …)
+   zostają bez zmian — patrz `.clinerules` sekcja „Struktura YAML dla
+   tłumaczeń UI".
+
+3. **Tłumaczenie dokumentacji/instrukcji.** Uruchom skrypt
+   autotłumaczący (`tlumacz_ai.py` lub dedykowany batch) — ma
+   **zamrozić** parametry `{…}` przed wysyłką do LLM i scalić je
+   z odpowiedzią po tłumaczeniu. Wynik trafia do `i18n/<kod>/`.
+
+4. **Odznaczenie języka w tym pliku.** Przekreśl pozycje w sekcjach
+   3.1 / 3.2 oraz odhacz odpowiednie zdania smoketestowe w sekcji 6.
+   To sygnał, że język jest w pełni wdrożony.
+
+5. **Release** jako kolejna wersja **13.x**: pierwszy nowy język → 13.1,
+   drugi → 13.2, itd. Gdy ten plik zostanie wyczerpany (wszystkie języki
+   z sekcji 3.1 i 3.2 zamknięte), następny release to **14.0**, a plik
+   `TODO_skrotowce_wielojezyczne.md` można usunąć z repozytorium.
+
+### Uwagi operacyjne
+
+- **Jeden język na raz.** Wrzucenie kilkunastu YAML-i w jednym commicie
+  utrudnia przegląd i testowanie. Lepiej dokładać pojedynczo (najlepiej
+  z krótkim smoke testem przed merge do `main`).
+- **Autodetekcja.** Silnik wykryje nowy folder `dictionaries/<kod>/`
+  automatycznie przez `dostepne_jezyki_bazowe()` — nie trzeba ręcznie
+  dopisywać niczego do kodu Pythona.
+- **Szybki sprawdzian w GUI.** Po zamknięciu etapów 1 i 2 odpal
+  `python main.py`, wejdź w Poliglota → Tryb Szyfranta → wybierz nowy
+  język bazowy. Odwracacz powinien rozwinąć skrótowce, kod ISO w pliku
+  wynikowym musi być właściwy, a etykiety przycisków — w nowym języku.
 
 ## 5. Powiązane artefakty
 
@@ -207,3 +250,115 @@ trzeba by dopisać regexy od zera. Wstępne podpowiedzi:
   `rozwiniecia` i aplikuje je przez `re.sub(..., flags=re.IGNORECASE)`.
 * `core_poliglota.py::dostepne_jezyki_bazowe` – autodetekcja nowych
   folderów `dictionaries/<kod>/`.
+
+---
+
+## 6. Przykłady smoketestowe (błędy redakcyjne w skrótowcach)
+
+> Gotowe zdania testowe do weryfikacji silnika `_algo_odwracanie` dla każdego
+> nowego języka. Każde zawiera **celowy błąd pisowni skrótowca** — taki, jaki
+> przecieka przez korektę redakcyjną (literówka, brak kropki, nieprawidłowa
+> spacja wewnątrz skrótu). Kolumna „oczekiwany wynik" pokazuje, czy silnik
+> **powinien** rozwinąć skrót (✅ pokrywa regex) czy go **zostawić**
+> (⚠️ poza zasięgiem — warto rozważyć, czy rozszerzyć wzorzec).
+
+### 6.1 Polski (`pl`)
+
+| Wejście (zdanie ze skrótowcem)                                          | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Byli obecni m.in przedstawiciele czterech mediów.`                     | brak końcowej `.`            | ⚠️ nie rozwinięte (`m\.in\.` wymaga obu kropek) |
+| `Kupił tzt. wszystko, co było potrzebne na targi.`                      | literówka `tzt.`             | ⚠️ nie rozwinięte (brak wzorca dla `tzt\.`)     |
+| `To był n.p. największy błąd w całym projekcie.`                        | `n.p.` zamiast `np.`         | ⚠️ nie rozwinięte (niepoprawna forma skrótu)     |
+| `Projekt zakończono tj. w czerwcu ubiegłego roku.`                      | forma poprawna               | ✅ rozwinięte → `to jest`                        |
+| `Wyniki były b.dobre, tj. na poziomie 98 procent.`                      | `b.` bez spacji i rozwinięcia | ⚠️ `b.` — bez rozwinięcia; `tj.` → ✅ `to jest` |
+| `Przybyło ok 400 uczestników, w tym wielu z zagranicy.`                 | brak `.` po `ok`             | ⚠️ nie rozwinięte (regex: `ok\.`)               |
+
+### 6.2 Angielski (`en`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `The results were positive, e.g faster loading times than before.`      | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `e\.g\.`)             |
+| `She called her boss, ie. the director, to inform him directly.`        | przestawiona `.` (`ie.`)     | ⚠️ nie rozwinięte (`ie\.` ≠ `i\.e\.`)           |
+| `We brought snacks, ect. for everyone at the conference.`               | literówka `ect.`             | ⚠️ nie rozwinięte (brak wzorca dla `ect\.`)     |
+| `Dr Smith confirmed the diagnosis in the morning.`                      | brak `.` po `Dr`             | ⚠️ nie rozwinięte (regex: `Dr\.`)               |
+| `He studied in the U.S.A without any financial support.`                | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `U\.S\.A\.`)          |
+| `See p 14 for more details on this topic.`                              | brak `.` po `p`              | ⚠️ nie rozwinięte (regex: `p\.` / `pp\.`)       |
+
+### 6.3 Rosyjski (`ru`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Результаты были т.е не такими, как предполагалось изначально.`         | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `т\.е\.`)             |
+| `Взяли всё необходимое, и т.д без каких-либо исключений.`               | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `т\.д\.`)             |
+| `Заведующий кафедрой проф Иванов выступил первым на конференции.`       | brak `.` po `проф`           | ⚠️ nie rozwinięte (regex: `проф\.`)             |
+| `На ул Пушкина состоялся митинг жителей квартала.`                      | brak `.` po `ул`             | ⚠️ nie rozwinięte (regex: `ул\.`)               |
+| `Мероприятие прошло в т.ч при участии зарубежных делегаций.`            | brak końcowej `.` (`в т.ч`)  | ⚠️ nie rozwinięte (regex: `в\.т\.ч\.`)          |
+
+### 6.4 Włoski (`it`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Ha acquistato diversi articoli, ecc tra cui libri e riviste.`          | brak `.` po `ecc`            | ⚠️ nie rozwinięte (regex: `ecc\.`)              |
+| `Il sig Rossi ha firmato il contratto nella tarda mattinata.`           | brak `.` po `sig`            | ⚠️ nie rozwinięte (regex: `sig\.`)              |
+| `Vedi pagg 14–16 per ulteriori dettagli sulla questione.`               | brak `.` po `pagg`           | ⚠️ nie rozwinięte (regex: `pagg\.`)             |
+| `Il dott Bianchi ha presentato i risultati dello studio.`               | brak `.` po `dott`           | ⚠️ nie rozwinięte (regex: `dott\.`)             |
+| `Per maggiori informazioni cfr il capitolo precedente.`                 | brak `.` po `cfr`            | ⚠️ nie rozwinięte (regex: `cfr\.`)              |
+
+### 6.5 Fiński (`fi`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Hänellä oli useita tehtäviä, esim kirjoittaa raportti ennen kokousta.` | brak `.` po `esim`           | ⚠️ nie rozwinięte (regex: `esim\.`)             |
+| `Ostimme ruokaa, jn.e. kaikkea tarpeellista ennen matkaa.`              | przestawienie: `jn.e.`       | ⚠️ nie rozwinięte (regex: `jne\.`)              |
+| `Hän oli nss. tunnettu asiantuntija omalla alallaan.`                   | podwójne `s`: `nss.`         | ⚠️ nie rozwinięte (regex: `ns\.`)               |
+| `Johtaja, prof Mäkinen, piti avauspuheen konferenssissa.`               | brak `.` po `prof`           | ⚠️ nie rozwinięte (regex: `prof\.`)             |
+| `Projekti kesti n. kaksi vuotta ennen valmistumistaan.`                 | forma poprawna               | ✅ rozwinięte → `noin`                           |
+
+### 6.6 Islandzki (`is`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Hann keypti margt, t.d bækur og tónlist á vefsíðunni.`                 | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `t\.d\.`)             |
+| `Þetta er þ.e. besta mögulega lausn á vandanum.`                        | forma poprawna               | ✅ rozwinięte → `það er`                         |
+| `Hún skrifaði undir skv lögum um opinberar skrár.`                      | brak `.` po `skv`            | ⚠️ nie rozwinięte (regex: `skv\.`)              |
+| `Verðið var u.þ.b 50 þúsund krónur á hvern einstakling.`                | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `u\.þ\.b\.`)          |
+| `Fundarmaður fh ráðherra mætti á fundinn í stað hans.`                  | brak `.` po `fh`             | ⚠️ nie rozwinięte (regex: `fh\.`)               |
+
+> **Uwaga do sekcji 6.7–6.9:** poniższe języki (`fr`, `de`, `es`) nie mają
+> regexów w notebooku źródłowym (sekcja 3.2 tego pliku). Smoketesty są więc
+> scenariuszami **docelowymi** — zadziałają dopiero, gdy dopiszemy
+> `dictionaries/<kod>/szyfry/odwracanie.yaml` z propozycjami rozwinięć z 3.2.
+> Do tego czasu silnik zwróci „⚠️ nie rozwinięte" także dla form poprawnych.
+
+### 6.7 Francuski (`fr`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Il a acheté plusieurs livres, p. ex des romans et des essais.`         | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `p\. ex\.`)           |
+| `Le directeur, c.-a-d. Monsieur Dupont, a validé la décision.`          | `a` bez akcentu (`c.-a-d.`)  | ⚠️ nie rozwinięte (regex wymaga `c\.-à-d\.`)    |
+| `M Dupont a signé le contrat hier après-midi à la mairie.`              | brak `.` po `M`              | ⚠️ nie rozwinięte (regex: `M\.`)                |
+| `Le Dr Martin a confirmé le diagnostic rapidement au patient.`          | forma poprawna (w fr bez `.`) | ✅ rozwinięte → `Docteur` (regex: `Dr\b`)       |
+| `Consultez la page no 42 pour plus de détails sur le sujet.`            | `no` zamiast `n°`            | ⚠️ nie rozwinięte (regex: `n°`)                 |
+| `On a visité etc des musées, mais aussi des parcs historiques.`         | `etc` bez końcowej `.`       | ⚠️ nie rozwinięte (regex: `etc\.`)              |
+
+### 6.8 Niemiecki (`de`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Er brachte Geschenke mit, z.B Schokolade und Blumen für alle Gäste.`   | brak spacji i `.` (`z.B`)    | ⚠️ nie rozwinięte (regex: `z\. B\.`)            |
+| `Das Projekt endete, d. h am letzten Freitag des Monats pünktlich.`     | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `d\. h\.`)            |
+| `Herr Dr Müller leitete die Sitzung souverän bis zum Abend.`            | brak `.` po `Dr`             | ⚠️ nie rozwinięte (regex: `Dr\.`)               |
+| `Die Veranstaltung war erfolgreich, u. a wegen der Musikauswahl.`       | brak końcowej `.` (`u. a`)   | ⚠️ nie rozwinięte (regex: `u\. a\.`)            |
+| `Wir fahren zur Hauptstr 15 im Zentrum der Altstadt morgen früh.`       | brak `.` po `Hauptstr`       | ⚠️ nie rozwinięte (regex: `Str\.`)              |
+| `Siehe S. 42 und Nr. 7 des Anhangs für weitere Informationen.`          | forma poprawna               | ✅ rozwinięte → `Seite` / `Nummer`              |
+
+### 6.9 Hiszpański (`es`)
+
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
+| `Trajo varias frutas, p. ej manzanas y peras frescas del mercado.`      | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `p\. ej\.`)           |
+| `El Sr Pérez firmó el contrato por la mañana en la notaría central.`    | brak `.` po `Sr`             | ⚠️ nie rozwinięte (regex: `Sr\.`)               |
+| `La Sra. Gómez llegó tarde a la reunión directiva del consejo.`         | forma poprawna               | ✅ rozwinięte → `Señora`                         |
+| `Véase pág 12 para más información sobre el tema tratado.`              | brak `.` po `pág`            | ⚠️ nie rozwinięte (regex: `pág\.`)              |
+| `El núm 5 de la colección es el más buscado por los lectores.`          | brak `.` po `núm`            | ⚠️ nie rozwinięte (regex: `núm\.`)              |
+| `El Dr. Ramírez presentó los resultados ante el comité científico.`     | forma poprawna               | ✅ rozwinięte → `Doctor`                         |
