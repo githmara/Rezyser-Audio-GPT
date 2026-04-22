@@ -76,8 +76,57 @@ class RezyserPanel(wx.Panel):
         "Aby zmienić projekt, musisz najpierw wyczyścić pamięć bieżącą."
     )
 
+    # --------------------------------------------------------------
+    # PROMPT ARCHITEKTA – gotowy tekst do wklejenia w zewnętrznego chatbota.
+    # Wersja 13.0: przeniesiony z instrukcja.txt bezpośrednio do GUI, by
+    # użytkownik (zwłaszcza korzystający z NVDA) nie musiał go wyszukiwać
+    # w pliku tekstowym. Dialog wywołany przez przycisk „📖 Prompt
+    # Architekta dla AI…” pokazuje ten tekst w polu READONLY gotowym do
+    # skopiowania (Ctrl+A → Ctrl+C lub przycisk „Skopiuj do schowka").
+    #
+    # Jeśli kiedykolwiek zmienisz tę treść — zaktualizuj też sekcję
+    # „KROK 7" w ``instrukcja.txt`` (jedno zdanie wprowadzające),
+    # żeby dokumentacja dla end-userów nie odbiegała od stanu GUI.
+    # --------------------------------------------------------------
+    PROMPT_ARCHITEKTA = (
+        "Jesteś wybitnym architektem światów (Worldbuilder) i konsultantem "
+        "literackim. Mam luźny pomysł na fabułę: [TUTAJ WPISZ SWÓJ POMYSŁ]. "
+        "Twoim zadaniem jest rozbudowanie tego do profesjonalnej "
+        "„Księgi Świata”.\n"
+        "Dostosuj ton i zasady do mojego pomysłu. Unikaj tanich, "
+        "baśniowych skrótów i klisz AI.\n\n"
+        "ZASADY FORMATOWANIA (KRYTYCZNE):\n"
+        "Musisz zwrócić odpowiedź w dwóch oddzielnych częściach:\n\n"
+        "CZĘŚĆ 1: KSIĘGA ŚWIATA\n"
+        "Tę część musisz bezwzględnie zamknąć w JEDNYM bloku kodu Markdown "
+        "(użyj znaczników ```markdown na początku i ``` na końcu). "
+        "Wewnątrz bloku kodu zastosuj te reguły:\n"
+        "1. Rozpocznij od emotki otwartej książki i roboczego tytułu, "
+        "np. 📖 Księga Świata: [Tytuł].\n"
+        "2. Używaj pojedynczego hashtagu (#) dla głównych sekcji "
+        "(np. # Zasady Świata, # Postacie).\n"
+        "3. Używaj podwójnego hashtagu (##) dla podsekcji.\n"
+        "4. Używaj myślników (-) do tworzenia czytelnych list.\n"
+        "5. Używaj podwójnych gwiazdek (**tekst**), by pogrubić absolutne, "
+        "nienaruszalne zasady (np. **Bohater NIGDY nie kłamie**).\n"
+        "6. Opisz psychologię postaci, ich największe wady i motywacje. "
+        "W przypadku postaci obcojęzycznych, dodaj informację o akcencie "
+        "bezpośrednio przy tagu, np. `[Speaker 1: Imię] - sepleni i ma "
+        "akcent francuski`. **Wskazówka techniczna:** Użycie słowa "
+        "kluczowego `akcent` jest bezwzględnie wymagane, ponieważ to na "
+        "jego podstawie zewnętrzny skrypt aplikacji automatycznie wykrywa "
+        "i nakłada poprawne reguły fonetyczne na dialogi danej postaci.\n\n"
+        "CZĘŚĆ 2: REKOMENDACJA TRYBU\n"
+        "Tę część umieść POZA blokiem kodu, jako zwykły tekst pod spodem. "
+        "Doradź mi, który z trybów mojej aplikacji będzie najlepszy do "
+        "realizacji tego pomysłu: 🎬 Tryb Surowego Skryptu (słuchowiska, "
+        "SFX, fonetyka), czy 📖 Tryb Tradycyjnego Audiobooka (klasyczna "
+        "proza literacka)."
+    )
+
     ENV_FILENAME = "golden_key.env"
     SKRYPTY_DIR  = "skrypty"
+
 
     def __init__(self, parent: wx.Window) -> None:
 
@@ -435,6 +484,26 @@ class RezyserPanel(wx.Panel):
             "Wymaga podania nazwy pliku projektu."
         )
 
+        # ── [TAB 7a] Prompt Architekta (skopiuj do zewnętrznego AI) ───
+        # Refaktor 13.0: prompt architekta przeniesiony z instrukcja.txt
+        # wprost do GUI jako przycisk + dialog z polem do skopiowania.
+        # Wzorzec A11y identyczny jak dla ``WynikKreatoraDialog`` w
+        # Managerze Reguł – pełny tekst w wx.TextCtrl (TE_READONLY),
+        # przycisk "Skopiuj do schowka", NVDA od razu czyta zawartość.
+        self._btn_prompt_architekta = wx.Button(
+            self,
+            label="📖 Prompt Architekta dla AI…",
+            name="Przycisk Pokaż Prompt Architekta dla zewnętrznego chatbota",
+        )
+        self._btn_prompt_architekta.SetToolTip(
+            "Otwiera okno z gotowym promptem dla zewnętrznego chatbota "
+            "(ChatGPT, Claude).\n"
+            "Wklej swój pomysł fabularny, a AI wygeneruje profesjonalną "
+            "Księgę Świata sformatowaną w Markdown – do wklejenia do pola "
+            "„Księga Świata” powyżej."
+        )
+
+
         lbl_pamiec = wx.StaticText(self, label="🧠 Pamięć Długotrwała (Streszczenie):")
 
         # ── [TAB 8] Pamięć Długotrwała ────────────────────────────────
@@ -470,11 +539,17 @@ class RezyserPanel(wx.Panel):
         )
         sizer.Add(self._btn_zapisz_ksiege, flag=wx.ALL, border=BORDER)
         sizer.Add(
+            self._btn_prompt_architekta,
+            flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            border=BORDER,
+        )
+        sizer.Add(
             wx.StaticLine(self),
             flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
             border=BORDER,
         )
         sizer.Add(lbl_pamiec, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
+
         sizer.Add(
             self._txt_pamiec,
             proportion=1,
@@ -814,8 +889,10 @@ class RezyserPanel(wx.Panel):
         self._btn_clear_current.Bind(wx.EVT_BUTTON, self._on_clear_current)
         self._btn_hard_reset.Bind(wx.EVT_BUTTON,    self._on_hard_reset)
         self._btn_zapisz_ksiege.Bind(wx.EVT_BUTTON, self._on_zapisz_ksiege)
+        self._btn_prompt_architekta.Bind(wx.EVT_BUTTON, self._on_prompt_architekta)
         self._btn_zapisz_pamiec.Bind(wx.EVT_BUTTON, self._on_zapisz_pamiec)
         self._btn_wyslij.Bind(wx.EVT_BUTTON,        self._on_wyslij)
+
 
         # Zmiany w polu nazwy i polu streszczenia wpływają na stan przycisków
         self._txt_file_name.Bind(wx.EVT_TEXT,         self._on_file_name_change)
@@ -1175,8 +1252,117 @@ class RezyserPanel(wx.Panel):
             )
 
     # ------------------------------------------------------------------
+    # Prompt Architekta – dialog z gotowym promptem do skopiowania
+    # ------------------------------------------------------------------
+    def _on_prompt_architekta(self, _event: wx.Event) -> None:
+        """Otwiera okno dialogowe z treścią ``PROMPT_ARCHITEKTA`` (A11y-friendly).
+
+        Wzorzec dialogu identyczny z :class:`gui_manager_regul.WynikKreatoraDialog`
+        – TextCtrl READONLY + przycisk "Skopiuj do schowka" + opis działania.
+        Dzięki temu użytkownik (zwłaszcza z NVDA) może wybrać tekst strzałkami,
+        skopiować Ctrl+A/Ctrl+C lub przyciskiem — bez wracania do instrukcji.
+        """
+        dlg = wx.Dialog(
+            self,
+            title="Prompt Architekta – wklej do zewnętrznego chatbota",
+            size=(720, 560),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        # Nagłówek: krótkie wyjaśnienie po co i jak.
+        lbl_head = wx.TextCtrl(
+            dlg,
+            value=(
+                "Ten gotowy prompt wklej do zewnętrznego chatbota "
+                "(np. darmowego ChatGPT albo Claude) i zastąp tekst "
+                "„[TUTAJ WPISZ SWÓJ POMYSŁ]” własnym zalążkiem fabuły.\n\n"
+                "AI zwróci ci gotową Księgę Świata w bloku kodu Markdown — "
+                "skopiuj jej zawartość (bez otaczających znaczników ```) "
+                "i wklej do pola „Księga Świata” powyżej, a następnie "
+                "kliknij „Zapisz Księgę na stałe”."
+            ),
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
+            name="Instrukcja korzystania z Promptu Architekta",
+        )
+        lbl_head.SetBackgroundColour(dlg.GetBackgroundColour())
+        lbl_head.SetMinSize((-1, 110))
+        sizer.Add(lbl_head, flag=wx.ALL | wx.EXPAND, border=12)
+
+        # Główne pole – Prompt Architekta (READONLY, rozciąga się na całe okno).
+        lbl_prompt = wx.StaticText(dlg, label="Prompt do skopiowania (Ctrl+A, Ctrl+C):")
+        f = lbl_prompt.GetFont()
+        f.MakeBold()
+        lbl_prompt.SetFont(f)
+        sizer.Add(lbl_prompt, flag=wx.LEFT | wx.RIGHT, border=12)
+
+        txt_prompt = wx.TextCtrl(
+            dlg,
+            value=self.PROMPT_ARCHITEKTA,
+            style=wx.TE_MULTILINE | wx.TE_READONLY,
+            name="Pełna treść Promptu Architekta",
+        )
+        sizer.Add(
+            txt_prompt, proportion=1,
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=12,
+        )
+
+        # Rząd przycisków: „Skopiuj do schowka” + „Zamknij” (IDENTYCZNIE
+        # jak w WynikKreatoraDialog w Managerze Reguł).
+        btn_row = wx.BoxSizer(wx.HORIZONTAL)
+
+        btn_kopiuj = wx.Button(
+            dlg, label="📋  Skopiuj prompt do schowka",
+            name="Przycisk Skopiuj Prompt Architekta do schowka",
+        )
+
+        def _kopiuj(_e: wx.Event) -> None:
+            dane = wx.TextDataObject(self.PROMPT_ARCHITEKTA)
+            if wx.TheClipboard.Open():
+                try:
+                    wx.TheClipboard.SetData(dane)
+                    wx.TheClipboard.Flush()
+                    wx.MessageBox(
+                        "Prompt Architekta został skopiowany do schowka.\n"
+                        "Wklej go (Ctrl+V) do ChatGPT lub Claude i zastąp "
+                        "[TUTAJ WPISZ SWÓJ POMYSŁ] własnym pomysłem fabularnym.",
+                        "Skopiowano",
+                        wx.OK | wx.ICON_INFORMATION,
+                        dlg,
+                    )
+                finally:
+                    wx.TheClipboard.Close()
+            else:
+                wx.MessageBox(
+                    "Nie udało się otworzyć schowka systemowego.\n"
+                    "Skopiuj prompt ręcznie: kliknij w pole powyżej, "
+                    "zaznacz wszystko (Ctrl+A) i skopiuj (Ctrl+C).",
+                    "Schowek niedostępny",
+                    wx.OK | wx.ICON_WARNING,
+                    dlg,
+                )
+
+        dlg.Bind(wx.EVT_BUTTON, _kopiuj, btn_kopiuj)
+        btn_row.Add(btn_kopiuj, flag=wx.RIGHT, border=8)
+
+        btn_close = wx.Button(dlg, wx.ID_CLOSE, label="Zamknij")
+        dlg.Bind(wx.EVT_BUTTON, lambda _e: dlg.EndModal(wx.ID_CLOSE), btn_close)
+        dlg.SetEscapeId(wx.ID_CLOSE)
+        btn_row.Add(btn_close)
+
+        sizer.Add(btn_row, flag=wx.ALL | wx.ALIGN_RIGHT, border=12)
+
+        dlg.SetSizer(sizer)
+        # Fokus startowy: główne pole z promptem (NVDA od razu zacznie
+        # czytać treść zamiast ogłaszać tytuł przycisku).
+        txt_prompt.SetFocus()
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    # ------------------------------------------------------------------
     # Zapis Streszczenia (Pamięci Długotrwałej)
     # ------------------------------------------------------------------
+
     def _on_zapisz_pamiec(self, _event: wx.Event) -> None:
         """Zapisuje streszczenie do pliku skrypty/<nazwa>_streszczenie.txt.
 

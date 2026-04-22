@@ -8,7 +8,8 @@ Zestaw przenośnych narzędzi napędzanych przez AI do automatycznego pisania, p
 
 ## 🚀 Główne Moduły
 
-Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota) oraz narzędzia do budowania struktury pliku (Architekt Audiobooków). Wszystkie trzy narzędzia dostępne są w jednym oknie programu i przełączane przyciskami na pasku narzędzi lub skrótami klawiaturowymi (Ctrl+1 / Ctrl+2 / Ctrl+3).
+Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków) oraz — od wersji 13.0 — Managera Reguł, w którym lingwista bez znajomości Pythona może dodać nowy akcent, szyfr albo tryb twórczy wprost z GUI. Wszystkie cztery narzędzia dostępne są w jednym oknie programu i przełączane przyciskami na pasku narzędzi lub skrótami klawiaturowymi (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4).
+
 
 ### 1. Reżyseria (Kreator AI)
 * **Wieloprojektowa Księga Świata:** System automatycznie ładuje w tle dedykowane zasady uniwersum (`.md`) na podstawie aktywnego pliku źródłowego, zapewniając pełną izolację (zero-click context loading).
@@ -25,9 +26,15 @@ Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń 
 * Przetwarza surowe pliki `.txt` lub `.docx` pod kątem nawigacji klawiszowej dla NVDA i systemów takich jak ElevenLabs.
 * Automatycznie konwertuje słowa kluczowe (Akt, Rozdział, Prolog) na nagłówki "Heading 1" w dokumencie Word, a także czyści zbędne tagi HTML i znaczniki Markdown.
 
+### 4. Manager Reguł (nowość w 13.0, Ctrl+4)
+* **Eksplorator słowników bez Pythona:** Wizualne drzewo wszystkich plików YAML w folderze [`dictionaries/`](dictionaries/README.md) — akcenty fonetyczne, szyfry i tryby twórcze Reżysera. Lingwista lub tłumacz może przeglądać, duplikować, edytować i usuwać reguły wprost z GUI, bez otwierania Eksploratora plików i bez znajomości języka Python.
+* **Kreator nowych reguł:** Formularz z wyborem typu (akcent, szyfr czystych zamian, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny) tworzący gotowy szablon YAML, a dla trudniejszych przypadków generujący sformatowany prompt do wklejenia w ChatGPT / Claude.
+* **Refaktor 13.0 — reguły w YAML-ach:** Wszystkie akcenty, szyfry i tryby pracy Reżysera, które do wersji 12.0 żyły jako „zaszyte" stałe w kodzie Pythona, zostały przeniesione do deklaratywnych plików `.yaml` wczytywanych dynamicznie przy starcie aplikacji. Każdy, kto potrafi obsłużyć Notatnik, może dostroić akcent (np. zamienić `sz → sh` na `sz → sch`), dodać nowy język, a nawet zmienić brzmienie prompta systemowego dla AI — bez kompilowania kodu. Pełna dokumentacja formatu: **[`dictionaries/README.md`](dictionaries/README.md)**.
+
 ---
 
 ## 🧠 Architektura AI i Użyte Modele
+
 
 Aplikacja inteligentnie rozdziela zadania, optymalizując koszty i szybkość działania API OpenAI:
 * **GPT-4o:** Główny silnik napędzający aplikację. Odpowiada za ciężkie zadania generatywne: reżyserowanie skryptów, pisanie tradycyjnej prozy (Audiobook), generowanie streszczeń oraz zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego.

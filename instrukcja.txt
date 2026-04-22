@@ -2,7 +2,8 @@ Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.0 - Release Can
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
-Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota) oraz narzędzia do budowania struktury pliku (Architekt Audiobooków). Wszystkie trzy narzędzia dostępne są w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi.
+Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków) oraz — od wersji 13.0 — Managera Reguł, w którym bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy (patrz KROK 7b poniżej). Wszystkie cztery narzędzia dostępne są w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+4.
+
 
 
 KROK 1: Pierwsze uruchomienie (Cross-Platform)
@@ -210,7 +211,33 @@ Skrypt czyści również znaczniki Markdown — usuwa hashtagi nagłówków (np.
 - Tarcza ochronna: Skrypt chroni wszystkie tagi HTML. Psuje tylko dialogi i narrację.
 - Działa lokalnie i nic nie kosztuje!
 
+Tryb 3: Szyfrant (NOWOŚĆ w 13.0 — zabawy tekstem, darmowe, lokalne)
+
+Trzeci RadioButton w Poligloci, obok Tłumacza AI i Trybu Reżysera: „Tryb Szyfranta (zabawy tekstem, losowe zacinanie)". Uruchamia sześć lokalnych algorytmów zniekształcających tekst — do harców, zagadek, łamigłówek językowych. Po wybraniu trybu pojawia się rozwijana lista algorytmów, a dla jednego z nich (Szyfru Cezara) dodatkowe pole liczbowe na przesunięcie.
+
+Dostępne algorytmy (zaznacz w menu „Wybierz algorytm zniekształcający"):
+
+- Odwracacz Tekstu (Czytanie wspak z wielką literą) — każde zdanie jest odwracane znak po znaku, z zachowaniem kropki/wykrzyknika/pytajnika na końcu i wielkiej litery na początku. Przed odwróceniem skrypt rozwija popularne skrótowce (m.in., np., tzw., tzn., dr itp.), żeby wynik po odwróceniu nadal miał sens — bez tego „m.in." po odwróceniu zmienia się w absurdalne „.nim".
+
+  Inspiracja: misja z programu „The Traitors. Zdrajcy". Gdy prowadząca bez zapowiedzi pokazała uczestnikom popularną polską piosenkę z bajki — po prostu odtworzoną wstecz — reakcje szły w styl „jaki to język?", „to chyba ormiański", „węgierski albo fiński". Właściwa misja polegała na tym, że jedna drużyna dostawała w lesie tekst piosenki zapisany wspak, miała go zaśpiewać w tej odwróconej formie, druga drużyna to nagrywała, puszczała od końca — i w teorii odzyskiwała oryginalną piosenkę do odgadnięcia. Dokładnie to samo zabawne nieporozumienie fonetyczne generuje nasz Odwracacz, gdy zapuścisz przetworzony plik przez syntezator TTS.
+
+- Typoglikemia (Wymieszany środek słów) — klasyczny efekt psycholingwistyczny: „Nei mozesż perzczytać tkesu w tkerkią kolejonsci likter, jśeli pieszwa i otsanita ltiera są na woscim mijecsu". Skrypt miesza losowo środek każdego słowa dłuższego niż 4 znaki, pierwsza i ostatnia litera zostają nietknięte. Świetne do testu „ile tak naprawdę widzę, a ile domyśla się mój mózg".
+
+- Zepsuty Telefon / Wężowy dialekt — każde „s", „z" lub dwuznak „sz" jest losowo wydłużane w syk długości 4-8 znaków („ssssss", „zzzzzz", „ssssssz"). Inspiracja: Snecko z gry „Slay the Spire". Efekt: tekst brzmi, jakby przeczytał go wąż z wadą wymowy.
+
+- Samogłoskowiec (Wszystko dudni na „O") — każda samogłoska w tekście zamieniana jest na „o", z zachowaniem polskich zmiękczeń. „Dzień dobry" → „Dźoń doboro". Im dłuższy tekst, tym zabawniejszy efekt (a czytnik ekranu czyta to z pełnym przekonaniem).
+
+- Silne Jąkanie / Uszkodzony Robot — dokleja zająknięcia na początku słów: „ko-ko-ko-komputer", „pr-pr-prysznic". Dla krótkich słów (mniej niż 3 znaki) algorytm je pomija. Jeśli druga litera słowa jest spółgłoską, powtarza dwie pierwsze litery (bardziej naturalny efekt); jeśli samogłoską — powtarza tylko pierwszą.
+
+- Szyfr Cezara (przesunięcie alfabetu PL) — klasyczny szyfr podstawieniowy: każda litera jest przesuwana o N pozycji w polskim alfabecie (AĄBCĆ…ZŻŹ, 35 znaków). Wartość przesunięcia wpisujesz w polu liczbowym „Przesunięcie szyfru Cezara (0 = losowe, zakres -35…35)". Jeśli wpiszesz 0 — aplikacja wylosuje przesunięcie w zakresie 1-34 i pokaże je w komunikacie po zakończeniu (żebyś mógł potem odszyfrować). Znaki spoza alfabetu (cyfry, interpunkcja, spacje) zostają bez zmian.
+
+Praktyczne zastosowanie: szyfry zapisują wynik w tym samym formacie co Tryb Reżysera (.html z tagiem lang lub .docx z tagami XML), czyli NVDA odczyta je głosem odpowiedniego języka. Szczególnie Odwracacz i Samogłoskowiec brzmią w syntezatorze znacznie ciekawiej niż gdy czytasz je oczami — bo mózg przy czytaniu wzrokiem automatycznie próbuje „zdekodować" tekst, a TTS czyta go dokładnie tak, jak zapisany.
+
+Wszystkie sześć szyfrów opisano też szerszym, przystępnym językiem w pliku dictionaries/instrukcja.txt w paczce aplikacji — razem z poradami, jak dodać własny szyfr typu „zamiana liter" bez znajomości programowania (np. język gwary szkolnej, mowa-trawa).
+
+
 Detekcja języka
+
 
 Zanim skrypt "zepsuje" tekst, sprawdza, w jakim języku jest napisany. Jeśli wykryje, że to nie jest polski, wyświetli ostrzeżenie. Reguły fonetyczne są skrojone pod polszczyznę — stosowanie ich do obcojęzycznego tekstu dałoby nieprzewidywalne efekty.
 
@@ -292,27 +319,36 @@ KROK 7: Jak pisać Księgę Świata (Prompt Architekta i Mini-kurs Markdown)
 
 Sztuczna inteligencja zasilająca Główne Studio najlepiej rozumie komendy, gdy są sformatowane w języku znaczników Markdown. Jeśli podasz AI w Reżyserze tylko luźny pomysł (np. "dwie siostry w zaświatach"), maszyna spanikuje z braku szczegółów i stworzy banalną, przewidywalną historię, ignorując logikę.
 
-Aby temu zapobiec, użyj zewnętrznego chatbota (np. darmowego ChatGPT lub Claude) jako swojego osobistego Architekta. Skopiuj poniższy prompt, wstaw w niego swój pomysł i pozwól zewnętrznemu AI odwalić czarną robotę — wygenerować gotowy, perfekcyjnie sformatowany kod do wklejenia w panel "Księgi Świata".
+Aby temu zapobiec, użyj zewnętrznego chatbota (np. darmowego ChatGPT lub Claude) jako swojego osobistego Architekta. W wersji 13.0 nie musisz już przepisywać promptu z instrukcji — w panelu Reżysera, tuż pod przyciskiem „Zapisz Księgę na stałe", znajdziesz przycisk „📖 Prompt Architekta dla AI…". Kliknij go, a otworzy się okno dialogowe z gotowym tekstem promptu w polu „tylko do odczytu" oraz przyciskiem „Skopiuj do schowka". NVDA ogłasza całą zawartość od razu po otwarciu okna — wystarczy kliknąć „Skopiuj", wkleić (Ctrl+V) w ChatGPT/Claude i zastąpić fragment „[TUTAJ WPISZ SWÓJ POMYSŁ]" własnym zalążkiem fabuły.
 
-PROMPT ARCHITEKTA (Skopiuj i wklej do zewnętrznego AI):
-"Jesteś wybitnym architektem światów (Worldbuilder) i konsultantem literackim. Mam luźny pomysł na fabułę: [TUTAJ WPISZ SWÓJ POMYSŁ]. Twoim zadaniem jest rozbudowanie tego do profesjonalnej 'Księgi Świata'.
-Dostosuj ton i zasady do mojego pomysłu. Unikaj tanich, baśniowych skrótów i klisz AI.
-ZASADY FORMATOWANIA (KRYTYCZNE):
-Musisz zwrócić odpowiedź w dwóch oddzielnych częściach:
-CZĘŚĆ 1: KSIĘGA ŚWIATA
-Tę część musisz bezwzględnie zamknąć w JEDNYM bloku kodu Markdown (użyj znaczników ```markdown na początku i ``` na końcu). Wewnątrz bloku kodu zastosuj te reguły:
-1. Rozpocznij od emotki otwartej książki i roboczego tytułu, np. 📖 Księga Świata: [Tytuł].
-2. Używaj pojedynczego hashtagu (#) dla głównych sekcji (np. # Zasady Świata, # Postacie).
-3. Używaj podwójnego hashtagu (##) dla podsekcji.
-4. Używaj myślników (-) do tworzenia czytelnych list.
-5. Używaj podwójnych gwiazdek (**tekst**), by pogrubić absolutne, nienaruszalne zasady (np. **Bohater NIGDY nie kłamie**).
-6. Opisz psychologię postaci, ich największe wady i motywacje. W przypadku postaci obcojęzycznych, dodaj informację o akcencie bezpośrednio przy tagu, np. `[Speaker 1: Imię] - sepleni i ma akcent francuski`. **Wskazówka techniczna:** Użycie słowa kluczowego `akcent` jest bezwzględnie wymagane, ponieważ to na jego podstawie zewnętrzny skrypt aplikacji automatycznie wykrywa i nakłada poprawne reguły fonetyczne na dialogi danej postaci.
-CZĘŚĆ 2: REKOMENDACJA TRYBU
-Tę część umieść POZA blokiem kodu, jako zwykły tekst pod spodem. Doradź mi, który z trybów mojej aplikacji będzie najlepszy do realizacji tego pomysłu: 🎬 Tryb Surowego Skryptu (słuchowiska, SFX, fonetyka), czy 📖 Tryb Tradycyjnego Audiobooka (klasyczna proza literacka)."
+Dlaczego tak, a nie przez kopiowanie z instrukcji? Dialog w GUI ma kluczową zaletę dostępnościową: jest natywny i czytany bez zakłóceń przez czytnik ekranu, nie wymaga przełączania się do edytora tekstu (gdzie polskie „ogonki" i cudzysłowy bywają źle kopiowane) i działa identycznie na każdym systemie operacyjnym. Ten sam wzorzec — dialog z promptem do skopiowania — używany jest też w Managerze Reguł (patrz KROK 7b poniżej).
 
-Po wygenerowaniu tekstu przez chatbota, skopiuj zawartość bloku kodu (samą Księgę Świata, bez znaczników ```) i wklej do bocznego panelu Księgi Świata w Reżyserze, a następnie kliknij "Zapisz Księgę na stałe".
+Jak AI odpowiada: W odpowiedzi otrzymasz tekst w dwóch częściach. Pierwsza to Księga Świata zamknięta w bloku kodu Markdown (znaczniki ```markdown … ```). Skopiuj WYŁĄCZNIE zawartość bloku kodu (bez samych znaczników ```) i wklej do pola „Księga Świata" w Reżyserze, a następnie kliknij „Zapisz Księgę na stałe". Druga część to rekomendacja, który z trybów twórczych (Skrypt czy Audiobook) najlepiej pasuje do Twojego pomysłu — potraktuj ją jako podpowiedź przy zaznaczaniu trybu w RadioBoxie.
+
+Mini-kurs Markdown w Księdze: pojedynczy hashtag (#) to główna sekcja (np. „# Postacie"), podwójny hashtag (##) to podsekcja, myślniki (-) tworzą listy, a podwójne gwiazdki (**tekst**) pogrubiają absolutne, nienaruszalne zasady (np. „**Bohater NIGDY nie kłamie**"). Dla postaci obcojęzycznej dodawaj tag z akcentem, np. „[Speaker 1: Marek] - ma akcent francuski". Słowo kluczowe „akcent" jest KONIECZNE — silnik aplikacji wykrywa je automatycznie i nakłada poprawne reguły fonetyczne na dialogi danej postaci.
 
 Wskazówka: Pamiętaj, by co jakiś czas (wraz z rozbudową fabuły o nowe miejsca czy ważnych bohaterów) aktualizować swoją Księgę Świata. Możesz to robić ręcznie lub z pomocą zewnętrznego chatbota. Im bogatszy fundament, tym lepsze efekty w Reżyserii!
+
+
+KROK 7b: Manager Reguł (Ctrl+4) — słowniki dla lingwistów bez Pythona
+
+Wersja 13.0 wprowadza czwarte narzędzie na pasku: Manager Reguł. Otwierasz go klawiszem Ctrl+4 lub z menu Narzędzia. To wizualny eksplorator folderu dictionaries/, w którym aplikacja trzyma wszystkie reguły fonetyczne (akcenty), szyfry i tryby Reżysera w plikach YAML (format czytelny dla człowieka, prostszy niż JSON).
+
+Po co komu YAML? Do wersji 12.0 wszystkie akcenty, tryby twórcze i filtry były „zaszyte" w kodzie Pythona. Dodanie nowego akcentu wymagało programisty. W wersji 13.0 wszystko to wyjechało do plików .yaml w folderze dictionaries/ — każdy, kto potrafi otworzyć Notatnik, może dostroić istniejący akcent („zamień sz na sh na sch") lub dodać zupełnie nowy (szwedzki, duński, rosyjski dialekt).
+
+Co znajdziesz w Managerze Reguł:
+- Drzewo plików — pełna lista wszystkich plików YAML w dictionaries/ z podziałem na języki bazowe (na razie tylko polski: pl/) i kategorie (akcenty/, szyfry/, rezyser/). Nawigacja strzałkami jak w Eksploratorze plików Windows, pełne wsparcie NVDA.
+- Przycisk „Otwórz w edytorze tekstu" — otwiera zaznaczony plik w domyślnym Notatniku systemu. Edytujesz, zapisujesz, klikasz „Odśwież drzewo" i gotowe.
+- Przycisk „Duplikuj wybrany plik" — najszybsza droga do nowego akcentu: bierzesz istniejący plik (np. finski.yaml), podajesz nową nazwę (np. szwedzki), Manager tworzy kopię z komentarzem „zmień pola etykieta i opis" i otwiera ją w edytorze.
+- Przycisk „Nowy plik reguł…" — kreator z wyborem typu (akcent, szyfr, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny). Dla zwykłych przypadków (akcent, szyfr typu „zamiana liter") kreator tworzy gotowy do edycji szablon YAML. Dla przypadków wymagających programisty (nowy język bazowy, algorytm typu „mieszanie środka słów") kreator generuje prompt dla chatbota AI — wklejasz do ChatGPT, dostajesz gotowy plik YAML, zapisujesz w dictionaries/ i gotowe.
+
+Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć na Stronę główną, kliknij „🔄 Odśwież akcenty Reżysera z YAML" i uruchom aplikację ponownie. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.
+
+Gdzie szukać dalszej dokumentacji folderu dictionaries/:
+- Plik `dictionaries/instrukcja.txt` (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.
+- Plik `dictionaries/README.md` (dostępny tylko przy klonowaniu repozytorium z GitHuba — paczki wydaniowe filtrują pliki .md) — szczegółowa dokumentacja techniczna formatu YAML z przykładami, listami pól, zasadami pipeline'u, regex-ami. Ten dokument adresowany jest do lingwistów znających podstawy programowania oraz do deweloperów.
+
+
 
 
 Ważne wskazówki dla użytkowników czytników ekranu (NVDA)
@@ -327,7 +363,8 @@ Po kliknięciu przycisków takich jak "Wyślij do AI" lub "Uruchom Przetwarzanie
 
 3. Nawigacja między narzędziami
 
-Poruszanie się między narzędziami (Reżyser, Poliglota, Konwerter) odbywa się w jednym oknie programu za pomocą trzech przycisków na pasku narzędzi lub przez menu Narzędzia (Alt, a następnie N). Dostępne skróty klawiaturowe: Ctrl+1 (Reżyser), Ctrl+2 (Poliglota), Ctrl+3 (Konwerter), Ctrl+0 (Strona główna). Po przełączeniu narzędzia fokus automatycznie ląduje na opisie nowego modułu — NVDA od razu zaczyna czytać nowy widok.
+Poruszanie się między narzędziami (Reżyser, Poliglota, Konwerter, Manager Reguł) odbywa się w jednym oknie programu za pomocą czterech przycisków na pasku narzędzi lub przez menu Narzędzia (Alt, a następnie N). Dostępne skróty klawiaturowe: Ctrl+0 (Strona główna), Ctrl+1 (Reżyser), Ctrl+2 (Poliglota), Ctrl+3 (Konwerter), Ctrl+4 (Manager Reguł — nowość w 13.0). Po przełączeniu narzędzia fokus automatycznie ląduje na opisie nowego modułu — NVDA od razu zaczyna czytać nowy widok.
+
 
 4. Kolejność tabulatora i nazwy widżetów
 
@@ -448,6 +485,13 @@ Funkcje zachowane bez zmian z wersji 11.0
 
 Nowe funkcje i zmiany w wersji 13.0 — Release Candidate
 
+- Refaktor na YAML — akcenty, szyfry i tryby Reżysera w plikach tekstowych (ZMIANA ARCHITEKTONICZNA, największa od czasu migracji na wxPython). Do wersji 12.0 wszystkie reguły fonetyczne (akcenty) i tryby twórcze Reżysera (Burza, Skrypt, Audiobook, postprodukcja tytułów) były „zaszyte" w kodzie Pythona jako stałe, funkcje i promptowe sztywne stringi, a całej kategorii szyfrów/zabaw tekstowych po prostu nie było — są wprowadzane razem z refaktorem 13.0. W wersji 13.0 wszystko to leży w plikach .yaml w nowym folderze `dictionaries/` — silnik (`core_poliglota.py`, `core_rezyser.py`, `przepisy_rezysera.py`) ładuje je dynamicznie przy starcie. Efekt praktyczny: dodanie nowego akcentu, nowego szyfru bazującego na zamianach albo zmiana brzmienia prompta systemowego dla któregoś trybu Reżysera nie wymaga znajomości Pythona — wystarczy edytor tekstu. Krótki opis dla end-userów znajduje się w `dictionaries/instrukcja.txt` (dołączona do paczek z Releases); pełna dokumentacja techniczna formatu — w `dictionaries/README.md` (tylko w repozytorium Git, bo paczki wydaniowe filtrują pliki .md).
+
+
+- Manager Reguł — czwarte narzędzie na pasku (NOWOŚĆ, Ctrl+4). Wizualny eksplorator folderu `dictionaries/` z drzewem plików YAML (natywne wx.TreeCtrl, pełne wsparcie NVDA) i zestawem akcji: „Otwórz w edytorze tekstu", „Nowy plik reguł…" (kreator z wyborem typu: akcent, szyfr, tryb, nowy język), „Duplikuj wybrany plik", „Usuń plik", „Odśwież drzewo". Dla przypadków wykraczających poza zwykłe zamiany (nowy język bazowy, szyfr algorytmiczny) kreator generuje gotowy do skopiowania prompt dla chatbota AI — pełne wyjaśnienie w nowym KROKU 7b.
+
+- Prompt Architekta wprost w panelu Reżysera (ZMIANA A11y). Dotychczas prompt dla zewnętrznego chatbota do wygenerowania Księgi Świata żył tylko w tej instrukcji — użytkownik musiał go skopiować z pliku tekstowego (co na czytnikach ekranu bywa problematyczne przy polskich znakach i cudzysłowach). W wersji 13.0 panel Reżysera ma nowy przycisk „📖 Prompt Architekta dla AI…" (tuż pod „Zapisz Księgę na stałe"), który otwiera natywne okno dialogowe z pełnym tekstem promptu w polu READONLY oraz osobnym przyciskiem „Skopiuj do schowka". Wzorzec A11y jest identyczny jak dla dialogu wyników kreatora w Managerze Reguł — NVDA od razu czyta całą zawartość okna bez dodatkowej konfiguracji. Pełny opis w zaktualizowanym KROKU 7.
+
 - Akcent rosyjski w Poliglocie (NOWOŚĆ — ósmy język europejski w menu Trybu Reżysera). Do listy rozwijanej „Tryb Reżysera / Akcenty" dołącza opcja „Rosyjski (np. Milena / Irina / Yuri / Pavel)". W przeciwieństwie do pozostałych akcentów, które tylko „psują" polski tekst na poziomie liter łacińskich (np. „sz" → „sh", „w" → „v"), akcent rosyjski wykonuje pełną transliterację polskiego tekstu na cyrylicę — dzięki temu rosyjskojęzyczne głosy syntezatora TTS (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") mają po czym „wymawiać" słowa. Wzbogacono mapowanie o jotowane samogłoski („ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю"), polskie zmiękczenia si/ci/ni/zi + samogłoska (np. „ciocia" → „цёця"), a także rosyjskie dwuznaki specjalne: „ść" / „szcz" → „щ", „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х".
 
   Uwaga fonetyczna: Akcent nie jest rosyjską transliteracją akademicką (ISO 9, GOST, BGN/PCGN). Celem jest wyłącznie brzmieniowe upodobnienie polskiego tekstu do rosyjskiego — dla potrzeb syntezy mowy, nie do poważnej transliteracji nazw własnych. Dla tej drugiej pracy używaj dedykowanych narzędzi językoznawczych.
@@ -456,13 +500,19 @@ Nowe funkcje i zmiany w wersji 13.0 — Release Candidate
 
 - Uwaga o „ź": W rosyjskim nie ma dokładnego odpowiednika polskiego „ź", więc ten znak normalizujemy do „ж" — podobnie jak „ż". Część dialektów północnorosyjskich i białoruski wymawia „ź" bliżej „зь", ale z perspektywy syntezatora mowy różnica jest pomijalna. Gdyby lingwista uznał, że preferuje „зь", może samodzielnie podmienić tę jedną regułę w pliku `dictionaries/pl/akcenty/rosyjski.yaml` — silnik ładuje YAML-e dynamicznie, więc nie wymaga to przekompilowania aplikacji.
 
+- Rozszerzony pasek nawigacji i menu Narzędzia (ZMIANA). Pasek ma teraz czwarty przycisk — Manager Reguł — a menu „Narzędzia" obsługuje nowy skrót Ctrl+4. Dotychczasowe skróty (Ctrl+0 Strona główna, Ctrl+1 Reżyser, Ctrl+2 Poliglota, Ctrl+3 Konwerter) pozostają bez zmian.
+
+- Przycisk „Odśwież akcenty Reżysera z YAML" na Stronie głównej (NOWOŚĆ). Po dodaniu nowego akcentu przez Manager Reguł (lub ręcznej edycji pliku YAML) kliknięcie tego przycisku przeładuje wrappery akcent_* w silniku Poligloty i Reżysera, tak by nowy akcent był widoczny w menu oraz w automatycznym wykrywaniu akcentów na podstawie tagów postaci w Księdze Świata. Poliglota wykrywa YAML-e automatycznie (bez odświeżania), ale Reżyser potrzebuje regeneracji wrapperów — zwykle po odświeżeniu trzeba jeszcze uruchomić aplikację ponownie.
+
 Funkcje zachowane bez zmian z wersji 12.0
 
 - Natywne GUI desktopowe oparte o wxPython (bez przeglądarki, bez serwera lokalnego).
-- Pasek nawigacji z klawiszami skrótów Ctrl+0/1/2/3.
+- Pasek nawigacji z klawiszami skrótów (teraz Ctrl+0/1/2/3/4 — dodano Ctrl+4 dla Managera Reguł).
 - Pełna optymalizacja pod czytniki ekranu (NVDA, VoiceOver) — polskie nazwy dostępnościowe, poprawna kolejność tabulatora.
 - Ochrona trybu twórczego przed przypadkową zmianą w trakcie pracy.
 - Twardy Reset projektu jednym kliknięciem w Reżyserze.
 - Automatyczne wczytywanie trybu twórczego z pliku metadanych projektu.
 - Wszystkie akcenty z poprzednich wersji (Angielski, Francuski, Niemiecki, Hiszpański, Włoski, Fiński, Islandzki) oraz Naprawiacz Tagów.
 - Pełne funkcje AI: Burza Mózgów, Skrypt, Audiobook, Akumulator Fabuły, Nieskończona Pamięć, Nadawanie Tytułów.
+
+
