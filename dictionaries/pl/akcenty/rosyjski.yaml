@@ -19,7 +19,7 @@ opis: |
     - polskie zmiękczenia si/ci/ni/zi + samogłoska → rosyjskie jotowane
         („siano" → „сяно", „nie" → „не", „ciocia" → „цёця", …);
     - „ń", „ś", „ć" bez samogłoski po → litera + miękki znak „ь";
-    - nosowe „ą" → „он", „ę" → „ен";
+    - nosowe „ą" → „он", „ę" → „эн";
     - „ź" → „ж" (niektóre dialekty normalizują do „зь"; z perspektywy
         syntezatora mowy różnica jest pomijalna, dlatego zostajemy przy
         wariancie prostszym, identycznym z „ż");
@@ -136,8 +136,8 @@ zamiany:
   # --- 5. Polskie znaki diakrytyczne (jednoliterowe) ---
   - { wzor: "ą",    zamiana: "он" }
   - { wzor: "Ą",    zamiana: "Он" }
-  - { wzor: "ę",    zamiana: "ен" }
-  - { wzor: "Ę",    zamiana: "Ен" }
+  - { wzor: "ę",    zamiana: "эн" }
+  - { wzor: "Ę",    zamiana: "Эн" }
   - { wzor: "ł",    zamiana: "л"  }
   - { wzor: "Ł",    zamiana: "Л"  }
   - { wzor: "ó",    zamiana: "у"  }
@@ -162,8 +162,8 @@ zamiany:
   - { wzor: "C",    zamiana: "Ц"  }
   - { wzor: "d",    zamiana: "д"  }
   - { wzor: "D",    zamiana: "Д"  }
-  - { wzor: "e",    zamiana: "е"  }
-  - { wzor: "E",    zamiana: "Е"  }
+  - { wzor: "e",    zamiana: "э"  }
+  - { wzor: "E",    zamiana: "Э"  }
   - { wzor: "f",    zamiana: "ф"  }
   - { wzor: "F",    zamiana: "Ф"  }
   - { wzor: "g",    zamiana: "г"  }
