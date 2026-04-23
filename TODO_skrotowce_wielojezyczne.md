@@ -194,31 +194,38 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
    │   ├── angielski.yaml          #   (dla <kod>=fi: pl/en/ru/... ALE NIE fi)
    │   ├── polski.yaml
    │   └── ...
-   └── szyfry/                     # te same 6 algorytmów co dictionaries/pl/szyfry/
-       ├── cezar.yaml
-       ├── jakanie.yaml
-       ├── odwracanie.yaml         # <- tutaj rozwinięcia skrótowców z notebooka
-       ├── samogloskowiec.yaml
-       ├── typoglikemia.yaml
-       └── waz.yaml
+   ├── szyfry/                     # te same 6 algorytmów co dictionaries/pl/szyfry/
+   │   ├── cezar.yaml
+   │   ├── jakanie.yaml
+   │   ├── odwracanie.yaml         # <- tutaj rozwinięcia skrótowców z notebooka
+   │   ├── samogloskowiec.yaml
+   │   ├── typoglikemia.yaml
+   │   └── waz.yaml
+   └── gui/                        # tłumaczenia UI (dodawane w etapie 2 i 3)
+       ├── ui.yaml                 #   etykiety przycisków, menu, tooltipów
+       └── dokumentacja/           #   przetłumaczona instrukcja / readme
    ```
    Bez `podstawy.yaml` silnik nie wykryje języka (autodetekcja w
-   `core_poliglota.py::dostepne_jezyki_bazowe`). Zakończ etap
+   `core_poliglota.py::dostepne_jezyki_bazowe`). Podfolder `gui/` w etapie 1
+   może być jeszcze pusty — wypełniamy go w kolejnych etapach. Zakończ etap
    **smoke testem** z sekcji 6 tego pliku — puść wybrane zdania przez
    `_algo_odwracanie` i zweryfikuj, czy wynik pokrywa się z kolumną
    „oczekiwany wynik silnika".
 
-2. **Tłumaczenie interfejsu.** Dodaj `i18n/<kod>/ui.yaml` (etykiety
-   przycisków, nagłówki paneli, komunikaty walidacji) — ten sam schemat
-   kluczy co `i18n/pl/ui.yaml`, tylko przetłumaczone wartości.
-   Parametry dynamiczne (`{nazwa_projektu}`, `{n}`, `{procent}`, …)
-   zostają bez zmian — patrz `.clinerules` sekcja „Struktura YAML dla
-   tłumaczeń UI".
+2. **Tłumaczenie interfejsu.** Dodaj `dictionaries/<kod>/gui/ui.yaml`
+   (etykiety przycisków, nagłówki paneli, komunikaty walidacji) — ten sam
+   schemat kluczy co `dictionaries/pl/gui/ui.yaml`, tylko przetłumaczone
+   wartości. Tłumaczenia UI mieszkają obok reszty warstwy językowej
+   (`akcenty/`, `szyfry/`, `rezyser/`), dzięki czemu dodanie nowego języka
+   to jeden folder `dictionaries/<kod>/` — nie dwa. Parametry dynamiczne
+   (`{numer_rozdzialu}`, `{nazwa_pliku}`, `{liczba_znakow}`, …) zostają
+   bez zmian — patrz `.clinerules` sekcja „Struktura YAML dla tłumaczeń UI".
 
 3. **Tłumaczenie dokumentacji/instrukcji.** Uruchom skrypt
    autotłumaczący (`tlumacz_ai.py` lub dedykowany batch) — ma
    **zamrozić** parametry `{…}` przed wysyłką do LLM i scalić je
-   z odpowiedzią po tłumaczeniu. Wynik trafia do `i18n/<kod>/`.
+   z odpowiedzią po tłumaczeniu. Wynik trafia do `dictionaries/<kod>/gui/`
+   (obok `ui.yaml`).
 
 4. **Odznaczenie języka w tym pliku.** Przekreśl pozycje w sekcjach
    3.1 / 3.2 oraz odhacz odpowiednie zdania smoketestowe w sekcji 6.
@@ -237,6 +244,13 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 - **Autodetekcja.** Silnik wykryje nowy folder `dictionaries/<kod>/`
   automatycznie przez `dostepne_jezyki_bazowe()` — nie trzeba ręcznie
   dopisywać niczego do kodu Pythona.
+- **Manager Reguł — opcjonalne rozszerzenie.** `gui_manager_regul.py` już dziś
+  skanuje `dictionaries/*/` i pokazuje trzy kategorie (`akcenty/`, `szyfry/`,
+  `rezyser/`) w drzewie plików. Dodanie czwartej kategorii `gui/` to czysto
+  kosmetyczna zmiana (stała `FOLDER_GUI`, wpis w `_ETYKIETA_KATEGORII`,
+  rozszerzenie jednej krotki w pętli) — może wejść w dowolnym releasie 13.x,
+  nie blokuje pierwszego wydania z tłumaczonym interfejsem. Patrz
+  `.clinerules` sekcja „Integracja z Managerem Reguł".
 - **Szybki sprawdzian w GUI.** Po zamknięciu etapów 1 i 2 odpal
   `python main.py`, wejdź w Poliglota → Tryb Szyfranta → wybierz nowy
   język bazowy. Odwracacz powinien rozwinąć skrótowce, kod ISO w pliku

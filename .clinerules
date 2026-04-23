@@ -43,8 +43,8 @@
    - `szyfry/` — te same **6 algorytmów** co w `dictionaries/pl/szyfry/` (`cezar.yaml`, `jakanie.yaml`, `odwracanie.yaml` z rozwinięciami skrótowców, `samogloskowiec.yaml`, `typoglikemia.yaml`, `waz.yaml`),
    - `akcenty/` — **wszystkie akcenty poza natywnym** (patrz reguła niżej).
    Zakończ **smoke testem** ze zdaniami z sekcji 6 pliku `TODO_skrotowce_wielojezyczne.md` (silnik wykrywa język, szyfry rozwijają skrótowce zgodnie z oczekiwaniami, kod ISO w pliku wynikowym jest właściwy).
-2. **Tłumaczenie interfejsu** — etykiety przycisków, nagłówki paneli, komunikaty walidacji ładowane z `i18n/<kod>/ui.yaml`.
-3. **Tłumaczenie dokumentacji/instrukcji** — skrypt autotłumaczący z zachowaniem parametrów dynamicznych (patrz niżej).
+2. **Tłumaczenie interfejsu** — etykiety przycisków, nagłówki paneli, komunikaty walidacji ładowane z `dictionaries/<kod>/gui/ui.yaml` (czwarty podfolder obok `akcenty/`, `szyfry/`, `rezyser/`).
+3. **Tłumaczenie dokumentacji/instrukcji** — skrypt autotłumaczący z zachowaniem parametrów dynamicznych (patrz niżej). Wynik trafia do `dictionaries/<kod>/gui/` (spójnie z etykietami).
 4. **Odznaczenie języka** w `TODO_skrotowce_wielojezyczne.md` (pozycja w sekcji 3.x + odhaczenie zdań smoketestowych w sekcji 6).
 5. **Release** jako kolejna wersja 13.x (pierwszy nowy język → 13.1, drugi → 13.2, itd.).
 
@@ -55,7 +55,7 @@
 
 ## Struktura YAML dla tłumaczeń UI (parametry dynamiczne)
 
-- Plik wzorcowy: `i18n/pl/ui.yaml`. Pozostałe języki: `i18n/<kod>/ui.yaml` — ten sam schemat kluczy, tylko przetłumaczone wartości.
+- Plik wzorcowy: `dictionaries/pl/gui/ui.yaml`. Pozostałe języki: `dictionaries/<kod>/gui/ui.yaml` — ten sam schemat kluczy, tylko przetłumaczone wartości. Tłumaczenia interfejsu mieszkają obok reszty warstwy językowej (`podstawy.yaml`, `akcenty/`, `szyfry/`, `rezyser/`), żeby dodanie nowego języka było jednym folderem `dictionaries/<kod>/`.
 - Parametry dynamiczne (nie do tłumaczenia) oznaczamy składnią `{nazwa_parametru}` (Python `str.format`). Podwojone klamry `{{nazwa_parametru}}` stosujemy **tylko wtedy**, gdy ten sam string przechodzi przez dwa kolejne etapy `.format()` (np. szablon dokumentacji → potem znów podmieniany w GUI) i pierwszy etap ma zostawić placeholder w spokoju.
 - **Konwencje nazw parametrów** (zawsze `snake_case`, zgodne z faktycznymi wzorcami z kodu — patrz `grep -nE 'f"[^"]*\{' gui_*.py main.py`):
   - `{nazwa_projektu}` / `{nazwa_pliku}` / `{sciezka_pliku}` — identyfikatory zasobów na dysku,
@@ -85,7 +85,7 @@
   `{nazwa_pliku}`, `{liczba_znakow}`, `{min_przesuniecie}` itd. bez zmiany —
   LLM dostaje do przetłumaczenia wyłącznie tekst otaczający.
 - **Czego NIE tłumaczyć (oprócz `{…}`)** — literały techniczne muszą zostać 1:1, nawet jeśli brzmią jak słowa:
-  - **nazwy plików / katalogów**: `golden_key.env`, `skrypty/`, `dictionaries/`, `runtime/`, `i18n/`, `requirements.txt`, `main.py`, `core_poliglota.py`, itp.,
+  - **nazwy plików / katalogów**: `golden_key.env`, `skrypty/`, `dictionaries/`, `runtime/`, `requirements.txt`, `main.py`, `core_poliglota.py`, itp.,
   - **rozszerzenia**: `.md`, `.yaml`, `.txt`, `.docx`, `.env`, `.mode`,
   - **emoji i znaki statusu**: `🎬 📄 📚 🌍 ✅ ⚠️ 🚨 ℹ️ ✂️ 🎭 🔄 📝` — zachowane dokładnie tam, gdzie są,
   - **nazwy modułów i funkcji**: `OPENAI_API_KEY=`, `wx.MessageBox`, `core_rezyser.py::dostepne_jezyki_bazowe`, itp.,
@@ -124,7 +124,7 @@ krytyczne — tłumacz (człowiek lub LLM) musi wiedzieć, jak je traktować:
    w oryginale (żeby muscle memory użytkownika nie ucierpiała).
 
 3. **Tooltip vs etykieta — dwa osobne klucze i18n**. `SetLabel` i
-   `SetToolTip` mają osobne wpisy w `i18n/<kod>/ui.yaml` (bo często
+   `SetToolTip` mają osobne wpisy w `dictionaries/<kod>/gui/ui.yaml` (bo często
    tooltip jest zdaniem pełnym, a label — krótkim hasłem). Przykład:
    ```yaml
    btn_manager_label:   "📚  &Manager Reguł"
@@ -146,8 +146,28 @@ krytyczne — tłumacz (człowiek lub LLM) musi wiedzieć, jak je traktować:
   1. Parsować wejściowy YAML/TXT.
   2. Wyodrębniać i **zamrażać** parametry dynamiczne (`{…}`) — nie przekazywać ich do LLM.
   3. Scalać przetłumaczony tekst z zachowanymi parametrami.
-  4. Zapisywać wynik do `i18n/<kod>/` lub odpowiedniego katalogu dokumentacji.
+  4. Zapisywać wynik do `dictionaries/<kod>/gui/` (obok `ui.yaml`).
 - Skrypt jest niezależny od silnika Poligloty i może być uruchamiany jednorazowo (batch) przed releasem danej wersji 13.x.
+
+## Integracja z Managerem Reguł (opcjonalna faza 2)
+
+Folder `dictionaries/<kod>/gui/` jest celowo położony obok `akcenty/`,
+`szyfry/` i `rezyser/`, żeby `gui_manager_regul.py` mógł pokazywać
+tłumaczenia UI jako **czwartą kategorię** w drzewie plików YAML. Integracja
+jest trywialna (punkty zmiany w kodzie):
+1. Dopisać `FOLDER_GUI = "gui"` obok `FOLDER_AKCENTY` / `FOLDER_SZYFRY` /
+   `FOLDER_REZYSER`.
+2. Dodać wpis do `_ETYKIETA_KATEGORII` (np. `"Tłumaczenia UI  🌐"`).
+3. Rozszerzyć krotkę w pętli skanującej:
+   `for kat in (FOLDER_AKCENTY, FOLDER_SZYFRY, FOLDER_REZYSER, FOLDER_GUI)`.
+4. W kreatorze nowego języka dopisać tworzenie podfolderu `gui/` obok
+   obecnie tworzonych `akcenty/` i `szyfry/`.
+
+Dzięki temu lingwista tłumaczący interfejs pracuje dokładnie tam, gdzie
+pracuje twórca nowego akcentu — bez otwierania osobnego katalogu.
+Integracja NIE jest blokerem dla pierwszego wydania z tłumaczonym UI
+(faza 1 wystarczy, że czyta pliki z dysku); może wejść w dowolnym
+releasie 13.x, w którym akurat zmieścimy ten podpunkt.
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze usuwaj wszystkie pliki tymczasowe (np. `_output.txt`, pliki testowe py), które utworzyłeś w trakcie zadania. Kiedy ogłaszasz koniec pracy, katalog główny musi być czysty i wolny od Twoich "śladów".
