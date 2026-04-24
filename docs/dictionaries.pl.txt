@@ -34,7 +34,6 @@ w specjalny sposób zwykły tekst). Otwierasz je dowolnym edytorem
 Struktura folderu wygląda tak:
 
     dictionaries/
-    ├── instrukcja.txt   (ten plik)
     └── pl/              folder języka bazowego (polskiego)
         ├── podstawy.yaml              polskie diakrytyki + alfabet
         ├── akcenty/                   8 plików z akcentami

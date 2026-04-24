@@ -1,5 +1,5 @@
 """
-generuj_dokumentacje.py — Generator dokumentacji użytkownika (i18n, Etap 1).
+generuj_dokumentacje.py — Generator dokumentacji użytkownika (i18n).
 
 Czyta szablony z `dictionaries/<kod>/gui/dokumentacja/*.yaml`, podstawia
 placeholdery z `dictionaries/<kod>/gui/ui.yaml` i zapisuje wynik do
@@ -26,9 +26,19 @@ Konwencja nazewnicza plików wynikowych (decyzja 13.1):
 
 Użycie:
   python generuj_dokumentacje.py                # wygeneruj wszystkie języki
-  python generuj_dokumentacje.py --sprawdz      # wygeneruj + smoke test (porównanie
-                                                #    z referencyjnymi instrukcja.txt
-                                                #    dla języka polskiego)
+  python generuj_dokumentacje.py --waliduj      # wygeneruj + twardy check
+                                                #   (exit 1, jeśli jakikolwiek
+                                                #    placeholder NIE został
+                                                #    rozwinięty przez ui.yaml)
+
+Historia trybów weryfikacji:
+  * Etap 1/5 miał tryb `--sprawdz`, który porównywał wygenerowane pliki
+    z historycznymi `instrukcja.txt` i `dictionaries/instrukcja.txt`
+    (tolerancja: 1 linia z wersją, whitespace-only). W Etapie 2/5 oba
+    referencyjne pliki zostały usunięte z repozytorium — `docs/*.txt`
+    stały się jedyną kanoniczną formą. Zastąpiliśmy więc tryb porównawczy
+    trybem `--waliduj`, który sprawdza, co realnie chroni spójność:
+    czy każdy `{placeholder}` w szablonach ma wartość w `ui.yaml`.
 
 Moduł NIE zależy od wxPython — można go wywołać w headlessowym kontekście
 (np. z `buduj_wydanie.py` przed pakowaniem paczki ZIP) bez inicjalizacji GUI.
@@ -36,7 +46,6 @@ Moduł NIE zależy od wxPython — można go wywołać w headlessowym kontekści
 from __future__ import annotations
 
 import argparse
-import difflib
 import re
 import sys
 from pathlib import Path
@@ -174,12 +183,22 @@ def _rozwin_placeholdery(szablon: str, ui_dane: dict[str, Any]) -> tuple[str, li
 # ---------------------------------------------------------------------------
 # Główna funkcja generatora
 # ---------------------------------------------------------------------------
-def generuj(docelowy_katalog: Path = DOCS_DIR, *, cicho: bool = False) -> list[Path]:
+def generuj(
+    docelowy_katalog: Path = DOCS_DIR,
+    *,
+    cicho: bool = False,
+    zbieraj_brakujace: dict[str, list[str]] | None = None,
+) -> list[Path]:
     """Generuje wszystkie pliki ``docs/<id>.<kod>.txt`` z szablonów YAML.
 
     Args:
-        docelowy_katalog: Gdzie zapisać wynikowe pliki .txt (domyślnie ``docs/``).
-        cicho:            Czy pominąć przyjazne komunikaty print (dla testów).
+        docelowy_katalog:   Gdzie zapisać wynikowe pliki .txt (domyślnie ``docs/``).
+        cicho:              Czy pominąć przyjazne komunikaty print (dla testów).
+        zbieraj_brakujace:  Jeśli podasz pusty dict, funkcja wypełni go
+                            mapowaniem ``"<jezyk>/<id_szablonu>"`` →
+                            posortowana lista unikalnych brakujących placeholderów.
+                            Używane przez tryb ``--waliduj`` do zwrócenia
+                            twardego exit code po zakończeniu generacji.
 
     Returns:
         Lista ścieżek wygenerowanych plików.
@@ -204,6 +223,8 @@ def generuj(docelowy_katalog: Path = DOCS_DIR, *, cicho: bool = False) -> list[P
             if brakujace and not cicho:
                 unikalne = sorted(set(brakujace))
                 print(f"⚠️  {jezyk}/{id_szablonu}: brakujące placeholdery w ui.yaml: {unikalne}")
+            if zbieraj_brakujace is not None and brakujace:
+                zbieraj_brakujace[f"{jezyk}/{id_szablonu}"] = sorted(set(brakujace))
 
             sciezka_wyjscia = docelowy_katalog / f"{id_szablonu}.{jezyk}.txt"
             # Piszemy z `newline="\n"` — celowo LF, nie platform-default.
@@ -219,114 +240,47 @@ def generuj(docelowy_katalog: Path = DOCS_DIR, *, cicho: bool = False) -> list[P
 
 
 # ---------------------------------------------------------------------------
-# Smoke test: porównanie ze starymi plikami referencyjnymi (tylko Etap 1!)
+# Walidacja: czy wszystkie placeholdery rozwinięte przez ui.yaml?
 # ---------------------------------------------------------------------------
-def _znormalizuj(tekst: str) -> str:
-    """Normalizuje EOL (CRLF → LF), żeby diff na Windowsie nie wybuchał."""
-    return tekst.replace("\r\n", "\n")
+def waliduj() -> int:
+    """Twardy check spójności szablonów z ``ui.yaml``.
 
+    Generuje pliki tak samo jak ``generuj()``, a następnie sprawdza,
+    czy w którymkolwiek szablonie pozostał niesparowany placeholder
+    ``{klucz.zagniezdzony}``, dla którego nie znaleziono wartości
+    w ``dictionaries/<jezyk>/gui/ui.yaml``.
 
-def sprawdz_zgodnosc_z_referencyjnymi() -> int:
-    """Smoke test Etapu 1: porównanie z dzisiejszym instrukcja.txt.
-
-    Oczekiwany rezultat:
-      * `docs/dictionaries.pl.txt` ≡ `dictionaries/instrukcja.txt` (bajt-po-bajcie
-        po normalizacji EOL), bo ten plik nie ma placeholderów.
-      * `docs/manual.pl.txt` różni się od `instrukcja.txt` WYŁĄCZNIE w linii
-        z wersją (po migracji na ui.yaml wartość to "13.1 – Wersja Wydawnicza"
-        zamiast zahardkodowanego "13.0 - Release Candidate"). To jest oczekiwana
-        zmiana — ui.yaml jest od 13.1 źródłem prawdy dla wersji.
+    To jest jedyny mechaniczny kontrakt między szablonami dokumentacji
+    a warstwą i18n. Nie dba o stylistykę ani zawartość merytoryczną
+    (tłumaczenia robi człowiek albo LLM), dba tylko o to, żeby żadna
+    nazwa klucza nie zostawała w wynikowym .txt jako surowy `{coś}`.
 
     Returns:
-        Liczba par, gdzie diff przekracza tolerancję (0 = wszystko OK).
+        0 — wszystkie placeholdery rozwinięte, paczka gotowa do buildu.
+        1 — znaleziono brakujące placeholdery; exit code dla CI / buduj_wydanie.
     """
-    pary = [
-        (DOCS_DIR / "manual.pl.txt",       ROOT / "instrukcja.txt",
-         "Tolerowana różnica: 1 linia z wersją (13.0 → 13.1 po migracji na ui.yaml)."),
-        (DOCS_DIR / "dictionaries.pl.txt", ROOT / "dictionaries" / "instrukcja.txt",
-         "Powinien być identyczny bajt-po-bajcie (brak placeholderów)."),
-    ]
+    brakujace_wedlug_pliku: dict[str, list[str]] = {}
+    generuj(zbieraj_brakujace=brakujace_wedlug_pliku)
 
-    liczba_bledow = 0
-    for wygenerowany, referencyjny, uwaga in pary:
-        print(f"\n── Porównanie: {wygenerowany.name} ↔ {referencyjny.relative_to(ROOT)}")
-        print(f"   {uwaga}")
+    print("\n========== WALIDACJA PLACEHOLDERÓW ==========")
+    if not brakujace_wedlug_pliku:
+        print("✅ Wszystkie {placeholdery} w szablonach mają wartości w ui.yaml.")
+        print("=============================================")
+        return 0
 
-        if not wygenerowany.is_file():
-            print(f"   ❌ Brak wygenerowanego pliku: {wygenerowany}")
-            liczba_bledow += 1
-            continue
-        if not referencyjny.is_file():
-            print(f"   ❌ Brak referencyjnego pliku: {referencyjny}")
-            liczba_bledow += 1
-            continue
-
-        tresc_wyg = _znormalizuj(wygenerowany.read_text(encoding="utf-8"))
-        tresc_ref = _znormalizuj(referencyjny.read_text(encoding="utf-8"))
-
-        if tresc_wyg == tresc_ref:
-            print("   ✅ Pliki identyczne.")
-            continue
-
-        # Policz linie różniące się.
-        # Tolerujemy różnice "whitespace-only" — wynikają z tego, że edytory
-        # często auto-trimują trailing whitespace w pustych liniach
-        # (a referencyjny `instrukcja.txt` miał je zachowane historycznie).
-        # Semantycznie dla czytelnika plik wygląda identycznie — 1:1 puste linie.
-        linie_wyg = tresc_wyg.splitlines()
-        linie_ref = tresc_ref.splitlines()
-
-        # Odrzucamy TRAILING EMPTY LINES przed liczeniem długości — referencyjny
-        # `instrukcja.txt` miał historycznie 2 pustki na końcu pliku, a YAML
-        # block-scalar `|` normalizuje do 1 trailing newline (UNIX best-practice).
-        # Różnica niewidoczna w edytorze, irrelewantna dla usera.
-        while linie_wyg and not linie_wyg[-1].strip():
-            linie_wyg.pop()
-        while linie_ref and not linie_ref[-1].strip():
-            linie_ref.pop()
-        rozniace_istotne = 0
-        rozniace_kosmetyczne = 0
-        for l_wyg, l_ref in zip(linie_wyg, linie_ref):
-            if l_wyg == l_ref:
-                continue
-            if not l_wyg.strip() and not l_ref.strip():
-                rozniace_kosmetyczne += 1
-            else:
-                rozniace_istotne += 1
-        roznica_dlugosci = abs(len(linie_wyg) - len(linie_ref))
-        rozniace = rozniace_istotne  # "istotne" = niepuste wizualnie
-
-        print(
-            f"   Różnic: {rozniace_istotne} istotnych + {rozniace_kosmetyczne} "
-            f"kosmetycznych (trailing whitespace w pustych liniach), "
-            f"{roznica_dlugosci} linii dopisanych/usuniętych."
-        )
-        diff = list(difflib.unified_diff(
-            linie_ref, linie_wyg,
-            fromfile=str(referencyjny.relative_to(ROOT)),
-            tofile=str(wygenerowany.relative_to(ROOT)),
-            lineterm="",
-            n=1,
-        ))
-        for linia in diff[:20]:
-            print("     " + linia)
-        if len(diff) > 20:
-            print(f"     ... (łącznie {len(diff)} linii diff, pokazano pierwsze 20)")
-
-        # Tolerancje:
-        #   * 0 istotnych różnic + 0 linii dopisanych/usuniętych → OK dla każdego pliku
-        #     (kosmetyczne różnice whitespace-only w pustych liniach są akceptowane).
-        #   * manual.pl.txt: dodatkowo DOKŁADNIE 1 istotna różnica (linia z wersją)
-        #     jest akceptowana po migracji na `ui.yaml::app.wersja`.
-        if rozniace_istotne == 0 and roznica_dlugosci == 0:
-            print("   ✅ Różnica mieści się w tolerancji (tylko whitespace w pustych liniach).")
-        elif (wygenerowany.name == "manual.pl.txt"
-              and rozniace_istotne == 1 and roznica_dlugosci == 0):
-            print("   ✅ Różnica mieści się w tolerancji (tylko linia z wersją — oczekiwana po migracji).")
-        else:
-            liczba_bledow += 1
-
-    return liczba_bledow
+    print(f"❌ Znaleziono brakujące placeholdery w {len(brakujace_wedlug_pliku)} "
+          f"szablonie/ach:")
+    for nazwa, brakujace in sorted(brakujace_wedlug_pliku.items()):
+        print(f"  • {nazwa}")
+        for klucz in brakujace:
+            print(f"      - {{{klucz}}}")
+    print("=============================================")
+    print(
+        "Napraw: dodaj brakujące klucze do ui.yaml danego języka ALBO usuń "
+        "nieużywane placeholdery z szablonu. Surowe `{coś}` w docs/*.txt "
+        "wygląda jak błąd, więc build nie przejdzie."
+    )
+    return 1
 
 
 # ---------------------------------------------------------------------------
@@ -334,26 +288,21 @@ def sprawdz_zgodnosc_z_referencyjnymi() -> int:
 # ---------------------------------------------------------------------------
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Generator dokumentacji użytkownika (i18n, Etap 1 wersji 13.x).",
+        description="Generator dokumentacji użytkownika (i18n).",
     )
     parser.add_argument(
-        "--sprawdz",
+        "--waliduj",
         action="store_true",
-        help="Po wygenerowaniu porównaj output z referencyjnymi plikami "
-             "(instrukcja.txt w rooclie i dictionaries/instrukcja.txt).",
+        help="Po wygenerowaniu sprawdź, czy wszystkie {placeholdery} zostały "
+             "rozwinięte przez ui.yaml. Exit 1, gdy cokolwiek zostało jako "
+             "surowe `{klucz}` w wynikowym docs/*.txt.",
     )
     args = parser.parse_args()
 
-    generuj()
+    if args.waliduj:
+        return waliduj()
 
-    if args.sprawdz:
-        print("\n========== SMOKE TEST ==========")
-        bledy = sprawdz_zgodnosc_z_referencyjnymi()
-        print("================================")
-        if bledy:
-            print(f"❌ Smoke test NIE przeszedł: {bledy} par z błędami.")
-            return 1
-        print("✅ Smoke test OK (wszystkie pary mieszczą się w tolerancji).")
+    generuj()
     return 0
 
 
