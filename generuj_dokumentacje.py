@@ -86,6 +86,14 @@ NAZWA_UI = "ui.yaml"
 # - dalej: litery, cyfry, podkreślenia, kropki (dla ścieżek zagnieżdżonych)
 PLACEHOLDER_REGEX = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_.]*)\}")
 
+# Regex akceleratora wxPython: `&` przed dowolną literą Unicode (A-Z, a-z,
+# także polskie Ą/ę/Ł itd.). `[^\W\d_]` w trybie domyślnym Pythona działa
+# w Unicode, więc łapie akceleratory na przetłumaczonych literach w EN/RU/FI.
+# Nie ruszamy `& ` z neutralnych kontekstów typu "Tom & Jerry" — bez litery
+# po `&` regex się nie dopasuje.
+AKCELERATOR_REGEX = re.compile(r"&([^\W\d_])", flags=re.UNICODE)
+
+
 
 # ---------------------------------------------------------------------------
 # Wczytywanie UI i szablonów dokumentacji
@@ -158,8 +166,38 @@ def _pobierz_wartosc(dane: dict[str, Any], klucz: str) -> Any:
     return aktualne
 
 
+def _normalizuj_etykiete(wartosc: str) -> str:
+    """Usuwa z etykiety GUI dekoratory wxPython niepotrzebne w dokumentacji.
+
+    Etykiety w ``ui.yaml`` są zapisane tak, jak wxPython ich oczekuje:
+        * ``&Reżyser``         — `&` przed literą robi z niej akcelerator
+                                 (Alt+R w GUI). W dokumentacji tekstowej
+                                 `&` wygląda jak literówka.
+        * ``Strona główna\tCtrl+0`` — znak tabulatora oddziela etykietę
+                                       menu od skrótu klawiszowego.
+                                       W docs interesuje nas tylko sama
+                                       etykieta; skrót („Ctrl+0") cytujemy
+                                       osobno w tekście opisowym.
+
+    Ta funkcja jest wywoływana TYLKO tutaj — moduł `i18n.py`, używany przez
+    runtime GUI, zachowuje oryginalne stringi z `&`/`\\t` bez zmian,
+    bo wxPython ich potrzebuje.
+    """
+    # 1) Ucinamy skrót klawiszowy. Pierwszy `\t` jest separatorem.
+    if "\t" in wartosc:
+        wartosc = wartosc.split("\t", 1)[0].rstrip()
+    # 2) Usuwamy `&` tylko wtedy, gdy działa jako akcelerator (przed literą).
+    wartosc = AKCELERATOR_REGEX.sub(r"\1", wartosc)
+    return wartosc
+
+
 def _rozwin_placeholdery(szablon: str, ui_dane: dict[str, Any]) -> tuple[str, list[str]]:
     """Podstawia wszystkie ``{klucz}`` wartościami z ``ui_dane``.
+
+    Wartości przechodzą przez `_normalizuj_etykiete` — wstawiamy do
+    dokumentacji „suchą" wersję etykiety bez `&` akceleratora i bez
+    końcówki `\\tCtrl+…`, żeby tekst .txt czytało się naturalnie nawet
+    dla przycisków/menu, które w GUI mają te dekoratory.
 
     Returns:
         Krotka (wynikowa_tresc, lista_brakujacych_kluczy).
@@ -174,10 +212,11 @@ def _rozwin_placeholdery(szablon: str, ui_dane: dict[str, Any]) -> tuple[str, li
         if wartosc is None or not isinstance(wartosc, str):
             brakujace.append(klucz)
             return match.group(0)   # zostaw oryginalny {klucz}
-        return wartosc
+        return _normalizuj_etykiete(wartosc)
 
     wynik = PLACEHOLDER_REGEX.sub(_zamien, szablon)
     return wynik, brakujace
+
 
 
 # ---------------------------------------------------------------------------

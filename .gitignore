@@ -30,8 +30,15 @@ pages/
 # Ignorujemy gotowe paczki ZIP i instalatory EXE, by nie zaśmiecać repozytorium
 *.zip
 *.exe
-# Launcher end-user jest generowany przez buduj_wydanie.py — nie wersjonujemy go w repo
+# Launcher end-user jest generowany przez build_release.py — nie wersjonujemy go w repo.
+# (W wersjach 11.x–13.0 ten plik nazywał się `Uruchom_Rezysera.bat`; został
+# przemianowany w 13.1 razem z resztą skryptów infrastruktury na angielskie
+# nazwy. Historyczny plik nadal może się walać na dyskach deweloperów,
+# którzy zbudowali starsze paczki lokalnie — stąd poniżej zostaje również
+# stary wzorzec, żeby `git status` ich nie dziwił.)
+run.bat
 Uruchom_Rezysera.bat
+
 
 # --- USTAWIENIA EDYTORA ---
 .vscode/

@@ -36,10 +36,12 @@ if sys.platform == "win32":
 #   * 13.1:    wersja migruje w całości do dictionaries/pl/gui/ui.yaml::app.wersja,
 #              czytana przez t("app.wersja") z modułu i18n. Atrybut MainFrame.VERSION
 #              i pierwsza linia instrukcja.txt przestały istnieć jako osobne źródła,
-#              co sprawiło, że stary cross-check w buduj_wydanie.py zostaje „martwy"
-#              (regex nie łapie → exit 1). Od Etapu 2/5 refaktoru dokumentacji build
-#              wyciąga numer wersji bezpośrednio z ui.yaml — jedyny plik, który
-#              deweloper musi zedytować, żeby wypuścić nowy release.
+#              co sprawiło, że stary cross-check w buduj_wydanie.py (obecnie
+#              build_release.py — nazwa skryptu też została zangielszczona w 13.1)
+#              zostaje „martwy" (regex nie łapie → exit 1). Od Etapu 2/5 refaktoru
+#              dokumentacji build wyciąga numer wersji bezpośrednio z ui.yaml —
+#              jedyny plik, który deweloper musi zedytować, żeby wypuścić nowy release.
+
 #
 # Wartość `app.wersja` jest stringiem ludzkim, np. „13.1 – Wersja Wydawnicza" —
 # regex wyłuskuje z niej sam numer („13.1"). Tolerujemy zarówno ASCII `-`, jak
@@ -115,26 +117,41 @@ def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
     zostaje na dysku do czasu, gdy deweloper świadomie go usunie lub
     przenumeruje wersję. Chroni przed sytuacją „zbudowałem w złej kolejności
     i nadpisałem wcześniejszy wariant, którego już nigdy nie odtworzę".
+
+    Komunikaty po angielsku — od 13.1 cała infrastruktura buildowa mówi do
+    dewelopera po angielsku, żeby ewentualni zagraniczni kontrybutorzy mieli
+    zerowy próg wejścia. Polski interfejs aplikacji dla end-userów
+    (dictionaries/pl/gui/ui.yaml) zostaje bez zmian.
     """
     if os.path.exists(nazwa_zip):
-        print(f"❌ BŁĄD KRYTYCZNY: Paczka {nazwa_zip} już istnieje w katalogu.")
+        print(f"❌ FATAL: Release package {nazwa_zip} already exists in this directory.")
         print()
-        print("Jedno z trojga:")
-        print(f"  (a) Przenumeruj wersję w {SCIEZKA_UI_YAML} (klucz {KLUCZ_WERSJI}).")
-        print(f"  (b) Przenieś dotychczasowy {nazwa_zip} do innego folderu "
-              "(archiwum poprzednich releasów).")
-        print(f"  (c) Świadomie usuń {nazwa_zip}, jeśli chcesz go odtworzyć "
-              "z aktualnego stanu repo.")
+        print("Pick one of three:")
+        print(f"  (a) Bump the version in {SCIEZKA_UI_YAML} (key {KLUCZ_WERSJI}).")
+        print(f"  (b) Move the existing {nazwa_zip} somewhere else "
+              "(archive of previous releases).")
+        print(f"  (c) Delete {nazwa_zip} on purpose if you want to rebuild it "
+              "from the current state of the repo.")
         sys.exit(1)
+
 
 
 # =============================================================================
 # Reguły wykluczania plików (wspólne dla ZIP-a i filtrów)
 # =============================================================================
 IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '__pycache__', 'skrypty', 'venv', '.venv', 'env'}
-IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'buduj_wydanie.py', 'skrypt_instalatora.iss', 'golden_key.env', 'skonfiguruj_dev.bat', 'uruchom_rezysera_dev.bat'}
+# Skrypty infrastruktury developerskiej (nigdy nie trafiają do paczki dla
+# end-usera). Nazwy zangielszczone w 13.1 — patrz changelog manual.yaml:
+#   skonfiguruj_dev.bat  → setup_dev.bat
+#   skonfiguruj_dev.sh   → setup_dev.sh   (filtrowane przez `.sh` w IGNOROWANE_ROZSZERZENIA)
+#   uruchom_rezysera_dev.bat → run_dev.bat
+#   uruchom_rezysera.sh  → run.sh         (filtrowane przez `.sh` w IGNOROWANE_ROZSZERZENIA)
+#   buduj_wydanie.py     → build_release.py
+#   skrypt_instalatora.iss → installer.iss
+IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'build_release.py', 'installer.iss', 'golden_key.env', 'setup_dev.bat', 'run_dev.bat'}
 IGNOROWANE_ROZSZERZENIA = {'.env', '.pyc', '.md', '.sh', '.jsonl'}
 KATALOG_ZRODLOWY = "."
+
 
 
 def czy_ignorowac(sciezka, nazwa_pliku):
@@ -180,72 +197,71 @@ def czy_ignorowac(sciezka, nazwa_pliku):
 
 
 def main() -> None:
-    # --- STRAŻNIK (GUARD CLAUSE) ---
+    # --- GUARD CLAUSE (runtime/ folder check) ---
     sciezka_python = os.path.join("runtime", "python.exe")
 
-    # 1. Sprawdzenie, czy plik w ogóle istnieje
+    # 1. Check if the portable Python file exists at all.
     if not os.path.exists("runtime") or not os.path.exists(sciezka_python):
-        print("❌ BŁĄD KRYTYCZNY: Nie znaleziono folderu 'runtime/' z lokalnym środowiskiem Pythona!")
-        print("Repozytorium Git nie zawiera bibliotek uruchomieniowych.")
-        print("Zanim zbudujesz wydanie, musisz umieścić przenośnego Pythona w folderze 'runtime'.")
+        print("❌ FATAL: 'runtime/' folder with the portable Python environment not found!")
+        print("The Git repo does not ship runtime libraries.")
+        print("Drop a portable Python into the 'runtime/' folder before building a release.")
         sys.exit(1)
 
-    # 2. Walidacja, czy to faktycznie działający interpreter Pythona
-    print("🔍 Sprawdzanie środowiska uruchomieniowego...")
+    # 2. Validate that it behaves like a real Python interpreter.
+    print("🔍 Verifying the runtime Python environment...")
     try:
-        # Próbujemy wywołać prostą komendę, która zwróci tekst "OK"
         wynik = subprocess.run(
             [sciezka_python, "-c", "print('OK')"],
             capture_output=True,
             text=True,
-            timeout=3  # Zabezpieczenie przed zawieszeniem
+            timeout=3,  # guard against a hang
         )
 
         if "OK" not in wynik.stdout:
-            print("❌ BŁĄD KRYTYCZNY: Plik 'runtime/python.exe' istnieje, ale nie zachowuje się jak Python!")
-            print("Upewnij się, że umieszczono prawidłową wersję Portable, a nie instalator lub inny program.")
+            print("❌ FATAL: 'runtime/python.exe' exists but does not behave like Python!")
+            print("Make sure you put a proper Portable Python build there, not an installer or some other program.")
             sys.exit(1)
 
     except subprocess.TimeoutExpired:
-        print("❌ BŁĄD KRYTYCZNY: Plik 'runtime/python.exe' przestał odpowiadać (Timeout). To prawdopodobnie nie jest Python.")
+        print("❌ FATAL: 'runtime/python.exe' stopped responding (timeout). It is probably not Python.")
         sys.exit(1)
     except Exception as e:
-        print(f"❌ BŁĄD KRYTYCZNY: Nie można uruchomić 'runtime/python.exe'. Szczegóły błędu: {e}")
+        print(f"❌ FATAL: Cannot launch 'runtime/python.exe'. Details: {e}")
         sys.exit(1)
 
-    print("✅ Środowisko Pythona zweryfikowane pomyślnie.\n")
+    print("✅ Portable Python environment verified.\n")
 
-    # 3. Automatyczne wykrycie wersji (single source of truth: ui.yaml)
-    print(f"🔍 Wykrywanie numeru wersji ({SCIEZKA_UI_YAML} → {KLUCZ_WERSJI})...")
+    # 3. Read the release version (single source of truth: ui.yaml).
+    print(f"🔍 Detecting release version ({SCIEZKA_UI_YAML} → {KLUCZ_WERSJI})...")
     try:
         wersja = odczytaj_wersje_z_ui_yaml()
     except RuntimeError as exc:
-        print(f"❌ BŁĄD KRYTYCZNY (odczyt wersji): {exc}")
+        print(f"❌ FATAL (version read): {exc}")
         sys.exit(1)
-    print(f"✅ Wersja wczytana: {wersja}\n")
+    print(f"✅ Version loaded: {wersja}\n")
 
     nazwa_zip = f"Rezyser_Audio_v{wersja}_Portable.zip"
 
-    # 4. Blokada nadpisywania poprzedniego releasu
+    # 4. Refuse to overwrite a previous release package.
     sprawdz_czy_zip_juz_istnieje(nazwa_zip)
 
-    # 5. Ostatnie potwierdzenie dewelopera przed kompresją
-    odp = input(f"Zbudować paczkę {nazwa_zip}? (t/n): ").strip().lower()
-    if odp != "t":
-        print("Anulowano budowanie wydania.")
+    # 5. Last-chance developer confirmation before we actually compress.
+    odp = input(f"Build package {nazwa_zip}? (y/n): ").strip().lower()
+    if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
+        print("Build aborted.")
         sys.exit(0)
 
-    # 6. Regeneracja dokumentacji end-userowej (docs/<id>.<kod>.txt)
-    # Wywołujemy generator in-proc (ten sam proces Pythona, bez subprocess),
-    # bo moduł ma własny UTF-8 fix i nie potrzebuje osobnej sesji. Dzięki
-    # temu masz gwarancję, że paczka ZIP zawiera świeże docs/ nawet jeśli
-    # deweloper zapomniał ręcznie uruchomić generator po edycji szablonu.
-    print("🔍 Regeneracja dokumentacji (szablony YAML → docs/*.txt)...")
+    # 6. Regenerate end-user documentation (docs/<id>.<kod>.txt).
+    # We call the generator in-process (same Python process, no subprocess) —
+    # the module has its own UTF-8 fix and does not need a fresh session.
+    # This guarantees the ZIP package ships fresh docs/ even when the developer
+    # forgot to run the generator manually after editing a template.
+    print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
     generuj_dokumentacje.generuj()
-    print("✅ Dokumentacja zregenerowana.\n")
+    print("✅ Documentation regenerated.\n")
 
-    # 7. Budowanie wersji Portable (ZIP)
-    print(f"[1/2] Pakowanie wersji Portable: {nazwa_zip}...")
+    # 7. Build the Portable ZIP package.
+    print(f"[1/2] Packing the Portable ZIP: {nazwa_zip}...")
     with zipfile.ZipFile(nazwa_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(KATALOG_ZRODLOWY):
             dirs[:] = [d for d in dirs if d not in IGNOROWANE_FOLDERY]
@@ -254,22 +270,24 @@ def main() -> None:
                     pelna_sciezka = os.path.join(root, file)
                     sciezka_w_zip = os.path.relpath(pelna_sciezka, KATALOG_ZRODLOWY)
                     zipf.write(pelna_sciezka, sciezka_w_zip)
-    print("✅ Gotowe!")
+    print("✅ Done!")
 
-    # 8. Budowanie wersji Instalacyjnej (EXE)
-    chce_instalator = input("\nCzy chcesz wygenerowac rowniez instalator .exe? (t/n): ").strip().lower()
+    # 8. Build the Installer EXE (optional).
+    chce_instalator = input("\nAlso build the .exe installer? (y/n): ").strip().lower()
 
-    if chce_instalator == 't':
-        print("\n[2/2] Uruchamiam kompilator Inno Setup (iscc)...")
-        komenda = f'iscc /Q skrypt_instalatora.iss /DMyAppVersion="{wersja}"'
+    if chce_instalator in ("y", "t"):
+        print("\n[2/2] Launching the Inno Setup compiler (iscc)...")
+        # `installer.iss` — renamed from `skrypt_instalatora.iss` in 13.1.
+        komenda = f'iscc /Q installer.iss /DMyAppVersion="{wersja}"'
 
         try:
             subprocess.run(komenda, shell=True, check=True)
-            print(f"✅ Sukces! Utworzono instalator Rezyser_Audio_v{wersja}_Installer.exe")
+            print(f"✅ Success! Installer created: Rezyser_Audio_v{wersja}_Installer.exe")
         except subprocess.CalledProcessError:
-            print("❌ Błąd kompilacji. Upewnij się, że Inno Setup jest zainstalowany, a 'iscc' dodano do systemowej zmiennej PATH.")
+            print("❌ Compilation error. Make sure Inno Setup is installed and 'iscc' is in your system PATH.")
     else:
-        print("\nPominięto budowanie instalatora.")
+        print("\nSkipped installer build.")
+
 
 
 if __name__ == "__main__":

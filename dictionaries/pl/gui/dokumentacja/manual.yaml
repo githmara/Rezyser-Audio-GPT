@@ -11,17 +11,30 @@
 #     API co moduł i18n.py przy odczycie `t("app.wersja")`). Jedyne źródło
 #     prawdy dla numeru wersji — zmiana w ui.yaml automatycznie propaguje
 #     się do instrukcji, bez ręcznej synchronizacji.
+#   * {app.nazwa} — nazwa aplikacji (np. "Reżyser Audio GPT"). Używamy
+#     w kluczowych miejscach (nagłówek instrukcji, System Check), żeby
+#     rebranding nazwy w ui.yaml automatycznie propagował się do docs.
+#     W tekście narracyjnym zostawiamy „Reżyser" / „Poliglota" jako
+#     literały, bo to pojęcia funkcjonalne (moduły aplikacji), a nie
+#     nazwa własna — tłumacz je przełoży tak, jak tłumaczy „Director" /
+#     „Polyglot" w swoim języku.
+#   * {main.btn.rezyser}, {main.btn.poliglota}, {main.btn.konwerter},
+#     {main.btn.manager} — etykiety czterech przycisków paska nawigacji.
+#     Generator `generuj_dokumentacje.py` przed podstawieniem wycina z nich
+#     akcelerator wxPython (`&` przed literą) i ewentualny skrót `\tCtrl+…`,
+#     żeby wynikowy .txt czytało się naturalnie — zatem
+#     `"🎬  &Reżyser"` w ui.yaml staje się `"🎬  Reżyser"` w docs.
 #
-# Ograniczenia świadomie pozostawione (do rozstrzygnięcia w Etapie 3):
-#   * Nazwy skryptów (`Uruchom_Rezysera.bat`, `skonfiguruj_dev.bat`, itd.) są
-#     jeszcze literałami. Po Etapie 3 (renaming infrastruktury na nazwy
-#     angielskie) zamienimy je w tym szablonie odpowiednio (`run.bat`,
-#     `setup_dev.bat`, `run_dev.bat`, `setup_dev.sh`, `run.sh`).
-#   * Etykiety przycisków z GUI są cytowane literalnie (np. "🎬 Reżyser").
-#     Jeżeli w przyszłości zmienimy ich brzmienie w ui.yaml, trzeba będzie
-#     tu ręcznie zsynchronizować — albo wprowadzić dodatkowe placeholdery
-#     `{main.btn.rezyser}` itd. (decyzja projektowa poza zakresem Etapu 1).
+# Ograniczenia świadomie pozostawione:
+#   * Setki drobnych etykiet („Wyślij do AI", „Wczytaj historię", „Prompt
+#     Architekta…") zostają literałami. Parametryzacja każdej z nich
+#     zamieniłaby szablon w spaghetti placeholderów i utrudniła tłumaczenie
+#     (LLM musi widzieć kontekst akapitu, żeby przetłumaczyć etykietę
+#     w sensownym brzmieniu dla danego języka). Jeśli konkretna etykieta
+#     zmieni brzmienie w GUI, trzeba ją tu zsynchronizować ręcznie — ale
+#     to rzadka sytuacja po wejściu aplikacji w fazę stabilną.
 # =============================================================================
+
 
 id: manual
 tresc: |
@@ -35,22 +48,24 @@ tresc: |
 
   KROK 1: Pierwsze uruchomienie (Cross-Platform)
 
-  Aplikacja jest w pełni przenośna i gotowa do działania na systemie Windows. Po prostu wejdź do folderu i uruchom plik Uruchom_Rezysera.bat (klikając w niego dwukrotnie lub tworząc do niego skrót na pulpicie). Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu — Reżyser Audio GPT. Żadnej przeglądarki, żadnego serwera w tle. Gdy skończysz pracę, po prostu zamknij okno programu.
+  Aplikacja jest w pełni przenośna i gotowa do działania na systemie Windows. Po prostu wejdź do folderu i uruchom plik run.bat (klikając w niego dwukrotnie lub tworząc do niego skrót na pulpicie). Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu — {app.nazwa}. Żadnej przeglądarki, żadnego serwera w tle. Gdy skończysz pracę, po prostu zamknij okno programu.
+
 
   Ważne: Folder runtime/ jest częścią wyłącznie gotowych paczek dla systemu Windows pobieranych z zakładki Releases na GitHubie. Zawiera izolowane środowisko Pythona gotowe do użycia bez instalacji. Jeśli klonujesz repozytorium, tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
 
   --- Dla Programistów (Windows — repozytorium Git) ---
 
   1. Sklonuj repozytorium na swój dysk.
-  2. Uruchom plik skonfiguruj_dev.bat. Skrypt automatycznie utworzy wirtualne środowisko Pythona (venv) i zainstaluje wszystkie wymagane zależności z pliku requirements.txt.
-  3. Uruchom aplikację komendą python main.py lub przez plik uruchom_rezysera_dev.bat — skrypt automatycznie wykryje folder venv i uruchomi program.
+  2. Uruchom plik setup_dev.bat. Skrypt automatycznie utworzy wirtualne środowisko Pythona (venv) i zainstaluje wszystkie wymagane zależności z pliku requirements.txt.
+  3. Uruchom aplikację komendą python main.py lub przez plik run_dev.bat — skrypt automatycznie wykryje folder venv i uruchomi program.
 
   --- Dla Programistów i zwykłych użytkowników (macOS / Linux) ---
 
   1. Sklonuj repozytorium na swój dysk.
   2. Otwórz terminal w folderze projektu i nadaj skryptom uprawnienia do wykonania: chmod +x *.sh
-  3. Uruchom skrypt konfiguracyjny: ./skonfiguruj_dev.sh — skrypt utworzy środowisko venv i zainstaluje zależności.
-  4. Uruchom aplikację: python main.py lub ./uruchom_rezysera.sh
+  3. Uruchom skrypt konfiguracyjny: ./setup_dev.sh — skrypt utworzy środowisko venv i zainstaluje zależności.
+  4. Uruchom aplikację: python main.py lub ./run.sh
+
 
   Co zobaczysz po uruchomieniu: Po uruchomieniu programu otwiera się okno z ekranem startowym. Znajdziesz na nim krótki opis dostępnych narzędzi oraz sekcję "System Check". Jeśli klucz API nie jest jeszcze skonfigurowany, zobaczysz czerwony komunikat informujący, że moduły oparte na AI (Reżyseria, Tłumacz) nie będą działać — darmowe funkcje lokalne (akcenty, Architekt) są jednak aktywne od razu. Konfigurację klucza opisuje kolejny krok.
 
@@ -69,7 +84,8 @@ tresc: |
 
   KROK 3: Główne Studio Reżyserskie
 
-  To Twoje centrum dowodzenia do wymyślania historii i pisania scenariuszy. Przejdź do niego, klikając przycisk "🎬 Reżyser" na pasku przycisków lub wybierając Narzędzia → Reżyser z menu (skrót: Ctrl+1).
+  To Twoje centrum dowodzenia do wymyślania historii i pisania scenariuszy. Przejdź do niego, klikając przycisk "{main.btn.rezyser}" na pasku przycisków lub wybierając Narzędzia → Reżyser z menu (skrót: Ctrl+1).
+
 
 
   WAŻNE: Format plików projektów — powrót do .txt
@@ -192,7 +208,8 @@ tresc: |
 
   KROK 5: Poliglota AI
 
-  Aplikacja do tłumaczeń i wymuszania twardych akcentów na syntezatorach czytników ekranu. Przejdź do niej, klikając przycisk "🌍 Poliglota" na pasku przycisków lub wybierając Narzędzia → Poliglota z menu (skrót: Ctrl+2).
+  Aplikacja do tłumaczeń i wymuszania twardych akcentów na syntezatorach czytników ekranu. Przejdź do niej, klikając przycisk "{main.btn.poliglota}" na pasku przycisków lub wybierając Narzędzia → Poliglota z menu (skrót: Ctrl+2).
+
 
   Tryb 1: Zwykły Tłumacz (Używa AI - Płatny)
 
@@ -324,7 +341,8 @@ tresc: |
 
   KROK 6: Architekt Audiobooków
 
-  Narzędzie do przygotowywania profesjonalnej struktury pliku pod czytniki ekranu i ElevenLabs. Przejdź do niego, klikając przycisk "📄 Konwerter" na pasku przycisków lub wybierając Narzędzia → Konwerter z menu (skrót: Ctrl+3).
+  Narzędzie do przygotowywania profesjonalnej struktury pliku pod czytniki ekranu i ElevenLabs. Przejdź do niego, klikając przycisk "{main.btn.konwerter}" na pasku przycisków lub wybierając Narzędzia → Konwerter z menu (skrót: Ctrl+3).
+
 
   Jak to działa?
 
@@ -468,7 +486,8 @@ tresc: |
 
   - Nowe akcenty w Poliglocie (NOWOŚĆ — cztery nowe języki europejskie). Do menu Trybu Reżysera dodano cztery nowe opcje fonetycznego "psucia" tekstu: Angielski (Samantha / Mark / Zira / Hazel), Francuski (Thomas / Amelie / Julie), Niemiecki (Stefan / Markus / Katja / Hedda), Hiszpański (Jorge / Monica / Helena). Każdy nowy akcent automatycznie wstrzykuje odpowiedni kod ISO (en, fr, de, es) do generowanego pliku .html lub .docx — NVDA od razu użyje właściwego głosu dla przetworzonego tekstu.
 
-  - Cross-platform: Wsparcie dla macOS i Linux (ZMIANA dokumentacji). Sekcja "Pierwsze uruchomienie" została gruntownie przepisana. Teraz rozróżnia trzy ścieżki: użytkownicy końcowi Windows pobierają gotową paczkę ZIP z zakładki Releases i uruchamiają Uruchom_Rezysera.bat; programiści Windows konfigurują środowisko przez skonfiguruj_dev.bat; użytkownicy macOS i Linux konfigurują środowisko przez ./skonfiguruj_dev.sh i uruchamiają ./uruchom_rezysera.sh.
+  - Cross-platform: Wsparcie dla macOS i Linux (ZMIANA dokumentacji). Sekcja "Pierwsze uruchomienie" została gruntownie przepisana. Teraz rozróżnia trzy ścieżki: użytkownicy końcowi Windows pobierają gotową paczkę ZIP z zakładki Releases i uruchamiają run.bat; programiści Windows konfigurują środowisko przez setup_dev.bat; użytkownicy macOS i Linux konfigurują środowisko przez ./setup_dev.sh i uruchamiają ./run.sh. (Uwaga: w wersjach 11.x–13.0 te same skrypty nazywały się inaczej — `Uruchom_Rezysera.bat`, `skonfiguruj_dev.bat`, `skonfiguruj_dev.sh`, `uruchom_rezysera.sh` — zostały przemianowane w 13.1 na angielskie odpowiedniki, bo zagraniczni deweloperzy klonujący repo zgłaszali, że polskie nazwy plików utrudniają im wpisywanie komend w terminalu.)
+
 
   - Folder runtime/ — wyjaśnienie statusu (DOKUMENTACJA). Sekcja "Pierwsze uruchomienie" zawiera teraz jawne wyjaśnienie, że folder runtime/ (środowisko Pythona dla paczek ZIP) jest dystrybuowany wyłącznie w gotowych paczkach dla systemu Windows z zakładki Releases. W repozytorium Git ten folder nie istnieje i być nie powinien.
 

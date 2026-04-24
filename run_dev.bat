@@ -2,33 +2,33 @@
 chcp 65001 >nul
 set APP_DIR=%~dp0
 
-:: 1. Srodowisko Wydawnicze (Tylko Windows)
+:: 1. Release runtime (Windows only, shipped with ZIP/EXE)
 if exist "%APP_DIR%runtime\python.exe" (
     set PYTHON_EXE="%APP_DIR%runtime\python.exe"
-    goto :uruchom
+    goto :launch
 )
 
-:: 2. Srodowisko Deweloperskie (VS Code)
+:: 2. Dev venv (VS Code)
 if exist "%APP_DIR%.venv\Scripts\python.exe" (
     set PYTHON_EXE="%APP_DIR%.venv\Scripts\python.exe"
-    goto :uruchom
+    goto :launch
 )
 
-:: 3. Srodowisko Deweloperskie (Klasyczne)
+:: 3. Dev venv (classic)
 if exist "%APP_DIR%venv\Scripts\python.exe" (
     set PYTHON_EXE="%APP_DIR%venv\Scripts\python.exe"
-    goto :uruchom
+    goto :launch
 )
 
-:: 4. Brak srodowiska
+:: 4. No environment found
 echo =======================================================
-echo BLAD KRYTYCZNY: Nie znaleziono srodowiska uruchomieniowego!
+echo  FATAL: No runtime environment found!
 echo =======================================================
-echo Uruchom najpierw plik "skonfiguruj_dev.bat", aby zainstalowac biblioteki.
+echo  Run `setup_dev.bat` first to create a venv and install dependencies.
 echo =======================================================
 pause
 exit /b
 
-:uruchom
+:launch
 "%PYTHON_EXE%" "%APP_DIR%main.py"
 pause
