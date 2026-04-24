@@ -260,7 +260,7 @@ tresc: |
 
   Praktyczne zastosowanie: szyfry zapisują wynik w tym samym formacie co Tryb Reżysera (.html z tagiem lang lub .docx z tagami XML), czyli NVDA odczyta je głosem odpowiedniego języka. Szczególnie Odwracacz i Samogłoskowiec brzmią w syntezatorze znacznie ciekawiej niż gdy czytasz je oczami — bo mózg przy czytaniu wzrokiem automatycznie próbuje „zdekodować" tekst, a TTS czyta go dokładnie tak, jak zapisany.
 
-  Wszystkie sześć szyfrów opisano też szerszym, przystępnym językiem w pliku dictionaries/instrukcja.txt w paczce aplikacji — razem z poradami, jak dodać własny szyfr typu „zamiana liter" bez znajomości programowania (np. język gwary szkolnej, mowa-trawa).
+  Wszystkie sześć szyfrów opisano też szerszym, przystępnym językiem w pliku docs/dictionaries.pl.txt w paczce aplikacji — razem z poradami, jak dodać własny szyfr typu „zamiana liter" bez znajomości programowania (np. język gwary szkolnej, mowa-trawa).
 
 
   Detekcja języka
@@ -372,7 +372,7 @@ tresc: |
   Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć na Stronę główną, kliknij „🔄 Odśwież akcenty Reżysera z YAML" i uruchom aplikację ponownie. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.
 
   Gdzie szukać dalszej dokumentacji folderu dictionaries/:
-  - Plik `dictionaries/instrukcja.txt` (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.
+  - Plik `docs/dictionaries.pl.txt` (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.
   - Plik `dictionaries/README.md` (dostępny tylko przy klonowaniu repozytorium z GitHuba — paczki wydaniowe filtrują pliki .md) — szczegółowa dokumentacja techniczna formatu YAML z przykładami, listami pól, zasadami pipeline'u, regex-ami. Ten dokument adresowany jest do lingwistów znających podstawy programowania oraz do deweloperów.
 
 
@@ -512,7 +512,7 @@ tresc: |
 
   Nowe funkcje i zmiany w wersji 13.0 — Release Candidate
 
-  - Refaktor na YAML — akcenty, szyfry i tryby Reżysera w plikach tekstowych (ZMIANA ARCHITEKTONICZNA, największa od czasu migracji na wxPython). Do wersji 12.0 wszystkie reguły fonetyczne (akcenty) i tryby twórcze Reżysera (Burza, Skrypt, Audiobook, postprodukcja tytułów) były „zaszyte" w kodzie Pythona jako stałe, funkcje i promptowe sztywne stringi, a całej kategorii szyfrów/zabaw tekstowych po prostu nie było — są wprowadzane razem z refaktorem 13.0. W wersji 13.0 wszystko to leży w plikach .yaml w nowym folderze `dictionaries/` — silnik (`core_poliglota.py`, `core_rezyser.py`, `przepisy_rezysera.py`) ładuje je dynamicznie przy starcie. Efekt praktyczny: dodanie nowego akcentu, nowego szyfru bazującego na zamianach albo zmiana brzmienia prompta systemowego dla któregoś trybu Reżysera nie wymaga znajomości Pythona — wystarczy edytor tekstu. Krótki opis dla end-userów znajduje się w `dictionaries/instrukcja.txt` (dołączona do paczek z Releases); pełna dokumentacja techniczna formatu — w `dictionaries/README.md` (tylko w repozytorium Git, bo paczki wydaniowe filtrują pliki .md).
+  - Refaktor na YAML — akcenty, szyfry i tryby Reżysera w plikach tekstowych (ZMIANA ARCHITEKTONICZNA, największa od czasu migracji na wxPython). Do wersji 12.0 wszystkie reguły fonetyczne (akcenty) i tryby twórcze Reżysera (Burza, Skrypt, Audiobook, postprodukcja tytułów) były „zaszyte" w kodzie Pythona jako stałe, funkcje i promptowe sztywne stringi, a całej kategorii szyfrów/zabaw tekstowych po prostu nie było — są wprowadzane razem z refaktorem 13.0. W wersji 13.0 wszystko to leży w plikach .yaml w nowym folderze `dictionaries/` — silnik (`core_poliglota.py`, `core_rezyser.py`, `przepisy_rezysera.py`) ładuje je dynamicznie przy starcie. Efekt praktyczny: dodanie nowego akcentu, nowego szyfru bazującego na zamianach albo zmiana brzmienia prompta systemowego dla któregoś trybu Reżysera nie wymaga znajomości Pythona — wystarczy edytor tekstu. Krótki opis dla end-userów znajduje się w `docs/dictionaries.pl.txt` (dołączony do paczek z Releases); pełna dokumentacja techniczna formatu — w `dictionaries/README.md` (tylko w repozytorium Git, bo paczki wydaniowe filtrują pliki .md).
 
 
   - Manager Reguł — czwarte narzędzie na pasku (NOWOŚĆ, Ctrl+4). Wizualny eksplorator folderu `dictionaries/` z drzewem plików YAML (natywne wx.TreeCtrl, pełne wsparcie NVDA) i zestawem akcji: „Otwórz w edytorze tekstu", „Nowy plik reguł…" (kreator z wyborem typu: akcent, szyfr, tryb, nowy język), „Duplikuj wybrany plik", „Usuń plik", „Odśwież drzewo". Dla przypadków wykraczających poza zwykłe zamiany (nowy język bazowy, szyfr algorytmiczny) kreator generuje gotowy do skopiowania prompt dla chatbota AI — pełne wyjaśnienie w nowym KROKU 7b.
