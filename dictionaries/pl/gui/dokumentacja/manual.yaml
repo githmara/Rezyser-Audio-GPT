@@ -24,15 +24,41 @@
 #     akcelerator wxPython (`&` przed literą) i ewentualny skrót `\tCtrl+…`,
 #     żeby wynikowy .txt czytało się naturalnie — zatem
 #     `"🎬  &Reżyser"` w ui.yaml staje się `"🎬  Reżyser"` w docs.
+#   * {main.menu.rezyser}, {main.menu.poliglota}, {main.menu.konwerter} —
+#     pozycje menu „Narzędzia" (po normalizacji: gołe nazwy bez emoji,
+#     bo `main.menu.*` w ui.yaml ma tylko `&Litera\tCtrl+N` bez ozdobników).
+#   * Etykiety „żywych" przycisków, które user realnie klika w sekcjach
+#     instrukcyjnych (KROK 3-7b, sekcja A11y NVDA): {home.heading_system_check},
+#     {home.btn_generate}, {home.btn_odswiez_label}, {rezyser.btn_wyslij_label},
+#     {rezyser.btn_wczytaj_label}, {rezyser.btn_zapisz_ksiege_label},
+#     {rezyser.btn_prompt_architekta_label}, {rezyser.btn_prolog_label},
+#     {rezyser.btn_epilog_label}, {rezyser.struktura_heading},
+#     {poliglota.btn_wczytaj}, {poliglota.btn_process}, {konwerter.btn_buduj},
+#     {manager.btn_otworz_label}, {manager.btn_odswiez_label},
+#     {manager.btn_duplikuj_label}, {manager.btn_nowy_label}.
+#     Generator wycina `&` z każdej z nich; emoji w `ui.yaml` (📜, 🏁, ✂️,
+#     💾, 📝, 🔄, 📋, ➕) trafi automatycznie do docs — zsynchronizowanie
+#     emoji z GUI jest tu zamierzone (Etap 3.5).
 #
 # Ograniczenia świadomie pozostawione:
-#   * Setki drobnych etykiet („Wyślij do AI", „Wczytaj historię", „Prompt
-#     Architekta…") zostają literałami. Parametryzacja każdej z nich
-#     zamieniłaby szablon w spaghetti placeholderów i utrudniła tłumaczenie
-#     (LLM musi widzieć kontekst akapitu, żeby przetłumaczyć etykietę
-#     w sensownym brzmieniu dla danego języka). Jeśli konkretna etykieta
-#     zmieni brzmienie w GUI, trzeba ją tu zsynchronizować ręcznie — ale
-#     to rzadka sytuacja po wejściu aplikacji w fazę stabilną.
+#   * Cytaty w sekcjach Changelog (od „Ważne uwagi do wersji 9.0" w dół)
+#     zostają literałami — to historyczne odniesienia do wersji, które się
+#     nie zmieniają nawet jeśli ui.yaml ewoluuje.
+#   * Etykiety GUI z parametrem dynamicznym `{numer_…}` w ui.yaml
+#     (np. `rezyser.btn_rozdzial_label = "✂️ Wstaw cięcie (Rozdział {numer_rozdzialu})"`)
+#     zostają literałami w manualu — sparametryzowanie wstawiłoby surowe
+#     `{numer_rozdzialu}` do docs (generator nie zna kontekstu wartości).
+#   * Etykiety, które w manualu są skróconą formą rzeczywistego label-a
+#     z ui.yaml (np. „Pamięć Modelu" vs `lbl_pamiec_modelu = "🧠 Pamięć
+#     Modelu (Stan Okna Kontekstowego):"`) — sparametryzowanie zaburzyłoby
+#     składnię akapitu.
+#   * Narracyjne cytaty stylistyczne („zamykania", „ucieka", przykłady
+#     dialogów AI) i nazwy plików użytkownika („znieczulica", „Rozdział 3")
+#     pozostają literałami — to nie etykiety GUI.
+#   * Niespójności manual ↔ ui.yaml (np. „Zapisz Streszczenie (na stałe)"
+#     w manualu vs `btn_zapisz_pamiec_label = "💾 Zapisz Streszczenie"`
+#     w ui.yaml) zostają literałami do osobnego TODO refaktoru, bo to
+#     niespójność DANYCH, nie tylko placeholder vs literal.
 # =============================================================================
 
 
@@ -67,7 +93,7 @@ tresc: |
   4. Uruchom aplikację: python main.py lub ./run.sh
 
 
-  Co zobaczysz po uruchomieniu: Po uruchomieniu programu otwiera się okno z ekranem startowym. Znajdziesz na nim krótki opis dostępnych narzędzi oraz sekcję "System Check". Jeśli klucz API nie jest jeszcze skonfigurowany, zobaczysz czerwony komunikat informujący, że moduły oparte na AI (Reżyseria, Tłumacz) nie będą działać — darmowe funkcje lokalne (akcenty, Architekt) są jednak aktywne od razu. Konfigurację klucza opisuje kolejny krok.
+  Co zobaczysz po uruchomieniu: Po uruchomieniu programu otwiera się okno z ekranem startowym. Znajdziesz na nim krótki opis dostępnych narzędzi oraz sekcję "{home.heading_system_check}". Jeśli klucz API nie jest jeszcze skonfigurowany, zobaczysz czerwony komunikat informujący, że moduły oparte na AI (Reżyseria, Tłumacz) nie będą działać — darmowe funkcje lokalne (akcenty, Architekt) są jednak aktywne od razu. Konfigurację klucza opisuje kolejny krok.
 
 
   KROK 2: Zasilanie API (Klucz OpenAI)
@@ -76,15 +102,15 @@ tresc: |
 
   1. Załóż konto na platform.openai.com i doładuj konto w zakładce Billing.
   2. Wygeneruj klucz w zakładce API Keys (zaczyna się od sk-proj-). Uwaga: klucz jest wyświetlany tylko raz — w momencie tworzenia. Jeśli zamkniesz okno bez skopiowania, przepada bezpowrotnie i trzeba będzie go zastrzec (opcja revoke secret key) i wygenerować nowy. Skopiuj go od razu, zanim cokolwiek klikniesz.
-  3. Na ekranie startowym programu kliknij przycisk "Wygeneruj plik golden_key.env i otwórz edytor tekstu". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
+  3. Na ekranie startowym programu kliknij przycisk "{home.btn_generate}". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
   4. W otwartym pliku zobaczysz linię OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój skopiowany klucz bezpośrednio po znaku równości (bez spacji). Zapisz plik i uruchom aplikację ponownie.
 
-  Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i wyświetli zielony komunikat w sekcji "System Check" — oznacza to, że wszystkie moduły AI są gotowe do pracy. W przeciwnym wypadku jasno ci powie, co jest nie tak i pozwoli otworzyć edytor tekstu, aby szybko dało się naprawić błąd.
+  Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i wyświetli zielony komunikat w sekcji "{home.heading_system_check}" — oznacza to, że wszystkie moduły AI są gotowe do pracy. W przeciwnym wypadku jasno ci powie, co jest nie tak i pozwoli otworzyć edytor tekstu, aby szybko dało się naprawić błąd.
 
 
   KROK 3: Główne Studio Reżyserskie
 
-  To Twoje centrum dowodzenia do wymyślania historii i pisania scenariuszy. Przejdź do niego, klikając przycisk "{main.btn.rezyser}" na pasku przycisków lub wybierając Narzędzia → Reżyser z menu (skrót: Ctrl+1).
+  To Twoje centrum dowodzenia do wymyślania historii i pisania scenariuszy. Przejdź do niego, klikając przycisk "{main.btn.rezyser}" na pasku przycisków lub wybierając Narzędzia → {main.menu.rezyser} z menu (skrót: Ctrl+1).
 
 
 
@@ -99,7 +125,7 @@ tresc: |
 
   Wszystkie Twoje wygenerowane skrypty i książki zapisują się w zwykłych plikach tekstowych (.txt), które z łatwością otworzysz w Notatniku.
 
-  Jako Reżyser masz PEŁNE PRAWO (a wręcz obowiązek) edytować ten plik! Jeśli sztuczna inteligencja zagalopuje się i np. sama rozwiąże problem bohaterów na końcu wygenerowanego fragmentu, otwórz plik, usuń ostatnie linijki i zostaw tekst urwany w najbardziej napiętym momencie, zanim wyczyścisz pamięć, wczytasz plik na nowo w celu przeładowania okna kontekstowego i klikniesz "Wyślij do AI" w celu kontynuacji.
+  Jako Reżyser masz PEŁNE PRAWO (a wręcz obowiązek) edytować ten plik! Jeśli sztuczna inteligencja zagalopuje się i np. sama rozwiąże problem bohaterów na końcu wygenerowanego fragmentu, otwórz plik, usuń ostatnie linijki i zostaw tekst urwany w najbardziej napiętym momencie, zanim wyczyścisz pamięć, wczytasz plik na nowo w celu przeładowania okna kontekstowego i klikniesz "{rezyser.btn_wyslij_label}" w celu kontynuacji.
 
   🔴 JEDNAKŻE - CZEGO NIE WOLNO CI DOTYKAĆ:
 
@@ -113,7 +139,7 @@ tresc: |
 
   Jak używać Reżyserii?
 
-  - Księga Świata (pasek boczny po lewej): Tu wpisujesz zasady uniwersum. Każdy projekt ma teraz własną Księgę powiązaną z nazwą pliku — jeśli Twój plik historii to np. emilia_heist_audiobook.txt, Księga Świata zapisze się jako skrypty/emilia_heist_audiobook.md. Dlatego kolejność jest ważna: najpierw wpisz nazwę pliku projektu w polu "Nazwa pliku projektu", a dopiero potem możesz zapisać Księgę. Przycisk "Zapisz Księgę na stałe" pozostaje wyszarzony, dopóki nie podasz nazwy. Wczytanie istniejącego projektu przyciskiem "Wczytaj historię" automatycznie załaduje też odpowiadający mu plik .md — nie musisz robić nic ręcznie. Uwaga: Bez wypełnionej Księgi Świata aplikacja zablokuje wysyłanie zapytań do AI — to celowe zabezpieczenie, które chroni Cię przed generowaniem tekstu bez żadnych zasad.
+  - Księga Świata (pasek boczny po lewej): Tu wpisujesz zasady uniwersum. Każdy projekt ma teraz własną Księgę powiązaną z nazwą pliku — jeśli Twój plik historii to np. emilia_heist_audiobook.txt, Księga Świata zapisze się jako skrypty/emilia_heist_audiobook.md. Dlatego kolejność jest ważna: najpierw wpisz nazwę pliku projektu w polu "Nazwa pliku projektu", a dopiero potem możesz zapisać Księgę. Przycisk "{rezyser.btn_zapisz_ksiege_label}" pozostaje wyszarzony, dopóki nie podasz nazwy. Wczytanie istniejącego projektu przyciskiem "{rezyser.btn_wczytaj_label}" automatycznie załaduje też odpowiadający mu plik .md — nie musisz robić nic ręcznie. Uwaga: Bez wypełnionej Księgi Świata aplikacja zablokuje wysyłanie zapytań do AI — to celowe zabezpieczenie, które chroni Cię przed generowaniem tekstu bez żadnych zasad.
   - Pamięć Długotrwała (pasek boczny po lewej): Drugie pole w pasku bocznym. Tu AI automatycznie zapisuje streszczenie fabuły, gdy pamięć zaczyna się przepełniać. Możesz też wpisać tu własne notatki ręcznie — model potraktuje je jako "co już wiem" przed przeczytaniem bieżącej sceny.
   - Tryb Burzy Mózgów: Wpisz luźny pomysł, a AI da Ci 3 opcje rozwoju fabuły. Dla każdej opcji od razu wygeneruje gotowy blok "--- SZKIC PROMPTU ---". Po wybraniu jednej z nich wklej ten prompt do Trybu Skryptu lub Audiobooka i wprowadź ewentualne uwagi lub informacje dla modelu. Pamięć fabuły nie zmienia się podczas Burzy — możesz eksperymentować bez ryzyka!
   - Tryb Surowego Skryptu: Wklejasz tu "Szkic Promptu" wygenerowany w Burzy Mózgów. AI napisze długi fragment z pełnymi tagami [Speaker X: Imię - emocja] dla dialogów i efektami [SFX: ...] dla dźwięków. Tekst automatycznie dopisuje się do Twojego pliku (np. nowa_scena.txt) w folderze skrypty/.
@@ -121,7 +147,7 @@ tresc: |
   - Automatyczne tworzenie postaci: Skrypt jest zaprogramowany tak, by samoczynnie tworzyć nowe tagi [Speaker], jeśli fabuła wymaga nowej postaci. Wskazówka: Jeśli AI stworzy fajną postać, skopiuj jej tag i wklej do Księgi Świata, by model zapamiętał ją na stałe!
 
   Zarządzanie projektem — trzy przyciski akcji:
-  - Wczytaj historię: Wczytuje istniejący plik projektu do pamięci. Dostępny tylko gdy pamięć jest pusta i wpisano nazwę pliku.
+  - {rezyser.btn_wczytaj_label}: Wczytuje istniejący plik projektu do pamięci. Dostępny tylko gdy pamięć jest pusta i wpisano nazwę pliku.
   - Wyczyść bieżącą (zostaw Streszczenie): Czyści wyłącznie bieżącą historię. Streszczenie w Pamięci Długotrwałej i Księga Świata zostają zachowane — idealne do kontynuacji długiej książki po wygenerowaniu streszczenia.
   - Zamknij Projekt (Twardy Reset): Całkowicie czyści projekt. Usuwa historię, streszczenie, Księgę Świata i zeruje wszystkie liczniki. Używaj przy zmianie projektu lub nowej historii.
 
@@ -152,14 +178,14 @@ tresc: |
 
   Zarządzanie Aktami i Scenami (Tryb Skryptu, z wersji 7, zachowane)
 
-  Tryb Surowego Skryptu posiada dedykowany panel "Zarządzanie Strukturą" z przyciskami do budowania struktury słuchowiska w czasie rzeczywistym.
+  Tryb Surowego Skryptu posiada dedykowany panel "{rezyser.struktura_heading}" z przyciskami do budowania struktury słuchowiska w czasie rzeczywistym.
 
   - Wstaw Akt X: Wstawia nagłówek aktu (np. "Akt 2") ORAZ automatycznie dopisuje pod nim "Scena 1" — bo każdy nowy akt zaczyna się od pierwszej sceny. Licznik aktów przeskakuje na następny numer, a licznik scen resetuje się do 2 (gotowy na kolejną scenę w tym akcie).
   - Wstaw Scenę X: Wstawia tylko nagłówek sceny (np. "Scena 3") w obrębie bieżącego aktu. Licznik scen rośnie automatycznie.
 
   Inteligentne wczytywanie pliku: Gdy wczytasz istniejący plik skryptu, aplikacja automatycznie przeskanuje go i ustawi liczniki aktów i scen na właściwe numery. Licznik scen jest zawsze obliczany w obrębie ostatniego aktu w pliku.
 
-  Prolog i Epilog: Przyciski "Wstaw Prolog" i "Wstaw Epilog" są wspólne dla obu trybów i dostępne w tym samym panelu.
+  Prolog i Epilog: Przyciski "{rezyser.btn_prolog_label}" i "{rezyser.btn_epilog_label}" są wspólne dla obu trybów i dostępne w tym samym panelu.
 
   Architekt Audiobooków automatycznie zamieni Akty na główne punkty nawigacyjne (Heading 1) dla ElevenLabs i NVDA — Sceny staną się pogrubionym tekstem widocznym w dokumencie, ale niewidocznym w spisie treści.
 
@@ -208,14 +234,14 @@ tresc: |
 
   KROK 5: Poliglota AI
 
-  Aplikacja do tłumaczeń i wymuszania twardych akcentów na syntezatorach czytników ekranu. Przejdź do niej, klikając przycisk "{main.btn.poliglota}" na pasku przycisków lub wybierając Narzędzia → Poliglota z menu (skrót: Ctrl+2).
+  Aplikacja do tłumaczeń i wymuszania twardych akcentów na syntezatorach czytników ekranu. Przejdź do niej, klikając przycisk "{main.btn.poliglota}" na pasku przycisków lub wybierając Narzędzia → {main.menu.poliglota} z menu (skrót: Ctrl+2).
 
 
   Tryb 1: Zwykły Tłumacz (Używa AI - Płatny)
 
   Idealny do słuchania opowieści w pięknej, poprawnej obcej mowie.
 
-  - Wczytaj plik przyciskiem "Wczytaj plik do pamięci" lub używając przycisku "Przeglądaj..." do wyboru pliku w oknie systemowym.
+  - Wczytaj plik przyciskiem "{poliglota.btn_wczytaj}" lub używając przycisku "Przeglądaj..." do wyboru pliku w oknie systemowym.
   - Wybierz tryb "Tłumacz AI", wpisz język docelowy (np. "Fiński").
   - Skrypt przetłumaczy treść. Jeśli wczytasz plik .html, przetłumaczy tylko tekst widoczny dla czytelnika i zaktualizuje kod języka w tagu html.
   - Jeśli wczytasz zwykły plik .txt lub .md (np. skrypt wygenerowany przez Reżyserię), skrypt po przetłumaczeniu automatycznie zapisze wynik jako plik .html z wbudowanym tagiem językowym — gotowy do czytania przez NVDA bez żadnej dodatkowej pracy.
@@ -341,13 +367,13 @@ tresc: |
 
   KROK 6: Architekt Audiobooków
 
-  Narzędzie do przygotowywania profesjonalnej struktury pliku pod czytniki ekranu i ElevenLabs. Przejdź do niego, klikając przycisk "{main.btn.konwerter}" na pasku przycisków lub wybierając Narzędzia → Konwerter z menu (skrót: Ctrl+3).
+  Narzędzie do przygotowywania profesjonalnej struktury pliku pod czytniki ekranu i ElevenLabs. Przejdź do niego, klikając przycisk "{main.btn.konwerter}" na pasku przycisków lub wybierając Narzędzia → {main.menu.konwerter} z menu (skrót: Ctrl+3).
 
 
   Jak to działa?
 
   1. Wpisz ścieżkę do pliku źródłowego w polu tekstowym lub kliknij przycisk "Przeglądaj...", by wybrać plik w systemowym oknie dialogowym. Skrypt przyjmuje zarówno .txt, jak i .docx, a także pliki .html i .htm.
-  2. Kliknij "Buduj Architekturę dla ElevenLabs".
+  2. Kliknij "{konwerter.btn_buduj}".
   3. Skrypt przeskanuje każdą linię tekstu i zamieni słowa kluczowe (Akt, Rozdział, Prolog, Epilog, Czołówka) na nagłówki "Heading 1" w dokumencie Word.
   4. Sceny (linie zaczynające się od słowa "Scena") zamieniają się w pogrubiony tekst — widoczne w dokumencie, ale niewidoczne w spisie treści ElevenLabs.
   5. Cały pozostały tekst (dialogi, opisy) przechodzi bez zmian.
@@ -364,11 +390,11 @@ tresc: |
 
   Sztuczna inteligencja zasilająca Główne Studio najlepiej rozumie komendy, gdy są sformatowane w języku znaczników Markdown. Jeśli podasz AI w Reżyserze tylko luźny pomysł (np. "dwie siostry w zaświatach"), maszyna spanikuje z braku szczegółów i stworzy banalną, przewidywalną historię, ignorując logikę.
 
-  Aby temu zapobiec, użyj zewnętrznego chatbota (np. darmowego ChatGPT lub Claude) jako swojego osobistego Architekta. W wersji 13.0 nie musisz już przepisywać promptu z instrukcji — w panelu Reżysera, tuż pod przyciskiem „Zapisz Księgę na stałe", znajdziesz przycisk „📖 Prompt Architekta dla AI…". Kliknij go, a otworzy się okno dialogowe z gotowym tekstem promptu w polu „tylko do odczytu" oraz przyciskiem „Skopiuj do schowka". NVDA ogłasza całą zawartość od razu po otwarciu okna — wystarczy kliknąć „Skopiuj", wkleić (Ctrl+V) w ChatGPT/Claude i zastąpić fragment „[TUTAJ WPISZ SWÓJ POMYSŁ]" własnym zalążkiem fabuły.
+  Aby temu zapobiec, użyj zewnętrznego chatbota (np. darmowego ChatGPT lub Claude) jako swojego osobistego Architekta. W wersji 13.0 nie musisz już przepisywać promptu z instrukcji — w panelu Reżysera, tuż pod przyciskiem „{rezyser.btn_zapisz_ksiege_label}", znajdziesz przycisk „{rezyser.btn_prompt_architekta_label}". Kliknij go, a otworzy się okno dialogowe z gotowym tekstem promptu w polu „tylko do odczytu" oraz przyciskiem „Skopiuj do schowka". NVDA ogłasza całą zawartość od razu po otwarciu okna — wystarczy kliknąć „Skopiuj", wkleić (Ctrl+V) w ChatGPT/Claude i zastąpić fragment „[TUTAJ WPISZ SWÓJ POMYSŁ]" własnym zalążkiem fabuły.
 
   Dlaczego tak, a nie przez kopiowanie z instrukcji? Dialog w GUI ma kluczową zaletę dostępnościową: jest natywny i czytany bez zakłóceń przez czytnik ekranu, nie wymaga przełączania się do edytora tekstu (gdzie polskie „ogonki" i cudzysłowy bywają źle kopiowane) i działa identycznie na każdym systemie operacyjnym. Ten sam wzorzec — dialog z promptem do skopiowania — używany jest też w Managerze Reguł (patrz KROK 7b poniżej).
 
-  Jak AI odpowiada: W odpowiedzi otrzymasz tekst w dwóch częściach. Pierwsza to Księga Świata zamknięta w bloku kodu Markdown (znaczniki ```markdown … ```). Skopiuj WYŁĄCZNIE zawartość bloku kodu (bez samych znaczników ```) i wklej do pola „Księga Świata" w Reżyserze, a następnie kliknij „Zapisz Księgę na stałe". Druga część to rekomendacja, który z trybów twórczych (Skrypt czy Audiobook) najlepiej pasuje do Twojego pomysłu — potraktuj ją jako podpowiedź przy zaznaczaniu trybu w RadioBoxie.
+  Jak AI odpowiada: W odpowiedzi otrzymasz tekst w dwóch częściach. Pierwsza to Księga Świata zamknięta w bloku kodu Markdown (znaczniki ```markdown … ```). Skopiuj WYŁĄCZNIE zawartość bloku kodu (bez samych znaczników ```) i wklej do pola „Księga Świata" w Reżyserze, a następnie kliknij „{rezyser.btn_zapisz_ksiege_label}". Druga część to rekomendacja, który z trybów twórczych (Skrypt czy Audiobook) najlepiej pasuje do Twojego pomysłu — potraktuj ją jako podpowiedź przy zaznaczaniu trybu w RadioBoxie.
 
   Mini-kurs Markdown w Księdze: pojedynczy hashtag (#) to główna sekcja (np. „# Postacie"), podwójny hashtag (##) to podsekcja, myślniki (-) tworzą listy, a podwójne gwiazdki (**tekst**) pogrubiają absolutne, nienaruszalne zasady (np. „**Bohater NIGDY nie kłamie**"). Dla postaci obcojęzycznej dodawaj tag z akcentem, np. „[Speaker 1: Marek] - ma akcent francuski". Słowo kluczowe „akcent" jest KONIECZNE — silnik aplikacji wykrywa je automatycznie i nakłada poprawne reguły fonetyczne na dialogi danej postaci.
 
@@ -383,11 +409,11 @@ tresc: |
 
   Co znajdziesz w Managerze Reguł:
   - Drzewo plików — pełna lista wszystkich plików YAML w dictionaries/ z podziałem na języki bazowe (na razie tylko polski: pl/) i kategorie (akcenty/, szyfry/, rezyser/). Nawigacja strzałkami jak w Eksploratorze plików Windows, pełne wsparcie NVDA.
-  - Przycisk „Otwórz w edytorze tekstu" — otwiera zaznaczony plik w domyślnym Notatniku systemu. Edytujesz, zapisujesz, klikasz „Odśwież drzewo" i gotowe.
-  - Przycisk „Duplikuj wybrany plik" — najszybsza droga do nowego akcentu: bierzesz istniejący plik (np. finski.yaml), podajesz nową nazwę (np. szwedzki), Manager tworzy kopię z komentarzem „zmień pola etykieta i opis" i otwiera ją w edytorze.
-  - Przycisk „Nowy plik reguł…" — kreator z wyborem typu (akcent, szyfr, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny). Dla zwykłych przypadków (akcent, szyfr typu „zamiana liter") kreator tworzy gotowy do edycji szablon YAML. Dla przypadków wymagających programisty (nowy język bazowy, algorytm typu „mieszanie środka słów") kreator generuje prompt dla chatbota AI — wklejasz do ChatGPT, dostajesz gotowy plik YAML, zapisujesz w dictionaries/ i gotowe.
+  - Przycisk „{manager.btn_otworz_label}" — otwiera zaznaczony plik w domyślnym Notatniku systemu. Edytujesz, zapisujesz, klikasz „{manager.btn_odswiez_label}" i gotowe.
+  - Przycisk „{manager.btn_duplikuj_label}" — najszybsza droga do nowego akcentu: bierzesz istniejący plik (np. finski.yaml), podajesz nową nazwę (np. szwedzki), Manager tworzy kopię z komentarzem „zmień pola etykieta i opis" i otwiera ją w edytorze.
+  - Przycisk „{manager.btn_nowy_label}" — kreator z wyborem typu (akcent, szyfr, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny). Dla zwykłych przypadków (akcent, szyfr typu „zamiana liter") kreator tworzy gotowy do edycji szablon YAML. Dla przypadków wymagających programisty (nowy język bazowy, algorytm typu „mieszanie środka słów") kreator generuje prompt dla chatbota AI — wklejasz do ChatGPT, dostajesz gotowy plik YAML, zapisujesz w dictionaries/ i gotowe.
 
-  Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć na Stronę główną, kliknij „🔄 Odśwież akcenty Reżysera z YAML" i uruchom aplikację ponownie. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.
+  Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć na Stronę główną, kliknij „{home.btn_odswiez_label}" i uruchom aplikację ponownie. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.
 
   Gdzie szukać dalszej dokumentacji folderu dictionaries/:
   - Plik `docs/dictionaries.pl.txt` (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.
@@ -404,7 +430,7 @@ tresc: |
 
   2. Ważne ostrzeżenie: ciche przetwarzanie w tle
 
-  Po kliknięciu przycisków takich jak "Wyślij do AI" lub "Uruchom Przetwarzanie", program natychmiast rozpoczyna przetwarzanie w tle. Na ekranie pojawia się pasek postępu (Gauge), ale NVDA NIE odczytuje jego wartości w czasie rzeczywistym — czytnik ekranu milczy podczas pracy. Nie klikaj przycisku ponownie. Poczekaj, aż pojawi się okno dialogowe z wynikiem lub komunikatem o błędzie — NVDA ogłosi je automatycznie.
+  Po kliknięciu przycisków takich jak "{rezyser.btn_wyslij_label}" lub "{poliglota.btn_process}", program natychmiast rozpoczyna przetwarzanie w tle. Na ekranie pojawia się pasek postępu (Gauge), ale NVDA NIE odczytuje jego wartości w czasie rzeczywistym — czytnik ekranu milczy podczas pracy. Nie klikaj przycisku ponownie. Poczekaj, aż pojawi się okno dialogowe z wynikiem lub komunikatem o błędzie — NVDA ogłosi je automatycznie.
 
   3. Nawigacja między narzędziami
 
