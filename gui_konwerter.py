@@ -3,6 +3,9 @@ gui_konwerter.py – Panel modułu „Architekt Audiobooków".
 
 Zastępuje pages/3_Konwerter.py (Streamlit).
 Dziedziczy po wx.Panel; podpinany do MainFrame z main.py.
+
+Wersja 13.1: cały tekst widoczny dla użytkownika przechodzi przez
+:mod:`i18n` (klucze z ``dictionaries/pl/gui/ui.yaml`` – sekcja ``konwerter``).
 """
 
 import os
@@ -10,6 +13,8 @@ import re
 
 import docx
 import wx
+
+from i18n import t
 
 
 class KonwerterPanel(wx.Panel):
@@ -25,16 +30,9 @@ class KonwerterPanel(wx.Panel):
         - Sukces / błąd raportuje przez wx.MessageBox (A11y)
     """
 
-    TOOL_DESCRIPTION = (
-        "Ten moduł służy do przygotowania architektury pliku dla czytników ekranu "
-        "(nawigacja klawiszami 1 i h po nagłówkach) oraz ElevenLabs. "
-        "Zmienia słowa kluczowe (Czołówka, Akt, Rozdział, Prolog, Epilog) na Nagłówki "
-        "pierwszego poziomu, pozostawiając całą resztę skryptu bez zmian."
-    )
-
     def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
-        self.SetName("Panel Architekta Audiobooków")
+        self.SetName(t("konwerter.panel_name"))
 
         self._build_ui()
         self._bind_events()
@@ -46,7 +44,7 @@ class KonwerterPanel(wx.Panel):
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # --- Nagłówek narzędzia ---
-        heading = wx.StaticText(self, label="📄  Architekt Audiobooków")
+        heading = wx.StaticText(self, label=t("konwerter.heading"))
         heading_font = heading.GetFont()
         heading_font.SetPointSize(16)
         heading_font.MakeBold()
@@ -55,7 +53,7 @@ class KonwerterPanel(wx.Panel):
         # --- Opis narzędzia ---
         description = wx.TextCtrl(
             self,
-            value=self.TOOL_DESCRIPTION,
+            value=t("konwerter.tool_description"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
         )
         # Upodabniamy tło pola do tła głównego okna, żeby nie wyglądało jak pole do wpisywania
@@ -65,23 +63,17 @@ class KonwerterPanel(wx.Panel):
         separator = wx.StaticLine(self)
 
         # --- Etykieta + pole wejściowe na nazwę / ścieżkę pliku ---
-        lbl_file = wx.StaticText(
-            self,
-            label="Nazwa lub pełna ścieżka pliku źródłowego\n"
-                  "(np. plik .txt, .html, .md lub dokument .docx):",
-        )
+        lbl_file = wx.StaticText(self, label=t("konwerter.lbl_plik"))
 
         self._txt_file = wx.TextCtrl(
             self,
             style=wx.TE_PROCESS_ENTER,
-            name="Pole ścieżki pliku źródłowego",
+            name=t("konwerter.txt_plik_name"),
         )
-        self._txt_file.SetHint("Wpisz ścieżkę do pliku (tekstowy, HTML, MD, DOCX)…")
+        self._txt_file.SetHint(t("konwerter.txt_plik_hint"))
 
-        self._btn_browse = wx.Button(self, label="Przeglądaj…")
-        self._btn_browse.SetToolTip(
-            "Otwiera systemowe okno wyboru pliku .txt lub .docx"
-        )
+        self._btn_browse = wx.Button(self, label=t("konwerter.btn_przegladaj"))
+        self._btn_browse.SetToolTip(t("konwerter.btn_przegladaj_tooltip"))
 
         # Poziomy sizer: pole tekstowe (rozszerzalne) + przycisk po prawej
         file_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -97,13 +89,8 @@ class KonwerterPanel(wx.Panel):
         )
 
         # --- Przycisk akcji ---
-        self._btn_build = wx.Button(
-            self,
-            label="Buduj Architekturę dla ElevenLabs",
-        )
-        self._btn_build.SetToolTip(
-            "Przetwarza plik i zapisuje architektura_<nazwa>.docx obok pliku źródłowego"
-        )
+        self._btn_build = wx.Button(self, label=t("konwerter.btn_buduj"))
+        self._btn_build.SetToolTip(t("konwerter.btn_buduj_tooltip"))
 
         # --- Złożenie layoutu ---
         main_sizer.Add(heading,       flag=wx.ALL, border=16)
@@ -139,8 +126,8 @@ class KonwerterPanel(wx.Panel):
         """Otwiera systemowy dialog wyboru pliku i wstawia ścieżkę do pola."""
         with wx.FileDialog(
             self,
-            message="Wybierz plik źródłowy",
-            wildcard="Wszystkie obsługiwane pliki (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*",
+            message=t("konwerter.file_dlg_title"),
+            wildcard=t("konwerter.file_dlg_wildcard"),
             style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
         ) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
@@ -157,8 +144,8 @@ class KonwerterPanel(wx.Panel):
         # --- Walidacja wejścia ---
         if not file_name:
             wx.MessageBox(
-                "Podaj nazwę lub ścieżkę pliku źródłowego.",
-                "Brak pliku",
+                t("konwerter.brak_pliku_tresc"),
+                t("konwerter.brak_pliku_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -167,8 +154,8 @@ class KonwerterPanel(wx.Panel):
 
         if not os.path.exists(file_name):
             wx.MessageBox(
-                f"Nie znaleziono pliku:\n{file_name}",
-                "Plik nie istnieje",
+                t("konwerter.plik_nie_istnieje_tresc", sciezka_pliku=file_name),
+                t("konwerter.plik_nie_istnieje_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -185,16 +172,19 @@ class KonwerterPanel(wx.Panel):
                     tekst = fh.read()
         except Exception as exc:
             wx.MessageBox(
-                f"Błąd podczas odczytu pliku:\n{exc}",
-                "Błąd odczytu",
+                t("konwerter.blad_odczytu_tresc", tresc_bledu=str(exc)),
+                t("konwerter.blad_odczytu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
 
         # --- Przetwarzanie treści ---
+        # Pole `author` .docx jest widoczne dla NVDA w dymkach podpowiedzi
+        # Eksploratora – bierzemy je z i18n, żeby nie pokazywać polskiego
+        # „Reżyser" użytkownikom, którzy aplikację mają na innym języku.
         nowy_doc = docx.Document()
-        nowy_doc.core_properties.author = "Reżyser"
+        nowy_doc.core_properties.author = t("konwerter.author_metadata")
         nowy_doc.core_properties.comments = ""
 
         for linia in tekst.splitlines():
@@ -238,17 +228,16 @@ class KonwerterPanel(wx.Panel):
             nowy_doc.save(out_name)
         except Exception as exc:
             wx.MessageBox(
-                f"Błąd podczas zapisu pliku wynikowego:\n{exc}",
-                "Błąd zapisu",
+                t("konwerter.blad_zapisu_tresc", tresc_bledu=str(exc)),
+                t("konwerter.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
 
         wx.MessageBox(
-            f"Perfetto! Nagłówki pierwszego poziomu zostały ustawione.\n\n"
-            f"Plik zapisano jako:\n{out_name}",
-            "Sukces",
+            t("konwerter.sukces_tresc", sciezka_pliku=out_name),
+            t("konwerter.sukces_tytul"),
             wx.OK | wx.ICON_INFORMATION,
             self,
         )

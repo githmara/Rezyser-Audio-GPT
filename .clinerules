@@ -29,6 +29,22 @@
 10. DESYNCHRONIZACJA `python -c` — PROBLEM ROZWIĄZANY (po aktualizacji Shell Integration): Poprzednie wersje Cline tłumiły output bardzo długich inline-skryptów (~20+ linii z wieloma `print` + `assert`), wymuszając plik `_output.txt` + `read_file`. Test potwierdził, że **po aktualizacji** `python -c` z 20 liniami kodu, 8 assertami, f-stringami i słownikami zwraca pełny output natywnie przez `execute_command` (exit 0, żadnej potrzeby reload okna).
    -> AKTUALNA PRAKTYKA: Dla testów do ~30-40 linii Pythona możesz polegać na outpucie zwracanym bezpośrednio przez `execute_command`. Dla większych testów (np. pełny refaktor kilku funkcji) nadal preferuj **tymczasowy plik** `_test_*.py` — czytelność kodu w cudzysłowach jest mordercza.
    -> FALLBACK (gdy output jednak zniknie): Użyj starego wzorca `.venv\Scripts\python.exe -c "..." > _output.txt 2>&1` i odczytaj plik natywnym `read_file`. Komenda czyszcząca bufor przed testem to w CMD `cls && ...` (NIE `clear && ...` — `clear` to bashowa komenda, w CMD nie istnieje).
+11. UNICODE W TEŚCIE Z PRINT-AMI — WYBIERZ OD RAZU OSOBNY PLIK (nauka z refaktoru i18n 13.1): Kiedy skrypt testowy drukuje wartości zawierające polskie diakrytyki, symbole Unicode (`—`, `…`, `•`) albo emoji (`✂️ 🎬 🌍 📋`), gołe `python -c "print(...)"` w CMD wywróci się z `UnicodeEncodeError: 'charmap' codec can't encode characters...`, bo domyślny `sys.stdout` dziedziczy z CMD kodowanie OEM (`cp1250`/`cp852`). Potwierdzone empirycznie w sesji 13.1:
+    - `chcp 65001 >nul && python -c "print('✂️')"` → nadal błąd (emoji `✂️` to dwa kody Unicode, niemapowalne w cp1250),
+    - `set PYTHONIOENCODING=utf-8 && python -c "print('✂️')"` → **też** potrafi się wywalić, bo zmienna ustawiona przez `set` nie zawsze propaguje do nowego procesu Python uruchomionego z CMD,
+    - przekierowanie `> _output.txt 2>&1` z tą samą zmienną potrafi zapisać krzaki (`Re¿yser` zamiast `Reżyser`), bo Python tworzy writer z tym, co dziedziczy przed `set`.
+    -> JEDYNA NIEZAWODNA PRAKTYKA: natychmiast przejdź na plik `_test_*.py` z ręcznym `open("_output.txt", "w", encoding="utf-8")` i dopisuj do niego wszystkie wartości, które chcesz obejrzeć. Do terminala drukuj tylko **ASCII-only sygnał sukcesu** (np. `print("SMOKE_TEST_OK", file=sys.stderr)`) — służy do wykrycia exit-code=0, nie do czytania wyników. Odczyt `_output.txt` robisz natywnym `read_file` Cline'a — tam UTF-8 działa zawsze.
+    -> KIEDY TO JEST WYMAGANE: walidacja kluczy i18n (`t("...")` może zawierać polskie zdanie), iteracja po wczytanym YAML-u (emoji w `manager.kategorie.*`), test konstruktorów `wx.Panel` (wxPython panele mają w nazwach `🎬 Reżyser Audio GPT`). NIE marnuj rundy na próbę `python -c`, jeśli spodziewasz się choćby jednego Unicode w outpucie — od razu plik.
+12. WX TEST KONSTRUKTORÓW BEZ `MainLoop()` — BEZPIECZNY WZORZEC (nauka z 13.1): Żeby sprawdzić, czy wszystkie panele wxPython tworzą się bez wyjątków, ale **bez blokowania terminala**, zastosuj ten wzorzec w pliku `_test_smoke.py`:
+    ```python
+    import wx
+    app = wx.App(False)
+    frame = main_mod.MainFrame()         # konstruktor wołany – sprawdza wszystkie t("...")
+    frame._switch_tool(...)              # przelotnie każdy panel
+    frame.Destroy()
+    wx.CallAfter(app.ExitMainLoop)       # NIE wołamy app.MainLoop() — okno znika samo
+    ```
+    `MainFrame.__init__` woła `self.Show()`, ale bez `MainLoop()` okno nie wchodzi w pętlę zdarzeń — zamyka się natychmiast po `Destroy()`. Test wraca z exit 0 w milisekundy i **nie zawiesza terminala** (patrz reguła 2). Wzorzec sprawdzony w 13.1 do smoke-testu infrastruktury i18n — wykrył kilka drobnych bugów (np. literówka klucza `YAND` zamiast `YAML` w tooltipie).
 
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
@@ -159,25 +175,30 @@ krytyczne — tłumacz (człowiek lub LLM) musi wiedzieć, jak je traktować:
   4. Zapisywać wynik do `dictionaries/<kod>/gui/` (obok `ui.yaml`).
 - Skrypt jest niezależny od silnika Poligloty i może być uruchamiany jednorazowo (batch) przed releasem danej wersji 13.x.
 
-## Integracja z Managerem Reguł (opcjonalna faza 2)
+## Integracja z Managerem Reguł (✅ wdrożona w 13.1)
 
 Folder `dictionaries/<kod>/gui/` jest celowo położony obok `akcenty/`,
-`szyfry/` i `rezyser/`, żeby `gui_manager_regul.py` mógł pokazywać
-tłumaczenia UI jako **czwartą kategorię** w drzewie plików YAML. Integracja
-jest trywialna (punkty zmiany w kodzie):
-1. Dopisać `FOLDER_GUI = "gui"` obok `FOLDER_AKCENTY` / `FOLDER_SZYFRY` /
-   `FOLDER_REZYSER`.
-2. Dodać wpis do `_ETYKIETA_KATEGORII` (np. `"Tłumaczenia UI  🌐"`).
-3. Rozszerzyć krotkę w pętli skanującej:
+`szyfry/` i `rezyser/`, a `gui_manager_regul.py` pokazuje tłumaczenia UI
+jako **czwartą kategorię** w drzewie plików YAML. Integracja weszła
+w wersji 13.1 razem z modułem `i18n.py` i plikiem
+`dictionaries/pl/gui/ui.yaml`. Wdrożone punkty (dla referencji przy
+ewentualnym kopiowaniu do innego projektu):
+
+1. ✅ `FOLDER_GUI = "gui"` obok `FOLDER_AKCENTY` / `FOLDER_SZYFRY` /
+   `FOLDER_REZYSER` (stała w `gui_manager_regul.py`).
+2. ✅ Etykiety kategorii trzymane w YAML-u pod kluczem `manager.kategorie.*`
+   i pobierane przez funkcję `_etykieta_kategorii(kat)` (zamiast globalnej
+   stałej `_ETYKIETA_KATEGORII`) — dzięki temu tłumaczenie etykiety
+   nie wymaga zmiany kodu Pythona.
+3. ✅ Pętla skanująca rozszerzona:
    `for kat in (FOLDER_AKCENTY, FOLDER_SZYFRY, FOLDER_REZYSER, FOLDER_GUI)`.
-4. W kreatorze nowego języka dopisać tworzenie podfolderu `gui/` obok
-   obecnie tworzonych `akcenty/` i `szyfry/`.
+4. ✅ Kreator nowego języka bazowego tworzy teraz trzy podfoldery:
+   `akcenty/`, `szyfry/`, `gui/` (w tej kolejności, po zapisie
+   `podstawy.yaml`).
 
 Dzięki temu lingwista tłumaczący interfejs pracuje dokładnie tam, gdzie
-pracuje twórca nowego akcentu — bez otwierania osobnego katalogu.
-Integracja NIE jest blokerem dla pierwszego wydania z tłumaczonym UI
-(faza 1 wystarczy, że czyta pliki z dysku); może wejść w dowolnym
-releasie 13.x, w którym akurat zmieścimy ten podpunkt.
+pracuje twórca nowego akcentu — bez otwierania osobnego katalogu. Nowe
+języki dopisywane w 13.2+ dostają od razu pełną strukturę folderów.
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze usuwaj wszystkie pliki tymczasowe (np. `_output.txt`, pliki testowe py), które utworzyłeś w trakcie zadania. Kiedy ogłaszasz koniec pracy, katalog główny musi być czysty i wolny od Twoich "śladów".

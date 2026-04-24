@@ -24,6 +24,12 @@ Główne sekcje UI (zobacz metody ``_zbuduj_*``):
     • BLOK E – panel struktury (Prolog/Epilog/Akt/Scena/Rozdział).
     • BLOK F – panel postprodukcji (tytułowanie rozdziałów AI).
     • BLOK G – wskaźnik okna kontekstowego AI (Gauge + status).
+
+Wersja 13.1: cały tekst widoczny dla użytkownika pochodzi z
+``dictionaries/pl/gui/ui.yaml`` (sekcja ``rezyser``) przez moduł
+:mod:`i18n`. W konstruktorze pobieramy też ``TOOL_DESCRIPTION`` i
+``PROMPT_ARCHITEKTA`` – są zbyt duże, żeby trzymać je twardo w kodzie
+i tak utrudniały tłumaczenie w przyszłości.
 """
 
 from __future__ import annotations
@@ -41,6 +47,7 @@ import wx
 import core_rezyser as cr
 import przepisy_rezysera as pr
 import rezyser_ai as rai
+from i18n import t
 
 
 
@@ -65,65 +72,6 @@ class RezyserPanel(wx.Panel):
     z wynikami przekazywanymi do GUI przez ``wx.CallAfter``.
     """
 
-    TOOL_DESCRIPTION = (
-        "Reżyser Audio GPT to hybrydowe studio twórcze.\n\n"
-        "Tryb Burzy Mózgów  – planuj fabułę, generuj 3 opcje (BEZ zapisu do pliku).\n"
-        "Tryb Skryptu        – pisz surowy skrypt dźwiękowy z tagami [SFX] i [Postać:"
-        " emocja] (ZAPIS DO PLIKU).\n"
-        "Tryb Audiobooka     – generuj gęstą, klasyczną prozę literacką (ZAPIS DO PLIKU).\n\n"
-        "Projekty zapisywane są w podfolderze 'skrypty/' obok programu.\n"
-        "Podaj nazwę projektu BEZ rozszerzenia (np. kroniki_arkonii).\n"
-        "Aby zmienić projekt, musisz najpierw wyczyścić pamięć bieżącą."
-    )
-
-    # --------------------------------------------------------------
-    # PROMPT ARCHITEKTA – gotowy tekst do wklejenia w zewnętrznego chatbota.
-    # Wersja 13.0: przeniesiony z instrukcja.txt bezpośrednio do GUI, by
-    # użytkownik (zwłaszcza korzystający z NVDA) nie musiał go wyszukiwać
-    # w pliku tekstowym. Dialog wywołany przez przycisk „📖 Prompt
-    # Architekta dla AI…” pokazuje ten tekst w polu READONLY gotowym do
-    # skopiowania (Ctrl+A → Ctrl+C lub przycisk „Skopiuj do schowka").
-    #
-    # Jeśli kiedykolwiek zmienisz tę treść — zaktualizuj też sekcję
-    # „KROK 7" w ``instrukcja.txt`` (jedno zdanie wprowadzające),
-    # żeby dokumentacja dla end-userów nie odbiegała od stanu GUI.
-    # --------------------------------------------------------------
-    PROMPT_ARCHITEKTA = (
-        "Jesteś wybitnym architektem światów (Worldbuilder) i konsultantem "
-        "literackim. Mam luźny pomysł na fabułę: [TUTAJ WPISZ SWÓJ POMYSŁ]. "
-        "Twoim zadaniem jest rozbudowanie tego do profesjonalnej "
-        "„Księgi Świata”.\n"
-        "Dostosuj ton i zasady do mojego pomysłu. Unikaj tanich, "
-        "baśniowych skrótów i klisz AI.\n\n"
-        "ZASADY FORMATOWANIA (KRYTYCZNE):\n"
-        "Musisz zwrócić odpowiedź w dwóch oddzielnych częściach:\n\n"
-        "CZĘŚĆ 1: KSIĘGA ŚWIATA\n"
-        "Tę część musisz bezwzględnie zamknąć w JEDNYM bloku kodu Markdown "
-        "(użyj znaczników ```markdown na początku i ``` na końcu). "
-        "Wewnątrz bloku kodu zastosuj te reguły:\n"
-        "1. Rozpocznij od emotki otwartej książki i roboczego tytułu, "
-        "np. 📖 Księga Świata: [Tytuł].\n"
-        "2. Używaj pojedynczego hashtagu (#) dla głównych sekcji "
-        "(np. # Zasady Świata, # Postacie).\n"
-        "3. Używaj podwójnego hashtagu (##) dla podsekcji.\n"
-        "4. Używaj myślników (-) do tworzenia czytelnych list.\n"
-        "5. Używaj podwójnych gwiazdek (**tekst**), by pogrubić absolutne, "
-        "nienaruszalne zasady (np. **Bohater NIGDY nie kłamie**).\n"
-        "6. Opisz psychologię postaci, ich największe wady i motywacje. "
-        "W przypadku postaci obcojęzycznych, dodaj informację o akcencie "
-        "bezpośrednio przy tagu, np. `[Speaker 1: Imię] - sepleni i ma "
-        "akcent francuski`. **Wskazówka techniczna:** Użycie słowa "
-        "kluczowego `akcent` jest bezwzględnie wymagane, ponieważ to na "
-        "jego podstawie zewnętrzny skrypt aplikacji automatycznie wykrywa "
-        "i nakłada poprawne reguły fonetyczne na dialogi danej postaci.\n\n"
-        "CZĘŚĆ 2: REKOMENDACJA TRYBU\n"
-        "Tę część umieść POZA blokiem kodu, jako zwykły tekst pod spodem. "
-        "Doradź mi, który z trybów mojej aplikacji będzie najlepszy do "
-        "realizacji tego pomysłu: 🎬 Tryb Surowego Skryptu (słuchowiska, "
-        "SFX, fonetyka), czy 📖 Tryb Tradycyjnego Audiobooka (klasyczna "
-        "proza literacka)."
-    )
-
     ENV_FILENAME = "golden_key.env"
     SKRYPTY_DIR  = "skrypty"
 
@@ -131,7 +79,18 @@ class RezyserPanel(wx.Panel):
     def __init__(self, parent: wx.Window) -> None:
 
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
-        self.SetName("Panel Reżysera Audio GPT")
+        self.SetName(t("rezyser.panel_name"))
+
+        # --------------------------------------------------------------
+        # Wersja 13.1: duże bloki tekstu (opis narzędzia + prompt dla AI)
+        # pobrane z YAML-a przez i18n. Przypisujemy je do instancji, a NIE
+        # do klasy – bo `t()` działa dopiero po ustawieniu języka w
+        # ``i18n.ustaw_jezyk()`` (co robi ``main.py`` w ``main()``).
+        # Dzięki temu przy przyszłej zmianie języka w locie wystarczy
+        # odbudować panel, a nie podmieniać stałe klasy w runtime.
+        # --------------------------------------------------------------
+        self._tool_description = t("rezyser.tool_description")
+        self._prompt_architekta = t("rezyser.prompt_architekta_content")
 
         # ── Model danych: stan projektu, I/O, liczniki, silnik fonetyczny ──
         # Refaktor 13.0: cały stan trzymany w core_rezyser.ProjektRezysera.
@@ -169,16 +128,7 @@ class RezyserPanel(wx.Panel):
     # Helper: wskazuje przepis dla aktualnie zaznaczonego trybu w RadioBox
     # ------------------------------------------------------------------
     def _aktualny_przepis(self) -> pr.PrzepisRezysera | None:
-        """Zwraca :class:`PrzepisRezysera` odpowiadający zaznaczonemu trybowi.
-
-        Użyteczne dla wątku tła AI (``_wyslij_worker``) – eliminuje
-        konieczność pracy z indeksem trybu (0/1/2) i pozwala korzystać
-        z pól YAML-a typu ``zapis_do_pliku``, ``stosuj_akcenty_fonetyczne``.
-
-        Returns:
-            Pierwszy przepis odpowiadający ``self._rb_mode.GetSelection()``
-            lub ``None``, gdy lista ``self._przepisy`` jest pusta (brak YAML-i).
-        """
+        """Zwraca :class:`PrzepisRezysera` odpowiadający zaznaczonemu trybowi."""
         if not self._przepisy:
             return None
         idx = self._rb_mode.GetSelection()
@@ -188,14 +138,6 @@ class RezyserPanel(wx.Panel):
 
     # ==================================================================
     # SHIMY WŁAŚCIWOŚCI delegujące do self._projekt
-    # ------------------------------------------------------------------
-    # Po refaktorze 13.0 prawdziwy stan projektu żyje w ``self._projekt``
-    # (instancja ``core_rezyser.ProjektRezysera``). Aby nie zmieniać setek
-    # miejsc w tym pliku, które czytają/piszą ``self.full_story`` itp.,
-    # każdy dawny atrybut jest tu @property z getter'em i setter'em
-    # delegującym do ``self._projekt.*``. Operacje typu
-    # ``self.full_story += tekst`` działają naturalnie: Python wywołuje
-    # getter (by przeczytać bieżącą wartość), konkatenuje i wywołuje setter.
     # ==================================================================
 
     @property
@@ -248,8 +190,6 @@ class RezyserPanel(wx.Panel):
 
     @property
     def zapisana_nazwa_pliku(self) -> str:
-        # Pole w ProjektRezysera nazywa się ``nazwa_pliku`` – shim mapuje
-        # starą polską nazwę na nową (krótszą).
         return self._projekt.nazwa_pliku
 
     @zapisana_nazwa_pliku.setter
@@ -285,54 +225,16 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Budowanie interfejsu (kompozer)
     # ------------------------------------------------------------------
-    # Refaktor 13.0/4F: dawniej monolityczny ``_build_ui`` został podzielony
-    # na prywatne metody ``_zbuduj_*``, jedna na każdy logiczny blok.
-    # Każda taka metoda:
-    #   1. Tworzy swoje widżety jako bezpośrednie dzieci ``self`` lub
-    #      dedykowanego sub-panelu (``self._pnl_struktura`` /
-    #      ``self._pnl_postprodukcja``).
-    #   2. Zwraca gotowy ``wx.BoxSizer`` z logicznym rozmieszczeniem.
-    # Dzięki temu:
-    #   * Każdy blok UI można przeczytać osobno (~30-50 linii).
-    #   * Łatwiej eksperymentować z układem w konkretnej sekcji bez
-    #     ryzyka, że zepsuje się reszta.
-    #   * Tab order zachowany, bo kolejność WYWOŁAŃ metod pozostaje
-    #     identyczna z oryginałem (widżety są tworzone w tej samej
-    #     kolejności co przed refaktorem).
-    # ------------------------------------------------------------------
-
     def _build_ui(self) -> None:
-        """Buduje cały interfejs panelu poprzez wywołanie metod ``_zbuduj_*``.
-
-        A11y: wszystkie widżety są bezpośrednimi dziećmi RezyserPanel
-        (poza dwoma sub-panelami struktury i postprodukcji). Kolejność
-        tabulatora = kolejność tworzenia widżetów w poszczególnych
-        ``_zbuduj_*``.
-
-        Pożądana kolejność Tab:
-            opis → nazwa_pliku → wczytaj → wyczyść → hard_reset
-            → ksiega_swiata → zapisz_ksiege
-            → pamiec_dlugotrwala → zapisz_pamiec
-            → radiobox_trybu → [przyciski struktury]
-            → podgląd_historii → instrukcje → wyslij
-            → [przycisk postprodukcji] → wskaźnik_pamięci_modelu
-        """
+        """Buduje cały interfejs panelu poprzez wywołanie metod ``_zbuduj_*``."""
         BORDER = 8
 
-        # Kolejność wywołań ≡ kolejność tworzenia widżetów ≡ tab order.
-        # UWAGA: pasek pliku (BLOK B) MUSI być utworzony PRZED sidebarem (BLOK C),
-        # bo w kolejności tabulatora: nazwa_pliku → wczytaj → wyczyść → hard_reset
-        # → ksiega_swiata → zapisz_ksiege → pamiec → zapisz_pamiec. Sidebar
-        # wizualnie jest w LEWEJ kolumnie, ale jego widgety tworzone są
-        # dopiero w trzeciej kolejności.
         top_sizer         = self._zbuduj_naglowek(BORDER)
         pasek_pliku_sizer = self._zbuduj_pasek_pliku(BORDER)
         sidebar_sizer     = self._zbuduj_sidebar(BORDER)
         main_area_sizer   = self._zbuduj_obszar_roboczy(BORDER, pasek_pliku_sizer)
 
-        # Pionowy separator między lewą a prawą kolumną.
         v_sep = wx.StaticLine(self, style=wx.LI_VERTICAL)
-
 
         two_col_sizer = wx.BoxSizer(wx.HORIZONTAL)
         two_col_sizer.Add(sidebar_sizer,   proportion=1, flag=wx.EXPAND | wx.ALL, border=4)
@@ -347,25 +249,20 @@ class RezyserPanel(wx.Panel):
         self.SetSizer(root_sizer)
 
     # ------------------------------------------------------------------
-    # BLOK A – Nagłówek panelu (tytuł + opis narzędzia + separator)
+    # BLOK A – Nagłówek panelu
     # ------------------------------------------------------------------
     def _zbuduj_naglowek(self, BORDER: int) -> wx.BoxSizer:
-        """Buduje nagłówek Reżysera (tytuł + opis narzędzia + separator)."""
-        heading = wx.StaticText(
-            self,
-            label="🎬  Reżyser Audio GPT – Hybrydowe Studio Twórcze",
-        )
+        heading = wx.StaticText(self, label=t("rezyser.heading"))
         hf = heading.GetFont()
         hf.SetPointSize(16)
         hf.MakeBold()
         heading.SetFont(hf)
 
-        # ── [TAB 1] Opis narzędzia – Read-Only, NoBorder (NVDA-friendly) ──
         self._description = wx.TextCtrl(
             self,
-            value=self.TOOL_DESCRIPTION,
+            value=self._tool_description,
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
-            name="Opis modułu Reżyser Audio GPT",
+            name=t("rezyser.description_name"),
         )
         self._description.SetBackgroundColour(self.GetBackgroundColour())
         self._description.SetMinSize((-1, 110))
@@ -388,49 +285,24 @@ class RezyserPanel(wx.Panel):
     # BLOK B – Pole nazwy pliku + przyciski wczytaj / wyczyść / reset
     # ------------------------------------------------------------------
     def _zbuduj_pasek_pliku(self, BORDER: int) -> wx.BoxSizer:
-        """Buduje pasek: etykieta + pole nazwy pliku + 3 przyciski (wiersz)."""
-        lbl_file = wx.StaticText(
-            self,
-            label="Nazwa pliku projektu (bez rozszerzenia, np. kroniki_arkonii):",
-        )
+        lbl_file = wx.StaticText(self, label=t("rezyser.lbl_nazwa_pliku"))
 
-        # ── [TAB 2] Pole nazwy projektu ──────────────────────────────
         self._txt_file_name = wx.TextCtrl(
             self,
             style=wx.TE_PROCESS_ENTER,
-            name="Pole nazwy pliku projektu",
+            name=t("rezyser.txt_nazwa_pliku_name"),
         )
-        self._txt_file_name.SetHint("np. kroniki_arkonii")
-        self._txt_file_name.SetToolTip(
-            "Wpisz nazwę projektu BEZ rozszerzenia.\n"
-            "Plik historii zapisywany jako: skrypty/<nazwa>.txt\n"
-            "Pole zablokowane, gdy pamięć jest zajęta."
-        )
+        self._txt_file_name.SetHint(t("rezyser.txt_nazwa_pliku_hint"))
+        self._txt_file_name.SetToolTip(t("rezyser.txt_nazwa_pliku_tooltip"))
 
-        # ── [TAB 3] Wczytaj historię ──────────────────────────────────
-        self._btn_load = wx.Button(self, label="Wczytaj historię")
-        self._btn_load.SetToolTip(
-            "Wczytuje istniejący plik projektu (skrypty/<nazwa>.txt) do pamięci.\n"
-            "Aktywny tylko gdy pamięć jest pusta i podano nazwę."
-        )
+        self._btn_load = wx.Button(self, label=t("rezyser.btn_wczytaj_label"))
+        self._btn_load.SetToolTip(t("rezyser.btn_wczytaj_tooltip"))
 
-        # ── [TAB 4] Wyczyść bieżącą (zostaw Streszczenie i Księgę) ───
-        self._btn_clear_current = wx.Button(
-            self, label="Wyczyść bieżącą (zostaw Streszczenie)"
-        )
-        self._btn_clear_current.SetToolTip(
-            "Czyści wyłącznie historię bieżącą z pamięci.\n"
-            "Streszczenie (Pamięć Długotrwała) i Księga Świata zostają zachowane.\n"
-            "Używaj do kontynuacji długiej książki po wygenerowaniu streszczenia."
-        )
+        self._btn_clear_current = wx.Button(self, label=t("rezyser.btn_wyczysc_biezaca_label"))
+        self._btn_clear_current.SetToolTip(t("rezyser.btn_wyczysc_biezaca_tooltip"))
 
-        # ── [TAB 5] Zamknij Projekt – Twardy Reset ────────────────────
-        self._btn_hard_reset = wx.Button(self, label="Zamknij Projekt (Twardy Reset)")
-        self._btn_hard_reset.SetToolTip(
-            "CAŁKOWITE wyczyszczenie projektu: historia, streszczenie, Księga Świata.\n"
-            "Zeruje wszystkie liczniki i odblokowuje pole nazwy pliku.\n"
-            "Używaj przy zmianie projektu lub zupełnie nowej historii."
-        )
+        self._btn_hard_reset = wx.Button(self, label=t("rezyser.btn_hard_reset_label"))
+        self._btn_hard_reset.SetToolTip(t("rezyser.btn_hard_reset_tooltip"))
 
         file_row = wx.BoxSizer(wx.HORIZONTAL)
         file_row.Add(self._txt_file_name,     proportion=1, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
@@ -444,89 +316,48 @@ class RezyserPanel(wx.Panel):
         return sizer
 
     # ------------------------------------------------------------------
-    # BLOK C – Sidebar: Księga Świata + Pamięć Długotrwała (lewa kolumna)
+    # BLOK C – Sidebar: Księga Świata + Pamięć Długotrwała
     # ------------------------------------------------------------------
     def _zbuduj_sidebar(self, BORDER: int) -> wx.BoxSizer:
-        """Buduje sidebar (lewą kolumnę): Księga Świata + Pamięć Długotrwała.
-
-        Uwaga: sidebar jest tworzony JAKO TRZECI (po nagłówku i pasku pliku),
-        by zachować tab order: nazwa_pliku → wczytaj → ... → ksiega_swiata.
-        Wizualnie pojawia się jednak w lewej kolumnie two_col_sizer.
-        """
-        lbl_sb_heading = wx.StaticText(self, label="📖 Pasek Boczny projektu")
+        lbl_sb_heading = wx.StaticText(self, label=t("rezyser.sidebar_heading"))
         sbf = lbl_sb_heading.GetFont()
         sbf.SetPointSize(11)
         sbf.MakeBold()
         lbl_sb_heading.SetFont(sbf)
 
-        lbl_ksiega = wx.StaticText(self, label="Księga Świata – Zasady i Postacie:")
+        lbl_ksiega = wx.StaticText(self, label=t("rezyser.lbl_ksiega_swiata"))
 
-        # ── [TAB 6] Księga Świata – duże pole wieloliniowe ────────────
         self._txt_ksiega_swiata = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE,
-            name="Pole Księgi Świata – zasady i postacie",
+            name=t("rezyser.txt_ksiega_name"),
         )
-        self._txt_ksiega_swiata.SetHint(
-            "Wpisz zasady świata, opis postaci i ich akcenty fonetyczne…\n"
-            "Np. [Geralt: akcent islandzki]\n"
-            "Zawartość dołączana jest do każdego zapytania AI."
-        )
-        self._txt_ksiega_swiata.SetToolTip(
-            "Kontekst stale dołączany do AI: zasady świata, postacie, akcenty fonetyczne.\n"
-            "Zapis na dysk wymaga podania nazwy pliku projektu."
-        )
+        self._txt_ksiega_swiata.SetHint(t("rezyser.txt_ksiega_hint"))
+        self._txt_ksiega_swiata.SetToolTip(t("rezyser.txt_ksiega_tooltip"))
 
-        # ── [TAB 7] Zapisz Księgę ─────────────────────────────────────
-        self._btn_zapisz_ksiege = wx.Button(self, label="💾 Zapisz Księgę na stałe")
-        self._btn_zapisz_ksiege.SetToolTip(
-            "Zapisuje Księgę Świata do pliku: skrypty/<nazwa>.md\n"
-            "Wymaga podania nazwy pliku projektu."
-        )
+        self._btn_zapisz_ksiege = wx.Button(self, label=t("rezyser.btn_zapisz_ksiege_label"))
+        self._btn_zapisz_ksiege.SetToolTip(t("rezyser.btn_zapisz_ksiege_tooltip"))
 
-        # ── [TAB 7a] Prompt Architekta (skopiuj do zewnętrznego AI) ───
-        # Refaktor 13.0: prompt architekta przeniesiony z instrukcja.txt
-        # wprost do GUI jako przycisk + dialog z polem do skopiowania.
-        # Wzorzec A11y identyczny jak dla ``WynikKreatoraDialog`` w
-        # Managerze Reguł – pełny tekst w wx.TextCtrl (TE_READONLY),
-        # przycisk "Skopiuj do schowka", NVDA od razu czyta zawartość.
         self._btn_prompt_architekta = wx.Button(
             self,
-            label="📖 Prompt Architekta dla AI…",
-            name="Przycisk Pokaż Prompt Architekta dla zewnętrznego chatbota",
+            label=t("rezyser.btn_prompt_architekta_label"),
+            name=t("rezyser.btn_prompt_architekta_name"),
         )
-        self._btn_prompt_architekta.SetToolTip(
-            "Otwiera okno z gotowym promptem dla zewnętrznego chatbota "
-            "(ChatGPT, Claude).\n"
-            "Wklej swój pomysł fabularny, a AI wygeneruje profesjonalną "
-            "Księgę Świata sformatowaną w Markdown – do wklejenia do pola "
-            "„Księga Świata” powyżej."
-        )
+        self._btn_prompt_architekta.SetToolTip(t("rezyser.btn_prompt_architekta_tooltip"))
 
 
-        lbl_pamiec = wx.StaticText(self, label="🧠 Pamięć Długotrwała (Streszczenie):")
+        lbl_pamiec = wx.StaticText(self, label=t("rezyser.lbl_pamiec_dlugotrwala"))
 
-        # ── [TAB 8] Pamięć Długotrwała ────────────────────────────────
         self._txt_pamiec = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE,
-            name="Pole Pamięci Długotrwałej – streszczenie wydarzeń",
+            name=t("rezyser.txt_pamiec_name"),
         )
-        self._txt_pamiec.SetHint(
-            "Tu AI zapisze streszczenie przy przepełnieniu pamięci.\n"
-            "Możesz je też edytować ręcznie."
-        )
-        self._txt_pamiec.SetToolTip(
-            "Streszczenie poprzednich wydarzeń dołączane do każdego zapytania AI.\n"
-            "Pozwala kontynuować historię bez ograniczeń okna kontekstowego modelu."
-        )
+        self._txt_pamiec.SetHint(t("rezyser.txt_pamiec_hint"))
+        self._txt_pamiec.SetToolTip(t("rezyser.txt_pamiec_tooltip"))
 
-        # ── [TAB 9] Zapisz Streszczenie ──────────────────────────────
-        self._btn_zapisz_pamiec = wx.Button(self, label="💾 Zapisz Streszczenie")
-        self._btn_zapisz_pamiec.SetToolTip(
-            "Zapisuje streszczenie do pliku: skrypty/<nazwa>_streszczenie.txt\n"
-            "Po zapisie możesz bezpiecznie wyczyścić pamięć bieżącą."
-        )
+        self._btn_zapisz_pamiec = wx.Button(self, label=t("rezyser.btn_zapisz_pamiec_label"))
+        self._btn_zapisz_pamiec.SetToolTip(t("rezyser.btn_zapisz_pamiec_tooltip"))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_sb_heading, flag=wx.ALL, border=BORDER)
@@ -567,31 +398,12 @@ class RezyserPanel(wx.Panel):
         BORDER: int,
         pasek_pliku_sizer: wx.BoxSizer,
     ) -> wx.BoxSizer:
-        """Buduje prawą kolumnę: pasek pliku + tryb + struktura + wskaźnik pamięci
-        + podgląd historii + instrukcje + postprodukcja.
-
-        Args:
-            BORDER:             Wspólna wartość marginesu w pikselach.
-            pasek_pliku_sizer:  Gotowy sizer paska pliku, zbudowany wcześniej
-                                przez ``_zbuduj_pasek_pliku`` — sidebar musi
-                                być utworzony MIĘDZY paskiem pliku a resztą
-                                obszaru roboczego, więc pasek_pliku przychodzi
-                                z zewnątrz.
-
-        A11y: kolejność tworzenia widżetów wewnątrz tej metody to
-        RadioBox → panel struktury → podgląd historii → instrukcje →
-        panel postprodukcji → wskaźnik pamięci. To wyznacza tab order
-        DALSZEJ części obszaru roboczego (po pasku pliku i sidebarze).
-        """
-        lbl_main_heading = wx.StaticText(self, label="🎬 Obszar Roboczy")
+        lbl_main_heading = wx.StaticText(self, label=t("rezyser.main_heading"))
         mf = lbl_main_heading.GetFont()
         mf.SetPointSize(11)
         mf.MakeBold()
         lbl_main_heading.SetFont(mf)
 
-        # Kolejność wywołań = kolejność tworzenia widżetów = tab order.
-        # Pasek pliku jest już gotowy (przekazany z ``_build_ui``), tworzymy tu:
-        # tryb → struktura → podgląd → instrukcje → postprodukcja → wskaźnik.
         radiobox_sizer      = self._zbuduj_radiobox_trybu(BORDER)
         panel_struktury     = self._zbuduj_panel_struktury(BORDER)
         podglad_sizer       = self._zbuduj_podglad_historii(BORDER)
@@ -600,7 +412,7 @@ class RezyserPanel(wx.Panel):
         wskaznik_sizer      = self._zbuduj_wskaznik_pamieci_modelu(BORDER)
 
 
-        sep = lambda: wx.StaticLine(self)   # noqa: E731 - krótka fabryka separatorów
+        sep = lambda: wx.StaticLine(self)   # noqa: E731
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_main_heading, flag=wx.ALL, border=BORDER)
@@ -622,23 +434,15 @@ class RezyserPanel(wx.Panel):
     # BLOK D.1 – RadioBox wyboru trybu pracy
     # ------------------------------------------------------------------
     def _zbuduj_radiobox_trybu(self, BORDER: int) -> wx.BoxSizer:
-        """Buduje RadioBox z trybami pracy załadowanymi z YAML-i."""
-        # Etykiety pobierane dynamicznie z YAML-i w ``dictionaries/pl/rezyser/``.
-        # Zbiorczy commit wersji 13.0 zawiera ten folder, więc w środowisku
-        # wydawniczym ``self._przepisy`` jest zawsze niepuste.
         self._rb_mode = wx.RadioBox(
             self,
-            label="Tryb pracy:",
+            label=t("rezyser.rb_tryb_label"),
             choices=[p.etykieta for p in self._przepisy],
             majorDimension=1,
             style=wx.RA_SPECIFY_COLS,
-            name="Wybór trybu pracy AI",
+            name=t("rezyser.rb_tryb_name"),
         )
-        self._rb_mode.SetToolTip(
-            "Burza Mózgów – planowanie bez zapisu do pliku.\n"
-            "Skrypt        – surowy skrypt dźwiękowy (zapisywany do pliku).\n"
-            "Audiobook     – tradycyjna proza literacka (zapisywana do pliku)."
-        )
+        self._rb_mode.SetToolTip(t("rezyser.rb_tryb_tooltip"))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self._rb_mode, flag=wx.EXPAND | wx.ALL, border=BORDER)
@@ -648,10 +452,9 @@ class RezyserPanel(wx.Panel):
     # BLOK E – Panel Zarządzania Strukturą (dynamicznie ukrywany)
     # ------------------------------------------------------------------
     def _zbuduj_panel_struktury(self, BORDER: int) -> wx.Panel:
-        """Buduje ``self._pnl_struktura`` z przyciskami Prolog/Epilog/Rozdział/Akt/Scena."""
         self._pnl_struktura = wx.Panel(self)
 
-        lbl_struktura = wx.StaticText(self._pnl_struktura, label="✂️ Zarządzanie Strukturą")
+        lbl_struktura = wx.StaticText(self._pnl_struktura, label=t("rezyser.struktura_heading"))
         sf = lbl_struktura.GetFont()
         sf.SetPointSize(10)
         sf.MakeBold()
@@ -659,53 +462,38 @@ class RezyserPanel(wx.Panel):
 
         self._btn_prolog = wx.Button(
             self._pnl_struktura,
-            label="📜 Wstaw Prolog",
-            name="Przycisk Wstaw Prolog",
+            label=t("rezyser.btn_prolog_label"),
+            name=t("rezyser.btn_prolog_name"),
         )
-        self._btn_prolog.SetToolTip(
-            "Wstawia nagłówek 'Prolog' na samym początku historii.\n"
-            "Możliwy tylko gdy historia jest pusta. Wymaga nazwy projektu."
-        )
+        self._btn_prolog.SetToolTip(t("rezyser.btn_prolog_tooltip"))
 
         self._btn_epilog = wx.Button(
             self._pnl_struktura,
-            label="🏁 Wstaw Epilog",
-            name="Przycisk Wstaw Epilog",
+            label=t("rezyser.btn_epilog_label"),
+            name=t("rezyser.btn_epilog_name"),
         )
-        self._btn_epilog.SetToolTip(
-            "Wstawia nagłówek 'Epilog' na końcu historii.\n"
-            "Blokuje dalsze dopisywanie treści po Epilogu."
-        )
+        self._btn_epilog.SetToolTip(t("rezyser.btn_epilog_tooltip"))
 
         self._btn_rozdzial = wx.Button(
             self._pnl_struktura,
-            label="✂️ Wstaw cięcie (Rozdział 1)",
-            name="Przycisk Wstaw Rozdział",
+            label=t("rezyser.btn_rozdzial_label", numer_rozdzialu=1),
+            name=t("rezyser.btn_rozdzial_name"),
         )
-        self._btn_rozdzial.SetToolTip(
-            "Wstawia nagłówek kolejnego rozdziału do historii i pliku.\n"
-            "Dostępny wyłącznie w trybie Audiobooka."
-        )
+        self._btn_rozdzial.SetToolTip(t("rezyser.btn_rozdzial_tooltip"))
 
         self._btn_akt = wx.Button(
             self._pnl_struktura,
-            label="🎭 Wstaw Akt 1",
-            name="Przycisk Wstaw Akt",
+            label=t("rezyser.btn_akt_label", numer_aktu=1),
+            name=t("rezyser.btn_akt_name"),
         )
-        self._btn_akt.SetToolTip(
-            "Wstawia nagłówek 'Akt N' oraz automatycznie 'Scena 1' do historii i pliku.\n"
-            "Dostępny wyłącznie w trybie Skryptu."
-        )
+        self._btn_akt.SetToolTip(t("rezyser.btn_akt_tooltip"))
 
         self._btn_scena = wx.Button(
             self._pnl_struktura,
-            label="🎬 Wstaw Scenę 1",
-            name="Przycisk Wstaw Scenę",
+            label=t("rezyser.btn_scena_label", numer_sceny=1),
+            name=t("rezyser.btn_scena_name"),
         )
-        self._btn_scena.SetToolTip(
-            "Wstawia nagłówek kolejnej sceny do historii i pliku.\n"
-            "Dostępny wyłącznie w trybie Skryptu."
-        )
+        self._btn_scena.SetToolTip(t("rezyser.btn_scena_tooltip"))
 
         prolog_epilog_row = wx.BoxSizer(wx.HORIZONTAL)
         prolog_epilog_row.Add(self._btn_prolog, flag=wx.RIGHT, border=6)
@@ -724,22 +512,17 @@ class RezyserPanel(wx.Panel):
         return self._pnl_struktura
 
     # ------------------------------------------------------------------
-    # BLOK E.1 – Podgląd pełnej historii (TextCtrl read-only)
+    # BLOK E.1 – Podgląd pełnej historii
     # ------------------------------------------------------------------
     def _zbuduj_podglad_historii(self, BORDER: int) -> wx.BoxSizer:
-        """Buduje podgląd ``full_story`` (TextCtrl read-only) + etykietę."""
-        lbl_full_story = wx.StaticText(
-            self,
-            label="Bieżąca historia w pamięci (tylko do odczytu – nawiguj strzałkami):",
-        )
+        lbl_full_story = wx.StaticText(self, label=t("rezyser.lbl_podglad_historii"))
 
-        # ── [TAB] Podgląd full_story ──────────────────────────────────
         self._txt_full_story = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name="Podgląd pełnej historii w pamięci – tylko do odczytu",
+            name=t("rezyser.txt_podglad_name"),
         )
-        self._txt_full_story.SetHint("(pamięć jest pusta – wczytaj projekt lub zacznij nowy)")
+        self._txt_full_story.SetHint(t("rezyser.txt_podglad_hint"))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_full_story, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
@@ -755,33 +538,18 @@ class RezyserPanel(wx.Panel):
     # BLOK E.2 – Pole instrukcji dla AI + przycisk Wyślij
     # ------------------------------------------------------------------
     def _zbuduj_pole_instrukcji(self, BORDER: int) -> wx.BoxSizer:
-        """Buduje etykietę + pole instrukcji dla AI + przycisk 'Wyślij'."""
-        lbl_user_input = wx.StaticText(
-            self,
-            label=(
-                "Instrukcje do kolejnego fragmentu "
-                "(wpisz 'streszczenie', by wymusić zapis do Pamięci Długotrwałej):"
-            ),
-        )
+        lbl_user_input = wx.StaticText(self, label=t("rezyser.lbl_instrukcje"))
 
-        # ── [TAB] Pole instrukcji ─────────────────────────────────────
         self._txt_user_input = wx.TextCtrl(
             self,
             style=wx.TE_MULTILINE,
-            name="Pole instrukcji dla AI – dawny user_input",
+            name=t("rezyser.txt_instrukcje_name"),
         )
-        self._txt_user_input.SetHint(
-            "Podaj instrukcje do kolejnego fragmentu historii…\n"
-            "(np. 'Opisz spotkanie Geralta z wiedźmą w lesie. Duże napięcie.')"
-        )
+        self._txt_user_input.SetHint(t("rezyser.txt_instrukcje_hint"))
         self._txt_user_input.SetMinSize((-1, 100))
 
-        # ── [TAB] Wyślij do AI ────────────────────────────────────────
-        self._btn_wyslij = wx.Button(self, label="Wyślij do AI")
-        self._btn_wyslij.SetToolTip(
-            "Wysyła instrukcje do modelu gpt-4o i dopisuje odpowiedź do historii.\n"
-            "Wymaga aktywnego klucza API i uzupełnionej Księgi Świata."
-        )
+        self._btn_wyslij = wx.Button(self, label=t("rezyser.btn_wyslij_label"))
+        self._btn_wyslij.SetToolTip(t("rezyser.btn_wyslij_tooltip"))
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_user_input,       flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
@@ -790,13 +558,12 @@ class RezyserPanel(wx.Panel):
         return sizer
 
     # ------------------------------------------------------------------
-    # BLOK F – Panel Postprodukcji (dynamicznie ukrywany)
+    # BLOK F – Panel Postprodukcji
     # ------------------------------------------------------------------
     def _zbuduj_panel_postprodukcji(self, BORDER: int) -> wx.Panel:
-        """Buduje ``self._pnl_postprodukcja`` (tytułowanie rozdziałów AI)."""
         self._pnl_postprodukcja = wx.Panel(self)
 
-        lbl_postprod = wx.StaticText(self._pnl_postprodukcja, label="🎛️ Postprodukcja")
+        lbl_postprod = wx.StaticText(self._pnl_postprodukcja, label=t("rezyser.postprod_heading"))
         pf = lbl_postprod.GetFont()
         pf.SetPointSize(10)
         pf.MakeBold()
@@ -804,21 +571,15 @@ class RezyserPanel(wx.Panel):
 
         lbl_tytuly_info = wx.StaticText(
             self._pnl_postprodukcja,
-            label=(
-                "Moduł iteruje po rozdziałach z zapisanego pliku "
-                "i nadaje im krótki tytuł literacki (analiza AI)."
-            ),
+            label=t("rezyser.postprod_info"),
         )
 
         self._btn_tytuly_ai = wx.Button(
             self._pnl_postprodukcja,
-            label="📜 Nadaj Tytuły Rozdziałom (AI)",
-            name="Przycisk Nadaj Tytuły Rozdziałom AI",
+            label=t("rezyser.btn_tytuly_ai_label"),
+            name=t("rezyser.btn_tytuly_ai_name"),
         )
-        self._btn_tytuly_ai.SetToolTip(
-            "Iteruje po rozdziałach z zapisanego pliku i nadaje im tytuły (gpt-4o-mini).\n"
-            "Wymaga zapisanego pliku projektu i aktywnego klucza API."
-        )
+        self._btn_tytuly_ai.SetToolTip(t("rezyser.btn_tytuly_ai_tooltip"))
 
         self._gauge_postprod = wx.Gauge(self._pnl_postprodukcja, range=100)
         self._gauge_postprod.Hide()
@@ -840,14 +601,10 @@ class RezyserPanel(wx.Panel):
         return self._pnl_postprodukcja
 
     # ------------------------------------------------------------------
-    # BLOK G – Wskaźnik okna kontekstowego AI (Gauge + status)
+    # BLOK G – Wskaźnik okna kontekstowego AI
     # ------------------------------------------------------------------
     def _zbuduj_wskaznik_pamieci_modelu(self, BORDER: int) -> wx.BoxSizer:
-        """Buduje wskaźnik pamięci modelu (nagłówek + Gauge + status read-only)."""
-        lbl_kontekst = wx.StaticText(
-            self,
-            label="🧠 Pamięć Modelu (Stan Okna Kontekstowego):",
-        )
+        lbl_kontekst = wx.StaticText(self, label=t("rezyser.lbl_pamiec_modelu"))
         kf = lbl_kontekst.GetFont()
         kf.SetWeight(wx.FONTWEIGHT_BOLD)
         lbl_kontekst.SetFont(kf)
@@ -859,9 +616,9 @@ class RezyserPanel(wx.Panel):
 
         self._lbl_kontekst_status = wx.TextCtrl(
             self,
-            value="🟢 Pamięć czysta. Maszyna gotowa na nową historię.",
+            value=t("rezyser.lbl_pamiec_modelu_start"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
-            name="Status pamięci modelu AI",
+            name=t("rezyser.pamiec_modelu_status_name"),
         )
         self._lbl_kontekst_status.SetBackgroundColour(self.GetBackgroundColour())
         self._lbl_kontekst_status.SetMinSize((-1, 60))
@@ -893,59 +650,38 @@ class RezyserPanel(wx.Panel):
         self._btn_zapisz_pamiec.Bind(wx.EVT_BUTTON, self._on_zapisz_pamiec)
         self._btn_wyslij.Bind(wx.EVT_BUTTON,        self._on_wyslij)
 
-
-        # Zmiany w polu nazwy i polu streszczenia wpływają na stan przycisków
         self._txt_file_name.Bind(wx.EVT_TEXT,         self._on_file_name_change)
         self._txt_file_name.Bind(wx.EVT_TEXT_ENTER,   self._on_load)
         self._txt_pamiec.Bind(wx.EVT_TEXT,             self._on_pamiec_change)
         self._txt_user_input.Bind(wx.EVT_TEXT,         self._on_user_input_change)
 
-        # Zmiana trybu wpływa na wymagania przycisku Wyślij
         self._rb_mode.Bind(wx.EVT_RADIOBOX, self._on_mode_change)
 
-        # ── Przyciski Zarządzania Strukturą ───────────────────────────
         self._btn_prolog.Bind(wx.EVT_BUTTON,   self._on_wstaw_prolog)
         self._btn_epilog.Bind(wx.EVT_BUTTON,   self._on_wstaw_epilog)
         self._btn_rozdzial.Bind(wx.EVT_BUTTON, self._on_wstaw_rozdzial)
         self._btn_akt.Bind(wx.EVT_BUTTON,      self._on_wstaw_akt)
         self._btn_scena.Bind(wx.EVT_BUTTON,    self._on_wstaw_scena)
 
-        # ── Postprodukcja ─────────────────────────────────────────────
         self._btn_tytuly_ai.Bind(wx.EVT_BUTTON, self._on_tytuly_ai)
 
     # ------------------------------------------------------------------
     # Odświeżanie stanu przycisków (Enable/Disable)
     # ------------------------------------------------------------------
     def _refresh_ui_state(self) -> None:
-        """Aktualizuje stan Enabled/Disabled przycisków na podstawie stanu pamięci.
-
-        Refaktor 13.0: większość obliczeń (``pamiec_zajeta``, ``ma_prolog``,
-        ``ma_epilog``, ``ostatnia_linia_to_naglowek``, ``epilog_ma_tresc``)
-        została przeniesiona do properties w ``core_rezyser.ProjektRezysera``.
-        Dzięki temu ta metoda stała się czytelniejsza: odpowiada wyłącznie
-        za mapowanie stanu modelu na ``Enable/Disable/Show/Hide`` widżetów.
-
-        Na końcu zawsze wywołuje self.Layout(), by okno poprawnie przeliczyło
-        rozmiary po ewentualnym ukryciu lub pokazaniu paneli struktury i postprodukcji.
-        """
+        """Aktualizuje stan Enabled/Disabled przycisków na podstawie stanu pamięci."""
         pamiec_zajeta = self._projekt.pamiec_zajeta
         pamiec_pusta  = not pamiec_zajeta
         nazwa_podana  = bool(self._txt_file_name.GetValue().strip())
         streszczenie_wpisane = bool(self._txt_pamiec.GetValue().strip())
         user_text_present    = bool(self._txt_user_input.GetValue().strip())
-        tryb_idx    = self._rb_mode.GetSelection()   # 0=BM, 1=Skrypt, 2=Audiobook
+        tryb_idx    = self._rb_mode.GetSelection()
         tryb_zapisu = tryb_idx in (1, 2)
 
-        # ── Pole nazwy pliku: zablokowane gdy pamięć zajęta ──────────
         self._txt_file_name.Enable(not pamiec_zajeta)
-
-        # ── Wczytaj: tylko gdy pamięć pusta I nazwa podana ───────────
         self._btn_load.Enable(pamiec_pusta and nazwa_podana)
-
-        # ── Wyczyść bieżącą: tylko gdy pamięć bieżąca zajęta ─────────
         self._btn_clear_current.Enable(pamiec_zajeta)
 
-        # ── Twardy Reset: aktywny gdy cokolwiek w pamięci / polach ───
         cos_do_wyczyszczenia = pamiec_zajeta or bool(
             self._txt_file_name.GetValue().strip()
             or self._txt_ksiega_swiata.GetValue().strip()
@@ -953,14 +689,9 @@ class RezyserPanel(wx.Panel):
         )
         self._btn_hard_reset.Enable(cos_do_wyczyszczenia)
 
-        # ── Zapisz Księgę: wymaga nazwy pliku ────────────────────────
         self._btn_zapisz_ksiege.Enable(nazwa_podana)
-
-        # ── Zapisz Streszczenie: wymaga nazwy i treści ────────────────
         self._btn_zapisz_pamiec.Enable(nazwa_podana and streszczenie_wpisane)
 
-        # ── Wyślij do AI ──────────────────────────────────────────────
-        # Epilog z treścią = historia zakończona, dalsze dopisywanie zablokowane.
         _epilog_ma_tresc = self._projekt.epilog_ma_tresc
 
         if not self._api_dostepne:
@@ -974,11 +705,6 @@ class RezyserPanel(wx.Panel):
         else:
             self._btn_wyslij.Enable()
 
-        # ══════════════════════════════════════════════════════════════
-        # DYNAMICZNA WIDOCZNOŚĆ – Panel Zarządzania Strukturą
-        # ══════════════════════════════════════════════════════════════
-
-        # Wspólne warunki dla przycisków struktury (wszystkie z modelu).
         _prolog_juz_jest   = self._projekt.ma_prolog
         _epilog_juz_jest   = self._projekt.ma_epilog
         _historia_niepusta = bool(self.full_story.strip())
@@ -986,13 +712,10 @@ class RezyserPanel(wx.Panel):
 
 
         if tryb_idx == 0:
-            # Tryb Burza Mózgów – ukryj cały panel struktury
             self._pnl_struktura.Hide()
         else:
-            # Tryb Skrypt (1) lub Audiobook (2) – pokaż panel
             self._pnl_struktura.Show()
 
-            # Widoczność przycisków wewnątrz panelu (zależna od trybu)
             jest_skrypt   = (tryb_idx == 1)
             jest_audiobok = (tryb_idx == 2)
 
@@ -1000,19 +723,20 @@ class RezyserPanel(wx.Panel):
             self._btn_akt.Show(jest_skrypt)
             self._btn_scena.Show(jest_skrypt)
 
-            # Dynamiczne etykiety z aktualnymi licznikami
+            # Dynamiczne etykiety z aktualnymi licznikami (z i18n)
             self._btn_rozdzial.SetLabel(
-                f"✂️ Wstaw cięcie (Rozdział {self.chapter_counter})"
+                t("rezyser.btn_rozdzial_label", numer_rozdzialu=self.chapter_counter),
             )
-            self._btn_akt.SetLabel(f"🎭 Wstaw Akt {self.akt_counter}")
-            self._btn_scena.SetLabel(f"🎬 Wstaw Scenę {self.scena_counter}")
+            self._btn_akt.SetLabel(
+                t("rezyser.btn_akt_label", numer_aktu=self.akt_counter),
+            )
+            self._btn_scena.SetLabel(
+                t("rezyser.btn_scena_label", numer_sceny=self.scena_counter),
+            )
 
-            # Stany Enable/Disable
             self._btn_prolog.Enable(
                 nazwa_podana and not _historia_niepusta and not _prolog_juz_jest
             )
-            # Epilog dostępny tylko gdy: jest nazwa, historia NIE jest pusta,
-            # i ostatnia linia NIE jest nagłówkiem (jest treść po ostatnim nagłówku).
             self._btn_epilog.Enable(
                 nazwa_podana and _historia_niepusta and not _blokada
             )
@@ -1020,13 +744,9 @@ class RezyserPanel(wx.Panel):
             self._btn_akt.Enable(nazwa_podana and not _blokada)
             self._btn_scena.Enable(nazwa_podana and not _blokada)
 
-            # Przelicz sizer wewnątrz panelu po zmianie widoczności przycisków
             self._pnl_struktura.Layout()
 
-        # Ochrona przed przypadkową zmianą trybu twórczego (test12):
-        # gdy pamięć jest zajęta (pełna historia LUB streszczenie) w trybie
-        # Skrypt (1) lub Audiobook (2), blokuj przełączenie na drugi tryb zapisu.
-        # Burza Mózgów (0) zawsze dostępna.
+        # Ochrona przed przypadkową zmianą trybu twórczego.
         self._rb_mode.EnableItem(0, True)
         if pamiec_zajeta and tryb_idx == 1:
             self._rb_mode.EnableItem(1, True)
@@ -1038,27 +758,20 @@ class RezyserPanel(wx.Panel):
             self._rb_mode.EnableItem(1, True)
             self._rb_mode.EnableItem(2, True)
 
-        # ══════════════════════════════════════════════════════════════
-        # DYNAMICZNA WIDOCZNOŚĆ – Panel Postprodukcji
-        # ══════════════════════════════════════════════════════════════
         if tryb_idx == 2:
-            # Tryb Audiobook – pokaż panel postprodukcji
             self._pnl_postprodukcja.Show()
-            # Przycisk aktywny gdy: API działa + projekt ma nazwę + historia niepusta
             self._btn_tytuly_ai.Enable(
                 self._api_dostepne and nazwa_podana and _historia_niepusta
             )
         else:
             self._pnl_postprodukcja.Hide()
 
-        # ── Wskaźnik pamięci modelu AI ────────────────────────────────
         self._aktualizuj_pamiec_modelu()
 
-        # ── Przelicz layout okna po zmianie widoczności paneli ────────
         self.Layout()
 
     # ------------------------------------------------------------------
-    # Handlery zmian w polach tekstowych (odświeżają przyciski)
+    # Handlery zmian w polach tekstowych
     # ------------------------------------------------------------------
     def _on_file_name_change(self, _event: wx.Event) -> None:
         self._refresh_ui_state()
@@ -1076,18 +789,11 @@ class RezyserPanel(wx.Panel):
     # Wczytywanie historii z pliku
     # ------------------------------------------------------------------
     def _on_load(self, _event: wx.Event) -> None:
-        """Wczytuje istniejący plik projektu z folderu skrypty/.
-
-        Deleguje do ``self._projekt.wczytaj()`` – cała logika I/O, analizy
-        liczników i reguły Nieskończonej Pamięci (streszczenie priorytet
-        nad full_story) żyje w ``core_rezyser.ProjektRezysera``. GUI tylko
-        synchronizuje kontrolki UI ze stanem projektu i pokazuje status.
-        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
-                "Podaj nazwę pliku projektu przed wczytaniem.",
-                "Brak nazwy",
+                t("rezyser.brak_nazwy_tresc"),
+                t("rezyser.brak_nazwy_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -1098,93 +804,81 @@ class RezyserPanel(wx.Panel):
             wynik = self._projekt.wczytaj(nazwa)
         except FileNotFoundError as exc:
             wx.MessageBox(
-                f"Nie znaleziono pliku:\n{exc}\n\n"
-                "Jeśli zaczynasz nową historię — po prostu zacznij pisać.\n"
-                "Plik zostanie utworzony automatycznie przy pierwszym wysłaniu do AI.",
-                "Plik nie istnieje",
+                t("rezyser.plik_nie_istnieje_tresc", tresc_bledu=str(exc)),
+                t("rezyser.plik_nie_istnieje_tytul"),
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
             return
         except OSError as exc:
             wx.MessageBox(
-                f"Błąd odczytu pliku:\n{exc}",
-                "Błąd odczytu",
+                t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
+                t("common.blad_odczytu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
 
-        # Synchronizuj kontrolki UI ze stanem projektu (właściwości @property
-        # już przekierowały odczyt do self._projekt.*).
         self._txt_ksiega_swiata.SetValue(self.world_lore)
         self._txt_pamiec.SetValue(self.summary_text)
         self._txt_full_story.SetValue(self.full_story)
 
-        # Jeśli projekt miał zapisany tryb twórczy w pliku .mode – ustaw RadioBox
         if wynik.saved_mode in (1, 2):
             self._rb_mode.SetSelection(wynik.saved_mode)
 
-        # Komunikat statusu: Nieskończona Pamięć vs. zwykłe wczytanie
-        lore_info = f" Wczytano też Księgę: skrypty/{nazwa}.md." if wynik.czy_ksiega_swiata else ""
+        lore_info = (
+            t("rezyser.status_wczytano_ksiega", nazwa_projektu=nazwa)
+            if wynik.czy_ksiega_swiata else ""
+        )
         if wynik.czy_streszczenie:
-            status_msg = (
-                f"Wczytano streszczenie projektu '{nazwa}'.{lore_info}\n"
-                "Pamięć bieżąca pozostaje pusta (tryb Nieskończonej Pamięci).\n"
-                "Możesz kontynuować historię — AI operuje na streszczeniu."
+            status_msg = t(
+                "rezyser.status_wczytano_streszczenie",
+                nazwa_projektu=nazwa,
+                lore_info=lore_info,
             )
         else:
-            status_msg = (
-                f"Wczytano historię '{nazwa}' ({wynik.liczba_znakow} znaków).{lore_info}"
+            status_msg = t(
+                "rezyser.status_wczytano_historia",
+                nazwa_projektu=nazwa,
+                liczba_znakow=wynik.liczba_znakow,
+                lore_info=lore_info,
             )
 
         self._refresh_ui_state()
-        wx.MessageBox(status_msg, "Wczytano projekt", wx.OK | wx.ICON_INFORMATION, self)
+        wx.MessageBox(status_msg, t("rezyser.status_wczytano_tytul"),
+                      wx.OK | wx.ICON_INFORMATION, self)
 
     # ------------------------------------------------------------------
-    # Czyszczenie pamięci bieżącej (streszczenie i Księga zostają)
+    # Czyszczenie pamięci bieżącej
     # ------------------------------------------------------------------
     def _on_clear_current(self, _event: wx.Event) -> None:
-        """Czyści WYŁĄCZNIE bieżącą fabułę (full_story) i ostatnią odpowiedź AI.
-
-        Deleguje do ``self._projekt.wyczysc_biezaca()`` – zachowane zostają:
-        liczniki rozdziałów/aktów/scen, nazwa pliku, Księga Świata,
-        Streszczenie (Pamięć Długotrwała), zapamiętany tryb twórczy.
-        Dzięki temu użytkownik może kontynuować projekt od razu po wyczyszczeniu.
-        """
         self._projekt.wyczysc_biezaca()
         self._txt_full_story.SetValue("")
 
         self._refresh_ui_state()
-        komunikat = "Pamięć bieżąca wyczyszczona."
+        komunikat = t("rezyser.pamiec_wyczyszczona_tresc")
         if self.summary_text.strip():
-            komunikat += "\nStreszczenie w Pamięci Długotrwałej zostało zachowane."
-        wx.MessageBox(komunikat, "Pamięć wyczyszczona", wx.OK | wx.ICON_INFORMATION, self)
+            komunikat += t("rezyser.pamiec_wyczyszczona_streszczenie_zostaje")
+        wx.MessageBox(
+            komunikat, t("rezyser.pamiec_wyczyszczona_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self,
+        )
 
     # ------------------------------------------------------------------
-    # Twardy Reset – całkowite zamknięcie projektu
+    # Twardy Reset
     # ------------------------------------------------------------------
     def _on_hard_reset(self, _event: wx.Event) -> None:
-        """Całkowicie czyści projekt: historia, streszczenie, Księga Świata i liczniki."""
         odp = wx.MessageBox(
-            "Czy na pewno chcesz zamknąć projekt?\n\n"
-            "Zostanie wyczyszczone:\n"
-            "  • historia bieżąca\n"
-            "  • streszczenie (Pamięć Długotrwała)\n"
-            "  • Księga Świata\n"
-            "  • wszystkie liczniki (rozdziały, akty, sceny)\n\n"
-            "Pliki na dysku NIE zostaną usunięte.",
-            "Zamknij Projekt – Twardy Reset",
+            t("rezyser.hard_reset_pytanie"),
+            t("rezyser.hard_reset_pytanie_tytul"),
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
             self,
         )
         if odp != wx.YES:
             return
 
-        # Wyzeruj cały stan pamięci (jedno wywołanie zamiast 8 linii).
         self._projekt.twardy_reset()
 
-        # Wyczyść wszystkie kontrolki UI
         self._txt_file_name.SetValue("")
         self._txt_file_name.Enable()
         self._txt_full_story.SetValue("")
@@ -1194,8 +888,8 @@ class RezyserPanel(wx.Panel):
 
         self._refresh_ui_state()
         wx.MessageBox(
-            "Projekt zamknięty. Wszystkie dane w pamięci zostały wyczyszczone.",
-            "Projekt zamknięty",
+            t("rezyser.hard_reset_ok_tresc"),
+            t("rezyser.hard_reset_ok_tytul"),
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
@@ -1205,16 +899,11 @@ class RezyserPanel(wx.Panel):
     # Zapis Księgi Świata
     # ------------------------------------------------------------------
     def _on_zapisz_ksiege(self, _event: wx.Event) -> None:
-        """Zapisuje Księgę Świata do pliku skrypty/<nazwa>.md.
-
-        Deleguje do ``self._projekt.zapisz_ksiege_swiata()`` – metoda
-        aktualizuje także ``self.world_lore`` przez property-shim.
-        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
-                "Podaj najpierw nazwę pliku projektu w polu nazwy.",
-                "Brak nazwy pliku",
+                t("rezyser.brak_nazwy_ksiega_tresc"),
+                t("rezyser.brak_nazwy_ksiega_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -1224,29 +913,28 @@ class RezyserPanel(wx.Panel):
         tresc = self._txt_ksiega_swiata.GetValue().strip()
         if not tresc:
             wx.MessageBox(
-                "Księga Świata jest pusta. Nic do zapisania.",
-                "Pusta Księga Świata",
+                t("rezyser.ksiega_pusta_tresc"),
+                t("rezyser.ksiega_pusta_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
             self._txt_ksiega_swiata.SetFocus()
             return
 
-        # Upewnij się, że projekt zna nazwę (walidacja _wymagaj_nazwy w core).
         if self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
         try:
             self._projekt.zapisz_ksiege_swiata(tresc)
             wx.MessageBox(
-                f"Księga Świata zapisana: skrypty/{nazwa}.md",
-                "Księga zapisana",
+                t("rezyser.ksiega_zapisana_tresc", nazwa_projektu=nazwa),
+                t("rezyser.ksiega_zapisana_tytul"),
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd zapisu Księgi Świata:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_zapisu_ksiegi", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -1255,42 +943,25 @@ class RezyserPanel(wx.Panel):
     # Prompt Architekta – dialog z gotowym promptem do skopiowania
     # ------------------------------------------------------------------
     def _on_prompt_architekta(self, _event: wx.Event) -> None:
-        """Otwiera okno dialogowe z treścią ``PROMPT_ARCHITEKTA`` (A11y-friendly).
-
-        Wzorzec dialogu identyczny z :class:`gui_manager_regul.WynikKreatoraDialog`
-        – TextCtrl READONLY + przycisk "Skopiuj do schowka" + opis działania.
-        Dzięki temu użytkownik (zwłaszcza z NVDA) może wybrać tekst strzałkami,
-        skopiować Ctrl+A/Ctrl+C lub przyciskiem — bez wracania do instrukcji.
-        """
         dlg = wx.Dialog(
             self,
-            title="Prompt Architekta – wklej do zewnętrznego chatbota",
+            title=t("rezyser.prompt_arch_dlg_tytul"),
             size=(720, 560),
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # Nagłówek: krótkie wyjaśnienie po co i jak.
         lbl_head = wx.TextCtrl(
             dlg,
-            value=(
-                "Ten gotowy prompt wklej do zewnętrznego chatbota "
-                "(np. darmowego ChatGPT albo Claude) i zastąp tekst "
-                "„[TUTAJ WPISZ SWÓJ POMYSŁ]” własnym zalążkiem fabuły.\n\n"
-                "AI zwróci ci gotową Księgę Świata w bloku kodu Markdown — "
-                "skopiuj jej zawartość (bez otaczających znaczników ```) "
-                "i wklej do pola „Księga Świata” powyżej, a następnie "
-                "kliknij „Zapisz Księgę na stałe”."
-            ),
+            value=t("rezyser.prompt_arch_instrukcja"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
-            name="Instrukcja korzystania z Promptu Architekta",
+            name=t("rezyser.prompt_arch_instrukcja_name"),
         )
         lbl_head.SetBackgroundColour(dlg.GetBackgroundColour())
         lbl_head.SetMinSize((-1, 110))
         sizer.Add(lbl_head, flag=wx.ALL | wx.EXPAND, border=12)
 
-        # Główne pole – Prompt Architekta (READONLY, rozciąga się na całe okno).
-        lbl_prompt = wx.StaticText(dlg, label="Prompt do skopiowania (Ctrl+A, Ctrl+C):")
+        lbl_prompt = wx.StaticText(dlg, label=t("rezyser.prompt_arch_lbl"))
         f = lbl_prompt.GetFont()
         f.MakeBold()
         lbl_prompt.SetFont(f)
@@ -1298,35 +969,31 @@ class RezyserPanel(wx.Panel):
 
         txt_prompt = wx.TextCtrl(
             dlg,
-            value=self.PROMPT_ARCHITEKTA,
+            value=self._prompt_architekta,
             style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name="Pełna treść Promptu Architekta",
+            name=t("rezyser.prompt_arch_tresc_name"),
         )
         sizer.Add(
             txt_prompt, proportion=1,
             flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=12,
         )
 
-        # Rząd przycisków: „Skopiuj do schowka” + „Zamknij” (IDENTYCZNIE
-        # jak w WynikKreatoraDialog w Managerze Reguł).
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
 
         btn_kopiuj = wx.Button(
-            dlg, label="📋  Skopiuj prompt do schowka",
-            name="Przycisk Skopiuj Prompt Architekta do schowka",
+            dlg, label=t("rezyser.prompt_arch_btn_kopiuj"),
+            name=t("rezyser.prompt_arch_btn_kopiuj_name"),
         )
 
         def _kopiuj(_e: wx.Event) -> None:
-            dane = wx.TextDataObject(self.PROMPT_ARCHITEKTA)
+            dane = wx.TextDataObject(self._prompt_architekta)
             if wx.TheClipboard.Open():
                 try:
                     wx.TheClipboard.SetData(dane)
                     wx.TheClipboard.Flush()
                     wx.MessageBox(
-                        "Prompt Architekta został skopiowany do schowka.\n"
-                        "Wklej go (Ctrl+V) do ChatGPT lub Claude i zastąp "
-                        "[TUTAJ WPISZ SWÓJ POMYSŁ] własnym pomysłem fabularnym.",
-                        "Skopiowano",
+                        t("rezyser.prompt_arch_skopiowano_tresc"),
+                        t("rezyser.prompt_arch_skopiowano_tytul"),
                         wx.OK | wx.ICON_INFORMATION,
                         dlg,
                     )
@@ -1334,10 +1001,8 @@ class RezyserPanel(wx.Panel):
                     wx.TheClipboard.Close()
             else:
                 wx.MessageBox(
-                    "Nie udało się otworzyć schowka systemowego.\n"
-                    "Skopiuj prompt ręcznie: kliknij w pole powyżej, "
-                    "zaznacz wszystko (Ctrl+A) i skopiuj (Ctrl+C).",
-                    "Schowek niedostępny",
+                    t("rezyser.prompt_arch_schowek_nieudany"),
+                    t("common.komunikat_schowek_nieudany_tytul"),
                     wx.OK | wx.ICON_WARNING,
                     dlg,
                 )
@@ -1345,7 +1010,7 @@ class RezyserPanel(wx.Panel):
         dlg.Bind(wx.EVT_BUTTON, _kopiuj, btn_kopiuj)
         btn_row.Add(btn_kopiuj, flag=wx.RIGHT, border=8)
 
-        btn_close = wx.Button(dlg, wx.ID_CLOSE, label="Zamknij")
+        btn_close = wx.Button(dlg, wx.ID_CLOSE, label=t("common.btn_zamknij"))
         dlg.Bind(wx.EVT_BUTTON, lambda _e: dlg.EndModal(wx.ID_CLOSE), btn_close)
         dlg.SetEscapeId(wx.ID_CLOSE)
         btn_row.Add(btn_close)
@@ -1353,27 +1018,19 @@ class RezyserPanel(wx.Panel):
         sizer.Add(btn_row, flag=wx.ALL | wx.ALIGN_RIGHT, border=12)
 
         dlg.SetSizer(sizer)
-        # Fokus startowy: główne pole z promptem (NVDA od razu zacznie
-        # czytać treść zamiast ogłaszać tytuł przycisku).
         txt_prompt.SetFocus()
         dlg.ShowModal()
         dlg.Destroy()
 
     # ------------------------------------------------------------------
-    # Zapis Streszczenia (Pamięci Długotrwałej)
+    # Zapis Streszczenia
     # ------------------------------------------------------------------
-
     def _on_zapisz_pamiec(self, _event: wx.Event) -> None:
-        """Zapisuje streszczenie do pliku skrypty/<nazwa>_streszczenie.txt.
-
-        Deleguje do ``self._projekt.zapisz_streszczenie()`` – metoda
-        aktualizuje także ``self.summary_text`` przez property-shim.
-        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
-                "Podaj najpierw nazwę pliku projektu w polu nazwy.",
-                "Brak nazwy pliku",
+                t("rezyser.brak_nazwy_ksiega_tresc"),
+                t("rezyser.brak_nazwy_ksiega_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -1383,30 +1040,28 @@ class RezyserPanel(wx.Panel):
         tresc = self._txt_pamiec.GetValue().strip()
         if not tresc:
             wx.MessageBox(
-                "Pamięć Długotrwała jest pusta. Nic do zapisania.",
-                "Puste streszczenie",
+                t("rezyser.pamiec_pusta_tresc"),
+                t("rezyser.pamiec_pusta_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
             self._txt_pamiec.SetFocus()
             return
 
-        # Upewnij się, że projekt zna nazwę (walidacja _wymagaj_nazwy w core).
         if self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
         try:
             self._projekt.zapisz_streszczenie(tresc)
             wx.MessageBox(
-                f"Streszczenie zapisane: skrypty/{nazwa}_streszczenie.txt\n\n"
-                "Możesz teraz bezpiecznie wyczyścić pamięć bieżącą.",
-                "Streszczenie zapisane",
+                t("rezyser.streszczenie_zapisane_tresc", nazwa_projektu=nazwa),
+                t("rezyser.streszczenie_zapisane_tytul"),
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd zapisu streszczenia:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_zapisu_streszczenia", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -1415,20 +1070,10 @@ class RezyserPanel(wx.Panel):
     # Wysyłanie do AI
     # ------------------------------------------------------------------
     def _on_wyslij(self, _event: wx.Event) -> None:
-        """Obsługuje przycisk 'Wyślij do AI'.
-
-        Refaktor 13.0: cała logika budowy promptów, wywołania OpenAI,
-        detekcji odrzucenia i ekstrakcji streszczenia żyje teraz w
-        :mod:`rezyser_ai` (``generuj_fragment``). Ta metoda tylko
-        waliduje dane wejściowe z GUI, ustawia ``self._projekt`` w znany
-        stan (``world_lore``, ``nazwa_pliku``) i odpala wątek tła
-        z gotowym ``SnapshotProjektu`` + wybranym ``PrzepisRezysera``.
-        """
         if not self._api_dostepne:
             wx.MessageBox(
-                "Brak połączenia z OpenAI.\n"
-                "Sprawdź plik golden_key.env i uruchom aplikację ponownie.",
-                "Brak API",
+                t("rezyser.brak_api_tresc"),
+                t("rezyser.brak_api_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -1437,8 +1082,8 @@ class RezyserPanel(wx.Panel):
         user_text = self._txt_user_input.GetValue().strip()
         if not user_text:
             wx.MessageBox(
-                "Wpisz instrukcje dla AI przed wysłaniem.",
-                "Puste pole",
+                t("rezyser.puste_pole_tresc"),
+                t("rezyser.puste_pole_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -1449,9 +1094,8 @@ class RezyserPanel(wx.Panel):
         przepis     = self._aktualny_przepis()
         if przepis is None:
             wx.MessageBox(
-                "Nie udało się załadować żadnego trybu pracy z YAML.\n"
-                "Uruchom odswiez_rezysera.py lub sprawdź dictionaries/pl/rezyser/.",
-                "Brak przepisów",
+                t("rezyser.brak_przepisow_tresc"),
+                t("rezyser.brak_przepisow_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -1460,9 +1104,8 @@ class RezyserPanel(wx.Panel):
 
         if tryb_zapisu and not nazwa:
             wx.MessageBox(
-                "Podaj nazwę pliku projektu, zanim wygenerujesz tekst do zapisu.\n"
-                f"(Tryb '{przepis.etykieta}' wymaga nazwy pliku.)",
-                "Brak nazwy pliku",
+                t("rezyser.brak_nazwy_wyslanie_tresc", tytul_trybu=przepis.etykieta),
+                t("rezyser.brak_nazwy_ksiega_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -1472,120 +1115,83 @@ class RezyserPanel(wx.Panel):
         world_context = self._txt_ksiega_swiata.GetValue().strip()
         if not world_context:
             wx.MessageBox(
-                "Uzupełnij Księgę Świata przed wysłaniem zapytania do AI.\n"
-                "Zasady świata i postacie są wymagane przez model.",
-                "Brak Księgi Świata",
+                t("rezyser.brak_ksiegi_tresc"),
+                t("rezyser.brak_ksiegi_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
             self._txt_ksiega_swiata.SetFocus()
             return
 
-        # Ochrona przed generowaniem streszczenia w trybie zapisu do pliku.
-        # Słowa kluczowe bierzemy z YAML-a (``slowa_wyzwalajace.streszczenie``)
-        # – lingwista może je rozszerzyć o "podsumuj", "streść" itp.
         slowa_streszczenia = przepis.slowa_wyzwalajace.get("streszczenie", [])
         if tryb_zapisu and any(s in user_text.lower() for s in slowa_streszczenia):
             wx.MessageBox(
-                "Próbujesz wygenerować streszczenie w trybie zapisu do pliku!\n"
-                "To mogłoby uszkodzić Twoją historię.\n\n"
-                "Przełącz się na tryb 'Burza Mózgów' i spróbuj ponownie.",
-                "Błąd trybu",
+                t("rezyser.blad_trybu_tresc"),
+                t("rezyser.blad_trybu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
 
-        # Synchronizujemy stan modelu z aktualnymi wartościami kontrolek,
-        # zanim zrobimy snapshot dla wątku tła:
-        #   • Księga Świata mogła zostać zmodyfikowana po ostatnim "Zapisz Księgę";
-        #   • nazwa_pliku mogła nie być jeszcze ustawiona w modelu, jeśli user
-        #     dopiero wpisał ją do pola (bez "Wczytaj historię").
         self._projekt.world_lore = world_context
         if nazwa and self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
 
-        # Zablokuj przycisk, wyczyść pole instrukcji
         self._btn_wyslij.Disable()
         self._txt_user_input.SetValue("")
         self._refresh_ui_state()
 
-        # Snapshot niezmiennego stanu dla wątku tła (GIL-safe).
         snapshot = self._projekt.snapshot()
 
-        t = threading.Thread(
+        t_thread = threading.Thread(
             target=self._wyslij_worker,
             args=(przepis, snapshot, user_text, nazwa, tryb_zapisu),
             daemon=True,
         )
-        self._worker_thread = t
-        t.start()
+        self._worker_thread = t_thread
+        t_thread.start()
 
 
     # ------------------------------------------------------------------
-    # Pomocnicza metoda zapisu do pliku projektu (thin wrapper)
+    # Pomocnicza metoda zapisu do pliku projektu
     # ------------------------------------------------------------------
     def _dopisz_do_pliku(self, nazwa: str, content: str, mode: str = "a") -> None:
-        """Thin wrapper: deleguje do ``self._projekt.dopisz_do_pliku_historii``.
-
-        Zachowany dla kompatybilności z istniejącymi wywołaniami w
-        ``_on_wstaw_*`` i ``_on_wyslij_done_zapis``. Błędy I/O zostaną
-            obsłużone przez wx.MessageBox, tak jak dotychczas – bo
-        ProjektRezysera.dopisz_do_pliku_historii propaguje wyjątki.
-
-        Args:
-            nazwa:   Nazwa projektu (tylko dla spójności API – w praktyce
-                     ``ProjektRezysera`` używa własnego ``nazwa_pliku``).
-            content: Treść do zapisania.
-            mode:    ``"a"`` (dopisz) lub ``"w"`` (nadpisz – dla Prologu).
-        """
-        # Upewnij się, że projekt ma ustawioną nazwę pliku – niezbędne dla
-        # walidacji w ProjektRezysera._wymagaj_nazwy().
         if self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
         try:
             self._projekt.dopisz_do_pliku_historii(content, mode=mode)
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd zapisu do pliku:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_zapisu_do_pliku", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
 
     # ------------------------------------------------------------------
-    # Wyświetlanie błędów AI (krótkie → MessageBox; długie → dialog)
+    # Wyświetlanie błędów AI
     # ------------------------------------------------------------------
     def _wyswietl_blad_ai(self, tresc_bledu: str, custom_msg: str | None = None) -> None:
-
-        """Wyświetla błąd AI – krótki przez MessageBox, długi przez dialog z polem do skopiowania.
-
-        Args:
-            tresc_bledu:  Treść błędu (string wyjątku lub długi komunikat).
-            custom_msg:   Opcjonalny nagłówek / krótki opis kontekstu błędu.
-                          Odpowiednik ``custom_msg`` z wyswietl_blad_ai() w Streamlicie.
-        """
-        msg_header  = custom_msg or "Wystąpił nieoczekiwany błąd podczas przetwarzania."
+        """Krótki błąd → MessageBox; długi → dialog z polem do skopiowania."""
+        msg_header  = custom_msg or t("rezyser.blad_ai_naglowek")
         jest_krotki = len(tresc_bledu) <= 200 and "\n" not in tresc_bledu
 
         if jest_krotki:
             pelna_tresc = f"{msg_header}\n\n{tresc_bledu}" if custom_msg else tresc_bledu
-            wx.MessageBox(pelna_tresc, "Błąd AI", wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(pelna_tresc, t("rezyser.blad_ai_tytul"),
+                          wx.OK | wx.ICON_ERROR, self)
         else:
-            dlg = wx.Dialog(self, title="Błąd AI – Szczegóły techniczne", size=(640, 400))
+            dlg = wx.Dialog(self, title=t("rezyser.blad_ai_szczegoly_tytul"), size=(640, 400))
             sizer = wx.BoxSizer(wx.VERTICAL)
             lbl_head = wx.StaticText(dlg, label=msg_header)
-            lbl_copy = wx.StaticText(
-                dlg,
-                label="Treść błędu (zaznacz Ctrl+A, skopiuj Ctrl+C – do zgłoszenia):",
-            )
+            lbl_copy = wx.StaticText(dlg, label=t("rezyser.blad_ai_lbl_tresc"))
             txt = wx.TextCtrl(
                 dlg,
                 value=tresc_bledu,
                 style=wx.TE_MULTILINE | wx.TE_READONLY,
-                name="Treść błędu do skopiowania",
+                name=t("rezyser.blad_ai_tresc_name"),
             )
-            btn_ok = wx.Button(dlg, wx.ID_OK, label="Zamknij")
+            btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
             sizer.Add(lbl_head, flag=wx.ALL,                                       border=8)
             sizer.Add(lbl_copy, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,               border=8)
             sizer.Add(txt,      proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
@@ -1598,11 +1204,6 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Aktualizacja wskaźnika przepełnienia okna kontekstowego AI
     # ------------------------------------------------------------------
-    # Mapa poziom zagrożenia → kolor wskaźnika pamięci modelu.
-    # Trzymana poza metodą, by nie tworzyć obiektu wx.Colour przy każdym
-    # odświeżeniu UI. Kolory zgodne z dotychczasową wersją (zielony/
-    # pomarańczowy/czerwony), tylko teraz mapowane przez poziom z
-    # ``core_rezyser.StatusPamieciModelu`` zamiast progiem na sztywno.
     _KOLORY_POZIOMOW = {
         cr.POZIOM_CZYSTA:     (0, 128, 0),
         cr.POZIOM_OK:         (0, 128, 0),
@@ -1611,12 +1212,6 @@ class RezyserPanel(wx.Panel):
     }
 
     def _aktualizuj_pamiec_modelu(self) -> None:
-        """Odświeża wskaźnik pamięci modelu (kontekst okna AI).
-
-        Refaktor 13.0: obliczenia progów i komunikatów są w
-        ``ProjektRezysera.status_pamieci_modelu()``. Ta metoda tylko
-        mapuje wynik (procent + komunikat + poziom) na widżety wxPython.
-        """
         status = self._projekt.status_pamieci_modelu()
         r, g, b = self._KOLORY_POZIOMOW.get(status.poziom, (0, 0, 0))
         self._gauge_kontekst.SetValue(status.procent)
@@ -1625,7 +1220,7 @@ class RezyserPanel(wx.Panel):
 
 
     # ------------------------------------------------------------------
-    # Wątek tła – główna logika AI (ŻADNYCH wx.* bezpośrednio!)
+    # Wątek tła – główna logika AI
     # ------------------------------------------------------------------
     def _wyslij_worker(
         self,
@@ -1635,61 +1230,36 @@ class RezyserPanel(wx.Panel):
         nazwa: str,
         tryb_zapisu: bool,
     ) -> None:
-        """Wywołuje ``rezyser_ai.generuj_fragment`` i rozsyła wyniki przez wx.CallAfter.
-
-        Refaktor 13.0: cała warstwa budowy payloadu OpenAI, wybierania
-        sufiksów kontekstowych, detekcji odrzucenia i ekstrakcji
-        ``<STRESZCZENIE>`` została wydzielona do :mod:`rezyser_ai`.
-        Tu zostaje tylko „cienki kontroler": przeniesienie wyniku
-        z wątku tła z powrotem do GUI (zapis do pliku / okno dialogowe /
-        komunikat błędu).
-
-        Args:
-            przepis:     Aktualnie wybrany tryb pracy (Burza / Skrypt /
-                         Audiobook) załadowany z YAML-a.
-            snapshot:    Niezmienny snapshot stanu projektu (``full_story``,
-                         ``summary_text``, ``world_lore``, ``nazwa``).
-            user_text:   Treść instrukcji użytkownika z pola „Instrukcje".
-            nazwa:       Nazwa projektu (do dopisania do pliku po odpowiedzi).
-            tryb_zapisu: Odpowiednik ``przepis.zapis_do_pliku`` — powielony
-                         jako argument, by nie musieć dodatkowo czytać z
-                         ``przepis`` w workerze (drobna optymalizacja).
-        """
         try:
             wynik = rai.generuj_fragment(
                 klient=self._client,
                 przepis=przepis,
                 snapshot=snapshot,
                 user_text=user_text,
-                on_postep=None,  # pasek postępu w _on_wyslij nie jest jeszcze wpięty
+                on_postep=None,
             )
         except openai.RateLimitError:
             wx.CallAfter(
                 self._on_wyslij_error,
-                "Brak kredytów OpenAI! Doładuj konto i spróbuj ponownie.",
+                t("rezyser.err_rate_limit"),
             )
             return
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._on_wyslij_error, str(exc))
             return
 
-        # AI odrzuciło prompt – NIE zapisujemy nic do pliku historii.
         if wynik.odrzucone:
             wx.CallAfter(
                 self._on_wyslij_error,
-                "AI odrzuciło prompt (wykryto tag [ODRZUCENIE_AI]).\n"
-                "Tekst NIE zostanie zapisany do pliku historii.\n"
-                "Możesz zmodyfikować instrukcję i spróbować ponownie.",
+                t("rezyser.err_odrzucenie"),
             )
             return
 
-        # Streszczenie wyciągnięte w Burzy Mózgów – aktualizujemy Pamięć Długotrwałą.
         if wynik.nowe_streszczenie:
             wx.CallAfter(
                 self._on_wyslij_zapisz_streszczenie, wynik.nowe_streszczenie,
             )
 
-        # Zapis do pliku (Skrypt / Audiobook) lub dialog-only (Burza Mózgów).
         if tryb_zapisu:
             wx.CallAfter(self._on_wyslij_done_zapis, wynik.tekst_odpowiedzi, nazwa)
         else:
@@ -1697,25 +1267,18 @@ class RezyserPanel(wx.Panel):
 
 
     # ------------------------------------------------------------------
-    # Callbacki _wyslij_worker (wywołania przez wx.CallAfter – wątek GUI)
+    # Callbacki _wyslij_worker
     # ------------------------------------------------------------------
     def _on_wyslij_error(self, msg: str) -> None:
-        """Pokazuje błąd AI i odblokowuje przycisk Wyślij.
-
-        Krótkie komunikaty (np. brak kredytów) → wx.MessageBox.
-        Długie / techniczne wyjątki OpenAI → dialog z polem do skopiowania.
-        """
         self._btn_wyslij.Enable()
         self._refresh_ui_state()
         self._wyswietl_blad_ai(msg)
 
     def _on_wyslij_zapisz_streszczenie(self, streszczenie: str) -> None:
-        """Zapisuje wykryte streszczenie AI do pamięci i pola UI (Pamięć Długotrwała)."""
         self.summary_text = streszczenie
         self._txt_pamiec.SetValue(streszczenie)
 
     def _on_wyslij_done_zapis(self, response_text: str, nazwa: str) -> None:
-        """Dopisuje odpowiedź AI do full_story i pliku (tryb Skrypt / Audiobook)."""
         if self.full_story:
             self.full_story += "\n\n" + response_text
         else:
@@ -1725,36 +1288,30 @@ class RezyserPanel(wx.Panel):
         self.last_response = response_text
         self._btn_wyslij.Enable()
         self._refresh_ui_state()
-        # A11y: sygnał dźwiękowy + fokus na historii → NVDA od razu czyta nowy fragment
         wx.Bell()
         self._txt_full_story.SetFocus()
 
     def _on_wyslij_done_burza(self, response_text: str) -> None:
-        """Wyświetla odpowiedź AI w oknie dialogowym (tryb Burza Mózgów – BEZ zapisu)."""
         self.last_response = response_text
         self._btn_wyslij.Enable()
         self._refresh_ui_state()
         self._show_response_dialog(response_text)
 
     def _show_response_dialog(self, tekst: str) -> None:
-        """Otwiera modal z odpowiedzią AI (czytelny przez NVDA / klawiatury)."""
         dlg = wx.Dialog(
             self,
-            title="Odpowiedź AI – Burza Mózgów",
+            title=t("rezyser.burza_dlg_tytul"),
             size=(720, 520),
         )
         sizer = wx.BoxSizer(wx.VERTICAL)
-        lbl = wx.StaticText(
-            dlg,
-            label="Skopiuj zaznaczony tekst (Ctrl+A, Ctrl+C) lub zamknij:",
-        )
+        lbl = wx.StaticText(dlg, label=t("rezyser.burza_dlg_lbl"))
         txt = wx.TextCtrl(
             dlg,
             value=tekst,
             style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name="Odpowiedź AI – Burza Mózgów",
+            name=t("rezyser.burza_dlg_name"),
         )
-        btn_ok = wx.Button(dlg, wx.ID_OK, label="Zamknij")
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
         sizer.Add(lbl,    flag=wx.ALL,                                   border=8)
         sizer.Add(txt,    proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
         sizer.Add(btn_ok, flag=wx.ALL | wx.ALIGN_RIGHT,                  border=8)
@@ -1764,22 +1321,14 @@ class RezyserPanel(wx.Panel):
         dlg.Destroy()
 
     # ------------------------------------------------------------------
-    # Helper: wspólna walidacja nazwy projektu dla operacji strukturalnych
+    # Helper: wspólna walidacja nazwy projektu
     # ------------------------------------------------------------------
     def _wymagaj_nazwy_lub_alert(self) -> str | None:
-        """Zwraca ``nazwa`` z pola lub ``None`` (po pokazaniu alertu i ustawieniu fokusa).
-
-        Refaktor 13.0: wcześniej każda z pięciu metod ``_on_wstaw_*``
-        powtarzała identycznych 10 linii walidacji. Teraz jedno wywołanie
-        na początku handlera załatwia sprawę. Dodatkowo, po odnalezieniu
-        nazwy synchronizujemy ją z ``self._projekt.nazwa_pliku``, by
-        ``ProjektRezysera._wymagaj_nazwy()`` mógł przejść bez wyjątku.
-        """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
-                "Podaj nazwę pliku projektu przed wstawianiem struktury.",
-                "Brak nazwy",
+                t("rezyser.struktura_brak_nazwy_tresc"),
+                t("rezyser.struktura_brak_nazwy_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -1790,12 +1339,6 @@ class RezyserPanel(wx.Panel):
         return nazwa
 
     def _po_wstawieniu_struktury(self, tytul: str, komunikat: str) -> None:
-        """Wspólny „post-wstawienie": odśwież UI, zapisz tryb, pokaż MessageBox.
-
-        Używane przez wszystkie pięć handlerów ``_on_wstaw_*``. Nie
-        odczytuje już wartości z ``ProjektRezysera`` – te wywołane wcześniej
-        przez delegację ``self._projekt.wstaw_*()`` zaktualizowały stan.
-        """
         self._txt_full_story.SetValue(self.full_story)
         self._zapisz_tryb_projektu()
         self._refresh_ui_state()
@@ -1805,144 +1348,117 @@ class RezyserPanel(wx.Panel):
     # Wstawianie Prologu
     # ------------------------------------------------------------------
     def _on_wstaw_prolog(self, _event: wx.Event) -> None:
-        """Wstawia nagłówek 'Prolog' do historii i pliku projektu.
-
-        Deleguje do ``self._projekt.wstaw_prolog()`` – cała logika
-        (``full_story += header``, mode="w" dla pliku, licznik) żyje
-        w ``core_rezyser.ProjektRezysera``.
-        """
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
             self._projekt.wstaw_prolog()
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd wstawiania Prologu:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_wstawiania_prolog", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
         self._po_wstawieniu_struktury(
-            "Prolog wstawiony",
-            "Wstawiono nagłówek: Prolog.\n\nRozpocznij pisanie treści prologu.",
+            t("rezyser.prolog_tytul"),
+            t("rezyser.prolog_tresc"),
         )
 
     # ------------------------------------------------------------------
     # Wstawianie Epilogu
     # ------------------------------------------------------------------
     def _on_wstaw_epilog(self, _event: wx.Event) -> None:
-        """Wstawia nagłówek 'Epilog' na końcu historii i pliku projektu.
-
-        Deleguje do ``self._projekt.wstaw_epilog()``.
-        """
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
             self._projekt.wstaw_epilog()
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd wstawiania Epilogu:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_wstawiania_epilog", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
         self._po_wstawieniu_struktury(
-            "Epilog wstawiony",
-            "Wstawiono nagłówek: Epilog.\n\n"
-            "Dalsze generowanie treści po Epilogu jest zablokowane.",
+            t("rezyser.epilog_tytul"),
+            t("rezyser.epilog_tresc"),
         )
 
     # ------------------------------------------------------------------
     # Wstawianie cięcia Rozdziału (Audiobook)
     # ------------------------------------------------------------------
     def _on_wstaw_rozdzial(self, _event: wx.Event) -> None:
-        """Wstawia nagłówek 'Rozdział N' do historii i pliku (tryb Audiobook).
-
-        Deleguje do ``self._projekt.wstaw_rozdzial()`` – licznik
-        ``chapter_counter`` jest inkrementowany wewnątrz modelu.
-        """
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
             naglowek = self._projekt.wstaw_rozdzial()
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd wstawiania rozdziału:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_wstawiania_rozdzialu", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
         self._po_wstawieniu_struktury(
-            "Cięcie rozdziału wstawione",
-            f"Wstawiono nagłówek: {naglowek}.",
+            t("rezyser.rozdzial_tytul"),
+            t("rezyser.rozdzial_tresc", naglowek=naglowek),
         )
 
     # ------------------------------------------------------------------
     # Wstawianie Aktu (Skrypt)
     # ------------------------------------------------------------------
     def _on_wstaw_akt(self, _event: wx.Event) -> None:
-        """Wstawia 'Akt N' + automatycznie 'Scena 1' (tryb Skrypt).
-
-        Deleguje do ``self._projekt.wstaw_akt()`` – metoda zwraca
-        krotkę ``(akt, scena)``, licznik aktów inkrementuje, licznik
-        scen ustawia na 2 (bo Scena 1 została właśnie wstawiona).
-        """
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
             akt_nag, scena_nag = self._projekt.wstaw_akt()
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd wstawiania aktu:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_wstawiania_aktu", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
         self._po_wstawieniu_struktury(
-            "Akt wstawiony",
-            f"Wstawiono: {akt_nag} oraz {scena_nag}.",
+            t("rezyser.akt_tytul"),
+            t("rezyser.akt_tresc", akt_naglowek=akt_nag, scena_naglowek=scena_nag),
         )
 
     # ------------------------------------------------------------------
     # Wstawianie Sceny (Skrypt)
     # ------------------------------------------------------------------
     def _on_wstaw_scena(self, _event: wx.Event) -> None:
-        """Wstawia 'Scena N' do historii i pliku (tryb Skrypt).
-
-        Deleguje do ``self._projekt.wstaw_scena()``.
-        """
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
             scena_nag = self._projekt.wstaw_scena()
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Błąd wstawiania sceny:\n{exc}",
-                "Błąd zapisu",
+                t("rezyser.blad_wstawiania_sceny", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
         self._po_wstawieniu_struktury(
-            "Scena wstawiona",
-            f"Wstawiono nagłówek: {scena_nag}.",
+            t("rezyser.scena_tytul"),
+            t("rezyser.scena_tresc", naglowek=scena_nag),
         )
 
 
     # ------------------------------------------------------------------
-    # Postprodukcja – Nadaj Tytuły Rozdziałom (stub)
+    # Postprodukcja – Nadaj Tytuły Rozdziałom
     # ------------------------------------------------------------------
     def _on_tytuly_ai(self, _event: wx.Event) -> None:
-        """Uruchamia wątek generowania tytułów rozdziałów z zapisanego pliku projektu."""
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
-                "Podaj nazwę projektu przed nadaniem tytułów.",
-                "Brak nazwy projektu",
+                t("rezyser.tytuly_brak_nazwy_tresc"),
+                t("rezyser.tytuly_brak_nazwy_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -1950,8 +1466,8 @@ class RezyserPanel(wx.Panel):
 
         if self._worker_thread and self._worker_thread.is_alive():
             wx.MessageBox(
-                "Trwa już inne zapytanie do AI. Poczekaj na zakończenie.",
-                "Zajęty",
+                t("rezyser.tytuly_zajety_tresc"),
+                t("rezyser.tytuly_zajety_tytul"),
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
@@ -1961,9 +1477,8 @@ class RezyserPanel(wx.Panel):
         filepath = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
         if not os.path.exists(filepath):
             wx.MessageBox(
-                f"Nie znaleziono pliku:\n{filepath}\n\n"
-                "Wygeneruj i zapisz najpierw treść projektu.",
-                "Brak pliku projektu",
+                t("rezyser.tytuly_brak_pliku_tresc", sciezka_pliku=filepath),
+                t("rezyser.tytuly_brak_pliku_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -1974,55 +1489,41 @@ class RezyserPanel(wx.Panel):
                 pelny_tekst = fh.read()
         except Exception as exc:
             wx.MessageBox(
-                f"Błąd odczytu pliku:\n{exc}",
-                "Błąd odczytu",
+                t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
+                t("common.blad_odczytu_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
             return
 
-        # Pokaż pasek postępu i zablokuj przycisk
         self._btn_tytuly_ai.Disable()
         self._gauge_postprod.SetValue(0)
         self._gauge_postprod.Show()
-        self._lbl_postprod_status.SetLabel("Przygotowywanie…")
+        self._lbl_postprod_status.SetLabel(t("rezyser.tytuly_prep"))
         self._lbl_postprod_status.Show()
         self._pnl_postprodukcja.Layout()
         self.Layout()
 
-        t = threading.Thread(
+        t_thread = threading.Thread(
             target=self._tytuly_worker,
             args=(pelny_tekst,),
             daemon=True,
         )
-        self._worker_thread = t
-        t.start()
+        self._worker_thread = t_thread
+        t_thread.start()
 
     # ------------------------------------------------------------------
-    # Wątek tła – generowanie tytułów (ŻADNYCH wx.* bezpośrednio!)
+    # Wątek tła – generowanie tytułów
     # ------------------------------------------------------------------
     def _tytuly_worker(self, pelny_tekst: str) -> None:
-        """Wywołuje ``rezyser_ai.nadaj_tytuly_rozdzialom`` i rozsyła wyniki.
-
-        Refaktor 13.0: cała iteracja po rozdziałach, wywołania OpenAI
-        i logika obsługi RateLimitError / innych wyjątków została
-        przeniesiona do :func:`rezyser_ai.nadaj_tytuly_rozdzialom`.
-        Tutaj zostaje tylko: wybór przepisu z YAML-a, przekazanie
-        callbacka postępu przez ``wx.CallAfter`` i finalna prezentacja
-        wyników (pełnych lub częściowych przy błędzie).
-        """
         if self._przepis_tytuly is None:
             wx.CallAfter(
                 self._on_tytuly_error,
-                "Nie znaleziono przepisu 'tytuly' w YAML "
-                "(dictionaries/pl/rezyser/postprod_tytuly.yaml).\n"
-                "Bez niego postprodukcja tytułów rozdziałów jest niedostępna.",
+                t("rezyser.tytuly_brak_przepisu_tresc"),
             )
             return
 
         def _cb(msg: str, percent: int) -> None:
-            # Callback tłumaczący progress z rezyser_ai na wx.CallAfter –
-            # bezpieczne modyfikowanie GUI z wątku tła.
             wx.CallAfter(self._update_tytuly_progress, msg, percent)
 
         wynik = rai.nadaj_tytuly_rozdzialom(
@@ -2033,11 +1534,9 @@ class RezyserPanel(wx.Panel):
         )
 
         if wynik.przerwano_bledem:
-            # Przerwanie błędem – pokazujemy blad + ewentualne
-            # częściowe tytuły wygenerowane przed awarią.
             wx.CallAfter(
                 self._on_tytuly_error,
-                wynik.blad or "Nieznany błąd podczas tytułowania.",
+                wynik.blad or t("rezyser.tytuly_blad_nieznany"),
                 list(wynik.tytuly),
             )
             return
@@ -2046,19 +1545,13 @@ class RezyserPanel(wx.Panel):
 
 
     # ------------------------------------------------------------------
-    # Callbacki _tytuly_worker (wywołania przez wx.CallAfter – wątek GUI)
+    # Callbacki _tytuly_worker
     # ------------------------------------------------------------------
     def _update_tytuly_progress(self, msg: str, percent: int) -> None:
-        """Aktualizuje pasek i etykietę postępu tytułowania."""
         self._lbl_postprod_status.SetLabel(msg)
         self._gauge_postprod.SetValue(max(0, min(100, percent)))
 
     def _on_tytuly_error(self, msg: str, partial_tytuly: list | None = None) -> None:
-        """Obsługuje błąd tytułowania: ukrywa pasek, pokazuje błąd i ewentualne tytuły częściowe.
-
-        Jeśli do momentu błędu wygenerowano już część tytułów, pokazuje je
-        w osobnym oknie dialogowym — tak samo jak w Streamlit (wyswietl_blad_ai + st.markdown).
-        """
         self._btn_tytuly_ai.Enable()
         self._gauge_postprod.SetValue(0)
         self._gauge_postprod.Hide()
@@ -2067,37 +1560,35 @@ class RezyserPanel(wx.Panel):
         self.Layout()
         self._wyswietl_blad_ai(
             msg,
-            "Wystąpił błąd podczas generowania tytułów rozdziałów.",
+            t("rezyser.tytuly_blad_naglowek"),
         )
         if partial_tytuly:
             self._show_titles_dialog(
-                "⚠️ Częściowe wyniki (generowanie przerwano błędem):\n\n"
-                + "\n".join(partial_tytuly)
+                t(
+                    "rezyser.tytuly_czesciowe_naglowek",
+                    wyniki="\n".join(partial_tytuly),
+                )
             )
 
     def _show_titles_dialog(self, tytuly_text: str) -> None:
-        """Wyświetla wygenerowane tytuły rozdziałów w oknie dialogowym."""
         self._btn_tytuly_ai.Enable()
         self._gauge_postprod.SetValue(100)
-        self._lbl_postprod_status.SetLabel("Gotowe! Tytuły wygenerowane.")
+        self._lbl_postprod_status.SetLabel(t("rezyser.tytuly_gotowe"))
 
         dlg = wx.Dialog(
             self,
-            title="Proponowane Tytuły Rozdziałów (AI)",
+            title=t("rezyser.tytuly_dlg_tytul"),
             size=(620, 420),
         )
         sizer = wx.BoxSizer(wx.VERTICAL)
-        lbl = wx.StaticText(
-            dlg,
-            label="Skopiuj tytuły (Ctrl+A, Ctrl+C) lub zanotuj je w Księdze Świata:",
-        )
+        lbl = wx.StaticText(dlg, label=t("rezyser.tytuly_dlg_lbl"))
         txt = wx.TextCtrl(
             dlg,
             value=tytuly_text,
             style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name="Lista proponowanych tytułów rozdziałów",
+            name=t("rezyser.tytuly_dlg_name"),
         )
-        btn_ok = wx.Button(dlg, wx.ID_OK, label="Zamknij")
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
         sizer.Add(lbl,    flag=wx.ALL,                                   border=8)
         sizer.Add(txt,    proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
         sizer.Add(btn_ok, flag=wx.ALL | wx.ALIGN_RIGHT,                  border=8)
@@ -2107,22 +1598,13 @@ class RezyserPanel(wx.Panel):
         dlg.Destroy()
 
     # ------------------------------------------------------------------
-    # Zapis trybu twórczego do pliku metadanych projektu (thin wrapper)
+    # Zapis trybu twórczego do pliku metadanych projektu
     # ------------------------------------------------------------------
     def _zapisz_tryb_projektu(self) -> None:
-        """Thin wrapper: deleguje do ``self._projekt.zapisz_tryb_tworczy``.
-
-        Plik ``runtime/skrypty/<nazwa>.mode`` przywraca właściwy tryb po
-        ponownym wczytaniu projektu. Cichy fail – metadata nie jest
-        krytyczna dla działania programu.
-        """
         nazwa    = self._txt_file_name.GetValue().strip()
         tryb_idx = self._rb_mode.GetSelection()
         if not nazwa:
             return
-        # Upewnij się, że projekt zna nazwę przed zapisem – nawet gdy
-        # użytkownik dopiero co wpisał nazwę w pole i nie wczytał jeszcze
-        # projektu z dysku.
         if self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
         self._projekt.zapisz_tryb_tworczy(tryb_idx)

@@ -20,6 +20,10 @@ Wzorzec przetwarzania na GUI sprowadza się w praktyce do:
 
     wynik = core_poliglota.przetworz(tekst, tryb="Szyfrant", jezyk="pl",
                                      wariant="cezar", przesuniecie=7)
+
+Wersja 13.1: cały tekst widoczny dla użytkownika pochodzi z
+``dictionaries/pl/gui/ui.yaml`` (sekcja ``poliglota``) przez moduł
+:mod:`i18n`.
 """
 
 from __future__ import annotations
@@ -35,14 +39,16 @@ import wx
 
 import core_poliglota
 import tlumacz_ai
+from i18n import t
 
 
-# TODO(13.1, multi-language): zastąp stałą polem instancji
+# TODO(13.2, multi-language): zastąp stałą polem instancji
 # ``self._jezyk_aktywny`` wyliczanym po wczytaniu pliku przez
-# ``core_poliglota.wykryj_jezyk_zrodlowy(self._file_content)`` – dziś
-# zawsze zwraca "pl" bo `dictionaries/` ma tylko jedną wersję językową,
-# ale gdy powstanie drugi `dictionaries/<kod>/`, hardkod stanie się
-# wąskim gardłem multilingual content.
+# ``core_poliglota.wykryj_jezyk_zrodlowy(self._file_content)``. Na razie,
+# w ramach wersji 13.1, w projekcie jest tylko jeden folder bazowy
+# (`dictionaries/pl/`), więc stała pozostaje stałą – zmiana musi iść
+# razem z pierwszym nowym językiem bazowym, bo wymaga logiki wyboru
+# słowników w GUI i pipeline silnika Poligloty.
 JEZYK_BAZOWY = "pl"   # docelowo konfigurowalne w menu Ustawienia
 
 
@@ -61,15 +67,6 @@ class PoliglotaPanel(wx.Panel):
     w wątku GUI.
     """
 
-    TOOL_DESCRIPTION = (
-        "Moduł Poliglota służy do nakładania twardych akcentów fonetycznych "
-        "pod lokalne syntezatory mowy (NVDA/Vocalizer/eSpeak), do zabaw "
-        "tekstowych w Trybie Szyfranta oraz do tłumaczenia tekstów za pomocą "
-        "AI (OpenAI gpt-4o).\n\n"
-        "Obsługuje pliki: .txt, .html, .htm, .docx.\n"
-        "Wynik zapisywany jest w tym samym katalogu co plik źródłowy."
-    )
-
     ENV_FILENAME = "golden_key.env"
 
     # ------------------------------------------------------------------
@@ -77,7 +74,7 @@ class PoliglotaPanel(wx.Panel):
     # ------------------------------------------------------------------
     def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
-        self.SetName("Panel Poligloty AI")
+        self.SetName(t("poliglota.panel_name"))
 
         # Stan wewnętrzny (odpowiednik st.session_state)
         self._file_content: str = ""
@@ -131,7 +128,7 @@ class PoliglotaPanel(wx.Panel):
         BORDER = 12
 
         # ── Nagłówek ────────────────────────────────────────────────────
-        heading = wx.StaticText(self, label="🌍  Poliglota AI – Hybrydowe Studio Tłumaczeń")
+        heading = wx.StaticText(self, label=t("poliglota.heading"))
         font = heading.GetFont()
         font.SetPointSize(16); font.MakeBold()
         heading.SetFont(font)
@@ -139,34 +136,33 @@ class PoliglotaPanel(wx.Panel):
         # ── Opis narzędzia (czytany przez NVDA) ──────────────────────────
         self._description = wx.TextCtrl(
             self,
-            value=self.TOOL_DESCRIPTION,
+            value=t("poliglota.tool_description"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
-            name="Opis modułu Poliglota",
+            name=t("poliglota.description_name"),
         )
         self._description.SetBackgroundColour(self.GetBackgroundColour())
 
         # ── Sekcja 1: Wczytywanie pliku ──────────────────────────────────
-        lbl_section1 = self._naglowek("1. Wczytywanie pliku źródłowego")
-        lbl_file = wx.StaticText(
-            self, label="Nazwa lub pełna ścieżka pliku (.txt, .html, .htm, .docx):")
+        lbl_section1 = self._naglowek(t("poliglota.section1_heading"))
+        lbl_file = wx.StaticText(self, label=t("poliglota.lbl_plik"))
 
         self._txt_file = wx.TextCtrl(self, style=wx.TE_PROCESS_ENTER,
-                                     name="Pole ścieżki pliku źródłowego")
-        self._txt_file.SetHint("Wpisz ścieżkę do pliku lub wybierz przyciskiem Przeglądaj…")
+                                     name=t("poliglota.txt_plik_name"))
+        self._txt_file.SetHint(t("poliglota.txt_plik_hint"))
 
-        self._btn_browse = wx.Button(self, label="Przeglądaj…")
-        self._btn_browse.SetToolTip("Otwiera systemowe okno wyboru pliku")
+        self._btn_browse = wx.Button(self, label=t("poliglota.btn_przegladaj"))
+        self._btn_browse.SetToolTip(t("poliglota.btn_przegladaj_tooltip"))
 
         file_row = wx.BoxSizer(wx.HORIZONTAL)
         file_row.Add(self._txt_file,   proportion=1,
                      flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
         file_row.Add(self._btn_browse, flag=wx.ALIGN_CENTER_VERTICAL)
 
-        self._btn_load = wx.Button(self, label="Wczytaj plik do pamięci")
-        self._btn_load.SetToolTip("Wczytuje zawartość wskazanego pliku do pamięci roboczej")
+        self._btn_load = wx.Button(self, label=t("poliglota.btn_wczytaj"))
+        self._btn_load.SetToolTip(t("poliglota.btn_wczytaj_tooltip"))
 
-        self._btn_clear = wx.Button(self, label="Wyczyść pamięć")
-        self._btn_clear.SetToolTip("Usuwa wczytaną treść, pozwala wybrać inny plik")
+        self._btn_clear = wx.Button(self, label=t("poliglota.btn_wyczysc"))
+        self._btn_clear.SetToolTip(t("poliglota.btn_wyczysc_tooltip"))
         self._btn_clear.Disable()
 
         load_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -174,28 +170,27 @@ class PoliglotaPanel(wx.Panel):
         load_row.Add(self._btn_clear)
 
         self._lbl_file_status = wx.TextCtrl(
-            self, value="Brak wczytanego pliku.",
+            self, value=t("poliglota.plik_status_brak"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER)
         self._lbl_file_status.SetBackgroundColour(self.GetBackgroundColour())
-        self._lbl_file_status.SetName("Status wczytanego pliku")
+        self._lbl_file_status.SetName(t("poliglota.lbl_plik_status_name"))
 
         # ── Sekcja 2: Konfiguracja trybu pracy ──────────────────────────
-        lbl_section2 = self._naglowek("2. Konfiguracja Pracy")
+        lbl_section2 = self._naglowek(t("poliglota.section2_heading"))
 
         self._rb_ai = wx.RadioButton(
-            self, label="Tłumacz AI (OpenAI gpt-4o – wymaga klucza API, kosztuje kredyty)",
-            style=wx.RB_GROUP, name="Tryb Tłumacza AI")
+            self, label=t("poliglota.rb_ai"),
+            style=wx.RB_GROUP, name=t("poliglota.rb_ai_name"))
         self._rb_rezyser = wx.RadioButton(
-            self, label="Tryb Reżysera (darmowe reguły fonetyczne z YAML)",
-            name="Tryb Reżysera darmowy")
+            self, label=t("poliglota.rb_rezyser"),
+            name=t("poliglota.rb_rezyser_name"))
         self._rb_szyfrant = wx.RadioButton(
-            self, label="Tryb Szyfranta (zabawy tekstem, losowe zacinanie)",
-            name="Tryb Szyfranta i zabaw tekstowych")
+            self, label=t("poliglota.rb_szyfrant"),
+            name=t("poliglota.rb_szyfrant_name"))
 
         if not self._api_dostepne:
             self._rb_ai.Disable()
-            self._rb_ai.SetLabel(
-                "Tłumacz AI (wyłączony – brak poprawnego pliku golden_key.env)")
+            self._rb_ai.SetLabel(t("poliglota.rb_ai_disabled"))
             self._rb_rezyser.SetValue(True)
         else:
             self._rb_ai.SetValue(True)
@@ -206,11 +201,10 @@ class PoliglotaPanel(wx.Panel):
         self._pnl_szyfrant.Hide()
 
         # ── Sekcja 3: Przetwarzanie ──────────────────────────────────────
-        lbl_section3 = self._naglowek("3. Przetwarzanie")
+        lbl_section3 = self._naglowek(t("poliglota.section3_heading"))
 
-        self._btn_process = wx.Button(self, label="Uruchom Przetwarzanie")
-        self._btn_process.SetToolTip(
-            "Uruchamia wybrane przetwarzanie i zapisuje wynik obok pliku źródłowego")
+        self._btn_process = wx.Button(self, label=t("poliglota.btn_process"))
+        self._btn_process.SetToolTip(t("poliglota.btn_process_tooltip"))
 
         self._gauge = wx.Gauge(self, range=100,
                                style=wx.GA_HORIZONTAL | wx.GA_SMOOTH)
@@ -220,19 +214,18 @@ class PoliglotaPanel(wx.Panel):
             self, value="",
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER)
         self._lbl_progress.SetBackgroundColour(self.GetBackgroundColour())
-        self._lbl_progress.SetName("Status postępu przetwarzania")
+        self._lbl_progress.SetName(t("poliglota.lbl_progress_name"))
         self._lbl_progress.Hide()
 
         # ── Sekcja 4: Wynik ──────────────────────────────────────────────
-        lbl_section4 = self._naglowek(
-            "4. Wynik (tylko do odczytu – nawiguj strzałkami)")
+        lbl_section4 = self._naglowek(t("poliglota.section4_heading"))
 
         self._txt_result = wx.TextCtrl(
             self, value="",
             style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name="Pole wynikowe – gotowy tekst")
+            name=t("poliglota.txt_wynik_name"))
         self._txt_result.SetMinSize((-1, 200))
-        self._txt_result.SetHint("Tutaj pojawi się przetworzona treść…")
+        self._txt_result.SetHint(t("poliglota.txt_wynik_hint"))
 
         # ── Złożenie layoutu ─────────────────────────────────────────────
         main_sizer.Add(heading,              flag=wx.ALL, border=BORDER)
@@ -279,12 +272,10 @@ class PoliglotaPanel(wx.Panel):
         panel = wx.Panel(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        lbl = wx.StaticText(
-            panel,
-            label="Język docelowy tłumaczenia (np. Fiński, Islandzki, Angielski, Arabski):")
+        lbl = wx.StaticText(panel, label=t("poliglota.lbl_jezyk_docelowy"))
         self._txt_lang = wx.TextCtrl(panel, style=wx.TE_PROCESS_ENTER,
-                                     name="Pole języka docelowego")
-        self._txt_lang.SetHint("Wpisz nazwę języka docelowego…")
+                                     name=t("poliglota.txt_jezyk_name"))
+        self._txt_lang.SetHint(t("poliglota.txt_jezyk_hint"))
 
         sizer.Add(lbl,           flag=wx.BOTTOM, border=4)
         sizer.Add(self._txt_lang, flag=wx.EXPAND)
@@ -296,21 +287,19 @@ class PoliglotaPanel(wx.Panel):
         panel = wx.Panel(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        lbl = wx.StaticText(panel, label="Wybierz akcent lub tryb czyszczenia:")
+        lbl = wx.StaticText(panel, label=t("poliglota.lbl_akcent"))
         etykiety = [w["etykieta"] for w in self._akcenty]
         self._combo_akcent = wx.ComboBox(panel, choices=etykiety,
                                          style=wx.CB_READONLY,
-                                         name="Lista akcentów i trybów czyszczenia")
+                                         name=t("poliglota.combo_akcent_name"))
         if etykiety:
             self._combo_akcent.SetSelection(0)
-        self._combo_akcent.SetToolTip(
-            "Wybierz akcent fonetyczny lub tryb czyszczenia tekstu pod czytniki ekranu")
+        self._combo_akcent.SetToolTip(t("poliglota.combo_akcent_tooltip"))
 
-        self._lbl_iso = wx.StaticText(
-            panel, label="Kod ISO języka (2 litery, np. en, fr, de):")
-        self._txt_iso = wx.TextCtrl(panel, name="Pole kodu ISO języka")
+        self._lbl_iso = wx.StaticText(panel, label=t("poliglota.lbl_iso"))
+        self._txt_iso = wx.TextCtrl(panel, name=t("poliglota.txt_iso_name"))
         self._txt_iso.SetMaxLength(2)
-        self._txt_iso.SetHint("np. en")
+        self._txt_iso.SetHint(t("poliglota.txt_iso_hint"))
         self._lbl_iso.Hide(); self._txt_iso.Hide()
 
         sizer.Add(lbl,                flag=wx.BOTTOM, border=4)
@@ -325,11 +314,11 @@ class PoliglotaPanel(wx.Panel):
         panel = wx.Panel(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        lbl_szyfr = wx.StaticText(panel, label="Wybierz algorytm zniekształcający:")
+        lbl_szyfr = wx.StaticText(panel, label=t("poliglota.lbl_szyfr"))
         etykiety = [w["etykieta"] for w in self._szyfry]
         self._combo_szyfr = wx.ComboBox(panel, choices=etykiety,
                                         style=wx.CB_READONLY,
-                                        name="Lista algorytmów szyfrujących")
+                                        name=t("poliglota.combo_szyfr_name"))
         if etykiety:
             self._combo_szyfr.SetSelection(0)
 
@@ -341,9 +330,14 @@ class PoliglotaPanel(wx.Panel):
 
         lbl_cezar = wx.StaticText(
             panel,
-            label=f"Przesunięcie szyfru Cezara (0 = losowe, zakres {min_pr}…{max_pr}):")
+            label=t(
+                "poliglota.lbl_cezar",
+                min_przesuniecie=min_pr,
+                max_przesuniecie=max_pr,
+            ),
+        )
         self._spin_cezara = wx.SpinCtrl(panel, min=min_pr, max=max_pr, initial=0,
-                                        name="Przesunięcie szyfru Cezara")
+                                        name=t("poliglota.spin_cezar_name"))
 
         sizer.Add(lbl_szyfr,          flag=wx.BOTTOM, border=4)
         sizer.Add(self._combo_szyfr,  flag=wx.EXPAND | wx.BOTTOM, border=8)
@@ -373,15 +367,8 @@ class PoliglotaPanel(wx.Panel):
     def _on_browse(self, _event: wx.Event) -> None:
         with wx.FileDialog(
             self,
-            message="Wybierz plik źródłowy",
-            wildcard=(
-                "Obsługiwane pliki (*.txt;*.html;*.htm;*.docx)"
-                "|*.txt;*.html;*.htm;*.docx"
-                "|Pliki tekstowe (*.txt)|*.txt"
-                "|Pliki HTML (*.html;*.htm)|*.html;*.htm"
-                "|Dokumenty Word (*.docx)|*.docx"
-                "|Wszystkie pliki (*.*)|*.*"
-            ),
+            message=t("poliglota.file_dlg_title"),
+            wildcard=t("poliglota.file_dlg_wildcard"),
             style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
         ) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
@@ -394,14 +381,17 @@ class PoliglotaPanel(wx.Panel):
 
         file_name = self._txt_file.GetValue().strip()
         if not file_name:
-            wx.MessageBox("Podaj nazwę lub ścieżkę pliku przed wczytaniem.",
-                          "Brak pliku", wx.OK | wx.ICON_WARNING, self)
+            wx.MessageBox(t("poliglota.brak_pliku_tresc"),
+                          t("common.brak_pliku_tytul"),
+                          wx.OK | wx.ICON_WARNING, self)
             self._txt_file.SetFocus()
             return
 
         if not os.path.exists(file_name):
-            wx.MessageBox(f"Nie znaleziono pliku:\n{file_name}",
-                          "Plik nie istnieje", wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(
+                t("poliglota.plik_nie_istnieje_tresc", sciezka_pliku=file_name),
+                t("common.plik_nie_istnieje_tytul"),
+                wx.OK | wx.ICON_ERROR, self)
             self._txt_file.SetFocus()
             return
 
@@ -415,8 +405,10 @@ class PoliglotaPanel(wx.Panel):
                 with open(file_name, "r", encoding="utf-8") as fh:
                     self._file_content = fh.read()
         except Exception as exc:
-            wx.MessageBox(f"Błąd podczas odczytu pliku:\n{exc}",
-                          "Błąd odczytu", wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(
+                t("poliglota.blad_odczytu_tresc", tresc_bledu=str(exc)),
+                t("common.blad_odczytu_tytul"),
+                wx.OK | wx.ICON_ERROR, self)
             return
 
         self._oryginalna_nazwa  = os.path.splitext(os.path.basename(file_name))[0]
@@ -424,9 +416,11 @@ class PoliglotaPanel(wx.Panel):
         self._sciezka_oryginalu = os.path.abspath(file_name)
 
         znaki = len(self._file_content)
-        status_msg = (
-            f"Plik wczytany: {os.path.basename(file_name)}  ({znaki} znaków).\n"
-            "Możesz teraz uruchomić przetwarzanie.")
+        status_msg = t(
+            "poliglota.plik_status_wczytany",
+            nazwa_pliku=os.path.basename(file_name),
+            liczba_znakow=znaki,
+        )
         self._lbl_file_status.SetValue(status_msg)
         self._lbl_file_status.SetName(status_msg)
         self._lbl_file_status.SetForegroundColour(wx.Colour(0, 128, 0))
@@ -437,9 +431,13 @@ class PoliglotaPanel(wx.Panel):
         self._btn_clear.Enable()
 
         wx.MessageBox(
-            f"Wczytano plik: {os.path.basename(file_name)}\n({znaki} znaków).\n\n"
-            "Możesz teraz skonfigurować tryb pracy i uruchomić przetwarzanie.",
-            "Plik wczytany", wx.OK | wx.ICON_INFORMATION, self)
+            t(
+                "poliglota.plik_wczytany_tresc",
+                nazwa_pliku=os.path.basename(file_name),
+                liczba_znakow=znaki,
+            ),
+            t("poliglota.plik_wczytany_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self)
 
     def _on_clear(self, _event: wx.Event) -> None:
         self._file_content      = ""
@@ -453,7 +451,7 @@ class PoliglotaPanel(wx.Panel):
         self._btn_load.Enable()
         self._btn_clear.Disable()
 
-        clear_msg = "Pamięć wyczyszczona. Możesz wczytać nowy plik."
+        clear_msg = t("poliglota.plik_status_wyczyszczono")
         self._lbl_file_status.SetValue(clear_msg)
         self._lbl_file_status.SetName(clear_msg)
         self._lbl_file_status.SetForegroundColour(self.GetForegroundColour())
@@ -503,21 +501,24 @@ class PoliglotaPanel(wx.Panel):
     def _on_process(self, _event: wx.Event) -> None:
         # --- walidacja ogólna ---
         if not self._file_content:
-            wx.MessageBox("Najpierw wczytaj plik źródłowy (sekcja 1).",
-                          "Brak pliku w pamięci", wx.OK | wx.ICON_WARNING, self)
+            wx.MessageBox(t("poliglota.brak_pliku_pamieci_tresc"),
+                          t("poliglota.brak_pliku_pamieci_tytul"),
+                          wx.OK | wx.ICON_WARNING, self)
             return
 
         if self._worker_thread and self._worker_thread.is_alive():
-            wx.MessageBox("Przetwarzanie jest już w toku. Poczekaj na zakończenie.",
-                          "Zajęty", wx.OK | wx.ICON_INFORMATION, self)
+            wx.MessageBox(t("poliglota.zajety_tresc"),
+                          t("poliglota.zajety_tytul"),
+                          wx.OK | wx.ICON_INFORMATION, self)
             return
 
         # --- dispatcher trybu ---
         if self._api_dostepne and self._rb_ai.GetValue():
             target_lang = self._txt_lang.GetValue().strip()
             if not target_lang:
-                wx.MessageBox("Wpisz język docelowy tłumaczenia przed uruchomieniem.",
-                              "Brak języka", wx.OK | wx.ICON_WARNING, self)
+                wx.MessageBox(t("poliglota.brak_jezyka_tresc"),
+                              t("poliglota.brak_jezyka_tytul"),
+                              wx.OK | wx.ICON_WARNING, self)
                 self._txt_lang.SetFocus()
                 return
             self._start_ai_translation(target_lang)
@@ -537,7 +538,8 @@ class PoliglotaPanel(wx.Panel):
     def _run_rezyser_mode(self) -> None:
         cfg = self._aktualny_wariant_akcentu()
         if cfg is None:
-            wx.MessageBox("Nie wybrano żadnego akcentu.", "Błąd",
+            wx.MessageBox(t("poliglota.nie_wybrano_akcentu"),
+                          t("poliglota.blad_wyniku_tytul"),
                           wx.OK | wx.ICON_ERROR, self)
             return
 
@@ -545,9 +547,9 @@ class PoliglotaPanel(wx.Panel):
         if cfg.get("kategoria") == "naprawiacz":
             kod_iso = self._txt_iso.GetValue().strip().lower()
             if not kod_iso or len(kod_iso) > 2:
-                wx.MessageBox(
-                    "Podaj poprawny dwuliterowy kod ISO języka (np. en, fr, de).",
-                    "Brak kodu ISO", wx.OK | wx.ICON_WARNING, self)
+                wx.MessageBox(t("poliglota.brak_iso_tresc"),
+                              t("poliglota.brak_iso_tytul"),
+                              wx.OK | wx.ICON_WARNING, self)
                 self._txt_iso.SetFocus()
                 return
             opcje["iso_reczne"] = kod_iso
@@ -566,8 +568,10 @@ class PoliglotaPanel(wx.Panel):
                 **opcje,
             )
         except Exception as exc:
-            wx.MessageBox(f"Błąd przetwarzania:\n{exc}", "Błąd",
-                          wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(
+                t("poliglota.blad_przetwarzania", tresc_bledu=str(exc)),
+                t("poliglota.blad_wyniku_tytul"),
+                wx.OK | wx.ICON_ERROR, self)
             return
 
         self._zakoncz_zapisem(wynik, cfg, opcje, tryb=core_poliglota.TRYB_REZYSER)
@@ -578,7 +582,8 @@ class PoliglotaPanel(wx.Panel):
     def _run_szyfrant_mode(self) -> None:
         cfg = self._aktualny_wariant_szyfru()
         if cfg is None:
-            wx.MessageBox("Nie wybrano żadnego szyfru.", "Błąd",
+            wx.MessageBox(t("poliglota.nie_wybrano_szyfru"),
+                          t("poliglota.blad_wyniku_tytul"),
                           wx.OK | wx.ICON_ERROR, self)
             return
 
@@ -596,8 +601,10 @@ class PoliglotaPanel(wx.Panel):
                 **opcje,
             )
         except Exception as exc:
-            wx.MessageBox(f"Błąd przetwarzania:\n{exc}", "Błąd",
-                          wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(
+                t("poliglota.blad_przetwarzania", tresc_bledu=str(exc)),
+                t("poliglota.blad_wyniku_tytul"),
+                wx.OK | wx.ICON_ERROR, self)
             return
 
         # Cezar z zerem = wylosowane przesunięcie → poinformuj użytkownika
@@ -605,8 +612,11 @@ class PoliglotaPanel(wx.Panel):
             wylosowane = opcje.get("przesuniecie_faktyczne")
             if wylosowane:
                 wx.MessageBox(
-                    f"Wartość przesunięcia wynosiła 0 – wylosowano: {wylosowane}.",
-                    "Szyfr Cezara – losowe przesunięcie",
+                    t(
+                        "poliglota.cezar_losowe_tresc",
+                        wylosowane_przesuniecie=wylosowane,
+                    ),
+                    t("poliglota.cezar_losowe_tytul"),
                     wx.OK | wx.ICON_INFORMATION, self)
 
         self._zakoncz_zapisem(wynik, cfg, opcje, tryb=core_poliglota.TRYB_SZYFRANT)
@@ -617,8 +627,9 @@ class PoliglotaPanel(wx.Panel):
     def _zakoncz_zapisem(self, wynik: str, cfg: dict,
                          opcje: dict, tryb: str) -> None:
         if not wynik and cfg.get("kategoria") != "naprawiacz":
-            wx.MessageBox("Nie udało się wygenerować wynikowego tekstu.",
-                          "Błąd", wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(t("poliglota.blad_wyniku_tresc"),
+                          t("poliglota.blad_wyniku_tytul"),
+                          wx.OK | wx.ICON_ERROR, self)
             return
 
         wariant_id = cfg["id"]
@@ -639,20 +650,24 @@ class PoliglotaPanel(wx.Panel):
                 sciezka_oryginalu=self._sciezka_oryginalu,
             )
         except Exception as exc:
-            wx.MessageBox(f"Błąd podczas zapisu pliku wynikowego:\n{exc}",
-                          "Błąd zapisu", wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(
+                t("poliglota.blad_zapisu_wyjscia", tresc_bledu=str(exc)),
+                t("common.blad_zapisu_tytul"),
+                wx.OK | wx.ICON_ERROR, self)
             return
 
         self._txt_result.SetValue(wynik)
         self._txt_result.SetFocus()
-        wx.MessageBox(f"Plik zapisany jako:\n{out_path}", "Sukces",
-                      wx.OK | wx.ICON_INFORMATION, self)
+        wx.MessageBox(
+            t("poliglota.sukces_zapis", sciezka_pliku=out_path),
+            t("common.sukces_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self)
 
     # ------------------------------------------------------------------
     # Miękkie ostrzeżenie o języku źródłowym
     # ------------------------------------------------------------------
     def _maybe_ostrzez_o_jezyku_zrodla(self) -> None:
-        # TODO(13.1, multi-language): zastąp bezpośrednie `detect()` na
+        # TODO(13.2, multi-language): zastąp bezpośrednie `detect()` na
         # `core_poliglota.wykryj_jezyk_zrodlowy()` – funkcja robi to samo,
         # ale dodatkowo waliduje wynik wobec dostępnych folderów w
         # ``dictionaries/`` i zwraca sensowny fallback. Wtedy zamiast
@@ -661,10 +676,7 @@ class PoliglotaPanel(wx.Panel):
         # właściwy pipeline słowników.
         try:
             if detect(self._file_content) != JEZYK_BAZOWY:
-                ostrzezenie = (
-                    "Uwaga: Wykryto język główny inny niż polski. "
-                    "Reguły fonetyczne są przystosowane do polszczyzny – "
-                    "efekt może być nieprzewidywalny.")
+                ostrzezenie = t("poliglota.ostrzezenie_jezyk")
                 self._lbl_progress.SetValue(ostrzezenie)
                 self._lbl_progress.SetName(ostrzezenie)
                 self._lbl_progress.Show()
@@ -680,7 +692,7 @@ class PoliglotaPanel(wx.Panel):
         self._btn_process.Disable()
         self._gauge.SetValue(0);   self._gauge.Show()
         self._lbl_progress.Show()
-        self._lbl_progress.SetValue("Inicjowanie tłumaczenia…")
+        self._lbl_progress.SetValue(t("poliglota.ai_init"))
         self._txt_result.SetValue("")
         self.Layout()
 
@@ -761,14 +773,19 @@ class PoliglotaPanel(wx.Panel):
                 sciezka_oryginalu=self._sciezka_oryginalu,
             )
         except Exception as exc:
-            self._on_ai_error(f"Błąd zapisu pliku wynikowego:\n{exc}", wynik.tekst)
+            self._on_ai_error(
+                t("poliglota.ai_blad_zapisu", tresc_bledu=str(exc)),
+                wynik.tekst,
+            )
             return
 
         self._gauge.SetValue(100)
         self._btn_process.Enable()
 
-        wx.MessageBox(f"Tłumaczenie ukończone!\n\nPlik zapisany jako:\n{out_path}",
-                      "Sukces", wx.OK | wx.ICON_INFORMATION, self)
+        wx.MessageBox(
+            t("poliglota.ai_zakonczone_tresc", sciezka_pliku=out_path),
+            t("poliglota.ai_zakonczone_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self)
 
         self._gauge.Hide()
         self._lbl_progress.SetValue(""); self._lbl_progress.Hide()
@@ -780,24 +797,23 @@ class PoliglotaPanel(wx.Panel):
     def _wyswietl_blad_ai(self, tresc_bledu: str,
                           custom_msg: str | None = None) -> None:
         """Krótki błąd → MessageBox; długi → Dialog z polem do skopiowania."""
-        msg_header  = custom_msg or "Wystąpił nieoczekiwany błąd podczas przetwarzania."
+        msg_header  = custom_msg or t("poliglota.blad_ai_naglowek")
         jest_krotki = len(tresc_bledu) <= 200 and "\n" not in tresc_bledu
 
         if jest_krotki:
             pelna = f"{msg_header}\n\n{tresc_bledu}" if custom_msg else tresc_bledu
-            wx.MessageBox(pelna, "Błąd", wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(pelna, t("poliglota.blad_ai_tytul"),
+                          wx.OK | wx.ICON_ERROR, self)
             return
 
-        dlg = wx.Dialog(self, title="Błąd – Szczegóły techniczne", size=(640, 400))
+        dlg = wx.Dialog(self, title=t("poliglota.blad_ai_szczegoly_tytul"), size=(640, 400))
         sizer = wx.BoxSizer(wx.VERTICAL)
         lbl_head = wx.StaticText(dlg, label=msg_header)
-        lbl_copy = wx.StaticText(
-            dlg,
-            label="Treść błędu (zaznacz Ctrl+A, skopiuj Ctrl+C – do zgłoszenia):")
+        lbl_copy = wx.StaticText(dlg, label=t("poliglota.blad_ai_lbl_tresc"))
         txt = wx.TextCtrl(dlg, value=tresc_bledu,
                           style=wx.TE_MULTILINE | wx.TE_READONLY,
-                          name="Treść błędu do skopiowania")
-        btn_ok = wx.Button(dlg, wx.ID_OK, label="Zamknij")
+                          name=t("poliglota.blad_ai_tresc_name"))
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
 
         sizer.Add(lbl_head, flag=wx.ALL,                                       border=8)
         sizer.Add(lbl_copy, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,               border=8)

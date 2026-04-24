@@ -1,6 +1,10 @@
 """
 Reżyser Audio GPT – główny plik aplikacji (wxPython).
 Zastępuje Start.py (Streamlit). Punkt wejścia: python main.py
+
+Wersja 13.1: cały widoczny dla użytkownika tekst pochodzi z
+``dictionaries/pl/gui/ui.yaml`` poprzez moduł :mod:`i18n`. Hard-kodowane
+stringi zostały zastąpione wywołaniami ``t("klucz", **parametry)``.
 """
 
 import os
@@ -9,11 +13,13 @@ import subprocess
 
 import wx
 
+import i18n
 import odswiez_rezysera
 from gui_konwerter import KonwerterPanel
 from gui_manager_regul import ManagerRegulPanel
 from gui_poliglota import PoliglotaPanel
 from gui_rezyser import RezyserPanel
+from i18n import t
 
 
 # ---------------------------------------------------------------------------
@@ -41,10 +47,11 @@ class HomePanel(wx.Panel):
     """
 
     ENV_FILENAME = "golden_key.env"
+    MINIMUM_ZNAKOW_KLUCZA = 40
 
     def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
-        self.SetName("Panel startowy – Strona główna")
+        self.SetName(t("home.panel_name"))
         self._build_ui()
         self._run_system_check()
 
@@ -66,18 +73,7 @@ class HomePanel(wx.Panel):
         # --- Opis narzędzi ---
         welcome = wx.TextCtrl(
             self,
-            value=(
-                "To jest Twoje zintegrowane studio nagraniowe.\n"
-                "Wybierz narzędzie z paska przycisków lub z menu Narzędzia:\n\n"
-                "  \u2022  Reżyser       \u2013  Pisz skrypty i prozę z AI;"
-                " dynamicznie zarządzaj Księgą Świata.\n"
-                "  \u2022  Poliglota     \u2013  Nakładaj twarde akcenty pod"
-                " lokalne syntezatory (NVDA/Vocalizer) i tłumacz teksty.\n"
-                "  \u2022  Konwerter     \u2013  Szybko twórz profesjonalne"
-                " pliki Word z nagłówkami poziomu 1.\n"
-                "  \u2022  Manager Reguł \u2013  Przeglądaj i twórz reguły"
-                " słownikowe bez wchodzenia w pliki YAML ręcznie."
-            ),
+            value=t("home.welcome_text"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
         )
         # Upodabniamy tło pola do tła głównego okna, żeby nie wyglądało jak pole do wpisywania
@@ -92,7 +88,7 @@ class HomePanel(wx.Panel):
         )
 
         # --- Nagłówek sekcji System Check ---
-        heading_check = wx.StaticText(self, label="System Check")
+        heading_check = wx.StaticText(self, label=t("home.heading_system_check"))
         font_h = heading_check.GetFont()
         font_h.SetPointSize(13)
         font_h.MakeBold()
@@ -102,7 +98,7 @@ class HomePanel(wx.Panel):
         # --- Etykieta statusu (aktualizowana przez _run_system_check) ---
         self._status_lbl = wx.TextCtrl(
             self,
-            value="Sprawdzanie konfiguracji\u2026",
+            value=t("home.checking"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
         )
         # Upodabniamy tło pola do tła głównego okna, żeby nie wyglądało jak pole do wpisywania
@@ -120,7 +116,7 @@ class HomePanel(wx.Panel):
             wx.StaticLine(self), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8
         )
 
-        heading_tools = wx.StaticText(self, label="Narzędzia słownikowe")
+        heading_tools = wx.StaticText(self, label=t("home.heading_narzedzia_slownikowe"))
         font_t = heading_tools.GetFont()
         font_t.SetPointSize(13)
         font_t.MakeBold()
@@ -129,18 +125,9 @@ class HomePanel(wx.Panel):
 
         tools_info = wx.TextCtrl(
             self,
-            value=(
-                'Chcesz dodać nowy akcent, szyfr albo tryb Reżysera?\n'
-                'Otwórz Manager Reguł (Ctrl+4) – znajdziesz tam drzewo '
-                'wszystkich plików YAML w dictionaries/ oraz kreator, który '
-                'sam utworzy szablon lub wygeneruje prompt dla chatbota AI.\n\n'
-                'Po dodaniu nowego AKCENTU kliknij dodatkowo przycisk '
-                '„Odśwież akcenty Reżysera z YAML" poniżej – pozwoli to '
-                'Trybowi Reżysera zauważyć nowy akcent (Poliglota wykrywa '
-                'YAML-e automatycznie). Po odświeżeniu uruchom aplikację ponownie.'
-            ),
+            value=t("home.tools_info"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
-            name="Opis narzędzi słownikowych",
+            name=t("home.narzedzia_slownikowe_name"),
         )
         tools_info.SetBackgroundColour(self.GetBackgroundColour())
         main_sizer.Add(tools_info, flag=wx.LEFT | wx.RIGHT | wx.TOP | wx.EXPAND,
@@ -150,25 +137,18 @@ class HomePanel(wx.Panel):
         tools_btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         self._btn_open_manager = wx.Button(
-            self, label="📚 Otwórz Manager Reguł",
-            name="Przycisk Otwórz Manager Reguł",
+            self, label=t("home.btn_open_manager_label"),
+            name=t("home.btn_open_manager_name"),
         )
-        self._btn_open_manager.SetToolTip(
-            "Przechodzi do Managera Reguł – eksploratora plików YAML "
-            "i kreatora nowych akcentów / trybów / szyfrów (Ctrl+4)."
-        )
+        self._btn_open_manager.SetToolTip(t("home.btn_open_manager_tooltip"))
         self.Bind(wx.EVT_BUTTON, self._on_open_manager, self._btn_open_manager)
         tools_btn_sizer.Add(self._btn_open_manager, flag=wx.RIGHT, border=8)
 
         self._btn_odswiez = wx.Button(
-            self, label="🔄 Odśwież akcenty Reżysera z YAML",
-            name="Przycisk Odśwież akcenty Reżysera z YAML",
+            self, label=t("home.btn_odswiez_label"),
+            name=t("home.btn_odswiez_name"),
         )
-        self._btn_odswiez.SetToolTip(
-            "Skanuje dictionaries/*/akcenty/ i regeneruje wrappery akcent_* "
-            "w core_poliglota.py oraz core_rezyser.py. Po udanym odświeżeniu "
-            "należy uruchomić aplikację ponownie."
-        )
+        self._btn_odswiez.SetToolTip(t("home.btn_odswiez_tooltip"))
         self.Bind(wx.EVT_BUTTON, self._on_odswiez_rezysera, self._btn_odswiez)
         tools_btn_sizer.Add(self._btn_odswiez)
 
@@ -199,18 +179,10 @@ class HomePanel(wx.Panel):
 
         # Plik nie istnieje – pierwsze uruchomienie
         if not os.path.exists(env_path):
-            self._set_status(
-                "🚨 Brak pliku konfiguracji środowiskowej!\n\n"
-                "Wykryto pierwsze uruchomienie programu. Moduły są zablokowane "
-                "ze względów bezpieczeństwa.\n"
-                "Aby odblokować wszystkie narzędzia, kliknij przycisk poniżej — "
-                "program automatycznie wygeneruje plik golden_key.env "
-                "i otworzy go w domyślnym edytorze tekstu.",
-                kind="error",
-            )
+            self._set_status(t("home.err_brak_pliku"), kind="error")
             self._show_action_btn(
                 action="generate",
-                label="Wygeneruj plik golden_key.env i otwórz edytor tekstu",
+                label=t("home.btn_generate"),
             )
             return
 
@@ -220,33 +192,21 @@ class HomePanel(wx.Panel):
                 zawartosc = fh.read().strip()
         except Exception as exc:
             self._set_status(
-                f"🚨 Nie udało się odczytać pliku golden_key.env:\n{exc}",
+                t("home.err_odczyt", tresc_bledu=str(exc)),
                 kind="error",
             )
             return
 
         # 1. Brak parametru OPENAI_API_KEY=
         if "OPENAI_API_KEY=" not in zawartosc:
-            self._set_status(
-                "🚨 Błąd struktury pliku!\n"
-                "Brakuje wymaganego parametru OPENAI_API_KEY=.\n"
-                "Prawdopodobnie skasowałeś znak równości lub nazwę zmiennej.\n"
-                "Usuń plik, wygeneruj go ponownie i wklej klucz ostrożniej.",
-                kind="error",
-            )
-            self._show_action_btn("open", "📝 Otwórz plik golden_key.env w edytorze tekstu")
+            self._set_status(t("home.err_struktura"), kind="error")
+            self._show_action_btn("open", t("home.btn_open"))
             return
 
         # 2. Tekst zastępczy nadal w pliku
         if "TUTAJ_WKLEJ_SWOJ_KLUCZ" in zawartosc:
-            self._set_status(
-                "⚠️ Klucz nie został wprowadzony!\n"
-                "W pliku golden_key.env nadal znajduje się tekst zastępczy.\n"
-                "Otwórz plik w edytorze tekstu, usuń tekst zastępczy "
-                "i wklej swój prawdziwy klucz API.",
-                kind="warning",
-            )
-            self._show_action_btn("open", "📝 Otwórz plik golden_key.env w edytorze tekstu")
+            self._set_status(t("home.err_tekst_zastepczy"), kind="warning")
+            self._show_action_btn("open", t("home.btn_open"))
             return
 
         klucz_raw = zawartosc.split("OPENAI_API_KEY=")[-1].split("\n")[0]
@@ -255,62 +215,37 @@ class HomePanel(wx.Panel):
         # 3. Zbędne cudzysłowy
         if (klucz.startswith('"') and klucz.endswith('"')) or \
            (klucz.startswith("'") and klucz.endswith("'")):
-            self._set_status(
-                "🚨 Zbędne cudzysłowy wokół klucza!\n"
-                'Klucz API wklejono w cudzysłowach (np. "sk-\u2026").\n'
-                "Otwórz plik w edytorze tekstu i usuń znaki cudzysłowu —\n"
-                "klucz musi być wpisany bezpośrednio po znaku '=', "
-                "bez żadnych dodatkowych znaków.",
-                kind="error",
-            )
-            self._show_action_btn("open", "📝 Otwórz plik golden_key.env w edytorze tekstu")
+            self._set_status(t("home.err_cudzyslowy"), kind="error")
+            self._show_action_btn("open", t("home.btn_open"))
             return
 
         # 4. Spacje lub znaki niedrukowalne przy kluczu
         if klucz_raw != klucz:
-            self._set_status(
-                "🚨 Niedozwolone znaki wokół klucza!\n"
-                "Przed lub za kluczem API wykryto spację bądź inny niewidoczny znak.\n"
-                "Otwórz plik w edytorze tekstu i upewnij się, że wartość zaczyna się\n"
-                "natychmiast po znaku '=', bez żadnych spacji.",
-                kind="error",
-            )
-            self._show_action_btn("open", "📝 Otwórz plik golden_key.env w edytorze tekstu")
+            self._set_status(t("home.err_niedozwolone_znaki"), kind="error")
+            self._show_action_btn("open", t("home.btn_open"))
             return
 
         # 5. Niepoprawny format klucza OpenAI
         if not klucz.startswith("sk-"):
-            self._set_status(
-                "🚨 Podejrzany format klucza!\n"
-                "Poprawny klucz OpenAI zawsze zaczyna się od znaków sk- (np. sk-proj-\u2026).\n"
-                "Upewnij się, że skopiowałeś właściwy ciąg znaków "
-                "i nie ma przed nim żadnych spacji.",
-                kind="error",
-            )
-            self._show_action_btn("open", "📝 Otwórz plik golden_key.env w edytorze tekstu")
+            self._set_status(t("home.err_format"), kind="error")
+            self._show_action_btn("open", t("home.btn_open"))
             return
 
         # 6. Klucz zbyt krótki
-        if len(klucz) < 40:
+        if len(klucz) < self.MINIMUM_ZNAKOW_KLUCZA:
             self._set_status(
-                f"⚠️ Klucz wydaje się zbyt krótki "
-                f"(wykryto {len(klucz)} znaków, oczekiwano co najmniej 40).\n"
-                "Prawdopodobnie skopiowałeś tylko fragment klucza.\n\n"
-                "Jeśli zamknąłeś już okienko z kluczem na platform.openai.com,\n"
-                "musisz wrócić na konto, użyć opcji 'Revoke secret key' dla tego\n"
-                "uciętego klucza i wygenerować nowy. Pamiętaj, by następnym razem\n"
-                "skopiować klucz w całości przed kliknięciem 'Done'.",
+                t(
+                    "home.err_zbyt_krotki",
+                    liczba_znakow=len(klucz),
+                    minimum_znakow=self.MINIMUM_ZNAKOW_KLUCZA,
+                ),
                 kind="warning",
             )
-            self._show_action_btn("open", "📝 Otwórz plik golden_key.env w edytorze tekstu")
+            self._show_action_btn("open", t("home.btn_open"))
             return
 
         # Wszystkie testy przeszły – sukces
-        self._set_status(
-            "✅ Klucz API (golden_key.env) wykryty i poprawnie sformatowany.\n"
-            "Wszystkie moduły są gotowe do pracy.",
-            kind="ok",
-        )
+        self._set_status(t("home.ok_klucz_wykryty"), kind="ok")
 
     # ------------------------------------------------------------------
     # Pomocnicze metody UI
@@ -354,17 +289,14 @@ class HomePanel(wx.Panel):
                     fh.write("OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ")
             except Exception as exc:
                 wx.MessageBox(
-                    f"Nie udało się utworzyć pliku golden_key.env:\n{exc}",
-                    "Błąd",
+                    t("home.blad_tworzenia_env_tresc", tresc_bledu=str(exc)),
+                    t("home.blad_tworzenia_env_tytul"),
                     wx.OK | wx.ICON_ERROR,
                 )
                 return
             # Plik wygenerowany – zaktualizuj UI
             self._set_status(
-                f"✅ Plik {self.ENV_FILENAME} został wygenerowany!\n"
-                "Edytor tekstu otwiera się automatycznie.\n"
-                "Wklej swój klucz API, zapisz plik (Ctrl+S) "
-                "i uruchom aplikację ponownie.",
+                t("home.ok_plik_wygenerowany", nazwa_pliku=self.ENV_FILENAME),
                 kind="ok",
             )
             # Przenieś fokus przed ukryciem przycisku – NVDA nie wpadnie w próżnię (A11y)
@@ -380,11 +312,10 @@ class HomePanel(wx.Panel):
                 subprocess.Popen(["open", env_path])
             else:
                 subprocess.Popen(["xdg-open", env_path])   # Linux + Orca itp.
-        except Exception as exc:  # noqa: BLE001
+        except Exception:  # noqa: BLE001
             wx.MessageBox(
-                f"Nie udało się automatycznie otworzyć pliku.\n"
-                f"Otwórz go ręcznie:\n{env_path}",
-                "Informacja",
+                t("home.blad_otwarcia_pliku_tresc", sciezka_pliku=env_path),
+                t("home.blad_otwarcia_pliku_tytul"),
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
@@ -405,8 +336,8 @@ class HomePanel(wx.Panel):
             raport = odswiez_rezysera.uruchom(on_log=linie.append)
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
-                f"Wystąpił nieoczekiwany błąd:\n{exc}",
-                "Błąd odświeżania akcentów",
+                t("home.raport_niespodziewany_tresc", tresc_bledu=str(exc)),
+                t("home.raport_niespodziewany_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -414,23 +345,16 @@ class HomePanel(wx.Panel):
 
         # Zbuduj nagłówek dialogu w zależności od wyniku
         if raport["errors"]:
-            tytul  = "Odśwież akcenty Reżysera – BŁĄD"
-            header = "⛔ Generator napotkał błędy – patrz log poniżej."
+            tytul  = t("home.raport_tytul_blad")
+            header = t("home.raport_header_blad")
         elif raport["core_changed"] or raport["rezyser_changed"]:
-
-            tytul  = "Odśwież akcenty Reżysera – Sukces"
+            tytul  = t("home.raport_tytul_sukces")
             n = len(raport["akcenty"])
-            header = (
-                f"✅ Zmodyfikowano pliki dla {n} akcentów.\n"
-                "Aby nowe akcenty pojawiły się w Trybie Reżysera, "
-                "uruchom aplikację ponownie."
-            )
+            header = t("home.raport_header_sukces", liczba_akcentow=n)
         else:
-            tytul  = "Odśwież akcenty Reżysera – Bez zmian"
+            tytul  = t("home.raport_tytul_bez_zmian")
             n = len(raport["akcenty"])
-            header = (
-                f"ℹ️ Brak zmian. Wykryto {n} akcentów – wrappery są już aktualne."
-            )
+            header = t("home.raport_header_bez_zmian", liczba_akcentow=n)
 
         self._pokaz_raport_dialog(tytul, header, "\n".join(linie))
 
@@ -447,16 +371,13 @@ class HomePanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         lbl_head = wx.StaticText(dlg, label=header)
-        lbl_copy = wx.StaticText(
-            dlg,
-            label="Pełny log (Ctrl+A, Ctrl+C kopiuje do schowka):",
-        )
+        lbl_copy = wx.StaticText(dlg, label=t("home.raport_lbl_log"))
         txt = wx.TextCtrl(
             dlg, value=tresc_logu,
             style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name="Log generatora akcentów Reżysera",
+            name=t("home.raport_log_name"),
         )
-        btn_ok = wx.Button(dlg, wx.ID_OK, label="Zamknij")
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
 
         sizer.Add(lbl_head, flag=wx.ALL,                                       border=8)
         sizer.Add(lbl_copy, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,               border=8)
@@ -478,15 +399,17 @@ class MainFrame(wx.Frame):
     Struktura:
         - pasek menu (wx.MenuBar) z menu „Narzędzia" i „Plik"
         - centralny wx.Panel, w którym podmieniane są panele narzędzi
+
+    Wersja 13.1: tytuł, wersja i nazwy narzędzi pobierane z i18n
+    (sekcja ``app`` i ``main.nazwy_narzedzi`` w ``ui.yaml``).
     """
 
-    TITLE   = "Reżyser Audio GPT"
-    VERSION = "13.0 – Wersja Wydawnicza"
-
     def __init__(self) -> None:
+        self._tytul = t("app.nazwa")
+        self._wersja = t("app.wersja")
         super().__init__(
             parent=None,
-            title=f"{self.TITLE}  |  {self.VERSION}",
+            title=t("app.title_home", nazwa_aplikacji=self._tytul, wersja=self._wersja),
             size=(960, 640),
         )
 
@@ -495,7 +418,7 @@ class MainFrame(wx.Frame):
         self._bind_events()
 
         # Domyślnie ładujemy ekran powitalny (Strona główna)
-        self._switch_tool("Dom")
+        self._switch_tool(t("main.nazwy_narzedzi.dom"))
 
         self.Centre()
         self.Show()
@@ -511,44 +434,43 @@ class MainFrame(wx.Frame):
 
         menu_tools.Append(
             ID_HOME,
-            "Strona &główna\tCtrl+0",
-            "Wróć do ekranu startowego z opisem narzędzi i System Check",
+            t("main.menu.strona_glowna"),
+            t("main.menu_status.strona_glowna"),
         )
         menu_tools.AppendSeparator()
 
-        item_rezyser = menu_tools.Append(
+        menu_tools.Append(
             ID_TOOL_REZYSER,
-            "&Reżyser\tCtrl+1",
-            "Otwiera moduł Reżyserii – pisanie skryptów i prozy z AI",
+            t("main.menu.rezyser"),
+            t("main.menu_status.rezyser"),
         )
-        item_poliglota = menu_tools.Append(
+        menu_tools.Append(
             ID_TOOL_POLIGLOTA,
-            "&Poliglota\tCtrl+2",
-            "Otwiera moduł Poligloty – akcenty i tłumaczenie tekstów",
+            t("main.menu.poliglota"),
+            t("main.menu_status.poliglota"),
         )
-        item_konwerter = menu_tools.Append(
+        menu_tools.Append(
             ID_TOOL_KONWERTER,
-            "&Konwerter\tCtrl+3",
-            "Otwiera moduł Konwertera – tworzenie plików Word",
+            t("main.menu.konwerter"),
+            t("main.menu_status.konwerter"),
         )
-        item_manager = menu_tools.Append(
+        menu_tools.Append(
             ID_TOOL_MANAGER,
-            "&Manager Reguł\tCtrl+4",
-            "Otwiera Managera Reguł – eksplorator plików YAML "
-            "w dictionaries/ i kreator nowych akcentów / trybów / szyfrów",
+            t("main.menu.manager"),
+            t("main.menu_status.manager"),
         )
 
         # --- Menu: Plik ------------------------------------------------
         menu_file = wx.Menu()
-        menu_file.Append(ID_EXIT, "Za&kończ\tAlt+F4", "Zamknij aplikację")
+        menu_file.Append(ID_EXIT, t("main.menu.zakoncz"), t("main.menu_status.zakoncz"))
 
-        menubar.Append(menu_tools, "&Narzędzia")
-        menubar.Append(menu_file,  "&Plik")
+        menubar.Append(menu_tools, t("main.menu.narzedzia"))
+        menubar.Append(menu_file,  t("main.menu.plik"))
 
         self.SetMenuBar(menubar)
 
         # Dostępnościowa nazwa paska menu (NVDA odczyta ją po Alt)
-        menubar.SetName("Pasek menu głównego")
+        menubar.SetName(t("app.menubar_name"))
 
     # ------------------------------------------------------------------
     # Budowanie układu UI (sizer + panel centralny)
@@ -556,14 +478,14 @@ class MainFrame(wx.Frame):
     def _build_ui(self) -> None:
         # Główny kontener – panel z tabulacją
         self._root_panel = wx.Panel(self, style=wx.TAB_TRAVERSAL)
-        self._root_panel.SetName("Obszar roboczy")
+        self._root_panel.SetName(t("app.obszar_roboczy_name"))
 
         self._root_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Baner tytułowy (dostępny dla NVDA jako statyczny tekst)
         self._banner = wx.StaticText(
             self._root_panel,
-            label=f"🎬  {self.TITLE}",
+            label=t("app.banner", nazwa_aplikacji=self._tytul),
         )
         banner_font = self._banner.GetFont()
         banner_font.SetPointSize(18)
@@ -576,39 +498,30 @@ class MainFrame(wx.Frame):
         self._btn_rezyser = wx.Button(
             self._root_panel,
             id=ID_TOOL_REZYSER,
-            label="🎬  &Reżyser",
+            label=t("main.btn.rezyser"),
         )
-        self._btn_rezyser.SetToolTip(
-            "Moduł Reżyserii (Ctrl+1): Pisz skrypty i prozę z pomocą AI"
-        )
+        self._btn_rezyser.SetToolTip(t("main.tooltip.rezyser"))
 
         self._btn_poliglota = wx.Button(
             self._root_panel,
             id=ID_TOOL_POLIGLOTA,
-            label="🌍  &Poliglota",
+            label=t("main.btn.poliglota"),
         )
-        self._btn_poliglota.SetToolTip(
-            "Moduł Poligloty (Ctrl+2): Akcenty i tłumaczenie tekstów"
-        )
+        self._btn_poliglota.SetToolTip(t("main.tooltip.poliglota"))
 
         self._btn_konwerter = wx.Button(
             self._root_panel,
             id=ID_TOOL_KONWERTER,
-            label="📄  &Konwerter",
+            label=t("main.btn.konwerter"),
         )
-        self._btn_konwerter.SetToolTip(
-            "Moduł Konwertera (Ctrl+3): Twórz pliki Word z nagłówkami"
-        )
+        self._btn_konwerter.SetToolTip(t("main.tooltip.konwerter"))
 
         self._btn_manager = wx.Button(
             self._root_panel,
             id=ID_TOOL_MANAGER,
-            label="📚  &Manager Reguł",
+            label=t("main.btn.manager"),
         )
-        self._btn_manager.SetToolTip(
-            "Manager Reguł (Ctrl+4): Eksploruj pliki YAML w dictionaries/, "
-            "twórz nowe akcenty, szyfry i tryby (szablon lub prompt dla AI)"
-        )
+        self._btn_manager.SetToolTip(t("main.tooltip.manager"))
 
         btn_sizer.Add(self._btn_rezyser,   flag=wx.ALL, border=4)
         btn_sizer.Add(self._btn_poliglota, flag=wx.ALL, border=4)
@@ -659,22 +572,36 @@ class MainFrame(wx.Frame):
     # Przełączanie narzędzi
     # ------------------------------------------------------------------
     def _switch_tool(self, name: str) -> None:
-        """Podmienia panel centralny na panel wskazanego narzędzia."""
+        """Podmienia panel centralny na panel wskazanego narzędzia.
+
+        Args:
+            name: Nazwa narzędzia — wartość zwracana przez
+                  ``t("main.nazwy_narzedzi.*")``. Używamy ich zarówno
+                  do routingu, jak i do budowy tytułu okna — dzięki temu
+                  przy zmianie języka wszystko pozostaje spójne.
+        """
+        # Pobierz kanoniczne nazwy z i18n (raz, zamiast wielokrotnie wołać t())
+        n_dom       = t("main.nazwy_narzedzi.dom")
+        n_rezyser   = t("main.nazwy_narzedzi.rezyser")
+        n_poliglota = t("main.nazwy_narzedzi.poliglota")
+        n_konwerter = t("main.nazwy_narzedzi.konwerter")
+        n_manager   = t("main.nazwy_narzedzi.manager")
+
         # Usuń poprzedni panel (jeśli istnieje)
         if self._current_panel is not None:
             self._content_area.Detach(self._current_panel)
             self._current_panel.Destroy()
 
         # Utwórz właściwy panel narzędzia
-        if name == "Dom":
+        if name == n_dom:
             self._current_panel = HomePanel(self._root_panel)
-        elif name == "Reżyser":
+        elif name == n_rezyser:
             self._current_panel = RezyserPanel(self._root_panel)
-        elif name == "Poliglota":
+        elif name == n_poliglota:
             self._current_panel = PoliglotaPanel(self._root_panel)
-        elif name == "Konwerter":
+        elif name == n_konwerter:
             self._current_panel = KonwerterPanel(self._root_panel)
-        else:  # "Manager Reguł"
+        else:  # Manager Reguł
             self._current_panel = ManagerRegulPanel(self._root_panel)
         self._content_area.Add(self._current_panel, proportion=1, flag=wx.EXPAND)
 
@@ -685,17 +612,26 @@ class MainFrame(wx.Frame):
         # od razu zaczęło czytać nowy widok po zmianie narzędzia.
         # Na ekranie startowym fokus ląduje na tekście powitalnym (welcome),
         # w pozostałych panelach domyślny SetFocus kieruje go na pierwszy TabStop.
-        if name == "Dom":
+        if name == n_dom:
             wx.CallAfter(self._current_panel._welcome.SetFocus)
         else:
             wx.CallAfter(self._current_panel.SetFocus)
 
         # Zaktualizuj tytuł okna – NVDA go odczyta
         # Dla ekranu startowego pomijamy myślnik (brak aktywnego narzędzia)
-        if name == "Dom":
-            self.SetTitle(f"{self.TITLE}  |  {self.VERSION}")
+        if name == n_dom:
+            self.SetTitle(
+                t("app.title_home", nazwa_aplikacji=self._tytul, wersja=self._wersja),
+            )
         else:
-            self.SetTitle(f"{self.TITLE}  –  {name}  |  {self.VERSION}")
+            self.SetTitle(
+                t(
+                    "app.title_z_narzedziem",
+                    nazwa_aplikacji=self._tytul,
+                    nazwa_narzedzia=name,
+                    wersja=self._wersja,
+                ),
+            )
 
         # Zaktualizuj wizualne wyróżnienie aktywnego przycisku
         self._update_button_states(name)
@@ -703,10 +639,10 @@ class MainFrame(wx.Frame):
     def _update_button_states(self, active_name: str) -> None:
         """Wizualnie wyróżnia aktywny przycisk narzędzia (bold)."""
         mapping = {
-            "Reżyser":       self._btn_rezyser,
-            "Poliglota":     self._btn_poliglota,
-            "Konwerter":     self._btn_konwerter,
-            "Manager Reguł": self._btn_manager,
+            t("main.nazwy_narzedzi.rezyser"):   self._btn_rezyser,
+            t("main.nazwy_narzedzi.poliglota"): self._btn_poliglota,
+            t("main.nazwy_narzedzi.konwerter"): self._btn_konwerter,
+            t("main.nazwy_narzedzi.manager"):   self._btn_manager,
         }
         for tool_name, btn in mapping.items():
             font = btn.GetFont()
@@ -719,19 +655,19 @@ class MainFrame(wx.Frame):
     # Handlery zdarzeń
     # ------------------------------------------------------------------
     def _on_home(self, _event: wx.Event) -> None:
-        self._switch_tool("Dom")
+        self._switch_tool(t("main.nazwy_narzedzi.dom"))
 
     def _on_rezyser(self, _event: wx.Event) -> None:
-        self._switch_tool("Reżyser")
+        self._switch_tool(t("main.nazwy_narzedzi.rezyser"))
 
     def _on_poliglota(self, _event: wx.Event) -> None:
-        self._switch_tool("Poliglota")
+        self._switch_tool(t("main.nazwy_narzedzi.poliglota"))
 
     def _on_konwerter(self, _event: wx.Event) -> None:
-        self._switch_tool("Konwerter")
+        self._switch_tool(t("main.nazwy_narzedzi.konwerter"))
 
     def _on_manager(self, _event: wx.Event) -> None:
-        self._switch_tool("Manager Reguł")
+        self._switch_tool(t("main.nazwy_narzedzi.manager"))
 
     def _on_exit(self, _event: wx.Event) -> None:
         self.Close()
@@ -744,6 +680,11 @@ class MainFrame(wx.Frame):
 # Punkt wejścia
 # ---------------------------------------------------------------------------
 def main() -> None:
+    # Wersja 13.1: wczytaj tłumaczenia UI przed budową jakiegokolwiek okna.
+    # Jawne ustawienie języka gwarantuje, że plik `dictionaries/pl/gui/ui.yaml`
+    # jest już w cache, zanim konstruktory paneli zaczną pytać o etykiety.
+    i18n.ustaw_jezyk(i18n.JEZYK_DOMYSLNY)
+
     app = wx.App(False)
     frame = MainFrame()  # noqa: F841  (frame jest trzymany przez wx.App)
     app.MainLoop()

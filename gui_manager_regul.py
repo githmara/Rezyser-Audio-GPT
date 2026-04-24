@@ -18,6 +18,10 @@ Bezpieczeństwo: drzewo ma zakotwiczony root w ``DICTIONARIES_DIR``,
 kreator nie udostępnia wyboru dowolnej ścieżki, a każda operacja
 na pliku przechodzi przez :func:`_bezpieczna_sciezka` – użytkownik nie
 ma jak wyjść poza ``dictionaries/``.
+
+Wersja 13.1: dodana czwarta kategoria ``gui/`` (tłumaczenia UI), cały
+tekst widoczny dla użytkownika przechodzi przez :mod:`i18n` (klucze
+``manager.*`` w ``dictionaries/<kod>/gui/ui.yaml``).
 """
 
 from __future__ import annotations
@@ -30,6 +34,7 @@ import subprocess
 import wx
 
 import manager_regul_szablony as mrs
+from i18n import t
 
 
 # =============================================================================
@@ -42,21 +47,25 @@ DICTIONARIES_DIR = os.path.join(_ROOT_DIR, "dictionaries")
 FOLDER_AKCENTY = "akcenty"
 FOLDER_SZYFRY  = "szyfry"
 FOLDER_REZYSER = "rezyser"
+FOLDER_GUI     = "gui"   # tłumaczenia UI – dodane w 13.1
 
-# Przyjazne etykiety dla NVDA + wizualne emoji jako wsparcie (A11y: NVDA
-# odczyta zarówno emoji, jak i pełną nazwę – emoji idzie na koniec, żeby
-# odczyt zaczynał się od kluczowego słowa).
-_ETYKIETA_KATEGORII = {
-    FOLDER_AKCENTY: "Akcenty (fonetyka dla TTS)  🎙️",
-    FOLDER_SZYFRY:  "Szyfry (zabawy tekstem)  🔐",
-    FOLDER_REZYSER: "Reżyser (tryby i postprodukcja)  🎬",
-}
 
 # Walidacja id pliku – ASCII snake_case (żeby działało wszędzie, także
 # pod Windows z UAC i w nazwach z generatora wrapperów akcent_*).
 _RE_ID_PLIKU        = re.compile(r"^[a-z][a-z0-9_]*$")
 _RE_KOD_JEZYKA      = re.compile(r"^[a-z]{2,3}$")
 _RE_KOD_ISO         = re.compile(r"^[a-z]{2,3}$")
+
+
+def _etykieta_kategorii(kat: str) -> str:
+    """Zwraca przyjazną etykietę kategorii drzewa (z ``manager.kategorie.*``).
+
+    Wersja 13.1: etykiety przeniesione do i18n zamiast stałej globalnej,
+    dzięki czemu przyzwyczajenie do języka polskiego można zmienić
+    wyłącznie przez edycję ``dictionaries/<kod>/gui/ui.yaml`` – kod
+    Pythona nie wymaga zmian.
+    """
+    return t(f"manager.kategorie.{kat}")
 
 
 def _otworz_w_edytorze_tekstu(parent: wx.Window, sciezka: str) -> None:
@@ -76,9 +85,12 @@ def _otworz_w_edytorze_tekstu(parent: wx.Window, sciezka: str) -> None:
             subprocess.Popen(["xdg-open", sciezka])            # noqa: S603,S607
     except Exception as exc:                                    # noqa: BLE001
         wx.MessageBox(
-            f"Nie udało się automatycznie otworzyć pliku.\n"
-            f"Otwórz go ręcznie:\n{sciezka}\n\nSzczegóły: {exc}",
-            "Informacja",
+            t(
+                "manager.blad_otwarcia_tresc",
+                sciezka_pliku=sciezka,
+                tresc_bledu=str(exc),
+            ),
+            t("manager.blad_otwarcia_tytul"),
             wx.OK | wx.ICON_INFORMATION,
             parent,
         )
@@ -117,7 +129,7 @@ class ManagerRegulPanel(wx.Panel):
 
     def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
-        self.SetName("Panel Managera Reguł – eksplorator słowników")
+        self.SetName(t("manager.panel_name"))
 
         self._build_ui()
         self._bind_events()
@@ -132,19 +144,9 @@ class ManagerRegulPanel(wx.Panel):
         # --- Opis górny (A11y) ---
         desc = wx.TextCtrl(
             self,
-            value=(
-                "Manager Reguł pozwala przeglądać i edytować pliki YAML "
-                "w folderze dictionaries/ bez wchodzenia w Eksploratora "
-                "plików systemu. Wybierz plik w drzewie po lewej, a "
-                "następnie skorzystaj z przycisków po prawej: otwórz w "
-                "edytorze tekstu, utwórz nowy plik, duplikuj lub usuń.\n\n"
-                "Dla trudniejszych zadań (nowy język, akcent obcej "
-                "fonetyki, szyfr algorytmiczny) Manager wygeneruje "
-                "prompt dla chatbota AI – wystarczy wkleić go do ChatGPT "
-                "lub Claude i zapisać odpowiedź."
-            ),
+            value=t("manager.desc"),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
-            name="Opis Managera Reguł",
+            name=t("manager.desc_name"),
         )
         desc.SetBackgroundColour(self.GetBackgroundColour())
         main_sizer.Add(desc, flag=wx.ALL | wx.EXPAND, border=12)
@@ -160,63 +162,43 @@ class ManagerRegulPanel(wx.Panel):
                   | wx.TR_HIDE_ROOT
                   | wx.TR_SINGLE
                   | wx.TR_FULL_ROW_HIGHLIGHT,
-            name="Drzewo plików dictionaries",
+            name=t("manager.tree_name"),
         )
-        self._tree.SetToolTip(
-            "Drzewo wszystkich plików YAML w folderze dictionaries/. "
-            "Rozwiń język, potem kategorię, a następnie wybierz plik. "
-            "Strzałki i Enter działają standardowo dla NVDA."
-        )
+        self._tree.SetToolTip(t("manager.tree_tooltip"))
         work_sizer.Add(self._tree, proportion=3, flag=wx.EXPAND | wx.ALL, border=6)
 
         # Prawa kolumna: pionowy stos przycisków
         btn_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self._btn_otworz = wx.Button(
-            self, label="📝  &Otwórz w edytorze tekstu",
-            name="Przycisk Otwórz zaznaczony plik w edytorze tekstu",
+            self, label=t("manager.btn_otworz_label"),
+            name=t("manager.btn_otworz_name"),
         )
-        self._btn_otworz.SetToolTip(
-            "Otwiera zaznaczony plik YAML w domyślnym edytorze tekstu "
-            "systemu (Notatnik na Windows, TextEdit na macOS)."
-        )
+        self._btn_otworz.SetToolTip(t("manager.btn_otworz_tooltip"))
 
         self._btn_nowy = wx.Button(
-            self, label="➕  &Nowy plik reguł…",
-            name="Przycisk Utwórz nowy plik reguł",
+            self, label=t("manager.btn_nowy_label"),
+            name=t("manager.btn_nowy_name"),
         )
-        self._btn_nowy.SetToolTip(
-            "Otwiera kreator nowego pliku: wybierasz typ (akcent, szyfr, "
-            "tryb Reżysera, język bazowy), Manager tworzy szablon albo "
-            "generuje prompt dla AI."
-        )
+        self._btn_nowy.SetToolTip(t("manager.btn_nowy_tooltip"))
 
         self._btn_duplikuj = wx.Button(
-            self, label="📋  &Duplikuj wybrany plik",
-            name="Przycisk Duplikuj zaznaczony plik",
+            self, label=t("manager.btn_duplikuj_label"),
+            name=t("manager.btn_duplikuj_name"),
         )
-        self._btn_duplikuj.SetToolTip(
-            "Tworzy kopię zaznaczonego pliku YAML pod nową nazwą – "
-            "szybki start dla wariantu istniejącej reguły."
-        )
+        self._btn_duplikuj.SetToolTip(t("manager.btn_duplikuj_tooltip"))
 
         self._btn_usun = wx.Button(
-            self, label="🗑️  &Usuń zaznaczony plik",
-            name="Przycisk Usuń zaznaczony plik",
+            self, label=t("manager.btn_usun_label"),
+            name=t("manager.btn_usun_name"),
         )
-        self._btn_usun.SetToolTip(
-            "Usuwa zaznaczony plik YAML z dysku (z potwierdzeniem). "
-            "Operacja jest nieodwracalna – pomyśl dwa razy."
-        )
+        self._btn_usun.SetToolTip(t("manager.btn_usun_tooltip"))
 
         self._btn_odswiez = wx.Button(
-            self, label="🔄  O&dśwież drzewo",
-            name="Przycisk Odśwież drzewo plików",
+            self, label=t("manager.btn_odswiez_label"),
+            name=t("manager.btn_odswiez_name"),
         )
-        self._btn_odswiez.SetToolTip(
-            "Przeładowuje drzewo z dysku – użyj, jeśli zmieniłeś pliki "
-            "ręcznie w Eksploratorze lub po zapisie w edytorze tekstu."
-        )
+        self._btn_odswiez.SetToolTip(t("manager.btn_odswiez_tooltip"))
 
         for btn in (
             self._btn_otworz,
@@ -228,11 +210,7 @@ class ManagerRegulPanel(wx.Panel):
             btn_sizer.Add(btn, flag=wx.EXPAND | wx.BOTTOM, border=6)
 
         # Uwaga dla użytkownika na samym dole kolumny przycisków
-        info = wx.StaticText(
-            self,
-            label=('Po utworzeniu nowego akcentu wróć na Stronę główną\n'
-                   'i kliknij „Odśwież akcenty Reżysera z YAML".'),
-        )
+        info = wx.StaticText(self, label=t("manager.info_stopka"))
         info.Wrap(260)
         btn_sizer.AddStretchSpacer()
         btn_sizer.Add(info, flag=wx.TOP, border=12)
@@ -262,21 +240,22 @@ class ManagerRegulPanel(wx.Panel):
     def _zaladuj_drzewo(self, zaznacz_sciezke: str | None = None) -> None:
         """Przebudowuje wx.TreeCtrl na podstawie aktualnej zawartości dysku.
 
+        Wersja 13.1: oprócz ``akcenty/``, ``szyfry/`` i ``rezyser/``
+        skanujemy też nowy katalog ``gui/`` (tłumaczenia UI) – dzięki temu
+        lingwista pracujący nad nowym językiem widzi wszystkie warstwy
+        w jednym drzewie.
+
         Args:
             zaznacz_sciezke: jeśli podane, po przebudowie drzewo próbuje
                              zaznaczyć element o tej ścieżce (użyteczne
                              po utworzeniu lub zmianie nazwy pliku).
         """
         self._tree.DeleteAllItems()
-        root = self._tree.AddRoot("Słowniki (dictionaries/)")
+        root = self._tree.AddRoot(t("manager.tree_root"))
 
         if not os.path.isdir(DICTIONARIES_DIR):
             # Brak katalogu – ostrzeż i zakończ
-            komunikat = (
-                '⚠️  Brak folderu dictionaries/ – utwórz pierwszy język '
-                'przyciskiem „Nowy plik reguł…".'
-            )
-            wezel = self._tree.AppendItem(root, komunikat)
+            wezel = self._tree.AppendItem(root, t("manager.tree_brak_folderu"))
             self._tree.SetItemData(wezel, {"typ": "info"})
             return
 
@@ -290,7 +269,8 @@ class ManagerRegulPanel(wx.Panel):
                 continue
 
             wezel_jezyka = self._tree.AppendItem(
-                root, f"🌐  {jezyk}  ({_opis_jezyka(jezyk)})",
+                root,
+                t("manager.tree_jezyk", kod_jezyka=jezyk, nazwa_jezyka=_opis_jezyka(jezyk)),
             )
             self._tree.SetItemData(wezel_jezyka, {
                 "typ": "jezyk",
@@ -301,9 +281,7 @@ class ManagerRegulPanel(wx.Panel):
             # 1) podstawy.yaml
             podstawy = os.path.join(sciezka_jezyka, "podstawy.yaml")
             if os.path.isfile(podstawy):
-                wezel = self._tree.AppendItem(
-                    wezel_jezyka, "📄  podstawy.yaml  (diakrytyki + alfabet)",
-                )
+                wezel = self._tree.AppendItem(wezel_jezyka, t("manager.tree_podstawy"))
                 self._tree.SetItemData(wezel, {
                     "typ": "plik",
                     "sciezka": podstawy,
@@ -313,8 +291,9 @@ class ManagerRegulPanel(wx.Panel):
                 if zaznacz_sciezke and _ta_sama_sciezka(podstawy, zaznacz_sciezke):
                     do_zaznaczenia = wezel
 
-            # 2) kategorie (akcenty/ / szyfry/ / rezyser/)
-            for kat in (FOLDER_AKCENTY, FOLDER_SZYFRY, FOLDER_REZYSER):
+            # 2) kategorie (akcenty/ / szyfry/ / rezyser/ / gui/)
+            # Wersja 13.1: FOLDER_GUI dołożony jako czwarta kategoria.
+            for kat in (FOLDER_AKCENTY, FOLDER_SZYFRY, FOLDER_REZYSER, FOLDER_GUI):
                 sciezka_kat = os.path.join(sciezka_jezyka, kat)
                 if not os.path.isdir(sciezka_kat):
                     continue
@@ -327,7 +306,11 @@ class ManagerRegulPanel(wx.Panel):
                 )
                 wezel_kat = self._tree.AppendItem(
                     wezel_jezyka,
-                    f"{_ETYKIETA_KATEGORII[kat]}  [{len(pliki)}]",
+                    t(
+                        "manager.tree_kategoria",
+                        etykieta=_etykieta_kategorii(kat),
+                        liczba_plikow=len(pliki),
+                    ),
                 )
                 self._tree.SetItemData(wezel_kat, {
                     "typ": "kategoria",
@@ -337,7 +320,10 @@ class ManagerRegulPanel(wx.Panel):
                 })
                 for plik in pliki:
                     pelna = os.path.join(sciezka_kat, plik)
-                    wezel = self._tree.AppendItem(wezel_kat, f"📄  {plik}")
+                    wezel = self._tree.AppendItem(
+                        wezel_kat,
+                        t("manager.tree_plik", nazwa_pliku=plik),
+                    )
                     self._tree.SetItemData(wezel, {
                         "typ": "plik",
                         "sciezka": pelna,
@@ -402,9 +388,8 @@ class ManagerRegulPanel(wx.Panel):
         """Opakowanie bezpieczeństwa wokół ``_otworz_w_edytorze_tekstu``."""
         if not _bezpieczna_sciezka(sciezka) or not os.path.isfile(sciezka):
             wx.MessageBox(
-                "Plik leży poza folderem dictionaries/ lub już nie istnieje.\n"
-                "Odśwież drzewo i spróbuj ponownie.",
-                "Nie można otworzyć pliku",
+                t("manager.plik_wne_tresc"),
+                t("manager.plik_wne_tytul"),
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
@@ -428,9 +413,8 @@ class ManagerRegulPanel(wx.Panel):
 
         dlg = wx.TextEntryDialog(
             self,
-            f"Podaj nową nazwę pliku (bez rozszerzenia, tylko ASCII, "
-            f"lower_snake).\nPlik źródłowy: {stara_nazwa}",
-            "Duplikuj plik YAML",
+            t("manager.dup_dlg_label", nazwa_pliku=stara_nazwa),
+            t("manager.dup_dlg_tytul"),
             value=_zaproponuj_nowa_nazwe(stara_nazwa),
         )
         try:
@@ -442,10 +426,8 @@ class ManagerRegulPanel(wx.Panel):
 
         if not _RE_ID_PLIKU.match(nowa_id):
             wx.MessageBox(
-                "Nieprawidłowa nazwa.\n\nDozwolone: małe litery ASCII, "
-                "cyfry i podkreślenia. Pierwszy znak musi być literą.\n"
-                "Przykłady: szwedzki, nowy_tryb, postprod_rozdzialy.",
-                "Błąd nazwy pliku",
+                t("manager.dup_nazwa_blad_tresc"),
+                t("manager.dup_nazwa_blad_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -453,14 +435,17 @@ class ManagerRegulPanel(wx.Panel):
 
         nowa_sciezka = os.path.join(folder, f"{nowa_id}.yaml")
         if not _bezpieczna_sciezka(nowa_sciezka):
-            wx.MessageBox("Docelowa ścieżka leży poza dictionaries/.",
-                          "Błąd", wx.OK | wx.ICON_ERROR, self)
+            wx.MessageBox(
+                t("manager.dup_poza_dict_tresc"),
+                t("manager.dup_poza_dict_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
             return
         if os.path.exists(nowa_sciezka):
             wx.MessageBox(
-                f"Plik {nowa_id}.yaml już istnieje w tym folderze.\n"
-                "Wybierz inną nazwę.",
-                "Plik już istnieje",
+                t("manager.dup_istnieje_tresc", nazwa_pliku=nowa_id),
+                t("manager.dup_istnieje_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )
@@ -470,7 +455,6 @@ class ManagerRegulPanel(wx.Panel):
             with open(stary, "r", encoding="utf-8") as fh:
                 zawartosc = fh.read()
             # Zamień `id: <stare>` na `id: <nowe>` w pierwszej linii, która pasuje.
-            stara_id = os.path.splitext(stara_nazwa)[0]
             zawartosc_nowa = re.sub(
                 r"^(\s*id:\s*).+$",
                 rf"\1{nowa_id}",
@@ -480,25 +464,21 @@ class ManagerRegulPanel(wx.Panel):
             )
             # Dopisz jednorazowy komentarz na górze, żeby lingwista wiedział,
             # skąd pochodzi plik i co zmienić dalej.
-            naglowek = (
-                f"# Duplikat z: {stara_nazwa}\n"
-                f"# UWAGA: zmień pola `etykieta` i `opis`, a potem zapisz plik.\n"
-            )
+            naglowek = t("manager.dup_komentarz_naglowek", nazwa_pliku=stara_nazwa) + "\n"
             with open(nowa_sciezka, "w", encoding="utf-8") as fh:
                 fh.write(naglowek + zawartosc_nowa)
         except Exception as exc:                                # noqa: BLE001
             wx.MessageBox(
-                f"Nie udało się utworzyć duplikatu:\n{exc}",
-                "Błąd", wx.OK | wx.ICON_ERROR, self,
+                t("manager.dup_blad", tresc_bledu=str(exc)),
+                t("common.blad_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
             )
             return
 
         wx.MessageBox(
-            f"Utworzono duplikat: {os.path.basename(nowa_sciezka)}\n\n"
-            "Edytor tekstu otwiera się automatycznie. Zmień pola "
-            "`etykieta` i `opis`, zapisz plik (Ctrl+S), a potem wróć "
-            'do Managera i kliknij „Odśwież drzewo".',
-            "Duplikat utworzony",
+            t("manager.dup_ok_tresc", nazwa_pliku=os.path.basename(nowa_sciezka)),
+            t("manager.dup_ok_tytul"),
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
@@ -518,10 +498,12 @@ class ManagerRegulPanel(wx.Panel):
             return  # defensive
 
         odp = wx.MessageBox(
-            f"Czy na pewno usunąć plik:\n\n{os.path.basename(sciezka)}\n"
-            f"(z katalogu {os.path.relpath(os.path.dirname(sciezka), _ROOT_DIR)})\n\n"
-            "Operacja jest NIEODWRACALNA.",
-            "Potwierdź usunięcie",
+            t(
+                "manager.usun_pytanie_tresc",
+                nazwa_pliku=os.path.basename(sciezka),
+                katalog_wzgledny=os.path.relpath(os.path.dirname(sciezka), _ROOT_DIR),
+            ),
+            t("manager.usun_pytanie_tytul"),
             wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
             self,
         )
@@ -532,15 +514,16 @@ class ManagerRegulPanel(wx.Panel):
             os.remove(sciezka)
         except Exception as exc:                                # noqa: BLE001
             wx.MessageBox(
-                f"Nie udało się usunąć pliku:\n{exc}",
-                "Błąd", wx.OK | wx.ICON_ERROR, self,
+                t("manager.usun_blad", tresc_bledu=str(exc)),
+                t("common.blad_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
             )
             return
 
         wx.MessageBox(
-            "Plik usunięty. Pamiętaj, aby po usunięciu akcentu kliknąć "
-            '„Odśwież akcenty Reżysera z YAML" na Stronie głównej.',
-            "Usunięto",
+            t("manager.usun_ok_tresc"),
+            t("manager.usun_ok_tytul"),
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
@@ -603,7 +586,7 @@ class ManagerRegulPanel(wx.Panel):
 
         # KOLEJNOŚĆ MA ZNACZENIE:
         # Najpierw zapisujemy plik podstawy.yaml (gdy tworzymy nowy język),
-        # DOPIERO POTEM tworzymy podfoldery akcenty/ i szyfry/. Odwrotna
+        # DOPIERO POTEM tworzymy podfoldery akcenty/, szyfry/ i gui/. Odwrotna
         # kolejność tworzyła „półpusty" folder języka (tylko puste
         # podfoldery, bez podstawy.yaml) zawsze, gdy użytkownik anulował
         # pytanie o nadpisanie – a silnik Poligloty wywraca się na takim
@@ -611,15 +594,19 @@ class ManagerRegulPanel(wx.Panel):
         if pakiet["yaml"]:
             if not _bezpieczna_sciezka(docelowy_abs):
                 wx.MessageBox(
-                    "Docelowa ścieżka leży poza dictionaries/. Przerywam.",
-                    "Błąd bezpieczeństwa", wx.OK | wx.ICON_ERROR, self,
+                    t("manager.blad_bezpieczenstwa_tresc"),
+                    t("manager.blad_bezpieczenstwa_tytul"),
+                    wx.OK | wx.ICON_ERROR,
+                    self,
                 )
                 return
             if os.path.exists(docelowy_abs):
                 odp = wx.MessageBox(
-                    f"Plik {os.path.basename(docelowy_abs)} już istnieje.\n"
-                    "Nadpisać?",
-                    "Plik istnieje",
+                    t(
+                        "manager.plik_istnieje_tresc",
+                        nazwa_pliku=os.path.basename(docelowy_abs),
+                    ),
+                    t("manager.plik_istnieje_tytul"),
                     wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
                     self,
                 )
@@ -632,13 +619,17 @@ class ManagerRegulPanel(wx.Panel):
                     fh.write(pakiet["yaml"])
             except Exception as exc:                            # noqa: BLE001
                 wx.MessageBox(
-                    f"Nie udało się utworzyć pliku:\n{exc}",
-                    "Błąd", wx.OK | wx.ICON_ERROR, self,
+                    t("manager.blad_tworzenia", tresc_bledu=str(exc)),
+                    t("common.blad_tytul"),
+                    wx.OK | wx.ICON_ERROR,
+                    self,
                 )
                 return
 
         # Dopiero po udanym zapisie podstawy.yaml dokładamy strukturę
         # podfolderów dla nowego języka (silnik ich oczekuje).
+        # Wersja 13.1: tworzymy też podfolder gui/ – żeby tłumacz UI nowego
+        # języka miał gotowe miejsce na ui.yaml bez grzebania w konsoli.
         if typ == mrs.TYP_JEZYK_BAZOWY:
             folder_jezyka = os.path.join(DICTIONARIES_DIR, id_pliku)
             try:
@@ -646,14 +637,12 @@ class ManagerRegulPanel(wx.Panel):
                             exist_ok=True)
                 os.makedirs(os.path.join(folder_jezyka, FOLDER_SZYFRY),
                             exist_ok=True)
+                os.makedirs(os.path.join(folder_jezyka, FOLDER_GUI),
+                            exist_ok=True)
             except Exception as exc:                            # noqa: BLE001
                 wx.MessageBox(
-                    "Plik podstawy.yaml zapisano, ale nie udało się utworzyć "
-                    f"podfolderów akcenty/ i szyfry/:\n{exc}\n\n"
-                    "Utwórz je ręcznie w Eksploratorze plików, zanim "
-                    "uruchomisz Poliglotę – inaczej silnik wyrzuci błąd "
-                    "przy skanowaniu nowego języka.",
-                    "Niepełna struktura języka",
+                    t("manager.niepelna_struktura_tresc", tresc_bledu=str(exc)),
+                    t("manager.niepelna_struktura_tytul"),
                     wx.OK | wx.ICON_WARNING,
                     self,
                 )
@@ -679,6 +668,12 @@ class ManagerRegulPanel(wx.Panel):
 # =============================================================================
 # Pomocnicze: etykiety, walidacje, zgadywanie kontekstu
 # =============================================================================
+# Uwaga: mapowanie ``kod_jezyka → nazwa_jezyka`` zostaje intencjonalnie
+# twardo w kodzie, bo to dane referencyjne (jak kody ISO) – nie etykiety UI.
+# Gdy ktoś zmieni język aplikacji na angielski, i tak dalej ma sens
+# pokazywać „ru (rosyjski)", bo to tylko pomaga rozróżnić folder
+# w drzewie. Pełne tłumaczenie tej tabeli może przyjść w 14.0, jeśli
+# będzie na nie konkretne zapotrzebowanie.
 _NAZWY_JEZYKOW = {
     "pl": "polski",
     "en": "angielski",
@@ -742,6 +737,9 @@ def _zgadnij_typ_z_zaznaczenia(meta: dict | None) -> str:
         return mrs.TYP_SZYFR_ZAMIANY
     if kat == FOLDER_REZYSER:
         return mrs.TYP_TRYB_REZYSERA
+    # FOLDER_GUI nie ma jeszcze dedykowanego typu w kreatorze (13.1) –
+    # trafia do domyślnego (akcent), bo kreator tłumaczeń UI byłby
+    # dużym osobnym skryptem (patrz TODO_skrotowce_wielojezyczne.md).
     return mrs.TYP_AKCENT
 
 
@@ -766,7 +764,7 @@ class KreatorNowejRegulyDialog(wx.Dialog):
     ) -> None:
         super().__init__(
             parent,
-            title="Nowy plik reguł – kreator",
+            title=t("manager.kreator_tytul"),
             size=(640, 520),
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
@@ -786,7 +784,7 @@ class KreatorNowejRegulyDialog(wx.Dialog):
 
         # --- Wybór typu reguły ---
         sizer.Add(
-            wx.StaticText(self, label="Co chcesz utworzyć?"),
+            wx.StaticText(self, label=t("manager.kreator_co_utworzyc")),
             flag=wx.LEFT | wx.RIGHT | wx.TOP, border=12,
         )
 
@@ -801,7 +799,7 @@ class KreatorNowejRegulyDialog(wx.Dialog):
             self,
             choices=self._etykiety_typow,
             style=wx.CB_READONLY,
-            name="Wybór typu nowego pliku reguł",
+            name=t("manager.kreator_cb_name"),
         )
         domyslny_idx = self._id_typow.index(domyslny_typ) \
                        if domyslny_typ in self._id_typow else 0
@@ -814,7 +812,7 @@ class KreatorNowejRegulyDialog(wx.Dialog):
             value="",
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
             size=(-1, 60),
-            name="Opis wybranego typu reguły",
+            name=t("manager.kreator_opis_name"),
         )
         self._lbl_opis_typu.SetBackgroundColour(self.GetBackgroundColour())
         sizer.Add(self._lbl_opis_typu, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=12)
@@ -823,21 +821,21 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         form = wx.FlexGridSizer(rows=0, cols=2, vgap=8, hgap=8)
         form.AddGrowableCol(1)
 
-        self._txt_id = wx.TextCtrl(self, name="Pole identyfikator pliku")
-        self._txt_id.SetHint("np. szwedzki  (małe litery, bez spacji)")
-        form.Add(wx.StaticText(self, label="Identyfikator (nazwa pliku):"),
+        self._txt_id = wx.TextCtrl(self, name=t("manager.kreator_id_name"))
+        self._txt_id.SetHint(t("manager.kreator_id_hint"))
+        form.Add(wx.StaticText(self, label=t("manager.kreator_lbl_id")),
                  flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_id, flag=wx.EXPAND)
 
-        self._txt_etykieta = wx.TextCtrl(self, name="Pole etykieta reguły")
-        self._txt_etykieta.SetHint('np. "Szwedzki (Alva / Oskar)"')
-        form.Add(wx.StaticText(self, label="Etykieta (widoczna w GUI):"),
+        self._txt_etykieta = wx.TextCtrl(self, name=t("manager.kreator_etykieta_name"))
+        self._txt_etykieta.SetHint(t("manager.kreator_etykieta_hint"))
+        form.Add(wx.StaticText(self, label=t("manager.kreator_lbl_etykieta")),
                  flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_etykieta, flag=wx.EXPAND)
 
-        self._txt_iso = wx.TextCtrl(self, name="Pole kod ISO języka")
-        self._txt_iso.SetHint("np. sv, de, en (2 znaki)")
-        self._lbl_iso = wx.StaticText(self, label="Kod ISO języka docelowego:")
+        self._txt_iso = wx.TextCtrl(self, name=t("manager.kreator_iso_name"))
+        self._txt_iso.SetHint(t("manager.kreator_iso_hint"))
+        self._lbl_iso = wx.StaticText(self, label=t("manager.kreator_lbl_iso"))
         form.Add(self._lbl_iso, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_iso, flag=wx.EXPAND)
 
@@ -845,24 +843,22 @@ class KreatorNowejRegulyDialog(wx.Dialog):
             self,
             choices=self._dostepne_jezyki,
             style=wx.CB_READONLY,
-            name="Wybór języka bazowego (folderu)",
+            name=t("manager.kreator_jezyk_name"),
         )
         if self._domyslny_jezyk in self._dostepne_jezyki:
             self._cb_jezyk.SetStringSelection(self._domyslny_jezyk)
         else:
             self._cb_jezyk.SetSelection(0)
-        self._lbl_jezyk = wx.StaticText(self, label="Język bazowy (folder dictionaries/…):")
+        self._lbl_jezyk = wx.StaticText(self, label=t("manager.kreator_lbl_jezyk"))
         form.Add(self._lbl_jezyk, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._cb_jezyk, flag=wx.EXPAND)
 
         self._txt_opis_efektu = wx.TextCtrl(
             self, style=wx.TE_MULTILINE,
-            name="Pole opis efektu (tylko dla szyfru algorytmicznego)",
+            name=t("manager.kreator_opis_efektu_name"),
         )
-        self._txt_opis_efektu.SetHint(
-            "Opisz 1-3 zdaniami, co ma robić ten szyfr (wejście → wyjście)."
-        )
-        self._lbl_opis_efektu = wx.StaticText(self, label="Opis efektu (dla AI):")
+        self._txt_opis_efektu.SetHint(t("manager.kreator_opis_efektu_hint"))
+        self._lbl_opis_efektu = wx.StaticText(self, label=t("manager.kreator_lbl_opis"))
         form.Add(self._lbl_opis_efektu, flag=wx.ALIGN_CENTER_VERTICAL | wx.TOP, border=4)
         form.Add(self._txt_opis_efektu, flag=wx.EXPAND)
 
@@ -870,7 +866,7 @@ class KreatorNowejRegulyDialog(wx.Dialog):
 
         # --- Przyciski OK / Anuluj ---
         btn_sizer = self.CreateStdDialogButtonSizer(wx.OK | wx.CANCEL)
-        self.FindWindowById(wx.ID_OK, self).SetLabel("Utwórz")
+        self.FindWindowById(wx.ID_OK, self).SetLabel(t("manager.kreator_btn_utworz"))
         sizer.Add(btn_sizer, flag=wx.ALL | wx.ALIGN_RIGHT, border=12)
 
         self.SetSizer(sizer)
@@ -917,15 +913,15 @@ class KreatorNowejRegulyDialog(wx.Dialog):
 
         # Zmiana etykiet + podpowiedzi pod dany typ
         if typ == mrs.TYP_JEZYK_BAZOWY:
-            self._txt_id.SetHint("np. en, de, fr (kod ISO 639-1, 2-3 znaki)")
-            self._txt_etykieta.SetHint("np. Angielski, Niemiecki…")
-            self._lbl_iso.SetLabel("Nazwa języka (powtórzona w szablonie):")
-            self._txt_iso.SetHint("np. Angielski")
+            self._txt_id.SetHint(t("manager.kreator_jezyk_bazowy_id_hint"))
+            self._txt_etykieta.SetHint(t("manager.kreator_jezyk_bazowy_etykieta_hint"))
+            self._lbl_iso.SetLabel(t("manager.kreator_jezyk_bazowy_iso_label"))
+            self._txt_iso.SetHint(t("manager.kreator_jezyk_bazowy_iso_hint"))
         else:
-            self._txt_id.SetHint("np. szwedzki  (małe litery, bez spacji)")
-            self._txt_etykieta.SetHint('np. "Szwedzki (Alva / Oskar)"')
-            self._lbl_iso.SetLabel("Kod ISO języka docelowego:")
-            self._txt_iso.SetHint("np. sv, de, en (2 znaki)")
+            self._txt_id.SetHint(t("manager.kreator_id_hint"))
+            self._txt_etykieta.SetHint(t("manager.kreator_etykieta_hint"))
+            self._lbl_iso.SetLabel(t("manager.kreator_lbl_iso"))
+            self._txt_iso.SetHint(t("manager.kreator_iso_hint"))
 
         self.Layout()
 
@@ -948,35 +944,29 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         if typ == mrs.TYP_JEZYK_BAZOWY:
             # Tu „id” = kod języka (en, de, fr)
             if not _RE_KOD_JEZYKA.match(id_pliku):
-                self._alert("Kod języka musi być 2- lub 3-literowy (ISO 639-1/3).")
+                self._alert(t("manager.kreator_blad_kod_jezyka"))
                 return
             if not etykieta:
-                self._alert("Podaj nazwę języka (np. Angielski).")
+                self._alert(t("manager.kreator_blad_nazwa_jezyka"))
                 return
             iso = iso_lub_nazwa or etykieta   # w prompcie użyjemy nazwy
         else:
             if not _RE_ID_PLIKU.match(id_pliku):
-                self._alert(
-                    "Identyfikator pliku musi być ASCII w formacie lower_snake.\n"
-                    "Przykłady: szwedzki, tryb_dziennik, postprod_streszczenia."
-                )
+                self._alert(t("manager.kreator_blad_id"))
                 return
             if not etykieta:
-                self._alert("Podaj etykietę widoczną w GUI.")
+                self._alert(t("manager.kreator_blad_etykieta"))
                 return
             iso = iso_lub_nazwa.lower()
             if typ == mrs.TYP_AKCENT:
                 if not _RE_KOD_ISO.match(iso):
-                    self._alert("Podaj kod ISO języka docelowego (np. sv, de).")
+                    self._alert(t("manager.kreator_blad_iso"))
                     return
             else:
                 iso = iso or "pl"    # domyślny dla szyfrów i trybów
 
         if typ == mrs.TYP_SZYFR_ALGORYTM and not opis_efektu:
-            self._alert(
-                "Dla szyfru algorytmicznego opisz efekt słowami – ten opis "
-                "trafi do promptu dla AI."
-            )
+            self._alert(t("manager.kreator_blad_opis_efektu"))
             return
 
         self.wynik = {
@@ -990,8 +980,12 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         event.Skip()   # domyślnie zamyka dialog z wx.ID_OK
 
     def _alert(self, wiadomosc: str) -> None:
-        wx.MessageBox(wiadomosc, "Brak lub błąd pola",
-                      wx.OK | wx.ICON_WARNING, self)
+        wx.MessageBox(
+            wiadomosc,
+            t("manager.kreator_alert_tytul"),
+            wx.OK | wx.ICON_WARNING,
+            self,
+        )
 
 
 # =============================================================================
@@ -1019,9 +1013,8 @@ class WynikKreatoraDialog(wx.Dialog):
         docelowy_abs: str,
         szablon_zapisany: bool,
     ) -> None:
-        tytul = "Nowy plik reguł – wynik"
         super().__init__(
-            parent, title=tytul, size=(700, 560),
+            parent, title=t("manager.wynik_tytul"), size=(700, 560),
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
         )
         self._pakiet = pakiet
@@ -1034,15 +1027,12 @@ class WynikKreatoraDialog(wx.Dialog):
 
         # --- Nagłówek statusu ---
         if szablon_zapisany:
-            naglowek_txt = (
-                f"✅  Utworzono plik:\n"
-                f"{os.path.relpath(self._docelowy_abs, _ROOT_DIR)}"
+            naglowek_txt = t(
+                "manager.wynik_sukces_naglowek",
+                sciezka_pliku=os.path.relpath(self._docelowy_abs, _ROOT_DIR),
             )
         else:
-            naglowek_txt = (
-                "ℹ️  Plik nie został utworzony (ten typ reguły wymaga "
-                "kodu Pythona od programisty – patrz prompt dla AI poniżej)."
-            )
+            naglowek_txt = t("manager.wynik_brak_pliku_naglowek")
         naglowek = wx.TextCtrl(
             self, value=naglowek_txt,
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
@@ -1052,7 +1042,7 @@ class WynikKreatoraDialog(wx.Dialog):
         sizer.Add(naglowek, flag=wx.ALL | wx.EXPAND, border=12)
 
         # --- Uwagi z pakietu ---
-        uwagi_lbl = wx.StaticText(self, label="Dalsze kroki:")
+        uwagi_lbl = wx.StaticText(self, label=t("manager.wynik_lbl_uwagi"))
         font = uwagi_lbl.GetFont()
         font.MakeBold()
         uwagi_lbl.SetFont(font)
@@ -1062,16 +1052,13 @@ class WynikKreatoraDialog(wx.Dialog):
             self, value=self._pakiet["uwagi"],
             style=wx.TE_MULTILINE | wx.TE_READONLY,
             size=(-1, 110),
-            name="Uwagi do utworzonej reguły",
+            name=t("manager.wynik_uwagi_name"),
         )
         sizer.Add(uwagi_txt, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=12)
 
         # --- Prompt dla AI (jeśli jest) ---
         if self._pakiet["prompt"]:
-            prompt_lbl = wx.StaticText(
-                self,
-                label="Prompt dla AI (wklej do ChatGPT / Claude):",
-            )
+            prompt_lbl = wx.StaticText(self, label=t("manager.wynik_lbl_prompt"))
             f2 = prompt_lbl.GetFont()
             f2.MakeBold()
             prompt_lbl.SetFont(f2)
@@ -1080,14 +1067,14 @@ class WynikKreatoraDialog(wx.Dialog):
             self._txt_prompt = wx.TextCtrl(
                 self, value=self._pakiet["prompt"],
                 style=wx.TE_MULTILINE | wx.TE_READONLY,
-                name="Prompt do wklejenia do chatbota AI",
+                name=t("manager.wynik_prompt_name"),
             )
             sizer.Add(self._txt_prompt, proportion=1,
                       flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=12)
 
             btn_kopiuj = wx.Button(
-                self, label="📋  Skopiuj prompt do schowka",
-                name="Przycisk Skopiuj prompt AI do schowka",
+                self, label=t("manager.wynik_btn_kopiuj"),
+                name=t("manager.wynik_btn_kopiuj_name"),
             )
             self.Bind(wx.EVT_BUTTON, self._on_kopiuj, btn_kopiuj)
             sizer.Add(btn_kopiuj, flag=wx.LEFT | wx.TOP | wx.BOTTOM, border=12)
@@ -1095,7 +1082,7 @@ class WynikKreatoraDialog(wx.Dialog):
             self._txt_prompt = None
 
         # --- Przycisk Zamknij ---
-        btn_close = wx.Button(self, wx.ID_CLOSE, label="Zamknij")
+        btn_close = wx.Button(self, wx.ID_CLOSE, label=t("common.btn_zamknij"))
         self.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_CLOSE), btn_close)
         self.SetEscapeId(wx.ID_CLOSE)
         sizer.Add(btn_close, flag=wx.ALL | wx.ALIGN_RIGHT, border=12)
@@ -1120,9 +1107,8 @@ class WynikKreatoraDialog(wx.Dialog):
                 wx.TheClipboard.SetData(dane)
                 wx.TheClipboard.Flush()
                 wx.MessageBox(
-                    "Prompt został skopiowany do schowka.\n"
-                    "Wklej go (Ctrl+V) do ChatGPT lub Claude.",
-                    "Skopiowano",
+                    t("manager.wynik_skopiowano_tresc"),
+                    t("manager.wynik_skopiowano_tytul"),
                     wx.OK | wx.ICON_INFORMATION,
                     self,
                 )
@@ -1130,9 +1116,8 @@ class WynikKreatoraDialog(wx.Dialog):
                 wx.TheClipboard.Close()
         else:
             wx.MessageBox(
-                "Nie udało się otworzyć schowka systemowego.\n"
-                "Skopiuj prompt ręcznie: Ctrl+A, Ctrl+C w polu powyżej.",
-                "Schowek niedostępny",
+                t("manager.wynik_schowek_nieudany_tresc"),
+                t("manager.wynik_schowek_nieudany_tytul"),
                 wx.OK | wx.ICON_WARNING,
                 self,
             )

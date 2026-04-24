@@ -1,0 +1,795 @@
+# =============================================================================
+# dictionaries/pl/gui/ui.yaml – tłumaczenia interfejsu użytkownika (POLSKI).
+#
+# To jest plik bazowy dla wszystkich innych języków. Każdy inny folder
+# `dictionaries/<kod>/gui/ui.yaml` (np. `en`, `fi`, `ru`) zachowuje
+# DOKŁADNIE TĘ SAMĄ STRUKTURĘ KLUCZY – tłumaczone są tylko wartości.
+#
+# Konwencje:
+#   * Parametry dynamiczne: `{nazwa_parametru}` (snake_case, patrz
+#     `.clinerules` sekcja "Struktura YAML dla tłumaczeń UI").
+#   * `&` w etykietach = akcelerator menu/przycisku (Alt+litera).
+#     W tłumaczeniu przesuwamy `&` na literę występującą w przetłumaczonym
+#     słowie, dbając, by nie kolidowała z innymi akceleratorami tego menu.
+#   * `\tCtrl+…` w etykietach menu = skrót klawiszowy; `Ctrl`, `Alt`,
+#     `Shift` oraz litery/cyfry pozostają literalnie identyczne we
+#     wszystkich językach.
+#   * Emoji (🎬 📄 📚 🌍 ✅ ⚠️ 🚨 ℹ️ ✂️ 🎭 🔄 📝 📋 🧠 🎙️ 🔐 🎛️ 🏁 📜 📖)
+#     zachowane 1:1.
+#   * Literały techniczne (`golden_key.env`, `.docx`, `sk-`, `dictionaries/`,
+#     `NVDA`, `OpenAI gpt-4o` itp.) – nie tłumaczymy.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# APP – tytuł i parametry globalne
+# -----------------------------------------------------------------------------
+app:
+  nazwa:                 "Reżyser Audio GPT"
+  wersja:                "13.1 – Wersja Wydawnicza"
+  title_home:            "{nazwa_aplikacji}  |  {wersja}"
+  title_z_narzedziem:    "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
+  banner:                "🎬  {nazwa_aplikacji}"
+  obszar_roboczy_name:   "Obszar roboczy"
+  menubar_name:          "Pasek menu głównego"
+
+# -----------------------------------------------------------------------------
+# COMMON – elementy wielokrotnego użytku (dialogi, przyciski standardowe)
+# -----------------------------------------------------------------------------
+common:
+  btn_zamknij:           "Zamknij"
+  btn_anuluj:            "Anuluj"
+  btn_skopiuj_schowek:   "📋  Skopiuj do schowka"
+  komunikat_skopiowano:  "Skopiowano"
+  komunikat_schowek_nieudany_tytul: "Schowek niedostępny"
+  komunikat_schowek_nieudany_tresc: "Nie udało się otworzyć schowka systemowego.\nSkopiuj tekst ręcznie: Ctrl+A, Ctrl+C w polu powyżej."
+  blad_tytul:            "Błąd"
+  blad_odczytu_tytul:    "Błąd odczytu"
+  blad_zapisu_tytul:     "Błąd zapisu"
+  brak_pliku_tytul:      "Brak pliku"
+  plik_nie_istnieje_tytul: "Plik nie istnieje"
+  sukces_tytul:          "Sukces"
+  informacja_tytul:      "Informacja"
+
+# -----------------------------------------------------------------------------
+# MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
+# -----------------------------------------------------------------------------
+main:
+  menu:
+    narzedzia:           "&Narzędzia"
+    plik:                "&Plik"
+    strona_glowna:       "Strona &główna\tCtrl+0"
+    rezyser:             "&Reżyser\tCtrl+1"
+    poliglota:           "&Poliglota\tCtrl+2"
+    konwerter:           "&Konwerter\tCtrl+3"
+    manager:             "&Manager Reguł\tCtrl+4"
+    zakoncz:             "Za&kończ\tAlt+F4"
+  menu_status:
+    strona_glowna:       "Wróć do ekranu startowego z opisem narzędzi i System Check"
+    rezyser:             "Otwiera moduł Reżyserii – pisanie skryptów i prozy z AI"
+    poliglota:           "Otwiera moduł Poligloty – akcenty i tłumaczenie tekstów"
+    konwerter:           "Otwiera moduł Konwertera – tworzenie plików Word"
+    manager:             "Otwiera Managera Reguł – eksplorator plików YAML w dictionaries/ i kreator nowych akcentów / trybów / szyfrów"
+    zakoncz:             "Zamknij aplikację"
+  btn:
+    rezyser:             "🎬  &Reżyser"
+    poliglota:           "🌍  &Poliglota"
+    konwerter:           "📄  &Konwerter"
+    manager:             "📚  &Manager Reguł"
+  tooltip:
+    rezyser:             "Moduł Reżyserii (Ctrl+1): Pisz skrypty i prozę z pomocą AI"
+    poliglota:           "Moduł Poligloty (Ctrl+2): Akcenty i tłumaczenie tekstów"
+    konwerter:           "Moduł Konwertera (Ctrl+3): Twórz pliki Word z nagłówkami"
+    manager:             "Manager Reguł (Ctrl+4): Eksploruj pliki YAND w dictionaries/, twórz nowe akcenty, szyfry i tryby (szablon lub prompt dla AI)"
+  nazwy_narzedzi:
+    dom:                 "Dom"
+    rezyser:             "Reżyser"
+    poliglota:           "Poliglota"
+    konwerter:           "Konwerter"
+    manager:             "Manager Reguł"
+
+# -----------------------------------------------------------------------------
+# HOME – panel startowy (HomePanel w main.py)
+# -----------------------------------------------------------------------------
+home:
+  panel_name:            "Panel startowy – Strona główna"
+  welcome_text: |-
+    To jest Twoje zintegrowane studio nagraniowe.
+    Wybierz narzędzie z paska przycisków lub z menu Narzędzia:
+
+      •  Reżyser       –  Pisz skrypty i prozę z AI; dynamicznie zarządzaj Księgą Świata.
+      •  Poliglota     –  Nakładaj twarde akcenty pod lokalne syntezatory (NVDA/Vocalizer) i tłumacz teksty.
+      •  Konwerter     –  Szybko twórz profesjonalne pliki Word z nagłówkami poziomu 1.
+      •  Manager Reguł –  Przeglądaj i twórz reguły słownikowe bez wchodzenia w pliki YAML ręcznie.
+  heading_system_check:  "System Check"
+  checking:              "Sprawdzanie konfiguracji…"
+  # Błędy walidacji golden_key.env
+  err_brak_pliku: |-
+    🚨 Brak pliku konfiguracji środowiskowej!
+
+    Wykryto pierwsze uruchomienie programu. Moduły są zablokowane ze względów bezpieczeństwa.
+    Aby odblokować wszystkie narzędzia, kliknij przycisk poniżej — program automatycznie wygeneruje plik golden_key.env i otworzy go w domyślnym edytorze tekstu.
+  err_odczyt:            "🚨 Nie udało się odczytać pliku golden_key.env:\n{tresc_bledu}"
+  err_struktura: |-
+    🚨 Błąd struktury pliku!
+    Brakuje wymaganego parametru OPENAI_API_KEY=.
+    Prawdopodobnie skasowałeś znak równości lub nazwę zmiennej.
+    Usuń plik, wygeneruj go ponownie i wklej klucz ostrożniej.
+  err_tekst_zastepczy: |-
+    ⚠️ Klucz nie został wprowadzony!
+    W pliku golden_key.env nadal znajduje się tekst zastępczy.
+    Otwórz plik w edytorze tekstu, usuń tekst zastępczy i wklej swój prawdziwy klucz API.
+  err_cudzyslowy: |-
+    🚨 Zbędne cudzysłowy wokół klucza!
+    Klucz API wklejono w cudzysłowach (np. "sk-…").
+    Otwórz plik w edytorze tekstu i usuń znaki cudzysłowu —
+    klucz musi być wpisany bezpośrednio po znaku '=', bez żadnych dodatkowych znaków.
+  err_niedozwolone_znaki: |-
+    🚨 Niedozwolone znaki wokół klucza!
+    Przed lub za kluczem API wykryto spację bądź inny niewidoczny znak.
+    Otwórz plik w edytorze tekstu i upewnij się, że wartość zaczyna się
+    natychmiast po znaku '=', bez żadnych spacji.
+  err_format: |-
+    🚨 Podejrzany format klucza!
+    Poprawny klucz OpenAI zawsze zaczyna się od znaków sk- (np. sk-proj-…).
+    Upewnij się, że skopiowałeś właściwy ciąg znaków i nie ma przed nim żadnych spacji.
+  err_zbyt_krotki: |-
+    ⚠️ Klucz wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow}).
+    Prawdopodobnie skopiowałeś tylko fragment klucza.
+
+    Jeśli zamknąłeś już okienko z kluczem na platform.openai.com,
+    musisz wrócić na konto, użyć opcji 'Revoke secret key' dla tego
+    uciętego klucza i wygenerować nowy. Pamiętaj, by następnym razem
+    skopiować klucz w całości przed kliknięciem 'Done'.
+  ok_klucz_wykryty: |-
+    ✅ Klucz API (golden_key.env) wykryty i poprawnie sformatowany.
+    Wszystkie moduły są gotowe do pracy.
+  # Przyciski akcji panelu startowego
+  btn_generate:          "Wygeneruj plik golden_key.env i otwórz edytor tekstu"
+  btn_open:              "📝 Otwórz plik golden_key.env w edytorze tekstu"
+  blad_tworzenia_env_tytul: "Błąd"
+  blad_tworzenia_env_tresc: "Nie udało się utworzyć pliku golden_key.env:\n{tresc_bledu}"
+  ok_plik_wygenerowany: |-
+    ✅ Plik {nazwa_pliku} został wygenerowany!
+    Edytor tekstu otwiera się automatycznie.
+    Wklej swój klucz API, zapisz plik (Ctrl+S) i uruchom aplikację ponownie.
+  blad_otwarcia_pliku_tytul: "Informacja"
+  blad_otwarcia_pliku_tresc: "Nie udało się automatycznie otworzyć pliku.\nOtwórz go ręcznie:\n{sciezka_pliku}"
+  # Sekcja: Narzędzia słownikowe
+  heading_narzedzia_slownikowe: "Narzędzia słownikowe"
+  narzedzia_slownikowe_name: "Opis narzędzi słownikowych"
+  tools_info: |-
+    Chcesz dodać nowy akcent, szyfr albo tryb Reżysera?
+    Otwórz Manager Reguł (Ctrl+4) – znajdziesz tam drzewo wszystkich plików YAML w dictionaries/ oraz kreator, który sam utworzy szablon lub wygeneruje prompt dla chatbota AI.
+
+    Po dodaniu nowego AKCENTU kliknij dodatkowo przycisk „Odśwież akcenty Reżysera z YAML" poniżej – pozwoli to Trybowi Reżysera zauważyć nowy akcent (Poliglota wykrywa YAML-e automatycznie). Po odświeżeniu uruchom aplikację ponownie.
+  btn_open_manager_label:   "📚 Otwórz Manager Reguł"
+  btn_open_manager_name:    "Przycisk Otwórz Manager Reguł"
+  btn_open_manager_tooltip: "Przechodzi do Managera Reguł – eksploratora plików YAML i kreatora nowych akcentów / trybów / szyfrów (Ctrl+4)."
+  btn_odswiez_label:        "🔄 Odśwież akcenty Reżysera z YAML"
+  btn_odswiez_name:         "Przycisk Odśwież akcenty Reżysera z YAML"
+  btn_odswiez_tooltip:      "Skanuje dictionaries/*/akcenty/ i regeneruje wrappery akcent_* w core_poliglota.py oraz core_rezyser.py. Po udanym odświeżeniu należy uruchomić aplikację ponownie."
+  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
+  raport_niespodziewany_tytul: "Błąd odświeżania akcentów"
+  raport_niespodziewany_tresc: "Wystąpił nieoczekiwany błąd:\n{tresc_bledu}"
+  raport_tytul_blad:        "Odśwież akcenty Reżysera – BŁĄD"
+  raport_header_blad:       "⛔ Generator napotkał błędy – patrz log poniżej."
+  raport_tytul_sukces:      "Odśwież akcenty Reżysera – Sukces"
+  raport_header_sukces: |-
+    ✅ Zmodyfikowano pliki dla {liczba_akcentow} akcentów.
+    Aby nowe akcenty pojawiły się w Trybie Reżysera, uruchom aplikację ponownie.
+  raport_tytul_bez_zmian:   "Odśwież akcenty Reżysera – Bez zmian"
+  raport_header_bez_zmian:  "ℹ️ Brak zmian. Wykryto {liczba_akcentow} akcentów – wrappery są już aktualne."
+  raport_lbl_log:           "Pełny log (Ctrl+A, Ctrl+C kopiuje do schowka):"
+  raport_log_name:          "Log generatora akcentów Reżysera"
+
+# -----------------------------------------------------------------------------
+# REZYSER – panel modułu Reżyser (gui_rezyser.py)
+# -----------------------------------------------------------------------------
+rezyser:
+  panel_name:            "Panel Reżysera Audio GPT"
+  heading:               "🎬  Reżyser Audio GPT – Hybrydowe Studio Twórcze"
+  description_name:      "Opis modułu Reżyser Audio GPT"
+  tool_description: |-
+    Reżyser Audio GPT to hybrydowe studio twórcze.
+
+    Tryb Burzy Mózgów  – planuj fabułę, generuj 3 opcje (BEZ zapisu do pliku).
+    Tryb Skryptu        – pisz surowy skrypt dźwiękowy z tagami [SFX] i [Postać: emocja] (ZAPIS DO PLIKU).
+    Tryb Audiobooka     – generuj gęstą, klasyczną prozę literacką (ZAPIS DO PLIKU).
+
+    Projekty zapisywane są w podfolderze 'skrypty/' obok programu.
+    Podaj nazwę projektu BEZ rozszerzenia (np. kroniki_arkonii).
+    Aby zmienić projekt, musisz najpierw wyczyścić pamięć bieżącą.
+  prompt_architekta_content: |-
+    Jesteś wybitnym architektem światów (Worldbuilder) i konsultantem literackim. Mam luźny pomysł na fabułę: [TUTAJ WPISZ SWÓJ POMYSŁ]. Twoim zadaniem jest rozbudowanie tego do profesjonalnej „Księgi Świata".
+    Dostosuj ton i zasady do mojego pomysłu. Unikaj tanich, baśniowych skrótów i klisz AI.
+
+    ZASADY FORMATOWANIA (KRYTYCZNE):
+    Musisz zwrócić odpowiedź w dwóch oddzielnych częściach:
+
+    CZĘŚĆ 1: KSIĘGA ŚWIATA
+    Tę część musisz bezwzględnie zamknąć w JEDNYM bloku kodu Markdown (użyj znaczników ```markdown na początku i ``` na końcu). Wewnątrz bloku kodu zastosuj te reguły:
+    1. Rozpocznij od emotki otwartej książki i roboczego tytułu, np. 📖 Księga Świata: [Tytuł].
+    2. Używaj pojedynczego hashtagu (#) dla głównych sekcji (np. # Zasady Świata, # Postacie).
+    3. Używaj podwójnego hashtagu (##) dla podsekcji.
+    4. Używaj myślników (-) do tworzenia czytelnych list.
+    5. Używaj podwójnych gwiazdek (**tekst**), by pogrubić absolutne, nienaruszalne zasady (np. **Bohater NIGDY nie kłamie**).
+    6. Opisz psychologię postaci, ich największe wady i motywacje. W przypadku postaci obcojęzycznych, dodaj informację o akcencie bezpośrednio przy tagu, np. `[Speaker 1: Imię] - sepleni i ma akcent francuski`. **Wskazówka techniczna:** Użycie słowa kluczowego `akcent` jest bezwzględnie wymagane, ponieważ to na jego podstawie zewnętrzny skrypt aplikacji automatycznie wykrywa i nakłada poprawne reguły fonetyczne na dialogi danej postaci.
+
+    CZĘŚĆ 2: REKOMENDACJA TRYBU
+    Tę część umieść POZA blokiem kodu, jako zwykły tekst pod spodem. Doradź mi, który z trybów mojej aplikacji będzie najlepszy do realizacji tego pomysłu: 🎬 Tryb Surowego Skryptu (słuchowiska, SFX, fonetyka), czy 📖 Tryb Tradycyjnego Audiobooka (klasyczna proza literacka).
+
+  # Pasek pliku
+  lbl_nazwa_pliku:       "Nazwa pliku projektu (bez rozszerzenia, np. kroniki_arkonii):"
+  txt_nazwa_pliku_name:  "Pole nazwy pliku projektu"
+  txt_nazwa_pliku_hint:  "np. kroniki_arkonii"
+  txt_nazwa_pliku_tooltip: |-
+    Wpisz nazwę projektu BEZ rozszerzenia.
+    Plik historii zapisywany jako: skrypty/<nazwa>.txt
+    Pole zablokowane, gdy pamięć jest zajęta.
+  btn_wczytaj_label:     "Wczytaj historię"
+  btn_wczytaj_tooltip: |-
+    Wczytuje istniejący plik projektu (skrypty/<nazwa>.txt) do pamięci.
+    Aktywny tylko gdy pamięć jest pusta i podano nazwę.
+  btn_wyczysc_biezaca_label: "Wyczyść bieżącą (zostaw Streszczenie)"
+  btn_wyczysc_biezaca_tooltip: |-
+    Czyści wyłącznie historię bieżącą z pamięci.
+    Streszczenie (Pamięć Długotrwała) i Księga Świata zostają zachowane.
+    Używaj do kontynuacji długiej książki po wygenerowaniu streszczenia.
+  btn_hard_reset_label:  "Zamknij Projekt (Twardy Reset)"
+  btn_hard_reset_tooltip: |-
+    CAŁKOWITE wyczyszczenie projektu: historia, streszczenie, Księga Świata.
+    Zeruje wszystkie liczniki i odblokowuje pole nazwy pliku.
+    Używaj przy zmianie projektu lub zupełnie nowej historii.
+  # Sidebar
+  sidebar_heading:       "📖 Pasek Boczny projektu"
+  lbl_ksiega_swiata:     "Księga Świata – Zasady i Postacie:"
+  txt_ksiega_name:       "Pole Księgi Świata – zasady i postacie"
+  txt_ksiega_hint: |-
+    Wpisz zasady świata, opis postaci i ich akcenty fonetyczne…
+    Np. [Geralt: akcent islandzki]
+    Zawartość dołączana jest do każdego zapytania AI.
+  txt_ksiega_tooltip: |-
+    Kontekst stale dołączany do AI: zasady świata, postacie, akcenty fonetyczne.
+    Zapis na dysk wymaga podania nazwy pliku projektu.
+  btn_zapisz_ksiege_label: "💾 Zapisz Księgę na stałe"
+  btn_zapisz_ksiege_tooltip: |-
+    Zapisuje Księgę Świata do pliku: skrypty/<nazwa>.md
+    Wymaga podania nazwy pliku projektu.
+  btn_prompt_architekta_label: "📖 Prompt Architekta dla AI…"
+  btn_prompt_architekta_name:  "Przycisk Pokaż Prompt Architekta dla zewnętrznego chatbota"
+  btn_prompt_architekta_tooltip: |-
+    Otwiera okno z gotowym promptem dla zewnętrznego chatbota (ChatGPT, Claude).
+    Wklej swój pomysł fabularny, a AI wygeneruje profesjonalną Księgę Świata sformatowaną w Markdown – do wklejenia do pola „Księga Świata" powyżej.
+  lbl_pamiec_dlugotrwala: "🧠 Pamięć Długotrwała (Streszczenie):"
+  txt_pamiec_name:       "Pole Pamięci Długotrwałej – streszczenie wydarzeń"
+  txt_pamiec_hint: |-
+    Tu AI zapisze streszczenie przy przepełnieniu pamięci.
+    Możesz je też edytować ręcznie.
+  txt_pamiec_tooltip: |-
+    Streszczenie poprzednich wydarzeń dołączane do każdego zapytania AI.
+    Pozwala kontynuować historię bez ograniczeń okna kontekstowego modelu.
+  btn_zapisz_pamiec_label:   "💾 Zapisz Streszczenie"
+  btn_zapisz_pamiec_tooltip: |-
+    Zapisuje streszczenie do pliku: skrypty/<nazwa>_streszczenie.txt
+    Po zapisie możesz bezpiecznie wyczyścić pamięć bieżącą.
+  # Obszar roboczy
+  main_heading:          "🎬 Obszar Roboczy"
+  rb_tryb_label:         "Tryb pracy:"
+  rb_tryb_name:          "Wybór trybu pracy AI"
+  rb_tryb_tooltip: |-
+    Burza Mózgów – planowanie bez zapisu do pliku.
+    Skrypt        – surowy skrypt dźwiękowy (zapisywany do pliku).
+    Audiobook     – tradycyjna proza literacka (zapisywana do pliku).
+  # Panel struktury
+  struktura_heading:     "✂️ Zarządzanie Strukturą"
+  btn_prolog_label:      "📜 Wstaw Prolog"
+  btn_prolog_name:       "Przycisk Wstaw Prolog"
+  btn_prolog_tooltip: |-
+    Wstawia nagłówek 'Prolog' na samym początku historii.
+    Możliwy tylko gdy historia jest pusta. Wymaga nazwy projektu.
+  btn_epilog_label:      "🏁 Wstaw Epilog"
+  btn_epilog_name:       "Przycisk Wstaw Epilog"
+  btn_epilog_tooltip: |-
+    Wstawia nagłówek 'Epilog' na końcu historii.
+    Blokuje dalsze dopisywanie treści po Epilogu.
+  btn_rozdzial_label:    "✂️ Wstaw cięcie (Rozdział {numer_rozdzialu})"
+  btn_rozdzial_name:     "Przycisk Wstaw Rozdział"
+  btn_rozdzial_tooltip: |-
+    Wstawia nagłówek kolejnego rozdziału do historii i pliku.
+    Dostępny wyłącznie w trybie Audiobooka.
+  btn_akt_label:         "🎭 Wstaw Akt {numer_aktu}"
+  btn_akt_name:          "Przycisk Wstaw Akt"
+  btn_akt_tooltip: |-
+    Wstawia nagłówek 'Akt N' oraz automatycznie 'Scena 1' do historii i pliku.
+    Dostępny wyłącznie w trybie Skryptu.
+  btn_scena_label:       "🎬 Wstaw Scenę {numer_sceny}"
+  btn_scena_name:        "Przycisk Wstaw Scenę"
+  btn_scena_tooltip: |-
+    Wstawia nagłówek kolejnej sceny do historii i pliku.
+    Dostępny wyłącznie w trybie Skryptu.
+  # Podgląd historii
+  lbl_podglad_historii:  "Bieżąca historia w pamięci (tylko do odczytu – nawiguj strzałkami):"
+  txt_podglad_name:      "Podgląd pełnej historii w pamięci – tylko do odczytu"
+  txt_podglad_hint:      "(pamięć jest pusta – wczytaj projekt lub zacznij nowy)"
+  # Pole instrukcji
+  lbl_instrukcje: |-
+    Instrukcje do kolejnego fragmentu (wpisz 'streszczenie', by wymusić zapis do Pamięci Długotrwałej):
+  txt_instrukcje_name:   "Pole instrukcji dla AI – dawny user_input"
+  txt_instrukcje_hint: |-
+    Podaj instrukcje do kolejnego fragmentu historii…
+    (np. 'Opisz spotkanie Geralta z wiedźmą w lesie. Duże napięcie.')
+  btn_wyslij_label:      "Wyślij do AI"
+  btn_wyslij_tooltip: |-
+    Wysyła instrukcje do modelu gpt-4o i dopisuje odpowiedź do historii.
+    Wymaga aktywnego klucza API i uzupełnionej Księgi Świata.
+  # Postprodukcja
+  postprod_heading:      "🎛️ Postprodukcja"
+  postprod_info: |-
+    Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
+  btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"
+  btn_tytuly_ai_name:    "Przycisk Nadaj Tytuły Rozdziałom AI"
+  btn_tytuly_ai_tooltip: |-
+    Iteruje po rozdziałach z zapisanego pliku i nadaje im tytuły (gpt-4o-mini).
+    Wymaga zapisanego pliku projektu i aktywnego klucza API.
+  # Pamięć modelu
+  lbl_pamiec_modelu:     "🧠 Pamięć Modelu (Stan Okna Kontekstowego):"
+  lbl_pamiec_modelu_start: "🟢 Pamięć czysta. Maszyna gotowa na nową historię."
+  pamiec_modelu_status_name: "Status pamięci modelu AI"
+  # Komunikaty - wczytywanie
+  brak_nazwy_tytul:      "Brak nazwy"
+  brak_nazwy_tresc:      "Podaj nazwę pliku projektu przed wczytaniem."
+  plik_nie_istnieje_tytul: "Plik nie istnieje"
+  plik_nie_istnieje_tresc: |-
+    Nie znaleziono pliku:
+    {tresc_bledu}
+
+    Jeśli zaczynasz nową historię — po prostu zacznij pisać.
+    Plik zostanie utworzony automatycznie przy pierwszym wysłaniu do AI.
+  blad_odczytu_tresc:    "Błąd odczytu pliku:\n{tresc_bledu}"
+  status_wczytano_tytul: "Wczytano projekt"
+  status_wczytano_ksiega: " Wczytano też Księgę: skrypty/{nazwa_projektu}.md."
+  status_wczytano_streszczenie: |-
+    Wczytano streszczenie projektu '{nazwa_projektu}'.{lore_info}
+    Pamięć bieżąca pozostaje pusta (tryb Nieskończonej Pamięci).
+    Możesz kontynuować historię — AI operuje na streszczeniu.
+  status_wczytano_historia: "Wczytano historię '{nazwa_projektu}' ({liczba_znakow} znaków).{lore_info}"
+  # Komunikaty - czyszczenie
+  pamiec_wyczyszczona_tytul: "Pamięć wyczyszczona"
+  pamiec_wyczyszczona_tresc: "Pamięć bieżąca wyczyszczona."
+  pamiec_wyczyszczona_streszczenie_zostaje: "\nStreszczenie w Pamięci Długotrwałej zostało zachowane."
+  hard_reset_pytanie_tytul: "Zamknij Projekt – Twardy Reset"
+  hard_reset_pytanie: |-
+    Czy na pewno chcesz zamknąć projekt?
+
+    Zostanie wyczyszczone:
+      • historia bieżąca
+      • streszczenie (Pamięć Długotrwała)
+      • Księga Świata
+      • wszystkie liczniki (rozdziały, akty, sceny)
+
+    Pliki na dysku NIE zostaną usunięte.
+  hard_reset_ok_tytul:   "Projekt zamknięty"
+  hard_reset_ok_tresc:   "Projekt zamknięty. Wszystkie dane w pamięci zostały wyczyszczone."
+  # Zapis Księgi
+  brak_nazwy_ksiega_tytul: "Brak nazwy pliku"
+  brak_nazwy_ksiega_tresc: "Podaj najpierw nazwę pliku projektu w polu nazwy."
+  ksiega_pusta_tytul:    "Pusta Księga Świata"
+  ksiega_pusta_tresc:    "Księga Świata jest pusta. Nic do zapisania."
+  ksiega_zapisana_tytul: "Księga zapisana"
+  ksiega_zapisana_tresc: "Księga Świata zapisana: skrypty/{nazwa_projektu}.md"
+  blad_zapisu_ksiegi:    "Błąd zapisu Księgi Świata:\n{tresc_bledu}"
+  # Prompt Architekta dialog
+  prompt_arch_dlg_tytul: "Prompt Architekta – wklej do zewnętrznego chatbota"
+  prompt_arch_instrukcja: |-
+    Ten gotowy prompt wklej do zewnętrznego chatbota (np. darmowego ChatGPT albo Claude) i zastąp tekst „[TUTAJ WPISZ SWÓJ POMYSŁ]" własnym zalążkiem fabuły.
+
+    AI zwróci ci gotową Księgę Świata w bloku kodu Markdown — skopiuj jej zawartość (bez otaczających znaczników ```) i wklej do pola „Księga Świata" powyżej, a następnie kliknij „Zapisz Księgę na stałe".
+  prompt_arch_instrukcja_name: "Instrukcja korzystania z Promptu Architekta"
+  prompt_arch_lbl:       "Prompt do skopiowania (Ctrl+A, Ctrl+C):"
+  prompt_arch_tresc_name: "Pełna treść Promptu Architekta"
+  prompt_arch_btn_kopiuj: "📋  Skopiuj prompt do schowka"
+  prompt_arch_btn_kopiuj_name: "Przycisk Skopiuj Prompt Architekta do schowka"
+  prompt_arch_skopiowano_tytul: "Skopiowano"
+  prompt_arch_skopiowano_tresc: |-
+    Prompt Architekta został skopiowany do schowka.
+    Wklej go (Ctrl+V) do ChatGPT lub Claude i zastąp [TUTAJ WPISZ SWÓJ POMYSŁ] własnym pomysłem fabularnym.
+  prompt_arch_schowek_nieudany: |-
+    Nie udało się otworzyć schowka systemowego.
+    Skopiuj prompt ręcznie: kliknij w pole powyżej, zaznacz wszystko (Ctrl+A) i skopiuj (Ctrl+C).
+  # Zapis Streszczenia
+  pamiec_pusta_tytul:    "Puste streszczenie"
+  pamiec_pusta_tresc:    "Pamięć Długotrwała jest pusta. Nic do zapisania."
+  streszczenie_zapisane_tytul: "Streszczenie zapisane"
+  streszczenie_zapisane_tresc: |-
+    Streszczenie zapisane: skrypty/{nazwa_projektu}_streszczenie.txt
+
+    Możesz teraz bezpiecznie wyczyścić pamięć bieżącą.
+  blad_zapisu_streszczenia: "Błąd zapisu streszczenia:\n{tresc_bledu}"
+  # Wysyłanie do AI
+  brak_api_tytul:        "Brak API"
+  brak_api_tresc: |-
+    Brak połączenia z OpenAI.
+    Sprawdź plik golden_key.env i uruchom aplikację ponownie.
+  puste_pole_tytul:      "Puste pole"
+  puste_pole_tresc:      "Wpisz instrukcje dla AI przed wysłaniem."
+  brak_przepisow_tytul:  "Brak przepisów"
+  brak_przepisow_tresc: |-
+    Nie udało się załadować żadnego trybu pracy z YAML.
+    Uruchom odswiez_rezysera.py lub sprawdź dictionaries/pl/rezyser/.
+  brak_nazwy_wyslanie_tresc: |-
+    Podaj nazwę pliku projektu, zanim wygenerujesz tekst do zapisu.
+    (Tryb '{tytul_trybu}' wymaga nazwy pliku.)
+  brak_ksiegi_tytul:     "Brak Księgi Świata"
+  brak_ksiegi_tresc: |-
+    Uzupełnij Księgę Świata przed wysłaniem zapytania do AI.
+    Zasady świata i postacie są wymagane przez model.
+  blad_trybu_tytul:      "Błąd trybu"
+  blad_trybu_tresc: |-
+    Próbujesz wygenerować streszczenie w trybie zapisu do pliku!
+    To mogłoby uszkodzić Twoją historię.
+
+    Przełącz się na tryb 'Burza Mózgów' i spróbuj ponownie.
+  err_rate_limit:        "Brak kredytów OpenAI! Doładuj konto i spróbuj ponownie."
+  err_odrzucenie: |-
+    AI odrzuciło prompt (wykryto tag [ODRZUCENIE_AI]).
+    Tekst NIE zostanie zapisany do pliku historii.
+    Możesz zmodyfikować instrukcję i spróbować ponownie.
+  blad_ai_tytul:         "Błąd AI"
+  blad_ai_szczegoly_tytul: "Błąd AI – Szczegóły techniczne"
+  blad_ai_naglowek:      "Wystąpił nieoczekiwany błąd podczas przetwarzania."
+  blad_ai_lbl_tresc:     "Treść błędu (zaznacz Ctrl+A, skopiuj Ctrl+C – do zgłoszenia):"
+  blad_ai_tresc_name:    "Treść błędu do skopiowania"
+  # Wstawianie struktury (potwierdzenia)
+  struktura_brak_nazwy_tytul: "Brak nazwy"
+  struktura_brak_nazwy_tresc: "Podaj nazwę pliku projektu przed wstawianiem struktury."
+  blad_wstawiania_prolog: "Błąd wstawiania Prologu:\n{tresc_bledu}"
+  blad_wstawiania_epilog: "Błąd wstawiania Epilogu:\n{tresc_bledu}"
+  blad_wstawiania_rozdzialu: "Błąd wstawiania rozdziału:\n{tresc_bledu}"
+  blad_wstawiania_aktu:  "Błąd wstawiania aktu:\n{tresc_bledu}"
+  blad_wstawiania_sceny: "Błąd wstawiania sceny:\n{tresc_bledu}"
+  prolog_tytul:          "Prolog wstawiony"
+  prolog_tresc:          "Wstawiono nagłówek: Prolog.\n\nRozpocznij pisanie treści prologu."
+  epilog_tytul:          "Epilog wstawiony"
+  epilog_tresc: |-
+    Wstawiono nagłówek: Epilog.
+
+    Dalsze generowanie treści po Epilogu jest zablokowane.
+  rozdzial_tytul:        "Cięcie rozdziału wstawione"
+  rozdzial_tresc:        "Wstawiono nagłówek: {naglowek}."
+  akt_tytul:             "Akt wstawiony"
+  akt_tresc:             "Wstawiono: {akt_naglowek} oraz {scena_naglowek}."
+  scena_tytul:           "Scena wstawiona"
+  scena_tresc:           "Wstawiono nagłówek: {naglowek}."
+  # Odpowiedź AI – Burza Mózgów
+  burza_dlg_tytul:       "Odpowiedź AI – Burza Mózgów"
+  burza_dlg_lbl:         "Skopiuj zaznaczony tekst (Ctrl+A, Ctrl+C) lub zamknij:"
+  burza_dlg_name:        "Odpowiedź AI – Burza Mózgów"
+  # Postprodukcja
+  tytuly_brak_nazwy_tytul: "Brak nazwy projektu"
+  tytuly_brak_nazwy_tresc: "Podaj nazwę projektu przed nadaniem tytułów."
+  tytuly_zajety_tytul:   "Zajęty"
+  tytuly_zajety_tresc:   "Trwa już inne zapytanie do AI. Poczekaj na zakończenie."
+  tytuly_brak_pliku_tytul: "Brak pliku projektu"
+  tytuly_brak_pliku_tresc: |-
+    Nie znaleziono pliku:
+    {sciezka_pliku}
+
+    Wygeneruj i zapisz najpierw treść projektu.
+  tytuly_prep:           "Przygotowywanie…"
+  tytuly_brak_przepisu_tresc: |-
+    Nie znaleziono przepisu 'tytuly' w YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
+    Bez niego postprodukcja tytułów rozdziałów jest niedostępna.
+  tytuly_blad_naglowek:  "Wystąpił błąd podczas generowania tytułów rozdziałów."
+  tytuly_blad_nieznany:  "Nieznany błąd podczas tytułowania."
+  tytuly_czesciowe_naglowek: "⚠️ Częściowe wyniki (generowanie przerwano błędem):\n\n{wyniki}"
+  tytuly_dlg_tytul:      "Proponowane Tytuły Rozdziałów (AI)"
+  tytuly_dlg_lbl:        "Skopiuj tytuły (Ctrl+A, Ctrl+C) lub zanotuj je w Księdze Świata:"
+  tytuly_dlg_name:       "Lista proponowanych tytułów rozdziałów"
+  tytuly_gotowe:         "Gotowe! Tytuły wygenerowane."
+  blad_zapisu_do_pliku:  "Błąd zapisu do pliku:\n{tresc_bledu}"
+
+# -----------------------------------------------------------------------------
+# POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
+# -----------------------------------------------------------------------------
+poliglota:
+  panel_name:            "Panel Poligloty AI"
+  heading:               "🌍  Poliglota AI – Hybrydowe Studio Tłumaczeń"
+  description_name:      "Opis modułu Poliglota"
+  tool_description: |-
+    Moduł Poliglota służy do nakładania twardych akcentów fonetycznych pod lokalne syntezatory mowy (NVDA/Vocalizer/eSpeak), do zabaw tekstowych w Trybie Szyfranta oraz do tłumaczenia tekstów za pomocą AI (OpenAI gpt-4o).
+
+    Obsługuje pliki: .txt, .html, .htm, .docx.
+    Wynik zapisywany jest w tym samym katalogu co plik źródłowy.
+  # Sekcja 1: wczytywanie pliku
+  section1_heading:      "1. Wczytywanie pliku źródłowego"
+  lbl_plik:              "Nazwa lub pełna ścieżka pliku (.txt, .html, .htm, .docx):"
+  txt_plik_name:         "Pole ścieżki pliku źródłowego"
+  txt_plik_hint:         "Wpisz ścieżkę do pliku lub wybierz przyciskiem Przeglądaj…"
+  btn_przegladaj:        "Przeglądaj…"
+  btn_przegladaj_tooltip: "Otwiera systemowe okno wyboru pliku"
+  btn_wczytaj:           "Wczytaj plik do pamięci"
+  btn_wczytaj_tooltip:   "Wczytuje zawartość wskazanego pliku do pamięci roboczej"
+  btn_wyczysc:           "Wyczyść pamięć"
+  btn_wyczysc_tooltip:   "Usuwa wczytaną treść, pozwala wybrać inny plik"
+  lbl_plik_status_name:  "Status wczytanego pliku"
+  plik_status_brak:      "Brak wczytanego pliku."
+  plik_status_wczytany:  "Plik wczytany: {nazwa_pliku}  ({liczba_znakow} znaków).\nMożesz teraz uruchomić przetwarzanie."
+  plik_status_wyczyszczono: "Pamięć wyczyszczona. Możesz wczytać nowy plik."
+  # Plik dialog
+  file_dlg_title:        "Wybierz plik źródłowy"
+  file_dlg_wildcard: |-
+    Obsługiwane pliki (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Pliki tekstowe (*.txt)|*.txt|Pliki HTML (*.html;*.htm)|*.html;*.htm|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*
+  # Komunikaty wczytywania
+  brak_pliku_tresc:      "Podaj nazwę lub ścieżkę pliku przed wczytaniem."
+  plik_nie_istnieje_tresc: "Nie znaleziono pliku:\n{sciezka_pliku}"
+  blad_odczytu_tresc:    "Błąd podczas odczytu pliku:\n{tresc_bledu}"
+  plik_wczytany_tytul:   "Plik wczytany"
+  plik_wczytany_tresc: |-
+    Wczytano plik: {nazwa_pliku}
+    ({liczba_znakow} znaków).
+
+    Możesz teraz skonfigurować tryb pracy i uruchomić przetwarzanie.
+  # Sekcja 2: konfiguracja trybu pracy
+  section2_heading:      "2. Konfiguracja Pracy"
+  rb_ai:                 "Tłumacz AI (OpenAI gpt-4o – wymaga klucza API, kosztuje kredyty)"
+  rb_ai_disabled:        "Tłumacz AI (wyłączony – brak poprawnego pliku golden_key.env)"
+  rb_ai_name:            "Tryb Tłumacza AI"
+  rb_rezyser:            "Tryb Reżysera (darmowe reguły fonetyczne z YAML)"
+  rb_rezyser_name:       "Tryb Reżysera darmowy"
+  rb_szyfrant:           "Tryb Szyfranta (zabawy tekstem, losowe zacinanie)"
+  rb_szyfrant_name:      "Tryb Szyfranta i zabaw tekstowych"
+  # Panel AI
+  lbl_jezyk_docelowy:    "Język docelowy tłumaczenia (np. Fiński, Islandzki, Angielski, Arabski):"
+  txt_jezyk_name:        "Pole języka docelowego"
+  txt_jezyk_hint:        "Wpisz nazwę języka docelowego…"
+  # Panel Reżysera
+  lbl_akcent:            "Wybierz akcent lub tryb czyszczenia:"
+  combo_akcent_name:     "Lista akcentów i trybów czyszczenia"
+  combo_akcent_tooltip:  "Wybierz akcent fonetyczny lub tryb czyszczenia tekstu pod czytniki ekranu"
+  lbl_iso:               "Kod ISO języka (2 litery, np. en, fr, de):"
+  txt_iso_name:          "Pole kodu ISO języka"
+  txt_iso_hint:          "np. en"
+  # Panel Szyfranta
+  lbl_szyfr:             "Wybierz algorytm zniekształcający:"
+  combo_szyfr_name:      "Lista algorytmów szyfrujących"
+  lbl_cezar:             "Przesunięcie szyfru Cezara (0 = losowe, zakres {min_przesuniecie}…{max_przesuniecie}):"
+  spin_cezar_name:       "Przesunięcie szyfru Cezara"
+  # Sekcja 3: Przetwarzanie
+  section3_heading:      "3. Przetwarzanie"
+  btn_process:           "Uruchom Przetwarzanie"
+  btn_process_tooltip:   "Uruchamia wybrane przetwarzanie i zapisuje wynik obok pliku źródłowego"
+  lbl_progress_name:     "Status postępu przetwarzania"
+  # Sekcja 4: Wynik
+  section4_heading:      "4. Wynik (tylko do odczytu – nawiguj strzałkami)"
+  txt_wynik_name:        "Pole wynikowe – gotowy tekst"
+  txt_wynik_hint:        "Tutaj pojawi się przetworzona treść…"
+  # Przetwarzanie – komunikaty
+  brak_pliku_pamieci_tytul: "Brak pliku w pamięci"
+  brak_pliku_pamieci_tresc: "Najpierw wczytaj plik źródłowy (sekcja 1)."
+  zajety_tytul:          "Zajęty"
+  zajety_tresc:          "Przetwarzanie jest już w toku. Poczekaj na zakończenie."
+  brak_jezyka_tytul:     "Brak języka"
+  brak_jezyka_tresc:     "Wpisz język docelowy tłumaczenia przed uruchomieniem."
+  nie_wybrano_akcentu:   "Nie wybrano żadnego akcentu."
+  nie_wybrano_szyfru:    "Nie wybrano żadnego szyfru."
+  brak_iso_tytul:        "Brak kodu ISO"
+  brak_iso_tresc:        "Podaj poprawny dwuliterowy kod ISO języka (np. en, fr, de)."
+  ostrzezenie_jezyk: |-
+    Uwaga: Wykryto język główny inny niż polski. Reguły fonetyczne są przystosowane do polszczyzny – efekt może być nieprzewidywalny.
+  blad_przetwarzania:    "Błąd przetwarzania:\n{tresc_bledu}"
+  cezar_losowe_tytul:    "Szyfr Cezara – losowe przesunięcie"
+  cezar_losowe_tresc:    "Wartość przesunięcia wynosiła 0 – wylosowano: {wylosowane_przesuniecie}."
+  blad_wyniku_tytul:     "Błąd"
+  blad_wyniku_tresc:     "Nie udało się wygenerować wynikowego tekstu."
+  blad_zapisu_wyjscia:   "Błąd podczas zapisu pliku wynikowego:\n{tresc_bledu}"
+  sukces_zapis:          "Plik zapisany jako:\n{sciezka_pliku}"
+  # Tłumacz AI
+  ai_init:               "Inicjowanie tłumaczenia…"
+  ai_zakonczone_tytul:   "Sukces"
+  ai_zakonczone_tresc:   "Tłumaczenie ukończone!\n\nPlik zapisany jako:\n{sciezka_pliku}"
+  ai_blad_zapisu:        "Błąd zapisu pliku wynikowego:\n{tresc_bledu}"
+  # Wyświetlanie błędu AI
+  blad_ai_tytul:         "Błąd"
+  blad_ai_szczegoly_tytul: "Błąd – Szczegóły techniczne"
+  blad_ai_naglowek:      "Wystąpił nieoczekiwany błąd podczas przetwarzania."
+  blad_ai_lbl_tresc:     "Treść błędu (zaznacz Ctrl+A, skopiuj Ctrl+C – do zgłoszenia):"
+  blad_ai_tresc_name:    "Treść błędu do skopiowania"
+
+# -----------------------------------------------------------------------------
+# KONWERTER – panel modułu Konwerter (gui_konwerter.py)
+# -----------------------------------------------------------------------------
+konwerter:
+  panel_name:            "Panel Architekta Audiobooków"
+  heading:               "📄  Architekt Audiobooków"
+  tool_description: |-
+    Ten moduł służy do przygotowania architektury pliku dla czytników ekranu (nawigacja klawiszami 1 i h po nagłówkach) oraz ElevenLabs. Zmienia słowa kluczowe (Czołówka, Akt, Rozdział, Prolog, Epilog) na Nagłówki pierwszego poziomu, pozostawiając całą resztę skryptu bez zmian.
+  lbl_plik: |-
+    Nazwa lub pełna ścieżka pliku źródłowego
+    (np. plik .txt, .html, .md lub dokument .docx):
+  txt_plik_name:         "Pole ścieżki pliku źródłowego"
+  txt_plik_hint:         "Wpisz ścieżkę do pliku (tekstowy, HTML, MD, DOCX)…"
+  btn_przegladaj:        "Przeglądaj…"
+  btn_przegladaj_tooltip: "Otwiera systemowe okno wyboru pliku .txt lub .docx"
+  btn_buduj:             "Buduj Architekturę dla ElevenLabs"
+  btn_buduj_tooltip:     "Przetwarza plik i zapisuje architektura_<nazwa>.docx obok pliku źródłowego"
+  # Metadana zapisywana do pola `author` w core_properties wynikowego .docx.
+  # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
+  # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
+  author_metadata:       "Reżyser"
+  # Dialog wyboru pliku
+  file_dlg_title:        "Wybierz plik źródłowy"
+  file_dlg_wildcard:     "Wszystkie obsługiwane pliki (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*"
+  # Komunikaty
+  brak_pliku_tytul:      "Brak pliku"
+  brak_pliku_tresc:      "Podaj nazwę lub ścieżkę pliku źródłowego."
+  plik_nie_istnieje_tytul: "Plik nie istnieje"
+  plik_nie_istnieje_tresc: "Nie znaleziono pliku:\n{sciezka_pliku}"
+  blad_odczytu_tytul:    "Błąd odczytu"
+  blad_odczytu_tresc:    "Błąd podczas odczytu pliku:\n{tresc_bledu}"
+  blad_zapisu_tytul:     "Błąd zapisu"
+  blad_zapisu_tresc:     "Błąd podczas zapisu pliku wynikowego:\n{tresc_bledu}"
+  sukces_tytul:          "Sukces"
+  sukces_tresc: |-
+    Perfetto! Nagłówki pierwszego poziomu zostały ustawione.
+
+    Plik zapisano jako:
+    {sciezka_pliku}
+
+# -----------------------------------------------------------------------------
+# MANAGER – panel Managera Reguł (gui_manager_regul.py)
+# -----------------------------------------------------------------------------
+manager:
+  panel_name:            "Panel Managera Reguł – eksplorator słowników"
+  desc: |-
+    Manager Reguł pozwala przeglądać i edytować pliki YAML w folderze dictionaries/ bez wchodzenia w Eksploratora plików systemu. Wybierz plik w drzewie po lewej, a następnie skorzystaj z przycisków po prawej: otwórz w edytorze tekstu, utwórz nowy plik, duplikuj lub usuń.
+
+    Dla trudniejszych zadań (nowy język, akcent obcej fonetyki, szyfr algorytmiczny) Manager wygeneruje prompt dla chatbota AI – wystarczy wkleić go do ChatGPT lub Claude i zapisać odpowiedź.
+  desc_name:             "Opis Managera Reguł"
+  # Drzewo
+  tree_name:             "Drzewo plików dictionaries"
+  tree_tooltip: |-
+    Drzewo wszystkich plików YAML w folderze dictionaries/. Rozwiń język, potem kategorię, a następnie wybierz plik. Strzałki i Enter działają standardowo dla NVDA.
+  tree_root:             "Słowniki (dictionaries/)"
+  tree_brak_folderu:     "⚠️  Brak folderu dictionaries/ – utwórz pierwszy język przyciskiem „Nowy plik reguł…\"."
+  tree_jezyk:            "🌐  {kod_jezyka}  ({nazwa_jezyka})"
+  tree_podstawy:         "📄  podstawy.yaml  (diakrytyki + alfabet)"
+  tree_kategoria:        "{etykieta}  [{liczba_plikow}]"
+  tree_plik:             "📄  {nazwa_pliku}"
+  # Etykiety kategorii drzewa
+  kategorie:
+    akcenty:             "Akcenty (fonetyka dla TTS)  🎙️"
+    szyfry:              "Szyfry (zabawy tekstem)  🔐"
+    rezyser:             "Reżyser (tryby i postprodukcja)  🎬"
+    gui:                 "Tłumaczenia UI  🌐"
+  # Przyciski akcji
+  btn_otworz_label:      "📝  &Otwórz w edytorze tekstu"
+  btn_otworz_name:       "Przycisk Otwórz zaznaczony plik w edytorze tekstu"
+  btn_otworz_tooltip:    "Otwiera zaznaczony plik YAML w domyślnym edytorze tekstu systemu (Notatnik na Windows, TextEdit na macOS)."
+  btn_nowy_label:        "➕  &Nowy plik reguł…"
+  btn_nowy_name:         "Przycisk Utwórz nowy plik reguł"
+  btn_nowy_tooltip:      "Otwiera kreator nowego pliku: wybierasz typ (akcent, szyfr, tryb Reżysera, język bazowy), Manager tworzy szablon albo generuje prompt dla AI."
+  btn_duplikuj_label:    "📋  &Duplikuj wybrany plik"
+  btn_duplikuj_name:     "Przycisk Duplikuj zaznaczony plik"
+  btn_duplikuj_tooltip:  "Tworzy kopię zaznaczonego pliku YAML pod nową nazwą – szybki start dla wariantu istniejącej reguły."
+  btn_usun_label:        "🗑️  &Usuń zaznaczony plik"
+  btn_usun_name:         "Przycisk Usuń zaznaczony plik"
+  btn_usun_tooltip:      "Usuwa zaznaczony plik YAML z dysku (z potwierdzeniem). Operacja jest nieodwracalna – pomyśl dwa razy."
+  btn_odswiez_label:     "🔄  O&dśwież drzewo"
+  btn_odswiez_name:      "Przycisk Odśwież drzewo plików"
+  btn_odswiez_tooltip:   "Przeładowuje drzewo z dysku – użyj, jeśli zmieniłeś pliki ręcznie w Eksploratorze lub po zapisie w edytorze tekstu."
+  info_stopka: |-
+    Po utworzeniu nowego akcentu wróć na Stronę główną
+    i kliknij „Odśwież akcenty Reżysera z YAML".
+  # Otwarcie w edytorze
+  plik_wne_tytul:        "Nie można otworzyć pliku"
+  plik_wne_tresc: |-
+    Plik leży poza folderem dictionaries/ lub już nie istnieje.
+    Odśwież drzewo i spróbuj ponownie.
+  blad_otwarcia_tytul:   "Informacja"
+  blad_otwarcia_tresc:   "Nie udało się automatycznie otworzyć pliku.\nOtwórz go ręcznie:\n{sciezka_pliku}\n\nSzczegóły: {tresc_bledu}"
+  # Duplikowanie
+  dup_dlg_tytul:         "Duplikuj plik YAML"
+  dup_dlg_label: |-
+    Podaj nową nazwę pliku (bez rozszerzenia, tylko ASCII, lower_snake).
+    Plik źródłowy: {nazwa_pliku}
+  dup_nazwa_blad_tytul:  "Błąd nazwy pliku"
+  dup_nazwa_blad_tresc: |-
+    Nieprawidłowa nazwa.
+
+    Dozwolone: małe litery ASCII, cyfry i podkreślenia. Pierwszy znak musi być literą.
+    Przykłady: szwedzki, nowy_tryb, postprod_rozdzialy.
+  dup_poza_dict_tytul:   "Błąd"
+  dup_poza_dict_tresc:   "Docelowa ścieżka leży poza dictionaries/."
+  dup_istnieje_tytul:    "Plik już istnieje"
+  dup_istnieje_tresc: |-
+    Plik {nazwa_pliku}.yaml już istnieje w tym folderze.
+    Wybierz inną nazwę.
+  dup_blad:              "Nie udało się utworzyć duplikatu:\n{tresc_bledu}"
+  dup_komentarz_naglowek: |-
+    # Duplikat z: {nazwa_pliku}
+    # UWAGA: zmień pola `etykieta` i `opis`, a potem zapisz plik.
+  dup_ok_tytul:          "Duplikat utworzony"
+  dup_ok_tresc: |-
+    Utworzono duplikat: {nazwa_pliku}
+
+    Edytor tekstu otwiera się automatycznie. Zmień pola `etykieta` i `opis`, zapisz plik (Ctrl+S), a potem wróć do Managera i kliknij „Odśwież drzewo".
+  # Usuwanie
+  usun_pytanie_tytul:    "Potwierdź usunięcie"
+  usun_pytanie_tresc: |-
+    Czy na pewno usunąć plik:
+
+    {nazwa_pliku}
+    (z katalogu {katalog_wzgledny})
+
+    Operacja jest NIEODWRACALNA.
+  usun_blad:             "Nie udało się usunąć pliku:\n{tresc_bledu}"
+  usun_ok_tytul:         "Usunięto"
+  usun_ok_tresc: |-
+    Plik usunięty. Pamiętaj, aby po usunięciu akcentu kliknąć „Odśwież akcenty Reżysera z YAML" na Stronie głównej.
+  # Kreator
+  kreator_tytul:         "Nowy plik reguł – kreator"
+  kreator_co_utworzyc:   "Co chcesz utworzyć?"
+  kreator_cb_name:       "Wybór typu nowego pliku reguł"
+  kreator_opis_name:     "Opis wybranego typu reguły"
+  kreator_lbl_id:        "Identyfikator (nazwa pliku):"
+  kreator_id_name:       "Pole identyfikator pliku"
+  kreator_id_hint:       "np. szwedzki  (małe litery, bez spacji)"
+  kreator_lbl_etykieta:  "Etykieta (widoczna w GUI):"
+  kreator_etykieta_name: "Pole etykieta reguły"
+  kreator_etykieta_hint: 'np. "Szwedzki (Alva / Oskar)"'
+  kreator_lbl_iso:       "Kod ISO języka docelowego:"
+  kreator_iso_name:      "Pole kod ISO języka"
+  kreator_iso_hint:      "np. sv, de, en (2 znaki)"
+  kreator_lbl_jezyk:     "Język bazowy (folder dictionaries/…):"
+  kreator_jezyk_name:    "Wybór języka bazowego (folderu)"
+  kreator_lbl_opis:      "Opis efektu (dla AI):"
+  kreator_opis_efektu_name: "Pole opis efektu (tylko dla szyfru algorytmicznego)"
+  kreator_opis_efektu_hint: "Opisz 1-3 zdaniami, co ma robić ten szyfr (wejście → wyjście)."
+  kreator_btn_utworz:    "Utwórz"
+  # Kreator – hinty dla języka bazowego
+  kreator_jezyk_bazowy_id_hint: "np. en, de, fr (kod ISO 639-1, 2-3 znaki)"
+  kreator_jezyk_bazowy_etykieta_hint: "np. Angielski, Niemiecki…"
+  kreator_jezyk_bazowy_iso_label: "Nazwa języka (powtórzona w szablonie):"
+  kreator_jezyk_bazowy_iso_hint: "np. Angielski"
+  # Kreator – walidacje
+  kreator_alert_tytul:   "Brak lub błąd pola"
+  kreator_blad_kod_jezyka: "Kod języka musi być 2- lub 3-literowy (ISO 639-1/3)."
+  kreator_blad_nazwa_jezyka: "Podaj nazwę języka (np. Angielski)."
+  kreator_blad_id: |-
+    Identyfikator pliku musi być ASCII w formacie lower_snake.
+    Przykłady: szwedzki, tryb_dziennik, postprod_streszczenia.
+  kreator_blad_etykieta: "Podaj etykietę widoczną w GUI."
+  kreator_blad_iso:      "Podaj kod ISO języka docelowego (np. sv, de)."
+  kreator_blad_opis_efektu: |-
+    Dla szyfru algorytmicznego opisz efekt słowami – ten opis trafi do promptu dla AI.
+  # Wynik kreatora
+  wynik_tytul:           "Nowy plik reguł – wynik"
+  wynik_sukces_naglowek: "✅  Utworzono plik:\n{sciezka_pliku}"
+  wynik_brak_pliku_naglowek: |-
+    ℹ️  Plik nie został utworzony (ten typ reguły wymaga kodu Pythona od programisty – patrz prompt dla AI poniżej).
+  wynik_lbl_uwagi:       "Dalsze kroki:"
+  wynik_uwagi_name:      "Uwagi do utworzonej reguły"
+  wynik_lbl_prompt:      "Prompt dla AI (wklej do ChatGPT / Claude):"
+  wynik_prompt_name:     "Prompt do wklejenia do chatbota AI"
+  wynik_btn_kopiuj:      "📋  Skopiuj prompt do schowka"
+  wynik_btn_kopiuj_name: "Przycisk Skopiuj prompt AI do schowka"
+  wynik_skopiowano_tytul: "Skopiowano"
+  wynik_skopiowano_tresc: |-
+    Prompt został skopiowany do schowka.
+    Wklej go (Ctrl+V) do ChatGPT lub Claude.
+  wynik_schowek_nieudany_tytul: "Schowek niedostępny"
+  wynik_schowek_nieudany_tresc: |-
+    Nie udało się otworzyć schowka systemowego.
+    Skopiuj prompt ręcznie: Ctrl+A, Ctrl+C w polu powyżej.
+  # Nadpisywanie pliku
+  plik_istnieje_tytul:   "Plik istnieje"
+  plik_istnieje_tresc:   "Plik {nazwa_pliku} już istnieje.\nNadpisać?"
+  blad_bezpieczenstwa_tytul: "Błąd bezpieczeństwa"
+  blad_bezpieczenstwa_tresc: "Docelowa ścieżka leży poza dictionaries/. Przerywam."
+  blad_tworzenia:        "Nie udało się utworzyć pliku:\n{tresc_bledu}"
+  niepelna_struktura_tytul: "Niepełna struktura języka"
+  niepelna_struktura_tresc: |-
+    Plik podstawy.yaml zapisano, ale nie udało się utworzyć podfolderów akcenty/ i szyfry/:
+    {tresc_bledu}
+
+    Utwórz je ręcznie w Eksploratorze plików, zanim uruchomisz Poliglotę – inaczej silnik wyrzuci błąd przy skanowaniu nowego języka.
