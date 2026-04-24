@@ -4,6 +4,10 @@ import zipfile
 import subprocess
 import sys
 
+import yaml
+
+import generuj_dokumentacje
+
 
 # =============================================================================
 # STDOUT UTF-8 (fix dla Windowsa, gdzie domyślne cp1250 łamie się na emoji 🔍)
@@ -23,109 +27,85 @@ if sys.platform == "win32":
 
 
 # =============================================================================
-
-# WYKRYWANIE I WALIDACJA WERSJI (wersja 13.0 — koniec z input() i literówkami)
+# WYKRYWANIE WERSJI (wersja 13.1 — single source of truth: ui.yaml)
 # =============================================================================
-# Wersja 12.0 i wcześniejsze prosiły o numer wersji przez input(). To otwierało
-# drzwi na czynnik ludzki: literówka w numerze, przypadkowa spacja albo —
-# najgorsze — zbudowanie paczki z inną wersją niż ta, którą widzi użytkownik
-# w tytule okna aplikacji. W 13.0 wersja jest wyliczana automatycznie z dwóch
-# źródeł prawdy i porównywana krzyżowo:
+# Historia:
+#   * do 12.x: numer wersji podawany ręcznie przez input() — literówki, desynchronizacja.
+#   * 13.0:    cross-check main.py::MainFrame.VERSION ↔ pierwsza linia instrukcja.txt
+#              — działało, ale wymagało edycji DWÓCH miejsc przy każdym bumpie.
+#   * 13.1:    wersja migruje w całości do dictionaries/pl/gui/ui.yaml::app.wersja,
+#              czytana przez t("app.wersja") z modułu i18n. Atrybut MainFrame.VERSION
+#              i pierwsza linia instrukcja.txt przestały istnieć jako osobne źródła,
+#              co sprawiło, że stary cross-check w buduj_wydanie.py zostaje „martwy"
+#              (regex nie łapie → exit 1). Od Etapu 2/5 refaktoru dokumentacji build
+#              wyciąga numer wersji bezpośrednio z ui.yaml — jedyny plik, który
+#              deweloper musi zedytować, żeby wypuścić nowy release.
 #
-#   1) main.py  → klasa MainFrame, atrybut VERSION = "13.0 – ..." (to, co
-#      widzi end-user w pasku tytułu okna aplikacji).
-#   2) instrukcja.txt → pierwsza linia nagłówka "...(Wersja 13.0 - ...)".
-#
-# Obie muszą zwrócić IDENTYCZNY numer (np. "13.0"). Jeśli się rozjeżdżają,
-# skrypt przerywa działanie ze wskazaniem, który plik wymaga aktualizacji.
-# Dodatkowo, jeśli paczka ZIP tej wersji już istnieje na dysku, skrypt też
-# przerywa — zmuszając dewelopera do przenumerowania wersji (częstsza
-# sytuacja) albo świadomego usunięcia poprzedniego buildu.
+# Wartość `app.wersja` jest stringiem ludzkim, np. „13.1 – Wersja Wydawnicza" —
+# regex wyłuskuje z niej sam numer („13.1"). Tolerujemy zarówno ASCII `-`, jak
+# i typograficzny em-dash `–` w separatorze, bo oba warianty pojawiły się
+# historycznie w plikach tłumaczeń.
 
-SCIEZKA_MAIN_PY      = "main.py"
-SCIEZKA_INSTRUKCJA   = "instrukcja.txt"
-WZORZEC_VERSION_PY   = re.compile(r'VERSION\s*=\s*"(\d+(?:\.\d+)+)')
-WZORZEC_WERSJA_TXT   = re.compile(r'Wersja\s+(\d+(?:\.\d+)+)')
+SCIEZKA_UI_YAML    = os.path.join("dictionaries", "pl", "gui", "ui.yaml")
+KLUCZ_WERSJI       = "app.wersja"
+WZORZEC_NUMER_WERSJI = re.compile(r"\d+(?:\.\d+)+")
 
 
-def odczytaj_wersje_z_main_py() -> str:
-    """Wyciąga numer wersji z ``MainFrame.VERSION`` w main.py.
+def odczytaj_wersje_z_ui_yaml() -> str:
+    """Wyciąga numer wersji z ``dictionaries/pl/gui/ui.yaml::app.wersja``.
 
     Raises:
-        RuntimeError: gdy plik nie istnieje albo wzorzec nie pasuje.
+        RuntimeError: gdy plik nie istnieje, nie parsuje się jako YAML,
+        nie ma klucza ``app.wersja`` albo wartość nie zawiera numeru
+        wersji w formacie ``\\d+(?:\\.\\d+)+``.
 
     Returns:
-        Sam numer wersji bez sufiksu opisowego, np. ``"13.0"`` z linii
-        ``VERSION = "13.0 – Wersja Wydawnicza"``.
+        Sam numer wersji bez sufiksu opisowego, np. ``"13.1"`` z wartości
+        ``"13.1 – Wersja Wydawnicza"``.
     """
-    if not os.path.exists(SCIEZKA_MAIN_PY):
+    if not os.path.exists(SCIEZKA_UI_YAML):
         raise RuntimeError(
-            f"Nie znaleziono {SCIEZKA_MAIN_PY}. "
+            f"Nie znaleziono {SCIEZKA_UI_YAML}. "
             "Uruchom skrypt z katalogu głównego projektu."
         )
-    with open(SCIEZKA_MAIN_PY, "r", encoding="utf-8") as fh:
-        tresc = fh.read()
-    dopasowanie = WZORZEC_VERSION_PY.search(tresc)
-    if not dopasowanie:
-        raise RuntimeError(
-            f"Nie znaleziono linii 'VERSION = \"X.Y ...\"' w {SCIEZKA_MAIN_PY}. "
-            "Sprawdź, czy klasa MainFrame nadal ma atrybut VERSION."
-        )
-    return dopasowanie.group(1)
-
-
-def odczytaj_wersje_z_instrukcji() -> str:
-    """Wyciąga numer wersji z pierwszej linii instrukcja.txt.
-
-    Raises:
-        RuntimeError: gdy plik nie istnieje albo wzorzec nie pasuje.
-
-    Returns:
-        Sam numer wersji z fragmentu "(Wersja 13.0 - ...)", np. ``"13.0"``.
-    """
-    if not os.path.exists(SCIEZKA_INSTRUKCJA):
-        raise RuntimeError(
-            f"Nie znaleziono {SCIEZKA_INSTRUKCJA}. "
-            "Uruchom skrypt z katalogu głównego projektu."
-        )
-    with open(SCIEZKA_INSTRUKCJA, "r", encoding="utf-8") as fh:
-        pierwsza_linia = fh.readline()
-    dopasowanie = WZORZEC_WERSJA_TXT.search(pierwsza_linia)
-    if not dopasowanie:
-        raise RuntimeError(
-            f"Nie znaleziono fragmentu 'Wersja X.Y' w pierwszej linii "
-            f"{SCIEZKA_INSTRUKCJA}.\nObecna pierwsza linia:\n  {pierwsza_linia!r}"
-        )
-    return dopasowanie.group(1)
-
-
-def wykryj_i_zweryfikuj_wersje() -> str:
-    """Cross-checkuje wersję main.py vs. instrukcja.txt i zwraca numer.
-
-    Oba źródła muszą zwrócić IDENTYCZNY numer. Niezgodność = błąd krytyczny
-    ze wskazaniem, który plik zaktualizować. Ta jedna bramka w całości
-    eliminuje ryzyko wydania paczki z błędną/niezsynchronizowaną wersją.
-    """
     try:
-        wersja_py  = odczytaj_wersje_z_main_py()
-        wersja_txt = odczytaj_wersje_z_instrukcji()
-    except RuntimeError as exc:
-        print(f"❌ BŁĄD KRYTYCZNY (odczyt wersji): {exc}")
-        sys.exit(1)
+        with open(SCIEZKA_UI_YAML, "r", encoding="utf-8") as fh:
+            dane = yaml.safe_load(fh)
+    except yaml.YAMLError as exc:
+        raise RuntimeError(
+            f"Plik {SCIEZKA_UI_YAML} nie parsuje się jako YAML: {exc}"
+        ) from exc
 
-    if wersja_py != wersja_txt:
-        print("❌ BŁĄD KRYTYCZNY: Niezsynchronizowane numery wersji.")
-        print(f"   • {SCIEZKA_MAIN_PY} (MainFrame.VERSION) → {wersja_py!r}")
-        print(f"   • {SCIEZKA_INSTRUKCJA} (1. linia)       → {wersja_txt!r}")
-        print()
-        print("Zaktualizuj OBA pliki przed zbudowaniem wydania.")
-        print(
-            "Aktualizacja tylko jednego z nich prowadzi do niespójności "
-            "(user widzi w tytule okna inną wersję niż czyta w instrukcji)."
+    if not isinstance(dane, dict):
+        raise RuntimeError(
+            f"Plik {SCIEZKA_UI_YAML} nie zawiera mapy na najwyższym poziomie."
         )
-        sys.exit(1)
 
-    return wersja_py
+    # Schodzenie po ścieżce zagnieżdżonej (kropka = kolejny poziom) — spójne
+    # z semantyką `i18n.t()` i `generuj_dokumentacje._pobierz_wartosc()`.
+    wartosc = dane
+    for segment in KLUCZ_WERSJI.split("."):
+        if not isinstance(wartosc, dict) or segment not in wartosc:
+            raise RuntimeError(
+                f"Nie znaleziono klucza '{KLUCZ_WERSJI}' w {SCIEZKA_UI_YAML}. "
+                "Od wersji 13.1 to jedyne źródło prawdy dla numeru wersji — "
+                "sprawdź, czy plik ui.yaml ma sekcję `app:` z polem `wersja:`."
+            )
+        wartosc = wartosc[segment]
+
+    if not isinstance(wartosc, str):
+        raise RuntimeError(
+            f"Wartość '{KLUCZ_WERSJI}' w {SCIEZKA_UI_YAML} nie jest stringiem "
+            f"(jest: {type(wartosc).__name__})."
+        )
+
+    dopasowanie = WZORZEC_NUMER_WERSJI.search(wartosc)
+    if not dopasowanie:
+        raise RuntimeError(
+            f"Wartość '{KLUCZ_WERSJI}' w {SCIEZKA_UI_YAML} nie zawiera numeru "
+            f"wersji w formacie X.Y.\n  Obecna wartość: {wartosc!r}"
+        )
+    return dopasowanie.group(0)
 
 
 def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
@@ -140,7 +120,7 @@ def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
         print(f"❌ BŁĄD KRYTYCZNY: Paczka {nazwa_zip} już istnieje w katalogu.")
         print()
         print("Jedno z trojga:")
-        print(f"  (a) Przenumeruj wersję w {SCIEZKA_MAIN_PY} i {SCIEZKA_INSTRUKCJA}.")
+        print(f"  (a) Przenumeruj wersję w {SCIEZKA_UI_YAML} (klucz {KLUCZ_WERSJI}).")
         print(f"  (b) Przenieś dotychczasowy {nazwa_zip} do innego folderu "
               "(archiwum poprzednich releasów).")
         print(f"  (c) Świadomie usuń {nazwa_zip}, jeśli chcesz go odtworzyć "
@@ -159,8 +139,18 @@ KATALOG_ZRODLOWY = "."
 
 def czy_ignorowac(sciezka, nazwa_pliku):
     """Decyduje, czy dany plik ma być pominięty w paczce ZIP."""
-    czesci_sciezki = sciezka.replace('\\', '/').split('/')
+    sciezka_ukosniki = sciezka.replace('\\', '/')
+    czesci_sciezki = sciezka_ukosniki.split('/')
     if any(ignorowany in czesci_sciezki for ignorowany in IGNOROWANE_FOLDERY):
+        return True
+
+    # Szablony YAML dokumentacji end-userowej — `dictionaries/<kod>/gui/dokumentacja/*.yaml`.
+    # Te pliki są surowcem developerskim (treść z placeholderami `{app.wersja}`);
+    # end-user dostaje przetworzone wersje w `docs/<id>.<kod>.txt`, generowane
+    # przez `generuj_dokumentacje.py` przed pakowaniem. Do paczki trafiają
+    # tylko docelowe .txt, bez surowych YAML-i — inaczej użytkownik widziałby
+    # w aplikacji DWA warianty tego samego dokumentu i nie wiedział, który czytać.
+    if '/gui/dokumentacja' in sciezka_ukosniki:
         return True
 
     if nazwa_pliku in IGNOROWANE_PLIKI:
@@ -183,7 +173,7 @@ def czy_ignorowac(sciezka, nazwa_pliku):
 # =============================================================================
 # Owinięcie całego flow w funkcję main() + wywołanie pod __main__ daje dwie
 # korzyści:
-#   1. Funkcje walidacji wersji (odczytaj_wersje_z_main_py itp.) można
+#   1. Funkcje walidacji wersji (odczytaj_wersje_z_ui_yaml itp.) można
 #      importować i testować w izolacji, bez wyzwalania guardu runtime/ ani
 #      interaktywnego input().
 #   2. Skrypt staje się zgodny z normalną konwencją Python (import-safe).
@@ -225,10 +215,14 @@ def main() -> None:
 
     print("✅ Środowisko Pythona zweryfikowane pomyślnie.\n")
 
-    # 3. Automatyczne wykrycie wersji (cross-check main.py ↔ instrukcja.txt)
-    print("🔍 Wykrywanie numeru wersji (cross-check main.py ↔ instrukcja.txt)...")
-    wersja = wykryj_i_zweryfikuj_wersje()
-    print(f"✅ Wersja zweryfikowana w obu źródłach: {wersja}\n")
+    # 3. Automatyczne wykrycie wersji (single source of truth: ui.yaml)
+    print(f"🔍 Wykrywanie numeru wersji ({SCIEZKA_UI_YAML} → {KLUCZ_WERSJI})...")
+    try:
+        wersja = odczytaj_wersje_z_ui_yaml()
+    except RuntimeError as exc:
+        print(f"❌ BŁĄD KRYTYCZNY (odczyt wersji): {exc}")
+        sys.exit(1)
+    print(f"✅ Wersja wczytana: {wersja}\n")
 
     nazwa_zip = f"Rezyser_Audio_v{wersja}_Portable.zip"
 
@@ -241,8 +235,17 @@ def main() -> None:
         print("Anulowano budowanie wydania.")
         sys.exit(0)
 
-    # 6. Budowanie wersji Portable (ZIP)
-    print(f"\n[1/2] Pakowanie wersji Portable: {nazwa_zip}...")
+    # 6. Regeneracja dokumentacji end-userowej (docs/<id>.<kod>.txt)
+    # Wywołujemy generator in-proc (ten sam proces Pythona, bez subprocess),
+    # bo moduł ma własny UTF-8 fix i nie potrzebuje osobnej sesji. Dzięki
+    # temu masz gwarancję, że paczka ZIP zawiera świeże docs/ nawet jeśli
+    # deweloper zapomniał ręcznie uruchomić generator po edycji szablonu.
+    print("🔍 Regeneracja dokumentacji (szablony YAML → docs/*.txt)...")
+    generuj_dokumentacje.generuj()
+    print("✅ Dokumentacja zregenerowana.\n")
+
+    # 7. Budowanie wersji Portable (ZIP)
+    print(f"[1/2] Pakowanie wersji Portable: {nazwa_zip}...")
     with zipfile.ZipFile(nazwa_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(KATALOG_ZRODLOWY):
             dirs[:] = [d for d in dirs if d not in IGNOROWANE_FOLDERY]
@@ -253,7 +256,7 @@ def main() -> None:
                     zipf.write(pelna_sciezka, sciezka_w_zip)
     print("✅ Gotowe!")
 
-    # 7. Budowanie wersji Instalacyjnej (EXE)
+    # 8. Budowanie wersji Instalacyjnej (EXE)
     chce_instalator = input("\nCzy chcesz wygenerowac rowniez instalator .exe? (t/n): ").strip().lower()
 
     if chce_instalator == 't':
@@ -271,5 +274,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
