@@ -43,3 +43,8 @@ Uruchom_Rezysera.bat
 # --- USTAWIENIA EDYTORA ---
 .vscode/
 .cline/
+# Folder konfiguracyjny Claude Code (ustawienia, hooki, settings.local.json) —
+# czysto deweloperski artefakt, nigdy nie ląduje w paczce produkcyjnej.
+# Wykluczany analogicznie w build_release.py::IGNOROWANE_FOLDERY oraz w
+# installer.iss::Excludes — trzymamy spójność wszystkich trzech miejsc.
+/.claude/

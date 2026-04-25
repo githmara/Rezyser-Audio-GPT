@@ -1,0 +1,35 @@
+# =============================================================================
+#  PODSTAWY JĘZYKA ROSYJSKIEGO
+# =============================================================================
+#
+#  Plik fundamentu dla `dictionaries/ru/`. Silnik Poligloty wymaga, aby każdy
+#  język miał ten plik — bez niego nowy język NIE jest w ogóle wykrywany.
+#
+#  Struktura wzorowana na `dictionaries/pl/podstawy.yaml`. Pole `polskie_znaki`
+#  pozostawiono jako pustą listę — w wersji 13.x nie planujemy transliteracji
+#  cyrylicy. Nazwa klucza `polskie_znaki` jest historyczna; manager reguł
+#  oczekuje jej obecności, więc nie zmieniamy jej.
+# =============================================================================
+
+id: podstawy
+jezyk: ru
+etykieta: "Русский – фонетические основы"
+opis: |
+  Bazowe reguły dla języka rosyjskiego:
+    1. Brak transliteracji znaków cyrylicy (`polskie_znaki: []`) –
+       rosyjski operuje wyłącznie w alfabecie cyrylickim, nie wymaga
+       konwersji do łaciny.
+    2. Alfabet rosyjski (33 wielkie litery cyrylicy) – używany przez
+       szyfr Cezara.
+
+# -----------------------------------------------------------------------------
+# Brak diakrytyków do transliteracji. Pusta lista zachowuje kontrakt API
+# z managerem reguł.
+# -----------------------------------------------------------------------------
+polskie_znaki: []
+
+# -----------------------------------------------------------------------------
+# Alfabet rosyjski – 33 wielkie litery cyrylicy (z Ё), bez znaków białych.
+# Używany przez szyfr Cezara.
+# -----------------------------------------------------------------------------
+alfabet: "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"

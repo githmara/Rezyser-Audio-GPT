@@ -1,0 +1,787 @@
+# =============================================================================
+# dictionaries/is/gui/ui.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_ui.py
+# ze źródła dictionaries/pl/gui/ui.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany
+# wprowadzaj w pliku źródłowym PL i uruchom ponownie skrypt.
+#
+# Tłumaczone są WYŁĄCZNIE wartości; klucze, struktura, komentarze
+# sekcyjne i style block-scalar (`|-`, `|`) są zachowane przez
+# round-trip ruamel.yaml. Placeholdery {nazwa} i skróty \tCtrl+...
+# zostały zamrożone tokenami ⟦P{i}⟧/⟦S{j}⟧ na czas tłumaczenia,
+# odtworzone 1:1 po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# APP – tytuł i parametry globalne
+# -----------------------------------------------------------------------------
+app:
+  nazwa: "Hljóðstjóri GPT"
+  wersja: "13.1 – Útgáfuútgáfa"
+  title_home: "{nazwa_aplikacji}  |  {wersja}"
+  title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
+  banner: "🎬  {nazwa_aplikacji}"
+  obszar_roboczy_name: "Vinnusvæði"
+  menubar_name: "Aðalvalmynd"
+
+# -----------------------------------------------------------------------------
+# COMMON – elementy wielokrotnego użytku (dialogi, przyciski standardowe)
+# -----------------------------------------------------------------------------
+common:
+  btn_zamknij: "Loka"
+  btn_anuluj: "Hætta við"
+  btn_skopiuj_schowek: "📋  Afrita í klippiborð"
+  komunikat_skopiowano: "Afritað"
+  komunikat_schowek_nieudany_tytul: "Klippiborð ekki tiltækt"
+  komunikat_schowek_nieudany_tresc: "Ekki tókst að opna kerfisklippiborð.\nAfritaðu textann handvirkt: Ctrl+A, Ctrl+C í reitinn hér að ofan."
+  blad_tytul: "Villa"
+  blad_odczytu_tytul: "Lestrarmistök"
+  blad_zapisu_tytul: "Skrifmistök"
+  brak_pliku_tytul: "Engin skrá"
+  plik_nie_istnieje_tytul: "Skráin er ekki til"
+  sukces_tytul: "Árangur"
+  informacja_tytul: "Upplýsingar"
+
+# -----------------------------------------------------------------------------
+# MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
+# -----------------------------------------------------------------------------
+main:
+  menu:
+    narzedzia: "&Verkfæri"
+    plik: "&Skrá"
+    strona_glowna: "Heima&síða\tCtrl+0"
+    rezyser: "&Leikstjóri\tCtrl+1"
+    poliglota: "&Tungumálamaður\tCtrl+2"
+    konwerter: "&Breytingartæki\tCtrl+3"
+    manager: "&Reglustjóri\tCtrl+4"
+    zakoncz: "Ljúka &við\tAlt+F4"
+  menu_status:
+    strona_glowna: "Fara aftur á upphafsskjá með verkfæralýsingu og System Check"
+    rezyser: "Opnar Leikstjórnarstillingu – skrifa handrit og prósa með AI"
+    poliglota: "Opnar Tungumálamannsstillingu – framburður og textaþýðingar"
+    konwerter: "Opnar Breytingartæki – búa til Word skrár"
+    manager: "Opnar Reglustjóra – skoða YAML skrár í dictionaries/ og búa til nýja framburði / stillingar / dulmál"
+    zakoncz: "Loka forriti"
+  btn:
+    rezyser: "🎬  &Leikstjóri"
+    poliglota: "🌍  &Tungumálamaður"
+    konwerter: "📄  &Breytingartæki"
+    manager: "📚  &Reglustjóri"
+  tooltip:
+    rezyser: "Leikstjórnarstilling (Ctrl+1): Skrifa handrit og prósa með AI"
+    poliglota: "Tungumálamannsstilling (Ctrl+2): Framburður og textaþýðingar"
+    konwerter: "Breytingartækisstilling (Ctrl+3): Búa til Word skrár með fyrirsögnum"
+    manager: "Reglustjórastilling (Ctrl+4): Skoða YAML skrár í dictionaries/, búa til nýja framburði, dulmál og stillingar (sniðmát eða ábending fyrir AI)"
+  nazwy_narzedzi:
+    dom: "Heim"
+    rezyser: "Leikstjóri"
+    poliglota: "Tungumálamaður"
+    konwerter: "Breytingartæki"
+    manager: "Reglustjóri"
+
+# -----------------------------------------------------------------------------
+# HOME – panel startowy (HomePanel w main.py)
+# -----------------------------------------------------------------------------
+home:
+  panel_name: "Upphafsskjár – Heimasíða"
+  welcome_text: |-
+    Þetta er samþætt upptökustúdíó þitt.
+    Veldu verkfæri úr hnappastikunni eða úr Verkfæramenni:
+
+      •  Leikstjóri       –  Skrifa handrit og prósa með AI; stjórna Księga Świata á dýnamískan hátt.
+      •  Tungumálamaður  –  Setja á hörð framburð fyrir staðbundna talgervla (NVDA/Vocalizer) og þýða texta.
+      •  Breytingartæki  –  Fljótt búa til faglegar Word skrár með fyrirsögnum á stigi 1.
+      •  Reglustjóri     –  Skoða og búa til orðabókarreglur án þess að fara handvirkt í YAML skrár.
+  heading_system_check: "Kerfisathugun"
+  checking: "Athugar stillingar…"
+  # Błędy walidacji golden_key.env
+  err_brak_pliku: |-
+    🚨 Engin umhverfisstillingaskrá!
+
+    Fyrsta gangsetning forrits greind. Einingar eru læstar af öryggisástæðum.
+    Til að opna öll verkfæri, smelltu á hnappinn hér að neðan — forritið mun sjálfkrafa búa til skrána golden_key.env og opna hana í sjálfgefnum textaritli.
+  err_odczyt: "🚨 Ekki tókst að lesa skrána golden_key.env:\n{tresc_bledu}"
+  err_struktura: |-
+    🚨 Skjalauppbyggingarvilla!
+    Vantar nauðsynlegt breytu OPENAI_API_KEY=.
+    Þú hefur líklega eytt jafnaðarmerki eða breytunafni.
+    Eyða skránni, búa hana til aftur og líma lykilinn varlega.
+  err_tekst_zastepczy: |-
+    ⚠️ Lykill ekki sleginn inn!
+    Í skránni golden_key.env er enn staðgengilstexti.
+    Opnaðu skrána í textaritli, fjarlægðu staðgengilstextann og límdu inn raunverulegan API lykil þinn.
+  err_cudzyslowy: |-
+    🚨 Óþarfa gæsalappir um lykilinn!
+    API lykillinn var límdur í gæsalöppum (t.d. "sk-…").
+    Opnaðu skrána í textaritli og fjarlægðu gæsalappirnar —
+    lykilinn verður að vera skrifaður beint eftir '=', án nokkurra auka tákna.
+  err_niedozwolone_znaki: |-
+    🚨 Óleyfileg tákn um lykilinn!
+    Bil eða annað ósýnilegt tákn fannst fyrir eða eftir API lykilinn.
+    Opnaðu skrána í textaritli og vertu viss um að gildið byrji
+    strax eftir '=', án nokkurra bila.
+  err_format: |-
+    🚨 Grunsamlegt lykilsnið!
+    Réttur OpenAI lykill byrjar alltaf á sk- (t.d. sk-proj-…).
+    Gakktu úr skugga um að þú hafir afritað réttan streng og að engin bil séu fyrir framan hann.
+  err_zbyt_krotki: |-
+    ⚠️ Lykillinn virðist of stuttur ({liczba_znakow} tákn fundust, búist var við að minnsta kosti {minimum_znakow}).
+    Þú hefur líklega aðeins afritað hluta lykilsins.
+
+    Ef þú hefur þegar lokað glugganum með lykilnum á platform.openai.com,
+    þarftu að fara aftur á reikninginn, nota 'Revoke secret key' valkostinn fyrir þennan
+    skerta lykil og búa til nýjan. Mundu að afrita lykilinn í heild sinni næst áður en þú smellir á 'Done'.
+  ok_klucz_wykryty: |-
+    ✅ API lykill (golden_key.env) fannst og er rétt sniðinn.
+    Allar einingar eru tilbúnar til notkunar.
+  # Przyciski akcji panelu startowego
+  btn_generate: "Búa til skrána golden_key.env og opna textaritil"
+  btn_open: "📝 Opna skrána golden_key.env í textaritli"
+  blad_tworzenia_env_tytul: "Villa"
+  blad_tworzenia_env_tresc: "Ekki tókst að búa til skrána golden_key.env:\n{tresc_bledu}"
+  ok_plik_wygenerowany: |-
+    ✅ Skráin {nazwa_pliku} hefur verið búin til!
+    Textaritill opnast sjálfkrafa.
+    Límdu inn API lykilinn þinn, vistaðu skrána (Ctrl+S) og keyrðu forritið aftur.
+  blad_otwarcia_pliku_tytul: "Upplýsingar"
+  blad_otwarcia_pliku_tresc: "Ekki tókst að opna skrána sjálfkrafa.\nOpnaðu hana handvirkt:\n{sciezka_pliku}"
+  # Sekcja: Narzędzia słownikowe
+  heading_narzedzia_slownikowe: "Orðabókarverkfæri"
+  narzedzia_slownikowe_name: "Lýsing á orðabókarverkfærum"
+  tools_info: |-
+    Viltu bæta við nýjum framburði, dulmáli eða Leikstjórnarstillingu?
+    Opnaðu Reglustjóra (Ctrl+4) – þar finnur þú tré allra YAML skráa í dictionaries/ og skapalón sem býr til skapalón eða býr til ábendingu fyrir spjallmenni AI.
+
+    Eftir að hafa bætt við nýjum FRAMBURÐI, smelltu á hnappinn „Endurnýja framburði Leikstjóra úr YAML" hér að neðan – þetta gerir Leikstjórnarstillingu kleift að taka eftir nýjum framburði (Tungumálamaður greinir YAML skrár sjálfkrafa). Eftir endurnýjun skaltu keyra forritið aftur.
+  btn_open_manager_label: "📚 Opna Reglustjóra"
+  btn_open_manager_name: "Hnappur Opna Reglustjóra"
+  btn_open_manager_tooltip: "Fara í Reglustjóra – skoða YAML skrár og búa til nýja framburði / stillingar / dulmál (Ctrl+4)."
+  btn_odswiez_label: "🔄 Endurnýja framburði Leikstjóra úr YAML"
+  btn_odswiez_name: "Hnappur Endurnýja framburði Leikstjóra úr YAML"
+  btn_odswiez_tooltip: "Skannar dictionaries/*/framburðir/ og endurgerir framburðarskálar í core_poliglota.py og core_rezyser.py. Eftir vel heppnaða endurnýjun þarf að keyra forritið aftur."
+  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
+  raport_niespodziewany_tytul: "Villa við endurnýjun framburða"
+  raport_niespodziewany_tresc: "Óvænt villa kom upp:\n{tresc_bledu}"
+  raport_tytul_blad: "Endurnýja framburði Leikstjóra – VILLA"
+  raport_header_blad: "⛔ Villa kom upp í framleiðanda – sjá log hér að neðan."
+  raport_tytul_sukces: "Endurnýja framburði Leikstjóra – Árangur"
+  raport_header_sukces: |-
+    ✅ Skrár fyrir {liczba_akcentow} framburði hafa verið breyttar.
+    Til að nýir framburðir birtist í Leikstjórnarstillingu, keyrðu forritið aftur.
+  raport_tytul_bez_zmian: "Endurnýja framburði Leikstjóra – Engar breytingar"
+  raport_header_bez_zmian: "ℹ️ Engar breytingar. {liczba_akcentow} framburðir fundust – skálar eru nú þegar uppfærðar."
+  raport_lbl_log: "Heill log (Ctrl+A, Ctrl+C afritar í klippiborð):"
+  raport_log_name: "Log af framburðarframleiðanda Leikstjóra"
+
+# -----------------------------------------------------------------------------
+# REZYSER – panel modułu Reżyser (gui_rezyser.py)
+# -----------------------------------------------------------------------------
+rezyser:
+  panel_name: "Hljóðstjórnarspjald GPT"
+  heading: "🎬  Hljóðstjóri GPT – Blönduð Skapandi Stúdíó"
+  description_name: "Lýsing á Hljóðstjórnarstillingu GPT"
+  tool_description: |-
+    Hljóðstjóri GPT er blandað skapandi stúdíó.
+
+    Hugstormunarstilling  – skipuleggja söguþráð, búa til 3 valkosti (ENGIN skráarskráning).
+    Handritsstilling       – skrifa hrátt hljóðhandrit með merkjum [SFX] og [Persóna: tilfinning] (SKRÁARSKRÁNING).
+    Hljóðbókarstilling     – búa til þétt, klassískt bókmenntaprósa (SKRÁARSKRÁNING).
+
+    Verkefni eru vistuð í undirmöppu 'skrypty/' við hlið forritsins.
+    Sláðu inn nafn verkefnis án viðbótar (t.d. kroniki_arkonii).
+    Til að breyta verkefni þarftu fyrst að hreinsa núverandi minni.
+  prompt_architekta_content: |-
+    Þú ert framúrskarandi heimabyggingameistari (Worldbuilder) og bókmenntaráðgjafi. Ég hef lauslega hugmynd um söguþráð: [SETTU HUGMYND ÞÍNA HÉR]. Verkefni þitt er að þróa þetta í faglega „Księga Świata".
+    Aðlagaðu tón og reglur að hugmynd minni. Forðastu ódýrar, ævintýralegar styttingar og klisjur AI.
+
+    FORMATREGLUR (MIKILVÆGAR):
+    Þú verður að skila svari í tveimur aðskildum hlutum:
+
+    HLUTI 1: KSIĘGA ŚWIATA
+    Þennan hluta verður þú að loka í EINUM Markdown kóðablokk (notaðu merkin ```markdown í upphafi og ``` í lokin). Innan kóðablokkarins skaltu fylgja þessum reglum:
+    1. Byrjaðu á opnu bókar emoji og vinnutitli, t.d. 📖 Księga Świata: [Titill].
+    2. Notaðu einn hashtag (#) fyrir aðalhluta (t.d. # Heimreglur, # Persónur).
+    3. Notaðu tvöfalt hashtag (##) fyrir undirhluta.
+    4. Notaðu bandstrik (-) til að búa til læsilegar lista.
+    5. Notaðu tvöfaldar stjörnur (**texti**) til að feitletra algjörlega óhagganlegar reglur (t.d. **Hetjan LÝGUR ALDREI**).
+    6. Lýstu sálfræði persóna, stærstu göllum þeirra og hvötum. Fyrir erlendar persónur, bættu við upplýsingum um framburð beint við merkið, t.d. `[Speaker 1: Nafn] - seplar og hefur franskan framburð`. **Tæknileg ábending:** Notkun lykilorðsins `framburður` er algjörlega nauðsynleg, þar sem ytri skrift forritsins greinir og setur sjálfkrafa réttar hljóðreglur á samtöl viðkomandi persónu.
+
+    HLUTI 2: TILLAGA UM STÖÐU
+    Þennan hluta skaltu setja UTAN kóðablokkar, sem venjulegan texta fyrir neðan. Ráðleggðu mér hvaða stilling forritsins míns verður best til að framkvæma þessa hugmynd: 🎬 Hrá Handritsstilling (hljóðleikir, SFX, framburður), eða 📖 Hefðbundin Hljóðbókarstilling (klassísk bókmenntaprósa).
+
+  # Pasek pliku
+  lbl_nazwa_pliku: "Skráarnafn verkefnis (án viðbótar, t.d. kroniki_arkonii):"
+  txt_nazwa_pliku_name: "Verkefnisskráarnafnareitur"
+  txt_nazwa_pliku_hint: "t.d. kroniki_arkonii"
+  txt_nazwa_pliku_tooltip: |-
+    Sláðu inn nafn verkefnis án viðbótar.
+    Söguskrá vistuð sem: skrypty/<nafn>.txt
+    Reitur læstur þegar minni er upptekið.
+  btn_wczytaj_label: "Hlaða sögu"
+  btn_wczytaj_tooltip: |-
+    Hleður inn núverandi verkefnisskrá (skrypty/<nafn>.txt) í minni.
+    Virkur aðeins þegar minni er tómt og nafn er gefið.
+  btn_wyczysc_biezaca_label: "Hreinsa núverandi (skilja eftir Samantekt)"
+  btn_wyczysc_biezaca_tooltip: |-
+    Hreinsar aðeins núverandi sögu úr minni.
+    Samantekt (Langtímaminni) og Księga Świata eru varðveitt.
+    Notaðu til að halda áfram með langa bók eftir að samantekt hefur verið búin til.
+  btn_hard_reset_label: "Loka Verkefni (Harður Endurstilling)"
+  btn_hard_reset_tooltip: |-
+    ALGJÖR hreinsun verkefnis: saga, samantekt, Księga Świata.
+    Núllstillir alla teljara og opnar skráarnafnareit.
+    Notaðu við breytingu á verkefni eða alveg nýja sögu.
+  # Sidebar
+  sidebar_heading: "📖 Verkefnis Hliðarstika"
+  lbl_ksiega_swiata: "Księga Świata – Reglur og Persónur:"
+  txt_ksiega_name: "Księga Świata reitur – reglur og persónur"
+  txt_ksiega_hint: |-
+    Sláðu inn reglur heimsins, lýsingu á persónum og framburði þeirra…
+    T.d. [Geralt: framburður íslenskur]
+    Innihald er bætt við hverja AI fyrirspurn.
+  txt_ksiega_tooltip: |-
+    Samhengi stöðugt bætt við AI: reglur heimsins, persónur, framburðir.
+    Skráning á disk krefst skráarnafns verkefnis.
+  btn_zapisz_ksiege_label: "💾 Vista Księga varanlega"
+  btn_zapisz_ksiege_tooltip: |-
+    Vista Księga Świata í skrá: skrypty/<nafn>.md
+    Krefst skráarnafns verkefnis.
+  btn_prompt_architekta_label: "📖 Ábending Arkitekts fyrir AI…"
+  btn_prompt_architekta_name: "Hnappur Sýna Ábendingu Arkitekts fyrir ytri spjallmenni"
+  btn_prompt_architekta_tooltip: |-
+    Opnar glugga með tilbúinni ábendingu fyrir ytri spjallmenni (ChatGPT, Claude).
+    Límdu inn hugmynd þína um söguþráð, og AI mun búa til faglega Księga Świata sniðna í Markdown – til að líma í reitinn „Księga Świata" hér að ofan.
+  lbl_pamiec_dlugotrwala: "🧠 Langtímaminni (Samantekt):"
+  txt_pamiec_name: "Langtímaminni reitur – samantekt atburða"
+  txt_pamiec_hint: |-
+    Hér mun AI vista samantekt þegar minni er fullt.
+    Þú getur líka breytt því handvirkt.
+  txt_pamiec_tooltip: |-
+    Samantekt fyrri atburða bætt við hverja AI fyrirspurn.
+    Leyfir að halda áfram með söguna án takmarkana á samhengi glugga líkansins.
+  btn_zapisz_pamiec_label: "💾 Vista Samantekt"
+  btn_zapisz_pamiec_tooltip: |-
+    Vista samantekt í skrá: skrypty/<nafn>_samantekt.txt
+    Eftir vistun geturðu örugglega hreinsað núverandi minni.
+  # Obszar roboczy
+  main_heading: "🎬 Vinnusvæði"
+  rb_tryb_label: "Vinnustilling:"
+  rb_tryb_name: "Velja vinnustillingu AI"
+  rb_tryb_tooltip: |-
+    Hugstormun – skipuleggja án skráarskráningar.
+    Handrit        – hrátt hljóðhandrit (vistað í skrá).
+    Hljóðbók       – hefðbundin bókmenntaprósa (vistað í skrá).
+  # Panel struktury
+  struktura_heading: "✂️ Stjórnun Uppbyggingar"
+  btn_prolog_label: "📜 Setja inn Formála"
+  btn_prolog_name: "Hnappur Setja inn Formála"
+  btn_prolog_tooltip: |-
+    Setur inn fyrirsögn 'Formáli' í upphafi sögunnar.
+    Mögulegt aðeins þegar saga er tóm. Krefst verkefnisnafns.
+  btn_epilog_label: "🏁 Setja inn Eftirorð"
+  btn_epilog_name: "Hnappur Setja inn Eftirorð"
+  btn_epilog_tooltip: |-
+    Setur inn fyrirsögn 'Eftirorð' í lok sögunnar.
+    Læsir frekari skrifum eftir Eftirorð.
+  btn_rozdzial_label: "✂️ Setja inn skurð (Kafli {numer_rozdzialu})"
+  btn_rozdzial_name: "Hnappur Setja inn Kafla"
+  btn_rozdzial_tooltip: |-
+    Setur inn fyrirsögn næsta kafla í söguna og skrána.
+    Aðeins í boði í Hljóðbókarstillingu.
+  btn_akt_label: "🎭 Setja inn Þátt {numer_aktu}"
+  btn_akt_name: "Hnappur Setja inn Þátt"
+  btn_akt_tooltip: |-
+    Setur inn fyrirsögn 'Þáttur N' og sjálfkrafa 'Atriði 1' í söguna og skrána.
+    Aðeins í boði í Handritsstillingu.
+  btn_scena_label: "🎬 Setja inn Atriði {numer_sceny}"
+  btn_scena_name: "Hnappur Setja inn Atriði"
+  btn_scena_tooltip: |-
+    Setur inn fyrirsögn næsta atriðis í söguna og skrána.
+    Aðeins í boði í Handritsstillingu.
+  # Podgląd historii
+  lbl_podglad_historii: "Núverandi saga í minni (aðeins til lesturs – sigla með örvum):"
+  txt_podglad_name: "Forskoðun á allri sögu í minni – aðeins til lesturs"
+  txt_podglad_hint: "(minni er tómt – hlaða inn verkefni eða byrja nýtt)"
+  # Pole instrukcji
+  lbl_instrukcje: |-
+    Leiðbeiningar fyrir næsta brot (sláðu inn 'samantekt' til að þvinga vistun í Langtímaminni):
+  txt_instrukcje_name: "Leiðbeiningareitur fyrir AI – fyrri notendainntak"
+  txt_instrukcje_hint: |-
+    Gefðu leiðbeiningar fyrir næsta brot sögunnar…
+    (t.d. 'Lýstu fundi Geralts við nornina í skóginum. Mikil spenna.')
+  btn_wyslij_label: "Senda til AI"
+  btn_wyslij_tooltip: |-
+    Sendir leiðbeiningar til gpt-4o líkansins og bætir svari við söguna.
+    Krefst virks API lykils og fylltrar Księga Świata.
+  # Postprodukcja
+  postprod_heading: "🎛️ Eftirvinnsla"
+  postprod_info: |-
+    Einingin fer yfir kafla úr vistaðri skrá og gefur þeim stutt bókmenntatitil (AI greining).
+  btn_tytuly_ai_label: "📜 Gefa Kafla Titla (AI)"
+  btn_tytuly_ai_name: "Hnappur Gefa Kafla Titla AI"
+  btn_tytuly_ai_tooltip: |-
+    Fer yfir kafla úr vistaðri skrá og gefur þeim titla (gpt-4o-mini).
+    Krefst vistaðrar verkefnisskrár og virks API lykils.
+  # Pamięć modelu
+  lbl_pamiec_modelu: "🧠 Minni Líkans (Staða Samhengisglugga):"
+  lbl_pamiec_modelu_start: "🟢 Minni hreint. Vél tilbúin fyrir nýja sögu."
+  pamiec_modelu_status_name: "Staða minnis AI líkans"
+  # Komunikaty - wczytywanie
+  brak_nazwy_tytul: "Nafn vantar"
+  brak_nazwy_tresc: "Sláðu inn nafn verkefnisskrár áður en þú hleður inn."
+  plik_nie_istnieje_tytul: "Skrá er ekki til"
+  plik_nie_istnieje_tresc: |-
+    Skrá fannst ekki:
+    {tresc_bledu}
+
+    Ef þú byrjar nýja sögu — byrjaðu bara að skrifa.
+    Skráin verður búin til sjálfkrafa við fyrstu sendingu til AI.
+  blad_odczytu_tresc: "Villa við að lesa skrá:\n{tresc_bledu}"
+  status_wczytano_tytul: "Verkefni hlaðið inn"
+  status_wczytano_ksiega: " Einnig var bók hlaðið inn: skrypty/{nazwa_projektu}.md."
+  status_wczytano_streszczenie: |-
+    Yfirlit verkefnis '{nazwa_projektu}' hlaðið inn.{lore_info}
+    Núverandi minni er tómt (Óendanlegt Minni stilling).
+    Þú getur haldið áfram með söguna — AI vinnur með yfirlitið.
+  status_wczytano_historia: "Saga '{nazwa_projektu}' hlaðið inn ({liczba_znakow} stafir).{lore_info}"
+  # Komunikaty - czyszczenie
+  pamiec_wyczyszczona_tytul: "Minni hreinsað"
+  pamiec_wyczyszczona_tresc: "Núverandi minni hreinsað."
+  pamiec_wyczyszczona_streszczenie_zostaje: "\nYfirlit í Langtímaminni hefur verið varðveitt."
+  hard_reset_pytanie_tytul: "Loka Verkefni – Harður Endurstilling"
+  hard_reset_pytanie: |-
+    Ertu viss um að þú viljir loka verkefninu?
+
+    Eftirfarandi verður hreinsað:
+      • núverandi saga
+      • yfirlit (Langtímaminni)
+      • Heimabók
+      • allir teljarar (kaflar, þættir, senur)
+
+    Skrár á disknum verða EKKI eytt.
+  hard_reset_ok_tytul: "Verkefni lokað"
+  hard_reset_ok_tresc: "Verkefni lokað. Öll gögn í minni hafa verið hreinsuð."
+  # Zapis Księgi
+  brak_nazwy_ksiega_tytul: "Skránafn vantar"
+  brak_nazwy_ksiega_tresc: "Sláðu fyrst inn nafn verkefnisskrár í nafnreitinn."
+  ksiega_pusta_tytul: "Tóm Heimabók"
+  ksiega_pusta_tresc: "Heimabókin er tóm. Ekkert til að vista."
+  ksiega_zapisana_tytul: "Bók vistuð"
+  ksiega_zapisana_tresc: "Heimabók vistuð: skrypty/{nazwa_projektu}.md"
+  blad_zapisu_ksiegi: "Villa við vistun Heimabókar:\n{tresc_bledu}"
+  # Prompt Architekta dialog
+  prompt_arch_dlg_tytul: "Prompt Arkitekts – límdu í ytri spjallforrit"
+  prompt_arch_instrukcja: |-
+    Þetta tilbúna prompt límdu í ytri spjallforrit (t.d. ókeypis ChatGPT eða Claude) og skiptu út textanum „[TUTAJ WPISZ SWÓJ POMYSŁ]" með eigin hugmynd að sögu.
+
+    AI mun skila þér tilbúinni Heimabók í Markdown kóða blokk — afritaðu innihald hennar (án umlykjandi merkja ```) og límdu í reitinn „Heimabók" hér að ofan, og smelltu síðan á „Vista Bók varanlega".
+  prompt_arch_instrukcja_name: "Leiðbeiningar um notkun Prompt Arkitekts"
+  prompt_arch_lbl: "Prompt til að afrita (Ctrl+A, Ctrl+C):"
+  prompt_arch_tresc_name: "Fullur texti Prompt Arkitekts"
+  prompt_arch_btn_kopiuj: "📋  Afritaðu prompt í klippiborð"
+  prompt_arch_btn_kopiuj_name: "Hnappur Afritaðu Prompt Arkitekts í klippiborð"
+  prompt_arch_skopiowano_tytul: "Afritað"
+  prompt_arch_skopiowano_tresc: |-
+    Prompt Arkitekts hefur verið afritað í klippiborð.
+    Límdu það (Ctrl+V) í ChatGPT eða Claude og skiptu út [TUTAJ WPISZ SWÓJ POMYSŁ] með eigin hugmynd að sögu.
+  prompt_arch_schowek_nieudany: |-
+    Ekki tókst að opna kerfisklippiborð.
+    Afritaðu prompt handvirkt: smelltu í reitinn hér að ofan, veldu allt (Ctrl+A) og afritaðu (Ctrl+C).
+  # Zapis Streszczenia
+  pamiec_pusta_tytul: "Tómt yfirlit"
+  pamiec_pusta_tresc: "Langtímaminni er tómt. Ekkert til að vista."
+  streszczenie_zapisane_tytul: "Yfirlit vistað"
+  streszczenie_zapisane_tresc: |-
+    Yfirlit vistað: skrypty/{nazwa_projektu}_yfirlit.txt
+
+    Þú getur nú örugglega hreinsað núverandi minni.
+  blad_zapisu_streszczenia: "Villa við vistun yfirlits:\n{tresc_bledu}"
+  # Wysyłanie do AI
+  brak_api_tytul: "API vantar"
+  brak_api_tresc: |-
+    Engin tenging við OpenAI.
+    Athugaðu skrána golden_key.env og ræstu forritið aftur.
+  puste_pole_tytul: "Tómt reit"
+  puste_pole_tresc: "Sláðu inn leiðbeiningar fyrir AI áður en þú sendir."
+  brak_przepisow_tytul: "Engar uppskriftir"
+  brak_przepisow_tresc: |-
+    Ekki tókst að hlaða neinn vinnustilling úr YAML.
+    Ræstu odswiez_rezysera.py eða athugaðu dictionaries/pl/rezyser/.
+  brak_nazwy_wyslanie_tresc: |-
+    Sláðu inn nafn verkefnisskrár áður en þú býrð til texta til að vista.
+    (Stilling '{tytul_trybu}' krefst skráarnafns.)
+  brak_ksiegi_tytul: "Heimabók vantar"
+  brak_ksiegi_tresc: |-
+    Fylltu út Heimabók áður en þú sendir fyrirspurn til AI.
+    Reglur heimsins og persónur eru nauðsynlegar fyrir líkanið.
+  blad_trybu_tytul: "Stillingarvilla"
+  blad_trybu_tresc: |-
+    Þú ert að reyna að búa til yfirlit í skráarvistunarstillingu!
+    Þetta gæti skemmt söguna þína.
+
+    Skiptu yfir í 'Brainstorming' stillingu og reyndu aftur.
+  err_rate_limit: "Engin OpenAI inneign! Hladdu reikninginn og reyndu aftur."
+  err_odrzucenie: |-
+    AI hafnaði promptinu (tag [ODRZUCENIE_AI] greint).
+    Textinn verður EKKI vistaður í söguskrá.
+    Þú getur breytt leiðbeiningunni og reynt aftur.
+  blad_ai_tytul: "AI villa"
+  blad_ai_szczegoly_tytul: "AI villa – Tæknilegar upplýsingar"
+  blad_ai_naglowek: "Óvænt villa kom upp við vinnslu."
+  blad_ai_lbl_tresc: "Villutexti (veldu Ctrl+A, afritaðu Ctrl+C – til að tilkynna):"
+  blad_ai_tresc_name: "Villutexti til að afrita"
+  # Wstawianie struktury (potwierdzenia)
+  struktura_brak_nazwy_tytul: "Nafn vantar"
+  struktura_brak_nazwy_tresc: "Sláðu inn nafn verkefnisskrár áður en þú setur inn uppbyggingu."
+  blad_wstawiania_prolog: "Villa við innsetningu Prologs:\n{tresc_bledu}"
+  blad_wstawiania_epilog: "Villa við innsetningu Epilogs:\n{tresc_bledu}"
+  blad_wstawiania_rozdzialu: "Villa við innsetningu kafla:\n{tresc_bledu}"
+  blad_wstawiania_aktu: "Villa við innsetningu þáttar:\n{tresc_bledu}"
+  blad_wstawiania_sceny: "Villa við innsetningu senu:\n{tresc_bledu}"
+  prolog_tytul: "Prolog sett inn"
+  prolog_tresc: "Fyrirsögn sett inn: Prolog.\n\nByrjaðu að skrifa efni prologsins."
+  epilog_tytul: "Epilog sett inn"
+  epilog_tresc: |-
+    Fyrirsögn sett inn: Epilog.
+
+    Frekar efnisgerð eftir Epilog er læst.
+  rozdzial_tytul: "Kaflaskipting sett inn"
+  rozdzial_tresc: "Fyrirsögn sett inn: {naglowek}."
+  akt_tytul: "Þáttur sett inn"
+  akt_tresc: "Sett inn: {akt_naglowek} og {scena_naglowek}."
+  scena_tytul: "Sena sett inn"
+  scena_tresc: "Fyrirsögn sett inn: {naglowek}."
+  # Odpowiedź AI – Burza Mózgów
+  burza_dlg_tytul: "Svar AI – Brainstorming"
+  burza_dlg_lbl: "Afritaðu valinn texta (Ctrl+A, Ctrl+C) eða lokaðu:"
+  burza_dlg_name: "Svar AI – Brainstorming"
+  # Postprodukcja
+  tytuly_brak_nazwy_tytul: "Verkefnisnafn vantar"
+  tytuly_brak_nazwy_tresc: "Sláðu inn nafn verkefnis áður en þú gefur titla."
+  tytuly_zajety_tytul: "Upptekið"
+  tytuly_zajety_tresc: "Önnur fyrirspurn til AI er þegar í gangi. Bíddu eftir að henni ljúki."
+  tytuly_brak_pliku_tytul: "Verkefnisskrá vantar"
+  tytuly_brak_pliku_tresc: |-
+    Skrá fannst ekki:
+    {sciezka_pliku}
+
+    Búðu fyrst til og vistaðu efni verkefnisins.
+  tytuly_prep: "Undirbúningur…"
+  tytuly_brak_przepisu_tresc: |-
+    Uppskrift 'titlar' fannst ekki í YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
+    Án hennar er eftirvinnsla titla kafla ekki í boði.
+  tytuly_blad_naglowek: "Villa kom upp við að búa til titla kafla."
+  tytuly_blad_nieznany: "Óþekkt villa við titlun."
+  tytuly_czesciowe_naglowek: "⚠️ Hluta niðurstöður (framleiðsla stöðvuð vegna villu):\n\n{wyniki}"
+  tytuly_dlg_tytul: "Fyrirhugaðir Kaflatitlar (AI)"
+  tytuly_dlg_lbl: "Afritaðu titla (Ctrl+A, Ctrl+C) eða skráðu þá í Heimabók:"
+  tytuly_dlg_name: "Listi yfir fyrirhugaða kaflatitla"
+  tytuly_gotowe: "Tilbúið! Titlar búnir til."
+  blad_zapisu_do_pliku: "Villa við vistun í skrá:\n{tresc_bledu}"
+
+# -----------------------------------------------------------------------------
+# POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
+# -----------------------------------------------------------------------------
+poliglota:
+  panel_name: "AI Fjöltyngispanel"
+  heading: "🌍  AI Fjöltyngur – Blönduð Þýðingastofa"
+  description_name: "Lýsing á Fjöltyngismódúl"
+  tool_description: |-
+    Fjöltyngismódúllinn er notaður til að leggja áherslu á hljóðfræðilega áherslu fyrir staðbundna talgervla (NVDA/Vocalizer/eSpeak), til textaleikja í Dulkóðunarstillingu og til að þýða texta með AI (OpenAI gpt-4o).
+
+    Styður skrár: .txt, .html, .htm, .docx.
+    Niðurstaðan er vistuð í sama skráarsafni og upprunaskráin.
+  # Sekcja 1: wczytywanie pliku
+  section1_heading: "1. Hleðsla upprunaskrár"
+  lbl_plik: "Nafn eða full slóð skráar (.txt, .html, .htm, .docx):"
+  txt_plik_name: "Reitur fyrir upprunaskrárslóð"
+  txt_plik_hint: "Sláðu inn skráarslóð eða veldu með hnappinum Skoða…"
+  btn_przegladaj: "Skoða…"
+  btn_przegladaj_tooltip: "Opnar kerfisglugga til að velja skrá"
+  btn_wczytaj: "Hlaða skrá í minni"
+  btn_wczytaj_tooltip: "Hleður innihaldi tilgreindrar skráar í vinnsluminni"
+  btn_wyczysc: "Hreinsa minni"
+  btn_wyczysc_tooltip: "Fjarlægir hlaðið efni, leyfir að velja aðra skrá"
+  lbl_plik_status_name: "Staða hlaðinnar skráar"
+  plik_status_brak: "Engin skrá hlaðin."
+  plik_status_wczytany: "Skrá hlaðin: {nazwa_pliku}  ({liczba_znakow} stafir).\nÞú getur nú keyrt vinnslu."
+  plik_status_wyczyszczono: "Minni hreinsað. Þú getur hlaðið nýja skrá."
+  # Plik dialog
+  file_dlg_title: "Veldu upprunaskrá"
+  file_dlg_wildcard: |-
+    Stuðningsskrár (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Textaskrár (*.txt)|*.txt|HTML skrár (*.html;*.htm)|*.html;*.htm|Word skjöl (*.docx)|*.docx|Allar skrár (*.*)|*.*
+  # Komunikaty wczytywania
+  brak_pliku_tresc: "Sláðu inn nafn eða slóð skráar áður en þú hleður inn."
+  plik_nie_istnieje_tresc: "Skrá fannst ekki:\n{sciezka_pliku}"
+  blad_odczytu_tresc: "Villa við að lesa skrá:\n{tresc_bledu}"
+  plik_wczytany_tytul: "Skrá hlaðin"
+  plik_wczytany_tresc: |-
+    Skrá hlaðin: {nazwa_pliku}
+    ({liczba_znakow} stafir).
+
+    Þú getur nú stillt vinnslustillingu og keyrt vinnslu.
+  # Sekcja 2: konfiguracja trybu pracy
+  section2_heading: "2. Vinnslustilling"
+  rb_ai: "AI Þýðandi (OpenAI gpt-4o – krefst API lykils, kostar inneign)"
+  rb_ai_disabled: "AI Þýðandi (óvirkur – vantar rétta skrá golden_key.env)"
+  rb_ai_name: "AI Þýðandi Stilling"
+  rb_rezyser: "Režisér Stilling (ókeypis hljóðfræðireglur úr YAML)"
+  rb_rezyser_name: "Režisér Stilling ókeypis"
+  rb_szyfrant: "Dulkóðunarstilling (textaleikir, handahófskennd hik)"
+  rb_szyfrant_name: "Dulkóðunarstilling og textaleikir"
+  # Panel AI
+  lbl_jezyk_docelowy: "Markmálsþýðing (t.d. Finnska, Íslenska, Enska, Arabíska):"
+  txt_jezyk_name: "Reitur fyrir markmál"
+  txt_jezyk_hint: "Sláðu inn nafn markmáls…"
+  # Panel Reżysera
+  lbl_akcent: "Veldu áherslu eða hreinsunarstillingu:"
+  combo_akcent_name: "Listi yfir áherslur og hreinsunarstillingar"
+  combo_akcent_tooltip: "Veldu hljóðfræðilega áherslu eða hreinsunarstillingu texta fyrir skjálesara"
+  lbl_iso: "ISO tungumálakóði (2 stafir, t.d. en, fr, de):"
+  txt_iso_name: "Reitur fyrir ISO tungumálakóða"
+  txt_iso_hint: "t.d. en"
+  # Panel Szyfranta
+  lbl_szyfr: "Veldu afmyndunaralgrím:"
+  combo_szyfr_name: "Listi yfir dulkóðunaralgrím"
+  lbl_cezar: "Cæsar dulritunarskekkja (0 = handahófskennt, svið {min_przesuniecie}…{max_przesuniecie}):"
+  spin_cezar_name: "Cæsar dulritunarskekkja"
+  # Sekcja 3: Przetwarzanie
+  section3_heading: "3. Vinnsla"
+  btn_process: "Keyra Vinnslu"
+  btn_process_tooltip: "Keyrir valda vinnslu og vistar niðurstöðu við hlið upprunaskrár"
+  lbl_progress_name: "Staða vinnsluferlis"
+  # Sekcja 4: Wynik
+  section4_heading: "4. Niðurstaða (aðeins til lesturs – sigla með örvum)"
+  txt_wynik_name: "Niðurstöðureitur – tilbúinn texti"
+  txt_wynik_hint: "Hér mun birtast unnið efni…"
+  # Przetwarzanie – komunikaty
+  brak_pliku_pamieci_tytul: "Engin skrá í minni"
+  brak_pliku_pamieci_tresc: "Hlaða fyrst inn upprunaskrá (kafli 1)."
+  zajety_tytul: "Upptekinn"
+  zajety_tresc: "Vinnsla er þegar í gangi. Vinsamlegast bíddu þar til henni er lokið."
+  brak_jezyka_tytul: "Engin tungumál"
+  brak_jezyka_tresc: "Sláðu inn markmálið fyrir þýðingu áður en þú byrjar."
+  nie_wybrano_akcentu: "Enginn hreimur valinn."
+  nie_wybrano_szyfru: "Engin dulmál valin."
+  brak_iso_tytul: "Enginn ISO kóði"
+  brak_iso_tresc: "Sláðu inn réttan tveggja stafa ISO kóða fyrir tungumálið (t.d. en, fr, de)."
+  ostrzezenie_jezyk: |-
+    Athugið: Aðaltungumál sem greint er er annað en pólsku. Hljóðreglur eru aðlagaðar að pólsku – niðurstaðan gæti verið ófyrirsjáanleg.
+  blad_przetwarzania: "Vinnsluvilla:\n{tresc_bledu}"
+  cezar_losowe_tytul: "Cæsar dulmál – handahófskennt tilfærsla"
+  cezar_losowe_tresc: "Gildi tilfærslu var 0 – handahófskennt: {wylosowane_przesuniecie}."
+  blad_wyniku_tytul: "Villa"
+  blad_wyniku_tresc: "Ekki tókst að búa til niðurstöðutexta."
+  blad_zapisu_wyjscia: "Villa við skráningu niðurstöðuskrár:\n{tresc_bledu}"
+  sukces_zapis: "Skrá vistuð sem:\n{sciezka_pliku}"
+  # Tłumacz AI
+  ai_init: "Þýðing er að hefjast…"
+  ai_zakonczone_tytul: "Árangur"
+  ai_zakonczone_tresc: "Þýðingu lokið!\n\nSkrá vistuð sem:\n{sciezka_pliku}"
+  ai_blad_zapisu: "Villa við skráningu niðurstöðuskrár:\n{tresc_bledu}"
+  # Wyświetlanie błędu AI
+  blad_ai_tytul: "Villa"
+  blad_ai_szczegoly_tytul: "Villa – Tæknilegar upplýsingar"
+  blad_ai_naglowek: "Óvænt villa kom upp við vinnslu."
+  blad_ai_lbl_tresc: "Villutexti (veldu Ctrl+A, afritaðu Ctrl+C – til að tilkynna):"
+  blad_ai_tresc_name: "Villutexti til að afrita"
+
+# -----------------------------------------------------------------------------
+# KONWERTER – panel modułu Konwerter (gui_konwerter.py)
+# -----------------------------------------------------------------------------
+konwerter:
+  panel_name: "Hljóðbókaarkitekt spjaldið"
+  heading: "📄  Hljóðbókaarkitekt"
+  tool_description: |-
+    Þessi eining er notuð til að undirbúa skráararkitektúr fyrir skjálesara (siglingar með lyklum 1 og h eftir fyrirsögnum) og ElevenLabs. Breytir lykilorðum (Inngangur, Þáttur, Kafli, Formáli, Eftirmáli) í fyrirsagnir á fyrsta stigi, án þess að breyta restinni af handritinu.
+  lbl_plik: |-
+    Nafn eða fullur slóð skráar
+    (t.d. .txt, .html, .md eða .docx skjal):
+  txt_plik_name: "Slóðarsvæði fyrir skrá"
+  txt_plik_hint: "Sláðu inn slóð á skrá (texta, HTML, MD, DOCX)…"
+  btn_przegladaj: "Skoða…"
+  btn_przegladaj_tooltip: "Opnar kerfisglugga til að velja .txt eða .docx skrá"
+  btn_buduj: "Byggja arkitektúr fyrir ElevenLabs"
+  btn_buduj_tooltip: "Vinnur skrá og vistar arkitektúr_<nafn>.docx við hliðina á upprunaskránni"
+  # Metadana zapisywana do pola `author` w core_properties wynikowego .docx.
+  # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
+  # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
+  author_metadata: "Leikstjóri"
+  # Dialog wyboru pliku
+  file_dlg_title: "Veldu upprunaskrá"
+  file_dlg_wildcard: "Öll studd skjöl (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word skjöl (*.docx)|*.docx|Öll skjöl (*.*)|*.*"
+  # Komunikaty
+  brak_pliku_tytul: "Engin skrá"
+  brak_pliku_tresc: "Sláðu inn nafn eða slóð upprunaskrár."
+  plik_nie_istnieje_tytul: "Skrá er ekki til"
+  plik_nie_istnieje_tresc: "Skrá fannst ekki:\n{sciezka_pliku}"
+  blad_odczytu_tytul: "Lestrarsvilla"
+  blad_odczytu_tresc: "Villa við lestur skrár:\n{tresc_bledu}"
+  blad_zapisu_tytul: "Skráningavilla"
+  blad_zapisu_tresc: "Villa við skráningu niðurstöðuskrár:\n{tresc_bledu}"
+  sukces_tytul: "Árangur"
+  sukces_tresc: |-
+    Perfetto! Fyrirsagnir á fyrsta stigi hafa verið settar.
+
+    Skrá vistuð sem:
+    {sciezka_pliku}
+
+# -----------------------------------------------------------------------------
+# MANAGER – panel Managera Reguł (gui_manager_regul.py)
+# -----------------------------------------------------------------------------
+manager:
+  panel_name: "Reglustjóraspjald – orðabóka könnuður"
+  desc: |-
+    Reglustjóri gerir þér kleift að skoða og breyta YAML skrám í dictionaries/ möppunni án þess að fara inn í skráarkönnuð kerfisins. Veldu skrá í trénu til vinstri og notaðu síðan hnappana til hægri: opnaðu í textaritli, búðu til nýja skrá, afritaðu eða eyða.
+
+    Fyrir erfiðari verkefni (nýtt tungumál, hreimur erlends framburðar, reiknirit dulmál) mun Reglustjóri búa til prompt fyrir AI spjallmenni – bara límdu það í ChatGPT eða Claude og vistaðu svarið.
+  desc_name: "Lýsing á Reglustjóra"
+  # Drzewo
+  tree_name: "Skráatré dictionaries"
+  tree_tooltip: |-
+    Tré allra YAML skráa í dictionaries/ möppunni. Stækkaðu tungumál, síðan flokk, og veldu síðan skrá. Örvar og Enter virka venjulega fyrir NVDA.
+  tree_root: "Orðabækur (dictionaries/)"
+  tree_brak_folderu: "⚠️  Engin dictionaries/ mappa – búðu til fyrsta tungumálið með „Ný skrá reglur…\" hnappinum."
+  tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
+  tree_podstawy: "📄  grunnur.yaml  (diakritísk merki + stafróf)"
+  tree_kategoria: "{etykieta}  [{liczba_plikow}]"
+  tree_plik: "📄  {nazwa_pliku}"
+  # Etykiety kategorii drzewa
+  kategorie:
+    akcenty: "Hreimar (framburður fyrir TTS)  🎙️"
+    szyfry: "Dulmál (textaleikir)  🔐"
+    rezyser: "Leikstjóri (stillingar og eftirvinnsla)  🎬"
+    gui: "Notendaviðmótsþýðingar  🌐"
+  # Przyciski akcji
+  btn_otworz_label: "📝  &Opna í textaritli"
+  btn_otworz_name: "Hnappur Opna valda skrá í textaritli"
+  btn_otworz_tooltip: "Opnar valda YAML skrá í sjálfgefnum textaritli kerfisins (Notepad á Windows, TextEdit á macOS)."
+  btn_nowy_label: "➕  &Ný skrá reglur…"
+  btn_nowy_name: "Hnappur Búa til nýja skrá reglur"
+  btn_nowy_tooltip: "Opnar töframann fyrir nýja skrá: þú velur tegund (hreimur, dulmál, Leikstjóri stilling, grunn tungumál), Reglustjóri býr til sniðmát eða býr til prompt fyrir AI."
+  btn_duplikuj_label: "📋  &Afrita valda skrá"
+  btn_duplikuj_name: "Hnappur Afrita valda skrá"
+  btn_duplikuj_tooltip: "Býr til afrit af valinni YAML skrá undir nýju nafni – fljótleg byrjun fyrir afbrigði af núverandi reglu."
+  btn_usun_label: "🗑️  &Eyða valda skrá"
+  btn_usun_name: "Hnappur Eyða valda skrá"
+  btn_usun_tooltip: "Eyðir valinni YAML skrá af diski (með staðfestingu). Aðgerð er óafturkræf – hugsaðu þig tvisvar um."
+  btn_odswiez_label: "🔄  &Endurnýja tré"
+  btn_odswiez_name: "Hnappur Endurnýja skráatré"
+  btn_odswiez_tooltip: "Endurhleður tré af diski – notaðu ef þú breyttir skrám handvirkt í könnuð eða eftir að hafa vistað í textaritli."
+  info_stopka: |-
+    Eftir að hafa búið til nýjan hreim, farðu aftur á Heimssíðuna
+    og smelltu á „Endurnýja hreima Leikstjóra úr YAML".
+  # Otwarcie w edytorze
+  plik_wne_tytul: "Ekki hægt að opna skrá"
+  plik_wne_tresc: |-
+    Skráin er utan dictionaries/ möppunnar eða er ekki lengur til.
+    Endurnýjaðu tré og reyndu aftur.
+  blad_otwarcia_tytul: "Upplýsingar"
+  blad_otwarcia_tresc: "Ekki tókst að opna skrá sjálfkrafa.\nOpnaðu hana handvirkt:\n{sciezka_pliku}\n\nUpplýsingar: {tresc_bledu}"
+  # Duplikowanie
+  dup_dlg_tytul: "Afrita YAML skrá"
+  dup_dlg_label: |-
+    Sláðu inn nýtt skráarheiti (án viðbótar, aðeins ASCII, lower_snake).
+    Upprunaskrá: {nazwa_pliku}
+  dup_nazwa_blad_tytul: "Skráarheiti villa"
+  dup_nazwa_blad_tresc: |-
+    Ógilt nafn.
+
+    Leyfilegt: litlir ASCII stafir, tölustafir og undirstrik. Fyrsti stafur verður að vera bókstafur.
+    Dæmi: sænska, nýtt_stilling, eftirvinnsla_kaflar.
+  dup_poza_dict_tytul: "Villa"
+  dup_poza_dict_tresc: "Markslóð er utan dictionaries/."
+  dup_istnieje_tytul: "Skrá er þegar til"
+  dup_istnieje_tresc: |-
+    Skrá {nazwa_pliku}.yaml er þegar til í þessari möppu.
+    Veldu annað nafn.
+  dup_blad: "Ekki tókst að búa til afrit:\n{tresc_bledu}"
+  dup_komentarz_naglowek: |-
+    # Afrit frá: {nazwa_pliku}
+    # ATH: breyttu reitunum `label` og `description`, og vistaðu síðan skrána.
+  dup_ok_tytul: "Afrit búið til"
+  dup_ok_tresc: |-
+    Afrit búið til: {nazwa_pliku}
+
+    Textaritill opnast sjálfkrafa. Breyttu reitunum `label` og `description`, vistaðu skrána (Ctrl+S), og farðu síðan aftur í Reglustjóra og smelltu á „Endurnýja tré".
+  # Usuwanie
+  usun_pytanie_tytul: "Staðfesta eyðingu"
+  usun_pytanie_tresc: |-
+    Ertu viss um að þú viljir eyða skránni:
+
+    {nazwa_pliku}
+    (úr möppu {katalog_wzgledny})
+
+    Aðgerð er ÓAFTURKRÆF.
+  usun_blad: "Ekki tókst að eyða skrá:\n{tresc_bledu}"
+  usun_ok_tytul: "Eytt"
+  usun_ok_tresc: |-
+    Skrá eytt. Mundu að eftir að hreim hefur verið eytt, smelltu á „Endurnýja hreima Leikstjóra úr YAML" á Heimssíðunni.
+  # Kreator
+  kreator_tytul: "Ný skrá reglur – töframaður"
+  kreator_co_utworzyc: "Hvað viltu búa til?"
+  kreator_cb_name: "Val á tegund nýrrar skráar reglur"
+  kreator_opis_name: "Lýsing á valinni reglu tegund"
+  kreator_lbl_id: "Auðkenni (skráarheiti):"
+  kreator_id_name: "Auðkennisreit fyrir skrá"
+  kreator_id_hint: "t.d. sænska  (litlir stafir, engin bil)"
+  kreator_lbl_etykieta: "Merki (sýnilegt í GUI):"
+  kreator_etykieta_name: "Merkingarreitur fyrir reglu"
+  kreator_etykieta_hint: 't.d. "Sænska (Alva / Oskar)"'
+  kreator_lbl_iso: "ISO kóði markmáls:"
+  kreator_iso_name: "ISO kóða reitur fyrir tungumál"
+  kreator_iso_hint: "t.d. sv, de, en (2 stafir)"
+  kreator_lbl_jezyk: "Grunntungumál (mappa dictionaries/…):"
+  kreator_jezyk_name: "Val á grunntungumáli (möppu)"
+  kreator_lbl_opis: "Lýsing á áhrifum (fyrir AI):"
+  kreator_opis_efektu_name: "Lýsingarreitur fyrir áhrif (aðeins fyrir reiknirit dulmál)"
+  kreator_opis_efektu_hint: "Lýstu í 1-3 setningum hvað þetta dulmál á að gera (inntak → úttak)."
+  kreator_btn_utworz: "Búa til"
+  # Kreator – hinty dla języka bazowego
+  kreator_jezyk_bazowy_id_hint: "t.d. en, de, fr (ISO 639-1 kóði, 2-3 stafir)"
+  kreator_jezyk_bazowy_etykieta_hint: "t.d. Enska, Þýska…"
+  kreator_jezyk_bazowy_iso_label: "Nafn tungumáls (endurtekið í sniðmáti):"
+  kreator_jezyk_bazowy_iso_hint: "t.d. Enska"
+  # Kreator – walidacje
+  kreator_alert_tytul: "Vantar eða villa í reit"
+  kreator_blad_kod_jezyka: "Tungumálakóði verður að vera 2- eða 3-stafa (ISO 639-1/3)."
+  kreator_blad_nazwa_jezyka: "Sláðu inn nafn tungumáls (t.d. Enska)."
+  kreator_blad_id: |-
+    Auðkenni skráar verður að vera ASCII í lower_snake sniði.
+    Dæmi: sænska, dagbók_stilling, eftirvinnsla_útdrættir.
+  kreator_blad_etykieta: "Sláðu inn merki sýnilegt í GUI."
+  kreator_blad_iso: "Sláðu inn ISO kóða markmáls (t.d. sv, de)."
+  kreator_blad_opis_efektu: |-
+    Fyrir reiknirit dulmál, lýstu áhrifum með orðum – þessi lýsing fer í prompt fyrir AI.
+  # Wynik kreatora
+  wynik_tytul: "Ný skrá reglur – niðurstaða"
+  wynik_sukces_naglowek: "✅  Skrá búin til:\n{sciezka_pliku}"
+  wynik_brak_pliku_naglowek: |-
+    ℹ️  Skrá var ekki búin til (þessi tegund reglu krefst Python kóða frá forritara – sjá prompt fyrir AI hér að neðan).
+  wynik_lbl_uwagi: "Næstu skref:"
+  wynik_uwagi_name: "Athugasemdir við búna reglu"
+  wynik_lbl_prompt: "Prompt fyrir AI (límdu í ChatGPT / Claude):"
+  wynik_prompt_name: "Prompt til að líma í AI spjallmenni"
+  wynik_btn_kopiuj: "📋  Afrita prompt í klippiborð"
+  wynik_btn_kopiuj_name: "Hnappur Afrita AI prompt í klippiborð"
+  wynik_skopiowano_tytul: "Afritað"
+  wynik_skopiowano_tresc: |-
+    Prompt hefur verið afritað í klippiborð.
+    Límdu það (Ctrl+V) í ChatGPT eða Claude.
+  wynik_schowek_nieudany_tytul: "Klippiborð ekki tiltækt"
+  wynik_schowek_nieudany_tresc: |-
+    Ekki tókst að opna kerfisklippiborð.
+    Afritaðu prompt handvirkt: Ctrl+A, Ctrl+C í reitnum hér að ofan.
+  # Nadpisywanie pliku
+  plik_istnieje_tytul: "Skrá er til"
+  plik_istnieje_tresc: "Skrá {nazwa_pliku} er þegar til.\nYfirskrifa?"
+  blad_bezpieczenstwa_tytul: "Öryggisvilla"
+  blad_bezpieczenstwa_tresc: "Markslóð er utan dictionaries/. Hætt við."
+  blad_tworzenia: "Ekki tókst að búa til skrá:\n{tresc_bledu}"
+  niepelna_struktura_tytul: "Ófullnægjandi tungumálauppbygging"
+  niepelna_struktura_tresc: |-
+    Skrá grunnur.yaml var vistuð, en ekki tókst að búa til undirmöppur hreimar/ og dulmál/:
+    {tresc_bledu}
+
+    Búðu til þær handvirkt í skráarkönnuð áður en þú keyrir Fjöltyngja – annars mun vélin kasta villu við skönnun nýs tungumáls.

@@ -1,0 +1,36 @@
+# =============================================================================
+#  PODSTAWY JĘZYKA WŁOSKIEGO
+# =============================================================================
+#
+#  Plik fundamentu dla `dictionaries/it/`. Silnik Poligloty wymaga, aby każdy
+#  język miał ten plik — bez niego nowy język NIE jest w ogóle wykrywany.
+#
+#  Struktura wzorowana na `dictionaries/pl/podstawy.yaml`. Pole `polskie_znaki`
+#  pozostawiono jako pustą listę — w wersji 13.x nie planujemy transliteracji
+#  dla języków innych niż polski. Nazwa klucza `polskie_znaki` jest historyczna;
+#  manager reguł oczekuje jej obecności, więc nie zmieniamy jej.
+# =============================================================================
+
+id: podstawy
+jezyk: it
+etykieta: "Italiano – fondamenti fonetici"
+opis: |
+  Bazowe reguły dla języka włoskiego:
+    1. Brak transliteracji znaków diakrytycznych (`polskie_znaki: []`) –
+       włoski używa standardowego alfabetu łacińskiego; akcentowane
+       samogłoski (à, è, é, ì, ò, ù) traktujemy jak osobne formy bazowe,
+       nie zamieniamy ich.
+    2. Alfabet włoski (21 rodzimych wielkich liter, bez J, K, W, X, Y) –
+       używany przez szyfr Cezara.
+
+# -----------------------------------------------------------------------------
+# Brak diakrytyków do transliteracji. Pusta lista zachowuje kontrakt API
+# z managerem reguł.
+# -----------------------------------------------------------------------------
+polskie_znaki: []
+
+# -----------------------------------------------------------------------------
+# Alfabet włoski – 21 wielkich liter w rodzimej kolejności (bez J, K, W, X, Y),
+# bez znaków białych. Używany przez szyfr Cezara.
+# -----------------------------------------------------------------------------
+alfabet: "ABCDEFGHILMNOPQRSTUVZ"

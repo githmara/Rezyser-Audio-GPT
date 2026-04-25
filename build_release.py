@@ -139,7 +139,7 @@ def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
 # =============================================================================
 # Reguły wykluczania plików (wspólne dla ZIP-a i filtrów)
 # =============================================================================
-IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '__pycache__', 'skrypty', 'venv', '.venv', 'env'}
+IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '.claude', '__pycache__', 'skrypty', 'venv', '.venv', 'env'}
 # Skrypty infrastruktury developerskiej (nigdy nie trafiają do paczki dla
 # end-usera). Nazwy zangielszczone w 13.1 — patrz changelog manual.yaml:
 #   skonfiguruj_dev.bat  → setup_dev.bat
@@ -148,7 +148,7 @@ IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '__pycache__', 'skrypty', 've
 #   uruchom_rezysera.sh  → run.sh         (filtrowane przez `.sh` w IGNOROWANE_ROZSZERZENIA)
 #   buduj_wydanie.py     → build_release.py
 #   skrypt_instalatora.iss → installer.iss
-IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'build_release.py', 'installer.iss', 'golden_key.env', 'setup_dev.bat', 'run_dev.bat'}
+IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'build_release.py', 'installer.iss', 'golden_key.env', 'setup_dev.bat', 'run_dev.bat', 'buduj_wielojezyczne_docs.py', 'buduj_wielojezyczne_ui.py'}
 IGNOROWANE_ROZSZERZENIA = {'.env', '.pyc', '.md', '.sh', '.jsonl'}
 KATALOG_ZRODLOWY = "."
 

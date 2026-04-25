@@ -1,0 +1,34 @@
+# =============================================================================
+#  PODSTAWY JĘZYKA ANGIELSKIEGO
+# =============================================================================
+#
+#  Plik fundamentu dla `dictionaries/en/`. Silnik Poligloty wymaga, aby każdy
+#  język miał ten plik — bez niego nowy język NIE jest w ogóle wykrywany.
+#
+#  Struktura wzorowana na `dictionaries/pl/podstawy.yaml`. Pole `polskie_znaki`
+#  pozostawiono jako pustą listę — w wersji 13.x nie planujemy transliteracji
+#  dla języków innych niż polski (akcenty PL → łacina). Nazwa klucza
+#  `polskie_znaki` jest historyczna; manager reguł oczekuje jej obecności,
+#  więc nie zmieniamy jej na bardziej generyczną.
+# =============================================================================
+
+id: podstawy
+jezyk: en
+etykieta: "English – phonetic basics"
+opis: |
+  Bazowe reguły dla języka angielskiego:
+    1. Brak transliteracji znaków diakrytycznych (`polskie_znaki: []`) –
+       angielski używa standardowego alfabetu łacińskiego A-Z.
+    2. Alfabet angielski (26 wielkich liter) – używany przez szyfr Cezara.
+
+# -----------------------------------------------------------------------------
+# Brak diakrytyków do transliteracji – angielski operuje na czystym alfabecie
+# łacińskim. Pusta lista zachowuje kontrakt API z managerem reguł.
+# -----------------------------------------------------------------------------
+polskie_znaki: []
+
+# -----------------------------------------------------------------------------
+# Alfabet angielski – 26 wielkich liter, bez znaków białych.
+# Używany przez szyfr Cezara (plik szyfry/cezar.yaml w odpowiednim katalogu).
+# -----------------------------------------------------------------------------
+alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

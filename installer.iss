@@ -33,7 +33,7 @@ OutputDir=.
 ; `runtime\python.exe`). Nazwy zostały zangielszczone w wersji 13.1, stare
 ; polskie nazwy (`skonfiguruj_dev.bat`, `uruchom_rezysera_dev.bat`,
 ; `skonfiguruj_dev.sh`, `uruchom_rezysera.sh`) przestały istnieć w repo.
-Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git\*,.vscode\*,.cline\*,__pycache__\*,skrypty\*,runtime\__pycache__\*,runtime\skrypty\*,venv\*,.venv\*,env\*,*.env,*.pyc,*.md,*.iss,*.sh,*.jsonl,Rezyser_Audio_*.zip,Rezyser_Audio_*.exe,build_release.py,requirements.txt,.clinerules,.gitignore,setup_dev.bat,run_dev.bat,dictionaries\*\gui\dokumentacja\*"
+Source: "*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git\*,.vscode\*,.cline\*,.claude\*,__pycache__\*,skrypty\*,runtime\__pycache__\*,runtime\skrypty\*,venv\*,.venv\*,env\*,*.env,*.pyc,*.md,*.iss,*.sh,*.jsonl,Rezyser_Audio_*.zip,Rezyser_Audio_*.exe,build_release.py,buduj_wielojezyczne_docs.py,buduj_wielojezyczne_ui.py,requirements.txt,.clinerules,.gitignore,setup_dev.bat,run_dev.bat,dictionaries\*\gui\dokumentacja\*"
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

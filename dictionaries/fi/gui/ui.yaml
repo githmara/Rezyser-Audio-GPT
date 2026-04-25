@@ -1,0 +1,787 @@
+# =============================================================================
+# dictionaries/fi/gui/ui.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_ui.py
+# ze źródła dictionaries/pl/gui/ui.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany
+# wprowadzaj w pliku źródłowym PL i uruchom ponownie skrypt.
+#
+# Tłumaczone są WYŁĄCZNIE wartości; klucze, struktura, komentarze
+# sekcyjne i style block-scalar (`|-`, `|`) są zachowane przez
+# round-trip ruamel.yaml. Placeholdery {nazwa} i skróty \tCtrl+...
+# zostały zamrożone tokenami ⟦P{i}⟧/⟦S{j}⟧ na czas tłumaczenia,
+# odtworzone 1:1 po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# APP – tytuł i parametry globalne
+# -----------------------------------------------------------------------------
+app:
+  nazwa: "Audio GPT -ohjaaja"
+  wersja: "13.1 – Julkaisuversio"
+  title_home: "{nazwa_aplikacji}  |  {wersja}"
+  title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
+  banner: "🎬  {nazwa_aplikacji}"
+  obszar_roboczy_name: "Työtila"
+  menubar_name: "Päävalikkopalkki"
+
+# -----------------------------------------------------------------------------
+# COMMON – elementy wielokrotnego użytku (dialogi, przyciski standardowe)
+# -----------------------------------------------------------------------------
+common:
+  btn_zamknij: "Sulje"
+  btn_anuluj: "Peruuta"
+  btn_skopiuj_schowek: "📋  Kopioi leikepöydälle"
+  komunikat_skopiowano: "Kopioitu"
+  komunikat_schowek_nieudany_tytul: "Leikepöytä ei ole käytettävissä"
+  komunikat_schowek_nieudany_tresc: "Leikepöytää ei voitu avata.\nKopioi teksti manuaalisesti: Ctrl+A, Ctrl+C yllä olevassa kentässä."
+  blad_tytul: "Virhe"
+  blad_odczytu_tytul: "Lukuvirhe"
+  blad_zapisu_tytul: "Kirjoitusvirhe"
+  brak_pliku_tytul: "Tiedosto puuttuu"
+  plik_nie_istnieje_tytul: "Tiedostoa ei ole olemassa"
+  sukces_tytul: "Onnistui"
+  informacja_tytul: "Tietoa"
+
+# -----------------------------------------------------------------------------
+# MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
+# -----------------------------------------------------------------------------
+main:
+  menu:
+    narzedzia: "&Työkalut"
+    plik: "&Tiedosto"
+    strona_glowna: "&Kotisivu\tCtrl+0"
+    rezyser: "&Ohjaaja\tCtrl+1"
+    poliglota: "&Polyglootti\tCtrl+2"
+    konwerter: "&Muunnin\tCtrl+3"
+    manager: "&Sääntöjen Hallinta\tCtrl+4"
+    zakoncz: "&Lopeta\tAlt+F4"
+  menu_status:
+    strona_glowna: "Palaa aloitusnäyttöön, jossa on työkalujen kuvaus ja System Check"
+    rezyser: "Avaa Ohjaaja-moduulin – kirjoita käsikirjoituksia ja proosaa AI:n avulla"
+    poliglota: "Avaa Polyglootti-moduulin – aksentit ja tekstien kääntäminen"
+    konwerter: "Avaa Muunnin-moduulin – luo Word-tiedostoja"
+    manager: "Avaa Sääntöjen Hallinta – YAML-tiedostojen tutkija dictionaries/ ja uusien aksenttien / tilojen / salauksien luonti"
+    zakoncz: "Sulje sovellus"
+  btn:
+    rezyser: "🎬  &Ohjaaja"
+    poliglota: "🌍  &Polyglootti"
+    konwerter: "📄  &Muunnin"
+    manager: "📚  &Sääntöjen Hallinta"
+  tooltip:
+    rezyser: "Ohjaaja-moduuli (Ctrl+1): Kirjoita käsikirjoituksia ja proosaa AI:n avulla"
+    poliglota: "Polyglootti-moduuli (Ctrl+2): Aksentit ja tekstien kääntäminen"
+    konwerter: "Muunnin-moduuli (Ctrl+3): Luo Word-tiedostoja otsikoilla"
+    manager: "Sääntöjen Hallinta (Ctrl+4): Tutki YAML-tiedostoja dictionaries/, luo uusia aksentteja, salauksia ja tiloja (malli tai kehotus AI:lle)"
+  nazwy_narzedzi:
+    dom: "Koti"
+    rezyser: "Ohjaaja"
+    poliglota: "Polyglootti"
+    konwerter: "Muunnin"
+    manager: "Sääntöjen Hallinta"
+
+# -----------------------------------------------------------------------------
+# HOME – panel startowy (HomePanel w main.py)
+# -----------------------------------------------------------------------------
+home:
+  panel_name: "Aloituspaneeli – Etusivu"
+  welcome_text: |-
+    Tämä on integroitu äänitysstudiosi.
+    Valitse työkalu painikepalkista tai Työkalut-valikosta:
+
+      •  Ohjaaja       –  Kirjoita käsikirjoituksia ja proosaa AI:n avulla; hallitse Księga Świataa dynaamisesti.
+      •  Polyglootti     –  Lisää kovia aksentteja paikallisiin synteettisiin ääniin (NVDA/Vocalizer) ja käännä tekstejä.
+      •  Muunnin     –  Luo nopeasti ammattimaisia Word-tiedostoja tason 1 otsikoilla.
+      •  Sääntöjen Hallinta –  Tutki ja luo sanakirjasääntöjä ilman, että sinun tarvitsee käsitellä YAML-tiedostoja manuaalisesti.
+  heading_system_check: "System Check"
+  checking: "Konfiguraation tarkistus…"
+  # Błędy walidacji golden_key.env
+  err_brak_pliku: |-
+    🚨 Ympäristökonfiguraatiotiedosto puuttuu!
+
+    Ohjelman ensimmäinen käynnistys havaittu. Moduulit on lukittu turvallisuussyistä.
+    Voit avata kaikki työkalut napsauttamalla alla olevaa painiketta — ohjelma luo automaattisesti golden_key.env-tiedoston ja avaa sen oletustekstieditorissa.
+  err_odczyt: "🚨 golden_key.env-tiedoston lukeminen epäonnistui:\n{tresc_bledu}"
+  err_struktura: |-
+    🚨 Tiedoston rakennevirhe!
+    Pakollinen parametri OPENAI_API_KEY= puuttuu.
+    Olet todennäköisesti poistanut yhtäsuuruusmerkin tai muuttujan nimen.
+    Poista tiedosto, luo se uudelleen ja liitä avain huolellisemmin.
+  err_tekst_zastepczy: |-
+    ⚠️ Avain ei ole syötetty!
+    Tiedostossa golden_key.env on edelleen paikkamerkkiteksti.
+    Avaa tiedosto tekstieditorissa, poista paikkamerkkiteksti ja liitä oikea API-avaimesi.
+  err_cudzyslowy: |-
+    🚨 Avain on lainausmerkeissä!
+    API-avain on liitetty lainausmerkkeihin (esim. "sk-…").
+    Avaa tiedosto tekstieditorissa ja poista lainausmerkit —
+    avain on kirjoitettava suoraan yhtäsuuruusmerkin jälkeen ilman ylimääräisiä merkkejä.
+  err_niedozwolone_znaki: |-
+    🚨 Kiellettyjä merkkejä avaimen ympärillä!
+    API-avaimen edessä tai takana on havaittu välilyönti tai muu näkymätön merkki.
+    Avaa tiedosto tekstieditorissa ja varmista, että arvo alkaa
+    heti yhtäsuuruusmerkin jälkeen ilman välilyöntejä.
+  err_format: |-
+    🚨 Epäilyttävä avaimen muoto!
+    Oikea OpenAI-avain alkaa aina merkeillä sk- (esim. sk-proj-…).
+    Varmista, että olet kopioinut oikean merkkijonon eikä sen edessä ole välilyöntejä.
+  err_zbyt_krotki: |-
+    ⚠️ Avain vaikuttaa liian lyhyeltä (havaittu {liczba_znakow} merkkiä, odotettiin vähintään {minimum_znakow}).
+    Olet todennäköisesti kopioinut vain osan avaimesta.
+
+    Jos olet jo sulkenut avainikkunan platform.openai.com-sivustolla,
+    sinun on palattava tilillesi, käytettävä 'Revoke secret key' -vaihtoehtoa tälle
+    katkaistulle avaimelle ja luotava uusi. Muista kopioida avain kokonaisuudessaan ennen kuin napsautat 'Done'.
+  ok_klucz_wykryty: |-
+    ✅ API-avain (golden_key.env) havaittu ja oikein muotoiltu.
+    Kaikki moduulit ovat valmiita käyttöön.
+  # Przyciski akcji panelu startowego
+  btn_generate: "Luo golden_key.env-tiedosto ja avaa tekstieditori"
+  btn_open: "📝 Avaa golden_key.env-tiedosto tekstieditorissa"
+  blad_tworzenia_env_tytul: "Virhe"
+  blad_tworzenia_env_tresc: "golden_key.env-tiedoston luominen epäonnistui:\n{tresc_bledu}"
+  ok_plik_wygenerowany: |-
+    ✅ Tiedosto {nazwa_pliku} on luotu!
+    Tekstieditori avautuu automaattisesti.
+    Liitä API-avaimesi, tallenna tiedosto (Ctrl+S) ja käynnistä sovellus uudelleen.
+  blad_otwarcia_pliku_tytul: "Tietoa"
+  blad_otwarcia_pliku_tresc: "Tiedostoa ei voitu avata automaattisesti.\nAvaa se manuaalisesti:\n{sciezka_pliku}"
+  # Sekcja: Narzędzia słownikowe
+  heading_narzedzia_slownikowe: "Sanakirjatyökalut"
+  narzedzia_slownikowe_name: "Sanakirjatyökalujen kuvaus"
+  tools_info: |-
+    Haluatko lisätä uuden aksentin, salauksen tai Ohjaajan tilan?
+    Avaa Sääntöjen Hallinta (Ctrl+4) – löydät sieltä kaikki YAML-tiedostot dictionaries/ sekä luojan, joka luo mallin tai generoi kehotuksen AI-chatbotille.
+
+    Kun olet lisännyt uuden AKSENTIN, napsauta lisäksi alla olevaa "Päivitä Ohjaajan aksentit YAML:stä" -painiketta – tämä antaa Ohjaajan tilan huomata uuden aksentin (Polyglootti tunnistaa YAML-tiedostot automaattisesti). Päivityksen jälkeen käynnistä sovellus uudelleen.
+  btn_open_manager_label: "📚 Avaa Sääntöjen Hallinta"
+  btn_open_manager_name: "Avaa Sääntöjen Hallinta -painike"
+  btn_open_manager_tooltip: "Siirtyy Sääntöjen Hallintaan – YAML-tiedostojen tutkija ja uusien aksenttien / tilojen / salauksien luoja (Ctrl+4)."
+  btn_odswiez_label: "🔄 Päivitä Ohjaajan aksentit YAML:stä"
+  btn_odswiez_name: "Päivitä Ohjaajan aksentit YAML:stä -painike"
+  btn_odswiez_tooltip: "Skannaa dictionaries/*/aksentit/ ja regeneroi aksentti_* -kääreet core_poliglota.py:ssä ja core_rezyser.py:ssä. Onnistuneen päivityksen jälkeen sovellus on käynnistettävä uudelleen."
+  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
+  raport_niespodziewany_tytul: "Aksenttien päivitysvirhe"
+  raport_niespodziewany_tresc: "Odottamaton virhe tapahtui:\n{tresc_bledu}"
+  raport_tytul_blad: "Päivitä Ohjaajan aksentit – VIRHE"
+  raport_header_blad: "⛔ Generaattori kohtasi virheitä – katso loki alla."
+  raport_tytul_sukces: "Päivitä Ohjaajan aksentit – Onnistui"
+  raport_header_sukces: |-
+    ✅ Muokattu tiedostoja {liczba_akcentow} aksentille.
+    Jotta uudet aksentit näkyvät Ohjaajan tilassa, käynnistä sovellus uudelleen.
+  raport_tytul_bez_zmian: "Päivitä Ohjaajan aksentit – Ei muutoksia"
+  raport_header_bez_zmian: "ℹ️ Ei muutoksia. Havaittu {liczba_akcentow} aksenttia – kääreet ovat jo ajan tasalla."
+  raport_lbl_log: "Täysi loki (Ctrl+A, Ctrl+C kopioi leikepöydälle):"
+  raport_log_name: "Ohjaajan aksenttigeneraattorin loki"
+
+# -----------------------------------------------------------------------------
+# REZYSER – panel modułu Reżyser (gui_rezyser.py)
+# -----------------------------------------------------------------------------
+rezyser:
+  panel_name: "Audio GPT -ohjaajan paneeli"
+  heading: "🎬  Audio GPT -ohjaaja – Hybridi Luova Studio"
+  description_name: "Audio GPT -ohjaajan moduulin kuvaus"
+  tool_description: |-
+    Audio GPT -ohjaaja on hybridi luova studio.
+
+    Aivoriihi-tila  – suunnittele juoni, luo 3 vaihtoehtoa (EI tallennusta tiedostoon).
+    Käsikirjoitus-tila        – kirjoita raakaa äänikäsikirjoitusta tageilla [SFX] ja [Hahmo: tunne] (TALLENNUS TIEDOSTOON).
+    Äänikirja-tila     – luo tiheää, klassista kirjallista proosaa (TALLENNUS TIEDOSTOON).
+
+    Projektit tallennetaan ohjelman viereiseen 'skrypty/'-alikansioon.
+    Anna projektin nimi ILMAN laajennusta (esim. kroniki_arkonii).
+    Vaihtaaksesi projektia sinun on ensin tyhjennettävä nykyinen muisti.
+  prompt_architekta_content: |-
+    Olet erinomainen maailmojen arkkitehti (Worldbuilder) ja kirjallinen konsultti. Minulla on löyhä idea juonesta: [KIRJOITA IDEASI TÄHÄN]. Tehtäväsi on laajentaa tämä ammattimaiseksi "Księga Świata".
+    Sovita sävy ja säännöt ideani mukaan. Vältä halpoja, satumaisia oikoteitä ja AI-kliseitä.
+
+    MUOTOILUSÄÄNNÖT (KRIITTINEN):
+    Sinun on palautettava vastaus kahdessa erillisessä osassa:
+
+    OSA 1: KSIĘGA ŚWIATA
+    Tämä osa on ehdottomasti suljettava YHDESSÄ Markdown-koodilohkossa (käytä merkintöjä ```markdown alussa ja ``` lopussa). Koodilohkon sisällä noudata näitä sääntöjä:
+    1. Aloita avoimen kirjan emojilla ja työnimellä, esim. 📖 Księga Świata: [Nimi].
+    2. Käytä yksittäistä hashtagia (#) pääosioille (esim. # Maailman Säännöt, # Hahmot).
+    3. Käytä kaksoishashtagia (##) aliosioille.
+    4. Käytä viivoja (-) luodaksesi selkeitä luetteloita.
+    5. Käytä kaksoistähtiä (**teksti**), korostaaksesi ehdottomia, rikkomattomia sääntöjä (esim. **Sankari EI KOSKAAN valehtele**).
+    6. Kuvaile hahmojen psykologiaa, heidän suurimpia heikkouksiaan ja motiivejaan. Vieraskielisten hahmojen kohdalla lisää tieto aksentista suoraan tagin viereen, esim. `[Puhuja 1: Nimi] - lispaa ja hänellä on ranskalainen aksentti`. **Tekninen vihje:** Avainsanan `akcent` käyttö on ehdottomasti vaadittua, koska sen perusteella sovelluksen ulkoinen skripti tunnistaa ja soveltaa oikeat foneettiset säännöt kyseisen hahmon dialogeihin.
+
+    OSA 2: TILASUOSITUS
+    Tämä osa sijoitetaan Koodilohkon ULKOPUOLELLE, tavallisena tekstinä alapuolelle. Suosita minulle, mikä sovellukseni tila on paras tämän idean toteuttamiseen: 🎬 Raaka Käsikirjoitus -tila (kuunnelmat, SFX, fonetiikka) vai 📖 Perinteinen Äänikirja -tila (klassinen kirjallinen proosa).
+
+  # Pasek pliku
+  lbl_nazwa_pliku: "Projektitiedoston nimi (ilman laajennusta, esim. kroniki_arkonii):"
+  txt_nazwa_pliku_name: "Projektitiedoston nimen kenttä"
+  txt_nazwa_pliku_hint: "esim. kroniki_arkonii"
+  txt_nazwa_pliku_tooltip: |-
+    Anna projektin nimi ILMAN laajennusta.
+    Historia tallennetaan tiedostoon: skrypty/<nimi>.txt
+    Kenttä on lukittu, kun muisti on käytössä.
+  btn_wczytaj_label: "Lataa historia"
+  btn_wczytaj_tooltip: |-
+    Lataa olemassa oleva projektitiedosto (skrypty/<nimi>.txt) muistiin.
+    Aktiivinen vain, kun muisti on tyhjä ja nimi on annettu.
+  btn_wyczysc_biezaca_label: "Tyhjennä nykyinen (jätä Yhteenveto)"
+  btn_wyczysc_biezaca_tooltip: |-
+    Tyhjentää vain nykyisen historian muistista.
+    Yhteenveto (Pysyvä Muisti) ja Księga Świata säilyvät.
+    Käytä pitkän kirjan jatkamiseen yhteenvedon luomisen jälkeen.
+  btn_hard_reset_label: "Sulje Projekti (Kova Nollaus)"
+  btn_hard_reset_tooltip: |-
+    PROJEKTIN KOKONAISTYHJENNYS: historia, yhteenveto, Księga Świata.
+    Nollaa kaikki laskurit ja avaa tiedostonimen kentän.
+    Käytä projektin vaihtamiseen tai täysin uuden tarinan aloittamiseen.
+  # Sidebar
+  sidebar_heading: "📖 Projektin Sivupalkki"
+  lbl_ksiega_swiata: "Księga Świata – Säännöt ja Hahmot:"
+  txt_ksiega_name: "Księga Świata -kenttä – säännöt ja hahmot"
+  txt_ksiega_hint: |-
+    Kirjoita maailman säännöt, hahmojen kuvaus ja heidän foneettiset aksenttinsa…
+    Esim. [Geralt: islantilainen aksentti]
+    Sisältö liitetään jokaiseen AI-pyyntöön.
+  txt_ksiega_tooltip: |-
+    Konteksti, joka liitetään jatkuvasti AI:lle: maailman säännöt, hahmot, foneettiset aksentit.
+    Tallennus levylle vaatii projektitiedoston nimen.
+  btn_zapisz_ksiege_label: "💾 Tallenna Księga pysyvästi"
+  btn_zapisz_ksiege_tooltip: |-
+    Tallentaa Księga Świata -tiedostoon: skrypty/<nimi>.md
+    Vaatii projektitiedoston nimen.
+  btn_prompt_architekta_label: "📖 Arkkitehdin Kehotus AI:lle…"
+  btn_prompt_architekta_name: "Näytä Arkkitehdin Kehotus ulkoiselle chatbotille -painike"
+  btn_prompt_architekta_tooltip: |-
+    Avaa ikkuna valmiilla kehotuksella ulkoiselle chatbotille (ChatGPT, Claude).
+    Liitä juoni-ideasi, ja AI luo ammattimaisen Księga Świata -dokumentin Markdown-muodossa – liitettäväksi yllä olevaan "Księga Świata" -kenttään.
+  lbl_pamiec_dlugotrwala: "🧠 Pysyvä Muisti (Yhteenveto):"
+  txt_pamiec_name: "Pysyvä Muisti -kenttä – tapahtumien yhteenveto"
+  txt_pamiec_hint: |-
+    Tänne AI tallentaa yhteenvedon, kun muisti on täynnä.
+    Voit myös muokata sitä manuaalisesti.
+  txt_pamiec_tooltip: |-
+    Aiemman tapahtumien yhteenveto liitetään jokaiseen AI-pyyntöön.
+    Mahdollistaa tarinan jatkamisen ilman mallin kontekstin ikkunan rajoituksia.
+  btn_zapisz_pamiec_label: "💾 Tallenna Yhteenveto"
+  btn_zapisz_pamiec_tooltip: |-
+    Tallentaa yhteenvedon tiedostoon: skrypty/<nimi>_yhteenveto.txt
+    Tallennuksen jälkeen voit turvallisesti tyhjentää nykyisen muistin.
+  # Obszar roboczy
+  main_heading: "🎬 Työtila"
+  rb_tryb_label: "Työtila:"
+  rb_tryb_name: "AI:n työtilan valinta"
+  rb_tryb_tooltip: |-
+    Aivoriihi – suunnittelu ilman tallennusta tiedostoon.
+    Käsikirjoitus        – raaka äänikäsikirjoitus (tallennetaan tiedostoon).
+    Äänikirja     – perinteinen kirjallinen proosa (tallennetaan tiedostoon).
+  # Panel struktury
+  struktura_heading: "✂️ Rakennehallinta"
+  btn_prolog_label: "📜 Lisää Prologi"
+  btn_prolog_name: "Lisää Prologi -painike"
+  btn_prolog_tooltip: |-
+    Lisää 'Prologi'-otsikon tarinan alkuun.
+    Mahdollinen vain, kun tarina on tyhjä. Vaatii projektin nimen.
+  btn_epilog_label: "🏁 Lisää Epilogi"
+  btn_epilog_name: "Lisää Epilogi -painike"
+  btn_epilog_tooltip: |-
+    Lisää 'Epilogi'-otsikon tarinan loppuun.
+    Estää sisällön lisäämisen Epilogin jälkeen.
+  btn_rozdzial_label: "✂️ Lisää leikkaus (Luku {numer_rozdzialu})"
+  btn_rozdzial_name: "Lisää Luku -painike"
+  btn_rozdzial_tooltip: |-
+    Lisää seuraavan luvun otsikon tarinaan ja tiedostoon.
+    Saatavilla vain Äänikirja-tilassa.
+  btn_akt_label: "🎭 Lisää Näytös {numer_aktu}"
+  btn_akt_name: "Lisää Näytös -painike"
+  btn_akt_tooltip: |-
+    Lisää 'Näytös N' -otsikon ja automaattisesti 'Kohtaus 1' tarinaan ja tiedostoon.
+    Saatavilla vain Käsikirjoitus-tilassa.
+  btn_scena_label: "🎬 Lisää Kohtaus {numer_sceny}"
+  btn_scena_name: "Lisää Kohtaus -painike"
+  btn_scena_tooltip: |-
+    Lisää seuraavan kohtauksen otsikon tarinaan ja tiedostoon.
+    Saatavilla vain Käsikirjoitus-tilassa.
+  # Podgląd historii
+  lbl_podglad_historii: "Nykyinen tarina muistissa (vain luku – navigoi nuolilla):"
+  txt_podglad_name: "Täydellinen tarinan esikatselu muistissa – vain luku"
+  txt_podglad_hint: "(muisti on tyhjä – lataa projekti tai aloita uusi)"
+  # Pole instrukcji
+  lbl_instrukcje: |-
+    Ohjeet seuraavaan osaan (kirjoita 'yhteenveto', pakottaaksesi tallennuksen Pysyvä Muistiin):
+  txt_instrukcje_name: "AI:n ohjekenttä – entinen user_input"
+  txt_instrukcje_hint: |-
+    Anna ohjeet seuraavaan tarinan osaan…
+    (esim. 'Kuvaile Geraltin kohtaaminen noidan kanssa metsässä. Suuri jännitys.')
+  btn_wyslij_label: "Lähetä AI:lle"
+  btn_wyslij_tooltip: |-
+    Lähettää ohjeet gpt-4o-mallille ja lisää vastauksen tarinaan.
+    Vaatii aktiivisen API-avaimen ja täytetyn Księga Świata.
+  # Postprodukcja
+  postprod_heading: "🎛️ Jälkituotanto"
+  postprod_info: |-
+    Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen kirjallisen otsikon (AI-analyysi).
+  btn_tytuly_ai_label: "📜 Anna Luvuille Otsikot (AI)"
+  btn_tytuly_ai_name: "Anna Luvuille Otsikot AI -painike"
+  btn_tytuly_ai_tooltip: |-
+    Käy läpi tallennetun tiedoston luvut ja antaa niille otsikot (gpt-4o-mini).
+    Vaatii tallennetun projektitiedoston ja aktiivisen API-avaimen.
+  # Pamięć modelu
+  lbl_pamiec_modelu: "🧠 Mallin muisti (Konteksti-ikkunan tila):"
+  lbl_pamiec_modelu_start: "🟢 Muisti on tyhjä. Kone on valmis uuteen tarinaan."
+  pamiec_modelu_status_name: "AI-mallin muistin tila"
+  # Komunikaty - wczytywanie
+  brak_nazwy_tytul: "Ei nimeä"
+  brak_nazwy_tresc: "Anna projektitiedoston nimi ennen lataamista."
+  plik_nie_istnieje_tytul: "Tiedostoa ei ole olemassa"
+  plik_nie_istnieje_tresc: |-
+    Tiedostoa ei löytynyt:
+    {tresc_bledu}
+
+    Jos aloitat uuden tarinan — aloita vain kirjoittaminen.
+    Tiedosto luodaan automaattisesti, kun lähetät ensimmäisen kerran AI:lle.
+  blad_odczytu_tresc: "Tiedoston lukeminen epäonnistui:\n{tresc_bledu}"
+  status_wczytano_tytul: "Projekti ladattu"
+  status_wczytano_ksiega: " Myös Kirja ladattu: skrypty/{nazwa_projektu}.md."
+  status_wczytano_streszczenie: |-
+    Projektin yhteenveto ladattu '{nazwa_projektu}'.{lore_info}
+    Nykyinen muisti pysyy tyhjänä (Loputon Muisti -tila).
+    Voit jatkaa tarinaa — AI toimii yhteenvedon perusteella.
+  status_wczytano_historia: "Historia ladattu '{nazwa_projektu}' ({liczba_znakow} merkkiä).{lore_info}"
+  # Komunikaty - czyszczenie
+  pamiec_wyczyszczona_tytul: "Muisti tyhjennetty"
+  pamiec_wyczyszczona_tresc: "Nykyinen muisti tyhjennetty."
+  pamiec_wyczyszczona_streszczenie_zostaje: "\nYhteenveto Pitkäaikaisessa Muistissa on säilytetty."
+  hard_reset_pytanie_tytul: "Sulje Projekti – Kova Nollaus"
+  hard_reset_pytanie: |-
+    Haluatko varmasti sulkea projektin?
+
+    Seuraavat tyhjennetään:
+      • nykyinen historia
+      • yhteenveto (Pitkäaikainen Muisti)
+      • Maailman Kirja
+      • kaikki laskurit (luvut, näytökset, kohtaukset)
+
+    Tiedostoja levyllä EI poisteta.
+  hard_reset_ok_tytul: "Projekti suljettu"
+  hard_reset_ok_tresc: "Projekti suljettu. Kaikki muistin tiedot on tyhjennetty."
+  # Zapis Księgi
+  brak_nazwy_ksiega_tytul: "Tiedoston nimi puuttuu"
+  brak_nazwy_ksiega_tresc: "Anna ensin projektitiedoston nimi nimikenttään."
+  ksiega_pusta_tytul: "Tyhjä Maailman Kirja"
+  ksiega_pusta_tresc: "Maailman Kirja on tyhjä. Ei mitään tallennettavaa."
+  ksiega_zapisana_tytul: "Kirja tallennettu"
+  ksiega_zapisana_tresc: "Maailman Kirja tallennettu: skrypty/{nazwa_projektu}.md"
+  blad_zapisu_ksiegi: "Maailman Kirjan tallennusvirhe:\n{tresc_bledu}"
+  # Prompt Architekta dialog
+  prompt_arch_dlg_tytul: "Arkkitehdin Kehote – liitä ulkoiseen chatbotiin"
+  prompt_arch_instrukcja: |-
+    Tämä valmis kehote liitä ulkoiseen chatbotiin (esim. ilmainen ChatGPT tai Claude) ja korvaa teksti "[TÄHÄN KIRJOITA IDEASI]" omalla juonen alullasi.
+
+    AI palauttaa sinulle valmiin Maailman Kirjan Markdown-koodilohkossa — kopioi sen sisältö (ilman ympäröiviä merkkejä ```) ja liitä se yllä olevaan "Maailman Kirja" -kenttään, ja napsauta sitten "Tallenna Kirja pysyvästi".
+  prompt_arch_instrukcja_name: "Arkkitehdin Kehotteen käyttöohje"
+  prompt_arch_lbl: "Kopioitava kehote (Ctrl+A, Ctrl+C):"
+  prompt_arch_tresc_name: "Arkkitehdin Kehotteen koko sisältö"
+  prompt_arch_btn_kopiuj: "📋  Kopioi kehote leikepöydälle"
+  prompt_arch_btn_kopiuj_name: "Kopioi Arkkitehdin Kehote leikepöydälle -painike"
+  prompt_arch_skopiowano_tytul: "Kopioitu"
+  prompt_arch_skopiowano_tresc: |-
+    Arkkitehdin Kehote on kopioitu leikepöydälle.
+    Liitä se (Ctrl+V) ChatGPT:hen tai Claudeen ja korvaa [TÄHÄN KIRJOITA IDEASI] omalla juoni-ideallasi.
+  prompt_arch_schowek_nieudany: |-
+    Järjestelmän leikepöydän avaaminen epäonnistui.
+    Kopioi kehote manuaalisesti: napsauta yllä olevaa kenttää, valitse kaikki (Ctrl+A) ja kopioi (Ctrl+C).
+  # Zapis Streszczenia
+  pamiec_pusta_tytul: "Tyhjä yhteenveto"
+  pamiec_pusta_tresc: "Pitkäaikainen Muisti on tyhjä. Ei mitään tallennettavaa."
+  streszczenie_zapisane_tytul: "Yhteenveto tallennettu"
+  streszczenie_zapisane_tresc: |-
+    Yhteenveto tallennettu: skrypty/{nazwa_projektu}_yhteenveto.txt
+
+    Voit nyt turvallisesti tyhjentää nykyisen muistin.
+  blad_zapisu_streszczenia: "Yhteenvedon tallennusvirhe:\n{tresc_bledu}"
+  # Wysyłanie do AI
+  brak_api_tytul: "Ei APIa"
+  brak_api_tresc: |-
+    Ei yhteyttä OpenAI:hin.
+    Tarkista tiedosto golden_key.env ja käynnistä sovellus uudelleen.
+  puste_pole_tytul: "Tyhjä kenttä"
+  puste_pole_tresc: "Kirjoita ohjeet AI:lle ennen lähettämistä."
+  brak_przepisow_tytul: "Ei reseptejä"
+  brak_przepisow_tresc: |-
+    Yhtään toimintatilaa ei voitu ladata YAML:stä.
+    Suorita odswiez_rezysera.py tai tarkista dictionaries/pl/rezyser/.
+  brak_nazwy_wyslanie_tresc: |-
+    Anna projektitiedoston nimi ennen kuin luot tallennettavan tekstin.
+    (Tila '{tytul_trybu}' vaatii tiedoston nimen.)
+  brak_ksiegi_tytul: "Ei Maailman Kirjaa"
+  brak_ksiegi_tresc: |-
+    Täydennä Maailman Kirja ennen kuin lähetät kyselyn AI:lle.
+    Maailman säännöt ja hahmot ovat mallin vaatimia.
+  blad_trybu_tytul: "Tilavirhe"
+  blad_trybu_tresc: |-
+    Yrität luoda yhteenvetoa tiedostoon tallennustilassa!
+    Tämä voisi vahingoittaa tarinaasi.
+
+    Vaihda 'Aivoriihi'-tilaan ja yritä uudelleen.
+  err_rate_limit: "Ei OpenAI-krediittejä! Lataa tilisi ja yritä uudelleen."
+  err_odrzucenie: |-
+    AI hylkäsi kehotteen (tunnistettu tunniste [ODRZUCENIE_AI]).
+    Tekstiä EI tallenneta tiedostoon.
+    Voit muokata ohjetta ja yrittää uudelleen.
+  blad_ai_tytul: "AI-virhe"
+  blad_ai_szczegoly_tytul: "AI-virhe – Teknisiä yksityiskohtia"
+  blad_ai_naglowek: "Odottamaton virhe tapahtui käsittelyn aikana."
+  blad_ai_lbl_tresc: "Virheen sisältö (valitse Ctrl+A, kopioi Ctrl+C – raportointia varten):"
+  blad_ai_tresc_name: "Kopioitava virheen sisältö"
+  # Wstawianie struktury (potwierdzenia)
+  struktura_brak_nazwy_tytul: "Ei nimeä"
+  struktura_brak_nazwy_tresc: "Anna projektitiedoston nimi ennen rakenteen lisäämistä."
+  blad_wstawiania_prolog: "Prologin lisäämisvirhe:\n{tresc_bledu}"
+  blad_wstawiania_epilog: "Epilogin lisäämisvirhe:\n{tresc_bledu}"
+  blad_wstawiania_rozdzialu: "Luvun lisäämisvirhe:\n{tresc_bledu}"
+  blad_wstawiania_aktu: "Näytöksen lisäämisvirhe:\n{tresc_bledu}"
+  blad_wstawiania_sceny: "Kohtauksen lisäämisvirhe:\n{tresc_bledu}"
+  prolog_tytul: "Prologi lisätty"
+  prolog_tresc: "Otsikko lisätty: Prologi.\n\nAloita prologin sisällön kirjoittaminen."
+  epilog_tytul: "Epilogi lisätty"
+  epilog_tresc: |-
+    Otsikko lisätty: Epilogi.
+
+    Sisällön generointi Epilogin jälkeen on estetty.
+  rozdzial_tytul: "Luvun katkaisu lisätty"
+  rozdzial_tresc: "Otsikko lisätty: {naglowek}."
+  akt_tytul: "Näytös lisätty"
+  akt_tresc: "Lisätty: {akt_naglowek} ja {scena_naglowek}."
+  scena_tytul: "Kohtaus lisätty"
+  scena_tresc: "Otsikko lisätty: {naglowek}."
+  # Odpowiedź AI – Burza Mózgów
+  burza_dlg_tytul: "AI-vastaus – Aivoriihi"
+  burza_dlg_lbl: "Kopioi valittu teksti (Ctrl+A, Ctrl+C) tai sulje:"
+  burza_dlg_name: "AI-vastaus – Aivoriihi"
+  # Postprodukcja
+  tytuly_brak_nazwy_tytul: "Projektin nimi puuttuu"
+  tytuly_brak_nazwy_tresc: "Anna projektin nimi ennen otsikoiden antamista."
+  tytuly_zajety_tytul: "Varattu"
+  tytuly_zajety_tresc: "Toinen AI-kysely on jo käynnissä. Odota, että se valmistuu."
+  tytuly_brak_pliku_tytul: "Projektitiedosto puuttuu"
+  tytuly_brak_pliku_tresc: |-
+    Tiedostoa ei löytynyt:
+    {sciezka_pliku}
+
+    Luo ja tallenna ensin projektin sisältö.
+  tytuly_prep: "Valmistellaan…"
+  tytuly_brak_przepisu_tresc: |-
+    Reseptiä 'tytuly' ei löytynyt YAML:stä (dictionaries/pl/rezyser/postprod_tytuly.yaml).
+    Ilman sitä lukujen otsikoiden jälkikäsittely ei ole käytettävissä.
+  tytuly_blad_naglowek: "Virhe tapahtui lukujen otsikoiden generoinnissa."
+  tytuly_blad_nieznany: "Tuntematon virhe otsikoinnissa."
+  tytuly_czesciowe_naglowek: "⚠️ Osittaiset tulokset (generointi keskeytettiin virheellä):\n\n{wyniki}"
+  tytuly_dlg_tytul: "Ehdotetut Lukuotsikot (AI)"
+  tytuly_dlg_lbl: "Kopioi otsikot (Ctrl+A, Ctrl+C) tai merkitse ne Maailman Kirjaan:"
+  tytuly_dlg_name: "Lista ehdotetuista lukuotsikoista"
+  tytuly_gotowe: "Valmis! Otsikot luotu."
+  blad_zapisu_do_pliku: "Tiedostoon tallennusvirhe:\n{tresc_bledu}"
+
+# -----------------------------------------------------------------------------
+# POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
+# -----------------------------------------------------------------------------
+poliglota:
+  panel_name: "AI Polyglot -paneeli"
+  heading: "🌍  Polyglot AI – Hybridikäännösstudio"
+  description_name: "Polyglot-moduulin kuvaus"
+  tool_description: |-
+    Polyglot-moduuli on tarkoitettu kovien foneettisten aksenttien asettamiseen paikallisille puhesyntetisaattoreille (NVDA/Vocalizer/eSpeak), tekstileikkeihin Kryptaajan Tilassa sekä tekstien kääntämiseen AI:n avulla (OpenAI gpt-4o).
+
+    Tukee tiedostoja: .txt, .html, .htm, .docx.
+    Tulos tallennetaan samaan hakemistoon kuin lähdetiedosto.
+  # Sekcja 1: wczytywanie pliku
+  section1_heading: "1. Lähdetiedoston lataaminen"
+  lbl_plik: "Tiedoston nimi tai koko polku (.txt, .html, .htm, .docx):"
+  txt_plik_name: "Lähdetiedoston polkukenttä"
+  txt_plik_hint: "Kirjoita tiedoston polku tai valitse Selaa… -painikkeella"
+  btn_przegladaj: "Selaa…"
+  btn_przegladaj_tooltip: "Avaa järjestelmän tiedostonvalintaikkuna"
+  btn_wczytaj: "Lataa tiedosto muistiin"
+  btn_wczytaj_tooltip: "Lataa valitun tiedoston sisältö työmuistiin"
+  btn_wyczysc: "Tyhjennä muisti"
+  btn_wyczysc_tooltip: "Poistaa ladatun sisällön, mahdollistaa toisen tiedoston valinnan"
+  lbl_plik_status_name: "Ladatun tiedoston tila"
+  plik_status_brak: "Ei ladattua tiedostoa."
+  plik_status_wczytany: "Tiedosto ladattu: {nazwa_pliku}  ({liczba_znakow} merkkiä).\nVoit nyt aloittaa käsittelyn."
+  plik_status_wyczyszczono: "Muisti tyhjennetty. Voit ladata uuden tiedoston."
+  # Plik dialog
+  file_dlg_title: "Valitse lähdetiedosto"
+  file_dlg_wildcard: |-
+    Tuetut tiedostot (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Tekstitiedostot (*.txt)|*.txt|HTML-tiedostot (*.html;*.htm)|*.html;*.htm|Word-dokumentit (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*
+  # Komunikaty wczytywania
+  brak_pliku_tresc: "Anna tiedoston nimi tai polku ennen lataamista."
+  plik_nie_istnieje_tresc: "Tiedostoa ei löytynyt:\n{sciezka_pliku}"
+  blad_odczytu_tresc: "Virhe tiedoston lukemisessa:\n{tresc_bledu}"
+  plik_wczytany_tytul: "Tiedosto ladattu"
+  plik_wczytany_tresc: |-
+    Tiedosto ladattu: {nazwa_pliku}
+    ({liczba_znakow} merkkiä).
+
+    Voit nyt määrittää toimintatilan ja aloittaa käsittelyn.
+  # Sekcja 2: konfiguracja trybu pracy
+  section2_heading: "2. Työkonfiguraatio"
+  rb_ai: "AI-kääntäjä (OpenAI gpt-4o – vaatii API-avaimen, maksaa krediittejä)"
+  rb_ai_disabled: "AI-kääntäjä (pois käytöstä – golden_key.env-tiedosto puuttuu tai on virheellinen)"
+  rb_ai_name: "AI-kääntäjän tila"
+  rb_rezyser: "Ohjaajan tila (ilmaiset foneettiset säännöt YAML:stä)"
+  rb_rezyser_name: "Ohjaajan tila ilmainen"
+  rb_szyfrant: "Kryptaajan tila (tekstileikit, satunnainen katkaisu)"
+  rb_szyfrant_name: "Kryptaajan tila ja tekstileikit"
+  # Panel AI
+  lbl_jezyk_docelowy: "Käännöksen kohdekieli (esim. Suomi, Islanti, Englanti, Arabia):"
+  txt_jezyk_name: "Kohdekielen kenttä"
+  txt_jezyk_hint: "Kirjoita kohdekielen nimi…"
+  # Panel Reżysera
+  lbl_akcent: "Valitse aksentti tai puhdistustila:"
+  combo_akcent_name: "Aksenttien ja puhdistustilojen lista"
+  combo_akcent_tooltip: "Valitse foneettinen aksentti tai tekstin puhdistustila ruudunlukijoille"
+  lbl_iso: "Kielen ISO-koodi (2 kirjainta, esim. en, fr, de):"
+  txt_iso_name: "Kielen ISO-koodin kenttä"
+  txt_iso_hint: "esim. en"
+  # Panel Szyfranta
+  lbl_szyfr: "Valitse vääristysalgoritmi:"
+  combo_szyfr_name: "Suojausalgoritmien lista"
+  lbl_cezar: "Caesarin salauksen siirto (0 = satunnainen, alue {min_przesuniecie}…{max_przesuniecie}):"
+  spin_cezar_name: "Caesarin salauksen siirto"
+  # Sekcja 3: Przetwarzanie
+  section3_heading: "3. Käsittely"
+  btn_process: "Aloita Käsittely"
+  btn_process_tooltip: "Käynnistää valitun käsittelyn ja tallentaa tuloksen lähdetiedoston viereen"
+  lbl_progress_name: "Käsittelyn etenemisen tila"
+  # Sekcja 4: Wynik
+  section4_heading: "4. Tulos (vain luku – navigoi nuolilla)"
+  txt_wynik_name: "Tuloskenttä – valmis teksti"
+  txt_wynik_hint: "Tänne ilmestyy käsitelty sisältö…"
+  # Przetwarzanie – komunikaty
+  brak_pliku_pamieci_tytul: "Ei tiedostoa muistissa"
+  brak_pliku_pamieci_tresc: "Lataa ensin lähdetiedosto (osio 1)."
+  zajety_tytul: "Varattu"
+  zajety_tresc: "Käsittely on jo käynnissä. Odota, kunnes se on valmis."
+  brak_jezyka_tytul: "Ei kieltä"
+  brak_jezyka_tresc: "Syötä kohdekieli ennen käynnistämistä."
+  nie_wybrano_akcentu: "Ei aksenttia valittuna."
+  nie_wybrano_szyfru: "Ei salakirjoitusta valittuna."
+  brak_iso_tytul: "Ei ISO-koodia"
+  brak_iso_tresc: "Anna kelvollinen kaksikirjaiminen ISO-kielikoodi (esim. en, fr, de)."
+  ostrzezenie_jezyk: |-
+    Huomio: Havaittu pääkieli muu kuin puola. Foneettiset säännöt on mukautettu puolalle – vaikutus voi olla arvaamaton.
+  blad_przetwarzania: "Käsittelyvirhe:\n{tresc_bledu}"
+  cezar_losowe_tytul: "Caesarin salakirjoitus – satunnainen siirto"
+  cezar_losowe_tresc: "Siirtoarvo oli 0 – arvottu: {wylosowane_przesuniecie}."
+  blad_wyniku_tytul: "Virhe"
+  blad_wyniku_tresc: "Tulostetekstin luominen epäonnistui."
+  blad_zapisu_wyjscia: "Virhe tulostiedoston tallennuksessa:\n{tresc_bledu}"
+  sukces_zapis: "Tiedosto tallennettu nimellä:\n{sciezka_pliku}"
+  # Tłumacz AI
+  ai_init: "Käännöksen alustaminen…"
+  ai_zakonczone_tytul: "Onnistui"
+  ai_zakonczone_tresc: "Käännös valmis!\n\nTiedosto tallennettu nimellä:\n{sciezka_pliku}"
+  ai_blad_zapisu: "Virhe tulostiedoston tallennuksessa:\n{tresc_bledu}"
+  # Wyświetlanie błędu AI
+  blad_ai_tytul: "Virhe"
+  blad_ai_szczegoly_tytul: "Virhe – Tekninen yksityiskohta"
+  blad_ai_naglowek: "Odottamaton virhe tapahtui käsittelyn aikana."
+  blad_ai_lbl_tresc: "Virheen sisältö (valitse Ctrl+A, kopioi Ctrl+C – raportointia varten):"
+  blad_ai_tresc_name: "Virheen sisältö kopioitavaksi"
+
+# -----------------------------------------------------------------------------
+# KONWERTER – panel modułu Konwerter (gui_konwerter.py)
+# -----------------------------------------------------------------------------
+konwerter:
+  panel_name: "Äänikirja-arkkitehdin paneeli"
+  heading: "📄  Äänikirja-arkkitehti"
+  tool_description: |-
+    Tämä moduuli on tarkoitettu tiedoston rakenteen valmisteluun ruudunlukijoille (navigointi otsikoiden mukaan näppäimillä 1 ja h) sekä ElevenLabsille. Se muuttaa avainsanat (Alku, Näytös, Luku, Prologi, Epilogi) ensimmäisen tason otsikoiksi, jättäen muun käsikirjoituksen ennalleen.
+  lbl_plik: |-
+    Lähdetiedoston nimi tai koko polku
+    (esim. .txt, .html, .md tai .docx-dokumentti):
+  txt_plik_name: "Lähdetiedoston polkukenttä"
+  txt_plik_hint: "Kirjoita tiedoston polku (teksti, HTML, MD, DOCX)…"
+  btn_przegladaj: "Selaa…"
+  btn_przegladaj_tooltip: "Avaa järjestelmän tiedostonvalintaikkunan .txt- tai .docx-tiedostolle"
+  btn_buduj: "Rakenna arkkitehtuuri ElevenLabsille"
+  btn_buduj_tooltip: "Käsittelee tiedoston ja tallentaa arkkitehtuuri_<nimi>.docx lähdetiedoston viereen"
+  # Metadana zapisywana do pola `author` w core_properties wynikowego .docx.
+  # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
+  # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
+  author_metadata: "Ohjaaja"
+  # Dialog wyboru pliku
+  file_dlg_title: "Valitse lähdetiedosto"
+  file_dlg_wildcard: "Kaikki tuetut tiedostot (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word-dokumentit (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*"
+  # Komunikaty
+  brak_pliku_tytul: "Ei tiedostoa"
+  brak_pliku_tresc: "Anna lähdetiedoston nimi tai polku."
+  plik_nie_istnieje_tytul: "Tiedostoa ei ole olemassa"
+  plik_nie_istnieje_tresc: "Tiedostoa ei löytynyt:\n{sciezka_pliku}"
+  blad_odczytu_tytul: "Lukuvirhe"
+  blad_odczytu_tresc: "Virhe tiedoston lukemisessa:\n{tresc_bledu}"
+  blad_zapisu_tytul: "Tallennusvirhe"
+  blad_zapisu_tresc: "Virhe tulostiedoston tallennuksessa:\n{tresc_bledu}"
+  sukces_tytul: "Onnistui"
+  sukces_tresc: |-
+    Perfetto! Ensimmäisen tason otsikot on asetettu.
+
+    Tiedosto tallennettu nimellä:
+    {sciezka_pliku}
+
+# -----------------------------------------------------------------------------
+# MANAGER – panel Managera Reguł (gui_manager_regul.py)
+# -----------------------------------------------------------------------------
+manager:
+  panel_name: "Sääntöjen hallintapaneeli – sanakirjojen tutkija"
+  desc: |-
+    Sääntöjen hallinta mahdollistaa YAML-tiedostojen selaamisen ja muokkaamisen dictionaries/-kansiossa ilman, että tarvitsee avata järjestelmän tiedostoselainta. Valitse tiedosto vasemmanpuoleisesta puusta ja käytä oikeanpuoleisia painikkeita: avaa tekstieditorissa, luo uusi tiedosto, kopioi tai poista.
+
+    Vaikeampiin tehtäviin (uusi kieli, vieraan foneettinen aksentti, algoritminen salakirjoitus) Manager luo kehotteen AI-chatbotille – riittää, että liität sen ChatGPT:hen tai Claudeen ja tallennat vastauksen.
+  desc_name: "Sääntöjen hallinnan kuvaus"
+  # Drzewo
+  tree_name: "dictionaries-tiedostopuu"
+  tree_tooltip: |-
+    Kaikkien dictionaries/-kansion YAML-tiedostojen puu. Laajenna kieli, sitten kategoria ja valitse tiedosto. Nuolinäppäimet ja Enter toimivat NVDA:ssa tavallisesti.
+  tree_root: "Sanakirjat (dictionaries/)"
+  tree_brak_folderu: "⚠️  Ei dictionaries/-kansiota – luo ensimmäinen kieli painikkeella „Uusi sääntötiedosto…\"."
+  tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
+  tree_podstawy: "📄  perusteet.yaml  (diakriitit + aakkoset)"
+  tree_kategoria: "{etykieta}  [{liczba_plikow}]"
+  tree_plik: "📄  {nazwa_pliku}"
+  # Etykiety kategorii drzewa
+  kategorie:
+    akcenty: "Aksentit (foneettinen TTS:lle)  🎙️"
+    szyfry: "Salakirjoitukset (tekstileikit)  🔐"
+    rezyser: "Ohjaaja (tilat ja jälkituotanto)  🎬"
+    gui: "UI-käännökset  🌐"
+  # Przyciski akcji
+  btn_otworz_label: "📝  &Avaa tekstieditorissa"
+  btn_otworz_name: "Painike Avaa valittu tiedosto tekstieditorissa"
+  btn_otworz_tooltip: "Avaa valitun YAML-tiedoston järjestelmän oletustekstieditorissa (Notepad Windowsissa, TextEdit macOS:ssä)."
+  btn_nowy_label: "➕  &Uusi sääntötiedosto…"
+  btn_nowy_name: "Painike Luo uusi sääntötiedosto"
+  btn_nowy_tooltip: "Avaa uuden tiedoston luontityökalun: valitse tyyppi (aksentti, salakirjoitus, ohjaajan tila, peruskieli), Manager luo mallin tai generoi kehotteen AI:lle."
+  btn_duplikuj_label: "📋  &Kopioi valittu tiedosto"
+  btn_duplikuj_name: "Painike Kopioi valittu tiedosto"
+  btn_duplikuj_tooltip: "Luo kopion valitusta YAML-tiedostosta uudella nimellä – nopea aloitus olemassa olevan säännön variantille."
+  btn_usun_label: "🗑️  &Poista valittu tiedosto"
+  btn_usun_name: "Painike Poista valittu tiedosto"
+  btn_usun_tooltip: "Poistaa valitun YAML-tiedoston levyltä (vahvistuksella). Toiminto on peruuttamaton – mieti kahdesti."
+  btn_odswiez_label: "🔄  Päi&vitä puu"
+  btn_odswiez_name: "Painike Päivitä tiedostopuu"
+  btn_odswiez_tooltip: "Lataa puu uudelleen levyltä – käytä, jos muutit tiedostoja manuaalisesti Resurssienhallinnassa tai tallennuksen jälkeen tekstieditorissa."
+  info_stopka: |-
+    Kun olet luonut uuden aksentin, palaa etusivulle
+    ja napsauta „Päivitä ohjaajan aksentit YAML:stä".
+  # Otwarcie w edytorze
+  plik_wne_tytul: "Tiedostoa ei voi avata"
+  plik_wne_tresc: |-
+    Tiedosto sijaitsee dictionaries/-kansion ulkopuolella tai sitä ei enää ole.
+    Päivitä puu ja yritä uudelleen.
+  blad_otwarcia_tytul: "Tieto"
+  blad_otwarcia_tresc: "Tiedostoa ei voitu avata automaattisesti.\nAvaa se manuaalisesti:\n{sciezka_pliku}\n\nYksityiskohdat: {tresc_bledu}"
+  # Duplikowanie
+  dup_dlg_tytul: "Kopioi YAML-tiedosto"
+  dup_dlg_label: |-
+    Anna tiedoston uusi nimi (ilman laajennusta, vain ASCII, lower_snake).
+    Lähdetiedosto: {nazwa_pliku}
+  dup_nazwa_blad_tytul: "Tiedostonimen virhe"
+  dup_nazwa_blad_tresc: |-
+    Virheellinen nimi.
+
+    Sallitut: pienet ASCII-kirjaimet, numerot ja alaviivat. Ensimmäisen merkin on oltava kirjain.
+    Esimerkkejä: ruotsi, uusi_tila, jälkituotanto_luvut.
+  dup_poza_dict_tytul: "Virhe"
+  dup_poza_dict_tresc: "Kohdepolku sijaitsee dictionaries/-kansion ulkopuolella."
+  dup_istnieje_tytul: "Tiedosto on jo olemassa"
+  dup_istnieje_tresc: |-
+    Tiedosto {nazwa_pliku}.yaml on jo olemassa tässä kansiossa.
+    Valitse toinen nimi.
+  dup_blad: "Kopion luominen epäonnistui:\n{tresc_bledu}"
+  dup_komentarz_naglowek: |-
+    # Kopioitu: {nazwa_pliku}
+    # HUOMIO: muuta kenttiä `etiketti` ja `kuvaus`, ja tallenna sitten tiedosto.
+  dup_ok_tytul: "Kopio luotu"
+  dup_ok_tresc: |-
+    Kopio luotu: {nazwa_pliku}
+
+    Tekstieditori avautuu automaattisesti. Muuta kenttiä `etiketti` ja `kuvaus`, tallenna tiedosto (Ctrl+S), ja palaa sitten Manageriin ja napsauta „Päivitä puu".
+  # Usuwanie
+  usun_pytanie_tytul: "Vahvista poisto"
+  usun_pytanie_tresc: |-
+    Haluatko varmasti poistaa tiedoston:
+
+    {nazwa_pliku}
+    (kansiosta {katalog_wzgledny})
+
+    Toiminto on PERUUTTAMATON.
+  usun_blad: "Tiedoston poistaminen epäonnistui:\n{tresc_bledu}"
+  usun_ok_tytul: "Poistettu"
+  usun_ok_tresc: |-
+    Tiedosto poistettu. Muista, että aksentin poistamisen jälkeen napsauta „Päivitä ohjaajan aksentit YAML:stä" etusivulla.
+  # Kreator
+  kreator_tytul: "Uusi sääntötiedosto – luontityökalu"
+  kreator_co_utworzyc: "Mitä haluat luoda?"
+  kreator_cb_name: "Uuden sääntötiedoston tyypin valinta"
+  kreator_opis_name: "Valitun sääntötyypin kuvaus"
+  kreator_lbl_id: "Tunniste (tiedoston nimi):"
+  kreator_id_name: "Tiedoston tunnistekenttä"
+  kreator_id_hint: "esim. ruotsi  (pienet kirjaimet, ei välilyöntejä)"
+  kreator_lbl_etykieta: "Etiketti (näkyy käyttöliittymässä):"
+  kreator_etykieta_name: "Säännön etikettikenttä"
+  kreator_etykieta_hint: 'esim. "Ruotsi (Alva / Oskar)"'
+  kreator_lbl_iso: "Kohdekielen ISO-koodi:"
+  kreator_iso_name: "Kielen ISO-koodikenttä"
+  kreator_iso_hint: "esim. sv, de, en (2 merkkiä)"
+  kreator_lbl_jezyk: "Peruskieli (kansio dictionaries/…):"
+  kreator_jezyk_name: "Peruskielen valinta (kansio)"
+  kreator_lbl_opis: "Vaikutuksen kuvaus (AI:lle):"
+  kreator_opis_efektu_name: "Vaikutuksen kuvauskenttä (vain algoritmiselle salakirjoitukselle)"
+  kreator_opis_efektu_hint: "Kuvaile 1-3 lauseella, mitä tämä salakirjoitus tekee (syöte → tuloste)."
+  kreator_btn_utworz: "Luo"
+  # Kreator – hinty dla języka bazowego
+  kreator_jezyk_bazowy_id_hint: "esim. en, de, fr (ISO 639-1-koodi, 2-3 merkkiä)"
+  kreator_jezyk_bazowy_etykieta_hint: "esim. Englanti, Saksa…"
+  kreator_jezyk_bazowy_iso_label: "Kielen nimi (toistettu mallissa):"
+  kreator_jezyk_bazowy_iso_hint: "esim. Englanti"
+  # Kreator – walidacje
+  kreator_alert_tytul: "Kenttä puuttuu tai on virheellinen"
+  kreator_blad_kod_jezyka: "Kielikoodin on oltava 2- tai 3-kirjaiminen (ISO 639-1/3)."
+  kreator_blad_nazwa_jezyka: "Anna kielen nimi (esim. Englanti)."
+  kreator_blad_id: |-
+    Tiedoston tunnisteen on oltava ASCII lower_snake-muodossa.
+    Esimerkkejä: ruotsi, tila_päiväkirja, jälkituotanto_tiivistelmät.
+  kreator_blad_etykieta: "Anna käyttöliittymässä näkyvä etiketti."
+  kreator_blad_iso: "Anna kohdekielen ISO-koodi (esim. sv, de)."
+  kreator_blad_opis_efektu: |-
+    Algoritmiselle salakirjoitukselle kuvaile vaikutus sanoin – tämä kuvaus menee AI-kehotteeseen.
+  # Wynik kreatora
+  wynik_tytul: "Uusi sääntötiedosto – tulos"
+  wynik_sukces_naglowek: "✅  Tiedosto luotu:\n{sciezka_pliku}"
+  wynik_brak_pliku_naglowek: |-
+    ℹ️  Tiedostoa ei luotu (tämä sääntötyyppi vaatii Python-koodia ohjelmoijalta – katso AI-kehote alla).
+  wynik_lbl_uwagi: "Seuraavat vaiheet:"
+  wynik_uwagi_name: "Huomautuksia luodusta säännöstä"
+  wynik_lbl_prompt: "AI-kehote (liitä ChatGPT:hen / Claudeen):"
+  wynik_prompt_name: "Kehote liitettäväksi AI-chatbotiin"
+  wynik_btn_kopiuj: "📋  Kopioi kehote leikepöydälle"
+  wynik_btn_kopiuj_name: "Painike Kopioi AI-kehote leikepöydälle"
+  wynik_skopiowano_tytul: "Kopioitu"
+  wynik_skopiowano_tresc: |-
+    Kehote on kopioitu leikepöydälle.
+    Liitä se (Ctrl+V) ChatGPT:hen tai Claudeen.
+  wynik_schowek_nieudany_tytul: "Leikepöytä ei ole käytettävissä"
+  wynik_schowek_nieudany_tresc: |-
+    Järjestelmän leikepöytää ei voitu avata.
+    Kopioi kehote manuaalisesti: Ctrl+A, Ctrl+C yllä olevassa kentässä.
+  # Nadpisywanie pliku
+  plik_istnieje_tytul: "Tiedosto on olemassa"
+  plik_istnieje_tresc: "Tiedosto {nazwa_pliku} on jo olemassa.\nKorvataanko?"
+  blad_bezpieczenstwa_tytul: "Turvallisuusvirhe"
+  blad_bezpieczenstwa_tresc: "Kohdepolku sijaitsee dictionaries/-kansion ulkopuolella. Keskeytetään."
+  blad_tworzenia: "Tiedoston luominen epäonnistui:\n{tresc_bledu}"
+  niepelna_struktura_tytul: "Kielen rakenne on puutteellinen"
+  niepelna_struktura_tresc: |-
+    Tiedosto perusteet.yaml tallennettu, mutta kansioiden aksentit/ ja salakirjoitukset/ luominen epäonnistui:
+    {tresc_bledu}
+
+    Luo ne manuaalisesti Resurssienhallinnassa ennen Polygotin käynnistämistä – muuten moottori antaa virheen uuden kielen skannauksen yhteydessä.
