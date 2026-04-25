@@ -63,6 +63,7 @@ main:
     konwerter:           "&Konwerter\tCtrl+3"
     manager:             "&Manager Reguł\tCtrl+4"
     zakoncz:             "Za&kończ\tAlt+F4"
+    jezyk_interfejsu:    "&Język interfejsu"
   menu_status:
     strona_glowna:       "Wróć do ekranu startowego z opisem narzędzi i System Check"
     rezyser:             "Otwiera moduł Reżyserii – pisanie skryptów i prozy z AI"
@@ -70,6 +71,7 @@ main:
     konwerter:           "Otwiera moduł Konwertera – tworzenie plików Word"
     manager:             "Otwiera Managera Reguł – eksplorator plików YAML w dictionaries/ i kreator nowych akcentów / trybów / szyfrów"
     zakoncz:             "Zamknij aplikację"
+    jezyk_interfejsu:    "Wybierz język interfejsu aplikacji (zmiana wymaga ponownego uruchomienia)"
   btn:
     rezyser:             "🎬  &Reżyser"
     poliglota:           "🌍  &Poliglota"
@@ -86,6 +88,12 @@ main:
     poliglota:           "Poliglota"
     konwerter:           "Konwerter"
     manager:             "Manager Reguł"
+  dialog:
+    zmiana_jezyka_tytul: "Zmiana języka interfejsu"
+    zmiana_jezyka_tresc: |-
+      Zmiana języka interfejsu wymaga ponownego uruchomienia aplikacji.
+
+      Kliknij OK, aby zamknąć aplikację. Po ponownym uruchomieniu interfejs będzie w wybranym języku ({nazwa_jezyka}).
 
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)

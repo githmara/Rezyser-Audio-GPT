@@ -13,6 +13,7 @@ import subprocess
 
 import wx
 
+import core_poliglota
 import i18n
 import odswiez_rezysera
 from gui_konwerter import KonwerterPanel
@@ -31,6 +32,110 @@ ID_TOOL_POLIGLOTA  = wx.NewIdRef()
 ID_TOOL_KONWERTER  = wx.NewIdRef()
 ID_TOOL_MANAGER    = wx.NewIdRef()   # Manager Reguł – nowość w 13.0
 ID_EXIT            = wx.NewIdRef()
+
+
+# ---------------------------------------------------------------------------
+# Konfiguracja użytkownika (wx.Config — cross-platform: rejestr Windows,
+# plik INI na Linux, plist na macOS).
+# ---------------------------------------------------------------------------
+_NAZWA_APP_CONFIG  = "RezyserAudioGPT"
+_KLUCZ_CONFIG_JEZYK = "/JezykInterfejsu"
+
+
+def _natywna_nazwa(kod: str) -> str:
+    """Natywna nazwa języka (prefiks `etykieta` w `<kod>/podstawy.yaml`).
+
+    Przykład: dla `kod="fi"` zwraca ``"Suomi"`` (z etykiety
+    ``"Suomi – foneettiset perusteet"``). Fallback na sam kod ISO,
+    gdy etykieta nie ma separatora ` – ` lub nie istnieje.
+    """
+    etyk = core_poliglota._zaladuj_podstawy(kod).get("etykieta", "")
+    if isinstance(etyk, str) and etyk:
+        nazwa = etyk.split(" – ", 1)[0].strip()
+        if nazwa:
+            return nazwa
+    return kod
+
+
+def _wybierz_jezyk_startowy() -> str:
+    """Decyduje, który język interfejsu załadować na starcie aplikacji.
+
+    Logika (w kolejności):
+
+      1. Jeśli `wx.Config` ma zapisaną wartość pod kluczem
+         `/JezykInterfejsu` i ten kod jest dziś *kompletny*
+         (tj. obecny w :func:`core_poliglota.dostepne_jezyki_bazowe`)
+         — używamy go.
+      2. Jeśli kompletny jest tylko jeden język — milczący zapis
+         (silent init), bez pytania użytkownika.
+      3. Jeśli kompletnych jest ≥ 2 — pokazujemy first-run dialog
+         (hardkodowany po angielsku), zapisujemy wybór do `wx.Config`.
+      4. Awaryjny fallback — :data:`i18n.JEZYK_DOMYSLNY` (= ``"pl"``),
+         np. gdy `dictionaries/` zniknął lub żaden folder nie przechodzi
+         filtra kompletności.
+
+    Wymaga aktywnej instancji `wx.App` (wx.Config zapisuje do rejestru/
+    pliku użytkownika, a wx.SingleChoiceDialog korzysta z głównej pętli
+    GUI). Wywołuj PRZED utworzeniem :class:`MainFrame`.
+    """
+    kompletne = core_poliglota.dostepne_jezyki_bazowe()
+    if not kompletne:
+        return i18n.JEZYK_DOMYSLNY
+
+    cfg = wx.Config(_NAZWA_APP_CONFIG)
+    zapisany = cfg.Read(_KLUCZ_CONFIG_JEZYK, "")
+    if zapisany and zapisany in kompletne:
+        return zapisany
+
+    # Brak ważnego ustawienia — zdecyduj
+    if len(kompletne) == 1:
+        cfg.Write(_KLUCZ_CONFIG_JEZYK, kompletne[0])
+        cfg.Flush()
+        return kompletne[0]
+
+    wybor = _first_run_dialog(kompletne)
+    cfg.Write(_KLUCZ_CONFIG_JEZYK, wybor)
+    cfg.Flush()
+    return wybor
+
+
+def _first_run_dialog(kompletne: list[str]) -> str:
+    """First-run language selector — HARDKODOWANY po angielsku.
+
+    Treść NIE używa modułu i18n, bo użytkownik nie wybrał jeszcze języka
+    interfejsu — angielski to neutralne i powszechnie zrozumiałe domyślne.
+    Lista języków posortowana po kodzie ISO (deterministycznie, bez
+    PL-hardcode na pierwszej pozycji), z natywnymi nazwami pobranymi
+    z `<kod>/podstawy.yaml::etykieta`.
+
+    Cancel → :data:`i18n.JEZYK_DOMYSLNY` (``"pl"``) jako bezpieczny
+    fallback (rdzeń projektu).
+
+    Args:
+        kompletne: lista kodów ISO 639-1, każdy spełnia kryterium
+                   `core_poliglota._jezyk_kompletny`.
+
+    Returns:
+        Wybrany kod ISO (np. ``"fi"``).
+    """
+    kody_sort = sorted(kompletne)
+    nazwy_sort = [_natywna_nazwa(k) for k in kody_sort]
+
+    dlg = wx.SingleChoiceDialog(
+        None,
+        "Please select the application interface language.",
+        "Choose your language",
+        nazwy_sort,
+    )
+    dlg.SetSelection(0)
+    try:
+        if dlg.ShowModal() == wx.ID_OK:
+            wybor = kody_sort[dlg.GetSelection()]
+        else:
+            wybor = i18n.JEZYK_DOMYSLNY
+    finally:
+        dlg.Destroy()
+    return wybor
 
 
 # ---------------------------------------------------------------------------
@@ -467,6 +572,22 @@ class MainFrame(wx.Frame):
         menubar.Append(menu_tools, t("main.menu.narzedzia"))
         menubar.Append(menu_file,  t("main.menu.plik"))
 
+        # --- Menu: Język interfejsu (tylko gdy ≥ 2 kompletne języki) --
+        # Mapa {wx.WindowIDRef: kod_iso}, wypełniana w pętli i odczytywana
+        # przez :meth:`_on_zmien_jezyk`. Pusta gdy menu nie powstaje.
+        self._jezyk_menu_ids: dict[int, str] = {}
+        kompletne = core_poliglota.dostepne_jezyki_bazowe()
+        if len(kompletne) >= 2:
+            menu_lang = wx.Menu()
+            aktualny = i18n.aktualny_jezyk()
+            for kod in kompletne:
+                new_id = wx.NewIdRef()
+                item = menu_lang.AppendRadioItem(new_id, _natywna_nazwa(kod))
+                if kod == aktualny:
+                    item.Check(True)
+                self._jezyk_menu_ids[int(new_id)] = kod
+            menubar.Append(menu_lang, t("main.menu.jezyk_interfejsu"))
+
         self.SetMenuBar(menubar)
 
         # Dostępnościowa nazwa paska menu (NVDA odczyta ją po Alt)
@@ -559,6 +680,11 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_konwerter,  id=ID_TOOL_KONWERTER)
         self.Bind(wx.EVT_MENU, self._on_manager,    id=ID_TOOL_MANAGER)
         self.Bind(wx.EVT_MENU, self._on_exit,       id=ID_EXIT)
+
+        # Menu: Język interfejsu — jeden handler dla wszystkich radio items;
+        # rozróżnienie kodu ISO przez `event.GetId()` w `_on_zmien_jezyk`.
+        for menu_id in self._jezyk_menu_ids:
+            self.Bind(wx.EVT_MENU, self._on_zmien_jezyk, id=menu_id)
 
         # Przyciski (te same identyfikatory → te same handlery przez EVT_BUTTON)
         self.Bind(wx.EVT_BUTTON, self._on_rezyser,   id=ID_TOOL_REZYSER)
@@ -672,6 +798,32 @@ class MainFrame(wx.Frame):
     def _on_exit(self, _event: wx.Event) -> None:
         self.Close()
 
+    def _on_zmien_jezyk(self, event: wx.Event) -> None:
+        """Handler radio-item z menu „Język interfejsu".
+
+        Zapisuje wybór do `wx.Config`, pokazuje komunikat o konieczności
+        restartu (w aktywnym = poprzednim języku, bo nowe tłumaczenia
+        zaczną obowiązywać dopiero po ponownym uruchomieniu) i zamyka
+        aplikację. Brak dynamicznego re-renderu – ryzyko regresji we
+        wszystkich oknach byłoby zbyt duże, a użytkownicy NVDA i tak
+        odzyskują pełen kontekst po ponownym otwarciu okna.
+        """
+        kod = self._jezyk_menu_ids.get(event.GetId())
+        if not kod or kod == i18n.aktualny_jezyk():
+            return  # nic nie zmieniamy
+
+        cfg = wx.Config(_NAZWA_APP_CONFIG)
+        cfg.Write(_KLUCZ_CONFIG_JEZYK, kod)
+        cfg.Flush()
+
+        wx.MessageBox(
+            t("main.dialog.zmiana_jezyka_tresc", nazwa_jezyka=_natywna_nazwa(kod)),
+            t("main.dialog.zmiana_jezyka_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+        self.Close()
+
     def _on_close(self, event: wx.CloseEvent) -> None:
         event.Skip()  # Pozwól wxPython zniszczyć okno w standardowy sposób
 
@@ -680,12 +832,19 @@ class MainFrame(wx.Frame):
 # Punkt wejścia
 # ---------------------------------------------------------------------------
 def main() -> None:
-    # Wersja 13.1: wczytaj tłumaczenia UI przed budową jakiegokolwiek okna.
-    # Jawne ustawienie języka gwarantuje, że plik `dictionaries/pl/gui/ui.yaml`
-    # jest już w cache, zanim konstruktory paneli zaczną pytać o etykiety.
-    i18n.ustaw_jezyk(i18n.JEZYK_DOMYSLNY)
-
+    # Kolejność jest istotna:
+    #   1. wx.App MUSI istnieć przed wx.Config (rejestr/plik użytkownika)
+    #      i przed wx.SingleChoiceDialog (first-run dialog korzysta z GUI).
+    #   2. _wybierz_jezyk_startowy() ustala kod języka z 4 źródeł
+    #      (cfg → silent init → first-run dialog → fallback "pl").
+    #   3. i18n.ustaw_jezyk() ładuje `dictionaries/<kod>/gui/ui.yaml` do
+    #      cache, dzięki czemu konstruktory paneli mogą wołać `t()` bez
+    #      narzutu I/O w wątku GUI.
+    #   4. MainFrame() buduje okno na bazie już-aktywnego języka.
     app = wx.App(False)
+    kod_jezyka = _wybierz_jezyk_startowy()
+    i18n.ustaw_jezyk(kod_jezyka)
+
     frame = MainFrame()  # noqa: F841  (frame jest trzymany przez wx.App)
     app.MainLoop()
 
