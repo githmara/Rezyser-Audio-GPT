@@ -272,6 +272,13 @@ rezyser:
     Brainstorming – planning without file saving.
     Script        – raw audio script (saved to file).
     Audiobook     – traditional literary prose (saved to file).
+  # 13.2: director fallback messages (no rules for UI language nor EN)
+  brak_trybow_dla_jezyka: |-
+    No director AI modes found for language "{jezyk}", and the English
+    fallback (dictionaries/en/rezyser/) is missing too. Add a mode YAML
+    to the language's rules folder or restore the default English pack.
+  brak_trybow_tytul: "No director modes"
+  placeholder_brak_trybow: "(no modes available)"
   # Panel struktury
   struktura_heading: "✂️ Structure Management"
   btn_prolog_label: "📜 Insert Prologue"

@@ -47,7 +47,7 @@ import wx
 import core_rezyser as cr
 import przepisy_rezysera as pr
 import rezyser_ai as rai
-from i18n import t
+from i18n import aktualny_jezyk, t
 
 
 
@@ -102,14 +102,36 @@ class RezyserPanel(wx.Panel):
         # przez ``self._projekt.snapshot()``.
         self._projekt: cr.ProjektRezysera = cr.ProjektRezysera()
 
-        # ── Przepisy twórcze załadowane z YAML-i (dictionaries/pl/rezyser/) ─
-        # Kolejność jest zgodna z dawnym TRYBY_PRACY:
-        # indeks 0 = Burza, 1 = Skrypt, 2 = Audiobook. Dynamika RadioBox
-        # w ``_build_ui`` używa ``p.etykieta`` dla każdego przepisu.
-        self._przepisy: list[pr.PrzepisRezysera] = pr.lista_trybow("pl")
-        self._przepis_tytuly: pr.PrzepisRezysera | None = pr.zaladuj_przepis(
-            "tytuly", kategoria="postprodukcja",
+        # ── Przepisy twórcze załadowane z YAML-i (dictionaries/<jezyk>/rezyser/) ─
+        # 13.2: ładujemy tryby w języku UI z miękkim fallbackiem do EN. Twardego
+        # polskiego fallbacku NIE robimy — etykiety i prompty mają być spójne
+        # z językiem użytkownika, a angielski jest neutralny dla wszystkich.
+        # Kolejność RadioBoxa wynika z pola ``kolejnosc`` w YAML-ach
+        # (Burza=10, Skrypt=20, Audiobook=30).
+        jezyk_ui = aktualny_jezyk()
+        przepisy = pr.lista_trybow(jezyk_ui)
+        if not przepisy and jezyk_ui != "en":
+            przepisy = pr.lista_trybow("en")
+        self._przepisy: list[pr.PrzepisRezysera] = przepisy
+
+        przepis_tytuly = pr.zaladuj_przepis(
+            "tytuly", jezyk=jezyk_ui, kategoria="postprodukcja",
         )
+        if przepis_tytuly is None and jezyk_ui != "en":
+            przepis_tytuly = pr.zaladuj_przepis(
+                "tytuly", jezyk="en", kategoria="postprodukcja",
+            )
+        self._przepis_tytuly: pr.PrzepisRezysera | None = przepis_tytuly
+
+        # Skrajny przypadek: ani język UI, ani EN nie ma trybów — komunikat A11y.
+        if not self._przepisy:
+            wx.CallAfter(
+                wx.MessageBox,
+                t("rezyser.brak_trybow_dla_jezyka", jezyk=jezyk_ui),
+                t("rezyser.brak_trybow_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
 
         # ── Klient OpenAI ──────────────────────────────────────────────────
         self._client = None
@@ -434,10 +456,16 @@ class RezyserPanel(wx.Panel):
     # BLOK D.1 – RadioBox wyboru trybu pracy
     # ------------------------------------------------------------------
     def _zbuduj_radiobox_trybu(self, BORDER: int) -> wx.BoxSizer:
+        # wx.RadioBox z choices=[] rzuca wxAssertionError. Skrajny przypadek
+        # braku trybów (sprawdzony w __init__ + komunikat A11y) zabezpieczamy
+        # placeholderem, żeby panel zbudował się normalnie.
+        choices = [p.etykieta for p in self._przepisy] or [
+            t("rezyser.placeholder_brak_trybow")
+        ]
         self._rb_mode = wx.RadioBox(
             self,
             label=t("rezyser.rb_tryb_label"),
-            choices=[p.etykieta for p in self._przepisy],
+            choices=choices,
             majorDimension=1,
             style=wx.RA_SPECIFY_COLS,
             name=t("rezyser.rb_tryb_name"),

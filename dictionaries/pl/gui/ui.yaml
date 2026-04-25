@@ -288,6 +288,13 @@ rezyser:
     Burza Mózgów – planowanie bez zapisu do pliku.
     Skrypt        – surowy skrypt dźwiękowy (zapisywany do pliku).
     Audiobook     – tradycyjna proza literacka (zapisywana do pliku).
+  # 13.2: komunikaty fallbacku reżysera (gdy brak reguł dla języka UI ani EN)
+  brak_trybow_dla_jezyka: |-
+    Dla języka „{jezyk}" nie znaleziono trybów reżysera AI ani fallbacku
+    angielskiego (dictionaries/en/rezyser/). Dodaj plik YAML z trybem
+    do folderu reguł języka albo przywróć domyślny pakiet angielski.
+  brak_trybow_tytul:     "Brak trybów reżysera"
+  placeholder_brak_trybow: "(brak trybów do wyboru)"
   # Panel struktury
   struktura_heading:     "✂️ Zarządzanie Strukturą"
   btn_prolog_label:      "📜 Wstaw Prolog"
