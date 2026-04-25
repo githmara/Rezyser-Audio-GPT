@@ -1,0 +1,36 @@
+# -----------------------------------------------------------------------------
+#  CIPHER: VOWELIZER
+#  Replaces every vowel with 'o' (or 'O'). Pure Step 3 of the polish
+#  three-step algorithm — English has no equivalent of the polish soft
+#  consonants (dzi/ci/ni/si/zi), so Steps 1 and 2 are intentionally empty.
+# -----------------------------------------------------------------------------
+id: samogloskowiec
+etykieta: "Vowelizer (Everything booms on 'O')"
+opis: |
+  "Wherever you look — only O" effect. For English the algorithm collapses
+  to a single step (the polish softening logic does not apply): every vowel
+  is replaced with 'o' (or 'O').
+
+  Note: English diphthongs ('ou', 'ea', 'ie' etc.) collapse to 'oo' / 'oo' /
+  'oo'. This is intentional — the cipher's purpose is the comic effect, not
+  phonetic accuracy.
+iso: en
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# -----------------------------------------------------------------------------
+# Steps 1 and 2 (polish-specific softening) — intentionally empty for English.
+# Engine accepts empty lists without error.
+# -----------------------------------------------------------------------------
+zmiekszenia_przed_samogloska: []
+zmiekszenia_przed_spolgloska: []
+
+# -----------------------------------------------------------------------------
+# Step 3: vowel replacement.
+# `samogloski_*` are character-class strings used by the engine's regex.
+# -----------------------------------------------------------------------------
+samogloski_male:             "aeiouy"
+samogloski_wielkie:          "AEIOUY"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"

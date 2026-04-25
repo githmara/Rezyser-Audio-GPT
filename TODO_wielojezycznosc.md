@@ -1,4 +1,4 @@
-# TODO: Wielojęzyczne skrótowce (notatka robocza)
+# TODO: Wielojęzyczność (notatka robocza)
 
 > **Status pliku:** Osobista notatka autora projektu. Plik nie trafia do
 > paczek releasowych – `buduj_wydanie.py` i `skrypt_instalatora.iss`
@@ -235,7 +235,7 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 5. **Release** jako kolejna wersja **13.x**: jeden nowy w pełni wdrożony
    język na release (od 13.3 wzwyż). Gdy ten plik zostanie wyczerpany
    (wszystkie języki z sekcji 3.1 i 3.2 zamknięte), następny release to
-   **14.0**, a plik `TODO_skrotowce_wielojezyczne.md` można usunąć
+   **14.0**, a plik `TODO_wielojezycznosc.md` można usunąć
    z repozytorium.
 
    > **Uwaga o numeracji 13.1 i 13.2.** Wbrew pierwotnemu założeniu
@@ -404,3 +404,77 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 | `Véase pág 12 para más información sobre el tema tratado.`              | brak `.` po `pág`            | ⚠️ nie rozwinięte (regex: `pág\.`)              |
 | `El núm 5 de la colección es el más buscado por los lectores.`          | brak `.` po `núm`            | ⚠️ nie rozwinięte (regex: `núm\.`)              |
 | `El Dr. Ramírez presentó los resultados ante el comité científico.`     | forma poprawna               | ✅ rozwinięte → `Doctor`                         |
+
+---
+
+## 7. Otwarte zadania silnika (post-13.3)
+
+Notatki ujawnione podczas wdrażania pełnej paczki angielskiej. Nie blokują
+żadnego kolejnego języka z sekcji 3 — to są usprawnienia jakościowe, które
+można wdrożyć w dowolnej kolejności w 13.x+, gdy któreś okaże się
+problemem w realnym użyciu.
+
+### 7.1 Łącznik „na" w regułach lore-ad-hoc (`core_rezyser.py:~165`)
+
+Reguły ad-hoc w Księdze Świata zapisuje się dziś po polsku:
+
+```
+[Geralt: zamień 'w' na 'v', 'r' na 'rr']
+```
+
+Regex w `core_rezyser.zastosuj_akcenty_uniwersalne` szuka literału `na`
+między cudzysłowami. Po angielsku autor Księgi napisałby naturalnie
+`'w' to 'v'` lub `'w' becomes 'v'`, a parser tego nie złapie. Rozwiązanie
+analogiczne do `slowo_akcent` z 13.3:
+
+* nowe pole `slowo_zamiany: ["na"]` (PL) / `["to", "becomes"]` (EN) /…
+  w `dictionaries/<jezyk>/podstawy.yaml`,
+* `core_poliglota.slowa_zamiany(jezyk)` — publiczny helper z fallbackiem,
+* regex w `core_rezyser` budowany dynamicznie analogicznie do
+  `wzorzec_akcentu`.
+
+Nie ma realnego pilnego przypadku — domyślne reguły akcentów w YAML-ach
+wystarczają w 99 % scenariuszy, ad-hoc Lore to backdoor dla specjalnych
+przypadków. Wystarczy 13.x+ kiedyś.
+
+### 7.2 Heurystyka stop-words dla regexa parsera akcentów
+
+Regex `(?:slowo)\s+(\w+)|(\w+)\s+(?:slowo)` z 13.3 łapie sąsiada
+**bezpośrednio** przylegającego do słowa-wyzwalacza. W gramatykach
+przylegających (PL: „francuski akcent" — przymiotnik tuż przed
+rzeczownikiem) to działa naturalnie. W angielskim zdania typu
+„heavily accented French" gubią się na przysłówku: regex chwyci
+„heavily" zamiast „French".
+
+Możliwe rozwiązania:
+
+* **Lista stop-words per język** w `podstawy.yaml`
+  (`stop_slowa_akcentu: ["heavily", "barely", "thickly", ...]`) —
+  parser pomija sąsiadów z tej listy i bierze następny kandydat.
+* **Backup heurystyka**: gdy „lewy sąsiad" pasuje do listy stop-words,
+  parser bierze jeszcze jedno słowo wstecz (lub w prawo, jeśli
+  istnieje pasujący kandydat po słowie-wyzwalaczu).
+* **Workaround dla użytkownika** (już dziś): pisać Księgę Świata prosto
+  („French accent", nie „heavily accented French"). Udokumentować
+  w paczce dokumentacji EN.
+
+W 13.3 idziemy z workaround'em w dokumentacji. Jeśli realni użytkownicy
+zaczną zgłaszać problem — dorobić konfigurowalną listę stop-words w
+13.x+.
+
+### 7.3 Konfigurowalna trailing-letter w silniku węża (`_algo_waz`)
+
+Silnik ma twardy `if znak.lower() == "sz": syk = "s" * ile + "z"`.
+Polski dwuznak `sz` zachowuje końcowe `z`. Dla angielskiego `sh` ten
+sam mechanizm wymaga dodatkowej gałęzi — w 13.3 obeszliśmy to
+upraszczając regex do `(?i)(s|z)` (`sh` rozpada się na rozciągnięte
+`s` + zachowane `h`). Dla pełnej elastyczności (np. niemieckie `sch`,
+szwedzkie `sj`):
+
+* nowe pole `dwuznaki_sykow: [{wzor: "sz", trailing: "z"}, {wzor: "sch",
+  trailing: "ch"}, ...]` w `dictionaries/<jezyk>/szyfry/waz.yaml`,
+* refaktor `_algo_waz` na pętlę po dwuznakach + fallback na pojedynczy
+  znak.
+
+Niski priorytet — polski `sz` jest jedynym użytym dwuznakiem, kompromis
+EN brzmi naturalnie.

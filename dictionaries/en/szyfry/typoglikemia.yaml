@@ -1,0 +1,18 @@
+# -----------------------------------------------------------------------------
+#  CIPHER: TYPOGLYCEMIA
+#  Shuffles the letters in the middle of each word (first and last stay).
+# -----------------------------------------------------------------------------
+id: typoglikemia
+etykieta: "Typoglycemia (Shuffled middle of words)"
+opis: |
+  Psycholinguistic phenomenon: as long as the first and last letters of a
+  word are correct, humans still read the text fluently even when the
+  middle is scrambled. Words shorter than `min_dlugosc_slowa` are not
+  changed.
+iso: en
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Algorithm parameters
+min_dlugosc_slowa: 4

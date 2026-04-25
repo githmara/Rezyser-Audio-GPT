@@ -816,7 +816,7 @@ def _zgadnij_typ_z_zaznaczenia(meta: dict | None) -> str:
         return mrs.TYP_TRYB_REZYSERA
     # FOLDER_GUI nie ma jeszcze dedykowanego typu w kreatorze (13.1) –
     # trafia do domyślnego (akcent), bo kreator tłumaczeń UI byłby
-    # dużym osobnym skryptem (patrz TODO_skrotowce_wielojezyczne.md).
+    # dużym osobnym skryptem (patrz TODO_wielojezycznosc.md).
     return mrs.TYP_AKCENT
 
 

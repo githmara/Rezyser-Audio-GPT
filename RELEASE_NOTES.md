@@ -78,7 +78,7 @@
 
 ### Co znaczy „13.2 = fundament infrastruktury, nie pakiet językowy"?
 
-Pierwotny plan w `TODO_skrotowce_wielojezyczne.md` zakładał: *13.2 = pierwszy w pełni nowy język (np. fiński z pełnym pakietem akcentów i szyfrów)*. Audyt kodu po wydaniu 13.1 ujawnił trzy poważne luki, których ten pakiet nie zamknąłby:
+Pierwotny plan w `TODO_wielojezycznosc.md` zakładał: *13.2 = pierwszy w pełni nowy język (np. fiński z pełnym pakietem akcentów i szyfrów)*. Audyt kodu po wydaniu 13.1 ujawnił trzy poważne luki, których ten pakiet nie zamknąłby:
 
 1. `gui_rezyser.py` ładował tryby twardo z `pl/rezyser/` — angielski użytkownik widziałby polskie etykiety w `wx.RadioBox`.
 2. `gui_poliglota.py` miał stałą modułową `JEZYK_BAZOWY = "pl"` użytą w 9 miejscach pipeline'u — pakiet fiński działałby tylko w teorii.
@@ -96,7 +96,7 @@ Bez tych trzech łatek pakiet językowy byłby *false advertising*. 13.2 łata w
 - `dictionaries/en/szyfry/` — sześć algorytmów (cezar/jakanie/odwracanie/samogloskowiec/typoglikemia/wąż) plus rozwinięcia skrótowców `e.g./i.e./etc./Dr./Mr./...` z `TODO § 3.1`.
 - `dictionaries/en/podstawy.yaml::polskie_znaki: []` (z definicji puste — angielski nie ma diakrytyków do transliteracji).
 
-Każdy minor 13.x dorzuca **jeden** w pełni wdrożony język (od 13.3 zamiast od 13.2 — przesunięte zgodnie z faktem, że 13.2 zjadł budżet na infrastrukturę). Gdy plik `TODO_skrotowce_wielojezyczne.md` zostanie wyczerpany, następny release to **14.0**.
+Każdy minor 13.x dorzuca **jeden** w pełni wdrożony język (od 13.3 zamiast od 13.2 — przesunięte zgodnie z faktem, że 13.2 zjadł budżet na infrastrukturę). Gdy plik `TODO_wielojezycznosc.md` zostanie wyczerpany, następny release to **14.0**.
 
 ### Co działa „samoczynnie" od 13.3 (en z pełnym pakietem)
 

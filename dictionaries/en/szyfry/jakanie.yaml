@@ -1,0 +1,28 @@
+# -----------------------------------------------------------------------------
+#  CIPHER: STUTTER / BROKEN ROBOT
+#  Prepends repetitions of the first one or two letters of each word,
+#  separated by hyphens.
+# -----------------------------------------------------------------------------
+id: jakanie
+etykieta: "Heavy Stutter / Broken Robot"
+opis: |
+  For each word longer than `min_dlugosc_slowa`, draws a number of
+  repetitions of the first (or first two) letters and prepends them with
+  hyphens: "computer" → "co-co-co-computer", "is" → "is" (too short).
+
+  If the second letter of the word is a consonant (not in the `samogloski`
+  string), the stutter includes TWO leading letters — gives a more natural
+  sound (e.g. "shower" → "sh-sh-shower").
+iso: en
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Algorithm parameters
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Vowels — if the second character of the word is in this set, only the
+# first letter is repeated. Otherwise the first two letters are repeated.
+samogloski: "aeiouyAEIOUY"

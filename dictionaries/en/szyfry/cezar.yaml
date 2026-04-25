@@ -1,0 +1,28 @@
+# -----------------------------------------------------------------------------
+#  CIPHER: CAESAR
+#  Classic shift cipher rotating each letter by N positions in the
+#  English alphabet (26 letters).
+# -----------------------------------------------------------------------------
+id: cezar
+etykieta: "Caesar Cipher (English alphabet shift)"
+opis: |
+  Classic Caesar cipher: each letter is shifted by N positions in the
+  English alphabet (ABC…Z, 26 characters, no whitespace). Characters
+  outside the alphabet (digits, punctuation) remain unchanged.
+
+  The shift value is provided by the user in the GUI ("Caesar Cipher
+  shift" field). A value of 0 means "draw randomly from 1..25".
+iso: en
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# Alphabet is loaded from dictionaries/en/podstawy.yaml (key: alfabet).
+# If you want to use a different alphabet (e.g. with extra letters),
+# uncomment the line below and provide your own set of uppercase letters:
+# alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+# Allowed shift range in the GUI (SpinCtrl). 26 letters → ±25 covers
+# every distinct rotation; ±26 would equal identity.
+min_przesuniecie: -25
+max_przesuniecie: 25

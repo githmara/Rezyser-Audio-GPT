@@ -1,0 +1,28 @@
+# -----------------------------------------------------------------------------
+#  CIPHER: BROKEN PHONE / SNAKE DIALECT
+#  Stretches sibilants: every "s" or "z" becomes a long hiss.
+#  Inspiration: Snecko from Slay The Spire.
+# -----------------------------------------------------------------------------
+id: waz
+etykieta: "Broken Phone (Snake dialect, hissing sibilants)"
+opis: |
+  Inspired by Snecko from "Slay the Spire". Every occurrence of "s" or
+  "z" (case-insensitive) is randomly stretched into a hiss of length
+  `min_syk` to `max_syk` characters.
+
+  For English we deliberately do NOT add the digraph "sh" to the pattern
+  — the engine has a polish-specific branch for "sz" that appends "z" at
+  the tail; we don't have an equivalent branch for "sh", so leaving "sh"
+  out of the alternation gives the more natural "shake" → "ssssshake"
+  (with `h` preserved) instead of the muddy "sssssake".
+iso: en
+kategoria: szyfr
+kolejnosc: 30
+algorytm: waz
+
+# Algorithm parameters
+min_syk: 4
+max_syk: 8
+
+# Regex matching single sibilants to stretch (case-insensitive).
+wzor_syku: "(?i)(s|z)"

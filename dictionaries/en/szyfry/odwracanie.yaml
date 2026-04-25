@@ -1,0 +1,63 @@
+# -----------------------------------------------------------------------------
+#  CIPHER: TEXT REVERSER
+#  Expands common abbreviations, then reads each sentence backwards.
+#  Inspiration: a mission from "The Traitors".
+# -----------------------------------------------------------------------------
+id: odwracanie
+etykieta: "Text Reverser (Read backwards with capital letter)"
+opis: |
+  First expands popular English abbreviations (e.g. → "for example",
+  i.e. → "that is", Dr. → "Doctor", U.S.A. → "United States of America"
+  etc.). Thanks to that, the reversed sentence still sounds sensible —
+  with no absurd "elpmaxe rof" stubs glued to a leftover ".g.e".
+  Then reverses each sentence character by character, keeping the
+  terminal punctuation in place and capitalising the first letter.
+
+  Selected list source: TODO_wielojezycznosc.md § 3.1 (en).
+iso: en
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# -----------------------------------------------------------------------------
+# Abbreviation expansions — REGEX patterns (each `wzor` is a regex, the
+# engine applies them with `re.IGNORECASE` before reversing the text).
+# Order matters in two places:
+#   * `U\.S\.A\.` MUST be applied before `U\.S\.` (greedy match guard).
+#   * `pp\.\s` MUST be applied before `p\.\s` (avoids "pp." → "page p.").
+# -----------------------------------------------------------------------------
+rozwiniecia:
+  # Latin logic markers (most-frequent in English prose)
+  - { wzor: '\be\.\s*g\.,?\s',         zamiana: "for example "             }
+  - { wzor: '\bi\.\s*e\.,?\s',         zamiana: "that is "                 }
+  - { wzor: '\betc\.\s',               zamiana: "et cetera "               }
+  - { wzor: '\bvs\.\s',                zamiana: "versus "                  }
+  - { wzor: '\bcf\.\s',                zamiana: "confer "                  }
+
+  # Geographic — longer forms first (greedy guard).
+  # `(?![A-Z])` blocks U.S. / U.K. from matching when followed by another
+  # capital letter without a space (typoes like "U.S.A" without a trailing
+  # dot must NOT be expanded — see TODO § 6.2). The lookahead is happy with
+  # a space afterwards, so legitimate "U.S. Government" still expands.
+  - { wzor: '\bU\.\s*S\.\s*A\.',       zamiana: "United States of America" }
+  - { wzor: '\bU\.\s*S\.(?![A-Z])',    zamiana: "United States"            }
+  - { wzor: '\bU\.\s*K\.(?![A-Z])',    zamiana: "United Kingdom"           }
+
+  # Titles — require terminal "." so we ignore British forms ("Dr Smith",
+  # "Mr Smith") that the smoke test in TODO § 6.2 expects to pass through.
+  - { wzor: '\bDr\.\s',                zamiana: "Doctor "                  }
+  - { wzor: '\bMrs\.\s',               zamiana: "Missus "                  }
+  - { wzor: '\bMr\.\s',                zamiana: "Mister "                  }
+  - { wzor: '\bMs\.\s',                zamiana: "Miss "                    }
+  - { wzor: '\bProf\.\s',              zamiana: "Professor "               }
+  # NOTE: "St." is ambiguous between "Saint" and "Street". We pick "Saint"
+  # — the more common pattern in audio drama lore (proper names, place
+  # references). Project authors who need "Street" can override the
+  # variant locally without touching the engine.
+  - { wzor: '\bSt\.\s',                zamiana: "Saint "                   }
+
+  # References / numbering — `pp.` before `p.` (greedy guard).
+  - { wzor: '\bFig\.\s',               zamiana: "Figure "                  }
+  - { wzor: '\bNo\.\s',                zamiana: "Number "                  }
+  - { wzor: '\bpp\.\s',                zamiana: "pages "                   }
+  - { wzor: '\bp\.\s',                 zamiana: "page "                    }

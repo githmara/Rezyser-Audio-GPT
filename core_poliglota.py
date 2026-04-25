@@ -362,7 +362,7 @@ def dostepne_jezyki_bazowe() -> list[str]:
     języka interfejsu w GUI.
 
     Skutek dla v13.1: dziś tylko `pl` przechodzi filtr. Każdy kolejny
-    release minor 13.x (zgodnie z `TODO_skrotowce_wielojezyczne.md` § 4)
+    release minor 13.x (zgodnie z `TODO_wielojezycznosc.md` § 4)
     dorzuca jeden nowy folder w pełni wdrożony, więc lista rośnie o jedną
     pozycję per release — bez zmian w kodzie Pythona.
 
