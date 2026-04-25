@@ -7,10 +7,11 @@
 #  rilevata.
 #
 #  Struttura modellata su `dictionaries/pl/podstawy.yaml`. Il campo
-#  `polskie_znaki` è stato lasciato come lista vuota — nella versione 13.x non
-#  prevediamo la traslitterazione dei segni diacritici per lingue diverse dal
-#  polacco. Il nome della chiave `polskie_znaki` è storico; il gestore delle
-#  regole ne richiede la presenza, quindi non lo modifichiamo.
+#  `polskie_znaki`, nonostante il nome storico, contiene TUTTI i segni
+#  diacritici da normalizzare in ASCII prima dell'applicazione di cifrari
+#  o regole di accento. L'italiano usa l'alfabeto latino di 21 lettere
+#  native, senza diacritici nativi (à, è, ì, ò, ù sono trattati come
+#  varianti tonali di forma di base) — quindi normalizziamo TUTTO.
 # =============================================================================
 
 id: podstawy
@@ -18,18 +19,113 @@ jezyk: it
 etykieta: "Italiano – fondamenti fonetici"
 opis: |
   Regole di base per la lingua italiana:
-    1. Nessuna traslitterazione dei segni diacritici (`polskie_znaki: []`) –
-       l'italiano usa l'alfabeto latino standard; le vocali accentate
-       (à, è, é, ì, ò, ù) sono trattate come forme di base distinte e
-       non vengono modificate.
+    1. Normalizzazione dei segni diacritici per parole prese in prestito
+       (`polskie_znaki`) — affinché il cifrario di Cesare e i motori di
+       accento vedano solo l'alfabeto italiano di 21 lettere.
     2. Alfabeto italiano (21 lettere maiuscole native, senza J, K, W, X, Y) –
        utilizzato dal cifrario di Cesare.
 
 # -----------------------------------------------------------------------------
-# Nessun segno diacritico da traslitterare. La lista vuota mantiene il
-# contratto API con il gestore delle regole.
+# Normalizzazione dei segni diacritici. Ogni lettera latina non-italiana
+# viene mappata al suo equivalente ASCII più vicino. Le vocali accentate
+# italiane (à, è, é, ì, ò, ù) vanno alle vocali base senza accento.
 # -----------------------------------------------------------------------------
-polskie_znaki: []
+polskie_znaki:
+  # -- Polish loans → plain ASCII --
+  - { wzor: "ą", zamiana: "a"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ę", zamiana: "e"  }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ó", zamiana: "o"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ó", zamiana: "O"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  # -- → a --
+  - { wzor: "á", zamiana: "a"  }
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "ä", zamiana: "a"  }
+  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "Á", zamiana: "A"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  - { wzor: "Ä", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "A"  }
+  # -- → ae --
+  - { wzor: "æ", zamiana: "ae" }
+  - { wzor: "Æ", zamiana: "Ae" }
+  # -- → c --
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  # -- → d (Icelandic Ð/ð) --
+  - { wzor: "ð", zamiana: "d"  }
+  - { wzor: "Ð", zamiana: "D"  }
+  # -- → e --
+  - { wzor: "é", zamiana: "e"  }
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "É", zamiana: "E"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  # -- → i --
+  - { wzor: "í", zamiana: "i"  }
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Í", zamiana: "I"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  # -- → n --
+  - { wzor: "ñ", zamiana: "n"  }
+  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → o --
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ö", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ö", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  # -- → oe --
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  # -- → ss (German) --
+  - { wzor: "ß", zamiana: "ss" }
+  # -- → th (Icelandic Þ/þ) --
+  - { wzor: "þ", zamiana: "th" }
+  - { wzor: "Þ", zamiana: "Th" }
+  # -- → u --
+  - { wzor: "ú", zamiana: "u"  }
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ú", zamiana: "U"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "Û", zamiana: "U"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  # -- → y --
+  - { wzor: "ý", zamiana: "y"  }
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ý", zamiana: "Y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
 
 # -----------------------------------------------------------------------------
 # Alfabeto italiano – 21 lettere maiuscole nell'ordine nativo

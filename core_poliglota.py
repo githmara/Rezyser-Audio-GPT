@@ -841,6 +841,16 @@ def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
     """Szyfrant: dispatcher na algorytm wskazany w ``cfg['algorytm']``."""
     podstawy = _zaladuj_podstawy(jezyk)
 
+    # 13.3: Normalizacja diakrytyki PRZED czyszczeniem i algorytmem.
+    # Bez tego znaki spoza alfabetu danego języka (np. "é" w angielskim
+    # "café", "ñ" w "jalapeño", "ö" w polskim "Schrödinger") wymykały się
+    # szyfrowi Cezara nieszyfrowane i przeciekały do wyniku w oryginalnej
+    # postaci. Lista mapowań pochodzi z ``podstawy.yaml::polskie_znaki`` —
+    # każda paczka językowa deklaruje, jakie znaki zapożyczone normalizować
+    # do swojego ASCII (z zachowaniem natywnych liter alfabetu — np. "ä"
+    # NIE jest mapowane w paczce fi/, bo to natywna fińska litera).
+    tekst = _usun_polskie_znaki(tekst, podstawy)
+
     # Najpierw zawsze oczyszczamy tekst z bełkotu TTS i normalizujemy liczby –
     # to zgodne z dotychczasowym zachowaniem Trybu Szyfranta.
     tekst_czysty = oczysc_tekst_tts(tekst, z_normalizacja=True, jezyk=jezyk)

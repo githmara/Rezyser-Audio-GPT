@@ -40,7 +40,7 @@ kolejnosc: 45
 czysc_tekst_tts: true
 normalizuj_liczby: true
 # Latin source has no polish diacritics to strip.
-usun_polskie_znaki: false
+usun_polskie_znaki: true
 # `sklej_pojedyncze_litery` regex looks for [a-z]; meaningless after
 # transliteration to Cyrillic.
 skleja_pojedyncze_litery: false

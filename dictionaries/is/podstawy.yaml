@@ -7,10 +7,11 @@
 #  greint.
 #
 #  Uppbygging er mótuð eftir `dictionaries/pl/podstawy.yaml`. Reiturinn
-#  `polskie_znaki` er skilinn eftir sem tómur listi — í útgáfu 13.x er ekki
-#  fyrirhugað að umrita broddstafi fyrir önnur tungumál en pólsku. Nafnið
-#  `polskie_znaki` er sögulegt; reglustjórinn býst við nærveru þess, því
-#  breytum við því ekki.
+#  `polskie_znaki`, þrátt fyrir sögulegt nafn, hýsir ALLA broddstafi sem
+#  þarf að umrita í ASCII áður en dulritun eða hreimsreglur eru beittar.
+#  Íslenskir broddstafir Á, É, Í, Ó, Ú, Ý, Þ, Æ, Ö og Ð eru NATIVA og
+#  EKKI með á þessari listan — þeir eru hluti stafrófsins og Caesar
+#  dulritar þá beint.
 # =============================================================================
 
 id: podstawy
@@ -18,17 +19,94 @@ jezyk: is
 etykieta: "Íslenska – hljóðfræðilegur grunnur"
 opis: |
   Grunnreglur íslenskunnar:
-    1. Engin umritun broddstafa (`polskie_znaki: []`) –
-       íslenska notar eigið stafróf með bókstöfunum Þ, Ð, Æ, Ö ásamt
-       stöfum með brodd.
+    1. Umritun broddstafa fyrir evrópsk lánsorð (`polskie_znaki`) — svo
+       að Caesar og hreimsvélar sjái aðeins 32-stafa íslenska stafrófið.
     2. Íslenska stafrófið (32 hástafir, í eigin röð, án C, Q, W, Z) –
        notað af Caesar-dulmálinu.
 
 # -----------------------------------------------------------------------------
-# Engir broddstafir til að umrita. Tómi listinn varðveitir API-samninginn
-# við reglustjórann.
+# Umritun broddstafa. Sérhver ekki-íslenskur latneskur broddstafur er
+# tengdur við næsta ASCII jafngildi. Íslenskir broddstafir Á, É, Í, Ó, Ú, Ý,
+# Þ, Æ, Ö, Ð EKKI eru á þessum lista — þeir eru hluti stafrófsins.
 # -----------------------------------------------------------------------------
-polskie_znaki: []
+polskie_znaki:
+  # -- Polish loans → plain ASCII --
+  - { wzor: "ą", zamiana: "a"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ę", zamiana: "e"  }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  # NOTE: Polish "ó/Ó" NOT mapped here — collides with native Icelandic Ó.
+  # An Icelandic reader of "Łódź" would see "Lódz" → Caesar encrypts the Ó
+  # natively. Acceptable; full ASCII reduction would lose the Icelandic Ó.
+  # -- → a (NOT á — native) --
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "ä", zamiana: "a"  }
+  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  - { wzor: "Ä", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "A"  }
+  # -- → c --
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  # -- → e (NOT é — native) --
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  # -- → i (NOT í — native) --
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  # -- → n --
+  - { wzor: "ñ", zamiana: "n"  }
+  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → o (NOT ó — native; NOT ö — native) --
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  # -- → oe --
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  # -- → ss (German) --
+  - { wzor: "ß", zamiana: "ss" }
+  # -- → u (NOT ú — native) --
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "Û", zamiana: "U"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  # -- → y (NOT ý — native) --
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
+  # NOTE: æ/Æ, þ/Þ, ð/Ð are NATIVE Icelandic letters — NOT mapped here.
+  # The Caesar cipher encrypts them through the native alphabet directly.
 
 # -----------------------------------------------------------------------------
 # Íslenska stafrófið – 32 hástafir í eigin röð

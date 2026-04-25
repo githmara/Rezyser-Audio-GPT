@@ -23,7 +23,7 @@ kolejnosc: 30
 # --- Pipeline ---
 czysc_tekst_tts: true
 normalizuj_liczby: true
-usun_polskie_znaki: false   # English source has nothing to transliterate
+usun_polskie_znaki: true   # English source has nothing to transliterate
 skleja_pojedyncze_litery: true
 
 # --- Phonetic substitutions (digraphs FIRST, then single letters) ---

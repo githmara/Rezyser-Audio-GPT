@@ -7,10 +7,10 @@
 #  lainkaan.
 #
 #  Rakenne mallinnettu tiedostosta `dictionaries/pl/podstawy.yaml`. Kenttä
-#  `polskie_znaki` on jätetty tyhjäksi listaksi — versiossa 13.x emme suunnittele
-#  diakriittisten merkkien translitterointia muille kielille kuin puolaksi.
-#  Avaimen nimi `polskie_znaki` on historiallinen; sääntöjen hallinta odottaa
-#  sen läsnäoloa, joten emme muuta sitä.
+#  `polskie_znaki`, vaikka nimi on historiallinen, sisältää KAIKKI diakriittiset
+#  merkit, jotka pitäisi normalisoida ASCII:ksi ennen salakirjoituksen tai
+#  korostussääntöjen soveltamista. Suomalaiset Å, Ä, Ö ovat natiivit eikä niitä
+#  sisällytetä — ne ovat osa aakkostoa ja Caesar-salakirjoitus salaa ne suoraan.
 # =============================================================================
 
 id: podstawy
@@ -18,16 +18,107 @@ jezyk: fi
 etykieta: "Suomi – foneettiset perusteet"
 opis: |
   Suomen kielen perussäännöt:
-    1. Ei diakriittisten merkkien translitterointia (`polskie_znaki: []`) –
-       suomi käyttää tavallista latinalaista aakkostoa lisämerkein Å, Ä, Ö.
+    1. Diakriittisten merkkien normalisointi eurooppalaisten lainasanojen
+       osalta (`polskie_znaki`) — niin että Caesar ja korostusmoottorit
+       näkevät vain 29-kirjaimisen suomalaisen aakkoston.
     2. Suomalainen aakkosto (29 isoa kirjainta, alkuperäisessä järjestyksessä) –
        Caesar-salakirjoituksen käyttämä.
 
 # -----------------------------------------------------------------------------
-# Ei translitteroitavia diakriittisiä merkkejä. Tyhjä lista säilyttää
-# API-sopimuksen sääntöjen hallinnan kanssa.
+# Diakriittisten merkkien normalisointi. Jokainen ei-suomalainen latinankielinen
+# kirjain mapataan lähimpään ASCII-vastineeseensa. Suomalaiset Å, Ä, Ö EIVÄT ole
+# tällä listalla — ne ovat natiivit aakkoston kirjaimet ja Caesar salaa ne.
 # -----------------------------------------------------------------------------
-polskie_znaki: []
+polskie_znaki:
+  # -- Polish loans → plain ASCII --
+  - { wzor: "ą", zamiana: "a"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ę", zamiana: "e"  }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ó", zamiana: "o"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ó", zamiana: "O"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  # -- → a (NOTE: å, ä are NATIVE Finnish letters — NOT mapped here) --
+  - { wzor: "á", zamiana: "a"  }
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "Á", zamiana: "A"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  # -- → ae --
+  - { wzor: "æ", zamiana: "ae" }
+  - { wzor: "Æ", zamiana: "Ae" }
+  # -- → c --
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  # -- → d (Icelandic Ð/ð) --
+  - { wzor: "ð", zamiana: "d"  }
+  - { wzor: "Ð", zamiana: "D"  }
+  # -- → e --
+  - { wzor: "é", zamiana: "e"  }
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "É", zamiana: "E"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  # -- → i --
+  - { wzor: "í", zamiana: "i"  }
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Í", zamiana: "I"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  # -- → n --
+  - { wzor: "ñ", zamiana: "n"  }
+  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → o (NOTE: ö is NATIVE Finnish letter — NOT mapped here) --
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  # -- → oe --
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  # -- → ss (German) --
+  - { wzor: "ß", zamiana: "ss" }
+  # -- → th (Icelandic Þ/þ) --
+  - { wzor: "þ", zamiana: "th" }
+  - { wzor: "Þ", zamiana: "Th" }
+  # -- → u --
+  - { wzor: "ú", zamiana: "u"  }
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ú", zamiana: "U"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "Û", zamiana: "U"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  # -- → y --
+  - { wzor: "ý", zamiana: "y"  }
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ý", zamiana: "Y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
 
 # -----------------------------------------------------------------------------
 # Suomalainen aakkosto – 29 isoa kirjainta alkuperäisessä järjestyksessä

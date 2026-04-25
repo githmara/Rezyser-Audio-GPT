@@ -44,6 +44,87 @@ polskie_znaki:
   - { wzor: "Ń", zamiana: "N"  }
   - { wzor: "Ż", zamiana: "Z"  }
   - { wzor: "Ź", zamiana: "Z"  }
+  # 13.3: rozszerzenie listy o diakrytyki europejskich zapożyczeń
+  # (Pokémon, café, jalapeño, façade, Schrödinger, naïve...). Bez tych
+  # reguł szyfr Cezara pomijał obce znaki, łamiąc spójność szyfrowania
+  # tekstów wielojęzycznych. Każdy znak mapowany do najprostszej
+  # reprezentacji ASCII zgodnie z polską intuicją czytelnika.
+  # -- → a --
+  - { wzor: "á", zamiana: "a"  }
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "ä", zamiana: "a"  }
+  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "Á", zamiana: "A"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  - { wzor: "Ä", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "A"  }
+  # -- → ae --
+  - { wzor: "æ", zamiana: "ae" }
+  - { wzor: "Æ", zamiana: "Ae" }
+  # -- → c --
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  # -- → d --
+  - { wzor: "ð", zamiana: "d"  }
+  - { wzor: "Ð", zamiana: "D"  }
+  # -- → e --
+  - { wzor: "é", zamiana: "e"  }
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "É", zamiana: "E"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  # -- → i --
+  - { wzor: "í", zamiana: "i"  }
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Í", zamiana: "I"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  # -- → n --
+  - { wzor: "ñ", zamiana: "n"  }
+  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → o (zachowane ó→u w sekcji polskiej powyżej; obce → o) --
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ö", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ö", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  # -- → oe --
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  # -- → ss (niemiecki) --
+  - { wzor: "ß", zamiana: "ss" }
+  # -- → th (islandzki Þ/þ) --
+  - { wzor: "þ", zamiana: "th" }
+  - { wzor: "Þ", zamiana: "Th" }
+  # -- → u --
+  - { wzor: "ú", zamiana: "u"  }
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ú", zamiana: "U"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "Û", zamiana: "U"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  # -- → y --
+  - { wzor: "ý", zamiana: "y"  }
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ý", zamiana: "Y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
 
 # -----------------------------------------------------------------------------
 # Alfabet polski – 35 wielkich liter, bez znaków białych.

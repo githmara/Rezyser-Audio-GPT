@@ -7,10 +7,11 @@
 #  at all.
 #
 #  Structure modeled after `dictionaries/pl/podstawy.yaml`. The `polskie_znaki`
-#  field is left as an empty list — version 13.x does not plan diacritic
-#  transliteration for languages other than Polish (PL accents → Latin). The
-#  key name `polskie_znaki` is historical; the rule manager expects its
-#  presence, so we do not rename it to something more generic.
+#  field, despite its historical name, holds ALL diacritics that should be
+#  normalised to ASCII before cipher application or accent rules — including
+#  loanwords from other European languages (Pokémon, café, jalapeño, façade,
+#  Schrödinger…). The rule manager expects the key name `polskie_znaki`,
+#  so we keep it.
 # =============================================================================
 
 id: podstawy
@@ -18,15 +19,117 @@ jezyk: en
 etykieta: "English – phonetic basics"
 opis: |
   Base rules for the English language:
-    1. No diacritic transliteration (`polskie_znaki: []`) –
-       English uses the standard Latin alphabet A–Z.
+    1. Diacritic normalisation for European loanwords (`polskie_znaki`) –
+       so that the Caesar cipher and accent engines see only the 26-letter
+       English alphabet (otherwise non-native chars slip through).
     2. English alphabet (26 uppercase letters) – used by the Caesar cipher.
 
 # -----------------------------------------------------------------------------
-# No diacritics to transliterate – English operates on a clean Latin alphabet.
-# An empty list preserves the API contract with the rule manager.
+# Diacritic normalisation. Every non-English Latin letter is mapped to its
+# closest ASCII equivalent so the Caesar cipher and accent rules can operate
+# on the 26-letter alphabet without skipping characters. Without this list,
+# "Pokémon" + Caesar(3) → "Srnéprq" (é stays unencrypted) — a real bug fixed
+# in 13.3.
+#
+# Categories: Polish, French/European, Spanish, Scandinavian, Icelandic, German.
 # -----------------------------------------------------------------------------
-polskie_znaki: []
+polskie_znaki:
+  # -- Polish (PL letters in EN texts go to plain ASCII; no nasal expansion
+  #    like in pl/podstawy.yaml — an English reader doesn't know about /ɔ̃/) --
+  - { wzor: "ą", zamiana: "a"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ę", zamiana: "e"  }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ó", zamiana: "o"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ó", zamiana: "O"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  # -- → a (French/Spanish/Portuguese/Scandinavian/German) --
+  - { wzor: "á", zamiana: "a"  }
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "ä", zamiana: "a"  }
+  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "Á", zamiana: "A"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  - { wzor: "Ä", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "A"  }
+  # -- → ae --
+  - { wzor: "æ", zamiana: "ae" }
+  - { wzor: "Æ", zamiana: "Ae" }
+  # -- → c --
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  # -- → d (Icelandic Ð/ð) --
+  - { wzor: "ð", zamiana: "d"  }
+  - { wzor: "Ð", zamiana: "D"  }
+  # -- → e --
+  - { wzor: "é", zamiana: "e"  }
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "É", zamiana: "E"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  # -- → i --
+  - { wzor: "í", zamiana: "i"  }
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Í", zamiana: "I"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  # -- → n --
+  - { wzor: "ñ", zamiana: "n"  }
+  - { wzor: "Ñ", zamiana: "N"  }
+  # -- → o --
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ö", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ö", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  # -- → oe --
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  # -- → ss (German ß; only lowercase form exists in standard orthography) --
+  - { wzor: "ß", zamiana: "ss" }
+  # -- → th (Icelandic Þ/þ) --
+  - { wzor: "þ", zamiana: "th" }
+  - { wzor: "Þ", zamiana: "Th" }
+  # -- → u --
+  - { wzor: "ú", zamiana: "u"  }
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ú", zamiana: "U"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "Û", zamiana: "U"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  # -- → y --
+  - { wzor: "ý", zamiana: "y"  }
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ý", zamiana: "Y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
 
 # -----------------------------------------------------------------------------
 # English alphabet – 26 uppercase letters, no whitespace.
