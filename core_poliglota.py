@@ -97,15 +97,21 @@ _CACHE_WARIANTOW: dict[tuple[str, str], list[dict]] = {}   # (tryb, jezyk) → l
 # Funkcje niskiego poziomu – czyste, bezstanowe, używane przez akcenty i szyfry
 # =============================================================================
 
-def normalizuj_liczby(tekst: str) -> str:
+def normalizuj_liczby(tekst: str, jezyk: str = "pl") -> str:
     """Zamienia cyfrowe zapisy liczb na słowa (np. ``123`` → ``sto dwadzieścia trzy``).
 
-    Używa ``num2words`` dla języka polskiego. Liczby, których biblioteka nie
-    potrafi zapisać (np. bardzo duże), zostawia w oryginale.
+    13.3: parametr ``jezyk`` decyduje, w jakim języku ``num2words`` rozwija
+    cyfrę. Domyślnie ``"pl"`` — backward-compat. Akcent angielski musi
+    przekazać ``"en"`` (``123`` → ``one hundred and twenty-three``), bo
+    inaczej w angielski tekst wkleilibyśmy polskie słowa.
+
+    Liczby, których biblioteka nie potrafi zapisać dla danego języka
+    (nieznane locale, bardzo duże wartości), zostawiamy w oryginale —
+    lepiej zostawić cyfry niż wybuchnąć.
     """
     def zamien(match: re.Match[str]) -> str:
         try:
-            return num2words(match.group(), lang="pl")
+            return num2words(match.group(), lang=jezyk)
         except Exception:
             return match.group()
     return re.sub(r"\d+", zamien, tekst)
@@ -116,7 +122,8 @@ def sklej_pojedyncze_litery(tekst: str) -> str:
     return re.sub(r"(?i)\b([a-z])\s+", r"\1", tekst)
 
 
-def oczysc_tekst_tts(tekst: str, z_normalizacja: bool = True) -> str:
+def oczysc_tekst_tts(tekst: str, z_normalizacja: bool = True,
+                     jezyk: str = "pl") -> str:
     """Oczyszcza tekst pod syntezator mowy (TTS).
 
     Usuwa:
@@ -127,10 +134,10 @@ def oczysc_tekst_tts(tekst: str, z_normalizacja: bool = True) -> str:
       * frazy typu „z wplecionymi wdechami” (artefakty gpt-4).
 
     Jeśli ``z_normalizacja`` jest prawdziwe – dodatkowo zamienia cyfry
-    na słowa (por. :func:`normalizuj_liczby`).
+    na słowa w języku ``jezyk`` (por. :func:`normalizuj_liczby`).
     """
     if z_normalizacja:
-        tekst = normalizuj_liczby(tekst)
+        tekst = normalizuj_liczby(tekst, jezyk)
     tekst = re.sub(r"[\*=]+", "", tekst)
     tekst = re.sub(r"^#+\s*", "", tekst, flags=re.MULTILINE)
     tekst = re.sub(r"\([^)]*\)", "", tekst)
@@ -506,7 +513,8 @@ def wykryj_jezyk_zrodlowy(
 # Tryb Reżysera – pipeline akcentu fonetycznego z pliku YAML
 # =============================================================================
 
-def _aplikuj_akcent_z_yaml(tekst: str, cfg: dict, podstawy: dict) -> str:
+def _aplikuj_akcent_z_yaml(tekst: str, cfg: dict, podstawy: dict,
+                           jezyk: str = "pl") -> str:
     """Uruchamia pięcioetapowy pipeline akcentu wg flag w ``cfg``.
 
     Etapy (wykonywane w stałej kolejności):
@@ -515,11 +523,19 @@ def _aplikuj_akcent_z_yaml(tekst: str, cfg: dict, podstawy: dict) -> str:
         3. ``usun_polskie_znaki``
         4. ``zamiany`` (właściwe reguły fonetyczne akcentu)
         5. ``skleja_pojedyncze_litery``
+
+    13.3: ``jezyk`` decyduje o locale ``num2words`` — domyślnie ``"pl"``
+    dla backward-compat, ale wywołujący (``_przetworz_rezyser``) przekazuje
+    rzeczywisty język tekstu źródłowego.
     """
     if cfg.get("czysc_tekst_tts"):
-        tekst = oczysc_tekst_tts(tekst, z_normalizacja=cfg.get("normalizuj_liczby", False))
+        tekst = oczysc_tekst_tts(
+            tekst,
+            z_normalizacja=cfg.get("normalizuj_liczby", False),
+            jezyk=jezyk,
+        )
     elif cfg.get("normalizuj_liczby"):
-        tekst = normalizuj_liczby(tekst)
+        tekst = normalizuj_liczby(tekst, jezyk)
 
     if cfg.get("usun_polskie_znaki"):
         tekst = _usun_polskie_znaki(tekst, podstawy)
@@ -551,7 +567,7 @@ def zastosuj_reguly_fonetyczne(tekst: str, wariant: str,
     """
     cfg = wariant_po_id(TRYB_REZYSER, jezyk, wariant) or {}
     podstawy = _zaladuj_podstawy(jezyk)
-    tekst = normalizuj_liczby(tekst)
+    tekst = normalizuj_liczby(tekst, jezyk)
     tekst = _usun_polskie_znaki(tekst, podstawy)
     tekst = _zastosuj_zamiany(tekst, cfg.get("zamiany", []))
     return sklej_pojedyncze_litery(tekst)
@@ -618,11 +634,15 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
 
     # Oczyszczenie: brak zamian, ewentualnie bez normalizacji liczb.
     if kategoria == "oczyszczenie":
-        return oczysc_tekst_tts(tekst, z_normalizacja=cfg.get("normalizuj_liczby", True))
+        return oczysc_tekst_tts(
+            tekst,
+            z_normalizacja=cfg.get("normalizuj_liczby", True),
+            jezyk=jezyk,
+        )
 
     # Zwykły akcent – pipeline z ochroną tagów HTML.
     def _pipeline(fragment: str) -> str:
-        return _aplikuj_akcent_z_yaml(fragment, cfg, podstawy)
+        return _aplikuj_akcent_z_yaml(fragment, cfg, podstawy, jezyk)
 
     # Najpierw pełne oczyszczenie (z/bez normalizacji), potem zamiany –
     # tak, by oczyszczenie zdążyło usunąć bełkot jeszcze przed transliteracją.
@@ -818,7 +838,7 @@ def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
 
     # Najpierw zawsze oczyszczamy tekst z bełkotu TTS i normalizujemy liczby –
     # to zgodne z dotychczasowym zachowaniem Trybu Szyfranta.
-    tekst_czysty = oczysc_tekst_tts(tekst, z_normalizacja=True)
+    tekst_czysty = oczysc_tekst_tts(tekst, z_normalizacja=True, jezyk=jezyk)
 
     nazwa_algo = cfg.get("algorytm", "")
     funkcja = _ALGORYTMY_SZYFROW.get(nazwa_algo)
