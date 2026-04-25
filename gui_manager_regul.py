@@ -34,7 +34,13 @@ import subprocess
 import wx
 
 import manager_regul_szablony as mrs
-from i18n import t
+from i18n import aktualny_jezyk, t
+
+
+# 13.2: sentinel oznaczający widok bez filtra (dla autorów paczek językowych).
+# Wartość nie odpowiada żadnemu kodowi języka, więc nie zderzy się z folderami
+# w ``dictionaries/``. Etykieta wyświetlana w dropdownie pochodzi z i18n.
+_OPCJA_WSZYSTKIE = "__all__"
 
 
 # =============================================================================
@@ -151,6 +157,41 @@ class ManagerRegulPanel(wx.Panel):
         desc.SetBackgroundColour(self.GetBackgroundColour())
         main_sizer.Add(desc, flag=wx.ALL | wx.EXPAND, border=12)
 
+        # --- 13.2: filtr języka (A11y) ---
+        # Domyślny widok = język UI (czysta lista, bez mieszanki w czytniku
+        # ekranu). Ostatnia opcja "Wszystkie języki" jest przeznaczona dla
+        # autorów paczek językowych, którzy chcą porównywać foldery obok
+        # siebie. Choice trzyma kody języków równolegle do widocznych etykiet
+        # (lista ``self._kody_jezykow``), żeby selekcja mogła wprost
+        # przenieść kod do filtra drzewa.
+        filter_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        lbl_filter = wx.StaticText(self, label=t("manager.dropdown_jezyk_label"))
+        self._kody_jezykow: list[str] = self._dostepne_kody_jezykow()
+        etykiety_jezykow = [
+            t("manager.tree_jezyk", kod_jezyka=k, nazwa_jezyka=_opis_jezyka(k))
+            for k in self._kody_jezykow
+        ]
+        etykiety_jezykow.append(t("manager.opcja_wszystkie_jezyki"))
+        self._kody_jezykow.append(_OPCJA_WSZYSTKIE)
+
+        self._choice_jezyk = wx.Choice(
+            self,
+            choices=etykiety_jezykow,
+            name=t("manager.dropdown_jezyk_label"),
+        )
+        self._choice_jezyk.SetToolTip(t("manager.dropdown_jezyk_tooltip"))
+
+        domyslny = aktualny_jezyk()
+        if domyslny in self._kody_jezykow:
+            self._choice_jezyk.SetSelection(self._kody_jezykow.index(domyslny))
+        else:
+            # Język UI nie ma własnego folderu w dictionaries/ — pokaż wszystko.
+            self._choice_jezyk.SetSelection(len(self._kody_jezykow) - 1)
+
+        filter_sizer.Add(lbl_filter, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=8)
+        filter_sizer.Add(self._choice_jezyk, proportion=1, flag=wx.EXPAND)
+        main_sizer.Add(filter_sizer, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.EXPAND, border=12)
+
         # --- Obszar roboczy (drzewo + przyciski) ---
         work_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -233,6 +274,35 @@ class ManagerRegulPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self._on_duplikuj, self._btn_duplikuj)
         self.Bind(wx.EVT_BUTTON, self._on_usun,     self._btn_usun)
         self.Bind(wx.EVT_BUTTON, self._on_odswiez,  self._btn_odswiez)
+        self.Bind(wx.EVT_CHOICE, self._on_zmiana_filtra_jezyka, self._choice_jezyk)
+
+    # ------------------------------------------------------------------
+    # 13.2: filtr języka
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _dostepne_kody_jezykow() -> list[str]:
+        """Zwraca posortowaną listę kodów języków (folderów w ``dictionaries/``).
+
+        Zwracamy WSZYSTKIE foldery, nie tylko kompletne (``_jezyk_kompletny``),
+        bo manager służy też do tworzenia paczek od zera — autor może edytować
+        język, który jeszcze nie ma akcentów ani szyfrów.
+        """
+        if not os.path.isdir(DICTIONARIES_DIR):
+            return []
+        return sorted(
+            nazwa for nazwa in os.listdir(DICTIONARIES_DIR)
+            if os.path.isdir(os.path.join(DICTIONARIES_DIR, nazwa))
+        )
+
+    def _aktywny_filtr_jezyka(self) -> str:
+        """Zwraca kod języka z dropdownu lub ``_OPCJA_WSZYSTKIE``."""
+        idx = self._choice_jezyk.GetSelection()
+        if 0 <= idx < len(self._kody_jezykow):
+            return self._kody_jezykow[idx]
+        return _OPCJA_WSZYSTKIE
+
+    def _on_zmiana_filtra_jezyka(self, _event: wx.CommandEvent) -> None:
+        self._zaladuj_drzewo()
 
     # ------------------------------------------------------------------
     # Ładowanie drzewa
@@ -261,11 +331,18 @@ class ManagerRegulPanel(wx.Panel):
 
         do_zaznaczenia: wx.TreeItemId | None = None
 
+        # 13.2: filtr języka z dropdownu — domyślnie pokazujemy tylko język UI
+        # (czysty widok, bez mieszanki kodów dla NVDA), opcja „Wszystkie"
+        # pokazuje cały folder dla autorów paczek.
+        filtr = self._aktywny_filtr_jezyka()
+
         # Sortujemy języki alfabetycznie; docelowe ścieżki to foldery w
         # dictionaries/ (pomijamy ukryte i pliki na tym poziomie, np. README).
         for jezyk in sorted(os.listdir(DICTIONARIES_DIR)):
             sciezka_jezyka = os.path.join(DICTIONARIES_DIR, jezyk)
             if not os.path.isdir(sciezka_jezyka):
+                continue
+            if filtr != _OPCJA_WSZYSTKIE and jezyk != filtr:
                 continue
 
             wezel_jezyka = self._tree.AppendItem(

@@ -671,6 +671,12 @@ manager:
     Drzewo wszystkich plików YAML w folderze dictionaries/. Rozwiń język, potem kategorię, a następnie wybierz plik. Strzałki i Enter działają standardowo dla NVDA.
   tree_root:             "Słowniki (dictionaries/)"
   tree_brak_folderu:     "⚠️  Brak folderu dictionaries/ – utwórz pierwszy język przyciskiem „Nowy plik reguł…\"."
+  # 13.2: filtr języka — domyślnie pokazujemy tylko aktywny język UI (A11y),
+  # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
+  dropdown_jezyk_label:  "&Język:"
+  dropdown_jezyk_tooltip: |-
+    Filtruje drzewo do wybranego folderu w dictionaries/. Domyślnie ustawiony na język interfejsu, by lista była czytelna dla czytnika ekranu. Wybierz „Wszystkie języki", aby porównywać foldery obok siebie podczas tworzenia nowej paczki.
+  opcja_wszystkie_jezyki: "🌍  Wszystkie języki"
   tree_jezyk:            "🌐  {kod_jezyka}  ({nazwa_jezyka})"
   tree_podstawy:         "📄  podstawy.yaml  (diakrytyki + alfabet)"
   tree_kategoria:        "{etykieta}  [{liczba_plikow}]"

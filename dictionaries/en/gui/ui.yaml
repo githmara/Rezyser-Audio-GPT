@@ -655,6 +655,12 @@ manager:
     Tree of all YAML files in the dictionaries/ folder. Expand the language, then the category, and then select the file. Arrows and Enter work standard for NVDA.
   tree_root: "Dictionaries (dictionaries/)"
   tree_brak_folderu: "⚠️  No dictionaries/ folder – create the first language with the \"New Rule File…\" button."
+  # 13.2: language filter — default view shows only the active UI language
+  # (A11y), and a separate "All languages" option is for language-pack authors.
+  dropdown_jezyk_label: "&Language:"
+  dropdown_jezyk_tooltip: |-
+    Filters the tree down to the selected folder in dictionaries/. Defaults to the UI language so the list stays clean for screen readers. Pick "All languages" to compare folders side by side while authoring a new pack.
+  opcja_wszystkie_jezyki: "🌍  All languages"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
   tree_podstawy: "📄  basics.yaml  (diacritics + alphabet)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
