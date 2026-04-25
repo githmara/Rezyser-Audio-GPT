@@ -1,0 +1,114 @@
+# -----------------------------------------------------------------------------
+#  POLISH ACCENT (English source → Polish TTS)
+#  For synthesizers: Paulina / Adam / Maja (Polish TTS, Vocalizer Ewa/Zosia).
+# -----------------------------------------------------------------------------
+id: polski
+etykieta: "Polish (e.g. Paulina / Adam / Maja)"
+opis: |
+  Adapts an English script for a Polish speech synthesizer (Paulina /
+  Adam / Maja, Vocalizer Ewa / Zosia). Polish phonology has its own
+  digraphs (sz/cz) and reads "ł" as /w/ — exactly the English /w/
+  phoneme, which gives us a magic mapping w → ł.
+
+  CRITICAL: Polish TTS softens i-prefixed clusters (Ci/Si/Ni/Zi/Szi/Czi)
+  to /tɕi/, /ɕi/, /ɲi/, /ʑi/, /ɕi/, /ʨi/ by orthography rule. A real
+  Polish speaker switching to English does NOT use those soft phonemes —
+  we MUST harden every "i" after a soft-trigger consonant to "y" so
+  Ewa reads them with hard /ɨ/ instead of soft /i/. Without this
+  safeguard the immersion breaks instantly ("city" sounds like "ćity",
+  "shiny" like "śiny" — the seplenious effect a native speaker called
+  out as "ruining the immersion").
+
+  Markers:
+    - w/wh → ł     (Polish "ł" is exactly English /w/ — magic mapping.
+                     "water" → "łater", "what" → "łat")
+    - sh → sz      (Polish digraph for /ʂ/. "shiny" → "sziny" → "szyny")
+    - ch → cz      (Polish digraph for /tʂ/. "church" → "czurcz")
+    - th → d       (Both /θ/ and /ð/ flatten to /d/ — classic Polish-
+                     accent simplification, used by ~90% of Polish
+                     speakers regardless of voicing. "this" → "dis",
+                     "think" → "dink".)
+    - **Hardening of soft clusters** (the iron rule for this accent):
+        szi → szy, czi → czy, si → sy, ci → cy, zi → zy, ni → ny
+        After every transformation, force every "i" in a softening
+        position to "y" so Ewa reads /ɨ/ not /i/.
+    - **Final-E truncation** (silent E from English the Pole drops):
+        (?<=\\w{3})e\\b → ""    — only in words with ≥4 chars
+        "have" → "haw" → "hał"
+        "love" → "lov"
+        "give" → "giw"
+        "twelve" → "tłelw"
+        Words ≤3 chars protected by the lookbehind length:
+        "the", "be", "we", "he", "she" stay intact.
+
+  Heavy lifting we deliberately leave to Polish TTS:
+    - R           — Polish trill /r/ rendered natively
+    - vowels      — Polish A/U/I/O without English diphthongs is
+                     exactly the desired Polish-accented effect
+    - J as /j/    — Polish reads "j" as /j/ ("John" → /jɔn/), the
+                     authentic Polish first-pass mistake
+    - V           — Polish /v/ identical to English, no transform
+    - final-obstruent devoicing — Polish TTS does it natively
+                     ("bag" → /bak/ without explicit rule)
+
+iso: pl
+kategoria: akcent
+# Pomiędzy islandzkim (30) a angielskim (40) w PL — symbolicznie polski
+# w grupie słowiańsko-bałtyckiej tuż po skandynawskich.
+kolejnosc: 35
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Phonetic substitutions ---
+# CRITICAL ORDERING (read top-to-bottom — silnik aplikuje w kolejności listy):
+#   1-4: Core digraph rewrites (sh/ch/th/wh).
+#   5-6: Hardening of digraph + i (szi → szy, czi → czy) — must run AFTER
+#        steps 1-2 so they see the freshly-produced sz/cz.
+#   7-10: Hardening of single soft consonants + i (si/ci/zi/ni → *y).
+#   11: w → ł (after wh → ł).
+#   12: Final-E truncation in words ≥4 chars (regex: true) — last.
+zamiany:
+  # --- 1-4. Core digraph rewrites ---
+  - { wzor: "sh", zamiana: "sz" }
+  - { wzor: "Sh", zamiana: "Sz" }
+  - { wzor: "ch", zamiana: "cz" }
+  - { wzor: "Ch", zamiana: "Cz" }
+  - { wzor: "th", zamiana: "d"  }
+  - { wzor: "Th", zamiana: "D"  }
+  - { wzor: "wh", zamiana: "ł"  }
+  - { wzor: "Wh", zamiana: "Ł"  }
+
+  # --- 5-6. Hardening of digraph-i clusters (after sh→sz, ch→cz) ---
+  - { wzor: "szi", zamiana: "szy" }
+  - { wzor: "Szi", zamiana: "Szy" }
+  - { wzor: "czi", zamiana: "czy" }
+  - { wzor: "Czi", zamiana: "Czy" }
+
+  # --- 7-10. Hardening of single soft consonants + i ---
+  # Native Polish ortografia "ci"/"si"/"zi"/"ni" forces soft phonemes
+  # /tɕi ɕi ʑi ɲi/. We replace every i to y after these triggers so
+  # Ewa reads /tsɨ sɨ zɨ nɨ/ — hard, English-like.
+  - { wzor: "si", zamiana: "sy" }
+  - { wzor: "Si", zamiana: "Sy" }
+  - { wzor: "ci", zamiana: "cy" }
+  - { wzor: "Ci", zamiana: "Cy" }
+  - { wzor: "zi", zamiana: "zy" }
+  - { wzor: "Zi", zamiana: "Zy" }
+  - { wzor: "ni", zamiana: "ny" }
+  - { wzor: "Ni", zamiana: "Ny" }
+
+  # --- 11. w → ł (after wh → ł) ---
+  - { wzor: "w",  zamiana: "ł"  }
+  - { wzor: "W",  zamiana: "Ł"  }
+
+  # --- 12. Final-E truncation in words ≥4 chars (regex: true) ---
+  # Lookbehind (?<=\w{3}) requires exactly 3 word-chars before \be\b,
+  # so total word length is at least 4. Protects "the/be/we/he/she".
+  # Two rules cover small and capital E (rare on word ending but
+  # possible in ALL-CAPS text).
+  - { wzor: '(?<=\w{3})e\b', zamiana: "", regex: true }
+  - { wzor: '(?<=\w{3})E\b', zamiana: "", regex: true }

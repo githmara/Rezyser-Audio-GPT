@@ -67,6 +67,7 @@ from dataclasses import dataclass
 # <GENEROWANE_IMPORTY_AKCENTOW_START>
 from core_poliglota import (
     akcent_islandzki,
+    akcent_polski,
     akcent_angielski,
     akcent_rosyjski,
     akcent_francuski,
@@ -197,6 +198,7 @@ def zastosuj_akcenty_uniwersalne(
     # <GENEROWANY_SLOWNIK_AKCENTOW_START>
     _AKCENT_FUNCS = {
         "islandzki": akcent_islandzki,
+        "polski":    akcent_polski,
         "angielski": akcent_angielski,
         "rosyjski":  akcent_rosyjski,
         "francuski": akcent_francuski,

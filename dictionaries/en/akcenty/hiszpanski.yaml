@@ -1,0 +1,86 @@
+# -----------------------------------------------------------------------------
+#  SPANISH ACCENT (English source → Spanish TTS)
+#  For synthesizers: Helena / Pablo / Sabina (Spanish TTS).
+# -----------------------------------------------------------------------------
+id: hiszpanski
+etykieta: "Spanish (e.g. Helena / Pablo / Sabina)"
+opis: |
+  Adapts an English script for a Spanish speech synthesizer (Helena /
+  Pablo / Sabina). Spanish phonology lacks /v/ as distinct from /b/,
+  /z/ as distinct from /s/, /θ/ /ð/, and the digraph /ʃ/. Spanish
+  phonotactics also FORBIDS word-initial s+consonant clusters — every
+  native speaker carries this gap into English.
+
+  Markers:
+    - sh → ch       (Despacito-style: no /ʃ/, Spaniards use /tʃ/;
+                     "shoe" → "choe", "she" → "che")
+    - th → t        (no /θ/ /ð/; "think" → "tink", "this" → "tis")
+    - ph → f        (rare in Spanish but consistent for loanwords)
+    - z → s         (no /z/ in Latin Am. Spanish; "zoo" → "soo")
+    - \bv → b       (V/B unification ON WORD INITIAL ONLY — Spanish
+                     does not distinguish /v/ /b/. Restricted to word
+                     start so "Volkswagen" → "Bolkswagen" but "very"
+                     stays "very" mid-sentence to avoid grating
+                     repetition; the word-initial marker alone reads
+                     unmistakably Spanish.)
+    - **Prosthetic E** (the iron rule of Spanish phonotactics):
+        Word-initial s+consonant gets a leading "e".
+        "Spain"  → "Espain"
+        "stop"   → "estop"
+        "school" → "eschool"
+        "spider" → "espider"
+        Non-negotiable — every native Spaniard does this, every time.
+
+  Heavy lifting we deliberately leave to Helena/Pablo:
+    - silent H        — Spanish "h" is silent natively
+    - J as /x/        — Helena reads "j" as /x/ ("John" → /xon/)
+    - LL as /ʝ/       — auto
+    - rolled R        — auto
+    - C/Z before e/i  — auto according to engine's locale (Latin Am.
+                        /s/ vs Castilian /θ/)
+    - QU as /k/       — auto ("queen" → /ken/)
+
+iso: es
+kategoria: akcent
+# Spójność z dictionaries/pl/akcenty/hiszpanski.yaml (kolejnosc=70).
+# Włoski już ma 80 w en/akcenty, więc trzymamy konwencję PL.
+kolejnosc: 70
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Phonetic substitutions ---
+# CRITICAL ORDERING:
+#   * Digraphs (sh, th, ph) BEFORE single letters and BEFORE prosthetic E.
+#     Digraphs may change a word's first letter (e.g. "shop" → "chop"),
+#     which alters whether prosthetic E should fire.
+#   * \bv → b BEFORE prosthetic E too — same reason (word-initial change).
+#   * Prosthetic E runs LAST — operates on definitive starting letters.
+zamiany:
+  - { wzor: "sh", zamiana: "ch" }
+  - { wzor: "Sh", zamiana: "Ch" }
+  - { wzor: "th", zamiana: "t"  }
+  - { wzor: "Th", zamiana: "T"  }
+  - { wzor: "ph", zamiana: "f"  }
+  - { wzor: "Ph", zamiana: "F"  }
+  - { wzor: "z",  zamiana: "s"  }
+  - { wzor: "Z",  zamiana: "S"  }
+
+  # --- V → B only at word start (regex: true) ---
+  # Świadome zawężenie: bezwarunkowe v → b ("victory" → "bictory") byłoby
+  # zbyt agresywne w długim tekście. Sam marker na początku słowa
+  # wystarczy, żeby zaznaczyć akcent.
+  - { wzor: '\bv', zamiana: "b", regex: true }
+  - { wzor: '\bV', zamiana: "B", regex: true }
+
+  # --- Prosthetic E (regex: true) ---
+  # Word-initial s+consonant → es+consonant. Three rules cover lowercase,
+  # capitalized first letter ("Spain" → "Espain"), and ALL-CAPS ("STOP" →
+  # "ESTOP"). Lookahead is consonant-class, restricted per case to keep
+  # capitalisation predictable.
+  - { wzor: '\bs(?=[bcdfgklmnpqrstvwxz])', zamiana: "es", regex: true }
+  - { wzor: '\bS(?=[bcdfgklmnpqrstvwxz])', zamiana: "Es", regex: true }
+  - { wzor: '\bS(?=[BCDFGKLMNPQRSTVWXZ])', zamiana: "ES", regex: true }

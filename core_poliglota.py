@@ -585,6 +585,11 @@ def akcent_islandzki(tekst: str, jezyk: str = "pl") -> str:
     return zastosuj_reguly_fonetyczne(tekst, "islandzki", jezyk)
 
 
+def akcent_polski(tekst: str, jezyk: str = "pl") -> str:
+    """Alias: reguły fonetyczne akcentu ``polski`` (źródła: ``dictionaries/en/akcenty/polski.yaml``)."""
+    return zastosuj_reguly_fonetyczne(tekst, "polski", jezyk)
+
+
 def akcent_angielski(tekst: str, jezyk: str = "pl") -> str:
     """Alias: reguły fonetyczne akcentu ``angielski`` (źródła: ``dictionaries/pl/akcenty/angielski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "angielski", jezyk)
@@ -606,7 +611,7 @@ def akcent_niemiecki(tekst: str, jezyk: str = "pl") -> str:
 
 
 def akcent_hiszpanski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``hiszpanski`` (źródła: ``dictionaries/pl/akcenty/hiszpanski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``hiszpanski`` (źródła: ``dictionaries/en/akcenty/hiszpanski.yaml``, ``dictionaries/pl/akcenty/hiszpanski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "hiszpanski", jezyk)
 
 
