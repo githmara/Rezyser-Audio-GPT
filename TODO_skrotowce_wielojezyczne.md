@@ -233,22 +233,35 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
    To sygnał, że język jest w pełni wdrożony.
 
 5. **Release** jako kolejna wersja **13.x**: jeden nowy w pełni wdrożony
-   język na release (od 13.2 wzwyż). Gdy ten plik zostanie wyczerpany
+   język na release (od 13.3 wzwyż). Gdy ten plik zostanie wyczerpany
    (wszystkie języki z sekcji 3.1 i 3.2 zamknięte), następny release to
    **14.0**, a plik `TODO_skrotowce_wielojezyczne.md` można usunąć
    z repozytorium.
 
-   > **Uwaga o numeracji 13.1.** Wbrew pierwotnemu założeniu „13.1 =
-   > pierwszy w pełni nowy język" release 13.1 stał się commitem
+   > **Uwaga o numeracji 13.1 i 13.2.** Wbrew pierwotnemu założeniu
+   > „13.1 = pierwszy w pełni nowy język" release 13.1 stał się commitem
    > porządkowym dla istniejących stubów językowych: refresh pól
    > `opis: |` i komentarzy nagłówkowych w `dictionaries/<kod>/podstawy.yaml`
    > (en/fi/is/it/ru) na języki natywne, bez dorzucania `akcenty/` ani
-   > `szyfry/`. Powodem była strategiczna zmiana tempa — wcześniejsze
-   > etapy 1–5/5 wdrożyły UI i dokumentację dla 5 języków na raz, wyprzedzając
-   > pierwszy krok schematu z TODO § 4 (treści języka bazowego). Release 13.1
-   > ten dług naprawia. Pełen pakiet każdego języka (akcenty + szyfry +
-   > smoke test sekcji 6) trafia od **13.2** — jeden język na release,
-   > zgodnie z „Jeden język na raz" w Uwagach operacyjnych poniżej.
+   > `szyfry/`. Release **13.2** też nie przyniósł pełnej paczki językowej —
+   > zamiast tego załatał trzy luki w fundamencie ujawnione podczas audytu
+   > po 13.1: polski hardkod w `gui_rezyser.py`, modułową stałą
+   > `JEZYK_BAZOWY` w `gui_poliglota.py` (używaną w 9 miejscach pipeline'u)
+   > oraz polski prompt systemowy w `tlumacz_ai.py`. Plus przekład 4 trybów
+   > Reżysera AI na angielski (jako miękki fallback) i dropdown filtra
+   > języka w Managerze Reguł. Bez tych łatek pakiet językowy byłby
+   > *false advertising* — fiński user widziałby polski miks etykiet
+   > zaraz po przełączeniu UI.
+   >
+   > Pełen pakiet każdego języka (akcenty + szyfry + smoke test sekcji 6)
+   > trafia więc od **13.3** (przesunięte z 13.2) — jeden język na release,
+   > zgodnie z „Jeden język na raz" w Uwagach operacyjnych poniżej. 13.3
+   > otwiera angielski, plus dwie krytyczne łatki silnika ujawnione przy
+   > 13.2: dynamiczny skan języków w `odswiez_rezysera.py` (zamiast
+   > `OBSLUGIWANE_JEZYKI = ("pl",)`) i pole `slowo_akcent` w `podstawy.yaml`
+   > (regex `[a-zńśźżćłó]+` w `core_rezyser.py:146` przechodzi na `\w+`
+   > z flagą Unicode, żeby skandynawskie/niemieckie/francuskie diakrytyki
+   > w Księdze Świata przestały psuć parsowanie).
 
 ### Uwagi operacyjne
 

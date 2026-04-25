@@ -1,123 +1,122 @@
-# Release Notes — Reżyser Audio GPT 13.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.2 „Wersja Wydawnicza"
 
-*Punkt wyjścia: V13.0-RC (22 IV 2026) → 19 commitów → V13.1.*
-*Motyw przewodni: pełna warstwa wielojęzyczności od fundamentu po menu, bez wyprzedzania harmonogramu.*
+*Punkt wyjścia: V13.1 (db5b2d2) → 5 commitów WIP + commit zamykający → V13.2.*
+*Motyw przewodni: fundamenty wielojęzyczności faktycznie wielojęzyczne — koniec polskiego hardkodu w sercu pipeline'u.*
 
 ---
 
 ## TL;DR
 
-13.1 jest pierwszym wydaniem, w którym **interfejs aplikacji potrafi mówić w różnych językach naraz** (polski, angielski, fiński, rosyjski, islandzki, włoski) — choć dziś użytkownik widzi to tylko jako *przygotowanie pod 13.2*. Cały tekst widoczny w GUI i obie instrukcje (`docs/manual.pl.txt`, `docs/dictionaries.pl.txt`) zostały oderwane od kodu Pythona i przeniesione do plików YAML w `dictionaries/<kod>/gui/`. Powstała infrastruktura wyboru języka interfejsu zapisywana w `wx.Config` (cross‑platform), z dialogiem pierwszego uruchomienia i menu w pasku menubar. Zaostrzono też definicję „obsługiwanego języka" — dziś w komunikatach widnieje tylko polski, jako jedyny, w którym silnik faktycznie potrafi cokolwiek zrobić; kolejne języki będą się dorzucały *organicznie* w miarę dodawania pełnych pakietów akcentów i szyfrów.
+13.2 nie dorzuca jeszcze pełnej paczki językowej — robi coś ważniejszego: **przebudowuje fundament tak, żeby kolejne paczki dało się dorzucać bez ruszania kodu Pythona**. Tłumacz AI, Reżyser AI i Poliglota przestają zakładać, że językiem projektu jest polski. Manager Reguł dostaje filtr języka (czysty widok dla NVDA + tryb „pokaż wszystko" dla autorów paczek). Brakujące reguły reżysera dla danego języka miękko fallbackują do angielskiego (neutralny język bootstrap'u), brakujące akcenty i szyfry — twardo wyłączają odpowiednie kontrolki z komunikatem A11y, bo to reguły fonetyczne ściśle związane z językiem źródłowym. Pełna paczka angielska (akcenty + szyfry + smoke test) przesuwa się na 13.3.
 
 ---
 
 ## Co nowego dla użytkownika końcowego
 
-### Wybór języka interfejsu (przygotowane, ujawni się w 13.2)
+### Reżyser AI w innym języku interfejsu = angielskie tryby zamiast polskich
 
-- **Pierwsze uruchomienie:** gdy w `dictionaries/` znajdzie się ≥ 2 w pełni wdrożone języki, aplikacja wita użytkownika oknem dialogowym `Choose your language` (treść hardkodowana po angielsku, neutralnie i bez ryzyka wykluczenia kogokolwiek). Lista to natywne nazwy (Polski, English, Suomi, Íslenska, Italiano, Русский) posortowane po ISO. Cancel = polski jako fallback.
-- **Menu „Język interfejsu"** w pasku menu z radio‑items dla każdego języka. Aktywny zaznaczony, zmiana po prostu zapisuje wybór do `wx.Config` i prosi o restart aplikacji (świadoma decyzja: dynamiczny re‑render wszystkich kontrolek wxPython byłby ryzykiem regresji w czytniku ekranu — prościej jest zamknąć i otworzyć ponownie).
-- **Trwałe zapamiętanie wyboru:** `wx.Config` używa rejestru Windows (`HKCU\Software\RezyserAudioGPT`), pliku INI w `~` na Linuksie i `~/Library/Preferences/...` na macOS. Per‑user, nie wymaga uprawnień administratora.
-- **Silent init dla starych instalacji:** jeśli kompletny jest tylko jeden język (stan w 13.1: tylko polski), dialog się nie pojawia — aplikacja milcząco zapisuje polski i lecimy dalej. Żadnych pytań w które nie ma czego wpisać.
+- Gdy użytkownik włączy interfejs angielski, fiński czy islandzki, panel Reżysera nie pokazuje już „Burza Mózgów / Skrypt / Audiobook" po polsku. Tryby ładowane są z `dictionaries/<jezyk_ui>/rezyser/`, a gdy folder dla danego języka jeszcze nie istnieje — z `dictionaries/en/rezyser/` (pełen przekład 4 trybów AI dorzucony w 13.2).
+- **Twardego polskiego fallbacku już nie ma.** Gdyby ktoś usunął oba foldery (UI i EN), panel pokazuje placeholder w RadioBox + jednorazowy `wx.MessageBox` A11y z wyjaśnieniem, jak naprawić — a nie podsuwa cicho polskie etykiety obcojęzycznemu użytkownikowi NVDA.
 
-### Komunikat ostrzegający o niewspieranym języku tekstu źródłowego
+### Poliglota wykrywa język tekstu po wczytaniu pliku
 
-- Lista *„obsługiwanych języków"* w ostrzeżeniu jest budowana **dynamicznie** ze skanu folderów `dictionaries/<kod>/podstawy.yaml`, nie hardkodowana. Każdy nowy folder z pełnym pakietem dorzuca pozycję sam — bez edycji żadnego stringa.
-- **Język interfejsu użytkownika idzie pierwszy.** Polski użytkownik widzi „Polski, …", angielski zobaczy „English, Polski, …" — porządek odzwierciedla kontekst, w którym pracuje (czytniki ekranu czytają od początku, więc to liczy się dla A11y).
+- Po wczytaniu pliku panel Poligloty woła `core_poliglota.wykryj_jezyk_zrodlowy()` (z walidacją wobec kompletnych folderów w `dictionaries/`) i przełącza pipeline na wykryty język. Akcenty, szyfry i zakres SpinCtrl szyfru Cezara odświeżają się automatycznie.
+- Gdy w wykrytym języku nie ma jeszcze reguł — `wx.ComboBox` akcentów lub szyfrów zostaje wyłączony, tooltip A11y informuje wprost: „Dla języka »fi« nie zainstalowano akcentów fonetycznych. Reguły są ściśle związane z językiem źródłowym i nie mogą być pożyczane z innych folderów dictionaries/." Świadomy kompromis: lepiej zablokować przycisk niż udawać, że polskie reguły fonetyczne zadziałają na fiński tekst.
 
-### Higiena dokumentacji end‑user
+### Manager Reguł — dropdown „Język" u góry panelu
 
-- Stara dwoistość `instrukcja.txt` w roocie + `dictionaries/instrukcja.txt` została skasowana (797 linii). Jedynym kanonicznym źródłem dokumentacji są teraz `docs/manual.pl.txt` i `docs/dictionaries.pl.txt`, generowane przez nowy `generuj_dokumentacje.py` z szablonów YAML. Dla zagranicznych użytkowników GitHuba nazwy plików po angielsku, kod ISO w rozszerzeniu.
-- Numer wersji ma teraz **jedno źródło prawdy** — `dictionaries/pl/gui/ui.yaml::app.wersja`. Tytuł okna, paczki releasu, dokumentacja — wszystko czyta to samo. Koniec ze synchronizacją literówek typu „v1**O**.1" zamiast „v10.1".
-
-### Build releasu
-
-- `buduj_wydanie.py` przestał pytać o numer wersji przez `input()` (single point of failure: literówka prowadziła do desynchronizacji paczki z tytułem aplikacji). Skrypt teraz auto‑detekcję z `ui.yaml` i blokuje nadpisanie istniejących paczek `Rezyser_Audio_v<wersja>_*` — chroni archiwum buildów.
-- Instalator EXE (Inno Setup) i portable ZIP są teraz w **parity**: oba wykluczają surowe szablony z `dictionaries/<kod>/gui/dokumentacja/` (użytkownik dostaje wygenerowane `docs/*.txt`, nie YAML‑e z placeholderami).
-- Naprawa `sys.stdout.reconfigure(encoding="utf-8")` na Windowsie — emoji w printach buildu nie wywalają już procesu.
+- Domyślny widok = język interfejsu. Czytnik ekranu nie ślizga się już po obcojęzycznych wpisach, których użytkownik nie rozumie.
+- Ostatnia opcja w liście to „🌍 Wszystkie języki" — przeznaczona dla autorów paczek językowych, którzy chcą porównywać foldery obok siebie podczas tworzenia nowej paczki. Akcelerator `&Język:` / `&Language:` ustawiony na pasującą literę w obu UI.
+- Lista języków pochodzi z faktycznych folderów w `dictionaries/`, a nie tylko z kompletnych — bo manager służy też do **tworzenia** paczek od zera.
 
 ---
 
 ## Pod maską
 
-### Warstwa tłumaczeń UI (`i18n.py`)
+### Tłumacz AI: prompt systemowy zneutralizowany
 
-- Nowy moduł `i18n.py`: cienki loader YAML‑ów z cache w pamięci, API `t("klucz", **params)`, fallback na polski przy brakującym kluczu. Obsługa zagnieżdżonych kluczy przez kropkę (`t("main.menu.zakoncz")`).
-- Hardkodowane stringi w `main.py`, `gui_konwerter.py`, `gui_manager_regul.py`, `gui_poliglota.py`, `gui_rezyser.py` zostały zmigrowane: 441 kluczy w 8 sekcjach (`app`, `common`, `main`, `home`, `rezyser`, `poliglota`, `konwerter`, `manager`). Smoke test 440 kluczy w kodzie kontra YAML — 0 brakujących.
-- Manager Reguł dostał **czwartą kategorię** w drzewie: `gui/` obok `akcenty/`, `szyfry/`, `rezyser/`. Kreator nowego języka tworzy podfolder `gui/` automatycznie.
-- Konwerter zapisuje teraz metadane `author` w `.docx` przez `t()` — wcześniej hardkodowane „Reżyser" pokazywałoby się obcojęzycznemu użytkownikowi NVDA w dymkach Eksploratora.
+- `tlumacz_ai._PROMPT_SYSTEMOWY_TEMPLATE` przepisany na angielski i wyniesiony do stałej modułowej. Powód: tłumacz to wewnętrzne narzędzie bootstrap'owe dla autorów paczek językowych — nie user-facing. Polski prompt wprowadzał bias modelu w stronę polskiego źródła i był nieczytelny dla nie-polskiego współautora.
+- Świadomie **nie** wynosimy promptu do YAML-a — to byłoby over-engineering. Lokalna stała w module wystarcza, ekstrakcja możliwa w 14.x jeśli pojawi się realna potrzeba (np. modele lokalne preferujące inny język systemowy).
 
-### Wielojęzyczne tłumaczenia UI (5 języków)
+### Reżyser AI: fallback do EN + 4 nowe YAML-e
 
-- Nowy `buduj_wielojezyczne_ui.py`: autotłumacz oparty o `ruamel.yaml` round‑trip (komentarze sekcyjne zachowane bit‑w‑bit) + JSON batched przez `gpt-4o`.
-- **Tokenizacja dwuwarstwowa** chroni strukturę: `⟦P{n}⟧` dla `{placeholderów}` (`{nazwa_pliku}`, `{liczba_znakow}`), `⟦S{n}⟧` dla skrótów klawiaturowych (`\tCtrl+1`). Akcelerator `&` celowo nietokenizowany — LLM dostaje go widocznego z explicit instrukcją relokacji na sensowną literę docelową języka.
-- Walidacje per‑leaf: parity tokenów + count(`'&'`) + kompletność id‑ów. Auto‑retry dla problematycznych liści (fiński zgubił raz `&` — retry naprawił bez interwencji człowieka).
-- Chunking po 150 liści + `max_tokens=16_384` + `finish_reason` guard (gpt‑4o w jednym requeście nie pomieścił 450 liści cyrylicy).
-- Wynik: `dictionaries/{en,fi,ru,is,it}/gui/ui.yaml` — 450 liści/język, ~41–45 kB każdy.
-- Surgical update: nowa flaga `--klucz` w `buduj_wielojezyczne_ui.py` filtruje liście do prefiksu i iniekuje wybrane wartości w istniejący ui.yaml zachowując bit‑w‑bit pozostałe liście — koszt 5 mikro‑requestów zamiast 15 pełnych chunków.
+- `gui_rezyser.py:109` — twardy `pr.lista_trybow("pl")` zamieniony na łańcuch z fallbackiem: `lista_trybow(jezyk_ui) or lista_trybow("en")`. Analogicznie dla `zaladuj_przepis("tytuly", ...)`.
+- Folder `dictionaries/en/rezyser/` z czterema plikami: `tryb_audiobook.yaml`, `tryb_burza.yaml`, `tryb_skrypt.yaml`, `postprod_tytuly.yaml`. Pełne tłumaczenia etykiet, promptów systemowych, sufiksów i przypomnień.
+- **Zachowano klucze techniczne:** `kategoria: tryb`/`postprodukcja` (porównywane literalnie w `przepisy_rezysera.py`), tagi `<STRESZCZENIE>` i `[ODRZUCENIE_AI]` (parsowane regexami w `rezyser_ai.py`), `id` plików.
+- **Zlokalizowano elementy w języku projektu:** `slowa_wyzwalajace.streszczenie` (`summarize/summary/recap`), `regex_podzial_rozdzialow` (`Prologue|Chapter \d+|Epilogue`), pole `jezyk_odpowiedzi` (`English`).
+- `_jezyk_kompletny()` wciąż celowo pomija folder `rezyser/` — wymóg przesunięty na 14.x zgodnie z istniejącym komentarzem w `core_poliglota.py:307-310`.
 
-### Wielojęzyczne tłumaczenia dokumentacji
+### Poliglota: stała → pole instancji
 
-- Nowy `buduj_wielojezyczne_docs.py` + szablony `dictionaries/<kod>/gui/dokumentacja/manual.yaml`. Skrypt zamraża placeholdery `{...}` przed wysyłką do LLM i scala je z odpowiedzią — model nie ma jak zaszkodzić strukturze.
-- Parametryzacja „żywych etykiet GUI" w manual.yaml: 25 wystąpień literałów (15 unikalnych kluczy GUI) zamienionych na placeholdery `{main.menu.zakoncz}` itp. Dzięki temu cytaty w instrukcji nie rozjeżdżają się z rzeczywistym GUI po retłumaczeniu.
+- `JEZYK_BAZOWY = "pl"` (modułowa stała) usunięta. Zastąpiona przez `self._jezyk_aktywny` ustawianą w konstruktorze na `JEZYK_DOMYSLNY = "pl"` i podmienianą po wczytaniu pliku przez nowy helper `_odswiez_warianty()`.
+- `_odswiez_warianty()` przeładowuje `self._akcenty`/`self._szyfry`, odświeża zawartość obu `wx.ComboBox` (`SetSelection(0)`, `Enable()`) lub — gdy lista pusta — wyłącza kontrolkę i ustawia tooltip A11y z komunikatem braku reguł.
+- Funkcja `_maybe_ostrzez_o_jezyku_zrodla()` przepisana z bezpośredniego `langdetect.detect()` na `core_poliglota.wykryj_jezyk_zrodlowy()` (tak jak zapowiadał TODO w kodzie). `langdetect` przestał być importowany w warstwie GUI — został tylko w `core_poliglota`, gdzie ma sens.
+- Wszystkie wywołania `core_poliglota.przetworz/kod_iso/sufiks_nazwy_pliku/wariant_po_*` używają teraz `self._jezyk_aktywny` zamiast modułowej stałej.
 
-### Treści języków bazowych
+### Manager Reguł: filtr języka i sentinel `_OPCJA_WSZYSTKIE`
 
-- Nowe pliki `dictionaries/{en,fi,ru,is,it}/podstawy.yaml` z natywnymi alfabetami: en (26), fi (29 z Å, Ä, Ö), ru (33 cyrylicy z Ё), is (32 z Þ, Ð, Æ), it (21 rodzimych bez J, K, W, X, Y).
-- Pole `polskie_znaki: []` (puste — w 13.x transliteracja PL→łacina nie dotyczy innych języków). Klucz historyczny, manager reguł oczekuje jego obecności.
-- Pola `opis: |` i komentarze nagłówkowe **w językach natywnych** (refresh w 13.1): suomi po fińsku, íslenska po islandzku, русский po rosyjsku itd.
+- `wx.Choice` u góry panelu zbudowany z dynamicznej listy folderów w `dictionaries/` + ostatnia pozycja „Wszystkie języki" (sentinel `__all__`, nie zderzający się z żadnym kodem ISO).
+- `_zaladuj_drzewo()` filtruje pętlę `for jezyk in sorted(os.listdir(...))` przez aktywny filtr — pojedynczy `if filtr != _OPCJA_WSZYSTKIE and jezyk != filtr: continue`.
+- Helper `_dostepne_kody_jezykow()` zwraca **wszystkie** foldery (nie tylko kompletne), bo manager służy też do tworzenia paczek od zera dla nowego języka.
 
-### Definicja „kompletnego" języka
+### 8 nowych kluczy i18n (PL + EN)
 
-Wprowadzono nowe kryterium w `core_poliglota._jezyk_kompletny()`:
-
-```
-✓ podstawy.yaml          (alfabet + transliteracja)
-✓ gui/ui.yaml            (tłumaczenie interfejsu)
-✓ akcenty/*.yaml ≥ 1     (tryb Reżysera)
-✓ szyfry/*.yaml  ≥ 1     (tryb Szyfranta)
-```
-
-`dostepne_jezyki_bazowe()` zwraca dziś tylko `["pl"]`. 5 stubów (en/fi/is/it/ru) jest filtrowanych — silnik nie umiałby przetwarzać tekstu w żadnym z nich, więc nie powinny się pojawiać w komunikatach typu „obsługiwane języki" ani w selektorze języka interfejsu. Folder `rezyser/` świadomie pominięty w kryterium — zawiera dziś PL‑specyficzne prompty `gpt-4o`, nie kontrakt każdego języka.
-
-### Migracja na Claude Code
-
-- `chore: gruntowny refaktor zasad projektu i migracja na Claude Code (Bash)` — odejście od `.clinerules` (Cline + PowerShell) na rzecz `CLAUDE.md` (Claude Code + Git Bash). Wszystkie wewnętrzne odwołania do `.clinerules` w plikach projektowych (m.in. `TODO_skrotowce_wielojezyczne.md`) przetłumaczone na nowe sekcje `CLAUDE.md`.
+| Sekcja      | Klucz                              | Użycie                                         |
+|-------------|-------------------------------------|------------------------------------------------|
+| `rezyser`   | `brak_trybow_dla_jezyka`            | komunikat A11y, gdy fallback EN też pusty      |
+| `rezyser`   | `brak_trybow_tytul`                 | tytuł `wx.MessageBox`                          |
+| `rezyser`   | `placeholder_brak_trybow`           | label w pustym `wx.RadioBox`                   |
+| `poliglota` | `brak_akcentow_dla_jezyka`          | tooltip wyłączonego `combo_akcent`             |
+| `poliglota` | `brak_szyfrow_dla_jezyka`           | tooltip wyłączonego `combo_szyfr`              |
+| `manager`   | `dropdown_jezyk_label`              | etykieta `wx.Choice` (z akceleratorem `&`)     |
+| `manager`   | `dropdown_jezyk_tooltip`            | tooltip wyjaśniający domyślny widok i tryb All |
+| `manager`   | `opcja_wszystkie_jezyki`            | etykieta sentinela `__all__`                   |
 
 ---
 
-## Strategia wdrażania (zmiana tempa)
+## Strategia wdrażania (rozłączenie infrastruktury od zawartości)
 
-### Co znaczy „13.1 = wersja porządkowa"?
+### Co znaczy „13.2 = fundament infrastruktury, nie pakiet językowy"?
 
-Pierwotna intencja `TODO_skrotowce_wielojezyczne.md` zakładała: *13.1 = pierwszy w pełni nowy język*. W praktyce, etapy 1–5/5 i18n wdrożyły **infrastrukturę i tłumaczenia** dla pięciu języków na raz, wyprzedzając pierwszy krok schematu z TODO § 4 (treści języka bazowego). 13.1 ten dług naprawia: refresh polski podstawy.yaml, dopracowanie `opis` i komentarzy w językach natywnych, plus gridowanie infrastruktury wyboru języka interfejsu (`wx.Config` + menu + ostrzeżenie). **Bez wciągania niedokończonych języków do widoku użytkownika.**
+Pierwotny plan w `TODO_skrotowce_wielojezyczne.md` zakładał: *13.2 = pierwszy w pełni nowy język (np. fiński z pełnym pakietem akcentów i szyfrów)*. Audyt kodu po wydaniu 13.1 ujawnił trzy poważne luki, których ten pakiet nie zamknąłby:
 
-### Co przyniesie 13.2 i dalej
+1. `gui_rezyser.py` ładował tryby twardo z `pl/rezyser/` — angielski użytkownik widziałby polskie etykiety w `wx.RadioBox`.
+2. `gui_poliglota.py` miał stałą modułową `JEZYK_BAZOWY = "pl"` użytą w 9 miejscach pipeline'u — pakiet fiński działałby tylko w teorii.
+3. `tlumacz_ai._prompt_systemowy()` był po polsku i wprowadzał bias modelu.
 
-Każdy minor 13.x dorzuca **jeden** w pełni wdrożony język:
-- `dictionaries/<kod>/akcenty/` — komplet akcentów minus akcent natywny tego języka
-- `dictionaries/<kod>/szyfry/` — sześć algorytmów (cezar/jakanie/odwracanie/samogloskowiec/typoglikemia/wąż), z rozwinięciami skrótowców z TODO § 3.1
-- smoke test sekcji 6 TODO
+Bez tych trzech łatek pakiet językowy byłby *false advertising*. 13.2 łata wszystkie trzy. Pełna paczka angielska (akcenty z kompromisami fonetycznymi + szyfry przepisane + smoke test sekcji 6 TODO) trafia do 13.3.
 
-Gdy plik TODO zostanie wyczerpany (wszystkie języki z § 3.1 + 3.2 zamknięte), następny release to **14.0**.
+### Co przyniesie 13.3 i dalej
 
-### Co działa „samoczynnie" od 13.2 (fi z pełnym pakietem)
+13.3 dostarczy **pierwszy w pełni nowy język** (angielski) plus dwie krytyczne łatki silnika ujawnione podczas audytu 13.2:
 
-Bez edycji jednej linii Pythona — siatka jest gotowa:
-- `dostepne_jezyki_bazowe()` zwróci `["fi", "pl"]`
-- Menu „Język interfejsu" pojawi się w pasku menu z 2 radio‑items (Polski, Suomi)
-- First‑run dialog zacznie wyskakiwać dla nowych instalacji
-- Lista w ostrzeżeniu dla użytkownika z interfejsem fińskim zacznie się od „Suomi, Polski"
+- **`odswiez_rezysera.OBSLUGIWANE_JEZYKI` z hardkodu na skan dynamiczny.** Generator wrapperów `akcent_*` musi automatycznie podchwytywać nowe foldery `dictionaries/<kod>/akcenty/` zgodnie z duchem projektu „nowy język = nowy folder".
+- **Słowo „akcent" w `dictionaries/<kod>/podstawy.yaml` (lista synonimów).** `core_rezyser.py:146` parsuje Księgę Świata regexem `r"akcent\s+([a-zńśźżćłó]+)..."` — twardy hardkod polskiego słowa i polskiego alfabetu. W 13.3 pole `slowo_akcent: ["akcent"]` (PL) / `["accent", "accented"]` (EN), a alfabet `[a-zńśźżćłó]+` przechodzi na `\w+` z flagą Unicode (skandynawskie/niemieckie/francuskie diakrytyki przestają psuć parsowanie).
+- `dictionaries/en/akcenty/` — komplet akcentów z notatki autora (z kompromisami fonetycznymi: nie wszystko da się odwzorować z polskiego na angielski 1:1).
+- `dictionaries/en/szyfry/` — sześć algorytmów (cezar/jakanie/odwracanie/samogloskowiec/typoglikemia/wąż) plus rozwinięcia skrótowców `e.g./i.e./etc./Dr./Mr./...` z `TODO § 3.1`.
+- `dictionaries/en/podstawy.yaml::polskie_znaki: []` (z definicji puste — angielski nie ma diakrytyków do transliteracji).
+
+Każdy minor 13.x dorzuca **jeden** w pełni wdrożony język (od 13.3 zamiast od 13.2 — przesunięte zgodnie z faktem, że 13.2 zjadł budżet na infrastrukturę). Gdy plik `TODO_skrotowce_wielojezyczne.md` zostanie wyczerpany, następny release to **14.0**.
+
+### Co działa „samoczynnie" od 13.3 (en z pełnym pakietem)
+
+Bez edycji jednej linii Pythona — siatka jest już gotowa:
+
+- `dostepne_jezyki_bazowe()` zwróci `["en", "pl"]`.
+- Menu „Język interfejsu" pokaże 2 radio-items (Polski, English).
+- `wykryj_jezyk_zrodlowy()` zwróci `"en"` dla angielskiego pliku → Poliglota auto-przełączy pipeline.
+- Reżyser dla użytkownika z UI=EN załaduje już pełne `en/rezyser/` (zamiast fallbacku) — bo same pliki YAML w `13.2/dictionaries/en/rezyser/` są kompletne.
+- Manager Reguł domyślnie pokaże tylko `en/` w drzewie, dropdown „Wszystkie języki" pozostaje dostępny.
 
 ---
 
 ## Breaking changes / migracja
 
-- **Numer wersji zniknął z `main.py`.** Atrybut `MainFrame.VERSION` w 13.1 nie istnieje — wersja siedzi wyłącznie w `dictionaries/pl/gui/ui.yaml::app.wersja`. Ewentualne zewnętrzne skrypty muszą czytać stamtąd.
-- **Stare `instrukcja.txt` (root) i `dictionaries/instrukcja.txt` zostały usunięte.** Nowe lokalizacje: `docs/manual.pl.txt` i `docs/dictionaries.pl.txt`. Linki w bookmarkach/skryptach do zaktualizowania.
-- **Lista „obsługiwanych języków" w ostrzeżeniu skróciła się z 6 do 1.** Świadoma regresja kosmetyczna — wcześniejsza lista (etap 5/5) była *false advertising*: langdetect przepuszczał stuby, ale silnik w żadnym z 5 języków nie miał akcentów ani szyfrów. Po 13.2+ lista znów rośnie, organicznie i uczciwie.
-- **Nowa zależność:** `ruamel.yaml` w `requirements.txt` (potrzebne tylko dla skryptów buildu wielojęzycznych UI; sama aplikacja działa z `pyyaml`).
+- **`JEZYK_BAZOWY` jako modułowa stała w `gui_poliglota.py` została usunięta.** Zewnętrzne skrypty importujące `gui_poliglota.JEZYK_BAZOWY` przestaną działać. Zastąpiona przez `JEZYK_DOMYSLNY` (wartość domyślna) oraz pole instancji `PoliglotaPanel._jezyk_aktywny`. Migracja: nikt zewnętrzny nie powinien o tej stałej wiedzieć — była detalem implementacji.
+- **`from langdetect import detect, LangDetectException` w `gui_poliglota.py` usunięty.** Sam pakiet `langdetect` pozostaje w `requirements.txt` — używa go `core_poliglota.wykryj_jezyk_zrodlowy()`. Nie odinstalowywać z venv ani runtime.
+- **Polski hardkod w `pr.lista_trybow("pl")` w `gui_rezyser.py` zamieniony na fallback chain.** Aplikacja w UI=PL zachowuje się identycznie (PL ma własne tryby), w UI≠PL wcześniej widać było polski miks etykiet — teraz spójna paczka EN lub komunikat.
+- **Numer wersji w obu `ui.yaml` bumpniętym na `13.2`.** Tytuł okna, paczki releasu, dokumentacja czytają stąd — efekt automatyczny.
 
 ---
 
-*Notes wygenerowane na podstawie 19 commitów od `V13.0-RC` do `d911c60` (HEAD). Pełna lista commitów: `git log V13.0-RC..HEAD --oneline`.*
+*Notes wygenerowane na podstawie 5 commitów WIP (810eb28..d28767c) + commit zamykający. Pełna lista: `git log V13.1..HEAD --oneline`.*
