@@ -1,0 +1,45 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUCTION: ASSIGN CHAPTER TITLES (AI)
+#  Tool for the Audiobook mode: iterates over chapters in the saved project
+#  file and generates a short literary title for each.
+#  Uses a cheap model (gpt-4o-mini) by default — the task is simple.
+# -----------------------------------------------------------------------------
+id: tytuly
+etykieta: "Assign Chapter Titles (AI)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- OpenAI parameters ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: English
+
+# --- System prompt ---
+prompt_systemowy: |
+  You are a distinguished editor. You answer with the title alone.
+
+# --- User-instruction template (role=user) ---
+# Placeholders: {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Here is the content of a book passage ({naglowek}). Invent ONE short, catchy, literary title without quotation marks.
+
+  CONTENT:
+  {probka}
+
+# --- Project-file iteration parameters ---
+# Regex splitting the file into structural headers + content. The capture
+# group must extract THE HEADER ALONE ("Prologue" / "Chapter 7" / "Epilogue").
+# Leading/trailing \n* allow multiple blank lines around headers.
+regex_podzial_rozdzialow: "(?i)\\n*(Prologue|Chapter \\d+|Epilogue)\\n*"
+
+# Fragments shorter than this get the "(Fragment too short)" status instead
+# of an AI call (saves API credits + avoids meaningless titles).
+min_dlugosc_fragmentu: 50
+
+# Maximum length of the text sample sent to the model in one request.
+# The AI sees the start of the chapter — enough to invent a title.
+max_dlugosc_probki: 6000
+
+# Messages shown in the results window:
+etykieta_fragment_zbyt_krotki: "(Fragment too short)"
+etykieta_bled_brak_kredytow: "(Error – no API credits)"

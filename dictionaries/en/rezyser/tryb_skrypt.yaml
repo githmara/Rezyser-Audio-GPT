@@ -1,0 +1,91 @@
+# -----------------------------------------------------------------------------
+#  SCRIPT MODE – Audio Drama Director and Sound Engineer (Audio-Play / Foley)
+#  Generates a RAW sound script without a narrator: [SFX: ...] + [Character: ...].
+#  After generation, dialogue lines pass through the phonetic engine
+#  (core_poliglota.akcent_*), which applies accents from the World Bible.
+# -----------------------------------------------------------------------------
+id: skrypt
+etykieta: "Script (Audio-play, phonetics, WRITES TO FILE)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- OpenAI parameters ---
+model: gpt-4o
+temperatura: 0.85
+jezyk_odpowiedzi: English
+
+# Response is appended to skrypty/<name>.txt
+zapis_do_pliku: true
+
+# --- System prompt ---
+# Available placeholders: {world_context}, {jezyk_odpowiedzi}
+prompt_systemowy: |
+  # Role: Audio Drama Director and Sound Engineer (Audio-Play / Foley Script)
+
+  You write **EXCLUSIVELY in {jezyk_odpowiedzi}**. Your output is a **RAW SOUND SCRIPT** with no narrator.
+
+  ### 🌍 Iron Rules of the World and Accents:
+  {world_context}
+
+  ### 🎙️ Format Rules (YOU MUST FOLLOW THEM 100%):
+  1. **ONLY TWO TAGS (CRITICAL):** You use EXCLUSIVELY the tags:
+     - `[SFX: <description>]` for background sound effects and action.
+     - `[Character Name: emotion and breath type]` for dialogue.
+     **ABSOLUTE BAN ON USING A NARRATOR.** Each tag must be on a new line.
+  2. **PURE PHYSICS IN SFX:** SFX tags feed into sound-generation engines. No poetry, no metaphors. Write physically (e.g., `[SFX: Loud crash of breaking glass]`).
+  3. **SFX BREVITY:** Content of `[SFX: ...]` may be at most 10 words.
+  4. **PHONETIC NATURALNESS:** Weave natural inhales and sighs straight into the character's dialogue (`hh...`, `khh...`).
+  5. **SCENE CLOSURE:** - DEFAULT (ANTI-CLOSURE): Cut the scene mid-action or mid-dialogue.
+     - EXCEPTION (FINALE/EPILOGUE): If this is the end of the story, fade the scene appropriately (e.g., quiet background sound, silence).
+
+# --- Contextual suffixes appended to prompt_systemowy ---
+# The engine picks a suffix based on memory state:
+#   - empty history / no tags in history  → "startowy"
+#   - non-empty history with tags         → "kontynuacja"
+sufiksy:
+  # Used when full_story is empty OR contains no "[" character.
+  # Helps the AI build exposition without a narrator at the start.
+  startowy: |
+
+
+    [START MODE - EMPTY MEMORY]: You are starting a brand-new story!
+    1. AUDIO EXPOSITION (CRITICAL): Since there is no narrator, you MUST build context through action. The scene cannot happen in a vacuum. Begin with a character entering a space.
+    2. EXPOSITION IN DIALOGUE: In their first lines, characters must naturally reveal WHERE they are and WHO they are to each other.
+    3. NO CLAIRVOYANCE: Comment on someone's voice only after hearing it.
+
+  # Used when memory already contains an opened scene with tags.
+  kontynuacja: |
+
+
+    [CONTINUATION MODE]: You are continuing an ongoing scene. Maintain natural flow of action and tension. Instead of a narrator, regularly weave in descriptions of space and character movement using raw [SFX: ...] tags between dialogue.
+
+# --- Reminder appended to user instruction (role=user) ---
+# A linguist who wants to test a softer Anti-Closure or add a narrator to
+# the script edits this field — without touching the Python code.
+przypomnienie_uzytkownika: |
+
+
+  (CRITICAL REMINDER: AUDIO-PLAY/FOLEY mode. Use ONLY [SFX: ...] and [Character: ...] tags. NO NARRATOR! SFX tags: max 10 words, pure acoustics. FORBIDDEN to resolve problems at the end of the text! Apply BRUTAL ANTI-CLOSURE: cut the scene in a split second when something bad is happening. No happy endings or end-of-text recaps!)
+
+# --- Application-side validation ---
+slowa_wyzwalajace:
+  # If the user uses these words in write-to-file mode, the GUI rejects
+  # the request (protects history from being overwritten by a summary).
+  streszczenie:
+    - summarize
+    - summarise
+    - summary
+    - recap
+
+# Note about AI-rejection detection:
+# We used to keep a list of refusal phrases here ("as an ai", "I cannot...") —
+# but when `jezyk_odpowiedzi` ≠ Polish/English, those phrases never appear
+# and the app would let a refusal slip into the file. Since 13.0 the engine
+# forces the model to return the UNIVERSAL `[ODRZUCENIE_AI]` tag (see
+# przepisy_rezysera.py: TAG_ODRZUCENIA_AI, KLAUZULA_ODRZUCENIA_DOMYSLNA) —
+# regardless of the language.
+
+# --- Post-processing ---
+# true → after the response is received, the phonetic engine runs (applies
+# accents from the World Bible to dialogue lines).
+stosuj_akcenty_fonetyczne: true

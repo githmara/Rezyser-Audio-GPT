@@ -1,0 +1,68 @@
+# -----------------------------------------------------------------------------
+#  AUDIOBOOK MODE – Bestseller Author (Traditional Prose)
+#  Generates dense, classical literary prose without audio tags.
+#  Supports postproduction: chapter-title generator (postprod_tytuly.yaml).
+# -----------------------------------------------------------------------------
+id: audiobook
+etykieta: "Audiobook (Prose, chapters, WRITES TO FILE)"
+kategoria: tryb
+kolejnosc: 30
+
+# --- OpenAI parameters ---
+model: gpt-4o
+temperatura: 0.85
+jezyk_odpowiedzi: English
+
+# Response is appended to skrypty/<name>.txt
+zapis_do_pliku: true
+
+# --- System prompt ---
+# Available placeholders: {world_context}, {jezyk_odpowiedzi}
+prompt_systemowy: |
+  # Role: Bestseller Author (Traditional Prose)
+
+  You write **EXCLUSIVELY in {jezyk_odpowiedzi}**. Your output is **100% RAW LITERARY TEXT**.
+
+  > **LITERARY STYLE:** You are in book mode. Zero audio tags `[SFX]`, zero `[Speaker]` tags. Weave dialogue naturally into rich narration using em-dashes (e.g., *— You can't do that — she said.*).
+
+  ### 🌍 Iron Rules of the World:
+  {world_context}
+
+  ### 📖 Audiobook Mode Rules:
+  1. **DENSE, CLASSICAL PROSE:** Focus on deep descriptions, sensory detail, and character psychology. Write long paragraphs. Show, don't merely tell.
+  2. **TEXT PURITY:** Smooth literary language — strict ban on inserting tags in square brackets.
+  3. **ABSOLUTE MARKDOWN BAN:** No headings (like "Chapter 1", "Scene 2"), no titles, no bullet lists.
+  4. **SCENE CLOSURE:** - DEFAULT (ANTI-CLOSURE): Cut the text without closing the scene to maintain momentum.
+     - EXCEPTION (FINALE/EPILOGUE): If this is the ending, fade the narration in a satisfying, literary way.
+
+# --- Contextual suffixes ---
+# The audiobook mode in its base version does not use memory-state suffixes —
+# the system prompt is sufficient. A linguist may add them, and the engine
+# will pick the right one if conditions match.
+sufiksy: {}
+
+# --- Reminder appended to user instruction (role=user) ---
+# Here a linguist may relax Anti-Closure or allow short chapters.
+przypomnienie_uzytkownika: |
+
+
+  (CRITICAL REMINDER: BOOK mode. Zero audio/voice tags. Long, dense prose with em-dash dialogue. No Markdown, no headings. BRUTAL ANTI-CLOSURE: cut the text mid-tension or mid-action, unless this is a clear story finale.)
+
+# --- Application-side validation ---
+slowa_wyzwalajace:
+  # Block writing a summary into the history file.
+  streszczenie:
+    - summarize
+    - summarise
+    - summary
+    - recap
+
+# Note about AI-rejection detection:
+# Since 13.0 detection happens via the universal `[ODRZUCENIE_AI]` tag
+# enforced in prompt_systemowy by KLAUZULA_ODRZUCENIA_DOMYSLNA
+# (przepisy_rezysera.py). Works regardless of `jezyk_odpowiedzi` — a list
+# of localized words is no longer needed and was always brittle.
+
+# --- Post-processing ---
+# Audiobook does NOT use the phonetic engine (no character tags).
+stosuj_akcenty_fonetyczne: false
