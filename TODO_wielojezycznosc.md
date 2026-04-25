@@ -85,21 +85,26 @@ nowe foldery przez `dostepne_jezyki_bazowe()` w `core_poliglota.py`.
   - [ ] `пр.` → `проспект`
   - [ ] `пер.` → `переулок`
 
-- [ ] **Angielski (`en`)** – z notebooka:
-  - [ ] `e.g.` / `e. g.` / `e.g,` → `for example`
-  - [ ] `i.e.` / `i. e.` / `i.e,` → `that is`
-  - [ ] `U.S.` / `U. S.` → `United States`
-  - [ ] `U.K.` / `U. K.` → `United Kingdom`
-  - [ ] `etc.` / `etc .` → `et cetera`
-  - [ ] `vs.` → `versus`
-  - [ ] `Dr.` → `Doctor`
-  - [ ] `Mr.` → `Mister`
-  - [ ] `Mrs.` → `Missus`
-  - [ ] `Prof.` → `Professor`
-  - [ ] `St.` → `Saint` lub `Street` (wybrać jeden wariant; kontekstu tu nie ma)
-  - [ ] `Fig.` → `Figure`
-  - [ ] `No.` → `Number`
-  - [ ] `p.` / `pp.` → `page` / `pages`
+- [x] **Angielski (`en`)** – wdrożone w 13.3:
+  - [x] `e.g.` / `e. g.` → `for example`
+  - [x] `i.e.` / `i. e.` → `that is`
+  - [x] `U.S.` / `U. S.` → `United States` (z negative lookahead `(?![A-Z])`,
+        chroni `U.S.A` przed fałszywym dopasowaniem do `U.S.` + leftover `A`)
+  - [x] `U.S.A.` → `United States of America` (greedy guard PRZED `U.S.`)
+  - [x] `U.K.` / `U. K.` → `United Kingdom`
+  - [x] `etc.` → `et cetera`
+  - [x] `vs.` → `versus`
+  - [x] `cf.` → `confer`
+  - [x] `Dr.` → `Doctor`
+  - [x] `Mr.` → `Mister`
+  - [x] `Mrs.` → `Missus`
+  - [x] `Ms.` → `Miss`
+  - [x] `Prof.` → `Professor`
+  - [x] `St.` → `Saint` (wybrany wariant; "Street" do rozważenia per-projekt)
+  - [x] `Fig.` → `Figure`
+  - [x] `No.` → `Number`
+  - [x] `pp.` → `pages` (greedy guard PRZED `p.`)
+  - [x] `p.` → `page`
 
 - [ ] **Włoski (`it`)** – z notebooka:
   - [ ] `ad es.` → `ad esempio`
@@ -315,7 +320,7 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 | `Wyniki były b.dobre, tj. na poziomie 98 procent.`                      | `b.` bez spacji i rozwinięcia | ⚠️ `b.` — bez rozwinięcia; `tj.` → ✅ `to jest` |
 | `Przybyło ok 400 uczestników, w tym wielu z zagranicy.`                 | brak `.` po `ok`             | ⚠️ nie rozwinięte (regex: `ok\.`)               |
 
-### 6.2 Angielski (`en`)
+### 6.2 Angielski (`en`) ✅ zwalidowane w 13.3
 
 | Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
 |-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
@@ -478,3 +483,47 @@ szwedzkie `sj`):
 
 Niski priorytet — polski `sz` jest jedynym użytym dwuznakiem, kompromis
 EN brzmi naturalnie.
+
+### 7.4 Wymagane `regex: true` przy regex-paternach w YAML-ach
+
+Silnik `core_poliglota._zastosuj_zamiany` używa `str.replace` domyślnie,
+a `re.sub` TYLKO gdy w wpisie YAML jest `regex: true`. Wpadek typu:
+
+```yaml
+- { wzor: '\by', zamiana: "й" }   # ZŁE: \b traktowane jako literał
+- { wzor: '\by', zamiana: "й", regex: true }   # OK
+```
+
+Ujawnione przy 13.3 podczas wdrażania `\b`-paternów w `en/akcenty/rosyjski.yaml`
+(word-boundary `y` na cyrylicę + ubezdźwięcznianie końcówek). Naprawione,
+ale wartoby dorzucić walidację w Manager Reguł albo skrypt sanity-check
+który ostrzega gdy `wzor` zawiera meta-znaki regex bez flagi `regex: true`.
+Lista podejrzanych meta-znaków: `\b \w \W \d \D \s \S ( ) [ ] { } | ^ $ + * ?`.
+
+Niski priorytet do czasu, aż druga osoba zacznie pisać paczki językowe.
+
+### 7.5 Normalizacja podwójnego skryptu w paczce ru/
+
+Paczka rosyjska używa cyrylicy jako alfabetu, więc szyfr Cezara operuje
+na 33 literach kirylicznych (`АБВ…ЯЁ`). Łacińskie znaki w tekście (np.
+nazwiska "Smith", marki "iPhone") **nie są szyfrowane** — Cezar je pomija
+jako "spoza alfabetu". Lista `polskie_znaki` pozostaje pusta z notatką
+o podwójnym skrypcie.
+
+Możliwe rozwiązania w 13.x+:
+
+* **Ścieżka A** — pre-transliteracja: silnik dla paczki ru/ wykonuje
+  łacina→cyrylica (analogicznie do akcent_rosyjski) PRZED Cezarem.
+  Wymaga osobnej tabeli transliteracji w `ru/podstawy.yaml::lacina_na_cyrylice`.
+  Tekst "Smith" → "Смит" → cezar(3) → "Фпмх" — szyfr spójny.
+* **Ścieżka B** — rozszerzony alfabet: dorzucić łacińskie litery do
+  alfabetu Cezara w ru/. Cezar +3 zmienia "Smith" → "Vplwk" (latina),
+  "Привет" → "Услезх" (cyrylica). Mieszany wynik, ale każdy znak
+  zaszyfrowany.
+* **Ścieżka C** — dwa alfabety równolegle: Cezar wykrywa skrypt znaku
+  i obraca w obrębie odpowiedniego alfabetu. Najczystsze, najwięcej kodu.
+
+Wybór architektoniczny zostaje na 13.x+ kiedy realny use case tego
+zażąda. Dziś — pomijamy z czystym sumieniem (rosyjski TTS Milena czyta
+mieszanki bez problemu, akcent rosyjski transliteruje EN→cyrylica
+przed wymową).

@@ -1,122 +1,128 @@
-# Release Notes — Reżyser Audio GPT 13.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.3 „Wersja Wydawnicza"
 
-*Punkt wyjścia: V13.1 (db5b2d2) → 5 commitów WIP + commit zamykający → V13.2.*
-*Motyw przewodni: fundamenty wielojęzyczności faktycznie wielojęzyczne — koniec polskiego hardkodu w sercu pipeline'u.*
+*Punkt wyjścia: V13.2 (4f1d91d) → 11 commitów (10× WIP + 1× release) → V13.3.*
+*Motyw przewodni: pierwszy w pełni wdrożony obcy język (angielski) + standardyzacja silnika dla wszystkich kolejnych.*
 
 ---
 
 ## TL;DR
 
-13.2 nie dorzuca jeszcze pełnej paczki językowej — robi coś ważniejszego: **przebudowuje fundament tak, żeby kolejne paczki dało się dorzucać bez ruszania kodu Pythona**. Tłumacz AI, Reżyser AI i Poliglota przestają zakładać, że językiem projektu jest polski. Manager Reguł dostaje filtr języka (czysty widok dla NVDA + tryb „pokaż wszystko" dla autorów paczek). Brakujące reguły reżysera dla danego języka miękko fallbackują do angielskiego (neutralny język bootstrap'u), brakujące akcenty i szyfry — twardo wyłączają odpowiednie kontrolki z komunikatem A11y, bo to reguły fonetyczne ściśle związane z językiem źródłowym. Pełna paczka angielska (akcenty + szyfry + smoke test) przesuwa się na 13.3.
+13.3 to release, w którym **angielski przestaje być stubem** — paczka `dictionaries/en/` zyskuje pełen pakiet 6 algorytmów szyfrów, 8 akcentów obcojęzycznych dla anglojęzycznego mówcy oraz 3 narzędzia czyszczenia/naprawiacza tagów. Każdy z 8 akcentów (islandzki/fiński/rosyjski/niemiecki/włoski/francuski/hiszpański/polski) został zaprojektowany pod natywny TTS swojego języka (Guðrún/Satu/Milena/Hedda/Lucia/Hortense/Helena/Ewa) — z konkretnymi markerami fonetycznymi, świadomymi kompromisami i komediowymi stereotypami, które rozpoznaje każdy native speaker. Silnik dostał trzy istotne usprawnienia: wielojęzyczna delegacja w pipeline'ie reżysera (`zastosuj_akcenty_uniwersalne(jezyk_projektu)`), elastyczny parser akcentów oparty o dynamiczne `slowo_akcent` z `podstawy.yaml` (zamiast hardkodowanej polskiej listy), oraz `num2words` przekazujące prawidłowy locale (koniec polskich „sto dwadzieścia trzy" w angielskim tekście). W ramach standaryzacji łatany został też subtelny bug Cezara, który przepuszczał diakrytyki spoza alfabetu paczki („Pokémon" + Cezar+3 → wcześniej „Srnéprq", teraz „Srnhprq").
 
 ---
 
 ## Co nowego dla użytkownika końcowego
 
-### Reżyser AI w innym języku interfejsu = angielskie tryby zamiast polskich
+### Pierwszy w pełni wdrożony obcy język: angielski
 
-- Gdy użytkownik włączy interfejs angielski, fiński czy islandzki, panel Reżysera nie pokazuje już „Burza Mózgów / Skrypt / Audiobook" po polsku. Tryby ładowane są z `dictionaries/<jezyk_ui>/rezyser/`, a gdy folder dla danego języka jeszcze nie istnieje — z `dictionaries/en/rezyser/` (pełen przekład 4 trybów AI dorzucony w 13.2).
-- **Twardego polskiego fallbacku już nie ma.** Gdyby ktoś usunął oba foldery (UI i EN), panel pokazuje placeholder w RadioBox + jednorazowy `wx.MessageBox` A11y z wyjaśnieniem, jak naprawić — a nie podsuwa cicho polskie etykiety obcojęzycznemu użytkownikowi NVDA.
+- **6 szyfrów** w `dictionaries/en/szyfry/`: Cezar (alfabet 26 liter, ±25 przesunięcia), Jąkanie (samogłoski `aeiouy`), Samogłoskowiec (Krok 3 jedyny — angielski nie ma polskich miękczeń), Typoglikemia (algorytm neutralny), Wąż (uproszczony regex `(s|z)` — `sh` zostawiony, żeby zachować naturalne brzmienie), Odwracacz tekstu z 18 wzorcami rozwijania skrótowców (e.g./i.e./etc./vs./cf./U.S./U.K./U.S.A./Dr./Mr./Mrs./Ms./Prof./St./Fig./No./pp./p.).
 
-### Poliglota wykrywa język tekstu po wczytaniu pliku
+- **8 akcentów obcojęzycznych** w `dictionaries/en/akcenty/`. Każdy karmi natywny TTS swojego języka, który dokłada własną fonetykę:
 
-- Po wczytaniu pliku panel Poligloty woła `core_poliglota.wykryj_jezyk_zrodlowy()` (z walidacją wobec kompletnych folderów w `dictionaries/`) i przełącza pipeline na wykryty język. Akcenty, szyfry i zakres SpinCtrl szyfru Cezara odświeżają się automatycznie.
-- Gdy w wykrytym języku nie ma jeszcze reguł — `wx.ComboBox` akcentów lub szyfrów zostaje wyłączony, tooltip A11y informuje wprost: „Dla języka »fi« nie zainstalowano akcentów fonetycznych. Reguły są ściśle związane z językiem źródłowym i nie mogą być pożyczane z innych folderów dictionaries/." Świadomy kompromis: lepiej zablokować przycisk niż udawać, że polskie reguły fonetyczne zadziałają na fiński tekst.
+  | Akcent | TTS | Marker'y |
+  |---|---|---|
+  | Islandzki | Guðrún / eSpeak is | wh→v, w→v, sh→s, ch→k, th→t, j→y |
+  | Fiński | Satu / Mikko / Heidi | b/d/g→p/t/k, f/ph→v, z→s, sh→s, th→t, c→k, j→y, w→v |
+  | Rosyjski | Milena / Yuri / Pavel | transliteracja EN→cyrylica + ubezdźwięcznianie końcówek (bag→бак) |
+  | Niemiecki | Hedda / Stefan | v→f, w→v, th→z, j→y, Auslautverhärtung (b/d/g→p/t/k na końcu) |
+  | Włoski | Lucia / Cosimo | silent H, sh→s, th→t, w→v, y\b→i, **epenteza końcowa** po klastrach rk/st/nd/kt/pt/ft (work→worka, fast→fasta) |
+  | Francuski | Hortense / Paul | silent H, th→z (klasyk „zis is ze"), ch→sh, w→v |
+  | Hiszpański | Helena / Pablo | sh→ch (Despacito), th→t, ph→f, z→s, \bv→b, **prosthetic E** (Spain→Espain, stop→estop) |
+  | Polski | Paulina / Adam (Vocalizer Ewa/Zosia) | w/wh→ł (magic mapping), sh→sz, ch→cz, th→d, **blokada miękczeń** (szi/czi/si/ci/zi/ni→szy/czy/sy/cy/zy/ny — Ewa nie sepleni!), final-E truncation w słowach ≥4 znaków |
 
-### Manager Reguł — dropdown „Język" u góry panelu
+- **3 narzędzia uniwersalne** w `dictionaries/en/akcenty/`: Czyszczenie tekstu (z/bez normalizacji liczb) i Naprawiacz tagów (wstrzyknięcie kodu ISO). Trzy wzorce skopiowane do en/fi/is/it/ru z natywną lokalizacją etykiet — autor każdej paczki widzi już kompletny kontrakt struktury.
 
-- Domyślny widok = język interfejsu. Czytnik ekranu nie ślizga się już po obcojęzycznych wpisach, których użytkownik nie rozumie.
-- Ostatnia opcja w liście to „🌍 Wszystkie języki" — przeznaczona dla autorów paczek językowych, którzy chcą porównywać foldery obok siebie podczas tworzenia nowej paczki. Akcelerator `&Język:` / `&Language:` ustawiony na pasującą literę w obu UI.
-- Lista języków pochodzi z faktycznych folderów w `dictionaries/`, a nie tylko z kompletnych — bo manager służy też do **tworzenia** paczek od zera.
+### Stub-paczki dostają „lokalizowane place-holdery"
+
+- `dictionaries/{fi,is,it,ru}/akcenty/` — wcześniej puste folderze. Po 13.3 każdy zawiera 3 narzędzia czyszczenia z natywną lokalizacją („Ei mitään / Engin / Nessuno / Никакой"). Manager Reguł od razu pokazuje 3 dodatkowe pliki dla każdej paczki, autor paczki widzi pełen kontrakt struktury.
+- `_jezyk_kompletny()` pozostaje rygorystyczny: paczka jest „kompletna" tylko gdy ma akcenty fonetyczne (kategoria `akcent`) **plus** szyfry. fi/is/it/ru wciąż mają stub-status do czasu dorzucenia szyfrów (planowane 13.4+). Listę „obsługiwanych języków" wciąż widnieje tylko polski + angielski.
+
+### Łatka Cezara dla diakrytyki europejskich
+
+- Cezar wcześniej przepuszczał znaki spoza alfabetu paczki nieszyfrowane: „Pokémon" + Cezar(3) → „Srnéprq" (é zostało nieszyfrowane). Realny bug zauważony przez native speakera. Naprawa w 13.3: pole `polskie_znaki` w `podstawy.yaml` rozszerzone o pełen zestaw europejskich diakrytyków (`é/à/ç/ñ/ö/ø/þ/ð/æ/œ/ß/...`), `_przetworz_szyfrant` normalizuje je przed wywołaniem algorytmu.
+- Po naprawie: „Pokémon" → „Srnhprq", „café" → „fdih", „naïve" → „qdlyh", „façade" → „idfdgh", „Schrödinger" → „Vfkurglqjhu" — każda litera szyfrowana spójnie.
+- Każda paczka deklaruje *swoje* znaki natywne (np. fi zachowuje `Å/Ä/Ö` jako natywne, is zachowuje `Á/É/Í/Ó/Ú/Ý/Þ/Æ/Ö/Ð`) — silnik to honoruje. Akcenty z flagą `usun_polskie_znaki: true` automatycznie korzystają z tej samej listy, więc „Łódź" + akcent_polski(en) → „Lodz" przed nałożeniem reguł fonetycznych.
 
 ---
 
 ## Pod maską
 
-### Tłumacz AI: prompt systemowy zneutralizowany
+### Wielojęzyczna delegacja w pipeline'ie reżysera
 
-- `tlumacz_ai._PROMPT_SYSTEMOWY_TEMPLATE` przepisany na angielski i wyniesiony do stałej modułowej. Powód: tłumacz to wewnętrzne narzędzie bootstrap'owe dla autorów paczek językowych — nie user-facing. Polski prompt wprowadzał bias modelu w stronę polskiego źródła i był nieczytelny dla nie-polskiego współautora.
-- Świadomie **nie** wynosimy promptu do YAML-a — to byłoby over-engineering. Lokalna stała w module wystarcza, ekstrakcja możliwa w 14.x jeśli pojawi się realna potrzeba (np. modele lokalne preferujące inny język systemowy).
+- `core_poliglota.akcent_<id>(tekst, jezyk: str = "pl")` — wszystkie wrappery generowane przez `odswiez_rezysera.py` przyjmują teraz opcjonalny argument języka. Default `"pl"` zachowuje pełną wsteczną kompatybilność dla zewnętrznych importów. Ten sam wrapper `akcent_islandzki()` daje 100% inny wynik dla `pl` vs `en` — bo silnik ładuje inne reguły YAML w zależności od argumentu.
+- `core_rezyser.zastosuj_akcenty_uniwersalne(tekst, lore_text, jezyk_projektu="pl")` — nowy 3-ci argument przepuszczany do dispatchera `_AKCENT_FUNCS[nazwa](fragment, jezyk_projektu)`. Wywołujący w `rezyser_ai.py` na razie używa default `"pl"` — pełne wykorzystanie czeka na pole „język projektu" w stanie reżysera (planowane razem z multi-language Księgą Świata).
+- `odswiez_rezysera.OBSLUGIWANE_JEZYKI = ("pl",)` zastąpione funkcją `odkryj_obslugiwane_jezyki()` skanującą `dictionaries/`. Generator zbiera unię id-ów akcentów po wszystkich folderach z deduplikacją — dodanie `dictionaries/en/akcenty/` nie wymagało zmiany kodu Pythona, tylko ponownego uruchomienia odświerzacza.
 
-### Reżyser AI: fallback do EN + 4 nowe YAML-e
+### Elastyczny parser akcentów (regex + `slowo_akcent`)
 
-- `gui_rezyser.py:109` — twardy `pr.lista_trybow("pl")` zamieniony na łańcuch z fallbackiem: `lista_trybow(jezyk_ui) or lista_trybow("en")`. Analogicznie dla `zaladuj_przepis("tytuly", ...)`.
-- Folder `dictionaries/en/rezyser/` z czterema plikami: `tryb_audiobook.yaml`, `tryb_burza.yaml`, `tryb_skrypt.yaml`, `postprod_tytuly.yaml`. Pełne tłumaczenia etykiet, promptów systemowych, sufiksów i przypomnień.
-- **Zachowano klucze techniczne:** `kategoria: tryb`/`postprodukcja` (porównywane literalnie w `przepisy_rezysera.py`), tagi `<STRESZCZENIE>` i `[ODRZUCENIE_AI]` (parsowane regexami w `rezyser_ai.py`), `id` plików.
-- **Zlokalizowano elementy w języku projektu:** `slowa_wyzwalajace.streszczenie` (`summarize/summary/recap`), `regex_podzial_rozdzialow` (`Prologue|Chapter \d+|Epilogue`), pole `jezyk_odpowiedzi` (`English`).
-- `_jezyk_kompletny()` wciąż celowo pomija folder `rezyser/` — wymóg przesunięty na 14.x zgodnie z istniejącym komentarzem w `core_poliglota.py:307-310`.
+- `core_rezyser.zastosuj_akcenty_uniwersalne` parsował Księgę Świata regexem `r"akcent\s+([a-zńśźżćłó]+)..."` — twardy hardkod polskiego słowa „akcent" plus polskiego alfabetu. Po 13.3 regex budowany dynamicznie z `slowa_akcentu(jezyk_projektu)` — listy słów-wyzwalaczy z `podstawy.yaml`:
+  - PL: `["akcent"]`
+  - EN: `["accent", "accented"]`
+  - FI: `["aksentti", "korostus"]`
+  - IS: `["hreimur", "áhersla"]`
+  - IT: `["accento", "accentato"]`
+  - RU: `["акцент", "акцентом", "говор"]`
+- Alfabet `[a-zńśźżćłó]+` przeniesiony na `\w+` z flagą `re.UNICODE` — skandynawskie/niemieckie/francuskie/cyrylica nie blokują parsowania. Reguły lore-ad-hoc (`'w' na 'v'`) też używają `\w` (łącznik „na" wciąż polski; wielojęzyczne łączniki to TODO 13.x+).
 
-### Poliglota: stała → pole instancji
+### `num2words` z prawidłowym locale w pipeline'ie
 
-- `JEZYK_BAZOWY = "pl"` (modułowa stała) usunięta. Zastąpiona przez `self._jezyk_aktywny` ustawianą w konstruktorze na `JEZYK_DOMYSLNY = "pl"` i podmienianą po wczytaniu pliku przez nowy helper `_odswiez_warianty()`.
-- `_odswiez_warianty()` przeładowuje `self._akcenty`/`self._szyfry`, odświeża zawartość obu `wx.ComboBox` (`SetSelection(0)`, `Enable()`) lub — gdy lista pusta — wyłącza kontrolkę i ustawia tooltip A11y z komunikatem braku reguł.
-- Funkcja `_maybe_ostrzez_o_jezyku_zrodla()` przepisana z bezpośredniego `langdetect.detect()` na `core_poliglota.wykryj_jezyk_zrodlowy()` (tak jak zapowiadał TODO w kodzie). `langdetect` przestał być importowany w warstwie GUI — został tylko w `core_poliglota`, gdzie ma sens.
-- Wszystkie wywołania `core_poliglota.przetworz/kod_iso/sufiks_nazwy_pliku/wariant_po_*` używają teraz `self._jezyk_aktywny` zamiast modułowej stałej.
+- `core_poliglota.normalizuj_liczby` miało `lang="pl"` na sztywno. Konsekwencja: angielski tekst „I have 123 apples" po normalizacji stawał się „I have sto dwadzieścia trzy apples" — polskie słowa wstrzykiwane w angielski skrypt, czytane przez TTS docelowy jako bełkot. Bug istniał od początku obsługi wielojęzyczności, ale dopóki `en/akcenty/` nie istniało, nikt go nie odpalał na innym języku niż pl.
+- Naprawa: parametr `jezyk` propagowany przez 5 funkcji łańcucha (`normalizuj_liczby` → `oczysc_tekst_tts` → `_aplikuj_akcent_z_yaml` → `_przetworz_rezyser` / `_przetworz_szyfrant` → `zastosuj_reguly_fonetyczne`). Default `"pl"` wszędzie zachowuje pełną wsteczną kompatybilność.
+- Smoke test 9 języków (pl/en/fi/is/it/ru/de/fr/es): „123" → poprawnie zlokalizowane słowa w każdym (`one hundred and twenty-three / satakaksikymmentäkolme / eitt hundrað tuttugu og þrír / centoventitre / сто двадцать три / einhundertdreiundzwanzig / cent vingt-trois / ciento veintitrés`).
 
-### Manager Reguł: filtr języka i sentinel `_OPCJA_WSZYSTKIE`
+### Refaktor `_przetworz_szyfrant` dla normalizacji diakrytyki
 
-- `wx.Choice` u góry panelu zbudowany z dynamicznej listy folderów w `dictionaries/` + ostatnia pozycja „Wszystkie języki" (sentinel `__all__`, nie zderzający się z żadnym kodem ISO).
-- `_zaladuj_drzewo()` filtruje pętlę `for jezyk in sorted(os.listdir(...))` przez aktywny filtr — pojedynczy `if filtr != _OPCJA_WSZYSTKIE and jezyk != filtr: continue`.
-- Helper `_dostepne_kody_jezykow()` zwraca **wszystkie** foldery (nie tylko kompletne), bo manager służy też do tworzenia paczek od zera dla nowego języka.
+- Cezar i pozostałe szyfry wcześniej operowały bezpośrednio na tekście wejściowym — diakrytyki spoza alfabetu paczki przepuszczane. W 13.3 `_przetworz_szyfrant` wywołuje `_usun_polskie_znaki(tekst, podstawy)` przed `oczysc_tekst_tts` i przed wybranym algorytmem. Każdy szyfr (cezar/jakanie/odwracanie/samogloskowiec/typoglikemia/waz) automatycznie zyskuje normalizację.
+- Akcenty z flagą `usun_polskie_znaki: true` korzystają z tej samej listy w `podstawy.yaml` — autor paczki definiuje normalizację JEDEN raz, silnik honoruje konsekwentnie w każdym pipelinie.
+- `dictionaries/en/akcenty/*.yaml` — flaga `usun_polskie_znaki: false → true` zmieniona w 8 plikach (wcześniej argumentowałem „English source has nothing to transliterate" — niesłuszne, bo angielski tekst często zawiera loanwords z diakrytyką: „résumé", „Pokémon", „café").
 
-### 8 nowych kluczy i18n (PL + EN)
+### Pakiet czyszczenia uniwersalny w 5 paczkach
 
-| Sekcja      | Klucz                              | Użycie                                         |
-|-------------|-------------------------------------|------------------------------------------------|
-| `rezyser`   | `brak_trybow_dla_jezyka`            | komunikat A11y, gdy fallback EN też pusty      |
-| `rezyser`   | `brak_trybow_tytul`                 | tytuł `wx.MessageBox`                          |
-| `rezyser`   | `placeholder_brak_trybow`           | label w pustym `wx.RadioBox`                   |
-| `poliglota` | `brak_akcentow_dla_jezyka`          | tooltip wyłączonego `combo_akcent`             |
-| `poliglota` | `brak_szyfrow_dla_jezyka`           | tooltip wyłączonego `combo_szyfr`              |
-| `manager`   | `dropdown_jezyk_label`              | etykieta `wx.Choice` (z akceleratorem `&`)     |
-| `manager`   | `dropdown_jezyk_tooltip`            | tooltip wyjaśniający domyślny widok i tryb All |
-| `manager`   | `opcja_wszystkie_jezyki`            | etykieta sentinela `__all__`                   |
+- 15 nowych plików: 3 wzorce (oczyszczenie, oczyszczenie_bez_liczb, naprawiacz_tagow) skopiowane do każdej paczki językowej z lokalizacją etykiet i opisów na język natywny. Wartości techniczne identyczne z PL — algorytmy czyszczenia są językowo neutralne, tylko etykiety wymagały lokalizacji.
+- Korzyść: gdy w przyszłości któraś z paczek dostanie własne szyfry (13.4+), tryby Czyszczenia/Naprawiacza już TAM SĄ z poprawną lokalizacją. Manager Reguł od razu pokazuje 3 dodatkowe pliki dla każdej paczki — autor paczki widzi pełen kontrakt struktury.
+- Maska kompletności pozostaje nienaruszona: `_jezyk_kompletny` wymaga akcenty/ z **kategorią `akcent`** plus szyfry/. Czyszczenia (`kategoria: oczyszczenie`) i naprawiacz (`kategoria: naprawiacz`) nie liczą się do testu kompletności — fi/is/it/ru wciąż stuby do czasu dorzucenia akcentów fonetycznych i szyfrów.
 
 ---
 
-## Strategia wdrażania (rozłączenie infrastruktury od zawartości)
+## Strategia wdrażania (jeden język na release)
 
-### Co znaczy „13.2 = fundament infrastruktury, nie pakiet językowy"?
+### Co znaczy „13.3 = pierwszy w pełni nowy język"?
 
-Pierwotny plan w `TODO_wielojezycznosc.md` zakładał: *13.2 = pierwszy w pełni nowy język (np. fiński z pełnym pakietem akcentów i szyfrów)*. Audyt kodu po wydaniu 13.1 ujawnił trzy poważne luki, których ten pakiet nie zamknąłby:
+Pierwotny plan w `TODO_wielojezycznosc.md` zakładał: *13.2 = pierwszy w pełni nowy język*. Audyt po 13.1 ujawnił trzy luki silnika, które 13.2 musiało zamknąć (polski hardkod w `gui_rezyser`, modułowa stała `JEZYK_BAZOWY` w `gui_poliglota`, polski prompt systemowy w `tlumacz_ai`). Pełna paczka angielska przesunęła się na **13.3**, wraz z dwiema dodatkowymi łatkami silnika ujawnionymi po drodze: dynamiczny skan w `odswiez_rezysera` i dynamiczne `slowo_akcent` w `podstawy.yaml`.
 
-1. `gui_rezyser.py` ładował tryby twardo z `pl/rezyser/` — angielski użytkownik widziałby polskie etykiety w `wx.RadioBox`.
-2. `gui_poliglota.py` miał stałą modułową `JEZYK_BAZOWY = "pl"` użytą w 9 miejscach pipeline'u — pakiet fiński działałby tylko w teorii.
-3. `tlumacz_ai._prompt_systemowy()` był po polsku i wprowadzał bias modelu.
+13.3 wykonało więc **podwójny krok**: pełna paczka angielska *plus* fundamenty pod każdą kolejną paczkę. Każdy następny język (fi/is/it/ru/de/es/...) nie wymaga już zmian w kodzie Pythona — wystarczy dorzucić foldery i pliki YAML.
 
-Bez tych trzech łatek pakiet językowy byłby *false advertising*. 13.2 łata wszystkie trzy. Pełna paczka angielska (akcenty z kompromisami fonetycznymi + szyfry przepisane + smoke test sekcji 6 TODO) trafia do 13.3.
+### Co przyniesie 13.4 i dalej
 
-### Co przyniesie 13.3 i dalej
+Każdy minor 13.x dorzuca **jeden** w pełni wdrożony język (od 13.4 wzwyż). Oczekiwane następne paczki:
 
-13.3 dostarczy **pierwszy w pełni nowy język** (angielski) plus dwie krytyczne łatki silnika ujawnione podczas audytu 13.2:
+- **fiński (`fi`)** — najbliższy kandydat (klasyczne komediowe markery, fanostwo skandynawskie wśród autorów audiobooków),
+- **rosyjski (`ru`)** — wymaga rozwiązania kwestii podwójnego skryptu (sekcja 7.5 TODO),
+- **islandzki (`is`)** — nisza, ale fundamenty już są (paczka stub),
+- **włoski (`it`)** — popularny dla rolnych RPG słuchowiskowych.
 
-- **`odswiez_rezysera.OBSLUGIWANE_JEZYKI` z hardkodu na skan dynamiczny.** Generator wrapperów `akcent_*` musi automatycznie podchwytywać nowe foldery `dictionaries/<kod>/akcenty/` zgodnie z duchem projektu „nowy język = nowy folder".
-- **Słowo „akcent" w `dictionaries/<kod>/podstawy.yaml` (lista synonimów).** `core_rezyser.py:146` parsuje Księgę Świata regexem `r"akcent\s+([a-zńśźżćłó]+)..."` — twardy hardkod polskiego słowa i polskiego alfabetu. W 13.3 pole `slowo_akcent: ["akcent"]` (PL) / `["accent", "accented"]` (EN), a alfabet `[a-zńśźżćłó]+` przechodzi na `\w+` z flagą Unicode (skandynawskie/niemieckie/francuskie diakrytyki przestają psuć parsowanie).
-- `dictionaries/en/akcenty/` — komplet akcentów z notatki autora (z kompromisami fonetycznymi: nie wszystko da się odwzorować z polskiego na angielski 1:1).
-- `dictionaries/en/szyfry/` — sześć algorytmów (cezar/jakanie/odwracanie/samogloskowiec/typoglikemia/wąż) plus rozwinięcia skrótowców `e.g./i.e./etc./Dr./Mr./...` z `TODO § 3.1`.
-- `dictionaries/en/podstawy.yaml::polskie_znaki: []` (z definicji puste — angielski nie ma diakrytyków do transliteracji).
-
-Każdy minor 13.x dorzuca **jeden** w pełni wdrożony język (od 13.3 zamiast od 13.2 — przesunięte zgodnie z faktem, że 13.2 zjadł budżet na infrastrukturę). Gdy plik `TODO_wielojezycznosc.md` zostanie wyczerpany, następny release to **14.0**.
+Strategia per paczka: kopia `pl/szyfry/` z lokalizacją regexów skrótowców (TODO § 3.1), kopia akcentów obcojęzycznych z mapowaniami pod natywną fonetykę (8 akcentów minus akcent natywny tego języka), smoke test sekcji 6.x TODO. Gdy plik `TODO_wielojezycznosc.md` zostanie wyczerpany, następny release to **14.0**.
 
 ### Co działa „samoczynnie" od 13.3 (en z pełnym pakietem)
 
-Bez edycji jednej linii Pythona — siatka jest już gotowa:
+Bez edycji jednej linii Pythona — siatka jest gotowa:
 
-- `dostepne_jezyki_bazowe()` zwróci `["en", "pl"]`.
-- Menu „Język interfejsu" pokaże 2 radio-items (Polski, English).
-- `wykryj_jezyk_zrodlowy()` zwróci `"en"` dla angielskiego pliku → Poliglota auto-przełączy pipeline.
-- Reżyser dla użytkownika z UI=EN załaduje już pełne `en/rezyser/` (zamiast fallbacku) — bo same pliki YAML w `13.2/dictionaries/en/rezyser/` są kompletne.
-- Manager Reguł domyślnie pokaże tylko `en/` w drzewie, dropdown „Wszystkie języki" pozostaje dostępny.
+- `dostepne_jezyki_bazowe()` zwraca `["en", "pl"]`.
+- Menu „Język interfejsu" pokazuje 2 radio-items (Polski, English).
+- `wykryj_jezyk_zrodlowy()` zwraca `"en"` dla angielskiego pliku → Poliglota auto-przełącza pipeline.
+- Reżyser dla użytkownika z UI=EN ładuje już pełne `en/rezyser/` (zamiast fallbacku z 13.2) — bo same pliki YAML w `dictionaries/en/rezyser/` są kompletne (od 13.2).
+- Manager Reguł domyślnie pokazuje tylko `en/` w drzewie, dropdown „Wszystkie języki" pozostaje dostępny dla autorów paczek.
 
 ---
 
 ## Breaking changes / migracja
 
-- **`JEZYK_BAZOWY` jako modułowa stała w `gui_poliglota.py` została usunięta.** Zewnętrzne skrypty importujące `gui_poliglota.JEZYK_BAZOWY` przestaną działać. Zastąpiona przez `JEZYK_DOMYSLNY` (wartość domyślna) oraz pole instancji `PoliglotaPanel._jezyk_aktywny`. Migracja: nikt zewnętrzny nie powinien o tej stałej wiedzieć — była detalem implementacji.
-- **`from langdetect import detect, LangDetectException` w `gui_poliglota.py` usunięty.** Sam pakiet `langdetect` pozostaje w `requirements.txt` — używa go `core_poliglota.wykryj_jezyk_zrodlowy()`. Nie odinstalowywać z venv ani runtime.
-- **Polski hardkod w `pr.lista_trybow("pl")` w `gui_rezyser.py` zamieniony na fallback chain.** Aplikacja w UI=PL zachowuje się identycznie (PL ma własne tryby), w UI≠PL wcześniej widać było polski miks etykiet — teraz spójna paczka EN lub komunikat.
-- **Numer wersji w obu `ui.yaml` bumpniętym na `13.2`.** Tytuł okna, paczki releasu, dokumentacja czytają stąd — efekt automatyczny.
+- **Sygnatura `core_rezyser.zastosuj_akcenty_uniwersalne` rozszerzona.** Trzeci argument `jezyk_projektu="pl"` z domyślną wartością. Stare wywołania 2-arg wciąż działają. Nowi wywołujący przekazują kod języka projektu.
+- **`core_poliglota.normalizuj_liczby` rozszerzona.** Drugi argument `jezyk="pl"` z domyślną wartością. Stare wywołania 1-arg zachowują polski locale.
+- **`odswiez_rezysera.OBSLUGIWANE_JEZYKI` usunięta.** Zastąpiona funkcją `odkryj_obslugiwane_jezyki()`. Zewnętrzne skrypty importujące tę krotkę przestaną działać — była jednak detalem implementacji generatora, nikt z zewnątrz nie powinien o niej wiedzieć.
+- **Pole `polskie_znaki` w `dictionaries/<jezyk>/podstawy.yaml` rozszerzone w 5 paczkach.** EN/FI/IS/IT teraz zawierają pełen zestaw europejskich diakrytyków → ASCII. Paczki user-tworzonych języków, które dziedziczyły pusty `polskie_znaki: []`, nadal działają — pełen zestaw nie jest wymagany, tylko zalecany.
+- **Numer wersji w obu `ui.yaml` bumpniętym na `13.3`.** Tytuł okna, paczki releasu, dokumentacja czytają stąd — efekt automatyczny.
 
 ---
 
-*Notes wygenerowane na podstawie 5 commitów WIP (810eb28..d28767c) + commit zamykający. Pełna lista: `git log V13.1..HEAD --oneline`.*
+*Notes wygenerowane na podstawie 10 commitów WIP od `V13.2` do `af17e4e` + commit zamykający. Pełna lista: `git log V13.2..HEAD --oneline`.*
