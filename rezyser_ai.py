@@ -348,6 +348,10 @@ def generuj_fragment(
         tekst, nowe_streszczenie = wyciagnij_streszczenie(tekst)
 
     # 3) Akcenty fonetyczne — tylko gdy przepis tego wymaga (Skrypt).
+    # 13.3: ``zastosuj_akcenty_uniwersalne`` przyjmuje teraz ``jezyk_projektu``
+    # (default "pl"). Tu zostawiamy default — gdy pojawi się odrębne pole
+    # „język projektu" w stanie reżysera (kandydat na 13.x), przekazujemy
+    # ``jezyk_projektu=snapshot.jezyk`` lub równoważne.
     if przepis.stosuj_akcenty_fonetyczne:
         tekst = cr.zastosuj_akcenty_uniwersalne(tekst, snapshot.world_lore)
 

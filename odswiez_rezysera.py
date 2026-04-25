@@ -65,10 +65,35 @@ LogCallback = Callable[[str], None]
 # =============================================================================
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
-# Silnik obsługuje na razie tylko polski język bazowy. W przyszłości można
-# rozszerzyć generator o inne języki (np. "en") – wystarczy dopisać ich kod
-# do poniższej listy.
-OBSLUGIWANE_JEZYKI = ("pl",)
+# 13.3: dynamiczny skan zamiast hardkodowanej krotki. Generator skanuje
+# wszystkie foldery ``dictionaries/<kod>/akcenty/`` i zbiera unię id-ów
+# akcentów. Dzięki temu dodanie ``dictionaries/en/akcenty/`` (albo dowolnego
+# kolejnego języka) nie wymaga edycji kodu Pythona — spójnie z duchem
+# projektu „nowy język = nowy folder".
+DICTIONARIES_DIR = os.path.join(ROOT, "dictionaries")
+
+
+def odkryj_obslugiwane_jezyki() -> tuple[str, ...]:
+    """Skanuje ``dictionaries/`` i zwraca kody języków z folderem ``akcenty/``.
+
+    Zwracamy tylko te języki, które mają NIEPUSTE ``akcenty/`` (przynajmniej
+    jeden plik ``.yaml``/``.yml``). Foldery bez akcentów pomijamy — dodanie
+    pustego stuba językowego nie ma być warunkiem regeneracji.
+
+    Wynik posortowany alfabetycznie po kodzie języka, dla deterministycznego
+    porządku w generowanych blokach.
+    """
+    if not os.path.isdir(DICTIONARIES_DIR):
+        return ()
+    znalezione: list[str] = []
+    for kod in sorted(os.listdir(DICTIONARIES_DIR)):
+        kat_akcenty = os.path.join(DICTIONARIES_DIR, kod, "akcenty")
+        if not os.path.isdir(kat_akcenty):
+            continue
+        if any(p.lower().endswith((".yaml", ".yml"))
+               for p in os.listdir(kat_akcenty)):
+            znalezione.append(kod)
+    return tuple(znalezione)
 
 CORE_POLIGLOTA_PATH = os.path.join(ROOT, "core_poliglota.py")
 CORE_REZYSER_PATH   = os.path.join(ROOT, "core_rezyser.py")
@@ -152,7 +177,14 @@ def zbierz_akcenty(jezyk: str, log: LogCallback = print) -> list[dict]:
 # =============================================================================
 
 def _generuj_aliasy_core(akcenty: list[dict]) -> str:
-    """Zwraca treść między markerami w ``core_poliglota.py``."""
+    """Zwraca treść między markerami w ``core_poliglota.py``.
+
+    13.3: wrapper przyjmuje opcjonalny argument ``jezyk`` (default ``"pl"``
+    dla backward-compat). Reguły fonetyczne tego samego id mogą żyć
+    w wielu folderach (np. ``pl/akcenty/islandzki.yaml`` to akcent islandzki
+    *po polsku*, ``en/akcenty/islandzki.yaml`` — *po angielsku*) — wrapper
+    deleguje wybór do silnika ``zastosuj_reguly_fonetyczne``.
+    """
     bloki: list[str] = [
         "# UWAGA: Blok poniżej jest generowany automatycznie przez skrypt",
         "# ``odswiez_rezysera.py``. NIE edytuj go ręcznie — edycje zostaną",
@@ -163,12 +195,18 @@ def _generuj_aliasy_core(akcenty: list[dict]) -> str:
     ]
     for idx, akc in enumerate(akcenty):
         id_ = akc["id"]
-        bloki.append(f"def akcent_{id_}(tekst: str) -> str:")
+        jezyki = akc.get("jezyki", ["pl"])
+        zrodla = ", ".join(
+            f"``dictionaries/{j}/akcenty/{akc['plik']}``" for j in jezyki
+        )
+        bloki.append(f'def akcent_{id_}(tekst: str, jezyk: str = "pl") -> str:')
         bloki.append(
             f'    """Alias: reguły fonetyczne akcentu ``{id_}`` '
-            f'(z ``dictionaries/pl/akcenty/{akc["plik"]}``)."""'
+            f'(źródła: {zrodla})."""'
         )
-        bloki.append(f'    return zastosuj_reguly_fonetyczne(tekst, "{id_}")')
+        bloki.append(
+            f'    return zastosuj_reguly_fonetyczne(tekst, "{id_}", jezyk)'
+        )
         if idx < len(akcenty) - 1:
             bloki.append("")   # pusta linia między funkcjami
             bloki.append("")
@@ -184,7 +222,7 @@ def _generuj_imports_rezyser(akcenty: list[dict]) -> str:
     Importy są na poziomie modułu, więc nie mają wcięcia.
     """
     if not akcenty:
-        return "# (brak akcentów – folder dictionaries/pl/akcenty/ jest pusty)\n"
+        return "# (brak akcentów – żaden folder dictionaries/*/akcenty/ nie zawiera reguł)\n"
     linie = ["from core_poliglota import ("]
     for akc in akcenty:
         linie.append(f"    akcent_{akc['id']},")
@@ -293,8 +331,15 @@ def uruchom(on_log: LogCallback = print) -> dict:
     on_log("Odświeżacz Reżysera – generator akcent_* z plików YAML")
     on_log("=" * 60)
 
-    wszystkie_akcenty: list[dict] = []
-    for jezyk in OBSLUGIWANE_JEZYKI:
+    # 13.3: zamiast hardkodowanej krotki — dynamiczny skan ``dictionaries/``.
+    obslugiwane = odkryj_obslugiwane_jezyki()
+    on_log(f"\nWykryte folder(y) z akcentami: {', '.join(obslugiwane) or '(brak)'}")
+
+    # Agregacja: dla każdego ``id`` pamiętamy listę języków, w których plik
+    # istnieje. Dzięki temu wrapper ``akcent_<id>(tekst, jezyk)`` w docstringu
+    # pokazuje pełną listę dostępnych folderów (a nie tylko jeden).
+    zlepione: dict[str, dict] = {}
+    for jezyk in obslugiwane:
         akcenty = zbierz_akcenty(jezyk, on_log)
         on_log(f"\nJezyk '{jezyk}': wykryto {len(akcenty)} akcentow")
         for akc in akcenty:
@@ -302,24 +347,23 @@ def uruchom(on_log: LogCallback = print) -> dict:
                 f"  - {akc['id']:<25} (iso={akc['iso'] or '?':<4})"
                 f" [{akc['plik']}]"
             )
-        wszystkie_akcenty.extend(akcenty)
+            akc_id = akc["id"]
+            if akc_id not in zlepione:
+                zlepione[akc_id] = {**akc, "jezyki": [jezyk]}
+            else:
+                zlepione[akc_id]["jezyki"].append(jezyk)
 
-    if not wszystkie_akcenty:
+    if not zlepione:
         msg = ("Nie wykryto zadnego akcentu (kategoria: akcent). "
                "Sprawdz katalog dictionaries/*/akcenty/.")
         on_log("\n[BLAD] " + msg)
         raport["errors"].append(msg)
         return raport
 
-    # Deduplikacja po id (na wypadek dwóch języków – chronimy przed kolizją)
-    widziane_id: set[str] = set()
-    unikalne: list[dict] = []
-    for akc in wszystkie_akcenty:
-        if akc["id"] in widziane_id:
-            on_log(f"  [OSTRZEZENIE] powielone id '{akc['id']}' - pomijam")
-            continue
-        widziane_id.add(akc["id"])
-        unikalne.append(akc)
+    # Deterministyczny porządek: kolejność z YAML-a, fallback po pliku.
+    unikalne: list[dict] = sorted(
+        zlepione.values(), key=lambda a: (a["kolejnosc"], a["plik"])
+    )
 
     raport["akcenty"] = [akc["id"] for akc in unikalne]
     on_log(f"\nGenerowanie wrapperów dla {len(unikalne)} unikalnych akcentów…")

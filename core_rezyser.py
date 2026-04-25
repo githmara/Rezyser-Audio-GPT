@@ -118,7 +118,11 @@ def _usun_polskie(nazwa: str) -> str:
     return nazwa.strip()
 
 
-def zastosuj_akcenty_uniwersalne(tekst: str, lore_text: str) -> str:
+def zastosuj_akcenty_uniwersalne(
+    tekst: str,
+    lore_text: str,
+    jezyk_projektu: str = "pl",
+) -> str:
     """Aplikuje akcenty fonetyczne z Księgi Świata na tekst skryptu.
 
     Parsuje Księgę Świata w poszukiwaniu bloków ``[Postać: akcent X]``,
@@ -133,6 +137,14 @@ def zastosuj_akcenty_uniwersalne(tekst: str, lore_text: str) -> str:
 
     Jeśli Księga nie zawiera żadnych definicji akcentów, tekst zwracany
     jest bez zmian.
+
+    Args:
+        tekst:           Skrypt audio z tagami ``[Postać: ...]`` i dialogami.
+        lore_text:       Treść Księgi Świata (parsowana po blokach postaci).
+        jezyk_projektu:  Kod języka, w którym napisany jest tekst skryptu
+                         (13.3+). Wybiera ``dictionaries/<jezyk>/akcenty/``
+                         przy aplikacji reguł fonetycznych — domyślnie
+                         ``"pl"`` (zachowanie sprzed 13.3).
     """
     # ── 1. Wyciąganie mapowania postaci → akcent z Księgi Świata ──
     akcenty_map: dict[str, dict] = {}
@@ -201,7 +213,7 @@ def zastosuj_akcenty_uniwersalne(tekst: str, lore_text: str) -> str:
                         znorm = _usun_polskie(dopasowane_dane["nazwa"])
                         fn = _AKCENT_FUNCS.get(znorm)
                         if fn:
-                            dialog = fn(dialog)
+                            dialog = fn(dialog, jezyk_projektu)
                             zmodyfikowano = True
                     if not zmodyfikowano and dopasowane_dane["reguly"]:
                         for z, na in dopasowane_dane["reguly"]:
