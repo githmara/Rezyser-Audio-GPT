@@ -142,13 +142,38 @@ def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
 
 
 def _jezyki_ze_szablonami() -> list[str]:
-    """Zwraca posortowaną listę kodów języków mających folder dokumentacja/."""
+    """Zwraca posortowaną listę kodów języków, dla których generujemy docs/.
+
+    Od 13.1 stosujemy ten sam filtr kompletności co `dostepne_jezyki_bazowe()`
+    w `core_poliglota.py` — generujemy `docs/<id>.<kod>.txt` tylko dla języków
+    z PEŁNYM pakietem (`podstawy.yaml` + `gui/ui.yaml` + `akcenty/*.yaml` ≥ 1
+    + `szyfry/*.yaml` ≥ 1). Stuby z samym podfolderem `gui/dokumentacja/`
+    pomija — w aplikacji i tak są zafiltrowane z menu „Język interfejsu"
+    i z listy „obsługiwanych języków", więc dorzucanie użytkownikowi
+    instrukcji obsługi w „nieistniejącym" języku byłoby tylko *cosmetic
+    confusion*.
+
+    Import `core_poliglota` jest LAZY — generator może być wciąż wywoływany
+    standalone (np. z CLI), zanim załadowane są wszystkie moduły aplikacji.
+    Gdy import się nie uda (np. minimalny kontekst, brak `docx` lub
+    `num2words`), wracamy do zachowania historycznego: wszystkie foldery
+    z `gui/dokumentacja/` są generowane (niemaskowanie).
+    """
     if not DICT_DIR.is_dir():
         return []
+
+    try:
+        from core_poliglota import _jezyk_kompletny
+    except ImportError:
+        _jezyk_kompletny = None
+
     wyniki = []
     for wpis in sorted(DICT_DIR.iterdir()):
-        if wpis.is_dir() and (wpis / FOLDER_GUI / FOLDER_DOKUMENTACJA).is_dir():
-            wyniki.append(wpis.name)
+        if not (wpis.is_dir() and (wpis / FOLDER_GUI / FOLDER_DOKUMENTACJA).is_dir()):
+            continue
+        if _jezyk_kompletny is not None and not _jezyk_kompletny(wpis.name):
+            continue
+        wyniki.append(wpis.name)
     return wyniki
 
 
