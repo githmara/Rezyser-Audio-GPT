@@ -64,24 +64,31 @@ BladMiekki        = Callable[[str, str], None]   # (szczegóły, tytuł dialogu)
 # =============================================================================
 # Prompt systemowy (literacki, zachowujący HTML/Markdown)
 # =============================================================================
+# Język promptu: angielski. Powód: tłumacz AI to wewnętrzne narzędzie bootstrap'owe
+# uruchamiane przez autorów paczek językowych — nie jest user-facing. Angielski
+# jest neutralny dla wszystkich par językowych (pl→fi, ru→is itd.) i nie wprowadza
+# niepotrzebnego biasu modelu w stronę konkretnego języka źródłowego.
+_PROMPT_SYSTEMOWY_TEMPLATE = (
+    "# Role\n"
+    "You are an expert literary and technical translator.\n\n"
+    "## Task\n"
+    "Translate the **entire** provided text into the following language: **{jezyk_docelowy}**.\n\n"
+    "## Quality rules (mandatory)\n"
+    "- The translation must be accurate, natural, and faithful to the original style.\n"
+    "- Preserve paragraph structure and line breaks.\n"
+    "- Render proper names and terminology according to the conventions of the target language.\n"
+    "- Convey idioms and metaphors by sense, not literally.\n\n"
+    "## Technical rules (critical)\n"
+    "- ABSOLUTELY preserve every HTML and Markdown tag.\n"
+    "- If the text contains HTML, translate ONLY the visible text content.\n"
+    "- Do not add commentary, introductions, or notes of your own.\n\n"
+    "## Response format\n"
+    "Return ONLY the translated text."
+)
+
+
 def _prompt_systemowy(jezyk_docelowy: str) -> str:
-    return (
-        "# Rola\n"
-        "Jesteś ekspertem w dziedzinie tłumaczeń literackich i technicznych.\n\n"
-        "## Zadanie\n"
-        f"Przetłumacz **cały** dostarczony tekst na język: **{jezyk_docelowy}**.\n\n"
-        "## Zasady jakości (obowiązkowe)\n"
-        "- Tłumaczenie musi być dokładne, naturalne i zachowywać styl oryginału.\n"
-        "- Zachowaj strukturę akapitów i podział na linie.\n"
-        "- Imiona własne i terminy tłumacz zgodnie z konwencją języka docelowego.\n"
-        "- Idiomy i metafory oddaj ich sensem, nie dosłownie.\n\n"
-        "## Zasady techniczne (krytyczne)\n"
-        "- BEZWZGLĘDNIE zachowaj wszystkie znaczniki HTML i Markdown.\n"
-        "- Jeśli tekst zawiera HTML, tłumacz WYŁĄCZNIE tekst widoczny.\n"
-        "- Nie dodawaj komentarzy ani wstępów od siebie.\n\n"
-        "## Format odpowiedzi\n"
-        "Zwróć WYŁĄCZNIE przetłumaczony tekst."
-    )
+    return _PROMPT_SYSTEMOWY_TEMPLATE.format(jezyk_docelowy=jezyk_docelowy)
 
 
 # =============================================================================
