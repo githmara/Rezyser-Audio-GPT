@@ -676,7 +676,10 @@ class PoliglotaPanel(wx.Panel):
         # właściwy pipeline słowników.
         try:
             if detect(self._file_content) != JEZYK_BAZOWY:
-                ostrzezenie = t("poliglota.ostrzezenie_jezyk")
+                ostrzezenie = t(
+                    "poliglota.ostrzezenie_jezyk",
+                    wspierane_jezyki=core_poliglota.lista_wspieranych_jezykow_natywnie(),
+                )
                 self._lbl_progress.SetValue(ostrzezenie)
                 self._lbl_progress.SetName(ostrzezenie)
                 self._lbl_progress.Show()

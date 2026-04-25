@@ -567,7 +567,7 @@ poliglota:
   brak_iso_tytul: "Ei ISO-koodia"
   brak_iso_tresc: "Anna kelvollinen kaksikirjaiminen ISO-kielikoodi (esim. en, fr, de)."
   ostrzezenie_jezyk: |-
-    Huomio: Havaittu pääkieli muu kuin puola. Foneettiset säännöt on mukautettu puolalle – vaikutus voi olla arvaamaton.
+    Huomio: Tekstin pääkieli on havaittu olevan tuettujen ulkopuolella. Foneettiset säännöt on tällä hetkellä mukautettu kielille: {wspierane_jezyki}. Vaikutus voi olla arvaamaton.
   blad_przetwarzania: "Käsittelyvirhe:\n{tresc_bledu}"
   cezar_losowe_tytul: "Caesarin salakirjoitus – satunnainen siirto"
   cezar_losowe_tresc: "Siirtoarvo oli 0 – arvottu: {wylosowane_przesuniecie}."

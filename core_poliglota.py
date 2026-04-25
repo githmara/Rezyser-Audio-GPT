@@ -316,6 +316,48 @@ def dostepne_jezyki_bazowe() -> list[str]:
     return wynik
 
 
+def lista_wspieranych_jezykow_natywnie() -> str:
+    """Zwraca natywne nazwy wspieranych języków, gotowe do komunikatu GUI.
+
+    Skanuje `dictionaries/<kod>/podstawy.yaml`, czyta pole `etykieta`
+    i bierze prefiks przed separatorem ` – ` (em-dash z otaczającymi
+    spacjami — konwencja przyjęta we WSZYSTKICH plikach `podstawy.yaml`).
+    Format zwrotny to natywne nazwy języków rozdzielone przecinkami,
+    z zachowaniem oryginalnych znaków (cyrylica, Þ, Æ itp.).
+
+    Sortowanie hybrydowe: PL twardo na pierwszym miejscu (język bazowy
+    i rdzeń projektu), pozostałe alfabetycznie po kodzie ISO. Dzięki
+    temu wynik jest deterministyczny, a każdy nowo dodany folder
+    `dictionaries/<kod>/` automatycznie wpada na właściwą pozycję
+    w komunikacie — bez edycji żadnego stringa.
+
+    Returns:
+        Np. ``"Polski, English, Suomi, Русский, Íslenska, Italiano"``.
+        Pusty string, gdy `dictionaries/` nie istnieje lub żaden
+        język nie ma kompletnego `podstawy.yaml`.
+    """
+    kody = dostepne_jezyki_bazowe()
+    if not kody:
+        return ""
+
+    if "pl" in kody:
+        kolejnosc = ["pl"] + sorted(k for k in kody if k != "pl")
+    else:
+        kolejnosc = sorted(kody)
+
+    natywne: list[str] = []
+    for kod in kolejnosc:
+        etyk = _zaladuj_podstawy(kod).get("etykieta", "")
+        if not isinstance(etyk, str):
+            continue
+        # Splitujemy po em-dashu; gdy go brak (np. ktoś wpisał krótką
+        # etykietę "Polski"), zostawiamy całość — fallback na cały string.
+        nazwa = etyk.split(" – ", 1)[0].strip()
+        if nazwa:
+            natywne.append(nazwa)
+    return ", ".join(natywne)
+
+
 # Minimalna długość tekstu, przy której uznajemy ``langdetect`` za wiarygodny.
 # Krótsze fragmenty często trafiają na „en" albo „af" bo model trenowany na
 # Wikipedii ma przewagę angielskich słów (nawet w polskim tekście).

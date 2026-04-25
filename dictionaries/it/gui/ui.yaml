@@ -568,7 +568,7 @@ poliglota:
   brak_iso_tytul: "Nessun codice ISO"
   brak_iso_tresc: "Fornisci un codice ISO di lingua valido a due lettere (es. en, fr, de)."
   ostrzezenie_jezyk: |-
-    Attenzione: Rilevata lingua principale diversa dal polacco. Le regole fonetiche sono adattate al polacco – l'effetto potrebbe essere imprevedibile.
+    Attenzione: Rilevata lingua principale del testo non supportata. Le regole fonetiche sono attualmente adattate per le lingue: {wspierane_jezyki}. L'effetto potrebbe essere imprevedibile.
   blad_przetwarzania: "Errore di elaborazione:\n{tresc_bledu}"
   cezar_losowe_tytul: "Cifrario di Cesare – spostamento casuale"
   cezar_losowe_tresc: "Il valore dello spostamento era 0 – generato: {wylosowane_przesuniecie}."

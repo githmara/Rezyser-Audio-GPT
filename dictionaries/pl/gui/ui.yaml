@@ -575,7 +575,7 @@ poliglota:
   brak_iso_tytul:        "Brak kodu ISO"
   brak_iso_tresc:        "Podaj poprawny dwuliterowy kod ISO języka (np. en, fr, de)."
   ostrzezenie_jezyk: |-
-    Uwaga: Wykryto język główny inny niż polski. Reguły fonetyczne są przystosowane do polszczyzny – efekt może być nieprzewidywalny.
+    Uwaga: Wykryto język główny tekstu spoza wspieranych. Reguły fonetyczne są obecnie przystosowane do języków: {wspierane_jezyki}. Efekt może być nieprzewidywalny.
   blad_przetwarzania:    "Błąd przetwarzania:\n{tresc_bledu}"
   cezar_losowe_tytul:    "Szyfr Cezara – losowe przesunięcie"
   cezar_losowe_tresc:    "Wartość przesunięcia wynosiła 0 – wylosowano: {wylosowane_przesuniecie}."

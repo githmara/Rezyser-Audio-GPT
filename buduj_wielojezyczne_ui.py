@@ -510,12 +510,26 @@ def tlumacz_jezyk(
     skip_existing: bool,
     dry_run: bool,
     model: str,
+    klucz: str | None = None,
 ) -> bool:
-    """Pełen pipeline dla jednego języka. Zwraca True przy sukcesie."""
+    """Pełen pipeline dla jednego języka. Zwraca True przy sukcesie.
+
+    Tryb FULL (`klucz=None`): tłumaczy wszystkie liście, klonuje drzewo PL
+    do iniekcji, nadpisuje cały plik `<kod>/gui/ui.yaml`.
+
+    Tryb UPDATE (`klucz="dotted.path"`): tłumaczy TYLKO podany klucz
+    (lub całe poddrzewo, gdy klucz wskazuje na gałąź), wczytuje już
+    istniejący `<kod>/gui/ui.yaml` jako bazę iniekcji, nadpisuje wybrane
+    liście — pozostałe są zachowane bit w bit. Wymaga, żeby plik
+    docelowy istniał (najpierw FULL, potem UPDATE).
+    """
     cel = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
-    if cel.exists() and skip_existing:
+    if klucz is None and cel.exists() and skip_existing:
         print(f"⏭️  {kod}: {cel.relative_to(ROOT)} już istnieje — pomijam (--skip-existing).")
         return True
+    if klucz is not None and not cel.exists():
+        print(f"❌ {kod}: brak {cel.relative_to(ROOT)} — uruchom najpierw bez --klucz.")
+        return False
 
     # --- Krok 1: tokenizacja per-liść -----------------------------------------
     liscie_tok: list[tuple[int, str]] = []
@@ -624,11 +638,17 @@ def tlumacz_jezyk(
         print(f"✅ {kod}: retry naprawił wszystkie {len(porazki)} problematycznych liści.")
 
     # --- Krok 4: detokenizacja + iniekcja w drzewo ruamel ---------------------
-    # Klonujemy drzewo PL przez round-trip dump+load — żeby nie mutować
-    # oryginału między językami (jeden walk, wiele zapisów).
-    buf_clone = io.StringIO()
-    yaml_io.dump(drzewo_pl, buf_clone)
-    drzewo_kopia = yaml_io.load(buf_clone.getvalue())
+    # Tryb FULL: klonujemy drzewo PL przez round-trip dump+load — bazą
+    #            jest pełna struktura PL ze wszystkimi komentarzami.
+    # Tryb UPDATE: wczytujemy istniejące <kod>/gui/ui.yaml — tłumaczenia
+    #              pozostałych liści są zachowane, podmieniamy tylko wybrane.
+    if klucz is not None:
+        with open(cel, "r", encoding="utf-8") as fh:
+            drzewo_kopia = yaml_io.load(fh)
+    else:
+        buf_clone = io.StringIO()
+        yaml_io.dump(drzewo_pl, buf_clone)
+        drzewo_kopia = yaml_io.load(buf_clone.getvalue())
 
     for idx, src_tok in liscie_tok:
         path, _ = liscie_pl[idx]
@@ -694,7 +714,21 @@ def _parsuj_argumenty() -> argparse.Namespace:
         default="gpt-4o",
         help="Model OpenAI do tłumaczenia (domyślnie: gpt-4o).",
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--klucz",
+        type=str,
+        default=None,
+        help="Tłumacz tylko liście, których dotted-path zaczyna się od podanego "
+             "klucza (np. `poliglota.ostrzezenie_jezyk` lub całe poddrzewo "
+             "`poliglota`). Wymaga, by `<kod>/gui/ui.yaml` już istniał — "
+             "pozostałe liście są zachowane bit w bit. Pozwala na surgical "
+             "update jednej etykiety bez retłumaczenia całego pliku.",
+    )
+    args = parser.parse_args()
+    if args.klucz and args.skip_existing:
+        parser.error("--klucz i --skip-existing wzajemnie się wykluczają "
+                     "(--klucz celowo nadpisuje wybrane liście w istniejącym pliku).")
+    return args
 
 
 def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
@@ -734,6 +768,20 @@ def main() -> int:
         return 2
     print(f"📄 Wczytano {sciezka_pl.relative_to(ROOT)}: {len(liscie_pl)} liści.")
 
+    # Filtr `--klucz`: zostaw tylko liście, których dotted-path zaczyna się
+    # od podanego prefiksu (sam klucz LUB klucz + "." → poddrzewo).
+    if args.klucz:
+        przed = len(liscie_pl)
+        liscie_pl = [
+            (p, v) for p, v in liscie_pl
+            if p == args.klucz or p.startswith(args.klucz + ".")
+        ]
+        if not liscie_pl:
+            print(f"❌ Brak liści dla klucza `{args.klucz}` w {sciezka_pl.relative_to(ROOT)}. "
+                  f"Sprawdź dotted-path (np. `poliglota.ostrzezenie_jezyk`).")
+            return 2
+        print(f"🔎 Filtr --klucz='{args.klucz}': {len(liscie_pl)}/{przed} liści.")
+
     klient: Any = None if args.dry_run else _zainicjuj_klienta_openai()
 
     sukcesy: list[str] = []
@@ -751,6 +799,7 @@ def main() -> int:
             skip_existing=args.skip_existing,
             dry_run=args.dry_run,
             model=args.model,
+            klucz=args.klucz,
         )
         (sukcesy if ok else porazki).append(kod)
 

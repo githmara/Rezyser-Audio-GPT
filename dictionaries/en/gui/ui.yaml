@@ -567,7 +567,7 @@ poliglota:
   brak_iso_tytul: "No ISO Code"
   brak_iso_tresc: "Provide a valid two-letter ISO language code (e.g., en, fr, de)."
   ostrzezenie_jezyk: |-
-    Note: A primary language other than Polish detected. Phonetic rules are adapted to Polish – the effect may be unpredictable.
+    Note: The main language of the text detected is not supported. Phonetic rules are currently adapted to the following languages: {wspierane_jezyki}. The effect may be unpredictable.
   blad_przetwarzania: "Processing Error:\n{tresc_bledu}"
   cezar_losowe_tytul: "Caesar Cipher – Random Shift"
   cezar_losowe_tresc: "The shift value was 0 – drawn: {wylosowane_przesuniecie}."

@@ -567,7 +567,7 @@ poliglota:
   brak_iso_tytul: "Enginn ISO kóði"
   brak_iso_tresc: "Sláðu inn réttan tveggja stafa ISO kóða fyrir tungumálið (t.d. en, fr, de)."
   ostrzezenie_jezyk: |-
-    Athugið: Aðaltungumál sem greint er er annað en pólsku. Hljóðreglur eru aðlagaðar að pólsku – niðurstaðan gæti verið ófyrirsjáanleg.
+    Athugið: Aðaltextamál sem greind eru eru ekki studd. Hljóðfræðilegar reglur eru nú aðlagaðar að tungumálum: {wspierane_jezyki}. Áhrifin geta verið ófyrirsjáanleg.
   blad_przetwarzania: "Vinnsluvilla:\n{tresc_bledu}"
   cezar_losowe_tytul: "Cæsar dulmál – handahófskennt tilfærsla"
   cezar_losowe_tresc: "Gildi tilfærslu var 0 – handahófskennt: {wylosowane_przesuniecie}."
