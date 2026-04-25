@@ -1,0 +1,59 @@
+# -----------------------------------------------------------------------------
+#  FRENCH ACCENT (English source → French TTS)
+#  For synthesizers: Hortense / Paul / Julie (French TTS).
+# -----------------------------------------------------------------------------
+id: francuski
+etykieta: "French (e.g. Hortense / Paul / Julie)"
+opis: |
+  Adapts an English script for a French speech synthesizer (Hortense /
+  Paul / Julie). French phonology lacks /h/ and the digraphs /θ/ /ð/, and
+  French "ch" is /ʃ/ rather than English /tʃ/ — we steer the French TTS
+  into producing the iconic "Zis is ze" stereotype:
+    - silent H        ("hello" → "ello", "happy" → "appy")
+    - th → z          ("this" → "zis", "think" → "zink")
+    - ch → sh         (French "ch" is /ʃ/; "church" → "shursh", "cherry"
+                       → "sherry")
+    - w/wh → v        (no native /w/; "water" → "vater")
+
+  Heavy lifting we deliberately leave to Hortense:
+    - R               — uvular /ʁ/ rendered natively
+    - J               — Hortense reads "j" as /ʒ/ automatically, so
+                        "John" → /ʒɔn/ without any rule
+    - G before e/i    — auto /ʒ/ ("gentle" → /ʒɑ̃tl/)
+    - tion → /sjɔ̃/    — Hortense auto-converts ("nation" → /nɑsjɔ̃/)
+    - qu → /k/        — auto ("queen" → /kin/)
+    - nasalisation    — auto for an/en/in/on/un before consonant
+    - silent finals   — left to natural French articulation softening
+
+  Result: a small, surgical rule set — the TTS does most of the work.
+iso: fr
+kategoria: akcent
+kolejnosc: 50
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Phonetic substitutions ---
+# CRITICAL ORDERING:
+#   * Digraphs (th, wh, ch) before single letters.
+#   * `wh → v` before `\bh → ""` (so "what" → "vat", then the leftover
+#     `\bh` rule has nothing to chew).
+#   * `\bh` before `w → v` (consistency with siblings; here the order
+#     between them is actually independent — "hat" never had a `w`).
+zamiany:
+  - { wzor: "th", zamiana: "z"  }
+  - { wzor: "Th", zamiana: "Z"  }
+  - { wzor: "wh", zamiana: "v"  }
+  - { wzor: "Wh", zamiana: "V"  }
+  - { wzor: "ch", zamiana: "sh" }
+  - { wzor: "Ch", zamiana: "Sh" }
+
+  # --- Silent H at word start (regex: true) ---
+  - { wzor: '\bh', zamiana: "", regex: true }
+  - { wzor: '\bH', zamiana: "", regex: true }
+
+  - { wzor: "w",  zamiana: "v" }
+  - { wzor: "W",  zamiana: "V" }

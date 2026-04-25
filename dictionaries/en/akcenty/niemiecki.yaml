@@ -1,0 +1,66 @@
+# -----------------------------------------------------------------------------
+#  GERMAN ACCENT (English source → German TTS)
+#  For synthesizers: Hedda / Stefan / Marlene (German TTS).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "German (e.g. Hedda / Stefan / Marlene)"
+opis: |
+  Adapts an English script for a German speech synthesizer (Hedda / Stefan
+  / Marlene). German phonology has no /w/ and reads native /v/ as /f/ —
+  we steer the German TTS into the same gap so an English listener hears
+  the classic German accent:
+    - w   → v        (no native /w/; "water" → "vater" — the iconic marker)
+    - v   → f        (German "v" is /f/; "very" → "fery", "love" → "lofe")
+    - wh  → v        (must run BEFORE w → v)
+    - th  → z        (no /θ/ /ð/; both flatten to /z/ — "this" → "zis",
+                      "think" → "zink"; the comedic stereotype)
+    - j   → y        (German /j/ is read as English "y" — yot)
+    - Auslautverhärtung (final-obstruent devoicing — the iron rule of
+      German phonology): b/d/g at end of word → p/t/k
+        "bag"  → "bak"
+        "good" → "goot"
+        "bed"  → "bet"
+
+  Things we deliberately do NOT touch:
+    - R           — Hedda renders /ʁ/ uvular fricative natively
+    - ch          — German has ach-laut /x/ vs ich-laut /ç/, context-dependent
+                    and impossible in a flat regex; left to TTS
+    - final -er   — German /-ɐ/ reduction; would over-modify English nouns
+iso: de
+kategoria: akcent
+kolejnosc: 60
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Phonetic substitutions ---
+# CRITICAL ORDERING:
+#   * `v → f` MUST run BEFORE `wh → v` and `w → v`. Otherwise
+#     "what" → "vat" (via wh→v) → "fat" (via v→f) — the second pass would
+#     cannibalise the first. Running `v → f` first consumes only the
+#     ORIGINAL v's, leaving newly-produced v's untouched.
+#   * `wh → v` before `w → v` (digraph rule — same convention as elsewhere).
+#   * Final-obstruent devoicing at the end (regex: true).
+zamiany:
+  - { wzor: "th", zamiana: "z" }
+  - { wzor: "Th", zamiana: "Z" }
+  - { wzor: "v",  zamiana: "f" }
+  - { wzor: "V",  zamiana: "F" }
+  - { wzor: "wh", zamiana: "v" }
+  - { wzor: "Wh", zamiana: "V" }
+  - { wzor: "w",  zamiana: "v" }
+  - { wzor: "W",  zamiana: "V" }
+  - { wzor: "j",  zamiana: "y" }
+  - { wzor: "J",  zamiana: "Y" }
+
+  # --- Auslautverhärtung — final-obstruent devoicing on Latin ---
+  # `regex: true` REQUIRED because str.replace treats `\b` as a literal.
+  - { wzor: 'b\b', zamiana: "p", regex: true }
+  - { wzor: 'B\b', zamiana: "P", regex: true }
+  - { wzor: 'd\b', zamiana: "t", regex: true }
+  - { wzor: 'D\b', zamiana: "T", regex: true }
+  - { wzor: 'g\b', zamiana: "k", regex: true }
+  - { wzor: 'G\b', zamiana: "K", regex: true }

@@ -1,0 +1,74 @@
+# -----------------------------------------------------------------------------
+#  ITALIAN ACCENT (English source → Italian TTS)
+#  For synthesizers: Lucia / Cosimo / Pierina (Italian TTS).
+# -----------------------------------------------------------------------------
+id: wloski
+etykieta: "Italian (e.g. Lucia / Cosimo / Pierina)"
+opis: |
+  Adapts an English script for an Italian speech synthesizer (Lucia /
+  Cosimo / Pierina). Italian phonology lacks /h/, /θ/ /ð/ and /w/, and
+  Italian words almost never end in a hard consonant cluster — Italians
+  carry these gaps into English. We steer the Italian TTS into the same
+  gaps:
+    - silent H at word start  ("hello" → "ello", "Henry" → "Enry")
+    - th → t                  (no /θ/ /ð/; "think" → "tink", "this" → "tis")
+    - sh → s                  (no /ʃ/ standardly)
+    - w/wh → v                (no native W; "water" → "vater")
+    - j → y                   (Italian J is /j/ — yot, like Scandinavian)
+    - y\b → i                 ("happy" → "happi", "city" → "citi")
+    - epenthetic vowel after hard final clusters (rk/st/nd/kt/pt/ft)
+        "work"  → "worka"
+        "fast"  → "fasta"
+        "stand" → "standa"
+      Constrained to those clusters by design — broader epenthesis
+      (every consonant) caricaturises every preposition ("is" → "isa",
+      "in" → "ina") and grates over a long script.
+
+  Things we deliberately do NOT touch:
+    - c before e/i        — Lucia auto-reads as /tʃ/ ("city" → /ˈʧiti/)
+    - g before e/i        — Lucia auto-reads as /dʒ/
+    - rolled R            — Lucia natively
+    - geminated consonants — Lucia adds them automatically for stress
+iso: it
+kategoria: akcent
+kolejnosc: 80
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Phonetic substitutions ---
+# CRITICAL ORDERING:
+#   * `wh → v` before `\bh → ""` (so "what" → "vat" first, then leftover
+#     `\bh` rule sees "vat" without an `h` at the start — nothing to do).
+#   * Digraphs (sh, th) before single letters.
+#   * `y\b → i` and the consonant-cluster epenthesis MUST run at the end
+#     of the pipeline — they target the actual word endings after every
+#     other transformation has settled.
+zamiany:
+  - { wzor: "wh", zamiana: "v" }
+  - { wzor: "Wh", zamiana: "V" }
+  - { wzor: "sh", zamiana: "s" }
+  - { wzor: "Sh", zamiana: "S" }
+  - { wzor: "th", zamiana: "t" }
+  - { wzor: "Th", zamiana: "T" }
+
+  # --- Silent H at word start (regex: true) ---
+  - { wzor: '\bh', zamiana: "", regex: true }
+  - { wzor: '\bH', zamiana: "", regex: true }
+
+  - { wzor: "j",  zamiana: "y" }
+  - { wzor: "J",  zamiana: "Y" }
+  - { wzor: "w",  zamiana: "v" }
+  - { wzor: "W",  zamiana: "V" }
+
+  # --- Word-final transformations (regex: true) ---
+  - { wzor: 'y\b', zamiana: "i", regex: true }
+  - { wzor: 'Y\b', zamiana: "I", regex: true }
+  # Epenthesis after hard final clusters — narrow whitelist (rk/st/nd/kt/pt/ft)
+  # avoids over-caricaturising prepositions and articles. Capture group is
+  # preserved verbatim, "a" appended.
+  - { wzor: '(rk|st|nd|kt|pt|ft)\b', zamiana: '\1a', regex: true }
+  - { wzor: '(RK|ST|ND|KT|PT|FT)\b', zamiana: '\1a', regex: true }
