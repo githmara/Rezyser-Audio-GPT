@@ -565,7 +565,7 @@ def zastosuj_reguly_fonetyczne(tekst: str, wariant: str,
 
 
 def akcent_islandzki(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``islandzki`` (źródła: ``dictionaries/pl/akcenty/islandzki.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``islandzki`` (źródła: ``dictionaries/en/akcenty/islandzki.yaml``, ``dictionaries/pl/akcenty/islandzki.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "islandzki", jezyk)
 
 
@@ -575,7 +575,7 @@ def akcent_angielski(tekst: str, jezyk: str = "pl") -> str:
 
 
 def akcent_rosyjski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``rosyjski`` (źródła: ``dictionaries/pl/akcenty/rosyjski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``rosyjski`` (źródła: ``dictionaries/en/akcenty/rosyjski.yaml``, ``dictionaries/pl/akcenty/rosyjski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "rosyjski", jezyk)
 
 
@@ -600,7 +600,7 @@ def akcent_wloski(tekst: str, jezyk: str = "pl") -> str:
 
 
 def akcent_finski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``finski`` (źródła: ``dictionaries/pl/akcenty/finski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``finski`` (źródła: ``dictionaries/en/akcenty/finski.yaml``, ``dictionaries/pl/akcenty/finski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "finski", jezyk)
 
 # <GENEROWANE_AKCENTY_REZYSERA_END>

@@ -1,0 +1,48 @@
+# -----------------------------------------------------------------------------
+#  ICELANDIC ACCENT (English source → Icelandic TTS)
+#  For synthesizers: Guðrún / eSpeak "is".
+# -----------------------------------------------------------------------------
+id: islandzki
+etykieta: "Icelandic (e.g. Guðrún / eSpeak)"
+opis: |
+  Adapts an English script for an Icelandic speech synthesizer (Guðrún or
+  eSpeak set to "is"). The Icelandic engine reads Latin script natively
+  but applies its own phonetics — by tweaking spelling we steer it into
+  emphasising the markers that make a native English listener hear an
+  Icelandic accent:
+    - "w" → "v"   (Icelanders do not distinguish /v/ vs /w/)
+    - "th" → "t"  (Þ/Ð flatten to a hard /t/ for non-native English)
+    - "sh" → "s"  (no /ʃ/ phoneme in Icelandic)
+    - "ch" → "k"  (no /tʃ/ either; "k" is the typical first-pass error)
+    - "j" → "y"   (Icelandic /j/ is read as English "y" — yot)
+    - "wh" → "v"  (must run BEFORE "w" → "v" — see ordering note below)
+iso: is
+kategoria: akcent
+kolejnosc: 30
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false   # English source has nothing to transliterate
+skleja_pojedyncze_litery: true
+
+# --- Phonetic substitutions (digraphs FIRST, then single letters) ---
+# Critical ordering:
+#   * `wh` before `w`     — otherwise "what" → "vat" via two passes is
+#                           unstable and the "h" leaks through.
+#   * `sh` before `s`-ish reductions (we don't have any here, but keep
+#                           the convention so future rules can chain).
+#   * `ch`, `th` before any single-letter rule that touches `c`/`t`/`h`.
+zamiany:
+  - { wzor: "wh", zamiana: "v" }
+  - { wzor: "Wh", zamiana: "V" }
+  - { wzor: "sh", zamiana: "s" }
+  - { wzor: "Sh", zamiana: "S" }
+  - { wzor: "ch", zamiana: "k" }
+  - { wzor: "Ch", zamiana: "K" }
+  - { wzor: "th", zamiana: "t" }
+  - { wzor: "Th", zamiana: "T" }
+  - { wzor: "w",  zamiana: "v" }
+  - { wzor: "W",  zamiana: "V" }
+  - { wzor: "j",  zamiana: "y" }
+  - { wzor: "J",  zamiana: "Y" }

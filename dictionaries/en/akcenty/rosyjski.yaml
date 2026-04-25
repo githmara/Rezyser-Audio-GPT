@@ -1,0 +1,162 @@
+# -----------------------------------------------------------------------------
+#  RUSSIAN ACCENT (English source → Russian TTS)
+#  For synthesizers: Milena / Irina / Yuri / Pavel (Russian TTS).
+# -----------------------------------------------------------------------------
+id: rosyjski
+etykieta: "Russian (e.g. Milena / Irina / Yuri / Pavel)"
+opis: |
+  Transliterates an English script into Cyrillic so that a Russian TTS
+  (NVDA → Vocalizer Milena, eSpeak "ru", OneCore Irina/Pavel/Yuri) reads
+  the text with a natural Russian accent. Same strategy as the polish-
+  side Russian accent — we don't try to fool an English engine into
+  faking a Russian voice; we hand the text to an actual Russian voice
+  and shape the spelling so that Russian phonology produces the desired
+  accent automatically.
+
+  Mapping highlights:
+    - Digraphs first (greedy guard):
+        "th" → "з", "sh" → "ш", "ch" → "ч", "ph" → "ф",
+        "qu" → "кв", "ck" → "к", "wh" → "в";
+    - Word-initial "y" → "й" (yes → йес), word-final → "и" (happy → хаппи);
+    - Single Latin letters mapped 1:1 to Cyrillic phonetic equivalents
+      (a → а, b → б, c → к, … z → з);
+    - Final-obstruent devoicing applied at the end of the pipeline on
+      the already-transliterated Cyrillic (bag → бак, good → гут,
+      give → гиф, was → вас) — guarantees the accent even if the
+      specific Russian TTS engine doesn't add it on its own.
+
+  Russian "h" → "х" (kh) on purpose — that's how a native Russian reads
+  English "h", and it's the most recognisable marker of the accent.
+
+  NOTE for linguists: this is NOT an academic transliteration (ISO 9,
+  GOST, BGN/PCGN). The goal is purely phonetic — making English text
+  sound Russian-accented through a Russian TTS. For proper transliteration
+  of proper names, use dedicated tooling.
+iso: ru
+kategoria: akcent
+kolejnosc: 45
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+# Latin source has no polish diacritics to strip.
+usun_polskie_znaki: false
+# `sklej_pojedyncze_litery` regex looks for [a-z]; meaningless after
+# transliteration to Cyrillic.
+skleja_pojedyncze_litery: false
+
+# -----------------------------------------------------------------------------
+# CRITICAL ORDERING:
+#   1. Digraphs (th, sh, ch, ph, qu, ck, wh) — BEFORE any single letter.
+#   2. Word-initial / word-final "y" — BEFORE the generic `y → и`.
+#   3. Latin singletons → Cyrillic (a → а, b → б, …).
+#   4. Final-obstruent devoicing on Cyrillic (г\b → к, …) — at the end,
+#      so the rules see the already-Cyrillic tail of every word.
+# Digraphs always precede the singletons that compose them — otherwise
+# `s → с` would shred `sh` and `t → т` would shred `th`.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Digraphs ---
+  - { wzor: "th", zamiana: "з"  }
+  - { wzor: "Th", zamiana: "З"  }
+  - { wzor: "TH", zamiana: "З"  }
+  - { wzor: "sh", zamiana: "ш"  }
+  - { wzor: "Sh", zamiana: "Ш"  }
+  - { wzor: "SH", zamiana: "Ш"  }
+  - { wzor: "ch", zamiana: "ч"  }
+  - { wzor: "Ch", zamiana: "Ч"  }
+  - { wzor: "CH", zamiana: "Ч"  }
+  - { wzor: "ph", zamiana: "ф"  }
+  - { wzor: "Ph", zamiana: "Ф"  }
+  - { wzor: "PH", zamiana: "Ф"  }
+  - { wzor: "qu", zamiana: "кв" }
+  - { wzor: "Qu", zamiana: "Кв" }
+  - { wzor: "QU", zamiana: "КВ" }
+  - { wzor: "ck", zamiana: "к"  }
+  - { wzor: "Ck", zamiana: "К"  }
+  - { wzor: "CK", zamiana: "К"  }
+  - { wzor: "wh", zamiana: "в"  }
+  - { wzor: "Wh", zamiana: "В"  }
+  - { wzor: "WH", zamiana: "В"  }
+
+  # --- 2. Word-boundary "y" handling (BEFORE the generic y rule) ---
+  # `\by` at the start of a word → "й" (jotated): "yes" → "йес",
+  # "you" → "йоу" (after `o → о` and `u → у` in section 3).
+  # `y\b` at the end → "и": "happy" → "хаппи", "city" → "кити".
+  # `regex: true` is REQUIRED — silnik domyślnie używa str.replace.
+  - { wzor: '\by',  zamiana: "й", regex: true }
+  - { wzor: '\bY',  zamiana: "Й", regex: true }
+  - { wzor: 'y\b',  zamiana: "и", regex: true }
+  - { wzor: 'Y\b',  zamiana: "И", regex: true }
+
+  # --- 3. Latin singletons → Cyrillic ---
+  - { wzor: "a",  zamiana: "а"  }
+  - { wzor: "A",  zamiana: "А"  }
+  - { wzor: "b",  zamiana: "б"  }
+  - { wzor: "B",  zamiana: "Б"  }
+  - { wzor: "c",  zamiana: "к"  }
+  - { wzor: "C",  zamiana: "К"  }
+  - { wzor: "d",  zamiana: "д"  }
+  - { wzor: "D",  zamiana: "Д"  }
+  - { wzor: "e",  zamiana: "э"  }
+  - { wzor: "E",  zamiana: "Э"  }
+  - { wzor: "f",  zamiana: "ф"  }
+  - { wzor: "F",  zamiana: "Ф"  }
+  - { wzor: "g",  zamiana: "г"  }
+  - { wzor: "G",  zamiana: "Г"  }
+  - { wzor: "h",  zamiana: "х"  }
+  - { wzor: "H",  zamiana: "Х"  }
+  - { wzor: "i",  zamiana: "и"  }
+  - { wzor: "I",  zamiana: "И"  }
+  - { wzor: "j",  zamiana: "дж" }
+  - { wzor: "J",  zamiana: "Дж" }
+  - { wzor: "k",  zamiana: "к"  }
+  - { wzor: "K",  zamiana: "К"  }
+  - { wzor: "l",  zamiana: "л"  }
+  - { wzor: "L",  zamiana: "Л"  }
+  - { wzor: "m",  zamiana: "м"  }
+  - { wzor: "M",  zamiana: "М"  }
+  - { wzor: "n",  zamiana: "н"  }
+  - { wzor: "N",  zamiana: "Н"  }
+  - { wzor: "o",  zamiana: "о"  }
+  - { wzor: "O",  zamiana: "О"  }
+  - { wzor: "p",  zamiana: "п"  }
+  - { wzor: "P",  zamiana: "П"  }
+  - { wzor: "q",  zamiana: "к"  }
+  - { wzor: "Q",  zamiana: "К"  }
+  - { wzor: "r",  zamiana: "р"  }
+  - { wzor: "R",  zamiana: "Р"  }
+  - { wzor: "s",  zamiana: "с"  }
+  - { wzor: "S",  zamiana: "С"  }
+  - { wzor: "t",  zamiana: "т"  }
+  - { wzor: "T",  zamiana: "Т"  }
+  - { wzor: "u",  zamiana: "у"  }
+  - { wzor: "U",  zamiana: "У"  }
+  - { wzor: "v",  zamiana: "в"  }
+  - { wzor: "V",  zamiana: "В"  }
+  - { wzor: "w",  zamiana: "в"  }
+  - { wzor: "W",  zamiana: "В"  }
+  - { wzor: "x",  zamiana: "кс" }
+  - { wzor: "X",  zamiana: "Кс" }
+  - { wzor: "y",  zamiana: "и"  }   # mid-word fallback (start/end handled above)
+  - { wzor: "Y",  zamiana: "И"  }
+  - { wzor: "z",  zamiana: "з"  }
+  - { wzor: "Z",  zamiana: "З"  }
+
+  # --- 4. Final-obstruent devoicing on Cyrillic ---
+  # Russian phonology hardens voiced stops/fricatives at the end of a word.
+  # English-trained speaker carries it over: "bag" → "бак", "good" → "гут",
+  # "Bob" → "боп", "give" → "гиф", "was" → "вас". Applied on Cyrillic
+  # because by this point sections 1-3 already transliterated everything.
+  # `regex: true` because `\b` only carries meaning under re.sub, not
+  # str.replace.
+  - { wzor: 'г\b', zamiana: "к", regex: true }
+  - { wzor: 'Г\b', zamiana: "К", regex: true }
+  - { wzor: 'д\b', zamiana: "т", regex: true }
+  - { wzor: 'Д\b', zamiana: "Т", regex: true }
+  - { wzor: 'б\b', zamiana: "п", regex: true }
+  - { wzor: 'Б\b', zamiana: "П", regex: true }
+  - { wzor: 'в\b', zamiana: "ф", regex: true }
+  - { wzor: 'В\b', zamiana: "Ф", regex: true }
+  - { wzor: 'з\b', zamiana: "с", regex: true }
+  - { wzor: 'З\b', zamiana: "С", regex: true }

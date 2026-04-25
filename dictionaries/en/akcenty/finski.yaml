@@ -1,0 +1,63 @@
+# -----------------------------------------------------------------------------
+#  FINNISH ACCENT (English source → Finnish TTS)
+#  For synthesizers: Satu / Mikko / Heidi (Finnish TTS).
+# -----------------------------------------------------------------------------
+id: finski
+etykieta: "Finnish (e.g. Satu / Mikko / Heidi)"
+opis: |
+  Adapts an English script for a Finnish speech synthesizer (Satu / Mikko
+  / Heidi). Finnish phonology lacks voiced obstruents, /f/, /z/, /ʃ/ and
+  the digraphs /θ/ /ð/ — a native Finn carries this gap into English.
+  We steer the Finnish TTS into the same gap by collapsing the missing
+  phonemes onto the closest native equivalents:
+    - b/d/g  → p/t/k   (no voiced stops in native Finnish — universal,
+                        not just final-position devoicing)
+    - f      → v       (Finnish has no /f/; transferred to English)
+    - z      → s       (no /z/ either)
+    - sh     → s       (no /ʃ/)
+    - th     → t       (no /θ/ or /ð/ — flattened to a hard /t/)
+    - ph     → v       (English /f/ collapses the same as native f→v)
+    - w      → v       (no native W; Finn reads W as V even in loanwords)
+    - j      → y       (Finnish /j/ is read as English "y" — yot)
+    - c      → k       (no native C; Finn hardens loanwords to K, e.g.
+                        "city" → Satu reads it as /kiti/)
+iso: fi
+kategoria: akcent
+kolejnosc: 90
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Phonetic substitutions ---
+# Critical ordering:
+#   * `ph` before `p`        — protects "phone" from a leftover `h`.
+#   * `sh` before `s`        — keeps the conventional pattern.
+#   * `th` before `t`/`d`    — must run BEFORE `d → t`, otherwise "this"
+#                              would slide through `d` chain rules first.
+#   * Digraphs always before single letters.
+zamiany:
+  - { wzor: "ph", zamiana: "v" }
+  - { wzor: "Ph", zamiana: "V" }
+  - { wzor: "sh", zamiana: "s" }
+  - { wzor: "Sh", zamiana: "S" }
+  - { wzor: "th", zamiana: "t" }
+  - { wzor: "Th", zamiana: "T" }
+  - { wzor: "f",  zamiana: "v" }
+  - { wzor: "F",  zamiana: "V" }
+  - { wzor: "z",  zamiana: "s" }
+  - { wzor: "Z",  zamiana: "S" }
+  - { wzor: "c",  zamiana: "k" }
+  - { wzor: "C",  zamiana: "K" }
+  - { wzor: "j",  zamiana: "y" }
+  - { wzor: "J",  zamiana: "Y" }
+  - { wzor: "w",  zamiana: "v" }
+  - { wzor: "W",  zamiana: "V" }
+  - { wzor: "b",  zamiana: "p" }
+  - { wzor: "B",  zamiana: "P" }
+  - { wzor: "d",  zamiana: "t" }
+  - { wzor: "D",  zamiana: "T" }
+  - { wzor: "g",  zamiana: "k" }
+  - { wzor: "G",  zamiana: "K" }
