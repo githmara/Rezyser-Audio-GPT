@@ -294,24 +294,66 @@ def wariant_po_etykiecie(tryb: str, jezyk: str, etykieta: str) -> dict | None:
 # drugie, trzecie `dictionaries/<kod>/`, GUI będzie musiał podmienić hardkod
 # na wynik :func:`wykryj_jezyk_zrodlowy` – infrastruktura jest już gotowa.
 
-def dostepne_jezyki_bazowe() -> list[str]:
-    """Zwraca posortowaną listę kodów języków z folderów w ``dictionaries/``.
+def _jezyk_kompletny(kod: str) -> bool:
+    """Czy folder ``dictionaries/<kod>/`` ma komplet plików pełnej obsługi?
 
-    Każdy folder musi zawierać plik ``podstawy.yaml`` – w przeciwnym razie
-    zostaje pominięty (jest „niekompletnym" językiem, bo silnik Cezara
-    potrzebuje jego alfabetu).
+    Kryterium kompletności (spójne z TODO § 4 krok 1):
+
+      1. ``podstawy.yaml``            – alfabet + transliteracja (Cezar)
+      2. ``gui/ui.yaml``              – tłumaczenie warstwy interfejsu
+      3. ``akcenty/<id>.yaml`` ≥ 1   – tryb Reżysera
+      4. ``szyfry/<id>.yaml``  ≥ 1   – tryb Szyfranta
+
+    Folder ``rezyser/`` z trybami AI jest świadomie POMIJANY — w 13.x
+    to wciąż polskie prompty `gpt-4o`, nie kontrakt każdego języka
+    (do reanalizy w 14.x, gdy tryby Reżysera dostaną wielojęzyczne
+    prompty systemowe).
+
+    Args:
+        kod: dwuliterowy kod języka (nazwa folderu w ``dictionaries/``).
 
     Returns:
-        np. ``["pl"]`` dziś, a po dodaniu ``dictionaries/en/`` → ``["en", "pl"]``.
+        True gdy wszystkie cztery warunki spełnione, False przy stubach.
+    """
+    folder = os.path.join(DICTIONARIES_DIR, kod)
+    if not os.path.isfile(os.path.join(folder, "podstawy.yaml")):
+        return False
+    if not os.path.isfile(os.path.join(folder, "gui", "ui.yaml")):
+        return False
+    for pod in ("akcenty", "szyfry"):
+        pod_dir = os.path.join(folder, pod)
+        if not os.path.isdir(pod_dir):
+            return False
+        if not any(p.endswith(".yaml") for p in os.listdir(pod_dir)):
+            return False
+    return True
+
+
+def dostepne_jezyki_bazowe() -> list[str]:
+    """Zwraca posortowaną listę kodów KOMPLETNYCH języków w ``dictionaries/``.
+
+    „Kompletny" oznacza folder spełniający wszystkie cztery warunki
+    z :func:`_jezyk_kompletny`. Stuby (np. folder z samym `podstawy.yaml`
+    i `gui/ui.yaml`, ale bez `akcenty/` i `szyfry/`) są filtrowane —
+    silnik nie umiałby przetwarzać tekstu w takim języku, więc nie powinny
+    pojawiać się w komunikatach typu „obsługiwane języki" ani w selektorze
+    języka interfejsu w GUI.
+
+    Skutek dla v13.1: dziś tylko `pl` przechodzi filtr. Każdy kolejny
+    release minor 13.x (zgodnie z `TODO_skrotowce_wielojezyczne.md` § 4)
+    dorzuca jeden nowy folder w pełni wdrożony, więc lista rośnie o jedną
+    pozycję per release — bez zmian w kodzie Pythona.
+
+    Returns:
+        np. ``["pl"]`` po 13.1, a po wdrożeniu fińskiego w 13.2 → ``["fi", "pl"]``.
     """
     if not os.path.isdir(DICTIONARIES_DIR):
         return []
     wynik: list[str] = []
     for nazwa in sorted(os.listdir(DICTIONARIES_DIR)):
-        sciezka_jezyka = os.path.join(DICTIONARIES_DIR, nazwa)
-        if not os.path.isdir(sciezka_jezyka):
+        if not os.path.isdir(os.path.join(DICTIONARIES_DIR, nazwa)):
             continue
-        if os.path.isfile(os.path.join(sciezka_jezyka, "podstawy.yaml")):
+        if _jezyk_kompletny(nazwa):
             wynik.append(nazwa)
     return wynik
 
@@ -332,9 +374,10 @@ def lista_wspieranych_jezykow_natywnie() -> str:
     w komunikacie — bez edycji żadnego stringa.
 
     Returns:
-        Np. ``"Polski, English, Suomi, Русский, Íslenska, Italiano"``.
-        Pusty string, gdy `dictionaries/` nie istnieje lub żaden
-        język nie ma kompletnego `podstawy.yaml`.
+        Po 13.1: ``"Polski"`` (jedyny w pełni wdrożony język). Po 13.2
+        z fińskim: ``"Polski, Suomi"``. Pusty string, gdy `dictionaries/`
+        nie istnieje lub żaden język nie przechodzi filtra kompletności
+        z :func:`dostepne_jezyki_bazowe`.
     """
     kody = dostepne_jezyki_bazowe()
     if not kody:
