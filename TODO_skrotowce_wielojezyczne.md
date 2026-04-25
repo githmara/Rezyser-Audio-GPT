@@ -178,10 +178,11 @@ trzeba by dopisać regexy od zera. Wstępne podpowiedzi:
   - [ ] `núm.` → `número`
   - [ ] `pág.` → `página`
 
-## 4. Strategia wdrażania (spójna z `.clinerules`)
+## 4. Strategia wdrażania (spójna z `CLAUDE.md`)
 
 Dla każdego nowego języka stosujemy 5-etapowy schemat — ten sam, który
-opisuje sekcja „Bezpieczna kolejność wdrażania" w `.clinerules`. Kolejność
+opisuje sekcja „WIELOJĘZYCZNOŚĆ I TŁUMACZENIA INTERFEJSU" w `CLAUDE.md`
+(akapit „Bezpieczna kolejność wdrażania"). Kolejność
 jest nieprzypadkowa: najpierw weryfikujemy, że treści w nowym języku
 w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 (i tokeny LLM) w tłumaczenie warstwy UI i dokumentacji.
@@ -219,7 +220,7 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
    (`akcenty/`, `szyfry/`, `rezyser/`), dzięki czemu dodanie nowego języka
    to jeden folder `dictionaries/<kod>/` — nie dwa. Parametry dynamiczne
    (`{numer_rozdzialu}`, `{nazwa_pliku}`, `{liczba_znakow}`, …) zostają
-   bez zmian — patrz `.clinerules` sekcja „Struktura YAML dla tłumaczeń UI".
+   bez zmian — patrz `CLAUDE.md` sekcja „WIELOJĘZYCZNOŚĆ I TŁUMACZENIA INTERFEJSU".
 
 3. **Tłumaczenie dokumentacji/instrukcji.** Uruchom skrypt
    autotłumaczący (`tlumacz_ai.py` lub dedykowany batch) — ma
@@ -231,10 +232,23 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
    3.1 / 3.2 oraz odhacz odpowiednie zdania smoketestowe w sekcji 6.
    To sygnał, że język jest w pełni wdrożony.
 
-5. **Release** jako kolejna wersja **13.x**: pierwszy nowy język → 13.1,
-   drugi → 13.2, itd. Gdy ten plik zostanie wyczerpany (wszystkie języki
-   z sekcji 3.1 i 3.2 zamknięte), następny release to **14.0**, a plik
-   `TODO_skrotowce_wielojezyczne.md` można usunąć z repozytorium.
+5. **Release** jako kolejna wersja **13.x**: jeden nowy w pełni wdrożony
+   język na release (od 13.2 wzwyż). Gdy ten plik zostanie wyczerpany
+   (wszystkie języki z sekcji 3.1 i 3.2 zamknięte), następny release to
+   **14.0**, a plik `TODO_skrotowce_wielojezyczne.md` można usunąć
+   z repozytorium.
+
+   > **Uwaga o numeracji 13.1.** Wbrew pierwotnemu założeniu „13.1 =
+   > pierwszy w pełni nowy język" release 13.1 stał się commitem
+   > porządkowym dla istniejących stubów językowych: refresh pól
+   > `opis: |` i komentarzy nagłówkowych w `dictionaries/<kod>/podstawy.yaml`
+   > (en/fi/is/it/ru) na języki natywne, bez dorzucania `akcenty/` ani
+   > `szyfry/`. Powodem była strategiczna zmiana tempa — wcześniejsze
+   > etapy 1–5/5 wdrożyły UI i dokumentację dla 5 języków na raz, wyprzedzając
+   > pierwszy krok schematu z TODO § 4 (treści języka bazowego). Release 13.1
+   > ten dług naprawia. Pełen pakiet każdego języka (akcenty + szyfry +
+   > smoke test sekcji 6) trafia od **13.2** — jeden język na release,
+   > zgodnie z „Jeden język na raz" w Uwagach operacyjnych poniżej.
 
 ### Uwagi operacyjne
 
@@ -250,7 +264,8 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
   kosmetyczna zmiana (stała `FOLDER_GUI`, wpis w `_ETYKIETA_KATEGORII`,
   rozszerzenie jednej krotki w pętli) — może wejść w dowolnym releasie 13.x,
   nie blokuje pierwszego wydania z tłumaczonym interfejsem. Patrz
-  `.clinerules` sekcja „Integracja z Managerem Reguł".
+  `CLAUDE.md` sekcja „WIELOJĘZYCZNOŚĆ I TŁUMACZENIA INTERFEJSU"
+  (uwaga o `gui_manager_regul.py` skanującym `dictionaries/*/`).
 - **Szybki sprawdzian w GUI.** Po zamknięciu etapów 1 i 2 odpal
   `python main.py`, wejdź w Poliglota → Tryb Szyfranta → wybierz nowy
   język bazowy. Odwracacz powinien rozwinąć skrótowce, kod ISO w pliku

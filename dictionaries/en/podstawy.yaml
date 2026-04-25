@@ -1,34 +1,35 @@
 # =============================================================================
-#  PODSTAWY JĘZYKA ANGIELSKIEGO
+#  ENGLISH LANGUAGE BASICS
 # =============================================================================
 #
-#  Plik fundamentu dla `dictionaries/en/`. Silnik Poligloty wymaga, aby każdy
-#  język miał ten plik — bez niego nowy język NIE jest w ogóle wykrywany.
+#  Foundation file for `dictionaries/en/`. The Poliglota engine requires every
+#  language to have this file — without it, a new language is NOT detected
+#  at all.
 #
-#  Struktura wzorowana na `dictionaries/pl/podstawy.yaml`. Pole `polskie_znaki`
-#  pozostawiono jako pustą listę — w wersji 13.x nie planujemy transliteracji
-#  dla języków innych niż polski (akcenty PL → łacina). Nazwa klucza
-#  `polskie_znaki` jest historyczna; manager reguł oczekuje jej obecności,
-#  więc nie zmieniamy jej na bardziej generyczną.
+#  Structure modeled after `dictionaries/pl/podstawy.yaml`. The `polskie_znaki`
+#  field is left as an empty list — version 13.x does not plan diacritic
+#  transliteration for languages other than Polish (PL accents → Latin). The
+#  key name `polskie_znaki` is historical; the rule manager expects its
+#  presence, so we do not rename it to something more generic.
 # =============================================================================
 
 id: podstawy
 jezyk: en
 etykieta: "English – phonetic basics"
 opis: |
-  Bazowe reguły dla języka angielskiego:
-    1. Brak transliteracji znaków diakrytycznych (`polskie_znaki: []`) –
-       angielski używa standardowego alfabetu łacińskiego A-Z.
-    2. Alfabet angielski (26 wielkich liter) – używany przez szyfr Cezara.
+  Base rules for the English language:
+    1. No diacritic transliteration (`polskie_znaki: []`) –
+       English uses the standard Latin alphabet A–Z.
+    2. English alphabet (26 uppercase letters) – used by the Caesar cipher.
 
 # -----------------------------------------------------------------------------
-# Brak diakrytyków do transliteracji – angielski operuje na czystym alfabecie
-# łacińskim. Pusta lista zachowuje kontrakt API z managerem reguł.
+# No diacritics to transliterate – English operates on a clean Latin alphabet.
+# An empty list preserves the API contract with the rule manager.
 # -----------------------------------------------------------------------------
 polskie_znaki: []
 
 # -----------------------------------------------------------------------------
-# Alfabet angielski – 26 wielkich liter, bez znaków białych.
-# Używany przez szyfr Cezara (plik szyfry/cezar.yaml w odpowiednim katalogu).
+# English alphabet – 26 uppercase letters, no whitespace.
+# Used by the Caesar cipher (file szyfry/cezar.yaml in the corresponding folder).
 # -----------------------------------------------------------------------------
 alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

@@ -1,36 +1,38 @@
 # =============================================================================
-#  PODSTAWY JĘZYKA WŁOSKIEGO
+#  FONDAMENTI DELLA LINGUA ITALIANA
 # =============================================================================
 #
-#  Plik fundamentu dla `dictionaries/it/`. Silnik Poligloty wymaga, aby każdy
-#  język miał ten plik — bez niego nowy język NIE jest w ogóle wykrywany.
+#  File di base per `dictionaries/it/`. Il motore Poliglota richiede che ogni
+#  lingua abbia questo file — senza di esso una nuova lingua NON viene affatto
+#  rilevata.
 #
-#  Struktura wzorowana na `dictionaries/pl/podstawy.yaml`. Pole `polskie_znaki`
-#  pozostawiono jako pustą listę — w wersji 13.x nie planujemy transliteracji
-#  dla języków innych niż polski. Nazwa klucza `polskie_znaki` jest historyczna;
-#  manager reguł oczekuje jej obecności, więc nie zmieniamy jej.
+#  Struttura modellata su `dictionaries/pl/podstawy.yaml`. Il campo
+#  `polskie_znaki` è stato lasciato come lista vuota — nella versione 13.x non
+#  prevediamo la traslitterazione dei segni diacritici per lingue diverse dal
+#  polacco. Il nome della chiave `polskie_znaki` è storico; il gestore delle
+#  regole ne richiede la presenza, quindi non lo modifichiamo.
 # =============================================================================
 
 id: podstawy
 jezyk: it
 etykieta: "Italiano – fondamenti fonetici"
 opis: |
-  Bazowe reguły dla języka włoskiego:
-    1. Brak transliteracji znaków diakrytycznych (`polskie_znaki: []`) –
-       włoski używa standardowego alfabetu łacińskiego; akcentowane
-       samogłoski (à, è, é, ì, ò, ù) traktujemy jak osobne formy bazowe,
-       nie zamieniamy ich.
-    2. Alfabet włoski (21 rodzimych wielkich liter, bez J, K, W, X, Y) –
-       używany przez szyfr Cezara.
+  Regole di base per la lingua italiana:
+    1. Nessuna traslitterazione dei segni diacritici (`polskie_znaki: []`) –
+       l'italiano usa l'alfabeto latino standard; le vocali accentate
+       (à, è, é, ì, ò, ù) sono trattate come forme di base distinte e
+       non vengono modificate.
+    2. Alfabeto italiano (21 lettere maiuscole native, senza J, K, W, X, Y) –
+       utilizzato dal cifrario di Cesare.
 
 # -----------------------------------------------------------------------------
-# Brak diakrytyków do transliteracji. Pusta lista zachowuje kontrakt API
-# z managerem reguł.
+# Nessun segno diacritico da traslitterare. La lista vuota mantiene il
+# contratto API con il gestore delle regole.
 # -----------------------------------------------------------------------------
 polskie_znaki: []
 
 # -----------------------------------------------------------------------------
-# Alfabet włoski – 21 wielkich liter w rodzimej kolejności (bez J, K, W, X, Y),
-# bez znaków białych. Używany przez szyfr Cezara.
+# Alfabeto italiano – 21 lettere maiuscole nell'ordine nativo
+# (senza J, K, W, X, Y), senza spazi bianchi. Utilizzato dal cifrario di Cesare.
 # -----------------------------------------------------------------------------
 alfabet: "ABCDEFGHILMNOPQRSTUVZ"

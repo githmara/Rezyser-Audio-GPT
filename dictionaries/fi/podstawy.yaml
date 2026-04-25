@@ -1,34 +1,36 @@
 # =============================================================================
-#  PODSTAWY JĘZYKA FIŃSKIEGO
+#  SUOMEN KIELEN PERUSTEET
 # =============================================================================
 #
-#  Plik fundamentu dla `dictionaries/fi/`. Silnik Poligloty wymaga, aby każdy
-#  język miał ten plik — bez niego nowy język NIE jest w ogóle wykrywany.
+#  Perustiedosto kansiolle `dictionaries/fi/`. Poliglota-moottori vaatii, että
+#  jokaisella kielellä on tämä tiedosto — ilman sitä uutta kieltä EI tunnisteta
+#  lainkaan.
 #
-#  Struktura wzorowana na `dictionaries/pl/podstawy.yaml`. Pole `polskie_znaki`
-#  pozostawiono jako pustą listę — w wersji 13.x nie planujemy transliteracji
-#  dla języków innych niż polski. Nazwa klucza `polskie_znaki` jest historyczna;
-#  manager reguł oczekuje jej obecności, więc nie zmieniamy jej.
+#  Rakenne mallinnettu tiedostosta `dictionaries/pl/podstawy.yaml`. Kenttä
+#  `polskie_znaki` on jätetty tyhjäksi listaksi — versiossa 13.x emme suunnittele
+#  diakriittisten merkkien translitterointia muille kielille kuin puolaksi.
+#  Avaimen nimi `polskie_znaki` on historiallinen; sääntöjen hallinta odottaa
+#  sen läsnäoloa, joten emme muuta sitä.
 # =============================================================================
 
 id: podstawy
 jezyk: fi
 etykieta: "Suomi – foneettiset perusteet"
 opis: |
-  Bazowe reguły dla języka fińskiego:
-    1. Brak transliteracji znaków diakrytycznych (`polskie_znaki: []`) –
-       fiński używa standardowego alfabetu łacińskiego z dodatkami Å, Ä, Ö.
-    2. Alfabet fiński (29 wielkich liter, kolejność rodzima) – używany
-       przez szyfr Cezara.
+  Suomen kielen perussäännöt:
+    1. Ei diakriittisten merkkien translitterointia (`polskie_znaki: []`) –
+       suomi käyttää tavallista latinalaista aakkostoa lisämerkein Å, Ä, Ö.
+    2. Suomalainen aakkosto (29 isoa kirjainta, alkuperäisessä järjestyksessä) –
+       Caesar-salakirjoituksen käyttämä.
 
 # -----------------------------------------------------------------------------
-# Brak diakrytyków do transliteracji. Pusta lista zachowuje kontrakt API
-# z managerem reguł.
+# Ei translitteroitavia diakriittisiä merkkejä. Tyhjä lista säilyttää
+# API-sopimuksen sääntöjen hallinnan kanssa.
 # -----------------------------------------------------------------------------
 polskie_znaki: []
 
 # -----------------------------------------------------------------------------
-# Alfabet fiński – 29 wielkich liter w rodzimej kolejności (Å, Ä, Ö na końcu),
-# bez znaków białych. Używany przez szyfr Cezara.
+# Suomalainen aakkosto – 29 isoa kirjainta alkuperäisessä järjestyksessä
+# (Å, Ä, Ö lopussa), ilman välilyöntejä. Caesar-salakirjoituksen käyttämä.
 # -----------------------------------------------------------------------------
 alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"

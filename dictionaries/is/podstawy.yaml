@@ -1,36 +1,38 @@
 # =============================================================================
-#  PODSTAWY JĘZYKA ISLANDZKIEGO
+#  GRUNNATRIÐI ÍSLENSKU
 # =============================================================================
 #
-#  Plik fundamentu dla `dictionaries/is/`. Silnik Poligloty wymaga, aby każdy
-#  język miał ten plik — bez niego nowy język NIE jest w ogóle wykrywany.
+#  Grunnskrá fyrir `dictionaries/is/`. Poliglota-vélin krefst þess að hvert
+#  tungumál hafi þessa skrá — án hennar er nýtt tungumál EKKI yfirhöfuð
+#  greint.
 #
-#  Struktura wzorowana na `dictionaries/pl/podstawy.yaml`. Pole `polskie_znaki`
-#  pozostawiono jako pustą listę — w wersji 13.x nie planujemy transliteracji
-#  dla języków innych niż polski. Nazwa klucza `polskie_znaki` jest historyczna;
-#  manager reguł oczekuje jej obecności, więc nie zmieniamy jej.
+#  Uppbygging er mótuð eftir `dictionaries/pl/podstawy.yaml`. Reiturinn
+#  `polskie_znaki` er skilinn eftir sem tómur listi — í útgáfu 13.x er ekki
+#  fyrirhugað að umrita broddstafi fyrir önnur tungumál en pólsku. Nafnið
+#  `polskie_znaki` er sögulegt; reglustjórinn býst við nærveru þess, því
+#  breytum við því ekki.
 # =============================================================================
 
 id: podstawy
 jezyk: is
 etykieta: "Íslenska – hljóðfræðilegur grunnur"
 opis: |
-  Bazowe reguły dla języka islandzkiego:
-    1. Brak transliteracji znaków diakrytycznych (`polskie_znaki: []`) –
-       islandzki używa rodzimego alfabetu z literami Þ, Ð, Æ, Ö oraz
-       akcentowanymi samogłoskami.
-    2. Alfabet islandzki (32 wielkie litery, kolejność rodzima, bez C, Q,
-       W, Z) – używany przez szyfr Cezara.
+  Grunnreglur íslenskunnar:
+    1. Engin umritun broddstafa (`polskie_znaki: []`) –
+       íslenska notar eigið stafróf með bókstöfunum Þ, Ð, Æ, Ö ásamt
+       stöfum með brodd.
+    2. Íslenska stafrófið (32 hástafir, í eigin röð, án C, Q, W, Z) –
+       notað af Caesar-dulmálinu.
 
 # -----------------------------------------------------------------------------
-# Brak diakrytyków do transliteracji. Pusta lista zachowuje kontrakt API
-# z managerem reguł.
+# Engir broddstafir til að umrita. Tómi listinn varðveitir API-samninginn
+# við reglustjórann.
 # -----------------------------------------------------------------------------
 polskie_znaki: []
 
 # -----------------------------------------------------------------------------
-# Alfabet islandzki – 32 wielkie litery w rodzimej kolejności
+# Íslenska stafrófið – 32 hástafir í eigin röð
 # (A Á B D Ð E É F G H I Í J K L M N O Ó P R S T U Ú V X Y Ý Þ Æ Ö),
-# bez znaków białych. Używany przez szyfr Cezara.
+# án bila. Notað af Caesar-dulmálinu.
 # -----------------------------------------------------------------------------
 alfabet: "AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ"
