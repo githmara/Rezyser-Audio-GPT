@@ -358,7 +358,7 @@ def dostepne_jezyki_bazowe() -> list[str]:
     return wynik
 
 
-def lista_wspieranych_jezykow_natywnie() -> str:
+def lista_wspieranych_jezykow_natywnie(jezyk_pierwszy: str | None = None) -> str:
     """Zwraca natywne nazwy wspieranych języków, gotowe do komunikatu GUI.
 
     Skanuje `dictionaries/<kod>/podstawy.yaml`, czyta pole `etykieta`
@@ -367,23 +367,36 @@ def lista_wspieranych_jezykow_natywnie() -> str:
     Format zwrotny to natywne nazwy języków rozdzielone przecinkami,
     z zachowaniem oryginalnych znaków (cyrylica, Þ, Æ itp.).
 
-    Sortowanie hybrydowe: PL twardo na pierwszym miejscu (język bazowy
-    i rdzeń projektu), pozostałe alfabetycznie po kodzie ISO. Dzięki
-    temu wynik jest deterministyczny, a każdy nowo dodany folder
-    `dictionaries/<kod>/` automatycznie wpada na właściwą pozycję
-    w komunikacie — bez edycji żadnego stringa.
+    Sortowanie hybrydowe:
+      * gdy ``jezyk_pierwszy`` jest podany i obecny w wyniku
+        :func:`dostepne_jezyki_bazowe` — ten kod idzie na pierwszą
+        pozycję, reszta alfabetycznie po kodzie ISO. Pozwala GUI
+        priorytetyzować język interfejsu użytkownika w komunikatach
+        (np. dla użytkownika EN: „English, Polski, Suomi…" zamiast
+        twardego „Polski, …").
+      * w przeciwnym razie — PL twardo na pierwszym miejscu (rdzeń
+        projektu, bezpieczny domyślny), reszta po ISO.
+
+    Args:
+        jezyk_pierwszy: Opcjonalny dwuliterowy kod ISO języka, który
+                        ma się pojawić jako pierwszy element listy.
+                        Najczęściej `i18n.aktualny_jezyk()`.
+                        Jeśli None lub kod nieobecny w `dictionaries/` —
+                        spadamy na PL-hardcode.
 
     Returns:
-        Po 13.1: ``"Polski"`` (jedyny w pełni wdrożony język). Po 13.2
-        z fińskim: ``"Polski, Suomi"``. Pusty string, gdy `dictionaries/`
-        nie istnieje lub żaden język nie przechodzi filtra kompletności
-        z :func:`dostepne_jezyki_bazowe`.
+        Po 13.1: ``"Polski"`` (jedyny w pełni wdrożony język).
+        Po 13.2 z fińskim, gdy `jezyk_pierwszy="fi"`: ``"Suomi, Polski"``.
+        Pusty string, gdy `dictionaries/` nie istnieje lub żaden język
+        nie przechodzi filtra kompletności z :func:`dostepne_jezyki_bazowe`.
     """
     kody = dostepne_jezyki_bazowe()
     if not kody:
         return ""
 
-    if "pl" in kody:
+    if jezyk_pierwszy and jezyk_pierwszy in kody:
+        kolejnosc = [jezyk_pierwszy] + sorted(k for k in kody if k != jezyk_pierwszy)
+    elif "pl" in kody:
         kolejnosc = ["pl"] + sorted(k for k in kody if k != "pl")
     else:
         kolejnosc = sorted(kody)

@@ -38,6 +38,7 @@ from langdetect import LangDetectException, detect
 import wx
 
 import core_poliglota
+import i18n
 import tlumacz_ai
 from i18n import t
 
@@ -678,7 +679,9 @@ class PoliglotaPanel(wx.Panel):
             if detect(self._file_content) != JEZYK_BAZOWY:
                 ostrzezenie = t(
                     "poliglota.ostrzezenie_jezyk",
-                    wspierane_jezyki=core_poliglota.lista_wspieranych_jezykow_natywnie(),
+                    wspierane_jezyki=core_poliglota.lista_wspieranych_jezykow_natywnie(
+                        jezyk_pierwszy=i18n.aktualny_jezyk(),
+                    ),
                 )
                 self._lbl_progress.SetValue(ostrzezenie)
                 self._lbl_progress.SetName(ostrzezenie)
