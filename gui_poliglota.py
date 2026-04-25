@@ -33,7 +33,6 @@ import threading
 
 import docx
 from dotenv import load_dotenv
-from langdetect import LangDetectException, detect
 
 import wx
 
@@ -43,14 +42,15 @@ import tlumacz_ai
 from i18n import t
 
 
-# TODO(13.2, multi-language): zastąp stałą polem instancji
-# ``self._jezyk_aktywny`` wyliczanym po wczytaniu pliku przez
-# ``core_poliglota.wykryj_jezyk_zrodlowy(self._file_content)``. Na razie,
-# w ramach wersji 13.1, w projekcie jest tylko jeden folder bazowy
-# (`dictionaries/pl/`), więc stała pozostaje stałą – zmiana musi iść
-# razem z pierwszym nowym językiem bazowym, bo wymaga logiki wyboru
-# słowników w GUI i pipeline silnika Poligloty.
-JEZYK_BAZOWY = "pl"   # docelowo konfigurowalne w menu Ustawienia
+# 13.2: język bazowy pipeline'u Poligloty żyje teraz na poziomie instancji
+# (``self._jezyk_aktywny``). Domyślną wartością jest ``"pl"`` — jedyny język
+# kompletny w wersji wydawniczej. Po wczytaniu pliku panel wywołuje
+# ``core_poliglota.wykryj_jezyk_zrodlowy(...)``, który waliduje wynik
+# wobec dostępnych folderów w ``dictionaries/`` i przełącza pipeline na
+# wykryty kompletny język. Twardego polskiego fallbacku już NIE robimy —
+# akcenty/szyfry to reguły fonetyczne ściśle związane z językiem źródłowym
+# i mieszanie ich między językami byłoby błędem merytorycznym, nie wolnością.
+JEZYK_DOMYSLNY = "pl"
 
 
 class PoliglotaPanel(wx.Panel):
@@ -92,11 +92,17 @@ class PoliglotaPanel(wx.Panel):
         # Wątek tła tłumacza AI (referencja, by nie uruchamiać drugiego)
         self._worker_thread: threading.Thread | None = None
 
-        # Konfiguracje wariantów (z YAML) – pobierane raz przy starcie panelu
+        # Aktywny język pipeline'u (akcenty/szyfry/cezar). Po wczytaniu pliku
+        # podmieniany przez ``_odswiez_warianty()`` na wynik
+        # ``wykryj_jezyk_zrodlowy()``.
+        self._jezyk_aktywny: str = JEZYK_DOMYSLNY
+
+        # Konfiguracje wariantów (z YAML) – pobierane raz przy starcie panelu,
+        # ponownie przy zmianie ``self._jezyk_aktywny``.
         self._akcenty = core_poliglota.lista_wariantow(
-            core_poliglota.TRYB_REZYSER, JEZYK_BAZOWY)
+            core_poliglota.TRYB_REZYSER, self._jezyk_aktywny)
         self._szyfry  = core_poliglota.lista_wariantow(
-            core_poliglota.TRYB_SZYFRANT, JEZYK_BAZOWY)
+            core_poliglota.TRYB_SZYFRANT, self._jezyk_aktywny)
 
         self._build_ui()
         self._bind_events()
@@ -325,7 +331,7 @@ class PoliglotaPanel(wx.Panel):
 
         # Zakres SpinCtrl Cezara pochodzi z jego YAML-a (jeśli istnieje)
         cezar_cfg = core_poliglota.wariant_po_id(
-            core_poliglota.TRYB_SZYFRANT, JEZYK_BAZOWY, "cezar") or {}
+            core_poliglota.TRYB_SZYFRANT, self._jezyk_aktywny, "cezar") or {}
         min_pr = int(cezar_cfg.get("min_przesuniecie", -35))
         max_pr = int(cezar_cfg.get("max_przesuniecie",  35))
 
@@ -416,6 +422,17 @@ class PoliglotaPanel(wx.Panel):
         self._plik_katalog      = os.path.dirname(os.path.abspath(file_name))
         self._sciezka_oryginalu = os.path.abspath(file_name)
 
+        # 13.2: po wczytaniu pliku przełącz pipeline na język wykryty z treści
+        # (tylko jeśli ma kompletny folder w ``dictionaries/``). Domyślny
+        # ``self._jezyk_aktywny`` jest zachowywany jako fallback.
+        wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
+            self._file_content,
+            fallback=self._jezyk_aktywny,
+        )
+        if wykryty != self._jezyk_aktywny:
+            self._jezyk_aktywny = wykryty
+            self._odswiez_warianty()
+
         znaki = len(self._file_content)
         status_msg = t(
             "poliglota.plik_status_wczytany",
@@ -486,15 +503,55 @@ class PoliglotaPanel(wx.Panel):
         self._pnl_rezyser.Layout()
         self.Layout()
 
+    # ------------------------------------------------------------------
+    # 13.2: przeładowanie list wariantów po zmianie języka aktywnego
+    # ------------------------------------------------------------------
+    def _odswiez_warianty(self) -> None:
+        """Wczytuje akcenty/szyfry dla ``self._jezyk_aktywny`` i odświeża GUI.
+
+        Twardy filtr: nie ma fallbacku do innego języka — gdy folder reguł
+        nie istnieje, ComboBox jest pusty i wyłączony, a tooltip informuje
+        użytkownika, że dla danego języka nie ma jeszcze reguł.
+        """
+        self._akcenty = core_poliglota.lista_wariantow(
+            core_poliglota.TRYB_REZYSER, self._jezyk_aktywny)
+        self._szyfry = core_poliglota.lista_wariantow(
+            core_poliglota.TRYB_SZYFRANT, self._jezyk_aktywny)
+
+        # ── Akcenty ─────────────────────────────────────────────────────
+        etykiety_akcentow = [w["etykieta"] for w in self._akcenty]
+        self._combo_akcent.Set(etykiety_akcentow)
+        if etykiety_akcentow:
+            self._combo_akcent.SetSelection(0)
+            self._combo_akcent.Enable()
+            self._combo_akcent.SetToolTip(t("poliglota.combo_akcent_tooltip"))
+        else:
+            self._combo_akcent.Disable()
+            self._combo_akcent.SetToolTip(
+                t("poliglota.brak_akcentow_dla_jezyka", jezyk=self._jezyk_aktywny)
+            )
+
+        # ── Szyfry ──────────────────────────────────────────────────────
+        etykiety_szyfrow = [w["etykieta"] for w in self._szyfry]
+        self._combo_szyfr.Set(etykiety_szyfrow)
+        if etykiety_szyfrow:
+            self._combo_szyfr.SetSelection(0)
+            self._combo_szyfr.Enable()
+        else:
+            self._combo_szyfr.Disable()
+            self._combo_szyfr.SetToolTip(
+                t("poliglota.brak_szyfrow_dla_jezyka", jezyk=self._jezyk_aktywny)
+            )
+
     def _aktualny_wariant_akcentu(self) -> dict | None:
         etykieta = self._combo_akcent.GetStringSelection()
         return core_poliglota.wariant_po_etykiecie(
-            core_poliglota.TRYB_REZYSER, JEZYK_BAZOWY, etykieta)
+            core_poliglota.TRYB_REZYSER, self._jezyk_aktywny, etykieta)
 
     def _aktualny_wariant_szyfru(self) -> dict | None:
         etykieta = self._combo_szyfr.GetStringSelection()
         return core_poliglota.wariant_po_etykiecie(
-            core_poliglota.TRYB_SZYFRANT, JEZYK_BAZOWY, etykieta)
+            core_poliglota.TRYB_SZYFRANT, self._jezyk_aktywny, etykieta)
 
     # ==================================================================
     # URUCHOMIENIE PRZETWARZANIA
@@ -564,7 +621,7 @@ class PoliglotaPanel(wx.Panel):
             wynik = core_poliglota.przetworz(
                 self._file_content,
                 tryb=core_poliglota.TRYB_REZYSER,
-                jezyk=JEZYK_BAZOWY,
+                jezyk=self._jezyk_aktywny,
                 wariant=cfg["id"],
                 **opcje,
             )
@@ -597,7 +654,7 @@ class PoliglotaPanel(wx.Panel):
             wynik = core_poliglota.przetworz(
                 self._file_content,
                 tryb=core_poliglota.TRYB_SZYFRANT,
-                jezyk=JEZYK_BAZOWY,
+                jezyk=self._jezyk_aktywny,
                 wariant=cfg["id"],
                 **opcje,
             )
@@ -634,9 +691,9 @@ class PoliglotaPanel(wx.Panel):
             return
 
         wariant_id = cfg["id"]
-        iso  = core_poliglota.kod_iso(tryb, JEZYK_BAZOWY, wariant_id, opcje)
+        iso  = core_poliglota.kod_iso(tryb, self._jezyk_aktywny, wariant_id, opcje)
         base = core_poliglota.sufiks_nazwy_pliku(
-            tryb, JEZYK_BAZOWY, wariant_id, self._oryginalna_nazwa, opcje)
+            tryb, self._jezyk_aktywny, wariant_id, self._oryginalna_nazwa, opcje)
 
         try:
             out_path = core_poliglota.zapisz_wynik(
@@ -668,28 +725,28 @@ class PoliglotaPanel(wx.Panel):
     # Miękkie ostrzeżenie o języku źródłowym
     # ------------------------------------------------------------------
     def _maybe_ostrzez_o_jezyku_zrodla(self) -> None:
-        # TODO(13.2, multi-language): zastąp bezpośrednie `detect()` na
-        # `core_poliglota.wykryj_jezyk_zrodlowy()` – funkcja robi to samo,
-        # ale dodatkowo waliduje wynik wobec dostępnych folderów w
-        # ``dictionaries/`` i zwraca sensowny fallback. Wtedy zamiast
-        # ostrzegać użytkownika o „niepasującym języku" będziemy mogli
-        # PRZEŁĄCZYĆ `self._jezyk_aktywny` na wykryty kod i uruchomić
-        # właściwy pipeline słowników.
-        try:
-            if detect(self._file_content) != JEZYK_BAZOWY:
-                ostrzezenie = t(
-                    "poliglota.ostrzezenie_jezyk",
-                    wspierane_jezyki=core_poliglota.lista_wspieranych_jezykow_natywnie(
-                        jezyk_pierwszy=i18n.aktualny_jezyk(),
-                    ),
-                )
-                self._lbl_progress.SetValue(ostrzezenie)
-                self._lbl_progress.SetName(ostrzezenie)
-                self._lbl_progress.Show()
-                self.Layout()
-                wx.LogMessage(ostrzezenie)
-        except LangDetectException:
-            pass
+        # 13.2: detekcja przez core_poliglota.wykryj_jezyk_zrodlowy(), które
+        # waliduje wynik wobec folderów w ``dictionaries/`` i zwraca tylko
+        # kompletne języki bazowe. Porównujemy z aktywnym językiem pipeline'u
+        # (przełączanym w _odswiez_warianty po wczytaniu pliku) — ostrzeżenie
+        # jest miękkie i pojawia się tylko, gdy detekcja widzi inny kompletny
+        # język niż aktualnie wybrany w GUI.
+        wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
+            self._file_content,
+            fallback=self._jezyk_aktywny,
+        )
+        if wykryty != self._jezyk_aktywny:
+            ostrzezenie = t(
+                "poliglota.ostrzezenie_jezyk",
+                wspierane_jezyki=core_poliglota.lista_wspieranych_jezykow_natywnie(
+                    jezyk_pierwszy=i18n.aktualny_jezyk(),
+                ),
+            )
+            self._lbl_progress.SetValue(ostrzezenie)
+            self._lbl_progress.SetName(ostrzezenie)
+            self._lbl_progress.Show()
+            self.Layout()
+            wx.LogMessage(ostrzezenie)
 
     # ==================================================================
     # TRYB TŁUMACZA AI (w wątku tła)
