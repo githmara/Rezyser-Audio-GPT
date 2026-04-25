@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  MERKJAVIÐGERÐ (sérstök stilling)
+#  Breytir ekki innihaldi — sprautar aðeins ISO-kóða tungumáls inn í
+#  úttaksskrá.
+# -----------------------------------------------------------------------------
+id: naprawiacz_tagow
+etykieta: "🔧 Merkjaviðgerð (Aðeins ISO-kóðainnskráning)"
+opis: |
+  Þessi „hreimur" breytir EKKI textainnihaldinu eða hljóðfræðinni.
+  Hann sprautar aðeins ISO-kóða tungumáls inn í úttaksskrána:
+    - HTML: lang="..." attribútan á <html>-merkinu
+    - DOCX: <w:lang w:val="..."/> á sérhverju textariti
+  Þannig skiptir skjálesarinn (NVDA/JAWS) rétt yfir á rétta
+  talgervilsröddina.
+
+  ISO-kóðinn er settur inn handvirkt í GUI ("ISO-kóði"-reit), ekki
+  úr þessari skrá — þess vegna er gildið `iso` autt hér.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Sérstök stilling — KEYRIR EKKI neinn textavinnsluáfanga.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

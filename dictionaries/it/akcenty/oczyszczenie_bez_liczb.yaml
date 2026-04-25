@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+#  PULIZIA DEL TESTO SENZA NORMALIZZAZIONE DEI NUMERI
+#  Variante per testi tecnici (date, codici, numerazioni) in cui le cifre
+#  NON devono essere trasformate in parole.
+# -----------------------------------------------------------------------------
+id: oczyszczenie_bez_liczb
+etykieta: "Nessuno (Pulizia SENZA normalizzazione numeri)"
+opis: |
+  Non applica alcun accento fonetico. Esegue la pulizia del testo per i
+  sintetizzatori vocali, ma CONSERVA le cifre nella forma originale.
+  Usalo per testi tecnici dove la forma "123" è più importante di
+  "centoventitre".
+iso: it
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

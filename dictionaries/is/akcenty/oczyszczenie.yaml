@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+#  TEXTAHREINSUN MEÐ TÖLU-NORMALÍSERINGU
+#  Sjálfgefinn valkostur "Engin hreimur" — hreinsar aðeins texta fyrir
+#  skjálesarann.
+# -----------------------------------------------------------------------------
+id: oczyszczenie
+etykieta: "Engin (Hreinsun MEÐ tölu-normalíseringu)"
+opis: |
+  Beitir engum hljóðfræðilegum hreim. Keyrir aðeins texta-hreinsun
+  fyrir talhermir (fjarlægir uppfyllingarhljóð eins og „khh", stjörnur,
+  hashmerki, runur af punktum) og umbreytir tölum í orð (t.d. „123" →
+  „eitt hundrað tuttugu og þrír").
+iso: is
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

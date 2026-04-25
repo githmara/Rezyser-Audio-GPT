@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+#  PULIZIA DEL TESTO CON NORMALIZZAZIONE DEI NUMERI
+#  Variante predefinita "Nessun accento" — pulisce solo il testo per il
+#  lettore di schermo.
+# -----------------------------------------------------------------------------
+id: oczyszczenie
+etykieta: "Nessuno (Pulizia CON normalizzazione numeri)"
+opis: |
+  Non applica alcun accento fonetico. Esegue solo la procedura di pulizia
+  del testo per i sintetizzatori vocali (rimuove riempitivi come "khh",
+  asterischi, hashtag, sequenze di punti) e converte le cifre in parole
+  (es. "123" → "centoventitre").
+iso: it
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  TAG REPAIR (special mode)
+#  Does not modify content — only injects the language ISO code into the
+#  output file.
+# -----------------------------------------------------------------------------
+id: naprawiacz_tagow
+etykieta: "🔧 Tag Repair (ISO code injection only)"
+opis: |
+  This "accent" does NOT modify the text content or its phonetics.
+  It only injects the language ISO code into the output file:
+    - HTML: lang="..." attribute on the <html> element
+    - DOCX: <w:lang w:val="..."/> element on every text run
+  This way the screen reader (NVDA/JAWS) correctly switches the
+  synthesizer voice to the right language.
+
+  The ISO code is provided by the user in the GUI ("ISO Code" field),
+  not from this file — that's why the `iso` value here is empty.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Special mode — DOES NOT run any text-processing stage.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

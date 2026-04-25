@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+#  TEKSTIN PUHDISTUS ILMAN NUMEROIDEN NORMALISOINTIA
+#  Variantti teknisille teksteille (päivämäärät, koodit, numerointi),
+#  joissa numeroita EI muuteta sanoiksi.
+# -----------------------------------------------------------------------------
+id: oczyszczenie_bez_liczb
+etykieta: "Ei mitään (Puhdistus ILMAN numeroiden normalisointia)"
+opis: |
+  Ei aseta foneettista korostusta. Suorittaa tekstin puhdistuksen
+  puhesyntetisaattoria varten, mutta SÄILYTTÄÄ numerot alkuperäisessä
+  muodossa. Käytä teknisille teksteille, joissa "123":n kirjoitusasu
+  on tärkeämpi kuin "satakaksikymmentäkolme".
+iso: fi
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+#  TEXT CLEANING WITHOUT NUMBER NORMALIZATION
+#  Variant for technical texts (dates, codes, references) where digits
+#  must NOT be expanded into words.
+# -----------------------------------------------------------------------------
+id: oczyszczenie_bez_liczb
+etykieta: "None (Cleaning WITHOUT number normalization)"
+opis: |
+  Does not apply any phonetic accent. Runs the text-sanitising pass for
+  speech synthesizers but PRESERVES digits in their original form. Use
+  for technical texts where the literal "123" matters more than the
+  spelled-out "one hundred and twenty-three".
+iso: en
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

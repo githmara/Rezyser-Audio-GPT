@@ -1,0 +1,20 @@
+# -----------------------------------------------------------------------------
+#  TEXTAHREINSUN ÁN TÖLU-NORMALÍSERINGAR
+#  Valkostur fyrir tæknilega texta (dagsetningar, kóða, númer), þar sem
+#  tölum á EKKI að breyta í orð.
+# -----------------------------------------------------------------------------
+id: oczyszczenie_bez_liczb
+etykieta: "Engin (Hreinsun ÁN tölu-normalíseringar)"
+opis: |
+  Beitir engum hljóðfræðilegum hreim. Keyrir texta-hreinsun fyrir
+  talhermir, en VARÐVEITIR tölur í upprunalegu formi. Notist fyrir
+  tæknilega texta þar sem ritmyndin „123" skiptir meira máli en
+  „eitt hundrað tuttugu og þrír".
+iso: is
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

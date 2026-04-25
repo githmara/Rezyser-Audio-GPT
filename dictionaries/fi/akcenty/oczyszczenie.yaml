@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  TEKSTIN PUHDISTUS NUMEROIDEN NORMALISOINNILLA
+#  Oletusvariantti "Ei korostusta" — vain siivoaa tekstin näytönlukijaa varten.
+# -----------------------------------------------------------------------------
+id: oczyszczenie
+etykieta: "Ei mitään (Puhdistus numeroiden normalisoinnilla)"
+opis: |
+  Ei aseta foneettista korostusta. Suorittaa vain tekstin
+  puhdistusproseduurin puhesyntetisaattoria varten (poistaa täytesanat
+  kuten "khh", tähdet, hashtagit, peräkkäiset pisteet) ja muuntaa
+  numerot sanoiksi (esim. "123" → "satakaksikymmentäkolme").
+iso: fi
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

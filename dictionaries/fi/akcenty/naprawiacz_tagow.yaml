@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  TUNNISTEKORJAIN (erikoistila)
+#  Ei muokkaa sisältöä — syöttää ainoastaan kielen ISO-koodin
+#  tulostiedostoon.
+# -----------------------------------------------------------------------------
+id: naprawiacz_tagow
+etykieta: "🔧 Tunnistekorjain (Vain ISO-koodin syöttö)"
+opis: |
+  Tämä "korostus" EI muokkaa tekstin sisältöä eikä sen fonetiikkaa.
+  Se syöttää ainoastaan kielen ISO-koodin tulostiedostoon:
+    - HTML: lang="..." -attribuutti <html>-tunnisteessa
+    - DOCX: <w:lang w:val="..."/> -elementti jokaiseen tekstijaksoon
+  Näin näytönlukija (NVDA/JAWS) vaihtaa puhesyntetisaattorin äänen
+  oikealle kielelle.
+
+  ISO-koodi syötetään käsin GUI:ssa ("ISO-koodi" -kenttä), ei tästä
+  tiedostosta — siksi `iso`-arvo on tyhjä.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Erikoistila — EI suorita yhtään tekstinkäsittelyvaihetta.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

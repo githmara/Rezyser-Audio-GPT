@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  RIPARATORE DI TAG (modalità speciale)
+#  Non modifica il contenuto — inietta solo il codice ISO della lingua
+#  nel file di output.
+# -----------------------------------------------------------------------------
+id: naprawiacz_tagow
+etykieta: "🔧 Riparatore di Tag (Solo iniezione codice ISO)"
+opis: |
+  Questo "accento" NON modifica il contenuto del testo né la sua fonetica.
+  Inietta soltanto il codice ISO della lingua nel file di output:
+    - HTML: attributo lang="..." nell'elemento <html>
+    - DOCX: elemento <w:lang w:val="..."/> per ogni tratto di testo
+  In questo modo il lettore di schermo (NVDA/JAWS) commuta correttamente
+  la voce del sintetizzatore alla lingua giusta.
+
+  Il codice ISO viene fornito manualmente nella GUI (campo "Codice ISO"),
+  non da questo file — per questo il valore `iso` qui è vuoto.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Modalità speciale — NON esegue alcuna fase di elaborazione del testo.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

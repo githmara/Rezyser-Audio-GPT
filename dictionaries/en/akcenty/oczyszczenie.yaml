@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  TEXT CLEANING WITH NUMBER NORMALIZATION
+#  Default "No accent" variant — only sanitises text for the screen reader.
+# -----------------------------------------------------------------------------
+id: oczyszczenie
+etykieta: "None (Cleaning WITH number normalization)"
+opis: |
+  Does not apply any phonetic accent. Runs only the text-sanitising pass
+  for speech synthesizers (removes filler grunts like "khh", asterisks,
+  hashtags, runs of dots) and converts digits to words (e.g. "123" →
+  "one hundred and twenty-three").
+iso: en
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []
