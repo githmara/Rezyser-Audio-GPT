@@ -77,6 +77,10 @@ from core_poliglota import (
 )
 # <GENEROWANE_IMPORTY_AKCENTOW_END>
 
+# 13.3: helper do dynamicznego budowania regexa parsera akcentów —
+# importowany ręcznie poza blokiem generatora, żeby odświerzacz go nie ruszał.
+from core_poliglota import slowa_akcentu
+
 
 # =============================================================================
 # Stałe konfiguracyjne
@@ -147,6 +151,26 @@ def zastosuj_akcenty_uniwersalne(
                          ``"pl"`` (zachowanie sprzed 13.3).
     """
     # ── 1. Wyciąganie mapowania postaci → akcent z Księgi Świata ──
+    # 13.3: regex zbudowany dynamicznie z ``slowa_akcentu(jezyk_projektu)``.
+    # Słowa-wyzwalacze pochodzą z ``dictionaries/<jezyk>/podstawy.yaml`` (np.
+    # PL: ["akcent"], EN: ["accent", "accented"], FI: ["aksentti", "korostus"]).
+    # ``\w+`` z flagą ``re.UNICODE`` (domyślną w Py3) łapie diakrytyki
+    # skandynawskie/niemieckie/francuskie/cyrylicę — żaden alfabet nie blokuje
+    # parsowania tylko dlatego, że nie był na białej liście znaków.
+    slowa = slowa_akcentu(jezyk_projektu)
+    alt_slow = "|".join(re.escape(s) for s in slowa)
+    wzorzec_akcentu = re.compile(
+        rf"(?:{alt_slow})\s+(\w+)|(\w+)\s+(?:{alt_slow})",
+        re.UNICODE,
+    )
+    # Reguły ad-hoc Lore: pojedyncze litery zamieniane łącznikiem „na".
+    # Same litery na ``\w`` (Unicode) — `na` jako łącznik zostawiamy
+    # polski w 13.3, wielojęzyczne łączniki to osobny TODO na 13.x+.
+    wzorzec_regul_lore = re.compile(
+        r"[\"'](\w)[\"']\s+na\s+[\"'](\w)[\"']",
+        re.IGNORECASE | re.UNICODE,
+    )
+
     akcenty_map: dict[str, dict] = {}
     postacie_bloki = re.split(r"\[([^:\]\-]+).*?\]", lore_text)
 
@@ -154,19 +178,13 @@ def zastosuj_akcenty_uniwersalne(
         imie = postacie_bloki[i].strip().lower()
         opis = postacie_bloki[i + 1].lower() if i + 1 < len(postacie_bloki) else ""
 
-        akcent_match = re.search(
-            r"akcent\s+([a-zńśźżćłó]+)|([a-zńśźżćłó]+)\s+akcent", opis
-        )
+        akcent_match = wzorzec_akcentu.search(opis)
         nazwa_akcentu = (
             (akcent_match.group(1) or akcent_match.group(2))
             if akcent_match
             else None
         )
-        reguly_lore = re.findall(
-            r"[\"']([a-ząćęłńóśźż])[\"']\s+na\s+[\"']([a-ząćęłńóśźż])[\"']",
-            opis,
-            re.IGNORECASE,
-        )
+        reguly_lore = wzorzec_regul_lore.findall(opis)
         if nazwa_akcentu or reguly_lore:
             akcenty_map[imie] = {"nazwa": nazwa_akcentu, "reguly": reguly_lore}
 

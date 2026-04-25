@@ -50,3 +50,13 @@ polskie_znaki:
 # Używany przez szyfr Cezara (plik szyfry/cezar.yaml).
 # -----------------------------------------------------------------------------
 alfabet: "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSTUVWXYZŹŻ"
+
+# -----------------------------------------------------------------------------
+# Słowa-wyzwalacze parsera akcentów w Księdze Świata (13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne buduje z tej listy regex
+# wyłapujący frazy „<słowo> X" lub „X <słowo>" (np. „akcent islandzki"
+# albo „islandzki akcent"). Wszystkie wpisy małymi literami — porównujemy
+# z opisem lower-cased.
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "akcent"

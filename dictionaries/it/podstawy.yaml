@@ -36,3 +36,14 @@ polskie_znaki: []
 # (senza J, K, W, X, Y), senza spazi bianchi. Utilizzato dal cifrario di Cesare.
 # -----------------------------------------------------------------------------
 alfabet: "ABCDEFGHILMNOPQRSTUVZ"
+
+# -----------------------------------------------------------------------------
+# Parole-trigger del parser degli accenti nella Bibbia del Mondo (13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne costruisce da questa lista una
+# regex che cattura frasi "<parola> X" oppure "X <parola>" (es. "accento
+# islandese" oppure "islandese accento"). Tutte le voci in minuscolo —
+# confrontate con una descrizione in minuscolo.
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "accento"
+  - "accentato"

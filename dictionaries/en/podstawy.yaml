@@ -33,3 +33,14 @@ polskie_znaki: []
 # Used by the Caesar cipher (file szyfry/cezar.yaml in the corresponding folder).
 # -----------------------------------------------------------------------------
 alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+# -----------------------------------------------------------------------------
+# Trigger words for the World-Bible accent parser (13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne builds a regex from this list
+# that catches phrases "<word> X" or "X <word>" (e.g. "Icelandic accent"
+# or "accent Icelandic"). All entries lowercase — matched against a
+# lower-cased description.
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "accent"
+  - "accented"

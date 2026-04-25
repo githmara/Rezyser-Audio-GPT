@@ -215,6 +215,28 @@ def _zaladuj_podstawy(jezyk: str) -> dict:
     return _CACHE_PODSTAWY[jezyk]
 
 
+def slowa_akcentu(jezyk: str) -> list[str]:
+    """Zwraca listę słów-wyzwalaczy parsera akcentów dla danego języka.
+
+    13.3+: pole ``slowo_akcent`` w ``dictionaries/<jezyk>/podstawy.yaml``
+    zawiera listę słów (lower-case), które ``core_rezyser`` traktuje jako
+    znacznik „tu mowa o akcencie X" w Księdze Świata. Funkcja zwraca:
+
+      * listę z YAML-a, gdy pole istnieje i jest niepuste,
+      * fallback ``["akcent"]`` dla starszych paczek bez pola lub gdy
+        plik podstaw nie istnieje (zachowanie sprzed 13.3).
+
+    Wynik jest płaską listą stringów; wpisy nie-stringowe filtrujemy
+    defensywnie (gdyby ktoś wpisał liczbę albo zagnieżdżoną listę).
+    """
+    podstawy = _zaladuj_podstawy(jezyk)
+    surowe = podstawy.get("slowo_akcent")
+    if not isinstance(surowe, list):
+        return ["akcent"]
+    czyste = [str(s).strip().lower() for s in surowe if isinstance(s, str) and s.strip()]
+    return czyste or ["akcent"]
+
+
 def _zaladuj_warianty(tryb: str, jezyk: str) -> list[dict]:
     """Zwraca listę wszystkich wariantów (akcentów/szyfrów) dla pary tryb+język.
 

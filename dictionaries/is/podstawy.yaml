@@ -36,3 +36,14 @@ polskie_znaki: []
 # án bila. Notað af Caesar-dulmálinu.
 # -----------------------------------------------------------------------------
 alfabet: "AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ"
+
+# -----------------------------------------------------------------------------
+# Hreyfiorð fyrir hreimaþáttara Heimsbókarinnar (13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne smíðar regex úr þessum lista
+# sem grípur orðasambönd "<orð> X" eða "X <orð>" (t.d. „íslenskur hreimur"
+# eða „hreimur íslenskur"). Öll atriði í lágstöfum — borið saman við
+# lágstafaða lýsingu.
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "hreimur"
+  - "áhersla"

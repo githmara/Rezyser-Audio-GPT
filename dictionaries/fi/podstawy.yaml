@@ -34,3 +34,14 @@ polskie_znaki: []
 # (Å, Ä, Ö lopussa), ilman välilyöntejä. Caesar-salakirjoituksen käyttämä.
 # -----------------------------------------------------------------------------
 alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"
+
+# -----------------------------------------------------------------------------
+# Maailmankuvaston aksenttijäsentimen liipaisinsanat (13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne rakentaa tästä listasta
+# säännöllisen lausekkeen, joka tunnistaa muotoja "<sana> X" tai
+# "X <sana>" (esim. "islantilainen aksentti" tai "aksentti islantilainen").
+# Kaikki merkinnät pieninä kirjaimina — vertailemme lower-cased kuvaukseen.
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "aksentti"
+  - "korostus"
