@@ -1,0 +1,77 @@
+# -----------------------------------------------------------------------------
+#  RANSKAN AKSENTTI (suomi → ranskalainen TTS)
+#  Syntetisaattoreille: Hortense / Paul / Julie (ranskalainen TTS).
+# -----------------------------------------------------------------------------
+id: francuski
+etykieta: "Ranska (esim. Hortense / Paul / Julie)"
+opis: |
+  Mukauttaa suomenkielisen tekstin ranskalaiselle puhesyntetisaattorille
+  (Hortense / Paul / Julie). Ranskan fonetiikka tarjoaa kaksi erinomaista
+  vastaavuutta suomen äänteille:
+    - y (/y/) → u   Ranskan u = /y/ — TÄYDELLINEN vastaavuus!
+                     "työ" → "tueu" → Hortense lukee /tyø/ ✓
+    - ö (/ø/) → eu  Ranskan eu = /ø/ (kuten "peu", "jeu") — TÄYDELLINEN!
+                     Jopa pitkä öö → eu (pituusero häviää; ranskan TTS ei
+                     erottele vokaalikvantiteettia).
+
+  Kriittiset ongelmat ja niiden korjaukset:
+    - j → y   Ranskan j = /ʒ/ (kuten "vision") ≠ suomen j = /j/.
+               Korjaus: j → y (ranskan y = /j/ tavun alussa).
+               KRIITTINEN JÄRJESTYS: y → u ENSIN, j → y JÄLKEEN.
+               Näin alkuperäinen suomen y muuttuu u:ksi (→ /y/),
+               ja vasta sitten alkuperäinen j muuttuu y:ksi (→ /j/).
+
+  Tunnettu rajoitus:
+    - h → hiljainen ranskan TTS:ssä (suomen /h/ häviää). "Helsinki"
+      → Hortense lukee "elsinki". Tämä on osa ranskalaisen aksentin
+      luonnetta — ei korjattavissa ilman sopivaa foneemia.
+
+  Ranskan TTS hoitaa automaattisesti:
+    - r  → uvulaarinen /ʁ/ (ranskalainen R — ikonisin aksenttimerkki)
+    - nasaalivokalit (an/en/in/on) — automaattisesti
+iso: fr
+kategoria: akcent
+kolejnosc: 50
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Fonetiset korvaukset ---
+# KRIITTINEN JÄRJESTYS:
+#   1. y → u  (ENSIN: suomen y = /y/ → ranskan u = /y/)
+#   2. j → y  (JÄLKEEN: suomen j = /j/ → ranskan y = /j/)
+#      Käänteinen järjestys tuottaisi kaaoksen: j muuttuisi u:ksi.
+#   3. Pitkät öö ENNEN lyhyttä ö (suoja kaksinkertaiselta eu-korvaukselta).
+#   4. Pitkät ää ENNEN lyhyttä ä.
+zamiany:
+  # --- 1. y → u (EHDOTTOMASTI ENSIMMÄINEN) ---
+  - { wzor: "yy", zamiana: "uu" }
+  - { wzor: "Yy", zamiana: "Uu" }
+  - { wzor: "YY", zamiana: "UU" }
+  - { wzor: "y",  zamiana: "u"  }
+  - { wzor: "Y",  zamiana: "U"  }
+
+  # --- 2. j → y (TOINEN, y→u:n jälkeen) ---
+  - { wzor: "j",  zamiana: "y"  }
+  - { wzor: "J",  zamiana: "Y"  }
+
+  # --- 3. ö → eu (ranskan eu = /ø/ = täydellinen vastaavuus) ---
+  - { wzor: "öö", zamiana: "eu" }
+  - { wzor: "Öö", zamiana: "Eu" }
+  - { wzor: "ÖÖ", zamiana: "EU" }
+  - { wzor: "ö",  zamiana: "eu" }
+  - { wzor: "Ö",  zamiana: "Eu" }
+
+  # --- 4. ä → e ---
+  - { wzor: "ää", zamiana: "ee" }
+  - { wzor: "Ää", zamiana: "Ee" }
+  - { wzor: "ÄÄ", zamiana: "EE" }
+  - { wzor: "ä",  zamiana: "e"  }
+  - { wzor: "Ä",  zamiana: "E"  }
+
+  # --- å → o ---
+  - { wzor: "å",  zamiana: "o"  }
+  - { wzor: "Å",  zamiana: "O"  }

@@ -1,0 +1,56 @@
+# -----------------------------------------------------------------------------
+#  ISLANNIN AKSENTTI (suomi → islantilainen TTS)
+#  Syntetisaattoreille: Guðrún / eSpeak "is" (islantilainen TTS).
+# -----------------------------------------------------------------------------
+id: islandzki
+etykieta: "Islanti (esim. Guðrún / eSpeak)"
+opis: |
+  Mukauttaa suomenkielisen tekstin islantilaiselle puhesyntetisaattorille
+  (Guðrún tai eSpeak asetettu kielelle "is"). Suomen ja islannin
+  fonetiikka on yllättävän yhteensopiva — monet kirjaimet siirtyvät
+  sellaisenaan:
+    - j   = /j/  molemmissa kielissä — ei muutosta tarvita ✓
+    - v   = /v/  molemmissa — ei muutosta ✓
+    - h   = /h/  molemmissa (toisin kuin ranska ja espanja!) ✓
+    - ö   = /ø/  molemmissa — islantilainen TTS lukee ö:n oikein ✓
+    - kk/tt/pp — geminaatat molemmissa ✓
+
+  Tarvittavat muutokset:
+    - y (/y/) → u   Islannin u = /ʏ/ (etinen, pyöristetty) ≈ suomen y = /y/.
+                     Paras käytettävissä oleva vastaavuus — tarkempi kuin
+                     islannin y (= /ɪ/, ei pyöristetty).
+    - ä (/æ/) → e   Islannissa ei ole ä-kirjainta; /ɛ/ on lähin vaihtoehto.
+    - å (/ɔ/) → o   Islannissa ei ole å-kirjainta.
+  ö jätetään muuttamatta — islantilainen TTS tuottaa /ø/:n automaattisesti.
+iso: is
+kategoria: akcent
+kolejnosc: 30
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Fonetiset korvaukset ---
+# Järjestys: pitkät yy/ää ENNEN lyhyitä y/ä (suoja kaksinkertaiselta
+# korvaukselta). ö jätetään kokonaan pois listalta — islantilainen TTS
+# käsittelee sen oikein /ø/:nä.
+zamiany:
+  # --- y → u (islantilainen u = /ʏ/ ≈ suomen y = /y/) ---
+  - { wzor: "yy", zamiana: "uu" }
+  - { wzor: "Yy", zamiana: "Uu" }
+  - { wzor: "YY", zamiana: "UU" }
+  - { wzor: "y",  zamiana: "u"  }
+  - { wzor: "Y",  zamiana: "U"  }
+
+  # --- ä → e (ei islantilainen kirjain; /ɛ/ on lähin) ---
+  - { wzor: "ää", zamiana: "ee" }
+  - { wzor: "Ää", zamiana: "Ee" }
+  - { wzor: "ÄÄ", zamiana: "EE" }
+  - { wzor: "ä",  zamiana: "e"  }
+  - { wzor: "Ä",  zamiana: "E"  }
+
+  # --- å → o (ei islantilainen kirjain) ---
+  - { wzor: "å",  zamiana: "o"  }
+  - { wzor: "Å",  zamiana: "O"  }

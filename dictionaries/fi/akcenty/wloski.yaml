@@ -1,0 +1,67 @@
+# -----------------------------------------------------------------------------
+#  ITALIAN AKSENTTI (suomi → italialainen TTS)
+#  Syntetisaattoreille: Lucia / Cosimo / Pierina (italialainen TTS).
+# -----------------------------------------------------------------------------
+id: wloski
+etykieta: "Italia (esim. Lucia / Cosimo / Pierina)"
+opis: |
+  Mukauttaa suomenkielisen tekstin italialaiselle puhesyntetisaattorille
+  (Lucia / Cosimo / Pierina). Italian fonetiikka sopii hyvin suomen kanssa
+  useilla tärkeillä alueilla:
+    - r   — italialainen rullaava r = suomalainen rullaava r ✓
+    - v   = /v/ molemmissa ✓
+    - kk/tt/pp — geminaatat molemmissa ✓
+
+  Tarvittavat muutokset:
+    - j → y   Italian TTS voi lukea j:n /dʒ/:nä (kuten "jazz"). Korjaus:
+               j → y (italian y = /j/), joka vastaa suomen j:tä.
+    - ä → e   Ei italian aakkosissa; /ɛ/ on lähin vaihtoehto.
+    - ö → e   Ei italian aakkosissa; /ɛ/ parempi kuin /o/ (/ø/ on etinen vokaali).
+    - å → o   Ei italian aakkosissa.
+
+  Tunnettu rajoitus:
+    - h → hiljainen italian TTS:ssä (suomen /h/ häviää). "Helsinki"
+      → Lucia lukee "elsinki". Italian h on aina mykkä — ei korjattavissa.
+
+  Italian TTS hoitaa automaattisesti:
+    - c ennen e/i → /tʃ/ (ei vaikuta suomen tekstiin, koska suomessa
+      ei ole tätä yhdistelmää kotoperäisissä sanoissa)
+    - geminaatat lisätään painotuksen mukaan automaattisesti
+iso: it
+kategoria: akcent
+kolejnosc: 80
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Fonetiset korvaukset ---
+# Järjestys: j → y ensin, sitten pitkät ää/öö ennen lyhyitä ä/ö.
+zamiany:
+  # --- j → y (varmistaa /j/ eikä /dʒ/) ---
+  - { wzor: "j",  zamiana: "y"  }
+  - { wzor: "J",  zamiana: "Y"  }
+
+  # --- ä → e (pitkä ennen lyhyttä) ---
+  - { wzor: "ää", zamiana: "ee" }
+  - { wzor: "Ää", zamiana: "Ee" }
+  - { wzor: "ÄÄ", zamiana: "EE" }
+  - { wzor: "ä",  zamiana: "e"  }
+  - { wzor: "Ä",  zamiana: "E"  }
+
+  # --- ö → e (pitkä ennen lyhyttä) ---
+  - { wzor: "öö", zamiana: "ee" }
+  - { wzor: "Öö", zamiana: "Ee" }
+  - { wzor: "ÖÖ", zamiana: "EE" }
+  - { wzor: "ö",  zamiana: "e"  }
+  - { wzor: "Ö",  zamiana: "E"  }
+
+  # --- å → o ---
+  - { wzor: "å",  zamiana: "o"  }
+  - { wzor: "Å",  zamiana: "O"  }
+
+  # --- w → v (lainasanat; italialainen TTS ei tunnista natiivia w:tä) ---
+  - { wzor: "w",  zamiana: "v"  }
+  - { wzor: "W",  zamiana: "V"  }
