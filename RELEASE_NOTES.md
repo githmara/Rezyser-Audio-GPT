@@ -1,11 +1,30 @@
-# Release Notes — Reżyser Audio GPT 13.3 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.3.1 „Wersja Wydawnicza"
 
-*Punkt wyjścia: V13.2 (4f1d91d) → 11 commitów (10× WIP + 1× release) → V13.3.*
-*Motyw przewodni: pierwszy w pełni wdrożony obcy język (angielski) + standardyzacja silnika dla wszystkich kolejnych.*
+*Hotfix dla 13.3 — uzupełnienie brakujących tłumaczeń wielojęzycznych w głównym GUI.*
 
 ---
 
-## TL;DR
+## 13.3.1 — hotfix tłumaczeń (patch)
+
+W 13.3 paczki `dictionaries/{en,fi,is,it,ru}/gui/ui.yaml` nie zawierały czterech kluczy używanych przez `main.py`:
+
+- `main.menu.jezyk_interfejsu` — pozycja menu „Język interfejsu" w menubarze (Alt)
+- `main.menu_status.jezyk_interfejsu` — opis tej pozycji w pasku stanu
+- `main.dialog.zmiana_jezyka_tytul` + `main.dialog.zmiana_jezyka_tresc` — tytuł i treść MessageBoxa o konieczności restartu (z parametrem `{nazwa_jezyka}`)
+
+Fallback z `i18n.t()` automatycznie podstawiał polskie wartości, więc każdy nie-polski użytkownik widział w pasku menu polską pozycję obok przetłumaczonego „File"/„Tools" oraz polski tekst dialogu po wyborze nowego języka. Po stronie kodu Pythona (`main.py::_build_menu`, `main.py::_on_zmien_jezyk`) wszystko było już od początku obsłużone przez `t(...)` — buga było wyłącznie w słownikach.
+
+Przy okazji zsynchronizowane zostało pole `app.wersja` w paczkach `fi/is/it/ru`, które tkwiło na „13.1" od dwóch wydań — teraz wszystkie sześć paczek zgodnie raportuje „13.3.1" w pasku tytułu.
+
+Brak zmian w kodzie Pythona, brak zmian w kontrakcie API, brak migracji danych. Patch bezpieczny do natychmiastowego wdrożenia.
+
+---
+
+## 13.3 — pełen release (motyw przewodni: pierwszy w pełni wdrożony obcy język)
+
+*Punkt wyjścia: V13.2 (4f1d91d) → 11 commitów (10× WIP + 1× release) → V13.3.*
+
+### TL;DR
 
 13.3 to release, w którym **angielski przestaje być stubem** — paczka `dictionaries/en/` zyskuje pełen pakiet 6 algorytmów szyfrów, 8 akcentów obcojęzycznych dla anglojęzycznego mówcy oraz 3 narzędzia czyszczenia/naprawiacza tagów. Każdy z 8 akcentów (islandzki/fiński/rosyjski/niemiecki/włoski/francuski/hiszpański/polski) został zaprojektowany pod natywny TTS swojego języka (Guðrún/Satu/Milena/Hedda/Lucia/Hortense/Helena/Ewa) — z konkretnymi markerami fonetycznymi, świadomymi kompromisami i komediowymi stereotypami, które rozpoznaje każdy native speaker. Silnik dostał trzy istotne usprawnienia: wielojęzyczna delegacja w pipeline'ie reżysera (`zastosuj_akcenty_uniwersalne(jezyk_projektu)`), elastyczny parser akcentów oparty o dynamiczne `slowo_akcent` z `podstawy.yaml` (zamiast hardkodowanej polskiej listy), oraz `num2words` przekazujące prawidłowy locale (koniec polskich „sto dwadzieścia trzy" w angielskim tekście). W ramach standaryzacji łatany został też subtelny bug Cezara, który przepuszczał diakrytyki spoza alfabetu paczki („Pokémon" + Cezar+3 → wcześniej „Srnéprq", teraz „Srnhprq").
 

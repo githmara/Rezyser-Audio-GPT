@@ -25,7 +25,7 @@
 # -----------------------------------------------------------------------------
 app:
   nazwa:                 "Reżyser Audio GPT"
-  wersja:                "13.3 – Wersja Wydawnicza"
+  wersja:                "13.3.1 – Wersja Wydawnicza"
   title_home:            "{nazwa_aplikacji}  |  {wersja}"
   title_z_narzedziem:    "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
   banner:                "🎬  {nazwa_aplikacji}"
