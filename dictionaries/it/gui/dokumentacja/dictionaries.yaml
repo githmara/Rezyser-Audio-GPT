@@ -1,0 +1,260 @@
+# =============================================================================
+# dictionaries/it/gui/dokumentacja/dictionaries.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
+# ze źródła dictionaries/pl/gui/dokumentacja/dictionaries.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
+# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
+#
+# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
+# po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+id: dictionaries
+tresc: |
+  Słowniki Poligloty i Reżysera — Istruzioni per tutti
+  ====================================================
+
+  Ciao! Se stai leggendo questo file, significa che hai dato un'occhiata alla cartella "dictionaries/" accanto all'applicazione Reżyser Audio GPT e ti stai chiedendo cosa siano questi file con le strane estensioni ".yaml". Tranquillo — non è necessario conoscere la programmazione o Python per capire cosa sta succedendo qui, e con un po' di coraggio puoi persino aggiungere qualcosa di tuo.
+
+  Questo file è scritto in un linguaggio semplice per scrittori, linguisti, insegnanti, genitori e in generale per i curiosi. Se conosci le basi della programmazione e stai cercando una documentazione dettagliata del formato dei file YAML (con elenchi di campi, regex, regole di pipeline di elaborazione), consulta il file "README.md" nella stessa cartella — ma attenzione, questo file è disponibile solo se hai clonato il repository da GitHub. Nei pacchetti di rilascio scaricati dalla scheda Releases, i file Markdown sono filtrati (per evitare che nel pacchetto finiscano per sbaglio, ad esempio, i tuoi libri del mondo con spoiler), quindi solo questo file ".txt" arriva agli utenti finali.
+
+  Cosa c'è qui dentro?
+  ---------------------
+
+  La cartella "dictionaries/" è una libreria di regole utilizzate da Poliglota (uno strumento per traduzioni e accenti) e dal motore interno di Reżyser. Fino alla versione 12.0 tutte queste regole erano "incorporate" nel codice Python — se volevi aggiungere un nuovo accento o cambiare le regole, dovevi chiedere a un programmatore. Dalla versione 13.0 tutto è salvato in semplici file di testo (estensione ".yaml" — è solo testo formattato in un modo speciale). Li apri con qualsiasi editor (Blocco note, VS Code, Notepad++) e li modifichi come qualsiasi altro documento.
+
+  La struttura della cartella è la seguente:
+
+      dictionaries/
+      └── pl/              cartella della lingua di base (polacco)
+          ├── podstawy.yaml              diacritici polacchi + alfabeto
+          ├── akcenty/                   {liczba_plikow_w_akcentach} file con accenti
+          ├── szyfry/                    {liczba_szyfrow} file con cifrari e giochi
+          └── rezyser/                   {liczba_trybow_rezysera} file con modalità del Regista AI
+
+  Attualmente completamente implementati sono: {lista_kompletnych_jezykow_natywnie}
+  ({liczba_kompletnych_jezykow} lingue di base). Ognuna ha il proprio pacchetto
+  "dictionaries/<codice>/" con diacritici, alfabeto e regole fonetiche
+  che operano sul testo in quella lingua specifica — l'applicazione rileva automaticamente la lingua di origine tramite langdetect e carica il pacchetto appropriato. Altre lingue sono in preparazione (un pacchetto completo richiede "podstawy.yaml", "gui/ui.yaml" e almeno un file in "akcenty/" e "szyfry/").
+
+  Cos'è un accento?
+  -----------------
+
+  Un accento è un insieme di regole che "alterano" il testo polacco in modo che il lettore di schermo (ad esempio NVDA) lo legga con una voce di lingua straniera. Ad esempio, l'accento finlandese sostituisce il polacco "sz" con "s", "w" con "v", e i diacritici (ą, ę, ł) con le loro versioni semplificate — il risultato è che il testo suona come se un finlandese di Helsinki stesse appena imparando il polacco. Non si tratta di una vera traslitterazione, ma di una distorsione divertente e intenzionale per scopi narrativi.
+
+  Accenti disponibili ({liczba_akcentow_jezykowych} lingue):
+
+  - inglese (Samantha/Mark in Vocalizer, Zira/Hazel in OneCore)
+  - francese (Thomas/Amelie in Vocalizer, Julie in OneCore)
+  - tedesco (Markus/Stefan in Vocalizer, Katja/Hedda in OneCore)
+  - spagnolo (Jorge/Monica in Vocalizer, Helena in OneCore)
+  - polacco (Ewa in Vocalizer, Paulina in OneCore)
+  - finlandese (Satu/Mikko in Vocalizer, Heidi in OneCore)
+  - islandese (solo OneCore Gudrun e eSpeak gratuito — Vocalizer non
+    ha una voce islandese!)
+  - russo (Milena in Vocalizer, Irina/Pavel/Yuri in OneCore — questo
+    è speciale perché invece di "alterare" le lettere latine esegue una
+    traslitterazione completa in cirillico; senza di essa la voce russa
+    non avrebbe nulla da pronunciare)
+
+  Inoltre, nel menu degli accenti ci sono due opzioni "di pulizia senza accento":
+  una senza normalizzazione dei numeri, l'altra con normalizzazione (sostituisce "15" con "quindici" prima dell'elaborazione, perché uno straniero probabilmente non declinerebbe correttamente questo numero — il che aggiunge autenticità) e "Riparatore di Tag", che semplicemente inserisce nel file il codice lingua ISO senza alterare il contenuto (salvezza quando il tuo file già tradotto è uscito con un codice lingua errato).
+
+  Cos'è un cifrario?
+  ------------------
+
+  I cifrari sono giochi di testo per enigmi, esercizi linguistici, rompicapo. A differenza degli accenti, NON sono orientati verso una voce specifica del sintetizzatore — semplicemente distorcono il testo secondo una regola specifica. Cifrari disponibili ({liczba_szyfrow}):
+
+  1. Invertitore di Testo (lettura al contrario)
+     Ogni frase viene invertita carattere per carattere, mantenendo la
+     lettera maiuscola all'inizio e il punto/esclamativo/interrogativo
+     alla fine. Prima dell'inversione, lo script espande le abbreviazioni
+     italiane (ad es., ecc., dott., prof., pag...), perché senza questo
+     dopo l'inversione uscirebbero assurdità tipo ".se da".
+
+     Ispirazione: missione della versione polacca del programma "The Traitors. Zdrajcy".
+     La conduttrice ha fatto ascoltare ai partecipanti una popolare canzone per bambini
+     riprodotta al contrario. Le reazioni sono state del tipo "che lingua è? armeno?
+     ungherese? finlandese?" — e invece era una melodia conosciuta fin dall'infanzia
+     tratta da un cartone animato. Poi si è scoperto che la squadra nel bosco ha ricevuto
+     il testo della canzone al contrario e doveva cantare proprio in quella versione —
+     la squadra del castello doveva registrarlo, invertirlo e in teoria recuperare la
+     canzone da indovinare.
+
+     Esattamente lo stesso divertente malinteso accade quando si passa il nostro
+     Invertitore attraverso un sintetizzatore vocale. Ottimo per enigmi tematici,
+     escape room, giochi di festa.
+
+  2. Tipoglicemia (centro delle parole mescolato)
+     Classico effetto psicolinguistico: "Sceondo uno sutdio dlel'Univesitrà di
+     Cambrdige, non ipmtorta in qaule odirne saino le lttreere in una palora,
+     l'uinca csoa imptraonte è che la pirma e l'utlima lteetra sniao al psoto
+     gusito". Lo script mescola
+     casualmente il centro di ogni parola più lunga di 4 caratteri, il primo e l'ultimo
+     carattere rimangono al loro posto. Ottimo per testare "quanto vedo veramente e
+     quanto mi suggerisce il cervello".
+
+  3. Telefono Rotto / Dialetto Serpente
+     Ogni "s", "z" o "sz" viene allungato casualmente in un sibilo di lunghezza
+     4-8 caratteri. Ispirazione: Snecko dal gioco "Slay the Spire". Effetto: il testo
+     suona come se fosse letto da un serpente con un difetto di pronuncia. Ottimo per
+     doppiaggi di personaggi di serpenti confusi o robot difettosi con un sibilo.
+
+  4. Vocalizzatore (tutto rimbomba su "o")
+     Ogni vocale nel testo viene sostituita con "o", mantenendo le
+     ammorbidimenti polacchi (ci, si, ni, zi, dzi sono gestiti correttamente):
+     "Buongiorno, signora" → "Boongiorno, soignoro". Più lungo è il testo,
+     più divertente è l'effetto — e il lettore di schermo lo legge con piena
+     convinzione, senza tentare di decodificarlo.
+
+  5. Forte Balbuzie / Robot Danneggiato
+     Aggiunge balbuzie all'inizio delle parole: "computer" → "co-co-co-computer",
+     "doccia" → "do-do-doccia". Le parole più corte di 3 caratteri sono ignorate.
+     Se la seconda lettera della parola è una consonante, vengono ripetute le
+     prime due (suona più naturale); se è una vocale — solo la prima.
+
+  6. Cifrario di Cesare (classico)
+     Il più antico cifrario documentato nella storia (usato già nell'antica
+     Roma). Ogni lettera viene spostata di N posizioni nell'alfabeto polacco
+     (35 lettere, con diacritici: AĄBCĆ...ZŻŹ). Lo spostamento viene inserito
+     nell'interfaccia grafica nel campo numerico; se inserisci 0, l'applicazione
+     sceglierà un valore casuale tra 1-34 e lo mostrerà in un messaggio, in modo
+     che tu possa successivamente decifrare il messaggio. I caratteri al di fuori
+     dell'alfabeto (numeri, spazi, punteggiatura) rimangono invariati.
+
+  Cos'è la "modalità Regista"?
+  ----------------------------
+
+  La cartella "rezyser/" contiene {liczba_trybow_rezysera} file che descrivono le modalità di lavoro dello Studio Principale del Regista dell'applicazione:
+
+  - tryb_burza.yaml      — Brainstorming (pianificazione della trama, 3 opzioni
+                           di sviluppo della storia, direttiva anti-closure)
+  - tryb_skrypt.yaml     — Script Grezzo (tag [SFX], [Speaker: emozione],
+                           fonetica dei personaggi)
+  - tryb_audiobook.yaml  — Audiolibro Tradizionale (prosa letteraria pura,
+                           divieto di riassunti e chiusure)
+  - postprod_tytuly.yaml — assegnazione di titoli letterari ai capitoli dopo
+                           la generazione dell'intera storia
+
+  All'interno di ciascuno di questi file, la parte più preziosa è il "prompt
+  di sistema" — una lunga istruzione per l'intelligenza artificiale su come
+  comportarsi in quella modalità. Se senti che, ad esempio, la modalità
+  Audiolibro scrive "troppo fiorito" o che Brainstorming propone troppo
+  spesso soluzioni magiche, puoi regolare questi testi secondo il tuo gusto,
+  salvarli e l'applicazione al prossimo avvio caricherà la tua versione.
+  Zero programmazione.
+
+  Come iniziare a divertirsi — tre livelli di difficoltà
+  ------------------------------------------------------
+
+  LIVELLO 1 — piccole regolazioni di un accento esistente
+
+  Immagina che l'accento francese dell'applicazione sostituisca "sz" con "sh", ma
+  tu pensi che un francese direbbe piuttosto "sch" o "ch". Nessun problema.
+
+  1. Avvia l'applicazione e vai al Gestore delle Regole (tasto Ctrl+4 o
+     quarto pulsante sulla barra).
+  2. Nell'albero dei file a sinistra espandi "pl" → "akcenty" e fai clic su
+     "francuski.yaml".
+  3. Fai clic sul pulsante "Apri nell'editor di testo". Il file si aprirà nel
+     Blocco note di Windows (o nel tuo editor di testo predefinito).
+  4. Scorri verso il basso fino alla sezione "zamiany:". Trova la riga con il
+     modello "sz" e cambia il valore "zamiana" con quello che preferisci.
+  5. Salva il file (Ctrl+S), chiudi l'editor.
+  6. Torna al Gestore delle Regole e fai clic su "Aggiorna albero", quindi
+     chiudi e riavvia l'applicazione. La tua modifica è già attiva.
+
+  LIVELLO 2 — aggiungere un nuovo accento tramite duplicazione
+
+  Vuoi aggiungere un accento svedese o danese? Inizia con quello più simile
+  esistente.
+
+  1. Nel Gestore delle Regole seleziona ad esempio "finski.yaml" (il finlandese
+     è foneticamente vicino allo svedese) e fai clic su "Duplica file selezionato".
+  2. Il Gestore chiederà un nuovo nome — inserisci ad esempio "szwedzki" (in
+     minuscolo, senza spazi, senza caratteri polacchi).
+  3. Il nuovo file si aprirà nell'editor. Cambia i campi:
+        - "etykieta" — ciò che vedrai nel menu dell'applicazione, ad esempio
+          "Svedese (Alva / Oskar — OneCore/Vocalizer)"
+        - "opis" — breve descrizione per te stesso per il futuro
+        - "iso" — codice lingua a due lettere, per lo svedese "sv"
+  4. Regola l'elenco delle "zamiany" secondo la fonetica svedese (ad esempio,
+     aggiungi "å → o", "ö → ö", rimuovi o modifica quelle specifiche per il
+     finlandese).
+  5. Salva, torna alla Pagina principale, fai clic su "🔄 Aggiorna accenti del
+     Regista da YAML" e riavvia l'applicazione. Il nuovo svedese apparirà nel
+     menu degli accenti di Poliglota (e se aggiungi al Libro del Mondo il tag
+     "[Marek] - ha accento svedese", anche il Regista lo riconoscerà
+     automaticamente e lo applicherà ai suoi dialoghi).
+
+  LIVELLO 3 — creare qualcosa di completamente nuovo
+
+  Vuoi un gergo scolastico? La lingua degli antichi cavalieri? Un linguaggio
+  criptico? Un cifrario per i genitori davanti ai bambini?
+
+  1. Nel Gestore delle Regole fai clic su "Nuovo file di regole…".
+  2. Scegli il tipo (accento, cifrario di sostituzione, modalità del Regista,
+     nuova lingua di base, cifrario algoritmico). Per i casi comuni
+     l'applicazione creerà immediatamente un modello YAML pronto — lo modifichi
+     come al livello 2.
+  3. Per i casi più complessi (algoritmi come "mescolamento delle desinenze"
+     o un'intera nuova lingua di base) il Gestore ti mostrerà un prompt pronto
+     da incollare in ChatGPT o Claude. L'IA genererà un file YAML completo,
+     tu lo copierai semplicemente nella cartella. Non devi sapere programmare —
+     basta saper copiare e incollare.
+
+  Alcune idee per divertirsi
+  --------------------------
+
+  - Classe scolastica durante la lezione di italiano: compito "leggi un
+    frammento di un libro in Poliglota con accento russo — riconosci l'autore?".
+    Particolarmente prezioso per i bambini non vedenti, perché ricevono un
+    suono interessante senza dover leggere il poster con gli occhi.
+
+  - Escape room in biblioteca: prepara un frammento di una poesia con
+    l'Invertitore di testo, stampalo (o invialo in un messaggio), i partecipanti
+    devono leggerlo ad alta voce e registrarlo, quindi riprodurlo al contrario,
+    o semplicemente scansionarlo da soli con gli occhi dall'inizio alla fine.
+    La chiave dell'armadietto viene data a chi riconosce il titolo della poesia.
+
+  - Audiolibro domestico per la famiglia anziana: registra la fiaba "Il brutto
+    anatroccolo" in diversi accenti (narratore inglese, mamma anatra italiana,
+    papà anatra tedesco) e montalo in Audacity. Particolarmente divertente per
+    i nonni, perché distinguono "chi sta parlando ora" solo dal suono.
+
+  - Esercizio per attori: passa la tua battuta attraverso il Dialetto Serpente
+    e prova a ripeterla dal vivo. Esercita il sibilo, il respiro, il controllo
+    della lingua.
+
+  - Biglietto di compleanno con enigma: sposta gli auguri con il Cifrario di
+    Cesare di 3 posizioni, aggiungi "chiave: sposta ogni lettera di quanto
+    hai anni oggi". Il festeggiato deve trovare da solo la decodifica. (Funziona
+    meglio per bambini di 7-12 anni; gli adulti di solito se ne accorgono
+    rapidamente.)
+
+  C'è qualcosa che può rompersi?
+  ------------------------------
+
+  In realtà no. L'applicazione carica i file YAML dinamicamente e se uno di
+  essi è scritto in modo errato, semplicemente lo ignora e visualizza un
+  avviso all'avvio. Il resto delle regole funziona come se nulla fosse.
+
+  La cosa peggiore che può succedere è che il nuovo file semplicemente non
+  appaia nel menu dell'applicazione. In tal caso:
+
+  - torna al Gestore delle Regole, verifica se il file è visibile nell'albero,
+  - aprilo nuovamente nell'editor di testo e confronta la struttura con
+    quelli vicini (rientri, due punti, virgolette),
+  - se sei veramente bloccato — copia il contenuto del tuo file, apri
+    ChatGPT e scrivi "ho un file YAML che l'applicazione non carica,
+    trova l'errore e mostra la versione corretta". Incolla il file.
+    L'IA di solito lo corregge in pochi secondi.
+
+  Non eliminare i file originali del pacchetto (angielski.yaml, cezar.yaml,
+  podstawy.yaml ecc.) — è meglio "nasconderli" cambiando l'estensione da
+  ".yaml" a ".yaml.backup", se vuoi che scompaiano dal menu. Se in seguito
+  cambi idea, basta ripristinare l'estensione.
+
+  Buon divertimento!

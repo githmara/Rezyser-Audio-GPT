@@ -1,0 +1,289 @@
+Polyglot and Director Dictionaries — Instructions for Everyone
+==============================================================
+
+Hello! If you're reading this file, it means you've looked into the
+"dictionaries/" folder next to the Audio GPT Director application and are
+wondering what these files with the strange ".yaml" extensions are. Don't
+worry — you don't need to know programming or Python to understand what's
+going on here, and with a little courage, you can even add something of
+your own.
+
+This file is written in simple language for writers, linguists, teachers,
+parents, and generally the curious. If you know the basics of programming
+and are looking for detailed documentation of the YAML file format (with
+field lists, regexes, processing pipeline rules), check out the "README.md"
+file in the same folder — but note, this file is only available if you've
+cloned the repository from GitHub. In the release package downloaded from
+the Releases tab, Markdown files are filtered out (so that your world books
+with spoilers don't accidentally end up in the package), so only this ".txt"
+file reaches end users.
+
+
+What's in here?
+---------------
+
+The "dictionaries/" folder is a library of rules used by Polyglot (a tool
+for translations and accents) and the internal engine of the Director. Up
+to version 12.0, all these rules were "hardcoded" in Python — if you wanted
+to add a new accent or change the rules, you had to ask a programmer. From
+version 13.0, everything is saved in plain text files (".yaml" extension —
+it's just formatted plain text). You open them with any editor (Notepad, VS
+Code, Notepad++) and edit them like any other document.
+
+The folder structure looks like this:
+
+    dictionaries/
+    └── pl/              base language folder (Polish)
+        ├── podstawy.yaml              Polish diacritics + alphabet
+        ├── akcenty/                   11 accent files
+        ├── szyfry/                    6 cipher and game files
+        └── rezyser/                   4 AI Director mode files
+
+Currently fully implemented are: Polski, English
+(2 base languages). Each has its own "dictionaries/<code>/" package with
+diacritics, alphabet, and phonetic rules operating on text in that language
+— the application automatically detects the source language via langdetect
+and loads the appropriate package. More languages are in preparation (a
+complete package requires "podstawy.yaml", "gui/ui.yaml", and at least one
+file in "akcenty/" and "szyfry/").
+
+
+What is an accent?
+------------------
+
+An accent is a set of rules that "distort" Polish text so that a screen
+reader (e.g., NVDA) reads it with the voice of a foreign language. For
+example, the Finnish accent changes Polish "sz" to "s", "w" to "v", and
+diacritics (ą, ę, ł) to their simplified versions — as a result, the text
+sounds like a Finn from Helsinki is just learning Polish. It's not about
+authentic transliteration, but about a funny and deliberate distortion for
+storytelling purposes.
+
+Available accents (8 languages):
+
+- Polish (Ewa in Vocalizer, Paulina in OneCore)
+- French (Thomas/Amelie in Vocalizer, Julie in OneCore)
+- German (Markus/Stefan in Vocalizer, Katja/Hedda in OneCore)
+- Spanish (Jorge/Monica in Vocalizer, Helena in OneCore)
+- Italian (Alice/Luca in Vocalizer, Elsa in OneCore)
+- Finnish (Satu/Mikko in Vocalizer, Heidi in OneCore)
+- Icelandic (only OneCore Gudrun and free eSpeak — Vocalizer doesn't
+  have an Icelandic voice!)
+- Russian (Milena in Vocalizer, Irina/Pavel/Yuri in OneCore — this
+  one is unique because instead of "distorting" Latin letters, it
+  performs a full transliteration to Cyrillic; without this, the Russian
+  voice wouldn't have anything to pronounce)
+
+Additionally, the accent menu includes two "cleaning without accent"
+options: one without number normalization, the other with normalization
+(changes "15" to "fifteen" before processing, because a foreigner probably
+wouldn't decline this number correctly — which adds authenticity) and a
+"Tag Fixer" that simply inserts the ISO language code into the file without
+distorting the content (a rescue when your already translated file came out
+with the wrong language code).
+
+
+What is a cipher?
+-----------------
+
+Ciphers are text games for puzzles, language exercises, riddles. Unlike
+accents, they are NOT targeted at a specific speech synthesizer voice —
+they simply distort text according to a specific rule. Available ciphers
+(6):
+
+1. Text Reverser (reading backwards)
+   Each sentence is reversed character by character, keeping the capital
+   letter at the beginning and the period/exclamation/question mark at
+   the end. Before reversing, the script expands English abbreviations
+   (e.g., i.e., etc., U.S., U.K...), because without this, reversing
+   would result in absurdities like ".g.e".
+
+   Inspiration: a mission from the Polish version of the program "The
+   Traitors. Zdrajcy". The host played participants a popular children's
+   song played backwards. Reactions went like "what language is this?
+   Armenian? Hungarian? Finnish?" — and it was a melody known from
+   childhood cartoons. Then it turned out that the team in the forest
+   received the text of the song written backwards and had to sing it
+   in that version — the castle team had to record it, reverse the
+   recording, and theoretically recover the song to guess.
+
+   Exactly the same funny misunderstanding happens when you run our
+   Reverser through a speech synthesizer. Great for theme puzzles,
+   escape rooms, party games.
+
+2. Typoglycemia (scrambled word middles)
+   Classic psycholinguistic effect: "Aoccdrnig to a rscheearch at
+   Cmabrigde Uinervtisy, it deosn't mttaer in waht oredr the ltteers
+   in a wrod are, the olny iprmoatnt tihng is taht the frist and lsat
+   ltteer be at the rghit pclae." The script randomly shuffles the
+   middle of each word longer than 4 characters, leaving the first and
+   last character in place. Great for testing "how much do I really see,
+   and how much does my brain suggest."
+
+3. Broken Telephone / Snake Dialect
+   Each "s", "z" or "sz" is randomly extended into a hiss of 4-8
+   characters. Inspiration: Snecko from the game "Slay the Spire".
+   Effect: the text sounds like it's being read by a snake with a speech
+   impediment. Great for voiceovers for a confused reptile or a broken
+   robot on a hissing crack.
+
+4. Vowelizer (everything booms on "o")
+   Each vowel in the text is replaced with "o", preserving Polish
+   softening (ci, si, ni, zi, dzi are handled correctly): "Good morning,
+   welcome madam" → "Goo mornong, woltom modom". The longer the text,
+   the funnier the effect — and the screen reader reads it with full
+   conviction, without trying to decode.
+
+5. Strong Stuttering / Broken Robot
+   Attaches stuttering at the beginning of words: "computer" →
+   "co-co-co-computer", "shower" → "sh-sh-shower". Words shorter than
+   3 characters are skipped. If the second letter of a word is a
+   consonant, the first two are repeated (sounds more natural); if a
+   vowel — only the first one.
+
+6. Caesar Cipher (classic)
+   The oldest documented cipher in history (used in ancient Rome). Each
+   letter is shifted by N positions in the Polish alphabet (35 letters,
+   with diacritics: AĄBCĆ...ZŻŹ). You enter the shift in the GUI in a
+   numeric field; if you enter 0, the application will randomly select
+   a value in the range 1-34 and display it in a message so you can
+   later decrypt the message. Characters outside the alphabet (numbers,
+   spaces, punctuation) remain unchanged.
+
+
+What is "Director Mode"?
+------------------------
+
+The "rezyser/" folder contains 4 files describing the operating modes
+of the Main Director Studio of the application:
+
+- tryb_burza.yaml      — Brainstorm Mode (story planning, 3 story
+                         development options, anti-closure directive)
+- tryb_skrypt.yaml     — Raw Script (tags [SFX], [Speaker: emotion],
+                         character phonetics)
+- tryb_audiobook.yaml  — Traditional Audiobook (pure literary prose,
+                         ban on summaries and frames)
+- postprod_tytuly.yaml — assigning literary titles to chapters after
+                         generating the entire story
+
+Inside each of these files, the most valuable part is the "system prompt"
+— a long instruction for artificial intelligence on how to behave in that
+mode. If you feel, for example, that Audiobook mode writes "too floridly"
+or Brainstorm Mode too often proposes magical solutions, you can adjust
+these texts to your taste, save them, and the application will load your
+version the next time it starts. Zero programming.
+
+
+How to Start Playing — Three Levels of Difficulty
+-------------------------------------------------
+
+LEVEL 1 — minor tuning of an existing accent
+
+Imagine the application's French accent changes "sz" to "sh", but you
+think a French person would rather say "sch" or "ch". No problem.
+
+1. Launch the application and go to the Rule Manager (Ctrl+4 key or the
+   fourth button on the bar).
+2. In the file tree on the left, expand "pl" → "akcenty" and click
+   "francuski.yaml".
+3. Click the "Open in text editor" button. The file will open in Windows
+   Notepad (or your default text editor).
+4. Scroll down to the "zamiany:" section. Find the line with the pattern
+   "sz" and change the "zamiana" value to what suits you.
+5. Save the file (Ctrl+S), close the editor.
+6. Return to the Rule Manager and click "Refresh tree", then close and
+   restart the application. Your change is already working.
+
+LEVEL 2 — adding a new accent by duplication
+
+Want to add a Swedish or Danish accent? Start with the most similar
+existing one.
+
+1. In the Rule Manager, select e.g., "finski.yaml" (Finnish is
+   phonetically close to Swedish) and click "Duplicate selected file".
+2. The manager will ask for a new name — enter e.g., "szwedzki" (lowercase,
+   no spaces, no Polish characters).
+3. The new file will open in the editor. Change the fields:
+      - "label" — what you'll see in the application menu, e.g.,
+        "Swedish (Alva / Oskar — OneCore/Vocalizer)"
+      - "description" — a short description for yourself for the future
+      - "iso" — two-letter language code, for Swedish "sv"
+4. Tune the "zamiany" list for Swedish phonetics (e.g., add "å → o",
+   "ö → ö", remove or change those specific to Finnish).
+5. Save, return to the Home Page, click "🔄 Refresh Director accents
+   from YAML" and restart the application. The new Swedish will appear
+   in the Polyglot accent menu (and if you add to the World Book
+   characters the tag "[Marek] - has a Swedish accent", the Director
+   will also recognize it automatically and apply it to her dialogues).
+
+LEVEL 3 — creating something completely new
+
+Want school slang? Ancient knights' language? Gibberish? Parent cipher
+before children?
+
+1. In the Rule Manager, click "New rule file…".
+2. Choose the type (accent, substitution cipher, Director mode, new base
+   language, algorithmic cipher). For ordinary cases, the application
+   will immediately create a ready YAML template — you edit it as in
+   level 2.
+3. For more difficult cases (algorithms like "endings mixing" or a whole
+   new base language), the Manager will show you a ready prompt to paste
+   into ChatGPT or Claude. AI will generate a complete YAML file, you
+   just copy it to the folder. You don't need to know programming —
+   just know how to paste.
+
+
+Some Ideas for Fun
+------------------
+
+- School class in Polish lesson: task "read an excerpt from the reading
+  in Polyglot in a Russian accent — can you recognize the author?". For
+  blind children especially valuable, as they get an interesting sound
+  without having to read the poster visually.
+
+- Library escape room: prepare a poem fragment in the Text Reverser,
+  print it (or send it in a message), participants must either read it
+  aloud and record it, then play it backwards, or simply scan it
+  themselves from the end. The key to the locker is given to those who
+  recognize the poem's title.
+
+- Home radio play for the older family: save the fairy tale "The Ugly
+  Duckling" in different accents (English narrator, Italian mother duck,
+  German father drake) and edit in Audacity. Especially funny for
+  grandparents, as they can distinguish "who is speaking now" by the
+  sound alone.
+
+- Exercise for an actor: run your line through the Snake Dialect and
+  try to repeat it live. Exercises hissing, breathing, tongue control.
+
+- Birthday card with a puzzle: shift the wishes with the Caesar Cipher
+  by 3 positions, add "key: shift each letter by as many as your age
+  today". The birthday person must find the decryption themselves. (Works
+  best for children 7-12 years old; adults usually catch on quickly.)
+
+
+Can Anything Go Wrong?
+----------------------
+
+Not really. The application loads YAML files dynamically, and if one is
+incorrectly saved, it simply skips it and displays a warning at startup.
+The rest of the rules work as if nothing happened.
+
+The worst that can happen is that the new file simply doesn't appear in
+the application menu. In that case:
+
+- return to the Rule Manager, check if the file is visible in the tree,
+- open it again in the text editor and compare the structure with
+  neighboring ones (indentations, colons, quotes),
+- if you're really stuck — copy the contents of your file, open ChatGPT
+  and write "I have a YAML file that the application doesn't load, find
+  the error and show the corrected version". Paste the file. AI usually
+  fixes it in a few seconds.
+
+Do NOT delete the original files from the package (angielski.yaml,
+cezar.yaml, podstawy.yaml, etc.) — it's better to "hide" them by changing
+the extension from ".yaml" to ".yaml.backup" if you want them to disappear
+from the menu. If you later change your mind, just restore the extension.
+
+
+Have fun!
