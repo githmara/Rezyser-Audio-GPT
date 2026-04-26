@@ -1,0 +1,18 @@
+# -----------------------------------------------------------------------------
+#  SALAUSAVAIN: TYPOGLYKEMIA
+#  Sekoittaa kirjaimet sanan keskeltä (ensimmäinen ja viimeinen pysyvät).
+# -----------------------------------------------------------------------------
+id: typoglikemia
+etykieta: "Typoglykemia (Sekoitettu sanojen keskiosa)"
+opis: |
+  Psykolingvistinen ilmiö: jos sanan ensimmäinen ja viimeinen kirjain
+  ovat oikein, ihminen lukee tekstin sujuvasti, vaikka keskiosa on
+  sekoitettu. Sanoja, jotka ovat lyhyempiä kuin `min_dlugosc_slowa`,
+  ei muuteta.
+iso: fi
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Algoritmin parametrit
+min_dlugosc_slowa: 4

@@ -1,0 +1,46 @@
+# -----------------------------------------------------------------------------
+#  JÄLKITUOTANTO: ANNA LUVUILLE NIMET (tekoäly)
+#  Työkalu Äänikirja-tilaan: iteroi tallennetun projektitiedoston luvut ja
+#  tuottaa jokaiselle lyhyen, kaunokirjallisen otsikon.
+#  Käyttää oletuksena halpaa mallia (gpt-4o-mini), koska tehtävä on yksinkertainen.
+# -----------------------------------------------------------------------------
+id: tytuly
+etykieta: "Anna Lukujen Nimet (tekoäly)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- OpenAI-parametrit ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: suomeksi
+
+# --- Järjestelmäprompt ---
+prompt_systemowy: |
+  Olet arvostettu toimittaja. Vastaat pelkällä otsikolla.
+
+# --- Käyttäjäinstruktioiden malli (role=user) ---
+# Paikkamerkit: {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Tässä on kirjan tekstikohdan sisältö ({naglowek}). Keksi YKSI lyhyt, tarttuva ja kaunokirjallinen otsikko ilman lainausmerkkejä.
+
+  SISÄLTÖ:
+  {probka}
+
+# --- Projektitiedoston iterointiparametrit ---
+# Regex, joka jakaa tiedoston rakenteellisiin otsikoihin + sisältöihin.
+# Kaappaavan ryhmän on poimittava PELKKÄ otsikko ("Johdanto" / "Luku 7" /
+# "Epilogi"). Alussa ja lopussa olevat \n* sallivat useat tyhjät rivit
+# otsikoiden ympärillä.
+regex_podzial_rozdzialow: "(?i)\\n*(Johdanto|Luku \\d+|Epilogi)\\n*"
+
+# Tätä lyhyemmät fragmentit saavat tilan "(Fragmentti liian lyhyt)" tekoälykutsun
+# sijaan (säästää API-krediittejä ja välttää merkityksettömät otsikot).
+min_dlugosc_fragmentu: 50
+
+# Mallille yhdessä pyynnössä lähetettävän tekstinäytteen enimmäispituus.
+# Tekoäly näkee luvun alun — riittää otsikon keksimiseen.
+max_dlugosc_probki: 6000
+
+# Tulosikkunassa näytettävät viestit:
+etykieta_fragment_zbyt_krotki: "(Fragmentti liian lyhyt)"
+etykieta_bled_brak_kredytow: "(Virhe – ei API-krediittejä)"

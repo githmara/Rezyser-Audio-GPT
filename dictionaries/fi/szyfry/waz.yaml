@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  SALAUSAVAIN: RIKKINÄINEN PUHELIN / KÄÄRMEDIALEKTI
+#  Venyttää sihinät: jokainen "s" tai "z" muuttuu pitkäksi sihinäksi.
+#  Inspiraatio: Snecko pelistä Slay The Spire.
+# -----------------------------------------------------------------------------
+id: waz
+etykieta: "Rikkinäinen Puhelin (Käärmedialekti, sihinät)"
+opis: |
+  Inspiraationa Snecko pelistä "Slay the Spire". Jokainen "s" tai "z"
+  (kirjainkoosta riippumatta) venytetään satunnaisesti sihinäksi, jonka
+  pituus on `min_syk`–`max_syk` merkkiä.
+
+  Suomelle ei lisätä kaksoiskonsonanttia "sz" kaavaan — suomessa
+  ei esiinny "sz"-yhdistelmää kotoperäisissä sanoissa, joten pelkkä
+  "s" ja "z" riittää.
+iso: fi
+kategoria: szyfr
+kolejnosc: 30
+algorytm: waz
+
+# Algoritmin parametrit
+min_syk: 4
+max_syk: 8
+
+# Regex, joka vastaa venytettäviä merkkejä (kirjainkoosta riippumatta).
+wzor_syku: "(?i)(s|z)"

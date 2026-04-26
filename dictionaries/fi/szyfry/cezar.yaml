@@ -1,0 +1,28 @@
+# -----------------------------------------------------------------------------
+#  SALAUSAVAIN: CAESAR
+#  Klassinen siirtosalausavain, joka siirtää jokaisen kirjaimen N askelta
+#  suomalaisessa aakkostossa (29 kirjainta).
+# -----------------------------------------------------------------------------
+id: cezar
+etykieta: "Caesarin salausavain (suomalaisen aakkoston siirto)"
+opis: |
+  Klassinen Caesarin salausavain: jokainen kirjain siirretään N askelta
+  suomalaisessa aakkostossa (ABC…ÅÄÖ, 29 merkkiä, ei välilyöntejä). Aakkoston
+  ulkopuoliset merkit (numerot, välimerkit) pysyvät muuttumattomina.
+
+  Siirtoarvo annetaan käyttöliittymässä ("Caesarin salausavaimen siirto"
+  -kentässä). Arvo 0 tarkoittaa "arvo arvotaan väliltä 1..28".
+iso: fi
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# Aakkosto luetaan tiedostosta dictionaries/fi/podstawy.yaml (avain: alfabet).
+# Jos haluat käyttää eri aakkostoa, poista kommentti seuraavalta riviltä ja
+# kirjoita oma suuraakkosjoukko:
+# alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"
+
+# Sallittu siirtoalue käyttöliittymässä (SpinCtrl).
+# 29 kirjainta → siirto 29 ≡ 0 (identiteetti); siirrot ±1..±28 ovat yksilöllisiä.
+min_przesuniecie: -29
+max_przesuniecie: 29

@@ -1,0 +1,29 @@
+# -----------------------------------------------------------------------------
+#  SALAUSAVAIN: ÄNKYTYS / RIKKINÄINEN ROBOTTI
+#  Lisää sanan alkuun toistoja ensimmäisestä kirjaimesta yhdysmerkillä.
+# -----------------------------------------------------------------------------
+id: jakanie
+etykieta: "Vaikea Änkytys / Rikkinäinen Robotti"
+opis: |
+  Jokaiselle sanalle, jonka pituus on >= `min_dlugosc_slowa`, arvotaan
+  ensimmäisen (tai kahden ensimmäisen) kirjaimen toistojen määrä, jotka
+  lisätään sanan alkuun yhdysmerkillä: "tietokone" → "ti-ti-ti-tietokone",
+  "se" → "se" (liian lyhyt).
+
+  Jos sanan toinen kirjain on konsonantti (ei kuulu merkkijonoon
+  `samogloski`), änkytys sisältää KAKSI ensimmäistä kirjainta – tämä
+  kuulostaa luonnollisemmalta (esim. "prinsessa" → "pr-pr-prinsessa").
+iso: fi
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Algoritmin parametrit
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Vokaalit – jos sanan toinen merkki kuuluu tähän joukkoon, toistetaan
+# vain ensimmäinen kirjain. Muuten toistetaan kaksi ensimmäistä.
+# Suomalaiset vokaalit: a e i o u y ä ö å
+samogloski: "aeiouyäöåAEIOUYÄÖÅ"

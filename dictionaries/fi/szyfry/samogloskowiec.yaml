@@ -1,0 +1,37 @@
+# -----------------------------------------------------------------------------
+#  SALAUSAVAIN: VOKAALIMUUNTAJA
+#  Korvaa jokaisen vokaalin 'o':lla (tai 'O':lla). Pelkkä vaihe 3
+#  puolalaisesta kolmivaiheisesta algoritmista — suomessa ei ole
+#  puolalaisia pehmennyskonsonantteja (dzi/ci/ni/si/zi), joten vaiheet
+#  1 ja 2 ovat tarkoituksella tyhjiä.
+# -----------------------------------------------------------------------------
+id: samogloskowiec
+etykieta: "Vokaalimuuntaja (Kaikki jyrisee 'O':lla)"
+opis: |
+  "Minne katsotkin – pelkkiä O:ta" -efekti. Suomessa algoritmi supistuu
+  yhteen vaiheeseen (puolalainen pehmennyslogiikka ei sovellu): jokainen
+  vokaali korvataan 'o':lla (tai 'O':lla).
+
+  Suomen vokaaliharmonia (ä/ö/å natiiveja kirjaimia) häviää kokonaan —
+  komisteltava efekti suomen pitkillä vokaaleilla (aa/uu/ii/ää/öö).
+iso: fi
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# -----------------------------------------------------------------------------
+# Vaiheet 1 ja 2 (puolalaiskohtainen pehmennys) — tarkoituksella tyhjiä suomelle.
+# Moottori hyväksyy tyhjät listat ilman virhettä.
+# -----------------------------------------------------------------------------
+zmiekszenia_przed_samogloska: []
+zmiekszenia_przed_spolgloska: []
+
+# -----------------------------------------------------------------------------
+# Vaihe 3: vokaalinvaihto.
+# `samogloski_*` ovat merkkijonoja regex-luokkaa varten.
+# Suomalaiset vokaalit: a e i o u y ä ö å (+ isot kirjaimet)
+# -----------------------------------------------------------------------------
+samogloski_male:             "aeiouyäöå"
+samogloski_wielkie:          "AEIOUYÄÖÅ"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"

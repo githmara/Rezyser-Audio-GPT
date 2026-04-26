@@ -1,0 +1,40 @@
+# -----------------------------------------------------------------------------
+#  SALAUSAVAIN: TEKSTINKÄÄNTÄJÄ
+#  Laajentaa lyhenteet ja lukee jokaisen lauseen takaperin.
+#  Inspiraatio: tehtävä pelistä "The Traitors / Zdrajcy".
+# -----------------------------------------------------------------------------
+id: odwracanie
+etykieta: "Tekstinkääntäjä (Lukeminen takaperin isolla kirjaimella)"
+opis: |
+  Ensin laajennetaan yleiset suomalaiset lyhenteet (jne. → "ja niin
+  edelleen", ns. → "niin sanottu", ko. → "kyseinen" jne.). Näin käännetty
+  lause kuulostaa järkevältä eikä tuota absurdeja ".lled niin aj" -pätkiä.
+  Sitten jokainen lause käännetään merkki kerrallaan takaperin säilyttäen
+  välimerkin lopussa ja suurentaen ensimmäisen kirjaimen.
+iso: fi
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# -----------------------------------------------------------------------------
+# Lyhenteiden laajennukset — REGEX-muoto.
+# Jokainen {wzor, zamiana} -pari käytetään ennen kääntämistä.
+# Lisää uusi lyhenne lisäämällä uusi rivi.
+# -----------------------------------------------------------------------------
+rozwiniecia:
+  - { wzor: '\bjne\.?,?\s',          zamiana: "ja niin edelleen "   }
+  - { wzor: '\bjms\.?,?\s',          zamiana: "ja muuta sellaista " }
+  - { wzor: '\bns\.?,?\s',           zamiana: "niin sanottu "       }
+  - { wzor: '\bn\.\s*s\.\b',         zamiana: "niin sanottu"        }
+  - { wzor: '\bem\.\s',              zamiana: "edellä mainittu "    }
+  - { wzor: '\bko\.\s',              zamiana: "kyseinen "           }
+  - { wzor: '\bao\.\s',              zamiana: "alla oleva "         }
+  - { wzor: '\byo\.\s',              zamiana: "yllä mainittu "      }
+  - { wzor: '\bvs\.?,?\s',           zamiana: "vastaan "            }
+  - { wzor: '\bprof\.?\s',           zamiana: "professori "         }
+  - { wzor: '\bdr\.?\s',             zamiana: "tohtori "            }
+  - { wzor: '\bpuh\.?\s',            zamiana: "puhelinnumero "      }
+  - { wzor: '\bos\.?\s',             zamiana: "omaa sukua "         }
+  - { wzor: '\bv\.?\s(?=\d)',        zamiana: "vuonna "             }
+  - { wzor: '\bs\.?\s(?=\d)',        zamiana: "sivu "               }
+  - { wzor: '\bko\.?\s(?=\d)',       zamiana: "kohta "              }

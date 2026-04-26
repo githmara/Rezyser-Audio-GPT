@@ -1,0 +1,68 @@
+# -----------------------------------------------------------------------------
+#  ÄÄNIKIRJATILA – Bestsellerkirjailija (Perinteinen Proosa)
+#  Tuottaa tiheää, klassista kaunokirjallista proosaa ilman äänitageja.
+#  Tukee jälkituotantoa: lukuotsikkogeneraattori (postprod_tytuly.yaml).
+# -----------------------------------------------------------------------------
+id: audiobook
+etykieta: "Äänikirja (Proosa, luvut, TALLENTAA TIEDOSTOON)"
+kategoria: tryb
+kolejnosc: 30
+
+# --- OpenAI-parametrit ---
+model: gpt-4o
+temperatura: 0.85
+jezyk_odpowiedzi: suomeksi
+
+# Vastaus lisätään tiedostoon skrypty/<nimi>.txt
+zapis_do_pliku: true
+
+# --- Järjestelmäprompt ---
+# Saatavilla olevat paikkamerkit: {world_context}, {jezyk_odpowiedzi}
+prompt_systemowy: |
+  # Rooli: Bestsellerkirjailija (Perinteinen Proosa)
+
+  Kirjoitat **YKSINOMAAN {jezyk_odpowiedzi}**. Tulosteesi on **100% RAAKAA KAUNOKIRJALLISTA TEKSTIÄ**.
+
+  > **KIRJALLINEN TYYLI:** Olet kirjatilassa. Nolla äänitageja `[SFX]`, nolla `[Hahmo]`-tageja. Kutoo dialogi luontevasti rikkaaseen kerrontaan käyttäen ajatusviivoja (esim. *— Et voi tehdä niin — hän sanoi.*).
+
+  ### 🌍 Maailman rautaiset säännöt:
+  {world_context}
+
+  ### 📖 Äänikirjatilan säännöt:
+  1. **TIHEÄ, KLASSINEN PROOSA:** Keskity syviin kuvauksiin, aistimuksiin ja hahmojen psykologiaan. Kirjoita pitkiä kappaleita. Näytä äläkä vain kuvaile.
+  2. **TEKSTIN PUHTAUS:** Sujuva kaunokirjallinen kieli — ehdoton kielto lisätä hakasulkeisiin tageja.
+  3. **EHDOTON MARKDOWN-KIELTO:** Ei otsikoita (kuten "Luku 1", "Kohtaus 2"), ei otsikkoja eikä luetteloita.
+  4. **KOHTAUKSEN SULKEMINEN:** - OLETUKSENA (ANTI-CLOSURE): Katkaise teksti sulkematta kohtausta, jotta vauhti säilyy.
+     - POIKKEUS (FINAALI/EPILOGI): Jos tämä on lopetus, sammuta kerronta tyydyttävällä, kaunokirjallisella tavalla.
+
+# --- Kontekstuaaliset suffiksit ---
+# Äänikirjatila ei perusversiossaan käytä muistitilaan perustuvia suffikseja —
+# järjestelmäprompt on riittävä. Lingvisti voi lisätä niitä, ja moottori valitsee
+# oikean, jos ehdot täyttyvät.
+sufiksy: {}
+
+# --- Käyttäjäinstruktion liitettävä muistutus (role=user) ---
+# Täällä lingvisti voi löysätä Anti-Closurea tai sallia lyhyet luvut.
+przypomnienie_uzytkownika: |
+
+
+  (KRIITTINEN MUISTUTUS: KIRJA-tila. Nolla ääni-/äänitageja. Pitkä, tiheä proosa ajatusviivadialogi. Ei Markdownia, ei otsikoita. BRUTAALI ANTI-CLOSURE: katkaise teksti jännityksen tai toiminnan keskellä, ellei tämä ole selkeä tarinan finaali.)
+
+# --- Sovelluspuolen validointi ---
+slowa_wyzwalajace:
+  # Estetään yhteenvedon kirjoittaminen historiatiedostoon.
+  streszczenie:
+    - tiivistä
+    - tee yhteenveto
+    - yhteenveto
+    - kertaa
+
+# Huomio tekoälyn hylkäystunnistuksesta:
+# Versiosta 13.0 lähtien tunnistus tapahtuu universaalin `[ODRZUCENIE_AI]`-tagin
+# kautta, jota KLAUZULA_ODRZUCENIA_DOMYSLNA pakottaa (przepisy_rezysera.py).
+# Toimii riippumatta `jezyk_odpowiedzi`:sta — paikallistettujen sanojen lista
+# ei enää tarvita eikä ollut luotettava.
+
+# --- Jälkikäsittely ---
+# Äänikirja EI käytä foneettista moottoria (ei hahmotageja).
+stosuj_akcenty_fonetyczne: false
