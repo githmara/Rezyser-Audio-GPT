@@ -36,13 +36,17 @@ Struktura folderu wygląda tak:
     dictionaries/
     └── pl/              folder języka bazowego (polskiego)
         ├── podstawy.yaml              polskie diakrytyki + alfabet
-        ├── akcenty/                   8 plików z akcentami
+        ├── akcenty/                   11 plików z akcentami
         ├── szyfry/                    6 plików z szyframi i zabawami
-        └── rezyser/                   4 pliki z trybami Reżysera AI
+        └── rezyser/                   4 plików z trybami Reżysera AI
 
-W przyszłości, gdy ktoś dorzuci wsparcie dla innego języka bazowego
-(angielskiego, niemieckiego, itd.), obok folderu "pl/" pojawią się
-"en/", "de/" i tak dalej, każdy ze swoimi diakrytykami i regułami.
+Obecnie kompletnie wdrożone są: Polski, English
+(2 języków bazowych). Każdy ma własną paczkę
+"dictionaries/<kod>/" z diakrytykami, alfabetem i regułami fonetycznymi
+działającymi na tekst w tym właśnie języku — aplikacja sama wykrywa język
+źródłowy przez langdetect i ładuje odpowiednią paczkę. Kolejne języki są
+w przygotowaniu (kompletny pakiet wymaga "podstawy.yaml", "gui/ui.yaml"
+oraz minimum jednego pliku w "akcenty/" i "szyfry/").
 
 
 Co to jest akcent?
@@ -55,7 +59,7 @@ na ich uproszczone wersje — w efekcie tekst brzmi, jakby Fin z Helsinek
 dopiero uczył się polskiego. Nie chodzi o autentyczną transliterację,
 tylko o zabawne i celowe zniekształcenie dla potrzeb fabuły.
 
-Dostępne akcenty (osiem języków):
+Dostępne akcenty (8 języków):
 
 - angielski (Samantha/Mark w Vocalizerze, Zira/Hazel w OneCore)
 - francuski (Thomas/Amelie w Vocalizerze, Julie w OneCore)
@@ -85,7 +89,7 @@ Co to jest szyfr?
 Szyfry to zabawy tekstowe do zagadek, ćwiczeń językowych, łamigłówek.
 W przeciwieństwie do akcentów NIE są skierowane na konkretny głos
 syntezatora — po prostu zniekształcają tekst według określonej zasady.
-Dostępne szyfry (sześć sztuk):
+Dostępne szyfry (6):
 
 1. Odwracacz Tekstu (czytanie wspak)
    Każde zdanie jest odwracane znak po znaku, z zachowaniem wielkiej
@@ -145,7 +149,7 @@ Dostępne szyfry (sześć sztuk):
 Co to jest "tryb Reżysera"?
 ---------------------------
 
-Folder "rezyser/" zawiera cztery pliki opisujące tryby pracy Głównego
+Folder "rezyser/" zawiera 4 plików opisujących tryby pracy Głównego
 Studia Reżyserskiego aplikacji:
 
 - tryb_burza.yaml      — Burza Mózgów (planowanie fabuły, 3 opcje

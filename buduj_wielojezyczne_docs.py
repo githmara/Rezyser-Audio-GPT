@@ -130,6 +130,166 @@ MAPA_JEZYKOW: dict[str, str] = {
 
 
 # ---------------------------------------------------------------------------
+# 13.4: tabela skrótowców per język docelowy (do custom system promptu)
+# ---------------------------------------------------------------------------
+# Zaczerpnięte z `TODO_wielojezycznosc.md` § 3.1 (notebook autora projektu).
+# Po 5 najpopularniejszych pozycji per język — nie chcemy obciążać promptu
+# pełnymi tabelami (10-16 pozycji), bo to zwiększa koszt każdego call'a API
+# bez znaczącej poprawy wyniku. Lista służy LLM jako konkretne dane do
+# wstrzyknięcia w sekcję „Cipher: Text Reverser" wynikowego dokumentu —
+# zastępują polskie m.in./np./tzw./tzn./dr.
+ABBREV_BY_LANG: dict[str, list[tuple[str, str]]] = {
+    "en": [
+        ("e.g.",   "for example"),
+        ("i.e.",   "that is"),
+        ("etc.",   "et cetera"),
+        ("U.S.",   "United States"),
+        ("U.K.",   "United Kingdom"),
+    ],
+    "ru": [
+        ("т.е.",   "то есть"),
+        ("т.д.",   "так далее"),
+        ("т.н.",   "так называемый"),
+        ("т.к.",   "так как"),
+        ("и.о.",   "исполняющий обязанности"),
+    ],
+    "it": [
+        ("ad es.", "ad esempio"),
+        ("ecc.",   "eccetera"),
+        ("dott.",  "dottore"),
+        ("prof.",  "professore"),
+        ("pag.",   "pagina"),
+    ],
+    "fi": [
+        ("esim.",  "esimerkiksi"),
+        ("jne.",   "ja niin edelleen"),
+        ("ym.",    "ynnä muuta"),
+        ("ns.",    "niin sanottu"),
+        ("tms.",   "tai muuta sellaista"),
+    ],
+    "is": [
+        ("t.d.",      "til dæmis"),
+        ("þ.e.",      "það er"),
+        ("m.a.",      "meðal annars"),
+        ("u.þ.b.",    "um það bil"),
+        ("o.s.frv.",  "og svo framvegis"),
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# 13.4: builder customowego system-promptu per (kod_docelowy, nazwa_natywna)
+# ---------------------------------------------------------------------------
+# Dokleja się do `_PROMPT_SYSTEMOWY_TEMPLATE` z `tlumacz_ai.py` przez nowy
+# parametr `prompt_dodatkowy`. Wymusza na modelu trzy nieoczywiste rzeczy
+# zidentyfikowane podczas review wyników pierwszego batchu (13.4):
+#
+#   1. NIE pisać że wsparcie kodu_docelowego jest „w przyszłości" —
+#      paczka `dictionaries/<kod>/` jest już kompletna w 13.4.
+#   2. W liście akcentów PODMIENIĆ pozycję dla języka docelowego
+#      (no-op dla użytkownika natywnego) na akcent polski (Ewa/Paulina).
+#   3. W sekcjach szyfrów (Odwracacz, Typoglikemia) — nie kopiować
+#      polskich przykładów dosłownie, tylko zlokalizować je pod
+#      docelową fonetykę.
+PROMPT_TEMPLATE_DOKUMENTACJA = """\
+## Project context (CRITICAL — read carefully)
+This documentation describes "Reżyser Audio GPT", a Polish desktop tool for writers
+and voice-over creators. The translation is for a {nazwa_natywna} user who already
+has the "dictionaries/{kod}/" package installed and complete in version 13.4.
+DO NOT write that {nazwa_natywna} support is "coming in a future version" — it is
+already shipped and the user is reading these docs in {nazwa_natywna} right now.
+
+The application supports MULTIPLE source languages (today: Polish and English; more
+in 13.4+). Each "dictionaries/<source>/" folder is a self-contained rule pack that
+operates on input text written in that source language. The application uses
+langdetect to pick the right pack automatically — you must NOT claim that the rules
+apply to Polish source only.
+
+### Accent list — REPLACE the native accent
+The docs include a list of available accents like:
+  - English (Samantha/Mark in Vocalizer, Zira/Hazel in OneCore)
+  - Finnish (Satu/Mikko in Vocalizer, Heidi in OneCore)
+  - Italian (Alice/Luca in Vocalizer, Elsa in OneCore)
+  ...
+
+One entry matches the TARGET language ({nazwa_natywna}). That entry is meaningless
+for this reader — applying e.g. an English accent to text already in English is a
+no-op. REPLACE the {nazwa_natywna} entry with a POLISH accent entry, using these
+voice names:
+    Polish (Ewa in Vocalizer, Paulina in OneCore)
+
+Keep ALL OTHER entries (translate language NAMES to {nazwa_natywna}, but preserve
+voice names like Samantha, Markus, Heidi, Gudrun, Milena 1:1 — product names).
+
+### Cipher: Text Reverser — replace abbreviations with target-language equivalents
+The Reverser cipher section lists Polish abbreviations (m.in., np., tzw., tzn., dr.)
+that the script expands BEFORE reversing the sentence — without expansion, dotted
+abbreviations would reverse into phonetic nonsense (Polish example: ".nim").
+
+You MUST localize this:
+  1. REPLACE the 5 Polish abbreviations with these {nazwa_natywna} equivalents:
+{abbreviation_list}
+  2. RE-COMPUTE the nonsense example (".nim" in Polish): take the FIRST abbreviation
+     from your replacement list, reverse it character-by-character, and present that
+     as the new nonsense example for the target language.
+
+### Cipher: Typoglycemia — DECODE, TRANSLATE, RE-SCRAMBLE
+The Typoglycemia section contains an example sentence that is ITSELF an output of
+the cipher (Polish, scrambled middles):
+   "Nie meossż peyrzcztać tkstueu w trkirej klojoinseęci letir, jśeli pszeriwa i
+    otsnatia leritea są na wscłaoyicwh mscjaieh"
+
+The unscrambled meaning is roughly: "You can read text in any letter order as long
+as the first and last letters of each word are in the right place."
+
+You MUST:
+  1. RECOGNIZE that the example is itself scrambled — do NOT copy it verbatim.
+  2. TRANSLATE the unscrambled meaning into {nazwa_natywna} naturally.
+  3. RE-SCRAMBLE the translation: keep the FIRST and LAST character of every word
+     longer than 3 characters; randomly permute the middle characters. Words of 3
+     or fewer characters stay unchanged.
+
+For English, a well-known canonical version exists you can use as a reference:
+   "Aoccdrnig to a rscheearch at Cmabrigde Uinervtisy, it deosn't mttaer in waht
+    oredr the ltteers in a wrod are, the olny iprmoatnt tihng is taht the frist
+    and lsat ltteer be at the rghit pclae."
+
+For other languages, generate an equivalent in the same spirit.
+
+### Filenames and voice names — KEEP 1:1
+Polish filenames (angielski.yaml, cezar.yaml, podstawy.yaml, finski.yaml, islandzki.yaml,
+naprawiacz_tagow.yaml, oczyszczenie.yaml, oczyszczenie_bez_liczb.yaml, rosyjski.yaml,
+wloski.yaml, niemiecki.yaml, francuski.yaml, hiszpanski.yaml, polski.yaml) are PHYSICAL
+filenames in the package — keep them verbatim, do NOT translate.
+
+Voice product names (Samantha, Mark, Markus, Hedda, Heidi, Gudrun, Milena, Irina,
+Pavel, Yuri, Satu, Mikko, Thomas, Amelie, Julie, Stefan, Katja, Jorge, Monica, Helena,
+Alice, Luca, Elsa, Zira, Hazel, Ewa, Paulina) are product names — keep 1:1.
+
+### Frozen markers ⟦i⟧
+Every ⟦N⟧ marker is a frozen placeholder. Copy character-for-character; do not
+translate, do not renumber, do not insert new ones.\
+"""
+
+
+def _zbuduj_prompt_dodatkowy(kod: str, nazwa_natywna: str) -> str:
+    """Buduje custom system-prompt dla pary (kod_docelowy, nazwa_natywna).
+
+    Zwraca pusty string, gdy nie mamy tabeli skrótowców dla danego języka —
+    wtedy autotłumacz korzysta z bazowego promptu z `tlumacz_ai.py` bez modyfikacji.
+    """
+    abbrev = ABBREV_BY_LANG.get(kod)
+    if not abbrev:
+        return ""
+    bullety = "\n".join(f'     - "{skr}" → "{exp}"' for skr, exp in abbrev)
+    return PROMPT_TEMPLATE_DOKUMENTACJA.format(
+        kod=kod,
+        nazwa_natywna=nazwa_natywna,
+        abbreviation_list=bullety,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Prefix-instrukcja dla LLM (dokleja się do samej treści, nie do systemu)
 # ---------------------------------------------------------------------------
 # `_prompt_systemowy` w tlumacz_ai.py NIE jest modyfikowany (reguła 13.1).
@@ -309,6 +469,7 @@ def wczytaj_szablony_pl() -> list[tuple[str, str, str]]:
 def tlumacz_szablon(
     kod: str,
     nazwa_pl: str,
+    nazwa_natywna: str,
     klient: Any,
     nazwa_pliku: str,
     id_szablonu: str,
@@ -324,7 +485,9 @@ def tlumacz_szablon(
     (np. ``"manual.yaml"`` / ``"dictionaries.yaml"``) decyduje o ścieżce
     docelowej i o kluczu cache wznawiania w ``runtime/``, dzięki czemu
     równoległe tłumaczenie wielu szablonów w jednym języku nie zderza się
-    o ten sam ``temp_manual_*.jsonl``.
+    o ten sam ``temp_manual_*.jsonl``. Argument ``nazwa_natywna`` (np. „English",
+    „Suomi") wchodzi do customowego system-promptu (sekcja „Project context")
+    z :func:`_zbuduj_prompt_dodatkowy`, żeby model mówił do użytkownika natywnie.
     """
     cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
     if cel.exists() and skip_existing:
@@ -380,6 +543,11 @@ def tlumacz_szablon(
     def _on_blad_miekki(msg: str, tytul: str) -> None:
         print(f"⚠️  {kod}/{nazwa_pliku}: {tytul} — {msg.splitlines()[0]}")
 
+    # 13.4: customowy system-prompt z kontekstem projektu (instrukcje dot. listy
+    # akcentów, lokalizacji szyfrów, zachowania nazw plików/głosów). Pusty
+    # string = brak modyfikacji (jeśli kod języka nie ma tabeli skrótowców).
+    prompt_dodatkowy = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna)
+
     wynik = tlumacz_dlugi_tekst(
         tresc=payload,
         jezyk_docelowy=nazwa_pl,
@@ -390,6 +558,7 @@ def tlumacz_szablon(
         on_blad_krytyczny=_on_blad_krytyczny,
         on_blad_miekki=_on_blad_miekki,
         model_tlumacz=model,
+        prompt_dodatkowy=prompt_dodatkowy,
     )
 
     if wynik is None:
@@ -600,14 +769,21 @@ def main() -> int:
 
     sukcesy: list[str] = []
     porazki: list[str] = []
+    # 13.4: import lazy — `core_poliglota` dorzuca docx/num2words. Skrypt
+    # uruchamiany w czystym kontekście CLI nie powinien płacić za to przy
+    # imporcie modułu, tylko gdy faktycznie idzie tłumaczyć.
+    from core_poliglota import natywna_nazwa
+
     for kod in kody:
         nazwa_pl = MAPA_JEZYKOW[kod]
-        print(f"\n========== {kod.upper()} ({nazwa_pl}) ==========")
+        nazwa_natywna = natywna_nazwa(kod)
+        print(f"\n========== {kod.upper()} ({nazwa_pl} / {nazwa_natywna}) ==========")
         wszystko_ok = True
         for nazwa_pliku, id_szablonu, tresc_pl in szablony:
             ok = tlumacz_szablon(
                 kod,
                 nazwa_pl,
+                nazwa_natywna,
                 klient,
                 nazwa_pliku,
                 id_szablonu,

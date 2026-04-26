@@ -92,6 +92,15 @@ FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
 NAZWA_UI = "ui.yaml"
 
+# 13.4: globalne placeholdery dynamiczne (liczone z dysku przy każdym wywołaniu
+# `generuj()` — tanie, deterministyczne). Pozwalają w szablonach docs używać
+# wartości typu `{liczba_szyfrow}` zamiast hardkodowanego "6", dzięki czemu
+# dorzucenie nowego YAML-a do `dictionaries/pl/szyfry/` aktualizuje dokumentację
+# wszystkich języków przy najbliższym `generuj_dokumentacje.py` — bez ponownego
+# tłumaczenia (placeholdery są zamrożone w autotłumaczu jako `⟦i⟧` i wracają
+# w wynikowych YAML-ach 1:1 — generator rozwija je dopiero przy renderze .txt).
+_FOLDER_REFERENCYJNY = "pl"   # paczka, z której liczymy referencyjne wartości
+
 # Regex placeholdera: {klucz} albo {klucz.zagniezdzony.z.kropkami}
 # - pierwszy znak: litera lub podkreślenie
 # - dalej: litery, cyfry, podkreślenia, kropki (dla ścieżek zagnieżdżonych)
@@ -227,13 +236,82 @@ def _normalizuj_etykiete(wartosc: str) -> str:
     return wartosc
 
 
-def _rozwin_placeholdery(szablon: str, ui_dane: dict[str, Any]) -> tuple[str, list[str]]:
-    """Podstawia wszystkie ``{klucz}`` wartościami z ``ui_dane``.
+def _zbuduj_placeholdery_globalne() -> dict[str, str]:
+    """Liczy globalne placeholdery dynamiczne z dysku.
+
+    13.4: zamiast hardkodować w PL-szablonach „8 plików z akcentami" / „sześć
+    sztuk" / „na razie tylko polski", używamy nazwanych tokenów (`{liczba_szyfrow}`,
+    `{lista_kompletnych_jezykow_natywnie}`), a generator liczy ich wartości na
+    żywo z dysku tuż przed renderem .txt. Dorzucenie nowego akcentu do paczki
+    PL → kolejny `python generuj_dokumentacje.py` aktualizuje docs WSZYSTKICH
+    języków bez ponownego tłumaczenia (placeholdery są zamrożone w autotłumaczu
+    jako ⟦i⟧ i wracają w wynikowych YAML-ach 1:1 — generator rozwija je dopiero
+    teraz, przy renderze).
+
+    Wartości referencyjne brane są z `dictionaries/pl/` (rdzeń projektu, zawsze
+    kompletny). Import `core_poliglota` jest LAZY (jak w `_jezyki_ze_szablonami`),
+    żeby generator pozostał użyteczny w minimalnym kontekście CLI bez wxPython.
+    """
+    pusty: dict[str, str] = {}
+    if not DICT_DIR.is_dir():
+        return pusty
+
+    try:
+        import core_poliglota as cp
+    except ImportError:
+        return pusty
+
+    pl_akcenty_dir = DICT_DIR / _FOLDER_REFERENCYJNY / "akcenty"
+    pl_szyfry_dir  = DICT_DIR / _FOLDER_REFERENCYJNY / "szyfry"
+    pl_rezyser_dir = DICT_DIR / _FOLDER_REFERENCYJNY / "rezyser"
+
+    akcenty_lista = cp.lista_wariantow(cp.TRYB_REZYSER, _FOLDER_REFERENCYJNY)
+    szyfry_lista  = cp.lista_wariantow(cp.TRYB_SZYFRANT, _FOLDER_REFERENCYJNY)
+    kompletne_jezyki = cp.dostepne_jezyki_bazowe()
+
+    return {
+        # Numer wersji aplikacji — pojedyncze źródło prawdy w pliku VERSION.
+        # Dotąd dostępny tylko nested (jako placeholder w wartości `app.wersja`
+        # z ui.yaml); od 13.4 również standalone na poziomie szablonu.
+        "numer_wersji": NUMER_WERSJI,
+        # Liczba akcentów stricte fonetycznych (kategoria == "akcent");
+        # pomija oczyszczenia i naprawiacz_tagow.
+        "liczba_akcentow_jezykowych": str(
+            sum(1 for a in akcenty_lista if a.get("kategoria") == "akcent")
+        ),
+        # Liczba wszystkich plików w katalogu (akcenty + utility).
+        "liczba_plikow_w_akcentach": str(
+            len([p for p in pl_akcenty_dir.glob("*.yaml")]) if pl_akcenty_dir.is_dir() else 0
+        ),
+        "liczba_szyfrow":          str(len(szyfry_lista)),
+        "liczba_trybow_rezysera":  str(
+            len([p for p in pl_rezyser_dir.glob("*.yaml")]) if pl_rezyser_dir.is_dir() else 0
+        ),
+        "liczba_kompletnych_jezykow":          str(len(kompletne_jezyki)),
+        "lista_kompletnych_jezykow_natywnie":  cp.lista_wspieranych_jezykow_natywnie(),
+    }
+
+
+def _rozwin_placeholdery(
+    szablon: str,
+    ui_dane: dict[str, Any],
+    placeholdery_globalne: dict[str, str] | None = None,
+) -> tuple[str, list[str]]:
+    """Podstawia wszystkie ``{klucz}`` wartościami z ``ui_dane`` i z placeholderów globalnych.
 
     Wartości przechodzą przez `_normalizuj_etykiete` — wstawiamy do
     dokumentacji „suchą" wersję etykiety bez `&` akceleratora i bez
     końcówki `\\tCtrl+…`, żeby tekst .txt czytało się naturalnie nawet
     dla przycisków/menu, które w GUI mają te dekoratory.
+
+    Args:
+        szablon:               Tekst z ``{placeholderami}`` do rozwinięcia.
+        ui_dane:               Słownik z `dictionaries/<jezyk>/gui/ui.yaml`.
+        placeholdery_globalne: Wartości liczone z dysku (liczba_szyfrow itd.) —
+                               jeśli None, generator wywoła sam :func:`_zbuduj_placeholdery_globalne`.
+                               Eksponowane jako parametr, żeby testy mogły wstrzyknąć
+                               zmockowane wartości i `generuj()` mogło je policzyć
+                               raz na cały batch (zamiast na każdy szablon).
 
     Returns:
         Krotka (wynikowa_tresc, lista_brakujacych_kluczy).
@@ -241,9 +319,19 @@ def _rozwin_placeholdery(szablon: str, ui_dane: dict[str, Any]) -> tuple[str, li
         na listę — wywołujący może wypisać ostrzeżenie.
     """
     brakujace: list[str] = []
+    globalne = placeholdery_globalne if placeholdery_globalne is not None else _zbuduj_placeholdery_globalne()
 
     def _zamien(match: re.Match[str]) -> str:
         klucz = match.group(1)
+
+        # 1. Najpierw spróbuj rozwinąć przez globalny słownik dynamiczny —
+        #    tu siedzą `numer_wersji`, `liczba_szyfrow` itd. Globalne placeholdery
+        #    wygrywają z ui.yaml, gdyby ktoś przypadkiem zdefiniował klucz
+        #    o tej samej nazwie (single source of truth = dysk, nie ui.yaml).
+        if klucz in globalne:
+            return globalne[klucz]
+
+        # 2. Reszta — przez ścieżkę z ui.yaml.
         wartosc = _pobierz_wartosc(ui_dane, klucz)
         if wartosc is None or not isinstance(wartosc, str):
             brakujace.append(klucz)
@@ -291,6 +379,11 @@ def generuj(
         print("ℹ️  Brak folderów dictionaries/<kod>/gui/dokumentacja/ — nic do zrobienia.")
         return wyniki
 
+    # 13.4: licz globalne placeholdery raz na batch — niezależne od języka
+    # docelowego (wszystkie referowane wartości pochodzą z `dictionaries/pl/`,
+    # paczki rdzennej projektu).
+    placeholdery_globalne = _zbuduj_placeholdery_globalne()
+
     for jezyk in jezyki:
         ui = _wczytaj_ui(jezyk)
         szablony = _wczytaj_szablony(jezyk)
@@ -299,7 +392,8 @@ def generuj(
             continue
 
         for id_szablonu, tresc_szablonu in szablony:
-            wynik_tresc, brakujace = _rozwin_placeholdery(tresc_szablonu, ui)
+            wynik_tresc, brakujace = _rozwin_placeholdery(
+                tresc_szablonu, ui, placeholdery_globalne)
             if brakujace and not cicho:
                 unikalne = sorted(set(brakujace))
                 print(f"⚠️  {jezyk}/{id_szablonu}: brakujące placeholdery w ui.yaml: {unikalne}")

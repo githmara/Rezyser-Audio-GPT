@@ -184,6 +184,7 @@ def tlumacz_dlugi_tekst(
     model_tlumacz: str = "gpt-4o",
     model_iso: str = "gpt-4o-mini",
     max_znakow_na_blok: int = 10_000,
+    prompt_dodatkowy: str = "",
 ) -> WynikTlumaczenia | None:
     """Tłumaczy długi tekst przez OpenAI z wznawianiem po przerwaniu.
 
@@ -206,6 +207,13 @@ def tlumacz_dlugi_tekst(
         model_tlumacz:     Nazwa modelu do głównego tłumaczenia.
         model_iso:         Nazwa tańszego modelu do wykrycia kodu ISO.
         max_znakow_na_blok: Rozmiar bloku przy dzieleniu długiego tekstu.
+        prompt_dodatkowy:  13.4. Doklejany do `_PROMPT_SYSTEMOWY_TEMPLATE` jako
+                           dodatkowy kontekst projektowy — np. lista skrótowców
+                           per język, wskazówki dotyczące szyfrów, polityka
+                           podmiany akcentów. Pusty string = brak modyfikacji.
+                           Używane przez batchowy autotłumacz dokumentacji
+                           (`buduj_wielojezyczne_docs.py`); GUI Poligloty AI
+                           dalej wywołuje funkcję bez tego argumentu.
 
     Returns:
         :class:`WynikTlumaczenia` po sukcesie, albo ``None`` po błędzie
@@ -218,6 +226,10 @@ def tlumacz_dlugi_tekst(
     plik_temp = _sciezka_pliku_tymczasowego(runtime_dir, base_name)
 
     sys_prompt = _prompt_systemowy(jezyk_docelowy)
+    if prompt_dodatkowy:
+        # Doklejony jako kolejna sekcja system-message — model traktuje całość
+        # jako jeden blok instrukcji, więc nie ma ryzyka „I'm just an AI" itp.
+        sys_prompt = sys_prompt + "\n\n" + prompt_dodatkowy
     bloki = _podziel_na_bloki(tresc, max_znakow=max_znakow_na_blok)
 
     # -------- Odzyskanie wcześniej opłaconych bloków ----------------------
