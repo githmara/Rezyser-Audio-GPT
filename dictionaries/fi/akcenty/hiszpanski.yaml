@@ -1,0 +1,81 @@
+# -----------------------------------------------------------------------------
+#  ESPANJAN AKSENTTI (suomi → espanjalainen TTS)
+#  Syntetisaattoreille: Helena / Pablo / Sabina (espanjalainen TTS).
+# -----------------------------------------------------------------------------
+id: hiszpanski
+etykieta: "Espanja (esim. Helena / Pablo)"
+opis: |
+  Mukauttaa suomenkielisen tekstin espanjalaiselle puhesyntetisaattorille
+  (Helena / Pablo / Sabina). Korvaa h-kirjaimen j-kirjaimella (frikatiivi)
+  ja j-kirjaimen y-kirjaimella.
+
+  Kaksi kriittistä ongelmaa ratkaistu oikeassa järjestyksessä:
+
+  ONGELMA 1 — j → /x/ (kurkku-h, "jota"):
+    Espanjalainen TTS lukee "j":n /x/:nä (kuten espanjan "jota").
+    Suomen j = /j/ (pehmeä). Korjaus: j → y.
+    Espanjalainen "y" = /j/ tai /ʝ/ — riittävän lähellä suomen /j/:tä.
+
+  ONGELMA 2 — h on HILJAINEN espanjassa:
+    Suomen h = /h/ (aina äännetty, selkeä). Espanjassa "h" on mykkä.
+    Korjaus: h → j (TOINEN, j→y jo tehty — alkuperäiset "j":t poissa).
+    Espanjan j = /x/ = voimakas h-äänne — paljon parempi kuin täydellinen
+    hiljaisuus!
+
+    Esimerkki: "Helsinki" → j→y (ei j:tä): "Helsinki" → h→j: "Jelsinki"
+    → Helena lukee: /xelsiŋki/ — kuultava kurkku-H ✓
+
+  SÄÄNTÖJEN JÄRJESTYS ON KRIITTINEN:
+    Ensin j → y, vasta sitten h → j.
+    Käänteinen järjestys tuottaisi kaaoksen.
+
+  Suomen ä/ö/å:
+    - ä (/æ/) → e  (espanjan /e/ ≈ suomen /æ/)
+    - ö (/ø/) → e  (/ø/ on etinen vokaali; /e/ parempi kuin /o/)
+    - å (/ɔ/) → o
+  Pitkät ää/öö → ee — fonologinen pituus säilyy.
+
+  Tunnetut rajoitukset:
+    - ll → Helena lukee /ʎ/ tai /j/ suomen geminaaatin /lː/ sijaan
+    - v  → Helena lukee /b/ tai /β/ suomen /v/:n sijaan
+    - ng → voi tuottaa ylimääräisen /g/:n (/ŋg/ eikä /ŋ/)
+iso: es
+kategoria: akcent
+kolejnosc: 70
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Fonetiset korvaukset ---
+# KRIITTINEN JÄRJESTYS (lue yllä oleva opis!):
+#   1. j → y   (ENSIMMÄINEN: suomen /j/ → espanjan y = /j/)
+#   2. h → j   (TOINEN: suomen /h/ → espanjan j = /x/ = voimakas h)
+#   3. Pitkät ää/öö ENNEN lyhyitä ä/ö
+#   4. Lyhyet ä/ö/å lopuksi
+zamiany:
+  # --- 1. j → y (EHDOTTOMASTI ENSIMMÄINEN) ---
+  - { wzor: "j",  zamiana: "y"  }
+  - { wzor: "J",  zamiana: "Y"  }
+
+  # --- 2. h → j (TOINEN, j→y:n jälkeen) ---
+  - { wzor: "h",  zamiana: "j"  }
+  - { wzor: "H",  zamiana: "J"  }
+
+  # --- 3. Pitkät suomen vokaalit (pituus säilyy) ---
+  - { wzor: "ää", zamiana: "ee" }
+  - { wzor: "Ää", zamiana: "Ee" }
+  - { wzor: "ÄÄ", zamiana: "EE" }
+  - { wzor: "öö", zamiana: "ee" }
+  - { wzor: "Öö", zamiana: "Ee" }
+  - { wzor: "ÖÖ", zamiana: "EE" }
+
+  # --- 4. Lyhyet suomen natiivivokaalit → lähimmät espanjalaiset ---
+  - { wzor: "ä",  zamiana: "e"  }
+  - { wzor: "Ä",  zamiana: "E"  }
+  - { wzor: "ö",  zamiana: "e"  }
+  - { wzor: "Ö",  zamiana: "E"  }
+  - { wzor: "å",  zamiana: "o"  }
+  - { wzor: "Å",  zamiana: "O"  }

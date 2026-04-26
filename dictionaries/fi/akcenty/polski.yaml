@@ -1,0 +1,56 @@
+# -----------------------------------------------------------------------------
+#  PUOLAN AKSENTTI (suomi → puolalainen TTS)
+#  Syntetisaattoreille: Ewa / Adam / Maja (puolalainen TTS).
+# -----------------------------------------------------------------------------
+id: polski
+etykieta: "Puola (esim. Ewa / Adam / Maja)"
+opis: |
+  Mukauttaa suomenkielisen tekstin puolalaiselle puhesyntetisaattorille
+  (Ewa / Adam / Maja). Puolan ja suomen konsonantisto on yllättävän
+  yhteensopiva — useimmat kirjaimet siirtyvät sellaisenaan:
+    - j   = /j/  molemmissa kielissä — ei muutosta tarvita
+    - v   = /v/  molemmissa — ei muutosta
+    - r   — puolalainen rullaava r = suomalainen rullaava r ✓
+    - kk/tt/pp — puolalainen TTS käsittelee geminaatat ✓
+    - h   — Ewa lukee /x/:nä suomen /h/:n sijaan; tämä on luonteva
+             puolalainen virhe suomea puhuttaessa — aksentin efekti, jätetään
+
+  Tarvittavat muutokset koskevat kolmea suomen natiiviaakkosia,
+  joita Ewa ei tunne:
+    - ä (/æ/)  → e (/ɛ/)   Suun etuosa; parempi kuin puolalainen /a/
+    - ö (/ø/)  → e (/ɛ/)   /ø/ on etinen, pyöristetty; /ɛ/ parempi kuin /o/
+    - å (/ɔ/)  → o (/o/)   Lähin vastine
+  Pitkät ää/öö kuvautuvat ee:ksi — fonologinen pituus säilyy.
+
+  Suomen y (/y/ = ü) Ewa lukee /ɨ/:nä (keski-asento, pyöristämätön).
+  Epätäydellinen mutta hyväksyttävä lähennys; molemmat ovat korkeita
+  vokaaleja ja antavat tekstille "vieraskielisen" leiman.
+iso: pl
+kategoria: akcent
+kolejnosc: 35
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Fonetiset korvaukset ---
+# Järjestys: pitkät ää/öö ENNEN lyhyitä ä/ö,
+# jotta "öö" ei hajoa kahteen erilliseen "ö"→"e"-korvaukseen.
+zamiany:
+  # --- Pitkät suomen vokaalit (pituus säilyy) ---
+  - { wzor: "ää", zamiana: "ee" }
+  - { wzor: "Ää", zamiana: "Ee" }
+  - { wzor: "ÄÄ", zamiana: "EE" }
+  - { wzor: "öö", zamiana: "ee" }
+  - { wzor: "Öö", zamiana: "Ee" }
+  - { wzor: "ÖÖ", zamiana: "EE" }
+
+  # --- Lyhyet suomen natiivivokaalit → lähimmät puolalaiset ---
+  - { wzor: "ä",  zamiana: "e"  }
+  - { wzor: "Ä",  zamiana: "E"  }
+  - { wzor: "ö",  zamiana: "e"  }
+  - { wzor: "Ö",  zamiana: "E"  }
+  - { wzor: "å",  zamiana: "o"  }
+  - { wzor: "Å",  zamiana: "O"  }
