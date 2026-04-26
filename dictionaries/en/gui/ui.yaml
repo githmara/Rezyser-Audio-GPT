@@ -56,6 +56,7 @@ main:
     konwerter: "&Converter\tCtrl+3"
     manager: "&Rule Manager\tCtrl+4"
     zakoncz: "E&xit\tAlt+F4"
+    jezyk_interfejsu: "&Interface language"
   menu_status:
     strona_glowna: "Return to the start screen with tool descriptions and System Check"
     rezyser: "Opens the Director module – script and prose writing with AI"
@@ -63,6 +64,7 @@ main:
     konwerter: "Opens the Converter module – create Word files"
     manager: "Opens the Rule Manager – YAML file explorer in dictionaries/ and creator of new accents/modes/ciphers"
     zakoncz: "Close the application"
+    jezyk_interfejsu: "Choose the application interface language (change requires restart)"
   btn:
     rezyser: "🎬  &Director"
     poliglota: "🌍  &Polyglot"
@@ -79,6 +81,12 @@ main:
     poliglota: "Polyglot"
     konwerter: "Converter"
     manager: "Rule Manager"
+  dialog:
+    zmiana_jezyka_tytul: "Interface language change"
+    zmiana_jezyka_tresc: |-
+      Changing the interface language requires restarting the application.
+
+      Click OK to close the application. After restarting the interface will be in the selected language ({nazwa_jezyka}).
 
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)

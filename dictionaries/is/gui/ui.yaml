@@ -56,6 +56,7 @@ main:
     konwerter: "&Breytingartæki\tCtrl+3"
     manager: "&Reglustjóri\tCtrl+4"
     zakoncz: "Ljúka &við\tAlt+F4"
+    jezyk_interfejsu: "&Tungumál viðmóts"
   menu_status:
     strona_glowna: "Fara aftur á upphafsskjá með verkfæralýsingu og System Check"
     rezyser: "Opnar Leikstjórnarstillingu – skrifa handrit og prósa með AI"
@@ -63,6 +64,7 @@ main:
     konwerter: "Opnar Breytingartæki – búa til Word skrár"
     manager: "Opnar Reglustjóra – skoða YAML skrár í dictionaries/ og búa til nýja framburði / stillingar / dulmál"
     zakoncz: "Loka forriti"
+    jezyk_interfejsu: "Veldu tungumál notendaviðmóts forritsins (breytingin krefst endurræsingar)"
   btn:
     rezyser: "🎬  &Leikstjóri"
     poliglota: "🌍  &Tungumálamaður"
@@ -79,6 +81,12 @@ main:
     poliglota: "Tungumálamaður"
     konwerter: "Breytingartæki"
     manager: "Reglustjóri"
+  dialog:
+    zmiana_jezyka_tytul: "Breyting á tungumáli viðmóts"
+    zmiana_jezyka_tresc: |-
+      Til að breyta tungumáli viðmótsins þarf að endurræsa forritið.
+
+      Smelltu á OK til að loka forritinu. Eftir endurræsingu verður viðmótið á völdu tungumáli ({nazwa_jezyka}).
 
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
