@@ -42,15 +42,31 @@ import tlumacz_ai
 from i18n import t
 
 
-# 13.2: język bazowy pipeline'u Poligloty żyje teraz na poziomie instancji
-# (``self._jezyk_aktywny``). Domyślną wartością jest ``"pl"`` — jedyny język
-# kompletny w wersji wydawniczej. Po wczytaniu pliku panel wywołuje
-# ``core_poliglota.wykryj_jezyk_zrodlowy(...)``, który waliduje wynik
-# wobec dostępnych folderów w ``dictionaries/`` i przełącza pipeline na
-# wykryty kompletny język. Twardego polskiego fallbacku już NIE robimy —
-# akcenty/szyfry to reguły fonetyczne ściśle związane z językiem źródłowym
-# i mieszanie ich między językami byłoby błędem merytorycznym, nie wolnością.
-JEZYK_DOMYSLNY = "pl"
+# 13.2+: język bazowy pipeline'u Poligloty żyje na poziomie instancji
+# (``self._jezyk_aktywny``). Po wczytaniu pliku panel wywołuje
+# ``core_poliglota.wykryj_jezyk_zrodlowy(...)``, który waliduje wynik wobec
+# dostępnych folderów w ``dictionaries/`` i przełącza pipeline na wykryty
+# kompletny język.
+#
+# 13.4: dopóki nie ma wczytanego pliku, default bierzemy z języka UI
+# (``i18n.aktualny_jezyk()``) — pod warunkiem, że ma komplet reguł
+# w ``dictionaries/``. Inaczej spadamy na ``pl`` (rdzeń projektu, zawsze
+# kompletny). Bez tego użytkownik EN widział angielski opis sekcji,
+# ale po przełączeniu trybu na Reżysera/Szyfranta combobox zalewały
+# polskie etykiety akcentów (bug zaobserwowany na 13.3.1).
+JEZYK_FALLBACK = "pl"
+
+
+def _wybierz_domyslny_jezyk_pipeline() -> str:
+    """Zwraca kod języka, którym Poliglota zainicjuje pipeline bez projektu.
+
+    Priorytet: aktualny język UI (jeśli ma komplet reguł), fallback na ``pl``.
+    """
+    ui = i18n.aktualny_jezyk()
+    kompletne = core_poliglota.dostepne_jezyki_bazowe()
+    if ui in kompletne:
+        return ui
+    return JEZYK_FALLBACK
 
 
 class PoliglotaPanel(wx.Panel):
@@ -92,10 +108,12 @@ class PoliglotaPanel(wx.Panel):
         # Wątek tła tłumacza AI (referencja, by nie uruchamiać drugiego)
         self._worker_thread: threading.Thread | None = None
 
-        # Aktywny język pipeline'u (akcenty/szyfry/cezar). Po wczytaniu pliku
-        # podmieniany przez ``_odswiez_warianty()`` na wynik
-        # ``wykryj_jezyk_zrodlowy()``.
-        self._jezyk_aktywny: str = JEZYK_DOMYSLNY
+        # Aktywny język pipeline'u (akcenty/szyfry/cezar). Bez wczytanego
+        # pliku domyślnie idzie z języka UI (gdy ma komplet reguł), żeby
+        # użytkownik EN nie zobaczył polskich etykiet akcentów w combo.
+        # Po wczytaniu pliku podmieniany przez ``_odswiez_warianty()``
+        # na wynik ``wykryj_jezyk_zrodlowy()``.
+        self._jezyk_aktywny: str = _wybierz_domyslny_jezyk_pipeline()
 
         # Konfiguracje wariantów (z YAML) – pobierane raz przy starcie panelu,
         # ponownie przy zmianie ``self._jezyk_aktywny``.
@@ -422,16 +440,33 @@ class PoliglotaPanel(wx.Panel):
         self._plik_katalog      = os.path.dirname(os.path.abspath(file_name))
         self._sciezka_oryginalu = os.path.abspath(file_name)
 
-        # 13.2: po wczytaniu pliku przełącz pipeline na język wykryty z treści
-        # (tylko jeśli ma kompletny folder w ``dictionaries/``). Domyślny
-        # ``self._jezyk_aktywny`` jest zachowywany jako fallback.
+        # 13.2: po wczytaniu pliku wykrywamy język treści (tylko jeśli ma
+        # kompletny folder w ``dictionaries/``). Domyślny ``self._jezyk_aktywny``
+        # jest zachowywany jako fallback.
+        # 13.4 (A11Y): poprzednio przełączenie odbywało się cicho, przez co
+        # NVDA nie zgłaszało zmiany etykiet w combo akcentów/szyfrów. Teraz
+        # przed przełączeniem prosimy o jawną zgodę użytkownika — dialog
+        # YES_NO jest sam w sobie powiadomieniem (czytnik ekranu odczyta
+        # tytuł i treść, więc użytkownik wie, że etykiety zaraz się zmienią).
+        # Cancel = zostaje aktywny język UI; ``_maybe_ostrzez_o_jezyku_zrodla``
+        # i tak rzuci miękkie ostrzeżenie przy uruchomieniu trybu Reżysera.
         wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
             self._file_content,
             fallback=self._jezyk_aktywny,
         )
         if wykryty != self._jezyk_aktywny:
-            self._jezyk_aktywny = wykryty
-            self._odswiez_warianty()
+            odp = wx.MessageBox(
+                t(
+                    "poliglota.zmiana_jezyka_pipeline_tresc",
+                    jezyk_aktywny=core_poliglota.natywna_nazwa(self._jezyk_aktywny),
+                    jezyk_wykryty=core_poliglota.natywna_nazwa(wykryty),
+                ),
+                t("poliglota.zmiana_jezyka_pipeline_tytul"),
+                wx.YES_NO | wx.ICON_QUESTION, self,
+            )
+            if odp == wx.YES:
+                self._jezyk_aktywny = wykryty
+                self._odswiez_warianty()
 
         znaki = len(self._file_content)
         status_msg = t(

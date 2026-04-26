@@ -544,6 +544,18 @@ poliglota:
     ({liczba_znakow} znaków).
 
     Możesz teraz skonfigurować tryb pracy i uruchomić przetwarzanie.
+  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
+  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
+  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
+  zmiana_jezyka_pipeline_tytul: "Wykryto inny język niż aktywny"
+  zmiana_jezyka_pipeline_tresc: |-
+    Treść wczytanego pliku jest w języku „{jezyk_wykryty}".
+    Aktywny zestaw reguł (akcenty/szyfry) to obecnie „{jezyk_aktywny}".
+
+    Czy przełączyć reguły na „{jezyk_wykryty}"?
+
+    TAK – etykiety akcentów i szyfrów oraz reguły fonetyczne zmienią się na „{jezyk_wykryty}", zgodnie z treścią pliku.
+    NIE – zostawiam reguły dla „{jezyk_aktywny}". Efekt na obcojęzycznym tekście może być nieprzewidywalny.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading:      "2. Konfiguracja Pracy"
   rb_ai:                 "Tłumacz AI (OpenAI gpt-4o – wymaga klucza API, kosztuje kredyty)"

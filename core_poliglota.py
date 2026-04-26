@@ -387,6 +387,25 @@ def dostepne_jezyki_bazowe() -> list[str]:
     return wynik
 
 
+def natywna_nazwa(kod: str) -> str:
+    """Natywna nazwa języka (prefiks `etykieta` w `<kod>/podstawy.yaml`).
+
+    Przykład: dla ``kod="fi"`` zwraca ``"Suomi"`` (z etykiety
+    ``"Suomi – foneettiset perusteet"``). Fallback na sam kod ISO,
+    gdy etykieta nie ma separatora ` – ` lub nie istnieje.
+
+    13.4: wyciągnięte z ``main._natywna_nazwa`` na poziom modułu, żeby GUI
+    Poligloty mogło użyć tego helpera w komunikacie A11Y o zmianie języka
+    pipeline'u (NVDA odczytuje pełne natywne nazwy zamiast kodów ISO).
+    """
+    etyk = _zaladuj_podstawy(kod).get("etykieta", "")
+    if isinstance(etyk, str) and etyk:
+        nazwa = etyk.split(" – ", 1)[0].strip()
+        if nazwa:
+            return nazwa
+    return kod
+
+
 def lista_wspieranych_jezykow_natywnie(jezyk_pierwszy: str | None = None) -> str:
     """Zwraca natywne nazwy wspieranych języków, gotowe do komunikatu GUI.
 
@@ -432,13 +451,8 @@ def lista_wspieranych_jezykow_natywnie(jezyk_pierwszy: str | None = None) -> str
 
     natywne: list[str] = []
     for kod in kolejnosc:
-        etyk = _zaladuj_podstawy(kod).get("etykieta", "")
-        if not isinstance(etyk, str):
-            continue
-        # Splitujemy po em-dashu; gdy go brak (np. ktoś wpisał krótką
-        # etykietę "Polski"), zostawiamy całość — fallback na cały string.
-        nazwa = etyk.split(" – ", 1)[0].strip()
-        if nazwa:
+        nazwa = natywna_nazwa(kod)
+        if nazwa and nazwa != kod:
             natywne.append(nazwa)
     return ", ".join(natywne)
 

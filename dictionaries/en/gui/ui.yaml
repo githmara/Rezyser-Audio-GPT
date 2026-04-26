@@ -536,6 +536,18 @@ poliglota:
     ({liczba_znakow} characters).
 
     You can now configure the work mode and start processing.
+  # 13.4: A11Y dialog shown BEFORE silently switching `_jezyk_aktywny`
+  # when the loaded file's language differs from the active pipeline,
+  # so NVDA explicitly announces that accent/cipher labels will change.
+  zmiana_jezyka_pipeline_tytul: "Different language detected"
+  zmiana_jezyka_pipeline_tresc: |-
+    The loaded file's text appears to be in "{jezyk_wykryty}".
+    The active rule set (accents/ciphers) is currently "{jezyk_aktywny}".
+
+    Switch the rules to "{jezyk_wykryty}"?
+
+    YES – accent and cipher labels and the phonetic rules will switch to "{jezyk_wykryty}", matching the file's content.
+    NO – I keep the rules for "{jezyk_aktywny}". The effect on foreign-language text may be unpredictable.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Work Configuration"
   rb_ai: "AI Translator (OpenAI gpt-4o – requires API key, costs credits)"

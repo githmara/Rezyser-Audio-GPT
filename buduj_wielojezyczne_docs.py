@@ -2,11 +2,13 @@
 """
 buduj_wielojezyczne_docs.py — Batchowy autotłumacz dokumentacji (i18n, Etap 5/5).
 
-Czyta kanoniczne źródło `dictionaries/pl/gui/dokumentacja/manual.yaml`,
-przepuszcza pole `tresc` przez silnik OpenAI (`tlumacz_ai.py`) z zamrożeniem
-placeholderów `{klucz.zagniezdzony}` (np. `{app.wersja}`, `{rezyser.btn_prolog_label}`)
-i zapisuje wynik jako `dictionaries/<kod>/gui/dokumentacja/manual.yaml` dla
-każdego języka docelowego.
+Czyta WSZYSTKIE szablony z `dictionaries/pl/gui/dokumentacja/*.yaml`
+(13.4: ``manual.yaml``, ``dictionaries.yaml``, każdy kolejny YAML wrzucony
+do tego folderu w przyszłości), przepuszcza pole `tresc` przez silnik
+OpenAI (`tlumacz_ai.py`) z zamrożeniem placeholderów `{klucz.zagniezdzony}`
+(np. `{app.wersja}`, `{rezyser.btn_prolog_label}`) i zapisuje wynik jako
+`dictionaries/<kod>/gui/dokumentacja/<plik>.yaml` dla każdego języka
+docelowego — z zachowaniem oryginalnej nazwy pliku PL.
 
 Architektura (decyzja 13.1 — Etap 5):
 
@@ -46,6 +48,12 @@ Użycie:
   python buduj_wielojezyczne_docs.py --jezyki en                 # tylko angielski
   python buduj_wielojezyczne_docs.py --jezyki en,fi --skip-existing
   python buduj_wielojezyczne_docs.py --jezyki en --dry-run       # sama tokenizacja, zero API
+  python buduj_wielojezyczne_docs.py --wszystkie --szablony dictionaries
+                                                                # tylko jeden szablon
+                                                                # (np. gdy manual.yaml jest
+                                                                #  już przetłumaczony i nie
+                                                                #  chcesz spalać API-billa
+                                                                #  na rerun)
 
 Wymaga: `OPENAI_API_KEY` w środowisku (to samo konto co GUI Poliglota).
 Moduł NIE zależy od wxPython — uruchamialny w CLI / CI bez inicjalizacji GUI.
@@ -85,8 +93,13 @@ RUNTIME_DIR = ROOT / "runtime"
 
 FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
-NAZWA_MANUAL = "manual.yaml"
 KOD_ZRODLOWY = "pl"
+
+# 13.4: skrypt obsługuje WSZYSTKIE szablony z ``dictionaries/pl/gui/dokumentacja/``
+# (manual.yaml + dictionaries.yaml + przyszłe). Wcześniej wpis ``NAZWA_MANUAL``
+# zamykał generację na jednym pliku; teraz iterujemy po katalogu — dorzucenie
+# nowego YAML-a do paczki PL zaowocuje automatycznym tłumaczeniem we wszystkich
+# językach docelowych przy najbliższym ``--wszystkie`` (bez zmian w kodzie).
 
 # Regex placeholdera — 1:1 jak w `generuj_dokumentacje.py`, żeby siatka
 # {klucz.zagniezdzony} była definiowana w jednym kanonicznym miejscu
@@ -202,8 +215,13 @@ def utnij_prefix_z_wyniku(wynik: str) -> str:
 # ---------------------------------------------------------------------------
 # Budowanie wynikowego YAML-a (block scalar `|` + nagłówek-komentarz)
 # ---------------------------------------------------------------------------
-def zbuduj_yaml_wynikowy(kod_jezyka: str, id_szablonu: str, tresc: str) -> str:
-    """Składa `dictionaries/<kod>/gui/dokumentacja/manual.yaml` do zapisu.
+def zbuduj_yaml_wynikowy(
+    kod_jezyka: str,
+    id_szablonu: str,
+    tresc: str,
+    nazwa_pliku: str,
+) -> str:
+    """Składa ``dictionaries/<kod>/gui/dokumentacja/<plik>.yaml`` do zapisu.
 
     Nie używamy `yaml.dump` — nie gwarantuje on block-scalar stylu `|`
     w ładnej formie, zwłaszcza dla treści z nawiasami klamrowymi
@@ -224,10 +242,10 @@ def zbuduj_yaml_wynikowy(kod_jezyka: str, id_szablonu: str, tresc: str) -> str:
 
     naglowek = (
         "# =============================================================================\n"
-        f"# dictionaries/{kod_jezyka}/gui/dokumentacja/manual.yaml\n"
+        f"# dictionaries/{kod_jezyka}/gui/dokumentacja/{nazwa_pliku}\n"
         "#\n"
         "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py\n"
-        f"# ze źródła dictionaries/{KOD_ZRODLOWY}/gui/dokumentacja/manual.yaml\n"
+        f"# ze źródła dictionaries/{KOD_ZRODLOWY}/gui/dokumentacja/{nazwa_pliku}\n"
         "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj\n"
         "# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.\n"
         "#\n"
@@ -246,31 +264,53 @@ def zbuduj_yaml_wynikowy(kod_jezyka: str, id_szablonu: str, tresc: str) -> str:
 # ---------------------------------------------------------------------------
 # Wczytanie źródła PL
 # ---------------------------------------------------------------------------
-def wczytaj_zrodlo_pl() -> tuple[str, str]:
-    """Zwraca (id, tresc) z `dictionaries/pl/gui/dokumentacja/manual.yaml`."""
-    sciezka = DICT_DIR / KOD_ZRODLOWY / FOLDER_GUI / FOLDER_DOKUMENTACJA / NAZWA_MANUAL
-    if not sciezka.is_file():
-        raise FileNotFoundError(f"Brak pliku źródłowego PL: {sciezka}")
-    with open(sciezka, "r", encoding="utf-8") as fh:
-        dane = yaml.safe_load(fh)
-    if not isinstance(dane, dict):
-        raise ValueError(f"Plik {sciezka} nie parsuje się do słownika YAML.")
-    id_szablonu = dane.get("id")
-    tresc = dane.get("tresc")
-    if not isinstance(id_szablonu, str) or not isinstance(tresc, str):
+def wczytaj_szablony_pl() -> list[tuple[str, str, str]]:
+    """Zwraca listę ``(nazwa_pliku, id, tresc)`` z PL-owej dokumentacji.
+
+    13.4: zastępuje hardkodowany ``wczytaj_zrodlo_pl``. Iteruje po
+    ``dictionaries/pl/gui/dokumentacja/*.yaml`` i wyciąga z każdego pola
+    ``id`` oraz ``tresc``. Pliki bez wymaganych pól są pomijane z ostrzeżeniem,
+    ale nie blokują reszty (taka sama łagodna degradacja jak w
+    :mod:`generuj_dokumentacje`).
+
+    Returns:
+        Lista trójek (nazwa pliku jak ``manual.yaml``, id szablonu, treść PL).
+        Posortowana alfabetycznie po nazwie pliku, żeby kolejność tłumaczenia
+        była deterministyczna (cache wznawiania w runtime/ jest po niej kluczowany).
+    """
+    folder = DICT_DIR / KOD_ZRODLOWY / FOLDER_GUI / FOLDER_DOKUMENTACJA
+    if not folder.is_dir():
+        raise FileNotFoundError(f"Brak folderu źródłowego PL: {folder}")
+
+    szablony: list[tuple[str, str, str]] = []
+    for plik in sorted(folder.glob("*.yaml")):
+        with open(plik, "r", encoding="utf-8") as fh:
+            dane = yaml.safe_load(fh)
+        if not isinstance(dane, dict):
+            print(f"⚠️  Pomijam {plik.name}: nie parsuje się do słownika YAML.")
+            continue
+        id_szablonu = dane.get("id")
+        tresc = dane.get("tresc")
+        if not isinstance(id_szablonu, str) or not isinstance(tresc, str):
+            print(f"⚠️  Pomijam {plik.name}: brak stringowych pól `id` lub `tresc`.")
+            continue
+        szablony.append((plik.name, id_szablonu, tresc))
+
+    if not szablony:
         raise ValueError(
-            f"Plik {sciezka} musi mieć stringowe pola `id` oraz `tresc`."
+            f"Folder {folder} nie zawiera żadnego poprawnego szablonu *.yaml."
         )
-    return id_szablonu, tresc
+    return szablony
 
 
 # ---------------------------------------------------------------------------
 # Pipeline dla jednego języka docelowego
 # ---------------------------------------------------------------------------
-def tlumacz_jezyk(
+def tlumacz_szablon(
     kod: str,
     nazwa_pl: str,
     klient: Any,
+    nazwa_pliku: str,
     id_szablonu: str,
     tresc_pl: str,
     *,
@@ -278,28 +318,38 @@ def tlumacz_jezyk(
     dry_run: bool,
     model: str,
 ) -> bool:
-    """Pełny przebieg dla jednego języka. Zwraca True przy sukcesie."""
-    cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / NAZWA_MANUAL
+    """Pełny przebieg tłumaczenia jednego pliku-szablonu na jeden język.
+
+    13.4: zastępuje wcześniejsze ``tlumacz_jezyk``. Argument ``nazwa_pliku``
+    (np. ``"manual.yaml"`` / ``"dictionaries.yaml"``) decyduje o ścieżce
+    docelowej i o kluczu cache wznawiania w ``runtime/``, dzięki czemu
+    równoległe tłumaczenie wielu szablonów w jednym języku nie zderza się
+    o ten sam ``temp_manual_*.jsonl``.
+    """
+    cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
     if cel.exists() and skip_existing:
-        print(f"⏭️  {kod}: {cel.relative_to(ROOT)} już istnieje — pomijam (--skip-existing).")
+        print(f"⏭️  {kod}/{nazwa_pliku}: już istnieje — pomijam (--skip-existing).")
         return True
 
     # --- Krok 1: tokenizacja --------------------------------------------------
     tresc_tok, mapa = tokenizuj(tresc_pl)
     liczba_ph = len(mapa)
-    print(f"ℹ️  {kod}: zamrożono {liczba_ph} placeholderów → tokeny ⟦0..{liczba_ph - 1}⟧.")
+    print(
+        f"ℹ️  {kod}/{nazwa_pliku}: zamrożono {liczba_ph} placeholderów → "
+        f"tokeny ⟦0..{max(liczba_ph - 1, 0)}⟧."
+    )
     if dry_run:
         # Podgląd: kilka pierwszych mapowań i próbka tokenizowanej treści
-        print(f"    Podgląd mapy (pierwsze 8):")
-        for idx in list(mapa.keys())[:8]:
-            print(f"      ⟦{idx}⟧ = {mapa[idx]}")
-        if liczba_ph > 8:
-            print(f"      ... (+{liczba_ph - 8} kolejnych)")
+        if liczba_ph:
+            print(f"    Podgląd mapy (pierwsze 8):")
+            for idx in list(mapa.keys())[:8]:
+                print(f"      ⟦{idx}⟧ = {mapa[idx]}")
+            if liczba_ph > 8:
+                print(f"      ... (+{liczba_ph - 8} kolejnych)")
+        else:
+            print(f"    (Brak placeholderów — szablon czysto tekstowy.)")
         # Szybki sanity check — mapa musi pokrywać 100% wystąpień w oryginale
         oryginalne = Counter(PLACEHOLDER_REGEX.findall(tresc_pl))
-        z_mapy = Counter(
-            re.findall(r"([a-zA-Z_][a-zA-Z0-9_.]*)", " ".join(v.strip("{}") for v in mapa.values()))
-        )
         if sum(oryginalne.values()) == liczba_ph:
             print(f"    ✅ Sanity check: wszystkie {liczba_ph} wystąpień placeholderów trafiło do mapy.")
         else:
@@ -314,24 +364,28 @@ def tlumacz_jezyk(
     payload = PREFIX_INSTRUKCJA + tresc_tok
     blad_kryt: dict[str, Any] = {"msg": None, "partial": None}
 
+    # Klucz cache wznawiania: nazwa pliku BEZ rozszerzenia (np. "manual",
+    # "dictionaries"). Dzięki temu temp_manual_pl_to_en_*.jsonl i
+    # temp_dictionaries_pl_to_en_*.jsonl żyją obok siebie i nie kasują się
+    # nawzajem przy częściowym progresie.
+    rdzen = nazwa_pliku.rsplit(".", 1)[0]
+
     def _on_postep(msg: str, pct: int) -> None:
-        sys.stderr.write(f"   [{kod} {pct:3d}%] {msg}\n")
+        sys.stderr.write(f"   [{kod}/{rdzen} {pct:3d}%] {msg}\n")
 
     def _on_blad_krytyczny(msg: str, partial: str) -> None:
         blad_kryt["msg"] = msg
         blad_kryt["partial"] = partial
 
     def _on_blad_miekki(msg: str, tytul: str) -> None:
-        # ISO i tak nie używamy (generujemy dictionaries/<kod>/..., mamy kod),
-        # ale logujemy ostrzeżenie, żeby nie znikło w ciszy.
-        print(f"⚠️  {kod}: {tytul} — {msg.splitlines()[0]}")
+        print(f"⚠️  {kod}/{nazwa_pliku}: {tytul} — {msg.splitlines()[0]}")
 
     wynik = tlumacz_dlugi_tekst(
         tresc=payload,
         jezyk_docelowy=nazwa_pl,
         klient=klient,
         runtime_dir=str(RUNTIME_DIR),
-        oryginalna_nazwa=f"manual_{KOD_ZRODLOWY}_to_{kod}",
+        oryginalna_nazwa=f"{rdzen}_{KOD_ZRODLOWY}_to_{kod}",
         on_postep=_on_postep,
         on_blad_krytyczny=_on_blad_krytyczny,
         on_blad_miekki=_on_blad_miekki,
@@ -340,15 +394,18 @@ def tlumacz_jezyk(
 
     if wynik is None:
         komunikat = blad_kryt["msg"] or "nieznany błąd silnika tlumacz_ai.py"
-        print(f"❌  {kod}: przerwano tłumaczenie.\n    {komunikat.splitlines()[0]}")
-        print(f"    Częściowy postęp w: {RUNTIME_DIR / f'temp_manual_{KOD_ZRODLOWY}_to_{kod}_tlumaczenie_{nazwa_pl}.jsonl'}")
+        print(f"❌  {kod}/{nazwa_pliku}: przerwano tłumaczenie.\n    {komunikat.splitlines()[0]}")
+        print(
+            f"    Częściowy postęp w: "
+            f"{RUNTIME_DIR / f'temp_{rdzen}_{KOD_ZRODLOWY}_to_{kod}_tlumaczenie_{nazwa_pl}.jsonl'}"
+        )
         return False
 
     # --- Krok 3: obcięcie prefixu + walidacja parzystości --------------------
     tekst_wy = utnij_prefix_z_wyniku(wynik.tekst)
     ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
     if not ok:
-        print(f"❌  {kod}: NARUSZONA parzystość markerów ⟦i⟧. NIE zapisuję pliku.")
+        print(f"❌  {kod}/{nazwa_pliku}: NARUSZONA parzystość markerów ⟦i⟧. NIE zapisuję pliku.")
         for diag in problemy[:20]:
             print(f"     {diag}")
         if len(problemy) > 20:
@@ -361,14 +418,14 @@ def tlumacz_jezyk(
 
     # --- Krok 4: detokenizacja + zapis ---------------------------------------
     tekst_final = detokenizuj(tekst_wy, mapa)
-    zawartosc_yaml = zbuduj_yaml_wynikowy(kod, id_szablonu, tekst_final)
+    zawartosc_yaml = zbuduj_yaml_wynikowy(kod, id_szablonu, tekst_final, nazwa_pliku)
 
     cel.parent.mkdir(parents=True, exist_ok=True)
     with open(cel, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(zawartosc_yaml)
 
     print(
-        f"✅  {kod}: zapisano {cel.relative_to(ROOT)} "
+        f"✅  {kod}/{nazwa_pliku}: zapisano {cel.relative_to(ROOT)} "
         f"({liczba_ph} placeholderów OK, {len(tekst_final):,} znaków)."
     )
     return True
@@ -399,10 +456,26 @@ def _parsuj_argumenty() -> argparse.Namespace:
         help=f"Tłumacz na wszystkie języki ({', '.join(MAPA_JEZYKOW)}).",
     )
     parser.add_argument(
+        "--szablony",
+        type=str,
+        default="",
+        help="CSV nazw szablonów do przetłumaczenia (np. `dictionaries.yaml` "
+             "lub bare-name `dictionaries`; rozszerzenie `.yaml` jest "
+             "dosztukowywane automatycznie). Pusta wartość = wszystkie szablony "
+             "z `dictionaries/pl/gui/dokumentacja/`. Sensowne, gdy część "
+             "szablonów ma już aktualne tłumaczenia na dysku i nie chcesz "
+             "ponownie spalać API-billa (np. `--szablony dictionaries`, gdy "
+             "`manual.yaml` jest już przetłumaczony we wszystkich językach).",
+    )
+    parser.add_argument(
         "--skip-existing",
         action="store_true",
-        help="Pomiń języki, dla których `dictionaries/<kod>/gui/dokumentacja/manual.yaml` "
-             "już istnieje (idempotentny rerun).",
+        help="Pomiń SZABLONY, dla których "
+             "`dictionaries/<kod>/gui/dokumentacja/<plik>.yaml` już istnieje "
+             "(idempotentny rerun na poziomie pojedynczego pliku — gdy dorzucisz "
+             "nowy szablon do PL, wystarczy `--wszystkie --skip-existing`, żeby "
+             "dotłumaczyć tylko brakujące pozycje bez ponownego API-billingu na "
+             "manual.yaml).",
     )
     parser.add_argument(
         "--dry-run",
@@ -415,6 +488,43 @@ def _parsuj_argumenty() -> argparse.Namespace:
         help="Model OpenAI do głównego tłumaczenia (domyślnie: gpt-4o).",
     )
     return parser.parse_args()
+
+
+def _filtruj_szablony(
+    wszystkie: list[tuple[str, str, str]],
+    wybor_csv: str,
+) -> list[tuple[str, str, str]]:
+    """Zostawia tylko te szablony PL, których nazwy figurują w ``wybor_csv``.
+
+    Pusty CSV = brak filtrowania (zachowanie domyślne — wszystkie szablony).
+    Akceptuje zarówno pełne nazwy plików (``manual.yaml``), jak i bare-names
+    (``manual``); rozszerzenie ``.yaml`` jest dosztukowywane automatycznie.
+
+    Twardy SystemExit, gdy CSV referuje do nieistniejącego szablonu — lepiej
+    wcześnie wywalić niż cicho zrobić nic, bo użytkownik mógł pomylić nazwę.
+    """
+    if not wybor_csv.strip():
+        return wszystkie
+
+    wybrane: set[str] = set()
+    for pozycja in wybor_csv.split(","):
+        nazwa = pozycja.strip()
+        if not nazwa:
+            continue
+        if not nazwa.endswith((".yaml", ".yml")):
+            nazwa += ".yaml"
+        wybrane.add(nazwa)
+
+    dostepne = {s[0] for s in wszystkie}
+    nieznane = sorted(wybrane - dostepne)
+    if nieznane:
+        raise SystemExit(
+            f"❌ Nieznane szablony: {nieznane}.\n"
+            f"   Dostępne w dictionaries/{KOD_ZRODLOWY}/{FOLDER_GUI}/{FOLDER_DOKUMENTACJA}/: "
+            f"{sorted(dostepne)}"
+        )
+
+    return [s for s in wszystkie if s[0] in wybrane]
 
 
 def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
@@ -466,10 +576,25 @@ def main() -> int:
     kody = _wybierz_jezyki(args)
 
     try:
-        id_szablonu, tresc_pl = wczytaj_zrodlo_pl()
+        wszystkie_szablony = wczytaj_szablony_pl()
     except (FileNotFoundError, ValueError) as exc:
         print(f"❌ {exc}")
         return 2
+
+    szablony = _filtruj_szablony(wszystkie_szablony, args.szablony)
+    if not szablony:
+        print("❌ Filtr `--szablony` zostawił pustą listę — nic do roboty.")
+        return 2
+
+    pelna_lista = ", ".join(s[0] for s in wszystkie_szablony)
+    wybrana_lista = ", ".join(s[0] for s in szablony)
+    if len(szablony) == len(wszystkie_szablony):
+        print(f"ℹ️  Szablony PL do przetłumaczenia: {wybrana_lista} (razem {len(szablony)}).")
+    else:
+        print(
+            f"ℹ️  Szablony PL: filtr `--szablony` wybrał {wybrana_lista} "
+            f"({len(szablony)}/{len(wszystkie_szablony)} dostępnych: {pelna_lista})."
+        )
 
     klient: Any = None if args.dry_run else _zainicjuj_klienta_openai()
 
@@ -478,22 +603,27 @@ def main() -> int:
     for kod in kody:
         nazwa_pl = MAPA_JEZYKOW[kod]
         print(f"\n========== {kod.upper()} ({nazwa_pl}) ==========")
-        ok = tlumacz_jezyk(
-            kod,
-            nazwa_pl,
-            klient,
-            id_szablonu,
-            tresc_pl,
-            skip_existing=args.skip_existing,
-            dry_run=args.dry_run,
-            model=args.model,
-        )
-        (sukcesy if ok else porazki).append(kod)
+        wszystko_ok = True
+        for nazwa_pliku, id_szablonu, tresc_pl in szablony:
+            ok = tlumacz_szablon(
+                kod,
+                nazwa_pl,
+                klient,
+                nazwa_pliku,
+                id_szablonu,
+                tresc_pl,
+                skip_existing=args.skip_existing,
+                dry_run=args.dry_run,
+                model=args.model,
+            )
+            if not ok:
+                wszystko_ok = False
+        (sukcesy if wszystko_ok else porazki).append(kod)
 
     print("\n========== PODSUMOWANIE ==========")
     print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
     if porazki:
-        print(f"❌ Porażki: {', '.join(porazki)}")
+        print(f"❌ Porażki (≥1 szablon nie powiódł się): {', '.join(porazki)}")
         return 1
     return 0
 

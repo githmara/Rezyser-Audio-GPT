@@ -42,19 +42,11 @@ _NAZWA_APP_CONFIG  = "RezyserAudioGPT"
 _KLUCZ_CONFIG_JEZYK = "/JezykInterfejsu"
 
 
-def _natywna_nazwa(kod: str) -> str:
-    """Natywna nazwa języka (prefiks `etykieta` w `<kod>/podstawy.yaml`).
-
-    Przykład: dla `kod="fi"` zwraca ``"Suomi"`` (z etykiety
-    ``"Suomi – foneettiset perusteet"``). Fallback na sam kod ISO,
-    gdy etykieta nie ma separatora ` – ` lub nie istnieje.
-    """
-    etyk = core_poliglota._zaladuj_podstawy(kod).get("etykieta", "")
-    if isinstance(etyk, str) and etyk:
-        nazwa = etyk.split(" – ", 1)[0].strip()
-        if nazwa:
-            return nazwa
-    return kod
+# 13.4: lokalny `_natywna_nazwa` zastąpiony publicznym `core_poliglota.natywna_nazwa`
+# (single source of truth — używane też w GUI Poligloty przy dialogu zmiany języka
+# pipeline'u). Funkcja modułu Poligloty czyta `<kod>/podstawy.yaml::etykieta`
+# i bierze prefiks przed em-dashem.
+_natywna_nazwa = core_poliglota.natywna_nazwa
 
 
 def _wybierz_jezyk_startowy() -> str:
