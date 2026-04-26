@@ -76,6 +76,17 @@ ROOT = Path(__file__).resolve().parent
 DICT_DIR = ROOT / "dictionaries"
 DOCS_DIR = ROOT / "docs"
 
+# Single source of truth dla numeru wersji (od 13.4) — plik VERSION w roocie.
+# Wczytywane raz przy imporcie, używane do rozwinięcia placeholdera
+# `{numer_wersji}` zagnieżdżonego w wartościach `app.wersja` w ui.yaml
+# (regex `_rozwin_placeholdery` nie iteruje rekursywnie, więc po pobraniu
+# wartości robimy explicit replace w `_zamien`).
+_PLIK_WERSJI = ROOT / "VERSION"
+try:
+    NUMER_WERSJI = _PLIK_WERSJI.read_text(encoding="utf-8").strip()
+except OSError:
+    NUMER_WERSJI = "?"
+
 # Podfoldery w dictionaries/<kod>/gui/
 FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
@@ -237,6 +248,11 @@ def _rozwin_placeholdery(szablon: str, ui_dane: dict[str, Any]) -> tuple[str, li
         if wartosc is None or not isinstance(wartosc, str):
             brakujace.append(klucz)
             return match.group(0)   # zostaw oryginalny {klucz}
+        # Drugi krok: rozwiń zagnieżdżony placeholder {numer_wersji}, jeśli
+        # występuje w wartości (np. `app.wersja: "{numer_wersji} – Sufiks"`
+        # w ui.yaml — od 13.4 numer wersji żyje w pliku VERSION).
+        if "{numer_wersji}" in wartosc:
+            wartosc = wartosc.replace("{numer_wersji}", NUMER_WERSJI)
         return _normalizuj_etykiete(wartosc)
 
     wynik = PLACEHOLDER_REGEX.sub(_zamien, szablon)

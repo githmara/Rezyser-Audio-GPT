@@ -49,6 +49,15 @@ _DICTIONARIES_DIR = _ROOT_DIR / "dictionaries"
 _NAZWA_PLIKU_UI = "ui.yaml"
 _FOLDER_GUI = "gui"
 
+# Single source of truth dla numeru wersji. Plain text w roocie, jeden bump
+# = wszystkie języki. Wartość ładowana raz przy imporcie (read_text jest tani),
+# auto-wstrzykiwana do każdego format() w `t()` jako kwarg `numer_wersji`.
+_PLIK_WERSJI = _ROOT_DIR / "VERSION"
+try:
+    NUMER_WERSJI = _PLIK_WERSJI.read_text(encoding="utf-8").strip()
+except OSError:
+    NUMER_WERSJI = "?"
+
 
 # ---------------------------------------------------------------------------
 # Stan modułu
@@ -177,12 +186,14 @@ def t(klucz: str, **kwargs: Any) -> str:
     if not isinstance(wartosc, str):
         return wartosc
 
-    if kwargs:
-        try:
-            return wartosc.format(**kwargs)
-        except (KeyError, IndexError, ValueError):
-            return wartosc
-    return wartosc
+    # Auto-wstrzyknięcie numer_wersji: każda wartość w ui.yaml może użyć
+    # placeholdera {numer_wersji} bez konieczności wywoływania t() z kwargiem.
+    # Wartość przekazana jawnie (np. w testach) ma pierwszeństwo.
+    kwargs.setdefault("numer_wersji", NUMER_WERSJI)
+    try:
+        return wartosc.format(**kwargs)
+    except (KeyError, IndexError, ValueError):
+        return wartosc
 
 
 # ---------------------------------------------------------------------------

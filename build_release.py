@@ -1,10 +1,7 @@
 import os
-import re
 import zipfile
 import subprocess
 import sys
-
-import yaml
 
 import generuj_dokumentacje
 
@@ -27,87 +24,55 @@ if sys.platform == "win32":
 
 
 # =============================================================================
-# WYKRYWANIE WERSJI (wersja 13.1 — single source of truth: ui.yaml)
+# WYKRYWANIE WERSJI (od 13.4 — single source of truth: plik VERSION w roocie)
 # =============================================================================
 # Historia:
 #   * do 12.x: numer wersji podawany ręcznie przez input() — literówki, desynchronizacja.
 #   * 13.0:    cross-check main.py::MainFrame.VERSION ↔ pierwsza linia instrukcja.txt
 #              — działało, ale wymagało edycji DWÓCH miejsc przy każdym bumpie.
 #   * 13.1:    wersja migruje w całości do dictionaries/pl/gui/ui.yaml::app.wersja,
-#              czytana przez t("app.wersja") z modułu i18n. Atrybut MainFrame.VERSION
-#              i pierwsza linia instrukcja.txt przestały istnieć jako osobne źródła,
-#              co sprawiło, że stary cross-check w buduj_wydanie.py (obecnie
-#              build_release.py — nazwa skryptu też została zangielszczona w 13.1)
-#              zostaje „martwy" (regex nie łapie → exit 1). Od Etapu 2/5 refaktoru
-#              dokumentacji build wyciąga numer wersji bezpośrednio z ui.yaml —
-#              jedyny plik, który deweloper musi zedytować, żeby wypuścić nowy release.
+#              czytana przez t("app.wersja"). Bumpa robisz w jednym pliku — ALE
+#              po dodaniu kolejnych języków (en/fi/is/it/ru w 13.3) pojawiła się
+#              regresja: app.wersja jest powielony w każdej paczce, co przy
+#              bumpie skaluje się liniowo z liczbą języków (fi/is/it/ru tkwiło
+#              przez dwa wydania na "13.1" — nikt nie pamiętał).
+#   * 13.4:    numer wersji wyjeżdża do plain-text pliku VERSION w roocie.
+#              W ui.yaml::app.wersja zostaje tylko placeholder typu
+#              "{numer_wersji} – Wersja Wydawnicza". i18n.py auto-wstrzykuje
+#              numer_wersji do każdego format() w t(), więc main.py i szablony
+#              docs/manual.*.txt nadal działają bez zmian. Bumpa robisz wyłącznie
+#              w pliku VERSION — niezależnie od liczby paczek językowych.
 
-#
-# Wartość `app.wersja` jest stringiem ludzkim, np. „13.1 – Wersja Wydawnicza" —
-# regex wyłuskuje z niej sam numer („13.1"). Tolerujemy zarówno ASCII `-`, jak
-# i typograficzny em-dash `–` w separatorze, bo oba warianty pojawiły się
-# historycznie w plikach tłumaczeń.
-
-SCIEZKA_UI_YAML    = os.path.join("dictionaries", "pl", "gui", "ui.yaml")
-KLUCZ_WERSJI       = "app.wersja"
-WZORZEC_NUMER_WERSJI = re.compile(r"\d+(?:\.\d+)+")
+SCIEZKA_VERSION = os.path.join(os.path.dirname(__file__), "VERSION")
 
 
-def odczytaj_wersje_z_ui_yaml() -> str:
-    """Wyciąga numer wersji z ``dictionaries/pl/gui/ui.yaml::app.wersja``.
+def odczytaj_wersje() -> str:
+    """Wczytuje numer wersji z pliku ``VERSION`` w roocie projektu.
 
     Raises:
-        RuntimeError: gdy plik nie istnieje, nie parsuje się jako YAML,
-        nie ma klucza ``app.wersja`` albo wartość nie zawiera numeru
-        wersji w formacie ``\\d+(?:\\.\\d+)+``.
+        RuntimeError: gdy plik nie istnieje albo jest pusty/białoznakowy.
 
     Returns:
-        Sam numer wersji bez sufiksu opisowego, np. ``"13.1"`` z wartości
-        ``"13.1 – Wersja Wydawnicza"``.
+        Numer wersji bez końcowego whitespace'a, np. ``"13.4-WIP"`` lub ``"13.4"``.
     """
-    if not os.path.exists(SCIEZKA_UI_YAML):
+    if not os.path.exists(SCIEZKA_VERSION):
         raise RuntimeError(
-            f"Nie znaleziono {SCIEZKA_UI_YAML}. "
-            "Uruchom skrypt z katalogu głównego projektu."
+            f"Nie znaleziono pliku VERSION w {SCIEZKA_VERSION}. "
+            "Od 13.4 to jedyne źródło prawdy dla numeru wersji — "
+            "sprawdź, czy plik istnieje w roocie projektu."
         )
     try:
-        with open(SCIEZKA_UI_YAML, "r", encoding="utf-8") as fh:
-            dane = yaml.safe_load(fh)
-    except yaml.YAMLError as exc:
-        raise RuntimeError(
-            f"Plik {SCIEZKA_UI_YAML} nie parsuje się jako YAML: {exc}"
-        ) from exc
+        with open(SCIEZKA_VERSION, "r", encoding="utf-8") as fh:
+            wartosc = fh.read().strip()
+    except OSError as exc:
+        raise RuntimeError(f"Nie udało się odczytać {SCIEZKA_VERSION}: {exc}") from exc
 
-    if not isinstance(dane, dict):
+    if not wartosc:
         raise RuntimeError(
-            f"Plik {SCIEZKA_UI_YAML} nie zawiera mapy na najwyższym poziomie."
+            f"Plik {SCIEZKA_VERSION} jest pusty. Wpisz numer wersji "
+            "(np. 13.4 albo 13.4-WIP)."
         )
-
-    # Schodzenie po ścieżce zagnieżdżonej (kropka = kolejny poziom) — spójne
-    # z semantyką `i18n.t()` i `generuj_dokumentacje._pobierz_wartosc()`.
-    wartosc = dane
-    for segment in KLUCZ_WERSJI.split("."):
-        if not isinstance(wartosc, dict) or segment not in wartosc:
-            raise RuntimeError(
-                f"Nie znaleziono klucza '{KLUCZ_WERSJI}' w {SCIEZKA_UI_YAML}. "
-                "Od wersji 13.1 to jedyne źródło prawdy dla numeru wersji — "
-                "sprawdź, czy plik ui.yaml ma sekcję `app:` z polem `wersja:`."
-            )
-        wartosc = wartosc[segment]
-
-    if not isinstance(wartosc, str):
-        raise RuntimeError(
-            f"Wartość '{KLUCZ_WERSJI}' w {SCIEZKA_UI_YAML} nie jest stringiem "
-            f"(jest: {type(wartosc).__name__})."
-        )
-
-    dopasowanie = WZORZEC_NUMER_WERSJI.search(wartosc)
-    if not dopasowanie:
-        raise RuntimeError(
-            f"Wartość '{KLUCZ_WERSJI}' w {SCIEZKA_UI_YAML} nie zawiera numeru "
-            f"wersji w formacie X.Y.\n  Obecna wartość: {wartosc!r}"
-        )
-    return dopasowanie.group(0)
+    return wartosc
 
 
 def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
@@ -127,7 +92,7 @@ def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
         print(f"❌ FATAL: Release package {nazwa_zip} already exists in this directory.")
         print()
         print("Pick one of three:")
-        print(f"  (a) Bump the version in {SCIEZKA_UI_YAML} (key {KLUCZ_WERSJI}).")
+        print(f"  (a) Bump the version in {SCIEZKA_VERSION}.")
         print(f"  (b) Move the existing {nazwa_zip} somewhere else "
               "(archive of previous releases).")
         print(f"  (c) Delete {nazwa_zip} on purpose if you want to rebuild it "
@@ -190,7 +155,7 @@ def czy_ignorowac(sciezka, nazwa_pliku):
 # =============================================================================
 # Owinięcie całego flow w funkcję main() + wywołanie pod __main__ daje dwie
 # korzyści:
-#   1. Funkcje walidacji wersji (odczytaj_wersje_z_ui_yaml itp.) można
+#   1. Funkcje walidacji wersji (odczytaj_wersje itp.) można
 #      importować i testować w izolacji, bez wyzwalania guardu runtime/ ani
 #      interaktywnego input().
 #   2. Skrypt staje się zgodny z normalną konwencją Python (import-safe).
@@ -231,10 +196,10 @@ def main() -> None:
 
     print("✅ Portable Python environment verified.\n")
 
-    # 3. Read the release version (single source of truth: ui.yaml).
-    print(f"🔍 Detecting release version ({SCIEZKA_UI_YAML} → {KLUCZ_WERSJI})...")
+    # 3. Read the release version (single source of truth: VERSION in repo root).
+    print(f"🔍 Detecting release version ({SCIEZKA_VERSION})...")
     try:
-        wersja = odczytaj_wersje_z_ui_yaml()
+        wersja = odczytaj_wersje()
     except RuntimeError as exc:
         print(f"❌ FATAL (version read): {exc}")
         sys.exit(1)

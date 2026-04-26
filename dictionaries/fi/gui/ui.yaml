@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 app:
   nazwa: "Audio GPT -ohjaaja"
-  wersja: "13.3.1 – Julkaisuversio"
+  wersja: "{numer_wersji} – Julkaisuversio"
   title_home: "{nazwa_aplikacji}  |  {wersja}"
   title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
   banner: "🎬  {nazwa_aplikacji}"
