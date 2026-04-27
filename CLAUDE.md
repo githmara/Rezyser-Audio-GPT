@@ -30,6 +30,12 @@
 - Wersjonowanie: Projekt zaczyna wersjonowanie od 13.0 (język polski), każdy kolejny język to wydanie minor (13.1, 13.2).
 - Bezpieczna kolejność wdrażania: Najpierw język bazowy z szyframi, potem tłumaczenie interfejsu (ui.yaml), skrypt autotłumaczący dokumentację, i na koniec wydanie releasu.
 - Reguła natywności: Każdy język otrzymuje standardowe 6 szyfrów, a także wszystkie akcenty z wyjątkiem własnego natywnego.
+- DEFINICJA KOMPLETNOŚCI JĘZYKA (aktualna do wyczerpania TODO_wielojezycznosc.md): Język jest w 100% gotowy do releasu, gdy jego folder `dictionaries/<kod>/` zawiera dokładnie:
+  * `gui/ui.yaml` — tłumaczenia interfejsu
+  * `rezyser/` — **4 pliki** trybów Reżysera AI
+  * `szyfry/` — **6 plików** szyfrów (cezar, jakanie, odwracanie, samogloskowiec, typoglikemia, waz)
+  * `akcenty/` — **11 plików**: 8 akcentów fonetycznych obcojęzycznych + 3 narzędzia czyszczenia (oczyszczenie, oczyszczenie_bez_liczb, naprawiacz_tagow)
+  Weryfikacja: `ls dictionaries/<kod>/akcenty/*.yaml | wc -l` (→ 11), analogicznie dla szyfry (→ 6) i rezyser (→ 4). Dla zupełnie nowych języków (de/es/fr) stosuj bezpieczną kolejność z TODO_wielojezycznosc.md. UWAGA: Ta reguła traci aktualność po wyczerpaniu TODO_wielojezycznosc.md — wtedy należy ją usunąć z CLAUDE.md.
 - Tłumaczenia interfejsu rezydują w dedykowanym pliku: `dictionaries/<kod>/gui/ui.yaml`. ZAKAZ hardkodowania etykiet GUI w kodzie źródłowym Pythona.
 - Parametry dynamiczne takie jak `{nazwa_projektu}`, `{liczba_znakow}`, `{min_przesuniecie}` pozostaw w tłumaczeniach nienaruszone. Nie tłumacz literałów technicznych i rozszerzeń (np. `.md`, `skrypty/`) ani nie usuwaj emoji zachowując ich ścisłą pozycję.
 - Konwencje wxPython w i18n:
@@ -47,6 +53,16 @@
 Przy każdym release commicie, jeśli w danym cyklu zmieniło się cokolwiek z listy: nowy język, nowa funkcja opisana w manualach, zmiana liczby akcentów/szyfrów/trybów, zmiana numeru wersji (VERSION).
 
 ## Procedura (w tej kolejności)
+
+### Krok 0 — Odśwież reżysera (ZAWSZE po dodaniu/usunięciu pliku akcent*.yaml)
+```bash
+.venv/Scripts/python odswiez_rezysera.py
+```
+Skrypt skanuje `dictionaries/*/akcenty/` i aktualizuje dwa bloki generowane w kodzie:
+- `core_poliglota.py` — docstringi wrapperów `akcent_*` (lista plików źródłowych per akcent)
+- `core_rezyser.py` — blok importów i słownik `_AKCENT_FUNCS` (dispatch reżysera)
+
+**Bez tego kroku samo nakładanie akcentów w Poliglocie działa** (czyta YAML bezpośrednio), ale **dynamiczne nakładanie akcentów w Reżyserze na podstawie regexów Księgi Świata — nie** (dispatch nie zna nowych plików). Sprawdź output: każdy nowy akcent/język musi pojawić się na liście wykrytych. Jeśli `core_poliglota.py` lub `core_rezyser.py` ma zmiany — zcommituj je przed przejściem do kroku 1.
 
 ### Krok 1 — Przejrzyj i zaktualizuj szablony źródłowe
 Szablony to `dictionaries/<kod>/gui/dokumentacja/*.yaml` dla **każdego** języka z osobna (`pl`, `en`, `fi`, `is`, `it`, `ru`). Istniejące szablony edytuj **ręcznie w danym języku** — nie uruchamiaj autotłumacza na plikach, które już istnieją. Powody: koszt API OpenAI + podatność LLM na halucynacje (niezaszyfrowane przykłady szyfrów, bezsensowne sklejki zdań po przeklejonej informacji).
