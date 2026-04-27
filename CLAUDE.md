@@ -40,6 +40,51 @@
 - Skrypt autotłumaczący z użyciem modelu (`tlumacz_ai.py`) zamraża podmieniane zmienne `{...}`, aby LLM nie naruszył struktury programu.
 - Manager reguł skanuje pliki YAML z folderów `akcenty`, `szyfry`, `rezyser` i nowo dodanego folderu tłumaczeń `gui`. Proces kreacji nowego języka buduje wymaganą dla tych komponentów strukturę katalogów.
 
+# ZAMYKANIE RELEASU — DOKUMENTACJA (KRYTYCZNE)
+`build_release.py` wywołuje `generuj_dokumentacje.generuj()` wewnętrznie, przez co po jego uruchomieniu w repo pojawiają się niezcommitowane zmiany w `docs/*.txt`. Żeby tego uniknąć, dokumentację należy wygenerować i zcommitować **ręcznie** przed commitem release'u, według poniższego schematu.
+
+## Kiedy stosować
+Przy każdym release commicie, jeśli w danym cyklu zmieniło się cokolwiek z listy: nowy język, nowa funkcja opisana w manualach, zmiana liczby akcentów/szyfrów/trybów, zmiana numeru wersji (VERSION).
+
+## Procedura (w tej kolejności)
+
+### Krok 1 — Przejrzyj i zaktualizuj szablony źródłowe
+Szablony to `dictionaries/<kod>/gui/dokumentacja/*.yaml` dla **każdego** języka z osobna (`pl`, `en`, `fi`, `is`, `it`, `ru`). Istniejące szablony edytuj **ręcznie w danym języku** — nie uruchamiaj autotłumacza na plikach, które już istnieją. Powody: koszt API OpenAI + podatność LLM na halucynacje (niezaszyfrowane przykłady szyfrów, bezsensowne sklejki zdań po przeklejonej informacji).
+
+Dla każdego istniejącego szablonu sprawdź:
+- Czy opis nowych funkcji (nowy język, nowa funkcja silnika) jest aktualny i przetłumaczony na język szablonu?
+- Czy stare „w przyszłości pojawi się X" zostało usunięte, skoro X już działa?
+- Czy liczby (`liczba_akcentow_jezykowych` itp.) są placeholderami, nie zahardkodowanymi wartościami?
+- Czy usunięte / przemianowane elementy GUI nie mają już swoich akapitów?
+
+Wzorzec edycji: najpierw zaktualizuj `pl/` (język bazowy), potem otwórz analogiczny fragment w każdym języku obcym i wprowadź tę samą zmianę treści, zachowując istniejące tłumaczenie otoczenia jako wzorzec stylu.
+
+**Autotłumacz (`buduj_wielojezyczne_docs.py`) — TYLKO dla zupełnie nowych plików szablonów**, tzn. gdy dany `*.yaml` w danym `<kod>/gui/dokumentacja/` w ogóle nie istnieje (np. nowy język bazowy albo nowy szablon dodany do `pl/` bez odpowiednika w `en/fi/...`). Po AI-tłumaczeniu obowiązkowo przejrzyj wyniki i popraw halucynacje używając już zatwierdzonych szablonów jako wzorca.
+
+### Krok 2 — Wygeneruj + zwaliduj
+```bash
+.venv/Scripts/python generuj_dokumentacje.py --waliduj
+```
+- `--waliduj` generuje wszystkie `docs/*.txt` i sprawdza czy żaden `{placeholder}` nie pozostał nierozwinięty (brakujący klucz w `ui.yaml`). Exit 0 = OK, Exit 1 = błąd który **blokuje build**.
+- Bez flagi generuje cicho; używaj `--waliduj` zawsze przed commitem.
+
+### Krok 3 — Przejrzyj wygenerowane pliki
+```bash
+git --no-pager diff docs/
+git --no-pager status   # sprawdź czy nie ma nowych plików (np. docs/manual.fi.txt)
+```
+Zweryfikuj czy zmiany są sensowne: numer wersji zaktualizowany, lista języków poprawna, nowe rozdziały obecne, stare „w przyszłości" usunięte.
+
+### Krok 4 — Zcommituj docs przed release commitem
+```bash
+git add docs/
+git commit -m "docs: regeneracja po 13.X — <krótki opis zmian>"
+```
+Dopiero po tym robi się commit release'u (VERSION, RELEASE_NOTES, TODO).
+
+### Uwaga o build_release.py
+`build_release.py` i tak wywołuje `generuj()` wewnętrznie — to jest celowe (paczka ZIP zawsze ma świeże docs). Po pre-commicie przez Ciebie `git status` po buildzie pokaże „nothing to commit" zamiast zmienionych plików, bo wygenerowana treść będzie identyczna z tą w repo.
+
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
 - Weryfikuj porządek przez komendę `git status` patrząc na nieśledzone pliki (Untracked files).
