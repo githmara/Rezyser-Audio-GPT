@@ -96,6 +96,15 @@ tresc: |
   Co zobaczysz po uruchomieniu: Po uruchomieniu programu otwiera się okno z ekranem startowym. Znajdziesz na nim krótki opis dostępnych narzędzi oraz sekcję "{home.heading_system_check}". Jeśli klucz API nie jest jeszcze skonfigurowany, zobaczysz czerwony komunikat informujący, że moduły oparte na AI (Reżyseria, Tłumacz) nie będą działać — darmowe funkcje lokalne (akcenty, Architekt) są jednak aktywne od razu. Konfigurację klucza opisuje kolejny krok.
 
 
+  Automatyczne aktualizacje
+
+  Aplikacja sprawdza przy starcie, czy na GitHubie dostępna jest nowsza wersja — sprawdzenie odbywa się w tle i nie blokuje interfejsu.
+
+  Jeśli instalowałeś program przez gotowy plik instalatora (.exe): przy wykryciu nowszej wersji pojawi się okienko z pytaniem, czy ją pobrać. Po potwierdzeniu uruchomi się pasek postępu, a gdy pobieranie dobiegnie końca, aplikacja zamknie się automatycznie i nowy instalator uruchomi się samoczynnie — Twoje projekty i klucz API zostają nienaruszone.
+
+  Jeśli korzystasz z repozytorium Git (programiści i użytkownicy macOS/Linux): zamiast propozycji pobrania zobaczysz informację o nowej wersji z bezpośrednim linkiem do strony wydania na GitHubie. Pobierz stamtąd archiwum „Source code" lub zaktualizuj repozytorium komendą git pull.
+
+
   KROK 2: Zasilanie API (Klucz OpenAI)
 
   Aby sztuczna inteligencja mogła działać, potrzebuje dostępu do serwerów OpenAI (twórców ChatuGPT).

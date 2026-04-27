@@ -793,3 +793,31 @@ manager:
     {tresc_bledu}
 
     Búðu til þær handvirkt í skráarkönnuð áður en þú keyrir Fjöltyngja – annars mun vélin kasta villu við skönnun nýs tungumáls.
+
+# -----------------------------------------------------------------------------
+# UPDATER – sjálfvirk uppfærsla (core_updater.py + bakgrunnsvísir í main.py)
+# -----------------------------------------------------------------------------
+updater:
+  nowa_wersja_tytul:        "Uppfærsla í boði"
+  nowa_wersja_tresc: |-
+    Ný útgáfa er í boði: {nowa_wersja}.
+    Þín útgáfa: {aktualna_wersja}.
+
+    Viltu hlaða niður og setja upp uppfærsluna núna?
+  pobieranie_tytul:         "Hleður niður uppfærslu {nowa_wersja}"
+  pobieranie_tresc:         "Hleður niður {nazwa_pliku}..."
+  instalacja_tytul:         "Niðurhal lokið"
+  instalacja_tresc: |-
+    Niðurhal lokið. Uppsetningarforritið ræsist.
+    Forritið verður lokað.
+  blad_pobierania_tytul:    "Villa við niðurhal"
+  blad_pobierania_tresc:    "Tókst ekki að hlaða niður uppfærslunni:\n{tresc_bledu}"
+  blad_uruchomienia_tytul:  "Villa við ræsingu uppsetningar"
+  blad_uruchomienia_tresc:  "Tókst ekki að ræsa uppsetningarforritið:\n{sciezka_pliku}\n\n{tresc_bledu}"
+  dev_info_tresc: |-
+    Ný útgáfa er í boði: {nowa_wersja}.
+
+    Þessi uppsetning notar ekki runtime-pakkann — niðurhal uppsetningarforritsins er ekki í boði.
+    Farðu á GitHub-útgáfusíðuna og sæktu „Source code"-skjalasafnið eða klónaðu geymsluna:
+
+    {url_release}

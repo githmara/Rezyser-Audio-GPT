@@ -5,6 +5,14 @@
 ; dynamicznie tworzony dla każdej wersji; `.gitignore` zawiera wpis `run.bat`).
 #define MyAppExeName "run.bat"
 
+[Languages]
+Name: "english";  MessagesFile: "compiler:Default.isl"
+Name: "polish";   MessagesFile: "compiler:Languages\Polish.isl"
+Name: "italian";  MessagesFile: "compiler:Languages\Italian.isl"
+Name: "russian";  MessagesFile: "compiler:Languages\Russian.isl"
+Name: "finnish";  MessagesFile: "compiler:Languages\Finnish.isl"
+Name: "icelandic"; MessagesFile: "compiler:Languages\Icelandic.isl"
+
 [Setup]
 AppId={{12345678-ABCD-1234-ABCD-1234567890AB}
 AppName={#MyAppName}
@@ -40,4 +48,4 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Tasks]
-Name: "desktopicon"; Description: "Utworz skrot na pulpicie"; GroupDescription: "Dodatkowe ikony:"
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"

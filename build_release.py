@@ -237,21 +237,15 @@ def main() -> None:
                     zipf.write(pelna_sciezka, sciezka_w_zip)
     print("✅ Done!")
 
-    # 8. Build the Installer EXE (optional).
-    chce_instalator = input("\nAlso build the .exe installer? (y/n): ").strip().lower()
+    # 8. Build the Installer EXE (always — required for GitHub Releases auto-update).
+    print("\n[2/2] Launching the Inno Setup compiler (iscc)...")
+    komenda = f'iscc /Q installer.iss /DMyAppVersion="{wersja}"'
 
-    if chce_instalator in ("y", "t"):
-        print("\n[2/2] Launching the Inno Setup compiler (iscc)...")
-        # `installer.iss` — renamed from `skrypt_instalatora.iss` in 13.1.
-        komenda = f'iscc /Q installer.iss /DMyAppVersion="{wersja}"'
-
-        try:
-            subprocess.run(komenda, shell=True, check=True)
-            print(f"✅ Success! Installer created: Rezyser_Audio_v{wersja}_Installer.exe")
-        except subprocess.CalledProcessError:
-            print("❌ Compilation error. Make sure Inno Setup is installed and 'iscc' is in your system PATH.")
-    else:
-        print("\nSkipped installer build.")
+    try:
+        subprocess.run(komenda, shell=True, check=True)
+        print(f"✅ Success! Installer created: Rezyser_Audio_v{wersja}_Installer.exe")
+    except subprocess.CalledProcessError:
+        print("❌ Compilation error. Make sure Inno Setup is installed and 'iscc' is in your system PATH.")
 
 
 

@@ -823,3 +823,31 @@ manager:
     {tresc_bledu}
 
     Create them manually in File Explorer before running Polyglot – otherwise, the engine will throw an error when scanning the new language.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-update (core_updater.py + background thread in main.py)
+# -----------------------------------------------------------------------------
+updater:
+  nowa_wersja_tytul:        "Update Available"
+  nowa_wersja_tresc: |-
+    A new version is available: {nowa_wersja}.
+    Your version: {aktualna_wersja}.
+
+    Do you want to download and install the update now?
+  pobieranie_tytul:         "Downloading Update {nowa_wersja}"
+  pobieranie_tresc:         "Downloading {nazwa_pliku}..."
+  instalacja_tytul:         "Download Complete"
+  instalacja_tresc: |-
+    Download complete. The installer is starting.
+    The application will close.
+  blad_pobierania_tytul:    "Download Error"
+  blad_pobierania_tresc:    "Failed to download the update:\n{tresc_bledu}"
+  blad_uruchomienia_tytul:  "Installer Launch Error"
+  blad_uruchomienia_tresc:  "Failed to launch the installer:\n{sciezka_pliku}\n\n{tresc_bledu}"
+  dev_info_tresc: |-
+    A new version is available: {nowa_wersja}.
+
+    This installation does not use the runtime package — downloading the installer is unavailable.
+    Visit the GitHub release page and download the "Source code" archive or clone the repository:
+
+    {url_release}

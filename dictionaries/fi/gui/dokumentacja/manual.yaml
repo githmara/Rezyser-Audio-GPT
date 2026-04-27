@@ -40,6 +40,15 @@ tresc: |
 
   Mitä näet käynnistyksen jälkeen: Ohjelman käynnistyessä avautuu ikkuna aloitusnäytöllä. Siinä on lyhyt kuvaus käytettävissä olevista työkaluista ja osio "{home.heading_system_check}". Jos API-avain ei ole vielä määritetty, näet punaisen viestin, joka kertoo, että AI-pohjaiset moduulit (Ohjaamo, Kääntäjä) eivät toimi — ilmaiset paikalliset toiminnot (aksentit, Arkkitehti) ovat kuitenkin heti käytettävissä. API-avaimen määrittely kuvataan seuraavassa vaiheessa.
 
+
+  Automaattiset päivitykset
+
+  Sovellus tarkistaa käynnistyksessä, onko GitHubissa saatavilla uudempi versio — tarkistus tapahtuu taustalla eikä estä käyttöliittymää.
+
+  Jos asensit ohjelman valmiilla asennusohjelmalla (.exe): kun uudempi versio havaitaan, näyttöön tulee valintaikkuna, jossa kysytään, haluatko ladata sen. Vahvistuksen jälkeen käynnistyy edistymispalkki, ja kun lataus on valmis, sovellus sulkeutuu automaattisesti ja uusi asennusohjelma käynnistyy itsestään — projektisi ja API-avaimesi säilyvät koskemattomina.
+
+  Jos käytät Git-repositoriota (kehittäjät ja macOS/Linux-käyttäjät): latausehdotuksen sijaan näet ilmoituksen uudesta versiosta sekä suoran linkin GitHub-julkaisusivulle. Lataa sieltä "Source code" -arkisto tai päivitä repositorio komennolla git pull.
+
   VAIHE 2: API:n Käyttöönotto (OpenAI-avain)
 
   Jotta tekoäly voi toimia, se tarvitsee pääsyn OpenAI:n palvelimille (ChatGPT:n luojat).

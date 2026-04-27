@@ -793,3 +793,31 @@ manager:
     {tresc_bledu}
 
     Luo ne manuaalisesti Resurssienhallinnassa ennen Polygotin käynnistämistä – muuten moottori antaa virheen uuden kielen skannauksen yhteydessä.
+
+# -----------------------------------------------------------------------------
+# UPDATER – automaattinen päivitys (core_updater.py + taustasäie main.py:ssä)
+# -----------------------------------------------------------------------------
+updater:
+  nowa_wersja_tytul:        "Päivitys saatavilla"
+  nowa_wersja_tresc: |-
+    Uusi versio on saatavilla: {nowa_wersja}.
+    Nykyinen versiosi: {aktualna_wersja}.
+
+    Haluatko ladata ja asentaa päivityksen nyt?
+  pobieranie_tytul:         "Ladataan päivitystä {nowa_wersja}"
+  pobieranie_tresc:         "Ladataan {nazwa_pliku}..."
+  instalacja_tytul:         "Lataus valmis"
+  instalacja_tresc: |-
+    Lataus valmis. Asennusohjelma käynnistyy.
+    Sovellus suljetaan.
+  blad_pobierania_tytul:    "Latausvirhe"
+  blad_pobierania_tresc:    "Päivityksen lataaminen epäonnistui:\n{tresc_bledu}"
+  blad_uruchomienia_tytul:  "Asennusohjelman käynnistysvirhe"
+  blad_uruchomienia_tresc:  "Asennusohjelman käynnistäminen epäonnistui:\n{sciezka_pliku}\n\n{tresc_bledu}"
+  dev_info_tresc: |-
+    Uusi versio on saatavilla: {nowa_wersja}.
+
+    Tässä asennuksessa ei käytetä runtime-pakettia — asennusohjelman lataaminen ei ole saatavilla.
+    Vieraile GitHubin julkaisusivulla ja lataa "Source code" -arkisto tai kloonaa arkisto:
+
+    {url_release}

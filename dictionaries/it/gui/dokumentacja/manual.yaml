@@ -45,6 +45,15 @@ tresc: |
   Cosa vedrai all'avvio: All'avvio del programma si apre una finestra con la schermata iniziale. Troverai una breve descrizione degli strumenti disponibili e una sezione "{home.heading_system_check}". Se la chiave API non è ancora configurata, vedrai un messaggio rosso che informa che i moduli basati su AI (Regia, Traduttore) non funzioneranno — le funzioni locali gratuite (accenti, Architetto) sono però attive subito. La configurazione della chiave è descritta nel passo successivo.
 
 
+  Aggiornamenti automatici
+
+  L'applicazione verifica all'avvio se su GitHub è disponibile una versione più recente — il controllo avviene in background e non blocca l'interfaccia.
+
+  Se hai installato il programma tramite il file di installazione (.exe): quando viene rilevata una versione più recente, apparirà una finestra di dialogo che chiede se vuoi scaricarla. Dopo la conferma si avvierà una barra di avanzamento e, una volta completato il download, l'applicazione si chiuderà automaticamente e il nuovo programma di installazione si avvierà da solo — i tuoi progetti e la chiave API rimangono intatti.
+
+  Se utilizzi il repository Git (sviluppatori e utenti macOS/Linux): invece di una proposta di download, vedrai una notifica sulla nuova versione con un collegamento diretto alla pagina di rilascio su GitHub. Scarica da lì l'archivio „Source code" oppure aggiorna il repository con il comando git pull.
+
+
   PASSO 2: Alimentazione API (Chiave OpenAI)
 
   Perché l'intelligenza artificiale possa funzionare, ha bisogno di accedere ai server OpenAI (creatori di ChatGPT).

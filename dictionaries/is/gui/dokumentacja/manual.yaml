@@ -40,6 +40,15 @@ tresc: |
 
   Hvað þú munt sjá eftir gangsetningu: Eftir að forritið hefur verið keyrt opnast gluggi með upphafsskjá. Þar finnur þú stutta lýsingu á aðgengilegum verkfærum og hluta "{home.heading_system_check}". Ef API lykillinn er ekki enn stilltur, sérðu rauða tilkynningu sem segir að AI byggð einingar (Reżyseria, Tłumacz) muni ekki virka — ókeypis staðbundnar aðgerðir (hreim, Architekt) eru þó virkar strax. Skrefið sem lýsir stillingu lykilsins kemur næst.
 
+
+  Sjálfvirkar uppfærslur
+
+  Forritið athugar við ræsingu hvort nýrri útgáfa sé til á GitHub — athugunin á sér stað í bakgrunni og hindrar ekki viðmótið.
+
+  Ef þú settir upp forritið með tilbúnum uppsetningarforrit (.exe): þegar nýrri útgáfa finnst birtist gluggi sem spyr hvort þú viljir hlaða henni niður. Eftir staðfestingu birtist framvindustika og þegar niðurhalinu er lokið lokar forritið sjálfkrafa og nýja uppsetningarforritið ræsist af sjálfu sér — verkefni þín og API lykill eru óskiptar.
+
+  Ef þú notar Git-geymslu (forritarar og macOS/Linux notendur): í stað niðurhalstillögu sérðu tilkynningu um nýju útgáfuna með beinan hlekk á útgáfusíðuna á GitHub. Sæktu þaðan „Source code"-skjalasafnið eða uppfærðu geymsluna með skipuninni git pull.
+
   SKREF 2: API Virkjun (OpenAI Lykill)
 
   Til að gervigreindin geti virkað þarf hún aðgang að OpenAI netþjónum (höfundum ChatuGPT).

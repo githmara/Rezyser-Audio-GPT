@@ -794,3 +794,31 @@ manager:
     {tresc_bledu}
 
     Creale manualmente nell'Esplora file prima di avviare Poliglotta – altrimenti il motore genererà un errore durante la scansione della nuova lingua.
+
+# -----------------------------------------------------------------------------
+# UPDATER – aggiornamento automatico (core_updater.py + thread in background in main.py)
+# -----------------------------------------------------------------------------
+updater:
+  nowa_wersja_tytul:        "Aggiornamento disponibile"
+  nowa_wersja_tresc: |-
+    È disponibile una nuova versione: {nowa_wersja}.
+    La tua versione: {aktualna_wersja}.
+
+    Vuoi scaricare e installare l'aggiornamento ora?
+  pobieranie_tytul:         "Download aggiornamento {nowa_wersja}"
+  pobieranie_tresc:         "Download di {nazwa_pliku}..."
+  instalacja_tytul:         "Download completato"
+  instalacja_tresc: |-
+    Download completato. Il programma di installazione si avvierà.
+    L'applicazione verrà chiusa.
+  blad_pobierania_tytul:    "Errore di download"
+  blad_pobierania_tresc:    "Impossibile scaricare l'aggiornamento:\n{tresc_bledu}"
+  blad_uruchomienia_tytul:  "Errore di avvio installatore"
+  blad_uruchomienia_tresc:  "Impossibile avviare il programma di installazione:\n{sciezka_pliku}\n\n{tresc_bledu}"
+  dev_info_tresc: |-
+    È disponibile una nuova versione: {nowa_wersja}.
+
+    Questa installazione non utilizza il pacchetto runtime — il download del programma di installazione non è disponibile.
+    Visita la pagina della release su GitHub e scarica l'archivio "Source code" oppure clona il repository:
+
+    {url_release}

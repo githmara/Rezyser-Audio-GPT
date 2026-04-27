@@ -10,10 +10,12 @@ stringi zostały zastąpione wywołaniami ``t("klucz", **parametry)``.
 import os
 import platform
 import subprocess
+import threading
 
 import wx
 
 import core_poliglota
+import core_updater
 import i18n
 import odswiez_rezysera
 from gui_konwerter import KonwerterPanel
@@ -519,6 +521,7 @@ class MainFrame(wx.Frame):
 
         self.Centre()
         self.Show()
+        self._start_update_check()
 
     # ------------------------------------------------------------------
     # Budowanie paska menu
@@ -818,6 +821,136 @@ class MainFrame(wx.Frame):
 
     def _on_close(self, event: wx.CloseEvent) -> None:
         event.Skip()  # Pozwól wxPython zniszczyć okno w standardowy sposób
+
+    # ------------------------------------------------------------------
+    # Auto-aktualizacja
+    # ------------------------------------------------------------------
+
+    def _start_update_check(self) -> None:
+        """Odpytuje GitHub API w wątku tła — nie blokuje MainLoop."""
+        threading.Thread(target=self._w_watku_sprawdz, daemon=True).start()
+
+    def _w_watku_sprawdz(self) -> None:
+        """Wątek tła: jeśli jest nowsza wersja, zgłasza to do głównego wątku."""
+        info = core_updater.sprawdz_aktualizacje()
+        if info:
+            wx.CallAfter(self._on_aktualizacja_dostepna, info)
+
+    def _on_aktualizacja_dostepna(self, info: core_updater.UpdateInfo) -> None:
+        """Główny wątek: rozgałęzia na dwa tryby w zależności od środowiska.
+
+        runtime/python.exe istnieje → paczka Inno Setup → oferuj pobranie .exe.
+        Brak pliku → środowisko deweloperskie lub inny OS → informuj o ręcznej
+        aktualizacji (sklonuj repo lub pobierz archiwum „Source code" z Releases).
+        """
+        _runtime_python = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "runtime", "python.exe"
+        )
+
+        if os.path.isfile(_runtime_python):
+            odpowiedz = wx.MessageBox(
+                t(
+                    "updater.nowa_wersja_tresc",
+                    nowa_wersja=info.wersja,
+                    aktualna_wersja=i18n.NUMER_WERSJI,
+                ),
+                t("updater.nowa_wersja_tytul"),
+                wx.YES_NO | wx.YES_DEFAULT | wx.ICON_INFORMATION,
+                self,
+            )
+            if odpowiedz == wx.YES:
+                self._start_pobieranie(info)
+        else:
+            url_release = (
+                f"https://github.com/{core_updater.GITHUB_USER}"
+                f"/{core_updater.GITHUB_REPO}/releases/tag/{info.tag}"
+            )
+            wx.MessageBox(
+                t(
+                    "updater.dev_info_tresc",
+                    nowa_wersja=info.wersja,
+                    url_release=url_release,
+                ),
+                t("updater.nowa_wersja_tytul"),
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+
+    def _start_pobieranie(self, info: core_updater.UpdateInfo) -> None:
+        """Główny wątek: otwiera ProgressDialog i startuje wątek pobierania."""
+        self._progress_dlg = wx.ProgressDialog(
+            t("updater.pobieranie_tytul", nowa_wersja=info.wersja),
+            t("updater.pobieranie_tresc", nazwa_pliku=info.nazwa_pliku),
+            maximum=100,
+            parent=self,
+            style=wx.PD_APP_MODAL | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME,
+        )
+        threading.Thread(
+            target=self._w_watku_pobierz, args=(info,), daemon=True,
+        ).start()
+
+    def _w_watku_pobierz(self, info: core_updater.UpdateInfo) -> None:
+        """Wątek tła: pobiera instalator; odświeża dialog przez CallAfter."""
+        try:
+            sciezka = core_updater.pobierz_instalator(
+                info,
+                callback=lambda pobrane, total: wx.CallAfter(
+                    self._on_postep_pobierania, pobrane, total
+                ),
+            )
+            wx.CallAfter(self._on_pobieranie_zakonczone, sciezka)
+        except Exception as exc:  # noqa: BLE001
+            wx.CallAfter(self._on_pobieranie_blad, exc)
+
+    def _on_postep_pobierania(self, pobrane: int, total: int) -> None:
+        """Główny wątek: odświeża pasek postępu (A11y: NVDA czyta % automatycznie)."""
+        if not getattr(self, "_progress_dlg", None):
+            return
+        if total > 0:
+            # max=99 — nie wyzwala auto-hide przed naszym jawnym Destroy()
+            self._progress_dlg.Update(min(int(pobrane * 100 / total), 99))
+        else:
+            self._progress_dlg.Pulse()
+
+    def _on_pobieranie_zakonczone(self, sciezka) -> None:
+        """Główny wątek: zamknij dialog, uruchom instalator, wyjdź z aplikacji."""
+        if getattr(self, "_progress_dlg", None):
+            self._progress_dlg.Destroy()
+            self._progress_dlg = None
+
+        wx.MessageBox(
+            t("updater.instalacja_tresc"),
+            t("updater.instalacja_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+        try:
+            subprocess.Popen([str(sciezka)])
+        except Exception as exc:  # noqa: BLE001
+            wx.MessageBox(
+                t(
+                    "updater.blad_uruchomienia_tresc",
+                    sciezka_pliku=str(sciezka),
+                    tresc_bledu=str(exc),
+                ),
+                t("updater.blad_uruchomienia_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+        wx.GetApp().ExitMainLoop()
+
+    def _on_pobieranie_blad(self, exc: Exception) -> None:
+        """Główny wątek: zamknij dialog i pokaż komunikat błędu."""
+        if getattr(self, "_progress_dlg", None):
+            self._progress_dlg.Destroy()
+            self._progress_dlg = None
+        wx.MessageBox(
+            t("updater.blad_pobierania_tresc", tresc_bledu=str(exc)),
+            t("updater.blad_pobierania_tytul"),
+            wx.OK | wx.ICON_ERROR,
+            self,
+        )
 
 
 # ---------------------------------------------------------------------------

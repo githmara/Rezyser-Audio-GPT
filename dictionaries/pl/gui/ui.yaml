@@ -831,3 +831,35 @@ manager:
     {tresc_bledu}
 
     Utwórz je ręcznie w Eksploratorze plików, zanim uruchomisz Poliglotę – inaczej silnik wyrzuci błąd przy skanowaniu nowego języka.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
+# -----------------------------------------------------------------------------
+updater:
+  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  nowa_wersja_tytul:        "Dostępna aktualizacja"
+  nowa_wersja_tresc: |-
+    Dostępna jest nowa wersja: {nowa_wersja}.
+    Twoja wersja: {aktualna_wersja}.
+
+    Czy chcesz pobrać i zainstalować aktualizację teraz?
+  # Pobieranie (wx.ProgressDialog)
+  pobieranie_tytul:         "Pobieranie aktualizacji {nowa_wersja}"
+  pobieranie_tresc:         "Pobieranie {nazwa_pliku}…"
+  # Zakończenie pobierania i uruchomienie instalatora
+  instalacja_tytul:         "Pobieranie zakończone"
+  instalacja_tresc: |-
+    Pobieranie zakończone. Instalator uruchamia się.
+    Aplikacja zostanie zamknięta.
+  # Błędy
+  blad_pobierania_tytul:    "Błąd pobierania"
+  blad_pobierania_tresc:    "Nie udało się pobrać aktualizacji:\n{tresc_bledu}"
+  blad_uruchomienia_tytul:  "Błąd uruchamiania instalatora"
+  blad_uruchomienia_tresc:  "Nie udało się uruchomić instalatora:\n{sciezka_pliku}\n\n{tresc_bledu}"
+  dev_info_tresc: |-
+    Dostępna jest nowa wersja: {nowa_wersja}.
+
+    Ta instalacja nie korzysta z pakietu runtime — pobranie instalatora jest niedostępne.
+    Odwiedź stronę wydania na GitHubie i pobierz archiwum „Source code" lub sklonuj repozytorium:
+
+    {url_release}
