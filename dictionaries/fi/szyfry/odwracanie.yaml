@@ -38,3 +38,4 @@ rozwiniecia:
   - { wzor: '\bv\.?\s(?=\d)',        zamiana: "vuonna "             }
   - { wzor: '\bs\.?\s(?=\d)',        zamiana: "sivu "               }
   - { wzor: '\bko\.?\s(?=\d)',       zamiana: "kohta "              }
+  - { wzor: '\bn\.\s',              zamiana: "noin "               }

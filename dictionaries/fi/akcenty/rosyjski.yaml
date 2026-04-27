@@ -1,0 +1,146 @@
+# -----------------------------------------------------------------------------
+#  VENÄJÄN AKSENTTI (suomi → venäläinen TTS)
+#  Syntetisaattoreille: Milena / Irina / Yuri / Pavel (venäläinen TTS).
+# -----------------------------------------------------------------------------
+id: rosyjski
+etykieta: "Venäjä (esim. Milena / Irina / Yuri / Pavel)"
+opis: |
+  Translitteroi suomenkielisen tekstin kyrilliseksi niin, että venäläinen
+  puhesyntetisaattori (NVDA → Vocalizer Milena, eSpeak "ru", OneCore
+  Irina/Pavel/Yuri) lukee suomalaisen tekstin venäläisellä aksentilla.
+
+  Vokaalien kartoitus:
+    - a  → а   (suora vastaavuus)
+    - e  → э   (kova e — ei palatalisoi edeltävää konsonanttia; suomen e
+                 ei pehmentele konsonantteja, toisin kuin venäjän е)
+    - i  → и   (suora vastaavuus)
+    - o  → о   (suora vastaavuus)
+    - u  → у   (suora vastaavuus)
+    - ä  → э   (/æ/ → /e/: lähin venäläinen vokaali ilman jotisointia)
+    - ö  → ё   (/ø/ → /ʲo/: ё lisää palatalisoinnin, joka luo etisyyden
+                 tunnun — venäläinen kuulostaa "yrittävän" /ø/:tä)
+    - å  → о   (harvinainen; lainasanoissa ≈ /o/)
+    - y  → ю   (/y/ → /ju/: venäläinen ei tuota /y/:tä — jotisoinut ю on
+                 lähimpänä etistä pyöristettyä vokaalia. Voimakas aksenti!)
+
+  Konsonanttien kartoitus:
+    - h  → х   (/h/ → /x/: merkittävin foneettinen ero — venäläinen
+                 TTS korvaa aspiroidun /h/:n velaarisella kitinällä /x/)
+    - j  → й   (ennen konsonanttia tai erikoisvokaaleja ä/ö/y/i)
+    - v  → в   b→б, c→ц, d→д, f→ф, g→г, k→к, l→л, m→м, n→н,
+               p→п, q→к, r→р, s→с, t→т, w→в, x→кс, z→з
+
+  j + vokaali-yhdistelmät (ENNEN j → й -sääntöä):
+    - ja → я   (jotisoinut а)
+    - je → е   (jotisoinut э)
+    - jo → ё   (jotisoinut о)
+    - ju → ю   (jotisoinut у)
+    Jäljellä oleva j (ennen ä/ö/y/i tai konsonanttia) → й;
+    vokaali kartoitetaan sen jälkeen erikseen:
+      jä → й + э = йэ,  jö → й + ё = йё,  jy → й + ю = йю
+
+  HUOM. kielitieteilijöille: Tämä aksenti ei ole akateemista translitteraatiota
+  (ISO 9, GOST, BGN/PCGN). Tavoitteena on yksinomaan saada venäläinen TTS
+  kuulostamaan siltä kuin se yrittäisi lukea suomea — ei oikeaoppinen
+  tieteellinen translitterointi.
+iso: ru
+kategoria: akcent
+kolejnosc: 45
+
+# --- Pipeline przetwarzania ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+# Ei poisteta suomen diakritiikaasia automaattisesti — tehdään manuaalisesti
+# zamiany-osiossa kartoittamalla ne kyrillisiksi kirjaimiksi.
+usun_polskie_znaki: false
+# Yksittäisten latinalaisten kirjainten yhdistäminen ei toimi
+# translitteroinnin jälkeen (regex etsii luokkaa [a-z]).
+skleja_pojedyncze_litery: false
+
+# -----------------------------------------------------------------------------
+# KORVAUSJÄRJESTYS — KRIITTINEN:
+#   1. j + päävokaalit (ja/je/jo/ju) ENNEN j → й -sääntöä
+#   2. j → й (jää ennen ä/ö/y/i tai konsonanttia)
+#   3. Yksittäiset vokaalit (a/e/i/o/u/ä/ö/å/y)
+#   4. Konsonantit (h/v/s/k/... → kyrillinen)
+# Monogrammit ENNEN yksittäisiä kirjaimia — muuten j → й rikkoisi ja/je/jo/ju.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. j + päävokaalit (jotisoidut kirjaimet) ---
+  - { wzor: "ja",  zamiana: "я"  }
+  - { wzor: "Ja",  zamiana: "Я"  }
+  - { wzor: "JA",  zamiana: "Я"  }
+  - { wzor: "je",  zamiana: "е"  }
+  - { wzor: "Je",  zamiana: "Е"  }
+  - { wzor: "JE",  zamiana: "Е"  }
+  - { wzor: "jo",  zamiana: "ё"  }
+  - { wzor: "Jo",  zamiana: "Ё"  }
+  - { wzor: "JO",  zamiana: "Ё"  }
+  - { wzor: "ju",  zamiana: "ю"  }
+  - { wzor: "Ju",  zamiana: "Ю"  }
+  - { wzor: "JU",  zamiana: "Ю"  }
+
+  # --- 2. Jäljellä oleva j → й ---
+  # (kattaa j:n ennen ä/ö/y/i ja konsonantteja sekä sanan lopussa)
+  - { wzor: "j",   zamiana: "й"  }
+  - { wzor: "J",   zamiana: "Й"  }
+
+  # --- 3. Yksittäiset vokaalit ---
+  - { wzor: "a",   zamiana: "а"  }
+  - { wzor: "A",   zamiana: "А"  }
+  - { wzor: "e",   zamiana: "э"  }
+  - { wzor: "E",   zamiana: "Э"  }
+  - { wzor: "i",   zamiana: "и"  }
+  - { wzor: "I",   zamiana: "И"  }
+  - { wzor: "o",   zamiana: "о"  }
+  - { wzor: "O",   zamiana: "О"  }
+  - { wzor: "u",   zamiana: "у"  }
+  - { wzor: "U",   zamiana: "У"  }
+  - { wzor: "ä",   zamiana: "э"  }
+  - { wzor: "Ä",   zamiana: "Э"  }
+  - { wzor: "ö",   zamiana: "ё"  }
+  - { wzor: "Ö",   zamiana: "Ё"  }
+  - { wzor: "å",   zamiana: "о"  }
+  - { wzor: "Å",   zamiana: "О"  }
+  - { wzor: "y",   zamiana: "ю"  }
+  - { wzor: "Y",   zamiana: "Ю"  }
+
+  # --- 4. Konsonantit → kyrillinen ---
+  - { wzor: "b",   zamiana: "б"  }
+  - { wzor: "B",   zamiana: "Б"  }
+  - { wzor: "c",   zamiana: "ц"  }
+  - { wzor: "C",   zamiana: "Ц"  }
+  - { wzor: "d",   zamiana: "д"  }
+  - { wzor: "D",   zamiana: "Д"  }
+  - { wzor: "f",   zamiana: "ф"  }
+  - { wzor: "F",   zamiana: "Ф"  }
+  - { wzor: "g",   zamiana: "г"  }
+  - { wzor: "G",   zamiana: "Г"  }
+  - { wzor: "h",   zamiana: "х"  }
+  - { wzor: "H",   zamiana: "Х"  }
+  - { wzor: "k",   zamiana: "к"  }
+  - { wzor: "K",   zamiana: "К"  }
+  - { wzor: "l",   zamiana: "л"  }
+  - { wzor: "L",   zamiana: "Л"  }
+  - { wzor: "m",   zamiana: "м"  }
+  - { wzor: "M",   zamiana: "М"  }
+  - { wzor: "n",   zamiana: "н"  }
+  - { wzor: "N",   zamiana: "Н"  }
+  - { wzor: "p",   zamiana: "п"  }
+  - { wzor: "P",   zamiana: "П"  }
+  - { wzor: "q",   zamiana: "к"  }
+  - { wzor: "Q",   zamiana: "К"  }
+  - { wzor: "r",   zamiana: "р"  }
+  - { wzor: "R",   zamiana: "Р"  }
+  - { wzor: "s",   zamiana: "с"  }
+  - { wzor: "S",   zamiana: "С"  }
+  - { wzor: "t",   zamiana: "т"  }
+  - { wzor: "T",   zamiana: "Т"  }
+  - { wzor: "v",   zamiana: "в"  }
+  - { wzor: "V",   zamiana: "В"  }
+  - { wzor: "w",   zamiana: "в"  }
+  - { wzor: "W",   zamiana: "В"  }
+  - { wzor: "x",   zamiana: "кс" }
+  - { wzor: "X",   zamiana: "Кс" }
+  - { wzor: "z",   zamiana: "з"  }
+  - { wzor: "Z",   zamiana: "З"  }

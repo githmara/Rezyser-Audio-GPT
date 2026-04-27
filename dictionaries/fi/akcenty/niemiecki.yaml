@@ -1,0 +1,53 @@
+# -----------------------------------------------------------------------------
+#  SAKSAN AKSENTTI (suomi → saksalainen TTS)
+#  Syntetisaattoreille: Hedda / Stefan / Katja / Markus (saksalainen TTS).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "Saksa (esim. Hedda / Stefan / Katja)"
+opis: |
+  Mukauttaa suomenkielisen tekstin saksalaiselle puhesyntetisaattorille
+  (Hedda / Stefan / Katja / Markus).
+
+  Saksalaisella TTS:llä on yllättävän hyvä luonnollinen yhteensopivuus
+  suomen kanssa monella tärkeällä osa-alueella:
+    - ä = /æ/  molemmissa kielissä — saksalainen TTS lukee ä:n oikein ✓
+    - ö = /ø/  molemmissa — saksalainen TTS lukee ö:n oikein ✓
+    - j = /j/  molemmissa (kuten "ja" saksaksi) ✓
+    - h = /h/  molemmissa ✓
+    - kk/tt/pp — geminaatat säilyvät kirjoitusasussa ✓
+
+  Automaattiset saksan aksenttiefektit (ei muutosta tarvita):
+    - r  → uvulaarinen /ʁ/ (saksan "r" — voimakkain aksenttimerkki!)
+    - s  ennen vokaalia → /z/ (äänekäs): "sana" → "zana"-ääninen
+
+  Tarvittavat muutokset:
+    - y (/y/) → ü   KRIITTINEN: suomen y = /y/ (etinen pyöristetty vokaali).
+                     Saksan TTS ei tunnista y:tä vokaaliksi — se lukee sen
+                     joko /j/:nä tai /ɪ/:nä. Saksan ü = /y/ → täydellinen!
+    - v (/v/) → w   KRIITTINEN: saksan TTS lukee v:n /f/:nä (äänettömäksi),
+                     koska saksan natiivikirjoituksessa v = /f/ (mm. "von").
+                     Saksan w = /v/ → korjaa kriittinen poikkeama.
+
+  Pitkät vokaalit (yy, vv) muuttuvat automaattisesti: y → ü tuottaa
+  yy → üü, ja v → w tuottaa vv → ww kirjain kerrallaan.
+iso: de
+kategoria: akcent
+kolejnosc: 60
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Fonetiset korvaukset ---
+# Järjestys: molemmat muutokset ovat toisistaan riippumattomia,
+# joten niiden järjestyksellä ei ole merkitystä.
+zamiany:
+  # --- y → ü (KRIITTINEN: suomen /y/ → saksan ü = /y/) ---
+  - { wzor: "y",  zamiana: "ü" }
+  - { wzor: "Y",  zamiana: "Ü" }
+
+  # --- v → w (KRIITTINEN: saksan TTS lukee v:n /f/:nä, w:n /v/:nä) ---
+  - { wzor: "v",  zamiana: "w" }
+  - { wzor: "V",  zamiana: "W" }
