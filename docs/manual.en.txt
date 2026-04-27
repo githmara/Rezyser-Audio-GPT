@@ -1,4 +1,4 @@
-Audio AI Director's Manual - Complete Guide (Version 13.4 – Release Edition)
+Audio AI Director's Manual - Complete Guide (Version 13.4.1 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -24,6 +24,15 @@ Important: The runtime/ folder is part of the ready-made packages for Windows do
 4. Launch the application: python main.py or ./run.sh
 
 What you'll see after launching: After starting the program, a window with the start screen opens. You'll find a brief description of the available tools and the "System Check" section. If the API key is not yet configured, you'll see a red message indicating that AI-based modules (Directing, Translator) won't work — free local features (accents, Architect) are active immediately. The key configuration is described in the next step.
+
+
+Automatic Updates
+
+The application checks at startup whether a newer version is available on GitHub — the check runs in the background and does not block the interface.
+
+If you installed the program using the ready-made installer (.exe): when a newer version is detected, a dialog will appear asking whether you want to download it. After confirming, a progress bar will appear, and once the download is complete, the application will close automatically and the new installer will launch on its own — your projects and API key remain intact.
+
+If you are using the Git repository (developers and macOS/Linux users): instead of a download prompt, you will see a notification about the new version with a direct link to the release page on GitHub. Download the "Source code" archive from there or update the repository with the git pull command.
 
 STEP 2: Powering the API (OpenAI Key)
 
