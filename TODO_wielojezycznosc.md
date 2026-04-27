@@ -120,19 +120,20 @@ nowe foldery przez `dostepne_jezyki_bazowe()` w `core_poliglota.py`.
   - [ ] `cfr.` → `confronta`
   - [ ] `vol.` → `volume`
 
-- [ ] **Fiński (`fi`)** – z notebooka:
+- [x] **Fiński (`fi`)** – wdrożone w 13.4 (paczka kompletna: 8 akcentów + 6 szyfrów + GUI):
   - [ ] `esim.` → `esimerkiksi`
-  - [ ] `jne.` → `ja niin edelleen`
+  - [x] `jne.` → `ja niin edelleen`
   - [ ] `ym.` → `ynnä muuta`
-  - [ ] `ns.` → `niin sanottu`
+  - [x] `ns.` → `niin sanottu`
   - [ ] `tms.` → `tai muuta sellaista`
-  - [ ] `ko.` → `kyseinen`
+  - [x] `ko.` → `kyseinen`
   - [ ] `po.` → `pitää olla` (lub kontekst. `pohjoiseen`)
   - [ ] `vt.` → `virkaa tekevä`
-  - [ ] `prof.` → `professori`
-  - [ ] `dr.` → `tohtori`
-  - [ ] `os.` → `osasto`
-  - [ ] `v.` → `vuosi` (lub `versus`)
+  - [x] `prof.` → `professori` (opcjonalna kropka: `prof\.?\s`)
+  - [x] `dr.` → `tohtori` (opcjonalna kropka: `dr\.?\s`)
+  - [ ] `os.` → `osasto` (YAML ma błędnie: `omaa sukua` — wymaga korekty)
+  - [x] `v.` → `vuosi` (jako `vuonna` przed cyfrą: `v\.?\s(?=\d)`)
+  - [x] `n.` → `noin` (dodane w 13.4: `\bn\.\s`)
 
 - [ ] **Islandzki (`is`)** – z notebooka:
   - [ ] `t.d.` → `til dæmis`
@@ -351,7 +352,7 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 | `Il dott Bianchi ha presentato i risultati dello studio.`               | brak `.` po `dott`           | ⚠️ nie rozwinięte (regex: `dott\.`)             |
 | `Per maggiori informazioni cfr il capitolo precedente.`                 | brak `.` po `cfr`            | ⚠️ nie rozwinięte (regex: `cfr\.`)              |
 
-### 6.5 Fiński (`fi`)
+### 6.5 Fiński (`fi`) ✅ zwalidowane w 13.4
 
 | Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
 |-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|

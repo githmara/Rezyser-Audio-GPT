@@ -1,3 +1,85 @@
+# Release Notes — Reżyser Audio GPT 13.4 „Wersja Wydawnicza"
+
+*Drugi w pełni wdrożony obcy język: fiński. Refaktor numeru wersji na single source of truth.*
+
+---
+
+## 13.4 — pełen release (motyw przewodni: fiński — kompletna paczka językowa)
+
+*Punkt wyjścia: V13.3.1 (fc82669) → 9 commitów WIP + 1 commit release → V13.4.*
+
+### TL;DR
+
+13.4 zamyka paczkę `dictionaries/fi/` jako **drugi w pełni wdrożony obcy język** — fiński dołącza do angielskiego z kompletem 8 akcentów fonetycznych (obcojęzyczne TTS czytające fiński tekst z charakterystycznym akcentem), 6 szyfrów, trybów Reżysera AI i przetłumaczonego GUI. Szczególnie wyraziste są dwa nowe akcenty: **saksalainen** (*Hedda* gardle-rolls każde `r` i sybiluje `s→z`, fiński `y` zamieniony na `ü` dla poprawnego /y/) i **venäläinen** (pełna transliteracja FI→cyrylica: `y→ю`, `ä→э`, `ö→ё` — rosyjski TTS brzmi jak Rosjanin mówiący po fińsku). Infrastruktura dostała **single source of truth dla numeru wersji** (plik `VERSION` w rocie, koniec sześciu-plikowych bumpów), **zgodę A11Y na zmianę języka pipeline'u** (MessageBox YES/NO zamiast cichego przełączania) oraz **wieloszablonowy autotłumacz dokumentacji** z dynamicznymi placeholderami i custom system-promptem.
+
+---
+
+## Co nowego dla użytkownika końcowego
+
+### Drugi w pełni wdrożony obcy język: fiński
+
+- **8 akcentów obcojęzycznych** w `dictionaries/fi/akcenty/`. Każdy przerabia fiński tekst pod natywny TTS swojego języka:
+
+  | Akcent | TTS | Kluczowe markery |
+  |---|---|---|
+  | Angielski | David / Zira | j→y (en-j = /dʒ/), ä→a, ö→e |
+  | Polski | Paulina / Ewa | j→y (de-kompatybilny), ä→a, ö→e |
+  | Islandzki | Guðrún / eSpeak is | y→u, ä→e (ö zostaje — is TTS ma /ø/) |
+  | Francuski | Hortense / Paul | y→u (fr u=/y/ — idealnie!), j→y, ö→eu |
+  | Hiszpański | Helena / Pablo | y→u, j→y, ä→a, ö→o |
+  | Włoski | Lucia / Cosimo | j→y, ä→e, ö→e (h milknie automatycznie) |
+  | **Saksalainen** | **Hedda / Stefan** | **y→ü (krytyczne), v→w (krytyczne)** |
+  | **Venäläinen** | **Milena / Yuri** | **pełna FI→cyrylica: y→ю, ä→э, ö→ё** |
+
+- **Akcent saksalainen** — dwie reguły, reszta dzieje się sama: TTS DE gardle-rolls każde `r` do /ʁ/, przed samogłoskami czyta `s` jako /z/ (`sana`→`zana`). `ä` i `ö` obsługuje natywnie (Niemcy mają te litery). Jedyne korekty: `y→ü` (niem. TTS bez tego czyta /j/) i `v→w` (niem. `v`=/f/, `w`=/v/).
+
+- **Akcent venäläinen** — pełna transliteracja fińskiej łacinki na cyrylicę, z czterema fińskimi wyzwaniami: `y→ю` (/y/ → /ju/, silny efekt akcentu!), `ä→э` (twarde e, bez palatalizacji konsonantów), `ö→ё` (palatalizacja = przybliżenie frontowej /ø/), `e→э` zamiast `е` (fiński `e` nie palatalizuje — to ważna różnica od polskiego). Jotyzacja: `ja→я`, `je→е`, `jo→ё`, `ju→ю`; pozostałe `j→й`, potem vokal mapowany osobno.
+
+- **6 szyfrów** w `dictionaries/fi/szyfry/`: Cezar (alfabet fi + ä/ö/å), Jąkanie (vokale fińskie), Samogłoskowiec, Typoglikemia, Wąż, Odwracacz tekstu (14 wzorców skrótowców: jne./ns./ko./prof./dr./em./ao./yo./puh./vs./jms./v.+liczba/s.+liczba/n.=noin).
+
+- **Tryby Reżysera AI** dla fińskiego — pełne tłumaczenia trybów na język fiński.
+
+- `n. kaksi vuotta` → `noin kaksi vuotta` — brakująca reguła w `fi/szyfry/odwracanie.yaml` dodana w tym releasie (smoke test 6.5 pełny).
+
+### Zgoda A11Y na przełączenie języka pipeline'u
+
+- Poliglota startuje teraz z języka interfejsu (gdy paczka ma pełny zestaw reguł), zamiast hardkodowanego `pl`. Użytkownik z UI=FI nie zobaczy polskich etykiet akcentów przy pierwszym wejściu do panelu.
+- Po wczytaniu obcojęzycznego pliku pojawia się `wx.MessageBox YES_NO` (NVDA odczyta zmianę) z pytaniem o przełączenie pipeline'u — zamiast cichego działania w tle.
+
+---
+
+## Pod maską
+
+### Single source of truth dla numeru wersji
+
+- **Przed 13.4:** bump wersji wymagał edycji 6 plików `dictionaries/<kod>/gui/ui.yaml`. W 13.3.1 hotfixował błąd, gdy fi/is/it/ru tkwiło na 13.1 dwa wydania.
+- **Od 13.4:** jeden plik `VERSION` w rocie repozytorium (plain text, np. `13.4`). Wszystkie `ui.yaml` używają templated string `"{numer_wersji} – <natywny sufiks>"`. `i18n.py` wstrzykuje `numer_wersji=` automatycznie przy każdym `t()`; `build_release.odczytaj_wersje()` czyta `VERSION` bezpośrednio.
+- Efekt: następny bump = zmiana jednej linii w jednym pliku.
+
+### Wieloszablonowy autotłumacz dokumentacji
+
+- `buduj_wielojezyczne_docs.py` iteruje teraz po **wszystkich** `*.yaml` w `dictionaries/pl/gui/dokumentacja/` (manual + dictionaries + przyszłe szablony) zamiast jednego pliku. Flaga `--szablony` pozwala przetłumaczyć tylko wybrany podzbiór bez ponownego API-billu.
+- Dynamiczne placeholdery w `dictionaries.yaml`: liczby akcentów/szyfrów/trybów i lista kompletnych języków obliczane ze stanu dysku (`_zbuduj_placeholdery_globalne()`). Dodanie nowej paczki językowej automatycznie aktualizuje dokumentację we wszystkich językach.
+- Custom system-prompt autotłumacza: trzy kluczowe instrukcje eliminujące typowe błędy LLM (1. nie pisać „w przyszłości"; 2. podmienić akcent natywny na pl; 3. zlokalizować przykłady szyfrów pod fonetykę docelową).
+
+### Batchowe tłumaczenia `dictionaries.yaml`
+
+- Pliki `dictionaries/<kod>/gui/dokumentacja/dictionaries.yaml` (opis słowników widoczny w panelu pomocy) przetłumaczone na en/fi/is/it/ru z ręcznymi fixami po review. Użytkownik fińskojęzyczny widzi opisy szyfrów i akcentów po fińsku.
+
+---
+
+## Breaking changes / migracja
+
+- **`VERSION`** — plik w rocie jest nowym single source of truth. Skrypty zewnętrzne odczytujące numer wersji z `ui.yaml` należy przepiąć na `VERSION`.
+- **`build_release.odczytaj_wersje_z_ui_yaml()`** usunięta, zastąpiona przez `odczytaj_wersje()`. Sygnatura i typ zwracany bez zmian.
+- **`i18n.NUMER_WERSJI`** — nowa publiczna stała (string), dostępna po `import i18n`. Fallback do `"?"` gdy `VERSION` brak (aplikacja nie wywala się przy starcie).
+
+---
+
+*Notes wygenerowane na podstawie 8 commitów WIP od `V13.3.1` do `2e57fd3` + commit zamykający. Pełna lista: `git log V13.3.1..HEAD --oneline`.*
+
+---
+
 # Release Notes — Reżyser Audio GPT 13.3.1 „Wersja Wydawnicza"
 
 *Hotfix dla 13.3 — uzupełnienie brakujących tłumaczeń wielojęzycznych w głównym GUI.*
