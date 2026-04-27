@@ -1,6 +1,64 @@
-# Release Notes — Reżyser Audio GPT 13.4 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.4.1 „Wersja Wydawnicza"
 
-*Drugi w pełni wdrożony obcy język: fiński. Refaktor numeru wersji na single source of truth.*
+*System auto-aktualizacji przez GitHub Releases. Wielojęzyczny instalator.*
+
+---
+
+## 13.4.1 — patch release (motyw przewodni: auto-aktualizacja)
+
+*Punkt wyjścia: V13.4 (432179b) → commity WIP + commit release → V13.4.1.*
+
+### TL;DR
+
+13.4.1 wprowadza **system auto-aktualizacji oparty o GitHub Releases API**. Przy każdym starcie aplikacja odpytuje GitHub w wątku tła — jeśli dostępna jest nowsza wersja, zachowanie zależy od środowiska: użytkownik Windows z paczką instalatora dostaje `wx.ProgressDialog` z pobieraniem `.exe` i automatycznym zamknięciem aplikacji przed instalacją; deweloper lub użytkownik macOS/Linux widzi `wx.MessageBox` z bezpośrednim linkiem do strony wydania. Obsługa jest w pełni dostępna dla czytników ekranu (A11y: wszystkie dialogi natywne wxPython, `wx.CallAfter` do wątku GUI). Instalator Inno Setup dostał sekcję `[Languages]` dla wszystkich 6 obsługiwanych języków.
+
+---
+
+## Co nowego dla użytkownika końcowego
+
+### Automatyczne aktualizacje
+
+- Przy starcie aplikacja sprawdza w tle (wątek daemon, brak blokowania MainLoop), czy na GitHubie jest dostępna nowsza wersja.
+- **Użytkownicy Windows z instalatorem** (plik `runtime/python.exe` obecny): `wx.MessageBox` TAK/NIE → `wx.ProgressDialog` z pobieraniem → `subprocess.Popen` instalatora → `ExitMainLoop()`. Projekty i klucz API nienaruszone.
+- **Deweloperzy i użytkownicy macOS/Linux** (brak `runtime/python.exe`): `wx.MessageBox` z informacją o nowej wersji i bezpośrednim linkiem do strony wydania na GitHubie (archiwum „Source code" lub `git pull`).
+- Wszystkie dialogi natywne wxPython — NVDA odczytuje tytuł, treść i pasek postępu bez dodatkowej konfiguracji.
+
+### Wielojęzyczny instalator
+
+- `installer.iss` dostał sekcję `[Languages]` obejmującą wszystkie 6 obsługiwanych języków (`english`, `polish`, `italian`, `russian`, `finnish`, `icelandic`). Inno Setup automatycznie dobiera język instalatora do systemu użytkownika.
+- Etykiety w sekcji `[Tasks]` (skrót na pulpicie) zamienione na wbudowane stałe Inno Setup (`{cm:CreateDesktopIcon}`, `{cm:AdditionalIcons}`), które lokalizują się automatycznie.
+
+---
+
+## Pod maską
+
+### core_updater.py — izolowany moduł sieciowy
+
+- Nowy moduł `core_updater.py` (bez zależności od wxPython) odpytuje `https://api.github.com/repos/githmara/Rezyser-Audio-GPT/releases/latest`.
+- `_normalizuj_wersje()` — konwersja `"v13.4.1"` / `"13.5-WIP"` na krotkę `(13, 4, 1)` / `(13, 5, 0)` do porównania.
+- `sprawdz_aktualizacje(token=None)` — łapie wszystkie wyjątki sieciowe, zwraca `None` zamiast rzucać; opcjonalny `GITHUB_TOKEN` dla prywatnych repozytoriów.
+- `pobierz_instalator(info, callback)` — pobiera asset `.exe` do `%TEMP%` chunkami 64 KB; `callback(pobrane, total)` wywoływany po każdym chunku (użyj `wx.CallAfter` w GUI).
+
+### Integracja z main.py (A11y)
+
+- `_start_update_check()` startuje wątek daemon natychmiast po `self.Show()` — okno jest już widoczne dla NVDA zanim sprawdzenie wróci.
+- `_on_postep_pobierania()` — `dlg.Update(min(procent, 99))` zamiast 100, żeby `wx.PD_AUTO_HIDE` nie ukrył dialogu przed jawnym `Destroy()`.
+- Rozgałęzienie środowisko: `os.path.isfile("runtime/python.exe")` — ten sam plik sprawdza `build_release.py` przy budowaniu paczki.
+
+### Tłumaczenia UI i dokumentacja
+
+- Sekcja `updater:` w `dictionaries/*/gui/ui.yaml` × 6 języków (9 kluczy: `nowa_wersja_tytul`, `nowa_wersja_tresc`, `pobieranie_tytul`, `pobieranie_tresc`, `instalacja_tytul`, `instalacja_tresc`, `blad_pobierania_tytul`, `blad_pobierania_tresc`, `blad_uruchomienia_tytul`, `blad_uruchomienia_tresc`, `dev_info_tresc`).
+- Sekcja „Automatyczne aktualizacje" dodana do `dictionaries/*/gui/dokumentacja/manual.yaml` × 6 języków — między KROK 1 a KROK 2.
+
+### build_release.py
+
+- Usunięto `input("Also build the .exe installer? (y/n)")` — instalator jest zawsze budowany, bo GitHub Releases auto-updater go wymaga.
+
+---
+
+## Breaking changes / migracja
+
+Brak — zmiana w pełni addytywna.
 
 ---
 
