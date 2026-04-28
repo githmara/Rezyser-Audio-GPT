@@ -322,6 +322,11 @@ rezyser:
   btn_scena_tooltip: |-
     Wstawia nagłówek kolejnej sceny do historii i pliku.
     Dostępny wyłącznie w trybie Skryptu.
+  naglowek_prolog:    "Prolog"
+  naglowek_epilog:    "Epilog"
+  naglowek_rozdzial:  "Rozdział"
+  naglowek_akt:       "Akt"
+  naglowek_scena:     "Scena"
   # Podgląd historii
   lbl_podglad_historii:  "Bieżąca historia w pamięci (tylko do odczytu – nawiguj strzałkami):"
   txt_podglad_name:      "Podgląd pełnej historii w pamięci – tylko do odczytu"

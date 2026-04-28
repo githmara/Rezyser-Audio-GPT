@@ -307,6 +307,11 @@ rezyser:
   btn_scena_tooltip: |-
     Lisää seuraavan kohtauksen otsikon tarinaan ja tiedostoon.
     Saatavilla vain Käsikirjoitus-tilassa.
+  naglowek_prolog:   "Prologi"
+  naglowek_epilog:   "Epilogi"
+  naglowek_rozdzial: "Luku"
+  naglowek_akt:      "Näytös"
+  naglowek_scena:    "Kohtaus"
   # Podgląd historii
   lbl_podglad_historii: "Nykyinen tarina muistissa (vain luku – navigoi nuolilla):"
   txt_podglad_name: "Täydellinen tarinan esikatselu muistissa – vain luku"

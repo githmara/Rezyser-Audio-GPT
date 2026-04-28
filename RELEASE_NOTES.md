@@ -1,6 +1,30 @@
-# Release Notes — Reżyser Audio GPT 13.4.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.4.2 „Wersja Wydawnicza"
 
-*System auto-aktualizacji przez GitHub Releases. Wielojęzyczny instalator.*
+*Hotfix: wielojęzyczne nagłówki struktury w Reżyserze i Konwerterze.*
+
+---
+
+## 13.4.2 — hotfix (motyw przewodni: i18n nagłówków struktury)
+
+*Punkt wyjścia: V13.4.1 → commit hotfix → V13.4.2.*
+
+### TL;DR
+
+13.4.2 naprawia krytyczny bug internalizacji: panel struktury w Reżyserze AI wstawiał nagłówki rozdziałów, aktów i scen zawsze po polsku, niezależnie od wybranego języka interfejsu. Konwerter DOCX rozpoznawał nagłówki tylko po polsku, przez co angielski „Chapter 1" lub fiński „Näytös 2" nie był promowany na Heading 1. Naprawiono też pogrubianie nagłówków scen dla wszystkich języków.
+
+### Co nowego dla użytkownika końcowego
+
+- Przycisk „Wstaw Rozdział" wstawia teraz „Chapter N" w EN, „Luku N" w FI, „Kafli N" w IS, „Capitolo N" w IT, „Глава N" w RU.
+- Analogicznie Akt/Scena/Prolog/Epilog — każdy w natywnym słowie dla wybranego języka.
+- Konwerter `.txt → .docx` rozpoznaje nagłówki we wszystkich 6 językach i poprawnie formatuje je jako Heading 1 (rozdziały) lub Bold (sceny).
+
+### Pod maską
+
+- Dodano klucze `rezyser.naglowek_{prolog|epilog|rozdzial|akt|scena}` do wszystkich 6 plików `dictionaries/<kod>/gui/ui.yaml`.
+- `core_rezyser.py`: metody `wstaw_*` przyjmują opcjonalne keyword-only parametry `naglowek`/`naglowek_bazowy`/`naglowek_akt`/`naglowek_scena` z polskimi wartościami domyślnymi (backward-compatible).
+- `core_rezyser.py`: stałe modułowe `_WZORZEC_{ROZDZIAL|AKT|SCENA|NAGLOWEK_LINIA}` zastąpiły hardkodowane polskie regexy w licznikach (`_odczytaj_liczniki_z_pliku`) i detekcji ostatniej linii (`ostatnia_linia_to_naglowek`).
+- `gui_konwerter.py`: regexy detekcji nagłówków/scen rozszerzone o wszystkie 6 języków.
+- `gui_rezyser.py`: handlery `_on_wstaw_*` przekazują wartości z `t("rezyser.naglowek_*")` do `core_rezyser`.
 
 ---
 

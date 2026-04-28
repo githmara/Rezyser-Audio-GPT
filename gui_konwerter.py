@@ -201,8 +201,15 @@ class KonwerterPanel(wx.Panel):
             linia = re.sub(r'^#+\s*', '', linia)
 
             # Detekcja nagłówków głównych (tnących plik na rozdziały w ElevenLabs)
+            # Obsługuje wszystkie 6 języków: pl/en/fi/is/it/ru
             if re.match(
-                r"^[=\-\s]*(Czołówka|Rozdział|Prolog|Epilog|Akt)",
+                r"^[=\-\s]*("
+                r"Czołówka"
+                r"|Rozdzia[łl]|Chapter|Luku|Kafli|Capitolo|Глава"
+                r"|Prolog(?:ue|i|o)?|Formáli|Пролог"
+                r"|Epilog(?:ue|i|o)?|Eftirorð|Эпилог"
+                r"|Akt|Act|Акт|Näytös|Þáttur"
+                r")",
                 linia,
                 re.IGNORECASE,
             ):
@@ -210,7 +217,12 @@ class KonwerterPanel(wx.Panel):
                 nowy_doc.add_heading(czysty, level=1)
 
             # Detekcja scen (pogrubiony tekst, bez wpisu w spisie treści)
-            elif re.match(r"^[=\-\s]*Scena", linia, re.IGNORECASE):
+            # Obsługuje wszystkie 6 języków: pl/en/fi/is/it/ru
+            elif re.match(
+                r"^[=\-\s]*(?:Scena|Scene|Kohtaus|Atriði|Сцена)",
+                linia,
+                re.IGNORECASE,
+            ):
                 czysty = re.sub(r'^[=\-\s]+|[=\-\s]+$', '', linia)
                 p = nowy_doc.add_paragraph()
                 run = p.add_run(czysty)

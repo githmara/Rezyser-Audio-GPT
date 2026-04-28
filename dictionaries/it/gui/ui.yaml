@@ -308,6 +308,11 @@ rezyser:
   btn_scena_tooltip: |-
     Inserisce l'intestazione della scena successiva nella storia e nel file.
     Disponibile solo in modalità Script.
+  naglowek_prolog:   "Prologo"
+  naglowek_epilog:   "Epilogo"
+  naglowek_rozdzial: "Capitolo"
+  naglowek_akt:      "Atto"
+  naglowek_scena:    "Scena"
   # Podgląd historii
   lbl_podglad_historii: "Storia corrente in memoria (solo lettura – naviga con le frecce):"
   txt_podglad_name: "Anteprima della storia completa in memoria – solo lettura"

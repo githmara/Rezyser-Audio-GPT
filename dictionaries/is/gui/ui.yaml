@@ -307,6 +307,11 @@ rezyser:
   btn_scena_tooltip: |-
     Setur inn fyrirsögn næsta atriðis í söguna og skrána.
     Aðeins í boði í Handritsstillingu.
+  naglowek_prolog:   "Formáli"
+  naglowek_epilog:   "Eftirorð"
+  naglowek_rozdzial: "Kafli"
+  naglowek_akt:      "Þáttur"
+  naglowek_scena:    "Atriði"
   # Podgląd historii
   lbl_podglad_historii: "Núverandi saga í minni (aðeins til lesturs – sigla með örvum):"
   txt_podglad_name: "Forskoðun á allri sögu í minni – aðeins til lesturs"

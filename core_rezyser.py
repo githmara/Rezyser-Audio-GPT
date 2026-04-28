@@ -82,6 +82,27 @@ from core_poliglota import (
 # importowany ręcznie poza blokiem generatora, żeby odświerzacz go nie ruszał.
 from core_poliglota import slowa_akcentu
 
+# Wzorce nagłówków dla wszystkich 6 obsługiwanych języków aplikacji.
+# Używane przez parsing liczników, detekcję ostatniej linii oraz konwerter.
+_WZORZEC_ROZDZIAL = (
+    r"(?i)\b(?:rozdzia[łl]|chapter|luku|kafli|capitolo|глава)\s+(\d+)"
+)
+_WZORZEC_AKT = (
+    r"(?i)\b(?:akt|act|акт|näytös|þáttur)\s+(\d+)"
+)
+_WZORZEC_SCENA = (
+    r"(?i)\b(?:scena|scene|kohtaus|atriði|сцена)\s+(\d+)"
+)
+_WZORZEC_NAGLOWEK_LINIA = (
+    r"(?i)^(?:"
+    r"(?:rozdzia[łl]|chapter|luku|kafli|capitolo|глава)\s+\d+"
+    r"|(?:akt|act|акт|näytös|þáttur)\s+\d+"
+    r"|(?:scena|scene|kohtaus|atriði|сцена)\s+\d+"
+    r"|prolog(?:ue|i|o)?|formáli|пролог"
+    r"|epilog(?:ue|i|o)?|eftirorð|эпилог"
+    r")\s*$"
+)
+
 
 # =============================================================================
 # Stałe konfiguracyjne
@@ -370,13 +391,13 @@ class ProjektRezysera:
             content = fh.read()
 
         # --- Liczniki: bierzemy maksimum znalezionych numerów i +1 ---
-        chapter_nums = [int(m) for m in re.findall(r"(?i)\brozdzia[łl]\s+(\d+)", content)]
-        akt_nums = [int(m) for m in re.findall(r"(?i)\bakt\s+(\d+)", content)]
+        chapter_nums = [int(m) for m in re.findall(_WZORZEC_ROZDZIAL, content)]
+        akt_nums = [int(m) for m in re.findall(_WZORZEC_AKT, content)]
         # Sceny liczymy tylko wewnątrz OSTATNIEGO aktu – numeracja
         # scen restartuje się z każdym aktem.
-        ostatni_split = re.split(r"(?i)\bakt\s+\d+", content)
+        ostatni_split = re.split(_WZORZEC_AKT.replace(r"(\d+)", r"\d+"), content)
         ostatni_frag = ostatni_split[-1] if ostatni_split else content
-        scena_nums = [int(m) for m in re.findall(r"(?i)\bscena\s+(\d+)", ostatni_frag)]
+        scena_nums = [int(m) for m in re.findall(_WZORZEC_SCENA, ostatni_frag)]
 
         self.chapter_counter = (max(chapter_nums) + 1) if chapter_nums else 1
         self.akt_counter = (max(akt_nums) + 1) if akt_nums else 1
@@ -527,45 +548,50 @@ class ProjektRezysera:
     # „Wstawiono: …".
     # ------------------------------------------------------------------
 
-    def wstaw_prolog(self) -> str:
-        """Wstawia ``Prolog`` na początek historii (nadpisując plik)."""
+    def wstaw_prolog(self, *, naglowek: str = "Prolog") -> str:
+        """Wstawia nagłówek prologu na początek historii (nadpisując plik)."""
         self._wymagaj_nazwy()
-        header = "Prolog\n\n"
+        header = f"{naglowek}\n\n"
         self.full_story += header
         # Tryb "w" – Prolog zaczyna historię od zera. Gdyby plik zawierał
         # resztki z poprzedniej sesji (test zmian, zepsuty zapis), byłyby
         # teraz niszczone. Tak samo robił oryginalny kod w gui_rezyser.
         self.dopisz_do_pliku_historii(header, mode="w")
-        return "Prolog"
+        return naglowek
 
-    def wstaw_epilog(self) -> str:
-        """Wstawia ``Epilog`` na koniec historii. Po nim dalszy zapis jest blokowany."""
+    def wstaw_epilog(self, *, naglowek: str = "Epilog") -> str:
+        """Wstawia nagłówek epilogu na koniec historii. Po nim dalszy zapis jest blokowany."""
         self._wymagaj_nazwy()
-        header = "\n\nEpilog\n\n"
+        header = f"\n\n{naglowek}\n\n"
         self.full_story += header
         self.dopisz_do_pliku_historii(header)
-        return "Epilog"
+        return naglowek
 
-    def wstaw_rozdzial(self) -> str:
-        """Wstawia ``Rozdział N`` (Audiobook) i inkrementuje licznik."""
+    def wstaw_rozdzial(self, *, naglowek_bazowy: str = "Rozdział") -> str:
+        """Wstawia nagłówek kolejnego rozdziału (Audiobook) i inkrementuje licznik."""
         self._wymagaj_nazwy()
-        naglowek = f"Rozdział {self.chapter_counter}"
+        naglowek = f"{naglowek_bazowy} {self.chapter_counter}"
         content = f"\n\n{naglowek}\n\n"
         self.full_story += content
         self.chapter_counter += 1
         self.dopisz_do_pliku_historii(content)
         return naglowek
 
-    def wstaw_akt(self) -> tuple[str, str]:
-        """Wstawia ``Akt N`` + automatycznie ``Scena 1`` (tryb Skrypt).
+    def wstaw_akt(
+        self,
+        *,
+        naglowek_akt: str = "Akt",
+        naglowek_scena: str = "Scena",
+    ) -> tuple[str, str]:
+        """Wstawia nagłówek aktu + automatycznie sceny 1 (tryb Skrypt).
 
         Inkrementuje licznik aktów i ustawia licznik scen na 2 (bo Scena 1
         właśnie została wstawiona). Zwraca krotkę ``(akt, scena)``
         – dla GUI do komunikatu zwrotnego.
         """
         self._wymagaj_nazwy()
-        akt = f"Akt {self.akt_counter}"
-        scena = "Scena 1"
+        akt = f"{naglowek_akt} {self.akt_counter}"
+        scena = f"{naglowek_scena} 1"
         content = f"\n\n{akt}\n\n{scena}\n\n"
         self.full_story += content
         self.akt_counter += 1
@@ -573,10 +599,10 @@ class ProjektRezysera:
         self.dopisz_do_pliku_historii(content)
         return akt, scena
 
-    def wstaw_scena(self) -> str:
-        """Wstawia kolejną ``Scena N`` w bieżącym Akcie."""
+    def wstaw_scena(self, *, naglowek_bazowy: str = "Scena") -> str:
+        """Wstawia kolejny nagłówek sceny w bieżącym Akcie."""
         self._wymagaj_nazwy()
-        scena = f"Scena {self.scena_counter}"
+        scena = f"{naglowek_bazowy} {self.scena_counter}"
         content = f"\n\n{scena}\n\n"
         self.full_story += content
         self.scena_counter += 1
@@ -667,10 +693,7 @@ class ProjektRezysera:
         """
         for linia in reversed(self.full_story.splitlines()):
             if linia.strip():
-                return bool(re.match(
-                    r"(?i)^(rozdzia[łl]\s+\d+|akt\s+\d+|scena\s+\d+|prolog|epilog)\s*$",
-                    linia.strip(),
-                ))
+                return bool(re.match(_WZORZEC_NAGLOWEK_LINIA, linia.strip()))
         return False
 
     # ------------------------------------------------------------------

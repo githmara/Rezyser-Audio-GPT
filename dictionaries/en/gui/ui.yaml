@@ -314,6 +314,11 @@ rezyser:
   btn_scena_tooltip: |-
     Inserts the next scene header into the story and file.
     Available only in Script mode.
+  naglowek_prolog:   "Prologue"
+  naglowek_epilog:   "Epilogue"
+  naglowek_rozdzial: "Chapter"
+  naglowek_akt:      "Act"
+  naglowek_scena:    "Scene"
   # Podgląd historii
   lbl_podglad_historii: "Current story in memory (read-only – navigate with arrows):"
   txt_podglad_name: "Full story preview in memory – read-only"

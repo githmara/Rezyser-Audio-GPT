@@ -1379,7 +1379,7 @@ class RezyserPanel(wx.Panel):
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
-            self._projekt.wstaw_prolog()
+            self._projekt.wstaw_prolog(naglowek=t("rezyser.naglowek_prolog"))
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_wstawiania_prolog", tresc_bledu=str(exc)),
@@ -1400,7 +1400,7 @@ class RezyserPanel(wx.Panel):
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
-            self._projekt.wstaw_epilog()
+            self._projekt.wstaw_epilog(naglowek=t("rezyser.naglowek_epilog"))
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_wstawiania_epilog", tresc_bledu=str(exc)),
@@ -1421,7 +1421,9 @@ class RezyserPanel(wx.Panel):
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
-            naglowek = self._projekt.wstaw_rozdzial()
+            naglowek = self._projekt.wstaw_rozdzial(
+                naglowek_bazowy=t("rezyser.naglowek_rozdzial"),
+            )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_wstawiania_rozdzialu", tresc_bledu=str(exc)),
@@ -1442,7 +1444,10 @@ class RezyserPanel(wx.Panel):
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
-            akt_nag, scena_nag = self._projekt.wstaw_akt()
+            akt_nag, scena_nag = self._projekt.wstaw_akt(
+                naglowek_akt=t("rezyser.naglowek_akt"),
+                naglowek_scena=t("rezyser.naglowek_scena"),
+            )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_wstawiania_aktu", tresc_bledu=str(exc)),
@@ -1463,7 +1468,9 @@ class RezyserPanel(wx.Panel):
         if self._wymagaj_nazwy_lub_alert() is None:
             return
         try:
-            scena_nag = self._projekt.wstaw_scena()
+            scena_nag = self._projekt.wstaw_scena(
+                naglowek_bazowy=t("rezyser.naglowek_scena"),
+            )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_wstawiania_sceny", tresc_bledu=str(exc)),

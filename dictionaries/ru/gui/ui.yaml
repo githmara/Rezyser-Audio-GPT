@@ -308,6 +308,11 @@ rezyser:
   btn_scena_tooltip: |-
     Вставляет заголовок следующей сцены в историю и файл.
     Доступно только в режиме Скрипта.
+  naglowek_prolog:   "Пролог"
+  naglowek_epilog:   "Эпилог"
+  naglowek_rozdzial: "Глава"
+  naglowek_akt:      "Акт"
+  naglowek_scena:    "Сцена"
   # Podgląd historii
   lbl_podglad_historii: "Текущая история в памяти (только для чтения – навигация стрелками):"
   txt_podglad_name: "Просмотр полной истории в памяти – только для чтения"
