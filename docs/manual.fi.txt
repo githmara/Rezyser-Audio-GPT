@@ -1,4 +1,4 @@
-Podręcznik Ääniohjaajan AI - Täydellinen Opas (Versio 13.4.1 – Julkaisuversio)
+Podręcznik Ääniohjaajan AI - Täydellinen Opas (Versio 13.4.2 – Julkaisuversio)
 
 Tervetuloa Hybridin Äänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukumoottoreiden (NVDA) kanssa.
 

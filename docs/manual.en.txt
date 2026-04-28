@@ -1,4 +1,4 @@
-Audio AI Director's Manual - Complete Guide (Version 13.4.1 – Release Edition)
+Audio AI Director's Manual - Complete Guide (Version 13.4.2 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
