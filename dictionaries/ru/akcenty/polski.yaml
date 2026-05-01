@@ -57,6 +57,24 @@ zamiany:
   - { wzor: "Ц", zamiana: "C"    }
   - { wzor: "ц", zamiana: "c"    }
 
+  # --- 1.5 Кириллическое и + йотированная гласная (избегаем подвоения [i]) ---
+  # 13.5.1: без этих правил «присутствие» → «prisutstwiie» — польский TTS читает
+  # подвоенное [i:e] вместо [i-je]. Польская «j» = /j/, поэтому пишем явный
+  # йот-разделитель: `ие → ije`, `ия → ija`, `иё → ijo`, `ию → iju`.
+  # Эти правила должны идти ПЕРЕД одиночными «и → i» и «Е/Я/Ё/Ю → Ie/...».
+  - { wzor: "ИЯ", zamiana: "IJA" }
+  - { wzor: "Ия", zamiana: "Ija" }
+  - { wzor: "ия", zamiana: "ija" }
+  - { wzor: "ИЕ", zamiana: "IJE" }
+  - { wzor: "Ие", zamiana: "Ije" }
+  - { wzor: "ие", zamiana: "ije" }
+  - { wzor: "ИЁ", zamiana: "IJO" }
+  - { wzor: "Иё", zamiana: "Ijo" }
+  - { wzor: "иё", zamiana: "ijo" }
+  - { wzor: "ИЮ", zamiana: "IJU" }
+  - { wzor: "Ию", zamiana: "Iju" }
+  - { wzor: "ию", zamiana: "iju" }
+
   # --- 2. Йотированные гласные ---
   - { wzor: "Ё", zamiana: "Io"   }
   - { wzor: "ё", zamiana: "io"   }

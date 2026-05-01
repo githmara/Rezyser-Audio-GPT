@@ -1,6 +1,30 @@
-# Release Notes — Reżyser Audio GPT 13.5 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.5.1 „Wersja Wydawnicza"
 
-*Minor: pełna paczka rosyjska — 6 szyfrów, 4 tryby Reżysera, 8 obcojęzycznych akcentów + dwa fundamenty silnika domknięte.*
+*Patch: koniec podwojenia [i] w końcówkach `-ие/-ия/-иё/-ию` dla 3 akcentów (polski/francuski/włoski).*
+
+---
+
+## 13.5.1 — patch release (motyw przewodni: hiat `и + jotowana` w 3 akcentach)
+
+*Punkt wyjścia: V13.5 (6527e23) → commit hotfix → V13.5.1.*
+
+### TL;DR
+
+13.5.1 naprawia bug zgłoszony zaraz po wydaniu 13.5: w polskim akcencie końcówka `-ие` (np. `присутствие`) zamieniała się na `prisutstwiie` (podwojone `i`), co polski TTS Ewa wymawiała jako sztucznie przeciągnięte [i:e] zamiast naturalnego [i-je]. Problem dotyczył 3 z 8 akcentów dla rosyjskiego — tych, w których yotowana samogłoska zaczyna się od `i` (а nie `j`/`y`):
+
+* **polski** (`Я→Ia`, `Е→Ie`, `Ё→Io`, `Ю→Iu`) → naprawa: dodaj eksplicytny `j` jako rozdzielnik. `Россия → Rossija` (zamiast `Rossiia`), `присутствие → prisutstwije` (zamiast `prisutstwiie`). Polski Ewa wymawia `j` jako natywne /j/, więc fonetyka jest wierna rosyjskiemu [i-je].
+* **francuski** (`Я→Ia`, `Е→Ie`, `Ё→Io`, `Ю→Iou`) → naprawa: skrócenie. `Россия → Rossia`, `присутствие → prisoutstvie`. Francuski `j` to /ʒ/ (jak w „journal"), więc nie nadaje się jako rozdzielnik; skrócenie pozwala francuskiej naturalnej palatalizacji wykonać robotę.
+* **włoski** (`Я→Ia`, `Е→Ie`, `Ё→Io`, `Ю→Iu`) → naprawa: skrócenie, jak we francuskim. `Россия → Rossia`, `присутствие → prisutstvie`. Włoski `j` jest niejednoznaczny (Lucia czyta go jako /j/ albo /dʒ/ zależnie od słowa), więc bezpieczniej zostać przy skróceniu.
+
+5 pozostałych akcentów (`angielski`, `niemiecki`, `hiszpanski`, `islandzki`, `finski`) **nie wymagało zmian** — w nich yotowana zaczyna się od `j` (de/is/fi) lub `y` (en/es), więc `ия → ija` / `ия → iya` brzmi naturalnie i jest zgodne ze standardami transliteracji (BGN/PCGN dla angielskiego).
+
+### Pod maską
+
+W każdym z 3 zmienionych plików (`polski.yaml`, `francuski.yaml`, `wloski.yaml`) dodano sekcję 1.5 „Кириллическое и + йотированная гласная" z 12 wpisami (`ИЯ/Ия/ия` × 4 yotowane samogłoski), umieszczoną PRZED sekcją 2 (yotowane jednoznaczne) i sekcją 4 (jednoliterowe). Multi-char zamiana łapie kombinację cyrylica `и + я/е/ё/ю` zanim zwykłe `и → i` i `я → Ia` (etc.) zdążą stworzyć podwojone `i`. Smoke test (`присутствие`, `Россия`, `здание`, `академия`, `стихиё`, `Россию`) zwalidowany dla wszystkich 8 akcentów: 48/48 poprawnych transliteracji, zero podwojeń `ii`.
+
+### Breaking changes / migracja
+
+Brak. Zmiana czysto addytywna — istniejące transliteracje słów BEZ kombinacji `и+jotowana` nie są dotykane.
 
 ---
 
