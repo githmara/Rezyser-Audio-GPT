@@ -582,6 +582,8 @@ poliglota:
   ostrzezenie_jezyk: |-
     Huomio: Tekstin pääkieli on havaittu olevan tuettujen ulkopuolella. Foneettiset säännöt on tällä hetkellä mukautettu kielille: {wspierane_jezyki}. Vaikutus voi olla arvaamaton.
   blad_przetwarzania: "Käsittelyvirhe:\n{tresc_bledu}"
+  brak_reguly_tytul: "Sääntö puuttuu havaitulle kielelle"
+  brak_reguly_naglowek: "Lingua-tunnistin havaitsi tekstistä katkelman kielellä, jolle sääntötiedosto puuttuu. Käsittely keskeytettiin, jotta tulosta ei vahingoiteta."
   cezar_losowe_tytul: "Caesarin salakirjoitus – satunnainen siirto"
   cezar_losowe_tresc: "Siirtoarvo oli 0 – arvottu: {wylosowane_przesuniecie}."
   blad_wyniku_tytul: "Virhe"

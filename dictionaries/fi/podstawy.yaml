@@ -15,6 +15,11 @@
 
 id: podstawy
 jezyk: fi
+# 13.4.3: lingua-language-detector -tunniste, jota Poliglota-moottori käyttää.
+# Arvon on oltava `lingua.Language`-enumin nimi (isolla, ilman etuliitettä) —
+# täydellinen lista: https://github.com/pemistahl/lingua-py. Kentän puuttuminen
+# poistaa kielen tunnistimesta (sticky-fallback aktivoituu), kansio pysyy näkyvissä.
+lingua: FINNISH
 etykieta: "Suomi – foneettiset perusteet"
 opis: |
   Suomen kielen perussäännöt:

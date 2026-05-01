@@ -64,7 +64,8 @@ tresc: |
   ({liczba_kompletnych_jezykow} języków bazowych). Każdy ma własną paczkę
   "dictionaries/<kod>/" z diakrytykami, alfabetem i regułami fonetycznymi
   działającymi na tekst w tym właśnie języku — aplikacja sama wykrywa język
-  źródłowy przez langdetect i ładuje odpowiednią paczkę. Kolejne języki są
+  źródłowy przez lingua-language-detector (per akapit) i ładuje odpowiednią
+  paczkę dla każdego fragmentu osobno. Kolejne języki są
   w przygotowaniu (kompletny pakiet wymaga "podstawy.yaml", "gui/ui.yaml"
   oraz minimum jednego pliku w "akcenty/" i "szyfry/").
 

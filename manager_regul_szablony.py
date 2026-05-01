@@ -359,15 +359,25 @@ def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
 #  PODSTAWY JĘZYKA {etykieta_jezyka.upper()}
 # =============================================================================
 #  Szablon wygenerowany przez Manager Reguł. Uzupełnij obie sekcje:
-#   1. polskie_znaki – mapowanie diakrytyków języka „{kod_jezyka}" na litery
-#      łacińskie (używane przez flagę `usun_polskie_znaki: true` akcentów).
-#   2. alfabet – pełny alfabet wielkich liter (używany przez szyfr Cezara).
+#   1. lingua          – nazwa enum-a `lingua.Language` dla detektora języka
+#                        (POLISH, GERMAN, SPANISH, FRENCH, …). Pełna lista:
+#                        https://github.com/pemistahl/lingua-py
+#   2. polskie_znaki   – mapowanie diakrytyków języka „{kod_jezyka}" na litery
+#                        łacińskie (używane przez flagę `usun_polskie_znaki:
+#                        true` akcentów).
+#   3. alfabet         – pełny alfabet wielkich liter (używany przez szyfr
+#                        Cezara).
 #
-#  Aby szybko wygenerować obie sekcje, poproś AI promptem z Managera Reguł.
+#  Aby szybko wygenerować WSZYSTKIE trzy sekcje, poproś AI promptem
+#  z Managera Reguł.
 # =============================================================================
 
 id: podstawy
 jezyk: {kod_jezyka}
+# WYMAGANE: nazwa enum-a `lingua.Language` (wielkimi, bez prefiksu).
+# Brak tego pola wyłącza język z detektora — w GUI wybierze się ręcznie,
+# ale fragmenty mieszane (np. wstęp w innym języku) nie będą rozpoznawane.
+lingua: <UZUPEŁNIJ_NAZWE_ENUMA_NP_GERMAN>
 etykieta: "{etykieta_jezyka} – podstawy fonetyczne"
 opis: |
   Bazowe reguły dla języka {etykieta_jezyka.lower()}:
@@ -400,6 +410,7 @@ dla języka **{etykieta_jezyka}** (kod ISO 639-1: `{kod_jezyka}`).
 ```yaml
 id: podstawy
 jezyk: {kod_jezyka}
+lingua: <NAZWA_ENUMA_LINGUA_LANGUAGE>
 etykieta: "{etykieta_jezyka} – podstawy fonetyczne"
 opis: |
   Bazowe reguły dla języka {etykieta_jezyka.lower()}:
@@ -415,23 +426,43 @@ alfabet: "<WIELKIE_LITERY_ALFABETU_BEZ_SPACJI>"
 ```
 
 ## ZASADY ŻELAZNE
-1. Sekcja `polskie_znaki` (mimo nazwy!) opisuje DIAKRYTYKI JĘZYKA
+1. Pole `lingua` to identyfikator detektora języka (biblioteka
+   `lingua-language-detector`). Wartość MUSI być nazwą istniejącego enum-a
+   `lingua.Language` zapisaną WIELKIMI LITERAMI, bez prefiksu, bez kropek
+   i nawiasów. Przykłady poprawne dla najpopularniejszych języków:
+     - angielski → `ENGLISH`
+     - niemiecki → `GERMAN`
+     - hiszpański → `SPANISH`
+     - francuski → `FRENCH`
+     - portugalski → `PORTUGUESE`
+     - polski → `POLISH`
+     - rosyjski → `RUSSIAN`
+     - fiński → `FINNISH`
+     - islandzki → `ICELANDIC`
+     - włoski → `ITALIAN`
+     - chiński → `CHINESE`
+     - japoński → `JAPANESE`
+   Pełna lista (74 języki w lingua 2.x): https://github.com/pemistahl/lingua-py
+   Jeśli `{etykieta_jezyka}` nie figuruje na liście lingua, ZAMIAST
+   zgadywać zwróć błąd: napisz na początku odpowiedzi
+   `# BRAK_W_LINGUA: <kod>` i pomiń pole.
+2. Sekcja `polskie_znaki` (mimo nazwy!) opisuje DIAKRYTYKI JĘZYKA
    `{kod_jezyka}`. Jeśli `{etykieta_jezyka}` nie ma diakrytyków, zostaw
    pustą listę `polskie_znaki: []`.
-2. Dla każdego diakrytyka PODAJ PARĘ: wariant mały i wielki
+3. Dla każdego diakrytyka PODAJ PARĘ: wariant mały i wielki
    (np. „ä → a" i „Ä → A").
-3. `alfabet` to ciąg WIELKICH LITER w kolejności standardowej dla danego
+4. `alfabet` to ciąg WIELKICH LITER w kolejności standardowej dla danego
    języka, BEZ spacji i BEZ znaków specjalnych (tylko litery alfabetu).
    Przykłady:
    - angielski: `"ABCDEFGHIJKLMNOPQRSTUVWXYZ"` (26 liter)
    - niemiecki: `"ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"` (29 liter – diakrytyki
      NA KOŃCU, bo szyfr Cezara ma działać predictably; UWAGA: `ß` NIE
-     trafia do alfabetu – patrz zasada nr 5).
+     trafia do alfabetu – patrz zasada nr 6).
    - fiński: `"ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"` (29 liter)
    - szwedzki: `"ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"` (29 liter)
-4. Zwróć TYLKO treść pliku YAML – żadnego komentarza, żadnych bloków
+5. Zwróć TYLKO treść pliku YAML – żadnego komentarza, żadnych bloków
    ``` wokół, żadnych wyjaśnień.
-5. ⚠️ LITERY „ROSNĄCE" PRZY .upper() — TRAKTUJ PO SZWAJCARSKU!
+6. ⚠️ LITERY „ROSNĄCE" PRZY .upper() — TRAKTUJ PO SZWAJCARSKU!
    Szyfr Cezara w aplikacji operuje na WIELKICH literach alfabetu przez
    `str.upper()`. Niektóre litery w Unicode rozbijają się przy tej
    operacji na WIĘCEJ niż 1 znak i **rozwalają mapowanie** Cezara:
@@ -459,6 +490,7 @@ alfabet: "<WIELKIE_LITERY_ALFABETU_BEZ_SPACJI>"
 ```yaml
 id: podstawy
 jezyk: pl
+lingua: POLISH
 etykieta: "Polski – podstawy fonetyczne"
 opis: |
   Bazowe reguły dla języka polskiego: ... (skrócone)

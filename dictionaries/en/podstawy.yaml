@@ -16,6 +16,11 @@
 
 id: podstawy
 jezyk: en
+# 13.4.3: lingua-language-detector identifier used by the Poliglota engine.
+# Must be the name of a `lingua.Language` enum (uppercase, no prefix) — full
+# list at https://github.com/pemistahl/lingua-py. Missing field disables this
+# language in the detector (sticky-fallback kicks in), the folder stays visible.
+lingua: ENGLISH
 etykieta: "English – phonetic basics"
 opis: |
   Base rules for the English language:

@@ -16,6 +16,12 @@
 
 id: podstawy
 jezyk: it
+# 13.4.3: identificatore lingua-language-detector utilizzato dal motore Poliglota.
+# Deve essere il nome di un enum `lingua.Language` (maiuscolo, senza prefisso) —
+# elenco completo: https://github.com/pemistahl/lingua-py. La mancanza del campo
+# disabilita questa lingua nel rilevatore (si attiva lo sticky-fallback),
+# la cartella rimane visibile.
+lingua: ITALIAN
 etykieta: "Italiano – fondamenti fonetici"
 opis: |
   Regole di base per la lingua italiana:

@@ -2,7 +2,8 @@ wxpython
 openai
 python-dotenv
 python-docx
-langdetect
+lingua-language-detector
+beautifulsoup4
 num2words
 pyyaml
 ruamel.yaml

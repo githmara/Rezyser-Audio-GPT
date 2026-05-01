@@ -61,16 +61,23 @@ from docx.oxml.shared import OxmlElement
 
 from num2words import num2words
 
-# ``langdetect`` jest niedeterministyczny z założenia – ustawiamy seed, żeby
-# w testach i walidacji dostawać powtarzalny wynik. Import leniwy: do funkcji
-# ``wykryj_jezyk_zrodlowy`` – nigdzie indziej w module z niego nie korzystamy.
+# 13.5: detekcja języka oparta na ``lingua-language-detector``.
+# Lingua jest deterministyczna z założenia (operuje na n-gramowych modelach
+# statystycznych, nie na losowych próbkach), znacznie dokładniejsza dla
+# krótkich tekstów niż dawne ``langdetect``, i — co dla nas kluczowe — pozwala
+# zawęzić zestaw rozpoznawanych języków do tych, dla których faktycznie mamy
+# słowniki w ``dictionaries/``. Dzięki temu detektor nigdy nie zwróci kodu
+# języka, którego silnik i tak nie umiałby przetworzyć.
+#
+# Builder ładuje modele leniwie przy pierwszej detekcji (~1–2 s, ~100 MB RAM),
+# dlatego trzymamy go za lazy singletonem ``_zbuduj_detektor_lingua``,
+# uruchamianym dopiero przy realnym wywołaniu, nie w czasie importu modułu.
 try:
-    from langdetect import detect as _ld_detect, LangDetectException as _LdErr
-    from langdetect import DetectorFactory as _LdFactory
-    _LdFactory.seed = 0
+    from lingua import Language as _LinguaLanguage
+    from lingua import LanguageDetectorBuilder as _LinguaBuilder
 except ImportError:                                             # pragma: no cover
-    _ld_detect = None       # type: ignore[assignment]
-    _LdErr = Exception      # type: ignore[misc,assignment]
+    _LinguaLanguage = None   # type: ignore[assignment]
+    _LinguaBuilder = None    # type: ignore[assignment]
 
 
 # =============================================================================
@@ -457,10 +464,271 @@ def lista_wspieranych_jezykow_natywnie(jezyk_pierwszy: str | None = None) -> str
     return ", ".join(natywne)
 
 
-# Minimalna długość tekstu, przy której uznajemy ``langdetect`` za wiarygodny.
-# Krótsze fragmenty często trafiają na „en" albo „af" bo model trenowany na
-# Wikipedii ma przewagę angielskich słów (nawet w polskim tekście).
+# Minimalna długość tekstu (po strip), przy której uznajemy detekcję za
+# wiarygodną. Lingua dla krótszych próbek miewa fałszywe alarmy (np. „OK"
+# bywa klasyfikowane jako fiński). Niżej operujemy na sticky-fallbacku: zbyt
+# krótki akapit dziedziczy język po poprzednim (a na samym początku pliku —
+# po parametrze ``jezyk`` przekazanym do :func:`przetworz`).
 _MIN_TEKST_DLA_DETEKCJI = 20
+
+
+# ---------------------------------------------------------------------------
+# Mapowania ISO ↔ ``lingua.Language`` i lazy singleton detektora
+# ---------------------------------------------------------------------------
+# 13.4.3: mapowanie nie jest już zhardkodowane w Pythonie. Każdy
+# ``dictionaries/<kod>/podstawy.yaml`` deklaruje własne pole ``lingua:``
+# (wartość = nazwa enum-a ``lingua.Language``, np. ``POLISH``, ``GERMAN``).
+# Dzięki temu dodanie nowego języka bazowego (de/es/fr → 13.5+) sprowadza się
+# do utworzenia folderu z plikami YAML — bez zmian w kodzie Pythona, spójnie
+# z obietnicą „nowy język = nowy folder", którą trzymamy też dla
+# ``odswiez_rezysera`` i ``dostepne_jezyki_bazowe``.
+
+_LINGUA_MAPOWANIE_CACHE: dict[str, Any] | None = None
+
+
+def _zbuduj_mapowanie_lingua() -> dict[str, Any]:
+    """Skanuje ``dictionaries/<kod>/podstawy.yaml`` i zwraca mapę ISO → ``Language``.
+
+    Pomija języki, których ``podstawy.yaml`` nie deklaruje pola ``lingua``,
+    deklaruje je pustym stringiem albo wartością nieznaną dla aktualnej
+    wersji ``lingua-language-detector`` (np. literówka, nowsze enum-y, jeszcze
+    nieobsługiwany przez paczkę). Wynik jest cache'owany — pierwszy skan
+    woła się przy budowie detektora, kolejne wywołania są O(1).
+
+    Wynik ``{}`` (np. brak ``lingua-py`` w środowisku albo żaden
+    ``podstawy.yaml`` nie ma pola ``lingua``) prowadzi do całkowitego wyłączenia
+    detektora — :func:`_wykryj_jezyk_fragmentu` zwróci wtedy każdorazowo
+    ``fallback`` (czyli język aktywny w GUI).
+    """
+    global _LINGUA_MAPOWANIE_CACHE
+    if _LINGUA_MAPOWANIE_CACHE is not None:
+        return _LINGUA_MAPOWANIE_CACHE
+    if _LinguaLanguage is None:
+        _LINGUA_MAPOWANIE_CACHE = {}
+        return _LINGUA_MAPOWANIE_CACHE
+
+    mapa: dict[str, Any] = {}
+    for kod in _jezyki_obecne_w_dictionaries():
+        wartosc = _zaladuj_podstawy(kod).get("lingua")
+        if not isinstance(wartosc, str) or not wartosc.strip():
+            continue
+        nazwa_enuma = wartosc.strip().upper()
+        # `getattr` zamiast `Language[...]`, żeby nieznana nazwa nie wyrzucała
+        # KeyError na każdym imporcie modułu — defensywnie pomijamy.
+        kandydat = getattr(_LinguaLanguage, nazwa_enuma, None)
+        if kandydat is None:
+            print(f"[core_poliglota] Pole lingua: '{wartosc}' w "
+                  f"dictionaries/{kod}/podstawy.yaml nie jest znaną nazwą "
+                  f"`lingua.Language` — język pomijany w detektorze.")
+            continue
+        mapa[kod] = kandydat
+
+    _LINGUA_MAPOWANIE_CACHE = mapa
+    return _LINGUA_MAPOWANIE_CACHE
+
+
+def _zbuduj_mapowanie_lingua_to_iso() -> dict[str, str]:
+    """Odwrócone mapowanie ``Language.name → ISO 639-1`` na bazie tej samej mapy."""
+    return {lang.name: iso for iso, lang in _zbuduj_mapowanie_lingua().items()}
+
+
+def _jezyki_obecne_w_dictionaries() -> list[str]:
+    """Zwraca listę kodów języków, które mają chociaż ``podstawy.yaml``.
+
+    Rozluźniona wersja :func:`dostepne_jezyki_bazowe` — nie wymaga ``szyfry/``
+    ani ``akcenty/``, a jedynie obecności pliku ``podstawy.yaml``. Używana
+    tylko do nakarmienia ``LanguageDetectorBuilder`` zestawem języków, który
+    chcemy rozpoznawać; rzeczywista weryfikacja kompletności reguł odbywa
+    się dopiero w dyspozytorach (``_przetworz_rezyser`` / ``_przetworz_szyfrant``)
+    przy pomocy :class:`BrakRegulyDlaJezykaError`.
+    """
+    if not os.path.isdir(DICTIONARIES_DIR):
+        return []
+    wynik: list[str] = []
+    for nazwa in sorted(os.listdir(DICTIONARIES_DIR)):
+        folder = os.path.join(DICTIONARIES_DIR, nazwa)
+        if not os.path.isdir(folder):
+            continue
+        if os.path.isfile(os.path.join(folder, "podstawy.yaml")):
+            wynik.append(nazwa)
+    return wynik
+
+
+_LINGUA_DETEKTOR: Any = None       # cache singletona; budowa leniwa
+_LINGUA_DETEKTOR_BLD_FAILED = False  # flaga, by nie powtarzać próby budowy
+
+
+def _zbuduj_detektor_lingua() -> Any:
+    """Lazy singleton ``LanguageDetector`` z lingua.
+
+    Buduje detektor przy pierwszym wywołaniu, używając zestawu języków
+    z :func:`_zbuduj_mapowanie_lingua` (czyli tych ``dictionaries/<kod>/``,
+    których ``podstawy.yaml`` deklaruje pole ``lingua: <NAZWA_ENUMA>``).
+
+    Lingua wymaga ≥ 2 języków w builderze – gdy w ``dictionaries/`` jest tylko
+    jeden (lub zero) język z poprawnym polem ``lingua``, zwracamy ``None``
+    i wywołujący spada na ``fallback``. Zwroty ``None`` są cache'owane przez
+    flagę ``_LINGUA_DETEKTOR_BLD_FAILED``, żeby nie powtarzać prób budowy
+    przy każdej detekcji fragmentu.
+    """
+    global _LINGUA_DETEKTOR, _LINGUA_DETEKTOR_BLD_FAILED
+
+    if _LINGUA_DETEKTOR is not None:
+        return _LINGUA_DETEKTOR
+    if _LINGUA_DETEKTOR_BLD_FAILED:
+        return None
+    if _LinguaBuilder is None:
+        _LINGUA_DETEKTOR_BLD_FAILED = True
+        return None
+
+    mapowanie = _zbuduj_mapowanie_lingua()
+    if len(mapowanie) < 2:
+        _LINGUA_DETEKTOR_BLD_FAILED = True
+        return None
+
+    _LINGUA_DETEKTOR = _LinguaBuilder.from_languages(*mapowanie.values()).build()
+    return _LINGUA_DETEKTOR
+
+
+def _wykryj_jezyk_fragmentu(tekst: str, fallback: str) -> str:
+    """Wykrywa kod ISO języka pojedynczego fragmentu (akapitu).
+
+    Zasady (każda w innym warunku):
+      1. Tekst pusty / krótszy niż ``_MIN_TEKST_DLA_DETEKCJI`` → ``fallback``
+         (dla A11y: pojedyncze „OK." nie powinno przerywać przetwarzania).
+      2. Brak instancji lingua (import się nie udał, < 2 języki w
+         ``dictionaries/``) → ``fallback``.
+      3. ``detect_language_of`` zwraca ``None`` (lingua nie jest pewna) →
+         ``fallback``.
+      4. Wynik mapowany przez :func:`_zbuduj_mapowanie_lingua_to_iso`. Gdy
+         ``Language.name`` nie ma odpowiednika w ``dictionaries/`` (teoretycznie
+         nie powinno się zdarzyć — ten sam zestaw karmił builder) → ``fallback``.
+    """
+    if not isinstance(tekst, str) or len(tekst.strip()) < _MIN_TEKST_DLA_DETEKCJI:
+        return fallback
+
+    detektor = _zbuduj_detektor_lingua()
+    if detektor is None:
+        return fallback
+
+    wynik = detektor.detect_language_of(tekst)
+    if wynik is None:
+        return fallback
+
+    iso = _zbuduj_mapowanie_lingua_to_iso().get(wynik.name)
+    if not iso:
+        return fallback
+    return iso if iso in _jezyki_obecne_w_dictionaries() else fallback
+
+
+# ---------------------------------------------------------------------------
+# Wyjątek: brak reguły dla wykrytego języka fragmentu
+# ---------------------------------------------------------------------------
+
+class BrakRegulyDlaJezykaError(RuntimeError):
+    """Lingua wykryła w tekście język, dla którego brakuje żądanej reguły.
+
+    Podnoszony przez :func:`_przetworz_rezyser` / :func:`_przetworz_szyfrant`,
+    gdy w tekście wejściowym znajdzie się akapit w języku ``L``, a w
+    ``dictionaries/L/<podfolder>/<wariant>.yaml`` nie istnieje plik z regułą.
+    GUI łapie ten wyjątek osobno i wyświetla **długi techniczny komunikat
+    w ``wx.Dialog`` z ``TextCtrl`` ``TE_READONLY``** (zgodnie z konwencją
+    A11y: krótkie powiadomienia → ``wx.MessageBox``, długie techniczne →
+    ``wx.Dialog`` z polem do skopiowania).
+
+    Atrybuty:
+        jezyk_kod:        Kod ISO 639-1 wykrytego języka (np. ``"ru"``).
+        jezyk_natywna:    Nazwa języka w jego natywnym brzmieniu
+                          (np. ``"Русский"``); jeżeli nie ma ``podstawy.yaml``
+                          — równe ``jezyk_kod``.
+        tryb:             ``"Rezyser"`` lub ``"Szyfrant"``.
+        wariant:          ``id`` wariantu (np. ``"jakanie"``).
+        oczekiwany_folder: Względna ścieżka brakującej reguły, np.
+                          ``"dictionaries/ru/szyfry"``. Pomaga użytkownikowi
+                          natychmiast trafić do miejsca, w którym powinien
+                          dorzucić plik YAML.
+    """
+
+    def __init__(self, jezyk_kod: str, jezyk_natywna: str, tryb: str,
+                 wariant: str, oczekiwany_folder: str) -> None:
+        self.jezyk_kod = jezyk_kod
+        self.jezyk_natywna = jezyk_natywna
+        self.tryb = tryb
+        self.wariant = wariant
+        self.oczekiwany_folder = oczekiwany_folder
+        komunikat = (
+            f"Wykryto fragment w języku {jezyk_natywna} (kod '{jezyk_kod}'), "
+            f"ale brakuje reguły '{wariant}' w folderze {oczekiwany_folder}.\n\n"
+            f"Utwórz plik {oczekiwany_folder}/{wariant}.yaml przed "
+            f"kontynuowaniem przetwarzania, albo usuń fragmenty w tym "
+            f"języku z tekstu wejściowego."
+        )
+        super().__init__(komunikat)
+
+
+# ---------------------------------------------------------------------------
+# Segmentacja tekstu na akapity z ochroną tagów HTML
+# ---------------------------------------------------------------------------
+
+# Segment to trójka ``(jezyk_iso, tresc, czy_przetwarzac)``:
+#   * ``jezyk_iso``       – kod języka (sticky-fallback dla krótkich akapitów),
+#   * ``tresc``           – dosłowny fragment tekstu (akapit, separator, tag),
+#   * ``czy_przetwarzac`` – ``True`` tylko dla właściwych akapitów tekstowych;
+#                            ``False`` dla tagów HTML i separatorów ``\n\n``,
+#                            które należy przepisać 1:1 do wyniku.
+Segment = tuple[str, str, bool]
+
+
+def _segmentuj_z_ochrona_tagow(tekst: str, fallback_jezyk: str) -> list[Segment]:
+    """Dzieli tekst na segmenty z wykrytym językiem; chroni tagi HTML i separatory.
+
+    Algorytm dwuwarstwowy:
+      1. ``re.split(r"(<[^>]+>)", tekst)`` → naprzemienne pozycje tekst/tag.
+         Tagi (indeksy nieparzyste) trafiają do wyniku z flagą ``False``
+         i nie są nigdy poddawane detekcji ani transformacjom.
+      2. Każdy fragment-tekst (indeksy parzyste) dzielimy ponownie:
+         ``re.split(r"(\\n\\s*\\n)", ...)`` → akapity i pomiędzy nimi
+         dosłowne separatory ``\\n\\s*\\n``. Separatory zachowujemy 1:1.
+      3. Dla każdego niepustego akapitu wywołujemy
+         :func:`_wykryj_jezyk_fragmentu` z fallbackiem na język poprzedniego
+         akapitu – tym samym krótka linia („Tak.", „OK.") dziedziczy język
+         po sąsiadach zamiast wymuszać reset na ``fallback_jezyk``.
+
+    Pierwszy akapit (gdy nie ma jeszcze „poprzedniego") używa
+    ``fallback_jezyk`` – zwykle parametr ``jezyk`` przekazany do
+    :func:`przetworz`, czyli język aktywny w GUI.
+
+    Zwraca listę gotową do iteracji w dyspozytorach – wszystko jest tam
+    gotowe: kod języka per akapit, dosłowna treść, flaga „przetwarzaj".
+    """
+    if not isinstance(tekst, str) or not tekst:
+        return []
+
+    czesci = re.split(r"(<[^>]+>)", tekst)
+    wynik: list[Segment] = []
+    poprzedni_jezyk = fallback_jezyk
+
+    for i, czesc in enumerate(czesci):
+        if i % 2 == 1:
+            # Tag HTML – zachowaj 1:1, nie analizuj.
+            wynik.append((poprzedni_jezyk, czesc, False))
+            continue
+        if not czesc:
+            continue
+        # Drugi poziom: akapity (\n\n) z zachowaniem separatora.
+        akapity = re.split(r"(\n\s*\n)", czesc)
+        for j, akapit in enumerate(akapity):
+            if j % 2 == 1:
+                # Separator między akapitami – nie tłumaczymy.
+                wynik.append((poprzedni_jezyk, akapit, False))
+                continue
+            if not akapit:
+                continue
+            jez = _wykryj_jezyk_fragmentu(akapit, fallback=poprzedni_jezyk)
+            wynik.append((jez, akapit, True))
+            poprzedni_jezyk = jez
+
+    return wynik
 
 
 def wykryj_jezyk_zrodlowy(
@@ -472,20 +740,20 @@ def wykryj_jezyk_zrodlowy(
     """Wykrywa kod języka tekstu; waliduje wynik wobec ``dictionaries/``.
 
     Funkcja jest „konserwatywna" – zwraca ``fallback`` w każdym z wypadków,
-    w których wynik langdetect byłby niemiarodajny:
+    w których wynik detekcji byłby niemiarodajny:
 
-      1. ``langdetect`` nie zostało zainstalowane (brak importu na starcie),
+      1. ``lingua`` nie zostało zainstalowane (brak importu na starcie),
       2. ``tekst`` jest za krótki (<``_MIN_TEKST_DLA_DETEKCJI`` znaków
          po strip),
-      3. ``langdetect`` rzuca ``LangDetectException`` (tekst bez liter,
-         same emotikony itp.),
-      4. wykryty kod NIE ma swojego folderu w ``dictionaries/`` – nawet
-         jeśli langdetect trafił, silnik nie ma reguł dla tego języka,
-         więc GUI musi pozostać przy języku, który ma działające słowniki.
+      3. detektor zwraca ``None`` (zbyt mało sygnału do klasyfikacji),
+      4. wykryty kod NIE występuje w liście ``dostepne`` – nawet jeśli
+         lingua trafiła, GUI musi pozostać przy języku, który ma komplet
+         działających słowników (``szyfry/`` + ``akcenty/`` + ``gui/``).
 
     Dzięki punktowi (4) funkcja jest „multi-language ready": dziś zawsze
-    zwraca ``"pl"`` (bo to jedyny dostępny język), ale gdy powstanie
-    ``dictionaries/en/``, zacznie zwracać ``"en"`` dla angielskich tekstów.
+    zwraca ``"pl"`` (bo to jedyny *kompletny* język), ale gdy
+    ``dictionaries/en/`` dostanie szyfry, zacznie zwracać ``"en"`` dla
+    angielskich tekstów.
 
     Args:
         tekst:    Tekst do zbadania (zwykle wczytana zawartość pliku).
@@ -503,18 +771,24 @@ def wykryj_jezyk_zrodlowy(
         'pl'
         >>> wykryj_jezyk_zrodlowy("???")          # za krótki + brak liter
         'pl'
-        >>> wykryj_jezyk_zrodlowy("Hello world")  # „en" nie ma folderu
+        >>> wykryj_jezyk_zrodlowy("The quick brown fox jumps over the lazy dog.",
+        ...                       dostepne=["pl"])  # zawężone do PL
         'pl'
     """
-    if _ld_detect is None:
-        return fallback
-
+    # Szybka ścieżka: za krótki tekst → fallback (bez budowania detektora).
     if not isinstance(tekst, str) or len(tekst.strip()) < _MIN_TEKST_DLA_DETEKCJI:
         return fallback
 
-    try:
-        kod_wykryty = _ld_detect(tekst)
-    except _LdErr:
+    detektor = _zbuduj_detektor_lingua()
+    if detektor is None:
+        return fallback
+
+    wynik = detektor.detect_language_of(tekst)
+    if wynik is None:
+        return fallback
+
+    kod_wykryty = _zbuduj_mapowanie_lingua_to_iso().get(wynik.name)
+    if not kod_wykryty:
         return fallback
 
     if dostepne is None:
@@ -642,30 +916,72 @@ def akcent_finski(tekst: str, jezyk: str = "pl") -> str:
 
 
 def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
-    """Rezyser: akcent / oczyszczenie / naprawiacz."""
-    kategoria = cfg.get("kategoria", "")
-    podstawy  = _zaladuj_podstawy(jezyk)
+    """Rezyser: akcent / oczyszczenie / naprawiacz – z dynamiczną detekcją języka.
 
-    # Naprawiacz tagów nie modyfikuje treści – wstrzyknięcie ISO dzieje
-    # się na etapie :func:`zapisz_wynik`.
+    13.5: silnik segmentuje wejście na akapity (z ochroną tagów HTML),
+    wykrywa język każdego osobno i pobiera dla niego *własną* konfigurację
+    wariantu. Brak reguły dla wykrytego języka → :class:`BrakRegulyDlaJezykaError`.
+
+    Side-channel: do ``opcje["_segmenty_wynikowe"]`` zapisywana jest lista
+    krotek ``(jezyk_iso, fragment_wynikowy, czy_przetwarzany)`` zachowująca
+    kolejność z wejścia. :func:`zapisz_wynik` używa jej do wstrzyknięcia
+    tagu ``lang`` per akapit bez konieczności ponownej detekcji.
+    """
+    kategoria = cfg.get("kategoria", "")
+    wariant_id = cfg.get("id", "")
+
+    # Naprawiacz tagów nie modyfikuje treści – tylko wstrzykiwanie ISO
+    # w :func:`zapisz_wynik`. Tam też dzieje się detekcja per akapit.
     if kategoria == "naprawiacz":
         return tekst
 
-    # Oczyszczenie: brak zamian, ewentualnie bez normalizacji liczb.
+    # Oczyszczenie: pipeline TTS niezależny od reguł YAML konkretnego języka.
+    # Detekcja per akapit potrzebna tylko dla locale ``num2words``.
     if kategoria == "oczyszczenie":
-        return oczysc_tekst_tts(
-            tekst,
-            z_normalizacja=cfg.get("normalizuj_liczby", True),
-            jezyk=jezyk,
-        )
+        segmenty_in = _segmentuj_z_ochrona_tagow(tekst, fallback_jezyk=jezyk)
+        wyniki: list[str] = []
+        zapisane: list[Segment] = []
+        for jez_seg, fragment, czy_przetwarzac in segmenty_in:
+            if not czy_przetwarzac:
+                wyniki.append(fragment)
+                zapisane.append((jez_seg, fragment, False))
+                continue
+            wynik_fr = oczysc_tekst_tts(
+                fragment,
+                z_normalizacja=cfg.get("normalizuj_liczby", True),
+                jezyk=jez_seg,
+            )
+            wyniki.append(wynik_fr)
+            zapisane.append((jez_seg, wynik_fr, True))
+        opcje["_segmenty_wynikowe"] = zapisane
+        return "".join(wyniki)
 
-    # Zwykły akcent – pipeline z ochroną tagów HTML.
-    def _pipeline(fragment: str) -> str:
-        return _aplikuj_akcent_z_yaml(fragment, cfg, podstawy, jezyk)
+    # Zwykły akcent – per fragment szukamy YAML-a dla wykrytego języka.
+    segmenty_in = _segmentuj_z_ochrona_tagow(tekst, fallback_jezyk=jezyk)
+    wyniki = []
+    zapisane = []
+    for jez_seg, fragment, czy_przetwarzac in segmenty_in:
+        if not czy_przetwarzac:
+            wyniki.append(fragment)
+            zapisane.append((jez_seg, fragment, False))
+            continue
 
-    # Najpierw pełne oczyszczenie (z/bez normalizacji), potem zamiany –
-    # tak, by oczyszczenie zdążyło usunąć bełkot jeszcze przed transliteracją.
-    return procesuj_z_ochrona_tagow(tekst, _pipeline)
+        cfg_jez = wariant_po_id(TRYB_REZYSER, jez_seg, wariant_id)
+        if cfg_jez is None:
+            raise BrakRegulyDlaJezykaError(
+                jezyk_kod=jez_seg,
+                jezyk_natywna=natywna_nazwa(jez_seg),
+                tryb=TRYB_REZYSER,
+                wariant=wariant_id,
+                oczekiwany_folder=f"dictionaries/{jez_seg}/akcenty",
+            )
+        podstawy_jez = _zaladuj_podstawy(jez_seg)
+        wynik_fr = _aplikuj_akcent_z_yaml(fragment, cfg_jez, podstawy_jez, jez_seg)
+        wyniki.append(wynik_fr)
+        zapisane.append((jez_seg, wynik_fr, True))
+
+    opcje["_segmenty_wynikowe"] = zapisane
+    return "".join(wyniki)
 
 
 # =============================================================================
@@ -852,35 +1168,71 @@ _ALGORYTMY_SZYFROW: dict[str, Callable[[str, dict, dict, dict], str]] = {
 
 
 def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
-    """Szyfrant: dispatcher na algorytm wskazany w ``cfg['algorytm']``."""
-    podstawy = _zaladuj_podstawy(jezyk)
+    """Szyfrant: dispatcher na algorytm – z dynamiczną detekcją języka per akapit.
 
-    # 13.3: Normalizacja diakrytyki PRZED czyszczeniem i algorytmem.
-    # Bez tego znaki spoza alfabetu danego języka (np. "é" w angielskim
-    # "café", "ñ" w "jalapeño", "ö" w polskim "Schrödinger") wymykały się
-    # szyfrowi Cezara nieszyfrowane i przeciekały do wyniku w oryginalnej
-    # postaci. Lista mapowań pochodzi z ``podstawy.yaml::polskie_znaki`` —
-    # każda paczka językowa deklaruje, jakie znaki zapożyczone normalizować
-    # do swojego ASCII (z zachowaniem natywnych liter alfabetu — np. "ä"
-    # NIE jest mapowane w paczce fi/, bo to natywna fińska litera).
-    tekst = _usun_polskie_znaki(tekst, podstawy)
+    13.5: dla każdego akapitu pobierane są reguły z ``dictionaries/<jezyk>/
+    szyfry/<wariant>.yaml`` (gdzie ``<jezyk>`` = wynik detekcji lingua,
+    ``<wariant>`` = id wybrane przez użytkownika w GUI). Brak pliku dla
+    wykrytego języka → :class:`BrakRegulyDlaJezykaError`.
 
-    # Najpierw zawsze oczyszczamy tekst z bełkotu TTS i normalizujemy liczby –
-    # to zgodne z dotychczasowym zachowaniem Trybu Szyfranta.
-    tekst_czysty = oczysc_tekst_tts(tekst, z_normalizacja=True, jezyk=jezyk)
-
-    nazwa_algo = cfg.get("algorytm", "")
-    funkcja = _ALGORYTMY_SZYFROW.get(nazwa_algo)
-    if funkcja is None:
+    Cezar: pole ``opcje["przesuniecie_faktyczne"]`` (zapisywane przez
+    :func:`_algo_cezar` po pierwszym losowaniu) jest współdzielone między
+    fragmentami przez referencję ``opcje`` – dzięki temu pierwszy akapit
+    losuje, a kolejne reużywają tego samego przesunięcia. Każdy język ma
+    własny alfabet (mod ``len(alfabet)`` różny), więc finalny shift na
+    rosyjskim akapicie przy ``n=33`` da inny wynik niż na polskim akapicie
+    przy ``n=32`` – to spójne z założeniem multi-language szyfrowania.
+    """
+    wariant_id = cfg.get("id", "")
+    nazwa_algo_glob = cfg.get("algorytm", "")
+    if nazwa_algo_glob and nazwa_algo_glob not in _ALGORYTMY_SZYFROW:
         raise ValueError(
-            f"Nieznany algorytm szyfru: „{nazwa_algo}”. "
+            f"Nieznany algorytm szyfru: „{nazwa_algo_glob}”. "
             f"Dostępne: {sorted(_ALGORYTMY_SZYFROW)}"
         )
 
-    def _pipeline(fragment: str) -> str:
-        return funkcja(fragment, cfg, podstawy, opcje)
+    segmenty_in = _segmentuj_z_ochrona_tagow(tekst, fallback_jezyk=jezyk)
+    wyniki: list[str] = []
+    zapisane: list[Segment] = []
 
-    return procesuj_z_ochrona_tagow(tekst_czysty, _pipeline)
+    for jez_seg, fragment, czy_przetwarzac in segmenty_in:
+        if not czy_przetwarzac:
+            wyniki.append(fragment)
+            zapisane.append((jez_seg, fragment, False))
+            continue
+
+        cfg_jez = wariant_po_id(TRYB_SZYFRANT, jez_seg, wariant_id)
+        if cfg_jez is None:
+            raise BrakRegulyDlaJezykaError(
+                jezyk_kod=jez_seg,
+                jezyk_natywna=natywna_nazwa(jez_seg),
+                tryb=TRYB_SZYFRANT,
+                wariant=wariant_id,
+                oczekiwany_folder=f"dictionaries/{jez_seg}/szyfry",
+            )
+        podstawy_jez = _zaladuj_podstawy(jez_seg)
+
+        # 13.3: normalizacja diakrytyki PRZED czyszczeniem i algorytmem.
+        # 13.5: per fragment, używając podstaw języka FRAGMENTU – inaczej
+        # rosyjski akapit dostałby polskie mapowania znaków.
+        fragment_norm = _usun_polskie_znaki(fragment, podstawy_jez)
+        fragment_czysty = oczysc_tekst_tts(fragment_norm, z_normalizacja=True,
+                                            jezyk=jez_seg)
+
+        nazwa_algo = cfg_jez.get("algorytm", "")
+        funkcja = _ALGORYTMY_SZYFROW.get(nazwa_algo)
+        if funkcja is None:
+            raise ValueError(
+                f"Nieznany algorytm szyfru: „{nazwa_algo}” "
+                f"(plik dictionaries/{jez_seg}/szyfry/{wariant_id}.yaml). "
+                f"Dostępne: {sorted(_ALGORYTMY_SZYFROW)}"
+            )
+        wynik_fr = funkcja(fragment_czysty, cfg_jez, podstawy_jez, opcje)
+        wyniki.append(wynik_fr)
+        zapisane.append((jez_seg, wynik_fr, True))
+
+    opcje["_segmenty_wynikowe"] = zapisane
+    return "".join(wyniki)
 
 
 # =============================================================================
@@ -1004,6 +1356,113 @@ def sufiks_nazwy_pliku(
 # Zapis pliku wynikowego (HTML / DOCX / TXT z tagiem lang)
 # =============================================================================
 
+# Lista tagów blokowych, dla których ma sens lokalny atrybut ``lang``.
+# Wybrane spośród elementów HTML5, które typowo zawierają samodzielną
+# jednostkę tekstu (czytniki ekranu przełączają silnik mowy na granicy
+# zmiany ``lang`` właśnie tutaj). Inline'y (``span``, ``a``) celowo poza
+# listą — generowałyby setki krótkich detekcji o niskiej wiarygodności.
+_PARA_TAGS_LANG = (
+    "p", "h1", "h2", "h3", "h4", "h5", "h6",
+    "li", "blockquote", "dt", "dd",
+    "td", "th", "caption", "figcaption", "summary",
+)
+
+
+def _wstrzyknij_lang_w_pelnym_html(html_text: str, iso_fallback: str) -> str:
+    """Parsuje pełnoprawny HTML i ustawia atrybut ``lang`` per element blokowy.
+
+    13.4.3: zastępuje wcześniejszy regex (działający tylko na ``<html>``).
+    BeautifulSoup buduje DOM; dla każdego elementu z :data:`_PARA_TAGS_LANG`
+    wykrywamy język jego ``get_text()``-u i ustawiamy ``lang="..."`` lokalnie.
+    Atrybut ``lang`` na samym ``<html>`` pozostaje globalnym fallbackiem dla
+    pustych/krótkich elementów (sticky-fallback z
+    :func:`_wykryj_jezyk_fragmentu`).
+
+    Parser: ``lxml`` (preferowany — szybki i tolerancyjny dla niedomkniętego
+    HTML, a w środowisku 13.4.3 gwarantowany w ``requirements.txt``). Fallback
+    na wbudowany ``html.parser`` w razie braku ``lxml`` w środowisku
+    deweloperskim.
+    """
+    try:
+        from bs4 import BeautifulSoup
+    except ImportError:                                     # pragma: no cover
+        # bs4 niedostępne — wracamy do prostego ustawienia lang w <html>.
+        if "lang=" in html_text.lower():
+            return re.sub(
+                r'(<html[^>]*?)lang=["\'][^"\']+["\']',
+                fr'\1lang="{iso_fallback}"',
+                html_text, flags=re.IGNORECASE,
+            )
+        return re.sub(
+            r"(<html[^>]*)>", fr'\1 lang="{iso_fallback}">',
+            html_text, flags=re.IGNORECASE,
+        )
+
+    try:
+        soup = BeautifulSoup(html_text, "lxml")
+    except Exception:                                       # pragma: no cover
+        soup = BeautifulSoup(html_text, "html.parser")
+
+    if soup.html is not None:
+        soup.html["lang"] = iso_fallback
+
+    for tag_name in _PARA_TAGS_LANG:
+        for el in soup.find_all(tag_name):
+            tekst = el.get_text(separator=" ", strip=True)
+            if not tekst:
+                continue
+            el["lang"] = _wykryj_jezyk_fragmentu(tekst, fallback=iso_fallback)
+
+    return str(soup)
+
+
+def _ustaw_lang_runa(run: Any, iso: str) -> None:
+    """Wstrzykuje ``<w:lang w:val=iso>`` do biegu Word, tworząc ``rPr`` jeśli brak."""
+    rPr = run._r.get_or_add_rPr()
+    lang_el = rPr.find(qn("w:lang"))
+    if lang_el is None:
+        lang_el = OxmlElement("w:lang")
+        rPr.append(lang_el)
+    lang_el.set(qn("w:val"), iso)
+
+
+def _iso_per_linia(tresc: str, segmenty: list[Segment] | None,
+                   iso_fallback: str) -> list[str]:
+    """Mapuje każdą linię ``tresc.split('\\n')`` na kod ISO języka.
+
+    Strategia:
+      1. Jeśli ``segmenty`` są dane (z side-channel ``opcje['_segmenty_wynikowe']``)
+         i ich konkatenacja zgadza się z ``tresc`` – używamy ich. To najmocniejsze
+         źródło, bo zawiera detekcję wykonaną PRZED transformacją (np. cezarem,
+         który zaszyfrowałby alfabet i zafałszował detekcję na wyniku).
+      2. W przeciwnym razie segmentujemy ``tresc`` na żywo (przypadek naprawiacza
+         tagów oraz każdego trybu, w którym wywołujący nie podał side-channelu).
+      3. Buduemy mapę offset→iso ze sticky-fallbackiem: separatory ``\\n\\s*\\n``
+         dziedziczą iso po ostatnim segmencie tekstowym.
+      4. Iterujemy linie, przesuwając kursor o ``len(linia)+1`` (znak ``\\n``).
+    """
+    if segmenty is None or "".join(s[1] for s in segmenty) != tresc:
+        segmenty = _segmentuj_z_ochrona_tagow(tresc, fallback_jezyk=iso_fallback)
+
+    # Mapa offset → iso (długość mapy == len(tresc))
+    iso_per_offset: list[str] = []
+    ostatni_iso = iso_fallback
+    for jez, fr, czy_tekst in segmenty:
+        if czy_tekst:
+            ostatni_iso = jez
+        iso_per_offset.extend([ostatni_iso] * len(fr))
+
+    wynik: list[str] = []
+    cursor = 0
+    for linia in tresc.split("\n"):
+        if 0 <= cursor < len(iso_per_offset):
+            wynik.append(iso_per_offset[cursor])
+        else:
+            wynik.append(ostatni_iso)
+        cursor += len(linia) + 1  # +1 za znak '\n'
+    return wynik
+
+
 def zapisz_wynik(
     tresc_wynikowa: str,
     katalog_wyjscia: str,
@@ -1014,14 +1473,26 @@ def zapisz_wynik(
     wariant_cfg: dict | None,
     oryginalny_content: str,
     sciezka_oryginalu: str | None = None,
+    *,
+    segmenty_wynikowe: list[Segment] | None = None,
 ) -> str:
     """Zapisuje wynik do pliku i zwraca jego ścieżkę.
 
+    13.5: tag ``lang`` jest wstrzykiwany **per akapit / per paragraf**, a nie
+    globalnie. Dla trybów Reżysera i Szyfranta używana jest mapa
+    ``segmenty_wynikowe`` (side-channel z :func:`przetworz`) – zawiera ona
+    detekcję wykonaną PRZED transformacją tekstu, więc działa nawet po
+    szyfrowaniu cezara czy odwracaniu zdań. Dla naprawiacza tagów detekcja
+    odbywa się na bieżąco, paragraf po paragrafie, na ORYGINALNEJ treści.
+
     Obsługiwane rozszerzenia:
-      * ``.docx`` – dokument Word z tagiem ``<w:lang w:val=iso>``,
-      * ``.html`` / ``.htm`` – HTML z atrybutem ``lang="iso"`` w ``<html>``,
-      * ``.txt`` / ``.md`` – konwertowane do HTML z taggiem ``lang``
-        (tak, by czytnik ekranu znał język).
+      * ``.docx`` – dokument Word z tagiem ``<w:lang w:val=iso>`` per paragraf,
+      * ``.html`` / ``.htm`` – HTML; jeżeli wejście ma ``<html>``, atrybut
+        ``lang`` ustawiany na ``iso_code`` (jak dotąd); w pozostałych
+        przypadkach budujemy nowy dokument z ``<p lang="...">`` per akapit
+        (rozdzielany ``\\n\\s*\\n``),
+      * ``.txt`` / ``.md`` – konwertowane do HTML; każdy akapit dostaje
+        własny ``<p lang="...">``,
       * każde inne – surowy zapis tekstu z oryginalnym rozszerzeniem.
 
     Args:
@@ -1031,15 +1502,22 @@ def zapisz_wynik(
                               (wynik :func:`sufiks_nazwy_pliku`).
         ext:                  Rozszerzenie źródła (np. ``".docx"``) – decyduje
                               o formacie wyjścia.
-        iso_code:             Dwuliterowy kod języka do tagu ``lang``.
+        iso_code:             Domyślny kod języka (fallback dla pustych /
+                              krótkich akapitów oraz dla atrybutu ``<html lang>``).
         tryb:                 ``"Rezyser"`` / ``"Szyfrant"`` / ``"Tlumacz"``.
         wariant_cfg:          Konfiguracja wariantu (z YAML) – potrzebna,
-                              by rozpoznać „naprawiacz tagów”.
+                              by rozpoznać „naprawiacz tagów".
         oryginalny_content:   Treść źródłowa (wykorzystywana przez naprawiacza
                               tagów, gdy ``sciezka_oryginalu`` nie istnieje).
         sciezka_oryginalu:    Pełna ścieżka oryginału (tylko dla naprawiacza
                               ``.docx`` – kopiujemy oryginalny dokument,
                               tylko wstrzykując tag ``w:lang``).
+        segmenty_wynikowe:    *Keyword-only.* Side-channel z
+                              :func:`przetworz` (``opcje['_segmenty_wynikowe']``).
+                              Lista krotek ``(iso, fragment, czy_tekst)`` w
+                              kolejności wynikowej. ``None`` → detekcja na
+                              bieżąco po treści wynikowej (przypadek naprawiacza
+                              i wywołań spoza Reżysera/Szyfranta).
 
     Returns:
         Pełna ścieżka zapisanego pliku.
@@ -1051,24 +1529,30 @@ def zapisz_wynik(
         out_path = os.path.join(katalog_wyjscia, f"{base_name}.docx")
 
         if jest_naprawiacz and sciezka_oryginalu and os.path.exists(sciezka_oryginalu):
-            # Otwieramy oryginał i wstrzykujemy tag lang do każdego biegu.
+            # Otwieramy oryginał i wstrzykujemy tag lang dynamicznie per paragraf.
             doc = docx.Document(sciezka_oryginalu)
+            for para in doc.paragraphs:
+                tekst_para = para.text
+                jez_para = (
+                    _wykryj_jezyk_fragmentu(tekst_para, fallback=iso_code)
+                    if tekst_para.strip() else iso_code
+                )
+                for run in para.runs:
+                    _ustaw_lang_runa(run, jez_para)
         else:
-            # Tworzymy nowy dokument z przetworzoną treścią (lub z oryginalną
-            # treścią, gdy naprawiacz nie znalazł pliku źródłowego).
+            # Nowy dokument: side-channel (tryb Rezyser/Szyfrant) lub live-detect
+            # (naprawiacz bez pliku źródła, Tlumacz, inne wywołania).
             doc = docx.Document()
             zawartosc = oryginalny_content if jest_naprawiacz else tresc_wynikowa
-            for linia in zawartosc.split("\n"):
-                doc.add_paragraph(linia)
 
-        for para in doc.paragraphs:
-            for run in para.runs:
-                rPr = run._r.get_or_add_rPr()
-                lang_el = rPr.find(qn("w:lang"))
-                if lang_el is None:
-                    lang_el = OxmlElement("w:lang")
-                    rPr.append(lang_el)
-                lang_el.set(qn("w:val"), iso_code)
+            sgm = None if jest_naprawiacz else segmenty_wynikowe
+            iso_lista = _iso_per_linia(zawartosc, sgm, iso_code)
+
+            linie = zawartosc.split("\n")
+            for linia, iso_lin in zip(linie, iso_lista):
+                p = doc.add_paragraph(linia)
+                for run in p.runs:
+                    _ustaw_lang_runa(run, iso_lin)
         doc.save(out_path)
         return out_path
 
@@ -1076,33 +1560,41 @@ def zapisz_wynik(
     if ext in (".html", ".htm"):
         out_path = os.path.join(katalog_wyjscia, f"{base_name}{ext}")
         tekst = tresc_wynikowa
-        if "lang=" in tekst.lower():
-            tekst = re.sub(
-                r'(<html[^>]*?)lang=["\'][^"\']+["\']',
-                fr'\1lang="{iso_code}"',
+        ma_html = "<html" in tekst.lower()
+
+        if ma_html:
+            # 13.4.3: pełnoprawny HTML — bs4 + lxml wstrzykują ``lang``
+            # per element blokowy (paragraf, nagłówek, lista, komórka),
+            # zachowując resztę DOM-u. Globalny ``<html lang>`` to fallback.
+            tekst = _wstrzyknij_lang_w_pelnym_html(tekst, iso_code)
+        else:
+            # Fragment HTML / czysty tekst — owijamy akapity (``\n\s*\n``) w
+            # ``<p lang="...">`` z dynamicznym językiem.
+            tekst = _zbuduj_html_z_akapitow(
                 tekst,
-                flags=re.IGNORECASE,
+                segmenty_wynikowe if not jest_naprawiacz else None,
+                iso_code,
+                z_doctype=False,
             )
-        elif "<html" in tekst.lower():
-            tekst = re.sub(
-                r"(<html[^>]*)>",
-                fr'\1 lang="{iso_code}">',
-                tekst,
-                flags=re.IGNORECASE,
-            )
+
         with open(out_path, "w", encoding="utf-8") as fh:
             fh.write(tekst)
         return out_path
 
-    # -------- TXT / MD → HTML (z tagiem lang) -----------------------------
+    # -------- TXT / MD → HTML (z tagiem lang per akapit) ------------------
     if ext in (".txt", ".md"):
         out_path = os.path.join(katalog_wyjscia, f"{base_name}.html")
-        linie  = tresc_wynikowa.split("\n")
-        tytul  = linie[0].strip() if linie and linie[0].strip() else "Dokument"
-        body   = tresc_wynikowa.replace("\n", "<br>\n")
+        linie = tresc_wynikowa.split("\n")
+        tytul = linie[0].strip() if linie and linie[0].strip() else "Dokument"
+        body = _zbuduj_html_z_akapitow(
+            tresc_wynikowa,
+            segmenty_wynikowe if not jest_naprawiacz else None,
+            iso_code,
+            z_doctype=False,
+        )
         html = (
             f'<!DOCTYPE html>\n<html lang="{iso_code}">\n'
-            f"<head>\n<meta charset=\"utf-8\">\n<title>{tytul}</title>\n</head>\n"
+            f'<head>\n<meta charset="utf-8">\n<title>{tytul}</title>\n</head>\n'
             f"<body>\n{body}\n</body>\n</html>"
         )
         with open(out_path, "w", encoding="utf-8") as fh:
@@ -1114,3 +1606,51 @@ def zapisz_wynik(
     with open(out_path, "w", encoding="utf-8") as fh:
         fh.write(tresc_wynikowa)
     return out_path
+
+
+def _zbuduj_html_z_akapitow(tresc: str,
+                            segmenty: list[Segment] | None,
+                            iso_fallback: str,
+                            z_doctype: bool = False) -> str:
+    """Buduje HTML, owijając każdy akapit w ``<p lang="...">``.
+
+    Akapity są oddzielane wzorcem ``\\n\\s*\\n``. Wewnątrz akapitu pojedyncze
+    ``\\n`` zostaje konwertowane na ``<br>`` (tak jak we wcześniejszym
+    zachowaniu ``zapisz_wynik``). HTML-special chars (``<``, ``>``, ``&``)
+    NIE są ekranowane — wynik często zawiera już własne tagi z naprawiacza
+    lub akcentu, a wejście do trybów Poligloty pochodzi z zaufanego źródła
+    (lokalny plik użytkownika).
+
+    Mapowanie iso → akapit czerpie z ``segmenty`` (side-channel) gdy są
+    dostępne, w przeciwnym razie segmentuje ``tresc`` na żywo.
+    """
+    if segmenty is None or "".join(s[1] for s in segmenty) != tresc:
+        segmenty = _segmentuj_z_ochrona_tagow(tresc, fallback_jezyk=iso_fallback)
+
+    czesci_html: list[str] = []
+    biezacy_akapit: list[str] = []
+    biezacy_iso = iso_fallback
+
+    def flush_akapit() -> None:
+        if not biezacy_akapit:
+            return
+        body = "".join(biezacy_akapit)
+        if not body.strip():
+            biezacy_akapit.clear()
+            return
+        czesci_html.append(f'<p lang="{biezacy_iso}">{body.replace(chr(10), "<br>")}</p>')
+        biezacy_akapit.clear()
+
+    for jez, fr, czy_tekst in segmenty:
+        if czy_tekst:
+            biezacy_iso = jez
+            biezacy_akapit.append(fr)
+        else:
+            # Separator \n\n lub tag HTML
+            if re.fullmatch(r"\n\s*\n", fr):
+                flush_akapit()
+            else:
+                # Tag HTML w środku akapitu — zachowujemy w treści akapitu.
+                biezacy_akapit.append(fr)
+    flush_akapit()
+    return "\n".join(czesci_html)

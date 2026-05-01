@@ -42,8 +42,9 @@ The folder structure looks like this:
 Currently fully implemented are: Polski, English, Suomi
 (3 base languages). Each has its own "dictionaries/<code>/" package with
 diacritics, alphabet, and phonetic rules operating on text in that language
-— the application automatically detects the source language via langdetect
-and loads the appropriate package. More languages are in preparation (a
+— the application automatically detects the source language via
+lingua-language-detector (per paragraph) and loads the appropriate package
+for each fragment separately. More languages are in preparation (a
 complete package requires "podstawy.yaml", "gui/ui.yaml", and at least one
 file in "akcenty/" and "szyfry/").
 

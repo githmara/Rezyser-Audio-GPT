@@ -614,6 +614,8 @@ poliglota:
   brak_szyfrow_dla_jezyka: |-
     Dla języka „{jezyk}" nie zainstalowano szyfrów. Reguły są ściśle związane z językiem źródłowym i nie mogą być pożyczane z innych folderów dictionaries/.
   blad_przetwarzania:    "Błąd przetwarzania:\n{tresc_bledu}"
+  brak_reguly_tytul:     "Brak reguły dla wykrytego języka"
+  brak_reguly_naglowek:  "Detektor lingua wykrył w tekście fragment w języku, dla którego brakuje pliku reguły. Aplikacja przerwała przetwarzanie, żeby nie uszkodzić wyniku."
   cezar_losowe_tytul:    "Szyfr Cezara – losowe przesunięcie"
   cezar_losowe_tresc:    "Wartość przesunięcia wynosiła 0 – wylosowano: {wylosowane_przesuniecie}."
   blad_wyniku_tytul:     "Błąd"

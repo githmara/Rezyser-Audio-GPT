@@ -45,7 +45,8 @@ Tällä hetkellä täysin toteutettuja ovat: Polski, English, Suomi
 (3 peruskieliä). Jokaisella on oma paketti
 "sanakirjat/<koodi>/" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
 toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa
-lähdekielen automaattisesti langdetectin avulla ja lataa oikean paketin.
+lähdekielen automaattisesti lingua-language-detector -työkalulla
+(kappaletasolla) ja lataa oikean paketin kullekin katkelmalle erikseen.
 Lisää kieliä on valmisteilla (täydellinen paketti vaatii "podstawy.yaml",
 "gui/ui.yaml" sekä vähintään yhden tiedoston "aksentit/" ja "salaukset/").
 

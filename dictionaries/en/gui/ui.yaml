@@ -606,6 +606,8 @@ poliglota:
   brak_szyfrow_dla_jezyka: |-
     No ciphers are installed for language "{jezyk}". The rules are strictly tied to the source language and cannot be borrowed from other dictionaries/ folders.
   blad_przetwarzania: "Processing Error:\n{tresc_bledu}"
+  brak_reguly_tytul: "Missing Rule for Detected Language"
+  brak_reguly_naglowek: "The lingua detector found a fragment in a language for which the rule file is missing. Processing was aborted to prevent corrupting the result."
   cezar_losowe_tytul: "Caesar Cipher – Random Shift"
   cezar_losowe_tresc: "The shift value was 0 – drawn: {wylosowane_przesuniecie}."
   blad_wyniku_tytul: "Error"

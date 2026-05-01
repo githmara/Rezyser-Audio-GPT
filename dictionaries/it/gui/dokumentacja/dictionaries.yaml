@@ -37,7 +37,7 @@ tresc: |
   Attualmente completamente implementati sono: {lista_kompletnych_jezykow_natywnie}
   ({liczba_kompletnych_jezykow} lingue di base). Ognuna ha il proprio pacchetto
   "dictionaries/<codice>/" con diacritici, alfabeto e regole fonetiche
-  che operano sul testo in quella lingua specifica — l'applicazione rileva automaticamente la lingua di origine tramite langdetect e carica il pacchetto appropriato. Altre lingue sono in preparazione (un pacchetto completo richiede "podstawy.yaml", "gui/ui.yaml" e almeno un file in "akcenty/" e "szyfry/").
+  che operano sul testo in quella lingua specifica — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente. Altre lingue sono in preparazione (un pacchetto completo richiede "podstawy.yaml", "gui/ui.yaml" e almeno un file in "akcenty/" e "szyfry/").
 
   Cos'è un accento?
   -----------------

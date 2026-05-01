@@ -1,6 +1,41 @@
-# Release Notes — Reżyser Audio GPT 13.4.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.4.3 „Wersja Wydawnicza"
 
-*Hotfix: wielojęzyczne nagłówki struktury w Reżyserze i Konwerterze.*
+*Patch: detekcja języka per akapit przez lingua + dynamiczny tag `lang` w wynikach + nowy język = nowy folder bez Pythona.*
+
+---
+
+## 13.4.3 — patch release (motyw przewodni: dynamiczna wielojęzyczność wyniku)
+
+*Punkt wyjścia: V13.4.2 (973080b) → commity WIP + commit release → V13.4.3.*
+
+### TL;DR
+
+13.4.3 wymienia bibliotekę detekcji języka z `langdetect` na `lingua-language-detector` i przebudowuje silnik Poligloty, by wykrywał język **per akapit** zamiast raz dla całego tekstu. Każdy fragment (akapit, paragraf HTML, paragraf DOCX) dostaje teraz osobno dobrane reguły fonetyczne / szyfrowe i własny atrybut `lang`. Gdy w tekście pojawi się fragment w języku, dla którego brakuje reguły (np. rosyjski akapit w trybie Szyfrant — `dictionaries/ru/szyfry/` jeszcze nie istnieje), aplikacja zatrzymuje przetwarzanie i pokazuje czytelny komunikat z dokładną ścieżką brakującego pliku — w `wx.Dialog` z polem `TE_READONLY` (A11y: NVDA odczytuje, użytkownik kopiuje Ctrl+C).
+
+Domknięto też lukę architektoniczną: dodanie nowego języka bazowego (TODO planuje niemiecki, hiszpański, francuski) nie wymaga już zmian w kodzie Pythona. Wystarczy nowy folder `dictionaries/<kod>/` z polem `lingua: <NAZWA>` w `podstawy.yaml` — silnik sam zarejestruje język w detektorze. Manager Reguł dostał zaktualizowany szablon i prompt AI, które wprost wymagają tego pola i podają listę poprawnych nazw enum-a `lingua.Language`.
+
+### Co nowego dla użytkownika końcowego
+
+- Mieszany tekst (np. polski wstęp + angielski cytat) jest wreszcie poprawnie obsługiwany: każdy akapit dostaje swój znacznik `lang` w pliku wyjściowym, więc czytniki ekranu i syntezatory TTS (Microsoft, eSpeak, Vocalizer) automatycznie przełączają język wymowy w odpowiednim miejscu.
+- W trybie Reżysera akcent islandzki, niemiecki itd. działa poprawnie również na fragmentach niepolskich — silnik dla każdego akapitu sięga po regułę z `dictionaries/<wykryty_język>/akcenty/<akcent>.yaml`, jeśli istnieje.
+- W trybie Szyfranta to samo: szyfr Cezara z polskim alfabetem nie szyfruje już rosyjskiej cyrylicy „przez przypadek" — silnik wykrywa, że to inny język i zatrzymuje się z czytelnym komunikatem zamiast produkować śmieci.
+- W plikach HTML wynikowych każdy `<p>`, `<h1>`-`<h6>`, `<li>`, `<blockquote>`, `<td>` ma własny atrybut `lang` ustawiony zgodnie z jego treścią (parser `BeautifulSoup` + `lxml`).
+- W plikach DOCX każdy paragraf dostaje `<w:lang w:val="...">` zgodny z jego treścią — Word i Adobe Acrobat respektują to przy eksporcie do PDF/audio.
+- Wsparcie dla pełnoprawnych dokumentów HTML (`<!DOCTYPE html>...<body>...`): parser `BeautifulSoup` ustawia atrybut `lang` osobno na `<h1>`-`<h6>`, `<p>`, `<li>`, `<blockquote>`, `<td>`, `<th>` i innych elementach blokowych — zachowując całą strukturę DOM.
+
+### Pod maską
+
+- `core_poliglota.py`: `langdetect` → `lingua-language-detector` z lazy singleton-builderem (`_zbuduj_detektor_lingua`). Detektor obsługuje wszystkie 6 języków obecnych w `dictionaries/`.
+- Nowy helper `_segmentuj_z_ochrona_tagow(tekst, fallback_jezyk)` dwuwarstwowo dzieli wejście: najpierw po tagach HTML (zachowuje je 1:1), potem po `\n\s*\n` (akapity). Sticky-fallback: krótkie akapity dziedziczą język po sąsiadach.
+- Nowy wyjątek `BrakRegulyDlaJezykaError` (atrybuty: `jezyk_kod`, `jezyk_natywna`, `tryb`, `wariant`, `oczekiwany_folder`). `gui_poliglota.py` rozpoznaje go osobno i kieruje do `_wyswietl_blad_ai` (długi multi-line komunikat → `wx.Dialog` z `TextCtrl TE_READONLY`).
+- `_przetworz_rezyser` i `_przetworz_szyfrant` przepisane na pętlę per-fragment: dla każdego segmentu pobierają konfigurację wariantu w wykrytym języku i podnoszą wyjątek przy braku reguły. Side-channel `opcje["_segmenty_wynikowe"]` propaguje mapę (iso, fragment, czy_tekst) do `zapisz_wynik`.
+- `zapisz_wynik` z nowym keyword-only parametrem `segmenty_wynikowe`. DOCX: tag `w:lang` per paragraf (mapowanie offset→iso, sticky-fallback dla pustych linii). HTML pełnoprawny: BeautifulSoup parsuje DOM, ustawia `lang` na wszystkich elementach blokowych. HTML fragmentaryczny i TXT/MD: nowy helper `_zbuduj_html_z_akapitow` owija akapity w `<p lang="...">`. Naprawiacz tagów: detekcja per paragraf na żywo.
+- Klucze i18n `poliglota.brak_reguly_tytul` / `poliglota.brak_reguly_naglowek` dodane we wszystkich 6 plikach `dictionaries/<kod>/gui/ui.yaml` (PL/EN/FI/IS/IT/RU).
+- Szablony dokumentacji `dictionaries/<kod>/gui/dokumentacja/dictionaries.yaml` zaktualizowane we wszystkich 6 językach (wzmianka o lingua per akapit zamiast langdetect globalnie).
+- `requirements.txt`: usunięto `langdetect`, dodano `lingua-language-detector` i `beautifulsoup4`. Środowisko `runtime/Lib/site-packages` zsynchronizowane z `.venv` (oba bez langdetect, oba z bs4 i lingua).
+- **Dynamic lingua mapping (luka architektoniczna domknięta).** `core_poliglota._ISO_TO_LINGUA` zniknął z kodu Pythona. Każdy `dictionaries/<kod>/podstawy.yaml` deklaruje teraz pole `lingua: <NAZWA_ENUMA>` (np. `POLISH`, `ENGLISH`, `GERMAN`). Funkcja `_zbuduj_mapowanie_lingua()` skanuje YAML-e przy pierwszym wywołaniu detektora, mapuje nazwy na `lingua.Language` przez `getattr` (defensywnie pomijając wartości spoza znanego enum-a). Dodanie nowego języka bazowego sprowadza się do utworzenia folderu — bez touchu Pythona. Spójne z istniejącym duchem `odswiez_rezysera.odkryj_obslugiwane_jezyki()` i `dostepne_jezyki_bazowe()`.
+- `manager_regul_szablony.szablon_podstawy()` generuje teraz szablon z polem `lingua: <UZUPEŁNIJ_NAZWE_ENUMA_NP_GERMAN>` i komentarzem wyjaśniającym wymóg + URL do listy enum-ów.
+- `manager_regul_szablony.prompt_jezyk_bazowy()` (prompt dla AI tworzącego nowy język) ma nową ZASADĘ ŻELAZNĄ #1: pole `lingua` z listą 12 najpopularniejszych poprawnych wartości i instrukcją „jeśli język nie jest na liście lingua, zwróć `# BRAK_W_LINGUA: <kod>` zamiast zgadywać".
 
 ---
 

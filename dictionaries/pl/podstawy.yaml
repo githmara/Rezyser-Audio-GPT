@@ -11,6 +11,12 @@
 
 id: podstawy
 jezyk: pl
+# 13.4.3: identyfikator lingua-language-detector używany przez detektor języka
+# silnika Poligloty. Wartość MUSI być nazwą enum-a `lingua.Language` (bez
+# prefiksu, wielkimi literami) — pełna lista na https://github.com/pemistahl/lingua-py
+# (POLISH, GERMAN, SPANISH, …). Brak tego pola wyłącza dany język z detektora
+# (sticky-fallback w core_poliglota), folder pozostaje w dictionaries widoczny.
+lingua: POLISH
 etykieta: "Polski – podstawy fonetyczne"
 opis: |
   Bazowe reguły dla języka polskiego:

@@ -582,6 +582,8 @@ poliglota:
   ostrzezenie_jezyk: |-
     Athugið: Aðaltextamál sem greind eru eru ekki studd. Hljóðfræðilegar reglur eru nú aðlagaðar að tungumálum: {wspierane_jezyki}. Áhrifin geta verið ófyrirsjáanleg.
   blad_przetwarzania: "Vinnsluvilla:\n{tresc_bledu}"
+  brak_reguly_tytul: "Regla vantar fyrir greint tungumál"
+  brak_reguly_naglowek: "Lingua-skynjarinn fann brot á tungumáli sem reglur eru ekki til fyrir. Vinnsla var stöðvuð til að spilla ekki útkomunni."
   cezar_losowe_tytul: "Cæsar dulmál – handahófskennt tilfærsla"
   cezar_losowe_tresc: "Gildi tilfærslu var 0 – handahófskennt: {wylosowane_przesuniecie}."
   blad_wyniku_tytul: "Villa"

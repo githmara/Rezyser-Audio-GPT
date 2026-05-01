@@ -583,6 +583,8 @@ poliglota:
   ostrzezenie_jezyk: |-
     Attenzione: Rilevata lingua principale del testo non supportata. Le regole fonetiche sono attualmente adattate per le lingue: {wspierane_jezyki}. L'effetto potrebbe essere imprevedibile.
   blad_przetwarzania: "Errore di elaborazione:\n{tresc_bledu}"
+  brak_reguly_tytul: "Regola mancante per la lingua rilevata"
+  brak_reguly_naglowek: "Il rilevatore lingua ha trovato un frammento in una lingua per la quale manca il file di regole. L'elaborazione è stata interrotta per non corrompere il risultato."
   cezar_losowe_tytul: "Cifrario di Cesare – spostamento casuale"
   cezar_losowe_tresc: "Il valore dello spostamento era 0 – generato: {wylosowane_przesuniecie}."
   blad_wyniku_tytul: "Errore"

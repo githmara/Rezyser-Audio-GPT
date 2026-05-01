@@ -16,6 +16,12 @@
 
 id: podstawy
 jezyk: is
+# 13.4.3: lingua-language-detector auðkenni notað af Poliglota-vélinni.
+# Verður að vera nafn `lingua.Language` enum-s (hástafir, án forskeytis) —
+# fullur listi: https://github.com/pemistahl/lingua-py. Ef reiturinn vantar
+# er tungumálið slökkt í skynjaranum (sticky-fallback tekur við), mappan
+# verður áfram sýnileg.
+lingua: ICELANDIC
 etykieta: "Íslenska – hljóðfræðilegur grunnur"
 opis: |
   Grunnreglur íslenskunnar:

@@ -660,6 +660,15 @@ class PoliglotaPanel(wx.Panel):
                 wariant=cfg["id"],
                 **opcje,
             )
+        except core_poliglota.BrakRegulyDlaJezykaError as exc:
+            # 13.5: długi techniczny komunikat → wx.Dialog z TextCtrl TE_READONLY
+            # (zgodnie z konwencją A11y: NVDA ma spokojnie odczytać i pozwolić
+            # użytkownikowi skopiować ścieżkę brakującej reguły).
+            self._wyswietl_blad_ai(
+                str(exc),
+                custom_msg=t("poliglota.brak_reguly_naglowek"),
+            )
+            return
         except Exception as exc:
             wx.MessageBox(
                 t("poliglota.blad_przetwarzania", tresc_bledu=str(exc)),
@@ -693,6 +702,12 @@ class PoliglotaPanel(wx.Panel):
                 wariant=cfg["id"],
                 **opcje,
             )
+        except core_poliglota.BrakRegulyDlaJezykaError as exc:
+            self._wyswietl_blad_ai(
+                str(exc),
+                custom_msg=t("poliglota.brak_reguly_naglowek"),
+            )
+            return
         except Exception as exc:
             wx.MessageBox(
                 t("poliglota.blad_przetwarzania", tresc_bledu=str(exc)),
@@ -730,6 +745,11 @@ class PoliglotaPanel(wx.Panel):
         base = core_poliglota.sufiks_nazwy_pliku(
             tryb, self._jezyk_aktywny, wariant_id, self._oryginalna_nazwa, opcje)
 
+        # 13.5: side-channel z core_poliglota._przetworz_* — mapa
+        # (iso, fragment, czy_tekst) per akapit. Pozwala zapisz_wynik
+        # wstrzyknąć tag lang per paragraf bez ponownej detekcji.
+        segmenty_wynikowe = opcje.get("_segmenty_wynikowe")
+
         try:
             out_path = core_poliglota.zapisz_wynik(
                 tresc_wynikowa=wynik,
@@ -741,6 +761,7 @@ class PoliglotaPanel(wx.Panel):
                 wariant_cfg=cfg,
                 oryginalny_content=self._file_content,
                 sciezka_oryginalu=self._sciezka_oryginalu,
+                segmenty_wynikowe=segmenty_wynikowe,
             )
         except Exception as exc:
             wx.MessageBox(

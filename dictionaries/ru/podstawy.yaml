@@ -14,6 +14,12 @@
 
 id: podstawy
 jezyk: ru
+# 13.4.3: идентификатор lingua-language-detector, используемый движком Poliglota.
+# Значение ДОЛЖНО быть именем enum-а `lingua.Language` (заглавными буквами,
+# без префикса) — полный список: https://github.com/pemistahl/lingua-py.
+# Отсутствие поля отключает язык в детекторе (включается sticky-fallback),
+# папка остаётся видимой.
+lingua: RUSSIAN
 etykieta: "Русский – фонетические основы"
 opis: |
   Базовые правила для русского языка:
