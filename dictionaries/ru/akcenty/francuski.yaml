@@ -1,0 +1,129 @@
+# -----------------------------------------------------------------------------
+#  ФРАНЦУЗСКИЙ АКЦЕНТ (русский → французский TTS)
+#  Для синтезаторов: Hortense / Paul / Julie (французский TTS).
+# -----------------------------------------------------------------------------
+id: francuski
+etykieta: "Французский (напр. Hortense / Paul / Julie)"
+opis: |
+  Транслитерирует русский текст так, чтобы французский синтезатор
+  (Hortense / Paul / Julie) прочитал его с естественным русским акцентом.
+
+  Французская фонетика подкидывает несколько идеальных совпадений:
+    - Ж → J     (французская j = /ʒ/ — ИДЕАЛЬНО для русского /ʐ/)
+    - Ш → CH    (французская ch = /ʃ/ — ИДЕАЛЬНО)
+    - Ч → TCH   (французская tch = /tʃ/)
+    - Щ → CHTCH
+    - Х → KH    (КРИТИЧНО: французский h обычно немой; KH вынуждает
+                 синтезатор произнести что-то близкое к /x/, хотя
+                 русское /x/ через KH идёт мягче, чем у Hortense)
+    - Ц → TS
+
+  Гласные и йотированные:
+    - У → OU    (КРИТИЧНО: французская u = /y/ ≠ русское /u/;
+                 французская ou = /u/ — единственный способ получить /u/)
+    - Ю → IOU   (йотированный /u/ во французской записи)
+    - Ё → IO, Я → IA, Е → IE
+    - И → I, Й → I (французский j ≠ /j/, мы уже использовали его для Ж;
+                    рядовое i перед гласной читается как /j/ — приемлемо)
+    - В → V
+
+  Известные ограничения:
+    - Французский r = /ʁ/ (увулярное) ≠ русское /r/ (альвеолярное).
+      Это не вредит акценту — наоборот, усиливает его «французскость»,
+      что делает русский говор узнаваемее.
+iso: fr
+kategoria: akcent
+kolejnosc: 50
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# -----------------------------------------------------------------------------
+# КРИТИЧЕСКИЙ ПОРЯДОК ЗАМЕН:
+#   1. Многобуквенные согласные.
+#   2. Йотированные гласные (включая Ю → IOU перед У → OU,
+#      иначе Ю → ... затронет получившийся OU).
+#   3. У → OU.
+#   4. Одиночные буквы.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Многобуквенные согласные ---
+  - { wzor: "Щ", zamiana: "Chtch"  }
+  - { wzor: "щ", zamiana: "chtch"  }
+  - { wzor: "Ш", zamiana: "Ch"     }
+  - { wzor: "ш", zamiana: "ch"     }
+  - { wzor: "Ч", zamiana: "Tch"    }
+  - { wzor: "ч", zamiana: "tch"    }
+  - { wzor: "Ж", zamiana: "J"      }
+  - { wzor: "ж", zamiana: "j"      }
+  - { wzor: "Х", zamiana: "Kh"     }
+  - { wzor: "х", zamiana: "kh"     }
+  - { wzor: "Ц", zamiana: "Ts"     }
+  - { wzor: "ц", zamiana: "ts"     }
+
+  # --- 2. Йотированные гласные (Ю до У → OU) ---
+  - { wzor: "Ё", zamiana: "Io"     }
+  - { wzor: "ё", zamiana: "io"     }
+  - { wzor: "Ю", zamiana: "Iou"    }
+  - { wzor: "ю", zamiana: "iou"    }
+  - { wzor: "Я", zamiana: "Ia"     }
+  - { wzor: "я", zamiana: "ia"     }
+  - { wzor: "Е", zamiana: "Ie"     }
+  - { wzor: "е", zamiana: "ie"     }
+  - { wzor: "Э", zamiana: "E"      }
+  - { wzor: "э", zamiana: "e"      }
+
+  # --- 3. У → OU (французская ou = /u/) ---
+  - { wzor: "У", zamiana: "Ou"     }
+  - { wzor: "у", zamiana: "ou"     }
+
+  # --- 4. Й до И ---
+  - { wzor: "Й", zamiana: "I"      }
+  - { wzor: "й", zamiana: "i"      }
+
+  # --- 5. Одиночные буквы ---
+  - { wzor: "А", zamiana: "A"      }
+  - { wzor: "а", zamiana: "a"      }
+  - { wzor: "Б", zamiana: "B"      }
+  - { wzor: "б", zamiana: "b"      }
+  - { wzor: "В", zamiana: "V"      }
+  - { wzor: "в", zamiana: "v"      }
+  - { wzor: "Г", zamiana: "G"      }
+  - { wzor: "г", zamiana: "g"      }
+  - { wzor: "Д", zamiana: "D"      }
+  - { wzor: "д", zamiana: "d"      }
+  - { wzor: "З", zamiana: "Z"      }
+  - { wzor: "з", zamiana: "z"      }
+  - { wzor: "И", zamiana: "I"      }
+  - { wzor: "и", zamiana: "i"      }
+  - { wzor: "К", zamiana: "K"      }
+  - { wzor: "к", zamiana: "k"      }
+  - { wzor: "Л", zamiana: "L"      }
+  - { wzor: "л", zamiana: "l"      }
+  - { wzor: "М", zamiana: "M"      }
+  - { wzor: "м", zamiana: "m"      }
+  - { wzor: "Н", zamiana: "N"      }
+  - { wzor: "н", zamiana: "n"      }
+  - { wzor: "О", zamiana: "O"      }
+  - { wzor: "о", zamiana: "o"      }
+  - { wzor: "П", zamiana: "P"      }
+  - { wzor: "п", zamiana: "p"      }
+  - { wzor: "Р", zamiana: "R"      }
+  - { wzor: "р", zamiana: "r"      }
+  - { wzor: "С", zamiana: "S"      }
+  - { wzor: "с", zamiana: "s"      }
+  - { wzor: "Т", zamiana: "T"      }
+  - { wzor: "т", zamiana: "t"      }
+  - { wzor: "Ф", zamiana: "F"      }
+  - { wzor: "ф", zamiana: "f"      }
+  - { wzor: "Ы", zamiana: "Y"      }
+  - { wzor: "ы", zamiana: "y"      }
+
+  # --- 6. Знаки — удаляются ---
+  - { wzor: "Ъ", zamiana: ""       }
+  - { wzor: "ъ", zamiana: ""       }
+  - { wzor: "Ь", zamiana: ""       }
+  - { wzor: "ь", zamiana: ""       }

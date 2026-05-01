@@ -1,0 +1,125 @@
+# -----------------------------------------------------------------------------
+#  ИТАЛЬЯНСКИЙ АКЦЕНТ (русский → итальянский TTS)
+#  Для синтезаторов: Lucia / Cosimo / Pierina (итальянский TTS).
+# -----------------------------------------------------------------------------
+id: wloski
+etykieta: "Итальянский (напр. Lucia / Cosimo / Pierina)"
+opis: |
+  Транслитерирует русский текст так, чтобы итальянский синтезатор
+  (Lucia / Cosimo / Pierina) прочитал его с естественным русским акцентом.
+
+  Особенности итальянской фонетики:
+    - h в итальянском НЕМОЙ — нельзя писать Х → H, иначе пропадёт /x/.
+      Решение: Х → KH (приближение; итальянский TTS произнесёт /k/+/h/,
+      что ближе к /x/, чем абсолютная тишина).
+    - j редко используется и читается /j/ или /jot/. Используем для Й.
+    - z = /ts/ или /dz/ — подходит для Ц.
+    - sc перед e/i = /ʃ/ — но мы не можем гарантировать «правильный»
+      контекст, поэтому Ш → SH (итальянский TTS прочитает SH как два
+      звука /s/+/h/, последний немой, итог /s/, что неточно).
+      Альтернатива: SCI/SCE — но это меняет гласную. Принимаем /s/.
+
+  Прочие отображения:
+    - Ж → J     (итальянская j редко = /dʒ/, приближение к /ʐ/)
+    - Ч → CI    (перед гласной даёт /tʃ/) — но мы делаем 1:1, поэтому Ч → CH
+    - Щ → SHCH
+    - Ё → IO, Ю → IU, Я → IA, Е → IE
+    - И → I, Й → J
+    - В → V (итальянская v = /v/ ✓)
+
+  Известные ограничения:
+    - Итальянский TTS добавляет напряжённую артикуляцию и удвоенные
+      согласные — это естественный эффект акцента.
+    - Безударные гласные не редуцируются (в отличие от русского).
+iso: it
+kategoria: akcent
+kolejnosc: 80
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# -----------------------------------------------------------------------------
+# КРИТИЧЕСКИЙ ПОРЯДОК ЗАМЕН:
+#   1. Многобуквенные согласные.
+#   2. Йотированные гласные.
+#   3. Одиночные буквы.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Многобуквенные согласные ---
+  - { wzor: "Щ", zamiana: "Shch" }
+  - { wzor: "щ", zamiana: "shch" }
+  - { wzor: "Ш", zamiana: "Sh"   }
+  - { wzor: "ш", zamiana: "sh"   }
+  - { wzor: "Ч", zamiana: "Ch"   }
+  - { wzor: "ч", zamiana: "ch"   }
+  - { wzor: "Ж", zamiana: "J"    }   # Итальянская j = /dʒ/, приближение к /ʐ/
+  - { wzor: "ж", zamiana: "j"    }
+  - { wzor: "Х", zamiana: "Kh"   }
+  - { wzor: "х", zamiana: "kh"   }
+  - { wzor: "Ц", zamiana: "Z"    }   # Итальянская z = /ts/ или /dz/
+  - { wzor: "ц", zamiana: "z"    }
+
+  # --- 2. Йотированные гласные ---
+  - { wzor: "Ё", zamiana: "Io"   }
+  - { wzor: "ё", zamiana: "io"   }
+  - { wzor: "Ю", zamiana: "Iu"   }
+  - { wzor: "ю", zamiana: "iu"   }
+  - { wzor: "Я", zamiana: "Ia"   }
+  - { wzor: "я", zamiana: "ia"   }
+  - { wzor: "Е", zamiana: "Ie"   }
+  - { wzor: "е", zamiana: "ie"   }
+  - { wzor: "Э", zamiana: "E"    }
+  - { wzor: "э", zamiana: "e"    }
+
+  # --- 3. Й до И ---
+  - { wzor: "Й", zamiana: "I"    }   # Итальянская j занята под Ж
+  - { wzor: "й", zamiana: "i"    }
+
+  # --- 4. Одиночные буквы ---
+  - { wzor: "А", zamiana: "A"    }
+  - { wzor: "а", zamiana: "a"    }
+  - { wzor: "Б", zamiana: "B"    }
+  - { wzor: "б", zamiana: "b"    }
+  - { wzor: "В", zamiana: "V"    }
+  - { wzor: "в", zamiana: "v"    }
+  - { wzor: "Г", zamiana: "G"    }
+  - { wzor: "г", zamiana: "g"    }
+  - { wzor: "Д", zamiana: "D"    }
+  - { wzor: "д", zamiana: "d"    }
+  - { wzor: "З", zamiana: "S"    }   # Итальянская s между гласными = /z/
+  - { wzor: "з", zamiana: "s"    }
+  - { wzor: "И", zamiana: "I"    }
+  - { wzor: "и", zamiana: "i"    }
+  - { wzor: "К", zamiana: "K"    }
+  - { wzor: "к", zamiana: "k"    }
+  - { wzor: "Л", zamiana: "L"    }
+  - { wzor: "л", zamiana: "l"    }
+  - { wzor: "М", zamiana: "M"    }
+  - { wzor: "м", zamiana: "m"    }
+  - { wzor: "Н", zamiana: "N"    }
+  - { wzor: "н", zamiana: "n"    }
+  - { wzor: "О", zamiana: "O"    }
+  - { wzor: "о", zamiana: "o"    }
+  - { wzor: "П", zamiana: "P"    }
+  - { wzor: "п", zamiana: "p"    }
+  - { wzor: "Р", zamiana: "R"    }
+  - { wzor: "р", zamiana: "r"    }
+  - { wzor: "С", zamiana: "S"    }
+  - { wzor: "с", zamiana: "s"    }
+  - { wzor: "Т", zamiana: "T"    }
+  - { wzor: "т", zamiana: "t"    }
+  - { wzor: "У", zamiana: "U"    }
+  - { wzor: "у", zamiana: "u"    }
+  - { wzor: "Ф", zamiana: "F"    }
+  - { wzor: "ф", zamiana: "f"    }
+  - { wzor: "Ы", zamiana: "I"    }   # Итальянский не имеет /ɨ/
+  - { wzor: "ы", zamiana: "i"    }
+
+  # --- 5. Знаки — удаляются ---
+  - { wzor: "Ъ", zamiana: ""     }
+  - { wzor: "ъ", zamiana: ""     }
+  - { wzor: "Ь", zamiana: ""     }
+  - { wzor: "ь", zamiana: ""     }

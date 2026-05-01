@@ -1,0 +1,123 @@
+# -----------------------------------------------------------------------------
+#  ФИНСКИЙ АКЦЕНТ (русский → финский TTS)
+#  Для синтезаторов: Heidi / Onni / финские голоса (финский TTS).
+# -----------------------------------------------------------------------------
+id: finski
+etykieta: "Финский (напр. Heidi / Onni)"
+opis: |
+  Транслитерирует русский текст так, чтобы финский синтезатор
+  прочитал его с естественным русским акцентом.
+
+  Особенности финской фонетики:
+    - h в финском = /h/ ✓ — но мы используем KH для Х, т.к. русское
+      /x/ заметно сильнее финского /h/.
+    - j в финском = /j/ ✓ — идеально для Й и йотированных гласных.
+    - Финский не имеет /ʒ/, /ʃ/ — приближаем через ZH, SH (финский TTS
+      разложит на /z/+/h/, /s/+/h/, что усилит «иностранность» звучания).
+    - Финский имеет долгие гласные (aa, uu, …), но мы их не используем —
+      русские безударные не редуцированы достаточно, чтобы оправдать
+      удвоение.
+
+  Прочие отображения:
+    - Ш → SH, Щ → SHTSH, Ч → TSH (финские TTS дружат с диграфами)
+    - Ж → ZH, Х → KH, Ц → TS
+    - Ё → JO, Ю → JU, Я → JA, Е → JE
+    - Й → J, И → I, Ы → Y
+    - В → V (финская v = /ʋ/, близко к /v/ ✓)
+
+  Известные ограничения:
+    - Финский TTS читает каждую букву отдельно — нет редукции
+      безударных русских «о». Это часть акцента: русский, говорящий
+      по-фински, тоже произносит каждую гласную чётко.
+iso: fi
+kategoria: akcent
+kolejnosc: 55
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# -----------------------------------------------------------------------------
+# КРИТИЧЕСКИЙ ПОРЯДОК ЗАМЕН:
+#   1. Многобуквенные согласные.
+#   2. Йотированные гласные.
+#   3. Одиночные буквы.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Многобуквенные согласные ---
+  - { wzor: "Щ", zamiana: "Shtsh" }
+  - { wzor: "щ", zamiana: "shtsh" }
+  - { wzor: "Ш", zamiana: "Sh"    }
+  - { wzor: "ш", zamiana: "sh"    }
+  - { wzor: "Ч", zamiana: "Tsh"   }
+  - { wzor: "ч", zamiana: "tsh"   }
+  - { wzor: "Ж", zamiana: "Zh"    }
+  - { wzor: "ж", zamiana: "zh"    }
+  - { wzor: "Х", zamiana: "Kh"    }
+  - { wzor: "х", zamiana: "kh"    }
+  - { wzor: "Ц", zamiana: "Ts"    }
+  - { wzor: "ц", zamiana: "ts"    }
+
+  # --- 2. Йотированные гласные (финская j = /j/) ---
+  - { wzor: "Ё", zamiana: "Jo"    }
+  - { wzor: "ё", zamiana: "jo"    }
+  - { wzor: "Ю", zamiana: "Ju"    }
+  - { wzor: "ю", zamiana: "ju"    }
+  - { wzor: "Я", zamiana: "Ja"    }
+  - { wzor: "я", zamiana: "ja"    }
+  - { wzor: "Е", zamiana: "Je"    }
+  - { wzor: "е", zamiana: "je"    }
+  - { wzor: "Э", zamiana: "E"     }
+  - { wzor: "э", zamiana: "e"     }
+
+  # --- 3. Й до И ---
+  - { wzor: "Й", zamiana: "J"     }
+  - { wzor: "й", zamiana: "j"     }
+
+  # --- 4. Одиночные буквы ---
+  - { wzor: "А", zamiana: "A"     }
+  - { wzor: "а", zamiana: "a"     }
+  - { wzor: "Б", zamiana: "B"     }
+  - { wzor: "б", zamiana: "b"     }
+  - { wzor: "В", zamiana: "V"     }
+  - { wzor: "в", zamiana: "v"     }
+  - { wzor: "Г", zamiana: "G"     }
+  - { wzor: "г", zamiana: "g"     }
+  - { wzor: "Д", zamiana: "D"     }
+  - { wzor: "д", zamiana: "d"     }
+  - { wzor: "З", zamiana: "Z"     }
+  - { wzor: "з", zamiana: "z"     }
+  - { wzor: "И", zamiana: "I"     }
+  - { wzor: "и", zamiana: "i"     }
+  - { wzor: "К", zamiana: "K"     }
+  - { wzor: "к", zamiana: "k"     }
+  - { wzor: "Л", zamiana: "L"     }
+  - { wzor: "л", zamiana: "l"     }
+  - { wzor: "М", zamiana: "M"     }
+  - { wzor: "м", zamiana: "m"     }
+  - { wzor: "Н", zamiana: "N"     }
+  - { wzor: "н", zamiana: "n"     }
+  - { wzor: "О", zamiana: "O"     }
+  - { wzor: "о", zamiana: "o"     }
+  - { wzor: "П", zamiana: "P"     }
+  - { wzor: "п", zamiana: "p"     }
+  - { wzor: "Р", zamiana: "R"     }
+  - { wzor: "р", zamiana: "r"     }
+  - { wzor: "С", zamiana: "S"     }
+  - { wzor: "с", zamiana: "s"     }
+  - { wzor: "Т", zamiana: "T"     }
+  - { wzor: "т", zamiana: "t"     }
+  - { wzor: "У", zamiana: "U"     }
+  - { wzor: "у", zamiana: "u"     }
+  - { wzor: "Ф", zamiana: "F"     }
+  - { wzor: "ф", zamiana: "f"     }
+  - { wzor: "Ы", zamiana: "Y"     }
+  - { wzor: "ы", zamiana: "y"     }
+
+  # --- 5. Знаки — удаляются ---
+  - { wzor: "Ъ", zamiana: ""      }
+  - { wzor: "ъ", zamiana: ""      }
+  - { wzor: "Ь", zamiana: ""      }
+  - { wzor: "ь", zamiana: ""      }

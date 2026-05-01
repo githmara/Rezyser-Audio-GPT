@@ -1,0 +1,116 @@
+# -----------------------------------------------------------------------------
+#  НЕМЕЦКИЙ АКЦЕНТ (русский → немецкий TTS)
+#  Для синтезаторов: Hedda / Stefan / Katja / Markus (немецкий TTS).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "Немецкий (напр. Hedda / Stefan / Katja)"
+opis: |
+  Транслитерирует русский текст так, чтобы немецкий синтезатор
+  (Hedda / Stefan / Katja / Markus) прочитал его с естественным
+  русским акцентом.
+
+  Ключевые отображения, специфичные для немецкого TTS:
+    - Ш → SCH    (немецкая sch = /ʃ/ — идеальное совпадение)
+    - Щ → SCHTSCH (sch + tsch)
+    - Ч → TSCH   (немецкая tsch = /tʃ/)
+    - Ж → SCH    (приближение; немецкий не имеет отдельного /ʒ/)
+    - Х → CH     (немецкая ch = /x/ после a/o/u — идеально)
+    - Ц → Z      (немецкая z = /ts/)
+    - Ё → JO, Ю → JU, Я → JA, Е → JE
+    - В → W      (КРИТИЧНО: немецкая v = /f/, w = /v/)
+    - Й → J, И → I, Ы → Y
+    - Ъ, Ь — удаляются
+iso: de
+kategoria: akcent
+kolejnosc: 60
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# -----------------------------------------------------------------------------
+# КРИТИЧЕСКИЙ ПОРЯДОК ЗАМЕН:
+#   1. Самые длинные кириллические согласные (Щ → SCHTSCH) ПЕРЕД короткими
+#      (Ш → SCH, Ч → TSCH).
+#   2. Х → CH перед общими.
+#   3. Йотированные гласные.
+#   4. Одиночные буквы.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Многобуквенные согласные ---
+  - { wzor: "Щ", zamiana: "Schtsch" }
+  - { wzor: "щ", zamiana: "schtsch" }
+  - { wzor: "Ш", zamiana: "Sch"     }
+  - { wzor: "ш", zamiana: "sch"     }
+  - { wzor: "Ч", zamiana: "Tsch"    }
+  - { wzor: "ч", zamiana: "tsch"    }
+  - { wzor: "Ж", zamiana: "Sch"     }
+  - { wzor: "ж", zamiana: "sch"     }
+  - { wzor: "Х", zamiana: "Ch"      }
+  - { wzor: "х", zamiana: "ch"      }
+  - { wzor: "Ц", zamiana: "Z"       }
+  - { wzor: "ц", zamiana: "z"       }
+
+  # --- 2. Йотированные гласные (немецкий j = /j/) ---
+  - { wzor: "Ё", zamiana: "Jo"      }
+  - { wzor: "ё", zamiana: "jo"      }
+  - { wzor: "Ю", zamiana: "Ju"      }
+  - { wzor: "ю", zamiana: "ju"      }
+  - { wzor: "Я", zamiana: "Ja"      }
+  - { wzor: "я", zamiana: "ja"      }
+  - { wzor: "Е", zamiana: "Je"      }
+  - { wzor: "е", zamiana: "je"      }
+  - { wzor: "Э", zamiana: "E"       }
+  - { wzor: "э", zamiana: "e"       }
+
+  # --- 3. Й до И ---
+  - { wzor: "Й", zamiana: "J"       }
+  - { wzor: "й", zamiana: "j"       }
+
+  # --- 4. Одиночные буквы ---
+  - { wzor: "А", zamiana: "A"       }
+  - { wzor: "а", zamiana: "a"       }
+  - { wzor: "Б", zamiana: "B"       }
+  - { wzor: "б", zamiana: "b"       }
+  - { wzor: "В", zamiana: "W"       }
+  - { wzor: "в", zamiana: "w"       }
+  - { wzor: "Г", zamiana: "G"       }
+  - { wzor: "г", zamiana: "g"       }
+  - { wzor: "Д", zamiana: "D"       }
+  - { wzor: "д", zamiana: "d"       }
+  - { wzor: "З", zamiana: "S"       }   # Немецкий s перед гласной = /z/
+  - { wzor: "з", zamiana: "s"       }
+  - { wzor: "И", zamiana: "I"       }
+  - { wzor: "и", zamiana: "i"       }
+  - { wzor: "К", zamiana: "K"       }
+  - { wzor: "к", zamiana: "k"       }
+  - { wzor: "Л", zamiana: "L"       }
+  - { wzor: "л", zamiana: "l"       }
+  - { wzor: "М", zamiana: "M"       }
+  - { wzor: "м", zamiana: "m"       }
+  - { wzor: "Н", zamiana: "N"       }
+  - { wzor: "н", zamiana: "n"       }
+  - { wzor: "О", zamiana: "O"       }
+  - { wzor: "о", zamiana: "o"       }
+  - { wzor: "П", zamiana: "P"       }
+  - { wzor: "п", zamiana: "p"       }
+  - { wzor: "Р", zamiana: "R"       }
+  - { wzor: "р", zamiana: "r"       }
+  - { wzor: "С", zamiana: "S"       }
+  - { wzor: "с", zamiana: "s"       }
+  - { wzor: "Т", zamiana: "T"       }
+  - { wzor: "т", zamiana: "t"       }
+  - { wzor: "У", zamiana: "U"       }
+  - { wzor: "у", zamiana: "u"       }
+  - { wzor: "Ф", zamiana: "F"       }
+  - { wzor: "ф", zamiana: "f"       }
+  - { wzor: "Ы", zamiana: "Y"       }
+  - { wzor: "ы", zamiana: "y"       }
+
+  # --- 5. Знаки — удаляются ---
+  - { wzor: "Ъ", zamiana: ""        }
+  - { wzor: "ъ", zamiana: ""        }
+  - { wzor: "Ь", zamiana: ""        }
+  - { wzor: "ь", zamiana: ""        }

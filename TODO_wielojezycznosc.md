@@ -67,23 +67,23 @@ Nowy język bazowy wymaga też pliku `dictionaries/<kod>/podstawy.yaml`
 (alfabet + ewentualna tabela transliteracji). Silnik autodetekuje
 nowe foldery przez `dostepne_jezyki_bazowe()` w `core_poliglota.py`.
 
-- [ ] **Rosyjski (`ru`)** – z notebooka:
-  - [ ] `т.е.` → `то есть`
-  - [ ] `т.д.` → `так далее`
-  - [ ] `т.п.` → `тому подобное`
-  - [ ] `т.к.` → `так как`
-  - [ ] `т.н.` → `так называемый`
-  - [ ] `и.о.` → `исполняющий обязанности`
-  - [ ] `с.г.` → `сего года`
-  - [ ] `н.э.` → `нашей эры`
-  - [ ] `в.т.ч.` → `в том числе`
-  - [ ] `и т.д.` / `и т.п.` → `и так далее` / `и тому подобное`
-  - [ ] `проф.` → `профессор`
-  - [ ] `акад.` → `академик`
-  - [ ] `доц.` → `доцент`
-  - [ ] `ул.` → `улица`
-  - [ ] `пр.` → `проспект`
-  - [ ] `пер.` → `переулок`
+- [x] **Rosyjski (`ru`)** – wdrożone w 13.5 (paczka kompletna: 8 akcentów + 6 szyfrów + 4 reżyserów + GUI):
+  - [x] `т.е.` → `то есть`
+  - [x] `т.д.` → `так далее`
+  - [x] `т.п.` → `тому подобное`
+  - [x] `т.к.` → `так как`
+  - [x] `т.н.` → `так называемый`
+  - [x] `и.о.` → `исполняющий обязанности`
+  - [x] `с.г.` → `сего года`
+  - [x] `н.э.` → `нашей эры`
+  - [x] `в.т.ч.` → `в том числе`
+  - [x] `и т.д.` / `и т.п.` → `и так далее` / `и тому подобное`
+  - [x] `проф.` → `профессор`
+  - [x] `акад.` → `академик`
+  - [x] `доц.` → `доцент`
+  - [x] `ул.` → `улица`
+  - [x] `пр.` → `проспект`
+  - [x] `пер.` → `переулок`
 
 - [x] **Angielski (`en`)** – wdrożone w 13.3:
   - [x] `e.g.` / `e. g.` → `for example`
@@ -332,7 +332,7 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 | `He studied in the U.S.A without any financial support.`                | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `U\.S\.A\.`)          |
 | `See p 14 for more details on this topic.`                              | brak `.` po `p`              | ⚠️ nie rozwinięte (regex: `p\.` / `pp\.`)       |
 
-### 6.3 Rosyjski (`ru`)
+### 6.3 Rosyjski (`ru`) ✅ zwalidowane w 13.5
 
 | Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
 |-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
@@ -503,28 +503,25 @@ Lista podejrzanych meta-znaków: `\b \w \W \d \D \s \S ( ) [ ] { } | ^ $ + * ?`.
 
 Niski priorytet do czasu, aż druga osoba zacznie pisać paczki językowe.
 
-### 7.5 Normalizacja podwójnego skryptu w paczce ru/
+### 7.5 Normalizacja podwójnego skryptu w paczce ru/ ✅ zamknięte w 13.5
 
-Paczka rosyjska używa cyrylicy jako alfabetu, więc szyfr Cezara operuje
-na 33 literach kirylicznych (`АБВ…ЯЁ`). Łacińskie znaki w tekście (np.
-nazwiska "Smith", marki "iPhone") **nie są szyfrowane** — Cezar je pomija
-jako "spoza alfabetu". Lista `polskie_znaki` pozostaje pusta z notatką
-o podwójnym skrypcie.
+Wybrano **ścieżkę B** (rozszerzony alfabet). `dictionaries/ru/podstawy.yaml::alfabet`
+to teraz 59-znakowy ciąg `АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯABCDEFGHIJKLMNOPQRSTUVWXYZ`,
+więc każdy znak (cyrylica i łacinka) jest szyfrowany w obrębie tego samego
+pierścienia. Round-trip działa: "Apple это марка iPhone" + Cezar(7) →
+"Hwwsl eщх ужчсж pWovul" → Cezar(-7) wraca do oryginału. Granica między
+skryptami jest przekraczana naturalnie (np. „Я"+3 = „C"; „X"+3 = „А") —
+to normalna własność szyfru Cezara z poszerzonym alfabetem, decoder
+wraca do oryginału przez `-N`.
 
-Możliwe rozwiązania w 13.x+:
+Dodatkowo `polskie_znaki` w `ru/podstawy.yaml` rozszerzono na pełną listę
+łacińskich diakrytyków → ASCII (`Pokémon` → `Pokemon`, `Müller` → `Muller`,
+`naïve` → `naive`), żeby akcenty obcojęzyczne dla rosyjskiego z flagą
+`usun_polskie_znaki: true` widziały spójną, bezdiakrytyczną łacinkę
+zanim wykonają transliterację cyrylica → łacinka docelowa. Cyrylica
+natywna nigdy nie jest dotykana przez `polskie_znaki` (lista zawiera tylko
+wzorce łacińskie).
 
-* **Ścieżka A** — pre-transliteracja: silnik dla paczki ru/ wykonuje
-  łacina→cyrylica (analogicznie do akcent_rosyjski) PRZED Cezarem.
-  Wymaga osobnej tabeli transliteracji w `ru/podstawy.yaml::lacina_na_cyrylice`.
-  Tekst "Smith" → "Смит" → cezar(3) → "Фпмх" — szyfr spójny.
-* **Ścieżka B** — rozszerzony alfabet: dorzucić łacińskie litery do
-  alfabetu Cezara w ru/. Cezar +3 zmienia "Smith" → "Vplwk" (latina),
-  "Привет" → "Услезх" (cyrylica). Mieszany wynik, ale każdy znak
-  zaszyfrowany.
-* **Ścieżka C** — dwa alfabety równolegle: Cezar wykrywa skrypt znaku
-  i obraca w obrębie odpowiedniego alfabetu. Najczystsze, najwięcej kodu.
-
-Wybór architektoniczny zostaje na 13.x+ kiedy realny use case tego
-zażąda. Dziś — pomijamy z czystym sumieniem (rosyjski TTS Milena czyta
-mieszanki bez problemu, akcent rosyjski transliteruje EN→cyrylica
-przed wymową).
+Ścieżki A i C nieużywane — ścieżka B okazała się minimalna (zero kodu
+Pythona, jedna linia w YAML-u), a ścieżka A wymagałaby destrukcyjnej
+transliteracji nazw własnych przed Cezarem.

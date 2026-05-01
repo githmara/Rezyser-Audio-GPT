@@ -1,0 +1,119 @@
+# -----------------------------------------------------------------------------
+#  ИСЛАНДСКИЙ АКЦЕНТ (русский → исландский TTS)
+#  Для синтезаторов: Guðrún / eSpeak "is" (исландский TTS).
+# -----------------------------------------------------------------------------
+id: islandzki
+etykieta: "Исландский (напр. Guðrún / eSpeak)"
+opis: |
+  Транслитерирует русский текст так, чтобы исландский синтезатор
+  (Guðrún или eSpeak в режиме «is») прочитал его с естественным русским
+  акцентом.
+
+  Особенности исландской фонетики:
+    - h в исландском произносится /h/ ✓ — но мы всё равно используем KH
+      для Х, потому что русское /x/ заметно сильнее /h/, и KH вынуждает
+      двойную артикуляцию, что ближе к велярному /x/.
+    - j в исландском = /j/ ✓ — идеально для Й и йотированных гласных.
+    - Исландский не имеет /ʒ/, /ʃ/ — приближаем через ZH, SH (eSpeak
+      может прочитать ZH как разделённые /z/+/h/, что даёт эффект
+      «странной артикуляции», усиливающий русский акцент).
+
+  Прочие отображения:
+    - Ш → SH, Щ → SHTSH, Ч → TSH (eSpeak дружелюбен к этим диграфам)
+    - Ж → ZH, Х → KH, Ц → TS
+    - Ё → JÓ (исландская ó = /oʊ/), Ю → JÚ (исландская ú = /u/),
+      Я → JÁ (исландская á = /aʊ/), Е → JE
+    - Й → J, И → I, Ы → Y (исландский y = /ɪ/, приближение к русскому /ɨ/)
+    - В → V (исландская v = /v/ ✓)
+iso: is
+kategoria: akcent
+kolejnosc: 30
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# -----------------------------------------------------------------------------
+# КРИТИЧЕСКИЙ ПОРЯДОК ЗАМЕН:
+#   1. Многобуквенные согласные.
+#   2. Йотированные гласные.
+#   3. Одиночные буквы.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Многобуквенные согласные ---
+  - { wzor: "Щ", zamiana: "Shtsh" }
+  - { wzor: "щ", zamiana: "shtsh" }
+  - { wzor: "Ш", zamiana: "Sh"    }
+  - { wzor: "ш", zamiana: "sh"    }
+  - { wzor: "Ч", zamiana: "Tsh"   }
+  - { wzor: "ч", zamiana: "tsh"   }
+  - { wzor: "Ж", zamiana: "Zh"    }
+  - { wzor: "ж", zamiana: "zh"    }
+  - { wzor: "Х", zamiana: "Kh"    }
+  - { wzor: "х", zamiana: "kh"    }
+  - { wzor: "Ц", zamiana: "Ts"    }
+  - { wzor: "ц", zamiana: "ts"    }
+
+  # --- 2. Йотированные гласные (исландские акцентированные гласные) ---
+  - { wzor: "Ё", zamiana: "Jó"    }
+  - { wzor: "ё", zamiana: "jó"    }
+  - { wzor: "Ю", zamiana: "Jú"    }
+  - { wzor: "ю", zamiana: "jú"    }
+  - { wzor: "Я", zamiana: "Já"    }
+  - { wzor: "я", zamiana: "já"    }
+  - { wzor: "Е", zamiana: "Je"    }
+  - { wzor: "е", zamiana: "je"    }
+  - { wzor: "Э", zamiana: "E"     }
+  - { wzor: "э", zamiana: "e"     }
+
+  # --- 3. Й до И ---
+  - { wzor: "Й", zamiana: "J"     }
+  - { wzor: "й", zamiana: "j"     }
+
+  # --- 4. Одиночные буквы ---
+  - { wzor: "А", zamiana: "A"     }
+  - { wzor: "а", zamiana: "a"     }
+  - { wzor: "Б", zamiana: "B"     }
+  - { wzor: "б", zamiana: "b"     }
+  - { wzor: "В", zamiana: "V"     }
+  - { wzor: "в", zamiana: "v"     }
+  - { wzor: "Г", zamiana: "G"     }
+  - { wzor: "г", zamiana: "g"     }
+  - { wzor: "Д", zamiana: "D"     }
+  - { wzor: "д", zamiana: "d"     }
+  - { wzor: "З", zamiana: "Z"     }
+  - { wzor: "з", zamiana: "z"     }
+  - { wzor: "И", zamiana: "I"     }
+  - { wzor: "и", zamiana: "i"     }
+  - { wzor: "К", zamiana: "K"     }
+  - { wzor: "к", zamiana: "k"     }
+  - { wzor: "Л", zamiana: "L"     }
+  - { wzor: "л", zamiana: "l"     }
+  - { wzor: "М", zamiana: "M"     }
+  - { wzor: "м", zamiana: "m"     }
+  - { wzor: "Н", zamiana: "N"     }
+  - { wzor: "н", zamiana: "n"     }
+  - { wzor: "О", zamiana: "O"     }
+  - { wzor: "о", zamiana: "o"     }
+  - { wzor: "П", zamiana: "P"     }
+  - { wzor: "п", zamiana: "p"     }
+  - { wzor: "Р", zamiana: "R"     }
+  - { wzor: "р", zamiana: "r"     }
+  - { wzor: "С", zamiana: "S"     }
+  - { wzor: "с", zamiana: "s"     }
+  - { wzor: "Т", zamiana: "T"     }
+  - { wzor: "т", zamiana: "t"     }
+  - { wzor: "У", zamiana: "U"     }
+  - { wzor: "у", zamiana: "u"     }
+  - { wzor: "Ф", zamiana: "F"     }
+  - { wzor: "ф", zamiana: "f"     }
+  - { wzor: "Ы", zamiana: "Y"     }   # Исландская y = /ɪ/, приближение к /ɨ/
+  - { wzor: "ы", zamiana: "y"     }
+
+  # --- 5. Знаки — удаляются ---
+  - { wzor: "Ъ", zamiana: ""      }
+  - { wzor: "ъ", zamiana: ""      }
+  - { wzor: "Ь", zamiana: ""      }
+  - { wzor: "ь", zamiana: ""      }

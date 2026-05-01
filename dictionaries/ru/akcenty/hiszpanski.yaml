@@ -1,0 +1,132 @@
+# -----------------------------------------------------------------------------
+#  ИСПАНСКИЙ АКЦЕНТ (русский → испанский TTS)
+#  Для синтезаторов: Helena / Pablo / Sabina (испанский TTS).
+# -----------------------------------------------------------------------------
+id: hiszpanski
+etykieta: "Испанский (напр. Helena / Pablo)"
+opis: |
+  Транслитерирует русский текст так, чтобы испанский синтезатор
+  (Helena / Pablo / Sabina) прочитал его с естественным русским акцентом.
+
+  Особенности испанской фонетики и их обход:
+
+  ПРОБЛЕМА 1 — h в испанском нем:
+    Если транслитерировать Х → H, испанский TTS НЕ ПРОИЗНЕСЁТ /x/ —
+    он молча проглотит букву. Решение: Х → J.
+    Испанская j = /x/ (как в «jota») — ИДЕАЛЬНОЕ совпадение для русского
+    /x/. «хорошо» → «joroshó» → Helena произнесёт /xoroʃó/ ✓
+
+  ПРОБЛЕМА 2 — j в испанском уже /x/:
+    Поэтому Й и йотированные согласные нельзя писать через j — иначе
+    они зазвучат как /x/. Решение: Й → Y, Я → YA, Ю → YU, Ё → YO, Е → YE.
+    Испанская y перед гласной = /ʝ/ или /j/ — приближение к русскому /j/.
+
+  Прочие согласные:
+    - Ш → SH    (испанский TTS прочтёт ш-подобно)
+    - Щ → SHCH
+    - Ч → CH    (испанская ch = /tʃ/ — идеально)
+    - Ж → ZH    (приближение, испанский не имеет /ʒ/)
+    - Ц → TS
+
+  Известные ограничения:
+    - Испанское v = /b/ или /β/ ≠ русское /v/. «Владимир» → Helena
+      произнесёт /blaðimir/. Это естественная особенность испанского
+      акцента и усиливает узнаваемость.
+    - Безударные русские «о» испанский TTS читает как полное /o/, что
+      отличается от русской редукции до /ɐ/, но это допустимая потеря.
+iso: es
+kategoria: akcent
+kolejnosc: 70
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# -----------------------------------------------------------------------------
+# КРИТИЧЕСКИЙ ПОРЯДОК ЗАМЕН:
+#   1. Многобуквенные согласные (Щ → SHCH ПЕРЕД Ш → SH).
+#   2. Х → J (ВАЖНО: ПЕРЕД одиночными буквами, чтобы избежать конфликта
+#      со словами, где случайно встретится «h»).
+#   3. Йотированные гласные.
+#   4. Одиночные буквы.
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1. Многобуквенные согласные ---
+  - { wzor: "Щ", zamiana: "Shch" }
+  - { wzor: "щ", zamiana: "shch" }
+  - { wzor: "Ш", zamiana: "Sh"   }
+  - { wzor: "ш", zamiana: "sh"   }
+  - { wzor: "Ч", zamiana: "Ch"   }
+  - { wzor: "ч", zamiana: "ch"   }
+  - { wzor: "Ж", zamiana: "Zh"   }
+  - { wzor: "ж", zamiana: "zh"   }
+  - { wzor: "Ц", zamiana: "Ts"   }
+  - { wzor: "ц", zamiana: "ts"   }
+
+  # --- 2. Х → J (испанская j = /x/) ---
+  - { wzor: "Х", zamiana: "J"    }
+  - { wzor: "х", zamiana: "j"    }
+
+  # --- 3. Йотированные гласные (через Y, не J — чтобы избежать /x/) ---
+  - { wzor: "Ё", zamiana: "Yo"   }
+  - { wzor: "ё", zamiana: "yo"   }
+  - { wzor: "Ю", zamiana: "Yu"   }
+  - { wzor: "ю", zamiana: "yu"   }
+  - { wzor: "Я", zamiana: "Ya"   }
+  - { wzor: "я", zamiana: "ya"   }
+  - { wzor: "Е", zamiana: "Ye"   }
+  - { wzor: "е", zamiana: "ye"   }
+  - { wzor: "Э", zamiana: "E"    }
+  - { wzor: "э", zamiana: "e"    }
+
+  # --- 4. Й до И ---
+  - { wzor: "Й", zamiana: "Y"    }
+  - { wzor: "й", zamiana: "y"    }
+
+  # --- 5. Одиночные буквы ---
+  - { wzor: "А", zamiana: "A"    }
+  - { wzor: "а", zamiana: "a"    }
+  - { wzor: "Б", zamiana: "B"    }
+  - { wzor: "б", zamiana: "b"    }
+  - { wzor: "В", zamiana: "V"    }
+  - { wzor: "в", zamiana: "v"    }
+  - { wzor: "Г", zamiana: "G"    }
+  - { wzor: "г", zamiana: "g"    }
+  - { wzor: "Д", zamiana: "D"    }
+  - { wzor: "д", zamiana: "d"    }
+  - { wzor: "З", zamiana: "Z"    }
+  - { wzor: "з", zamiana: "z"    }
+  - { wzor: "И", zamiana: "I"    }
+  - { wzor: "и", zamiana: "i"    }
+  - { wzor: "К", zamiana: "K"    }
+  - { wzor: "к", zamiana: "k"    }
+  - { wzor: "Л", zamiana: "L"    }
+  - { wzor: "л", zamiana: "l"    }
+  - { wzor: "М", zamiana: "M"    }
+  - { wzor: "м", zamiana: "m"    }
+  - { wzor: "Н", zamiana: "N"    }
+  - { wzor: "н", zamiana: "n"    }
+  - { wzor: "О", zamiana: "O"    }
+  - { wzor: "о", zamiana: "o"    }
+  - { wzor: "П", zamiana: "P"    }
+  - { wzor: "п", zamiana: "p"    }
+  - { wzor: "Р", zamiana: "R"    }
+  - { wzor: "р", zamiana: "r"    }
+  - { wzor: "С", zamiana: "S"    }
+  - { wzor: "с", zamiana: "s"    }
+  - { wzor: "Т", zamiana: "T"    }
+  - { wzor: "т", zamiana: "t"    }
+  - { wzor: "У", zamiana: "U"    }
+  - { wzor: "у", zamiana: "u"    }
+  - { wzor: "Ф", zamiana: "F"    }
+  - { wzor: "ф", zamiana: "f"    }
+  - { wzor: "Ы", zamiana: "I"    }   # ы → i (испанский TTS не имеет /ɨ/)
+  - { wzor: "ы", zamiana: "i"    }
+
+  # --- 6. Знаки — удаляются ---
+  - { wzor: "Ъ", zamiana: ""     }
+  - { wzor: "ъ", zamiana: ""     }
+  - { wzor: "Ь", zamiana: ""     }
+  - { wzor: "ь", zamiana: ""     }

@@ -1,6 +1,40 @@
-# Release Notes — Reżyser Audio GPT 13.4.3 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.5 „Wersja Wydawnicza"
 
-*Patch: detekcja języka per akapit przez lingua + dynamiczny tag `lang` w wynikach + nowy język = nowy folder bez Pythona.*
+*Minor: pełna paczka rosyjska — 6 szyfrów, 4 tryby Reżysera, 8 obcojęzycznych akcentów + dwa fundamenty silnika domknięte.*
+
+---
+
+## 13.5 — minor release (motyw przewodni: rosyjski jako pełnoprawny język bazowy)
+
+*Punkt wyjścia: V13.4.3 (58216bd) → commity WIP + commit release → V13.5.*
+
+### TL;DR
+
+13.5 zamyka rosyjski jako pełnoprawny język bazowy (TODO_wielojezycznosc.md §3.1). Folder `dictionaries/ru/` zyskał komplet 6 szyfrów (Cezar, jąkanie, odwracacz, samogłoskowiec, typoglikemia, wąż), 4 tryby Reżysera AI (audiobook, burza, skrypt, postprod tytuły) oraz 8 akcentów obcojęzycznych transliterujących cyrylicę → odpowiednią łacinkę dla docelowego TTS (angielski, polski, niemiecki, francuski, hiszpański, włoski, islandzki, fiński). Każdy akcent ma swoje specyficzne tweaki — np. francuski Х→Kh + У→Ou (bo francuska u = /y/), hiszpański Х→J (hiszpańska j = /x/, idealny match dla rosyjskiego /x/), niemiecki Ш→Sch (niemiecka sch = /ʃ/).
+
+Po drodze domknięto dwa fundamenty silnika, ujawnione przy wdrażaniu rosyjskiego:
+
+1. **Cezar dla dwuskryptowych tekstów (TODO §7.5).** Alfabet Cezara dla `ru` to teraz 59 znaków: 33 cyrylicy + 26 łacinki (wielkie). Dzięki temu nazwy własne (Apple, Müller, iPhone), które nie powinny być transliterowane na cyrylicę, są SZYFROWANE razem z resztą tekstu — Cezar nie pomija ich już bezgłośnie. Round-trip działa: każda litera z obu skryptów wraca do siebie po `+N/-N`.
+2. **Universal Unicode-aware regex słowa.** `core_poliglota._REGEX_SLOWA` zmieniony z `\b[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+\b` na `[^\W\d_]+` (litery dowolnego skryptu Unicode bez cyfr i `_`). Bez tej łatki `_algo_typoglikemia` i `_algo_jakanie` po prostu nie widziały rosyjskich słów — patrz analogiczna łatka w `core_rezyser.py` z 13.3.
+
+### Co nowego dla użytkownika końcowego
+
+- **Tryb Szyfrant** dla rosyjskiego tekstu: wszystkie 6 algorytmów dostępne. Cezar bezpiecznie szyfruje również wstawki łacińskie (nazwiska, marki) bez utraty znaków. Odwracacz tekstu rozwija typowe rosyjskie skrótowce (`т.е.` → „то есть", `т.д.` → „так далее", `проф.` → „профессор", `ул.` → „улица", `и т.п.` → „и тому подобное" itd. — pełna lista z notebooka autora projektu).
+- **Tryb Reżyser** dla rosyjskiego: pełne 4 reżysery AI po rosyjsku — promty systemowe, suffiksy kontekstowe, słowa-wyzwalacze („обобщи", „резюме"). Postprod „Daj Nazwy Rozdziałom" rozpoznaje rosyjskie nagłówki (Глава N / Введение / Эпилог).
+- **Akcenty fonetyczne** w rosyjskim → 8 obcojęzycznych syntezatorów: rosyjski tekst odczytywany przez angielskiego/polskiego/niemieckiego/francuskiego/hiszpańskiego/włoskiego/islandzkiego/fińskiego TTS brzmi z naturalnym rosyjskim akcentem (KH dla Х, ZH dla Ж, SHCH dla Щ, itd. dostosowane per docelowy TTS).
+- Zamiana w `dictionaries/ru/akcenty/polski.yaml` od autora-noszonego polskiego (студент русской филологии): Щ → Ść, Ч → Ć, plus reguły końcówek bezokolicznika `ть → ć` i zwrotności `сь → ś` — dzięki czemu polski TTS nie bełkocze „wstawat" tylko brzmi po polsku-z-rosyjska.
+
+### Pod maską
+
+- `dictionaries/ru/podstawy.yaml` — rozszerzony alfabet Cezara (59 znaków, dwuskryptowy) + pełna lista normalizacji łacińskich diakrytyków → ASCII (jak `fi/`). Cyrylica natywna nietknięta, więc akcenty obcojęzyczne otrzymują czysty wzór do transliteracji.
+- `dictionaries/ru/szyfry/` — 6 plików: cezar (`min/max_przesuniecie: ±59`), jakanie (samogłoski rosyjskie `аеёиоуыэюя`), odwracanie (regexy z notebooka § ABBREV_BY_LANG dla rosyjskiego), samogłoskowiec (wszystkie samogłoski → `о`), typoglikemia (Unicode-aware), waz (szypiące с/з/ш/ж).
+- `dictionaries/ru/rezyser/` — 4 pliki: tryb_burza, tryb_skrypt, tryb_audiobook, postprod_tytuly. Wszystkie z `jezyk_odpowiedzi: по-русски`.
+- `dictionaries/ru/akcenty/` — 8 nowych plików (angielski, polski, niemiecki, francuski, hiszpanski, wloski, islandzki, finski) + 3 już-istniejące (oczyszczenie, oczyszczenie_bez_liczb, naprawiacz_tagow). Każdy obcojęzyczny akcent ma sortowanie: triglify/digrafy najpierw (Щ → Shch, Sch, Chtch, …), potem yotowane głoski (Ё/Ю/Я/Е), Й, pojedyncze litery, na końcu Ъ/Ь usuwane.
+- `core_poliglota._REGEX_SLOWA` → `r"[^\W\d_]+"` (Unicode klasa). Komentarz przy stałej zaktualizowany — lłatka-towarzysz tej z `core_rezyser.py:146` w 13.3.
+
+### Breaking changes / migracja
+
+Brak. Zmiana w pełni addytywna — istniejące języki (pl, en, fi) nadal działają identycznie. Cezar dla `pl/en/fi/it/is` korzysta z dotychczasowych alfabetów; tylko `ru` dostała rozszerzony, dwuskryptowy alfabet.
 
 ---
 
