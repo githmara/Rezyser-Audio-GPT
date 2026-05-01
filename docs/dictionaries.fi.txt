@@ -41,8 +41,8 @@ Kansion rakenne näyttää tältä:
         ├── salaukset/                6 salaus- ja leikkitiedostot
         └── rezyser/                  4 Reżyser AI -tilatiedostot
 
-Tällä hetkellä täysin toteutettuja ovat: Polski, English, Suomi
-(3 peruskieliä). Jokaisella on oma paketti
+Tällä hetkellä täysin toteutettuja ovat: Polski, English, Suomi, Русский
+(4 peruskieliä). Jokaisella on oma paketti
 "sanakirjat/<koodi>/" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
 toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa
 lähdekielen automaattisesti lingua-language-detector -työkalulla
