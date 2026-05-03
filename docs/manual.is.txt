@@ -1,0 +1,507 @@
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.6 – Útgáfuútgáfa)
+
+Velkomin í Hybrid Recording Studio! Þessi verkfærasett gerir þér kleift að skrifa, skipuleggja, formatta og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Það hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálesurum (NVDA).
+
+Settið samanstendur af aðalstúdíóinu (Reżyseria), þýðingar- og hreimverkfæri (Poliglota), skráarbyggingarverkfæri (Architekt Audiobooków) og — frá útgáfu 13.0 — Reglustjóra, þar sem þú getur bætt við nýjum hreim, dulmáli eða skapandi stillingu án Python (sjá SKREF 7b hér að neðan). Öll fjögur verkfærin eru aðgengileg í einu glugga forritsins, skipt með hnöppum á stikunni eða flýtilyklum Ctrl+1..Ctrl+4.
+
+SKREF 1: Fyrsta gangsetning (Cross-Platform)
+
+Forritið er fullkomlega flytjanlegt og tilbúið til notkunar á Windows kerfi. Farðu einfaldlega inn í möppuna og keyrðu skrána run.bat (með því að tvísmella á hana eða búa til flýtileið á skjáborðinu). Stutt terminalgluggi opnast (hverfur sjálfkrafa) og eftir smá stund birtist aðalgluggi forritsins — Hljóðstjóri GPT. Enginn vafri, enginn bakgrunnsþjónn. Þegar þú ert búinn að vinna, lokaðu einfaldlega forritsglugganum.
+
+Mikilvægt: Möppan runtime/ er aðeins hluti af tilbúnum pakkningum fyrir Windows kerfi sem eru sóttar úr Releases flipanum á GitHub. Hún inniheldur einangrað Python umhverfi tilbúið til notkunar án uppsetningar. Ef þú klónar geymsluna, þá er þessi mappa ekki til staðar og ætti ekki að vera — þú notar þá sýndarumhverfið venv sem lýst er í hlutanum fyrir forritara hér að neðan.
+
+--- Fyrir Forritara (Windows — Git geymsla) ---
+
+1. Klónaðu geymsluna á diskinn þinn.
+2. Keyrðu skrána setup_dev.bat. Skiptan býr sjálfkrafa til sýndarumhverfi fyrir Python (venv) og setur upp allar nauðsynlegar háðingar úr skránni requirements.txt.
+3. Keyrðu forritið með skipuninni python main.py eða með skránni run_dev.bat — skiptan greinir sjálfkrafa venv möppuna og keyrir forritið.
+
+--- Fyrir Forritara og venjulega notendur (macOS / Linux) ---
+
+1. Klónaðu geymsluna á diskinn þinn.
+2. Opnaðu terminal í verkefnamöppunni og veittu skriftum framkvæmdarheimildir: chmod +x *.sh
+3. Keyrðu uppsetningarskriftuna: ./setup_dev.sh — skriftan býr til venv umhverfi og setur upp háðingar.
+4. Keyrðu forritið: python main.py eða ./run.sh
+
+Hvað þú munt sjá eftir gangsetningu: Eftir að forritið hefur verið keyrt opnast gluggi með upphafsskjá. Þar finnur þú stutta lýsingu á aðgengilegum verkfærum og hluta "Kerfisathugun". Ef API lykillinn er ekki enn stilltur, sérðu rauða tilkynningu sem segir að AI byggð einingar (Reżyseria, Tłumacz) muni ekki virka — ókeypis staðbundnar aðgerðir (hreim, Architekt) eru þó virkar strax. Skrefið sem lýsir stillingu lykilsins kemur næst.
+
+
+Sjálfvirkar uppfærslur
+
+Forritið athugar við ræsingu hvort nýrri útgáfa sé til á GitHub — athugunin á sér stað í bakgrunni og hindrar ekki viðmótið.
+
+Ef þú settir upp forritið með tilbúnum uppsetningarforrit (.exe): þegar nýrri útgáfa finnst birtist gluggi sem spyr hvort þú viljir hlaða henni niður. Eftir staðfestingu birtist framvindustika og þegar niðurhalinu er lokið lokar forritið sjálfkrafa og nýja uppsetningarforritið ræsist af sjálfu sér — verkefni þín og API lykill eru óskiptar.
+
+Ef þú notar Git-geymslu (forritarar og macOS/Linux notendur): í stað niðurhalstillögu sérðu tilkynningu um nýju útgáfuna með beinan hlekk á útgáfusíðuna á GitHub. Sæktu þaðan „Source code"-skjalasafnið eða uppfærðu geymsluna með skipuninni git pull.
+
+SKREF 2: API Virkjun (OpenAI Lykill)
+
+Til að gervigreindin geti virkað þarf hún aðgang að OpenAI netþjónum (höfundum ChatuGPT).
+
+1. Stofnaðu reikning á platform.openai.com og bættu við inneign í Billing flipanum.
+2. Búðu til lykil í API Keys flipanum (byrjar með sk-proj-). Athugið: lykillinn er aðeins sýndur einu sinni — við sköpun. Ef þú lokar glugganum án þess að afrita hann, glatast hann og þú þarft að afturkalla hann (revoke secret key) og búa til nýjan. Afritaðu hann strax, áður en þú gerir neitt annað.
+3. Á upphafsskjá forritsins, smelltu á hnappinn "Búa til skrána golden_key.env og opna textaritil". Kerfið býr sjálfkrafa til hreina stillingarskrá á réttum stað og opnar Notepad með tilbúnum sniðmáti til breytinga.
+4. Í opnu skránni sérðu línu OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Fjarlægðu staðgengilstextann og límdu inn afritaða lykilinn þinn beint eftir jafnaðarmerkið (án bils). Vistaðu skrána og keyrðu forritið aftur.
+
+Ábending: Eftir að forritið hefur verið keyrt aftur, mun það athuga skrána og sýna græna tilkynningu í hluta "Kerfisathugun" — það þýðir að allar AI einingar eru tilbúnar til notkunar. Annars mun það skýra hvað er að og leyfa þér að opna textaritil til að laga villuna fljótt.
+
+SKREF 3: Aðalstúdíó Reżyseria
+
+Þetta er stjórnmiðstöðin þín til að búa til sögur og skrifa handrit. Færðu þig þangað með því að smella á hnappinn "🎬  Leikstjóri" á hnappastikunni eða velja Verkfæri → Leikstjóri úr valmyndinni (flýtilykill: Ctrl+1).
+
+MIKILVÆGT: Skráarsnið verkefna — aftur til .txt
+
+Í útgáfu 7 voru verkefnaskrár vistaðar í Markdown sniði (.md), t.d. skrypty/znieczulica.md. Þetta var meðvitað tilraun — .md sniðið átti að vera sálfræðileg hindrun fyrir ó tæknilega notendur, til að letja þá frá því að opna og breyta skránni handvirkt í Notepad (og þar með til að koma í veg fyrir að þeir skemmi fyrirsagnir uppbyggingar).
+
+Tilraunin tókst ekki. AI brýtur oft eitt af grundvallarreglunum (meira um það á eftir). Af þessum sökum var í útgáfu 8 farið aftur í einfaldar .txt skrár — meira innsæi og læsilegar fyrir alla. Til dæmis verður verkefni sem heitir "znieczulica" nú vistað sem skrypty/znieczulica.txt og samantekt þess sem skrypty/znieczulica_streszczenie.txt. Þetta gerir öllum kleift að gera leikstjórnarbreytingar eða klippingar á textanum auðveldlega.
+
+⚠️ KRYTISK REGLA FYRIR KLIPPARA (LESTU ÁÐUR EN ÞÚ BYRJAR!) ⚠️
+
+Allar handritin þín og bækurnar sem eru búnar til eru vistaðar í venjulegum textaskrám (.txt), sem þú getur auðveldlega opnað í Notepad.
+
+Sem leikstjóri hefurðu FULLT RÉTT (og jafnvel skyldu) til að breyta þessari skrá! Ef gervigreindin fer út af sporinu og t.d. leysir sjálf vandamál persónanna í lok bútsins, opnaðu skrána, fjarlægðu síðustu línurnar og skildu textann eftir í mest spennandi augnablikinu, áður en þú hreinsar minni, hleður skránni aftur til að endurhlaða samhengisgluggann og smellir á "Senda til AI" til að halda áfram.
+
+🔴 EN - HVAÐ ÞÚ MÁTT EKKI SNERTA:
+
+Aldrei breyta, fjarlægja eða breyta línum sem innihalda uppbyggingu (t.d. Akt 1, Scena 2, Rozdział 1, Prolog). Ef þú skemmir þessar fyrirsagnir:
+1. Sagann þín mun brotna í skjálesurum (NVDA).
+2. Architekt hljóðbókarins, og þar með einnig Studio Eleven Labs, mun ekki geta skipt bókinni þinni rétt í lestrarbúta.
+3. Innri umbreytir forritsins mun ekki búa til rétt efnisyfirlit í Word skrá eða á tímalínu í ElevenLabs.
+
+Breyttu samtölum, klipptu aðgerðir, en láttu uppbygginguna í friði!
+
+Hvernig á að nota Reżyseria?
+
+- Heimsbók (hliðarræma til vinstri): Hér skrifarðu reglur alheimsins. Hvert verkefni hefur nú eigin Heimsbók tengda við skráarnafn — ef sagaskráin þín er t.d. emilia_heist_audiobook.txt, verður Heimsbókin vistuð sem skrypty/emilia_heist_audiobook.md. Þess vegna er röðin mikilvæg: fyrst slærðu inn skráarnafn verkefnisins í reitinn "Nazwa pliku projektu", og síðan geturðu vistað Heimsbókina. Hnappurinn "💾 Vista Księga varanlega" er gráður þar til þú gefur upp nafn. Hleðsla á núverandi verkefni með hnappinum "Hlaða sögu" mun sjálfkrafa hlaða samsvarandi .md skrá — þú þarft ekki að gera neitt handvirkt. Athugið: Án útfylltrar Heimsbókar mun forritið loka á að senda fyrirspurnir til AI — þetta er meðvitað öryggi sem verndar þig frá því að búa til texta án nokkurra reglna.
+- Langtímaminni (hliðarræma til vinstri): Annað reitinn í hliðarræmunni. Hér skráir AI sjálfkrafa samantekt sögunnar þegar minnið byrjar að fyllast. Þú getur líka skrifað eigin glósur handvirkt hér — líkanið mun líta á þær sem "hvað ég veit nú þegar" áður en það les núverandi senu.
+- Hugstormunarstilling: Skrifaðu lauslega hugmynd og AI gefur þér 3 valkosti fyrir þróun sögunnar. Fyrir hvern valkost býr það strax til tilbúinn blokk "--- SZKIC PROMPTU ---". Eftir að hafa valið einn þeirra, límdu þetta prompt í Skiptastillingu eða Hljóðbókarstillingu og bættu við athugasemdum eða upplýsingum fyrir líkanið. Söguminnið breytist ekki meðan á Hugstormun stendur — þú getur gert tilraunir án áhættu!
+- Hrár Skiptastilling: Hér límirðu inn "Szkic Promptu" sem var búið til í Hugstormun. AI skrifar langan bút með fullum merkjum [Speaker X: Nafn - tilfinning] fyrir samtöl og áhrifum [SFX: ...] fyrir hljóð. Textinn bætist sjálfkrafa við skrána þína (t.d. nowa_scena.txt) í skrypty/ möppunni.
+- Hefðbundin Hljóðbókarstilling: Stilling fyrir rithöfunda. AI býr til hreinan bókmenntatexta — engin merki, engin hljóðfræði, klassísk samtöl fléttuð í frásögnina. Textinn bætist við skrána á sama hátt og í Skiptastillingu.
+- Sjálfvirk persónusköpun: Skiptan er forrituð til að búa sjálfkrafa til ný merki [Speaker] ef sagan krefst nýrrar persónu. Ábending: Ef AI býr til skemmtilega persónu, afritaðu merkið hennar og límdu það í Heimsbókina, svo líkanið muni hana til frambúðar!
+
+Verkefnastjórnun — þrír aðgerðahnappir:
+- Hlaða sögu: Hleður núverandi verkefnaskrá í minnið. Aðeins aðgengilegt þegar minnið er tómt og skráarnafn hefur verið slegið inn.
+- Hreinsa núverandi (láta Samantekt vera): Hreinsar aðeins núverandi sögu. Samantekt í Langtímaminni og Heimsbók eru varðveittar — fullkomið til að halda áfram með langa bók eftir að samantekt hefur verið búin til.
+- Loka Verkefni (Harður Endurstilling): Hreinsar verkefnið alveg. Fjarlægir sögu, samantekt, Heimsbók og núllstillir alla teljara. Notaðu við verkefnaskipti eða nýja sögu.
+
+Söguleg athugasemd — af hverju stillingar eru nú varðar gegn óvart breytingum:
+
+Í eldri útgáfum forritsins var engin eftirlit með samræmi í skapandi ham innan eins verkefnis. Þetta gaf möguleika á ákveðinni fínlegri sköpun sem mætti lýsa á eftirfarandi hátt: þú byrjar söguna í Skiptastillingu, setur inn "Akt 1" og "Scena 1" (forritið er ánægt með samræmi þitt), býrð til nokkur skjáspennandi atriði með merkjum [SFX: Hurðarskellur] og [Speaker 1: Marek - vonlaus]... og svo — þegar innblásturinn kemur — smellirðu á "Setja inn kaflaskil". Forritið bætir við fyrirsögninni "Kafli 1" í skrána, rétt eftir "Scena 3". Þú ert nú með blöndu af 50s útvarpsleikriti og félagslegri skáldsögu í skránni. ElevenLabs lítur á þessa uppbyggingu, sér kaflafyrirsögn í miðjum akta og ákveður að þetta sé líklega villa í kerfinu. Efnisyfirlitið lítur út eins og verk framúrstefnulistamanns. Architekt Audiobooków, á hinn bóginn, gerir ráð fyrir að þú sért fullorðinn einstaklingur og vinnur úr þessu án orðs — en einnig án nokkurra ábyrgða á útkomunni. Frá útgáfu 12.0 lokar viðmótið einfaldlega á breytingu á skráningarham þegar saga er þegar í minni. Hugstormun er alltaf aðgengileg — þú getur þar hugsað án takmarkana.
+
+Showrunner Prompty — AI sem handritshöfundur þáttaraðar (frá útgáfu 7, varðveitt)
+
+Þetta er stærsta breytingin sem var innleidd í útgáfu 7, varðveitt án breytinga. Hún er ekki sýnileg í viðmótinu, en breytir róttækt gæðum sköpunarinnar.
+
+Showrunner er í sjónvarpsiðnaðinum sá sem ber ábyrgð á heildarþáttaraðgerðinni — hann tryggir að sagan leiti aldrei að auðveldum lausnum, heldur þéttist, hrúgi upp árekstrum og haldi áhorfendum í spennu í mörg tímabil. Í útgáfu 7 var þessi heimspeki byggð beint inn í kerfisleiðbeiningar AI.
+
+Anti-Closure Leiðbeining — ástand í útgáfu 8
+
+Þrátt fyrir að prófa mismunandi nálganir, er Anti-Closure bannið oft brotið af líkaninu, sérstaklega í Hefðbundinni Hljóðbókarstillingu. AI hefur sterka tilhneigingu til að "loka" sögunni við hvert tækifæri — það fléttar inn setningar sem draga saman söguna, býr til falska hamingjusama enda eða lokar árekstrum í miðjum kafla, eins og hver bútur væri sá síðasti. Útkoman er sú að næsti bútur byrjar frá grunni, án náttúrulegrar samfellu.
+
+Þess vegna er svo mikilvægt að fylgja reglu klipparans sem lýst er hér að ofan: ef AI brýtur bannið og lokar sjálft á senu, er það þitt hlutverk sem Leikstjóri að opna .txt skrána, fjarlægja síðustu setningarnar og skilja textann eftir í spennandi augnabliki áður en þú hleður honum aftur inn í forritið.
+
+Hver hamur hefur innbyggða Anti-Closure leiðbeiningu:
+
+- Hugstormun: AI starfar sem handritshöfundur margra tímabila þáttaraðar. Hver af 3 boðnum valkostum VERÐUR að hrúga upp hindrunum, kynna nýjar áskoranir, opna árekstra og cliffhangera. Algert bann við að bjóða upp á valkosti þar sem persónur sættast varanlega, sigrast á aðalhindruninni án mikilla afleiðinga eða sagan stefnir í flýti til enda. Bann við að búa til ódýrar, töfrandi staðsetningar sem brjóta uppbyggingu heimsins.
+- Hrár Skiptastilling: Algert bann við að ljúka textanum með samantektum, boðskap eða klöppum. AI á að slíta aðgerðina náttúrulega í spennandi augnabliki (cliffhanger), forðast niðurstöður, svo næsti bútur geti tekið við frásögninni áreynslulaust.
+- Hefðbundin Hljóðbókarstilling: Algert bann við að ljúka textanum með hátíðlegum samantektum, lokun árekstra eða að gefa til kynna endalok sögunnar (t.d. "Hún var tilbúin fyrir nýjar áskoranir", "Hún skildi að tími var kominn til að fara áfram"). Textinn á að slitna í miðjum aðgerðum, spennu eða opnum hugsunum.
+
+Undantekning frá reglunni: Ef þú biður beinlínis um endalok, loka eða epilog, mun AI búa til fullnægjandi lokun á sögunni — bannið gildir ekki þegar þú biður um það.
+
+Stjórnun Akta og Sena (Skiptastilling, frá útgáfu 7, varðveitt)
+
+Hrár Skiptastilling hefur sérstakan spjald "✂️ Stjórnun Uppbyggingar" með hnöppum til að byggja uppbyggingu útvarpsleiksins í rauntíma.
+
+- Setja inn Akt X: Setur inn fyrirsögn akts (t.d. "Akt 2") OG bætir sjálfkrafa við "Scena 1" undir því — því hver nýr akt byrjar á fyrstu senu. Aktatalningin hoppar á næsta númer, og senutalningin endurstillist í 2 (tilbúin fyrir næstu senu í þessum akta).
+- Setja inn Senu X: Setur aðeins inn fyrirsögn senu (t.d. "Scena 3") innan núverandi akts. Senutalningin eykst sjálfkrafa.
+
+Snjöll skráarhleðsla: Þegar þú hleður inn núverandi skrá, skannar forritið hana sjálfkrafa og stillir akt- og senutalningarnar á rétta númer. Senutalningin er alltaf reiknuð innan síðasta akts í skránni.
+
+Prolog og Epilog: Hnappar "📜 Setja inn Formála" og "🏁 Setja inn Eftirorð" eru sameiginlegir fyrir báða hamina og aðgengilegir í sama spjaldi.
+
+Architekt Audiobooków breytir sjálfkrafa Aktum í aðal leiðsögupunkta (Heading 1) fyrir ElevenLabs og NVDA — Senur verða feitletraðar textar sýnilegir í skjalinu, en ósýnilegir í efnisyfirlitinu.
+
+Snjöll Stjórnun Kafla (Hljóðbókarstilling, frá útgáfu 5, varðveitt)
+
+LLM býr til að hámarki um 5000 stafi á hverja fyrirspurn — það er ekki nóg fyrir heilan kafla. Þess vegna vinnurðu í skrefum: býrð til næstu búta með því að smella á "Senda til AI", þar til þú telur að kaflinn sé tilbúinn. Þá smellirðu á "Setja inn kaflaskil" — forritið bætir við fyrirsögn í skrána og minni, og kaflatalningin hoppar sjálfkrafa á næsta númer.
+
+Hnappar í spjaldinu:
+
+- Setja inn kaflaskil (Kafli X): Setur inn fyrirsögn (t.d. "Kafli 3") í skrána og minni. Kaflatalningin uppfærist sjálfkrafa.
+- Setja inn Prolog: Virkar aðeins í upphafi, þegar minnið er tómt. Öryggi gegn því að setja Prolog inn í miðja söguna.
+- Setja inn Epilog: Lokar sögunni. Eftir að Epilog hefur verið settur inn með efni lokar forritið á frekari bútagerð — þetta er viljandi, því eftir að sögunni er lokið er ekkert meira að bæta við.
+
+Snjöll skráarhleðsla: Þegar þú hleður inn núverandi skrá, skannar forritið hana sjálfkrafa og stillir kaflatalninguna á rétta númer. Ef skráin hefur Prolog og þrjá kafla, sýnir talningin "Kafli 4" — án handvirkrar talningar.
+
+Fabulusafnari — hvernig AI minnið virkar
+
+Aðeins hreinn texti sögunnar fer í minni líkanins — það sem AI hefur raunverulega skrifað. Leiðbeiningar, valkostir og áætlanir hverfa eftir notkun og menga ekki samhengi. Útkoman? Líkanið heldur einbeitingu lengur, man betur persónueinkenni og sleppur sjaldnar frá reglum Heimsbókarinnar.
+
+"Minni Líkans" vísirinn á skjánum sýnir hversu mikið pláss sagan þín tekur nú þegar:
+- Grænt (allt að 150.000 stafir): Líkanið er fullkomlega einbeitt, þú hefur öruggt svigrúm.
+- Gult (150.000 – 175.000 stafir): Þú nálgast mörkin. AI getur byrjað að stytta setningar og hunsa reglur. Byrjaðu að loka árekstrum hægt.
+- Rautt (yfir 175.000 stafir): Krítískt ofhleðsla!
+
+Óendanlegt Minni (frá útgáfu 6, varðveitt)
+
+Þegar rauði viðvörunarmerkið kviknar, þarftu ekki lengur að afrita samantekt handvirkt. Sláðu inn í Hugstormun skipun sem inniheldur orðið "samantekt" eða "yfirlit" — AI býr til stutta yfirlit yfir alla fyrri sögu. Smelltu síðan á "Vista Samantekt (varanlega)" — forritið býr sjálfkrafa til skrá _streszczenie.txt í skrypty/ möppunni og verndar hana gegn óvart yfirskrift. Eftir að hafa vistað, hreinsaðu minnið og þú getur haldið áfram að skapa í núverandi skrá. Samantektina hleðurðu inn í Langtímaminni fyrir næstu lotu — og þú getur haldið áfram sögunni endalaust, án nokkurra lengdarmarka. Þú þarft aðeins að muna að ef öll söguskráin hefur yfir 175.000 stafi, til að geta örugglega hætt vinnu og komið aftur síðar, þarftu að búa til og vista Samantekt sögunnar. AI bætir nú einnig við nokkrum síðustu málsgreinum sögunnar þegar samantektin er skrifuð.
+
+Sjálfvirk samantekt: Þegar minnið fer í viðvörunarástand, skiptir Hugstormun sjálfkrafa yfir í björgunarham — í stað þess að búa strax til valkosti, býr það fyrst til ítarlega samantekt yfir alla fyrri sögu og vistar hana í merkjum <STRESZCZENIE>. Forritið greinir þessi merki og flytur sjálfkrafa samantektina í Langtímaminni. Engin handvirk vinna!
+
+Snjöll hleðsla með samantektarskrá: Þegar þú hleður inn verkefni sem hefur þegar vistaða samantektarskrá (t.d. znieczulica_streszczenie.txt), hleður forritið sjálfkrafa samantektinni í Langtímaminni og skilur Núverandi Minni tómt. Þannig sóarðu ekki táknum í að hlaða alla söguna aftur — líkanið þekkir samhengi úr samantektinni og er tilbúið til endalausrar framhalds.
+
+SKREF 4: Eftirvinnsla í Reżyseria
+
+Eftir að hafa skrifað söguna hefurðu aðgang að eftirvinnslutæki sem er aðgengilegt neðst í Reżyseria spjaldinu (birtist aðeins í Hljóðbókarstillingu).
+
+Að gefa Kafla Titla (Hljóðbókarstilling)
+
+AI greinir alla söguna og leggur til lýsandi, bókmenntalega titla fyrir hvern kafla (og hugsanlega Prolog og Epilog). Einingin fer í gegnum kaflana í vistaðri skrá og gefur þeim stuttan titil, greinir aðeins upphaf hvers kafla (allt að 6000 stafir). Hún skilar aðeins tölusettum lista yfir titla — án þess að afrita efni bókarinnar.
+
+Athugið: Einingin krefst þess að skráin sé þegar vistuð á disknum (búin til eða hlaðin). Ef skráin er ekki til, mun forritið birta viðeigandi skilaboð.
+
+SKREF 5: Poliglota AI
+
+Forrit til þýðinga og að þvinga fram harða hreim á talgervlum skjálesara. Færðu þig þangað með því að smella á hnappinn "🌍  Tungumálamaður" á hnappastikunni eða velja Verkfæri → Tungumálamaður úr valmyndinni (flýtilykill: Ctrl+2).
+
+Hamur 1: Venjulegur Þýðandi (Notar AI - Greitt)
+
+Fullkomið til að hlusta á sögur á fallegu, réttmætu erlendu máli.
+
+- Hladdu inn skrá með því að smella á hnappinn "Hlaða skrá í minni" eða nota hnappinn "Flettu..." til að velja skrá í kerfisglugga.
+- Veldu ham "AI Þýðandi", sláðu inn markmálið (t.d. "Finnska").
+- Skiptan mun þýða efnið. Ef þú hleður inn .html skrá, mun hún aðeins þýða textann sem er sýnilegur lesandanum og uppfæra tungumálakóðann í html merkjunum.
+
+- Ef þú hleður inn venjulegri .txt eða .md skrá (t.d. handrit búið til af Reżyseria), mun skjalið sjálfkrafa vista niðurstöðuna sem .html skrá með innbyggðum tungumálakóða — tilbúið til að lesa með NVDA án nokkurrar viðbótarvinnu.
+- Styður einnig .docx skrár.
+
+Snjöll skipting í blokka: Langir textar eru sjálfkrafa skiptir í blokka allt að 10.000 stafi og þýddir í röð með framvindustiku.
+
+Bilunarþolið framvinduvistun (NÝTT í útgáfu 9): Hver þýddur blokk er strax vistuð í falda tímabundna skrá í kerfismöppu forritsins. Ef þýðingin er rofin vegna þess að API kvóti er uppurinn, mun forritið sjálfkrafa greina þessa skrá við næstu ræsingu, endurheimta þegar greidda framvindu og klára verkið rólega frá þeim stað sem rofið var — án nokkurrar handvirkrar afritunar. Eftir að verkinu er lokið með góðum árangri er tímabundna skráin sjálfkrafa eytt.
+
+Af hverju er þetta mikilvægt? Í útgáfu 8 hafði nálgunin við að halda áfram þýðingu alvarlegan, hljóðlátan galla: ef maður endurnefndi ekki skrána með hlutþýðingunni og klippti út þýdda hlutann samkvæmt leiðbeiningum, og síðan hélt strax áfram að þýða restina — opnaði forritið úttaksskrána í yfirskriftarham. Greidd framvinda var óafturkræft og ómeðvitað eytt áður en þú tókst eftir neinu. Útgáfa 9 útrýmir þessari gildru algjörlega: vistun er varanleg eftir hverja blokk, óháð því hvað þú gerir síðan.
+
+Hamur 2: Leikstjórnarhamur / Hreim (Ókeypis - Virkar á staðnum)
+
+Tæki til að "spilla" texta. Þvingar brotinn íslenskan hreim á talgervla.
+
+Samþættur fellilisti Leikstjórnarhamarins gerir þér kleift að velja hreim beint af einum lista. Í boði eru valkostir eins og:
+Enska (Samantha / Mark — Vocalizer/Apple, Zira / Hazel — OneCore)
+Rússneska (Milena — Vocalizer/Apple, Irina / Pavel / Yuri — OneCore, eSpeak)
+Franska (Thomas / Amelie — Vocalizer/Apple, Julie — OneCore)
+Þýska (Markus / Stefan — Vocalizer/Apple, Hedda / Katja — OneCore)
+Spænska (Jorge / Monica — Vocalizer/Apple, Helena — OneCore)
+Íslenska (Gudrun — OneCore, eSpeak; athugið: Vocalizer hefur ekki þennan tungumál!)
+Ítalska (Alice / Luca — Vocalizer/Apple, Elsa — OneCore)
+Finnska (Satu / Mikko — Vocalizer/Apple, Heidi — OneCore)
+Og einnig tveir hreinsunarvalkostir án hreims:
+"Enginn (Hreinsun ÁN tölunormalíseringar)"
+"Enginn (Hreinsun MEÐ tölunormalíseringu)"
+Valmöguleikinn með tölunormalíseringu breytir sjálfkrafa tölum í orð (t.d. 15 verður "fimmtán") fyrir vinnslu — þannig les NVDA tölur áreynslulaust, og ef textinn hefur þvingaðan hreim, fær talan einnig þann hreim, án undantekninga.
+Þú spyrð kannski hvort talgervillinn muni geta beygt svo normalíseraðar tölur eftir samhengi? Svarið er: nei. Og það er viljandi eiginleiki. Eins og almennt er vitað: "íslenska er erfið" — og útlendingur sem brýtur málfræðina okkar bætir aðeins við trúverðugleika brotins hreims!
+
+Tagaviðgerðir (NÝTT í útgáfu 9): Neðst á listanum finnurðu viðbótarvalkost — Tagaviðgerðir. Það notar engar hljóðreglur né hreinsun. Það gerir eitt: sprautar inn í skrána tveggja stafa ISO tungumálakóða sem þú gefur upp (t.d. "fi" fyrir finnsku, "en" fyrir ensku). Þetta er gagnlegt þegar þú hefur þegar tilbúna skrá — t.d. áður þýdda af AI Þýðanda — en af einhverjum ástæðum kom út með röngum eða vantar tungumálakóða. Í stað þess að þýða hana aftur, einfaldlega keyrirðu Tagaviðgerðir með réttum ISO kóða og eftir smá stund hefurðu rétta skrá.
+
+Skipt hreinsar út fyrir sviðsstjórnunarathugasemdir í sviga — fjarlægir alla texta sem eru innan sviga (t.d. "(með innfelldum andardrætti)", "(hvíslandi)", "(kaldhæðnislega)"). ElevenLabs á aðeins að lesa samtöl og frásögn, ekki sviðsstjórnunarleiðbeiningar sem eru innfelldar í textann.
+
+Skipt hreinsar einnig Markdown merki — fjarlægir fyrirsagnir með hashtögum (t.d. #, ##, ###), jafnteikn notuð sem undirstrikun fyrirsagna og munaðarlausar kommur sem gætu truflað lestrarhraða talgervilsins.
+
+- Verndarskjöldur: Skipt verndar öll HTML merki. Það spillir aðeins samtölum og frásögn.
+- Virkar á staðnum og kostar ekkert!
+
+Hamur 3: Dulkóðari (NÝTT í 13.0 — textaleikir, ókeypis, á staðnum)
+
+Þriðji RadioButton í Poliglota, við hlið AI Þýðanda og Leikstjórnarhamar: „Dulkóðarahamur (textaleikir, handahófskennd föstun)". Keyrir sex staðbundna reiknirit sem afmynda texta — til skemmtunar, gátna, málfræðilegra þrauta. Eftir að hafa valið ham birtist fellilisti reiknirita, og fyrir eitt þeirra (Cæsar dulritun) viðbótar tölusvið fyrir færslu.
+
+Í boði reiknirit (veldu í valmyndinni „Veldu afmyndunarreiknirit"):
+
+- Textaöflun (Lesið afturábak með stórum staf) — hver setning er snúin við staf fyrir staf, með punkt/upphrópunarmerki/spurningarmerki á endanum og stórum staf í upphafi. Áður en snúið er við, þróar skipt út vinsæl skammstafanir (t.d., t.d., t.d., dr o.fl.), svo að niðurstaðan eftir snúning haldi áfram að hafa merkingu — án þessa breytist „t.d." í fáránlegt „.dt".
+
+  Innblástur: verkefni úr „The Traitors. Zdrajcy". Þegar stjórnandi sýndi þátttakendum vinsælt íslenskt lag úr teiknimynd — einfaldlega spilað afturábak — voru viðbrögðin í stíl við „hvaða tungumál er þetta?", „þetta er líklega armenska", „ungverska eða finnska". Rétta verkefnið var að ein lið fékk texta lagsins skráð afturábak í skógi, átti að syngja það í þessari snúnu mynd, annað lið tók það upp, spilaði það afturábak — og í kenningu endurheimti upprunalega lagið til að giska á. Nákvæmlega sama skemmtilega misskilningur hljóðfræðilega skapar okkar Textaöflun, þegar þú keyrir afmynda skrá í gegnum TTS.
+
+- Typoglykemia (Blandaður miðhluti orða) — klassísk sálfræðileg áhrif: „Þú getur ekki lesið texta í hvaða röð sem er, ef fyrsti og síðasti stafurinn eru á réttum stað". Skipt blandar handahófskennt miðhluta hvers orðs lengra en 4 stafir, fyrsti og síðasti stafurinn eru óbreyttir. Frábært til að prófa „hversu mikið sé ég í raun, og hversu mikið gerir heilinn minn ráð fyrir".
+
+- Brotnir Símar / Snáka mállýska — hvert „s", „z" eða tvíhljóð „sz" er handahófskennt lengt í 4-8 stafa suð („ssssss", „zzzzzz", „ssssssz"). Innblástur: Snecko úr leiknum „Slay the Spire". Áhrif: textinn hljómar eins og hann hafi verið lesinn af snáki með talgalla.
+
+- Sérhljóðari (Allt hljómar á „O") — hver sérhljóði í textanum er breytt í „o", með íslenskum mýkingum. „Góðan daginn" → „Góðon doginn". Því lengri texti, því skemmtilegri áhrif (og skjálesari les þetta með fullri sannfæringu).
+
+- Sterkt Stama / Skemmdur Vélmenni — bætir við stama í upphafi orða: „ko-ko-ko-tölva", „pr-pr-prísund". Fyrir stutt orð (minna en 3 stafir) sleppir reikniritið þeim. Ef annar stafur orðsins er samhljóði, endurtekur það fyrstu tvo stafina (náttúrulegri áhrif); ef sérhljóði — endurtekur aðeins fyrsta.
+
+- Cæsar dulritun (færslu íslenska stafrófsins) — klassísk dulritunaraðferð: hver stafur er færður um N stöður í íslenska stafrófinu (AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ, 32 stafir). Þú slærð inn færslugildi í tölusviði „Færsla Cæsar dulritunar (0 = handahófskennt, svið -32…32)". Ef þú slærð inn 0 — forritið velur handahófskennt færslu á bilinu 1-31 og sýnir það í skilaboðum eftir að því er lokið (svo þú getir síðan afkóðað). Stafir utan stafrófsins (tölur, greinarmerki, bil) eru óbreyttir.
+
+Hagnýt notkun: dulritun geymir niðurstöðuna í sama formati og Leikstjórnarhamur (.html með lang tag eða .docx með XML merkjum), sem þýðir að NVDA les þau með rödd viðeigandi tungumáls. Sérstaklega Textaöflun og Sérhljóðari hljóma í talgervli mun áhugaverðari en þegar þú lest þau með augunum — því heilinn reynir sjálfkrafa að „afkóða" textann, en TTS les hann nákvæmlega eins og hann er skráður.
+
+Öll sex dulritun eru einnig lýst á breiðari, aðgengilegri tungumáli í skrá docs/dictionaries.pl.txt í forritspakkanum — ásamt ráðleggingum um hvernig á að bæta við eigin dulritun eins og „stafaskipti" án forritunarþekkingar (t.d. skólamál, grasamál).
+
+Greining á tungumáli
+
+Áður en skipt „spillar" textanum, athugar það á hvaða tungumáli hann er skrifaður. Ef það greinir að þetta er ekki íslenska, birtir það viðvörun. Hljóðreglurnar eru sniðnar fyrir íslensku — að nota þær á erlendan texta myndi gefa ófyrirsjáanleg áhrif.
+
+Hreimar fínstilltir fyrir staðbundna talgervla (NVDA)
+
+Hreimar eru 100% hannaðir fyrir staðbundna, ókeypis og greidda talgervla skjálesara — Vocalizer og eSpeak í NVDA. Þetta tryggir stöðugleika og fyrirsjáanleika á hverjum tölvu.
+
+Af hverju ekki ElevenLabs? Prófanir á lengri skjölum sýndu að hljóðfræðileg afmyndanir texta í vélum eins og ElevenLabs þvinga ekki fyrirhugaðan hreim — vélin einfaldlega „giskar" á tungumálið og gerir frekar hreim vestur-/suðurslavneskan. Staðbundnir talgervlar NVDA eru mun hlýðnari í þessu efni.
+
+Sérkenni staðbundinna talgervla (TTS)
+
+Mismunandi TTS vélar hegða sér á mismunandi hátt. Hér eru lykilmunir sem hafa bein áhrif á hreim:
+
+eSpeak (Open Source)
+Létt, ókeypis vél með gríðarstóran gagnagrunn tungumála — styður m.a. íslensku. Mjög ströng varðandi kóðun stafa, sem gerir hana fyrirsjáanlega. Hefur þó hljóðfræðilega galla: deilir oft hljóðum milli tungumála, þannig að t.d. úkraínska hljómar með rússneskum blæ.
+
+Nuance Vocalizer
+Greidd vél, innbyggð ókeypis í Apple tæki (VoiceOver). Býður upp á mjög náttúrulega gæði framburðar. Mikilvægt takmörk: STYÐUR EKKI öll tungumál — ENGIN íslensk rödd. Fyrir finnska er Satu í boði, fyrir ítalska Alice.
+
+Hvernig á að sækja Vocalizer á Windows?
+Vocalizer er ekki innbyggður í Windows kerfi — þetta eru greidd viðbætur fyrir NVDA dreift af Tiflotecnia fyrirtæki. Uppsetning samanstendur af tveimur skrefum: niðurhal á bílstjóra og sjálfum röddum.
+
+- Kaup og niðurhal á bílstjóra: Farðu á vefsíðuna tiflotecnia.com (kaupformið er á ensku), keyptu leyfi og farðu í hlutann "Downloads" til að hlaða niður bílstjóraskránni. Mikilvæg athugasemd fyrir NVDA: Undirsíðan "Downloads" er arkitektónískt martröð — fyrirsagnir eru á ensku, leiðsögn á portúgölsku og öll síðan hefur innsprautaðan portúgalskan tungumálakóða í kóðanum! Jafnvel þótt þú kveikir á þýðanda í vafranum, mun hann þýða efnið en venjulega ekki fjarlægja tungumálakóðann úr kóðanum. Afleiðingin er sú að skjálesari gæti reynt að lesa ensk-pólsku síðuna með mjög brotnum portúgölskum hreim. Láttu þetta ekki trufla þig og slökktu tímabundið á sjálfvirkri tungumálaskiptum, þýddu síðan síðuna og hlaðaðu niður bílstjóranum!
+- Niðurhal á röddum: Sjálfur bílstjórinn er ekki nóg — eftir uppsetningu mun NVDA sjálfgefið sýna villu við hleðslu talgervilsins. Til að leysa þetta þarftu að hlaða niður raddpökkum sem þú ætlar að nota (t.d. pólsku Ewa til að lesa kerfisstýringar áreynslulaust og finnska Satu fyrir hreim í Poliglota).
+Athugið: Mundu að kveikja á sjálfvirkri tungumálaskiptingu eftir að þú lokar undirsíðunni, svo þú verðir ekki fyrir vonbrigðum síðar!
+- Fljótleg uppsetning: Skrárnar sem þú hleður niður eru viðbótarpakka fyrir NVDA (með viðskeytið .nvda-addon). Þú þarft ekki að leita að uppsetningu þeirra í NVDA -> Verkfæri -> Viðbótabúð. Ef NVDA er í gangi, einfaldlega "opnaðu" þessar skrár á venjulegan hátt (með því að ýta á Enter). Windows gæti falið viðskeytið þeirra, en ábendingarvísirinn mun rétt lesa þær sem "NVDA viðbótarpakka skrá". Skjálesarinn mun sjálfur spyrja hvort þú viljir setja upp viðbótina.
+Eftir að bílstjórinn og raddirnar hafa verið settar upp og skjálesarinn endurræstur, mun Vocalizer birtast á listanum yfir talgervla í NVDA stillingum og ætti ekki að sýna villur.
+
+Microsoft OneCore
+Ókeypis raddir innbyggðar í Windows kerfið (Mobile Voices). Gott jafnvægi milli gæða og tungumálastuðnings. Býður upp á há gæði og hefur stuðning fyrir íslensku (Guðrún), finnska (Heidi) og ítalska (Elsa). Athugið: OneCore styður ekki sjálfvirka tungumálaskiptingu byggða á lang merkjum (nema þú notir innbyggða kerfisskjálesarann) — sjá kaflann hér að neðan.
+
+Hvernig á að hlaða niður OneCore röddum á Windows? OneCore raddir eru ókeypis, en flest tungumál eru ekki sjálfgefið uppsett. Til að hlaða niður vantar tungumál, farðu í Windows Stillingar → Tími og tungumál → Tal → Stjórna röddum (eða "Bæta við röddum"). Veldu tungumál af listanum (t.d. Íslenska, Finnska, Ítalska) og smelltu á Hlaða niður. Eftir niðurhal mun röddin birtast sjálfkrafa í NVDA — án frekari stillinga.
+
+Apple (iPhone / iPad / Mac) — VoiceOver með Vocalizer
+Á Apple tækjum er Vocalizer innbyggður í stýrikerfið og styður öll tungumál án frekari kaupa. Sjálfgefið eru þó uppsettar þjappaðar útgáfur radda sem hljóma dálítið vélrænt. Til að fá mun betri, náttúrulegri hljóm, er mælt með að hlaða niður útbreiddum eða premium útgáfum:
+- Á iPhone/iPad: Stillingar → Aðgengi → VoiceOver → Tal → Rödd → veldu tungumál (t.d. Finnska) → snertu nafn raddarinnar (t.d. Satu) → þú munt sjá valkostina "Útbreidd" og "Premium". Hlaða niður valinni útgáfu — hún tekur meira pláss á diskinum, en munurinn í gæðum er áberandi.
+- Á Mac: Kerfisstillingar (eða Kerfisstillingar) → Aðgengi → VoiceOver → Opna VoiceOver tól → Tal → Rödd → smelltu á "Sérsníða" við valda rödd og hlaða niður útbreiddri eða premium útgáfu.
+
+Android — Vocalizer greitt fyrir hverja rödd
+Á Android er Vocalizer fáanlegur sem app í Google Play Store (leitaðu að "Vocalizer TTS"). Athugið: hvert tungumál og rödd er keypt sérstaklega — það er ekki eitt leyfi fyrir allt. Áður en þú kaupir geturðu prófað röddina í nokkrar mínútur í prufuham. Eftir kaup er röddin tengd við Google reikninginn þinn og hægt að setja hana upp á hvaða tæki sem er með sama reikningi.
+
+Killer Feature fyrir blinda: Skrár með tungumálakóðum
+
+Þetta er sannarlega bylting. Vinnsla skráa vista nú sem:
+
+- .html með lang eiginleika (t.d. lang="fi" fyrir finnska) — NVDA les þennan kóða og skiptir sjálfkrafa yfir á viðeigandi talgervil fyrir tungumálið. Engin handvirk stilling!
+- .docx með varðveislu sniðs — hver textahluti hefur innsprautaðan tungumálakóða í XML skjali, svo Word og NVDA vita hvaða rödd á að nota fyrir hvern hluta.
+
+Vinnsluskrár eru alltaf vistaðar sem NÝ skjöl (t.d. hreim_Finnska.html).
+
+Sjálfvirk tungumálaskipting í NVDA — hvað þú þarft að vita
+
+Til að NVDA skiptir í raun rödd byggt á lang kóða, þarf að vera kveikt á stillingunni "Sjálfvirk tungumálaskipting þegar studd". Þú finnur hana í NVDA Stillingar → Tal. Sjálfgefið er hún kveikt við fyrsta ræsingu skjálesarans — en það er gott að athuga hvort einhver hafi slökkt á henni.
+
+Mikilvægt takmörk OneCore radda: Microsoft OneCore raddir styðja ekki þetta kerfi sjálfgefið með NVDA, aðeins með innbyggða kerfisskjálesaranum. Það er óopinber viðbót fyrir NVDA sem heitir "One Core Autolang" sem reynir að laga þetta — en þróun hennar var fljótt hætt. Ástæðan er einföld: árlega, við fyrstu útgáfu NVDA á hverju ári, koma breytingar sem brjóta samhæfni API (svokallaðar API Breaking Changes). Stundum nægir að uppfæra reitinn "síðasta prófaða útgáfa" í viðbótarauglýsingunni, en stundum þarf raunverulegar breytingar í kóðanum — og höfundurinn nær ekki að fylgja eftir uppfærslum. Ef þú vilt sjálfvirka tungumálaskiptingu, eru Vocalizer eða eSpeak öruggari valkostir, sem styðja þetta kerfi innfæddlega, þó í fyrra tilfellinu þarftu einnig að reikna með tímabundinni óaðgengileika uppfærðs Vocalizer raddbílstjóra fyrir nýjasta NVDA vegna þess sem lýst var nokkrum setningum fyrr. Þá hefurðu val um:
+- Ekki uppfæra NVDA - raddirnar munu örugglega virka, en þú munt ekki hafa aðgang að nýjum mögulegum eiginleikum, endurbótum eða villuleiðréttingum.
+- Uppfæra NVDA og neyða viðbótina til að virka með því að breyta samhæfni (nýlega kynnt, virkar ef hingað til var aðeins nauðsynlegt að uppfæra auglýsinguna). Annars... jæja, það var viðvörun um að þú gerir þetta á eigin ábyrgð.
+
+SKREF 6: Hljóðbókaarkitekt
+
+Tól til að undirbúa faglega skráaruppbyggingu fyrir skjálesara og ElevenLabs. Fara í það með því að smella á hnappinn "📄  Breytingartæki" á verkfærastikunni eða velja Verkfæri → Breytingartæki úr valmyndinni (flýtileið: Ctrl+3).
+
+Hvernig virkar það?
+
+1. Sláðu inn slóð skráarinnar í textareitinn eða smelltu á hnappinn "Skoða..." til að velja skrá í kerfisvalmyndinni. Handritið tekur við bæði .txt og .docx, auk .html og .htm skráa.
+2. Smelltu á "Byggja arkitektúr fyrir ElevenLabs".
+3. Handritið skannar hverja línu textans og breytir lykilorðum (Aðgerð, Kafli, Formáli, Eftirmáli, Forspil) í fyrirsagnir "Heading 1" í Word skjalinu.
+4. Senur (línur sem byrja á orðinu "Sena") breytast í feitletraðan texta — sýnilegt í skjalinu, en ósýnilegt í innihaldsyfirliti ElevenLabs.
+5. Allur annar texti (samtöl, lýsingar) fer án breytinga.
+6. Þú færð skrána arkitektúr_[nafn_upprunalega].docx — faglegt Word skjal tilbúið til frekari vinnu. Til dæmis, ef innskráin þín hét dofi.txt, mun úttaksskráin heita arkitektúr_dofi.docx og birtast í sama möppu og upprunalega.
+
+Hreinsun í leiðinni: Handritið fjarlægir sjálfkrafa HTML merki (ef textinn kemur úr vafra eða staðbundinni .html skrá, t.d. búið til af Poliglota) og Markdown fyrirsagnir (t.d. ### eða ####) áður en unnið er úr því. Þú þarft ekki að hreinsa skrána handvirkt.
+
+Öflugur kostur fyrir NVDA og ElevenLabs notendur
+
+"Heading 1" snið fyrir kafla er ekki bara fagurfræðilegt. Í NVDA geturðu farið hratt um fyrirsagnir með því að ýta á H (eða 1 fyrir fyrirsagnir fyrsta stigs). Í stað þess að fletta í gegnum hundruð blaðsíðna, hopparðu frá kafla til kafla á sekúndubrotum. Þetta breytir vinnuaðferðum með löng skjöl. Í ElevenLabs hefurðu tryggingu fyrir því að vélin setur sjálfkrafa inn skurði og mun ekki frjósa meðan á leikstjórn hljóðklippa stendur.
+
+SKREF 7: Hvernig á að skrifa Heimabók (Prompt Arkitekt og Mini-kúrs Markdown)
+
+Gervigreindin sem knýr Aðalstúdíó skilur best skipanir þegar þær eru sniðnar í Markdown merkjamáli. Ef þú gefur AI í Leikstjóra aðeins lauslega hugmynd (t.d. "tvær systur í framheimi"), mun vélin verða ringluð vegna skorts á smáatriðum og búa til klisjukennda, fyrirsjáanlega sögu, sem hunsar rökfræði.
+
+Til að koma í veg fyrir þetta, notaðu ytri spjallbotn (t.d. ókeypis ChatGPT eða Claude) sem þinn persónulega Arkitekt. Í útgáfu 13.0 þarftu ekki lengur að afrita prompt úr leiðbeiningum — í Leikstjóra spjaldinu, rétt undir hnappinum „💾 Vista Księga varanlega", finnurðu hnappinn „📖 Ábending Arkitekts fyrir AI…". Smelltu á hann, og opnast gluggi með tilbúnum texta í „aðeins til lestrar" reit og hnappinn „Afrita í klippiborð". NVDA tilkynnir allt innihaldið strax eftir að glugginn opnast — einfaldlega smelltu á „Afrita", límdu (Ctrl+V) í ChatGPT/Claude og skiptu út hlutanum „[SKRIFAÐU HUGMYND ÞÍNA HÉR]" með eigin söguþræði.
+
+Af hverju svona, en ekki með því að afrita úr leiðbeiningum? Samræðan í GUI hefur lykilforskot á aðgengi: hún er innfædd og lesin án truflana af skjálesara, krefst ekki þess að skipta yfir í textaritil (þar sem íslenskir „stafir" og gæsalappir geta verið illa afritaðir) og virkar eins á öllum stýrikerfum. Sama mynstur — samræðugluggi með prompt til að afrita — er einnig notað í Reglustjóra (sjá SKREF 7b hér að neðan).
+
+Hvernig AI svarar: Í svari færðu texta í tveimur hlutum. Fyrsti hlutinn er Heimabók lokuð í Markdown kóðablokk (merki ```markdown … ```). Afritaðu AÐEINS innihald kóðablokkarinnar (án merkjanna sjálfra ```) og límdu í reitinn „Heimabók" í Leikstjóra, og smelltu síðan á „💾 Vista Księga varanlega". Annar hlutinn er tillaga um hvaða sköpunarhamur (Handrit eða Hljóðbók) passar best við hugmyndina þína — líttu á hana sem ábendingu við að velja ham í RadioBoxinu.
+
+Mini-námskeið í Markdown í Heimabók: einn hashtaggur (#) er aðalhluti (t.d. „# Persónur"), tvöfaldur hashtaggur (##) er undirhluti, bandstrik (-) búa til lista og tvöfaldar stjörnur (**texti**) feitletra algjörlega óhagganlegar reglur (t.d. „**Hetjan LÝGUR ALDREI**"). Fyrir erlenda persónu skaltu bæta við merki með hreim, t.d. „[Ræðumaður 1: Marek] - hefur franskan hreim". Lykilorðið „hreim" er NAUÐSYNLEGT — forritavélin greinir það sjálfkrafa og setur réttar hljóðreglur á samtöl viðkomandi persónu.
+
+Ábending: Mundu að uppfæra Heimabókina þína reglulega (með því að bæta við nýjum stöðum eða mikilvægum persónum í söguna). Þú getur gert þetta handvirkt eða með hjálp ytri spjallbota. Því ríkari grunnur, því betri árangur í Leikstjórn!
+
+SKREF 7b: Reglustjóri (Ctrl+4) — orðabækur fyrir málfræðinga án Pythons
+
+Útgáfa 13.0 kynnir fjórða tólið á verkfærastikunni: Reglustjóri. Þú opnar það með Ctrl+4 eða úr valmyndinni Verkfæri. Þetta er sjónrænn könnuður fyrir möppuna dictionaries/, þar sem forritið geymir allar hljóðreglur (hreim), dulmál og Leikstjórnaraðferðir í YAML skrám (mannlesanlegt snið, einfaldara en JSON).
+
+Af hverju YAML? Fram að útgáfu 12.0 voru allir hreimar, skapandi stillingar og síur „innbyggðar" í Python kóðann. Að bæta við nýjum hreim þurfti forritara. Í útgáfu 13.0 er allt þetta flutt í .yaml skrár í möppunni dictionaries/ — hver sem getur opnað Notepad getur fínstillt núverandi hreim („skipta sz yfir í sh í sch") eða bætt við alveg nýjum (sænskur, danskur, rússneskur mállýska).
+
+Hvað finnur þú í Reglustjóra:
+- Skjalamappa — fullur listi yfir allar YAML skrár í dictionaries/ með skiptingu eftir grunnmálum (eins og er fullkomlega innleitt: Polski, English, Suomi, Íslenska, Русский) og flokkum (hreimar/, dulmál/, leikstjóri/). Leiðsögn með örvum eins og í Windows File Explorer, fullur stuðningur við NVDA.
+- Hnappur „📝  Opna í textaritli" — opnar valda skrá í sjálfgefnum Notepad kerfisins. Þú breytir, vistar, smellir á „🔄  Endurnýja tré" og búið.
+- Hnappur „📋  Afrita valda skrá" — fljótlegasta leiðin til nýs hreims: tekur núverandi skrá (t.d. finski.yaml), gefur nýtt nafn (t.d. sænski), Reglustjóri býr til afrit með athugasemd „breyta merkimiða og lýsing" og opnar það í ritlinum.
+- Hnappur „➕  Ný skrá reglur…" — skapalón með val á tegund (hreim, dulmál, Leikstjórnaraðferð, nýtt grunnmál, reiknirit dulmál). Fyrir venjuleg tilfelli (hreim, dulmál af gerðinni „skipta um stafi") skapar skapalónið tilbúið YAML skjal til að breyta. Fyrir tilfelli sem krefjast forritara (nýtt grunnmál, reiknirit af gerðinni „blanda miðju orða") skapar skapalónið prompt fyrir AI spjallbotann — þú límir í ChatGPT, færð tilbúna YAML skrá, vistar í dictionaries/ og búið.
+
+Hagnýt notkun: Viltu bæta við sænskum hreim? Opnaðu Reglustjóra, veldu dictionaries/pl/hreimar/finski.yaml, smelltu á „Afrita", nefndu skrána sænski, breyttu merkimiðanum í "Sænski (Alva / Oskar)", ISO kóðanum í sv, breyttu nokkrum reglum og vistaðu. Farðu aftur á Heimaskjá, smelltu á „🔄 Endurnýja framburði Leikstjóra úr YAML" og endurræstu forritið. Nýi hreimurinn birtist í Poliglota valmyndinni (í Leikstjórnaraðferð) og — ef þú bætir honum við í Heimabók persónunnar („[Marek] - hefur sænskan hreim") — einnig í sjálfvirkri hreimsgreiningu Leikstjórans.
+
+Hvar á að leita að frekari skjölum um dictionaries/ möppuna:
+- Skrá `docs/dictionaries.pl.txt` (aðgengileg í pakkanum fyrir endanotendur úr flipanum Releases) — stuttur, einfaldur texti sem lýsir hverri undirmöppu, 6 tilbúnir dulmál, 8 tilbúnir hreimar og hugmyndir um hvað hægt er að gera sjálfur, án þekkingar á Python.
+- Skrá `dictionaries/README.md` (aðeins aðgengileg við klónun úr GitHub geymslu — útgáfupakkar sía .md skrár) — ítarleg tæknileg skjölun á YAML sniði með dæmum, lista yfir reiti, reglum um vinnslupípu, regex. Þetta skjal er ætlað málfræðingum með grunnþekkingu á forritun og þróunaraðilum.
+
+Mikilvægar ábendingar fyrir skjálesara notendur (NVDA)
+
+1. Skilaboð um árangur og villur
+
+Þegar forritið lýkur aðgerð (t.d. vistar skrá eða lendir í villu), birtist valmyndargluggi með titli eins og "Árangur", "Viðvörun" eða "Villa". NVDA tilkynnir strax þennan glugga og les efni hans. Þú þarft ekki að gera neitt — valmyndirnar eru fullkomlega aðgengilegar með lyklaborði og fókus lendir sjálfkrafa á „OK" hnappinum. Engar fleiri brellur með forskeyti "Viðvörun" — innfæddar wxPython valmyndir eru studdar beint af skjálesaranum.
+
+2. Mikilvæg viðvörun: hljóðlaus bakgrunnsvinnsla
+
+Eftir að smellt er á hnappa eins og "Senda til AI" eða "Keyra Vinnslu", byrjar forritið strax bakgrunnsvinnslu. Á skjánum birtist framvindustika (Gauge), en NVDA LES EKKI gildi hennar í rauntíma — skjálesarinn er hljóður meðan á vinnslu stendur. Ekki smella á hnappinn aftur. Bíddu þar til valmyndargluggi með niðurstöðu eða villuskilaboðum birtist — NVDA mun tilkynna það sjálfkrafa.
+
+3. Leiðsögn milli tóla
+
+Að færa sig milli tóla (Leikstjóri, Poliglota, Breytir, Reglustjóri) fer fram í einu forritsglugga með fjórum hnöppum á verkfærastikunni eða í gegnum valmyndina Verkfæri (Alt, síðan N). Aðgengilegir flýtilyklar: Ctrl+0 (Heimaskjár), Ctrl+1 (Leikstjóri), Ctrl+2 (Poliglota), Ctrl+3 (Breytir), Ctrl+4 (Reglustjóri — nýtt í 13.0). Eftir að skipt er um tól lendir fókus sjálfkrafa á lýsingu nýja einingunnar — NVDA byrjar strax að lesa nýja útsýnið.
+
+4. Röð flýtivísis og nöfn á viðmótshlutum
+
+Hver viðmótshlutur hefur skýrt íslenskt nafn — NVDA les það við fókus. Röð flýtivísis er rökrétt: frá lýsingu tólsins, í gegnum stillingareiti, að aðgerðahnöppum. Engar óvæntar uppákomur — lyklaborðsleiðsögn virkar eins og í hverju öðru innfæddu Windows forriti. Öll valmyndir og hnappar eru á íslensku og NVDA les þau með íslenskum hreim án viðbótarstillinga.
+
+Mikilvægar athugasemdir við útgáfu 9.0 / Breytingaskrá
+
+Nýir eiginleikar og breytingar í útgáfu 9
+
+Bilanaþolið vistun á stöðu þýðingar (BREYTING — lagfæring á mikilvægum galla)
+Í útgáfu 8 var endurupptaka á truflaðri þýðingu með hljóðlausri, eyðileggjandi gildru: ef notandi fylgdi leiðbeiningum (handvirkt klippt út þýdda hluta), og síðan strax endurupptók þýðingu á restinni, opnaði forritið úttaksskrána í yfirskriftarham — óafturkallanlega og óafvitandi eyðandi allan greiddan árangur. Í útgáfu 9 var allur vélbúnaður endurhannaður. Hver þýddur blokk er nú þegar vistuð í tímabundna skrá (.jsonl) með úthlutuðum vísitölu. Endurupptaka er fullkomlega sjálfvirk — forritið greinir sjálfkrafa skrána og endurheimtir framvindu án nokkurrar íhlutunar notanda. Eftir vel heppnaða lokun er tímabundna skráin sjálfkrafa fjarlægð.
+
+Merkingarleiðrétting í Leikstjórnaraðferð (NÝTT)
+Ný valkostur hefur verið bætt við Leikstjórnaraðferð — Merkingarleiðrétting. Það sprautar aðeins inn tveggja stafa ISO tungumálakóða sem notandi gefur upp, án þess að beita neinum hljóðreglum eða hreinsun. Björgunartæki ef tilbúin skrá kom út með röngum eða vantar tungumálamerki.
+
+Sjálfvirk umbreyting .txt í .html í Þýðingaraðferð (BREYTING)
+Textaskrár (.txt og .md) sem þýddar eru af AI Þýðanda eru nú sjálfkrafa vistaðar í .html sniði með innbyggðu tungumálamerki. Þannig les NVDA strax skrána með réttum hreim — án nokkurra viðbótar skrefa frá notanda.
+
+Snjallt skráarheiti í Arkitekt (BREYTING)
+Hljóðbókaarkitekt vistar ekki lengur úttaksskrána alltaf undir sama nafni arkitektúr_gotova.docx. Nú er nafnið dregið af innskrá — t.d. fyrir znieczulica.txt verður úttaksskráin arkitektúr_znieczulica.docx. Skráin birtist í sama möppu og upprunalega.
+
+Eiginleikar haldnir óbreyttir frá útgáfu 8
+
+Endurkoma á .txt sniði fyrir verkefnaskrár (BREYTING)
+Verkefnaskrár og yfirlit eru nú vistuð í .txt sniði í stað .md (Markdown). Tilraun með .md snið sem sálfræðileg hindrun gegn breytingum reyndist óskilvirk — AI brýtur oft regluna um anti-closure og oft er betra að breyta skrá á staðnum og síðan endurhlaða minni, svo AI, ef mögulegt er, fái ekki leynilegt leyfi til að brjóta bannið. .txt sniðið er meira innsæi og læsilegt fyrir alla.
+
+Regla um Samsetningaraðila — ný viðvörun
+Í leiðbeiningunum (og í framtíðarútgáfum viðmótsins) hefur verið bætt við skýrri viðvörun sem útskýrir hvað má og hvað má ekki breyta í verkefnaskrám. Notandi hefur fullt leyfi til að breyta samtölum og efni, en má alls ekki breyta uppbyggingarlínum (Aðgerð, Sena, Kafli, Formáli, Eftirmáli) — skemmdir á þeim skemma leiðsögn NVDA, skiptingu í ElevenLabs og efnisyfirlit í Word.
+
+Uppfærður Prompt Arkitekts (BREYTING)
+Prompt fyrir ytri spjallbota (ChatGPT/Claude) hefur verið endurhannaður. Í stað þess að skila hráum Markdown kóða, skilar AI nú svari í tveimur skýrt aðskildum hlutum: Hluti 1 er Heimabók lokuð í Markdown kóðablokk (auðvelt að afrita án merkja), og Hluti 2 er Tillaga um Tryggð sem venjulegur texti utan bloks — ráðleggur hvort betra sé að nota Hrár Handritsham eða Hefðbundinn Hljóðbókham. Lýsing á persónumerkjum hefur einnig verið breytt: í stað „hljóðrænn" er nú talað um hreim og tón raddar í merki, t.d. [Ræðumaður 1: Nafn] - seplar og hefur franskan hreim.
+
+Skýring á stöðu Anti-Closure tilskipunar (SKJÖL)
+Leiðbeiningarnar innihalda nú hreinskilna skýringu á því að þrátt fyrir innbyggð bann við Anti-Closure, brýtur líkanið enn oft þessa reglu, sérstaklega í Hljóðbókham. Í stað þess að fela þennan vanda, setur útgáfa 8 málið skýrt fram og skilar ábyrgðinni á „handvirkri lokun" aftur til Leikstjóra — þar af leiðandi Regla um Samsetningaraðila sem opinbert verkfæri og endurkoma á venjulegt textasnið.
+
+Eiginleikar haldnir óbreyttir frá útgáfu 7
+
+Showrunner Prompts — Anti-Closure tilskipun (Leikstjórn — allir hamir)
+
+Öll þrjú Leikstjórnunarhamir halda innbyggðum showrunner tilskipunum. Hugstormun virkar eins og handritshöfundur fyrir margra þátta seríu. Hrár Handritshamur og Hljóðbókhamur hafa bann við að ljúka texta með samantektum, siðferðislegum lærdómum og frásagnarklóm — nema notandi biðji sérstaklega um lokaorð eða eftirmála.
+
+Rauntímastjórnun á Þáttum og Senum (Leikstjórn — Handritshamur)
+Hrár Handritshamur hefur spjald með hnöppum "Setja inn Þátt X" og "Setja inn Senu X". Teljarar uppfærast sjálfkrafa. Hleðsla á núverandi skrá stillir báða teljara á réttar tölur.
+
+Hreinsun á svigadidaskalíum (Poliglota — Leikstjórnunarhamur)
+Handritið fjarlægir alla textabúta sem eru í svigum (t.d. "(hvíslar)", "(með innfelldum andardráttum)"). ElevenLabs les eingöngu samtöl og frásagnir.
+
+Óendanlegt Minni og Sjálfvirk Samantekt (Leikstjórn — Sögugeymir)
+Þegar minnisvísir fer í rauðan viðvörunarham, býr Hugstormun sjálfkrafa til samantekt á söguþræði og vistar hana í Langtímaminni. Smelltu á "Vista Samantekt (varanlega)" til að búa til skrá _samantekt.txt. Eftir að hafa hreinsað minni og hlaðið inn samantektinni geturðu haldið áfram með söguna án lengdarmarka.
+
+Hljóðbókaarkitekt
+Tólið styður lykilorð eins og Þáttur, Kafli, Formáli, Eftirmáli og Forspil sem fyrirsagnir á fyrsta stigi. Senur breytast í feitletraðan texta. Handritið hreinsar sjálfkrafa HTML merki og Markdown tákn áður en þau eru unnin.
+
+Snjöll Stjórnun Kafla (Hljóðbókhamur)
+Sérstakt spjald með hnöppum til að setja inn Formála, Eftirmála og kaflaskiptingar beint úr viðmótinu. Kaflateljarinn uppfærast sjálfkrafa. Hleðsla á núverandi skrá stillir teljarann á rétta tölu án handvirkrar talningar.
+
+Að gefa Kafla Titla (Eftirvinnsla — Hljóðbókhamur)
+Einingin fer í gegnum kafla úr vistaðri skrá og gefur þeim stuttan, bókmenntalegan titil með því að nota hraðvirkt AI líkan, sem greinir aðeins upphaf hvers kafla.
+
+Fjarlægðar aðgerðir (óbreyttar frá útgáfu 7)
+
+Klippikort (Handritshamur) — skipt út fyrir rauntímastjórnun á Þáttum og Senum.
+Aðlögun Handrits í Hljóðbók (Handritshamur) — fjarlægð af fjárhagslegum ástæðum. Vinnuflæðið skapaði þrjá aðskilda kostnaðarliði: handritsgerð, mögulega samantekt við minnisofhleðslu, og að lokum endurgerð alls sem hljóðbókarprósa. Við mælum með að skrifa beint í Hefðbundnum Hljóðbókham frá upphafi.
+
+
+Eiginleikar frá útgáfu 10.0 (haldnir óbreyttir í útgáfum 11.0 og 12.0)
+
+- Sjálfvirkur skráarsniðsmyndari golden_key.env innbyggður beint í aðalviðmót forritsins. Notandi þarf ekki lengur að búa til skrá handvirkt né hafa áhyggjur af gildru með .txt viðskeyti — einn smellur á hnappinn á upphafsskjánum og kerfið býr til hreina, tilbúna skrá á réttum stað.
+- Algjör fjarlæging á úreltum skrá napraw_api.bat, sem er ekki lengur nauðsynleg. Vandamálið sem þessi skrá leysti (röng viðskeyti sem Notepad gaf) er nú algjörlega útrýmt þökk sé innbyggðum myndara.
+- Fjölbókmenntun Heimabókar — hvert verkefni hefur nú eigin lore skrá (NÝTT). Áður var ein sameiginleg skrá moje_lore.md, sem var hlaðin við hverja ræsingu forritsins — óháð því hvaða verkefni þú vinnur að. Frá útgáfu 10 er Heimabókin náið tengd við nafn verkefnisskrárinnar: ef saga þín er skrypty/emilia_heist_audiobook.txt, þá er Heimabókin hennar skrypty/emilia_heist_audiobook.md. Hnappurinn "Vista Heimabók varanlega" er gráður þar til þú slærð inn skráarnafn — röðin er hér viljandi og þvinguð af viðmótinu. Smelltu á "Hlaða sögu" til að hlaða sjálfkrafa samsvarandi .md skrá af diski, ef hún er til. Breytingin hefur einnig hagnýt skipulagsgildi: þú getur nú unnið að nokkrum verkefnum samtímis, og hvert þeirra mun hafa sínar eigin, einangruðu reglur heimsins og lista yfir persónur — án áhættu að Emilia úr bankaráni lendi skyndilega í geimóperu.
+
+
+Nýir eiginleikar og breytingar í útgáfu 11.0
+
+- Nýir hreimar í Poliglota (NÝTT — fjögur ný evrópsk tungumál). Fjórir nýir valkostir fyrir hljóðfræðilega "spillingu" texta hafa verið bætt við Leikstjórnunarham: Enska (Samantha / Mark / Zira / Hazel), Franska (Thomas / Amelie / Julie), Þýska (Stefan / Markus / Katja / Hedda), Spænska (Jorge / Monica / Helena). Hver nýr hreimur sprautar sjálfkrafa viðeigandi ISO kóða (en, fr, de, es) í framleidda .html eða .docx skrá — NVDA notar strax réttan rödd fyrir unnin texta.
+
+- Þverpallur: Stuðningur fyrir macOS og Linux (BREYTING skjölun). Kaflinn "Fyrsta ræsingu" hefur verið endurskrifaður frá grunni. Nú greinir hann þrjár leiðir: endanotendur Windows sækja tilbúna ZIP pakka úr flipanum Releases og keyra run.bat; forritarar Windows setja upp umhverfi með setup_dev.bat; notendur macOS og Linux setja upp umhverfi með ./setup_dev.sh og keyra ./run.sh. (Athugið: í útgáfum 11.x–13.0 hétu sömu skrár öðruvísi — `Uruchom_Rezysera.bat`, `skonfiguruj_dev.bat`, `skonfiguruj_dev.sh`, `uruchom_rezysera.sh` — þær voru endurnefndar í 13.1 í enskum samsvörunum, þar sem erlendir forritarar sem klóna geymslu tilkynntu að pólsku skráarnöfnin gerðu þeim erfitt fyrir að slá inn skipanir í flugstöðinni.)
+
+
+- Mappa runtime/ — útskýring á stöðu (SKJÖL). Kaflinn "Fyrsta ræsingu" inniheldur nú skýra útskýringu á því að mappan runtime/ (Python umhverfi fyrir ZIP pakka) er aðeins dreift í tilbúnum pakkningum fyrir Windows úr flipanum Releases. Í Git geymslu er þessi mappa ekki til og ætti ekki að vera.
+
+- Uppfærsla á nöfnum raddgervla í Poliglota valmyndinni (BREYTING). Uppfærðar nöfn radda í valmynd selectbox fyrir núverandi tungumál: Ítalska hefur nú einnig Luca (Vocalizer), Finnska hefur nú einnig Mikko (Vocalizer). Íslenska hélt nafni án sértákna (Gudrun í stað Gudrun með eth tákni) fyrir betri samhæfni.
+
+Eiginleikar haldnir óbreyttir frá útgáfu 10
+
+- Sjálfvirkur skráarsniðsmyndari golden_key.env innbyggður í viðmótið.
+- Fjölbókmenntun Heimabókar (hvert verkefni hefur eigin .md skrá með reglum heimsins).
+- Bilanaþolið endurupptökuvélbúnaður fyrir þýðingu (vistað í .jsonl).
+- Merkjabætir í Leikstjórnunarham (sprautun ISO kóða).
+
+
+Nýir eiginleikar og breytingar í útgáfu 12.0 — Útgáfuútgáfa
+
+- Algjör endurhönnun notendaviðmóts (BREYTING ARKITEKTÚR). Forritið hætti að vera vefverkfæri sem keyrir í vafra. Allt viðmótið var endurskrifað frá grunni sem innfæddur skjáborðsforrit byggt á wxPython ramma. Enginn staðbundinn netþjónn lengur, enginn vafri, ekkert flugstöðvargluggi sem keyrir í bakgrunni — það er eitt, venjulegt forritsgluggi. Inngangspunktur er main.py.
+
+- Leiðsögustika með flýtilyklum (NÝTT). Verkfæri eru skipt með þremur hnöppum á stiku (Leikstjóri, Poliglota, Breytir) eða í gegnum valmyndina Verkfæri. Aðgengilegir flýtilyklar: Ctrl+0 (Heimaskjár með Kerfisathugun), Ctrl+1 (Leikstjóri), Ctrl+2 (Poliglota), Ctrl+3 (Breytir). Virkt verkfæri er sjónrænt dregið fram með feitletruðum hnappi.
+
+- Full hagræðing fyrir skjálesara frá grunni (NVDA, VoiceOver). Hver viðmótshlutur hefur fengið skýrt íslenskt aðgengisnafn. Fókus eftir að tól er skipt lendir sjálfkrafa á lýsingu einingarinnar — NVDA byrjar strax að lesa nýja útsýnið. wx.MessageBox samræður eru innfæddar tilkynntar af skjálesaranum án nokkurra brellna. Röð flýtivísis er rökrétt og samræmd í öllu viðmótinu. Horfin eru söguleg takmörk Streamlit og React ramma.
+
+- Engin eldveggsstilling (BREYTING). Útrýming staðbundins vefþjóns þýðir að Windows Firewall birtir ekki lengur glugga með spurningu um leyfi til netaðgangs við fyrstu ræsingu. Forritið einfaldlega ræsist.
+
+- Innfæddar skráarvalgluggar (NÝTT). Einingar Poliglota og Breytir hafa nú hnappinn "Skoða...", sem opnar kerfisskráarvalglugga í stað handvirkrar innsláttar á slóð.
+
+- Verndun skapandi ham (NÝTT). Í Leikstjórnaraðferð er ekki lengur hægt að breyta vinnuham óvart (t.d. frá Hljóðbók í Handrit), þegar minni er upptekið — viðmótið lokar á skipti yfir í annan skráningarham, þar til saga eða samantekt er hreinsuð. Hugstormunarhamur er alltaf aðgengilegur.
+
+- Hnappur fyrir Harðan Endurstillingu í Leikstjórnaraðferð (NÝTT). Nýr hnappur "Loka Verkefni (Harður Endurstilling)" leyfir einum smelli að hreinsa allt verkefnið: sögu, samantekt, Heimabók og alla teljara — án þess að þurfa að núllstilla hvert reit fyrir sig.
+
+- Sjálfvirk hleðsla skapandi ham (NÝTT). Við hleðslu verkefnis endurheimtir forritið sjálfkrafa síðast notaða vinnuham (Handrit eða Hljóðbók) úr metadata skrá sem er stjórnað af forritinu. Þannig stillir RadioBox sig sjálfkrafa við opnun verkefnis — þú þarft ekki að muna í hvaða ham þú varst að vinna.
+
+Eiginleikar haldnir óbreyttir frá útgáfu 11.0
+
+- Hljóðfræðilegir hreimar í Poliglota (Enska, Franska, Þýska, Spænska, Ítalska, Finnska, Íslenska).
+- Sjálfvirkur skráarsniðsmyndari golden_key.env innbyggður í upphafsskjá.
+- Fjölbókmenntun Heimabókar (hvert verkefni hefur eigin .md skrá).
+- Bilanaþolið endurupptökuvélbúnaður fyrir þýðingu (vistað í .jsonl).
+- Merkjabætir í Leikstjórnaraðferð (sprautun ISO kóða).
+- Öll AI eiginleikar: Hugstormun, Handrit, Hljóðbók, Sögugeymir, Óendanlegt Minni, Að gefa Kafla Titla.
+
+
+Nýir eiginleikar og breytingar í útgáfu 13.0 — Útgáfuútgáfa
+
+- Yfirlestur á YAML — hreimar, dulmál og Leikstjórnunarhamir í textaskrám (ARKITEKTÚR BREYTING, sú stærsta síðan flutningur yfir á wxPython). Fram að útgáfu 12.0 voru allar hljóðfræðilegar reglur (hreimar) og skapandi hamir Leikstjóra (Hugstormun, Handrit, Hljóðbók, eftirvinnsla titla) "innbyggðar" í Python kóða sem fastar, aðgerðir og fastar strengir, og heil flokkur dulmála/textaleikja var einfaldlega ekki til — þau eru kynnt með refaktorum 13.0. Í útgáfu 13.0 er allt þetta í .yaml skrám í nýrri möppu `dictionaries/` — vélin (`core_poliglota.py`, `core_rezyser.py`, `przepisy_rezysera.py`) hleður þeim upp sjálfkrafa við ræsingu. Hagnýt áhrif: að bæta við nýjum hreim, nýju dulmáli sem byggir á skiptingum eða breyta hljómi kerfisprompta fyrir einhvern Leikstjórnunarham krefst ekki þekkingar á Python — aðeins textaritill. Stutt lýsing fyrir endanotendur er í `docs/dictionaries.pl.txt` (fylgir með útgáfupökkum); full tæknileg skjölun á sniði — í `dictionaries/README.md` (aðeins í Git geymslu, því útgáfupakkar sía .md skrár).
+
+- Reglustjóri — fjórða tólið á stiku (NÝTT, Ctrl+4). Sjónrænn könnuður á `dictionaries/` möppunni með YAML skráatré (innfædd wx.TreeCtrl, full NVDA stuðningur) og sett af aðgerðum: „Opna í textaritli", „Ný skrá með reglum…" (töframaður með val á tegund: hreimur, dulmál, hamur, nýtt tungumál), „Afrita valda skrá", „Eyða skrá", „Endurnýja tré". Fyrir tilfelli sem fara út fyrir venjulegar skiptingar (nýtt grunnmál, reiknirit dulmál) býr töframaðurinn til tilbúið prompt fyrir AI chatbot — full útskýring í nýju SKREFI 7b.
+
+- Arkitekt Prompt beint í Leikstjórnunarspjaldi (A11y BREYTING). Hingað til var prompt fyrir ytri chatbot til að búa til Heimabók aðeins til í þessari leiðbeiningu — notandi þurfti að afrita það úr textaskrá (sem getur verið vandasamt með skjálesara þegar um er að ræða íslenska stafi og gæsalappir). Í útgáfu 13.0 hefur Leikstjórnunarspjaldið nýjan hnapp „📖 Arkitekt Prompt fyrir AI…" (rétt undir „Vista Heimabók varanlega"), sem opnar innfædda samræðuglugga með fullum texta prompta í READONLY reit og sérstökum hnappi „Afrita í klemmuspjald". A11y mynstur er eins og fyrir niðurstöðusamræðu töframanns í Reglustjóra — NVDA les strax allt innihald gluggans án frekari stillinga. Full lýsing í uppfærðu SKREFI 7.
+
+- Rússneskur hreimur í Poliglota (NÝTT — áttunda evrópska tungumálið í Leikstjórnunarham). Í fellilista „Leikstjórnunarhamur / Hreimar" bætist við valkosturinn „Rússneska (t.d. Milena / Irina / Yuri / Pavel)". Ólíkt öðrum hreimum, sem aðeins „spilla" íslenskum texta á latnesku stafi (t.d. „sj" → „sh", „v" → „v"), framkvæmir rússneski hreimurinn fulla umritun íslenska textans yfir á kyrillísku — þannig hafa rússneskumælandi raddir TTS (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") eitthvað til að „bera fram" orðin. Kortlagningin hefur verið bætt með jótísku sérhljóðum („ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю"), íslenskum mýkingum si/ci/ni/zi + sérhljóð (t.d. „frænka" → „цёця"), auk rússneskra sértákna: „ść" / „szcz" → „щ", „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х".
+
+  Hljóðfræðileg athugasemd: Hreimurinn er ekki rússnesk fræðileg umritun (ISO 9, GOST, BGN/PCGN). Markmiðið er eingöngu að gera íslenskan texta hljóðlega líkan rússnesku — fyrir talgervil, ekki fyrir alvarlega umritun á nöfnum. Fyrir þá vinnu skaltu nota tileinkaðar málvísindatól.
+
+  Tungumálakóði fyrir niðurstöðuskrá: „ru" (ISO 639-1). NVDA með virka valkostinn „Skiptu sjálfkrafa um tungumál þegar það er stutt" skiptir strax yfir í rússneska rödd.
+
+- Athugasemd um „ź": Í rússnesku er enginn nákvæmur samsvörun við íslenska „ź", svo þessi stafur er normaliseraður í „ж" — líkt og „ż". Sumir norðurrússneskir mállýskur og hvítrússneska bera „ź" nær „зь", en frá sjónarhóli talgervils er munurinn hverfandi. Ef málvísindamaður telur að hann vilji frekar „зь", getur hann sjálfur breytt þessari einu reglu í `dictionaries/pl/akcenty/rosyjski.yaml` — vélin hleður YAML-skrárnar upp sjálfkrafa, svo það krefst ekki endursamsetningar á forritinu.
+
+- Stækkaður leiðsögustika og Verkfæravalmynd (BREYTING). Stikan hefur nú fjórða hnappinn — Reglustjóri — og valmyndin „Verkfæri" styður nýja flýtivísinn Ctrl+4. Fyrri flýtivísar (Ctrl+0 Heimaskjár, Ctrl+1 Leikstjóri, Ctrl+2 Poliglota, Ctrl+3 Breytir) haldast óbreyttir.
+
+- Hnappur „Endurnýja hreima Leikstjóra frá YAML" á Heimaskjá (NÝTT). Eftir að hafa bætt við nýjum hreim með Reglustjóra (eða handvirkri breytingu á YAML skrá) mun smellur á þennan hnapp endurhlaða hreim_* umbúðir í Poliglota og Leikstjórnunarvél, svo nýi hreimurinn sé sýnilegur í valmyndinni og í sjálfvirkri greiningu hreima byggð á merkjum persóna í Heimabókinni. Poliglota greinir YAML-skrár sjálfkrafa (án endurnýjunar), en Leikstjóri þarf að endurbyggja umbúðir — venjulega þarf að endurræsa forritið eftir endurnýjun.
+
+Eiginleikar haldnir óbreyttir frá útgáfu 12.0
+
+- Innfædd skjáborðsviðmót byggt á wxPython (án vafra, án staðbundins netþjóns).
+- Leiðsögustika með flýtilyklum (nú Ctrl+0/1/2/3/4 — bætt við Ctrl+4 fyrir Reglustjóra).
+- Full hagræðing fyrir skjálesara (NVDA, VoiceOver) — íslensk aðgengisnöfn, rétt röð tabulators.
+- Verndun skapandi ham fyrir óviljandi breytingum í vinnu.
+- Harður Endurstilling verkefnis með einum smelli í Leikstjóra.
+- Sjálfvirk hleðsla skapandi ham úr metadata skrá verkefnis.
+- Allir hreimar frá fyrri útgáfum (Enska, Franska, Þýska, Spænska, Ítalska, Finnska, Íslenska) og Merkjabætir.
+- Full AI virkni: Hugstormun, Handrit, Hljóðbók, Sögugeymir, Óendanlegt Minni, Að gefa Kafla Titla.

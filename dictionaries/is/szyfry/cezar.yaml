@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  DULMÁL: CAESAR-DULMÁL
+#  Klassískt skiptidulmál sem flytur hvern staf N stig í íslensku stafrófinu.
+# -----------------------------------------------------------------------------
+id: cezar
+etykieta: "Caesar-dulmál (Flutningur í íslensku stafrófinu)"
+opis: |
+  Klassískt Caesar-dulmál: hverjum staf er flt N stig í íslensku stafrófinu
+  (AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ, 32 stafir, engin bil). Stafir utan
+  stafrófsins (tölur, greinarmerki) haldast óbreyttir.
+
+  Flutningsgildi er gefið í notendaviðmótinu ("Caesar-dulmál flutningur"
+  -reiturinn). Gildi 0 þýðir "gildið er handahófskennt á bilinu 1..31".
+iso: is
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# Stafrófið er lesið úr skránni dictionaries/is/podstawy.yaml (lykill: alfabet).
+# Ef þú vilt nota annað stafróf, fjarlægðu athugasemdina og skrifaðu eigið:
+# alfabet: "AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ"
+
+# Leyfilegt flutningsbil í notendaviðmótinu (SpinCtrl).
+# 32 stafir → flutningur 32 ≡ 0 (sjálfsmynd); flutningar ±1..±31 eru einstakar.
+min_przesuniecie: -32
+max_przesuniecie: 32

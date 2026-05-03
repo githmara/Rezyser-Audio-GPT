@@ -1,0 +1,45 @@
+# -----------------------------------------------------------------------------
+#  EFTIRVINNSLA: GEFÐU KÖFLUM NÖFN (gervigreind)
+#  Verkfæri fyrir Hljóðbókarstillingu: fer yfir kafla í vistaðri verkefnisskrá
+#  og framleiðir stuttan, bókmenntanlegan titil fyrir hvern kafla.
+#  Notar sjálfgefið ódýrara líkan (gpt-4o-mini) þar sem verkefnið er einfalt.
+# -----------------------------------------------------------------------------
+id: tytuly
+etykieta: "Gefðu Köflum Nöfn (gervigreind)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- OpenAI-parametrar ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: á íslensku
+
+# --- Kerfisprompt ---
+prompt_systemowy: |
+  Þú ert metinn ritstjóri. Þú svarar eingöngu með fyrirsögninni.
+
+# --- Sniðmát notendafyrirmæla (role=user) ---
+# Staðgenglar: {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Hér er innihald textabrots úr bókinni ({naglowek}). Finndu EINN stuttan, girnilegan og bókmenntanlegan titil án gæsalappa.
+
+  INNIHALD:
+  {probka}
+
+# --- Iterunarfæribreytur verkefnisskráar ---
+# Regex sem skiptir skránni í skipulegar fyrirsagnir + innihald.
+# Námunarflokkurinn verður að vinna EINGÖNGU fyrirsögnina ("Formáli" / "Kafli 7" /
+# "Eftirorð"). Upphaf og endir \n* leyfa margar tómar línur umhverfis fyrirsagnir.
+regex_podzial_rozdzialow: "(?i)\\n*(Formáli|Kafli \\d+|Eftirorð)\\n*"
+
+# Brot styttri en þetta fá stöðuna "(Brot of stutt)" í stað gervigreindarkalls
+# (sparar API-inneign og forðast merkingarlausar fyrirsagnir).
+min_dlugosc_fragmentu: 50
+
+# Hámarkslengd textasýnis sem sent er líkaninu í einni beiðni.
+# Gervigreind sér upphaf kafla — nóg til að finna fyrirsögn.
+max_dlugosc_probki: 6000
+
+# Skilaboð í niðurstöðuglugganum:
+etykieta_fragment_zbyt_krotki: "(Brot of stutt)"
+etykieta_bled_brak_kredytow: "(Villa – engin API-inneign)"

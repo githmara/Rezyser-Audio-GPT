@@ -1,0 +1,70 @@
+# -----------------------------------------------------------------------------
+#  ÍTÖLSKUR HREIMUR (íslenska → ítölskur TTS)
+#  Fyrir talgervla: Lucia / Cosimo / Pierina (ítölskur TTS).
+# -----------------------------------------------------------------------------
+id: wloski
+etykieta: "Ítalía (t.d. Lucia / Cosimo / Pierina)"
+opis: |
+  Aðlagar íslenskan texta ítölskum talgervla (Lucia / Cosimo / Pierina).
+  Ítalska og íslenska fara vel saman á nokkrum sviðum:
+    - r   — ítölsk rúllandi r = íslenskt r ✓
+    - v   = /v/ í báðum ✓
+    - kk/tt/pp — tvíhljóðar í báðum ✓
+
+  Nauðsynlegar breytingar:
+    - j → y   Ítölskur TTS getur lesið j sem /dʒ/. Leiðrétting: j → y
+              (ítölsk y = /j/), sem samsvarar íslenskum j.
+    - Þ/þ → t   Ítalska hefur engan /θ/.
+    - Ð/ð → d
+    - Æ/æ → e   Ekki ítölskur stafur; /ɛ/ er nánast.
+    - Ö/ö → e   Ekki ítölskur stafur; /ɛ/ betri en /o/ (ö er framan sérhljóð).
+    - Sérhljóðar með broddmerki → ASCII.
+
+  Þekkt takmörkun: h → þögnin í ítölskum TTS (íslenskt /h/ hverfur).
+  "Helgi" → Lucia les "elgi". Þetta er hluti af ítölskum hreim — ólægilegt.
+iso: it
+kategoria: akcent
+kolejnosc: 80
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Hljóðfræðilegar skiptingar ---
+# Röðun: j → y FYRST, síðan séríslenskir stafir, síðan sérhljóðar.
+zamiany:
+  # --- j → y (tryggir /j/ en ekki /dʒ/) ---
+  - { wzor: "j",  zamiana: "y"  }
+  - { wzor: "J",  zamiana: "Y"  }
+
+  # --- Þ/þ → t ---
+  - { wzor: "Þ",  zamiana: "T"  }
+  - { wzor: "þ",  zamiana: "t"  }
+
+  # --- Ð/ð → d ---
+  - { wzor: "Ð",  zamiana: "D"  }
+  - { wzor: "ð",  zamiana: "d"  }
+
+  # --- Æ/æ → e (/ai/ → /e/) ---
+  - { wzor: "Æ",  zamiana: "E"  }
+  - { wzor: "æ",  zamiana: "e"  }
+
+  # --- Ö/ö → e (/ø/ → /ɛ/) ---
+  - { wzor: "Ö",  zamiana: "E"  }
+  - { wzor: "ö",  zamiana: "e"  }
+
+  # --- Sérhljóðar með broddmerki → ASCII ---
+  - { wzor: "Á",  zamiana: "A"  }
+  - { wzor: "á",  zamiana: "a"  }
+  - { wzor: "É",  zamiana: "E"  }
+  - { wzor: "é",  zamiana: "e"  }
+  - { wzor: "Í",  zamiana: "I"  }
+  - { wzor: "í",  zamiana: "i"  }
+  - { wzor: "Ó",  zamiana: "O"  }
+  - { wzor: "ó",  zamiana: "o"  }
+  - { wzor: "Ú",  zamiana: "U"  }
+  - { wzor: "ú",  zamiana: "u"  }
+  - { wzor: "Ý",  zamiana: "I"  }
+  - { wzor: "ý",  zamiana: "i"  }

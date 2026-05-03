@@ -40,8 +40,8 @@ Struktura folderu wygląda tak:
         ├── szyfry/                    6 plików z szyframi i zabawami
         └── rezyser/                   4 plików z trybami Reżysera AI
 
-Obecnie kompletnie wdrożone są: Polski, English, Suomi, Русский
-(4 języków bazowych). Każdy ma własną paczkę
+Obecnie kompletnie wdrożone są: Polski, English, Suomi, Íslenska, Русский
+(5 języków bazowych). Każdy ma własną paczkę
 "dictionaries/<kod>/" z diakrytykami, alfabetem i regułami fonetycznymi
 działającymi na tekst w tym właśnie języku — aplikacja sama wykrywa język
 źródłowy przez lingua-language-detector (per akapit) i ładuje odpowiednią

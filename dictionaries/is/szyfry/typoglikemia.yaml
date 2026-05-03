@@ -1,0 +1,17 @@
+# -----------------------------------------------------------------------------
+#  DULMÁL: TYPOGLYCEMIA
+#  Stokkar miðstafi orðs (fyrsti og síðasti stafur haldast).
+# -----------------------------------------------------------------------------
+id: typoglikemia
+etykieta: "Typoglycemia (Stokkaðir miðstafir orða)"
+opis: |
+  Sállingvistískt fyrirbæri: ef fyrsti og síðasti stafur orðs eru réttir,
+  les maðurinn textann reiðubúinn, þótt miðhlutinn sé stokkur. Orð sem eru
+  styttri en `min_dlugosc_slowa` eru óbreytt.
+iso: is
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Parametrar reikniritsins
+min_dlugosc_slowa: 4

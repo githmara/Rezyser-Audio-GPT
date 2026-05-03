@@ -1,0 +1,74 @@
+# -----------------------------------------------------------------------------
+#  ENSKUR HREIMUR (íslenska → enskur TTS)
+#  Fyrir talgervla: David / Zira / Samantha / Hazel (enskur TTS).
+# -----------------------------------------------------------------------------
+id: angielski
+etykieta: "Enska (t.d. David / Zira / Samantha)"
+opis: |
+  Aðlagar íslenskan texta enskum talgervla (David / Zira / Samantha / Hazel).
+
+  Bestu samsvörun milli íslensks og ensks:
+    - h   = /h/  í báðum — engin breyting þarf ✓
+    - v   = /v/  í báðum ✓
+    - kk/tt/pp — tvíhljóðar í báðum ✓
+    - Þ/þ (/θ/) → th  FULLKOMIN samsvörun! Enska "th" = /θ/ ✓
+    - Ð/ð (/ð/) → th  Enska raddað "th" (the, this) = /ð/ ✓
+
+  Aðrar breytingar:
+    - j (/j/) → y   MIKILVÆGT: Enska j = /dʒ/, íslenska j = /j/ = enska y.
+    - Æ/æ (/ai/) → ae  Nálægt tvíhljóðslíking.
+    - Ö/ö (/ø/) → e    Enska /ɛ/ er nánast /ø/.
+    - Sérhljóðar með broddmerki → ASCII (enskur TTS les þá ófyrirsjáanlega).
+
+  KRITIKAL RÖÐUN: j → y ÁÐUR EN Þ → th (til að koma í veg fyrir
+  tvöfaldar skiptingar í orðum sem innihalda bæði j og þ).
+iso: en
+kategoria: akcent
+kolejnosc: 40
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Hljóðfræðilegar skiptingar ---
+# KRITIKAL RÖÐUN:
+#   1. j → y   (FYRST: enska j = /dʒ/, þarf leiðréttingu)
+#   2. Þ/þ → th, Ð/ð → th  (séríslenskir stafir)
+#   3. Æ/æ, Ö/ö
+#   4. Sérhljóðar með broddmerki → ASCII
+zamiany:
+  # --- 1. j → y (EÐAL FYRST) ---
+  - { wzor: "j",  zamiana: "y"  }
+  - { wzor: "J",  zamiana: "Y"  }
+
+  # --- 2. Þ/þ → th (FULLKOMIN /θ/ í ensku!) ---
+  - { wzor: "Þ",  zamiana: "Th" }
+  - { wzor: "þ",  zamiana: "th" }
+
+  # --- Ð/ð → th (raddað /ð/ ≈ enska "the") ---
+  - { wzor: "Ð",  zamiana: "Th" }
+  - { wzor: "ð",  zamiana: "th" }
+
+  # --- 3. Æ/æ → ae (/ai/ → nálægt í ensku) ---
+  - { wzor: "Æ",  zamiana: "Ae" }
+  - { wzor: "æ",  zamiana: "ae" }
+
+  # --- Ö/ö → e (/ø/ → /ɛ/) ---
+  - { wzor: "Ö",  zamiana: "E"  }
+  - { wzor: "ö",  zamiana: "e"  }
+
+  # --- 4. Sérhljóðar með broddmerki → ASCII ---
+  - { wzor: "Á",  zamiana: "A"  }
+  - { wzor: "á",  zamiana: "a"  }
+  - { wzor: "É",  zamiana: "E"  }
+  - { wzor: "é",  zamiana: "e"  }
+  - { wzor: "Í",  zamiana: "I"  }
+  - { wzor: "í",  zamiana: "i"  }
+  - { wzor: "Ó",  zamiana: "O"  }
+  - { wzor: "ó",  zamiana: "o"  }
+  - { wzor: "Ú",  zamiana: "U"  }
+  - { wzor: "ú",  zamiana: "u"  }
+  - { wzor: "Ý",  zamiana: "I"  }
+  - { wzor: "ý",  zamiana: "i"  }

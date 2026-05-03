@@ -1,0 +1,151 @@
+Słowniki Poligloty i Reżysera — Leiðbeiningar fyrir alla
+=======================================================
+
+Halló! Ef þú ert að lesa þessa skrá, þá þýðir það að þú hefur kíkt í möppuna "dictionaries/" við hliðina á Reżyser Audio GPT forritinu og ert að velta fyrir þér hvað þessar skrár með skrýtnu ".yaml" viðbótunum eru. Ekki hafa áhyggjur — þú þarft ekki að kunna forritun eða Python til að skilja hvað er að gerast hér, og með smá hugrekki geturðu jafnvel bætt við eitthvað þitt eigið.
+
+Þessi skrá er skrifuð á einföldu máli fyrir rithöfunda, málvísindamenn, kennara, foreldra og almennt forvitna. Ef þú þekkir grunnatriði forritunar og ert að leita að ítarlegri skjölum um YAML skráarsniðið (með lista yfir reiti, regex, reglur fyrir vinnslupípur), kíktu á skrána "README.md" í sömu möppu — en athugaðu að þessi skrá er aðeins aðgengileg ef þú hefur klónað geymsluna frá GitHub. Í útgáfupakkanum sem sóttur er úr Releases flipanum eru Markdown skrár síaðar út (til að koma í veg fyrir að til dæmis þínar heimsbækur með spoilerum lendi í pakkanum), þannig að aðeins þessi ".txt" skrá fer til endanotenda.
+
+
+Hvað er hér yfirleitt?
+-------------------
+
+Mappan "dictionaries/" er safn reglna sem Poliglota (þýðingar- og hreimverkfæri) og innri vél Reżysera notar. Fram að útgáfu 12.0 voru allar þessar reglur "innbyggðar" í Python kóðann — ef þú vildir bæta við nýjum hreim eða breyta reglum, þurftirðu að biðja forritara. Frá útgáfu 13.0 er allt skráð í venjulegar textaskrár (viðbót ".yaml" — þetta er einfaldlega texti sniðinn á sérstakan hátt). Þú opnar þær með hvaða ritli sem er (Notepad, VS Code, Notepad++) og breytir eins og hverri annarri skrá.
+
+Strúktúr möppunnar lítur svona út:
+
+    dictionaries/
+    └── pl/              grunnmálamappa (pólska)
+        ├── podstawy.yaml              pólska diakritísk tákn + stafróf
+        ├── akcenty/                   11 skrár með hreimum
+        ├── szyfry/                    6 skrár með dulritunum og leikjum
+        └── rezyser/                   4 skrár með AI Reżyser stillingum
+
+Nú þegar eru Polski, English, Suomi, Íslenska, Русский fullkomlega útfærð
+(5 grunnmál). Hvert hefur sitt eigið "dictionaries/<code>/" pakka með diakritískum táknum, stafrófi og hljóðreglum sem virka á texta á því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (eftir málsgrein) og hleður viðeigandi pakka fyrir hvert brot fyrir sig. Fleiri tungumál eru í vinnslu (fullkominn pakki krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").
+
+
+Hvað er hreimur?
+------------------
+
+Hreimur er safn reglna sem "skemma" pólska texta þannig að skjálesari (eins og NVDA) lesi hann með rödd annars tungumáls. Til dæmis breytir finnski hreimurinn pólska "sz" í "s", "w" í "v", og diakritísk tákn (ą, ę, ł) í einfaldaðar útgáfur þeirra — þannig hljómar textinn eins og Finn frá Helsinki sé að læra pólsku. Þetta snýst ekki um ekta transliteringu, heldur skemmtilega og viljandi afskræmingu fyrir sögulegan tilgang.
+
+Aðgengilegir hreimar (8 tungumál):
+
+- enska (Samantha/Mark í Vocalizer, Zira/Hazel í OneCore)
+- franska (Thomas/Amelie í Vocalizer, Julie í OneCore)
+- þýska (Markus/Stefan í Vocalizer, Katja/Hedda í OneCore)
+- spænska (Jorge/Monica í Vocalizer, Helena í OneCore)
+- ítalska (Alice/Luca í Vocalizer, Elsa í OneCore)
+- finnska (Satu/Mikko í Vocalizer, Heidi í OneCore)
+- pólska (Ewa í Vocalizer, Paulina í OneCore)
+- rússneska (Milena í Vocalizer, Irina/Pavel/Yuri í OneCore — þessi er sérstakur, því í stað þess að "skemma" latneska stafi framkvæmir hann fulla transliteringu yfir í kyrillísku; án þess hefði rússneska röddin ekkert til að bera fram)
+
+Auk þess eru tvær hreinsunarvalkostir í hreimavalmyndinni: einn án tölunormalíseringar og annar með normalíseringu (breytir "15" í "fimmtán" fyrir vinnslu, því útlendingur myndi líklega ekki beygja þessa tölu rétt — sem bætir við áreiðanleika) og "Tag Fixer", sem einfaldlega setur ISO tungumálakóða í skrána án þess að skemma innihaldið (björgun þegar þýdd skrá þín hefur rangt tungumálakóða).
+
+
+Hvað er dulritun?
+-----------------
+
+Dulritanir eru textaleikir fyrir þrautir, málæfingar, gáfur. Ólíkt hreimum eru þau EKKI miðuð við ákveðna raddgervil — þau afskræma einfaldlega texta samkvæmt ákveðinni reglu. Aðgengilegar dulritanir (6):
+
+1. Texta Snúningur (lesa afturábak)
+   Hvert setning er snúið við staf fyrir staf, með stórum staf í upphafi og punkti/upphrópunarmerki/spurningarmerki í lokin. Fyrir snúninginn stækkar skriftin íslensk skammstafanir (t.d., þ.e., m.a., u.þ.b., o.s.frv.), því án þess myndu koma út fáránleikar eins og ".d.t".
+
+   Innblástur: verkefni úr íslenskri útgáfu af "The Traitors. Zdrajcy". Kynnirinn spilaði þátttakendum vinsælt barnalag sem var spilað afturábak. Viðbrögðin voru á borð við "hvaða tungumál er þetta? armenska? ungverska? finnska?" — en þetta var þekkt lag úr teiknimynd. Síðan kom í ljós að liðið í skóginum fékk texta lagsins afturábak og átti að syngja það í þeirri útgáfu — kastalaliðið átti að taka það upp, snúa upptökunni við og í orði kveðnu endurheimta lagið til að giska á.
+
+   Nákvæmlega sama skemmtilega misskilningur gerist þegar þú keyrir Texta Snúninginn í gegnum raddgervil. Frábært fyrir þemabundnar þrautir, flóttaherbergi, partýleiki.
+
+2. Typoglycemia (blandaður miðja orða)
+   Klassískur sálfræðilegur áhrif: "Þú gtuer lseið txeta í havða röð sem er, svo fmaralrega sem fystri og sðasíti sftaur hvres oðrs eru á rttuém satð." Skript blandar handahófskennt miðju hvers orðs lengra en 4 stafir, fyrsti og síðasti stafur eru á sínum stað. Frábært til að prófa "hversu mikið sé ég í raun og veru, og hversu mikið segir heilinn mér".
+
+3. Skemmd Sími / Slöngumál
+   Hvert "s", "z" eða "sz" er handahófskennt lengt í hvísl á lengd 4-8 stafa. Innblástur: Snecko úr leiknum "Slay the Spire". Áhrif: textinn hljómar eins og hann sé lesinn af slöngu með talgalla. Frábært fyrir undirlag fyrir persónu sem er ruglaður skriðdýr eða bilaður vélmenni með hvæsandi bilun.
+
+4. Sérhljóðabreyting (allt hljómar á "o")
+   Hvert sérhljóð í textanum er breytt í "o", með varðveislu íslenskra mýkinga (ci, si, ni, zi, dzi eru rétt meðhöndluð): "Góðan daginn, velkomin" → "Góðon doginn, volkomin". Því lengri texti, því fyndnari áhrif — og skjálesari les þetta með fullri sannfæringu, án þess að reyna að afkóða.
+
+5. Sterk Stam / Skemmd Vélmenni
+   Bætir stami við upphaf orða: "tölva" → "tö-tö-tölva", "sturtu" → "st-st-sturtu". Orð styttri en 3 stafir eru sleppt. Ef annar stafur orðsins er samhljóði, eru fyrstu tveir stafir endurteknir (hljómar náttúrulegra); ef sérhljóði — aðeins fyrsti.
+
+6. Cæsar Dulritun (klassík)
+   Elsta skjalfesta dulritun í sögunni (notuð í forn Róm). Hver stafur er færður um N stöður í íslenska stafrófinu (32 stafir, með diakritískum: AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ). Færslan er gefin upp í GUI í tölusviði; ef þú slærð inn 0, velur forritið handahófskennt gildi á bilinu 1-31 og sýnir það í skilaboðum, svo þú getir síðan afkóðað skilaboðin. Stafir utan stafrófsins (tölur, bil, greinarmerki) eru óbreyttir.
+
+
+Hvað er "Reżyser stilling"?
+---------------------------
+
+Mappan "rezyser/" inniheldur 4 skrár sem lýsa vinnustillingum aðalstúdíósins í forritinu:
+
+- tryb_burza.yaml      — Hugstormur (söguáætlun, 3 valkostir fyrir þróun sögunnar, anti-closure tilskipun)
+- tryb_skrypt.yaml     — Hrátt Handrit (merki [SFX], [Speaker: tilfinning], hljóðfræði persóna)
+- tryb_audiobook.yaml  — Hefðbundin Hljóðbók (hrein bókmenntaleg prósa, bann við samantektum og ramma)
+- postprod_tytuly.yaml — veiting bókmenntatitla á köflum eftir að öll sagan hefur verið búin til
+
+Inni í hverri af þessum skrám er verðmætasti hlutinn "kerfisáreiti" — löng leiðbeining fyrir gervigreindina um hvernig hún á að hegða sér í viðkomandi stillingu. Ef þér finnst t.d. að Hljóðbókarstillingin sé "of blómleg" eða Hugstormurinn leggi of oft til töfralausnir, geturðu stillt þessa texta eftir þínum smekk, vistað og forritið mun hlaða þína útgáfu næst þegar það er ræst. Engin forritun.
+
+
+Hvernig á að byrja að leika sér — þrjú erfiðleikastig
+-------------------------------------------
+
+STIG 1 — smávægileg stilling á núverandi hreim
+
+Ímyndaðu þér að franski hreimurinn í forritinu breyti "sz" í "sh", en þú telur að Frakki myndi frekar segja "sch" eða "ch". Engin vandamál.
+
+1. Ræstu forritið og farðu í Reglustjóra (Ctrl+4 eða fjórði hnappurinn á stikunni).
+2. Í skráatrénu til vinstri, stækkaðu "pl" → "akcenty" og smelltu á "francuski.yaml".
+3. Smelltu á "Opna í textaritli". Skráin opnast í Notepad Windows (eða þínum sjálfgefna textaritli).
+4. Skrunaðu niður í "zamiany:" kaflann. Finndu línuna með mynstrinu "sz" og breyttu "zamiana" gildinu í það sem þér hentar.
+5. Vistaðu skrána (Ctrl+S), lokaðu ritlinum.
+6. Farðu aftur í Reglustjóra og smelltu á "Endurnýja tré", lokaðu síðan og ræstu forritið aftur. Breytingin þín er nú virk.
+
+STIG 2 — bæta við nýjum hreim með afritun
+
+Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á því sem er líkast núverandi.
+
+1. Í Reglustjóra, veldu t.d. "finski.yaml" (finnska er nálægt sænsku hljóðfræðilega) og smelltu á "Afrita valda skrá".
+2. Reglustjórinn spyr um nýtt nafn — sláðu inn t.d. "svenski" (með litlum stöfum, án bils, án íslenskra stafa).
+3. Nýja skráin opnast í ritlinum. Breyttu reitum:
+      - "etykieta" — það sem þú sérð í forritsvalmyndinni, t.d. "Sænska (Alva / Oskar — OneCore/Vocalizer)"
+      - "opis" — stutt lýsing fyrir sjálfan þig til framtíðar
+      - "iso" — tveggja stafa tungumálakóði, fyrir sænsku "sv"
+4. Stilltu "zamiany" listann eftir sænskri hljóðfræði (t.d. bættu við "å → o", "ö → ö", fjarlægðu eða breyttu þeim sem eru sértæk fyrir finnska).
+5. Vistaðu, farðu á Heimasíðuna, smelltu á "🔄 Endurnýja hreima Reżysera úr YAML" og ræstu forritið aftur. Nýja sænska birtist í hreimavalmynd Poligloty (og ef þú bætir við persónu í Heimsbókina með merkinu "[Marek] - hefur sænskan hreim", mun Reżyser einnig þekkja það sjálfkrafa og nota það í samtölum hennar).
+
+STIG 3 — búa til eitthvað alveg nýtt
+
+Viltu skólaskrýmsli? Tungumál fornra riddara? Grasamál? Dulritun foreldra fyrir börnum?
+
+1. Í Reglustjóra, smelltu á "Ný regla skrá…".
+2. Veldu tegund (hreim, dulritun, Reżyser stilling, nýtt grunnmál, reiknirit dulritun). Fyrir venjuleg tilfelli mun forritið strax búa til tilbúið YAML sniðmát — þú breytir því eins og í stigi 2.
+3. Fyrir erfiðari tilfelli (reiknirit eins og "blöndun endinga" eða heilt nýtt grunnmál) mun Reglustjórinn sýna þér tilbúið áreiti til að líma í ChatGPT eða Claude. AI mun búa til fullkomna YAML skrá, þú einfaldlega afritar hana í möppuna. Þú þarft ekki að kunna forritun — það nægir að geta límt.
+
+
+Nokkrar hugmyndir að leikjum
+------------------------
+
+- Skólabekkur í íslenskutíma: verkefni "lesa brot úr bókmenntum í Poligloti með rússneskum hreim — þekkirðu höfundinn?". Sérstaklega dýrmætt fyrir blind börn, þar sem þau fá áhugaverða hljómun án þess að þurfa að lesa plakat með augunum.
+
+- Flóttaherbergi í bókasafni: undirbúðu brot úr ljóði í Texta Snúningnum, prentaðu (eða sendu í skilaboðum), þátttakendur þurfa annað hvort að lesa upphátt og taka upp, og síðan spila afturábak, eða einfaldlega skanna sjálfir með augunum frá enda. Lykillinn að skápnum fer til þeirra sem þekkja titil ljóðsins.
+
+- Heimahljóðleikrit fyrir eldri fjölskyldu: vistaðu ævintýrið "Ljóta andarunginn" í mismunandi hreimum (sögumaður á ensku, móðir önd á ítölsku, faðir önd á þýsku) og klipptu saman í Audacity. Sérstaklega skemmtilegt fyrir ömmur og afa, því þau greina "hver er að tala núna" bara eftir hljóminum.
+
+- Æfing fyrir leikara: keyrðu línuna þína í gegnum Slöngumál og reyndu að endurtaka í beinni. Æfir hvæs, öndun, stjórn á tungu.
+
+- Afmæliskort með þraut: færðu kveðjur með Cæsar Dulritun um 3 stöður, bættu við "lykill: færðu hvern staf um jafn margar stöður og þú ert gamall í dag". Afmælisbarnið þarf sjálft að finna afkóðunina. (Virkar best fyrir börn 7-12 ára; fullorðnir átta sig yfirleitt fljótt.)
+
+
+Getur eitthvað bilað hjá mér?
+---------------------------
+
+Í raun ekki. Forritið hleður YAML skrárnar á hreyfanlegan hátt og ef einhver er ranglega skráð, sleppir það einfaldlega henni og birtir viðvörun við ræsingu. Restin af reglum virkar eins og ekkert hafi gerst.
+
+Það versta sem getur gerst er að nýja skráin birtist einfaldlega ekki í valmynd forritsins. Þá:
+
+- farðu aftur í Reglustjóra, athugaðu hvort skráin sé sýnileg í trénu,
+- opnaðu hana aftur í textaritli og berðu saman uppbyggingu við nágrannaskrár (inndráttur, tvípunktar, gæsalappir),
+- ef þú ert virkilega fastur — afritaðu innihald skráarinnar þinnar, opnaðu ChatGPT og segðu "ég er með YAML skrá sem forritið hleður ekki, finndu villuna og sýndu leiðrétta útgáfu". Límdu skrána. AI leiðréttir hana yfirleitt á nokkrum sekúndum.
+
+Ekki eyða upprunalegu skránum úr pakkanum (angielski.yaml, cezar.yaml, podstawy.yaml o.s.frv.) — betra að "fela" þær með því að breyta viðbótinni úr ".yaml" í ".yaml.backup", ef þú vilt að þær hverfi úr valmyndinni. Ef þú skiptir um skoðun síðar, nægir að endurheimta viðbótina.
+
+
+Góða skemmtun!

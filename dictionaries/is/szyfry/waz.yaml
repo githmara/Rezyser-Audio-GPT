@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+#  DULMÁL: BROTINN SÍMI / ORMAMÁL
+#  Teygir siðan: hvert "s" eða "z" breytist í langan þys.
+#  Innblástur: Snecko úr leiknum "Slay the Spire".
+# -----------------------------------------------------------------------------
+id: waz
+etykieta: "Brotinn Sími (Ormamál, þys)"
+opis: |
+  Innblásinn af Snecko úr "Slay the Spire". Hvert "s" eða "z"
+  (óháð hástöfum) er tilfallandi teygð í þys af lengdinni `min_syk`–`max_syk`
+  stafir.
+
+  Í íslensku er "s" mjög algengt — þetta skapar sérstaklega dramatískt
+  "ormamál"-áhrif.
+iso: is
+kategoria: szyfr
+kolejnosc: 30
+algorytm: waz
+
+# Parametrar reikniritsins
+min_syk: 4
+max_syk: 8
+
+# Regex sem passar við hljóðana sem á að teygja (óháð hástöfum).
+wzor_syku: "(?i)(s|z)"

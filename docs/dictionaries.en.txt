@@ -39,8 +39,8 @@ The folder structure looks like this:
         ├── szyfry/                    6 cipher and game files
         └── rezyser/                   4 AI Director mode files
 
-Currently fully implemented are: Polski, English, Suomi, Русский
-(4 base languages). Each has its own "dictionaries/<code>/" package with
+Currently fully implemented are: Polski, English, Suomi, Íslenska, Русский
+(5 base languages). Each has its own "dictionaries/<code>/" package with
 diacritics, alphabet, and phonetic rules operating on text in that language
 — the application automatically detects the source language via
 lingua-language-detector (per paragraph) and loads the appropriate package

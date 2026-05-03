@@ -1,0 +1,30 @@
+# -----------------------------------------------------------------------------
+#  DULMÁL: SÉRHLJÓÐASKIPTARI
+#  Skiptir öllum sérhljóðum með 'o' (eða 'O').
+# -----------------------------------------------------------------------------
+id: samogloskowiec
+etykieta: "Sérhljóðaskiptari (Allt brunnar 'O')"
+opis: |
+  "Hvert sem þú lítir — bara O-in" áhrifin. Þrep 1 og 2 (pólsk mýkingarlogík)
+  eiga ekki við í íslensku og eru vísvitandi tóm. Eitt þrep á íslensku:
+  hvert sérhljóð er skipt með 'o' (eða 'O').
+
+  Sérhljóðaríkleiki íslensku (a á e é i í o ó u ú y ý æ ö — 14 sérhljóðar!)
+  gerir þetta sérstaklega dramatískt og fjörmikið.
+iso: is
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# Þrep 1 og 2 (pólsk mýking) — vísvitandi tóm fyrir íslensku.
+# Vélin tekur við tómum listum án villu.
+zmiekszenia_przed_samogloska: []
+zmiekszenia_przed_spolgloska: []
+
+# Þrep 3: sérhljóðaskipti.
+# `samogloski_*` eru strengir fyrir regex-klasa.
+# Íslenskir sérhljóðar: a á e é i í o ó u ú y ý æ ö (+ hástafir)
+samogloski_male:             "aáeéiíoóuúyýæö"
+samogloski_wielkie:          "AÁEÉIÍOÓUÚYÝÆÖ"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"

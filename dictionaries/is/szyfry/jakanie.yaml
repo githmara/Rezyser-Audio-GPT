@@ -1,0 +1,29 @@
+# -----------------------------------------------------------------------------
+#  DULMÁL: HÖRPUNARTAK / BROTINN VÉLMENNI
+#  Bætir við endurtekningum á fyrsta staf orðs með bandstriki.
+# -----------------------------------------------------------------------------
+id: jakanie
+etykieta: "Þungt Hörpunartak / Brotinn Vélmenni"
+opis: |
+  Fyrir hvert orð sem er >= `min_dlugosc_slowa` stafir, er handahófskennt
+  fjöldi endurtekninga á fyrsta (eða fyrstu tveimur) stöfum valinn og bætt
+  við í byrjun orðsins með bandstriki: "stelpa" → "st-st-st-stelpa", "ég" →
+  "ég" (of stutt).
+
+  Ef annar stafur orðsins er samhljóðar (er ekki í strengnum `samogloski`),
+  þá inniheldur hörpunin TVOLUNDA fyrstu stafi — þetta hljómar náttúrulegra
+  (t.d. "þrjótur" → "þr-þr-þrjótur").
+iso: is
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Parametrar reikniritsins
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Sérhljóðar — ef annar stafur orðsins tilheyrir þessum hópi, er aðeins
+# fyrsti stafurinn endurtekinn. Annars eru fyrstu tveir stafir endurteknir.
+# Íslenskir sérhljóðar: a á e é i í o ó u ú y ý æ ö (14 sérhljóðar)
+samogloski: "aáeéiíoóuúyýæöAÁEÉIÍOÓUÚYÝÆÖ"

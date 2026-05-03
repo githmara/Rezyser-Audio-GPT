@@ -1,0 +1,65 @@
+# -----------------------------------------------------------------------------
+#  HLJÓÐBÓKARSTILLING – Metaseljarahöfundur (Hefðbundin Prósa)
+#  Framleiðir þétt, klassískt bókmenntaprósa án hljóðtaga.
+#  Styður eftirvinnslu: kaflafyrirsagnagenerator (postprod_tytuly.yaml).
+# -----------------------------------------------------------------------------
+id: audiobook
+etykieta: "Hljóðbók (Prósa, kaflar, SKRÁARSKRÁNING)"
+kategoria: tryb
+kolejnosc: 30
+
+# --- OpenAI-parametrar ---
+model: gpt-4o
+temperatura: 0.85
+jezyk_odpowiedzi: á íslensku
+
+# Svar bætt við skrána skrypty/<nafn>.txt
+zapis_do_pliku: true
+
+# --- Kerfisprompt ---
+# Tiltækir staðgenglar: {world_context}, {jezyk_odpowiedzi}
+prompt_systemowy: |
+  # Hlutverk: Metaseljarahöfundur (Hefðbundin Prósa)
+
+  Þú skrifar **EINGÖNGU {jezyk_odpowiedzi}**. Úttakið þitt er **100% HRÁT BÓKMENNTAPRÓSA**.
+
+  > **BÓKLEGUR STÍLL:** Þú ert í bókastillingu. Núll hljóðtöggum `[SFX]`, núll `[Persóna]`-tögum. Vefur samtal náttúrulega inn í ríkar frásögur með þankstrikum (t.d. *— Þú getur ekki gert þetta — sagði hann.*).
+
+  ### 🌍 Járnreglur heimsins:
+  {world_context}
+
+  ### 📖 Reglur hljóðbókarstillingar:
+  1. **ÞÉTT, KLASSÍSKT PRÓSA:** Einbeittu þér að djúpum lýsingum, skynjunum og sálfræði persónanna. Skrifaðu langa kafla. Sýndu frekar en lýsðu.
+  2. **HREINN TEXTI:** Slétt bókmenntamál — algjört bann á að bæta við tögum í hornklofa.
+  3. **ALGJÖRT MARKDOWN-BAN:** Engar fyrirsagnir (eins og "Kafli 1", "Atriði 2"), engar fyrirsagnir né listar.
+  4. **LOKUN ATRIÐIS:** - SJÁLFGEFIÐ (ANDLOKUN): Slíttu textann án þess að loka atriðinu til að viðhalda þunga.
+     - UNDANTEKNING (FINAL/EPILOGI): Ef þetta er lokun, slökktu á frásögninni á ánægjulegan, bókmenntanlegan máta.
+
+# --- Samhengileg viðbætur ---
+# Hljóðbókarstilling notar ekki minnisstýrðar viðbætur í grunnútgáfu —
+# kerfisprompt er nægur.
+sufiksy: {}
+
+# --- Notendafyrirmæli viðbót (role=user) ---
+przypomnienie_uzytkownika: |
+
+
+  (MIKILVÆG ÁMINNIG: BÓK-stilling. Núll hljóð-/hljóðtaga. Langt, þétt prósa þankstriksamtal. Ekkert Markdown, engar fyrirsagnir. BRUTAL ANDLOKUN: slíttu textann í spennu eða mitti í aðgerð, nema þetta sé skýr sögufinal.)
+
+# --- Vélarstýring ---
+slowa_wyzwalajace:
+  # Kemur í veg fyrir að samantekt sé skráð í sögusskrána.
+  streszczenie:
+    - samantekt
+    - dragðu saman
+    - gerðu samantekt
+    - endurtaktu
+
+# Athugið um gervigreindarhöfnunargreiningu:
+# Frá útgáfu 13.0 fer greining fram í gegnum altækan [ODRZUCENIE_AI]-tagg
+# sem KLAUZULA_ODRZUCENIA_DOMYSLNA þvingar (przepisy_rezysera.py).
+# Virkar óháð `jezyk_odpowiedzi`.
+
+# --- Eftirvinnsla ---
+# Hljóðbók notar EKKI hljóðfræðivél (engar persónutaggar).
+stosuj_akcenty_fonetyczne: false

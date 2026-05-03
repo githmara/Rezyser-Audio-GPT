@@ -1,0 +1,71 @@
+# -----------------------------------------------------------------------------
+#  ÞÝSKUR HREIMUR (íslenska → þýskur TTS)
+#  Fyrir talgervla: Hedda / Stefan / Katja / Markus (þýskur TTS).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "Þýskaland (t.d. Hedda / Stefan / Katja)"
+opis: |
+  Aðlagar íslenskan texta þýskum talgervla (Hedda / Stefan / Katja / Markus).
+
+  Þýskur TTS hefur ótrúlega góða náttúrulega samhæfni við íslensku:
+    - j   = /j/  í báðum (þýskt "ja" = "já") ✓
+    - h   = /h/  í báðum ✓
+    - ö   = /ø/  í báðum — þýskur TTS les ö rétt ✓
+    - kk/tt/pp — tvíhljóðar í báðum ✓
+
+  Sjálfvirkir þýskir hreimáhrif (engar breytingar þurfa):
+    - r  → hverfhlyð /ʁ/ (þýskt "r" — sterkasti hreimáhrifið!)
+    - s  fyrir sérhljóð → /z/ (hljóðrænt): "saga" → "zaga"-hljóð
+
+  Nauðsynlegar breytingar:
+    - v (/v/) → w   MIKILVÆGT: Þýskur TTS les v sem /f/ (þar sem þýsk v
+                    í innlendum orðum = /f/). Þýskt w = /v/ → leiðréttir þetta.
+    - Þ/þ → t       Þýska hefur engan /θ/ (þótt sumar mállýskur hafi hann).
+    - Ð/ð → d
+    - Æ/æ → ei      Þýskt "ei" = /ai/ — FULLKOMIN samsvörun við íslenskt æ = /ai/!
+    - Sérhljóðar með broddmerki → ASCII.
+  Ö látinn vera — þýskur TTS framleiðir /ø/ sjálfkrafa.
+iso: de
+kategoria: akcent
+kolejnosc: 60
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Hljóðfræðilegar skiptingar ---
+# Röðun: v → w og Þ/Ð/Æ fyrst, þá sérhljóðar.
+zamiany:
+  # --- v → w (MIKILVÆGT: þýskur TTS les v sem /f/, w sem /v/) ---
+  - { wzor: "v",  zamiana: "w"  }
+  - { wzor: "V",  zamiana: "W"  }
+
+  # --- Þ/þ → t (engin /θ/ í staðalþýsku) ---
+  - { wzor: "Þ",  zamiana: "T"  }
+  - { wzor: "þ",  zamiana: "t"  }
+
+  # --- Ð/ð → d ---
+  - { wzor: "Ð",  zamiana: "D"  }
+  - { wzor: "ð",  zamiana: "d"  }
+
+  # --- Æ/æ → ei (þýskt ei = /ai/ = íslenskt æ ✓) ---
+  - { wzor: "Æ",  zamiana: "Ei" }
+  - { wzor: "æ",  zamiana: "ei" }
+
+  # --- Ö látinn vera — þýskur TTS les /ø/ rétt ✓ ---
+
+  # --- Sérhljóðar með broddmerki → ASCII ---
+  - { wzor: "Á",  zamiana: "A"  }
+  - { wzor: "á",  zamiana: "a"  }
+  - { wzor: "É",  zamiana: "E"  }
+  - { wzor: "é",  zamiana: "e"  }
+  - { wzor: "Í",  zamiana: "I"  }
+  - { wzor: "í",  zamiana: "i"  }
+  - { wzor: "Ó",  zamiana: "O"  }
+  - { wzor: "ó",  zamiana: "o"  }
+  - { wzor: "Ú",  zamiana: "U"  }
+  - { wzor: "ú",  zamiana: "u"  }
+  - { wzor: "Ý",  zamiana: "I"  }
+  - { wzor: "ý",  zamiana: "i"  }

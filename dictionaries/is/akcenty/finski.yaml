@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------------
+#  FINNSKUR HREIMUR (íslenska → finnskur TTS)
+#  Fyrir talgervla: Heidi / Onni / finnskir raddar (finnskur TTS).
+# -----------------------------------------------------------------------------
+id: finski
+etykieta: "Finnska (t.d. Heidi / Onni)"
+opis: |
+  Aðlagar íslenskan texta finnskum talgervla (Heidi / Onni).
+  Finnsk og íslensk hljóðfræði er mjög samhæf á mörgum sviðum:
+    - j   = /j/  í báðum ✓
+    - v   = /v/  í báðum (finnsk v = /ʋ/, nálægt) ✓
+    - h   = /h/  í báðum ✓
+    - ö   = /ø/  í báðum — finnskur TTS les ö rétt ✓
+    - kk/tt/pp — tvíhljóðar í báðum ✓
+
+  Nauðsynlegar breytingar:
+    - Þ/þ (/θ/) → t   Finnska hefur engan /θ/ — Finnar nota /t/.
+    - Ð/ð (/ð/) → d   Finnsk /d/ er nánast.
+    - Æ/æ (/ai/) → ai Finnsk "ai" = /ai/ ✓ — fullkomin samsvörun!
+    - Sérhljóðar með broddmerki: á é í ó ú ý → ASCII (finnskur TTS les
+      þá ófyrirsjáanlega — þeir eru ekki finnsk stöfrum).
+  Ö er látinn vera — finnskur TTS framleiðir /ø/ sjálfkrafa.
+iso: fi
+kategoria: akcent
+kolejnosc: 30
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Hljóðfræðilegar skiptingar ---
+# Röðun: Þ/Ð/Æ ÁÐUR EN sérhljóðar með broddmerki.
+zamiany:
+  # --- Þ/þ → t (engin /θ/ í finnsku) ---
+  - { wzor: "Þ",  zamiana: "T"  }
+  - { wzor: "þ",  zamiana: "t"  }
+
+  # --- Ð/ð → d ---
+  - { wzor: "Ð",  zamiana: "D"  }
+  - { wzor: "ð",  zamiana: "d"  }
+
+  # --- Æ/æ → ai (finnsk /ai/ = íslenskt æ = /ai/ ✓) ---
+  - { wzor: "Æ",  zamiana: "Ai" }
+  - { wzor: "æ",  zamiana: "ai" }
+
+  # --- Ö látinn vera — finnskur TTS les hann sem /ø/ ✓ ---
+
+  # --- Sérhljóðar með broddmerki → ASCII ---
+  - { wzor: "Á",  zamiana: "A"  }
+  - { wzor: "á",  zamiana: "a"  }
+  - { wzor: "É",  zamiana: "E"  }
+  - { wzor: "é",  zamiana: "e"  }
+  - { wzor: "Í",  zamiana: "I"  }
+  - { wzor: "í",  zamiana: "i"  }
+  - { wzor: "Ó",  zamiana: "O"  }
+  - { wzor: "ó",  zamiana: "o"  }
+  - { wzor: "Ú",  zamiana: "U"  }
+  - { wzor: "ú",  zamiana: "u"  }
+  - { wzor: "Ý",  zamiana: "Y"  }
+  - { wzor: "ý",  zamiana: "y"  }

@@ -1,0 +1,148 @@
+# -----------------------------------------------------------------------------
+#  RÚSSNESKUR HREIMUR (íslenska → rússneskur TTS)
+#  Fyrir talgervla: Milena / Irina / Yuri / Pavel (rússneskur TTS).
+# -----------------------------------------------------------------------------
+id: rosyjski
+etykieta: "Rússland (t.d. Milena / Irina / Yuri / Pavel)"
+opis: |
+  Þýðir íslenskan texta yfir á kýrilískt letur þannig að rússneskur talgervill
+  (NVDA → Vocalizer Milena, eSpeak "ru", OneCore Irina/Pavel/Yuri) les
+  íslenskan texta með rússneskum hreim.
+
+  Séríslenskar sérhljóðar:
+    - á  → а   (beint)
+    - é  → э   (hart e — palataliserar ekki)
+    - í  → и
+    - ó  → о
+    - ú  → у
+    - ý  → и   (íslenskt ý = /iː/ → rússneskt и = /i/)
+    - æ  → ай  (íslenskt /ai/ → rússneskur /aj/ ✓)
+    - ö  → ё   (/ø/ → /ʲo/, líkt og finnska → rússneskt)
+
+  Séríslenskar samhljóðar:
+    - Þ/þ → с   (/θ/ → Rússar nota /s/ sem nálgun)
+    - Ð/ð → д   (/ð/ → /d/)
+    - h   → х   (rússneskt /x/ sterkara en íslenskt /h/ — hreimáhrif)
+
+  Staðlaðar latneskur → kýrillískt: sömu reglur og finnska.
+  j + sérhljóð (ja/je/jo/ju) → jótaðar rúnar ÁÐUR EN j → й-reglan.
+iso: ru
+kategoria: akcent
+kolejnosc: 45
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+# Séríslenskir stafir eru skráðir handvirkt í zamiany — EKKI sjálfvirkt.
+usun_polskie_znaki: false
+# Tengsl staka latneskra stafa virka ekki eftir kýrillíska þýðingu.
+skleja_pojedyncze_litery: false
+
+# -----------------------------------------------------------------------------
+# KRITIKAL RÖÐUN SKIPTA:
+#   1. Séríslenskir stafir (Þ/þ, Ð/ð, Æ/æ, Á/á, É/é, Í/í, Ó/ó, Ú/ú, Ý/ý, Ö/ö)
+#      ÁÐUR EN venjulegar latneskur → kýrillískt (til að koma í veg fyrir
+#      tvöfaldar skiptingar).
+#   2. j + aðalsérhljóðar (ja/je/jo/ju) ÁÐUR EN j → й.
+#   3. j → й (eftir j+sérhljóð-reglur).
+#   4. Einstaka sérhljóðar → kýrillískt.
+#   5. Samhljóðar → kýrillískt (h → х skapar hreiminn).
+# -----------------------------------------------------------------------------
+zamiany:
+  # --- 1a. Séríslenskt tvíhljóð: Æ/æ → ай ---
+  - { wzor: "Æ",  zamiana: "Ай"  }
+  - { wzor: "æ",  zamiana: "ай"  }
+
+  # --- 1b. Séríslenskir samhljóðar ---
+  - { wzor: "Þ",  zamiana: "С"   }
+  - { wzor: "þ",  zamiana: "с"   }
+  - { wzor: "Ð",  zamiana: "Д"   }
+  - { wzor: "ð",  zamiana: "д"   }
+
+  # --- 1c. Séríslenskir sérhljóðar → kýrillískt ---
+  - { wzor: "Á",  zamiana: "А"   }
+  - { wzor: "á",  zamiana: "а"   }
+  - { wzor: "É",  zamiana: "Э"   }
+  - { wzor: "é",  zamiana: "э"   }
+  - { wzor: "Í",  zamiana: "И"   }
+  - { wzor: "í",  zamiana: "и"   }
+  - { wzor: "Ó",  zamiana: "О"   }
+  - { wzor: "ó",  zamiana: "о"   }
+  - { wzor: "Ú",  zamiana: "У"   }
+  - { wzor: "ú",  zamiana: "у"   }
+  - { wzor: "Ý",  zamiana: "И"   }
+  - { wzor: "ý",  zamiana: "и"   }
+  - { wzor: "Ö",  zamiana: "Ё"   }
+  - { wzor: "ö",  zamiana: "ё"   }
+
+  # --- 2. j + aðalsérhljóðar (jótaðar rúnar) ---
+  - { wzor: "ja", zamiana: "я"   }
+  - { wzor: "Ja", zamiana: "Я"   }
+  - { wzor: "JA", zamiana: "Я"   }
+  - { wzor: "je", zamiana: "е"   }
+  - { wzor: "Je", zamiana: "Е"   }
+  - { wzor: "JE", zamiana: "Е"   }
+  - { wzor: "jo", zamiana: "ё"   }
+  - { wzor: "Jo", zamiana: "Ё"   }
+  - { wzor: "JO", zamiana: "Ё"   }
+  - { wzor: "ju", zamiana: "ю"   }
+  - { wzor: "Ju", zamiana: "Ю"   }
+  - { wzor: "JU", zamiana: "Ю"   }
+
+  # --- 3. Eftirstandandi j → й ---
+  - { wzor: "j",  zamiana: "й"   }
+  - { wzor: "J",  zamiana: "Й"   }
+
+  # --- 4. Einstaka sérhljóðar → kýrillískt ---
+  - { wzor: "a",  zamiana: "а"   }
+  - { wzor: "A",  zamiana: "А"   }
+  - { wzor: "e",  zamiana: "э"   }
+  - { wzor: "E",  zamiana: "Э"   }
+  - { wzor: "i",  zamiana: "и"   }
+  - { wzor: "I",  zamiana: "И"   }
+  - { wzor: "o",  zamiana: "о"   }
+  - { wzor: "O",  zamiana: "О"   }
+  - { wzor: "u",  zamiana: "у"   }
+  - { wzor: "U",  zamiana: "У"   }
+  - { wzor: "y",  zamiana: "ы"   }
+  - { wzor: "Y",  zamiana: "Ы"   }
+
+  # --- 5. Samhljóðar → kýrillískt (h → х skapar hreiminn) ---
+  - { wzor: "b",  zamiana: "б"   }
+  - { wzor: "B",  zamiana: "Б"   }
+  - { wzor: "c",  zamiana: "ц"   }
+  - { wzor: "C",  zamiana: "Ц"   }
+  - { wzor: "d",  zamiana: "д"   }
+  - { wzor: "D",  zamiana: "Д"   }
+  - { wzor: "f",  zamiana: "ф"   }
+  - { wzor: "F",  zamiana: "Ф"   }
+  - { wzor: "g",  zamiana: "г"   }
+  - { wzor: "G",  zamiana: "Г"   }
+  - { wzor: "h",  zamiana: "х"   }
+  - { wzor: "H",  zamiana: "Х"   }
+  - { wzor: "k",  zamiana: "к"   }
+  - { wzor: "K",  zamiana: "К"   }
+  - { wzor: "l",  zamiana: "л"   }
+  - { wzor: "L",  zamiana: "Л"   }
+  - { wzor: "m",  zamiana: "м"   }
+  - { wzor: "M",  zamiana: "М"   }
+  - { wzor: "n",  zamiana: "н"   }
+  - { wzor: "N",  zamiana: "Н"   }
+  - { wzor: "p",  zamiana: "п"   }
+  - { wzor: "P",  zamiana: "П"   }
+  - { wzor: "q",  zamiana: "к"   }
+  - { wzor: "Q",  zamiana: "К"   }
+  - { wzor: "r",  zamiana: "р"   }
+  - { wzor: "R",  zamiana: "Р"   }
+  - { wzor: "s",  zamiana: "с"   }
+  - { wzor: "S",  zamiana: "С"   }
+  - { wzor: "t",  zamiana: "т"   }
+  - { wzor: "T",  zamiana: "Т"   }
+  - { wzor: "v",  zamiana: "в"   }
+  - { wzor: "V",  zamiana: "В"   }
+  - { wzor: "w",  zamiana: "в"   }
+  - { wzor: "W",  zamiana: "В"   }
+  - { wzor: "x",  zamiana: "кс"  }
+  - { wzor: "X",  zamiana: "Кс"  }
+  - { wzor: "z",  zamiana: "з"   }
+  - { wzor: "Z",  zamiana: "З"   }

@@ -1,0 +1,71 @@
+# -----------------------------------------------------------------------------
+#  SPÆNSKUR HREIMUR (íslenska → spænskur TTS)
+#  Fyrir talgervla: Helena / Pablo / Sabina (spænskur TTS).
+# -----------------------------------------------------------------------------
+id: hiszpanski
+etykieta: "Spánn (t.d. Helena / Pablo)"
+opis: |
+  Aðlagar íslenskan texta spænskum talgervla (Helena / Pablo / Sabina).
+  Leysir tvö mikilvæg vandamál í réttri röð:
+
+  VANDAMÁL 1 — j → /x/ (hálshljóð, "jota"):
+    Spænskur TTS les "j" sem /x/. Íslenskt j = /j/ (mjúkt).
+    Leiðrétting: j → y (spænskt y = /j/ = íslenskt j).
+
+  VANDAMÁL 2 — h er þögull í spænsku:
+    Íslenskt h = /h/ (alltaf borið fram). Í spænsku er "h" þögnin.
+    Leiðrétting: h → j (EFTIR j → y er búið). Spænskt j = /x/ ≈ sterk h.
+    "Helgi" → j → y (engin j): "Helgi" → h → j: "jelgi" → Helena
+    les: /xelɣi/ — heyranleg gómkverkjandi /x/ ✓
+
+  RÖÐUN ER MIKILVÆG: Fyrst j → y, svo h → j. Öfug röðun þvælar.
+
+  Spænskar stafar á, é, í, ó, ú eru LÁTNAR VERA — Helena les þá rétt
+  sem áherslusettar sérhljóðar (fullkomin samsvörun) ✓
+
+  Séríslenskir stafir:
+    - Þ/þ → z   Kastílískt spænskt z = /θ/ ✓ (Helenaútgáfa les þetta rétt!).
+    - Ð/ð → d
+    - Æ/æ → e
+    - Ö/ö → e   Spænskt TTS hefur engan /ø/.
+    - Ý/ý → i   Spænskt y ætti frekar við sem samhljóð.
+iso: es
+kategoria: akcent
+kolejnosc: 70
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Hljóðfræðilegar skiptingar ---
+# KRITIKAL RÖÐUN (lesa opis hér að ofan!):
+#   1. j → y   (FYRST: íslenskt /j/ → spænskt y = /j/)
+#   2. h → j   (SÍÐAN: íslenskt /h/ → spænskt j = /x/ ≈ sterk h)
+#   3. Þ/Ð/Æ/Ö
+#   4. Ý → i
+zamiany:
+  # --- 1. j → y (EÐAL FYRST) ---
+  - { wzor: "j",  zamiana: "y"  }
+  - { wzor: "J",  zamiana: "Y"  }
+
+  # --- 2. h → j (SÍÐAN, eftir j → y) ---
+  - { wzor: "h",  zamiana: "j"  }
+  - { wzor: "H",  zamiana: "J"  }
+
+  # --- 3. Séríslenskir stafir ---
+  - { wzor: "Þ",  zamiana: "Z"  }
+  - { wzor: "þ",  zamiana: "z"  }
+  - { wzor: "Ð",  zamiana: "D"  }
+  - { wzor: "ð",  zamiana: "d"  }
+  - { wzor: "Æ",  zamiana: "E"  }
+  - { wzor: "æ",  zamiana: "e"  }
+  - { wzor: "Ö",  zamiana: "E"  }
+  - { wzor: "ö",  zamiana: "e"  }
+
+  # --- á é í ó ú látnar vera — spænskur TTS les þær rétt ✓ ---
+
+  # --- 4. Ý → i (spænskt y virkar betur sem samhljóð) ---
+  - { wzor: "Ý",  zamiana: "I"  }
+  - { wzor: "ý",  zamiana: "i"  }

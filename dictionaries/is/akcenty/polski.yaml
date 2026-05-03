@@ -1,0 +1,63 @@
+# -----------------------------------------------------------------------------
+#  PÓLSKUR HREIMUR (íslenska → pólskur TTS)
+#  Fyrir talgervla: Ewa / Adam / Maja (pólskur TTS).
+# -----------------------------------------------------------------------------
+id: polski
+etykieta: "Pólska (t.d. Ewa / Adam / Maja)"
+opis: |
+  Aðlagar íslenskan texta að pólskum talgervla (Ewa / Adam / Maja).
+
+  Séríslenskir stafir sem þurfa meðhöndlun:
+    - Þ/þ (/θ/) → t   Pólska hefur engan /θ/ — /t/ er nánasta hljóðlíking.
+    - Ð/ð (/ð/) → d   Pólska /d/ er beint nálægt /ð/.
+    - Æ/æ (/ai/) → e  Tvíhljóð → næsta einfaldur sérhljóðar.
+    - Ö/ö (/ø/) → e   Pólska hefur engan /ø/ — /e/ er nánast.
+
+  Sérhljóðar með broddmerki (á é í ó ú ý) eru skráðir til ASCII — pólskur TTS
+  les þá ófyrirsjáanlega. Sérstaklega: ó → o (pólskt ó er /u/, fjarri
+  íslenskum /oʊ/).
+
+  Athugið: Pólskur TTS les "h" sem /x/ (gómhljóð) í stað íslensks /h/ —
+  þetta er hluti hreims og er látið vera.
+iso: pl
+kategoria: akcent
+kolejnosc: 35
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Hljóðfræðilegar skiptingar ---
+# Röðun: séríslenskir stafir fyrst, síðan sérhljóðar með broddmerki.
+zamiany:
+  # --- Þ/þ → t (engin /θ/ í pólsku) ---
+  - { wzor: "Þ",  zamiana: "T" }
+  - { wzor: "þ",  zamiana: "t" }
+
+  # --- Ð/ð → d (/ð/ → /d/) ---
+  - { wzor: "Ð",  zamiana: "D" }
+  - { wzor: "ð",  zamiana: "d" }
+
+  # --- Æ/æ → e (tvíhljóð /ai/ → /e/) ---
+  - { wzor: "Æ",  zamiana: "E" }
+  - { wzor: "æ",  zamiana: "e" }
+
+  # --- Ö/ö → e (/ø/ → /e/) ---
+  - { wzor: "Ö",  zamiana: "E" }
+  - { wzor: "ö",  zamiana: "e" }
+
+  # --- Sérhljóðar með broddmerki → ASCII ---
+  - { wzor: "Á",  zamiana: "A" }
+  - { wzor: "á",  zamiana: "a" }
+  - { wzor: "É",  zamiana: "E" }
+  - { wzor: "é",  zamiana: "e" }
+  - { wzor: "Í",  zamiana: "I" }
+  - { wzor: "í",  zamiana: "i" }
+  - { wzor: "Ó",  zamiana: "O" }
+  - { wzor: "ó",  zamiana: "o" }
+  - { wzor: "Ú",  zamiana: "U" }
+  - { wzor: "ú",  zamiana: "u" }
+  - { wzor: "Ý",  zamiana: "Y" }
+  - { wzor: "ý",  zamiana: "y" }

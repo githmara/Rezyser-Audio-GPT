@@ -1,0 +1,78 @@
+# -----------------------------------------------------------------------------
+#  FRANSKUR HREIMUR (íslenska → franskur TTS)
+#  Fyrir talgervla: Hortense / Paul / Julie (franskur TTS).
+# -----------------------------------------------------------------------------
+id: francuski
+etykieta: "Frakkland (t.d. Hortense / Paul / Julie)"
+opis: |
+  Aðlagar íslenskan texta frönskum talgervla (Hortense / Paul / Julie).
+  Franska gefur tvær einstakar samsvörun við íslenska hljóðfræði:
+    - Ö/ö (/ø/) → eu  Franskt eu = /ø/ — FULLKOMIN samsvörun!
+                       "Björn" → "Bjeur n" → Hortense les /bjøʁn/ ≈ ✓
+
+  Mikilvæg vandamál:
+    - j → y   Franskt j = /ʒ/ ≠ íslenskt j = /j/.
+              Leiðrétting: j → y (franskt y = /j/ í upphafi atkvæðis).
+              KRITIKAL RÖÐUN: Þ → th og Ð → d ÁÐUR EN j → y,
+              þannig að upprunalegt j breytist í y (= /j/)
+              en h í "th"-skiptunum fer í gegnum h → þögnina.
+
+  Þekkt takmörkun: h → þögnin í frönskum TTS (íslenskt /h/ hverfur).
+  "Hrafn" → Hortense les "rafn". Þetta er hluti af frönskum hreim — ólægilegt.
+
+  Franskar sérhljóðar é/è/â o.s.frv. eru látnar vera þar sem franskt TTS
+  les þær. Séríslenskar táknar eru skráðar niður:
+    - Þ/þ → t   (engin /θ/ í frönskunni)
+    - Ð/ð → d
+    - Æ/æ → e   (/ai/ → franskur /e/)
+    - Sérhljóðar á é í ó ú ý → ASCII.
+iso: fr
+kategoria: akcent
+kolejnosc: 50
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Hljóðfræðilegar skiptingar ---
+# KRITIKAL RÖÐUN:
+#   1. Þ/þ → t, Ð/ð → d  (FYRST: svo h í "th" fer síðar í þögnina)
+#   2. j → y              (SÍÐAN: íslenskt /j/ → franskt y = /j/)
+#   3. Ö/ö → eu           (FULLKOMIN samsvörun /ø/)
+#   4. Æ/æ, sérhljóðar
+zamiany:
+  # --- 1. Þ/þ → t (EÐAL FYRST) ---
+  - { wzor: "Þ",  zamiana: "T"  }
+  - { wzor: "þ",  zamiana: "t"  }
+
+  # --- Ð/ð → d ---
+  - { wzor: "Ð",  zamiana: "D"  }
+  - { wzor: "ð",  zamiana: "d"  }
+
+  # --- 2. j → y (eftir Þ/Ð-skiptingar) ---
+  - { wzor: "j",  zamiana: "y"  }
+  - { wzor: "J",  zamiana: "Y"  }
+
+  # --- 3. Ö/ö → eu (FULLKOMIN /ø/ í frönskunni) ---
+  - { wzor: "Ö",  zamiana: "Eu" }
+  - { wzor: "ö",  zamiana: "eu" }
+
+  # --- 4. Æ/æ → e (/ai/ → franskt /e/) ---
+  - { wzor: "Æ",  zamiana: "E"  }
+  - { wzor: "æ",  zamiana: "e"  }
+
+  # --- Sérhljóðar með broddmerki → ASCII ---
+  - { wzor: "Á",  zamiana: "A"  }
+  - { wzor: "á",  zamiana: "a"  }
+  - { wzor: "É",  zamiana: "E"  }
+  - { wzor: "é",  zamiana: "e"  }
+  - { wzor: "Í",  zamiana: "I"  }
+  - { wzor: "í",  zamiana: "i"  }
+  - { wzor: "Ó",  zamiana: "O"  }
+  - { wzor: "ó",  zamiana: "o"  }
+  - { wzor: "Ú",  zamiana: "U"  }
+  - { wzor: "ú",  zamiana: "u"  }
+  - { wzor: "Ý",  zamiana: "I"  }
+  - { wzor: "ý",  zamiana: "i"  }

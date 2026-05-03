@@ -1,0 +1,34 @@
+# -----------------------------------------------------------------------------
+#  DULMÁL: TEXTASNÚNINGUR
+#  Þýðir skammstafanir og les hverja setningu afturábak.
+#  Innblástur: verkefni úr leiknum "The Traitors / Zdrajcy".
+# -----------------------------------------------------------------------------
+id: odwracanie
+etykieta: "Textasnúningur (Baklestur með hástaf)"
+opis: |
+  Fyrst er öllum algengum íslenskum skammstöfunum þýtt út (t.d. → til dæmis,
+  þ.e. → það er, m.a. → meðal annars o.s.frv.). Þannig hljómar snúin setning
+  á skynsamlegan hátt og framleiðir ekki fáránlegar ".simæd lit" niðurstöður.
+  Síðan er hver setning snúin staf fyrir staf, greinarmerki er varðveitt
+  og fyrsti stafurinn gerður að hástaf.
+iso: is
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# -----------------------------------------------------------------------------
+# Þýðingar skammstafana — REGEX-snið.
+# Hvert {wzor, zamiana} par er notað áður en snúið er við.
+# Bættu við nýrri skammstöfun með því að bæta við nýrri línu.
+# -----------------------------------------------------------------------------
+rozwiniecia:
+  - { wzor: '\bt\.d\.\s',          zamiana: "til dæmis "        }
+  - { wzor: '\bþ\.e\.\s',          zamiana: "það er "            }
+  - { wzor: '\bm\.a\.\s',          zamiana: "meðal annars "      }
+  - { wzor: '\bu\.þ\.b\.\s',       zamiana: "um það bil "        }
+  - { wzor: '\bo\.s\.frv\.\s',     zamiana: "og svo framvegis "  }
+  - { wzor: '\bdr\.?\s',           zamiana: "doktor "            }
+  - { wzor: '\bprof\.?\s',         zamiana: "prófessor "         }
+  - { wzor: '\bbls\.?\s(?=\d)',    zamiana: "blaðsíða "          }
+  - { wzor: '\bskv\.?\s',          zamiana: "samkvæmt "          }
+  - { wzor: '\bfh\.?\s',           zamiana: "fyrir hönd "        }
