@@ -15,11 +15,11 @@ z regexami skrótowców dla **6 języków**:
 | Język       | Kod ISO | Źródło regexów                       |
 |-------------|---------|--------------------------------------|
 | polski      | `pl`    | notebook + ten projekt (zrobione ✅) |
-| rosyjski    | `ru`    | notebook                             |
-| angielski   | `en`    | notebook                             |
+| rosyjski    | `ru`    | notebook (zrobione ✅ 13.5)           |
+| angielski   | `en`    | notebook (zrobione ✅ 13.3)           |
 | włoski      | `it`    | notebook                             |
-| fiński      | `fi`    | notebook                             |
-| islandzki   | `is`    | notebook                             |
+| fiński      | `fi`    | notebook (zrobione ✅ 13.4)           |
+| islandzki   | `is`    | notebook (zrobione ✅ 13.6)           |
 
 Reguły polskie już są w `dictionaries/pl/szyfry/odwracanie.yaml`
 (sekcja `rozwiniecia`). Pozostałe języki – do dopisania, gdy i jeśli
@@ -135,17 +135,17 @@ nowe foldery przez `dostepne_jezyki_bazowe()` w `core_poliglota.py`.
   - [x] `v.` → `vuosi` (jako `vuonna` przed cyfrą: `v\.?\s(?=\d)`)
   - [x] `n.` → `noin` (dodane w 13.4: `\bn\.\s`)
 
-- [ ] **Islandzki (`is`)** – z notebooka:
-  - [ ] `t.d.` → `til dæmis`
-  - [ ] `þ.e.` → `það er`
-  - [ ] `m.a.` → `meðal annars`
-  - [ ] `u.þ.b.` → `um það bil`
-  - [ ] `o.s.frv.` → `og svo framvegis`
-  - [ ] `dr.` → `doktor`
-  - [ ] `prof.` → `prófessor`
-  - [ ] `bls.` → `blaðsíða`
-  - [ ] `skv.` → `samkvæmt`
-  - [ ] `fh.` → `fyrir hönd`
+- [x] **Islandzki (`is`)** – z notebooka: ✅ wdrożone w 13.6
+  - [x] `t.d.` → `til dæmis`
+  - [x] `þ.e.` → `það er`
+  - [x] `m.a.` → `meðal annars`
+  - [x] `u.þ.b.` → `um það bil`
+  - [x] `o.s.frv.` → `og svo framvegis`
+  - [x] `dr.` → `doktor`
+  - [x] `prof.` → `prófessor`
+  - [x] `bls.` → `blaðsíða`
+  - [x] `skv.` → `samkvæmt`
+  - [x] `fh.` → `fyrir hönd`
 
 ### 3.2 Języki bez regexów w notebooku
 
