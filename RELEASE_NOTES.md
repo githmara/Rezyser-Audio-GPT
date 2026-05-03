@@ -1,4 +1,49 @@
-# Release Notes — Reżyser Audio GPT 13.5.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.6 „Wersja Wydawnicza"
+
+*Minor: Íslenska dołącza jako piąty pełnoprawny język bazowy (6 szyfrów, 4 reżyserów, 8 akcentów).*
+
+---
+
+## 13.6 — minor release (motyw przewodni: islandzki jako pełnoprawny język bazowy)
+
+*Punkt wyjścia: V13.5.1 (26a8169) → commity WIP + commit release → V13.6.*
+
+### TL;DR
+
+13.6 zamyka islandzki (`is`) jako piąty pełnoprawny język bazowy. Folder `dictionaries/is/` zyskał komplet 6 szyfrów, 4 tryby Reżysera AI i 8 akcentów obcojęzycznych.
+
+Islandzki ma kilka cech odróżniających go od pozostałych języków:
+- **32-znakowy alfabet** bez C, Q, W, Z, za to z natywnymi Á, É, Í, Ó, Ú, Ý, Þ, Æ, Ö, Ð — Cezar szyfruje wszystkie 32 litery bezpośrednio.
+- **14 samogłosek** (a á e é i í o ó u ú y ý æ ö) — Samogłoskowiec jest wyjątkowo dramatyczny.
+- **Þ (thorn) i Ð (eth)** — historyczne litery angielskie żyjące tylko w islandzkim; akcent angielski przekształca je do `th` (Þ→Th, Ð→th), co daje fonologicznie doskonałą zgodność `/θ/` i `/ð/` w angielskim TTS.
+- **Æ = /ai/** — aksent fiński przekształca je do `ai` (fińskie AI = /ai/ ✓), natomiast w akcencie rosyjskim → `ай`.
+
+### Co nowego dla użytkownika końcowego
+
+- **Tryb Szyfrant** dla islandzkiego tekstu: wszystkie 6 algorytmów dostępne. Odwracacz rozwija 10 islandzkich skrótowców (`t.d.` → `til dæmis`, `þ.e.` → `það er`, `m.a.` → `meðal annars`, `u.þ.b.` → `um það bil`, `o.s.frv.` → `og svo framvegis`, `dr.` → `doktor`, `prof.` → `prófessor`, `bls.` → `blaðsíða`, `skv.` → `samkvæmt`, `fh.` → `fyrir hönd`).
+- **Tryb Reżyser** dla islandzkiego: pełne 4 reżysery AI po islandzku — promty systemowe, suffiksy kontekstowe, słowa-wyzwalacze (`samantekt`, `dragðu saman`, `gerðu samantekt`). Postprod rozpoznaje islandzkie nagłówki (Kafli N / Formáli / Eftirorð).
+- **Akcenty fonetyczne** dla islandzkiego → 8 obcojęzycznych syntezatorów: islandzki tekst przez angielski/fiński/polski/rosyjski/francuski/hiszpański/włoski/niemiecki TTS z odpowiednim akcentem. Specjalne cechy:
+  - Angielski: Þ→th, Ð→th, j→y
+  - Fiński: Þ→t, Æ→ai (idealne `ai=/ai/`), Ö bez zmian (fiński TTS czyta go jako `/ø/`)
+  - Rosyjski: pełna transliteracja + Æ→ай, Þ→с, Ð→д, Ö→ё
+  - Niemiecki: v→w (KRYTYCZNE: de-TTS czyta v jako /f/!), Æ→ei (de-TTS `ei=/ai/`✓), Ö bez zmian
+  - Hiszpański: j→y, h→j (po j→y, żeby `/h/` nie zniknął w ciszy), Þ→z (Kastylijski z=/θ/✓)
+  - Francuski: Ö→eu (idealne `eu=/ø/`✓), Þ→t, j→y
+
+### Pod maską
+
+- `dictionaries/is/szyfry/` — 6 plików: cezar (`min/max: ±32`), jakanie (samogloski 14 islandzkich), odwracanie (10 regexów z notebooka), samogloskowiec (14 samogłosek), typoglikemia, waz.
+- `dictionaries/is/akcenty/` — 8 nowych plików + 3 już-istniejące (oczyszczenie, oczyszczenie_bez_liczb, naprawiacz_tagow).
+- `dictionaries/is/rezyser/` — 4 pliki: tryb_burza, tryb_skrypt, tryb_audiobook, postprod_tytuly. Wszystkie z `jezyk_odpowiedzi: á íslensku`.
+- `core_poliglota.py` — docstringi 8 wrapperów `akcent_*` zaktualizowane przez `odswiez_rezysera.py` (dodano `dictionaries/is/akcenty/` jako źródło).
+
+### Breaking changes / migracja
+
+Brak. Islandzki to nowy język — żadne istniejące funkcje nie są dotknięte.
+
+---
+
+## 13.5.1 — patch release (motyw przewodni: hiat `и + jotowana` w 3 akcentach)
 
 *Patch: koniec podwojenia [i] w końcówkach `-ие/-ия/-иё/-ию` dla 3 akcentów (polski/francuski/włoski).*
 
