@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------------
+#  ACCENTO INGLESE (italiano → TTS inglese)
+#  Per i sintetizzatori: David / Zira / Samantha / Hazel (TTS inglese).
+# -----------------------------------------------------------------------------
+id: angielski
+etykieta: "Inglese (es. David / Zira / Samantha)"
+opis: |
+  Adatta il testo italiano al sintetizzatore vocale inglese
+  (David / Zira / Samantha / Hazel).
+
+  Compatibilità naturale italiano-inglese:
+    - v   = /v/ in entrambi ✓
+    - g + e/i = /dʒ/ in entrambi (es. "gente") ✓
+    - h   — il TTS inglese legge /h/, italiano h è muta → accento inglese
+    - geminati — gestiti dal TTS ✓
+
+  Problema critico — il digramma ch:
+    - ch + e/i = /k/ in italiano ("chiesa" = /kjɛza/)
+      Il TTS inglese legge "ch" come /tʃ/ ("chiesa" → /tʃjɛza/): incomprensibile.
+      Correzione: che → ke, chi → ki.
+    - gh + e/i = /g/ in italiano → il TTS inglese legge "gh" in modo imprevedibile.
+      Correzione: ghe → ge, ghi → gi.
+
+  Accenti naturali dell'inglese sull'italiano (lasciati intenzionalmente):
+    - c + e/i = /tʃ/ in italiano, inglese legge come /s/ → accento inglese
+    - z = /ts/ in italiano, inglese legge come /z/ → accento inglese
+    - gli = /ʎ/ in italiano, inglese legge come /gli/ → accento inglese
+    - gn = /ɲ/ in italiano, inglese legge come /gn/ → accento inglese
+iso: en
+kategoria: akcent
+kolejnosc: 40
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sostituzioni fonetiche ---
+zamiany:
+  # --- ch + e/i → k (CRITICO: inglese ch=/tʃ/, italiano ch=/k/) ---
+  - { wzor: "Che", zamiana: "Ke"  }
+  - { wzor: "che", zamiana: "ke"  }
+  - { wzor: "CHE", zamiana: "KE"  }
+  - { wzor: "Chi", zamiana: "Ki"  }
+  - { wzor: "chi", zamiana: "ki"  }
+  - { wzor: "CHI", zamiana: "KI"  }
+
+  # --- gh + e/i → g (italiano gh=/g/, inglese legge in modo imprevedibile) ---
+  - { wzor: "Ghe", zamiana: "Ge"  }
+  - { wzor: "ghe", zamiana: "ge"  }
+  - { wzor: "GHE", zamiana: "GE"  }
+  - { wzor: "Ghi", zamiana: "Gi"  }
+  - { wzor: "ghi", zamiana: "gi"  }
+  - { wzor: "GHI", zamiana: "GI"  }

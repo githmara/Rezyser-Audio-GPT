@@ -1,0 +1,34 @@
+# -----------------------------------------------------------------------------
+#  CIFRARIO: VOCALOIDE
+#  Sostituisce ogni vocale con 'o' (o 'O').
+# -----------------------------------------------------------------------------
+id: samogloskowiec
+etykieta: "Vocaloide (Tutto rimbomba come 'O')"
+opis: |
+  Effetto "ovunque si guardi — solo O". Per l'italiano l'algoritmo si riduce
+  a un unico passaggio (la logica di ammorbidimento polacco — dzi/ci/ni —
+  non si applica): ogni vocale viene sostituita con 'o' (o 'O').
+
+  Nota: i dittonghi italiani ('ai', 'ei', 'oi', 'au', 'eu') collassano in
+  'oo'. È intenzionale — lo scopo del cifrario è l'effetto comico, non
+  la precisione fonetica.
+iso: it
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# -----------------------------------------------------------------------------
+# Fasi 1 e 2 (ammorbidimento specifico del polacco) — intenzionalmente vuote.
+# Il motore accetta liste vuote senza errori.
+# -----------------------------------------------------------------------------
+zmiekszenia_przed_samogloska: []
+zmiekszenia_przed_spolgloska: []
+
+# -----------------------------------------------------------------------------
+# Fase 3: sostituzione delle vocali.
+# `samogloski_*` sono stringhe per la character-class delle regex del motore.
+# -----------------------------------------------------------------------------
+samogloski_male:             "aeiou"
+samogloski_wielkie:          "AEIOU"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"

@@ -1,0 +1,29 @@
+# -----------------------------------------------------------------------------
+#  CIFRARIO: CESARE
+#  Classico cifrario a scorrimento che sposta ogni lettera di N posizioni
+#  nell'alfabeto italiano (21 lettere).
+# -----------------------------------------------------------------------------
+id: cezar
+etykieta: "Cifrario di Cesare (scorrimento alfabeto IT)"
+opis: |
+  Classico cifrario di Cesare: ogni lettera viene spostata di N posizioni
+  nell'alfabeto italiano (ABCDEFGHILMNOPQRSTUVZ, 21 caratteri, senza spazi
+  bianchi). I caratteri al di fuori dell'alfabeto (cifre, punteggiatura)
+  rimangono invariati.
+
+  Il valore di scorrimento viene fornito dall'utente nell'interfaccia
+  grafica (campo "Scorrimento cifrario di Cesare"). Il valore 0 significa
+  "sorteggia casualmente nell'intervallo 1..20".
+iso: it
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# L'alfabeto viene caricato da dictionaries/it/podstawy.yaml (chiave: alfabet).
+# Per usare un alfabeto diverso, decommenta la riga seguente:
+# alfabet: "ABCDEFGHILMNOPQRSTUVZ"
+
+# Intervallo di scorrimento consentito nella GUI (SpinCtrl).
+# 21 lettere → ±20 copre tutte le rotazioni distinte.
+min_przesuniecie: -20
+max_przesuniecie: 20

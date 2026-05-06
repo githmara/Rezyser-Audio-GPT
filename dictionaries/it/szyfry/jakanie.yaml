@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  CIFRARIO: BALBUZIE / ROBOT ROTTO
+#  Aggiunge ripetizioni delle prime lettere di ogni parola, separate da trattini.
+# -----------------------------------------------------------------------------
+id: jakanie
+etykieta: "Balbuzie Intensa / Robot Rotto"
+opis: |
+  Per ogni parola di lunghezza >= `min_dlugosc_slowa`, estrae un numero
+  casuale di ripetizioni della prima (o delle prime due) lettere e le
+  prepende con trattini: "computer" → "co-co-co-computer", "io" → "io".
+
+  Se la seconda lettera della parola è una consonante (non presente nella
+  stringa `samogloski`), la balbuzie include DUE lettere iniziali — dà
+  un suono più naturale (es. "strada" → "st-st-strada").
+iso: it
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Parametri algoritmo
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Vocali — se il secondo carattere della parola appartiene a questo set,
+# si ripete solo la prima lettera. Altrimenti si ripetono le prime due.
+samogloski: "aeiouyAEIOUY"

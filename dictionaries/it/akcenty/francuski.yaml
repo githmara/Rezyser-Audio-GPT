@@ -1,0 +1,56 @@
+# -----------------------------------------------------------------------------
+#  ACCENTO FRANCESE (italiano → TTS francese)
+#  Per i sintetizzatori: Thomas / Julie / Marie (TTS francese).
+# -----------------------------------------------------------------------------
+id: francuski
+etykieta: "Francese (es. Thomas / Julie / Marie)"
+opis: |
+  Adatta il testo italiano al sintetizzatore vocale francese
+  (Thomas / Julie / Marie).
+
+  Compatibilità naturale italiano-francese:
+    - v   = /v/ in entrambi ✓
+    - h   — muta in entrambe le lingue! ✓ (il TTS francese ignora la h, come l'italiano)
+    - gn  = /ɲ/ in entrambe le lingue! (come "montagne" in francese) ✓
+
+  Problema critico — il digramma ch:
+    - ch + e/i = /k/ in italiano ("chiesa" = /kjɛza/)
+      Il TTS francese legge "ch" come /ʃ/ (come "sh" in inglese) →
+      "chiesa" → /ʃjeza/: completamente diverso dall'italiano.
+      Correzione: che → ke, chi → ki.
+    - gh + e/i = /g/ in italiano → il TTS francese legge in modo imprevedibile.
+      Correzione: ghe → ge, ghi → gi.
+
+  Accenti naturali del francese sull'italiano (lasciati intenzionalmente):
+    - c + e/i = /tʃ/ in italiano, francese legge come /s/ → accento francese
+    - g + e/i = /dʒ/ in italiano, francese legge come /ʒ/ → accento francese (simile)
+    - z = /ts/ in italiano, francese legge come /z/ → accento francese
+    - j = /ʒ/ in francese vs /j/ italiano → accento francese (raro in italiano)
+    - gli = /ʎ/ → francese legge come /gli/ → accento francese
+iso: fr
+kategoria: akcent
+kolejnosc: 60
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sostituzioni fonetiche ---
+zamiany:
+  # --- ch + e/i → k (CRITICO: francese ch=/ʃ/, italiano ch=/k/) ---
+  - { wzor: "Che", zamiana: "Ke"  }
+  - { wzor: "che", zamiana: "ke"  }
+  - { wzor: "CHE", zamiana: "KE"  }
+  - { wzor: "Chi", zamiana: "Ki"  }
+  - { wzor: "chi", zamiana: "ki"  }
+  - { wzor: "CHI", zamiana: "KI"  }
+
+  # --- gh + e/i → g (italiano gh=/g/, francese imprevedibile) ---
+  - { wzor: "Ghe", zamiana: "Ge"  }
+  - { wzor: "ghe", zamiana: "ge"  }
+  - { wzor: "GHE", zamiana: "GE"  }
+  - { wzor: "Ghi", zamiana: "Gi"  }
+  - { wzor: "ghi", zamiana: "gi"  }
+  - { wzor: "GHI", zamiana: "GI"  }

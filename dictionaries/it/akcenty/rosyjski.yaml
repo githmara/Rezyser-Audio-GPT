@@ -1,0 +1,209 @@
+# -----------------------------------------------------------------------------
+#  ACCENTO RUSSO (italiano → TTS russo)
+#  Per i sintetizzatori: Milena / Irina / Yuri / Pavel (TTS russo).
+# -----------------------------------------------------------------------------
+id: rosyjski
+etykieta: "Russo (es. Milena / Irina / Yuri / Pavel)"
+opis: |
+  Traslittera il testo italiano in cirillico in modo che il sintetizzatore
+  vocale russo (NVDA → Vocalizer Milena, eSpeak "ru", OneCore Irina/Pavel/Yuri)
+  legga il testo italiano con accento russo.
+
+  Corrispondenze vocali (dirette):
+    - a → а,  e → е,  i → и,  o → о,  u → у
+
+  Consonanti (corrispondenze dirette o più prossime):
+    - b → б,  d → д,  f → ф,  k → к,  l → л,  m → м
+    - n → н,  p → п,  r → р,  s → с,  t → т,  v → в
+    - z → з   (italiano /ts/ → russo /z/: accento russo)
+    - h → х   (italiana "h" muta → russo /x/: effetto accento forte)
+
+  Digrammi italiani speciali (ELABORATI PRIMA delle lettere singole):
+    - gli /ʎ/     → льи   (l palatale + и)
+    - gn /ɲ/      → нь    (n palatale)
+    - sce /ʃe/    → ше,   sci /ʃi/ → ши
+    - sche /ske/  → ске,  schi /ski/ → ски
+    - che /ke/    → ке,   chi /ki/ → ки
+    - ghe /ge/    → ге,   ghi /gi/ → ги
+    - ce /tʃe/    → че,   ci /tʃi/ → чи
+    - ge /dʒe/    → дже,  gi /dʒi/ → джи
+    - qu /kw/     → кв
+
+  NOTA LINGUISTICA: Questa traslitterazione non è accademica (non segue ISO 9
+  o BGN/PCGN). L'obiettivo è che il TTS russo suoni come un russo che prova a
+  parlare italiano — non una traslitterazione scientifica.
+iso: ru
+kategoria: akcent
+kolejnosc: 45
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+# Le vocali accentate italiane (à, è, é, ecc.) vengono normalizzate
+# alla forma base dalla pipeline (podstawy.yaml) PRIMA delle zamiany.
+usun_polskie_znaki: true
+# Dopo la conversione in cirillico il regex [a-z] non funziona più.
+skleja_pojedyncze_litery: false
+
+# -----------------------------------------------------------------------------
+# ORDINE CRITICO DELLE SOSTITUZIONI:
+#   1. Trigrammi (gli, gn+vocale, sce/sci, sche/schi)  — PRIMA DI TUTTO
+#   2. Digrammi (che/chi, ghe/ghi, ce/ci, ge/gi, qu)
+#   3. Digramma residuo (gn)
+#   4. Vocali singole
+#   5. Consonanti singole
+# I pattern più lunghi DEVONO precedere quelli più corti per evitare
+# doppie sostituzioni (es. "gli" deve essere catturato prima di "g" e "l").
+# -----------------------------------------------------------------------------
+zamiany:
+  # =========================================================================
+  # 1. TRIGRAMMI E SEQUENZE SPECIALI (più lunghi — elaborati per primi)
+  # =========================================================================
+
+  # --- gli /ʎ/ → льи (l palatale + и) ---
+  - { wzor: "Gli", zamiana: "Льи" }
+  - { wzor: "gli", zamiana: "льи" }
+  - { wzor: "GLI", zamiana: "ЛЬИ" }
+
+  # --- gn + vocale /ɲ/ → нь + vocale (n palatale) ---
+  - { wzor: "Gna", zamiana: "Нья" }
+  - { wzor: "gna", zamiana: "нья" }
+  - { wzor: "GNA", zamiana: "НЬА" }
+  - { wzor: "Gne", zamiana: "Нье" }
+  - { wzor: "gne", zamiana: "нье" }
+  - { wzor: "GNE", zamiana: "НЬЕ" }
+  - { wzor: "Gni", zamiana: "Ньи" }
+  - { wzor: "gni", zamiana: "ньи" }
+  - { wzor: "GNI", zamiana: "НЬИ" }
+  - { wzor: "Gno", zamiana: "Ньо" }
+  - { wzor: "gno", zamiana: "ньо" }
+  - { wzor: "GNO", zamiana: "НЬО" }
+  - { wzor: "Gnu", zamiana: "Нью" }
+  - { wzor: "gnu", zamiana: "нью" }
+  - { wzor: "GNU", zamiana: "НЬЮ" }
+
+  # --- sche /ske/ → ске, schi /ski/ → ски (prima di sce/sci!) ---
+  - { wzor: "Sche", zamiana: "Ске" }
+  - { wzor: "sche", zamiana: "ске" }
+  - { wzor: "SCHE", zamiana: "СКЕ" }
+  - { wzor: "Schi", zamiana: "Ски" }
+  - { wzor: "schi", zamiana: "ски" }
+  - { wzor: "SCHI", zamiana: "СКИ" }
+
+  # --- sce /ʃe/ → ше, sci /ʃi/ → ши ---
+  - { wzor: "Sce", zamiana: "Ше"  }
+  - { wzor: "sce", zamiana: "ше"  }
+  - { wzor: "SCE", zamiana: "ШЕ"  }
+  - { wzor: "Sci", zamiana: "Ши"  }
+  - { wzor: "sci", zamiana: "ши"  }
+  - { wzor: "SCI", zamiana: "ШИ"  }
+
+  # =========================================================================
+  # 2. DIGRAMMI
+  # =========================================================================
+
+  # --- che /ke/ → ке, chi /ki/ → ки ---
+  - { wzor: "Che", zamiana: "Ке"  }
+  - { wzor: "che", zamiana: "ке"  }
+  - { wzor: "CHE", zamiana: "КЕ"  }
+  - { wzor: "Chi", zamiana: "Ки"  }
+  - { wzor: "chi", zamiana: "ки"  }
+  - { wzor: "CHI", zamiana: "КИ"  }
+
+  # --- ghe /ge/ → ге, ghi /gi/ → ги ---
+  - { wzor: "Ghe", zamiana: "Ге"  }
+  - { wzor: "ghe", zamiana: "ге"  }
+  - { wzor: "GHE", zamiana: "ГЕ"  }
+  - { wzor: "Ghi", zamiana: "Ги"  }
+  - { wzor: "ghi", zamiana: "ги"  }
+  - { wzor: "GHI", zamiana: "ГИ"  }
+
+  # --- ce /tʃe/ → че, ci /tʃi/ → чи ---
+  - { wzor: "Ce",  zamiana: "Че"  }
+  - { wzor: "ce",  zamiana: "че"  }
+  - { wzor: "CE",  zamiana: "ЧЕ"  }
+  - { wzor: "Ci",  zamiana: "Чи"  }
+  - { wzor: "ci",  zamiana: "чи"  }
+  - { wzor: "CI",  zamiana: "ЧИ"  }
+
+  # --- ge /dʒe/ → дже, gi /dʒi/ → джи ---
+  - { wzor: "Ge",  zamiana: "Дже" }
+  - { wzor: "ge",  zamiana: "дже" }
+  - { wzor: "GE",  zamiana: "ДЖЕ" }
+  - { wzor: "Gi",  zamiana: "Джи" }
+  - { wzor: "gi",  zamiana: "джи" }
+  - { wzor: "GI",  zamiana: "ДЖИ" }
+
+  # --- qu /kw/ → кв ---
+  - { wzor: "Qu",  zamiana: "Кв"  }
+  - { wzor: "qu",  zamiana: "кв"  }
+  - { wzor: "QU",  zamiana: "КВ"  }
+
+  # =========================================================================
+  # 3. DIGRAMMA RESIDUO
+  # =========================================================================
+
+  # --- gn residuo (prima di consonante o fine parola) → нь ---
+  - { wzor: "Gn",  zamiana: "Нь"  }
+  - { wzor: "gn",  zamiana: "нь"  }
+  - { wzor: "GN",  zamiana: "НЬ"  }
+
+  # =========================================================================
+  # 4. VOCALI SINGOLE
+  # =========================================================================
+  - { wzor: "a",   zamiana: "а"   }
+  - { wzor: "A",   zamiana: "А"   }
+  - { wzor: "e",   zamiana: "е"   }
+  - { wzor: "E",   zamiana: "Е"   }
+  - { wzor: "i",   zamiana: "и"   }
+  - { wzor: "I",   zamiana: "И"   }
+  - { wzor: "o",   zamiana: "о"   }
+  - { wzor: "O",   zamiana: "О"   }
+  - { wzor: "u",   zamiana: "у"   }
+  - { wzor: "U",   zamiana: "У"   }
+
+  # =========================================================================
+  # 5. CONSONANTI SINGOLE
+  # =========================================================================
+  - { wzor: "b",   zamiana: "б"   }
+  - { wzor: "B",   zamiana: "Б"   }
+  - { wzor: "c",   zamiana: "к"   }
+  - { wzor: "C",   zamiana: "К"   }
+  - { wzor: "d",   zamiana: "д"   }
+  - { wzor: "D",   zamiana: "Д"   }
+  - { wzor: "f",   zamiana: "ф"   }
+  - { wzor: "F",   zamiana: "Ф"   }
+  - { wzor: "g",   zamiana: "г"   }
+  - { wzor: "G",   zamiana: "Г"   }
+  - { wzor: "h",   zamiana: "х"   }
+  - { wzor: "H",   zamiana: "Х"   }
+  - { wzor: "j",   zamiana: "й"   }
+  - { wzor: "J",   zamiana: "Й"   }
+  - { wzor: "k",   zamiana: "к"   }
+  - { wzor: "K",   zamiana: "К"   }
+  - { wzor: "l",   zamiana: "л"   }
+  - { wzor: "L",   zamiana: "Л"   }
+  - { wzor: "m",   zamiana: "м"   }
+  - { wzor: "M",   zamiana: "М"   }
+  - { wzor: "n",   zamiana: "н"   }
+  - { wzor: "N",   zamiana: "Н"   }
+  - { wzor: "p",   zamiana: "п"   }
+  - { wzor: "P",   zamiana: "П"   }
+  - { wzor: "q",   zamiana: "к"   }
+  - { wzor: "Q",   zamiana: "К"   }
+  - { wzor: "r",   zamiana: "р"   }
+  - { wzor: "R",   zamiana: "Р"   }
+  - { wzor: "s",   zamiana: "с"   }
+  - { wzor: "S",   zamiana: "С"   }
+  - { wzor: "t",   zamiana: "т"   }
+  - { wzor: "T",   zamiana: "Т"   }
+  - { wzor: "v",   zamiana: "в"   }
+  - { wzor: "V",   zamiana: "В"   }
+  - { wzor: "w",   zamiana: "в"   }
+  - { wzor: "W",   zamiana: "В"   }
+  - { wzor: "x",   zamiana: "кс"  }
+  - { wzor: "X",   zamiana: "Кс"  }
+  - { wzor: "y",   zamiana: "й"   }
+  - { wzor: "Y",   zamiana: "Й"   }
+  - { wzor: "z",   zamiana: "з"   }
+  - { wzor: "Z",   zamiana: "З"   }

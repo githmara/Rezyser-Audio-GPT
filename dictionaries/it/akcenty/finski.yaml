@@ -1,0 +1,57 @@
+# -----------------------------------------------------------------------------
+#  ACCENTO FINLANDESE (italiano → TTS finlandese)
+#  Per i sintetizzatori: Heidi / Onni / Satu (TTS finlandese).
+# -----------------------------------------------------------------------------
+id: finski
+etykieta: "Finlandese (es. Heidi / Onni / Satu)"
+opis: |
+  Adatta il testo italiano al sintetizzatore vocale finlandese
+  (Heidi / Onni / Satu).
+
+  Compatibilità naturale italiano-finlandese:
+    - v   = /v/ in entrambi ✓
+    - r   — r vibrante finlandese ≈ r vibrante italiana ✓
+    - z   = /ts/ in finlandese (!) — compatibile con z=/ts/ italiano ✓
+    - geminati (ll, mm, nn, tt) — fondamentali in entrambe le lingue ✓
+    - vocali a/e/i/o/u — corrispondenza diretta in entrambe ✓
+
+  Problema critico — il digramma ch:
+    - ch + e/i = /k/ in italiano ("chiesa" = /kjɛza/)
+      Il TTS finlandese non usa "ch" nativamente e può leggerlo in modo
+      imprevedibile. Correzione: che → ke, chi → ki.
+    - gh + e/i = /g/ in italiano → TTS finlandese può leggerlo stranamente.
+      Correzione: ghe → ge, ghi → gi.
+
+  Accenti naturali del finlandese sull'italiano (lasciati intenzionalmente):
+    - c + e/i = /tʃ/ in italiano, finlandese legge come /k/ → accento finlandese
+    - g + e/i = /dʒ/ in italiano, finlandese legge come /g/ → accento finlandese
+    - h muta italiana → TTS finlandese legge come /h/ → accento finlandese
+    - gli = /ʎ/ → finlandese legge come /gli/ → accento finlandese
+    - gn = /ɲ/ → finlandese legge come /gn/ → accento finlandese
+iso: fi
+kategoria: akcent
+kolejnosc: 50
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sostituzioni fonetiche ---
+zamiany:
+  # --- ch + e/i → k (CRITICO: italiano ch=/k/, TTS finlandese incerto) ---
+  - { wzor: "Che", zamiana: "Ke"  }
+  - { wzor: "che", zamiana: "ke"  }
+  - { wzor: "CHE", zamiana: "KE"  }
+  - { wzor: "Chi", zamiana: "Ki"  }
+  - { wzor: "chi", zamiana: "ki"  }
+  - { wzor: "CHI", zamiana: "KI"  }
+
+  # --- gh + e/i → g (italiano gh=/g/, TTS finlandese imprevedibile) ---
+  - { wzor: "Ghe", zamiana: "Ge"  }
+  - { wzor: "ghe", zamiana: "ge"  }
+  - { wzor: "GHE", zamiana: "GE"  }
+  - { wzor: "Ghi", zamiana: "Gi"  }
+  - { wzor: "ghi", zamiana: "gi"  }
+  - { wzor: "GHI", zamiana: "GI"  }

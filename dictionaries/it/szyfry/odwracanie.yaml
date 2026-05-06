@@ -1,0 +1,38 @@
+# -----------------------------------------------------------------------------
+#  CIFRARIO: ROVESCIATORE DI TESTO
+#  Espande le abbreviazioni e legge ogni frase al contrario.
+#  Ispirazione: una missione da "The Traitors / I Traditori".
+# -----------------------------------------------------------------------------
+id: odwracanie
+etykieta: "Rovesciatore di Testo (Lettura al contrario con maiuscola)"
+opis: |
+  Prima espande le abbreviazioni italiane più comuni (ad es. → "ad esempio",
+  ecc. → "eccetera", dott. → "dottore", ecc.). Grazie a ciò la frase
+  rovesciata suona ancora comprensibile, senza assurdi ".se da" al posto
+  di "ad es.".
+  Poi inverte ogni frase carattere per carattere, mantenendo il segno
+  di punteggiatura finale e la maiuscola alla prima lettera.
+
+  Fonte delle abbreviazioni: TODO_wielojezycznosc.md § 3.1 (it).
+iso: it
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# Espansioni abbreviazioni — pattern REGEX
+# Ordine: più lunghe PRIMA delle più corte (pagg. prima di pag., sig.ra prima di sig.)
+rozwiniecia:
+  - { wzor: '\bad\s+es\.?,?\s',    zamiana: "ad esempio "   }
+  - { wzor: '\becc\.?,?\s',        zamiana: "eccetera "     }
+  - { wzor: '\bdott\.?\s',         zamiana: "dottore "      }
+  - { wzor: '\bprof\.?\s',         zamiana: "professore "   }
+  - { wzor: '\bpagg\.?\s',         zamiana: "pagine "       }
+  - { wzor: '\bpag\.?\s',          zamiana: "pagina "       }
+  - { wzor: '\bsig\.ra\s',         zamiana: "signora "      }
+  - { wzor: '\bsig\.?\s',          zamiana: "signore "      }
+  - { wzor: '\bart\.?\s',          zamiana: "articolo "     }
+  - { wzor: '\bcap\.?\s',          zamiana: "capitolo "     }
+  - { wzor: '\bn\.ro\b',           zamiana: "numero"        }
+  - { wzor: '\bn\.\s',             zamiana: "numero "       }
+  - { wzor: '\bcfr\.?,?\s',        zamiana: "confronta "    }
+  - { wzor: '\bvol\.?\s',          zamiana: "volume "       }

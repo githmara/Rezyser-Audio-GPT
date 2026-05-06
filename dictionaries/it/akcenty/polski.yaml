@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------------
+#  ACCENTO POLACCO (italiano → TTS polacco)
+#  Per i sintetizzatori: Ewa / Adam / Maja (TTS polacco).
+# -----------------------------------------------------------------------------
+id: polski
+etykieta: "Polonia (es. Ewa / Adam / Maja)"
+opis: |
+  Adatta il testo italiano al sintetizzatore vocale polacco (Ewa / Adam / Maja).
+  L'italiano e il polacco condividono molti suoni latini di base:
+    - v   = /v/ in entrambi — nessuna modifica necessaria ✓
+    - r   — r vibrante polacca ≈ r vibrante italiana ✓
+    - geminati (ll, mm, nn, tt) — il TTS polacco li gestisce ✓
+
+  Problema critico — i digrammi italiani ch/gh:
+    - ch + e/i = /k/ in italiano (es. "chiesa" = /kjɛza/)
+      Il TTS polacco legge "ch" come /x/ — "chiesa" → /xjeza/: incomprensibile.
+      Correzione: che → ke, chi → ki.
+    - gh + e/i = /g/ in italiano (es. "ghetto" = /getto/)
+      Il TTS polacco può leggere "gh" come /gx/: incomprensibile.
+      Correzione: ghe → ge, ghi → gi.
+
+  Accenti naturali del polacco sull'italiano (lasciati intenzionalmente):
+    - c + e/i = /tʃ/ in italiano, polacco legge come /ts/ → accento polacco
+    - g + e/i = /dʒ/ in italiano, polacco legge come /g/ → accento polacco
+    - z = /ts/ in italiano, polacco legge come /z/ → accento polacco
+    - h iniziale (es. "ha", "ho") — polacco legge come /x/ → accento polacco
+iso: pl
+kategoria: akcent
+kolejnosc: 35
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sostituzioni fonetiche ---
+# ORDINE CRITICO: digrammi prima delle lettere singole,
+# e le varianti più lunghe prima di quelle più corte (Che prima di Ch, ecc.)
+zamiany:
+  # --- ch + e/i → k (CRITICO: polacco legge ch=/x/, italiano ch=/k/) ---
+  - { wzor: "Che", zamiana: "Ke"  }
+  - { wzor: "che", zamiana: "ke"  }
+  - { wzor: "CHE", zamiana: "KE"  }
+  - { wzor: "Chi", zamiana: "Ki"  }
+  - { wzor: "chi", zamiana: "ki"  }
+  - { wzor: "CHI", zamiana: "KI"  }
+
+  # --- gh + e/i → g (gh italiano=/g/, polacco legge come /gx/) ---
+  - { wzor: "Ghe", zamiana: "Ge"  }
+  - { wzor: "ghe", zamiana: "ge"  }
+  - { wzor: "GHE", zamiana: "GE"  }
+  - { wzor: "Ghi", zamiana: "Gi"  }
+  - { wzor: "ghi", zamiana: "gi"  }
+  - { wzor: "GHI", zamiana: "GI"  }

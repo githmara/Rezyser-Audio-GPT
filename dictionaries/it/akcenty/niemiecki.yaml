@@ -1,0 +1,65 @@
+# -----------------------------------------------------------------------------
+#  ACCENTO TEDESCO (italiano → TTS tedesco)
+#  Per i sintetizzatori: Stefan / Petra / Hans (TTS tedesco).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "Tedesco (es. Stefan / Petra / Hans)"
+opis: |
+  Adatta il testo italiano al sintetizzatore vocale tedesco
+  (Stefan / Petra / Hans).
+
+  Compatibilità naturale italiano-tedesco:
+    - z   = /ts/ in tedesco (!) — compatibile con z=/ts/ italiano ✓
+    - r   — r vibrante tedesca ≈ r vibrante italiana ✓
+    - geminati — il TTS tedesco li gestisce ✓
+
+  Problema CRITICO — la lettera v:
+    - v = /v/ in italiano ("vino", "vita", "voce"), ma
+      il TTS tedesco legge v come /f/ ("vino" → /fino/) — INCOMPRENSIBILE.
+      Correzione: v → w (il tedesco "w" = /v/).
+
+  Problema critico — il digramma ch:
+    - ch + e/i = /k/ in italiano ("chiesa" = /kjɛza/)
+      Il TTS tedesco legge "ch" come /x/ o /ç/ → "chiesa" → /xjeza/: errato.
+      Correzione: che → ke, chi → ki.
+    - gh + e/i = /g/ in italiano → TTS tedesco imprevedibile.
+      Correzione: ghe → ge, ghi → gi.
+
+  Accenti naturali del tedesco sull'italiano (lasciati intenzionalmente):
+    - c + e/i = /tʃ/ in italiano, tedesco legge come /k/ o /ts/ → accento tedesco
+    - g + e/i = /dʒ/ in italiano, tedesco legge come /g/ → accento tedesco
+    - z = /ts/ in entrambi → nessun errore qui (raro allineamento)
+    - gli = /ʎ/ → tedesco legge come /gli/ → accento tedesco
+    - gn = /ɲ/ → tedesco legge come /gn/ → accento tedesco
+iso: de
+kategoria: akcent
+kolejnosc: 70
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sostituzioni fonetiche ---
+# ORDINE: prima v→w (critico), poi digrammi ch/gh
+zamiany:
+  # --- v → w (CRITICO: tedesco v=/f/, italiano v=/v/) ---
+  - { wzor: "v",  zamiana: "w"  }
+  - { wzor: "V",  zamiana: "W"  }
+
+  # --- ch + e/i → k (tedesco ch=/x/ç/, italiano ch=/k/) ---
+  - { wzor: "Che", zamiana: "Ke"  }
+  - { wzor: "che", zamiana: "ke"  }
+  - { wzor: "CHE", zamiana: "KE"  }
+  - { wzor: "Chi", zamiana: "Ki"  }
+  - { wzor: "chi", zamiana: "ki"  }
+  - { wzor: "CHI", zamiana: "KI"  }
+
+  # --- gh + e/i → g (italiano gh=/g/, tedesco imprevedibile) ---
+  - { wzor: "Ghe", zamiana: "Ge"  }
+  - { wzor: "ghe", zamiana: "ge"  }
+  - { wzor: "GHE", zamiana: "GE"  }
+  - { wzor: "Ghi", zamiana: "Gi"  }
+  - { wzor: "ghi", zamiana: "gi"  }
+  - { wzor: "GHI", zamiana: "GI"  }

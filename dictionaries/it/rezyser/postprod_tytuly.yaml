@@ -1,0 +1,45 @@
+# -----------------------------------------------------------------------------
+#  POST-PRODUZIONE: ASSEGNAZIONE TITOLI AI CAPITOLI (IA)
+#  Strumento per la modalità Audiobook: itera sui capitoli nel file di progetto
+#  salvato e genera un breve titolo letterario per ognuno.
+#  Usa un modello economico (gpt-4o-mini) per default — il compito è semplice.
+# -----------------------------------------------------------------------------
+id: tytuly
+etykieta: "Assegna Titoli ai Capitoli (IA)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- Parametri OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: italiano
+
+# --- Prompt di sistema ---
+prompt_systemowy: |
+  Sei un distinto redattore. Rispondi con il solo titolo.
+
+# --- Template istruzione utente (role=user) ---
+# Segnaposto: {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Ecco il contenuto di un brano del libro ({naglowek}). Inventa UN titolo breve, accattivante e letterario senza virgolette.
+
+  CONTENUTO:
+  {probka}
+
+# --- Parametri di iterazione sul file di progetto ---
+# Regex che divide il file in intestazioni strutturali + contenuto. Il gruppo
+# di cattura deve estrarre LA SOLA INTESTAZIONE ("Prologo" / "Capitolo 7" / "Epilogo").
+# I \n* iniziali/finali permettono più righe vuote attorno alle intestazioni.
+regex_podzial_rozdzialow: "(?i)\\n*(Prologo|Capitolo \\d+|Epilogo)\\n*"
+
+# I frammenti più corti di questo valore ottengono lo stato "(Frammento troppo corto)"
+# invece di una chiamata IA (risparmia crediti API + evita titoli privi di senso).
+min_dlugosc_fragmentu: 50
+
+# Lunghezza massima del campione di testo inviato al modello in una richiesta.
+# L'IA vede l'inizio del capitolo — abbastanza per inventare un titolo.
+max_dlugosc_probki: 6000
+
+# Messaggi mostrati nella finestra dei risultati:
+etykieta_fragment_zbyt_krotki: "(Frammento troppo corto)"
+etykieta_bled_brak_kredytow: "(Errore — crediti API esauriti)"

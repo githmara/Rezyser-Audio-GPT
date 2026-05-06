@@ -1,0 +1,18 @@
+# -----------------------------------------------------------------------------
+#  CIFRARIO: TIPOGLICEMIA
+#  Mescola le lettere al centro di ogni parola (la prima e l'ultima restano).
+# -----------------------------------------------------------------------------
+id: typoglikemia
+etykieta: "Tipoglicemia (Centro delle parole mescolato)"
+opis: |
+  Fenomeno psicolinguistico: se la prima e l'ultima lettera di una parola
+  sono corrette, il lettore la legge comunque con fluidità, anche se il
+  centro è mescolato. Le parole più corte di `min_dlugosc_slowa` non vengono
+  modificate.
+iso: it
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Parametri algoritmo
+min_dlugosc_slowa: 4

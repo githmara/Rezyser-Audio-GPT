@@ -106,19 +106,19 @@ nowe foldery przez `dostepne_jezyki_bazowe()` w `core_poliglota.py`.
   - [x] `pp.` → `pages` (greedy guard PRZED `p.`)
   - [x] `p.` → `page`
 
-- [ ] **Włoski (`it`)** – z notebooka:
-  - [ ] `ad es.` → `ad esempio`
-  - [ ] `ecc.` → `eccetera`
-  - [ ] `dott.` → `dottore`
-  - [ ] `prof.` → `professore`
-  - [ ] `pag.` / `pagg.` → `pagina` / `pagine`
-  - [ ] `sig.` → `signore`
-  - [ ] `sig.ra` → `signora`
-  - [ ] `art.` → `articolo`
-  - [ ] `cap.` → `capitolo`
-  - [ ] `n.` / `n.ro` → `numero`
-  - [ ] `cfr.` → `confronta`
-  - [ ] `vol.` → `volume`
+- [x] **Włoski (`it`)** – wdrożone w 13.7 (paczka kompletna: 8 akcentów + 6 szyfrów + 4 reżyserów + GUI):
+  - [x] `ad es.` → `ad esempio`
+  - [x] `ecc.` → `eccetera`
+  - [x] `dott.` → `dottore`
+  - [x] `prof.` → `professore`
+  - [x] `pag.` / `pagg.` → `pagina` / `pagine`
+  - [x] `sig.` → `signore`
+  - [x] `sig.ra` → `signora`
+  - [x] `art.` → `articolo`
+  - [x] `cap.` → `capitolo`
+  - [x] `n.` / `n.ro` → `numero`
+  - [x] `cfr.` → `confronta`
+  - [x] `vol.` → `volume`
 
 - [x] **Fiński (`fi`)** – wdrożone w 13.4 (paczka kompletna: 8 akcentów + 6 szyfrów + GUI):
   - [ ] `esim.` → `esimerkiksi`
