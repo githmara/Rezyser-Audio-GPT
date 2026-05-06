@@ -13,294 +13,304 @@
 
 id: dictionaries
 tresc: |
-  Słowniki Poligloty i Reżysera — Instrukcja dla każdego
-  =======================================================
+  Wörterbücher des Polyglott und des Regisseurs — Anleitung für alle
+  ===================================================================
 
-  Cześć! Jeśli czytasz ten plik, to znaczy, że zajrzałeś do folderu
-  "dictionaries/" obok aplikacji Reżyser Audio GPT i zastanawiasz się, co
-  to za pliki z dziwnymi rozszerzeniami ".yaml". Spokojnie — nie trzeba
-  znać programowania ani Pythona, żeby zrozumieć, co tu się dzieje, a
-  przy odrobinie odwagi nawet dodać coś swojego.
+  Hallo! Wenn Sie diese Datei lesen, haben Sie einen Blick in den Ordner
+  "dictionaries/" neben der Anwendung Reżyser Audio GPT geworfen und fragen
+  sich, was das für Dateien mit diesen seltsamen Endungen ".yaml" sind.
+  Keine Sorge — man muss weder Programmieren noch Python kennen, um zu
+  verstehen, was hier passiert, und mit ein wenig Mut kann man sogar selbst
+  etwas hinzufügen.
 
-  Ten plik jest napisany prostym językiem dla pisarzy, lingwistów,
-  nauczycieli, rodziców i generalnie ciekawskich. Jeśli znasz podstawy
-  programowania i szukasz szczegółowej dokumentacji formatu plików YAML
-  (z listami pól, regex-ami, zasadami pipeline'u przetwarzania), zajrzyj
-  do plika "README.md" w tym samym folderze — ale uwaga, ten plik jest
-  dostępny tylko wtedy, gdy sklonowałeś repozytorium z GitHuba. W paczce
-  wydaniowej pobranej z zakładki Releases pliki Markdown są odfiltrowane
-  (żeby do paczki nie trafiły przypadkiem np. Twoje księgi światów ze
-  spoilerami), więc tylko ten plik ".txt" trafia do użytkowników
-  końcowych.
+  Diese Datei ist in einfacher Sprache für Schriftsteller, Linguisten,
+  Lehrer, Eltern und Neugierige geschrieben. Wenn Sie die Grundlagen der
+  Programmierung kennen und eine detaillierte Dokumentation des YAML-
+  Dateiformats suchen (mit Feldlisten, Regexen, Pipeline-Verarbeitungsregeln),
+  schauen Sie in die Datei "README.md" im selben Ordner — aber Achtung: Diese
+  Datei ist nur verfügbar, wenn Sie das Repository von GitHub geklont haben.
+  Im Release-Paket, das Sie über den Reiter Releases herunterladen, werden
+  Markdown-Dateien herausgefiltert (damit keine Weltenbücher mit Spoilern in
+  das Paket gelangen), sodass nur diese ".txt"-Datei an Endbenutzer weitergegeben
+  wird.
 
 
-  Co w ogóle tu jest?
-  -------------------
+  Was ist hier überhaupt?
+  -----------------------
 
-  Folder "dictionaries/" to biblioteka reguł, którymi posługuje się
-  Poliglota (narzędzie do tłumaczeń i akcentów) oraz wewnętrzny silnik
-  Reżysera. Do wersji 12.0 wszystkie te reguły były "zaszyte" w kodzie
-  Pythona — jeśli chciałeś dodać nowy akcent albo zmienić zasady, musiałeś
-  prosić programistę. Od wersji 13.0 wszystko jest zapisane w zwykłych
-  plikach tekstowych (rozszerzenie ".yaml" — to po prostu sformatowany
-  w specjalny sposób zwykły tekst). Otwierasz je dowolnym edytorem
-  (Notatnik, VS Code, Notepad++) i edytujesz jak każdy inny dokument.
+  Der Ordner "dictionaries/" ist eine Regelbibliothek, die vom Polyglott
+  (Übersetzungs- und Akzentwerkzeug) und dem internen Regisseur-Motor
+  genutzt wird. Bis Version 12.0 waren alle diese Regeln im Python-Code
+  "eingebettet" — wenn man einen neuen Akzent hinzufügen oder die Regeln
+  ändern wollte, musste man einen Programmierer bitten. Ab Version 13.0
+  ist alles in einfachen Textdateien gespeichert (Endung ".yaml" — das ist
+  einfach formatierter normaler Text). Man öffnet sie mit einem beliebigen
+  Editor (Notepad, VS Code, Notepad++) und bearbeitet sie wie jedes andere
+  Dokument.
 
-  Struktura folderu wygląda tak:
+  Die Ordnerstruktur sieht so aus:
 
       dictionaries/
-      └── pl/              folder języka bazowego (polskiego)
-          ├── podstawy.yaml              polskie diakrytyki + alfabet
-          ├── akcenty/                   {liczba_plikow_w_akcentach} plików z akcentami
-          ├── szyfry/                    {liczba_szyfrow} plików z szyframi i zabawami
-          └── rezyser/                   {liczba_trybow_rezysera} plików z trybami Reżysera AI
+      └── de/              Basissprachenordner (Deutsch)
+          ├── podstawy.yaml              deutsche Diakritika + Alphabet
+          ├── akcenty/                   {liczba_plikow_w_akcentach} Akzentdateien
+          ├── szyfry/                    {liczba_szyfrow} Chiffre- und Spieledateien
+          └── rezyser/                   {liczba_trybow_rezysera} Regisseur-KI-Modusdateien
 
-  Obecnie kompletnie wdrożone są: {lista_kompletnych_jezykow_natywnie}
-  ({liczba_kompletnych_jezykow} języków bazowych). Każdy ma własną paczkę
-  "dictionaries/<kod>/" z diakrytykami, alfabetem i regułami fonetycznymi
-  działającymi na tekst w tym właśnie języku — aplikacja sama wykrywa język
-  źródłowy przez lingua-language-detector (per akapit) i ładuje odpowiednią
-  paczkę dla każdego fragmentu osobno. Kolejne języki są
-  w przygotowaniu (kompletny pakiet wymaga "podstawy.yaml", "gui/ui.yaml"
-  oraz minimum jednego pliku w "akcenty/" i "szyfry/").
-
-
-  Co to jest akcent?
-  ------------------
-
-  Akcent to zestaw reguł, które "psują" polski tekst tak, żeby czytnik
-  ekranu (np. NVDA) przeczytał go głosem obcego języka. Na przykład akcent
-  fiński zamienia polskie "sz" na "s", "w" na "v", a diakrytyki (ą, ę, ł)
-  na ich uproszczone wersje — w efekcie tekst brzmi, jakby Fin z Helsinek
-  dopiero uczył się polskiego. Nie chodzi o autentyczną transliterację,
-  tylko o zabawne i celowe zniekształcenie dla potrzeb fabuły.
-
-  Dostępne akcenty ({liczba_akcentow_jezykowych} języków):
-
-  - Englisch (Samantha/Mark w Vocalizerze, Zira/Hazel w OneCore)
-  - Französisch (Thomas/Amelie w Vocalizerze, Julie w OneCore)
-  - Polnisch (Ewa w Vocalizerze, Paulina w OneCore)
-  - Spanisch (Jorge/Monica w Vocalizerze, Helena w OneCore)
-  - Italienisch (Alice/Luca w Vocalizerze, Elsa w OneCore)
-  - Finnisch (Satu/Mikko w Vocalizerze, Heidi w OneCore)
-  - Isländisch (tylko OneCore Gudrun oraz darmowy eSpeak — Vocalizer nie
-    ma głosu islandzkiego!)
-  - Russisch (Milena w Vocalizerze, Irina/Pavel/Yuri w OneCore — ten
-    jest wyjątkowy, bo zamiast "psuć" litery łacińskie wykonuje pełną
-    transliterację na cyrylicę; bez tego rosyjski głos nie miałby czego
-    wymawiać)
-
-  Dodatkowo w menu akcentów są dwie pozycje "czyszczące bez akcentu":
-  jedna bez normalizacji liczb, druga z normalizacją (zamienia "15" na
-  "piętnaście" przed przetwarzaniem, bo obcokrajowiec pewnie by tej
-  liczby nie odmienił poprawnie — co dodaje autentyczności) oraz
-  "Naprawiacz Tagów", który po prostu wstawia do pliku kod języka ISO
-  bez psucia treści (ratunek, gdy Twój już przetłumaczony plik wyszedł
-  z błędnym kodem językowym).
+  Derzeit vollständig implementiert sind: {lista_kompletnych_jezykow_natywnie}
+  ({liczba_kompletnych_jezykow} Basissprachen). Jede hat ein eigenes Paket
+  "dictionaries/<code>/" mit Diakritika, Alphabet und phonetischen Regeln,
+  die auf Texte in genau dieser Sprache wirken — die Anwendung erkennt die
+  Quellsprache automatisch über den lingua-language-detector (per Absatz) und
+  lädt das passende Paket für jeden Textabschnitt separat. Weitere Sprachen
+  sind in Vorbereitung (ein vollständiges Paket erfordert "podstawy.yaml",
+  "gui/ui.yaml" sowie mindestens eine Datei in "akcenty/" und "szyfry/").
 
 
-  Co to jest szyfr?
-  -----------------
+  Was ist ein Akzent?
+  -------------------
 
-  Szyfry to zabawy tekstowe do zagadek, ćwiczeń językowych, łamigłówek.
-  W przeciwieństwie do akcentów NIE są skierowane na konkretny głos
-  syntezatora — po prostu zniekształcają tekst według określonej zasady.
-  Dostępne szyfry ({liczba_szyfrow}):
+  Ein Akzent ist ein Regelwerk, das deutschen Text so "verdirbt", dass ein
+  Bildschirmleser (z.B. NVDA) ihn mit der Stimme einer Fremdsprache liest.
+  Zum Beispiel ersetzt der polnische Akzent bestimmte deutsche Lautgruppen
+  durch klanglich ähnliche Varianten — der Effekt ist, dass der Text klingt,
+  als würde ein Pole aus Warschau gerade Deutsch lernen. Es geht nicht um
+  eine authentische Transliteration, sondern um eine unterhaltsame und
+  bewusste Verzerrung für kreative Zwecke.
 
-  1. Odwracacz Tekstu (czytanie wspak)
-     Każde zdanie jest odwracane znak po znaku, z zachowaniem wielkiej
-     litery na początku i kropki/wykrzyknika/pytajnika na końcu.
-     Przed odwróceniem skrypt rozwija niemieckie skrótowce (z.B., d.h., usw.,
-     bzw., ggf.), bo bez tego po odwróceniu wyszłyby absurdy typu ".bZ".
+  Verfügbare Akzente ({liczba_akcentow_jezykowych} Sprachen):
 
-     Inspiracja: misja z polskiej wersji programu "The Traitors. Zdrajcy".
-     Prowadząca puściła uczestnikom popularną dziecięcą piosenkę odtworzoną
-     wstecz. Reakcje poszły w styl "jaki to język? ormiański?
-     węgierski? fiński?" — a to była znana od dziecka melodia z bajki.
-     Potem okazało się, że drużyna w lesie dostała zapis tekstu piosenki
-     wspak i miała zaśpiewać właśnie w takiej wersji — drużyna zamkowa
-     miała to nagrać, odwrócić nagranie i w teorii odzyskać piosenkę do
-     zgadnięcia.
+  - Englisch (Samantha/Mark im Vocalizer, Zira/Hazel in OneCore)
+  - Französisch (Thomas/Amelie im Vocalizer, Julie in OneCore)
+  - Polnisch (Ewa im Vocalizer, Paulina in OneCore)
+  - Spanisch (Jorge/Monica im Vocalizer, Helena in OneCore)
+  - Italienisch (Alice/Luca im Vocalizer, Elsa in OneCore)
+  - Finnisch (Satu/Mikko im Vocalizer, Heidi in OneCore)
+  - Isländisch (nur OneCore Gudrun sowie kostenloser eSpeak — Vocalizer hat
+    keine isländische Stimme!)
+  - Russisch (Milena im Vocalizer, Irina/Pavel/Yuri in OneCore — dieser
+    ist besonders, weil er statt das Alphabet zu "verbiegen" eine vollständige
+    Transliteration ins Kyrillische durchführt; ohne das hätte die russische
+    Stimme nichts zum Aussprechen)
 
-     Dokładnie to samo zabawne nieporozumienie dzieje się, gdy zapuścisz
-     nasz Odwracacz przez syntezator mowy. Świetne do zagadek tematycznych,
-     escape roomów, zabaw imprezowych.
+  Zusätzlich gibt es im Akzentmenü zwei "reinigende" Einträge ohne Akzent:
+  einen ohne Zahlennormalisierung und einen mit Normalisierung (wandelt "15"
+  in "fünfzehn" um, bevor der Text verarbeitet wird, weil ein Ausländer die
+  Zahl wahrscheinlich nicht korrekt beugen würde — was zur Authentizität
+  beiträgt) sowie den "Tag-Reparateur", der einfach den ISO-Sprachcode in
+  die Datei einfügt, ohne den Inhalt zu verändern (Rettungsanker, wenn Ihre
+  bereits übersetzte Datei mit einem falschen Sprachcode herausgekommen ist).
 
-  2. Typoglykämie (vertauschte Buchstaben)
+
+  Was ist ein Chiffre?
+  --------------------
+
+  Chiffren sind Textspielereien für Rätsel, Sprachübungen und Knobelaufgaben.
+  Im Gegensatz zu Akzenten sind sie NICHT auf eine bestimmte Synthesizerstimme
+  ausgerichtet — sie verzerren den Text einfach nach einer bestimmten Regel.
+  Verfügbare Chiffren ({liczba_szyfrow}):
+
+  1. Textumkehrer (rückwärts lesen)
+     Jeder Satz wird Zeichen für Zeichen umgekehrt, wobei der Großbuchstabe
+     am Anfang und der Punkt/Ausrufezeichen/Fragezeichen am Ende erhalten
+     bleiben. Vor der Umkehrung erweitert das Skript deutsche Abkürzungen
+     (z.B., d.h., usw., bzw., ggf.), da sonst nach der Umkehrung Absurditäten
+     wie ".Bz" entstehen würden.
+
+     Inspiration: Eine Mission aus dem Programm „The Traitors. Verräter".
+     Die Moderatorin spielte den Teilnehmern ein bekanntes Kinderlied aus
+     einem Märchen rückwärts ab — ohne Vorwarnung. Die Reaktionen gingen in
+     Richtung „Was ist das für eine Sprache? Armenisch? Ungarisch? Finnisch?"
+     — dabei war es eine seit Kindheitstagen bekannte Melodie. Es stellte
+     sich heraus, dass ein Team im Wald den Liedtext rückwärts geschrieben
+     bekam und ihn genau so singen sollte — das andere Team nahm es auf,
+     spielte es rückwärts ab und sollte theoretisch das Originallied zum
+     Erraten zurückgewinnen.
+
+     Genau dasselbe lustige Missverständnis entsteht, wenn man unseren
+     Textumkehrer durch einen Sprachsynthesizer laufen lässt. Hervorragend
+     für thematische Rätsel, Escape Rooms und Party-Spielchen.
+
+  2. Typoglykämie (vertauschte Wortmitten)
      Klassischer psycholinguistischer Effekt: "Laut eneir Stidue der
-     Cmabrigde Uinervtisy ist es eagl, in wlehcer Rheniefolge die
-     Bcuhsatben in eneim Wrot snid, das Ezinge, was wcihtig ist, ist,
-     dass der estre und der ltzete Bchstabe am rcihtigen Paltz snid."
-     Das Skript mischt zufällig die Mitte jedes Wortes, das länger als
-     4 Buchstaben ist, der erste und letzte Buchstabe bleiben an Ort
-     und Stelle. Hervorragend für den Test "wie viel sehe ich wirklich
-     und wie viel ergänzt mein Gehirn".
+     Cmabridge Uinervtisy knan man Wötre in jderede Riehnfolge lseen, solgane
+     die estenr und letzetn Bchstaaebn am rcihtgien Paltz snid". Das Skript
+     mischt zufällig die Mitte jedes Wortes, das länger als 4 Zeichen ist,
+     der erste und letzte Buchstabe bleibt an Ort und Stelle. Hervorragend
+     für den Test "Wie viel sehe ich wirklich und wie viel ergänzt mein
+     Gehirn?".
 
   3. Kaputtes Telefon / Schlangendialekt
-     Jedes "s", "z" oder "sch" wird zufällig zu einem Zischen von 4-8
-     Zeichen verlängert. Inspiration: Snecko aus dem Spiel "Slay the Spire".
+     Jedes "s", "z" oder "sch" wird zufällig in ein Zischen von 4-8 Zeichen
+     Länge verlängert. Inspiration: Snecko aus dem Spiel "Slay the Spire".
      Effekt: Der Text klingt, als würde ihn eine Schlange mit Sprachfehler
      lesen. Hervorragend für die Vertonung einer verwirrten Schlange oder
-     eines kaputten Roboters mit zischendem Akzent.
+     eines kaputten Roboters mit zischender Störung.
 
-  4. Vokalisierer (alles klingt wie "o")
-     Jeder Vokal im Text wird zu "o" geändert, wobei polnische Weichungen
-     (ci, si, ni, zi, dzi) korrekt behandelt werden: "Dzień dobry, witam
-     panią" → "Dźoń doboro, wotom poną". Je länger der Text, desto
-     lustiger der Effekt — und der Bildschirmleser liest es mit voller
-     Überzeugung, ohne zu versuchen, es zu dekodieren.
+  4. Vokalisierer (alles dröhnt auf "o")
+     Jeder Vokal im Text wird in ein "o" umgewandelt: "Guten Morgen" →
+     "Goton Moroon". Je länger der Text, desto lustiger der Effekt — und
+     der Bildschirmleser liest es mit voller Überzeugung, ohne zu versuchen,
+     es zu dekodieren.
 
-  5. Stottern / Defekter Roboter
-     Fügt Stottern am Anfang von Wörtern hinzu: "komputer" → "ko-ko-ko-komputer",
-     "prysznic" → "pr-pr-prysznic". Wörter kürzer als 3 Zeichen werden
-     übersprungen. Wenn der zweite Buchstabe des Wortes ein Konsonant ist,
-     werden die ersten beiden wiederholt (klingt natürlicher); wenn ein
-     Vokal — nur der erste.
+  5. Starkes Stottern / Kaputter Roboter
+     Fügt Stottern am Anfang der Wörter hinzu: "Sch-Sch-Schrank",
+     "Ko-Ko-Koffer". Wörter kürzer als 3 Zeichen werden übersprungen. Wenn
+     der zweite Buchstabe des Wortes ein Konsonant ist, werden die ersten
+     beiden wiederholt (klingt natürlicher); wenn ein Vokal — nur der erste.
 
   6. Cäsar-Chiffre (Klassiker)
-     Der älteste dokumentierte Chiffre in der Geschichte (bereits im
-     antiken Rom verwendet). Jeder Buchstabe wird um N Positionen im
-     polnischen Alphabet verschoben (35 Buchstaben, mit diakritischen
-     Zeichen: AĄBCĆ...ZŻŹ). Die Verschiebung gibst du im GUI im
-     Zahlenfeld an; wenn du 0 eingibst, wählt die Anwendung einen
-     Wert im Bereich 1-34 zufällig aus und zeigt ihn in einer
-     Nachricht an, damit du die Nachricht später entschlüsseln kannst.
-     Zeichen außerhalb des Alphabets (Zahlen, Leerzeichen,
+     Die älteste dokumentierte Chiffre der Geschichte (bereits im alten
+     Rom verwendet). Jeder Buchstabe wird um N Positionen im deutschen
+     Alphabet verschoben (29 Buchstaben: ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ).
+     Die Verschiebung gibst du im GUI im Zahlenfeld an; wenn du 0 eingibst,
+     wählt die Anwendung einen Wert im Bereich 1-28 zufällig aus und zeigt
+     ihn in einer Nachricht an, damit du die Nachricht später entschlüsseln
+     kannst. Zeichen außerhalb des Alphabets (Zahlen, Leerzeichen,
      Interpunktion) bleiben unverändert.
 
 
-  Co to jest "tryb Reżysera"?
+  Was ist der "Regisseur-Modus"?
+  ------------------------------
+
+  Der Ordner "rezyser/" enthält {liczba_trybow_rezysera} Dateien, die die Arbeitsmodi
+  des Haupt-Regiestudios der Anwendung beschreiben:
+
+  - tryb_burza.yaml      — Brainstorming (Handlungsplanung, 3 Entwicklungs-
+                           optionen, Anti-Closure-Direktive)
+  - tryb_skrypt.yaml     — Rohskript (Tags [SFX], [Sprecher: Emotion],
+                           Figurenphoneti)
+  - tryb_audiobook.yaml  — Traditionelles Hörbuch (reine Literaturprosa,
+                           ohne Zusammenfassungen und Klammern)
+  - postprod_tytuly.yaml — Vergabe literarischer Kapitelüberschriften nach
+                           der Generierung der gesamten Geschichte
+
+  Im Inneren jeder dieser Dateien ist der wertvollste Teil der "System-Prompt"
+  — eine lange Anweisung für die künstliche Intelligenz, wie sie sich in
+  diesem Modus verhalten soll. Wenn Sie das Gefühl haben, dass z.B. der
+  Hörbuchmodus "zu blumig" schreibt oder das Brainstorming zu häufig magische
+  Lösungen vorschlägt, können Sie diese Texte nach Ihrem Geschmack anpassen,
+  speichern, und die Anwendung lädt Ihre Version beim nächsten Start. Kein
+  Programmieren erforderlich.
+
+
+  Wie man anfängt — drei Schwierigkeitsstufen
+  --------------------------------------------
+
+  STUFE 1 — Feinabstimmung eines bestehenden Akzents
+
+  Stellen Sie sich vor, der französische Akzent der Anwendung ersetzt "sch"
+  durch "sh", aber Sie meinen, ein Franzose würde eher "ch" sagen. Kein Problem.
+
+  1. Starten Sie die Anwendung und gehen Sie zum Regelmanager (Taste Strg+4
+     oder die vierte Schaltfläche in der Leiste).
+  2. Klappen Sie im Dateibaum links "de" → "akcenty" auf und klicken Sie
+     auf "francuski.yaml".
+  3. Klicken Sie auf die Schaltfläche "In Texteditor öffnen". Die Datei
+     öffnet sich im Windows-Notepad (oder Ihrem Standard-Texteditor).
+  4. Scrollen Sie nach unten zum Abschnitt "zamiany:". Suchen Sie die Zeile
+     mit dem gesuchten Muster und ändern Sie den Wert "zamiana" auf das,
+     was Ihnen passt.
+  5. Speichern Sie die Datei (Strg+S) und schließen Sie den Editor.
+  6. Kehren Sie zum Regelmanager zurück und klicken Sie auf "Baum aktualisieren",
+     dann schließen und starten Sie die Anwendung neu. Ihre Änderung wirkt.
+
+  STUFE 2 — Einen neuen Akzent durch Duplizierung hinzufügen
+
+  Möchten Sie einen schwedischen oder dänischen Akzent hinzufügen? Beginnen
+  Sie mit dem phonetisch ähnlichsten vorhandenen.
+
+  1. Markieren Sie im Regelmanager z.B. "finski.yaml" (Finnisch ist phonetisch
+     dem Schwedischen ähnlich) und klicken Sie auf "Ausgewählte Datei
+     duplizieren".
+  2. Der Manager fragt nach einem neuen Namen — geben Sie z.B. "schwedisch"
+     ein (Kleinbuchstaben, ohne Leerzeichen).
+  3. Die neue Datei öffnet sich im Editor. Ändern Sie die Felder:
+        - "etykieta" — was Sie im Anwendungsmenü sehen, z.B.
+          "Schwedisch (Alva / Oskar — OneCore/Vocalizer)"
+        - "opis" — kurze Beschreibung für die Zukunft
+        - "iso" — zweistelliger Sprachcode, für Schwedisch "sv"
+  4. Passen Sie die Liste der Ersetzungen an die schwedische Phonetik an
+     (z.B. "å → o", löschen oder ändern Sie die finnischen Spezifika).
+  5. Speichern, zur Startseite zurück, auf "🔄 Regisseur-Akzente aus YAML
+     neu laden" klicken und Anwendung neu starten. Das neue Schwedisch
+     erscheint im Polyglott-Akzentmenü (und wenn Sie im Weltbuch des Projekts
+     den Tag "[Marek] — hat schwedischen Akzent" hinzufügen, erkennt der
+     Regisseur ihn automatisch und wendet ihn auf Dialoge dieser Figur an).
+
+  STUFE 3 — Etwas völlig Neues erschaffen
+
+  Schulhofsprache? Sprache der antiken Ritter? Elterngeheimsprache vor den
+  Kindern?
+
+  1. Klicken Sie im Regelmanager auf "Neue Regeldatei…".
+  2. Wählen Sie den Typ (Akzent, Ersetzungschiffre, Regisseur-Modus, neue
+     Basissprache, algorithmische Chiffre). Für einfache Fälle erstellt die
+     Anwendung sofort eine bearbeitbare YAML-Vorlage — Sie bearbeiten sie
+     wie in Stufe 2.
+  3. Für schwierigere Fälle (Algorithmen wie "Wortendungsmischung" oder eine
+     ganz neue Basissprache) zeigt der Manager einen fertigen Prompt zum
+     Einfügen in ChatGPT oder Claude. Die KI generiert eine vollständige
+     YAML-Datei, Sie kopieren sie nur in den Ordner. Kein Programmieren
+     nötig — es reicht die Fähigkeit zum Kopieren und Einfügen.
+
+
+  Einige Spielideen
+  -----------------
+
+  - Deutschunterricht in der Schule: Aufgabe "Lade einen Textabschnitt im
+    Polyglott mit russischem Akzent — erkennst du den Autor?". Für blinde
+    Kinder besonders wertvoll, weil sie einen interessanten Klang erhalten,
+    ohne ein Plakat mit den Augen lesen zu müssen.
+
+  - Escape Room in der Bibliothek: Bereite einen Gedichtabschnitt im
+    Textumkehrer vor, drucke ihn aus (oder schicke ihn als Nachricht),
+    die Teilnehmer müssen entweder laut vorlesen und aufnehmen, dann
+    rückwärts abspielen, oder einfach von hinten nach vorne lesen.
+    Den Schlüssel zum Schrank bekommen die, die den Gedichttitel erkennen.
+
+  - Hausproduktion für die ältere Familie: Schreibe das Märchen "Der
+    hässliche Entling" in verschiedenen Akzenten (Erzähler englisch,
+    Mutter-Ente französisch, Vater-Erpel polnisch) und schneide es in
+    Audacity zusammen. Für Großeltern besonders lustig, weil sie "wer
+    jetzt spricht" allein am Klang erkennen.
+
+  - Übung für Schauspieler: Schicke deinen Text durch den Schlangendialekt
+    und versuche, ihn live zu wiederholen. Übt Zischen, Atmung und
+    Zungenkontrolle.
+
+  - Geburtstagskarte mit Rätsel: Verschiebe die Glückwünsche mit der
+    Cäsar-Chiffre um 3 Positionen, schreibe dazu "Schlüssel: verschiebe
+    jeden Buchstaben um so viele Positionen, wie du heute Jahre alt wirst".
+    Der Jubilar muss selbst die Entschlüsselung finden. (Funktioniert am
+    besten für Kinder von 7-12 Jahren; Erwachsene merken es meist schnell.)
+
+
+  Kann mir etwas kaputtgehen?
   ---------------------------
 
-  Folder "rezyser/" zawiera {liczba_trybow_rezysera} plików opisujących tryby pracy Głównego
-  Studia Reżyserskiego aplikacji:
+  Im Grunde nicht. Die Anwendung lädt YAML-Dateien dynamisch, und wenn eine
+  fehlerhaft gespeichert ist, überspringt sie diese einfach und zeigt beim
+  Start eine Warnung an. Der Rest der Regeln funktioniert wie gewohnt.
 
-  - tryb_burza.yaml      — Burza Mózgów (planowanie fabuły, 3 opcje
-                           rozwoju historii, dyrektywa anti-closure)
-  - tryb_skrypt.yaml     — Surowy Skrypt (tagi [SFX], [Speaker: emocja],
-                           fonetyka postaci)
-  - tryb_audiobook.yaml  — Tradycyjny Audiobook (czysta proza literacka,
-                           zakaz podsumowań i klamr)
-  - postprod_tytuly.yaml — nadawanie literackich tytułów rozdziałom po
-                           wygenerowaniu całej historii
+  Das Schlimmste, was passieren kann, ist, dass die neue Datei einfach nicht
+  im Anwendungsmenü erscheint. Dann:
 
-  W środku każdego z tych plików najcenniejszą częścią jest "prompt
-  systemowy" — długa instrukcja dla sztucznej inteligencji, jak ma się
-  zachowywać w danym trybie. Jeśli czujesz, że np. tryb Audiobooka pisze
-  "zbyt kwieciście" albo Burza Mózgów za często proponuje magiczne
-  rozwiązania, możesz te teksty dostroić pod swój gust, zapisać i aplikacja
-  przy następnym uruchomieniu załaduje Twoją wersję. Zero programowania.
+  - kehren Sie zum Regelmanager zurück und prüfen Sie, ob die Datei im
+    Baum sichtbar ist,
+  - öffnen Sie sie erneut im Texteditor und vergleichen Sie die Struktur
+    mit benachbarten Dateien (Einrückungen, Doppelpunkte, Anführungszeichen),
+  - wenn Sie wirklich feststecken — kopieren Sie den Inhalt Ihrer Datei,
+    öffnen Sie ChatGPT und schreiben Sie "Ich habe eine YAML-Datei, die
+    die Anwendung nicht lädt, finde den Fehler und zeig die korrigierte
+    Version". Fügen Sie die Datei ein. Die KI korrigiert sie normalerweise
+    in wenigen Sekunden.
 
-
-  Jak zacząć zabawę — trzy poziomy trudności
-  -------------------------------------------
-
-  POZIOM 1 — drobne dostrojenie istniejącego akcentu
-
-  Wyobraź sobie, że francuski akcent aplikacji zamienia "sz" na "sh", ale
-  Ty uważasz, że Francuz raczej powiedziałby "sch" lub "ch". Żaden problem.
-
-  1. Uruchom aplikację i przejdź do Managera Reguł (klawisz Ctrl+4 lub
-     czwarty przycisk na pasku).
-  2. W drzewie plików po lewej rozwiń "pl" → "akcenty" i kliknij
-     "francuski.yaml".
-  3. Kliknij przycisk "Otwórz w edytorze tekstu". Plik otworzy się w
-     Notatniku Windows (lub Twoim domyślnym edytorze tekstu).
-  4. Przewiń w dół do sekcji "zamiany:". Znajdź linię z wzorcem "sz" i
-     zmień wartość "zamiana" na to, co Ci pasuje.
-  5. Zapisz plik (Ctrl+S), zamknij edytor.
-  6. Wróć do Managera Reguł i kliknij "Odśwież drzewo", a potem zamknij
-     i uruchom aplikację ponownie. Twoja zmiana już działa.
-
-  POZIOM 2 — dodanie nowego akcentu przez duplikację
-
-  Chcesz dodać akcent szwedzki albo duński? Zacznij od najbardziej
-  podobnego istniejącego.
-
-  1. W Managerze Reguł zaznacz np. "finski.yaml" (fiński jest blisko
-     szwedzkiego fonetycznie) i kliknij "Duplikuj wybrany plik".
-
-  2. Manager zapyta o nową nazwę — wpisz np. "szwedzki" (małymi literami,
-     bez spacji, bez polskich znaków).
-  3. Nowy plik otworzy się w edytorze. Zmień pola:
-        - "etykieta" — to, co zobaczysz w menu aplikacji, np.
-          "Szwedzki (Alva / Oskar — OneCore/Vocalizer)"
-        - "opis" — krótki opis dla siebie na przyszłość
-        - "iso" — dwuliterowy kod języka, dla szwedzkiego "sv"
-  4. Dostrój listę "zamian" pod fonetykę szwedzką (np. dodaj "å → o",
-     "ö → ö", usuń albo zmień te, które są specyficzne dla fińskiego).
-  5. Zapisz, wróć na Stronę główną, kliknij "🔄 Odśwież akcenty Reżysera
-     z YAML" i uruchom aplikację ponownie. Nowy szwedzki pojawi się w
-     menu akcentów Poligloty (a jeśli dodasz do Księgi Świata postaci
-     tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna
-     automatycznie i zastosuje do jej dialogów).
-
-  POZIOM 3 — stworzenie czegoś zupełnie nowego
-
-  Chcesz gwarę szkolną? Język starożytnych rycerzy? Mowę trawę? Szyfr
-  rodziców przed dziećmi?
-
-  1. W Managerze Reguł kliknij "Nowy plik reguł…".
-  2. Wybierz typ (akcent, szyfr zamian, tryb Reżysera, nowy język bazowy,
-     szyfr algorytmiczny). Dla zwykłych przypadków aplikacja utworzy od
-     razu gotowy szablon YAML — edytujesz go jak w poziomie 2.
-  3. Dla trudniejszych przypadków (algorytmy typu "mieszanie końcówek"
-     albo cały nowy język bazowy) Manager pokaże Ci gotowy prompt do
-     wklejenia w ChatGPT lub Claude. AI wygeneruje kompletny plik YAML,
-     Ty go tylko skopiujesz do folderu. Nie musisz umieć programować —
-     wystarczy umieć przekleić.
+  Die Originaldateien aus dem Paket (angielski.yaml, cezar.yaml, podstawy.yaml
+  usw.) NICHT löschen — besser "verstecken" Sie sie, indem Sie die Endung
+  von ".yaml" in ".yaml.backup" ändern, wenn sie im Menü verschwinden sollen.
+  Wenn Sie später Ihre Meinung ändern, genügt es, die Endung
+  wiederherzustellen.
 
 
-  Kilka pomysłów na zabawę
-  ------------------------
-
-  - Klasa szkolna na lekcji polskiego: zadanie "wczytaj fragment lektury
-    w Poligloci w akcencie rosyjskim — czy poznasz autora?". Dla dzieci
-    niewidomych szczególnie wartościowe, bo dostają ciekawe brzmienie
-    bez konieczności czytania plakatu wzrokiem.
-
-  - Escape room w bibliotece: przygotuj fragment wiersza w Odwracaczu
-    tekstu, wydrukuj (lub wyślij w wiadomości), uczestnicy muszą albo
-    odczytać na głos i nagrać, a potem puścić wstecz, albo po prostu
-    samodzielnie skanować wzrokiem od końca. Klucz do szafki dostają
-    ci, którzy rozpoznają tytuł wiersza.
-
-  - Słuchowisko domowe dla starszej rodziny: zapisz bajkę "Brzydkie
-    kaczątko" w różnych akcentach (narrator angielski, mama kaczka
-    włoska, ojciec kaczor niemiecki) i zmontuj w Audacity. Dla dziadków
-    szczególnie zabawne, bo odróżnią "kto teraz mówi" po samym brzmieniu.
-
-  - Ćwiczenie dla aktora: przepuść swoją kwestię przez Wężowy Dialekt i
-    spróbuj powtórzyć na żywo. Ćwiczy syczenie, oddech, kontrolę języka.
-
-  - Kartka urodzinowa z zagadką: przesuń życzenia Szyfrem Cezara o 3
-    pozycje, dopisz "klucz: przesuń każdą literę o tyle, ile masz lat
-    dzisiaj". Jubilat musi sam znaleźć rozszyfrowanie. (Działa najlepiej
-    dla dzieci 7-12 lat; dorośli zazwyczaj szybko się zorientują.)
-
-
-  Czy coś mi się może popsuć?
-  ---------------------------
-
-  W zasadzie nie. Aplikacja ładuje pliki YAML dynamicznie i jeśli któryś
-  jest niepoprawnie zapisany, zwyczajnie pomija go i wyświetla ostrzeżenie
-  przy starcie. Reszta reguł działa jak gdyby nigdy nic.
-
-  Najgorsze, co może się stać, to że nowy plik po prostu się nie pojawi w
-  menu aplikacji. Wtedy:
-
-  - wróć do Managera Reguł, sprawdź, czy plik jest widoczny w drzewie,
-  - otwórz go ponownie w edytorze tekstu i porównaj strukturę z
-    sąsiednimi (wcięcia, dwukropki, cudzysłowy),
-  - jeśli naprawdę utknąłeś — skopiuj zawartość swojego pliku, otwórz
-    ChatGPT i napisz "mam plik YAML, którego aplikacja nie ładuje,
-    znajdź błąd i pokaż poprawioną wersję". Wklej plik. AI zwykle
-    poprawi go w kilka sekund.
-
-  Oryginalnych plików z paczki (angielski.yaml, cezar.yaml, podstawy.yaml
-  itd.) NIE kasuj — lepiej je "schowaj" zmieniając rozszerzenie z ".yaml"
-  na ".yaml.backup", jeśli chcesz, żeby zniknęły z menu. Gdybyś później
-  zmienił zdanie, wystarczy przywrócić rozszerzenie.
-
-
-  Miłej zabawy!
+  Viel Spaß!

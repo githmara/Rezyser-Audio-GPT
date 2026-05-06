@@ -254,15 +254,15 @@ tresc: |
 
   - Kaputtes Telefon / Schlangendialekt — jedes „s", „z" oder der Digraph „sz" wird zufällig in ein Zischen von 4-8 Zeichen Länge verlängert („ssssss", „zzzzzz", „ssssssz"). Inspiration: Snecko aus dem Spiel „Slay the Spire". Effekt: Der Text klingt, als würde ihn eine Schlange mit Sprachfehler lesen.
 
-  - Vokalisierer (Alles dröhnt auf „O") — jeder Vokal im Text wird in „o" umgewandelt, mit Beibehaltung der polnischen Weichungen. „Dzień dobry" → „Dźoń doboro". Je länger der Text, desto lustiger der Effekt (und der Bildschirmleser liest es mit voller Überzeugung).
+  - Vokalisierer (Alles dröhnt auf „O") — jeder Vokal im Text wird in „o" umgewandelt. „Guten Morgen" → „Goton Moroon". Je länger der Text, desto lustiger der Effekt (und der Bildschirmleser liest es mit voller Überzeugung).
 
-  - Starker Stotterer / Beschädigter Roboter — fügt Stottern am Anfang von Wörtern hinzu: „ko-ko-ko-komputer", „pr-pr-prysznic". Für kurze Wörter (weniger als 3 Zeichen) ignoriert der Algorithmus sie. Wenn der zweite Buchstabe des Wortes ein Konsonant ist, wiederholt er die ersten beiden Buchstaben (natürlicherer Effekt); wenn es ein Vokal ist, wiederholt er nur den ersten.
+  - Starker Stotterer / Beschädigter Roboter — fügt Stottern am Anfang von Wörtern hinzu: „Sch-Sch-Schrank", „Ko-Ko-Koffer". Für kurze Wörter (weniger als 3 Zeichen) ignoriert der Algorithmus sie. Wenn der zweite Buchstabe des Wortes ein Konsonant ist, wiederholt er die ersten beiden Buchstaben (natürlicherer Effekt); wenn es ein Vokal ist, wiederholt er nur den ersten.
 
   - Caesar-Chiffre (PL-Alphabetverschiebung) — klassischer Substitutionschiffre: Jeder Buchstabe wird um N Positionen im polnischen Alphabet verschoben (AĄBCĆ…ZŻŹ, 35 Zeichen). Den Verschiebungswert geben Sie im Zahlenfeld „Caesar-Chiffre-Verschiebung (0 = zufällig, Bereich -35…35)" ein. Wenn Sie 0 eingeben — wählt die Anwendung eine Verschiebung im Bereich 1-34 zufällig aus und zeigt sie nach Abschluss in einer Nachricht an (damit Sie sie später entschlüsseln können). Zeichen außerhalb des Alphabets (Zahlen, Interpunktion, Leerzeichen) bleiben unverändert.
 
   Praktische Anwendung: Die Chiffren speichern das Ergebnis im gleichen Format wie der Regisseur-Modus (.html mit Sprach-Tag oder .docx mit XML-Tags), sodass NVDA sie mit der Stimme der entsprechenden Sprache liest. Besonders der Umkehrer und der Vokalisierer klingen im Synthesizer viel interessanter als beim Lesen mit den Augen — denn das Gehirn versucht beim Lesen mit den Augen automatisch, den Text zu „entschlüsseln", während TTS ihn genau so liest, wie er geschrieben ist.
 
-  Alle sechs Chiffren sind auch in einer breiteren, zugänglichen Sprache in der Datei docs/dictionaries.pl.txt im Anwendungspaket beschrieben — zusammen mit Tipps, wie man ohne Programmierkenntnisse eine eigene „Buchstabentausch"-Chiffre hinzufügen kann (z.B. Schulhofslang, Kauderwelsch).
+  Alle sechs Chiffren sind auch in einer breiteren, zugänglichen Sprache in der Datei docs/dictionaries.de.txt im Anwendungspaket beschrieben — zusammen mit Tipps, wie man ohne Programmierkenntnisse eine eigene „Buchstabentausch"-Chiffre hinzufügen kann (z.B. Schulhofslang, Kauderwelsch).
 
   Spracherkennung
 
@@ -371,7 +371,7 @@ tresc: |
   Praktische Anwendung: Möchten Sie einen schwedischen Akzent hinzufügen? Öffnen Sie den Regelmanager, wählen Sie dictionaries/pl/akzente/finski.yaml, klicken Sie auf „Duplizieren“, benennen Sie die Datei in schwedisch um, ändern Sie das Feld label in "Schwedisch (Alva / Oskar)", den ISO-Code in sv, ändern Sie einige Austauschregeln und speichern Sie. Kehren Sie zur Startseite zurück, klicken Sie auf „{home.btn_odswiez_label}“ und starten Sie die Anwendung neu. Der neue Akzent erscheint im Polyglot-Menü (im Regiemodus) und — wenn Sie ihn dem Buch der Welt der Charaktere hinzufügen („[Marek] - hat einen schwedischen Akzent“) — auch in der automatischen Akzenterkennung des Regisseurs.
 
   Wo Sie weitere Dokumentation zum Ordner dictionaries/ finden:
-  - Datei `docs/dictionaries.pl.txt` (verfügbar im Endbenutzerpaket aus dem Reiter Releases) — eine kurze, einfache Beschreibung jedes Unterordners, 6 fertige Chiffren, 8 fertige Akzente und Ideen, was man selbst ohne Python-Kenntnisse tun kann.
+  - Datei `docs/dictionaries.de.txt` (verfügbar im Endbenutzerpaket aus dem Reiter Releases) — eine kurze, einfache Beschreibung jedes Unterordners, 6 fertige Chiffren, 8 fertige Akzente und Ideen, was man selbst ohne Python-Kenntnisse tun kann.
   - Datei `dictionaries/README.md` (nur verfügbar beim Klonen des Repositories von GitHub — Release-Pakete filtern .md-Dateien) — detaillierte technische Dokumentation des YAML-Formats mit Beispielen, Feldlisten, Pipeline-Regeln, Regexen. Dieses Dokument richtet sich an Linguisten mit Grundkenntnissen in Programmierung und an Entwickler.
 
   Wichtige Hinweise für Bildschirmleser-Nutzer (NVDA)
