@@ -62,15 +62,15 @@ tylko o zabawne i celowe zniekształcenie dla potrzeb fabuły.
 
 Dostępne akcenty (8 języków):
 
-- angielski (Samantha/Mark w Vocalizerze, Zira/Hazel w OneCore)
-- francuski (Thomas/Amelie w Vocalizerze, Julie w OneCore)
-- niemiecki (Markus/Stefan w Vocalizerze, Katja/Hedda w OneCore)
-- hiszpański (Jorge/Monica w Vocalizerze, Helena w OneCore)
-- włoski (Alice/Luca w Vocalizerze, Elsa w OneCore)
-- fiński (Satu/Mikko w Vocalizerze, Heidi w OneCore)
-- islandzki (tylko OneCore Gudrun oraz darmowy eSpeak — Vocalizer nie
+- Englisch (Samantha/Mark w Vocalizerze, Zira/Hazel w OneCore)
+- Französisch (Thomas/Amelie w Vocalizerze, Julie w OneCore)
+- Polnisch (Ewa w Vocalizerze, Paulina w OneCore)
+- Spanisch (Jorge/Monica w Vocalizerze, Helena w OneCore)
+- Italienisch (Alice/Luca w Vocalizerze, Elsa w OneCore)
+- Finnisch (Satu/Mikko w Vocalizerze, Heidi w OneCore)
+- Isländisch (tylko OneCore Gudrun oraz darmowy eSpeak — Vocalizer nie
   ma głosu islandzkiego!)
-- rosyjski (Milena w Vocalizerze, Irina/Pavel/Yuri w OneCore — ten
+- Russisch (Milena w Vocalizerze, Irina/Pavel/Yuri w OneCore — ten
   jest wyjątkowy, bo zamiast "psuć" litery łacińskie wykonuje pełną
   transliterację na cyrylicę; bez tego rosyjski głos nie miałby czego
   wymawiać)
@@ -95,8 +95,8 @@ Dostępne szyfry (6):
 1. Odwracacz Tekstu (czytanie wspak)
    Każde zdanie jest odwracane znak po znaku, z zachowaniem wielkiej
    litery na początku i kropki/wykrzyknika/pytajnika na końcu.
-   Przed odwróceniem skrypt rozwija polskie skrótowce (m.in., np., tzw.,
-   tzn., dr...), bo bez tego po odwróceniu wyszłyby absurdy typu ".nim".
+   Przed odwróceniem skrypt rozwija niemieckie skrótowce (z.B., d.h., usw.,
+   bzw., ggf.), bo bez tego po odwróceniu wyszłyby absurdy typu ".bZ".
 
    Inspiracja: misja z polskiej wersji programu "The Traitors. Zdrajcy".
    Prowadząca puściła uczestnikom popularną dziecięcą piosenkę odtworzoną
@@ -111,40 +111,47 @@ Dostępne szyfry (6):
    nasz Odwracacz przez syntezator mowy. Świetne do zagadek tematycznych,
    escape roomów, zabaw imprezowych.
 
-2. Typoglikemia (wymieszany środek słów)
-   Klasyczny efekt psycholingwistyczny: "Nie meossż peyrzcztać tkstueu w
-   trkirej klojoinseęci letir, jśeli pszeriwa i otsnatia leritea są na
-   wscłaoyicwh mscjaieh". Skrypt miesza losowo środek każdego słowa
-   dłuższego niż 4 znaki, pierwszy i ostatni znak zostaje na miejscu.
-   Świetne do testu "ile tak naprawdę widzę, a ile podpowiada mi mózg".
+2. Typoglykämie (vertauschte Buchstaben)
+   Klassischer psycholinguistischer Effekt: "Laut eneir Stidue der
+   Cmabrigde Uinervtisy ist es eagl, in wlehcer Rheniefolge die
+   Bcuhsatben in eneim Wrot snid, das Ezinge, was wcihtig ist, ist,
+   dass der estre und der ltzete Bchstabe am rcihtigen Paltz snid."
+   Das Skript mischt zufällig die Mitte jedes Wortes, das länger als
+   4 Buchstaben ist, der erste und letzte Buchstabe bleiben an Ort
+   und Stelle. Hervorragend für den Test "wie viel sehe ich wirklich
+   und wie viel ergänzt mein Gehirn".
 
-3. Zepsuty Telefon / Wężowy Dialekt
-   Każde "s", "z" albo "sz" jest losowo wydłużane w syk o długości 4-8
-   znaków. Inspiracja: Snecko z gry "Slay the Spire". Efekt: tekst
-   brzmi, jakby czytał go wąż z wadą wymowy. Świetne do podkładów pod
-   postać zmieszanego gada albo zepsutego robota na szczelinie syczącej.
+3. Kaputtes Telefon / Schlangendialekt
+   Jedes "s", "z" oder "sch" wird zufällig zu einem Zischen von 4-8
+   Zeichen verlängert. Inspiration: Snecko aus dem Spiel "Slay the Spire".
+   Effekt: Der Text klingt, als würde ihn eine Schlange mit Sprachfehler
+   lesen. Hervorragend für die Vertonung einer verwirrten Schlange oder
+   eines kaputten Roboters mit zischendem Akzent.
 
-4. Samogłoskowiec (wszystko dudni na "o")
-   Każda samogłoska w tekście zamieniana jest na "o", z zachowaniem
-   polskich zmiękczeń (ci, si, ni, zi, dzi są obsługiwane poprawnie):
-   "Dzień dobry, witam panią" → "Dźoń doboro, wotom poną". Im dłuższy
-   tekst, tym zabawniejszy efekt — a czytnik ekranu czyta to z pełnym
-   przekonaniem, bez próby dekodowania.
+4. Vokalisierer (alles klingt wie "o")
+   Jeder Vokal im Text wird zu "o" geändert, wobei polnische Weichungen
+   (ci, si, ni, zi, dzi) korrekt behandelt werden: "Dzień dobry, witam
+   panią" → "Dźoń doboro, wotom poną". Je länger der Text, desto
+   lustiger der Effekt — und der Bildschirmleser liest es mit voller
+   Überzeugung, ohne zu versuchen, es zu dekodieren.
 
-5. Silne Jąkanie / Uszkodzony Robot
-   Dokleja zająknięcia na początku słów: "komputer" → "ko-ko-ko-komputer",
-   "prysznic" → "pr-pr-prysznic". Słowa krótsze niż 3 znaki są pomijane.
-   Jeśli druga litera słowa jest spółgłoską, powtarzane są dwie pierwsze
-   (brzmi bardziej naturalnie); jeśli samogłoską — tylko pierwsza.
+5. Stottern / Defekter Roboter
+   Fügt Stottern am Anfang von Wörtern hinzu: "komputer" → "ko-ko-ko-komputer",
+   "prysznic" → "pr-pr-prysznic". Wörter kürzer als 3 Zeichen werden
+   übersprungen. Wenn der zweite Buchstabe des Wortes ein Konsonant ist,
+   werden die ersten beiden wiederholt (klingt natürlicher); wenn ein
+   Vokal — nur der erste.
 
-6. Szyfr Cezara (klasyka)
-   Najstarszy udokumentowany szyfr w historii (używany już w starożytnym
-   Rzymie). Każda litera jest przesuwana o N pozycji w alfabecie polskim
-   (35 liter, z diakrytykami: AĄBCĆ...ZŻŹ). Przesunięcie podajesz w GUI
-   w polu liczbowym; jeśli wpiszesz 0, aplikacja wylosuje wartość w
-   zakresie 1-34 i pokaże ją w komunikacie, żebyś mógł potem odszyfrować
-   wiadomość. Znaki spoza alfabetu (cyfry, spacje, interpunkcja) zostają
-   bez zmian.
+6. Cäsar-Chiffre (Klassiker)
+   Der älteste dokumentierte Chiffre in der Geschichte (bereits im
+   antiken Rom verwendet). Jeder Buchstabe wird um N Positionen im
+   polnischen Alphabet verschoben (35 Buchstaben, mit diakritischen
+   Zeichen: AĄBCĆ...ZŻŹ). Die Verschiebung gibst du im GUI im
+   Zahlenfeld an; wenn du 0 eingibst, wählt die Anwendung einen
+   Wert im Bereich 1-34 zufällig aus und zeigt ihn in einer
+   Nachricht an, damit du die Nachricht später entschlüsseln kannst.
+   Zeichen außerhalb des Alphabets (Zahlen, Leerzeichen,
+   Interpunktion) bleiben unverändert.
 
 
 Co to jest "tryb Reżysera"?
@@ -197,6 +204,7 @@ podobnego istniejącego.
 
 1. W Managerze Reguł zaznacz np. "finski.yaml" (fiński jest blisko
    szwedzkiego fonetycznie) i kliknij "Duplikuj wybrany plik".
+
 2. Manager zapyta o nową nazwę — wpisz np. "szwedzki" (małymi literami,
    bez spacji, bez polskich znaków).
 3. Nowy plik otworzy się w edytorze. Zmień pola:

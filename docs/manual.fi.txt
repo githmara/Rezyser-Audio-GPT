@@ -6,7 +6,7 @@ Paketti koostuu päästudiosta (Ohjaamo), käännös- ja aksenttityökalusta (Po
 
 VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)
 
-Sovellus on täysin siirrettävä ja valmis toimimaan Windows-järjestelmässä. Mene vain kansioon ja käynnistä run.bat-tiedosto (kaksoisnapsauttamalla sitä tai luomalla pikakuvakkeen työpöydälle). Lyhytaikainen terminaali-ikkuna avautuu (sulkeutuu automaattisesti), ja hetken kuluttua ohjelman pääikkuna avautuu — Audio GPT -ohjaaja. Ei selainta, ei taustapalvelinta. Kun lopetat työn, sulje vain ohjelmaikkuna.
+Sovellus on täysin siirrettävä ja valmis toimimaan Windows-järjestelmässä. Mene vain kansioon ja käynnistä run.bat-tiedosto (kaksoisnapsauttamalla sitä tai luomalla pikakuvakkeen työpöydälle). Lyhytaikainen terminaali-ikkuna avautuu (sulkeutuu automaattisesti), ja hetken kuluttua ohjelman pääikkuna avautuu — Ääniohjaaja GPT. Ei selainta, ei taustapalvelinta. Kun lopetat työn, sulje vain ohjelmaikkuna.
 
 Tärkeää: Runtime/-kansio on osa ainoastaan valmiita Windows-paketteja, jotka ladataan GitHubin Releases-välilehdeltä. Se sisältää eristetyn Python-ympäristön, joka on valmis käytettäväksi ilman asennusta. Jos kloonaat arkiston, tätä kansiota ei ole eikä sen pitäisi olla — käytät silloin virtuaalista venv-ympäristöä, joka on kuvattu kehittäjille tarkoitetussa osiossa alla.
 
@@ -23,7 +23,7 @@ Tärkeää: Runtime/-kansio on osa ainoastaan valmiita Windows-paketteja, jotka 
 3. Suorita asennusskripti: ./setup_dev.sh — skripti luo venv-ympäristön ja asentaa riippuvuudet.
 4. Käynnistä sovellus: python main.py tai ./run.sh
 
-Mitä näet käynnistyksen jälkeen: Ohjelman käynnistyessä avautuu ikkuna aloitusnäytöllä. Siinä on lyhyt kuvaus käytettävissä olevista työkaluista ja osio "System Check". Jos API-avain ei ole vielä määritetty, näet punaisen viestin, joka kertoo, että AI-pohjaiset moduulit (Ohjaamo, Kääntäjä) eivät toimi — ilmaiset paikalliset toiminnot (aksentit, Arkkitehti) ovat kuitenkin heti käytettävissä. API-avaimen määrittely kuvataan seuraavassa vaiheessa.
+Mitä näet käynnistyksen jälkeen: Ohjelman käynnistyessä avautuu ikkuna aloitusnäytöllä. Siinä on lyhyt kuvaus käytettävissä olevista työkaluista ja osio "Järjestelmän tarkistus". Jos API-avain ei ole vielä määritetty, näet punaisen viestin, joka kertoo, että AI-pohjaiset moduulit (Ohjaamo, Kääntäjä) eivät toimi — ilmaiset paikalliset toiminnot (aksentit, Arkkitehti) ovat kuitenkin heti käytettävissä. API-avaimen määrittely kuvataan seuraavassa vaiheessa.
 
 
 Automaattiset päivitykset
@@ -43,7 +43,7 @@ Jotta tekoäly voi toimia, se tarvitsee pääsyn OpenAI:n palvelimille (ChatGPT:
 3. Ohjelman aloitusnäytöllä napsauta "Luo golden_key.env-tiedosto ja avaa tekstieditori"-painiketta. Järjestelmä luo automaattisesti puhtaan konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion valmiilla mallilla muokattavaksi.
 4. Avoimessa tiedostossa näet rivin OPENAI_API_KEY=TÄHÄN_LIITÄ_OMA_AVAIN. Poista paikkamerkkiteksti ja liitä kopioitu avain suoraan yhtäsuuruusmerkin jälkeen (ilman välilyöntejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
 
-Vinkki: Sovelluksen uudelleenkäynnistyksen jälkeen se tarkistaa tiedoston ja näyttää vihreän viestin osiossa "System Check" — tämä tarkoittaa, että kaikki AI-moduulit ovat valmiita toimintaan. Muussa tapauksessa se kertoo selvästi, mikä on vialla, ja antaa mahdollisuuden avata tekstieditori virheen korjaamiseksi nopeasti.
+Vinkki: Sovelluksen uudelleenkäynnistyksen jälkeen se tarkistaa tiedoston ja näyttää vihreän viestin osiossa "Järjestelmän tarkistus" — tämä tarkoittaa, että kaikki AI-moduulit ovat valmiita toimintaan. Muussa tapauksessa se kertoo selvästi, mikä on vialla, ja antaa mahdollisuuden avata tekstieditori virheen korjaamiseksi nopeasti.
 
 VAIHE 3: Pääohjaamo
 
@@ -72,7 +72,7 @@ Muokkaa dialogeja, leikkaa toimintaa, mutta jätä rakenne rauhaan!
 
 Kuinka käyttää Ohjaamoa?
 
-- Maailmankirja (sivupalkki vasemmalla): Täällä kirjoitat universumin säännöt. Jokaisella projektilla on nyt oma Maailmankirja, joka liittyy tiedoston nimeen — jos tarinasi tiedosto on esimerkiksi emilia_heist_audiobook.txt, Maailmankirja tallentuu nimellä käsikirjoitukset/emilia_heist_audiobook.md. Siksi järjestys on tärkeä: kirjoita ensin projektitiedoston nimi "Projektitiedoston nimi" -kenttään, ja vasta sitten voit tallentaa Maailmankirjan. "💾 Tallenna Księga pysyvästi"-painike pysyy harmaana, kunnes annat nimen. Olemassa olevan projektin lataaminen "Lataa historia"-painikkeella lataa automaattisesti myös vastaavan .md-tiedoston — sinun ei tarvitse tehdä mitään käsin. Huomio: Ilman täytettyä Maailmankirjaa sovellus estää AI-kyselyjen lähettämisen — tämä on tarkoituksellinen suojaus, joka estää sinua luomasta tekstiä ilman sääntöjä.
+- Maailmankirja (sivupalkki vasemmalla): Täällä kirjoitat universumin säännöt. Jokaisella projektilla on nyt oma Maailmankirja, joka liittyy tiedoston nimeen — jos tarinasi tiedosto on esimerkiksi emilia_heist_audiobook.txt, Maailmankirja tallentuu nimellä käsikirjoitukset/emilia_heist_audiobook.md. Siksi järjestys on tärkeä: kirjoita ensin projektitiedoston nimi "Projektitiedoston nimi" -kenttään, ja vasta sitten voit tallentaa Maailmankirjan. "💾 Tallenna Maailmankirja pysyvästi"-painike pysyy harmaana, kunnes annat nimen. Olemassa olevan projektin lataaminen "Lataa tarina"-painikkeella lataa automaattisesti myös vastaavan .md-tiedoston — sinun ei tarvitse tehdä mitään käsin. Huomio: Ilman täytettyä Maailmankirjaa sovellus estää AI-kyselyjen lähettämisen — tämä on tarkoituksellinen suojaus, joka estää sinua luomasta tekstiä ilman sääntöjä.
 - Pitkäaikainen Muisti (sivupalkki vasemmalla): Toinen kenttä sivupalkissa. Täällä AI tallentaa automaattisesti juonen yhteenvedon, kun muisti alkaa täyttyä. Voit myös kirjoittaa omia muistiinpanojasi käsin — malli käsittelee niitä "mitä jo tiedän" ennen nykyisen kohtauksen lukemista.
 - Aivoriihitila: Kirjoita löyhä idea, ja AI antaa sinulle 3 vaihtoehtoa juonen kehittämiseen. Jokaiselle vaihtoehdolle se luo heti valmiin lohkon "--- LUONNOS PROMPTISTA ---". Kun olet valinnut yhden niistä, liitä tämä prompti Käsikirjoitus- tai Äänikirjatilaan ja lisää mahdolliset huomautukset tai tiedot mallille. Juonimuisti ei muutu Aivoriihen aikana — voit kokeilla ilman riskiä!
 - Raakakäsikirjoitustila: Liitä tähän Aivoriihessä luotu "Luonnos Promptista". AI kirjoittaa pitkän katkelman täydellisillä [Puhuja X: Nimi - tunne] -tageilla dialogeille ja [SFX: ...] -ääniefekteille. Teksti tallentuu automaattisesti tiedostoosi (esim. uusi_kohtaus.txt) kansioon käsikirjoitukset/.
@@ -80,7 +80,7 @@ Kuinka käyttää Ohjaamoa?
 - Automaattinen hahmojen luominen: Skripti on ohjelmoitu luomaan uusia [Puhuja]-tageja automaattisesti, jos juoni vaatii uutta hahmoa. Vinkki: Jos AI luo hienon hahmon, kopioi sen tagi ja liitä se Maailmankirjaan, jotta malli muistaa sen pysyvästi!
 
 Projektin hallinta — kolme toimintopainiketta:
-- Lataa historia: Lataa olemassa olevan projektitiedoston muistiin. Saatavilla vain, kun muisti on tyhjä ja tiedoston nimi on annettu.
+- Lataa tarina: Lataa olemassa olevan projektitiedoston muistiin. Saatavilla vain, kun muisti on tyhjä ja tiedoston nimi on annettu.
 - Tyhjennä nykyinen (jätä Yhteenveto): Tyhjentää vain nykyisen tarinan. Pitkäaikainen Muisti ja Maailmankirja säilyvät — ihanteellinen pitkän kirjan jatkamiseen yhteenvedon luomisen jälkeen.
 - Sulje Projekti (Kova Nollaus): Tyhjentää projektin kokonaan. Poistaa tarinan, yhteenvedon, Maailmankirjan ja nollaa kaikki laskurit. Käytä projektin tai uuden tarinan vaihtamiseen.
 
@@ -315,11 +315,11 @@ VAIHE 7: Kuinka kirjoittaa Maailman Kirja (Arkkitehdin kehotus ja Mini-kurssi Ma
 
 Päästudion tekoäly ymmärtää komennot parhaiten, kun ne on muotoiltu Markdown-merkintäkielellä. Jos annat AI:lle Reżyserissä vain löyhän idean (esim. "kaksi sisarta tuonpuoleisessa"), kone panikoi yksityiskohtien puutteesta ja luo banaalin, ennalta-arvattavan tarinan, joka jättää logiikan huomiotta.
 
-Tämän estämiseksi käytä ulkoista chatbotia (esim. ilmaista ChatGPT:tä tai Claudea) henkilökohtaisena Arkkitehtinasi. Versiossa 13.0 sinun ei enää tarvitse kirjoittaa kehotusta ohjeista — Reżyserin paneelissa, juuri "💾 Tallenna Księga pysyvästi"-painikkeen alla, löydät "📖 Arkkitehdin Kehotus AI:lle…"-painikkeen. Napsauta sitä, ja avautuu valintaikkuna, jossa on valmis kehotusteksti "vain luku" -kentässä sekä "Kopioi leikepöydälle" -painike. NVDA ilmoittaa koko sisällön heti ikkunan avauduttua — riittää, että napsautat "Kopioi", liität (Ctrl+V) ChatGPT/Claudeen ja korvaat osan "[TÄHÄN KIRJOITA OMA IDEASI]" omalla juonialullasi.
+Tämän estämiseksi käytä ulkoista chatbotia (esim. ilmaista ChatGPT:tä tai Claudea) henkilökohtaisena Arkkitehtinasi. Versiossa 13.0 sinun ei enää tarvitse kirjoittaa kehotusta ohjeista — Reżyserin paneelissa, juuri "💾 Tallenna Maailmankirja pysyvästi"-painikkeen alla, löydät "📖 Arkkitehdin Kehotus AI:lle…"-painikkeen. Napsauta sitä, ja avautuu valintaikkuna, jossa on valmis kehotusteksti "vain luku" -kentässä sekä "Kopioi leikepöydälle" -painike. NVDA ilmoittaa koko sisällön heti ikkunan avauduttua — riittää, että napsautat "Kopioi", liität (Ctrl+V) ChatGPT/Claudeen ja korvaat osan "[TÄHÄN KIRJOITA OMA IDEASI]" omalla juonialullasi.
 
 Miksi näin eikä ohjeista kopioimalla? Käyttöliittymän dialogilla on keskeinen saavutettavuusetu: se on natiivi ja ruudunlukija lukee sen ilman häiriöitä, eikä se vaadi siirtymistä tekstieditoriin (missä puolalaiset "häntämerkit" ja lainausmerkit saattavat kopioitua väärin) ja toimii identtisesti kaikissa käyttöjärjestelmissä. Sama malli — dialogi kopioitavalla kehotuksella — käytetään myös Sääntöjen Hallinnassa (katso VAIHE 7b alla).
 
-Kuinka AI vastaa: Vastauksena saat tekstin kahdessa osassa. Ensimmäinen on Maailman Kirja, joka on suljettu Markdown-koodilohkoon (merkinnät ```markdown … ```). Kopioi VAIN koodilohkon sisältö (ilman itse merkintöjä ```) ja liitä se "Maailman Kirja" -kenttään Reżyserissä, sitten napsauta "💾 Tallenna Księga pysyvästi". Toinen osa on suositus, kumpi luovista tiloista (Käsikirjoitus vai Äänikirja) sopii parhaiten ideasi — pidä se vihjeenä valitessasi tilaa RadioBoxissa.
+Kuinka AI vastaa: Vastauksena saat tekstin kahdessa osassa. Ensimmäinen on Maailman Kirja, joka on suljettu Markdown-koodilohkoon (merkinnät ```markdown … ```). Kopioi VAIN koodilohkon sisältö (ilman itse merkintöjä ```) ja liitä se "Maailman Kirja" -kenttään Reżyserissä, sitten napsauta "💾 Tallenna Maailmankirja pysyvästi". Toinen osa on suositus, kumpi luovista tiloista (Käsikirjoitus vai Äänikirja) sopii parhaiten ideasi — pidä se vihjeenä valitessasi tilaa RadioBoxissa.
 
 Markdownin minikurssi Kirjassa: yksittäinen risuaita (#) on pääosio (esim. "# Hahmot"), kaksoisrisuaita (##) on aliosio, ajatusviivat (-) luovat listoja, ja kaksoistähdet (**teksti**) lihavoivat ehdottomat, muuttumattomat säännöt (esim. "**Päähenkilö EI KOSKAAN valehtele**"). Vieraskieliselle hahmolle lisää aksenttitagi, esim. "[Puhuja 1: Marek] - ranskalainen aksentti". Avainsana "aksentti" on VÄLTTÄMÄTÖN — sovelluksen moottori tunnistaa sen automaattisesti ja soveltaa oikeat foneettiset säännöt kyseisen hahmon dialogeihin.
 
@@ -332,7 +332,7 @@ Versio 13.0 tuo neljännen työkalun työkalupalkkiin: Sääntöjen Hallinta. Av
 Miksi YAML? Versioon 12.0 asti kaikki aksentit, luovat tilat ja suodattimet olivat "kovakoodattuja" Pythoniin. Uuden aksentin lisääminen vaati ohjelmoijaa. Versiossa 13.0 kaikki tämä siirrettiin .yaml-tiedostoihin dictionaries/-kansiossa — kuka tahansa, joka osaa avata Muistion, voi hienosäätää olemassa olevaa aksenttia ("vaihda sz sh:ksi sch:ksi") tai lisätä täysin uuden (ruotsalainen, tanskalainen, venäläinen murre).
 
 Mitä löydät Sääntöjen Hallinnasta:
-- Tiedostopuu — täydellinen lista kaikista YAML-tiedostoista dictionaries/-kansiossa jaoteltuna peruskieliin (tällä hetkellä täysin toteutetut: Polski, English, Suomi, Íslenska, Italiano, Русский) ja kategorioihin (aksentit/, salaukset/, ohjaus/). Navigointi nuolinäppäimillä kuten Windowsin Resurssienhallinnassa, täydellinen NVDA-tuki.
+- Tiedostopuu — täydellinen lista kaikista YAML-tiedostoista dictionaries/-kansiossa jaoteltuna peruskieliin (tällä hetkellä täysin toteutetut: Polski, Deutsch, English, Suomi, Íslenska, Italiano, Русский) ja kategorioihin (aksentit/, salaukset/, ohjaus/). Navigointi nuolinäppäimillä kuten Windowsin Resurssienhallinnassa, täydellinen NVDA-tuki.
 - Painike "📝  Avaa tekstieditorissa" — avaa valitun tiedoston järjestelmän oletusmuistiossa. Muokkaa, tallenna, klikkaa "🔄  Päivitä puu" ja valmis.
 - Painike "📋  Kopioi valittu tiedosto" — nopein tapa uuteen aksenttiin: ota olemassa oleva tiedosto (esim. suomi.yaml), anna uusi nimi (esim. ruotsi), Manager luo kopion kommentilla "muuta kentät etiketti ja kuvaus" ja avaa sen editorissa.
 - Painike "➕  Uusi sääntötiedosto…" — luoja, jossa valitaan tyyppi (aksentti, salaus, ohjaustila, uusi peruskieli, algoritminen salaus). Tavallisille tapauksille (aksentti, kirjainten vaihto) luoja luo valmiin muokattavan YAML-mallin. Tapauksille, jotka vaativat ohjelmoijaa (uusi peruskieli, algoritmi, kuten "sanojen keskiosan sekoittaminen") luoja generoi kehotteen AI-chatbotille — liitä se ChatGPT:hen, saat valmiin YAML-tiedoston, tallenna dictionaries/-kansioon ja valmis.
@@ -351,7 +351,7 @@ Kun sovellus lopettaa toiminnan (esim. tallentaa tiedoston tai kohtaa virheen), 
 
 2. Tärkeä varoitus: hiljainen taustaprosessointi
 
-Kun klikkaat painikkeita kuten "Lähetä AI:lle" tai "Aloita Käsittely", ohjelma aloittaa välittömästi taustaprosessoinnin. Näytölle ilmestyy edistymispalkki (Gauge), mutta NVDA EI lue sen arvoa reaaliajassa — ruudunlukija on hiljaa työn aikana. Älä klikkaa painiketta uudelleen. Odota, kunnes tulosikkuna tai virheilmoitus ilmestyy — NVDA ilmoittaa siitä automaattisesti.
+Kun klikkaat painikkeita kuten "Lähetä AI:lle" tai "Käynnistä käsittely", ohjelma aloittaa välittömästi taustaprosessoinnin. Näytölle ilmestyy edistymispalkki (Gauge), mutta NVDA EI lue sen arvoa reaaliajassa — ruudunlukija on hiljaa työn aikana. Älä klikkaa painiketta uudelleen. Odota, kunnes tulosikkuna tai virheilmoitus ilmestyy — NVDA ilmoittaa siitä automaattisesti.
 
 3. Navigointi työkalujen välillä
 

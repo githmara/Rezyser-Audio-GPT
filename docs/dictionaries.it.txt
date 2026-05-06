@@ -19,8 +19,8 @@ La struttura della cartella è la seguente:
         ├── szyfry/                    6 file con cifrari e giochi
         └── rezyser/                   4 file con modalità del Regista AI
 
-Attualmente completamente implementati sono: Polski, English, Suomi, Íslenska, Italiano, Русский
-(6 lingue di base). Ognuna ha il proprio pacchetto
+Attualmente completamente implementati sono: Polski, Deutsch, English, Suomi, Íslenska, Italiano, Русский
+(7 lingue di base). Ognuna ha il proprio pacchetto
 "dictionaries/<codice>/" con diacritici, alfabeto e regole fonetiche
 che operano sul testo in quella lingua specifica — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente. Altre lingue sono in preparazione (un pacchetto completo richiede "podstawy.yaml", "gui/ui.yaml" e almeno un file in "akcenty/" e "szyfry/").
 

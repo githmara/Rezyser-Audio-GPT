@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida Completa (Versione 13.7 – Versione di Rilascio)
+Manuale del Regista Audio AI - Guida Completa (Versione 13.7 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente di scrivere, pianificare, formattare e tradurre automaticamente sceneggiature per radiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori locali di lettori di schermo (NVDA).
 
@@ -27,7 +27,7 @@ Importante: La cartella runtime/ è parte esclusivamente dei pacchetti pronti pe
 4. Avvia l'applicazione: python main.py o ./run.sh
 
 
-Cosa vedrai all'avvio: All'avvio del programma si apre una finestra con la schermata iniziale. Troverai una breve descrizione degli strumenti disponibili e una sezione "System Check". Se la chiave API non è ancora configurata, vedrai un messaggio rosso che informa che i moduli basati su AI (Regia, Traduttore) non funzioneranno — le funzioni locali gratuite (accenti, Architetto) sono però attive subito. La configurazione della chiave è descritta nel passo successivo.
+Cosa vedrai all'avvio: All'avvio del programma si apre una finestra con la schermata iniziale. Troverai una breve descrizione degli strumenti disponibili e una sezione "Controllo del Sistema". Se la chiave API non è ancora configurata, vedrai un messaggio rosso che informa che i moduli basati su AI (Regia, Traduttore) non funzioneranno — le funzioni locali gratuite (accenti, Architetto) sono però attive subito. La configurazione della chiave è descritta nel passo successivo.
 
 
 Aggiornamenti automatici
@@ -48,7 +48,7 @@ Perché l'intelligenza artificiale possa funzionare, ha bisogno di accedere ai s
 3. Nella schermata iniziale del programma clicca sul pulsante "Genera il file golden_key.env e apri l'editor di testo". Il sistema creerà automaticamente un file di configurazione pulito nel posto giusto e aprirà il Blocco Note con un modello pronto per la modifica.
 4. Nel file aperto vedrai la riga OPENAI_API_KEY=QUI_INCOLLA_LA_TUA_CHIAVE. Rimuovi il testo segnaposto e incolla la tua chiave copiata direttamente dopo il segno di uguale (senza spazi). Salva il file e riavvia l'applicazione.
 
-Suggerimento: Dopo il riavvio, l'applicazione controllerà il file e mostrerà un messaggio verde nella sezione "System Check" — significa che tutti i moduli AI sono pronti per lavorare. Altrimenti ti dirà chiaramente cosa non va e ti permetterà di aprire l'editor di testo per correggere rapidamente l'errore.
+Suggerimento: Dopo il riavvio, l'applicazione controllerà il file e mostrerà un messaggio verde nella sezione "Controllo del Sistema" — significa che tutti i moduli AI sono pronti per lavorare. Altrimenti ti dirà chiaramente cosa non va e ti permetterà di aprire l'editor di testo per correggere rapidamente l'errore.
 
 
 PASSO 3: Studio di Regia Principale
@@ -67,7 +67,7 @@ L'esperimento non ha funzionato. L'AI spesso infrange uno dei divieti fondamenta
 
 Tutti i tuoi script e libri generati vengono salvati in semplici file di testo (.txt), che puoi facilmente aprire nel Blocco Note.
 
-Come Regista hai PIENO DIRITTO (e anzi l'obbligo) di modificare questo file! Se l'intelligenza artificiale si spinge troppo oltre e ad esempio risolve da sola il problema dei protagonisti alla fine del frammento generato, apri il file, elimina le ultime righe e lascia il testo interrotto nel momento più teso, prima di svuotare la memoria, ricaricare il file per ricaricare la finestra contestuale e cliccare su "Invia a AI" per continuare.
+Come Regista hai PIENO DIRITTO (e anzi l'obbligo) di modificare questo file! Se l'intelligenza artificiale si spinge troppo oltre e ad esempio risolve da sola il problema dei protagonisti alla fine del frammento generato, apri il file, elimina le ultime righe e lascia il testo interrotto nel momento più teso, prima di svuotare la memoria, ricaricare il file per ricaricare la finestra contestuale e cliccare su "Invia all'AI" per continuare.
 
 🔴 TUTTAVIA - COSA NON PUOI TOCCARE:
 
@@ -177,7 +177,7 @@ Modalità 1: Traduttore Semplice (Usa AI - A Pagamento)
 
 Ideale per ascoltare storie in una lingua straniera bella e corretta.
 
-- Carica il file con il pulsante "Carica il file in memoria" o utilizzando il pulsante "Sfoglia..." per selezionare il file nella finestra di sistema.
+- Carica il file con il pulsante "Carica file in memoria" o utilizzando il pulsante "Sfoglia..." per selezionare il file nella finestra di sistema.
 - Seleziona la modalità "Traduttore AI", inserisci la lingua di destinazione (es. "Finlandese").
 - Lo script tradurrà il contenuto. Se carichi un file .html, tradurrà solo il testo visibile al lettore e aggiornerà il codice della lingua nel tag html.
 
@@ -341,7 +341,7 @@ La versione 13.0 introduce il quarto strumento sulla barra: il Gestore delle Reg
 Perché YAML? Fino alla versione 12.0 tutti gli accenti, modalità creative e filtri erano "incorporati" nel codice Python. Aggiungere un nuovo accento richiedeva un programmatore. Nella versione 13.0 tutto è stato spostato nei file .yaml nella cartella dictionaries/ — chiunque sappia aprire il Blocco Note può regolare un accento esistente ("sostituisci sz con sh con sch") o aggiungerne uno completamente nuovo (svedese, danese, dialetto russo).
 
 Cosa trovi nel Gestore delle Regole:
-- Albero dei file — elenco completo di tutti i file YAML in dictionaries/ suddivisi per lingue di base (attualmente completamente implementate: Polski, English, Suomi, Íslenska, Italiano, Русский) e categorie (accenti/, cifrari/, regista/). Navigazione con le frecce come in Esplora file di Windows, pieno supporto NVDA.
+- Albero dei file — elenco completo di tutti i file YAML in dictionaries/ suddivisi per lingue di base (attualmente completamente implementate: Polski, Deutsch, English, Suomi, Íslenska, Italiano, Русский) e categorie (accenti/, cifrari/, regista/). Navigazione con le frecce come in Esplora file di Windows, pieno supporto NVDA.
 - Pulsante "📝  Apri nell'editor di testo" — apre il file selezionato nel Blocco Note predefinito del sistema. Modifica, salva, clicca "🔄  Aggiorna albero" ed è fatto.
 - Pulsante "📋  Duplica file selezionato" — il modo più veloce per un nuovo accento: prendi un file esistente (es. finski.yaml), dai un nuovo nome (es. svedese), il Gestore crea una copia con il commento "cambia i campi etichetta e descrizione" e lo apre nell'editor.
 - Pulsante "➕  Nuovo file regole…" — wizard con scelta del tipo (accento, cifrario, modalità Regista, nuova lingua di base, cifrario algoritmico). Per i casi comuni (accento, cifrario tipo "sostituzione lettere") il wizard crea un modello YAML pronto per la modifica. Per i casi che richiedono un programmatore (nuova lingua di base, algoritmo tipo "mescolamento interno delle parole") il wizard genera un prompt per un chatbot AI — incolli in ChatGPT, ottieni un file YAML pronto, lo salvi in dictionaries/ ed è fatto.
@@ -360,7 +360,7 @@ Quando l'applicazione termina un'operazione (es. salva un file o incontra un err
 
 2. Importante avviso: elaborazione silenziosa in background
 
-Dopo aver cliccato pulsanti come "Invia a AI" o "Avvia Elaborazione", il programma inizia immediatamente l'elaborazione in background. Sullo schermo appare una barra di avanzamento (Gauge), ma NVDA NON legge il suo valore in tempo reale — il lettore di schermo rimane silenzioso durante il lavoro. Non cliccare nuovamente il pulsante. Attendi che appaia una finestra di dialogo con il risultato o un messaggio di errore — NVDA li annuncerà automaticamente.
+Dopo aver cliccato pulsanti come "Invia all'AI" o "Avvia Elaborazione", il programma inizia immediatamente l'elaborazione in background. Sullo schermo appare una barra di avanzamento (Gauge), ma NVDA NON legge il suo valore in tempo reale — il lettore di schermo rimane silenzioso durante il lavoro. Non cliccare nuovamente il pulsante. Attendi che appaia una finestra di dialogo con il risultato o un messaggio di errore — NVDA li annuncerà automaticamente.
 
 3. Navigazione tra gli strumenti
 
