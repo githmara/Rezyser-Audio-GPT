@@ -1,7 +1,9 @@
 import os
+import shutil
 import zipfile
 import subprocess
 import sys
+from pathlib import Path
 
 import generuj_dokumentacje
 
@@ -44,6 +46,32 @@ if sys.platform == "win32":
 #              w pliku VERSION — niezależnie od liczby paczek językowych.
 
 SCIEZKA_VERSION = os.path.join(os.path.dirname(__file__), "VERSION")
+
+# Mapowanie kodów języków na nazwy i pliki .isl Inno Setup.
+# Języki bez wsparcia (np. islandzki) są pomijane przy buildzie z ostrzeżeniem.
+INNO_LANG_MAP: dict[str, tuple[str, str]] = {
+    "en": ("english",  "compiler:Default.isl"),
+    "pl": ("polish",   "compiler:Languages\\Polish.isl"),
+    "fi": ("finnish",  "compiler:Languages\\Finnish.isl"),
+    "ru": ("russian",  "compiler:Languages\\Russian.isl"),
+    "it": ("italian",  "compiler:Languages\\Italian.isl"),
+    "de": ("german",   "compiler:Languages\\German.isl"),
+}
+
+
+def zbierz_jezyki_bazowe() -> list[str]:
+    """Zwraca kody języków bazowych z folderu dictionaries/.
+
+    Kryterium: podfolder dictionaries/<kod>/ zawiera plik podstawy.yaml.
+    Wynik posortowany alfabetycznie dla determinizmu outputu.
+    """
+    katalog = Path(__file__).parent / "dictionaries"
+    kody = sorted(
+        p.parent.name
+        for p in katalog.glob("*/podstawy.yaml")
+        if p.parent.is_dir()
+    )
+    return kody
 
 
 def odczytaj_wersje() -> str:
@@ -238,14 +266,57 @@ def main() -> None:
     print("✅ Done!")
 
     # 8. Build the Installer EXE (always — required for GitHub Releases auto-update).
-    print("\n[2/2] Launching the Inno Setup compiler (iscc)...")
-    komenda = f'iscc /Q installer.iss /DMyAppVersion="{wersja}"'
+    iscc_exe = shutil.which("iscc")
+    if iscc_exe is None:
+        print("❌ FATAL: 'iscc' not found in PATH.")
+        print("Install Inno Setup (https://jrsoftware.org/isinfo.php) and make sure")
+        print("its folder (e.g. C:\\Program Files (x86)\\Inno Setup 6) is in your PATH.")
+        sys.exit(1)
 
+    # Collect base language codes and map them to Inno Setup .isl entries.
+    kody = zbierz_jezyki_bazowe()
+    # English must be first so Inno Setup picks it as default when no match.
+    wpisy: list[tuple[str, str]] = []
+    if "en" in kody:
+        wpisy.append(INNO_LANG_MAP["en"])
+    for kod in kody:
+        if kod == "en":
+            continue
+        if kod in INNO_LANG_MAP:
+            wpisy.append(INNO_LANG_MAP[kod])
+        else:
+            print(f"   ⚠ Skipping language '{kod}': no matching Inno Setup .isl file.")
+
+    # Build the [Languages] block.
+    blok_languages = "\n".join(
+        f'Name: "{nazwa}";  MessagesFile: "{plik}"'
+        for nazwa, plik in wpisy
+    )
+
+    # Read installer.iss and replace the [Languages] section dynamically.
+    sciezka_iss = Path(__file__).parent / "installer.iss"
+    sciezka_tmp = Path(__file__).parent / "_installer_tmp.iss"
+    iss_tresc = sciezka_iss.read_text(encoding="utf-8")
+    # Split around [Languages] … [Setup] to replace only that section.
+    przed, reszta = iss_tresc.split("[Languages]", 1)
+    _, po_setup = reszta.split("[Setup]", 1)
+    nowy_iss = f"{przed}[Languages]\n{blok_languages}\n\n[Setup]{po_setup}"
+
+    print("\n[2/2] Creating the installer...")
+    tmp_created = False
     try:
-        subprocess.run(komenda, shell=True, check=True)
-        print(f"✅ Success! Installer created: Rezyser_Audio_v{wersja}_Installer.exe")
+        sciezka_tmp.write_text(nowy_iss, encoding="utf-8")
+        tmp_created = True
+        subprocess.run(
+            [iscc_exe, "/Q", str(sciezka_tmp), f"/DMyAppVersion={wersja}"],
+            check=True,
+        )
+        print(f"✅ Installer created: Rezyser_Audio_v{wersja}_Installer.exe")
     except subprocess.CalledProcessError:
-        print("❌ Compilation error. Make sure Inno Setup is installed and 'iscc' is in your system PATH.")
+        print("❌ Compilation error. Inno Setup returned a non-zero exit code.")
+    finally:
+        if tmp_created and sciezka_tmp.exists():
+            sciezka_tmp.unlink()
 
 
 
