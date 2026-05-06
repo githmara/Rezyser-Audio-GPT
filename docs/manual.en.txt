@@ -1,4 +1,4 @@
-Audio AI Director's Manual - Complete Guide (Version 13.6 – Release Edition)
+Audio AI Director's Manual - Complete Guide (Version 13.7 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -332,7 +332,7 @@ Version 13.0 introduces the fourth tool on the toolbar: Rule Manager. You open i
 Why YAML? Until version 12.0, all accents, creative modes, and filters were "hardcoded" in Python. Adding a new accent required a programmer. In version 13.0, all this moved to .yaml files in the dictionaries/ folder — anyone who can open Notepad can fine-tune an existing accent ("replace sz with sh with sch") or add a completely new one (Swedish, Danish, Russian dialect).
 
 What you'll find in the Rule Manager:
-- File tree — a complete list of all YAML files in dictionaries/ divided by base languages (currently fully implemented: Polski, English, Suomi, Íslenska, Русский) and categories (accents/, ciphers/, director/). Navigate with arrows like in Windows File Explorer, full NVDA support.
+- File tree — a complete list of all YAML files in dictionaries/ divided by base languages (currently fully implemented: Polski, English, Suomi, Íslenska, Italiano, Русский) and categories (accents/, ciphers/, director/). Navigate with arrows like in Windows File Explorer, full NVDA support.
 - "📝  Open in Text Editor" button — opens the selected file in the system's default Notepad. Edit, save, click "🔄  Refresh Tree", and you're done.
 - "📋  Duplicate Selected File" button — the fastest way to a new accent: take an existing file (e.g., finski.yaml), give it a new name (e.g., swedish), the Manager creates a copy with the comment "change label and description fields" and opens it in the editor.
 - "➕  New Rule File…" button — a wizard with a type selection (accent, cipher, Director mode, new base language, algorithmic cipher). For ordinary cases (accent, letter substitution cipher), the wizard creates a ready-to-edit YAML template. For cases requiring a programmer (new base language, word middle mixing algorithm), the wizard generates a prompt for an AI chatbot — paste it into ChatGPT, get a ready YAML file, save it in dictionaries/, and you're done.

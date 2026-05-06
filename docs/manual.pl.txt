@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.6 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.7 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -351,7 +351,7 @@ Wersja 13.0 wprowadza czwarte narzędzie na pasku: Manager Reguł. Otwierasz go 
 Po co komu YAML? Do wersji 12.0 wszystkie akcenty, tryby twórcze i filtry były „zaszyte" w kodzie Pythona. Dodanie nowego akcentu wymagało programisty. W wersji 13.0 wszystko to wyjechało do plików .yaml w folderze dictionaries/ — każdy, kto potrafi otworzyć Notatnik, może dostroić istniejący akcent („zamień sz na sh na sch") lub dodać zupełnie nowy (szwedzki, duński, rosyjski dialekt).
 
 Co znajdziesz w Managerze Reguł:
-- Drzewo plików — pełna lista wszystkich plików YAML w dictionaries/ z podziałem na języki bazowe (obecnie kompletnie wdrożone: Polski, English, Suomi, Íslenska, Русский) i kategorie (akcenty/, szyfry/, rezyser/). Nawigacja strzałkami jak w Eksploratorze plików Windows, pełne wsparcie NVDA.
+- Drzewo plików — pełna lista wszystkich plików YAML w dictionaries/ z podziałem na języki bazowe (obecnie kompletnie wdrożone: Polski, English, Suomi, Íslenska, Italiano, Русский) i kategorie (akcenty/, szyfry/, rezyser/). Nawigacja strzałkami jak w Eksploratorze plików Windows, pełne wsparcie NVDA.
 - Przycisk „📝  Otwórz w edytorze tekstu" — otwiera zaznaczony plik w domyślnym Notatniku systemu. Edytujesz, zapisujesz, klikasz „🔄  Odśwież drzewo" i gotowe.
 - Przycisk „📋  Duplikuj wybrany plik" — najszybsza droga do nowego akcentu: bierzesz istniejący plik (np. finski.yaml), podajesz nową nazwę (np. szwedzki), Manager tworzy kopię z komentarzem „zmień pola etykieta i opis" i otwiera ją w edytorze.
 - Przycisk „➕  Nowy plik reguł…" — kreator z wyborem typu (akcent, szyfr, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny). Dla zwykłych przypadków (akcent, szyfr typu „zamiana liter") kreator tworzy gotowy do edycji szablon YAML. Dla przypadków wymagających programisty (nowy język bazowy, algorytm typu „mieszanie środka słów") kreator generuje prompt dla chatbota AI — wklejasz do ChatGPT, dostajesz gotowy plik YAML, zapisujesz w dictionaries/ i gotowe.

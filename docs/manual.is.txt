@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.6 – Útgáfuútgáfa)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.7 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærasett gerir þér kleift að skrifa, skipuleggja, formatta og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Það hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálesurum (NVDA).
 
@@ -332,7 +332,7 @@ SKREF 7b: Reglustjóri (Ctrl+4) — orðabækur fyrir málfræðinga án Pythons
 Af hverju YAML? Fram að útgáfu 12.0 voru allir hreimar, skapandi stillingar og síur „innbyggðar" í Python kóðann. Að bæta við nýjum hreim þurfti forritara. Í útgáfu 13.0 er allt þetta flutt í .yaml skrár í möppunni dictionaries/ — hver sem getur opnað Notepad getur fínstillt núverandi hreim („skipta sz yfir í sh í sch") eða bætt við alveg nýjum (sænskur, danskur, rússneskur mállýska).
 
 Hvað finnur þú í Reglustjóra:
-- Skjalamappa — fullur listi yfir allar YAML skrár í dictionaries/ með skiptingu eftir grunnmálum (eins og er fullkomlega innleitt: Polski, English, Suomi, Íslenska, Русский) og flokkum (hreimar/, dulmál/, leikstjóri/). Leiðsögn með örvum eins og í Windows File Explorer, fullur stuðningur við NVDA.
+- Skjalamappa — fullur listi yfir allar YAML skrár í dictionaries/ með skiptingu eftir grunnmálum (eins og er fullkomlega innleitt: Polski, English, Suomi, Íslenska, Italiano, Русский) og flokkum (hreimar/, dulmál/, leikstjóri/). Leiðsögn með örvum eins og í Windows File Explorer, fullur stuðningur við NVDA.
 - Hnappur „📝  Opna í textaritli" — opnar valda skrá í sjálfgefnum Notepad kerfisins. Þú breytir, vistar, smellir á „🔄  Endurnýja tré" og búið.
 - Hnappur „📋  Afrita valda skrá" — fljótlegasta leiðin til nýs hreims: tekur núverandi skrá (t.d. finski.yaml), gefur nýtt nafn (t.d. sænski), Reglustjóri býr til afrit með athugasemd „breyta merkimiða og lýsing" og opnar það í ritlinum.
 - Hnappur „➕  Ný skrá reglur…" — skapalón með val á tegund (hreim, dulmál, Leikstjórnaraðferð, nýtt grunnmál, reiknirit dulmál). Fyrir venjuleg tilfelli (hreim, dulmál af gerðinni „skipta um stafi") skapar skapalónið tilbúið YAML skjal til að breyta. Fyrir tilfelli sem krefjast forritara (nýtt grunnmál, reiknirit af gerðinni „blanda miðju orða") skapar skapalónið prompt fyrir AI spjallbotann — þú límir í ChatGPT, færð tilbúna YAML skrá, vistar í dictionaries/ og búið.

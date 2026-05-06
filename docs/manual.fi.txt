@@ -1,4 +1,4 @@
-Podręcznik Ääniohjaajan AI - Täydellinen Opas (Versio 13.6 – Julkaisuversio)
+Podręcznik Ääniohjaajan AI - Täydellinen Opas (Versio 13.7 – Julkaisuversio)
 
 Tervetuloa Hybridin Äänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukumoottoreiden (NVDA) kanssa.
 
@@ -332,7 +332,7 @@ Versio 13.0 tuo neljännen työkalun työkalupalkkiin: Sääntöjen Hallinta. Av
 Miksi YAML? Versioon 12.0 asti kaikki aksentit, luovat tilat ja suodattimet olivat "kovakoodattuja" Pythoniin. Uuden aksentin lisääminen vaati ohjelmoijaa. Versiossa 13.0 kaikki tämä siirrettiin .yaml-tiedostoihin dictionaries/-kansiossa — kuka tahansa, joka osaa avata Muistion, voi hienosäätää olemassa olevaa aksenttia ("vaihda sz sh:ksi sch:ksi") tai lisätä täysin uuden (ruotsalainen, tanskalainen, venäläinen murre).
 
 Mitä löydät Sääntöjen Hallinnasta:
-- Tiedostopuu — täydellinen lista kaikista YAML-tiedostoista dictionaries/-kansiossa jaoteltuna peruskieliin (tällä hetkellä täysin toteutetut: Polski, English, Suomi, Íslenska, Русский) ja kategorioihin (aksentit/, salaukset/, ohjaus/). Navigointi nuolinäppäimillä kuten Windowsin Resurssienhallinnassa, täydellinen NVDA-tuki.
+- Tiedostopuu — täydellinen lista kaikista YAML-tiedostoista dictionaries/-kansiossa jaoteltuna peruskieliin (tällä hetkellä täysin toteutetut: Polski, English, Suomi, Íslenska, Italiano, Русский) ja kategorioihin (aksentit/, salaukset/, ohjaus/). Navigointi nuolinäppäimillä kuten Windowsin Resurssienhallinnassa, täydellinen NVDA-tuki.
 - Painike "📝  Avaa tekstieditorissa" — avaa valitun tiedoston järjestelmän oletusmuistiossa. Muokkaa, tallenna, klikkaa "🔄  Päivitä puu" ja valmis.
 - Painike "📋  Kopioi valittu tiedosto" — nopein tapa uuteen aksenttiin: ota olemassa oleva tiedosto (esim. suomi.yaml), anna uusi nimi (esim. ruotsi), Manager luo kopion kommentilla "muuta kentät etiketti ja kuvaus" ja avaa sen editorissa.
 - Painike "➕  Uusi sääntötiedosto…" — luoja, jossa valitaan tyyppi (aksentti, salaus, ohjaustila, uusi peruskieli, algoritminen salaus). Tavallisille tapauksille (aksentti, kirjainten vaihto) luoja luo valmiin muokattavan YAML-mallin. Tapauksille, jotka vaativat ohjelmoijaa (uusi peruskieli, algoritmi, kuten "sanojen keskiosan sekoittaminen") luoja generoi kehotteen AI-chatbotille — liitä se ChatGPT:hen, saat valmiin YAML-tiedoston, tallenna dictionaries/-kansioon ja valmis.

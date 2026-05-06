@@ -20,8 +20,8 @@ Strúktúr möppunnar lítur svona út:
         ├── szyfry/                    6 skrár með dulritunum og leikjum
         └── rezyser/                   4 skrár með AI Reżyser stillingum
 
-Nú þegar eru Polski, English, Suomi, Íslenska, Русский fullkomlega útfærð
-(5 grunnmál). Hvert hefur sitt eigið "dictionaries/<code>/" pakka með diakritískum táknum, stafrófi og hljóðreglum sem virka á texta á því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (eftir málsgrein) og hleður viðeigandi pakka fyrir hvert brot fyrir sig. Fleiri tungumál eru í vinnslu (fullkominn pakki krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").
+Nú þegar eru Polski, English, Suomi, Íslenska, Italiano, Русский fullkomlega útfærð
+(6 grunnmál). Hvert hefur sitt eigið "dictionaries/<code>/" pakka með diakritískum táknum, stafrófi og hljóðreglum sem virka á texta á því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (eftir málsgrein) og hleður viðeigandi pakka fyrir hvert brot fyrir sig. Fleiri tungumál eru í vinnslu (fullkominn pakki krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").
 
 
 Hvað er hreimur?
