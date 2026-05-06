@@ -782,6 +782,7 @@ manager:
   kreator_lbl_etykieta:  "Etykieta (widoczna w GUI):"
   kreator_etykieta_name: "Pole etykieta reguły"
   kreator_etykieta_hint: 'np. "Szwedzki (Alva / Oskar)"'
+  kreator_jezyk_bazowy_etykieta_label: "Nazwa języka (ojczyście lub po angielsku):"
   kreator_lbl_iso:       "Kod ISO języka docelowego:"
   kreator_iso_name:      "Pole kod ISO języka"
   kreator_iso_hint:      "np. sv, de, en (2 znaki)"
@@ -793,13 +794,11 @@ manager:
   kreator_btn_utworz:    "Utwórz"
   # Kreator – hinty dla języka bazowego
   kreator_jezyk_bazowy_id_hint: "np. en, de, fr (kod ISO 639-1, 2-3 znaki)"
-  kreator_jezyk_bazowy_etykieta_hint: "np. Angielski, Niemiecki…"
-  kreator_jezyk_bazowy_iso_label: "Nazwa języka (powtórzona w szablonie):"
-  kreator_jezyk_bazowy_iso_hint: "np. Angielski"
+  kreator_jezyk_bazowy_etykieta_hint: "np. Deutsch, Finnish — ojczyście lub po angielsku (nie: Niemiecki)"
   # Kreator – walidacje
   kreator_alert_tytul:   "Brak lub błąd pola"
   kreator_blad_kod_jezyka: "Kod języka musi być 2- lub 3-literowy (ISO 639-1/3)."
-  kreator_blad_nazwa_jezyka: "Podaj nazwę języka (np. Angielski)."
+  kreator_blad_nazwa_jezyka: "Podaj nazwę języka po angielsku lub ojczyście (np. German, Deutsch — nie: Niemecki)."
   kreator_blad_id: |-
     Identyfikator pliku musi być ASCII w formacie lower_snake.
     Przykłady: szwedzki, tryb_dziennik, postprod_streszczenia.

@@ -64,8 +64,8 @@ LISTA_TYPOW: list[tuple[str, str, str]] = [
     (
         TYP_JEZYK_BAZOWY,
         "Nowy język bazowy (np. en, de, fr)",
-        "Tworzy folder <jezyk>/ z pustym podstawy.yaml oraz podfolderami "
-        "akcenty/ i szyfry/. Dane fonetyczne wygeneruje AI z promptu.",
+        "Tworzy folder <jezyk>/ z podstawy.yaml i podfolderami akcenty/, szyfry/, gui/. "
+        "Dane fonetyczne generuje AI z promptu; tłumaczenie UI – buduj_wielojezyczne_ui.py.",
     ),
     (
         TYP_SZYFR_ALGORYTM,
@@ -426,6 +426,12 @@ alfabet: "<WIELKIE_LITERY_ALFABETU_BEZ_SPACJI>"
 ```
 
 ## ZASADY ŻELAZNE
+0. ⚠️ NAZWA JĘZYKA A POLE `lingua` — OBOWIĄZEK ANGIELSKIEJ NAZWY ENUMA.
+   Pole `lingua` ZAWSZE musi być ANGIELSKĄ nazwą enuma `lingua.Language`,
+   nawet jeśli użytkownik podał etykietę w języku ojczystym (np. „Deutsch").
+   Prawidłowe mapowanie: Deutsch / German → `lingua: GERMAN`,
+   Français / French → `lingua: FRENCH` itd. Nigdy nie przepisuj etykiety
+   dosłownie (np. `lingua: DEUTSCH` byłoby błędem).
 1. Pole `lingua` to identyfikator detektora języka (biblioteka
    `lingua-language-detector`). Wartość MUSI być nazwą istniejącego enum-a
    `lingua.Language` zapisaną WIELKIMI LITERAMI, bez prefiksu, bez kropek
@@ -752,11 +758,12 @@ def zbuduj_wynik(
             "prompt":   prompt_jezyk_bazowy(id_pliku, etykieta),
             "docelowy": f"{id_pliku}/podstawy.yaml",
             "uwagi": (
-                "Manager utworzy folder `dictionaries/{kod}/` oraz "
-                "podfoldery `akcenty/` i `szyfry/`. Szablon `podstawy.yaml` "
-                "ma puste miejsca – skopiuj prompt do AI, aby otrzymać "
-                "pełne dane fonetyczne dla nowego języka."
-            ).replace("{kod}", id_pliku),
+                f"Manager utworzy folder `dictionaries/{id_pliku}/` z podfolderami "
+                f"`akcenty/`, `szyfry/` i `gui/`. Szablon `podstawy.yaml` ma puste "
+                f"miejsca – skopiuj prompt do AI, aby otrzymać dane fonetyczne. "
+                f"Tłumaczenie interfejsu (`gui/ui.yaml`) generuje skrypt "
+                f"`buduj_wielojezyczne_ui.py` – nie twórz go ręcznie."
+            ),
         }
 
     if typ == TYP_SZYFR_ALGORYTM:

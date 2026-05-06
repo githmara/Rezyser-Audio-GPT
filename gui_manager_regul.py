@@ -906,8 +906,8 @@ class KreatorNowejRegulyDialog(wx.Dialog):
 
         self._txt_etykieta = wx.TextCtrl(self, name=t("manager.kreator_etykieta_name"))
         self._txt_etykieta.SetHint(t("manager.kreator_etykieta_hint"))
-        form.Add(wx.StaticText(self, label=t("manager.kreator_lbl_etykieta")),
-                 flag=wx.ALIGN_CENTER_VERTICAL)
+        self._lbl_etykieta = wx.StaticText(self, label=t("manager.kreator_lbl_etykieta"))
+        form.Add(self._lbl_etykieta, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_etykieta, flag=wx.EXPAND)
 
         self._txt_iso = wx.TextCtrl(self, name=t("manager.kreator_iso_name"))
@@ -944,6 +944,7 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         # --- Przyciski OK / Anuluj ---
         btn_sizer = self.CreateStdDialogButtonSizer(wx.OK | wx.CANCEL)
         self.FindWindowById(wx.ID_OK, self).SetLabel(t("manager.kreator_btn_utworz"))
+        self.FindWindowById(wx.ID_CANCEL, self).SetLabel(t("common.btn_anuluj"))
         sizer.Add(btn_sizer, flag=wx.ALL | wx.ALIGN_RIGHT, border=12)
 
         self.SetSizer(sizer)
@@ -974,10 +975,10 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         self._lbl_opis_typu.SetName(opis)   # NVDA odczyta po sfocusowaniu
 
         # Reguły pokazywania pól:
-        #   - ISO: tylko dla akcentu i nowego języka bazowego.
+        #   - ISO: tylko dla akcentu (nie dla nowego języka — tam jest zbędne).
         #   - Opis efektu: tylko dla szyfru algorytmicznego.
         #   - Język bazowy (ComboBox): dla WSZYSTKICH poza nowym językiem.
-        pokaz_iso        = typ in (mrs.TYP_AKCENT, mrs.TYP_JEZYK_BAZOWY)
+        pokaz_iso        = typ == mrs.TYP_AKCENT
         pokaz_opis_efekt = typ == mrs.TYP_SZYFR_ALGORYTM
         pokaz_jezyk      = typ != mrs.TYP_JEZYK_BAZOWY
 
@@ -991,11 +992,11 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         # Zmiana etykiet + podpowiedzi pod dany typ
         if typ == mrs.TYP_JEZYK_BAZOWY:
             self._txt_id.SetHint(t("manager.kreator_jezyk_bazowy_id_hint"))
+            self._lbl_etykieta.SetLabel(t("manager.kreator_jezyk_bazowy_etykieta_label"))
             self._txt_etykieta.SetHint(t("manager.kreator_jezyk_bazowy_etykieta_hint"))
-            self._lbl_iso.SetLabel(t("manager.kreator_jezyk_bazowy_iso_label"))
-            self._txt_iso.SetHint(t("manager.kreator_jezyk_bazowy_iso_hint"))
         else:
             self._txt_id.SetHint(t("manager.kreator_id_hint"))
+            self._lbl_etykieta.SetLabel(t("manager.kreator_lbl_etykieta"))
             self._txt_etykieta.SetHint(t("manager.kreator_etykieta_hint"))
             self._lbl_iso.SetLabel(t("manager.kreator_lbl_iso"))
             self._txt_iso.SetHint(t("manager.kreator_iso_hint"))

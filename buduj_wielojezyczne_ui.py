@@ -510,24 +510,24 @@ def tlumacz_jezyk(
     skip_existing: bool,
     dry_run: bool,
     model: str,
-    klucz: str | None = None,
+    klucze: list[str] | None = None,
 ) -> bool:
     """Pełen pipeline dla jednego języka. Zwraca True przy sukcesie.
 
-    Tryb FULL (`klucz=None`): tłumaczy wszystkie liście, klonuje drzewo PL
+    Tryb FULL (`klucze=None`): tłumaczy wszystkie liście, klonuje drzewo PL
     do iniekcji, nadpisuje cały plik `<kod>/gui/ui.yaml`.
 
-    Tryb UPDATE (`klucz="dotted.path"`): tłumaczy TYLKO podany klucz
-    (lub całe poddrzewo, gdy klucz wskazuje na gałąź), wczytuje już
-    istniejący `<kod>/gui/ui.yaml` jako bazę iniekcji, nadpisuje wybrane
-    liście — pozostałe są zachowane bit w bit. Wymaga, żeby plik
-    docelowy istniał (najpierw FULL, potem UPDATE).
+    Tryb UPDATE (`klucze=[...]`): tłumaczy TYLKO podane klucze (lub całe
+    poddrzewa, gdy klucz wskazuje na gałąź), wczytuje już istniejący
+    `<kod>/gui/ui.yaml` jako bazę iniekcji, nadpisuje wybrane liście —
+    pozostałe są zachowane bit w bit. Wymaga, żeby plik docelowy istniał
+    (najpierw FULL, potem UPDATE). Kilka kluczy = jeden request per chunk.
     """
     cel = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
-    if klucz is None and cel.exists() and skip_existing:
+    if klucze is None and cel.exists() and skip_existing:
         print(f"⏭️  {kod}: {cel.relative_to(ROOT)} już istnieje — pomijam (--skip-existing).")
         return True
-    if klucz is not None and not cel.exists():
+    if klucze is not None and not cel.exists():
         print(f"❌ {kod}: brak {cel.relative_to(ROOT)} — uruchom najpierw bez --klucz.")
         return False
 
@@ -642,7 +642,7 @@ def tlumacz_jezyk(
     #            jest pełna struktura PL ze wszystkimi komentarzami.
     # Tryb UPDATE: wczytujemy istniejące <kod>/gui/ui.yaml — tłumaczenia
     #              pozostałych liści są zachowane, podmieniamy tylko wybrane.
-    if klucz is not None:
+    if klucze is not None:
         with open(cel, "r", encoding="utf-8") as fh:
             drzewo_kopia = yaml_io.load(fh)
     else:
@@ -718,11 +718,13 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "--klucz",
         type=str,
         default=None,
-        help="Tłumacz tylko liście, których dotted-path zaczyna się od podanego "
-             "klucza (np. `poliglota.ostrzezenie_jezyk` lub całe poddrzewo "
-             "`poliglota`). Wymaga, by `<kod>/gui/ui.yaml` już istniał — "
-             "pozostałe liście są zachowane bit w bit. Pozwala na surgical "
-             "update jednej etykiety bez retłumaczenia całego pliku.",
+        metavar="KLUCZ[,KLUCZ...]",
+        help="Tłumacz TYLKO wskazane klucze (dotted-path), reszta pliku bez zmian. "
+             "Można podać wiele kluczy oddzielonych przecinkiem: "
+             "`manager.kreator_jezyk_bazowy_etykieta_hint,manager.kreator_blad_nazwa_jezyka`. "
+             "Klucz pasuje do liścia dokładnie LUB do całego poddrzewa (prefix + '.children'). "
+             "Wymaga, by `<kod>/gui/ui.yaml` już istniał — najpierw pełne tłumaczenie, "
+             "potem surgical update wybranych kluczy.",
     )
     args = parser.parse_args()
     if args.klucz and args.skip_existing:
@@ -768,19 +770,28 @@ def main() -> int:
         return 2
     print(f"📄 Wczytano {sciezka_pl.relative_to(ROOT)}: {len(liscie_pl)} liści.")
 
-    # Filtr `--klucz`: zostaw tylko liście, których dotted-path zaczyna się
-    # od podanego prefiksu (sam klucz LUB klucz + "." → poddrzewo).
+    # Filtr `--klucz`: zostaw tylko liście, których dotted-path dokładnie
+    # pasuje do jednego z podanych kluczy LUB zaczyna się od niego + "."
+    # (poddrzewo). Kilka kluczy oddzielonych przecinkiem → unia zbiorów.
+    klucze_filtru: list[str] | None = None
     if args.klucz:
+        klucze_filtru = [k.strip() for k in args.klucz.split(",") if k.strip()]
         przed = len(liscie_pl)
         liscie_pl = [
             (p, v) for p, v in liscie_pl
-            if p == args.klucz or p.startswith(args.klucz + ".")
+            if any(p == k or p.startswith(k + ".") for k in klucze_filtru)
         ]
         if not liscie_pl:
-            print(f"❌ Brak liści dla klucza `{args.klucz}` w {sciezka_pl.relative_to(ROOT)}. "
-                  f"Sprawdź dotted-path (np. `poliglota.ostrzezenie_jezyk`).")
+            print(
+                f"❌ Brak liści dla kluczy {klucze_filtru} w {sciezka_pl.relative_to(ROOT)}.\n"
+                f"   Sprawdź dotted-path (np. `manager.kreator_jezyk_bazowy_etykieta_hint`)."
+            )
             return 2
-        print(f"🔎 Filtr --klucz='{args.klucz}': {len(liscie_pl)}/{przed} liści.")
+        print(
+            f"🔎 Filtr --klucz ({len(klucze_filtru)} kluczy): "
+            f"{len(liscie_pl)}/{przed} liści. "
+            f"Istniejące pliki ui.yaml zostaną zaktualizowane w miejscu."
+        )
 
     klient: Any = None if args.dry_run else _zainicjuj_klienta_openai()
 
@@ -799,7 +810,7 @@ def main() -> int:
             skip_existing=args.skip_existing,
             dry_run=args.dry_run,
             model=args.model,
-            klucz=args.klucz,
+            klucze=klucze_filtru,
         )
         (sukcesy if ok else porazki).append(kod)
 

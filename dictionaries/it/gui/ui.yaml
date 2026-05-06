@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 app:
   nazwa: "Regista Audio GPT"
-  wersja: "{numer_wersji} – Versione di Rilascio"
+  wersja: "{numer_wersji} – Versione di Pubblicazione"
   title_home: "{nazwa_aplikacji}  |  {wersja}"
   title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
   banner: "🎬  {nazwa_aplikacji}"
@@ -64,17 +64,17 @@ main:
     konwerter: "Apre il modulo Convertitore – creazione di file Word"
     manager: "Apre il Gestore Regole – esploratore di file YAML in dictionaries/ e creatore di nuovi accenti / modalità / cifrari"
     zakoncz: "Chiudi l'applicazione"
-    jezyk_interfejsu: "Seleziona la lingua dell'interfaccia dell'applicazione (la modifica richiede il riavvio)"
+    jezyk_interfejsu: "Seleziona la lingua dell'interfaccia dell'applicazione (il cambiamento richiede il riavvio)"
   btn:
     rezyser: "🎬  &Regista"
     poliglota: "🌍  &Poliglotta"
     konwerter: "📄  &Convertitore"
     manager: "📚  &Gestore Regole"
   tooltip:
-    rezyser: "Modulo Regista (Ctrl+1): Scrivi script e prosa con AI"
+    rezyser: "Modulo Regista (Ctrl+1): Scrivi script e prosa con l'aiuto dell'AI"
     poliglota: "Modulo Poliglotta (Ctrl+2): Accenti e traduzione testi"
     konwerter: "Modulo Convertitore (Ctrl+3): Crea file Word con intestazioni"
-    manager: "Gestore Regole (Ctrl+4): Esplora file YAML in dictionaries/, crea nuovi accenti, cifrari e modalità (modello o prompt per AI)"
+    manager: "Gestore Regole (Ctrl+4): Esplora file YAND in dictionaries/, crea nuovi accenti, cifrari e modalità (modello o prompt per AI)"
   nazwy_narzedzi:
     dom: "Casa"
     rezyser: "Regista"
@@ -82,11 +82,11 @@ main:
     konwerter: "Convertitore"
     manager: "Gestore Regole"
   dialog:
-    zmiana_jezyka_tytul: "Cambio della lingua dell'interfaccia"
+    zmiana_jezyka_tytul: "Cambio lingua dell'interfaccia"
     zmiana_jezyka_tresc: |-
-      La modifica della lingua dell'interfaccia richiede il riavvio dell'applicazione.
+      Il cambio della lingua dell'interfaccia richiede il riavvio dell'applicazione.
 
-      Fai clic su OK per chiudere l'applicazione. Dopo il riavvio l'interfaccia sarà nella lingua selezionata ({nazwa_jezyka}).
+      Clicca OK per chiudere l'applicazione. Al riavvio, l'interfaccia sarà nella lingua selezionata ({nazwa_jezyka}).
 
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
@@ -95,14 +95,14 @@ home:
   panel_name: "Pannello iniziale – Pagina principale"
   welcome_text: |-
     Questo è il tuo studio di registrazione integrato.
-    Scegli uno strumento dalla barra dei pulsanti o dal menu Strumenti:
+    Seleziona uno strumento dalla barra dei pulsanti o dal menu Strumenti:
 
       •  Regista       –  Scrivi script e prosa con AI; gestisci dinamicamente il Libro del Mondo.
-      •  Poliglotta     –  Applica accenti forti per i sintetizzatori locali (NVDA/Vocalizer) e traduci testi.
+      •  Poliglotta     –  Applica accenti duri ai sintetizzatori locali (NVDA/Vocalizer) e traduci testi.
       •  Convertitore     –  Crea rapidamente file Word professionali con intestazioni di livello 1.
-      •  Gestore Regole –  Esplora e crea regole lessicali senza entrare manualmente nei file YAML.
-  heading_system_check: "System Check"
-  checking: "Verifica configurazione…"
+      •  Gestore Regole –  Esplora e crea regole di dizionario senza entrare manualmente nei file YAML.
+  heading_system_check: "Controllo del Sistema"
+  checking: "Verifica della configurazione…"
   # Błędy walidacji golden_key.env
   err_brak_pliku: |-
     🚨 File di configurazione ambientale mancante!
@@ -126,11 +126,11 @@ home:
     la chiave deve essere inserita direttamente dopo il segno '=', senza caratteri aggiuntivi.
   err_niedozwolone_znaki: |-
     🚨 Caratteri non consentiti attorno alla chiave!
-    Rilevato uno spazio o un altro carattere invisibile prima o dopo la chiave API.
+    È stato rilevato uno spazio o un altro carattere invisibile prima o dopo la chiave API.
     Apri il file nell'editor di testo e assicurati che il valore inizi
     immediatamente dopo il segno '=', senza spazi.
   err_format: |-
-    🚨 Formato chiave sospetto!
+    🚨 Formato della chiave sospetto!
     La chiave OpenAI corretta inizia sempre con i caratteri sk- (es. sk-proj-…).
     Assicurati di aver copiato la stringa corretta e che non ci siano spazi prima di essa.
   err_zbyt_krotki: |-
@@ -140,7 +140,7 @@ home:
     Se hai già chiuso la finestra con la chiave su platform.openai.com,
     devi tornare al tuo account, usare l'opzione 'Revoke secret key' per questa
     chiave troncata e generare una nuova. Ricorda di copiare l'intera chiave
-    prima di cliccare 'Done'.
+    prima di cliccare 'Done' la prossima volta.
   ok_klucz_wykryty: |-
     ✅ Chiave API (golden_key.env) rilevata e formattata correttamente.
     Tutti i moduli sono pronti per l'uso.
@@ -156,13 +156,13 @@ home:
   blad_otwarcia_pliku_tytul: "Informazione"
   blad_otwarcia_pliku_tresc: "Impossibile aprire automaticamente il file.\nAprilo manualmente:\n{sciezka_pliku}"
   # Sekcja: Narzędzia słownikowe
-  heading_narzedzia_slownikowe: "Strumenti lessicali"
-  narzedzia_slownikowe_name: "Descrizione degli strumenti lessicali"
+  heading_narzedzia_slownikowe: "Strumenti di dizionario"
+  narzedzia_slownikowe_name: "Descrizione degli strumenti di dizionario"
   tools_info: |-
     Vuoi aggiungere un nuovo accento, cifrario o modalità Regista?
-    Apri il Gestore Regole (Ctrl+4) – troverai l'albero di tutti i file YAML in dictionaries/ e un creatore che genererà automaticamente un modello o un prompt per il chatbot AI.
+    Apri il Gestore Regole (Ctrl+4) – troverai lì l'albero di tutti i file YAML in dictionaries/ e un creatore che creerà automaticamente un modello o genererà un prompt per il chatbot AI.
 
-    Dopo aver aggiunto un nuovo ACCENTO, clicca inoltre il pulsante "Aggiorna accenti Regista da YAML" qui sotto – questo permetterà alla Modalità Regista di rilevare il nuovo accento (Poliglotta rileva automaticamente i YAML). Dopo l'aggiornamento, riavvia l'applicazione.
+    Dopo aver aggiunto un nuovo ACCENTO, clicca inoltre il pulsante "Aggiorna accenti Regista da YAML" qui sotto – questo permetterà alla Modalità Regista di rilevare il nuovo accento (Poliglotta rileva automaticamente gli YAML). Dopo l'aggiornamento, riavvia l'applicazione.
   btn_open_manager_label: "📚 Apri Gestore Regole"
   btn_open_manager_name: "Pulsante Apri Gestore Regole"
   btn_open_manager_tooltip: "Passa al Gestore Regole – esploratore di file YAML e creatore di nuovi accenti / modalità / cifrari (Ctrl+4)."
@@ -170,7 +170,7 @@ home:
   btn_odswiez_name: "Pulsante Aggiorna accenti Regista da YAML"
   btn_odswiez_tooltip: "Scansiona dictionaries/*/accenti/ e rigenera i wrapper accenti_* in core_poliglota.py e core_rezyser.py. Dopo un aggiornamento riuscito, è necessario riavviare l'applicazione."
   # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Errore aggiornamento accenti"
+  raport_niespodziewany_tytul: "Errore di aggiornamento accenti"
   raport_niespodziewany_tresc: "Si è verificato un errore imprevisto:\n{tresc_bledu}"
   raport_tytul_blad: "Aggiorna accenti Regista – ERRORE"
   raport_header_blad: "⛔ Il generatore ha incontrato errori – vedi log qui sotto."
@@ -199,9 +199,9 @@ rezyser:
 
     I progetti vengono salvati nella sottocartella 'skrypty/' accanto al programma.
     Fornisci il nome del progetto SENZA estensione (es. cronache_arkonii).
-    Per cambiare progetto, devi prima svuotare la memoria corrente.
+    Per cambiare progetto, devi prima cancellare la memoria corrente.
   prompt_architekta_content: |-
-    Sei un eccezionale architetto di mondi (Worldbuilder) e consulente letterario. Ho un'idea vaga per una trama: [INSERISCI QUI LA TUA IDEA]. Il tuo compito è espanderla in un "Libro del Mondo" professionale.
+    Sei un eccezionale architetto di mondi (Worldbuilder) e consulente letterario. Ho un'idea vaga per una trama: [INSERISCI QUI LA TUA IDEA]. Il tuo compito è espandere questo in un "Libro del Mondo" professionale.
     Adatta il tono e le regole alla mia idea. Evita scorciatoie fiabesche e cliché AI.
 
     REGOLE DI FORMATTAZIONE (CRITICHE):
@@ -214,14 +214,14 @@ rezyser:
     3. Usa un doppio hashtag (##) per le sottosezioni.
     4. Usa trattini (-) per creare elenchi leggibili.
     5. Usa doppie asterischi (**testo**) per evidenziare regole assolute e inviolabili (es. **L'eroe NON mente MAI**).
-    6. Descrivi la psicologia dei personaggi, i loro maggiori difetti e motivazioni. Per i personaggi di lingua straniera, aggiungi informazioni sull'accento direttamente accanto al tag, es. `[Speaker 1: Nome] - balbetta e ha un accento francese`. **Suggerimento tecnico:** L'uso della parola chiave `accento` è assolutamente richiesto, poiché è su questa base che uno script esterno dell'applicazione rileva automaticamente e applica le corrette regole fonetiche ai dialoghi del personaggio.
+    6. Descrivi la psicologia dei personaggi, i loro maggiori difetti e motivazioni. Per i personaggi di lingua straniera, aggiungi informazioni sull'accento direttamente al tag, es. `[Speaker 1: Nome] - balbetta e ha un accento francese`. **Suggerimento tecnico:** L'uso della parola chiave `accento` è assolutamente richiesto, poiché su di essa uno script esterno dell'applicazione rileva automaticamente e applica le corrette regole fonetiche ai dialoghi del personaggio.
 
     PARTE 2: RACCOMANDAZIONE MODALITÀ
     Questa parte deve essere inserita FUORI dal blocco di codice, come testo normale sotto. Consigliami quale delle modalità della mia applicazione sarà la migliore per realizzare questa idea: 🎬 Modalità Script Grezzo (dramma radiofonico, SFX, fonetica), o 📖 Modalità Audiolibro Tradizionale (prosa letteraria classica).
 
   # Pasek pliku
   lbl_nazwa_pliku: "Nome del file del progetto (senza estensione, es. cronache_arkonii):"
-  txt_nazwa_pliku_name: "Campo nome file del progetto"
+  txt_nazwa_pliku_name: "Campo nome del file del progetto"
   txt_nazwa_pliku_hint: "es. cronache_arkonii"
   txt_nazwa_pliku_tooltip: |-
     Inserisci il nome del progetto SENZA estensione.
@@ -239,7 +239,7 @@ rezyser:
   btn_hard_reset_label: "Chiudi Progetto (Reset Completo)"
   btn_hard_reset_tooltip: |-
     Cancellazione COMPLETA del progetto: storia, sommario, Libro del Mondo.
-    Azzera tutti i contatori e sblocca il campo nome file.
+    Azzera tutti i contatori e sblocca il campo nome del file.
     Usa quando cambi progetto o inizi una storia completamente nuova.
   # Sidebar
   sidebar_heading: "📖 Barra Laterale del progetto"
@@ -248,18 +248,18 @@ rezyser:
   txt_ksiega_hint: |-
     Inserisci le regole del mondo, la descrizione dei personaggi e i loro accenti fonetici…
     Es. [Geralt: accento islandese]
-    Il contenuto viene aggiunto a ogni richiesta AI.
+    Il contenuto viene incluso in ogni richiesta AI.
   txt_ksiega_tooltip: |-
-    Contesto sempre aggiunto all'AI: regole del mondo, personaggi, accenti fonetici.
-    Il salvataggio su disco richiede il nome del file del progetto.
+    Contesto sempre incluso per AI: regole del mondo, personaggi, accenti fonetici.
+    Il salvataggio su disco richiede di fornire il nome del file del progetto.
   btn_zapisz_ksiege_label: "💾 Salva il Libro in modo permanente"
   btn_zapisz_ksiege_tooltip: |-
     Salva il Libro del Mondo nel file: skrypty/<nome>.md
-    Richiede il nome del file del progetto.
+    Richiede di fornire il nome del file del progetto.
   btn_prompt_architekta_label: "📖 Prompt dell'Architetto per AI…"
   btn_prompt_architekta_name: "Pulsante Mostra Prompt dell'Architetto per chatbot esterno"
   btn_prompt_architekta_tooltip: |-
-    Apre una finestra con un prompt pronto per il chatbot esterno (ChatGPT, Claude).
+    Apre una finestra con un prompt pronto per un chatbot esterno (ChatGPT, Claude).
     Incolla la tua idea di trama e l'AI genererà un Libro del Mondo professionale formattato in Markdown – da incollare nel campo "Libro del Mondo" sopra.
   lbl_pamiec_dlugotrwala: "🧠 Memoria a Lungo Termine (Sommario):"
   txt_pamiec_name: "Campo Memoria a Lungo Termine – sommario degli eventi"
@@ -267,8 +267,8 @@ rezyser:
     Qui l'AI salverà il sommario quando la memoria è piena.
     Puoi anche modificarlo manualmente.
   txt_pamiec_tooltip: |-
-    Sommario degli eventi precedenti aggiunto a ogni richiesta AI.
-    Permette di continuare la storia senza limiti della finestra contestuale del modello.
+    Sommario degli eventi precedenti incluso in ogni richiesta AI.
+    Permette di continuare la storia senza limitazioni della finestra contestuale del modello.
   btn_zapisz_pamiec_label: "💾 Salva Sommario"
   btn_zapisz_pamiec_tooltip: |-
     Salva il sommario nel file: skrypty/<nome>_sommario.txt
@@ -281,6 +281,13 @@ rezyser:
     Brainstorming – pianificazione senza salvataggio su file.
     Script        – script audio grezzo (salvato su file).
     Audiolibro     – prosa letteraria tradizionale (salvata su file).
+  # 13.2: komunikaty fallbacku reżysera (gdy brak reguł dla języka UI ani EN)
+  brak_trybow_dla_jezyka: |-
+    Per la lingua "{jezyk}" non sono stati trovati modalità regista AI né fallback
+    inglese (dictionaries/en/rezyser/). Aggiungi un file YAML con la modalità
+    nella cartella delle regole della lingua o ripristina il pacchetto inglese predefinito.
+  brak_trybow_tytul: "Nessuna modalità regista"
+  placeholder_brak_trybow: "(nessuna modalità disponibile)"
   # Panel struktury
   struktura_heading: "✂️ Gestione della Struttura"
   btn_prolog_label: "📜 Inserisci Prologo"
@@ -292,7 +299,7 @@ rezyser:
   btn_epilog_name: "Pulsante Inserisci Epilogo"
   btn_epilog_tooltip: |-
     Inserisce l'intestazione 'Epilogo' alla fine della storia.
-    Blocca ulteriori aggiunte di contenuti dopo l'Epilogo.
+    Blocca ulteriori aggiunte di contenuto dopo l'Epilogo.
   btn_rozdzial_label: "✂️ Inserisci taglio (Capitolo {numer_rozdzialu})"
   btn_rozdzial_name: "Pulsante Inserisci Capitolo"
   btn_rozdzial_tooltip: |-
@@ -308,23 +315,23 @@ rezyser:
   btn_scena_tooltip: |-
     Inserisce l'intestazione della scena successiva nella storia e nel file.
     Disponibile solo in modalità Script.
-  naglowek_prolog:   "Prologo"
-  naglowek_epilog:   "Epilogo"
+  naglowek_prolog: "Prologo"
+  naglowek_epilog: "Epilogo"
   naglowek_rozdzial: "Capitolo"
-  naglowek_akt:      "Atto"
-  naglowek_scena:    "Scena"
+  naglowek_akt: "Atto"
+  naglowek_scena: "Scena"
   # Podgląd historii
   lbl_podglad_historii: "Storia corrente in memoria (solo lettura – naviga con le frecce):"
-  txt_podglad_name: "Anteprima della storia completa in memoria – solo lettura"
-  txt_podglad_hint: "(memoria vuota – carica un progetto o inizia uno nuovo)"
+  txt_podglad_name: "Anteprima della cronologia completa in memoria – solo lettura"
+  txt_podglad_hint: "(la memoria è vuota – carica un progetto o inizia uno nuovo)"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Istruzioni per il prossimo frammento (inserisci 'sommario' per forzare il salvataggio nella Memoria a Lungo Termine):
-  txt_instrukcje_name: "Campo istruzioni per AI – vecchio user_input"
+    Istruzioni per il prossimo frammento (digita 'riassunto' per forzare il salvataggio nella Memoria a Lungo Termine):
+  txt_instrukcje_name: "Campo istruzioni per l'AI – vecchio user_input"
   txt_instrukcje_hint: |-
-    Fornisci istruzioni per il prossimo frammento della storia…
-    (es. 'Descrivi l'incontro di Geralt con la strega nel bosco. Grande tensione.')
-  btn_wyslij_label: "Invia a AI"
+    Fornisci istruzioni per il prossimo frammento di storia…
+    (ad es. 'Descrivi l'incontro di Geralt con la strega nel bosco. Alta tensione.')
+  btn_wyslij_label: "Invia all'AI"
   btn_wyslij_tooltip: |-
     Invia istruzioni al modello gpt-4o e aggiunge la risposta alla storia.
     Richiede una chiave API attiva e un Libro del Mondo compilato.
@@ -342,9 +349,9 @@ rezyser:
   lbl_pamiec_modelu_start: "🟢 Memoria pulita. Macchina pronta per una nuova storia."
   pamiec_modelu_status_name: "Stato della memoria del modello AI"
   # Komunikaty - wczytywanie
-  brak_nazwy_tytul: "Senza nome"
-  brak_nazwy_tresc: "Inserisci il nome del file del progetto prima di caricare."
-  plik_nie_istnieje_tytul: "File non esistente"
+  brak_nazwy_tytul: "Nessun nome"
+  brak_nazwy_tresc: "Fornisci un nome per il file del progetto prima di caricarlo."
+  plik_nie_istnieje_tytul: "File inesistente"
   plik_nie_istnieje_tresc: |-
     File non trovato:
     {tresc_bledu}
@@ -353,7 +360,7 @@ rezyser:
     Il file verrà creato automaticamente al primo invio all'AI.
   blad_odczytu_tresc: "Errore di lettura del file:\n{tresc_bledu}"
   status_wczytano_tytul: "Progetto caricato"
-  status_wczytano_ksiega: " Caricato anche il Libro: skrypty/{nazwa_projektu}.md."
+  status_wczytano_ksiega: " Caricato anche il Libro: scripts/{nazwa_projektu}.md."
   status_wczytano_streszczenie: |-
     Riassunto del progetto '{nazwa_projektu}' caricato.{lore_info}
     La memoria corrente rimane vuota (modalità Memoria Infinita).
@@ -377,12 +384,12 @@ rezyser:
   hard_reset_ok_tytul: "Progetto chiuso"
   hard_reset_ok_tresc: "Progetto chiuso. Tutti i dati in memoria sono stati cancellati."
   # Zapis Księgi
-  brak_nazwy_ksiega_tytul: "Nome file mancante"
-  brak_nazwy_ksiega_tresc: "Inserisci prima il nome del file del progetto nel campo nome."
-  ksiega_pusta_tytul: "Libro del Mondo Vuoto"
+  brak_nazwy_ksiega_tytul: "Nessun nome file"
+  brak_nazwy_ksiega_tresc: "Fornisci prima un nome per il file del progetto nel campo nome."
+  ksiega_pusta_tytul: "Libro del Mondo vuoto"
   ksiega_pusta_tresc: "Il Libro del Mondo è vuoto. Niente da salvare."
   ksiega_zapisana_tytul: "Libro salvato"
-  ksiega_zapisana_tresc: "Libro del Mondo salvato: skrypty/{nazwa_projektu}.md"
+  ksiega_zapisana_tresc: "Libro del Mondo salvato: scripts/{nazwa_projektu}.md"
   blad_zapisu_ksiegi: "Errore di salvataggio del Libro del Mondo:\n{tresc_bledu}"
   # Prompt Architekta dialog
   prompt_arch_dlg_tytul: "Prompt dell'Architetto – incolla nel chatbot esterno"
@@ -393,7 +400,7 @@ rezyser:
   prompt_arch_instrukcja_name: "Istruzioni per l'uso del Prompt dell'Architetto"
   prompt_arch_lbl: "Prompt da copiare (Ctrl+A, Ctrl+C):"
   prompt_arch_tresc_name: "Contenuto completo del Prompt dell'Architetto"
-  prompt_arch_btn_kopiuj: "📋  Copia il prompt negli appunti"
+  prompt_arch_btn_kopiuj: "📋  Copia prompt negli appunti"
   prompt_arch_btn_kopiuj_name: "Pulsante Copia Prompt dell'Architetto negli appunti"
   prompt_arch_skopiowano_tytul: "Copiato"
   prompt_arch_skopiowano_tresc: |-
@@ -407,25 +414,25 @@ rezyser:
   pamiec_pusta_tresc: "La Memoria a Lungo Termine è vuota. Niente da salvare."
   streszczenie_zapisane_tytul: "Riassunto salvato"
   streszczenie_zapisane_tresc: |-
-    Riassunto salvato: skrypty/{nazwa_projektu}_riassunto.txt
+    Riassunto salvato: scripts/{nazwa_projektu}_riassunto.txt
 
     Ora puoi cancellare in sicurezza la memoria corrente.
   blad_zapisu_streszczenia: "Errore di salvataggio del riassunto:\n{tresc_bledu}"
   # Wysyłanie do AI
-  brak_api_tytul: "Mancanza di API"
+  brak_api_tytul: "Nessun API"
   brak_api_tresc: |-
     Nessuna connessione con OpenAI.
     Controlla il file golden_key.env e riavvia l'applicazione.
   puste_pole_tytul: "Campo vuoto"
-  puste_pole_tresc: "Inserisci le istruzioni per l'AI prima di inviare."
-  brak_przepisow_tytul: "Mancanza di ricette"
+  puste_pole_tresc: "Inserisci istruzioni per l'AI prima di inviare."
+  brak_przepisow_tytul: "Nessuna ricetta"
   brak_przepisow_tresc: |-
     Impossibile caricare alcuna modalità di lavoro da YAML.
     Esegui odswiez_rezysera.py o controlla dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
-    Inserisci il nome del file del progetto prima di generare il testo da salvare.
+    Fornisci un nome per il file del progetto prima di generare il testo da salvare.
     (La modalità '{tytul_trybu}' richiede un nome file.)
-  brak_ksiegi_tytul: "Mancanza del Libro del Mondo"
+  brak_ksiegi_tytul: "Nessun Libro del Mondo"
   brak_ksiegi_tresc: |-
     Completa il Libro del Mondo prima di inviare la richiesta all'AI.
     Le regole del mondo e i personaggi sono richiesti dal modello.
@@ -435,7 +442,7 @@ rezyser:
     Questo potrebbe danneggiare la tua storia.
 
     Passa alla modalità 'Brainstorming' e riprova.
-  err_rate_limit: "Mancanza di crediti OpenAI! Ricarica il conto e riprova."
+  err_rate_limit: "Nessun credito OpenAI! Ricarica il tuo account e riprova."
   err_odrzucenie: |-
     L'AI ha rifiutato il prompt (rilevato tag [RIFIUTO_AI]).
     Il testo NON verrà salvato nel file della storia.
@@ -446,36 +453,36 @@ rezyser:
   blad_ai_lbl_tresc: "Contenuto dell'errore (seleziona Ctrl+A, copia Ctrl+C – per la segnalazione):"
   blad_ai_tresc_name: "Contenuto dell'errore da copiare"
   # Wstawianie struktury (potwierdzenia)
-  struktura_brak_nazwy_tytul: "Senza nome"
-  struktura_brak_nazwy_tresc: "Inserisci il nome del file del progetto prima di inserire la struttura."
+  struktura_brak_nazwy_tytul: "Nessun nome"
+  struktura_brak_nazwy_tresc: "Fornisci un nome per il file del progetto prima di inserire la struttura."
   blad_wstawiania_prolog: "Errore di inserimento del Prologo:\n{tresc_bledu}"
   blad_wstawiania_epilog: "Errore di inserimento dell'Epilogo:\n{tresc_bledu}"
   blad_wstawiania_rozdzialu: "Errore di inserimento del capitolo:\n{tresc_bledu}"
   blad_wstawiania_aktu: "Errore di inserimento dell'atto:\n{tresc_bledu}"
   blad_wstawiania_sceny: "Errore di inserimento della scena:\n{tresc_bledu}"
   prolog_tytul: "Prologo inserito"
-  prolog_tresc: "Intestazione inserita: Prologo.\n\nInizia a scrivere il contenuto del prologo."
+  prolog_tresc: "Inserito intestazione: Prologo.\n\nInizia a scrivere il contenuto del prologo."
   epilog_tytul: "Epilogo inserito"
   epilog_tresc: |-
-    Intestazione inserita: Epilogo.
+    Inserito intestazione: Epilogo.
 
     La generazione di contenuti dopo l'Epilogo è bloccata.
   rozdzial_tytul: "Taglio del capitolo inserito"
-  rozdzial_tresc: "Intestazione inserita: {naglowek}."
+  rozdzial_tresc: "Inserito intestazione: {naglowek}."
   akt_tytul: "Atto inserito"
   akt_tresc: "Inserito: {akt_naglowek} e {scena_naglowek}."
   scena_tytul: "Scena inserita"
-  scena_tresc: "Intestazione inserita: {naglowek}."
+  scena_tresc: "Inserito intestazione: {naglowek}."
   # Odpowiedź AI – Burza Mózgów
   burza_dlg_tytul: "Risposta AI – Brainstorming"
   burza_dlg_lbl: "Copia il testo selezionato (Ctrl+A, Ctrl+C) o chiudi:"
   burza_dlg_name: "Risposta AI – Brainstorming"
   # Postprodukcja
-  tytuly_brak_nazwy_tytul: "Nome del progetto mancante"
-  tytuly_brak_nazwy_tresc: "Inserisci il nome del progetto prima di assegnare i titoli."
+  tytuly_brak_nazwy_tytul: "Nessun nome progetto"
+  tytuly_brak_nazwy_tresc: "Fornisci un nome per il progetto prima di assegnare i titoli."
   tytuly_zajety_tytul: "Occupato"
-  tytuly_zajety_tresc: "È già in corso un'altra richiesta all'AI. Attendi il completamento."
-  tytuly_brak_pliku_tytul: "File del progetto mancante"
+  tytuly_zajety_tresc: "Un'altra richiesta all'AI è già in corso. Attendi il completamento."
+  tytuly_brak_pliku_tytul: "Nessun file di progetto"
   tytuly_brak_pliku_tresc: |-
     File non trovato:
     {sciezka_pliku}
@@ -513,7 +520,7 @@ poliglota:
   txt_plik_hint: "Inserisci il percorso del file o seleziona con il pulsante Sfoglia…"
   btn_przegladaj: "Sfoglia…"
   btn_przegladaj_tooltip: "Apre la finestra di selezione file di sistema"
-  btn_wczytaj: "Carica il file in memoria"
+  btn_wczytaj: "Carica file in memoria"
   btn_wczytaj_tooltip: "Carica il contenuto del file indicato nella memoria di lavoro"
   btn_wyczysc: "Cancella memoria"
   btn_wyczysc_tooltip: "Rimuove il contenuto caricato, consente di selezionare un altro file"
@@ -526,7 +533,7 @@ poliglota:
   file_dlg_wildcard: |-
     File supportati (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|File di testo (*.txt)|*.txt|File HTML (*.html;*.htm)|*.html;*.htm|Documenti Word (*.docx)|*.docx|Tutti i file (*.*)|*.*
   # Komunikaty wczytywania
-  brak_pliku_tresc: "Inserisci il nome o il percorso del file prima di caricare."
+  brak_pliku_tresc: "Fornisci un nome o un percorso per il file prima di caricarlo."
   plik_nie_istnieje_tresc: "File non trovato:\n{sciezka_pliku}"
   blad_odczytu_tresc: "Errore durante la lettura del file:\n{tresc_bledu}"
   plik_wczytany_tytul: "File caricato"
@@ -535,10 +542,22 @@ poliglota:
     ({liczba_znakow} caratteri).
 
     Ora puoi configurare la modalità di lavoro e avviare l'elaborazione.
+  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
+  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
+  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
+  zmiana_jezyka_pipeline_tytul: "Rilevata lingua diversa da quella attiva"
+  zmiana_jezyka_pipeline_tresc: |-
+    Il contenuto del file caricato è in lingua "{jezyk_wykryty}".
+    Il set di regole attivo (accenti/cifre) è attualmente "{jezyk_aktywny}".
+
+    Vuoi cambiare le regole in "{jezyk_wykryty}"?
+
+    SÌ – le etichette degli accenti e delle cifre e le regole fonetiche cambieranno in "{jezyk_wykryty}", in base al contenuto del file.
+    NO – lascio le regole per "{jezyk_aktywny}". L'effetto su un testo in lingua straniera potrebbe essere imprevedibile.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Configurazione del Lavoro"
   rb_ai: "Traduttore AI (OpenAI gpt-4o – richiede chiave API, costa crediti)"
-  rb_ai_disabled: "Traduttore AI (disattivato – manca il file golden_key.env corretto)"
+  rb_ai_disabled: "Traduttore AI (disabilitato – manca un file golden_key.env corretto)"
   rb_ai_name: "Modalità Traduttore AI"
   rb_rezyser: "Modalità Regista (regole fonetiche gratuite da YAML)"
   rb_rezyser_name: "Modalità Regista gratuita"
@@ -554,12 +573,12 @@ poliglota:
   combo_akcent_tooltip: "Seleziona accento fonetico o modalità di pulizia del testo per i lettori di schermo"
   lbl_iso: "Codice ISO della lingua (2 lettere, es. en, fr, de):"
   txt_iso_name: "Campo codice ISO della lingua"
-  txt_iso_hint: "es. en"
+  txt_iso_hint: "ad es. en"
   # Panel Szyfranta
-  lbl_szyfr: "Seleziona algoritmo di distorsione:"
-  combo_szyfr_name: "Elenco algoritmi di cifratura"
-  lbl_cezar: "Scorrimento cifrario di Cesare (0 = casuale, intervallo {min_przesuniecie}…{max_przesuniecie}):"
-  spin_cezar_name: "Scorrimento cifrario di Cesare"
+  lbl_szyfr: "Seleziona l'algoritmo di distorsione:"
+  combo_szyfr_name: "Elenco degli algoritmi di crittografia"
+  lbl_cezar: "Spostamento del cifrario di Cesare (0 = casuale, intervallo {min_przesuniecie}…{max_przesuniecie}):"
+  spin_cezar_name: "Spostamento del cifrario di Cesare"
   # Sekcja 3: Przetwarzanie
   section3_heading: "3. Elaborazione"
   btn_process: "Avvia Elaborazione"
@@ -567,8 +586,8 @@ poliglota:
   lbl_progress_name: "Stato di avanzamento dell'elaborazione"
   # Sekcja 4: Wynik
   section4_heading: "4. Risultato (solo lettura – naviga con le frecce)"
-  txt_wynik_name: "Campo risultato – testo pronto"
-  txt_wynik_hint: "Qui apparirà il contenuto elaborato…"
+  txt_wynik_name: "Campo del risultato – testo pronto"
+  txt_wynik_hint: "Il contenuto elaborato apparirà qui…"
   # Przetwarzanie – komunikaty
   brak_pliku_pamieci_tytul: "Nessun file in memoria"
   brak_pliku_pamieci_tresc: "Carica prima il file sorgente (sezione 1)."
@@ -579,14 +598,19 @@ poliglota:
   nie_wybrano_akcentu: "Nessun accento selezionato."
   nie_wybrano_szyfru: "Nessun cifrario selezionato."
   brak_iso_tytul: "Nessun codice ISO"
-  brak_iso_tresc: "Fornisci un codice ISO di lingua valido a due lettere (es. en, fr, de)."
+  brak_iso_tresc: "Fornisci un codice ISO a due lettere valido per la lingua (ad es. en, fr, de)."
   ostrzezenie_jezyk: |-
     Attenzione: Rilevata lingua principale del testo non supportata. Le regole fonetiche sono attualmente adattate per le lingue: {wspierane_jezyki}. L'effetto potrebbe essere imprevedibile.
+  # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu
+  brak_akcentow_dla_jezyka: |-
+    Per la lingua "{jezyk}" non sono installati accenti fonetici. Le regole sono strettamente legate alla lingua sorgente e non possono essere prese in prestito da altre cartelle dictionaries/.
+  brak_szyfrow_dla_jezyka: |-
+    Per la lingua "{jezyk}" non sono installati cifrari. Le regole sono strettamente legate alla lingua sorgente e non possono essere prese in prestito da altre cartelle dictionaries/.
   blad_przetwarzania: "Errore di elaborazione:\n{tresc_bledu}"
-  brak_reguly_tytul: "Regola mancante per la lingua rilevata"
-  brak_reguly_naglowek: "Il rilevatore lingua ha trovato un frammento in una lingua per la quale manca il file di regole. L'elaborazione è stata interrotta per non corrompere il risultato."
+  brak_reguly_tytul: "Nessuna regola per la lingua rilevata"
+  brak_reguly_naglowek: "Il rilevatore di lingua ha trovato nel testo un frammento in una lingua per la quale manca un file di regole. L'applicazione ha interrotto l'elaborazione per non danneggiare il risultato."
   cezar_losowe_tytul: "Cifrario di Cesare – spostamento casuale"
-  cezar_losowe_tresc: "Il valore dello spostamento era 0 – generato: {wylosowane_przesuniecie}."
+  cezar_losowe_tresc: "Il valore dello spostamento era 0 – generato casualmente: {wylosowane_przesuniecie}."
   blad_wyniku_tytul: "Errore"
   blad_wyniku_tresc: "Impossibile generare il testo risultante."
   blad_zapisu_wyjscia: "Errore durante il salvataggio del file risultante:\n{tresc_bledu}"
@@ -610,10 +634,10 @@ konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   heading: "📄  Architetto Audiolibri"
   tool_description: |-
-    Questo modulo serve a preparare l'architettura del file per i lettori di schermo (navigazione con i tasti 1 e h sui titoli) e ElevenLabs. Cambia le parole chiave (Introduzione, Atto, Capitolo, Prologo, Epilogo) in Titoli di primo livello, lasciando il resto del copione invariato.
+    Questo modulo serve a preparare l'architettura del file per i lettori di schermo (navigazione con i tasti 1 e h sui titoli) e ElevenLabs. Cambia le parole chiave (Frontespizio, Atto, Capitolo, Prologo, Epilogo) in Titoli di primo livello, lasciando il resto del copione invariato.
   lbl_plik: |-
     Nome o percorso completo del file sorgente
-    (es. file .txt, .html, .md o documento .docx):
+    (ad es. file .txt, .html, .md o documento .docx):
   txt_plik_name: "Campo percorso file sorgente"
   txt_plik_hint: "Inserisci il percorso del file (testo, HTML, MD, DOCX)…"
   btn_przegladaj: "Sfoglia…"
@@ -630,7 +654,7 @@ konwerter:
   # Komunikaty
   brak_pliku_tytul: "Nessun file"
   brak_pliku_tresc: "Fornisci il nome o il percorso del file sorgente."
-  plik_nie_istnieje_tytul: "File inesistente"
+  plik_nie_istnieje_tytul: "File non esistente"
   plik_nie_istnieje_tresc: "File non trovato:\n{sciezka_pliku}"
   blad_odczytu_tytul: "Errore di lettura"
   blad_odczytu_tresc: "Errore durante la lettura del file:\n{tresc_bledu}"
@@ -656,9 +680,15 @@ manager:
   # Drzewo
   tree_name: "Albero file dictionaries"
   tree_tooltip: |-
-    Albero di tutti i file YAML nella cartella dictionaries/. Espandi la lingua, poi la categoria, quindi seleziona il file. Le frecce e Invio funzionano normalmente per NVDA.
+    Albero di tutti i file YAML nella cartella dictionaries/. Espandi la lingua, poi la categoria, quindi seleziona il file. Le frecce e Invio funzionano standard per NVDA.
   tree_root: "Dizionari (dictionaries/)"
-  tree_brak_folderu: "⚠️  Cartella dictionaries/ mancante – crea la prima lingua con il pulsante \"Nuovo file regole…\"."
+  tree_brak_folderu: "⚠️  Nessuna cartella dictionaries/ – crea la prima lingua con il pulsante \"Nuovo file regole…\"."
+  # 13.2: filtr języka — domyślnie pokazujemy tylko aktywny język UI (A11y),
+  # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
+  dropdown_jezyk_label: "&Lingua:"
+  dropdown_jezyk_tooltip: |-
+    Filtra l'albero alla cartella selezionata in dictionaries/. Impostato di default sulla lingua dell'interfaccia, per rendere l'elenco leggibile per il lettore di schermo. Seleziona "Tutte le lingue" per confrontare le cartelle affiancate durante la creazione di un nuovo pacchetto.
+  opcja_wszystkie_jezyki: "🌍  Tutte le lingue"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
   tree_podstawy: "📄  basi.yaml  (diacritici + alfabeto)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
@@ -684,14 +714,14 @@ manager:
   btn_usun_tooltip: "Elimina il file YAML selezionato dal disco (con conferma). L'operazione è irreversibile – pensaci due volte."
   btn_odswiez_label: "🔄  A&ggiorna albero"
   btn_odswiez_name: "Pulsante Aggiorna albero file"
-  btn_odswiez_tooltip: "Ricarica l'albero dal disco – usa se hai modificato i file manualmente nell'Esplora file o dopo aver salvato nell'editor di testo."
+  btn_odswiez_tooltip: "Ricarica l'albero dal disco – usa se hai modificato i file manualmente nell'Esplora file o dopo il salvataggio nell'editor di testo."
   info_stopka: |-
     Dopo aver creato un nuovo accento, torna alla Pagina principale
     e fai clic su "Aggiorna accenti Regista da YAML".
   # Otwarcie w edytorze
   plik_wne_tytul: "Impossibile aprire il file"
   plik_wne_tresc: |-
-    Il file si trova al di fuori della cartella dictionaries/ o non esiste più.
+    Il file si trova fuori dalla cartella dictionaries/ o non esiste più.
     Aggiorna l'albero e riprova.
   blad_otwarcia_tytul: "Informazione"
   blad_otwarcia_tresc: "Impossibile aprire automaticamente il file.\nAprilo manualmente:\n{sciezka_pliku}\n\nDettagli: {tresc_bledu}"
@@ -707,7 +737,7 @@ manager:
     Consentiti: lettere minuscole ASCII, numeri e trattini bassi. Il primo carattere deve essere una lettera.
     Esempi: svedese, nuovo_mod, postprod_capitoli.
   dup_poza_dict_tytul: "Errore"
-  dup_poza_dict_tresc: "Il percorso di destinazione si trova al di fuori di dictionaries/."
+  dup_poza_dict_tresc: "Il percorso di destinazione si trova fuori da dictionaries/."
   dup_istnieje_tytul: "Il file esiste già"
   dup_istnieje_tresc: |-
     Il file {nazwa_pliku}.yaml esiste già in questa cartella.
@@ -733,7 +763,7 @@ manager:
   usun_blad: "Impossibile eliminare il file:\n{tresc_bledu}"
   usun_ok_tytul: "Eliminato"
   usun_ok_tresc: |-
-    File eliminato. Ricorda, dopo aver eliminato un accento, di fare clic su "Aggiorna accenti Regista da YAML" nella Pagina principale.
+    File eliminato. Ricorda di fare clic su "Aggiorna accenti Regista da YAML" sulla Pagina principale dopo aver eliminato un accento.
   # Kreator
   kreator_tytul: "Nuovo file regole – creatore"
   kreator_co_utworzyc: "Cosa vuoi creare?"
@@ -741,45 +771,44 @@ manager:
   kreator_opis_name: "Descrizione del tipo di regola selezionato"
   kreator_lbl_id: "Identificatore (nome file):"
   kreator_id_name: "Campo identificatore file"
-  kreator_id_hint: "es. svedese  (lettere minuscole, senza spazi)"
+  kreator_id_hint: "ad es. svedese  (lettere minuscole, senza spazi)"
   kreator_lbl_etykieta: "Etichetta (visibile nell'interfaccia):"
   kreator_etykieta_name: "Campo etichetta regola"
-  kreator_etykieta_hint: 'es. "Svedese (Alva / Oskar)"'
+  kreator_etykieta_hint: 'ad es. "Svedese (Alva / Oskar)"'
+  kreator_jezyk_bazowy_etykieta_label: "Nome della lingua (nella lingua madre o in inglese):"
   kreator_lbl_iso: "Codice ISO della lingua di destinazione:"
   kreator_iso_name: "Campo codice ISO lingua"
-  kreator_iso_hint: "es. sv, de, en (2 caratteri)"
+  kreator_iso_hint: "ad es. sv, de, en (2 caratteri)"
   kreator_lbl_jezyk: "Lingua base (cartella dictionaries/…):"
   kreator_jezyk_name: "Selezione lingua base (cartella)"
-  kreator_lbl_opis: "Descrizione effetto (per AI):"
+  kreator_lbl_opis: "Descrizione dell'effetto (per AI):"
   kreator_opis_efektu_name: "Campo descrizione effetto (solo per cifrario algoritmico)"
   kreator_opis_efektu_hint: "Descrivi in 1-3 frasi cosa deve fare questo cifrario (input → output)."
   kreator_btn_utworz: "Crea"
   # Kreator – hinty dla języka bazowego
-  kreator_jezyk_bazowy_id_hint: "es. en, de, fr (codice ISO 639-1, 2-3 caratteri)"
-  kreator_jezyk_bazowy_etykieta_hint: "es. Inglese, Tedesco…"
-  kreator_jezyk_bazowy_iso_label: "Nome della lingua (ripetuto nel modello):"
-  kreator_jezyk_bazowy_iso_hint: "es. Inglese"
+  kreator_jezyk_bazowy_id_hint: "ad es. en, de, fr (codice ISO 639-1, 2-3 caratteri)"
+  kreator_jezyk_bazowy_etykieta_hint: "es. Deutsch, Finnish — nella lingua madre o in inglese (non: Tedesco)"
   # Kreator – walidacje
   kreator_alert_tytul: "Campo mancante o errato"
   kreator_blad_kod_jezyka: "Il codice della lingua deve essere di 2 o 3 lettere (ISO 639-1/3)."
-  kreator_blad_nazwa_jezyka: "Fornisci il nome della lingua (es. Inglese)."
+  kreator_blad_nazwa_jezyka: "Fornisci il nome della lingua in inglese o nella lingua madre (es. German, Deutsch — non: Tedesco)."
   kreator_blad_id: |-
-    L'identificatore del file deve essere ASCII in formato lower_snake.
+    L'identificatore del file deve essere in ASCII in formato lower_snake.
     Esempi: svedese, modalità_giorno, postprod_riassunti.
-  kreator_blad_etykieta: "Fornisci l'etichetta visibile nell'interfaccia."
-  kreator_blad_iso: "Fornisci il codice ISO della lingua di destinazione (es. sv, de)."
+  kreator_blad_etykieta: "Fornisci un'etichetta visibile nell'interfaccia."
+  kreator_blad_iso: "Fornisci il codice ISO della lingua di destinazione (ad es. sv, de)."
   kreator_blad_opis_efektu: |-
     Per il cifrario algoritmico descrivi l'effetto a parole – questa descrizione andrà nel prompt per l'AI.
   # Wynik kreatora
-  wynik_tytul: "Nuovo file regole – risultato"
-  wynik_sukces_naglowek: "✅  File creato:\n{sciezka_pliku}"
+  wynik_tytul: "Nuovo file di regole – risultato"
+  wynik_sukces_naglowek: "✅  Creato file:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
-    ℹ️  Il file non è stato creato (questo tipo di regola richiede codice Python da un programmatore – vedi prompt per AI sotto).
+    ℹ️  Il file non è stato creato (questo tipo di regola richiede codice Python da uno sviluppatore – vedi prompt per l'AI sotto).
   wynik_lbl_uwagi: "Passi successivi:"
   wynik_uwagi_name: "Note sulla regola creata"
-  wynik_lbl_prompt: "Prompt per AI (incolla in ChatGPT / Claude):"
+  wynik_lbl_prompt: "Prompt per l'AI (incolla in ChatGPT / Claude):"
   wynik_prompt_name: "Prompt da incollare nel chatbot AI"
-  wynik_btn_kopiuj: "📋  Copia prompt negli appunti"
+  wynik_btn_kopiuj: "📋  Copia il prompt negli appunti"
   wynik_btn_kopiuj_name: "Pulsante Copia prompt AI negli appunti"
   wynik_skopiowano_tytul: "Copiato"
   wynik_skopiowano_tresc: |-
@@ -793,39 +822,43 @@ manager:
   plik_istnieje_tytul: "Il file esiste"
   plik_istnieje_tresc: "Il file {nazwa_pliku} esiste già.\nSovrascrivere?"
   blad_bezpieczenstwa_tytul: "Errore di sicurezza"
-  blad_bezpieczenstwa_tresc: "Il percorso di destinazione si trova al di fuori di dictionaries/. Interrompo."
+  blad_bezpieczenstwa_tresc: "Il percorso di destinazione è al di fuori di dictionaries/. Interrompo."
   blad_tworzenia: "Impossibile creare il file:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Struttura linguistica incompleta"
   niepelna_struktura_tresc: |-
-    File basi.yaml salvato, ma impossibile creare le sottocartelle accenti/ e cifrari/:
+    Il file base.yaml è stato salvato, ma non è stato possibile creare le sottocartelle accenti/ e cifrari/:
     {tresc_bledu}
 
-    Creale manualmente nell'Esplora file prima di avviare Poliglotta – altrimenti il motore genererà un errore durante la scansione della nuova lingua.
+    Creale manualmente in Esplora file prima di avviare Poliglotta – altrimenti il motore genererà un errore durante la scansione della nuova lingua.
 
 # -----------------------------------------------------------------------------
-# UPDATER – aggiornamento automatico (core_updater.py + thread in background in main.py)
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  nowa_wersja_tytul:        "Aggiornamento disponibile"
+  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  nowa_wersja_tytul: "Aggiornamento disponibile"
   nowa_wersja_tresc: |-
     È disponibile una nuova versione: {nowa_wersja}.
     La tua versione: {aktualna_wersja}.
 
     Vuoi scaricare e installare l'aggiornamento ora?
-  pobieranie_tytul:         "Download aggiornamento {nowa_wersja}"
-  pobieranie_tresc:         "Download di {nazwa_pliku}..."
-  instalacja_tytul:         "Download completato"
+  # Pobieranie (wx.ProgressDialog)
+  pobieranie_tytul: "Scaricamento aggiornamento {nowa_wersja}"
+  pobieranie_tresc: "Scaricamento {nazwa_pliku}…"
+  # Zakończenie pobierania i uruchomienie instalatora
+  instalacja_tytul: "Scaricamento completato"
   instalacja_tresc: |-
-    Download completato. Il programma di installazione si avvierà.
+    Scaricamento completato. L'installatore si avvia.
     L'applicazione verrà chiusa.
-  blad_pobierania_tytul:    "Errore di download"
-  blad_pobierania_tresc:    "Impossibile scaricare l'aggiornamento:\n{tresc_bledu}"
-  blad_uruchomienia_tytul:  "Errore di avvio installatore"
-  blad_uruchomienia_tresc:  "Impossibile avviare il programma di installazione:\n{sciezka_pliku}\n\n{tresc_bledu}"
+  # Błędy
+  blad_pobierania_tytul: "Errore di scaricamento"
+  blad_pobierania_tresc: "Impossibile scaricare l'aggiornamento:\n{tresc_bledu}"
+  blad_uruchomienia_tytul: "Errore di avvio dell'installatore"
+  blad_uruchomienia_tresc: "Impossibile avviare l'installatore:\n{sciezka_pliku}\n\n{tresc_bledu}"
   dev_info_tresc: |-
     È disponibile una nuova versione: {nowa_wersja}.
 
-    Questa installazione non utilizza il pacchetto runtime — il download del programma di installazione non è disponibile.
-    Visita la pagina della release su GitHub e scarica l'archivio "Source code" oppure clona il repository:
+    Questa installazione non utilizza il pacchetto runtime — il download dell'installatore non è disponibile.
+    Visita la pagina di rilascio su GitHub e scarica l'archivio "Source code" o clona il repository:
 
     {url_release}
