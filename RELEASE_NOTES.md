@@ -1,6 +1,47 @@
-# Release Notes — Reżyser Audio GPT 13.6 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.7 „Wersja Wydawnicza"
 
-*Minor: Íslenska dołącza jako piąty pełnoprawny język bazowy (6 szyfrów, 4 reżyserów, 8 akcentów).*
+*Minor: Italiano dołącza jako szósty pełnoprawny język bazowy (6 szyfrów, 4 reżyserów, 8 akcentów).*
+
+---
+
+## 13.7 — minor release (motyw przewodni: włoski jako pełnoprawny język bazowy)
+
+*Punkt wyjścia: V13.6 (fed5da6) → commit WIP + commit docs + commit release → V13.7.*
+
+### TL;DR
+
+13.7 zamyka włoski (`it`) jako szósty pełnoprawny język bazowy. Folder `dictionaries/it/` zyskał komplet 6 szyfrów, 4 tryby Reżysera AI i 8 akcentów obcojęzycznych. Język włoski był już wcześniej zarejestrowany w silniku (stub z `podstawy.yaml`, `gui/ui.yaml` i narzędziami czyszczenia), więc ten release domknął wyłącznie brakujące warstwy treści.
+
+### Co nowego dla użytkownika końcowego
+
+- **Tryb Szyfrant** dla włoskiego tekstu: wszystkie 6 algorytmów dostępne. Odwracacz tekstu rozwija 14 włoskich skrótowców z wzorcami `\.?` (kropka opcjonalna — tolerancja na brakującą kropkę):
+  `ad es.` → `ad esempio`, `ecc.` → `eccetera`, `dott.` → `dottore`, `prof.` → `professore`, `pagg.` → `pagine`, `pag.` → `pagina`, `sig.ra` → `signora`, `sig.` → `signore`, `art.` → `articolo`, `cap.` → `capitolo`, `n.ro` → `numero`, `n.` → `numero`, `cfr.` → `confronta`, `vol.` → `volume`.
+
+- **Tryb Reżyser** dla włoskiego: pełne 4 reżysery AI po włosku — promty systemowe, suffiksy kontekstowe (riepilogo forzato / ottimizzazione / allarme), słowa-wyzwalacze (`riassumi`, `riassunto`, `sintetizza`, `sommario`). Postprod „Assegna Titoli ai Capitoli" rozpoznaje włoskie nagłówki (`Prologo|Capitolo \d+|Epilogo`).
+
+- **Akcenty fonetyczne** dla włoskiego → 8 obcojęzycznych syntezatorów. Silnik dostał pełny zestaw reguł dla włoskiego tekstu czytanego przez każdy TTS:
+
+  | Akcent | TTS | Kluczowe markery |
+  |---|---|---|
+  | Polski | Ewa / Adam / Maja | `ch`→`k` (pl-TTS czyta `ch`=/x/), `gh`→`g` |
+  | Angielski | David / Zira / Samantha | `ch`→`k` (en-TTS czyta `ch`=/tʃ/), `gh`→`g` |
+  | Fiński | Heidi / Onni / Satu | `ch`→`k`, `gh`→`g`; z=/ts/ kompatybilne ✓ |
+  | Islandzki | Dóra / Gunnar / Ísrún | `ch`→`k`, `gh`→`g` |
+  | Francuski | Thomas / Julie / Marie | `ch`→`k` (fr-TTS czyta `ch`=/ʃ/!), `gh`→`g`; `gn`=/ɲ/ idealne ✓ |
+  | Hiszpański | Pablo / María / Carmen | `ch`→`k` (es-TTS czyta `ch`=/tʃ/), `gh`→`g` |
+  | Niemecki | Stefan / Petra / Hans | **`v`→`w` (KRYTYCZNE: de-TTS czyta `v`=/f/!)**, `ch`→`k`, `gh`→`g` |
+  | Rosyjski | Milena / Irina / Yuri | pełna transliteracja cyrylicka z obsługą digrafów: `gli`→`льи`, `gne/gni/gna/gno/gnu`→`нь+`, `sce/sci`→`ше/ши`, `sche/schi`→`ске/ски`, `ce/ci`→`че/чи`, `ge/gi`→`дже/джи` |
+
+### Pod maską
+
+- `dictionaries/it/szyfry/` — 6 plików: cezar (`min/max: ±20`, alfabet 21-literowy IT), jakanie (samogłoski `aeiou`), odwracanie (14 regexów z notebooka `\.?` — łapie formy z brakującą kropką), samogloskowiec (brak polskich miękczeń — puste listy `zmiekszenia_*`), typoglikemia, waz.
+- `dictionaries/it/akcenty/` — 8 nowych plików. Wspólna korekta krytyczna dla 7 akcentów łacińskich: `che`→`ke`, `chi`→`ki`, `ghe`→`ge`, `ghi`→`gi` (włoskie `ch`/`gh` = /k//g/ przed e/i; większość obcych TTS czyta je inaczej). Akcent rosyjski: pełna transliteracja z hierarchicznym procesowaniem digrafów (trigramy → digramy → litery); `usun_polskie_znaki: true` + normaliz. akcentowanych samogłosek it (à/è/é/ì/ò/ù) przed konwersją cyrylicką.
+- `dictionaries/it/rezyser/` — 4 pliki: tryb_burza, tryb_skrypt, tryb_audiobook, postprod_tytuly. Wszystkie z `jezyk_odpowiedzi: italiano`. Tag strukturalny `<STRESZCZENIE>` zachowany niezmieniony (silnik go szuka globalnie niezależnie od języka).
+- `core_poliglota.py` — docstringi 8 wrapperów `akcent_*` zaktualizowane przez `odswiez_rezysera.py` (dodano `dictionaries/it/akcenty/` jako źródło).
+
+### Breaking changes / migracja
+
+Brak. Włoski to domknięcie istniejącego stuba — żadne istniejące funkcje nie są dotknięte.
 
 ---
 

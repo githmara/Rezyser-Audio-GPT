@@ -342,15 +342,17 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 | `На ул Пушкина состоялся митинг жителей квартала.`                      | brak `.` po `ул`             | ⚠️ nie rozwinięte (regex: `ул\.`)               |
 | `Мероприятие прошло в т.ч при участии зарубежных делегаций.`            | brak końcowej `.` (`в т.ч`)  | ⚠️ nie rozwinięte (regex: `в\.т\.ч\.`)          |
 
-### 6.4 Włoski (`it`)
+### 6.4 Włoski (`it`) ✅ zwalidowane w 13.7
 
-| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
-|-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
-| `Ha acquistato diversi articoli, ecc tra cui libri e riviste.`          | brak `.` po `ecc`            | ⚠️ nie rozwinięte (regex: `ecc\.`)              |
-| `Il sig Rossi ha firmato il contratto nella tarda mattinata.`           | brak `.` po `sig`            | ⚠️ nie rozwinięte (regex: `sig\.`)              |
-| `Vedi pagg 14–16 per ulteriori dettagli sulla questione.`               | brak `.` po `pagg`           | ⚠️ nie rozwinięte (regex: `pagg\.`)             |
-| `Il dott Bianchi ha presentato i risultati dello studio.`               | brak `.` po `dott`           | ⚠️ nie rozwinięte (regex: `dott\.`)             |
-| `Per maggiori informazioni cfr il capitolo precedente.`                 | brak `.` po `cfr`            | ⚠️ nie rozwinięte (regex: `cfr\.`)              |
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika (13.7)                          |
+|-------------------------------------------------------------------------|------------------------------|----------------------------------------------------------|
+| `Ha acquistato diversi articoli, ecc tra cui libri e riviste.`          | brak `.` po `ecc`            | ✅ rozwinięte (`\.?` — kropka opcjonalna)               |
+| `Il sig Rossi ha firmato il contratto nella tarda mattinata.`           | brak `.` po `sig`            | ✅ rozwinięte (`\.?` — kropka opcjonalna)               |
+| `Vedi pagg 14–16 per ulteriori dettagli sulla questione.`               | brak `.` po `pagg`           | ✅ rozwinięte (`\.?` — kropka opcjonalna)               |
+| `Il dott Bianchi ha presentato i risultati dello studio.`               | brak `.` po `dott`           | ✅ rozwinięte (`\.?` — kropka opcjonalna)               |
+| `Per maggiori informazioni cfr il capitolo precedente.`                 | brak `.` po `cfr`            | ✅ rozwinięte (`\.?` — kropka opcjonalna)               |
+
+> **Uwaga (13.7):** Implementacja używa wzorców `\.?` (kropka opcjonalna), więc silnik łapie **wszystkie 5 form z brakującą kropką** — lepiej niż zakładała tabela (która bazowała na ścisłych wzorcach z notebooka). 14/14 testów pozytywnych (poprawnie zapisane skrótowce) zaliczonych. Formy z brakującą kropką to bonus `\.?`, nie cofnięcie.
 
 ### 6.5 Fiński (`fi`) ✅ zwalidowane w 13.4
 
