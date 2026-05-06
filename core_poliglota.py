@@ -869,37 +869,37 @@ def zastosuj_reguly_fonetyczne(tekst: str, wariant: str,
 
 
 def akcent_islandzki(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``islandzki`` (źródła: ``dictionaries/en/akcenty/islandzki.yaml``, ``dictionaries/fi/akcenty/islandzki.yaml``, ``dictionaries/pl/akcenty/islandzki.yaml``, ``dictionaries/ru/akcenty/islandzki.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``islandzki`` (źródła: ``dictionaries/en/akcenty/islandzki.yaml``, ``dictionaries/fi/akcenty/islandzki.yaml``, ``dictionaries/it/akcenty/islandzki.yaml``, ``dictionaries/pl/akcenty/islandzki.yaml``, ``dictionaries/ru/akcenty/islandzki.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "islandzki", jezyk)
 
 
 def akcent_polski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``polski`` (źródła: ``dictionaries/en/akcenty/polski.yaml``, ``dictionaries/fi/akcenty/polski.yaml``, ``dictionaries/is/akcenty/polski.yaml``, ``dictionaries/ru/akcenty/polski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``polski`` (źródła: ``dictionaries/en/akcenty/polski.yaml``, ``dictionaries/fi/akcenty/polski.yaml``, ``dictionaries/is/akcenty/polski.yaml``, ``dictionaries/it/akcenty/polski.yaml``, ``dictionaries/ru/akcenty/polski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "polski", jezyk)
 
 
 def akcent_angielski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``angielski`` (źródła: ``dictionaries/fi/akcenty/angielski.yaml``, ``dictionaries/is/akcenty/angielski.yaml``, ``dictionaries/pl/akcenty/angielski.yaml``, ``dictionaries/ru/akcenty/angielski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``angielski`` (źródła: ``dictionaries/fi/akcenty/angielski.yaml``, ``dictionaries/is/akcenty/angielski.yaml``, ``dictionaries/it/akcenty/angielski.yaml``, ``dictionaries/pl/akcenty/angielski.yaml``, ``dictionaries/ru/akcenty/angielski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "angielski", jezyk)
 
 
 def akcent_rosyjski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``rosyjski`` (źródła: ``dictionaries/en/akcenty/rosyjski.yaml``, ``dictionaries/fi/akcenty/rosyjski.yaml``, ``dictionaries/is/akcenty/rosyjski.yaml``, ``dictionaries/pl/akcenty/rosyjski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``rosyjski`` (źródła: ``dictionaries/en/akcenty/rosyjski.yaml``, ``dictionaries/fi/akcenty/rosyjski.yaml``, ``dictionaries/is/akcenty/rosyjski.yaml``, ``dictionaries/it/akcenty/rosyjski.yaml``, ``dictionaries/pl/akcenty/rosyjski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "rosyjski", jezyk)
 
 
 def akcent_francuski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``francuski`` (źródła: ``dictionaries/en/akcenty/francuski.yaml``, ``dictionaries/fi/akcenty/francuski.yaml``, ``dictionaries/is/akcenty/francuski.yaml``, ``dictionaries/pl/akcenty/francuski.yaml``, ``dictionaries/ru/akcenty/francuski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``francuski`` (źródła: ``dictionaries/en/akcenty/francuski.yaml``, ``dictionaries/fi/akcenty/francuski.yaml``, ``dictionaries/is/akcenty/francuski.yaml``, ``dictionaries/it/akcenty/francuski.yaml``, ``dictionaries/pl/akcenty/francuski.yaml``, ``dictionaries/ru/akcenty/francuski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "francuski", jezyk)
 
 
 def akcent_niemiecki(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``niemiecki`` (źródła: ``dictionaries/en/akcenty/niemiecki.yaml``, ``dictionaries/fi/akcenty/niemiecki.yaml``, ``dictionaries/is/akcenty/niemiecki.yaml``, ``dictionaries/pl/akcenty/niemiecki.yaml``, ``dictionaries/ru/akcenty/niemiecki.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``niemiecki`` (źródła: ``dictionaries/en/akcenty/niemiecki.yaml``, ``dictionaries/fi/akcenty/niemiecki.yaml``, ``dictionaries/is/akcenty/niemiecki.yaml``, ``dictionaries/it/akcenty/niemiecki.yaml``, ``dictionaries/pl/akcenty/niemiecki.yaml``, ``dictionaries/ru/akcenty/niemiecki.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "niemiecki", jezyk)
 
 
 def akcent_hiszpanski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``hiszpanski`` (źródła: ``dictionaries/en/akcenty/hiszpanski.yaml``, ``dictionaries/fi/akcenty/hiszpanski.yaml``, ``dictionaries/is/akcenty/hiszpanski.yaml``, ``dictionaries/pl/akcenty/hiszpanski.yaml``, ``dictionaries/ru/akcenty/hiszpanski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``hiszpanski`` (źródła: ``dictionaries/en/akcenty/hiszpanski.yaml``, ``dictionaries/fi/akcenty/hiszpanski.yaml``, ``dictionaries/is/akcenty/hiszpanski.yaml``, ``dictionaries/it/akcenty/hiszpanski.yaml``, ``dictionaries/pl/akcenty/hiszpanski.yaml``, ``dictionaries/ru/akcenty/hiszpanski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "hiszpanski", jezyk)
 
 
@@ -909,7 +909,7 @@ def akcent_wloski(tekst: str, jezyk: str = "pl") -> str:
 
 
 def akcent_finski(tekst: str, jezyk: str = "pl") -> str:
-    """Alias: reguły fonetyczne akcentu ``finski`` (źródła: ``dictionaries/en/akcenty/finski.yaml``, ``dictionaries/is/akcenty/finski.yaml``, ``dictionaries/pl/akcenty/finski.yaml``, ``dictionaries/ru/akcenty/finski.yaml``)."""
+    """Alias: reguły fonetyczne akcentu ``finski`` (źródła: ``dictionaries/en/akcenty/finski.yaml``, ``dictionaries/is/akcenty/finski.yaml``, ``dictionaries/it/akcenty/finski.yaml``, ``dictionaries/pl/akcenty/finski.yaml``, ``dictionaries/ru/akcenty/finski.yaml``)."""
     return zastosuj_reguly_fonetyczne(tekst, "finski", jezyk)
 
 # <GENEROWANE_AKCENTY_REZYSERA_END>
