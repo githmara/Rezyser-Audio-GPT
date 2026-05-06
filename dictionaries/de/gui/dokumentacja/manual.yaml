@@ -1,0 +1,534 @@
+# =============================================================================
+# dictionaries/de/gui/dokumentacja/manual.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
+# ze źródła dictionaries/pl/gui/dokumentacja/manual.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
+# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
+#
+# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
+# po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+id: manual
+tresc: |
+  Podręcznik Reżysera Audio AI - Komplettanleitung (Version {app.wersja})
+
+  Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
+
+  Das Set besteht aus dem Hauptstudio (Regie), dem Übersetzungs- und Akzentwerkzeug (Polyglott), dem Werkzeug zur Strukturierung von Dateien (Audiobook-Architekt) und — seit Version 13.0 — dem Regelmanager, in dem Sie ohne Python einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen können (siehe SCHRITT 7b unten). Alle vier Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+4 umgeschaltet wird.
+
+
+
+  SCHRITT 1: Erste Ausführung (Cross-Platform)
+
+  Die Anwendung ist vollständig portabel und einsatzbereit unter Windows. Gehen Sie einfach in den Ordner und starten Sie die Datei run.bat (durch Doppelklick oder durch Erstellen einer Verknüpfung auf dem Desktop). Ein kurzes Terminalfenster öffnet sich (verschwindet automatisch), und nach einem Moment erscheint das Hauptfenster des Programms — {app.nazwa}. Kein Browser, kein Server im Hintergrund. Wenn Sie fertig sind, schließen Sie einfach das Programmfenster.
+
+
+  Wichtig: Der Ordner runtime/ ist nur Teil der fertigen Windows-Pakete, die von der Registerkarte Releases auf GitHub heruntergeladen werden. Er enthält eine isolierte Python-Umgebung, die ohne Installation einsatzbereit ist. Wenn Sie das Repository klonen, gibt es diesen Ordner nicht und sollte auch nicht vorhanden sein — Sie verwenden dann die virtuelle Umgebung venv, die im Abschnitt für Entwickler unten beschrieben ist.
+
+  --- Für Entwickler (Windows — Git-Repository) ---
+
+  1. Klonen Sie das Repository auf Ihre Festplatte.
+  2. Führen Sie die Datei setup_dev.bat aus. Das Skript erstellt automatisch eine virtuelle Python-Umgebung (venv) und installiert alle erforderlichen Abhängigkeiten aus der Datei requirements.txt.
+  3. Starten Sie die Anwendung mit dem Befehl python main.py oder über die Datei run_dev.bat — das Skript erkennt automatisch den venv-Ordner und startet das Programm.
+
+  --- Für Entwickler und normale Benutzer (macOS / Linux) ---
+
+  1. Klonen Sie das Repository auf Ihre Festplatte.
+  2. Öffnen Sie das Terminal im Projektordner und erteilen Sie den Skripten Ausführungsrechte: chmod +x *.sh
+  3. Führen Sie das Konfigurationsskript aus: ./setup_dev.sh — das Skript erstellt die venv-Umgebung und installiert die Abhängigkeiten.
+  4. Starten Sie die Anwendung: python main.py oder ./run.sh
+
+
+  Was Sie beim Start sehen: Nach dem Start des Programms öffnet sich ein Fenster mit dem Startbildschirm. Sie finden dort eine kurze Beschreibung der verfügbaren Werkzeuge und den Abschnitt "{home.heading_system_check}". Wenn der API-Schlüssel noch nicht konfiguriert ist, sehen Sie eine rote Meldung, die darauf hinweist, dass die auf KI basierenden Module (Regie, Übersetzer) nicht funktionieren — die kostenlosen lokalen Funktionen (Akzente, Architekt) sind jedoch sofort aktiv. Die Konfiguration des Schlüssels wird im nächsten Schritt beschrieben.
+
+
+  Automatische Updates
+
+  Die Anwendung überprüft beim Start, ob auf GitHub eine neuere Version verfügbar ist — die Überprüfung erfolgt im Hintergrund und blockiert nicht die Benutzeroberfläche.
+
+  Wenn Sie das Programm über die fertige Installationsdatei (.exe) installiert haben: Bei Erkennung einer neueren Version erscheint ein Fenster mit der Frage, ob Sie sie herunterladen möchten. Nach Bestätigung wird ein Fortschrittsbalken angezeigt, und wenn der Download abgeschlossen ist, schließt sich die Anwendung automatisch und der neue Installer startet von selbst — Ihre Projekte und der API-Schlüssel bleiben unberührt.
+
+  Wenn Sie das Git-Repository verwenden (Entwickler und macOS/Linux-Benutzer): Anstelle eines Download-Vorschlags sehen Sie eine Information über die neue Version mit einem direkten Link zur Release-Seite auf GitHub. Laden Sie von dort das „Source code“-Archiv herunter oder aktualisieren Sie das Repository mit dem Befehl git pull.
+
+
+  SCHRITT 2: API-Versorgung (OpenAI-Schlüssel)
+
+  Damit die künstliche Intelligenz funktionieren kann, benötigt sie Zugriff auf die Server von OpenAI (den Entwicklern von ChatGPT).
+
+  1. Erstellen Sie ein Konto auf platform.openai.com und laden Sie Ihr Konto im Abschnitt Billing auf.
+  2. Generieren Sie einen Schlüssel im Abschnitt API Keys (beginnt mit sk-proj-). Achtung: Der Schlüssel wird nur einmal angezeigt — zum Zeitpunkt der Erstellung. Wenn Sie das Fenster schließen, ohne ihn zu kopieren, ist er unwiderruflich verloren und muss gesperrt (Option revoke secret key) und ein neuer generiert werden. Kopieren Sie ihn sofort, bevor Sie etwas anderes anklicken.
+  3. Klicken Sie im Startbildschirm des Programms auf die Schaltfläche "{home.btn_generate}". Das System erstellt automatisch eine leere Konfigurationsdatei an der richtigen Stelle und öffnet den Notizblock mit einer Vorlage zur Bearbeitung.
+  4. In der geöffneten Datei sehen Sie die Zeile OPENAI_API_KEY=HIER_IHREN_SCHLÜSSEL_EINFÜGEN. Entfernen Sie den Platzhaltertext und fügen Sie Ihren kopierten Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen). Speichern Sie die Datei und starten Sie die Anwendung erneut.
+
+  Tipp: Nach dem Neustart überprüft die Anwendung die Datei und zeigt eine grüne Meldung im Abschnitt "{home.heading_system_check}" an — das bedeutet, dass alle KI-Module einsatzbereit sind. Andernfalls wird Ihnen klar gesagt, was nicht stimmt, und Sie können den Texteditor öffnen, um den Fehler schnell zu beheben.
+
+
+  SCHRITT 3: Hauptregiestudio
+
+  Dies ist Ihr Kontrollzentrum zum Erfinden von Geschichten und Schreiben von Drehbüchern. Gehen Sie dorthin, indem Sie die Schaltfläche "{main.btn.rezyser}" in der Schaltflächenleiste klicken oder im Menü Werkzeuge → {main.menu.rezyser} auswählen (Tastenkombination: Ctrl+1).
+
+
+
+  WICHTIG: Dateiformat der Projekte — Rückkehr zu .txt
+
+  In Version 7 wurden die Projektdateien im Markdown-Format (.md) gespeichert, z.B. skripte/znieczulica.md. Dies war ein gezieltes Experiment — das .md-Format sollte eine psychologische Barriere für nicht-technische Personen darstellen, um sie davon abzuhalten, die Datei im Notizblock zu öffnen und manuell zu bearbeiten (und damit versehentlich die Strukturüberschriften zu beschädigen).
+
+  Das Experiment hat sich nicht bewährt. Die KI bricht oft unabsichtlich eines der fundamentalen Verbote (mehr dazu in Kürze). Aus diesem Grund wurde in Version 8 zu einfachen .txt-Dateien zurückgekehrt — intuitiver und lesbarer für jeden. Beispielsweise wird das Projekt mit dem Namen "znieczulica" jetzt als skripte/znieczulica.txt gespeichert, und seine Zusammenfassung als skripte/znieczulica_zusammenfassung.txt. Dies ermöglicht es jedem, leichter Regiekorrekturen oder Textkürzungen vorzunehmen.
+
+
+  ⚠️ KRITISCHE REGEL FÜR DEN SCHNITTMEISTER (LESEN SIE, BEVOR SIE BEGINNEN!) ⚠️
+
+  Alle Ihre generierten Skripte und Bücher werden in einfachen Textdateien (.txt) gespeichert, die Sie problemlos im Notizblock öffnen können.
+
+  Als Regisseur haben Sie das VOLLE RECHT (und sogar die Pflicht), diese Datei zu bearbeiten! Wenn die künstliche Intelligenz sich überschlägt und z.B. das Problem der Helden am Ende des generierten Fragments selbst löst, öffnen Sie die Datei, löschen Sie die letzten Zeilen und lassen Sie den Text an der spannendsten Stelle abgebrochen, bevor Sie den Speicher leeren, die Datei erneut laden, um das Kontextfenster neu zu laden, und auf "{rezyser.btn_wyslij_label}" klicken, um fortzufahren.
+
+  🔴 JEDOCH - WAS SIE NICHT ANFASSEN DÜRFEN:
+
+  Ändern, löschen oder modifizieren Sie niemals Zeilen, die die Struktur enthalten (z.B. Akt 1, Szene 2, Kapitel 1, Prolog). Wenn Sie diese Überschriften beschädigen:
+  1. Ihre Geschichte wird in Screenreadern (NVDA) auseinanderfallen.
+  2. Der Audiobook-Architekt und damit auch das Studio Eleven Labs werden nicht in der Lage sein, Ihr Buch korrekt in Lesefragmente zu unterteilen.
+  3. Der interne Konverter der Anwendung wird kein korrektes Inhaltsverzeichnis in der Word-Datei oder auf der Zeitleiste in ElevenLabs generieren.
+
+  Bearbeiten Sie Dialoge, kürzen Sie die Handlung, aber lassen Sie die Struktur in Ruhe!
+
+
+  Wie benutzt man die Regie?
+
+  - Weltbuch (Seitenleiste links): Hier geben Sie die Regeln des Universums ein. Jedes Projekt hat jetzt ein eigenes Buch, das mit dem Dateinamen verknüpft ist — wenn Ihre Geschichtsdatei z.B. emilia_heist_audiobook.txt ist, wird das Weltbuch als skripte/emilia_heist_audiobook.md gespeichert. Daher ist die Reihenfolge wichtig: Geben Sie zuerst den Projektdateinamen im Feld "Projektdateiname" ein, und erst dann können Sie das Buch speichern. Die Schaltfläche "{rezyser.btn_zapisz_ksiege_label}" bleibt ausgegraut, bis Sie einen Namen eingeben. Das Laden eines bestehenden Projekts mit der Schaltfläche "{rezyser.btn_wczytaj_label}" lädt automatisch auch die entsprechende .md-Datei — Sie müssen nichts manuell tun. Hinweis: Ohne ausgefülltes Weltbuch blockiert die Anwendung das Senden von Anfragen an die KI — dies ist eine bewusste Sicherheitsmaßnahme, die Sie davor schützt, Text ohne Regeln zu generieren.
+  - Langzeitspeicher (Seitenleiste links): Das zweite Feld in der Seitenleiste. Hier speichert die KI automatisch die Zusammenfassung der Handlung, wenn der Speicher voll zu werden beginnt. Sie können hier auch manuell eigene Notizen eingeben — das Modell behandelt sie als "was ich schon weiß", bevor es die aktuelle Szene liest.
+  - Brainstorming-Modus: Geben Sie eine lose Idee ein, und die KI gibt Ihnen 3 Optionen zur Entwicklung der Handlung. Für jede Option wird sofort ein fertiger Block "--- PROMPT-SKIZZE ---" generiert. Nachdem Sie eine ausgewählt haben, fügen Sie diesen Prompt in den Skript- oder Hörbuchmodus ein und geben Sie eventuelle Anmerkungen oder Informationen für das Modell ein. Das Handlungsgedächtnis ändert sich während des Brainstormings nicht — Sie können ohne Risiko experimentieren!
+  - Rohskriptmodus: Hier fügen Sie die "Prompt-Skizze" ein, die im Brainstorming-Modus generiert wurde. Die KI schreibt einen langen Abschnitt mit vollständigen Tags [Sprecher X: Name - Emotion] für Dialoge und Effekten [SFX: ...] für Geräusche. Der Text wird automatisch in Ihre Datei (z.B. neue_szene.txt) im Ordner skripte/ geschrieben.
+  - Traditioneller Hörbuchmodus: Modus für Schriftsteller. Die KI generiert reine literarische Prosa — keine Tags, keine Phonetik, klassische Dialoge in die Erzählung eingeflochten. Der Text wird genauso in die Datei geschrieben wie im Skriptmodus.
+  - Automatische Charaktererstellung: Das Skript ist so programmiert, dass es automatisch neue [Sprecher]-Tags erstellt, wenn die Handlung einen neuen Charakter erfordert. Tipp: Wenn die KI einen tollen Charakter erstellt, kopieren Sie dessen Tag und fügen Sie ihn in das Weltbuch ein, damit das Modell ihn dauerhaft speichert!
+
+  Projektverwaltung — drei Aktionsschaltflächen:
+  - {rezyser.btn_wczytaj_label}: Lädt eine bestehende Projektdatei in den Speicher. Nur verfügbar, wenn der Speicher leer ist und ein Dateiname eingegeben wurde.
+
+  - Aktuelle löschen (Zusammenfassung behalten): Löscht nur die aktuelle Geschichte. Die Zusammenfassung im Langzeitspeicher und das Weltbuch bleiben erhalten — ideal, um ein langes Buch fortzusetzen, nachdem eine Zusammenfassung erstellt wurde.
+  - Projekt schließen (Harter Reset): Löscht das Projekt vollständig. Entfernt die Geschichte, die Zusammenfassung, das Weltbuch und setzt alle Zähler zurück. Verwenden Sie dies beim Wechsel des Projekts oder bei einer neuen Geschichte.
+
+  Historische Anmerkung — warum die Modi jetzt vor versehentlichem Wechsel geschützt sind:
+  In früheren Versionen der Anwendung hat niemand die Konsistenz des kreativen Modus innerhalb eines Projekts überwacht. Das Ergebnis war eine subtile kreative Möglichkeit, die man so beschreiben könnte: Sie beginnen die Geschichte im Skriptmodus, fügen "Akt 1" und "Szene 1" ein (die Anwendung ist begeistert von Ihrer Konsequenz), generieren einige spannende Bildschirme mit Tags wie [SFX: Türknallen] und [Sprecher 1: Markus - resigniert]... und dann — weil Sie gerade inspiriert sind — klicken Sie auf "Kapitel 1 einfügen". Die Anwendung fügt ohne zu zögern die Überschrift "Kapitel 1" in die Datei ein, direkt nach "Szene 3". Jetzt haben Sie in Ihrer Datei eine Hybridstruktur aus einem Hörspiel der 50er Jahre und einem Gesellschaftsroman. ElevenLabs sieht diese Struktur, sieht die Kapitelüberschrift mitten im Akt und entscheidet, dass es wahrscheinlich ein Fehler in der Matrix ist. Das Inhaltsverzeichnis sieht aus wie das Werk eines avantgardistischen Künstlers. Der Audiobook-Architekt hingegen geht davon aus, dass Sie ein erwachsener Mensch sind und verarbeitet es einfach ohne ein Wort — aber auch ohne jegliche Garantie für das Ergebnis. Seit Version 12.0 blockiert die Benutzeroberfläche einfach den Wechsel des Schreibmodus, wenn bereits eine Geschichte im Speicher ist. Brainstorming ist immer verfügbar — Sie können dort ohne Einschränkungen planen.
+
+
+  Showrunner-Prompts — KI als Serienautor (seit Version 7, beibehalten)
+
+  Dies ist die größte Änderung, die in Version 7 eingeführt wurde, und sie bleibt unverändert. Sie ist nicht in der Benutzeroberfläche sichtbar, verändert jedoch radikal die Qualität der generierten Handlung.
+
+  Ein Showrunner ist in der Fernsehbranche die Person, die für das Gesamtbild einer Serie verantwortlich ist — er sorgt dafür, dass die Handlung nie zu einer einfachen Lösung führt, sondern ständig dichter wird, Konflikte aufbaut und den Zuschauer über viele Staffeln hinweg in Spannung hält. In Version 7 wurde diese Philosophie direkt in die systemischen Anweisungen der KI eingebaut.
+
+  Anti-Closure-Direktive — Stand in Version 8
+
+  Trotz des Testens verschiedener Ansätze wird das Anti-Closure-Verbot oft notorisch vom Modell gebrochen, insbesondere im traditionellen Hörbuchmodus. Die KI hat eine starke Tendenz, die Geschichte bei jeder Gelegenheit "abzuschließen" — sie fügt zusammenfassende Sätze in die Handlung ein, schafft falsche Happy Ends oder schließt Handlungsstränge in der Mitte eines Kapitels ab, als wäre jeder Abschnitt der letzte. Das Ergebnis ist, dass der nächste Abschnitt von vorne beginnt, ohne natürliche Kontinuität.
+
+  Deshalb ist die oben beschriebene Regel des Schnittmeisters so wichtig: Wenn die KI das Verbot bricht und die Szene selbst abschließt, ist es Ihre Aufgabe als Regisseur, die .txt-Datei zu öffnen, diese letzten Sätze zu löschen und den Text an einer spannenden Stelle abzubrechen, bevor Sie ihn zurück in die Anwendung laden.
+
+  Jeder Modus hat eine eingebaute Anti-Closure-Direktive:
+
+  - Brainstorming: Die KI agiert wie ein Serienautor für eine mehrjährige Serie. Jede der 3 vorgeschlagenen Optionen MUSS Hindernisse aufbauen, neue Dilemmata einführen, offene Handlungsstränge und Cliffhanger schaffen. Absolutes Verbot, Optionen vorzuschlagen, in denen sich die Charaktere dauerhaft versöhnen, das Hauptproblem ohne erhebliche Konsequenzen überwinden oder die Geschichte zu einem schnellen Ende führt. Verbot, billige, magische Orte zu erfinden, die die Architektur der Welt brechen.
+  - Rohskriptmodus: Absolutes Verbot, den Text mit Zusammenfassungen, Moral oder Klammern zu beenden. Die KI soll die Handlung natürlich an einem spannenden Punkt (Cliffhanger) abbrechen, ohne eine Schlussfolgerung zu ziehen, damit der nächste Abschnitt die Erzählung nahtlos übernehmen kann.
+  - Traditioneller Hörbuchmodus: Absolutes Verbot, den Text mit pathetischen Zusammenfassungen, dem Schließen von Handlungssträngen oder der Andeutung des Endes der Geschichte zu beenden (z.B. "Sie war bereit für neue Herausforderungen", "Sie verstand, dass es Zeit war, weiterzugehen"). Der Text soll mitten in der laufenden Handlung, Spannung oder einem offenen Gedanken abbrechen.
+
+  Ausnahme von der Regel: Wenn Sie ausdrücklich um ein Ende, einen Abschluss oder einen Epilog bitten, wird die KI ein zufriedenstellendes Ende der Geschichte generieren — das Verbot gilt nicht, wenn Sie es selbst anfordern.
+
+
+  Verwaltung von Akten und Szenen (Skriptmodus, seit Version 7, beibehalten)
+
+  Der Rohskriptmodus verfügt über ein dediziertes Panel "{rezyser.struktura_heading}" mit Schaltflächen zum Aufbau der Hörspielstruktur in Echtzeit.
+
+  - Akt X einfügen: Fügt eine Aktüberschrift ein (z.B. "Akt 2") UND fügt automatisch darunter "Szene 1" hinzu — denn jeder neue Akt beginnt mit der ersten Szene. Der Aktzähler springt auf die nächste Nummer, und der Szenenzähler wird auf 2 zurückgesetzt (bereit für die nächste Szene in diesem Akt).
+  - Szene X einfügen: Fügt nur die Szenenüberschrift ein (z.B. "Szene 3") innerhalb des aktuellen Akts. Der Szenenzähler erhöht sich automatisch.
+
+  Intelligentes Laden der Datei: Wenn Sie eine bestehende Skriptdatei laden, scannt die Anwendung sie automatisch und stellt die Akt- und Szenenzähler auf die richtigen Nummern ein. Der Szenenzähler wird immer innerhalb des letzten Akts in der Datei berechnet.
+
+  Prolog und Epilog: Die Schaltflächen "{rezyser.btn_prolog_label}" und "{rezyser.btn_epilog_label}" sind für beide Modi gemeinsam und im selben Panel verfügbar.
+
+  Der Audiobook-Architekt wandelt Akte automatisch in Hauptnavigationspunkte (Heading 1) für ElevenLabs und NVDA um — Szenen werden als fettgedruckter Text im Dokument sichtbar, aber im Inhaltsverzeichnis unsichtbar.
+
+
+  Intelligente Kapitelverwaltung (Hörbuchmodus, seit Version 5, beibehalten)
+
+  LLM generiert maximal etwa 5000 Zeichen pro Anfrage — das ist zu wenig für ein vollständiges Kapitel. Daher arbeiten Sie iterativ: Sie generieren weitere Abschnitte mit der Schaltfläche "An AI senden", bis Sie der Meinung sind, dass das Kapitel fertig ist. Dann klicken Sie auf "Kapiteltrennung einfügen" — die Anwendung fügt die Überschrift in die Datei und den Speicher ein, und der Kapitelzähler springt automatisch auf die nächste Nummer.
+
+  Schaltflächen im Panel:
+
+  - Trennung einfügen (Kapitel X): Fügt die Überschrift (z.B. "Kapitel 3") in die Datei und den Speicher ein. Der Kapitelzähler aktualisiert sich automatisch.
+  - Prolog einfügen: Funktioniert nur am Anfang, wenn der Speicher leer ist. Schutz vor versehentlichem Einfügen des Prologs mitten in der Geschichte.
+  - Epilog einfügen: Schließt die Geschichte ab. Nach dem Einfügen eines Epilogs mit Inhalt blockiert die Anwendung die Generierung neuer Abschnitte — das ist beabsichtigt, denn nach dem Ende der Geschichte gibt es nichts mehr hinzuzufügen.
+
+  Intelligentes Laden der Datei: Wenn Sie eine bestehende Datei laden, scannt die Anwendung sie automatisch und stellt den Kapitelzähler auf die richtige Nummer ein. Wenn die Datei einen Prolog und drei Kapitel hat, zeigt der Zähler "Kapitel 4" an — ohne manuelles Zählen.
+
+
+  Handlungsakku — wie das Gedächtnis der KI funktioniert
+
+  Im Gedächtnis des Modells landet nur der reine Text der Geschichte — das, was die KI tatsächlich geschrieben hat. Anweisungen, Optionen und Pläne verschwinden nach der Verwendung und verschmutzen den Kontext nicht. Das Ergebnis? Das Modell bleibt länger fokussiert, erinnert sich besser an die Akzente der Charaktere und weicht seltener von den Regeln des Weltbuchs ab.
+
+  Der "Modellspeicher"-Indikator auf dem Bildschirm zeigt an, wie viel Platz Ihre Geschichte bereits einnimmt:
+  - Grün (bis zu 150.000 Zeichen): Das Modell ist voll fokussiert, Sie haben einen sicheren Puffer.
+  - Gelb (150.000 – 175.000 Zeichen): Sie nähern sich der Grenze. Die KI kann beginnen, Aussagen zu kürzen und Regeln zu ignorieren. Beginnen Sie langsam, den Handlungsstrang zu schließen.
+  - Rot (über 175.000 Zeichen): Kritische Überlastung!
+
+  Unendliches Gedächtnis (seit Version 6, beibehalten)
+
+  Wenn der rote Alarm aufleuchtet, müssen Sie keine Zusammenfassung mehr manuell kopieren. Geben Sie im Brainstorming-Modus einen Befehl ein, der das Wort "Zusammenfassung" oder "Summary" enthält — die KI erstellt eine prägnante Wissenskapsel über die gesamte bisherige Handlung. Klicken Sie dann auf die Schaltfläche "Zusammenfassung speichern (dauerhaft)" — die Anwendung erstellt automatisch eine Datei _zusammenfassung.txt im Ordner skripte/ und schützt sie vor versehentlichem Überschreiben. Nach dem Speichern leeren Sie den Speicher und können im aktuellen Dokument weiterarbeiten. Laden Sie die Zusammenfassung vor der nächsten Sitzung in das Feld Langzeitspeicher — und Sie können die Geschichte unendlich fortsetzen, ohne jegliche Längenbeschränkungen. Sie müssen nur daran denken, dass, wenn die gesamte Geschichtsdatei über 175.000 Zeichen hat, um sicher die Arbeit zu unterbrechen und später fortzusetzen, Sie eine Zusammenfassung der Geschichte generieren und speichern müssen. Die KI fügt jetzt auch einige der letzten Absätze der Geschichte hinzu, wenn sie die Zusammenfassung schreibt.
+
+  Automatische Zusammenfassung: Wenn der Speicher in den Alarmzustand übergeht, schaltet das Brainstorming automatisch in den Rettungsmodus — anstatt sofort Optionen zu generieren, erstellt es zuerst eine detaillierte Zusammenfassung der gesamten bisherigen Handlung und speichert sie in <ZUSAMMENFASSUNG>-Tags. Die Anwendung erkennt diese Tags und verschiebt die Zusammenfassung automatisch in das Feld Langzeitspeicher. Keine manuelle Arbeit!
+
+  Intelligentes Laden mit Zusammenfassungsdatei: Wenn Sie ein Projekt laden, das bereits eine gespeicherte Zusammenfassungsdatei hat (z.B. znieczulica_zusammenfassung.txt), lädt die Anwendung die Zusammenfassung automatisch in den Langzeitspeicher und lässt den aktuellen Speicher leer. So verschwenden Sie keine Tokens für das erneute Laden der gesamten Geschichte — das Modell kennt den Kontext aus der Zusammenfassung und ist bereit für eine unendliche Fortsetzung.
+
+
+  SCHRITT 4: Postproduktion in der Regie
+
+  Nachdem Sie die Geschichte geschrieben haben, steht Ihnen ein Postproduktionswerkzeug zur Verfügung, das unten im Regie-Panel verfügbar ist (erscheint nur im Hörbuchmodus).
+
+  Kapitelüberschriften vergeben (Hörbuchmodus)
+
+  Die KI analysiert die gesamte Geschichte und schlägt beschreibende, literarische Titel für jedes Kapitel (sowie einen möglichen Prolog und Epilog) vor. Das Modul iteriert über die Kapitel der gespeicherten Datei und gibt ihnen einen kurzen Titel, indem es nur die Anfänge jedes Kapitels (bis zu 6000 Zeichen) analysiert. Es gibt nur eine nummerierte Liste von Titeln zurück — ohne den Inhalt des Buches neu zu schreiben.
+
+  Hinweis: Das Modul erfordert, dass die Datei bereits auf der Festplatte gespeichert ist (generiert oder geladen). Wenn die Datei nicht existiert, zeigt die Anwendung eine entsprechende Nachricht an.
+
+
+  SCHRITT 5: AI Polyglot
+
+  Eine Anwendung zum Übersetzen und Erzwingen harter Akzente auf Screenreader-Synthesizern. Wechseln Sie dorthin, indem Sie die Schaltfläche "{main.btn.poliglota}" in der Schaltflächenleiste klicken oder im Menü Werkzeuge → {main.menu.poliglota} auswählen (Tastenkombination: Ctrl+2).
+
+
+  Modus 1: Normaler Übersetzer (Verwendet AI - Kostenpflichtig)
+
+  Ideal, um Geschichten in einer schönen, korrekten Fremdsprache zu hören.
+
+  - Laden Sie die Datei mit der Schaltfläche "{poliglota.btn_wczytaj}" oder verwenden Sie die Schaltfläche "Durchsuchen...", um die Datei im Systemfenster auszuwählen.
+  - Wählen Sie den Modus "AI-Übersetzer", geben Sie die Zielsprache ein (z.B. "Finnisch").
+  - Das Skript übersetzt den Inhalt. Wenn Sie eine .html-Datei laden, wird nur der für den Leser sichtbare Text übersetzt und der Sprachcode im HTML-Tag aktualisiert.
+  - Wenn Sie eine normale .txt- oder .md-Datei laden (z.B. ein vom Regisseur generiertes Skript), speichert das Skript das Ergebnis nach der Übersetzung automatisch als .html-Datei mit eingebettetem Sprach-Tag — bereit zum Lesen durch NVDA ohne zusätzliche Arbeit.
+  - Unterstützt auch .docx-Dateien.
+
+  Intelligente Blockaufteilung: Lange Texte werden automatisch in Blöcke von bis zu 10.000 Zeichen unterteilt und sequentiell mit Fortschrittsbalken übersetzt.
+
+  Fehlertolerante Fortschrittsspeicherung (NEU in Version 9): Jeder übersetzte Block wird sofort in einer versteckten temporären Datei im Systemordner der Anwendung gespeichert. Wenn die Übersetzung aufgrund eines erschöpften API-Limits unterbrochen wird, erkennt die Anwendung beim nächsten Start diese Datei automatisch, stellt den bereits bezahlten Fortschritt wieder her und beendet die Arbeit ruhig von der Unterbrechungsstelle aus — ohne manuelles Kopieren. Nach erfolgreichem Abschluss wird die temporäre Datei automatisch gelöscht.
+
+  Warum ist das wichtig? In Version 8 hatte der Ansatz zur Wiederaufnahme der Übersetzung einen kritischen, stillen Fehler: Wenn man die Datei mit der Teilübersetzung nicht umbenannte und den übersetzten Abschnitt gemäß der Anweisung herausschnitt und dann sofort die Übersetzung des Rests fortsetzte — öffnete die Anwendung die Ausgabedatei im Überschreibmodus. Der bezahlte Fortschritt wurde unwiderruflich und unbemerkt gelöscht, bevor man überhaupt etwas bemerkte. Version 9 eliminiert diese Falle vollständig: Die Speicherung erfolgt nach jedem Block, unabhängig davon, was Sie danach tun.
+
+  Modus 2: Regisseur-Modus / Akzente (Kostenlos - Funktioniert lokal)
+
+  Ein Werkzeug zum "Verzerren" von Text. Erzwingt gebrochenes Polnisch auf Synthesizern.
+
+  Das integrierte Dropdown-Menü des Regisseur-Modus ermöglicht die Auswahl eines Akzents direkt aus einer Liste. Verfügbare Optionen sind:
+  Englisch (Samantha / Mark — Vocalizer/Apple, Zira / Hazel — OneCore)
+  Russisch (Milena — Vocalizer/Apple, Irina / Pavel / Yuri — OneCore, eSpeak)
+  Französisch (Thomas / Amelie — Vocalizer/Apple, Julie — OneCore)
+  Polnisch (Ewa — Vocalizer, Paulina — OneCore)
+  Spanisch (Jorge / Monica — Vocalizer/Apple, Helena — OneCore)
+  Isländisch (Gudrun — OneCore, eSpeak; Hinweis: Vocalizer unterstützt diese Sprache nicht!)
+  Italienisch (Alice / Luca — Vocalizer/Apple, Elsa — OneCore)
+  Finnisch (Satu / Mikko — Vocalizer/Apple, Heidi — OneCore)
+  Und zwei Optionen zur Bereinigung ohne Akzent:
+  "Keiner (Bereinigung OHNE Normalisierung von Zahlen)"
+  "Keiner (Bereinigung MIT Normalisierung von Zahlen)"
+  Die Option mit Normalisierung von Zahlen wandelt automatisch Ziffern in ihre ausgeschriebene Form um (z.B. 15 wird zu "fünfzehn") vor der Verarbeitung — so liest NVDA die Zahlen flüssig, und wenn der Text einen erzwungenen Akzent hat, erhält auch die Zahl diesen, ohne Ausnahmen.
+  Sie fragen sich wahrscheinlich, ob der Synthesizer in der Lage sein wird, solche normalisierten Zahlen je nach Kontext zu beugen? Die Antwort ist: nein. Und das ist ein beabsichtigtes Feature. Wie allgemein bekannt: "Polnisch ist schwer" — und ein Ausländer, der unsere Grammatik bricht, fügt dem gebrochenen Akzent nur Authentizität hinzu!
+
+  Tag-Reparierer (NEU in Version 9): Am Ende der Liste finden Sie eine zusätzliche Option — den Tag-Reparierer. Er wendet keine phonetischen Regeln oder Bereinigungen an. Er macht nur eine Sache: Er injiziert den von Ihnen angegebenen zweibuchstabigen ISO-Sprachcode (z.B. "fi" für Finnisch, "en" für Englisch) in die Datei. Dies ist nützlich, wenn Sie bereits eine fertige Datei haben — z.B. zuvor vom AI-Übersetzer übersetzt — aber aus irgendeinem Grund mit einem falschen oder fehlenden Sprach-Tag herausgekommen ist. Anstatt sie neu zu übersetzen, starten Sie einfach den Reparierer mit dem richtigen ISO-Code und haben in Kürze eine korrekte Datei.
+
+  Das Skript bereinigt Regieanweisungen in Klammern — entfernt alle Textteile, die in runden Klammern eingeschlossen sind (z.B. "(mit eingeflochtenen Atemzügen)", "(flüsternd)", "(ironisch)"). ElevenLabs soll ausschließlich Dialoge und Erzählungen lesen, nicht in den Text eingeflochtene Regieanweisungen.
+
+  Das Skript bereinigt auch Markdown-Tags — entfernt Hashtags von Überschriften (z.B. #, ##, ###), Gleichheitszeichen, die als Unterstreichungen von Überschriften verwendet werden, sowie verwaiste Kommata, die den Lesefluss des Synthesizers stören könnten.
+
+  - Schutzschild: Das Skript schützt alle HTML-Tags. Es verzerrt nur Dialoge und Erzählungen.
+  - Funktioniert lokal und kostet nichts!
+
+  Modus 3: Chiffrierer (NEU in 13.0 — Textspielereien, kostenlos, lokal)
+
+  Der dritte RadioButton im Polyglot neben AI-Übersetzer und Regisseur-Modus: „Chiffrierer-Modus (Textspielereien, zufälliges Stottern)". Startet sechs lokale Algorithmen zur Textverzerrung — für Spiele, Rätsel, Sprachpuzzles. Nach Auswahl des Modus erscheint eine Dropdown-Liste der Algorithmen, und für einen von ihnen (Caesar-Chiffre) ein zusätzliches Zahlenfeld für die Verschiebung.
+
+  Verfügbare Algorithmen (im Menü „Wählen Sie einen Verzerrungsalgorithmus"):
+
+  - Textumkehrer (Rückwärtslesen mit Großbuchstaben) — jeder Satz wird Zeichen für Zeichen umgekehrt, wobei Punkt/Ausrufezeichen/Fragezeichen am Ende und Großbuchstaben am Anfang beibehalten werden. Vor der Umkehrung erweitert das Skript gängige Abkürzungen (z.B., d.h., usw., bzw., ggf.), damit das Ergebnis nach der Umkehrung noch Sinn ergibt — ohne das würde "z.B." in das absurde ".Bz" umgewandelt.
+
+    Inspiration: Eine Mission aus dem Programm „The Traitors. Verräter". Als die Moderatorin den Teilnehmern ohne Ankündigung ein bekanntes polnisches Lied aus einem Märchen zeigte — einfach rückwärts abgespielt — gingen die Reaktionen in Richtung „Welche Sprache ist das?", „Das ist wohl Armenisch", „Ungarisch oder Finnisch". Die eigentliche Mission bestand darin, dass ein Team im Wald den Text des Liedes rückwärts geschrieben bekam, es in dieser umgekehrten Form singen sollte, das andere Team es aufnahm, rückwärts abspielte — und theoretisch das Originallied zur Erraten erhielt. Genau dasselbe lustige Missverständnis erzeugt unser Umkehrer, wenn Sie die verarbeitete Datei durch einen TTS-Synthesizer laufen lassen.
+
+  - Typoglycämie (Gemischtes Wortinnere) — klassischer psycholinguistischer Effekt: „Mnaclh rsehrceh, dass es eagl ist, in wlehcer Rhenfogle die Bchustbaen in einem Wrot sind, das Eiznige, was zhlt, ist, dass der esrte und ltezte Bchustbae am rcihtigen Paltz sind". Das Skript mischt zufällig das Innere jedes Wortes, das länger als 4 Zeichen ist, der erste und letzte Buchstabe bleiben unberührt. Hervorragend für den Test „Wie viel sehe ich wirklich und wie viel errät mein Gehirn".
+
+  - Kaputtes Telefon / Schlangendialekt — jedes „s", „z" oder der Digraph „sz" wird zufällig in ein Zischen von 4-8 Zeichen Länge verlängert („ssssss", „zzzzzz", „ssssssz"). Inspiration: Snecko aus dem Spiel „Slay the Spire". Effekt: Der Text klingt, als würde ihn eine Schlange mit Sprachfehler lesen.
+
+  - Vokalisierer (Alles dröhnt auf „O") — jeder Vokal im Text wird in „o" umgewandelt, mit Beibehaltung der polnischen Weichungen. „Dzień dobry" → „Dźoń doboro". Je länger der Text, desto lustiger der Effekt (und der Bildschirmleser liest es mit voller Überzeugung).
+
+  - Starker Stotterer / Beschädigter Roboter — fügt Stottern am Anfang von Wörtern hinzu: „ko-ko-ko-komputer", „pr-pr-prysznic". Für kurze Wörter (weniger als 3 Zeichen) ignoriert der Algorithmus sie. Wenn der zweite Buchstabe des Wortes ein Konsonant ist, wiederholt er die ersten beiden Buchstaben (natürlicherer Effekt); wenn es ein Vokal ist, wiederholt er nur den ersten.
+
+  - Caesar-Chiffre (PL-Alphabetverschiebung) — klassischer Substitutionschiffre: Jeder Buchstabe wird um N Positionen im polnischen Alphabet verschoben (AĄBCĆ…ZŻŹ, 35 Zeichen). Den Verschiebungswert geben Sie im Zahlenfeld „Caesar-Chiffre-Verschiebung (0 = zufällig, Bereich -35…35)" ein. Wenn Sie 0 eingeben — wählt die Anwendung eine Verschiebung im Bereich 1-34 zufällig aus und zeigt sie nach Abschluss in einer Nachricht an (damit Sie sie später entschlüsseln können). Zeichen außerhalb des Alphabets (Zahlen, Interpunktion, Leerzeichen) bleiben unverändert.
+
+  Praktische Anwendung: Die Chiffren speichern das Ergebnis im gleichen Format wie der Regisseur-Modus (.html mit Sprach-Tag oder .docx mit XML-Tags), sodass NVDA sie mit der Stimme der entsprechenden Sprache liest. Besonders der Umkehrer und der Vokalisierer klingen im Synthesizer viel interessanter als beim Lesen mit den Augen — denn das Gehirn versucht beim Lesen mit den Augen automatisch, den Text zu „entschlüsseln", während TTS ihn genau so liest, wie er geschrieben ist.
+
+  Alle sechs Chiffren sind auch in einer breiteren, zugänglichen Sprache in der Datei docs/dictionaries.pl.txt im Anwendungspaket beschrieben — zusammen mit Tipps, wie man ohne Programmierkenntnisse eine eigene „Buchstabentausch"-Chiffre hinzufügen kann (z.B. Schulhofslang, Kauderwelsch).
+
+  Spracherkennung
+
+  Bevor das Skript den Text „verzerrt", überprüft es, in welcher Sprache er geschrieben ist. Wenn es erkennt, dass es sich nicht um Polnisch handelt, zeigt es eine Warnung an. Die phonetischen Regeln sind auf Polnisch zugeschnitten — die Anwendung auf fremdsprachige Texte würde unvorhersehbare Effekte haben.
+
+  Akzente optimiert für lokale Synthesizer (NVDA)
+
+  Die Akzente wurden zu 100% für lokale, kostenlose und kostenpflichtige Bildschirmleser-Synthesizer entworfen — Vocalizer und eSpeak in NVDA. Das garantiert Stabilität und Vorhersehbarkeit des Effekts auf jedem Computer.
+
+  Warum nicht ElevenLabs? Tests an längeren Dokumenten zeigten, dass phonetische Textverzerrung in Motoren wie ElevenLabs den beabsichtigten Akzent nicht erzwingt — der Motor „errät" einfach die Sprache und macht daraus eher einen west-/südsLAWischen Akzent. Lokale NVDA-Synthesizer sind in dieser Hinsicht viel gehorsamer.
+
+  Spezifika lokaler Synthesizer (TTS)
+
+  Verschiedene TTS-Engines verhalten sich unterschiedlich. Nachfolgend die wichtigsten Unterschiede, die direkten Einfluss auf das Verhalten der Akzente haben:
+
+  eSpeak (Open Source)
+  Leichtgewichtiger, kostenloser Motor mit einer riesigen Sprachdatenbank — unterstützt u.a. Isländisch. Sehr streng bei der Zeichencodierung, was ihn vorhersehbar macht. Hat jedoch phonetische Schwächen: Oft teilt er Phoneme zwischen Sprachen, wodurch z.B. Ukrainisch mit einem russischen Einschlag klingt.
+
+  Nuance Vocalizer
+  Kommerzieller, kostenpflichtiger Motor, kostenlos in Apple-Geräten (VoiceOver) integriert. Bietet eine sehr natürliche Sprachqualität. Wichtiges Limit: UNTERSTÜTZT nicht alle Sprachen — KEINE isländische Stimme. Für Finnisch ist Satu verfügbar, für Italienisch Alice.
+
+  Wie lädt man Vocalizer auf Windows herunter?
+
+  Vocalizer ist nicht in Windows integriert — es handelt sich um kostenpflichtige Add-ons für NVDA, die von der Firma Tiflotecnia vertrieben werden. Die Installation erfolgt in zwei Schritten: Herunterladen des Treibers und der Stimmen selbst.
+  - Kauf und Herunterladen des Treibers: Besuchen Sie die Website tiflotecnia.com (das Bestellformular ist auf Englisch), erwerben Sie eine Lizenz und gehen Sie zum Abschnitt "Downloads", um die Treiberdatei herunterzuladen. Wichtiger Hinweis für NVDA: Die Unterseite "Downloads" ist ein architektonischer Albtraum — die Überschriften sind auf Englisch, die Navigation auf Portugiesisch, und die gesamte Seite hat ein portugiesisches Sprach-Tag im Code! Selbst wenn Sie den Übersetzer im Browser aktivieren, wird er den Inhalt übersetzen, aber normalerweise das Sprach-Tag im Code nicht entfernen. Infolgedessen kann der Bildschirmleser versuchen, die englisch-polnische Seite mit einem sehr gebrochenen, portugiesischen Akzent zu lesen. Lassen Sie sich davon nicht abschrecken und deaktivieren Sie vorübergehend die automatische Sprachumschaltung, übersetzen Sie dann einfach die Seite und laden Sie den Treiber herunter!
+  - Herunterladen der Stimmen: Der Treiber allein reicht nicht aus — nach der Installation zeigt NVDA standardmäßig einen Fehler beim Laden des Synthesizers an. Um dies zu beheben, müssen Sie separat die Sprachpakete herunterladen, die Sie verwenden möchten (z.B. die polnische Ewa für flüssiges Lesen der Systemsteuerung und die finnische Satu für Akzente im Polyglot).
+  Hinweis: Vergessen Sie nicht, die automatische Sprachumschaltung nach dem Schließen der Unterseite wieder zu aktivieren, um später nicht enttäuscht zu werden!
+  - Schnelle Installation: Die heruntergeladenen Dateien sind NVDA-Add-on-Pakete (sie haben die Erweiterung .nvda-addon). Sie müssen sie nicht über NVDA -> Werkzeuge -> Add-on Store installieren. Wenn NVDA läuft, öffnen Sie diese Dateien einfach auf die übliche Weise (durch Drücken der Eingabetaste). Windows kann ihre Erweiterung ausblenden, aber das Tooltip wird sie korrekt als "NVDA-Add-on-Paketdatei" erkennen. Der Bildschirmleser fragt Sie, ob Sie das Add-on installieren möchten.
+  Nach der Installation des Treibers und der Stimmen sowie einem Neustart des Lesers erscheint Vocalizer in der Liste der Synthesizer in den NVDA-Einstellungen und sollte keine Fehler anzeigen.
+
+  Microsoft OneCore
+  Kostenlose Stimmen, die in Windows integriert sind (Mobile Voices). Ein guter Kompromiss zwischen Qualität und Sprachverfügbarkeit. Bietet hohe Qualität und unterstützt die isländische (Gudrun), finnische (Heidi) und italienische (Elsa) Sprache. Hinweis: OneCore unterstützt nativ KEINE automatische Sprachumschaltung basierend auf lang-Tags (es sei denn, Sie verwenden den in Windows integrierten Bildschirmleser Narrator) — siehe Abschnitt unten.
+
+  Wie lädt man OneCore-Stimmen auf Windows herunter? OneCore-Stimmen sind kostenlos, aber die meisten Sprachen sind nicht standardmäßig installiert. Um fehlende Sprachen herunterzuladen, gehen Sie zu Windows-Einstellungen → Zeit und Sprache → Sprache → Stimmen verwalten (oder "Stimmen hinzufügen"). Wählen Sie die Sprache aus der Liste (z.B. Isländisch, Finnisch, Italienisch) und klicken Sie auf Herunterladen. Nach dem Herunterladen erscheint die Stimme automatisch in NVDA — ohne zusätzliche Konfiguration.
+
+  Apple (iPhone / iPad / Mac) — VoiceOver mit Vocalizer
+  Auf Apple-Geräten ist der Vocalizer-Motor nativ im Betriebssystem integriert und unterstützt alle Sprachen ohne zusätzliche Käufe. Standardmäßig sind jedoch kompakte Versionen der Stimmen installiert, die etwas mechanisch klingen. Um eine deutlich bessere, natürlichere Klangqualität zu erhalten, sollten Sie die erweiterten oder Premium-Versionen herunterladen:
+  - Auf dem iPhone/iPad: Einstellungen → Bedienungshilfen → VoiceOver → Sprache → Stimme → wählen Sie die Sprache (z.B. Finnisch) → tippen Sie auf den Namen der Stimme (z.B. Satu) → Sie sehen die Optionen "Erweitert" und "Premium". Laden Sie die gewünschte Version herunter — sie benötigt mehr Speicherplatz, aber der Qualitätsunterschied ist deutlich.
+  - Auf dem Mac: Systemeinstellungen (oder Systemeinstellungen) → Bedienungshilfen → VoiceOver → VoiceOver-Dienstprogramm öffnen → Sprache → Stimme → klicken Sie auf "Anpassen" bei der ausgewählten Stimme und laden Sie die erweiterte oder Premium-Version herunter.
+
+  Android — Vocalizer kostenpflichtig pro Stimme
+  Auf Android ist Vocalizer als App im Google Play Store verfügbar (suchen Sie nach "Vocalizer TTS"). Hinweis: Jede Sprache und Stimme wird separat gekauft — es gibt keine Lizenz für alles. Vor dem Kauf können Sie die Stimme im Demo-Modus für einige Minuten testen. Nach dem Kauf ist die Stimme mit Ihrem Google-Konto verknüpft und kann auf jedem Gerät mit demselben Konto installiert werden.
+
+  Killer-Feature für Blinde: Dateien mit Sprach-Tags
+
+  Das ist eine echte Revolution. Verarbeitete Dateien werden jetzt gespeichert als:
+
+  - .html mit lang-Attribut (z.B. lang="fi" für Finnisch) — NVDA liest diesen Tag und wechselt automatisch zur entsprechenden Sprachsynthesizer-Stimme. Null manuelle Konfiguration!
+  - .docx mit Formatierung beibehalten — jeder Textlauf hat ein Sprach-Tag im XML-Dokument, sodass Word und NVDA wissen, mit welcher Stimme jeder Abschnitt gelesen werden soll.
+
+  Verarbeitete Dateien werden immer als NEUE Dokumente gespeichert (z.B. akzent_Finnisch.html).
+
+  Automatische Sprachumschaltung in NVDA — was Sie wissen müssen
+
+  Damit NVDA die Stimme tatsächlich basierend auf dem lang-Tag umschaltet, muss die Einstellung "Sprache automatisch ändern, wenn unterstützt" aktiviert sein. Sie finden es in den NVDA-Einstellungen → Sprache. Standardmäßig ist es beim ersten Start des Lesers aktiviert — aber es ist ratsam zu überprüfen, ob es jemand deaktiviert hat.
+
+  Wichtiges Limit der OneCore-Stimmen: Microsoft OneCore-Stimmen unterstützen diesen Mechanismus nativ nicht mit NVDA, sondern nur mit dem in Windows integrierten Narrator. Es gibt ein inoffizielles NVDA-Add-on namens "One Core Autolang", das versucht, dies zu beheben — aber seine Entwicklung wurde schnell eingestellt. Der Grund ist banal: Jedes Jahr, bei der ersten NVDA-Version des Jahres, gibt es Änderungen, die die API-Kompatibilität brechen (sogenannte API Breaking Changes). Manchmal reicht es aus, das Feld "last tested version" im Add-on-Manifest zu aktualisieren, aber manchmal sind echte Änderungen im Code erforderlich — und der Autor kommt mit den Updates nicht nach. Wenn Ihnen die automatische Sprachumschaltung wichtig ist, sind Vocalizer oder eSpeak eine sicherere Wahl, da sie diesen Mechanismus nativ unterstützen, wobei im ersten Fall auch mit einer vorübergehenden Nichtverfügbarkeit des aktualisierten Vocalizer-Treibers für das neueste NVDA zu rechnen ist, aufgrund des zuvor beschriebenen Problems. Dann haben Sie die Wahl:
+  - NVDA nicht aktualisieren - die Stimmen werden sicher funktionieren, aber Sie haben keinen Zugriff auf neue potenzielle Funktionen, Verbesserungen oder Fehlerbehebungen.
+  - NVDA aktualisieren und das Add-on durch Überschreiben der Kompatibilität erzwingen (kürzlich eingeführt, funktioniert, wenn bisher nur das Manifest aktualisiert werden musste). Andernfalls... nun ja, es gab eine Warnung, dass Sie dies auf eigenes Risiko tun.
+
+  SCHRITT 6: Audiobook-Architekt
+
+  Ein Werkzeug zur Erstellung einer professionellen Dateistruktur für Bildschirmleser und ElevenLabs. Gehen Sie dorthin, indem Sie die Schaltfläche "{main.btn.konwerter}" in der Symbolleiste klicken oder Werkzeuge → {main.menu.konwerter} aus dem Menü wählen (Tastenkombination: Strg+3).
+
+  Wie funktioniert es?
+
+  1. Geben Sie den Pfad zur Quelldatei im Textfeld ein oder klicken Sie auf die Schaltfläche "Durchsuchen...", um die Datei im Systemdialog auszuwählen. Das Skript akzeptiert sowohl .txt als auch .docx sowie .html und .htm Dateien.
+  2. Klicken Sie auf "{konwerter.btn_buduj}".
+  3. Das Skript scannt jede Textzeile und wandelt Schlüsselwörter (Akt, Kapitel, Prolog, Epilog, Vorspann) in "Heading 1"-Überschriften im Word-Dokument um.
+  4. Szenen (Zeilen, die mit dem Wort "Szene" beginnen) werden in Fettdruck umgewandelt — sichtbar im Dokument, aber unsichtbar im Inhaltsverzeichnis von ElevenLabs.
+  5. Der gesamte übrige Text (Dialoge, Beschreibungen) bleibt unverändert.
+  6. Sie erhalten eine Datei architektur_[original_name].docx — ein professionelles Word-Dokument, bereit für die weitere Bearbeitung. Wenn Ihre Eingabedatei z.B. betäubung.txt hieß, wird die Ergebnisdatei den Namen architektur_betäubung.docx haben und im selben Ordner wie das Original erscheinen.
+
+  Reinigung nebenbei: Das Skript entfernt automatisch HTML-Tags (wenn der Text aus dem Browser oder einer lokalen .html-Datei stammt, z.B. von Polyglot generiert) und Markdown-Header-Tags (z.B. ### oder ####) vor der Verarbeitung. Sie müssen die Datei nicht manuell bereinigen.
+
+  Großer Vorteil für NVDA- und ElevenLabs-Nutzer
+
+  Das "Heading 1"-Format für Kapitel ist nicht nur ästhetisch. In NVDA können Sie blitzschnell durch Überschriften navigieren, indem Sie die H-Taste (oder 1 für Überschriften der ersten Ebene) drücken. Anstatt Hunderte von Seiten zu scrollen, springen Sie von Kapitel zu Kapitel in Sekundenbruchteilen. Das verändert die Arbeit mit langen Dokumenten. In ElevenLabs können Sie sicher sein, dass die Engine automatisch Schnitte einfügt und sich beim Regie führen von Audioclips nicht aufhängt.
+
+  SCHRITT 7: Wie man das Buch der Welt schreibt (Prompt des Architekten und Mini-Markdown-Kurs)
+
+  Die künstliche Intelligenz, die das Hauptstudio antreibt, versteht Befehle am besten, wenn sie im Markdown-Markup-Format formatiert sind. Wenn Sie der KI im Regisseur nur eine lose Idee geben (z.B. "zwei Schwestern im Jenseits"), wird die Maschine aufgrund fehlender Details in Panik geraten und eine banale, vorhersehbare Geschichte erstellen, die die Logik ignoriert.
+
+  Um dies zu verhindern, verwenden Sie einen externen Chatbot (z.B. den kostenlosen ChatGPT oder Claude) als Ihren persönlichen Architekten. In Version 13.0 müssen Sie den Prompt nicht mehr aus den Anweisungen abschreiben — im Regisseur-Panel, direkt unter der Schaltfläche „{rezyser.btn_zapisz_ksiege_label}", finden Sie die Schaltfläche „{rezyser.btn_prompt_architekta_label}". Klicken Sie darauf, und ein Dialogfenster mit dem fertigen Prompt-Text im "Nur-Lesen"-Feld sowie einer Schaltfläche "In die Zwischenablage kopieren" wird geöffnet. NVDA gibt den gesamten Inhalt sofort nach dem Öffnen des Fensters bekannt — klicken Sie einfach auf "Kopieren", fügen Sie ihn in ChatGPT/Claude ein (Strg+V) und ersetzen Sie den Abschnitt „[HIER IHRE IDEE EINFÜGEN]" durch Ihren eigenen Handlungsansatz.
+
+  Warum so und nicht durch Kopieren aus den Anweisungen? Der Dialog im GUI hat einen entscheidenden Vorteil in Bezug auf die Zugänglichkeit: Er ist nativ und wird ohne Störungen vom Bildschirmleser gelesen, erfordert kein Umschalten in einen Texteditor (wo polnische „Schwänze" und Anführungszeichen manchmal falsch kopiert werden) und funktioniert identisch auf jedem Betriebssystem. Dasselbe Muster — ein Dialog mit einem zu kopierenden Prompt — wird auch im Regelmanager verwendet (siehe SCHRITT 7b unten).
+
+  Wie AI antwortet: Sie erhalten eine Antwort in zwei Teilen. Der erste Teil ist das Buch der Welt, eingebettet in einen Markdown-Codeblock (```markdown … ```). Kopieren Sie NUR den Inhalt des Codeblocks (ohne die eigentlichen ```-Markierungen) und fügen Sie ihn in das Feld „Buch der Welt“ im Regisseur ein, dann klicken Sie auf „{rezyser.btn_zapisz_ksiege_label}“. Der zweite Teil ist eine Empfehlung, welcher der kreativen Modi (Skript oder Hörbuch) am besten zu Ihrer Idee passt — betrachten Sie dies als Hinweis bei der Auswahl des Modus im RadioBox.
+
+  Mini-Markdown-Kurs im Buch: Ein einzelnes Hashtag (#) ist eine Hauptsektion (z.B. „# Charaktere“), ein doppeltes Hashtag (##) ist eine Untersektion, Bindestriche (-) erstellen Listen, und doppelte Sternchen (**Text**) heben absolute, unveränderliche Regeln hervor (z.B. „**Der Held LÜGT NIEMALS**“). Für einen fremdsprachigen Charakter fügen Sie einen Akzent-Tag hinzu, z.B. „[Sprecher 1: Marek] - hat einen französischen Akzent“. Das Schlüsselwort „Akzent“ ist NOTWENDIG — die Anwendungs-Engine erkennt es automatisch und wendet die richtigen phonetischen Regeln auf die Dialoge des Charakters an.
+
+  Tipp: Denken Sie daran, Ihr Buch der Welt regelmäßig zu aktualisieren, wenn Sie die Handlung um neue Orte oder wichtige Charaktere erweitern. Sie können dies manuell oder mit Hilfe eines externen Chatbots tun. Je reicher das Fundament, desto bessere Ergebnisse in der Regie!
+
+  SCHRITT 7b: Regelmanager (Strg+4) — Wörterbücher für Linguisten ohne Python
+
+  Version 13.0 führt das vierte Werkzeug in der Leiste ein: den Regelmanager. Sie öffnen ihn mit Strg+4 oder über das Menü Werkzeuge. Es ist ein visueller Explorer des Ordners dictionaries/, in dem die Anwendung alle phonetischen Regeln (Akzente), Chiffren und Regiemodi in YAML-Dateien (ein menschenlesbares Format, einfacher als JSON) speichert.
+
+  Warum YAML? Bis Version 12.0 waren alle Akzente, kreativen Modi und Filter „eingebettet“ im Python-Code. Das Hinzufügen eines neuen Akzents erforderte einen Programmierer. In Version 13.0 wurde alles in .yaml-Dateien im Ordner dictionaries/ ausgelagert — jeder, der Notepad öffnen kann, kann einen bestehenden Akzent feinjustieren („ersetze sz durch sh durch sch“) oder einen völlig neuen hinzufügen (schwedisch, dänisch, russischer Dialekt).
+
+  Was Sie im Regelmanager finden:
+  - Dateibaum — vollständige Liste aller YAML-Dateien in dictionaries/ mit Unterteilung in Quellsprachen (derzeit vollständig implementiert: {lista_kompletnych_jezykow_natywnie}) und Kategorien (akzente/, chifren/, regisseur/). Navigation mit Pfeiltasten wie im Windows-Dateiexplorer, vollständige NVDA-Unterstützung.
+  - Schaltfläche „{manager.btn_otworz_label}“ — öffnet die ausgewählte Datei im Standard-Notepad des Systems. Sie bearbeiten, speichern, klicken auf „{manager.btn_odswiez_label}“ und fertig.
+  - Schaltfläche „{manager.btn_duplikuj_label}“ — der schnellste Weg zu einem neuen Akzent: Sie nehmen eine bestehende Datei (z.B. finski.yaml), geben einen neuen Namen (z.B. schwedisch) an, der Manager erstellt eine Kopie mit dem Kommentar „ändern Sie die Felder label und description“ und öffnet sie im Editor.
+  - Schaltfläche „{manager.btn_nowy_label}“ — Assistent mit Auswahl des Typs (Akzent, Chiffre, Regiemodus, neue Quellsprache, algorithmische Chiffre). Für einfache Fälle (Akzent, Chiffre vom Typ „Buchstabentausch“) erstellt der Assistent eine bearbeitbare YAML-Vorlage. Für Fälle, die einen Programmierer erfordern (neue Quellsprache, Algorithmus vom Typ „Wortmitte mischen“), generiert der Assistent einen Prompt für einen AI-Chatbot — Sie fügen ihn in ChatGPT ein, erhalten eine fertige YAML-Datei, speichern sie in dictionaries/ und fertig.
+
+  Praktische Anwendung: Möchten Sie einen schwedischen Akzent hinzufügen? Öffnen Sie den Regelmanager, wählen Sie dictionaries/pl/akzente/finski.yaml, klicken Sie auf „Duplizieren“, benennen Sie die Datei in schwedisch um, ändern Sie das Feld label in "Schwedisch (Alva / Oskar)", den ISO-Code in sv, ändern Sie einige Austauschregeln und speichern Sie. Kehren Sie zur Startseite zurück, klicken Sie auf „{home.btn_odswiez_label}“ und starten Sie die Anwendung neu. Der neue Akzent erscheint im Polyglot-Menü (im Regiemodus) und — wenn Sie ihn dem Buch der Welt der Charaktere hinzufügen („[Marek] - hat einen schwedischen Akzent“) — auch in der automatischen Akzenterkennung des Regisseurs.
+
+  Wo Sie weitere Dokumentation zum Ordner dictionaries/ finden:
+  - Datei `docs/dictionaries.pl.txt` (verfügbar im Endbenutzerpaket aus dem Reiter Releases) — eine kurze, einfache Beschreibung jedes Unterordners, 6 fertige Chiffren, 8 fertige Akzente und Ideen, was man selbst ohne Python-Kenntnisse tun kann.
+  - Datei `dictionaries/README.md` (nur verfügbar beim Klonen des Repositories von GitHub — Release-Pakete filtern .md-Dateien) — detaillierte technische Dokumentation des YAML-Formats mit Beispielen, Feldlisten, Pipeline-Regeln, Regexen. Dieses Dokument richtet sich an Linguisten mit Grundkenntnissen in Programmierung und an Entwickler.
+
+  Wichtige Hinweise für Bildschirmleser-Nutzer (NVDA)
+
+  1. Erfolgs- und Fehlermeldungen
+
+  Wenn die Anwendung eine Aufgabe abschließt (z.B. eine Datei speichert oder auf einen Fehler stößt), erscheint ein Dialogfenster mit einem Titel wie „Erfolg“, „Warnung“ oder „Fehler“. NVDA gibt dieses Fenster sofort bekannt und liest seinen Inhalt vor. Sie müssen nichts tun — die Dialoge sind vollständig tastaturzugänglich, und der Fokus landet automatisch auf der Schaltfläche „OK“. Es gibt keine Tricks mehr mit dem Präfix „Alert“ — native wxPython-Dialoge werden direkt vom Leser unterstützt.
+
+  2. Wichtige Warnung: Stille Hintergrundverarbeitung
+
+  Nach dem Klicken auf Schaltflächen wie „{rezyser.btn_wyslij_label}“ oder „{poliglota.btn_process}“ beginnt das Programm sofort mit der Hintergrundverarbeitung. Ein Fortschrittsbalken (Gauge) erscheint auf dem Bildschirm, aber NVDA liest seinen Wert nicht in Echtzeit vor — der Bildschirmleser bleibt während der Arbeit stumm. Klicken Sie nicht erneut auf die Schaltfläche. Warten Sie, bis ein Ergebnis- oder Fehlermeldungsdialog erscheint — NVDA gibt ihn automatisch bekannt.
+
+  3. Navigation zwischen Werkzeugen
+
+  Das Wechseln zwischen Werkzeugen (Regisseur, Polyglot, Konverter, Regelmanager) erfolgt in einem einzigen Programmfenster über vier Schaltflächen in der Symbolleiste oder über das Menü Werkzeuge (Alt, dann N). Verfügbare Tastenkombinationen: Strg+0 (Startseite), Strg+1 (Regisseur), Strg+2 (Polyglot), Strg+3 (Konverter), Strg+4 (Regelmanager — neu in 13.0). Nach dem Wechsel des Werkzeugs landet der Fokus automatisch auf der Beschreibung des neuen Moduls — NVDA beginnt sofort, die neue Ansicht zu lesen.
+
+  4. Tab-Reihenfolge und Widget-Namen
+
+  Jedes Interface-Element hat einen klaren deutschen Namen — NVDA liest ihn beim Fokussieren vor. Die Tab-Reihenfolge ist logisch: von der Werkzeugbeschreibung über Konfigurationsfelder bis zu den Aktionsschaltflächen. Es gibt keine Überraschungen — die Tastaturnavigation funktioniert wie in jedem anderen nativen Windows-Programm. Alle Menüs und Schaltflächen sind auf Deutsch und NVDA liest sie mit deutscher Stimme ohne zusätzliche Einstellungen vor.
+
+  Wichtige Hinweise zur Version 9.0 / Changelog
+
+  Neue Funktionen und Änderungen in Version 9
+
+  Fehlerresistentes Speichern des Übersetzungsfortschritts (ÄNDERUNG — Behebung eines kritischen Fehlers)
+  In Version 8 war das Fortsetzen einer unterbrochenen Übersetzung mit einer stillen, destruktiven Falle behaftet: Wenn der Benutzer den Anweisungen folgte (manuelles Ausschneiden des übersetzten Abschnitts) und dann sofort die Übersetzung des Rests fortsetzte, öffnete die Anwendung die Ausgabedatei im Überschreibmodus — unwiderruflich und unbewusst den gesamten bezahlten Fortschritt löschend. In Version 9 wurde der gesamte Mechanismus neu gestaltet. Jeder übersetzte Block wird jetzt sofort in einer temporären Datei (.jsonl) mit zugewiesenem Index gespeichert. Das Fortsetzen ist vollständig automatisiert — die Anwendung erkennt die Datei selbst und stellt den Fortschritt ohne Benutzereingriff wieder her. Nach erfolgreichem Abschluss wird die temporäre Datei automatisch gelöscht.
+
+  Tag-Fixer im Regiemodus (NEU)
+  Dem Menü des Regiemodus wurde eine neue Option hinzugefügt — der Tag-Fixer. Er injiziert in die Datei nur den vom Benutzer angegebenen zweibuchstabigen ISO-Sprachcode, ohne phonetische Regeln oder Bereinigungen anzuwenden. Ein Rettungswerkzeug für den Fall, dass die fertige Datei mit einem falschen oder fehlenden Sprach-Tag herauskam.
+
+  Automatische Konvertierung von .txt zu .html im Übersetzermodus (ÄNDERUNG)
+  Textdateien (.txt und .md), die vom AI-Übersetzer übersetzt werden, werden jetzt automatisch im .html-Format mit eingebettetem Sprach-Tag gespeichert. Dadurch liest NVDA die Datei sofort mit der richtigen Stimme — ohne zusätzliche Schritte seitens des Benutzers.
+
+  Intelligente Dateibenennung im Architekten (ÄNDERUNG)
+  Der Audiobook-Architekt speichert die Ergebnisdatei nicht mehr immer unter dem gleichen Namen architektur_fertig.docx. Jetzt ergibt sich der Name aus der Eingabedatei — z.B. für betäubung.txt wird die Ergebnisdatei architektur_betäubung.docx heißen. Die Datei erscheint im selben Ordner wie das Original.
+
+  Funktionen unverändert aus Version 8
+
+  Rückkehr zum .txt-Format für Projektdateien (ÄNDERUNG)
+  Projektdateien und Zusammenfassungen werden jetzt im .txt-Format statt .md (Markdown) gespeichert. Das Experiment mit dem .md-Format als psychologische Barriere vor der Bearbeitung erwies sich als ineffektiv — AI bricht oft notorisch die Anti-Closure-Regel und es ist oft besser, die Datei laufend zu bearbeiten und dann den Speicher neu zu laden, damit AI, soweit möglich, keine versteckte Erlaubnis zum Brechen des Verbots erhält. Das .txt-Format ist intuitiver und lesbarer für jeden.
+
+  Regel des Editors — neue Warnung
+  In der Anleitung (und in zukünftigen Versionen der Benutzeroberfläche) wurde eine deutliche Warnung hinzugefügt, die erklärt, was in Projektdateien bearbeitet werden darf und was nicht. Der Benutzer hat das volle Recht, Dialoge und Inhalte zu bearbeiten, darf jedoch keinesfalls die Strukturzeilen (Akt, Szene, Kapitel, Prolog, Epilog) ändern — deren Beschädigung ruiniert die NVDA-Navigation, die Aufteilung in ElevenLabs und das Inhaltsverzeichnis in Word.
+
+  Aktualisierter Prompt des Architekten (ÄNDERUNG)
+  Der Prompt für den externen Chatbot (ChatGPT/Claude) wurde neu gestaltet. Anstatt rohen Markdown-Code zurückzugeben, gibt AI jetzt die Antwort in zwei klar getrennten Teilen zurück: Teil 1 ist das Buch der Welt, eingebettet in einen Markdown-Codeblock (leicht ohne Markierungen zu kopieren), und Teil 2 ist die Modusempfehlung als normaler Text außerhalb des Blocks — er rät, ob besser der Rohskriptmodus oder der traditionelle Hörbuchmodus verwendet werden sollte. Auch die Beschreibung der Charakter-Tags wurde geändert: Anstelle von „klanglich“ wird jetzt im Tag von Akzent und Stimmton gesprochen, z.B. [Sprecher 1: Name] - lispelt und hat einen französischen Akzent.
+
+  Erläuterung des Anti-Closure-Direktivenstatus (DOKUMENTATION)
+
+  Instruktion enthält jetzt eine ehrliche Erklärung, dass trotz der eingebauten Anti-Closure-Verbote das Modell diese Regel notorisch bricht, insbesondere im Hörbuchmodus. Anstatt dieses Problem zu verbergen, stellt Version 8 die Sache klar und überträgt die Verantwortung für das "manuelle Schließen" zurück an den Regisseur — daher die Editorregel als offizielles Arbeitswerkzeug und die Rückkehr zum normalen Textformat.
+
+  Funktionen unverändert aus Version 7
+
+  Showrunner-Prompts — Anti-Closure-Direktive (Regie — alle Modi)
+  Alle drei Regiemodi behalten die eingebauten Showrunner-Direktiven bei. Brainstorming fungiert wie ein Drehbuchautor für eine mehrstaffelige Serie. Der Rohskriptmodus und der Hörbuchmodus haben das Verbot, den Text mit Zusammenfassungen, Moral und narrativen Klammern zu beenden — es sei denn, der Benutzer fordert ausdrücklich ein Finale oder einen Epilog an.
+
+  Echtzeitverwaltung von Akten und Szenen (Regie — Skriptmodus)
+  Der Rohskriptmodus verfügt über ein Panel mit den Schaltflächen "Akt X einfügen" und "Szene X einfügen". Die Zähler aktualisieren sich automatisch. Das Laden einer vorhandenen Datei setzt beide Zähler auf die richtigen Nummern.
+
+  Bereinigung von Regieanweisungen in Klammern (Polyglot — Regiemodus)
+  Das Skript entfernt alle Textfragmente in runden Klammern (z.B. "(flüstert)", "(mit eingeflochtenen Atemzügen)"). ElevenLabs liest ausschließlich Dialoge und Erzählungen.
+
+  Unendlicher Speicher und automatisches Zusammenfassen (Regie — Plot-Akku)
+  Wenn der Speicherindikator in den roten Alarmzustand wechselt, generiert Brainstorming automatisch eine Zusammenfassung der Handlung und speichert sie im Langzeitspeicherfeld. Ein Klick auf "Zusammenfassung speichern (dauerhaft)" erstellt eine Datei _zusammenfassung.txt. Nach dem Löschen des Speichers und dem Laden der Zusammenfassung kann die Geschichte ohne Längenbeschränkungen fortgesetzt werden.
+
+  Audiobook-Architekt
+  Das Tool unterstützt die Schlüsselwörter Akt, Kapitel, Prolog, Epilog und Intro als Überschriften der ersten Ebene. Szenen werden in fett formatierten Text umgewandelt. Das Skript bereinigt automatisch HTML-Tags und Markdown-Markierungen vor der Verarbeitung.
+
+  Intelligente Kapitelverwaltung (Hörbuchmodus)
+  Ein dediziertes Panel mit Schaltflächen zum Einfügen von Prolog, Epilogen und Kapitelschnitten direkt aus der Benutzeroberfläche. Der Kapitelzähler aktualisiert sich automatisch. Das Laden einer vorhandenen Datei setzt den Zähler auf die richtige Nummer ohne manuelles Zählen.
+
+  Kapitelbenennung (Postproduktion — Hörbuchmodus)
+  Das Modul iteriert über die Kapitel der gespeicherten Datei und vergibt ihnen einen kurzen, literarischen Titel mithilfe eines schnellen AI-Modells, das nur die Anfänge jedes Kapitels analysiert.
+
+  Entfernte Funktionen (unverändert seit Version 7)
+
+  Schnittkarte (Skriptmodus) — ersetzt durch Echtzeitverwaltungspanel für Akte und Szenen.
+  Skriptadaption für Hörbücher (Skriptmodus) — aus finanziellen Gründen entfernt. Der Arbeitsablauf erzeugte drei separate Kosten: Skripterstellung, potenzielles Zusammenfassen bei Speicherüberlauf und schließlich erneutes Generieren der gesamten Prosa als Hörbuch. Wir empfehlen, von Anfang an direkt im traditionellen Hörbuchmodus zu schreiben.
+
+  Funktionen aus Version 10.0 (unverändert in Versionen 11.0 und 12.0)
+
+  - Automatischer Konfigurationsdateigenerator golden_key.env direkt in die Hauptoberfläche der Anwendung integriert. Der Benutzer muss die Datei nicht mehr manuell erstellen oder sich um die .txt-Fallstricke kümmern — ein Klick auf die Schaltfläche auf dem Startbildschirm erstellt die saubere, fertige Datei am richtigen Ort.
+  - Vollständige Entfernung des veralteten Skripts napraw_api.bat, das nicht mehr benötigt wird. Das Problem, das dieses Skript löste (falsche Dateierweiterung durch Notepad), ist jetzt vollständig durch den eingebauten Generator eliminiert.
+  - Mehrbuchfähigkeit des Buchs der Welt — jedes Projekt hat jetzt seine eigene Lore-Datei (NEU). Früher gab es eine gemeinsame Datei moje_lore.md, die bei jedem Start der Anwendung geladen wurde — unabhängig davon, an welchem Projekt Sie arbeiten. Seit Version 10 ist das Buch der Welt eng mit dem Projektnamen verknüpft: Wenn Ihre Geschichte skripty/emilia_heist_audiobook.txt ist, dann ist ihr Buch skripty/emilia_heist_audiobook.md. Die Schaltfläche "Buch dauerhaft speichern" ist ausgegraut, bis Sie einen Dateinamen eingeben — die Reihenfolge ist hier absichtlich und wird durch die Benutzeroberfläche erzwungen. Ein Klick auf "Geschichte laden" lädt automatisch die entsprechende .md-Datei von der Festplatte, sofern vorhanden. Die Änderung hat auch einen praktischen organisatorischen Aspekt: Sie können jetzt mehrere Projekte gleichzeitig führen, und jedes hat seine eigenen, isolierten Weltregeln und Charakterlisten — ohne das Risiko, dass Emilia aus dem Tresorraub plötzlich in einer Weltraumoper landet.
+
+  Neue Funktionen und Änderungen in Version 11.0
+
+  - Neue Akzente im Polyglot (NEU — vier neue europäische Sprachen). Dem Menü des Regiemodus wurden vier neue Optionen zum phonetischen "Verfälschen" von Text hinzugefügt: Englisch (Samantha / Mark / Zira / Hazel), Französisch (Thomas / Amelie / Julie), Deutsch (Stefan / Markus / Katja / Hedda), Spanisch (Jorge / Monica / Helena). Jeder neue Akzent injiziert automatisch den entsprechenden ISO-Code (en, fr, de, es) in die generierte .html- oder .docx-Datei — NVDA verwendet sofort die richtige Stimme für den verarbeiteten Text.
+
+  - Plattformübergreifend: Unterstützung für macOS und Linux (ÄNDERUNG der Dokumentation). Der Abschnitt "Erster Start" wurde gründlich überarbeitet. Jetzt unterscheidet er drei Pfade: Endbenutzer von Windows laden das fertige ZIP-Paket aus dem Reiter Releases herunter und führen run.bat aus; Windows-Entwickler richten die Umgebung über setup_dev.bat ein; macOS- und Linux-Benutzer richten die Umgebung über ./setup_dev.sh ein und führen ./run.sh aus. (Hinweis: In den Versionen 11.x–13.0 hießen dieselben Skripte anders — `Uruchom_Rezysera.bat`, `skonfiguruj_dev.bat`, `skonfiguruj_dev.sh`, `uruchom_rezysera.sh` — sie wurden in 13.1 auf englische Äquivalente umbenannt, da ausländische Entwickler, die das Repo klonen, berichteten, dass polnische Dateinamen das Eingeben von Befehlen im Terminal erschweren.)
+
+  - Ordner runtime/ — Erklärung des Status (DOKUMENTATION). Der Abschnitt "Erster Start" enthält jetzt eine explizite Erklärung, dass der Ordner runtime/ (Python-Umgebung für ZIP-Pakete) ausschließlich in fertigen Paketen für Windows aus dem Reiter Releases verteilt wird. Im Git-Repository existiert dieser Ordner nicht und sollte es auch nicht.
+
+  - Aktualisierung der Synthesizernamen im Polyglot-Menü (ÄNDERUNG). Die Namen der Stimmen im Selectbox-Menü für bestehende Sprachen wurden aktualisiert: Italienisch hat jetzt auch Luca (Vocalizer), Finnisch hat jetzt auch Mikko (Vocalizer). Isländisch behielt den Namen ohne diakritische Zeichen (Gudrun anstelle von Gudrun mit Eth-Zeichen) für bessere Kompatibilität.
+
+  Funktionen unverändert aus Version 10
+
+  - Automatischer Konfigurationsdateigenerator golden_key.env in die Benutzeroberfläche integriert.
+  - Mehrbuchfähigkeit des Buchs der Welt (jedes Projekt hat eigene .md-Datei mit Weltregeln).
+  - Fehlerresistenter Mechanismus zur Wiederaufnahme der Übersetzung (Speicherung in .jsonl).
+  - Tag-Fixer im Regiemodus (ISO-Code-Injektion).
+
+  Neue Funktionen und Änderungen in Version 12.0 — Release Candidate
+
+  - Vollständiger Umbau der Benutzeroberfläche (ARCHITEKTONISCHE ÄNDERUNG). Die Anwendung ist nicht mehr ein webbasiertes Tool, das im Browser läuft. Die gesamte Benutzeroberfläche wurde von Grund auf als native Desktop-Anwendung auf Basis des wxPython-Frameworks neu geschrieben. Es gibt keinen lokalen Server mehr, keinen Browser, kein Terminalfenster, das im Hintergrund läuft — es gibt ein einziges, normales Programmfenster. Der Einstiegspunkt ist main.py.
+
+  - Navigationsleiste mit Tastenkombinationen (NEU). Werkzeuge werden über drei Schaltflächen in der Leiste (Regisseur, Polyglot, Konverter) oder über das Menü Werkzeuge umgeschaltet. Verfügbare Tastenkombinationen: Strg+0 (Startseite mit Systemprüfung), Strg+1 (Regisseur), Strg+2 (Polyglot), Strg+3 (Konverter). Das aktive Werkzeug ist visuell durch eine fettgedruckte Schaltfläche hervorgehoben.
+
+  - Vollständige Optimierung für Bildschirmleser von Grund auf (NVDA, VoiceOver). Jedes Widget hat einen klaren deutschen Zugänglichkeitsnamen. Der Fokus landet nach dem Wechsel des Werkzeugs automatisch auf der Modulbeschreibung — NVDA beginnt sofort, die neue Ansicht zu lesen. wx.MessageBox-Dialoge werden nativ vom Bildschirmleser ohne Tricks angekündigt. Die Tab-Reihenfolge ist logisch und konsistent in der gesamten Benutzeroberfläche. Historische Einschränkungen von Streamlit und dem React-Framework entfallen.
+
+  - Keine Firewall-Konfiguration (ÄNDERUNG). Die Eliminierung des lokalen Webservers bedeutet, dass die Windows-Firewall beim ersten Start kein Fenster mehr anzeigt, um um Erlaubnis für den Netzwerkzugriff zu bitten. Die Anwendung startet einfach.
+
+  - Native Dateiauswahldialoge (NEU). Die Module Polyglot und Konverter verfügen jetzt über eine Schaltfläche "Durchsuchen...", die den systemeigenen Dateiauswahldialog öffnet, anstatt den Pfad manuell einzugeben.
+
+  - Schutz des Kreativmodus (NEU). Im Regisseur kann der Arbeitsmodus (z.B. von Hörbuch zu Skript) nicht mehr versehentlich geändert werden, wenn der Speicher belegt ist — die Benutzeroberfläche blockiert das Umschalten auf den zweiten Schreibmodus, bis die Geschichte oder Zusammenfassung gelöscht ist. Der Brainstorming-Modus ist immer verfügbar.
+
+  - Schaltfläche für harten Reset im Regisseur (NEU). Eine neue Schaltfläche "Projekt schließen (Harter Reset)" ermöglicht es, das gesamte Projekt mit einem Klick zu löschen: Geschichte, Zusammenfassung, Buch der Welt und alle Zähler — ohne jedes Feld einzeln zurücksetzen zu müssen.
+
+  - Automatisches Laden des Kreativmodus (NEU). Beim Laden eines Projekts stellt die Anwendung automatisch den zuletzt verwendeten Arbeitsmodus (Skript oder Hörbuch) aus einer von der Anwendung verwalteten Metadatendatei wieder her. Dadurch stellt sich das RadioBox beim erneuten Öffnen des Projekts selbst ein — Sie müssen sich nicht merken, in welchem Modus Sie gearbeitet haben.
+
+  Funktionen unverändert aus Version 11.0
+
+  - Phonetische Akzente im Polyglot (Englisch, Französisch, Deutsch, Spanisch, Italienisch, Finnisch, Isländisch).
+  - Automatischer Konfigurationsdateigenerator golden_key.env in den Startbildschirm integriert.
+  - Mehrbuchfähigkeit des Buchs der Welt (jedes Projekt hat eigene .md-Datei).
+  - Fehlerresistenter Mechanismus zur Wiederaufnahme der Übersetzung (Speicherung in .jsonl).
+  - Tag-Fixer im Regiemodus (ISO-Code-Injektion).
+
+  - Alle KI-Funktionen: Brainstorming, Skript, Hörbuch, Plot-Akku, Unendlicher Speicher, Titelvergabe.
+
+  Neue Funktionen und Änderungen in Version 13.0 — Release Candidate
+
+  - Refaktorierung auf YAML — Akzente, Chiffren und Regiemodi in Textdateien (ARCHITEKTONISCHE ÄNDERUNG, die größte seit der Migration zu wxPython). Bis Version 12.0 waren alle phonetischen Regeln (Akzente) und kreativen Modi des Regisseurs (Brainstorming, Skript, Hörbuch, Titelvergabe in der Postproduktion) im Python-Code als Konstanten, Funktionen und feste Prompt-Strings „eingebettet", und die gesamte Kategorie der Chiffren/Textspiele existierte einfach nicht — sie werden zusammen mit der Refaktorierung in 13.0 eingeführt. In Version 13.0 liegt all dies in .yaml-Dateien im neuen Ordner `dictionaries/` — der Motor (`core_poliglota.py`, `core_rezyser.py`, `przepisy_rezysera.py`) lädt sie dynamisch beim Start. Praktischer Effekt: Das Hinzufügen eines neuen Akzents, einer neuen chiffrenbasierten Ersetzung oder das Ändern des Klangs eines Systemprompts für einen der Regiemodi erfordert keine Python-Kenntnisse — ein Texteditor genügt. Eine kurze Beschreibung für Endbenutzer befindet sich in `docs/dictionaries.de.txt` (im Release-Paket enthalten); die vollständige technische Dokumentation des Formats — in `dictionaries/README.md` (nur im Git-Repository, da die Release-Pakete .md-Dateien filtern).
+
+  - Regel-Manager — viertes Werkzeug in der Leiste (NEU, Strg+4). Visueller Explorer des Ordners `dictionaries/` mit einer Baumansicht der YAML-Dateien (native wx.TreeCtrl, volle NVDA-Unterstützung) und einem Satz von Aktionen: „In Texteditor öffnen", „Neue Regeldatei…" (Assistent mit Typauswahl: Akzent, Chiffre, Modus, neue Sprache), „Ausgewählte Datei duplizieren", „Datei löschen", „Baum aktualisieren". Für Fälle, die über einfache Ersetzungen hinausgehen (neue Basissprache, algorithmische Chiffre), generiert der Assistent einen fertigen Prompt für den AI-Chatbot — vollständige Erklärung im neuen SCHRITT 7b.
+
+  - Prompt des Architekten direkt im Regisseur-Panel (ÄNDERUNG A11y). Bisher existierte der Prompt für den externen Chatbot zur Erstellung des Buchs der Welt nur in dieser Anleitung — der Benutzer musste ihn aus einer Textdatei kopieren (was bei Bildschirmlesern problematisch sein kann, insbesondere bei deutschen Zeichen und Anführungszeichen). In Version 13.0 hat das Regisseur-Panel eine neue Schaltfläche „📖 Prompt des Architekten für AI…" (direkt unter „Buch dauerhaft speichern"), die ein natives Dialogfenster mit dem vollständigen Text des Prompts in einem READONLY-Feld sowie einer separaten Schaltfläche „In Zwischenablage kopieren" öffnet. Das A11y-Muster ist identisch mit dem für den Ergebnisdialog des Assistenten im Regel-Manager — NVDA liest sofort den gesamten Inhalt des Fensters ohne zusätzliche Konfiguration. Vollständige Beschreibung im aktualisierten SCHRITT 7.
+
+  - Russischer Akzent im Polyglot (NEU — achte europäische Sprache im Regiemodus-Menü). Zur Dropdown-Liste „Regiemodus / Akzente" wird die Option „Russisch (z.B. Milena / Irina / Yuri / Pavel)" hinzugefügt. Im Gegensatz zu den anderen Akzenten, die nur den polnischen Text auf lateinischer Ebene „verfälschen" (z.B. „sz" → „sh", „w" → „v"), führt der russische Akzent eine vollständige Transliteration des polnischen Textes in kyrillische Schrift durch — so haben russischsprachige TTS-Synthesizerstimmen (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") eine Grundlage, um die Wörter „auszusprechen". Die Zuordnung wurde um jodierte Vokale („ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю"), polnische Weichungen si/ci/ni/zi + Vokal (z.B. „ciocia" → „цёця") sowie spezielle russische Digraphen erweitert: „ść" / „szcz" → „щ", „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х".
+
+    Phonetischer Hinweis: Der Akzent ist keine akademische russische Transliteration (ISO 9, GOST, BGN/PCGN). Ziel ist es ausschließlich, den polnischen Text klanglich dem Russischen anzunähern — für die Sprachsynthese, nicht für eine ernsthafte Transliteration von Eigennamen. Für letztere Arbeit verwenden Sie dedizierte sprachwissenschaftliche Werkzeuge.
+
+    Sprachcode für die Ergebnisdatei: „ru" (ISO 639-1). NVDA mit aktivierter Option „Sprache automatisch wechseln, wenn unterstützt" schaltet sofort auf die russische Stimme um.
+
+  - Hinweis zu „ź": Im Russischen gibt es kein genaues Äquivalent zum polnischen „ź", daher normalisieren wir dieses Zeichen zu „ж" — ähnlich wie „ż". Einige nordrussische Dialekte und das Belarussische sprechen „ź" näher an „зь" aus, aber aus Sicht des Sprachsynthesizers ist der Unterschied vernachlässigbar. Sollte ein Linguist „зь" bevorzugen, kann er diese eine Regel in der Datei `dictionaries/pl/akcenty/rosyjski.yaml` selbst ändern — der Motor lädt YAMLs dynamisch, sodass keine Neukompilierung der Anwendung erforderlich ist.
+
+  - Erweiterte Navigationsleiste und Werkzeugmenü (ÄNDERUNG). Die Leiste hat jetzt eine vierte Schaltfläche — Regel-Manager — und das Menü „Werkzeuge" unterstützt den neuen Shortcut Strg+4. Die bisherigen Shortcuts (Strg+0 Startseite, Strg+1 Regisseur, Strg+2 Polyglot, Strg+3 Konverter) bleiben unverändert.
+
+  - Schaltfläche „Akzente des Regisseurs aus YAML aktualisieren" auf der Startseite (NEU). Nach dem Hinzufügen eines neuen Akzents durch den Regel-Manager (oder manueller Bearbeitung der YAML-Datei) lädt ein Klick auf diese Schaltfläche die Akzent-Wrapper im Polyglot- und Regisseur-Motor neu, sodass der neue Akzent im Menü und in der automatischen Akzenterkennung basierend auf den Charakter-Tags im Buch der Welt sichtbar ist. Polyglot erkennt YAMLs automatisch (ohne Aktualisierung), aber der Regisseur benötigt eine Regeneration der Wrapper — normalerweise muss die Anwendung nach der Aktualisierung neu gestartet werden.
+
+  Funktionen unverändert aus Version 12.0
+
+  - Native Desktop-GUI basierend auf wxPython (ohne Browser, ohne lokalen Server).
+  - Navigationsleiste mit Tastenkombinationen (jetzt Strg+0/1/2/3/4 — hinzugefügt Strg+4 für Regel-Manager).
+  - Volle Optimierung für Bildschirmleser (NVDA, VoiceOver) — deutsche Zugänglichkeitsnamen, korrekte Tab-Reihenfolge.
+  - Schutz des Kreativmodus vor versehentlichem Wechsel während der Arbeit.
+  - Harte Projektzurücksetzung mit einem Klick im Regisseur.
+  - Automatisches Laden des Kreativmodus aus der Projekt-Metadatendatei.
+  - Alle Akzente aus vorherigen Versionen (Englisch, Französisch, Deutsch, Spanisch, Italienisch, Finnisch, Isländisch) sowie Tag-Fixer.
+  - Alle KI-Funktionen: Brainstorming, Skript, Hörbuch, Plot-Akku, Unendlicher Speicher, Titelvergabe.

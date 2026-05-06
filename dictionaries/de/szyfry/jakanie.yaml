@@ -1,0 +1,26 @@
+# CHIFFRE: STOTTERN / DEFEKTER ROBOTER
+# Fügt Wiederholungen der ersten Buchstaben jedes Wortes mit Bindestrichen hinzu.
+
+id: jakanie
+etykieta: "Intensives Stottern / Defekter Roboter"
+opis: |
+  Für jedes Wort mit Länge >= `min_dlugosc_slowa` wird eine zufällige Anzahl
+  von Wiederholungen des ersten (oder der ersten zwei) Buchstaben erzeugt und
+  mit Bindestrichen vorangestellt: „Computer" → „Co-Co-Co-Computer", „Ich" → „Ich".
+
+  Wenn der zweite Buchstabe des Wortes ein Konsonant ist (nicht in der Zeichenkette
+  `samogloski`), umfasst das Stottern ZWEI Anfangsbuchstaben — klingt natürlicher
+  (z.B. „Straße" → „St-St-Straße").
+iso: de
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Algorithmus-Parameter
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Vokale — wenn der zweite Buchstabe des Wortes zu dieser Menge gehört,
+# wird nur der erste Buchstabe wiederholt. Andernfalls werden die ersten zwei wiederholt.
+samogloski: "aeiouäöüyAEIOUÄÖÜY"

@@ -66,15 +66,17 @@ from dataclasses import dataclass
 # ręcznie – uruchom "Odśwież akcenty Reżysera z YAML" w aplikacji.
 # <GENEROWANE_IMPORTY_AKCENTOW_START>
 from core_poliglota import (
-    akcent_islandzki,
-    akcent_polski,
+    akcent_wl,
     akcent_angielski,
-    akcent_rosyjski,
     akcent_francuski,
     akcent_niemiecki,
+    akcent_rosyjski,
     akcent_hiszpanski,
+    akcent_polski,
+    akcent_hiszp,
     akcent_wloski,
     akcent_finski,
+    akcent_islandzki,
 )
 # <GENEROWANE_IMPORTY_AKCENTOW_END>
 
@@ -218,15 +220,17 @@ def zastosuj_akcenty_uniwersalne(
     # dodaniu nowego pliku YAML w dictionaries/<język>/akcenty/.
     # <GENEROWANY_SLOWNIK_AKCENTOW_START>
     _AKCENT_FUNCS = {
-        "islandzki": akcent_islandzki,
-        "polski":    akcent_polski,
+        "wl":        akcent_wl,
         "angielski": akcent_angielski,
-        "rosyjski":  akcent_rosyjski,
         "francuski": akcent_francuski,
         "niemiecki": akcent_niemiecki,
+        "rosyjski":  akcent_rosyjski,
         "hiszpanski":akcent_hiszpanski,
+        "polski":    akcent_polski,
+        "hiszp":     akcent_hiszp,
         "wloski":    akcent_wloski,
         "finski":    akcent_finski,
+        "islandzki": akcent_islandzki,
     }
 # <GENEROWANY_SLOWNIK_AKCENTOW_END>
 

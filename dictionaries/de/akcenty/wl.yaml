@@ -1,0 +1,57 @@
+# ITALIENISCHER AKZENT (Deutsch → italienischer TTS)
+# Für Synthesizer: Elsa / Cosimo / ähnliche italienische TTS-Stimmen.
+
+id: wl
+etykieta: "Italienisch (z.B. Elsa / Cosimo)"
+opis: |
+  Passt deutschen Text für einen italienischen Sprachsynthesizer an.
+  Italienisches TTS liest lateinische Buchstaben nach italienischen Regeln.
+
+  Wichtigste Anpassungen:
+    - „sch" → „sc" (it. sc + e/i = /ʃ/, aber vor anderen Vokalen = /sk/;
+      wir vereinfachen zu sc)
+    - „tsch" → „ci" (it. ci + Vokal = /tʃ/)
+    - „ch" → „c" (it. c + a/o/u = /k/)
+    - „ei" → „ei" (bleibt — it. liest ei annähernd korrekt)
+    - „eu" → „eu" (bleibt)
+    - „ü" → „u" (it. hat kein /y/ → u)
+    - „ö" → „o" (it. hat kein /ø/ → o)
+    - „ä" → „e" (it. hat kein /ɛ/ separat → e)
+    - „ß" → „ss"
+    - „w" → „v" (it. TTS liest w als /v/ — korrekt!)
+    - „z" → „ts" (it. z ist /ts/ oder /dz/)
+    - „v" → „v" (bleibt — it. TTS liest v als /v/)
+iso: it
+kategoria: akcent
+kolejnosc: 30
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Trigramme zuerst ---
+  - { wzor: "tsch", zamiana: "ci"  }
+  - { wzor: "Tsch", zamiana: "Ci"  }
+  - { wzor: "TSch", zamiana: "CI"  }
+  # --- Digramme ---
+  - { wzor: "sch",  zamiana: "sc"  }
+  - { wzor: "Sch",  zamiana: "Sc"  }
+  - { wzor: "SCH",  zamiana: "SC"  }
+  - { wzor: "ch",   zamiana: "c"   }
+  - { wzor: "Ch",   zamiana: "C"   }
+  - { wzor: "CH",   zamiana: "C"   }
+  - { wzor: "ie",   zamiana: "i"   }
+  - { wzor: "Ie",   zamiana: "I"   }
+  # --- Umlaute ---
+  - { wzor: "ü",    zamiana: "u"   }
+  - { wzor: "Ü",    zamiana: "U"   }
+  - { wzor: "ö",    zamiana: "o"   }
+  - { wzor: "Ö",    zamiana: "O"   }
+  - { wzor: "ä",    zamiana: "e"   }
+  - { wzor: "Ä",    zamiana: "E"   }
+  - { wzor: "ß",    zamiana: "ss"  }
+  # --- Einzelne Konsonanten ---
+  - { wzor: "w",    zamiana: "v"   }
+  - { wzor: "W",    zamiana: "V"   }

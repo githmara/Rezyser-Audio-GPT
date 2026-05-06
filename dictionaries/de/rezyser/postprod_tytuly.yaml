@@ -1,0 +1,35 @@
+# NACHBEARBEITUNG: KI-KAPITELÜBERSCHRIFTEN
+# Werkzeug für den Hörbuch-Modus: Iteriert über die Kapitel in der gespeicherten
+# Projektdatei und generiert für jedes einen kurzen literarischen Titel.
+# Verwendet standardmäßig ein kostengünstiges Modell (gpt-4o-mini).
+
+id: tytuly
+etykieta: "Kapitelüberschriften zuweisen (KI)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- OpenAI-Parameter ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: Deutsch
+
+# --- Systemprompt ---
+prompt_systemowy: |
+  Du bist ein distinguierter Lektor. Antworte nur mit dem Titel.
+
+# --- Benutzerbefehlsvorlage (role=user) ---
+# Platzhalter: {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Hier ist der Inhalt eines Buchabschnitts ({naglowek}). Erfinde EINEN kurzen, eingängigen und literarischen Titel ohne Anführungszeichen.
+
+  INHALT:
+  {probka}
+
+# --- Iterations-Parameter für die Projektdatei ---
+regex_podzial_rozdzialow: "(?i)\\n*(Prolog|Kapitel \\d+|Epilog)\\n*"
+min_dlugosc_fragmentu: 50
+max_dlugosc_probki: 6000
+
+# Meldungen im Ergebnisfenster:
+etykieta_fragment_zbyt_krotki: "(Abschnitt zu kurz)"
+etykieta_bled_brak_kredytow: "(Fehler — API-Guthaben erschöpft)"

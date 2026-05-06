@@ -126,6 +126,7 @@ MAPA_JEZYKOW: dict[str, str] = {
     "ru": "rosyjski",
     "is": "islandzki",
     "it": "włoski",
+    "de": "niemiecki",
 }
 
 
@@ -173,6 +174,13 @@ ABBREV_BY_LANG: dict[str, list[tuple[str, str]]] = {
         ("m.a.",      "meðal annars"),
         ("u.þ.b.",    "um það bil"),
         ("o.s.frv.",  "og svo framvegis"),
+    ],
+    "de": [
+        ("z.B.",   "zum Beispiel"),
+        ("d.h.",   "das heißt"),
+        ("usw.",   "und so weiter"),
+        ("bzw.",   "beziehungsweise"),
+        ("ggf.",   "gegebenenfalls"),
     ],
 }
 

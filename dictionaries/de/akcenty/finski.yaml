@@ -1,0 +1,58 @@
+# FINNISCHER AKZENT (Deutsch → finnischer TTS)
+# Für Synthesizer: Satu / Mikko / Heidi / ähnliche finnische TTS-Stimmen.
+
+id: finski
+etykieta: "Finnisch (z.B. Satu / Mikko / Heidi)"
+opis: |
+  Passt deutschen Text für einen finnischen Sprachsynthesizer an.
+  Finnisches TTS kennt keine Stimmhaftigkeit bei Plosiven und Frikativen.
+
+  Wichtigste Anpassungen:
+    - „b" → „p", „d" → „t", „g" → „k" (finnisch stimmlos)
+    - „sch" → „s" (finnisch hat kein /ʃ/)
+    - „tsch" → „ts" (finnisch nächste Entsprechung)
+    - „ch" → „h" (finnisch hat kein /x/)
+    - „w" → „v" (dt. /v/ → fi. v)
+    - „v" → „f" oder „v" je nach Kontext
+    - Umlaute ä/ö bleiben (fi. Alphabet hat ä und ö!)
+    - „ü" → „y" (fi. hat y für /y/)
+    - „ei" → „ei" (fi. liest korrekt)
+    - „z" → „s" (finnisch hat kein /ts/)
+iso: fi
+kategoria: akcent
+kolejnosc: 90
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Trigramme zuerst ---
+  - { wzor: "tsch", zamiana: "ts"  }
+  - { wzor: "Tsch", zamiana: "Ts"  }
+  - { wzor: "TSch", zamiana: "TS"  }
+  # --- Digramme ---
+  - { wzor: "sch",  zamiana: "s"   }
+  - { wzor: "Sch",  zamiana: "S"   }
+  - { wzor: "SCH",  zamiana: "S"   }
+  - { wzor: "ch",   zamiana: "h"   }
+  - { wzor: "Ch",   zamiana: "H"   }
+  - { wzor: "CH",   zamiana: "H"   }
+  # --- Umlaute ---
+  - { wzor: "ü",    zamiana: "y"   }
+  - { wzor: "Ü",    zamiana: "Y"   }
+  - { wzor: "ß",    zamiana: "ss"  }
+  # ä und ö bleiben (fi. Alphabet enthält diese!)
+  # --- Stimmlose Plosive ---
+  - { wzor: "b",    zamiana: "p"   }
+  - { wzor: "B",    zamiana: "P"   }
+  - { wzor: "d",    zamiana: "t"   }
+  - { wzor: "D",    zamiana: "T"   }
+  - { wzor: "g",    zamiana: "k"   }
+  - { wzor: "G",    zamiana: "K"   }
+  # --- Einzelne Konsonanten ---
+  - { wzor: "w",    zamiana: "v"   }
+  - { wzor: "W",    zamiana: "V"   }
+  - { wzor: "z",    zamiana: "s"   }
+  - { wzor: "Z",    zamiana: "S"   }

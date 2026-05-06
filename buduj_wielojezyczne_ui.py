@@ -136,6 +136,7 @@ MAPA_JEZYKOW: dict[str, str] = {
     "ru": "rosyjski",
     "is": "islandzki",
     "it": "włoski",
+    "de": "niemiecki",
 }
 
 

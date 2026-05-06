@@ -1,0 +1,54 @@
+# RUSSISCHER AKZENT (Deutsch → russischer TTS)
+# Für Synthesizer: Irina / Pavel / ähnliche russische TTS-Stimmen.
+
+id: rosyjski
+etykieta: "Russisch (z.B. Irina / Pavel)"
+opis: |
+  Passt deutschen Text für einen russischen Sprachsynthesizer an.
+  Russisches TTS liest lateinische Buchstaben nach eigenem Regelwerk.
+
+  Wichtigste Anpassungen:
+    - „sch" → „sch" (russisches TTS liest /ʃ/ ähnlich)
+    - „tsch" → „tsch" (bleibt)
+    - „ch" → „h" (russisch hat kein /x/ im Lateinlesen → h)
+    - „w" → „w" (russisches TTS liest w als /v/ — gut!)
+    - „ei" → „ej" (russische Vokalstruktur)
+    - „eu" → „oj" (russische Vokalstruktur)
+    - „ü" → „ju" (russische Annäherung)
+    - „ö" → „jo" (russische Annäherung)
+    - „ä" → „je" (russische Annäherung)
+    - „ß" → „ss" (kein ß im Russischen)
+    - „z" → „z" (russisches TTS liest z als /z/ — gut!)
+    - „v" → „w" (damit russisches TTS /v/ liest)
+iso: ru
+kategoria: akcent
+kolejnosc: 60
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Umlaute (vor Digrammen, damit ü/ö/ä nicht mit ie/ei kollidieren) ---
+  - { wzor: "ü",    zamiana: "ju"  }
+  - { wzor: "Ü",    zamiana: "Ju"  }
+  - { wzor: "ö",    zamiana: "jo"  }
+  - { wzor: "Ö",    zamiana: "Jo"  }
+  - { wzor: "ä",    zamiana: "je"  }
+  - { wzor: "Ä",    zamiana: "Je"  }
+  - { wzor: "ß",    zamiana: "ss"  }
+  # --- Digramme ---
+  - { wzor: "ei",   zamiana: "ej"  }
+  - { wzor: "Ei",   zamiana: "Ej"  }
+  - { wzor: "EI",   zamiana: "EJ"  }
+  - { wzor: "eu",   zamiana: "oj"  }
+  - { wzor: "Eu",   zamiana: "Oj"  }
+  - { wzor: "ie",   zamiana: "i"   }
+  - { wzor: "Ie",   zamiana: "I"   }
+  - { wzor: "ch",   zamiana: "h"   }
+  - { wzor: "Ch",   zamiana: "H"   }
+  - { wzor: "CH",   zamiana: "H"   }
+  # --- Einzelne Konsonanten ---
+  - { wzor: "v",    zamiana: "w"   }
+  - { wzor: "V",    zamiana: "W"   }

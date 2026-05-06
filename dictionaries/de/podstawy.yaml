@@ -1,0 +1,143 @@
+# =============================================================================
+#  GRUNDLAGEN DER DEUTSCHEN SPRACHE
+# =============================================================================
+#
+#  Basisdatei für `dictionaries/de/`. Die Poliglota-Engine erfordert, dass
+#  jede Sprache diese Datei hat — ohne sie wird eine neue Sprache überhaupt
+#  nicht erkannt.
+#
+#  Struktur analog zu `dictionaries/pl/podstawy.yaml`. Das Feld
+#  `polskie_znaki` enthält trotz des historischen Namens ALLE diakritischen
+#  Zeichen, die vor der Anwendung von Chiffren oder Akzentregeln auf ASCII
+#  normalisiert werden müssen.
+#
+#  Besonderer Hinweis: „ß" wird NICHT in das `alfabet`-Feld aufgenommen,
+#  da es beim `.upper()`-Aufruf zu „SS" wird (2 Zeichen), was den
+#  Caesar-Chiffre-Index-Mechanismus zerstören würde. Stattdessen wird „ß"
+#  in `polskie_znaki` als „ss" transliteriert (wie in der Schweiz üblich).
+# =============================================================================
+
+id: podstawy
+jezyk: de
+# lingua-language-detector Enum (großgeschrieben, ohne Präfix).
+# Vollständige Liste: https://github.com/pemistahl/lingua-py
+lingua: GERMAN
+etykieta: "Deutsch – phonetische Grundlagen"
+opis: |
+  Basisregeln für die deutsche Sprache:
+    1. Normalisierung diakritischer Zeichen (`polskie_znaki`) — damit der
+       Caesar-Chiffre und die Akzent-Engines nur das deutsche Alphabet
+       aus 29 Buchstaben sehen (A–Z + Ä, Ö, Ü; ohne ß).
+    2. Deutsches Alphabet (29 Großbuchstaben, Umlaute am Ende) —
+       verwendet vom Caesar-Chiffre.
+
+# -----------------------------------------------------------------------------
+# Normalisierung diakritischer Zeichen. ß → ss (Schweizer Konvention),
+# Umlaute ä/ö/ü bleiben im Alphabet, werden aber auch für Akkzent-Engines
+# (usun_polskie_znaki: true) auf Basis-ASCII normalisiert.
+# -----------------------------------------------------------------------------
+polskie_znaki:
+  # -- ß → ss (rosnące przy .upper(): ß→SS — ZAKAZ w alfabet) --
+  - { wzor: "ß", zamiana: "ss" }
+  - { wzor: "ẞ", zamiana: "SS" }
+  # -- ä → a (dla akcent-engines z usun_polskie_znaki: true) --
+  - { wzor: "ä", zamiana: "a"  }
+  - { wzor: "Ä", zamiana: "A"  }
+  # -- ö → o --
+  - { wzor: "ö", zamiana: "o"  }
+  - { wzor: "Ö", zamiana: "O"  }
+  # -- ü → u --
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  # -- Polnische Zeichen → ASCII --
+  - { wzor: "ą", zamiana: "a"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ę", zamiana: "e"  }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ó", zamiana: "o"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ó", zamiana: "O"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  # -- Weitere europäische Diakritika → ASCII --
+  - { wzor: "á", zamiana: "a"  }
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "Á", zamiana: "A"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "A"  }
+  - { wzor: "æ", zamiana: "ae" }
+  - { wzor: "Æ", zamiana: "Ae" }
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  - { wzor: "ð", zamiana: "d"  }
+  - { wzor: "Ð", zamiana: "D"  }
+  - { wzor: "é", zamiana: "e"  }
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "É", zamiana: "E"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  - { wzor: "í", zamiana: "i"  }
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Í", zamiana: "I"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  - { wzor: "ñ", zamiana: "n"  }
+  - { wzor: "Ñ", zamiana: "N"  }
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  - { wzor: "þ", zamiana: "th" }
+  - { wzor: "Þ", zamiana: "Th" }
+  - { wzor: "ú", zamiana: "u"  }
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "Ú", zamiana: "U"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "Û", zamiana: "U"  }
+  - { wzor: "ý", zamiana: "y"  }
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ý", zamiana: "Y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
+
+# -----------------------------------------------------------------------------
+# Deutsches Alphabet — 29 Großbuchstaben (A–Z + Ä, Ö, Ü am Ende).
+# ß ist NICHT enthalten (wächst beim .upper(): ß→SS).
+# Verwendet vom Caesar-Chiffre.
+# -----------------------------------------------------------------------------
+alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"
+
+# -----------------------------------------------------------------------------
+# Trigger-Wörter des Akzent-Parsers in der Weltbibel (13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne erstellt aus dieser Liste eine
+# Regex, die Phrasen „<Wort> X" oder „X <Wort>" erkennt.
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "akzent"
+  - "aussprache"

@@ -1,0 +1,18 @@
+# TEXTBEREINIGUNG MIT ZAHLENNORMALISIERUNG
+# Standardvariante „Kein Akzent" — bereinigt nur den Text für den Screenreader.
+
+id: oczyszczenie
+etykieta: "Kein Akzent (Bereinigung MIT Zahlennormalisierung)"
+opis: |
+  Wendet keinen phonetischen Akzent an. Führt nur die Textbereinigung für
+  Sprachsynthesizer durch (entfernt Füllwörter wie „khh", Sternchen, Hashtags,
+  Punktfolgen) und wandelt Ziffern in Wörter um
+  (z.B. „123" → „einhundertdreiundzwanzig").
+iso: de
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

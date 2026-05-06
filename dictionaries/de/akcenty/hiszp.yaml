@@ -1,0 +1,60 @@
+# SPANISCHER AKZENT (Deutsch → spanischer TTS)
+# Für Synthesizer: Pablo / Helena / ähnliche spanische TTS-Stimmen.
+
+id: hiszp
+etykieta: "Spanisch (z.B. Pablo / Helena)"
+opis: |
+  Passt deutschen Text für einen spanischen Sprachsynthesizer an.
+  Spanisches TTS liest lateinische Buchstaben nach spanischen Regeln.
+
+  Wichtigste Anpassungen:
+    - „sch" → „sh" (spanisches TTS liest sh als /ʃ/ — besser als sch → /sk/)
+    - „tsch" → „ch" (spanisches TTS liest ch als /tʃ/)
+    - „ch" → „k" (dt. /x/ — span. j wäre /x/ aber Schreibweise unklar → k)
+    - „ei" → „ei" (bleibt — spanisch liest ei gut)
+    - „eu" → „eu" (bleibt)
+    - „ü" → „u" (span. hat kein /y/ → u)
+    - „ö" → „o" (span. hat kein /ø/ → o)
+    - „ä" → "e" (span. hat kein /ɛ/ → e)
+    - „ß" → „ss"
+    - „w" → „v" (span. /v/ ≈ /b/ — TTS liest beides ähnlich)
+    - „z" → „s" (span. TTS liest z als /s/ in Lateinamerika)
+    - „v" → „b" (span. v und b klingen gleich: /b/)
+iso: es
+kategoria: akcent
+kolejnosc: 80
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Trigramme zuerst ---
+  - { wzor: "tsch", zamiana: "ch"  }
+  - { wzor: "Tsch", zamiana: "Ch"  }
+  - { wzor: "TSch", zamiana: "CH"  }
+  # --- Digramme ---
+  - { wzor: "sch",  zamiana: "sh"  }
+  - { wzor: "Sch",  zamiana: "Sh"  }
+  - { wzor: "SCH",  zamiana: "SH"  }
+  - { wzor: "ch",   zamiana: "k"   }
+  - { wzor: "Ch",   zamiana: "K"   }
+  - { wzor: "CH",   zamiana: "K"   }
+  - { wzor: "ie",   zamiana: "i"   }
+  - { wzor: "Ie",   zamiana: "I"   }
+  # --- Umlaute ---
+  - { wzor: "ü",    zamiana: "u"   }
+  - { wzor: "Ü",    zamiana: "U"   }
+  - { wzor: "ö",    zamiana: "o"   }
+  - { wzor: "Ö",    zamiana: "O"   }
+  - { wzor: "ä",    zamiana: "e"   }
+  - { wzor: "Ä",    zamiana: "E"   }
+  - { wzor: "ß",    zamiana: "ss"  }
+  # --- Einzelne Konsonanten ---
+  - { wzor: "w",    zamiana: "v"   }
+  - { wzor: "W",    zamiana: "V"   }
+  - { wzor: "v",    zamiana: "b"   }
+  - { wzor: "V",    zamiana: "B"   }
+  - { wzor: "z",    zamiana: "s"   }
+  - { wzor: "Z",    zamiana: "S"   }

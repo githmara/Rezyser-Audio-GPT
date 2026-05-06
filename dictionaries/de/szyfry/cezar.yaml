@@ -1,0 +1,28 @@
+# CHIFFRE: CAESAR
+# Klassische Verschiebungsverschlüsselung, die jeden Buchstaben um N Positionen
+# im deutschen Alphabet (29 Buchstaben: A–Z + Ä, Ö, Ü) verschiebt.
+
+id: cezar
+etykieta: "Caesar-Chiffre (Verschiebung Alphabet DE)"
+opis: |
+  Klassischer Caesar-Chiffre: jeder Buchstabe wird um N Positionen
+  im deutschen Alphabet verschoben (ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ,
+  29 Zeichen, ohne Leerzeichen). Zeichen außerhalb des Alphabets
+  (Ziffern, Satzzeichen) bleiben unverändert.
+
+  Der Verschiebungswert wird vom Benutzer in der grafischen Oberfläche
+  eingegeben (Feld „Caesar-Verschiebung"). Der Wert 0 bedeutet
+  „zufällige Auswahl im Bereich 1..28".
+iso: de
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# Das Alphabet wird aus dictionaries/de/podstawy.yaml (Schlüssel: alfabet) geladen.
+# Für ein anderes Alphabet die folgende Zeile auskommentieren:
+# alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ"
+
+# Erlaubter Verschiebungsbereich in der GUI (SpinCtrl).
+# 29 Buchstaben → ±28 deckt alle unterschiedlichen Rotationen ab.
+min_przesuniecie: -28
+max_przesuniecie: 28

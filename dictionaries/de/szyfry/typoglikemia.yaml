@@ -1,0 +1,17 @@
+# CHIFFRE: TYPOGLYKÄMIE
+# Mischt die mittleren Buchstaben jedes Wortes (erster und letzter bleiben).
+
+id: typoglikemia
+etykieta: "Typoglykämie (Wortmitte durchgemischt)"
+opis: |
+  Psycholinguistisches Phänomen: Wenn der erste und letzte Buchstabe eines
+  Wortes korrekt sind, liest der Leser das Wort trotzdem flüssig, selbst
+  wenn die Mitte durchgemischt ist. Wörter kürzer als `min_dlugosc_slowa`
+  werden nicht verändert.
+iso: de
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Algorithmus-Parameter
+min_dlugosc_slowa: 4

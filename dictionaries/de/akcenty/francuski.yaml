@@ -1,0 +1,61 @@
+# FRANZÖSISCHER AKZENT (Deutsch → französischer TTS)
+# Für Synthesizer: Julie / Thomas / ähnliche französische TTS-Stimmen.
+
+id: francuski
+etykieta: "Französisch (z.B. Julie / Thomas)"
+opis: |
+  Passt deutschen Text für einen französischen Sprachsynthesizer an.
+  Französisches TTS liest bestimmte Konsonantenverbindungen anders als Deutsch.
+
+  Wichtigste Anpassungen:
+    - „sch" → „ch" (fr. /ʃ/ wird als ch geschrieben)
+    - „tsch" → „tch" (fr. /tʃ/ → tch)
+    - „ch" → „k" (dt. /x/ hat kein fr. Äquivalent, k ist am nächsten)
+    - „w" → „v" (dt. /v/ → fr. v korrekt)
+    - „ei" → „é" (dt. /aɪ/ → fr. Schreibweise)
+    - „eu" → „eu" (bleibt — fr. hat „eu"!)
+    - „ü" → „u" (dt. /y/ → fr. u ist korrekt: /y/)
+    - „ö" → „eu" (dt. /ø/ → fr. „eu" ist korrekt: /ø/)
+    - „ä" → „è" (dt. /ɛ/ → fr. è)
+    - „ß" → „ss" (kein ß im Französischen)
+    - „z" → „ts" (dt. /ts/ → fr. TTS liest ts besser als z)
+    - „v" → „v" (bleibt — fr. TTS liest v als /v/ korrekt)
+iso: fr
+kategoria: akcent
+kolejnosc: 50
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Trigramme zuerst ---
+  - { wzor: "tsch", zamiana: "tch"  }
+  - { wzor: "Tsch", zamiana: "Tch"  }
+  - { wzor: "TSch", zamiana: "TCH"  }
+  # --- Digramme ---
+  - { wzor: "sch",  zamiana: "ch"   }
+  - { wzor: "Sch",  zamiana: "Ch"   }
+  - { wzor: "SCH",  zamiana: "CH"   }
+  - { wzor: "ch",   zamiana: "k"    }
+  - { wzor: "Ch",   zamiana: "K"    }
+  - { wzor: "CH",   zamiana: "K"    }
+  - { wzor: "ei",   zamiana: "é"    }
+  - { wzor: "Ei",   zamiana: "É"    }
+  - { wzor: "EI",   zamiana: "É"    }
+  - { wzor: "ie",   zamiana: "i"    }
+  - { wzor: "Ie",   zamiana: "I"    }
+  # --- Umlaute ---
+  - { wzor: "ü",    zamiana: "u"    }
+  - { wzor: "Ü",    zamiana: "U"    }
+  - { wzor: "ö",    zamiana: "eu"   }
+  - { wzor: "Ö",    zamiana: "Eu"   }
+  - { wzor: "ä",    zamiana: "è"    }
+  - { wzor: "Ä",    zamiana: "È"    }
+  - { wzor: "ß",    zamiana: "ss"   }
+  # --- Einzelne Konsonanten ---
+  - { wzor: "w",    zamiana: "v"    }
+  - { wzor: "W",    zamiana: "V"    }
+  - { wzor: "z",    zamiana: "ts"   }
+  - { wzor: "Z",    zamiana: "Ts"   }

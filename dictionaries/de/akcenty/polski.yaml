@@ -1,0 +1,60 @@
+# POLNISCHER AKZENT (Deutsch → polnischer TTS)
+# Für Synthesizer: Microsoft Hedda / Stefan / ähnliche deutsche TTS-Stimmen.
+
+id: polski
+etykieta: "Polnisch (z.B. Hedda / Stefan)"
+opis: |
+  Passt deutschen Text für einen polnischen Sprachsynthesizer an.
+  Ersetzt deutsche Lautmuster durch polnische Äquivalente.
+
+  Wichtigste Anpassungen:
+    - „sch" → „sz" (dt. /ʃ/ → pl. Digraph sz)
+    - „tsch" → „cz" (dt. /tʃ/ → pl. cz)
+    - „ch" → „ch" (bleibt, pl. TTS liest es als /x/)
+    - „ei" → „aj" (dt. /aɪ/ → pl. Schreibweise aj)
+    - „au" → „au" (dt. /aʊ/ → pl. unverändert)
+    - „ü" → „y" (dt. /y/ → nächste pl. Entsprechung)
+    - „ö" → „e" (dt. /ø/ → pl. nächste Entsprechung)
+    - „ä" → „e" (dt. /ɛ/ → pl. e)
+    - „v" → „f" / „w" (je nach Position: vor Vokal → w, sonst → f)
+    - „w" → „v" (dt. /v/ → pl. TTS liest w als /v/)
+iso: pl
+kategoria: akcent
+kolejnosc: 70
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Trigramme zuerst ---
+  - { wzor: "tsch", zamiana: "cz"  }
+  - { wzor: "Tsch", zamiana: "Cz"  }
+  - { wzor: "TSch", zamiana: "CZ"  }
+  # --- Digramme ---
+  - { wzor: "sch",  zamiana: "sz"  }
+  - { wzor: "Sch",  zamiana: "Sz"  }
+  - { wzor: "SCH",  zamiana: "SZ"  }
+  - { wzor: "ei",   zamiana: "aj"  }
+  - { wzor: "Ei",   zamiana: "Aj"  }
+  - { wzor: "EI",   zamiana: "AJ"  }
+  - { wzor: "eu",   zamiana: "oj"  }
+  - { wzor: "Eu",   zamiana: "Oj"  }
+  - { wzor: "ie",   zamiana: "i"   }
+  - { wzor: "Ie",   zamiana: "I"   }
+  # --- Umlaute ---
+  - { wzor: "ü",    zamiana: "y"   }
+  - { wzor: "Ü",    zamiana: "Y"   }
+  - { wzor: "ö",    zamiana: "e"   }
+  - { wzor: "Ö",    zamiana: "E"   }
+  - { wzor: "ä",    zamiana: "e"   }
+  - { wzor: "Ä",    zamiana: "E"   }
+  - { wzor: "ß",    zamiana: "ss"  }
+  # --- Einzelne Konsonanten ---
+  - { wzor: "v",    zamiana: "f"   }
+  - { wzor: "V",    zamiana: "F"   }
+  - { wzor: "w",    zamiana: "v"   }
+  - { wzor: "W",    zamiana: "V"   }
+  - { wzor: "z",    zamiana: "ts"  }
+  - { wzor: "Z",    zamiana: "Ts"  }

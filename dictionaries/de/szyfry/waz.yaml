@@ -1,0 +1,25 @@
+# CHIFFRE: SCHLANGENTELEFON / SCHLANGENDIALEKT
+# Verlängert Zischlaute: jedes „s" oder „z" wird zu einem langen Zischen.
+# Inspiration: Snecko aus Slay The Spire.
+
+id: waz
+etykieta: "Schlangentelefon (Schlangendialekt, Zischlaute)"
+opis: |
+  Inspiriert von Snecko aus dem Spiel „Slay the Spire". Jedes Vorkommen von
+  „s" oder „z" (unabhängig von Groß-/Kleinschreibung) wird zufällig zu einem
+  Zischen der Länge `min_syk` bis `max_syk` Zeichen verlängert.
+
+  Hinweis: Der Trigraph „sch" wird nicht als Einheit behandelt — das einzelne
+  „s" wird verlängert, sodass „Schule" zu „ssssschule" wird (mit erhaltenem
+  „ch"). Das gibt dem Effekt einen besonders ausgeprägten Schlangencharakter.
+iso: de
+kategoria: szyfr
+kolejnosc: 30
+algorytm: waz
+
+# Algorithmus-Parameter
+min_syk: 4
+max_syk: 8
+
+# Regex, der die zu verlängernden Zeichen erfasst (case-insensitive).
+wzor_syku: "(?i)(s|z)"

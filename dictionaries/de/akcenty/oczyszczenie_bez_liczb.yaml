@@ -1,0 +1,19 @@
+# TEXTBEREINIGUNG OHNE ZAHLENNORMALISIERUNG
+# Variante für technische Texte (Daten, Codes, Nummerierungen), bei denen
+# Ziffern NICHT in Wörter umgewandelt werden sollen.
+
+id: oczyszczenie_bez_liczb
+etykieta: "Kein Akzent (Bereinigung OHNE Zahlennormalisierung)"
+opis: |
+  Wendet keinen phonetischen Akzent an. Führt die Textbereinigung für
+  Sprachsynthesizer durch, BEHÄLT aber Ziffern in ihrer ursprünglichen Form.
+  Verwende diese Option für technische Texte, bei denen „123" wichtiger ist
+  als „einhundertdreiundzwanzig".
+iso: de
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

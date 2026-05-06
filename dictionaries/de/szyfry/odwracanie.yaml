@@ -1,0 +1,46 @@
+# CHIFFRE: TEXTRÜCKWÄRTSER
+# Löst Abkürzungen auf und liest jeden Satz rückwärts.
+# Inspiration: eine Mission aus „The Traitors / Die Verräter".
+
+id: odwracanie
+etykieta: "Textrückwärtser (Rückwärtslesen mit Großschreibung)"
+opis: |
+  Löst zunächst die häufigsten deutschen Abkürzungen auf (z.B. → „zum Beispiel",
+  d.h. → „das heißt", usw. → „und so weiter" usw.). Dadurch klingt der
+  umgekehrte Satz noch verständlich, ohne absurde „.B.z" statt „z.B.".
+  Anschließend wird jeder Satz Zeichen für Zeichen umgekehrt, wobei das
+  abschließende Satzzeichen und der Großbuchstabe am Anfang erhalten bleiben.
+
+  Abkürzungsquelle: Standarddeutsche Abkürzungen nach Duden.
+iso: de
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# Abkürzungsauflösungen — REGEX-Muster
+# Reihenfolge: längere VOR kürzeren (bspw. vor bzw., d.h. vor d.)
+rozwiniecia:
+  - { wzor: '\bz\.?\s*[Bb]\.?,?\s',          zamiana: "zum Beispiel "     }
+  - { wzor: '\bz\.B\.?,?\s',                 zamiana: "zum Beispiel "     }
+  - { wzor: '\bZB\b',                         zamiana: "zum Beispiel"      }
+  - { wzor: '\bd\.?\s*[Hh]\.?,?\s',          zamiana: "das heißt "        }
+  - { wzor: '\bd\.h\.?,?\s',                  zamiana: "das heißt "        }
+  - { wzor: '\bu\.?\s*[Ss]\.?\s*[Ww]\.?,?\s', zamiana: "und so weiter "   }
+  - { wzor: '\busw\.?,?\s',                   zamiana: "und so weiter "    }
+  - { wzor: '\bb\.?\s*[Zz]\.?\s*[Ww]\.?,?\s', zamiana: "beziehungsweise " }
+  - { wzor: '\bbzw\.?,?\s',                   zamiana: "beziehungsweise "  }
+  - { wzor: '\bg\.?\s*[Gg]\.?\s*[Ff]\.?,?\s', zamiana: "gegebenenfalls "  }
+  - { wzor: '\bggf\.?,?\s',                   zamiana: "gegebenenfalls "   }
+  - { wzor: '\bbspw\.?,?\s',                  zamiana: "beispielsweise "   }
+  - { wzor: '\bu\.?\s*[Aa]\.?,?\s',           zamiana: "unter anderem "    }
+  - { wzor: '\bu\.a\.?,?\s',                  zamiana: "unter anderem "    }
+  - { wzor: '\bu\.?\s*[Uu]\.?,?\s',           zamiana: "und ähnliche "     }
+  - { wzor: '\betc\.?,?\s',                   zamiana: "et cetera "        }
+  - { wzor: '\bDr\.?\s',                      zamiana: "Doktor "           }
+  - { wzor: '\bProf\.?\s',                    zamiana: "Professor "        }
+  - { wzor: '\bHr\.?\s',                      zamiana: "Herr "             }
+  - { wzor: '\bFr\.?\s',                      zamiana: "Frau "             }
+  - { wzor: '\bNr\.?\s',                      zamiana: "Nummer "           }
+  - { wzor: '\bAbb\.?\s',                     zamiana: "Abbildung "        }
+  - { wzor: '\bKap\.?\s',                     zamiana: "Kapitel "          }
+  - { wzor: '\bS\.?\s',                       zamiana: "Seite "            }

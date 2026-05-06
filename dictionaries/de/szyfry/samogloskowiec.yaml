@@ -1,0 +1,29 @@
+# CHIFFRE: VOKALOID
+# Ersetzt jeden Vokal durch 'o' (oder 'O').
+
+id: samogloskowiec
+etykieta: "Vokaloid (Alles hallt wie 'O')"
+opis: |
+  Effekt „wohin man schaut — nur O". Für das Deutsche umfasst der Algorithmus
+  neben den Grundvokalen (a, e, i, o, u) auch die Umlaute (ä, ö, ü) und das
+  vokalisierte y: jeder Vokal wird durch 'o' (oder 'O') ersetzt.
+
+  Hinweis: Deutsche Diphthonge ('ei', 'au', 'eu', 'äu') kollabieren zu 'oo'.
+  Dies ist beabsichtigt — das Ziel der Chiffre ist der komische Effekt,
+  nicht phonetische Präzision.
+iso: de
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# Phasen 1 und 2 (polnische Erweichung) — absichtlich leer.
+# Der Motor akzeptiert leere Listen ohne Fehler.
+zmiekszenia_przed_samogloska: []
+zmiekszenia_przed_spolgloska: []
+
+# Phase 3: Vokalersetzung.
+# `samogloski_*` sind Zeichenketten für die Zeichenklassen der Motor-Regex.
+samogloski_male:             "aeiouäöüy"
+samogloski_wielkie:          "AEIOUÄÖÜY"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"

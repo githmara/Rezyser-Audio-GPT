@@ -1,0 +1,25 @@
+# TAG-REPARATEUR (Sondermodus)
+# Verändert den Inhalt nicht — injiziert nur den ISO-Sprachcode in die Ausgabedatei.
+
+id: naprawiacz_tagow
+etykieta: "🔧 Tag-Reparateur (Nur ISO-Code-Injektion)"
+opis: |
+  Dieser „Akzent" verändert weder den Textinhalt noch dessen Phonetik.
+  Er injiziert nur den ISO-Sprachcode in die Ausgabedatei:
+    - HTML: lang="..."-Attribut im <html>-Element
+    - DOCX: <w:lang w:val="..."/>-Element für jeden Textabschnitt
+  Dadurch wechselt der Screenreader (NVDA/JAWS) korrekt zur richtigen
+  Sprache und Synthesizer-Stimme.
+
+  Der ISO-Code wird manuell in der GUI (Feld „ISO-Code") eingegeben,
+  nicht aus dieser Datei — daher ist der `iso`-Wert hier leer.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Sondermodus — führt keine Textverarbeitungsphase aus.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

@@ -1,0 +1,59 @@
+# ISLÄNDISCHER AKZENT (Deutsch → isländischer TTS)
+# Für Synthesizer: Dora / Karl / ähnliche isländische TTS-Stimmen.
+
+id: islandzki
+etykieta: "Isländisch (z.B. Dora / Karl)"
+opis: |
+  Passt deutschen Text für einen isländischen Sprachsynthesizer an.
+  Isländisches TTS kennt Þ/þ (th), Ð/ð (th/dh) und behandelt Konsonanten
+  anders als Deutsch.
+
+  Wichtigste Anpassungen:
+    - „sch" → „sk" (is. /sk/ ist das nächste)
+    - „tsch" → „tsk" (is. Annäherung)
+    - „ch" → „k" (is. hat kein /x/ systematisch)
+    - „ei" → „ei" (is. liest ei als /eɪ/ — gut!)
+    - „eu" → „öy" (is. Annäherung für /ɔɪ/)
+    - „ü" → „y" (is. hat y für /ɪ/)
+    - „ö" → „ö" (is. hat ö!)
+    - „ä" → „æ" (is. hat æ für /aɪ/ — nächste Entsprechung)
+    - „ß" → „ss"
+    - „w" → „v" (is. TTS liest v als /v/)
+    - „z" → „s" (is. TTS liest z als /s/)
+iso: is
+kategoria: akcent
+kolejnosc: 100
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Trigramme zuerst ---
+  - { wzor: "tsch", zamiana: "tsk"  }
+  - { wzor: "Tsch", zamiana: "Tsk"  }
+  - { wzor: "TSch", zamiana: "TSK"  }
+  # --- Digramme ---
+  - { wzor: "sch",  zamiana: "sk"   }
+  - { wzor: "Sch",  zamiana: "Sk"   }
+  - { wzor: "SCH",  zamiana: "SK"   }
+  - { wzor: "ch",   zamiana: "k"    }
+  - { wzor: "Ch",   zamiana: "K"    }
+  - { wzor: "CH",   zamiana: "K"    }
+  - { wzor: "eu",   zamiana: "öy"   }
+  - { wzor: "Eu",   zamiana: "Öy"   }
+  - { wzor: "ie",   zamiana: "i"    }
+  - { wzor: "Ie",   zamiana: "I"    }
+  # --- Umlaute ---
+  - { wzor: "ü",    zamiana: "y"    }
+  - { wzor: "Ü",    zamiana: "Y"    }
+  - { wzor: "ä",    zamiana: "æ"    }
+  - { wzor: "Ä",    zamiana: "Æ"    }
+  - { wzor: "ß",    zamiana: "ss"   }
+  # ö bleibt (is. hat ö!)
+  # --- Einzelne Konsonanten ---
+  - { wzor: "w",    zamiana: "v"    }
+  - { wzor: "W",    zamiana: "V"    }
+  - { wzor: "z",    zamiana: "s"    }
+  - { wzor: "Z",    zamiana: "S"    }

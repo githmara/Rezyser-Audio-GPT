@@ -1,0 +1,63 @@
+# ENGLISCHER AKZENT (Deutsch → englischer TTS)
+# Für Synthesizer: David / Zira / Samantha / Hazel (englische TTS-Stimmen).
+
+id: angielski
+etykieta: "Englisch (z.B. David / Zira / Samantha)"
+opis: |
+  Passt deutschen Text für einen englischen Sprachsynthesizer an.
+  Hauptanpassungen:
+
+  Problematische deutsche Laute für englisches TTS:
+    - „sch" → „sh" (dt. /ʃ/ — englisches TTS liest sch als /sk/)
+    - „ch" → „kh" (dt. /x/ — englisches TTS liest ch als /tʃ/)
+    - „ei" → „eye" oder „ai" (dt. /aɪ/)
+    - „eu" → „oy" (dt. /ɔɪ/)
+    - „ü" → „ue" (dt. /y/ — englisches TTS kennt kein y-Laut)
+    - „ö" → „oe" (dt. /ø/)
+    - „ä" → „ae" (dt. /ɛ/)
+    - „w" → „v" (dt. /v/ — englisches TTS liest w als /w/)
+    - „z" → „ts" (dt. /ts/ — englisches TTS liest z als /z/)
+    - „v" → „f" (dt. /f/ — englisches TTS liest v als /v/)
+iso: en
+kategoria: akcent
+kolejnosc: 40
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Trigramme zuerst ---
+  - { wzor: "tsch", zamiana: "ch"  }
+  - { wzor: "Tsch", zamiana: "Ch"  }
+  - { wzor: "TSch", zamiana: "CH"  }
+  # --- Digramme ---
+  - { wzor: "sch",  zamiana: "sh"  }
+  - { wzor: "Sch",  zamiana: "Sh"  }
+  - { wzor: "SCH",  zamiana: "SH"  }
+  - { wzor: "ch",   zamiana: "kh"  }
+  - { wzor: "Ch",   zamiana: "Kh"  }
+  - { wzor: "CH",   zamiana: "KH"  }
+  - { wzor: "ei",   zamiana: "ai"  }
+  - { wzor: "Ei",   zamiana: "Ai"  }
+  - { wzor: "EI",   zamiana: "AI"  }
+  - { wzor: "eu",   zamiana: "oy"  }
+  - { wzor: "Eu",   zamiana: "Oy"  }
+  - { wzor: "ie",   zamiana: "ee"  }
+  - { wzor: "Ie",   zamiana: "Ee"  }
+  # --- Umlaute ---
+  - { wzor: "ü",    zamiana: "ue"  }
+  - { wzor: "Ü",    zamiana: "Ue"  }
+  - { wzor: "ö",    zamiana: "oe"  }
+  - { wzor: "Ö",    zamiana: "Oe"  }
+  - { wzor: "ä",    zamiana: "ae"  }
+  - { wzor: "Ä",    zamiana: "Ae"  }
+  - { wzor: "ß",    zamiana: "ss"  }
+  # --- Einzelne Konsonanten ---
+  - { wzor: "w",    zamiana: "v"   }
+  - { wzor: "W",    zamiana: "V"   }
+  - { wzor: "v",    zamiana: "f"   }
+  - { wzor: "V",    zamiana: "F"   }
+  - { wzor: "z",    zamiana: "ts"  }
+  - { wzor: "Z",    zamiana: "Ts"  }
