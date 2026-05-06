@@ -163,17 +163,17 @@ trzeba by dopisać regexy od zera. Wstępne podpowiedzi:
   - [ ] `p.` → `page`
   - [ ] `cf.` → `confer`
 
-- [ ] **Niemiecki (`de`)** – typowe skrótowce:
-  - [ ] `z. B.` → `zum Beispiel`
-  - [ ] `d. h.` → `das heißt`
-  - [ ] `u. a.` → `unter anderem`
-  - [ ] `usw.` → `und so weiter`
-  - [ ] `u. Ä.` → `und Ähnliches`
-  - [ ] `bzw.` → `beziehungsweise`
-  - [ ] `Hr.` / `Fr.` → `Herr` / `Frau`
-  - [ ] `Dr.` / `Prof.` → `Doktor` / `Professor`
-  - [ ] `Str.` → `Straße`
-  - [ ] `S.` / `Nr.` → `Seite` / `Nummer`
+- [x] **Niemecki (`de`)** – wdrożone w 13.8 (paczka kompletna: 8 akcentów + 6 szyfrów + 4 reżyserów + GUI):
+  - [x] `z.B.` → `zum Beispiel`
+  - [x] `d.h.` → `das heißt`
+  - [x] `u.a.` → `unter anderem`
+  - [x] `usw.` → `und so weiter`
+  - [x] `bzw.` → `beziehungsweise`
+  - [x] `ggf.` → `gegebenenfalls`
+  - [x] `bspw.` → `beispielsweise`
+  - [x] `Hr.` / `Fr.` → `Herr` / `Frau`
+  - [x] `Dr.` / `Prof.` → `Doktor` / `Professor`
+  - [x] `Nr.` / `S.` / `Abb.` / `Kap.` → `Nummer` / `Seite` / `Abbildung` / `Kapitel`
 
 - [ ] **Hiszpański (`es`)** – typowe skrótowce:
   - [ ] `p. ej.` → `por ejemplo`

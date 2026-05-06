@@ -1,6 +1,45 @@
-# Release Notes — Reżyser Audio GPT 13.7 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.8 „Wersja Wydawnicza"
 
-*Minor: Italiano dołącza jako szósty pełnoprawny język bazowy (6 szyfrów, 4 reżyserów, 8 akcentów).*
+*Minor: Deutsch dołącza jako siódmy pełnoprawny język bazowy; refaktor Kreatora nowej reguły w Managerze.*
+
+---
+
+## 13.8 — minor release (motyw przewodni: język bazowy DE + refaktor Managera Reguł)
+
+*Punkt wyjścia: V13.7 (637281f) → commit Task1 + commit docs + WIP DE + commit docs DE + commit build + commit release → V13.8.*
+
+### TL;DR
+
+13.8 zamyka dwie linie pracy: **pełną paczkę językową Deutsch** (`dictionaries/de/`) oraz **refaktor kreatora nowej reguły** w Managerze Reguł (m.in. przycisk Anuluj przez i18n, ukryte pole ISO dla nowych języków bazowych). Bonus infrastrukturalny: `build_release.py` teraz automatycznie wykrywa języki bazowe i wstrzykuje je do sekcji `[Languages]` skryptu Inno Setup — bez ręcznej edycji `installer.iss` przy każdym nowym języku.
+
+### Co nowego dla użytkownika końcowego
+
+#### Manager Reguł — Kreator nowej reguły
+- **Przycisk „Anuluj"** jest teraz tłumaczony przez i18n (wcześniej zawsze po polsku).
+- **Pole „Identyfikator ISO"** jest ukryte przy tworzeniu nowego języka bazowego (było widoczne, ale ignorowane — mylące).
+- **Etykieta i hint pola Etykieta** zmieniają się dynamicznie w zależności od wybranego typu reguły: dla nowego języka bazowego wyświetlają podpowiedź „Nazwa języka (ojczyście lub po angielsku)", np. „Deutsch, Finnish".
+- `manager_regul_szablony.py`: reguła 0 w prompcie AI wymusza angielską nazwę enuma `lingua` (zapobiega błędowi `lingua: DEUTSCH` zamiast `lingua: GERMAN`); sekcja `uwagi` informuje teraz o folderze `gui/` i skrypcie `buduj_wielojezyczne_ui.py`.
+
+#### Nowy język bazowy: Deutsch (`de`)
+Siódmy pełnoprawny język bazowy. Kompletna paczka `dictionaries/de/`:
+
+- **6 szyfrów**: Cezar (alfabet 29-literowy ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ, bez ß — `ß.upper()=="SS"` łamałoby indeksy), jakanie (samogłoski `aeiouäöüy`), odwracanie (24 wzorce skrótowców: `z.B.`, `d.h.`, `usw.`, `bzw.`, `ggf.`, `bspw.`, `u.a.`, `Dr.`, `Prof.`, `Hr.`, `Fr.` i in.), samogłoskowiec, typoglikemia, wąż.
+
+- **4 tryby Reżysera AI** po niemiecku: Burza Mózgów, Skrypt (Hörspiel/Foley), Audiobook, Postprod. Słowa-wyzwalacze: `fasse zusammen`, `Zusammenfassung`, `zusammenfassen`, `Überblick`. Postprod rozpoznaje nagłówki `Prolog|Kapitel \d+|Epilog`.
+
+- **11 plików akcenty/**: 8 akcentów fonetycznych obcojęzycznych + 3 narzędzia czyszczenia. Akcent angielski: `v`→`f` (DE-TTS czyta `v` jako /f/!); akcent rosyjski: pełna transliteracja cyrylicka z obsługą digrafów `sch`→`ш`, `tsch`→`ч`, `ch`→`х`.
+
+### Pod maską
+
+- `dictionaries/de/podstawy.yaml`: `lingua: GERMAN`, alfabet 29-literowy, tabela `polskie_znaki` z mapowaniem umlauts (`ä`→`a`, `ö`→`o`, `ü`→`u`, `ß`→`ss`) i wszystkich europejskich diakrytyków.
+- `core_poliglota.py` + `core_rezyser.py`: zaktualizowane przez `odswiez_rezysera.py` — docstringi wrapperów `akcent_*` i słownik `_AKCENT_FUNCS` znają teraz DE.
+- `buduj_wielojezyczne_ui.py`: `--klucz` przyjmuje listę oddzieloną przecinkami (`kreator_jezyk_bazowy_etykieta_label,kreator_blad_nazwa_jezyka`) — chirurgiczny update wielu kluczy naraz bez re-tłumaczenia całego pliku.
+- `build_release.py`: `shutil.which("iscc")` + `zbierz_jezyki_bazowe()` + `INNO_LANG_MAP` → sekcja `[Languages]` generowana automatycznie z `dictionaries/*/podstawy.yaml`; `installer.iss` nie wymaga już ręcznej edycji.
+- `dictionaries/de/gui/dokumentacja/`: szablony `dictionaries.yaml` i `manual.yaml` po niemiecku (ręcznie poprawione po nieudanym auto-tłumaczeniu). Wygenerowane: `docs/dictionaries.de.txt`, `docs/manual.de.txt`.
+
+### Breaking changes
+
+Brak.
 
 ---
 
