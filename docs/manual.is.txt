@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.7 – Útgáfuútgáfa)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 13.8 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærasett gerir þér kleift að skrifa, skipuleggja, formatta og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Það hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálesurum (NVDA).
 

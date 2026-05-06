@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida Completa (Versione 13.7 – Versione di Pubblicazione)
+Manuale del Regista Audio AI - Guida Completa (Versione 13.8 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente di scrivere, pianificare, formattare e tradurre automaticamente sceneggiature per radiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori locali di lettori di schermo (NVDA).
 

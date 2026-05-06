@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Komplettanleitung (Version 13.7 – Veröffentlichungsversion)
+Podręcznik Reżysera Audio AI - Komplettanleitung (Version 13.8 – Veröffentlichungsversion)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
