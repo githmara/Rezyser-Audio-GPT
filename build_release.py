@@ -47,15 +47,63 @@ if sys.platform == "win32":
 
 SCIEZKA_VERSION = os.path.join(os.path.dirname(__file__), "VERSION")
 
-# Mapowanie kodów języków na nazwy i pliki .isl Inno Setup.
-# Języki bez wsparcia (np. islandzki) są pomijane przy buildzie z ostrzeżeniem.
+# Mapowanie kodów ISO języków na wpisy Inno Setupa (nazwa + plik .isl).
+#
+# UWAGA: Ta mapa to lustro listy języków OFICJALNIE shippowanych z Inno Setup 6
+# (29 paczek w `compiler:Languages\\` + angielski w `compiler:Default.isl`),
+# nie listy języków naszego projektu. Pliki .isl należą do instalacji Inno
+# Setupa, więc ich nazwy są stałe niezależnie od tego, które języki ma
+# `dictionaries/`. Wniosek praktyczny: dodanie nowego języka bazowego do
+# `dictionaries/<kod>/` NIE wymaga edycji tej mapy, dopóki ten język ma
+# oficjalną paczkę Inno Setupa. Mapa jest pre-populowana, więc fr/es/de/ja/ko/...
+# działają out-of-the-box.
+#
+# Świadomie pomijamy paczki NIEOFICJALNE z https://jrsoftware.org/files/istrans/
+# (np. Icelandic, Esperanto, Estonian, SerbianCyrillic, SerbianLatin). Mają różny
+# poziom utrzymania (Icelandic ostatni update 2020), więc deweloperzy musieliby
+# je doinstalowywać ręcznie — a to przeczy idei "działa po świeżej instalacji
+# Inno Setupa". Jeśli kiedyś potrzebny będzie nieoficjalny język, dopisać go tu
+# z komentarzem "[unofficial]" i zadbać o instrukcję pobrania w docs.
+#
+# Fallback "skip with warning" obsługuje dwa scenariusze:
+#   1. Język spoza puli Inno Setupa (np. esperanto bez ręcznej paczki) — kod
+#      nieobecny w mapie.
+#   2. Plik .isl jest w mapie, ale nie istnieje w instalacji u dewelopera
+#      (bardzo stara wersja Inno Setupa albo własnoręcznie usunięta paczka).
+#      Sprawdzane runtime przez `buduj_wpisy_inno` przed przekazaniem do iscc,
+#      żeby nie dostać kryptycznego błędu Windows "nie można odnaleźć
+#      określonego pliku" z głębi kompilatora.
 INNO_LANG_MAP: dict[str, tuple[str, str]] = {
-    "en": ("english",  "compiler:Default.isl"),
-    "pl": ("polish",   "compiler:Languages\\Polish.isl"),
-    "fi": ("finnish",  "compiler:Languages\\Finnish.isl"),
-    "ru": ("russian",  "compiler:Languages\\Russian.isl"),
-    "it": ("italian",  "compiler:Languages\\Italian.isl"),
-    "de": ("german",   "compiler:Languages\\German.isl"),
+    "en":    ("english",             "compiler:Default.isl"),
+    "ar":    ("arabic",              "compiler:Languages\\Arabic.isl"),
+    "bg":    ("bulgarian",           "compiler:Languages\\Bulgarian.isl"),
+    "ca":    ("catalan",             "compiler:Languages\\Catalan.isl"),
+    "co":    ("corsican",            "compiler:Languages\\Corsican.isl"),
+    "cs":    ("czech",               "compiler:Languages\\Czech.isl"),
+    "da":    ("danish",              "compiler:Languages\\Danish.isl"),
+    "de":    ("german",              "compiler:Languages\\German.isl"),
+    "es":    ("spanish",             "compiler:Languages\\Spanish.isl"),
+    "fi":    ("finnish",             "compiler:Languages\\Finnish.isl"),
+    "fr":    ("french",              "compiler:Languages\\French.isl"),
+    "he":    ("hebrew",              "compiler:Languages\\Hebrew.isl"),
+    "hu":    ("hungarian",           "compiler:Languages\\Hungarian.isl"),
+    "hy":    ("armenian",            "compiler:Languages\\Armenian.isl"),
+    "it":    ("italian",             "compiler:Languages\\Italian.isl"),
+    "ja":    ("japanese",            "compiler:Languages\\Japanese.isl"),
+    "ko":    ("korean",              "compiler:Languages\\Korean.isl"),
+    "nb":    ("norwegian",           "compiler:Languages\\Norwegian.isl"),
+    "nl":    ("dutch",               "compiler:Languages\\Dutch.isl"),
+    "pl":    ("polish",              "compiler:Languages\\Polish.isl"),
+    "pt":    ("portuguese",          "compiler:Languages\\Portuguese.isl"),
+    "pt-br": ("brazilianportuguese", "compiler:Languages\\BrazilianPortuguese.isl"),
+    "ru":    ("russian",             "compiler:Languages\\Russian.isl"),
+    "sk":    ("slovak",              "compiler:Languages\\Slovak.isl"),
+    "sl":    ("slovenian",           "compiler:Languages\\Slovenian.isl"),
+    "sv":    ("swedish",             "compiler:Languages\\Swedish.isl"),
+    "ta":    ("tamil",               "compiler:Languages\\Tamil.isl"),
+    "th":    ("thai",                "compiler:Languages\\Thai.isl"),
+    "tr":    ("turkish",             "compiler:Languages\\Turkish.isl"),
+    "uk":    ("ukrainian",           "compiler:Languages\\Ukrainian.isl"),
 }
 
 
@@ -85,20 +133,20 @@ def odczytaj_wersje() -> str:
     """
     if not os.path.exists(SCIEZKA_VERSION):
         raise RuntimeError(
-            f"Nie znaleziono pliku VERSION w {SCIEZKA_VERSION}. "
-            "Od 13.4 to jedyne źródło prawdy dla numeru wersji — "
-            "sprawdź, czy plik istnieje w roocie projektu."
+            f"VERSION file not found at {SCIEZKA_VERSION}. "
+            "Since 13.4 it's the single source of truth for the version number — "
+            "make sure the file exists in the repo root."
         )
     try:
         with open(SCIEZKA_VERSION, "r", encoding="utf-8") as fh:
             wartosc = fh.read().strip()
     except OSError as exc:
-        raise RuntimeError(f"Nie udało się odczytać {SCIEZKA_VERSION}: {exc}") from exc
+        raise RuntimeError(f"Failed to read {SCIEZKA_VERSION}: {exc}") from exc
 
     if not wartosc:
         raise RuntimeError(
-            f"Plik {SCIEZKA_VERSION} jest pusty. Wpisz numer wersji "
-            "(np. 13.4 albo 13.4-WIP)."
+            f"{SCIEZKA_VERSION} is empty. Write the version number into it "
+            "(e.g. 13.4 or 13.4-WIP)."
         )
     return wartosc
 
@@ -126,6 +174,37 @@ def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
         print(f"  (c) Delete {nazwa_zip} on purpose if you want to rebuild it "
               "from the current state of the repo.")
         sys.exit(1)
+
+
+def buduj_wpisy_inno(kody: list[str], katalog_inno: Path) -> list[tuple[str, str]]:
+    """Mapuje kody języków bazowych na wpisy bloku ``[Languages]`` Inno Setupa.
+
+    Pomija języki nieobecne w INNO_LANG_MAP (Inno Setup nie ma oficjalnej
+    paczki — np. islandzki, esperanto, estoński; mapa świadomie ich nie
+    zawiera, patrz komentarz przy INNO_LANG_MAP) oraz te, których plik ``.isl``
+    nie istnieje w lokalnej instalacji (bardzo stara wersja Inno Setupa albo
+    własnoręcznie usunięta paczka). Sprawdzanie runtime, żeby zamiast
+    kryptycznego błędu Windows o nieznalezionym pliku dostać czytelny
+    ``⚠ Skipping language``. Angielski leci pierwszy, żeby Inno Setup wybrał
+    go jako fallback default.
+    """
+    wpisy: list[tuple[str, str]] = []
+    kolejnosc = (["en"] if "en" in kody else []) + [k for k in kody if k != "en"]
+    for kod in kolejnosc:
+        if kod not in INNO_LANG_MAP:
+            print(f"   ⚠ Skipping language '{kod}': not supported by Inno Setup.")
+            continue
+        nazwa, plik = INNO_LANG_MAP[kod]
+        relatywna = plik.removeprefix("compiler:").replace("\\", "/")
+        if not (katalog_inno / relatywna).exists():
+            nazwa_pliku = relatywna.rsplit("/", 1)[-1]
+            print(f"   ⚠ Skipping language '{kod}': '{nazwa_pliku}' missing in "
+                  f"Inno Setup install ({katalog_inno}).")
+            print("     → Update Inno Setup or grab the .isl from "
+                  "https://jrsoftware.org/files/istrans/")
+            continue
+        wpisy.append((nazwa, plik))
+    return wpisy
 
 
 
@@ -274,18 +353,12 @@ def main() -> None:
         sys.exit(1)
 
     # Collect base language codes and map them to Inno Setup .isl entries.
+    # `katalog_inno` derives from iscc_exe (it sits in the Inno Setup install
+    # root) — we use it to verify each .isl file is actually present before
+    # handing the path to the compiler.
+    katalog_inno = Path(iscc_exe).parent
     kody = zbierz_jezyki_bazowe()
-    # English must be first so Inno Setup picks it as default when no match.
-    wpisy: list[tuple[str, str]] = []
-    if "en" in kody:
-        wpisy.append(INNO_LANG_MAP["en"])
-    for kod in kody:
-        if kod == "en":
-            continue
-        if kod in INNO_LANG_MAP:
-            wpisy.append(INNO_LANG_MAP[kod])
-        else:
-            print(f"   ⚠ Skipping language '{kod}': no matching Inno Setup .isl file.")
+    wpisy = buduj_wpisy_inno(kody, katalog_inno)
 
     # Build the [Languages] block.
     blok_languages = "\n".join(
