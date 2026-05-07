@@ -1,6 +1,38 @@
-# Release Notes — Reżyser Audio GPT 13.8 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.8.1 „Wersja Wydawnicza"
 
-*Minor: Deutsch dołącza jako siódmy pełnoprawny język bazowy; refaktor Kreatora nowej reguły w Managerze.*
+*Patch: alarm dokumentacyjny dla użytkowników Vocalizera — NVDA 2026.1 wyłącza wszystkie istniejące dodatki głosowe Vocalizera.*
+
+---
+
+## 13.8.1 — patch release (motyw przewodni: ostrzeżenie o NVDA 2026.1 / Vocalizer)
+
+*Punkt wyjścia: V13.8 (bf6aa0c) → patch docs + commit release → V13.8.1.*
+
+### TL;DR
+
+NVDA 2026.1 (maj 2026) to skok architektoniczny — przejście na Pythona 3.13 i porzucenie 32-bitów. Wszystkie dotychczasowe dodatki Vocalizerowe przestały działać i nie naprawi tego nadpisanie zgodności w NVDA: muszą zostać przekompilowane biblioteki .dll głosów. Do czasu wydania zaktualizowanej paczki przez Tiflotecnia jedyne ścieżki dla użytkowników Poliglocie/Vocalizera to wstrzymanie aktualizacji, downgrade NVDA do 2025.x lub przejście na komercyjną paczkę głosów SAPI5 (z bezwzględnym wymogiem wybrania „Microsoft Speech API wersja 5 — 32 bit", a nie zwykłego „SAPI5").
+
+### Co nowego dla użytkownika końcowego
+
+#### Sekcja „ALARM dla użytkowników Vocalizera: NVDA 2026.1" w manualu (7 języków)
+
+Dodana w `dictionaries/<kod>/gui/dokumentacja/manual.yaml` zaraz po istniejącym akapicie o cyklicznych „API Breaking Changes" w kontekście dodatku „One Core Autolang". Sekcja domyka teoretyczne ostrzeżenie konkretnym przypadkiem 2026.1 i instruuje:
+
+- **Jeśli jeszcze nie aktualizowano NVDA** — wstrzymać aktualizację do oficjalnego komunikatu Tiflotecnia.
+- **Jeśli już zaktualizowano i Vocalizer zniknął** — dwie ścieżki:
+  1. Downgrade NVDA do 2025.x (najszybszy powrót do działających głosów).
+  2. Komercyjna paczka SAPI5 (np. A T Guys, atguys.com) z **krytycznym** wymogiem wybrania w NVDA syntezatora „Microsoft Speech API wersja 5 — **32 bit**", a NIE zwykłego „Microsoft Speech API wersja 5" — w przeciwnym wypadku lista głosów pozostanie pusta.
+
+Tłumaczenia ręczne (CLAUDE.md: nie odpalamy autotłumacza na istniejących szablonach z powodu kosztu API i halucynacji LLM): `pl`, `en`, `de`, `fi`, `is`, `it`, `ru`. Wygenerowane: `docs/manual.<iso>.txt` × 7.
+
+### Pod maską
+
+- `VERSION`: `13.8` → `13.8.1` (patch tag, zgodnie z regułą hotfix = X.Y.Z+1, bez nadpisywania artefaktów release'u 13.8).
+- 7 plików `dictionaries/<kod>/gui/dokumentacja/manual.yaml` rozszerzone o sekcję alarmową (treść ręcznie tłumaczona, zachowane konwencje istniejących szablonów).
+
+### Breaking changes
+
+Brak.
 
 ---
 
