@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida Completa (Versione 13.8 – Versione di Pubblicazione)
+Manuale del Regista Audio AI - Guida Completa (Versione 13.8.1 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente di scrivere, pianificare, formattare e tradurre automaticamente sceneggiature per radiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori locali di lettori di schermo (NVDA).
 
@@ -300,6 +300,16 @@ Perché NVDA cambi effettivamente la voce in base al tag lang, deve essere abili
 Importante limitazione delle voci OneCore: Le voci Microsoft OneCore non supportano nativamente questo meccanismo con NVDA, ma solo con il lettore di schermo integrato nel sistema Windows, Narratore. Esiste un plugin non ufficiale per NVDA chiamato "One Core Autolang", che cerca di risolvere questo problema — ma il suo sviluppo è stato rapidamente interrotto. La ragione è semplice: ogni anno, con la prima versione di NVDA dell'anno, ci sono cambiamenti che rompono la compatibilità delle API (cosiddetti API Breaking Changes). A volte basta aggiornare il campo "last tested version" nel manifesto del plugin, ma a volte sono richieste vere modifiche nel codice — e l'autore non riesce a tenere il passo con gli aggiornamenti. Se ti interessa il cambio automatico della lingua, una scelta più sicura sono Vocalizer o eSpeak, che supportano questo meccanismo nativamente, anche se nel primo caso devi anche considerare la temporanea indisponibilità del driver aggiornato delle voci Vocalizer per l'ultima versione di NVDA a causa di quanto descritto qualche frase prima. In tal caso avrai la scelta:
 - Non aggiornare NVDA - le voci funzioneranno sicuramente, ma non avrai accesso a nuove potenziali funzionalità, miglioramenti o correzioni di bug.
 - Aggiornare NVDA e forzare l'attivazione del plugin sovrascrivendo la compatibilità (introdotto abbastanza recentemente, funzionerà se finora era necessario solo aggiornare il manifesto). Altrimenti... beh, c'era l'avvertimento che lo fai a tuo rischio.
+
+ALLARME per gli utenti di Vocalizer: NVDA 2026.1 (maggio 2026)
+
+L'avvertimento sopra è appena diventato realtà. NVDA 2026.1 non è un consueto aggiornamento annuale con un piccolo API Breaking Change — è un salto architettonico che ROMPE tutti i plugin Vocalizer esistenti. NVDA è passato a Python 3.13 e ha abbandonato il supporto per l'architettura a 32 bit, quindi anche le librerie .dll delle voci stesse devono essere RICOMPILATE — il semplice aggiornamento del manifesto e del codice del plugin non basta più. Finché Tiflotecnia non rilascerà un pacchetto driver e voci aggiornato, Vocalizer su NVDA 2026.1+ non funzionerà in nessuna configurazione — nessuna sovrascrittura della compatibilità può aggirare questo.
+
+Conseguenze pratiche:
+- Se NON hai ancora aggiornato NVDA e dipendi da Vocalizer — RINVIA l'aggiornamento. Al momento non esiste un percorso di salvataggio che riporti Vocalizer in 2026.1. Aspetta l'annuncio ufficiale di Tiflotecnia.
+- Se hai già aggiornato e Vocalizer è scomparso — hai due strade:
+  1. Fare pace con Vocalizer: disinstalla NVDA 2026.1 e torna alla versione precedente funzionante (ad es. 2025.x). È il modo più rapido per tornare a voci funzionanti.
+  2. Acquistare una licenza per un pacchetto vocale commerciale SAPI5 — ad esempio da A T Guys (atguys.com). IMPORTANTE durante la configurazione: nella selezione del sintetizzatore di NVDA scegli „Microsoft Speech API versione 5 — 32 bit", NON il semplice „Microsoft Speech API versione 5". Scegliendo la variante SAPI5 predefinita la lista delle voci rimarrà vuota — le voci SAPI5 con licenza sono distribuite come librerie a 32 bit, e solo la variante API a 32 bit può „vederle".
 
 PASSO 6: Architetto degli Audiolibri
 

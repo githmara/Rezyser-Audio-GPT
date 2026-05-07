@@ -374,6 +374,16 @@ tresc: |
   - Nie aktualizować NVDA - głosy na pewno będą działać, ale nie będziesz mieć dostępu do nowych potencjalnych funkcji, ulepszeń czy poprawek błędów.
   - Zaktualizować NVDA i wymusić włączenie dodatku poprzez nadpisanie zgodności (dość niedawno wprowadzone, zadziała, jeśli do tej pory wymagane było tylko zaktualizowanie manifestu). W przeciwnym wypadku... no cóż, było ostrzeżenie, że robisz to na własne ryzyko.
 
+  ALARM dla użytkowników Vocalizera: NVDA 2026.1 (maj 2026)
+
+  Powyższe ostrzeżenie właśnie stało się faktem. NVDA 2026.1 to nie zwykła roczna aktualizacja z drobnym API Breaking Change — to skok architektoniczny, który ŁAMIE wszystkie dotychczasowe dodatki Vocalizerowe. NVDA przeszło na Pythona 3.13 i porzuciło wsparcie dla architektury 32-bitowej, więc same biblioteki .dll z głosami muszą zostać PRZEKOMPILOWANE — sama aktualizacja manifestu i kodu dodatku to za mało. Dopóki Tiflotecnia nie wyda zaktualizowanej paczki sterowników i głosów, Vocalizer w NVDA 2026.1+ nie zadziała w żadnej konfiguracji — żadne nadpisanie zgodności tego nie obejdzie.
+
+  Co z tego wynika praktycznie:
+  - Jeśli jeszcze NIE aktualizowałeś NVDA i zależy Ci na Vocalizerze — WSTRZYMAJ AKTUALIZACJĘ. Na ten moment nie istnieje ścieżka ratunkowa, która przywróci Vocalizera w 2026.1. Poczekaj na oficjalny komunikat od Tiflotecnia.
+  - Jeśli już zaktualizowałeś i Vocalizer Ci zniknął — masz dwie ścieżki:
+    1. Przeprosić się z Vocalizerem: odinstaluj NVDA 2026.1 i wróć do poprzedniej, działającej wersji (np. 2025.x). To najszybszy powrót do działających głosów.
+    2. Wykupić licencję na komercyjną paczkę głosową dla SAPI5 — np. od A T Guys (atguys.com). UWAGA przy konfiguracji: w NVDA przy wyborze syntezatora wskaż „Microsoft Speech API wersja 5 — 32 bity", a NIE samo „Microsoft Speech API wersja 5". Wybór domyślnego wariantu SAPI5 sprawi, że lista głosów pozostanie pusta — licencjonowane głosy SAPI5 są dystrybuowane jako biblioteki 32-bitowe i tylko 32-bitowy wariant API je „widzi".
+
   KROK 6: Architekt Audiobooków
 
   Narzędzie do przygotowywania profesjonalnej struktury pliku pod czytniki ekranu i ElevenLabs. Przejdź do niego, klikając przycisk "{main.btn.konwerter}" na pasku przycisków lub wybierając Narzędzia → {main.menu.konwerter} z menu (skrót: Ctrl+3).

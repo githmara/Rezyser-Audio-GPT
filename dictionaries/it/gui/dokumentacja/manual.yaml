@@ -316,6 +316,16 @@ tresc: |
   - Non aggiornare NVDA - le voci funzioneranno sicuramente, ma non avrai accesso a nuove potenziali funzionalità, miglioramenti o correzioni di bug.
   - Aggiornare NVDA e forzare l'attivazione del plugin sovrascrivendo la compatibilità (introdotto abbastanza recentemente, funzionerà se finora era necessario solo aggiornare il manifesto). Altrimenti... beh, c'era l'avvertimento che lo fai a tuo rischio.
 
+  ALLARME per gli utenti di Vocalizer: NVDA 2026.1 (maggio 2026)
+
+  L'avvertimento sopra è appena diventato realtà. NVDA 2026.1 non è un consueto aggiornamento annuale con un piccolo API Breaking Change — è un salto architettonico che ROMPE tutti i plugin Vocalizer esistenti. NVDA è passato a Python 3.13 e ha abbandonato il supporto per l'architettura a 32 bit, quindi anche le librerie .dll delle voci stesse devono essere RICOMPILATE — il semplice aggiornamento del manifesto e del codice del plugin non basta più. Finché Tiflotecnia non rilascerà un pacchetto driver e voci aggiornato, Vocalizer su NVDA 2026.1+ non funzionerà in nessuna configurazione — nessuna sovrascrittura della compatibilità può aggirare questo.
+
+  Conseguenze pratiche:
+  - Se NON hai ancora aggiornato NVDA e dipendi da Vocalizer — RINVIA l'aggiornamento. Al momento non esiste un percorso di salvataggio che riporti Vocalizer in 2026.1. Aspetta l'annuncio ufficiale di Tiflotecnia.
+  - Se hai già aggiornato e Vocalizer è scomparso — hai due strade:
+    1. Fare pace con Vocalizer: disinstalla NVDA 2026.1 e torna alla versione precedente funzionante (ad es. 2025.x). È il modo più rapido per tornare a voci funzionanti.
+    2. Acquistare una licenza per un pacchetto vocale commerciale SAPI5 — ad esempio da A T Guys (atguys.com). IMPORTANTE durante la configurazione: nella selezione del sintetizzatore di NVDA scegli „Microsoft Speech API versione 5 — 32 bit", NON il semplice „Microsoft Speech API versione 5". Scegliendo la variante SAPI5 predefinita la lista delle voci rimarrà vuota — le voci SAPI5 con licenza sono distribuite come librerie a 32 bit, e solo la variante API a 32 bit può „vederle".
+
   PASSO 6: Architetto degli Audiolibri
 
   Strumento per preparare una struttura professionale del file per i lettori di schermo e ElevenLabs. Accedi cliccando il pulsante "{main.btn.konwerter}" sulla barra dei pulsanti o selezionando Strumenti → {main.menu.konwerter} dal menu (scorciatoia: Ctrl+3).

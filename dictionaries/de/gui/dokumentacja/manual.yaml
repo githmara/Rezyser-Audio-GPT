@@ -323,6 +323,16 @@ tresc: |
   - NVDA nicht aktualisieren - die Stimmen werden sicher funktionieren, aber Sie haben keinen Zugriff auf neue potenzielle Funktionen, Verbesserungen oder Fehlerbehebungen.
   - NVDA aktualisieren und das Add-on durch Überschreiben der Kompatibilität erzwingen (kürzlich eingeführt, funktioniert, wenn bisher nur das Manifest aktualisiert werden musste). Andernfalls... nun ja, es gab eine Warnung, dass Sie dies auf eigenes Risiko tun.
 
+  ALARM für Vocalizer-Nutzer: NVDA 2026.1 (Mai 2026)
+
+  Die obige Warnung ist soeben Realität geworden. NVDA 2026.1 ist kein gewöhnliches Jahresupdate mit einem kleinen API Breaking Change — es ist ein architektonischer Sprung, der ALLE bisherigen Vocalizer-Add-ons BRICHT. NVDA ist auf Python 3.13 umgestiegen und hat die Unterstützung für 32-Bit-Architektur eingestellt, sodass auch die .dll-Bibliotheken der Stimmen selbst NEU KOMPILIERT werden müssen — eine bloße Aktualisierung von Manifest und Code des Add-ons reicht nicht mehr aus. Solange Tiflotecnia kein aktualisiertes Treiber- und Stimmenpaket veröffentlicht, läuft Vocalizer unter NVDA 2026.1+ in keiner Konfiguration — kein Kompatibilitäts-Override kann das umgehen.
+
+  Praktische Konsequenzen:
+  - Wenn Sie NVDA noch NICHT aktualisiert haben und auf Vocalizer angewiesen sind — VERSCHIEBEN Sie das Update. Derzeit gibt es keinen Rettungsweg, der Vocalizer in 2026.1 zurückbringt. Warten Sie auf die offizielle Mitteilung von Tiflotecnia.
+  - Wenn Sie bereits aktualisiert haben und Vocalizer verschwunden ist — Sie haben zwei Wege:
+    1. Frieden mit Vocalizer schließen: NVDA 2026.1 deinstallieren und zur vorherigen, funktionierenden Version zurückkehren (z.B. 2025.x). Das ist der schnellste Weg zurück zu funktionierenden Stimmen.
+    2. Eine Lizenz für ein kommerzielles SAPI5-Stimmenpaket erwerben — zum Beispiel von A T Guys (atguys.com). WICHTIG bei der Einrichtung: Wählen Sie in der NVDA-Synthesizer-Auswahl „Microsoft Speech API Version 5 — 32-Bit", NICHT das einfache „Microsoft Speech API Version 5". Die Wahl der Standard-SAPI5-Variante führt zu einer leeren Stimmenliste — lizenzierte SAPI5-Stimmen werden als 32-Bit-Bibliotheken ausgeliefert, und nur die 32-Bit-API-Variante kann sie „sehen".
+
   SCHRITT 6: Audiobook-Architekt
 
   Ein Werkzeug zur Erstellung einer professionellen Dateistruktur für Bildschirmleser und ElevenLabs. Gehen Sie dorthin, indem Sie die Schaltfläche "{main.btn.konwerter}" in der Symbolleiste klicken oder Werkzeuge → {main.menu.konwerter} aus dem Menü wählen (Tastenkombination: Strg+3).

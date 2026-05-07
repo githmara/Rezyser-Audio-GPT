@@ -307,6 +307,16 @@ tresc: |
   - Ekki uppfæra NVDA - raddirnar munu örugglega virka, en þú munt ekki hafa aðgang að nýjum mögulegum eiginleikum, endurbótum eða villuleiðréttingum.
   - Uppfæra NVDA og neyða viðbótina til að virka með því að breyta samhæfni (nýlega kynnt, virkar ef hingað til var aðeins nauðsynlegt að uppfæra auglýsinguna). Annars... jæja, það var viðvörun um að þú gerir þetta á eigin ábyrgð.
 
+  VIÐVÖRUN fyrir notendur Vocalizer: NVDA 2026.1 (maí 2026)
+
+  Viðvörunin hér að ofan er nýorðin að veruleika. NVDA 2026.1 er ekki venjuleg árleg uppfærsla með smá API Breaking Change — þetta er byggingarstökk sem BRÝTUR allar fyrri Vocalizer viðbætur. NVDA hefur fært sig yfir á Python 3.13 og hætt stuðningi við 32-bita byggingu, svo .dll skráarsöfnin sjálf með röddunum þurfa að vera ÞÝDD AFTUR — það nægir ekki lengur að uppfæra einungis manifesto og kóða viðbótarinnar. Þangað til Tiflotecnia gefur út uppfærðan rekil og raddapakka, virkar Vocalizer ekki í NVDA 2026.1+ í neinni stillingu — engin samhæfnisbreyting kemst fram hjá þessu.
+
+  Hvað þýðir þetta í reynd:
+  - Ef þú hefur EKKI enn uppfært NVDA og þú treystir á Vocalizer — FRESTAÐU uppfærslunni. Eins og er er engin björgunarleið sem færir Vocalizer aftur í 2026.1. Bíddu eftir opinberri tilkynningu frá Tiflotecnia.
+  - Ef þú hefur þegar uppfært og Vocalizer er horfinn — þú hefur tvær leiðir:
+    1. Sættast við Vocalizer: fjarlægðu NVDA 2026.1 og farðu aftur í fyrri, virka útgáfu (t.d. 2025.x). Þetta er fljótlegasta leiðin til baka að virkum röddum.
+    2. Kauptu leyfi fyrir viðskiptalegan SAPI5 raddapakka — til dæmis frá A T Guys (atguys.com). MIKILVÆGT við uppsetningu: í NVDA röddargjafarvalinu skaltu velja „Microsoft Speech API útgáfa 5 — 32-bita", EKKI einfaldlega „Microsoft Speech API útgáfa 5". Að velja sjálfgefið SAPI5 afbrigði skilur raddalistann eftir tóman — leyfishafðar SAPI5 raddir eru dreifðar sem 32-bita söfn, og aðeins 32-bita API afbrigðið „sér" þær.
+
   SKREF 6: Hljóðbókaarkitekt
 
   Tól til að undirbúa faglega skráaruppbyggingu fyrir skjálesara og ElevenLabs. Fara í það með því að smella á hnappinn "{main.btn.konwerter}" á verkfærastikunni eða velja Verkfæri → {main.menu.konwerter} úr valmyndinni (flýtileið: Ctrl+3).

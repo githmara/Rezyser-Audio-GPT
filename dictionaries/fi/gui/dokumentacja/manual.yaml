@@ -307,6 +307,16 @@ tresc: |
   - Älä päivitä NVDA:ta — äänet toimivat varmasti, mutta et pääse käsiksi uusiin mahdollisiin ominaisuuksiin, parannuksiin tai virheenkorjauksiin.
   - Päivitä NVDA ja pakota lisäosan käyttö yhteensopivuuden ohittamalla (melko äskettäin käyttöön otettu, toimii, jos tähän mennessä vaadittiin vain manifestin päivittämistä). Muussa tapauksessa... no, oli varoitus, että teet sen omalla vastuullasi.
 
+  HÄLYTYS Vocalizer-käyttäjille: NVDA 2026.1 (toukokuu 2026)
+
+  Yllä oleva varoitus on juuri muuttunut todeksi. NVDA 2026.1 ei ole tavanomainen vuosipäivitys pienellä API Breaking Changella — se on arkkitehtuurinen harppaus, joka RIKKOO kaikki tähänastiset Vocalizer-lisäosat. NVDA on siirtynyt Python 3.13:een ja luopunut 32-bittisen arkkitehtuurin tuesta, joten myös itse äänten .dll-kirjastot on KÄÄNNETTÄVÄ UUDELLEEN — pelkkä lisäosan manifestin ja koodin päivittäminen ei enää riitä. Kunnes Tiflotecnia julkaisee päivitetyn ajurin ja äänipaketin, Vocalizer ei toimi NVDA 2026.1+:ssa missään kokoonpanossa — mikään yhteensopivuuden ohitus ei tätä kierrä.
+
+  Käytännön seuraukset:
+  - Jos et ole VIELÄ päivittänyt NVDA:ta ja luotat Vocalizeriin — LYKKÄÄ päivitystä. Tällä hetkellä ei ole pelastusreittiä, joka palauttaisi Vocalizerin 2026.1:een. Odota Tiflotecnian virallista ilmoitusta.
+  - Jos olet jo päivittänyt ja Vocalizer on kadonnut — sinulla on kaksi tietä:
+    1. Tee sovinto Vocalizerin kanssa: poista NVDA 2026.1 ja palaa edelliseen, toimivaan versioon (esim. 2025.x). Tämä on nopein tie takaisin toimiviin ääniin.
+    2. Hanki lisenssi kaupalliseen SAPI5-äänipakettiin — esimerkiksi A T Guysilta (atguys.com). TÄRKEÄÄ määrityksessä: NVDA:n syntetisaattorivalinnassa valitse „Microsoft Speech API versio 5 — 32-bit", EI pelkkää „Microsoft Speech API versio 5". Oletus-SAPI5-vaihtoehdon valinta jättää äänilistan tyhjäksi — lisensoidut SAPI5-äänet jaetaan 32-bittisinä kirjastoina, ja vain 32-bittinen API-variantti „näkee" ne.
+
   VAIHE 6: Äänikirjojen Arkkitehti
 
   Työkalu ammattimaisen tiedostorakenteen valmisteluun ruudunlukijoille ja ElevenLabsille. Siirry siihen napsauttamalla "{main.btn.konwerter}"-painiketta työkalupalkissa tai valitsemalla Työkalut → {main.menu.konwerter} valikosta (pikanäppäin: Ctrl+3).

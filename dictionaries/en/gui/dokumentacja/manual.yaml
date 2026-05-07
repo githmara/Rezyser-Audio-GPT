@@ -307,6 +307,16 @@ tresc: |
   - Not update NVDA — the voices will definitely work, but you won't have access to new potential features, improvements, or bug fixes.
   - Update NVDA and force the add-on to enable by overriding compatibility (recently introduced, will work if only updating the manifest was required so far). Otherwise... well, you were warned that you do it at your own risk.
 
+  ALERT for Vocalizer users: NVDA 2026.1 (May 2026)
+
+  The warning above has just become reality. NVDA 2026.1 is not an ordinary yearly update with a minor API Breaking Change — it is an architectural leap that BREAKS every existing Vocalizer add-on. NVDA has migrated to Python 3.13 and dropped support for 32-bit architecture, so the .dll voice libraries themselves must be RECOMPILED — updating the add-on's manifest and code is no longer enough. Until Tiflotecnia ships an updated driver and voice package, Vocalizer in NVDA 2026.1+ will not run in any configuration — no compatibility override can work around this.
+
+  Practical consequences:
+  - If you have NOT yet updated NVDA and you rely on Vocalizer — HOLD OFF on the update. There is currently no rescue path that brings Vocalizer back in 2026.1. Wait for the official announcement from Tiflotecnia.
+  - If you have already updated and Vocalizer has disappeared — you have two paths:
+    1. Make peace with Vocalizer: uninstall NVDA 2026.1 and roll back to the previous, working release (e.g., 2025.x). This is the fastest way back to working voices.
+    2. Purchase a commercial SAPI5 voice pack — for example from A T Guys (atguys.com). IMPORTANT during setup: in NVDA's synthesizer selection, pick "Microsoft Speech API version 5 — 32-bit", NOT plain "Microsoft Speech API version 5". Selecting the default SAPI5 variant will leave the voice list empty — licensed SAPI5 voices are distributed as 32-bit libraries, and only the 32-bit API variant can "see" them.
+
   STEP 6: Audiobook Architect
 
   A tool for preparing a professional file structure for screen readers and ElevenLabs. Access it by clicking the "{main.btn.konwerter}" button on the toolbar or selecting Tools → {main.menu.konwerter} from the menu (shortcut: Ctrl+3).

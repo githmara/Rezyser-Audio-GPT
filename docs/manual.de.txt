@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Komplettanleitung (Version 13.8 – Veröffentlichungsversion)
+Podręcznik Reżysera Audio AI - Komplettanleitung (Version 13.8.1 – Veröffentlichungsversion)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -307,6 +307,16 @@ Damit NVDA die Stimme tatsächlich basierend auf dem lang-Tag umschaltet, muss d
 Wichtiges Limit der OneCore-Stimmen: Microsoft OneCore-Stimmen unterstützen diesen Mechanismus nativ nicht mit NVDA, sondern nur mit dem in Windows integrierten Narrator. Es gibt ein inoffizielles NVDA-Add-on namens "One Core Autolang", das versucht, dies zu beheben — aber seine Entwicklung wurde schnell eingestellt. Der Grund ist banal: Jedes Jahr, bei der ersten NVDA-Version des Jahres, gibt es Änderungen, die die API-Kompatibilität brechen (sogenannte API Breaking Changes). Manchmal reicht es aus, das Feld "last tested version" im Add-on-Manifest zu aktualisieren, aber manchmal sind echte Änderungen im Code erforderlich — und der Autor kommt mit den Updates nicht nach. Wenn Ihnen die automatische Sprachumschaltung wichtig ist, sind Vocalizer oder eSpeak eine sicherere Wahl, da sie diesen Mechanismus nativ unterstützen, wobei im ersten Fall auch mit einer vorübergehenden Nichtverfügbarkeit des aktualisierten Vocalizer-Treibers für das neueste NVDA zu rechnen ist, aufgrund des zuvor beschriebenen Problems. Dann haben Sie die Wahl:
 - NVDA nicht aktualisieren - die Stimmen werden sicher funktionieren, aber Sie haben keinen Zugriff auf neue potenzielle Funktionen, Verbesserungen oder Fehlerbehebungen.
 - NVDA aktualisieren und das Add-on durch Überschreiben der Kompatibilität erzwingen (kürzlich eingeführt, funktioniert, wenn bisher nur das Manifest aktualisiert werden musste). Andernfalls... nun ja, es gab eine Warnung, dass Sie dies auf eigenes Risiko tun.
+
+ALARM für Vocalizer-Nutzer: NVDA 2026.1 (Mai 2026)
+
+Die obige Warnung ist soeben Realität geworden. NVDA 2026.1 ist kein gewöhnliches Jahresupdate mit einem kleinen API Breaking Change — es ist ein architektonischer Sprung, der ALLE bisherigen Vocalizer-Add-ons BRICHT. NVDA ist auf Python 3.13 umgestiegen und hat die Unterstützung für 32-Bit-Architektur eingestellt, sodass auch die .dll-Bibliotheken der Stimmen selbst NEU KOMPILIERT werden müssen — eine bloße Aktualisierung von Manifest und Code des Add-ons reicht nicht mehr aus. Solange Tiflotecnia kein aktualisiertes Treiber- und Stimmenpaket veröffentlicht, läuft Vocalizer unter NVDA 2026.1+ in keiner Konfiguration — kein Kompatibilitäts-Override kann das umgehen.
+
+Praktische Konsequenzen:
+- Wenn Sie NVDA noch NICHT aktualisiert haben und auf Vocalizer angewiesen sind — VERSCHIEBEN Sie das Update. Derzeit gibt es keinen Rettungsweg, der Vocalizer in 2026.1 zurückbringt. Warten Sie auf die offizielle Mitteilung von Tiflotecnia.
+- Wenn Sie bereits aktualisiert haben und Vocalizer verschwunden ist — Sie haben zwei Wege:
+  1. Frieden mit Vocalizer schließen: NVDA 2026.1 deinstallieren und zur vorherigen, funktionierenden Version zurückkehren (z.B. 2025.x). Das ist der schnellste Weg zurück zu funktionierenden Stimmen.
+  2. Eine Lizenz für ein kommerzielles SAPI5-Stimmenpaket erwerben — zum Beispiel von A T Guys (atguys.com). WICHTIG bei der Einrichtung: Wählen Sie in der NVDA-Synthesizer-Auswahl „Microsoft Speech API Version 5 — 32-Bit", NICHT das einfache „Microsoft Speech API Version 5". Die Wahl der Standard-SAPI5-Variante führt zu einer leeren Stimmenliste — lizenzierte SAPI5-Stimmen werden als 32-Bit-Bibliotheken ausgeliefert, und nur die 32-Bit-API-Variante kann sie „sehen".
 
 SCHRITT 6: Audiobook-Architekt
 
