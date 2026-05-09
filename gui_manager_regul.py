@@ -899,27 +899,33 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         form = wx.FlexGridSizer(rows=0, cols=2, vgap=8, hgap=8)
         form.AddGrowableCol(1)
 
+        # A11y (KRYTYCZNE): kolejność tworzenia widgetów = kolejność dzieci
+        # rodzica (parent's child list). NVDA na Windows dla wx.TextCtrl bez
+        # silnego AccessibleName-API szuka poprzedzającego wx.StaticText
+        # w tej liście — jeśli pole edycyjne powstaje PRZED swoją etykietą,
+        # czytnik traci label (problem dotyczył `_txt_id`, który jako pierwsze
+        # pole formularza miał za sobą tylko TextCtrl-y, nie StaticText).
+        # Wzorzec: NAJPIERW konstruujemy `_lbl_*`, potem `_txt_*` / `_cb_*`,
+        # i dopiero wtedy wkładamy je w form.Add() w kolejności [label, field].
+        self._lbl_id = wx.StaticText(self, label=t("manager.kreator_lbl_id"))
         self._txt_id = wx.TextCtrl(self, name=t("manager.kreator_id_name"))
         self._txt_id.SetHint(t("manager.kreator_id_hint"))
-        # A11y: trzymamy referencję do StaticText, bo etykieta zmienia się
-        # w zależności od typu (dla „nowy język" pole id znaczy „kod języka",
-        # nie „identyfikator pliku" — bez aktualizacji label myli czytniki).
-        self._lbl_id = wx.StaticText(self, label=t("manager.kreator_lbl_id"))
         form.Add(self._lbl_id, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_id, flag=wx.EXPAND)
 
+        self._lbl_etykieta = wx.StaticText(self, label=t("manager.kreator_lbl_etykieta"))
         self._txt_etykieta = wx.TextCtrl(self, name=t("manager.kreator_etykieta_name"))
         self._txt_etykieta.SetHint(t("manager.kreator_etykieta_hint"))
-        self._lbl_etykieta = wx.StaticText(self, label=t("manager.kreator_lbl_etykieta"))
         form.Add(self._lbl_etykieta, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_etykieta, flag=wx.EXPAND)
 
+        self._lbl_iso = wx.StaticText(self, label=t("manager.kreator_lbl_iso"))
         self._txt_iso = wx.TextCtrl(self, name=t("manager.kreator_iso_name"))
         self._txt_iso.SetHint(t("manager.kreator_iso_hint"))
-        self._lbl_iso = wx.StaticText(self, label=t("manager.kreator_lbl_iso"))
         form.Add(self._lbl_iso, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_iso, flag=wx.EXPAND)
 
+        self._lbl_jezyk = wx.StaticText(self, label=t("manager.kreator_lbl_jezyk"))
         self._cb_jezyk = wx.ComboBox(
             self,
             choices=self._dostepne_jezyki,
@@ -930,16 +936,15 @@ class KreatorNowejRegulyDialog(wx.Dialog):
             self._cb_jezyk.SetStringSelection(self._domyslny_jezyk)
         else:
             self._cb_jezyk.SetSelection(0)
-        self._lbl_jezyk = wx.StaticText(self, label=t("manager.kreator_lbl_jezyk"))
         form.Add(self._lbl_jezyk, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._cb_jezyk, flag=wx.EXPAND)
 
+        self._lbl_opis_efektu = wx.StaticText(self, label=t("manager.kreator_lbl_opis"))
         self._txt_opis_efektu = wx.TextCtrl(
             self, style=wx.TE_MULTILINE,
             name=t("manager.kreator_opis_efektu_name"),
         )
         self._txt_opis_efektu.SetHint(t("manager.kreator_opis_efektu_hint"))
-        self._lbl_opis_efektu = wx.StaticText(self, label=t("manager.kreator_lbl_opis"))
         form.Add(self._lbl_opis_efektu, flag=wx.ALIGN_CENTER_VERTICAL | wx.TOP, border=4)
         form.Add(self._txt_opis_efektu, flag=wx.EXPAND)
 
