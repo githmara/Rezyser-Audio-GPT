@@ -1,6 +1,55 @@
-# Release Notes — Reżyser Audio GPT 13.8.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 13.9 „Wersja Wydawnicza"
 
-*Patch: alarm dokumentacyjny dla użytkowników Vocalizera — NVDA 2026.1 wyłącza wszystkie istniejące dodatki głosowe Vocalizera.*
+*Audyt A11y kreatora Managera Reguł, kontrakt silnika rozszerzony o `rezyser/`, audyt promptów Managera (natywność + agentowy format), pełna paczka językowa Français.*
+
+---
+
+## 13.9 — minor release (motyw przewodni: język bazowy FR + audyt kreatora/promptów Managera Reguł)
+
+*Punkt wyjścia: V13.8.1 (17b2e7c) → audyt A11y + kontrakt rezyser/ + audyt promptów + paczka FR + commit docs + commit release → V13.9.*
+
+### TL;DR
+
+13.9 zamyka cztery linie pracy ujawnione podczas wdrażania paczki niemieckiej (13.8): **audyt A11y kreatora nowej reguły** (NVDA czytało niezatytułowane pole edycji), **rozszerzenie kontraktu silnika** o wymóg `rezyser/` (przesunięte z 14.0+ na teraz, bo wzorzec 4 plików per paczka stabilizował się po 7 paczkach), **audyt promptów AI** Managera Reguł (natywność komentarzy, format agentowy zamiast chatbotowego, rozdzielenie 3 podtypów akcentów), oraz **pełną paczkę językową Français** (`dictionaries/fr/`) — ósmy w pełni wdrożony język bazowy.
+
+### Co nowego dla użytkownika końcowego
+
+#### Nowy język bazowy: Français (`fr`)
+Ósmy pełnoprawny język bazowy. Kompletna paczka `dictionaries/fr/`:
+
+- **6 szyfrów**: Cezar (alfabet 40-literowy `ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÇÉÈÊËÎÏÔÙÛÜŸ`, ligatury `œ/æ` decomposowane do `oe/ae` w `polskie_znaki` żeby `.upper()` nie łamał indeksów Cezara), jakanie (samogłoski `aeiouàâéèêëîïôùûüÿy`), odwracanie (15 wzorców skrótowców francuskich: `p. ex.` → `par exemple`, `c.-à-d.` → `c'est-à-dire`, `etc.`, `cf.`, `M.`/`Mme`/`Mlle`, `Dr`/`Pr` (bez kropki, francuska konwencja), `n°`/`No`, `p.`/`pp.`, `av./apr. J.-C.`), samogłoskowiec, typoglikemia, wąż.
+
+- **4 tryby Reżysera AI** po francusku: Brainstorming, Scénario (Pièce radio/Foley), Livre audio, Postprod (regex `Prologue|Chapitre \d+|Épilogue`). Słowa-wyzwalacze: `résume`, `résumé`, `résumer`, `vue d'ensemble`. Endonim `Français`, lingua `FRENCH`.
+
+- **11 plików akcenty/**: 8 akcentów fonetycznych obcojęzycznych (angielski, niemiecki, polski, rosyjski, włoski, fiński, islandzki, hiszpański) + 3 narzędzia czyszczenia (`oczyszczenie`, `oczyszczenie_bez_liczb`, `naprawiacz_tagow`). Akcenty oparte o cechy fonologiczne francuskiego: `ch` /ʃ/ → `sh`/`sch`/`sci`/`š` (per docelowy TTS), `j` /ʒ/ → `zh`/`sch`/`ż`/`gi`/`ll`/`ž`, `ou` /u/ → `oo`/`u`/`uu`/`ú`, `u` /y/ → `ü` (de), `y` (fi), `iu` (it/es), `i` (pl approx), `gn` /ɲ/ → `ny`/`nj`/`ń`/`ñ`, `qu` /k/ → `k`/`kv`, `ç` → `s`/`ss`, nieme `h` usuwane.
+
+- **Pełen przekład UI** (`dictionaries/fr/gui/ui.yaml`, 483 klucze, parytet 100% z paczką włoską) + dokumentacja (`dictionaries/fr/gui/dokumentacja/manual.yaml` + `dictionaries.yaml` — manual auto-tłumaczony przez `buduj_wielojezyczne_docs.py` + ręczna korekta halucynacji LLM, `dictionaries.yaml` napisany ręcznie ze wzorcem stylu z paczki włoskiej).
+
+- **`buduj_wielojezyczne_ui.py` + `buduj_wielojezyczne_docs.py`**: dodane `fr` do `MAPA_JEZYKOW`. `buduj_wielojezyczne_docs.py` ma też wpis `fr` w `ABBREV_BY_LANG` (5 najpopularniejszych skrótowców: `p. ex.`, `c.-à-d.`, `etc.`, `M.`, `Dr`).
+
+#### Manager Reguł — audyt A11y kreatora (commits `41d082d`, `8cc4800`)
+- **WynikKreatoraDialog.naglowek** dostał `name=` (NVDA czytało jako gołe „edit"). Klucz `wynik_naglowek_name` × 7 języków.
+- **KreatorNowejRegulyDialog._lbl_id** zachowany jako pole klasy i przełączany dynamicznie między „Identyfikator (nazwa pliku)" ↔ „Kod języka (ISO 639-1)" w zależności od wybranego typu reguły. Klucz `kreator_jezyk_bazowy_id_label` × 7 języków.
+- **Manager przy nowym języku** tworzy 4 podfoldery (`akcenty/`, `szyfry/`, `rezyser/`, `gui/`) zamiast 3 — kontrakt silnika od 13.9 wymaga ≥1 plik `*.yaml` w `rezyser/`.
+
+#### Manager Reguł — audyt promptów AI (commits `12f692f`, `a9c8ce3`, `17b2e7c`)
+- **Helpery natywności**: `_NATYWNE_JEZYK_ODPOWIEDZI` (mapa 7 wdrożonych: PL→polsku, DE→Deutsch, IT→italiano, RU→по-русски, FI→suomeksi, IS→á íslensku, EN→English; `Français` dla zaplanowanego FR), `_NATYWNE_STRESZCZENIE` (4 słowa per język), `_NATYWNA_NAZWA_JEZYKA` (endonim, też `Français`/`Español` dla planowanych).
+- **Wszystkie 6 promptów** (`prompt_jezyk_bazowy`, `prompt_akcent`, `prompt_szyfr_zamiany`, `prompt_tryb_rezysera`, `prompt_postprodukcja`, `prompt_szyfr_algorytm`) przepisane na format ROLA → KONTEKST PROJEKTU → ZADANIE → PLIKI REFERENCYJNE → WYMAGANIA → PROCEDURA (Write + Bash z `yaml.safe_load` + `odswiez_rezysera.py`). Plik schudł z ~1170 do ~660 linii (-510): wycięliśmy ~500 linii literalnych przykładów YAML, dodaliśmy struktualne sekcje. Tradeoff: prompt zakłada że AI ma dostęp do projektu (Claude Code, Cursor, Aider), nie zwykły chatbot.
+- **Trzy podtypy akcentów** rozdzielone (commit `17b2e7c`): `TYP_AKCENT` (fonetyczny), `TYP_AKCENT_OCZYSZCZENIE`, `TYP_AKCENT_NAPRAWIACZ`. Manager dotąd traktował wszystkie jako fonetyczne — `naprawiacz_tagow` w paczce FR generował absurdalny prompt o transliteracji „Français → fr". Teraz: `kategoria: oczyszczenie` (heurystyka `bez_liczb` w id → `normalizuj_liczby: false`), `kategoria: naprawiacz` (iso pusty, wszystko OFF), `kategoria: akcent` (WALIDACJA SCENARIUSZA — agent przerywa jeśli `iso == jezyk_bazowy` lub iso pusty).
+
+### Pod maską
+
+- `core_poliglota._jezyk_kompletny` (od 13.9): wymóg piąty — ≥1 plik `*.yaml` w `rezyser/` (obok `podstawy.yaml`, `gui/ui.yaml`, `akcenty/` ≥1, `szyfry/` ≥1). Przesunięcie z 14.0+ na teraz: po 7 paczkach (PL, EN, FI, IS, IT, RU, DE) wzorzec 4 plików `rezyser/` per paczka stabilizował się, więc nowe języki są obsługiwane bez zmian w kodzie pod warunkiem `odswiez_rezysera.py`. `dostepne_jezyki_bazowe()` zwraca teraz `['de', 'en', 'fi', 'fr', 'is', 'it', 'pl', 'ru']` (8 języków).
+- `core_poliglota.py` zaktualizowany przez `odswiez_rezysera.py` — docstringi wrapperów `akcent_*` zawierają teraz `dictionaries/fr/akcenty/<>.yaml` w listach źródeł (8 z 11 unikalnych nazw plików obecnych w paczce FR).
+- `gui_manager_regul._zgadnij_typ_z_zaznaczenia` (od 13.9): rozpoznaje podtyp po prefiksie nazwy (`oczyszczenie*` / `naprawiacz_*`).
+- Szablon oczyszczenie: heurystyka `bez_liczb` w id → `normalizuj_liczby: false`. Szablon naprawiacz: iso="", `kategoria: naprawiacz`, wszystko OFF.
+- `prompt_akcent` fonetyczny: WALIDACJA SCENARIUSZA — agent przerywa jeśli `iso == jezyk_bazowy` lub iso pusty.
+- `CLAUDE.md` rozszerzony o regułę 7 sekcji „ZARZĄDZANIE TERMINALEM" — `golden_key.env` jest gitignorowany ale obecny na dysku, agent **może i powinien** odpalać `buduj_wielojezyczne_*.py` / `tlumacz_ai.py` bezpośrednio (nie odsyłać użytkownika), zatrzymać się dopiero przy 401/429/braku klucza.
+- Walidacja docs: `generuj_dokumentacje.py --waliduj` zielona (8 par dictionaries/manual po wszystkie kompletne języki).
+
+### Breaking changes
+
+- `core_poliglota._jezyk_kompletny` ma piąty warunek (`rezyser/` ≥1). Stub-paczki bez tego podfolderu (gdyby istniały, np. niedokończone fr/de/es z 13.7-) byłyby teraz wykluczane z `dostepne_jezyki_bazowe()`. Nie dotyczy żadnej istniejącej paczki — wszystkie 8 wdrożonych języków (PL, EN, FI, IS, IT, RU, DE, FR) ma `rezyser/` z ≥4 plikami.
 
 ---
 

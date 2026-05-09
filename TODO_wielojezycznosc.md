@@ -153,15 +153,16 @@ W tym projekcie istnieją polskie akcenty dla tych języków, ale notebook
 nie podał dla nich regexów skrótowców. Gdyby miały dostać Odwracacz,
 trzeba by dopisać regexy od zera. Wstępne podpowiedzi:
 
-- [ ] **Francuski (`fr`)** – typowe skrótowce:
-  - [ ] `p. ex.` → `par exemple`
-  - [ ] `c.-à-d.` → `c'est-à-dire`
-  - [ ] `etc.` → `et cetera`
-  - [ ] `M.` / `Mme` / `Mlle` → `Monsieur` / `Madame` / `Mademoiselle`
-  - [ ] `Dr` / `Pr` → `Docteur` / `Professeur`
-  - [ ] `No` / `n°` → `numéro`
-  - [ ] `p.` → `page`
-  - [ ] `cf.` → `confer`
+- [x] **Francuski (`fr`)** – wdrożone w 13.9 (paczka kompletna: 8 akcentów + 6 szyfrów + 4 reżyserów + GUI):
+  - [x] `p. ex.` → `par exemple`
+  - [x] `c.-à-d.` → `c'est-à-dire`
+  - [x] `etc.` → `et cetera`
+  - [x] `M.` / `Mme` / `Mlle` → `Monsieur` / `Madame` / `Mademoiselle`
+  - [x] `Dr` / `Pr` → `Docteur` / `Professeur` (forma francuska — bez kropki, akceptowana też z kropką)
+  - [x] `n°` / `No` → `numéro`
+  - [x] `p.` / `pp.` → `page` / `pages`
+  - [x] `cf.` → `confer`
+  - [x] `av. J.-C.` / `apr. J.-C.` → `avant Jésus-Christ` / `après Jésus-Christ`
 
 - [x] **Niemecki (`de`)** – wdrożone w 13.8 (paczka kompletna: 8 akcentów + 6 szyfrów + 4 reżyserów + GUI):
   - [x] `z.B.` → `zum Beispiel`
@@ -197,10 +198,13 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
    ```
    dictionaries/<kod>/
    ├── podstawy.yaml               # alfabet + ewentualna transliteracja
-   ├── akcenty/                    # WSZYSTKIE akcenty poza natywnym
+   ├── akcenty/                    # 8 akcentów obcych (poza natywnym) + 3 narzędzia
    │   ├── angielski.yaml          #   (dla <kod>=fi: pl/en/ru/... ALE NIE fi)
    │   ├── polski.yaml
-   │   └── ...
+   │   ├── ...
+   │   ├── oczyszczenie.yaml       # narzędzie czyszczenia (kategoria: oczyszczenie)
+   │   ├── oczyszczenie_bez_liczb.yaml
+   │   └── naprawiacz_tagow.yaml   # narzędzie (kategoria: naprawiacz)
    ├── szyfry/                     # te same 6 algorytmów co dictionaries/pl/szyfry/
    │   ├── cezar.yaml
    │   ├── jakanie.yaml
@@ -208,6 +212,11 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
    │   ├── samogloskowiec.yaml
    │   ├── typoglikemia.yaml
    │   └── waz.yaml
+   ├── rezyser/                    # 4 tryby Reżysera AI (od 13.9 — wymóg silnika)
+   │   ├── postprod_tytuly.yaml    #   regex nagłówków rozdziałów
+   │   ├── tryb_audiobook.yaml
+   │   ├── tryb_burza.yaml
+   │   └── tryb_skrypt.yaml
    └── gui/                        # tłumaczenia UI (dodawane w etapie 2 i 3)
        ├── ui.yaml                 #   etykiety przycisków, menu, tooltipów
        └── dokumentacja/           #   przetłumaczona instrukcja / readme
@@ -218,6 +227,21 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
    **smoke testem** z sekcji 6 tego pliku — puść wybrane zdania przez
    `_algo_odwracanie` i zweryfikuj, czy wynik pokrywa się z kolumną
    „oczekiwany wynik silnika".
+
+   > **Uwaga o `rezyser/` (od 13.9).** Pierwotnie pełna paczka trybów
+   > Reżysera AI miała być wymogiem silnika dopiero od **14.0+** — do tego
+   > czasu nowe języki mogły wystartować bez `rezyser/`, a brakujące tryby
+   > podmieniał angielski fallback z 13.2. Po wdrożeniu siódmej kompletnej
+   > paczki (DE w 13.8) wzorzec się ustabilizował: każda paczka 13.3–13.8
+   > i tak miała 4 pliki w `rezyser/`, więc `core_poliglota._jezyk_kompletny`
+   > **od 13.9** wymaga ≥1 plik `*.yaml` w tym podfolderze (piąty warunek
+   > kontraktu silnika obok `podstawy.yaml`, `akcenty/`, `szyfry/` i
+   > `gui/ui.yaml`). Manager Reguł też tworzy ten podfolder automatycznie
+   > przy nowym języku — nie ma już potrzeby ręcznego `mkdir`. Decyzja
+   > o przesunięciu w czasie celowa: kontrakt zostaje rozszerzony **wraz
+   > z** wdrożeniem ostatnich brakujących języków (`fr`, `es`), a nie po,
+   > żeby uniknąć stanu w którym 14.0 ekspresowo wymusza to, czego
+   > 13.9 jeszcze nie egzekwowało.
 
 2. **Tłumaczenie interfejsu.** Dodaj `dictionaries/<kod>/gui/ui.yaml`
    (etykiety przycisków, nagłówki paneli, komunikaty walidacji) — ten sam
@@ -374,22 +398,24 @@ w ogóle działają w silniku Poligloty, a dopiero potem inwestujemy czas
 | `Verðið var u.þ.b 50 þúsund krónur á hvern einstakling.`                | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `u\.þ\.b\.`)          |
 | `Fundarmaður fh ráðherra mætti á fundinn í stað hans.`                  | brak `.` po `fh`             | ⚠️ nie rozwinięte (regex: `fh\.`)               |
 
-> **Uwaga do sekcji 6.7–6.9:** poniższe języki (`fr`, `de`, `es`) nie mają
+> **Uwaga do sekcji 6.8–6.9:** poniższe języki (`de`, `es`) nie mają
 > regexów w notebooku źródłowym (sekcja 3.2 tego pliku). Smoketesty są więc
 > scenariuszami **docelowymi** — zadziałają dopiero, gdy dopiszemy
 > `dictionaries/<kod>/szyfry/odwracanie.yaml` z propozycjami rozwinięć z 3.2.
 > Do tego czasu silnik zwróci „⚠️ nie rozwinięte" także dla form poprawnych.
 
-### 6.7 Francuski (`fr`)
+### 6.7 Francuski (`fr`) ✅ zwalidowane w 13.9
 
-| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika                         |
+| Wejście                                                                 | Błąd redakcyjny              | Oczekiwany wynik silnika (13.9)                  |
 |-------------------------------------------------------------------------|------------------------------|--------------------------------------------------|
-| `Il a acheté plusieurs livres, p. ex des romans et des essais.`         | brak końcowej `.`            | ⚠️ nie rozwinięte (regex: `p\. ex\.`)           |
+| `Il a acheté plusieurs livres, p. ex des romans et des essais.`         | brak końcowej `.`            | ✅ rozwinięte (`\.?` — kropka opcjonalna)        |
 | `Le directeur, c.-a-d. Monsieur Dupont, a validé la décision.`          | `a` bez akcentu (`c.-a-d.`)  | ⚠️ nie rozwinięte (regex wymaga `c\.-à-d\.`)    |
 | `M Dupont a signé le contrat hier après-midi à la mairie.`              | brak `.` po `M`              | ⚠️ nie rozwinięte (regex: `M\.`)                |
-| `Le Dr Martin a confirmé le diagnostic rapidement au patient.`          | forma poprawna (w fr bez `.`) | ✅ rozwinięte → `Docteur` (regex: `Dr\b`)       |
+| `Le Dr Martin a confirmé le diagnostic rapidement au patient.`          | forma poprawna (w fr bez `.`) | ✅ rozwinięte → `Docteur` (regex: `Dr\.?\s`)    |
 | `Consultez la page no 42 pour plus de détails sur le sujet.`            | `no` zamiast `n°`            | ⚠️ nie rozwinięte (regex: `n°`)                 |
-| `On a visité etc des musées, mais aussi des parcs historiques.`         | `etc` bez końcowej `.`       | ⚠️ nie rozwinięte (regex: `etc\.`)              |
+| `On a visité etc des musées, mais aussi des parcs historiques.`         | `etc` bez końcowej `.`       | ✅ rozwinięte (`\.?` — kropka opcjonalna)        |
+
+> **Uwaga (13.9):** Implementacja używa wzorców `\.?` (kropka opcjonalna), więc silnik łapie 2 dodatkowe formy z brakującą kropką (testy #1 `p. ex` → `par exemple`, #6 `etc` → `et cetera`) ponad tabelę. To bonus, nie cofnięcie — wszystkie 15 form kanonicznych przechodzi.
 
 ### 6.8 Niemiecki (`de`)
 
