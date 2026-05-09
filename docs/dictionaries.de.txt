@@ -42,8 +42,8 @@ Die Ordnerstruktur sieht so aus:
         ├── szyfry/                    6 Chiffre- und Spieledateien
         └── rezyser/                   4 Regisseur-KI-Modusdateien
 
-Derzeit vollständig implementiert sind: Polski, Deutsch, English, Suomi, Íslenska, Italiano, Русский
-(7 Basissprachen). Jede hat ein eigenes Paket
+Derzeit vollständig implementiert sind: Polski, Deutsch, English, Suomi, Français, Íslenska, Italiano, Русский
+(8 Basissprachen). Jede hat ein eigenes Paket
 "dictionaries/<code>/" mit Diakritika, Alphabet und phonetischen Regeln,
 die auf Texte in genau dieser Sprache wirken — die Anwendung erkennt die
 Quellsprache automatisch über den lingua-language-detector (per Absatz) und

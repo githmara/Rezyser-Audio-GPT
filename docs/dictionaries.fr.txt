@@ -1,0 +1,245 @@
+Dictionnaires de Polyglotte et Réalisateur — Mode d'emploi pour tous
+=====================================================================
+
+Salut ! Si vous lisez ce fichier, c'est que vous avez jeté un œil au dossier « dictionaries/ » à côté de l'application Réalisateur Audio GPT et que vous vous demandez ce que sont ces fichiers aux extensions étranges « .yaml ». Pas de panique — il n'est pas nécessaire de connaître la programmation ou Python pour comprendre ce qui se passe ici, et avec un peu de courage vous pouvez même y ajouter quelque chose à vous.
+
+Ce fichier est rédigé dans une langue simple pour les écrivains, linguistes, enseignants, parents et plus généralement les curieux. Si vous connaissez les bases de la programmation et que vous cherchez une documentation détaillée du format des fichiers YAML (avec listes de champs, regex, règles du pipeline de traitement), consultez le fichier « README.md » dans le même dossier — mais attention, ce fichier n'est disponible que si vous avez cloné le dépôt depuis GitHub. Dans les paquets de version téléchargés depuis l'onglet Releases, les fichiers Markdown sont filtrés (pour éviter qu'y atterrissent par erreur, par exemple, vos bibles du monde avec des spoilers), donc seul ce fichier « .txt » parvient aux utilisateurs finaux.
+
+Qu'y a-t-il là-dedans ?
+-----------------------
+
+Le dossier « dictionaries/ » est une bibliothèque de règles utilisées par Polyglotte (un outil pour les traductions et accents) et par le moteur interne du Réalisateur. Jusqu'à la version 12.0, toutes ces règles étaient « intégrées » dans le code Python — si vous vouliez ajouter un nouvel accent ou changer les règles, il fallait demander à un programmeur. Depuis la version 13.0, tout est sauvegardé dans de simples fichiers texte (extension « .yaml » — ce n'est que du texte formaté d'une manière particulière). Vous les ouvrez avec n'importe quel éditeur (Bloc-notes, VS Code, Notepad++) et les modifiez comme n'importe quel autre document.
+
+La structure du dossier est la suivante :
+
+    dictionaries/
+    └── pl/              dossier de la langue de base (polonais)
+        ├── podstawy.yaml              diacritiques polonais + alphabet
+        ├── akcenty/                   11 fichiers d'accents
+        ├── szyfry/                    6 fichiers de chiffrements et jeux
+        └── rezyser/                   4 fichiers de modes du Réalisateur IA
+
+Sont actuellement entièrement implémentées : Polski, Deutsch, English, Suomi, Français, Íslenska, Italiano, Русский
+(8 langues de base). Chacune dispose de son propre pack
+« dictionaries/<code>/ » avec ses diacritiques, son alphabet et ses règles phonétiques
+qui opèrent sur le texte dans cette langue spécifique — l'application détecte automatiquement la langue d'origine via lingua-language-detector (par paragraphe) et charge le pack approprié pour chaque fragment séparément. D'autres langues sont en préparation (un pack complet exige « podstawy.yaml », « gui/ui.yaml » et au moins un fichier dans « akcenty/ » et « szyfry/ »).
+
+Qu'est-ce qu'un accent ?
+------------------------
+
+Un accent est un ensemble de règles qui « altèrent » le texte de manière à ce que le lecteur d'écran (par exemple NVDA) le lise avec une voix de langue étrangère. Par exemple, l'accent finnois remplace « sz » par « s », « w » par « v », et les diacritiques par leurs versions simplifiées — résultat : le texte sonne comme si un Finlandais d'Helsinki venait juste d'apprendre la langue. Il ne s'agit pas d'une véritable translittération, mais d'une distorsion intentionnelle et amusante à des fins narratives.
+
+Accents disponibles (8 langues) :
+
+- anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
+- français (Thomas/Amelie dans Vocalizer, Julie dans OneCore)
+- allemand (Markus/Stefan dans Vocalizer, Katja/Hedda dans OneCore)
+- espagnol (Jorge/Monica dans Vocalizer, Helena dans OneCore)
+- polonais (Ewa dans Vocalizer, Paulina dans OneCore)
+- finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
+- islandais (uniquement OneCore Gudrun et eSpeak gratuit — Vocalizer
+  n'a pas de voix islandaise !)
+- russe (Milena dans Vocalizer, Irina/Pavel/Yuri dans OneCore — celui-ci
+  est spécial car au lieu d'« altérer » les lettres latines il effectue une
+  translittération complète en cyrillique ; sans cela, la voix russe
+  n'aurait rien à prononcer)
+
+De plus, dans le menu des accents, il y a deux options « de nettoyage sans accent » :
+l'une sans normalisation des nombres, l'autre avec normalisation (remplace « 15 » par
+« quinze » avant le traitement, parce qu'un étranger ne fléchirait sans doute pas correctement ce nombre — ce qui ajoute de l'authenticité), et le « Réparateur de Balises », qui se contente d'insérer dans le fichier le code de langue ISO sans altérer le contenu (un sauvetage quand votre fichier déjà traduit est sorti avec un code de langue erroné).
+
+Qu'est-ce qu'un chiffrement ?
+-----------------------------
+
+Les chiffrements sont des jeux textuels pour énigmes, exercices linguistiques, casse-tête. Contrairement aux accents, ils NE sont PAS orientés vers une voix spécifique du synthétiseur — ils déforment simplement le texte selon une règle précise. Chiffrements disponibles (6) :
+
+1. Inverseur de Texte (lecture à l'envers)
+   Chaque phrase est inversée caractère par caractère, en conservant la
+   majuscule au début et le point/point d'exclamation/point d'interrogation
+   à la fin. Avant l'inversion, le script développe les abréviations
+   françaises (par ex., p. ex., c.-à-d., etc., M., Dr...), car sans cela,
+   après l'inversion, des absurdités du type « .xe .p » apparaîtraient.
+
+   Inspiration : mission de la version polonaise de l'émission « The Traitors. Zdrajcy ».
+   L'animatrice a fait écouter aux participants une chanson populaire pour enfants
+   diffusée à l'envers. Les réactions étaient du style « quelle langue est-ce ? arménien ?
+   hongrois ? finnois ? » — alors qu'il s'agissait d'une mélodie connue depuis l'enfance
+   tirée d'un dessin animé. Il s'est avéré ensuite que l'équipe en forêt avait reçu
+   les paroles de la chanson à l'envers et devait chanter dans cette version-là —
+   l'équipe au château devait l'enregistrer, l'inverser et en théorie récupérer la
+   chanson à deviner.
+
+   Exactement le même malentendu amusant se produit quand on fait passer notre
+   Inverseur par un synthétiseur vocal. Excellent pour les énigmes thématiques,
+   escape rooms, jeux de fête.
+
+2. Typoglycémie (milieu des mots mélangé)
+   Effet psycholinguistique classique : « Slon une étdue de l'Univesritè de
+   Cambrgide, l'odrre des lerttes dnas un mot n'a pas d'imptornace, sleue cmtope
+   que la prerimèe et la dirneèe lretste sniot à la bnone palce. » Le script mélange
+   aléatoirement le milieu de chaque mot de plus de 4 caractères, le premier et le dernier
+   caractère restent à leur place. Excellent pour tester « ce que je vois vraiment et
+   ce que mon cerveau me suggère ».
+
+3. Téléphone Cassé / Dialecte Serpent
+   Chaque « s », « z » ou « ss » est aléatoirement allongé en un sifflement de longueur
+   4-8 caractères. Inspiration : Snecko du jeu « Slay the Spire ». Effet : le texte
+   sonne comme s'il était lu par un serpent avec un défaut de prononciation. Excellent pour
+   les doublages de personnages serpents confus ou de robots défectueux avec un sifflement.
+
+4. Vocaloïde (tout résonne en « o »)
+   Chaque voyelle du texte est remplacée par « o », en conservant les
+   adoucissements (les digrammes français comme « ai », « ou », « eu » s'effondrent en « oo ») :
+   « Bonjour, madame » → « Bonoor, modomo ». Plus le texte est long,
+   plus l'effet est drôle — et le lecteur d'écran le lit avec une totale
+   conviction, sans tenter de le décoder.
+
+5. Bégaiement Intense / Robot Endommagé
+   Ajoute des bégaiements en début de mot : « ordinateur » → « or-or-or-ordinateur »,
+   « douche » → « do-do-douche ». Les mots de moins de 3 caractères sont ignorés.
+   Si la deuxième lettre du mot est une consonne, les deux premières sont répétées
+   (cela sonne plus naturel) ; si c'est une voyelle — seule la première l'est.
+
+6. Chiffrement de César (classique)
+   Le plus ancien chiffrement documenté de l'histoire (utilisé déjà dans la
+   Rome antique). Chaque lettre est décalée de N positions dans l'alphabet français
+   (40 lettres, avec diacritiques : ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÇÉÈÊËÎÏÔÙÛÜŸ). Le décalage est saisi
+   dans l'interface graphique dans le champ numérique ; si vous saisissez 0, l'application
+   choisira une valeur aléatoire entre 1 et 39 et l'affichera dans un message, afin
+   que vous puissiez ensuite déchiffrer le message. Les caractères hors
+   de l'alphabet (chiffres, espaces, ponctuation) restent inchangés.
+
+Qu'est-ce que le « mode Réalisateur » ?
+---------------------------------------
+
+Le dossier « rezyser/ » contient 4 fichiers décrivant les modes de travail du Studio Principal du Réalisateur de l'application :
+
+- tryb_burza.yaml      — Brainstorming (planification de l'intrigue, 3 options
+                         de développement de l'histoire, directive anti-clôture)
+- tryb_skrypt.yaml     — Scénario Brut (balises [SFX], [Speaker : émotion],
+                         phonétique des personnages)
+- tryb_audiobook.yaml  — Livre Audio Traditionnel (prose littéraire pure,
+                         interdiction des résumés et conclusions)
+- postprod_tytuly.yaml — attribution de titres littéraires aux chapitres après
+                         la génération de toute l'histoire
+
+À l'intérieur de chacun de ces fichiers, la partie la plus précieuse est le « prompt
+système » — une longue instruction pour l'intelligence artificielle sur la façon
+de se comporter dans ce mode. Si vous sentez que, par exemple, le mode
+Livre Audio écrit « trop fleuri » ou que Brainstorming propose trop
+souvent des solutions magiques, vous pouvez ajuster ces textes selon votre goût,
+les sauvegarder, et l'application chargera votre version au prochain démarrage.
+Zéro programmation.
+
+Comment commencer à s'amuser — trois niveaux de difficulté
+----------------------------------------------------------
+
+NIVEAU 1 — petits ajustements d'un accent existant
+
+Imaginez que l'accent anglais de l'application remplace « ch » par « sh », mais
+vous pensez qu'un Anglais dirait plutôt « tch ». Aucun problème.
+
+1. Lancez l'application et allez dans le Gestionnaire de Règles (touche Ctrl+4 ou
+   quatrième bouton de la barre).
+2. Dans l'arborescence de fichiers à gauche, développez « fr » → « akcenty » et cliquez sur
+   « angielski.yaml ».
+3. Cliquez sur le bouton « Ouvrir dans l'éditeur de texte ». Le fichier s'ouvrira dans le
+   Bloc-notes Windows (ou votre éditeur de texte par défaut).
+4. Faites défiler vers le bas jusqu'à la section « zamiany: ». Trouvez la ligne avec le
+   motif « ch » et changez la valeur « zamiana » avec celle qui vous convient.
+5. Sauvegardez le fichier (Ctrl+S), fermez l'éditeur.
+6. Retournez au Gestionnaire de Règles et cliquez sur « Actualiser l'arborescence », puis
+   fermez et relancez l'application. Votre modification est déjà active.
+
+NIVEAU 2 — ajouter un nouvel accent par duplication
+
+Vous voulez ajouter un accent suédois ou danois ? Commencez par celui qui ressemble
+le plus à un existant.
+
+1. Dans le Gestionnaire de Règles, sélectionnez par exemple « finski.yaml » (le finnois
+   est phonétiquement proche du suédois) et cliquez sur « Dupliquer le fichier sélectionné ».
+2. Le Gestionnaire demandera un nouveau nom — saisissez par exemple « szwedzki » (en
+   minuscules, sans espaces, sans diacritiques).
+3. Le nouveau fichier s'ouvrira dans l'éditeur. Modifiez les champs :
+      - « etykieta » — ce que vous verrez dans le menu de l'application, par exemple
+        « Suédois (Alva / Oskar — OneCore/Vocalizer) »
+      - « opis » — courte description pour vous-même pour l'avenir
+      - « iso » — code de langue à deux lettres, pour le suédois « sv »
+4. Ajustez la liste des « zamiany » à la phonétique suédoise (par exemple,
+   ajoutez « å → o », « ö → ö », supprimez ou modifiez celles spécifiques au
+   finnois).
+5. Sauvegardez, retournez à la Page d'accueil, cliquez sur « 🔄 Actualiser les accents du
+   Réalisateur depuis YAML » et relancez l'application. Le nouveau suédois apparaîtra dans le
+   menu des accents de Polyglotte (et si vous ajoutez à la Bible du Monde la balise
+   « [Marek] - a un accent suédois », le Réalisateur le reconnaîtra
+   automatiquement et l'appliquera à ses dialogues).
+
+NIVEAU 3 — créer quelque chose de complètement nouveau
+
+Vous voulez un argot scolaire ? La langue des chevaliers anciens ? Un langage
+cryptique ? Un chiffrement pour les parents devant les enfants ?
+
+1. Dans le Gestionnaire de Règles, cliquez sur « Nouveau fichier de règles… ».
+2. Choisissez le type (accent, chiffrement de substitution, mode Réalisateur,
+   nouvelle langue de base, chiffrement algorithmique). Pour les cas courants,
+   l'application créera immédiatement un modèle YAML prêt — vous le modifiez
+   comme au niveau 2.
+3. Pour les cas plus complexes (algorithmes du type « mélange des terminaisons »
+   ou toute une nouvelle langue de base), le Gestionnaire vous montrera un prompt prêt
+   à coller dans ChatGPT ou Claude. L'IA générera un fichier YAML complet,
+   vous le copierez simplement dans le dossier. Pas besoin de savoir programmer —
+   il suffit de savoir copier-coller.
+
+Quelques idées pour s'amuser
+----------------------------
+
+- Classe d'école pendant le cours de français : exercice « lis un
+  fragment d'un livre dans Polyglotte avec un accent russe — reconnais-tu l'auteur ? ».
+  Particulièrement précieux pour les enfants non voyants, car ils reçoivent une
+  sonorité intéressante sans devoir lire l'affiche avec les yeux.
+
+- Escape room en bibliothèque : préparez un fragment d'un poème avec
+  l'Inverseur de texte, imprimez-le (ou envoyez-le dans un message), les participants
+  doivent le lire à voix haute et l'enregistrer, puis le repasser à l'envers,
+  ou simplement le scanner eux-mêmes des yeux du début à la fin.
+  La clé du casier est donnée à celui qui reconnaît le titre du poème.
+
+- Livre audio domestique pour la famille âgée : enregistrez le conte « Le Vilain
+  Petit Canard » avec différents accents (narrateur anglais, maman cane italienne,
+  papa canard allemand) et montez-le dans Audacity. Particulièrement amusant pour
+  les grands-parents, parce qu'ils distinguent « qui parle maintenant » rien qu'à la sonorité.
+
+- Exercice pour acteurs : faites passer votre réplique par le Dialecte Serpent
+  et essayez de la répéter en direct. Ça travaille le sifflement, la respiration,
+  le contrôle de la langue.
+
+- Carte d'anniversaire avec énigme : décalez les vœux avec le Chiffrement de
+  César de 3 positions, ajoutez « clé : décale chaque lettre du nombre d'années
+  que tu as aujourd'hui ». Le fêté doit trouver lui-même le déchiffrement. (Fonctionne
+  le mieux pour les enfants de 7-12 ans ; les adultes s'en aperçoivent généralement
+  rapidement.)
+
+Quelque chose peut-il se casser ?
+---------------------------------
+
+En fait non. L'application charge les fichiers YAML dynamiquement et si l'un d'eux
+est mal écrit, elle l'ignore tout simplement et affiche un avertissement
+au démarrage. Le reste des règles fonctionne comme si de rien n'était.
+
+Le pire qui puisse arriver, c'est que le nouveau fichier n'apparaisse simplement
+pas dans le menu de l'application. Dans ce cas :
+
+- retournez au Gestionnaire de Règles, vérifiez si le fichier est visible dans l'arborescence,
+- rouvrez-le dans l'éditeur de texte et comparez la structure avec
+  celle des fichiers voisins (indentations, deux-points, guillemets),
+- si vous êtes vraiment bloqué — copiez le contenu de votre fichier, ouvrez
+  ChatGPT et écrivez « j'ai un fichier YAML que l'application ne charge pas,
+  trouve l'erreur et montre la version corrigée ». Collez le fichier.
+  L'IA le corrige généralement en quelques secondes.
+
+Ne supprimez pas les fichiers originaux du pack (angielski.yaml, cezar.yaml,
+podstawy.yaml etc.) — il vaut mieux les « cacher » en changeant l'extension de
+« .yaml » en « .yaml.backup », si vous voulez qu'ils disparaissent du menu. Si
+vous changez d'avis plus tard, il suffit de restaurer l'extension.
+
+Bon amusement !
