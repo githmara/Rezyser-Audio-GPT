@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import zipfile
 import subprocess
@@ -46,6 +47,7 @@ if sys.platform == "win32":
 #              w pliku VERSION — niezależnie od liczby paczek językowych.
 
 SCIEZKA_VERSION = os.path.join(os.path.dirname(__file__), "VERSION")
+SCIEZKA_REQUIREMENTS = os.path.join(os.path.dirname(__file__), "requirements.txt")
 
 # Mapowanie kodów ISO języków na wpisy Inno Setupa (nazwa + plik .isl).
 #
@@ -149,6 +151,117 @@ def odczytaj_wersje() -> str:
             "(e.g. 13.4 or 13.4-WIP)."
         )
     return wartosc
+
+
+def wczytaj_wymagane_pakiety() -> list[str]:
+    """Czyta ``requirements.txt`` i zwraca listę nazw dystrybucji PyPI.
+
+    Specyfikatory wersji (``==``, ``>=``), extras (``[fast]``) i markers
+    (``; python_version >= "3.10"``) zostają obcięte — interesuje nas wyłącznie
+    nazwa, którą poda się do ``importlib.metadata.version()``. Komentarze
+    (``# ...``) i linie zaczynające się od ``-`` (np. ``-e ./mylib``,
+    ``-r other.txt``) są pomijane — to konstrukcje pip-a, nie pakiety, więc
+    nie ma sensu pytać o ich wersję.
+    """
+    if not os.path.exists(SCIEZKA_REQUIREMENTS):
+        raise RuntimeError(
+            f"requirements.txt not found at {SCIEZKA_REQUIREMENTS}. "
+            "Cannot verify the runtime environment without the dependency manifest."
+        )
+    pakiety: list[str] = []
+    with open(SCIEZKA_REQUIREMENTS, "r", encoding="utf-8") as fh:
+        for linia in fh:
+            tekst = linia.strip()
+            if not tekst or tekst.startswith("#") or tekst.startswith("-"):
+                continue
+            nazwa = re.split(r"[<>=!~;\s\[]", tekst, 1)[0].strip()
+            if nazwa:
+                pakiety.append(nazwa)
+    if not pakiety:
+        raise RuntimeError(
+            f"{SCIEZKA_REQUIREMENTS} contains no installable packages — "
+            "release verification needs at least one entry to be meaningful."
+        )
+    return pakiety
+
+
+def weryfikuj_runtime(sciezka_python: str) -> None:
+    """Sprawdza, czy ``runtime/python.exe`` to faktyczny interpreter Pythona
+    z kompletem zależności wydawniczych z ``requirements.txt``.
+
+    Zamiast minimalnego ``print('OK')`` (które potwierdzało tylko, że proces się
+    uruchamia, ale milczało o tym, czy wxpython/openai/lingua faktycznie są
+    zainstalowane), odpalamy w runtime jednorazowy skrypt: dla każdego pakietu
+    z manifestu pyta ``importlib.metadata.version()`` o numer wersji, a brak
+    rzuca ``PackageNotFoundError``. Logika dystynkcji błędów na końcu rozróżnia
+    dwa scenariusze:
+
+    * **brak pakietów** (subprocess wraca z ``__MISSING__:...`` na stderr) →
+      runtime istnieje, ale jest niegotowy do wydania; fix to
+      ``runtime/python.exe -m pip install -r requirements.txt``;
+    * **runtime/python.exe nie jest Pythonem** (timeout, non-zero exit bez
+      sygnału ``__MISSING__``) → trzeba podmienić cały folder ``runtime/``.
+
+    Używamy ``importlib.metadata.version`` zamiast ``importlib.import_module``,
+    bo czyta tylko metadata pip-a — nie ładuje natywnych bibliotek wxpython
+    (które bywają cięższe i potencjalnie psują output stderr). To wystarczy,
+    żeby stwierdzić „pip uważa, że jest zainstalowane" — a to dokładnie to
+    pytanie, na które chcemy odpowiedzi przed pakowaniem release'u.
+    """
+    try:
+        pakiety = wczytaj_wymagane_pakiety()
+    except RuntimeError as exc:
+        print(f"❌ FATAL: {exc}")
+        sys.exit(1)
+
+    skrypt_check = (
+        "import sys\n"
+        "from importlib.metadata import version, PackageNotFoundError\n"
+        f"pakiety = {pakiety!r}\n"
+        "brakujace = []\n"
+        "for nazwa in pakiety:\n"
+        "    try:\n"
+        "        print(f'   {nazwa} == {version(nazwa)}')\n"
+        "    except PackageNotFoundError:\n"
+        "        brakujace.append(nazwa)\n"
+        "        print(f'   {nazwa} == [MISSING]')\n"
+        "if brakujace:\n"
+        "    sys.stderr.write('__MISSING__:' + ','.join(brakujace) + '\\n')\n"
+        "    sys.exit(1)\n"
+    )
+
+    try:
+        wynik = subprocess.run(
+            [sciezka_python, "-c", skrypt_check],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=15,
+        )
+    except subprocess.TimeoutExpired:
+        print("❌ FATAL: 'runtime/python.exe' stopped responding (timeout). It is probably not Python.")
+        sys.exit(1)
+    except Exception as exc:
+        print(f"❌ FATAL: Cannot launch 'runtime/python.exe'. Details: {exc}")
+        sys.exit(1)
+
+    if wynik.stdout:
+        print(wynik.stdout, end="")
+
+    if wynik.returncode != 0:
+        if wynik.stderr and "__MISSING__:" in wynik.stderr:
+            brakujace = wynik.stderr.split("__MISSING__:", 1)[1].strip().rstrip(",")
+            print()
+            print(f"❌ FATAL: 'runtime/' is missing release dependencies: {brakujace}")
+            print("The runtime exists, but it isn't release-ready yet. Install the manifest:")
+            print(f"   {sciezka_python} -m pip install -r requirements.txt")
+            sys.exit(1)
+        print("❌ FATAL: 'runtime/python.exe' exists but does not behave like Python!")
+        if wynik.stderr:
+            print("Subprocess stderr:")
+            print(wynik.stderr)
+        print("Make sure you put a proper Portable Python build there, not an installer or some other program.")
+        sys.exit(1)
 
 
 def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
@@ -279,29 +392,15 @@ def main() -> None:
         print("Drop a portable Python into the 'runtime/' folder before building a release.")
         sys.exit(1)
 
-    # 2. Validate that it behaves like a real Python interpreter.
-    print("🔍 Verifying the runtime Python environment...")
-    try:
-        wynik = subprocess.run(
-            [sciezka_python, "-c", "print('OK')"],
-            capture_output=True,
-            text=True,
-            timeout=3,  # guard against a hang
-        )
-
-        if "OK" not in wynik.stdout:
-            print("❌ FATAL: 'runtime/python.exe' exists but does not behave like Python!")
-            print("Make sure you put a proper Portable Python build there, not an installer or some other program.")
-            sys.exit(1)
-
-    except subprocess.TimeoutExpired:
-        print("❌ FATAL: 'runtime/python.exe' stopped responding (timeout). It is probably not Python.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"❌ FATAL: Cannot launch 'runtime/python.exe'. Details: {e}")
-        sys.exit(1)
-
-    print("✅ Portable Python environment verified.\n")
+    # 2. Validate that it behaves like a real Python interpreter AND that every
+    #    package from requirements.txt is installed inside it. The old check
+    #    just ran `print('OK')` — that confirmed the binary launches, but said
+    #    nothing about whether wxpython/openai/lingua etc. are present. Result:
+    #    the build would happily pack a runtime/ that throws ModuleNotFoundError
+    #    on first launch at the user. weryfikuj_runtime() closes that gap.
+    print("🔍 Verifying the runtime Python environment + release dependencies...")
+    weryfikuj_runtime(sciezka_python)
+    print("✅ Portable Python environment + release dependencies verified.\n")
 
     # 3. Read the release version (single source of truth: VERSION in repo root).
     print(f"🔍 Detecting release version ({SCIEZKA_VERSION})...")
