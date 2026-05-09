@@ -56,7 +56,15 @@ Przy każdym release commicie, jeśli w danym cyklu zmieniło się cokolwiek z l
 
 ## Procedura (w tej kolejności)
 
-### Krok 0 — Odśwież reżysera (ZAWSZE po dodaniu/usunięciu pliku akcent*.yaml)
+### Krok 0a — Bump VERSION (KRYTYCZNE: PRZED jakąkolwiek regeneracją docs!)
+```bash
+# zaktualizuj plik VERSION w roocie repo, np. 13.8.1 → 13.9
+```
+**Dlaczego TUTAJ, a nie w commicie release'u?** `generuj_dokumentacje.py` rozwija placeholder `{numer_wersji}` z pliku VERSION przy KAŻDYM wywołaniu. Jeśli zwalidujesz docs (Krok 2) jeszcze ze starym numerem, zcommitujesz docs ze starym numerem, a potem dopiero bumpniesz VERSION w commicie release'u — `build_release.py` zadziała: wewnątrz wywoła `generuj()` z nowym VERSION, regeneruje wszystkie 16 plików `docs/*.txt` z nowym tytułem („Version 13.9" zamiast „Version 13.8.1") i wygeneruje **niezcommitowany diff** zaraz po buildzie. Symptom: `git status` po `build_release.py` pokazuje `modified: docs/manual.<iso>.txt × 8` — co kontradyktuje obietnicy „dokumentacja zcommitowana ręcznie przed release'em".
+
+Zasada: **najpierw bump VERSION, potem regeneracja docs, potem release commit z VERSION + RELEASE_NOTES + TODO** (sam VERSION można zcommitować z release commitem — chodzi o to, żeby docs były generowane już z docelowym numerem). Plik VERSION jest mały (jedna linia) i bumpa robisz raz na release — nie ma kosztu „o, zapomniałem zacommitować VERSION zanim odpaliłem `--waliduj`", bo Krok 4 i tak go scali.
+
+### Krok 0b — Odśwież reżysera (ZAWSZE po dodaniu/usunięciu pliku akcent*.yaml)
 ```bash
 .venv/Scripts/python odswiez_rezysera.py
 ```
@@ -98,10 +106,10 @@ Zweryfikuj czy zmiany są sensowne: numer wersji zaktualizowany, lista języków
 git add docs/
 git commit -m "docs: regeneracja po 13.X — <krótki opis zmian>"
 ```
-Dopiero po tym robi się commit release'u (VERSION, RELEASE_NOTES, TODO).
+Dopiero po tym robi się commit release'u (VERSION wraz z RELEASE_NOTES i TODO — sam plik VERSION był już zaktualizowany w Kroku 0a i czeka jako unstaged change w `git status`, więc `git add VERSION RELEASE_NOTES.md TODO_wielojezycznosc.md && git commit` zamknie release jednym commitem).
 
-### Uwaga o build_release.py
-`build_release.py` i tak wywołuje `generuj()` wewnętrznie — to jest celowe (paczka ZIP zawsze ma świeże docs). Po pre-commicie przez Ciebie `git status` po buildzie pokaże „nothing to commit" zamiast zmienionych plików, bo wygenerowana treść będzie identyczna z tą w repo.
+### Uwaga o build_release.py — sanity check
+`build_release.py` i tak wywołuje `generuj()` wewnętrznie — to jest celowe (paczka ZIP zawsze ma świeże docs). Po prawidłowym pre-commicie (Krok 0a → 2 → 4 w tej kolejności) `git status` po buildzie pokaże „nothing to commit" zamiast zmienionych plików, bo wygenerowana treść będzie identyczna z tą w repo. Jeśli `git status` po buildzie pokazuje `modified: docs/manual.<iso>.txt`, to znaczy że Krok 0a (bump VERSION przed regeneracją) został pominięty albo VERSION zmieniony pomiędzy Krokiem 2 a release commitem — diff pokaże stary numer wersji w nagłówkach i należy zrobić fixup commit `docs: bump numer wersji w docs/ po regeneracji`.
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
