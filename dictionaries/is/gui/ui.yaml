@@ -808,14 +808,14 @@ manager:
   wynik_naglowek_name: "Staða stofnunar regluskráar"
   wynik_lbl_uwagi: "Næstu skref:"
   wynik_uwagi_name: "Athugasemdir við búna reglu"
-  wynik_lbl_prompt: "Beiðni fyrir AI (líma í ChatGPT / Claude):"
+  wynik_lbl_prompt: "Beiðni fyrir AI-umboðsmann með aðgang að verkefninu (Claude Code / Cursor / Aider):"
   wynik_prompt_name: "Beiðni til að líma í AI spjallmenni"
   wynik_btn_kopiuj: "📋  Afrita beiðni í klemmuspjald"
   wynik_btn_kopiuj_name: "Hnappur Afrita beiðni AI í klemmuspjald"
   wynik_skopiowano_tytul: "Afritað"
   wynik_skopiowano_tresc: |-
     Beiðni hefur verið afrituð í klemmuspjald.
-    Líma hana (Ctrl+V) í ChatGPT eða Claude.
+    Límdu hana (Ctrl+V) í AI-umboðsmann þinn með aðgang að verkefninu (Claude Code, Cursor, Aider) — umboðsmaðurinn vistar skrána og keyrir nauðsynleg forskrift sjálfur.
   wynik_schowek_nieudany_tytul: "Klemmuspjald ekki tiltækt"
   wynik_schowek_nieudany_tresc: |-
     Ekki tókst að opna kerfisklemmuspjald.

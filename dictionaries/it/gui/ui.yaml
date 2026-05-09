@@ -808,14 +808,14 @@ manager:
   wynik_naglowek_name: "Stato di creazione del file di regole"
   wynik_lbl_uwagi: "Passi successivi:"
   wynik_uwagi_name: "Note sulla regola creata"
-  wynik_lbl_prompt: "Prompt per l'AI (incolla in ChatGPT / Claude):"
+  wynik_lbl_prompt: "Prompt per un agente AI con accesso al progetto (Claude Code / Cursor / Aider):"
   wynik_prompt_name: "Prompt da incollare nel chatbot AI"
   wynik_btn_kopiuj: "📋  Copia il prompt negli appunti"
   wynik_btn_kopiuj_name: "Pulsante Copia prompt AI negli appunti"
   wynik_skopiowano_tytul: "Copiato"
   wynik_skopiowano_tresc: |-
     Il prompt è stato copiato negli appunti.
-    Incollalo (Ctrl+V) in ChatGPT o Claude.
+    Incollalo (Ctrl+V) nel tuo agente AI con accesso al progetto (Claude Code, Cursor, Aider) — l'agente salverà il file ed eseguirà gli script necessari da solo.
   wynik_schowek_nieudany_tytul: "Appunti non disponibili"
   wynik_schowek_nieudany_tresc: |-
     Impossibile aprire gli appunti di sistema.

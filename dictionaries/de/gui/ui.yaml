@@ -808,14 +808,14 @@ manager:
   wynik_naglowek_name: "Status der Regeldatei-Erstellung"
   wynik_lbl_uwagi: "Nächste Schritte:"
   wynik_uwagi_name: "Hinweise zur erstellten Regel"
-  wynik_lbl_prompt: "Prompt für AI (in ChatGPT / Claude einfügen):"
+  wynik_lbl_prompt: "Prompt für einen KI-Agenten mit Projektzugriff (Claude Code / Cursor / Aider):"
   wynik_prompt_name: "Prompt zum Einfügen in den AI-Chatbot"
   wynik_btn_kopiuj: "📋  Prompt in die Zwischenablage kopieren"
   wynik_btn_kopiuj_name: "Schaltfläche Prompt AI in die Zwischenablage kopieren"
   wynik_skopiowano_tytul: "Kopiert"
   wynik_skopiowano_tresc: |-
     Prompt wurde in die Zwischenablage kopiert.
-    Fügen Sie ihn (Ctrl+V) in ChatGPT oder Claude ein.
+    Fügen Sie ihn (Ctrl+V) in Ihren KI-Agenten mit Projektzugriff ein (Claude Code, Cursor, Aider) — der Agent speichert die Datei und führt das erforderliche Skript selbst aus.
   wynik_schowek_nieudany_tytul: "Zwischenablage nicht verfügbar"
   wynik_schowek_nieudany_tresc: |-
     Systemzwischenablage konnte nicht geöffnet werden.

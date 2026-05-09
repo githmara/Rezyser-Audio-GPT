@@ -807,14 +807,14 @@ manager:
   wynik_naglowek_name: "Rule file creation status"
   wynik_lbl_uwagi: "Next steps:"
   wynik_uwagi_name: "Notes on the created rule"
-  wynik_lbl_prompt: "AI prompt (paste into ChatGPT / Claude):"
+  wynik_lbl_prompt: "Prompt for an agentic AI with project access (Claude Code / Cursor / Aider):"
   wynik_prompt_name: "Prompt to paste into AI chatbot"
   wynik_btn_kopiuj: "📋  Copy prompt to clipboard"
   wynik_btn_kopiuj_name: "Copy AI prompt to clipboard button"
   wynik_skopiowano_tytul: "Copied"
   wynik_skopiowano_tresc: |-
     Prompt has been copied to the clipboard.
-    Paste it (Ctrl+V) into ChatGPT or Claude.
+    Paste it (Ctrl+V) into your agentic AI with project access (Claude Code, Cursor, Aider) — the agent will save the file and run any required script itself.
   wynik_schowek_nieudany_tytul: "Clipboard unavailable"
   wynik_schowek_nieudany_tresc: |-
     Failed to open system clipboard.

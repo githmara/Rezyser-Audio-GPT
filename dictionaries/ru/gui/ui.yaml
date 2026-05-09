@@ -808,14 +808,14 @@ manager:
   wynik_naglowek_name: "Статус создания файла правил"
   wynik_lbl_uwagi: "Дальнейшие шаги:"
   wynik_uwagi_name: "Замечания к созданному правилу"
-  wynik_lbl_prompt: "Подсказка для AI (вставьте в ChatGPT / Claude):"
+  wynik_lbl_prompt: "Подсказка для AI-агента с доступом к проекту (Claude Code / Cursor / Aider):"
   wynik_prompt_name: "Подсказка для вставки в чат-бота AI"
   wynik_btn_kopiuj: "📋  Скопировать подсказку в буфер обмена"
   wynik_btn_kopiuj_name: "Кнопка Копировать подсказку AI в буфер обмена"
   wynik_skopiowano_tytul: "Скопировано"
   wynik_skopiowano_tresc: |-
     Подсказка скопирована в буфер обмена.
-    Вставьте её (Ctrl+V) в ChatGPT или Claude.
+    Вставьте её (Ctrl+V) в вашего AI-агента с доступом к проекту (Claude Code, Cursor, Aider) — агент сам сохранит файл и запустит нужный скрипт.
   wynik_schowek_nieudany_tytul: "Буфер обмена недоступен"
   wynik_schowek_nieudany_tresc: |-
     Не удалось открыть системный буфер обмена.

@@ -815,14 +815,14 @@ manager:
   wynik_naglowek_name:   "Status utworzenia pliku reguł"
   wynik_lbl_uwagi:       "Dalsze kroki:"
   wynik_uwagi_name:      "Uwagi do utworzonej reguły"
-  wynik_lbl_prompt:      "Prompt dla AI (wklej do ChatGPT / Claude):"
+  wynik_lbl_prompt:      "Prompt dla agenta AI z dostępem do projektu (Claude Code / Cursor / Aider):"
   wynik_prompt_name:     "Prompt do wklejenia do chatbota AI"
   wynik_btn_kopiuj:      "📋  Skopiuj prompt do schowka"
   wynik_btn_kopiuj_name: "Przycisk Skopiuj prompt AI do schowka"
   wynik_skopiowano_tytul: "Skopiowano"
   wynik_skopiowano_tresc: |-
     Prompt został skopiowany do schowka.
-    Wklej go (Ctrl+V) do ChatGPT lub Claude.
+    Wklej go (Ctrl+V) do swojego agenta AI z dostępem do projektu (Claude Code, Cursor, Aider) — agent sam zapisze plik i odpali wymagany skrypt.
   wynik_schowek_nieudany_tytul: "Schowek niedostępny"
   wynik_schowek_nieudany_tresc: |-
     Nie udało się otworzyć schowka systemowego.

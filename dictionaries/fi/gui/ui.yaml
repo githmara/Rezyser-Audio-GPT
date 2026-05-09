@@ -808,14 +808,14 @@ manager:
   wynik_naglowek_name: "Sääntötiedoston luomisen tila"
   wynik_lbl_uwagi: "Seuraavat vaiheet:"
   wynik_uwagi_name: "Huomautuksia luodusta säännöstä"
-  wynik_lbl_prompt: "AI-kehote (liitä ChatGPT:hen / Claudeen):"
+  wynik_lbl_prompt: "Kehote tekoälyagentille, jolla on pääsy projektiin (Claude Code / Cursor / Aider):"
   wynik_prompt_name: "Kehote liitettäväksi AI-chatbotiin"
   wynik_btn_kopiuj: "📋  Kopioi kehote leikepöydälle"
   wynik_btn_kopiuj_name: "Kopioi AI-kehote leikepöydälle -painike"
   wynik_skopiowano_tytul: "Kopioitu"
   wynik_skopiowano_tresc: |-
     Kehote on kopioitu leikepöydälle.
-    Liitä se (Ctrl+V) ChatGPT:hen tai Claudeen.
+    Liitä se (Ctrl+V) tekoälyagentillesi, jolla on pääsy projektiin (Claude Code, Cursor, Aider) — agentti tallentaa tiedoston ja suorittaa tarvittavat skriptit itse.
   wynik_schowek_nieudany_tytul: "Leikepöytä ei ole käytettävissä"
   wynik_schowek_nieudany_tresc: |-
     Leikepöytää ei voitu avata.
