@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Komplettanleitung (Version 13.9 – Veröffentlichungsversion)
+Podręcznik Reżysera Audio AI - Komplettanleitung (Version 14.0 – Veröffentlichungsversion)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -358,7 +358,7 @@ Version 13.0 führt das vierte Werkzeug in der Leiste ein: den Regelmanager. Sie
 Warum YAML? Bis Version 12.0 waren alle Akzente, kreativen Modi und Filter „eingebettet“ im Python-Code. Das Hinzufügen eines neuen Akzents erforderte einen Programmierer. In Version 13.0 wurde alles in .yaml-Dateien im Ordner dictionaries/ ausgelagert — jeder, der Notepad öffnen kann, kann einen bestehenden Akzent feinjustieren („ersetze sz durch sh durch sch“) oder einen völlig neuen hinzufügen (schwedisch, dänisch, russischer Dialekt).
 
 Was Sie im Regelmanager finden:
-- Dateibaum — vollständige Liste aller YAML-Dateien in dictionaries/ mit Unterteilung in Quellsprachen (derzeit vollständig implementiert: Polski, Deutsch, English, Suomi, Français, Íslenska, Italiano, Русский) und Kategorien (akzente/, chifren/, regisseur/). Navigation mit Pfeiltasten wie im Windows-Dateiexplorer, vollständige NVDA-Unterstützung.
+- Dateibaum — vollständige Liste aller YAML-Dateien in dictionaries/ mit Unterteilung in Quellsprachen (derzeit vollständig implementiert: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский) und Kategorien (akzente/, chifren/, regisseur/). Navigation mit Pfeiltasten wie im Windows-Dateiexplorer, vollständige NVDA-Unterstützung.
 - Schaltfläche „📝  Im Texteditor öffnen“ — öffnet die ausgewählte Datei im Standard-Notepad des Systems. Sie bearbeiten, speichern, klicken auf „🔄  Baum aktualisieren“ und fertig.
 - Schaltfläche „📋  Ausgewählte Datei duplizieren“ — der schnellste Weg zu einem neuen Akzent: Sie nehmen eine bestehende Datei (z.B. finski.yaml), geben einen neuen Namen (z.B. schwedisch) an, der Manager erstellt eine Kopie mit dem Kommentar „ändern Sie die Felder label und description“ und öffnet sie im Editor.
 - Schaltfläche „➕  Neue Regeldatei…“ — Assistent mit Auswahl des Typs (Akzent, Chiffre, Regiemodus, neue Quellsprache, algorithmische Chiffre). Für einfache Fälle (Akzent, Chiffre vom Typ „Buchstabentausch“) erstellt der Assistent eine bearbeitbare YAML-Vorlage. Für Fälle, die einen Programmierer erfordern (neue Quellsprache, Algorithmus vom Typ „Wortmitte mischen“), generiert der Assistent einen Prompt für einen AI-Chatbot — Sie fügen ihn in ChatGPT ein, erhalten eine fertige YAML-Datei, speichern sie in dictionaries/ und fertig.
