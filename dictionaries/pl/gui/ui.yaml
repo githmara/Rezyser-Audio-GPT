@@ -777,6 +777,7 @@ manager:
   kreator_cb_name:       "Wybór typu nowego pliku reguł"
   kreator_opis_name:     "Opis wybranego typu reguły"
   kreator_lbl_id:        "Identyfikator (nazwa pliku):"
+  kreator_jezyk_bazowy_id_label: "Kod języka (ISO 639-1):"
   kreator_id_name:       "Pole identyfikator pliku"
   kreator_id_hint:       "np. szwedzki  (małe litery, bez spacji)"
   kreator_lbl_etykieta:  "Etykieta (widoczna w GUI):"
@@ -811,6 +812,7 @@ manager:
   wynik_sukces_naglowek: "✅  Utworzono plik:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
     ℹ️  Plik nie został utworzony (ten typ reguły wymaga kodu Pythona od programisty – patrz prompt dla AI poniżej).
+  wynik_naglowek_name:   "Status utworzenia pliku reguł"
   wynik_lbl_uwagi:       "Dalsze kroki:"
   wynik_uwagi_name:      "Uwagi do utworzonej reguły"
   wynik_lbl_prompt:      "Prompt dla AI (wklej do ChatGPT / Claude):"
@@ -833,7 +835,7 @@ manager:
   blad_tworzenia:        "Nie udało się utworzyć pliku:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Niepełna struktura języka"
   niepelna_struktura_tresc: |-
-    Plik podstawy.yaml zapisano, ale nie udało się utworzyć podfolderów akcenty/ i szyfry/:
+    Plik podstawy.yaml zapisano, ale nie udało się utworzyć podfolderów akcenty/, szyfry/, rezyser/ i gui/:
     {tresc_bledu}
 
     Utwórz je ręcznie w Eksploratorze plików, zanim uruchomisz Poliglotę – inaczej silnik wyrzuci błąd przy skanowaniu nowego języka.

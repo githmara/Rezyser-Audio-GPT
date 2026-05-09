@@ -333,30 +333,34 @@ def wariant_po_etykiecie(tryb: str, jezyk: str, etykieta: str) -> dict | None:
 def _jezyk_kompletny(kod: str) -> bool:
     """Czy folder ``dictionaries/<kod>/`` ma komplet plików pełnej obsługi?
 
-    Kryterium kompletności (spójne z TODO § 4 krok 1):
+    Kryterium kompletności:
 
       1. ``podstawy.yaml``            – alfabet + transliteracja (Cezar)
       2. ``gui/ui.yaml``              – tłumaczenie warstwy interfejsu
-      3. ``akcenty/<id>.yaml`` ≥ 1   – tryb Reżysera
+      3. ``akcenty/<id>.yaml`` ≥ 1   – tryb Poligloty
       4. ``szyfry/<id>.yaml``  ≥ 1   – tryb Szyfranta
+      5. ``rezyser/<id>.yaml`` ≥ 1   – tryb Reżysera
 
-    Folder ``rezyser/`` z trybami AI jest świadomie POMIJANY — w 13.x
-    to wciąż polskie prompty `gpt-4o`, nie kontrakt każdego języka
-    (do reanalizy w 14.x, gdy tryby Reżysera dostaną wielojęzyczne
-    prompty systemowe).
+    Wersja 13.9: kontrakt rozszerzony o wymóg co najmniej jednego pliku
+    w ``rezyser/``. Po wdrożeniu siedmiu kompletnych paczek (pl, en, fi,
+    is, it, ru, de — każda ma 4 pliki ``rezyser/*.yaml``) wiadomo, że
+    nowe języki są obsługiwane bez zmian w kodzie pod warunkiem
+    uruchomienia ``odswiez_rezysera.py`` po dodaniu trybów. Brak tego
+    folderu czyni paczkę „prawie gotową", ale dispatch Reżysera nie ma
+    z czego wystartować — więc to równoprawny warunek kompletności.
 
     Args:
         kod: dwuliterowy kod języka (nazwa folderu w ``dictionaries/``).
 
     Returns:
-        True gdy wszystkie cztery warunki spełnione, False przy stubach.
+        True gdy wszystkie pięć warunków spełnione, False przy stubach.
     """
     folder = os.path.join(DICTIONARIES_DIR, kod)
     if not os.path.isfile(os.path.join(folder, "podstawy.yaml")):
         return False
     if not os.path.isfile(os.path.join(folder, "gui", "ui.yaml")):
         return False
-    for pod in ("akcenty", "szyfry"):
+    for pod in ("akcenty", "szyfry", "rezyser"):
         pod_dir = os.path.join(folder, pod)
         if not os.path.isdir(pod_dir):
             return False
@@ -368,20 +372,17 @@ def _jezyk_kompletny(kod: str) -> bool:
 def dostepne_jezyki_bazowe() -> list[str]:
     """Zwraca posortowaną listę kodów KOMPLETNYCH języków w ``dictionaries/``.
 
-    „Kompletny" oznacza folder spełniający wszystkie cztery warunki
-    z :func:`_jezyk_kompletny`. Stuby (np. folder z samym `podstawy.yaml`
-    i `gui/ui.yaml`, ale bez `akcenty/` i `szyfry/`) są filtrowane —
-    silnik nie umiałby przetwarzać tekstu w takim języku, więc nie powinny
+    „Kompletny" oznacza folder spełniający wszystkie pięć warunków
+    z :func:`_jezyk_kompletny` (podstawy + gui/ui.yaml + akcenty/ + szyfry/
+    + rezyser/, każdy z minimum jednym plikiem ``*.yaml``). Stuby (np.
+    folder z samym `podstawy.yaml` bez podfolderów) są filtrowane — silnik
+    nie umiałby przetwarzać tekstu w takim języku, więc nie powinny
     pojawiać się w komunikatach typu „obsługiwane języki" ani w selektorze
     języka interfejsu w GUI.
 
-    Skutek dla v13.1: dziś tylko `pl` przechodzi filtr. Każdy kolejny
-    release minor 13.x (zgodnie z `TODO_wielojezycznosc.md` § 4)
-    dorzuca jeden nowy folder w pełni wdrożony, więc lista rośnie o jedną
-    pozycję per release — bez zmian w kodzie Pythona.
-
     Returns:
-        np. ``["pl"]`` po 13.1, a po wdrożeniu fińskiego w 13.2 → ``["fi", "pl"]``.
+        Listę kodów ISO języków gotowych do użycia, np. ``["de", "en",
+        "fi", "is", "it", "pl", "ru"]`` po 13.8.
     """
     if not os.path.isdir(DICTIONARIES_DIR):
         return []

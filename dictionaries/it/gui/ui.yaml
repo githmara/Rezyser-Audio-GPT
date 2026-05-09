@@ -770,6 +770,7 @@ manager:
   kreator_cb_name: "Selezione tipo di nuovo file regole"
   kreator_opis_name: "Descrizione del tipo di regola selezionato"
   kreator_lbl_id: "Identificatore (nome file):"
+  kreator_jezyk_bazowy_id_label: "Codice della lingua (ISO 639-1):"
   kreator_id_name: "Campo identificatore file"
   kreator_id_hint: "ad es. svedese  (lettere minuscole, senza spazi)"
   kreator_lbl_etykieta: "Etichetta (visibile nell'interfaccia):"
@@ -804,6 +805,7 @@ manager:
   wynik_sukces_naglowek: "✅  Creato file:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
     ℹ️  Il file non è stato creato (questo tipo di regola richiede codice Python da uno sviluppatore – vedi prompt per l'AI sotto).
+  wynik_naglowek_name: "Stato di creazione del file di regole"
   wynik_lbl_uwagi: "Passi successivi:"
   wynik_uwagi_name: "Note sulla regola creata"
   wynik_lbl_prompt: "Prompt per l'AI (incolla in ChatGPT / Claude):"
@@ -826,7 +828,7 @@ manager:
   blad_tworzenia: "Impossibile creare il file:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Struttura linguistica incompleta"
   niepelna_struktura_tresc: |-
-    Il file base.yaml è stato salvato, ma non è stato possibile creare le sottocartelle accenti/ e cifrari/:
+    Il file base.yaml è stato salvato, ma non è stato possibile creare le sottocartelle accenti/, cifrari/, regista/ e gui/:
     {tresc_bledu}
 
     Creale manualmente in Esplora file prima di avviare Poliglotta – altrimenti il motore genererà un errore durante la scansione della nuova lingua.

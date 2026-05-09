@@ -770,6 +770,7 @@ manager:
   kreator_cb_name: "Auswahl des Typs der neuen Regeldatei"
   kreator_opis_name: "Beschreibung des ausgewählten Regeltyps"
   kreator_lbl_id: "Bezeichner (Dateiname):"
+  kreator_jezyk_bazowy_id_label: "Sprachcode (ISO 639-1):"
   kreator_id_name: "Feld Dateibezeichner"
   kreator_id_hint: "z.B. schwedisch  (Kleinbuchstaben, ohne Leerzeichen)"
   kreator_lbl_etykieta: "Label (sichtbar im GUI):"
@@ -804,6 +805,7 @@ manager:
   wynik_sukces_naglowek: "✅  Datei erstellt:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
     ℹ️  Datei wurde nicht erstellt (dieser Regeltyp erfordert Python-Code vom Entwickler – siehe AI-Prompt unten).
+  wynik_naglowek_name: "Status der Regeldatei-Erstellung"
   wynik_lbl_uwagi: "Nächste Schritte:"
   wynik_uwagi_name: "Hinweise zur erstellten Regel"
   wynik_lbl_prompt: "Prompt für AI (in ChatGPT / Claude einfügen):"
@@ -826,7 +828,7 @@ manager:
   blad_tworzenia: "Datei konnte nicht erstellt werden:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Unvollständige Sprachstruktur"
   niepelna_struktura_tresc: |-
-    Datei basis.yaml gespeichert, aber Unterordner akzente/ und chiffern/ konnten nicht erstellt werden:
+    Datei basis.yaml gespeichert, aber Unterordner akzente/, chiffern/, regisseur/ und gui/ konnten nicht erstellt werden:
     {tresc_bledu}
 
     Erstellen Sie diese manuell im Datei-Explorer, bevor Sie Polyglot starten – andernfalls wird die Engine beim Scannen der neuen Sprache einen Fehler ausgeben.

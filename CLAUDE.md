@@ -36,6 +36,7 @@
   * `szyfry/` — **6 plików** szyfrów (cezar, jakanie, odwracanie, samogloskowiec, typoglikemia, waz)
   * `akcenty/` — **11 plików**: 8 akcentów fonetycznych obcojęzycznych + 3 narzędzia czyszczenia (oczyszczenie, oczyszczenie_bez_liczb, naprawiacz_tagow)
   Weryfikacja: `ls dictionaries/<kod>/akcenty/*.yaml | wc -l` (→ 11), analogicznie dla szyfry (→ 6) i rezyser (→ 4). Dla zupełnie nowych języków (de/es/fr) stosuj bezpieczną kolejność z TODO_wielojezycznosc.md. UWAGA: Ta reguła traci aktualność po wyczerpaniu TODO_wielojezycznosc.md — wtedy należy ją usunąć z CLAUDE.md.
+- WYMÓG SILNIKA (`core_poliglota._jezyk_kompletny`, od 13.9): folder `<kod>/` jest skanowany pod kątem `podstawy.yaml` + minimum **1 pliku** w każdym z czterech podfolderów (`akcenty/`, `szyfry/`, `rezyser/`, `gui/ui.yaml`). Stuby są filtrowane przez `dostepne_jezyki_bazowe()`. Po dodaniu/usunięciu pliku w `rezyser/` lub `akcenty/` uruchom `odswiez_rezysera.py`, żeby zaktualizować dispatch (`core_rezyser._AKCENT_FUNCS` + docstringi `core_poliglota.akcent_*`). Przesunięcie tego wymogu z 14.0+ na teraz zostało zrobione wraz z wdrożeniem siódmej kompletnej paczki (DE) — wzorzec się ustabilizował, nowe języki nie wymagają już zmian w kodzie Pythona.
 - Tłumaczenia interfejsu rezydują w dedykowanym pliku: `dictionaries/<kod>/gui/ui.yaml`. ZAKAZ hardkodowania etykiet GUI w kodzie źródłowym Pythona.
 - Parametry dynamiczne takie jak `{nazwa_projektu}`, `{liczba_znakow}`, `{min_przesuniecie}` pozostaw w tłumaczeniach nienaruszone. Nie tłumacz literałów technicznych i rozszerzeń (np. `.md`, `skrypty/`) ani nie usuwaj emoji zachowując ich ścisłą pozycję.
 - Konwencje wxPython w i18n:
@@ -44,7 +45,7 @@
  * Długie komunikaty błędów zachowują bezwzględnie wszystkie białe znaki (`\n`), co warunkuje właściwe łamanie tekstu.
  * Rozróżniaj klucze: Tooltip i etykieta to dwa osobne klucze dla jednego obiektu.
 - Skrypt autotłumaczący z użyciem modelu (`tlumacz_ai.py`) zamraża podmieniane zmienne `{...}`, aby LLM nie naruszył struktury programu.
-- Manager reguł skanuje pliki YAML z folderów `akcenty`, `szyfry`, `rezyser` i nowo dodanego folderu tłumaczeń `gui`. Proces kreacji nowego języka buduje wymaganą dla tych komponentów strukturę katalogów.
+- Manager reguł skanuje pliki YAML z folderów `akcenty`, `szyfry`, `rezyser` i nowo dodanego folderu tłumaczeń `gui`. Proces kreacji nowego języka buduje wszystkie cztery podfoldery na raz — dispatch silnika nie wystartuje bez `rezyser/` (wymóg ≥1 trybu od 13.9).
 
 # ZAMYKANIE RELEASU — DOKUMENTACJA (KRYTYCZNE)
 `build_release.py` wywołuje `generuj_dokumentacje.generuj()` wewnętrznie, przez co po jego uruchomieniu w repo pojawiają się niezcommitowane zmiany w `docs/*.txt`. Żeby tego uniknąć, dokumentację należy wygenerować i zcommitować **ręcznie** przed commitem release'u, według poniższego schematu.

@@ -770,6 +770,7 @@ manager:
   kreator_cb_name: "Velja tegund nýrrar regluskjal"
   kreator_opis_name: "Lýsing valinnar reglugerðar"
   kreator_lbl_id: "Auðkenni (skráarheiti):"
+  kreator_jezyk_bazowy_id_label: "Tungumálakóði (ISO 639-1):"
   kreator_id_name: "Auðkenni skráarsvæði"
   kreator_id_hint: "t.d. sænska  (litlir stafir, engin bil)"
   kreator_lbl_etykieta: "Merki (sýnilegt í GUI):"
@@ -804,6 +805,7 @@ manager:
   wynik_sukces_naglowek: "✅  Skrá búin til:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
     ℹ️  Skrá var ekki búin til (þessi tegund reglu krefst Python kóða frá forritara – sjá beiðni fyrir AI hér að neðan).
+  wynik_naglowek_name: "Staða stofnunar regluskráar"
   wynik_lbl_uwagi: "Næstu skref:"
   wynik_uwagi_name: "Athugasemdir við búna reglu"
   wynik_lbl_prompt: "Beiðni fyrir AI (líma í ChatGPT / Claude):"
@@ -826,7 +828,7 @@ manager:
   blad_tworzenia: "Ekki tókst að búa til skrá:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Ófullkomið tungumálauppbygging"
   niepelna_struktura_tresc: |-
-    Skrá grunnur.yaml var vistuð, en ekki tókst að búa til undirmöppur accenter/ og kóðar/:
+    Skrá grunnur.yaml var vistuð, en ekki tókst að búa til undirmöppur accenter/, kóðar/, leikstjóri/ og gui/:
     {tresc_bledu}
 
     Búðu þær til handvirkt í Skjalakönnu áður en þú keyrir Fjöltyngda – annars mun vélin kasta villu við skönnun nýs tungumáls.

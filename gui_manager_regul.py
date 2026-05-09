@@ -707,15 +707,16 @@ class ManagerRegulPanel(wx.Panel):
         # podfolderów dla nowego języka (silnik ich oczekuje).
         # Wersja 13.1: tworzymy też podfolder gui/ – żeby tłumacz UI nowego
         # języka miał gotowe miejsce na ui.yaml bez grzebania w konsoli.
+        # Wersja 13.9: dorzucamy także rezyser/ — od kiedy _jezyk_kompletny
+        # wymaga przynajmniej jednego trybu, brak tego folderu od startu
+        # zostawiał paczkę „prawie gotową" i wymuszał ręczne mkdir w konsoli.
         if typ == mrs.TYP_JEZYK_BAZOWY:
             folder_jezyka = os.path.join(DICTIONARIES_DIR, id_pliku)
             try:
-                os.makedirs(os.path.join(folder_jezyka, FOLDER_AKCENTY),
-                            exist_ok=True)
-                os.makedirs(os.path.join(folder_jezyka, FOLDER_SZYFRY),
-                            exist_ok=True)
-                os.makedirs(os.path.join(folder_jezyka, FOLDER_GUI),
-                            exist_ok=True)
+                for pod in (FOLDER_AKCENTY, FOLDER_SZYFRY,
+                            FOLDER_REZYSER, FOLDER_GUI):
+                    os.makedirs(os.path.join(folder_jezyka, pod),
+                                exist_ok=True)
             except Exception as exc:                            # noqa: BLE001
                 wx.MessageBox(
                     t("manager.niepelna_struktura_tresc", tresc_bledu=str(exc)),
@@ -900,8 +901,11 @@ class KreatorNowejRegulyDialog(wx.Dialog):
 
         self._txt_id = wx.TextCtrl(self, name=t("manager.kreator_id_name"))
         self._txt_id.SetHint(t("manager.kreator_id_hint"))
-        form.Add(wx.StaticText(self, label=t("manager.kreator_lbl_id")),
-                 flag=wx.ALIGN_CENTER_VERTICAL)
+        # A11y: trzymamy referencję do StaticText, bo etykieta zmienia się
+        # w zależności od typu (dla „nowy język" pole id znaczy „kod języka",
+        # nie „identyfikator pliku" — bez aktualizacji label myli czytniki).
+        self._lbl_id = wx.StaticText(self, label=t("manager.kreator_lbl_id"))
+        form.Add(self._lbl_id, flag=wx.ALIGN_CENTER_VERTICAL)
         form.Add(self._txt_id, flag=wx.EXPAND)
 
         self._txt_etykieta = wx.TextCtrl(self, name=t("manager.kreator_etykieta_name"))
@@ -991,10 +995,12 @@ class KreatorNowejRegulyDialog(wx.Dialog):
 
         # Zmiana etykiet + podpowiedzi pod dany typ
         if typ == mrs.TYP_JEZYK_BAZOWY:
+            self._lbl_id.SetLabel(t("manager.kreator_jezyk_bazowy_id_label"))
             self._txt_id.SetHint(t("manager.kreator_jezyk_bazowy_id_hint"))
             self._lbl_etykieta.SetLabel(t("manager.kreator_jezyk_bazowy_etykieta_label"))
             self._txt_etykieta.SetHint(t("manager.kreator_jezyk_bazowy_etykieta_hint"))
         else:
+            self._lbl_id.SetLabel(t("manager.kreator_lbl_id"))
             self._txt_id.SetHint(t("manager.kreator_id_hint"))
             self._lbl_etykieta.SetLabel(t("manager.kreator_lbl_etykieta"))
             self._txt_etykieta.SetHint(t("manager.kreator_etykieta_hint"))
@@ -1111,10 +1117,15 @@ class WynikKreatoraDialog(wx.Dialog):
             )
         else:
             naglowek_txt = t("manager.wynik_brak_pliku_naglowek")
+        # A11y: bez `name=` ten TextCtrl czytany jest przez NVDA jako gołe
+        # „edit" — użytkownik nie wie, czym jest pole. Nazwa wstrzykuje
+        # akcesorny label, dzięki któremu czytnik najpierw mówi „Status
+        # utworzenia pliku reguł", potem treść.
         naglowek = wx.TextCtrl(
             self, value=naglowek_txt,
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
             size=(-1, 60),
+            name=t("manager.wynik_naglowek_name"),
         )
         naglowek.SetBackgroundColour(self.GetBackgroundColour())
         sizer.Add(naglowek, flag=wx.ALL | wx.EXPAND, border=12)

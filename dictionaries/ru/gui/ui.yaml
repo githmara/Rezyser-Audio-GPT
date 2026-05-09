@@ -770,6 +770,7 @@ manager:
   kreator_cb_name: "Выбор типа нового файла правил"
   kreator_opis_name: "Описание выбранного типа правила"
   kreator_lbl_id: "Идентификатор (имя файла):"
+  kreator_jezyk_bazowy_id_label: "Код языка (ISO 639-1):"
   kreator_id_name: "Поле идентификатор файла"
   kreator_id_hint: "например, шведский  (строчные буквы, без пробелов)"
   kreator_lbl_etykieta: "Этикетка (видна в GUI):"
@@ -804,6 +805,7 @@ manager:
   wynik_sukces_naglowek: "✅  Создан файл:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
     ℹ️  Файл не был создан (этот тип правила требует кода Python от разработчика – см. подсказку для AI ниже).
+  wynik_naglowek_name: "Статус создания файла правил"
   wynik_lbl_uwagi: "Дальнейшие шаги:"
   wynik_uwagi_name: "Замечания к созданному правилу"
   wynik_lbl_prompt: "Подсказка для AI (вставьте в ChatGPT / Claude):"
@@ -826,7 +828,7 @@ manager:
   blad_tworzenia: "Не удалось создать файл:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Неполная структура языка"
   niepelna_struktura_tresc: |-
-    Файл основы.yaml сохранён, но не удалось создать подпапки акценты/ и шифры/:
+    Файл основы.yaml сохранён, но не удалось создать подпапки акценты/, шифры/, режиссёр/ и gui/:
     {tresc_bledu}
 
     Создайте их вручную в Проводнике, прежде чем запускать Полиглот — иначе движок выдаст ошибку при сканировании нового языка.

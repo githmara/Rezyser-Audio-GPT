@@ -64,8 +64,10 @@ LISTA_TYPOW: list[tuple[str, str, str]] = [
     (
         TYP_JEZYK_BAZOWY,
         "Nowy język bazowy (np. en, de, fr)",
-        "Tworzy folder <jezyk>/ z podstawy.yaml i podfolderami akcenty/, szyfry/, gui/. "
-        "Dane fonetyczne generuje AI z promptu; tłumaczenie UI – buduj_wielojezyczne_ui.py.",
+        "Tworzy folder <jezyk>/ z podstawy.yaml i podfolderami akcenty/, szyfry/, "
+        "rezyser/, gui/. Dane fonetyczne generuje AI z promptu; tłumaczenie UI – "
+        "buduj_wielojezyczne_ui.py; tryby Reżysera kopiuje się z pl/rezyser/ "
+        "(wymagany ≥1 plik tryb_*.yaml, żeby silnik uznał język za kompletny).",
     ),
     (
         TYP_SZYFR_ALGORYTM,
@@ -759,10 +761,12 @@ def zbuduj_wynik(
             "docelowy": f"{id_pliku}/podstawy.yaml",
             "uwagi": (
                 f"Manager utworzy folder `dictionaries/{id_pliku}/` z podfolderami "
-                f"`akcenty/`, `szyfry/` i `gui/`. Szablon `podstawy.yaml` ma puste "
-                f"miejsca – skopiuj prompt do AI, aby otrzymać dane fonetyczne. "
+                f"`akcenty/`, `szyfry/`, `rezyser/` i `gui/`. Szablon `podstawy.yaml` "
+                f"ma puste miejsca – skopiuj prompt do AI, aby otrzymać dane fonetyczne. "
                 f"Tłumaczenie interfejsu (`gui/ui.yaml`) generuje skrypt "
-                f"`buduj_wielojezyczne_ui.py` – nie twórz go ręcznie."
+                f"`buduj_wielojezyczne_ui.py` – nie twórz go ręcznie. Tryby Reżysera "
+                f"(`rezyser/tryb_*.yaml`) skopiuj z `pl/rezyser/` – silnik wymaga "
+                f"co najmniej jednego trybu, żeby uznać język za kompletny."
             ),
         }
 

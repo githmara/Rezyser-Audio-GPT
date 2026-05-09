@@ -770,6 +770,7 @@ manager:
   kreator_cb_name: "Uuden sääntötiedoston tyypin valinta"
   kreator_opis_name: "Valitun sääntötyypin kuvaus"
   kreator_lbl_id: "Tunniste (tiedostonimi):"
+  kreator_jezyk_bazowy_id_label: "Kielikoodi (ISO 639-1):"
   kreator_id_name: "Tiedoston tunnistekenttä"
   kreator_id_hint: "esim. ruotsi  (pienet kirjaimet, ei välilyöntejä)"
   kreator_lbl_etykieta: "Etiketti (näkyy käyttöliittymässä):"
@@ -804,6 +805,7 @@ manager:
   wynik_sukces_naglowek: "✅  Luotu tiedosto:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
     ℹ️  Tiedostoa ei luotu (tämä sääntötyyppi vaatii kehittäjän Python-koodia – katso AI-kehote alla).
+  wynik_naglowek_name: "Sääntötiedoston luomisen tila"
   wynik_lbl_uwagi: "Seuraavat vaiheet:"
   wynik_uwagi_name: "Huomautuksia luodusta säännöstä"
   wynik_lbl_prompt: "AI-kehote (liitä ChatGPT:hen / Claudeen):"
@@ -826,7 +828,7 @@ manager:
   blad_tworzenia: "Tiedostoa ei voitu luoda:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Kielen rakenne on puutteellinen"
   niepelna_struktura_tresc: |-
-    Tiedosto pohja.yaml tallennettiin, mutta kansioita aksentit/ ja salaukset/ ei voitu luoda:
+    Tiedosto pohja.yaml tallennettiin, mutta kansioita aksentit/, salaukset/, ohjaaja/ ja gui/ ei voitu luoda:
     {tresc_bledu}
 
     Luo ne manuaalisesti Tiedostonhallinnassa ennen kuin käynnistät Polyglotin – muuten moottori antaa virheen uuden kielen skannauksen yhteydessä.

@@ -769,6 +769,7 @@ manager:
   kreator_cb_name: "Select the type of new rule file"
   kreator_opis_name: "Description of the selected rule type"
   kreator_lbl_id: "Identifier (file name):"
+  kreator_jezyk_bazowy_id_label: "Language code (ISO 639-1):"
   kreator_id_name: "File identifier field"
   kreator_id_hint: "e.g. swedish  (lowercase, no spaces)"
   kreator_lbl_etykieta: "Label (visible in GUI):"
@@ -803,6 +804,7 @@ manager:
   wynik_sukces_naglowek: "✅  File created:\n{sciezka_pliku}"
   wynik_brak_pliku_naglowek: |-
     ℹ️  File not created (this type of rule requires Python code from a developer – see AI prompt below).
+  wynik_naglowek_name: "Rule file creation status"
   wynik_lbl_uwagi: "Next steps:"
   wynik_uwagi_name: "Notes on the created rule"
   wynik_lbl_prompt: "AI prompt (paste into ChatGPT / Claude):"
@@ -825,7 +827,7 @@ manager:
   blad_tworzenia: "Failed to create file:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Incomplete language structure"
   niepelna_struktura_tresc: |-
-    File podstawy.yaml saved, but failed to create subfolders akcenty/ and szyfry/:
+    File podstawy.yaml saved, but failed to create subfolders akcenty/, szyfry/, rezyser/, and gui/:
     {tresc_bledu}
 
     Create them manually in File Explorer before running Poliglot — otherwise, the engine will throw an error when scanning the new language.
