@@ -805,11 +805,24 @@ if not hasattr(os.path, "samefile_or_eq"):
 
 
 def _zgadnij_typ_z_zaznaczenia(meta: dict | None) -> str:
-    """Zgaduje typ reguły na podstawie zaznaczonego węzła w drzewie."""
+    """Zgaduje typ reguły na podstawie zaznaczonego węzła w drzewie.
+
+    Wersja 13.9: TYP_AKCENT rozdzielony na trzy podtypy odpowiadające
+    trzem `kategoria:` w plikach paczek (akcent / oczyszczenie /
+    naprawiacz). Heurystyka po prefiksie nazwy pliku — gdy zaznaczony
+    jest plik o znanym id (oczyszczenie* / naprawiacz_*), wybieramy
+    odpowiedni podtyp; w pozostałych przypadkach default = fonetyczny.
+    """
     if not meta:
         return mrs.TYP_AKCENT
     kat = meta.get("kategoria", "")
     if kat == FOLDER_AKCENTY:
+        sciezka = meta.get("sciezka", "")
+        nazwa = os.path.basename(sciezka).lower()
+        if nazwa.startswith("oczyszczenie"):
+            return mrs.TYP_AKCENT_OCZYSZCZENIE
+        if nazwa.startswith("naprawiacz"):
+            return mrs.TYP_AKCENT_NAPRAWIACZ
         return mrs.TYP_AKCENT
     if kat == FOLDER_SZYFRY:
         return mrs.TYP_SZYFR_ZAMIANY

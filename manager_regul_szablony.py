@@ -28,7 +28,9 @@ from __future__ import annotations
 # Pomocnicze stałe – lista typów obsługiwanych przez kreator
 # =============================================================================
 TYP_JEZYK_BAZOWY         = "jezyk_bazowy"
-TYP_AKCENT               = "akcent"
+TYP_AKCENT               = "akcent"             # fonetyczny cross-language
+TYP_AKCENT_OCZYSZCZENIE  = "akcent_oczyszczenie"  # preprocessor bez fonetyki
+TYP_AKCENT_NAPRAWIACZ    = "akcent_naprawiacz"    # wstrzykuje ISO do HTML/DOCX
 TYP_SZYFR_ZAMIANY        = "szyfr_zamiany"
 TYP_SZYFR_ALGORYTM       = "szyfr_algorytm"
 TYP_TRYB_REZYSERA        = "tryb_rezysera"
@@ -39,9 +41,27 @@ LISTA_TYPOW: list[tuple[str, str, str]] = [
     # (id, etykieta, krótki opis)
     (
         TYP_AKCENT,
-        "Nowy akcent fonetyczny (np. duński, szwedzki)",
-        "Plik w <jezyk>/akcenty/. Manager tworzy szablon + prompt dla AI, "
-        "który wygeneruje listę zamian fonetycznych.",
+        "Akcent fonetyczny (cross-language, np. szwedzki, fiński)",
+        "Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: akcent`. Tekst paczki "
+        "bazowej (jezyk_bazowy) jest transliterowany pod wymowę docelowego "
+        "syntezatora (iso != jezyk_bazowy). Manager tworzy szablon + prompt "
+        "dla agenta AI, który zaprojektuje listę `zamiany:`.",
+    ),
+    (
+        TYP_AKCENT_OCZYSZCZENIE,
+        "Akcent czyszczący (preprocessor, bez fonetyki)",
+        "Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: oczyszczenie`. "
+        "Czyści tekst pod TTS (usuwa bełkot, normalizuje liczby) BEZ zmiany "
+        "fonetyki. iso == jezyk_bazowy. Manager tworzy szablon (gotowy "
+        "wzorzec) + prompt do tłumaczenia etykiety/opisu na natywny.",
+    ),
+    (
+        TYP_AKCENT_NAPRAWIACZ,
+        "Naprawiacz tagów (wstrzykuje ISO do HTML/DOCX)",
+        "Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: naprawiacz`. NIE "
+        "modyfikuje treści — wstrzykuje kod ISO języka do plików wynikowych "
+        "(<html lang>, <w:lang>). iso pusty (kod podaje user w GUI). Manager "
+        "tworzy szablon + prompt do tłumaczenia etykiety/opisu na natywny.",
     ),
     (
         TYP_SZYFR_ZAMIANY,
@@ -266,6 +286,16 @@ akcent fonetyczny **{etykieta}**, który upodobni tekst pisany w języku
 **{natywna_baza}** do wymowy w języku o kodzie ISO **{iso}** (docelowy
 syntezator TTS).
 
+# WALIDACJA SCENARIUSZA (zanim cokolwiek napiszesz)
+Sprawdź, czy `iso` ({iso}) różni się od `jezyk_bazowy` ({jezyk_bazowy}).
+Jeśli `iso == jezyk_bazowy` lub `iso` jest puste — ten plik NIE jest
+akcentem fonetycznym, tylko narzędziowym preprocessorem
+(`kategoria: oczyszczenie`) lub naprawiaczem tagów (`kategoria:
+naprawiacz`). PRZERWIJ pracę i poproś usera, żeby uruchomił Manager
+Reguł z odpowiednim podtypem („Akcent czyszczący" lub „Naprawiacz tagów"
+zamiast „Akcent fonetyczny"). Nie da się sensownie napisać listy
+`zamiany:` upodabniającej język do samego siebie.
+
 # PLIKI REFERENCYJNE (otwórz przed pisaniem)
 1. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — alfabet i mapa
    diakrytyków `polskie_znaki` paczki bazowej. Twoje wzory zamian MUSZĄ
@@ -318,6 +348,221 @@ syntezator TTS).
    strukturę między paczkami.
 6. W odpowiedzi raportuj: ile par ma `zamiany:`, którą paczkę wzięto
    za wzorzec stylu, i czy `odswiez_rezysera.py` wyrzucił ostrzeżenia.
+"""
+
+
+# =============================================================================
+# SZABLON 1B: Akcent oczyszczający (preprocessor — bez fonetyki)
+# =============================================================================
+def szablon_oczyszczenie(id_pliku: str, etykieta: str,
+                         jezyk_bazowy: str) -> str:
+    """Szablon dla `kategoria: oczyszczenie`.
+
+    Struktura jest stała we wszystkich 7 wdrożonych paczkach: pipeline ON
+    (czysc_tekst_tts + normalizuj_liczby), pozostałe OFF, brak listy zamian.
+    Zmienne między paczkami: tylko etykieta, opis i komentarze (natywne).
+    """
+    natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
+    # Heurystyka: oczyszczenie_bez_liczb wyłącza normalizację cyfr na słowa.
+    bez_liczb = "bez_liczb" in id_pliku
+    normalizuj_liczby = "false" if bez_liczb else "true"
+    return f"""# -----------------------------------------------------------------------------
+#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: nagłówek pliku, np. dla DE:
+#   „TEXTBEREINIGUNG MIT ZAHLENNORMALISIERUNG"; dla IT: „PULIZIA DEL TESTO
+#   CON NORMALIZZAZIONE DEI NUMERI">
+#  Domyślny wariant „Żaden akcent" — sprząta tekst pod czytnik ekranu.
+# -----------------------------------------------------------------------------
+id: {id_pliku}
+etykieta: "{etykieta}"
+opis: |
+  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: 2-4 zdania o tym, że ten „akcent"
+  nie nakłada fonetyki, a tylko uruchamia czyszczenie pod TTS (usuwa
+  bełkot typu „khh", gwiazdki, hashtagi, kropki) {"oraz zamienia cyfry na słowa" if not bez_liczb else "(BEZ normalizacji liczb — przydatne dla książek z dużą liczbą dat/numerów)"}.>
+iso: {jezyk_bazowy}
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: {normalizuj_liczby}
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []
+"""
+
+
+# =============================================================================
+# PROMPT 1B: Akcent oczyszczający — tłumaczenie etykiety/opisu na natywny
+# =============================================================================
+def prompt_oczyszczenie(id_pliku: str, etykieta: str,
+                        jezyk_bazowy: str) -> str:
+    natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
+    inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    return f"""# ROLA
+Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
+Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: zaadaptować
+plik „akcentu czyszczącego" (preprocessor TTS) do nowej paczki językowej.
+
+# KONTEKST PROJEKTU
+- Akcenty „czyszczące" (`kategoria: oczyszczenie`) NIE nakładają fonetyki —
+  uruchamiają wyłącznie pipeline `czysc_tekst_tts` + ewentualnie
+  `normalizuj_liczby` (cyfry → słowa). Lista `zamiany:` jest pusta.
+- Struktura tych plików jest IDENTYCZNA we wszystkich 7 wdrożonych
+  paczkach ({inne_paczki}); różni się TYLKO treść etykiety, opisu
+  i komentarzy YAML — wszystko natywne.
+- Każda paczka zawiera dwa warianty: `oczyszczenie.yaml` (z normalizacją
+  liczb) i `oczyszczenie_bez_liczb.yaml` (bez — dla książek z datami,
+  numerami stron itp.).
+
+# ZADANIE
+Utwórz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
+akcent czyszczący w paczce {natywna_baza}, etykieta widoczna w GUI:
+**{etykieta}**.
+
+# PLIKI REFERENCYJNE (otwórz przed pisaniem)
+1. `dictionaries/<dowolna z wdrożonych>/akcenty/{id_pliku}.yaml` — gotowy
+   wzorzec stylu (struktura, kolejnosc, pipeline). Jedyne, co zmieniasz,
+   to etykieta + opis + komentarze przekładane na {natywna_baza}.
+2. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — sprawdzenie konwencji
+   stylu komentarzy YAML w paczce bazowej.
+
+# WYMAGANIA STRUKTURY
+1. `kategoria: oczyszczenie` (silnik traktuje takie pliki jako
+   preprocessor, nie fonetyczny akcent).
+2. `iso: {jezyk_bazowy}` (operuje na tekście paczki bazowej).
+3. Pipeline:
+   - `oczyszczenie` (z normalizacją liczb): `czysc_tekst_tts: true`,
+     `normalizuj_liczby: true`, `usun_polskie_znaki: false`,
+     `skleja_pojedyncze_litery: false`.
+   - `oczyszczenie_bez_liczb`: jak wyżej, ale `normalizuj_liczby: false`.
+4. `zamiany: []` (pusta lista — to nie fonetyczny akcent).
+5. `kolejnosc: 20` (umieszcza w GUI nad fonetycznymi).
+
+# WYMAGANIA NATYWNOŚCI
+`etykieta`, `opis`, nagłówek pliku, komentarze YAML — wszystko
+w {natywna_baza}. Zwróć uwagę na konwencję etykiety wdrożonych paczek:
+- PL: „Żaden (Czyszczenie Z normalizacją liczb)"
+- DE: „Keiner (Bereinigung MIT Zahlennormalisierung)"
+- IT: „Nessuno (Pulizia CON normalizzazione numeri)"
+Pierwsze słowo to „brak akcentu" w {natywna_baza}, w nawiasie krótka
+charakterystyka co dokładnie robi pipeline.
+
+# PROCEDURA
+1. Otwórz `dictionaries/<wdrożona>/akcenty/{id_pliku}.yaml` (Read).
+2. Otwórz `dictionaries/{jezyk_bazowy}/podstawy.yaml` żeby zobaczyć
+   konwencję komentarzy paczki bazowej.
+3. Zapisz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
+   (Write) z tą samą strukturą, ale natywną treścią pól tekstowych.
+4. Zweryfikuj parsowalność:
+   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
+5. Uruchom `python odswiez_rezysera.py` (Bash) — dispatcher zauważy
+   plik. W ostrzeżeniach silnika nie powinno być info o niespójnościach
+   (struktura jest standardowa).
+6. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec i ostrzeżenia
+   `odswiez_rezysera.py`.
+"""
+
+
+# =============================================================================
+# SZABLON 1C: Naprawiacz tagów (wstrzykuje ISO do HTML/DOCX, bez modyfikacji)
+# =============================================================================
+def szablon_naprawiacz(id_pliku: str, etykieta: str,
+                       jezyk_bazowy: str) -> str:
+    """Szablon dla `kategoria: naprawiacz`.
+
+    Tryb specjalny: wszystkie flagi pipeline OFF, `zamiany: []`,
+    `iso: ""` (kod podaje user w GUI). Plik istnieje raz na paczkę.
+    """
+    natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
+    return f"""# -----------------------------------------------------------------------------
+#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: nagłówek pliku, np. dla DE:
+#   „TAG-REPARATEUR (Sondermodus)"; dla IT: „RIPARATORE DI TAG (modalità
+#   speciale)"; dla RU: „ВОССТАНОВИТЕЛЬ ТЕГОВ (специальный режим)">
+#  NIE modyfikuje treści — wstrzykuje TYLKO kod ISO języka do pliku
+#  wynikowego (HTML <html lang>, DOCX <w:lang>).
+# -----------------------------------------------------------------------------
+id: {id_pliku}
+etykieta: "{etykieta}"
+opis: |
+  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: 2-4 zdania:
+  - Ten „akcent" NIE modyfikuje treści ani fonetyki tekstu.
+  - Wstrzykuje kod ISO języka do pliku wynikowego:
+      HTML: atrybut lang="..." w znaczniku <html>
+      DOCX: element <w:lang w:val="..."/> dla każdego biegu tekstu
+  - Czytnik ekranu (NVDA/JAWS) poprawnie przełącza głos syntezatora.
+  - Kod ISO podaje user ręcznie w polu „Kod ISO" w GUI — `iso:` jest puste.>
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Tryb specjalny — NIE uruchamia żadnego etapu przetwarzania tekstu.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []
+"""
+
+
+# =============================================================================
+# PROMPT 1C: Naprawiacz tagów — tłumaczenie etykiety/opisu na natywny
+# =============================================================================
+def prompt_naprawiacz(id_pliku: str, etykieta: str,
+                      jezyk_bazowy: str) -> str:
+    natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
+    inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    return f"""# ROLA
+Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
+Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: zaadaptować
+plik „naprawiacza tagów" do nowej paczki językowej.
+
+# KONTEKST PROJEKTU
+- Naprawiacz tagów (`kategoria: naprawiacz`) to TRYB SPECJALNY: NIE
+  modyfikuje treści tekstu ani jego fonetyki. Wstrzykuje wyłącznie kod
+  ISO języka do plików wynikowych:
+    * HTML: atrybut `lang="..."` w znaczniku `<html>`
+    * DOCX: element `<w:lang w:val="..."/>` dla każdego biegu tekstu
+  Dzięki temu czytnik ekranu (NVDA/JAWS) poprawnie przełącza głos
+  syntezatora na właściwy język.
+- Kod ISO podaje user ręcznie w GUI (pole „Kod ISO") — wartość `iso:`
+  w pliku jest pusta (`iso: ""`).
+- Struktura pliku jest IDENTYCZNA we wszystkich 7 wdrożonych paczkach
+  ({inne_paczki}); różni się TYLKO treść etykiety, opisu i komentarzy
+  YAML — wszystko natywne.
+
+# ZADANIE
+Utwórz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
+naprawiacz tagów w paczce {natywna_baza}, etykieta widoczna w GUI:
+**{etykieta}**.
+
+# PLIKI REFERENCYJNE (otwórz przed pisaniem)
+1. `dictionaries/<dowolna z wdrożonych>/akcenty/naprawiacz_tagow.yaml` —
+   gotowy wzorzec stylu. Jedyne, co zmieniasz: etykieta + opis +
+   komentarze przekładane na {natywna_baza}.
+
+# WYMAGANIA STRUKTURY (silnik)
+1. `kategoria: naprawiacz` — silnik wykrywa tryb specjalny po tej wartości.
+2. `iso: ""` (pusty string — kod podawany przez user w GUI).
+3. Wszystkie flagi pipeline `false`: `czysc_tekst_tts`,
+   `normalizuj_liczby`, `usun_polskie_znaki`, `skleja_pojedyncze_litery`.
+4. `zamiany: []` (pusta lista — silnik nie aplikuje żadnych zamian).
+5. `kolejnosc: 100` (na końcu listy w GUI).
+
+# WYMAGANIA NATYWNOŚCI
+`etykieta`, `opis`, nagłówek pliku, komentarze YAML — wszystko
+w {natywna_baza}. Konwencja etykiety wdrożonych paczek (z emoji 🔧):
+- PL: „🔧 Naprawiacz Tagów (Tylko wstrzyknięcie kodu ISO)"
+- DE: „🔧 Tag-Reparateur (Nur ISO-Code-Injektion)"
+- IT: „🔧 Riparatore di tag (solo iniezione del codice ISO)"
+
+# PROCEDURA
+1. Otwórz `dictionaries/<wdrożona>/akcenty/naprawiacz_tagow.yaml` (Read).
+2. Zapisz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
+   (Write) z tą samą strukturą, natywną treścią pól tekstowych.
+3. Zweryfikuj parsowalność:
+   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
+4. Uruchom `python odswiez_rezysera.py` (Bash) — dispatcher dorzuci
+   plik do mapy.
+5. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec i ewentualne
+   ostrzeżenia z `odswiez_rezysera.py`.
 """
 
 
@@ -1040,6 +1285,39 @@ def zbuduj_wynik(
     Returns:
         Słownik z kluczami: tryb, yaml, prompt, docelowy, uwagi.
     """
+    if typ == TYP_AKCENT_OCZYSZCZENIE:
+        return {
+            "tryb":     "SZABLON_I_PROMPT",
+            "yaml":     szablon_oczyszczenie(id_pliku, etykieta, jezyk_bazowy),
+            "prompt":   prompt_oczyszczenie(id_pliku, etykieta, jezyk_bazowy),
+            "docelowy": f"{jezyk_bazowy}/akcenty/{id_pliku}.yaml",
+            "uwagi": (
+                f"Akcent czyszczący w paczce `{jezyk_bazowy}/` "
+                "(`kategoria: oczyszczenie`). Struktura plików tego typu "
+                "jest identyczna we wszystkich wdrożonych paczkach — "
+                "różni się TYLKO etykieta + opis + komentarze (natywne). "
+                "Skopiuj prompt do agenta AI z dostępem do projektu — "
+                "agent otworzy gotowy wzorzec z innej paczki, przetłumaczy "
+                "tekstowe pola na język natywny i zapisze plik."
+            ),
+        }
+
+    if typ == TYP_AKCENT_NAPRAWIACZ:
+        return {
+            "tryb":     "SZABLON_I_PROMPT",
+            "yaml":     szablon_naprawiacz(id_pliku, etykieta, jezyk_bazowy),
+            "prompt":   prompt_naprawiacz(id_pliku, etykieta, jezyk_bazowy),
+            "docelowy": f"{jezyk_bazowy}/akcenty/{id_pliku}.yaml",
+            "uwagi": (
+                f"Naprawiacz tagów w paczce `{jezyk_bazowy}/` "
+                "(`kategoria: naprawiacz`). Tryb specjalny — wstrzykuje kod "
+                "ISO do plików wynikowych (HTML/DOCX), nie modyfikuje "
+                "treści. Skopiuj prompt do agenta AI z dostępem do projektu "
+                "— agent otworzy gotowy wzorzec z innej paczki, przetłumaczy "
+                "tekstowe pola na język natywny i zapisze plik."
+            ),
+        }
+
     if typ == TYP_AKCENT:
         return {
             "tryb":     "SZABLON_I_PROMPT",
