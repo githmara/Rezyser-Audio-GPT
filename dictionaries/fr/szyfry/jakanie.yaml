@@ -1,0 +1,28 @@
+# CHIFFREMENT : BÉGAIEMENT / ROBOT DÉFECTUEUX
+# Ajoute des répétitions des premières lettres de chaque mot avec des tirets.
+
+id: jakanie
+etykieta: "Bégaiement intense / Robot défectueux"
+opis: |
+  Pour chaque mot dont la longueur est >= `min_dlugosc_slowa`, un nombre
+  aléatoire de répétitions de la première (ou des deux premières) lettre(s)
+  est généré et préfixé avec des tirets : « ordinateur » → « or-or-or-ordinateur »,
+  « moi » → « moi ».
+
+  Si la deuxième lettre du mot est une consonne (absente de la chaîne
+  `samogloski`), le bégaiement couvre DEUX lettres initiales — cela sonne
+  plus naturel (par exemple « stratégie » → « st-st-stratégie »).
+iso: fr
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Paramètres de l'algorithme
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Voyelles — si la deuxième lettre du mot appartient à cet ensemble,
+# seule la première lettre est répétée. Sinon, les deux premières le sont.
+# Inclut les diacritiques français (à â é è ê ë î ï ô ù û ü ÿ) et le « y » vocalique.
+samogloski: "aeiouàâéèêëîïôùûüÿyAEIOUÀÂÉÈÊËÎÏÔÙÛÜŸY"

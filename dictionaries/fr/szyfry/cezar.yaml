@@ -1,0 +1,28 @@
+# CHIFFREMENT : CÉSAR
+# Chiffre de décalage classique qui déplace chaque lettre de N positions
+# dans l'alphabet français (40 lettres : A–Z + 14 diacritiques).
+
+id: cezar
+etykieta: "Chiffrement de César (décalage alphabet FR)"
+opis: |
+  Chiffrement de César classique : chaque lettre est décalée de N positions
+  dans l'alphabet français (ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÇÉÈÊËÎÏÔÙÛÜŸ,
+  40 caractères, sans espaces). Les caractères hors alphabet (chiffres,
+  ponctuation) restent inchangés.
+
+  La valeur du décalage est saisie par l'utilisateur dans l'interface
+  graphique (champ « Décalage de César »). La valeur 0 signifie
+  « sélection aléatoire dans la plage 1..39 ».
+iso: fr
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# L'alphabet est chargé depuis dictionaries/fr/podstawy.yaml (clé : alfabet).
+# Pour utiliser un alphabet différent, décommenter la ligne suivante :
+# alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÇÉÈÊËÎÏÔÙÛÜŸ"
+
+# Plage de décalage autorisée dans l'interface (SpinCtrl).
+# 40 lettres → ±39 couvre toutes les rotations distinctes.
+min_przesuniecie: -39
+max_przesuniecie: 39

@@ -1,0 +1,52 @@
+# -----------------------------------------------------------------------------
+#  ACCENT ANGLAIS (français → TTS anglais)
+#  Pour les synthétiseurs : David / Zira / Samantha / Hazel (TTS anglais).
+# -----------------------------------------------------------------------------
+id: angielski
+etykieta: "Anglais (par ex. David / Zira / Samantha)"
+opis: |
+  Adapte le texte français au synthétiseur vocal anglais (David / Zira /
+  Samantha / Hazel).
+
+  Différences fonétiques critiques français → anglais :
+    - « ch » fr = /ʃ/, « ch » en = /tʃ/ → on écrit « sh ».
+    - « j »  fr = /ʒ/, « j »  en = /dʒ/ → on écrit « zh » (digramme russe).
+    - « gn » fr = /ɲ/, « gn » en = /gn/ → on écrit « ny ».
+    - « ou » fr = /u/, « ou » en = /aʊ/ → on écrit « oo ».
+    - « ç »  fr = /s/, lecture en imprévisible → on écrit « s ».
+    - « qu » fr = /k/, « qu » en = /kw/ → on écrit « k ».
+    - « h »  fr muet, « h » en aspiré → on supprime.
+
+  Accents naturels laissés intentionnellement : nasalisation française
+  (an / en / in / on / un) sans équivalent anglais, « r » uvulaire vs.
+  « r » alvéolaire — sources naturelles d'un accent « English speaks French ».
+iso: en
+kategoria: akcent
+kolejnosc: 40
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Digrammes prioritaires (avant les lettres seules) ---
+  - { wzor: "ch", zamiana: "sh" }
+  - { wzor: "Ch", zamiana: "Sh" }
+  - { wzor: "CH", zamiana: "SH" }
+  - { wzor: "gn", zamiana: "ny" }
+  - { wzor: "Gn", zamiana: "Ny" }
+  - { wzor: "GN", zamiana: "NY" }
+  - { wzor: "ou", zamiana: "oo" }
+  - { wzor: "Ou", zamiana: "Oo" }
+  - { wzor: "OU", zamiana: "OO" }
+  - { wzor: "qu", zamiana: "k"  }
+  - { wzor: "Qu", zamiana: "K"  }
+  - { wzor: "QU", zamiana: "K"  }
+  # --- Lettres simples ---
+  - { wzor: "j",  zamiana: "zh" }
+  - { wzor: "J",  zamiana: "Zh" }
+  - { wzor: "ç",  zamiana: "s"  }
+  - { wzor: "Ç",  zamiana: "S"  }
+  - { wzor: "h",  zamiana: ""   }
+  - { wzor: "H",  zamiana: ""   }

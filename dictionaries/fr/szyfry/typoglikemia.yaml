@@ -1,0 +1,18 @@
+# CHIFFREMENT : TYPOGLYCÉMIE
+# Mélange les lettres centrales de chaque mot (la première et la dernière
+# restent en place).
+
+id: typoglikemia
+etykieta: "Typoglycémie (milieu de mot mélangé)"
+opis: |
+  Phénomène psycholinguistique : si la première et la dernière lettre d'un
+  mot sont correctes, le lecteur lit toujours le mot couramment, même si
+  le milieu est mélangé. Les mots plus courts que `min_dlugosc_slowa` ne
+  sont pas modifiés.
+iso: fr
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Paramètres de l'algorithme
+min_dlugosc_slowa: 4

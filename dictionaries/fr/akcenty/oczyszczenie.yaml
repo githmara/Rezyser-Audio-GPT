@@ -1,0 +1,19 @@
+# NETTOYAGE DE TEXTE AVEC NORMALISATION DES NOMBRES
+# Variante par défaut « Sans accent » — nettoie uniquement le texte pour
+# le lecteur d'écran.
+
+id: oczyszczenie
+etykieta: "Sans accent (Nettoyage AVEC normalisation des nombres)"
+opis: |
+  N'applique aucun accent phonétique. Effectue uniquement le nettoyage du
+  texte pour le synthétiseur vocal (supprime les onomatopées de remplissage
+  comme « euh », les astérisques, les hashtags, les séries de points) et
+  convertit les chiffres en mots (par ex. « 123 » → « cent vingt-trois »).
+iso: fr
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

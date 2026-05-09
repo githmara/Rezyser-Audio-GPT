@@ -1,0 +1,143 @@
+# =============================================================================
+#  FONDEMENTS DE LA LANGUE FRANÇAISE
+# =============================================================================
+#
+#  Fichier de base pour `dictionaries/fr/`. Le moteur Poliglota exige que
+#  chaque langue possède ce fichier — sans lui, une nouvelle langue ne sera
+#  pas reconnue par `dostepne_jezyki_bazowe()`.
+#
+#  Structure analogue à `dictionaries/pl/podstawy.yaml`. Le champ
+#  `polskie_znaki`, malgré son nom historique, contient TOUS les signes
+#  diacritiques qui doivent être normalisés en ASCII avant l'application
+#  des chiffrements ou des règles d'accentuation (`usun_polskie_znaki: true`).
+#
+#  Note spéciale : les ligatures « œ » et « æ » sont translittérées en
+#  « oe » et « ae » dans `polskie_znaki` — elles ne peuvent PAS figurer
+#  dans `alfabet`, car le mécanisme du chiffrement de César repose sur
+#  `.upper()` et les ligatures cassent l'indice de position.
+# =============================================================================
+
+id: podstawy
+jezyk: fr
+# Énumération lingua-language-detector (en majuscules, sans préfixe).
+# Liste complète : https://github.com/pemistahl/lingua-py
+lingua: FRENCH
+etykieta: "Français – fondements phonétiques"
+opis: |
+  Règles de base pour la langue française :
+    1. Normalisation des signes diacritiques (`polskie_znaki`) — pour que
+       le chiffrement de César et les moteurs d'accentuation puissent
+       traiter correctement les caractères spéciaux (les ligatures
+       œ/æ sont décomposées en oe/ae).
+    2. Alphabet français (26 lettres standard + 14 diacritiques à la fin) —
+       utilisé par le chiffrement de César.
+
+# -----------------------------------------------------------------------------
+# Normalisation des signes diacritiques.
+# Les ligatures (œ, æ) sont décomposées en deux lettres pour préserver les
+# indices du chiffrement de César.
+# -----------------------------------------------------------------------------
+polskie_znaki:
+  # -- Ligatures françaises → 2 lettres --
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  - { wzor: "æ", zamiana: "ae" }
+  - { wzor: "Æ", zamiana: "Ae" }
+  # -- Diacritiques français → ASCII (pour les moteurs d'accent avec
+  #    usun_polskie_znaki: true) --
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  - { wzor: "é", zamiana: "e"  }
+  - { wzor: "É", zamiana: "E"  }
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "Û", zamiana: "U"  }
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
+  # -- Caractères polonais → ASCII --
+  - { wzor: "ą", zamiana: "a"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ę", zamiana: "e"  }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ó", zamiana: "o"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ó", zamiana: "O"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  # -- Autres diacritiques européens → ASCII --
+  - { wzor: "á", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "ä", zamiana: "a"  }
+  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "Á", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  - { wzor: "Ä", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "A"  }
+  - { wzor: "ð", zamiana: "d"  }
+  - { wzor: "Ð", zamiana: "D"  }
+  - { wzor: "í", zamiana: "i"  }
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "Í", zamiana: "I"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "ñ", zamiana: "n"  }
+  - { wzor: "Ñ", zamiana: "N"  }
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ö", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ö", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  - { wzor: "ß", zamiana: "ss" }
+  - { wzor: "ẞ", zamiana: "SS" }
+  - { wzor: "þ", zamiana: "th" }
+  - { wzor: "Þ", zamiana: "Th" }
+  - { wzor: "ú", zamiana: "u"  }
+  - { wzor: "Ú", zamiana: "U"  }
+  - { wzor: "ý", zamiana: "y"  }
+  - { wzor: "Ý", zamiana: "Y"  }
+
+# -----------------------------------------------------------------------------
+# Alphabet français — 26 lettres standard + 14 diacritiques en fin.
+# Utilisé par le chiffrement de César. Les ligatures œ/æ NE sont PAS
+# incluses (elles sont décomposées en 2 lettres dans `polskie_znaki`).
+# -----------------------------------------------------------------------------
+alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÇÉÈÊËÎÏÔÙÛÜŸ"
+
+# -----------------------------------------------------------------------------
+# Mots déclencheurs de l'analyseur d'accents dans la Bible du Monde (13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne construit une regex à partir
+# de cette liste pour reconnaître les phrases « <mot> X » ou « X <mot> ».
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "accent"
+  - "prononciation"

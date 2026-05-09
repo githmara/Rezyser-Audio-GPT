@@ -1,0 +1,861 @@
+# =============================================================================
+# dictionaries/fr/gui/ui.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_ui.py
+# ze źródła dictionaries/pl/gui/ui.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany
+# wprowadzaj w pliku źródłowym PL i uruchom ponownie skrypt.
+#
+# Tłumaczone są WYŁĄCZNIE wartości; klucze, struktura, komentarze
+# sekcyjne i style block-scalar (`|-`, `|`) są zachowane przez
+# round-trip ruamel.yaml. Placeholdery {nazwa} i skróty \tCtrl+...
+# zostały zamrożone tokenami ⟦P{i}⟧/⟦S{j}⟧ na czas tłumaczenia,
+# odtworzone 1:1 po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# APP – tytuł i parametry globalne
+# -----------------------------------------------------------------------------
+app:
+  nazwa: "Réalisateur Audio GPT"
+  wersja: "{numer_wersji} – Version de Publication"
+  title_home: "{nazwa_aplikacji}  |  {wersja}"
+  title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
+  banner: "🎬  {nazwa_aplikacji}"
+  obszar_roboczy_name: "Espace de travail"
+  menubar_name: "Barre du menu principal"
+
+# -----------------------------------------------------------------------------
+# COMMON – elementy wielokrotnego użytku (dialogi, przyciski standardowe)
+# -----------------------------------------------------------------------------
+common:
+  btn_zamknij: "Fermer"
+  btn_anuluj: "Annuler"
+  btn_skopiuj_schowek: "📋  Copier dans le presse-papiers"
+  komunikat_skopiowano: "Copié"
+  komunikat_schowek_nieudany_tytul: "Presse-papiers indisponible"
+  komunikat_schowek_nieudany_tresc: "Impossible d'ouvrir le presse-papiers du système.\nCopiez le texte manuellement : Ctrl+A, Ctrl+C dans le champ ci-dessus."
+  blad_tytul: "Erreur"
+  blad_odczytu_tytul: "Erreur de lecture"
+  blad_zapisu_tytul: "Erreur d'écriture"
+  brak_pliku_tytul: "Fichier manquant"
+  plik_nie_istnieje_tytul: "Le fichier n'existe pas"
+  sukces_tytul: "Succès"
+  informacja_tytul: "Information"
+
+# -----------------------------------------------------------------------------
+# MAIN – pasek menu, przyciski narzędzi, kontener główny (main.py)
+# -----------------------------------------------------------------------------
+main:
+  menu:
+    narzedzia: "&Outils"
+    plik: "&Fichier"
+    strona_glowna: "Page d'&accueil\tCtrl+0"
+    rezyser: "&Réalisateur\tCtrl+1"
+    poliglota: "&Polyglotte\tCtrl+2"
+    konwerter: "&Convertisseur\tCtrl+3"
+    manager: "&Gestionnaire de Règles\tCtrl+4"
+    zakoncz: "Quitt&er\tAlt+F4"
+    jezyk_interfejsu: "&Langue de l'interface"
+  menu_status:
+    strona_glowna: "Revient à l'écran d'accueil avec la description des outils et System Check"
+    rezyser: "Ouvre le module Réalisateur — écriture de scénarios et de prose avec l'IA"
+    poliglota: "Ouvre le module Polyglotte — accents et traduction de textes"
+    konwerter: "Ouvre le module Convertisseur — création de fichiers Word"
+    manager: "Ouvre le Gestionnaire de Règles — explorateur de fichiers YAML dans dictionaries/ et créateur de nouveaux accents / modes / chiffrements"
+    zakoncz: "Ferme l'application"
+    jezyk_interfejsu: "Sélectionne la langue de l'interface de l'application (le changement nécessite un redémarrage)"
+  btn:
+    rezyser: "🎬  &Réalisateur"
+    poliglota: "🌍  &Polyglotte"
+    konwerter: "📄  &Convertisseur"
+    manager: "📚  &Gestionnaire de Règles"
+  tooltip:
+    rezyser: "Module Réalisateur (Ctrl+1) : écris scénarios et prose avec l'aide de l'IA"
+    poliglota: "Module Polyglotte (Ctrl+2) : accents et traduction de textes"
+    konwerter: "Module Convertisseur (Ctrl+3) : crée des fichiers Word avec en-têtes"
+    manager: "Gestionnaire de Règles (Ctrl+4) : explore les fichiers YAML dans dictionaries/, crée de nouveaux accents, chiffrements et modes (modèle ou prompt pour IA)"
+  nazwy_narzedzi:
+    dom: "Accueil"
+    rezyser: "Réalisateur"
+    poliglota: "Polyglotte"
+    konwerter: "Convertisseur"
+    manager: "Gestionnaire de Règles"
+  dialog:
+    zmiana_jezyka_tytul: "Changement de langue de l'interface"
+    zmiana_jezyka_tresc: |-
+      Le changement de langue de l'interface nécessite un redémarrage de l'application.
+
+      Cliquez sur OK pour fermer l'application. Au redémarrage, l'interface sera dans la langue sélectionnée ({nazwa_jezyka}).
+
+# -----------------------------------------------------------------------------
+# HOME – panel startowy (HomePanel w main.py)
+# -----------------------------------------------------------------------------
+home:
+  panel_name: "Panneau de démarrage — Page d'accueil"
+  welcome_text: |-
+    Voici votre studio d'enregistrement intégré.
+    Sélectionnez un outil dans la barre des boutons ou dans le menu Outils :
+
+      •  Réalisateur     —  Écris scénarios et prose avec l'IA ; gère dynamiquement la Bible du Monde.
+      •  Polyglotte      —  Applique des accents marqués aux synthétiseurs locaux (NVDA/Vocalizer) et traduis des textes.
+      •  Convertisseur   —  Crée rapidement des fichiers Word professionnels avec titres de niveau 1.
+      •  Gestionnaire de Règles —  Explore et crée des règles de dictionnaire sans entrer manuellement dans les fichiers YAML.
+  heading_system_check: "Vérification du Système"
+  checking: "Vérification de la configuration…"
+  # Błędy walidacji golden_key.env
+  err_brak_pliku: |-
+    🚨 Fichier de configuration d'environnement manquant !
+
+    Premier démarrage du programme détecté. Les modules sont bloqués pour des raisons de sécurité.
+    Pour débloquer tous les outils, cliquez sur le bouton ci-dessous — le programme générera automatiquement le fichier golden_key.env et l'ouvrira dans l'éditeur de texte par défaut.
+  err_odczyt: "🚨 Impossible de lire le fichier golden_key.env :\n{tresc_bledu}"
+  err_struktura: |-
+    🚨 Erreur dans la structure du fichier !
+    Le paramètre obligatoire OPENAI_API_KEY= est manquant.
+    Vous avez probablement supprimé le signe égal ou le nom de la variable.
+    Supprimez le fichier, regénérez-le et collez la clé avec attention.
+  err_tekst_zastepczy: |-
+    ⚠️ Clé non saisie !
+    Le fichier golden_key.env contient encore le texte de remplacement.
+    Ouvrez le fichier dans l'éditeur de texte, supprimez le texte de remplacement et collez votre véritable clé API.
+  err_cudzyslowy: |-
+    🚨 Guillemets superflus autour de la clé !
+    La clé API a été collée entre guillemets (par ex. "sk-…").
+    Ouvrez le fichier dans l'éditeur de texte et supprimez les guillemets —
+    la clé doit être saisie directement après le signe '=', sans caractères supplémentaires.
+  err_niedozwolone_znaki: |-
+    🚨 Caractères non autorisés autour de la clé !
+    Un espace ou un autre caractère invisible a été détecté avant ou après la clé API.
+    Ouvrez le fichier dans l'éditeur de texte et assurez-vous que la valeur commence
+    immédiatement après le signe '=', sans espaces.
+  err_format: |-
+    🚨 Format de clé suspect !
+    Une clé OpenAI correcte commence toujours par les caractères sk- (par ex. sk-proj-…).
+    Assurez-vous d'avoir copié la chaîne correcte et qu'il n'y a pas d'espaces avant elle.
+  err_zbyt_krotki: |-
+    ⚠️ La clé semble trop courte ({liczba_znakow} caractères détectés, au moins {minimum_znakow} attendus).
+    Vous n'avez probablement copié qu'une partie de la clé.
+
+    Si vous avez déjà fermé la fenêtre avec la clé sur platform.openai.com,
+    vous devez retourner à votre compte, utiliser l'option « Revoke secret key » pour cette
+    clé tronquée et en générer une nouvelle. N'oubliez pas de copier la clé entière
+    avant de cliquer sur « Done » la prochaine fois.
+  ok_klucz_wykryty: |-
+    ✅ Clé API (golden_key.env) détectée et correctement formatée.
+    Tous les modules sont prêts à l'emploi.
+  # Przyciski akcji panelu startowego
+  btn_generate: "Générer le fichier golden_key.env et ouvrir l'éditeur de texte"
+  btn_open: "📝 Ouvrir le fichier golden_key.env dans l'éditeur de texte"
+  blad_tworzenia_env_tytul: "Erreur"
+  blad_tworzenia_env_tresc: "Impossible de créer le fichier golden_key.env :\n{tresc_bledu}"
+  ok_plik_wygenerowany: |-
+    ✅ Le fichier {nazwa_pliku} a été généré !
+    L'éditeur de texte s'ouvre automatiquement.
+    Collez votre clé API, sauvegardez le fichier (Ctrl+S) et redémarrez l'application.
+  blad_otwarcia_pliku_tytul: "Information"
+  blad_otwarcia_pliku_tresc: "Impossible d'ouvrir automatiquement le fichier.\nOuvrez-le manuellement :\n{sciezka_pliku}"
+  # Sekcja: Narzędzia słownikowe
+  heading_narzedzia_slownikowe: "Outils de dictionnaire"
+  narzedzia_slownikowe_name: "Description des outils de dictionnaire"
+  tools_info: |-
+    Vous voulez ajouter un nouvel accent, chiffrement ou mode Réalisateur ?
+    Ouvrez le Gestionnaire de Règles (Ctrl+4) — vous y trouverez l'arborescence de tous les fichiers YAML de dictionaries/ et un créateur qui crée automatiquement un modèle ou génère un prompt pour le chatbot IA.
+
+    Après avoir ajouté un nouvel ACCENT, cliquez en plus sur le bouton « Actualiser les accents Réalisateur depuis YAML » ci-dessous — cela permettra au Mode Réalisateur de détecter le nouvel accent (le Polyglotte détecte automatiquement les YAML). Après l'actualisation, redémarrez l'application.
+  btn_open_manager_label: "📚 Ouvrir le Gestionnaire de Règles"
+  btn_open_manager_name: "Bouton Ouvrir le Gestionnaire de Règles"
+  btn_open_manager_tooltip: "Passe au Gestionnaire de Règles — explorateur de fichiers YAML et créateur de nouveaux accents / modes / chiffrements (Ctrl+4)."
+  btn_odswiez_label: "🔄 Actualiser les accents Réalisateur depuis YAML"
+  btn_odswiez_name: "Bouton Actualiser les accents Réalisateur depuis YAML"
+  btn_odswiez_tooltip: "Scanne dictionaries/*/akcenty/ et regénère les wrappers akcent_* dans core_poliglota.py et core_rezyser.py. Après une actualisation réussie, il faut redémarrer l'application."
+  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
+  raport_niespodziewany_tytul: "Erreur de mise à jour des accents"
+  raport_niespodziewany_tresc: "Une erreur inattendue s'est produite :\n{tresc_bledu}"
+  raport_tytul_blad: "Actualiser les accents Réalisateur — ERREUR"
+  raport_header_blad: "⛔ Le générateur a rencontré des erreurs — voir le journal ci-dessous."
+  raport_tytul_sukces: "Actualiser les accents Réalisateur — Succès"
+  raport_header_sukces: |-
+    ✅ Fichiers modifiés pour {liczba_akcentow} accents.
+    Pour faire apparaître les nouveaux accents en Mode Réalisateur, redémarrez l'application.
+  raport_tytul_bez_zmian: "Actualiser les accents Réalisateur — Aucune modification"
+  raport_header_bez_zmian: "ℹ️ Aucune modification. {liczba_akcentow} accents détectés — les wrappers sont déjà à jour."
+  raport_lbl_log: "Journal complet (Ctrl+A, Ctrl+C copie dans le presse-papiers) :"
+  raport_log_name: "Journal du générateur d'accents Réalisateur"
+
+# -----------------------------------------------------------------------------
+# REZYSER – panel modułu Reżyser (gui_rezyser.py)
+# -----------------------------------------------------------------------------
+rezyser:
+  panel_name: "Panneau Réalisateur Audio GPT"
+  heading: "🎬  Réalisateur Audio GPT — Studio Créatif Hybride"
+  description_name: "Description du module Réalisateur Audio GPT"
+  tool_description: |-
+    Réalisateur Audio GPT est un studio créatif hybride.
+
+    Mode Brainstorming  — planifie l'intrigue, génère 3 options (SANS sauvegarde fichier).
+    Mode Scénario       — écris un scénario audio brut avec balises [SFX] et [Personnage : émotion] (SAUVEGARDE FICHIER).
+    Mode Livre audio    — génère une prose littéraire dense et classique (SAUVEGARDE FICHIER).
+
+    Les projets sont enregistrés dans le sous-dossier 'skrypty/' à côté du programme.
+    Indique le nom du projet SANS extension (par ex. chroniques_arkonia).
+    Pour changer de projet, il faut d'abord effacer la mémoire actuelle.
+  prompt_architekta_content: |-
+    Tu es un excellent architecte de mondes (Worldbuilder) et conseiller littéraire. J'ai une idée vague d'intrigue : [INSÈRE ICI TON IDÉE]. Ta mission est de la développer en une « Bible du Monde » professionnelle.
+    Adapte le ton et les règles à mon idée. Évite les raccourcis de conte de fées et les clichés de l'IA.
+
+    RÈGLES DE FORMATAGE (CRITIQUES) :
+    Tu dois renvoyer ta réponse en deux parties séparées :
+
+    PARTIE 1 : BIBLE DU MONDE
+    Cette partie doit être strictement enfermée dans UN bloc de code Markdown (utilise les marqueurs ```markdown au début et ``` à la fin). À l'intérieur du bloc de code, applique ces règles :
+    1. Commence par une émoji de livre ouvert et un titre de travail, par ex. 📖 Bible du Monde : [Titre].
+    2. Utilise un seul dièse (#) pour les sections principales (par ex. # Règles du Monde, # Personnages).
+    3. Utilise un double dièse (##) pour les sous-sections.
+    4. Utilise des tirets (-) pour créer des listes lisibles.
+    5. Utilise des doubles astérisques (**texte**) pour mettre en évidence les règles absolues et inviolables (par ex. **Le héros NE ment JAMAIS**).
+    6. Décris la psychologie des personnages, leurs principaux défauts et leurs motivations. Pour les personnages parlant une langue étrangère, ajoute l'information sur l'accent directement à la balise, par ex. `[Speaker 1 : Nom] - bégaie et a un accent français`. **Astuce technique :** L'utilisation du mot-clé `accent` est absolument requise, car c'est sur lui qu'un script externe de l'application détecte automatiquement et applique les bonnes règles phonétiques aux dialogues du personnage.
+
+    PARTIE 2 : RECOMMANDATION DE MODE
+    Cette partie doit être placée HORS du bloc de code, comme texte normal en dessous. Conseille-moi lequel des modes de mon application sera le meilleur pour réaliser cette idée : 🎬 Mode Scénario Brut (pièce radiophonique, SFX, phonétique), ou 📖 Mode Livre Audio Traditionnel (prose littéraire classique).
+
+  # Pasek pliku
+  lbl_nazwa_pliku: "Nom du fichier de projet (sans extension, par ex. chroniques_arkonia) :"
+  txt_nazwa_pliku_name: "Champ nom du fichier de projet"
+  txt_nazwa_pliku_hint: "par ex. chroniques_arkonia"
+  txt_nazwa_pliku_tooltip: |-
+    Saisissez le nom du projet SANS extension.
+    Le fichier de l'histoire est sauvegardé sous : skrypty/<nom>.txt
+    Champ verrouillé lorsque la mémoire est occupée.
+  btn_wczytaj_label: "Charger l'histoire"
+  btn_wczytaj_tooltip: |-
+    Charge un fichier de projet existant (skrypty/<nom>.txt) en mémoire.
+    Actif uniquement quand la mémoire est vide et qu'un nom est fourni.
+  btn_wyczysc_biezaca_label: "Effacer la courante (laisser le Résumé)"
+  btn_wyczysc_biezaca_tooltip: |-
+    Efface uniquement l'histoire courante de la mémoire.
+    Le Résumé (Mémoire à Long Terme) et la Bible du Monde sont conservés.
+    À utiliser pour continuer un livre long après avoir généré le résumé.
+  btn_hard_reset_label: "Fermer le Projet (Réinitialisation Complète)"
+  btn_hard_reset_tooltip: |-
+    Effacement COMPLET du projet : histoire, résumé, Bible du Monde.
+    Remet à zéro tous les compteurs et déverrouille le champ nom de fichier.
+    À utiliser quand vous changez de projet ou commencez une histoire totalement nouvelle.
+  # Sidebar
+  sidebar_heading: "📖 Barre latérale du projet"
+  lbl_ksiega_swiata: "Bible du Monde — Règles et Personnages :"
+  txt_ksiega_name: "Champ Bible du Monde — règles et personnages"
+  txt_ksiega_hint: |-
+    Saisissez les règles du monde, la description des personnages et leurs accents phonétiques…
+    Par ex. [Geralt : accent islandais]
+    Le contenu est inclus dans chaque requête IA.
+  txt_ksiega_tooltip: |-
+    Contexte toujours inclus pour l'IA : règles du monde, personnages, accents phonétiques.
+    La sauvegarde sur disque nécessite de fournir le nom du fichier de projet.
+  btn_zapisz_ksiege_label: "💾 Sauvegarder la Bible de manière permanente"
+  btn_zapisz_ksiege_tooltip: |-
+    Sauvegarde la Bible du Monde dans le fichier : skrypty/<nom>.md
+    Nécessite de fournir le nom du fichier de projet.
+  btn_prompt_architekta_label: "📖 Prompt de l'Architecte pour l'IA…"
+  btn_prompt_architekta_name: "Bouton Afficher le Prompt de l'Architecte pour chatbot externe"
+  btn_prompt_architekta_tooltip: |-
+    Ouvre une fenêtre avec un prompt prêt pour un chatbot externe (ChatGPT, Claude).
+    Colle ton idée d'intrigue et l'IA générera une Bible du Monde professionnelle formatée en Markdown — à coller dans le champ « Bible du Monde » ci-dessus.
+  lbl_pamiec_dlugotrwala: "🧠 Mémoire à Long Terme (Résumé) :"
+  txt_pamiec_name: "Champ Mémoire à Long Terme — résumé des événements"
+  txt_pamiec_hint: |-
+    L'IA y enregistrera le résumé quand la mémoire sera pleine.
+    Vous pouvez aussi le modifier manuellement.
+  txt_pamiec_tooltip: |-
+    Résumé des événements précédents inclus dans chaque requête IA.
+    Permet de continuer l'histoire sans les limitations de la fenêtre contextuelle du modèle.
+  btn_zapisz_pamiec_label: "💾 Sauvegarder le Résumé"
+  btn_zapisz_pamiec_tooltip: |-
+    Sauvegarde le résumé dans le fichier : skrypty/<nom>_resume.txt
+    Après la sauvegarde, vous pouvez effacer la mémoire courante en toute sécurité.
+  # Obszar roboczy
+  main_heading: "🎬 Espace de Travail"
+  rb_tryb_label: "Mode de travail :"
+  rb_tryb_name: "Sélection du mode de travail IA"
+  rb_tryb_tooltip: |-
+    Brainstorming — planification sans sauvegarde fichier.
+    Scénario      — scénario audio brut (sauvegardé dans le fichier).
+    Livre audio   — prose littéraire traditionnelle (sauvegardée dans le fichier).
+  # 13.2: komunikaty fallbacku reżysera (gdy brak reguł dla języka UI ani EN)
+  brak_trybow_dla_jezyka: |-
+    Pour la langue « {jezyk} », aucun mode réalisateur IA ni fallback
+    anglais (dictionaries/en/rezyser/) n'a été trouvé. Ajoutez un fichier YAML avec le mode
+    dans le dossier de règles de la langue ou restaurez le pack anglais par défaut.
+  brak_trybow_tytul: "Aucun mode réalisateur"
+  placeholder_brak_trybow: "(aucun mode disponible)"
+  # Panel struktury
+  struktura_heading: "✂️ Gestion de la Structure"
+  btn_prolog_label: "📜 Insérer le Prologue"
+  btn_prolog_name: "Bouton Insérer le Prologue"
+  btn_prolog_tooltip: |-
+    Insère l'en-tête « Prologue » au début de l'histoire.
+    Possible uniquement quand l'histoire est vide. Nécessite le nom du projet.
+  btn_epilog_label: "🏁 Insérer l'Épilogue"
+  btn_epilog_name: "Bouton Insérer l'Épilogue"
+  btn_epilog_tooltip: |-
+    Insère l'en-tête « Épilogue » à la fin de l'histoire.
+    Bloque l'ajout ultérieur de contenu après l'Épilogue.
+  btn_rozdzial_label: "✂️ Insérer une coupure (Chapitre {numer_rozdzialu})"
+  btn_rozdzial_name: "Bouton Insérer un Chapitre"
+  btn_rozdzial_tooltip: |-
+    Insère l'en-tête du chapitre suivant dans l'histoire et le fichier.
+    Disponible uniquement en mode Livre audio.
+  btn_akt_label: "🎭 Insérer l'Acte {numer_aktu}"
+  btn_akt_name: "Bouton Insérer un Acte"
+  btn_akt_tooltip: |-
+    Insère l'en-tête « Acte N » et automatiquement « Scène 1 » dans l'histoire et le fichier.
+    Disponible uniquement en mode Scénario.
+  btn_scena_label: "🎬 Insérer la Scène {numer_sceny}"
+  btn_scena_name: "Bouton Insérer une Scène"
+  btn_scena_tooltip: |-
+    Insère l'en-tête de la scène suivante dans l'histoire et le fichier.
+    Disponible uniquement en mode Scénario.
+  naglowek_prolog: "Prologue"
+  naglowek_epilog: "Épilogue"
+  naglowek_rozdzial: "Chapitre"
+  naglowek_akt: "Acte"
+  naglowek_scena: "Scène"
+  # Podgląd historii
+  lbl_podglad_historii: "Histoire courante en mémoire (lecture seule — naviguez avec les flèches) :"
+  txt_podglad_name: "Aperçu de la chronologie complète en mémoire — lecture seule"
+  txt_podglad_hint: "(la mémoire est vide — chargez un projet ou commencez-en un nouveau)"
+  # Pole instrukcji
+  lbl_instrukcje: |-
+    Instructions pour le prochain fragment (tapez « résume » pour forcer la sauvegarde dans la Mémoire à Long Terme) :
+  txt_instrukcje_name: "Champ instructions pour l'IA — ancien user_input"
+  txt_instrukcje_hint: |-
+    Donnez les instructions pour le prochain fragment d'histoire…
+    (par ex. « Décris la rencontre de Geralt avec la sorcière dans la forêt. Tension élevée. »)
+  btn_wyslij_label: "Envoyer à l'IA"
+  btn_wyslij_tooltip: |-
+    Envoie les instructions au modèle gpt-4o et ajoute la réponse à l'histoire.
+    Nécessite une clé API active et une Bible du Monde remplie.
+  # Postprodukcja
+  postprod_heading: "🎛️ Post-production"
+  postprod_info: |-
+    Le module itère sur les chapitres du fichier sauvegardé et leur attribue un court titre littéraire (analyse IA).
+  btn_tytuly_ai_label: "📜 Attribuer les Titres aux Chapitres (IA)"
+  btn_tytuly_ai_name: "Bouton Attribuer les Titres aux Chapitres IA"
+  btn_tytuly_ai_tooltip: |-
+    Itère sur les chapitres du fichier sauvegardé et leur attribue des titres (gpt-4o-mini).
+    Nécessite un fichier de projet sauvegardé et une clé API active.
+  # Pamięć modelu
+  lbl_pamiec_modelu: "🧠 Mémoire du Modèle (État de la Fenêtre Contextuelle) :"
+  lbl_pamiec_modelu_start: "🟢 Mémoire propre. Machine prête pour une nouvelle histoire."
+  pamiec_modelu_status_name: "État de la mémoire du modèle IA"
+  # Komunikaty - wczytywanie
+  brak_nazwy_tytul: "Aucun nom"
+  brak_nazwy_tresc: "Indiquez un nom pour le fichier de projet avant de le charger."
+  plik_nie_istnieje_tytul: "Fichier inexistant"
+  plik_nie_istnieje_tresc: |-
+    Fichier introuvable :
+    {tresc_bledu}
+
+    Si vous commencez une nouvelle histoire — commencez simplement à écrire.
+    Le fichier sera créé automatiquement au premier envoi à l'IA.
+  blad_odczytu_tresc: "Erreur de lecture du fichier :\n{tresc_bledu}"
+  status_wczytano_tytul: "Projet chargé"
+  status_wczytano_ksiega: " Bible également chargée : skrypty/{nazwa_projektu}.md."
+  status_wczytano_streszczenie: |-
+    Résumé du projet '{nazwa_projektu}' chargé.{lore_info}
+    La mémoire courante reste vide (mode Mémoire Infinie).
+    Vous pouvez continuer l'histoire — l'IA travaille sur le résumé.
+  status_wczytano_historia: "Histoire '{nazwa_projektu}' chargée ({liczba_znakow} caractères).{lore_info}"
+  # Komunikaty - czyszczenie
+  pamiec_wyczyszczona_tytul: "Mémoire effacée"
+  pamiec_wyczyszczona_tresc: "Mémoire courante effacée."
+  pamiec_wyczyszczona_streszczenie_zostaje: "\nLe résumé dans la Mémoire à Long Terme a été conservé."
+  hard_reset_pytanie_tytul: "Fermer le Projet — Réinitialisation Complète"
+  hard_reset_pytanie: |-
+    Êtes-vous sûr de vouloir fermer le projet ?
+
+    Seront effacés :
+      • histoire courante
+      • résumé (Mémoire à Long Terme)
+      • Bible du Monde
+      • tous les compteurs (chapitres, actes, scènes)
+
+    Les fichiers sur le disque NE seront PAS supprimés.
+  hard_reset_ok_tytul: "Projet fermé"
+  hard_reset_ok_tresc: "Projet fermé. Toutes les données en mémoire ont été effacées."
+  # Zapis Księgi
+  brak_nazwy_ksiega_tytul: "Aucun nom de fichier"
+  brak_nazwy_ksiega_tresc: "Indiquez d'abord un nom pour le fichier de projet dans le champ nom."
+  ksiega_pusta_tytul: "Bible du Monde vide"
+  ksiega_pusta_tresc: "La Bible du Monde est vide. Rien à sauvegarder."
+  ksiega_zapisana_tytul: "Bible sauvegardée"
+  ksiega_zapisana_tresc: "Bible du Monde sauvegardée : skrypty/{nazwa_projektu}.md"
+  blad_zapisu_ksiegi: "Erreur de sauvegarde de la Bible du Monde :\n{tresc_bledu}"
+  # Prompt Architekta dialog
+  prompt_arch_dlg_tytul: "Prompt de l'Architecte — coller dans le chatbot externe"
+  prompt_arch_instrukcja: |-
+    Collez ce prompt prêt dans le chatbot externe (par ex. ChatGPT gratuit ou Claude) et remplacez le texte « [INSÈRE ICI TON IDÉE] » par votre étincelle narrative.
+
+    L'IA vous renverra une Bible du Monde prête dans un bloc de code Markdown — copiez son contenu (sans les marqueurs ``` autour) et collez-le dans le champ « Bible du Monde » ci-dessus, puis cliquez sur « Sauvegarder la Bible de manière permanente ».
+  prompt_arch_instrukcja_name: "Instructions d'utilisation du Prompt de l'Architecte"
+  prompt_arch_lbl: "Prompt à copier (Ctrl+A, Ctrl+C) :"
+  prompt_arch_tresc_name: "Contenu complet du Prompt de l'Architecte"
+  prompt_arch_btn_kopiuj: "📋  Copier le prompt dans le presse-papiers"
+  prompt_arch_btn_kopiuj_name: "Bouton Copier le Prompt de l'Architecte dans le presse-papiers"
+  prompt_arch_skopiowano_tytul: "Copié"
+  prompt_arch_skopiowano_tresc: |-
+    Le Prompt de l'Architecte a été copié dans le presse-papiers.
+    Collez-le (Ctrl+V) dans ChatGPT ou Claude et remplacez [INSÈRE ICI TON IDÉE] par votre étincelle narrative.
+  prompt_arch_schowek_nieudany: |-
+    Impossible d'ouvrir le presse-papiers du système.
+    Copiez le prompt manuellement : cliquez dans le champ ci-dessus, sélectionnez tout (Ctrl+A) et copiez (Ctrl+C).
+  # Zapis Streszczenia
+  pamiec_pusta_tytul: "Résumé vide"
+  pamiec_pusta_tresc: "La Mémoire à Long Terme est vide. Rien à sauvegarder."
+  streszczenie_zapisane_tytul: "Résumé sauvegardé"
+  streszczenie_zapisane_tresc: |-
+    Résumé sauvegardé : skrypty/{nazwa_projektu}_resume.txt
+
+    Vous pouvez maintenant effacer la mémoire courante en toute sécurité.
+  blad_zapisu_streszczenia: "Erreur de sauvegarde du résumé :\n{tresc_bledu}"
+  # Wysyłanie do AI
+  brak_api_tytul: "Aucune API"
+  brak_api_tresc: |-
+    Aucune connexion à OpenAI.
+    Vérifiez le fichier golden_key.env et redémarrez l'application.
+  puste_pole_tytul: "Champ vide"
+  puste_pole_tresc: "Saisissez les instructions pour l'IA avant l'envoi."
+  brak_przepisow_tytul: "Aucune recette"
+  brak_przepisow_tresc: |-
+    Impossible de charger un mode de travail depuis YAML.
+    Exécutez odswiez_rezysera.py ou vérifiez dictionaries/pl/rezyser/.
+  brak_nazwy_wyslanie_tresc: |-
+    Indiquez un nom pour le fichier de projet avant de générer le texte à sauvegarder.
+    (Le mode '{tytul_trybu}' nécessite un nom de fichier.)
+  brak_ksiegi_tytul: "Aucune Bible du Monde"
+  brak_ksiegi_tresc: |-
+    Remplissez la Bible du Monde avant d'envoyer la requête à l'IA.
+    Les règles du monde et les personnages sont requis par le modèle.
+  blad_trybu_tytul: "Erreur de mode"
+  blad_trybu_tresc: |-
+    Vous essayez de générer un résumé en mode sauvegarde fichier !
+    Cela pourrait endommager votre histoire.
+
+    Passez en mode « Brainstorming » et réessayez.
+  err_rate_limit: "Pas de crédit OpenAI ! Rechargez votre compte et réessayez."
+  err_odrzucenie: |-
+    L'IA a rejeté le prompt (balise [REJECT_AI] détectée).
+    Le texte NE sera PAS sauvegardé dans le fichier de l'histoire.
+    Vous pouvez modifier l'instruction et réessayer.
+  blad_ai_tytul: "Erreur IA"
+  blad_ai_szczegoly_tytul: "Erreur IA — Détails techniques"
+  blad_ai_naglowek: "Une erreur inattendue s'est produite pendant le traitement."
+  blad_ai_lbl_tresc: "Contenu de l'erreur (sélectionnez Ctrl+A, copiez Ctrl+C — pour le signalement) :"
+  blad_ai_tresc_name: "Contenu de l'erreur à copier"
+  # Wstawianie struktury (potwierdzenia)
+  struktura_brak_nazwy_tytul: "Aucun nom"
+  struktura_brak_nazwy_tresc: "Indiquez un nom pour le fichier de projet avant d'insérer la structure."
+  blad_wstawiania_prolog: "Erreur d'insertion du Prologue :\n{tresc_bledu}"
+  blad_wstawiania_epilog: "Erreur d'insertion de l'Épilogue :\n{tresc_bledu}"
+  blad_wstawiania_rozdzialu: "Erreur d'insertion du chapitre :\n{tresc_bledu}"
+  blad_wstawiania_aktu: "Erreur d'insertion de l'acte :\n{tresc_bledu}"
+  blad_wstawiania_sceny: "Erreur d'insertion de la scène :\n{tresc_bledu}"
+  prolog_tytul: "Prologue inséré"
+  prolog_tresc: "En-tête inséré : Prologue.\n\nCommencez à écrire le contenu du prologue."
+  epilog_tytul: "Épilogue inséré"
+  epilog_tresc: |-
+    En-tête inséré : Épilogue.
+
+    La génération de contenu après l'Épilogue est bloquée.
+  rozdzial_tytul: "Coupure de chapitre insérée"
+  rozdzial_tresc: "En-tête inséré : {naglowek}."
+  akt_tytul: "Acte inséré"
+  akt_tresc: "Inséré : {akt_naglowek} et {scena_naglowek}."
+  scena_tytul: "Scène insérée"
+  scena_tresc: "En-tête inséré : {naglowek}."
+  # Odpowiedź AI – Burza Mózgów
+  burza_dlg_tytul: "Réponse IA — Brainstorming"
+  burza_dlg_lbl: "Copiez le texte sélectionné (Ctrl+A, Ctrl+C) ou fermez :"
+  burza_dlg_name: "Réponse IA — Brainstorming"
+  # Postprodukcja
+  tytuly_brak_nazwy_tytul: "Aucun nom de projet"
+  tytuly_brak_nazwy_tresc: "Indiquez un nom pour le projet avant d'attribuer les titres."
+  tytuly_zajety_tytul: "Occupé"
+  tytuly_zajety_tresc: "Une autre requête IA est déjà en cours. Attendez la fin."
+  tytuly_brak_pliku_tytul: "Aucun fichier de projet"
+  tytuly_brak_pliku_tresc: |-
+    Fichier introuvable :
+    {sciezka_pliku}
+
+    Générez et sauvegardez d'abord le contenu du projet.
+  tytuly_prep: "Préparation…"
+  tytuly_brak_przepisu_tresc: |-
+    Recette « titres » introuvable dans YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
+    Sans elle, la post-production des titres de chapitres n'est pas disponible.
+  tytuly_blad_naglowek: "Une erreur s'est produite pendant la génération des titres de chapitres."
+  tytuly_blad_nieznany: "Erreur inconnue lors de l'attribution des titres."
+  tytuly_czesciowe_naglowek: "⚠️ Résultats partiels (génération interrompue par une erreur) :\n\n{wyniki}"
+  tytuly_dlg_tytul: "Titres de Chapitres Proposés (IA)"
+  tytuly_dlg_lbl: "Copiez les titres (Ctrl+A, Ctrl+C) ou notez-les dans la Bible du Monde :"
+  tytuly_dlg_name: "Liste des titres de chapitres proposés"
+  tytuly_gotowe: "Terminé ! Titres générés."
+  blad_zapisu_do_pliku: "Erreur de sauvegarde dans le fichier :\n{tresc_bledu}"
+
+# -----------------------------------------------------------------------------
+# POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
+# -----------------------------------------------------------------------------
+poliglota:
+  panel_name: "Panneau Polyglotte IA"
+  heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
+  description_name: "Description du module Polyglotte"
+  tool_description: |-
+    Le module Polyglotte sert à appliquer des accents phonétiques marqués aux synthétiseurs vocaux locaux (NVDA/Vocalizer/eSpeak), à des jeux de mots en Mode Chiffrant et à traduire des textes via l'IA (OpenAI gpt-4o).
+
+    Prend en charge les fichiers : .txt, .html, .htm, .docx.
+    Le résultat est sauvegardé dans le même répertoire que le fichier source.
+  # Sekcja 1: wczytywanie pliku
+  section1_heading: "1. Chargement du fichier source"
+  lbl_plik: "Nom ou chemin complet du fichier (.txt, .html, .htm, .docx) :"
+  txt_plik_name: "Champ chemin du fichier source"
+  txt_plik_hint: "Saisissez le chemin du fichier ou sélectionnez avec le bouton Parcourir…"
+  btn_przegladaj: "Parcourir…"
+  btn_przegladaj_tooltip: "Ouvre la fenêtre de sélection de fichier du système"
+  btn_wczytaj: "Charger le fichier en mémoire"
+  btn_wczytaj_tooltip: "Charge le contenu du fichier indiqué dans la mémoire de travail"
+  btn_wyczysc: "Effacer la mémoire"
+  btn_wyczysc_tooltip: "Supprime le contenu chargé, permet de sélectionner un autre fichier"
+  lbl_plik_status_name: "État du fichier chargé"
+  plik_status_brak: "Aucun fichier chargé."
+  plik_status_wczytany: "Fichier chargé : {nazwa_pliku}  ({liczba_znakow} caractères).\nVous pouvez maintenant lancer le traitement."
+  plik_status_wyczyszczono: "Mémoire effacée. Vous pouvez charger un nouveau fichier."
+  # Plik dialog
+  file_dlg_title: "Sélectionner un fichier source"
+  file_dlg_wildcard: |-
+    Fichiers pris en charge (*.txt;*.html;*.htm;*.docx)|*.txt;*.html;*.htm;*.docx|Fichiers texte (*.txt)|*.txt|Fichiers HTML (*.html;*.htm)|*.html;*.htm|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*
+  # Komunikaty wczytywania
+  brak_pliku_tresc: "Indiquez un nom ou un chemin pour le fichier avant de le charger."
+  plik_nie_istnieje_tresc: "Fichier introuvable :\n{sciezka_pliku}"
+  blad_odczytu_tresc: "Erreur lors de la lecture du fichier :\n{tresc_bledu}"
+  plik_wczytany_tytul: "Fichier chargé"
+  plik_wczytany_tresc: |-
+    Fichier chargé : {nazwa_pliku}
+    ({liczba_znakow} caractères).
+
+    Vous pouvez maintenant configurer le mode de travail et lancer le traitement.
+  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
+  zmiana_jezyka_pipeline_tytul: "Langue détectée différente de la langue active"
+  zmiana_jezyka_pipeline_tresc: |-
+    Le contenu du fichier chargé est en langue « {jezyk_wykryty} ».
+    L'ensemble de règles actif (accents/chiffrements) est actuellement « {jezyk_aktywny} ».
+
+    Voulez-vous changer les règles vers « {jezyk_wykryty} » ?
+
+    OUI — les étiquettes des accents et des chiffrements ainsi que les règles phonétiques changeront vers « {jezyk_wykryty} », en fonction du contenu du fichier.
+    NON — je laisse les règles pour « {jezyk_aktywny} ». L'effet sur un texte en langue étrangère pourrait être imprévisible.
+  # Sekcja 2: konfiguracja trybu pracy
+  section2_heading: "2. Configuration du Travail"
+  rb_ai: "Traducteur IA (OpenAI gpt-4o — nécessite une clé API, consomme du crédit)"
+  rb_ai_disabled: "Traducteur IA (désactivé — fichier golden_key.env correct manquant)"
+  rb_ai_name: "Mode Traducteur IA"
+  rb_rezyser: "Mode Réalisateur (règles phonétiques gratuites depuis YAML)"
+  rb_rezyser_name: "Mode Réalisateur gratuit"
+  rb_szyfrant: "Mode Chiffrant (jeux de mots, bégaiements aléatoires)"
+  rb_szyfrant_name: "Mode Chiffrant et jeux de mots"
+  # Panel AI
+  lbl_jezyk_docelowy: "Langue cible de la traduction (par ex. Finnois, Islandais, Anglais, Arabe) :"
+  txt_jezyk_name: "Champ langue cible"
+  txt_jezyk_hint: "Saisissez le nom de la langue cible…"
+  # Panel Reżysera
+  lbl_akcent: "Sélectionnez l'accent ou le mode de nettoyage :"
+  combo_akcent_name: "Liste des accents et modes de nettoyage"
+  combo_akcent_tooltip: "Sélectionnez l'accent phonétique ou le mode de nettoyage du texte pour les lecteurs d'écran"
+  lbl_iso: "Code ISO de la langue (2 lettres, par ex. en, fr, de) :"
+  txt_iso_name: "Champ code ISO de la langue"
+  txt_iso_hint: "par ex. en"
+  # Panel Szyfranta
+  lbl_szyfr: "Sélectionnez l'algorithme de distorsion :"
+  combo_szyfr_name: "Liste des algorithmes de chiffrement"
+  lbl_cezar: "Décalage du chiffrement de César (0 = aléatoire, plage {min_przesuniecie}…{max_przesuniecie}) :"
+  spin_cezar_name: "Décalage du chiffrement de César"
+  # Sekcja 3: Przetwarzanie
+  section3_heading: "3. Traitement"
+  btn_process: "Lancer le Traitement"
+  btn_process_tooltip: "Lance le traitement sélectionné et sauvegarde le résultat à côté du fichier source"
+  lbl_progress_name: "État d'avancement du traitement"
+  # Sekcja 4: Wynik
+  section4_heading: "4. Résultat (lecture seule — naviguez avec les flèches)"
+  txt_wynik_name: "Champ du résultat — texte prêt"
+  txt_wynik_hint: "Le contenu traité apparaîtra ici…"
+  # Przetwarzanie – komunikaty
+  brak_pliku_pamieci_tytul: "Aucun fichier en mémoire"
+  brak_pliku_pamieci_tresc: "Chargez d'abord le fichier source (section 1)."
+  zajety_tytul: "Occupé"
+  zajety_tresc: "Le traitement est déjà en cours. Attendez la fin."
+  brak_jezyka_tytul: "Aucune langue"
+  brak_jezyka_tresc: "Saisissez la langue cible de la traduction avant de lancer."
+  nie_wybrano_akcentu: "Aucun accent sélectionné."
+  nie_wybrano_szyfru: "Aucun chiffrement sélectionné."
+  brak_iso_tytul: "Aucun code ISO"
+  brak_iso_tresc: "Indiquez un code ISO à deux lettres valide pour la langue (par ex. en, fr, de)."
+  ostrzezenie_jezyk: |-
+    Attention : la langue principale détectée du texte n'est pas prise en charge. Les règles phonétiques sont actuellement adaptées aux langues : {wspierane_jezyki}. L'effet pourrait être imprévisible.
+  # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu
+  brak_akcentow_dla_jezyka: |-
+    Pour la langue « {jezyk} », aucun accent phonétique n'est installé. Les règles sont strictement liées à la langue source et ne peuvent pas être empruntées à d'autres dossiers dictionaries/.
+  brak_szyfrow_dla_jezyka: |-
+    Pour la langue « {jezyk} », aucun chiffrement n'est installé. Les règles sont strictement liées à la langue source et ne peuvent pas être empruntées à d'autres dossiers dictionaries/.
+  blad_przetwarzania: "Erreur de traitement :\n{tresc_bledu}"
+  brak_reguly_tytul: "Aucune règle pour la langue détectée"
+  brak_reguly_naglowek: "Le détecteur de langue a trouvé dans le texte un fragment dans une langue pour laquelle un fichier de règles est manquant. L'application a interrompu le traitement pour ne pas endommager le résultat."
+  cezar_losowe_tytul: "Chiffrement de César — décalage aléatoire"
+  cezar_losowe_tresc: "La valeur du décalage était 0 — généré aléatoirement : {wylosowane_przesuniecie}."
+  blad_wyniku_tytul: "Erreur"
+  blad_wyniku_tresc: "Impossible de générer le texte résultant."
+  blad_zapisu_wyjscia: "Erreur lors de la sauvegarde du fichier résultant :\n{tresc_bledu}"
+  sukces_zapis: "Fichier sauvegardé sous :\n{sciezka_pliku}"
+  # Tłumacz AI
+  ai_init: "Initialisation de la traduction…"
+  ai_zakonczone_tytul: "Succès"
+  ai_zakonczone_tresc: "Traduction terminée !\n\nFichier sauvegardé sous :\n{sciezka_pliku}"
+  ai_blad_zapisu: "Erreur de sauvegarde du fichier résultant :\n{tresc_bledu}"
+  # Wyświetlanie błędu AI
+  blad_ai_tytul: "Erreur"
+  blad_ai_szczegoly_tytul: "Erreur — Détails techniques"
+  blad_ai_naglowek: "Une erreur inattendue s'est produite pendant le traitement."
+  blad_ai_lbl_tresc: "Contenu de l'erreur (sélectionnez Ctrl+A, copiez Ctrl+C — pour le signalement) :"
+  blad_ai_tresc_name: "Contenu de l'erreur à copier"
+
+# -----------------------------------------------------------------------------
+# KONWERTER – panel modułu Konwerter (gui_konwerter.py)
+# -----------------------------------------------------------------------------
+konwerter:
+  panel_name: "Panneau Architecte de Livres Audio"
+  heading: "📄  Architecte de Livres Audio"
+  tool_description: |-
+    Ce module sert à préparer l'architecture du fichier pour les lecteurs d'écran (navigation avec les touches 1 et h sur les titres) et ElevenLabs. Il transforme les mots-clés (Page de titre, Acte, Chapitre, Prologue, Épilogue) en Titres de premier niveau, en laissant le reste du scénario intact.
+  lbl_plik: |-
+    Nom ou chemin complet du fichier source
+    (par ex. fichier .txt, .html, .md ou document .docx) :
+  txt_plik_name: "Champ chemin du fichier source"
+  txt_plik_hint: "Saisissez le chemin du fichier (texte, HTML, MD, DOCX)…"
+  btn_przegladaj: "Parcourir…"
+  btn_przegladaj_tooltip: "Ouvre la fenêtre de sélection de fichier du système pour .txt ou .docx"
+  btn_buduj: "Construire l'Architecture pour ElevenLabs"
+  btn_buduj_tooltip: "Traite le fichier et sauvegarde architectura_<nom>.docx à côté du fichier source"
+  # Metadana zapisywana do pola `author` w core_properties wynikowego .docx.
+  author_metadata: "Réalisateur"
+  # Dialog wyboru pliku
+  file_dlg_title: "Sélectionner un fichier source"
+  file_dlg_wildcard: "Tous les fichiers pris en charge (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*"
+  # Komunikaty
+  brak_pliku_tytul: "Aucun fichier"
+  brak_pliku_tresc: "Indiquez le nom ou le chemin du fichier source."
+  plik_nie_istnieje_tytul: "Fichier inexistant"
+  plik_nie_istnieje_tresc: "Fichier introuvable :\n{sciezka_pliku}"
+  blad_odczytu_tytul: "Erreur de lecture"
+  blad_odczytu_tresc: "Erreur lors de la lecture du fichier :\n{tresc_bledu}"
+  blad_zapisu_tytul: "Erreur de sauvegarde"
+  blad_zapisu_tresc: "Erreur lors de la sauvegarde du fichier résultant :\n{tresc_bledu}"
+  sukces_tytul: "Succès"
+  sukces_tresc: |-
+    Parfait ! Les titres de premier niveau ont été définis.
+
+    Fichier sauvegardé sous :
+    {sciezka_pliku}
+
+# -----------------------------------------------------------------------------
+# MANAGER – panel Managera Reguł (gui_manager_regul.py)
+# -----------------------------------------------------------------------------
+manager:
+  panel_name: "Panneau Gestionnaire de Règles — explorateur de dictionnaires"
+  desc: |-
+    Le Gestionnaire de Règles permet d'explorer et de modifier les fichiers YAML du dossier dictionaries/ sans entrer dans l'Explorateur de fichiers du système. Sélectionnez un fichier dans l'arborescence à gauche, puis utilisez les boutons à droite : ouvrir dans l'éditeur de texte, créer un nouveau fichier, dupliquer ou supprimer.
+
+    Pour des tâches plus complexes (nouvelle langue, accent de phonétique étrangère, chiffrement algorithmique), le Gestionnaire générera un prompt pour le chatbot IA — il suffit de le coller dans ChatGPT ou Claude et de sauvegarder la réponse.
+  desc_name: "Description du Gestionnaire de Règles"
+  # Drzewo
+  tree_name: "Arborescence des fichiers dictionaries"
+  tree_tooltip: |-
+    Arborescence de tous les fichiers YAML du dossier dictionaries/. Développez la langue, puis la catégorie, puis sélectionnez le fichier. Les flèches et Entrée fonctionnent normalement pour NVDA.
+  tree_root: "Dictionnaires (dictionaries/)"
+  tree_brak_folderu: "⚠️  Aucun dossier dictionaries/ — créez la première langue avec le bouton « Nouveau fichier de règles… »."
+  # 13.2: filtr języka
+  dropdown_jezyk_label: "&Langue :"
+  dropdown_jezyk_tooltip: |-
+    Filtre l'arborescence sur le dossier sélectionné dans dictionaries/. Réglé par défaut sur la langue de l'interface, pour rendre la liste lisible pour le lecteur d'écran. Sélectionnez « Toutes les langues » pour comparer les dossiers côte à côte lors de la création d'un nouveau pack.
+  opcja_wszystkie_jezyki: "🌍  Toutes les langues"
+  tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
+  tree_podstawy: "📄  fondements.yaml  (diacritiques + alphabet)"
+  tree_kategoria: "{etykieta}  [{liczba_plikow}]"
+  tree_plik: "📄  {nazwa_pliku}"
+  # Etykiety kategorii drzewa
+  kategorie:
+    akcenty: "Accents (phonétique pour TTS)  🎙️"
+    szyfry: "Chiffrements (jeux de texte)  🔐"
+    rezyser: "Réalisateur (modes et post-production)  🎬"
+    gui: "Traductions UI  🌐"
+  # Przyciski akcji
+  btn_otworz_label: "📝  &Ouvrir dans l'éditeur de texte"
+  btn_otworz_name: "Bouton Ouvrir le fichier sélectionné dans l'éditeur de texte"
+  btn_otworz_tooltip: "Ouvre le fichier YAML sélectionné dans l'éditeur de texte par défaut du système (Bloc-notes sous Windows, TextEdit sous macOS)."
+  btn_nowy_label: "➕  &Nouveau fichier de règles…"
+  btn_nowy_name: "Bouton Créer un nouveau fichier de règles"
+  btn_nowy_tooltip: "Ouvre le créateur de nouveaux fichiers : choisissez le type (accent, chiffrement, mode Réalisateur, langue de base), le Gestionnaire crée un modèle ou génère un prompt pour l'IA."
+  btn_duplikuj_label: "📋  &Dupliquer le fichier sélectionné"
+  btn_duplikuj_name: "Bouton Dupliquer le fichier sélectionné"
+  btn_duplikuj_tooltip: "Crée une copie du fichier YAML sélectionné avec un nouveau nom — démarrage rapide pour une variante d'une règle existante."
+  btn_usun_label: "🗑️  &Supprimer le fichier sélectionné"
+  btn_usun_name: "Bouton Supprimer le fichier sélectionné"
+  btn_usun_tooltip: "Supprime le fichier YAML sélectionné du disque (avec confirmation). L'opération est irréversible — réfléchissez-y à deux fois."
+  btn_odswiez_label: "🔄  Ac&tualiser l'arborescence"
+  btn_odswiez_name: "Bouton Actualiser l'arborescence des fichiers"
+  btn_odswiez_tooltip: "Recharge l'arborescence depuis le disque — utilisez si vous avez modifié les fichiers manuellement dans l'Explorateur ou après une sauvegarde dans l'éditeur de texte."
+  info_stopka: |-
+    Après avoir créé un nouvel accent, retournez à la Page d'accueil
+    et cliquez sur « Actualiser les accents Réalisateur depuis YAML ».
+  # Otwarcie w edytorze
+  plik_wne_tytul: "Impossible d'ouvrir le fichier"
+  plik_wne_tresc: |-
+    Le fichier se trouve hors du dossier dictionaries/ ou n'existe plus.
+    Actualisez l'arborescence et réessayez.
+  blad_otwarcia_tytul: "Information"
+  blad_otwarcia_tresc: "Impossible d'ouvrir automatiquement le fichier.\nOuvrez-le manuellement :\n{sciezka_pliku}\n\nDétails : {tresc_bledu}"
+  # Duplikowanie
+  dup_dlg_tytul: "Dupliquer le fichier YAML"
+  dup_dlg_label: |-
+    Indiquez un nouveau nom pour le fichier (sans extension, ASCII uniquement, lower_snake).
+    Fichier source : {nazwa_pliku}
+  dup_nazwa_blad_tytul: "Erreur de nom de fichier"
+  dup_nazwa_blad_tresc: |-
+    Nom non valide.
+
+    Autorisés : lettres ASCII minuscules, chiffres et tirets bas. Le premier caractère doit être une lettre.
+    Exemples : suedois, nouveau_mode, postprod_chapitres.
+  dup_poza_dict_tytul: "Erreur"
+  dup_poza_dict_tresc: "Le chemin de destination se trouve hors de dictionaries/."
+  dup_istnieje_tytul: "Le fichier existe déjà"
+  dup_istnieje_tresc: |-
+    Le fichier {nazwa_pliku}.yaml existe déjà dans ce dossier.
+    Choisissez un autre nom.
+  dup_blad: "Impossible de créer le doublon :\n{tresc_bledu}"
+  dup_komentarz_naglowek: |-
+    # Dupliqué depuis : {nazwa_pliku}
+    # ATTENTION : modifiez les champs `etykieta` et `opis`, puis sauvegardez le fichier.
+  dup_ok_tytul: "Doublon créé"
+  dup_ok_tresc: |-
+    Doublon créé : {nazwa_pliku}
+
+    L'éditeur de texte s'ouvre automatiquement. Modifiez les champs `etykieta` et `opis`, sauvegardez le fichier (Ctrl+S), puis retournez au Gestionnaire et cliquez sur « Actualiser l'arborescence ».
+  # Usuwanie
+  usun_pytanie_tytul: "Confirmation de suppression"
+  usun_pytanie_tresc: |-
+    Êtes-vous sûr de vouloir supprimer le fichier :
+
+    {nazwa_pliku}
+    (du dossier {katalog_wzgledny})
+
+    L'opération est IRRÉVERSIBLE.
+  usun_blad: "Impossible de supprimer le fichier :\n{tresc_bledu}"
+  usun_ok_tytul: "Supprimé"
+  usun_ok_tresc: |-
+    Fichier supprimé. N'oubliez pas de cliquer sur « Actualiser les accents Réalisateur depuis YAML » sur la Page d'accueil après avoir supprimé un accent.
+  # Kreator
+  kreator_tytul: "Nouveau fichier de règles — créateur"
+  kreator_co_utworzyc: "Que voulez-vous créer ?"
+  kreator_cb_name: "Sélection du type de nouveau fichier de règles"
+  kreator_opis_name: "Description du type de règle sélectionné"
+  kreator_lbl_id: "Identifiant (nom de fichier) :"
+  kreator_jezyk_bazowy_id_label: "Code de la langue (ISO 639-1) :"
+  kreator_id_name: "Champ identifiant du fichier"
+  kreator_id_hint: "par ex. suedois  (lettres minuscules, sans espaces)"
+  kreator_lbl_etykieta: "Étiquette (visible dans l'interface) :"
+  kreator_etykieta_name: "Champ étiquette de règle"
+  kreator_etykieta_hint: 'par ex. "Suédois (Alva / Oskar)"'
+  kreator_jezyk_bazowy_etykieta_label: "Nom de la langue (dans la langue maternelle ou en anglais) :"
+  kreator_lbl_iso: "Code ISO de la langue cible :"
+  kreator_iso_name: "Champ code ISO de la langue"
+  kreator_iso_hint: "par ex. sv, de, en (2 caractères)"
+  kreator_lbl_jezyk: "Langue de base (dossier dictionaries/…) :"
+  kreator_jezyk_name: "Sélection de la langue de base (dossier)"
+  kreator_lbl_opis: "Description de l'effet (pour l'IA) :"
+  kreator_opis_efektu_name: "Champ description de l'effet (uniquement pour le chiffrement algorithmique)"
+  kreator_opis_efektu_hint: "Décrivez en 1-3 phrases ce que doit faire ce chiffrement (entrée → sortie)."
+  kreator_btn_utworz: "Créer"
+  # Kreator – hinty dla języka bazowego
+  kreator_jezyk_bazowy_id_hint: "par ex. en, de, fr (code ISO 639-1, 2-3 caractères)"
+  kreator_jezyk_bazowy_etykieta_hint: "par ex. Deutsch, Finnish — dans la langue maternelle ou en anglais (pas : Allemand)"
+  # Kreator – walidacje
+  kreator_alert_tytul: "Champ manquant ou erroné"
+  kreator_blad_kod_jezyka: "Le code de la langue doit comporter 2 ou 3 lettres (ISO 639-1/3)."
+  kreator_blad_nazwa_jezyka: "Indiquez le nom de la langue en anglais ou dans la langue maternelle (par ex. German, Deutsch — pas : Allemand)."
+  kreator_blad_id: |-
+    L'identifiant du fichier doit être en ASCII au format lower_snake.
+    Exemples : suedois, mode_jour, postprod_resumes.
+  kreator_blad_etykieta: "Indiquez une étiquette visible dans l'interface."
+  kreator_blad_iso: "Indiquez le code ISO de la langue cible (par ex. sv, de)."
+  kreator_blad_opis_efektu: |-
+    Pour le chiffrement algorithmique, décrivez l'effet en mots — cette description ira dans le prompt pour l'IA.
+  # Wynik kreatora
+  wynik_tytul: "Nouveau fichier de règles — résultat"
+  wynik_sukces_naglowek: "✅  Fichier créé :\n{sciezka_pliku}"
+  wynik_brak_pliku_naglowek: |-
+    ℹ️  Le fichier n'a pas été créé (ce type de règle nécessite du code Python d'un développeur — voir le prompt pour l'IA ci-dessous).
+  wynik_naglowek_name: "État de création du fichier de règles"
+  wynik_lbl_uwagi: "Étapes suivantes :"
+  wynik_uwagi_name: "Notes sur la règle créée"
+  wynik_lbl_prompt: "Prompt pour un agent IA avec accès au projet (Claude Code / Cursor / Aider) :"
+  wynik_prompt_name: "Prompt à coller dans le chatbot IA"
+  wynik_btn_kopiuj: "📋  Copier le prompt dans le presse-papiers"
+  wynik_btn_kopiuj_name: "Bouton Copier le prompt IA dans le presse-papiers"
+  wynik_skopiowano_tytul: "Copié"
+  wynik_skopiowano_tresc: |-
+    Le prompt a été copié dans le presse-papiers.
+    Collez-le (Ctrl+V) dans votre agent IA avec accès au projet (Claude Code, Cursor, Aider) — l'agent sauvegardera le fichier et exécutera lui-même les scripts nécessaires.
+  wynik_schowek_nieudany_tytul: "Presse-papiers indisponible"
+  wynik_schowek_nieudany_tresc: |-
+    Impossible d'ouvrir le presse-papiers du système.
+    Copiez le prompt manuellement : Ctrl+A, Ctrl+C dans le champ ci-dessus.
+  # Nadpisywanie pliku
+  plik_istnieje_tytul: "Le fichier existe"
+  plik_istnieje_tresc: "Le fichier {nazwa_pliku} existe déjà.\nL'écraser ?"
+  blad_bezpieczenstwa_tytul: "Erreur de sécurité"
+  blad_bezpieczenstwa_tresc: "Le chemin de destination est hors de dictionaries/. Interruption."
+  blad_tworzenia: "Impossible de créer le fichier :\n{tresc_bledu}"
+  niepelna_struktura_tytul: "Structure linguistique incomplète"
+  niepelna_struktura_tresc: |-
+    Le fichier podstawy.yaml a été sauvegardé, mais les sous-dossiers akcenty/, szyfry/, rezyser/ et gui/ n'ont pas pu être créés :
+    {tresc_bledu}
+
+    Créez-les manuellement dans l'Explorateur de fichiers avant de lancer le Polyglotte — sinon le moteur générera une erreur lors du scan de la nouvelle langue.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
+# -----------------------------------------------------------------------------
+updater:
+  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  nowa_wersja_tytul: "Mise à jour disponible"
+  nowa_wersja_tresc: |-
+    Une nouvelle version est disponible : {nowa_wersja}.
+    Votre version : {aktualna_wersja}.
+
+    Voulez-vous télécharger et installer la mise à jour maintenant ?
+  # Pobieranie (wx.ProgressDialog)
+  pobieranie_tytul: "Téléchargement de la mise à jour {nowa_wersja}"
+  pobieranie_tresc: "Téléchargement de {nazwa_pliku}…"
+  # Zakończenie pobierania i uruchomienie instalatora
+  instalacja_tytul: "Téléchargement terminé"
+  instalacja_tresc: |-
+    Téléchargement terminé. L'installateur démarre.
+    L'application va se fermer.
+  # Błędy
+  blad_pobierania_tytul: "Erreur de téléchargement"
+  blad_pobierania_tresc: "Impossible de télécharger la mise à jour :\n{tresc_bledu}"
+  blad_uruchomienia_tytul: "Erreur de démarrage de l'installateur"
+  blad_uruchomienia_tresc: "Impossible de démarrer l'installateur :\n{sciezka_pliku}\n\n{tresc_bledu}"
+  dev_info_tresc: |-
+    Une nouvelle version est disponible : {nowa_wersja}.
+
+    Cette installation n'utilise pas le pack runtime — le téléchargement de l'installateur n'est pas disponible.
+    Visitez la page de version sur GitHub et téléchargez l'archive « Source code » ou clonez le dépôt :
+
+    {url_release}

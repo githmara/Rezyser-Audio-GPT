@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------------
+#  ACCENT ALLEMAND (français → TTS allemand)
+#  Pour les synthétiseurs : Hedda / Stefan / Katja (TTS allemand).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "Allemand (par ex. Hedda / Stefan / Katja)"
+opis: |
+  Adapte le texte français au synthétiseur vocal allemand (Hedda / Stefan /
+  Katja).
+
+  Différences fonétiques critiques français → allemand :
+    - « ch » fr = /ʃ/, « ch » de = /x/ → on écrit « sch ».
+    - « j »  fr = /ʒ/, « j »  de = /j/ → on écrit « sch » (approximation).
+    - « ou » fr = /u/, « ou » de inhabituel → on écrit « u ».
+    - « u »  fr = /y/, « ü »  de = /y/ ✓ → on écrit « ü ».
+    - « ç »  fr = /s/, absent en de → on écrit « ss ».
+    - « qu » fr = /k/, « qu » de = /kv/ → on écrit « k ».
+    - « gn » fr = /ɲ/, « gn » de = /gn/ → on écrit « nj ».
+    - « h »  fr muet, « h »  de aspiré → on supprime.
+
+  Accents naturels laissés intentionnellement : nasalisation française
+  (an/en/in/on/un) — TTS allemand lit en voyelle + n, ce qui est l'accent
+  recherché.
+iso: de
+kategoria: akcent
+kolejnosc: 30
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Digrammes prioritaires ---
+  - { wzor: "ch", zamiana: "sch" }
+  - { wzor: "Ch", zamiana: "Sch" }
+  - { wzor: "CH", zamiana: "SCH" }
+  - { wzor: "ou", zamiana: "u"   }
+  - { wzor: "Ou", zamiana: "U"   }
+  - { wzor: "OU", zamiana: "U"   }
+  - { wzor: "gn", zamiana: "nj"  }
+  - { wzor: "Gn", zamiana: "Nj"  }
+  - { wzor: "GN", zamiana: "NJ"  }
+  - { wzor: "qu", zamiana: "k"   }
+  - { wzor: "Qu", zamiana: "K"   }
+  - { wzor: "QU", zamiana: "K"   }
+  # --- Lettres simples (après digrammes pour éviter de casser « ou » → « u ») ---
+  - { wzor: "j",  zamiana: "sch" }
+  - { wzor: "J",  zamiana: "Sch" }
+  - { wzor: "u",  zamiana: "ü"   }
+  - { wzor: "U",  zamiana: "Ü"   }
+  - { wzor: "ç",  zamiana: "ss"  }
+  - { wzor: "Ç",  zamiana: "Ss"  }
+  - { wzor: "h",  zamiana: ""    }
+  - { wzor: "H",  zamiana: ""    }

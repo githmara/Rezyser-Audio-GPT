@@ -1,0 +1,26 @@
+# CHIFFREMENT : TÉLÉPHONE-SERPENT / DIALECTE SERPENT
+# Allonge les sifflantes : chaque « s » ou « z » devient un long sifflement.
+# Inspiration : Snecko de « Slay The Spire ».
+
+id: waz
+etykieta: "Téléphone-serpent (dialecte serpent, sifflantes)"
+opis: |
+  Inspiré de Snecko du jeu « Slay The Spire ». Chaque occurrence de
+  « s » ou « z » (indépendamment de la casse) est aléatoirement allongée
+  en un sifflement de longueur `min_syk` à `max_syk` caractères.
+
+  Note : le digramme « ss » n'est pas traité comme une unité — chaque « s »
+  individuel est allongé, donc « passer » devient « passsssser » (avec
+  la sonorité doublée renforcée). Cela confère à l'effet un caractère
+  serpentin particulièrement marqué.
+iso: fr
+kategoria: szyfr
+kolejnosc: 30
+algorytm: waz
+
+# Paramètres de l'algorithme
+min_syk: 4
+max_syk: 8
+
+# Regex qui capture les caractères à allonger (case-insensitive).
+wzor_syku: "(?i)(s|z)"

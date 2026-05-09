@@ -127,6 +127,7 @@ MAPA_JEZYKOW: dict[str, str] = {
     "is": "islandzki",
     "it": "włoski",
     "de": "niemiecki",
+    "fr": "francuski",
 }
 
 
@@ -181,6 +182,13 @@ ABBREV_BY_LANG: dict[str, list[tuple[str, str]]] = {
         ("usw.",   "und so weiter"),
         ("bzw.",   "beziehungsweise"),
         ("ggf.",   "gegebenenfalls"),
+    ],
+    "fr": [
+        ("p. ex.",   "par exemple"),
+        ("c.-à-d.",  "c'est-à-dire"),
+        ("etc.",     "et cetera"),
+        ("M.",       "Monsieur"),
+        ("Dr",       "Docteur"),
     ],
 }
 

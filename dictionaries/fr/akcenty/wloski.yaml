@@ -1,0 +1,51 @@
+# -----------------------------------------------------------------------------
+#  ACCENT ITALIEN (français → TTS italien)
+#  Pour les synthétiseurs : Elsa / Cosimo / Carla (TTS italien).
+# -----------------------------------------------------------------------------
+id: wloski
+etykieta: "Italien (par ex. Elsa / Cosimo / Carla)"
+opis: |
+  Adapte le texte français au synthétiseur vocal italien (Elsa / Cosimo /
+  Carla). Deux langues romanes très proches — peu de modifications nécessaires.
+
+  Différences fonétiques critiques français → italien :
+    - « ch » fr = /ʃ/, « ch » it = /k/ (devant e/i) → on écrit « sci ».
+    - « j »  fr = /ʒ/, absent en italien → on écrit « gi » (it g+e/i = /dʒ/,
+      approximation la plus lisible par TTS italien).
+    - « ou » fr = /u/, « u » it = /u/ → on écrit « u ».
+    - « u »  fr = /y/, absent en italien → on écrit « iu » (approximation).
+    - « ç »  fr = /s/ → on écrit « ss ».
+    - « gn » fr = /ɲ/, « gn » it = /ɲ/ ✓ → on conserve.
+    - « qu » fr = /k/, « qu » it = /kw/ → on écrit « c » (devant a/o/u) /
+      « ch » (devant e/i). Simplifié : on écrit toujours « k ».
+
+  Accents naturels laissés intentionnellement : nasalisations françaises,
+  « h » initial (en italien il est muet, comme en français — pas de
+  conflit), « r » uvulaire fr vs. « r » roulé italien.
+iso: it
+kategoria: akcent
+kolejnosc: 45
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Digrammes prioritaires ---
+  - { wzor: "ch", zamiana: "sci" }
+  - { wzor: "Ch", zamiana: "Sci" }
+  - { wzor: "CH", zamiana: "SCI" }
+  - { wzor: "ou", zamiana: "u"   }
+  - { wzor: "Ou", zamiana: "U"   }
+  - { wzor: "OU", zamiana: "U"   }
+  - { wzor: "qu", zamiana: "k"   }
+  - { wzor: "Qu", zamiana: "K"   }
+  - { wzor: "QU", zamiana: "K"   }
+  # --- Lettres simples (gn conservé : it gn = fr gn = /ɲ/) ---
+  - { wzor: "j",  zamiana: "gi"  }
+  - { wzor: "J",  zamiana: "Gi"  }
+  - { wzor: "u",  zamiana: "iu"  }
+  - { wzor: "U",  zamiana: "Iu"  }
+  - { wzor: "ç",  zamiana: "ss"  }
+  - { wzor: "Ç",  zamiana: "Ss"  }

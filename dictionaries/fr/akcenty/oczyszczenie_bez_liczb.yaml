@@ -1,0 +1,19 @@
+# NETTOYAGE DE TEXTE SANS NORMALISATION DES NOMBRES
+# Variante pour textes techniques (dates, codes, numérotations) où les
+# chiffres NE doivent PAS être convertis en mots.
+
+id: oczyszczenie_bez_liczb
+etykieta: "Sans accent (Nettoyage SANS normalisation des nombres)"
+opis: |
+  N'applique aucun accent phonétique. Effectue le nettoyage du texte pour
+  le synthétiseur vocal, mais CONSERVE les chiffres dans leur forme
+  d'origine. Utiliser cette option pour les textes techniques où « 123 »
+  est plus important que « cent vingt-trois ».
+iso: fr
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

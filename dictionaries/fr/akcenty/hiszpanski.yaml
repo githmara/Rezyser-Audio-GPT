@@ -1,0 +1,50 @@
+# -----------------------------------------------------------------------------
+#  ACCENT ESPAGNOL (français → TTS espagnol)
+#  Pour les synthétiseurs : Helena / Pablo / Lucia (TTS espagnol).
+# -----------------------------------------------------------------------------
+id: hiszpanski
+etykieta: "Espagnol (par ex. Helena / Pablo / Lucia)"
+opis: |
+  Adapte le texte français au synthétiseur vocal espagnol (Helena /
+  Pablo / Lucia). Deux langues romanes — l'espagnol n'a ni /ʒ/ ni /ʃ/
+  ni /z/, donc plusieurs digrammes français doivent être réécrits.
+
+  Différences fonétiques critiques français → espagnol :
+    - « ch » fr = /ʃ/, « ch » es = /tʃ/ → on conserve « ch » (accent naturel).
+    - « j »  fr = /ʒ/, absent en es → on écrit « ll » (es ll = /ʝ/, le
+      plus proche TTS-friendly).
+    - « gn » fr = /ɲ/, « ñ »  es = /ɲ/ ✓ → on écrit « ñ ».
+    - « ou » fr = /u/, « u »  es = /u/ → on écrit « u ».
+    - « u »  fr = /y/, absent en es → on écrit « iu » (approximation).
+    - « ç »  fr = /s/, absent en es → on écrit « s ».
+    - « qu » fr = /k/, « qu » es = /k/ ✓ → on conserve.
+    - « v »  fr = /v/, « v »  es = /b/ → accent espagnol naturel, on conserve.
+    - « h »  fr et es muets → on conserve (pas de conflit).
+
+  Accents naturels laissés intentionnellement : nasalisations françaises,
+  « r » uvulaire fr vs. « r » roulé es, « z » fr = /z/ vs. « z » es = /θ/
+  (Espagne) ou /s/ (Amérique latine).
+iso: es
+kategoria: akcent
+kolejnosc: 55
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Digrammes prioritaires ---
+  - { wzor: "gn", zamiana: "ñ" }
+  - { wzor: "Gn", zamiana: "Ñ" }
+  - { wzor: "GN", zamiana: "Ñ" }
+  - { wzor: "ou", zamiana: "u" }
+  - { wzor: "Ou", zamiana: "U" }
+  - { wzor: "OU", zamiana: "U" }
+  # --- Lettres simples ---
+  - { wzor: "j",  zamiana: "ll" }
+  - { wzor: "J",  zamiana: "Ll" }
+  - { wzor: "u",  zamiana: "iu" }
+  - { wzor: "U",  zamiana: "Iu" }
+  - { wzor: "ç",  zamiana: "s"  }
+  - { wzor: "Ç",  zamiana: "S"  }

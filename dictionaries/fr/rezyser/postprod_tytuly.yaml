@@ -1,0 +1,35 @@
+# POST-PRODUCTION : TITRES DE CHAPITRE PAR IA
+# Outil pour le mode Livre audio : itère sur les chapitres dans le fichier
+# de projet enregistré et génère pour chacun un court titre littéraire.
+# Utilise par défaut un modèle peu coûteux (gpt-4o-mini).
+
+id: tytuly
+etykieta: "Attribuer les titres de chapitre (IA)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- Paramètres OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: français
+
+# --- Prompt système ---
+prompt_systemowy: |
+  Tu es un éditeur littéraire raffiné. Réponds uniquement avec le titre.
+
+# --- Modèle de prompt utilisateur (role=user) ---
+# Espaces réservés : {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Voici le contenu d'une section de livre ({naglowek}). Invente UN titre court, accrocheur et littéraire, sans guillemets.
+
+  CONTENU :
+  {probka}
+
+# --- Paramètres d'itération sur le fichier de projet ---
+regex_podzial_rozdzialow: "(?i)\\n*(Prologue|Chapitre \\d+|Épilogue)\\n*"
+min_dlugosc_fragmentu: 50
+max_dlugosc_probki: 6000
+
+# Messages dans la fenêtre de résultats :
+etykieta_fragment_zbyt_krotki: "(Section trop courte)"
+etykieta_bled_brak_kredytow: "(Erreur — crédit API épuisé)"

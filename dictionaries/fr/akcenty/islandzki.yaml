@@ -1,0 +1,57 @@
+# -----------------------------------------------------------------------------
+#  ACCENT ISLANDAIS (français → TTS islandais)
+#  Pour les synthétiseurs : Karl / Dora (TTS islandais).
+# -----------------------------------------------------------------------------
+id: islandzki
+etykieta: "Islandais (par ex. Karl / Dora)"
+opis: |
+  Adapte le texte français au synthétiseur vocal islandais (Karl / Dora).
+  L'islandais a une phonologie très distincte — pas de /ʒ/, pas de
+  nasalisation, mais possède /θ/ (þ) et /ð/ qui n'existent pas en français.
+  L'accent islandais sur le français est très reconnaissable.
+
+  Différences fonétiques critiques français → islandais :
+    - « ch » fr = /ʃ/, absent en is → on écrit « sh » (le TTS islandais
+      le lira comme /s/ + /h/, ce qui est l'accent recherché).
+    - « j »  fr = /ʒ/, « j » is = /j/ → on écrit « zh » (transcription
+      étrangère, TTS lira /z/ + /h/).
+    - « gn » fr = /ɲ/, absent en is → on écrit « nj ».
+    - « ou » fr = /u/, « ú » is = /u/ ✓ → on écrit « ú ».
+    - « u »  fr = /y/, « u » is ≈ /ʏ/ — proche → on conserve.
+    - « ç »  fr = /s/ → on écrit « s ».
+    - « qu » fr = /k/, « kv » is = /kv/ → on écrit « kv ».
+    - « h »  fr muet, « h » is aspiré → on supprime.
+
+  Accents naturels laissés intentionnellement : « r » uvulaire fr vs.
+  « r » roulé is, nasalisations françaises (TTS islandais les rendra
+  en voyelle + n), digramme « th » que TTS islandais peut lire comme /θ/.
+iso: is
+kategoria: akcent
+kolejnosc: 65
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Digrammes prioritaires ---
+  - { wzor: "ch", zamiana: "sh" }
+  - { wzor: "Ch", zamiana: "Sh" }
+  - { wzor: "CH", zamiana: "SH" }
+  - { wzor: "gn", zamiana: "nj" }
+  - { wzor: "Gn", zamiana: "Nj" }
+  - { wzor: "GN", zamiana: "NJ" }
+  - { wzor: "ou", zamiana: "ú"  }
+  - { wzor: "Ou", zamiana: "Ú"  }
+  - { wzor: "OU", zamiana: "Ú"  }
+  - { wzor: "qu", zamiana: "kv" }
+  - { wzor: "Qu", zamiana: "Kv" }
+  - { wzor: "QU", zamiana: "KV" }
+  # --- Lettres simples ---
+  - { wzor: "j",  zamiana: "zh" }
+  - { wzor: "J",  zamiana: "Zh" }
+  - { wzor: "ç",  zamiana: "s"  }
+  - { wzor: "Ç",  zamiana: "S"  }
+  - { wzor: "h",  zamiana: ""   }
+  - { wzor: "H",  zamiana: ""   }

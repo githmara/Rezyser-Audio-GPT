@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  RÉPARATEUR DE BALISES (mode spécial)
+#  Ne modifie pas le contenu — injecte SEULEMENT le code ISO de la langue
+#  dans le fichier de sortie (HTML <html lang>, DOCX <w:lang>).
+# -----------------------------------------------------------------------------
+id: naprawiacz_tagow
+etykieta: "🔧 Réparateur de balises (Injection du code ISO uniquement)"
+opis: |
+  Cet « accent » ne modifie ni le contenu textuel ni sa phonétique.
+  Il injecte uniquement le code ISO de la langue dans le fichier de sortie :
+    - HTML : attribut lang="..." dans la balise <html>
+    - DOCX : élément <w:lang w:val="..."/> pour chaque exécution de texte
+  Le lecteur d'écran (NVDA / JAWS) bascule ainsi correctement vers la
+  bonne langue et la voix du synthétiseur.
+
+  Le code ISO est saisi manuellement dans l'interface graphique (champ
+  « Code ISO »), pas depuis ce fichier — la valeur `iso` est donc vide.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Mode spécial — n'exécute aucune phase de traitement du texte.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

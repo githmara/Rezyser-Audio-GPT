@@ -1,0 +1,50 @@
+# CHIFFREMENT : INVERSEUR DE TEXTE
+# Développe les abréviations puis lit chaque phrase à l'envers.
+# Inspiration : une mission de « The Traitors / Les Traîtres ».
+
+id: odwracanie
+etykieta: "Inverseur de texte (lecture à rebours avec capitalisation)"
+opis: |
+  Développe d'abord les abréviations françaises les plus courantes (p. ex. →
+  « par exemple », c.-à-d. → « c'est-à-dire », etc. → « et cetera », etc.).
+  Cela permet à la phrase inversée de rester intelligible, sans absurdités
+  comme « .xe .p » à la place de « p. ex. ».
+  Ensuite, chaque phrase est inversée caractère par caractère, en préservant
+  la ponctuation finale et la majuscule en début de phrase.
+
+  Source des abréviations : abréviations françaises standard (TODO 3.2 —
+  premier ensemble pour la langue française).
+iso: fr
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# Développement des abréviations — motifs REGEX.
+# Ordre : les plus longues AVANT les plus courtes (Mlle avant Mme, c.-à-d.
+# avant c., n° avant n.).
+rozwiniecia:
+  # -- p. ex. → par exemple (avec ou sans espace, point optionnel) --
+  - { wzor: '\bp\.\s*ex\.?,?\s',          zamiana: "par exemple " }
+  # -- c.-à-d. → c'est-à-dire (la forme canonique avec accent grave) --
+  - { wzor: '\bc\.-à-d\.?,?\s',           zamiana: "c'est-à-dire " }
+  # -- etc. → et cetera --
+  - { wzor: '\betc\.?,?\s',               zamiana: "et cetera " }
+  # -- cf. → confer (référence bibliographique) --
+  - { wzor: '\bcf\.?,?\s',                zamiana: "confer " }
+  # -- Titres de civilité : Mlle/Mme avant M. (l'ordre compte — M.
+  #    seul ne doit PAS attraper « Mme » ni « Mlle »).
+  - { wzor: '\bMlles?\b\.?',              zamiana: "Mademoiselle" }
+  - { wzor: '\bMmes?\b\.?',               zamiana: "Madame" }
+  - { wzor: '\bM\.\s',                    zamiana: "Monsieur " }
+  # -- Titres académiques (en français Dr/Pr s'écrivent SANS point,
+  #    contrairement à l'anglais — on accepte aussi avec point) --
+  - { wzor: '\bDr\.?\s',                  zamiana: "Docteur " }
+  - { wzor: '\bPr\.?\s',                  zamiana: "Professeur " }
+  # -- Numéros de page / numéro --
+  - { wzor: '\bn°\s*',                    zamiana: "numéro " }
+  - { wzor: '\bN°\s*',                    zamiana: "numéro " }
+  - { wzor: '\bp\.\s',                    zamiana: "page " }
+  - { wzor: '\bpp\.\s',                   zamiana: "pages " }
+  # -- Datation historique --
+  - { wzor: '\bav\.\s*J\.-?C\.?,?\s',     zamiana: "avant Jésus-Christ " }
+  - { wzor: '\bapr\.\s*J\.-?C\.?,?\s',    zamiana: "après Jésus-Christ " }

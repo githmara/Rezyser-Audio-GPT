@@ -1,0 +1,57 @@
+# -----------------------------------------------------------------------------
+#  ACCENT POLONAIS (français → TTS polonais)
+#  Pour les synthétiseurs : Ewa / Adam / Maja (TTS polonais).
+# -----------------------------------------------------------------------------
+id: polski
+etykieta: "Polonais (par ex. Ewa / Adam / Maja)"
+opis: |
+  Adapte le texte français au synthétiseur vocal polonais (Ewa / Adam /
+  Maja).
+
+  Différences fonétiques critiques français → polonais :
+    - « ch » fr = /ʃ/, « ch » pl = /x/ → on écrit « sz » (= /ʃ/ pl).
+    - « j »  fr = /ʒ/, « j »  pl = /j/ → on écrit « ż » (= /ʒ/ pl).
+    - « gn » fr = /ɲ/, « gn » pl = /gn/ → on écrit « ń ».
+    - « ou » fr = /u/ → on écrit « u ».
+    - « u »  fr = /y/, absent en polonais → on écrit « i » (approximation).
+    - « ç »  fr = /s/ → on écrit « s ».
+    - « qu » fr = /k/ → on écrit « k ».
+    - « h »  fr muet, « h » pl = /x/ → on supprime.
+
+  Accents naturels laissés intentionnellement : « r » uvulaire fr vs.
+  « r » roulé polonais — source naturelle d'un accent polonais sur le
+  français. Nasalisations également non transformées (le TTS polonais
+  les lit comme voyelle + « n », ce qui est exactement l'accent
+  recherché).
+iso: pl
+kategoria: akcent
+kolejnosc: 35
+
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+zamiany:
+  # --- Digrammes prioritaires ---
+  - { wzor: "ch", zamiana: "sz" }
+  - { wzor: "Ch", zamiana: "Sz" }
+  - { wzor: "CH", zamiana: "SZ" }
+  - { wzor: "gn", zamiana: "ń"  }
+  - { wzor: "Gn", zamiana: "Ń"  }
+  - { wzor: "GN", zamiana: "Ń"  }
+  - { wzor: "ou", zamiana: "u"  }
+  - { wzor: "Ou", zamiana: "U"  }
+  - { wzor: "OU", zamiana: "U"  }
+  - { wzor: "qu", zamiana: "k"  }
+  - { wzor: "Qu", zamiana: "K"  }
+  - { wzor: "QU", zamiana: "K"  }
+  # --- Lettres simples (après digrammes) ---
+  - { wzor: "j",  zamiana: "ż"  }
+  - { wzor: "J",  zamiana: "Ż"  }
+  - { wzor: "u",  zamiana: "i"  }
+  - { wzor: "U",  zamiana: "I"  }
+  - { wzor: "ç",  zamiana: "s"  }
+  - { wzor: "Ç",  zamiana: "S"  }
+  - { wzor: "h",  zamiana: ""   }
+  - { wzor: "H",  zamiana: ""   }

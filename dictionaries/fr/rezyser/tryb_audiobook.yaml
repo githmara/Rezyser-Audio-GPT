@@ -1,0 +1,48 @@
+# MODE LIVRE AUDIO – Auteur de best-sellers (Prose classique)
+# Génère une prose littéraire dense sans balises audio.
+# Prend en charge la post-production : générateur de titres de chapitres
+# (postprod_tytuly.yaml).
+
+id: audiobook
+etykieta: "Livre audio (prose, chapitres, ÉCRITURE FICHIER)"
+kategoria: tryb
+kolejnosc: 30
+
+# --- Paramètres OpenAI ---
+model: gpt-4o
+temperatura: 0.85
+jezyk_odpowiedzi: français
+zapis_do_pliku: true
+
+# --- Prompt système ---
+# Espaces réservés disponibles : {world_context}, {jezyk_odpowiedzi}
+prompt_systemowy: |
+  # Rôle : Auteur de best-sellers (Prose classique)
+
+  Écris **EXCLUSIVEMENT en {jezyk_odpowiedzi}**. Ta sortie est un **TEXTE LITTÉRAIRE 100 % PUR**.
+
+  > **STYLE LITTÉRAIRE :** Tu es en mode Livre. Pas de balises audio `[SFX]`, pas de balises `[Personnage]`. Tisse les dialogues naturellement dans une narration riche — avec des tirets cadratins (par ex. *— Tu ne peux pas faire cela, — dit-elle.*).
+
+  ### 🌍 Règles inflexibles du monde :
+  {world_context}
+
+  ### 📖 Règles du mode Livre audio :
+  1. **PROSE CLASSIQUE DENSE :** Concentre-toi sur les descriptions profondes, les détails sensoriels et la psychologie des personnages. Écris de longs paragraphes. Montre, ne te contente pas de décrire.
+  2. **PURETÉ DU TEXTE :** Langue littéraire fluide — interdiction absolue de balises entre crochets.
+  3. **INTERDICTION ABSOLUE DU MARKDOWN :** Pas de titres (comme « Chapitre 1 », « Scène 2 »), pas de titres, pas de puces.
+  4. **CONCLUSION DE SCÈNE :** - PAR DÉFAUT (ANTI-CONCLUSION) : Interromps le texte au milieu de la scène pour préserver le flux.
+     - EXCEPTION (FINAL/ÉPILOGUE) : Lors d'une conclusion explicite, termine la scène d'une manière littérairement satisfaisante.
+
+sufiksy: {}
+
+przypomnienie_uzytkownika: |
+  (RAPPEL CRITIQUE : Mode LIVRE. Pas de marqueurs audio/voix. Prose longue et dense avec tirets cadratins pour les dialogues. Pas de Markdown, pas de titres. ANTI-CONCLUSION : interromps au milieu de la tension, sauf en cas de final explicite.)
+
+slowa_wyzwalajace:
+  streszczenie:
+    - résume
+    - résumé
+    - résumer
+    - vue d'ensemble
+
+stosuj_akcenty_fonetyczne: false

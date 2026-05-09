@@ -1,0 +1,30 @@
+# CHIFFREMENT : VOCALOÏDE
+# Remplace chaque voyelle par 'o' (ou 'O').
+
+id: samogloskowiec
+etykieta: "Vocaloïde (tout résonne en 'O')"
+opis: |
+  Effet « partout où l'on regarde — que des O ». Pour le français,
+  l'algorithme remplace les voyelles de base (a, e, i, o, u) ainsi que
+  les voyelles accentuées (à, â, é, è, ê, ë, î, ï, ô, ù, û, ü, ÿ) et le
+  « y » vocalique : chaque voyelle devient 'o' (ou 'O').
+
+  Note : les digrammes français (« ai », « au », « eu », « ou », « oi »)
+  s'effondrent en « oo ». C'est intentionnel — le but du chiffrement est
+  l'effet comique, non la précision phonétique.
+iso: fr
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# Phases 1 et 2 (adoucissement polonais) — intentionnellement vides.
+# Le moteur accepte les listes vides sans erreur.
+zmiekszenia_przed_samogloska: []
+zmiekszenia_przed_spolgloska: []
+
+# Phase 3 : remplacement des voyelles.
+# `samogloski_*` sont des chaînes pour les classes de caractères de la regex moteur.
+samogloski_male:             "aeiouàâéèêëîïôùûüÿy"
+samogloski_wielkie:          "AEIOUÀÂÉÈÊËÎÏÔÙÛÜŸY"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"
