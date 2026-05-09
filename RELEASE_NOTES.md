@@ -1,6 +1,52 @@
-# Release Notes — Reżyser Audio GPT 13.9 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 14.0 „Wersja Wydawnicza"
 
-*Audyt A11y kreatora Managera Reguł, kontrakt silnika rozszerzony o `rezyser/`, audyt promptów Managera (natywność + agentowy format), pełna paczka językowa Français.*
+*Pełna paczka językowa Español jako finałowy język bazowy — projekt wielojęzyczności zamknięty. `TODO_wielojezycznosc.md` usunięty z repozytorium, `CLAUDE.md` zsynchronizowany ze stanem 9 paczek (pl/en/de/es/fi/fr/is/it/ru).*
+
+---
+
+## 14.0 — major release (motyw przewodni: dziewiąta paczka językowa Español + zamknięcie roadmapy wielojęzycznościowej)
+
+*Punkt wyjścia: V13.9 (31af43f) → paczka ES (`dictionaries/es/`) + dopisanie `es` do `MAPA_JEZYKOW` w obu autotłumaczach + wpis `es`/`fr` do `_NATYWNE_JEZYK_ODPOWIEDZI` + `_NATYWNE_STRESZCZENIE` + aktualizacja `_PACZKI_WDROZONE` (7 → 9) + smoke test akcentów + commit docs + commit release → V14.0.*
+
+### TL;DR
+
+14.0 to **ostatnia paczka językowa z roadmapy** zaplanowanej w `TODO_wielojezycznosc.md`: pełny **Español** (`dictionaries/es/` — 11 akcentów, 6 szyfrów, 4 tryby Reżysera, GUI+dokumentacja). Wraz z dodaniem ES wyczerpana zostaje sekcja 3.1/3.2 TODO i pole „liczba w pełni wdrożonych języków" przechodzi z 8 na 9 (`pl en de es fi fr is it ru`). Plik `TODO_wielojezycznosc.md` zostaje **usunięty z repozytorium** — ostatnie pozycje na liście są zamknięte. Reguła „DEFINICJA KOMPLETNOŚCI JĘZYKA (aktualna do wyczerpania TODO_wielojezycznosc.md)" w `CLAUDE.md` zostaje usunięta zgodnie z jej własnym sunset-clause; reanaliza całego `CLAUDE.md` w stylu komendy `/init` aktualizuje liczniki i odniesienia do stanu post-14.0.
+
+Bump z **13.9 → 14.0** (a nie 13.10) celowo: zamyka epokę wersji 13.x, w której każdy minor był „jeden język na raz" (13.3 EN, 13.4 FI, 13.5 RU, 13.6 IS, 13.7 IT, 13.8 DE, 13.9 FR, 14.0 ES). Tematyka 14.x+ przechodzi na funkcje silnika/UX, nie na nowe paczki.
+
+### Co nowego dla użytkownika końcowego
+
+#### Nowy język bazowy: Español (`es`)
+Dziewiąty pełnoprawny język bazowy. Kompletna paczka `dictionaries/es/`:
+
+- **`podstawy.yaml`**: alfabet 27-literowy `ABCDEFGHIJKLMNÑOPQRSTUVWXYZ` (Ñ jako odrębna litera w pozycji kanonicznej między N i O — `.upper()` zachowuje pojedynczy znak, więc indeks Cezara jest spójny). `polskie_znaki` normalizuje 5 hiszpańskich vocales acentuadas (á/é/í/ó/ú) i diéresis ü do form bazowych dla akcentów obcojęzycznych z `usun_polskie_znaki: true`. `lingua: SPANISH`, `slowo_akcent: ["acento", "pronunciación"]`.
+
+- **6 szyfrów**: Cezar (`min/max ±26`, alfabet z Ñ), jakanie (samogłoski `aeiouáéíóúüy`), odwracanie (15 wzorców skrótowców hiszpańskich: `p. ej.` → `por ejemplo`, `es dec.` → `es decir`, `etc.` → `etcétera`, `Srta./Sra./Sr.`, `Dra./Dr./Prof.`, `pág(s).` → `página`, `núm.` → `número`, `cf./cfr.`, `vs.`, `vol./cap./art.`, `a.C./d.C.`), samogłoskowiec (`aeiouáéíóúü`), typoglikemia, wąż.
+
+- **4 tryby Reżysera AI** po hiszpańsku: Lluvia de ideas (Brainstorming), Guion (Radioteatro/Foley), Audiolibro, Postprod (regex `Prólogo|Capítulo \d+|Epílogo`). Słowa-wyzwalacze: `resume`, `resumen`, `resumir`, `sinopsis`. Endonim `Español`, lingua `SPANISH`.
+
+- **11 plików akcenty/**: 8 akcentów fonetycznych obcojęzycznych (angielski, niemiecki, polski, rosyjski, włoski, fiński, francuski, islandzki) + 3 narzędzia czyszczenia (`oczyszczenie`, `oczyszczenie_bez_liczb`, `naprawiacz_tagow`). Akcenty oparte o cechy fonologiczne hiszpańskiego: `ch` /tʃ/ → `cz`/`tsch`/`tš`/`ts`/`ci+vocal`/`tch` (per docelowy TTS, zachowane jako `ch` przy en/ru gdzie /tʃ/ jest natywne), `ñ` /ɲ/ → `ny`/`ń`/`gn`/`nj`, `j` /x/ → `h`/`ch`/`kh`/`gh`, `ll` /ʝ/ → `y`/`j`/`gli`/`ill`, `gu/qu` z u muda → `g`/`k`/`gh`/`ch`, `z` → `s`/`ss`. Krytyczne reguły kolejnościowe (komentowane w plikach): `j → <x>` PRZED `ñ → nj` i `ll → j`, żeby nowe j-podstawienia nie zostały złapane przez tę samą regułę.
+
+- **Pełen przekład UI** (`dictionaries/es/gui/ui.yaml`, 483 klucze, parytet 100% z paczką francuską) + dokumentacja (`dictionaries/es/gui/dokumentacja/manual.yaml` + `dictionaries.yaml` — auto-tłumaczone przez `buduj_wielojezyczne_docs.py` z zamrożeniem placeholderów).
+
+- **Smoke test sec 6.9 z TODO**: 6/6 zdań ze sekcji 6.9 rozwijanych poprawnie (w tym 4 z błędem redakcyjnym typu „brak końcowej kropki" — bonus dzięki `\.?` w regexach).
+
+#### Skrypty autotłumaczy + szablony Managera
+- `buduj_wielojezyczne_ui.py` + `buduj_wielojezyczne_docs.py`: dodane `"es": "hiszpański"` do `MAPA_JEZYKOW` (mapowanie ISO → polskie etykiety dla promptów LLM).
+- `manager_regul_szablony.py`: `_NATYWNE_JEZYK_ODPOWIEDZI` i `_NATYWNE_STRESZCZENIE` rozszerzone o `fr` (4 słowa: `résume`/`résumé`/`résumer`/`vue d'ensemble`) i `es` (4 słowa: `resume`/`resumen`/`resumir`/`sinopsis`). `_PACZKI_WDROZONE` z 7 → 9 (`pl en de es fi fr is it ru`). Lista paczek referencyjnych w prompcie agentowym Managera teraz pokazuje wszystkie 8 sąsiednich paczek przy tworzeniu nowych reguł.
+- Komentarze „planowane wdrożenie 13.10/13.11" przy `fr/es` w `_NATYWNA_NAZWA_JEZYKA` usunięte — paczki wdrożone, komentarze stały się szumem.
+
+### Zamknięcie roadmapy wielojęzyczności
+
+- **`TODO_wielojezycznosc.md` USUNIĘTY**: zgodnie z sekcją 4.5 tego pliku („Gdy ten plik zostanie wyczerpany, [...] plik `TODO_wielojezycznosc.md` można usunąć z repozytorium"). Wszystkie 6 języków z sekcji 3.1 (EN/FI/IS/IT/RU + bazowy PL) i 3 języki z sekcji 3.2 (DE/FR/ES) zamknięte. Smoke testy 6.1–6.9 — odhaczone.
+- **`CLAUDE.md` zaktualizowany**: usunięta reguła „DEFINICJA KOMPLETNOŚCI JĘZYKA (aktualna do wyczerpania TODO_wielojezycznosc.md)" — zgodnie z jej własnym sunset-clause. Pełna reanaliza w stylu `/init`: aktualizacja licznika języków (8 → 9), aktualizacja przykładów wersji w komentarzach.
+
+### Migracja 13.9 → 14.0 (dla deweloperów)
+
+Bez breaking changes. Punkty migracji:
+1. **Plik `TODO_wielojezycznosc.md` zniknął** — historia jest w git log, pełna mapa drogowa wdrożenia 8 języków (13.3–14.0) zachowana w commitach release'owych.
+2. **`CLAUDE.md` przycięty** — sekcja DEFINICJA KOMPLETNOŚCI usunięta. Aktualnym kontraktem jest `core_poliglota._jezyk_kompletny` (5 wymogów: `podstawy.yaml`, `akcenty/` ≥1 plik, `szyfry/` ≥1 plik, `rezyser/` ≥1 plik, `gui/ui.yaml`).
+3. **Manager Reguł (kreator nowego języka)** — działa identycznie. Listę 9 paczek widać w komponencie agentowego promptu, ale to dynamiczne (z `_PACZKI_WDROZONE`).
 
 ---
 
