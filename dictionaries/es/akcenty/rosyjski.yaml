@@ -1,0 +1,76 @@
+# -----------------------------------------------------------------------------
+#  ACENTO RUSO (español → TTS ruso)
+#  Para sintetizadores: Irina / Pavel (TTS ruso).
+# -----------------------------------------------------------------------------
+id: rosyjski
+etykieta: "Ruso (p. ej. Irina / Pavel)"
+opis: |
+  Adapta el texto español al sintetizador de voz ruso (Irina / Pavel). El
+  TTS ruso lee las letras latinas según sus propias reglas — usamos
+  transcripciones latinas legibles para una voz rusa.
+
+  Compatibilidad fonética natural español-ruso:
+    - ch  español = /tʃ/, ruso « ч » = /tʃ/ ✓ → se conserva « ch ».
+    - rr  vibrante español ≈ « р » rusa vibrante ✓
+    - vocales puras a/e/i/o/u — el TTS ruso las lee próximas al original.
+
+  Diferencias fonéticas críticas español → ruso:
+    - « ñ »  es = /ɲ/, ruso « нь » → se escribe « nj » (transcripción latina).
+    - « j »  es = /x/, ruso « х » = /x/ ✓ → se escribe « kh » (transcripción
+      estándar latina de « х »).
+    - « ll » es = /ʝ/ → se escribe « j » (transcripción latina rusa de « й »
+      = /j/, aproximación más cercana).
+    - « z »  es = /θ/ o /s/, ruso z = /z/ → se escribe « s ».
+    - « gu » + e/i es = /g/ (u muda) → se escribe « g ».
+    - « qu » + e/i es = /k/ (u muda) → se escribe « k ».
+
+  ORDEN CRÍTICO: « j → kh » se aplica ANTES que « ll → j ». De lo contrario
+  « calle » → « caje » → « cakhe » sería erróneo.
+
+  Acentos naturales del ruso sobre el español (dejados intencionalmente):
+    - « h » es muda, el TTS ruso la lee como /x/ aproximada → se conserva
+      (acento natural; no se elimina porque la « j → kh » de abajo
+      introduce un grafema con « h » que la regla « h → "" » dañaría).
+    - v  es = /b/, ruso « в » = /v/ → acento ruso natural.
+    - r  vibrante española vs. « р » rusa palatalizada en algunos contextos.
+iso: ru
+kategoria: akcent
+kolejnosc: 60
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+zamiany:
+  # --- gu + e/i → g (u muda) ---
+  - { wzor: "gue", zamiana: "ge" }
+  - { wzor: "Gue", zamiana: "Ge" }
+  - { wzor: "GUE", zamiana: "GE" }
+  - { wzor: "gui", zamiana: "gi" }
+  - { wzor: "Gui", zamiana: "Gi" }
+  - { wzor: "GUI", zamiana: "GI" }
+  # --- qu + e/i → k (u muda) ---
+  - { wzor: "que", zamiana: "ke" }
+  - { wzor: "Que", zamiana: "Ke" }
+  - { wzor: "QUE", zamiana: "KE" }
+  - { wzor: "qui", zamiana: "ki" }
+  - { wzor: "Qui", zamiana: "Ki" }
+  - { wzor: "QUI", zamiana: "KI" }
+  # --- j → kh (ANTES de ñ→nj y ll→j: la nueva j NO debe convertirse a kh) ---
+  - { wzor: "j", zamiana: "kh" }
+  - { wzor: "J", zamiana: "Kh" }
+  # --- ñ → nj (DESPUÉS de j→kh: la « j » dentro de « nj » representa /j/
+  #     palatal, NO debe convertirse a /x/. Si fuera al revés
+  #     « señorita » → « senjorita » → « senkhorita ».) ---
+  - { wzor: "ñ", zamiana: "nj" }
+  - { wzor: "Ñ", zamiana: "Nj" }
+  # --- ll → j (DESPUÉS de j→kh) ---
+  - { wzor: "ll", zamiana: "j" }
+  - { wzor: "Ll", zamiana: "J" }
+  - { wzor: "LL", zamiana: "J" }
+  # --- z → s ---
+  - { wzor: "z", zamiana: "s" }
+  - { wzor: "Z", zamiana: "S" }

@@ -1,0 +1,30 @@
+# -----------------------------------------------------------------------------
+#  CIFRADO: CÉSAR
+#  Cifrado de desplazamiento clásico que mueve cada letra N posiciones
+#  en el alfabeto español (27 letras: A–Z + Ñ).
+# -----------------------------------------------------------------------------
+id: cezar
+etykieta: "Cifrado de César (desplazamiento alfabeto ES)"
+opis: |
+  Cifrado de César clásico: cada letra se desplaza N posiciones en el
+  alfabeto español (ABCDEFGHIJKLMNÑOPQRSTUVWXYZ, 27 caracteres, sin
+  espacios). Los caracteres fuera del alfabeto (cifras, signos de
+  puntuación) permanecen sin cambios. La Ñ entra entre la N y la O,
+  manteniendo su posición canónica del orden alfabético español.
+
+  El valor del desplazamiento se introduce desde la interfaz gráfica
+  (campo «Desplazamiento del César»). El valor 0 significa «elegir
+  aleatoriamente entre 1..26».
+iso: es
+kategoria: szyfr
+kolejnosc: 60
+algorytm: cezar
+
+# El alfabeto se carga desde dictionaries/es/podstawy.yaml (clave: alfabet).
+# Para usar un alfabeto diferente, descomenta la siguiente línea:
+# alfabet: "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+
+# Rango de desplazamiento permitido en la GUI (SpinCtrl).
+# 27 letras → ±26 cubre todas las rotaciones distintas.
+min_przesuniecie: -26
+max_przesuniecie: 26

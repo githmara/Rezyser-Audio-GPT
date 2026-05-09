@@ -1,0 +1,56 @@
+# -----------------------------------------------------------------------------
+#  ACENTO FRANCÉS (español → TTS francés)
+#  Para sintetizadores: Thomas / Julie / Marie (TTS francés).
+# -----------------------------------------------------------------------------
+id: francuski
+etykieta: "Francés (p. ej. Thomas / Julie / Marie)"
+opis: |
+  Adapta el texto español al sintetizador de voz francés (Thomas / Julie /
+  Marie). Dos lenguas romances muy próximas — pocos cambios necesarios.
+
+  Compatibilidad fonética natural español-francés:
+    - h    muda en ambas lenguas ✓ — el TTS francés la ignora como el español.
+    - gu   + e/i = /g/ en ambas lenguas ✓ → se conserva.
+    - qu   + e/i = /k/ en ambas lenguas ✓ → se conserva.
+    - vocales puras — buena correspondencia (el francés tiene más matices,
+      pero el TTS francés lee sin problema las vocales españolas).
+
+  Diferencias fonéticas críticas español → francés:
+    - « ch » es = /tʃ/, francés « ch » = /ʃ/ → se escribe « tch »
+      (es la única transcripción francesa estándar para /tʃ/).
+    - « ñ »  es = /ɲ/, francés « gn » = /ɲ/ ✓ → se escribe « gn ».
+    - « j »  es = /x/, francés « j » = /ʒ/ → no hay /x/ en francés, así que
+      el TTS lo leerá como una /ʁ/ uvular natural — acento francés natural,
+      conservamos « j » (cambiarlo a « r » distorsionaría las palabras).
+    - « ll » es = /ʝ/, francés « ll » = /l/ geminada → se escribe « ill »
+      (fr ill = /j/, aproximación de /ʝ/).
+    - « z »  es = /θ/ o /s/, francés « z » = /z/ → acento francés natural,
+      no se transforma.
+
+  Acentos naturales del francés sobre el español (dejados intencionalmente):
+    - r  vibrante española vs. r uvular francesa → acento francés natural.
+    - v  es = /b/, francés v = /v/ → acento francés natural.
+    - vocales nasales francesas que el TTS introduce en sílabas an/en/in/on/un.
+iso: fr
+kategoria: akcent
+kolejnosc: 55
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+zamiany:
+  # --- ch → tch (CRÍTICO: francés ch=/ʃ/, español ch=/tʃ/) ---
+  - { wzor: "ch", zamiana: "tch" }
+  - { wzor: "Ch", zamiana: "Tch" }
+  - { wzor: "CH", zamiana: "TCH" }
+  # --- ñ → gn (correspondencia exacta /ɲ/) ---
+  - { wzor: "ñ", zamiana: "gn" }
+  - { wzor: "Ñ", zamiana: "Gn" }
+  # --- ll → ill (francés ill = /j/, aproximación de /ʝ/) ---
+  - { wzor: "ll", zamiana: "ill" }
+  - { wzor: "Ll", zamiana: "Ill" }
+  - { wzor: "LL", zamiana: "ILL" }

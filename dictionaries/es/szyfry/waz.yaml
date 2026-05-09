@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  CIFRADO: TELÉFONO ROTO / DIALECTO DE LA SERPIENTE
+#  Alarga las sibilantes: cada « s » o « z » se convierte en un siseo largo.
+#  Inspiración: Snecko de «Slay The Spire».
+# -----------------------------------------------------------------------------
+id: waz
+etykieta: "Teléfono roto (Dialecto de la serpiente, sibilantes)"
+opis: |
+  Inspirado en Snecko del juego «Slay the Spire». Cada aparición de
+  « s » o « z » (sin distinción de mayúsculas) se alarga aleatoriamente
+  hasta un siseo de longitud entre `min_syk` y `max_syk` caracteres.
+
+  Para el español no incluimos el dígrafo « ch » en el patrón —
+  preservamos solo « s » y « z », de modo que «pasos» se convierta en
+  «passsssos» (manteniendo « o » intermedia y la coda) en vez de algo
+  irreconocible. La «c» suave (ce/ci) ante « z » no se trata.
+iso: es
+kategoria: szyfr
+kolejnosc: 30
+algorytm: waz
+
+# Parámetros del algoritmo
+min_syk: 4
+max_syk: 8
+
+# Regex que captura los caracteres a alargar (case-insensitive).
+wzor_syku: "(?i)(s|z)"

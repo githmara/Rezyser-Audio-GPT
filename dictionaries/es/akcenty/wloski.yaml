@@ -1,0 +1,93 @@
+# -----------------------------------------------------------------------------
+#  ACENTO ITALIANO (español → TTS italiano)
+#  Para sintetizadores: Elsa / Cosimo / Carla (TTS italiano).
+# -----------------------------------------------------------------------------
+id: wloski
+etykieta: "Italiano (p. ej. Elsa / Cosimo / Carla)"
+opis: |
+  Adapta el texto español al sintetizador de voz italiano (Elsa / Cosimo /
+  Carla). Lenguas hermanas — muchos sonidos coinciden.
+
+  Compatibilidad fonética natural español-italiano:
+    - h    muda en ambas lenguas ✓
+    - r/rr vibrantes en ambas ✓
+    - vocales a/e/i/o/u — correspondencia directa ✓
+
+  Diferencias fonéticas críticas español → italiano:
+    - « ch » es = /tʃ/, italiano « ch » = /k/ → conflicto fuerte. Se escribe
+      « ci+vocal » (italiano ci+e/i = /tʃ/, ci+a/o/u = /tʃ/, máxima
+      legibilidad para TTS).
+    - « ñ »  es = /ɲ/, italiano « gn » = /ɲ/ ✓ → se escribe « gn ».
+    - « j »  es = /x/, italiano « j » lee como /j/ → se escribe « gh »
+      (italiano gh = /g/, aproximación pragmática).
+    - « ll » es = /ʝ/, italiano « gli » = /ʎ/ → se escribe « gli ».
+    - « z »  es = /θ/ o /s/, italiano « z » = /ts/ → se escribe « s »
+      (variante latinoamericana, más legible).
+    - « gu » + e/i es = /g/ (u muda), italiano « gh » + e/i = /g/ →
+      se escribe « gh ».
+    - « qu » + e/i es = /k/ (u muda), italiano « ch » + e/i = /k/ →
+      se escribe « ch ».
+
+  ORDEN CRÍTICO de transformaciones:
+    1. PRIMERO « ch » española (cha→cia, che→ce, chi→ci, cho→cio, chu→ciu)
+    2. DESPUÉS « qu » → « ch » (porque ahora no quedan « ch » que romper)
+    3. DESPUÉS « gu » → « gh ».
+
+  Acentos naturales del italiano sobre el español (dejados intencionalmente):
+    - v  es = /b/, italiano v = /v/ → acento italiano natural.
+    - r  vibrante en ambas, sin conflicto.
+iso: it
+kategoria: akcent
+kolejnosc: 50
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+zamiany:
+  # --- 1. ch española → ci+vocal (PRIMERO, antes de que qu→ch genere ch) ---
+  - { wzor: "cha", zamiana: "cia" }
+  - { wzor: "Cha", zamiana: "Cia" }
+  - { wzor: "CHA", zamiana: "CIA" }
+  - { wzor: "che", zamiana: "ce"  }
+  - { wzor: "Che", zamiana: "Ce"  }
+  - { wzor: "CHE", zamiana: "CE"  }
+  - { wzor: "chi", zamiana: "ci"  }
+  - { wzor: "Chi", zamiana: "Ci"  }
+  - { wzor: "CHI", zamiana: "CI"  }
+  - { wzor: "cho", zamiana: "cio" }
+  - { wzor: "Cho", zamiana: "Cio" }
+  - { wzor: "CHO", zamiana: "CIO" }
+  - { wzor: "chu", zamiana: "ciu" }
+  - { wzor: "Chu", zamiana: "Ciu" }
+  - { wzor: "CHU", zamiana: "CIU" }
+  # --- 2. qu + e/i → ch (italiano ch+e/i = /k/, mantiene la u muda española) ---
+  - { wzor: "que", zamiana: "che" }
+  - { wzor: "Que", zamiana: "Che" }
+  - { wzor: "QUE", zamiana: "CHE" }
+  - { wzor: "qui", zamiana: "chi" }
+  - { wzor: "Qui", zamiana: "Chi" }
+  - { wzor: "QUI", zamiana: "CHI" }
+  # --- 3. gu + e/i → gh (italiano gh+e/i = /g/, mantiene la u muda) ---
+  - { wzor: "gue", zamiana: "ghe" }
+  - { wzor: "Gue", zamiana: "Ghe" }
+  - { wzor: "GUE", zamiana: "GHE" }
+  - { wzor: "gui", zamiana: "ghi" }
+  - { wzor: "Gui", zamiana: "Ghi" }
+  - { wzor: "GUI", zamiana: "GHI" }
+  # --- ñ → gn (correspondencia exacta /ɲ/) ---
+  - { wzor: "ñ", zamiana: "gn" }
+  - { wzor: "Ñ", zamiana: "Gn" }
+  # --- ll → gli (italiano gli = /ʎ/, próximo a /ʝ/ española) ---
+  - { wzor: "ll", zamiana: "gli" }
+  - { wzor: "Ll", zamiana: "Gli" }
+  - { wzor: "LL", zamiana: "GLI" }
+  # --- j → gh (aproximación pragmática; italiano j leería /j/) ---
+  - { wzor: "j", zamiana: "gh" }
+  - { wzor: "J", zamiana: "Gh" }
+  # --- z → s (italiano z=/ts/, español z=/θ/ o /s/) ---
+  - { wzor: "z", zamiana: "s" }
+  - { wzor: "Z", zamiana: "S" }

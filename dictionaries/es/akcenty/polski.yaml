@@ -1,0 +1,72 @@
+# -----------------------------------------------------------------------------
+#  ACENTO POLACO (español → TTS polaco)
+#  Para sintetizadores: Ewa / Adam / Maja (TTS polaco).
+# -----------------------------------------------------------------------------
+id: polski
+etykieta: "Polaco (p. ej. Ewa / Adam / Maja)"
+opis: |
+  Adapta el texto español al sintetizador de voz polaco (Ewa / Adam / Maja).
+  Las dos lenguas comparten varios sonidos básicos del latín, pero divergen
+  fuertemente en /tʃ/, /x/, /ɲ/, /ʝ/.
+
+  Diferencias fonéticas críticas español → polaco:
+    - « ch » es = /tʃ/, polaco lo lee como /x/ (« ch » pl = /x/)
+      → se escribe « cz » (pl cz = /tʃ/) ✓ correspondencia exacta.
+    - « ñ »  es = /ɲ/, polaco « ń » = /ɲ/ ✓ → se escribe « ń ».
+    - « j »  es = /x/, polaco « ch » = /x/ → se escribe « ch ».
+    - « ll » es = /ʝ/, polaco « j » = /j/ → se escribe « j ».
+    - « gu » + e/i es = /g/ (u muda) → se escribe « g ».
+    - « qu » + e/i es = /k/ (u muda) → se escribe « k ».
+
+  ORDEN CRÍTICO: « j → ch » se aplica ANTES que « ll → j ». De lo contrario
+  « calle » → « caje » → « cache » sería erróneo. Tras « j → ch » la
+  letra j desaparece, así que « ll → j » introduce una nueva j sin
+  conflicto.
+
+  Acentos naturales del polaco sobre el español (dejados intencionalmente):
+    - « h » es muda, polaco « h » = /x/ → se conserva (acento natural;
+      no se elimina porque « j → ch » introduce una grafía con « h »
+      que la regla « h → "" » devoraría).
+    - z  es = /θ/ o /s/, polaco z = /z/ → acento polaco natural.
+    - v  es = /b/, polaco v = /v/ → acento polaco natural.
+    - r  vibrante en ambas lenguas ✓ — sin conflicto.
+iso: pl
+kategoria: akcent
+kolejnosc: 35
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+zamiany:
+  # --- ch → cz (CRÍTICO: polaco lee «ch» como /x/, español como /tʃ/) ---
+  - { wzor: "ch", zamiana: "cz" }
+  - { wzor: "Ch", zamiana: "Cz" }
+  - { wzor: "CH", zamiana: "CZ" }
+  # --- gu + e/i → g (u muda) ---
+  - { wzor: "gue", zamiana: "ge" }
+  - { wzor: "Gue", zamiana: "Ge" }
+  - { wzor: "GUE", zamiana: "GE" }
+  - { wzor: "gui", zamiana: "gi" }
+  - { wzor: "Gui", zamiana: "Gi" }
+  - { wzor: "GUI", zamiana: "GI" }
+  # --- qu + e/i → k (u muda) ---
+  - { wzor: "que", zamiana: "ke" }
+  - { wzor: "Que", zamiana: "Ke" }
+  - { wzor: "QUE", zamiana: "KE" }
+  - { wzor: "qui", zamiana: "ki" }
+  - { wzor: "Qui", zamiana: "Ki" }
+  - { wzor: "QUI", zamiana: "KI" }
+  # --- j → ch (ANTES de ll→j: de lo contrario «calle»→«caje»→«cache») ---
+  - { wzor: "j", zamiana: "ch" }
+  - { wzor: "J", zamiana: "Ch" }
+  # --- ñ → ń (DESPUÉS de j→ch: ń es letra propia, no genera «j» ni «ch») ---
+  - { wzor: "ñ", zamiana: "ń" }
+  - { wzor: "Ñ", zamiana: "Ń" }
+  # --- ll → j (DESPUÉS de j→ch) ---
+  - { wzor: "ll", zamiana: "j" }
+  - { wzor: "Ll", zamiana: "J" }
+  - { wzor: "LL", zamiana: "J" }

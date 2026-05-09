@@ -1,0 +1,31 @@
+# -----------------------------------------------------------------------------
+#  CIFRADO: TARTAMUDEO INTENSO / ROBOT AVERIADO
+#  Añade repeticiones de las primeras letras de cada palabra, separadas
+#  por guiones.
+# -----------------------------------------------------------------------------
+id: jakanie
+etykieta: "Tartamudeo intenso / Robot averiado"
+opis: |
+  Para cada palabra de longitud >= `min_dlugosc_slowa`, se generan al azar
+  varias repeticiones de la primera (o de las dos primeras) letras y se
+  anteponen separadas por guiones: «ordenador» → «or-or-or-ordenador»,
+  «yo» → «yo».
+
+  Si la segunda letra de la palabra es una consonante (ausente de la
+  cadena `samogloski`), el tartamudeo cubre DOS letras iniciales —
+  suena más natural (p. ej. «cristal» → «cr-cr-cristal»).
+iso: es
+kategoria: szyfr
+kolejnosc: 50
+algorytm: jakanie
+
+# Parámetros del algoritmo
+min_dlugosc_slowa: 3
+min_powtorzen:     1
+max_powtorzen:     3
+
+# Vocales — si la segunda letra de la palabra pertenece a este conjunto,
+# se repite solo la primera letra. Si no, las dos primeras.
+# Incluye las vocales acentuadas españolas (á é í ó ú) y la « y » con
+# valor vocálico (« y » conjunción / final de palabra).
+samogloski: "aeiouáéíóúüyAEIOUÁÉÍÓÚÜY"

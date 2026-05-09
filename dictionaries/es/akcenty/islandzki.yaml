@@ -1,0 +1,88 @@
+# -----------------------------------------------------------------------------
+#  ACENTO ISLANDÉS (español → TTS islandés)
+#  Para sintetizadores: Karl / Dora (TTS islandés).
+# -----------------------------------------------------------------------------
+id: islandzki
+etykieta: "Islandés (p. ej. Karl / Dora)"
+opis: |
+  Adapta el texto español al sintetizador de voz islandés (Karl / Dora).
+  El islandés tiene una fonología muy distintiva — posee /θ/ (þ) y /ð/
+  pero no /tʃ/, /ʝ/ ni /ɲ/. El acento islandés sobre el español es
+  fácilmente reconocible.
+
+  Diferencias fonéticas críticas español → islandés:
+    - « ch » es = /tʃ/, no existe en islandés → se escribe « ts »
+      (el TTS islandés lo leerá como /t/ + /s/, aproximación pragmática
+      de /tʃ/; mantiene la doble articulación oclusiva + sibilante).
+    - « ñ »  es = /ɲ/, no existe en islandés → se escribe « nj ».
+    - « j »  es = /x/, islandés « j » = /j/ → se escribe « h » (islandés
+      h aspirada, aproximación de /x/).
+    - « ll » es = /ʝ/, islandés « ll » = /tl/ → se escribe « j »
+      (islandés j = /j/, aproximación de /ʝ/).
+    - « z »  es = /θ/ o /s/ → se escribe « s » (variante latinoamericana,
+      más legible para el TTS islandés).
+    - « gu » + e/i es = /g/ (u muda) → se escribe « g ».
+    - « qu » + e/i es = /k/ (u muda), islandés « kv » = /kv/ → se escribe
+      « k » (Spanish qu = /k/, no /kv/).
+    - « h »  es muda, islandés h aspirada → se elimina ANTES de « j → h »
+      (orden crítico: las h originales se borran; la nueva h de « j »
+      sobrevive).
+
+  ORDEN CRÍTICO de transformaciones:
+    1. « ch » → « ts » (sin h en la salida — segura antes de h→"").
+    2. « h »  → ""    (borra h originales; ts no se ve afectada).
+    3. « j »  → « h » (introduce nueva h que sobrevive porque h→"" ya pasó).
+    4. « ll » → « j » (DESPUÉS de j→h: «calle»→«caje» — la nueva j queda).
+
+  Acentos naturales del islandés sobre el español (dejados intencionalmente):
+    - r  vibrante española vs. r vibrante islandesa con preaspiración →
+      acento islandés natural.
+    - v  es = /b/, islandés v = /v/ → acento islandés natural.
+    - vocales que el TTS islandés tiende a alargar.
+iso: is
+kategoria: akcent
+kolejnosc: 65
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+zamiany:
+  # --- 1. ch → ts (aproximación de /tʃ/ sin introducir h) ---
+  - { wzor: "ch", zamiana: "ts" }
+  - { wzor: "Ch", zamiana: "Ts" }
+  - { wzor: "CH", zamiana: "TS" }
+  # --- gu + e/i → g (u muda) ---
+  - { wzor: "gue", zamiana: "ge" }
+  - { wzor: "Gue", zamiana: "Ge" }
+  - { wzor: "GUE", zamiana: "GE" }
+  - { wzor: "gui", zamiana: "gi" }
+  - { wzor: "Gui", zamiana: "Gi" }
+  - { wzor: "GUI", zamiana: "GI" }
+  # --- qu + e/i → k (u muda) ---
+  - { wzor: "que", zamiana: "ke" }
+  - { wzor: "Que", zamiana: "Ke" }
+  - { wzor: "QUE", zamiana: "KE" }
+  - { wzor: "qui", zamiana: "ki" }
+  - { wzor: "Qui", zamiana: "Ki" }
+  - { wzor: "QUI", zamiana: "KI" }
+  # --- 2. h muda original → eliminada (ANTES de j→h) ---
+  - { wzor: "h", zamiana: "" }
+  - { wzor: "H", zamiana: "" }
+  # --- 3. j → h (islandés h aspirada, aproximación de /x/) ---
+  - { wzor: "j", zamiana: "h" }
+  - { wzor: "J", zamiana: "H" }
+  # --- ñ → nj (DESPUÉS de j→h: la « j » de « nj » NO debe pasar a /h/.
+  #     Si fuera al revés: « señorita » → « senjorita » → « senhorita ».) ---
+  - { wzor: "ñ", zamiana: "nj" }
+  - { wzor: "Ñ", zamiana: "Nj" }
+  # --- 4. ll → j (DESPUÉS de j→h) ---
+  - { wzor: "ll", zamiana: "j" }
+  - { wzor: "Ll", zamiana: "J" }
+  - { wzor: "LL", zamiana: "J" }
+  # --- z → s ---
+  - { wzor: "z", zamiana: "s" }
+  - { wzor: "Z", zamiana: "S" }

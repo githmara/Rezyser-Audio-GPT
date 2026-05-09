@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  REPARADOR DE ETIQUETAS (modo especial)
+#  No modifica el contenido — únicamente inyecta el código ISO del idioma
+#  en el archivo de salida (HTML <html lang>, DOCX <w:lang>).
+# -----------------------------------------------------------------------------
+id: naprawiacz_tagow
+etykieta: "🔧 Reparador de etiquetas (Solo inyección del código ISO)"
+opis: |
+  Este «acento» no modifica el contenido textual ni su fonética. Inyecta
+  únicamente el código ISO del idioma en el archivo de salida:
+    - HTML: atributo lang="..." en la etiqueta <html>
+    - DOCX: elemento <w:lang w:val="..."/> en cada bloque de texto
+  Así el lector de pantalla (NVDA / JAWS) cambia correctamente al idioma
+  adecuado y a la voz del sintetizador.
+
+  El código ISO se introduce manualmente en la interfaz gráfica (campo
+  «Código ISO»), no desde este archivo — el valor `iso` queda vacío.
+iso: ""
+kategoria: naprawiacz
+kolejnosc: 100
+
+# Modo especial — no ejecuta ninguna fase de procesamiento de texto.
+czysc_tekst_tts: false
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

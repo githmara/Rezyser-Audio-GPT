@@ -1,0 +1,58 @@
+# -----------------------------------------------------------------------------
+#  CIFRADO: INVERSOR DE TEXTO
+#  Expande las abreviaturas y luego lee cada frase al revés.
+#  Inspiración: una misión de «The Traitors / Los Traidores».
+# -----------------------------------------------------------------------------
+id: odwracanie
+etykieta: "Inversor de texto (Lectura al revés con mayúscula)"
+opis: |
+  Primero expande las abreviaturas españolas más comunes (p. ej. → «por
+  ejemplo», etc. → «etcétera», Sr. → «Señor», pág. → «página», etc.).
+  Gracias a esto la frase invertida sigue sonando inteligible, sin
+  absurdos como «.je .p» en lugar de «p. ej.».
+  Luego invierte cada frase carácter a carácter, conservando el signo
+  de puntuación final y la mayúscula al inicio de la frase.
+
+  Fuente de las abreviaturas: TODO_wielojezycznosc.md § 3.1 (es).
+iso: es
+kategoria: szyfr
+kolejnosc: 10
+algorytm: odwracanie
+
+# Expansión de abreviaturas — patrones REGEX.
+# Orden: las más largas ANTES de las más cortas (Srta. antes de Sra.
+# antes de Sr.; pág. antes de p.).
+# `\.?` permite la kropka opcional para tolerar formas con descuido
+# tipográfico («Sr Pérez», «pág 12») — esto da un bonus respecto a la
+# tabla de smoke testów § 6.9 del TODO.
+rozwiniecia:
+  # -- p. ej. → por ejemplo (con o sin espacio, punto final opcional) --
+  - { wzor: '\bp\.\s*ej\.?,?\s',     zamiana: "por ejemplo " }
+  # -- es dec. → es decir (forma abreviada poco común pero del notebook) --
+  - { wzor: '\bes\s+dec\.?,?\s',     zamiana: "es decir " }
+  # -- etc. → etcétera --
+  - { wzor: '\betc\.?,?\s',          zamiana: "etcétera " }
+  # -- cf. / cfr. → confer (referencia bibliográfica) --
+  - { wzor: '\bcfr?\.?,?\s',         zamiana: "confer " }
+  # -- vs. → versus --
+  - { wzor: '\bvs\.?,?\s',           zamiana: "versus " }
+  # -- Tratamientos: Srta./Sra./Sr. (orden: el más largo PRIMERO) --
+  - { wzor: '\bSrta\.?\s',           zamiana: "Señorita " }
+  - { wzor: '\bSra\.?\s',            zamiana: "Señora " }
+  - { wzor: '\bSr\.?\s',             zamiana: "Señor " }
+  # -- Títulos académicos --
+  - { wzor: '\bDra\.?\s',            zamiana: "Doctora " }
+  - { wzor: '\bDr\.?\s',             zamiana: "Doctor " }
+  - { wzor: '\bProf\.?\s',           zamiana: "Profesor " }
+  # -- Referencias de página / número --
+  - { wzor: '\bpágs?\.?\s',          zamiana: "página " }
+  - { wzor: '\bpags?\.?\s',          zamiana: "página " }
+  - { wzor: '\bnúm\.?\s',            zamiana: "número " }
+  - { wzor: '\bnum\.?\s',            zamiana: "número " }
+  # -- Referencias bibliográficas habituales --
+  - { wzor: '\bvol\.?\s',            zamiana: "volumen " }
+  - { wzor: '\bcap\.?\s',            zamiana: "capítulo " }
+  - { wzor: '\bart\.?\s',            zamiana: "artículo " }
+  # -- Datación histórica --
+  - { wzor: '\ba\.\s*C\.?,?\s',      zamiana: "antes de Cristo " }
+  - { wzor: '\bd\.\s*C\.?,?\s',      zamiana: "después de Cristo " }

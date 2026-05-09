@@ -1,0 +1,19 @@
+# LIMPIEZA DE TEXTO SIN NORMALIZACIÓN DE NÚMEROS
+# Variante para textos técnicos (fechas, códigos, numeraciones) en los
+# que los dígitos NO deben convertirse en palabras.
+
+id: oczyszczenie_bez_liczb
+etykieta: "Sin acento (Limpieza SIN normalización de números)"
+opis: |
+  No aplica ningún acento fonético. Realiza la limpieza del texto para
+  el sintetizador de voz, pero CONSERVA los dígitos en su forma original.
+  Usa esta opción para textos técnicos en los que «123» es más relevante
+  que «ciento veintitrés».
+iso: es
+kategoria: oczyszczenie
+kolejnosc: 10
+czysc_tekst_tts: true
+normalizuj_liczby: false
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

@@ -118,6 +118,8 @@ _NATYWNE_JEZYK_ODPOWIEDZI: dict[str, str] = {
     "it": "italiano",
     "ru": "по-русски",
     "de": "Deutsch",
+    "fr": "français",
+    "es": "español",
 }
 
 _NATYWNE_STRESZCZENIE: dict[str, list[str]] = {
@@ -130,6 +132,8 @@ _NATYWNE_STRESZCZENIE: dict[str, list[str]] = {
     "it": ["riassumi", "riassunto", "sintetizza", "sommario"],
     "ru": ["обобщи", "сделай резюме", "резюме", "подытожь"],
     "de": ["fasse zusammen", "Zusammenfassung", "zusammenfassen", "Überblick"],
+    "fr": ["résume", "résumé", "résumer", "vue d'ensemble"],
+    "es": ["resume", "resumen", "resumir", "sinopsis"],
 }
 
 _NATYWNA_NAZWA_JEZYKA: dict[str, str] = {
@@ -142,8 +146,8 @@ _NATYWNA_NAZWA_JEZYKA: dict[str, str] = {
     "it": "Italiano",
     "ru": "Русский",
     "de": "Deutsch",
-    "fr": "Français",     # planowane wdrożenie 13.10
-    "es": "Español",      # planowane wdrożenie 13.11
+    "fr": "Français",
+    "es": "Español",
 }
 
 
@@ -187,11 +191,11 @@ def _natywna_nazwa_jezyka(kod: str) -> str:
 
 
 # =============================================================================
-# Pomocnicze: lista paczek wdrożonych (stan na 13.9 — synchronizować ręcznie
+# Pomocnicze: lista paczek wdrożonych (stan na 14.0 — synchronizować ręcznie
 # przy każdym pełnym wdrożeniu nowego języka). Używane w promptach agentowych
 # jako podpowiedź „skąd brać wzorzec stylu".
 # =============================================================================
-_PACZKI_WDROZONE: tuple[str, ...] = ("pl", "en", "de", "fi", "is", "it", "ru")
+_PACZKI_WDROZONE: tuple[str, ...] = ("pl", "en", "de", "es", "fi", "fr", "is", "it", "ru")
 
 
 def _paczki_referencyjne(jezyk_bazowy: str) -> str:

@@ -1,0 +1,71 @@
+# -----------------------------------------------------------------------------
+#  ACENTO INGLÉS (español → TTS inglés)
+#  Para sintetizadores: David / Zira / Samantha / Hazel (TTS inglés).
+# -----------------------------------------------------------------------------
+id: angielski
+etykieta: "Inglés (p. ej. David / Zira / Samantha)"
+opis: |
+  Adapta el texto español al sintetizador de voz inglés (David / Zira /
+  Samantha / Hazel).
+
+  Compatibilidad fonética natural español-inglés:
+    - ch  = /tʃ/ en ambas lenguas ✓ se conserva
+    - rr  → el TTS inglés lee /r/ alveolar → acento inglés natural
+    - vocales a/e/i/o/u puras — el TTS inglés las leerá teñidas
+      (diptongos como /eɪ/, /oʊ/) — acento inglés natural
+
+  Diferencias fonéticas críticas español → inglés:
+    - « ñ »  es = /ɲ/, no existe en inglés → se escribe « ny ».
+    - « j »  es = /x/, inglés j = /dʒ/ (totalmente distinto) → se escribe « h »
+      (la /h/ inglesa es la aproximación más cercana a /x/).
+    - « ll » es = /ʝ/, inglés ll = /l/ (geminada) → se escribe « y ».
+    - « z »  es = /θ/ (España) o /s/ (Latinoamérica), inglés z = /z/
+      → se escribe « s » (variante latinoamericana, más legible).
+    - « gu » + e/i es = /g/ (u muda) → se escribe « g » (inglés leería /gju/).
+    - « qu » + e/i es = /k/ (u muda), inglés qu = /kw/ → se escribe « k ».
+
+  Acentos naturales del inglés sobre el español (dejados intencionalmente):
+    - « h » es muda, inglés h = /h/ aspirada → se conserva (acento natural;
+      no se elimina porque la regla « j → h » de abajo introduciría /h/
+      donde la regla « h → "" » la borraría — los dos pasos chocan).
+    - v   es = /b/, inglés v = /v/ → acento inglés natural sobre la « v ».
+    - r/rr es vibrante, inglés /ɹ/ aproximante → acento inglés natural.
+iso: en
+kategoria: akcent
+kolejnosc: 40
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+# ORDEN CRÍTICO: dígrafos antes que letras simples; gu/qu antes que g/q sueltas.
+zamiany:
+  # --- ñ → ny (CRÍTICO: inglés no tiene /ɲ/) ---
+  - { wzor: "ñ", zamiana: "ny" }
+  - { wzor: "Ñ", zamiana: "Ny" }
+  # --- ll → y (inglés y = /j/, aproximación de /ʝ/ española) ---
+  - { wzor: "ll", zamiana: "y" }
+  - { wzor: "Ll", zamiana: "Y" }
+  - { wzor: "LL", zamiana: "Y" }
+  # --- gu + e/i → g (u muda; inglés leería /gju/) ---
+  - { wzor: "gue", zamiana: "ge" }
+  - { wzor: "Gue", zamiana: "Ge" }
+  - { wzor: "GUE", zamiana: "GE" }
+  - { wzor: "gui", zamiana: "gi" }
+  - { wzor: "Gui", zamiana: "Gi" }
+  - { wzor: "GUI", zamiana: "GI" }
+  # --- qu + e/i → k (u muda; inglés leería /kw/) ---
+  - { wzor: "que", zamiana: "ke" }
+  - { wzor: "Que", zamiana: "Ke" }
+  - { wzor: "QUE", zamiana: "KE" }
+  - { wzor: "qui", zamiana: "ki" }
+  - { wzor: "Qui", zamiana: "Ki" }
+  - { wzor: "QUI", zamiana: "KI" }
+  # --- Letras simples (después de los dígrafos) ---
+  - { wzor: "j", zamiana: "h" }
+  - { wzor: "J", zamiana: "H" }
+  - { wzor: "z", zamiana: "s" }
+  - { wzor: "Z", zamiana: "S" }

@@ -1,0 +1,85 @@
+# -----------------------------------------------------------------------------
+#  ACENTO FINÉS (español → TTS finés)
+#  Para sintetizadores: Heidi / Onni (TTS finés).
+# -----------------------------------------------------------------------------
+id: finski
+etykieta: "Finés (p. ej. Heidi / Onni)"
+opis: |
+  Adapta el texto español al sintetizador de voz finés (Heidi / Onni).
+  El finés es muy distante fonéticamente del español — no tiene /tʃ/, /ʝ/,
+  /ɲ/ ni /x/. El acento finés sobre el español resulta muy marcado.
+
+  Diferencias fonéticas críticas español → finés:
+    - « ch » es = /tʃ/, no existe en finés → se escribe « tš » (letra
+      extranjera oficial finesa para /tʃ/ en préstamos).
+    - « ñ »  es = /ɲ/, no existe en finés → se escribe « nj » (aproximación).
+    - « j »  es = /x/, finés « j » = /j/ → se escribe « h » (finés h = /h/,
+      aproximación pragmática de /x/).
+    - « ll » es = /ʝ/, finés « ll » = /l/ geminada → se escribe « j »
+      (finés j = /j/, aproximación de /ʝ/).
+    - « z »  es = /θ/ o /s/, finés no tiene /z/ ni /θ/ → se escribe « s ».
+    - « gu » + e/i es = /g/ (u muda) → se escribe « g ».
+    - « qu » + e/i es = /k/ (u muda), finés sin /q/ → se escribe « k ».
+    - « h »  es muda, finés h = /h/ → se elimina ANTES de transformar
+      « j → h » (orden crítico: las h originales se borran primero;
+      después la « j → h » introduce un nuevo /h/ pretendido).
+
+  ORDEN CRÍTICO de transformaciones:
+    1. « ch » → « tš » (la sustitución contiene « š », no « h » → segura).
+    2. « h »  → ""    (borra h originales; tš no se ve afectada).
+    3. « j »  → « h » (introduce nueva h que sobrevive porque h→"" ya pasó).
+    4. « ll » → « j » (DESPUÉS de j→h: «calle»→«caje» — la nueva j queda).
+
+  Acentos naturales del finés sobre el español (dejados intencionalmente):
+    - r  vibrante en ambas lenguas, pero el TTS finés tiende a vibrar
+      menos → acento finés natural.
+    - v  es = /b/, finés v = /v/ → acento finés natural.
+    - vocales largas geminadas — el TTS finés puede prolongar vocales
+      españolas en sílabas tónicas.
+iso: fi
+kategoria: akcent
+kolejnosc: 70
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: true
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+zamiany:
+  # --- 1. ch → tš (sin h en la salida — segura antes de h→"") ---
+  - { wzor: "ch", zamiana: "tš" }
+  - { wzor: "Ch", zamiana: "Tš" }
+  - { wzor: "CH", zamiana: "TŠ" }
+  # --- gu + e/i → g (u muda) ---
+  - { wzor: "gue", zamiana: "ge" }
+  - { wzor: "Gue", zamiana: "Ge" }
+  - { wzor: "GUE", zamiana: "GE" }
+  - { wzor: "gui", zamiana: "gi" }
+  - { wzor: "Gui", zamiana: "Gi" }
+  - { wzor: "GUI", zamiana: "GI" }
+  # --- qu + e/i → k (u muda) ---
+  - { wzor: "que", zamiana: "ke" }
+  - { wzor: "Que", zamiana: "Ke" }
+  - { wzor: "QUE", zamiana: "KE" }
+  - { wzor: "qui", zamiana: "ki" }
+  - { wzor: "Qui", zamiana: "Ki" }
+  - { wzor: "QUI", zamiana: "KI" }
+  # --- 2. h muda original → eliminada (ANTES de j→h) ---
+  - { wzor: "h", zamiana: "" }
+  - { wzor: "H", zamiana: "" }
+  # --- 3. j → h (finés h = /h/, aproximación pragmática de /x/) ---
+  - { wzor: "j", zamiana: "h" }
+  - { wzor: "J", zamiana: "H" }
+  # --- ñ → nj (DESPUÉS de j→h: la « j » de « nj » NO debe pasar a /h/.
+  #     Si fuera al revés: « señorita » → « senjorita » → « senhorita ».) ---
+  - { wzor: "ñ", zamiana: "nj" }
+  - { wzor: "Ñ", zamiana: "Nj" }
+  # --- 4. ll → j (DESPUÉS de j→h, evita «calle»→«caje»→«cahe») ---
+  - { wzor: "ll", zamiana: "j" }
+  - { wzor: "Ll", zamiana: "J" }
+  - { wzor: "LL", zamiana: "J" }
+  # --- z → s ---
+  - { wzor: "z", zamiana: "s" }
+  - { wzor: "Z", zamiana: "S" }

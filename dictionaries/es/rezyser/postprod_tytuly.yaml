@@ -1,0 +1,36 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUCCIÓN: TÍTULOS DE CAPÍTULO POR IA
+#  Herramienta para el modo Audiolibro: itera sobre los capítulos del
+#  archivo de proyecto guardado y genera para cada uno un título literario
+#  breve. Por defecto utiliza un modelo de bajo coste (gpt-4o-mini).
+# -----------------------------------------------------------------------------
+id: tytuly
+etykieta: "Asignar títulos a los capítulos (IA)"
+kategoria: postprodukcja
+kolejnosc: 10
+
+# --- Parámetros OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.7
+jezyk_odpowiedzi: español
+
+# --- Prompt del sistema ---
+prompt_systemowy: |
+  Eres un editor literario refinado. Responde únicamente con el título.
+
+# --- Plantilla del prompt de usuario (role=user) ---
+# Marcadores de posición: {naglowek}, {probka}
+prompt_uzytkownika_szablon: |
+  Aquí tienes el contenido de una sección de un libro ({naglowek}). Inventa UN título corto, atractivo y literario, sin comillas.
+
+  CONTENIDO:
+  {probka}
+
+# --- Parámetros de iteración sobre el archivo de proyecto ---
+regex_podzial_rozdzialow: "(?i)\\n*(Prólogo|Capítulo \\d+|Epílogo)\\n*"
+min_dlugosc_fragmentu: 50
+max_dlugosc_probki: 6000
+
+# Mensajes en la ventana de resultados:
+etykieta_fragment_zbyt_krotki: "(Sección demasiado corta)"
+etykieta_bled_brak_kredytow: "(Error — crédito API agotado)"

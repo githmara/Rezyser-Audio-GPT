@@ -1,0 +1,19 @@
+# LIMPIEZA DE TEXTO CON NORMALIZACIÓN DE NÚMEROS
+# Variante por defecto «Sin acento» — limpia únicamente el texto para el
+# lector de pantalla.
+
+id: oczyszczenie
+etykieta: "Sin acento (Limpieza CON normalización de números)"
+opis: |
+  No aplica ningún acento fonético. Realiza únicamente la limpieza del
+  texto para el sintetizador de voz (elimina muletillas como «eh», los
+  asteriscos, las almohadillas, las series de puntos) y convierte los
+  números en palabras (p. ej. «123» → «ciento veintitrés»).
+iso: es
+kategoria: oczyszczenie
+kolejnosc: 20
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: false
+zamiany: []

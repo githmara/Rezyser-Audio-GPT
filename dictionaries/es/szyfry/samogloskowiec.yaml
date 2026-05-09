@@ -1,0 +1,32 @@
+# -----------------------------------------------------------------------------
+#  CIFRADO: VOCALOIDE
+#  Sustituye cada vocal por « o » (o « O »).
+# -----------------------------------------------------------------------------
+id: samogloskowiec
+etykieta: "Vocaloide (Todo retumba en 'O')"
+opis: |
+  Efecto «mires donde mires — solo Os». Para el español el algoritmo
+  reemplaza las vocales base (a, e, i, o, u) y las vocales acentuadas
+  (á, é, í, ó, ú, ü): cada vocal se convierte en « o » (o « O »).
+
+  Nota: los diptongos españoles («ai», «ei», «oi», «au», «eu», «ou»,
+  «ia», «ie», «io», «iu», «ua», «ue», «ui», «uo») colapsan en «oo».
+  Es intencional — el objetivo del cifrado es el efecto cómico, no la
+  precisión fonética.
+iso: es
+kategoria: szyfr
+kolejnosc: 40
+algorytm: samogloskowiec
+
+# Fases 1 y 2 (suavización polaca dzi/ci/ni) — intencionalmente vacías.
+# El motor acepta listas vacías sin error.
+zmiekszenia_przed_samogloska: []
+zmiekszenia_przed_spolgloska: []
+
+# Fase 3: sustitución de vocales.
+# `samogloski_*` son cadenas que se inyectan en la character-class de la
+# regex del motor.
+samogloski_male:             "aeiouáéíóúü"
+samogloski_wielkie:          "AEIOUÁÉÍÓÚÜ"
+zamiana_samogloski_male:     "o"
+zamiana_samogloski_wielkie:  "O"

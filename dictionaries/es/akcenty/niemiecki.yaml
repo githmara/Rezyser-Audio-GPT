@@ -1,0 +1,83 @@
+# -----------------------------------------------------------------------------
+#  ACENTO ALEMÁN (español → TTS alemán)
+#  Para sintetizadores: Hedda / Stefan / Katja (TTS alemán).
+# -----------------------------------------------------------------------------
+id: niemiecki
+etykieta: "Alemán (p. ej. Hedda / Stefan / Katja)"
+opis: |
+  Adapta el texto español al sintetizador de voz alemán (Hedda / Stefan /
+  Katja).
+
+  Diferencias fonéticas críticas español → alemán:
+    - « ch » es = /tʃ/, alemán « ch » = /x/ o /ç/ → se escribe « tsch »
+      (de tsch = /tʃ/, único modo de mantener la africada).
+    - « ñ »  es = /ɲ/, no existe en alemán → se escribe « nj » (aproximación).
+    - « j »  es = /x/, alemán « j » = /j/ → se escribe « ch » (de ch = /x/).
+    - « ll » es = /ʝ/, alemán « ll » = /l/ geminada → se escribe « j »
+      (de j = /j/, aproximación de /ʝ/).
+    - « z »  es = /θ/ o /s/, alemán « z » = /ts/ → se escribe « ss ».
+    - « gu » + e/i es = /g/ (u muda) → se escribe « g ».
+    - « qu » + e/i es = /k/ (u muda), alemán « qu » = /kv/ → se escribe « k ».
+
+  ORDEN CRÍTICO de transformaciones:
+    1. « ch » → « tsch » (PRIMERO; convierte la ch española /tʃ/).
+    2. « j »  → « ch »   (DESPUÉS de ch→tsch: la nueva « ch » representa
+                          /x/ alemana y NO debe convertirse a « tsch »).
+    3. « ñ »  → « nj »   (DESPUÉS de j→ch: la « j » que aparece dentro
+                          de « nj » representa /j/ palatal y NO debe
+                          convertirse a « ch ». Si fuera al revés,
+                          « señorita » → « senjorita » → « senchorita ».)
+    4. « ll » → « j »    (DESPUÉS de j→ch: si fuera al revés, « calle » →
+                          « caje » → « cache » sería incorrecto.)
+
+  Acentos naturales del alemán sobre el español (dejados intencionalmente):
+    - « h » es muda, alemán h aspirada → se conserva (acento natural;
+      no se elimina porque la « ch → tsch » y la « j → ch » de abajo
+      generan « h » en sus salidas que la regla « h → "" » devoraría).
+    - v  es = /b/, alemán v = /f/ → acento alemán natural muy marcado.
+    - r  vibrante española vs. r uvular alemana → acento alemán.
+iso: de
+kategoria: akcent
+kolejnosc: 30
+
+# --- Pipeline ---
+czysc_tekst_tts: true
+normalizuj_liczby: true
+usun_polskie_znaki: false
+skleja_pojedyncze_litery: true
+
+# --- Sustituciones fonéticas ---
+zamiany:
+  # --- 1. ch → tsch (alemán « ch » = /x/, hay que forzar /tʃ/) ---
+  - { wzor: "ch", zamiana: "tsch" }
+  - { wzor: "Ch", zamiana: "Tsch" }
+  - { wzor: "CH", zamiana: "TSCH" }
+  # --- ñ → nj ---
+  # --- gu + e/i → g (u muda) ---
+  - { wzor: "gue", zamiana: "ge" }
+  - { wzor: "Gue", zamiana: "Ge" }
+  - { wzor: "GUE", zamiana: "GE" }
+  - { wzor: "gui", zamiana: "gi" }
+  - { wzor: "Gui", zamiana: "Gi" }
+  - { wzor: "GUI", zamiana: "GI" }
+  # --- qu + e/i → k (u muda; alemán qu=/kv/) ---
+  - { wzor: "que", zamiana: "ke" }
+  - { wzor: "Que", zamiana: "Ke" }
+  - { wzor: "QUE", zamiana: "KE" }
+  - { wzor: "qui", zamiana: "ki" }
+  - { wzor: "Qui", zamiana: "Ki" }
+  - { wzor: "QUI", zamiana: "KI" }
+  # --- z → ss (alemán z=/ts/, lejos de /θ/ o /s/) ---
+  - { wzor: "z", zamiana: "ss" }
+  - { wzor: "Z", zamiana: "Ss" }
+  # --- 2. j → ch (DESPUÉS de ch→tsch; alemán ch=/x/ ≈ español j=/x/) ---
+  - { wzor: "j", zamiana: "ch" }
+  - { wzor: "J", zamiana: "Ch" }
+  # --- 3. ñ → nj (DESPUÉS de j→ch: la nueva j en «nj» NO debe convertirse
+  #     a ch — debe leerse como /j/ palatal alemana en la sílaba «nj».)  ---
+  - { wzor: "ñ", zamiana: "nj" }
+  - { wzor: "Ñ", zamiana: "Nj" }
+  # --- 4. ll → j (DESPUÉS de j→ch para evitar «calle»→«caje»→«cache») ---
+  - { wzor: "ll", zamiana: "j" }
+  - { wzor: "Ll", zamiana: "J" }
+  - { wzor: "LL", zamiana: "J" }

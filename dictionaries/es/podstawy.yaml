@@ -1,0 +1,155 @@
+# =============================================================================
+#  FUNDAMENTOS DE LA LENGUA ESPAÑOLA
+# =============================================================================
+#
+#  Archivo base para `dictionaries/es/`. El motor Poliglota requiere que
+#  cada lengua disponga de este fichero — sin él, una lengua nueva no se
+#  reconoce siquiera por `dostepne_jezyki_bazowe()`.
+#
+#  Estructura análoga a `dictionaries/pl/podstawy.yaml`. El campo
+#  `polskie_znaki`, pese a su nombre histórico, contiene TODOS los signos
+#  diacríticos que deben normalizarse a ASCII antes de aplicar los
+#  cifrados o las reglas de acentuación (`usun_polskie_znaki: true`).
+#
+#  Notas específicas del español:
+#    - La «ñ» SÍ se incluye en `alfabet`, porque `.upper()` la transforma
+#      en «Ñ» (un único carácter) — no rompe el índice del cifrado César.
+#    - Las vocales acentuadas (á, é, í, ó, ú) y la diéresis (ü) se
+#      tratan como variantes tonales: van a vocales sin acento en
+#      `polskie_znaki` (no entran en `alfabet`).
+# =============================================================================
+
+id: podstawy
+jezyk: es
+# Enumeración lingua-language-detector (en mayúsculas, sin prefijo).
+# Lista completa: https://github.com/pemistahl/lingua-py
+lingua: SPANISH
+etykieta: "Español – fundamentos fonéticos"
+opis: |
+  Reglas básicas para la lengua española:
+    1. Normalización de los signos diacríticos (`polskie_znaki`) — para
+       que el cifrado de César y los motores de acentuación traten
+       correctamente los caracteres especiales (las vocales acentuadas
+       á/é/í/ó/ú y la ü se reducen a su vocal base; otros diacríticos
+       europeos también se aplanan a ASCII).
+    2. Alfabeto español (27 letras: A–Z + Ñ) — utilizado por el cifrado
+       de César. La Ñ se conserva como letra propia.
+
+# -----------------------------------------------------------------------------
+# Normalización de los signos diacríticos. Las vocales acentuadas españolas
+# (á, é, í, ó, ú) y la ü pierden el acento; «ñ» NO se normaliza (es letra
+# propia del alfabeto). Otros diacríticos europeos pasan a ASCII para que
+# los acentos extranjeros con `usun_polskie_znaki: true` vean una base
+# limpia antes de aplicar sus propias transliteraciones.
+# -----------------------------------------------------------------------------
+polskie_znaki:
+  # -- Vocales acentuadas españolas → vocal base --
+  - { wzor: "á", zamiana: "a"  }
+  - { wzor: "Á", zamiana: "A"  }
+  - { wzor: "é", zamiana: "e"  }
+  - { wzor: "É", zamiana: "E"  }
+  - { wzor: "í", zamiana: "i"  }
+  - { wzor: "Í", zamiana: "I"  }
+  - { wzor: "ó", zamiana: "o"  }
+  - { wzor: "Ó", zamiana: "O"  }
+  - { wzor: "ú", zamiana: "u"  }
+  - { wzor: "Ú", zamiana: "U"  }
+  - { wzor: "ü", zamiana: "u"  }
+  - { wzor: "Ü", zamiana: "U"  }
+  # -- Caracteres polacos → ASCII --
+  - { wzor: "ą", zamiana: "a"  }
+  - { wzor: "ć", zamiana: "c"  }
+  - { wzor: "ę", zamiana: "e"  }
+  - { wzor: "ł", zamiana: "l"  }
+  - { wzor: "ń", zamiana: "n"  }
+  - { wzor: "ś", zamiana: "s"  }
+  - { wzor: "ź", zamiana: "z"  }
+  - { wzor: "ż", zamiana: "z"  }
+  - { wzor: "Ą", zamiana: "A"  }
+  - { wzor: "Ć", zamiana: "C"  }
+  - { wzor: "Ę", zamiana: "E"  }
+  - { wzor: "Ł", zamiana: "L"  }
+  - { wzor: "Ń", zamiana: "N"  }
+  - { wzor: "Ś", zamiana: "S"  }
+  - { wzor: "Ź", zamiana: "Z"  }
+  - { wzor: "Ż", zamiana: "Z"  }
+  # -- Diacríticos franceses / italianos / nórdicos → ASCII --
+  - { wzor: "à", zamiana: "a"  }
+  - { wzor: "â", zamiana: "a"  }
+  - { wzor: "ã", zamiana: "a"  }
+  - { wzor: "ä", zamiana: "a"  }
+  - { wzor: "å", zamiana: "a"  }
+  - { wzor: "À", zamiana: "A"  }
+  - { wzor: "Â", zamiana: "A"  }
+  - { wzor: "Ã", zamiana: "A"  }
+  - { wzor: "Ä", zamiana: "A"  }
+  - { wzor: "Å", zamiana: "A"  }
+  # -- æ → ae --
+  - { wzor: "æ", zamiana: "ae" }
+  - { wzor: "Æ", zamiana: "Ae" }
+  # -- ç → c --
+  - { wzor: "ç", zamiana: "c"  }
+  - { wzor: "Ç", zamiana: "C"  }
+  # -- ð → d (islandés) --
+  - { wzor: "ð", zamiana: "d"  }
+  - { wzor: "Ð", zamiana: "D"  }
+  # -- e con otros acentos (francés, italiano) → e --
+  - { wzor: "è", zamiana: "e"  }
+  - { wzor: "ê", zamiana: "e"  }
+  - { wzor: "ë", zamiana: "e"  }
+  - { wzor: "È", zamiana: "E"  }
+  - { wzor: "Ê", zamiana: "E"  }
+  - { wzor: "Ë", zamiana: "E"  }
+  # -- i con otros acentos → i --
+  - { wzor: "ì", zamiana: "i"  }
+  - { wzor: "î", zamiana: "i"  }
+  - { wzor: "ï", zamiana: "i"  }
+  - { wzor: "Ì", zamiana: "I"  }
+  - { wzor: "Î", zamiana: "I"  }
+  - { wzor: "Ï", zamiana: "I"  }
+  # -- o con otros acentos → o --
+  - { wzor: "ò", zamiana: "o"  }
+  - { wzor: "ô", zamiana: "o"  }
+  - { wzor: "õ", zamiana: "o"  }
+  - { wzor: "ö", zamiana: "o"  }
+  - { wzor: "ø", zamiana: "o"  }
+  - { wzor: "Ò", zamiana: "O"  }
+  - { wzor: "Ô", zamiana: "O"  }
+  - { wzor: "Õ", zamiana: "O"  }
+  - { wzor: "Ö", zamiana: "O"  }
+  - { wzor: "Ø", zamiana: "O"  }
+  # -- œ → oe --
+  - { wzor: "œ", zamiana: "oe" }
+  - { wzor: "Œ", zamiana: "Oe" }
+  # -- ß → ss (alemán) --
+  - { wzor: "ß", zamiana: "ss" }
+  - { wzor: "ẞ", zamiana: "SS" }
+  # -- þ → th (islandés) --
+  - { wzor: "þ", zamiana: "th" }
+  - { wzor: "Þ", zamiana: "Th" }
+  # -- u con otros acentos → u --
+  - { wzor: "ù", zamiana: "u"  }
+  - { wzor: "û", zamiana: "u"  }
+  - { wzor: "Ù", zamiana: "U"  }
+  - { wzor: "Û", zamiana: "U"  }
+  # -- y con acento → y --
+  - { wzor: "ý", zamiana: "y"  }
+  - { wzor: "ÿ", zamiana: "y"  }
+  - { wzor: "Ý", zamiana: "Y"  }
+  - { wzor: "Ÿ", zamiana: "Y"  }
+
+# -----------------------------------------------------------------------------
+# Alfabeto español — 27 letras mayúsculas (A–Z + Ñ).
+# Utilizado por el cifrado de César. La Ñ no rompe el índice porque
+# `.upper()` la convierte en un solo carácter (Ñ).
+# -----------------------------------------------------------------------------
+alfabet: "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+
+# -----------------------------------------------------------------------------
+# Palabras disparadoras del analizador de acentos en la Biblia del Mundo
+# (13.3+). core_rezyser.zastosuj_akcenty_uniwersalne construye una regex a
+# partir de esta lista para reconocer frases «<palabra> X» o «X <palabra>».
+# -----------------------------------------------------------------------------
+slowo_akcent:
+  - "acento"
+  - "pronunciación"

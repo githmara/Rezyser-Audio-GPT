@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  CIFRADO: TIPOGLICEMIA
+#  Mezcla las letras centrales de cada palabra (la primera y la última
+#  permanecen en su sitio).
+# -----------------------------------------------------------------------------
+id: typoglikemia
+etykieta: "Tipoglicemia (Centro de las palabras barajado)"
+opis: |
+  Fenómeno psicolingüístico: si la primera y la última letra de una
+  palabra son correctas, el lector la lee con fluidez aunque el centro
+  esté barajado. Las palabras más cortas que `min_dlugosc_slowa` no se
+  modifican.
+iso: es
+kategoria: szyfr
+kolejnosc: 20
+algorytm: typoglikemia
+
+# Parámetros del algoritmo
+min_dlugosc_slowa: 4
