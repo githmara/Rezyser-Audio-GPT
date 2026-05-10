@@ -951,7 +951,7 @@ opowiesci:
   brak_api_tytul:            "Brak klucza API"
   brak_api_tresc:            "Plik golden_key.env z prawidłowym kluczem OPENAI_API_KEY nie został znaleziony. Moduł Opowieści wymaga aktywnego klucza, by generować tury narracji."
   puste_pole_tytul:          "Puste pole akcji"
-  puste_pole_tresc:          "Wpisz akcję lub komendę w polu poniżej narracji, zanim klikniesz „Wyślij"."
+  puste_pole_tresc:          'Wpisz akcję lub komendę w polu poniżej narracji, zanim klikniesz „Wyślij".'
   puste_nazwa_tytul:         "Brak nazwy gry"
   puste_nazwa_tresc:         "Zanim wyślesz pierwszą akcję, wpisz nazwę gry w pasku na górze panelu — pod tą nazwą zostaną zapisane wszystkie pliki opowieści."
   status_wysylanie:          "Wysyłanie do AI…"
@@ -969,25 +969,27 @@ opowiesci:
 
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul:            "Brak aktywnej gry"
-  brak_gry_tresc:            "Załóż nową grę przyciskiem „Nowa gra" albo wczytaj wcześniej zapisaną przyciskiem „Wczytaj", zanim spróbujesz wysłać akcję."
+  brak_gry_tresc:            'Załóż nową grę przyciskiem „Nowa gra" albo wczytaj wcześniej zapisaną przyciskiem „Wczytaj", zanim spróbujesz wysłać akcję.'
   gra_istnieje_tytul:        "Gra o tej nazwie już istnieje"
-  gra_istnieje_tresc:        "Gra „{nazwa}" już ma zapisany stan na dysku. Czy chcesz nadpisać ją zerową grą? Cała dotychczasowa narracja, postacie i ekwipunek zostaną utracone (pliki .txt, .md i .game.json zostaną zresetowane)."
+  gra_istnieje_tresc:        'Gra „{nazwa}" już ma zapisany stan na dysku. Czy chcesz nadpisać ją zerową grą? Cała dotychczasowa narracja, postacie i ekwipunek zostaną utracone (pliki .txt, .md i .game.json zostaną zresetowane).'
   gra_nowa_tytul:            "Nowa gra utworzona"
-  gra_nowa_tresc:            "Gra „{nazwa}" została utworzona. Wpisz pierwszą akcję w polu poniżej narracji i kliknij „Wyślij", aby rozpocząć opowieść."
+  gra_nowa_tresc:            'Gra „{nazwa}" została utworzona. Wpisz pierwszą akcję w polu poniżej narracji i kliknij „Wyślij", aby rozpocząć opowieść.'
   gra_wczytana_tytul:        "Gra wczytana"
-  gra_wczytana_tresc:        "Gra „{nazwa}" została wczytana. Aktualny numer tury: {numer_tury}. Możesz kontynuować rozgrywkę."
+  gra_wczytana_tresc:        'Gra „{nazwa}" została wczytana. Aktualny numer tury: {numer_tury}. Możesz kontynuować rozgrywkę.'
   gra_zapisana_tytul:        "Gra zapisana"
-  gra_zapisana_tresc:        "Stan gry „{nazwa}" został zapisany na dysk."
-  nowa_gra_zaczatek:         "📖 Gra „{nazwa}" rozpoczęta.\n\nWpisz pierwszą akcję w polu poniżej i kliknij „Wyślij" — silnik narracyjny opisze świat, w którym się znalazłeś, i przedstawi pierwszą scenę."
-  brak_narracji_info:        "📖 Gra „{nazwa}" wczytana, ale plik narracji (skrypty/{nazwa}.txt) nie istnieje. Stan gry pochodzi z pliku game.json — możesz kontynuować."
+  gra_zapisana_tresc:        'Stan gry „{nazwa}" został zapisany na dysk.'
+  nowa_gra_zaczatek:         "📖 Gra \"{nazwa}\" rozpoczęta.\n\nWpisz pierwszą akcję w polu poniżej i kliknij \"Wyślij\" — silnik narracyjny opisze świat, w którym się znalazłeś, i przedstawi pierwszą scenę."
+  brak_narracji_info:        "📖 Gra \"{nazwa}\" wczytana, ale plik narracji (skrypty/{nazwa}.txt) nie istnieje. Stan gry pochodzi z pliku game.json — możesz kontynuować."
   dlg_wczytaj_tytul:         "Wczytaj grę Opowieści"
   dlg_wczytaj_filtr:         "Pliki gry Opowieści (*.game.json)|*.game.json|Wszystkie pliki|*.*"
   blad_zapisu_tresc:         "Wystąpił błąd zapisu pliku gry: {tresc_bledu}"
-  blad_wczytania_tresc:      "Wystąpił błąd wczytania gry „{nazwa}": {tresc_bledu}"
+  blad_wczytania_tresc:      'Wystąpił błąd wczytania gry „{nazwa}": {tresc_bledu}'
 
   # ---- Faza 4: slash-komendy + tiktoken + /visualize + Cinematic Warning ----
   komenda_nieznana_tytul:    "Nieznana komenda"
-  komenda_nieznana_tresc:    "Komenda „{komenda}" nie jest rozpoznawana. Dostępne komendy:\n\n{lista}"
+  komenda_nieznana_tresc:    'Komenda „{komenda}" nie jest rozpoznawana. Dostępne komendy:
+
+  {lista}'
   komendy_dostepne_lista: |-
     /zapisz, /save                    — wymuszenie zapisu gry
     /wczytaj, /load                   — otwórz dialog wczytania
@@ -1000,7 +1002,7 @@ opowiesci:
   dlg_ustawienia_model_quality:   "Wysokiej jakości (gpt-4o, wolniejszy, droższy)"
   dlg_ustawienia_btn_zatwierdz:   "Zatwierdź"
   dlg_ustawienia_zmieniono_tytul: "Model zmieniony"
-  dlg_ustawienia_zmieniono_tresc: "Silnik narracyjny będzie odtąd korzystał z modelu „{model}"."
+  dlg_ustawienia_zmieniono_tresc: 'Silnik narracyjny będzie odtąd korzystał z modelu „{model}".'
   dlg_visualize_tytul:       "🌅 Wizualizacja sceny"
   dlg_visualize_lbl:         "Multisensoryczny opis aktualnej sceny (nie zmienia stanu gry):"
   dlg_visualize_name:        "Pole z opisem wizualizacji sceny"
@@ -1025,4 +1027,4 @@ opowiesci:
   lbl_quick_start:           "Quick Start:"
   quick_start_wlasna:        "(własna gra)"
   choice_quick_start_name:   "Wybór gotowego scenariusza Quick Start"
-  choice_quick_start_tooltip: "Wybierz gotowy świat, by od razu zanurzyć się w narracji. Preset wstrzyknie do silnika krótki opis świata i bohatera, ustawi domyślny tryb gry. „(własna gra)" pozostawia start swobodny — silnik sam wymyśli świat na podstawie pierwszej akcji."
+  choice_quick_start_tooltip: 'Wybierz gotowy świat, by od razu zanurzyć się w narracji. Preset wstrzyknie do silnika krótki opis świata i bohatera, ustawi domyślny tryb gry. „(własna gra)" pozostawia start swobodny — silnik sam wymyśli świat na podstawie pierwszej akcji.'

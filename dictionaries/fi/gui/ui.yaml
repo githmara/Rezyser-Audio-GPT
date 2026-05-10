@@ -864,3 +864,148 @@ updater:
     Käy GitHub-julkaisusivulla ja lataa "Source code" -arkisto tai kloonaa arkisto:
 
     {url_release}
+
+opowiesci:
+  # ---- BLOK A — Nagłówek modułu ---------------------------------------------
+  panel_name: "Tarina-paneeli"
+  description_name: "Tarina-moduulin kuvaus"
+  heading: "📖  Interaktiiviset tarinat"
+  tool_description: |-
+    Olet dynaamisesti luodun tarinan sankari. Kirjoita uuden pelin nimi ja valitse tila aloittaaksesi — kerronta tapahtuu toisessa persoonassa ja se luetaan ruudunlukijalla tai TTS:llä.
+
+    Vapaa tila antaa mahdollisuuden kokeilla mitä tahansa toimintoa, joka on kirjoitettu alareunan kenttään. Valintatila tarjoaa 3-5 numeroitua vaihtoehtoa, jotka valitaan painikkeilla. "Pienempi paha" -tila tarjoaa vain epäsuotuisia valintoja — valitset, mikä on sinulle vähemmän haitallista. Komennot, jotka alkavat kauttaviivalla (/tallenna, /lataa, /asetukset, /lopeta, /visualisoi) toimivat milloin tahansa.
+
+  # ---- BLOK B — Pasek pliku gry ---------------------------------------------
+  lbl_nazwa_gry: "Pelin nimi"
+  txt_nazwa_gry_name: "Pelin nimen kenttä"
+  txt_nazwa_gry_hint: "esim. minun_seikkailut_1"
+  txt_nazwa_gry_tooltip: "Pelitiedoston nimi — käytetään automaattiseen tallennukseen hakemistoon skrypty/<nimi>.txt ja tilaan runtime/opowiesci/<nimi>.game.json"
+  btn_nowa_gra_label: "&Uusi peli"
+  btn_nowa_gra_tooltip: "Aloita uusi peli annetulla nimellä — vaatii pelin nimen ja valitun tilan"
+  btn_wczytaj_label: "&Lataa"
+  btn_wczytaj_tooltip: "Lataa aiemmin tallennettu peli hakemistosta runtime/opowiesci/<nimi>.game.json"
+  btn_zapisz_label: "&Tallenna"
+  btn_zapisz_tooltip: "Pakota manuaalinen pelitilan tallennus (automaattinen tallennus tapahtuu myös jokaisen vuoron jälkeen)"
+
+  # ---- BLOK C — RadioBox trybu ----------------------------------------------
+  rb_tryb_label: "Pelimuoto"
+  rb_tryb_name: "Pelimuodon valinta"
+  rb_tryb_tooltip: "Tila määrittää kerronnan luonteen ja vuorovaikutustavan"
+  tryb_swobodny: "Vapaa &tila"
+  tryb_wyborow: "Valinta&tila"
+  tryb_mniejsze_zlo: "&Pienempi paha"
+
+  # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
+  pamiec_lbl: "Mallin muisti:"
+  pamiec_gauge_name: "Mallin kontekstin käyttöaste"
+  pamiec_status_name: "Mallin muistin tila"
+  pamiec_status_init: "Ei aktiivista peliä"
+
+  # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
+  lbl_narracja: "Kerronta"
+  txt_narracja_name: "Kerrontakenttä"
+  txt_narracja_tooltip: "Pelin täydellinen kerronta — päivitetään automaattisesti jokaisen vuoron jälkeen. Vain luku; kirjoita päätöksesi alla olevaan toimintokenttään."
+  txt_narracja_init: |-
+    Aloittaaksesi tarinan, kirjoita pelin nimi yllä olevaan kenttään, valitse tila ja napsauta "Uusi peli".
+
+    Voit myös ladata aiemman pelin "Lataa"-painikkeella.
+
+  # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
+  lbl_wybory: "Valintasi"
+  panel_wyborow_name: "Valinta-alue"
+  panel_wyborow_placeholder: "Valinnat näkyvät täällä valinta- tai pienemmän pahan tilassa. Vapaassa tilassa tämä alue pysyy tyhjänä — kuvaile toimintoja vapaatekstinä alla olevaan kenttään."
+
+  # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
+  lbl_akcja: "Toimintosi tai komento"
+  txt_akcja_name: "Pelaajan toimintokenttä"
+  txt_akcja_hint: "Kuvaile, mitä teet, tai kirjoita komento, joka alkaa /"
+  txt_akcja_tooltip: "Kirjoita mikä tahansa toiminto (vapaateksti) tai järjestelmäkomento: /tallenna /lataa /asetukset /lopeta /visualisoi. Toiminnon vahvistaa Lähetä-painike."
+  btn_wyslij_label: "&Lähetä"
+  btn_wyslij_tooltip: "Lähetä toiminto kerrontamoottorille"
+
+  # ---- Stub callbacka — Faza 1 (przyciski Nowa/Wczytaj/Zapisz, do podłączenia w Fazie 3)
+  placeholder_msg_tytul: "Toiminto ei ole vielä käytettävissä"
+  placeholder_msg_tresc: "Tämä painike liitetään seuraavassa tarinamoduulin käyttöönoton vaiheessa (v15.0). Tällä hetkellä paneeli on olemassa vain NVDA:n saavutettavuuden tarkistamiseksi."
+
+  # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
+  tura_naglowek_format: "\n\n--- Vuoro {numer} ---\n\n"
+  brak_api_tytul: "API-avain puuttuu"
+  brak_api_tresc: "Tiedostoa golden_key.env, jossa on oikea OPENAI_API_KEY-avain, ei löytynyt. Tarinamoduuli vaatii aktiivisen avaimen luodakseen kerrontavuoroja."
+  puste_pole_tytul: "Tyhjä toimintokenttä"
+  puste_pole_tresc: 'Kirjoita toiminto tai komento kerronnan alapuolella olevaan kenttään ennen kuin napsautat "Lähetä".'
+  puste_nazwa_tytul: "Pelin nimi puuttuu"
+  puste_nazwa_tresc: "Ennen kuin lähetät ensimmäisen toiminnon, kirjoita pelin nimi paneelin yläosassa olevaan palkkiin — tämän nimen alla kaikki tarinatiedostot tallennetaan."
+  status_wysylanie: "Lähetetään AI:lle…"
+  status_gotowe: "Valmis — sinun vuorosi."
+  status_blad: "Kerrontamoottorin virhe."
+  btn_wybor_tooltip_format: "Valitse: {tekst}"
+  blad_ai_tytul: "Kerrontamoottorin virhe"
+  blad_ai_naglowek: "Virhe tapahtui tarinavuoron luomisen aikana. Täydellinen virhesisältö alla:"
+  blad_ai_szczegoly_tytul: "Kerrontamoottorin virheen yksityiskohdat"
+  blad_ai_lbl_tresc: "Virhesisältö (kopioitavaksi):"
+  blad_ai_tresc_name: "Kerrontamoottorin virhesisällön kenttä"
+  err_rate_limit: "OpenAI-kyselyraja on saavutettu. Odota hetki tai tarkista tilisi tila."
+  err_timeout: "Mallin vastausaika on ylitetty (yli 120 sekuntia). Yritä uudelleen."
+  err_struktura: "Malli tuotti väärän vastausrakenteen kahdesta korjausyrityksestä huolimatta. Yritä uudelleen tai muotoile toiminto toisin."
+
+  # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
+  brak_gry_tytul: "Ei aktiivista peliä"
+  brak_gry_tresc: 'Aloita uusi peli "Uusi peli" -painikkeella tai lataa aiemmin tallennettu "Lataa"-painikkeella ennen kuin yrität lähettää toimintoa.'
+  gra_istnieje_tytul: "Peli tällä nimellä on jo olemassa"
+  gra_istnieje_tresc: 'Peli "{nazwa}" on jo tallennettu levylle. Haluatko korvata sen nollapelillä? Kaikki aiempi kerronta, hahmot ja varusteet menetetään (tiedostot .txt, .md ja .game.json nollataan).'
+  gra_nowa_tytul: "Uusi peli luotu"
+  gra_nowa_tresc: 'Peli "{nazwa}" on luotu. Kirjoita ensimmäinen toiminto kerronnan alapuolella olevaan kenttään ja napsauta "Lähetä" aloittaaksesi tarinan.'
+  gra_wczytana_tytul: "Peli ladattu"
+  gra_wczytana_tresc: 'Peli "{nazwa}" on ladattu. Nykyinen vuoronumero: {numer_tury}. Voit jatkaa pelaamista.'
+  gra_zapisana_tytul: "Peli tallennettu"
+  gra_zapisana_tresc: 'Pelin "{nazwa}" tila on tallennettu levylle.'
+  nowa_gra_zaczatek: "📖 Peli \"{nazwa}\" aloitettu.\n\nKirjoita ensimmäinen toiminto alla olevaan kenttään ja napsauta \"Lähetä\" — kerrontamoottori kuvailee maailmaa, johon olet saapunut, ja esittelee ensimmäisen kohtauksen."
+  brak_narracji_info: "📖 Peli \"{nazwa}\" ladattu, mutta kerrontatiedostoa (skrypty/{nazwa}.txt) ei ole olemassa. Pelin tila on peräisin game.json-tiedostosta — voit jatkaa."
+  dlg_wczytaj_tytul: "Lataa tarinapeli"
+  dlg_wczytaj_filtr: "Tarinapelitiedostot (*.game.json)|*.game.json|Kaikki tiedostot|*.*"
+  blad_zapisu_tresc: "Pelitiedoston tallennusvirhe: {tresc_bledu}"
+  blad_wczytania_tresc: 'Pelin "{nazwa}" latausvirhe: {tresc_bledu}'
+
+  # ---- Faza 4: slash-komendy + tiktoken + /visualize + Cinematic Warning ----
+  komenda_nieznana_tytul: "Tuntematon komento"
+  komenda_nieznana_tresc: 'Komentoa "{komenda}" ei tunnisteta. Saatavilla olevat komennot:
+
+    {lista}'
+  komendy_dostepne_lista: |-
+    /tallenna, /save                    — pakota pelin tallennus
+    /lataa, /load                   — avaa latausdialogi
+    /asetukset, /settings            — vaihda AI-mallia (Standard/Quality)
+    /visualisoi <kuvaus>, /visualize    — moniaistinen kohtauksen kuvaus (ei tallennusta)
+    /lopeta, /quit                    — sulje sovellus
+  dlg_ustawienia_tytul: "Kerrontamoottorin asetukset"
+  dlg_ustawienia_lbl_model: "AI-malli:"
+  dlg_ustawienia_model_standard: "Standardi (gpt-4o-mini, nopeampi, halvempi)"
+  dlg_ustawienia_model_quality: "Korkealaatuinen (gpt-4o, hitaampi, kalliimpi)"
+  dlg_ustawienia_btn_zatwierdz: "Vahvista"
+  dlg_ustawienia_zmieniono_tytul: "Malli vaihdettu"
+  dlg_ustawienia_zmieniono_tresc: 'Kerrontamoottori käyttää tästä lähtien mallia "{model}".'
+  dlg_visualize_tytul: "🌅 Kohtauksen visualisointi"
+  dlg_visualize_lbl: "Moniaistinen kuvaus nykyisestä kohtauksesta (ei muuta pelin tilaa):"
+  dlg_visualize_name: "Kohtauksen visualisoinnin kuvauskenttä"
+  dlg_visualize_pusta_akcja_tytul: "Visualisoinnin kuvaus puuttuu"
+  dlg_visualize_pusta_akcja_tresc: "Komennon /visualisoi jälkeen kirjoita lyhyt kuvaus siitä, mitä haluat nähdä tarkemmin (esim. /visualisoi miltä vartija näyttää). Ilman argumenttia moottori ei tiedä, mihin keskittyä."
+  status_wizualizowanie: "Visualisointi luodaan…"
+  pamiec_status_format: "{procent}% — {tokeny} tokenia ({etap})"
+  pamiec_etap_czysta: "🟢 puhdas"
+  pamiec_etap_ok: "🟢 OK"
+  pamiec_etap_ostrzezenie: "⚠️ varoitus"
+  pamiec_etap_alarm: "🚨 HÄLYTYS"
+  status_streszczanie: "Kontekstin automaattinen tiivistäminen käynnissä…"
+  streszczenie_skonczone_tytul: "Mallin muisti palautettu"
+  streszczenie_skonczone_tresc: "Edellisten {liczba_tur} vuoron automaattinen tiivistäminen valmis. Puskuri vapautettu — voit jatkaa pelaamista."
+  cinematic_warning_dlg_tytul: "📖 Dramaattinen tauko — 150. vuoro"
+  cinematic_warning_dlg_lbl: "Kerrontamoottori keskeyttää kerronnan erityisellä varoituksella sinulle:"
+  cinematic_warning_dlg_name: "Cinematic Meta Warning -sisällön kenttä"
+  alarm_blokada_tytul: "Mallin muisti ylikuormitettu"
+  alarm_blokada_tresc: "Kontekstipuskuri on täynnä {procent}%. Automaattinen tiivistäminen ei vapauttanut tilaa. Yritä lopettaa peli ja ladata se uudelleen — moottori lataa vain tilan game.json-tiedostosta ilman viimeisten vuorojen historiaa."
+
+  # ---- Faza 5: Quick Start preset picker ----------------------------------
+  lbl_quick_start: "Pika-aloitus:"
+  quick_start_wlasna: "(oma peli)"
+  choice_quick_start_name: "Valitse valmis Quick Start -skenaario"
+  choice_quick_start_tooltip: 'Valitse valmis maailma, jotta voit heti sukeltaa kerrontaan. Esiasetus syöttää moottoriin lyhyen kuvauksen maailmasta ja sankarista, asettaa oletuspelitilan. "(oma peli)" jättää aloituksen vapaaksi — moottori keksii maailman ensimmäisen toiminnon perusteella.'
