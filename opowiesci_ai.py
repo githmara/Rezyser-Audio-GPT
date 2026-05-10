@@ -23,13 +23,16 @@ Faza 2 świadomie nie zapisuje plików — stan trzymany w pamięci panelu
 
 from __future__ import annotations
 
+import functools
 import json
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import jsonschema
 import tiktoken
+import yaml as _pyyaml
 from dotenv import load_dotenv
 
 # =============================================================================
@@ -225,53 +228,78 @@ def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
 
 
 # =============================================================================
-# Prompt systemowy — Faza 2: hardkodowany PL stub.
-# Faza 5 przeniesie treść do `dictionaries/<kod>/opowiesci/przepisy/*.yaml`
-# i będzie wybierać wariant per `snapshot.jezyk_projektu`.
+# Ładowanie przepisów (prompty + parametry OpenAI) z YAML
 # =============================================================================
+# Anty-spaghetti: prompty systemowe trzymane w `dictionaries/<kod>/opowiesci/`,
+# nie hardkodowane w Pythonie (patrz `feedback_yaml_prompty.md`). Wzorzec
+# kopiuje strukturę `dictionaries/<kod>/rezyser/`. Faza 5 zmigrowała PL;
+# pozostałe języki dochodzą RĘCZNIE per język (nie ma batch translatora dla
+# promptów — LLM halucynuje na nich).
+#
+# Fallback do PL: jeśli `<jezyk>/opowiesci/<plik>.yaml` nie istnieje (gracz
+# wybrał język, dla którego paczka jeszcze niedopisana), używamy PL żeby
+# aplikacja nie crashowała w trakcie tury — gracz dostanie polski prompt,
+# co jest do akceptacji jako tymczasowy fallback.
 
-_PROMPT_BAZA = """Jesteś silnikiem narracyjnym interaktywnej opowieści. Piszesz w drugiej osobie liczby pojedynczej („Idziesz", „Czujesz", „Widzisz"). Narracja immersyjna, zmysłowa (nie tylko wzrok — dźwięk, zapach, dotyk), 200-400 słów per tura. Nigdy nie wychodź z postaci narratora.
+ROOT_DICT = Path(__file__).resolve().parent / "dictionaries"
 
-ZASADY ŚWIATA:
-- Konsekwencje wyborów są realne i pamiętane. Postać może zginąć, jeśli gracz podejmie ryzykowną akcję.
-- NIE łamiesz czwartej ściany. Nie cytujesz mechaniki gry, nie używasz zwrotów typu „w tym RPG", „w tym scenariuszu".
-- Postacie mówią naturalnie — dialogi w cudzysłowie pisanym (np. „— Co tu robisz? — pyta strażnik.").
-- Gdy gracz wykonuje akcję bezsensowną z perspektywy postaci, pokazujesz konsekwencję — postać się waha, dziwi, otoczenie reaguje.
-
-FORMAT ODPOWIEDZI (JSON, ZAWSZE — bez wstępu, bez komentarza, surowy JSON):
-{
-  "narracja": "tekst opowieści w drugiej osobie",
-  "wybory": [{"id": "A", "tekst": "..."}, ...],
-  "postacie_aktywne": [{"imie": "Imię", "cechy": "krótki opis cech, akcent, charakter"}],
-  "stan": {"lokacja": "miejsce", "ekwipunek_zmiany": [...], "watki_otwarte": [...]},
-  "meta": {"etap_luku": "ekspozycja|narastanie|kulminacja|rozwiazanie", "powod_wyborow": "uzasadnienie wyborów"}
+_NAZWA_PLIKU_PER_TRYB = {
+    TRYB_BURZA:        "tryb_burza",
+    TRYB_SWOBODNY:     "tryb_swobodny",
+    TRYB_WYBOROW:      "tryb_wyborow",
+    TRYB_MNIEJSZE_ZLO: "tryb_mniejsze_zlo",
 }
 
-POLE `postacie_aktywne` — lista wszystkich postaci aktualnie obecnych w scenie. Cechy w stylu Księgi Świata: zwięźle, fonetycznie sensownie ("starszy strażnik z chrapliwym głosem, mówi krótkimi zdaniami"). Te postacie zostaną zachowane do następnej tury jako kontekst.
 
-POLE `stan.ekwipunek_zmiany` — co gracz właśnie zdobył lub stracił w tej turze ("+latarnia", "-klucz"); pusta tablica jeśli bez zmian.
+@functools.lru_cache(maxsize=128)
+def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:
+    """Ładuje plik `dictionaries/<jezyk>/opowiesci/<nazwa>.yaml` z fallbackiem do PL.
 
-POLE `stan.watki_otwarte` — niedokończone wątki które gracz powinien pamiętać.
-"""
+    LRU cache — w typowej grze odpalamy tę funkcję 1-2 razy per tura,
+    ale uniknięcie I/O (każdy plik ~1-3 KB) jest tanim optymalizem.
+    Cache invalidacja: programatycznie przez `_zaladuj_przepis.cache_clear()`
+    (np. po `/ustawienia` zmieniających język), albo restart aplikacji.
+    """
+    sciezka = ROOT_DICT / jezyk / "opowiesci" / f"{nazwa}.yaml"
+    if not sciezka.exists() and jezyk != "pl":
+        sciezka = ROOT_DICT / "pl" / "opowiesci" / f"{nazwa}.yaml"
+    if not sciezka.exists():
+        raise FileNotFoundError(
+            f"Brak przepisu opowieści `{nazwa}.yaml` ani w `{jezyk}/opowiesci/` "
+            f"ani w `pl/opowiesci/` (fallback). Czy folder dictionaries jest kompletny?"
+        )
+    with open(sciezka, "r", encoding="utf-8") as fh:
+        return _pyyaml.safe_load(fh) or {}
 
-_PROMPT_TRYB_3 = """TRYB: SWOBODNY. Pole `wybory` może być puste albo zawierać 1-3 sugestie (gracz pisze własną akcję, więc wybory są tylko podpowiedzią — nie obowiązkową ścieżką)."""
 
-_PROMPT_TRYB_4 = """TRYB: WYBORÓW. Pole `wybory` ZAWSZE zawiera 3-5 elementów oznaczonych literami A, B, C, D, E. Każdy wybór to konkretna akcja, którą gracz może podjąć — różne, nie pozorne. Free-text gracza zostanie zmapowany na najbliższy wybór semantycznie."""
+def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl") -> str:
+    """Składa prompt systemowy z bazy YAML + addonu trybu YAML.
 
-_PROMPT_TRYB_5 = """TRYB: MNIEJSZE ZŁO. Pole `wybory` zawiera 3-5 elementów A-E, gdzie KAŻDY wybór jest niekorzystny moralnie, fizycznie albo strategicznie — gracz wybiera mniejsze zło, nie dobro. Brak „neutralnej" opcji. Brak „happy endingu" w danej turze."""
+    Tryby narracyjne (3/4/5) używają `baza.yaml` + `tryb_<nazwa>.yaml`.
+    Tryb Burza (0) używa wyłącznie `tryb_burza.yaml` (visualize ma własny
+    pełny prompt, bez bazy narracyjnej z JSON-schemą).
+    """
+    nazwa = _NAZWA_PLIKU_PER_TRYB.get(tryb)
+    if nazwa is None:
+        raise ValueError(f"Nieznany tryb opowieści: {tryb} (oczekiwane 0/3/4/5)")
 
-_PROMPT_VISUALIZE = """Jesteś asystentem multisensorycznej wizualizacji sceny dla niewidomego gracza interaktywnej opowieści. Otrzymasz aktualny stan gry oraz pytanie/akcję gracza. Wygeneruj 150-300 słów immersyjnego opisu sceny korzystając ze wszystkich zmysłów: wzrok (kolory, kontrast światła), słuch (cisza, szmery, oddechy), zapach, dotyk powierzchni, temperatura, smak (jeśli pasuje). Format: czysty tekst (nie JSON), w drugiej osobie. To NIE jest tura gry — nie zmieniasz stanu, nie proponujesz wyborów, tylko opisujesz aktualną scenę z większą głębią."""
+    if tryb == TRYB_BURZA:
+        # Visualize stoi na własnych nogach — bez bazy narracyjnej.
+        return _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"]
+
+    baza   = _zaladuj_przepis(jezyk, "baza")["prompt_systemowy"]
+    addon  = _zaladuj_przepis(jezyk, nazwa)["prompt_systemowy"]
+    return baza + "\n\n" + addon
 
 
-def _zbuduj_prompt_systemowy(tryb: int) -> str:
-    """Składa prompt systemowy z bazy + dopisku trybu."""
-    if tryb == TRYB_SWOBODNY:
-        return _PROMPT_BAZA + "\n\n" + _PROMPT_TRYB_3
-    if tryb == TRYB_WYBOROW:
-        return _PROMPT_BAZA + "\n\n" + _PROMPT_TRYB_4
-    if tryb == TRYB_MNIEJSZE_ZLO:
-        return _PROMPT_BAZA + "\n\n" + _PROMPT_TRYB_5
-    raise ValueError(f"Nieznany tryb opowieści: {tryb} (oczekiwane 3/4/5)")
+def _parametr_z_yaml(jezyk: str, nazwa: str, klucz: str, default: Any) -> Any:
+    """Czyta wartość parametru z `<jezyk>/opowiesci/<nazwa>.yaml::<klucz>` z fallbackiem.
+
+    Używane do `model`, `temperatura`, `max_tokens`, `timeout_s` — pozwala
+    lingwiście / autorowi przepisu strojenie LLM bez modyfikacji Pythona.
+    """
+    przepis = _zaladuj_przepis(jezyk, nazwa)
+    return przepis.get(klucz, default)
 
 
 def _zbuduj_user_payload(snapshot: SnapshotOpowiesci, user_input: str) -> str:
@@ -305,16 +333,18 @@ def generuj_ture(
     snapshot:   SnapshotOpowiesci,
     user_input: str,
     tryb:       int,
-    model:      str = MODEL_DOMYSLNY,
+    model:      str | None = None,
 ) -> WynikTury:
     """Wysyła turę do LLM i zwraca strukturyzowany wynik.
 
     Args:
         klient     : skonfigurowany klient OpenAI (z :func:`inicjalizuj_klienta`)
-        snapshot   : niezmienny stan gry
+        snapshot   : niezmienny stan gry; ``snapshot.jezyk_projektu`` decyduje
+                     z którego `dictionaries/<kod>/opowiesci/*.yaml` ładować prompt
         user_input : akcja gracza (dowolny tekst lub mapowany wybór z przycisku)
         tryb       : 3/4/5 (Swobodny/Wyborów/Mniejsze zło)
-        model      : ``MODEL_DOMYSLNY`` lub ``MODEL_QUALITY``
+        model      : nadpisuje YAML jeśli podany (np. po zmianie w `/ustawienia`);
+                     ``None`` → bierzemy z `<jezyk>/opowiesci/baza.yaml::model`
 
     Returns:
         :class:`WynikTury` z zwalidowaną zawartością.
@@ -325,8 +355,15 @@ def generuj_ture(
         Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) są
         propagowane — GUI łapie i pokazuje w :func:`_wyswietl_blad_ai`.
     """
-    prompt_systemowy = _zbuduj_prompt_systemowy(tryb)
+    jezyk            = snapshot.jezyk_projektu or "pl"
+    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk)
     user_payload     = _zbuduj_user_payload(snapshot, user_input)
+
+    # Parametry: priorytet to argument funkcji (GUI może override przez
+    # `/ustawienia`), potem YAML trybu, na końcu hardkodowana stała.
+    nazwa_pliku = _NAZWA_PLIKU_PER_TRYB[tryb]
+    efektywny_model = model or _parametr_z_yaml(jezyk, nazwa_pliku, "model", MODEL_DOMYSLNY)
+    temperatura     = _parametr_z_yaml(jezyk, nazwa_pliku, "temperatura", TEMPERATURE_TURA)
 
     ostatni_blad: str | None = None
     for proba in range(MAX_RETRIES + 1):
@@ -348,9 +385,9 @@ def generuj_ture(
             })
 
         resp = klient.chat.completions.create(
-            model=model,
+            model=efektywny_model,
             messages=messages,
-            temperature=TEMPERATURE_TURA,
+            temperature=temperatura,
             max_tokens=MAX_TOKENS_OUT,
             timeout=TIMEOUT_S,
             response_format={"type": "json_object"},
@@ -399,14 +436,18 @@ def wygeneruj_wizualizacje(
     klient:     Any,
     snapshot:   SnapshotOpowiesci,
     user_input: str,
-    model:      str = MODEL_DOMYSLNY,
+    model:      str | None = None,
 ) -> str:
     """Multisensoryczny opis sceny dla slash-komendy ``/visualize``.
 
     Bez schemy JSON — zwraca surowy tekst do GUI. Bez zapisu do plików
-    (tryb 0/Burza). Krótszy timeout (60s), niższy max_tokens (1000) — to
-    nie jest tura gry, więc oszczędzamy budżet.
+    (tryb 0/Burza). Parametry (model/temperatura/max_tokens/timeout)
+    z `dictionaries/<jezyk>/opowiesci/tryb_burza.yaml`.
     """
+    jezyk = snapshot.jezyk_projektu or "pl"
+    przepis = _zaladuj_przepis(jezyk, "tryb_burza")
+    efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+
     payload = {
         "stan":             snapshot.stan_poprzedni,
         "postacie_aktywne": snapshot.postacie_aktywne,
@@ -418,14 +459,14 @@ def wygeneruj_wizualizacje(
         + json.dumps(payload, ensure_ascii=False, indent=2)
     )
     resp = klient.chat.completions.create(
-        model=model,
+        model=efektywny_model,
         messages=[
-            {"role": "system", "content": _PROMPT_VISUALIZE},
+            {"role": "system", "content": przepis["prompt_systemowy"]},
             {"role": "user",   "content": user_msg},
         ],
-        temperature=TEMPERATURE_VIS,
-        max_tokens=1000,
-        timeout=60.0,
+        temperature=przepis.get("temperatura", TEMPERATURE_VIS),
+        max_tokens=przepis.get("max_tokens", 1000),
+        timeout=przepis.get("timeout_s", 60.0),
     )
     return resp.choices[0].message.content or ""
 
@@ -461,7 +502,10 @@ def policz_tokeny(snapshot: SnapshotOpowiesci, tryb: int, model: str = MODEL_DOM
     + 2 tokeny na sygnaturę odpowiedzi).
     """
     encoder = _kodowanie_dla_modelu(model)
-    prompt_systemowy = _zbuduj_prompt_systemowy(tryb) if tryb in (TRYB_SWOBODNY, TRYB_WYBOROW, TRYB_MNIEJSZE_ZLO) else _PROMPT_VISUALIZE
+    jezyk   = snapshot.jezyk_projektu or "pl"
+    # `_zbuduj_prompt_systemowy` obsługuje WSZYSTKIE tryby (0/3/4/5), więc
+    # nie ma już potrzeby branch-owania na TRYB_BURZA.
+    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk)
     user_payload     = _zbuduj_user_payload(snapshot, "")  # akcja gracza nieznana — szacunek przed wpisaniem
 
     naglowek_chat_per_msg = 4   # "<|im_start|>role\n", "<|im_sep|>", "<|im_end|>\n"
@@ -531,21 +575,24 @@ def oblicz_status_pamieci(
 # Auto-streszczenie kontekstu (wywoływane po przekroczeniu PROG_OSTRZEZENIE)
 # =============================================================================
 
-_PROMPT_STRESZCZENIE = """Jesteś asystentem narracyjnym. Otrzymasz listę ostatnich tur interaktywnej opowieści (akcja gracza + skrót narracji per tura). Wygeneruj kondensat 200-400 słów obejmujący: kluczowe wydarzenia fabularne, decyzje gracza i ich konsekwencje, ważne postacie pojawiające się w narracji, miejsca odwiedzone, niedokończone wątki. Pisz w trzeciej osobie, neutralnie, jak streszczenie powieści — to NIE jest tura gry, gracz nie czyta tego jako narracji, ale silnik narracyjny używa go jako pamięci długotrwałej."""
-
-
 def streszczaj_kontekst(
     klient:   Any,
     snapshot: SnapshotOpowiesci,
-    model:    str = MODEL_DOMYSLNY,
+    model:    str | None = None,
 ) -> str:
     """Generuje streszczenie ``snapshot.ostatnie_tury`` jako pamięć długotrwałą.
 
-    GUI po sukcesie zastępuje ``ostatnie_tury`` tablicą z jednym dictem typu
+    Parametry z `dictionaries/<jezyk>/opowiesci/streszczenie.yaml` (niska
+    temperatura → wierne streszczenie, nie kreatywne). GUI po sukcesie
+    zastępuje ``ostatnie_tury`` tablicą z jednym dictem typu
     ``{"akcja_gracza": "(streszczenie poprzednich N tur)", "narracja_skrot": <streszczenie>}``,
     żeby kontekst dla LLM zmieścił się w oknie i jednocześnie zachował
     ciągłość fabularną.
     """
+    jezyk = snapshot.jezyk_projektu or "pl"
+    przepis = _zaladuj_przepis(jezyk, "streszczenie")
+    efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+
     payload = {
         "ostatnie_tury":    snapshot.ostatnie_tury,
         "postacie_aktywne": snapshot.postacie_aktywne,
@@ -557,14 +604,14 @@ def streszczaj_kontekst(
         + json.dumps(payload, ensure_ascii=False, indent=2)
     )
     resp = klient.chat.completions.create(
-        model=model,
+        model=efektywny_model,
         messages=[
-            {"role": "system", "content": _PROMPT_STRESZCZENIE},
+            {"role": "system", "content": przepis["prompt_systemowy"]},
             {"role": "user",   "content": user_msg},
         ],
-        temperature=0.3,    # niska — chcemy wierne, nie kreatywne
-        max_tokens=800,
-        timeout=60.0,
+        temperature=przepis.get("temperatura", 0.3),
+        max_tokens=przepis.get("max_tokens", 800),
+        timeout=przepis.get("timeout_s", 60.0),
     )
     return (resp.choices[0].message.content or "").strip()
 
@@ -573,26 +620,24 @@ def streszczaj_kontekst(
 # Cinematic Meta Warning (po 150 turach)
 # =============================================================================
 
-_PROMPT_CINEMATIC_WARNING = """Jesteś silnikiem narracyjnym interaktywnej opowieści. Gracz właśnie ukończył 150 turę — to specjalny moment dramatyczny. Wygeneruj 100-200-słowowe ostrzeżenie meta-narracyjne, otoczone z obu stron markerami ⚠️🚨⚠️ (dokładnie ten ciąg emoji, w pierwszej i ostatniej linii). Treść: zwrot bezpośrednio do gracza w drugiej osobie, podsumowanie tego co osiągnął, dramatyczne ostrzeżenie o wadze decyzji jakie podejmuje, zachęta do refleksji nad konsekwencjami. Nie zmieniasz stanu gry, nie proponujesz wyborów. To NIE jest tura gry — to przerywnik. Format:
-
-⚠️🚨⚠️
-[treść ostrzeżenia, 100-200 słów]
-⚠️🚨⚠️"""
-
-
 def generuj_cinematic_warning(
     klient:   Any,
     snapshot: SnapshotOpowiesci,
-    model:    str = MODEL_DOMYSLNY,
+    model:    str | None = None,
 ) -> str:
     """Generuje Cinematic Meta Warning — przerywnik dramatyczny po 150 turach.
 
+    Parametry z `dictionaries/<jezyk>/opowiesci/cinematic_warning.yaml`.
     Zwraca tekst Z markerami ``⚠️🚨⚠️`` (tak jak rozumie filter
     :meth:`core_opowiesci.ProjektOpowiesci.czysc_meta_warningi`). GUI
     zapisuje surowy tekst do ``.story.jsonl`` (log), pokazuje w
     ``wx.Dialog`` z ``wx.Bell()``, ale NIE appenduje do ``.txt`` — filter
     `czysc_meta_warningi` wyciąłby treść jeśli ktoś by spróbował.
     """
+    jezyk = snapshot.jezyk_projektu or "pl"
+    przepis = _zaladuj_przepis(jezyk, "cinematic_warning")
+    efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+
     payload = {
         "tura_numer":       snapshot.numer_tury,
         "postacie_aktywne": snapshot.postacie_aktywne,
@@ -604,13 +649,13 @@ def generuj_cinematic_warning(
         + json.dumps(payload, ensure_ascii=False, indent=2)
     )
     resp = klient.chat.completions.create(
-        model=model,
+        model=efektywny_model,
         messages=[
-            {"role": "system", "content": _PROMPT_CINEMATIC_WARNING},
+            {"role": "system", "content": przepis["prompt_systemowy"]},
             {"role": "user",   "content": user_msg},
         ],
-        temperature=0.85,
-        max_tokens=600,
-        timeout=60.0,
+        temperature=przepis.get("temperatura", 0.85),
+        max_tokens=przepis.get("max_tokens", 600),
+        timeout=przepis.get("timeout_s", 60.0),
     )
     return (resp.choices[0].message.content or "").strip()

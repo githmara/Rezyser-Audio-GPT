@@ -246,9 +246,35 @@ class OpowiesciPanel(wx.Panel):
         row.Add(self._btn_zapisz,
                 flag=wx.ALIGN_CENTER_VERTICAL)
 
+        # Faza 5: Quick Start preset picker — drugi wiersz w pasku.
+        # Loading z YAML zamiast hardkodowanej listy: lingwista dorabiając
+        # nowy zaczatek nie musi dotykać Pythona, tylko `zaczatki.yaml`.
+        # ``_klucze_zaczatkow`` przechowuje kolejność (Choice używa indeksów).
+        zaczatki_dict = oai._zaladuj_przepis("pl", "zaczatki").get("zaczatki", {})
+        # Kolejność z YAML zachowana (Python 3.7+ dict insertion-order).
+        self._klucze_zaczatkow: list[str] = list(zaczatki_dict.keys())
+        # Pierwsza pozycja to „własna gra" (brak presetu, tryb z RadioBox-a).
+        opcje_choice = [t("opowiesci.quick_start_wlasna")] + [
+            zaczatki_dict[k]["etykieta"] for k in self._klucze_zaczatkow
+        ]
+
+        lbl_qs = wx.StaticText(self, label=t("opowiesci.lbl_quick_start"))
+        self._choice_zaczatek = wx.Choice(
+            self, choices=opcje_choice,
+            name=t("opowiesci.choice_quick_start_name"),
+        )
+        self._choice_zaczatek.SetSelection(0)
+        self._choice_zaczatek.SetToolTip(t("opowiesci.choice_quick_start_tooltip"))
+
+        row_qs = wx.BoxSizer(wx.HORIZONTAL)
+        row_qs.Add(lbl_qs,                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
+        row_qs.Add(self._choice_zaczatek, proportion=1,
+                   flag=wx.ALIGN_CENTER_VERTICAL)
+
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(lbl_nazwa, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
-        sizer.Add(row,       flag=wx.EXPAND | wx.ALL,          border=BORDER)
+        sizer.Add(lbl_nazwa, flag=wx.LEFT | wx.RIGHT | wx.TOP,                 border=BORDER)
+        sizer.Add(row,       flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,  border=BORDER)
+        sizer.Add(row_qs,    flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,  border=BORDER)
         return sizer
 
     # ------------------------------------------------------------------
@@ -874,11 +900,25 @@ class OpowiesciPanel(wx.Panel):
             if potwierdzenie != wx.YES:
                 return
 
+        # Faza 5: Quick Start — jeśli wybrany preset, wstrzykuje seed_swiata
+        # do projektu i nadpisuje wybrany tryb (tryb_domyslny presetu ma
+        # priorytet nad RadioBox-em — preset zna swój gatunek lepiej niż
+        # gracz, który mógł zostawić RadioBox na domyślnym).
+        seed_swiata = ""
+        idx_zaczatek = self._choice_zaczatek.GetSelection()
+        if idx_zaczatek > 0:
+            klucz = self._klucze_zaczatkow[idx_zaczatek - 1]
+            preset = oai._zaladuj_przepis("pl", "zaczatki")["zaczatki"][klucz]
+            seed_swiata = preset.get("seed_swiata", "").strip()
+            tryb_preset = int(preset.get("tryb_domyslny", self._aktualny_tryb_int()))
+            self._ustaw_rb_z_trybu(tryb_preset)
+
         tryb = self._aktualny_tryb_int()
         projekt = ProjektOpowiesci(app_dir)
         projekt.nazwa_pliku    = nazwa
         projekt.tryb           = tryb
-        projekt.jezyk_projektu = "pl"   # Faza 5 podmieni na język aktywnego UI
+        projekt.jezyk_projektu = "pl"   # Faza 5 dorobi sync z UI lang
+        projekt.seed_swiata    = seed_swiata
 
         try:
             projekt.zapisz_tryb(tryb)
@@ -893,10 +933,11 @@ class OpowiesciPanel(wx.Panel):
             ))
             return
 
-        # Reset stanu pamięci: nowa gra → pusty snapshot.
+        # Reset stanu pamięci: nowa gra → pusty snapshot (z seed_swiata jeśli był).
         self._projekt = projekt
         self._snapshot = oai.SnapshotOpowiesci(
-            nazwa_gry=nazwa, numer_tury=0, jezyk_projektu="pl",
+            nazwa_gry=nazwa, numer_tury=0,
+            seed_swiata=seed_swiata, jezyk_projektu="pl",
         )
         self._txt_narracja.SetValue(t("opowiesci.nowa_gra_zaczatek", nazwa=nazwa))
         self._aktywuj_obszar_wyborow(False)   # czysta gra → brak wyborów

@@ -1,0 +1,18 @@
+# -----------------------------------------------------------------------------
+#  TRYB WYBORÓW (mode 4) — 3-5 ponumerowanych opcji per tura. Free-text
+#  gracza jest mapowany na najbliższy wybór semantycznie. GUI pokazuje
+#  obszar wyborów z dynamicznymi `wx.Button`, jeśli LLM zwrócił niepustą
+#  tablicę `wybory[]` (halucynacja → fallback do trybu free-text).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Tryb wyborów — 3-5 opcji A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- Parametry OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Addon do prompt_systemowy z baza.yaml ---
+prompt_systemowy: |
+  TRYB: WYBORÓW. Pole `wybory` ZAWSZE zawiera 3-5 elementów oznaczonych literami A, B, C, D, E. Każdy wybór to konkretna akcja, którą gracz może podjąć — różne, nie pozorne. Free-text gracza zostanie zmapowany na najbliższy wybór semantycznie.

@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  TRYB SWOBODNY (mode 3) — gracz pisze własną akcję free-textem.
+#  Pole `wybory` w odpowiedzi LLM może być puste lub zawierać 1-3 sugestie
+#  (są wtedy tylko podpowiedziami, nie obowiązkową ścieżką). GUI w trybie 3
+#  ZAWSZE ukrywa obszar wyborów (A11y), bez względu na ich zawartość.
+# -----------------------------------------------------------------------------
+id: tryb_swobodny
+etykieta: "Tryb swobodny — pisz dowolną akcję"
+kategoria: tryb
+kolejnosc: 30
+
+# --- Parametry OpenAI (dziedziczone z baza.yaml jeśli nieobecne tutaj) ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Addon do prompt_systemowy z baza.yaml ---
+# Łączony przez `_zbuduj_prompt_systemowy` jako: BAZA + "\n\n" + ten addon.
+prompt_systemowy: |
+  TRYB: SWOBODNY. Pole `wybory` może być puste albo zawierać 1-3 sugestie (gracz pisze własną akcję, więc wybory są tylko podpowiedzią — nie obowiązkową ścieżką).

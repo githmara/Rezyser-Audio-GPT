@@ -1020,3 +1020,9 @@ opowiesci:
   cinematic_warning_dlg_name:   "Pole z treścią Cinematic Meta Warning"
   alarm_blokada_tytul:       "Pamięć modelu przeładowana"
   alarm_blokada_tresc:       "Bufor kontekstu jest zapełniony w {procent}%. Auto-streszczenie nie zwolniło miejsca. Spróbuj zakończyć grę i wczytać ją ponownie — silnik załaduje tylko stan z pliku game.json, bez historii ostatnich tur."
+
+  # ---- Faza 5: Quick Start preset picker ----------------------------------
+  lbl_quick_start:           "Quick Start:"
+  quick_start_wlasna:        "(własna gra)"
+  choice_quick_start_name:   "Wybór gotowego scenariusza Quick Start"
+  choice_quick_start_tooltip: "Wybierz gotowy świat, by od razu zanurzyć się w narracji. Preset wstrzyknie do silnika krótki opis świata i bohatera, ustawi domyślny tryb gry. „(własna gra)" pozostawia start swobodny — silnik sam wymyśli świat na podstawie pierwszej akcji."

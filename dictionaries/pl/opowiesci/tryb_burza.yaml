@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+#  TRYB BURZA (mode 0, slash `/visualize`) — multisensoryczny opis sceny
+#  dla niewidomego gracza. NIE jest turą gry: nie zmienia stanu, nie
+#  proponuje wyborów, nie pisze do plików (response idzie wyłącznie
+#  do `wx.Dialog` w GUI). Krótszy timeout (60s), niższy max_tokens (1000)
+#  — to side-quest, oszczędzamy budżet API.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Wizualizacja sceny (slash /wizualizuj)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- Parametry OpenAI ---
+# Wyższa temperatura niż w trybach narracyjnych — chcemy bogatego, kreatywnego
+# opisu. max_tokens niski, bo to nie jest tura gry.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- Prompt systemowy ---
+# Brak placeholderów. Stan gry (postacie, lokacja, ostatnia tura) trafia
+# do role=user payload przez `_zbuduj_user_payload`-equiv w `wygeneruj_wizualizacje`.
+prompt_systemowy: |
+  Jesteś asystentem multisensorycznej wizualizacji sceny dla niewidomego gracza interaktywnej opowieści. Otrzymasz aktualny stan gry oraz pytanie/akcję gracza. Wygeneruj 150-300 słów immersyjnego opisu sceny korzystając ze wszystkich zmysłów: wzrok (kolory, kontrast światła), słuch (cisza, szmery, oddechy), zapach, dotyk powierzchni, temperatura, smak (jeśli pasuje). Format: czysty tekst (nie JSON), w drugiej osobie. To NIE jest tura gry — nie zmieniasz stanu, nie proponujesz wyborów, tylko opisujesz aktualną scenę z większą głębią.
