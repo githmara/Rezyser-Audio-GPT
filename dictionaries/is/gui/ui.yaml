@@ -907,9 +907,9 @@ opowiesci:
   pamiec_status_init: "Enginn virkur leikur"
 
   # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
-  lbl_narracja: "Frásögn"
-  txt_narracja_name: "Reitur fyrir frásögn"
-  txt_narracja_tooltip: "Full frásögn leiks — sjálfkrafa uppfærð eftir hverja umferð. Aðeins til lesturs; sláðu inn ákvarðanir þínar í aðgerðarreitinn hér að neðan."
+  lbl_narracja: "Full frásögn"
+  txt_narracja_name: "Reitur fullrar frásagnar"
+  txt_narracja_tooltip: "Full saga leiksins, sem eykst eftir hverja umferð. Aðeins til lesturs; sláðu inn ákvarðanir þínar í aðgerðarreitinn hér að neðan. Reiturinn „Síðasta umferð\" hér að ofan sýnir nýja senu án þess að fara í gegnum alla söguna."
   txt_narracja_init: |-
     Til að hefja sögu, sláðu inn nafn leiks í reitinn hér að ofan, veldu stillingu og smelltu á „Nýr leikur".
 
@@ -1014,3 +1014,8 @@ opowiesci:
   quick_start_wlasna: "(eigin leikur)"
   choice_quick_start_name: "Val á tilbúnu Quick Start atburðarás"
   choice_quick_start_tooltip: 'Veldu tilbúinn heim til að sökkva þér strax í frásögnina. Forsetning mun sprauta stutta lýsingu á heiminum og hetjunni í vélina, stilla sjálfgefna leikstillingu. „(eigin leikur)" skilur eftir frjálsa byrjun — vélin mun sjálf búa til heiminn út frá fyrstu aðgerð.'
+  lbl_ostatnia_tura: "Síðasta umferð"
+  txt_ostatnia_tura_name: "Reitur með efni síðustu umferðar"
+  txt_ostatnia_tura_tooltip: "Flýtileið sem inniheldur eingöngu nýlega myndaða senu — NVDA les hér nýja frásögn án þess að fara í gegnum hundruð lína af allri sögunni. Eftir hverja næstu umferð er reitnum skipt út fyrir nýtt efni."
+  txt_ostatnia_tura_init: "(Síðasta umferð birtist í þessum reit eftir fyrstu aðgerðina þína.)"
+  txt_ostatnia_tura_skrot_naglowek: "[samantekt síðustu vistuðu umferðar — full frásögn í reitnum hér að neðan]\n\n"

@@ -144,7 +144,9 @@ tresc: |
 
   Cały moduł Opowieści został zoptymalizowany pod kątem niewidomych graczy. Co konkretnie zrobiliśmy:
 
-  POLE NARRACJI — to wx.TextCtrl readonly multiline. NVDA czyta liniowo całą narrację, możesz nawigować strzałkami w obrębie tekstu, kopiować fragmenty Ctrl+C. Pole nigdy nie jest edytowalne — modyfikujesz historię TYLKO przez nową turę albo edycję pliku .txt poza aplikacją.
+  POLE OSTATNIA TURA — to oddzielne wx.TextCtrl readonly multiline (~140 px wysokości) NAD pełną narracją. Po każdej turze pole jest podmieniane na świeży fragment (nagłówek „--- Tura N ---" + treść narracji). NVDA wczytuje go natychmiast po focusie (auto-fokus po sukcesie tury), bez nawigowania przez setki linii pełnej historii. Po wczytaniu zapisanej gry pole pokazuje SKRÓT ostatniej zapisanej tury (max 400 znaków z bufora `ostatnie_tury`) z prefixem informującym, że pełna narracja jest w polu poniżej.
+
+  POLE PEŁNEJ NARRACJI — to wx.TextCtrl readonly multiline narastający po każdej turze. NVDA czyta liniowo całą narrację, możesz nawigować strzałkami w obrębie tekstu, kopiować fragmenty Ctrl+C. Pole nigdy nie jest edytowalne — modyfikujesz historię TYLKO przez nową turę albo edycję pliku .txt poza aplikacją. To pole jest zsynchronizowane z plikiem `skrypty/<nazwa>.txt`, możesz je traktować jako preview audiobooka.
 
   DYNAMICZNE PRZYCISKI WYBORU — w trybach Wyborów i Mniejsze zło każda tura tworzy nowe wx.Button-y w obszarze wyborów. Każdy ma tooltip czytany przez NVDA („Wybierz: idź dalej do lasu"). Tab między nimi działa naturalnie. Enter na zaznaczonym przycisku auto-wysyła ten wybór do silnika narracyjnego.
 

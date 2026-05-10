@@ -1,8 +1,8 @@
 Audio Director GPT — Interactive Stories Module (15.0 – Release Edition)
 
-The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through the misty forest, you smell the wet leaves..."), and you decide on the next move — by writing any action in free text or choosing one of the numbered options.
+The second main mode of the application alongside the Director — this time you become a player in a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by writing any action in free text or choosing one of the numbered options.
 
-The module was designed from the start with blind players in mind — narration is read linearly by a screen reader (NVDA) or TTS engine, dynamic choices are presented as buttons with voice descriptions, each completed turn is signaled by a bell sound and automatic focus shift to the newly generated text.
+The module was designed from the ground up with blind players in mind — narration is read linearly by a screen reader (NVDA) or TTS engine, dynamic choices appear as buttons with voice descriptions, each completed turn is signaled by a bell sound and automatic focus shift to the newly generated text.
 
 You can open the panel with the "📖  Stories" button on the toolbar or the Ctrl+5 keyboard shortcut.
 
@@ -12,33 +12,33 @@ STEP 1: Three game modes — choose your play style
 
 Just below the game name bar, you'll find a mode selection field (RadioBox). The mode determines how the narrative engine dialogues with you:
 
-FREE MODE — you enter any action in free text ("I'll try to open the door," "I ask the guard for directions," "I escape down the back stairs"). The narrative engine may suggest 1-3 hints, but these are only suggestions — not mandatory paths. The most free-form mode, recommended for experienced players improvising their own story.
+FREE MODE — you enter any action in free text ("I'll try to open the door", "I ask the guard for directions", "I escape through the back stairs"). The narrative engine may suggest 1-3 hints, but these are just suggestions — not a mandatory path. The most free-form mode, recommended for experienced players improvising their own story.
 
-CHOICE MODE — each turn ends with 3-5 numbered options A-E as clickable buttons. Each choice is a specific action you can take. You can also enter your own action in free text — the engine will match it to the closest semantic choice. The most intuitive mode for blind players: NVDA will read all options to you, you click Tab between them, Enter confirms.
+CHOICE MODE — each turn ends with 3-5 numbered options A-E in the form of clickable buttons. Each choice is a specific action you can take. You can also enter your own action in free text — the engine will match it to the closest semantic choice. The most intuitive mode for blind players: NVDA will read all options to you, you tab between them, and Enter confirms.
 
-LESSER EVIL MODE — like Choice, but each of the 3-5 options is morally, physically, or strategically disadvantageous. No "neutral" option, no happy ending in this turn. Mode for fans of dark fiction in the style of "Tales of Consequence" or moral dramas.
+LESSER EVIL MODE — like Choice, but each of the 3-5 options is morally, physically, or strategically disadvantageous. No "neutral" option, no happy ending in this turn. A mode for fans of dark fiction in the style of "Tales of Consequence" or moral dramas.
 
-You can change the mode during the game — in the next turn, the narrative engine will adapt to the new style (from Free to Choice can switch in one click).
+The mode can be changed during the game — in the next turn, the narrative engine will adapt to the new style (from Free to Choice can be done in one click).
 
 
 
 STEP 2: Quick Start — ready-made opening scenarios
 
-Below the game name field, you'll find a second row labeled "Quick Start:" with a dropdown selection (wx.Choice). The default position is "(custom game)" — the engine will invent a world based on your first action.
+Below the game name field, you'll find a second row labeled "Quick Start:" with a dropdown selection (wx.Choice). The default position is "(custom game)" — the engine will invent the world based on your first action.
 
 However, you can choose one of five ready-made presets to immediately immerse yourself in a specific world:
 
-POST-APOCALYPTIC SF — a century after an ecological disaster. The remnants of humanity in shelters under the Świętokrzyskie Mountains. You are a young courier from the Shaft Clan with your first serious assignment. Default mode: Choice.
+POST-APOCALYPTIC SF — a century after an ecological disaster. The remnants of humanity in shelters under the Świętokrzyskie Mountains. You are a young courier of the Shaft Clan with your first serious assignment. Default mode: Choice.
 
-DARK FANTASY — the border of the Kingdom of Three Streams, the ninth year of the religious war. You are a junior Inquisitor tracking a village where someone is protecting a possessed child. Default mode: Lesser Evil.
+DARK FANTASY — the borderlands of the Kingdom of Three Streams, the ninth year of the religious war. You are a junior Inquisitor on the trail of a village where someone is protecting a possessed child. Default mode: Lesser Evil.
 
 URBAN FANTASY DETECTIVE — Warsaw 2008, an October evening. You are a private detective who sees ghosts. A client wants to find her husband who disappeared under the Royal Castle. Default mode: Choice.
 
-COSMIC HORROR — the year 2247, a research station orbiting a neutron star. You wake up from hibernation without the captain — and without any traces that the captain ever existed. Default mode: Free (Lovecraftian atmosphere favors improvisation).
+COSMIC HORROR — year 2247, a research station orbiting a neutron star. You wake up from hibernation without a captain — and with no traces that the captain ever existed. Default mode: Free (the Lovecraftian atmosphere favors improvisation).
 
-ROMANTIC COMEDY OF MANNERS — Saska Kępa, April 2024, a small café facing closure. You are a barista-waitress whose owner tells you to "be nice" to a shy editor you've long wanted to approach yourself. Default mode: Free.
+ROMANTIC COMEDY DRAMA — Saska Kępa April 2024, a small café faces closure. You are a barista-waitress whose owner tells you to "be nice" to a shy editor you've long wanted to approach yourself. Default mode: Free.
 
-After selecting a preset, click "New Game" — the engine will inject a short description of the world and character into itself, set the default game mode (you can override it with the RadioBox before clicking "New Game"). The first LLM turn will play out the opening scene.
+After selecting a preset, click "New Game" — the engine will inject a short description of the world and character into itself, set the default game mode (you can override it with the RadioBox before clicking "New Game"). The first LLM turn will play the opening scene.
 
 
 
@@ -49,14 +49,14 @@ If you prefer full freedom, leave "(custom game)" in the Quick Start field and p
 1. Enter the game name in the "Game Name" bar (e.g., "my_adventure_1") — under this name, the narrative, state, and log files will be saved.
 2. Choose a mode (Free/Choice/Lesser Evil).
 3. Click "New Game". The application will create 3 files: game state (.game.json), an empty World Book (.md), and mode metadata (.mode). The narrative file (.txt) will be created after the first turn.
-4. In the "Your Action or Command" field at the bottom of the panel, enter the first action, e.g., "I wake up in an unknown room." Click "Send". The narrative engine will open the world based on your action — room description, sounds, characters, first decisions.
+4. In the "Your Action or Command" field at the bottom of the panel, enter the first action, e.g., "I wake up in an unknown room". Click "Send". The narrative engine will open the world based on your action — description of the room, sounds, characters, first decisions.
 5. Each turn will be automatically saved — you can close the application at any time and load the game later with the "Load" button.
 
 
 
 STEP 4: Slash commands — quick actions without API
 
-In the action field, you can enter a command starting with a slash `/` at any time. Commands are local (do not cost OpenAI calls) and work regardless of the game mode. Both Polish and English variants are accepted:
+In the action field, you can enter a command starting with a slash `/` at any time. Commands are local (they don't cost OpenAI calls) and work regardless of the game mode. Both Polish and English variants are accepted:
 
 /zapisz, /save — forces a manual save of the game state. Autosave works after each turn, so this command is mainly for assurance before closing the application.
 
@@ -64,9 +64,9 @@ In the action field, you can enter a command starting with a slash `/` at any ti
 
 /ustawienia, /settings — opens a dialog for selecting the AI model. By default, we use gpt-4o-mini (Standard) — faster and cheaper. Switching to gpt-4o (High Quality) makes the narrative richer, but each turn costs more and takes longer.
 
-/wizualizuj <opis>, /visualize <description> — multisensory description of the current scene. Does not change the game state, does not propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog, NOT appended to the narrative or saved in the audiobook file. Example: "/wizualizuj jak wygląda strażnik" or "/wizualizuj zapach kawiarni".
+/wizualizuj <description>, /visualize <description> — a multisensory description of the current scene. It doesn't change the game state, doesn't propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with more depth. The result appears in a separate dialog, is NOT added to the narrative, nor saved in the audiobook file. Example: "/wizualizuj jak wygląda strażnik" or "/wizualizuj zapach kawiarni".
 
-/koniec, /quit — closes the application (after autosaving the turn in progress).
+/koniec, /quit — closes the application (after autosaving the current turn).
 
 
 
@@ -74,38 +74,38 @@ STEP 5: Game files — where to find your data
 
 Each game produces five files, each in a different folder, with different roles:
 
-scripts/<name>.txt — full narrative ready to listen to as an audiobook. Can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
+scripts/<name>.txt — full narrative ready to be listened to as an audiobook. Can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
 
-scripts/<name>.md — World Book of characters in the format [Name: traits], regenerated after each turn. Format compatible with the Director's parser! You can load this file into the Director's panel (File → Load) and get native character accents in classic TTS narration — a bridge between the two main modules of the application.
+scripts/<name>.md — World Book of characters in the format [Name: traits], regenerated after each turn. Format compatible with the Director's parser! You can load this file into the Director's panel (File → Load) and get native character accents in classic TTS narration — a bridge between the two main application modules.
 
-runtime/opowiesci/<name>.game.json — full game state: name, mode, active characters, location, inventory, open threads, last 6 turns in a condensed form. This is the source of truth for loading the game — without this file, you cannot continue.
+runtime/opowiesci/<name>.game.json — full game state: name, mode, active characters, location, inventory, open threads, last 6 turns in a shortened form. This is the source of truth for loading the game — without this file, you cannot continue.
 
-runtime/opowiesci/<name>.story.jsonl — raw log of each turn (player request + model response in JSON). The file is not needed for the game — it is used for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
+runtime/opowiesci/<name>.story.jsonl — raw log of each turn (player request + model response in JSON). The file is not needed for the game — it serves for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
 
-runtime/scripts/<name>.mode — metadata of the mode number (3=Free, 4=Choice, 5=Lesser Evil). File shared with the Director, but numbering does not collide (Director uses 0-2).
+runtime/scripts/<name>.mode — metadata of the mode number (3=Free, 4=Choice, 5=Lesser Evil). A file shared with the Director, but the numbering does not collide (Director uses 0-2).
 
 
 
-STEP 6: Model memory indicator — why turns in old games don't require manual work from you
+STEP 6: Model memory indicator — why turns in old games don't require your manual work
 
-Below the mode RadioBox, you'll find the model memory indicator — a progress bar (wx.Gauge) with a status description next to it. The indicator shows the percentage of the narrative engine's context window filled (gpt-4o-mini has a 128,000 token buffer).
+Below the mode RadioBox, you'll find the model memory indicator — a progress bar (wx.Gauge) with a status description next to it. The indicator shows the percentage of the narrative engine's context window fill (gpt-4o-mini has a 128,000 token buffer).
 
 Four levels of fill:
 
-🟢 clean (0%) — the game has just started, no turns saved.
+🟢 clean (0%) — the game has just begun, no turns saved.
 🟢 OK (1-69%) — everything is normal, you can continue without restrictions.
-⚠️ warning (70-89%) — the engine automatically generates a summary of previous turns in the background thread. A message "Auto-summary of context in progress..." will appear — do not send the next turn until the summary is complete. After success, previous turns will be condensed into one digest, the buffer will be freed, and you will receive confirmation "Model memory recovered" with the number of condensed turns.
-🚨 ALARM (90%+) — auto-summary did not free the buffer (rare case after API failure). Sending the next turn is blocked. Force end the game with /quit, then reload it — the engine will load the state from game.json without the history of recent turns, the buffer will be fresh.
+⚠️ warning (70-89%) — the engine automatically generates a summary of previous turns in the background thread. A message "Auto-summary of context in progress..." will appear — do not send the next turn until the summary is complete. Upon success, previous turns will be condensed into one summary, the buffer will be freed, and you will receive confirmation "Model memory recovered" with the number of condensed turns.
+🚨 ALARM (90%+) — auto-summary did not free the buffer (rare case after API failure). Sending the next turn is blocked. Force end the game with /koniec, then reload it — the engine will load the state from game.json without the history of recent turns, the buffer will be fresh.
 
-In practice, the auto-reduction mechanism is invisible — the player does not feel that anything is happening because the background thread solves the problem before it is noticed. It's only important not to send the next turn during auto-summary (the "Send" button is grayed out then).
+In practice, the auto-reduction mechanism is invisible — the player does not feel that anything is happening because the background thread solves the problem before it is noticed. It is only important that you do not send the next turn during auto-summary (the "Send" button is then grayed out).
 
 
 
 STEP 7: Cinematic Meta Warning — dramatic interlude after the 150th turn
 
-After 150 turns of one game, the narrative engine will ONCE insert a "Cinematic Meta Warning" — a meta-narrative dramatic interlude. It will appear in a separate dialog with a bell sound, directly addressing you in the second person, summarizing achievements, and warning about the weight of decisions being made.
+After 150 turns of one game, the narrative engine will ONCE insert a "Cinematic Meta Warning" — a meta-narrative dramatic interlude. It will appear in a separate dialog with a bell sound, with a direct address to you in the second person, a summary of achievements, and a warning about the weight of the decisions being made.
 
-Cinematic Warning is NOT part of the audiobook narration — the .txt filtering engine automatically cuts out its content (marked with ⚠️🚨⚠️) so that during the audiobook playback, you don't hear a meta-commentary about your own game. The content only goes to the .story.jsonl log (for reflection or as a keepsake) and to the GUI dialog, where you can read it once and continue.
+Cinematic Warning is NOT part of the audiobook narration — the .txt filtering engine automatically removes its content (marked with ⚠️🚨⚠️) so that you don't hear a meta-commentary about your own game during the audiobook playback. The content only goes into the .story.jsonl log (for reflection or as a keepsake) and into the GUI dialog, where you can read it once and continue.
 
 
 
@@ -117,7 +117,7 @@ What you can do with it:
 
 1. After finishing the game, open the "🎬  Director" panel (Ctrl+1).
 2. Load a project with the same name — the Director will load the .txt file as a story and the .md file as the World Book.
-3. You will now receive classic Director narration (long, structured scenes with acts and chapters) with native character accents that you liked in Stories. The guard Karmel from the shelter speaking in short sentences, the inquisitor Rosanna with a melodic eastern accent — all traits preserved.
+3. You will now get the classic Director's narration (long, structured scenes with acts and chapters) with the native character accents you liked in Stories. The Carmel guard from the shelter speaking in short sentences, Inquisitor Rosanna with a melodic eastern accent — all traits preserved.
 
 This is a one-way bridge: Stories produce material, the Director formats it. The reverse is not possible — the Director does not load games from Stories as an interactive state.
 
@@ -127,33 +127,35 @@ STEP 9: Accessibility (NVDA and screen readers) — designed from the start
 
 The entire Stories module has been optimized for blind players. What we specifically did:
 
-NARRATION FIELD — it's a wx.TextCtrl readonly multiline. NVDA reads the entire narration linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn or by editing the .txt file outside the application.
+LAST TURN FIELD — this is a separate wx.TextCtrl readonly multiline (~140 px height) ABOVE the full narrative. After each turn, the field is replaced with a fresh fragment (header "--- Turn N ---" + narrative content). NVDA reads it immediately upon focus (auto-focus after a successful turn), without navigating through hundreds of lines of full history. After loading a saved game, the field shows a SUMMARY of the last saved turn (max 400 characters from the `last_turns` buffer) with a prefix informing that the full narrative is in the field below.
 
-DYNAMIC CHOICE BUTTONS — in Choice and Lesser Evil modes, each turn creates new wx.Buttons in the choice area. Each has a tooltip read by NVDA ("Choose: go further into the forest"). Tab between them works naturally. Enter on the selected button auto-sends that choice to the narrative engine.
+FULL NARRATIVE FIELD — this is a wx.TextCtrl readonly multiline growing after each turn. NVDA reads the entire narrative linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn or by editing the .txt file outside the application. This field is synchronized with the `scripts/<name>.txt` file, you can treat it as a preview of the audiobook.
 
-HIDING EMPTY AREAS — in Free mode, the choice area is COMPLETELY hidden (wx.Hide), not just grayed out — Tab skips it, NVDA won't pull it into the list of elements. This prevents player confusion from falling into an empty placeholder. In modes 4 and 5, the area appears only after successful model response validation (non-empty choice array); model hallucination (empty choices) results in a fallback to free-text without cluttering the interface.
+DYNAMIC CHOICE BUTTONS — in Choice and Lesser Evil modes, each turn creates new wx.Buttons in the choice area. Each has a tooltip read by NVDA ("Choose: go further into the forest"). Tabbing between them works naturally. Enter on the selected button auto-sends that choice to the narrative engine.
 
-SOUND SIGNALS — each completed turn is signaled by wx.Bell (system bell), followed by automatic focus shift to the narration field. NVDA will then read the new narration without the need for manual navigation.
+HIDING EMPTY AREAS — in Free mode, the choice area is COMPLETELY hidden (wx.Hide), not just grayed out — Tab skips it, NVDA does not include it in the list of elements. This prevents player confusion from falling into an empty placeholder. In modes 4 and 5, the area appears only after successful model response validation (non-empty choice array); model hallucination (empty choices) results in a fallback to free-text without cluttering the interface.
 
-COLOR MEMORY STATUS — the model memory indicator changes font color (green/orange/red) according to the fill level. For sighted users, this is an additional visual cue; NVDA still reads the status text, so blind users don't miss information.
+SOUND SIGNALS — each completed turn is signaled by wx.Bell (system bell), followed by automatic focus shift to the narrative field. NVDA will then read the new narrative without the need for manual navigation.
 
-KEYBOARD ACCELERATORS — all buttons have the `&` sign before one of the label letters, activating the Alt+letter accelerator. It works identically to other application modules.
+COLOR STATUS MEMORY — the model memory indicator changes font color (green/orange/red) according to the fill level. For sighted users, this is an additional visual signal; NVDA still reads the status text, so blind users do not miss information.
+
+KEYBOARD ACCELERATORS — all buttons have a `&` sign before one of the label letters, which activates the Alt+letter accelerator. It works identically as in other application modules.
 
 
 
-Common Problems
+Common problems
 
-Problem: After clicking "New Game", the message "No API key" appears.
+Problem: After clicking "New Game" a "No API key" message appears.
 Cause and solution: The golden_key.env file in the main application folder does not have a valid OpenAI key. Return to the start screen (Home button), click "Generate the golden_key.env file and open the text editor" and follow the instructions (STEP 2 of the main manual).
 
-Problem: I'm trying to send the next turn, but the "Send" button is grayed out.
-Cause and solution: Context auto-summary or Cinematic Warning generation is in progress in the background thread. Memory status will show "Context auto-summary in progress...". Wait a few seconds — the button will unlock automatically upon success.
+Problem: I try to send the next turn, but the "Send" button is grayed out.
+Cause and solution: Auto-summary of context or Cinematic Warning generation is in progress in the background thread. The memory status will show "Auto-summary of context in progress...". Wait a few seconds — the button will unlock automatically upon success.
 
-Problem: The message "Model memory overloaded" blocks the game.
+Problem: The "Model memory overloaded" message blocks the game.
 Cause and solution: Auto-summary did not free the buffer (e.g., OpenAI rate limit). End the game with the /quit command or close the application, then reload it — the engine will load only the state from game.json without the history of recent turns.
 
 Problem: In Choice mode, the engine did not generate buttons, even though I expected them.
-Cause and solution: Model hallucination — despite mode 4, the LLM returned an empty choice array. The application consciously hides the choice area then (instead of showing an empty placeholder) and allows continuation with free-text. The next turn will likely generate choices correctly.
+Cause and solution: Model hallucination — despite mode 4, the LLM returned an empty choice array. The application deliberately hides the choice area then (instead of showing an empty placeholder) and allows continuation with free-text. The next turn will likely generate choices correctly.
 
-Problem: The .game.json and .story.jsonl files are not visible on the desktop.
-Cause and solution: This is intentional — runtime/ is a system folder for regular users, invisible from the file explorer. Narrative files (.txt, .md) go to scripts/ — you will find them there.
+Problem: .game.json and .story.jsonl files are not visible on the desktop.
+Cause and solution: This is intentional — runtime/ is a system folder for regular users, invisible from the file explorer. Narrative files (.txt, .md) go to scripts/ — that's where you'll find them.

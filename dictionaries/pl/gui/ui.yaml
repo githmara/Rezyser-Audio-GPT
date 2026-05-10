@@ -920,10 +920,17 @@ opowiesci:
   pamiec_status_name:        "Status pamięci modelu"
   pamiec_status_init:        "Brak aktywnej gry"
 
-  # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
-  lbl_narracja:              "Narracja"
-  txt_narracja_name:         "Pole narracji"
-  txt_narracja_tooltip:      "Pełna narracja gry — automatycznie aktualizowana po każdej turze. Tylko do odczytu; w pole akcji poniżej wpisuj swoje decyzje."
+  # ---- BLOK E1 — Obszar „Ostatnia tura" (skrót dla NVDA, krótkie pole) ------
+  lbl_ostatnia_tura:         "Ostatnia tura"
+  txt_ostatnia_tura_name:    "Pole z treścią ostatniej tury"
+  txt_ostatnia_tura_tooltip: "Skrót zawierający wyłącznie ostatnio wygenerowaną scenę — NVDA czyta tu świeżą narrację bez nawigowania przez setki linii pełnej historii. Po każdej kolejnej turze pole jest podmieniane na nową treść."
+  txt_ostatnia_tura_init:    "(Ostatnia tura pojawi się w tym polu po pierwszej Twojej akcji.)"
+  txt_ostatnia_tura_skrot_naglowek: "[skrót ostatniej zapisanej tury — pełna narracja w polu poniżej]\n\n"
+
+  # ---- BLOK E2 — Obszar pełnej narracji (TextCtrl readonly multiline) -------
+  lbl_narracja:              "Pełna narracja"
+  txt_narracja_name:         "Pole pełnej narracji"
+  txt_narracja_tooltip:      'Pełna historia gry, narastająca po każdej turze. Tylko do odczytu; w pole akcji poniżej wpisuj swoje decyzje. Pole „Ostatnia tura" wyżej pokazuje świeżą scenę bez nawigacji przez całą historię.'
   txt_narracja_init: |-
     Aby rozpocząć opowieść, wpisz nazwę gry w polu powyżej, wybierz tryb i kliknij „Nowa gra".
 

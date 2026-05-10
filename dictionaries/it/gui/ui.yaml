@@ -907,9 +907,9 @@ opowiesci:
   pamiec_status_init: "Nessun gioco attivo"
 
   # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
-  lbl_narracja: "Narrazione"
-  txt_narracja_name: "Campo narrazione"
-  txt_narracja_tooltip: "Narrazione completa del gioco — aggiornata automaticamente dopo ogni turno. Solo lettura; inserisci le tue decisioni nel campo azioni sottostante."
+  lbl_narracja: "Narrazione completa"
+  txt_narracja_name: "Campo della narrazione completa"
+  txt_narracja_tooltip: "Storia completa del gioco, che cresce dopo ogni turno. Solo per lettura; inserisci le tue decisioni nel campo azioni sottostante. Il campo \"Ultimo turno\" sopra mostra la scena fresca senza navigare attraverso l'intera storia."
   txt_narracja_init: |-
     Per iniziare la storia, inserisci il nome del gioco nel campo sopra, scegli la modalità e clicca su "Nuovo gioco".
 
@@ -1014,3 +1014,8 @@ opowiesci:
   quick_start_wlasna: "(gioco personalizzato)"
   choice_quick_start_name: "Selezione di uno scenario Quick Start"
   choice_quick_start_tooltip: 'Scegli un mondo predefinito per immergerti subito nella narrazione. Il preset inietterà nel motore una breve descrizione del mondo e del personaggio, impostando la modalità di gioco predefinita. "(gioco personalizzato)" lascia l''inizio libero — il motore inventerà il mondo basandosi sulla prima azione.'
+  lbl_ostatnia_tura: "Ultimo turno"
+  txt_ostatnia_tura_name: "Campo con il contenuto dell'ultimo turno"
+  txt_ostatnia_tura_tooltip: "Scorciatoia contenente esclusivamente l'ultima scena generata — NVDA legge qui la narrazione fresca senza navigare attraverso centinaia di righe della storia completa. Dopo ogni turno successivo, il campo viene sostituito con il nuovo contenuto."
+  txt_ostatnia_tura_init: "(L'ultimo turno apparirà in questo campo dopo la tua prima azione.)"
+  txt_ostatnia_tura_skrot_naglowek: "[riassunto dell'ultimo turno salvato — narrazione completa nel campo sottostante]\n\n"

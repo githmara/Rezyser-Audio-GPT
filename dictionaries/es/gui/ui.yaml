@@ -906,9 +906,9 @@ opowiesci:
   pamiec_status_init: "No hay juego activo"
 
   # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
-  lbl_narracja: "Narración"
-  txt_narracja_name: "Campo de narración"
-  txt_narracja_tooltip: "Narración completa del juego: se actualiza automáticamente después de cada turno. Solo lectura; ingresa tus decisiones en el campo de acción a continuación."
+  lbl_narracja: "Narración completa"
+  txt_narracja_name: "Campo de narración completa"
+  txt_narracja_tooltip: "Historia completa del juego, que crece después de cada ronda. Solo lectura; escribe tus decisiones en el campo de acción a continuación. El campo \"Última ronda\" arriba muestra la escena reciente sin navegar por toda la historia."
   txt_narracja_init: |-
     Para comenzar una historia, escribe el nombre del juego en el campo de arriba, elige un modo y haz clic en "Nuevo juego".
 
@@ -1013,3 +1013,8 @@ opowiesci:
   quick_start_wlasna: "(juego propio)"
   choice_quick_start_name: "Selección de escenario predefinido de Inicio Rápido"
   choice_quick_start_tooltip: 'Elige un mundo predefinido para sumergirte inmediatamente en la narración. El preset inyectará en el motor una breve descripción del mundo y el protagonista, y establecerá el modo de juego predeterminado. "(juego propio)" deja el inicio libre: el motor inventará el mundo basado en la primera acción.'
+  lbl_ostatnia_tura: "Última ronda"
+  txt_ostatnia_tura_name: "Campo con el contenido de la última ronda"
+  txt_ostatnia_tura_tooltip: "Un resumen que contiene solo la escena generada recientemente — NVDA lee aquí la nueva narración sin navegar por cientos de líneas de la historia completa. Después de cada nueva ronda, el campo se reemplaza con el nuevo contenido."
+  txt_ostatnia_tura_init: "(La última ronda aparecerá en este campo después de tu primera acción.)"
+  txt_ostatnia_tura_skrot_naglowek: "[resumen de la última ronda guardada — narración completa en el campo de abajo]\n\n"

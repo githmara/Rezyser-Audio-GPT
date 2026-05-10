@@ -907,9 +907,9 @@ opowiesci:
   pamiec_status_init: "Ei aktiivista peliä"
 
   # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
-  lbl_narracja: "Kerronta"
-  txt_narracja_name: "Kerrontakenttä"
-  txt_narracja_tooltip: "Pelin täydellinen kerronta — päivitetään automaattisesti jokaisen vuoron jälkeen. Vain luku; kirjoita päätöksesi alla olevaan toimintokenttään."
+  lbl_narracja: "Koko kertomus"
+  txt_narracja_name: "Koko kertomuksen kenttä"
+  txt_narracja_tooltip: "Pelin koko tarina, joka kasvaa jokaisen kierroksen jälkeen. Vain luku; kirjoita päätöksesi alla olevaan toimintokenttään. Yllä oleva \"Viimeinen kierros\" -kenttä näyttää tuoreen kohtauksen ilman, että tarvitsee selata koko tarinaa."
   txt_narracja_init: |-
     Aloittaaksesi tarinan, kirjoita pelin nimi yllä olevaan kenttään, valitse tila ja napsauta "Uusi peli".
 
@@ -1014,3 +1014,8 @@ opowiesci:
   quick_start_wlasna: "(oma peli)"
   choice_quick_start_name: "Valitse valmis Quick Start -skenaario"
   choice_quick_start_tooltip: 'Valitse valmis maailma, jotta voit heti sukeltaa kerrontaan. Esiasetus syöttää moottoriin lyhyen kuvauksen maailmasta ja sankarista, asettaa oletuspelitilan. "(oma peli)" jättää aloituksen vapaaksi — moottori keksii maailman ensimmäisen toiminnon perusteella.'
+  lbl_ostatnia_tura: "Viimeinen kierros"
+  txt_ostatnia_tura_name: "Viimeisen kierroksen sisältökenttä"
+  txt_ostatnia_tura_tooltip: "Pikanäppäin, joka sisältää vain viimeksi luodun kohtauksen — NVDA lukee täällä tuoreen kertomuksen ilman, että tarvitsee selata satoja rivejä koko tarinasta. Jokaisen uuden kierroksen jälkeen kenttä korvataan uudella sisällöllä."
+  txt_ostatnia_tura_init: "(Viimeinen kierros ilmestyy tähän kenttään ensimmäisen toimintasi jälkeen.)"
+  txt_ostatnia_tura_skrot_naglowek: "[viimeksi tallennetun kierroksen tiivistelmä — koko kertomus alla olevassa kentässä]\n\n"

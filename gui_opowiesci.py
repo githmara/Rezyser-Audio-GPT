@@ -159,29 +159,36 @@ class OpowiesciPanel(wx.Panel):
         """Składa szkielet panelu z subpaneli ``_zbuduj_*``."""
         BORDER = 8
 
-        sizer_naglowek    = self._zbuduj_naglowek(BORDER)
-        sizer_pasek_pliku = self._zbuduj_pasek_pliku(BORDER)
-        sizer_tryb        = self._zbuduj_radiobox_trybu(BORDER)
-        sizer_pamiec      = self._zbuduj_wskaznik_pamieci(BORDER)
-        sizer_narracja    = self._zbuduj_obszar_narracji(BORDER)
-        sizer_wybory      = self._zbuduj_obszar_wyborow(BORDER)
-        sizer_akcja       = self._zbuduj_pole_akcji(BORDER)
+        sizer_naglowek       = self._zbuduj_naglowek(BORDER)
+        sizer_pasek_pliku    = self._zbuduj_pasek_pliku(BORDER)
+        sizer_tryb           = self._zbuduj_radiobox_trybu(BORDER)
+        sizer_pamiec         = self._zbuduj_wskaznik_pamieci(BORDER)
+        sizer_ostatnia_tura  = self._zbuduj_obszar_ostatnia_tura(BORDER)
+        sizer_narracja       = self._zbuduj_obszar_narracji(BORDER)
+        sizer_wybory         = self._zbuduj_obszar_wyborow(BORDER)
+        sizer_akcja          = self._zbuduj_pole_akcji(BORDER)
 
         sep = lambda: wx.StaticLine(self)  # noqa: E731
 
+        # Kolejność tabulacji (A11y krytyczna): pasek pliku → tryb → pamięć →
+        # ostatnia tura (NVDA czyta świeżą scenę najpierw) → pełna narracja
+        # (gracz może nawigować w głąb historii, ale to NIE pierwszy stop) →
+        # wybory → pole akcji.
         root = wx.BoxSizer(wx.VERTICAL)
-        root.Add(sizer_naglowek,                 flag=wx.EXPAND)
-        root.Add(sizer_pasek_pliku,              flag=wx.EXPAND)
-        root.Add(sep(),                          flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
-        root.Add(sizer_tryb,                     flag=wx.EXPAND)
-        root.Add(sep(),                          flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
-        root.Add(sizer_pamiec,                   flag=wx.EXPAND)
-        root.Add(sep(),                          flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
-        root.Add(sizer_narracja, proportion=3,   flag=wx.EXPAND)
-        root.Add(sep(),                          flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
-        root.Add(sizer_wybory,                   flag=wx.EXPAND)
-        root.Add(sep(),                          flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
-        root.Add(sizer_akcja,                    flag=wx.EXPAND)
+        root.Add(sizer_naglowek,                       flag=wx.EXPAND)
+        root.Add(sizer_pasek_pliku,                    flag=wx.EXPAND)
+        root.Add(sep(),                                flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        root.Add(sizer_tryb,                           flag=wx.EXPAND)
+        root.Add(sep(),                                flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        root.Add(sizer_pamiec,                         flag=wx.EXPAND)
+        root.Add(sep(),                                flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        root.Add(sizer_ostatnia_tura,                  flag=wx.EXPAND)
+        root.Add(sep(),                                flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        root.Add(sizer_narracja,        proportion=3,  flag=wx.EXPAND)
+        root.Add(sep(),                                flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        root.Add(sizer_wybory,                         flag=wx.EXPAND)
+        root.Add(sep(),                                flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        root.Add(sizer_akcja,                          flag=wx.EXPAND)
 
         self.SetSizer(root)
 
@@ -325,7 +332,34 @@ class OpowiesciPanel(wx.Panel):
         return sizer
 
     # ------------------------------------------------------------------
-    # BLOK E — Obszar narracji (TextCtrl readonly multiline) — KLUCZOWY A11y
+    # BLOK E1 — Obszar „Ostatnia tura" (skrót dla NVDA — czyta tylko świeżo
+    # wygenerowany fragment, bez nawigowania przez setki linii historii)
+    # ------------------------------------------------------------------
+    def _zbuduj_obszar_ostatnia_tura(self, BORDER: int) -> wx.BoxSizer:
+        lbl = wx.StaticText(self, label=t("opowiesci.lbl_ostatnia_tura"))
+        lf = lbl.GetFont()
+        lf.SetPointSize(11)
+        lf.MakeBold()
+        lbl.SetFont(lf)
+
+        self._txt_ostatnia_tura = wx.TextCtrl(
+            self,
+            value=t("opowiesci.txt_ostatnia_tura_init"),
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_BESTWRAP,
+            name=t("opowiesci.txt_ostatnia_tura_name"),
+        )
+        self._txt_ostatnia_tura.SetToolTip(t("opowiesci.txt_ostatnia_tura_tooltip"))
+        # Mniejsza wysokość niż pełna narracja — to skrót, nie czytadło.
+        self._txt_ostatnia_tura.SetMinSize((-1, 140))
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl,                    flag=wx.LEFT | wx.RIGHT | wx.TOP,         border=BORDER)
+        sizer.Add(self._txt_ostatnia_tura,
+                  flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,                  border=BORDER)
+        return sizer
+
+    # ------------------------------------------------------------------
+    # BLOK E2 — Obszar pełnej narracji (TextCtrl readonly multiline) — KLUCZOWY A11y
     # ------------------------------------------------------------------
     def _zbuduj_obszar_narracji(self, BORDER: int) -> wx.BoxSizer:
         lbl = wx.StaticText(self, label=t("opowiesci.lbl_narracja"))
@@ -623,6 +657,12 @@ class OpowiesciPanel(wx.Panel):
         )
         self._txt_narracja.AppendText(naglowek + wynik.narracja)
         self._txt_narracja.SetInsertionPointEnd()
+
+        # 1b. Pole „Ostatnia tura" — zastępujemy całość świeżym fragmentem.
+        # NVDA usłyszy go natychmiast po focusie (wx.CallAfter w pkt 5 niżej),
+        # bez konieczności nawigowania przez setki linii pełnej narracji.
+        self._txt_ostatnia_tura.SetValue(naglowek.lstrip() + wynik.narracja)
+        self._txt_ostatnia_tura.SetInsertionPoint(0)
 
         # 2. Aktualizacja snapshotu: nowe `ostatnie_tury` + postacie + stan.
         # Trzymamy ostatnie 6 par (akcja, narracja_skrót) — Faza 4 dorobi
@@ -940,6 +980,7 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=seed_swiata, jezyk_projektu="pl",
         )
         self._txt_narracja.SetValue(t("opowiesci.nowa_gra_zaczatek", nazwa=nazwa))
+        self._txt_ostatnia_tura.SetValue(t("opowiesci.txt_ostatnia_tura_init"))
         self._aktywuj_obszar_wyborow(False)   # czysta gra → brak wyborów
         self._aktualizuj_uistate()
 
@@ -1009,6 +1050,19 @@ class OpowiesciPanel(wx.Panel):
             self._txt_narracja.SetInsertionPointEnd()
         else:
             self._txt_narracja.SetValue(t("opowiesci.brak_narracji_info", nazwa=nazwa))
+
+        # Pole „Ostatnia tura": pokażmy skrót ostatniej zapisanej tury, jeśli
+        # istnieje w `ostatnie_tury` (snapshot wczytany z .game.json). To 400-
+        # znakowy skrót (FIFO buffer), nie pełna narracja — gracz dowie się
+        # gdzie skończył, a po pierwszej akcji pole wypełni się świeżą turą.
+        if projekt.ostatnie_tury:
+            ostatnia = projekt.ostatnie_tury[-1]
+            self._txt_ostatnia_tura.SetValue(
+                t("opowiesci.txt_ostatnia_tura_skrot_naglowek")
+                + (ostatnia.get("narracja_skrot") or "")
+            )
+        else:
+            self._txt_ostatnia_tura.SetValue(t("opowiesci.txt_ostatnia_tura_init"))
 
         self._aktywuj_obszar_wyborow(False)   # ostatnie wybory się utraciły, wymuszamy free-text
         self._aktualizuj_uistate()

@@ -906,9 +906,9 @@ opowiesci:
   pamiec_status_init: "No Active Game"
 
   # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
-  lbl_narracja: "Narrative"
-  txt_narracja_name: "Narrative Field"
-  txt_narracja_tooltip: "Full game narrative — automatically updated after each turn. Read-only; enter your decisions in the action field below."
+  lbl_narracja: "Full narration"
+  txt_narracja_name: "Full narration field"
+  txt_narracja_tooltip: "The full game history, accumulating after each turn. Read-only; enter your decisions in the action field below. The \"Last turn\" field above shows the fresh scene without navigating through the entire history."
   txt_narracja_init: |-
     To start a story, enter the game name in the field above, select a mode, and click "New Game".
 
@@ -1013,3 +1013,8 @@ opowiesci:
   quick_start_wlasna: "(custom game)"
   choice_quick_start_name: "Quick Start Scenario Selection"
   choice_quick_start_tooltip: 'Choose a ready-made world to immediately immerse yourself in the narrative. The preset will inject a short description of the world and the hero into the engine, setting the default game mode. "(custom game)" leaves the start free — the engine will invent the world based on the first action.'
+  lbl_ostatnia_tura: "Last turn"
+  txt_ostatnia_tura_name: "Last turn content field"
+  txt_ostatnia_tura_tooltip: "Shortcut containing only the most recently generated scene — NVDA reads the fresh narration here without navigating through hundreds of lines of the full story. After each subsequent turn, the field is replaced with new content."
+  txt_ostatnia_tura_init: "(The last turn will appear in this field after your first action.)"
+  txt_ostatnia_tura_skrot_naglowek: "[summary of the last saved turn — full narration in the field below]\n\n"

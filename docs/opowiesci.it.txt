@@ -1,28 +1,24 @@
 Reżyser Audio GPT — Modulo Storie Interattive (15.0 – Versione di Pubblicazione)
 
-Il secondo principale modo dell'applicazione accanto al Reżyser — questa volta diventi il giocatore di una storia generata dinamicamente invece del suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero o scegliendo una delle opzioni numerate.
+Il secondo principale modo dell'applicazione accanto al Reżyser — questa volta diventi un giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo qualsiasi azione in testo libero o scegliendo una delle opzioni numerate.
 
-Il modulo è stato progettato fin dall'inizio pensando ai giocatori non vedenti — la narrazione viene letta linearmente da uno screen reader (NVDA) o da un motore TTS, le scelte dinamiche sono presentate sotto forma di pulsanti con descrizioni vocali, ogni turno concluso è segnalato da un suono di campanello e il focus viene automaticamente spostato sul testo appena generato.
+Il modulo è stato progettato fin dall'inizio pensando ai giocatori non vedenti — la narrazione viene letta linearmente da uno screen reader (NVDA) o da un motore TTS, le scelte dinamiche sono in forma di pulsanti con descrizioni vocali, ogni turno concluso è segnalato da un suono di campanello e il focus viene automaticamente spostato sul testo appena generato.
 
 Apri il pannello con il pulsante "📖  Racconti" sulla barra degli strumenti o con la scorciatoia da tastiera Ctrl+5.
 
-
-
-PASSO 1: Tre modalità di gioco — scegli lo stile di gioco
+PASSO 1: Tre modalità di gioco — scegli il tuo stile di gioco
 
 Subito sotto la barra del nome del gioco troverai un campo di selezione della modalità (RadioBox). La modalità determina come il motore narrativo dialoga con te:
 
-MODALITÀ LIBERA — inserisci qualsiasi azione in testo libero ("provo ad aprire la porta", "chiedo al guardiano la strada", "scappo per le scale posteriori"). Il motore narrativo può proporre 1-3 suggerimenti, ma sono solo suggerimenti — non un percorso obbligatorio. La modalità più libera, consigliata per giocatori esperti che improvvisano la propria storia.
+MODALITÀ LIBERA — inserisci qualsiasi azione in testo libero ("provo ad aprire la porta", "chiedo al guardiano la strada", "scappo dalle scale posteriori"). Il motore narrativo può proporre 1-3 suggerimenti, ma sono solo consigli — non un percorso obbligatorio. La modalità più libera, consigliata per giocatori esperti che improvvisano la propria storia.
 
-MODALITÀ SCELTE — ogni turno termina con 3-5 opzioni numerate A-E sotto forma di pulsanti cliccabili. Ogni scelta è un'azione specifica che puoi intraprendere. Puoi anche inserire la tua azione in testo libero — il motore la adatterà alla scelta semanticamente più vicina. La modalità più intuitiva per i giocatori non vedenti: NVDA ti leggerà tutte le opzioni, premi Tab per navigare tra di esse, Enter per confermare.
+MODALITÀ SCELTE — ogni turno termina con 3-5 opzioni numerate A-E sotto forma di pulsanti cliccabili. Ogni scelta è un'azione specifica che puoi intraprendere. Puoi anche inserire la tua azione in testo libero — il motore la adatterà alla scelta più vicina semanticamente. La modalità più intuitiva per i giocatori non vedenti: NVDA ti leggerà tutte le opzioni, premi Tab tra di esse, Enter per confermare.
 
-MODALITÀ MINOR MALE — come Scelte, ma ciascuna delle 3-5 opzioni è moralmente, fisicamente o strategicamente sfavorevole. Nessuna opzione "neutrale", nessun lieto fine in questo turno. Modalità per gli amanti della narrativa oscura in stile "Tales of Consequence" o drammi morali.
+MODALITÀ MINORE MALE — come Scelte, ma ciascuna delle 3-5 opzioni è moralmente, fisicamente o strategicamente sfavorevole. Nessuna opzione "neutrale", nessun lieto fine in questo turno. Modalità per gli amanti della narrativa oscura in stile "Tales of Consequence" o drammi morali.
 
 Puoi cambiare modalità durante il gioco — al turno successivo il motore narrativo si adatterà al nuovo stile (da Libera a Scelte può passare con un solo clic).
 
-
-
-PASSO 2: Quick Start — scenari di apertura pronti
+PASSO 2: Avvio Rapido — scenari di apertura pronti
 
 Sotto il campo del nome del gioco troverai una seconda riga con l'etichetta "Avvio rapido:" e una selezione a discesa (wx.Choice). La posizione predefinita è "(gioco personalizzato)" — il motore inventerà il mondo basandosi sulla tua prima azione.
 
@@ -30,84 +26,72 @@ Puoi però scegliere uno dei cinque preset pronti per immergerti subito in un mo
 
 SF POST-APOCALITTICO — un secolo dopo una catastrofe ecologica. I resti dell'umanità nei rifugi sotto i Monti Świętokrzyskie. Sei un giovane corriere del Clan Sztolnia con il tuo primo incarico serio. Modalità predefinita: Scelte.
 
-FANTASY OSCURO — confine del Regno delle Tre Correnti, nono anno di guerra religiosa. Sei una giovane Inquisitrice sulle tracce di un villaggio dove qualcuno protegge un bambino posseduto. Modalità predefinita: Minor male.
+FANTASY OSCURO — confine del Regno delle Tre Correnti, nono anno di guerra religiosa. Sei una giovane Inquisitrice sulle tracce di un villaggio dove qualcuno protegge un bambino posseduto. Modalità predefinita: Minore Male.
 
-URBAN FANTASY DETECTIVE — Varsavia 2008, sera di ottobre. Sei un detective privato che vede i fantasmi. Una cliente vuole ritrovare il marito scomparso sotto il Castello Reale. Modalità predefinita: Scelte.
+DETECTIVE URBAN FANTASY — Varsavia 2008, sera di ottobre. Sei un detective privato che vede i fantasmi. Una cliente vuole ritrovare il marito scomparso sotto il Castello Reale. Modalità predefinita: Scelte.
 
-HORROR SPAZIALE — anno 2247, stazione di ricerca in orbita attorno a una stella di neutroni. Ti svegli dall'ibernazione senza il capitano — e senza tracce che il capitano sia mai esistito. Modalità predefinita: Libera (l'atmosfera lovecraftiana premia l'improvvisazione).
+HORROR COSMICO — anno 2247, stazione di ricerca in orbita attorno a una stella di neutroni. Ti svegli dall'ibernazione senza il capitano — e senza tracce che il capitano sia mai esistito. Modalità predefinita: Libera (l'atmosfera lovecraftiana premia l'improvvisazione).
 
-COMMEDIA ROMANTICA DI COSTUME — Saska Kępa aprile 2024, una piccola caffetteria è in procinto di chiudere. Sei una barista-cameriera a cui il proprietario chiede di "essere gentile" con un redattore timido che volevi avvicinare da tempo. Modalità predefinita: Libera.
+COMMEDIA ROMANTICA DI COSTUME — Saska Kępa, aprile 2024, una piccola caffetteria è in procinto di chiudere. Sei una barista-cameriera a cui il proprietario chiede di "essere gentile" con un redattore timido che volevi avvicinare da tempo. Modalità predefinita: Libera.
 
 Dopo aver scelto un preset, clicca "Nuovo gioco" — il motore inietterà una breve descrizione del mondo e del personaggio, imposterà la modalità di gioco predefinita (puoi sovrascriverla con il RadioBox prima di cliccare "Nuovo gioco"). Il primo turno LLM svolgerà la scena di apertura.
 
-
-
 PASSO 3: Primo gioco da zero — senza preset
 
-Se preferisci la massima libertà, lascia "(gioco personalizzato)" nel campo Quick Start e preparati a inserire manualmente la tua prima azione.
+Se preferisci la massima libertà, lascia "(gioco personalizzato)" nel campo Avvio Rapido e preparati a inserire manualmente la tua prima azione.
 
-1. Inserisci il nome del gioco nella barra "Nome del gioco" (es. "mia_avventura_1") — con questo nome verranno salvati i file di narrazione, stato e log.
-2. Scegli la modalità (Libera/Scelte/Minor male).
+1. Inserisci il nome del gioco nella barra "Nome del gioco" (es. "mia_avventura_1") — sotto questo nome verranno salvati i file di narrazione, stato e log.
+2. Scegli la modalità (Libera/Scelte/Minore Male).
 3. Clicca "Nuovo gioco". L'applicazione creerà 3 file: stato del gioco (.game.json), un Libro del Mondo vuoto (.md) e metadati della modalità (.mode). Il file di narrazione (.txt) verrà creato dopo il primo turno.
 4. Nel campo "La tua azione o comando" in fondo al pannello inserisci la tua prima azione, es. "mi sveglio in una stanza sconosciuta". Clicca "Invia". Il motore narrativo aprirà il mondo basandosi sulla tua azione — descrizione della stanza, suoni, personaggi, prime decisioni.
-5. Ogni turno verrà salvato automaticamente — puoi chiudere l'applicazione in qualsiasi momento e caricare il gioco successivamente con il pulsante "Carica".
-
-
+5. Ogni turno verrà salvato automaticamente — puoi chiudere l'applicazione in qualsiasi momento e caricare il gioco più tardi con il pulsante "Carica".
 
 PASSO 4: Comandi Slash — azioni rapide senza API
 
-Nel campo delle azioni puoi inserire in qualsiasi momento un comando che inizia con una barra `/`. I comandi sono locali (non richiedono chiamate a OpenAI) e funzionano indipendentemente dalla modalità di gioco. Sono accettate sia le varianti polacche che inglesi:
+Nel campo delle azioni puoi inserire in qualsiasi momento un comando che inizia con la barra `/`. I comandi sono locali (non costano chiamate a OpenAI) e funzionano indipendentemente dalla modalità di gioco. Sono accettate sia le varianti italiane che inglesi:
 
-/zapisz, /save — forza il salvataggio manuale dello stato del gioco. Il salvataggio automatico avviene dopo ogni turno, quindi questo comando è principalmente per sicurezza prima di chiudere l'applicazione.
+/salva, /save — forza il salvataggio manuale dello stato del gioco. Il salvataggio automatico avviene dopo ogni turno, quindi questo comando è principalmente per sicurezza prima di chiudere l'applicazione.
 
-/wczytaj, /load — apre una finestra di dialogo per la selezione del file dalla cartella runtime/opowiesci/. Dopo il caricamento, il nome del gioco, la modalità e l'intera narrazione vengono ripristinati — puoi continuare dal turno in cui hai interrotto.
+/carica, /load — apre il dialogo di selezione file dalla cartella runtime/opowiesci/. Dopo il caricamento, il nome del gioco, la modalità e l'intera narrazione vengono ripristinati — puoi continuare dal turno in cui hai interrotto.
 
-/ustawienia, /settings — apre una finestra di dialogo per la selezione del modello AI. Di default utilizziamo gpt-4o-mini (Standard) — più veloce ed economico. Passando a gpt-4o (Alta qualità) la narrazione diventa più ricca, ma ogni turno costa di più e dura più a lungo.
+/impostazioni, /settings — apre il dialogo di selezione del modello AI. Di default usiamo gpt-4o-mini (Standard) — più veloce ed economico. Passando a gpt-4o (Alta qualità) la narrazione diventa più ricca, ma ogni turno costa di più e dura più a lungo.
 
-/wizualizuj <descrizione>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in un dialogo separato, NON viene aggiunto alla narrazione né salvato nel file dell'audiolibro. Esempio: "/wizualizuj come appare il guardiano" o "/wizualizuj l'odore della caffetteria".
+/visualizza <descrizione>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo usa tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in un dialogo separato, NON viene aggiunto alla narrazione né salvato nel file audiobook. Esempio: "/visualizza come appare il guardiano" o "/visualizza l'odore della caffetteria".
 
-/koniec, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
-
-
+/fine, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
 
 PASSO 5: File di gioco — dove trovare i tuoi dati
 
 Ogni gioco produce cinque file, ciascuno in una cartella diversa, con ruoli diversi:
 
-skrypty/<nome>.txt — narrazione completa pronta per l'ascolto come audiolibro. Può essere aperto in Blocco note o caricato in Architetto Audiobook (Convertitore) per generare un file Word con capitoli o un timing per ElevenLabs.
+skrypty/<nome>.txt — narrazione completa pronta per l'ascolto come audiobook. Può essere aperto in Blocco note o caricato nel Architetto Audiobook (Convertitore) per generare un file Word con capitoli o timing per ElevenLabs.
 
 skrypty/<nome>.md — Libro del Mondo dei personaggi in formato [Nome: caratteristiche], rigenerato dopo ogni turno. Formato compatibile con il parser del Reżyser! Puoi caricare questo file nel pannello del Reżyser (File → Carica) e otterrai accenti nativi dei personaggi nella narrazione classica TTS — un ponte tra i due principali moduli dell'applicazione.
 
 runtime/opowiesci/<nome>.game.json — stato completo del gioco: nome, modalità, personaggi attivi, posizione, equipaggiamento, trame aperte, ultime 6 turni in forma abbreviata. Questa è la fonte di verità per caricare il gioco — senza questo file non è possibile continuare.
 
-runtime/opowiesci/<nome>.story.jsonl — log grezzo di ogni turno (richiesta del giocatore + risposta del modello in JSON). Il file non è necessario per il gioco — serve per il debug o l'analisi successiva (es. statistiche su quanto è durata l'avventura, quali trame ha introdotto LLM).
+runtime/opowiesci/<nome>.story.jsonl — log grezzo di ogni turno (richiesta del giocatore + risposta del modello in JSON). Il file non è necessario per il gioco — serve per il debug o l'analisi successiva (es. statistiche su quanto è durata l'avventura, quali trame LLM ha introdotto).
 
-runtime/skrypty/<nome>.mode — metadati del numero di modalità (3=Libera, 4=Scelte, 5=Minor male). File condiviso con il Reżyser, ma la numerazione non collide (il Reżyser usa 0-2).
+runtime/skrypty/<nome>.mode — metadati del numero di modalità (3=Libera, 4=Scelte, 5=Minore Male). File condiviso con il Reżyser, ma la numerazione non collude (il Reżyser usa 0-2).
 
-
-
-PASSO 6: Indicatore di memoria del modello — perché i turni nei vecchi giochi non richiedono il tuo lavoro manuale
+PASSO 6: Indicatore di memoria del modello — perché i turni nei vecchi giochi non richiedono il tuo intervento manuale
 
 Sotto il RadioBox della modalità troverai l'indicatore di memoria del modello — una barra di avanzamento (wx.Gauge) con una descrizione dello stato accanto. L'indicatore mostra la percentuale di riempimento della finestra contestuale del motore narrativo (gpt-4o-mini ha un buffer di 128.000 token).
 
 Quattro livelli di riempimento:
 
 🟢 pulita (0%) — il gioco è appena iniziato, nessun turno salvato.
-🟢 OK (1-69%) — tutto nella norma, puoi continuare senza restrizioni.
-⚠️ avviso (70-89%) — il motore genera automaticamente un riassunto dei turni precedenti nel thread di background. Apparirà il messaggio "Auto-riassunto del contesto in corso..." — non inviare il turno successivo finché il riassunto non è completato. Dopo il successo, i turni precedenti verranno compressi in un unico condensato, il buffer si libererà e riceverai la conferma "Memoria del modello recuperata" con il numero di turni compressi.
-🚨 ALLARME (90%+) — l'auto-riassunto non ha liberato il buffer (caso raro dopo un errore API). L'invio del turno successivo è bloccato. Forza la chiusura del gioco con /koniec, quindi ricaricalo — il motore caricherà lo stato da game.json senza la cronologia degli ultimi turni, il buffer sarà fresco.
+🟢 OK (1-69%) — tutto normale, puoi continuare senza restrizioni.
+⚠️ avviso (70-89%) — il motore genera automaticamente un riassunto dei turni precedenti nel thread di background. Apparirà il messaggio "Riassunto automatico del contesto in corso..." — non inviare il turno successivo finché il riassunto non è completato. Dopo il successo, i turni precedenti verranno compressi in un unico condensato, il buffer si libererà e riceverai la conferma "Memoria del modello recuperata" con il numero di turni compressi.
+🚨 ALLARME (90%+) — il riassunto automatico non ha liberato il buffer (caso raro dopo un errore API). L'invio del turno successivo è bloccato. Forza la chiusura del gioco con /fine, poi ricaricalo — il motore caricherà lo stato da game.json senza la cronologia degli ultimi turni, il buffer sarà fresco.
 
-In pratica, il meccanismo di autoreduzione è invisibile — il giocatore non si accorge che qualcosa sta accadendo, perché il thread di background risolve il problema prima che venga notato. È importante solo non inviare il turno successivo durante l'auto-riassunto (il pulsante "Invia" è allora disabilitato).
-
-
+In pratica, il meccanismo di autoreduzione è invisibile — il giocatore non si accorge che qualcosa sta accadendo, perché il thread di background risolve il problema prima che venga notato. È importante solo non inviare il turno successivo durante il riassunto automatico (il pulsante "Invia" è allora disabilitato).
 
 PASSO 7: Cinematic Meta Warning — intermezzo drammatico dopo il 150° turno
 
-Dopo 150 turni di un gioco, il motore narrativo inserirà UNA VOLTA un "Cinematic Meta Warning" — un intermezzo drammatico meta-narrativo. Apparirà in un dialogo separato con un suono di campanello, con un indirizzo diretto a te in seconda persona, un riassunto dei risultati e un avvertimento sull'importanza delle decisioni prese.
+Dopo 150 turni di un gioco, il motore narrativo inserirà UNA VOLTA un "Cinematic Meta Warning" — un intermezzo drammatico meta-narrativo. Apparirà in un dialogo separato con un suono di campanello, con un indirizzo diretto a te in seconda persona, un riepilogo dei risultati e un avvertimento sull'importanza delle decisioni prese.
 
-Cinematic Warning NON è parte della narrazione dell'audiolibro — il motore di filtraggio .txt elimina automaticamente il suo contenuto (segnalato con i marcatori ⚠️🚨⚠️), in modo che durante l'ascolto dell'audiolibro non si senta un meta-commento sul proprio gioco. Il contenuto viene registrato solo nel log .story.jsonl (per riflessione o come ricordo) e nel dialogo GUI, dove puoi leggerlo una volta e continuare.
-
-
+Cinematic Warning NON è parte della narrazione audiobook — il motore di filtraggio .txt taglia automaticamente il suo contenuto (segnalato da marcatori ⚠️🚨⚠️) in modo che durante l'ascolto dell'audiobook tu non senta un meta-commento sul tuo stesso gioco. Il contenuto va solo nel log .story.jsonl (per riflessione o come ricordo) e nel dialogo GUI, dove puoi leggerlo una volta e continuare.
 
 PASSO 8: Ponte verso il Reżyser — utilizza il Libro del Mondo creato nelle Storie
 
@@ -117,43 +101,41 @@ Cosa puoi fare con questo:
 
 1. Dopo aver terminato il gioco, apri il pannello "🎬  Regista" (Ctrl+1).
 2. Carica il progetto con lo stesso nome — il Reżyser caricherà il file .txt come storia e .md come Libro del Mondo.
-3. Otterrai ora una narrazione classica del Reżyser (scene lunghe e strutturate con atti e capitoli) con accenti nativi dei personaggi che hai apprezzato nelle Storie. Il guardiano Karmel del rifugio che parla con frasi brevi, l'inquisitrice Rosanna con un accento orientale melodioso — tutte le caratteristiche conservate.
+3. Otterrai ora la classica narrazione del Reżyser (scene lunghe e strutturate con atti e capitoli) con gli accenti nativi dei personaggi che hai apprezzato nelle Storie. Il guardiano Karmela dal rifugio che parla con frasi brevi, l'inquisitrice Rosanna con un accento orientale melodioso — tutte le caratteristiche mantenute.
 
-È un ponte unidirezionale: le Storie producono materiale, il Reżyser lo formatta. Non è possibile il contrario — il Reżyser non carica i giochi delle Storie come stato interattivo.
-
-
+È un ponte unidirezionale: le Storie producono materiale, il Reżyser lo formatta. Non è possibile il contrario — il Reżyser non carica giochi dalle Storie come stato interattivo.
 
 PASSO 9: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
 
-L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa abbiamo fatto in concreto:
+L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa abbiamo fatto nello specifico:
 
-CAMPO NARRAZIONE — è un wx.TextCtrl readonly multiline. NVDA legge linearmente tutta la narrazione, puoi navigare con le frecce all'interno del testo, copiare frammenti con Ctrl+C. Il campo non è mai modificabile — modifichi la storia SOLO con un nuovo turno o modificando il file .txt al di fuori dell'applicazione.
+CAMPO ULTIMO TURNO — è un wx.TextCtrl readonly multiline separato (~140 px di altezza) SOPRA la narrazione completa. Dopo ogni turno, il campo viene sostituito con un nuovo frammento (intestazione "--- Turno N ---" + contenuto della narrazione). NVDA lo legge immediatamente dopo il focus (auto-focus dopo il successo del turno), senza navigare attraverso centinaia di righe di storia completa. Dopo aver caricato un gioco salvato, il campo mostra un RIASSUNTO dell'ultimo turno salvato (max 400 caratteri dal buffer `ultimi_turni`) con un prefisso che informa che la narrazione completa è nel campo sottostante.
 
-PULSANTI DI SCELTA DINAMICI — nei modi Scelte e Minor male ogni turno crea nuovi wx.Button nell'area delle scelte. Ognuno ha un tooltip letto da NVDA ("Scegli: continua nella foresta"). Tab tra di essi funziona naturalmente. Enter sul pulsante selezionato invia automaticamente quella scelta al motore narrativo.
+CAMPO NARRAZIONE COMPLETA — è un wx.TextCtrl readonly multiline che cresce dopo ogni turno. NVDA legge linearmente l'intera narrazione, puoi navigare con le frecce all'interno del testo, copiare frammenti con Ctrl+C. Il campo non è mai modificabile — modifichi la storia SOLO con un nuovo turno o modificando il file .txt al di fuori dell'applicazione. Questo campo è sincronizzato con il file `skrypty/<nome>.txt`, puoi considerarlo un'anteprima dell'audiobook.
 
-NASCONDERE LE AREE VUOTE — nel modo Libero l'area delle scelte è COMPLETAMENTE nascosta (wx.Hide), non solo disabilitata — Tab la salta, NVDA non la include nella lista degli elementi. Questo previene la confusione del giocatore che finisce in un segnaposto vuoto. Nei modi 4 e 5 l'area appare solo dopo una validazione positiva della risposta del modello (array delle scelte non vuoto); un'allucinazione del modello (scelte vuote) comporta un fallback al testo libero senza ingombrare l'interfaccia.
+PULSANTI DI SCELTA DINAMICI — nei modi Scelte e Minore Male ogni turno crea nuovi wx.Button nell'area delle scelte. Ognuno ha un tooltip letto da NVDA ("Scegli: vai avanti nella foresta"). Tab tra di essi funziona naturalmente. Enter sul pulsante selezionato invia automaticamente quella scelta al motore narrativo.
 
-SEGNALI SONORI — ogni turno completato è segnalato da wx.Bell (campanello di sistema), seguito da un trasferimento automatico del focus sul campo narrazione. NVDA leggerà quindi la nuova narrazione senza necessità di navigazione manuale.
+NASCONDERE AREE VUOTE — nel modo Libero l'area delle scelte è COMPLETAMENTE nascosta (wx.Hide), non solo disattivata — Tab la salta, NVDA non la include nella lista degli elementi. Questo previene la confusione del giocatore che cade in un segnaposto vuoto. Nei modi 4 e 5 l'area appare solo dopo la convalida positiva della risposta del modello (array di scelte non vuoto); un'allucinazione del modello (scelte vuote) comporta un fallback al testo libero senza ingombrare l'interfaccia.
 
-STATUS DI MEMORIA A COLORI — l'indicatore di memoria del modello cambia il colore del carattere (verde/arancione/rosso) in base al livello di riempimento. Per gli utenti vedenti è un segnale visivo aggiuntivo; NVDA legge comunque il testo dello stato, quindi i non vedenti non perdono informazioni.
+SEGNALI SONORI — ogni turno completato è segnalato da wx.Bell (campanello di sistema), seguito dal trasferimento automatico del focus sul campo della narrazione. NVDA leggerà quindi la nuova narrazione senza necessità di navigazione manuale.
 
-ACCELERATORI DA TASTIERA — tutti i pulsanti hanno il segno `&` davanti a una delle lettere dell'etichetta, che attiva l'acceleratore Alt+lettera. Funziona in modo identico agli altri moduli dell'applicazione.
+STATI DI MEMORIA COLORATI — l'indicatore di memoria del modello cambia il colore del testo (verde/arancione/rosso) in base al livello di riempimento. Per gli utenti vedenti è un ulteriore segnale visivo; NVDA legge comunque il testo dello stato, quindi i non vedenti non perdono informazioni.
 
-
+ACCELERATORI DA TASTIERA — tutti i pulsanti hanno il carattere `&` davanti a una delle lettere dell'etichetta, che attiva l'acceleratore Alt+lettera. Funziona identicamente come in altri moduli dell'applicazione.
 
 Problemi più comuni
 
 Problema: Dopo aver cliccato "Nuovo gioco" appare il messaggio "Chiave API mancante".
-Causa e soluzione: Il file golden_key.env nella cartella principale dell'applicazione non ha una chiave OpenAI valida. Torna alla schermata iniziale (pulsante Home), clicca "Genera il file golden_key.env e apri l'editor di testo" e segui le istruzioni (PASSO 2 del manuale principale).
+Causa e soluzione: Il file golden_key.env nella cartella principale dell'applicazione non ha una chiave OpenAI corretta. Torna alla schermata iniziale (pulsante Home), clicca "Genera il file golden_key.env e apri l'editor di testo" e segui le istruzioni (PASSO 2 del manuale principale).
 
-Problema: Provo a inviare il turno successivo, ma il pulsante "Invia" è disabilitato.
-Causa e soluzione: È in corso un auto-riassunto del contesto o una generazione di Cinematic Warning nel thread di background. Lo stato della memoria mostrerà "Auto-riassunto del contesto in corso...". Attendi qualche secondo — il pulsante si sbloccherà automaticamente al successo.
+Problema: Provo a inviare un altro turno, ma il pulsante "Invia" è disattivato.
+Causa e soluzione: È in corso un auto-riassunto del contesto o la generazione di un Cinematic Warning nel thread di background. Lo stato della memoria mostrerà "Auto-riassunto del contesto in corso...". Aspetta qualche secondo — il pulsante si sbloccherà automaticamente dopo il successo.
 
 Problema: Il messaggio "Memoria del modello sovraccarica" blocca il gioco.
-Causa e soluzione: L'auto-riassunto non ha liberato il buffer (es. limite di velocità OpenAI). Termina il gioco con il comando /koniec o chiudi l'applicazione, poi ricaricala — il motore caricherà solo lo stato da game.json senza la cronologia degli ultimi turni.
+Causa e soluzione: L'auto-riassunto non ha liberato il buffer (ad es. limite di velocità OpenAI). Termina il gioco con il comando /fine o chiudi l'applicazione, poi ricaricalo — il motore caricherà solo lo stato da game.json senza la cronologia degli ultimi turni.
 
-Problema: Nel modo Scelte il motore non ha generato pulsanti, nonostante me li aspettassi.
-Causa e soluzione: Allucinazione del modello — nonostante il modo 4 LLM ha restituito un array delle scelte vuoto. L'applicazione nasconde consapevolmente l'area delle scelte (invece di mostrare un segnaposto vuoto) e permette di continuare con il testo libero. Il turno successivo probabilmente genererà le scelte correttamente.
+Problema: Nel modo Scelte il motore non ha generato pulsanti, anche se me li aspettavo.
+Causa e soluzione: Allucinazione del modello — nonostante il modo 4 LLM ha restituito un array di scelte vuoto. L'applicazione nasconde consapevolmente l'area delle scelte (invece di mostrare un segnaposto vuoto) e consente di continuare con testo libero. Il turno successivo probabilmente genererà le scelte correttamente.
 
 Problema: I file .game.json e .story.jsonl non sono visibili sul desktop.
-Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per gli utenti comuni, invisibile dall'esploratore di file. I file di narrazione (.txt, .md) vanno in skrypty/ — lì li troverai.
+Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per utenti comuni, invisibile dall'esploratore di file. I file di narrazione (.txt, .md) vanno in skrypty/ — li troverai lì.

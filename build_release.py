@@ -346,6 +346,15 @@ def czy_ignorowac(sciezka, nazwa_pliku):
     if any(ignorowany in czesci_sciezki for ignorowany in IGNOROWANE_FOLDERY):
         return True
 
+    # Dane gier modułu Opowieści (v15.0+) — `runtime/opowiesci/<gra>.{game.json,story.jsonl}`.
+    # Tu trzeba precyzyjnej ścieżki, nie samej nazwy folderu, bo `opowiesci`
+    # występuje też w `dictionaries/<kod>/opowiesci/` (prompty systemowe LLM,
+    # MUSZĄ być w paczce). Wykluczamy WYŁĄCZNIE wariant z `runtime/`, zostawiając
+    # paczki promptów nietknięte. `os.walk` zwraca `root` bez trailing slash,
+    # więc sprawdzamy zarówno suffix (sam folder) jak i prefix (pliki w środku).
+    if sciezka_ukosniki.endswith('runtime/opowiesci') or 'runtime/opowiesci/' in sciezka_ukosniki:
+        return True
+
     # Szablony YAML dokumentacji end-userowej — `dictionaries/<kod>/gui/dokumentacja/*.yaml`.
     # Te pliki są surowcem developerskim (treść z placeholderami `{app.wersja}`);
     # end-user dostaje przetworzone wersje w `docs/<id>.<kod>.txt`, generowane

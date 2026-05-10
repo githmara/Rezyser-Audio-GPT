@@ -907,9 +907,9 @@ opowiesci:
   pamiec_status_init: "Kein aktives Spiel"
 
   # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
-  lbl_narracja: "Erzählung"
-  txt_narracja_name: "Erzählungsfeld"
-  txt_narracja_tooltip: "Vollständige Spielnarration — wird nach jeder Runde automatisch aktualisiert. Nur lesbar; gib deine Entscheidungen im Aktionsfeld unten ein."
+  lbl_narracja: "Vollständige Erzählung"
+  txt_narracja_name: "Feld der vollständigen Erzählung"
+  txt_narracja_tooltip: "Die vollständige Spielgeschichte, die nach jeder Runde wächst. Nur zum Lesen; gib deine Entscheidungen im Aktionsfeld unten ein. Das Feld „Letzte Runde\" oben zeigt die frische Szene ohne Navigation durch die gesamte Geschichte."
   txt_narracja_init: |-
     Um die Geschichte zu beginnen, gib den Spielnamen im Feld oben ein, wähle einen Modus und klicke auf „Neues Spiel".
 
@@ -1014,3 +1014,8 @@ opowiesci:
   quick_start_wlasna: "(eigenes Spiel)"
   choice_quick_start_name: "Auswahl eines fertigen Schnellstart-Szenarios"
   choice_quick_start_tooltip: 'Wähle eine fertige Welt, um sofort in die Erzählung einzutauchen. Das Preset injiziert eine kurze Beschreibung der Welt und des Helden in die Maschine und stellt den Standardspielmodus ein. „(eigenes Spiel)" lässt den Start frei — die Maschine erfindet die Welt basierend auf der ersten Aktion.'
+  lbl_ostatnia_tura: "Letzte Runde"
+  txt_ostatnia_tura_name: "Feld mit dem Inhalt der letzten Runde"
+  txt_ostatnia_tura_tooltip: "Eine Abkürzung, die nur die zuletzt generierte Szene enthält — NVDA liest hier die frische Erzählung, ohne durch Hunderte von Zeilen der vollständigen Geschichte zu navigieren. Nach jeder weiteren Runde wird das Feld durch neuen Inhalt ersetzt."
+  txt_ostatnia_tura_init: "(Die letzte Runde wird in diesem Feld nach deiner ersten Aktion erscheinen.)"
+  txt_ostatnia_tura_skrot_naglowek: "[Zusammenfassung der zuletzt gespeicherten Runde — vollständige Erzählung im Feld unten]\n\n"
