@@ -942,6 +942,27 @@ opowiesci:
   btn_wyslij_label:          "&Wyślij"
   btn_wyslij_tooltip:        "Wyślij akcję do silnika narracyjnego"
 
-  # ---- Stub callbacka — Faza 1 (wszystkie przyciski wywołują _on_placeholder)
+  # ---- Stub callbacka — Faza 1 (przyciski Nowa/Wczytaj/Zapisz, do podłączenia w Fazie 3)
   placeholder_msg_tytul:     "Funkcja jeszcze niedostępna"
   placeholder_msg_tresc:     "Ten przycisk zostanie podłączony w kolejnej fazie wdrożenia modułu Opowieści (v15.0). Aktualnie panel istnieje wyłącznie jako szkielet UI dla weryfikacji dostępności pod NVDA."
+
+  # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
+  tura_naglowek_format:      "\n\n--- Tura {numer} ---\n\n"
+  brak_api_tytul:            "Brak klucza API"
+  brak_api_tresc:            "Plik golden_key.env z prawidłowym kluczem OPENAI_API_KEY nie został znaleziony. Moduł Opowieści wymaga aktywnego klucza, by generować tury narracji."
+  puste_pole_tytul:          "Puste pole akcji"
+  puste_pole_tresc:          "Wpisz akcję lub komendę w polu poniżej narracji, zanim klikniesz „Wyślij"."
+  puste_nazwa_tytul:         "Brak nazwy gry"
+  puste_nazwa_tresc:         "Zanim wyślesz pierwszą akcję, wpisz nazwę gry w pasku na górze panelu — pod tą nazwą zostaną zapisane wszystkie pliki opowieści."
+  status_wysylanie:          "Wysyłanie do AI…"
+  status_gotowe:             "Gotowe — Twoja kolej."
+  status_blad:               "Błąd silnika narracyjnego."
+  btn_wybor_tooltip_format:  "Wybierz: {tekst}"
+  blad_ai_tytul:             "Błąd silnika narracyjnego"
+  blad_ai_naglowek:          "Wystąpił błąd podczas generowania tury opowieści. Pełna treść błędu poniżej:"
+  blad_ai_szczegoly_tytul:   "Szczegóły błędu silnika narracyjnego"
+  blad_ai_lbl_tresc:         "Treść błędu (do skopiowania):"
+  blad_ai_tresc_name:        "Pole z treścią błędu silnika narracyjnego"
+  err_rate_limit:            "Limit zapytań do OpenAI został wyczerpany. Odczekaj chwilę albo sprawdź stan konta."
+  err_timeout:               "Czas oczekiwania na odpowiedź modelu został przekroczony (powyżej 120 sekund). Spróbuj ponownie."
+  err_struktura:             "Model wygenerował niewłaściwą strukturę odpowiedzi mimo dwóch prób korekty. Spróbuj ponownie albo sformułuj akcję inaczej."

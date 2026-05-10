@@ -34,9 +34,12 @@ może w każdej chwili odsłuchać scenę, sprawdzić wybory, wrócić do pisani
 from __future__ import annotations
 
 import os
+import threading
+from typing import Any
 
 import wx
 
+import opowiesci_ai as oai
 from i18n import t
 
 
@@ -63,6 +66,10 @@ class OpowiesciPanel(wx.Panel):
     OPOWIESCI_DIR  = os.path.join("runtime", "opowiesci")
     MODE_DIR       = os.path.join("runtime", "skrypty")  # ten sam folder co Reżyser
 
+    # Mapowanie indeksu RadioBox-a (0/1/2) na numer trybu w `.mode` (3/4/5).
+    # Kontynuuje numerację Reżysera (0=Burza, 1=Reżyser1, 2=Reżyser2).
+    _MAPA_TRYB_RB_NA_INT = (oai.TRYB_SWOBODNY, oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO)
+
     def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
         self.SetName(t("opowiesci.panel_name"))
@@ -72,8 +79,20 @@ class OpowiesciPanel(wx.Panel):
         # ``i18n.ustaw_jezyk()`` w main.main().
         self._tool_description = t("opowiesci.tool_description")
 
+        # ---- Faza 2: stan silnika LLM (klient + niezmienny snapshot) -----
+        # ``_snapshot`` żyje w pamięci panelu — Faza 3 zsynchronizuje go z
+        # plikami `.game.json`. Liczniki tury startują od 0; pierwsza akcja
+        # gracza inkrementuje do 1 przed wysyłką.
+        self._client: Any = None
+        self._api_dostepne: bool = False
+        self._snapshot: oai.SnapshotOpowiesci = oai.SnapshotOpowiesci(
+            nazwa_gry="", numer_tury=0,
+        )
+        self._worker_thread: threading.Thread | None = None
+
         self._build_ui()
         self._bind_events()
+        self._init_api()
 
         # Faza 1: obszar wyborów zawsze schowany — silnika narracyjnego
         # nie ma jeszcze, więc placeholder nie ma kontekstu i pusty panel
@@ -349,12 +368,14 @@ class OpowiesciPanel(wx.Panel):
     # ZDARZENIA — wszystkie ślepe w Fazie 1; Faza 2/3/4 podłączą logikę
     # ==================================================================
     def _bind_events(self) -> None:
+        # Faza 3 podmieni `_btn_nowa_gra`/`_btn_wczytaj`/`_btn_zapisz` na realny
+        # lifecycle plików; w Fazie 2 nadal idą w stub.
         self._btn_nowa_gra.Bind(wx.EVT_BUTTON, self._on_placeholder)
         self._btn_wczytaj.Bind(wx.EVT_BUTTON, self._on_placeholder)
         self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_placeholder)
-        self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_placeholder)
-        # `_rb_tryb` nie ma callbacku w Fazie 1 — wybór trybu zostanie odczytany
-        # dopiero przy uruchomieniu gry (Faza 3).
+        # Faza 2: `_btn_wyslij` ma realnego workera silnika narracyjnego.
+        self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_wyslij)
+        # `_rb_tryb` bez callbacku — wybór trybu odczytujemy w `_on_wyslij`.
 
     def _on_placeholder(self, _event: wx.Event) -> None:
         """Stub Fazy 1 — informuje że funkcja zostanie podłączona później."""
@@ -364,3 +385,297 @@ class OpowiesciPanel(wx.Panel):
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
+
+    # ==================================================================
+    # FAZA 2 — Silnik LLM
+    # ==================================================================
+    def _init_api(self) -> None:
+        """Inicjuje klienta OpenAI z ``golden_key.env``.
+
+        Wzorzec :meth:`gui_rezyser.RezyserPanel._init_api` — błąd ładowania
+        nigdy nie blokuje otwarcia panelu. Brak klucza → ``_api_dostepne``
+        zostaje ``False``, a :meth:`_on_wyslij` pokaże MessageBox z
+        `opowiesci.brak_api_tresc`. Sama detekcja przeniesiona do
+        :func:`opowiesci_ai.inicjalizuj_klienta` — moduł silnika i tak
+        potrzebuje tej funkcji do testów izolowanych.
+        """
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        klient = oai.inicjalizuj_klienta(app_dir)
+        if klient is not None:
+            self._client = klient
+            self._api_dostepne = True
+
+    def _aktualny_tryb_int(self) -> int:
+        """Zwraca numer trybu (3/4/5) ze stanu RadioBox-a (indeks 0/1/2)."""
+        return self._MAPA_TRYB_RB_NA_INT[self._rb_tryb.GetSelection()]
+
+    # ------------------------------------------------------------------
+    # _on_wyslij: walidacja → spawn daemon thread → _wyslij_worker
+    # ------------------------------------------------------------------
+    def _on_wyslij(self, _event: wx.Event) -> None:
+        """Handler przycisku „Wyślij" — bramka między GUI a wątkiem tła."""
+        if not self._api_dostepne:
+            wx.MessageBox(
+                t("opowiesci.brak_api_tresc"),
+                t("opowiesci.brak_api_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+
+        user_text = self._txt_akcja.GetValue().strip()
+        if not user_text:
+            wx.MessageBox(
+                t("opowiesci.puste_pole_tresc"),
+                t("opowiesci.puste_pole_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_akcja.SetFocus()
+            return
+
+        nazwa = self._txt_nazwa_gry.GetValue().strip()
+        if not nazwa:
+            # Faza 2 wymaga nazwy do logu i kontekstu, nawet jeśli plików
+            # jeszcze nie zapisujemy (lifecycle dochodzi w Fazie 3).
+            wx.MessageBox(
+                t("opowiesci.puste_nazwa_tresc"),
+                t("opowiesci.puste_nazwa_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_nazwa_gry.SetFocus()
+            return
+
+        tryb = self._aktualny_tryb_int()
+
+        # Aktualizujemy snapshot przed wysyłką: nazwa + nowy numer tury.
+        # Snapshot jest niezmienny po stronie wątku tła, ale tutaj jeszcze
+        # możemy mutować referencję panelu (GIL: pojedyncze przypisanie
+        # atrybutu jest atomowe w CPythonie).
+        self._snapshot = oai.SnapshotOpowiesci(
+            nazwa_gry=nazwa,
+            numer_tury=self._snapshot.numer_tury + 1,
+            ostatnie_tury=self._snapshot.ostatnie_tury,
+            postacie_aktywne=self._snapshot.postacie_aktywne,
+            stan_poprzedni=self._snapshot.stan_poprzedni,
+            seed_swiata=self._snapshot.seed_swiata,
+            jezyk_projektu=self._snapshot.jezyk_projektu,
+        )
+
+        # Lock UI: zapobiega podwójnej wysyłce, dezorientacji NVDA.
+        self._btn_wyslij.Disable()
+        self._txt_akcja.SetValue("")
+        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_wysylanie"))
+
+        # Daemon thread — proces nie czeka na nas przy zamknięciu aplikacji.
+        snapshot_kopia = self._snapshot
+        self._worker_thread = threading.Thread(
+            target=self._wyslij_worker,
+            args=(snapshot_kopia, user_text, tryb),
+            daemon=True,
+        )
+        self._worker_thread.start()
+
+    # ------------------------------------------------------------------
+    # _wyslij_worker: w wątku tła; do GUI tylko przez wx.CallAfter
+    # ------------------------------------------------------------------
+    def _wyslij_worker(
+        self,
+        snapshot:   oai.SnapshotOpowiesci,
+        user_input: str,
+        tryb:       int,
+    ) -> None:
+        """Worker w tle — wątek nigdy nie dotyka widgetów wxPython bezpośrednio.
+
+        Wszelka komunikacja z GUI idzie przez ``wx.CallAfter`` — gwarantuje
+        wykonanie w wątku głównym (event loop wxPython jest single-threaded).
+        Wzorzec z :meth:`gui_rezyser.RezyserPanel._wyslij_worker`.
+        """
+        try:
+            wynik = oai.generuj_ture(
+                klient=self._client,
+                snapshot=snapshot,
+                user_input=user_input,
+                tryb=tryb,
+            )
+        except Exception as exc:  # noqa: BLE001
+            # Łapiemy wszystko (RateLimitError, APITimeoutError, RuntimeError
+            # po wyczerpaniu retry, JSONDecode, etc.) — kategoryzacja per typ
+            # leży w :meth:`_obsluz_blad` żeby trzymać worker krótki.
+            wx.CallAfter(self._obsluz_blad, exc)
+            return
+
+        wx.CallAfter(self._obsluz_ture, wynik, user_input, tryb)
+
+    # ------------------------------------------------------------------
+    # _obsluz_ture: callback w wątku UI — append narracji + wybory
+    # ------------------------------------------------------------------
+    def _obsluz_ture(
+        self,
+        wynik:      oai.WynikTury,
+        user_input: str,
+        tryb:       int,
+    ) -> None:
+        """Aktualizacja UI po sukcesie tury — wszystko w wątku głównym."""
+        # 1. Append narracji do TextCtrl. AppendText jest tańszy niż SetValue
+        # (nie kasuje historii) i zachowuje pozycję kursora bliską końca.
+        naglowek = t(
+            "opowiesci.tura_naglowek_format",
+            numer=self._snapshot.numer_tury,
+        )
+        self._txt_narracja.AppendText(naglowek + wynik.narracja)
+        self._txt_narracja.SetInsertionPointEnd()
+
+        # 2. Aktualizacja snapshotu: nowe `ostatnie_tury` + postacie + stan.
+        # Trzymamy ostatnie 6 par (akcja, narracja_skrót) — Faza 4 dorobi
+        # streszczenie po 70% kontekstu; tu prosty FIFO.
+        nowe_ostatnie = list(self._snapshot.ostatnie_tury)
+        nowe_ostatnie.append({
+            "akcja_gracza":  user_input,
+            "narracja_skrot": wynik.narracja[:400],  # skracamy do oszczędności kontekstu
+        })
+        nowe_ostatnie = nowe_ostatnie[-6:]
+
+        self._snapshot = oai.SnapshotOpowiesci(
+            nazwa_gry=self._snapshot.nazwa_gry,
+            numer_tury=self._snapshot.numer_tury,
+            ostatnie_tury=nowe_ostatnie,
+            postacie_aktywne=wynik.postacie_aktywne,
+            stan_poprzedni=wynik.stan,
+            seed_swiata=self._snapshot.seed_swiata,
+            jezyk_projektu=self._snapshot.jezyk_projektu,
+        )
+
+        # 3. Wybory: w trybie Swobodnym (3) zawsze ukryte, w 4/5 widoczne
+        # tylko gdy LLM zwrócił niepustą tablicę (halucynacja → ukrywamy).
+        self._przeladuj_wybory(wynik.wybory, tryb)
+
+        # 4. Status + odblokowanie + dźwięk + fokus.
+        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
+        self._btn_wyslij.Enable()
+        wx.Bell()  # A11y: NVDA usłyszy „pinga" — sygnał gotowości
+        self._txt_narracja.SetFocus()  # NVDA przeczyta nową narrację
+
+    def _przeladuj_wybory(self, wybory: list[dict[str, str]], tryb: int) -> None:
+        """Rebuilduje obszar wyborów: kasuje stare przyciski, dodaje nowe.
+
+        KOLEJNOŚĆ KRYTYCZNA (znaleziono w analizie codebase):
+        1. ``_sizer_wyborow.Clear(delete_windows=True)`` — usuwa stare widgety
+        2. dodanie nowych ``wx.Button`` z bind-em na ``_on_wybor_btn``
+        3. ``_panel_wyborow.Layout()`` ORAZ ``self.Layout()`` — sizery
+           zewnętrzne też muszą się przeliczyć po zmianie zawartości
+        4. ``_aktywuj_obszar_wyborow(visible)`` — POTEM, bo Show/Hide z
+           pustym sizerem nie ustabilizowałby layoutu
+        """
+        self._sizer_wyborow.Clear(delete_windows=True)
+        # Referencja do placeholdera została zniszczona razem z panelem — usuwamy.
+        self._lbl_placeholder_wyborow = None
+
+        pokazac = (
+            tryb in (oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO)
+            and len(wybory) > 0
+        )
+
+        if pokazac:
+            for wybor in wybory:
+                etykieta = f"{wybor['id']}.  {wybor['tekst']}"
+                btn = wx.Button(self._panel_wyborow, label=etykieta)
+                btn.SetToolTip(t(
+                    "opowiesci.btn_wybor_tooltip_format",
+                    tekst=wybor["tekst"],
+                ))
+                # Closure z `tekst` — robimy lambda z default arg żeby
+                # uniknąć late-binding gotcha (każdy przycisk dostaje
+                # SWÓJ tekst, nie ostatniego z pętli).
+                btn.Bind(
+                    wx.EVT_BUTTON,
+                    lambda evt, t_wyb=wybor["tekst"]: self._on_wybor_btn(evt, t_wyb),
+                )
+                self._sizer_wyborow.Add(btn, flag=wx.EXPAND | wx.ALL, border=4)
+
+        self._panel_wyborow.Layout()
+        self.Layout()
+        self._aktywuj_obszar_wyborow(pokazac)
+
+    def _on_wybor_btn(self, _event: wx.Event, tekst_wyboru: str) -> None:
+        """Klik na przycisku wyboru — wpisuje tekst do pola akcji + auto-wysyła."""
+        self._txt_akcja.SetValue(tekst_wyboru)
+        # Symulujemy klik na „Wyślij" — przechodzi przez tę samą walidację.
+        # Bezpośrednie wywołanie `_on_wyslij(None)` zamiast EVT, bo to nie
+        # jest zdarzenie z magistrali wxPython, tylko nasza synteza.
+        self._on_wyslij(_event)
+
+    # ------------------------------------------------------------------
+    # _obsluz_blad: callback w wątku UI po wyjątku w workerze
+    # ------------------------------------------------------------------
+    def _obsluz_blad(self, exc: Exception) -> None:
+        """Mapuje wyjątek na komunikat lokalizowany i pokazuje dialog."""
+        # Lazy import — `openai` może nie być dostępne (brak klucza, brak
+        # paczki w środowisku testowym), a wtedy `import openai` na górze
+        # pliku rzuciłby ImportError i zablokowałby otwarcie panelu.
+        try:
+            import openai  # noqa: PLC0415
+            if isinstance(exc, openai.RateLimitError):
+                msg = t("opowiesci.err_rate_limit")
+            elif isinstance(exc, openai.APITimeoutError):
+                msg = t("opowiesci.err_timeout")
+            else:
+                msg = str(exc)
+        except ImportError:
+            msg = str(exc)
+
+        # Heurystyka: nasz custom RuntimeError o niewłaściwej strukturze
+        # ma w treści „niewłaściwą strukturę JSON" — podmieniamy na klucz
+        # lokalizowany żeby user nie widział angielskiej technicznej treści.
+        if "niewłaściwą strukturę JSON" in msg:
+            msg = t("opowiesci.err_struktura")
+
+        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_blad"))
+        self._btn_wyslij.Enable()
+        self._wyswietl_blad_ai(msg)
+
+    # ------------------------------------------------------------------
+    # _wyswietl_blad_ai: krótki błąd → MessageBox; długi → dialog z TextCtrl
+    # ------------------------------------------------------------------
+    def _wyswietl_blad_ai(self, tresc_bledu: str) -> None:
+        """Wzorzec z :meth:`gui_rezyser.RezyserPanel._wyswietl_blad_ai`.
+
+        Krótki błąd (≤200 znaków bez newline) idzie w MessageBox — szybkie
+        powiadomienie. Długi (np. dump traceback) idzie w dialog z
+        ``wx.TextCtrl(TE_READONLY)``, który NVDA potrafi przeczytać i
+        który użytkownik może kopiować (Ctrl+C).
+        """
+        jest_krotki = len(tresc_bledu) <= 200 and "\n" not in tresc_bledu
+        if jest_krotki:
+            wx.MessageBox(
+                tresc_bledu,
+                t("opowiesci.blad_ai_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
+
+        dlg = wx.Dialog(
+            self,
+            title=t("opowiesci.blad_ai_szczegoly_tytul"),
+            size=(640, 400),
+        )
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        lbl_head = wx.StaticText(dlg, label=t("opowiesci.blad_ai_naglowek"))
+        lbl_copy = wx.StaticText(dlg, label=t("opowiesci.blad_ai_lbl_tresc"))
+        txt = wx.TextCtrl(
+            dlg,
+            value=tresc_bledu,
+            style=wx.TE_MULTILINE | wx.TE_READONLY,
+            name=t("opowiesci.blad_ai_tresc_name"),
+        )
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
+        sizer.Add(lbl_head, flag=wx.ALL,                                       border=8)
+        sizer.Add(lbl_copy, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,               border=8)
+        sizer.Add(txt,      proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        sizer.Add(btn_ok,   flag=wx.ALL | wx.ALIGN_RIGHT,                      border=8)
+        dlg.SetSizer(sizer)
+        txt.SetFocus()
+        dlg.ShowModal()
+        dlg.Destroy()
