@@ -17,7 +17,7 @@ tresc: |
 
   Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente di scrivere, pianificare, formattare e tradurre automaticamente sceneggiature per radiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori locali di lettori di schermo (NVDA).
 
-  Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per costruire la struttura del file (Architetto Audiolibri) e — dalla versione 13.0 — dal Manager delle Regole, in cui senza Python puoi aggiungere un nuovo accento, cifrario o modalità creativa (vedi PASSO 7b sotto). Tutti e quattro gli strumenti sono disponibili in una sola finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+4.
+  Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per costruire la struttura del file (Architetto Audiolibri), dal Manager delle Regole (dalla versione 13.0 — senza Python puoi aggiungere un nuovo accento, cifrario o modalità creativa, vedi PASSO 7b sotto) e — dalla versione 15.0 — dal modulo Storie (fiction interattiva in seconda persona generata da IA, letta da TTS o screen reader, descritta nel manuale separato opowiesci.it.txt). Tutti e cinque gli strumenti sono disponibili in una sola finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+5.
 
 
 

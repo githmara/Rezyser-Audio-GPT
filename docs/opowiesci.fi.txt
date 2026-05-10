@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Moduuli Interaktiiviset Tarinat (14.0 – Julkaisuversio)
+Reżyser Audio GPT — Moduuli Interaktiiviset Tarinat (15.0 – Julkaisuversio)
 
 Toinen sovelluksen päätila Reżyserin rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly kertoo tarinan toisessa persoonassa yksikössä ("Kävelet sumuisen metsän läpi, tunnet märän lehtien tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla minkä tahansa toiminnon vapaana tekstinä tai valitsemalla yhden numeroiduista vaihtoehdoista.
 

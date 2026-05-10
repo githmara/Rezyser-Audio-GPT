@@ -17,7 +17,7 @@ tresc: |
 
   ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radioteatros y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 
-  El conjunto consta del estudio principal (Dirección), la herramienta de traducciones y acentos (Políglota), la herramienta para construir la estructura del archivo (Arquitecto de Audiolibros) y, desde la versión 13.0, el Gestor de Reglas, donde puedes añadir un nuevo acento, cifrado o modo creativo sin Python (ver PASO 7b abajo). Las cuatro herramientas están disponibles en una sola ventana del programa, conmutables mediante botones en la barra o atajos de teclado Ctrl+1..Ctrl+4.
+  El conjunto consta del estudio principal (Dirección), la herramienta de traducciones y acentos (Políglota), la herramienta para construir la estructura del archivo (Arquitecto de Audiolibros), el Gestor de Reglas (desde la versión 13.0 — sin Python puedes añadir un nuevo acento, cifrado o modo creativo, ver PASO 7b abajo) y, desde la versión 15.0, el módulo Historias (ficción interactiva en segunda persona generada por IA, leída por TTS o lector de pantalla, descrita en el manual separado opowiesci.es.txt). Las cinco herramientas están disponibles en una sola ventana del programa, conmutables mediante botones en la barra o atajos de teclado Ctrl+1..Ctrl+5.
 
 
 

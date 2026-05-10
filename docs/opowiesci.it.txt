@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modulo Storie Interattive (14.0 – Versione di Pubblicazione)
+Reżyser Audio GPT — Modulo Storie Interattive (15.0 – Versione di Pubblicazione)
 
 Il secondo principale modo dell'applicazione accanto al Reżyser — questa volta diventi il giocatore di una storia generata dinamicamente invece del suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero o scegliendo una delle opzioni numerate.
 

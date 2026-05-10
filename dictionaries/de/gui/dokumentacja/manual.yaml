@@ -17,7 +17,7 @@ tresc: |
 
   Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
-  Das Set besteht aus dem Hauptstudio (Regie), dem Übersetzungs- und Akzentwerkzeug (Polyglott), dem Werkzeug zur Strukturierung von Dateien (Audiobook-Architekt) und — seit Version 13.0 — dem Regelmanager, in dem Sie ohne Python einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen können (siehe SCHRITT 7b unten). Alle vier Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+4 umgeschaltet wird.
+  Das Set besteht aus dem Hauptstudio (Regie), dem Übersetzungs- und Akzentwerkzeug (Polyglott), dem Werkzeug zur Strukturierung von Dateien (Audiobook-Architekt), dem Regelmanager (seit Version 13.0 — ohne Python kannst du einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen, siehe SCHRITT 7b unten) und — seit Version 15.0 — dem Geschichten-Modul (interaktive Erzählung in der zweiten Person, KI-generiert, von TTS oder einem Screenreader vorgelesen, beschrieben im separaten Handbuch opowiesci.de.txt). Alle fünf Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+5 umgeschaltet wird.
 
 
 

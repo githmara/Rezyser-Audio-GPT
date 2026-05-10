@@ -17,7 +17,7 @@ tresc: |
 
   Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour des pièces radiophoniques et des livres audio. Il a été optimisé pour fonctionner avec des synthétiseurs vocaux professionnels et des moteurs de lecteurs d'écran locaux (NVDA).
 
-  L'ensemble se compose du studio principal (Réalisateur), de l'outil de traduction et d'accents (Polyglotte), de l'outil de construction de structure de fichier (Architecte de Livres Audio) et — depuis la version 13.0 — du Gestionnaire de Règles, où vous pouvez ajouter un nouvel accent, un chiffre ou un mode créatif sans Python (voir ÉTAPE 7b ci-dessous). Les quatre outils sont disponibles dans une seule fenêtre de programme, commutable par des boutons sur la barre ou des raccourcis clavier Ctrl+1..Ctrl+4.
+  L'ensemble se compose du studio principal (Réalisateur), de l'outil de traduction et d'accents (Polyglotte), de l'outil de construction de structure de fichier (Architecte de Livres Audio), du Gestionnaire de Règles (depuis la version 13.0 — vous pouvez ajouter un nouvel accent, un chiffre ou un mode créatif sans Python, voir ÉTAPE 7b ci-dessous) et — depuis la version 15.0 — du module Histoires (fiction interactive à la deuxième personne générée par IA, lue par TTS ou lecteur d'écran, décrite dans le manuel séparé opowiesci.fr.txt). Les cinq outils sont disponibles dans une seule fenêtre de programme, commutable par des boutons sur la barre ou des raccourcis clavier Ctrl+1..Ctrl+5.
 
   ÉTAPE 1 : Première exécution (Cross-Platform)
 

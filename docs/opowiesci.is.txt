@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modull Interaktívar Sögur (14.0 – Útgáfuútgáfa)
+Reżyser Audio GPT — Modull Interaktívar Sögur (15.0 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hlið Reżysera — nú verður þú leikmaður í sögunni sem er sjálfkrafa búin til í stað þess að vera höfundur hennar. Gervigreindin segir söguna í annarri persónu eintölu („Þú gengur í gegnum þokuskóg, finnur lyktina af blautum laufum..."), og þú ákveður næstu hreyfingu — með því að skrifa hvaða aðgerð sem er í frjálsum texta eða velja einn af tölusettum valkostum.
 
