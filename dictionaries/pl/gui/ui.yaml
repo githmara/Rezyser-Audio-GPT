@@ -62,6 +62,7 @@ main:
     poliglota:           "&Poliglota\tCtrl+2"
     konwerter:           "&Konwerter\tCtrl+3"
     manager:             "&Manager Reguł\tCtrl+4"
+    opowiesci:           "&Opowieści\tCtrl+5"
     zakoncz:             "Za&kończ\tAlt+F4"
     jezyk_interfejsu:    "&Język interfejsu"
   menu_status:
@@ -70,6 +71,7 @@ main:
     poliglota:           "Otwiera moduł Poligloty – akcenty i tłumaczenie tekstów"
     konwerter:           "Otwiera moduł Konwertera – tworzenie plików Word"
     manager:             "Otwiera Managera Reguł – eksplorator plików YAML w dictionaries/ i kreator nowych akcentów / trybów / szyfrów"
+    opowiesci:           "Otwiera moduł Opowieści – interaktywna fikcja II-osobowa generowana przez AI, czytana przez TTS/czytnik ekranu"
     zakoncz:             "Zamknij aplikację"
     jezyk_interfejsu:    "Wybierz język interfejsu aplikacji (zmiana wymaga ponownego uruchomienia)"
   btn:
@@ -77,17 +79,20 @@ main:
     poliglota:           "🌍  &Poliglota"
     konwerter:           "📄  &Konwerter"
     manager:             "📚  &Manager Reguł"
+    opowiesci:           "📖  &Opowieści"
   tooltip:
     rezyser:             "Moduł Reżyserii (Ctrl+1): Pisz skrypty i prozę z pomocą AI"
     poliglota:           "Moduł Poligloty (Ctrl+2): Akcenty i tłumaczenie tekstów"
     konwerter:           "Moduł Konwertera (Ctrl+3): Twórz pliki Word z nagłówkami"
     manager:             "Manager Reguł (Ctrl+4): Eksploruj pliki YAND w dictionaries/, twórz nowe akcenty, szyfry i tryby (szablon lub prompt dla AI)"
+    opowiesci:           "Moduł Opowieści (Ctrl+5): Interaktywna fikcja II-osobowa — generowana przez AI, czytana przez TTS"
   nazwy_narzedzi:
     dom:                 "Dom"
     rezyser:             "Reżyser"
     poliglota:           "Poliglota"
     konwerter:           "Konwerter"
     manager:             "Manager Reguł"
+    opowiesci:           "Opowieści"
   dialog:
     zmiana_jezyka_tytul: "Zmiana języka interfejsu"
     zmiana_jezyka_tresc: |-
@@ -871,3 +876,72 @@ updater:
     Odwiedź stronę wydania na GitHubie i pobierz archiwum „Source code" lub sklonuj repozytorium:
 
     {url_release}
+
+# -----------------------------------------------------------------------------
+# OPOWIEŚCI – panel modułu „Interaktywne Opowieści" (gui_opowiesci.py)
+# Drugi główny tryb obok Reżysera, wprowadzony w v15.0. Interaktywna fikcja
+# II-osobowa generowana przez LLM, odczytywana przez TTS/NVDA. JSON-schema
+# response, lifecycle plików w skrypty/ + runtime/opowiesci/. Numeracja .mode
+# kontynuuje numerację Reżysera: 3=Swobodny, 4=Wyborów, 5=Mniejsze zło.
+# -----------------------------------------------------------------------------
+opowiesci:
+  # ---- BLOK A — Nagłówek modułu ---------------------------------------------
+  panel_name:                "Panel Opowieści"
+  description_name:          "Opis modułu Opowieści"
+  heading:                   "📖  Interaktywne Opowieści"
+  tool_description: |-
+    Wcielasz się w bohatera dynamicznie generowanej historii. Wpisz nazwę nowej gry i wybierz tryb, by rozpocząć — narracja prowadzona jest w drugiej osobie i odczytywana przez czytnik ekranu lub TTS.
+
+    Tryb swobodny pozwala spróbować dowolnej akcji wpisanej w pole na dole. Tryb wyborów daje 3-5 ponumerowanych opcji do wyboru przyciskami. Tryb „mniejsze zło" stawia wyłącznie przed niekorzystnymi wyborami — wybierasz, co ci się mniej opłaca. Komendy zaczynające się od ukośnika (/zapisz, /wczytaj, /ustawienia, /koniec, /wizualizuj) działają w każdej chwili.
+
+  # ---- BLOK B — Pasek pliku gry ---------------------------------------------
+  lbl_nazwa_gry:             "Nazwa gry"
+  txt_nazwa_gry_name:        "Pole nazwy gry"
+  txt_nazwa_gry_hint:        "np. moje_przygody_1"
+  txt_nazwa_gry_tooltip:     "Nazwa pliku gry — używana dla autozapisu narracji do skrypty/<nazwa>.txt i stanu w runtime/opowiesci/<nazwa>.game.json"
+  btn_nowa_gra_label:        "&Nowa gra"
+  btn_nowa_gra_tooltip:      "Rozpocznij nową grę pod podaną nazwą — wymaga nazwy gry i wybranego trybu"
+  btn_wczytaj_label:         "&Wczytaj"
+  btn_wczytaj_tooltip:       "Wczytaj wcześniej zapisaną grę z runtime/opowiesci/<nazwa>.game.json"
+  btn_zapisz_label:          "&Zapisz"
+  btn_zapisz_tooltip:        "Wymuś ręczny zapis stanu gry (autozapis działa też po każdej turze)"
+
+  # ---- BLOK C — RadioBox trybu ----------------------------------------------
+  rb_tryb_label:             "Tryb gry"
+  rb_tryb_name:              "Wybór trybu gry"
+  rb_tryb_tooltip:           "Tryb określa charakter narracji i sposób interakcji"
+  tryb_swobodny:             "Tryb &swobodny"
+  tryb_wyborow:              "Tryb w&yborów"
+  tryb_mniejsze_zlo:         "&Mniejsze zło"
+
+  # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
+  pamiec_lbl:                "Pamięć modelu:"
+  pamiec_gauge_name:         "Wskaźnik wykorzystania okna kontekstowego modelu"
+  pamiec_status_name:        "Status pamięci modelu"
+  pamiec_status_init:        "Brak aktywnej gry"
+
+  # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
+  lbl_narracja:              "Narracja"
+  txt_narracja_name:         "Pole narracji"
+  txt_narracja_tooltip:      "Pełna narracja gry — automatycznie aktualizowana po każdej turze. Tylko do odczytu; w pole akcji poniżej wpisuj swoje decyzje."
+  txt_narracja_init: |-
+    Aby rozpocząć opowieść, wpisz nazwę gry w polu powyżej, wybierz tryb i kliknij „Nowa gra".
+
+    Możesz też wczytać wcześniejszą grę przyciskiem „Wczytaj".
+
+  # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
+  lbl_wybory:                "Twoje wybory"
+  panel_wyborow_name:        "Obszar wyborów"
+  panel_wyborow_placeholder: "Wybory pojawią się tutaj w trybie wyborów lub mniejszego zła. W trybie swobodnym ten obszar pozostaje pusty — opisuj akcje free-textem w polu poniżej."
+
+  # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
+  lbl_akcja:                 "Twoja akcja lub komenda"
+  txt_akcja_name:            "Pole akcji gracza"
+  txt_akcja_hint:            "Opisz, co robisz, lub wpisz komendę zaczynającą się od /"
+  txt_akcja_tooltip:         "Wpisz dowolną akcję (free-text) lub komendę systemową: /zapisz /wczytaj /ustawienia /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
+  btn_wyslij_label:          "&Wyślij"
+  btn_wyslij_tooltip:        "Wyślij akcję do silnika narracyjnego"
+
+  # ---- Stub callbacka — Faza 1 (wszystkie przyciski wywołują _on_placeholder)
+  placeholder_msg_tytul:     "Funkcja jeszcze niedostępna"
+  placeholder_msg_tresc:     "Ten przycisk zostanie podłączony w kolejnej fazie wdrożenia modułu Opowieści (v15.0). Aktualnie panel istnieje wyłącznie jako szkielet UI dla weryfikacji dostępności pod NVDA."
