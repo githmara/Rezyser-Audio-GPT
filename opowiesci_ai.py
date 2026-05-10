@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import jsonschema
+import tiktoken
 from dotenv import load_dotenv
 
 # =============================================================================
@@ -49,6 +50,22 @@ TRYB_BURZA         = 0          # /visualize — bez zapisu do plików
 TRYB_SWOBODNY      = 3          # free-text input, wybory opcjonalne
 TRYB_WYBOROW       = 4          # ZAWSZE 3-5 wyborów A-E
 TRYB_MNIEJSZE_ZLO  = 5          # jak 4, ale wszystkie wybory niekorzystne
+
+# Pamięć modelu: gpt-4o-mini ma 128k context window. Liczymy TYLKO input,
+# rezerwując ~5k na output (max_tokens=2000 + bufor na thinking/system).
+# Próg 70% triggeruje auto-streszczenie; 90% to alarm na wypadek gdyby
+# streszczenie się nie powiodło (race condition / brak API).
+OKNO_KONTEKSTU_MAX = 128_000
+PROG_OSTRZEZENIE   = 0.70   # 70% — auto-streszczenie
+PROG_ALARM         = 0.90   # 90% — alarm dla user-a, nie wysyłaj kolejnej tury
+TURY_DO_CINEMATIC  = 150    # licznik tur (niezależny od tokenów)
+
+# Poziomy statusu pamięci — używane przez GUI do doboru koloru i komunikatu.
+# Te same nazwy co `core_rezyser.POZIOM_*` dla spójności UI.
+POZIOM_CZYSTA      = "czysta"
+POZIOM_OK          = "ok"
+POZIOM_OSTRZEZENIE = "ostrzezenie"
+POZIOM_ALARM       = "alarm"
 
 # =============================================================================
 # JSON-schema dla strukturyzowanej tury
@@ -165,6 +182,20 @@ class WynikTury:
     stan:             dict[str, Any]
     meta:             dict[str, Any]
     surowy_json:      str   # do zapisu w `.story.jsonl` (Faza 3)
+
+
+@dataclass
+class StatusPamieci:
+    """Status wskaźnika pamięci modelu — gotowe dane dla GUI.
+
+    Pole ``poziom`` jest jednym z ``POZIOM_*`` — GUI dobiera kolor
+    (zielony/pomarańczowy/czerwony) i decyduje czy auto-streszczenie
+    odpalić w tle.
+    """
+    procent:        int          # 0–100, do `wx.Gauge.SetValue()`
+    tokeny:         int          # surowa liczba tokenów wejściowych
+    komunikat:      str          # pełny tekst (z emoji) do `_lbl_pamiec_status`
+    poziom:         str          # POZIOM_CZYSTA/OK/OSTRZEZENIE/ALARM
 
 
 # =============================================================================
@@ -397,3 +428,189 @@ def wygeneruj_wizualizacje(
         timeout=60.0,
     )
     return resp.choices[0].message.content or ""
+
+
+# =============================================================================
+# FAZA 4 — Pamięć modelu (tiktoken) + auto-streszczenie + Cinematic Warning
+# =============================================================================
+
+def _kodowanie_dla_modelu(model: str) -> tiktoken.Encoding:
+    """Zwraca encoder tiktoken — fallback na ``o200k_base`` dla nowych modeli.
+
+    `gpt-4o`/`gpt-4o-mini` używają tokenizera ``o200k_base``. Jeśli OpenAI
+    wyda nowszy model, którego biblioteka jeszcze nie zna,
+    ``encoding_for_model`` rzuci ``KeyError`` — łapiemy i używamy
+    najsensowniejszego defaultu zamiast crashować GUI.
+    """
+    try:
+        return tiktoken.encoding_for_model(model)
+    except KeyError:
+        return tiktoken.get_encoding("o200k_base")
+
+
+def policz_tokeny(snapshot: SnapshotOpowiesci, tryb: int, model: str = MODEL_DOMYSLNY) -> int:
+    """Liczy tokeny tego, co poszłoby w kolejnym wywołaniu :func:`generuj_ture`.
+
+    Tylko **input** — output (max_tokens=2000) liczy się osobno po stronie
+    OpenAI. Wartość użyteczna dla :func:`oblicz_status_pamieci` żeby
+    pokazać user-owi % zapełnienia okna kontekstowego.
+
+    Wzorzec idiomatic z OpenAI cookbook ("Counting tokens for chat
+    completions") — sumujemy tokeny w polu ``content`` każdego
+    message-a, plus stała narzut na sam format chat (~4 tokeny per wiadomość
+    + 2 tokeny na sygnaturę odpowiedzi).
+    """
+    encoder = _kodowanie_dla_modelu(model)
+    prompt_systemowy = _zbuduj_prompt_systemowy(tryb) if tryb in (TRYB_SWOBODNY, TRYB_WYBOROW, TRYB_MNIEJSZE_ZLO) else _PROMPT_VISUALIZE
+    user_payload     = _zbuduj_user_payload(snapshot, "")  # akcja gracza nieznana — szacunek przed wpisaniem
+
+    naglowek_chat_per_msg = 4   # "<|im_start|>role\n", "<|im_sep|>", "<|im_end|>\n"
+    naglowek_response     = 2
+
+    suma = naglowek_response
+    for tresc in (prompt_systemowy, user_payload):
+        suma += naglowek_chat_per_msg + len(encoder.encode(tresc))
+    return suma
+
+
+def oblicz_status_pamieci(
+    snapshot: SnapshotOpowiesci,
+    tryb:     int,
+    model:    str = MODEL_DOMYSLNY,
+) -> StatusPamieci:
+    """Zwraca status pamięci modelu dla wskaźnika GUI.
+
+    Logika analogiczna do :meth:`core_rezyser.ProjektRezysera.status_pamieci_modelu`,
+    ale liczy tokeny zamiast znaków (gpt-4o ma 128k token window — wartość
+    znakowa byłaby gruba i nieprecyzyjna).
+    """
+    if snapshot.numer_tury == 0 and not snapshot.ostatnie_tury:
+        return StatusPamieci(
+            procent=0,
+            tokeny=0,
+            komunikat="🟢 Pamięć czysta. Maszyna gotowa na nową historię.",
+            poziom=POZIOM_CZYSTA,
+        )
+
+    tokeny = policz_tokeny(snapshot, tryb, model)
+    procent = min(int(tokeny / OKNO_KONTEKSTU_MAX * 100), 100)
+    udzial  = tokeny / OKNO_KONTEKSTU_MAX
+
+    if udzial >= PROG_ALARM:
+        return StatusPamieci(
+            procent=procent,
+            tokeny=tokeny,
+            komunikat=(
+                f"🚨 KRYTYCZNE PRZEŁADOWANIE: {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów. "
+                "Auto-streszczenie nie zwolniło bufora — wpisz /streszczenie ręcznie albo "
+                "zakończ grę i wczytaj nową."
+            ),
+            poziom=POZIOM_ALARM,
+        )
+
+    if udzial >= PROG_OSTRZEZENIE:
+        return StatusPamieci(
+            procent=procent,
+            tokeny=tokeny,
+            komunikat=(
+                f"⚠️ STAN OSTRZEGAWCZY: {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów. "
+                "Auto-streszczenie zostanie odpalone przed kolejną turą."
+            ),
+            poziom=POZIOM_OSTRZEZENIE,
+        )
+
+    return StatusPamieci(
+        procent=procent,
+        tokeny=tokeny,
+        komunikat=f"🟢 Zużycie pamięci: {tokeny} / {OKNO_KONTEKSTU_MAX} tokenów. Bezpieczny bufor.",
+        poziom=POZIOM_OK,
+    )
+
+
+# =============================================================================
+# Auto-streszczenie kontekstu (wywoływane po przekroczeniu PROG_OSTRZEZENIE)
+# =============================================================================
+
+_PROMPT_STRESZCZENIE = """Jesteś asystentem narracyjnym. Otrzymasz listę ostatnich tur interaktywnej opowieści (akcja gracza + skrót narracji per tura). Wygeneruj kondensat 200-400 słów obejmujący: kluczowe wydarzenia fabularne, decyzje gracza i ich konsekwencje, ważne postacie pojawiające się w narracji, miejsca odwiedzone, niedokończone wątki. Pisz w trzeciej osobie, neutralnie, jak streszczenie powieści — to NIE jest tura gry, gracz nie czyta tego jako narracji, ale silnik narracyjny używa go jako pamięci długotrwałej."""
+
+
+def streszczaj_kontekst(
+    klient:   Any,
+    snapshot: SnapshotOpowiesci,
+    model:    str = MODEL_DOMYSLNY,
+) -> str:
+    """Generuje streszczenie ``snapshot.ostatnie_tury`` jako pamięć długotrwałą.
+
+    GUI po sukcesie zastępuje ``ostatnie_tury`` tablicą z jednym dictem typu
+    ``{"akcja_gracza": "(streszczenie poprzednich N tur)", "narracja_skrot": <streszczenie>}``,
+    żeby kontekst dla LLM zmieścił się w oknie i jednocześnie zachował
+    ciągłość fabularną.
+    """
+    payload = {
+        "ostatnie_tury":    snapshot.ostatnie_tury,
+        "postacie_aktywne": snapshot.postacie_aktywne,
+        "stan":             snapshot.stan_poprzedni,
+        "tura_numer":       snapshot.numer_tury,
+    }
+    user_msg = (
+        "Lista tur do streszczenia poniżej.\n\n"
+        + json.dumps(payload, ensure_ascii=False, indent=2)
+    )
+    resp = klient.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": _PROMPT_STRESZCZENIE},
+            {"role": "user",   "content": user_msg},
+        ],
+        temperature=0.3,    # niska — chcemy wierne, nie kreatywne
+        max_tokens=800,
+        timeout=60.0,
+    )
+    return (resp.choices[0].message.content or "").strip()
+
+
+# =============================================================================
+# Cinematic Meta Warning (po 150 turach)
+# =============================================================================
+
+_PROMPT_CINEMATIC_WARNING = """Jesteś silnikiem narracyjnym interaktywnej opowieści. Gracz właśnie ukończył 150 turę — to specjalny moment dramatyczny. Wygeneruj 100-200-słowowe ostrzeżenie meta-narracyjne, otoczone z obu stron markerami ⚠️🚨⚠️ (dokładnie ten ciąg emoji, w pierwszej i ostatniej linii). Treść: zwrot bezpośrednio do gracza w drugiej osobie, podsumowanie tego co osiągnął, dramatyczne ostrzeżenie o wadze decyzji jakie podejmuje, zachęta do refleksji nad konsekwencjami. Nie zmieniasz stanu gry, nie proponujesz wyborów. To NIE jest tura gry — to przerywnik. Format:
+
+⚠️🚨⚠️
+[treść ostrzeżenia, 100-200 słów]
+⚠️🚨⚠️"""
+
+
+def generuj_cinematic_warning(
+    klient:   Any,
+    snapshot: SnapshotOpowiesci,
+    model:    str = MODEL_DOMYSLNY,
+) -> str:
+    """Generuje Cinematic Meta Warning — przerywnik dramatyczny po 150 turach.
+
+    Zwraca tekst Z markerami ``⚠️🚨⚠️`` (tak jak rozumie filter
+    :meth:`core_opowiesci.ProjektOpowiesci.czysc_meta_warningi`). GUI
+    zapisuje surowy tekst do ``.story.jsonl`` (log), pokazuje w
+    ``wx.Dialog`` z ``wx.Bell()``, ale NIE appenduje do ``.txt`` — filter
+    `czysc_meta_warningi` wyciąłby treść jeśli ktoś by spróbował.
+    """
+    payload = {
+        "tura_numer":       snapshot.numer_tury,
+        "postacie_aktywne": snapshot.postacie_aktywne,
+        "stan":             snapshot.stan_poprzedni,
+        "ostatnie_tury":    snapshot.ostatnie_tury[-3:],   # tylko 3 ostatnie dla kontekstu
+    }
+    user_msg = (
+        "Stan gry poniżej. Wygeneruj Cinematic Meta Warning.\n\n"
+        + json.dumps(payload, ensure_ascii=False, indent=2)
+    )
+    resp = klient.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": _PROMPT_CINEMATIC_WARNING},
+            {"role": "user",   "content": user_msg},
+        ],
+        temperature=0.85,
+        max_tokens=600,
+        timeout=60.0,
+    )
+    return (resp.choices[0].message.content or "").strip()

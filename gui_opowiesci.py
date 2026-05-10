@@ -71,6 +71,32 @@ class OpowiesciPanel(wx.Panel):
     # Kontynuuje numerację Reżysera (0=Burza, 1=Reżyser1, 2=Reżyser2).
     _MAPA_TRYB_RB_NA_INT = (oai.TRYB_SWOBODNY, oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO)
 
+    # Slash-komendy (Faza 4). Klucze to zarówno warianty PL jak i EN-fallback —
+    # gracz angielski w polskim UI nadal może pisać `/save`, `/quit` itd.
+    # EN-fallback ZAWSZE aktywny, niezależnie od `i18n.AKTUALNY_JEZYK`.
+    # Wartości to nazwy metod-handlerów na panelu (string, nie callable —
+    # late-binding pozwala dispatcherowi reagować na metody dodane po init).
+    _DISPATCH_KOMEND = {
+        "/zapisz":     "_komenda_zapisz",
+        "/save":       "_komenda_zapisz",
+        "/wczytaj":    "_komenda_wczytaj",
+        "/load":       "_komenda_wczytaj",
+        "/ustawienia": "_komenda_ustawienia",
+        "/settings":   "_komenda_ustawienia",
+        "/wizualizuj": "_komenda_visualize",
+        "/visualize":  "_komenda_visualize",
+        "/koniec":     "_komenda_koniec",
+        "/quit":       "_komenda_koniec",
+    }
+
+    # Mapowanie kolorów dla wskaźnika pamięci modelu (analog `gui_rezyser._KOLORY_POZIOMOW`).
+    _KOLORY_POZIOMOW = {
+        oai.POZIOM_CZYSTA:      (0,   128, 0),
+        oai.POZIOM_OK:          (0,   128, 0),
+        oai.POZIOM_OSTRZEZENIE: (180, 100, 0),
+        oai.POZIOM_ALARM:       (180, 0,   0),
+    }
+
     def __init__(self, parent: wx.Window) -> None:
         super().__init__(parent, style=wx.TAB_TRAVERSAL)
         self.SetName(t("opowiesci.panel_name"))
@@ -97,6 +123,19 @@ class OpowiesciPanel(wx.Panel):
         # ``_btn_zapisz`` są disabled — chronimy przed I/O bez nazwy.
         self._projekt: ProjektOpowiesci | None = None
 
+        # ---- Faza 4: slash-komendy + tiktoken + auto-streszczenie ---------
+        # ``_aktualny_model`` można zmienić przez `/ustawienia`. Tury wysyłane
+        # PO zmianie idą nowym modelem; tury w locie zostają na starym.
+        self._aktualny_model: str = oai.MODEL_DOMYSLNY
+        # Race-condition guard: streszczenie i cinematic warning to wywołania
+        # LLM w wątku tła. Bez locka gracz mógłby spawnować drugie wywołanie
+        # zanim pierwsze wróci, mutując ``_snapshot.ostatnie_tury`` w trakcie
+        # czytania go przez wątek streszczeniowy.
+        self._meta_w_toku: bool = False
+        # Cinematic Warning pokazujemy DOKŁADNIE RAZ na grę (po 150. turze).
+        # Persystowany w `_projekt.stan["cinematic_pokazany"]` — Faza 3
+        # zapisuje cały dict `stan` do `.game.json`, więc rebuild po
+        # wczytaniu odzyska informację.
         self._build_ui()
         self._bind_events()
         self._init_api()
@@ -421,6 +460,25 @@ class OpowiesciPanel(wx.Panel):
     # ------------------------------------------------------------------
     def _on_wyslij(self, _event: wx.Event) -> None:
         """Handler przycisku „Wyślij" — bramka między GUI a wątkiem tła."""
+        user_text = self._txt_akcja.GetValue().strip()
+        if not user_text:
+            wx.MessageBox(
+                t("opowiesci.puste_pole_tresc"),
+                t("opowiesci.puste_pole_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_akcja.SetFocus()
+            return
+
+        # Faza 4: slash-komendy są przechwytywane PRZED walidacją API/projektu.
+        # `/ustawienia`, `/koniec` działają nawet bez aktywnej gry; `/zapisz`,
+        # `/wizualizuj` mają własne walidacje wewnątrz handlerów.
+        if user_text.startswith("/"):
+            self._txt_akcja.SetValue("")
+            self._obsluz_komende(user_text)
+            return
+
         if not self._api_dostepne:
             wx.MessageBox(
                 t("opowiesci.brak_api_tresc"),
@@ -442,15 +500,20 @@ class OpowiesciPanel(wx.Panel):
             self._txt_nazwa_gry.SetFocus()
             return
 
-        user_text = self._txt_akcja.GetValue().strip()
-        if not user_text:
+        # Faza 4: alarm pamięci modelu — blokuj wysyłkę dopóki gracz nie
+        # zwolni bufora (zakończy grę / wczyta nową). Auto-streszczenie
+        # próbuje to robić same po `_obsluz_ture`, ale w razie awarii
+        # streszczenia (rate limit, timeout) bufor zostaje pełny.
+        status_pamieci = oai.oblicz_status_pamieci(
+            self._snapshot, self._aktualny_tryb_int(), self._aktualny_model,
+        )
+        if status_pamieci.poziom == oai.POZIOM_ALARM:
             wx.MessageBox(
-                t("opowiesci.puste_pole_tresc"),
-                t("opowiesci.puste_pole_tytul"),
-                wx.OK | wx.ICON_WARNING,
+                t("opowiesci.alarm_blokada_tresc", procent=status_pamieci.procent),
+                t("opowiesci.alarm_blokada_tytul"),
+                wx.OK | wx.ICON_ERROR,
                 self,
             )
-            self._txt_akcja.SetFocus()
             return
 
         nazwa = self._projekt.nazwa_pliku
@@ -505,6 +568,7 @@ class OpowiesciPanel(wx.Panel):
                 snapshot=snapshot,
                 user_input=user_input,
                 tryb=tryb,
+                model=self._aktualny_model,
             )
         except Exception as exc:  # noqa: BLE001
             # Łapiemy wszystko (RateLimitError, APITimeoutError, RuntimeError
@@ -568,10 +632,33 @@ class OpowiesciPanel(wx.Panel):
         self._przeladuj_wybory(wynik.wybory, tryb)
 
         # 5. Status + odblokowanie + dźwięk + fokus.
-        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
         self._btn_wyslij.Enable()
         wx.Bell()  # A11y: NVDA usłyszy „pinga" — sygnał gotowości
         self._txt_narracja.SetFocus()  # NVDA przeczyta nową narrację
+
+        # 6. Faza 4: aktualizacja wskaźnika pamięci modelu (po update snapshotu).
+        self._aktualizuj_pamiec_modelu()
+
+        # 7. Cinematic Meta Warning po 150 turze (raz per gra). Persistujemy
+        # flagę w `_projekt.stan["cinematic_pokazany"]` — Faza 3 zapisuje
+        # cały stan do `.game.json`, więc po wczytaniu nie pokażemy ponownie.
+        if (
+            self._snapshot.numer_tury >= oai.TURY_DO_CINEMATIC
+            and self._projekt is not None
+            and not self._projekt.stan.get("cinematic_pokazany")
+            and not self._meta_w_toku
+        ):
+            self._spawn_cinematic_warning()
+            return   # cinematic warning blokuje resztę post-turn flow
+
+        # 8. Auto-streszczenie po przekroczeniu progu pamięci (70%).
+        # Robimy je AFTER Cinematic, żeby nie ucinać kontekstu który
+        # cinematic zna jako tło (3 ostatnie tury).
+        status_pamieci = oai.oblicz_status_pamieci(
+            self._snapshot, tryb, self._aktualny_model,
+        )
+        if status_pamieci.poziom == oai.POZIOM_OSTRZEZENIE and not self._meta_w_toku:
+            self._spawn_streszczenie()
 
     def _zsynchronizuj_projekt_z_wynikiem(
         self,
@@ -934,3 +1021,358 @@ class OpowiesciPanel(wx.Panel):
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
+
+    # ==================================================================
+    # FAZA 4 — Slash-komendy (parser lokalny, bez API)
+    # ==================================================================
+    def _obsluz_komende(self, user_text: str) -> None:
+        """Dispatcher slash-komend. Wzorzec PL+EN fallback.
+
+        Tokenizacja: pierwsze słowo to nazwa komendy, reszta jest argumentem
+        (np. ``/wizualizuj jak wygląda strażnik" → komenda='/wizualizuj',
+        arg='jak wygląda strażnik'). Komendy nieznane → MessageBox z listą.
+        """
+        # Pierwsze słowo (do whitespace) — komenda; reszta — argument.
+        czesci = user_text.split(None, 1)
+        komenda = czesci[0].lower()
+        arg = czesci[1] if len(czesci) > 1 else ""
+
+        nazwa_handlera = self._DISPATCH_KOMEND.get(komenda)
+        if nazwa_handlera is None:
+            wx.MessageBox(
+                t(
+                    "opowiesci.komenda_nieznana_tresc",
+                    komenda=komenda,
+                    lista=t("opowiesci.komendy_dostepne_lista"),
+                ),
+                t("opowiesci.komenda_nieznana_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            return
+
+        # Late-binding: handler może być dodany przez subclass lub mockiem
+        # w teście — `getattr` pozwala na to, statyczna referencja by nie.
+        handler = getattr(self, nazwa_handlera)
+        handler(arg)
+
+    def _komenda_zapisz(self, _arg: str) -> None:
+        """`/zapisz` / `/save` — proxy do :meth:`_on_zapisz`."""
+        self._on_zapisz(None)
+
+    def _komenda_wczytaj(self, _arg: str) -> None:
+        """`/wczytaj` / `/load` — proxy do :meth:`_on_wczytaj`."""
+        self._on_wczytaj(None)
+
+    def _komenda_koniec(self, _arg: str) -> None:
+        """`/koniec` / `/quit` — zamyka aplikację."""
+        wx.GetTopLevelParent(self).Close()
+
+    def _komenda_ustawienia(self, _arg: str) -> None:
+        """`/ustawienia` / `/settings` — dialog wyboru modelu (Standard/Quality)."""
+        dlg = wx.Dialog(self, title=t("opowiesci.dlg_ustawienia_tytul"), size=(480, 220))
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        lbl = wx.StaticText(dlg, label=t("opowiesci.dlg_ustawienia_lbl_model"))
+        rb = wx.RadioBox(
+            dlg,
+            choices=[
+                t("opowiesci.dlg_ustawienia_model_standard"),
+                t("opowiesci.dlg_ustawienia_model_quality"),
+            ],
+            majorDimension=1,
+            style=wx.RA_SPECIFY_COLS,
+        )
+        # Set initial selection na podstawie aktualnego modelu.
+        rb.SetSelection(0 if self._aktualny_model == oai.MODEL_DOMYSLNY else 1)
+
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("opowiesci.dlg_ustawienia_btn_zatwierdz"))
+        btn_anuluj = wx.Button(dlg, wx.ID_CANCEL, label=t("common.btn_zamknij"))
+
+        row_btn = wx.BoxSizer(wx.HORIZONTAL)
+        row_btn.Add(btn_ok,     flag=wx.RIGHT, border=8)
+        row_btn.Add(btn_anuluj)
+
+        sizer.Add(lbl, flag=wx.ALL,                          border=8)
+        sizer.Add(rb,  proportion=1, flag=wx.EXPAND | wx.ALL, border=8)
+        sizer.Add(row_btn, flag=wx.ALIGN_RIGHT | wx.ALL,      border=8)
+        dlg.SetSizer(sizer)
+        rb.SetFocus()
+
+        if dlg.ShowModal() == wx.ID_OK:
+            wybor = rb.GetSelection()
+            self._aktualny_model = oai.MODEL_DOMYSLNY if wybor == 0 else oai.MODEL_QUALITY
+            wx.MessageBox(
+                t("opowiesci.dlg_ustawienia_zmieniono_tresc", model=self._aktualny_model),
+                t("opowiesci.dlg_ustawienia_zmieniono_tytul"),
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+        dlg.Destroy()
+
+    def _komenda_visualize(self, arg: str) -> None:
+        """`/wizualizuj <opis>` / `/visualize` — multisensoryczny opis sceny."""
+        if not self._api_dostepne:
+            wx.MessageBox(
+                t("opowiesci.brak_api_tresc"),
+                t("opowiesci.brak_api_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+        if self._projekt is None:
+            wx.MessageBox(
+                t("opowiesci.brak_gry_tresc"),
+                t("opowiesci.brak_gry_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+        arg = arg.strip()
+        if not arg:
+            wx.MessageBox(
+                t("opowiesci.dlg_visualize_pusta_akcja_tresc"),
+                t("opowiesci.dlg_visualize_pusta_akcja_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_wizualizowanie"))
+        snapshot_kopia = self._snapshot
+        threading.Thread(
+            target=self._visualize_worker,
+            args=(snapshot_kopia, arg),
+            daemon=True,
+        ).start()
+
+    def _visualize_worker(self, snapshot: oai.SnapshotOpowiesci, arg: str) -> None:
+        """Worker `/visualize` — bez blokady `_btn_wyslij` (side-quest, gracz może
+        kontynuować rozgrywkę równolegle do generacji opisu)."""
+        try:
+            tekst = oai.wygeneruj_wizualizacje(
+                klient=self._client,
+                snapshot=snapshot,
+                user_input=arg,
+                model=self._aktualny_model,
+            )
+        except Exception as exc:  # noqa: BLE001
+            wx.CallAfter(self._obsluz_blad, exc)
+            return
+        wx.CallAfter(self._pokaz_visualize_dialog, tekst)
+
+    def _pokaz_visualize_dialog(self, tekst: str) -> None:
+        """Dialog z multisensorycznym opisem — readonly, NVDA-friendly, nie zapisuje plików."""
+        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
+
+        dlg = wx.Dialog(self, title=t("opowiesci.dlg_visualize_tytul"), size=(720, 520))
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        lbl = wx.StaticText(dlg, label=t("opowiesci.dlg_visualize_lbl"))
+        txt = wx.TextCtrl(
+            dlg, value=tekst,
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_BESTWRAP,
+            name=t("opowiesci.dlg_visualize_name"),
+        )
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
+        sizer.Add(lbl,    flag=wx.ALL,                                       border=8)
+        sizer.Add(txt,    proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        sizer.Add(btn_ok, flag=wx.ALL | wx.ALIGN_RIGHT,                      border=8)
+        dlg.SetSizer(sizer)
+        txt.SetFocus()  # NVDA odczyta opis sceny
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    # ==================================================================
+    # FAZA 4 — Wskaźnik pamięci modelu (tiktoken)
+    # ==================================================================
+    def _aktualizuj_pamiec_modelu(self) -> None:
+        """Odświeża `wx.Gauge` + label statusu na podstawie tokenów payloadu.
+
+        Wywoływane po każdej turze (w `_obsluz_ture`) i po auto-streszczeniu
+        (w `_streszczenie_done`). Operacja jest tania (~kilka ms na 6 tur),
+        ale rzucanie tego po każdym keystroke byłoby przesadą.
+        """
+        if self._projekt is None:
+            self._gauge_pamiec.SetValue(0)
+            self._lbl_pamiec_status.SetLabel(t("opowiesci.pamiec_status_init"))
+            return
+
+        status = oai.oblicz_status_pamieci(
+            self._snapshot, self._aktualny_tryb_int(), self._aktualny_model,
+        )
+        self._gauge_pamiec.SetValue(status.procent)
+        etap_klucz = {
+            oai.POZIOM_CZYSTA:      "opowiesci.pamiec_etap_czysta",
+            oai.POZIOM_OK:          "opowiesci.pamiec_etap_ok",
+            oai.POZIOM_OSTRZEZENIE: "opowiesci.pamiec_etap_ostrzezenie",
+            oai.POZIOM_ALARM:       "opowiesci.pamiec_etap_alarm",
+        }[status.poziom]
+        self._lbl_pamiec_status.SetLabel(t(
+            "opowiesci.pamiec_status_format",
+            procent=status.procent,
+            tokeny=status.tokeny,
+            etap=t(etap_klucz),
+        ))
+        r, g, b = self._KOLORY_POZIOMOW.get(status.poziom, (0, 0, 0))
+        self._lbl_pamiec_status.SetForegroundColour(wx.Colour(r, g, b))
+
+    # ==================================================================
+    # FAZA 4 — Auto-streszczenie po przekroczeniu PROG_OSTRZEZENIE
+    # ==================================================================
+    def _spawn_streszczenie(self) -> None:
+        """Spawn wątku tła z LLM-streszczeniem `ostatnie_tury`."""
+        self._meta_w_toku = True
+        self._btn_wyslij.Disable()  # blokada: race condition na ostatnie_tury
+        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_streszczanie"))
+
+        snapshot_kopia = self._snapshot
+        liczba_tur = len(snapshot_kopia.ostatnie_tury)
+        threading.Thread(
+            target=self._streszczenie_worker,
+            args=(snapshot_kopia, liczba_tur),
+            daemon=True,
+        ).start()
+
+    def _streszczenie_worker(self, snapshot: oai.SnapshotOpowiesci, liczba_tur: int) -> None:
+        """LLM streszcza ostatnie tury — blokujący wątek tła."""
+        try:
+            streszczenie = oai.streszczaj_kontekst(
+                klient=self._client, snapshot=snapshot, model=self._aktualny_model,
+            )
+        except Exception as exc:  # noqa: BLE001
+            wx.CallAfter(self._streszczenie_blad, exc)
+            return
+        wx.CallAfter(self._streszczenie_done, streszczenie, liczba_tur)
+
+    def _streszczenie_done(self, streszczenie: str, liczba_tur: int) -> None:
+        """Po sukcesie streszczenia: zwiń `ostatnie_tury` do jednego elementu."""
+        # Zwijamy pełną historię w jeden wpis-streszczenie. LLM w kolejnej
+        # turze dostanie 1 element zamiast 6, ale ten 1 zawiera cały
+        # backstory — kontekst zachowany, bufor zwolniony.
+        self._snapshot = oai.SnapshotOpowiesci(
+            nazwa_gry=self._snapshot.nazwa_gry,
+            numer_tury=self._snapshot.numer_tury,
+            ostatnie_tury=[{
+                "akcja_gracza":   "(streszczenie poprzednich tur)",
+                "narracja_skrot": streszczenie,
+            }],
+            postacie_aktywne=self._snapshot.postacie_aktywne,
+            stan_poprzedni=self._snapshot.stan_poprzedni,
+            seed_swiata=self._snapshot.seed_swiata,
+            jezyk_projektu=self._snapshot.jezyk_projektu,
+        )
+        if self._projekt is not None:
+            self._projekt.ostatnie_tury = list(self._snapshot.ostatnie_tury)
+            try:
+                self._projekt.zapisz_game_json()
+            except OSError:
+                pass   # zapis fail nie powinien blokować gry
+
+        self._meta_w_toku = False
+        self._btn_wyslij.Enable()
+        self._aktualizuj_pamiec_modelu()
+        wx.MessageBox(
+            t("opowiesci.streszczenie_skonczone_tresc", liczba_tur=liczba_tur),
+            t("opowiesci.streszczenie_skonczone_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self,
+        )
+
+    def _streszczenie_blad(self, exc: Exception) -> None:
+        """Streszczenie nie powiodło się — gra może iść dalej, ale alarm zostanie."""
+        self._meta_w_toku = False
+        self._btn_wyslij.Enable()
+        self._aktualizuj_pamiec_modelu()
+        self._wyswietl_blad_ai(str(exc))
+
+    # ==================================================================
+    # FAZA 4 — Cinematic Meta Warning po 150 turze
+    # ==================================================================
+    def _spawn_cinematic_warning(self) -> None:
+        """Spawn wątku tła z LLM-generowaniem przerywnika dramatycznego."""
+        self._meta_w_toku = True
+        self._btn_wyslij.Disable()
+
+        snapshot_kopia = self._snapshot
+        threading.Thread(
+            target=self._cinematic_worker,
+            args=(snapshot_kopia,),
+            daemon=True,
+        ).start()
+
+    def _cinematic_worker(self, snapshot: oai.SnapshotOpowiesci) -> None:
+        try:
+            tekst = oai.generuj_cinematic_warning(
+                klient=self._client, snapshot=snapshot, model=self._aktualny_model,
+            )
+        except Exception as exc:  # noqa: BLE001
+            wx.CallAfter(self._cinematic_blad, exc)
+            return
+        wx.CallAfter(self._cinematic_done, tekst)
+
+    def _cinematic_done(self, tekst: str) -> None:
+        """Pokaż dialog + zaloguj do .story.jsonl + flag w stanie projektu.
+
+        NIE appendujemy do `.txt` — `core_opowiesci.czysc_meta_warningi`
+        wyciąłby tekst między ⚠️🚨⚠️ markerami i tak. Filtr Faza 3 dba o to,
+        że audiobook nie zawiera meta-komentarza o własnej narracji.
+        """
+        if self._projekt is not None:
+            try:
+                self._projekt.dopisz_story_jsonl({
+                    "tura":                self._snapshot.numer_tury,
+                    "typ":                 "cinematic_meta_warning",
+                    "tresc":               tekst,
+                })
+                self._projekt.stan = dict(self._projekt.stan)
+                self._projekt.stan["cinematic_pokazany"] = True
+                self._projekt.zapisz_game_json()
+            except OSError:
+                pass
+
+        # Zsynchronizuj snapshot z nowym stanem (cinematic_pokazany=True),
+        # żeby kolejne tury nie spawnowały warningu ponownie.
+        if self._projekt is not None:
+            self._snapshot = oai.SnapshotOpowiesci(
+                nazwa_gry=self._snapshot.nazwa_gry,
+                numer_tury=self._snapshot.numer_tury,
+                ostatnie_tury=self._snapshot.ostatnie_tury,
+                postacie_aktywne=self._snapshot.postacie_aktywne,
+                stan_poprzedni=dict(self._projekt.stan),
+                seed_swiata=self._snapshot.seed_swiata,
+                jezyk_projektu=self._snapshot.jezyk_projektu,
+            )
+
+        self._meta_w_toku = False
+        self._btn_wyslij.Enable()
+        self._aktualizuj_pamiec_modelu()
+
+        # Dialog z treścią Cinematic Warning. wx.Bell() w tle — A11y „ping".
+        wx.Bell()
+        dlg = wx.Dialog(self, title=t("opowiesci.cinematic_warning_dlg_tytul"), size=(720, 520))
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        lbl = wx.StaticText(dlg, label=t("opowiesci.cinematic_warning_dlg_lbl"))
+        txt = wx.TextCtrl(
+            dlg, value=tekst,
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_BESTWRAP,
+            name=t("opowiesci.cinematic_warning_dlg_name"),
+        )
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
+        sizer.Add(lbl,    flag=wx.ALL,                                       border=8)
+        sizer.Add(txt,    proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        sizer.Add(btn_ok, flag=wx.ALL | wx.ALIGN_RIGHT,                      border=8)
+        dlg.SetSizer(sizer)
+        txt.SetFocus()
+        dlg.ShowModal()
+        dlg.Destroy()
+
+    def _cinematic_blad(self, exc: Exception) -> None:
+        """Cinematic Warning fail — niegroźne, oznacz pokazany żeby nie powtarzać."""
+        self._meta_w_toku = False
+        self._btn_wyslij.Enable()
+        if self._projekt is not None:
+            # Mark as shown żeby w przypadku transient API błędu (rate limit)
+            # nie spawnować ponownie przy każdej turze ≥ 150.
+            self._projekt.stan["cinematic_pokazany"] = True
+            try:
+                self._projekt.zapisz_game_json()
+            except OSError:
+                pass
+        # Nie pokazujemy błędu — to was side-quest, gracz nie czekał na to
+        # akcjonalnie. Cichy fail.

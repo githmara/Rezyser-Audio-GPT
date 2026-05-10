@@ -984,3 +984,39 @@ opowiesci:
   dlg_wczytaj_filtr:         "Pliki gry Opowieści (*.game.json)|*.game.json|Wszystkie pliki|*.*"
   blad_zapisu_tresc:         "Wystąpił błąd zapisu pliku gry: {tresc_bledu}"
   blad_wczytania_tresc:      "Wystąpił błąd wczytania gry „{nazwa}": {tresc_bledu}"
+
+  # ---- Faza 4: slash-komendy + tiktoken + /visualize + Cinematic Warning ----
+  komenda_nieznana_tytul:    "Nieznana komenda"
+  komenda_nieznana_tresc:    "Komenda „{komenda}" nie jest rozpoznawana. Dostępne komendy:\n\n{lista}"
+  komendy_dostepne_lista: |-
+    /zapisz, /save                    — wymuszenie zapisu gry
+    /wczytaj, /load                   — otwórz dialog wczytania
+    /ustawienia, /settings            — zmień model AI (Standard/Quality)
+    /wizualizuj <opis>, /visualize    — multisensoryczny opis sceny (bez zapisu)
+    /koniec, /quit                    — zamknij aplikację
+  dlg_ustawienia_tytul:      "Ustawienia silnika narracyjnego"
+  dlg_ustawienia_lbl_model:  "Model AI:"
+  dlg_ustawienia_model_standard:  "Standardowy (gpt-4o-mini, szybszy, tańszy)"
+  dlg_ustawienia_model_quality:   "Wysokiej jakości (gpt-4o, wolniejszy, droższy)"
+  dlg_ustawienia_btn_zatwierdz:   "Zatwierdź"
+  dlg_ustawienia_zmieniono_tytul: "Model zmieniony"
+  dlg_ustawienia_zmieniono_tresc: "Silnik narracyjny będzie odtąd korzystał z modelu „{model}"."
+  dlg_visualize_tytul:       "🌅 Wizualizacja sceny"
+  dlg_visualize_lbl:         "Multisensoryczny opis aktualnej sceny (nie zmienia stanu gry):"
+  dlg_visualize_name:        "Pole z opisem wizualizacji sceny"
+  dlg_visualize_pusta_akcja_tytul: "Brak opisu wizualizacji"
+  dlg_visualize_pusta_akcja_tresc: "Po komendzie /wizualizuj wpisz krótki opis tego, co chcesz zobaczyć dokładniej (np. /wizualizuj jak wygląda strażnik). Bez argumentu silnik nie wie na czym się skupić."
+  status_wizualizowanie:     "Generowanie wizualizacji…"
+  pamiec_status_format:      "{procent}% — {tokeny} tokenów ({etap})"
+  pamiec_etap_czysta:        "🟢 czysta"
+  pamiec_etap_ok:            "🟢 OK"
+  pamiec_etap_ostrzezenie:   "⚠️ ostrzeżenie"
+  pamiec_etap_alarm:         "🚨 ALARM"
+  status_streszczanie:       "Auto-streszczenie kontekstu w toku…"
+  streszczenie_skonczone_tytul: "Pamięć modelu odzyskana"
+  streszczenie_skonczone_tresc: "Auto-streszczenie poprzednich {liczba_tur} tur zakończone. Bufor zwolniony — możesz kontynuować rozgrywkę."
+  cinematic_warning_dlg_tytul:  "📖 Przerywnik dramatyczny — 150. tura"
+  cinematic_warning_dlg_lbl:    "Silnik narracyjny przerywa narrację specjalnym ostrzeżeniem dla Ciebie:"
+  cinematic_warning_dlg_name:   "Pole z treścią Cinematic Meta Warning"
+  alarm_blokada_tytul:       "Pamięć modelu przeładowana"
+  alarm_blokada_tresc:       "Bufor kontekstu jest zapełniony w {procent}%. Auto-streszczenie nie zwolniło miejsca. Spróbuj zakończyć grę i wczytać ją ponownie — silnik załaduje tylko stan z pliku game.json, bez historii ostatnich tur."
