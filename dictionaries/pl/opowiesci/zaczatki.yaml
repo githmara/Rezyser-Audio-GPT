@@ -1,0 +1,50 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 presetów Quick Start dla nowej gry. Gracz przy „Nowa gra"
+#  wybiera jeden z gotowych światów; preset autouzupełnia tryb i wstrzykuje
+#  `seed_swiata` do snapshotu (LLM dostaje go jako kontekst sceny otwierającej).
+#
+#  KAŻDY preset jest pisany RĘCZNIE per język — to literatura, nie i18n
+#  techniczne. Język docelowy ma własne motywy kulturowe; nie kalkujemy
+#  z polskiego (patrz `feedback_yaml_prompty.md`, `feedback_lokalizacja_nazw.md`).
+#
+#  Pole `tryb_domyslny`: 3=Swobodny / 4=Wybory / 5=Mniejsze zło.
+#  Dla niewidomego gracza preferowane są 4 i 5 (precyzyjne klikalne wybory),
+#  ale Swobodny zostawiamy dla horroru/komedii (gdzie improwizacja gracza
+#  jest częścią doświadczenia).
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "Po-apokaliptyczne SF"
+    opis_krotki: "Stulecie po katastrofie ekologicznej. Resztki ludzkości w schronach pod powierzchnią. Wybór między pragmatyzmem a człowieczeństwem."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Świat 200 lat po Wielkim Spaleniu — globalnym kataklizmie, który wypalił atmosferę. Promieniowanie UV zabija każdego, kto wyjdzie na powierzchnię bez kombinezonu. Ludzkość żyje w schronach skanalizowanych w skały Gór Świętokrzyskich, używając hydroponiki, syntetycznych białek i zerowej-wodnej gospodarki. Gracz jest młodym kurierem Klanu Sztolnia, jedną z kilkunastu wspólnot przeżywających pod ziemią. Klany handlują ze sobą, ale czasem walczą o zasoby — bateryjne ogniwa, semena roślin, geny niezdegradowane przez radiację. Klan Sztolnia ma sekret: ich szyb wentylacyjny prowadzi do podziemnego jeziora słodkowodnego. Nikt poza Starszyzną o tym nie wie. Gracz właśnie dostał pierwsze poważne zlecenie — przemycić mikroflorę probiotyczną do Klanu Bocian, który umiera od zaraz nieodwracalnej dyzbiozy jelitowej. Trasa wiedzie przez tunel nadbiegowy, gdzie podobno żyją zmutowane szczury. Postacie pojawiające się: Karmela (40 l., dyspozytorka kurierek, pragmatyczna; akcent: krótkie zdania, mówi „dziewczyno" zamiast imienia), Wiek (60 l., Starszy Sztolni, nosi pamięć przedkataklizmiczną; akcent: archaiczna polszczyzna, używa słów z lat 80.). Atmosfera duszna, neonowo-pomarańczowa od lamp sodowych, zapach maszynowego oleju i pleśni.
+
+  mroczne_fantasy:
+    etykieta: "Mroczne fantasy"
+    opis_krotki: "Pogranicze królestwa kąpane w deszczu. Inkwizytor demonów na tropie wieśniaków, którzy może chronią dziecko, a może coś gorszego."
+    tryb_domyslny: 5
+    seed_swiata: |
+      Królestwo Trzech Strug, dziewiąty rok wojny religijnej między Kościołem Płomienia a Starymi Bogami. Gracz jest młodszym Inkwizytorem zakonu Sióstr Cierniowych — kobiety, które łamią celibat i biorą do ręki miecze, kiedy Kościół potrzebuje czegoś więcej niż modlitwy. Misja: dotarłaś do wsi Brzezina, gdzie według donosu zaobserwowano znamiona Pielęgnowania (rytuał Starych Bogów polegający na zachowywaniu dziecka „opętanego" zamiast jego utopienia, jak nakazuje Płomień). Donos pisany niewprawną ręką, więc autor jest niepiśmienny — wiejski parobek albo dziewka. Wieś milczy. Sołtys Onufry (50 l., rumiana twarz, oczy unika; akcent: zwroty wschodniopolskie, „a co tam moja pani") prosi cię na wieczerzę i rozmawia o cenach żyta. Akuszerka Rosanna (35 l., wdowa, długie czarne warkocze; akcent: śpiewny, lubi metafory pogody) traktuje cię z jawną niechęcią. W chacie pod lasem mieszka rodzina, która dziwnie się chroni — chłop Felicjan, jego żona Magda, dwoje dorosłych dzieci. Plotki mówią, że jest jeszcze trzecie, mniejsze. Pada deszcz trzeci dzień, droga do najbliższego garnizonu zamokła i zostaniesz tu jeszcze dwa tygodnie. Twój inkwizytorski sygnet ma magię odpaloną Płomieniem — palić może i niewinnych, gdy wieś się zerwie. Słyszysz w nocy z chaty pod lasem dziwne mruczenie, które brzmi jak głosy dwóch matek mówiących równocześnie, ale jedna z nich nie jest człowiekiem.
+
+  urban_fantasy_detective:
+    etykieta: "Urban fantasy detective"
+    opis_krotki: "Warszawa, 2008. Prywatny detektyw, który widzi duchy. Klientka chce odnaleźć męża zaginionego na Starówce, ale Starówka to nie tylko Starówka."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Warszawa 2008, październik, deszczowy wieczór. Gracz jest prywatnym detektywem — Jarek Wachocki, 38 lat, były policjant z drogówki, zwolniony za pijaństwo na służbie. Ma w sobie coś, czego nie chce nazywać: widzi cienie, które nie powinny tam być. Twarze za ramieniem przechodniów. Postaci na cmentarzu Powązkowskim, które odpowiadają na pytania, jeśli przyniesiesz im wódkę. Wachocki nie wierzy w „ezoterykę", ale od czasu rozwodu i operacji wyrostka uważa, że coś z nim jest nie tak. Dziś do biura przy ulicy Wilczej (niski czynsz, klatka cuchnąca papierosami) przychodzi kobieta — Nadia Kossakowska, 45 l., wdowa od miesiąca, ale dopiero teraz przyznaje się przed sobą, że coś nie pasuje. Mąż Tadeusz, restaurator z Krakowskiego Przedmieścia, „pojechał na targ pod Zamek Królewski po ryby" trzeciego dnia po Wszystkich Świętych. Wrócił wieczorem normalnie, ale od tamtej nocy mówił do siebie po niemiecku — języka, którego nie znał. Po dwóch tygodniach skoczył z mostu Świętokrzyskiego. Policja umorzyła sprawę jako samobójstwo. Nadia myśli inaczej. Klimat: Warszawa pomiędzy późną PRL-owską estetyką a nową szklaną zabudową, mży, w kawiarniach pachnie melisą i palonymi papierosami, w bramach śpią bezdomni i może coś więcej. Postacie: Nadia (eleganckie szare włosy, mówi z lekkim akcentem wileńskim), Komisarz Surek (60 l., były kolega Wachockiego z drogówki, nadal mu pomaga; akcent: zaciągany śląski, ucieka w żarty kiedy temat za poważny).
+
+  kosmiczny_horror:
+    etykieta: "Kosmiczny horror"
+    opis_krotki: "Stacja badawcza orbitująca wokół neutronowej gwiazdy. Załoga budzi się z hibernacji — bez kapitana. I bez śladów, że kapitan kiedykolwiek był."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Rok 2247. Stacja badawcza „Heloiza" orbituje wokół neutronowej gwiazdy PSR J1748-2446ad, najszybciej rotującej gwiazdy znanej ludzkości (716 obrotów na sekundę). Misja: studium pulsacji magnetycznych. Gracz jest oficerem naukowym — dr Iwona Selecka, neurolożka kwantowa, 42 l., z Krakowa. Załoga 7-osobowa, hibernacja zaprogramowana na 4 lata, rozkład 4 godziny każdego budzonego osobno. Gracz budzi się jako trzeci. Komputer pokładowy „Atena" raportuje: hibernacja 4 lat 23 dni 6 godzin, wszystko nominalne. Ale licznik załogi wskazuje 6, nie 7. Brakuje kapitana — komandora Borysa Zarazy. Atena nie pamięta, żeby był kapitan. Manifest startowy z Ziemi: 7 osób. Lista hibernowana: 6. Twoje wspomnienia: tak, Zaraza istniał, jadłaś z nim śniadanie w Houston. Pozostali budzeni — inżynier Marek (28 l., milkliwy, akcent ślązaki) i biolog Cyryl (50 l., pochodzenia francuskiego, wciąż mówi „bonjour" zamiast „cześć") — twierdzą, że nie pamiętają żadnego kapitana. Czujesz, że jest jeszcze ktoś na stacji. W korytarzu ujściowym, którym powinno wracać powietrze z hydroponiki, słyszysz rytm — nie technologiczny, organiczny, jak oddech. Atena raportuje brak nieprawidłowości. Twoje neurologiczne badanie wczorajsze: w lewej skroni masz ślad blizny pochodzenia chirurgicznego. Nie pamiętasz operacji.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Romantyczna komedia obyczajowa"
+    opis_krotki: "Mała kawiarnia na Saskiej Kępie. Stała klientka, której sympatię zarząd próbuje wykorzystać do uratowania lokalu. A ona zna prawdę."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Warszawa, Saska Kępa, kwiecień 2024. „Kawa pod Wiatrem" — mała kawiarnia w przedwojennej kamienicy przy ulicy Francuskiej, czynna od 1998 roku. Właściciel Antoni Lewada, 67 l., emerytowany scenograf teatralny, gospodarujący lokalem z pasji bez specjalnego zysku. Drugi pracownik to barista i kelnerka w jednym — gracz: Magdalena Kos, 31 l., absolwentka filologii hiszpańskiej, pracuje tu czwarty rok, marzy o własnej księgarni. Kawiarnia jest miejscem klimatycznym: stare maszyny do pisania na półkach, jukebox z winylami, fortepian Petrof, na którym sąsiad-emeryt Konstanty grywa w soboty. Klientela stała, ciepła, kochana. Problem: wynajmujący kamienicę pan Roman Bukowiecki (55 l., agresywny, mówi szybko) podnosi czynsz dwukrotnie — Antoni nie ma już za co. Sześć tygodni do zamknięcia. W kawiarni siedzi codziennie ten sam mężczyzna, Cezary Mróz (38 l., redaktor wydawnictwa, sympatyczny, niesławnie nieśmiały) — Magdalena go dawno już zauważyła, ale nie podejmowała tematu. Dziś rano Antoni zwierzył się Magdalenie, że Cezary to kuzyn pana Bukowieckiego i ma „wstawić się za kawiarnią". Antoni oczekuje od Magdaleny żeby „była miła" dla Cezarego — w sposób, który Magdalenie się nie podoba. A ona dawno chciała Cezarego zaczepić sama, z własnej woli. Jest poniedziałkowe popołudnie. Cezary właśnie wszedł, zamówił flat white, siadł przy oknie. Antoni patrzy na ciebie znacząco zza kontuaru.

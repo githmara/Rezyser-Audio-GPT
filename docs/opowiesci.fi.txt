@@ -1,0 +1,161 @@
+Reżyser Audio GPT — Interaktiiviset Tarinat -moduuli (15.0 – Julkaisuversio)
+
+Toinen sovelluksen päätila Reżyserin rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly kertoo tarinaa toisessa persoonassa yksikössä ("Kävelet sumuisen metsän läpi, tunnet märän lehtien tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla minkä tahansa toiminnon vapaassa tekstissä tai valitsemalla yhden numeroiduista vaihtoehdoista.
+
+Moduuli on suunniteltu alusta alkaen sokeille pelaajille — kertomus luetaan lineaarisesti näytönlukijalla (NVDA) tai TTS-moottorilla, dynaamiset valinnat äänikuvauksilla varustettujen painikkeiden muodossa, jokainen päättynyt vuoro merkitään kellon äänellä ja automaattisella fokuksen siirrolla uuteen luotuun tekstiin.
+
+Avaat paneelin painikkeella "📖  Tarinoita" työkalupalkissa tai pikanäppäimellä Ctrl+5.
+
+
+
+VAIHE 1: Kolme pelitilaa — valitse pelityyli
+
+Heti pelin nimen alapuolella löydät tilan valintaruudun (RadioBox). Tila määrittää, miten kertomusmoottori käy dialogia kanssasi:
+
+VAPAA TILA — kirjoitat minkä tahansa toiminnon vapaassa tekstissä ("yritän avata oven", "kysyn vartijalta tietä", "pakenen takaportaita"). Kertomusmoottori voi ehdottaa 1-3 vihjettä, mutta ne ovat vain ehdotuksia — ei pakollinen polku. Vapaamuotoisin tila, suositeltu kokeneille pelaajille, jotka improvisoivat oman tarinansa.
+
+VALINTATILA — jokainen vuoro päättyy 3-5 numeroituun vaihtoehtoon A-E klikkailtavina painikkeina. Jokainen valinta on tietty toiminto, jonka voit suorittaa. Voit myös kirjoittaa oman toiminnon vapaassa tekstissä — moottori sovittaa sen lähimpään semanttiseen valintaan. Intuitiivisin tila sokeille pelaajille: NVDA lukee kaikki vaihtoehdot, siirryt niiden välillä Tabilla, Enter vahvistaa.
+
+PIENEMPI PAHA -TILA — kuten Valintatila, mutta jokainen 3-5 vaihtoehdosta on moraalisesti, fyysisesti tai strategisesti epäedullinen. Ei "neutraalia" vaihtoehtoa, ei onnellista loppua tässä vuorossa. Tila niille, jotka rakastavat synkkää fiktiota "Tales of Consequence" -tyyliin tai moraalisia draamoja.
+
+Tilan voi vaihtaa pelin aikana — seuraavassa vuorossa kertomusmoottori mukautuu uuteen tyyliin (Vapaasta Valintoihin voi siirtyä yhdellä klikkauksella).
+
+
+
+VAIHE 2: Nopea aloitus — valmiit avauskäsikirjoitukset
+
+Pelin nimen alapuolella löydät toisen rivin etiketillä "Pika-aloitus:" ja avattavan valikon (wx.Choice). Oletusvalinta on "(oma peli)" — moottori keksii maailman ensimmäisen toimintosi perusteella.
+
+Voit kuitenkin valita yhden viidestä valmiista esiasetuksesta, jotta voit heti sukeltaa tiettyyn maailmaan:
+
+POST-APOKALYPTINEN SF — vuosisata ekologisen katastrofin jälkeen. Ihmiskunnan jäänteet turvapaikoissa Świętokrzyskie-vuorten alla. Olet nuori kuriiri Klan Sztolniasta ensimmäisellä vakavalla toimeksiannollasi. Oletustila: Valintatila.
+
+SYNKKÄ FANTASIA — Kolmen Virran Kuningaskunnan rajaseutu, uskonsodan yhdeksäs vuosi. Olet nuorempi inkvisiittori jäljittämässä kylää, jossa joku suojelee riivattua lasta. Oletustila: Pienempi paha.
+
+KAUPUNKI FANTASIADETEKTIIVI — Varsova 2008, lokakuun ilta. Olet yksityisetsivä, joka näkee henkiä. Asiakas haluaa löytää miehensä, joka katosi Kuninkaanlinnan alla. Oletustila: Valintatila.
+
+AVARUUSKAUHU — vuosi 2247, tutkimusasema neutronitähden kiertoradalla. Heräät horroksesta ilman kapteenia — ja ilman merkkejä siitä, että kapteeni olisi koskaan ollut olemassa. Oletustila: Vapaa (lovecraftilainen ilmapiiri suosii improvisaatiota).
+
+ROMANTTINEN KOMEDIA — Saska Kępa huhtikuu 2024, pieni kahvila on sulkemisuhan alla. Olet barista-tarjoilija, jonka omistaja käskee "olla mukava" ujoa toimittajaa kohtaan, jota olet pitkään halunnut lähestyä itse. Oletustila: Vapaa.
+
+Kun olet valinnut esiasetuksen, klikkaa "Uusi peli" — moottori injektoi itseensä lyhyen kuvauksen maailmasta ja hahmosta, asettaa oletustilan (voit muuttaa sen RadioBoxilla ennen kuin klikkaat "Uusi peli"). Ensimmäinen LLM-vuoro pelaa avauskohtauksen.
+
+
+
+VAIHE 3: Ensimmäinen peli alusta — ilman esiasetusta
+
+Jos haluat täydellisen vapauden, jätä "(oma peli)" Quick Start -kenttään ja valmistaudu kirjoittamaan ensimmäinen toimintosi käsin.
+
+1. Kirjoita pelin nimi "Pelin nimi" -palkkiin (esim. "oma_seikkailu_1") — tällä nimellä tallennetaan kertomus-, tila- ja lokitiedostot.
+2. Valitse tila (Vapaa/Valintatila/Pienempi paha).
+3. Klikkaa "Uusi peli". Sovellus luo 3 tiedostoa: pelin tila (.game.json), tyhjä Maailmankirja (.md) ja tilan metatiedot (.mode). Kertomustiedosto (.txt) luodaan ensimmäisen vuoron jälkeen.
+4. Kirjoita ensimmäinen toimintosi paneelin alareunassa olevaan "Toimintosi tai komento" -kenttään, esim. "herään tuntemattomassa huoneessa". Klikkaa "Lähetä". Kertomusmoottori avaa maailman toimintosi perusteella — huoneen kuvaus, äänet, hahmot, ensimmäiset päätökset.
+5. Jokainen vuoro tallennetaan automaattisesti — voit milloin tahansa sulkea sovelluksen ja ladata pelin myöhemmin painikkeella "Lataa".
+
+
+
+VAIHE 4: Kauttakomennot — nopeat toiminnot ilman API:a
+
+Toimintokentässä voit milloin tahansa kirjoittaa komennon, joka alkaa kauttaviivalla `/`. Komennot ovat paikallisia (eivät vaadi OpenAI-kutsuja) ja toimivat riippumatta pelitilasta. Hyväksytään sekä suomen- että englanninkieliset versiot:
+
+/tallenna, /save — pakottaa pelitilan manuaalisen tallennuksen. Automaattitallennus toimii jokaisen vuoron jälkeen, joten tämä komento on lähinnä varmuuden vuoksi ennen sovelluksen sulkemista.
+
+/lataa, /load — avaa tiedoston valintaikkunan kansiosta runtime/opowiesci/. Kun lataat, pelin nimi, tila ja koko kertomus palautetaan — voit jatkaa siitä vuorosta, johon jäit.
+
+/asetukset, /settings — avaa AI-mallin valintaikkunan. Oletuksena käytämme gpt-4o-miniä (Standardi) — nopeampi ja halvempi. Kun vaihdat gpt-4o:hon (Korkealaatuinen), kertomus muuttuu rikkaammaksi, mutta jokainen vuoro maksaa enemmän ja kestää kauemmin.
+
+/visualisoi <kuvaus>, /visualize <kuvaus> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kertomusmoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvemmin. Tulos ilmestyy erilliseen dialogiin, sitä EI lisätä kertomukseen eikä tallenneta äänikirjatiedostoon. Esimerkki: "/visualisoi miltä vartija näyttää" tai "/visualisoi kahvilan tuoksu".
+
+/lopeta, /quit — sulkee sovelluksen (vuoron automaattitallennuksen jälkeen).
+
+
+
+VAIHE 5: Pelitiedostot — mistä löydät tietosi
+
+Jokainen peli tuottaa viisi tiedostoa, jokainen eri kansiossa, eri rooleilla:
+
+skrypty/<nimi>.txt — täydellinen kertomus valmiina kuunneltavaksi äänikirjana. Voidaan avata Muistiossa tai ladata Audiokirja-arkkitehtiin (Muunnin) ja luoda Word-tiedosto luvuilla tai ajoitus ElevenLabsille.
+
+skrypty/<nimi>.md — Maailmankirja hahmoista muodossa [Nimi: ominaisuudet], regeneroituu jokaisen vuoron jälkeen. Yhteensopiva Reżyserin parserin kanssa! Voit ladata tämän tiedoston Reżyserin paneeliin (Tiedosto → Lataa) ja saat alkuperäiset hahmojen aksentit klassisessa TTS-kertomuksessa — silta sovelluksen kahden päämoduulin välillä.
+
+runtime/opowiesci/<nimi>.game.json — täydellinen pelitila: nimi, tila, aktiiviset hahmot, sijainti, varusteet, avoimet juonet, viimeiset 6 vuoroa tiivistetyssä muodossa. Tämä on totuuden lähde pelin lataamiseen — ilman tätä tiedostoa et voi jatkaa.
+
+runtime/opowiesci/<nimi>.story.jsonl — raaka loki jokaisesta vuorosta (pelaajan pyyntö + mallin vastaus JSON-muodossa). Tiedostoa ei tarvita peliin — se on tarkoitettu virheenkorjaukseen tai myöhempään analyysiin (esim. tilastot kuinka monta vuoroa seikkailu kesti, mitä juonia LLM esitteli).
+
+runtime/skrypty/<nimi>.mode — tilan numeron metatiedot (3=Vapaa, 4=Valintatila, 5=Pienempi paha). Yhteinen tiedosto Reżyserin kanssa, mutta numerointi ei ole ristiriidassa (Reżyser käyttää 0-2).
+
+
+
+VAIHE 6: Mallin muistin osoitin — miksi vanhojen pelien vuorot eivät vaadi sinulta käsityötä
+
+Tilavalinnan RadioBoxin alapuolella löydät mallin muistin osoittimen — edistymispalkin (wx.Gauge) tilan kuvauksella vieressä. Osoitin näyttää kertomusmoottorin kontekstin ikkunan täyttöprosentin (gpt-4o-mini:llä on 128 000 tokenin puskuri).
+
+Neljä täyttötasoa:
+
+🟢 puhdas (0%) — peli on vasta alkanut, ei tallennettuja vuoroja.
+🟢 OK (1-69%) — kaikki kunnossa, voit jatkaa ilman rajoituksia.
+⚠️ varoitus (70-89%) — moottori generoi automaattisesti yhteenvedon aiemmista vuoroista taustaketjussa. Näkyviin tulee viesti "Kontekstin automaattinen tiivistäminen käynnissä..." — älä lähetä seuraavaa vuoroa ennen kuin tiivistäminen on valmis. Onnistumisen jälkeen aiemmat vuorot tiivistetään yhdeksi kondensaatiksi, puskuri vapautuu, ja saat vahvistuksen "Mallin muisti palautettu" tiivistettyjen vuorojen lukumäärällä.
+🚨 HÄLYTYS (90%+) — automaattinen tiivistäminen ei vapauttanut puskuria (harvinainen tapaus API-virheen jälkeen). Seuraavan vuoron lähettäminen on estetty. Pakota pelin lopetus komennolla /lopeta, lataa se sitten uudelleen — moottori lataa tilan game.json:sta ilman viimeisten vuorojen historiaa, puskuri on tuore.
+
+Käytännössä automaattinen tiivistysmekanismi on näkymätön — pelaaja ei tunne, että mitään tapahtuu, koska taustaketju ratkaisee ongelman ennen sen huomaamista. Tärkeää on vain, ettet lähetä seuraavaa vuoroa automaattisen tiivistyksen aikana (painike "Lähetä" on silloin harmaana).
+
+
+
+VAIHE 7: Cinematic Meta Warning — dramaattinen väliosa 150. vuoron jälkeen
+
+150 vuoron jälkeen yhdessä pelissä kertomusmoottori lisää KERRAN "Cinematic Meta Warning" — meta-kerronnallisen dramaattisen väliosuuden. Se ilmestyy erilliseen dialogiin kellon äänellä, suoraan sinulle toisessa persoonassa, saavutusten yhteenvedolla ja varoituksella päätösten merkityksestä.
+
+Cinematic Warning EI ole osa äänikirjan kerrontaa — .txt-suodatinmoottori poistaa sen sisällön automaattisesti (merkitty ⚠️🚨⚠️-merkeillä), jotta et kuule meta-kommenttia omasta pelistäsi äänikirjaa kuunnellessasi. Sisältö menee vain .story.jsonl-lokiin (reflektointia tai muistoksi säilyttämistä varten) ja GUI-dialogiin, jossa voit lukea sen kerran ja jatkaa.
+
+
+
+VAIHE 8: Silta Reżyseriin — hyödynnä Opowieściessa luotua Maailmankirjaa
+
+Pelin aikana luotu skrypty/<nimi>.md-tiedosto sisältää Maailmankirjan hahmoista, jotka esiintyivät kerronnassa, heidän ominaisuuksineen, aksentteineen ja luonteineen. Muoto on täsmälleen sellainen, jota Reżyserin parseri vaatii — [Nimi: ominaisuudet aksentin kuvauksella].
+
+Mitä voit tehdä tällä:
+
+1. Pelin päätyttyä, avaa paneeli "🎬  Ohjaaja" (Ctrl+1).
+2. Lataa projekti samalla nimellä — Reżyser lataa .txt-tiedoston tarinana ja .md-tiedoston Maailmankirjana.
+3. Saat nyt klassisen Reżyserin kerronnan (pitkät, jäsennellyt kohtaukset akteilla ja luvuilla) alkuperäisillä hahmojen aksenteilla, joista pidit Opowieściessa. Karmelan turvapaikan vartija puhuu lyhyin lausein, inkvisiittori Rosanna laulavalla itäisellä aksentilla — kaikki ominaisuudet säilytettyinä.
+
+Tämä on yksisuuntainen silta: Opowieści tuottaa materiaalia, Reżyser muotoilee sen. Käänteinen ei ole mahdollista — Reżyser ei lataa Opowieści-pelien tilaa interaktiivisena.
+
+
+
+VAIHE 9: Saavutettavuus (NVDA ja ruudunlukijat) — suunniteltu alusta alkaen
+
+Koko Opowieści-moduuli on optimoitu sokeille pelaajille. Mitä tarkalleen teimme:
+
+VIIMEISEN VUORON KENTTÄ — tämä on erillinen wx.TextCtrl vain luku -monirivinen (~140 px korkea) KOKO kerronnan yläpuolella. Jokaisen vuoron jälkeen kenttä korvataan tuoreella fragmentilla (otsikko „--- Vuoro N ---" + kerronnan sisältö). NVDA lukee sen heti fokuksen jälkeen (automaattinen fokus vuoron onnistumisen jälkeen), ilman navigointia satojen rivien läpi koko tarinassa. Tallennetun pelin lataamisen jälkeen kenttä näyttää VIIMEISEN tallennetun vuoron TIIVISTELMÄN (max 400 merkkiä `viimeiset_vuorot`-puskurista) etuliitteellä, joka kertoo, että koko kerronta on kentässä alla.
+
+KOKO KERRONNAN KENTTÄ — tämä on wx.TextCtrl vain luku -monirivinen, joka kasvaa jokaisen vuoron jälkeen. NVDA lukee lineaarisesti koko kerronnan, voit navigoida nuolinäppäimillä tekstin sisällä, kopioida osia Ctrl+C:llä. Kenttä ei ole koskaan muokattavissa — muokkaat tarinaa VAIN uudella vuorolla tai .txt-tiedoston muokkauksella sovelluksen ulkopuolella. Tämä kenttä on synkronoitu `skrypty/<nimi>.txt`-tiedoston kanssa, voit pitää sitä äänikirjan esikatseluna.
+
+DYNAMIIKKA VALINTAPAINIKKEET — Valintatiloissa ja Pienemmässä pahassa jokainen vuoro luo uusia wx.Button-painikkeita valinta-alueelle. Jokaisella on NVDA:n lukema työkaluvihje („Valitse: jatka metsään"). Tab niiden välillä toimii luonnollisesti. Enter valitulla painikkeella lähettää valinnan automaattisesti kerrontamoottorille.
+
+TYHJÄT ALUEET PIILOTETTU — Vapaassa tilassa valinta-alue on TÄYSIN piilotettu (wx.Hide), ei vain harmaana — Tab ohittaa sen, NVDA ei vedä sitä elementtilistaan. Tämä estää pelaajan hämmennyksen tyhjään paikkamerkkiin törmätessä. Tiloissa 4 ja 5 alue ilmestyy vain mallin vastauksen onnistuneen validoinnin jälkeen (ei-tyhjä valintataulukko); mallin hallusinaatio (tyhjät valinnat) johtaa paluuseen vapaaseen tekstiin ilman käyttöliittymän sotkemista.
+
+ÄÄNIMERKIT — jokainen päättynyt vuoro merkitään wx.Bell (järjestelmän kello), jota seuraa automaattinen fokuksen siirto kerrontakenttään. NVDA lukee sitten uuden kerronnan ilman manuaalista navigointia.
+
+VÄRIKÄS MUISTIN TILA — mallin muistin osoitin muuttaa fontin väriä (vihreä/oranssi/punainen) täyttöasteen mukaan. Näkeville käyttäjille tämä on lisävisuaalinen vihje; NVDA lukee joka tapauksessa tilatekstin, joten sokeat eivät menetä tietoa.
+
+NÄPPÄIMISTÖN PIKAKOMENNOT — kaikilla painikkeilla on `&`-merkki yhden etiketin kirjaimen edessä, mikä aktivoi Alt+kirjain-pikakomentimen. Toimii identtisesti muiden sovellusmoduulien kanssa.
+
+
+
+Yleisimmät ongelmat
+
+Ongelma: Klikattuasi "Uusi peli" ilmestyy viesti „API-avainta ei löydy".
+Syy ja ratkaisu: Sovelluksen pääkansiossa oleva golden_key.env-tiedosto ei sisällä oikeaa OpenAI-avainta. Palaa aloitusnäyttöön (Home-painike), klikkaa "Luo golden_key.env-tiedosto ja avaa tekstieditori" ja seuraa ohjeita (VAIHE 2 päämanuaalista).
+
+Ongelma: Yritän lähettää seuraavan vuoron, mutta "Lähetä" -painike on harmaana.
+Syy ja ratkaisu: Kontekstin automaattinen tiivistäminen tai Cinematic Warning -generointi on käynnissä taustaketjussa. Muistin tila näyttää „Kontekstin automaattinen tiivistäminen käynnissä…". Odota muutama sekunti — painike avautuu automaattisesti onnistumisen jälkeen.
+
+Ongelma: Viesti „Mallin muisti ylikuormitettu" estää pelin.
+Syy ja ratkaisu: Automaattinen tiivistäminen ei vapauttanut puskuria (esim. OpenAI:n nopeusrajoitus). Lopeta peli komennolla /lopeta tai sulje sovellus, lataa se sitten uudelleen — moottori lataa vain tilan game.json:sta ilman viimeisten vuorojen historiaa.
+
+Ongelma: Valintatilassa moottori ei luonut painikkeita, vaikka odotin niitä.
+Syy ja ratkaisu: Mallin hallusinaatio — vaikka tila on 4, LLM palautti tyhjän valintataulukon. Sovellus piilottaa silloin tietoisesti valinta-alueen (sen sijaan että näyttäisi tyhjän paikkamerkin) ja sallii jatkamisen vapaalla tekstillä. Seuraava vuoro todennäköisesti luo valinnat oikein.
+
+Ongelma: .game.json ja .story.jsonl -tiedostot eivät ole näkyvissä työpöydällä.
+Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on tavallisille käyttäjille järjestelmähakemisto, joka ei ole näkyvissä tiedostoselaimessa. Kertomustiedostot (.txt, .md) menevät skrypty/-kansioon — löydät ne sieltä.

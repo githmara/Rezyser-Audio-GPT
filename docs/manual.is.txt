@@ -1,8 +1,8 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 14.0 – Útgáfuútgáfa)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 15.0 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærasett gerir þér kleift að skrifa, skipuleggja, formatta og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Það hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálesurum (NVDA).
 
-Settið samanstendur af aðalstúdíóinu (Reżyseria), þýðingar- og hreimverkfæri (Poliglota), skráarbyggingarverkfæri (Architekt Audiobooków) og — frá útgáfu 13.0 — Reglustjóra, þar sem þú getur bætt við nýjum hreim, dulmáli eða skapandi stillingu án Python (sjá SKREF 7b hér að neðan). Öll fjögur verkfærin eru aðgengileg í einu glugga forritsins, skipt með hnöppum á stikunni eða flýtilyklum Ctrl+1..Ctrl+4.
+Settið samanstendur af aðalstúdíóinu (Reżyseria), þýðingar- og hreimverkfæri (Poliglota), skráarbyggingarverkfæri (Architekt Audiobooków), Reglustjóra (frá útgáfu 13.0 — þú getur bætt við nýjum hreim, dulmáli eða skapandi stillingu án Python, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögur-einingunni (gagnvirk önnur-persóna skáldsaga sem gervigreind býr til, lesin af TTS eða skjálesara, lýst í sérstakri handbók opowiesci.is.txt). Öll fimm verkfærin eru aðgengileg í einu glugga forritsins, skipt með hnöppum á stikunni eða flýtilyklum Ctrl+1..Ctrl+5.
 
 SKREF 1: Fyrsta gangsetning (Cross-Platform)
 

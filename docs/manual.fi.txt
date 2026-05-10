@@ -1,8 +1,8 @@
-Podręcznik Ääniohjaajan AI - Täydellinen Opas (Versio 14.0 – Julkaisuversio)
+Podręcznik Ääniohjaajan AI - Täydellinen Opas (Versio 15.0 – Julkaisuversio)
 
 Tervetuloa Hybridin Äänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukumoottoreiden (NVDA) kanssa.
 
-Paketti koostuu päästudiosta (Ohjaamo), käännös- ja aksenttityökalusta (Polyglotti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti) sekä — versiosta 13.0 alkaen — Sääntöjen Hallinnasta, jossa voit lisätä uuden aksentin, salauksen tai luovan tilan ilman Pythonia (katso VAIHE 7b alla). Kaikki neljä työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla työkalupalkissa tai pikanäppäimillä Ctrl+1..Ctrl+4.
+Paketti koostuu päästudiosta (Ohjaamo), käännös- ja aksenttityökalusta (Polyglotti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — voit lisätä uuden aksentin, salauksen tai luovan tilan ilman Pythonia, katso VAIHE 7b alla) sekä — versiosta 15.0 alkaen — Tarinat-moduulista (vuorovaikutteinen toisen persoonan fiktio, jonka tekoäly luo ja jonka TTS tai ruudunlukija lukee, kuvattuna erillisessä oppaassa opowiesci.fi.txt). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla työkalupalkissa tai pikanäppäimillä Ctrl+1..Ctrl+5.
 
 VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)
 

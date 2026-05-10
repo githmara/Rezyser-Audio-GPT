@@ -20,6 +20,7 @@ import i18n
 import odswiez_rezysera
 from gui_konwerter import KonwerterPanel
 from gui_manager_regul import ManagerRegulPanel
+from gui_opowiesci import OpowiesciPanel
 from gui_poliglota import PoliglotaPanel
 from gui_rezyser import RezyserPanel
 from i18n import t
@@ -33,6 +34,7 @@ ID_TOOL_REZYSER    = wx.NewIdRef()
 ID_TOOL_POLIGLOTA  = wx.NewIdRef()
 ID_TOOL_KONWERTER  = wx.NewIdRef()
 ID_TOOL_MANAGER    = wx.NewIdRef()   # Manager Reguł – nowość w 13.0
+ID_TOOL_OPOWIESCI  = wx.NewIdRef()   # Interaktywne Opowieści – nowość w 15.0
 ID_EXIT            = wx.NewIdRef()
 
 
@@ -559,6 +561,11 @@ class MainFrame(wx.Frame):
             t("main.menu.manager"),
             t("main.menu_status.manager"),
         )
+        menu_tools.Append(
+            ID_TOOL_OPOWIESCI,
+            t("main.menu.opowiesci"),
+            t("main.menu_status.opowiesci"),
+        )
 
         # --- Menu: Plik ------------------------------------------------
         menu_file = wx.Menu()
@@ -639,10 +646,18 @@ class MainFrame(wx.Frame):
         )
         self._btn_manager.SetToolTip(t("main.tooltip.manager"))
 
+        self._btn_opowiesci = wx.Button(
+            self._root_panel,
+            id=ID_TOOL_OPOWIESCI,
+            label=t("main.btn.opowiesci"),
+        )
+        self._btn_opowiesci.SetToolTip(t("main.tooltip.opowiesci"))
+
         btn_sizer.Add(self._btn_rezyser,   flag=wx.ALL, border=4)
         btn_sizer.Add(self._btn_poliglota, flag=wx.ALL, border=4)
         btn_sizer.Add(self._btn_konwerter, flag=wx.ALL, border=4)
         btn_sizer.Add(self._btn_manager,   flag=wx.ALL, border=4)
+        btn_sizer.Add(self._btn_opowiesci, flag=wx.ALL, border=4)
 
         # Separator poziomy
         separator = wx.StaticLine(self._root_panel)
@@ -663,6 +678,7 @@ class MainFrame(wx.Frame):
         self._btn_rezyser.MoveBeforeInTabOrder(self._btn_poliglota)
         self._btn_poliglota.MoveBeforeInTabOrder(self._btn_konwerter)
         self._btn_konwerter.MoveBeforeInTabOrder(self._btn_manager)
+        self._btn_manager.MoveBeforeInTabOrder(self._btn_opowiesci)
 
     # ------------------------------------------------------------------
     # Podpięcie zdarzeń
@@ -674,6 +690,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_poliglota,  id=ID_TOOL_POLIGLOTA)
         self.Bind(wx.EVT_MENU, self._on_konwerter,  id=ID_TOOL_KONWERTER)
         self.Bind(wx.EVT_MENU, self._on_manager,    id=ID_TOOL_MANAGER)
+        self.Bind(wx.EVT_MENU, self._on_opowiesci,  id=ID_TOOL_OPOWIESCI)
         self.Bind(wx.EVT_MENU, self._on_exit,       id=ID_EXIT)
 
         # Menu: Język interfejsu — jeden handler dla wszystkich radio items;
@@ -686,6 +703,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._on_poliglota, id=ID_TOOL_POLIGLOTA)
         self.Bind(wx.EVT_BUTTON, self._on_konwerter, id=ID_TOOL_KONWERTER)
         self.Bind(wx.EVT_BUTTON, self._on_manager,   id=ID_TOOL_MANAGER)
+        self.Bind(wx.EVT_BUTTON, self._on_opowiesci, id=ID_TOOL_OPOWIESCI)
 
         self.Bind(wx.EVT_CLOSE, self._on_close)
 
@@ -707,6 +725,7 @@ class MainFrame(wx.Frame):
         n_poliglota = t("main.nazwy_narzedzi.poliglota")
         n_konwerter = t("main.nazwy_narzedzi.konwerter")
         n_manager   = t("main.nazwy_narzedzi.manager")
+        n_opowiesci = t("main.nazwy_narzedzi.opowiesci")
 
         # Usuń poprzedni panel (jeśli istnieje)
         if self._current_panel is not None:
@@ -722,6 +741,8 @@ class MainFrame(wx.Frame):
             self._current_panel = PoliglotaPanel(self._root_panel)
         elif name == n_konwerter:
             self._current_panel = KonwerterPanel(self._root_panel)
+        elif name == n_opowiesci:
+            self._current_panel = OpowiesciPanel(self._root_panel)
         else:  # Manager Reguł
             self._current_panel = ManagerRegulPanel(self._root_panel)
         self._content_area.Add(self._current_panel, proportion=1, flag=wx.EXPAND)
@@ -764,6 +785,7 @@ class MainFrame(wx.Frame):
             t("main.nazwy_narzedzi.poliglota"): self._btn_poliglota,
             t("main.nazwy_narzedzi.konwerter"): self._btn_konwerter,
             t("main.nazwy_narzedzi.manager"):   self._btn_manager,
+            t("main.nazwy_narzedzi.opowiesci"): self._btn_opowiesci,
         }
         for tool_name, btn in mapping.items():
             font = btn.GetFont()
@@ -789,6 +811,9 @@ class MainFrame(wx.Frame):
 
     def _on_manager(self, _event: wx.Event) -> None:
         self._switch_tool(t("main.nazwy_narzedzi.manager"))
+
+    def _on_opowiesci(self, _event: wx.Event) -> None:
+        self._switch_tool(t("main.nazwy_narzedzi.opowiesci"))
 
     def _on_exit(self, _event: wx.Event) -> None:
         self.Close()

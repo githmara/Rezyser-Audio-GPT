@@ -1,8 +1,8 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 14.0 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 15.0 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
-Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków) oraz — od wersji 13.0 — Managera Reguł, w którym bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy (patrz KROK 7b poniżej). Wszystkie cztery narzędzia dostępne są w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+4.
+Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków), Managera Reguł (od wersji 13.0 — bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy, patrz KROK 7b poniżej) oraz — od wersji 15.0 — modułu Opowieści (interaktywna fikcja drugoosobowa generowana przez AI, czytana przez TTS lub czytnik ekranu, opisana osobnym manualem opowiesci.pl.txt). Wszystkie pięć narzędzi dostępnych jest w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+5.
 
 
 

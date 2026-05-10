@@ -57,6 +57,7 @@ main:
     manager: "&Regelmanager\tCtrl+4"
     zakoncz: "Be&enden\tAlt+F4"
     jezyk_interfejsu: "&Benutzeroberflächensprache"
+    opowiesci: "&Geschichten\tCtrl+5"
   menu_status:
     strona_glowna: "Zurück zum Startbildschirm mit Werkzeugbeschreibung und Systemprüfung"
     rezyser: "Öffnet das Regisseur-Modul – Skripte und Prosa mit KI schreiben"
@@ -65,22 +66,26 @@ main:
     manager: "Öffnet den Regelmanager – YAML-Dateiexplorer in dictionaries/ und Ersteller neuer Akzente / Modi / Chiffren"
     zakoncz: "Anwendung schließen"
     jezyk_interfejsu: "Wählen Sie die Sprache der Benutzeroberfläche der Anwendung (Änderung erfordert Neustart)"
+    opowiesci: "Öffnet das Geschichten-Modul – interaktive, von KI generierte Zweitperson-Fiktion, gelesen von TTS/Bildschirmleser"
   btn:
     rezyser: "🎬  &Regisseur"
     poliglota: "🌍  &Polyglott"
     konwerter: "📄  &Konverter"
     manager: "📚  &Regelmanager"
+    opowiesci: "📖  &Geschichten"
   tooltip:
     rezyser: "Regisseur-Modul (Strg+1): Schreibe Skripte und Prosa mit KI-Unterstützung"
     poliglota: "Polyglott-Modul (Strg+2): Akzente und Textübersetzung"
     konwerter: "Konverter-Modul (Strg+3): Erstelle Word-Dokumente mit Überschriften"
     manager: "Regelmanager (Strg+4): Erkunde YAND-Dateien in dictionaries/, erstelle neue Akzente, Chiffren und Modi (Vorlage oder Prompt für KI)"
+    opowiesci: "Geschichten-Modul (Ctrl+5): Interaktive, von KI generierte Zweitperson-Fiktion — gelesen von TTS"
   nazwy_narzedzi:
     dom: "Startseite"
     rezyser: "Regisseur"
     poliglota: "Polyglott"
     konwerter: "Konverter"
     manager: "Regelmanager"
+    opowiesci: "Geschichten"
   dialog:
     zmiana_jezyka_tytul: "Änderung der Benutzeroberflächensprache"
     zmiana_jezyka_tresc: |-
@@ -864,3 +869,153 @@ updater:
     Besuchen Sie die Release-Seite auf GitHub und laden Sie das Archiv „Source code" herunter oder klonen Sie das Repository:
 
     {url_release}
+
+opowiesci:
+  # ---- BLOK A — Nagłówek modułu ---------------------------------------------
+  panel_name: "Geschichten-Panel"
+  description_name: "Modulbeschreibung Geschichten"
+  heading: "📖  Interaktive Geschichten"
+  tool_description: |-
+    Du schlüpfst in die Rolle eines Helden in einer dynamisch generierten Geschichte. Gib den Namen eines neuen Spiels ein und wähle einen Modus, um zu beginnen — die Erzählung erfolgt in der zweiten Person und wird von einem Screenreader oder TTS vorgelesen.
+
+    Der freie Modus erlaubt es, jede beliebige Aktion im Feld unten einzugeben. Der Auswahlmodus bietet 3-5 nummerierte Optionen zur Auswahl mit Schaltflächen. Der Modus „kleineres Übel" stellt ausschließlich ungünstige Entscheidungen — du wählst, was dir weniger schadet. Befehle, die mit einem Schrägstrich beginnen (/speichern, /laden, /einstellungen, /ende, /visualisieren), funktionieren jederzeit.
+
+  # ---- BLOK B — Pasek pliku gry ---------------------------------------------
+  lbl_nazwa_gry: "Spielname"
+  txt_nazwa_gry_name: "Spielfeldname"
+  txt_nazwa_gry_hint: "z.B. meine_abenteuer_1"
+  txt_nazwa_gry_tooltip: "Spieldateiname — wird für das automatische Speichern der Erzählung in skripte/<name>.txt und den Zustand in runtime/geschichten/<name>.game.json verwendet"
+  btn_nowa_gra_label: "&Neues Spiel"
+  btn_nowa_gra_tooltip: "Starte ein neues Spiel mit dem angegebenen Namen — erfordert einen Spielnamen und einen ausgewählten Modus"
+  btn_wczytaj_label: "&Laden"
+  btn_wczytaj_tooltip: "Lade ein zuvor gespeichertes Spiel aus runtime/geschichten/<name>.game.json"
+  btn_zapisz_label: "&Speichern"
+  btn_zapisz_tooltip: "Erzwinge das manuelle Speichern des Spielstands (automatisches Speichern erfolgt auch nach jeder Runde)"
+
+  # ---- BLOK C — RadioBox trybu ----------------------------------------------
+  rb_tryb_label: "Spielmodus"
+  rb_tryb_name: "Auswahl des Spielmodus"
+  rb_tryb_tooltip: "Der Modus bestimmt den Charakter der Erzählung und die Art der Interaktion"
+  tryb_swobodny: "Freier &Modus"
+  tryb_wyborow: "Auswahl&modus"
+  tryb_mniejsze_zlo: "&Kleineres Übel"
+
+  # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
+  pamiec_lbl: "Modellspeicher:"
+  pamiec_gauge_name: "Indikator für die Nutzung des Kontextfensters des Modells"
+  pamiec_status_name: "Status des Modellspeichers"
+  pamiec_status_init: "Kein aktives Spiel"
+
+  # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
+  lbl_narracja: "Vollständige Erzählung"
+  txt_narracja_name: "Feld der vollständigen Erzählung"
+  txt_narracja_tooltip: "Die vollständige Spielgeschichte, die nach jeder Runde wächst. Nur zum Lesen; gib deine Entscheidungen im Aktionsfeld unten ein. Das Feld „Letzte Runde\" oben zeigt die frische Szene ohne Navigation durch die gesamte Geschichte."
+  txt_narracja_init: |-
+    Um die Geschichte zu beginnen, gib den Spielnamen im Feld oben ein, wähle einen Modus und klicke auf „Neues Spiel".
+
+    Du kannst auch ein früheres Spiel mit der Schaltfläche „Laden" laden.
+
+  # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
+  lbl_wybory: "Deine Entscheidungen"
+  panel_wyborow_name: "Entscheidungsbereich"
+  panel_wyborow_placeholder: "Entscheidungen erscheinen hier im Auswahlmodus oder im Modus des kleineren Übels. Im freien Modus bleibt dieser Bereich leer — beschreibe Aktionen im Freitext im Feld unten."
+
+  # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
+  lbl_akcja: "Deine Aktion oder Befehl"
+  txt_akcja_name: "Spieleraktionsfeld"
+  txt_akcja_hint: "Beschreibe, was du tust, oder gib einen Befehl ein, der mit / beginnt"
+  txt_akcja_tooltip: "Gib eine beliebige Aktion (Freitext) oder einen Systembefehl ein: /speichern /laden /einstellungen /ende /visualisieren. Aktion wird mit der Schaltfläche Senden bestätigt."
+  btn_wyslij_label: "&Senden"
+  btn_wyslij_tooltip: "Sende Aktion an die Erzählmaschine"
+
+  # ---- Stub callbacka — Faza 1 (przyciski Nowa/Wczytaj/Zapisz, do podłączenia w Fazie 3)
+  placeholder_msg_tytul: "Funktion noch nicht verfügbar"
+  placeholder_msg_tresc: "Diese Schaltfläche wird in der nächsten Phase der Implementierung des Geschichtenmoduls (v15.0) angeschlossen. Derzeit existiert das Panel nur als UI-Skelett zur Überprüfung der Zugänglichkeit unter NVDA."
+
+  # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
+  tura_naglowek_format: "\n\n--- Runde {numer} ---\n\n"
+  brak_api_tytul: "Kein API-Schlüssel"
+  brak_api_tresc: "Die Datei golden_key.env mit dem gültigen Schlüssel OPENAI_API_KEY wurde nicht gefunden. Das Geschichtenmodul erfordert einen aktiven Schlüssel, um Erzählrunden zu generieren."
+  puste_pole_tytul: "Leeres Aktionsfeld"
+  puste_pole_tresc: 'Gib eine Aktion oder einen Befehl im Feld unter der Erzählung ein, bevor du auf „Senden" klickst.'
+  puste_nazwa_tytul: "Kein Spielname"
+  puste_nazwa_tresc: "Bevor du die erste Aktion sendest, gib den Spielnamen in der Leiste oben im Panel ein — unter diesem Namen werden alle Geschichtsdateien gespeichert."
+  status_wysylanie: "Senden an AI…"
+  status_gotowe: "Fertig — dein Zug."
+  status_blad: "Fehler der Erzählmaschine."
+  btn_wybor_tooltip_format: "Wähle: {tekst}"
+  blad_ai_tytul: "Fehler der Erzählmaschine"
+  blad_ai_naglowek: "Ein Fehler trat beim Generieren der Erzählrunde auf. Vollständiger Fehlerinhalt unten:"
+  blad_ai_szczegoly_tytul: "Fehlerdetails der Erzählmaschine"
+  blad_ai_lbl_tresc: "Fehlerinhalt (zum Kopieren):"
+  blad_ai_tresc_name: "Feld mit Fehlerinhalt der Erzählmaschine"
+  err_rate_limit: "Das Anfrage-Limit zu OpenAI wurde erreicht. Warte einen Moment oder überprüfe den Kontostand."
+  err_timeout: "Die Antwortzeit des Modells wurde überschritten (über 120 Sekunden). Versuche es erneut."
+  err_struktura: "Das Modell hat trotz zweier Korrekturversuche eine falsche Antwortstruktur generiert. Versuche es erneut oder formuliere die Aktion anders."
+
+  # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
+  brak_gry_tytul: "Kein aktives Spiel"
+  brak_gry_tresc: 'Starte ein neues Spiel mit der Schaltfläche „Neues Spiel" oder lade ein zuvor gespeichertes mit der Schaltfläche „Laden", bevor du versuchst, eine Aktion zu senden.'
+  gra_istnieje_tytul: "Ein Spiel mit diesem Namen existiert bereits"
+  gra_istnieje_tresc: 'Das Spiel „{nazwa}" hat bereits einen gespeicherten Zustand auf der Festplatte. Möchtest du es mit einem Null-Spiel überschreiben? Die gesamte bisherige Erzählung, Charaktere und Ausrüstung gehen verloren (Dateien .txt, .md und .game.json werden zurückgesetzt).'
+  gra_nowa_tytul: "Neues Spiel erstellt"
+  gra_nowa_tresc: 'Das Spiel „{nazwa}" wurde erstellt. Gib die erste Aktion im Feld unter der Erzählung ein und klicke auf „Senden", um die Geschichte zu beginnen.'
+  gra_wczytana_tytul: "Spiel geladen"
+  gra_wczytana_tresc: 'Das Spiel „{nazwa}" wurde geladen. Aktuelle Rundennummer: {numer_tury}. Du kannst das Spiel fortsetzen.'
+  gra_zapisana_tytul: "Spiel gespeichert"
+  gra_zapisana_tresc: 'Der Spielstand „{nazwa}" wurde auf die Festplatte gespeichert.'
+  nowa_gra_zaczatek: "📖 Spiel \"{nazwa}\" gestartet.\n\nGib die erste Aktion im Feld unten ein und klicke auf \"Senden\" — die Erzählmaschine beschreibt die Welt, in der du dich befindest, und stellt die erste Szene vor."
+  brak_narracji_info: "📖 Spiel \"{nazwa}\" geladen, aber die Erzählungsdatei (skripte/{nazwa}.txt) existiert nicht. Der Spielstand stammt aus der Datei game.json — du kannst fortfahren."
+  dlg_wczytaj_tytul: "Geschichtenspiel laden"
+  dlg_wczytaj_filtr: "Geschichtenspiel-Dateien (*.game.json)|*.game.json|Alle Dateien|*.*"
+  blad_zapisu_tresc: "Ein Fehler beim Speichern der Spieldatei ist aufgetreten: {tresc_bledu}"
+  blad_wczytania_tresc: 'Ein Fehler beim Laden des Spiels „{nazwa}" ist aufgetreten: {tresc_bledu}'
+
+  # ---- Faza 4: slash-komendy + tiktoken + /visualize + Cinematic Warning ----
+  komenda_nieznana_tytul: "Unbekannter Befehl"
+  komenda_nieznana_tresc: 'Der Befehl „{komenda}" wird nicht erkannt. Verfügbare Befehle:
+
+    {lista}'
+  komendy_dostepne_lista: |-
+    /speichern, /save                    — erzwinge das Speichern des Spiels
+    /laden, /load                   — öffne den Lade-Dialog
+    /einstellungen, /settings            — ändere das AI-Modell (Standard/Qualität)
+    /visualisieren <beschreibung>, /visualize    — multisensorische Beschreibung der Szene (ohne Speicherung)
+    /ende, /quit                    — schließe die Anwendung
+  dlg_ustawienia_tytul: "Einstellungen der Erzählmaschine"
+  dlg_ustawienia_lbl_model: "AI-Modell:"
+  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, schneller, günstiger)"
+  dlg_ustawienia_model_quality: "Hohe Qualität (gpt-4o, langsamer, teurer)"
+  dlg_ustawienia_btn_zatwierdz: "Bestätigen"
+  dlg_ustawienia_zmieniono_tytul: "Modell geändert"
+  dlg_ustawienia_zmieniono_tresc: 'Die Erzählmaschine wird nun das Modell „{model}" verwenden.'
+  dlg_visualize_tytul: "🌅 Szenenvisualisierung"
+  dlg_visualize_lbl: "Multisensorische Beschreibung der aktuellen Szene (ändert den Spielstand nicht):"
+  dlg_visualize_name: "Feld mit der Beschreibung der Szenenvisualisierung"
+  dlg_visualize_pusta_akcja_tytul: "Keine Visualisierungsbeschreibung"
+  dlg_visualize_pusta_akcja_tresc: "Gib nach dem Befehl /visualisieren eine kurze Beschreibung dessen ein, was du genauer sehen möchtest (z.B. /visualisieren wie der Wächter aussieht). Ohne Argument weiß die Maschine nicht, worauf sie sich konzentrieren soll."
+  status_wizualizowanie: "Visualisierung wird generiert…"
+  pamiec_status_format: "{procent}% — {tokeny} Tokens ({etap})"
+  pamiec_etap_czysta: "🟢 sauber"
+  pamiec_etap_ok: "🟢 OK"
+  pamiec_etap_ostrzezenie: "⚠️ Warnung"
+  pamiec_etap_alarm: "🚨 ALARM"
+  status_streszczanie: "Auto-Zusammenfassung des Kontexts läuft…"
+  streszczenie_skonczone_tytul: "Modellspeicher wiederhergestellt"
+  streszczenie_skonczone_tresc: "Auto-Zusammenfassung der letzten {liczba_tur} Runden abgeschlossen. Puffer freigegeben — du kannst das Spiel fortsetzen."
+  cinematic_warning_dlg_tytul: "📖 Dramatische Unterbrechung — 150. Runde"
+  cinematic_warning_dlg_lbl: "Die Erzählmaschine unterbricht die Erzählung mit einer speziellen Warnung für dich:"
+  cinematic_warning_dlg_name: "Feld mit dem Inhalt der Cinematic Meta Warning"
+  alarm_blokada_tytul: "Modellspeicher überladen"
+  alarm_blokada_tresc: "Der Kontextpuffer ist zu {procent}% gefüllt. Die Auto-Zusammenfassung hat keinen Platz freigegeben. Versuche, das Spiel zu beenden und erneut zu laden — die Maschine lädt nur den Zustand aus der Datei game.json, ohne die Geschichte der letzten Runden."
+
+  # ---- Faza 5: Quick Start preset picker ----------------------------------
+  lbl_quick_start: "Schnellstart:"
+  quick_start_wlasna: "(eigenes Spiel)"
+  choice_quick_start_name: "Auswahl eines fertigen Schnellstart-Szenarios"
+  choice_quick_start_tooltip: 'Wähle eine fertige Welt, um sofort in die Erzählung einzutauchen. Das Preset injiziert eine kurze Beschreibung der Welt und des Helden in die Maschine und stellt den Standardspielmodus ein. „(eigenes Spiel)" lässt den Start frei — die Maschine erfindet die Welt basierend auf der ersten Aktion.'
+  lbl_ostatnia_tura: "Letzte Runde"
+  txt_ostatnia_tura_name: "Feld mit dem Inhalt der letzten Runde"
+  txt_ostatnia_tura_tooltip: "Eine Abkürzung, die nur die zuletzt generierte Szene enthält — NVDA liest hier die frische Erzählung, ohne durch Hunderte von Zeilen der vollständigen Geschichte zu navigieren. Nach jeder weiteren Runde wird das Feld durch neuen Inhalt ersetzt."
+  txt_ostatnia_tura_init: "(Die letzte Runde wird in diesem Feld nach deiner ersten Aktion erscheinen.)"
+  txt_ostatnia_tura_skrot_naglowek: "[Zusammenfassung der zuletzt gespeicherten Runde — vollständige Erzählung im Feld unten]\n\n"

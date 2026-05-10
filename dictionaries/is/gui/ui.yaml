@@ -57,6 +57,7 @@ main:
     manager: "&Reglustjóri\tCtrl+4"
     zakoncz: "Ljúka&\tAlt+F4"
     jezyk_interfejsu: "&Viðmótstungumál"
+    opowiesci: "&Sögur\tCtrl+5"
   menu_status:
     strona_glowna: "Farðu aftur á upphafsskjá með lýsingu á verkfærum og System Check"
     rezyser: "Opnar Leikstjórnarstillingu – skrifa handrit og prósa með AI"
@@ -65,22 +66,26 @@ main:
     manager: "Opnar Reglustjóra – YAML skráarkönnuður í dictionaries/ og nýr áherslu / stillinga / dulritunarsmiður"
     zakoncz: "Lokaðu forritinu"
     jezyk_interfejsu: "Veldu tungumál viðmótsins (breyting krefst endurræsingar)"
+    opowiesci: "Opnar Sögur einingu – gagnvirkar sögur í annarri persónu búnar til af AI, lesnar af TTS/skjálesara"
   btn:
     rezyser: "🎬  &Leikstjóri"
     poliglota: "🌍  &Tungumálamaður"
     konwerter: "📄  &Breytingartæki"
     manager: "📚  &Reglustjóri"
+    opowiesci: "📖  &Sögur"
   tooltip:
     rezyser: "Leikstjórnarstilling (Ctrl+1): Skrifaðu handrit og prósa með hjálp AI"
     poliglota: "Tungumálamannsstilling (Ctrl+2): Áherslur og þýðing texta"
     konwerter: "Breytingartækisstilling (Ctrl+3): Búðu til Word skrár með fyrirsögnum"
     manager: "Reglustjórastilling (Ctrl+4): Skoðaðu YAND skrár í dictionaries/, búðu til nýjar áherslur, dulritanir og stillingar (sniðmát eða ábending fyrir AI)"
+    opowiesci: "Sögur eining (Ctrl+5): Gagnvirkar sögur í annarri persónu — búnar til af AI, lesnar af TTS"
   nazwy_narzedzi:
     dom: "Heim"
     rezyser: "Leikstjóri"
     poliglota: "Tungumálamaður"
     konwerter: "Breytingartæki"
     manager: "Reglustjóri"
+    opowiesci: "Sögur"
   dialog:
     zmiana_jezyka_tytul: "Breyting á tungumáli viðmóts"
     zmiana_jezyka_tresc: |-
@@ -864,3 +869,153 @@ updater:
     Farðu á útgáfusíðuna á GitHub og sæktu „Source code" skjalasafnið eða klónaðu geymsluna:
 
     {url_release}
+
+opowiesci:
+  # ---- BLOK A — Nagłówek modułu ---------------------------------------------
+  panel_name: "Sögupanel"
+  description_name: "Lýsing á sögueiningu"
+  heading: "📖  Gagnvirkar sögur"
+  tool_description: |-
+    Þú leikur hetju í sögunni sem er kviklega búin til. Sláðu inn nafn á nýjum leik og veldu stillingu til að byrja — frásögnin er í annarri persónu og lesin af skjálesara eða TTS.
+
+    Frjáls stilling leyfir þér að prófa hvaða aðgerð sem er sem þú slærð inn í reitinn neðst. Valstilling gefur 3-5 tölusett val sem hægt er að velja með hnöppum. Stillingin „minna illt" býður aðeins upp á óhagstæð val — þú velur það sem er minna óhagstætt. Skipanir sem byrja á skástriki (/vista, /hlaða, /stillingar, /enda, /sjá) virka hvenær sem er.
+
+  # ---- BLOK B — Pasek pliku gry ---------------------------------------------
+  lbl_nazwa_gry: "Nafn leiks"
+  txt_nazwa_gry_name: "Reitur fyrir nafn leiks"
+  txt_nazwa_gry_hint: "t.d. ævintýri_mín_1"
+  txt_nazwa_gry_tooltip: "Nafn á leikskrá — notað fyrir sjálfvirka vistun frásagnar í skrypty/<nafn>.txt og stöðu í runtime/opowiesci/<nafn>.game.json"
+  btn_nowa_gra_label: "&Nýr leikur"
+  btn_nowa_gra_tooltip: "Byrja nýjan leik með gefnu nafni — krefst nafns leiks og valinnar stillingar"
+  btn_wczytaj_label: "&Hlaða"
+  btn_wczytaj_tooltip: "Hlaða áður vistaðan leik úr runtime/opowiesci/<nafn>.game.json"
+  btn_zapisz_label: "&Vista"
+  btn_zapisz_tooltip: "Þvinga handvirka vistun á stöðu leiks (sjálfvirk vistun á sér einnig stað eftir hverja umferð)"
+
+  # ---- BLOK C — RadioBox trybu ----------------------------------------------
+  rb_tryb_label: "Leikstilling"
+  rb_tryb_name: "Val á leikstillingu"
+  rb_tryb_tooltip: "Stilling ákvarðar eðli frásagnar og samskiptamátann"
+  tryb_swobodny: "Frjáls &stilling"
+  tryb_wyborow: "Val&stilling"
+  tryb_mniejsze_zlo: "&Minna illt"
+
+  # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
+  pamiec_lbl: "Minni líkans:"
+  pamiec_gauge_name: "Vísir um notkun á samhengisglugga líkans"
+  pamiec_status_name: "Staða minnis líkans"
+  pamiec_status_init: "Enginn virkur leikur"
+
+  # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
+  lbl_narracja: "Full frásögn"
+  txt_narracja_name: "Reitur fullrar frásagnar"
+  txt_narracja_tooltip: "Full saga leiksins, sem eykst eftir hverja umferð. Aðeins til lesturs; sláðu inn ákvarðanir þínar í aðgerðarreitinn hér að neðan. Reiturinn „Síðasta umferð\" hér að ofan sýnir nýja senu án þess að fara í gegnum alla söguna."
+  txt_narracja_init: |-
+    Til að hefja sögu, sláðu inn nafn leiks í reitinn hér að ofan, veldu stillingu og smelltu á „Nýr leikur".
+
+    Þú getur einnig hlaðið fyrri leik með því að smella á „Hlaða".
+
+  # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
+  lbl_wybory: "Val þín"
+  panel_wyborow_name: "Svæði fyrir val"
+  panel_wyborow_placeholder: "Val birtast hér í valstillingu eða minna illu. Í frjálsri stillingu er þetta svæði tómt — lýstu aðgerðum með frjálsum texta í reitnum hér að neðan."
+
+  # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
+  lbl_akcja: "Aðgerð þín eða skipun"
+  txt_akcja_name: "Reitur fyrir aðgerðir leikmanns"
+  txt_akcja_hint: "Lýstu því sem þú gerir, eða sláðu inn skipun sem byrjar á /"
+  txt_akcja_tooltip: "Sláðu inn hvaða aðgerð sem er (frjáls texti) eða kerfisskipun: /vista /hlaða /stillingar /enda /sjá. Aðgerð er staðfest með hnappinum Senda."
+  btn_wyslij_label: "&Senda"
+  btn_wyslij_tooltip: "Senda aðgerð til frásagnavélar"
+
+  # ---- Stub callbacka — Faza 1 (przyciski Nowa/Wczytaj/Zapisz, do podłączenia w Fazie 3)
+  placeholder_msg_tytul: "Aðgerð ekki enn tiltæk"
+  placeholder_msg_tresc: "Þessi hnappur verður tengdur í næstu áfanga innleiðingar sögueiningar (v15.0). Eins og er, er panelinn aðeins til sem UI beinagrind til að sannreyna aðgengi fyrir NVDA."
+
+  # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
+  tura_naglowek_format: "\n\n--- Umferð {numer} ---\n\n"
+  brak_api_tytul: "Enginn API lykill"
+  brak_api_tresc: "Skráin golden_key.env með réttum OPENAI_API_KEY lykli fannst ekki. Sögueiningin krefst virks lykils til að búa til umferðir frásagnar."
+  puste_pole_tytul: "Tómt aðgerðarreit"
+  puste_pole_tresc: 'Sláðu inn aðgerð eða skipun í reitinn hér að neðan frásögninni áður en þú smellir á „Senda".'
+  puste_nazwa_tytul: "Enginn leikur nafn"
+  puste_nazwa_tresc: "Áður en þú sendir fyrstu aðgerðina, sláðu inn nafn leiks í reitinn efst á panelnum — undir þessu nafni verða allir söguskrár vistaðar."
+  status_wysylanie: "Senda til AI…"
+  status_gotowe: "Tilbúið — þín umferð."
+  status_blad: "Villa í frásagnavél."
+  btn_wybor_tooltip_format: "Veldu: {tekst}"
+  blad_ai_tytul: "Villa í frásagnavél"
+  blad_ai_naglowek: "Villa kom upp við að búa til umferð sögunnar. Fullur texti villunnar hér að neðan:"
+  blad_ai_szczegoly_tytul: "Upplýsingar um villu í frásagnavél"
+  blad_ai_lbl_tresc: "Villutexti (til að afrita):"
+  blad_ai_tresc_name: "Reitur með villutexta frásagnavélar"
+  err_rate_limit: "Fjöldi fyrirspurna til OpenAI hefur verið tæmdur. Bíddu smá stund eða athugaðu stöðu reiknings."
+  err_timeout: "Svarstími líkans hefur verið yfirstiginn (yfir 120 sekúndur). Reyndu aftur."
+  err_struktura: "Líkanið bjó til ranga uppbyggingu svars þrátt fyrir tvær tilraunir til leiðréttingar. Reyndu aftur eða mótaðu aðgerðina á annan hátt."
+
+  # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
+  brak_gry_tytul: "Enginn virkur leikur"
+  brak_gry_tresc: 'Byrjaðu nýjan leik með því að smella á „Nýr leikur" eða hlaða áður vistaðan með því að smella á „Hlaða", áður en þú reynir að senda aðgerð.'
+  gra_istnieje_tytul: "Leikur með þessu nafni er þegar til"
+  gra_istnieje_tresc: 'Leikurinn „{nazwa}" hefur þegar vistað ástand á disknum. Viltu skrifa yfir hann með núll leik? Öll fyrri frásögn, persónur og búnaður verða glötuð (skrár .txt, .md og .game.json verða endurstilltar).'
+  gra_nowa_tytul: "Nýr leikur búinn til"
+  gra_nowa_tresc: 'Leikurinn „{nazwa}" hefur verið búinn til. Sláðu inn fyrstu aðgerðina í reitinn hér að neðan frásögninni og smelltu á „Senda" til að hefja söguna.'
+  gra_wczytana_tytul: "Leikur hlaðinn"
+  gra_wczytana_tresc: 'Leikurinn „{nazwa}" hefur verið hlaðinn. Núverandi umferðarnúmer: {numer_tury}. Þú getur haldið áfram að spila.'
+  gra_zapisana_tytul: "Leikur vistaður"
+  gra_zapisana_tresc: 'Staða leiks „{nazwa}" hefur verið vistuð á disk.'
+  nowa_gra_zaczatek: "📖 Leikur \"{nazwa}\" hafinn.\n\nSláðu inn fyrstu aðgerðina í reitinn hér að neðan og smelltu á \"Senda\" — frásagnavélin mun lýsa heiminum sem þú ert í og kynna fyrstu senu."
+  brak_narracji_info: "📖 Leikur \"{nazwa}\" hlaðinn, en frásagnarskráin (skrypty/{nazwa}.txt) er ekki til. Staða leiks kemur úr game.json skrá — þú getur haldið áfram."
+  dlg_wczytaj_tytul: "Hlaða söguleik"
+  dlg_wczytaj_filtr: "Skrár fyrir söguleik (*.game.json)|*.game.json|Allar skrár|*.*"
+  blad_zapisu_tresc: "Villa kom upp við vistun á leikskrá: {tresc_bledu}"
+  blad_wczytania_tresc: 'Villa kom upp við að hlaða leik „{nazwa}": {tresc_bledu}'
+
+  # ---- Faza 4: slash-komendy + tiktoken + /visualize + Cinematic Warning ----
+  komenda_nieznana_tytul: "Óþekkt skipun"
+  komenda_nieznana_tresc: 'Skipunin „{komenda}" er ekki þekkt. Tiltækar skipanir:
+
+    {lista}'
+  komendy_dostepne_lista: |-
+    /vista, /save                    — þvinga vistun leiks
+    /hlaða, /load                   — opna hleðsluskjá
+    /stillingar, /settings            — breyta AI líkani (Standard/Quality)
+    /sjá <lýsing>, /visualize    — fjölskynja lýsing á senu (án vistunar)
+    /enda, /quit                    — loka forritinu
+  dlg_ustawienia_tytul: "Stillingar frásagnavélar"
+  dlg_ustawienia_lbl_model: "AI líkan:"
+  dlg_ustawienia_model_standard: "Staðlað (gpt-4o-mini, hraðara, ódýrara)"
+  dlg_ustawienia_model_quality: "Hágæða (gpt-4o, hægara, dýrara)"
+  dlg_ustawienia_btn_zatwierdz: "Staðfesta"
+  dlg_ustawienia_zmieniono_tytul: "Líkan breytt"
+  dlg_ustawienia_zmieniono_tresc: 'Frásagnavélin mun héðan í frá nota líkanið „{model}".'
+  dlg_visualize_tytul: "🌅 Senuvísualisering"
+  dlg_visualize_lbl: "Fjölskynja lýsing á núverandi senu (breytir ekki stöðu leiks):"
+  dlg_visualize_name: "Reitur með lýsingu á senuvísualiseringu"
+  dlg_visualize_pusta_akcja_tytul: "Engin lýsing á senuvísualiseringu"
+  dlg_visualize_pusta_akcja_tresc: "Eftir skipunina /sjá, sláðu inn stutta lýsingu á því sem þú vilt sjá nánar (t.d. /sjá hvernig vörðurinn lítur út). Án röksemdar veit vélin ekki á hvað hún á að einbeita sér."
+  status_wizualizowanie: "Búa til senuvísualiseringu…"
+  pamiec_status_format: "{procent}% — {tokeny} tákn ({etap})"
+  pamiec_etap_czysta: "🟢 hreint"
+  pamiec_etap_ok: "🟢 OK"
+  pamiec_etap_ostrzezenie: "⚠️ viðvörun"
+  pamiec_etap_alarm: "🚨 VIÐVÖRUN"
+  status_streszczanie: "Sjálfvirk samantekt á samhengi í gangi…"
+  streszczenie_skonczone_tytul: "Minni líkans endurheimt"
+  streszczenie_skonczone_tresc: "Sjálfvirk samantekt á fyrri {liczba_tur} umferðum lokið. Buffert losað — þú getur haldið áfram að spila."
+  cinematic_warning_dlg_tytul: "📖 Dramatísk innskot — 150. umferð"
+  cinematic_warning_dlg_lbl: "Frásagnavélin stöðvar frásögn með sérstakri viðvörun fyrir þig:"
+  cinematic_warning_dlg_name: "Reitur með efni Cinematic Meta Warning"
+  alarm_blokada_tytul: "Minni líkans ofhlaðið"
+  alarm_blokada_tresc: "Samhengisbuffert er fyllt í {procent}%. Sjálfvirk samantekt losaði ekki pláss. Reyndu að ljúka leiknum og hlaða honum aftur — vélin mun aðeins hlaða stöðu úr game.json skrá, án sögu síðustu umferða."
+
+  # ---- Faza 5: Quick Start preset picker ----------------------------------
+  lbl_quick_start: "Fljótleg byrjun:"
+  quick_start_wlasna: "(eigin leikur)"
+  choice_quick_start_name: "Val á tilbúnu Quick Start atburðarás"
+  choice_quick_start_tooltip: 'Veldu tilbúinn heim til að sökkva þér strax í frásögnina. Forsetning mun sprauta stutta lýsingu á heiminum og hetjunni í vélina, stilla sjálfgefna leikstillingu. „(eigin leikur)" skilur eftir frjálsa byrjun — vélin mun sjálf búa til heiminn út frá fyrstu aðgerð.'
+  lbl_ostatnia_tura: "Síðasta umferð"
+  txt_ostatnia_tura_name: "Reitur með efni síðustu umferðar"
+  txt_ostatnia_tura_tooltip: "Flýtileið sem inniheldur eingöngu nýlega myndaða senu — NVDA les hér nýja frásögn án þess að fara í gegnum hundruð lína af allri sögunni. Eftir hverja næstu umferð er reitnum skipt út fyrir nýtt efni."
+  txt_ostatnia_tura_init: "(Síðasta umferð birtist í þessum reit eftir fyrstu aðgerðina þína.)"
+  txt_ostatnia_tura_skrot_naglowek: "[samantekt síðustu vistuðu umferðar — full frásögn í reitnum hér að neðan]\n\n"

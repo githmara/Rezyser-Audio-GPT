@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  TRYB MNIEJSZE ZŁO (mode 5) — wszystkie wybory są niekorzystne moralnie,
+#  fizycznie albo strategicznie. Gracz wybiera mniejsze zło, NIE dobro.
+#  Brak „neutralnej" opcji, brak „happy endingu" w danej turze.
+#  Mechanika Fiolki/Vial (z referencji `notatki_dev/tales_mechanics.md`)
+#  odłożona do v15.1 — Faza 5 v15.0 zachowuje narracyjną wersję trybu.
+# -----------------------------------------------------------------------------
+id: tryb_mniejsze_zlo
+etykieta: "Mniejsze zło — wszystkie opcje niekorzystne"
+kategoria: tryb
+kolejnosc: 50
+
+# --- Parametry OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Addon do prompt_systemowy z baza.yaml ---
+prompt_systemowy: |
+  TRYB: MNIEJSZE ZŁO. Pole `wybory` zawiera 3-5 elementów A-E, gdzie KAŻDY wybór jest niekorzystny moralnie, fizycznie albo strategicznie — gracz wybiera mniejsze zło, nie dobro. Brak „neutralnej" opcji. Brak „happy endingu" w danej turze.

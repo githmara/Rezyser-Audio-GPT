@@ -1,0 +1,30 @@
+# -----------------------------------------------------------------------------
+#  CINEMATIC META WARNING — przerywnik dramatyczny po 150 turze (raz per gra).
+#  Treść otoczona z obu stron markerami ⚠️🚨⚠️ — filter
+#  `core_opowiesci.czysc_meta_warningi` wycina ten fragment z `.txt`
+#  zanim trafi do TTS, więc gracz odsłuchujący audiobook NIE usłyszy
+#  meta-komentarza. Zapis idzie tylko do `.story.jsonl` (log) i `wx.Dialog`
+#  z `wx.Bell()` (A11y „ping" dla NVDA).
+# -----------------------------------------------------------------------------
+id: cinematic_warning
+etykieta: "Cinematic Meta Warning (150. tura)"
+kategoria: meta
+kolejnosc: 70
+
+# --- Parametry OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+max_tokens: 600
+timeout_s: 60.0
+
+# --- Prompt systemowy ---
+# Markery ⚠️🚨⚠️ MUSZĄ pojawić się DOKŁADNIE w pierwszej i ostatniej linii
+# odpowiedzi LLM — `core_opowiesci._REGEX_META_WARNING` wycina po nich.
+# Lingwista, który chce zmienić markery, MUSI równocześnie zaktualizować
+# regex w `core_opowiesci.py`.
+prompt_systemowy: |
+  Jesteś silnikiem narracyjnym interaktywnej opowieści. Gracz właśnie ukończył 150 turę — to specjalny moment dramatyczny. Wygeneruj 100-200-słowowe ostrzeżenie meta-narracyjne, otoczone z obu stron markerami ⚠️🚨⚠️ (dokładnie ten ciąg emoji, w pierwszej i ostatniej linii). Treść: zwrot bezpośrednio do gracza w drugiej osobie, podsumowanie tego co osiągnął, dramatyczne ostrzeżenie o wadze decyzji jakie podejmuje, zachęta do refleksji nad konsekwencjami. Nie zmieniasz stanu gry, nie proponujesz wyborów. To NIE jest tura gry — to przerywnik. Format:
+
+  ⚠️🚨⚠️
+  [treść ostrzeżenia, 100-200 słów]
+  ⚠️🚨⚠️

@@ -1,0 +1,23 @@
+# -----------------------------------------------------------------------------
+#  STRESZCZENIE — auto-kompresja `ostatnie_tury` po przekroczeniu progu
+#  pamięci modelu (PROG_OSTRZEZENIE = 70% z 128k tokenów = ~89.6k).
+#  Wynik zastępuje całą historię tur jednym wpisem typu
+#  `{"akcja_gracza": "(streszczenie poprzednich tur)", "narracja_skrot": <wynik>}`.
+#  GUI spawnuje to w wątku tła PO sukcesie tury, blokując `_btn_wyslij`
+#  do czasu zakończenia (race condition guard `_meta_w_toku=True`).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Auto-streszczenie kontekstu"
+kategoria: meta
+kolejnosc: 60
+
+# --- Parametry OpenAI ---
+# Niska temperatura — chcemy wierne, faktograficzne streszczenie (nie kreatywne).
+model: gpt-4o-mini
+temperatura: 0.3
+max_tokens: 800
+timeout_s: 60.0
+
+# --- Prompt systemowy ---
+prompt_systemowy: |
+  Jesteś asystentem narracyjnym. Otrzymasz listę ostatnich tur interaktywnej opowieści (akcja gracza + skrót narracji per tura). Wygeneruj kondensat 200-400 słów obejmujący: kluczowe wydarzenia fabularne, decyzje gracza i ich konsekwencje, ważne postacie pojawiające się w narracji, miejsca odwiedzone, niedokończone wątki. Pisz w trzeciej osobie, neutralnie, jak streszczenie powieści — to NIE jest tura gry, gracz nie czyta tego jako narracji, ale silnik narracyjny używa go jako pamięci długotrwałej.

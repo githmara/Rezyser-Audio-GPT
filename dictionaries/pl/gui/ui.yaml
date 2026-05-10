@@ -62,6 +62,7 @@ main:
     poliglota:           "&Poliglota\tCtrl+2"
     konwerter:           "&Konwerter\tCtrl+3"
     manager:             "&Manager Reguł\tCtrl+4"
+    opowiesci:           "&Opowieści\tCtrl+5"
     zakoncz:             "Za&kończ\tAlt+F4"
     jezyk_interfejsu:    "&Język interfejsu"
   menu_status:
@@ -70,6 +71,7 @@ main:
     poliglota:           "Otwiera moduł Poligloty – akcenty i tłumaczenie tekstów"
     konwerter:           "Otwiera moduł Konwertera – tworzenie plików Word"
     manager:             "Otwiera Managera Reguł – eksplorator plików YAML w dictionaries/ i kreator nowych akcentów / trybów / szyfrów"
+    opowiesci:           "Otwiera moduł Opowieści – interaktywna fikcja II-osobowa generowana przez AI, czytana przez TTS/czytnik ekranu"
     zakoncz:             "Zamknij aplikację"
     jezyk_interfejsu:    "Wybierz język interfejsu aplikacji (zmiana wymaga ponownego uruchomienia)"
   btn:
@@ -77,17 +79,20 @@ main:
     poliglota:           "🌍  &Poliglota"
     konwerter:           "📄  &Konwerter"
     manager:             "📚  &Manager Reguł"
+    opowiesci:           "📖  &Opowieści"
   tooltip:
     rezyser:             "Moduł Reżyserii (Ctrl+1): Pisz skrypty i prozę z pomocą AI"
     poliglota:           "Moduł Poligloty (Ctrl+2): Akcenty i tłumaczenie tekstów"
     konwerter:           "Moduł Konwertera (Ctrl+3): Twórz pliki Word z nagłówkami"
     manager:             "Manager Reguł (Ctrl+4): Eksploruj pliki YAND w dictionaries/, twórz nowe akcenty, szyfry i tryby (szablon lub prompt dla AI)"
+    opowiesci:           "Moduł Opowieści (Ctrl+5): Interaktywna fikcja II-osobowa — generowana przez AI, czytana przez TTS"
   nazwy_narzedzi:
     dom:                 "Dom"
     rezyser:             "Reżyser"
     poliglota:           "Poliglota"
     konwerter:           "Konwerter"
     manager:             "Manager Reguł"
+    opowiesci:           "Opowieści"
   dialog:
     zmiana_jezyka_tytul: "Zmiana języka interfejsu"
     zmiana_jezyka_tresc: |-
@@ -871,3 +876,162 @@ updater:
     Odwiedź stronę wydania na GitHubie i pobierz archiwum „Source code" lub sklonuj repozytorium:
 
     {url_release}
+
+# -----------------------------------------------------------------------------
+# OPOWIEŚCI – panel modułu „Interaktywne Opowieści" (gui_opowiesci.py)
+# Drugi główny tryb obok Reżysera, wprowadzony w v15.0. Interaktywna fikcja
+# II-osobowa generowana przez LLM, odczytywana przez TTS/NVDA. JSON-schema
+# response, lifecycle plików w skrypty/ + runtime/opowiesci/. Numeracja .mode
+# kontynuuje numerację Reżysera: 3=Swobodny, 4=Wyborów, 5=Mniejsze zło.
+# -----------------------------------------------------------------------------
+opowiesci:
+  # ---- BLOK A — Nagłówek modułu ---------------------------------------------
+  panel_name:                "Panel Opowieści"
+  description_name:          "Opis modułu Opowieści"
+  heading:                   "📖  Interaktywne Opowieści"
+  tool_description: |-
+    Wcielasz się w bohatera dynamicznie generowanej historii. Wpisz nazwę nowej gry i wybierz tryb, by rozpocząć — narracja prowadzona jest w drugiej osobie i odczytywana przez czytnik ekranu lub TTS.
+
+    Tryb swobodny pozwala spróbować dowolnej akcji wpisanej w pole na dole. Tryb wyborów daje 3-5 ponumerowanych opcji do wyboru przyciskami. Tryb „mniejsze zło" stawia wyłącznie przed niekorzystnymi wyborami — wybierasz, co ci się mniej opłaca. Komendy zaczynające się od ukośnika (/zapisz, /wczytaj, /ustawienia, /koniec, /wizualizuj) działają w każdej chwili.
+
+  # ---- BLOK B — Pasek pliku gry ---------------------------------------------
+  lbl_nazwa_gry:             "Nazwa gry"
+  txt_nazwa_gry_name:        "Pole nazwy gry"
+  txt_nazwa_gry_hint:        "np. moje_przygody_1"
+  txt_nazwa_gry_tooltip:     "Nazwa pliku gry — używana dla autozapisu narracji do skrypty/<nazwa>.txt i stanu w runtime/opowiesci/<nazwa>.game.json"
+  btn_nowa_gra_label:        "&Nowa gra"
+  btn_nowa_gra_tooltip:      "Rozpocznij nową grę pod podaną nazwą — wymaga nazwy gry i wybranego trybu"
+  btn_wczytaj_label:         "&Wczytaj"
+  btn_wczytaj_tooltip:       "Wczytaj wcześniej zapisaną grę z runtime/opowiesci/<nazwa>.game.json"
+  btn_zapisz_label:          "&Zapisz"
+  btn_zapisz_tooltip:        "Wymuś ręczny zapis stanu gry (autozapis działa też po każdej turze)"
+
+  # ---- BLOK C — RadioBox trybu ----------------------------------------------
+  rb_tryb_label:             "Tryb gry"
+  rb_tryb_name:              "Wybór trybu gry"
+  rb_tryb_tooltip:           "Tryb określa charakter narracji i sposób interakcji"
+  tryb_swobodny:             "Tryb &swobodny"
+  tryb_wyborow:              "Tryb w&yborów"
+  tryb_mniejsze_zlo:         "&Mniejsze zło"
+
+  # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
+  pamiec_lbl:                "Pamięć modelu:"
+  pamiec_gauge_name:         "Wskaźnik wykorzystania okna kontekstowego modelu"
+  pamiec_status_name:        "Status pamięci modelu"
+  pamiec_status_init:        "Brak aktywnej gry"
+
+  # ---- BLOK E1 — Obszar „Ostatnia tura" (skrót dla NVDA, krótkie pole) ------
+  lbl_ostatnia_tura:         "Ostatnia tura"
+  txt_ostatnia_tura_name:    "Pole z treścią ostatniej tury"
+  txt_ostatnia_tura_tooltip: "Skrót zawierający wyłącznie ostatnio wygenerowaną scenę — NVDA czyta tu świeżą narrację bez nawigowania przez setki linii pełnej historii. Po każdej kolejnej turze pole jest podmieniane na nową treść."
+  txt_ostatnia_tura_init:    "(Ostatnia tura pojawi się w tym polu po pierwszej Twojej akcji.)"
+  txt_ostatnia_tura_skrot_naglowek: "[skrót ostatniej zapisanej tury — pełna narracja w polu poniżej]\n\n"
+
+  # ---- BLOK E2 — Obszar pełnej narracji (TextCtrl readonly multiline) -------
+  lbl_narracja:              "Pełna narracja"
+  txt_narracja_name:         "Pole pełnej narracji"
+  txt_narracja_tooltip:      'Pełna historia gry, narastająca po każdej turze. Tylko do odczytu; w pole akcji poniżej wpisuj swoje decyzje. Pole „Ostatnia tura" wyżej pokazuje świeżą scenę bez nawigacji przez całą historię.'
+  txt_narracja_init: |-
+    Aby rozpocząć opowieść, wpisz nazwę gry w polu powyżej, wybierz tryb i kliknij „Nowa gra".
+
+    Możesz też wczytać wcześniejszą grę przyciskiem „Wczytaj".
+
+  # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
+  lbl_wybory:                "Twoje wybory"
+  panel_wyborow_name:        "Obszar wyborów"
+  panel_wyborow_placeholder: "Wybory pojawią się tutaj w trybie wyborów lub mniejszego zła. W trybie swobodnym ten obszar pozostaje pusty — opisuj akcje free-textem w polu poniżej."
+
+  # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
+  lbl_akcja:                 "Twoja akcja lub komenda"
+  txt_akcja_name:            "Pole akcji gracza"
+  txt_akcja_hint:            "Opisz, co robisz, lub wpisz komendę zaczynającą się od /"
+  txt_akcja_tooltip:         "Wpisz dowolną akcję (free-text) lub komendę systemową: /zapisz /wczytaj /ustawienia /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
+  btn_wyslij_label:          "&Wyślij"
+  btn_wyslij_tooltip:        "Wyślij akcję do silnika narracyjnego"
+
+  # ---- Stub callbacka — Faza 1 (przyciski Nowa/Wczytaj/Zapisz, do podłączenia w Fazie 3)
+  placeholder_msg_tytul:     "Funkcja jeszcze niedostępna"
+  placeholder_msg_tresc:     "Ten przycisk zostanie podłączony w kolejnej fazie wdrożenia modułu Opowieści (v15.0). Aktualnie panel istnieje wyłącznie jako szkielet UI dla weryfikacji dostępności pod NVDA."
+
+  # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
+  tura_naglowek_format:      "\n\n--- Tura {numer} ---\n\n"
+  brak_api_tytul:            "Brak klucza API"
+  brak_api_tresc:            "Plik golden_key.env z prawidłowym kluczem OPENAI_API_KEY nie został znaleziony. Moduł Opowieści wymaga aktywnego klucza, by generować tury narracji."
+  puste_pole_tytul:          "Puste pole akcji"
+  puste_pole_tresc:          'Wpisz akcję lub komendę w polu poniżej narracji, zanim klikniesz „Wyślij".'
+  puste_nazwa_tytul:         "Brak nazwy gry"
+  puste_nazwa_tresc:         "Zanim wyślesz pierwszą akcję, wpisz nazwę gry w pasku na górze panelu — pod tą nazwą zostaną zapisane wszystkie pliki opowieści."
+  status_wysylanie:          "Wysyłanie do AI…"
+  status_gotowe:             "Gotowe — Twoja kolej."
+  status_blad:               "Błąd silnika narracyjnego."
+  btn_wybor_tooltip_format:  "Wybierz: {tekst}"
+  blad_ai_tytul:             "Błąd silnika narracyjnego"
+  blad_ai_naglowek:          "Wystąpił błąd podczas generowania tury opowieści. Pełna treść błędu poniżej:"
+  blad_ai_szczegoly_tytul:   "Szczegóły błędu silnika narracyjnego"
+  blad_ai_lbl_tresc:         "Treść błędu (do skopiowania):"
+  blad_ai_tresc_name:        "Pole z treścią błędu silnika narracyjnego"
+  err_rate_limit:            "Limit zapytań do OpenAI został wyczerpany. Odczekaj chwilę albo sprawdź stan konta."
+  err_timeout:               "Czas oczekiwania na odpowiedź modelu został przekroczony (powyżej 120 sekund). Spróbuj ponownie."
+  err_struktura:             "Model wygenerował niewłaściwą strukturę odpowiedzi mimo dwóch prób korekty. Spróbuj ponownie albo sformułuj akcję inaczej."
+
+  # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
+  brak_gry_tytul:            "Brak aktywnej gry"
+  brak_gry_tresc:            'Załóż nową grę przyciskiem „Nowa gra" albo wczytaj wcześniej zapisaną przyciskiem „Wczytaj", zanim spróbujesz wysłać akcję.'
+  gra_istnieje_tytul:        "Gra o tej nazwie już istnieje"
+  gra_istnieje_tresc:        'Gra „{nazwa}" już ma zapisany stan na dysku. Czy chcesz nadpisać ją zerową grą? Cała dotychczasowa narracja, postacie i ekwipunek zostaną utracone (pliki .txt, .md i .game.json zostaną zresetowane).'
+  gra_nowa_tytul:            "Nowa gra utworzona"
+  gra_nowa_tresc:            'Gra „{nazwa}" została utworzona. Wpisz pierwszą akcję w polu poniżej narracji i kliknij „Wyślij", aby rozpocząć opowieść.'
+  gra_wczytana_tytul:        "Gra wczytana"
+  gra_wczytana_tresc:        'Gra „{nazwa}" została wczytana. Aktualny numer tury: {numer_tury}. Możesz kontynuować rozgrywkę.'
+  gra_zapisana_tytul:        "Gra zapisana"
+  gra_zapisana_tresc:        'Stan gry „{nazwa}" został zapisany na dysk.'
+  nowa_gra_zaczatek:         "📖 Gra \"{nazwa}\" rozpoczęta.\n\nWpisz pierwszą akcję w polu poniżej i kliknij \"Wyślij\" — silnik narracyjny opisze świat, w którym się znalazłeś, i przedstawi pierwszą scenę."
+  brak_narracji_info:        "📖 Gra \"{nazwa}\" wczytana, ale plik narracji (skrypty/{nazwa}.txt) nie istnieje. Stan gry pochodzi z pliku game.json — możesz kontynuować."
+  dlg_wczytaj_tytul:         "Wczytaj grę Opowieści"
+  dlg_wczytaj_filtr:         "Pliki gry Opowieści (*.game.json)|*.game.json|Wszystkie pliki|*.*"
+  blad_zapisu_tresc:         "Wystąpił błąd zapisu pliku gry: {tresc_bledu}"
+  blad_wczytania_tresc:      'Wystąpił błąd wczytania gry „{nazwa}": {tresc_bledu}'
+
+  # ---- Faza 4: slash-komendy + tiktoken + /visualize + Cinematic Warning ----
+  komenda_nieznana_tytul:    "Nieznana komenda"
+  komenda_nieznana_tresc:    'Komenda „{komenda}" nie jest rozpoznawana. Dostępne komendy:
+
+  {lista}'
+  komendy_dostepne_lista: |-
+    /zapisz, /save                    — wymuszenie zapisu gry
+    /wczytaj, /load                   — otwórz dialog wczytania
+    /ustawienia, /settings            — zmień model AI (Standard/Quality)
+    /wizualizuj <opis>, /visualize    — multisensoryczny opis sceny (bez zapisu)
+    /koniec, /quit                    — zamknij aplikację
+  dlg_ustawienia_tytul:      "Ustawienia silnika narracyjnego"
+  dlg_ustawienia_lbl_model:  "Model AI:"
+  dlg_ustawienia_model_standard:  "Standardowy (gpt-4o-mini, szybszy, tańszy)"
+  dlg_ustawienia_model_quality:   "Wysokiej jakości (gpt-4o, wolniejszy, droższy)"
+  dlg_ustawienia_btn_zatwierdz:   "Zatwierdź"
+  dlg_ustawienia_zmieniono_tytul: "Model zmieniony"
+  dlg_ustawienia_zmieniono_tresc: 'Silnik narracyjny będzie odtąd korzystał z modelu „{model}".'
+  dlg_visualize_tytul:       "🌅 Wizualizacja sceny"
+  dlg_visualize_lbl:         "Multisensoryczny opis aktualnej sceny (nie zmienia stanu gry):"
+  dlg_visualize_name:        "Pole z opisem wizualizacji sceny"
+  dlg_visualize_pusta_akcja_tytul: "Brak opisu wizualizacji"
+  dlg_visualize_pusta_akcja_tresc: "Po komendzie /wizualizuj wpisz krótki opis tego, co chcesz zobaczyć dokładniej (np. /wizualizuj jak wygląda strażnik). Bez argumentu silnik nie wie na czym się skupić."
+  status_wizualizowanie:     "Generowanie wizualizacji…"
+  pamiec_status_format:      "{procent}% — {tokeny} tokenów ({etap})"
+  pamiec_etap_czysta:        "🟢 czysta"
+  pamiec_etap_ok:            "🟢 OK"
+  pamiec_etap_ostrzezenie:   "⚠️ ostrzeżenie"
+  pamiec_etap_alarm:         "🚨 ALARM"
+  status_streszczanie:       "Auto-streszczenie kontekstu w toku…"
+  streszczenie_skonczone_tytul: "Pamięć modelu odzyskana"
+  streszczenie_skonczone_tresc: "Auto-streszczenie poprzednich {liczba_tur} tur zakończone. Bufor zwolniony — możesz kontynuować rozgrywkę."
+  cinematic_warning_dlg_tytul:  "📖 Przerywnik dramatyczny — 150. tura"
+  cinematic_warning_dlg_lbl:    "Silnik narracyjny przerywa narrację specjalnym ostrzeżeniem dla Ciebie:"
+  cinematic_warning_dlg_name:   "Pole z treścią Cinematic Meta Warning"
+  alarm_blokada_tytul:       "Pamięć modelu przeładowana"
+  alarm_blokada_tresc:       "Bufor kontekstu jest zapełniony w {procent}%. Auto-streszczenie nie zwolniło miejsca. Spróbuj zakończyć grę i wczytać ją ponownie — silnik załaduje tylko stan z pliku game.json, bez historii ostatnich tur."
+
+  # ---- Faza 5: Quick Start preset picker ----------------------------------
+  lbl_quick_start:           "Quick Start:"
+  quick_start_wlasna:        "(własna gra)"
+  choice_quick_start_name:   "Wybór gotowego scenariusza Quick Start"
+  choice_quick_start_tooltip: 'Wybierz gotowy świat, by od razu zanurzyć się w narracji. Preset wstrzyknie do silnika krótki opis świata i bohatera, ustawi domyślny tryb gry. „(własna gra)" pozostawia start swobodny — silnik sam wymyśli świat na podstawie pierwszej akcji.'

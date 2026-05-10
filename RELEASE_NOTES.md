@@ -1,6 +1,103 @@
-# Release Notes — Reżyser Audio GPT 14.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.0 „Wersja Wydawnicza"
 
-*Pełna paczka językowa Español jako finałowy język bazowy — projekt wielojęzyczności zamknięty. `TODO_wielojezycznosc.md` usunięty z repozytorium, `CLAUDE.md` zsynchronizowany ze stanem 9 paczek (pl/en/de/es/fi/fr/is/it/ru).*
+*Drugi główny tryb aplikacji: moduł „Interaktywne Opowieści" — gracz wciela się w bohatera dynamicznie generowanej fikcji drugoosobowej, narracja czytana TTS-em lub czytnikiem ekranu (NVDA-friendly). Pierwsze tak duże poszerzenie funkcjonalne od czasu zamknięcia roadmapy wielojęzycznościowej w 14.0; epoka 15.x+ skupia się na funkcjach silnika/UX, nie na nowych paczkach językowych.*
+
+---
+
+## 15.0 — major release (motyw przewodni: piąty moduł „Interaktywne Opowieści")
+
+*Punkt wyjścia: V14.0 (90b244e) → 9 commitów na gałęzi `v15.0-opowiesci` realizujących sześć faz wdrożenia (housekeeping → szkielet GUI → silnik LLM JSON-schema → lifecycle plików → slash-komendy + tiktoken + cinematic → YAML refaktor + Quick Start PL → batch UI 8 języków → manuał + docs 8 języków → release V15.0).*
+
+### TL;DR
+
+15.0 dodaje **drugi główny tryb aplikacji** obok Reżysera — moduł `Opowieści` (skrót `Ctrl+5`). To interaktywna fikcja drugoosobowa generowana przez OpenAI w roli storytellera w stylu „Tales of Consequence": narracja w drugiej osobie liczby pojedynczej („Idziesz przez mglisty las, czujesz zapach wilgotnych liści…"), gracz reaguje wpisując akcję wolnym tekstem albo klikając jeden z 3-5 przycisków-wyborów. Cały moduł zaprojektowany z myślą o niewidomych graczach: pole narracji to `wx.TextCtrl readonly multiline` (NVDA czyta liniowo), wybory to dynamiczne `wx.Button` z tooltip-ami, w trybie Swobodnym obszar wyborów jest całkowicie ukryty (Tab go pomija, NVDA nie wciąga), każda zakończona tura sygnalizowana `wx.Bell` + autofocus na narrację.
+
+Trzy tryby gry (continuum trudności moralnej): **Swobodny** (free-text, 1-3 sugestie opcjonalne), **Wyborów** (3-5 ponumerowanych opcji A-E per tura), **Mniejsze zło** (jak Wyborów, ale każda opcja niekorzystna — brak neutralnego wyjścia, brak happy endingu). Plus pięć **Quick Start presetów** (po-apokaliptyczne SF / mroczne fantasy / urban fantasy detective / kosmiczny horror / romantyczna komedia obyczajowa) — gracz wybiera świat z dropdown-a, silnik dostaje 1-2 paragrafowy seed. **Slash-komendy** parsowane lokalnie bez API: `/zapisz`/`/save`, `/wczytaj`/`/load`, `/ustawienia`/`/settings` (model picker), `/wizualizuj`/`/visualize` (multisensoryczny opis sceny bez zapisu), `/koniec`/`/quit`.
+
+Inteligentne zarządzanie kontekstem: `tiktoken` mierzy zapełnienie 128k-tokenowego okna gpt-4o, próg 70% triggeruje **auto-streszczenie** w wątku tła (LLM zwija ostatnie tury w jeden kondensat, bufor zwolniony). Po **150. turze** raz per gra silnik wstawia **Cinematic Meta Warning** — przerywnik dramatyczny w osobnym dialogu, NIE appendowany do `.txt` (filter `czysc_meta_warningi` z markerami `⚠️🚨⚠️` i tak by go wyciął — gracz odsłuchujący audiobook nie usłyszy meta-komentarza o własnej grze).
+
+**Bridge Opowieści → Reżyser**: każda tura aktualizuje `skrypty/<gra>.md` z postaciami w formacie `[Imię: cechy]` zgodnym z parserem `core_rezyser.py:199`. Możesz po skończeniu gry otworzyć Reżyser na tej samej nazwie i otrzymać klasyczny audiobook z natywnymi akcentami postaci, które polubiłeś w Opowieściach.
+
+Bump z **14.0 → 15.0** (a nie 14.1) celowo: zamyka epokę wersji 14.x „jeden moduł, wiele paczek językowych" i otwiera 15.x+ jako „funkcje silnika/UX". Roadmapa wielojęzycznościowa zamknięta w 14.0 zostaje aktualna — moduł Opowieści jest dostępny we wszystkich 9 językach (UI + manuał auto-tłumaczone), z fallbackiem promptów systemowych do PL przy braku natywnej paczki promptów (5b/5c TODO na v15.1+).
+
+### Co nowego dla użytkownika końcowego
+
+#### Drugi główny tryb: Opowieści (`Ctrl+5`)
+- **Triada modułowa**: `gui_opowiesci.OpowiesciPanel` (interfejs) + `core_opowiesci.ProjektOpowiesci` (lifecycle plików) + `opowiesci_ai` (silnik LLM). Spójna z istniejącym wzorcem Reżysera (`gui_rezyser` + `core_rezyser` + `rezyser_ai`).
+- **Pięć ścieżek per gra**:
+  - `skrypty/<nazwa>.txt` — narracja, append-only, BEZ meta-warningów (filtrowane).
+  - `skrypty/<nazwa>.md` — Księga Świata, idempotentny rebuild z `postacie_aktywne[]` per tura.
+  - `runtime/opowiesci/<nazwa>.game.json` — pełen stan (overwrite per tura).
+  - `runtime/opowiesci/<nazwa>.story.jsonl` — surowy log tur (request+response JSON, jedna linia per tura).
+  - `runtime/skrypty/<nazwa>.mode` — numeracja trybu (3=Swobodny, 4=Wyborów, 5=Mniejsze zło) — folder wspólny z Reżyserem (0=Burza, 1=Reżyser1, 2=Reżyser2 nie kolidują).
+- **JSON-schema response** wymuszane DWUKROTNIE: po stronie OpenAI przez `response_format={"type": "json_object"}` (gwarantuje składnię), po naszej przez `jsonschema.validate` (gwarantuje typy + obecność wymaganych pól). Halucynacja struktury → retry max 2× z błędem jako wskazówką dla modelu (self-correction wzorzec z OpenAI cookbook); trzeci błąd → `RuntimeError` z detalami.
+- **Wskaźnik pamięci modelu** (`tiktoken` na payloadzie): `🟢 czysta` (0%) → `🟢 OK` (1-69%) → `⚠️ ostrzeżenie` (70-89%, auto-streszczenie w toku) → `🚨 ALARM` (90%+, blokada wysyłki). Kolor labelu (zielony/pomarańczowy/czerwony) zsynchronizowany z poziomem.
+- **Lokalizacja idiomatyczna nazw trybów** (zob. `feedback_lokalizacja_nazw.md`): „Mniejsze zło" → EN „Lesser Evil" / DE „Kleineres Übel" / FR „Moindre mal" / IT „Male minore" / ES „Menor mal" / RU „Меньшее зло" / FI „Pienempi paha" / IS „Minna illt". Żadnej kalki literalnej („Smallest Evil" itp.).
+
+#### Quick Start: 5 presetów PL (gotowych światów)
+Lingwistyczna paczka PL gotowa do gry od pierwszego klika. Każdy preset: tryb domyślny + 1-2 paragrafowy `seed_swiata` z postaciami i akcentami (kompatybilny z parserem Reżysera) + idiomatyczne motywy kulturowe.
+- **Po-apokaliptyczne SF** (tryb 4): 200 lat po Wielkim Spaleniu, kurier Klanu Sztolnia w Górach Świętokrzyskich.
+- **Mroczne fantasy** (tryb 5): Inkwizytorka Sióstr Cierniowych na tropie wsi chroniącej dziecko opętane.
+- **Urban fantasy detective** (tryb 4): Warszawa 2008, prywatny detektyw widzący duchy, klientka szuka męża zaginionego pod Zamkiem Królewskim.
+- **Kosmiczny horror** (tryb 3): rok 2247, stacja badawcza wokół neutronowej gwiazdy, brakujący kapitan o którym nikt nie pamięta.
+- **Romantyczna komedia obyczajowa** (tryb 3): kawiarnia na Saskiej Kępie, barista-kelnerka między ratowaniem lokalu a redaktorem-nieśmielym.
+
+Pozostałe 8 języków dostają domyślny preset PL fallback do v15.1, gdy native presety zostaną dopisane ręcznie per język (literatura, motywy kulturowe natywne, nie kalka).
+
+#### YAML-izacja promptów systemowych (anty-spaghetti)
+Wszystkie 7 promptów (`baza`, `tryb_swobodny`, `tryb_wyborow`, `tryb_mniejsze_zlo`, `tryb_burza`/visualize, `streszczenie`, `cinematic_warning`) wyniesione z hardkodowanych stałych Pythona do `dictionaries/pl/opowiesci/*.yaml` zgodnie ze wzorcem `dictionaries/pl/rezyser/tryb_*.yaml`. Lingwista edytuje treść bez znajomości Pythona; LRU cache (128 entries) niweluje koszt I/O. Fallback do PL przy braku tłumaczenia w docelowym języku — gracz EN dostaje polski system prompt, ale narracja nadal idzie po angielsku (LLM jest multilingual; zauważalnie niższa jakość vs natywny prompt PL, ale grywalne).
+
+### Architektura — co dokładnie zmienia się w kodzie
+
+#### Nowe pliki
+- `gui_opowiesci.py` (~900 linii): `OpowiesciPanel(wx.Panel)` z 7 blokami A-G, daemon thread workers, dispatcher slash-komend (PL+EN fallback), cinematic + streszczenie spawn + handlery, wskaźnik pamięci `tiktoken`.
+- `core_opowiesci.py` (~270 linii): `ProjektOpowiesci`, `WynikWczytaniaOpowiesci` (@dataclass), `czysc_meta_warningi(tekst)` z `re.DOTALL`, idempotentny `rebuild_ksiega_swiata()`, hardenowane `wczytaj()` (defensywne `.get(klucz, default)` dla forward-compat).
+- `opowiesci_ai.py` (~600 linii): `SnapshotOpowiesci`, `WynikTury`, `StatusPamieci` (@dataclass-y), `inicjalizuj_klienta`, `generuj_ture` z retry, `wygeneruj_wizualizacje`, `policz_tokeny`/`oblicz_status_pamieci` (tiktoken z fallback `o200k_base`), `streszczaj_kontekst`, `generuj_cinematic_warning`, `_zaladuj_przepis` z LRU cache + fallback do PL.
+- `dictionaries/pl/opowiesci/` (8 plików YAML): 7 promptów + `zaczatki.yaml` z 5 presetami Quick Start.
+- `dictionaries/<jezyk>/gui/dokumentacja/opowiesci.yaml` (9 plików): manuał użytkownika modułu Opowieści (PL ręcznie ~210 linii, 8 obcych przez `buduj_wielojezyczne_docs.py --szablony opowiesci`).
+- `notatki_dev/` (NOWY folder, gitignored z release): `instrukcje_modelu.md` + `tales_mechanics.md` jako specyfikacja źródłowa GPT-style „Tales of Consequence" — zachowane do referencji deweloperskiej, wykluczone z paczki end-userowej (`build_release.py::IGNOROWANE_FOLDERY` + `installer.iss::Excludes`).
+
+#### Modyfikowane
+- `main.py`: import `OpowiesciPanel`, `ID_TOOL_OPOWIESCI = wx.NewIdRef()`, dispatcher w `_switch_tool` (`elif name == n_opowiesci`), handler `_on_opowiesci`, menu+button+akcelerator+`Ctrl+5`+nazwa narzędzia.
+- `dictionaries/<jezyk>/gui/ui.yaml`: 107 nowych kluczy w sekcji `opowiesci.*` + 5 kluczy `main.*.opowiesci` (PL ręcznie, 8 obcych przez `buduj_wielojezyczne_ui.py --klucz opowiesci` surgical update).
+- `dictionaries/<jezyk>/gui/dokumentacja/manual.yaml`: linia o liście modułów rozszerzona o piąty moduł — Opowieści (per język ręcznie, idiomatyczne tłumaczenie „pięć / Ctrl+1..Ctrl+5").
+- `requirements.txt`: dodane `jsonschema`, `tiktoken`.
+
+#### Decyzje architektoniczne (locked w pamięci projektowej)
+- **JSON-schema enforcement**: `response_format=json_object` po stronie OpenAI (gwarancja składni) + `jsonschema.validate` po naszej (gwarancja struktury). Reżyser NIE używał `json_object` (rezyser_ai.py free-form); świadomie wybraliśmy nowszy wzorzec dla Opowieści (jak `buduj_wielojezyczne_ui.py:373`).
+- **Brak `/undo`** (chaos kontekstu LLM przy retroaktywnych mutacjach).
+- **Cinematic Warning**: trigger Python (próg 150 tur), treść LLM, NIGDY w `.txt` (filtr regex `⚠️🚨⚠️.*?⚠️🚨⚠️` z `re.DOTALL`).
+- **Tryb Swobodny**: w GUI ZAWSZE ukrywa obszar wyborów, nawet gdy LLM zwrócił sugestie. Tryby 4/5: pokazuje tylko gdy `len(wybory) > 0` (halucynacja → free-text fallback).
+- **Slash-komendy parsowane lokalnie** (bez API call). EN-fallback ZAWSZE aktywny niezależnie od UI lang (gracz angielski w polskim UI nadal pisze `/save`).
+- **Late-binding dispatcher** (`getattr(self, nazwa_handlera)`): pozwala mockowi w testach podmienić `_komenda_X = lambda...` bez rebuildowania słownika.
+
+### Migracja z 14.x
+
+Bezbolesna — moduł Opowieści jest **addytywny**, nie modyfikuje żadnego istniejącego flow. Reżyser/Poliglota/Konwerter/Manager Reguł działają identycznie jak w 14.0. Skrót `Ctrl+5` był wcześniej wolny.
+
+Lista artefaktów na dysku po pierwszej grze (samo pojawienie się tych ścieżek nie blokuje innych modułów — folder `runtime/opowiesci/` jest niewidoczny dla zwykłych użytkowników Windows, jak `runtime/skrypty/`):
+```
+skrypty/<nazwa>.txt          # narracja, czytelne dla TTS
+skrypty/<nazwa>.md           # Księga Świata, kompatybilna z Reżyserem
+runtime/opowiesci/<nazwa>.game.json
+runtime/opowiesci/<nazwa>.story.jsonl
+runtime/skrypty/<nazwa>.mode  # tryb 3/4/5
+```
+
+### TODO na v15.1+
+
+- **Faza 5b**: prompty systemowe `dictionaries/{en,de,es,fi,fr,is,it,ru}/opowiesci/*.yaml` RĘCZNIE per język (~5-9h pracy, brak skryptu — LLM halucynuje na strukturyzowanych instrukcjach). Native prompty znacząco poprawią jakość narracji vs obecny fallback do PL.
+- **Faza 5c**: native zaczatki Quick Start per język (literatura, motywy kulturowe). PL gracz dostaje motywy z polskiej literatury, ES gracz z hiszpańskojęzycznej, itd.
+- **v15.1 — mechanika Fiolki/Vial** w trybie Mniejsze zło (referencja `notatki_dev/tales_mechanics.md` od „Tales of Consequence"): gracz może raz na grę odrzucić wszystkie wybory i wziąć fiolkę = redirect fabularny.
+- **v15.1 — spójność gramatyczna wyborów** (ujawnione przy real test gry `joanna_joana_conflict`): w trybach Wyborów/Mniejsze zło LLM raz daje opcje w bezokoliczniku („uciec drogą"), raz w trybie rozkazującym („uciekaj drogą"), raz w I osobie („uciekam drogą"). Doprecyzować w `dictionaries/<jezyk>/opowiesci/tryb_wyborow.yaml` + `tryb_mniejsze_zlo.yaml`, że format MUSI być jednolity per język (PL → 2-os. tryb rozkazujący „uciekaj"/„otwórz"/„zapytaj"; EN → imperative „run"/„open"/„ask"). Nie wymusi 100% spójności (LLM bywa kreatywny), ale stanowczy prompt zmniejszy oscylację.
+- **v15.1 — wzmocnienie trybu Mniejsze zło** (też ujawnione w real test): pierwsze 2-3 tury LLM generuje opcje „na łatwiznę", przez co fabuła szybko gaśnie i gracz musi obejść mechanikę przez free-text. Doprecyzować prompt: „PIERWSZE 5 TUR: każda z opcji MUSI eskalować ryzyko/dramatyzm scena-do-sceny, ZAKAZ łatwych wyjść (uciec, schować się, zignorować) bez równoczesnej istotnej straty (utrata sojusznika / ujawnienie sekretu / obarczenie konsekwencjami osoby trzeciej)".
+
+### Hotfix po v15.0 (w tym samym tagu)
+
+Problemy znalezione w real testach gry tuż przed pushem v15.0:
+
+- **Brakujące pole „Ostatnia tura"** (zgodne z oryginalną wizją z `notatki_dev/`): nowy `wx.TextCtrl readonly multiline` między wskaźnikiem pamięci a pełną narracją; po każdej turze wartość zastępowana świeżym fragmentem (nie append), żeby NVDA czytał od razu nową scenę bez nawigowania przez setki linii historii. Po wczytaniu gry pole pokazuje skrót ostatniej tury (z `_snapshot.ostatnie_tury[-1].narracja_skrot`, max 400 znaków) z prefixem informującym że pełna narracja jest w polu poniżej. 5 nowych kluczy i18n + zaktualizowane 3 etykiety dot. pełnej narracji („Narracja" → „Pełna narracja" dla odróżnienia), batch translated na 8 języków + manualna naprawa kalki LLM ("shortcut"/"Abkürzung"/"raccourci"/"scorciatoia"/"pikanäppäin"/"flýtileið" → "summary"/"Zusammenfassung"/"résumé"/"riassunto"/"tiivistelmä"/"samantekt" — LLM mylił semantykę polskiego „skrót" jako klawiszowy shortcut, nie summary).
+- **Wykluczenie `runtime/opowiesci/` z paczki release**: do paczki end-userowej (ZIP + EXE) deweloperskie pliki gier (.game.json, .story.jsonl) NIE mogą trafić. `.gitignore` już to chronił przed repo, ale `build_release.py::IGNOROWANE_FOLDERY` i `installer.iss::Excludes` wymagały dodania konkretnej ścieżki — proste dodanie `'opowiesci'` do listy folderów byłoby błędne, bo wykluczyłoby też `dictionaries/<kod>/opowiesci/` (paczki promptów MUSZĄ być w paczce end-user). Dodano precyzyjny check: `sciezka.endswith('runtime/opowiesci') or 'runtime/opowiesci/' in sciezka` w `czy_ignorowac` + `runtime\opowiesci\*` w `installer.iss::Excludes`.
 
 ---
 

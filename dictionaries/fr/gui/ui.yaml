@@ -57,6 +57,7 @@ main:
     manager: "&Gestionnaire de Règles\tCtrl+4"
     zakoncz: "Quitt&er\tAlt+F4"
     jezyk_interfejsu: "&Langue de l'interface"
+    opowiesci: "&Histoires\tCtrl+5"
   menu_status:
     strona_glowna: "Revient à l'écran d'accueil avec la description des outils et System Check"
     rezyser: "Ouvre le module Réalisateur — écriture de scénarios et de prose avec l'IA"
@@ -65,22 +66,26 @@ main:
     manager: "Ouvre le Gestionnaire de Règles — explorateur de fichiers YAML dans dictionaries/ et créateur de nouveaux accents / modes / chiffrements"
     zakoncz: "Ferme l'application"
     jezyk_interfejsu: "Sélectionne la langue de l'interface de l'application (le changement nécessite un redémarrage)"
+    opowiesci: "Ouvre le module Histoires – fiction interactive à la deuxième personne générée par IA, lue par TTS/lecteur d'écran"
   btn:
     rezyser: "🎬  &Réalisateur"
     poliglota: "🌍  &Polyglotte"
     konwerter: "📄  &Convertisseur"
     manager: "📚  &Gestionnaire de Règles"
+    opowiesci: "📖  &Histoires"
   tooltip:
     rezyser: "Module Réalisateur (Ctrl+1) : écris scénarios et prose avec l'aide de l'IA"
     poliglota: "Module Polyglotte (Ctrl+2) : accents et traduction de textes"
     konwerter: "Module Convertisseur (Ctrl+3) : crée des fichiers Word avec en-têtes"
     manager: "Gestionnaire de Règles (Ctrl+4) : explore les fichiers YAML dans dictionaries/, crée de nouveaux accents, chiffrements et modes (modèle ou prompt pour IA)"
+    opowiesci: "Module Histoires (Ctrl+5) : Fiction interactive à la deuxième personne — générée par IA, lue par TTS"
   nazwy_narzedzi:
     dom: "Accueil"
     rezyser: "Réalisateur"
     poliglota: "Polyglotte"
     konwerter: "Convertisseur"
     manager: "Gestionnaire de Règles"
+    opowiesci: "Histoires"
   dialog:
     zmiana_jezyka_tytul: "Changement de langue de l'interface"
     zmiana_jezyka_tresc: |-
@@ -859,3 +864,153 @@ updater:
     Visitez la page de version sur GitHub et téléchargez l'archive « Source code » ou clonez le dépôt :
 
     {url_release}
+
+opowiesci:
+  # ---- BLOK A — Nagłówek modułu ---------------------------------------------
+  panel_name: "Panneau d'Histoires"
+  description_name: "Description du module Histoires"
+  heading: "📖  Histoires Interactives"
+  tool_description: |-
+    Vous incarnez le héros d'une histoire générée dynamiquement. Entrez le nom d'un nouveau jeu et choisissez un mode pour commencer — la narration est menée à la deuxième personne et lue par un lecteur d'écran ou TTS.
+
+    Le mode libre vous permet d'essayer n'importe quelle action saisie dans le champ en bas. Le mode choix propose 3 à 5 options numérotées à choisir avec des boutons. Le mode « moindre mal » ne propose que des choix défavorables — vous choisissez ce qui vous convient le moins. Les commandes commençant par une barre oblique (/sauvegarder, /charger, /paramètres, /fin, /visualiser) fonctionnent à tout moment.
+
+  # ---- BLOK B — Pasek pliku gry ---------------------------------------------
+  lbl_nazwa_gry: "Nom du jeu"
+  txt_nazwa_gry_name: "Champ du nom du jeu"
+  txt_nazwa_gry_hint: "ex. mes_aventures_1"
+  txt_nazwa_gry_tooltip: "Nom du fichier de jeu — utilisé pour la sauvegarde automatique de la narration dans scripts/<nom>.txt et l'état dans runtime/histoires/<nom>.game.json"
+  btn_nowa_gra_label: "&Nouveau jeu"
+  btn_nowa_gra_tooltip: "Commencez un nouveau jeu avec le nom donné — nécessite un nom de jeu et un mode sélectionné"
+  btn_wczytaj_label: "&Charger"
+  btn_wczytaj_tooltip: "Charger un jeu précédemment sauvegardé depuis runtime/histoires/<nom>.game.json"
+  btn_zapisz_label: "&Sauvegarder"
+  btn_zapisz_tooltip: "Forcer la sauvegarde manuelle de l'état du jeu (la sauvegarde automatique fonctionne également après chaque tour)"
+
+  # ---- BLOK C — RadioBox trybu ----------------------------------------------
+  rb_tryb_label: "Mode de jeu"
+  rb_tryb_name: "Sélection du mode de jeu"
+  rb_tryb_tooltip: "Le mode détermine le caractère de la narration et la manière d'interagir"
+  tryb_swobodny: "Mode &libre"
+  tryb_wyborow: "Mode &choix"
+  tryb_mniejsze_zlo: "&Moindre mal"
+
+  # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
+  pamiec_lbl: "Mémoire du modèle :"
+  pamiec_gauge_name: "Indicateur d'utilisation de la fenêtre contextuelle du modèle"
+  pamiec_status_name: "Statut de la mémoire du modèle"
+  pamiec_status_init: "Aucun jeu actif"
+
+  # ---- BLOK E — Obszar narracji (TextCtrl readonly multiline) ---------------
+  lbl_narracja: "Narration complète"
+  txt_narracja_name: "Champ de la narration complète"
+  txt_narracja_tooltip: "Histoire complète du jeu, augmentant après chaque tour. Lecture seule ; entrez vos décisions dans le champ d'action ci-dessous. Le champ « Dernier tour » ci-dessus montre la scène récente sans naviguer à travers toute l'histoire."
+  txt_narracja_init: |-
+    Pour commencer une histoire, entrez le nom du jeu dans le champ ci-dessus, choisissez un mode et cliquez sur « Nouveau jeu ».
+
+    Vous pouvez également charger un jeu précédent avec le bouton « Charger ».
+
+  # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
+  lbl_wybory: "Vos choix"
+  panel_wyborow_name: "Zone de choix"
+  panel_wyborow_placeholder: "Les choix apparaîtront ici en mode choix ou moindre mal. En mode libre, cette zone reste vide — décrivez les actions en texte libre dans le champ ci-dessous."
+
+  # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
+  lbl_akcja: "Votre action ou commande"
+  txt_akcja_name: "Champ d'action du joueur"
+  txt_akcja_hint: "Décrivez ce que vous faites ou entrez une commande commençant par /"
+  txt_akcja_tooltip: "Entrez une action quelconque (texte libre) ou une commande système : /sauvegarder /charger /paramètres /fin /visualiser. L'action est validée par le bouton Envoyer."
+  btn_wyslij_label: "&Envoyer"
+  btn_wyslij_tooltip: "Envoyer l'action au moteur narratif"
+
+  # ---- Stub callbacka — Faza 1 (przyciski Nowa/Wczytaj/Zapisz, do podłączenia w Fazie 3)
+  placeholder_msg_tytul: "Fonction encore indisponible"
+  placeholder_msg_tresc: "Ce bouton sera connecté dans la prochaine phase de déploiement du module Histoires (v15.0). Actuellement, le panneau existe uniquement comme squelette UI pour la vérification de l'accessibilité sous NVDA."
+
+  # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
+  tura_naglowek_format: "\n\n--- Tour {numer} ---\n\n"
+  brak_api_tytul: "Pas de clé API"
+  brak_api_tresc: "Le fichier golden_key.env avec la clé OPENAI_API_KEY valide n'a pas été trouvé. Le module Histoires nécessite une clé active pour générer les tours de narration."
+  puste_pole_tytul: "Champ d'action vide"
+  puste_pole_tresc: 'Entrez une action ou une commande dans le champ sous la narration avant de cliquer sur « Envoyer ».'
+  puste_nazwa_tytul: "Pas de nom de jeu"
+  puste_nazwa_tresc: "Avant d'envoyer la première action, entrez le nom du jeu dans la barre en haut du panneau — sous ce nom, tous les fichiers d'histoires seront enregistrés."
+  status_wysylanie: "Envoi à l'IA…"
+  status_gotowe: "Prêt — à votre tour."
+  status_blad: "Erreur du moteur narratif."
+  btn_wybor_tooltip_format: "Choisissez : {tekst}"
+  blad_ai_tytul: "Erreur du moteur narratif"
+  blad_ai_naglowek: "Une erreur s'est produite lors de la génération du tour d'histoire. Le contenu complet de l'erreur ci-dessous :"
+  blad_ai_szczegoly_tytul: "Détails de l'erreur du moteur narratif"
+  blad_ai_lbl_tresc: "Contenu de l'erreur (à copier) :"
+  blad_ai_tresc_name: "Champ avec le contenu de l'erreur du moteur narratif"
+  err_rate_limit: "Le quota de requêtes à OpenAI est épuisé. Attendez un moment ou vérifiez l'état de votre compte."
+  err_timeout: "Le délai d'attente pour la réponse du modèle a été dépassé (plus de 120 secondes). Réessayez."
+  err_struktura: "Le modèle a généré une structure de réponse incorrecte malgré deux tentatives de correction. Réessayez ou formulez l'action différemment."
+
+  # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
+  brak_gry_tytul: "Aucun jeu actif"
+  brak_gry_tresc: 'Créez un nouveau jeu avec le bouton « Nouveau jeu » ou chargez un jeu précédemment sauvegardé avec le bouton « Charger » avant d''essayer d''envoyer une action.'
+  gra_istnieje_tytul: "Un jeu avec ce nom existe déjà"
+  gra_istnieje_tresc: 'Le jeu « {nazwa} » a déjà un état sauvegardé sur le disque. Voulez-vous l''écraser avec un jeu vierge ? Toute la narration, les personnages et l''équipement actuels seront perdus (les fichiers .txt, .md et .game.json seront réinitialisés).'
+  gra_nowa_tytul: "Nouveau jeu créé"
+  gra_nowa_tresc: 'Le jeu « {nazwa} » a été créé. Entrez la première action dans le champ sous la narration et cliquez sur « Envoyer » pour commencer l''histoire.'
+  gra_wczytana_tytul: "Jeu chargé"
+  gra_wczytana_tresc: 'Le jeu « {nazwa} » a été chargé. Numéro de tour actuel : {numer_tury}. Vous pouvez continuer à jouer.'
+  gra_zapisana_tytul: "Jeu sauvegardé"
+  gra_zapisana_tresc: 'L''état du jeu « {nazwa} » a été sauvegardé sur le disque.'
+  nowa_gra_zaczatek: "📖 Jeu \"{nazwa}\" commencé.\n\nEntrez la première action dans le champ ci-dessous et cliquez sur \"Envoyer\" — le moteur narratif décrira le monde dans lequel vous vous trouvez et présentera la première scène."
+  brak_narracji_info: "📖 Jeu \"{nazwa}\" chargé, mais le fichier de narration (scripts/{nazwa}.txt) n'existe pas. L'état du jeu provient du fichier game.json — vous pouvez continuer."
+  dlg_wczytaj_tytul: "Charger le jeu Histoires"
+  dlg_wczytaj_filtr: "Fichiers de jeu Histoires (*.game.json)|*.game.json|Tous les fichiers|*.*"
+  blad_zapisu_tresc: "Une erreur s'est produite lors de la sauvegarde du fichier de jeu : {tresc_bledu}"
+  blad_wczytania_tresc: 'Une erreur s''est produite lors du chargement du jeu « {nazwa} » : {tresc_bledu}'
+
+  # ---- Faza 4: slash-komendy + tiktoken + /visualize + Cinematic Warning ----
+  komenda_nieznana_tytul: "Commande inconnue"
+  komenda_nieznana_tresc: 'La commande « {komenda} » n''est pas reconnue. Commandes disponibles :
+
+    {lista}'
+  komendy_dostepne_lista: |-
+    /sauvegarder, /save                    — forcer la sauvegarde du jeu
+    /charger, /load                   — ouvrir la boîte de dialogue de chargement
+    /paramètres, /settings            — changer le modèle AI (Standard/Qualité)
+    /visualiser <description>, /visualize    — description multisensorielle de la scène (sans sauvegarde)
+    /fin, /quit                    — fermer l'application
+  dlg_ustawienia_tytul: "Paramètres du moteur narratif"
+  dlg_ustawienia_lbl_model: "Modèle AI :"
+  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, plus rapide, moins cher)"
+  dlg_ustawienia_model_quality: "Haute qualité (gpt-4o, plus lent, plus cher)"
+  dlg_ustawienia_btn_zatwierdz: "Valider"
+  dlg_ustawienia_zmieniono_tytul: "Modèle changé"
+  dlg_ustawienia_zmieniono_tresc: 'Le moteur narratif utilisera désormais le modèle « {model} ».'
+  dlg_visualize_tytul: "🌅 Visualisation de la scène"
+  dlg_visualize_lbl: "Description multisensorielle de la scène actuelle (ne change pas l'état du jeu) :"
+  dlg_visualize_name: "Champ avec la description de la visualisation de la scène"
+  dlg_visualize_pusta_akcja_tytul: "Pas de description de visualisation"
+  dlg_visualize_pusta_akcja_tresc: "Après la commande /visualiser, entrez une brève description de ce que vous souhaitez voir plus en détail (par exemple, /visualiser à quoi ressemble le garde). Sans argument, le moteur ne sait pas sur quoi se concentrer."
+  status_wizualizowanie: "Génération de la visualisation…"
+  pamiec_status_format: "{procent}% — {tokeny} jetons ({etap})"
+  pamiec_etap_czysta: "🟢 propre"
+  pamiec_etap_ok: "🟢 OK"
+  pamiec_etap_ostrzezenie: "⚠️ avertissement"
+  pamiec_etap_alarm: "🚨 ALERTE"
+  status_streszczanie: "Auto-résumé du contexte en cours…"
+  streszczenie_skonczone_tytul: "Mémoire du modèle récupérée"
+  streszczenie_skonczone_tresc: "Auto-résumé des {liczba_tur} tours précédents terminé. Tampon libéré — vous pouvez continuer à jouer."
+  cinematic_warning_dlg_tytul: "📖 Interlude dramatique — 150e tour"
+  cinematic_warning_dlg_lbl: "Le moteur narratif interrompt la narration avec un avertissement spécial pour vous :"
+  cinematic_warning_dlg_name: "Champ avec le contenu de l'avertissement cinématique"
+  alarm_blokada_tytul: "Mémoire du modèle surchargée"
+  alarm_blokada_tresc: "Le tampon de contexte est rempli à {procent}%. L'auto-résumé n'a pas libéré d'espace. Essayez de terminer le jeu et de le recharger — le moteur ne chargera que l'état du fichier game.json, sans l'historique des derniers tours."
+
+  # ---- Faza 5: Quick Start preset picker ----------------------------------
+  lbl_quick_start: "Démarrage rapide :"
+  quick_start_wlasna: "(jeu personnalisé)"
+  choice_quick_start_name: "Sélection d'un scénario Quick Start"
+  choice_quick_start_tooltip: 'Choisissez un monde prêt à l''emploi pour vous plonger immédiatement dans la narration. Le préréglage injectera dans le moteur une brève description du monde et du héros, et définira le mode de jeu par défaut. « (jeu personnalisé) » laisse le démarrage libre — le moteur inventera le monde en fonction de la première action.'
+  lbl_ostatnia_tura: "Dernier tour"
+  txt_ostatnia_tura_name: "Champ avec le contenu du dernier tour"
+  txt_ostatnia_tura_tooltip: "Raccourci contenant uniquement la scène récemment générée — NVDA lit ici la nouvelle narration sans naviguer à travers des centaines de lignes de l'histoire complète. Après chaque nouveau tour, le champ est remplacé par un nouveau contenu."
+  txt_ostatnia_tura_init: "(Le dernier tour apparaîtra dans ce champ après votre première action.)"
+  txt_ostatnia_tura_skrot_naglowek: "[résumé du dernier tour enregistré — narration complète dans le champ ci-dessous]\n\n"

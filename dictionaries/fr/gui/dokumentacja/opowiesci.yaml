@@ -1,0 +1,176 @@
+# =============================================================================
+# dictionaries/fr/gui/dokumentacja/opowiesci.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
+# ze źródła dictionaries/pl/gui/dokumentacja/opowiesci.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
+# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
+#
+# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
+# po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+id: opowiesci
+tresc: |
+  Reżyser Audio GPT — Module Histoires Interactives ({app.wersja})
+
+  Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle narre l'histoire à la deuxième personne du singulier (« Vous marchez à travers la forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant une action libre ou en choisissant l'une des options numérotées.
+
+  Le module a été conçu dès le départ pour les joueurs aveugles — la narration est lue linéairement par un lecteur d'écran (NVDA) ou un moteur TTS, les choix dynamiques sous forme de boutons avec descriptions vocales, chaque tour terminée est signalée par un son de cloche et le focus est automatiquement déplacé vers le texte nouvellement généré.
+
+  Vous ouvrez le panneau avec le bouton "{main.btn.opowiesci}" sur la barre d'outils ou avec le raccourci clavier Ctrl+5.
+
+
+
+  ÉTAPE 1 : Trois modes de jeu — choisissez le style de jeu
+
+  Juste en dessous de la barre de titre du jeu, vous trouverez un champ de sélection de mode (RadioBox). Le mode détermine comment le moteur narratif dialogue avec vous :
+
+  MODE LIBRE — vous entrez n'importe quelle action en texte libre (« j'essaie d'ouvrir la porte », « je demande au garde le chemin », « je fuis par l'escalier de service »). Le moteur narratif peut proposer 1 à 3 suggestions, mais ce ne sont que des indices — pas un chemin obligatoire. Le mode le plus libre, recommandé pour les joueurs expérimentés improvisant leur propre histoire.
+
+  MODE CHOIX — chaque tour se termine par 3 à 5 options numérotées A-E sous forme de boutons cliquables. Chaque choix est une action spécifique que vous pouvez entreprendre. Vous pouvez également entrer votre propre action en texte libre — le moteur l'adaptera au choix le plus proche sémantiquement. Le mode le plus intuitif pour les joueurs aveugles : NVDA vous lira toutes les options, vous naviguez entre elles avec Tab, Enter valide.
+
+  MODE MOINDRE MAL — comme le mode Choix, mais chacune des 3 à 5 options est défavorable moralement, physiquement ou stratégiquement. Pas d'option « neutre », pas de fin heureuse dans ce tour. Mode pour les amateurs de fiction sombre dans l'esprit de « Tales of Consequence » ou de drames moraux.
+
+  Le mode peut être changé en cours de jeu — lors du tour suivant, le moteur narratif s'adaptera au nouveau style (du mode Libre aux Choix, cela peut se faire en un clic).
+
+
+
+  ÉTAPE 2 : Démarrage rapide — scénarios d'ouverture prêts à l'emploi
+
+  Sous le champ de titre du jeu, vous trouverez une deuxième rangée avec l'étiquette « {opowiesci.lbl_quick_start} » et une sélection déroulante (wx.Choice). La position par défaut est "{opowiesci.quick_start_wlasna}" — le moteur inventera le monde en fonction de votre première action.
+
+  Cependant, vous pouvez choisir l'un des cinq préréglages prêts à l'emploi pour plonger directement dans un monde spécifique :
+
+  SF POST-APOCALYPTIQUE — un siècle après une catastrophe écologique. Les restes de l'humanité dans des abris sous les Montagnes Sainte-Croix. Vous êtes un jeune coursier du Clan Sztolnia avec votre première mission sérieuse. Mode par défaut : Choix.
+
+  FANTASY SOMBRE — frontière du Royaume des Trois Ruisseaux, neuvième année de guerre religieuse. Vous êtes une jeune Inquisitrice sur la piste d'un village où quelqu'un protège un enfant possédé. Mode par défaut : Moindre mal.
+
+  DETECTIVE URBAIN FANTASTIQUE — Varsovie 2008, soirée d'octobre. Vous êtes un détective privé qui voit des fantômes. Une cliente veut retrouver son mari disparu sous le Château Royal. Mode par défaut : Choix.
+
+  HORREUR COSMIQUE — année 2247, station de recherche en orbite autour d'une étoile à neutrons. Vous vous réveillez de l'hibernation sans capitaine — et sans traces qu'un capitaine ait jamais existé. Mode par défaut : Libre (l'ambiance lovecraftienne favorise l'improvisation).
+
+  COMÉDIE ROMANTIQUE SOCIALE — Saska Kępa avril 2024, un petit café est sur le point de fermer. Vous êtes une barista-serveuse dont le propriétaire demande d'être « gentille » avec un rédacteur timide que vous vouliez aborder depuis longtemps. Mode par défaut : Libre.
+
+  Après avoir choisi un préréglage, cliquez sur "{opowiesci.btn_nowa_gra_label}" — le moteur injectera une courte description du monde et du personnage, définira le mode de jeu par défaut (vous pouvez le remplacer avec le RadioBox avant de cliquer sur « Nouveau jeu »). La première tour LLM jouera la scène d'ouverture.
+
+
+
+  ÉTAPE 3 : Premier jeu à partir de zéro — sans préréglage
+
+  Si vous préférez une totale liberté, laissez "{opowiesci.quick_start_wlasna}" dans le champ Démarrage rapide et préparez-vous à entrer la première action manuellement.
+
+  1. Entrez le nom du jeu dans la barre « {opowiesci.lbl_nazwa_gry} » (par exemple, « mon_aventure_1 ») — sous ce nom, les fichiers de narration, d'état et de journal seront enregistrés.
+  2. Choisissez le mode (Libre/Choix/Moindre mal).
+  3. Cliquez sur "{opowiesci.btn_nowa_gra_label}". L'application créera 3 fichiers : état du jeu (.game.json), Livre du Monde vide (.md) et métadonnées du mode (.mode). Le fichier de narration (.txt) sera créé après le premier tour.
+  4. Dans le champ « {opowiesci.lbl_akcja} » en bas du panneau, entrez la première action, par exemple « je me réveille dans une pièce inconnue ». Cliquez sur "{opowiesci.btn_wyslij_label}". Le moteur narratif ouvrira le monde en fonction de votre action — description de la pièce, sons, personnages, premières décisions.
+  5. Chaque tour sera automatiquement enregistrée — vous pouvez fermer l'application à tout moment et recharger le jeu plus tard avec le bouton "{opowiesci.btn_wczytaj_label}".
+
+
+
+  ÉTAPE 4 : Commandes Slash — actions rapides sans API
+
+  Dans le champ d'action, vous pouvez à tout moment entrer une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne coûtent pas d'appels à OpenAI) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont acceptées :
+
+  /zapisz, /save — forcer l'enregistrement manuel de l'état du jeu. L'enregistrement automatique fonctionne après chaque tour, donc cette commande est principalement pour s'assurer avant de fermer l'application.
+
+  /wczytaj, /load — ouvre une boîte de dialogue de sélection de fichier depuis le dossier runtime/opowiesci/. Après le chargement, le nom du jeu, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous êtes arrêté.
+
+  /ustawienia, /settings — ouvre une boîte de dialogue de sélection du modèle AI. Par défaut, nous utilisons gpt-4o-mini (Standard) — plus rapide et moins cher. En passant à gpt-4o (Haute qualité), la narration devient plus riche, mais chaque tour coûte plus cher et prend plus de temps.
+
+  /wizualizuj <opis>, /visualize <description> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj à quoi ressemble le garde » ou « /wizualizuj l'odeur du café ».
+
+  /koniec, /quit — ferme l'application (après l'enregistrement automatique du tour en cours).
+
+
+
+  ÉTAPE 5 : Fichiers de jeu — où trouver vos données
+
+  Chaque jeu produit cinq fichiers, chacun dans un dossier différent, avec des rôles différents :
+
+  skrypty/<nom>.txt — narration complète prête à être écoutée comme un audiobook. Peut être ouvert dans le Bloc-notes ou chargé dans l'Architecte d'Audiobooks (Convertisseur) pour générer un fichier Word avec des chapitres ou un timing pour ElevenLabs.
+
+  skrypty/<nom>.md — Livre du Monde des personnages au format [Nom : caractéristiques], régénéré après chaque tour. Format compatible avec le parseur du Réalisateur ! Vous pouvez charger ce fichier dans le panneau du Réalisateur (Fichier → Charger) et obtenir des accents de personnages natifs dans la narration TTS classique — un pont entre les deux modules principaux de l'application.
+
+  runtime/opowiesci/<nom>.game.json — état complet du jeu : nom, mode, personnages actifs, localisation, équipement, fils ouverts, les 6 derniers tours en forme abrégée. C'est la source de vérité pour charger le jeu — sans ce fichier, il est impossible de continuer.
+
+  runtime/opowiesci/<nom>.story.jsonl — journal brut de chaque tour (demande du joueur + réponse du modèle en JSON). Le fichier n'est pas nécessaire pour jouer — il sert au débogage ou à une analyse ultérieure (par exemple, statistiques sur la durée de l'aventure, quels fils le LLM a introduits).
+
+  runtime/skrypty/<nom>.mode — métadonnées du numéro de mode (3=Libre, 4=Choix, 5=Moindre mal). Fichier partagé avec le Réalisateur, mais la numérotation ne se chevauche pas (le Réalisateur utilise 0-2).
+
+
+
+  ÉTAPE 6 : Indicateur de mémoire du modèle — pourquoi les tours dans les anciens jeux ne nécessitent pas votre intervention manuelle
+
+  Sous le RadioBox du mode, vous trouverez un indicateur de mémoire du modèle — une barre de progression (wx.Gauge) avec une description du statut à côté. L'indicateur montre le pourcentage de remplissage de la fenêtre contextuelle du moteur narratif (gpt-4o-mini a un tampon de 128 000 tokens).
+
+  Quatre niveaux de remplissage :
+
+  🟢 propre (0%) — le jeu vient de commencer, aucune tour enregistrée.
+  🟢 OK (1-69%) — tout est normal, vous pouvez continuer sans restrictions.
+  ⚠️ avertissement (70-89%) — le moteur génère automatiquement un résumé des tours précédentes dans le fil de fond. Un message « Auto-résumé du contexte en cours... » apparaîtra — n'envoyez pas de tour suivante tant que le résumé n'est pas terminé. Après succès, les tours précédentes seront condensées en un seul condensat, le tampon sera libéré, et vous recevrez une confirmation « Mémoire du modèle récupérée » avec le nombre de tours condensées.
+  🚨 ALERTE (90%+) — l'auto-résumé n'a pas libéré le tampon (cas rare après une panne de l'API). L'envoi d'une tour suivante est bloqué. Forcez la fin du jeu avec /koniec, puis rechargez-le — le moteur chargera l'état depuis game.json sans l'historique des derniers tours, le tampon sera frais.
+
+  En pratique, le mécanisme d'auto-réduction est invisible — le joueur ne ressent pas que quelque chose se passe, car le fil de fond résout le problème avant qu'il ne soit remarqué. Il est seulement important de ne pas envoyer de tour suivante pendant l'auto-résumé (le bouton "{opowiesci.btn_wyslij_label}" est alors grisé).
+
+
+
+  ÉTAPE 7 : Avertissement Meta Cinématique — interlude dramatique après le 150e tour
+
+  Après 150 tours d'un même jeu, le moteur narratif insérera UNE FOIS un « Avertissement Meta Cinématique » — un interlude dramatique méta-narratif. Il apparaîtra dans une boîte de dialogue séparée avec un son de cloche, s'adressant directement à vous à la deuxième personne, avec un résumé des réalisations et un avertissement sur l'importance des décisions prises.
+
+  Avertissement Cinématique n'est PAS une partie de la narration de l'audiobook — le moteur de filtrage .txt coupe automatiquement son contenu (marqué par des balises ⚠️🚨⚠️), pour que vous n'entendiez pas de méta-commentaire sur votre propre jeu lors de l'écoute de l'audiobook. Le contenu est uniquement enregistré dans le journal .story.jsonl (pour réflexion ou souvenir) et dans la boîte de dialogue GUI, où vous pouvez le lire une fois et continuer.
+
+
+
+  ÉTAPE 8 : Pont vers le Réalisateur — utilisez le Livre du Monde créé dans les Histoires
+
+  Le fichier skrypty/<nom>.md généré pendant le jeu contient le Livre du Monde avec les personnages qui sont apparus dans la narration, avec leurs caractéristiques, accents et personnalités. Le format est exactement celui requis par le parseur du Réalisateur — [Nom : caractéristiques avec description de l'accent].
+
+  Que pouvez-vous en faire :
+
+  1. Après avoir terminé le jeu, ouvrez le panneau "{main.btn.rezyser}" (Ctrl+1).
+  2. Chargez le projet du même nom — le Réalisateur chargera le fichier .txt comme histoire et .md comme Livre du Monde.
+  3. Vous obtiendrez maintenant une narration classique du Réalisateur (longues scènes structurées avec actes et chapitres) avec les accents natifs des personnages que vous avez aimés dans les Histoires. Le garde Karmel du refuge parlant avec des phrases courtes, l'inquisitrice Rosanna avec un accent chantant de l'est — toutes les caractéristiques sont conservées.
+
+  C'est un pont à sens unique : les Histoires produisent du matériel, le Réalisateur le formate. L'inverse n'est pas possible — le Réalisateur ne charge pas les jeux des Histoires comme état interactif.
+
+
+
+  ÉTAPE 9 : Accessibilité (NVDA et lecteurs d'écran) — conçu dès le départ
+
+  Tout le module Histoires a été optimisé pour les joueurs aveugles. Ce que nous avons fait spécifiquement :
+
+  CHAMP DERNIER TOUR — c'est un wx.TextCtrl readonly multiline séparé (~140 px de hauteur) AU-DESSUS de la narration complète. Après chaque tour, le champ est remplacé par un nouveau fragment (en-tête « --- Tour N ---" + contenu de la narration). NVDA le lit immédiatement après le focus (auto-focus après le succès du tour), sans naviguer à travers des centaines de lignes de l'histoire complète. Après avoir chargé un jeu enregistré, le champ montre un RÉSUMÉ du dernier tour enregistré (max 400 caractères du tampon `derniers_tours`) avec un préfixe informant que la narration complète est dans le champ ci-dessous.
+
+  CHAMP NARRATION COMPLÈTE — c'est un wx.TextCtrl readonly multiline qui s'accumule après chaque tour. NVDA lit linéairement toute la narration, vous pouvez naviguer avec les flèches dans le texte, copier des fragments avec Ctrl+C. Le champ n'est jamais éditable — vous modifiez l'histoire UNIQUEMENT par un nouveau tour ou en éditant le fichier .txt en dehors de l'application. Ce champ est synchronisé avec le fichier `skrypty/<nom>.txt`, vous pouvez le considérer comme un aperçu de l'audiobook.
+
+  BOUTONS DE CHOIX DYNAMIQUES — dans les modes Choix et Moindre mal, chaque tour crée de nouveaux wx.Buttons dans la zone de choix. Chacun a une infobulle lue par NVDA (« Choisir : avancer dans la forêt »). Tab entre eux fonctionne naturellement. Enter sur le bouton sélectionné envoie automatiquement ce choix au moteur narratif.
+
+  MASQUAGE DES ZONES VIDES — en mode Libre, la zone de choix est COMPLÈTEMENT masquée (wx.Hide), pas seulement grisée — Tab l'ignore, NVDA ne l'inclut pas dans la liste des éléments. Cela évite de désorienter le joueur tombant sur un espace réservé vide. Dans les modes 4 et 5, la zone apparaît uniquement après la validation réussie de la réponse du modèle (tableau de choix non vide); une hallucination du modèle (choix vides) entraîne un retour au texte libre sans encombrer l'interface.
+
+  SIGNAL SONORE — chaque tour terminée est signalée par wx.Bell (son de cloche système), suivi du déplacement automatique du focus sur le champ de narration. NVDA lira alors la nouvelle narration sans nécessiter de navigation manuelle.
+
+  STATUTS MÉMOIRE COLORÉS — l'indicateur de mémoire du modèle change la couleur de la police (vert/orange/rouge) selon le niveau de remplissage. Pour les utilisateurs voyants, c'est un signal visuel supplémentaire; NVDA lit quand même le texte du statut, donc les aveugles ne perdent pas d'information.
+
+  ACCÉLÉRATEURS CLAVIER — tous les boutons ont un signe `&` devant une des lettres de l'étiquette, ce qui active l'accélérateur Alt+lettre. Fonctionne de manière identique aux autres modules de l'application.
+
+
+
+  Problèmes fréquents
+
+  Problème : Après avoir cliqué sur "{opowiesci.btn_nowa_gra_label}", un message « Clé API manquante » apparaît.
+  Cause et solution : Le fichier golden_key.env dans le dossier principal de l'application n'a pas la clé OpenAI correcte. Revenez à l'écran de démarrage (bouton Accueil), cliquez sur "{home.btn_generate}" et suivez les instructions (ÉTAPE 2 du manuel principal).
+
+  Problème : J'essaie d'envoyer un tour suivant, mais le bouton "{opowiesci.btn_wyslij_label}" est grisé.
+  Cause et solution : Un auto-résumé du contexte ou une génération d'Avertissement Cinématique est en cours dans le fil d'arrière-plan. Le statut de la mémoire indiquera « Auto-résumé du contexte en cours… ». Attendez quelques secondes — le bouton se déverrouillera automatiquement après le succès.
+
+  Problème : Le message « Mémoire du modèle surchargée » bloque le jeu.
+  Cause et solution : L'auto-résumé n'a pas libéré le tampon (par exemple, limite de taux OpenAI). Terminez le jeu avec la commande /koniec ou fermez l'application, puis rechargez-la — le moteur chargera uniquement l'état depuis game.json sans l'historique des derniers tours.
+
+  Problème : En mode Choix, le moteur n'a pas généré de boutons, bien que je m'y attendais.
+  Cause et solution : Hallucination du modèle — malgré le mode 4, le LLM a renvoyé un tableau de choix vide. L'application masque alors consciemment la zone de choix (au lieu d'afficher un espace réservé vide) et permet de continuer avec le texte libre. Le tour suivant générera probablement des choix correctement.
+
+  Problème : Les fichiers .game.json et .story.jsonl ne sont pas visibles sur le bureau.
+  Cause et solution : C'est intentionnel — runtime/ est un dossier système pour les utilisateurs ordinaires, invisible depuis l'explorateur de fichiers. Les fichiers de narration (.txt, .md) vont dans skrypty/ — c'est là que vous les trouverez.

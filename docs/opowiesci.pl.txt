@@ -1,0 +1,161 @@
+Reżyser Audio GPT — Moduł Interaktywne Opowieści (15.0 – Wersja Wydawnicza)
+
+Drugi główny tryb aplikacji obok Reżysera — tym razem stajesz się graczem dynamicznie generowanej historii zamiast jej autorem. Sztuczna inteligencja prowadzi narrację w drugiej osobie liczby pojedynczej („Idziesz przez mglisty las, czujesz zapach mokrych liści…"), a Ty decydujesz o kolejnym ruchu — pisząc dowolną akcję wolnym tekstem albo wybierając jedną z ponumerowanych opcji.
+
+Moduł zaprojektowany został od początku z myślą o niewidomych graczach — narracja wczytywana liniowo czytnikiem ekranu (NVDA) lub silnikiem TTS, wybory dynamiczne w postaci przycisków z opisami głosowymi, każda zakończona tura sygnalizowana dźwiękiem dzwonka i automatycznym przeniesieniem fokusu na nowo wygenerowany tekst.
+
+Otworzysz panel przyciskiem "📖  Opowieści" na pasku narzędzi albo skrótem klawiaturowym Ctrl+5.
+
+
+
+KROK 1: Trzy tryby gry — wybierz styl rozgrywki
+
+Tuż pod paskiem nazwy gry znajdziesz pole wyboru trybu (RadioBox). Tryb określa, jak silnik narracyjny prowadzi z Tobą dialog:
+
+TRYB SWOBODNY — wpisujesz dowolną akcję wolnym tekstem („spróbuję otworzyć drzwi", „pytam strażnika o drogę", „uciekam tylnymi schodami"). Silnik narracyjny może zaproponować 1-3 sugestie, ale to tylko podpowiedzi — nie obowiązkowa ścieżka. Najbardziej swobodny tryb, polecany dla doświadczonych graczy improwizujących własną opowieść.
+
+TRYB WYBORÓW — każda tura kończy się 3-5 ponumerowanymi opcjami A-E w postaci klikalnych przycisków. Każdy wybór to konkretna akcja, którą możesz podjąć. Możesz też wpisać własną akcję wolnym tekstem — silnik dopasuje ją do najbliższego wyboru semantycznie. Najbardziej intuicyjny tryb dla niewidomych graczy: NVDA przeczyta Ci wszystkie opcje, klikasz Tab między nimi, Enter zatwierdza.
+
+TRYB MNIEJSZE ZŁO — jak Wyborów, ale każda z 3-5 opcji jest niekorzystna moralnie, fizycznie albo strategicznie. Brak „neutralnej" opcji, brak happy endingu w tej turze. Tryb dla miłośników mrocznej fikcji w klimacie „Tales of Consequence" albo dramatów moralnych.
+
+Tryb można zmienić w trakcie gry — przy następnej turze silnik narracyjny zaadoptuje się do nowego stylu (z trybu Swobodnego do Wyborów może przejść w jeden klik).
+
+
+
+KROK 2: Quick Start — gotowe scenariusze otwierające
+
+Pod polem nazwy gry znajdziesz drugi rząd z etykietą „Quick Start:" i wyborem rozwijanym (wx.Choice). Domyślna pozycja to "(własna gra)" — silnik sam wymyśli świat na podstawie pierwszej Twojej akcji.
+
+Możesz jednak wybrać jeden z pięciu gotowych presetów, by od razu zanurzyć się w konkretnym świecie:
+
+PO-APOKALIPTYCZNE SF — stulecie po katastrofie ekologicznej. Resztki ludzkości w schronach pod Górami Świętokrzyskimi. Jesteś młodym kurierem Klanu Sztolnia z pierwszym poważnym zleceniem. Tryb domyślny: Wyborów.
+
+MROCZNE FANTASY — pogranicze Królestwa Trzech Strug, dziewiąty rok wojny religijnej. Jesteś młodszą Inkwizytorką na tropie wsi, gdzie ktoś chroni dziecko opętane. Tryb domyślny: Mniejsze zło.
+
+URBAN FANTASY DETECTIVE — Warszawa 2008, październikowy wieczór. Jesteś prywatnym detektywem, który widzi duchy. Klientka chce odnaleźć męża zaginionego pod Zamkiem Królewskim. Tryb domyślny: Wyborów.
+
+KOSMICZNY HORROR — rok 2247, stacja badawcza orbitująca wokół neutronowej gwiazdy. Budzisz się z hibernacji bez kapitana — i bez śladów, że kapitan kiedykolwiek istniał. Tryb domyślny: Swobodny (klimat lovecraftowski premiuje improwizację).
+
+ROMANTYCZNA KOMEDIA OBYCZAJOWA — Saska Kępa kwiecień 2024, mała kawiarnia stoi w obliczu zamknięcia. Jesteś baristą-kelnerką, której właściciel każe „być miłą" dla redaktora-nieśmielego, którego dawno chciałaś zaczepić sama. Tryb domyślny: Swobodny.
+
+Po wyborze presetu kliknij "Nowa gra" — silnik wstrzyknie do siebie krótki opis świata i bohatera, ustawi domyślny tryb gry (możesz go nadpisać RadioBox-em zanim klikniesz „Nowa gra"). Pierwsza tura LLM rozegra scenę otwierającą.
+
+
+
+KROK 3: Pierwsza gra od zera — bez presetu
+
+Jeśli wolisz pełną swobodę, zostaw "(własna gra)" w polu Quick Start i przygotuj się do wpisania pierwszej akcji ręcznie.
+
+1. Wpisz nazwę gry w pasku „Nazwa gry" (np. „moja_przygoda_1") — pod tą nazwą zostaną zapisane pliki narracji, stanu i logu.
+2. Wybierz tryb (Swobodny/Wyborów/Mniejsze zło).
+3. Kliknij "Nowa gra". Aplikacja stworzy 3 pliki: stan gry (.game.json), pustą Księgę Świata (.md) i metadane trybu (.mode). Plik narracji (.txt) powstanie po pierwszej turze.
+4. W polu „Twoja akcja lub komenda" na dole panelu wpisz pierwszą akcję, np. „budzę się w nieznanym pokoju". Kliknij "Wyślij". Silnik narracyjny otworzy świat na podstawie Twojej akcji — opis pomieszczenia, dźwięki, postacie, pierwsze decyzje.
+5. Każda tura zostanie automatycznie zapisana — możesz w każdej chwili zamknąć aplikację i wczytać grę później przyciskiem "Wczytaj".
+
+
+
+KROK 4: Slash-komendy — szybkie akcje bez API
+
+W polu akcji możesz w każdej chwili wpisać komendę zaczynającą się od ukośnika `/`. Komendy są lokalne (nie kosztują wywołań do OpenAI) i działają niezależnie od trybu gry. Akceptowane są zarówno polskie, jak i angielskie warianty:
+
+/zapisz, /save — wymuszenie ręcznego zapisu stanu gry. Autozapis działa po każdej turze, więc ta komenda jest głównie dla pewności przed zamknięciem aplikacji.
+
+/wczytaj, /load — otwiera dialog wyboru pliku z folderu runtime/opowiesci/. Po wczytaniu nazwa gry, tryb i pełna narracja zostają przywrócone — możesz kontynuować od tury, na której skończyłeś.
+
+/ustawienia, /settings — otwiera dialog wyboru modelu AI. Domyślnie używamy gpt-4o-mini (Standardowy) — szybszy i tańszy. Po przełączeniu na gpt-4o (Wysokiej jakości) narracja staje się bogatsza, ale każda tura kosztuje więcej i trwa dłużej.
+
+/wizualizuj <opis>, /visualize <opis> — multisensoryczny opis aktualnej sceny. Nie zmienia stanu gry, nie proponuje wyborów — silnik narracyjny używa wszystkich pięciu zmysłów (wzrok, słuch, zapach, dotyk, smak), by pokazać scenę z większą głębią. Wynik pojawia się w osobnym dialogu, NIE jest dopisywany do narracji ani zapisany w pliku audiobooka. Przykład: „/wizualizuj jak wygląda strażnik" lub „/wizualizuj zapach kawiarni".
+
+/koniec, /quit — zamyka aplikację (po autozapisie tury w toku).
+
+
+
+KROK 5: Pliki gry — gdzie znajdziesz swoje dane
+
+Każda gra produkuje pięć plików, każdy w innym folderze, z różnymi rolami:
+
+skrypty/<nazwa>.txt — pełna narracja gotowa do odsłuchu jako audiobook. Można otworzyć w Notatniku albo wczytać do Architekta Audiobooków (Konwerter) i wygenerować plik Word z rozdziałami albo timing dla ElevenLabs.
+
+skrypty/<nazwa>.md — Księga Świata postaci w formacie [Imię: cechy], regenerowana po każdej turze. Format kompatybilny z parserem Reżysera! Możesz wczytać ten plik do panelu Reżysera (Plik → Wczytaj) i otrzymasz natywne akcenty postaci w klasycznej narracji TTS — most między dwoma głównymi modułami aplikacji.
+
+runtime/opowiesci/<nazwa>.game.json — pełen stan gry: nazwa, tryb, postacie aktywne, lokacja, ekwipunek, otwarte wątki, ostatnie 6 tur w skróconej formie. To źródło prawdy do wczytania gry — bez tego pliku nie da się kontynuować.
+
+runtime/opowiesci/<nazwa>.story.jsonl — surowy log każdej tury (request gracza + odpowiedź modelu w JSON). Plik nie jest potrzebny do gry — służy do debugowania albo analizy późniejszej (np. statystyki ile tur trwała przygoda, jakie wątki LLM wprowadzał).
+
+runtime/skrypty/<nazwa>.mode — metadane numeru trybu (3=Swobodny, 4=Wyborów, 5=Mniejsze zło). Plik wspólny z Reżyserem, ale numeracja nie koliduje (Reżyser używa 0-2).
+
+
+
+KROK 6: Wskaźnik pamięci modelu — dlaczego tury w starych grach nie wymagają od Ciebie ręcznej pracy
+
+Pod RadioBox-em trybu znajdziesz wskaźnik pamięci modelu — pasek postępu (wx.Gauge) z opisem statusu obok. Wskaźnik pokazuje procent zapełnienia okna kontekstowego silnika narracyjnego (gpt-4o-mini ma 128 000 tokenów buforu).
+
+Cztery poziomy zapełnienia:
+
+🟢 czysta (0%) — gra dopiero się zaczęła, brak zapisanych tur.
+🟢 OK (1-69%) — wszystko w normie, możesz kontynuować bez ograniczeń.
+⚠️ ostrzeżenie (70-89%) — silnik automatycznie generuje streszczenie poprzednich tur w wątku tła. Pojawi się komunikat „Auto-streszczenie kontekstu w toku…" — nie wysyłaj kolejnej tury dopóki streszczenie się nie zakończy. Po sukcesie poprzednie tury zostaną zwinięte do jednego kondensatu, bufor zwolni się, a Ty dostaniesz potwierdzenie „Pamięć modelu odzyskana" z liczbą zwiniętych tur.
+🚨 ALARM (90%+) — auto-streszczenie nie zwolniło bufora (rzadki przypadek po awarii API). Wysłanie kolejnej tury jest zablokowane. Wymuś zakończenie gry przez /koniec, potem wczytaj ją ponownie — silnik załaduje stan z game.json bez historii ostatnich tur, bufor będzie świeży.
+
+W praktyce mechanizm autoredukcji jest niewidoczny — gracz nie czuje, że coś się dzieje, bo wątek tła rozwiązuje problem przed jego zauważeniem. Ważne tylko, byś nie wysyłał kolejnej tury w trakcie auto-streszczenia (przycisk "Wyślij" jest wtedy wyszarzony).
+
+
+
+KROK 7: Cinematic Meta Warning — przerywnik dramatyczny po 150. turze
+
+Po 150 turach jednej gry silnik narracyjny RAZ wstawi „Cinematic Meta Warning" — meta-narracyjny przerywnik dramatyczny. Pojawi się w osobnym dialogu z dźwiękiem dzwonka, z zwrotem bezpośrednio do Ciebie w drugiej osobie, podsumowaniem osiągnięć i ostrzeżeniem o wadze podejmowanych decyzji.
+
+Cinematic Warning NIE jest częścią narracji audiobookowej — silnik filtrujący .txt automatycznie wycina jego treść (oznaczoną markerami ⚠️🚨⚠️), żebyś podczas odsłuchu audiobooka nie usłyszał meta-komentarza o własnej grze. Treść trafia tylko do logu .story.jsonl (do refleksji albo zachowania na pamiątkę) i do dialogu w GUI, gdzie możesz ją przeczytać raz i kontynuować.
+
+
+
+KROK 8: Most do Reżysera — wykorzystaj Księgę Świata stworzoną w Opowieściach
+
+Plik skrypty/<nazwa>.md generowany w trakcie gry zawiera Księgę Świata z postaciami, które pojawiały się w narracji, wraz z ich cechami, akcentami i charakterem. Format jest dokładnie taki, jakiego wymaga parser Reżysera — [Imię: cechy z opisem akcentu].
+
+Co możesz z tym zrobić:
+
+1. Po zakończeniu gry, otwórz panel "🎬  Reżyser" (Ctrl+1).
+2. Wczytaj projekt o tej samej nazwie — Reżyser załaduje plik .txt jako historię i .md jako Księgę Świata.
+3. Otrzymasz teraz klasyczną narrację Reżysera (długie, struktyzowane sceny z aktami i rozdziałami) z natywnymi akcentami postaci, które polubiłeś w Opowieściach. Strażnik Karmela ze schronu mówiący krótkimi zdaniami, inkwizytorka Rosanna ze śpiewnym akcentem wschodnim — wszystkie cechy zachowane.
+
+To jednokierunkowy most: Opowieści produkują materiał, Reżyser go formatuje. Możliwe odwrotne nie ma — Reżyser nie wczytuje gier z Opowieści jako stanu interaktywnego.
+
+
+
+KROK 9: Dostępność (NVDA i czytniki ekranu) — projektowane od początku
+
+Cały moduł Opowieści został zoptymalizowany pod kątem niewidomych graczy. Co konkretnie zrobiliśmy:
+
+POLE OSTATNIA TURA — to oddzielne wx.TextCtrl readonly multiline (~140 px wysokości) NAD pełną narracją. Po każdej turze pole jest podmieniane na świeży fragment (nagłówek „--- Tura N ---" + treść narracji). NVDA wczytuje go natychmiast po focusie (auto-fokus po sukcesie tury), bez nawigowania przez setki linii pełnej historii. Po wczytaniu zapisanej gry pole pokazuje SKRÓT ostatniej zapisanej tury (max 400 znaków z bufora `ostatnie_tury`) z prefixem informującym, że pełna narracja jest w polu poniżej.
+
+POLE PEŁNEJ NARRACJI — to wx.TextCtrl readonly multiline narastający po każdej turze. NVDA czyta liniowo całą narrację, możesz nawigować strzałkami w obrębie tekstu, kopiować fragmenty Ctrl+C. Pole nigdy nie jest edytowalne — modyfikujesz historię TYLKO przez nową turę albo edycję pliku .txt poza aplikacją. To pole jest zsynchronizowane z plikiem `skrypty/<nazwa>.txt`, możesz je traktować jako preview audiobooka.
+
+DYNAMICZNE PRZYCISKI WYBORU — w trybach Wyborów i Mniejsze zło każda tura tworzy nowe wx.Button-y w obszarze wyborów. Każdy ma tooltip czytany przez NVDA („Wybierz: idź dalej do lasu"). Tab między nimi działa naturalnie. Enter na zaznaczonym przycisku auto-wysyła ten wybór do silnika narracyjnego.
+
+UKRYWANIE PUSTYCH OBSZARÓW — w trybie Swobodnym obszar wyborów jest CAŁKOWICIE ukryty (wx.Hide), nie tylko wyszarzony — Tab go pomija, NVDA nie wciągnie go do listy elementów. To zapobiega dezorientacji gracza wpadającego w pusty placeholder. W trybach 4 i 5 obszar pojawia się tylko po pomyślnej walidacji odpowiedzi modelu (niepusta tablica wyborów); halucynacja modelu (puste wybory) skutkuje fallbackiem do free-text bez zaśmiecania interfejsu.
+
+SYGNAŁY DŹWIĘKOWE — każda zakończona tura sygnalizowana wx.Bell (dzwonek systemowy), za którym następuje automatyczne przeniesienie fokusu na pole narracji. NVDA odczyta wtedy nową narrację bez konieczności manualnej nawigacji.
+
+KOLOROWE STATUSY PAMIĘCI — wskaźnik pamięci modelu zmienia kolor czcionki (zielony/pomarańczowy/czerwony) zgodnie z poziomem zapełnienia. Dla użytkowników widzących to dodatkowy sygnał wzrokowy; NVDA i tak czyta tekst statusu, więc niewidomi nie tracą informacji.
+
+AKCELERATORY KLAWIATUROWE — wszystkie przyciski mają znak `&` przed jedną z liter etykiety, co aktywuje akcelerator Alt+litera. Działa identycznie jak w innych modułach aplikacji.
+
+
+
+Najczęstsze problemy
+
+Problem: Po kliknięciu "Nowa gra" pojawia się komunikat „Brak klucza API".
+Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza OpenAI. Wróć do ekranu startowego (przycisk Home), kliknij "Wygeneruj plik golden_key.env i otwórz edytor tekstu" i postępuj zgodnie z instrukcjami (KROK 2 głównego manuala).
+
+Problem: Próbuję wysłać kolejną turę, ale przycisk "Wyślij" jest wyszarzony.
+Przyczyna i rozwiązanie: Trwa auto-streszczenie kontekstu albo generacja Cinematic Warning w wątku tła. Status pamięci pokaże „Auto-streszczenie kontekstu w toku…". Poczekaj kilkanaście sekund — przycisk odblokuje się automatycznie po sukcesie.
+
+Problem: Komunikat „Pamięć modelu przeładowana" blokuje grę.
+Przyczyna i rozwiązanie: Auto-streszczenie nie zwolniło bufora (np. rate limit OpenAI). Zakończ grę komendą /koniec albo zamknij aplikację, potem wczytaj ją ponownie — silnik załaduje tylko stan z game.json bez historii ostatnich tur.
+
+Problem: W trybie Wyborów silnik nie wygenerował przycisków, mimo że spodziewałem się ich.
+Przyczyna i rozwiązanie: Halucynacja modelu — mimo trybu 4 LLM zwrócił pustą tablicę wyborów. Aplikacja świadomie ukrywa wtedy obszar wyborów (zamiast pokazać pusty placeholder) i pozwala kontynuować free-textem. Następna tura prawdopodobnie wygeneruje wybory poprawnie.
+
+Problem: Pliki .game.json i .story.jsonl nie są widoczne na pulpicie.
+Przyczyna i rozwiązanie: To celowe — runtime/ jest folderem systemowym dla zwykłych użytkowników, niewidocznym z poziomu eksploratora plików. Pliki narracji (.txt, .md) trafiają do skrypty/ — tam je znajdziesz.

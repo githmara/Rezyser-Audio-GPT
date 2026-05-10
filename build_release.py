@@ -324,7 +324,7 @@ def buduj_wpisy_inno(kody: list[str], katalog_inno: Path) -> list[tuple[str, str
 # =============================================================================
 # Reguły wykluczania plików (wspólne dla ZIP-a i filtrów)
 # =============================================================================
-IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '.claude', '__pycache__', 'skrypty', 'venv', '.venv', 'env'}
+IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '.claude', '__pycache__', 'skrypty', 'venv', '.venv', 'env', 'notatki_dev'}
 # Skrypty infrastruktury developerskiej (nigdy nie trafiają do paczki dla
 # end-usera). Nazwy zangielszczone w 13.1 — patrz changelog manual.yaml:
 #   skonfiguruj_dev.bat  → setup_dev.bat
@@ -344,6 +344,15 @@ def czy_ignorowac(sciezka, nazwa_pliku):
     sciezka_ukosniki = sciezka.replace('\\', '/')
     czesci_sciezki = sciezka_ukosniki.split('/')
     if any(ignorowany in czesci_sciezki for ignorowany in IGNOROWANE_FOLDERY):
+        return True
+
+    # Dane gier modułu Opowieści (v15.0+) — `runtime/opowiesci/<gra>.{game.json,story.jsonl}`.
+    # Tu trzeba precyzyjnej ścieżki, nie samej nazwy folderu, bo `opowiesci`
+    # występuje też w `dictionaries/<kod>/opowiesci/` (prompty systemowe LLM,
+    # MUSZĄ być w paczce). Wykluczamy WYŁĄCZNIE wariant z `runtime/`, zostawiając
+    # paczki promptów nietknięte. `os.walk` zwraca `root` bez trailing slash,
+    # więc sprawdzamy zarówno suffix (sam folder) jak i prefix (pliki w środku).
+    if sciezka_ukosniki.endswith('runtime/opowiesci') or 'runtime/opowiesci/' in sciezka_ukosniki:
         return True
 
     # Szablony YAML dokumentacji end-userowej — `dictionaries/<kod>/gui/dokumentacja/*.yaml`.
