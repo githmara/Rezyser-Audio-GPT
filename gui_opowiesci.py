@@ -40,6 +40,7 @@ from typing import Any
 import wx
 
 import opowiesci_ai as oai
+from core_opowiesci import ProjektOpowiesci
 from i18n import t
 
 
@@ -80,9 +81,9 @@ class OpowiesciPanel(wx.Panel):
         self._tool_description = t("opowiesci.tool_description")
 
         # ---- Faza 2: stan silnika LLM (klient + niezmienny snapshot) -----
-        # ``_snapshot`` żyje w pamięci panelu — Faza 3 zsynchronizuje go z
-        # plikami `.game.json`. Liczniki tury startują od 0; pierwsza akcja
-        # gracza inkrementuje do 1 przed wysyłką.
+        # ``_snapshot`` żyje w pamięci panelu i jest zsynchronizowany z
+        # ``_projekt`` (perzystencja na dysk). Liczniki tury startują od 0;
+        # pierwsza akcja gracza inkrementuje do 1 przed wysyłką.
         self._client: Any = None
         self._api_dostepne: bool = False
         self._snapshot: oai.SnapshotOpowiesci = oai.SnapshotOpowiesci(
@@ -90,9 +91,16 @@ class OpowiesciPanel(wx.Panel):
         )
         self._worker_thread: threading.Thread | None = None
 
+        # ---- Faza 3: perzystencja stanu (5 ścieżek na dysk) --------------
+        # ``_projekt`` jest ``None`` dopóki gracz nie założy gry przyciskiem
+        # „Nowa gra" albo nie wczyta starej. Bez tego ``_btn_wyslij`` /
+        # ``_btn_zapisz`` są disabled — chronimy przed I/O bez nazwy.
+        self._projekt: ProjektOpowiesci | None = None
+
         self._build_ui()
         self._bind_events()
         self._init_api()
+        self._aktualizuj_uistate()
 
         # Faza 1: obszar wyborów zawsze schowany — silnika narracyjnego
         # nie ma jeszcze, więc placeholder nie ma kontekstu i pusty panel
@@ -368,12 +376,11 @@ class OpowiesciPanel(wx.Panel):
     # ZDARZENIA — wszystkie ślepe w Fazie 1; Faza 2/3/4 podłączą logikę
     # ==================================================================
     def _bind_events(self) -> None:
-        # Faza 3 podmieni `_btn_nowa_gra`/`_btn_wczytaj`/`_btn_zapisz` na realny
-        # lifecycle plików; w Fazie 2 nadal idą w stub.
-        self._btn_nowa_gra.Bind(wx.EVT_BUTTON, self._on_placeholder)
-        self._btn_wczytaj.Bind(wx.EVT_BUTTON, self._on_placeholder)
-        self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_placeholder)
-        # Faza 2: `_btn_wyslij` ma realnego workera silnika narracyjnego.
+        # Faza 3 dorobiła realny lifecycle plików — wszystkie callbacki
+        # są podłączone do prawdziwych handlerów.
+        self._btn_nowa_gra.Bind(wx.EVT_BUTTON, self._on_nowa_gra)
+        self._btn_wczytaj.Bind(wx.EVT_BUTTON, self._on_wczytaj)
+        self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_zapisz)
         self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_wyslij)
         # `_rb_tryb` bez callbacku — wybór trybu odczytujemy w `_on_wyslij`.
 
@@ -423,6 +430,18 @@ class OpowiesciPanel(wx.Panel):
             )
             return
 
+        # Faza 3: bez aktywnej gry nie ma I/O. Walidacja nazwy przeszła
+        # do `_on_nowa_gra` — tutaj sprawdzamy tylko czy projekt istnieje.
+        if self._projekt is None:
+            wx.MessageBox(
+                t("opowiesci.brak_gry_tresc"),
+                t("opowiesci.brak_gry_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_nazwa_gry.SetFocus()
+            return
+
         user_text = self._txt_akcja.GetValue().strip()
         if not user_text:
             wx.MessageBox(
@@ -434,20 +453,8 @@ class OpowiesciPanel(wx.Panel):
             self._txt_akcja.SetFocus()
             return
 
-        nazwa = self._txt_nazwa_gry.GetValue().strip()
-        if not nazwa:
-            # Faza 2 wymaga nazwy do logu i kontekstu, nawet jeśli plików
-            # jeszcze nie zapisujemy (lifecycle dochodzi w Fazie 3).
-            wx.MessageBox(
-                t("opowiesci.puste_nazwa_tresc"),
-                t("opowiesci.puste_nazwa_tytul"),
-                wx.OK | wx.ICON_WARNING,
-                self,
-            )
-            self._txt_nazwa_gry.SetFocus()
-            return
-
-        tryb = self._aktualny_tryb_int()
+        nazwa = self._projekt.nazwa_pliku
+        tryb  = self._aktualny_tryb_int()
 
         # Aktualizujemy snapshot przed wysyłką: nazwa + nowy numer tury.
         # Snapshot jest niezmienny po stronie wątku tła, ale tutaj jeszcze
@@ -547,15 +554,60 @@ class OpowiesciPanel(wx.Panel):
             jezyk_projektu=self._snapshot.jezyk_projektu,
         )
 
-        # 3. Wybory: w trybie Swobodnym (3) zawsze ukryte, w 4/5 widoczne
+        # 3. Faza 3: synchronizacja stanu z dyskiem — 4 pliki per tura.
+        # Kolejność jest istotna: NAJPIERW append do `.txt` (najszybciej
+        # widoczny dla TTS jeśli ktoś otworzy plik bezpośrednio), POTEM
+        # rebuild księgi świata, na końcu game.json + story.jsonl. Błąd
+        # I/O w którymkolwiek kroku idzie w `_zglos_blad_zapisu` —
+        # narracja jest już w UI, więc gracz nie traci tury.
+        if self._projekt is not None:
+            self._zsynchronizuj_projekt_z_wynikiem(wynik, user_input, tryb, naglowek)
+
+        # 4. Wybory: w trybie Swobodnym (3) zawsze ukryte, w 4/5 widoczne
         # tylko gdy LLM zwrócił niepustą tablicę (halucynacja → ukrywamy).
         self._przeladuj_wybory(wynik.wybory, tryb)
 
-        # 4. Status + odblokowanie + dźwięk + fokus.
+        # 5. Status + odblokowanie + dźwięk + fokus.
         self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
         self._btn_wyslij.Enable()
         wx.Bell()  # A11y: NVDA usłyszy „pinga" — sygnał gotowości
         self._txt_narracja.SetFocus()  # NVDA przeczyta nową narrację
+
+    def _zsynchronizuj_projekt_z_wynikiem(
+        self,
+        wynik:      oai.WynikTury,
+        user_input: str,
+        tryb:       int,
+        naglowek:   str,
+    ) -> None:
+        """Wpisuje wynik tury w stan projektu i serializuje 4 pliki na dysk.
+
+        Ten helper jest celowo wydzielony z :meth:`_obsluz_ture` — UI części
+        nie da się testować bez wxPython, ale tę synchronizację tak.
+        """
+        assert self._projekt is not None, "wywoływane tylko gdy _projekt nie None"
+
+        self._projekt.numer_tury       = self._snapshot.numer_tury
+        self._projekt.tryb             = tryb
+        self._projekt.postacie_aktywne = wynik.postacie_aktywne
+        self._projekt.stan             = wynik.stan
+        self._projekt.ostatnie_tury    = list(self._snapshot.ostatnie_tury)
+
+        try:
+            self._projekt.dopisz_do_txt(wynik.narracja, naglowek=naglowek)
+            self._projekt.rebuild_ksiega_swiata()
+            self._projekt.zapisz_game_json()
+            self._projekt.dopisz_story_jsonl({
+                "tura":          self._snapshot.numer_tury,
+                "akcja_gracza":  user_input,
+                "tryb":          tryb,
+                "response_json": wynik.surowy_json,
+            })
+        except OSError as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_zapisu_tresc",
+                tresc_bledu=str(exc),
+            ))
 
     def _przeladuj_wybory(self, wybory: list[dict[str, str]], tryb: int) -> None:
         """Rebuilduje obszar wyborów: kasuje stare przyciski, dodaje nowe.
@@ -679,3 +731,206 @@ class OpowiesciPanel(wx.Panel):
         txt.SetFocus()
         dlg.ShowModal()
         dlg.Destroy()
+
+    # ==================================================================
+    # FAZA 3 — Lifecycle plików (Nowa gra / Wczytaj / Zapisz)
+    # ==================================================================
+    def _aktualizuj_uistate(self) -> None:
+        """Włącza/wyłącza przyciski zależnie od istnienia ``_projekt``.
+
+        - Bez projektu: nie ma sensu pokazywać „Wyślij" ani „Zapisz" —
+          gracz musi najpierw założyć grę albo wczytać starą.
+        - Z projektem: oba aktywne, RadioBox także zsynchronizowany.
+
+        Wzorzec :meth:`gui_rezyser.RezyserPanel._refresh_ui_state`.
+        """
+        ma_projekt = self._projekt is not None
+        self._btn_wyslij.Enable(ma_projekt)
+        self._btn_zapisz.Enable(ma_projekt)
+
+    def _ustaw_rb_z_trybu(self, tryb_int: int) -> None:
+        """RadioBox-owi ustawia indeks (0/1/2) na podstawie trybu (3/4/5)."""
+        if tryb_int in self._MAPA_TRYB_RB_NA_INT:
+            self._rb_tryb.SetSelection(self._MAPA_TRYB_RB_NA_INT.index(tryb_int))
+
+    # ------------------------------------------------------------------
+    # _on_nowa_gra: zakłada projekt + 5 plików (.txt/.md/.game.json/.story.jsonl/.mode)
+    # ------------------------------------------------------------------
+    def _on_nowa_gra(self, _event: wx.Event) -> None:
+        """Tworzy nową grę pod podaną nazwą.
+
+        Walidacje:
+        1. Niepusta nazwa.
+        2. Jeśli `<nazwa>.game.json` już istnieje — confirmation dialog
+           (gracz może chcieć kontynuować poprzednią; ostrzegamy że
+           „Nowa gra" nadpisze stan zerowymi wartościami).
+        """
+        nazwa = self._txt_nazwa_gry.GetValue().strip()
+        if not nazwa:
+            wx.MessageBox(
+                t("opowiesci.puste_nazwa_tresc"),
+                t("opowiesci.puste_nazwa_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_nazwa_gry.SetFocus()
+            return
+
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        if ProjektOpowiesci.istnieje(nazwa, app_dir):
+            potwierdzenie = wx.MessageBox(
+                t("opowiesci.gra_istnieje_tresc", nazwa=nazwa),
+                t("opowiesci.gra_istnieje_tytul"),
+                wx.YES_NO | wx.ICON_WARNING | wx.NO_DEFAULT,
+                self,
+            )
+            if potwierdzenie != wx.YES:
+                return
+
+        tryb = self._aktualny_tryb_int()
+        projekt = ProjektOpowiesci(app_dir)
+        projekt.nazwa_pliku    = nazwa
+        projekt.tryb           = tryb
+        projekt.jezyk_projektu = "pl"   # Faza 5 podmieni na język aktywnego UI
+
+        try:
+            projekt.zapisz_tryb(tryb)
+            projekt.zapisz_game_json()           # initial state na dysku
+            projekt.rebuild_ksiega_swiata()      # pusta księga (brak postaci na start)
+            # `.txt` nie tworzymy w „Nowa gra" — pierwsza tura LLM go założy
+            # (`dopisz_do_txt` ma `mode="a"` z domyślnym tworzeniem pliku).
+        except OSError as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_zapisu_tresc",
+                tresc_bledu=str(exc),
+            ))
+            return
+
+        # Reset stanu pamięci: nowa gra → pusty snapshot.
+        self._projekt = projekt
+        self._snapshot = oai.SnapshotOpowiesci(
+            nazwa_gry=nazwa, numer_tury=0, jezyk_projektu="pl",
+        )
+        self._txt_narracja.SetValue(t("opowiesci.nowa_gra_zaczatek", nazwa=nazwa))
+        self._aktywuj_obszar_wyborow(False)   # czysta gra → brak wyborów
+        self._aktualizuj_uistate()
+
+        wx.MessageBox(
+            t("opowiesci.gra_nowa_tresc", nazwa=nazwa),
+            t("opowiesci.gra_nowa_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+        self._txt_akcja.SetFocus()
+
+    # ------------------------------------------------------------------
+    # _on_wczytaj: FileDialog → ProjektOpowiesci.wczytaj() → sync UI
+    # ------------------------------------------------------------------
+    def _on_wczytaj(self, _event: wx.Event) -> None:
+        """Otwiera dialog z plikami `.game.json` i wczytuje wybraną grę."""
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        default_dir = os.path.join(app_dir, "runtime", "opowiesci")
+        # Folder może nie istnieć (świeża instalacja, brak żadnej gry) —
+        # `wx.FileDialog` poradzi sobie i pokaże pusty katalog.
+
+        with wx.FileDialog(
+            self,
+            message=t("opowiesci.dlg_wczytaj_tytul"),
+            defaultDir=default_dir,
+            wildcard=t("opowiesci.dlg_wczytaj_filtr"),
+            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
+        ) as dlg:
+            if dlg.ShowModal() != wx.ID_OK:
+                return
+            path = dlg.GetPath()
+
+        # Z `<app>/runtime/opowiesci/jakas_gra.game.json` wyciągamy `jakas_gra`.
+        basename = os.path.basename(path)
+        nazwa = basename[:-len(".game.json")] if basename.endswith(".game.json") else basename
+
+        projekt = ProjektOpowiesci(app_dir)
+        try:
+            wynik = projekt.wczytaj(nazwa)
+        except (FileNotFoundError, OSError, ValueError) as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_wczytania_tresc",
+                nazwa=nazwa,
+                tresc_bledu=str(exc),
+            ))
+            return
+
+        # Sync UI ze stanem wczytanego projektu.
+        self._projekt = projekt
+        self._snapshot = oai.SnapshotOpowiesci(
+            nazwa_gry=projekt.nazwa_pliku,
+            numer_tury=projekt.numer_tury,
+            ostatnie_tury=list(projekt.ostatnie_tury),
+            postacie_aktywne=list(projekt.postacie_aktywne),
+            stan_poprzedni=dict(projekt.stan),
+            seed_swiata=projekt.seed_swiata,
+            jezyk_projektu=projekt.jezyk_projektu,
+        )
+
+        self._txt_nazwa_gry.SetValue(projekt.nazwa_pliku)
+        # Tryb: priorytet ma `.mode` (saved_mode); jeśli brak — z game.json.
+        tryb_z_dysku = wynik.saved_mode if wynik.saved_mode is not None else projekt.tryb
+        self._ustaw_rb_z_trybu(tryb_z_dysku)
+        # Narracja: pełny tekst z `.txt` (lub fallback komunikat).
+        if wynik.czy_narracja:
+            self._txt_narracja.SetValue(projekt.full_story)
+            self._txt_narracja.SetInsertionPointEnd()
+        else:
+            self._txt_narracja.SetValue(t("opowiesci.brak_narracji_info", nazwa=nazwa))
+
+        self._aktywuj_obszar_wyborow(False)   # ostatnie wybory się utraciły, wymuszamy free-text
+        self._aktualizuj_uistate()
+        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
+
+        wx.MessageBox(
+            t(
+                "opowiesci.gra_wczytana_tresc",
+                nazwa=nazwa,
+                numer_tury=projekt.numer_tury,
+            ),
+            t("opowiesci.gra_wczytana_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+        self._txt_akcja.SetFocus()
+
+    # ------------------------------------------------------------------
+    # _on_zapisz: ręczny dump game.json (autozapis działa po każdej turze)
+    # ------------------------------------------------------------------
+    def _on_zapisz(self, _event: wx.Event) -> None:
+        """Wymusza dump `.game.json` na dysk.
+
+        W normalnej rozgrywce każda tura sama zapisuje stan w
+        :meth:`_zsynchronizuj_projekt_z_wynikiem` — ten przycisk jest
+        zachowany dla parytetu z Reżyserem (gracz wie że ma kontrolę)
+        i jako bezpieczna opcja przed zamknięciem aplikacji.
+        """
+        if self._projekt is None:
+            wx.MessageBox(
+                t("opowiesci.brak_gry_tresc"),
+                t("opowiesci.brak_gry_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            return
+
+        try:
+            self._projekt.zapisz_game_json()
+            self._projekt.zapisz_tryb(self._aktualny_tryb_int())
+        except OSError as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_zapisu_tresc",
+                tresc_bledu=str(exc),
+            ))
+            return
+
+        wx.MessageBox(
+            t("opowiesci.gra_zapisana_tresc", nazwa=self._projekt.nazwa_pliku),
+            t("opowiesci.gra_zapisana_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
