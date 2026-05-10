@@ -57,6 +57,7 @@ main:
     manager: "&Sääntöjen Hallinta\tCtrl+4"
     zakoncz: "&Lopeta\tAlt+F4"
     jezyk_interfejsu: "&Käyttöliittymän kieli"
+    opowiesci: "&Tarinoita\tCtrl+5"
   menu_status:
     strona_glowna: "Palaa aloitusnäyttöön, jossa on työkalujen kuvaus ja järjestelmän tarkistus"
     rezyser: "Avaa Ohjausmoduuli – kirjoita käsikirjoituksia ja proosaa AI:n avulla"
@@ -65,22 +66,26 @@ main:
     manager: "Avaa Sääntöjen Hallinta – tutki YAML-tiedostoja dictionaries/ ja luo uusia aksentteja / tiloja / salauksia"
     zakoncz: "Sulje sovellus"
     jezyk_interfejsu: "Valitse sovelluksen käyttöliittymän kieli (muutos vaatii uudelleenkäynnistyksen)"
+    opowiesci: "Avaa Tarinat-moduulin – interaktiivinen toisen persoonan fiktio, jonka AI luo ja TTS/ruudunlukija lukee"
   btn:
     rezyser: "🎬  &Ohjaaja"
     poliglota: "🌍  &Polyglootti"
     konwerter: "📄  &Muunnin"
     manager: "📚  &Sääntöjen Hallinta"
+    opowiesci: "📖  &Tarinoita"
   tooltip:
     rezyser: "Ohjausmoduuli (Ctrl+1): Kirjoita käsikirjoituksia ja proosaa AI:n avulla"
     poliglota: "Polyglootti-moduuli (Ctrl+2): Aksentit ja tekstien kääntäminen"
     konwerter: "Muunnin-moduuli (Ctrl+3): Luo Word-tiedostoja otsikoilla"
     manager: "Sääntöjen Hallinta (Ctrl+4): Tutki YAND-tiedostoja dictionaries/, luo uusia aksentteja, salauksia ja tiloja (malli tai kehotus AI:lle)"
+    opowiesci: "Tarinat-moduuli (Ctrl+5): Interaktiivinen toisen persoonan fiktio — AI:n luoma, TTS:n lukema"
   nazwy_narzedzi:
     dom: "Koti"
     rezyser: "Ohjaaja"
     poliglota: "Polyglootti"
     konwerter: "Muunnin"
     manager: "Sääntöjen Hallinta"
+    opowiesci: "Tarinoita"
   dialog:
     zmiana_jezyka_tytul: "Käyttöliittymän kielen vaihtaminen"
     zmiana_jezyka_tresc: |-

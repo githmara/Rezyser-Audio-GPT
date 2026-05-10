@@ -57,6 +57,7 @@ main:
     manager: "&Gestore Regole\tCtrl+4"
     zakoncz: "Ter&mina\tAlt+F4"
     jezyk_interfejsu: "&Lingua dell'interfaccia"
+    opowiesci: "&Racconti\tCtrl+5"
   menu_status:
     strona_glowna: "Torna alla schermata iniziale con la descrizione degli strumenti e System Check"
     rezyser: "Apre il modulo Regista – scrittura di script e prosa con AI"
@@ -65,22 +66,26 @@ main:
     manager: "Apre il Gestore Regole – esploratore di file YAML in dictionaries/ e creatore di nuovi accenti / modalità / cifrari"
     zakoncz: "Chiudi l'applicazione"
     jezyk_interfejsu: "Seleziona la lingua dell'interfaccia dell'applicazione (il cambiamento richiede il riavvio)"
+    opowiesci: "Apre il modulo Racconti – narrativa interattiva in seconda persona generata da AI, letta da TTS/lettore di schermo"
   btn:
     rezyser: "🎬  &Regista"
     poliglota: "🌍  &Poliglotta"
     konwerter: "📄  &Convertitore"
     manager: "📚  &Gestore Regole"
+    opowiesci: "📖  &Racconti"
   tooltip:
     rezyser: "Modulo Regista (Ctrl+1): Scrivi script e prosa con l'aiuto dell'AI"
     poliglota: "Modulo Poliglotta (Ctrl+2): Accenti e traduzione testi"
     konwerter: "Modulo Convertitore (Ctrl+3): Crea file Word con intestazioni"
     manager: "Gestore Regole (Ctrl+4): Esplora file YAND in dictionaries/, crea nuovi accenti, cifrari e modalità (modello o prompt per AI)"
+    opowiesci: "Modulo Racconti (Ctrl+5): Narrativa interattiva in seconda persona — generata da AI, letta da TTS"
   nazwy_narzedzi:
     dom: "Casa"
     rezyser: "Regista"
     poliglota: "Poliglotta"
     konwerter: "Convertitore"
     manager: "Gestore Regole"
+    opowiesci: "Racconti"
   dialog:
     zmiana_jezyka_tytul: "Cambio lingua dell'interfaccia"
     zmiana_jezyka_tresc: |-

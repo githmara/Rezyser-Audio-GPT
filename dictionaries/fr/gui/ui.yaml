@@ -57,6 +57,7 @@ main:
     manager: "&Gestionnaire de Règles\tCtrl+4"
     zakoncz: "Quitt&er\tAlt+F4"
     jezyk_interfejsu: "&Langue de l'interface"
+    opowiesci: "&Histoires\tCtrl+5"
   menu_status:
     strona_glowna: "Revient à l'écran d'accueil avec la description des outils et System Check"
     rezyser: "Ouvre le module Réalisateur — écriture de scénarios et de prose avec l'IA"
@@ -65,22 +66,26 @@ main:
     manager: "Ouvre le Gestionnaire de Règles — explorateur de fichiers YAML dans dictionaries/ et créateur de nouveaux accents / modes / chiffrements"
     zakoncz: "Ferme l'application"
     jezyk_interfejsu: "Sélectionne la langue de l'interface de l'application (le changement nécessite un redémarrage)"
+    opowiesci: "Ouvre le module Histoires – fiction interactive à la deuxième personne générée par IA, lue par TTS/lecteur d'écran"
   btn:
     rezyser: "🎬  &Réalisateur"
     poliglota: "🌍  &Polyglotte"
     konwerter: "📄  &Convertisseur"
     manager: "📚  &Gestionnaire de Règles"
+    opowiesci: "📖  &Histoires"
   tooltip:
     rezyser: "Module Réalisateur (Ctrl+1) : écris scénarios et prose avec l'aide de l'IA"
     poliglota: "Module Polyglotte (Ctrl+2) : accents et traduction de textes"
     konwerter: "Module Convertisseur (Ctrl+3) : crée des fichiers Word avec en-têtes"
     manager: "Gestionnaire de Règles (Ctrl+4) : explore les fichiers YAML dans dictionaries/, crée de nouveaux accents, chiffrements et modes (modèle ou prompt pour IA)"
+    opowiesci: "Module Histoires (Ctrl+5) : Fiction interactive à la deuxième personne — générée par IA, lue par TTS"
   nazwy_narzedzi:
     dom: "Accueil"
     rezyser: "Réalisateur"
     poliglota: "Polyglotte"
     konwerter: "Convertisseur"
     manager: "Gestionnaire de Règles"
+    opowiesci: "Histoires"
   dialog:
     zmiana_jezyka_tytul: "Changement de langue de l'interface"
     zmiana_jezyka_tresc: |-

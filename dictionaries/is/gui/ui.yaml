@@ -57,6 +57,7 @@ main:
     manager: "&Reglustjóri\tCtrl+4"
     zakoncz: "Ljúka&\tAlt+F4"
     jezyk_interfejsu: "&Viðmótstungumál"
+    opowiesci: "&Sögur\tCtrl+5"
   menu_status:
     strona_glowna: "Farðu aftur á upphafsskjá með lýsingu á verkfærum og System Check"
     rezyser: "Opnar Leikstjórnarstillingu – skrifa handrit og prósa með AI"
@@ -65,22 +66,26 @@ main:
     manager: "Opnar Reglustjóra – YAML skráarkönnuður í dictionaries/ og nýr áherslu / stillinga / dulritunarsmiður"
     zakoncz: "Lokaðu forritinu"
     jezyk_interfejsu: "Veldu tungumál viðmótsins (breyting krefst endurræsingar)"
+    opowiesci: "Opnar Sögur einingu – gagnvirkar sögur í annarri persónu búnar til af AI, lesnar af TTS/skjálesara"
   btn:
     rezyser: "🎬  &Leikstjóri"
     poliglota: "🌍  &Tungumálamaður"
     konwerter: "📄  &Breytingartæki"
     manager: "📚  &Reglustjóri"
+    opowiesci: "📖  &Sögur"
   tooltip:
     rezyser: "Leikstjórnarstilling (Ctrl+1): Skrifaðu handrit og prósa með hjálp AI"
     poliglota: "Tungumálamannsstilling (Ctrl+2): Áherslur og þýðing texta"
     konwerter: "Breytingartækisstilling (Ctrl+3): Búðu til Word skrár með fyrirsögnum"
     manager: "Reglustjórastilling (Ctrl+4): Skoðaðu YAND skrár í dictionaries/, búðu til nýjar áherslur, dulritanir og stillingar (sniðmát eða ábending fyrir AI)"
+    opowiesci: "Sögur eining (Ctrl+5): Gagnvirkar sögur í annarri persónu — búnar til af AI, lesnar af TTS"
   nazwy_narzedzi:
     dom: "Heim"
     rezyser: "Leikstjóri"
     poliglota: "Tungumálamaður"
     konwerter: "Breytingartæki"
     manager: "Reglustjóri"
+    opowiesci: "Sögur"
   dialog:
     zmiana_jezyka_tytul: "Breyting á tungumáli viðmóts"
     zmiana_jezyka_tresc: |-

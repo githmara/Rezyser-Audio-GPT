@@ -57,6 +57,7 @@ main:
     manager: "&Regelmanager\tCtrl+4"
     zakoncz: "Be&enden\tAlt+F4"
     jezyk_interfejsu: "&Benutzeroberflächensprache"
+    opowiesci: "&Geschichten\tCtrl+5"
   menu_status:
     strona_glowna: "Zurück zum Startbildschirm mit Werkzeugbeschreibung und Systemprüfung"
     rezyser: "Öffnet das Regisseur-Modul – Skripte und Prosa mit KI schreiben"
@@ -65,22 +66,26 @@ main:
     manager: "Öffnet den Regelmanager – YAML-Dateiexplorer in dictionaries/ und Ersteller neuer Akzente / Modi / Chiffren"
     zakoncz: "Anwendung schließen"
     jezyk_interfejsu: "Wählen Sie die Sprache der Benutzeroberfläche der Anwendung (Änderung erfordert Neustart)"
+    opowiesci: "Öffnet das Geschichten-Modul – interaktive, von KI generierte Zweitperson-Fiktion, gelesen von TTS/Bildschirmleser"
   btn:
     rezyser: "🎬  &Regisseur"
     poliglota: "🌍  &Polyglott"
     konwerter: "📄  &Konverter"
     manager: "📚  &Regelmanager"
+    opowiesci: "📖  &Geschichten"
   tooltip:
     rezyser: "Regisseur-Modul (Strg+1): Schreibe Skripte und Prosa mit KI-Unterstützung"
     poliglota: "Polyglott-Modul (Strg+2): Akzente und Textübersetzung"
     konwerter: "Konverter-Modul (Strg+3): Erstelle Word-Dokumente mit Überschriften"
     manager: "Regelmanager (Strg+4): Erkunde YAND-Dateien in dictionaries/, erstelle neue Akzente, Chiffren und Modi (Vorlage oder Prompt für KI)"
+    opowiesci: "Geschichten-Modul (Ctrl+5): Interaktive, von KI generierte Zweitperson-Fiktion — gelesen von TTS"
   nazwy_narzedzi:
     dom: "Startseite"
     rezyser: "Regisseur"
     poliglota: "Polyglott"
     konwerter: "Konverter"
     manager: "Regelmanager"
+    opowiesci: "Geschichten"
   dialog:
     zmiana_jezyka_tytul: "Änderung der Benutzeroberflächensprache"
     zmiana_jezyka_tresc: |-
