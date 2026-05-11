@@ -60,6 +60,8 @@ import os
 import re
 from dataclasses import dataclass
 
+import core_tokeny as ct
+
 # Silnik fonetyczny – punktowy import akcentów z core_poliglota.
 # Blok poniżej jest generowany automatycznie przez ``odswiez_rezysera.py``
 # na podstawie YAML-i z ``dictionaries/<jezyk>/akcenty/``. NIE edytuj
@@ -114,19 +116,20 @@ _WZORZEC_NAGLOWEK_LINIA = (
 SKRYPTY_DIR = "skrypty"          # pliki .txt / .md / _streszczenie.txt
 RUNTIME_DIR = "runtime"          # ukryta metadata – tam leżą .mode
 
-# Limity okna kontekstowego modelu (w znakach full_story).
-# LIMIT_PAMIECI to nie twardy limit tokenów OpenAI, tylko bufor bezpieczeństwa
-# dla typowej polskiej prozy (~4 znaki na token). Progi wyznaczają, kiedy
-# GUI pokazuje ostrzeżenie / wymusza streszczenie.
-LIMIT_PAMIECI = 200_000
-PROG_ALARM = 175_000
-PROG_OSTRZEZENIE = 150_000
+# Pamięć modelu — od v15.1 wspólne ze ścieżką Opowieści przez `core_tokeny`.
+# Liczymy faktyczne tokeny payloadu (tiktoken), nie znaki — gpt-4o ma 128k
+# okno, a heurystyka „~4 znaki/token" była gruba (zwłaszcza dla diakrytyków
+# słowiańskich i azjatyckich), oraz mierzyła tylko `full_story` z pominięciem
+# `summary_text` + `world_lore`, które również lecą w payloadzie do API.
+OKNO_KONTEKSTU_MAX = ct.OKNO_KONTEKSTU_MAX
+PROG_OSTRZEZENIE   = ct.PROG_OSTRZEZENIE   # 70% — ostrzeżenie + sufiks "alarm"
+PROG_ALARM         = ct.PROG_ALARM         # 90% — krytyczne przeładowanie
 
 # Poziomy statusu pamięci modelu – czytelne dla GUI (kolor + ikonka).
-POZIOM_CZYSTA = "czysta"
-POZIOM_OK = "ok"
-POZIOM_OSTRZEZENIE = "ostrzezenie"
-POZIOM_ALARM = "alarm"
+POZIOM_CZYSTA      = ct.POZIOM_CZYSTA
+POZIOM_OK          = ct.POZIOM_OK
+POZIOM_OSTRZEZENIE = ct.POZIOM_OSTRZEZENIE
+POZIOM_ALARM       = ct.POZIOM_ALARM
 
 # Polskie znaki → ASCII (do normalizacji nazw akcentów w Księdze Świata).
 _PL_TO_ASCII = {
@@ -317,6 +320,24 @@ class SnapshotProjektu:
     full_story: str
     summary_text: str
     world_lore: str
+
+
+def policz_tokeny_payloadu_snapshot(
+    snapshot: SnapshotProjektu,
+    model: str = ct.MODEL_DOMYSLNY_REZYSER,
+) -> int:
+    """Free-function wariant :meth:`ProjektRezysera.policz_tokeny_payloadu`.
+
+    Bierze :class:`SnapshotProjektu` zamiast obiektu projektu — używany
+    przez wątek tła (``rezyser_ai.wybierz_sufiks``), który ma dostęp tylko
+    do snapshotu.
+    """
+    tresci = [snapshot.full_story]
+    if snapshot.summary_text.strip():
+        tresci.append(snapshot.summary_text)
+    if snapshot.world_lore.strip():
+        tresci.append(snapshot.world_lore)
+    return ct.policz_tokeny_chat(tresci, model)
 
 
 # =============================================================================
@@ -703,6 +724,22 @@ class ProjektRezysera:
     # ------------------------------------------------------------------
     # Status pamięci modelu
     # ------------------------------------------------------------------
+    def policz_tokeny_payloadu(
+        self,
+        model: str = ct.MODEL_DOMYSLNY_REZYSER,
+    ) -> int:
+        """Liczy tokeny payloadu, jaki poszedłby w kolejnym wywołaniu API.
+
+        Sumuje pola wiadomości chat (``full_story`` + ``summary_text`` +
+        ``world_lore``) bez pełnego prompta systemowego — ten różni się
+        per tryb (Burza/Skrypt/Audiobook) i nie jest dostępny na poziomie
+        ``ProjektRezysera`` (przepisy żyją w `prompty_rezyser`). Wynik
+        jest dolnym oszacowaniem: prompt systemowy + user_text dodadzą
+        zwykle 2–4k tokenów (mniej niż 3% okna 128k), więc gauge GUI
+        zostaje wystarczająco dokładny do auto-alarmu.
+        """
+        return policz_tokeny_payloadu_snapshot(self.snapshot(), model)
+
     def status_pamieci_modelu(self) -> StatusPamieciModelu:
         """Zwraca gotowy do wyświetlenia status pamięci modelu.
 
@@ -710,40 +747,41 @@ class ProjektRezysera:
         Kolor (zielony/pomarańczowy/czerwony) GUI wybiera na podstawie
         pola ``poziom``.
         """
-        total = len(self.full_story)
-
-        if total == 0:
+        if not self.full_story and not self.summary_text and not self.world_lore:
             return StatusPamieciModelu(
                 procent=0,
                 komunikat="🟢 Pamięć czysta. Maszyna gotowa na nową historię.",
                 poziom=POZIOM_CZYSTA,
             )
 
-        if total >= PROG_ALARM:
-            pct = min(int(total / LIMIT_PAMIECI * 100), 100)
+        tokeny  = self.policz_tokeny_payloadu()
+        udzial  = tokeny / OKNO_KONTEKSTU_MAX
+        procent = min(int(udzial * 100), 100)
+
+        if udzial >= PROG_ALARM:
             return StatusPamieciModelu(
-                procent=pct,
+                procent=procent,
                 komunikat=(
-                    f"🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {total} z {LIMIT_PAMIECI} znaków.\n"
+                    f"🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów.\n"
                     "JAK KONTYNUOWAĆ: W Burzy Mózgów wpisz 'streszczenie', kliknij "
                     "'Zapisz Streszczenie', potem 'Wyczyść bieżącą (zostaw Streszczenie)'."
                 ),
                 poziom=POZIOM_ALARM,
             )
 
-        if total >= PROG_OSTRZEZENIE:
+        if udzial >= PROG_OSTRZEZENIE:
             return StatusPamieciModelu(
-                procent=int(total / LIMIT_PAMIECI * 100),
+                procent=procent,
                 komunikat=(
-                    f"⚠️ STAN OSTRZEGAWCZY: Zużyto {total} z {LIMIT_PAMIECI} znaków. "
+                    f"⚠️ STAN OSTRZEGAWCZY: Zużyto {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów. "
                     "Pamięć się zapełnia – wkrótce konieczne będzie wygenerowanie streszczenia."
                 ),
                 poziom=POZIOM_OSTRZEZENIE,
             )
 
         return StatusPamieciModelu(
-            procent=int(total / LIMIT_PAMIECI * 100),
-            komunikat=f"🟢 Zużycie pamięci: {total} / {LIMIT_PAMIECI} znaków. Bezpieczny bufor.",
+            procent=procent,
+            komunikat=f"🟢 Zużycie pamięci: {tokeny} / {OKNO_KONTEKSTU_MAX} tokenów. Bezpieczny bufor.",
             poziom=POZIOM_OK,
         )
 
