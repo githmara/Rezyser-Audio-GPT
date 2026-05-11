@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  ZUSAMMENFASSUNG — automatische Komprimierung von `ostatnie_tury`
+#  nachdem die Speicherschwelle des Modells (PROG_OSTRZEZENIE = 70% von
+#  128k Token ≈ 89,6k) überschritten wurde. Das Ergebnis ersetzt die
+#  gesamte Zughistorie durch einen einzigen Eintrag der Form
+#  `{"akcja_gracza": "(Zusammenfassung vorheriger Züge)",
+#  "narracja_skrot": <Ergebnis>}`. Die GUI startet das in einem
+#  Hintergrundthread NACH einem erfolgreichen Zug und blockiert
+#  `_btn_wyslij` bis zur Fertigstellung (Race-Condition-Wache
+#  `_meta_w_toku=True`).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Automatische Kontextzusammenfassung"
+kategoria: meta
+kolejnosc: 60
+
+# --- OpenAI-Parameter ---
+# Niedrige Temperatur — wir wollen eine treue, sachliche Zusammenfassung
+# (nicht kreativ).
+model: gpt-4o-mini
+temperatura: 0.3
+max_tokens: 800
+timeout_s: 60.0
+
+# --- Systemprompt ---
+prompt_systemowy: |
+  Du bist ein Erzählassistent. Du erhältst eine Liste der letzten Züge einer interaktiven Geschichte (Spieler-Aktion + verdichtete Erzählung pro Zug). Generiere ein Kondensat von 200-400 Wörtern, das Folgendes abdeckt: zentrale Handlungsereignisse, Entscheidungen des Spielers und deren Konsequenzen, wichtige in der Erzählung auftauchende Figuren, besuchte Orte, ungelöste Fäden. Schreibe in der dritten Person, neutral, wie eine Romanzusammenfassung — dies ist KEIN Spielzug, der Spieler liest dies nicht als Erzählung, aber der Erzählmotor nutzt es als Langzeitgedächtnis.

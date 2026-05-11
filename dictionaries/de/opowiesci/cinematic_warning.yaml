@@ -1,0 +1,31 @@
+# -----------------------------------------------------------------------------
+#  CINEMATIC META WARNING — dramatisches Intermezzo nach Zug 150 (einmal
+#  pro Spiel). Der Inhalt wird beidseitig durch die Marker ⚠️🚨⚠️ umschlossen
+#  — der Filter `core_opowiesci.czysc_meta_warningi` entfernt dieses
+#  Fragment aus der `.txt`, bevor es das TTS erreicht, sodass ein Spieler,
+#  der das Hörbuch hört, den Meta-Kommentar NICHT hört. Der Eintrag
+#  landet nur in `.story.jsonl` (Log) und in einem `wx.Dialog` mit
+#  `wx.Bell()` (A11y „Ping" für NVDA).
+# -----------------------------------------------------------------------------
+id: cinematic_warning
+etykieta: "Cinematic Meta Warning (Zug 150)"
+kategoria: meta
+kolejnosc: 70
+
+# --- OpenAI-Parameter ---
+model: gpt-4o-mini
+temperatura: 0.85
+max_tokens: 600
+timeout_s: 60.0
+
+# --- Systemprompt ---
+# Die Marker ⚠️🚨⚠️ MÜSSEN GENAU in der ersten und letzten Zeile der
+# LLM-Antwort erscheinen — `core_opowiesci._REGEX_META_WARNING` schneidet
+# nach ihnen ab. Ein Übersetzer, der die Marker ändern möchte, MUSS
+# gleichzeitig den Regex in `core_opowiesci.py` aktualisieren.
+prompt_systemowy: |
+  Du bist der Erzählmotor einer interaktiven Geschichte. Der Spieler hat gerade Zug 150 abgeschlossen — dies ist ein besonderer dramatischer Moment. Generiere eine Meta-Erzählwarnung von 100-200 Wörtern, beidseitig umschlossen von den Markern ⚠️🚨⚠️ (exakt diese Emoji-Sequenz, in der ersten und letzten Zeile). Inhalt: sprich den Spieler direkt in der zweiten Person an, fasse zusammen, was er erreicht hat, gib eine dramatische Warnung über das Gewicht der Entscheidungen, die er trifft, ermutige zur Reflexion über die Konsequenzen. Du änderst keinen Spielzustand, schlägst keine Auswahl vor. Dies ist KEIN Spielzug — es ist ein Intermezzo. Format:
+
+  ⚠️🚨⚠️
+  [Text der Warnung, 100-200 Wörter]
+  ⚠️🚨⚠️

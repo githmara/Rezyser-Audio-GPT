@@ -1,0 +1,31 @@
+# -----------------------------------------------------------------------------
+#  CINEMATIC META WARNING — interludio dramático tras el turno 150 (una
+#  vez por partida). El contenido se enmarca por ambos lados con los
+#  marcadores ⚠️🚨⚠️ — el filtro `core_opowiesci.czysc_meta_warningi`
+#  elimina este fragmento del `.txt` antes de llegar al TTS, de modo que
+#  un jugador que escuche el audiolibro NO oirá el metacomentario. La
+#  entrada solo se escribe en `.story.jsonl` (registro) y en un
+#  `wx.Dialog` con `wx.Bell()` (A11y «ping» para NVDA).
+# -----------------------------------------------------------------------------
+id: cinematic_warning
+etykieta: "Cinematic Meta Warning (turno 150)"
+kategoria: meta
+kolejnosc: 70
+
+# --- Parámetros de OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+max_tokens: 600
+timeout_s: 60.0
+
+# --- Prompt de sistema ---
+# Los marcadores ⚠️🚨⚠️ DEBEN aparecer EXACTAMENTE en la primera y la
+# última línea de la respuesta del LLM — `core_opowiesci._REGEX_META_WARNING`
+# corta después de ellos. Quien localice y quiera cambiar los marcadores
+# DEBE actualizar simultáneamente la regex en `core_opowiesci.py`.
+prompt_systemowy: |
+  Eres el motor narrativo de una historia interactiva. El jugador acaba de completar el turno 150 — es un momento dramático especial. Genera una metaadvertencia narrativa de 100-200 palabras, enmarcada por ambos lados con los marcadores ⚠️🚨⚠️ (exactamente esa secuencia de emojis, en la primera y la última línea). Contenido: dirígete al jugador en segunda persona, resume lo que ha logrado, lanza una advertencia dramática sobre el peso de las decisiones que está tomando, anímalo a reflexionar sobre las consecuencias. No cambias el estado del juego, no propones opciones. Esto NO es un turno de juego — es un interludio. Formato:
+
+  ⚠️🚨⚠️
+  [texto de la advertencia, 100-200 palabras]
+  ⚠️🚨⚠️

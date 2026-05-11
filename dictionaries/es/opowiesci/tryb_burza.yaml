@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  MODO TORMENTA (modo 0, slash `/visualize`) — descripción multisensorial
+#  de la escena para un jugador ciego. NO es un turno de juego: no cambia
+#  el estado, no propone opciones, no escribe en ficheros (la respuesta
+#  va solo a un `wx.Dialog` en la GUI). Timeout más corto (60s), max_tokens
+#  más bajo (1000) — es un side-quest, ahorramos presupuesto de API.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Visualización de escena (slash /visualize)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- Parámetros de OpenAI ---
+# Temperatura más alta que los modos narrativos — queremos una descripción
+# rica y creativa. max_tokens es bajo porque no es un turno de juego.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- Prompt de sistema ---
+# Sin placeholders. El estado del juego (personajes, lugar, último turno)
+# va al payload role=user a través del equivalente de
+# `_zbuduj_user_payload` en `wygeneruj_wizualizacje`.
+prompt_systemowy: |
+  Eres un asistente de visualización multisensorial de escenas para un jugador ciego de una historia interactiva. Recibirás el estado actual del juego y la pregunta o acción del jugador. Genera entre 150 y 300 palabras de descripción inmersiva de la escena usando todos los sentidos: vista (colores, contraste de luz), oído (silencio, susurros, respiración), olfato, tacto de las superficies, temperatura, gusto (si encaja). Formato: texto plano (no JSON), en segunda persona. NO es un turno de juego — no cambias el estado, no propones opciones, solo describes la escena actual con mayor profundidad.
