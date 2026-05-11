@@ -41,7 +41,7 @@ import wx
 
 import opowiesci_ai as oai
 from core_opowiesci import ProjektOpowiesci
-from i18n import t
+from i18n import aktualny_jezyk, t
 
 
 class OpowiesciPanel(wx.Panel):
@@ -257,7 +257,8 @@ class OpowiesciPanel(wx.Panel):
         # Loading z YAML zamiast hardkodowanej listy: lingwista dorabiając
         # nowy zaczatek nie musi dotykać Pythona, tylko `zaczatki.yaml`.
         # ``_klucze_zaczatkow`` przechowuje kolejność (Choice używa indeksów).
-        zaczatki_dict = oai._zaladuj_przepis("pl", "zaczatki").get("zaczatki", {})
+        # v15.1: zaczątki ładowane z UI lang (fallback do PL przez `_zaladuj_przepis`).
+        zaczatki_dict = oai._zaladuj_przepis(aktualny_jezyk(), "zaczatki").get("zaczatki", {})
         # Kolejność z YAML zachowana (Python 3.7+ dict insertion-order).
         self._klucze_zaczatkow: list[str] = list(zaczatki_dict.keys())
         # Pierwsza pozycja to „własna gra" (brak presetu, tryb z RadioBox-a).
@@ -968,7 +969,7 @@ class OpowiesciPanel(wx.Panel):
         idx_zaczatek = self._choice_zaczatek.GetSelection()
         if idx_zaczatek > 0:
             klucz = self._klucze_zaczatkow[idx_zaczatek - 1]
-            preset = oai._zaladuj_przepis("pl", "zaczatki")["zaczatki"][klucz]
+            preset = oai._zaladuj_przepis(aktualny_jezyk(), "zaczatki")["zaczatki"][klucz]
             seed_swiata = preset.get("seed_swiata", "").strip()
             tryb_preset = int(preset.get("tryb_domyslny", self._aktualny_tryb_int()))
             self._ustaw_rb_z_trybu(tryb_preset)
@@ -977,7 +978,7 @@ class OpowiesciPanel(wx.Panel):
         projekt = ProjektOpowiesci(app_dir)
         projekt.nazwa_pliku    = nazwa
         projekt.tryb           = tryb
-        projekt.jezyk_projektu = "pl"   # Faza 5 dorobi sync z UI lang
+        projekt.jezyk_projektu = aktualny_jezyk()   # v15.1: sync z UI lang
         projekt.seed_swiata    = seed_swiata
 
         try:
@@ -999,7 +1000,7 @@ class OpowiesciPanel(wx.Panel):
         self._projekt = projekt
         self._snapshot = oai.SnapshotOpowiesci(
             nazwa_gry=nazwa, numer_tury=0,
-            seed_swiata=seed_swiata, jezyk_projektu="pl",
+            seed_swiata=seed_swiata, jezyk_projektu=aktualny_jezyk(),
             zasady_swiata=projekt.zasady_swiata,
         )
         self._txt_narracja.SetValue(t("opowiesci.nowa_gra_zaczatek", nazwa=nazwa))
