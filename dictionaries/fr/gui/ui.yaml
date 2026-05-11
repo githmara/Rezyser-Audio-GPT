@@ -649,6 +649,9 @@ konwerter:
   btn_buduj_tooltip: "Traite le fichier et sauvegarde architectura_<nom>.docx à côté du fichier source"
   # Metadana zapisywana do pola `author` w core_properties wynikowego .docx.
   author_metadata: "Réalisateur"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Tour N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Scène {numer}"
   # Dialog wyboru pliku
   file_dlg_title: "Sélectionner un fichier source"
   file_dlg_wildcard: "Tous les fichiers pris en charge (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*"

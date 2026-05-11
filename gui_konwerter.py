@@ -17,6 +17,23 @@ import wx
 from i18n import t
 
 
+# v15.1: detekcja znaczników tury wstawianych przez Opowieści
+# (dopisz_do_txt(naglowek="\n\n--- Tura N ---\n\n") w core_opowiesci.py).
+# Alternatywa pokrywa wszystkie 9 wdrożonych języków zgodnie z kluczem
+# `opowiesci.tura_naglowek_format` w dictionaries/<kod>/gui/ui.yaml.
+_REGEX_TURA = re.compile(
+    r"^---\s*"
+    r"(?:Tura|Turn|Runde|Turno|Vuoro|Tour|Umferð|Ход)"
+    r"\s+(\d+)\s*---$",
+    re.IGNORECASE,
+)
+# Co ile tur konwerter wstawia nagłówek H1 „Scena N" (cięcie rozdziału w
+# ElevenLabs). 5 tur ≈ 5-7,5 tys. znaków, czyli kilka minut audio na scenę —
+# zbliżone do naturalnego rozdziału audiobooka. Krótszy próg (np. 1 tura ≈
+# H1 co minutę) sztucznie tnie narrację; dłuższy traci nawigację dla NVDA.
+TURY_NA_SCENE = 5
+
+
 class KonwerterPanel(wx.Panel):
     """
     Panel narzędzia „Architekt Audiobooków".
@@ -187,6 +204,12 @@ class KonwerterPanel(wx.Panel):
         nowy_doc.core_properties.author = t("konwerter.author_metadata")
         nowy_doc.core_properties.comments = ""
 
+        # v15.1: liczniki dla trybu Opowieści — co TURY_NA_SCENE tur wstawiamy
+        # H1 „Scena N", pozostałe znaczniki `--- Tura N ---` strippujemy
+        # (meta-info „Tura 7" w audiobooku łamie immersję).
+        tura_counter = 0
+        scena_counter = 0
+
         for linia in tekst.splitlines():
             linia = linia.strip()
             if not linia:
@@ -199,6 +222,20 @@ class KonwerterPanel(wx.Panel):
 
             # Usuwanie znaczników nagłówków Markdown (np. ### lub ####)
             linia = re.sub(r'^#+\s*', '', linia)
+
+            # v15.1: Detekcja znaczników tury z Opowieści.
+            # Co TURY_NA_SCENE tur wstawiamy H1 „Scena N"; pozostałe znaczniki
+            # są strippowane (nie pojawiają się w audiobooku).
+            if _REGEX_TURA.match(linia):
+                tura_counter += 1
+                if (tura_counter - 1) % TURY_NA_SCENE == 0:
+                    scena_counter += 1
+                    etykieta = t(
+                        "konwerter.scena_naglowek_format",
+                        numer=scena_counter,
+                    )
+                    nowy_doc.add_heading(etykieta, level=1)
+                continue
 
             # Detekcja nagłówków głównych (tnących plik na rozdziały w ElevenLabs)
             # Obsługuje wszystkie 6 języków: pl/en/fi/is/it/ru

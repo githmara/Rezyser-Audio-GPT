@@ -653,6 +653,9 @@ konwerter:
   # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
   # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
   author_metadata: "Leikstjóri"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Umferð N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Atriði {numer}"
   # Dialog wyboru pliku
   file_dlg_title: "Veldu upprunaskrá"
   file_dlg_wildcard: "Öll studd skjöl (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word skjöl (*.docx)|*.docx|Öll skjöl (*.*)|*.*"

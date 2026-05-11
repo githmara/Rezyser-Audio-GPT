@@ -653,6 +653,9 @@ konwerter:
   # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
   # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
   author_metadata: "Regista"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Turno N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Scena {numer}"
   # Dialog wyboru pliku
   file_dlg_title: "Seleziona file sorgente"
   file_dlg_wildcard: "Tutti i file supportati (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Documenti Word (*.docx)|*.docx|Tutti i file (*.*)|*.*"
