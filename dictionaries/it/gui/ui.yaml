@@ -1019,3 +1019,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Scorciatoia contenente esclusivamente l'ultima scena generata — NVDA legge qui la narrazione fresca senza navigare attraverso centinaia di righe della storia completa. Dopo ogni turno successivo, il campo viene sostituito con il nuovo contenuto."
   txt_ostatnia_tura_init: "(L'ultimo turno apparirà in questo campo dopo la tua prima azione.)"
   txt_ostatnia_tura_skrot_naglowek: "[riassunto dell'ultimo turno salvato — narrazione completa nel campo sottostante]\n\n"
+  btn_zasady_swiata_label: '&Modifica le regole del mondo…'
+  btn_zasady_swiata_tooltip: Apre la finestra di modifica delle regole del mondo — testo opzionale con regole fonetiche, culturali o meccaniche che il motore narrativo deve rispettare durante tutto il gioco. Campo vuoto = nessuna regola aggiuntiva (comportamento predefinito).
+  dlg_zasady_swiata_tytul: Regole del mondo di gioco
+  dlg_zasady_swiata_lbl: 'Regole che il motore narrativo deve rispettare durante tutto il gioco (opzionali):'
+  dlg_zasady_swiata_name: Campo di modifica delle regole del mondo
+  dlg_zasady_swiata_hint: "Ad esempio:\n- \"Pronuncia sempre il nome Joanna in modo duro, polacco [dż]; mai morbido [j].\"\n- \"In questo mondo la magia funziona solo di notte; di giorno i personaggi sono persone comuni.\"\n- \"L'antagonista Joana cerca di ammorbidire la pronuncia del nome della protagonista attraverso la declinazione grammaticale.\""
+  dlg_zasady_swiata_btn_ok: '&Salva'
+  dlg_zasady_swiata_btn_anuluj: '&Annulla'
+  status_zasady_zapisane: Regole del mondo aggiornate e salvate nel file di gioco.
+  zasady_bez_gry_tytul: Nessun gioco attivo
+  zasady_bez_gry_tresc: Crea un nuovo gioco con il pulsante "Nuovo gioco" oppure carica uno salvato in precedenza prima di definire le regole del mondo — le regole vengono salvate insieme allo stato del gioco.

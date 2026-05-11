@@ -1019,3 +1019,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Flýtileið sem inniheldur eingöngu nýlega myndaða senu — NVDA les hér nýja frásögn án þess að fara í gegnum hundruð lína af allri sögunni. Eftir hverja næstu umferð er reitnum skipt út fyrir nýtt efni."
   txt_ostatnia_tura_init: "(Síðasta umferð birtist í þessum reit eftir fyrstu aðgerðina þína.)"
   txt_ostatnia_tura_skrot_naglowek: "[samantekt síðustu vistuðu umferðar — full frásögn í reitnum hér að neðan]\n\n"
+  btn_zasady_swiata_label: '&Breyta heimsreglum…'
+  btn_zasady_swiata_tooltip: Opnar glugga til að breyta heimsreglum — valfrjálsum texta með hljóðfræðilegum, menningarlegum eða vélrænum reglum sem frásagnavélin á að virða í gegnum allt leikinn. Tómt svæði = engar viðbótarreglur (sjálfgefin hegðun).
+  dlg_zasady_swiata_tytul: Heimsreglur leiksins
+  dlg_zasady_swiata_lbl: 'Reglur sem frásagnavélin á að virða í gegnum allt leikinn (valfrjálst):'
+  dlg_zasady_swiata_name: Breytingarsvæði fyrir heimsreglur
+  dlg_zasady_swiata_hint: "Dæmi:\n- „Nafnið Joanna skal alltaf bera fram með hörðu, pólsku [dʒ]; aldrei mjúku [j].\"\n- „Í þessum heimi virkar galdur aðeins á nóttunni; á daginn eru persónurnar venjulegt fólk.\"\n- „Andstæðingurinn Joana reynir að mýkja framburð nafns aðalpersónunnar með málfræðilegri beygingu.\""
+  dlg_zasady_swiata_btn_ok: '&Vista'
+  dlg_zasady_swiata_btn_anuluj: '&Hætta við'
+  status_zasady_zapisane: Heimsreglur uppfærðar og vistaðar í leikskrá.
+  zasady_bez_gry_tytul: Enginn virkur leikur
+  zasady_bez_gry_tresc: Byrjaðu nýjan leik með „Nýr leikur" hnappnum eða hlaða inn áður vistaðan leik áður en þú skilgreinir heimsreglur — reglurnar eru vistaðar ásamt leikstöðu.

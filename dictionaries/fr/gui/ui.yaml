@@ -1014,3 +1014,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Raccourci contenant uniquement la scène récemment générée — NVDA lit ici la nouvelle narration sans naviguer à travers des centaines de lignes de l'histoire complète. Après chaque nouveau tour, le champ est remplacé par un nouveau contenu."
   txt_ostatnia_tura_init: "(Le dernier tour apparaîtra dans ce champ après votre première action.)"
   txt_ostatnia_tura_skrot_naglowek: "[résumé du dernier tour enregistré — narration complète dans le champ ci-dessous]\n\n"
+  btn_zasady_swiata_label: '&Éditer les règles du monde…'
+  btn_zasady_swiata_tooltip: Ouvre la fenêtre d'édition des règles du monde — texte optionnel avec des règles phonétiques, culturelles ou mécaniques que le moteur narratif doit respecter tout au long du jeu. Champ vide = pas de règles supplémentaires (comportement par défaut).
+  dlg_zasady_swiata_tytul: Règles du monde du jeu
+  dlg_zasady_swiata_lbl: 'Règles que le moteur narratif doit respecter tout au long du jeu (optionnel) :'
+  dlg_zasady_swiata_name: Champ d'édition des règles du monde
+  dlg_zasady_swiata_hint: "Par exemple :\n- « Prononcez toujours le prénom Joanna de manière dure, à la polonaise [dż] ; jamais de manière douce [j]. »\n- « Dans ce monde, la magie ne fonctionne que la nuit ; le jour, les personnages sont des gens ordinaires. »\n- « L'antagoniste Joana essaie d'adoucir la prononciation du prénom de la protagoniste par la déclinaison grammaticale. »"
+  dlg_zasady_swiata_btn_ok: '&Enregistrer'
+  dlg_zasady_swiata_btn_anuluj: '&Annuler'
+  status_zasady_zapisane: Règles du monde mises à jour et enregistrées dans le fichier du jeu.
+  zasady_bez_gry_tytul: Pas de jeu actif
+  zasady_bez_gry_tresc: Créez une nouvelle partie avec le bouton « Nouvelle partie » ou chargez une partie précédemment enregistrée avant de définir les règles du monde — les règles sont enregistrées avec l'état du jeu.

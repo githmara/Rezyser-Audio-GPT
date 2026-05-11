@@ -1019,3 +1019,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Pikanäppäin, joka sisältää vain viimeksi luodun kohtauksen — NVDA lukee täällä tuoreen kertomuksen ilman, että tarvitsee selata satoja rivejä koko tarinasta. Jokaisen uuden kierroksen jälkeen kenttä korvataan uudella sisällöllä."
   txt_ostatnia_tura_init: "(Viimeinen kierros ilmestyy tähän kenttään ensimmäisen toimintasi jälkeen.)"
   txt_ostatnia_tura_skrot_naglowek: "[viimeksi tallennetun kierroksen tiivistelmä — koko kertomus alla olevassa kentässä]\n\n"
+  btn_zasady_swiata_label: '&Muokkaa maailman sääntöjä…'
+  btn_zasady_swiata_tooltip: Avaa maailman sääntöjen muokkausikkunan — valinnainen teksti, joka sisältää foneettisia, kulttuurisia tai mekaanisia sääntöjä, joita kerrontamoottorin tulee noudattaa koko pelin ajan. Tyhjä kenttä = ei lisäsääntöjä (oletuskäyttäytyminen).
+  dlg_zasady_swiata_tytul: Pelin maailman säännöt
+  dlg_zasady_swiata_lbl: 'Säännöt, joita kerrontamoottorin tulee noudattaa koko pelin ajan (valinnainen):'
+  dlg_zasady_swiata_name: Maailman sääntöjen muokkauskenttä
+  dlg_zasady_swiata_hint: "Esim.:\n- \"Nimi Joanna lausutaan aina kovana, puolalaisena [dż]; ei koskaan pehmeänä [j].\"\n- \"Tässä maailmassa magia toimii vain yöllä; päivällä hahmot ovat tavallisia ihmisiä.\"\n- \"Antagonisti Joana yrittää pehmentää protagonistin nimen lausumista kieliopillisella taivutuksella.\""
+  dlg_zasady_swiata_btn_ok: '&Tallenna'
+  dlg_zasady_swiata_btn_anuluj: '&Peruuta'
+  status_zasady_zapisane: Maailman säännöt päivitetty ja tallennettu pelitiedostoon.
+  zasady_bez_gry_tytul: Ei aktiivista peliä
+  zasady_bez_gry_tresc: Aloita uusi peli painikkeella "Uusi peli" tai lataa aiemmin tallennettu peli ennen maailman sääntöjen määrittämistä — säännöt tallennetaan yhdessä pelitilan kanssa.

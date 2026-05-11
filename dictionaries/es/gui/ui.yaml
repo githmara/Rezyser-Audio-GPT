@@ -1018,3 +1018,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Un resumen que contiene solo la escena generada recientemente — NVDA lee aquí la nueva narración sin navegar por cientos de líneas de la historia completa. Después de cada nueva ronda, el campo se reemplaza con el nuevo contenido."
   txt_ostatnia_tura_init: "(La última ronda aparecerá en este campo después de tu primera acción.)"
   txt_ostatnia_tura_skrot_naglowek: "[resumen de la última ronda guardada — narración completa en el campo de abajo]\n\n"
+  btn_zasady_swiata_label: '&Editar reglas del mundo…'
+  btn_zasady_swiata_tooltip: 'Abre la ventana de edición de reglas del mundo: texto opcional con reglas fonéticas, culturales o mecánicas que el motor narrativo debe respetar durante todo el juego. Campo vacío = sin reglas adicionales (comportamiento predeterminado).'
+  dlg_zasady_swiata_tytul: Reglas del mundo del juego
+  dlg_zasady_swiata_lbl: 'Reglas que el motor narrativo debe respetar durante todo el juego (opcional):'
+  dlg_zasady_swiata_name: Campo de edición de reglas del mundo
+  dlg_zasady_swiata_hint: "Ej.:\n- \"El nombre Joanna siempre se pronuncia fuerte, polaco [dż]; nunca suave [j].\"\n- \"En este mundo, la magia solo funciona de noche; durante el día, los personajes son personas comunes.\"\n- \"La antagonista Joana intenta suavizar la pronunciación del nombre de la protagonista mediante la declinación gramatical.\""
+  dlg_zasady_swiata_btn_ok: '&Guardar'
+  dlg_zasady_swiata_btn_anuluj: '&Cancelar'
+  status_zasady_zapisane: Reglas del mundo actualizadas y guardadas en el archivo del juego.
+  zasady_bez_gry_tytul: No hay juego activo
+  zasady_bez_gry_tresc: 'Inicia un nuevo juego con el botón "Nuevo juego" o carga uno previamente guardado antes de definir las reglas del mundo: las reglas se guardan junto con el estado del juego.'

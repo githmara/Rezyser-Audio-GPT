@@ -1019,3 +1019,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Eine Abkürzung, die nur die zuletzt generierte Szene enthält — NVDA liest hier die frische Erzählung, ohne durch Hunderte von Zeilen der vollständigen Geschichte zu navigieren. Nach jeder weiteren Runde wird das Feld durch neuen Inhalt ersetzt."
   txt_ostatnia_tura_init: "(Die letzte Runde wird in diesem Feld nach deiner ersten Aktion erscheinen.)"
   txt_ostatnia_tura_skrot_naglowek: "[Zusammenfassung der zuletzt gespeicherten Runde — vollständige Erzählung im Feld unten]\n\n"
+  btn_zasady_swiata_label: '&Weltregeln bearbeiten…'
+  btn_zasady_swiata_tooltip: Öffnet das Fenster zur Bearbeitung der Weltregeln — optionaler Text mit phonetischen, kulturellen oder mechanischen Regeln, die die Erzählmaschine während des gesamten Spiels respektieren soll. Leeres Feld = keine zusätzlichen Regeln (Standardverhalten).
+  dlg_zasady_swiata_tytul: Spielweltregeln
+  dlg_zasady_swiata_lbl: 'Regeln, die die Erzählmaschine während des gesamten Spiels respektieren soll (optional):'
+  dlg_zasady_swiata_name: Bearbeitungsfeld für Weltregeln
+  dlg_zasady_swiata_hint: "Z.B.:\n- „Den Namen Joanna immer hart aussprechen, polnisch [dż]; niemals weich [j].\"\n- „In dieser Welt funktioniert Magie nur nachts; tagsüber sind die Charaktere normale Menschen.\"\n- „Die Antagonistin Joana versucht, die Aussprache des Namens der Protagonistin durch grammatikalische Abwandlung zu mildern.\""
+  dlg_zasady_swiata_btn_ok: '&Speichern'
+  dlg_zasady_swiata_btn_anuluj: '&Abbrechen'
+  status_zasady_zapisane: Weltregeln aktualisiert und in die Spieldatei gespeichert.
+  zasady_bez_gry_tytul: Kein aktives Spiel
+  zasady_bez_gry_tresc: Starten Sie ein neues Spiel mit der Schaltfläche „Neues Spiel" oder laden Sie ein zuvor gespeichertes, bevor Sie die Weltregeln definieren — die Regeln werden zusammen mit dem Spielstand gespeichert.
