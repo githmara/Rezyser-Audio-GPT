@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modulo Storie Interattive (15.0 – Versione di Pubblicazione)
+Reżyser Audio GPT — Modulo Storie Interattive (15.1 – Versione di Pubblicazione)
 
 Il secondo principale modo dell'applicazione accanto al Reżyser — questa volta diventi un giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo qualsiasi azione in testo libero o scegliendo una delle opzioni numerate.
 
@@ -46,7 +46,25 @@ Se preferisci la massima libertà, lascia "(gioco personalizzato)" nel campo Avv
 4. Nel campo "La tua azione o comando" in fondo al pannello inserisci la tua prima azione, es. "mi sveglio in una stanza sconosciuta". Clicca "Invia". Il motore narrativo aprirà il mondo basandosi sulla tua azione — descrizione della stanza, suoni, personaggi, prime decisioni.
 5. Ogni turno verrà salvato automaticamente — puoi chiudere l'applicazione in qualsiasi momento e caricare il gioco più tardi con il pulsante "Carica".
 
-PASSO 4: Comandi Slash — azioni rapide senza API
+PASSO 4: Regole del mondo — le tue regole che il motore rispetta per tutto il gioco
+
+Dalla versione 15.1, sopra il campo di narrazione troverai il pulsante "Modifica le regole del mondo…". Apre una finestra di modifica separata con un campo multilinea, dove puoi inserire qualsiasi regola — fonetica, meccanica o drammaturgica — che il motore narrativo rispetterà in ogni turno successivo di questa specifica partita. Le regole vengono salvate insieme allo stato del gioco (.game.json), quindi caricare la partita le conserva inalterate.
+
+Tre usi tipici delle regole del mondo:
+
+REGOLE FONETICHE — controllano come il TTS (Vocalizer, ElevenLabs) pronuncia i nomi dei personaggi. Esempio: "Pronuncia sempre il nome Joanna in modo duro, polacco [dż]; mai morbido [j]." Il motore inserirà quella variante nella narrazione dal turno successivo, e il personaggio Joanna nel Libro del Mondo manterrà il suono desiderato. È anche un ponte naturale verso gli accenti del Regista — se dopo aver terminato il gioco carichi il Libro del Mondo nel pannello del Regista (PASSO 9 sotto), la regola fonetica "passa" con la partita come tratto del personaggio.
+
+REGOLE MECCANICHE — descrivono le "leggi della fisica" del tuo mondo che l'LLM deve rispettare. Esempio: "In questo mondo la magia funziona solo di notte; di giorno i personaggi sono persone comuni." Il motore non inventerà incantesimi a mezzogiorno anche se l'azione del tuo turno lo richiede — invece proporrà un'alternativa o ti condurrà verso il crepuscolo.
+
+REGOLE DRAMMATURGICHE — definiscono tensioni a lungo termine tra i personaggi. Esempio: "L'antagonista Joana cerca di ammorbidire la pronuncia del nome della protagonista attraverso la declinazione grammaticale." Il motore intreccia tali segnali sottili nei dialoghi di Joana, sostenendo il conflitto per molti turni senza che tu debba ripetere l'istruzione.
+
+Campo regole vuoto = nessuna regola aggiuntiva (comportamento predefinito, come in v15.0). Non devi definire le regole subito all'inizio — puoi tornare alla finestra in qualsiasi turno, aggiungere regole notate durante il gioco e cliccare "Salva". La modifica entra in vigore dal turno successivo.
+
+Nota: le regole del mondo richiedono un gioco attivo. Se clicchi "Modifica le regole del mondo…" senza un gioco caricato/creato, riceverai il messaggio "Nessun gioco attivo" — clicca prima "Nuovo gioco" o carica un gioco salvato.
+
+
+
+PASSO 5: Comandi Slash — azioni rapide senza API
 
 Nel campo delle azioni puoi inserire in qualsiasi momento un comando che inizia con la barra `/`. I comandi sono locali (non costano chiamate a OpenAI) e funzionano indipendentemente dalla modalità di gioco. Sono accettate sia le varianti italiane che inglesi:
 
@@ -54,13 +72,13 @@ Nel campo delle azioni puoi inserire in qualsiasi momento un comando che inizia 
 
 /carica, /load — apre il dialogo di selezione file dalla cartella runtime/opowiesci/. Dopo il caricamento, il nome del gioco, la modalità e l'intera narrazione vengono ripristinati — puoi continuare dal turno in cui hai interrotto.
 
-/impostazioni, /settings — apre il dialogo di selezione del modello AI. Di default usiamo gpt-4o-mini (Standard) — più veloce ed economico. Passando a gpt-4o (Alta qualità) la narrazione diventa più ricca, ma ogni turno costa di più e dura più a lungo.
+Il motore narrativo seleziona automaticamente il modello AI in base alla modalità: per la modalità Scelte e Male minore usa il più costoso gpt-4o (rispetta rigorosamente le regole del mondo); per la modalità Libera — il più veloce ed economico gpt-4o-mini (il giocatore guida la trama, quindi non è necessario un pesante lavoro di regia).
 
 /visualizza <descrizione>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo usa tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in un dialogo separato, NON viene aggiunto alla narrazione né salvato nel file audiobook. Esempio: "/visualizza come appare il guardiano" o "/visualizza l'odore della caffetteria".
 
 /fine, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
 
-PASSO 5: File di gioco — dove trovare i tuoi dati
+PASSO 6: File di gioco — dove trovare i tuoi dati
 
 Ogni gioco produce cinque file, ciascuno in una cartella diversa, con ruoli diversi:
 
@@ -74,7 +92,7 @@ runtime/opowiesci/<nome>.story.jsonl — log grezzo di ogni turno (richiesta del
 
 runtime/skrypty/<nome>.mode — metadati del numero di modalità (3=Libera, 4=Scelte, 5=Minore Male). File condiviso con il Reżyser, ma la numerazione non collude (il Reżyser usa 0-2).
 
-PASSO 6: Indicatore di memoria del modello — perché i turni nei vecchi giochi non richiedono il tuo intervento manuale
+PASSO 7: Indicatore di memoria del modello — perché i turni nei vecchi giochi non richiedono il tuo intervento manuale
 
 Sotto il RadioBox della modalità troverai l'indicatore di memoria del modello — una barra di avanzamento (wx.Gauge) con una descrizione dello stato accanto. L'indicatore mostra la percentuale di riempimento della finestra contestuale del motore narrativo (gpt-4o-mini ha un buffer di 128.000 token).
 
@@ -87,13 +105,13 @@ Quattro livelli di riempimento:
 
 In pratica, il meccanismo di autoreduzione è invisibile — il giocatore non si accorge che qualcosa sta accadendo, perché il thread di background risolve il problema prima che venga notato. È importante solo non inviare il turno successivo durante il riassunto automatico (il pulsante "Invia" è allora disabilitato).
 
-PASSO 7: Cinematic Meta Warning — intermezzo drammatico dopo il 150° turno
+PASSO 8: Cinematic Meta Warning — intermezzo drammatico dopo il 150° turno
 
 Dopo 150 turni di un gioco, il motore narrativo inserirà UNA VOLTA un "Cinematic Meta Warning" — un intermezzo drammatico meta-narrativo. Apparirà in un dialogo separato con un suono di campanello, con un indirizzo diretto a te in seconda persona, un riepilogo dei risultati e un avvertimento sull'importanza delle decisioni prese.
 
 Cinematic Warning NON è parte della narrazione audiobook — il motore di filtraggio .txt taglia automaticamente il suo contenuto (segnalato da marcatori ⚠️🚨⚠️) in modo che durante l'ascolto dell'audiobook tu non senta un meta-commento sul tuo stesso gioco. Il contenuto va solo nel log .story.jsonl (per riflessione o come ricordo) e nel dialogo GUI, dove puoi leggerlo una volta e continuare.
 
-PASSO 8: Ponte verso il Reżyser — utilizza il Libro del Mondo creato nelle Storie
+PASSO 9: Ponte verso il Reżyser — utilizza il Libro del Mondo creato nelle Storie
 
 Il file skrypty/<nome>.md generato durante il gioco contiene il Libro del Mondo con i personaggi che sono apparsi nella narrazione, insieme alle loro caratteristiche, accenti e personalità. Il formato è esattamente quello richiesto dal parser del Reżyser — [Nome: caratteristiche con descrizione dell'accento].
 
@@ -105,7 +123,7 @@ Cosa puoi fare con questo:
 
 È un ponte unidirezionale: le Storie producono materiale, il Reżyser lo formatta. Non è possibile il contrario — il Reżyser non carica giochi dalle Storie come stato interattivo.
 
-PASSO 9: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
+PASSO 10: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
 
 L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa abbiamo fatto nello specifico:
 

@@ -362,6 +362,10 @@ tresc: |
 
   Limpieza adicional: El script elimina automáticamente las etiquetas HTML (si el texto proviene del navegador o de un archivo .html local, por ejemplo, generado por Políglota) y los marcadores de encabezados Markdown (por ejemplo, ### o ####) antes de procesar. No necesitas limpiar el archivo manualmente.
 
+  Modo Historias: agrupación automática de turnos en escenas (desde v15.1)
+
+  Si cargas en el Arquitecto un archivo skrypty/<juego>.txt generado por el módulo de Historias Interactivas, el conversor reconocerá los marcadores de turno (por ejemplo, "--- Turno 7 ---") en 9 idiomas (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) y cada cinco turnos insertará un nuevo encabezado de primer nivel en la forma "Escena N" (el número empieza en 1, localizado para el idioma dado — "Scena N" en polaco, "Scene N" en inglés, etc.). Los demás marcadores de turno se eliminan — no aparecen en la narración del audiolibro, porque "Turno 7" pronunciado por TTS rompe la inmersión del oyente. El resultado es un archivo Word con una división natural en escenas de varios minutos de audio cada una, listo para importar a ElevenLabs. El mecanismo es de detección automática — los archivos de audiolibro normales sin marcadores de turno (narración clásica del Director) se procesan exactamente como antes.
+
   Gran ventaja para usuarios de NVDA y ElevenLabs
 
   El formato "Heading 1" para capítulos no es solo estética. En NVDA puedes navegar por los encabezados rápidamente presionando la tecla H (o 1 para encabezados de primer nivel). En lugar de desplazarte por cientos de páginas, saltas de capítulo en capítulo en una fracción de segundo. Esto cambia la forma de trabajar con documentos largos. En ElevenLabs tienes la certeza de que el motor insertará automáticamente cortes y no se colgará durante la dirección de clips de audio.

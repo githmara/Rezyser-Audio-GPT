@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida Completa (Versione 15.0 – Versione di Pubblicazione)
+Manuale del Regista Audio AI - Guida Completa (Versione 15.1 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente di scrivere, pianificare, formattare e tradurre automaticamente sceneggiature per radiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori locali di lettori di schermo (NVDA).
 
@@ -325,6 +325,10 @@ Come funziona?
 6. Riceverai un file architettura_[nome_originale].docx — un Word professionale pronto per ulteriori lavori. Ad esempio, se il tuo file di input si chiamava insensibilità.txt, il file di output sarà chiamato architettura_insensibilità.docx e apparirà nella stessa cartella dell'originale.
 
 Pulizia contestuale: Lo script rimuove automaticamente i tag HTML (se il testo proviene dal browser o da un file .html locale, ad esempio generato da Poliglotta) e i marcatori di intestazione Markdown (ad esempio, ### o ####) prima dell'elaborazione. Non è necessario pulire il file manualmente.
+
+Modalità Storie: raggruppamento automatico dei turni in scene (dalla v15.1)
+
+Se carichi nell'Architetto un file skrypty/<gioco>.txt prodotto dal modulo Storie Interattive, il convertitore riconoscerà i marcatori di turno (ad esempio, "--- Turno 7 ---") in 9 lingue (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) e ogni cinque turni inserirà una nuova intestazione di primo livello nella forma "Scena N" (il numero parte da 1, localizzato per la lingua data — "Scena N" in polacco, "Scene N" in inglese, ecc.). Gli altri marcatori di turno vengono rimossi — non compaiono nella narrazione dell'audiolibro, perché "Turno 7" pronunciato dal TTS rompe l'immersione dell'ascoltatore. Il risultato è un file Word con una divisione naturale in scene da pochi minuti di audio ciascuna, pronto per l'importazione in ElevenLabs. Il meccanismo è auto-rilevante — i normali file audiolibro senza marcatori di turno (narrazione classica del Regista) vengono elaborati esattamente come prima.
 
 Grande vantaggio per gli utenti NVDA e ElevenLabs
 

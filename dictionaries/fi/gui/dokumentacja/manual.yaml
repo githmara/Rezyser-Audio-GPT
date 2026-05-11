@@ -332,6 +332,10 @@ tresc: |
 
   Puhdistus samalla: Skripti poistaa automaattisesti HTML-tunnisteet (jos teksti on peräisin selaimesta tai paikallisesta .html-tiedostosta, esim. Polyglootin luomasta) sekä Markdown-otsikkotunnisteet (esim. ### tai ####) ennen käsittelyä. Sinun ei tarvitse puhdistaa tiedostoa käsin.
 
+  Tarinat-tila: vuorojen automaattinen ryhmittely kohtauksiksi (v15.1 alkaen)
+
+  Jos lataat Arkkitehtiin Interaktiivisten Tarinoiden tuottaman tiedoston skrypty/<peli>.txt, muunnin tunnistaa vuoromerkit (esim. "--- Vuoro 7 ---") 9 kielellä (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) ja lisää viiden vuoron välein uuden ensimmäisen tason otsikon muodossa "Kohtaus N" (numero alkaa 1:stä, lokalisoituna kielelle — "Scena N" puolaksi, "Scene N" englanniksi jne.). Loput vuoromerkit poistetaan — ne eivät esiinny äänikirjan kerronnassa, koska TTS:n lausuma "Vuoro 7" rikkoo kuuntelijan eläytymisen. Tuloksena on Word-tiedosto, jossa on luonnollinen jako muutaman minuutin kohtauksiin, valmiina tuotavaksi ElevenLabsiin. Mekanismi on automaattinen — tavalliset äänikirjatiedostot ilman vuoromerkkejä (klassinen Ohjaajan kerronta) käsitellään täsmälleen kuten aiemmin.
+
   Vahva etu NVDA- ja ElevenLabs-käyttäjille
 
   "Heading 1" -muotoilu luvuissa ei ole pelkkää estetiikkaa. NVDA:ssa voit navigoida otsikoiden välillä salamannopeasti painamalla H-näppäintä (tai 1 ensimmäisen tason otsikoille). Sen sijaan, että selaisit satoja sivuja, hyppäät luvusta lukuun sekunnin murto-osassa. Tämä muuttaa tapaa työskennellä pitkien dokumenttien kanssa. ElevenLabsissa voit olla varma, että moottori lisää automaattisesti leikkauksia eikä jäädy äänileikkeiden ohjauksessa.

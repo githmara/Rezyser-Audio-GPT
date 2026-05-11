@@ -69,7 +69,25 @@ tresc: |
 
 
 
-  VAIHE 4: Kauttakomennot — nopeat toiminnot ilman API:a
+  VAIHE 4: Maailman säännöt — omat säännöt, joita kone kunnioittaa koko pelin ajan
+
+  Versiosta 15.1 alkaen narratiivikentän yläpuolelta löydät painikkeen "{opowiesci.btn_zasady_swiata_label}". Se avaa erillisen muokkausikkunan, jossa on monirivinen kenttä, johon voit kirjoittaa mitä tahansa sääntöjä — äännetarkkoja, mekaanisia tai dramaturgisia — joita narratiivikone kunnioittaa jokaisella seuraavalla tämän pelin vuorolla. Säännöt tallennetaan yhdessä pelitilan kanssa (.game.json), joten pelin lataaminen säilyttää ne muuttumattomina.
+
+  Kolme tyypillistä maailman sääntöjen käyttötapaa:
+
+  ÄÄNNETARKAT SÄÄNNÖT — ohjaavat, kuinka TTS (Vocalizer, ElevenLabs) ääntää hahmojen nimet. Esimerkki: "Nimi Joanna lausutaan aina kovana, puolalaisena [dż]; ei koskaan pehmeänä [j]." Kone lisää tämän muunnoksen narratiiviin seuraavasta vuorosta alkaen, ja hahmo Joanna Maailmankirjassa säilyttää halutun äänen. Tämä on myös luonnollinen silta Ohjaajan korostuksiin — jos pelin päätyttyä lataat Maailmankirjan Ohjaaja-paneeliin (VAIHE 9 alla), äännetarkka sääntö "siirtyy" pelin mukana hahmon ominaisuutena.
+
+  MEKAANISET SÄÄNNÖT — kuvaavat maailmasi "fysiikan lakeja", joita LLM:n on noudatettava. Esimerkki: "Tässä maailmassa magia toimii vain yöllä; päivällä hahmot ovat tavallisia ihmisiä." Kone ei keksi loitsuja keskipäivällä, vaikka vuorosi toiminta sitä vaatisi — sen sijaan se ehdottaa vaihtoehtoa tai ohjaa sinut iltahämärään.
+
+  DRAMATURGISET SÄÄNNÖT — määrittelevät pitkäaikaiset jännitteet hahmojen välillä. Esimerkki: "Antagonisti Joana yrittää pehmentää protagonistin nimen lausumista kieliopillisella taivutuksella." Kone kutoo tällaisia hienovaraisia signaaleja Joanan dialogiin ja ylläpitää konfliktia useiden vuorojen ajan ilman, että sinun tarvitsee toistaa ohjetta.
+
+  Tyhjä sääntökenttä = ei lisäsääntöjä (oletuskäyttäytyminen, kuten v15.0:ssa). Sääntöjä ei tarvitse määritellä heti alussa — voit palata ikkunaan milloin tahansa vuoroon, lisätä pelin aikana huomattuja sääntöjä ja painaa "{opowiesci.dlg_zasady_swiata_btn_ok}". Muutos astuu voimaan seuraavasta vuorosta.
+
+  Huomio: maailman säännöt vaativat aktiivisen pelin. Jos painat "{opowiesci.btn_zasady_swiata_label}" ilman ladattua/luotua peliä, saat viestin "{opowiesci.zasady_bez_gry_tytul}" — paina ensin "{opowiesci.btn_nowa_gra_label}" tai lataa tallennettu peli.
+
+
+
+  VAIHE 5: Kauttakomennot — nopeat toiminnot ilman API:a
 
   Toimintokentässä voit milloin tahansa kirjoittaa komennon, joka alkaa kauttaviivalla `/`. Komennot ovat paikallisia (eivät vaadi OpenAI-kutsuja) ja toimivat riippumatta pelitilasta. Hyväksytään sekä suomen- että englanninkieliset versiot:
 
@@ -85,7 +103,7 @@ tresc: |
 
 
 
-  VAIHE 5: Pelitiedostot — mistä löydät tietosi
+  VAIHE 6: Pelitiedostot — mistä löydät tietosi
 
   Jokainen peli tuottaa viisi tiedostoa, jokainen eri kansiossa, eri rooleilla:
 
@@ -101,7 +119,7 @@ tresc: |
 
 
 
-  VAIHE 6: Mallin muistin osoitin — miksi vanhojen pelien vuorot eivät vaadi sinulta käsityötä
+  VAIHE 7: Mallin muistin osoitin — miksi vanhojen pelien vuorot eivät vaadi sinulta käsityötä
 
   Tilavalinnan RadioBoxin alapuolella löydät mallin muistin osoittimen — edistymispalkin (wx.Gauge) tilan kuvauksella vieressä. Osoitin näyttää kertomusmoottorin kontekstin ikkunan täyttöprosentin (gpt-4o-mini:llä on 128 000 tokenin puskuri).
 
@@ -116,7 +134,7 @@ tresc: |
 
 
 
-  VAIHE 7: Cinematic Meta Warning — dramaattinen väliosa 150. vuoron jälkeen
+  VAIHE 8: Cinematic Meta Warning — dramaattinen väliosa 150. vuoron jälkeen
 
   150 vuoron jälkeen yhdessä pelissä kertomusmoottori lisää KERRAN "Cinematic Meta Warning" — meta-kerronnallisen dramaattisen väliosuuden. Se ilmestyy erilliseen dialogiin kellon äänellä, suoraan sinulle toisessa persoonassa, saavutusten yhteenvedolla ja varoituksella päätösten merkityksestä.
 
@@ -124,7 +142,7 @@ tresc: |
 
 
 
-  VAIHE 8: Silta Reżyseriin — hyödynnä Opowieściessa luotua Maailmankirjaa
+  VAIHE 9: Silta Reżyseriin — hyödynnä Opowieściessa luotua Maailmankirjaa
 
   Pelin aikana luotu skrypty/<nimi>.md-tiedosto sisältää Maailmankirjan hahmoista, jotka esiintyivät kerronnassa, heidän ominaisuuksineen, aksentteineen ja luonteineen. Muoto on täsmälleen sellainen, jota Reżyserin parseri vaatii — [Nimi: ominaisuudet aksentin kuvauksella].
 
@@ -138,7 +156,7 @@ tresc: |
 
 
 
-  VAIHE 9: Saavutettavuus (NVDA ja ruudunlukijat) — suunniteltu alusta alkaen
+  VAIHE 10: Saavutettavuus (NVDA ja ruudunlukijat) — suunniteltu alusta alkaen
 
   Koko Opowieści-moduuli on optimoitu sokeille pelaajille. Mitä tarkalleen teimme:
 

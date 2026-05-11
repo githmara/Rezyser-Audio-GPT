@@ -69,7 +69,25 @@ tresc: |
 
 
 
-  SCHRITT 4: Slash-Befehle — schnelle Aktionen ohne API
+  SCHRITT 4: Weltregeln — deine eigenen Regeln, die die Engine während des gesamten Spiels respektiert
+
+  Ab Version 15.1 findest du über dem Erzählungsfeld die Schaltfläche „{opowiesci.btn_zasady_swiata_label}". Sie öffnet ein separates Bearbeitungsfenster mit einem mehrzeiligen Feld, in dem du beliebige Regeln eingeben kannst — phonetische, mechanische oder dramaturgische — die die Erzählmaschine in jeder folgenden Runde dieses spezifischen Spiels respektieren wird. Die Regeln werden zusammen mit dem Spielstand (.game.json) gespeichert, sodass das Laden des Spiels sie unverändert beibehält.
+
+  Drei typische Anwendungen der Weltregeln:
+
+  PHONETISCHE REGELN — sie steuern, wie Charakternamen vom TTS (Vocalizer, ElevenLabs) ausgesprochen werden. Beispiel: „Den Namen Joanna immer hart aussprechen, polnisch [dż]; niemals weich [j]." Die Engine wird diese Variante ab der nächsten Runde in die Erzählung einfügen, und die Figur Joanna im Buch der Welt behält den beabsichtigten Klang. Das ist auch eine natürliche Brücke zu den Akzenten des Regisseurs — wenn du nach Spielende das Buch der Welt in das Regisseur-Panel lädst (SCHRITT 9 unten), „übergeht" die phonetische Regel mit dem Spiel als Charaktereigenschaft.
+
+  MECHANISCHE REGELN — sie beschreiben die „physikalischen Gesetze" deiner Welt, an die sich das LLM halten muss. Beispiel: „In dieser Welt funktioniert Magie nur nachts; tagsüber sind die Charaktere normale Menschen." Die Engine wird mittags keine Zauber erfinden, selbst wenn deine Spielzughandlung es verlangt — stattdessen schlägt sie eine Alternative vor oder leitet dich in die Dämmerung.
+
+  DRAMATURGISCHE REGELN — sie definieren langfristige Spannungen zwischen Charakteren. Beispiel: „Die Antagonistin Joana versucht, die Aussprache des Namens der Protagonistin durch grammatikalische Abwandlung zu mildern." Die Engine webt solche subtilen Signale in Joanas Dialoge ein und erhält den Konflikt über viele Runden aufrecht, ohne dass du die Anweisung wiederholen musst.
+
+  Leeres Regelfeld = keine zusätzlichen Regeln (Standardverhalten wie in v15.0). Du musst die Regeln nicht gleich zu Beginn definieren — du kannst zu jedem Zeitpunkt zum Fenster zurückkehren, im Spielverlauf bemerkte Regeln hinzufügen und auf „{opowiesci.dlg_zasady_swiata_btn_ok}" klicken. Die Änderung tritt ab der nächsten Runde in Kraft.
+
+  Hinweis: Weltregeln erfordern ein aktives Spiel. Wenn du auf „{opowiesci.btn_zasady_swiata_label}" klickst, ohne dass ein Spiel geladen/erstellt ist, erhältst du die Meldung „{opowiesci.zasady_bez_gry_tytul}" — klicke zuerst auf „{opowiesci.btn_nowa_gra_label}" oder lade ein gespeichertes Spiel.
+
+
+
+  SCHRITT 5: Slash-Befehle — schnelle Aktionen ohne API
 
   Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Befehle sind lokal (kosten keine Aufrufe an OpenAI) und funktionieren unabhängig vom Spielmodus. Sowohl deutsche als auch englische Varianten werden akzeptiert:
 
@@ -85,7 +103,7 @@ tresc: |
 
 
 
-  SCHRITT 5: Spieldateien — wo du deine Daten findest
+  SCHRITT 6: Spieldateien — wo du deine Daten findest
 
   Jedes Spiel erzeugt fünf Dateien, jede in einem anderen Ordner, mit unterschiedlichen Rollen:
 
@@ -101,7 +119,7 @@ tresc: |
 
 
 
-  SCHRITT 6: Modellgedächtnis-Indikator — warum alte Spiele keine manuelle Arbeit von dir erfordern
+  SCHRITT 7: Modellgedächtnis-Indikator — warum alte Spiele keine manuelle Arbeit von dir erfordern
 
   Unter dem RadioBox-Modus findest du den Modellgedächtnis-Indikator — eine Fortschrittsleiste (wx.Gauge) mit Statusbeschreibung daneben. Der Indikator zeigt den Prozentsatz der Auslastung des Kontextfensters der Erzählmaschine an (gpt-4o-mini hat einen Puffer von 128.000 Tokens).
 
@@ -116,7 +134,7 @@ tresc: |
 
 
 
-  SCHRITT 7: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
+  SCHRITT 8: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
 
   Nach 150 Runden in einem Spiel wird die Erzählmaschine EINMAL ein „Cinematic Meta Warning" einfügen — eine meta-narrative dramatische Unterbrechung. Es erscheint in einem separaten Dialog mit einem Glockengeräusch, mit einer direkten Ansprache an dich in der zweiten Person, einer Zusammenfassung der Errungenschaften und einer Warnung über die Bedeutung der getroffenen Entscheidungen.
 
@@ -124,7 +142,7 @@ tresc: |
 
 
 
-  SCHRITT 8: Brücke zum Regisseur — nutze das Buch der Welt, das in den Geschichten erstellt wurde
+  SCHRITT 9: Brücke zum Regisseur — nutze das Buch der Welt, das in den Geschichten erstellt wurde
 
   Die Datei skripte/<name>.md, die während des Spiels generiert wird, enthält das Buch der Welt mit Charakteren, die in der Erzählung aufgetaucht sind, zusammen mit ihren Eigenschaften, Akzenten und Charakteren. Das Format ist genau das, was der Regisseur-Parser benötigt — [Name: Eigenschaften mit Akzentbeschreibung].
 
@@ -138,7 +156,7 @@ tresc: |
 
 
 
-  SCHRITT 9: Barrierefreiheit (NVDA und Bildschirmleser) — von Anfang an entworfen
+  SCHRITT 10: Barrierefreiheit (NVDA und Bildschirmleser) — von Anfang an entworfen
 
   Das gesamte Geschichtenmodul wurde für blinde Spieler optimiert. Was wir konkret gemacht haben:
 

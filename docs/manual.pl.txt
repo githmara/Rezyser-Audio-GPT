@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 15.0 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 15.1 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -333,6 +333,10 @@ Jak to działa?
 6. Otrzymasz plik architektura_[nazwa_oryginału].docx — profesjonalny Word gotowy do dalszej pracy. Na przykład jeśli Twój plik wejściowy nazywał się znieczulica.txt, plik wynikowy będzie miał nazwę architektura_znieczulica.docx i pojawi się w tym samym folderze co oryginał.
 
 Oczyszczanie przy okazji: Skrypt automatycznie usuwa tagi HTML (jeśli tekst pochodzi z przeglądarki lub z lokalnego pliku .html, np. wygenerowanego przez Poliglotę) oraz znaczniki nagłówków Markdown (np. ### lub ####) przed przetworzeniem. Nie musisz czyścić pliku ręcznie.
+
+Tryb Opowieści: automatyczne grupowanie tur w sceny (od v15.1)
+
+Jeśli wczytasz do Architekta plik skrypty/<gra>.txt wygenerowany przez moduł Interaktywnych Opowieści, konwerter rozpozna znaczniki tury (np. „--- Tura 7 ---") w 9 językach (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) i co pięć tur wstawi nowy nagłówek pierwszego poziomu w formie „Scena N" (numer biegnie od 1, lokalny dla danego języka — w angielskim „Scene N", w niemieckim „Szene N" itd.). Pozostałe znaczniki tury są strippowane — nie pojawiają się w narracji audiobooka, bo „Tura 7" wymówiona przez TTS łamie immersję słuchacza. Wynikiem jest plik Word z naturalnym podziałem na sceny po kilka minut audio każda, gotowy do importu do ElevenLabs. Mechanizm jest auto-detekcyjny — zwykłe pliki audiobooków bez znaczników tury (klasyczna narracja z Reżysera) przetwarzane są dokładnie tak, jak dotąd.
 
 Potężna zaleta dla użytkowników NVDA i ElevenLabs
 

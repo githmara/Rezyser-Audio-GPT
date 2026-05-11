@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Komplettanleitung (Version 15.0 – Veröffentlichungsversion)
+Podręcznik Reżysera Audio AI - Komplettanleitung (Version 15.1 – Veröffentlichungsversion)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -332,6 +332,10 @@ Wie funktioniert es?
 6. Sie erhalten eine Datei architektur_[original_name].docx — ein professionelles Word-Dokument, bereit für die weitere Bearbeitung. Wenn Ihre Eingabedatei z.B. betäubung.txt hieß, wird die Ergebnisdatei den Namen architektur_betäubung.docx haben und im selben Ordner wie das Original erscheinen.
 
 Reinigung nebenbei: Das Skript entfernt automatisch HTML-Tags (wenn der Text aus dem Browser oder einer lokalen .html-Datei stammt, z.B. von Polyglot generiert) und Markdown-Header-Tags (z.B. ### oder ####) vor der Verarbeitung. Sie müssen die Datei nicht manuell bereinigen.
+
+Geschichten-Modus: automatische Gruppierung von Runden in Szenen (ab v15.1)
+
+Wenn Sie eine vom Modul „Interaktive Geschichten" erzeugte Datei skrypty/<spiel>.txt in den Architekten laden, erkennt der Konverter die Rundenmarker (z.B. „--- Runde 7 ---") in 9 Sprachen (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) und fügt alle fünf Runden eine neue Überschrift erster Ebene in der Form „Szene N" ein (die Nummer beginnt bei 1, lokalisiert für die jeweilige Sprache — „Scena N" auf Polnisch, „Scene N" auf Englisch, usw.). Die übrigen Rundenmarker werden entfernt — sie erscheinen nicht in der Hörbuch-Erzählung, weil „Runde 7" vom TTS ausgesprochen die Immersion des Hörers bricht. Das Ergebnis ist eine Word-Datei mit einer natürlichen Aufteilung in Szenen von jeweils einigen Minuten Audio, bereit für den Import in ElevenLabs. Der Mechanismus ist auto-erkennend — gewöhnliche Hörbuchdateien ohne Rundenmarker (klassische Erzählung vom Regisseur) werden genau wie zuvor verarbeitet.
 
 Großer Vorteil für NVDA- und ElevenLabs-Nutzer
 
