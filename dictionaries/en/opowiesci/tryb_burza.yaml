@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  STORM MODE (mode 0, slash `/visualize`) — multisensory scene description
+#  for a blind player. It is NOT a game turn: it does not change state, does
+#  not propose choices, does not write to files (the response goes only to
+#  a `wx.Dialog` in the GUI). Shorter timeout (60s), lower max_tokens (1000)
+#  — this is a side-quest, we save API budget.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Scene visualization (slash /visualize)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- OpenAI parameters ---
+# Higher temperature than the narrative modes — we want a rich, creative
+# description. max_tokens is low because this is not a game turn.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- System prompt ---
+# No placeholders. Game state (characters, location, last turn) goes into
+# the role=user payload via the `_zbuduj_user_payload`-equivalent in
+# `wygeneruj_wizualizacje`.
+prompt_systemowy: |
+  You are a multisensory scene-visualization assistant for a blind player of an interactive story. You will receive the current game state and the player's question or action. Generate 150-300 words of immersive scene description using every sense: sight (colours, contrast of light), hearing (silence, rustles, breathing), smell, the touch of surfaces, temperature, taste (if it fits). Format: plain text (not JSON), in the second person. This is NOT a game turn — you do not change state, do not propose choices, only describe the current scene in greater depth.

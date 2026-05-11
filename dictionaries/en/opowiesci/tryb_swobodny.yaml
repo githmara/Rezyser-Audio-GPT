@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  FREE MODE (mode 3) — the player writes their own action as free text.
+#  The `wybory` field in the LLM response may be empty or contain 1-3
+#  suggestions (treated only as hints, not a mandatory path). The GUI in
+#  mode 3 ALWAYS hides the choices area (A11y), regardless of content.
+# -----------------------------------------------------------------------------
+id: tryb_swobodny
+etykieta: "Free mode — write any action"
+kategoria: tryb
+kolejnosc: 30
+
+# --- OpenAI parameters (inherited from baza.yaml when absent here) ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Addon to prompt_systemowy from baza.yaml ---
+# Joined by `_zbuduj_prompt_systemowy` as: BASE + "\n\n" + this addon.
+prompt_systemowy: |
+  MODE: FREE. The `wybory` field may be empty or contain 1-3 suggestions (the player writes their own action, so choices are only hints — not a mandatory path).

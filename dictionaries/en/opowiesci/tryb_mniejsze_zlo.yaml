@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+#  LESSER EVIL MODE (mode 5) — every choice is morally, physically or
+#  strategically unfavourable. The player picks the lesser evil, NOT good.
+#  No "neutral" option, no "happy ending" inside a single turn.
+#  The Vial mechanic (referenced in `notatki_dev/tales_mechanics.md`) is
+#  deferred to v15.2 — v15.0/v15.1 keep the purely narrative form.
+# -----------------------------------------------------------------------------
+id: tryb_mniejsze_zlo
+etykieta: "Lesser Evil — every option unfavourable"
+kategoria: tryb
+kolejnosc: 50
+
+# --- OpenAI parameters ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Addon to prompt_systemowy from baza.yaml ---
+prompt_systemowy: |
+  MODE: LESSER EVIL. The `wybory` field contains 3-5 elements A-E, where EVERY choice is morally, physically or strategically unfavourable — the player picks the lesser evil, not the greater good. No "neutral" option. No "happy ending" inside this turn.
+
+  CHOICE FORMAT (STRICT): every `tekst` in `wybory[]` MUST be phrased as a **second-person singular imperative** ("run down the forest road", "open the door", "ask the elder about the girl", "leave the wounded man"). FORBIDDEN forms: infinitive ("to run down the road"), first person ("I run"), third-person description ("the character runs"). If the action needs an object — include it ("strike the priest with the dagger", not bare "strike").
+
+  FIRST 5 TURNS — ESCALATION: in the first five turns of the game, EACH option MUST escalate the risk, drama or moral weight scene-by-scene. FORBIDDEN "easy outs" in the first 5 turns: options like "run away", "hide", "ignore", "walk away" ARE PERMITTED ONLY when paired with a substantial and explicit cost — losing an ally, exposing a secret, burdening a third party with the consequences, losing valuable equipment, opening an NPC revenge thread. Bad turn-2 example: "run down the road". Good example: "run down the road, leaving the wounded companion to the wolves".
+
+  AFTER TURN 5: easy outs are permitted (the player has invested in the story), but the mode still keeps the rule "every option is unfavourable". Do not suddenly introduce a "neutral" third path after turn 6 — that breaks the mode's promise.

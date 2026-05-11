@@ -1,0 +1,22 @@
+# -----------------------------------------------------------------------------
+#  CHOICES MODE (mode 4) — 3-5 numbered options per turn. The player's
+#  free-text input is semantically mapped to the nearest choice. The GUI
+#  shows the choices area with dynamic `wx.Button`s if the LLM returned a
+#  non-empty `wybory[]` array (hallucination → fallback to free-text).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Choices mode — 3-5 options A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- OpenAI parameters ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Addon to prompt_systemowy from baza.yaml ---
+prompt_systemowy: |
+  MODE: CHOICES. The `wybory` field ALWAYS contains 3-5 elements labeled with letters A, B, C, D, E. Each choice is a concrete action the player can take — distinct, not redundant. The player's free-text input will be mapped to the nearest choice semantically.
+
+  CHOICE FORMAT (STRICT): every `tekst` in `wybory[]` MUST be phrased as a **second-person singular imperative** ("run down the forest road", "open the door", "ask the elder about the girl", "take the lantern from the table"). FORBIDDEN forms: infinitive ("to run down the road"), first person ("I run down the road", "I take the lantern"), third-person description ("the character runs"). If the action needs an object — include it in the choice ("ask the midwife about the child", not bare "ask"). Parallel structure across A-E is MORE IMPORTANT than stylistic variance — the player must see five parallel forms.
+
+  VARIETY: the 3-5 options must be different actions (not variants of the same one), with different narrative consequences. Avoid "dummy choices" like "look around" placed next to "go to the door" — looking around should be part of the narration, not a choice.
