@@ -868,12 +868,24 @@ class OpowiesciPanel(wx.Panel):
         self._aktywuj_obszar_wyborow(pokazac)
 
     def _on_wybor_btn(self, _event: wx.Event, tekst_wyboru: str) -> None:
-        """Klik na przycisku wyboru — wpisuje tekst do pola akcji + auto-wysyła."""
+        """Klik na przycisku wyboru — wpisuje tekst do pola akcji i daje focus.
+
+        v15.1: NIE wysyłamy już automatycznie. Powód: gdy zasady świata
+        narzucają konkretną fonetykę imienia/słowa (np. „Joanna" twardo
+        [dż]), a LLM-owy tekst wyboru zawiera odmianę gramatyczną która
+        wymusiłaby zmiękczenie ([j]), gracz musi mieć szansę przeredagować
+        wybór przed wysyłką — inaczej model dostaje sprzeczne instrukcje
+        (system prompt: „twardo"; user input: „Joannę" w wołaczu). Po
+        kliknięciu gracz może swobodnie edytować pole akcji i sam wcisnąć
+        „Wyślij" (lub Enter).
+
+        A11y: focus przechodzi do pola akcji, NVDA odczyta zawartość;
+        kursor stawiamy na końcu, żeby gracz dopisywał, a nie nadpisywał
+        na początku.
+        """
         self._txt_akcja.SetValue(tekst_wyboru)
-        # Symulujemy klik na „Wyślij" — przechodzi przez tę samą walidację.
-        # Bezpośrednie wywołanie `_on_wyslij(None)` zamiast EVT, bo to nie
-        # jest zdarzenie z magistrali wxPython, tylko nasza synteza.
-        self._on_wyslij(_event)
+        self._txt_akcja.SetInsertionPointEnd()
+        self._txt_akcja.SetFocus()
 
     # ------------------------------------------------------------------
     # _obsluz_blad: callback w wątku UI po wyjątku w workerze
