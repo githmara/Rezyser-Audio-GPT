@@ -44,6 +44,42 @@ from core_opowiesci import ProjektOpowiesci
 from i18n import aktualny_jezyk, t
 
 
+# v15.1: skrót `narracja_skrot` (FIFO `ostatnie_tury` + pole „Ostatnia tura"
+# po wczytaniu gry) tnie na granicy zdania, nie po sztywnym `[:N]`. Powód:
+# stare `[:400]` ucinało w środku słowa/dialogu — nieprofesjonalny wygląd
+# w widgecie po reloadzie. Limit znaków podniesiony do 1200, ale szukamy
+# ostatniego `.!?` w drugiej połowie okna; fallback z elipsą tylko gdy
+# w okrojonym fragmencie nie ma żadnego sensownego końca zdania.
+_SKROT_MAX_ZN = 1200
+_SKROT_MIN_PROG = 0.60   # nie cofaj się wcześniej niż 60% max_znakow
+
+
+def _skroc_na_granicy_zdania(tekst: str, max_znakow: int = _SKROT_MAX_ZN) -> str:
+    """Skraca `tekst` do ~`max_znakow` znaków, tnąc na granicy zdania.
+
+    Zwraca `tekst` w całości jeśli mieści się pod limit. W przeciwnym razie
+    szuka ostatniego `.!?` w obrębie [`_SKROT_MIN_PROG` × max, max], po którym
+    występuje whitespace, koniec stringa albo zamykający cudzysłów. Brak
+    sensownej granicy → twardy cut z dopisanym `…` (sygnał dla NVDA i wzroku
+    że to skrót).
+    """
+    if len(tekst) <= max_znakow:
+        return tekst.rstrip()
+    okrojony = tekst[:max_znakow]
+    min_prog = int(max_znakow * _SKROT_MIN_PROG)
+    najlepszy = -1
+    for znak in (".", "!", "?"):
+        idx = okrojony.rfind(znak)
+        if idx < min_prog or idx <= najlepszy:
+            continue
+        kontynuacja = tekst[idx + 1 : idx + 2]
+        if kontynuacja == "" or kontynuacja.isspace() or kontynuacja in ('"', "'", "”", "»", "’"):
+            najlepszy = idx
+    if najlepszy != -1:
+        return tekst[: najlepszy + 1].rstrip()
+    return okrojony.rstrip() + "…"
+
+
 class OpowiesciPanel(wx.Panel):
     """Panel modułu „Interaktywne Opowieści" — szkielet Fazy 1 v15.0.
 
@@ -690,7 +726,10 @@ class OpowiesciPanel(wx.Panel):
         nowe_ostatnie = list(self._snapshot.ostatnie_tury)
         nowe_ostatnie.append({
             "akcja_gracza":  user_input,
-            "narracja_skrot": wynik.narracja[:400],  # skracamy do oszczędności kontekstu
+            # v15.1: smart-trim na granicy zdania (`.!?`), limit ~1200 zn;
+            # stary `[:400]` ucinał w środku słowa i wyglądał nieprofesjonalnie
+            # w polu „Ostatnia tura" po wczytaniu gry.
+            "narracja_skrot": _skroc_na_granicy_zdania(wynik.narracja),
         })
         nowe_ostatnie = nowe_ostatnie[-6:]
 
@@ -766,6 +805,10 @@ class OpowiesciPanel(wx.Panel):
         self._projekt.postacie_aktywne = wynik.postacie_aktywne
         self._projekt.stan             = wynik.stan
         self._projekt.ostatnie_tury    = list(self._snapshot.ostatnie_tury)
+        # v15.1: persistujemy wybory ostatniej tury, żeby po reloadzie gracz
+        # w trybie 4/5 zobaczył te same przyciski (bez tego musiałby pisać
+        # free-text dopóki nie zrobi pierwszej własnej akcji).
+        self._projekt.ostatnie_wybory  = list(wynik.wybory)
 
         try:
             self._projekt.dopisz_do_txt(wynik.narracja, naglowek=naglowek)
@@ -1079,9 +1122,9 @@ class OpowiesciPanel(wx.Panel):
             self._txt_narracja.SetValue(t("opowiesci.brak_narracji_info", nazwa=nazwa))
 
         # Pole „Ostatnia tura": pokażmy skrót ostatniej zapisanej tury, jeśli
-        # istnieje w `ostatnie_tury` (snapshot wczytany z .game.json). To 400-
-        # znakowy skrót (FIFO buffer), nie pełna narracja — gracz dowie się
-        # gdzie skończył, a po pierwszej akcji pole wypełni się świeżą turą.
+        # istnieje w `ostatnie_tury` (snapshot wczytany z .game.json). Skrót
+        # od v15.1 jest cięty na granicy zdania (`_skroc_na_granicy_zdania`,
+        # ~1200 zn), więc nie urywa w środku słowa.
         if projekt.ostatnie_tury:
             ostatnia = projekt.ostatnie_tury[-1]
             self._txt_ostatnia_tura.SetValue(
@@ -1091,7 +1134,11 @@ class OpowiesciPanel(wx.Panel):
         else:
             self._txt_ostatnia_tura.SetValue(t("opowiesci.txt_ostatnia_tura_init"))
 
-        self._aktywuj_obszar_wyborow(False)   # ostatnie wybory się utraciły, wymuszamy free-text
+        # v15.1: wybory ostatniej tury są persystowane w `.game.json`, więc
+        # po wczytaniu w trybie 4/5 przywracamy przyciski (gracz nie musi
+        # pisać free-textu po reloadzie). `_przeladuj_wybory` sam ukryje
+        # obszar dla trybu Swobodnego (3) i dla pustej listy.
+        self._przeladuj_wybory(list(projekt.ostatnie_wybory), tryb_z_dysku)
         self._aktualizuj_uistate()
         self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
 
