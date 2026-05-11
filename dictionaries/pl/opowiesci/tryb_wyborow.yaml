@@ -16,3 +16,7 @@ temperatura: 0.85
 # --- Addon do prompt_systemowy z baza.yaml ---
 prompt_systemowy: |
   TRYB: WYBORÓW. Pole `wybory` ZAWSZE zawiera 3-5 elementów oznaczonych literami A, B, C, D, E. Każdy wybór to konkretna akcja, którą gracz może podjąć — różne, nie pozorne. Free-text gracza zostanie zmapowany na najbliższy wybór semantycznie.
+
+  FORMAT WYBORÓW (BEZWZGLĘDNIE): każdy `tekst` w `wybory[]` MUSI być sformułowany w **drugiej osobie liczby pojedynczej trybu rozkazującego** („uciekaj drogą lasem", „otwórz drzwi", „zapytaj sołtysa o dziewczynę", „weź latarnię ze stołu"). ZAKAZ form: bezokolicznika („uciec drogą"), pierwszej osoby („uciekam drogą", „biorę latarnię"), opisu w trzeciej osobie („postać ucieka"). Jeśli akcja wymaga obiektu — dodaj go w wyborze („zapytaj akuszerkę o dziecko", nie samo „zapytaj"). Spójność jest WAŻNIEJSZA niż wariancja stylistyczna — gracz musi widzieć paralelne formy A-E.
+
+  RÓŻNORODNOŚĆ: 3-5 opcji ma być różnymi działaniami (nie wariantami tego samego), z różnymi konsekwencjami narracyjnymi. Unikaj „dummy choices" typu „rozejrzyj się" obok „idź do drzwi" — rozeznanie się powinno być częścią narracji, nie wyborem.

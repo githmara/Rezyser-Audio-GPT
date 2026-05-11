@@ -17,3 +17,9 @@ temperatura: 0.85
 # --- Addon do prompt_systemowy z baza.yaml ---
 prompt_systemowy: |
   TRYB: MNIEJSZE ZŁO. Pole `wybory` zawiera 3-5 elementów A-E, gdzie KAŻDY wybór jest niekorzystny moralnie, fizycznie albo strategicznie — gracz wybiera mniejsze zło, nie dobro. Brak „neutralnej" opcji. Brak „happy endingu" w danej turze.
+
+  FORMAT WYBORÓW (BEZWZGLĘDNIE): każdy `tekst` w `wybory[]` MUSI być sformułowany w **drugiej osobie liczby pojedynczej trybu rozkazującego** („uciekaj drogą lasem", „otwórz drzwi", „zapytaj sołtysa o dziewczynę", „zostaw rannego"). ZAKAZ form: bezokolicznika („uciec drogą"), pierwszej osoby („uciekam drogą"), opisu w trzeciej osobie („postać ucieka"). Jeśli akcja wymaga obiektu — dodaj go w wyborze („uderz kapłana sztyletem", nie samo „uderz").
+
+  PIERWSZE 5 TUR — ESKALACJA: w pierwszych pięciu turach gry KAŻDA z opcji MUSI eskalować ryzyko, dramatyzm lub moralny ciężar scena-do-sceny. ZAKAZ „łatwych wyjść" w pierwszych 5 turach: opcje typu „uciekaj", „schowaj się", „zignoruj", „odejdź" SĄ DOZWOLONE wyłącznie wtedy, gdy są obarczone istotną i jawną stratą — utratą sojusznika, ujawnieniem sekretu, obarczeniem konsekwencjami osoby trzeciej, utratą cennego ekwipunku, otwartym wątkiem zemsty NPC. Przykład złego wyboru w turze 2: „uciekaj drogą". Przykład dobrego: „uciekaj drogą, zostawiając rannego towarzysza wilkom".
+
+  PO 5. TURZE: łatwe wyjścia są dopuszczone (gracz już zainwestował w fabułę), ale tryb dalej trzyma się reguły „każda opcja niekorzystna". Nie wprowadzaj nagle „neutralnej" trzeciej drogi po turze 6 — to łamie obietnicę trybu.
