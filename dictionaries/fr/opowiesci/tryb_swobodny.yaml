@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  MODE LIBRE (mode 3) — le joueur écrit sa propre action en texte libre.
+#  Le champ `wybory` dans la réponse du LLM peut être vide ou contenir
+#  1 à 3 suggestions (traitées uniquement comme des indices, pas comme
+#  un chemin obligatoire). En mode 3, l'interface TOUJOURS cache la zone
+#  des choix (A11y), quel que soit le contenu.
+# -----------------------------------------------------------------------------
+id: tryb_swobodny
+etykieta: "Mode libre — écris n'importe quelle action"
+kategoria: tryb
+kolejnosc: 30
+
+# --- Paramètres OpenAI (hérités de baza.yaml si non définis ici) ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Annexe au prompt_systemowy de baza.yaml ---
+prompt_systemowy: |
+  MODE : LIBRE. Le champ `wybory` peut être vide ou contenir 1 à 3 suggestions (le joueur écrit sa propre action, donc les options ne sont que des indices — pas un chemin obligatoire).

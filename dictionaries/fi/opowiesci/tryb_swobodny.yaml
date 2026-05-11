@@ -1,0 +1,18 @@
+# -----------------------------------------------------------------------------
+#  VAPAA MOODI (moodi 3) — pelaaja kirjoittaa oman tekonsa vapaana
+#  tekstinä. LLM-vastauksen `wybory`-kenttä voi olla tyhjä tai sisältää
+#  1-3 ehdotusta (pelkkä vihje, ei pakollinen reitti). GUI moodissa 3
+#  PIILOTTAA aina valintojen alueen (A11y), sisällöstä riippumatta.
+# -----------------------------------------------------------------------------
+id: tryb_swobodny
+etykieta: "Vapaa moodi — kirjoita mikä tahansa teko"
+kategoria: tryb
+kolejnosc: 30
+
+# --- OpenAI-parametrit (perityvät baza.yaml-tiedostosta, ellei tässä määritellä) ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Lisäys baza.yaml-tiedoston prompt_systemowy-kenttään ---
+prompt_systemowy: |
+  MOODI: VAPAA. `wybory`-kenttä voi olla tyhjä tai sisältää 1-3 ehdotusta (pelaaja kirjoittaa oman tekonsa, joten vaihtoehdot ovat pelkkiä vihjeitä — ei pakollinen reitti).

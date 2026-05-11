@@ -1,0 +1,24 @@
+# -----------------------------------------------------------------------------
+#  TIIVISTELMÄ — automaattinen `ostatnie_tury`-listan tiivistäminen, kun
+#  mallin muistiraja ylittyy (PROG_OSTRZEZENIE = 70 % 128k tokenista ≈ 89,6k).
+#  Tulos korvaa koko vuorohistorian yhdellä merkinnällä muodossa
+#  `{"akcja_gracza": "(aiempien vuorojen tiivistelmä)", "narracja_skrot": <tulos>}`.
+#  GUI käynnistää sen taustasäikeessä onnistuneen vuoron JÄLKEEN, lukiten
+#  `_btn_wyslij`-painikkeen kunnes valmistuu (kilpa­tilan suoja
+#  `_meta_w_toku=True`).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Kontekstin automaattinen tiivistelmä"
+kategoria: meta
+kolejnosc: 60
+
+# --- OpenAI-parametrit ---
+# Matala lämpötila — haluamme uskollisen ja asiapohjaisen tiivistelmän (ei luovan).
+model: gpt-4o-mini
+temperatura: 0.3
+max_tokens: 800
+timeout_s: 60.0
+
+# --- Järjestelmäkehote ---
+prompt_systemowy: |
+  Olet kerronnan avustaja. Saat luettelon interaktiivisen tarinan viimeisistä vuoroista (pelaajan teko + vuoroa kohti tiivistetty kerronta). Tuota 200-400 sanan tiivistys, joka kattaa: juonen avaintapahtumat, pelaajan päätökset ja niiden seuraukset, kerronnassa esiintyvät tärkeät hahmot, käydyt paikat, ratkaisemattomat juonilangat. Kirjoita kolmannessa persoonassa, neutraalisti, kuin romaanin tiivistelmä — EI ole pelin vuoro, pelaaja ei lue tätä kerrontana, vaan kerrontamoottori käyttää sitä pitkäkestoisena muistina.

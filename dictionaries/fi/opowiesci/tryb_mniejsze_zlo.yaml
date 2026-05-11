@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  PIENEMPI PAHA -MOODI (moodi 5) — jokainen vaihtoehto on moraalisesti,
+#  fyysisesti tai strategisesti epäedullinen. Pelaaja valitsee pienemmän
+#  pahan, EI hyvää. Ei «neutraalia» vaihtoehtoa, ei «onnellista loppua»
+#  yhden vuoron sisällä. Pulloutomekaniikka (viittaus tiedostossa
+#  `notatki_dev/tales_mechanics.md`) lykätään versioon v15.2 — v15.0/v15.1
+#  säilyttävät puhtaasti kerronnallisen muodon.
+# -----------------------------------------------------------------------------
+id: tryb_mniejsze_zlo
+etykieta: "Pienempi Paha — jokainen vaihtoehto epäedullinen"
+kategoria: tryb
+kolejnosc: 50
+
+# --- OpenAI-parametrit ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Lisäys baza.yaml-tiedoston prompt_systemowy-kenttään ---
+prompt_systemowy: |
+  MOODI: PIENEMPI PAHA. `wybory`-kenttä sisältää 3-5 elementtiä A-E, joissa JOKAINEN vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäedullinen — pelaaja valitsee pienemmän pahan, ei suuremman hyvän. Ei «neutraalia» vaihtoehtoa. Ei «onnellista loppua» tällä vuorolla.
+
+  VALINTOJEN MUOTO (TIUKKA): jokainen `wybory[]`-taulukon `tekst` ON muotoiltava **yksikön toisen persoonan käskymuotoon** («juokse metsätietä alas», «avaa ovi», «kysy vanhukselta tytöstä», «hylkää haavoittunut»). KIELLETYT MUODOT: infinitiivi («juosta metsätietä»), ensimmäinen persoona («juoksen»), kolmannessa persoonassa kuvaileva («hahmo juoksee»). Jos teko tarvitsee objektin — sisällytä se («puukota pappia tikarilla», ei pelkkä «puukota»).
+
+  ENSIMMÄISET 5 VUOROA — ESKALAATIO: pelin ensimmäisen viiden vuoron aikana JOKAISEN vaihtoehdon ON kasvatettava riskiä, dramatiikkaa tai moraalista painoa kohtauksesta toiseen. HELPOT POISPÄÄSYT KIELLETTY ensimmäisten 5 vuoron aikana: vaihtoehdot kuten «pakene», «piiloudu», «jätä huomiotta», «vetäydy» OVAT SALLITTUJA VAIN, jos ne on yhdistetty merkittävään ja eksplisiittiseen hintaan — liittolaisen menettäminen, salaisuuden paljastuminen, seurausten siirtäminen kolmannelle osapuolelle, arvokkaan varustuksen menetys, NPC:n kostonjuonen avautuminen. Huono esimerkki vuorolle 2: «juokse metsätietä alas». Hyvä esimerkki: «juokse metsätietä alas ja jätä haavoittunut toveri susille».
+
+  VUORON 5 JÄLKEEN: helpot pois­päästöt ovat sallittuja (pelaaja on sijoittanut tarinaan), mutta moodi pitäytyy sääntöönsä «jokainen vaihtoehto on epäedullinen». Älä äkillisesti tuo kolmatta «neutraalia» reittiä vuoron 6 jälkeen — se rikkoo moodin lupauksen.

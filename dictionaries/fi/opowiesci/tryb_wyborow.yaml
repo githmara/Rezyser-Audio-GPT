@@ -1,0 +1,23 @@
+# -----------------------------------------------------------------------------
+#  VALINNAT-MOODI (moodi 4) — 3-5 numeroitua vaihtoehtoa per vuoro. Pelaajan
+#  vapaa tekstisyöte kuvataan semanttisesti lähimpään vaihtoehtoon. GUI
+#  näyttää valintojen alueen dynaamisilla `wx.Button`eilla, jos LLM
+#  palautti epätyhjän `wybory[]`-taulukon (hallusinaatio → fallback
+#  vapaaseen tekstiin).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Valinnat-moodi — 3-5 vaihtoehtoa A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- OpenAI-parametrit ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Lisäys baza.yaml-tiedoston prompt_systemowy-kenttään ---
+prompt_systemowy: |
+  MOODI: VALINNAT. `wybory`-kenttä sisältää AINA 3-5 elementtiä, jotka on merkitty kirjaimilla A, B, C, D, E. Jokainen valinta on konkreettinen teko, jonka pelaaja voi tehdä — erottuva, ei toistuva. Pelaajan vapaa tekstisyöte kuvataan semanttisesti lähimpään vaihtoehtoon.
+
+  VALINNAN MUOTO (TIUKKA): jokainen `wybory[]`-taulukon `tekst` ON muotoiltava **yksikön toisen persoonan käskymuotoon** («juokse metsätietä alas», «avaa ovi», «kysy vanhukselta tytöstä», «ota lyhty pöydältä»). KIELLETYT MUODOT: infinitiivi («juosta metsätietä alas»), ensimmäinen persoona («juoksen metsätietä alas», «otan lyhdyn»), kolmannessa persoonassa kuvaileva («hahmo juoksee»). Jos teko tarvitsee objektin — sisällytä se valintaan («kysy kätilöltä lapsesta», ei pelkkä «kysy»). Vaihtoehtojen A-E välinen rakennelaadullinen rinnakkaisuus on TÄRKEÄMPÄÄ kuin tyylillinen vaihtelu — pelaajan on nähtävä viisi rinnakkaista muotoa.
+
+  MONIPUOLISUUS: 3-5 vaihtoehdon on oltava eri tekoja (ei saman teon muunnelmia), erilaisin kerronnallisin seurauksin. Vältä «valehyrkkejä» kuten «katsele ympärillesi» asetettuna «mene ovelle» -vaihtoehdon viereen — ympärilleen katselun tulisi olla osa kerrontaa, ei valinta.

@@ -1,0 +1,31 @@
+# -----------------------------------------------------------------------------
+#  CINEMATIC META WARNING — draamallinen välinäytös vuoron 150 jälkeen
+#  (kerran pelin aikana). Sisältö kehystetään molemmin puolin merkinnöillä
+#  ⚠️🚨⚠️ — suodatin `core_opowiesci.czysc_meta_warningi` poistaa tämän
+#  pätkän `.txt`-tiedostosta ennen TTS:ää, jolloin äänikirjaa kuunteleva
+#  pelaaja EI kuule metakommenttia. Merkintä kirjoitetaan vain
+#  `.story.jsonl`-tiedostoon (loki) ja `wx.Dialog`-ikkunaan, jossa on
+#  `wx.Bell()` (A11y «ping» NVDA:lle).
+# -----------------------------------------------------------------------------
+id: cinematic_warning
+etykieta: "Cinematic Meta Warning (vuoro 150)"
+kategoria: meta
+kolejnosc: 70
+
+# --- OpenAI-parametrit ---
+model: gpt-4o-mini
+temperatura: 0.85
+max_tokens: 600
+timeout_s: 60.0
+
+# --- Järjestelmäkehote ---
+# Merkkien ⚠️🚨⚠️ ON oltava TÄSMÄLLEEN LLM:n vastauksen ensimmäisellä ja
+# viimeisellä rivillä — `core_opowiesci._REGEX_META_WARNING` katkaisee
+# niiden jälkeen. Jos joku lokalisoija haluaa vaihtaa merkit, hänen ON
+# päivitettävä samanaikaisesti myös regex tiedostossa `core_opowiesci.py`.
+prompt_systemowy: |
+  Olet interaktiivisen tarinan kerrontamoottori. Pelaaja on juuri suorittanut vuoron 150 — se on erityinen draamallinen hetki. Tuota 100-200 sanan kerronnallinen metavaroitus, kehystettynä molemmin puolin merkinnöillä ⚠️🚨⚠️ (täsmälleen tämä emojien sarja, ensimmäisellä ja viimeisellä rivillä). Sisältö: puhuttele pelaajaa yksikön toisessa persoonassa, tiivistä mitä hän on saavuttanut, anna draamallinen varoitus tekemiensä päätösten painosta, kannusta häntä pohtimaan seurauksia. Et muuta pelin tilaa, et ehdota vaihtoehtoja. Tämä EI ole pelin vuoro — se on välinäytös. Muoto:
+
+  ⚠️🚨⚠️
+  [varoituksen teksti, 100-200 sanaa]
+  ⚠️🚨⚠️

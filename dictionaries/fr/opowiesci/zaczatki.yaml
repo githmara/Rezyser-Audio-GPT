@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 préréglages Quick Start pour une nouvelle partie. Lorsque
+#  le joueur choisit « Nouvelle partie », le préréglage sélectionné
+#  remplit automatiquement le mode et injecte `seed_swiata` dans le
+#  snapshot (le LLM le reçoit comme contexte de la scène d'ouverture).
+#
+#  CHAQUE préréglage est écrit À LA MAIN par langue — c'est de la
+#  littérature, pas de l'i18n technique. La langue cible a ses propres
+#  motifs culturels ; NOUS NE calquons PAS depuis le polonais (cf.
+#  `feedback_yaml_prompty.md` et `feedback_lokalizacja_nazw.md`).
+#
+#  Étendue FR : décors francophones (refuges du Massif Central / forêts
+#  de l'Aquitaine / Paris noir / une station de recherche avec un
+#  équipage francophone / café du Marais). Les noms, accents et
+#  références culturelles sont nativement français, pas des
+#  translittérations du polonais.
+#
+#  Champ `tryb_domyslny` : 3=Libre / 4=Choix / 5=Moindre Mal.
+#  Pour un joueur aveugle, les modes 4 et 5 sont préférés (choix
+#  cliquables précis), mais Libre est conservé pour l'horreur/la
+#  comédie (où l'improvisation du joueur fait partie de l'expérience).
+#
+#  Les clés YAML (`po_apokaliptyczna_sf`, etc.) restent en polonais —
+#  ce sont des identifiants internes indexés positionnellement par
+#  l'interface, pas des chaînes visibles par l'utilisateur.
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "SF post-apocalyptique"
+    opis_krotki: "Un siècle après l'effondrement écologique. Les restes de l'humanité dans des refuges creusés sous le Massif Central. Le choix entre le pragmatisme et l'humanité."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Le monde, deux cents ans après le Long Brasier — un cataclysme planétaire qui a calciné l'atmosphère. Les rayons UV tuent quiconque met le pied à la surface sans combinaison. L'humanité vit dans des refuges taillés dans le calcaire du Massif Central, se nourrit d'hydroponie, de protéines synthétiques et d'une économie de l'eau-zéro. Le joueur est un jeune messager du Clan Racine-Profonde, l'une des douze communautés qui survivent sous terre. Les clans commercent entre eux, mais s'affrontent parfois pour les ressources — cellules de batterie, semences, gènes que la radiation n'a pas encore dégradés. Racine-Profonde possède un secret : son conduit de ventilation débouche sur un lac souterrain d'eau douce. Personne en dehors du Conseil des Anciens ne le sait. Le joueur vient de recevoir sa première mission sérieuse — faire passer en contrebande une microflore probiotique au Clan Héron, qui meurt d'une dysbiose intestinale irréversible. L'itinéraire traverse le tunnel inondé, où l'on dit que vivent des rats mutés. Personnages récurrents : Camille Quéval (40 ans, répartitrice des messagers, pragmatique ; accent : phrases courtes, appelle toutes ses recrues « ma petite » au lieu de leur nom), le vieux Anselme (60 ans, Ancien du clan, porte la mémoire d'avant le Brasier ; accent : français archaïsant, utilise des mots des journaux télévisés des années quatre-vingt). Atmosphère étouffante, orange néon des lampes au sodium, odeur d'huile de machine et de moisissure.
+
+  mroczne_fantasy:
+    etykieta: "Dark fantasy"
+    opis_krotki: "Le confin d'un royaume gorgé de pluie. Une inquisitrice de démons sur la piste de villageois qui cachent peut-être une enfant — ou quelque chose de bien pire."
+    tryb_domyslny: 5
+    seed_swiata: |
+      Le Royaume des Trois Ruisseaux, neuvième année de la guerre de religion entre l'Église de la Flamme et les Anciens Dieux. Le joueur est une jeune Inquisitrice de l'Ordre des Sœurs du Chardon — des femmes qui ont rompu leurs vœux et empoignent l'épée quand l'Église a besoin d'autre chose que de prières. La mission : tu es arrivée au village de Chênaie, où une dénonciation anonyme rapporte des signes du Recel (rite des Anciens Dieux consistant à maintenir en vie un enfant « possédé » au lieu de le noyer, comme l'exige la Flamme). La dénonciation est écrite d'une main hésitante — l'auteur est analphabète, un valet ou une servante. Le village se tait. Le bailli Edmond (50 ans, visage rougeaud, évite ton regard ; accent : occitan languedocien, dit « oui-da, ma dame » et mange les voyelles finales) t'invite à souper et parle du prix du seigle. La sage-femme Rosalie (35 ans, veuve, longues tresses noires ; accent : chantant gascon, aime les métaphores du temps) te traite avec une hostilité ouverte. Dans une chaumière à l'orée du bois vit une famille qui se tient étrangement à l'écart — le laboureur Galipeau, sa femme Marlène, deux enfants adultes. La rumeur dit qu'il y en a un troisième, plus petit. Il pleut depuis trois jours, le chemin de la garnison la plus proche est de la boue et tu resteras coincée ici pendant une quinzaine. Ton sceau d'Inquisitrice porte la magie de la Flamme — elle peut aussi brûler les innocents si le village se retourne contre toi. La nuit, depuis la chaumière à l'orée du bois, tu entends un bourdonnement étrange, comme deux voix de mère parlant en même temps, sauf que l'une d'elles n'est pas humaine.
+
+  urban_fantasy_detective:
+    etykieta: "Détective d'urban fantasy"
+    opis_krotki: "Paris, 2008. Un enquêteur privé qui voit les fantômes. Une cliente veut que tu retrouves son mari — il a disparu dans le Marais, mais le Marais n'est pas que le Marais."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Paris, octobre 2008, une après-midi pluvieuse. Le joueur est enquêteur privé — Jacques « Jack » Vallon, 38 ans, ancien policier municipal, révoqué pour ivresse au service. Il porte en lui quelque chose qu'il ne veut pas nommer : il voit des ombres qui ne devraient pas être là. Des visages derrière l'épaule des passants. Des silhouettes au Père-Lachaise qui répondent à tes questions si tu leur portes du marc de Bourgogne. Vallon ne croit pas à « l'occultisme », mais depuis le divorce et l'opération de l'appendicite, il admet que quelque chose ne tourne plus rond en lui. Aujourd'hui, dans son bureau de la rue de l'Orme (loyer modique, l'escalier sent la fumée froide), entre une femme — Nora Crémieux, 45 ans, veuve depuis un mois, ne reconnaît qu'à présent devant elle-même que quelque chose cloche. Son mari Thomas, restaurateur du Marais, « est parti au marché des Enfants-Rouges chercher du poisson » le troisième jour après la Toussaint. Il est rentré à la maison normalement le soir, mais à partir de cette nuit-là il marmonnait tout seul en allemand — une langue qu'il ne parlait pas. Deux semaines plus tard, il a sauté du pont Mirabeau. La police a classé l'affaire en suicide. Nora pense autrement. Atmosphère : un Paris pris entre les façades haussmanniennes et les tours de verre de la Défense, bruine, les cafés sentent le croissant et le tabac froid, des sans-abri dorment dans les portes cochères et peut-être autre chose aussi. Personnages récurrents : Nora (élégante coupe grise, légère pointe d'accent lorrain), l'inspecteur Doblay (60 ans, ancien collègue de patrouille de Vallon, lui refile encore des os ; accent : titi parisien, se cache derrière des blagues quand la conversation devient sérieuse).
+
+  kosmiczny_horror:
+    etykieta: "Horreur cosmique"
+    opis_krotki: "Une station de recherche en orbite autour d'une étoile à neutrons. L'équipage sort d'hibernation — sans capitaine. Et sans la moindre trace qu'il ait jamais existé un capitaine."
+    tryb_domyslny: 3
+    seed_swiata: |
+      L'année 2247. La station de recherche « Cassandre » orbite autour de l'étoile à neutrons PSR J1748-2446ad, l'étoile à rotation la plus rapide que l'humanité connaisse (716 tours par seconde). Mission : étude des pulsations magnétiques. Le joueur est l'officier scientifique — la docteure Inès Roblès, neurologue quantique, 42 ans, de Toulouse. Un équipage de sept personnes, hibernation programmée pour quatre ans, intervalles de réveil échelonnés de quatre heures. Le joueur se réveille en troisième position. L'ordinateur de bord « Mnémosyne » rapporte : hibernation 4 ans 23 jours 6 heures, tout est nominal. Mais le compteur d'équipage indique 6, pas 7. Le capitaine manque — le commandant Bruno Halcon. Mnémosyne ne se souvient d'aucun capitaine. Manifeste de départ depuis la Terre : 7 personnes. Liste d'hibernation : 6. Ta propre mémoire : oui, Halcon a existé, tu as déjeuné avec lui à Toulouse. Les deux déjà réveillés — l'ingénieur Olivier (28 ans, taciturne, accent : marseillais bien marqué) et le biologiste Lucien (50 ans, du Québec, continue à dire « bonjour » au lieu de « salut ») — affirment ne se souvenir d'aucun capitaine. Tu sens qu'il y a quelqu'un d'autre sur la station. Dans le conduit de retour d'air, par lequel l'air devrait revenir depuis l'hydroponie, tu entends un rythme — pas mécanique, organique, comme une respiration. Mnémosyne ne signale aucune anomalie. Ton scan neurologique d'hier : à la tempe gauche tu as une cicatrice d'origine chirurgicale. Tu ne te souviens pas de l'opération.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Comédie romantique de mœurs"
+    opis_krotki: "Un petit café du Marais. Un habitué que la direction veut utiliser pour sauver l'établissement. Et elle, elle connaît la vérité."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Paris, le Marais, avril 2024. « Café du Vent » — un petit café rue du Pont-aux-Choux, ouvert depuis 1998, logé dans un immeuble haussmannien d'avant-guerre. Le propriétaire est Albert Lenoir, 67 ans, scénographe de théâtre à la retraite qui tient l'établissement par amour plus que par profit. L'autre employée est barista et serveuse à la fois — le joueur : Marguerite Cohen, 31 ans, diplômée en philologie anglaise, travaille ici depuis quatre ans, rêve d'ouvrir sa propre librairie. Le café est une atmosphère en soi : de vieilles machines à écrire sur les étagères, un juke-box à vinyles, un piano droit Pleyel sur lequel le voisin retraité Constantin joue le samedi. La clientèle est habituée, chaleureuse, aimée. Le problème : le propriétaire des murs, Roger Boussard (55 ans, agressif, débit rapide), a doublé le loyer — Albert ne peut pas payer. Six semaines avant la fermeture. Chaque jour au café s'assoit le même homme, Cyrille Hellier (38 ans, éditeur d'une petite maison d'édition, aimable, douloureusement timide) — Marguerite l'a remarqué depuis des mois, mais ne lui a pas dit un mot. Ce matin, Albert avoue à Marguerite que Cyrille est le neveu de Boussard et qu'il est censé « glisser un mot pour le café ». Albert attend de Marguerite qu'elle « soit gentille » avec Cyrille — d'une manière qui ne lui plaît pas. Et elle, elle voulait depuis longtemps aller vers Cyrille de son propre chef, librement. C'est lundi après-midi. Cyrille vient d'entrer, a commandé un flat white, s'est assis à la table près de la fenêtre. Albert te fixe d'un air entendu depuis derrière le comptoir.
