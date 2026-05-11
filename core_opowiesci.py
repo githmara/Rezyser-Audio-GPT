@@ -105,6 +105,13 @@ class ProjektOpowiesci:
                              przed wysyłką w ``OpowiesciPanel._on_wyslij``
         ostatnie_tury      : skondensowana historia (FIFO, ostatnie 6 par
                              akcja+narracja_skrót); Faza 4 doda streszczenie
+        zasady_swiata      : opcjonalny tekst z regułami świata zdefiniowanymi
+                             przez gracza (fonetyka tożsamości, koncepcje
+                             mechaniczne, ograniczenia kulturowe). Pusty
+                             string = stary tryb, kompatybilność wsteczna.
+                             Wstrzykiwany do prompt-systemowy przez
+                             :func:`opowiesci_ai._zbuduj_prompt_systemowy`
+                             jeśli niepusty. v15.1+.
     """
 
     def __init__(self, app_dir: str | None = None) -> None:
@@ -118,6 +125,7 @@ class ProjektOpowiesci:
         self.seed_swiata: str = ""
         self.numer_tury: int = 0
         self.ostatnie_tury: list[dict[str, str]] = []
+        self.zasady_swiata: str = ""
 
     # ------------------------------------------------------------------
     # Walidacja stanu
@@ -295,6 +303,7 @@ class ProjektOpowiesci:
             "postacie_aktywne": self.postacie_aktywne,
             "stan":             self.stan,
             "ostatnie_tury":    self.ostatnie_tury,
+            "zasady_swiata":    self.zasady_swiata,
         }
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
@@ -379,6 +388,7 @@ class ProjektOpowiesci:
         self.postacie_aktywne  = list(dane.get("postacie_aktywne", []))
         self.stan              = dict(dane.get("stan", {}))
         self.ostatnie_tury     = list(dane.get("ostatnie_tury", []))
+        self.zasady_swiata     = str(dane.get("zasady_swiata", ""))
 
         wynik = WynikWczytaniaOpowiesci(
             nazwa=nazwa,

@@ -166,6 +166,11 @@ class SnapshotOpowiesci:
                            string jeśli świat ma być wylosowany przez LLM
         jezyk_projektu   : kod języka narracji ("pl"/"en"/...); Faza 5 użyje
                            do doboru promptu systemowego z YAML
+        zasady_swiata    : opcjonalny tekst z regułami świata zdefiniowanymi
+                           przez gracza (v15.1+). Pusty string = stary tryb;
+                           niepusty → wstrzykiwany przez
+                           :func:`_zbuduj_prompt_systemowy` jako dodatkowa
+                           sekcja między bazą a addonem trybu.
     """
     nazwa_gry:        str
     numer_tury:       int
@@ -174,6 +179,7 @@ class SnapshotOpowiesci:
     stan_poprzedni:   dict[str, Any]       = field(default_factory=dict)
     seed_swiata:      str                   = ""
     jezyk_projektu:   str                   = "pl"
+    zasady_swiata:    str                   = ""
 
 
 @dataclass
@@ -272,24 +278,39 @@ def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:
         return _pyyaml.safe_load(fh) or {}
 
 
-def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl") -> str:
+def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl", zasady_swiata: str = "") -> str:
     """Składa prompt systemowy z bazy YAML + addonu trybu YAML.
 
     Tryby narracyjne (3/4/5) używają `baza.yaml` + `tryb_<nazwa>.yaml`.
     Tryb Burza (0) używa wyłącznie `tryb_burza.yaml` (visualize ma własny
     pełny prompt, bez bazy narracyjnej z JSON-schemą).
+
+    Args:
+        zasady_swiata: opcjonalny tekst gracza z regułami świata (v15.1+).
+            Niepusty → wstrzykiwany jako sekcja BEZWZGLĘDNIE wiążąca między
+            bazą a addonem trybu (tryby 3/4/5) lub na końcu (tryb 0/Burza).
+            Pusty / sam whitespace → brak wstrzyknięcia, kompatybilność wsteczna.
     """
     nazwa = _NAZWA_PLIKU_PER_TRYB.get(tryb)
     if nazwa is None:
         raise ValueError(f"Nieznany tryb opowieści: {tryb} (oczekiwane 0/3/4/5)")
 
+    zasady_blok = ""
+    if zasady_swiata and zasady_swiata.strip():
+        zasady_blok = (
+            "\n\n## Zasady świata (zdefiniowane przez gracza)\n\n"
+            f"{zasady_swiata.strip()}\n\n"
+            "Te zasady są BEZWZGLĘDNIE wiążące przez całą grę. Respektuj je "
+            "w narracji, dialogach, opisach postaci, wyborach i wizualizacjach."
+        )
+
     if tryb == TRYB_BURZA:
         # Visualize stoi na własnych nogach — bez bazy narracyjnej.
-        return _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"]
+        return _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"] + zasady_blok
 
     baza   = _zaladuj_przepis(jezyk, "baza")["prompt_systemowy"]
     addon  = _zaladuj_przepis(jezyk, nazwa)["prompt_systemowy"]
-    return baza + "\n\n" + addon
+    return baza + zasady_blok + "\n\n" + addon
 
 
 def _parametr_z_yaml(jezyk: str, nazwa: str, klucz: str, default: Any) -> Any:
@@ -356,7 +377,7 @@ def generuj_ture(
         propagowane — GUI łapie i pokazuje w :func:`_wyswietl_blad_ai`.
     """
     jezyk            = snapshot.jezyk_projektu or "pl"
-    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk)
+    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk, snapshot.zasady_swiata)
     user_payload     = _zbuduj_user_payload(snapshot, user_input)
 
     # Parametry: priorytet to argument funkcji (GUI może override przez
@@ -447,6 +468,10 @@ def wygeneruj_wizualizacje(
     jezyk = snapshot.jezyk_projektu or "pl"
     przepis = _zaladuj_przepis(jezyk, "tryb_burza")
     efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+    # v15.1+: zasady świata gracza trafiają też do prompt-systemowy
+    # wizualizacji (fonetyczna tożsamość musi być respektowana także w
+    # multisensorycznych opisach).
+    prompt_systemowy = _zbuduj_prompt_systemowy(TRYB_BURZA, jezyk, snapshot.zasady_swiata)
 
     payload = {
         "stan":             snapshot.stan_poprzedni,
@@ -461,7 +486,7 @@ def wygeneruj_wizualizacje(
     resp = klient.chat.completions.create(
         model=efektywny_model,
         messages=[
-            {"role": "system", "content": przepis["prompt_systemowy"]},
+            {"role": "system", "content": prompt_systemowy},
             {"role": "user",   "content": user_msg},
         ],
         temperature=przepis.get("temperatura", TEMPERATURE_VIS),
@@ -505,7 +530,7 @@ def policz_tokeny(snapshot: SnapshotOpowiesci, tryb: int, model: str = MODEL_DOM
     jezyk   = snapshot.jezyk_projektu or "pl"
     # `_zbuduj_prompt_systemowy` obsługuje WSZYSTKIE tryby (0/3/4/5), więc
     # nie ma już potrzeby branch-owania na TRYB_BURZA.
-    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk)
+    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk, snapshot.zasady_swiata)
     user_payload     = _zbuduj_user_payload(snapshot, "")  # akcja gracza nieznana — szacunek przed wpisaniem
 
     naglowek_chat_per_msg = 4   # "<|im_start|>role\n", "<|im_sep|>", "<|im_end|>\n"

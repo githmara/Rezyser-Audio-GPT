@@ -1035,3 +1035,20 @@ opowiesci:
   quick_start_wlasna:        "(własna gra)"
   choice_quick_start_name:   "Wybór gotowego scenariusza Quick Start"
   choice_quick_start_tooltip: 'Wybierz gotowy świat, by od razu zanurzyć się w narracji. Preset wstrzyknie do silnika krótki opis świata i bohatera, ustawi domyślny tryb gry. „(własna gra)" pozostawia start swobodny — silnik sam wymyśli świat na podstawie pierwszej akcji.'
+
+  # ---- v15.1: Zasady świata (edytowalna mini-księga koncepcji) ------------
+  btn_zasady_swiata_label:   "&Edytuj zasady świata…"
+  btn_zasady_swiata_tooltip: "Otwiera okno edycji zasad świata — opcjonalnego tekstu z regułami fonetycznymi, kulturowymi lub mechanicznymi, które silnik narracyjny ma respektować przez całą grę. Puste pole = brak dodatkowych reguł (zachowanie domyślne)."
+  dlg_zasady_swiata_tytul:   "Zasady świata gry"
+  dlg_zasady_swiata_lbl:     "Reguły, które silnik narracyjny ma respektować przez całą grę (opcjonalne):"
+  dlg_zasady_swiata_name:    "Pole edycji zasad świata"
+  dlg_zasady_swiata_hint: |-
+    Np.:
+    - „Imię Joanna wymawiaj zawsze twardo, polskie [dż]; nigdy miękko [j]."
+    - „W tym świecie magia działa tylko w nocy; w dzień postacie są zwykłymi ludźmi."
+    - „Antagonistka Joana próbuje zmiękczyć wymowę imienia protagonistki przez odmianę gramatyczną."
+  dlg_zasady_swiata_btn_ok:  "&Zapisz"
+  dlg_zasady_swiata_btn_anuluj: "&Anuluj"
+  status_zasady_zapisane:    "Zasady świata zaktualizowane i zapisane do pliku gry."
+  zasady_bez_gry_tytul:      "Brak aktywnej gry"
+  zasady_bez_gry_tresc:      'Załóż nową grę przyciskiem „Nowa gra" albo wczytaj wcześniej zapisaną, zanim zdefiniujesz zasady świata — zasady są zapisywane razem ze stanem gry.'

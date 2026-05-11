@@ -285,7 +285,7 @@ class OpowiesciPanel(wx.Panel):
         return sizer
 
     # ------------------------------------------------------------------
-    # BLOK C — RadioBox wyboru trybu gry (Swobodny / Wyborów / Mniejsze zło)
+    # BLOK C — RadioBox wyboru trybu gry + przycisk Zasady świata (v15.1)
     # ------------------------------------------------------------------
     def _zbuduj_radiobox_trybu(self, BORDER: int) -> wx.BoxSizer:
         choices = [
@@ -303,8 +303,21 @@ class OpowiesciPanel(wx.Panel):
         )
         self._rb_tryb.SetToolTip(t("opowiesci.rb_tryb_tooltip"))
 
+        # v15.1: przycisk otwierający dedykowane okno edycji zasad świata.
+        # CELOWO nie wstawiamy inline TextCtrl w głównym panelu — wieloliniowe
+        # pole byłoby Tab-pułapką dla NVDA przy każdej turze gry. Dialog
+        # otwiera się tylko na żądanie, edycja zasad jest aktem okazjonalnym.
+        self._btn_zasady_swiata = wx.Button(
+            self, label=t("opowiesci.btn_zasady_swiata_label"),
+        )
+        self._btn_zasady_swiata.SetToolTip(t("opowiesci.btn_zasady_swiata_tooltip"))
+
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(self._rb_tryb, proportion=1, flag=wx.EXPAND | wx.RIGHT, border=BORDER)
+        row.Add(self._btn_zasady_swiata, flag=wx.ALIGN_CENTER_VERTICAL)
+
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._rb_tryb, flag=wx.EXPAND | wx.ALL, border=BORDER)
+        sizer.Add(row, flag=wx.EXPAND | wx.ALL, border=BORDER)
         return sizer
 
     # ------------------------------------------------------------------
@@ -481,6 +494,8 @@ class OpowiesciPanel(wx.Panel):
         self._btn_wczytaj.Bind(wx.EVT_BUTTON, self._on_wczytaj)
         self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_zapisz)
         self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_wyslij)
+        # v15.1: edycja zasad świata przez dedykowany dialog.
+        self._btn_zasady_swiata.Bind(wx.EVT_BUTTON, self._on_zasady_swiata)
         # `_rb_tryb` bez callbacku — wybór trybu odczytujemy w `_on_wyslij`.
 
     def _on_placeholder(self, _event: wx.Event) -> None:
@@ -583,6 +598,9 @@ class OpowiesciPanel(wx.Panel):
         # Snapshot jest niezmienny po stronie wątku tła, ale tutaj jeszcze
         # możemy mutować referencję panelu (GIL: pojedyncze przypisanie
         # atrybutu jest atomowe w CPythonie).
+        # v15.1: zasady świata pobierane z `_projekt` (źródło prawdy po
+        # edycji dialogiem), nie z `_snapshot` — gdyby user edytował zasady
+        # w trakcie streszczenia, snapshot byłby stary.
         self._snapshot = oai.SnapshotOpowiesci(
             nazwa_gry=nazwa,
             numer_tury=self._snapshot.numer_tury + 1,
@@ -591,6 +609,7 @@ class OpowiesciPanel(wx.Panel):
             stan_poprzedni=self._snapshot.stan_poprzedni,
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
+            zasady_swiata=self._projekt.zasady_swiata,
         )
 
         # Lock UI: zapobiega podwójnej wysyłce, dezorientacji NVDA.
@@ -682,6 +701,7 @@ class OpowiesciPanel(wx.Panel):
             stan_poprzedni=wynik.stan,
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
+            zasady_swiata=self._snapshot.zasady_swiata,
         )
 
         # 3. Faza 3: synchronizacja stanu z dyskiem — 4 pliki per tura.
@@ -974,10 +994,13 @@ class OpowiesciPanel(wx.Panel):
             return
 
         # Reset stanu pamięci: nowa gra → pusty snapshot (z seed_swiata jeśli był).
+        # v15.1: świeży projekt nie ma zasad świata (`projekt.zasady_swiata = ""`),
+        # więc snapshot startuje też z pustym polem (default w dataclass).
         self._projekt = projekt
         self._snapshot = oai.SnapshotOpowiesci(
             nazwa_gry=nazwa, numer_tury=0,
             seed_swiata=seed_swiata, jezyk_projektu="pl",
+            zasady_swiata=projekt.zasady_swiata,
         )
         self._txt_narracja.SetValue(t("opowiesci.nowa_gra_zaczatek", nazwa=nazwa))
         self._txt_ostatnia_tura.SetValue(t("opowiesci.txt_ostatnia_tura_init"))
@@ -1029,6 +1052,8 @@ class OpowiesciPanel(wx.Panel):
             return
 
         # Sync UI ze stanem wczytanego projektu.
+        # v15.1: zasady świata też wczytywane z `.game.json` (z fallbackiem
+        # do "" dla starych zapisów bez tego pola).
         self._projekt = projekt
         self._snapshot = oai.SnapshotOpowiesci(
             nazwa_gry=projekt.nazwa_pliku,
@@ -1038,6 +1063,7 @@ class OpowiesciPanel(wx.Panel):
             stan_poprzedni=dict(projekt.stan),
             seed_swiata=projekt.seed_swiata,
             jezyk_projektu=projekt.jezyk_projektu,
+            zasady_swiata=projekt.zasady_swiata,
         )
 
         self._txt_nazwa_gry.SetValue(projekt.nazwa_pliku)
@@ -1116,6 +1142,62 @@ class OpowiesciPanel(wx.Panel):
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
+
+    # ==================================================================
+    # v15.1 — Zasady świata (dedykowany dialog, NIE inline TextCtrl)
+    # ==================================================================
+    def _on_zasady_swiata(self, _event: wx.Event) -> None:
+        """Otwiera dialog edycji zasad świata gry.
+
+        Zasady są opcjonalnym tekstem z regułami świata (fonetyka tożsamości,
+        koncepcje kulturowe, ograniczenia mechaniczne), które silnik narracyjny
+        respektuje przez całą grę. Wstrzykiwane do prompt-systemowy w
+        :func:`opowiesci_ai._zbuduj_prompt_systemowy`.
+
+        Wymóg: aktywna gra (`_projekt is not None`). Bez gry nie ma gdzie
+        zapisać zasad (są w `.game.json` per nazwa gry).
+        """
+        if self._projekt is None:
+            wx.MessageBox(
+                t("opowiesci.zasady_bez_gry_tresc"),
+                t("opowiesci.zasady_bez_gry_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_nazwa_gry.SetFocus()
+            return
+
+        dlg = DialogZasadySwiata(self, initial_text=self._projekt.zasady_swiata)
+        if dlg.ShowModal() == wx.ID_OK:
+            nowe_zasady = dlg.tekst
+            self._projekt.zasady_swiata = nowe_zasady
+            # Propagacja do snapshotu — następna tura użyje już nowych zasad.
+            self._snapshot = oai.SnapshotOpowiesci(
+                nazwa_gry=self._snapshot.nazwa_gry,
+                numer_tury=self._snapshot.numer_tury,
+                ostatnie_tury=list(self._snapshot.ostatnie_tury),
+                postacie_aktywne=list(self._snapshot.postacie_aktywne),
+                stan_poprzedni=dict(self._snapshot.stan_poprzedni),
+                seed_swiata=self._snapshot.seed_swiata,
+                jezyk_projektu=self._snapshot.jezyk_projektu,
+                zasady_swiata=nowe_zasady,
+            )
+            try:
+                self._projekt.zapisz_game_json()
+            except OSError as exc:
+                self._wyswietl_blad_ai(t(
+                    "opowiesci.blad_zapisu_tresc",
+                    tresc_bledu=str(exc),
+                ))
+                dlg.Destroy()
+                return
+            wx.MessageBox(
+                t("opowiesci.status_zasady_zapisane"),
+                t("opowiesci.dlg_zasady_swiata_tytul"),
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+        dlg.Destroy()
 
     # ==================================================================
     # FAZA 4 — Slash-komendy (parser lokalny, bez API)
@@ -1352,6 +1434,7 @@ class OpowiesciPanel(wx.Panel):
             stan_poprzedni=self._snapshot.stan_poprzedni,
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
+            zasady_swiata=self._snapshot.zasady_swiata,
         )
         if self._projekt is not None:
             self._projekt.ostatnie_tury = list(self._snapshot.ostatnie_tury)
@@ -1432,6 +1515,7 @@ class OpowiesciPanel(wx.Panel):
                 stan_poprzedni=dict(self._projekt.stan),
                 seed_swiata=self._snapshot.seed_swiata,
                 jezyk_projektu=self._snapshot.jezyk_projektu,
+                zasady_swiata=self._snapshot.zasady_swiata,
             )
 
         self._meta_w_toku = False
@@ -1471,3 +1555,77 @@ class OpowiesciPanel(wx.Panel):
                 pass
         # Nie pokazujemy błędu — to was side-quest, gracz nie czekał na to
         # akcjonalnie. Cichy fail.
+
+
+# =====================================================================
+# v15.1 — Dialog edycji „Zasady świata"
+# =====================================================================
+
+class DialogZasadySwiata(wx.Dialog):
+    """Dedykowane okno edycji opcjonalnego tekstu z regułami świata gry.
+
+    A11y rationale: zasady świata to akt okazjonalny (gracz dopisuje regułę
+    raz na kilkanaście-kilkadziesiąt tur), więc wieloliniowy ``TextCtrl`` NIE
+    siedzi w głównym panelu jako kolejny stop tabulacji. Otwiera się tylko
+    na żądanie przyciskiem „Edytuj zasady świata…" obok bloku trybu.
+
+    Po sukcesie (Zapisz) atrybut :attr:`tekst` zawiera nową treść zasad
+    (string, może być pusty — pusty = brak dodatkowych reguł). Wywołujący
+    sam decyduje co z tym zrobić (typowo: zapis do `.game.json` przez
+    :meth:`core_opowiesci.ProjektOpowiesci.zapisz_game_json`).
+    """
+
+    def __init__(self, parent: wx.Window, initial_text: str = "") -> None:
+        super().__init__(
+            parent,
+            title=t("opowiesci.dlg_zasady_swiata_tytul"),
+            size=(640, 460),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+
+        # Atrybut publiczny — wywołujący czyta go po `ShowModal() == wx.ID_OK`.
+        self.tekst: str = initial_text
+
+        lbl = wx.StaticText(self, label=t("opowiesci.dlg_zasady_swiata_lbl"))
+        # Wraps na długości okna — A11y: NVDA przeczyta etykietę przed
+        # wejściem w TextCtrl.
+        lbl.Wrap(600)
+
+        self._txt = wx.TextCtrl(
+            self,
+            value=initial_text,
+            style=wx.TE_MULTILINE | wx.TE_BESTWRAP,
+            name=t("opowiesci.dlg_zasady_swiata_name"),
+        )
+        # Hint pokazuje 3 przykłady (fonetyka, mechanika, antagonista). Renderuje
+        # się TYLKO gdy pole jest puste — gdy gracz coś już wpisał, hint znika.
+        self._txt.SetHint(t("opowiesci.dlg_zasady_swiata_hint"))
+        self._txt.SetMinSize((-1, 280))
+
+        btn_ok = wx.Button(self, wx.ID_OK,     label=t("opowiesci.dlg_zasady_swiata_btn_ok"))
+        btn_anuluj = wx.Button(self, wx.ID_CANCEL, label=t("opowiesci.dlg_zasady_swiata_btn_anuluj"))
+        btn_ok.SetDefault()
+
+        # OK musi zsynchronizować `self.tekst` z aktualną wartością TextCtrl
+        # PRZED zamknięciem dialogu — domyślny handler ID_OK zamknie modal
+        # natychmiast i wywołujący nie zobaczy zmian.
+        btn_ok.Bind(wx.EVT_BUTTON, self._on_zapisz)
+
+        row_btn = wx.BoxSizer(wx.HORIZONTAL)
+        row_btn.AddStretchSpacer()
+        row_btn.Add(btn_anuluj, flag=wx.RIGHT, border=8)
+        row_btn.Add(btn_ok)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl,       flag=wx.ALL,                                       border=10)
+        sizer.Add(self._txt, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=10)
+        sizer.Add(row_btn,   flag=wx.EXPAND | wx.ALL,                           border=10)
+        self.SetSizer(sizer)
+
+        # Fokus na pole tekstowe — gracz od razu może pisać.
+        wx.CallAfter(self._txt.SetFocus)
+
+    def _on_zapisz(self, _event: wx.Event) -> None:
+        """Zapisz zawartość pola do `self.tekst` i zamknij dialog z ID_OK."""
+        self.tekst = self._txt.GetValue()
+        self.EndModal(wx.ID_OK)
