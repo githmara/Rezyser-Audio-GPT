@@ -1,0 +1,24 @@
+# -----------------------------------------------------------------------------
+#  SAMANTEKT — sjálfvirk samþjöppun á `ostatnie_tury` eftir að farið
+#  hefur fram úr þröskuldi módelminnis (PROG_OSTRZEZENIE = 70 % af 128k
+#  tákn ≈ 89,6k). Niðurstaðan kemur í stað alls sögu-umferða með einni
+#  færslu í sniðinu `{"akcja_gracza": "(samantekt fyrri umferða)",
+#  "narracja_skrot": <niðurstaða>}`. Viðmótið ræsir hana í bakgrunni
+#  EFTIR vel heppnaða umferð, læsir `_btn_wyslij` þangað til hún klárar
+#  (kapphlaupsskilyrðisvörn `_meta_w_toku=True`).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Sjálfvirk samhengissamantekt"
+kategoria: meta
+kolejnosc: 60
+
+# --- OpenAI-stillingar ---
+# Lágt hitastig — við viljum trúfasta, staðreyndakennda samantekt (ekki skapandi).
+model: gpt-4o-mini
+temperatura: 0.3
+max_tokens: 800
+timeout_s: 60.0
+
+# --- Kerfishvati ---
+prompt_systemowy: |
+  Þú ert frásagnaraðstoðarmaður. Þú færð lista yfir nýlegar umferðir gagnvirkrar sögu (aðgerð leikmanns + samþjöppuð frásögn á umferð). Myndaðu 200 til 400 orða samantekt sem nær yfir: lykilatburði söguþráðarins, val leikmannsins og afleiðingar þeirra, mikilvægar persónur sem birtast í frásögninni, staði sem heimsóttir hafa verið, óleysta þræði. Skrifaðu í þriðju persónu, á hlutlausan hátt, eins og skáldsögusamantekt — ÞETTA ER EKKI leikumferð, leikmaðurinn les þetta ekki sem frásögn, frásagnarvélin notar þetta sem langtímaminni.

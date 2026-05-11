@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+#  RIASSUNTO — compressione automatica di `ostatnie_tury` dopo il
+#  superamento della soglia di memoria del modello (PROG_OSTRZEZENIE =
+#  70 % di 128k token ≈ 89,6k). Il risultato sostituisce tutta la storia
+#  dei turni con una singola voce in formato `{"akcja_gracza":
+#  "(riassunto dei turni precedenti)", "narracja_skrot": <risultato>}`.
+#  L'interfaccia lo lancia in un thread in background DOPO un turno
+#  riuscito, bloccando `_btn_wyslij` finché non termina (race condition
+#  guard `_meta_w_toku=True`).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Riassunto automatico del contesto"
+kategoria: meta
+kolejnosc: 60
+
+# --- Parametri OpenAI ---
+# Temperatura bassa — vogliamo un riassunto fedele e fattuale (non creativo).
+model: gpt-4o-mini
+temperatura: 0.3
+max_tokens: 800
+timeout_s: 60.0
+
+# --- Prompt di sistema ---
+prompt_systemowy: |
+  Sei un assistente narrativo. Ricevi un elenco dei turni recenti di una storia interattiva (azione del giocatore + narrazione condensata per turno). Genera un riassunto di 200-400 parole che copra: gli eventi chiave della trama, le decisioni del giocatore e le loro conseguenze, i personaggi importanti che appaiono nella narrazione, i luoghi visitati, i fili irrisolti. Scrivi in terza persona, in modo neutro, come un riassunto di romanzo — NON è un turno di gioco, il giocatore non lo legge come narrazione, è il motore narrativo che lo usa come memoria a lungo termine.

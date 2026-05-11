@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  MODO TEMPESTA (modo 0, slash `/visualize`) — descrizione multisensoriale
+#  della scena per un giocatore non vedente. NON è un turno di gioco: non
+#  cambia lo stato, non offre opzioni, non scrive nei file (la risposta
+#  va solo a un `wx.Dialog` dell'interfaccia). Timeout più breve (60 s),
+#  max_tokens più basso (1000) — è una side-quest, risparmiamo budget API.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Visualizzazione della scena (slash /visualize)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- Parametri OpenAI ---
+# Temperatura più alta dei modi narrativi — vogliamo una descrizione
+# ricca e creativa. max_tokens è basso perché non è un turno di gioco.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- Prompt di sistema ---
+# Nessun placeholder. Lo stato di gioco (personaggi, luogo, ultimo turno)
+# va nel payload role=user attraverso l'equivalente di
+# `_zbuduj_user_payload` in `wygeneruj_wizualizacje`.
+prompt_systemowy: |
+  Sei un assistente di visualizzazione multisensoriale delle scene per un giocatore non vedente di una storia interattiva. Ricevi lo stato attuale del gioco e la domanda o l'azione del giocatore. Genera 150-300 parole di descrizione immersiva della scena usando tutti i sensi: vista (colori, contrasto di luce), udito (silenzio, mormorii, respiro), olfatto, tatto delle superfici, temperatura, gusto (se pertinente). Formato: testo semplice (non JSON), in seconda persona. NON è un turno di gioco — non cambi lo stato, non offri opzioni, descrivi solo la scena attuale con più profondità.

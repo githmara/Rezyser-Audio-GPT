@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  FRJÁLS HAMUR (hamur 3) — leikmaðurinn skrifar sína eigin aðgerð sem
+#  frítexta. Reiturinn `wybory` í svari LLM má vera tómur eða innihalda
+#  1 til 3 tillögur (meðhöndlaðar einungis sem vísbendingar, ekki sem
+#  skyldubraut). Í hamur 3 ALLTAF felur viðmótið val-svæðið (A11y),
+#  óháð innihaldi.
+# -----------------------------------------------------------------------------
+id: tryb_swobodny
+etykieta: "Frjáls hamur — skrifaðu hvaða aðgerð sem er"
+kategoria: tryb
+kolejnosc: 30
+
+# --- OpenAI-stillingar (erfast frá baza.yaml ef ekki skilgreint hér) ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Viðauki við prompt_systemowy úr baza.yaml ---
+prompt_systemowy: |
+  HAMUR: FRJÁLS. Reiturinn `wybory` má vera tómur eða innihalda 1 til 3 tillögur (leikmaðurinn skrifar sína eigin aðgerð, þannig að valkostirnir eru einungis vísbendingar — ekki skyldubraut).

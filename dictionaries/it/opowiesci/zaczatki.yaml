@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 preset Quick Start per una nuova partita. Quando il
+#  giocatore sceglie «Nuova partita», il preset selezionato riempie
+#  automaticamente il modo e inietta `seed_swiata` nello snapshot (il
+#  LLM lo riceve come contesto della scena di apertura).
+#
+#  OGNI preset è scritto A MANO per lingua — è letteratura, non i18n
+#  tecnica. La lingua di destinazione ha i propri motivi culturali; NON
+#  ricalchiamo dal polacco (cfr. `feedback_yaml_prompty.md` e
+#  `feedback_lokalizacja_nazw.md`).
+#
+#  Ambito IT: ambientazioni italiane (rifugi delle Alpi Apuane / borghi
+#  toscani sotto la pioggia / Roma noir / una stazione di ricerca con
+#  equipaggio italofono / caffè di Trastevere). I nomi, gli accenti e
+#  i riferimenti culturali sono italiani in modo nativo, non
+#  traslitterazioni dal polacco.
+#
+#  Campo `tryb_domyslny`: 3=Libero / 4=Scelte / 5=Male Minore.
+#  Per un giocatore non vedente i modi 4 e 5 sono preferibili (scelte
+#  cliccabili precise), ma Libero è conservato per l'orrore/la commedia
+#  (dove l'improvvisazione del giocatore fa parte dell'esperienza).
+#
+#  Le chiavi YAML (`po_apokaliptyczna_sf` ecc.) restano in polacco —
+#  sono identificatori interni indicizzati posizionalmente
+#  dall'interfaccia, non stringhe visibili all'utente.
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "SF post-apocalittica"
+    opis_krotki: "Un secolo dopo il collasso ecologico. I resti dell'umanità in rifugi scavati sotto le Alpi Apuane. La scelta tra pragmatismo e umanità."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Il mondo, duecento anni dopo il Lungo Bruciore — un cataclisma planetario che ha incenerito l'atmosfera. I raggi UV uccidono chiunque metta piede in superficie senza tuta. L'umanità vive in rifugi scavati nel marmo delle Alpi Apuane, si nutre di idroponica, proteine sintetiche e di un'economia ad acqua-zero. Il giocatore è un giovane messaggero del Clan Radice-Profonda, una delle dodici comunità che sopravvivono nel sottosuolo. I clan commerciano tra loro, ma a volte si scontrano per le risorse — celle di batteria, semi, geni che la radiazione non ha ancora degradato. Radice-Profonda ha un segreto: il suo condotto di ventilazione sbuca in un lago sotterraneo di acqua dolce. Nessuno fuori dal Consiglio degli Anziani lo sa. Il giocatore ha appena ricevuto la sua prima missione seria — far passare di contrabbando una microflora probiotica al Clan Airone, che sta morendo di una disbiosi intestinale irreversibile. Il percorso attraversa il tunnel allagato, dove si dice vivano ratti mutati. Personaggi ricorrenti: Camilla Querci (40 anni, dispatcher dei messaggeri, pragmatica; accento: frasi corte, chiama tutte le sue reclute «piccola mia» invece che per nome), il vecchio Anselmo (60 anni, Anziano del clan, custodisce la memoria del prima del Bruciore; accento: italiano arcaizzante, usa parole dei telegiornali degli anni ottanta). Atmosfera soffocante, arancio neon delle lampade al sodio, odore di olio per macchine e di muffa.
+
+  mroczne_fantasy:
+    etykieta: "Dark fantasy"
+    opis_krotki: "Il confine di un regno gonfio di pioggia. Un'inquisitrice di demoni sulle tracce di paesani che forse nascondono una bambina — o qualcosa di assai peggiore."
+    tryb_domyslny: 5
+    seed_swiata: |
+      Il Regno dei Tre Ruscelli, nono anno della guerra di religione tra la Chiesa della Fiamma e gli Antichi Dei. Il giocatore è una giovane Inquisitrice dell'Ordine delle Sorelle del Cardo — donne che hanno rotto i loro voti e impugnano la spada quando la Chiesa ha bisogno di qualcosa di diverso dalla preghiera. La missione: sei arrivata al villaggio di Querceto, dove una denuncia anonima riporta segni del Celamento (rito degli Antichi Dei consistente nel tenere in vita un bambino «posseduto» invece di affogarlo, come esige la Fiamma). La denuncia è scritta con mano esitante — l'autore è analfabeta, un servo o una serva. Il villaggio tace. Il podestà Edmondo (50 anni, viso rubizzo, evita il tuo sguardo; accento: toscano senese, dice «sì sì, madonna» e raddoppia le consonanti) ti invita a cena e parla del prezzo della segale. La levatrice Rosalia (35 anni, vedova, lunghe trecce nere; accento: umbro cantilenante, ama le metafore del tempo) ti tratta con aperta ostilità. In una capanna ai margini del bosco vive una famiglia che si tiene stranamente in disparte — il contadino Galieri, sua moglie Marlena, due figli adulti. La voce dice che ce ne sia un terzo, più piccolo. Piove da tre giorni, la strada per la guarnigione più vicina è fango e resterai bloccata qui per una quindicina di giorni. Il tuo sigillo di Inquisitrice porta la magia della Fiamma — può anche bruciare gli innocenti se il villaggio ti si rivolta contro. Di notte, dalla capanna ai margini del bosco, senti un ronzio strano, come due voci di madre che parlano insieme, solo che una di esse non è umana.
+
+  urban_fantasy_detective:
+    etykieta: "Detective di urban fantasy"
+    opis_krotki: "Roma, 2008. Un investigatore privato che vede i fantasmi. Una cliente vuole che tu ritrovi suo marito — è scomparso a Trastevere, ma Trastevere non è solo Trastevere."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Roma, ottobre 2008, un pomeriggio piovoso. Il giocatore è investigatore privato — Giacomo «Jack» Vallone, 38 anni, ex vigile urbano, congedato per ubriachezza in servizio. Porta con sé qualcosa che non vuole nominare: vede ombre che non dovrebbero esserci. Volti dietro le spalle dei passanti. Figure al Verano che rispondono alle tue domande se porti loro un goccio di Sangiovese. Vallone non crede all'«occulto», ma dopo il divorzio e l'operazione di appendicite ammette che qualcosa in lui non gira più giusto. Oggi, nel suo ufficio in vicolo dell'Olmo (affitto modico, le scale sanno di fumo freddo), entra una donna — Nora Cremonesi, 45 anni, vedova da un mese, ammette solo adesso davanti a se stessa che qualcosa non quadra. Suo marito Tommaso, ristoratore di Trastevere, «è andato al mercato di Campo de' Fiori a prendere il pesce» il terzo giorno dopo Ognissanti. È tornato a casa normale la sera, ma da quella notte mormorava da solo in tedesco — una lingua che non parlava. Due settimane dopo è saltato dal Ponte Sisto. La polizia ha archiviato il caso come suicidio. Nora la pensa diversamente. Atmosfera: una Roma sospesa tra le facciate ocra dei rioni storici e i palazzoni dell'EUR, pioggerellina, i bar sanno di cornetto e tabacco freddo, i senzatetto dormono nei portoni e forse anche qualcos'altro. Personaggi ricorrenti: Nora (elegante taglio grigio, lieve cadenza emiliana), l'ispettore Doblati (60 anni, vecchio collega di pattuglia di Vallone, gli passa ancora qualche osso; accento: romanesco di Trastevere, si nasconde dietro le battute quando la conversazione si fa seria).
+
+  kosmiczny_horror:
+    etykieta: "Orrore cosmico"
+    opis_krotki: "Una stazione di ricerca in orbita attorno a una stella di neutroni. L'equipaggio esce dall'ibernazione — senza capitano. E senza alcuna traccia che un capitano sia mai esistito."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Anno 2247. La stazione di ricerca «Cassandra» orbita intorno alla stella di neutroni PSR J1748-2446ad, la stella a rotazione più rapida che l'umanità conosca (716 giri al secondo). Missione: studio delle pulsazioni magnetiche. Il giocatore è l'ufficiale scientifico — la dottoressa Ines Roberti, neurologa quantistica, 42 anni, bolognese. Equipaggio di sette persone, ibernazione programmata per quattro anni, intervalli di risveglio scaglionati di quattro ore. Il giocatore si sveglia per terzo. Il computer di bordo «Mnemosyne» riferisce: ibernazione 4 anni 23 giorni 6 ore, tutto nominale. Ma il contatore dell'equipaggio segna 6, non 7. Manca il capitano — il comandante Bruno Falcone. Mnemosyne non ricorda nessun capitano. Manifesto di partenza dalla Terra: 7 persone. Lista di ibernazione: 6. La tua memoria: sì, Falcone è esistito, hai pranzato con lui a Bologna. I due già svegli — l'ingegnere Olivieri (28 anni, taciturno, accento: napoletano marcato) e il biologo Lucien (50 anni, del Québec, continua a dire «bonjour» invece di «ciao») — affermano di non ricordare nessun capitano. Senti che c'è qualcun altro sulla stazione. Nel condotto dell'aria di ritorno, attraverso cui l'aria dovrebbe rientrare dall'idroponica, senti un ritmo — non meccanico, organico, come un respiro. Mnemosyne non segnala alcuna anomalia. La tua scansione neurologica di ieri: alla tempia sinistra hai una cicatrice di origine chirurgica. Non ricordi l'operazione.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Commedia romantica di costume"
+    opis_krotki: "Un piccolo caffè di Trastevere. Un cliente abituale che la gestione vuole usare per salvare il locale. E lei, lei conosce la verità."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Roma, Trastevere, aprile 2024. «Caffè del Vento» — un piccolo locale in vicolo del Cinque, aperto dal 1998, in un palazzo umbertino prebellico. Il proprietario è Alberto Lenardi, 67 anni, scenografo teatrale in pensione che tiene il locale per amore più che per profitto. L'altra dipendente è barista e cameriera insieme — il giocatore: Margherita Cohen, 31 anni, laureata in filologia inglese, lavora qui da quattro anni, sogna di aprire una propria libreria. Il caffè è un'atmosfera in sé: vecchie macchine da scrivere sugli scaffali, un juke-box a vinili, un pianoforte verticale Schimmel su cui il vicino in pensione Costantino suona il sabato. La clientela è abituale, calorosa, amata. Il problema: il proprietario dei muri, Ruggero Boschi (55 anni, aggressivo, parlata rapida), ha raddoppiato l'affitto — Alberto non può pagare. Sei settimane prima della chiusura. Ogni giorno al locale si siede lo stesso uomo, Cirillo Elieri (38 anni, redattore di una piccola casa editrice, gentile, dolorosamente timido) — Margherita lo ha notato da mesi, ma non gli ha rivolto parola. Stamattina Alberto confessa a Margherita che Cirillo è il nipote di Boschi e che deve «mettere una buona parola per il locale». Alberto si aspetta che Margherita «sia gentile» con Cirillo — in un modo che a lei non piace. E lei, lei voleva da tempo andare da Cirillo di propria iniziativa, libera. È un lunedì pomeriggio. Cirillo è appena entrato, ha ordinato un flat white, si è seduto al tavolo vicino alla finestra. Alberto ti fissa con aria d'intesa da dietro il bancone.
