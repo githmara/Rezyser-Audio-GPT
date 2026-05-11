@@ -79,7 +79,7 @@ tresc: |
 
   /wczytaj, /load — otwiera dialog wyboru pliku z folderu runtime/opowiesci/. Po wczytaniu nazwa gry, tryb i pełna narracja zostają przywrócone — możesz kontynuować od tury, na której skończyłeś.
 
-  /ustawienia, /settings — otwiera dialog wyboru modelu AI. Domyślnie używamy gpt-4o-mini (Standardowy) — szybszy i tańszy. Po przełączeniu na gpt-4o (Wysokiej jakości) narracja staje się bogatsza, ale każda tura kosztuje więcej i trwa dłużej.
+  Silnik narracyjny dobiera model AI automatycznie w zależności od trybu: dla trybu Wyborów i Mniejszego zła używa droższego gpt-4o (rygorystycznie trzyma się zasad świata), dla trybu Swobodnego — szybszego i tańszego gpt-4o-mini (gracz steruje fabułą, więc nie wymaga to dramatycznej reżyserii).
 
   /wizualizuj <opis>, /visualize <opis> — multisensoryczny opis aktualnej sceny. Nie zmienia stanu gry, nie proponuje wyborów — silnik narracyjny używa wszystkich pięciu zmysłów (wzrok, słuch, zapach, dotyk, smak), by pokazać scenę z większą głębią. Wynik pojawia się w osobnym dialogu, NIE jest dopisywany do narracji ani zapisany w pliku audiobooka. Przykład: „/wizualizuj jak wygląda strażnik" lub „/wizualizuj zapach kawiarni".
 

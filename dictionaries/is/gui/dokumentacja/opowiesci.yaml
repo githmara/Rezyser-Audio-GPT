@@ -69,7 +69,7 @@ tresc: |
 
   /hlaða, /load — opnar valglugga fyrir skrá úr möppunni runtime/opowiesci/. Eftir að hlaða er nafn leiksins, hamur og öll frásögn endurheimt — þú getur haldið áfram frá þeirri umferð sem þú endaðir á.
 
-  /stillingar, /settings — opnar valglugga fyrir AI-líkan. Sjálfgefið notum við gpt-4o-mini (Standard) — hraðari og ódýrari. Eftir að skipta yfir í gpt-4o (Hágæða) verður frásögnin ríkari, en hver umferð kostar meira og tekur lengri tíma.
+  Frásagnavélin velur AI-líkanið sjálfkrafa eftir stillingu: fyrir Valstillingu og Minna illt notar hún dýrara gpt-4o (heldur sig strangt við reglur heimsins); fyrir Frjálsa stillingu — hraðara og ódýrara gpt-4o-mini (spilarinn stýrir söguþræðinum, svo þung leikstjórn er ekki nauðsynleg).
 
   /sjá <lýsing>, /visualize <lýsing> — fjölskynjunar lýsing á núverandi senu. Breytir ekki ástandi leiksins, leggur ekki til valkosti — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snerting, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskránni. Dæmi: „/sjá hvernig vörðurinn lítur út" eða „/sjá lyktina af kaffihúsinu".
 

@@ -77,7 +77,7 @@ tresc: |
 
   /laden, /load — öffnet einen Dateiauswahldialog aus dem Ordner runtime/opowiesci/. Nach dem Laden werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst von der Runde fortfahren, in der du aufgehört hast.
 
-  /einstellungen, /settings — öffnet einen Dialog zur Auswahl des KI-Modells. Standardmäßig verwenden wir gpt-4o-mini (Standard) — schneller und günstiger. Beim Umschalten auf gpt-4o (Hochwertig) wird die Erzählung reicher, aber jede Runde kostet mehr und dauert länger.
+  Die Erzählmaschine wählt das KI-Modell automatisch je nach Modus: für den Auswahlmodus und das Kleinere Übel verwendet sie das teurere gpt-4o (hält sich strikt an die Weltregeln), für den freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, sodass keine schwere Regiearbeit nötig ist).
 
   /visualisiere <beschreibung>, /visualize <beschreibung> — multisensorische Beschreibung der aktuellen Szene. Ändert nicht den Spielstatus, schlägt keine Entscheidungen vor — die Erzählmaschine verwendet alle fünf Sinne (Sehen, Hören, Riechen, Fühlen, Schmecken), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT zur Erzählung hinzugefügt oder in der Hörbuchdatei gespeichert. Beispiel: „/visualisiere wie der Wächter aussieht" oder „/visualisiere den Geruch des Cafés".
 

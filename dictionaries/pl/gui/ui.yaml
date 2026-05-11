@@ -892,7 +892,7 @@ opowiesci:
   tool_description: |-
     Wcielasz się w bohatera dynamicznie generowanej historii. Wpisz nazwę nowej gry i wybierz tryb, by rozpocząć — narracja prowadzona jest w drugiej osobie i odczytywana przez czytnik ekranu lub TTS.
 
-    Tryb swobodny pozwala spróbować dowolnej akcji wpisanej w pole na dole. Tryb wyborów daje 3-5 ponumerowanych opcji do wyboru przyciskami. Tryb „mniejsze zło" stawia wyłącznie przed niekorzystnymi wyborami — wybierasz, co ci się mniej opłaca. Komendy zaczynające się od ukośnika (/zapisz, /wczytaj, /ustawienia, /koniec, /wizualizuj) działają w każdej chwili.
+    Tryb swobodny pozwala spróbować dowolnej akcji wpisanej w pole na dole. Tryb wyborów daje 3-5 ponumerowanych opcji do wyboru przyciskami. Tryb „mniejsze zło" stawia wyłącznie przed niekorzystnymi wyborami — wybierasz, co ci się mniej opłaca. Komendy zaczynające się od ukośnika (/zapisz, /wczytaj, /koniec, /wizualizuj) działają w każdej chwili.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry:             "Nazwa gry"
@@ -945,7 +945,7 @@ opowiesci:
   lbl_akcja:                 "Twoja akcja lub komenda"
   txt_akcja_name:            "Pole akcji gracza"
   txt_akcja_hint:            "Opisz, co robisz, lub wpisz komendę zaczynającą się od /"
-  txt_akcja_tooltip:         "Wpisz dowolną akcję (free-text) lub komendę systemową: /zapisz /wczytaj /ustawienia /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
+  txt_akcja_tooltip:         "Wpisz dowolną akcję (free-text) lub komendę systemową: /zapisz /wczytaj /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
   btn_wyslij_label:          "&Wyślij"
   btn_wyslij_tooltip:        "Wyślij akcję do silnika narracyjnego"
 
@@ -1000,16 +1000,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /zapisz, /save                    — wymuszenie zapisu gry
     /wczytaj, /load                   — otwórz dialog wczytania
-    /ustawienia, /settings            — zmień model AI (Standard/Quality)
     /wizualizuj <opis>, /visualize    — multisensoryczny opis sceny (bez zapisu)
     /koniec, /quit                    — zamknij aplikację
-  dlg_ustawienia_tytul:      "Ustawienia silnika narracyjnego"
-  dlg_ustawienia_lbl_model:  "Model AI:"
-  dlg_ustawienia_model_standard:  "Standardowy (gpt-4o-mini, szybszy, tańszy)"
-  dlg_ustawienia_model_quality:   "Wysokiej jakości (gpt-4o, wolniejszy, droższy)"
-  dlg_ustawienia_btn_zatwierdz:   "Zatwierdź"
-  dlg_ustawienia_zmieniono_tytul: "Model zmieniony"
-  dlg_ustawienia_zmieniono_tresc: 'Silnik narracyjny będzie odtąd korzystał z modelu „{model}".'
   dlg_visualize_tytul:       "🌅 Wizualizacja sceny"
   dlg_visualize_lbl:         "Multisensoryczny opis aktualnej sceny (nie zmienia stanu gry):"
   dlg_visualize_name:        "Pole z opisem wizualizacji sceny"

@@ -878,7 +878,7 @@ opowiesci:
   tool_description: |-
     Olet dynaamisesti luodun tarinan sankari. Kirjoita uuden pelin nimi ja valitse tila aloittaaksesi — kerronta tapahtuu toisessa persoonassa ja se luetaan ruudunlukijalla tai TTS:llä.
 
-    Vapaa tila antaa mahdollisuuden kokeilla mitä tahansa toimintoa, joka on kirjoitettu alareunan kenttään. Valintatila tarjoaa 3-5 numeroitua vaihtoehtoa, jotka valitaan painikkeilla. "Pienempi paha" -tila tarjoaa vain epäsuotuisia valintoja — valitset, mikä on sinulle vähemmän haitallista. Komennot, jotka alkavat kauttaviivalla (/tallenna, /lataa, /asetukset, /lopeta, /visualisoi) toimivat milloin tahansa.
+    Vapaa tila antaa mahdollisuuden kokeilla mitä tahansa toimintoa, joka on kirjoitettu alareunan kenttään. Valintatila tarjoaa 3-5 numeroitua vaihtoehtoa, jotka valitaan painikkeilla. "Pienempi paha" -tila tarjoaa vain epäsuotuisia valintoja — valitset, mikä on sinulle vähemmän haitallista. Komennot, jotka alkavat kauttaviivalla (/tallenna, /lataa, /lopeta, /visualisoi) toimivat milloin tahansa.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Pelin nimi"
@@ -924,7 +924,7 @@ opowiesci:
   lbl_akcja: "Toimintosi tai komento"
   txt_akcja_name: "Pelaajan toimintokenttä"
   txt_akcja_hint: "Kuvaile, mitä teet, tai kirjoita komento, joka alkaa /"
-  txt_akcja_tooltip: "Kirjoita mikä tahansa toiminto (vapaateksti) tai järjestelmäkomento: /tallenna /lataa /asetukset /lopeta /visualisoi. Toiminnon vahvistaa Lähetä-painike."
+  txt_akcja_tooltip: "Kirjoita mikä tahansa toiminto (vapaateksti) tai järjestelmäkomento: /tallenna /lataa /lopeta /visualisoi. Toiminnon vahvistaa Lähetä-painike."
   btn_wyslij_label: "&Lähetä"
   btn_wyslij_tooltip: "Lähetä toiminto kerrontamoottorille"
 
@@ -979,16 +979,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /tallenna, /save                    — pakota pelin tallennus
     /lataa, /load                   — avaa latausdialogi
-    /asetukset, /settings            — vaihda AI-mallia (Standard/Quality)
     /visualisoi <kuvaus>, /visualize    — moniaistinen kohtauksen kuvaus (ei tallennusta)
     /lopeta, /quit                    — sulje sovellus
-  dlg_ustawienia_tytul: "Kerrontamoottorin asetukset"
-  dlg_ustawienia_lbl_model: "AI-malli:"
-  dlg_ustawienia_model_standard: "Standardi (gpt-4o-mini, nopeampi, halvempi)"
-  dlg_ustawienia_model_quality: "Korkealaatuinen (gpt-4o, hitaampi, kalliimpi)"
-  dlg_ustawienia_btn_zatwierdz: "Vahvista"
-  dlg_ustawienia_zmieniono_tytul: "Malli vaihdettu"
-  dlg_ustawienia_zmieniono_tresc: 'Kerrontamoottori käyttää tästä lähtien mallia "{model}".'
   dlg_visualize_tytul: "🌅 Kohtauksen visualisointi"
   dlg_visualize_lbl: "Moniaistinen kuvaus nykyisestä kohtauksesta (ei muuta pelin tilaa):"
   dlg_visualize_name: "Kohtauksen visualisoinnin kuvauskenttä"

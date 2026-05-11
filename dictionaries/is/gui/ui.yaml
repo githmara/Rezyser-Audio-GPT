@@ -878,7 +878,7 @@ opowiesci:
   tool_description: |-
     Þú leikur hetju í sögunni sem er kviklega búin til. Sláðu inn nafn á nýjum leik og veldu stillingu til að byrja — frásögnin er í annarri persónu og lesin af skjálesara eða TTS.
 
-    Frjáls stilling leyfir þér að prófa hvaða aðgerð sem er sem þú slærð inn í reitinn neðst. Valstilling gefur 3-5 tölusett val sem hægt er að velja með hnöppum. Stillingin „minna illt" býður aðeins upp á óhagstæð val — þú velur það sem er minna óhagstætt. Skipanir sem byrja á skástriki (/vista, /hlaða, /stillingar, /enda, /sjá) virka hvenær sem er.
+    Frjáls stilling leyfir þér að prófa hvaða aðgerð sem er sem þú slærð inn í reitinn neðst. Valstilling gefur 3-5 tölusett val sem hægt er að velja með hnöppum. Stillingin „minna illt" býður aðeins upp á óhagstæð val — þú velur það sem er minna óhagstætt. Skipanir sem byrja á skástriki (/vista, /hlaða, /enda, /sjá) virka hvenær sem er.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Nafn leiks"
@@ -924,7 +924,7 @@ opowiesci:
   lbl_akcja: "Aðgerð þín eða skipun"
   txt_akcja_name: "Reitur fyrir aðgerðir leikmanns"
   txt_akcja_hint: "Lýstu því sem þú gerir, eða sláðu inn skipun sem byrjar á /"
-  txt_akcja_tooltip: "Sláðu inn hvaða aðgerð sem er (frjáls texti) eða kerfisskipun: /vista /hlaða /stillingar /enda /sjá. Aðgerð er staðfest með hnappinum Senda."
+  txt_akcja_tooltip: "Sláðu inn hvaða aðgerð sem er (frjáls texti) eða kerfisskipun: /vista /hlaða /enda /sjá. Aðgerð er staðfest með hnappinum Senda."
   btn_wyslij_label: "&Senda"
   btn_wyslij_tooltip: "Senda aðgerð til frásagnavélar"
 
@@ -979,16 +979,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /vista, /save                    — þvinga vistun leiks
     /hlaða, /load                   — opna hleðsluskjá
-    /stillingar, /settings            — breyta AI líkani (Standard/Quality)
     /sjá <lýsing>, /visualize    — fjölskynja lýsing á senu (án vistunar)
     /enda, /quit                    — loka forritinu
-  dlg_ustawienia_tytul: "Stillingar frásagnavélar"
-  dlg_ustawienia_lbl_model: "AI líkan:"
-  dlg_ustawienia_model_standard: "Staðlað (gpt-4o-mini, hraðara, ódýrara)"
-  dlg_ustawienia_model_quality: "Hágæða (gpt-4o, hægara, dýrara)"
-  dlg_ustawienia_btn_zatwierdz: "Staðfesta"
-  dlg_ustawienia_zmieniono_tytul: "Líkan breytt"
-  dlg_ustawienia_zmieniono_tresc: 'Frásagnavélin mun héðan í frá nota líkanið „{model}".'
   dlg_visualize_tytul: "🌅 Senuvísualisering"
   dlg_visualize_lbl: "Fjölskynja lýsing á núverandi senu (breytir ekki stöðu leiks):"
   dlg_visualize_name: "Reitur með lýsingu á senuvísualiseringu"

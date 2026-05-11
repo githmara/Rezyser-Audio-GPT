@@ -877,7 +877,7 @@ opowiesci:
   tool_description: |-
     You play as the hero of a dynamically generated story. Enter the name of a new game and choose a mode to start — the narrative is conducted in the second person and read by a screen reader or TTS.
 
-    Free mode allows you to try any action entered in the field at the bottom. Choice mode gives 3-5 numbered options to choose from with buttons. The "lesser evil" mode presents only unfavorable choices — you choose what is less disadvantageous. Commands starting with a slash (/save, /load, /settings, /end, /visualize) work at any time.
+    Free mode allows you to try any action entered in the field at the bottom. Choice mode gives 3-5 numbered options to choose from with buttons. The "lesser evil" mode presents only unfavorable choices — you choose what is less disadvantageous. Commands starting with a slash (/save, /load, /end, /visualize) work at any time.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Game Name"
@@ -923,7 +923,7 @@ opowiesci:
   lbl_akcja: "Your Action or Command"
   txt_akcja_name: "Player Action Field"
   txt_akcja_hint: "Describe what you do, or enter a command starting with /"
-  txt_akcja_tooltip: "Enter any action (free-text) or system command: /save /load /settings /end /visualize. Confirm the action with the Send button."
+  txt_akcja_tooltip: "Enter any action (free-text) or system command: /save /load /end /visualize. Confirm the action with the Send button."
   btn_wyslij_label: "&Send"
   btn_wyslij_tooltip: "Send action to the narrative engine"
 
@@ -978,16 +978,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /save, /save                    — force game save
     /load, /load                   — open load dialog
-    /settings, /settings            — change AI model (Standard/Quality)
     /visualize <description>, /visualize    — multisensory scene description (no save)
     /quit, /quit                    — close the application
-  dlg_ustawienia_tytul: "Narrative Engine Settings"
-  dlg_ustawienia_lbl_model: "AI Model:"
-  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, faster, cheaper)"
-  dlg_ustawienia_model_quality: "High Quality (gpt-4o, slower, more expensive)"
-  dlg_ustawienia_btn_zatwierdz: "Confirm"
-  dlg_ustawienia_zmieniono_tytul: "Model Changed"
-  dlg_ustawienia_zmieniono_tresc: 'The narrative engine will now use the model "{model}".'
   dlg_visualize_tytul: "🌅 Scene Visualization"
   dlg_visualize_lbl: "Multisensory description of the current scene (does not change game state):"
   dlg_visualize_name: "Scene Visualization Description Field"

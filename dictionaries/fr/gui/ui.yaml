@@ -873,7 +873,7 @@ opowiesci:
   tool_description: |-
     Vous incarnez le héros d'une histoire générée dynamiquement. Entrez le nom d'un nouveau jeu et choisissez un mode pour commencer — la narration est menée à la deuxième personne et lue par un lecteur d'écran ou TTS.
 
-    Le mode libre vous permet d'essayer n'importe quelle action saisie dans le champ en bas. Le mode choix propose 3 à 5 options numérotées à choisir avec des boutons. Le mode « moindre mal » ne propose que des choix défavorables — vous choisissez ce qui vous convient le moins. Les commandes commençant par une barre oblique (/sauvegarder, /charger, /paramètres, /fin, /visualiser) fonctionnent à tout moment.
+    Le mode libre vous permet d'essayer n'importe quelle action saisie dans le champ en bas. Le mode choix propose 3 à 5 options numérotées à choisir avec des boutons. Le mode « moindre mal » ne propose que des choix défavorables — vous choisissez ce qui vous convient le moins. Les commandes commençant par une barre oblique (/sauvegarder, /charger, /fin, /visualiser) fonctionnent à tout moment.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Nom du jeu"
@@ -919,7 +919,7 @@ opowiesci:
   lbl_akcja: "Votre action ou commande"
   txt_akcja_name: "Champ d'action du joueur"
   txt_akcja_hint: "Décrivez ce que vous faites ou entrez une commande commençant par /"
-  txt_akcja_tooltip: "Entrez une action quelconque (texte libre) ou une commande système : /sauvegarder /charger /paramètres /fin /visualiser. L'action est validée par le bouton Envoyer."
+  txt_akcja_tooltip: "Entrez une action quelconque (texte libre) ou une commande système : /sauvegarder /charger /fin /visualiser. L'action est validée par le bouton Envoyer."
   btn_wyslij_label: "&Envoyer"
   btn_wyslij_tooltip: "Envoyer l'action au moteur narratif"
 
@@ -974,16 +974,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /sauvegarder, /save                    — forcer la sauvegarde du jeu
     /charger, /load                   — ouvrir la boîte de dialogue de chargement
-    /paramètres, /settings            — changer le modèle AI (Standard/Qualité)
     /visualiser <description>, /visualize    — description multisensorielle de la scène (sans sauvegarde)
     /fin, /quit                    — fermer l'application
-  dlg_ustawienia_tytul: "Paramètres du moteur narratif"
-  dlg_ustawienia_lbl_model: "Modèle AI :"
-  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, plus rapide, moins cher)"
-  dlg_ustawienia_model_quality: "Haute qualité (gpt-4o, plus lent, plus cher)"
-  dlg_ustawienia_btn_zatwierdz: "Valider"
-  dlg_ustawienia_zmieniono_tytul: "Modèle changé"
-  dlg_ustawienia_zmieniono_tresc: 'Le moteur narratif utilisera désormais le modèle « {model} ».'
   dlg_visualize_tytul: "🌅 Visualisation de la scène"
   dlg_visualize_lbl: "Description multisensorielle de la scène actuelle (ne change pas l'état du jeu) :"
   dlg_visualize_name: "Champ avec la description de la visualisation de la scène"

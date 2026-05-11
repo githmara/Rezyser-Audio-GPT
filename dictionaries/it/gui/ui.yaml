@@ -878,7 +878,7 @@ opowiesci:
   tool_description: |-
     Interpreti il ruolo di un eroe in una storia generata dinamicamente. Inserisci il nome del nuovo gioco e scegli la modalità per iniziare — la narrazione è condotta in seconda persona e letta da uno screen reader o TTS.
 
-    La modalità libera ti permette di provare qualsiasi azione inserita nel campo in basso. La modalità scelte offre 3-5 opzioni numerate da selezionare con i pulsanti. La modalità "male minore" presenta solo scelte sfavorevoli — scegli quella che ti conviene meno. I comandi che iniziano con una barra (/, /salva, /carica, /impostazioni, /fine, /visualizza) funzionano in qualsiasi momento.
+    La modalità libera ti permette di provare qualsiasi azione inserita nel campo in basso. La modalità scelte offre 3-5 opzioni numerate da selezionare con i pulsanti. La modalità "male minore" presenta solo scelte sfavorevoli — scegli quella che ti conviene meno. I comandi che iniziano con una barra (/, /salva, /carica, /fine, /visualizza) funzionano in qualsiasi momento.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Nome del gioco"
@@ -924,7 +924,7 @@ opowiesci:
   lbl_akcja: "La tua azione o comando"
   txt_akcja_name: "Campo azioni del giocatore"
   txt_akcja_hint: "Descrivi cosa fai o inserisci un comando che inizia con /"
-  txt_akcja_tooltip: "Inserisci qualsiasi azione (testo libero) o comando di sistema: /salva /carica /impostazioni /fine /visualizza. L'azione viene confermata con il pulsante Invia."
+  txt_akcja_tooltip: "Inserisci qualsiasi azione (testo libero) o comando di sistema: /salva /carica /fine /visualizza. L'azione viene confermata con il pulsante Invia."
   btn_wyslij_label: "&Invia"
   btn_wyslij_tooltip: "Invia l'azione al motore narrativo"
 
@@ -979,16 +979,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /salva, /save                    — forza il salvataggio del gioco
     /carica, /load                   — apri il dialogo di caricamento
-    /impostazioni, /settings         — cambia il modello AI (Standard/Qualità)
     /visualizza <descrizione>, /visualize    — descrizione multisensoriale della scena (senza salvataggio)
     /fine, /quit                     — chiudi l'applicazione
-  dlg_ustawienia_tytul: "Impostazioni del motore narrativo"
-  dlg_ustawienia_lbl_model: "Modello AI:"
-  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, più veloce, più economico)"
-  dlg_ustawienia_model_quality: "Alta qualità (gpt-4o, più lento, più costoso)"
-  dlg_ustawienia_btn_zatwierdz: "Conferma"
-  dlg_ustawienia_zmieniono_tytul: "Modello cambiato"
-  dlg_ustawienia_zmieniono_tresc: 'Il motore narrativo utilizzerà d''ora in poi il modello "{model}".'
   dlg_visualize_tytul: "🌅 Visualizzazione della scena"
   dlg_visualize_lbl: "Descrizione multisensoriale della scena attuale (non cambia lo stato del gioco):"
   dlg_visualize_name: "Campo con la descrizione della visualizzazione della scena"

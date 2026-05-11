@@ -77,7 +77,7 @@ tresc: |
 
   /lataa, /load — avaa tiedoston valintaikkunan kansiosta runtime/opowiesci/. Kun lataat, pelin nimi, tila ja koko kertomus palautetaan — voit jatkaa siitä vuorosta, johon jäit.
 
-  /asetukset, /settings — avaa AI-mallin valintaikkunan. Oletuksena käytämme gpt-4o-miniä (Standardi) — nopeampi ja halvempi. Kun vaihdat gpt-4o:hon (Korkealaatuinen), kertomus muuttuu rikkaammaksi, mutta jokainen vuoro maksaa enemmän ja kestää kauemmin.
+  Kerrontamoottori valitsee AI-mallin automaattisesti tilan mukaan: Valintatilassa ja Pienemmässä pahassa käytetään kalliimpaa gpt-4o:ta (noudattaa tiukasti maailman sääntöjä); Vapaassa tilassa — nopeampaa ja halvempaa gpt-4o-miniä (pelaaja ohjaa juonta, joten raskasta ohjaajan työtä ei tarvita).
 
   /visualisoi <kuvaus>, /visualize <kuvaus> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kertomusmoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvemmin. Tulos ilmestyy erilliseen dialogiin, sitä EI lisätä kertomukseen eikä tallenneta äänikirjatiedostoon. Esimerkki: "/visualisoi miltä vartija näyttää" tai "/visualisoi kahvilan tuoksu".
 

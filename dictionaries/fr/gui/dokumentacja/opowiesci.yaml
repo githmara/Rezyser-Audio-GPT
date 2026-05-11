@@ -77,7 +77,7 @@ tresc: |
 
   /wczytaj, /load — ouvre une boîte de dialogue de sélection de fichier depuis le dossier runtime/opowiesci/. Après le chargement, le nom du jeu, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous êtes arrêté.
 
-  /ustawienia, /settings — ouvre une boîte de dialogue de sélection du modèle AI. Par défaut, nous utilisons gpt-4o-mini (Standard) — plus rapide et moins cher. En passant à gpt-4o (Haute qualité), la narration devient plus riche, mais chaque tour coûte plus cher et prend plus de temps.
+  Le moteur narratif choisit automatiquement le modèle d'IA en fonction du mode : pour le mode Choix et le Moindre mal, il utilise le plus coûteux gpt-4o (respecte rigoureusement les règles du monde) ; pour le mode Libre — le plus rapide et moins cher gpt-4o-mini (le joueur dirige l'intrigue, donc un lourd travail de mise en scène n'est pas nécessaire).
 
   /wizualizuj <opis>, /visualize <description> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj à quoi ressemble le garde » ou « /wizualizuj l'odeur du café ».
 

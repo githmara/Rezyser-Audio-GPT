@@ -117,8 +117,6 @@ class OpowiesciPanel(wx.Panel):
         "/save":       "_komenda_zapisz",
         "/wczytaj":    "_komenda_wczytaj",
         "/load":       "_komenda_wczytaj",
-        "/ustawienia": "_komenda_ustawienia",
-        "/settings":   "_komenda_ustawienia",
         "/wizualizuj": "_komenda_visualize",
         "/visualize":  "_komenda_visualize",
         "/koniec":     "_komenda_koniec",
@@ -160,9 +158,11 @@ class OpowiesciPanel(wx.Panel):
         self._projekt: ProjektOpowiesci | None = None
 
         # ---- Faza 4: slash-komendy + tiktoken + auto-streszczenie ---------
-        # ``_aktualny_model`` można zmienić przez `/ustawienia`. Tury wysyłane
-        # PO zmianie idą nowym modelem; tury w locie zostają na starym.
-        self._aktualny_model: str = oai.MODEL_DOMYSLNY
+        # v15.1: brak globalnego pola `_aktualny_model` — model dobierany
+        # automatycznie z trybu przez :meth:`_model_dla_trybu`. Powód:
+        # gpt-4o-mini regularnie łamał zasady świata w trybach Wyborów /
+        # Mniejszego zła (np. proponował opcje neutralne mimo wymogu
+        # „wszystkie wybory niekorzystne"), więc tryb decyduje twardo.
         # Race-condition guard: streszczenie i cinematic warning to wywołania
         # LLM w wątku tła. Bez locka gracz mógłby spawnować drugie wywołanie
         # zanim pierwsze wróci, mutując ``_snapshot.ostatnie_tury`` w trakcie
@@ -567,6 +567,24 @@ class OpowiesciPanel(wx.Panel):
         """Zwraca numer trybu (3/4/5) ze stanu RadioBox-a (indeks 0/1/2)."""
         return self._MAPA_TRYB_RB_NA_INT[self._rb_tryb.GetSelection()]
 
+    @staticmethod
+    def _model_dla_trybu(tryb: int) -> str:
+        """Mapuje numer trybu na model LLM.
+
+        v15.1: tryby z wyborami (4 = Wyborów, 5 = Mniejsze zło) używają
+        droższego gpt-4o, bo gpt-4o-mini regularnie łamał zasady świata
+        (proponował np. opcje neutralne w trybie „wszystkie wybory
+        niekorzystne", ignorował fonetyczne reguły imion z księgi).
+        Tryb 3 (Swobodny) zostaje na gpt-4o-mini — gracz steruje fabułą,
+        więc model nie musi przygotowywać dramatycznych dylematów sam.
+        Tryb 0 (Burza / `/visualize`) — mini, bo to opisówka.
+        Wywołania meta (streszczenie, cinematic) zawsze idą na mini —
+        nie używają tego helpera, hardkodują `oai.MODEL_DOMYSLNY`.
+        """
+        if tryb in (oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO):
+            return oai.MODEL_QUALITY
+        return oai.MODEL_DOMYSLNY
+
     # ------------------------------------------------------------------
     # _on_wyslij: walidacja → spawn daemon thread → _wyslij_worker
     # ------------------------------------------------------------------
@@ -584,8 +602,8 @@ class OpowiesciPanel(wx.Panel):
             return
 
         # Faza 4: slash-komendy są przechwytywane PRZED walidacją API/projektu.
-        # `/ustawienia`, `/koniec` działają nawet bez aktywnej gry; `/zapisz`,
-        # `/wizualizuj` mają własne walidacje wewnątrz handlerów.
+        # `/koniec` działa nawet bez aktywnej gry; `/zapisz`, `/wizualizuj`
+        # mają własne walidacje wewnątrz handlerów.
         if user_text.startswith("/"):
             self._txt_akcja.SetValue("")
             self._obsluz_komende(user_text)
@@ -617,7 +635,7 @@ class OpowiesciPanel(wx.Panel):
         # próbuje to robić same po `_obsluz_ture`, ale w razie awarii
         # streszczenia (rate limit, timeout) bufor zostaje pełny.
         status_pamieci = oai.oblicz_status_pamieci(
-            self._snapshot, self._aktualny_tryb_int(), self._aktualny_model,
+            self._snapshot, self._aktualny_tryb_int(), oai.MODEL_DOMYSLNY,
         )
         if status_pamieci.poziom == oai.POZIOM_ALARM:
             wx.MessageBox(
@@ -684,7 +702,7 @@ class OpowiesciPanel(wx.Panel):
                 snapshot=snapshot,
                 user_input=user_input,
                 tryb=tryb,
-                model=self._aktualny_model,
+                model=self._model_dla_trybu(tryb),
             )
         except Exception as exc:  # noqa: BLE001
             # Łapiemy wszystko (RateLimitError, APITimeoutError, RuntimeError
@@ -781,7 +799,7 @@ class OpowiesciPanel(wx.Panel):
         # Robimy je AFTER Cinematic, żeby nie ucinać kontekstu który
         # cinematic zna jako tło (3 ostatnie tury).
         status_pamieci = oai.oblicz_status_pamieci(
-            self._snapshot, tryb, self._aktualny_model,
+            self._snapshot, tryb, oai.MODEL_DOMYSLNY,
         )
         if status_pamieci.poziom == oai.POZIOM_OSTRZEZENIE and not self._meta_w_toku:
             self._spawn_streszczenie()
@@ -1305,48 +1323,6 @@ class OpowiesciPanel(wx.Panel):
         """`/koniec` / `/quit` — zamyka aplikację."""
         wx.GetTopLevelParent(self).Close()
 
-    def _komenda_ustawienia(self, _arg: str) -> None:
-        """`/ustawienia` / `/settings` — dialog wyboru modelu (Standard/Quality)."""
-        dlg = wx.Dialog(self, title=t("opowiesci.dlg_ustawienia_tytul"), size=(480, 220))
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
-        lbl = wx.StaticText(dlg, label=t("opowiesci.dlg_ustawienia_lbl_model"))
-        rb = wx.RadioBox(
-            dlg,
-            choices=[
-                t("opowiesci.dlg_ustawienia_model_standard"),
-                t("opowiesci.dlg_ustawienia_model_quality"),
-            ],
-            majorDimension=1,
-            style=wx.RA_SPECIFY_COLS,
-        )
-        # Set initial selection na podstawie aktualnego modelu.
-        rb.SetSelection(0 if self._aktualny_model == oai.MODEL_DOMYSLNY else 1)
-
-        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("opowiesci.dlg_ustawienia_btn_zatwierdz"))
-        btn_anuluj = wx.Button(dlg, wx.ID_CANCEL, label=t("common.btn_zamknij"))
-
-        row_btn = wx.BoxSizer(wx.HORIZONTAL)
-        row_btn.Add(btn_ok,     flag=wx.RIGHT, border=8)
-        row_btn.Add(btn_anuluj)
-
-        sizer.Add(lbl, flag=wx.ALL,                          border=8)
-        sizer.Add(rb,  proportion=1, flag=wx.EXPAND | wx.ALL, border=8)
-        sizer.Add(row_btn, flag=wx.ALIGN_RIGHT | wx.ALL,      border=8)
-        dlg.SetSizer(sizer)
-        rb.SetFocus()
-
-        if dlg.ShowModal() == wx.ID_OK:
-            wybor = rb.GetSelection()
-            self._aktualny_model = oai.MODEL_DOMYSLNY if wybor == 0 else oai.MODEL_QUALITY
-            wx.MessageBox(
-                t("opowiesci.dlg_ustawienia_zmieniono_tresc", model=self._aktualny_model),
-                t("opowiesci.dlg_ustawienia_zmieniono_tytul"),
-                wx.OK | wx.ICON_INFORMATION,
-                self,
-            )
-        dlg.Destroy()
-
     def _komenda_visualize(self, arg: str) -> None:
         """`/wizualizuj <opis>` / `/visualize` — multisensoryczny opis sceny."""
         if not self._api_dostepne:
@@ -1388,7 +1364,7 @@ class OpowiesciPanel(wx.Panel):
                 klient=self._client,
                 snapshot=snapshot,
                 user_input=arg,
-                model=self._aktualny_model,
+                model=oai.MODEL_DOMYSLNY,
             )
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._obsluz_blad, exc)
@@ -1432,7 +1408,7 @@ class OpowiesciPanel(wx.Panel):
             return
 
         status = oai.oblicz_status_pamieci(
-            self._snapshot, self._aktualny_tryb_int(), self._aktualny_model,
+            self._snapshot, self._aktualny_tryb_int(), oai.MODEL_DOMYSLNY,
         )
         self._gauge_pamiec.SetValue(status.procent)
         etap_klucz = {
@@ -1471,7 +1447,7 @@ class OpowiesciPanel(wx.Panel):
         """LLM streszcza ostatnie tury — blokujący wątek tła."""
         try:
             streszczenie = oai.streszczaj_kontekst(
-                klient=self._client, snapshot=snapshot, model=self._aktualny_model,
+                klient=self._client, snapshot=snapshot, model=oai.MODEL_DOMYSLNY,
             )
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._streszczenie_blad, exc)
@@ -1537,7 +1513,7 @@ class OpowiesciPanel(wx.Panel):
     def _cinematic_worker(self, snapshot: oai.SnapshotOpowiesci) -> None:
         try:
             tekst = oai.generuj_cinematic_warning(
-                klient=self._client, snapshot=snapshot, model=self._aktualny_model,
+                klient=self._client, snapshot=snapshot, model=oai.MODEL_DOMYSLNY,
             )
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._cinematic_blad, exc)

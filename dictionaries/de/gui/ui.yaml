@@ -878,7 +878,7 @@ opowiesci:
   tool_description: |-
     Du schlüpfst in die Rolle eines Helden in einer dynamisch generierten Geschichte. Gib den Namen eines neuen Spiels ein und wähle einen Modus, um zu beginnen — die Erzählung erfolgt in der zweiten Person und wird von einem Screenreader oder TTS vorgelesen.
 
-    Der freie Modus erlaubt es, jede beliebige Aktion im Feld unten einzugeben. Der Auswahlmodus bietet 3-5 nummerierte Optionen zur Auswahl mit Schaltflächen. Der Modus „kleineres Übel" stellt ausschließlich ungünstige Entscheidungen — du wählst, was dir weniger schadet. Befehle, die mit einem Schrägstrich beginnen (/speichern, /laden, /einstellungen, /ende, /visualisieren), funktionieren jederzeit.
+    Der freie Modus erlaubt es, jede beliebige Aktion im Feld unten einzugeben. Der Auswahlmodus bietet 3-5 nummerierte Optionen zur Auswahl mit Schaltflächen. Der Modus „kleineres Übel" stellt ausschließlich ungünstige Entscheidungen — du wählst, was dir weniger schadet. Befehle, die mit einem Schrägstrich beginnen (/speichern, /laden, /ende, /visualisieren), funktionieren jederzeit.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Spielname"
@@ -924,7 +924,7 @@ opowiesci:
   lbl_akcja: "Deine Aktion oder Befehl"
   txt_akcja_name: "Spieleraktionsfeld"
   txt_akcja_hint: "Beschreibe, was du tust, oder gib einen Befehl ein, der mit / beginnt"
-  txt_akcja_tooltip: "Gib eine beliebige Aktion (Freitext) oder einen Systembefehl ein: /speichern /laden /einstellungen /ende /visualisieren. Aktion wird mit der Schaltfläche Senden bestätigt."
+  txt_akcja_tooltip: "Gib eine beliebige Aktion (Freitext) oder einen Systembefehl ein: /speichern /laden /ende /visualisieren. Aktion wird mit der Schaltfläche Senden bestätigt."
   btn_wyslij_label: "&Senden"
   btn_wyslij_tooltip: "Sende Aktion an die Erzählmaschine"
 
@@ -979,16 +979,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /speichern, /save                    — erzwinge das Speichern des Spiels
     /laden, /load                   — öffne den Lade-Dialog
-    /einstellungen, /settings            — ändere das AI-Modell (Standard/Qualität)
     /visualisieren <beschreibung>, /visualize    — multisensorische Beschreibung der Szene (ohne Speicherung)
     /ende, /quit                    — schließe die Anwendung
-  dlg_ustawienia_tytul: "Einstellungen der Erzählmaschine"
-  dlg_ustawienia_lbl_model: "AI-Modell:"
-  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, schneller, günstiger)"
-  dlg_ustawienia_model_quality: "Hohe Qualität (gpt-4o, langsamer, teurer)"
-  dlg_ustawienia_btn_zatwierdz: "Bestätigen"
-  dlg_ustawienia_zmieniono_tytul: "Modell geändert"
-  dlg_ustawienia_zmieniono_tresc: 'Die Erzählmaschine wird nun das Modell „{model}" verwenden.'
   dlg_visualize_tytul: "🌅 Szenenvisualisierung"
   dlg_visualize_lbl: "Multisensorische Beschreibung der aktuellen Szene (ändert den Spielstand nicht):"
   dlg_visualize_name: "Feld mit der Beschreibung der Szenenvisualisierung"

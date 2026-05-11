@@ -69,7 +69,7 @@ tresc: |
 
   /carica, /load — apre il dialogo di selezione file dalla cartella runtime/opowiesci/. Dopo il caricamento, il nome del gioco, la modalità e l'intera narrazione vengono ripristinati — puoi continuare dal turno in cui hai interrotto.
 
-  /impostazioni, /settings — apre il dialogo di selezione del modello AI. Di default usiamo gpt-4o-mini (Standard) — più veloce ed economico. Passando a gpt-4o (Alta qualità) la narrazione diventa più ricca, ma ogni turno costa di più e dura più a lungo.
+  Il motore narrativo seleziona automaticamente il modello AI in base alla modalità: per la modalità Scelte e Male minore usa il più costoso gpt-4o (rispetta rigorosamente le regole del mondo); per la modalità Libera — il più veloce ed economico gpt-4o-mini (il giocatore guida la trama, quindi non è necessario un pesante lavoro di regia).
 
   /visualizza <descrizione>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo usa tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in un dialogo separato, NON viene aggiunto alla narrazione né salvato nel file audiobook. Esempio: "/visualizza come appare il guardiano" o "/visualizza l'odore della caffetteria".
 
