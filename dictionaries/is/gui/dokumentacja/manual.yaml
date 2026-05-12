@@ -332,6 +332,10 @@ tresc: |
 
   Hreinsun í leiðinni: Handritið fjarlægir sjálfkrafa HTML merki (ef textinn kemur úr vafra eða staðbundinni .html skrá, t.d. búið til af Poliglota) og Markdown fyrirsagnir (t.d. ### eða ####) áður en unnið er úr því. Þú þarft ekki að hreinsa skrána handvirkt.
 
+  Sögu-hamur: sjálfvirk hópun umferða í atriði (frá v15.1)
+
+  Ef þú hleður inn í Arkitektinn skrá skrypty/<leikur>.txt sem er búin til af Gagnvirkum Sögum, þá þekkir umbreytirinn umferðarmerkin (t.d. „--- Umferð 7 ---") á 9 tungumálum (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) og setur á fimm umferða fresti inn nýja fyrsta stigs fyrirsögn í forminu „Atriði N" (númerið byrjar á 1, staðbundið fyrir tungumálið — „Scena N" á pólsku, „Scene N" á ensku, o.s.frv.). Hin umferðarmerkin eru fjarlægð — þau birtast ekki í frásögn hljóðbókarinnar, því „Umferð 7" sem TTS les rýfur upplifun hlustandans. Niðurstaðan er Word-skrá með náttúrulegri skiptingu í atriði sem hvert um sig er nokkrar mínútur af hljóði, tilbúin til innflutnings í ElevenLabs. Vélbúnaðurinn er sjálfgreinandi — venjulegar hljóðbóka-skrár án umferðarmerkja (klassísk frásögn frá Leikstjóranum) eru unnar nákvæmlega eins og áður.
+
   Öflugur kostur fyrir NVDA og ElevenLabs notendur
 
   "Heading 1" snið fyrir kafla er ekki bara fagurfræðilegt. Í NVDA geturðu farið hratt um fyrirsagnir með því að ýta á H (eða 1 fyrir fyrirsagnir fyrsta stigs). Í stað þess að fletta í gegnum hundruð blaðsíðna, hopparðu frá kafla til kafla á sekúndubrotum. Þetta breytir vinnuaðferðum með löng skjöl. Í ElevenLabs hefurðu tryggingu fyrir því að vélin setur sjálfkrafa inn skurði og mun ekki frjósa meðan á leikstjórn hljóðklippa stendur.

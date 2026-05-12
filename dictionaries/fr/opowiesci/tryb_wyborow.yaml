@@ -1,0 +1,23 @@
+# -----------------------------------------------------------------------------
+#  MODE CHOIX (mode 4) — 3 à 5 options numérotées par tour. La saisie de
+#  texte libre du joueur est mappée sémantiquement à l'option la plus
+#  proche. L'interface affiche la zone des choix avec des `wx.Button`
+#  dynamiques si le LLM a renvoyé un tableau `wybory[]` non vide
+#  (hallucination → repli sur le texte libre).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Mode choix — 3 à 5 options A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- Paramètres OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Annexe au prompt_systemowy de baza.yaml ---
+prompt_systemowy: |
+  MODE : CHOIX. Le champ `wybory` contient TOUJOURS 3 à 5 éléments étiquetés avec les lettres A, B, C, D, E. Chaque choix est une action concrète que le joueur peut effectuer — distincte, non redondante. La saisie de texte libre du joueur sera mappée sémantiquement à l'option la plus proche.
+
+  FORMAT DES CHOIX (STRICT) : chaque `tekst` du tableau `wybory[]` DOIT être formulé à **l'impératif de la deuxième personne du singulier (tutoiement)** (« cours sur le chemin de la forêt », « ouvre la porte », « demande à l'ancien des nouvelles de la fille », « prends la lanterne sur la table »). FORMES INTERDITES : infinitif (« courir sur le chemin »), première personne (« je cours sur le chemin », « je prends la lanterne »), description à la troisième personne (« le personnage court »). Si l'action nécessite un objet — inclus-le dans le choix (« demande à la sage-femme des nouvelles de l'enfant », pas un simple « demande »). Le parallélisme structurel entre A-E est PLUS IMPORTANT que la variation stylistique — le joueur doit voir cinq formes parallèles.
+
+  VARIÉTÉ : les 3 à 5 options doivent être des actions différentes (pas des variantes de la même), avec des conséquences narratives distinctes. Évite les « faux choix » comme « regarde autour de toi » placé à côté de « va vers la porte » — regarder autour devrait faire partie de la narration, pas être un choix.

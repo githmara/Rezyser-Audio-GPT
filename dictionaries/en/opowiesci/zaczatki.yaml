@@ -1,0 +1,59 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 Quick Start presets for a new game. When the player selects
+#  "New game", the chosen preset auto-fills the mode and injects `seed_swiata`
+#  into the snapshot (the LLM receives it as the opening scene context).
+#
+#  EVERY preset is written BY HAND per language — this is literature, not
+#  technical i18n. The target language has its own cultural motifs; we do
+#  NOT calque from Polish (see `feedback_yaml_prompty.md` and
+#  `feedback_lokalizacja_nazw.md`).
+#
+#  EN scope: anglophone settings (Appalachian shelters / English fenlands /
+#  Boston noir / a research station with English-speaking crew / Brooklyn
+#  coffee shop). Names, accents and cultural references are native English,
+#  not transliterated Polish.
+#
+#  Field `tryb_domyslny`: 3=Free / 4=Choices / 5=Lesser Evil.
+#  For a blind player, modes 4 and 5 are preferred (precise clickable
+#  choices), but Free is kept for horror/comedy (where the player's
+#  improvisation is part of the experience).
+#
+#  YAML keys (`po_apokaliptyczna_sf`, etc.) stay Polish — they are internal
+#  IDs indexed positionally by the GUI, not user-facing strings.
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "Post-apocalyptic SF"
+    opis_krotki: "A century after ecological collapse. The remnants of humanity in shelters beneath the Appalachians. A choice between pragmatism and humanity."
+    tryb_domyslny: 4
+    seed_swiata: |
+      The world two hundred years after the Long Burn — a global cataclysm that scorched the atmosphere. UV radiation kills anyone who steps onto the surface without a suit. Humanity lives in shelters dug into the limestone of the Appalachian Mountains, running on hydroponics, synthetic proteins and zero-water economies. The player is a young courier of Clan Backbone, one of a dozen communities surviving underground. The clans trade with one another, but sometimes fight over resources — battery cells, seed stock, genes still undegraded by radiation. Clan Backbone has a secret: their ventilation shaft opens onto an underground freshwater lake. Nobody outside the Elders knows. The player has just been given their first serious run — smuggle a probiotic microflora to Clan Heron, who are dying of an irreversible gut dysbiosis. The route runs through the overrun tunnel, where mutated rats are said to live. Recurring characters: Carmela (40, courier dispatcher, pragmatic; accent: short sentences, calls everyone "girl" instead of their name), Old Wick (60, Elder of the Backbone, carries pre-Burn memory; accent: archaic Appalachian English, uses words from the 1980s news). Atmosphere stifling, neon-orange from sodium lamps, the smell of machine oil and mould.
+
+  mroczne_fantasy:
+    etykieta: "Dark fantasy"
+    opis_krotki: "The borderlands of an English kingdom soaked in rain. A demon inquisitor on the trail of villagers who may be sheltering a child, or something far worse."
+    tryb_domyslny: 5
+    seed_swiata: |
+      The Kingdom of the Three Brooks, ninth year of the religious war between the Church of the Flame and the Old Gods. The player is a junior Inquisitor of the Order of the Bramble Sisters — women who have broken their vows and taken up swords when the Church needs more than prayer. The mission: you have reached the village of Birchmoor, where a denunciation reports signs of the Tending (a rite of the Old Gods that involves keeping a "possessed" child alive instead of drowning them, as the Flame demands). The denunciation is written in an unsteady hand — the author is illiterate, a labourer or a kitchen maid. The village is silent. Headman Edmund (50, ruddy face, will not meet your eye; accent: Norfolk dialect, says "aye, my lady" and drops his h's) invites you to supper and talks about the price of rye. The midwife Roslyn (35, widow, long black braids; accent: lilting, fond of weather metaphors) treats you with open hostility. In a cottage at the edge of the forest lives a family who keeps strangely to themselves — the farmer Galen, his wife Mary, two grown children. Rumour says there is a third, smaller one. It has rained for three days, the road to the nearest garrison is mud, and you will be stuck here a fortnight. Your inquisitor's signet carries the Flame's magic — it can burn the innocent too, when a village turns on you. At night you hear from the cottage at the forest edge a strange humming, like the voices of two mothers speaking at once, except one of them is not human.
+
+  urban_fantasy_detective:
+    etykieta: "Urban fantasy detective"
+    opis_krotki: "Boston, 2008. A private detective who sees ghosts. A client wants her husband found — he vanished in the North End, but the North End is not only the North End."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Boston, October 2008, a rainy evening. The player is a private investigator — Jack "Jacky" Walsh, 38, a former Suffolk County patrolman, dismissed for drinking on duty. He carries something he refuses to name: he sees shadows that should not be there. Faces behind the shoulders of passers-by. Figures in Mount Auburn Cemetery who will answer your questions if you bring them whiskey. Walsh does not believe in "the occult", but since the divorce and the appendix surgery he has admitted something inside him is off. Today, in the office on Washington Street (cheap rent, the stairwell stinks of cigarette smoke), a woman walks in — Norah Kearney, 45, widowed a month ago, only now admitting to herself that something does not add up. Her husband Thomas, a restaurateur from the North End, "went to the wharf at Long Wharf for fish" the third day after All Saints. He came home in the evening behaving normally, but from that night he muttered to himself in German — a language he did not speak. Two weeks later he jumped from the Tobin Bridge. The police closed the case as suicide. Norah thinks otherwise. Atmosphere: Boston caught between brick-and-ivy old money and glass-tower new development, drizzle, cafés smelling of pumpkin spice and stale tobacco, the homeless asleep in doorways and perhaps something else. Recurring characters: Norah (elegant grey hair, faint trace of a County Cork accent), Sergeant Doyle (60, Walsh's old patrol partner, still throws him scraps; accent: thick Southie, hides behind jokes when the conversation gets too serious).
+
+  kosmiczny_horror:
+    etykieta: "Cosmic horror"
+    opis_krotki: "A research station orbiting a neutron star. The crew wakes from hibernation — without the captain. And without any sign the captain was ever there."
+    tryb_domyslny: 3
+    seed_swiata: |
+      The year 2247. The research station "Cassandra" orbits the neutron star PSR J1748-2446ad, the fastest-rotating star known to humanity (716 revolutions per second). The mission: a study of magnetic pulsations. The player is the science officer — Dr Iona Rowe, quantum neurologist, 42, from Edinburgh. A seven-person crew, hibernation programmed for 4 years, staggered four-hour wake intervals. The player wakes third. The onboard computer "Mnemosyne" reports: hibernation 4 years 23 days 6 hours, all nominal. But the crew counter shows 6, not 7. The captain is missing — Commander Bryce Halloran. Mnemosyne does not remember a captain. Launch manifest from Earth: 7 people. Hibernation roster: 6. Your own memory: yes, Halloran existed, you had breakfast with him in Houston. The two already woken — engineer Owen (28, taciturn, accent: South Welsh) and biologist Lucien (50, Quebecois, still says "bonjour" instead of "hello") — claim they remember no captain. You feel that someone else is on the station. In the return air duct, where air should be cycling back from hydroponics, you hear a rhythm — not mechanical, organic, like breathing. Mnemosyne reports no anomaly. Your neurological scan from yesterday: in your left temple there is a surgical scar. You do not remember the operation.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Romantic comedy of manners"
+    opis_krotki: "A small café in Park Slope. A regular customer the management hopes to use to save the place. And she knows the truth."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Brooklyn, Park Slope, April 2024. "Coffee in the Wind" — a small café on Sixth Avenue, open since 1998, housed in a pre-war brownstone. The owner is Albert Lewis, 67, a retired theatre set designer who runs the place out of love rather than profit. The other employee is a barista and waitress in one — the player: Maggie Kohler, 31, a Hispanic philology graduate, working here for the fourth year, dreaming of opening her own bookshop. The café is its own atmosphere: old typewriters on the shelves, a jukebox of vinyl, a Steinway upright that the elderly neighbour Konstantin plays on Saturdays. The regulars are warm, loyal, beloved. The problem: the landlord, Roger Boswick (55, aggressive, fast talker), has doubled the rent — Albert cannot pay. Six weeks until closing. Every day in the café sits the same man, Cyril Frost (38, an editor at a small press, kind, painfully shy) — Maggie has noticed him for months but never said a word. This morning Albert confides in Maggie that Cyril is Boswick's nephew and is supposed to "put in a word for the café". Albert expects Maggie to "be nice" to Cyril — in a way she dislikes. And she had long wanted to approach Cyril on her own, freely. It is Monday afternoon. Cyril has just walked in, ordered a flat white, taken the table by the window. Albert is staring at you meaningfully from behind the counter.

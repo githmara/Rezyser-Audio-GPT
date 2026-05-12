@@ -180,7 +180,10 @@ def wybierz_sufiks(
     if not przepis.zapis_do_pliku:
         if zada_streszczenia and "streszczenie" in przepis.sufiksy:
             return "streszczenie"
-        if len(snapshot.full_story) >= cr.PROG_OSTRZEZENIE:
+        # v15.1: pamięć liczymy w tokenach przez `core_tokeny` (był len-w-znakach).
+        tokeny  = cr.policz_tokeny_payloadu_snapshot(snapshot)
+        udzial  = tokeny / cr.OKNO_KONTEKSTU_MAX
+        if udzial >= cr.PROG_OSTRZEZENIE:
             if "alarm" in przepis.sufiksy:
                 return "alarm"
         elif "optymalizacja" in przepis.sufiksy:

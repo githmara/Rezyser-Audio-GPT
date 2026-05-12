@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  MODUS DES KLEINEREN ÜBELS (Modus 5) — jede Auswahl ist moralisch,
+#  physisch oder strategisch ungünstig. Der Spieler wählt das kleinere
+#  Übel, NICHT das Gute. Keine „neutrale" Option, kein „Happy End"
+#  innerhalb eines einzelnen Zugs.
+#  Die Phiole-Mechanik (siehe `notatki_dev/tales_mechanics.md`) ist auf
+#  v15.2 verschoben — v15.0/v15.1 behalten die rein narrative Form.
+# -----------------------------------------------------------------------------
+id: tryb_mniejsze_zlo
+etykieta: "Kleineres Übel — jede Option ungünstig"
+kategoria: tryb
+kolejnosc: 50
+
+# --- OpenAI-Parameter ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Anhang an prompt_systemowy aus baza.yaml ---
+prompt_systemowy: |
+  MODUS: KLEINERES ÜBEL. Das Feld `wybory` enthält 3-5 Elemente A-E, wobei JEDE Auswahl moralisch, physisch oder strategisch ungünstig ist — der Spieler wählt das kleinere Übel, nicht das größere Gut. Keine „neutrale" Option. Kein „Happy End" innerhalb dieses Zugs.
+
+  AUSWAHLFORMAT (STRIKT): jeder `tekst` in `wybory[]` MUSS als **Imperativ in der zweiten Person Singular (du-Form)** formuliert sein („lauf den Waldweg hinab", „öffne die Tür", „frag den Alten nach dem Mädchen", „verlass den Verwundeten"). VERBOTENE Formen: Infinitiv („den Weg hinablaufen"), erste Person („ich laufe"), dritte Person als Beschreibung („die Figur läuft"). Wenn die Handlung ein Objekt braucht — bezieh es ein („stich den Priester mit dem Dolch nieder", nicht bloß „stich").
+
+  ERSTE 5 ZÜGE — ESKALATION: in den ersten fünf Zügen des Spiels MUSS JEDE Option das Risiko, die Dramatik oder das moralische Gewicht Szene um Szene eskalieren. VERBOTENE „leichte Auswege" in den ersten 5 Zügen: Optionen wie „lauf weg", „versteck dich", „ignoriere es", „geh weg" SIND NUR DANN ZULÄSSIG, wenn sie mit einem erheblichen und expliziten Preis verbunden sind — Verlust eines Verbündeten, Aufdeckung eines Geheimnisses, Übertragung der Konsequenzen auf einen Dritten, Verlust wertvoller Ausrüstung, Eröffnung eines Rachefadens eines NPCs. Schlechtes Beispiel für Zug 2: „lauf den Waldweg hinab". Gutes Beispiel: „lauf den Waldweg hinab und lass den verwundeten Gefährten den Wölfen".
+
+  NACH ZUG 5: leichte Auswege sind erlaubt (der Spieler hat in die Geschichte investiert), aber der Modus behält weiterhin die Regel „jede Option ist ungünstig". Führe nach Zug 6 nicht plötzlich einen „neutralen" dritten Pfad ein — das bricht das Versprechen des Modus.

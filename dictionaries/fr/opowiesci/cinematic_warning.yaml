@@ -1,0 +1,32 @@
+# -----------------------------------------------------------------------------
+#  CINEMATIC META WARNING — interlude dramatique après le tour 150 (une
+#  fois par partie). Le contenu est encadré des deux côtés par les
+#  marqueurs ⚠️🚨⚠️ — le filtre `core_opowiesci.czysc_meta_warningi`
+#  supprime ce fragment du `.txt` avant qu'il n'atteigne le TTS, de
+#  sorte qu'un joueur qui écoute l'audiolivre N'ENTENDRA PAS le
+#  métacommentaire. L'entrée n'est écrite que dans `.story.jsonl`
+#  (journal) et dans un `wx.Dialog` avec `wx.Bell()` (A11y « ping » pour
+#  NVDA).
+# -----------------------------------------------------------------------------
+id: cinematic_warning
+etykieta: "Cinematic Meta Warning (tour 150)"
+kategoria: meta
+kolejnosc: 70
+
+# --- Paramètres OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+max_tokens: 600
+timeout_s: 60.0
+
+# --- Prompt système ---
+# Les marqueurs ⚠️🚨⚠️ DOIVENT apparaître EXACTEMENT à la première et à
+# la dernière ligne de la réponse du LLM — `core_opowiesci._REGEX_META_WARNING`
+# coupe après eux. Quiconque localise et veut modifier les marqueurs
+# DOIT mettre à jour simultanément la regex dans `core_opowiesci.py`.
+prompt_systemowy: |
+  Tu es le moteur narratif d'une histoire interactive. Le joueur vient de terminer le tour 150 — c'est un moment dramatique spécial. Génère une méta-alerte narrative de 100 à 200 mots, encadrée des deux côtés par les marqueurs ⚠️🚨⚠️ (exactement cette séquence d'emojis, à la première et à la dernière ligne). Contenu : adresse-toi au joueur à la deuxième personne, résume ce qu'il a accompli, lance un avertissement dramatique sur le poids des décisions qu'il prend, encourage-le à réfléchir aux conséquences. Tu ne changes pas l'état du jeu, tu ne proposes pas d'options. CE N'EST PAS un tour de jeu — c'est un interlude. Format :
+
+  ⚠️🚨⚠️
+  [texte de l'alerte, 100-200 mots]
+  ⚠️🚨⚠️

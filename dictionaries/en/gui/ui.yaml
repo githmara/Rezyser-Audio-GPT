@@ -652,6 +652,9 @@ konwerter:
   # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
   # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
   author_metadata: "Director"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Turn N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Scene {numer}"
   # Dialog wyboru pliku
   file_dlg_title: "Select source file"
   file_dlg_wildcard: "All supported files (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word Documents (*.docx)|*.docx|All files (*.*)|*.*"
@@ -877,7 +880,7 @@ opowiesci:
   tool_description: |-
     You play as the hero of a dynamically generated story. Enter the name of a new game and choose a mode to start — the narrative is conducted in the second person and read by a screen reader or TTS.
 
-    Free mode allows you to try any action entered in the field at the bottom. Choice mode gives 3-5 numbered options to choose from with buttons. The "lesser evil" mode presents only unfavorable choices — you choose what is less disadvantageous. Commands starting with a slash (/save, /load, /settings, /end, /visualize) work at any time.
+    Free mode allows you to try any action entered in the field at the bottom. Choice mode gives 3-5 numbered options to choose from with buttons. The "lesser evil" mode presents only unfavorable choices — you choose what is less disadvantageous. Commands starting with a slash (/save, /load, /end, /visualize) work at any time.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Game Name"
@@ -923,7 +926,7 @@ opowiesci:
   lbl_akcja: "Your Action or Command"
   txt_akcja_name: "Player Action Field"
   txt_akcja_hint: "Describe what you do, or enter a command starting with /"
-  txt_akcja_tooltip: "Enter any action (free-text) or system command: /save /load /settings /end /visualize. Confirm the action with the Send button."
+  txt_akcja_tooltip: "Enter any action (free-text) or system command: /save /load /end /visualize. Confirm the action with the Send button."
   btn_wyslij_label: "&Send"
   btn_wyslij_tooltip: "Send action to the narrative engine"
 
@@ -978,16 +981,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /save, /save                    — force game save
     /load, /load                   — open load dialog
-    /settings, /settings            — change AI model (Standard/Quality)
     /visualize <description>, /visualize    — multisensory scene description (no save)
     /quit, /quit                    — close the application
-  dlg_ustawienia_tytul: "Narrative Engine Settings"
-  dlg_ustawienia_lbl_model: "AI Model:"
-  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, faster, cheaper)"
-  dlg_ustawienia_model_quality: "High Quality (gpt-4o, slower, more expensive)"
-  dlg_ustawienia_btn_zatwierdz: "Confirm"
-  dlg_ustawienia_zmieniono_tytul: "Model Changed"
-  dlg_ustawienia_zmieniono_tresc: 'The narrative engine will now use the model "{model}".'
   dlg_visualize_tytul: "🌅 Scene Visualization"
   dlg_visualize_lbl: "Multisensory description of the current scene (does not change game state):"
   dlg_visualize_name: "Scene Visualization Description Field"
@@ -1018,3 +1013,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Shortcut containing only the most recently generated scene — NVDA reads the fresh narration here without navigating through hundreds of lines of the full story. After each subsequent turn, the field is replaced with new content."
   txt_ostatnia_tura_init: "(The last turn will appear in this field after your first action.)"
   txt_ostatnia_tura_skrot_naglowek: "[summary of the last saved turn — full narration in the field below]\n\n"
+  btn_zasady_swiata_label: '&Edit world rules…'
+  btn_zasady_swiata_tooltip: Opens the world rules editing window — optional text with phonetic, cultural, or mechanical rules that the narrative engine should respect throughout the game. Empty field = no additional rules (default behavior).
+  dlg_zasady_swiata_tytul: Game world rules
+  dlg_zasady_swiata_lbl: 'Rules that the narrative engine should respect throughout the game (optional):'
+  dlg_zasady_swiata_name: World rules edit field
+  dlg_zasady_swiata_hint: "E.g.:\n- “Pronounce the name Joanna always hard, Polish [dż]; never soft [j].\"\n- “In this world, magic works only at night; during the day, characters are ordinary people.\"\n- “The antagonist Joana tries to soften the pronunciation of the protagonist's name through grammatical inflection.\""
+  dlg_zasady_swiata_btn_ok: '&Save'
+  dlg_zasady_swiata_btn_anuluj: '&Cancel'
+  status_zasady_zapisane: World rules updated and saved to the game file.
+  zasady_bez_gry_tytul: No active game
+  zasady_bez_gry_tresc: Start a new game with the “New Game” button or load a previously saved one before defining world rules — rules are saved together with the game state.

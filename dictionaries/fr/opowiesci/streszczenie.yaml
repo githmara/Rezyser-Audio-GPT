@@ -1,0 +1,24 @@
+# -----------------------------------------------------------------------------
+#  RÉSUMÉ — compression automatique de `ostatnie_tury` après dépassement
+#  du seuil de mémoire du modèle (PROG_OSTRZEZENIE = 70 % de 128k
+#  tokens ≈ 89,6k). Le résultat remplace tout l'historique des tours par
+#  une seule entrée au format `{"akcja_gracza": "(résumé des tours
+#  précédents)", "narracja_skrot": <résultat>}`. L'interface le lance dans
+#  un thread d'arrière-plan APRÈS un tour réussi, bloquant `_btn_wyslij`
+#  jusqu'à la fin (garde de race condition `_meta_w_toku=True`).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Résumé automatique du contexte"
+kategoria: meta
+kolejnosc: 60
+
+# --- Paramètres OpenAI ---
+# Température basse — nous voulons un résumé fidèle et factuel (non créatif).
+model: gpt-4o-mini
+temperatura: 0.3
+max_tokens: 800
+timeout_s: 60.0
+
+# --- Prompt système ---
+prompt_systemowy: |
+  Tu es un assistant narratif. Tu reçois une liste des tours récents d'une histoire interactive (action du joueur + narration condensée par tour). Génère un condensé de 200 à 400 mots couvrant : les événements clés de l'intrigue, les décisions du joueur et leurs conséquences, les personnages importants apparaissant dans la narration, les lieux visités, les fils non résolus. Écris à la troisième personne, de manière neutre, comme un résumé de roman — CE N'EST PAS un tour de jeu, le joueur ne le lit pas comme une narration, c'est le moteur narratif qui l'utilise comme mémoire à long terme.

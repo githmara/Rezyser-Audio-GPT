@@ -649,6 +649,9 @@ konwerter:
   btn_buduj_tooltip: "Traite le fichier et sauvegarde architectura_<nom>.docx à côté du fichier source"
   # Metadana zapisywana do pola `author` w core_properties wynikowego .docx.
   author_metadata: "Réalisateur"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Tour N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Scène {numer}"
   # Dialog wyboru pliku
   file_dlg_title: "Sélectionner un fichier source"
   file_dlg_wildcard: "Tous les fichiers pris en charge (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Documents Word (*.docx)|*.docx|Tous les fichiers (*.*)|*.*"
@@ -873,7 +876,7 @@ opowiesci:
   tool_description: |-
     Vous incarnez le héros d'une histoire générée dynamiquement. Entrez le nom d'un nouveau jeu et choisissez un mode pour commencer — la narration est menée à la deuxième personne et lue par un lecteur d'écran ou TTS.
 
-    Le mode libre vous permet d'essayer n'importe quelle action saisie dans le champ en bas. Le mode choix propose 3 à 5 options numérotées à choisir avec des boutons. Le mode « moindre mal » ne propose que des choix défavorables — vous choisissez ce qui vous convient le moins. Les commandes commençant par une barre oblique (/sauvegarder, /charger, /paramètres, /fin, /visualiser) fonctionnent à tout moment.
+    Le mode libre vous permet d'essayer n'importe quelle action saisie dans le champ en bas. Le mode choix propose 3 à 5 options numérotées à choisir avec des boutons. Le mode « moindre mal » ne propose que des choix défavorables — vous choisissez ce qui vous convient le moins. Les commandes commençant par une barre oblique (/sauvegarder, /charger, /fin, /visualiser) fonctionnent à tout moment.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Nom du jeu"
@@ -919,7 +922,7 @@ opowiesci:
   lbl_akcja: "Votre action ou commande"
   txt_akcja_name: "Champ d'action du joueur"
   txt_akcja_hint: "Décrivez ce que vous faites ou entrez une commande commençant par /"
-  txt_akcja_tooltip: "Entrez une action quelconque (texte libre) ou une commande système : /sauvegarder /charger /paramètres /fin /visualiser. L'action est validée par le bouton Envoyer."
+  txt_akcja_tooltip: "Entrez une action quelconque (texte libre) ou une commande système : /sauvegarder /charger /fin /visualiser. L'action est validée par le bouton Envoyer."
   btn_wyslij_label: "&Envoyer"
   btn_wyslij_tooltip: "Envoyer l'action au moteur narratif"
 
@@ -974,16 +977,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /sauvegarder, /save                    — forcer la sauvegarde du jeu
     /charger, /load                   — ouvrir la boîte de dialogue de chargement
-    /paramètres, /settings            — changer le modèle AI (Standard/Qualité)
     /visualiser <description>, /visualize    — description multisensorielle de la scène (sans sauvegarde)
     /fin, /quit                    — fermer l'application
-  dlg_ustawienia_tytul: "Paramètres du moteur narratif"
-  dlg_ustawienia_lbl_model: "Modèle AI :"
-  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, plus rapide, moins cher)"
-  dlg_ustawienia_model_quality: "Haute qualité (gpt-4o, plus lent, plus cher)"
-  dlg_ustawienia_btn_zatwierdz: "Valider"
-  dlg_ustawienia_zmieniono_tytul: "Modèle changé"
-  dlg_ustawienia_zmieniono_tresc: 'Le moteur narratif utilisera désormais le modèle « {model} ».'
   dlg_visualize_tytul: "🌅 Visualisation de la scène"
   dlg_visualize_lbl: "Description multisensorielle de la scène actuelle (ne change pas l'état du jeu) :"
   dlg_visualize_name: "Champ avec la description de la visualisation de la scène"
@@ -1014,3 +1009,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Raccourci contenant uniquement la scène récemment générée — NVDA lit ici la nouvelle narration sans naviguer à travers des centaines de lignes de l'histoire complète. Après chaque nouveau tour, le champ est remplacé par un nouveau contenu."
   txt_ostatnia_tura_init: "(Le dernier tour apparaîtra dans ce champ après votre première action.)"
   txt_ostatnia_tura_skrot_naglowek: "[résumé du dernier tour enregistré — narration complète dans le champ ci-dessous]\n\n"
+  btn_zasady_swiata_label: '&Éditer les règles du monde…'
+  btn_zasady_swiata_tooltip: Ouvre la fenêtre d'édition des règles du monde — texte optionnel avec des règles phonétiques, culturelles ou mécaniques que le moteur narratif doit respecter tout au long du jeu. Champ vide = pas de règles supplémentaires (comportement par défaut).
+  dlg_zasady_swiata_tytul: Règles du monde du jeu
+  dlg_zasady_swiata_lbl: 'Règles que le moteur narratif doit respecter tout au long du jeu (optionnel) :'
+  dlg_zasady_swiata_name: Champ d'édition des règles du monde
+  dlg_zasady_swiata_hint: "Par exemple :\n- « Prononcez toujours le prénom Joanna de manière dure, à la polonaise [dż] ; jamais de manière douce [j]. »\n- « Dans ce monde, la magie ne fonctionne que la nuit ; le jour, les personnages sont des gens ordinaires. »\n- « L'antagoniste Joana essaie d'adoucir la prononciation du prénom de la protagoniste par la déclinaison grammaticale. »"
+  dlg_zasady_swiata_btn_ok: '&Enregistrer'
+  dlg_zasady_swiata_btn_anuluj: '&Annuler'
+  status_zasady_zapisane: Règles du monde mises à jour et enregistrées dans le fichier du jeu.
+  zasady_bez_gry_tytul: Pas de jeu actif
+  zasady_bez_gry_tresc: Créez une nouvelle partie avec le bouton « Nouvelle partie » ou chargez une partie précédemment enregistrée avant de définir les règles du monde — les règles sont enregistrées avec l'état du jeu.

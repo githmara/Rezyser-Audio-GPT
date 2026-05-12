@@ -1,0 +1,61 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 Quick Start forstillingar fyrir nýjan leik. Þegar
+#  leikmaðurinn velur „Nýr leikur" fyllir valda forstillingin sjálfkrafa
+#  haminn og dælir `seed_swiata` inn í snapshot-ið (LLM fær hann sem
+#  samhengi opnunarsenunnar).
+#
+#  HVER forstilling er skrifuð HANDVIRKT eftir tungumáli — þetta er
+#  bókmenntir, ekki tæknileg i18n. Markmálið hefur sín eigin
+#  menningarlegu mótíf; VIÐ köllum EKKI yfir úr pólsku (sbr.
+#  `feedback_yaml_prompty.md` og `feedback_lokalizacja_nazw.md`).
+#
+#  Svið IS: íslensk svið (skýli í hraunhellum Reykjanesskaga / norrænt
+#  miðaldarríki / Reykjavík 2008 í fjármálahruninu / rannsóknarstöð með
+#  íslenskumælandi áhöfn / kaffihús í 101 Reykjavík). Nöfn, hreimir og
+#  menningartilvísanir eru íslenskt í eðli sínu, ekki umritun úr pólsku.
+#
+#  Reitur `tryb_domyslny`: 3=Frjáls / 4=Val / 5=Minna illa.
+#  Fyrir blindan leikmann eru hamir 4 og 5 æskilegir (smellanleg
+#  nákvæm val), en Frjáls er haldið fyrir hrylling/gamanleik (þar sem
+#  spuni leikmannsins er hluti af upplifuninni).
+#
+#  YAML-lyklar (`po_apokaliptyczna_sf` o.s.frv.) eru áfram á pólsku —
+#  þetta eru innri auðkenni stöðu-vísuð af viðmótinu, ekki strengir
+#  sýnilegir notandanum.
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "Eftirheimsendis-SF"
+    opis_krotki: "Tveimur öldum eftir vistfræðilegt hrun. Leifar mannkynsins í skýlum grafnum undir Reykjanesi. Val milli raunsæis og mannúðar."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Heimurinn, tvö hundruð árum eftir Brennan löngu — alheimshamfarir sem brenndu lofthjúpinn. UV-geislar drepa alla sem stíga upp á yfirborðið án búninga. Mannkynið býr í skýlum sem skorin hafa verið í hraunhella Reykjanesskagans, lifir á vatnsræktun, gerviprótíni og núll-vatns hagkerfi. Leikmaðurinn er ungur sendiboði frá Klaninu Bergrót, einni af tólf samfélögum sem lifa af neðanjarðar. Klanin versla sín á milli en berjast stundum um auðlindir — rafhlöðufrumur, sáðkorn, gen sem geislunin hefur ekki enn brotið niður. Bergrót á leyndarmál: loftræstipípan opnast út í neðanjarðarvatn af fersku vatni. Enginn utan Öldungaráðsins veit það. Leikmaðurinn hefur einmitt fengið sitt fyrsta alvarlega verkefni — að smygla míkróflóru af probiotic-um til Klans Æðarkollu, sem er að deyja úr óafturkræfri þarmaójafnvægi. Leiðin liggur um flæddu gönguna, þar sem sagt er að lifi stökkbreyttar rottur. Endurteknar persónur: Halla Magnúsdóttir (40 ára, sendiboðadispatcher, raunsæ; hreimur: stuttar setningar, kallar alla nýliða „elskan mín" í stað nafns), gamli Þorbergur (60 ára, Öldungur klansins, ber minninguna fyrir Brennuna; hreimur: forn-íslenska, notar orð úr sjónvarpsfréttum níunda áratugarins). Andrúmsloft þrúgandi, appelsínugult neon af natríumlömpum, lykt af vélaolíu og myglu.
+
+  mroczne_fantasy:
+    etykieta: "Dark fantasy"
+    opis_krotki: "Útnári konungsríkis gegnsóða af rigningu. Djöfla-rannsóknardómari á slóð þorpsbúa sem kannski fela barn — eða eitthvað margfalt verra."
+    tryb_domyslny: 5
+    seed_swiata: |
+      Konungsríkið Þrír Lækir, níunda árið í trúarbragðastríðinu milli Eldskirkjunnar og Forngoðanna. Leikmaðurinn er ung Rannsóknardómari úr Reglu Þistilssystranna — konur sem hafa rofið heit sín og taka upp sverð þegar Kirkjan þarf á öðru en bænum að halda. Verkefnið: þú hefur komið í þorpið Eikiþorp, þar sem nafnlaus uppljóstrun greinir frá merkjum um Felun (helgisið Forngoðanna sem felst í að halda lífi í barni „andsetnu" í stað þess að drekkja því eins og Eldurinn krefst). Uppljóstrunin er rituð með hikandi hendi — höfundurinn er ólæs, vinnumaður eða vinnukona. Þorpið þegir. Sýslumaðurinn Eyjólfur (50 ára, rauðleitt andlit, forðast augnaráð þitt; hreimur: eyfirska, segir „jæja frú" og borðar endingarsérhljóð) býður þér í kvöldverð og talar um rúgverð. Ljósmóðirin Helga (35 ára, ekkja, langar svartar fléttur; hreimur: vestfirska, elskar myndlíkingar um veðrið) meðhöndlar þig með opinni fjandsemi. Í kotbýli við skógjaðarinn býr fjölskylda sem heldur sig undarlega til hlés — bóndinn Skjöldur, kona hans Marteina, tvö fullvaxin börn. Sagan segir að það sé þriðja, minna. Það hefur rignt í þrjá daga, vegurinn að næstu hervarðstöð er drulla og þú verður föst hér í hálfa mánuð. Innsigli Rannsóknardómara þíns ber galdur Eldsins — hann getur líka brennt sakleysingja ef þorpið snýst gegn þér. Á nóttunni, frá kotbýlinu við skógjaðarinn, heyrir þú undarlegt suð, eins og tvær móðurraddir tali samtímis, nema önnur þeirra er ekki mannleg.
+
+  urban_fantasy_detective:
+    etykieta: "Urban fantasy spæjari"
+    opis_krotki: "Reykjavík, október 2008. Einkaspæjari sem sér drauga. Skjólstæðingur vill að þú finnir eiginmann hennar — hann hvarf í Grjótaþorpi, en Grjótaþorpið er ekki bara Grjótaþorpið."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Reykjavík, október 2008, rigningardagur — bankarnir hrundu fyrir tveimur vikum, gengið hrunið, allir á taugum. Leikmaðurinn er einkaspæjari — Jakob „Jakki" Þorsteinsson, 38 ára, fyrrverandi rannsóknarlögreglumaður, leystur frá störfum fyrir drykkju á vakt. Hann ber með sér eitthvað sem hann vill ekki nefna: hann sér skugga sem eiga ekki að vera þarna. Andlit aftan við axlir vegfarenda. Skuggalegar verur í Hólavallagarði sem svara spurningum þínum ef þú færir þeim brennivínsdropa. Jakki trúir ekki á „dulrænu", en eftir skilnaðinn og botnlangaaðgerðina viðurkennir hann að eitthvað sé ekki lengur rétt í honum. Í dag, á skrifstofu hans á Hverfisgötu (lágur leiga, stiginn lyktar af gömlum reyk), kemur kona inn — Nóra Jónsdóttir, 45 ára, ekkja í mánuð, viðurkennir loksins fyrir sjálfri sér að eitthvað sé bogið. Eiginmaður hennar Tómas, veitingamaður í Grjótaþorpi, „fór á fiskmarkaðinn að ná í steinbít" á þriðja deginum eftir Allraheilagra messu. Hann kom heim eðlilega um kvöldið, en frá þeirri nóttu muldraði hann fyrir munni sér á þýsku — tungumáli sem hann talaði ekki. Tveimur vikum síðar stökk hann af Sundabrú. Lögreglan flokkaði málið sem sjálfsvíg. Nóra heldur annað. Andrúmsloft: Reykjavík klofin milli gamalla bárujárnshúsa og glerturna á Borgartúni, rigningarsuða, kaffihúsin lykta af kanilsnúðum og köldu tóbaki, heimilislausir sofa í hurðaopum og hugsanlega líka eitthvað annað. Endurteknar persónur: Nóra (snyrtileg grá klipping, ofurlítill borgnesingur í hreim), ylirannsóknarlögreglumaðurinn Davíð (60 ára, gamall vakta-félagi Jakka, lætur hann enn fá bein; hreimur: Reykjavíkurslangur, felur sig á bak við gamansögur þegar samtalið verður alvarlegt).
+
+  kosmiczny_horror:
+    etykieta: "Kosmískur hryllingur"
+    opis_krotki: "Rannsóknarstöð á braut um nifteindastjörnu. Áhöfnin vaknar úr dvala — án skipherra. Og án nokkurs ummerkis um að skipherra hafi nokkurn tíma verið til."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Árið 2247. Rannsóknarstöðin „Kassandra" snýst um nifteindastjörnuna PSR J1748-2446ad, hraðasta snúningsstjörnu sem mannkynið þekkir (716 snúningar á sekúndu). Verkefni: rannsókn á segulpúlsum. Leikmaðurinn er vísindaforinginn — dr. Inga Ragnarsdóttir, skammtafræðitaugalæknir, 42 ára, frá Akureyri. Sjö manna áhöfn, dvali stilltur á fjögur ár, vakningarbil með fjögurra klukkustunda millibili. Leikmaðurinn vaknar í þriðja sæti. Borðtölvan „Mnemósýna" tilkynnir: dvali 4 ár 23 dagar 6 klukkustundir, allt eðlilegt. En áhafnarteljarinn sýnir 6, ekki 7. Skipherrann vantar — Kdr Bjarni Halldórsson. Mnemósýna man eftir engum skipherra. Brottfararskrá frá jörðu: 7 manns. Dvalalisti: 6. Þitt eigið minni: já, Bjarni var til, þú borðaðir hádegismat með honum á Akureyri. Þeir tveir sem þegar eru vaknaðir — verkfræðingurinn Ólafur (28 ára, þögull, hreimur: greinilegur vestfirskur) og líffræðingurinn Lucien (50 ára, frá Québec, heldur áfram að segja „bonjour" í stað „komdu sæll") — segjast ekki muna eftir neinum skipherra. Þú finnur að það er einhver annar á stöðinni. Í loftrásinni, sem loftið ætti að koma um til baka frá vatnsræktinni, heyrir þú takt — ekki vélrænan, líffræðilegan, eins og andardrátt. Mnemósýna gefur ekkert frávik til kynna. Taugaskönnun þín frá í gær: á vinstra gagnauganu er skurðaðgerðarör. Þú manst ekki eftir aðgerðinni.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Rómantísk samfélagsgamanleikur"
+    opis_krotki: "Lítið kaffihús í 101 Reykjavík. Fastagestur sem eigandinn vill nota til að bjarga staðnum. Og hún veit sannleikann."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Reykjavík, Þingholtin, apríl 2024. „Vindkaffi" — lítið kaffihús á Skólavörðustígnum, opið síðan 1998, í bárujárnshúsi frá fyrri stríðstíma. Eigandinn er Arnaldur Pálsson, 67 ára, leikhúsleikmyndahönnuður á eftirlaunum sem rekur staðinn af ást frekar en gróðasjónarmiðum. Hinn starfsmaðurinn er barista og þjónustustúlka í senn — leikmaðurinn: Áslaug Jónsdóttir, 31 ára, með próf í ensku, vinnur hér í fjögur ár, dreymir um að opna eigin bókabúð. Kaffihúsið er andrúmsloft í sjálfu sér: gamlar ritvélar á hillunum, vínyl-djúkkbox, uppréttur Pleyel-flygill sem nágranninn Konráð á eftirlaunum spilar á laugardögum. Viðskiptavinirnir eru fastagestir, hlýir, elskaðir. Vandamálið: húseigandinn, Reynir Bjarnason (55 ára, ágengur, talar hratt), hefur tvöfaldað leiguna — Arnaldur getur ekki greitt. Sex vikur fram að lokun. Á hverjum degi situr sami maðurinn á kaffihúsinu, Hrafn Sigurðsson (38 ára, ritstjóri í lítilli bókaforlagi, kurteis, sárt feiminn) — Áslaug hefur tekið eftir honum í marga mánuði en hefur ekki sagt við hann orð. Í morgun viðurkennir Arnaldur fyrir Áslaugu að Hrafn sé frændi Reynis og að hann eigi að „leggja gott orð inn fyrir kaffihúsið". Arnaldur ætlast til þess að Áslaug „sé góð" við Hrafn — á þann hátt sem henni líkar ekki. Og hún hafði löngu ætlað að ganga til Hrafns að eigin frumkvæði, frjáls. Það er mánudagseftirmiðdagur. Hrafn er nýkominn inn, hefur pantað flat white, sest við borðið við gluggann. Arnaldur starir á þig vitiborinn úr bakvið afgreiðsluborðið.

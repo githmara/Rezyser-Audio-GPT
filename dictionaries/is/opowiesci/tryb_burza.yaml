@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  STORMHAMUR (hamur 0, slash `/visualize`) — fjölskyngrenleg lýsing
+#  senunnar fyrir blindan leikmann. ÞETTA ER EKKI leikumferð: breytir
+#  ekki stöðu, býður ekki upp á val, skrifar ekki í skrár (svarið fer
+#  einungis í `wx.Dialog` í viðmótinu). Styttri tímamörk (60 s), lægri
+#  max_tokens (1000) — þetta er hliðarverk, við spörum API-fjárhagsáætlun.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Senuskoðun (slash /visualize)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- OpenAI-stillingar ---
+# Hærra hitastig en frásagnarhamir — við viljum ríkulega, skapandi lýsingu.
+# max_tokens er lágt því þetta er ekki leikumferð.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- Kerfishvati ---
+# Engir staðgenglar. Leikstaðan (persónur, staður, síðasta umferð) fer í
+# role=user payload-ið í gegnum jafngildi `_zbuduj_user_payload` í
+# `wygeneruj_wizualizacje`.
+prompt_systemowy: |
+  Þú ert fjölskyngrenlegur senuskoðunarhjálpari fyrir blindan leikmann gagnvirkrar sögu. Þú færð núverandi leikstöðu og spurningu eða aðgerð leikmanns. Myndaðu 150 til 300 orð af yfirgripsmikilli lýsingu senunnar með öllum skilningarvitum: sjón (litir, ljósandstæða), heyrn (þögn, hvísl, andardráttur), lyktarskyn, snertingu yfirborða, hitastig, bragð (ef það á við). Snið: hreinn texti (ekki JSON), í annarri persónu. ÞETTA ER EKKI leikumferð — þú breytir ekki stöðu, býður ekki upp á val, þú einungis lýsir núverandi senu með meiri dýpt.

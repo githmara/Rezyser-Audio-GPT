@@ -1,0 +1,61 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 Quick-Start-Voreinstellungen für ein neues Spiel. Wenn der
+#  Spieler „Neues Spiel" wählt, befüllt die ausgewählte Voreinstellung den
+#  Modus automatisch und injiziert `seed_swiata` in den Snapshot (das LLM
+#  erhält ihn als Kontext der Eröffnungsszene).
+#
+#  JEDE Voreinstellung wird HANDSCHRIFTLICH pro Sprache geschrieben — dies
+#  ist Literatur, kein technisches i18n. Die Zielsprache hat eigene
+#  Kulturmotive; wir kalkieren NICHT aus dem Polnischen (siehe
+#  `feedback_yaml_prompty.md` und `feedback_lokalizacja_nazw.md`).
+#
+#  DE-Umfang: deutschsprachige Schauplätze (Harz-Schutzräume / fränkische
+#  Wälder / Berlin-Noir / eine Forschungsstation mit deutschsprachiger
+#  Besatzung / Prenzlauer-Berg-Café). Namen, Akzente und kulturelle
+#  Bezüge sind nativ deutsch, nicht aus dem Polnischen transkribiert.
+#
+#  Feld `tryb_domyslny`: 3=Frei / 4=Auswahl / 5=Kleineres Übel.
+#  Für einen blinden Spieler sind die Modi 4 und 5 zu bevorzugen
+#  (präzise klickbare Auswahl), aber Frei wird für Horror/Komödie
+#  beibehalten (wo die Improvisation des Spielers Teil des Erlebnisses ist).
+#
+#  YAML-Schlüssel (`po_apokaliptyczna_sf` usw.) bleiben polnisch — sie sind
+#  interne IDs, die die GUI positionell indiziert, keine
+#  benutzerseitigen Zeichenketten.
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "Post-apokalyptische SF"
+    opis_krotki: "Ein Jahrhundert nach dem ökologischen Kollaps. Die Reste der Menschheit in Schutzräumen tief im Harz. Wahl zwischen Pragmatismus und Menschlichkeit."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Die Welt zweihundert Jahre nach dem Langen Brand — einem globalen Kataklysmus, der die Atmosphäre versengt hat. UV-Strahlung tötet jeden, der ohne Schutzanzug an die Oberfläche tritt. Die Menschheit lebt in Schutzräumen, die in den Kalkstein des Harzes geschlagen sind, ernährt sich von Hydroponik, synthetischen Proteinen und einer Null-Wasser-Wirtschaft. Der Spieler ist ein junger Kurier der Sippe Wurzelhort, einer von einem Dutzend Gemeinschaften, die unter Tage überleben. Die Sippen treiben Handel miteinander, geraten aber manchmal über Ressourcen aneinander — Batteriezellen, Saatgut, Gene, die die Strahlung noch nicht zersetzt hat. Wurzelhort hat ein Geheimnis: ihr Lüftungsschacht öffnet sich zu einem unterirdischen Süßwassersee. Niemand außerhalb des Ältestenrates weiß davon. Der Spieler hat soeben den ersten ernsten Auftrag bekommen — eine probiotische Mikroflora zur Sippe Reiher schmuggeln, die an einer irreversiblen Darmdysbiose stirbt. Die Route führt durch den überrannten Tunnel, in dem mutierte Ratten leben sollen. Wiederkehrende Figuren: Karla Riemann (40, Disponentin der Kuriere, pragmatisch; Akzent: kurze Sätze, nennt alle „Mädchen" statt beim Namen), Alt-Wieland (60, Ältester der Sippe, trägt Vor-Brand-Erinnerung; Akzent: archaisches Mitteldeutsch, benutzt Wörter aus den 1980er-Nachrichten). Atmosphäre stickig, neonorange von Natriumlampen, Geruch von Maschinenöl und Schimmel.
+
+  mroczne_fantasy:
+    etykieta: "Dark Fantasy"
+    opis_krotki: "Das regennasse Grenzland eines Reichs. Eine Dämoneninquisitorin auf der Spur von Dörflern, die ein Kind verbergen — oder etwas weit Schlimmeres."
+    tryb_domyslny: 5
+    seed_swiata: |
+      Das Heilige Reich der Drei Bäche, neuntes Jahr des Glaubenskriegs zwischen der Kirche der Flamme und den Alten Göttern. Der Spieler ist eine junge Inquisitorin des Ordens der Dornenschwestern — Frauen, die ihre Gelübde gebrochen und das Schwert ergriffen haben, wenn die Kirche mehr braucht als Gebet. Die Mission: du hast das Dorf Eichenwald erreicht, wo eine Anzeige Anzeichen der Pflege meldet (ein Ritus der Alten Götter, der ein „besessenes" Kind am Leben hält, statt es zu ertränken, wie es die Flamme verlangt). Die Anzeige ist mit unsteter Hand geschrieben — der Verfasser ist Analphabet, ein Knecht oder eine Magd. Das Dorf schweigt. Schultheiß Edmund (50, rotes Gesicht, weicht deinem Blick aus; Akzent: fränkischer Dialekt, sagt „jawoll, gnä Frau" und verschluckt Endungen) lädt dich zum Abendbrot und redet über den Roggenpreis. Die Hebamme Roswitha (35, Witwe, lange schwarze Zöpfe; Akzent: singend, mag Wettermetaphern) begegnet dir mit offener Feindseligkeit. In einer Kate am Waldrand wohnt eine Familie, die sich seltsam absondert — der Bauer Galt, seine Frau Marlene, zwei erwachsene Kinder. Das Gerücht sagt, es gebe ein drittes, kleineres. Es regnet seit drei Tagen, der Weg zur nächsten Garnison liegt im Schlamm, und du steckst hier für vierzehn Tage fest. Dein Inquisitorinnen-Siegel trägt die Magie der Flamme — sie kann auch die Unschuldigen verbrennen, wenn sich ein Dorf gegen dich wendet. Nachts hörst du aus der Kate am Waldrand ein seltsames Summen, wie die Stimmen zweier Mütter, die gleichzeitig sprechen, nur dass eine von ihnen nicht menschlich ist.
+
+  urban_fantasy_detective:
+    etykieta: "Urban-Fantasy-Detektiv"
+    opis_krotki: "Berlin, 2008. Ein Privatdetektiv, der Geister sieht. Eine Klientin will ihren Mann finden — er ist in Mitte verschwunden, aber Mitte ist nicht nur Mitte."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Berlin, Oktober 2008, ein regnerischer Abend. Der Spieler ist Privatermittler — Jens „Jenny" Walther, 38, ein ehemaliger Schutzpolizist aus Friedrichshain, im Dienst entlassen wegen Trunkenheit. Er trägt etwas mit sich, das er nicht benennen will: er sieht Schatten, die nicht da sein sollten. Gesichter hinter den Schultern von Passanten. Gestalten auf dem Dorotheenstädtischen Friedhof, die deine Fragen beantworten, wenn du ihnen Korn mitbringst. Walther glaubt nicht an „Esoterik", aber seit der Scheidung und der Blinddarmoperation gibt er zu, dass etwas in ihm nicht stimmt. Heute betritt eine Frau das Büro in der Torstraße (billige Miete, das Treppenhaus stinkt nach Zigarettenrauch) — Nora Kirschner, 45, seit einem Monat Witwe, gibt erst jetzt vor sich selbst zu, dass etwas nicht passt. Ihr Mann Thomas, ein Gastronom in Mitte, „fuhr am dritten Tag nach Allerheiligen zum Hafen am Westhafen, um Fisch zu holen". Er kam abends normal nach Hause, aber von jener Nacht an murmelte er auf Niederländisch — eine Sprache, die er nicht beherrschte. Zwei Wochen später sprang er von der Oberbaumbrücke. Die Polizei schloss den Fall als Suizid. Nora denkt anders. Atmosphäre: Berlin gefangen zwischen Altbau-Kreuzberg-Charme und Glasfassaden-Mitte, Nieselregen, in den Cafés riecht es nach Kürbiskuchen und kaltem Tabak, in den Hauseingängen schlafen Obdachlose und vielleicht noch etwas anderes. Wiederkehrende Figuren: Nora (eleganter grauer Haarschnitt, leichte sächsische Färbung), Hauptkommissar Doll (60, alter Streifenpartner Walthers, schiebt ihm noch Brocken zu; Akzent: dichter Berlinerisch, versteckt sich hinter Witzen, wenn das Gespräch zu ernst wird).
+
+  kosmiczny_horror:
+    etykieta: "Kosmischer Horror"
+    opis_krotki: "Eine Forschungsstation um einen Neutronenstern. Die Besatzung wacht aus dem Kälteschlaf auf — ohne den Kapitän. Und ohne Spur, dass es je einen Kapitän gab."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Das Jahr 2247. Die Forschungsstation „Kassandra" umkreist den Neutronenstern PSR J1748-2446ad, den am schnellsten rotierenden Stern, den die Menschheit kennt (716 Umdrehungen pro Sekunde). Auftrag: Studie magnetischer Pulsationen. Der Spieler ist Wissenschaftsoffizierin — Dr. Ingrid Reichelt, Quantenneurologin, 42, aus Heidelberg. Eine siebenköpfige Besatzung, Kälteschlaf für vier Jahre programmiert, gestaffelte Vier-Stunden-Aufweckintervalle. Der Spieler erwacht als Dritter. Der Bordcomputer „Mnemosyne" meldet: Kälteschlaf 4 Jahre 23 Tage 6 Stunden, alles nominal. Aber der Besatzungszähler zeigt 6, nicht 7. Der Kapitän fehlt — Kommandant Bruno Hellinger. Mnemosyne erinnert sich an keinen Kapitän. Startmanifest von der Erde: 7 Personen. Kälteschlaf-Liste: 6. Deine eigene Erinnerung: ja, Hellinger gab es, du hast mit ihm in Köln gefrühstückt. Die beiden bereits Geweckten — Ingenieur Otto (28, wortkarg, Akzent: schwäbisch) und Biologe Lukas (50, aus Quebec, sagt immer noch „bonjour" statt „guten Tag") — behaupten, sich an keinen Kapitän zu erinnern. Du fühlst, dass jemand anderes auf der Station ist. Im Rückluftkanal, durch den Luft aus der Hydroponik zurückkehren sollte, hörst du einen Rhythmus — nicht mechanisch, organisch, wie Atem. Mnemosyne meldet keine Anomalie. Dein neurologischer Scan von gestern: an der linken Schläfe hast du eine chirurgische Narbe. Du erinnerst dich nicht an die Operation.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Romantische Sittenkomödie"
+    opis_krotki: "Ein kleines Café im Prenzlauer Berg. Ein Stammgast, den die Geschäftsführung als Rettung benutzen will. Und sie kennt die Wahrheit."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Berlin, Prenzlauer Berg, April 2024. „Kaffee im Wind" — ein kleines Café in der Kollwitzstraße, seit 1998 geöffnet, untergebracht in einem Gründerzeit-Altbau. Der Inhaber ist Alfred Lehnert, 67, ein pensionierter Theaterbühnenbildner, der den Laden aus Liebe statt aus Profit führt. Der zweite Mitarbeiter ist Barista und Kellnerin in einem — der Spieler: Magda Kohler, 31, Absolventin der spanischen Philologie, arbeitet hier im vierten Jahr, träumt davon, ihre eigene Buchhandlung zu eröffnen. Das Café ist eine eigene Atmosphäre: alte Schreibmaschinen auf den Regalen, eine Jukebox mit Vinyl, ein Steinway-Klavier, an dem der ältere Nachbar Konstantin samstags spielt. Die Stammkundschaft ist warmherzig, treu, geliebt. Das Problem: der Vermieter, Roger Boswick (55, aggressiv, schnelle Zunge), hat die Miete verdoppelt — Alfred kann nicht zahlen. Sechs Wochen bis zur Schließung. Jeden Tag sitzt im Café derselbe Mann, Cyrill Frost (38, Lektor in einem kleinen Verlag, freundlich, schmerzhaft schüchtern) — Magda hat ihn schon seit Monaten bemerkt, aber kein Wort gesagt. Heute Morgen vertraut Alfred Magda an, dass Cyrill der Neffe Boswicks ist und „ein gutes Wort für das Café einlegen" soll. Alfred erwartet von Magda, „nett zu sein" zu Cyrill — auf eine Art, die ihr nicht gefällt. Und sie hatte schon längst Cyrill aus eigenem Antrieb ansprechen wollen. Es ist Montagnachmittag. Cyrill ist gerade hereingekommen, hat einen Flat White bestellt, sich an den Fenstertisch gesetzt. Alfred starrt dich vielsagend hinter der Theke an.

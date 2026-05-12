@@ -653,6 +653,9 @@ konwerter:
   # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
   # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
   author_metadata: "Leikstjóri"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Umferð N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Atriði {numer}"
   # Dialog wyboru pliku
   file_dlg_title: "Veldu upprunaskrá"
   file_dlg_wildcard: "Öll studd skjöl (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word skjöl (*.docx)|*.docx|Öll skjöl (*.*)|*.*"
@@ -878,7 +881,7 @@ opowiesci:
   tool_description: |-
     Þú leikur hetju í sögunni sem er kviklega búin til. Sláðu inn nafn á nýjum leik og veldu stillingu til að byrja — frásögnin er í annarri persónu og lesin af skjálesara eða TTS.
 
-    Frjáls stilling leyfir þér að prófa hvaða aðgerð sem er sem þú slærð inn í reitinn neðst. Valstilling gefur 3-5 tölusett val sem hægt er að velja með hnöppum. Stillingin „minna illt" býður aðeins upp á óhagstæð val — þú velur það sem er minna óhagstætt. Skipanir sem byrja á skástriki (/vista, /hlaða, /stillingar, /enda, /sjá) virka hvenær sem er.
+    Frjáls stilling leyfir þér að prófa hvaða aðgerð sem er sem þú slærð inn í reitinn neðst. Valstilling gefur 3-5 tölusett val sem hægt er að velja með hnöppum. Stillingin „minna illt" býður aðeins upp á óhagstæð val — þú velur það sem er minna óhagstætt. Skipanir sem byrja á skástriki (/vista, /hlaða, /enda, /sjá) virka hvenær sem er.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Nafn leiks"
@@ -924,7 +927,7 @@ opowiesci:
   lbl_akcja: "Aðgerð þín eða skipun"
   txt_akcja_name: "Reitur fyrir aðgerðir leikmanns"
   txt_akcja_hint: "Lýstu því sem þú gerir, eða sláðu inn skipun sem byrjar á /"
-  txt_akcja_tooltip: "Sláðu inn hvaða aðgerð sem er (frjáls texti) eða kerfisskipun: /vista /hlaða /stillingar /enda /sjá. Aðgerð er staðfest með hnappinum Senda."
+  txt_akcja_tooltip: "Sláðu inn hvaða aðgerð sem er (frjáls texti) eða kerfisskipun: /vista /hlaða /enda /sjá. Aðgerð er staðfest með hnappinum Senda."
   btn_wyslij_label: "&Senda"
   btn_wyslij_tooltip: "Senda aðgerð til frásagnavélar"
 
@@ -979,16 +982,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /vista, /save                    — þvinga vistun leiks
     /hlaða, /load                   — opna hleðsluskjá
-    /stillingar, /settings            — breyta AI líkani (Standard/Quality)
     /sjá <lýsing>, /visualize    — fjölskynja lýsing á senu (án vistunar)
     /enda, /quit                    — loka forritinu
-  dlg_ustawienia_tytul: "Stillingar frásagnavélar"
-  dlg_ustawienia_lbl_model: "AI líkan:"
-  dlg_ustawienia_model_standard: "Staðlað (gpt-4o-mini, hraðara, ódýrara)"
-  dlg_ustawienia_model_quality: "Hágæða (gpt-4o, hægara, dýrara)"
-  dlg_ustawienia_btn_zatwierdz: "Staðfesta"
-  dlg_ustawienia_zmieniono_tytul: "Líkan breytt"
-  dlg_ustawienia_zmieniono_tresc: 'Frásagnavélin mun héðan í frá nota líkanið „{model}".'
   dlg_visualize_tytul: "🌅 Senuvísualisering"
   dlg_visualize_lbl: "Fjölskynja lýsing á núverandi senu (breytir ekki stöðu leiks):"
   dlg_visualize_name: "Reitur með lýsingu á senuvísualiseringu"
@@ -1019,3 +1014,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Flýtileið sem inniheldur eingöngu nýlega myndaða senu — NVDA les hér nýja frásögn án þess að fara í gegnum hundruð lína af allri sögunni. Eftir hverja næstu umferð er reitnum skipt út fyrir nýtt efni."
   txt_ostatnia_tura_init: "(Síðasta umferð birtist í þessum reit eftir fyrstu aðgerðina þína.)"
   txt_ostatnia_tura_skrot_naglowek: "[samantekt síðustu vistuðu umferðar — full frásögn í reitnum hér að neðan]\n\n"
+  btn_zasady_swiata_label: '&Breyta heimsreglum…'
+  btn_zasady_swiata_tooltip: Opnar glugga til að breyta heimsreglum — valfrjálsum texta með hljóðfræðilegum, menningarlegum eða vélrænum reglum sem frásagnavélin á að virða í gegnum allt leikinn. Tómt svæði = engar viðbótarreglur (sjálfgefin hegðun).
+  dlg_zasady_swiata_tytul: Heimsreglur leiksins
+  dlg_zasady_swiata_lbl: 'Reglur sem frásagnavélin á að virða í gegnum allt leikinn (valfrjálst):'
+  dlg_zasady_swiata_name: Breytingarsvæði fyrir heimsreglur
+  dlg_zasady_swiata_hint: "Dæmi:\n- „Nafnið Joanna skal alltaf bera fram með hörðu, pólsku [dʒ]; aldrei mjúku [j].\"\n- „Í þessum heimi virkar galdur aðeins á nóttunni; á daginn eru persónurnar venjulegt fólk.\"\n- „Andstæðingurinn Joana reynir að mýkja framburð nafns aðalpersónunnar með málfræðilegri beygingu.\""
+  dlg_zasady_swiata_btn_ok: '&Vista'
+  dlg_zasady_swiata_btn_anuluj: '&Hætta við'
+  status_zasady_zapisane: Heimsreglur uppfærðar og vistaðar í leikskrá.
+  zasady_bez_gry_tytul: Enginn virkur leikur
+  zasady_bez_gry_tresc: Byrjaðu nýjan leik með „Nýr leikur" hnappnum eða hlaða inn áður vistaðan leik áður en þú skilgreinir heimsreglur — reglurnar eru vistaðar ásamt leikstöðu.

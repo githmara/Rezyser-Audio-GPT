@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+#  FREIER MODUS (Modus 3) — der Spieler schreibt seine eigene Handlung als
+#  Freitext. Das Feld `wybory` in der LLM-Antwort darf leer sein oder 1-3
+#  Vorschläge enthalten (nur als Hinweis behandelt, kein Zwangspfad). Die
+#  GUI blendet im Modus 3 IMMER den Auswahlbereich aus (A11y), unabhängig
+#  vom Inhalt.
+# -----------------------------------------------------------------------------
+id: tryb_swobodny
+etykieta: "Freier Modus — eigene Handlung schreiben"
+kategoria: tryb
+kolejnosc: 30
+
+# --- OpenAI-Parameter (geerbt von baza.yaml, wenn hier nicht gesetzt) ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Anhang an prompt_systemowy aus baza.yaml ---
+prompt_systemowy: |
+  MODUS: FREI. Das Feld `wybory` darf leer sein oder 1-3 Vorschläge enthalten (der Spieler schreibt seine eigene Handlung, daher sind die Auswahlmöglichkeiten nur Hinweise — kein Zwangspfad).

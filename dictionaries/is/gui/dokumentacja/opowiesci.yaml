@@ -61,7 +61,25 @@ tresc: |
   4. Í reitnum „{opowiesci.lbl_akcja}" neðst á spjaldinu skaltu slá inn fyrstu aðgerðina, t.d. „ég vakna í ókunnu herbergi". Smelltu á "{opowiesci.btn_wyslij_label}". Frásagnarvélin mun opna heiminn út frá aðgerð þinni — lýsing á herberginu, hljóðum, persónum, fyrstu ákvörðunum.
   5. Hver umferð verður sjálfkrafa vistuð — þú getur lokað forritinu hvenær sem er og hlaðið leikinn aftur með því að smella á "{opowiesci.btn_wczytaj_label}".
 
-  SKREF 4: Slash-skipanir — fljótlegar aðgerðir án API
+  SKREF 4: Heimsreglur — þínar eigin reglur sem vélin virðir í gegnum allan leikinn
+
+  Frá útgáfu 15.1 finnurðu fyrir ofan frásagnarreitinn hnappinn „{opowiesci.btn_zasady_swiata_label}". Hann opnar sérstakan klippiglugga með margra lína reit, þar sem þú getur slegið inn hvaða reglur sem er — hljóðfræðilegar, vélrænar eða dramatískar — sem frásagnarvélin mun virða í hverri síðari umferð þessa tiltekna leiks. Reglurnar eru vistaðar ásamt leikstöðu (.game.json), þannig að við að hlaða leiknum halda þær óbreyttu formi.
+
+  Þrjár dæmigerðar notkunarleiðir heimsreglna:
+
+  HLJÓÐFRÆÐILEGAR REGLUR — þær stjórna því hvernig TTS (Vocalizer, ElevenLabs) ber fram nöfn persóna. Dæmi: „Nafnið Joanna skal alltaf bera fram með hörðu, pólsku [dʒ]; aldrei mjúku [j]." Vélin setur þessa afbrigði inn í frásögnina frá næstu umferð, og persónan Joanna í Heimabókinni heldur ætluðum hljómi. Þetta er einnig eðlileg brú að áherslum Leikstjórans — ef þú hleður Heimabókinni inn í Leikstjórnar-spjaldið eftir að leiknum er lokið (SKREF 9 að neðan), „færist" hljóðfræðilega reglan með leiknum sem einkenni persónunnar.
+
+  VÉLRÆNAR REGLUR — þær lýsa „eðlisfræðilögmálum" heimsins þíns sem LLM verður að virða. Dæmi: „Í þessum heimi virkar galdur aðeins á nóttunni; á daginn eru persónurnar venjulegt fólk." Vélin finnur ekki upp galdra um hádegi þótt aðgerð umferðar þinnar krefjist þess — þess í stað leggur hún til valkost eða leiðir þig í rökkur.
+
+  DRAMATÍSKAR REGLUR — þær skilgreina langtíma spennu á milli persóna. Dæmi: „Andstæðingurinn Joana reynir að mýkja framburð nafns aðalpersónunnar með málfræðilegri beygingu." Vélin vefur slík fíngerð merki inn í samtöl Joana og viðheldur ágreiningnum í gegnum margar umferðir án þess að þú þurfir að endurtaka leiðbeininguna.
+
+  Tómur reglureitur = engar viðbótarreglur (sjálfgefin hegðun, eins og í v15.0). Þú þarft ekki að skilgreina reglur strax í upphafi — þú getur snúið aftur í gluggann hvenær sem er, bætt við reglum sem þú tókst eftir í leiknum og smellt á „{opowiesci.dlg_zasady_swiata_btn_ok}". Breytingin tekur gildi frá næstu umferð.
+
+  Athugaðu: heimsreglur krefjast virks leiks. Ef þú smellir á „{opowiesci.btn_zasady_swiata_label}" án hlaðins/búinn leiks, færðu skilaboðin „{opowiesci.zasady_bez_gry_tytul}" — smelltu fyrst á „{opowiesci.btn_nowa_gra_label}" eða hladdu vistuðum leik.
+
+
+
+  SKREF 5: Slash-skipanir — fljótlegar aðgerðir án API
 
   Í aðgerðarreitnum geturðu hvenær sem er slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta ekki köll til OpenAI) og virka óháð leikham. Bæði íslensk og ensk afbrigði eru samþykkt:
 
@@ -69,13 +87,13 @@ tresc: |
 
   /hlaða, /load — opnar valglugga fyrir skrá úr möppunni runtime/opowiesci/. Eftir að hlaða er nafn leiksins, hamur og öll frásögn endurheimt — þú getur haldið áfram frá þeirri umferð sem þú endaðir á.
 
-  /stillingar, /settings — opnar valglugga fyrir AI-líkan. Sjálfgefið notum við gpt-4o-mini (Standard) — hraðari og ódýrari. Eftir að skipta yfir í gpt-4o (Hágæða) verður frásögnin ríkari, en hver umferð kostar meira og tekur lengri tíma.
+  Frásagnavélin velur AI-líkanið sjálfkrafa eftir stillingu: fyrir Valstillingu og Minna illt notar hún dýrara gpt-4o (heldur sig strangt við reglur heimsins); fyrir Frjálsa stillingu — hraðara og ódýrara gpt-4o-mini (spilarinn stýrir söguþræðinum, svo þung leikstjórn er ekki nauðsynleg).
 
   /sjá <lýsing>, /visualize <lýsing> — fjölskynjunar lýsing á núverandi senu. Breytir ekki ástandi leiksins, leggur ekki til valkosti — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snerting, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskránni. Dæmi: „/sjá hvernig vörðurinn lítur út" eða „/sjá lyktina af kaffihúsinu".
 
   /enda, /quit — lokar forritinu (eftir sjálfvirka vistun umferðar í gangi).
 
-  SKREF 5: Leikskrár — hvar þú finnur gögnin þín
+  SKREF 6: Leikskrár — hvar þú finnur gögnin þín
 
   Hver leikur framleiðir fimm skrár, hver í mismunandi möppu, með mismunandi hlutverkum:
 
@@ -89,7 +107,7 @@ tresc: |
 
   runtime/skrypty/<nazwa>.mode — metadata um númer ham (3=Frjáls, 4=Valkostir, 5=Minna illa). Skrá sameiginleg með Reżyser, en númerun stangast ekki á (Reżyser notar 0-2).
 
-  SKREF 6: Minni vísir líkans — af hverju umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
+  SKREF 7: Minni vísir líkans — af hverju umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
 
   Undir RadioBox hamnum finnurðu minni vísir líkans — framfarastiku (wx.Gauge) með stöðulýsingu við hliðina. Vísirinn sýnir prósentu fyllingar á samhengisglugga frásagnarvélarinnar (gpt-4o-mini hefur 128.000 táknabúffer).
 
@@ -102,13 +120,13 @@ tresc: |
 
   Í reynd er sjálfvirka minnkunarkerfið ósýnilegt — leikmaðurinn finnur ekki fyrir því að eitthvað sé að gerast, því bakgrunnsþráðurinn leysir vandamálið áður en það er tekið eftir. Mikilvægt er aðeins að þú sendir ekki næstu umferð á meðan sjálfvirk samantekt er í gangi (hnappurinn "{opowiesci.btn_wyslij_label}" er þá gráður).
 
-  SKREF 7: Cinematic Meta Warning — dramatísk innskot eftir 150. umferð
+  SKREF 8: Cinematic Meta Warning — dramatísk innskot eftir 150. umferð
 
   Eftir 150 umferðir í einum leik mun frásagnarvélin EINU SINNI setja inn „Cinematic Meta Warning" — dramatískt innskot með meta-frásögn. Það birtist í sérstöku glugga með bjölluhljóði, með beinni ávarpi til þín í annarri persónu, samantekt á afrekum og viðvörun um mikilvægi ákvarðana sem teknar eru.
 
   Cinematic Warning ER EKKI hluti af hljóðbókarfrásögninni — sían sem vinnur úr .txt skránni fjarlægir sjálfkrafa efni hennar (merkt með táknum ⚠️🚨⚠️), þannig að þú heyrir ekki meta-athugasemdir um eigin leik þegar þú hlustar á hljóðbókina. Efnið fer aðeins í logg .story.jsonl (til íhugunar eða til að geyma sem minningu) og í viðmótsglugga, þar sem þú getur lesið það einu sinni og haldið áfram.
 
-  SKREF 8: Brú til Reżysera — nýttu Heimabókina sem búin er til í Sögum
+  SKREF 9: Brú til Reżysera — nýttu Heimabókina sem búin er til í Sögum
 
   Skráin skrypty/<nazwa>.md sem er búin til í leiknum inniheldur Heimabók með persónum sem birtust í frásögninni, ásamt eiginleikum þeirra, áherslum og persónuleika. Format er nákvæmlega eins og Reżyser parserinn krefst — [Nafn: eiginleikar með lýsingu á áherslu].
 
@@ -120,7 +138,7 @@ tresc: |
 
   Þetta er einhliða brú: Sögur framleiða efni, Reżyser formatar það. Öfugt er ekki mögulegt — Reżyser hleður ekki inn leikjum úr Sögum sem gagnvirku ástandi.
 
-  SKREF 9: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
+  SKREF 10: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
 
   Allur Sögumódúllinn hefur verið fínstilltur fyrir blinda leikmenn. Hvað við gerðum nákvæmlega:
 

@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio IA - Guide Complet (Version 15.0 – Version de Publication)
+Manuel du Réalisateur Audio IA - Guide Complet (Version 15.1 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour des pièces radiophoniques et des livres audio. Il a été optimisé pour fonctionner avec des synthétiseurs vocaux professionnels et des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -314,6 +314,10 @@ Comment ça fonctionne ?
 6. Vous obtiendrez un fichier architecture_[nom_original].docx — un Word professionnel prêt pour un travail ultérieur. Par exemple, si votre fichier d'entrée s'appelait anesthesie.txt, le fichier résultant sera nommé architecture_anesthesie.docx et apparaîtra dans le même dossier que l'original.
 
 Nettoyage en passant : Le script supprime automatiquement les balises HTML (si le texte provient du navigateur ou d'un fichier .html local, par exemple généré par Polyglotte) et les balises d'en-tête Markdown (par exemple, ### ou ####) avant le traitement. Vous n'avez pas besoin de nettoyer le fichier manuellement.
+
+Mode Histoires : regroupement automatique des tours en scènes (depuis v15.1)
+
+Si vous chargez dans l'Architecte un fichier skrypty/<jeu>.txt généré par le module Histoires Interactives, le convertisseur reconnaîtra les marqueurs de tour (par exemple, « --- Tour 7 --- ») en 9 langues (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) et tous les cinq tours il insérera un nouveau titre de premier niveau sous la forme « Scène N » (le numéro commence à 1, localisé pour la langue donnée — « Scena N » en polonais, « Scene N » en anglais, etc.). Les autres marqueurs de tour sont supprimés — ils n'apparaissent pas dans la narration de l'audiolibre, car « Tour 7 » prononcé par le TTS brise l'immersion de l'auditeur. Le résultat est un fichier Word avec une division naturelle en scènes de quelques minutes d'audio chacune, prêt à être importé dans ElevenLabs. Le mécanisme est auto-détecteur — les fichiers d'audiolibre ordinaires sans marqueurs de tour (narration classique du Réalisateur) sont traités exactement comme avant.
 
 Avantage puissant pour les utilisateurs de NVDA et ElevenLabs
 

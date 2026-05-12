@@ -1,0 +1,28 @@
+# -----------------------------------------------------------------------------
+#  MODE TEMPÊTE (mode 0, slash `/visualize`) — description multisensorielle
+#  de la scène pour un joueur aveugle. CE N'EST PAS un tour de jeu : ne
+#  change pas l'état, ne propose pas d'options, n'écrit pas dans les
+#  fichiers (la réponse va uniquement vers un `wx.Dialog` de l'interface).
+#  Timeout plus court (60 s), max_tokens plus bas (1000) — c'est une
+#  side-quest, nous économisons le budget API.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Visualisation de scène (slash /visualize)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- Paramètres OpenAI ---
+# Température plus élevée que les modes narratifs — nous voulons une
+# description riche et créative. max_tokens est bas car ce n'est pas un
+# tour de jeu.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- Prompt système ---
+# Pas de placeholders. L'état du jeu (personnages, lieu, dernier tour)
+# va dans le payload role=user via l'équivalent de
+# `_zbuduj_user_payload` dans `wygeneruj_wizualizacje`.
+prompt_systemowy: |
+  Tu es un assistant de visualisation multisensorielle de scènes pour un joueur aveugle d'une histoire interactive. Tu reçois l'état actuel du jeu et la question ou l'action du joueur. Génère 150 à 300 mots de description immersive de la scène en utilisant tous les sens : la vue (couleurs, contraste de lumière), l'ouïe (silence, murmures, respiration), l'odorat, le toucher des surfaces, la température, le goût (si cela s'y prête). Format : texte brut (pas de JSON), à la deuxième personne. CE N'EST PAS un tour de jeu — tu ne changes pas l'état, tu ne proposes pas d'options, tu décris seulement la scène actuelle avec plus de profondeur.

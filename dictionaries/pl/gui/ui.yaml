@@ -660,6 +660,9 @@ konwerter:
   # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
   # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
   author_metadata:       "Reżyser"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Tura N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Scena {numer}"
   # Dialog wyboru pliku
   file_dlg_title:        "Wybierz plik źródłowy"
   file_dlg_wildcard:     "Wszystkie obsługiwane pliki (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Dokumenty Word (*.docx)|*.docx|Wszystkie pliki (*.*)|*.*"
@@ -892,7 +895,7 @@ opowiesci:
   tool_description: |-
     Wcielasz się w bohatera dynamicznie generowanej historii. Wpisz nazwę nowej gry i wybierz tryb, by rozpocząć — narracja prowadzona jest w drugiej osobie i odczytywana przez czytnik ekranu lub TTS.
 
-    Tryb swobodny pozwala spróbować dowolnej akcji wpisanej w pole na dole. Tryb wyborów daje 3-5 ponumerowanych opcji do wyboru przyciskami. Tryb „mniejsze zło" stawia wyłącznie przed niekorzystnymi wyborami — wybierasz, co ci się mniej opłaca. Komendy zaczynające się od ukośnika (/zapisz, /wczytaj, /ustawienia, /koniec, /wizualizuj) działają w każdej chwili.
+    Tryb swobodny pozwala spróbować dowolnej akcji wpisanej w pole na dole. Tryb wyborów daje 3-5 ponumerowanych opcji do wyboru przyciskami. Tryb „mniejsze zło" stawia wyłącznie przed niekorzystnymi wyborami — wybierasz, co ci się mniej opłaca. Komendy zaczynające się od ukośnika (/zapisz, /wczytaj, /koniec, /wizualizuj) działają w każdej chwili.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry:             "Nazwa gry"
@@ -945,7 +948,7 @@ opowiesci:
   lbl_akcja:                 "Twoja akcja lub komenda"
   txt_akcja_name:            "Pole akcji gracza"
   txt_akcja_hint:            "Opisz, co robisz, lub wpisz komendę zaczynającą się od /"
-  txt_akcja_tooltip:         "Wpisz dowolną akcję (free-text) lub komendę systemową: /zapisz /wczytaj /ustawienia /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
+  txt_akcja_tooltip:         "Wpisz dowolną akcję (free-text) lub komendę systemową: /zapisz /wczytaj /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
   btn_wyslij_label:          "&Wyślij"
   btn_wyslij_tooltip:        "Wyślij akcję do silnika narracyjnego"
 
@@ -1000,16 +1003,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /zapisz, /save                    — wymuszenie zapisu gry
     /wczytaj, /load                   — otwórz dialog wczytania
-    /ustawienia, /settings            — zmień model AI (Standard/Quality)
     /wizualizuj <opis>, /visualize    — multisensoryczny opis sceny (bez zapisu)
     /koniec, /quit                    — zamknij aplikację
-  dlg_ustawienia_tytul:      "Ustawienia silnika narracyjnego"
-  dlg_ustawienia_lbl_model:  "Model AI:"
-  dlg_ustawienia_model_standard:  "Standardowy (gpt-4o-mini, szybszy, tańszy)"
-  dlg_ustawienia_model_quality:   "Wysokiej jakości (gpt-4o, wolniejszy, droższy)"
-  dlg_ustawienia_btn_zatwierdz:   "Zatwierdź"
-  dlg_ustawienia_zmieniono_tytul: "Model zmieniony"
-  dlg_ustawienia_zmieniono_tresc: 'Silnik narracyjny będzie odtąd korzystał z modelu „{model}".'
   dlg_visualize_tytul:       "🌅 Wizualizacja sceny"
   dlg_visualize_lbl:         "Multisensoryczny opis aktualnej sceny (nie zmienia stanu gry):"
   dlg_visualize_name:        "Pole z opisem wizualizacji sceny"
@@ -1035,3 +1030,20 @@ opowiesci:
   quick_start_wlasna:        "(własna gra)"
   choice_quick_start_name:   "Wybór gotowego scenariusza Quick Start"
   choice_quick_start_tooltip: 'Wybierz gotowy świat, by od razu zanurzyć się w narracji. Preset wstrzyknie do silnika krótki opis świata i bohatera, ustawi domyślny tryb gry. „(własna gra)" pozostawia start swobodny — silnik sam wymyśli świat na podstawie pierwszej akcji.'
+
+  # ---- v15.1: Zasady świata (edytowalna mini-księga koncepcji) ------------
+  btn_zasady_swiata_label:   "&Edytuj zasady świata…"
+  btn_zasady_swiata_tooltip: "Otwiera okno edycji zasad świata — opcjonalnego tekstu z regułami fonetycznymi, kulturowymi lub mechanicznymi, które silnik narracyjny ma respektować przez całą grę. Puste pole = brak dodatkowych reguł (zachowanie domyślne)."
+  dlg_zasady_swiata_tytul:   "Zasady świata gry"
+  dlg_zasady_swiata_lbl:     "Reguły, które silnik narracyjny ma respektować przez całą grę (opcjonalne):"
+  dlg_zasady_swiata_name:    "Pole edycji zasad świata"
+  dlg_zasady_swiata_hint: |-
+    Np.:
+    - „Imię Joanna wymawiaj zawsze twardo, polskie [dż]; nigdy miękko [j]."
+    - „W tym świecie magia działa tylko w nocy; w dzień postacie są zwykłymi ludźmi."
+    - „Antagonistka Joana próbuje zmiękczyć wymowę imienia protagonistki przez odmianę gramatyczną."
+  dlg_zasady_swiata_btn_ok:  "&Zapisz"
+  dlg_zasady_swiata_btn_anuluj: "&Anuluj"
+  status_zasady_zapisane:    "Zasady świata zaktualizowane i zapisane do pliku gry."
+  zasady_bez_gry_tytul:      "Brak aktywnej gry"
+  zasady_bez_gry_tresc:      'Załóż nową grę przyciskiem „Nowa gra" albo wczytaj wcześniej zapisaną, zanim zdefiniujesz zasady świata — zasady są zapisywane razem ze stanem gry.'

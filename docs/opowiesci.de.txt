@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktives Geschichtenmodul (15.0 – Veröffentlichungsversion)
+Reżyser Audio GPT — Interaktives Geschichtenmodul (15.1 – Veröffentlichungsversion)
 
 Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion in freiem Text schreibst oder eine der nummerierten Optionen auswählst.
 
@@ -54,7 +54,25 @@ Wenn du volle Freiheit bevorzugst, lass "(eigenes Spiel)" im Quick Start-Feld un
 
 
 
-SCHRITT 4: Slash-Befehle — schnelle Aktionen ohne API
+SCHRITT 4: Weltregeln — deine eigenen Regeln, die die Engine während des gesamten Spiels respektiert
+
+Ab Version 15.1 findest du über dem Erzählungsfeld die Schaltfläche „Weltregeln bearbeiten…". Sie öffnet ein separates Bearbeitungsfenster mit einem mehrzeiligen Feld, in dem du beliebige Regeln eingeben kannst — phonetische, mechanische oder dramaturgische — die die Erzählmaschine in jeder folgenden Runde dieses spezifischen Spiels respektieren wird. Die Regeln werden zusammen mit dem Spielstand (.game.json) gespeichert, sodass das Laden des Spiels sie unverändert beibehält.
+
+Drei typische Anwendungen der Weltregeln:
+
+PHONETISCHE REGELN — sie steuern, wie Charakternamen vom TTS (Vocalizer, ElevenLabs) ausgesprochen werden. Beispiel: „Den Namen Joanna immer hart aussprechen, polnisch [dż]; niemals weich [j]." Die Engine wird diese Variante ab der nächsten Runde in die Erzählung einfügen, und die Figur Joanna im Buch der Welt behält den beabsichtigten Klang. Das ist auch eine natürliche Brücke zu den Akzenten des Regisseurs — wenn du nach Spielende das Buch der Welt in das Regisseur-Panel lädst (SCHRITT 9 unten), „übergeht" die phonetische Regel mit dem Spiel als Charaktereigenschaft.
+
+MECHANISCHE REGELN — sie beschreiben die „physikalischen Gesetze" deiner Welt, an die sich das LLM halten muss. Beispiel: „In dieser Welt funktioniert Magie nur nachts; tagsüber sind die Charaktere normale Menschen." Die Engine wird mittags keine Zauber erfinden, selbst wenn deine Spielzughandlung es verlangt — stattdessen schlägt sie eine Alternative vor oder leitet dich in die Dämmerung.
+
+DRAMATURGISCHE REGELN — sie definieren langfristige Spannungen zwischen Charakteren. Beispiel: „Die Antagonistin Joana versucht, die Aussprache des Namens der Protagonistin durch grammatikalische Abwandlung zu mildern." Die Engine webt solche subtilen Signale in Joanas Dialoge ein und erhält den Konflikt über viele Runden aufrecht, ohne dass du die Anweisung wiederholen musst.
+
+Leeres Regelfeld = keine zusätzlichen Regeln (Standardverhalten wie in v15.0). Du musst die Regeln nicht gleich zu Beginn definieren — du kannst zu jedem Zeitpunkt zum Fenster zurückkehren, im Spielverlauf bemerkte Regeln hinzufügen und auf „Speichern" klicken. Die Änderung tritt ab der nächsten Runde in Kraft.
+
+Hinweis: Weltregeln erfordern ein aktives Spiel. Wenn du auf „Weltregeln bearbeiten…" klickst, ohne dass ein Spiel geladen/erstellt ist, erhältst du die Meldung „Kein aktives Spiel" — klicke zuerst auf „Neues Spiel" oder lade ein gespeichertes Spiel.
+
+
+
+SCHRITT 5: Slash-Befehle — schnelle Aktionen ohne API
 
 Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Befehle sind lokal (kosten keine Aufrufe an OpenAI) und funktionieren unabhängig vom Spielmodus. Sowohl deutsche als auch englische Varianten werden akzeptiert:
 
@@ -62,7 +80,7 @@ Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägs
 
 /laden, /load — öffnet einen Dateiauswahldialog aus dem Ordner runtime/opowiesci/. Nach dem Laden werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst von der Runde fortfahren, in der du aufgehört hast.
 
-/einstellungen, /settings — öffnet einen Dialog zur Auswahl des KI-Modells. Standardmäßig verwenden wir gpt-4o-mini (Standard) — schneller und günstiger. Beim Umschalten auf gpt-4o (Hochwertig) wird die Erzählung reicher, aber jede Runde kostet mehr und dauert länger.
+Die Erzählmaschine wählt das KI-Modell automatisch je nach Modus: für den Auswahlmodus und das Kleinere Übel verwendet sie das teurere gpt-4o (hält sich strikt an die Weltregeln), für den freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, sodass keine schwere Regiearbeit nötig ist).
 
 /visualisiere <beschreibung>, /visualize <beschreibung> — multisensorische Beschreibung der aktuellen Szene. Ändert nicht den Spielstatus, schlägt keine Entscheidungen vor — die Erzählmaschine verwendet alle fünf Sinne (Sehen, Hören, Riechen, Fühlen, Schmecken), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT zur Erzählung hinzugefügt oder in der Hörbuchdatei gespeichert. Beispiel: „/visualisiere wie der Wächter aussieht" oder „/visualisiere den Geruch des Cafés".
 
@@ -70,7 +88,7 @@ Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägs
 
 
 
-SCHRITT 5: Spieldateien — wo du deine Daten findest
+SCHRITT 6: Spieldateien — wo du deine Daten findest
 
 Jedes Spiel erzeugt fünf Dateien, jede in einem anderen Ordner, mit unterschiedlichen Rollen:
 
@@ -86,7 +104,7 @@ runtime/skripte/<name>.mode — Metadaten der Modusnummer (3=Frei, 4=Auswahl, 5=
 
 
 
-SCHRITT 6: Modellgedächtnis-Indikator — warum alte Spiele keine manuelle Arbeit von dir erfordern
+SCHRITT 7: Modellgedächtnis-Indikator — warum alte Spiele keine manuelle Arbeit von dir erfordern
 
 Unter dem RadioBox-Modus findest du den Modellgedächtnis-Indikator — eine Fortschrittsleiste (wx.Gauge) mit Statusbeschreibung daneben. Der Indikator zeigt den Prozentsatz der Auslastung des Kontextfensters der Erzählmaschine an (gpt-4o-mini hat einen Puffer von 128.000 Tokens).
 
@@ -101,7 +119,7 @@ In der Praxis ist der Autoreduktionsmechanismus unsichtbar — der Spieler merkt
 
 
 
-SCHRITT 7: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
+SCHRITT 8: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
 
 Nach 150 Runden in einem Spiel wird die Erzählmaschine EINMAL ein „Cinematic Meta Warning" einfügen — eine meta-narrative dramatische Unterbrechung. Es erscheint in einem separaten Dialog mit einem Glockengeräusch, mit einer direkten Ansprache an dich in der zweiten Person, einer Zusammenfassung der Errungenschaften und einer Warnung über die Bedeutung der getroffenen Entscheidungen.
 
@@ -109,7 +127,7 @@ Cinematic Warning ist NICHT Teil der Audiobuch-Erzählung — der .txt-Filter-En
 
 
 
-SCHRITT 8: Brücke zum Regisseur — nutze das Buch der Welt, das in den Geschichten erstellt wurde
+SCHRITT 9: Brücke zum Regisseur — nutze das Buch der Welt, das in den Geschichten erstellt wurde
 
 Die Datei skripte/<name>.md, die während des Spiels generiert wird, enthält das Buch der Welt mit Charakteren, die in der Erzählung aufgetaucht sind, zusammen mit ihren Eigenschaften, Akzenten und Charakteren. Das Format ist genau das, was der Regisseur-Parser benötigt — [Name: Eigenschaften mit Akzentbeschreibung].
 
@@ -123,7 +141,7 @@ Dies ist eine Einbahnstraße: Geschichten produzieren Material, der Regisseur fo
 
 
 
-SCHRITT 9: Barrierefreiheit (NVDA und Bildschirmleser) — von Anfang an entworfen
+SCHRITT 10: Barrierefreiheit (NVDA und Bildschirmleser) — von Anfang an entworfen
 
 Das gesamte Geschichtenmodul wurde für blinde Spieler optimiert. Was wir konkret gemacht haben:
 

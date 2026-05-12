@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 Quick Start -alkuasetelmaa uudelle pelille. Kun pelaaja
+#  valitsee «Uusi peli», valittu alkuasetelma täyttää moodin automaattisesti
+#  ja syöttää `seed_swiata`-kentän snapshotiin (LLM saa sen
+#  avauskohtauksen kontekstina).
+#
+#  JOKAINEN alkuasetelma kirjoitetaan KÄSIN kielen mukaan — tämä on
+#  kirjallisuutta, ei teknistä i18n:ää. Kohdekielellä on omat kulttuuriset
+#  motiivinsa; EI kalkkata puolasta (ks. `feedback_yaml_prompty.md` ja
+#  `feedback_lokalizacja_nazw.md`).
+#
+#  FI-laajuus: suomenkielinen miljöö (Lapin suojat / karjalaisilla
+#  motiiveilla rakennettu fantasia / Helsinki-noir / tutkimusasema
+#  suomenkielisellä miehistöllä / Kallion kahvila). Nimet, aksentit ja
+#  kulttuuriset viittaukset ovat natiivisti suomalaisia, eivät
+#  puolasta translitteroituja.
+#
+#  Kenttä `tryb_domyslny`: 3=Vapaa / 4=Valinnat / 5=Pienempi Paha.
+#  Sokealle pelaajalle suositellaan moodeja 4 ja 5 (täsmälliset
+#  klikattavat valinnat), mutta Vapaa säilytetään kauhulle/komedialle
+#  (jossa pelaajan improvisointi on osa kokemusta).
+#
+#  YAML-avaimet (`po_apokaliptyczna_sf` jne.) pysyvät puolaksi —
+#  ne ovat sisäisiä ID:itä, jotka GUI indeksoi sijainnin mukaan, eivät
+#  käyttäjälle näkyviä merkkijonoja.
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "Postapokalyptinen SF"
+    opis_krotki: "Vuosisata ekologisen romahduksen jälkeen. Ihmiskunnan jäänteet Kolarin kallioperään hakattuissa suojissa. Valinta pragmatismin ja inhimillisyyden välillä."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Maailma kaksisataa vuotta Pitkän Palon jälkeen — globaalin kataklysmin, joka kärvensi ilmakehän. UV-säteily tappaa jokaisen, joka astuu pintaan ilman pukua. Ihmiskunta elää Kolarin kalkkikiveen hakatuissa suojissa, ravinnoksi hydroponiikkaa, synteettisiä proteiineja ja nollavesitalous. Pelaaja on nuori kuriiri Juurikallion klaanissa, yksi tusinasta maan alla selviävästä yhteisöstä. Klaanit käyvät kauppaa keskenään, mutta toisinaan taistelevat resursseista — akkukennoista, siemenistä, geeneistä, joita säteily ei ole vielä hajottanut. Juurikalliolla on salaisuus: heidän tuuletuskanavansa avautuu maanalaiseen makean veden järveen. Kukaan Vanhinneuvoston ulkopuolelta ei tiedä siitä. Pelaaja on juuri saanut ensimmäisen vakavan toimeksiantonsa — salakuljettaa probioottinen mikrofloora Haikara-klaaniin, joka kuolee peruuttamattomaan suolistodysbioosiin. Reitti kulkee tulvineen tunnelin läpi, jossa kerrotaan elävän mutatoituja rottia. Toistuvat hahmot: Helmi Aalto (40, kuriirien lähetti, pragmaattinen; aksentti: lyhyet lauseet, kutsuu kaikkia «tyttöseksi» nimen sijaan), Vanha Tapio (60, klaanin Vanhin, kantaa Paloa edeltävää muistia; aksentti: arkaainen kirjasuomi, käyttää sanoja 1980-luvun uutislähetyksistä). Tunnelma tukkoinen, neonoranssia natriumlamppujen valoa, koneöljyn ja homeen haju.
+
+  mroczne_fantasy:
+    etykieta: "Tumma fantasia"
+    opis_krotki: "Sateessa kylpevän valtakunnan reunamaa. Demonien inkvisiittori metsässä kyläläisten jäljillä, jotka ehkä piilottelevat lasta — tai jotain paljon pahempaa."
+    tryb_domyslny: 5
+    seed_swiata: |
+      Kolmen Puron Valtakunta, yhdeksäs vuosi uskonsodassa Liekin Kirkon ja Vanhojen Jumalien välillä. Pelaaja on nuori inkvisiittori Ohdakesisarten Veljeskunnasta — naiset, jotka ovat rikkoneet lupauksensa ja tarttuneet miekkaan, kun Kirkko tarvitsee muutakin kuin rukousta. Tehtävä: olet saapunut Tammikylään, jossa nimetön ilmianto kertoo Hoivan merkeistä (Vanhojen Jumalien rituaali, joka pitää «riivatun» lapsen hengissä sen sijaan että se hukutettaisiin, kuten Liekki vaatii). Ilmianto on kirjoitettu epävarmalla kädellä — kirjoittaja on lukutaidoton, renki tai piika. Kylä vaikenee. Nimismies Eemeli (50-vuotias, punaiset kasvot, välttää katsettasi; aksentti: hämäläinen, sanoo «niinpä, rouva» ja venyttää loppuvokaaleja) kutsuu sinut illalliselle ja puhuu rukiin hinnasta. Kätilö Sointu (35-vuotias, leski, pitkät mustat letit; aksentti: laulava savolainen, pitää säämetaforista) suhtautuu sinuun avoimen vihamielisesti. Metsän laidalla olevassa mökissä asuu perhe, joka erottautuu oudosti — talonpoika Antero, hänen vaimonsa Marketta, kaksi aikuista lasta. Huhu kertoo kolmannesta, pienemmästä. On satanut kolme päivää, tie lähimpään varuskuntaan on mutaa ja juutut tänne kahdeksi viikoksi. Inkvisiittorin sinettisi kantaa Liekin taikaa — se voi polttaa myös syyttömät, jos kylä kääntyy sinua vastaan. Yöllä kuulet metsän laidan mökistä oudon hyminän, kuin kahden äidin äänet samanaikaisesti, paitsi että toinen niistä ei ole inhimillinen.
+
+  urban_fantasy_detective:
+    etykieta: "Urbaani fantasiadekkari"
+    opis_krotki: "Helsinki, 2008. Yksityisetsivä, joka näkee aaveita. Asiakas haluaa että löydät hänen miehensä — hän katosi Kalliossa, mutta Kallio ei ole pelkkä Kallio."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Helsinki, lokakuu 2008, sateinen iltapäivä. Pelaaja on yksityisetsivä — Jaakko «Jake» Vuorinen, 38-vuotias, entinen poliisi, irtisanottu palveluksesta juopumuksen vuoksi. Hän kantaa mukanaan jotain, mitä ei halua nimetä: hän näkee varjoja, joiden ei kuuluisi olla siellä. Kasvoja ohikulkijoiden olkapäiden takana. Hahmoja Hietaniemen hautausmaalla, jotka vastaavat kysymyksiisi, jos viet niille pirtua. Vuorinen ei usko «okkultismiin», mutta avioeron ja umpilisäkeleikkauksen jälkeen hän myöntää, että jotain hänessä ei pelaa. Tänään Vuorikadun toimistolle (halpa vuokra, rappukäytävässä tupakansavun haju) astuu sisään nainen — Nora Lindgren, 45-vuotias, kuukauden leskenä, vasta nyt myöntää itselleen että jotain ei täsmää. Hänen miehensä Tuomas, kalliolainen ravintoloitsija, «lähti kolmantena päivänä pyhäinpäivän jälkeen Hakaniemen torille hakemaan kalaa». Tuli illalla kotiin normaalisti, mutta siitä yöstä lähtien mumisi yksinään saksaa — kieltä, jota ei osannut. Kaksi viikkoa myöhemmin hyppäsi Pitkältäsillalta. Poliisi sulki tapauksen itsemurhana. Nora ajattelee toisin. Tunnelma: Helsinki kiinni jugend-rapatun keskustan ja Sörnäisten lasitornien välissä, tihkusade, kahviloissa tuoksuvat korvapuustit ja kylmä tupakka, porttikongeissa nukkuvat asunnottomat ja ehkä jotain muutakin. Toistuvat hahmot: Nora (tyylikäs harmaa hiusten leikkaus, kevyt karjalainen sointu), ylikomisario Tolvanen (60-vuotias, Vuorisen vanha partiokumppani, heittää vielä luita; aksentti: tiivis Helsingin slangi, piiloutuu vitsien taakse, kun keskustelu menee vakavaksi).
+
+  kosmiczny_horror:
+    etykieta: "Kosminen kauhu"
+    opis_krotki: "Tutkimusasema neutroni­tähden kiertoradalla. Miehistö herää horroksesta — ilman kapteenia. Ja ilman jälkeäkään siitä, että kapteenia olisi koskaan ollut."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Vuosi 2247. Tutkimusasema «Kassandra» kiertää neutronitähteä PSR J1748-2446ad, nopeimmin pyörivää tähteä, jonka ihmiskunta tuntee (716 kierrosta sekunnissa). Tehtävä: magneettisten pulsaatioiden tutkimus. Pelaaja on tieteellinen upseeri — tohtori Inkeri Rautio, kvanttineurologi, 42-vuotias, Turusta. Seitsenhenkinen miehistö, horros ohjelmoitu neljäksi vuodeksi, porrastetut neljän tunnin herätysvälit. Pelaaja herää kolmantena. Aluksen tietokone «Mnemosyne» raportoi: horros 4 vuotta 23 päivää 6 tuntia, kaikki nominaalisti. Mutta miehistölaskuri näyttää 6, ei 7. Kapteeni puuttuu — komentaja Bertil Halonen. Mnemosyne ei muista kapteenia. Lähtömanifestti Maasta: 7 henkilöä. Horroslista: 6. Oma muistisi: kyllä, Halonen oli olemassa, söit hänen kanssaan aamiaista Otaniemessä. Kaksi jo herännyttä — insinööri Olli (28-vuotias, harvasanainen, aksentti: tiukka karjalainen) ja biologi Lucien (50, Quebecistä, sanoo edelleen «bonjour» «hyvän huomenen» sijaan) — väittävät, etteivät muista mitään kapteenia. Tunnet, että asemalla on joku muukin. Paluuilmakanavassa, jonka kautta ilman pitäisi palata hydroponiikasta, kuulet rytmin — ei mekaaninen, orgaaninen, kuin hengitys. Mnemosyne ei ilmoita poikkeavuudesta. Eilinen neurologinen skannauksesi: vasemmassa ohimossasi on kirurginen arpi. Et muista leikkausta.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Romanttinen tapakomedia"
+    opis_krotki: "Pieni kahvila Kalliossa. Vakioasiakas, jota johto haluaa käyttää paikan pelastamiseen. Ja hän tietää totuuden."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Helsinki, Kallio, huhtikuu 2024. «Tuulen kahvi» — pieni kahvila Helsinginkadulla, auki vuodesta 1998, sijaitsee 1900-luvun alun kerrostalossa. Omistaja on Aatos Lehtinen, 67-vuotias, eläkkeellä oleva teatterilavastaja, joka pyörittää paikkaa enemmän rakkaudesta kuin voitosta. Toinen työntekijä on barista ja tarjoilija yhdessä — pelaaja: Maija Koivisto, 31-vuotias, englantilaisen filologian maisteri, työskennellyt täällä neljä vuotta, unelmoi omasta kirjakaupastaan. Kahvila on oma tunnelmansa: vanhoja kirjoituskoneita hyllyillä, vinyylinen jukeboksi, pystypiano johon eläkeläisnaapuri Konsta soittaa lauantaisin. Asiakaskunta on vakituista, lämmintä, rakastettua. Ongelma: vuokranantaja, Reijo Salminen (55-vuotias, aggressiivinen, nopea kieli), on tuplannut vuokran — Aatos ei pysty maksamaan. Kuusi viikkoa sulkemiseen. Kahvilassa istuu joka päivä sama mies, Kyösti Pakkanen (38-vuotias, pienen kustantamon kustannustoimittaja, ystävällinen, tuskallisen ujo) — Maija on huomannut hänet kuukausia, mutta ei ole sanonut sanaakaan. Tänä aamuna Aatos paljastaa Maijalle, että Kyösti on Salmisen veljenpoika ja hänen oletetaan «laittavan hyvä sana kahvilan puolesta». Aatos odottaa Maijan «olevan kiltti» Kyöstille — tavalla, josta Maija ei pidä. Ja hän oli pitkään halunnut lähestyä Kyöstiä omasta tahdostaan, vapaasti. On maanantai-iltapäivä. Kyösti on juuri tullut sisään, tilannut flat whiten, istunut ikkunapöytään. Aatos katsoo sinua merkitsevästi tiskin takaa.

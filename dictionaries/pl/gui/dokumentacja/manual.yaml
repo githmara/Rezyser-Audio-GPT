@@ -400,6 +400,10 @@ tresc: |
 
   Oczyszczanie przy okazji: Skrypt automatycznie usuwa tagi HTML (jeśli tekst pochodzi z przeglądarki lub z lokalnego pliku .html, np. wygenerowanego przez Poliglotę) oraz znaczniki nagłówków Markdown (np. ### lub ####) przed przetworzeniem. Nie musisz czyścić pliku ręcznie.
 
+  Tryb Opowieści: automatyczne grupowanie tur w sceny (od v15.1)
+
+  Jeśli wczytasz do Architekta plik skrypty/<gra>.txt wygenerowany przez moduł Interaktywnych Opowieści, konwerter rozpozna znaczniki tury (np. „--- Tura 7 ---") w 9 językach (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) i co pięć tur wstawi nowy nagłówek pierwszego poziomu w formie „Scena N" (numer biegnie od 1, lokalny dla danego języka — w angielskim „Scene N", w niemieckim „Szene N" itd.). Pozostałe znaczniki tury są strippowane — nie pojawiają się w narracji audiobooka, bo „Tura 7" wymówiona przez TTS łamie immersję słuchacza. Wynikiem jest plik Word z naturalnym podziałem na sceny po kilka minut audio każda, gotowy do importu do ElevenLabs. Mechanizm jest auto-detekcyjny — zwykłe pliki audiobooków bez znaczników tury (klasyczna narracja z Reżysera) przetwarzane są dokładnie tak, jak dotąd.
+
   Potężna zaleta dla użytkowników NVDA i ElevenLabs
 
   Formatowanie "Heading 1" dla rozdziałów to nie tylko estetyka. W NVDA możesz nawigować po nagłówkach błyskawicznie, naciskając klawisz H (lub 1 dla nagłówków pierwszego poziomu). Zamiast przewijać setki stron, przeskakujesz od rozdziału do rozdziału w ułamku sekundy. To zmienia sposób pracy z długimi dokumentami. W ElevenLabs masz pewność, że silnik automatycznie wstawi cięcia i nie będzie się zawieszał podczas reżyserowania klipów audio.

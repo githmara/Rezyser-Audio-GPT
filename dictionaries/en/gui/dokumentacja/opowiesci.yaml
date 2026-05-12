@@ -69,7 +69,25 @@ tresc: |
 
 
 
-  STEP 4: Slash commands — quick actions without API
+  STEP 4: World rules — your own rules that the engine respects throughout the game
+
+  From version 15.1, above the narrative field you'll find the "{opowiesci.btn_zasady_swiata_label}" button. It opens a separate edit window with a multiline field where you can enter any rules — phonetic, mechanical, or dramaturgical — that the narrative engine will respect in every subsequent turn of this specific game. The rules are saved together with the game state (.game.json), so loading the game preserves them unchanged.
+
+  Three typical uses of world rules:
+
+  PHONETIC RULES — they control how character names are pronounced by TTS (Vocalizer, ElevenLabs). Example: "Pronounce the name Joanna always hard, Polish [dż]; never soft [j]." The engine will insert that variant into the narration from the next turn, and the character Joanna in the World Book will keep the intended sound. This is also a natural bridge to the Director's accents — if after finishing the game you load the World Book into the Director's panel (STEP 9 below), the phonetic rule "passes" with the game as a character trait.
+
+  MECHANICAL RULES — they describe the "laws of physics" of your world that the LLM must respect. Example: "In this world, magic works only at night; during the day, characters are ordinary people." The engine won't invent spells at noon even if your turn's action demands it — instead it will suggest an alternative or steer you toward dusk.
+
+  DRAMATURGICAL RULES — they define long-term tensions between characters. Example: "The antagonist Joana tries to soften the pronunciation of the protagonist's name through grammatical inflection." The engine weaves such subtle signals into Joana's dialogue, sustaining the conflict across many turns without you re-issuing the instruction.
+
+  Empty rules field = no additional rules (default behavior, as in v15.0). You don't have to define rules at the very beginning — you can return to the window at any turn, add rules you've noticed during play, and click "{opowiesci.dlg_zasady_swiata_btn_ok}". The change takes effect from the next turn.
+
+  Note: world rules require an active game. If you click "{opowiesci.btn_zasady_swiata_label}" without a loaded/created game, you'll get the "{opowiesci.zasady_bez_gry_tytul}" message — first click "{opowiesci.btn_nowa_gra_label}" or load a saved game.
+
+
+
+  STEP 5: Slash commands — quick actions without API
 
   In the action field, you can enter a command starting with a slash `/` at any time. Commands are local (they don't cost OpenAI calls) and work regardless of the game mode. Both Polish and English variants are accepted:
 
@@ -77,7 +95,7 @@ tresc: |
 
   /wczytaj, /load — opens a file selection dialog from the runtime/opowiesci/ folder. After loading, the game name, mode, and full narrative are restored — you can continue from the turn you left off.
 
-  /ustawienia, /settings — opens a dialog for selecting the AI model. By default, we use gpt-4o-mini (Standard) — faster and cheaper. Switching to gpt-4o (High Quality) makes the narrative richer, but each turn costs more and takes longer.
+  The narrative engine selects the AI model automatically based on the mode: for Choice mode and Lesser Evil it uses the more expensive gpt-4o (rigorously sticks to the world rules); for Free mode — the faster and cheaper gpt-4o-mini (the player drives the plot, so heavy directorial work is not needed).
 
   /wizualizuj <description>, /visualize <description> — a multisensory description of the current scene. It doesn't change the game state, doesn't propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with more depth. The result appears in a separate dialog, is NOT added to the narrative, nor saved in the audiobook file. Example: "/wizualizuj jak wygląda strażnik" or "/wizualizuj zapach kawiarni".
 
@@ -85,7 +103,7 @@ tresc: |
 
 
 
-  STEP 5: Game files — where to find your data
+  STEP 6: Game files — where to find your data
 
   Each game produces five files, each in a different folder, with different roles:
 
@@ -101,7 +119,7 @@ tresc: |
 
 
 
-  STEP 6: Model memory indicator — why turns in old games don't require your manual work
+  STEP 7: Model memory indicator — why turns in old games don't require your manual work
 
   Below the mode RadioBox, you'll find the model memory indicator — a progress bar (wx.Gauge) with a status description next to it. The indicator shows the percentage of the narrative engine's context window fill (gpt-4o-mini has a 128,000 token buffer).
 
@@ -116,7 +134,7 @@ tresc: |
 
 
 
-  STEP 7: Cinematic Meta Warning — dramatic interlude after the 150th turn
+  STEP 8: Cinematic Meta Warning — dramatic interlude after the 150th turn
 
   After 150 turns of one game, the narrative engine will ONCE insert a "Cinematic Meta Warning" — a meta-narrative dramatic interlude. It will appear in a separate dialog with a bell sound, with a direct address to you in the second person, a summary of achievements, and a warning about the weight of the decisions being made.
 
@@ -124,7 +142,7 @@ tresc: |
 
 
 
-  STEP 8: Bridge to the Director — use the World Book created in Stories
+  STEP 9: Bridge to the Director — use the World Book created in Stories
 
   The file scripts/<name>.md generated during the game contains the World Book with characters that appeared in the narrative, along with their traits, accents, and character. The format is exactly what the Director's parser requires — [Name: traits with accent description].
 
@@ -138,7 +156,7 @@ tresc: |
 
 
 
-  STEP 9: Accessibility (NVDA and screen readers) — designed from the start
+  STEP 10: Accessibility (NVDA and screen readers) — designed from the start
 
   The entire Stories module has been optimized for blind players. What we specifically did:
 

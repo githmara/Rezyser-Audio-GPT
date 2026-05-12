@@ -1,6 +1,75 @@
-# Release Notes — Reżyser Audio GPT 15.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.1 „Wersja Wydawnicza"
 
-*Drugi główny tryb aplikacji: moduł „Interaktywne Opowieści" — gracz wciela się w bohatera dynamicznie generowanej fikcji drugoosobowej, narracja czytana TTS-em lub czytnikiem ekranu (NVDA-friendly). Pierwsze tak duże poszerzenie funkcjonalne od czasu zamknięcia roadmapy wielojęzycznościowej w 14.0; epoka 15.x+ skupia się na funkcjach silnika/UX, nie na nowych paczkach językowych.*
+*Po fundamencie z 15.0 — moduł „Interaktywne Opowieści" jako drugi główny tryb — wersja 15.1 dojrzewa Opowieści w trzech wymiarach: (a) gracz dostaje pełną kontrolę nad regułami świata przez nowe edytowalne pole „Zasady świata" persistowane razem z grą; (b) wszystkie 9 wdrożonych języków otrzymuje natywne prompty systemowe LLM (zamknięcie tematu fallbacku do PL z 15.0); (c) model AI dobiera się twardo z trybu (gpt-4o dla Wyborów/Mniejszego zła, gpt-4o-mini dla Swobodnego/Burzy) — koniec z `/ustawienia` jako globalnym overridem. Plus konwerter wyłapuje znaczniki tur z Opowieści i grupuje je po 5 jako sceny audiobooka.*
+
+---
+
+## 15.1 — minor release (motyw przewodni: dojrzałość modułu Opowieści w 9 językach)
+
+*Punkt wyjścia: V15.0 (37c1cb1) → 15 commitów na gałęzi `v15.1-zasady-swiata` realizujących cztery równoległe wątki: (1) Zasady świata — core + AI + GUI + i18n × 9 jzk; (2) natywne paczki promptów Opowieści dla DE/ES/FI/FR/IS/IT/RU + wzmocnienie PL i EN; (3) model AI per tryb + likwidacja `/ustawienia`; (4) refaktor `core_tokeny` (DRY tiktoken) + bugfixy GUI + konwerter ze sceniczną grupą tur.*
+
+### TL;DR
+
+15.1 dopina trzy luki, które po 15.0 zostały świadomie odłożone:
+
+**Zasady świata** (nowy przycisk „Edytuj zasady świata…" w panelu Opowieści) to opcjonalny tekst, który silnik narracyjny respektuje przez całą grę — niezależnie od dłubiącego się streszczenia kontekstu. Zaprojektowane pod trzy typowe zastosowania: reguły fonetyczne (jak TTS ma wymawiać konkretne imię), reguły mechaniczne (prawa fizyki świata — „magia działa tylko w nocy"), reguły dramaturgiczne (długoterminowe napięcia między postaciami). Zapis razem ze stanem gry (`.game.json`), więc po wczytaniu gry zasady są zachowane.
+
+**Natywne prompty 9/9 języków** zamykają temat „fallback do PL przy braku natywnej paczki", którym świadomie żyliśmy w 15.0. Każdy z 7 promptów systemowych (`baza`, `tryb_swobodny`, `tryb_wyborow`, `tryb_mniejsze_zlo`, `tryb_burza`, `streszczenie`, `cinematic_warning`) ma teraz ręcznie zatwierdzone tłumaczenie w `dictionaries/<iso>/opowiesci/*.yaml` dla wszystkich 9 wdrożonych języków (PL/EN/DE/ES/FI/FR/IS/IT/RU). Gracz EN dostaje system prompt po angielsku, gracz RU — po rosyjsku, itd. Jakość narracji w trybach z wyborami zauważalnie wzrasta vs fallback PL (LLM lepiej trzyma się stylu opisowego i konstrukcji moralnych zgodnych z lokalną tradycją kulturową). EN dostał też 5 natywnych Quick Start presetów (PL preset z domyślnym fallbackiem nadal działa, ale gracz EN może wybrać preset osadzony w anglojęzycznym kontekście kulturowym).
+
+**Model AI dobierany twardo z trybu** likwiduje globalny override `/ustawienia` z 15.0. Helper `_model_dla_trybu(tryb)` zwraca `gpt-4o` dla TRYB_WYBOROW / TRYB_MNIEJSZE_ZLO i `gpt-4o-mini` dla TRYB_SWOBODNY / TRYB_BURZA. Powód: gpt-4o-mini regularnie łamał zasady świata w trybach z wyborami (proponował opcje neutralne mimo wymogu „wszystkie wybory niekorzystne", ignorował reguły fonetyczne imion) — narracje często nie nadawały się nawet do drobnej korekty. Wywołania pomocnicze (streszczenie, cinematic, status pamięci) hardkodują tańszy `oai.MODEL_DOMYSLNY` — to operacje meta, mini wystarcza. Usuniete: pole `self._aktualny_model`, metoda `_komenda_ustawienia`, wpisy `/ustawienia`/`/settings` w dispatcherze, 7 kluczy `dlg_ustawienia_*` w 9 plikach `ui.yaml`, akapit `/ustawienia` w 9 manualach Opowieści (zastąpiony brieflinem opisującym auto-wybór).
+
+**Konwerter — auto-grupowanie tur w sceny** (bonus dorzucony przed release'em): jeśli wczytasz do Architekta Audiobooków plik `skrypty/<gra>.txt` wygenerowany przez moduł Opowieści, konwerter rozpoznaje znaczniki `--- Tura N ---` w 9 językach i co 5 tur wstawia H1 „Scena N" (lokalnie nazwana — „Scene N" / „Szene N" / „Сцена N" itd.). Pozostałe znaczniki są strippowane — meta-info „Tura 7" wymówiona przez TTS łamałaby immersję. Wynik: docx z naturalnym podziałem na sceny po kilka minut audio każda, gotowy do importu do ElevenLabs. Mechanizm jest auto-detekcyjny — zwykłe pliki audiobooków bez znaczników tury przetwarzane są tak jak dotąd.
+
+15.1 to release **utrzymujący kierunek z 15.0** (dojrzewanie modułu Opowieści, nie wprowadzanie nowych modułów) — następna potencjalna duża zmiana (Fiolka — system inwentarza z dynamicznie używalnymi przedmiotami) idzie na v15.2 lub dalej, bo jeszcze 4o-mini sobie z nią nie poradzi dynamicznie.
+
+### Co nowego dla użytkownika końcowego
+
+#### Zasady świata — edytowalna mini-księga koncepcji
+- **Przycisk „Edytuj zasady świata…"** w panelu Opowieści (skrót: akcelerator z `&E`). Otwiera dialog `wx.Dialog` z polem `wx.TextCtrl` multiline + hint pokazujący 3 przykłady reguł (fonetyczne / mechaniczne / dramaturgiczne).
+- **Persystencja**: zasady zapisywane w `runtime/opowiesci/<gra>.game.json` w polu `zasady_swiata: str`. Po wczytaniu gry (przyciskiem albo `/wczytaj`) zasady są przywracane bez utraty.
+- **Propagacja do promptu**: silnik narracyjny w `opowiesci_ai.generuj_ture()` doszywa zasady do systemowego promptu pod nagłówkiem oddzielającym (LLM widzi je jako twardą instrukcję, na równi z trybem rozgrywki).
+- **Walidacja UX**: kliknięcie przycisku bez aktywnej gry → `wx.MessageBox` „Brak aktywnej gry" (zasady zapisują się razem ze stanem gry, więc grę musisz mieć założoną/wczytaną).
+- **Tłumaczenia w 9 jzk**: hint w `dlg_zasady_swiata_hint` ma natywne przykłady w każdym języku (z zachowaniem polskiej fonetyki [dż] jako case-study — żeby reguła była demonstrowalna niezależnie od języka GUI).
+
+#### Natywne prompty Opowieści w 9 językach
+- **7 promptów × 7 nowych jzk** (DE/ES/FI/FR/IS/IT/RU): `baza`, `tryb_swobodny`, `tryb_wyborow`, `tryb_mniejsze_zlo`, `tryb_burza`, `streszczenie`, `cinematic_warning`. Ręczne tłumaczenia, nie autotłumacz — żeby uniknąć halucynacji w terminologii narracyjnej.
+- **EN — wzmocnienie**: 7 promptów EN doprecyzowane (były bardziej dosłowne tłumaczenia z PL z 15.0); plus EN dostał 5 natywnych Quick Start presetów osadzonych w anglojęzycznym kontekście kulturowym.
+- **PL — wzmocnienie**: tryb Mniejsze zło dostał wzmocnienie eskalacji moralnej (LLM bardziej rygorystycznie odrzuca „neutralne" opcje); spójność wyborów A-E poprawiona (mniej halucynacji formatu).
+
+#### Model AI per tryb — bez togglla
+- **Wybory + Mniejsze zło** → `gpt-4o` (droższy, ale rygorystycznie trzyma się zasad świata i trybu).
+- **Swobodny + Burza** → `gpt-4o-mini` (szybszy i tańszy; gracz steruje fabułą, więc nie wymaga ciężkiej reżyserii).
+- **Likwidacja `/ustawienia`**: gracz nie wybiera modelu — system robi to za niego optymalnie dla danego trybu. Mniej decyzji = mniej rozproszenia.
+- **Wywołania pomocnicze** (streszczenie kontekstu, cinematic warning, oblicz_status_pamieci) hardkodują `oai.MODEL_DOMYSLNY` = `gpt-4o-mini`. Tania obsługa meta, nie wymaga 4o.
+
+#### Konwerter — grupowanie tur w sceny H1 (auto-detekcja Opowieści)
+- **Detekcja** znaczników `--- Tura N ---` przez regex pokrywający 9 wariantów językowych (Tura/Turn/Runde/Turno/Vuoro/Tour/Umferð/Turno/Ход).
+- **Grupowanie**: co `TURY_NA_SCENE=5` tur → nowy H1 „Scena N" (etykieta z i18n `konwerter.scena_naglowek_format` per jzk).
+- **Strippowanie**: pozostałe znaczniki tury usuwane z wyniku — meta-info nie pojawia się w audiobooku.
+- **Auto-detekcyjne**: licznik tur pozostaje 0 dla plików bez znaczników → zwykłe pliki audiobooków bez zmian.
+
+#### Bugfixy GUI Opowieści
+- **Skrót Ostatniej tury** (`opowiesci.last_turn` field): cięcie odbywa się na granicy zdania (znak `.`/`!`/`?`/`…`) zamiast w środku słowa — czytniki ekranu nie tną teraz w połowie wyrazu.
+- **Persist wyborów po wczytaniu**: tablica `ostatnie_wybory` w `.game.json` (nowe pole, opcjonalne) — po wczytaniu gry przyciski A-E są odtwarzane, gracz nie musi czekać na fresh turę.
+- **Klik wyboru nie wysyła**: kliknięcie przycisku wyboru wstawia tekst do pola akcji bez auto-wysyłki. Gracz może edytować/dodać kontekst przed `Wyślij`.
+
+### Architektura — co dokładnie zmienia się w kodzie
+
+#### Nowe pliki
+- `core_tokeny.py` (~109 linii): wspólny moduł tiktoken dla Opowieści + Reżysera (DRY). `policz_tokeny(tekst, model="gpt-4o-mini") -> int` z fallbackiem do `o200k_base` przy braku tiktoken-cache. Wspólne `OBLICZ_STATUS_PAMIECI(payload_tokens, MAX_TOKENS=128_000)` z 4 progami (`czysta`/`OK`/`warning`/`alarm`).
+- `dictionaries/<iso>/opowiesci/*.yaml` × 7 jzk × 7 promptów = 49 nowych plików (DE/ES/FI/FR/IS/IT/RU). EN dodatkowo dostał `zaczatki.yaml` z 5 presetami.
+
+#### Modyfikowane
+- `core_opowiesci.py` — dodane pole `zasady_swiata` w schema `.game.json`; `wczytaj()` defensywnie czyta z `.get("zasady_swiata", "")` dla forward-compat z grami 15.0 (brak pola → puste zasady, zachowanie identyczne z 15.0).
+- `core_rezyser.py` — refaktor `policz_tokeny` deleguje do `core_tokeny.policz_tokeny` (DRY).
+- `opowiesci_ai.py` — helper `_model_dla_trybu(tryb)` zwraca model per tryb. `generuj_ture()` doszywa `zasady_swiata` do system prompt. Usunięto `MODEL_KEY` settings.
+- `gui_opowiesci.py` — nowy widget „Edytuj zasady świata…" z dialogiem. Bugfix `_skroc_ostatnia_ture()` (granica zdania). `_on_wybor_btn()` nie wysyła auto. Persist `ostatnie_wybory` z `.game.json`. Usunięto `_komenda_ustawienia` + dispatcher entries `/ustawienia`/`/settings`.
+- `gui_konwerter.py` — `_REGEX_TURA` + `TURY_NA_SCENE=5` + branch w pętli `_on_build` z licznikiem scen.
+- `rezyser_ai.py` — `policz_tokeny` deleguje do `core_tokeny` (DRY).
+- `dictionaries/<iso>/gui/ui.yaml` × 9 — nowe klucze `btn_zasady_swiata_*`, `dlg_zasady_swiata_*`, `status_zasady_zapisane`, `zasady_bez_gry_*`, `konwerter.scena_naglowek_format`. Usunięte: 7 kluczy `dlg_ustawienia_*` (były tylko w EN i PL z 15.0).
+- `dictionaries/<iso>/gui/dokumentacja/opowiesci.yaml` × 9 — nowy KROK 4 „Zasady świata" + przenumerowanie KROK 5-10 + brief auto-wyboru modelu (zamiast `/ustawienia`).
+- `dictionaries/<iso>/gui/dokumentacja/manual.yaml` × 9 — akapit „Tryb Opowieści: automatyczne grupowanie tur w sceny" w KROK 6 (Architekt Audiobooków).
+- `dictionaries/pl/opowiesci/tryb_mniejsze_zlo.yaml`, `tryb_wyborow.yaml` — wzmocnienie eskalacji moralnej + spójność wyborów.
 
 ---
 

@@ -653,6 +653,9 @@ konwerter:
   # To jest tekst widoczny dla czytnika ekranu (np. NVDA) po włączeniu dymków
   # podpowiedzi na pliku .docx w Eksploratorze – powinien być tłumaczony.
   author_metadata: "Regisseur"
+  # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
+  # (znaczniki „--- Runde N ---" są wykrywane i grupowane w sceny).
+  scena_naglowek_format: "Szene {numer}"
   # Dialog wyboru pliku
   file_dlg_title: "Wählen Sie die Quelldatei"
   file_dlg_wildcard: "Alle unterstützten Dateien (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word-Dokumente (*.docx)|*.docx|Alle Dateien (*.*)|*.*"
@@ -878,7 +881,7 @@ opowiesci:
   tool_description: |-
     Du schlüpfst in die Rolle eines Helden in einer dynamisch generierten Geschichte. Gib den Namen eines neuen Spiels ein und wähle einen Modus, um zu beginnen — die Erzählung erfolgt in der zweiten Person und wird von einem Screenreader oder TTS vorgelesen.
 
-    Der freie Modus erlaubt es, jede beliebige Aktion im Feld unten einzugeben. Der Auswahlmodus bietet 3-5 nummerierte Optionen zur Auswahl mit Schaltflächen. Der Modus „kleineres Übel" stellt ausschließlich ungünstige Entscheidungen — du wählst, was dir weniger schadet. Befehle, die mit einem Schrägstrich beginnen (/speichern, /laden, /einstellungen, /ende, /visualisieren), funktionieren jederzeit.
+    Der freie Modus erlaubt es, jede beliebige Aktion im Feld unten einzugeben. Der Auswahlmodus bietet 3-5 nummerierte Optionen zur Auswahl mit Schaltflächen. Der Modus „kleineres Übel" stellt ausschließlich ungünstige Entscheidungen — du wählst, was dir weniger schadet. Befehle, die mit einem Schrägstrich beginnen (/speichern, /laden, /ende, /visualisieren), funktionieren jederzeit.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Spielname"
@@ -924,7 +927,7 @@ opowiesci:
   lbl_akcja: "Deine Aktion oder Befehl"
   txt_akcja_name: "Spieleraktionsfeld"
   txt_akcja_hint: "Beschreibe, was du tust, oder gib einen Befehl ein, der mit / beginnt"
-  txt_akcja_tooltip: "Gib eine beliebige Aktion (Freitext) oder einen Systembefehl ein: /speichern /laden /einstellungen /ende /visualisieren. Aktion wird mit der Schaltfläche Senden bestätigt."
+  txt_akcja_tooltip: "Gib eine beliebige Aktion (Freitext) oder einen Systembefehl ein: /speichern /laden /ende /visualisieren. Aktion wird mit der Schaltfläche Senden bestätigt."
   btn_wyslij_label: "&Senden"
   btn_wyslij_tooltip: "Sende Aktion an die Erzählmaschine"
 
@@ -979,16 +982,8 @@ opowiesci:
   komendy_dostepne_lista: |-
     /speichern, /save                    — erzwinge das Speichern des Spiels
     /laden, /load                   — öffne den Lade-Dialog
-    /einstellungen, /settings            — ändere das AI-Modell (Standard/Qualität)
     /visualisieren <beschreibung>, /visualize    — multisensorische Beschreibung der Szene (ohne Speicherung)
     /ende, /quit                    — schließe die Anwendung
-  dlg_ustawienia_tytul: "Einstellungen der Erzählmaschine"
-  dlg_ustawienia_lbl_model: "AI-Modell:"
-  dlg_ustawienia_model_standard: "Standard (gpt-4o-mini, schneller, günstiger)"
-  dlg_ustawienia_model_quality: "Hohe Qualität (gpt-4o, langsamer, teurer)"
-  dlg_ustawienia_btn_zatwierdz: "Bestätigen"
-  dlg_ustawienia_zmieniono_tytul: "Modell geändert"
-  dlg_ustawienia_zmieniono_tresc: 'Die Erzählmaschine wird nun das Modell „{model}" verwenden.'
   dlg_visualize_tytul: "🌅 Szenenvisualisierung"
   dlg_visualize_lbl: "Multisensorische Beschreibung der aktuellen Szene (ändert den Spielstand nicht):"
   dlg_visualize_name: "Feld mit der Beschreibung der Szenenvisualisierung"
@@ -1019,3 +1014,14 @@ opowiesci:
   txt_ostatnia_tura_tooltip: "Eine Abkürzung, die nur die zuletzt generierte Szene enthält — NVDA liest hier die frische Erzählung, ohne durch Hunderte von Zeilen der vollständigen Geschichte zu navigieren. Nach jeder weiteren Runde wird das Feld durch neuen Inhalt ersetzt."
   txt_ostatnia_tura_init: "(Die letzte Runde wird in diesem Feld nach deiner ersten Aktion erscheinen.)"
   txt_ostatnia_tura_skrot_naglowek: "[Zusammenfassung der zuletzt gespeicherten Runde — vollständige Erzählung im Feld unten]\n\n"
+  btn_zasady_swiata_label: '&Weltregeln bearbeiten…'
+  btn_zasady_swiata_tooltip: Öffnet das Fenster zur Bearbeitung der Weltregeln — optionaler Text mit phonetischen, kulturellen oder mechanischen Regeln, die die Erzählmaschine während des gesamten Spiels respektieren soll. Leeres Feld = keine zusätzlichen Regeln (Standardverhalten).
+  dlg_zasady_swiata_tytul: Spielweltregeln
+  dlg_zasady_swiata_lbl: 'Regeln, die die Erzählmaschine während des gesamten Spiels respektieren soll (optional):'
+  dlg_zasady_swiata_name: Bearbeitungsfeld für Weltregeln
+  dlg_zasady_swiata_hint: "Z.B.:\n- „Den Namen Joanna immer hart aussprechen, polnisch [dż]; niemals weich [j].\"\n- „In dieser Welt funktioniert Magie nur nachts; tagsüber sind die Charaktere normale Menschen.\"\n- „Die Antagonistin Joana versucht, die Aussprache des Namens der Protagonistin durch grammatikalische Abwandlung zu mildern.\""
+  dlg_zasady_swiata_btn_ok: '&Speichern'
+  dlg_zasady_swiata_btn_anuluj: '&Abbrechen'
+  status_zasady_zapisane: Weltregeln aktualisiert und in die Spieldatei gespeichert.
+  zasady_bez_gry_tytul: Kein aktives Spiel
+  zasady_bez_gry_tresc: Starten Sie ein neues Spiel mit der Schaltfläche „Neues Spiel" oder laden Sie ein zuvor gespeichertes, bevor Sie die Weltregeln definieren — die Regeln werden zusammen mit dem Spielstand gespeichert.

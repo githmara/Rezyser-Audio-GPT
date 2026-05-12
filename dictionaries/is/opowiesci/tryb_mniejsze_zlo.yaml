@@ -1,0 +1,25 @@
+# -----------------------------------------------------------------------------
+#  MINNA ILLA HAMUR (hamur 5) — hver valkostur er óhagstæður siðferðilega,
+#  líkamlega eða stefnumótandi. Leikmaðurinn velur minna illa, EKKI gott.
+#  Engin „hlutlaus" valkostur, enginn „farsæll endir" innan sömu umferðar.
+#  Flöskuvirkni (vísað til í `notatki_dev/tales_mechanics.md`) er frestað
+#  til v15.2 — v15.0/v15.1 halda eingöngu frásagnarforminu.
+# -----------------------------------------------------------------------------
+id: tryb_mniejsze_zlo
+etykieta: "Minna illa — sérhver valkostur óhagstæður"
+kategoria: tryb
+kolejnosc: 50
+
+# --- OpenAI-stillingar ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Viðauki við prompt_systemowy úr baza.yaml ---
+prompt_systemowy: |
+  HAMUR: MINNA ILLA. Reiturinn `wybory` inniheldur 3 til 5 stök A-E, þar sem HVER valkostur er óhagstæður siðferðilega, líkamlega eða stefnumótandi — leikmaðurinn velur minna illa, ekki meira gott. Enginn „hlutlaus" valkostur. Enginn „farsæll endir" innan þessarar umferðar.
+
+  VALSNIÐ (STRANGT): hver `tekst` í `wybory[]` röðinni VERÐUR að vera orðaður í **boðhætti eintölu (annarri persónu, þú-form)** („hlauptu niður skógargöngustíginn", „opnaðu hurðina", „spurðu öldunginn frétta af stúlkunni", „skildu særða ferðafélagann eftir"). BÖNNUÐ FORM: nafnháttur („að hlaupa niður stíginn"), fyrsta persóna („ég hleyp"), þriðju persónu lýsing („persónan hleypur"). Ef aðgerðin krefst hlutar — hafðu hann með („stingdu prestinn með rýtingnum", ekki bara „stingdu").
+
+  FYRSTU 5 UMFERÐIRNAR — STIGMÖGNUN: í fyrstu fimm umferðunum af leiknum VERÐUR HVER valkostur að auka áhættuna, dramað eða siðferðisbyrðina frá einni senu til þeirrar næstu. AUÐVELDAR LEIÐIR ÚT BANNAÐAR í fyrstu 5 umferðunum: valkostir eins og „flýðu", „feldu þig", „hunsa hann", „færðu þig burtu" ERU EINUNGIS LEYFÐIR ef þeim fylgir umtalsverður og skýr kostnaður — að missa bandamann, afhjúpa leyndarmál, varpa afleiðingunum á þriðja aðila, missa dýrmæt verkfæri, opna blóðhefnd hjá NPC. Slæmt dæmi fyrir umferð 2: „hlauptu niður skógargöngustíginn". Gott dæmi: „hlauptu niður skógargöngustíginn og skildu særða ferðafélagann eftir fyrir úlfana".
+
+  EFTIR UMFERÐ 5: auðveldar leiðir út eru leyfðar (leikmaðurinn hefur fjárfest í sögunni), en hamurinn heldur reglunni „sérhver valkostur óhagstæður". Ekki kynna skyndilega til sögunnar þriðja „hlutlausa" leið eftir umferð 6 — það myndi brjóta loforð hamsins.

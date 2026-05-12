@@ -69,7 +69,25 @@ tresc: |
 
 
 
-  PASO 4: Comandos Slash — acciones rápidas sin API
+  PASO 4: Reglas del mundo — tus propias reglas que el motor respeta durante todo el juego
+
+  Desde la versión 15.1, sobre el campo de narración encontrarás el botón "{opowiesci.btn_zasady_swiata_label}". Abre una ventana de edición independiente con un campo multilínea donde puedes escribir cualquier regla — fonética, mecánica o dramatúrgica — que el motor narrativo respetará en cada turno siguiente de este juego en particular. Las reglas se guardan junto con el estado del juego (.game.json), por lo que cargar el juego las conserva sin cambios.
+
+  Tres usos típicos de las reglas del mundo:
+
+  REGLAS FONÉTICAS — controlan cómo el TTS (Vocalizer, ElevenLabs) pronuncia los nombres de los personajes. Ejemplo: "El nombre Joanna siempre se pronuncia fuerte, polaco [dż]; nunca suave [j]." El motor insertará esa variante en la narración desde el siguiente turno, y el personaje Joanna en el Libro del Mundo conservará el sonido deseado. También es un puente natural a los acentos del Director — si después de terminar el juego cargas el Libro del Mundo en el panel del Director (PASO 9 abajo), la regla fonética "pasa" con el juego como rasgo del personaje.
+
+  REGLAS MECÁNICAS — describen las "leyes físicas" de tu mundo que el LLM debe respetar. Ejemplo: "En este mundo, la magia solo funciona de noche; durante el día, los personajes son personas comunes." El motor no inventará hechizos al mediodía aunque la acción de tu turno lo exija — en su lugar propondrá una alternativa o te llevará hacia el anochecer.
+
+  REGLAS DRAMATÚRGICAS — definen tensiones a largo plazo entre los personajes. Ejemplo: "La antagonista Joana intenta suavizar la pronunciación del nombre de la protagonista mediante la declinación gramatical." El motor entrelaza tales señales sutiles en los diálogos de Joana, manteniendo el conflicto durante muchos turnos sin que tengas que reiterar la instrucción.
+
+  Campo de reglas vacío = sin reglas adicionales (comportamiento por defecto, como en v15.0). No tienes que definir las reglas al principio — puedes volver a la ventana en cualquier turno, añadir reglas que hayas notado durante el juego y pulsar "{opowiesci.dlg_zasady_swiata_btn_ok}". El cambio entra en vigor desde el siguiente turno.
+
+  Nota: las reglas del mundo requieren un juego activo. Si pulsas "{opowiesci.btn_zasady_swiata_label}" sin tener un juego cargado/creado, recibirás el mensaje "{opowiesci.zasady_bez_gry_tytul}" — primero pulsa "{opowiesci.btn_nowa_gra_label}" o carga un juego guardado.
+
+
+
+  PASO 5: Comandos Slash — acciones rápidas sin API
 
   En el campo de acción puedes escribir en cualquier momento un comando que comience con una barra `/`. Los comandos son locales (no cuestan llamadas a OpenAI) y funcionan independientemente del modo de juego. Se aceptan tanto variantes en polaco como en inglés:
 
@@ -77,7 +95,7 @@ tresc: |
 
   /wczytaj, /load — abre un diálogo de selección de archivo desde la carpeta runtime/opowiesci/. Después de cargar, el nombre del juego, el modo y la narración completa se restauran — puedes continuar desde el turno en el que te quedaste.
 
-  /ustawienia, /settings — abre un diálogo de selección de modelo de IA. Por defecto usamos gpt-4o-mini (Estándar) — más rápido y económico. Al cambiar a gpt-4o (Alta calidad) la narración se enriquece, pero cada turno cuesta más y dura más tiempo.
+  El motor narrativo selecciona el modelo de IA automáticamente según el modo: para el modo de Elecciones y Menor mal usa el más costoso gpt-4o (se ciñe rigurosamente a las reglas del mundo); para el modo Libre — el más rápido y económico gpt-4o-mini (el jugador dirige la trama, por lo que no se requiere una dirección dramática pesada).
 
   /wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo usa los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo separado, NO se añade a la narración ni se guarda en el archivo de audiolibro. Ejemplo: "/wizualizuj cómo se ve el guardia" o "/wizualizuj el olor de la cafetería".
 
@@ -85,7 +103,7 @@ tresc: |
 
 
 
-  PASO 5: Archivos del juego — dónde encontrar tus datos
+  PASO 6: Archivos del juego — dónde encontrar tus datos
 
   Cada juego produce cinco archivos, cada uno en una carpeta diferente, con diferentes roles:
 
@@ -101,7 +119,7 @@ tresc: |
 
 
 
-  PASO 6: Indicador de memoria del modelo — por qué los turnos en juegos antiguos no requieren trabajo manual
+  PASO 7: Indicador de memoria del modelo — por qué los turnos en juegos antiguos no requieren trabajo manual
 
   Debajo del RadioBox del modo encontrarás un indicador de memoria del modelo — una barra de progreso (wx.Gauge) con una descripción del estado al lado. El indicador muestra el porcentaje de llenado de la ventana de contexto del motor narrativo (gpt-4o-mini tiene un búfer de 128,000 tokens).
 
@@ -116,7 +134,7 @@ tresc: |
 
 
 
-  PASO 7: Advertencia Meta Cinemática — interludio dramático después del turno 150
+  PASO 8: Advertencia Meta Cinemática — interludio dramático después del turno 150
 
   Después de 150 turnos de un juego, el motor narrativo insertará UNA VEZ una "Advertencia Meta Cinemática" — un interludio dramático meta-narrativo. Aparecerá en un diálogo separado con el sonido de una campana, con una dirección directa a ti en segunda persona, un resumen de logros y una advertencia sobre la importancia de las decisiones tomadas.
 
@@ -124,7 +142,7 @@ tresc: |
 
 
 
-  PASO 8: Puente al Director — utiliza el Libro del Mundo creado en Historias
+  PASO 9: Puente al Director — utiliza el Libro del Mundo creado en Historias
 
   El archivo skrypty/<nombre>.md generado durante el juego contiene el Libro del Mundo con los personajes que aparecieron en la narración, junto con sus características, acentos y personalidad. El formato es exactamente el que requiere el analizador del Director: [Nombre: características con descripción del acento].
 
@@ -138,7 +156,7 @@ tresc: |
 
 
 
-  PASO 9: Accesibilidad (NVDA y lectores de pantalla) — diseñado desde el principio
+  PASO 10: Accesibilidad (NVDA y lectores de pantalla) — diseñado desde el principio
 
   Todo el módulo de Historias ha sido optimizado para jugadores ciegos. ¿Qué hemos hecho específicamente?
 

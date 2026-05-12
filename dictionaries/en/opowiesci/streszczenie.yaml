@@ -1,0 +1,24 @@
+# -----------------------------------------------------------------------------
+#  SUMMARY — automatic compression of `ostatnie_tury` after the model's
+#  memory threshold (PROG_OSTRZEZENIE = 70% of 128k tokens ≈ 89.6k) is
+#  exceeded. The result replaces the whole turn history with a single entry
+#  of the form `{"akcja_gracza": "(summary of previous turns)",
+#  "narracja_skrot": <result>}`. The GUI spawns this on a background thread
+#  AFTER a successful turn, blocking `_btn_wyslij` until done (race
+#  condition guard `_meta_w_toku=True`).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Automatic context summary"
+kategoria: meta
+kolejnosc: 60
+
+# --- OpenAI parameters ---
+# Low temperature — we want a faithful, factual summary (not creative).
+model: gpt-4o-mini
+temperatura: 0.3
+max_tokens: 800
+timeout_s: 60.0
+
+# --- System prompt ---
+prompt_systemowy: |
+  You are a narrative assistant. You will receive a list of recent turns of an interactive story (player action + condensed narration per turn). Generate a 200-400-word condensate covering: key plot events, the player's decisions and their consequences, important characters appearing in the narration, places visited, unresolved threads. Write in the third person, neutrally, like a novel summary — this is NOT a game turn, the player does not read this as narration, but the narrative engine uses it as long-term memory.

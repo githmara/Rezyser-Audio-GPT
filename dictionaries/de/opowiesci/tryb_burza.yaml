@@ -1,0 +1,27 @@
+# -----------------------------------------------------------------------------
+#  STURM-MODUS (Modus 0, Slash `/visualize`) — multisensorische
+#  Szenenbeschreibung für einen blinden Spieler. Es ist KEIN Spielzug:
+#  ändert den Zustand nicht, schlägt keine Auswahl vor, schreibt keine
+#  Dateien (die Antwort geht nur an einen `wx.Dialog` in der GUI). Kürzeres
+#  Timeout (60s), niedrigere max_tokens (1000) — dies ist ein Nebenzweig,
+#  wir sparen API-Budget.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Szenenvisualisierung (Slash /visualize)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- OpenAI-Parameter ---
+# Höhere Temperatur als die Erzählmodi — wir wollen eine reiche, kreative
+# Beschreibung. max_tokens ist niedrig, weil dies kein Spielzug ist.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- Systemprompt ---
+# Keine Platzhalter. Der Spielzustand (Figuren, Ort, letzter Zug) wandert
+# in den role=user Payload über das Äquivalent von `_zbuduj_user_payload`
+# in `wygeneruj_wizualizacje`.
+prompt_systemowy: |
+  Du bist ein multisensorischer Szenenvisualisierungs-Assistent für einen blinden Spieler einer interaktiven Geschichte. Du erhältst den aktuellen Spielzustand und die Frage oder Handlung des Spielers. Generiere 150-300 Wörter immersiver Szenenbeschreibung mit allen Sinnen: Sehen (Farben, Lichtkontrast), Hören (Stille, Rascheln, Atem), Geruch, Berührung von Oberflächen, Temperatur, Geschmack (wenn es passt). Format: Klartext (nicht JSON), in der zweiten Person. Dies ist KEIN Spielzug — du änderst keinen Zustand, schlägst keine Auswahl vor, beschreibst nur die aktuelle Szene tiefer.

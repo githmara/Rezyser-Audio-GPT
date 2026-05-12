@@ -1,0 +1,23 @@
+# -----------------------------------------------------------------------------
+#  MODO ELECCIONES (modo 4) — 3-5 opciones numeradas por turno. La entrada
+#  de texto libre del jugador se mapea semánticamente a la opción más
+#  cercana. La GUI muestra el área de opciones con `wx.Button`s dinámicos
+#  si el LLM devolvió un array `wybory[]` no vacío (alucinación →
+#  fallback a texto libre).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Modo elecciones — 3-5 opciones A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- Parámetros de OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Anexo al prompt_systemowy de baza.yaml ---
+prompt_systemowy: |
+  MODO: ELECCIONES. El campo `wybory` SIEMPRE contiene 3-5 elementos etiquetados con las letras A, B, C, D, E. Cada opción es una acción concreta que el jugador puede ejecutar — distinta, no redundante. La entrada de texto libre del jugador se mapeará semánticamente a la opción más cercana.
+
+  FORMATO DE LAS OPCIONES (ESTRICTO): cada `tekst` de `wybory[]` DEBE estar formulado como **imperativo en segunda persona singular (tuteo)** («corre por el camino del bosque», «abre la puerta», «pregunta al anciano por la niña», «toma la linterna de la mesa»). FORMAS PROHIBIDAS: infinitivo («correr por el camino»), primera persona («yo corro por el camino», «tomo la linterna»), tercera persona descriptiva («el personaje corre»). Si la acción necesita un objeto — inclúyelo en la opción («pregunta a la partera por el niño», no solo «pregunta»). La estructura paralela entre A-E es MÁS IMPORTANTE que la variación estilística — el jugador debe ver cinco formas paralelas.
+
+  VARIEDAD: las 3-5 opciones deben ser acciones distintas (no variantes de la misma), con consecuencias narrativas distintas. Evita las «opciones falsas» como «mira a tu alrededor» junto a «ve hacia la puerta» — mirar alrededor debería formar parte de la narración, no ser una opción.

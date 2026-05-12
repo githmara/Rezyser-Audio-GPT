@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  MODE MOINDRE MAL (mode 5) — chaque option est défavorable sur le plan
+#  moral, physique ou stratégique. Le joueur choisit le moindre mal, PAS
+#  le bien. Sans option « neutre », sans « fin heureuse » à l'intérieur
+#  d'un même tour. La mécanique de la Fiole (référencée dans
+#  `notatki_dev/tales_mechanics.md`) est reportée à la v15.2 — v15.0/v15.1
+#  conservent la forme purement narrative.
+# -----------------------------------------------------------------------------
+id: tryb_mniejsze_zlo
+etykieta: "Moindre Mal — toute option défavorable"
+kategoria: tryb
+kolejnosc: 50
+
+# --- Paramètres OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Annexe au prompt_systemowy de baza.yaml ---
+prompt_systemowy: |
+  MODE : MOINDRE MAL. Le champ `wybory` contient 3 à 5 éléments A-E, où CHAQUE option est défavorable sur le plan moral, physique ou stratégique — le joueur choisit le moindre mal, pas le bien plus grand. Pas d'option « neutre ». Pas de « fin heureuse » dans ce tour.
+
+  FORMAT DES OPTIONS (STRICT) : chaque `tekst` du tableau `wybory[]` DOIT être formulé à **l'impératif de la deuxième personne du singulier (tutoiement)** (« cours sur le chemin de la forêt », « ouvre la porte », « demande à l'ancien des nouvelles de la fille », « abandonne le blessé »). FORMES INTERDITES : infinitif (« courir sur le chemin »), première personne (« je cours »), description à la troisième personne (« le personnage court »). Si l'action nécessite un objet — inclus-le (« poignarde le prêtre avec la dague », pas un simple « poignarde »).
+
+  LES 5 PREMIERS TOURS — ESCALADE : pendant les cinq premiers tours de la partie, CHAQUE option DOIT faire monter le risque, le dramatique ou le poids moral d'une scène à l'autre. SORTIES FACILES INTERDITES dans les 5 premiers tours : des options comme « fuis », « cache-toi », « ignore-le », « éloigne-toi » NE SONT ADMISES QUE si elles sont associées à un coût substantiel et explicite — perdre un allié, exposer un secret, faire retomber les conséquences sur un tiers, perdre un équipement précieux, ouvrir une vendetta de PNJ. Mauvais exemple pour le tour 2 : « cours sur le chemin de la forêt ». Bon exemple : « cours sur le chemin de la forêt en laissant ton compagnon blessé aux loups ».
+
+  APRÈS LE TOUR 5 : les sorties faciles sont permises (le joueur a investi dans l'histoire), mais le mode maintient la règle « toute option est défavorable ». N'introduis pas soudainement une troisième voie « neutre » après le tour 6 — cela briserait la promesse du mode.

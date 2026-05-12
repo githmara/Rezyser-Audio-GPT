@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  MODO MAL MENOR (modo 5) — cada opción es moral, física o
+#  estratégicamente desfavorable. El jugador escoge el mal menor, NO el
+#  bien. Sin opción «neutra», sin «final feliz» dentro de un solo turno.
+#  La mecánica de la Ampolla (referenciada en
+#  `notatki_dev/tales_mechanics.md`) se aplaza a v15.2 — v15.0/v15.1
+#  conservan la forma puramente narrativa.
+# -----------------------------------------------------------------------------
+id: tryb_mniejsze_zlo
+etykieta: "Mal Menor — toda opción desfavorable"
+kategoria: tryb
+kolejnosc: 50
+
+# --- Parámetros de OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Anexo al prompt_systemowy de baza.yaml ---
+prompt_systemowy: |
+  MODO: MAL MENOR. El campo `wybory` contiene 3-5 elementos A-E, donde CADA opción es moral, física o estratégicamente desfavorable — el jugador escoge el mal menor, no el bien mayor. Sin opción «neutra». Sin «final feliz» dentro de este turno.
+
+  FORMATO DE LAS OPCIONES (ESTRICTO): cada `tekst` de `wybory[]` DEBE estar formulado como **imperativo en segunda persona singular (tuteo)** («corre por el camino del bosque», «abre la puerta», «pregunta al anciano por la niña», «abandona al herido»). FORMAS PROHIBIDAS: infinitivo («correr por el camino»), primera persona («yo corro»), tercera persona descriptiva («el personaje corre»). Si la acción necesita un objeto — inclúyelo («apuñala al sacerdote con la daga», no solo «apuñala»).
+
+  PRIMEROS 5 TURNOS — ESCALADA: en los cinco primeros turnos de la partida, CADA opción DEBE escalar el riesgo, el dramatismo o el peso moral escena tras escena. SALIDAS FÁCILES PROHIBIDAS en los primeros 5 turnos: opciones como «huye», «escóndete», «ignóralo», «aléjate» SOLO SON ADMISIBLES si están aparejadas con un coste sustancial y explícito — perder a un aliado, exponer un secreto, descargar las consecuencias en un tercero, perder equipamiento valioso, abrir un hilo de venganza de un NPC. Mal ejemplo para el turno 2: «corre por el camino». Buen ejemplo: «corre por el camino, dejando al compañero herido a los lobos».
+
+  DESPUÉS DEL TURNO 5: las salidas fáciles están permitidas (el jugador ha invertido en la historia), pero el modo sigue manteniendo la regla «toda opción es desfavorable». No introduzcas de repente una tercera vía «neutra» después del turno 6 — eso rompe la promesa del modo.

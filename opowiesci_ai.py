@@ -31,17 +31,18 @@ from pathlib import Path
 from typing import Any
 
 import jsonschema
-import tiktoken
 import yaml as _pyyaml
 from dotenv import load_dotenv
+
+import core_tokeny as ct
 
 # =============================================================================
 # Stałe konfiguracyjne
 # =============================================================================
 
 ENV_FILENAME       = "golden_key.env"
-MODEL_DOMYSLNY     = "gpt-4o-mini"
-MODEL_QUALITY      = "gpt-4o"
+MODEL_DOMYSLNY     = ct.MODEL_DOMYSLNY_OPOWIESCI
+MODEL_QUALITY      = ct.MODEL_DOMYSLNY_REZYSER
 TIMEOUT_S          = 120.0
 MAX_TOKENS_OUT     = 2000
 MAX_RETRIES        = 2          # +1 oryginalna próba = 3 wywołania w pesymistycznym scenariuszu
@@ -54,21 +55,17 @@ TRYB_SWOBODNY      = 3          # free-text input, wybory opcjonalne
 TRYB_WYBOROW       = 4          # ZAWSZE 3-5 wyborów A-E
 TRYB_MNIEJSZE_ZLO  = 5          # jak 4, ale wszystkie wybory niekorzystne
 
-# Pamięć modelu: gpt-4o-mini ma 128k context window. Liczymy TYLKO input,
-# rezerwując ~5k na output (max_tokens=2000 + bufor na thinking/system).
-# Próg 70% triggeruje auto-streszczenie; 90% to alarm na wypadek gdyby
-# streszczenie się nie powiodło (race condition / brak API).
-OKNO_KONTEKSTU_MAX = 128_000
-PROG_OSTRZEZENIE   = 0.70   # 70% — auto-streszczenie
-PROG_ALARM         = 0.90   # 90% — alarm dla user-a, nie wysyłaj kolejnej tury
+# Pamięć modelu — okno kontekstowe + progi + nazwy poziomów importowane
+# z `core_tokeny` (wspólne dla Opowieści i Reżysera od v15.1).
+OKNO_KONTEKSTU_MAX = ct.OKNO_KONTEKSTU_MAX
+PROG_OSTRZEZENIE   = ct.PROG_OSTRZEZENIE
+PROG_ALARM         = ct.PROG_ALARM
 TURY_DO_CINEMATIC  = 150    # licznik tur (niezależny od tokenów)
 
-# Poziomy statusu pamięci — używane przez GUI do doboru koloru i komunikatu.
-# Te same nazwy co `core_rezyser.POZIOM_*` dla spójności UI.
-POZIOM_CZYSTA      = "czysta"
-POZIOM_OK          = "ok"
-POZIOM_OSTRZEZENIE = "ostrzezenie"
-POZIOM_ALARM       = "alarm"
+POZIOM_CZYSTA      = ct.POZIOM_CZYSTA
+POZIOM_OK          = ct.POZIOM_OK
+POZIOM_OSTRZEZENIE = ct.POZIOM_OSTRZEZENIE
+POZIOM_ALARM       = ct.POZIOM_ALARM
 
 # =============================================================================
 # JSON-schema dla strukturyzowanej tury
@@ -166,6 +163,11 @@ class SnapshotOpowiesci:
                            string jeśli świat ma być wylosowany przez LLM
         jezyk_projektu   : kod języka narracji ("pl"/"en"/...); Faza 5 użyje
                            do doboru promptu systemowego z YAML
+        zasady_swiata    : opcjonalny tekst z regułami świata zdefiniowanymi
+                           przez gracza (v15.1+). Pusty string = stary tryb;
+                           niepusty → wstrzykiwany przez
+                           :func:`_zbuduj_prompt_systemowy` jako dodatkowa
+                           sekcja między bazą a addonem trybu.
     """
     nazwa_gry:        str
     numer_tury:       int
@@ -174,6 +176,7 @@ class SnapshotOpowiesci:
     stan_poprzedni:   dict[str, Any]       = field(default_factory=dict)
     seed_swiata:      str                   = ""
     jezyk_projektu:   str                   = "pl"
+    zasady_swiata:    str                   = ""
 
 
 @dataclass
@@ -272,24 +275,39 @@ def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:
         return _pyyaml.safe_load(fh) or {}
 
 
-def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl") -> str:
+def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl", zasady_swiata: str = "") -> str:
     """Składa prompt systemowy z bazy YAML + addonu trybu YAML.
 
     Tryby narracyjne (3/4/5) używają `baza.yaml` + `tryb_<nazwa>.yaml`.
     Tryb Burza (0) używa wyłącznie `tryb_burza.yaml` (visualize ma własny
     pełny prompt, bez bazy narracyjnej z JSON-schemą).
+
+    Args:
+        zasady_swiata: opcjonalny tekst gracza z regułami świata (v15.1+).
+            Niepusty → wstrzykiwany jako sekcja BEZWZGLĘDNIE wiążąca między
+            bazą a addonem trybu (tryby 3/4/5) lub na końcu (tryb 0/Burza).
+            Pusty / sam whitespace → brak wstrzyknięcia, kompatybilność wsteczna.
     """
     nazwa = _NAZWA_PLIKU_PER_TRYB.get(tryb)
     if nazwa is None:
         raise ValueError(f"Nieznany tryb opowieści: {tryb} (oczekiwane 0/3/4/5)")
 
+    zasady_blok = ""
+    if zasady_swiata and zasady_swiata.strip():
+        zasady_blok = (
+            "\n\n## Zasady świata (zdefiniowane przez gracza)\n\n"
+            f"{zasady_swiata.strip()}\n\n"
+            "Te zasady są BEZWZGLĘDNIE wiążące przez całą grę. Respektuj je "
+            "w narracji, dialogach, opisach postaci, wyborach i wizualizacjach."
+        )
+
     if tryb == TRYB_BURZA:
         # Visualize stoi na własnych nogach — bez bazy narracyjnej.
-        return _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"]
+        return _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"] + zasady_blok
 
     baza   = _zaladuj_przepis(jezyk, "baza")["prompt_systemowy"]
     addon  = _zaladuj_przepis(jezyk, nazwa)["prompt_systemowy"]
-    return baza + "\n\n" + addon
+    return baza + zasady_blok + "\n\n" + addon
 
 
 def _parametr_z_yaml(jezyk: str, nazwa: str, klucz: str, default: Any) -> Any:
@@ -356,7 +374,7 @@ def generuj_ture(
         propagowane — GUI łapie i pokazuje w :func:`_wyswietl_blad_ai`.
     """
     jezyk            = snapshot.jezyk_projektu or "pl"
-    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk)
+    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk, snapshot.zasady_swiata)
     user_payload     = _zbuduj_user_payload(snapshot, user_input)
 
     # Parametry: priorytet to argument funkcji (GUI może override przez
@@ -447,6 +465,10 @@ def wygeneruj_wizualizacje(
     jezyk = snapshot.jezyk_projektu or "pl"
     przepis = _zaladuj_przepis(jezyk, "tryb_burza")
     efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+    # v15.1+: zasady świata gracza trafiają też do prompt-systemowy
+    # wizualizacji (fonetyczna tożsamość musi być respektowana także w
+    # multisensorycznych opisach).
+    prompt_systemowy = _zbuduj_prompt_systemowy(TRYB_BURZA, jezyk, snapshot.zasady_swiata)
 
     payload = {
         "stan":             snapshot.stan_poprzedni,
@@ -461,7 +483,7 @@ def wygeneruj_wizualizacje(
     resp = klient.chat.completions.create(
         model=efektywny_model,
         messages=[
-            {"role": "system", "content": przepis["prompt_systemowy"]},
+            {"role": "system", "content": prompt_systemowy},
             {"role": "user",   "content": user_msg},
         ],
         temperature=przepis.get("temperatura", TEMPERATURE_VIS),
@@ -475,20 +497,6 @@ def wygeneruj_wizualizacje(
 # FAZA 4 — Pamięć modelu (tiktoken) + auto-streszczenie + Cinematic Warning
 # =============================================================================
 
-def _kodowanie_dla_modelu(model: str) -> tiktoken.Encoding:
-    """Zwraca encoder tiktoken — fallback na ``o200k_base`` dla nowych modeli.
-
-    `gpt-4o`/`gpt-4o-mini` używają tokenizera ``o200k_base``. Jeśli OpenAI
-    wyda nowszy model, którego biblioteka jeszcze nie zna,
-    ``encoding_for_model`` rzuci ``KeyError`` — łapiemy i używamy
-    najsensowniejszego defaultu zamiast crashować GUI.
-    """
-    try:
-        return tiktoken.encoding_for_model(model)
-    except KeyError:
-        return tiktoken.get_encoding("o200k_base")
-
-
 def policz_tokeny(snapshot: SnapshotOpowiesci, tryb: int, model: str = MODEL_DOMYSLNY) -> int:
     """Liczy tokeny tego, co poszłoby w kolejnym wywołaniu :func:`generuj_ture`.
 
@@ -496,25 +504,16 @@ def policz_tokeny(snapshot: SnapshotOpowiesci, tryb: int, model: str = MODEL_DOM
     OpenAI. Wartość użyteczna dla :func:`oblicz_status_pamieci` żeby
     pokazać user-owi % zapełnienia okna kontekstowego.
 
-    Wzorzec idiomatic z OpenAI cookbook ("Counting tokens for chat
-    completions") — sumujemy tokeny w polu ``content`` każdego
-    message-a, plus stała narzut na sam format chat (~4 tokeny per wiadomość
+    Liczenie deleguje do :func:`core_tokeny.policz_tokeny_chat`, które
+    sumuje tokeny ``content`` + narzut formatu chat (~4 tokeny per wiadomość
     + 2 tokeny na sygnaturę odpowiedzi).
     """
-    encoder = _kodowanie_dla_modelu(model)
     jezyk   = snapshot.jezyk_projektu or "pl"
     # `_zbuduj_prompt_systemowy` obsługuje WSZYSTKIE tryby (0/3/4/5), więc
     # nie ma już potrzeby branch-owania na TRYB_BURZA.
-    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk)
+    prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk, snapshot.zasady_swiata)
     user_payload     = _zbuduj_user_payload(snapshot, "")  # akcja gracza nieznana — szacunek przed wpisaniem
-
-    naglowek_chat_per_msg = 4   # "<|im_start|>role\n", "<|im_sep|>", "<|im_end|>\n"
-    naglowek_response     = 2
-
-    suma = naglowek_response
-    for tresc in (prompt_systemowy, user_payload):
-        suma += naglowek_chat_per_msg + len(encoder.encode(tresc))
-    return suma
+    return ct.policz_tokeny_chat([prompt_systemowy, user_payload], model)
 
 
 def oblicz_status_pamieci(

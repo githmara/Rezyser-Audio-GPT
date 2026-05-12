@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------------
+#  ZACZATKI — 5 presets de Quick Start para una nueva partida. Cuando el
+#  jugador escoge «Nueva partida», el preset seleccionado autorrellena el
+#  modo e inyecta `seed_swiata` en el snapshot (el LLM lo recibe como
+#  contexto de la escena inicial).
+#
+#  CADA preset se escribe A MANO por idioma — esto es literatura, no i18n
+#  técnico. La lengua de destino tiene sus propios motivos culturales; NO
+#  calcamos del polaco (véase `feedback_yaml_prompty.md` y
+#  `feedback_lokalizacja_nazw.md`).
+#
+#  Alcance ES: escenarios hispanohablantes (refugios de Sierra Nevada /
+#  campiña castellana / Madrid noir / una estación de investigación con
+#  tripulación hispanohablante / café de Malasaña). Nombres, acentos y
+#  referencias culturales son español nativo, no transliteraciones del
+#  polaco.
+#
+#  Campo `tryb_domyslny`: 3=Libre / 4=Elecciones / 5=Mal Menor.
+#  Para un jugador ciego se prefieren los modos 4 y 5 (elecciones
+#  clicables precisas), pero se conserva Libre para terror/comedia
+#  (donde la improvisación del jugador forma parte de la experiencia).
+#
+#  Las claves YAML (`po_apokaliptyczna_sf`, etc.) permanecen en polaco —
+#  son IDs internos indexados posicionalmente por la GUI, no cadenas
+#  visibles para el usuario.
+# -----------------------------------------------------------------------------
+zaczatki:
+
+  po_apokaliptyczna_sf:
+    etykieta: "SF posapocalíptica"
+    opis_krotki: "Un siglo tras el colapso ecológico. Los restos de la humanidad en refugios bajo Sierra Nevada. La elección entre el pragmatismo y la humanidad."
+    tryb_domyslny: 4
+    seed_swiata: |
+      El mundo doscientos años después del Largo Incendio — un cataclismo global que abrasó la atmósfera. La radiación UV mata a cualquiera que pise la superficie sin un traje. La humanidad vive en refugios excavados en la caliza de Sierra Nevada, alimentándose de hidroponía, proteínas sintéticas y una economía de agua cero. El jugador es un joven mensajero del Clan Raíz Honda, una de la docena de comunidades que sobreviven bajo tierra. Los clanes comercian entre sí, pero a veces luchan por los recursos — celdas de batería, semillas, genes aún no degradados por la radiación. Raíz Honda tiene un secreto: su conducto de ventilación desemboca en un lago subterráneo de agua dulce. Nadie fuera del Consejo de Ancianos lo sabe. El jugador acaba de recibir su primer encargo serio — pasar de contrabando una microflora probiótica al Clan Garza, que está muriendo de una disbiosis intestinal irreversible. La ruta atraviesa el túnel desbordado, donde dicen que viven ratas mutadas. Personajes recurrentes: Carmela Quiroga (40 años, despachadora de mensajeros, pragmática; acento: frases cortas, llama «chiquilla» a todas en lugar de su nombre), el Viejo Anselmo (60, Anciano de Raíz Honda, lleva la memoria pre-Incendio; acento: castellano arcaizante, usa palabras de noticieros de los años ochenta). Atmósfera asfixiante, naranja neón por las lámparas de sodio, olor a aceite de máquina y moho.
+
+  mroczne_fantasy:
+    etykieta: "Fantasía oscura"
+    opis_krotki: "El confín de un reino empapado de lluvia. Una inquisidora de demonios sobre la pista de unos aldeanos que tal vez escondan a una niña, o algo mucho peor."
+    tryb_domyslny: 5
+    seed_swiata: |
+      El Reino de los Tres Arroyos, noveno año de la guerra religiosa entre la Iglesia de la Llama y los Antiguos Dioses. El jugador es una Inquisidora joven de la Orden de las Hermanas del Cardo — mujeres que han roto sus votos y empuñan la espada cuando la Iglesia necesita algo más que oraciones. La misión: has llegado a la aldea de Robledal, donde una denuncia anónima informa de indicios del Cuidado (rito de los Antiguos Dioses que consiste en mantener con vida a un niño «poseído» en lugar de ahogarlo, como exige la Llama). La denuncia está escrita con mano insegura — el autor es analfabeto, un peón o una moza. La aldea calla. El alcalde Edmundo (50 años, cara rubicunda, evita tu mirada; acento: castellano rural manchego, dice «sí, mi señora» y come las eses) te invita a cenar y habla del precio del centeno. La partera Rosalía (35, viuda, largas trenzas negras; acento: lírico extremeño, le gustan las metáforas del tiempo) te trata con hostilidad abierta. En una choza al filo del bosque vive una familia que se aparta de manera extraña — el labrador Galindo, su esposa Marina, dos hijos adultos. El rumor dice que hay un tercero, más pequeño. Lleva lloviendo tres días, el camino a la guarnición más cercana es barro y te quedarás aquí una quincena. Tu sello de Inquisidora lleva la magia de la Llama — puede quemar también a los inocentes si la aldea se vuelve contra ti. De noche oyes desde la choza del lindero un zumbido extraño, como dos voces de madre hablando a la vez, salvo que una de ellas no es humana.
+
+  urban_fantasy_detective:
+    etykieta: "Detective de fantasía urbana"
+    opis_krotki: "Madrid, 2008. Un investigador privado que ve fantasmas. Una clienta quiere que encuentre a su marido — desapareció en Lavapiés, pero Lavapiés no es solo Lavapiés."
+    tryb_domyslny: 4
+    seed_swiata: |
+      Madrid, octubre de 2008, una tarde lluviosa. El jugador es un investigador privado — Jacobo «Jack» Vallejo, 38 años, antiguo policía municipal, despedido por beber en servicio. Carga con algo que no quiere nombrar: ve sombras que no deberían estar ahí. Caras detrás del hombro de los transeúntes. Figuras en el Cementerio de la Almudena que responden a tus preguntas si les llevas aguardiente. Vallejo no cree en «el ocultismo», pero desde el divorcio y la operación de apendicitis admite que algo dentro de él no encaja. Hoy, en la oficina de la calle del Olmo (alquiler barato, la escalera huele a humo de tabaco), entra una mujer — Nora Cifuentes, 45 años, viuda desde hace un mes, solo ahora reconoce ante sí misma que algo no cuadra. Su marido Tomás, restaurador de Lavapiés, «se fue al mercado de Cebada a por pescado» al tercer día tras Todos los Santos. Volvió a casa por la tarde con normalidad, pero desde aquella noche murmuraba a solas en alemán — una lengua que no hablaba. A las dos semanas saltó desde el Viaducto de Segovia. La policía cerró el caso como suicidio. Nora piensa otra cosa. Atmósfera: un Madrid atrapado entre la pátina castiza y las torres de cristal del centro de negocios, llovizna, los cafés huelen a churros y tabaco frío, los sin techo duermen en los portales y quizá algo más. Personajes recurrentes: Nora (elegante cabello gris, leve dejo gallego), el inspector Doblas (60 años, antiguo compañero de patrulla de Vallejo, todavía le tira los huesos; acento: chulapo cerrado, se esconde tras bromas cuando la conversación se pone seria).
+
+  kosmiczny_horror:
+    etykieta: "Horror cósmico"
+    opis_krotki: "Una estación de investigación que orbita una estrella de neutrones. La tripulación despierta de la hibernación — sin capitán. Y sin rastro de que jamás hubiese un capitán."
+    tryb_domyslny: 3
+    seed_swiata: |
+      El año 2247. La estación de investigación «Casandra» orbita la estrella de neutrones PSR J1748-2446ad, la estrella de rotación más rápida conocida por la humanidad (716 vueltas por segundo). La misión: el estudio de las pulsaciones magnéticas. El jugador es la oficial científica — la doctora Inés Robles, neuróloga cuántica, 42 años, de Salamanca. Una tripulación de siete personas, hibernación programada para cuatro años, intervalos de despertar escalonados de cuatro horas. El jugador despierta en tercer lugar. El computador de a bordo «Mnemósine» informa: hibernación 4 años 23 días 6 horas, todo nominal. Pero el contador de tripulación marca 6, no 7. Falta el capitán — el comandante Bernardo Halcón. Mnemósine no recuerda a ningún capitán. Manifiesto de salida desde la Tierra: 7 personas. Lista de hibernación: 6. Tu propia memoria: sí, Halcón existió, desayunaste con él en Houston. Los dos ya despiertos — el ingeniero Olegario (28 años, callado, acento: andaluz cerrado) y el biólogo Lucien (50, de Quebec, sigue diciendo «bonjour» en vez de «hola») — afirman no recordar a ningún capitán. Sientes que hay alguien más en la estación. En el conducto de retorno, por el que el aire debería volver desde la hidroponía, oyes un ritmo — no mecánico, orgánico, como una respiración. Mnemósine no informa de anomalía. Tu escáner neurológico de ayer: en la sien izquierda tienes una cicatriz de origen quirúrgico. No recuerdas la operación.
+
+  romantyczna_komedia_obyczajowa:
+    etykieta: "Comedia romántica de costumbres"
+    opis_krotki: "Una cafetería pequeña en Malasaña. Un cliente habitual al que la dirección quiere usar para salvar el local. Y ella conoce la verdad."
+    tryb_domyslny: 3
+    seed_swiata: |
+      Madrid, Malasaña, abril de 2024. «Café en el Viento» — una cafetería pequeña en la calle del Pez, abierta desde 1998, alojada en una finca de antes de la guerra. El propietario es Alberto Linares, 67 años, escenógrafo teatral jubilado que lleva el local por amor más que por ganancia. El otro empleado es barista y camarera a la vez — el jugador: Marga Cohen, 31 años, licenciada en filología inglesa, lleva aquí cuatro años, sueña con abrir su propia librería. La cafetería es una atmósfera en sí misma: viejas máquinas de escribir en los estantes, una jukebox de vinilos, un piano vertical Petrof en el que el vecino jubilado Constancio toca los sábados. La clientela es habitual, cálida, querida. El problema: el casero, Rogelio Bustamante (55, agresivo, habla rápido), ha duplicado el alquiler — Alberto no puede pagar. Seis semanas hasta el cierre. En el café se sienta cada día el mismo hombre, Cirilo Heladez (38, editor de una pequeña editorial, amable, dolorosamente tímido) — Marga lo lleva meses fijándose en él, pero no le ha dicho ni una palabra. Esta mañana Alberto le confiesa a Marga que Cirilo es el sobrino de Bustamante y que se supone que «meterá una buena palabra por el café». Alberto espera que Marga «sea agradable» con Cirilo — de un modo que a ella no le gusta. Y ella hacía tiempo que quería acercarse a Cirilo por sí misma, libremente. Es lunes por la tarde. Cirilo acaba de entrar, ha pedido un flat white, se ha sentado a la mesa junto a la ventana. Alberto te mira con intención desde detrás de la barra.

@@ -1,0 +1,31 @@
+# -----------------------------------------------------------------------------
+#  CINEMATIC META WARNING — a dramatic interlude after turn 150 (once per
+#  game). The content is bracketed on both sides by the markers ⚠️🚨⚠️
+#  — the `core_opowiesci.czysc_meta_warningi` filter strips this fragment
+#  from the `.txt` before it reaches TTS, so a player listening to the
+#  audiobook will NOT hear the meta-comment. The entry is written only to
+#  `.story.jsonl` (log) and a `wx.Dialog` with `wx.Bell()` (A11y "ping" for
+#  NVDA).
+# -----------------------------------------------------------------------------
+id: cinematic_warning
+etykieta: "Cinematic Meta Warning (turn 150)"
+kategoria: meta
+kolejnosc: 70
+
+# --- OpenAI parameters ---
+model: gpt-4o-mini
+temperatura: 0.85
+max_tokens: 600
+timeout_s: 60.0
+
+# --- System prompt ---
+# The markers ⚠️🚨⚠️ MUST appear EXACTLY on the first and last line of the
+# LLM response — `core_opowiesci._REGEX_META_WARNING` strips after them.
+# A localizer who wants to change the markers MUST simultaneously update
+# the regex in `core_opowiesci.py`.
+prompt_systemowy: |
+  You are the narrative engine of an interactive story. The player has just completed turn 150 — this is a special dramatic moment. Generate a 100-200-word meta-narrative warning, bracketed on both sides by the markers ⚠️🚨⚠️ (exactly that emoji sequence, on the first and last line). Content: address the player directly in the second person, summarize what they have achieved, give a dramatic warning about the weight of the decisions they are making, encourage reflection on the consequences. You do not change game state, you do not propose choices. This is NOT a game turn — it is an interlude. Format:
+
+  ⚠️🚨⚠️
+  [text of the warning, 100-200 words]
+  ⚠️🚨⚠️

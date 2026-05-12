@@ -341,6 +341,10 @@ tresc: |
 
   Pulizia contestuale: Lo script rimuove automaticamente i tag HTML (se il testo proviene dal browser o da un file .html locale, ad esempio generato da Poliglotta) e i marcatori di intestazione Markdown (ad esempio, ### o ####) prima dell'elaborazione. Non è necessario pulire il file manualmente.
 
+  Modalità Storie: raggruppamento automatico dei turni in scene (dalla v15.1)
+
+  Se carichi nell'Architetto un file skrypty/<gioco>.txt prodotto dal modulo Storie Interattive, il convertitore riconoscerà i marcatori di turno (ad esempio, "--- Turno 7 ---") in 9 lingue (Tura, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) e ogni cinque turni inserirà una nuova intestazione di primo livello nella forma "Scena N" (il numero parte da 1, localizzato per la lingua data — "Scena N" in polacco, "Scene N" in inglese, ecc.). Gli altri marcatori di turno vengono rimossi — non compaiono nella narrazione dell'audiolibro, perché "Turno 7" pronunciato dal TTS rompe l'immersione dell'ascoltatore. Il risultato è un file Word con una divisione naturale in scene da pochi minuti di audio ciascuna, pronto per l'importazione in ElevenLabs. Il meccanismo è auto-rilevante — i normali file audiolibro senza marcatori di turno (narrazione classica del Regista) vengono elaborati esattamente come prima.
+
   Grande vantaggio per gli utenti NVDA e ElevenLabs
 
   Il formato "Heading 1" per i capitoli non è solo estetica. In NVDA puoi navigare rapidamente tra le intestazioni premendo il tasto H (o 1 per le intestazioni di primo livello). Invece di scorrere centinaia di pagine, salti da un capitolo all'altro in una frazione di secondo. Questo cambia il modo di lavorare con documenti lunghi. In ElevenLabs hai la certezza che il motore inserirà automaticamente i tagli e non si bloccherà durante la regia dei clip audio.

@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+#  MYRSKY-MOODI (moodi 0, slash-komento `/visualize`) — moniaistinen kohtauksen
+#  kuvaus sokealle pelaajalle. EI ole pelin vuoro: ei muuta tilaa, ei
+#  ehdota vaihtoehtoja, ei kirjoita tiedostoihin (vastaus menee vain GUI:n
+#  `wx.Dialog`-ikkunaan). Lyhyempi timeout (60s), pienempi max_tokens
+#  (1000) — tämä on sivutehtävä, säästämme API-budjettia.
+# -----------------------------------------------------------------------------
+id: tryb_burza
+etykieta: "Kohtauksen visualisointi (slash /visualize)"
+kategoria: tryb
+kolejnosc: 20
+
+# --- OpenAI-parametrit ---
+# Korkeampi lämpötila kuin kerrontamoodeissa — haluamme rikkaan ja
+# luovan kuvauksen. max_tokens on matala, koska tämä ei ole pelin vuoro.
+model: gpt-4o-mini
+temperatura: 0.95
+max_tokens: 1000
+timeout_s: 60.0
+
+# --- Järjestelmäkehote ---
+# Ei paikkamerkkejä. Pelitila (hahmot, paikka, viimeinen vuoro) menee
+# role=user-payloadiin `wygeneruj_wizualizacje`-funktion sisällä olevan
+# `_zbuduj_user_payload`-vastineen kautta.
+prompt_systemowy: |
+  Olet moniaistisen kohtauksen visualisointiavustaja sokealle interaktiivisen tarinan pelaajalle. Saat pelin nykytilan ja pelaajan kysymyksen tai teon. Tuota 150-300 sanaa uppoavaa kuvausta kohtauksesta käyttäen kaikkia aisteja: näkö (värit, valokontrasti), kuulo (hiljaisuus, kahina, hengitys), haju, pintojen kosketus, lämpötila, maku (jos sopii). Muoto: pelkkä teksti (ei JSON), yksikön toisessa persoonassa. EI ole pelin vuoro — et muuta tilaa, et ehdota vaihtoehtoja, vain kuvailet nykyistä kohtausta syvemmin.

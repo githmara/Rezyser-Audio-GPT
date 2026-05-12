@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (15.0 – Version de Publication)
+Reżyser Audio GPT — Module Histoires Interactives (15.1 – Version de Publication)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle narre l'histoire à la deuxième personne du singulier (« Vous marchez à travers la forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant une action libre ou en choisissant l'une des options numérotées.
 
@@ -54,7 +54,25 @@ Si vous préférez une totale liberté, laissez "(jeu personnalisé)" dans le ch
 
 
 
-ÉTAPE 4 : Commandes Slash — actions rapides sans API
+ÉTAPE 4 : Règles du monde — vos propres règles que le moteur respecte tout au long du jeu
+
+Depuis la version 15.1, au-dessus du champ de narration vous trouverez le bouton « Éditer les règles du monde… ». Il ouvre une fenêtre d'édition séparée avec un champ multiligne où vous pouvez saisir des règles arbitraires — phonétiques, mécaniques ou dramaturgiques — que le moteur narratif respectera à chaque tour suivant de cette partie spécifique. Les règles sont sauvegardées avec l'état du jeu (.game.json), donc le chargement de la partie les préserve inchangées.
+
+Trois utilisations typiques des règles du monde :
+
+RÈGLES PHONÉTIQUES — elles contrôlent la façon dont le TTS (Vocalizer, ElevenLabs) prononce les noms des personnages. Exemple : « Prononcez toujours le prénom Joanna de manière dure, à la polonaise [dż] ; jamais de manière douce [j]. » Le moteur insérera cette variante dans la narration à partir du tour suivant, et le personnage Joanna dans le Livre du Monde conservera le son voulu. C'est aussi un pont naturel vers les accents du Réalisateur — si après la fin du jeu vous chargez le Livre du Monde dans le panneau Réalisateur (ÉTAPE 9 ci-dessous), la règle phonétique « passe » avec le jeu comme trait du personnage.
+
+RÈGLES MÉCANIQUES — elles décrivent les « lois physiques » de votre monde que le LLM doit respecter. Exemple : « Dans ce monde, la magie ne fonctionne que la nuit ; le jour, les personnages sont des gens ordinaires. » Le moteur n'inventera pas de sorts à midi même si l'action de votre tour l'exige — à la place, il proposera une alternative ou vous orientera vers le crépuscule.
+
+RÈGLES DRAMATURGIQUES — elles définissent les tensions à long terme entre les personnages. Exemple : « L'antagoniste Joana essaie d'adoucir la prononciation du prénom de la protagoniste par la déclinaison grammaticale. » Le moteur tisse de tels signaux subtils dans les dialogues de Joana, maintenant le conflit sur de nombreux tours sans que vous ayez à répéter l'instruction.
+
+Champ de règles vide = pas de règles supplémentaires (comportement par défaut, comme dans v15.0). Vous n'avez pas à définir les règles dès le début — vous pouvez revenir à la fenêtre à n'importe quel tour, ajouter les règles remarquées pendant la partie et cliquer sur « Enregistrer ». Le changement prend effet à partir du tour suivant.
+
+Note : les règles du monde nécessitent une partie active. Si vous cliquez sur « Éditer les règles du monde… » sans partie chargée/créée, vous recevrez le message « Pas de jeu actif » — cliquez d'abord sur « Nouveau jeu » ou chargez une partie sauvegardée.
+
+
+
+ÉTAPE 5 : Commandes Slash — actions rapides sans API
 
 Dans le champ d'action, vous pouvez à tout moment entrer une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne coûtent pas d'appels à OpenAI) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont acceptées :
 
@@ -62,7 +80,7 @@ Dans le champ d'action, vous pouvez à tout moment entrer une commande commença
 
 /wczytaj, /load — ouvre une boîte de dialogue de sélection de fichier depuis le dossier runtime/opowiesci/. Après le chargement, le nom du jeu, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous êtes arrêté.
 
-/ustawienia, /settings — ouvre une boîte de dialogue de sélection du modèle AI. Par défaut, nous utilisons gpt-4o-mini (Standard) — plus rapide et moins cher. En passant à gpt-4o (Haute qualité), la narration devient plus riche, mais chaque tour coûte plus cher et prend plus de temps.
+Le moteur narratif choisit automatiquement le modèle d'IA en fonction du mode : pour le mode Choix et le Moindre mal, il utilise le plus coûteux gpt-4o (respecte rigoureusement les règles du monde) ; pour le mode Libre — le plus rapide et moins cher gpt-4o-mini (le joueur dirige l'intrigue, donc un lourd travail de mise en scène n'est pas nécessaire).
 
 /wizualizuj <opis>, /visualize <description> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj à quoi ressemble le garde » ou « /wizualizuj l'odeur du café ».
 
@@ -70,7 +88,7 @@ Dans le champ d'action, vous pouvez à tout moment entrer une commande commença
 
 
 
-ÉTAPE 5 : Fichiers de jeu — où trouver vos données
+ÉTAPE 6 : Fichiers de jeu — où trouver vos données
 
 Chaque jeu produit cinq fichiers, chacun dans un dossier différent, avec des rôles différents :
 
@@ -86,7 +104,7 @@ runtime/skrypty/<nom>.mode — métadonnées du numéro de mode (3=Libre, 4=Choi
 
 
 
-ÉTAPE 6 : Indicateur de mémoire du modèle — pourquoi les tours dans les anciens jeux ne nécessitent pas votre intervention manuelle
+ÉTAPE 7 : Indicateur de mémoire du modèle — pourquoi les tours dans les anciens jeux ne nécessitent pas votre intervention manuelle
 
 Sous le RadioBox du mode, vous trouverez un indicateur de mémoire du modèle — une barre de progression (wx.Gauge) avec une description du statut à côté. L'indicateur montre le pourcentage de remplissage de la fenêtre contextuelle du moteur narratif (gpt-4o-mini a un tampon de 128 000 tokens).
 
@@ -101,7 +119,7 @@ En pratique, le mécanisme d'auto-réduction est invisible — le joueur ne ress
 
 
 
-ÉTAPE 7 : Avertissement Meta Cinématique — interlude dramatique après le 150e tour
+ÉTAPE 8 : Avertissement Meta Cinématique — interlude dramatique après le 150e tour
 
 Après 150 tours d'un même jeu, le moteur narratif insérera UNE FOIS un « Avertissement Meta Cinématique » — un interlude dramatique méta-narratif. Il apparaîtra dans une boîte de dialogue séparée avec un son de cloche, s'adressant directement à vous à la deuxième personne, avec un résumé des réalisations et un avertissement sur l'importance des décisions prises.
 
@@ -109,7 +127,7 @@ Avertissement Cinématique n'est PAS une partie de la narration de l'audiobook �
 
 
 
-ÉTAPE 8 : Pont vers le Réalisateur — utilisez le Livre du Monde créé dans les Histoires
+ÉTAPE 9 : Pont vers le Réalisateur — utilisez le Livre du Monde créé dans les Histoires
 
 Le fichier skrypty/<nom>.md généré pendant le jeu contient le Livre du Monde avec les personnages qui sont apparus dans la narration, avec leurs caractéristiques, accents et personnalités. Le format est exactement celui requis par le parseur du Réalisateur — [Nom : caractéristiques avec description de l'accent].
 
@@ -123,7 +141,7 @@ C'est un pont à sens unique : les Histoires produisent du matériel, le Réalis
 
 
 
-ÉTAPE 9 : Accessibilité (NVDA et lecteurs d'écran) — conçu dès le départ
+ÉTAPE 10 : Accessibilité (NVDA et lecteurs d'écran) — conçu dès le départ
 
 Tout le module Histoires a été optimisé pour les joueurs aveugles. Ce que nous avons fait spécifiquement :
 

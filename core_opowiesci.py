@@ -105,6 +105,19 @@ class ProjektOpowiesci:
                              przed wysyłką w ``OpowiesciPanel._on_wyslij``
         ostatnie_tury      : skondensowana historia (FIFO, ostatnie 6 par
                              akcja+narracja_skrót); Faza 4 doda streszczenie
+        zasady_swiata      : opcjonalny tekst z regułami świata zdefiniowanymi
+                             przez gracza (fonetyka tożsamości, koncepcje
+                             mechaniczne, ograniczenia kulturowe). Pusty
+                             string = stary tryb, kompatybilność wsteczna.
+                             Wstrzykiwany do prompt-systemowy przez
+                             :func:`opowiesci_ai._zbuduj_prompt_systemowy`
+                             jeśli niepusty. v15.1+.
+        ostatnie_wybory    : lista wyborów wygenerowanych przez LLM w ostatniej
+                             turze (struktury ``{"id","tekst"}``). Persystowane
+                             w `.game.json` od v15.1, by po wczytaniu gry
+                             w trybie Wyborów/Mniejszego Zła odtworzyć
+                             przyciski — gracz nie musi pisać free-textu
+                             po reloadzie. Puste w trybie Swobodnym (3).
     """
 
     def __init__(self, app_dir: str | None = None) -> None:
@@ -118,6 +131,8 @@ class ProjektOpowiesci:
         self.seed_swiata: str = ""
         self.numer_tury: int = 0
         self.ostatnie_tury: list[dict[str, str]] = []
+        self.zasady_swiata: str = ""
+        self.ostatnie_wybory: list[dict[str, str]] = []
 
     # ------------------------------------------------------------------
     # Walidacja stanu
@@ -275,7 +290,9 @@ class ProjektOpowiesci:
               "numer_tury":       int,
               "postacie_aktywne": list[{"imie","cechy"}],
               "stan":             dict,
-              "ostatnie_tury":    list[{"akcja_gracza","narracja_skrot"}]
+              "ostatnie_tury":    list[{"akcja_gracza","narracja_skrot"}],
+              "zasady_swiata":    str,
+              "ostatnie_wybory":  list[{"id","tekst"}]    # v15.1+
             }
 
         Pole ``full_story`` celowo NIE jest tu zapisane — narracja żyje
@@ -295,6 +312,8 @@ class ProjektOpowiesci:
             "postacie_aktywne": self.postacie_aktywne,
             "stan":             self.stan,
             "ostatnie_tury":    self.ostatnie_tury,
+            "zasady_swiata":    self.zasady_swiata,
+            "ostatnie_wybory":  self.ostatnie_wybory,
         }
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
@@ -379,6 +398,8 @@ class ProjektOpowiesci:
         self.postacie_aktywne  = list(dane.get("postacie_aktywne", []))
         self.stan              = dict(dane.get("stan", {}))
         self.ostatnie_tury     = list(dane.get("ostatnie_tury", []))
+        self.zasady_swiata     = str(dane.get("zasady_swiata", ""))
+        self.ostatnie_wybory   = list(dane.get("ostatnie_wybory", []))
 
         wynik = WynikWczytaniaOpowiesci(
             nazwa=nazwa,

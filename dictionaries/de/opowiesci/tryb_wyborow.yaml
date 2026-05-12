@@ -1,0 +1,23 @@
+# -----------------------------------------------------------------------------
+#  AUSWAHL-MODUS (Modus 4) — 3-5 nummerierte Optionen pro Zug. Der freie
+#  Texteintrag des Spielers wird semantisch der nächstliegenden Option
+#  zugeordnet. Die GUI zeigt den Auswahlbereich mit dynamischen `wx.Button`s
+#  an, wenn das LLM ein nicht-leeres `wybory[]`-Array zurückgibt
+#  (Halluzination → Fallback auf Freitext).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Auswahl-Modus — 3-5 Optionen A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- OpenAI-Parameter ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Anhang an prompt_systemowy aus baza.yaml ---
+prompt_systemowy: |
+  MODUS: AUSWAHL. Das Feld `wybory` enthält IMMER 3-5 Elemente, die mit den Buchstaben A, B, C, D, E gekennzeichnet sind. Jede Option ist eine konkrete Handlung, die der Spieler ausführen kann — unterschiedlich, nicht redundant. Der freie Texteintrag des Spielers wird semantisch der nächstliegenden Option zugeordnet.
+
+  AUSWAHLFORMAT (STRIKT): jeder `tekst` in `wybory[]` MUSS als **Imperativ in der zweiten Person Singular (du-Form)** formuliert sein („lauf den Waldweg hinab", „öffne die Tür", „frag den Alten nach dem Mädchen", „nimm die Laterne vom Tisch"). VERBOTENE Formen: Infinitiv („den Waldweg hinablaufen"), erste Person („ich laufe den Waldweg hinab", „ich nehme die Laterne"), dritte Person als Beschreibung („die Figur läuft"). Wenn die Handlung ein Objekt braucht — bezieh es in die Auswahl ein („frag die Hebamme nach dem Kind", nicht bloß „frag"). Parallele Struktur über A-E ist WICHTIGER als stilistische Variation — der Spieler muss fünf parallele Formen sehen.
+
+  VIELFALT: die 3-5 Optionen müssen unterschiedliche Handlungen sein (keine Varianten derselben Handlung), mit unterschiedlichen erzählerischen Konsequenzen. Vermeide „Dummy-Optionen" wie „sieh dich um", die neben „geh zur Tür" stehen — sich umsehen sollte Teil der Erzählung sein, keine Auswahl.

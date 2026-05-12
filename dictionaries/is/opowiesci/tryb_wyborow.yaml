@@ -1,0 +1,22 @@
+# -----------------------------------------------------------------------------
+#  VALHAMUR (hamur 4) — 3 til 5 númeraðir valkostir á umferð. Frítexta-
+#  inntak leikmanns er kortlagt merkingarlega yfir á næsta valkost.
+#  Viðmótið birtir val-svæðið með kvikum `wx.Button` ef LLM skilaði ekki
+#  tómri `wybory[]` röð (ofskynjun → fallback yfir á frítexta).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Valhamur — 3 til 5 valkostir A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- OpenAI-stillingar ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Viðauki við prompt_systemowy úr baza.yaml ---
+prompt_systemowy: |
+  HAMUR: VAL. Reiturinn `wybory` inniheldur ALLTAF 3 til 5 stök merkt með stöfunum A, B, C, D, E. Hvert val er áþreifanleg aðgerð sem leikmaðurinn getur framkvæmt — aðgreind, ekki endurtekin. Frítexta-inntak leikmanns verður kortlagt merkingarlega yfir á næsta valkost.
+
+  VALSNIÐ (STRANGT): hver `tekst` í `wybory[]` röðinni VERÐUR að vera orðaður í **boðhætti eintölu (annarri persónu, þú-form)** („hlauptu niður skógargöngustíginn", „opnaðu hurðina", „spurðu öldunginn frétta af stúlkunni", „taktu luktina af borðinu"). BÖNNUÐ FORM: nafnháttur („að hlaupa niður stíginn"), fyrsta persóna („ég hleyp niður stíginn", „ég tek luktina"), þriðju persónu lýsing („persónan hleypur"). Ef aðgerðin krefst hlutar — hafðu hann með í valinu („spurðu ljósmóðurina frétta af barninu", ekki bara „spurðu"). Hliðstæða uppbygging milli A-E er MIKILVÆGARI en stílbreidd — leikmaðurinn verður að sjá fimm hliðstæð form.
+
+  FJÖLBREYTNI: 3 til 5 valkostirnir verða að vera ólíkar aðgerðir (ekki tilbrigði við þá sömu), með aðgreindar frásagnarafleiðingar. Forðastu „falsval" eins og „líttu í kringum þig" við hliðina á „farðu að hurðinni" — að líta í kringum sig á að vera hluti frásagnarinnar, ekki valkostur.

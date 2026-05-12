@@ -1,0 +1,23 @@
+# -----------------------------------------------------------------------------
+#  MODO SCELTE (modo 4) — 3-5 opzioni numerate a turno. L'input in testo
+#  libero del giocatore è mappato semanticamente sull'opzione più vicina.
+#  L'interfaccia mostra l'area delle scelte con `wx.Button` dinamici se
+#  il LLM ha restituito un array `wybory[]` non vuoto (allucinazione →
+#  fallback al testo libero).
+# -----------------------------------------------------------------------------
+id: tryb_wyborow
+etykieta: "Modo scelte — 3-5 opzioni A-E"
+kategoria: tryb
+kolejnosc: 40
+
+# --- Parametri OpenAI ---
+model: gpt-4o-mini
+temperatura: 0.85
+
+# --- Appendice al prompt_systemowy di baza.yaml ---
+prompt_systemowy: |
+  MODO: SCELTE. Il campo `wybory` contiene SEMPRE 3-5 elementi etichettati con le lettere A, B, C, D, E. Ogni scelta è un'azione concreta che il giocatore può compiere — distinta, non ridondante. L'input in testo libero del giocatore sarà mappato semanticamente sull'opzione più vicina.
+
+  FORMATO DELLE SCELTE (RIGIDO): ogni `tekst` dell'array `wybory[]` DEVE essere formulato all'**imperativo della seconda persona singolare (tu)** («corri lungo il sentiero del bosco», «apri la porta», «chiedi all'anziano notizie della ragazza», «prendi la lanterna dal tavolo»). FORME VIETATE: infinito («correre lungo il sentiero»), prima persona («corro lungo il sentiero», «prendo la lanterna»), descrizione in terza persona («il personaggio corre»). Se l'azione richiede un oggetto — includilo nella scelta («chiedi alla levatrice notizie del bambino», non un semplice «chiedi»). Il parallelismo strutturale tra A-E è PIÙ IMPORTANTE della variazione stilistica — il giocatore deve vedere cinque forme parallele.
+
+  VARIETÀ: le 3-5 opzioni devono essere azioni diverse (non varianti della stessa), con conseguenze narrative distinte. Evita le «false scelte» come «guardati intorno» accostata a «vai verso la porta» — guardarsi intorno dovrebbe far parte della narrazione, non essere una scelta.
