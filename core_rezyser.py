@@ -59,6 +59,7 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass
+from typing import Any
 
 import core_tokeny as ct
 
@@ -394,6 +395,18 @@ class ProjektRezysera:
         # użytkowników końcowych zainstalowanej aplikacji.
         return os.path.join(self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}.mode")
 
+    def _sciezka_brainstorm(self, nazwa: str) -> str:
+        # v15.2: persystencja wyników Burzy (3 opcje + opcjonalne streszczenie).
+        # Plik istnieje tylko między wygenerowaniem opcji a wysyłką prompta
+        # produkcyjnego (Skrypt/Audiobook), wtedy jest kasowany. Dzięki temu
+        # po wczytaniu projektu (np. nazajutrz) gracz wciąż widzi ostatnie
+        # opcje wygenerowane przez Burzę — nie musi ich pamiętać.
+        # Folder runtime/skrypty/ — ten sam co `.mode`, by jeden katalog
+        # trzymał całą metadane projektu (DRY).
+        return os.path.join(
+            self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}.brainstorm.json"
+        )
+
     # ------------------------------------------------------------------
     # Wczytywanie
     # ------------------------------------------------------------------
@@ -561,6 +574,122 @@ class ProjektRezysera:
             return val if val in (1, 2) else None
         except Exception:
             return None
+
+    # ------------------------------------------------------------------
+    # Persystencja wyników Burzy (v15.2)
+    # ------------------------------------------------------------------
+    # Cel: po wczytaniu projektu (np. nazajutrz) gracz wciąż widzi ostatnie
+    # opcje wygenerowane przez Burzę — nie musi ich pamiętać. Plik
+    # `runtime/skrypty/<nazwa>.brainstorm.json` istnieje TYLKO między
+    # wygenerowaniem Burzy a wysyłką prompta produkcyjnego (Skrypt/Audiobook)
+    # — wtedy GUI woła `usun_brainstorm()` przed wywołaniem produkcyjnego
+    # AI, bo opcje z Burzy stały się nieaktualne (gracz „skonsumował" je
+    # przy pisaniu sceny).
+    #
+    # Argumenty są prymitywami (list[dict], str) — żeby uniknąć cyklicznej
+    # zależności core_rezyser ↔ rezyser_ai. GUI/silnik konwertują dataclassy
+    # OpcjaBurzy z `rezyser_ai` do/z prymitywów przed/po I/O.
+
+    def zapisz_brainstorm(
+        self,
+        opcje: list[dict[str, str]],
+        streszczenie: str = "",
+    ) -> str:
+        """Zapisuje wynik Burzy do `runtime/skrypty/<nazwa>.brainstorm.json`.
+
+        Args:
+            opcje:        Lista dictów ``{"tytul", "opis", "cel_sceny"}``.
+                          GUI tworzy je z :class:`rezyser_ai.OpcjaBurzy`
+                          przez ``dataclasses.asdict`` lub ręczne mapowanie.
+            streszczenie: Opcjonalna treść streszczenia (sufiks alarm/
+                          streszczenie). Pusty string gdy bez streszczenia.
+
+        Zwraca ścieżkę zapisanego pliku. Nadpisuje plik (overwrite, jak
+        `.mode`) — każda nowa Burza zastępuje poprzednią; do historii
+        Burz nie wracamy, bo gracz wybrał JEDNĄ ścieżkę dalej.
+        """
+        self._wymagaj_nazwy()
+        meta_dir = os.path.join(self.app_dir, RUNTIME_DIR, SKRYPTY_DIR)
+        os.makedirs(meta_dir, exist_ok=True)
+        sciezka = self._sciezka_brainstorm(self.nazwa_pliku)
+
+        # Filtr: tylko dictów ze wszystkimi 3 wymaganymi polami. Halucynacja
+        # po stronie wywołującego (np. brak `cel_sceny`) nie powinna zapisać
+        # niezdatnego do użytku rekordu na dysk.
+        opcje_clean = [
+            {"tytul": str(o.get("tytul", "")),
+             "opis": str(o.get("opis", "")),
+             "cel_sceny": str(o.get("cel_sceny", ""))}
+            for o in (opcje or [])
+            if o.get("tytul") and o.get("cel_sceny")
+        ]
+        payload = {
+            "wersja": 1,
+            "opcje": opcje_clean,
+            "streszczenie": streszczenie or "",
+        }
+        import json  # noqa: PLC0415  (lazy — używane tylko przy I/O brainstorm)
+        with open(sciezka, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, ensure_ascii=False, indent=2)
+        return sciezka
+
+    def wczytaj_brainstorm(
+        self,
+        nazwa: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Wczytuje plik `runtime/skrypty/<nazwa>.brainstorm.json`.
+
+        Returns:
+            Dict ``{"opcje": [...], "streszczenie": str}`` gdy plik istnieje
+            i parsuje się jako JSON. ``None`` gdy brak pliku, błąd parsowania,
+            albo `opcje` puste (uznajemy za niezdatny do GUI).
+
+        GUI wywołuje to po :meth:`wczytaj` żeby odbudować przyciski opcji
+        — bez wymagania od gracza ponownej Burzy. Po sukcesie produkcyjnym
+        (Skrypt/Audiobook) GUI woła :meth:`usun_brainstorm`.
+        """
+        nazwa = nazwa or self.nazwa_pliku
+        if not nazwa:
+            return None
+        sciezka = self._sciezka_brainstorm(nazwa)
+        if not os.path.exists(sciezka):
+            return None
+        try:
+            import json  # noqa: PLC0415
+            with open(sciezka, "r", encoding="utf-8") as fh:
+                dane = json.load(fh)
+        except Exception:
+            return None
+
+        opcje = dane.get("opcje") or []
+        if not opcje:
+            return None
+        return {
+            "opcje":        list(opcje),
+            "streszczenie": str(dane.get("streszczenie", "")),
+        }
+
+    def usun_brainstorm(self, nazwa: str | None = None) -> None:
+        """Usuwa plik brainstorm (cichy fail jeśli nie istnieje).
+
+        Wołane przez GUI tuż przed wysłaniem prompta produkcyjnego
+        (Skrypt/Audiobook) — opcje z Burzy „zużyły się" przy pisaniu sceny
+        i nie powinny być proponowane jako wybór w następnej turze.
+        Wołane też przy starcie nowej Burzy (świeży plik nadpisze stary,
+        ale jawne `os.remove` przed `os.makedirs` zapobiega race-condition
+        gdyby gracz przerwał wysyłkę przed zapisem).
+        """
+        nazwa = nazwa or self.nazwa_pliku
+        if not nazwa:
+            return
+        sciezka = self._sciezka_brainstorm(nazwa)
+        try:
+            os.remove(sciezka)
+        except FileNotFoundError:
+            pass
+        except Exception:
+            # Jak `.mode` — metadata, cichy fail.
+            pass
 
     # ------------------------------------------------------------------
     # Zarządzanie strukturą (Prolog/Epilog/Rozdział/Akt/Scena)
