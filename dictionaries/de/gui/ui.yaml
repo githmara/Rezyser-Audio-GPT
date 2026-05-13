@@ -329,6 +329,11 @@ rezyser:
   lbl_podglad_historii: "Aktuelle Geschichte im Speicher (nur lesbar – mit Pfeiltasten navigieren):"
   txt_podglad_name: "Vorschau des gesamten Verlaufs im Speicher – nur lesbar"
   txt_podglad_hint: "(Speicher ist leer – Projekt laden oder neues beginnen)"
+  # Brainstorming-Optionen Panel (v15.2)
+  pnl_opcji_burzy_name:        "Panel der Brainstorming-Optionen"
+  lbl_opcji_burzy:             "🌪️ Brainstorming-Optionen — klicke, um in die Anweisungen einzufügen:"
+  txt_streszczenie_burzy_name: "Vom Brainstorming erzeugte Zusammenfassung — nur lesbar"
+  btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Anweisungen für den nächsten Abschnitt (geben Sie 'Zusammenfassung' ein, um die Speicherung im Langzeitspeicher zu erzwingen):

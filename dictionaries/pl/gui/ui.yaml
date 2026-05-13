@@ -336,6 +336,11 @@ rezyser:
   lbl_podglad_historii:  "Bieżąca historia w pamięci (tylko do odczytu – nawiguj strzałkami):"
   txt_podglad_name:      "Podgląd pełnej historii w pamięci – tylko do odczytu"
   txt_podglad_hint:      "(pamięć jest pusta – wczytaj projekt lub zacznij nowy)"
+  # Panel opcji Burzy Mózgów (v15.2)
+  pnl_opcji_burzy_name:        "Panel opcji Burzy Mózgów"
+  lbl_opcji_burzy:             "🌪️ Opcje Burzy Mózgów — kliknij, by wstawić do Instrukcji:"
+  txt_streszczenie_burzy_name: "Streszczenie wygenerowane przez Burzę Mózgów — tylko do odczytu"
+  btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Instrukcje do kolejnego fragmentu (wpisz 'streszczenie', by wymusić zapis do Pamięci Długotrwałej):

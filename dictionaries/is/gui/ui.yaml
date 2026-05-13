@@ -329,6 +329,11 @@ rezyser:
   lbl_podglad_historii: "Núverandi saga í minni (aðeins til lesturs – notaðu örvar til að fletta):"
   txt_podglad_name: "Forskoðun á allri sögu í minni – aðeins til lesturs"
   txt_podglad_hint: "(minni er tómt – hlaða inn verkefni eða byrja nýtt)"
+  # Spjald hugstormunarvalkosta (v15.2)
+  pnl_opcji_burzy_name:        "Spjald hugstormunarvalkosta"
+  lbl_opcji_burzy:             "🌪️ Hugstormunarvalkostir — smelltu til að setja inn í Leiðbeiningar:"
+  txt_streszczenie_burzy_name: "Samantekt mynduð af Hugstormun — aðeins til lesturs"
+  btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Leiðbeiningar fyrir næsta hluta (sláðu inn 'yfirlit' til að þvinga vistun í Langtímaminni):

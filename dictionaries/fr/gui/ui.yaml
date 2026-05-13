@@ -329,6 +329,11 @@ rezyser:
   lbl_podglad_historii: "Histoire courante en mémoire (lecture seule — naviguez avec les flèches) :"
   txt_podglad_name: "Aperçu de la chronologie complète en mémoire — lecture seule"
   txt_podglad_hint: "(la mémoire est vide — chargez un projet ou commencez-en un nouveau)"
+  # Panneau des options de Brainstorming (v15.2)
+  pnl_opcji_burzy_name:        "Panneau des options de Brainstorming"
+  lbl_opcji_burzy:             "🌪️ Options du Brainstorming — clique pour insérer dans Instructions :"
+  txt_streszczenie_burzy_name: "Résumé généré par le Brainstorming — lecture seule"
+  btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Instructions pour le prochain fragment (tapez « résume » pour forcer la sauvegarde dans la Mémoire à Long Terme) :

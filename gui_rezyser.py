@@ -429,6 +429,7 @@ class RezyserPanel(wx.Panel):
         radiobox_sizer      = self._zbuduj_radiobox_trybu(BORDER)
         panel_struktury     = self._zbuduj_panel_struktury(BORDER)
         podglad_sizer       = self._zbuduj_podglad_historii(BORDER)
+        panel_opcji_burzy   = self._zbuduj_panel_opcji_burzy(BORDER)
         pole_instrukcji     = self._zbuduj_pole_instrukcji(BORDER)
         panel_postprodukcji = self._zbuduj_panel_postprodukcji(BORDER)
         wskaznik_sizer      = self._zbuduj_wskaznik_pamieci_modelu(BORDER)
@@ -447,6 +448,12 @@ class RezyserPanel(wx.Panel):
         sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
         sizer.Add(podglad_sizer, proportion=1, flag=wx.EXPAND)
         sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        # v15.2: panel opcji Burzy między podglądem historii a polem instrukcji.
+        # Domyślnie ukryty; pokazuje się po sukcesie Burzy lub przy wczytaniu
+        # projektu z istniejącym `.brainstorm.json`. Tab-order naturalny —
+        # gracz po przeczytaniu opcji może wybrać przyciskiem (lub Enter +
+        # focus przesuwa się dalej do pola Instrukcji).
+        sizer.Add(panel_opcji_burzy, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
         sizer.Add(pole_instrukcji, flag=wx.EXPAND)
         sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
         sizer.Add(panel_postprodukcji, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
@@ -561,6 +568,145 @@ class RezyserPanel(wx.Panel):
             border=BORDER,
         )
         return sizer
+
+    # ------------------------------------------------------------------
+    # BLOK E.1b – Panel opcji Burzy Mózgów (v15.2)
+    # ------------------------------------------------------------------
+    # Dynamicznie pokazywany po sukcesie Burzy. Zawiera 3 przyciski
+    # (po jednym per opcja z JSON-a LLM) + opcjonalny label streszczenia.
+    # Klik przycisku wpisuje pełen szkic prompta (cel_sceny od LLM +
+    # doklejka_celu_sceny z yaml) do pola Instrukcji — gracz dopisuje
+    # własne uwagi reżyserskie i wysyła w trybie Skrypt/Audiobook.
+    # Po wysyłce produkcyjnej `proj.usun_brainstorm` + ukrycie panelu.
+    # Po wczytaniu projektu: jeśli `.brainstorm.json` istnieje, panel
+    # jest rebuildowany (gracz wciąż widzi ostatnie opcje sprzed paukacji).
+
+    def _zbuduj_panel_opcji_burzy(self, BORDER: int) -> wx.Panel:
+        self._pnl_opcji_burzy = wx.Panel(self, name=t("rezyser.pnl_opcji_burzy_name"))
+
+        # Label nagłówek panelu
+        self._lbl_opcji_burzy = wx.StaticText(
+            self._pnl_opcji_burzy,
+            label=t("rezyser.lbl_opcji_burzy"),
+        )
+        f = self._lbl_opcji_burzy.GetFont()
+        f.MakeBold()
+        self._lbl_opcji_burzy.SetFont(f)
+
+        # Label streszczenia (widoczny tylko gdy LLM wygenerował streszczenie).
+        # Multilinia + read-only — gracz może skopiować treść do Pamięci
+        # Długotrwałej, ale nie edytuje.
+        self._txt_opcji_burzy_streszczenie = wx.TextCtrl(
+            self._pnl_opcji_burzy,
+            style=wx.TE_MULTILINE | wx.TE_READONLY,
+            name=t("rezyser.txt_streszczenie_burzy_name"),
+        )
+        self._txt_opcji_burzy_streszczenie.SetMinSize((-1, 80))
+        self._txt_opcji_burzy_streszczenie.Hide()
+
+        # Kontener przycisków — populowany dynamicznie przez `_przeladuj_opcje_burzy`.
+        self._sizer_przyciskow_burzy = wx.BoxSizer(wx.VERTICAL)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self._lbl_opcji_burzy,                flag=wx.ALL, border=BORDER)
+        sizer.Add(self._txt_opcji_burzy_streszczenie,   flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        sizer.Add(self._sizer_przyciskow_burzy,         flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        self._pnl_opcji_burzy.SetSizer(sizer)
+
+        # Panel jest ukryty domyślnie — pokazuje się dopiero po sukcesie Burzy.
+        self._pnl_opcji_burzy.Hide()
+        return self._pnl_opcji_burzy
+
+    def _przeladuj_opcje_burzy(
+        self,
+        opcje:        list[dict[str, str]],
+        streszczenie: str,
+    ) -> None:
+        """Rebuilduje przyciski w panelu opcji Burzy z list[dict].
+
+        Wzorzec analogiczny do :meth:`gui_opowiesci.OpowiesciPanel._przeladuj_wybory`:
+        1. Wyczyść sizer (delete_windows=True) — usuwa stare wx.Button.
+        2. Dodaj nowy przycisk per opcja z bind-em na :meth:`_on_kliknieto_opcje_burzy`
+           (closure z `cel_sceny` przez default arg lambdy — chroni przed
+           late-binding gotcha).
+        3. `Layout()` panelu i okna nadrzędnego (sizery zewnętrzne też
+           muszą się przeliczyć po zmianie zawartości).
+        4. Pokaż / ukryj label streszczenia w zależności od ``streszczenie``.
+        5. Pokaż cały panel (`_pnl_opcji_burzy`) — był ukryty.
+        """
+        self._sizer_przyciskow_burzy.Clear(delete_windows=True)
+
+        # Streszczenie — pokazujemy tylko gdy LLM celowo je wygenerował
+        # (sufiks alarm/streszczenie był aktywny). Pusty string → ukrywamy.
+        if streszczenie:
+            self._txt_opcji_burzy_streszczenie.SetValue(streszczenie)
+            self._txt_opcji_burzy_streszczenie.Show()
+        else:
+            self._txt_opcji_burzy_streszczenie.Hide()
+
+        # Pobranie doklejki z bieżącego przepisu (Burza w aktywnym języku).
+        # Cache yaml — `rezyser_ai.doklejka_celu_sceny` patrzy do atrybutu
+        # PrzepisRezysera, więc jest tani.
+        przepis = self._aktualny_przepis()
+        doklejka = rai.doklejka_celu_sceny(przepis) if przepis else ""
+
+        for i, opcja in enumerate(opcje, start=1):
+            tytul = (opcja.get("tytul") or "").strip()
+            opis = (opcja.get("opis") or "").strip()
+            cel_sceny = (opcja.get("cel_sceny") or "").strip()
+            if not tytul or not cel_sceny:
+                continue   # halucynacja — zignoruj
+
+            etykieta = t("rezyser.btn_opcja_burzy_format", numer=i, tytul=tytul)
+            btn = wx.Button(self._pnl_opcji_burzy, label=etykieta)
+            btn.SetToolTip(opis or tytul)
+            # Closure z `cel_sceny` ORAZ `doklejka` jako default args —
+            # każdy przycisk dostaje SWÓJ tekst, nie ostatniego z pętli.
+            btn.Bind(
+                wx.EVT_BUTTON,
+                lambda evt, c=cel_sceny, d=doklejka:
+                    self._on_kliknieto_opcje_burzy(evt, c, d),
+            )
+            self._sizer_przyciskow_burzy.Add(btn, flag=wx.EXPAND | wx.BOTTOM, border=4)
+
+        self._pnl_opcji_burzy.Layout()
+        self._pnl_opcji_burzy.Show()
+        self.Layout()
+
+    def _ukryj_panel_opcji_burzy(self) -> None:
+        """Ukrywa panel opcji Burzy i czyści przyciski (po wysyłce produkcyjnej)."""
+        self._sizer_przyciskow_burzy.Clear(delete_windows=True)
+        self._txt_opcji_burzy_streszczenie.SetValue("")
+        self._txt_opcji_burzy_streszczenie.Hide()
+        self._pnl_opcji_burzy.Hide()
+        self.Layout()
+
+    def _on_kliknieto_opcje_burzy(
+        self,
+        _event:    wx.Event,
+        cel_sceny: str,
+        doklejka:  str,
+    ) -> None:
+        """Klik na przycisku opcji Burzy — wpisuje pełen szkic do Instrukcji.
+
+        Format wpisanego tekstu:
+
+            [CEL SCENY]: <cel_sceny z JSON-a LLM>
+
+            <doklejka_celu_sceny z yaml — [Reżyserze: ...] + [DYREKTYWA]: ...>
+
+        Doklejka jest deterministyczna (Python czyta z yaml), `cel_sceny`
+        twórczo wymyślony przez LLM. Gracz może edytować całość przed
+        wysyłką — typowo dopisuje swoje uwagi reżyserskie do linii
+        `[Reżyserze: ...]`. NIE wysyłamy automatycznie.
+
+        A11y: focus na pole instrukcji, kursor na końcu — NVDA odczyta
+        wstawiony tekst, gracz dopisuje dalej.
+        """
+        sklejka = f"[CEL SCENY]: {cel_sceny}\n\n{doklejka}".rstrip() + "\n"
+        self._txt_user_input.SetValue(sklejka)
+        self._txt_user_input.SetInsertionPointEnd()
+        self._txt_user_input.SetFocus()
 
     # ------------------------------------------------------------------
     # BLOK E.2 – Pole instrukcji dla AI + przycisk Wyślij
@@ -853,6 +999,26 @@ class RezyserPanel(wx.Panel):
 
         if wynik.saved_mode in (1, 2):
             self._rb_mode.SetSelection(wynik.saved_mode)
+
+        # v15.2: rebuild panelu opcji Burzy z `.brainstorm.json` jeśli istnieje.
+        # Po wczytaniu projektu gracz wciąż widzi 3 opcje wygenerowane przy
+        # poprzedniej sesji — nie musi pamiętać co planował, nie musi
+        # ponownie odpalać Burzy. Plik istnieje tylko między Burzą a wysyłką
+        # produkcyjną; jeśli go nie ma, panel pozostaje ukryty.
+        try:
+            brainstorm = self._projekt.wczytaj_brainstorm(nazwa)
+        except Exception:
+            brainstorm = None
+        if brainstorm is not None:
+            self._przeladuj_opcje_burzy(
+                brainstorm["opcje"],
+                brainstorm.get("streszczenie", ""),
+            )
+        else:
+            # Bezpieczeństwo: gdyby panel był pokazany ze starszych
+            # operacji (np. cykl Burza → wczytaj inny projekt bez brainstorm),
+            # chowamy go żeby nie wprowadzać w błąd.
+            self._ukryj_panel_opcji_burzy()
 
         lore_info = (
             t("rezyser.status_wczytano_ksiega", nazwa_projektu=nazwa)
@@ -1165,6 +1331,14 @@ class RezyserPanel(wx.Panel):
         if nazwa and self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
 
+        # v15.2: wysyłka w trybie produkcyjnym „zużywa" opcje z poprzedniej
+        # Burzy — gracz zdecydował co pisać i zawartość Burzy stała się
+        # nieaktualna. Kasujemy brainstorm + ukrywamy panel jeszcze przed
+        # wątkiem tła, żeby ekran natychmiast pokazał świeży stan.
+        if tryb_zapisu:
+            self._projekt.usun_brainstorm()
+            self._ukryj_panel_opcji_burzy()
+
         self._btn_wyslij.Disable()
         self._txt_user_input.SetValue("")
         self._refresh_ui_state()
@@ -1258,6 +1432,39 @@ class RezyserPanel(wx.Panel):
         nazwa: str,
         tryb_zapisu: bool,
     ) -> None:
+        # v15.2: dispatch na podstawie `przepis.id`. Burza idzie ścieżką
+        # JSON-mode (`generuj_burze` → :class:`WynikBurzy`), pozostałe tryby
+        # pozostają na starej ścieżce tekstowej (`generuj_fragment` →
+        # :class:`WynikGeneracji`).
+        if przepis.id == "burza":
+            try:
+                wynik_b = rai.generuj_burze(
+                    klient=self._client,
+                    przepis=przepis,
+                    snapshot=snapshot,
+                    user_text=user_text,
+                    on_postep=None,
+                )
+            except openai.RateLimitError:
+                wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
+                return
+            except Exception as exc:  # noqa: BLE001
+                wx.CallAfter(self._on_wyslij_error, str(exc))
+                return
+
+            if wynik_b.odrzucone:
+                wx.CallAfter(self._on_wyslij_error, t("rezyser.err_odrzucenie"))
+                return
+
+            if wynik_b.streszczenie:
+                wx.CallAfter(
+                    self._on_wyslij_zapisz_streszczenie, wynik_b.streszczenie,
+                )
+
+            wx.CallAfter(self._on_wyslij_done_burza_json, wynik_b)
+            return
+
+        # --- Tryby produkcyjne (Skrypt / Audiobook / postprodukcja) ---
         try:
             wynik = rai.generuj_fragment(
                 klient=self._client,
@@ -1320,10 +1527,58 @@ class RezyserPanel(wx.Panel):
         self._txt_full_story.SetFocus()
 
     def _on_wyslij_done_burza(self, response_text: str) -> None:
+        # v15.2: ścieżka legacy — fallback dla hipotetycznych przepisów
+        # spoza id="burza" z `zapis_do_pliku=false`. Burza w v15.2+ idzie
+        # przez :meth:`_on_wyslij_done_burza_json`. Zachowane na wypadek
+        # gdyby lingwista dodał własny przepis planowy bez JSON-schemy.
         self.last_response = response_text
         self._btn_wyslij.Enable()
         self._refresh_ui_state()
         self._show_response_dialog(response_text)
+
+    def _on_wyslij_done_burza_json(self, wynik: rai.WynikBurzy) -> None:
+        """v15.2: callback po sukcesie Burzy w trybie JSON.
+
+        Buduje przyciski opcji w panelu, persystuje wynik do
+        `runtime/skrypty/<nazwa>.brainstorm.json` żeby przeżył reload.
+        """
+        # Dataclass → list[dict] dla persystencji + przekazania do GUI.
+        # `dataclasses.asdict` nie jest tutaj idealne (nie wszystkie pola
+        # opcji mają iść do persystencji), więc ręczne mapowanie 3 pól.
+        opcje_dict = [
+            {"tytul": o.tytul, "opis": o.opis, "cel_sceny": o.cel_sceny}
+            for o in wynik.opcje
+        ]
+
+        # Persystencja — tylko gdy mamy nazwę projektu. Burza bez nazwy
+        # (gracz nie wpisał) nie jest blokowana, po prostu nie zapisujemy.
+        if self._projekt.nazwa_pliku:
+            try:
+                self._projekt.zapisz_brainstorm(opcje_dict, wynik.streszczenie)
+            except OSError as exc:
+                # Niekrytyczne — opcje są w GUI, brak pliku oznacza tylko
+                # że nie przeżyją reload. Logujemy w last_response żeby
+                # nie zatracić wyniku przy debug.
+                self._wyswietl_blad_ai(
+                    t("rezyser.blad_zapisu_do_pliku", tresc_bledu=str(exc)),
+                )
+
+        # Logujemy surowy JSON w last_response — pomocne w debug.
+        self.last_response = wynik.surowy_json
+
+        # Rebuild przycisków — pokazuje panel, ukryty od inicjalizacji.
+        self._przeladuj_opcje_burzy(opcje_dict, wynik.streszczenie)
+
+        self._btn_wyslij.Enable()
+        self._refresh_ui_state()
+        wx.Bell()  # A11y: NVDA „ping" sygnał gotowości
+        # Focus na pierwszy przycisk opcji, jeśli istnieje — NVDA przeczyta
+        # tytuł najsilniejszej propozycji jako pierwszą reakcję na sukces.
+        if self._pnl_opcji_burzy.GetChildren():
+            for child in self._pnl_opcji_burzy.GetChildren():
+                if isinstance(child, wx.Button):
+                    child.SetFocus()
+                    break
 
     def _show_response_dialog(self, tekst: str) -> None:
         dlg = wx.Dialog(

@@ -328,6 +328,11 @@ rezyser:
   lbl_podglad_historii: "Historia actual en memoria (solo lectura – navega con flechas):"
   txt_podglad_name: "Vista previa del historial completo en memoria – solo lectura"
   txt_podglad_hint: "(la memoria está vacía – carga un proyecto o comienza uno nuevo)"
+  # Panel de opciones de Lluvia de ideas (v15.2)
+  pnl_opcji_burzy_name:        "Panel de opciones de Lluvia de ideas"
+  lbl_opcji_burzy:             "🌪️ Opciones de Lluvia de ideas — clic para insertar en Instrucciones:"
+  txt_streszczenie_burzy_name: "Resumen generado por la Lluvia de ideas — solo lectura"
+  btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Instrucciones para el siguiente fragmento (escribe 'resumen' para forzar el guardado en la Memoria a Largo Plazo):

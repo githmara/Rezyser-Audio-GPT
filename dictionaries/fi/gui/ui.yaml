@@ -329,6 +329,11 @@ rezyser:
   lbl_podglad_historii: "Nykyinen tarina muistissa (vain luku – navigoi nuolilla):"
   txt_podglad_name: "Täysi historian esikatselu – vain luku"
   txt_podglad_hint: "(muisti on tyhjä – lataa projekti tai aloita uusi)"
+  # Aivoriihen vaihtoehtopaneeli (v15.2)
+  pnl_opcji_burzy_name:        "Aivoriihen vaihtoehtopaneeli"
+  lbl_opcji_burzy:             "🌪️ Aivoriihen vaihtoehdot — napsauta lisätäksesi Ohjeisiin:"
+  txt_streszczenie_burzy_name: "Aivoriihen tuottama yhteenveto — vain luku"
+  btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Ohjeet seuraavalle osalle (kirjoita 'yhteenveto' pakottaaksesi tallennuksen Pitkäaikaismuistiin):
