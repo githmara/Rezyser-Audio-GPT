@@ -172,6 +172,15 @@ class OpowiesciPanel(wx.Panel):
         # Persystowany w `_projekt.stan["cinematic_pokazany"]` — Faza 3
         # zapisuje cały dict `stan` do `.game.json`, więc rebuild po
         # wczytaniu odzyska informację.
+        #
+        # v15.2: flaga „w tej turze gracz wybrał Odkorkuj fiolkę". Ustawiana
+        # w :meth:`_on_wybor_btn` gdy `id_wyboru == "0"`, zerowana w
+        # :meth:`_obsluz_ture` po pomyślnej wymianie z LLM. Pomiędzy klikiem
+        # a wysyłką gracz może edytować tekst akcji — flaga pamięta intencję
+        # niezależnie od finalnej treści `_txt_akcja` (np. „Odkorkuję fiolkę
+        # z drżącą ręką" wciąż liczy się jako użycie fiolki). Kliknięcie
+        # innego wyboru po fiolce kasuje flagę (gracz zmienił zdanie).
+        self._fiolka_klikneto_w_tej_turze: bool = False
         self._build_ui()
         self._bind_events()
         self._init_api()
@@ -667,6 +676,30 @@ class OpowiesciPanel(wx.Panel):
             zasady_swiata=self._projekt.zasady_swiata,
         )
 
+        # v15.2: mechanika fiolki — wyliczana TYLKO w trybie Mniejsze zło.
+        # `fiolka_aktywacja` — czy LLM ma wprowadzić fiolkę w tej turze
+        # (próg z yaml osiągnięty, fiolka jeszcze nie obecna ani niezniszczona).
+        # `fiolka_seed` — losowany Pythonem skutek odkorkowania (jeśli
+        # gracz kliknął wybór 0). LLM dostaje gotowy seed; nie wymyśla
+        # skutku samodzielnie. Oba bloki defaultem None/False — w trybach
+        # 3/4 lecą jako no-op do generuj_ture.
+        fiolka_aktywacja = False
+        fiolka_seed: dict[str, str] | None = None
+        if tryb == oai.TRYB_MNIEJSZE_ZLO:
+            prog = oai.prog_aktywacji_fiolki(self._snapshot.jezyk_projektu or "pl")
+            fiolka_aktywacja = oai.czy_fiolka_powinna_sie_pojawic(self._snapshot, prog)
+            if self._fiolka_klikneto_w_tej_turze:
+                # Bezpiecznik: gracz mógł kliknąć „Odkorkuj fiolkę" w turze
+                # gdy fiolka NIE jest jeszcze obecna (race — przycisk powinien
+                # być widoczny tylko gdy obecna, ale jeśli zniszczona w
+                # poprzedniej turze a LLM nie usunął wyboru 0 z `wybory[]`,
+                # mogłaby się prześlizgnąć). Losujemy seed tylko gdy obecna.
+                fiolka_stan = (self._snapshot.stan_poprzedni or {}).get("fiolka") or {}
+                if fiolka_stan.get("obecna") and not fiolka_stan.get("zniszczona"):
+                    fiolka_seed = oai.wylosuj_seed_fiolki(
+                        self._snapshot.jezyk_projektu or "pl"
+                    )
+
         # Lock UI: zapobiega podwójnej wysyłce, dezorientacji NVDA.
         self._btn_wyslij.Disable()
         self._txt_akcja.SetValue("")
@@ -676,7 +709,7 @@ class OpowiesciPanel(wx.Panel):
         snapshot_kopia = self._snapshot
         self._worker_thread = threading.Thread(
             target=self._wyslij_worker,
-            args=(snapshot_kopia, user_text, tryb),
+            args=(snapshot_kopia, user_text, tryb, fiolka_aktywacja, fiolka_seed),
             daemon=True,
         )
         self._worker_thread.start()
@@ -686,15 +719,21 @@ class OpowiesciPanel(wx.Panel):
     # ------------------------------------------------------------------
     def _wyslij_worker(
         self,
-        snapshot:   oai.SnapshotOpowiesci,
-        user_input: str,
-        tryb:       int,
+        snapshot:         oai.SnapshotOpowiesci,
+        user_input:       str,
+        tryb:             int,
+        fiolka_aktywacja: bool = False,
+        fiolka_seed:      dict[str, str] | None = None,
     ) -> None:
         """Worker w tle — wątek nigdy nie dotyka widgetów wxPython bezpośrednio.
 
         Wszelka komunikacja z GUI idzie przez ``wx.CallAfter`` — gwarantuje
         wykonanie w wątku głównym (event loop wxPython jest single-threaded).
         Wzorzec z :meth:`gui_rezyser.RezyserPanel._wyslij_worker`.
+
+        v15.2: parametry ``fiolka_aktywacja`` / ``fiolka_seed`` propagowane
+        do :func:`opowiesci_ai.generuj_ture`. Domyślnie False/None — w trybach
+        Swobodny/Wyborów no-op.
         """
         try:
             wynik = oai.generuj_ture(
@@ -703,6 +742,8 @@ class OpowiesciPanel(wx.Panel):
                 user_input=user_input,
                 tryb=tryb,
                 model=self._model_dla_trybu(tryb),
+                fiolka_aktywacja=fiolka_aktywacja,
+                fiolka_seed=fiolka_seed,
             )
         except Exception as exc:  # noqa: BLE001
             # Łapiemy wszystko (RateLimitError, APITimeoutError, RuntimeError
@@ -774,6 +815,11 @@ class OpowiesciPanel(wx.Panel):
         # 4. Wybory: w trybie Swobodnym (3) zawsze ukryte, w 4/5 widoczne
         # tylko gdy LLM zwrócił niepustą tablicę (halucynacja → ukrywamy).
         self._przeladuj_wybory(wynik.wybory, tryb)
+
+        # 4b. v15.2: reset flagi fiolki — kolejna tura zaczyna od czystego
+        # stanu intencji. Gracz w nowej turze albo wybierze fiolkę znowu
+        # (flag wraca przez _on_wybor_btn), albo coś innego.
+        self._fiolka_klikneto_w_tej_turze = False
 
         # 5. Status + odblokowanie + dźwięk + fokus.
         self._btn_wyslij.Enable()
@@ -872,12 +918,14 @@ class OpowiesciPanel(wx.Panel):
                     "opowiesci.btn_wybor_tooltip_format",
                     tekst=wybor["tekst"],
                 ))
-                # Closure z `tekst` — robimy lambda z default arg żeby
-                # uniknąć late-binding gotcha (każdy przycisk dostaje
-                # SWÓJ tekst, nie ostatniego z pętli).
+                # Closure z `tekst` ORAZ `id` — id potrzebne do rozpoznania
+                # wyboru fiolki (`id="0"` w trybie 5, v15.2). Default args
+                # w lambdzie chronią przed late-binding gotcha (każdy
+                # przycisk dostaje SWOJE wartości, nie ostatnich z pętli).
                 btn.Bind(
                     wx.EVT_BUTTON,
-                    lambda evt, t_wyb=wybor["tekst"]: self._on_wybor_btn(evt, t_wyb),
+                    lambda evt, t_wyb=wybor["tekst"], id_wyb=wybor["id"]:
+                        self._on_wybor_btn(evt, t_wyb, id_wyb),
                 )
                 self._sizer_wyborow.Add(btn, flag=wx.EXPAND | wx.ALL, border=4)
 
@@ -885,7 +933,12 @@ class OpowiesciPanel(wx.Panel):
         self.Layout()
         self._aktywuj_obszar_wyborow(pokazac)
 
-    def _on_wybor_btn(self, _event: wx.Event, tekst_wyboru: str) -> None:
+    def _on_wybor_btn(
+        self,
+        _event:       wx.Event,
+        tekst_wyboru: str,
+        id_wyboru:    str = "",
+    ) -> None:
         """Klik na przycisku wyboru — wpisuje tekst do pola akcji i daje focus.
 
         v15.1: NIE wysyłamy już automatycznie. Powód: gdy zasady świata
@@ -897,10 +950,18 @@ class OpowiesciPanel(wx.Panel):
         kliknięciu gracz może swobodnie edytować pole akcji i sam wcisnąć
         „Wyślij" (lub Enter).
 
+        v15.2: parametr ``id_wyboru`` — gdy ``"0"`` (mechanika fiolki w
+        trybie Mniejsze zło), ustawiamy ``_fiolka_klikneto_w_tej_turze=True``.
+        Inny ID (A-E) zeruje flagę — gracz zmienił zdanie, fiolka nie idzie.
+        Flaga jest niezależna od finalnej treści `_txt_akcja` (gracz może
+        edytować „Odkorkuj fiolkę" → „Odkorkuję fiolkę z drżącą ręką",
+        wciąż liczy się jako użycie).
+
         A11y: focus przechodzi do pola akcji, NVDA odczyta zawartość;
         kursor stawiamy na końcu, żeby gracz dopisywał, a nie nadpisywał
         na początku.
         """
+        self._fiolka_klikneto_w_tej_turze = (id_wyboru == "0")
         self._txt_akcja.SetValue(tekst_wyboru)
         self._txt_akcja.SetInsertionPointEnd()
         self._txt_akcja.SetFocus()

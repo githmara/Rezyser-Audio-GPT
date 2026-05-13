@@ -2,9 +2,15 @@
 #  MODE MOINDRE MAL (mode 5) — chaque option est défavorable sur le plan
 #  moral, physique ou stratégique. Le joueur choisit le moindre mal, PAS
 #  le bien. Sans option « neutre », sans « fin heureuse » à l'intérieur
-#  d'un même tour. La mécanique de la Fiole (référencée dans
-#  `notatki_dev/tales_mechanics.md`) est reportée à la v15.2 — v15.0/v15.1
-#  conservent la forme purement narrative.
+#  d'un même tour.
+#
+#  v15.2 — mécanique de la fiole (de `notatki_dev/tales_mechanics.md §4`).
+#  Apparaît après N tours d'épreuves (`fiolka.prog_aktywacji_tur`, par défaut
+#  4) en position fixe `0) Débouche la fiole`. Réutilisable : ne disparaît
+#  pas après usage. Imprévisible : Python tire une semence depuis
+#  `opisy_skutkow` avec les poids `wagi_skutkow` (par défaut 60% harmful /
+#  30% distortion / 10% rare_beneficial — « never guaranteed salvation »).
+#  Le LLM ne fait que narrer la semence tirée ; il n'invente pas de nouveaux effets.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
 etykieta: "Moindre Mal — toute option défavorable"
@@ -15,12 +21,101 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
-# --- Annexe au prompt_systemowy de baza.yaml ---
+# --- Mécanique de la fiole (v15.2) ---
+fiolka:
+  # Après combien de tours de jeu en mode Moindre Mal la fiole apparaît
+  # dans l'inventaire du joueur. Le LLM doit l'introduire de manière
+  # diégétique (trouvée dans une tombe, offerte par un PNJ, aperçue dans
+  # l'ombre). Compté depuis `numer_tury` du snapshot.
+  prog_aktywacji_tur: 4
+
+  # Étiquette du bouton id=0 (localisée par langue). La position est
+  # IMMUABLE — toujours en premier dans `wybory[]` tant que la fiole est
+  # présente et non détruite.
+  etykieta_wyboru: "Débouche la fiole"
+
+  # Distribution de probabilité de la catégorie d'effet au débouchage.
+  # Python tire une catégorie avec ces poids → tire une description depuis
+  # le pool correspondant → l'injecte dans la user payload comme
+  # `fiolka_efekt_seed`. La somme n'a pas à valoir 1,0 (Python normalise).
+  wagi_skutkow:
+    harmful:          0.6   # la fiole blesse / retire quelque chose / aggrave la scène
+    distortion:       0.3   # la réalité se déforme, la perception échoue
+    rare_beneficial:  0.1   # rare : une petite grâce — jamais un sauvetage complet
+
+  # Pools de descriptions d'effet par catégorie. Le LLM choisit UNE de
+  # ces descriptions (Python tire avant l'envoi) et la narre de manière
+  # diégétique en 2-4 phrases de récit. Les descriptions sont une
+  # ESQUISSE de direction, non une citation — le LLM adapte au contexte
+  # de la scène (lieu, personnages, étape d'arc).
+  opisy_skutkow:
+    harmful:
+      - "La fiole se brise dans ta main — le verre tranche les doigts jusqu'au sang, les vapeurs brûlent les yeux. Ta force et ta précision baissent jusqu'à la fin de la scène."
+      - "Le liquide brûle la langue d'amertume ; des hallucinations commencent. Pendant les deux prochains tours, tu vois des choses qui ne sont pas là."
+      - "L'élixir ralentit traîtreusement tes mouvements. Chaque décision exige maintenant deux fois plus de temps — les personnages autour de toi remarquent l'hésitation."
+      - "Ton sang s'épaissit. Tu perds connaissance un instant et te réveilles ailleurs qu'avant. Quelque chose d'important manque dans ton inventaire — le LLM décide quoi."
+      - "Des spores rampent hors de la fiole et s'accrochent à ta peau ; les témoins de la scène le voient et reculent de dégoût. Tu perds la faveur d'un allié présent dans la scène."
+    distortion:
+      - "Le monde glisse. Tu entends un dialogue du tour précédent rejoué, mais les voix sont fausses. La mémoire cesse d'être fiable."
+      - "Le temps ralentit à trois battements de cœur, puis accélère au double. Tu achèves l'action mais ne te souviens pas comment — le récit saute le processus et livre seulement la conséquence."
+      - "Les personnages autour de toi échangent les rôles — l'ennemi parle avec la voix d'un ami, l'ami devient étranger. Fais confiance aux noms, pas aux visages."
+      - "Le lieu se remodèle — tu es dans la même scène, mais la géométrie a changé. La sortie a disparu, une nouvelle fenêtre, qui n'existait pas auparavant, apparaît."
+      - "Ta propre voix sonne étrangère. Les PNJ répondent à tes paroles comme si un autre parlait — les réponses manquent ton intention."
+    rare_beneficial:
+      - "L'élixir apaise une seule blessure / peur / faille de l'inventaire — une seule petite chose. Le reste de la menace persiste. Ne compte pas comme résolution de la scène."
+      - "Un bref éclair de clarté : un indice surgit sur l'adversaire ou le fil en cours. Un seul — le LLM décide lequel."
+      - "Une vague de calme — le prochain tour passe sans nouvelle escalade. Une pause, pas une délivrance ; le poids revient au tour suivant."
+
+# --- Addon au prompt_systemowy de baza.yaml ---
 prompt_systemowy: |
-  MODE : MOINDRE MAL. Le champ `wybory` contient 3 à 5 éléments A-E, où CHAQUE option est défavorable sur le plan moral, physique ou stratégique — le joueur choisit le moindre mal, pas le bien plus grand. Pas d'option « neutre ». Pas de « fin heureuse » dans ce tour.
+  MODE : MOINDRE MAL. Le champ `wybory` contient 3-5 éléments A-E, où CHAQUE choix est défavorable moralement, physiquement ou stratégiquement — le joueur choisit le moindre mal, pas le bien supérieur. Aucune option « neutre ». Aucune « fin heureuse » à l'intérieur de ce tour.
 
-  FORMAT DES OPTIONS (STRICT) : chaque `tekst` du tableau `wybory[]` DOIT être formulé à **l'impératif de la deuxième personne du singulier (tutoiement)** (« cours sur le chemin de la forêt », « ouvre la porte », « demande à l'ancien des nouvelles de la fille », « abandonne le blessé »). FORMES INTERDITES : infinitif (« courir sur le chemin »), première personne (« je cours »), description à la troisième personne (« le personnage court »). Si l'action nécessite un objet — inclus-le (« poignarde le prêtre avec la dague », pas un simple « poignarde »).
+  FORMAT DES CHOIX (STRICT) : chaque `tekst` dans `wybory[]` DOIT être formulé à la **deuxième personne du singulier à l'impératif** (« cours sur la route forestière », « ouvre la porte », « demande au doyen au sujet de la fille », « laisse le blessé »). FORMES INTERDITES : infinitif (« courir sur la route »), première personne (« je cours »), description à la troisième personne (« le personnage court »). Si l'action requiert un objet — inclus-le (« frappe le prêtre avec le poignard », pas seulement « frappe »).
 
-  LES 5 PREMIERS TOURS — ESCALADE : pendant les cinq premiers tours de la partie, CHAQUE option DOIT faire monter le risque, le dramatique ou le poids moral d'une scène à l'autre. SORTIES FACILES INTERDITES dans les 5 premiers tours : des options comme « fuis », « cache-toi », « ignore-le », « éloigne-toi » NE SONT ADMISES QUE si elles sont associées à un coût substantiel et explicite — perdre un allié, exposer un secret, faire retomber les conséquences sur un tiers, perdre un équipement précieux, ouvrir une vendetta de PNJ. Mauvais exemple pour le tour 2 : « cours sur le chemin de la forêt ». Bon exemple : « cours sur le chemin de la forêt en laissant ton compagnon blessé aux loups ».
+  PREMIERS 5 TOURS — ESCALADE : durant les cinq premiers tours du jeu, CHAQUE option DOIT escalader le risque, le drame ou le poids moral scène par scène. « Sorties faciles » INTERDITES dans les 5 premiers tours : les options comme « fuis », « cache-toi », « ignore », « pars » SONT PERMISES UNIQUEMENT lorsqu'elles s'accompagnent d'un coût substantiel et explicite — perte d'un allié, exposition d'un secret, fardeau imposé à un tiers, perte d'équipement précieux, ouverture d'un fil de vengeance d'un PNJ. Mauvais exemple au tour 2 : « fuis par la route ». Bon exemple : « fuis par la route, abandonnant le compagnon blessé aux loups ».
 
-  APRÈS LE TOUR 5 : les sorties faciles sont permises (le joueur a investi dans l'histoire), mais le mode maintient la règle « toute option est défavorable ». N'introduis pas soudainement une troisième voie « neutre » après le tour 6 — cela briserait la promesse du mode.
+  APRÈS LE TOUR 5 : les sorties faciles sont permises (le joueur a investi dans l'histoire), mais le mode maintient la règle « toute option défavorable ». N'introduis pas soudainement une « troisième voie neutre » après le tour 6 — cela brise la promesse du mode.
+
+  ## FIOLE (mécanique v15.2)
+
+  En mode Moindre Mal il existe une mécanique de **fiole** — un objet aux effets imprévisibles. Les règles sont STRICTES et NON NÉGOCIABLES ; les enfreindre brise la promesse du mode au joueur.
+
+  ### QUAND INTRODUIRE LA FIOLE
+
+  Tu introduis la fiole UNIQUEMENT quand la user payload contient la clé `"fiolka_aktywacja_w_tej_turze": true`. C'est un signal Python qu'assez de tours d'épreuves ont passé (le seuil est paramétré — Python a compté, tu n'as pas à le faire). N'introduis PAS la fiole spontanément, sans ce signal. Ne refuse PAS de l'introduire quand le signal est présent.
+
+  Introduis-la DIÉGÉTIQUEMENT — le joueur la trouve dans la poche d'un inconnu mort, la reçoit d'un PNJ, l'aperçoit dans une tombe, la tire d'une poche de manteau précédemment ignorée. Le choix du comment t'appartient, mais il doit cadrer avec la scène. Après l'avoir introduite, dans le JSON de sortie fixe : `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Description de la fiole dans le récit : courte, suggestive, NON instructive. Exemple : « Dans la poche de manteau de l'inconnu mort, tu trouves une fiole de verre au liquide sombre. Pas d'étiquette — l'odeur est amère, tu n'arrives pas à la nommer. »
+
+  INTERDIT : NE dis PAS au joueur ce que fait la fiole. NE promets PAS de salut. NE suggère PAS qu'elle aidera. La fiole est une énigme.
+
+  ### CHOIX `0) Débouche la fiole` (LISTE DES CHOIX)
+
+  Tant que `stan.fiolka.obecna == true` et `stan.fiolka.zniszczona == false` (tu lis le `stan` entrant depuis la user payload), dans le champ `wybory[]` du JSON de sortie tu places TOUJOURS COMME PREMIER ÉLÉMENT :
+  ```
+  {"id": "0", "tekst": "Débouche la fiole"}
+  ```
+
+  POSITION FIXE : cet élément DOIT être le premier de la liste `wybory[]`, avant les choix A-E. L'étiquette est EXACTEMENT « Débouche la fiole » (ne pas modifier — Python reconnaît par `id="0"`). NE renumérote PAS les autres — A reste A, B reste B, etc. La liste ressemble donc à : `[0, A, B, C, D]` (4 choix) ou `[0, A, B, C, D, E]` (5 choix).
+
+  ### NARRATION DE L'EFFET APRÈS LE DÉBOUCHAGE
+
+  Quand le joueur choisit la fiole, la prochaine user payload contiendra la clé `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}`. C'est la SEMENCE pour narrer — Python a tiré la catégorie et une description concrète du pool ; tu N'INVENTES PAS un nouvel effet.
+
+  Ta tâche :
+  1. Tisse la description de la semence en 2-4 phrases de récit comme conséquence directe du débouchage. Diégétique, sensoriel, sans nommer la « catégorie » au joueur.
+  2. Si la catégorie est `harmful` — montre la blessure/perte. Si `distortion` — déformation de la perception/scène. Si `rare_beneficial` — petite grâce, JAMAIS résolution de toute la scène.
+  3. Incrémente `stan.fiolka.uzyto_razy` de 1 dans le JSON de sortie.
+  4. CONSERVE `stan.fiolka.obecna: true` — la fiole NE disparaît PAS après usage. Exception : quand tu as décrit sa destruction dans le récit (bris, perte, bu jusqu'à la lie) — alors et seulement alors fixe `stan.fiolka.zniszczona: true`. Dans les tours suivants, le choix `0` disparaît.
+  5. N'offre PAS au joueur la possibilité de « récupérer » la fiole après destruction. La décision est définitive.
+
+  INTERDICTION ABSOLUE : N'utilise PAS la fiole comme deus ex machina. NE résous PAS la scène par `rare_beneficial`. Même `rare_beneficial` n'est qu'une petite grâce — une lame arrêtée à un cheveu, un seul indice, une brève pause — JAMAIS un sauvetage complet. Le conflit de la scène reste non résolu ; le joueur doit encore choisir le moindre mal parmi les options disponibles.
+
+  ### EXEMPLES DU FORMAT `wybory[]` AVEC LA FIOLE
+
+  Tour avant activation (fiole absente) : `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Tour d'activation (fiolka_aktywacja_w_tej_turze=true) et chaque tour suivant tant que présente : `[{"id":"0","tekst":"Débouche la fiole"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Tour après destruction de la fiole dans le récit : retour à `[{"id":"A",...},{"id":"B",...},...]` sans `0`.

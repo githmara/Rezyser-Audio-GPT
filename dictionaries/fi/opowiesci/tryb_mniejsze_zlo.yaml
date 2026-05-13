@@ -2,9 +2,15 @@
 #  PIENEMPI PAHA -MOODI (moodi 5) — jokainen vaihtoehto on moraalisesti,
 #  fyysisesti tai strategisesti epäedullinen. Pelaaja valitsee pienemmän
 #  pahan, EI hyvää. Ei «neutraalia» vaihtoehtoa, ei «onnellista loppua»
-#  yhden vuoron sisällä. Pulloutomekaniikka (viittaus tiedostossa
-#  `notatki_dev/tales_mechanics.md`) lykätään versioon v15.2 — v15.0/v15.1
-#  säilyttävät puhtaasti kerronnallisen muodon.
+#  yhden vuoron sisällä.
+#
+#  v15.2 — pullomekaniikka (tiedostosta `notatki_dev/tales_mechanics.md §4`).
+#  Ilmestyy N kovan vuoron jälkeen (`fiolka.prog_aktywacji_tur`, oletus 4)
+#  kiinteänä paikkana `0) Avaa pullo`. Uudelleenkäytettävä: ei katoa käytön
+#  jälkeen. Ennustamaton: Python arpoo siemenen `opisy_skutkow`-poolista
+#  painoilla `wagi_skutkow` (oletus 60% harmful / 30% distortion /
+#  10% rare_beneficial — «never guaranteed salvation»). LLM vain
+#  narratisoi arvotun siemenen; se ei keksi uusia vaikutuksia.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
 etykieta: "Pienempi Paha — jokainen vaihtoehto epäedullinen"
@@ -15,12 +21,100 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
-# --- Lisäys baza.yaml-tiedoston prompt_systemowy-kenttään ---
+# --- Pullomekaniikka (v15.2) ---
+fiolka:
+  # Kuinka monen Pienempi Paha -vuoron jälkeen pullo ilmestyy pelaajan
+  # tavaroihin. LLM:n täytyy esitellä se diegeettisesti (löydetty haudasta,
+  # NPC:n lahjana, varjoissa havaittu). Lasketaan snapshotin `numer_tury`
+  # -arvosta.
+  prog_aktywacji_tur: 4
+
+  # id=0-painikkeen otsikko (lokalisoitu per kieli). Sijainti on
+  # MUUTTUMATON — aina ensimmäisenä `wybory[]`-listassa niin kauan kuin
+  # pullo on läsnä ja rikkomaton.
+  etykieta_wyboru: "Avaa pullo"
+
+  # Vaikutuksen kategorian todennäköisyysjakauma avattaessa. Python arpoo
+  # kategorian näillä painoilla → arpoo kuvauksen vastaavasta poolista →
+  # injektoi sen käyttäjän payloadiin `fiolka_efekt_seed`-avaimena. Summan
+  # ei tarvitse olla 1,0 (Python normalisoi).
+  wagi_skutkow:
+    harmful:          0.6   # pullo haavoittaa / vie jotain / pahentaa kohtausta
+    distortion:       0.3   # todellisuus vääristyy, havainto pettää
+    rare_beneficial:  0.1   # harvoin: pieni armo — ei koskaan täydellistä pelastusta
+
+  # Vaikutuskuvauksen poolit per kategoria. LLM valitsee YHDEN näistä
+  # kuvauksista (Python arpoo ennen pyyntöä) ja narratisoi sen diegeettisesti
+  # 2-4 lauseen kerrontana. Kuvaukset ovat SUUNNAN luonnos, ei sitaatti —
+  # LLM mukauttaa kohtauksen kontekstiin (paikka, hahmot, kaaren vaihe).
+  opisy_skutkow:
+    harmful:
+      - "Pullo halkeaa kädessäsi — lasi viiltää sormet verille, höyryt polttavat silmiä. Voimasi ja tarkkuutesi laskevat kohtauksen loppuun saakka."
+      - "Neste polttaa kielen kitkerästi; harhanäyt alkavat. Seuraavat kaksi vuoroa näet asioita, joita ei ole."
+      - "Eliksiiri hidastaa petollisesti liikkeitäsi. Jokainen päätös vie nyt kaksinkertaisen ajan — ympärilläsi olevat hahmot huomaavat empimisen."
+      - "Veresi sakeutuu. Menetät hetkeksi tajuntasi ja heräät muualta kuin missä olit. Jokin tärkeä puuttuu tavaroistasi — LLM päättää mikä."
+      - "Pullosta ryömii itiöitä, jotka tarttuvat ihoosi; kohtauksen todistajat näkevät sen ja perääntyvät inhoten. Menetät yhden läsnäolevan liittolaisen suosion."
+    distortion:
+      - "Maailma luiskahtaa. Kuulet edellisen vuoron dialogin toistuvan, mutta äänet ovat väärät. Muisti lakkaa olemasta luotettava."
+      - "Aika hidastuu kolmen sydämenlyönnin mittaiseksi, sitten kiihtyy kaksinkertaiseksi. Suoritat toiminnon, mutta et muista miten — kerronta hyppää prosessin yli ja antaa vain seurauksen."
+      - "Ympärilläsi olevat hahmot vaihtavat rooleja — vihollinen puhuu ystävän äänellä, ystävästä tulee vieras. Luota nimiin, älä kasvoihin."
+      - "Paikka muotoutuu uudelleen — olet samassa kohtauksessa, mutta geometria on muuttunut. Uloskäynti on kadonnut, uusi ikkuna, jota ei ennen ollut, on ilmestynyt."
+      - "Oma äänesi kuulostaa vieraalta. NPC:t reagoivat sanoihisi kuin puhuisi joku muu — vastaukset ohittavat tarkoituksesi."
+    rare_beneficial:
+      - "Eliksiiri lievittää yhden haavan / pelon / aukon tavaroissasi — yhden pienen asian. Loput uhasta jää. Ei lasketa kohtauksen ratkaisuksi."
+      - "Lyhyt selkeyden välähdys: nousee yksi vihje nykyisestä vastustajasta tai juonesta. Vain yksi — LLM päättää mikä."
+      - "Rauhan aalto — seuraava vuoro kuluu ilman uutta eskalaatiota. Tauko, ei pelastus; paino palaa sitä seuraavalla vuorolla."
+
+# --- Lisäosa baza.yaml:n prompt_systemowy:hin ---
 prompt_systemowy: |
-  MOODI: PIENEMPI PAHA. `wybory`-kenttä sisältää 3-5 elementtiä A-E, joissa JOKAINEN vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäedullinen — pelaaja valitsee pienemmän pahan, ei suuremman hyvän. Ei «neutraalia» vaihtoehtoa. Ei «onnellista loppua» tällä vuorolla.
+  MOODI: PIENEMPI PAHA. Kenttä `wybory` sisältää 3-5 elementtiä A-E, joissa JOKAINEN vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäedullinen — pelaaja valitsee pienemmän pahan, ei suurempaa hyvää. Ei «neutraalia» vaihtoehtoa. Ei «onnellista loppua» tämän vuoron sisällä.
 
-  VALINTOJEN MUOTO (TIUKKA): jokainen `wybory[]`-taulukon `tekst` ON muotoiltava **yksikön toisen persoonan käskymuotoon** («juokse metsätietä alas», «avaa ovi», «kysy vanhukselta tytöstä», «hylkää haavoittunut»). KIELLETYT MUODOT: infinitiivi («juosta metsätietä»), ensimmäinen persoona («juoksen»), kolmannessa persoonassa kuvaileva («hahmo juoksee»). Jos teko tarvitsee objektin — sisällytä se («puukota pappia tikarilla», ei pelkkä «puukota»).
+  VAIHTOEHDON MUOTO (TIUKKA): jokainen `tekst` `wybory[]`-listassa TÄYTYY olla muotoiltu **yksikön toisen persoonan käskymuotona** («juokse metsätietä», «avaa ovi», «kysy vanhimmalta tytöstä», «jätä haavoittunut»). KIELLETYT muodot: infinitiivi («juosta tietä»), ensimmäinen persoona («juoksen»), kuvaus kolmannessa persoonassa («hahmo juoksee»). Jos toiminta vaatii kohteen — sisällytä se («lyö pappi tikarilla», ei pelkkä «lyö»).
 
-  ENSIMMÄISET 5 VUOROA — ESKALAATIO: pelin ensimmäisen viiden vuoron aikana JOKAISEN vaihtoehdon ON kasvatettava riskiä, dramatiikkaa tai moraalista painoa kohtauksesta toiseen. HELPOT POISPÄÄSYT KIELLETTY ensimmäisten 5 vuoron aikana: vaihtoehdot kuten «pakene», «piiloudu», «jätä huomiotta», «vetäydy» OVAT SALLITTUJA VAIN, jos ne on yhdistetty merkittävään ja eksplisiittiseen hintaan — liittolaisen menettäminen, salaisuuden paljastuminen, seurausten siirtäminen kolmannelle osapuolelle, arvokkaan varustuksen menetys, NPC:n kostonjuonen avautuminen. Huono esimerkki vuorolle 2: «juokse metsätietä alas». Hyvä esimerkki: «juokse metsätietä alas ja jätä haavoittunut toveri susille».
+  ENSIMMÄISET 5 VUOROA — ESKALAATIO: pelin viiden ensimmäisen vuoron aikana JOKAISEN vaihtoehdon TÄYTYY eskaloida riskiä, draamaa tai moraalista painoa kohtaus kerrallaan. KIELLETYT «helpot poistumistiet» ensimmäisten 5 vuoron aikana: vaihtoehdot kuten «pakene», «piiloudu», «sivuuta», «kävele pois» ON SALLITTU VAIN silloin kun ne on kytketty oleelliseen ja eksplisiittiseen menetykseen — liittolaisen menetys, salaisuuden paljastus, kolmannen osapuolen kuormittaminen seurauksilla, arvokkaiden varusteiden menetys, NPC:n koston säikeen avaaminen. Huono esimerkki vuorossa 2: «pakene tietä». Hyvä esimerkki: «pakene tietä, jätä haavoittunut toveri susille».
 
-  VUORON 5 JÄLKEEN: helpot pois­päästöt ovat sallittuja (pelaaja on sijoittanut tarinaan), mutta moodi pitäytyy sääntöönsä «jokainen vaihtoehto on epäedullinen». Älä äkillisesti tuo kolmatta «neutraalia» reittiä vuoron 6 jälkeen — se rikkoo moodin lupauksen.
+  VUORON 5 JÄLKEEN: helpot poistumistiet sallitaan (pelaaja on sijoittanut tarinaan), mutta moodi pitää edelleen sääntöä «jokainen vaihtoehto epäedullinen». Älä yhtäkkiä esitä «neutraalia kolmatta tietä» vuoron 6 jälkeen — se rikkoo moodin lupauksen.
+
+  ## PULLO (v15.2-mekaniikka)
+
+  Pienempi Paha -moodissa on **pullo**-mekaniikka — esine, jonka vaikutus on ennustamaton. Säännöt ovat TIUKAT ja EI-NEUVOTELTAVISSA; niiden rikkominen rikkoo moodin lupauksen pelaajalle.
+
+  ### MILLOIN ESITELLÄ PULLO
+
+  Esittelet pullon VAIN silloin, kun käyttäjän payloadissa on avain `"fiolka_aktywacja_w_tej_turze": true`. Tämä on Pythonin signaali, että tarpeeksi kovia vuoroja on kulunut (kynnys on parametrisoitu — Python laski, sinun ei tarvitse). ÄLÄ esittele pulloa spontaanisti ilman tätä signaalia. ÄLÄ kieltäydy esittelemästä sitä signaalin ollessa läsnä.
+
+  Esittele se DIEGEETTISESTI — pelaaja löytää sen kuolleen vieraan taskusta, saa sen NPC:ltä, näkee sen haudassa, vetää sen aiemmin sivuutetusta takintaskusta. Miten-valinta on sinun, mutta sen on sovittava kohtaukseen. Esittelyn jälkeen aseta tulos-JSON:iin: `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Pullon kuvaus kerronnassa: lyhyt, vihjailevallisen, EI ohjaava. Esimerkki: «Kuolleen vieraan takintaskusta löydät lasipullon tummalla nesteellä. Etikettiä ei ole — tuoksu on katkera, et osaa nimetä sitä.»
+
+  KIELLETTY: ÄLÄ kerro pelaajalle, mitä pullo tekee. ÄLÄ lupaa pelastusta. ÄLÄ vihjaa, että se auttaisi. Pullo on arvoitus.
+
+  ### VAIHTOEHTO `0) Avaa pullo` (VAIHTOEHTOJEN LISTA)
+
+  Kun `stan.fiolka.obecna == true` ja `stan.fiolka.zniszczona == false` (luet saapuvan `stan`:n käyttäjän payloadista), tulos-JSON:n `wybory[]`-kentässä laitat AINA ENSIMMÄISEKSI elementiksi:
+  ```
+  {"id": "0", "tekst": "Avaa pullo"}
+  ```
+
+  KIINTEÄ SIJAINTI: tämän elementin TÄYTYY olla ensimmäinen `wybory[]`-listassa, ennen vaihtoehtoja A-E. Otsikko on TÄSMÄLLEEN «Avaa pullo» (älä muokkaa — Python tunnistaa `id="0"`:lla). ÄLÄ numeroi muita uudelleen — A on edelleen A, B on edelleen B, jne. Lista näyttää siis: `[0, A, B, C, D]` (4 vaihtoehtoa) tai `[0, A, B, C, D, E]` (5 vaihtoehtoa).
+
+  ### VAIKUTUKSEN KERRONTA AVAUKSEN JÄLKEEN
+
+  Kun pelaaja valitsee pullon, seuraavassa käyttäjän payloadissa on avain `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}`. Tämä on SIEMEN kerrontaan — Python arpoi kategorian ja konkreettisen kuvauksen poolista; sinä ET keksi uutta vaikutusta.
+
+  Tehtäväsi:
+  1. Punne siemenen kuvaus 2-4 lauseeseen kerrontaa avauksen suorana seurauksena. Diegeettisesti, aistein, nimeämättä «kategoriaa» pelaajalle.
+  2. Jos kategoria on `harmful` — näytä haava/menetys. `distortion` — havainnon/kohtauksen vääristyminen. `rare_beneficial` — pieni armo, EI KOSKAAN koko kohtauksen ratkaisua.
+  3. Kasvata `stan.fiolka.uzyto_razy` yhdellä tulos-JSON:ssa.
+  4. PIDÄ `stan.fiolka.obecna: true` — pullo EI katoa käytön jälkeen. Poikkeus: kun olet kuvannut sen tuhoutumisen kerronnassa (halkeaminen, katoaminen, juominen pohjaan asti) — silloin ja vain silloin aseta `stan.fiolka.zniszczona: true`. Seuraavilla vuoroilla vaihtoehto `0` katoaa.
+  5. ÄLÄ tarjoa pelaajalle mahdollisuutta «palauttaa» pulloa tuhoutumisen jälkeen. Päätös on lopullinen.
+
+  EHDOTON KIELTO: ÄLÄ käytä pulloa deus ex machinana. ÄLÄ ratkaise kohtausta `rare_beneficial`:n kautta. Vielä `rare_beneficial`kin on pieni armo — terä pysäytetty hiuksen verran, yksi vihje, lyhyt tauko — EI KOSKAAN täydellinen pelastus. Kohtauksen konflikti jää ratkaisematta; pelaajan täytyy edelleen valita pienempi paha käytettävissä olevista vaihtoehdoista.
+
+  ### ESIMERKKEJÄ `wybory[]`-MUODOSTA PULLON KANSSA
+
+  Vuoro ennen aktivointia (pullo poissa): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Aktivointivuoro (fiolka_aktywacja_w_tej_turze=true) ja jokainen seuraava vuoro pullon ollessa läsnä: `[{"id":"0","tekst":"Avaa pullo"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Vuoro pullon tuhoutumisen jälkeen kerronnassa: paluu muotoon `[{"id":"A",...},{"id":"B",...},...]` ilman `0`:aa.

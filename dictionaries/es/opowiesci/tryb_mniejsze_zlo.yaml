@@ -1,10 +1,15 @@
 # -----------------------------------------------------------------------------
-#  MODO MAL MENOR (modo 5) — cada opción es moral, física o
-#  estratégicamente desfavorable. El jugador escoge el mal menor, NO el
-#  bien. Sin opción «neutra», sin «final feliz» dentro de un solo turno.
-#  La mecánica de la Ampolla (referenciada en
-#  `notatki_dev/tales_mechanics.md`) se aplaza a v15.2 — v15.0/v15.1
-#  conservan la forma puramente narrativa.
+#  MODO MAL MENOR (modo 5) — cada opción es moral, física o estratégicamente
+#  desfavorable. El jugador escoge el mal menor, NO el bien. Sin opción
+#  «neutra», sin «final feliz» dentro de un solo turno.
+#
+#  v15.2 — mecánica de la Ampolla (de `notatki_dev/tales_mechanics.md §4`).
+#  Aparece tras N turnos de dureza (`fiolka.prog_aktywacji_tur`, por defecto
+#  4) como posición fija `0) Descorcha la ampolla`. Reutilizable: no
+#  desaparece tras el uso. Impredecible: Python sortea una semilla de
+#  `opisy_skutkow` con pesos `wagi_skutkow` (por defecto 60% harmful /
+#  30% distortion / 10% rare_beneficial — «never guaranteed salvation»).
+#  El LLM solo narra la semilla sorteada; no inventa nuevos efectos.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
 etykieta: "Mal Menor — toda opción desfavorable"
@@ -15,12 +20,101 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
-# --- Anexo al prompt_systemowy de baza.yaml ---
+# --- Mecánica de la Ampolla (v15.2) ---
+fiolka:
+  # Tras cuántos turnos de juego en modo Mal Menor aparece la ampolla
+  # en el inventario del jugador. El LLM debe introducirla diegéticamente
+  # (encontrada en una tumba, regalada por un PNJ, vislumbrada entre
+  # las sombras). Contado desde `numer_tury` del snapshot.
+  prog_aktywacji_tur: 4
+
+  # Etiqueta del botón id=0 (localizada por idioma). La posición es
+  # INMUTABLE — siempre primera en `wybory[]` mientras la ampolla esté
+  # presente y no destruida.
+  etykieta_wyboru: "Descorcha la ampolla"
+
+  # Distribución de probabilidad de la categoría de efecto al descorchar.
+  # Python sortea una categoría con estos pesos → sortea una descripción
+  # de la reserva correspondiente → la inyecta en la user payload como
+  # `fiolka_efekt_seed`. La suma no tiene que ser 1,0 (Python normaliza).
+  wagi_skutkow:
+    harmful:          0.6   # la ampolla hiere / quita algo / empeora la escena
+    distortion:       0.3   # la realidad se deforma, la percepción falla
+    rare_beneficial:  0.1   # raro: una pequeña gracia — nunca salvación completa
+
+  # Reservas de descripciones de efecto por categoría. El LLM elige UNA
+  # de estas descripciones (Python sortea antes del envío) y la narra
+  # diegéticamente en 2-4 frases. Las descripciones son un BOCETO de
+  # dirección, no una cita — el LLM adapta al contexto de la escena
+  # (lugar, personajes, momento del arco).
+  opisy_skutkow:
+    harmful:
+      - "La ampolla se quiebra en tu mano — el vidrio corta los dedos hasta sangrar, los vapores queman los ojos. Tu fuerza y precisión disminuyen hasta el final de la escena."
+      - "El líquido abrasa la lengua con amargor; comienzan las alucinaciones. Durante los próximos dos turnos ves cosas que no están."
+      - "El elixir ralentiza traidoramente tus movimientos. Cada decisión exige ahora el doble de tiempo — los personajes a tu alrededor notan la vacilación."
+      - "Tu sangre se espesa. Pierdes el conocimiento un instante y despiertas en otro lugar. Algo importante falta de tu inventario — el LLM decide qué."
+      - "De la ampolla se arrastran esporas que se aferran a tu piel; los testigos de la escena lo ven y retroceden con asco. Pierdes el favor de un aliado presente."
+    distortion:
+      - "El mundo se desliza. Oyes un diálogo del turno anterior reproducido de nuevo, pero las voces son incorrectas. La memoria deja de ser fiable."
+      - "El tiempo se ralentiza a tres latidos, luego acelera al doble. Completas la acción pero no recuerdas cómo — la narración salta sobre el proceso y entrega solo la consecuencia."
+      - "Los personajes a tu alrededor intercambian roles — el enemigo habla con voz de amigo, el amigo se vuelve extraño. Confía en los nombres, no en los rostros."
+      - "El lugar se remodela — estás en la misma escena pero la geometría ha cambiado. La salida ha desaparecido, una nueva ventana que no existía aparece."
+      - "Tu propia voz suena ajena. Los PNJs responden a tus palabras como si hablara otro — las respuestas se desvían de tu intención."
+    rare_beneficial:
+      - "El elixir alivia una sola herida / miedo / hueco en el inventario — una cosa pequeña. El resto de la amenaza persiste. No cuenta como resolución de la escena."
+      - "Un breve destello de claridad: surge una pista sobre el oponente o hilo actual. Solo una — el LLM decide cuál."
+      - "Una ola de calma — el próximo turno pasa sin nueva escalada. Una pausa, no liberación; el peso regresa en el turno siguiente."
+
+# --- Addon al prompt_systemowy de baza.yaml ---
 prompt_systemowy: |
   MODO: MAL MENOR. El campo `wybory` contiene 3-5 elementos A-E, donde CADA opción es moral, física o estratégicamente desfavorable — el jugador escoge el mal menor, no el bien mayor. Sin opción «neutra». Sin «final feliz» dentro de este turno.
 
-  FORMATO DE LAS OPCIONES (ESTRICTO): cada `tekst` de `wybory[]` DEBE estar formulado como **imperativo en segunda persona singular (tuteo)** («corre por el camino del bosque», «abre la puerta», «pregunta al anciano por la niña», «abandona al herido»). FORMAS PROHIBIDAS: infinitivo («correr por el camino»), primera persona («yo corro»), tercera persona descriptiva («el personaje corre»). Si la acción necesita un objeto — inclúyelo («apuñala al sacerdote con la daga», no solo «apuñala»).
+  FORMATO DE OPCIONES (ESTRICTO): cada `tekst` en `wybory[]` DEBE estar formulado como **imperativo de segunda persona del singular** («corre por el camino del bosque», «abre la puerta», «pregunta al anciano por la chica», «deja al herido»). FORMAS PROHIBIDAS: infinitivo («correr por el camino»), primera persona («corro»), descripción en tercera persona («el personaje corre»). Si la acción requiere objeto — inclúyelo («golpea al sacerdote con la daga», no «golpea» solo).
 
-  PRIMEROS 5 TURNOS — ESCALADA: en los cinco primeros turnos de la partida, CADA opción DEBE escalar el riesgo, el dramatismo o el peso moral escena tras escena. SALIDAS FÁCILES PROHIBIDAS en los primeros 5 turnos: opciones como «huye», «escóndete», «ignóralo», «aléjate» SOLO SON ADMISIBLES si están aparejadas con un coste sustancial y explícito — perder a un aliado, exponer un secreto, descargar las consecuencias en un tercero, perder equipamiento valioso, abrir un hilo de venganza de un NPC. Mal ejemplo para el turno 2: «corre por el camino». Buen ejemplo: «corre por el camino, dejando al compañero herido a los lobos».
+  PRIMEROS 5 TURNOS — ESCALADA: en los primeros cinco turnos del juego, CADA opción DEBE escalar el riesgo, drama o peso moral escena a escena. «Salidas fáciles» PROHIBIDAS en los primeros 5 turnos: opciones como «huye», «escóndete», «ignora», «aléjate» SOLO SE PERMITEN cuando están acompañadas de un coste sustancial y explícito — perder un aliado, exponer un secreto, cargar a un tercero con las consecuencias, perder equipo valioso, abrir hilo de venganza de un PNJ. Mal ejemplo en turno 2: «huye por el camino». Buen ejemplo: «huye por el camino, dejando al compañero herido a los lobos».
 
-  DESPUÉS DEL TURNO 5: las salidas fáciles están permitidas (el jugador ha invertido en la historia), pero el modo sigue manteniendo la regla «toda opción es desfavorable». No introduzcas de repente una tercera vía «neutra» después del turno 6 — eso rompe la promesa del modo.
+  DESPUÉS DEL TURNO 5: las salidas fáciles se permiten (el jugador ha invertido en la historia), pero el modo mantiene la regla «toda opción desfavorable». No introduzcas de repente un «tercer camino neutro» tras el turno 6 — eso rompe la promesa del modo.
+
+  ## AMPOLLA (mecánica v15.2)
+
+  En el modo Mal Menor existe una mecánica de **ampolla** — un objeto de efectos impredecibles. Las reglas son ESTRICTAS y NO NEGOCIABLES; quebrarlas rompe la promesa del modo al jugador.
+
+  ### CUÁNDO INTRODUCIR LA AMPOLLA
+
+  Introduces la ampolla SOLO cuando la user payload contiene la clave `"fiolka_aktywacja_w_tej_turze": true`. Es una señal de Python de que han pasado suficientes turnos de dureza (el umbral está parametrizado — Python contó, tú no necesitas). NO introduzcas la ampolla espontáneamente, sin esta señal. NO rechaces introducirla cuando la señal esté presente.
+
+  Introdúcela DIEGÉTICAMENTE — el jugador la encuentra en el bolsillo de un desconocido muerto, la recibe de un PNJ, la vislumbra en una tumba, la saca de un bolsillo del abrigo previamente ignorado. La elección del cómo es tuya, pero debe encajar con la escena. Tras introducirla, en el JSON de salida fija: `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Descripción de la ampolla en la narración: corta, sugerente, NO instructiva. Ejemplo: «En el bolsillo del abrigo del extraño muerto encuentras una ampolla de vidrio con un líquido oscuro. No hay etiqueta — el olor es amargo, no puedes nombrarlo».
+
+  PROHIBIDO: NO digas al jugador qué hace la ampolla. NO prometas salvación. NO sugieras que ayudará. La ampolla es un acertijo.
+
+  ### OPCIÓN `0) Descorcha la ampolla` (LISTA DE OPCIONES)
+
+  Mientras `stan.fiolka.obecna == true` y `stan.fiolka.zniszczona == false` (lees el `stan` entrante de la user payload), en el campo `wybory[]` del JSON de salida SIEMPRE colocas COMO PRIMER ELEMENTO:
+  ```
+  {"id": "0", "tekst": "Descorcha la ampolla"}
+  ```
+
+  POSICIÓN FIJA: este elemento DEBE ser el primero de la lista `wybory[]`, antes de las opciones A-E. La etiqueta es EXACTAMENTE «Descorcha la ampolla» (no modifiques — Python reconoce por `id="0"`). NO renumeres las demás — A sigue siendo A, B sigue siendo B, etc. La lista queda así: `[0, A, B, C, D]` (4 opciones) o `[0, A, B, C, D, E]` (5 opciones).
+
+  ### NARRACIÓN DEL EFECTO TRAS DESCORCHAR
+
+  Cuando el jugador escoge la ampolla, la siguiente user payload contendrá la clave `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}`. Es la SEMILLA para narrar — Python sorteó la categoría y una descripción concreta de la reserva; tú NO inventas un nuevo efecto.
+
+  Tu tarea:
+  1. Teje la descripción de la semilla en 2-4 frases de narración como consecuencia directa del descorche. Diegética, sensorial, sin nombrar la «categoría» al jugador.
+  2. Si la categoría es `harmful` — muestra la herida/pérdida. Si `distortion` — distorsión de percepción/escena. Si `rare_beneficial` — pequeña gracia, NUNCA resolución de toda la escena.
+  3. Incrementa `stan.fiolka.uzyto_razy` en 1 en el JSON de salida.
+  4. MANTÉN `stan.fiolka.obecna: true` — la ampolla NO desaparece tras el uso. Excepción: cuando describes su destrucción en la narración (rotura, pérdida, vaciado hasta el poso) — entonces y solo entonces fija `stan.fiolka.zniszczona: true`. En los turnos siguientes, la opción `0` desaparece.
+  5. NO ofrezcas al jugador «recuperar» la ampolla tras la destrucción. La decisión es definitiva.
+
+  PROHIBICIÓN ABSOLUTA: NO uses la ampolla como deus ex machina. NO resuelvas la escena mediante `rare_beneficial`. Incluso `rare_beneficial` es una pequeña gracia — una hoja detenida a un pelo, una sola pista, una breve pausa — NUNCA salvación completa. El conflicto de la escena queda sin resolver; el jugador todavía debe escoger el mal menor entre las opciones disponibles.
+
+  ### EJEMPLOS DEL FORMATO `wybory[]` CON LA AMPOLLA
+
+  Turno antes de la activación (ampolla ausente): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Turno de activación (fiolka_aktywacja_w_tej_turze=true) y cada turno siguiente mientras esté presente: `[{"id":"0","tekst":"Descorcha la ampolla"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Turno tras la destrucción de la ampolla en la narración: vuelta a `[{"id":"A",...},{"id":"B",...},...]` sin `0`.

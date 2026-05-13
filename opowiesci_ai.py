@@ -125,6 +125,21 @@ SCHEMA_TURA: dict[str, Any] = {
                 "lokacja":           {"type": "string"},
                 "ekwipunek_zmiany":  {"type": "array", "items": {"type": "string"}},
                 "watki_otwarte":     {"type": "array", "items": {"type": "string"}},
+                # v15.2: mechanika fiolki w trybie Mniejsze zło. LLM zwraca
+                # blok TYLKO gdy fiolka jest aktywna albo właśnie ją dodaje
+                # (po N turach hardship — `prog_aktywacji_tur` w yaml). Pola
+                # nieobecne → fiolka nigdy się nie pojawiła. `zniszczona=True`
+                # jest definitywne (LLM decyduje w narracji), po czym `obecna`
+                # zostaje True ale wybór 0 znika i nie wraca.
+                "fiolka": {
+                    "type": "object",
+                    "additionalProperties": True,
+                    "properties": {
+                        "obecna":     {"type": "boolean"},
+                        "uzyto_razy": {"type": "integer", "minimum": 0},
+                        "zniszczona": {"type": "boolean"},
+                    },
+                },
             },
         },
         "meta": {
@@ -320,11 +335,27 @@ def _parametr_z_yaml(jezyk: str, nazwa: str, klucz: str, default: Any) -> Any:
     return przepis.get(klucz, default)
 
 
-def _zbuduj_user_payload(snapshot: SnapshotOpowiesci, user_input: str) -> str:
+def _zbuduj_user_payload(
+    snapshot:         SnapshotOpowiesci,
+    user_input:       str,
+    fiolka_aktywacja: bool = False,
+    fiolka_seed:      dict[str, str] | None = None,
+) -> str:
     """Konwertuje snapshot + input gracza na JSON payload dla LLM.
 
     Wstrzykiwany jako `role: user`; baza prompt-systemowy pokazuje strukturę
     wyjściową, a payload tutaj — strukturę wejściową.
+
+    Args:
+        fiolka_aktywacja: True jeśli w tej turze fiolka MA się pojawić po raz
+            pierwszy (próg ``prog_aktywacji_tur`` osiągnięty w trybie
+            Mniejsze zło). LLM dostaje sygnał, że musi wprowadzić fiolkę
+            diegetycznie do ekwipunku (znajdzona, podarowana, dostrzeżona).
+        fiolka_seed: jeśli gracz wybrał ``id="0"`` (Odkorkuj fiolkę), Python
+            losuje przed wysyłką kategorię i konkretny opis skutku z puli
+            ``fiolka.opisy_skutkow.<kategoria>`` w yaml — LLM dostaje gotowy
+            seed do znarracjonalizowania, NIE wymyśla skutku samodzielnie
+            (anti-halucynacja, kontrola rozkładu prawdopodobieństw).
     """
     payload = {
         "tura_numer":       snapshot.numer_tury,
@@ -335,6 +366,14 @@ def _zbuduj_user_payload(snapshot: SnapshotOpowiesci, user_input: str) -> str:
         "stan":             snapshot.stan_poprzedni,
         "akcja_gracza":     user_input,
     }
+
+    # Fiolka — bloki tylko gdy istotne. LLM ignoruje brakujące klucze; obecne
+    # interpretuje zgodnie z instrukcjami w `tryb_mniejsze_zlo.yaml::prompt_systemowy`.
+    if fiolka_aktywacja:
+        payload["fiolka_aktywacja_w_tej_turze"] = True
+    if fiolka_seed is not None:
+        payload["fiolka_efekt_seed"] = fiolka_seed
+
     return (
         "Stan gry i akcja gracza poniżej. Wygeneruj kolejną turę zgodnie "
         "ze schemą JSON podaną w prompt-systemowy.\n\n"
@@ -343,26 +382,119 @@ def _zbuduj_user_payload(snapshot: SnapshotOpowiesci, user_input: str) -> str:
 
 
 # =============================================================================
+# Mechanika fiolki (v15.2 — tryb Mniejsze zło)
+# =============================================================================
+# Vial z `notatki_dev/tales_mechanics.md §4`: pojawia się po kilku turach
+# hardship, listed jako stała pozycja `0) Odkorkuj fiolkę`. Reusable (nie
+# znika po użyciu) ale nieprzewidywalna — może zaszkodzić, zniekształcić,
+# rzadko pomóc, nigdy nie gwarantuje wybawienia. LLM decyduje w narracji
+# o zniszczeniu (`fiolka.zniszczona=True`), po czym wybór 0 znika.
+#
+# Architektura: PYTHON losuje kategorię skutku (z wagami z yaml) i konkretny
+# opis (z puli per-kategoria w yaml). LLM tylko narracjonalizuje gotowy seed.
+# Wzorzec: deterministyczna kontrola rozkładu (Python) + diegetyczna swoboda
+# w opisie (LLM) — odporne na halucynacje typu „deus ex machina".
+
+
+def czy_fiolka_powinna_sie_pojawic(
+    snapshot:            SnapshotOpowiesci,
+    prog_aktywacji_tur:  int,
+) -> bool:
+    """True jeśli należy aktywować fiolkę w nadchodzącej turze.
+
+    Warunki łączne:
+    - numer tury >= próg aktywacji,
+    - fiolka NIE jest jeszcze obecna w stanie,
+    - fiolka NIE była zniszczona w narracji (definitywne — po zniszczeniu
+      nie wraca).
+
+    Wywołujący (GUI) sprawdza tę flagę przed budowaniem snapshotu i ustawia
+    ``fiolka_aktywacja=True`` w wywołaniu :func:`generuj_ture`, żeby LLM
+    wiedział że musi w tej turze wprowadzić fiolkę do ekwipunku.
+    """
+    fiolka = (snapshot.stan_poprzedni or {}).get("fiolka") or {}
+    if fiolka.get("obecna"):
+        return False
+    if fiolka.get("zniszczona"):
+        return False
+    return snapshot.numer_tury >= prog_aktywacji_tur
+
+
+def wylosuj_seed_fiolki(jezyk: str = "pl") -> dict[str, str]:
+    """Losuje kategorię i konkretny opis skutku fiolki z puli yaml.
+
+    Czyta `dictionaries/<jezyk>/opowiesci/tryb_mniejsze_zlo.yaml::fiolka`:
+    - ``wagi_skutkow`` — rozkład prawdopodobieństwa (default 0.6/0.3/0.1
+      dla harmful/distortion/rare_beneficial; „never guaranteed salvation").
+    - ``opisy_skutkow.<kategoria>`` — lista 3-5 opisów per kategoria;
+      `random.choice` losuje jeden, ten trafia do LLM jako seed.
+
+    Returns:
+        ``{"kategoria": "harmful"|"distortion"|"rare_beneficial",
+            "opis": "konkretny opis skutku do narracjonalizacji"}``.
+        Przy braku puli (yaml bez sekcji ``fiolka``) — pusty opis;
+        LLM dostanie samą kategorię i sam ją zinterpretuje (graceful
+        degradation, nie crash).
+    """
+    import random  # noqa: PLC0415  (lazy — losowanie używane tylko w trybie 5)
+
+    przepis = _zaladuj_przepis(jezyk, "tryb_mniejsze_zlo")
+    fiolka_cfg = przepis.get("fiolka", {}) or {}
+
+    wagi_default = {"harmful": 0.6, "distortion": 0.3, "rare_beneficial": 0.1}
+    wagi = fiolka_cfg.get("wagi_skutkow", wagi_default) or wagi_default
+    kategorie = list(wagi.keys())
+    wagi_lista = [float(wagi[k]) for k in kategorie]
+    kategoria = random.choices(kategorie, weights=wagi_lista, k=1)[0]
+
+    pula = (fiolka_cfg.get("opisy_skutkow") or {}).get(kategoria) or []
+    opis = random.choice(pula) if pula else ""
+    return {"kategoria": kategoria, "opis": opis}
+
+
+def prog_aktywacji_fiolki(jezyk: str = "pl") -> int:
+    """Czyta `fiolka.prog_aktywacji_tur` z yaml (default 4)."""
+    przepis = _zaladuj_przepis(jezyk, "tryb_mniejsze_zlo")
+    return int((przepis.get("fiolka") or {}).get("prog_aktywacji_tur", 4))
+
+
+def etykieta_wyboru_fiolki(jezyk: str = "pl") -> str:
+    """Lokalizowana etykieta przycisku id=0 — z yaml, default „Odkorkuj fiolkę"."""
+    przepis = _zaladuj_przepis(jezyk, "tryb_mniejsze_zlo")
+    return str((przepis.get("fiolka") or {}).get("etykieta_wyboru", "Odkorkuj fiolkę"))
+
+
+# =============================================================================
 # Główna funkcja: generuj_ture (z retry + walidacja jsonschema)
 # =============================================================================
 
 def generuj_ture(
-    klient:     Any,
-    snapshot:   SnapshotOpowiesci,
-    user_input: str,
-    tryb:       int,
-    model:      str | None = None,
+    klient:           Any,
+    snapshot:         SnapshotOpowiesci,
+    user_input:       str,
+    tryb:             int,
+    model:            str | None = None,
+    fiolka_aktywacja: bool = False,
+    fiolka_seed:      dict[str, str] | None = None,
 ) -> WynikTury:
     """Wysyła turę do LLM i zwraca strukturyzowany wynik.
 
     Args:
-        klient     : skonfigurowany klient OpenAI (z :func:`inicjalizuj_klienta`)
-        snapshot   : niezmienny stan gry; ``snapshot.jezyk_projektu`` decyduje
-                     z którego `dictionaries/<kod>/opowiesci/*.yaml` ładować prompt
-        user_input : akcja gracza (dowolny tekst lub mapowany wybór z przycisku)
-        tryb       : 3/4/5 (Swobodny/Wyborów/Mniejsze zło)
-        model      : nadpisuje YAML jeśli podany (np. po zmianie w `/ustawienia`);
-                     ``None`` → bierzemy z `<jezyk>/opowiesci/baza.yaml::model`
+        klient           : skonfigurowany klient OpenAI (z :func:`inicjalizuj_klienta`)
+        snapshot         : niezmienny stan gry; ``snapshot.jezyk_projektu`` decyduje
+                           z którego `dictionaries/<kod>/opowiesci/*.yaml` ładować prompt
+        user_input       : akcja gracza (dowolny tekst lub mapowany wybór z przycisku)
+        tryb             : 3/4/5 (Swobodny/Wyborów/Mniejsze zło)
+        model            : nadpisuje YAML jeśli podany (np. po zmianie w `/ustawienia`);
+                           ``None`` → bierzemy z `<jezyk>/opowiesci/baza.yaml::model`
+        fiolka_aktywacja : tryb=5, fiolka jeszcze nie obecna, próg osiągnięty —
+                           GUI wstawia ``True`` (patrz :func:`czy_fiolka_powinna_sie_pojawic`)
+                           i LLM musi w tej turze wprowadzić fiolkę do ekwipunku
+                           diegetycznie + ustawić ``stan.fiolka.obecna=True``.
+        fiolka_seed      : gracz wybrał ``id="0"`` (Odkorkuj fiolkę). Python wylosował
+                           ``{"kategoria","opis"}`` (patrz :func:`wylosuj_seed_fiolki`)
+                           i wstrzykuje jako seed do narracjonalizacji. LLM ma się
+                           trzymać KATEGORII i OPISU; nie wymyślać nowego skutku.
 
     Returns:
         :class:`WynikTury` z zwalidowaną zawartością.
@@ -375,7 +507,12 @@ def generuj_ture(
     """
     jezyk            = snapshot.jezyk_projektu or "pl"
     prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk, snapshot.zasady_swiata)
-    user_payload     = _zbuduj_user_payload(snapshot, user_input)
+    user_payload     = _zbuduj_user_payload(
+        snapshot,
+        user_input,
+        fiolka_aktywacja=fiolka_aktywacja,
+        fiolka_seed=fiolka_seed,
+    )
 
     # Parametry: priorytet to argument funkcji (GUI może override przez
     # `/ustawienia`), potem YAML trybu, na końcu hardkodowana stała.

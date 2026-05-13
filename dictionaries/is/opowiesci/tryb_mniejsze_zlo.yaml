@@ -2,11 +2,17 @@
 #  MINNA ILLA HAMUR (hamur 5) — hver valkostur er óhagstæður siðferðilega,
 #  líkamlega eða stefnumótandi. Leikmaðurinn velur minna illa, EKKI gott.
 #  Engin „hlutlaus" valkostur, enginn „farsæll endir" innan sömu umferðar.
-#  Flöskuvirkni (vísað til í `notatki_dev/tales_mechanics.md`) er frestað
-#  til v15.2 — v15.0/v15.1 halda eingöngu frásagnarforminu.
+#
+#  v15.2 — flöskuvirkni (úr `notatki_dev/tales_mechanics.md §4`). Birtist
+#  eftir N umferðir af erfiðleika (`fiolka.prog_aktywacji_tur`, sjálfgefið
+#  4) sem föst staða `0) Opnaðu flöskuna`. Endurnýtanleg: hverfur ekki
+#  eftir notkun. Ófyrirsjáanleg: Python kastar fræi úr `opisy_skutkow` með
+#  vægi `wagi_skutkow` (sjálfgefið 60% harmful / 30% distortion /
+#  10% rare_beneficial — „never guaranteed salvation"). LLM aðeins segir
+#  frá uppkastaða fræinu; finnur ekki upp ný áhrif.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
-etykieta: "Minna illa — sérhver valkostur óhagstæður"
+etykieta: "Minna illa — hver valkostur óhagstæður"
 kategoria: tryb
 kolejnosc: 50
 
@@ -14,12 +20,99 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
-# --- Viðauki við prompt_systemowy úr baza.yaml ---
+# --- Flöskuvirkni (v15.2) ---
+fiolka:
+  # Eftir hve margar umferðir í Minna illa hamur birtist flaskan í
+  # eigum leikmanns. LLM verður að kynna hana diegetískt (fundin í gröf,
+  # gefin af persónu, sést í skugga). Talin frá `numer_tury` í snapshot.
+  prog_aktywacji_tur: 4
+
+  # Merkimiði hnapps id=0 (staðfært per tungumáli). Staðan er
+  # ÓBREYTANLEG — alltaf fyrst í `wybory[]` meðan flaskan er til staðar
+  # og óbrotin.
+  etykieta_wyboru: "Opnaðu flöskuna"
+
+  # Líkindasköntun á áhrifaflokki við opnun. Python kastar flokki með
+  # þessum vægjum → kastar lýsingu úr samsvarandi safni → sprautar í
+  # user payload sem `fiolka_efekt_seed`. Summa þarf ekki að vera 1,0
+  # (Python staðlar).
+  wagi_skutkow:
+    harmful:          0.6   # flaskan særir / tekur eitthvað / versnar atriðið
+    distortion:       0.3   # raunveruleikinn afmyndast, skynjun bilar
+    rare_beneficial:  0.1   # sjaldan: smá miskunn — aldrei full björgun
+
+  # Söfn áhrifalýsinga eftir flokki. LLM velur EINA af þessum lýsingum
+  # (Python kastar fyrir sendingu) og segir hana diegetískt frá í 2-4
+  # setningum frásagnar. Lýsingarnar eru DRÖG að stefnu, ekki tilvitnun —
+  # LLM aðlagar að samhengi atriðisins (staður, persónur, bogapunktur).
+  opisy_skutkow:
+    harmful:
+      - "Flaskan brotnar í hendi þér — glerið sker fingurna til blóðs, gufurnar brenna augun. Styrkur þinn og nákvæmni minnka til loka atriðisins."
+      - "Vökvinn brennir tunguna með beiskju; ofskynjanir hefjast. Næstu tvær umferðir sérðu hluti sem eru ekki til staðar."
+      - "Elixírinn sviksamlega hægir á hreyfingum þínum. Hver ákvörðun tekur nú tvöfaldan tíma — persónurnar í kring taka eftir hikinu."
+      - "Blóðið þitt þykknar. Þú missir meðvitund í augnablik og vaknar annars staðar en þú varst. Eitthvað mikilvægt vantar úr eigum þínum — LLM ákveður hvað."
+      - "Gró skríða úr flöskunni og festast við húð þína; vitni atriðisins sjá það og hörfa með viðbjóði. Þú missir hylli eins bandamanns sem er á staðnum."
+    distortion:
+      - "Heimurinn rennur. Þú heyrir samtal úr fyrri umferð endurspilað, en raddirnar eru rangar. Minningin hættir að vera trúverðug."
+      - "Tíminn hægist í þrjú hjartaslög, svo flýtist tvöfalt. Þú lýkur aðgerðinni en man ekki hvernig — frásögnin hoppar yfir ferlið og skilar aðeins afleiðingunni."
+      - "Persónurnar í kring skipta um hlutverk — óvinurinn talar með rödd vinar, vinurinn verður ókunnugur. Treystu nöfnum, ekki andlitum."
+      - "Staðurinn endurmótast — þú ert í sama atriði en rúmfræðin hefur breyst. Útgangurinn er horfinn, nýr gluggi sem var ekki áður birtist."
+      - "Eigin rödd þín hljómar framandi. Persónurnar bregðast við orðum þínum eins og einhver annar talaði — svörin missa marks við ásetningi þínum."
+    rare_beneficial:
+      - "Elixírinn linar eitt sár / ótta / skarð í eigum — eitt smá. Restin af ógninni helst. Telst ekki lausn atriðisins."
+      - "Stutt blika af skýrleika: ein vísbending vaknar um núverandi andstæðing eða þráð. Aðeins ein — LLM ákveður hver."
+      - "Ró bylgja — næsta umferð líður án nýrrar stigmögnunar. Hlé, ekki frelsun; þunginn snýr aftur í umferðinni eftir."
+
+# --- Viðbót við prompt_systemowy úr baza.yaml ---
 prompt_systemowy: |
-  HAMUR: MINNA ILLA. Reiturinn `wybory` inniheldur 3 til 5 stök A-E, þar sem HVER valkostur er óhagstæður siðferðilega, líkamlega eða stefnumótandi — leikmaðurinn velur minna illa, ekki meira gott. Enginn „hlutlaus" valkostur. Enginn „farsæll endir" innan þessarar umferðar.
+  HAMUR: MINNA ILLA. Reiturinn `wybory` inniheldur 3-5 stök A-E, þar sem HVER valkostur er óhagstæður siðferðilega, líkamlega eða stefnumótandi — leikmaðurinn velur minna illa, ekki meira gott. Engin „hlutlaus" valkostur. Enginn „farsæll endir" innan þessarar umferðar.
 
-  VALSNIÐ (STRANGT): hver `tekst` í `wybory[]` röðinni VERÐUR að vera orðaður í **boðhætti eintölu (annarri persónu, þú-form)** („hlauptu niður skógargöngustíginn", „opnaðu hurðina", „spurðu öldunginn frétta af stúlkunni", „skildu særða ferðafélagann eftir"). BÖNNUÐ FORM: nafnháttur („að hlaupa niður stíginn"), fyrsta persóna („ég hleyp"), þriðju persónu lýsing („persónan hleypur"). Ef aðgerðin krefst hlutar — hafðu hann með („stingdu prestinn með rýtingnum", ekki bara „stingdu").
+  VALKOSTAFORM (STRANGT): hver `tekst` í `wybory[]` VERÐUR að vera orðaður sem **boðháttur í annarri persónu eintölu** („hlauptu eftir skógarveginum", „opnaðu hurðina", „spurðu öldunginn um stúlkuna", „skildu eftir særðan"). BANNAD form: nafnháttur („að hlaupa eftir veginum"), fyrsta persóna („ég hleyp"), lýsing í þriðju persónu („persónan hleypur"). Ef aðgerðin krefst hlutar — taktu hann með („sláðu prestinn með rýtingnum", ekki bara „sláðu").
 
-  FYRSTU 5 UMFERÐIRNAR — STIGMÖGNUN: í fyrstu fimm umferðunum af leiknum VERÐUR HVER valkostur að auka áhættuna, dramað eða siðferðisbyrðina frá einni senu til þeirrar næstu. AUÐVELDAR LEIÐIR ÚT BANNAÐAR í fyrstu 5 umferðunum: valkostir eins og „flýðu", „feldu þig", „hunsa hann", „færðu þig burtu" ERU EINUNGIS LEYFÐIR ef þeim fylgir umtalsverður og skýr kostnaður — að missa bandamann, afhjúpa leyndarmál, varpa afleiðingunum á þriðja aðila, missa dýrmæt verkfæri, opna blóðhefnd hjá NPC. Slæmt dæmi fyrir umferð 2: „hlauptu niður skógargöngustíginn". Gott dæmi: „hlauptu niður skógargöngustíginn og skildu særða ferðafélagann eftir fyrir úlfana".
+  FYRSTU 5 UMFERÐIRNAR — STIGMÖGNUN: í fyrstu fimm umferðum leiksins VERÐUR HVERT val að stigmagna áhættu, drama eða siðferðilegan þunga atriði eftir atriði. „Auðveldar útgöngur" BANNAÐAR fyrstu 5 umferðirnar: valkostir eins og „flýja", „fela sig", „hunsa", „ganga í burtu" eru LEYFÐAR AÐEINS ef þeim fylgir verulegur og skýr kostnaður — missir bandamanns, afhjúpun leyndarmáls, þriðji aðili tekinn á sig afleiðingum, missir verðmæts búnaðar, opnun hefndarþráðs persónu. Lélegt dæmi í umferð 2: „flýja veginn". Gott dæmi: „flýja veginn og skilja særðan félaga eftir fyrir úlfana".
 
-  EFTIR UMFERÐ 5: auðveldar leiðir út eru leyfðar (leikmaðurinn hefur fjárfest í sögunni), en hamurinn heldur reglunni „sérhver valkostur óhagstæður". Ekki kynna skyndilega til sögunnar þriðja „hlutlausa" leið eftir umferð 6 — það myndi brjóta loforð hamsins.
+  EFTIR UMFERÐ 5: auðveldar útgöngur eru leyfðar (leikmaðurinn hefur fjárfest í sögunni), en hamurinn heldur áfram reglunni „hver valkostur óhagstæður". Ekki kynna skyndilega „hlutlausa þriðju leið" eftir umferð 6 — það brýtur loforð hamarsins.
+
+  ## FLASKA (v15.2-virkni)
+
+  Í Minna illa hamur er **flösku**-virkni — hlutur með ófyrirsjáanlegum áhrifum. Reglurnar eru STRANGAR og EKKI SAMNINGSATRIÐI; að brjóta þær brýtur loforð hamarsins við leikmanninn.
+
+  ### HVENÆR KYNNA FLÖSKUNA
+
+  Þú kynnir flöskuna AÐEINS þegar user payload inniheldur lykilinn `"fiolka_aktywacja_w_tej_turze": true`. Þetta er Python-merki um að nógu margar umferðir af erfiðleika hafa liðið (þröskuldurinn er paramatrískur — Python talaði, þú þarft þess ekki). Ekki kynna flöskuna sjálfkrafa, án þessa merkis. Ekki neita að kynna hana þegar merkið er til staðar.
+
+  Kynntu hana DIEGETÍSKT — leikmaðurinn finnur hana í vasa dauðs ókunnugs manns, fær hana frá persónu, sér hana í gröf, dregur hana úr frakkavasa sem áður var hunsaður. Val hvers vegs er þitt, en það verður að passa við atriðið. Eftir kynninguna fyrir í úttaks-JSON: `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Lýsing flöskunnar í frásögn: stutt, viðsemjandi, EKKI leiðbeinandi. Dæmi: „Í frakkavasa dauðs ókunnugs manns finnurðu glerflösku með dökkum vökva. Engin merking — lyktin er beisk, þú getur ekki nefnt hana."
+
+  BANNAÐ: EKKI segja leikmanninum hvað flaskan gerir. EKKI lofa björgun. EKKI gefa í skyn að hún muni hjálpa. Flaskan er gáta.
+
+  ### VAL `0) Opnaðu flöskuna` (VALKOSTALISTI)
+
+  Meðan `stan.fiolka.obecna == true` og `stan.fiolka.zniszczona == false` (þú lest komandi `stan` úr user payload), í `wybory[]`-reit úttaks-JSON setur þú ALLTAF SEM FYRSTA STAK:
+  ```
+  {"id": "0", "tekst": "Opnaðu flöskuna"}
+  ```
+
+  FÖST STAÐA: þetta stak VERÐUR að vera fyrst í `wybory[]`-listanum, fyrir A-E. Merkimiðinn er NÁKVÆMLEGA „Opnaðu flöskuna" (ekki breyta — Python þekkir með `id="0"`). Ekki endurnúmera hin — A er enn A, B er enn B, o.s.frv. Listinn lítur því út: `[0, A, B, C, D]` (4 valkostir) eða `[0, A, B, C, D, E]` (5 valkostir).
+
+  ### FRÁSÖGN ÁHRIFANNA EFTIR OPNUN
+
+  Þegar leikmaðurinn velur flöskuna mun næsta user payload innihalda lykilinn `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}`. Þetta er FRÆ til frásagnar — Python kastaði flokknum og áþreifanlegri lýsingu úr safninu; þú FINNUR EKKI upp ný áhrif.
+
+  Verkefni þitt:
+  1. Vefðu lýsingu fræsins í 2-4 setningar af frásögn sem beina afleiðingu opnunarinnar. Diegetískt, skynjandi, án þess að nefna „flokkinn" fyrir leikmanninum.
+  2. Ef flokkurinn er `harmful` — sýndu sár/missi. Ef `distortion` — afmyndun skynjunar/atriðis. Ef `rare_beneficial` — smá miskunn, ALDREI lausn heils atriðis.
+  3. Auktu `stan.fiolka.uzyto_razy` um 1 í úttaks-JSON.
+  4. VARÐVEITTU `stan.fiolka.obecna: true` — flaskan HVERFUR EKKI eftir notkun. Undantekning: þegar þú hefur lýst eyðingu hennar í frásögn (brot, glat, drukkin upp í botn) — þá og aðeins þá fyrir `stan.fiolka.zniszczona: true`. Í eftirfarandi umferðum hverfur val `0`.
+  5. Bjóddu EKKI leikmanninum að „endurheimta" flöskuna eftir eyðingu. Ákvörðunin er endanleg.
+
+  ALGJÖRT BANN: Notaðu EKKI flöskuna sem deus ex machina. Leystu EKKI atriðið með `rare_beneficial`. Jafnvel `rare_beneficial` er smá miskunn — egg stoppað við hárið, ein vísbending, stutt hlé — ALDREI full björgun. Ágreiningur atriðisins er óleystur; leikmaðurinn verður enn að velja minna illa úr tiltækum valkostum.
+
+  ### DÆMI UM `wybory[]`-FORM MEÐ FLÖSKUNNI
+
+  Umferð fyrir virkjun (flaska fjarverandi): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Virkjunarumferð (fiolka_aktywacja_w_tej_turze=true) og hver síðari umferð meðan til staðar: `[{"id":"0","tekst":"Opnaðu flöskuna"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Umferð eftir eyðingu flöskunnar í frásögn: aftur til `[{"id":"A",...},{"id":"B",...},...]` án `0`.

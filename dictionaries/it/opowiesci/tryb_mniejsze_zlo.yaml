@@ -1,10 +1,16 @@
 # -----------------------------------------------------------------------------
-#  MODO MALE MINORE (modo 5) — ogni opzione è sfavorevole sul piano
-#  morale, fisico o strategico. Il giocatore sceglie il male minore, NON
-#  il bene. Nessuna opzione «neutra», nessun «lieto fine» all'interno
-#  dello stesso turno. La meccanica della Fiala (richiamata in
-#  `notatki_dev/tales_mechanics.md`) è rimandata alla v15.2 — v15.0/v15.1
-#  conservano la forma puramente narrativa.
+#  MODO MALE MINORE (modo 5) — ogni opzione è sfavorevole sul piano morale,
+#  fisico o strategico. Il giocatore sceglie il male minore, NON il bene.
+#  Nessuna opzione «neutra», nessun «lieto fine» all'interno dello stesso
+#  turno.
+#
+#  v15.2 — meccanica della fiala (da `notatki_dev/tales_mechanics.md §4`).
+#  Compare dopo N turni di durezza (`fiolka.prog_aktywacji_tur`, predefinito
+#  4) come posizione fissa `0) Stappa la fiala`. Riutilizzabile: non
+#  scompare dopo l'uso. Imprevedibile: Python estrae un seme da
+#  `opisy_skutkow` con pesi `wagi_skutkow` (predefinito 60% harmful /
+#  30% distortion / 10% rare_beneficial — «never guaranteed salvation»).
+#  L'LLM si limita a narrare il seme estratto; non inventa nuovi effetti.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
 etykieta: "Male Minore — ogni opzione sfavorevole"
@@ -15,12 +21,101 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
-# --- Appendice al prompt_systemowy di baza.yaml ---
+# --- Meccanica della fiala (v15.2) ---
+fiolka:
+  # Dopo quanti turni di gioco in modo Male Minore la fiala compare
+  # nell'inventario del giocatore. L'LLM deve introdurla in modo
+  # diegetico (trovata in una tomba, donata da un PNG, scorta nell'ombra).
+  # Contato da `numer_tury` nello snapshot.
+  prog_aktywacji_tur: 4
+
+  # Etichetta del bottone id=0 (localizzata per lingua). La posizione è
+  # IMMUTABILE — sempre per prima in `wybory[]` finché la fiala è presente
+  # e non distrutta.
+  etykieta_wyboru: "Stappa la fiala"
+
+  # Distribuzione di probabilità della categoria di effetto alla stappatura.
+  # Python estrae una categoria con questi pesi → estrae una descrizione
+  # dalla riserva corrispondente → la inietta nella user payload come
+  # `fiolka_efekt_seed`. La somma non deve valere 1,0 (Python normalizza).
+  wagi_skutkow:
+    harmful:          0.6   # la fiala ferisce / toglie qualcosa / peggiora la scena
+    distortion:       0.3   # la realtà si distorce, la percezione cede
+    rare_beneficial:  0.1   # raro: una piccola grazia — mai una salvezza piena
+
+  # Riserve di descrizioni di effetto per categoria. L'LLM sceglie UNA di
+  # queste descrizioni (Python estrae prima della richiesta) e la narra
+  # in modo diegetico in 2-4 frasi di racconto. Le descrizioni sono uno
+  # SCHIZZO di direzione, non una citazione — l'LLM adatta al contesto
+  # della scena (luogo, personaggi, fase dell'arco).
+  opisy_skutkow:
+    harmful:
+      - "La fiala si spezza nella tua mano — il vetro taglia le dita fino al sangue, i vapori bruciano gli occhi. La tua forza e precisione calano fino al termine della scena."
+      - "Il liquido brucia la lingua di amarezza; iniziano le allucinazioni. Nei prossimi due turni vedi cose che non ci sono."
+      - "L'elisir rallenta proditoriamente i tuoi movimenti. Ogni decisione richiede ora il doppio del tempo — i personaggi attorno notano l'esitazione."
+      - "Il tuo sangue si addensa. Perdi conoscenza un istante e ti risvegli altrove rispetto a dov'eri. Qualcosa di importante manca dal tuo inventario — l'LLM decide cosa."
+      - "Dalla fiala strisciano spore che si aggrappano alla pelle; i testimoni della scena lo vedono e arretrano disgustati. Perdi il favore di un alleato presente nella scena."
+    distortion:
+      - "Il mondo slitta. Senti un dialogo del turno precedente riprodotto, ma le voci sono sbagliate. La memoria smette di essere affidabile."
+      - "Il tempo rallenta a tre battiti cardiaci, poi accelera al doppio. Completi l'azione ma non ricordi come — il racconto salta il processo e consegna solo la conseguenza."
+      - "I personaggi attorno scambiano i ruoli — il nemico parla con la voce di un amico, l'amico diventa estraneo. Fidati dei nomi, non dei volti."
+      - "Il luogo si rimodella — sei nella stessa scena ma la geometria è cambiata. L'uscita è sparita, una nuova finestra che prima non c'era appare."
+      - "La tua stessa voce suona straniera. I PNG rispondono alle tue parole come se parlasse un altro — le risposte mancano la tua intenzione."
+    rare_beneficial:
+      - "L'elisir lenisce una sola ferita / paura / lacuna nell'inventario — una sola piccola cosa. Il resto della minaccia rimane. Non conta come risoluzione della scena."
+      - "Un breve lampo di chiarezza: emerge un solo indizio sull'avversario o il filo attuale. Solo uno — l'LLM decide quale."
+      - "Un'ondata di calma — il prossimo turno passa senza nuova escalation. Una pausa, non una liberazione; il peso ritorna nel turno seguente."
+
+# --- Addon al prompt_systemowy da baza.yaml ---
 prompt_systemowy: |
-  MODO: MALE MINORE. Il campo `wybory` contiene 3-5 elementi A-E, dove OGNI opzione è sfavorevole sul piano morale, fisico o strategico — il giocatore sceglie il male minore, non il bene maggiore. Nessuna opzione «neutra». Nessun «lieto fine» in questo turno.
+  MODO: MALE MINORE. Il campo `wybory` contiene 3-5 elementi A-E, dove OGNI scelta è sfavorevole moralmente, fisicamente o strategicamente — il giocatore sceglie il male minore, non il bene maggiore. Nessuna opzione «neutra». Nessun «lieto fine» all'interno di questo turno.
 
-  FORMATO DELLE SCELTE (RIGIDO): ogni `tekst` dell'array `wybory[]` DEVE essere formulato all'**imperativo della seconda persona singolare (tu)** («corri lungo il sentiero del bosco», «apri la porta», «chiedi all'anziano notizie della ragazza», «abbandona il ferito»). FORME VIETATE: infinito («correre lungo il sentiero»), prima persona («corro»), descrizione in terza persona («il personaggio corre»). Se l'azione richiede un oggetto — includilo («pugnala il prete con il pugnale», non un semplice «pugnala»).
+  FORMATO DELLE SCELTE (RIGIDO): ogni `tekst` in `wybory[]` DEVE essere formulato come **imperativo di seconda persona singolare** («corri lungo la strada del bosco», «apri la porta», «chiedi all'anziano della ragazza», «lascia il ferito»). FORME VIETATE: infinito («correre lungo la strada»), prima persona («corro»), descrizione in terza persona («il personaggio corre»). Se l'azione richiede un oggetto — includilo («colpisci il prete con il pugnale», non solo «colpisci»).
 
-  I PRIMI 5 TURNI — ESCALATION: durante i primi cinque turni della partita, OGNI opzione DEVE far salire il rischio, il drammatico o il peso morale da una scena alla successiva. VIE D'USCITA FACILI VIETATE nei primi 5 turni: opzioni come «scappa», «nasconditi», «ignoralo», «allontanati» SONO AMMESSE SOLO se accompagnate da un costo sostanziale ed esplicito — perdere un alleato, esporre un segreto, far ricadere le conseguenze su un terzo, perdere un equipaggiamento prezioso, aprire una vendetta di un PNG. Esempio cattivo per il turno 2: «corri lungo il sentiero del bosco». Esempio buono: «corri lungo il sentiero del bosco lasciando il tuo compagno ferito ai lupi».
+  PRIMI 5 TURNI — ESCALATION: nei primi cinque turni del gioco, OGNI opzione DEVE far salire il rischio, il dramma o il peso morale scena per scena. «Vie di fuga facili» VIETATE nei primi 5 turni: opzioni come «scappa», «nasconditi», «ignora», «vai via» SONO CONCESSE SOLO se accompagnate da un costo sostanziale ed esplicito — perdita di un alleato, esposizione di un segreto, gravare un terzo delle conseguenze, perdita di equipaggiamento prezioso, apertura del filo di vendetta di un PNG. Cattivo esempio al turno 2: «scappa lungo la strada». Buon esempio: «scappa lungo la strada, lasciando il compagno ferito ai lupi».
 
-  DOPO IL TURNO 5: le vie d'uscita facili sono permesse (il giocatore ha investito nella storia), ma il modo mantiene la regola «ogni opzione sfavorevole». Non introdurre all'improvviso una terza via «neutra» dopo il turno 6 — spezzerebbe la promessa del modo.
+  DOPO IL TURNO 5: le vie di fuga facili sono concesse (il giocatore ha investito nella storia), ma il modo mantiene la regola «ogni opzione sfavorevole». Non introdurre improvvisamente una «terza via neutra» dopo il turno 6 — questo rompe la promessa del modo.
+
+  ## FIALA (meccanica v15.2)
+
+  Nel modo Male Minore esiste una meccanica della **fiala** — un oggetto dagli effetti imprevedibili. Le regole sono RIGIDE e NON NEGOZIABILI; infrangerle rompe la promessa del modo al giocatore.
+
+  ### QUANDO INTRODURRE LA FIALA
+
+  Introduci la fiala SOLO quando la user payload contiene la chiave `"fiolka_aktywacja_w_tej_turze": true`. È un segnale Python che sono passati abbastanza turni di durezza (la soglia è parametrizzata — Python ha contato, tu non devi). NON introdurre la fiala spontaneamente, senza questo segnale. NON rifiutare di introdurla quando il segnale è presente.
+
+  Introducila in modo DIEGETICO — il giocatore la trova nella tasca di uno sconosciuto morto, la riceve da un PNG, la scorge in una tomba, la estrae da una tasca del cappotto precedentemente ignorata. La scelta del come è tua, ma deve adattarsi alla scena. Dopo averla introdotta, nel JSON di uscita imposta: `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Descrizione della fiala nella narrazione: breve, suggestiva, NON istruttiva. Esempio: «Nella tasca del cappotto dello sconosciuto morto trovi una fiala di vetro con un liquido scuro. Nessuna etichetta — l'odore è amaro, non sai nominarlo.»
+
+  VIETATO: NON dire al giocatore cosa fa la fiala. NON promettere salvezza. NON suggerire che aiuterà. La fiala è un enigma.
+
+  ### SCELTA `0) Stappa la fiala` (LISTA DELLE SCELTE)
+
+  Mentre `stan.fiolka.obecna == true` e `stan.fiolka.zniszczona == false` (leggi lo `stan` in entrata dalla user payload), nel campo `wybory[]` del JSON di uscita collochi SEMPRE COME PRIMO ELEMENTO:
+  ```
+  {"id": "0", "tekst": "Stappa la fiala"}
+  ```
+
+  POSIZIONE FISSA: questo elemento DEVE essere il primo nella lista `wybory[]`, prima delle scelte A-E. L'etichetta è ESATTAMENTE «Stappa la fiala» (non modificare — Python riconosce dall'`id="0"`). NON rinumerare le altre — A resta A, B resta B, ecc. La lista appare quindi: `[0, A, B, C, D]` (4 scelte) o `[0, A, B, C, D, E]` (5 scelte).
+
+  ### NARRAZIONE DELL'EFFETTO DOPO LA STAPPATURA
+
+  Quando il giocatore sceglie la fiala, la prossima user payload conterrà la chiave `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}`. È il SEME da narrare — Python ha estratto la categoria e una descrizione concreta dalla riserva; tu NON inventi un nuovo effetto.
+
+  Il tuo compito:
+  1. Intreccia la descrizione del seme in 2-4 frasi di narrazione come conseguenza diretta della stappatura. In modo diegetico, sensoriale, senza nominare la «categoria» al giocatore.
+  2. Se la categoria è `harmful` — mostra la ferita/perdita. Se `distortion` — distorsione della percezione/scena. Se `rare_beneficial` — piccola grazia, MAI risoluzione dell'intera scena.
+  3. Incrementa `stan.fiolka.uzyto_razy` di 1 nel JSON di uscita.
+  4. MANTIENI `stan.fiolka.obecna: true` — la fiala NON scompare dopo l'uso. Eccezione: quando hai descritto la sua distruzione nella narrazione (rottura, smarrimento, bevuta fino al fondo) — allora e solo allora imposta `stan.fiolka.zniszczona: true`. Nei turni successivi la scelta `0` scompare.
+  5. NON offrire al giocatore di «recuperare» la fiala dopo la distruzione. La decisione è definitiva.
+
+  DIVIETO ASSOLUTO: NON usare la fiala come deus ex machina. NON risolvere la scena tramite `rare_beneficial`. Persino `rare_beneficial` è una piccola grazia — una lama fermata di un capello, un solo indizio, una breve pausa — MAI una salvezza piena. Il conflitto della scena resta irrisolto; il giocatore deve ancora scegliere il male minore tra le opzioni disponibili.
+
+  ### ESEMPI DEL FORMATO `wybory[]` CON LA FIALA
+
+  Turno prima dell'attivazione (fiala assente): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Turno di attivazione (fiolka_aktywacja_w_tej_turze=true) e ogni turno successivo finché presente: `[{"id":"0","tekst":"Stappa la fiala"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Turno dopo la distruzione della fiala nella narrazione: ritorno a `[{"id":"A",...},{"id":"B",...},...]` senza `0`.

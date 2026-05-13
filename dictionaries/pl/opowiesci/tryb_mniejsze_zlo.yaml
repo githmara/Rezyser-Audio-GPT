@@ -2,8 +2,14 @@
 #  TRYB MNIEJSZE ZŁO (mode 5) — wszystkie wybory są niekorzystne moralnie,
 #  fizycznie albo strategicznie. Gracz wybiera mniejsze zło, NIE dobro.
 #  Brak „neutralnej" opcji, brak „happy endingu" w danej turze.
-#  Mechanika Fiolki/Vial (z referencji `notatki_dev/tales_mechanics.md`)
-#  odłożona do v15.1 — Faza 5 v15.0 zachowuje narracyjną wersję trybu.
+#
+#  v15.2 — mechanika fiolki/vial (z `notatki_dev/tales_mechanics.md §4`).
+#  Pojawia się po N turach hardship (parametr `fiolka.prog_aktywacji_tur`,
+#  default 4) jako stała pozycja `0) Odkorkuj fiolkę`. Reusable: nie znika
+#  po użyciu. Nieprzewidywalna: Python losuje seed skutku z puli `opisy_skutkow`
+#  z wagami `wagi_skutkow` (default 60% harmful / 30% distortion / 10% rare_beneficial
+#  — „never guaranteed salvation"). LLM tylko narracjonalizuje wylosowany seed;
+#  nie wymyśla nowych skutków.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
 etykieta: "Mniejsze zło — wszystkie opcje niekorzystne"
@@ -14,6 +20,50 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
+# --- Mechanika fiolki (v15.2) ---
+fiolka:
+  # Po ilu turach gry w trybie Mniejsze Zło fiolka pojawia się
+  # w ekwipunku gracza? LLM musi wprowadzić ją diegetycznie
+  # (znaleziona w grobowcu, podarowana przez NPC, dostrzeżona
+  # w cieniu). Próg liczony od `numer_tury` snapshotu.
+  prog_aktywacji_tur: 4
+
+  # Etykieta przycisku id=0 (lokalizowana per język). Pozycja
+  # NIEZMIENNA — zawsze pierwsza w `wybory[]` dopóki fiolka
+  # obecna i niezniszczona.
+  etykieta_wyboru: "Odkorkuj fiolkę"
+
+  # Rozkład prawdopodobieństw kategorii skutku przy odkorkowaniu.
+  # Python losuje kategorię z tymi wagami → losuje opis z odpowiedniej
+  # puli → wstrzykuje do user payload jako `fiolka_efekt_seed`.
+  # Suma niekoniecznie 1.0 (Python normalizuje).
+  wagi_skutkow:
+    harmful:          0.6   # fiolka rani / odbiera coś / pogarsza sytuację
+    distortion:       0.3   # rzeczywistość się wykrzywia, percepcja zawodzi
+    rare_beneficial:  0.1   # rzadko: drobna pomoc — nigdy nie pełne wybawienie
+
+  # Pule opisów skutków per kategoria. LLM wybiera JEDEN z tych opisów
+  # (Python losuje przed wysyłką) i znarracjonalizuje go diegetycznie
+  # w 2-4 zdaniach narracji. Opisy są SZKICEM kierunku, nie cytatem —
+  # LLM dostosowuje do kontekstu sceny (lokacja, postacie, etap łuku).
+  opisy_skutkow:
+    harmful:
+      - "Fiolka pęka w dłoni — szkło tnie palce do krwi, opary parzą oczy. Twoja siła i precyzja maleją do końca sceny."
+      - "Ciecz osmala język goryczą; pojawiają się halucynacje. Następne dwie tury widzisz rzeczy, których nie ma."
+      - "Eliksir podstępnie spowalnia ruchy. Każda decyzja wymaga teraz dwukrotnie więcej czasu — postacie wokół zauważają twoje wahanie."
+      - "Twoja krew się zagęszcza. Tracisz przytomność na chwilę, budzisz się w innym miejscu niż byłeś. Coś istotnego zniknęło z ekwipunku — to LLM zdecyduje co."
+      - "Z fiolki wypełzają zarodki — przyczepiają się do skóry, świadkowie sceny dostrzegają i odwracają się ze wstrętem. Tracisz przychylność jednego sojusznika obecnego w scenie."
+    distortion:
+      - "Świat się ślizga. Słyszysz dialog z poprzedniej tury, jakby grał ponownie, ale głosy są niewłaściwe. Pamięć przestaje być wiarygodna."
+      - "Czas zwalnia do trzech uderzeń serca, potem przyspiesza dwukrotnie. Wykonujesz akcję, ale nie pamiętasz jak — narracja przeskakuje konsekwencję bez pokazania procesu."
+      - "Postacie wokół wymieniają się rolami — wróg mówi głosem przyjaciela, przyjaciel staje się obcy. Ufaj imionom, nie twarzom."
+      - "Lokacja się odmienia — jesteś w tej samej scenie, ale geometria się zmieniła. Wyjście znikło, pojawiło się nowe okno, którego nie było."
+      - "Twój własny głos brzmi obco. NPC reagują na twoje słowa, jakby mówił ktoś inny — odpowiedzi rozmijają się z intencją."
+    rare_beneficial:
+      - "Eliksir koi jedną ranę / lęk / lukę w ekwipunku — coś jednego, drobnego. Reszta zagrożenia trwa. Nie liczy się jako rozwiązanie sceny."
+      - "Krótki przebłysk jasności: pojawia się jedna podpowiedź dotycząca obecnego przeciwnika lub wątku. Tylko jedna — LLM wybiera co."
+      - "Fala spokoju — kolejna tura mija bez nowej eskalacji. To pauza, nie wybawienie; ciężar wróci w turze następującej po."
+
 # --- Addon do prompt_systemowy z baza.yaml ---
 prompt_systemowy: |
   TRYB: MNIEJSZE ZŁO. Pole `wybory` zawiera 3-5 elementów A-E, gdzie KAŻDY wybór jest niekorzystny moralnie, fizycznie albo strategicznie — gracz wybiera mniejsze zło, nie dobro. Brak „neutralnej" opcji. Brak „happy endingu" w danej turze.
@@ -23,3 +73,47 @@ prompt_systemowy: |
   PIERWSZE 5 TUR — ESKALACJA: w pierwszych pięciu turach gry KAŻDA z opcji MUSI eskalować ryzyko, dramatyzm lub moralny ciężar scena-do-sceny. ZAKAZ „łatwych wyjść" w pierwszych 5 turach: opcje typu „uciekaj", „schowaj się", „zignoruj", „odejdź" SĄ DOZWOLONE wyłącznie wtedy, gdy są obarczone istotną i jawną stratą — utratą sojusznika, ujawnieniem sekretu, obarczeniem konsekwencjami osoby trzeciej, utratą cennego ekwipunku, otwartym wątkiem zemsty NPC. Przykład złego wyboru w turze 2: „uciekaj drogą". Przykład dobrego: „uciekaj drogą, zostawiając rannego towarzysza wilkom".
 
   PO 5. TURZE: łatwe wyjścia są dopuszczone (gracz już zainwestował w fabułę), ale tryb dalej trzyma się reguły „każda opcja niekorzystna". Nie wprowadzaj nagle „neutralnej" trzeciej drogi po turze 6 — to łamie obietnicę trybu.
+
+  ## FIOLKA (mechanika v15.2)
+
+  W trybie Mniejsze zło istnieje mechanika **fiolki** — predmiotu o nieprzewidywalnym działaniu. Reguły są SZTYWNE i NIENEGOCJOWALNE; łamanie ich łamie obietnicę trybu wobec gracza.
+
+  ### KIEDY WPROWADZIĆ FIOLKĘ
+
+  Wprowadzasz fiolkę WYŁĄCZNIE wtedy, gdy w user payload widzisz klucz `"fiolka_aktywacja_w_tej_turze": true`. To jest sygnał Pythona, że minęło wystarczająco tur hardship (próg parametryzowany — Python policzył, ty nie musisz liczyć). NIE wprowadzaj fiolki spontanicznie, bez tego sygnału. NIE odmawiaj jej wprowadzenia, gdy sygnał jest obecny.
+
+  Wprowadzasz ją DIEGETYCZNIE — gracz znajduje ją w ekwipunku zmarłego, otrzymuje od NPC, dostrzega w grobie, wyciąga z kieszeni którą wcześniej zignorował. Wybór sposobu należy do ciebie, ale musi pasować do sceny. Po wprowadzeniu ustawiasz w wyjściowym JSON-ie `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Opis fiolki w narracji: krótki, sugestywny, NIE-instrukcyjny. Przykład: „W kieszeni płaszcza martwego nieznajomego znajdujesz szklaną fiolkę z ciemną cieczą. Etykietki nie ma — zapach gorzki, nie potrafisz go nazwać."
+
+  ZAKAZ: NIE mów graczowi co fiolka robi. NIE obiecuj wybawienia. NIE sugeruj że pomoże. Fiolka jest zagadką.
+
+  ### WYBÓR `0) Odkorkuj fiolkę` (LISTA WYBORÓW)
+
+  Gdy `stan.fiolka.obecna == true` i `stan.fiolka.zniszczona == false` (sprawdzasz wejściowy `stan` z user payload), w polu `wybory[]` w wyjściowym JSON-ie ZAWSZE umieszczasz JAKO PIERWSZY element wybór:
+  ```
+  {"id": "0", "tekst": "Odkorkuj fiolkę"}
+  ```
+
+  POZYCJA SZTYWNA: element ten musi być PIERWSZY w tablicy `wybory[]`, przed wyborami A-E. Etykieta DOKŁADNIE „Odkorkuj fiolkę" (bez modyfikacji — Python rozpoznaje po `id="0"`). NIE zmieniaj numeracji pozostałych — A nadal A, B nadal B, itd. Lista wyborów wygląda więc tak: `[0, A, B, C, D]` (4 wybory) lub `[0, A, B, C, D, E]` (5 wyborów).
+
+  ### NARRACJA SKUTKU PO ODKORKOWANIU
+
+  Gdy gracz wybierze fiolkę, w następnym user payload zobaczysz klucz `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}`. To jest SEED do narracjonalizacji — Python wylosował kategorię i konkretny opis z puli; ty NIE wymyślasz nowego skutku.
+
+  Twoja praca:
+  1. Wpleć opis seedu w 2-4 zdania narracji jako bezpośrednią konsekwencję odkorkowania. Diegetycznie, sensorycznie, bez nazywania „kategorii" gracza.
+  2. Jeśli kategoria to `harmful` — pokaż ranę/stratę. Jeśli `distortion` — zniekształcenie percepcji/sceny. Jeśli `rare_beneficial` — drobną ulgę, NIGDY nie rozwiązuj całej sceny.
+  3. Inkrementuj `stan.fiolka.uzyto_razy` o 1 w wyjściowym JSON-ie.
+  4. ZACHOWAJ `stan.fiolka.obecna: true` — fiolka NIE znika po użyciu. Wyjątkiem jest sytuacja, gdy w narracji opisałeś jej zniszczenie (pęknięcie, zgubienie, wypicie do dna) — wtedy i tylko wtedy ustaw `stan.fiolka.zniszczona: true`. W kolejnych turach wybór `0` znika.
+  5. NIE oferuj graczowi „odzyskania" fiolki po zniszczeniu. Decyzja jest definitywna.
+
+  ZAKAZ KATEGORYCZNY: NIE używaj fiolki jako deus ex machina. NIE rozwiązuj sceny przez `rare_beneficial`. Nawet `rare_beneficial` to drobna ulga — ostrze zatrzymane o włos, jedna podpowiedź, krótka pauza — NIE pełne wybawienie. Konflikt sceny zostaje nierozwiązany; gracz dalej musi wybierać mniejsze zło z dostępnych opcji.
+
+  ### PRZYKŁADY FORMATU `wybory[]` Z FIOLKĄ
+
+  Tura przed aktywacją (fiolka nieobecna): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Tura aktywacji (fiolka_aktywacja_w_tej_turze=true) i wszystkie kolejne dopóki obecna: `[{"id":"0","tekst":"Odkorkuj fiolkę"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Tura po zniszczeniu fiolki w narracji: powrót do `[{"id":"A",...},{"id":"B",...},...]` bez `0`.

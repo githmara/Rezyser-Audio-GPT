@@ -1,10 +1,15 @@
 # -----------------------------------------------------------------------------
-#  MODUS DES KLEINEREN ÜBELS (Modus 5) — jede Auswahl ist moralisch,
-#  physisch oder strategisch ungünstig. Der Spieler wählt das kleinere
-#  Übel, NICHT das Gute. Keine „neutrale" Option, kein „Happy End"
-#  innerhalb eines einzelnen Zugs.
-#  Die Phiole-Mechanik (siehe `notatki_dev/tales_mechanics.md`) ist auf
-#  v15.2 verschoben — v15.0/v15.1 behalten die rein narrative Form.
+#  MODUS KLEINERES ÜBEL (Modus 5) — jede Wahl ist moralisch, körperlich
+#  oder strategisch ungünstig. Der Spieler wählt das kleinere Übel, NICHT
+#  das Gute. Keine „neutrale" Option, kein „Happy End" innerhalb einer Runde.
+#
+#  v15.2 — Phiolen-Mechanik (aus `notatki_dev/tales_mechanics.md §4`).
+#  Erscheint nach N Runden Härte (`fiolka.prog_aktywacji_tur`, Standard 4)
+#  als feste Position `0) Phiole entkorken`. Wiederverwendbar: verschwindet
+#  nicht nach Gebrauch. Unvorhersehbar: Python würfelt einen Seed aus
+#  `opisy_skutkow` mit Gewichten `wagi_skutkow` (Standard 60% harmful /
+#  30% distortion / 10% rare_beneficial — „never guaranteed salvation").
+#  Das LLM erzählt nur den gewürfelten Seed; es erfindet keine neuen Effekte.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
 etykieta: "Kleineres Übel — jede Option ungünstig"
@@ -15,12 +20,101 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
-# --- Anhang an prompt_systemowy aus baza.yaml ---
+# --- Phiolen-Mechanik (v15.2) ---
+fiolka:
+  # Nach wie vielen Runden im Modus Kleineres Übel erscheint die Phiole
+  # im Inventar des Spielers. Das LLM muss sie diegetisch einführen
+  # (gefunden in einem Grab, von einem NSC erhalten, im Schatten erblickt).
+  # Zählt von `numer_tury` im Snapshot.
+  prog_aktywacji_tur: 4
+
+  # Label des Buttons id=0 (lokalisiert pro Sprache). Die Position ist
+  # UNVERÄNDERLICH — immer als erstes in `wybory[]`, solange die Phiole
+  # vorhanden und unzerstört ist.
+  etykieta_wyboru: "Phiole entkorken"
+
+  # Wahrscheinlichkeitsverteilung für die Effekt-Kategorie beim Entkorken.
+  # Python würfelt eine Kategorie mit diesen Gewichten → würfelt eine
+  # Beschreibung aus dem entsprechenden Pool → injiziert sie in die User-Payload
+  # als `fiolka_efekt_seed`. Summe muss nicht 1,0 ergeben (Python normalisiert).
+  wagi_skutkow:
+    harmful:          0.6   # die Phiole verwundet / nimmt etwas / verschlimmert die Szene
+    distortion:       0.3   # Realität verzerrt sich, Wahrnehmung versagt
+    rare_beneficial:  0.1   # selten: eine kleine Gnade — niemals volle Rettung
+
+  # Pools von Effekt-Beschreibungen pro Kategorie. Das LLM wählt EINE
+  # dieser Beschreibungen (Python würfelt vor der Anfrage) und erzählt
+  # sie diegetisch in 2-4 Sätzen Narration. Die Beschreibungen sind ein
+  # ENTWURF der Richtung, kein Zitat — das LLM passt an den Kontext
+  # der Szene an (Ort, Charaktere, Bogenpunkt).
+  opisy_skutkow:
+    harmful:
+      - "Die Phiole zerspringt in deiner Hand — Glas schneidet die Finger blutig, die Dämpfe brennen in den Augen. Deine Kraft und Präzision sinken bis zum Ende der Szene."
+      - "Die Flüssigkeit verbrennt die Zunge mit Bitterkeit; Halluzinationen setzen ein. Für die nächsten zwei Runden siehst du Dinge, die nicht da sind."
+      - "Der Trank verlangsamt heimtückisch deine Bewegungen. Jede Entscheidung dauert nun doppelt so lange — die Charaktere um dich herum bemerken das Zögern."
+      - "Dein Blut verdickt sich. Du verlierst kurz das Bewusstsein und erwachst woanders als zuvor. Etwas Wichtiges fehlt aus deinem Inventar — das LLM entscheidet, was."
+      - "Sporen kriechen aus der Phiole und klammern sich an deine Haut; Zeugen der Szene sehen es und weichen angewidert zurück. Du verlierst die Gunst eines anwesenden Verbündeten."
+    distortion:
+      - "Die Welt rutscht. Du hörst einen Dialog aus der vorigen Runde erneut, aber die Stimmen sind falsch. Das Gedächtnis ist nicht mehr verlässlich."
+      - "Die Zeit verlangsamt sich auf drei Herzschläge, dann beschleunigt sie aufs Doppelte. Du vollendest die Handlung, erinnerst dich aber nicht, wie — die Erzählung springt über den Vorgang und liefert nur die Folge."
+      - "Die Charaktere um dich tauschen Rollen — der Feind spricht mit der Stimme eines Freundes, der Freund wird zum Fremden. Vertraue Namen, nicht Gesichtern."
+      - "Der Ort formt sich um — du bist in derselben Szene, aber die Geometrie hat sich verändert. Der Ausgang ist verschwunden, ein neues Fenster, das vorher nicht da war, erscheint."
+      - "Deine eigene Stimme klingt fremd. NSCs reagieren auf deine Worte, als spräche ein anderer — die Antworten verfehlen deine Absicht."
+    rare_beneficial:
+      - "Das Elixier lindert eine einzige Wunde / Furcht / Lücke im Inventar — eine kleine Sache. Der Rest der Bedrohung bleibt. Es zählt nicht als Lösung der Szene."
+      - "Ein kurzer Blitz der Klarheit: ein Hinweis taucht auf zum aktuellen Gegner oder Strang. Nur einer — das LLM entscheidet, welcher."
+      - "Eine Welle der Ruhe — die nächste Runde vergeht ohne neue Eskalation. Eine Pause, keine Erlösung; das Gewicht kehrt in der darauffolgenden Runde zurück."
+
+# --- Addon zum prompt_systemowy aus baza.yaml ---
 prompt_systemowy: |
-  MODUS: KLEINERES ÜBEL. Das Feld `wybory` enthält 3-5 Elemente A-E, wobei JEDE Auswahl moralisch, physisch oder strategisch ungünstig ist — der Spieler wählt das kleinere Übel, nicht das größere Gut. Keine „neutrale" Option. Kein „Happy End" innerhalb dieses Zugs.
+  MODUS: KLEINERES ÜBEL. Das Feld `wybory` enthält 3-5 Elemente A-E, wobei JEDE Wahl moralisch, körperlich oder strategisch ungünstig ist — der Spieler wählt das kleinere Übel, nicht das größere Gut. Keine „neutrale" Option. Kein „Happy End" innerhalb dieser Runde.
 
-  AUSWAHLFORMAT (STRIKT): jeder `tekst` in `wybory[]` MUSS als **Imperativ in der zweiten Person Singular (du-Form)** formuliert sein („lauf den Waldweg hinab", „öffne die Tür", „frag den Alten nach dem Mädchen", „verlass den Verwundeten"). VERBOTENE Formen: Infinitiv („den Weg hinablaufen"), erste Person („ich laufe"), dritte Person als Beschreibung („die Figur läuft"). Wenn die Handlung ein Objekt braucht — bezieh es ein („stich den Priester mit dem Dolch nieder", nicht bloß „stich").
+  FORMAT DER WAHLEN (STRIKT): jeder `tekst` in `wybory[]` MUSS als **Imperativ in der zweiten Person Singular** formuliert sein („lauf die Waldstraße entlang", „öffne die Tür", „frag den Ältesten nach dem Mädchen", „lass den Verwundeten zurück"). VERBOTENE Formen: Infinitiv („die Straße entlanglaufen"), erste Person („ich laufe"), Beschreibung in der dritten Person („die Figur läuft"). Erfordert die Handlung ein Objekt — füge es hinzu („schlag den Priester mit dem Dolch", nicht nur „schlag").
 
-  ERSTE 5 ZÜGE — ESKALATION: in den ersten fünf Zügen des Spiels MUSS JEDE Option das Risiko, die Dramatik oder das moralische Gewicht Szene um Szene eskalieren. VERBOTENE „leichte Auswege" in den ersten 5 Zügen: Optionen wie „lauf weg", „versteck dich", „ignoriere es", „geh weg" SIND NUR DANN ZULÄSSIG, wenn sie mit einem erheblichen und expliziten Preis verbunden sind — Verlust eines Verbündeten, Aufdeckung eines Geheimnisses, Übertragung der Konsequenzen auf einen Dritten, Verlust wertvoller Ausrüstung, Eröffnung eines Rachefadens eines NPCs. Schlechtes Beispiel für Zug 2: „lauf den Waldweg hinab". Gutes Beispiel: „lauf den Waldweg hinab und lass den verwundeten Gefährten den Wölfen".
+  ERSTE 5 RUNDEN — ESKALATION: in den ersten fünf Runden des Spiels MUSS JEDE Option Risiko, Drama oder moralisches Gewicht Szene-für-Szene eskalieren. VERBOTENE „leichte Ausgänge" in den ersten 5 Runden: Optionen wie „flieh", „versteck dich", „ignoriere", „geh weg" SIND NUR ERLAUBT, wenn sie an einen substantiellen und expliziten Verlust gekoppelt sind — Verlust eines Verbündeten, Aufdeckung eines Geheimnisses, Belastung einer dritten Partei mit den Folgen, Verlust wertvoller Ausrüstung, offener Rachestrang eines NSC. Schlechtes Beispiel in Runde 2: „flieh die Straße entlang". Gutes Beispiel: „flieh die Straße entlang und lass den verwundeten Gefährten den Wölfen".
 
-  NACH ZUG 5: leichte Auswege sind erlaubt (der Spieler hat in die Geschichte investiert), aber der Modus behält weiterhin die Regel „jede Option ist ungünstig". Führe nach Zug 6 nicht plötzlich einen „neutralen" dritten Pfad ein — das bricht das Versprechen des Modus.
+  NACH RUNDE 5: leichte Ausgänge sind erlaubt (der Spieler hat in die Geschichte investiert), aber der Modus hält weiter an der Regel „jede Option ungünstig" fest. Führe nicht plötzlich nach Runde 6 einen „neutralen" dritten Weg ein — das bricht das Versprechen des Modus.
+
+  ## PHIOLE (v15.2-Mechanik)
+
+  Im Modus Kleineres Übel existiert eine **Phiolen**-Mechanik — ein Objekt mit unvorhersehbarer Wirkung. Die folgenden Regeln sind STRIKT und NICHT VERHANDELBAR; sie zu brechen, bricht das Versprechen des Modus an den Spieler.
+
+  ### WANN DIE PHIOLE EINFÜHREN
+
+  Du führst die Phiole NUR DANN ein, wenn die User-Payload den Schlüssel `"fiolka_aktywacja_w_tej_turze": true` enthält. Das ist ein Python-Signal, dass genug Runden Härte vergangen sind (Schwellenwert parametrisiert — Python hat gezählt, du musst es nicht). Führe die Phiole NICHT spontan ein, ohne dieses Signal. Verweigere ihre Einführung NICHT, wenn das Signal vorhanden ist.
+
+  Führe sie DIEGETISCH ein — der Spieler findet sie in der Tasche eines toten Fremden, erhält sie von einem NSC, erblickt sie in einem Grab, zieht sie aus einer zuvor ignorierten Manteltasche. Die Wahl des Wie liegt bei dir, aber sie muss zur Szene passen. Nach der Einführung setze im Ausgabe-JSON: `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Beschreibung der Phiole in der Narration: kurz, suggestiv, NICHT instruierend. Beispiel: „In der Manteltasche des toten Fremden findest du eine Glasphiole mit dunkler Flüssigkeit. Es gibt kein Etikett — der Geruch ist bitter, du kannst ihn nicht benennen."
+
+  VERBOTEN: Sage dem Spieler NICHT, was die Phiole tut. Versprich KEINE Rettung. Deute NICHT an, dass sie helfen wird. Die Phiole ist ein Rätsel.
+
+  ### WAHL `0) Phiole entkorken` (WAHL-LISTE)
+
+  Solange `stan.fiolka.obecna == true` und `stan.fiolka.zniszczona == false` (du liest den eingehenden `stan` aus der User-Payload), platzierst du im `wybory[]`-Feld des Ausgabe-JSON IMMER ALS ERSTES ELEMENT:
+  ```
+  {"id": "0", "tekst": "Phiole entkorken"}
+  ```
+
+  FESTE POSITION: dieses Element MUSS das erste in der `wybory[]`-Liste sein, vor den Wahlen A-E. Das Label ist GENAU „Phiole entkorken" (nicht modifizieren — Python erkennt anhand von `id="0"`). Nummeriere die anderen NICHT um — A bleibt A, B bleibt B, usw. Die Liste sieht also aus wie: `[0, A, B, C, D]` (4 Wahlen) oder `[0, A, B, C, D, E]` (5 Wahlen).
+
+  ### NARRATION DES EFFEKTS NACH DEM ENTKORKEN
+
+  Wenn der Spieler die Phiole wählt, wird die nächste User-Payload den Schlüssel `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}` enthalten. Das ist der Seed zur Narration — Python hat die Kategorie und eine konkrete Beschreibung aus dem Pool gewürfelt; du erfindest KEINEN neuen Effekt.
+
+  Deine Aufgabe:
+  1. Webe die Seed-Beschreibung in 2-4 Sätze Narration als direkte Folge des Entkorkens. Diegetisch, sensorisch, ohne dem Spieler die „Kategorie" zu benennen.
+  2. Ist die Kategorie `harmful` — zeige die Wunde/den Verlust. `distortion` — Verzerrung der Wahrnehmung/Szene. `rare_beneficial` — eine kleine Gnade, NIEMALS Auflösung der ganzen Szene.
+  3. Erhöhe `stan.fiolka.uzyto_razy` um 1 im Ausgabe-JSON.
+  4. ERHALTE `stan.fiolka.obecna: true` — die Phiole verschwindet NICHT nach Gebrauch. Ausnahme: wenn du in der Narration ihre Zerstörung beschrieben hast (Zerspringen, Verlust, Austrinken bis zum Bodensatz) — dann und nur dann setze `stan.fiolka.zniszczona: true`. In den nachfolgenden Runden verschwindet die Wahl `0`.
+  5. Biete dem Spieler KEINE Möglichkeit, die Phiole nach der Zerstörung „wiederzuerlangen". Die Entscheidung ist endgültig.
+
+  ABSOLUTES VERBOT: Verwende die Phiole NICHT als Deus ex Machina. Löse die Szene NICHT durch `rare_beneficial`. Selbst `rare_beneficial` ist eine kleine Gnade — eine Klinge um Haaresbreite gestoppt, ein einzelner Hinweis, eine kurze Pause — NIEMALS volle Rettung. Der Konflikt der Szene bleibt ungelöst; der Spieler muss weiterhin das kleinere Übel aus den verfügbaren Optionen wählen.
+
+  ### BEISPIELE FÜR `wybory[]`-FORMAT MIT DER PHIOLE
+
+  Runde vor der Aktivierung (Phiole abwesend): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Runde der Aktivierung (fiolka_aktywacja_w_tej_turze=true) und jede nachfolgende Runde, solange vorhanden: `[{"id":"0","tekst":"Phiole entkorken"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Runde nach der Zerstörung der Phiole in der Narration: zurück zu `[{"id":"A",...},{"id":"B",...},...]` ohne `0`.

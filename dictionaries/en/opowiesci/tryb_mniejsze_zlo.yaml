@@ -2,8 +2,14 @@
 #  LESSER EVIL MODE (mode 5) — every choice is morally, physically or
 #  strategically unfavourable. The player picks the lesser evil, NOT good.
 #  No "neutral" option, no "happy ending" inside a single turn.
-#  The Vial mechanic (referenced in `notatki_dev/tales_mechanics.md`) is
-#  deferred to v15.2 — v15.0/v15.1 keep the purely narrative form.
+#
+#  v15.2 — vial mechanic (from `notatki_dev/tales_mechanics.md §4`). Appears
+#  after N turns of hardship (`fiolka.prog_aktywacji_tur`, default 4) as the
+#  fixed position `0) Uncork the vial`. Reusable: does not vanish after use.
+#  Unpredictable: Python rolls a seed from `opisy_skutkow` with weights
+#  `wagi_skutkow` (default 60% harmful / 30% distortion / 10% rare_beneficial
+#  — "never guaranteed salvation"). The LLM only narrates the rolled seed;
+#  it does not invent new effects.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
 etykieta: "Lesser Evil — every option unfavourable"
@@ -14,6 +20,51 @@ kolejnosc: 50
 model: gpt-4o-mini
 temperatura: 0.85
 
+# --- Vial mechanic (v15.2) ---
+fiolka:
+  # After how many turns of Lesser Evil play the vial appears in the
+  # player's inventory. The LLM must introduce it diegetically (found in
+  # a tomb, given by an NPC, glimpsed in the shadows). Counted from
+  # `numer_tury` in the snapshot.
+  prog_aktywacji_tur: 4
+
+  # Label of the id=0 button (localised per language). The position
+  # is FIXED — always first in `wybory[]` while the vial is present
+  # and undestroyed.
+  etykieta_wyboru: "Uncork the vial"
+
+  # Probability distribution for the effect category when the vial is
+  # uncorked. Python rolls a category with these weights → rolls a
+  # description from the matching pool → injects it into the user payload
+  # as `fiolka_efekt_seed`. Sum need not equal 1.0 (Python normalises).
+  wagi_skutkow:
+    harmful:          0.6   # the vial wounds / takes something / worsens the scene
+    distortion:       0.3   # reality warps, perception fails
+    rare_beneficial:  0.1   # rarely: a small mercy — never a full rescue
+
+  # Effect-description pools per category. The LLM picks ONE of these
+  # descriptions (Python pre-rolls before the request) and narrates it
+  # diegetically in 2-4 sentences. The descriptions are a DIRECTION,
+  # not a quote — the LLM adapts to the scene's context (location,
+  # characters, arc beat).
+  opisy_skutkow:
+    harmful:
+      - "The vial cracks in your hand — glass cuts your fingers, fumes burn your eyes. Your strength and precision drop for the rest of the scene."
+      - "The liquid scorches your tongue with bitterness; hallucinations begin. For the next two turns you see things that are not there."
+      - "The elixir treacherously slows your movements. Every decision now takes twice as long — the characters around you notice the hesitation."
+      - "Your blood thickens. You black out briefly and wake somewhere other than where you were. Something important is missing from your inventory — the LLM decides what."
+      - "Spores crawl out of the vial and cling to your skin; witnesses in the scene see them and recoil in disgust. You lose the favour of one ally present in the scene."
+    distortion:
+      - "The world slips. You hear a line of dialogue from the previous turn replaying, but the voices are wrong. Memory stops being trustworthy."
+      - "Time slows to three heartbeats, then races to double speed. You complete the action but cannot recall how — the narration skips over the process and goes straight to the consequence."
+      - "Characters around you swap roles — the enemy speaks in a friend's voice, the friend becomes a stranger. Trust names, not faces."
+      - "The location remoulds itself — you are in the same scene but the geometry has changed. The exit is gone; a new window has appeared that wasn't there before."
+      - "Your own voice sounds foreign. NPCs respond to your words as if someone else were speaking — answers miss your intent."
+    rare_beneficial:
+      - "The elixir soothes a single wound / fear / equipment gap — one small thing. The rest of the threat persists. It does not count as a resolution of the scene."
+      - "A brief flash of clarity: one hint surfaces about the current opponent or thread. Just one — the LLM decides what."
+      - "A wave of calm — the next turn passes without fresh escalation. A pause, not deliverance; the weight returns in the turn after."
+
 # --- Addon to prompt_systemowy from baza.yaml ---
 prompt_systemowy: |
   MODE: LESSER EVIL. The `wybory` field contains 3-5 elements A-E, where EVERY choice is morally, physically or strategically unfavourable — the player picks the lesser evil, not the greater good. No "neutral" option. No "happy ending" inside this turn.
@@ -23,3 +74,47 @@ prompt_systemowy: |
   FIRST 5 TURNS — ESCALATION: in the first five turns of the game, EACH option MUST escalate the risk, drama or moral weight scene-by-scene. FORBIDDEN "easy outs" in the first 5 turns: options like "run away", "hide", "ignore", "walk away" ARE PERMITTED ONLY when paired with a substantial and explicit cost — losing an ally, exposing a secret, burdening a third party with the consequences, losing valuable equipment, opening an NPC revenge thread. Bad turn-2 example: "run down the road". Good example: "run down the road, leaving the wounded companion to the wolves".
 
   AFTER TURN 5: easy outs are permitted (the player has invested in the story), but the mode still keeps the rule "every option is unfavourable". Do not suddenly introduce a "neutral" third path after turn 6 — that breaks the mode's promise.
+
+  ## VIAL (v15.2 mechanic)
+
+  In Lesser Evil mode there exists a **vial** mechanic — an object with unpredictable effects. The rules below are STRICT and NON-NEGOTIABLE; breaking them breaks the mode's promise to the player.
+
+  ### WHEN TO INTRODUCE THE VIAL
+
+  You introduce the vial ONLY when the user payload contains the key `"fiolka_aktywacja_w_tej_turze": true`. This is a Python signal that enough turns of hardship have passed (the threshold is parameterised — Python counted, you do not need to). Do NOT introduce the vial spontaneously, without this signal. Do NOT refuse to introduce it when the signal is present.
+
+  Introduce it DIEGETICALLY — the player finds it in a dead stranger's pocket, receives it from an NPC, glimpses it in a grave, pulls it from a coat-pocket previously ignored. The choice of how is yours, but it must fit the scene. After introducing it, set in the output JSON: `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
+
+  Description of the vial in narration: short, suggestive, NOT instructional. Example: "In the dead stranger's coat-pocket you find a glass vial of dark liquid. There is no label — the smell is bitter, you cannot name it."
+
+  FORBIDDEN: do NOT tell the player what the vial does. Do NOT promise rescue. Do NOT hint that it will help. The vial is a riddle.
+
+  ### CHOICE `0) Uncork the vial` (CHOICE LIST)
+
+  While `stan.fiolka.obecna == true` and `stan.fiolka.zniszczona == false` (you read the incoming `stan` from the user payload), in the output JSON's `wybory[]` field you ALWAYS place AS THE FIRST element:
+  ```
+  {"id": "0", "tekst": "Uncork the vial"}
+  ```
+
+  FIXED POSITION: this element MUST be first in the `wybory[]` array, before choices A-E. The label is EXACTLY "Uncork the vial" (do not modify — Python recognises by `id="0"`). Do NOT renumber the others — A is still A, B is still B, etc. The choice list therefore looks like: `[0, A, B, C, D]` (4 choices) or `[0, A, B, C, D, E]` (5 choices).
+
+  ### NARRATING THE EFFECT AFTER UNCORKING
+
+  When the player picks the vial, the next user payload will contain the key `"fiolka_efekt_seed": {"kategoria": "harmful"|"distortion"|"rare_beneficial", "opis": "..."}`. This is the seed for narration — Python rolled the category and a specific description from the pool; you do NOT invent a new effect.
+
+  Your job:
+  1. Weave the seed's description into 2-4 sentences of narration as the direct consequence of uncorking. Diegetic, sensory, without naming the "category" to the player.
+  2. If the category is `harmful` — show the wound/loss. If `distortion` — perception/scene warping. If `rare_beneficial` — a small mercy, NEVER resolving the whole scene.
+  3. Increment `stan.fiolka.uzyto_razy` by 1 in the output JSON.
+  4. KEEP `stan.fiolka.obecna: true` — the vial does NOT vanish after use. The exception is when you describe its destruction in narration (cracking, losing, draining to the dregs) — then and only then set `stan.fiolka.zniszczona: true`. In subsequent turns the `0` choice disappears.
+  5. Do NOT offer the player a way to "recover" the vial after destruction. The decision is final.
+
+  ABSOLUTE BAN: do NOT use the vial as a deus ex machina. Do NOT resolve the scene through `rare_beneficial`. Even `rare_beneficial` is a small mercy — a blade stopped a hair short, a single hint, a brief pause — NEVER a full rescue. The scene's conflict remains unresolved; the player still has to choose the lesser evil from the available options.
+
+  ### EXAMPLES OF `wybory[]` FORMAT WITH THE VIAL
+
+  Turn before activation (vial absent): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Turn of activation (fiolka_aktywacja_w_tej_turze=true) and every subsequent turn while present: `[{"id":"0","tekst":"Uncork the vial"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+
+  Turn after the vial is destroyed in narration: back to `[{"id":"A",...},{"id":"B",...},...]` without `0`.
