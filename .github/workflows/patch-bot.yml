@@ -1,0 +1,38 @@
+name: Patch Bot
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  handle_patch_request:
+    # Uruchom tylko wtedy, gdy issue ma odpowiednią etykietę
+    if: contains(github.event.issue.labels.*.name, 'tiflotecnia-patch')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write # Uprawnienie potrzebne do zamknięcia i usunięcia issue
+
+    steps:
+      - name: Pobranie kodu repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja środowiska Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Wysłanie maila z patchem
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: |
+          python .github/scripts/send_patch.py "$ISSUE_BODY"
+
+      - name: Usunięcie śladów po issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          # Zamknięcie i całkowite usunięcie issue za pomocą GitHub CLI
+          gh issue delete "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --yes
