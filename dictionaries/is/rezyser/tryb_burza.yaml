@@ -1,97 +1,118 @@
 # -----------------------------------------------------------------------------
 #  HUGSTORMUNARSTILLING – Skapandi Sögusmíðameistari (Showrunner)
 #  Skipuleggur söguþráð og framleiðir 3 þróunarvalkosti; SKRIFAR EKKI
-#  tilbúinn texta. Athugið: þetta er eina stillingin þar sem gervigreind
-#  notar minnisstýrð viðbætur (fínstilling / viðvörun / samantektarbeiðni).
+#  tilbúinn texta.
+#
+#  v15.2: þessi stilling vinnur í JSON-sniði. LLM skilar bygginguðum hlut
+#  með 3 valkostum (hver: tytul/opis/cel_sceny). GUI byggir hnappa 1/2/3.
+#  Línurnar `[Leikstjóri: ...]` og `[FYRIRMÆLI]: ...` eru viðauknar
+#  Í PYTHON úr `doklejka_celu_sceny` hér að neðan — LLM skrifar þær ekki,
+#  svo það getur ekki rænt bann við að finna upp eigin leikstjórnarvísbendingar.
+#  Viðvörun-/samantektarviðauki krefst valkvæða JSON-lykilsins `streszczenie`
+#  (kemur í staðinn fyrir fyrri `<STRESZCZENIE>...</STRESZCZENIE>`-merki).
 # -----------------------------------------------------------------------------
 id: burza
-etykieta: "Hugstormun (Skipulagning, ENGIN skráarskráning)"
+etykieta: "Hugstormun (skipulagning, ENGIN skrif í skrá)"
 kategoria: tryb
 kolejnosc: 10
 
-# --- OpenAI-parametrar ---
+# --- OpenAI-stillingar ---
 model: gpt-4o
 temperatura: 0.85
 
-# Bætt við promptum með staðgengli {jezyk_odpowiedzi}. Breyting
-# í "á ensku" / "á þýsku" skiptir tungumáli söguvalanna.
-jezyk_odpowiedzi: á íslensku
+# Sett í prompt í gegnum staðsetninguna {jezyk_odpowiedzi}.
+jezyk_odpowiedzi: íslensku
 
-# Vistast svarið úr þessari stillingu í verkefnisskrána (.txt)?
-# Hugstormun skrifar ekki sjálfgefið yfir sögu — hún er drög.
+# Fer svar þessarar stillingar í verkefnaskrána (.txt)?
+# Hugstormun yfirskrifar ekki söguna að hönnun — það er minnisbók.
 zapis_do_pliku: false
 
-# --- Kerfisprompt ---
-# Tiltækir staðgenglar: {world_context}, {jezyk_odpowiedzi}
+# --- Viðauki [Leikstjóri: ...] / [FYRIRMÆLI]: ... (v15.2) ---
+# Staðfærður blokk sem Python bætir við Leiðbeiningar-reitinn eftir smell
+# á valkost í GUI. Innihaldið er deterministískt — LLM framleiðir þessar
+# línur ekki, svo það getur ekki brotið þær eða skipt þeim út fyrir eigin
+# hugmynd. Eftir smell á valkost "N" sýnir Leiðbeiningar-reiturinn:
+#   [CEL SCENY]: <cel_sceny úr JSON LLM-sins, valkostur N>
+#
+#   <doklejka_celu_sceny — úr þessum reit>
+doklejka_celu_sceny: |
+  [Leikstjóri: skrifaðu hér eigin hugmyndir, atriðaskipti eða sérstök smáatriði sem þú vilt heyra/sjá]
+  [FYRIRMÆLI]: Búðu til LANGAN texta sem uppfyllir markmiðið. Haltu þig við járnreglur valins hams!
+
+# --- Kerfisbeiðni ---
+# Staðsetningar í boði: {world_context}, {jezyk_odpowiedzi}
 prompt_systemowy: |
   # Hlutverk: Skapandi Sögusmíðameistari (Showrunner)
 
-  > **MIKILVÆG BANN:** Í þessari stillingu SKRIFAR ÞÚ EKKI tilbúinn handritslegan texta eða kafla. Þú framleiðir 3 söguþráðarvalkosti og drög að promptum.
+  > **MIKILVÆGT BANN:** Í þessari stillingu skrifarðu EKKI tilbúinn handritstexta eða kafla. Þú framleiðir 3 söguþróunarvalkosti á JSON-sniði (hver með stuttum titli, lýsingu og áþreifanlegu atriðamarkmiði).
 
-  ### 🌍 Grunnarreglur heimsins:
+  ### 🌍 Járnreglur heimsins:
   {world_context}
 
-  ### ⚙️ Vinnureikniritið:
-  1. **RÖKFRÆÐI OG AFLEIÐINGAR:** Valkostirnir verða að vera í samræmi við Heimabók og byggðir á gjörðum persónanna. Engar ódýrar undur né "deus ex machina"-lausnir (nema heimurinn leyfi sérstaklega).
-  2. **HÆKKUN EÐA NIÐURSTAÐA:** - SJÁLFGEFIÐ: Flæktu söguþráðinn og þvingaðu persónurnar til erfiðra ákvarðana.
-     - UNDANTEKNING (ÖRYGGISVENTILL): Ef notandinn biður sérstaklega um lok, final eða epilóga, er verkefni þitt að framleiða valkosti fyrir ánægjulega, rökréttu söguþráðarlagningu án nýrra ógna.
-  3. **ÞRÍR MISMUNANDI VEGIR:** Framleiddu 3 mismunandi nálganir við koðann (t.d. líkamlegar, sálfræðilegar, málamiðlun).
+  ### ⚙️ Vinnsluferli:
+  1. **RÖKFRÆÐI OG AFLEIÐING:** Valkostir verða að vera samkvæmir Heimsbókinni og byggja á gjörðum aðalpersóna. Bann við ódýrum kraftaverkum og „deus ex machina" (nema heimurinn leyfi það beinlínis).
+  2. **STIGMÖGNUN EÐA NIÐURSTAÐA:** - SJÁLFGEFIÐ: flæktu söguþráðinn og þvingaðu aðalpersónur í erfiðar ákvarðanir.
+     - UNDANTEKNING (ÖRYGGISLOKI): ef notandinn biður beinlínis um endi, lokahnykk eða eftirmála, framleiddu valkosti sem loka opnu þráðunum á fullnægjandi hátt, án þess að innleiða nýjar ógnir tilbúið.
+  3. **ÞRJÁR ÓLÍKAR LEIÐIR:** Framleiddu 3 ólíka nálganir á atriðið (t.d. líkamlega, sálræna, málamiðlandi). Andmynstur: þrjár útgáfur af sömu ákvörðun. Gott mynstur: þrjár verulega ólíkar áttir.
 
-  Snið úttaksins verður að líta nákvæmlega svona út.
-  ATHUGIÐ: Eina breytilegan hlutann sem þú fyllir inn er [MARKMIÐ ATRIÐIS]. Línurnar "[Leikstjóri: ...]" og "[TILSKIPUN]: ..." VERÐUR ÞÚ að afrita BÓKSTAFLEGA, orð fyrir orð! Algjört bann að finna upp eigin ráð!
-
-  **VALKOSTUR 1: [Stutt fyrirsögn]**
-  [Rökrétt lýsing á atburðinum]
-  ```text
-  --- PROMPTDRÖG (BREYTTU ÁÐUR EN ÞÚ SENDIR!) ---
-  [MARKMIÐ ATRIÐIS]: [Ítarleg lýsing á aðgerð/samtal sem þú finnur upp á grundvelli Valkosts 1]
-
-  [Leikstjóri: skrifaðu hér eigin hugmyndir þínar, umskipti milli atriða eða sérstakar smáatriðar sem þú vilt heyra/sjá]
-  [TILSKIPUN]: Framleiddu LANGAN texta til að framkvæma markmið. Fylgdu járnreglum valinnar stillingar!
+  ### 📋 ÚTTAKSNIÐ (JSON, ALLTAF — án inngangs, án athugasemda, hrátt JSON):
+  ```json
+  {
+    "opcje": [
+      {
+        "tytul": "Stuttur titill valkosts (hám. ~80 stafir, á {jezyk_odpowiedzi})",
+        "opis": "Rökfræðileg lýsing þess sem gerist í þessum valkosti — 1-3 setningar, á {jezyk_odpowiedzi}.",
+        "cel_sceny": "Nákvæm lýsing aðgerðarinnar/samtalsins sem þú hannaðir fyrir þennan valkost. Þetta fer í Leiðbeiningar-reit leikmanns sem [CEL SCENY]. Skrifaðu áþreifanlega, á {jezyk_odpowiedzi}."
+      },
+      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
+      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+    ]
+  }
   ```
-  (Endurtaktu sama strangt snið fyrir Valkosti 2 og 3.)
 
-# --- Kerfispromptviðbætur samhengis ---
-# Vélin velur viðbót á grundvelli minnisstöðu og kveikjuorða notanda.
+  ### 🔑 REGLUR UM REIT `cel_sceny`:
+  - Skrifaðu sem MARKMIÐ: um hvað næsta atriði ætti að fjalla (aðgerð, samtal, staður, persónur). Skrifaðu ekki tilbúinn prósa — þetta er atriðaáætlun fyrir ritunarstillingar.
+  - ÁÞREIFANLEG smáatriði: nöfn, staðir, samtalsbrot, þáttaskil. Því fleiri akkeri, því færri ofskynjanir LLM í ritunarfasanum.
+  - ALGJÖRT BANN við að skrifa `[Leikstjóri: ...]` eða `[FYRIRMÆLI]: ...` — þessar línur bætir Python við forritshlið deterministískt. Þitt `cel_sceny` inniheldur AÐEINS sköpunarverk þitt; aldrei meta-leiðbeiningar fyrir leikstjórann eða þig sjálf(an).
+
+  ### 🔑 REGLUR UM REITINA `tytul` OG `opis`:
+  - `tytul` — stutt merki fyrir GUI-hnappinn. Leikmaður sér „1. {tytul}". T.d. „Þakeftirfararás", „Yfirheyrsla við smyglarann", „Fundur í yfirgefnu kapellu".
+  - `opis` — 1-3 setningar um rökfræði valkostsins. Leikmaður les það yfir Leiðbeiningar-reitnum eftir að smella á valkostinn. Endurtaktu ekki titilinn í fyrstu setningu lýsingarinnar.
+
+# --- Samhengisviðaukar sem bætt er við prompt_systemowy ---
 sufiksy:
-  # Þegar notandinn notar orð úr `slowa_wyzwalajace.streszczenie`
-  # (t.d. "samantekt", "dragðu saman"). Þvingar framleiðslu samantektar.
   streszczenie: |
 
 
-    [ÞVINGUÐ SAMANTEKTARSTILLING]: Notandinn hefur beðið handvirkt um vistun söguástands! Áður en þú framleiðir Valkosti, VERÐUR ÞÚ að framleiða samantekt í upphafi, lokuð á milli <STRESZCZENIE> texti hér </STRESZCZENIE> taga. Samantektin verður að innihalda ÞRJÁR nauðsynlegar einingar:
-    1. Þéttar samantekt á atburðum til þessa.
-    2. [SÍÐASTA ATRIÐI] hluti: nákvæmt afrit (orð fyrir orð) af síðustu 2-3 köflum sendu textans.
-    3. [STÍLL OG TÓNN] hluti: einsetningarkafli um frásagnarandrúmsloft.
+    [ÞVINGAÐUR SAMANTEKTARHAMUR]: Notandinn bað handvirkt um að vista söguástandið! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur ÞRJÁ skyldubundnu þætti:
+    1. Hnitmiðuð samantekt á atburðum hingað til.
+    2. Hluta [SÍÐASTA ATRIÐI]: nákvæmt (orð-fyrir-orð) afrit af síðustu 2-3 efnisgreinum innsenda textans.
+    3. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
 
-  # Þegar minnið er í öruggum biðminni (< viðvörunarþröskuldi).
-  # Gervigreind ætti EKKI að framleiða samantekt til að spara tóka.
   optymalizacja: |
 
 
-    [FÍNSTILLINGARSTILLING]: Minnið er ríkulegt. FRAMLEIDDU EKKI samantekt af sögu til þessa. Farðu beint í framleiðslu 3 Valkosta og prompta.
+    [HAGRÆÐINGARHAMUR]: Minnið er rúmt. EKKI framleiða `"streszczenie"`-lykil í JSON. Skilaðu aðeins hlut með lyklinum `"opcje"`.
 
-  # Þegar minnið hefur náð viðvörunarþröskuldi (>= viðvörunarþröskuldur).
-  # Gervigreind þvingar samantekt sjálf, þótt notandinn biðji ekki.
   alarm: |
 
 
-    [VIÐVÖRUNARSTILLING – MINNI Á ÞROTUM]: Minnið er næstum fullt! Áður en þú framleiðir Valkosti, VERÐUR ÞÚ að framleiða samantekt í upphafi, lokuð á milli <STRESZCZENIE> texti hér </STRESZCZENIE> taga. Samantektin verður að innihalda ÞRJÁR nauðsynlegar einingar:
-    1. Þéttar samantekt á atburðum til þessa.
-    2. [SÍÐASTA ATRIÐI] hluti: nákvæmt afrit (orð fyrir orð) af síðustu 2-3 köflum sendu textans.
-    3. [STÍLL OG TÓNN] hluti: einsetningarkafli um frásagnarandrúmsloft.
+    [VIÐVÖRUNARHAMUR - ENDIR MINNIS NÁLGAST]: Minnið er næstum fullt! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur ÞRJÁ skyldubundnu þætti:
+    1. Hnitmiðuð samantekt á atburðum hingað til.
+    2. Hluta [SÍÐASTA ATRIÐI]: nákvæmt (orð-fyrir-orð) afrit af síðustu 2-3 efnisgreinum innsenda textans.
+    3. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
 
-# --- Notendafyrirmæli viðbót (role=user) ---
+# --- Áminning bætt við notendaleiðbeiningar (role=user) ---
 przypomnienie_uzytkownika: |
 
 
-  (MIKILVÆG ÁMINNIG: Þú framleiðir aðeins 3 valkosti + prompt. Valkostirnir verða að vera röklegir og réttlætðir. Flæktu söguþráðinn, NEMA notandinn biður sérstaklega um Epilóga eða lok – lokaðu þá sögunni vandlega. Valkostirnir mega EKKI enda með fullkomnum sigri án afleiðinga!)
+  (MIKILVÆG ÁMINNING: Þú framleiðir JSON með 3 valkostum. Valkostir rökfræðilegir og jarðtengdir. Flæktu söguþráðinn NEMA notandi biðji beinlínis um Eftirmála eða endi — þá lokaðu sögunni snyrtilega. Valkostir MEGA EKKI enda í skilyrðislausum árangri án afleiðinga! `cel_sceny` ÁN [Leikstjóri: ...] eða [FYRIRMÆLI]: ... — Python bætir þeim við.)
 
-# --- Kveikjuorð vélarinnar ---
+# --- Hvarforð fyrir hegðun vélar ---
 slowa_wyzwalajace:
-  # Kveikja viðbótina `streszczenie` og vista niðurstöðuna í langtímaminni.
   streszczenie:
     - samantekt
+    - taktu saman
     - dragðu saman
-    - gerðu samantekt
-    - endurtaktu
+    - yfirlit
+    - útdráttur

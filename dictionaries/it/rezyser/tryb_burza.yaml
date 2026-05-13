@@ -1,13 +1,18 @@
 # -----------------------------------------------------------------------------
 #  MODALITÀ BRAINSTORM – Architetto Creativo della Storia (Showrunner)
 #  Pianifica la trama e genera 3 opzioni di sviluppo; NON scrive il testo finale.
-#  Nota per il linguista: questa è l'unica modalità in cui l'IA opera anche con
-#  suffissi che reagiscono allo stato della memoria del modello (ottimizzazione /
-#  allarme / richiesta di riepilogo). Le soglie (quanti caratteri = "allarme")
-#  sono definite nel codice del motore.
+#
+#  v15.2: questa modalità opera in formato JSON. L'LLM restituisce un oggetto
+#  strutturato con 3 opzioni (ciascuna: tytul/opis/cel_sceny). La GUI costruisce
+#  i pulsanti 1/2/3. Le righe `[Regista: ...]` e `[DIRETTIVA]: ...` sono
+#  aggiunte IN PYTHON da `doklejka_celu_sceny` qui sotto — l'LLM non le scrive,
+#  quindi non può eludere il divieto di inventare proprie indicazioni di regia.
+#  I suffissi alarm/streszczenie richiedono la chiave JSON opzionale
+#  `streszczenie` (in sostituzione delle precedenti etichette
+#  `<STRESZCZENIE>...</STRESZCZENIE>`).
 # -----------------------------------------------------------------------------
 id: burza
-etykieta: "Brainstorm (Pianificazione, SENZA scrittura su file)"
+etykieta: "Brainstorm (pianificazione, SENZA scrittura su file)"
 kategoria: tryb
 kolejnosc: 10
 
@@ -15,88 +20,99 @@ kolejnosc: 10
 model: gpt-4o
 temperatura: 0.85
 
-# Inserito nei prompt tramite il segnaposto {jezyk_odpowiedzi}. Cambiarlo in
-# "polacco" / "inglese" commuta la lingua delle opzioni di trama generate.
+# Inserito nei prompt tramite il segnaposto {jezyk_odpowiedzi}.
 jezyk_odpowiedzi: italiano
 
-# La risposta di questa modalità va nel file di progetto (.txt)?
-# Il Brainstorm per definizione NON sovrascrive la storia — è uno sketchpad.
+# La risposta di questa modalità va nel file del progetto (.txt)?
+# Il Brainstorm per principio NON sovrascrive la storia — è un blocco appunti.
 zapis_do_pliku: false
 
+# --- Appendice [Regista: ...] / [DIRETTIVA]: ... (v15.2) ---
+# Blocco localizzato che Python aggiunge dopo il clic su un'opzione nella
+# GUI al campo Istruzioni. Il contenuto è deterministico — l'LLM non
+# produce queste righe, quindi non può romperle né sostituirle con
+# un'idea propria. Dopo il clic sull'opzione "N" il campo Istruzioni mostra:
+#   [CEL SCENY]: <cel_sceny dal JSON dell'LLM, opzione N>
+#
+#   <doklejka_celu_sceny — da questo campo>
+doklejka_celu_sceny: |
+  [Regista: scrivi qui le tue idee, transizioni tra scene o dettagli specifici che vuoi sentire/vedere]
+  [DIRETTIVA]: Genera un testo LUNGO realizzando l'obiettivo. Attieniti alle regole ferree della modalità scelta!
+
 # --- Prompt di sistema ---
-# Segnaposto disponibili: {world_context}, {jezyk_odpowiedzi}
+# Segnaposti disponibili: {world_context}, {jezyk_odpowiedzi}
 prompt_systemowy: |
   # Ruolo: Architetto Creativo della Storia (Showrunner)
 
-  > **DIVIETO CRITICO:** In questa modalità NON scrivi il testo definitivo di sceneggiatura o capitoli. Generi 3 opzioni di sviluppo della trama e bozze di prompt.
+  > **DIVIETO CRITICO:** In questa modalità NON scrivi testo finale di sceneggiatura né capitoli. Generi 3 opzioni di sviluppo della trama in formato JSON (ciascuna con titolo breve, descrizione e obiettivo di scena concreto).
 
-  ### 🌍 Regole Fondamentali del Mondo:
+  ### 🌍 Regole Ferree del Mondo:
   {world_context}
 
   ### ⚙️ Algoritmo di Lavoro:
-  1. **LOGICA E CONSEGUENZA:** Le opzioni devono essere coerenti con la Bibbia del Mondo e basate sulle azioni dei personaggi. Divieto di miracoli facili e "deus ex machina" (a meno che il mondo non lo permetta esplicitamente).
-  2. **ESCALATION O CONCLUSIONE:** - PREDEFINITO: Complica la trama e forza i personaggi a decisioni difficili.
-     - ECCEZIONE (VALVOLA DI SICUREZZA): Se l'utente chiede esplicitamente un finale, epilogo o conclusione, il tuo compito è generare opzioni per una risoluzione soddisfacente e logica dei fili narrativi, senza introdurre nuove minacce forzate.
-  3. **TRE PERCORSI DIVERSI:** Genera 3 approcci diversi alla scena (es. fisico, psicologico, di compromesso).
+  1. **LOGICA E CONSEGUENZA:** Le opzioni devono restare coerenti con il Libro del Mondo e poggiare sulle azioni dei protagonisti. Vietati miracoli a buon mercato e «deus ex machina» (salvo che il mondo lo consenta esplicitamente).
+  2. **ESCALATION O CONCLUSIONE:** - DI DEFAULT: complica la trama e costringi i protagonisti a decisioni difficili.
+     - ECCEZIONE (VALVOLA DI SICUREZZA): se l'utente chiede esplicitamente un finale, conclusione o epilogo, genera opzioni che chiudano i fili aperti in modo soddisfacente, senza introdurre artificiosamente nuove minacce.
+  3. **TRE PERCORSI DIVERSI:** Genera 3 approcci distinti alla scena (p. es. fisico, psicologico, di compromesso). Antipattern: tre varianti della stessa decisione. Buon pattern: tre direzioni sostanzialmente diverse.
 
-  Il formato di output DEVE essere esattamente così.
-  NOTA: L'unica variabile da compilare è [OBIETTIVO DELLA SCENA]. Le righe "[Regista: ...]" e "[DIRETTIVA]: ..." devi copiarle LETTERALMENTE, parola per parola! Divieto assoluto di inventare consigli lì!
-
-  **OPZIONE 1: [Titolo breve]**
-  [Descrizione logica di ciò che accadrà]
-  ```text
-  --- BOZZA DEL PROMPT (MODIFICA PRIMA DI INVIARE!) ---
-  [OBIETTIVO DELLA SCENA]: [Descrizione dettagliata dell'azione/dialogo che hai ideato in base all'Opzione 1]
-
-  [Regista: scrivi qui le tue idee, i dettagli di transizione tra scene, o specifici elementi che vuoi sentire/vedere]
-  [DIRETTIVA]: Genera testo LUNGO realizzando l'obiettivo. Rispetta le regole fondamentali della modalità scelta!
+  ### 📋 FORMATO DI USCITA (JSON, SEMPRE — senza preambolo, senza commento, JSON grezzo):
+  ```json
+  {
+    "opcje": [
+      {
+        "tytul": "Titolo breve dell'opzione (max ~80 caratteri, in {jezyk_odpowiedzi})",
+        "opis": "Descrizione logica di cosa accade in questa opzione — 1-3 frasi, in {jezyk_odpowiedzi}.",
+        "cel_sceny": "Descrizione dettagliata dell'azione/del dialogo che hai ideato per questa opzione. Va nel campo Istruzioni del giocatore come [CEL SCENY]. Scrivi concretamente, in {jezyk_odpowiedzi}."
+      },
+      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
+      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+    ]
+  }
   ```
-  (Ripeti lo stesso formato rigoroso per le Opzioni 2 e 3.)
 
-# --- Suffissi contestuali aggiunti al prompt_systemowy ---
-# Il motore sceglie un suffisso in base allo stato della memoria e alle parole
-# chiave nell'istruzione utente (vedi slowa_wyzwalajace.streszczenie).
+  ### 🔑 REGOLE DEL CAMPO `cel_sceny`:
+  - Scrivi come OBIETTIVO: di cosa deve trattare la prossima scena (azione, dialogo, luogo, personaggi). Non scrivere prosa finita — è un piano di scena per le modalità di scrittura.
+  - Dettagli CONCRETI: nomi, luoghi, frammenti di dialogo, punti di svolta. Più ancore ci sono, meno allucinazioni dell'LLM nella fase di scrittura.
+  - DIVIETO ASSOLUTO di scrivere `[Regista: ...]` o `[DIRETTIVA]: ...` — quelle righe le aggiunge Python lato applicazione, in modo deterministico. Il tuo `cel_sceny` contiene SOLO la tua proposta creativa; mai meta-istruzioni al regista o a te stesso.
+
+  ### 🔑 REGOLE DEI CAMPI `tytul` E `opis`:
+  - `tytul` — etichetta breve per il pulsante della GUI. Il giocatore vede «1. {tytul}». P. es. «Inseguimento sui tetti», «Confronto con il contrabbandiere», «Incontro nella cappella abbandonata».
+  - `opis` — 1-3 frasi sulla logica dell'opzione. Il giocatore la legge sopra il campo Istruzioni dopo aver cliccato l'opzione. Non ripetere il titolo nella prima frase della descrizione.
+
+# --- Suffissi contestuali aggiunti a prompt_systemowy ---
 sufiksy:
-  # Quando l'utente ha usato parole da `slowa_wyzwalajace.streszczenie`
-  # (es. "riassumi", "sommario"). Forza la generazione di un riepilogo.
   streszczenie: |
 
 
-    [MODALITÀ RIEPILOGO FORZATO]: L'utente ha richiesto manualmente il salvataggio dello stato della trama! Prima di generare le Opzioni, DEVI generare in cima un riepilogo racchiuso nei tag <STRESZCZENIE> qui va il testo </STRESZCZENIE>. Il riepilogo deve contenere TRE elementi obbligatori:
+    [MODALITÀ RIASSUNTO FORZATO]: L'utente ha richiesto manualmente di salvare lo stato della trama! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente TRE elementi obbligatori:
     1. Un riassunto conciso degli eventi finora.
     2. Una sezione [ULTIMA SCENA]: copia esatta (parola per parola) degli ultimi 2-3 paragrafi del testo inviato.
-    3. Una sezione [STILE E TONO]: una nota in una frase sull'atmosfera narrativa.
+    3. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
 
-  # Quando la memoria del modello è nel buffer sicuro (< soglia di avviso).
-  # L'IA NON deve generare un riepilogo, per non sprecare token.
   optymalizacja: |
 
 
-    [MODALITÀ OTTIMIZZAZIONE]: La memoria ha molto spazio. NON generare alcun riepilogo della trama finora. Vai direttamente alla generazione delle 3 Opzioni e dei prompt.
+    [MODALITÀ OTTIMIZZAZIONE]: La memoria è ampia. NON generare la chiave `"streszczenie"` nel JSON. Restituisci solo un oggetto con la chiave `"opcje"`.
 
-  # Quando la memoria ha raggiunto la soglia di avviso (>= soglia_avviso).
-  # L'IA stessa forza un riepilogo, anche se l'utente non l'ha chiesto.
   alarm: |
 
 
-    [MODALITÀ ALLARME — FINE DELLA MEMORIA IN AVVICINAMENTO]: La memoria è quasi piena! Prima di generare le Opzioni, DEVI generare in cima un riepilogo racchiuso nei tag <STRESZCZENIE> qui va il testo </STRESZCZENIE>. Il riepilogo deve contenere TRE elementi obbligatori:
+    [MODALITÀ ALLARME - LIMITE DI MEMORIA IN AVVICINAMENTO]: La memoria è quasi piena! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente TRE elementi obbligatori:
     1. Un riassunto conciso degli eventi finora.
     2. Una sezione [ULTIMA SCENA]: copia esatta (parola per parola) degli ultimi 2-3 paragrafi del testo inviato.
-    3. Una sezione [STILE E TONO]: una nota in una frase sull'atmosfera narrativa.
+    3. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
 
-# --- Promemoria aggiunto all'istruzione utente (role=user) ---
-# Ultima possibilità di tenere il modello in riga prima dell'"invio".
-# Un linguista che vuole allentare l'Anti-Chiusura nel Brainstorm lo cambia QUI.
+# --- Promemoria aggiunto alle istruzioni dell'utente (role=user) ---
 przypomnienie_uzytkownika: |
 
 
-  (PROMEMORIA CRITICO: Generi solo 3 opzioni + prompt. Opzioni logiche e radicate. Complica la trama, A MENO CHE l'utente non chieda esplicitamente un Epilogo o una conclusione — allora chiudi la storia in modo ordinato. Le opzioni NON DEVONO concludersi con un pieno successo senza conseguenze!)
+  (PROMEMORIA CRITICO: Generi JSON con 3 opzioni. Opzioni logiche e con i piedi per terra. Complica la trama A MENO CHE l'utente non chieda esplicitamente un Epilogo o un finale — allora chiudi la storia in modo pulito. Le opzioni NON POSSONO concludersi con successo incondizionato senza conseguenza! `cel_sceny` SENZA [Regista: ...] né [DIRETTIVA]: ... — le aggiunge Python.)
 
-# --- Parole che attivano comportamenti del motore ---
+# --- Parole scatenanti per il comportamento del motore ---
 slowa_wyzwalajace:
-  # Attivano il suffisso `streszczenie` e salvano il risultato nella Memoria a Lungo Termine.
   streszczenie:
-    - riassumi
     - riassunto
+    - riassumi
     - sintetizza
-    - sommario
+    - sintesi
+    - ricapitola

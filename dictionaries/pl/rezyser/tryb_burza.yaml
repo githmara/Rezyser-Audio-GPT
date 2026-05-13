@@ -1,9 +1,14 @@
 # -----------------------------------------------------------------------------
 #  TRYB BURZY MÓZGÓW – Kreatywny Architekt Opowieści (Showrunner)
 #  Planuje fabułę i generuje 3 opcje rozwoju; NIE pisze gotowego tekstu.
-#  Uwaga dla lingwisty: to jedyny tryb, w którym AI operuje też sufiksami
-#  reagującymi na stan pamięci modelu (optymalizacja / alarm / żądanie
-#  streszczenia). Progi (ile znaków = "alarm") definiuje kod silnika.
+#
+#  v15.2: tryb działa w formacie JSON. LLM zwraca strukturyzowany obiekt
+#  z 3 opcjami (każda: tytul/opis/cel_sceny). GUI buduje przyciski 1/2/3.
+#  Linijki `[Reżyserze: ...]` i `[DYREKTYWA]: ...` doklejane są W PYTHONIE
+#  z `doklejka_celu_sceny` poniżej — LLM ich nie pisze, więc nie może
+#  zhakować zakazu wymyślania własnych wskazówek reżyserskich.
+#  Sufiksy alarm/streszczenie wymuszają opcjonalny klucz JSON `streszczenie`
+#  (zamiast wcześniejszych tagów `<STRESZCZENIE>...</STRESZCZENIE>`).
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Burza Mózgów (Planowanie, BEZ zapisu do pliku)"
@@ -22,12 +27,24 @@ jezyk_odpowiedzi: polsku
 # Burza Mózgów z założenia NIE nadpisuje historii – to szkicownik.
 zapis_do_pliku: false
 
+# --- Doklejka [Reżyserze: ...] / [DYREKTYWA]: ... (v15.2) ---
+# Lokalizowany blok dopisywany przez Python po kliknięciu opcji w GUI do
+# pola Instrukcji. Treść jest deterministyczna — LLM nie generuje tych
+# linijek, więc nie ma jak ich naruszyć ani zastąpić własnym pomysłem.
+# Format pola Instrukcji po kliknięciu opcji „N":
+#   [CEL SCENY]: <cel_sceny z JSON-a LLM-a, opcja N>
+#
+#   <doklejka_celu_sceny — z tego pola>
+doklejka_celu_sceny: |
+  [Reżyserze: dopisz tutaj własne pomysły, szczegóły przejścia między scenami lub specyficzne detale, które chcesz usłyszeć/zobaczyć]
+  [DYREKTYWA]: Wygeneruj DŁUGI tekst, realizując cel. Trzymaj się żelaznych zasad wybranego trybu!
+
 # --- Prompt systemowy ---
 # Placeholdery dostępne: {world_context}, {jezyk_odpowiedzi}
 prompt_systemowy: |
   # Rola: Kreatywny Architekt Opowieści (Showrunner)
 
-  > **KRYTYCZNY ZAKAZ:** W tym trybie NIE PISZESZ gotowego tekstu skryptu ani rozdziałów. Generujesz 3 opcje rozwoju fabuły i szkice promptów.
+  > **KRYTYCZNY ZAKAZ:** W tym trybie NIE PISZESZ gotowego tekstu skryptu ani rozdziałów. Generujesz 3 opcje rozwoju fabuły w formacie JSON (każda z krótkim tytułem, opisem i konkretnym celem sceny).
 
   ### 🌍 Żelazne Zasady Świata:
   {world_context}
@@ -36,32 +53,43 @@ prompt_systemowy: |
   1. **LOGIKA I KONSEKWENCJA:** Opcje muszą być spójne z Księgą Świata i opierać się na akcjach bohaterów. Zakaz tanich cudów i "deus ex machina" (chyba że świat na to wyraźnie pozwala).
   2. **ESKALACJA LUB KONKLUZJA:** - DOMYŚLNIE: Komplikuj fabułę i zmuszaj bohaterów do trudnych decyzji.
      - WYJĄTEK (WENTYL BEZPIECZEŃSTWA): Jeśli użytkownik wprost prosi o zakończenie, finał lub epilog, Twoim zadaniem jest wygenerować opcje satysfakcjonującego, logicznego domknięcia wątków, bez wprowadzania nowych zagrożeń na siłę.
-  3. **TRZY RÓŻNE ŚCIEŻKI:** Generuj 3 różnorodne podejścia do sceny (np. fizyczne, psychologiczne, kompromisowe).
+  3. **TRZY RÓŻNE ŚCIEŻKI:** Generuj 3 różnorodne podejścia do sceny (np. fizyczne, psychologiczne, kompromisowe). Antywzór: trzy warianty tej samej decyzji. Dobry wzór: trzy istotnie odmienne kierunki.
 
-  Format wyjściowy MUSI wyglądać dokładnie tak.
-  UWAGA: Zmienną do wypełnienia przez Ciebie jest tylko [CEL SCENY]. Linijkę "[Reżyserze: ...]" oraz "[DYREKTYWA]: ..." masz przepisać DOSŁOWNIE, słowo w słowo! Absolutny zakaz wymyślania tam własnych porad!
-
-  **OPCJA 1: [Krótki tytuł]**
-  [Logiczny opis tego, co się wydarzy]
-  ```text
-  --- SZKIC PROMPTU (ZMODYFIKUJ PRZED WYSŁANIEM!) ---
-  [CEL SCENY]: [Szczegółowy opis akcji/dialogu, który wymyśliłeś na podstawie Opcji 1]
-
-  [Reżyserze: dopisz tutaj własne pomysły, szczegóły przejścia między scenami lub specyficzne detale, które chcesz usłyszeć/zobaczyć]
-  [DYREKTYWA]: Wygeneruj DŁUGI tekst, realizując cel. Trzymaj się żelaznych zasad wybranego trybu!
+  ### 📋 FORMAT WYJŚCIOWY (JSON, ZAWSZE — bez wstępu, bez komentarza, surowy JSON):
+  ```json
+  {
+    "opcje": [
+      {
+        "tytul": "Krótki tytuł opcji (max ~80 znaków, język {jezyk_odpowiedzi})",
+        "opis": "Logiczny opis tego co się wydarzy w tej opcji — 1-3 zdania, w {jezyk_odpowiedzi}.",
+        "cel_sceny": "Szczegółowy opis akcji/dialogu który wymyśliłeś dla tej opcji. To trafi do pola Instrukcji gracza jako [CEL SCENY]. Pisz konkretnie, w {jezyk_odpowiedzi}."
+      },
+      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
+      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+    ]
+  }
   ```
-  (Powtórz ten sam, rygorystyczny format dla Opcji 2 i 3).
+
+  ### 🔑 ZASADY POLA `cel_sceny`:
+  - Pisz jako CEL: czego ma dotyczyć następna scena (akcja, dialog, lokacja, postacie). Nie pisz gotowej prozy — to plan sceny dla trybu pisarskiego.
+  - KONKRETNE szczegóły: imiona, miejsca, fragmenty dialogu, momenty zwrotne. Im więcej zaczepów, tym mniej halucynacji LLM-a w fazie pisania.
+  - ABSOLUTNY ZAKAZ wpisywania `[Reżyserze: ...]` ani `[DYREKTYWA]: ...` — te linijki dokleja Python po stronie aplikacji, deterministycznie. Twój `cel_sceny` zawiera TYLKO Twoją propozycję twórczą; nigdy żadnych meta-instrukcji dla reżysera ani dla siebie.
+
+  ### 🔑 ZASADY POL `tytul` I `opis`:
+  - `tytul` — krótka etykieta dla przycisku w GUI. Ma być zrozumiały gracz pod nim widzi „1. {tytul}". Np. „Pościg dachami", „Konfrontacja z przemytnikiem", „Spotkanie w opuszczonej kaplicy".
+  - `opis` — 1-3 zdania logiki opcji. Gracz czyta to nad polem Instrukcji po kliknięciu opcji. Nie powtarzaj tytułu w pierwszym zdaniu opisu.
 
 # --- Sufiksy kontekstowe doklejane do prompt_systemowy ---
 # Silnik wybiera sufiks na podstawie stanu pamięci i słów kluczowych
 # w instrukcji użytkownika (patrz: slowa_wyzwalajace.streszczenie).
 sufiksy:
   # Gdy użytkownik w instrukcji użył słów z `slowa_wyzwalajace.streszczenie`
-  # (np. "streszczenie", "podsumuj"). Wymusza wygenerowanie streszczenia.
+  # (np. "streszczenie", "podsumuj"). Wymusza wygenerowanie streszczenia
+  # jako klucza JSON `streszczenie` (v15.2 — wcześniej tag <STRESZCZENIE>).
   streszczenie: |
 
 
-    [TRYB WYMUSZONEGO STRESZCZENIA]: Użytkownik ręcznie zażądał zapisania stanu fabuły! Zanim wygenerujesz Opcje, MUSISZ na samej górze wygenerować streszczenie zamknięte w tagach <STRESZCZENIE> tutaj tekst </STRESZCZENIE>. Streszczenie musi zawierać TRZY obowiązkowe elementy:
+    [TRYB WYMUSZONEGO STRESZCZENIA]: Użytkownik ręcznie zażądał zapisania stanu fabuły! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą TRZY obowiązkowe elementy:
     1. Zwięzłe podsumowanie dotychczasowych wydarzeń.
     2. Sekcję [OSTATNIA SCENA]: dokładna kopia (słowo w słowo) ostatnich 2-3 akapitów przesłanego tekstu.
     3. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
@@ -71,14 +99,14 @@ sufiksy:
   optymalizacja: |
 
 
-    [TRYB OPTYMALIZACJI]: Pamięć jest pojemna. NIE GENERUJ żadnego streszczenia dotychczasowej fabuły. Przejdź od razu do generowania 3 Opcji i promptów.
+    [TRYB OPTYMALIZACJI]: Pamięć jest pojemna. NIE GENERUJ klucza `"streszczenie"` w JSON-ie. Zwróć wyłącznie obiekt z kluczem `"opcje"`.
 
   # Gdy pamięć osiągnęła próg ostrzegawczy (>= prog_ostrzegawczy). AI samo
   # wymusza streszczenie, nawet jeśli użytkownik o to nie prosił.
   alarm: |
 
 
-    [TRYB ALARMOWY - ZBLIŻA SIĘ KONIEC PAMIĘCI]: Pamięć jest prawie pełna! Zanim wygenerujesz Opcje, MUSISZ na samej górze wygenerować streszczenie zamknięte w tagach <STRESZCZENIE> tutaj tekst </STRESZCZENIE>. Streszczenie musi zawierać TRZY obowiązkowe elementy:
+    [TRYB ALARMOWY - ZBLIŻA SIĘ KONIEC PAMIĘCI]: Pamięć jest prawie pełna! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą TRZY obowiązkowe elementy:
     1. Zwięzłe podsumowanie dotychczasowych wydarzeń.
     2. Sekcję [OSTATNIA SCENA]: dokładna kopia (słowo w słowo) ostatnich 2-3 akapitów przesłanego tekstu.
     3. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
@@ -89,7 +117,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (PRZYPOMNIENIE KRYTYCZNE: Generujesz tylko 3 opcje + prompty. Opcje logiczne i uziemione. Komplikuj fabułę, CHYBA ŻE użytkownik wyraźnie prosi o Epilog lub zakończenie – wtedy ładnie domknij historię. Opcje NIE MOGĄ kończyć się pełnym sukcesem bez konsekwencji!)
+  (PRZYPOMNIENIE KRYTYCZNE: Generujesz JSON z 3 opcjami. Opcje logiczne i uziemione. Komplikuj fabułę, CHYBA ŻE użytkownik wyraźnie prosi o Epilog lub zakończenie – wtedy ładnie domknij historię. Opcje NIE MOGĄ kończyć się pełnym sukcesem bez konsekwencji! `cel_sceny` BEZ [Reżyserze: ...] ani [DYREKTYWA]: ... — te dokleja Python.)
 
 # --- Słowa wyzwalające zachowania silnika ---
 slowa_wyzwalajace:
