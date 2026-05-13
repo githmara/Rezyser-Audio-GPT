@@ -5,7 +5,6 @@ Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyc
 Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków), Managera Reguł (od wersji 13.0 — bez Pythona dodasz nowy akcent, szyfr lub tryb twórczy, patrz KROK 7b poniżej) oraz — od wersji 15.0 — modułu Opowieści (interaktywna fikcja drugoosobowa generowana przez AI, czytana przez TTS lub czytnik ekranu, opisana osobnym manualem opowiesci.pl.txt). Wszystkie pięć narzędzi dostępnych jest w jednym oknie programu, przełączanym przyciskami na pasku lub skrótami klawiaturowymi Ctrl+1..Ctrl+5.
 
 
-
 KROK 1: Pierwsze uruchomienie (Cross-Platform)
 
 Aplikacja jest w pełni przenośna i gotowa do działania na systemie Windows. Po prostu wejdź do folderu i uruchom plik run.bat (klikając w niego dwukrotnie lub tworząc do niego skrót na pulpicie). Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu — Reżyser Audio GPT. Żadnej przeglądarki, żadnego serwera w tle. Gdy skończysz pracę, po prostu zamknij okno programu.
@@ -224,6 +223,7 @@ Skrypt czyści również znaczniki Markdown — usuwa hashtagi nagłówków (np.
 - Tarcza ochronna: Skrypt chroni wszystkie tagi HTML. Psuje tylko dialogi i narrację.
 - Działa lokalnie i nic nie kosztuje!
 
+
 Tryb 3: Szyfrant (NOWOŚĆ w 13.0 — zabawy tekstem, darmowe, lokalne)
 
 Trzeci RadioButton w Poligloci, obok Tłumacza AI i Trybu Reżysera: „Tryb Szyfranta (zabawy tekstem, losowe zacinanie)". Uruchamia sześć lokalnych algorytmów zniekształcających tekst — do harców, zagadek, łamigłówek językowych. Po wybraniu trybu pojawia się rozwijana lista algorytmów, a dla jednego z nich (Szyfru Cezara) dodatkowe pole liczbowe na przesunięcie.
@@ -254,11 +254,13 @@ Detekcja języka
 
 Zanim skrypt "zepsuje" tekst, sprawdza, w jakim języku jest napisany. Jeśli wykryje, że to nie jest polski, wyświetli ostrzeżenie. Reguły fonetyczne są skrojone pod polszczyznę — stosowanie ich do obcojęzycznego tekstu dałoby nieprzewidywalne efekty.
 
+
 Akcenty zoptymalizowane pod lokalne syntezatory (NVDA)
 
 Akcenty zostały w 100% zaprojektowane pod lokalne, darmowe i płatne syntezatoryczytników ekranu — Vocalizer i eSpeak w NVDA. To gwarantuje stabilność i przewidywalność efektu na każdym komputerze.
 
 Dlaczego nie ElevenLabs? Testy na dłuższych dokumentach wykazały, że fonetyczne zniekształcanie tekstu w silnikach takich jak ElevenLabs nie wymusza zamierzonego akcentu — silnik po prostu "zgaduje" język i z niego raczej robi akcent zachodnio/południowo-słowiański. Lokalne syntezatory NVDA są w tej kwestii znacznie bardziej posłuszne.
+
 
 Specyfika lokalnych syntezatorów (TTS)
 
@@ -266,6 +268,7 @@ Różne silniki TTS zachowują się inaczej. Poniżej kluczowe różnice, które
 
 eSpeak (Open Source)
 Lekki, darmowy silnik z ogromną bazą języków — obsługuje m.in. islandzki. Bardzo rygorystyczny wobec kodowania znaków, co czyni go przewidywalnym. Ma jednak wady fonetyczne: często współdzieli fonemy między językami, przez co np. ukraiński brzmi z rosyjskim nalotem.
+
 
 Nuance Vocalizer
 Płatny silnik komercyjny, wbudowany za darmo w urządzenia Apple (VoiceOver). Oferuje bardzo naturalną jakość wymowy. Ważne ograniczenie: NIE POSIADA wsparcia dla wszystkich języków — BRAK głosu islandzkiego. Dla fińskiego dostępna jest Satu, dla włoskiego Alice.
@@ -278,18 +281,22 @@ Uwaga: Tylko pamiętaj o włączeniu automatycznej zmiany języka po zamknięciu
 - Szybka instalacja: Pobrane pliki to pakiety wtyczek NVDA (mają rozszerzenie .nvda-addon). Nie musisz szukać ich instalacji przez NVDA -> Narzędzia -> Add-on Store. Jeśli NVDA jest włączone, po prostu "otwórz" te pliki w zwykły sposób (naciskając Enter). Windows może ukryć ich rozszerzenie, ale dymek podpowiedzi poprawnie odczyta je jako "Plik pakietu wtyczki NVDA". Czytnik sam zapyta, czy chcesz zainstalować dodatek.
 Po zainstalowaniu sterownika i głosów oraz ponownym uruchomieniu czytnika, Vocalizer pojawi się na liście syntezatorów w ustawieniach NVDA i nie powinien wyświetlać błędów.
 
+
 Microsoft OneCore
 Darmowe głosy wbudowane w system Windows (Mobile Voices). Dobry kompromis między jakością a dostępnością języków. Oferuje wysoką jakość i posiada wsparcie dla języka islandzkiego (Gudrun), fińskiego (Heidi) oraz włoskiego (Elsa). Uwaga: OneCore natywnie NIE obsługuje automatycznego przełączania języka na podstawie tagów lang (chyba że używasz wbudowanego w system czytnika ekranu narrator) — patrz sekcja poniżej.
 
 Jak pobrać głosy OneCore na Windows? Głosy OneCore są darmowe, ale większość języków nie jest instalowana domyślnie. Aby pobrać brakujące języki, wejdź w Ustawienia Windows → Czas i język → Mowa → Zarządzaj głosami (lub "Dodaj głosy"). Wybierz język z listy (np. Islandzki, Fiński, Włoski) i kliknij Pobierz. Po pobraniu głos pojawi się automatycznie w NVDA — bez żadnej dodatkowej konfiguracji.
+
 
 Apple (iPhone / iPad / Mac) — VoiceOver z Vocalizerem
 Na urządzeniach Apple silnik Vocalizer jest wbudowany natywnie w system operacyjny i obsługuje wszystkie języki bez żadnych dodatkowych zakupów. Domyślnie zainstalowane są jednak kompaktowe wersje głosów, które brzmią nieco mechanicznie. Aby uzyskać znacznie lepsze, bardziej naturalne brzmienie, warto pobrać wersje rozszerzone lub premium:
 - Na iPhonie/iPadzie: Ustawienia → Dostępność → VoiceOver → Mowa → Głos → wybierz język (np. Fiński) → dotknij nazwy głosu (np. Satu) → zobaczysz opcje "Rozszerzony" i "Premium". Pobierz wybraną wersję — zajmuje więcej miejsca na dysku, ale różnica w jakości jest wyraźna.
 - Na Macu: Preferencje systemowe (lub Ustawienia systemowe) → Dostępność → VoiceOver → Otwórz narzędzie VoiceOver → Mowa → Głos → kliknij "Dostosuj" przy wybranym głosie i pobierz wersję rozszerzoną lub premium.
 
+
 Android — Vocalizer płatny za każdy głos
 Na Androidzie Vocalizer jest dostępny jako aplikacja w Google Play Store (szukaj "Vocalizer TTS"). Uwaga: każdy język i głos kupuje się osobno — nie ma jednej licencji na wszystko. Przed zakupem możesz przetestować głos przez kilka minut w trybie demo. Po zakupie głos jest przypisany do konta Google i można go zainstalować na dowolnym urządzeniu z tym samym kontem.
+
 
 Killer Feature dla niewidomych: Pliki z tagami językowymi
 
@@ -300,6 +307,7 @@ To jest prawdziwa rewolucja. Przetworzone pliki zapisują się teraz jako:
 
 Przetworzone pliki zawsze zapisują się jako NOWE dokumenty (np. akcent_Finski.html).
 
+
 Automatyczne przełączanie języka w NVDA — co musisz wiedzieć
 
 Żeby NVDA faktycznie przełączało głos na podstawie tagu lang, musi być włączone ustawienie "Automatycznie zmieniaj język, gdy wspierane". Znajdziesz je w Preferencjach NVDA → Mowa. Domyślnie jest włączone po pierwszym uruchomieniu czytnika — ale warto sprawdzić, czy ktoś go nie wyłączył.
@@ -307,6 +315,7 @@ Automatyczne przełączanie języka w NVDA — co musisz wiedzieć
 Ważne ograniczenie głosów OneCore: Głosy Microsoft OneCore natywnie nie obsługują tego mechanizmu z NVDA, a tylko z wbudowanym w system Windows narratorem. Istnieje nieoficjalny dodatek do NVDA o nazwie "One Core Autolang", który próbuje to naprawić — ale jego rozwój został szybko przerwany. Przyczyna jest prozaiczna: co roku, przy pierwszej wersji NVDA w danym roku, pojawiają się zmiany łamiące kompatybilność API (tzw. API Breaking Changes). Czasem wystarczy zaktualizować pole "last tested version" w manifeście dodatku, ale czasem wymagane są prawdziwe zmiany w kodzie — a autor nie nadąża z aktualizacjami. Jeśli zależy Ci na automatycznym przełączaniu języka, bezpieczniejszym wyborem są Vocalizer lub eSpeak, które obsługują ten mechanizm natywnie, przy czym w tym pierwszym przypadku musisz się też liczyć z czasową niedostępnością zaktualizowanego sterownika głosó Vocalizer dla najnowszego NVDA z powodu opisanego kilka zdań wcześniej. Wtedy będziesz mieć do wyboru:
 - Nie aktualizować NVDA - głosy na pewno będą działać, ale nie będziesz mieć dostępu do nowych potencjalnych funkcji, ulepszeń czy poprawek błędów.
 - Zaktualizować NVDA i wymusić włączenie dodatku poprzez nadpisanie zgodności (dość niedawno wprowadzone, zadziała, jeśli do tej pory wymagane było tylko zaktualizowanie manifestu). W przeciwnym wypadku... no cóż, było ostrzeżenie, że robisz to na własne ryzyko.
+
 
 ALARM dla użytkowników Vocalizera: NVDA 2026.1 (maj 2026)
 
@@ -317,6 +326,7 @@ Co z tego wynika praktycznie:
 - Jeśli już zaktualizowałeś i Vocalizer Ci zniknął — masz dwie ścieżki:
   1. Przeprosić się z Vocalizerem: odinstaluj NVDA 2026.1 i wróć do poprzedniej, działającej wersji (np. 2025.x). To najszybszy powrót do działających głosów.
   2. Wykupić licencję na komercyjną paczkę głosową dla SAPI5 — np. od A T Guys (atguys.com). UWAGA przy konfiguracji: w NVDA przy wyborze syntezatora wskaż „Microsoft Speech API wersja 5 — 32 bity", a NIE samo „Microsoft Speech API wersja 5". Wybór domyślnego wariantu SAPI5 sprawi, że lista głosów pozostanie pusta — licencjonowane głosy SAPI5 są dystrybuowane jako biblioteki 32-bitowe i tylko 32-bitowy wariant API je „widzi".
+
 
 KROK 6: Architekt Audiobooków
 
@@ -375,8 +385,6 @@ Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, 
 Gdzie szukać dalszej dokumentacji folderu dictionaries/:
 - Plik `docs/dictionaries.pl.txt` (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.
 - Plik `dictionaries/README.md` (dostępny tylko przy klonowaniu repozytorium z GitHuba — paczki wydaniowe filtrują pliki .md) — szczegółowa dokumentacja techniczna formatu YAML z przykładami, listami pól, zasadami pipeline'u, regex-ami. Ten dokument adresowany jest do lingwistów znających podstawy programowania oraz do deweloperów.
-
-
 
 
 Ważne wskazówki dla użytkowników czytników ekranu (NVDA)

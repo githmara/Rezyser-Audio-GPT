@@ -136,12 +136,52 @@ def _wczytaj_ui(jezyk: str) -> dict[str, Any]:
     return _wczytaj_yaml(DICT_DIR / jezyk / FOLDER_GUI / NAZWA_UI)
 
 
+def _scal_tresc_sekcjami(tresc: Any) -> str | None:
+    """Scala wartość ``tresc`` z szablonu YAML w jeden tekst dokumentu.
+
+    Backward-compat dwa schematy:
+
+    * **Stary** (do v15.1): ``tresc: |`` jako pojedynczy block-scalar z całym
+      manualem w środku. Zwracamy 1:1 — nic do scalania.
+    * **Nowy** (od v15.2): ``tresc`` jako słownik ``{klucz_sekcji: tresc_sekcji}``
+      — każda wartość to block-scalar z jedną sekcją (np. ``krok_1``, ``vocalizer``,
+      ``changelog_15``). Skalamy w kolejności WSTAWIENIA (Python 3.7+ dict zachowuje
+      insertion order, ``yaml.safe_load`` ją honoruje). Między sekcjami wstawiamy
+      DWIE puste linie (``\\n\\n\\n``) — historyczny separator manuala PL używany
+      konsystentnie między KROKami i akapitami changelogowymi w stringowej wersji
+      ``tresc:`` z v15.1. Normalizacja ``rstrip("\\n") + "\\n\\n\\n".join``
+      daje deterministyczny output niezależnie od stylu block-scalar (``|`` clip
+      vs ``|+`` keep): końcowe ``\\n`` z każdej sekcji są ucinane przed joinerem,
+      więc finalnie zawsze są dokładnie dwie puste linie między sekcjami.
+
+    Zwraca ``None`` przy nieobsługiwanym typie — wywołujący wypisuje ostrzeżenie
+    i pomija ten plik (łagodna degradacja, jak reszta loadera).
+    """
+    if isinstance(tresc, str):
+        return tresc
+    if isinstance(tresc, dict):
+        sekcje: list[str] = []
+        for klucz, wartosc in tresc.items():
+            if not isinstance(wartosc, str):
+                print(f"⚠️  Sekcja '{klucz}' nie jest stringiem — pomijam.")
+                continue
+            sekcje.append(wartosc.rstrip("\n"))
+        if not sekcje:
+            return ""
+        return "\n\n\n".join(sekcje) + "\n"
+    return None
+
+
 def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
     """Zwraca listę (id, tresc) dla każdego szablonu w danym języku.
 
     Szablon = plik YAML w ``dictionaries/<jezyk>/gui/dokumentacja/``
-    z polami ``id`` (rdzeń nazwy pliku wynikowego) oraz ``tresc``
-    (block-scalar z właściwą treścią dokumentu + placeholdery).
+    z polami ``id`` (rdzeń nazwy pliku wynikowego) oraz ``tresc``.
+
+    Od v15.2 ``tresc`` może być:
+      * stringiem (stary schemat — block-scalar z całością manuala);
+      * słownikiem (nowy schemat — klucze sekcji w kolejności wstawiania).
+    Zob. :func:`_scal_tresc_sekcjami` po szczegóły scalania.
     """
     folder = DICT_DIR / jezyk / FOLDER_GUI / FOLDER_DOKUMENTACJA
     if not folder.is_dir():
@@ -153,11 +193,14 @@ def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
         if not dane:
             continue
         id_szablonu = dane.get("id") or plik.stem
-        tresc = dane.get("tresc", "")
-        if not isinstance(id_szablonu, str) or not isinstance(tresc, str):
-            print(f"⚠️  Pomijam {plik}: pola 'id' i 'tresc' muszą być stringami.")
+        if not isinstance(id_szablonu, str):
+            print(f"⚠️  Pomijam {plik}: pole 'id' musi być stringiem.")
             continue
-        szablony.append((id_szablonu, tresc))
+        tresc_scalona = _scal_tresc_sekcjami(dane.get("tresc", ""))
+        if tresc_scalona is None:
+            print(f"⚠️  Pomijam {plik}: 'tresc' musi być stringiem albo słownikiem sekcji.")
+            continue
+        szablony.append((id_szablonu, tresc_scalona))
     return szablony
 
 

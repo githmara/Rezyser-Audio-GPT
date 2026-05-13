@@ -7,7 +7,6 @@ Moduł zaprojektowany został od początku z myślą o niewidomych graczach — 
 Otworzysz panel przyciskiem "📖  Opowieści" na pasku narzędzi albo skrótem klawiaturowym Ctrl+5.
 
 
-
 KROK 1: Trzy tryby gry — wybierz styl rozgrywki
 
 Tuż pod paskiem nazwy gry znajdziesz pole wyboru trybu (RadioBox). Tryb określa, jak silnik narracyjny prowadzi z Tobą dialog:
@@ -19,7 +18,6 @@ TRYB WYBORÓW — każda tura kończy się 3-5 ponumerowanymi opcjami A-E w post
 TRYB MNIEJSZE ZŁO — jak Wyborów, ale każda z 3-5 opcji jest niekorzystna moralnie, fizycznie albo strategicznie. Brak „neutralnej" opcji, brak happy endingu w tej turze. Tryb dla miłośników mrocznej fikcji w klimacie „Tales of Consequence" albo dramatów moralnych.
 
 Tryb można zmienić w trakcie gry — przy następnej turze silnik narracyjny zaadoptuje się do nowego stylu (z trybu Swobodnego do Wyborów może przejść w jeden klik).
-
 
 
 KROK 2: Quick Start — gotowe scenariusze otwierające
@@ -41,7 +39,6 @@ ROMANTYCZNA KOMEDIA OBYCZAJOWA — Saska Kępa kwiecień 2024, mała kawiarnia s
 Po wyborze presetu kliknij "Nowa gra" — silnik wstrzyknie do siebie krótki opis świata i bohatera, ustawi domyślny tryb gry (możesz go nadpisać RadioBox-em zanim klikniesz „Nowa gra"). Pierwsza tura LLM rozegra scenę otwierającą.
 
 
-
 KROK 3: Pierwsza gra od zera — bez presetu
 
 Jeśli wolisz pełną swobodę, zostaw "(własna gra)" w polu Quick Start i przygotuj się do wpisania pierwszej akcji ręcznie.
@@ -51,7 +48,6 @@ Jeśli wolisz pełną swobodę, zostaw "(własna gra)" w polu Quick Start i przy
 3. Kliknij "Nowa gra". Aplikacja stworzy 3 pliki: stan gry (.game.json), pustą Księgę Świata (.md) i metadane trybu (.mode). Plik narracji (.txt) powstanie po pierwszej turze.
 4. W polu „Twoja akcja lub komenda" na dole panelu wpisz pierwszą akcję, np. „budzę się w nieznanym pokoju". Kliknij "Wyślij". Silnik narracyjny otworzy świat na podstawie Twojej akcji — opis pomieszczenia, dźwięki, postacie, pierwsze decyzje.
 5. Każda tura zostanie automatycznie zapisana — możesz w każdej chwili zamknąć aplikację i wczytać grę później przyciskiem "Wczytaj".
-
 
 
 KROK 4: Zasady świata — własne reguły, które silnik respektuje przez całą grę
@@ -71,7 +67,6 @@ Puste pole zasad = brak dodatkowych reguł (zachowanie domyślne, jak w v15.0). 
 Uwaga: zasady świata wymagają aktywnej gry. Jeśli klikniesz "Edytuj zasady świata…" bez wczytanej/założonej gry, dostaniesz komunikat „Brak aktywnej gry" — najpierw kliknij "Nowa gra" albo wczytaj zapisaną grę.
 
 
-
 KROK 5: Slash-komendy — szybkie akcje bez API
 
 W polu akcji możesz w każdej chwili wpisać komendę zaczynającą się od ukośnika `/`. Komendy są lokalne (nie kosztują wywołań do OpenAI) i działają niezależnie od trybu gry. Akceptowane są zarówno polskie, jak i angielskie warianty:
@@ -85,7 +80,6 @@ Silnik narracyjny dobiera model AI automatycznie w zależności od trybu: dla tr
 /wizualizuj <opis>, /visualize <opis> — multisensoryczny opis aktualnej sceny. Nie zmienia stanu gry, nie proponuje wyborów — silnik narracyjny używa wszystkich pięciu zmysłów (wzrok, słuch, zapach, dotyk, smak), by pokazać scenę z większą głębią. Wynik pojawia się w osobnym dialogu, NIE jest dopisywany do narracji ani zapisany w pliku audiobooka. Przykład: „/wizualizuj jak wygląda strażnik" lub „/wizualizuj zapach kawiarni".
 
 /koniec, /quit — zamyka aplikację (po autozapisie tury w toku).
-
 
 
 KROK 6: Pliki gry — gdzie znajdziesz swoje dane
@@ -103,7 +97,6 @@ runtime/opowiesci/<nazwa>.story.jsonl — surowy log każdej tury (request gracz
 runtime/skrypty/<nazwa>.mode — metadane numeru trybu (3=Swobodny, 4=Wyborów, 5=Mniejsze zło). Plik wspólny z Reżyserem, ale numeracja nie koliduje (Reżyser używa 0-2).
 
 
-
 KROK 7: Wskaźnik pamięci modelu — dlaczego tury w starych grach nie wymagają od Ciebie ręcznej pracy
 
 Pod RadioBox-em trybu znajdziesz wskaźnik pamięci modelu — pasek postępu (wx.Gauge) z opisem statusu obok. Wskaźnik pokazuje procent zapełnienia okna kontekstowego silnika narracyjnego (gpt-4o-mini ma 128 000 tokenów buforu).
@@ -118,13 +111,11 @@ Cztery poziomy zapełnienia:
 W praktyce mechanizm autoredukcji jest niewidoczny — gracz nie czuje, że coś się dzieje, bo wątek tła rozwiązuje problem przed jego zauważeniem. Ważne tylko, byś nie wysyłał kolejnej tury w trakcie auto-streszczenia (przycisk "Wyślij" jest wtedy wyszarzony).
 
 
-
 KROK 8: Cinematic Meta Warning — przerywnik dramatyczny po 150. turze
 
 Po 150 turach jednej gry silnik narracyjny RAZ wstawi „Cinematic Meta Warning" — meta-narracyjny przerywnik dramatyczny. Pojawi się w osobnym dialogu z dźwiękiem dzwonka, z zwrotem bezpośrednio do Ciebie w drugiej osobie, podsumowaniem osiągnięć i ostrzeżeniem o wadze podejmowanych decyzji.
 
 Cinematic Warning NIE jest częścią narracji audiobookowej — silnik filtrujący .txt automatycznie wycina jego treść (oznaczoną markerami ⚠️🚨⚠️), żebyś podczas odsłuchu audiobooka nie usłyszał meta-komentarza o własnej grze. Treść trafia tylko do logu .story.jsonl (do refleksji albo zachowania na pamiątkę) i do dialogu w GUI, gdzie możesz ją przeczytać raz i kontynuować.
-
 
 
 KROK 9: Most do Reżysera — wykorzystaj Księgę Świata stworzoną w Opowieściach
@@ -138,7 +129,6 @@ Co możesz z tym zrobić:
 3. Otrzymasz teraz klasyczną narrację Reżysera (długie, struktyzowane sceny z aktami i rozdziałami) z natywnymi akcentami postaci, które polubiłeś w Opowieściach. Strażnik Karmela ze schronu mówiący krótkimi zdaniami, inkwizytorka Rosanna ze śpiewnym akcentem wschodnim — wszystkie cechy zachowane.
 
 To jednokierunkowy most: Opowieści produkują materiał, Reżyser go formatuje. Możliwe odwrotne nie ma — Reżyser nie wczytuje gier z Opowieści jako stanu interaktywnego.
-
 
 
 KROK 10: Dostępność (NVDA i czytniki ekranu) — projektowane od początku
@@ -158,7 +148,6 @@ SYGNAŁY DŹWIĘKOWE — każda zakończona tura sygnalizowana wx.Bell (dzwonek 
 KOLOROWE STATUSY PAMIĘCI — wskaźnik pamięci modelu zmienia kolor czcionki (zielony/pomarańczowy/czerwony) zgodnie z poziomem zapełnienia. Dla użytkowników widzących to dodatkowy sygnał wzrokowy; NVDA i tak czyta tekst statusu, więc niewidomi nie tracą informacji.
 
 AKCELERATORY KLAWIATUROWE — wszystkie przyciski mają znak `&` przed jedną z liter etykiety, co aktywuje akcelerator Alt+litera. Działa identycznie jak w innych modułach aplikacji.
-
 
 
 Najczęstsze problemy

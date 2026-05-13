@@ -392,31 +392,35 @@ def utnij_prefix_z_wyniku(wynik: str) -> str:
 # ---------------------------------------------------------------------------
 # Budowanie wynikowego YAML-a (block scalar `|` + nagłówek-komentarz)
 # ---------------------------------------------------------------------------
+def _wcetnij_blok_scalar(tresc: str, wciecie: int = 2) -> list[str]:
+    """Wcina każdą linię o `wciecie` spacji, pust linie zostawia jako puste."""
+    linie = tresc.split("\n")
+    # Usuń ostatnią pustą linię (artefakt rstrip + "\n" w buduj sekcji)
+    if linie and linie[-1] == "":
+        linie = linie[:-1]
+    prefix = " " * wciecie
+    return [prefix + l if l.strip() else "" for l in linie]
+
+
 def zbuduj_yaml_wynikowy(
     kod_jezyka: str,
     id_szablonu: str,
-    tresc: str,
+    tresc: str | dict[str, str],
     nazwa_pliku: str,
 ) -> str:
     """Składa ``dictionaries/<kod>/gui/dokumentacja/<plik>.yaml`` do zapisu.
 
     Nie używamy `yaml.dump` — nie gwarantuje on block-scalar stylu `|`
     w ładnej formie, zwłaszcza dla treści z nawiasami klamrowymi
-    (wymusiłby cudzysłowy). Budujemy ręcznie:
+    (wymusiłby cudzysłowy). Budujemy ręcznie.
 
-      * nagłówek komentarza (informacja, że plik jest wygenerowany);
-      * `id: <id>`;
-      * `tresc: |` + treść, każda linia wcięta 2 spacjami;
-      * puste linie oryginału pozostają puste (bez końcowego whitespace).
+    Tresc może być:
+      * stringiem — stary schemat z jednego block-scalar `|`. Wynik:
+        ``id: <id>\\ntresc: |\\n  <treść wcięta 2 spacjami>``.
+      * słownikiem ``{klucz_sekcji: tresc_sekcji}`` — nowy schemat (v15.2+).
+        Każda wartość zapisana jako osobny block-scalar `|` wcięty 4 spacjami
+        (klucz sekcji wcięty 2 spaceami pod `tresc:`).
     """
-    linie = tresc.split("\n")
-    wciete: list[str] = []
-    for linia in linie:
-        if linia.strip() == "":
-            wciete.append("")
-        else:
-            wciete.append("  " + linia)
-
     naglowek = (
         "# =============================================================================\n"
         f"# dictionaries/{kod_jezyka}/gui/dokumentacja/{nazwa_pliku}\n"
@@ -432,26 +436,51 @@ def zbuduj_yaml_wynikowy(
         "# =============================================================================\n"
         "\n"
     )
-    cialo = f"id: {id_szablonu}\ntresc: |\n" + "\n".join(wciete)
-    if not cialo.endswith("\n"):
-        cialo += "\n"
-    return naglowek + cialo
+
+    if isinstance(tresc, str):
+        # Stary schemat: jeden block-scalar `|`
+        wciete = _wcetnij_blok_scalar(tresc, wciecie=2)
+        cialo = f"id: {id_szablonu}\ntresc: |\n" + "\n".join(wciete)
+        if not cialo.endswith("\n"):
+            cialo += "\n"
+        return naglowek + cialo
+
+    if isinstance(tresc, dict):
+        # Nowy schemat: tresc jako dict sekcji. Każda sekcja to osobny `|` scalar.
+        cialo = f"id: {id_szablonu}\ntresc:\n"
+        for klucz, sekcja in tresc.items():
+            cialo += f"  {klucz}: |\n"
+            wciete = _wcetnij_blok_scalar(sekcja, wciecie=4)
+            for linia in wciete:
+                cialo += linia + "\n"
+        return naglowek + cialo
+
+    raise TypeError(f"`tresc` musi być stringiem albo dict-em, dostałem {type(tresc).__name__}")
 
 
 # ---------------------------------------------------------------------------
 # Wczytanie źródła PL
 # ---------------------------------------------------------------------------
-def wczytaj_szablony_pl() -> list[tuple[str, str, str]]:
-    """Zwraca listę ``(nazwa_pliku, id, tresc)`` z PL-owej dokumentacji.
+# Klucz „_legacy" dla starych yaml-ów (string tresc): pakujemy do dict z jednym
+# kluczem, żeby downstream miał spójny interfejs. Dict z jednym kluczem
+# „_legacy" odpowiada zachowaniu sprzed v15.2 (jedno wywołanie LLM dla całości).
+KLUCZ_LEGACY = "_legacy"
 
-    13.4: zastępuje hardkodowany ``wczytaj_zrodlo_pl``. Iteruje po
-    ``dictionaries/pl/gui/dokumentacja/*.yaml`` i wyciąga z każdego pola
-    ``id`` oraz ``tresc``. Pliki bez wymaganych pól są pomijane z ostrzeżeniem,
-    ale nie blokują reszty (taka sama łagodna degradacja jak w
-    :mod:`generuj_dokumentacje`).
+
+def wczytaj_szablony_pl() -> list[tuple[str, str, dict[str, str]]]:
+    """Zwraca listę ``(nazwa_pliku, id, sekcje)`` z PL-owej dokumentacji.
+
+    Od v15.2 (task #3) szablony PL mają ``tresc`` jako dict sekcji
+    (``{krok_1: |..., krok_2: |..., ...}``) — pozwala to na surgical update
+    pojedynczej sekcji (``--klucz`` w CLI) zamiast retłumaczania całego
+    manuala 8 razy przy każdej drobnej zmianie.
+
+    Backward-compat: jeśli ``tresc`` jest stringiem (stary schemat z v15.1
+    i wcześniej), opakowujemy w dict z jednym kluczem ``_legacy``. Downstream
+    nie musi rozróżniać — ten sam pipeline tokenizacji + tłumaczenia.
 
     Returns:
-        Lista trójek (nazwa pliku jak ``manual.yaml``, id szablonu, treść PL).
+        Lista trójek (nazwa pliku jak ``manual.yaml``, id szablonu, dict sekcji).
         Posortowana alfabetycznie po nazwie pliku, żeby kolejność tłumaczenia
         była deterministyczna (cache wznawiania w runtime/ jest po niej kluczowany).
     """
@@ -459,7 +488,7 @@ def wczytaj_szablony_pl() -> list[tuple[str, str, str]]:
     if not folder.is_dir():
         raise FileNotFoundError(f"Brak folderu źródłowego PL: {folder}")
 
-    szablony: list[tuple[str, str, str]] = []
+    szablony: list[tuple[str, str, dict[str, str]]] = []
     for plik in sorted(folder.glob("*.yaml")):
         with open(plik, "r", encoding="utf-8") as fh:
             dane = yaml.safe_load(fh)
@@ -467,11 +496,27 @@ def wczytaj_szablony_pl() -> list[tuple[str, str, str]]:
             print(f"⚠️  Pomijam {plik.name}: nie parsuje się do słownika YAML.")
             continue
         id_szablonu = dane.get("id")
-        tresc = dane.get("tresc")
-        if not isinstance(id_szablonu, str) or not isinstance(tresc, str):
-            print(f"⚠️  Pomijam {plik.name}: brak stringowych pól `id` lub `tresc`.")
+        if not isinstance(id_szablonu, str):
+            print(f"⚠️  Pomijam {plik.name}: brak stringowego pola `id`.")
             continue
-        szablony.append((plik.name, id_szablonu, tresc))
+        tresc = dane.get("tresc")
+        if isinstance(tresc, str):
+            sekcje = {KLUCZ_LEGACY: tresc}
+        elif isinstance(tresc, dict):
+            # Filtruj tylko stringowe wartości (inne typy — pomiń z ostrzeżeniem)
+            sekcje = {}
+            for k, v in tresc.items():
+                if isinstance(v, str):
+                    sekcje[k] = v
+                else:
+                    print(f"⚠️  {plik.name}: sekcja '{k}' nie jest stringiem — pomijam.")
+            if not sekcje:
+                print(f"⚠️  Pomijam {plik.name}: dict `tresc` nie ma żadnych stringowych sekcji.")
+                continue
+        else:
+            print(f"⚠️  Pomijam {plik.name}: `tresc` musi być stringiem albo dictem.")
+            continue
+        szablony.append((plik.name, id_szablonu, sekcje))
 
     if not szablony:
         raise ValueError(
@@ -480,9 +525,123 @@ def wczytaj_szablony_pl() -> list[tuple[str, str, str]]:
     return szablony
 
 
+def wczytaj_istniejacy_docelowy(plik_docelowy: Path) -> dict[str, str] | None:
+    """Wczytuje istniejący <kod>/gui/dokumentacja/<plik>.yaml jako dict sekcji.
+
+    Używane przez tryb ``--klucz`` (surgical update): tłumaczymy TYLKO wybrane
+    sekcje, reszta zostaje z istniejącego pliku docelowego. Zwraca dict sekcji
+    lub None, gdy plik nie istnieje / nie da się sparsować.
+
+    Konwersja starego schematu (string tresc) → dict: opakowujemy w
+    ``{_legacy: str}`` — to znaczy że plik docelowy jest w starym schemacie.
+    Surgical update na pojedynczy klucz z dictu PL nie zadziała w takim
+    przypadku (klucz PL nie istnieje w docelowym), więc wywołujący musi
+    poradzić sobie z fallback-iem (najczęściej: retłumacz cały plik bez --klucz).
+    """
+    if not plik_docelowy.is_file():
+        return None
+    try:
+        with open(plik_docelowy, "r", encoding="utf-8") as fh:
+            dane = yaml.safe_load(fh)
+    except (OSError, yaml.YAMLError):
+        return None
+    if not isinstance(dane, dict):
+        return None
+    tresc = dane.get("tresc")
+    if isinstance(tresc, str):
+        return {KLUCZ_LEGACY: tresc}
+    if isinstance(tresc, dict):
+        return {k: v for k, v in tresc.items() if isinstance(v, str)}
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Pipeline dla jednego języka docelowego
 # ---------------------------------------------------------------------------
+def _tlumacz_pojedyncza_sekcje(
+    kod: str,
+    nazwa_pl: str,
+    klient: Any,
+    nazwa_pliku: str,
+    rdzen: str,
+    klucz_sekcji: str,
+    tresc_pl: str,
+    *,
+    dry_run: bool,
+    model: str,
+    prompt_dodatkowy: str,
+) -> tuple[bool, str | None]:
+    """Tłumaczy pojedynczą sekcję (tokenizacja + LLM + walidacja + detokenizacja).
+
+    Zwraca (success, przetłumaczona_tresc). Cache wznawiania w runtime/ jest
+    kluczowany przez `{rdzen}_{klucz_sekcji}_{KOD_ZRODLOWY}_to_{kod}` —
+    dzięki temu temp_manual_krok_5_vocalizer_pl_to_en_*.jsonl żyje obok
+    temp_manual_krok_5_onecore_pl_to_en_*.jsonl, a częściowy progres jednej
+    sekcji nie psuje drugiej.
+    """
+    tresc_tok, mapa = tokenizuj(tresc_pl)
+    liczba_ph = len(mapa)
+    sufiks = f" ({klucz_sekcji})" if klucz_sekcji != KLUCZ_LEGACY else ""
+    print(
+        f"ℹ️  {kod}/{nazwa_pliku}{sufiks}: zamrożono {liczba_ph} placeholderów → "
+        f"tokeny ⟦0..{max(liczba_ph - 1, 0)}⟧, {len(tresc_pl):,} znaków źródła."
+    )
+    if dry_run:
+        oryginalne = Counter(PLACEHOLDER_REGEX.findall(tresc_pl))
+        ok_sanity = sum(oryginalne.values()) == liczba_ph
+        marker = "✅" if ok_sanity else "⚠️"
+        print(f"    {marker} Sanity check: {sum(oryginalne.values())} wystąpień ph, mapa {liczba_ph}.")
+        return True, None
+
+    payload = PREFIX_INSTRUKCJA + tresc_tok
+    blad_kryt: dict[str, Any] = {"msg": None, "partial": None}
+    cache_key = (
+        f"{rdzen}_{klucz_sekcji}_{KOD_ZRODLOWY}_to_{kod}"
+        if klucz_sekcji != KLUCZ_LEGACY
+        else f"{rdzen}_{KOD_ZRODLOWY}_to_{kod}"
+    )
+
+    def _on_postep(msg: str, pct: int) -> None:
+        sys.stderr.write(f"   [{kod}/{rdzen}{sufiks} {pct:3d}%] {msg}\n")
+
+    def _on_blad_krytyczny(msg: str, partial: str) -> None:
+        blad_kryt["msg"] = msg
+        blad_kryt["partial"] = partial
+
+    def _on_blad_miekki(msg: str, tytul: str) -> None:
+        print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: {tytul} — {msg.splitlines()[0]}")
+
+    wynik = tlumacz_dlugi_tekst(
+        tresc=payload,
+        jezyk_docelowy=nazwa_pl,
+        klient=klient,
+        runtime_dir=str(RUNTIME_DIR),
+        oryginalna_nazwa=cache_key,
+        on_postep=_on_postep,
+        on_blad_krytyczny=_on_blad_krytyczny,
+        on_blad_miekki=_on_blad_miekki,
+        model_tlumacz=model,
+        prompt_dodatkowy=prompt_dodatkowy,
+    )
+    if wynik is None:
+        komunikat = blad_kryt["msg"] or "nieznany błąd silnika tlumacz_ai.py"
+        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: przerwano tłumaczenie.\n    {komunikat.splitlines()[0]}")
+        return False, None
+
+    tekst_wy = utnij_prefix_z_wyniku(wynik.tekst)
+    ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
+    if not ok:
+        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: NARUSZONA parzystość markerów ⟦i⟧.")
+        for diag in problemy[:10]:
+            print(f"     {diag}")
+        if len(problemy) > 10:
+            print(f"     ... (+{len(problemy) - 10} kolejnych)")
+        return False, None
+
+    tekst_final = detokenizuj(tekst_wy, mapa)
+    return True, tekst_final
+
+
 def tlumacz_szablon(
     kod: str,
     nazwa_pl: str,
@@ -490,129 +649,103 @@ def tlumacz_szablon(
     klient: Any,
     nazwa_pliku: str,
     id_szablonu: str,
-    tresc_pl: str,
+    sekcje_pl: dict[str, str],
     *,
     skip_existing: bool,
     dry_run: bool,
     model: str,
+    klucze_filtru: list[str] | None = None,
 ) -> bool:
     """Pełny przebieg tłumaczenia jednego pliku-szablonu na jeden język.
 
-    13.4: zastępuje wcześniejsze ``tlumacz_jezyk``. Argument ``nazwa_pliku``
-    (np. ``"manual.yaml"`` / ``"dictionaries.yaml"``) decyduje o ścieżce
-    docelowej i o kluczu cache wznawiania w ``runtime/``, dzięki czemu
-    równoległe tłumaczenie wielu szablonów w jednym języku nie zderza się
-    o ten sam ``temp_manual_*.jsonl``. Argument ``nazwa_natywna`` (np. „English",
-    „Suomi") wchodzi do customowego system-promptu (sekcja „Project context")
-    z :func:`_zbuduj_prompt_dodatkowy`, żeby model mówił do użytkownika natywnie.
+    Od v15.2 (task #3) przyjmuje ``sekcje_pl`` jako dict (zamiast pojedynczego
+    stringa). Każda sekcja przepuszczana osobno przez tlumacz_ai z osobnym
+    cache wznawiania w ``runtime/``. Argument ``nazwa_natywna`` wchodzi do
+    customowego system-promptu z :func:`_zbuduj_prompt_dodatkowy`.
+
+    Tryby pracy:
+
+      * **FULL** (``klucze_filtru=None``): tłumaczy wszystkie sekcje z ``sekcje_pl``
+        i zapisuje cały plik na nowo (overwrite). To tradycyjne zachowanie
+        przed v15.2 + obsługa nowego dict-schematu.
+
+      * **SURGICAL** (``klucze_filtru=['krok_5_vocalizer', ...]``): tłumaczy
+        TYLKO wskazane klucze, wczytuje istniejący plik docelowy, podmienia
+        w nim wskazane sekcje i zapisuje całość. Wymaga, by plik docelowy
+        już istniał W NOWYM SCHEMACIE (dict tresc). Stare pliki ze stringiem
+        tresc nie obsłużą surgical update — najpierw FULL retłumacz.
     """
     cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
-    if cel.exists() and skip_existing:
+    if klucze_filtru is None and cel.exists() and skip_existing:
         print(f"⏭️  {kod}/{nazwa_pliku}: już istnieje — pomijam (--skip-existing).")
         return True
 
-    # --- Krok 1: tokenizacja --------------------------------------------------
-    tresc_tok, mapa = tokenizuj(tresc_pl)
-    liczba_ph = len(mapa)
-    print(
-        f"ℹ️  {kod}/{nazwa_pliku}: zamrożono {liczba_ph} placeholderów → "
-        f"tokeny ⟦0..{max(liczba_ph - 1, 0)}⟧."
-    )
-    if dry_run:
-        # Podgląd: kilka pierwszych mapowań i próbka tokenizowanej treści
-        if liczba_ph:
-            print(f"    Podgląd mapy (pierwsze 8):")
-            for idx in list(mapa.keys())[:8]:
-                print(f"      ⟦{idx}⟧ = {mapa[idx]}")
-            if liczba_ph > 8:
-                print(f"      ... (+{liczba_ph - 8} kolejnych)")
-        else:
-            print(f"    (Brak placeholderów — szablon czysto tekstowy.)")
-        # Szybki sanity check — mapa musi pokrywać 100% wystąpień w oryginale
-        oryginalne = Counter(PLACEHOLDER_REGEX.findall(tresc_pl))
-        if sum(oryginalne.values()) == liczba_ph:
-            print(f"    ✅ Sanity check: wszystkie {liczba_ph} wystąpień placeholderów trafiło do mapy.")
-        else:
+    # SURGICAL: filtruj sekcje + wczytaj istniejący plik docelowy do scalenia
+    sekcje_do_tlumaczenia: dict[str, str] = sekcje_pl
+    sekcje_istniejace: dict[str, str] | None = None
+    if klucze_filtru is not None:
+        nieznane = [k for k in klucze_filtru if k not in sekcje_pl]
+        if nieznane:
+            print(f"❌ {kod}/{nazwa_pliku}: nieznane klucze w PL: {nieznane}")
+            print(f"   Dostępne klucze PL: {sorted(sekcje_pl.keys())}")
+            return False
+        sekcje_do_tlumaczenia = {k: sekcje_pl[k] for k in klucze_filtru}
+        sekcje_istniejace = wczytaj_istniejacy_docelowy(cel)
+        if sekcje_istniejace is None:
+            print(f"❌ {kod}/{nazwa_pliku}: brak istniejącego pliku docelowego — uruchom najpierw bez --klucz.")
+            return False
+        if KLUCZ_LEGACY in sekcje_istniejace:
             print(
-                f"    ⚠️  Sanity check: oryginał ma {sum(oryginalne.values())} wystąpień, "
-                f"mapa ma {liczba_ph} wpisów — rozjazd!"
+                f"❌ {kod}/{nazwa_pliku}: docelowy plik w starym schemacie (string tresc).\n"
+                f"   Surgical update niemożliwy — uruchom najpierw bez --klucz, żeby przemigrować na dict-schemat."
             )
-        print(f"    (dry-run) Nie wywołuję API.")
-        return True
+            return False
 
-    # --- Krok 2: tłumaczenie przez tlumacz_ai.py -----------------------------
-    payload = PREFIX_INSTRUKCJA + tresc_tok
-    blad_kryt: dict[str, Any] = {"msg": None, "partial": None}
-
-    # Klucz cache wznawiania: nazwa pliku BEZ rozszerzenia (np. "manual",
-    # "dictionaries"). Dzięki temu temp_manual_pl_to_en_*.jsonl i
-    # temp_dictionaries_pl_to_en_*.jsonl żyją obok siebie i nie kasują się
-    # nawzajem przy częściowym progresie.
     rdzen = nazwa_pliku.rsplit(".", 1)[0]
-
-    def _on_postep(msg: str, pct: int) -> None:
-        sys.stderr.write(f"   [{kod}/{rdzen} {pct:3d}%] {msg}\n")
-
-    def _on_blad_krytyczny(msg: str, partial: str) -> None:
-        blad_kryt["msg"] = msg
-        blad_kryt["partial"] = partial
-
-    def _on_blad_miekki(msg: str, tytul: str) -> None:
-        print(f"⚠️  {kod}/{nazwa_pliku}: {tytul} — {msg.splitlines()[0]}")
-
-    # 13.4: customowy system-prompt z kontekstem projektu (instrukcje dot. listy
-    # akcentów, lokalizacji szyfrów, zachowania nazw plików/głosów). Pusty
-    # string = brak modyfikacji (jeśli kod języka nie ma tabeli skrótowców).
     prompt_dodatkowy = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna)
 
-    wynik = tlumacz_dlugi_tekst(
-        tresc=payload,
-        jezyk_docelowy=nazwa_pl,
-        klient=klient,
-        runtime_dir=str(RUNTIME_DIR),
-        oryginalna_nazwa=f"{rdzen}_{KOD_ZRODLOWY}_to_{kod}",
-        on_postep=_on_postep,
-        on_blad_krytyczny=_on_blad_krytyczny,
-        on_blad_miekki=_on_blad_miekki,
-        model_tlumacz=model,
-        prompt_dodatkowy=prompt_dodatkowy,
-    )
-
-    if wynik is None:
-        komunikat = blad_kryt["msg"] or "nieznany błąd silnika tlumacz_ai.py"
-        print(f"❌  {kod}/{nazwa_pliku}: przerwano tłumaczenie.\n    {komunikat.splitlines()[0]}")
-        print(
-            f"    Częściowy postęp w: "
-            f"{RUNTIME_DIR / f'temp_{rdzen}_{KOD_ZRODLOWY}_to_{kod}_tlumaczenie_{nazwa_pl}.jsonl'}"
+    # Tłumaczenie sekcja-po-sekcji
+    sekcje_przetlumaczone: dict[str, str] = {}
+    for klucz, tresc_pl in sekcje_do_tlumaczenia.items():
+        ok, tekst = _tlumacz_pojedyncza_sekcje(
+            kod, nazwa_pl, klient, nazwa_pliku, rdzen, klucz, tresc_pl,
+            dry_run=dry_run, model=model, prompt_dodatkowy=prompt_dodatkowy,
         )
-        return False
+        if not ok:
+            print(f"❌  {kod}/{nazwa_pliku}: sekcja '{klucz}' nie udała się — NIE zapisuję pliku.")
+            return False
+        if not dry_run:
+            sekcje_przetlumaczone[klucz] = tekst or ""
 
-    # --- Krok 3: obcięcie prefixu + walidacja parzystości --------------------
-    tekst_wy = utnij_prefix_z_wyniku(wynik.tekst)
-    ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
-    if not ok:
-        print(f"❌  {kod}/{nazwa_pliku}: NARUSZONA parzystość markerów ⟦i⟧. NIE zapisuję pliku.")
-        for diag in problemy[:20]:
-            print(f"     {diag}")
-        if len(problemy) > 20:
-            print(f"     ... (+{len(problemy) - 20} kolejnych)")
-        print(
-            f"    Cache wznawiania zachowany w runtime/ — po korekcie promptu\n"
-            f"    uruchom ponownie z tym samym językiem, odzyska opłacone bloki."
-        )
-        return False
+    if dry_run:
+        print(f"    (dry-run) Nie wywołuję API, nie zapisuję {kod}/{nazwa_pliku}.")
+        return True
 
-    # --- Krok 4: detokenizacja + zapis ---------------------------------------
-    tekst_final = detokenizuj(tekst_wy, mapa)
-    zawartosc_yaml = zbuduj_yaml_wynikowy(kod, id_szablonu, tekst_final, nazwa_pliku)
+    # Złóż wynikowy dict: SURGICAL = scal z istniejącymi, FULL = same przetłumaczone
+    if sekcje_istniejace is not None:
+        wynikowy_dict = dict(sekcje_istniejace)
+        wynikowy_dict.update(sekcje_przetlumaczone)
+    else:
+        wynikowy_dict = sekcje_przetlumaczone
 
+    # Decyzja schematu zapisu:
+    # * Jeśli to legacy (jeden klucz _legacy) → zapisz jako string (stary schemat).
+    # * W przeciwnym razie → zapisz jako dict.
+    if list(wynikowy_dict.keys()) == [KLUCZ_LEGACY]:
+        tresc_do_zapisu: str | dict[str, str] = wynikowy_dict[KLUCZ_LEGACY]
+    else:
+        tresc_do_zapisu = wynikowy_dict
+
+    zawartosc_yaml = zbuduj_yaml_wynikowy(kod, id_szablonu, tresc_do_zapisu, nazwa_pliku)
     cel.parent.mkdir(parents=True, exist_ok=True)
     with open(cel, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(zawartosc_yaml)
 
+    tryb = "SURGICAL" if klucze_filtru else "FULL"
+    n_sekcji = len(sekcje_przetlumaczone)
     print(
         f"✅  {kod}/{nazwa_pliku}: zapisano {cel.relative_to(ROOT)} "
-        f"({liczba_ph} placeholderów OK, {len(tekst_final):,} znaków)."
+        f"({tryb}, {n_sekcji} sekcji przetłumaczonych, {len(zawartosc_yaml):,} znaków)."
     )
     return True
 
@@ -673,7 +806,23 @@ def _parsuj_argumenty() -> argparse.Namespace:
         default="gpt-4o",
         help="Model OpenAI do głównego tłumaczenia (domyślnie: gpt-4o).",
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--klucz",
+        type=str,
+        default=None,
+        metavar="KLUCZ[,KLUCZ...]",
+        help="Tłumacz TYLKO wskazane klucze sekcji (np. `krok_5_vocalizer,krok_5_alarm_nvda_2026`), "
+             "reszta pliku zostaje z istniejącego tłumaczenia. "
+             "Wymaga, by docelowy `<kod>/gui/dokumentacja/<plik>.yaml` już istniał W NOWYM SCHEMACIE "
+             "(dict `tresc:` z sekcjami) — najpierw zrób FULL tłumaczenie bez --klucz, "
+             "żeby plik nabrał nowego schematu. Surgical update jest tańszy API-wise: "
+             "tłumaczysz np. tylko sekcję Vocalizer (~2 kB) zamiast całego manuala (~68 kB).",
+    )
+    args = parser.parse_args()
+    if args.klucz and args.skip_existing:
+        parser.error("--klucz i --skip-existing wzajemnie się wykluczają "
+                     "(--klucz celowo nadpisuje wybrane sekcje w istniejącym pliku).")
+    return args
 
 
 def _filtruj_szablony(
@@ -791,12 +940,21 @@ def main() -> int:
     # imporcie modułu, tylko gdy faktycznie idzie tłumaczyć.
     from core_poliglota import natywna_nazwa
 
+    klucze_filtru: list[str] | None = None
+    if args.klucz:
+        klucze_filtru = [k.strip() for k in args.klucz.split(",") if k.strip()]
+        if not klucze_filtru:
+            print("❌ Flag --klucz podany, ale CSV jest pusty.")
+            return 2
+        print(f"🔎 Filtr --klucz ({len(klucze_filtru)} klucz/y): {klucze_filtru}")
+        print(f"   Surgical update — pozostałe sekcje zostaną z istniejących tłumaczeń.")
+
     for kod in kody:
         nazwa_pl = MAPA_JEZYKOW[kod]
         nazwa_natywna = natywna_nazwa(kod)
         print(f"\n========== {kod.upper()} ({nazwa_pl} / {nazwa_natywna}) ==========")
         wszystko_ok = True
-        for nazwa_pliku, id_szablonu, tresc_pl in szablony:
+        for nazwa_pliku, id_szablonu, sekcje_pl in szablony:
             ok = tlumacz_szablon(
                 kod,
                 nazwa_pl,
@@ -804,10 +962,11 @@ def main() -> int:
                 klient,
                 nazwa_pliku,
                 id_szablonu,
-                tresc_pl,
+                sekcje_pl,
                 skip_existing=args.skip_existing,
                 dry_run=args.dry_run,
                 model=args.model,
+                klucze_filtru=klucze_filtru,
             )
             if not ok:
                 wszystko_ok = False

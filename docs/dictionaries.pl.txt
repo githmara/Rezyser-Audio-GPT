@@ -173,6 +173,7 @@ przy następnym uruchomieniu załaduje Twoją wersję. Zero programowania.
 Jak zacząć zabawę — trzy poziomy trudności
 -------------------------------------------
 
+
 POZIOM 1 — drobne dostrojenie istniejącego akcentu
 
 Wyobraź sobie, że francuski akcent aplikacji zamienia "sz" na "sh", ale
@@ -189,6 +190,7 @@ Ty uważasz, że Francuz raczej powiedziałby "sch" lub "ch". Żaden problem.
 5. Zapisz plik (Ctrl+S), zamknij edytor.
 6. Wróć do Managera Reguł i kliknij "Odśwież drzewo", a potem zamknij
    i uruchom aplikację ponownie. Twoja zmiana już działa.
+
 
 POZIOM 2 — dodanie nowego akcentu przez duplikację
 
@@ -211,6 +213,7 @@ podobnego istniejącego.
    menu akcentów Poligloty (a jeśli dodasz do Księgi Świata postaci
    tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna
    automatycznie i zastosuje do jej dialogów).
+
 
 POZIOM 3 — stworzenie czegoś zupełnie nowego
 
