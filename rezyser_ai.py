@@ -69,9 +69,12 @@ SDK, gdy test używa mock-klienta.
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
 from typing import Any, Callable
+
+import jsonschema
 
 import core_rezyser as cr
 import przepisy_rezysera as pr
@@ -135,6 +138,105 @@ class WynikTytulowania:
     tytuly: list[str] = field(default_factory=list)
     przerwano_bledem: bool = False
     blad: str = ""
+
+
+# =============================================================================
+# Burza Mózgów (v15.2): strukturyzowane JSON wyjście + przyciski opcji
+# =============================================================================
+# Do v15.1 tryb Burza zwracał plain text w formacie „OPCJA 1: ... [Krótki tytuł]
+# / opis / blok kodu z [CEL SCENY], [Reżyserze: ...], [DYREKTYWA]: ..." — całość
+# wpisaną przez LLM. Skutki uboczne:
+# - LLM regularnie ignorował zakaz „nie wymyślaj instrukcji o uwagach od
+#   reżysera" i halucynował własne zwroty ([Reżyserze, rozważ kątem...]),
+#   przez co kontrakt na wpinanie się tych linijek do GUI był zawodny.
+# - Parsowanie tego pseudo-formatu w GUI wymagałoby regexa nad treścią
+#   LLM-a (kruche), więc nie było zrobione i gracz musiał przeklejać.
+#
+# v15.2: LLM zwraca STRUKTURYZOWANY JSON z 3 opcjami; każda zawiera
+# `cel_sceny` (treść celowa, którą LLM wymyślił). Linijki `[Reżyserze: ...]` i
+# `[DYREKTYWA]: ...` doklejane są W PYTHONIE z lokalizowanej stałej w
+# `dictionaries/<jezyk>/rezyser/tryb_burza.yaml::doklejka_celu_sceny` — Python
+# kontroluje treść tych instrukcji deterministycznie, LLM nie ma jak ich zepsuć.
+# GUI po wynikach generacji buduje przyciski 1/2/3; klik wstawia pełny szkic
+# prompta do pola Instrukcji (gracz dopisuje swoje uwagi reżyserskie).
+# -----------------------------------------------------------------------------
+
+SCHEMA_BURZA: dict[str, Any] = {
+    "type": "object",
+    "required": ["opcje"],
+    "additionalProperties": False,
+    "properties": {
+        # Streszczenie pojawia się TYLKO gdy sufiks "streszczenie"/"alarm" był
+        # aktywny. W normalnej turze klucz jest pusty stringiem albo nieobecny
+        # — GUI traktuje brak/"" tak samo. Sentinel pozwala odróżnić „LLM celowo
+        # nie wygenerował" (pusty string) od „pamięć była pełna i streszczenie
+        # jest" (niepusty string).
+        "streszczenie": {"type": "string"},
+        "opcje": {
+            "type": "array",
+            "minItems": 1,   # liberalnie — yaml mówi 3, ale halucynacja 2 nie powinna blokować GUI
+            "maxItems": 5,
+            "items": {
+                "type": "object",
+                "required": ["tytul", "opis", "cel_sceny"],
+                "additionalProperties": False,
+                "properties": {
+                    # Krótki tytuł opcji (max ~80 znaków). Wyświetlany na
+                    # przycisku w GUI: „1. {tytul}".
+                    "tytul":     {"type": "string", "minLength": 1, "maxLength": 200},
+                    # Logiczny opis tego co się stanie w opcji (1-3 zdania).
+                    # Trafia jako podpowiedź / tooltip + nad polem instrukcji
+                    # gdy gracz wybierze opcję.
+                    "opis":      {"type": "string", "minLength": 1},
+                    # Konkretna treść do wpisania jako [CEL SCENY]: w polu
+                    # Instrukcji. Powinna być GŁĘBSZA niż `opis` — szczegół
+                    # akcji/dialogu, który LLM proponuje. To jest jedyna treść
+                    # twórcza od LLM trafiająca do pola gracza.
+                    "cel_sceny": {"type": "string", "minLength": 1},
+                },
+            },
+        },
+    },
+}
+
+
+@dataclass
+class OpcjaBurzy:
+    """Pojedyncza opcja wygenerowana przez Burzę.
+
+    Attributes:
+        tytul:     Krótki tytuł (do przycisku „1. {tytul}" w GUI).
+        opis:      Logiczny opis co się stanie (do tooltipa / nagłówka).
+        cel_sceny: Konkretny szkic celu sceny — to jedyna treść LLM-a
+                   trafiająca do pola Instrukcji po kliknięciu opcji.
+    """
+    tytul:     str
+    opis:      str
+    cel_sceny: str
+
+
+@dataclass
+class WynikBurzy:
+    """Wynik :func:`generuj_burze` — strukturyzowana odpowiedź Burzy.
+
+    Attributes:
+        opcje:             Lista 1-5 :class:`OpcjaBurzy` (yaml wymaga 3,
+                           ale schemę zostawiamy liberalną — halucynacja
+                           2 nie powinna blokować GUI).
+        streszczenie:      Niepusty string gdy sufiks streszczenie/alarm
+                           był aktywny; pusty gdy LLM celowo nie generował.
+        odrzucone:         True jeśli LLM zwrócił sam tag ``[ODRZUCENIE_AI]``
+                           zamiast JSON-a (klauzula odmowy zadziałała).
+        uzyty_sufiks:      Diagnostyczne — nazwa sufiksu doklejonego do
+                           prompt_systemowy (``"alarm"``/``"streszczenie"``/
+                           ``"optymalizacja"``/``None``).
+        surowy_json:       Sucha odpowiedź modelu (do logu / debugowania).
+    """
+    opcje:        list[OpcjaBurzy] = field(default_factory=list)
+    streszczenie: str = ""
+    odrzucone:    bool = False
+    uzyty_sufiks: str | None = None
+    surowy_json:  str = ""
 
 
 # =============================================================================
@@ -276,6 +378,169 @@ def wyciagnij_streszczenie(tekst: str) -> tuple[str, str]:
     streszczenie = m.group(1).strip()
     tekst_bez = _RE_STRESZCZENIE.sub("", tekst).strip()
     return tekst_bez, streszczenie
+
+
+# =============================================================================
+# Pobranie doklejki [Reżyserze: ...] / [DYREKTYWA]: ... z YAML-a Burzy
+# =============================================================================
+
+def doklejka_celu_sceny(przepis: pr.PrzepisRezysera) -> str:
+    """Zwraca lokalizowany blok doklejany do `cel_sceny` z YAML-a Burzy.
+
+    Tekst pochodzi z klucza ``doklejka_celu_sceny`` w
+    ``dictionaries/<jezyk>/rezyser/tryb_burza.yaml``. Po stronie GUI
+    klik przycisku opcji wstawia do pola Instrukcji:
+
+        [CEL SCENY]: <cel_sceny od LLM>
+
+        <doklejka_celu_sceny — z YAML, lokalizowana>
+
+    Gdzie doklejka zawiera linijki `[Reżyserze: ...]` (instrukcja do
+    własnego dopisania uwag) i `[DYREKTYWA]: ...` (przypomnienie dla
+    następnego tryba o domknięciu sceny). Python kontroluje treść tych
+    linii deterministycznie — LLM nie ma jak ich zepsuć ani naruszyć
+    zakazu wymyślania własnych „[Reżyserze, rozważ ...]" zwrotów.
+
+    Fallback: jeśli yaml nie ma klucza ``doklejka_celu_sceny``, zwracamy
+    pusty string. GUI wtedy pokaże tylko ``[CEL SCENY]: ...`` bez doklejki.
+    Migracja na v15.2 wymaga dodania tego klucza do 9 yaml-ów.
+    """
+    # PrzepisRezysera nie ma tego pola jako dataclass attribute (kompatybilność
+    # wsteczna z v15.1) — bierzemy z surowego dictu yaml. Dla DRY: ładujemy
+    # raz przez `przepisy_rezysera`, ale tam dict jest filtrowany do dataclassy.
+    # Najmniej inwazyjnie: dodać pole `doklejka_celu_sceny` jako attribute w
+    # `PrzepisRezysera` z defaultem "" — robimy to w fazie B (yaml).
+    return getattr(przepis, "doklejka_celu_sceny", "") or ""
+
+
+# =============================================================================
+# Burza Mózgów (v15.2): wywołanie LLM z JSON schema i walidacją
+# =============================================================================
+
+def generuj_burze(
+    klient:    Any,
+    przepis:   pr.PrzepisRezysera,
+    snapshot:  cr.SnapshotProjektu,
+    user_text: str,
+    on_postep: PostepCallback | None = None,
+    timeout:   float = 120.0,
+    max_retry: int = 2,
+) -> WynikBurzy:
+    """Wysyła Burzę z ``response_format=json_object`` i waliduje JSON-schemę.
+
+    Wzorzec self-correction via error feedback — z ``opowiesci_ai.generuj_ture``.
+    Przy halucynacji struktury (brak klucza, zły typ) appendujemy poprzedni
+    błąd jako system message i wołamy ponownie; max ``max_retry`` powtórzeń
+    (default 2 → łącznie 3 wywołania).
+
+    Args:
+        klient:    Klient OpenAI.
+        przepis:   ``PrzepisRezysera`` z ``id="burza"``.
+        snapshot:  Niezmienny snapshot stanu projektu.
+        user_text: Instrukcja użytkownika.
+        on_postep: Callback postępu.
+        timeout:   Limit czasu pojedynczego wywołania (sekundy).
+        max_retry: Maks. liczba RETRY (default 2; łącznie max 3 wywołania).
+
+    Returns:
+        :class:`WynikBurzy` z 1-5 opcjami + opcjonalnym streszczeniem.
+
+    Raises:
+        RuntimeError: wyczerpane retry (halucynacja struktury) ALBO model
+                      zwrócił finish_reason="length" (max_tokens hit).
+        Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) — propagowane.
+    """
+    if on_postep:
+        on_postep("Budowanie payloadu Burzy…", 10)
+
+    messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+
+    if on_postep:
+        on_postep(f"Wysyłanie do {przepis.model} (JSON mode)…", 30)
+
+    ostatni_blad: str | None = None
+    surowy_text: str = ""
+
+    for proba in range(max_retry + 1):
+        # Self-correction: przy retry dodajemy info o poprzednim błędzie
+        # walidacji jako system message — model próbuje skorygować strukturę.
+        if ostatni_blad is not None:
+            messages.append({
+                "role": "system",
+                "content": (
+                    f"POPRZEDNIA PRÓBA NIE PRZESZŁA WALIDACJI. Błąd: {ostatni_blad}. "
+                    "Wygeneruj ponownie ZGODNIE ze schemą JSON podaną w prompt_systemowy. "
+                    "Wszystkie pola wymagane MUSZĄ być obecne i mieć właściwy typ."
+                ),
+            })
+
+        response = klient.chat.completions.create(
+            model=przepis.model,
+            messages=messages,
+            temperature=przepis.temperatura,
+            timeout=timeout,
+            response_format={"type": "json_object"},
+        )
+
+        finish = getattr(response.choices[0], "finish_reason", None)
+        if finish == "length":
+            raise RuntimeError(
+                "Model osiągnął limit max_tokens — odpowiedź Burzy została ucięta "
+                "przed zamknięciem JSON. Skróć kontekst lub zwiększ max_tokens."
+            )
+
+        surowy_text = response.choices[0].message.content or ""
+
+        # Detekcja odrzucenia PRZED walidacją JSON — bo klauzula odrzucenia
+        # wymusza ZWROT samego tagu, NIE JSON-a. JSONDecodeError w tej linii
+        # to legalny case „LLM odmówił, zwrócił tag, nie JSON".
+        if pr.wykryto_odrzucenie(surowy_text):
+            if on_postep:
+                on_postep("AI odrzuciło prompt (tag wykryty).", 100)
+            return WynikBurzy(
+                odrzucone=True,
+                uzyty_sufiks=sufiks_nazwa,
+                surowy_json=surowy_text,
+            )
+
+        try:
+            dane = json.loads(surowy_text)
+            jsonschema.validate(instance=dane, schema=SCHEMA_BURZA)
+        except json.JSONDecodeError as exc:
+            ostatni_blad = f"JSONDecodeError: {exc.msg}"
+            continue
+        except jsonschema.ValidationError as exc:
+            ostatni_blad = (
+                f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+            )
+            continue
+
+        # Sukces — żaden błąd schemy. Mapujemy do dataclassy.
+        opcje = [
+            OpcjaBurzy(
+                tytul=o["tytul"],
+                opis=o["opis"],
+                cel_sceny=o["cel_sceny"],
+            )
+            for o in dane["opcje"]
+        ]
+        streszczenie = (dane.get("streszczenie") or "").strip()
+
+        if on_postep:
+            on_postep("Gotowe.", 100)
+
+        return WynikBurzy(
+            opcje=opcje,
+            streszczenie=streszczenie,
+            odrzucone=False,
+            uzyty_sufiks=sufiks_nazwa,
+            surowy_json=surowy_text,
+        )
+
+    raise RuntimeError(
+        f"LLM wygenerował niewłaściwą strukturę JSON {max_retry + 1} razy z rzędu "
+        f"dla Burzy. Ostatni błąd: {ostatni_blad}"
+    )
 
 
 # =============================================================================

@@ -188,6 +188,13 @@ class PrzepisRezysera:
     slowa_wyzwalajace: dict[str, list[str]] = field(default_factory=dict)
     klauzula_odrzucenia: str = ""   # "" = użyj KLAUZULA_ODRZUCENIA_DOMYSLNA
 
+    # --- Burza Mózgów (v15.2) ---
+    # Lokalizowany blok doklejany przez Python do `cel_sceny` z odpowiedzi
+    # JSON LLM-a po kliknięciu opcji w GUI. Zawiera `[Reżyserze: ...]` i
+    # `[DYREKTYWA]: ...`. Patrz `rezyser_ai.doklejka_celu_sceny`. Pusty
+    # string = brak doklejki (kompatybilność wsteczna z yaml-ami bez klucza).
+    doklejka_celu_sceny: str = ""
+
     # --- Postprodukcja ---
     prompt_uzytkownika_szablon: str = ""
     regex_podzial_rozdzialow: str = ""
@@ -248,6 +255,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             for k, v in (data.get("slowa_wyzwalajace") or {}).items()
         },
         klauzula_odrzucenia=str(data.get("klauzula_odrzucenia", "")),
+        doklejka_celu_sceny=str(data.get("doklejka_celu_sceny", "")),
         prompt_uzytkownika_szablon=str(data.get("prompt_uzytkownika_szablon", "")),
         regex_podzial_rozdzialow=str(data.get("regex_podzial_rozdzialow", "")),
         min_dlugosc_fragmentu=int(data.get("min_dlugosc_fragmentu", 0)),
