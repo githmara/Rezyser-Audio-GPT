@@ -1040,3 +1040,13 @@ opowiesci:
   status_zasady_zapisane: Reglas del mundo actualizadas y guardadas en el archivo del juego.
   zasady_bez_gry_tytul: No hay juego activo
   zasady_bez_gry_tresc: 'Inicia un nuevo juego con el botón "Nuevo juego" o carga uno previamente guardado antes de definir las reglas del mundo: las reglas se guardan junto con el estado del juego.'
+  btn_edytuj_tryb_label: '&Editar modo de juego…'
+  btn_edytuj_tryb_tooltip: Abre la ventana de cambio de modo de juego de emergencia. Úsalo solo cuando la IA no quiera terminar la historia en modos con elecciones — cambiar al modo libre te permitirá escribir la escena final por ti mismo. En el juego normal, el modo no debe cambiarse durante la partida.
+  dlg_edytuj_tryb_tytul: Cambio de modo de juego durante la partida
+  dlg_edytuj_tryb_ostrzezenie: "ATENCIÓN: cambiar el modo durante un juego activo puede desincronizar el motor narrativo.\n\nEl modo de juego decide cómo se generan los siguientes turnos: el modelo de IA recibe diferentes instrucciones en el modo libre (el jugador escribe sus propias acciones) que en los modos con elecciones (la IA propone 3-5 opciones para elegir, en \"Menor mal\" todas desfavorables).\n\nRazón típica para usar esta puerta trasera: la IA insiste en generar más dilemas en lugar de terminar la historia — cambiar al modo libre te permite describir la escena final por ti mismo.\n\nDespués del cambio, el siguiente turno ya usará las nuevas reglas. El estado del juego (personajes, mundo, narrativa hasta el momento) permanece intacto."
+  dlg_edytuj_tryb_ostrzezenie_name: Campo de advertencia sobre el riesgo de cambiar el modo
+  dlg_edytuj_tryb_lbl: 'Elige un nuevo modo de juego:'
+  dlg_edytuj_tryb_name: Selección de nuevo modo de juego
+  dlg_edytuj_tryb_btn_ok: Cambiar &modo
+  dlg_edytuj_tryb_btn_anuluj: '&Cancelar'
+  status_tryb_zmieniony: Modo de juego cambiado a "{tryb_nazwa}". El siguiente turno usará las nuevas reglas de narración.

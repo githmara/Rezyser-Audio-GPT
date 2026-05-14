@@ -1041,3 +1041,13 @@ opowiesci:
   status_zasady_zapisane: Maailman säännöt päivitetty ja tallennettu pelitiedostoon.
   zasady_bez_gry_tytul: Ei aktiivista peliä
   zasady_bez_gry_tresc: Aloita uusi peli painikkeella "Uusi peli" tai lataa aiemmin tallennettu peli ennen maailman sääntöjen määrittämistä — säännöt tallennetaan yhdessä pelitilan kanssa.
+  btn_edytuj_tryb_label: '&Muokkaa pelitilaa…'
+  btn_edytuj_tryb_tooltip: Avaa hätätilan pelitilan vaihtamisikkunan. Käytä vain, jos AI ei halua lopettaa tarinaa valintatilassa — siirtyminen vapaaseen tilaan antaa sinun kirjoittaa loppukohtauksen itse. Normaalissa pelissä tilaa ei pitäisi vaihtaa kesken pelin.
+  dlg_edytuj_tryb_tytul: Pelitilan vaihtaminen kesken pelin
+  dlg_edytuj_tryb_ostrzezenie: "HUOMIO: tilan vaihtaminen kesken aktiivisen pelin voi aiheuttaa kertojamoottorin epäsynkronoinnin.\n\nPelitila määrittää, miten seuraavat vuorot luodaan — AI-malli saa erilaisia ohjeita vapaassa tilassa (pelaaja kirjoittaa omat toimintonsa) kuin valintatiloissa (AI ehdottaa 3-5 vaihtoehtoa, joista valita, \"Pienemmässä pahassa\" kaikki ovat epäedullisia).\n\nTyypillinen syy tämän kiertotien käyttöön: AI itsepintaisesti luo uusia dilemmoja sen sijaan, että lopettaisi tarinan — siirtyminen vapaaseen tilaan antaa sinun kuvata loppukohtauksen itse.\n\nVaihdon jälkeen seuraava vuoro käyttää jo uusia sääntöjä. Pelin tila (hahmot, maailma, tähänastinen kerronta) pysyy ennallaan."
+  dlg_edytuj_tryb_ostrzezenie_name: Varoituskenttä tilan vaihtamisen riskistä
+  dlg_edytuj_tryb_lbl: 'Valitse uusi pelitila:'
+  dlg_edytuj_tryb_name: Uuden pelitilan valinta
+  dlg_edytuj_tryb_btn_ok: Vaihda &tila
+  dlg_edytuj_tryb_btn_anuluj: '&Peruuta'
+  status_tryb_zmieniony: Pelitila vaihdettu tilaan „{tryb_nazwa}". Seuraava vuoro käyttää uusia kerrontasääntöjä.

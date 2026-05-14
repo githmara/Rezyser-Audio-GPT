@@ -933,6 +933,27 @@ opowiesci:
   tryb_wyborow:              "Tryb w&yborów"
   tryb_mniejsze_zlo:         "&Mniejsze zło"
 
+  # Furtka awaryjna na zmianę trybu w trakcie gry. Przycisk pojawia się
+  # tylko gdy projekt jest aktywny i tryb został już utrwalony — dialog
+  # wymaga świadomego potwierdzenia, żeby gracz nie zmienił trybu omyłkowo.
+  btn_edytuj_tryb_label:     "&Edytuj tryb gry…"
+  btn_edytuj_tryb_tooltip:   "Otwiera okno awaryjnej zmiany trybu gry. Używaj tylko gdy AI nie chce zakończyć historii w trybach z wyborami — przeskok na tryb swobodny pozwoli Ci samodzielnie napisać finałową scenę. W normalnej rozgrywce tryb nie powinien być zmieniany w trakcie."
+  dlg_edytuj_tryb_tytul:     "Zmiana trybu gry w trakcie rozgrywki"
+  dlg_edytuj_tryb_ostrzezenie: |-
+    UWAGA: zmiana trybu w trakcie aktywnej gry może rozsynchronizować silnik narracyjny.
+
+    Tryb gry decyduje o sposobie generowania kolejnych tur — model AI dostaje inne instrukcje w trybie swobodnym (gracz pisze własne akcje) niż w trybach z wyborami (AI proponuje 3-5 opcji do wyboru, w „Mniejszym złu" wszystkie niekorzystne).
+
+    Typowy powód użycia tej furtki: AI uparcie generuje kolejne dylematy zamiast zakończyć historię — przeskok na tryb swobodny pozwala Ci samodzielnie opisać finałową scenę.
+
+    Po zmianie kolejna tura użyje już nowych zasad. Stan gry (postacie, świat, dotychczasowa narracja) pozostaje nienaruszony.
+  dlg_edytuj_tryb_ostrzezenie_name: "Pole z ostrzeżeniem o ryzyku zmiany trybu"
+  dlg_edytuj_tryb_lbl:       "Wybierz nowy tryb gry:"
+  dlg_edytuj_tryb_name:      "Wybór nowego trybu gry"
+  dlg_edytuj_tryb_btn_ok:    "Zmień &tryb"
+  dlg_edytuj_tryb_btn_anuluj: "&Anuluj"
+  status_tryb_zmieniony:     'Tryb gry zmieniony na „{tryb_nazwa}". Kolejna tura użyje nowych zasad narracji.'
+
   # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
   pamiec_lbl:                "Pamięć modelu:"
   pamiec_gauge_name:         "Wskaźnik wykorzystania okna kontekstowego modelu"

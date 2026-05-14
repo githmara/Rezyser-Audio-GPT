@@ -1041,3 +1041,13 @@ opowiesci:
   status_zasady_zapisane: Weltregeln aktualisiert und in die Spieldatei gespeichert.
   zasady_bez_gry_tytul: Kein aktives Spiel
   zasady_bez_gry_tresc: Starten Sie ein neues Spiel mit der Schaltfläche „Neues Spiel" oder laden Sie ein zuvor gespeichertes, bevor Sie die Weltregeln definieren — die Regeln werden zusammen mit dem Spielstand gespeichert.
+  btn_edytuj_tryb_label: '&Spielmodus bearbeiten…'
+  btn_edytuj_tryb_tooltip: Öffnet das Notfallfenster zum Ändern des Spielmodus. Nur verwenden, wenn die KI die Geschichte in Auswahlmodi nicht beenden möchte — der Wechsel in den freien Modus ermöglicht es Ihnen, die letzte Szene selbst zu schreiben. Im normalen Spiel sollte der Modus nicht während des Spiels geändert werden.
+  dlg_edytuj_tryb_tytul: Änderung des Spielmodus während des Spiels
+  dlg_edytuj_tryb_ostrzezenie: "ACHTUNG: Das Ändern des Modus während eines aktiven Spiels kann den Erzählmotor desynchronisieren.\n\nDer Spielmodus bestimmt, wie die nächsten Runden generiert werden — das KI-Modell erhält im freien Modus (der Spieler schreibt eigene Aktionen) andere Anweisungen als in Auswahlmodi (die KI schlägt 3-5 Optionen zur Auswahl vor, im „kleineren Übel“ sind alle ungünstig).\n\nTypischer Grund für die Verwendung dieser Hintertür: Die KI generiert hartnäckig weitere Dilemmata, anstatt die Geschichte zu beenden — der Wechsel in den freien Modus ermöglicht es Ihnen, die letzte Szene selbst zu beschreiben.\n\nNach der Änderung wird die nächste Runde bereits die neuen Regeln verwenden. Der Spielstand (Charaktere, Welt, bisherige Erzählung) bleibt unberührt."
+  dlg_edytuj_tryb_ostrzezenie_name: Warnfeld über das Risiko der Modusänderung
+  dlg_edytuj_tryb_lbl: 'Wählen Sie einen neuen Spielmodus:'
+  dlg_edytuj_tryb_name: Auswahl eines neuen Spielmodus
+  dlg_edytuj_tryb_btn_ok: Modus &ändern
+  dlg_edytuj_tryb_btn_anuluj: '&Abbrechen'
+  status_tryb_zmieniony: Spielmodus geändert zu „{tryb_nazwa}“. Die nächste Runde wird die neuen Erzählregeln verwenden.

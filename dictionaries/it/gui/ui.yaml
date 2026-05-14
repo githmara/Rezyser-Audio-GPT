@@ -1041,3 +1041,13 @@ opowiesci:
   status_zasady_zapisane: Regole del mondo aggiornate e salvate nel file di gioco.
   zasady_bez_gry_tytul: Nessun gioco attivo
   zasady_bez_gry_tresc: Crea un nuovo gioco con il pulsante "Nuovo gioco" oppure carica uno salvato in precedenza prima di definire le regole del mondo — le regole vengono salvate insieme allo stato del gioco.
+  btn_edytuj_tryb_label: '&Modifica modalità di gioco…'
+  btn_edytuj_tryb_tooltip: Apre la finestra di cambio modalità di gioco d'emergenza. Usare solo quando l'AI non vuole concludere la storia nelle modalità con scelte — passare alla modalità libera ti permetterà di scrivere autonomamente la scena finale. In una partita normale, la modalità non dovrebbe essere cambiata durante il gioco.
+  dlg_edytuj_tryb_tytul: Cambio modalità di gioco durante la partita
+  dlg_edytuj_tryb_ostrzezenie: "ATTENZIONE: cambiare modalità durante una partita attiva può desincronizzare il motore narrativo.\n\nLa modalità di gioco determina il modo in cui vengono generate le mosse successive — il modello AI riceve istruzioni diverse in modalità libera (il giocatore scrive le proprie azioni) rispetto alle modalità con scelte (l'AI propone 3-5 opzioni tra cui scegliere, in \"Il male minore\" tutte sfavorevoli).\n\nMotivo tipico per usare questa scappatoia: l'AI continua ostinatamente a generare nuovi dilemmi invece di concludere la storia — passare alla modalità libera ti permette di descrivere autonomamente la scena finale.\n\nDopo il cambio, il turno successivo utilizzerà le nuove regole. Lo stato del gioco (personaggi, mondo, narrazione fino a quel momento) rimane intatto."
+  dlg_edytuj_tryb_ostrzezenie_name: Campo di avviso sul rischio di cambio modalità
+  dlg_edytuj_tryb_lbl: 'Scegli una nuova modalità di gioco:'
+  dlg_edytuj_tryb_name: Scelta della nuova modalità di gioco
+  dlg_edytuj_tryb_btn_ok: Cambia &modalità
+  dlg_edytuj_tryb_btn_anuluj: '&Annulla'
+  status_tryb_zmieniony: Modalità di gioco cambiata in "{tryb_nazwa}". Il turno successivo utilizzerà le nuove regole di narrazione.

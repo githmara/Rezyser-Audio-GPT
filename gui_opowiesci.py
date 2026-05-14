@@ -157,6 +157,15 @@ class OpowiesciPanel(wx.Panel):
         # ``_btn_zapisz`` są disabled — chronimy przed I/O bez nazwy.
         self._projekt: ProjektOpowiesci | None = None
 
+        # Mirror pliku `.mode` w RAM. Trzyma utrwaloną decyzję trybu gry
+        # (3=Swobodny, 4=Wyborów, 5=Mniejsze zło). Materializowany przy
+        # założeniu nowej gry, wczytaniu istniejącej i ręcznym zapisie;
+        # rozsynchronizowuje EnableItem RadioBoxa od bieżącego
+        # `_rb_tryb.GetSelection()`, dzięki czemu zmiana trybu w trakcie
+        # gry wymaga świadomej akcji przez dialog „Edytuj tryb gry"
+        # (furtka na sytuacje awaryjne — np. AI nie chce zakończyć fabuły).
+        self._zapisany_tryb: int | None = None
+
         # ---- Faza 4: slash-komendy + tiktoken + auto-streszczenie ---------
         # v15.1: brak globalnego pola `_aktualny_model` — model dobierany
         # automatycznie z trybu przez :meth:`_model_dla_trybu`. Powód:
@@ -358,9 +367,23 @@ class OpowiesciPanel(wx.Panel):
         )
         self._btn_zasady_swiata.SetToolTip(t("opowiesci.btn_zasady_swiata_tooltip"))
 
+        # Furtka awaryjna: przycisk odblokowujący zmianę trybu gry w trakcie
+        # zabawy. Domyślnie ukryty — `_aktualizuj_uistate` pokazuje go gdy
+        # projekt jest aktywny ORAZ `_zapisany_tryb` został utrwalony.
+        # Powód istnienia furtki: AI sporadycznie odmawia zakończenia historii
+        # w trybach z wyborami i gracz może chcieć przeskoczyć na Swobodny,
+        # gdzie sam pisze finałową scenę. Dialog wymaga jawnej akceptacji
+        # ostrzeżenia, żeby uniknąć przypadkowych zmian.
+        self._btn_edytuj_tryb = wx.Button(
+            self, label=t("opowiesci.btn_edytuj_tryb_label"),
+        )
+        self._btn_edytuj_tryb.SetToolTip(t("opowiesci.btn_edytuj_tryb_tooltip"))
+        self._btn_edytuj_tryb.Hide()
+
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(self._rb_tryb, proportion=1, flag=wx.EXPAND | wx.RIGHT, border=BORDER)
-        row.Add(self._btn_zasady_swiata, flag=wx.ALIGN_CENTER_VERTICAL)
+        row.Add(self._btn_zasady_swiata, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=BORDER)
+        row.Add(self._btn_edytuj_tryb, flag=wx.ALIGN_CENTER_VERTICAL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(row, flag=wx.EXPAND | wx.ALL, border=BORDER)
@@ -542,6 +565,14 @@ class OpowiesciPanel(wx.Panel):
         self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_wyslij)
         # v15.1: edycja zasad świata przez dedykowany dialog.
         self._btn_zasady_swiata.Bind(wx.EVT_BUTTON, self._on_zasady_swiata)
+        # Furtka awaryjna: ręczna zmiana trybu w trakcie aktywnej gry.
+        self._btn_edytuj_tryb.Bind(wx.EVT_BUTTON, self._on_edytuj_tryb)
+        # Pole nazwy gry: wpisanie innej nazwy niż aktywny projekt sygnalizuje
+        # zamiar założenia nowej gry — RadioBox odblokowuje się, żeby gracz
+        # mógł wybrać inny tryb. Powrót do nazwy bieżącej gry przywraca
+        # zamrożenie. Bez tego bindu nie da się zmienić trybu między dwoma
+        # grami w tej samej sesji aplikacji (`/koniec` zamyka apkę).
+        self._txt_nazwa_gry.Bind(wx.EVT_TEXT, self._on_nazwa_gry_change)
         # `_rb_tryb` bez callbacku — wybór trybu odczytujemy w `_on_wyslij`.
 
     def _on_placeholder(self, _event: wx.Event) -> None:
@@ -1047,14 +1078,36 @@ class OpowiesciPanel(wx.Panel):
         """Włącza/wyłącza przyciski zależnie od istnienia ``_projekt``.
 
         - Bez projektu: nie ma sensu pokazywać „Wyślij" ani „Zapisz" —
-          gracz musi najpierw założyć grę albo wczytać starą.
-        - Z projektem: oba aktywne, RadioBox także zsynchronizowany.
+          gracz musi najpierw założyć grę albo wczytać starą. RadioBox
+          ma wszystkie 3 pozycje aktywne (wolny wybór trybu nowej gry),
+          przycisk furtki ukryty (nie ma czego edytować).
+        - Z projektem: oba aktywne, RadioBox zsynchronizowany. Po utrwaleniu
+          trybu (`_zapisany_tryb in (3,4,5)`) dwie pozostałe pozycje
+          RadioBoxa są disabled, a furtka „Edytuj tryb gry…" widoczna —
+          jedyna ścieżka do zmiany trybu w trakcie gry biegnie przez
+          świadome potwierdzenie ostrzeżenia w dialogu.
 
         Wzorzec :meth:`gui_rezyser.RezyserPanel._refresh_ui_state`.
         """
         ma_projekt = self._projekt is not None
         self._btn_wyslij.Enable(ma_projekt)
         self._btn_zapisz.Enable(ma_projekt)
+
+        utrwalony = self._zapisany_tryb in self._MAPA_TRYB_RB_NA_INT
+        if utrwalony:
+            idx_utrwalony = self._MAPA_TRYB_RB_NA_INT.index(self._zapisany_tryb)
+            for idx in range(self._rb_tryb.GetCount()):
+                self._rb_tryb.EnableItem(idx, idx == idx_utrwalony)
+        else:
+            for idx in range(self._rb_tryb.GetCount()):
+                self._rb_tryb.EnableItem(idx, True)
+
+        # Furtka pojawia się tylko gdy faktycznie blokujemy zmianę trybu.
+        # Przed startem gry (brak `_zapisany_tryb`) i po `/koniec` (reset
+        # projektu) gracz ma swobodny wybór z poziomu RadioBoxa — dialog
+        # byłby tu redundantny.
+        self._btn_edytuj_tryb.Show(ma_projekt and utrwalony)
+        self.Layout()
 
     def _ustaw_rb_z_trybu(self, tryb_int: int) -> None:
         """RadioBox-owi ustawia indeks (0/1/2) na podstawie trybu (3/4/5)."""
@@ -1117,6 +1170,7 @@ class OpowiesciPanel(wx.Panel):
 
         try:
             projekt.zapisz_tryb(tryb)
+            self._zapisany_tryb = tryb           # utrwalenie decyzji w RAM
             projekt.zapisz_game_json()           # initial state na dysku
             projekt.rebuild_ksiega_swiata()      # pusta księga (brak postaci na start)
             # `.txt` nie tworzymy w „Nowa gra" — pierwsza tura LLM go założy
@@ -1185,6 +1239,15 @@ class OpowiesciPanel(wx.Panel):
                 tresc_bledu=str(exc),
             ))
             return
+
+        # Synchronizacja `_zapisany_tryb` z dysku — `.mode` ma priorytet
+        # nad polem `tryb` w `.game.json` (analogicznie do `_ustaw_rb_z_trybu`
+        # niżej). Brak `.mode` (stara gra) → fallback na `projekt.tryb`.
+        tryb_utrwalony = wynik.saved_mode if wynik.saved_mode is not None else projekt.tryb
+        if tryb_utrwalony in self._MAPA_TRYB_RB_NA_INT:
+            self._zapisany_tryb = tryb_utrwalony
+        else:
+            self._zapisany_tryb = None
 
         # Sync UI ze stanem wczytanego projektu.
         # v15.1: zasady świata też wczytywane z `.game.json` (z fallbackiem
@@ -1267,7 +1330,9 @@ class OpowiesciPanel(wx.Panel):
 
         try:
             self._projekt.zapisz_game_json()
-            self._projekt.zapisz_tryb(self._aktualny_tryb_int())
+            tryb_aktualny = self._aktualny_tryb_int()
+            self._projekt.zapisz_tryb(tryb_aktualny)
+            self._zapisany_tryb = tryb_aktualny   # pokrywa też stare gry bez `.mode`
         except OSError as exc:
             self._wyswietl_blad_ai(t(
                 "opowiesci.blad_zapisu_tresc",
@@ -1337,6 +1402,130 @@ class OpowiesciPanel(wx.Panel):
                 self,
             )
         dlg.Destroy()
+
+    # ------------------------------------------------------------------
+    # Furtka awaryjna: ręczna zmiana trybu w trakcie aktywnej gry
+    # ------------------------------------------------------------------
+    def _on_edytuj_tryb(self, _event: wx.Event) -> None:
+        """Pokazuje dialog z 3 trybami i ostrzeżeniem o ryzyku zmiany w locie.
+
+        Typowy use-case: gracz w trybie Wyborów / Mniejszego zła chce ręcznie
+        wymusić zakończenie historii, ale AI uparcie generuje kolejne dylematy.
+        Przeskok na Swobodny daje graczowi pełną kontrolę nad finałem.
+
+        Po OK aktualizujemy `_zapisany_tryb`, `.mode` na dysku i RadioBox.
+        Dialog wymaga jawnego potwierdzenia, żeby zmiana nie przeszła
+        przypadkowo (np. przy bezmyślnym klikaniu w interfejs).
+        """
+        if self._projekt is None or self._zapisany_tryb not in self._MAPA_TRYB_RB_NA_INT:
+            # Furtka nie powinna być widoczna w tym stanie (sprawdza
+            # `_aktualizuj_uistate`), ale strzeżemy się na wypadek
+            # nieprzewidzianego wywołania (np. skrót klawiszowy).
+            return
+
+        idx_obecny = self._MAPA_TRYB_RB_NA_INT.index(self._zapisany_tryb)
+        choices = [
+            t("opowiesci.tryb_swobodny"),
+            t("opowiesci.tryb_wyborow"),
+            t("opowiesci.tryb_mniejsze_zlo"),
+        ]
+
+        dlg = wx.Dialog(
+            self,
+            title=t("opowiesci.dlg_edytuj_tryb_tytul"),
+            size=(560, 360),
+        )
+        ostrzezenie = wx.TextCtrl(
+            dlg,
+            value=t("opowiesci.dlg_edytuj_tryb_ostrzezenie"),
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
+            name=t("opowiesci.dlg_edytuj_tryb_ostrzezenie_name"),
+        )
+        ostrzezenie.SetBackgroundColour(dlg.GetBackgroundColour())
+        ostrzezenie.SetMinSize((-1, 140))
+
+        lbl = wx.StaticText(dlg, label=t("opowiesci.dlg_edytuj_tryb_lbl"))
+        rb = wx.RadioBox(
+            dlg,
+            label=t("opowiesci.rb_tryb_label"),
+            choices=choices,
+            majorDimension=1,
+            style=wx.RA_SPECIFY_COLS,
+            name=t("opowiesci.dlg_edytuj_tryb_name"),
+        )
+        rb.SetSelection(idx_obecny)
+
+        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("opowiesci.dlg_edytuj_tryb_btn_ok"))
+        btn_anuluj = wx.Button(dlg, wx.ID_CANCEL, label=t("opowiesci.dlg_edytuj_tryb_btn_anuluj"))
+        btn_anuluj.SetDefault()   # Anuluj jest bezpieczną akcją domyślną
+
+        btn_row = wx.BoxSizer(wx.HORIZONTAL)
+        btn_row.AddStretchSpacer()
+        btn_row.Add(btn_anuluj, flag=wx.RIGHT, border=8)
+        btn_row.Add(btn_ok)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(ostrzezenie, proportion=1, flag=wx.EXPAND | wx.ALL, border=8)
+        sizer.Add(lbl,    flag=wx.LEFT | wx.RIGHT | wx.TOP, border=8)
+        sizer.Add(rb,     flag=wx.EXPAND | wx.ALL, border=8)
+        sizer.Add(btn_row, flag=wx.EXPAND | wx.ALL, border=8)
+        dlg.SetSizer(sizer)
+
+        # NVDA czyta najpierw ostrzeżenie (ważne dla świadomej decyzji).
+        ostrzezenie.SetFocus()
+
+        if dlg.ShowModal() != wx.ID_OK:
+            dlg.Destroy()
+            return
+
+        nowy_tryb = self._MAPA_TRYB_RB_NA_INT[rb.GetSelection()]
+        dlg.Destroy()
+
+        if nowy_tryb == self._zapisany_tryb:
+            return   # gracz potwierdził ten sam tryb — brak operacji
+
+        try:
+            self._projekt.zapisz_tryb(nowy_tryb)
+        except OSError as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_zapisu_tresc",
+                tresc_bledu=str(exc),
+            ))
+            return
+
+        self._zapisany_tryb = nowy_tryb
+        self._projekt.tryb = nowy_tryb
+        self._ustaw_rb_z_trybu(nowy_tryb)
+        self._aktualizuj_uistate()
+
+        wx.MessageBox(
+            t("opowiesci.status_tryb_zmieniony", tryb_nazwa=choices[rb.GetSelection()].replace("&", "")),
+            t("opowiesci.dlg_edytuj_tryb_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+
+    def _on_nazwa_gry_change(self, _event: wx.Event) -> None:
+        """Odblokowuje / zamraża RadioBox w zależności od stanu pola nazwy.
+
+        Gdy gracz wpisuje nazwę różną od aktualnego `_projekt.nazwa_pliku`,
+        traktujemy to jako sygnał „przygotowuję założenie nowej gry" —
+        RadioBox staje się wolny, żeby gracz mógł wybrać dowolny tryb.
+        Powrót do nazwy bieżącej gry przywraca zamrożenie. Bez aktywnego
+        projektu metoda jest no-op — RadioBox jest wtedy wolny z definicji.
+        """
+        if self._projekt is None:
+            return
+        nazwa = self._txt_nazwa_gry.GetValue().strip()
+        if nazwa and nazwa != self._projekt.nazwa_pliku:
+            if self._zapisany_tryb is not None:
+                self._zapisany_tryb = None
+                self._aktualizuj_uistate()
+        else:
+            # Powrót do nazwy bieżącego projektu — zamrażamy z powrotem.
+            if self._zapisany_tryb != self._projekt.tryb:
+                self._zapisany_tryb = self._projekt.tryb
+                self._aktualizuj_uistate()
 
     # ==================================================================
     # FAZA 4 — Slash-komendy (parser lokalny, bez API)

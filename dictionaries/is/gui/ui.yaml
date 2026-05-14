@@ -1041,3 +1041,13 @@ opowiesci:
   status_zasady_zapisane: Heimsreglur uppfærðar og vistaðar í leikskrá.
   zasady_bez_gry_tytul: Enginn virkur leikur
   zasady_bez_gry_tresc: Byrjaðu nýjan leik með „Nýr leikur" hnappnum eða hlaða inn áður vistaðan leik áður en þú skilgreinir heimsreglur — reglurnar eru vistaðar ásamt leikstöðu.
+  btn_edytuj_tryb_label: '&Breyta leikjaham…'
+  btn_edytuj_tryb_tooltip: Opnar neyðarglugga til að breyta leikjaham. Notaðu aðeins þegar AI vill ekki ljúka sögunni í valham — að skipta yfir í frjálsan ham gerir þér kleift að skrifa lokaatriðið sjálfur. Í venjulegum leik ætti ekki að breyta hamnum á meðan á leik stendur.
+  dlg_edytuj_tryb_tytul: Breyting á leikjaham á meðan á leik stendur
+  dlg_edytuj_tryb_ostrzezenie: "VIÐVÖRUN: breyting á ham á meðan á leik stendur getur valdið ósamræmi í frásagnarkerfinu.\n\nLeikjahamurinn ákvarðar hvernig næstu umferðir eru búnar til — AI módel fær mismunandi leiðbeiningar í frjálsum ham (leikmaður skrifar eigin aðgerðir) en í valham (AI leggur til 3-5 valkosti, í „Minna illu\" eru allir óhagstæðir).\n\nDæmigert ástæða fyrir að nota þessa undankomuleið: AI heldur áfram að búa til fleiri álitamál í stað þess að ljúka sögunni — að skipta yfir í frjálsan ham gerir þér kleift að lýsa lokaatriðinu sjálfur.\n\nEftir breytingu mun næsta umferð nota nýjar reglur. Staða leiksins (persónur, heimur, fyrri frásögn) helst óbreytt."
+  dlg_edytuj_tryb_ostrzezenie_name: Viðvörunarsvæði um áhættu við breytingu á ham
+  dlg_edytuj_tryb_lbl: 'Veldu nýjan leikjaham:'
+  dlg_edytuj_tryb_name: Val á nýjum leikjaham
+  dlg_edytuj_tryb_btn_ok: Breyta &ham
+  dlg_edytuj_tryb_btn_anuluj: '&Hætta við'
+  status_tryb_zmieniony: Leikjahamur breyttur í „{tryb_nazwa}". Næsta umferð mun nota nýjar frásagnarreglur.

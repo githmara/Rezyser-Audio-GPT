@@ -1040,3 +1040,13 @@ opowiesci:
   status_zasady_zapisane: World rules updated and saved to the game file.
   zasady_bez_gry_tytul: No active game
   zasady_bez_gry_tresc: Start a new game with the “New Game” button or load a previously saved one before defining world rules — rules are saved together with the game state.
+  btn_edytuj_tryb_label: '&Edit game mode…'
+  btn_edytuj_tryb_tooltip: Opens the emergency game mode change window. Use only when the AI refuses to end the story in choice modes — switching to free mode will allow you to write the final scene yourself. In normal gameplay, the mode should not be changed mid-game.
+  dlg_edytuj_tryb_tytul: Changing game mode during gameplay
+  dlg_edytuj_tryb_ostrzezenie: "WARNING: changing the mode during an active game may desynchronize the narrative engine.\n\nThe game mode determines how subsequent turns are generated — the AI model receives different instructions in free mode (player writes their own actions) than in choice modes (AI suggests 3-5 options to choose from, in \"Lesser Evil\" all unfavorable).\n\nTypical reason for using this loophole: the AI stubbornly generates further dilemmas instead of ending the story — switching to free mode allows you to describe the final scene yourself.\n\nAfter the change, the next turn will use the new rules. The game state (characters, world, existing narrative) remains intact."
+  dlg_edytuj_tryb_ostrzezenie_name: Warning field about the risk of changing mode
+  dlg_edytuj_tryb_lbl: 'Select a new game mode:'
+  dlg_edytuj_tryb_name: Selecting a new game mode
+  dlg_edytuj_tryb_btn_ok: Change &mode
+  dlg_edytuj_tryb_btn_anuluj: '&Cancel'
+  status_tryb_zmieniony: Game mode changed to "{tryb_nazwa}". The next turn will use the new narrative rules.
