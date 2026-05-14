@@ -117,10 +117,10 @@ tresc: |
 
   6. Cifrario di Cesare (classico)
      Il più antico cifrario documentato nella storia (usato già nell'antica
-     Roma). Ogni lettera viene spostata di N posizioni nell'alfabeto polacco
-     (35 lettere, con diacritici: AĄBCĆ...ZŻŹ). Lo spostamento viene inserito
+     Roma). Ogni lettera viene spostata di N posizioni nell'alfabeto italiano
+     (21 lettere: ABCDEFGHILMNOPQRSTUVZ — senza J, K, W, X, Y). Lo spostamento viene inserito
      nell'interfaccia grafica nel campo numerico; se inserisci 0, l'applicazione
-     sceglierà un valore casuale tra 1-34 e lo mostrerà in un messaggio, in modo
+     sceglierà un valore casuale tra 1-19 e lo mostrerà in un messaggio, in modo
      che tu possa successivamente decifrare il messaggio. I caratteri al di fuori
      dell'alfabeto (numeri, spazi, punteggiatura) rimangono invariati.
 

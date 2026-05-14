@@ -1,179 +1,170 @@
-Reżyser Audio GPT — Interaktives Geschichtenmodul (15.1 – Veröffentlichungsversion)
+Reżyser Audio GPT — Interaktive Geschichten Modul (15.1 – Veröffentlichungsversion)
 
-Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion in freiem Text schreibst oder eine der nummerierten Optionen auswählst.
+Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.
 
-Das Modul wurde von Anfang an mit Blick auf blinde Spieler entwickelt — die Erzählung wird linear von einem Bildschirmleser (NVDA) oder einer TTS-Engine vorgelesen, dynamische Entscheidungen in Form von Schaltflächen mit Sprachbeschreibungen, jede abgeschlossene Runde wird durch ein Glockengeräusch signalisiert und der Fokus automatisch auf den neu generierten Text verschoben.
+Das Modul wurde von Anfang an mit Blick auf blinde Spieler entwickelt — die Erzählung wird linear von einem Bildschirmleser (NVDA) oder einer TTS-Engine vorgelesen, dynamische Entscheidungen in Form von Schaltflächen mit Sprachbeschreibungen, jede abgeschlossene Runde wird durch einen Glockenton signalisiert und der Fokus automatisch auf den neu generierten Text verschoben.
 
 Du öffnest das Panel mit der Schaltfläche "📖  Geschichten" in der Symbolleiste oder mit der Tastenkombination Strg+5.
 
 
+KROK 1: Drei Spielmodi — wähle deinen Spielstil
 
-SCHRITT 1: Drei Spielmodi — wähle deinen Spielstil
+Direkt unter der Spieltitelleiste findest du eine Modusauswahl (RadioBox). Der Modus bestimmt, wie der narrative Motor mit dir im Dialog steht:
 
-Direkt unter der Spielnamenleiste findest du ein Auswahlfeld für den Modus (RadioBox). Der Modus bestimmt, wie die Erzählmaschine mit dir kommuniziert:
+FREIER MODUS — du gibst eine beliebige Aktion in freiem Text ein („Ich versuche, die Tür zu öffnen", „Ich frage den Wächter nach dem Weg", „Ich fliehe über die Hintertreppe"). Der narrative Motor kann 1-3 Vorschläge machen, aber das sind nur Hinweise — kein verpflichtender Pfad. Der freiste Modus, empfohlen für erfahrene Spieler, die ihre eigene Geschichte improvisieren.
 
-FREIER MODUS — du gibst eine beliebige Aktion in freiem Text ein („Ich versuche, die Tür zu öffnen", „Ich frage den Wächter nach dem Weg", „Ich fliehe die Hintertreppe hinunter"). Die Erzählmaschine kann 1-3 Vorschläge machen, aber das sind nur Tipps — kein obligatorischer Pfad. Der freiste Modus, empfohlen für erfahrene Spieler, die ihre eigene Geschichte improvisieren.
+AUSWAHL-MODUS — jede Runde endet mit 3-5 nummerierten Optionen A-E in Form von anklickbaren Schaltflächen. Jede Auswahl ist eine konkrete Aktion, die du unternehmen kannst. Du kannst auch eine eigene Aktion in freiem Text eingeben — der Motor passt sie semantisch an die nächste Auswahl an. Der intuitivste Modus für blinde Spieler: NVDA liest dir alle Optionen vor, du klickst mit Tab zwischen ihnen, Enter bestätigt.
 
-AUSWAHL-MODUS — jede Runde endet mit 3-5 nummerierten Optionen A-E in Form von anklickbaren Schaltflächen. Jede Auswahl ist eine konkrete Aktion, die du unternehmen kannst. Du kannst auch eine eigene Aktion in freiem Text eingeben — die Maschine passt sie semantisch an die nächste Auswahl an. Der intuitivste Modus für blinde Spieler: NVDA liest dir alle Optionen vor, du klickst mit Tab zwischen ihnen, Enter bestätigt.
+MODUS KLEINERES ÜBEL — wie der Auswahl-Modus, aber jede der 3-5 Optionen ist moralisch, physisch oder strategisch nachteilig. Keine „neutrale" Option, kein Happy End in dieser Runde. Ein Modus für Liebhaber düsterer Fiktion im Stil von „Tales of Consequence" oder moralischen Dramen.
 
-WENIGER ÜBEL-MODUS — wie der Auswahlmodus, aber jede der 3-5 Optionen ist moralisch, physisch oder strategisch nachteilig. Keine „neutrale" Option, kein Happy End in dieser Runde. Ein Modus für Liebhaber düsterer Fiktion im Stil von „Tales of Consequence" oder moralischen Dramen.
+Phiole im Modus Kleineres Übel (ab v15.2): Nach vier Runden im Auswahlfeld erscheint eine zusätzliche, mit NULL nummerierte Option „Phiole entkorken" — und bleibt bis zum Ende des Spiels als wiederverwendbare Auswahl (verschwindet nicht nach Gebrauch, du kannst sie mehrfach nutzen). Die Phiole ist eine Option des „verzweifelten Rettungsversuchs", aber ihre Wirkung ist absichtlich unvorhersehbar und umso dramatischer, je seltener sie ein positives Ergebnis liefert: in etwa 60% der Fälle ist der Inhalt der Phiole schädlich (vergiftet, verletzt, blendet), in 30% führt sie zu Wahrnehmungsstörungen oder Geistererscheinungen (Halluzinationen, veränderte Sprache, Panik), und nur in 10% erweist sie sich als selten nützlich (vorübergehende Stärkung, hilfreicher Geist, entscheidende Information). Die Verteilung wird durch Python erzwungen (`random.choices` auf der Anwendungsseite), das LLM erhält einen fertigen Seed `{Kategorie, Beschreibung}` und rationalisiert ihn nur — das Modell kann keinen rettenden Effekt „erfinden" außer durch Zufall. Dadurch wird die Phiole NIE zu einem deus ex machina: selbst der Griff danach in einem Moment äußerster Hoffnungslosigkeit verschlimmert die Situation meist. Die Wahl ihrer narrativen Form (ob die Phiole endgültig zerbricht oder wieder am Gürtel verstaut wird) obliegt dem narrativen Motor — manchmal kehrst du nach der ersten von 60%-schädlichen Dosen nie zurück.
 
-Der Modus kann während des Spiels geändert werden — bei der nächsten Runde passt sich die Erzählmaschine an den neuen Stil an (vom Freien Modus zum Auswahlmodus kann mit einem Klick gewechselt werden).
+Der Modus kann während des Spiels geändert werden — bei der nächsten Runde passt sich der narrative Motor dem neuen Stil an (vom Freien Modus zu Auswahl-Modus kann in einem Klick gewechselt werden). Hinweis: Die Phiole ist ausschließlich eine Eigenschaft des Modus Kleineres Übel — beim Wechsel im selben Spiel zu Auswahl oder Freiem Modus bleiben ihre Existenz und der Runden-Zähler im Spielzustand erhalten, aber solange du nicht zum Kleineren Übel zurückkehrst, wird die Option „Phiole entkorken" nicht angezeigt.
 
 
+SCHRITT 2: Schnellstart — fertige Eröffnungsszenarien
 
-SCHRITT 2: Quick Start — vorgefertigte Eröffnungsszenarien
+Unter dem Spielfeldnamen findest du eine zweite Zeile mit der Bezeichnung „Schnellstart:" und einem Dropdown-Menü (wx.Choice). Die Standardposition ist "(eigenes Spiel)" — die Engine erfindet die Welt basierend auf deiner ersten Aktion.
 
-Unter dem Spielfeldnamen findest du eine zweite Zeile mit der Bezeichnung „Schnellstart:" und einem Dropdown-Menü (wx.Choice). Die Standardposition ist "(eigenes Spiel)" — die Maschine erfindet die Welt basierend auf deiner ersten Aktion.
+Du kannst jedoch eines von fünf fertigen Presets auswählen, um sofort in eine bestimmte Welt einzutauchen:
 
-Du kannst jedoch einen der fünf vorgefertigten Presets auswählen, um sofort in eine bestimmte Welt einzutauchen:
+POST-APOKALYPTISCHE SF — ein Jahrhundert nach einer ökologischen Katastrophe. Die Überreste der Menschheit in Bunkern unter den Heiligkreuzbergen. Du bist ein junger Kurier des Stollenclans mit deinem ersten ernsthaften Auftrag. Standardmodus: Entscheidungen.
 
-POST-APOKALYPTISCHES SF — ein Jahrhundert nach einer ökologischen Katastrophe. Die Überreste der Menschheit in Bunkern unter den Heiligkreuzbergen. Du bist ein junger Kurier des Stollenklans mit deinem ersten großen Auftrag. Standardmodus: Auswahl.
+DUNKLE FANTASY — Grenzgebiet des Königreichs der Drei Ströme, das neunte Jahr des Religionskrieges. Du bist eine junge Inquisitorin auf der Spur eines Dorfes, in dem jemand ein besessenes Kind schützt. Standardmodus: Das kleinere Übel.
 
-DÜSTERES FANTASY — die Grenze des Königreichs der Drei Ströme, das neunte Jahr des Religionskrieges. Du bist eine junge Inquisitorin auf der Spur eines Dorfes, in dem jemand ein besessenes Kind versteckt. Standardmodus: Weniger Übel.
-
-URBAN FANTASY DETEKTIV — Warschau 2008, ein Oktoberabend. Du bist ein Privatdetektiv, der Geister sieht. Eine Kundin möchte ihren unter dem Königsschloss verschwundenen Ehemann finden. Standardmodus: Auswahl.
+URBAN FANTASY DETEKTIV — Warschau 2008, ein Oktoberabend. Du bist ein Privatdetektiv, der Geister sehen kann. Eine Klientin möchte ihren Ehemann finden, der unter dem Königsschloss verschwunden ist. Standardmodus: Entscheidungen.
 
 KOSMISCHER HORROR — Jahr 2247, eine Forschungsstation, die um einen Neutronenstern kreist. Du erwachst aus dem Winterschlaf ohne Kapitän — und ohne Spuren, dass der Kapitän jemals existiert hat. Standardmodus: Frei (lovecraftsche Atmosphäre fördert Improvisation).
 
-ROMANTISCHE KOMÖDIE — Saska Kępa im April 2024, ein kleines Café steht vor der Schließung. Du bist Barista-Kellnerin, deren Chef dir sagt, „nett zu sein" zu einem schüchternen Redakteur, den du schon lange selbst ansprechen wolltest. Standardmodus: Frei.
+ROMANTISCHE KOMÖDIE — Saska Kępa, April 2024, ein kleines Café steht vor der Schließung. Du bist eine Barista-Kellnerin, deren Besitzer dir sagt, du sollst „nett sein" zu einem schüchternen Redakteur, den du schon lange selbst ansprechen wolltest. Standardmodus: Frei.
 
-Nach der Auswahl eines Presets klicke auf "Neues Spiel" — die Maschine injiziert eine kurze Beschreibung der Welt und des Charakters, stellt den Standardspielmodus ein (du kannst ihn mit dem RadioBox überschreiben, bevor du „Neues Spiel" klickst). Die erste LLM-Runde spielt die Eröffnungsszene.
-
+Nach der Auswahl eines Presets klicke auf "Neues Spiel" — die Engine injiziert eine kurze Beschreibung der Welt und des Charakters, stellt den Standardspielmodus ein (du kannst ihn mit dem RadioBox überschreiben, bevor du „Neues Spiel" klickst). Die erste Runde des LLM spielt die Eröffnungsszene.
 
 
 SCHRITT 3: Erstes Spiel von Grund auf — ohne Preset
 
-Wenn du volle Freiheit bevorzugst, lass "(eigenes Spiel)" im Quick Start-Feld und bereite dich darauf vor, die erste Aktion manuell einzugeben.
+Wenn Sie volle Freiheit bevorzugen, lassen Sie "(eigenes Spiel)" im Quick Start-Feld und bereiten Sie sich darauf vor, die erste Aktion manuell einzugeben.
 
-1. Gib den Namen des Spiels in die Leiste „Spielname" ein (z.B. „mein_abenteuer_1") — unter diesem Namen werden die Erzähl-, Status- und Logdateien gespeichert.
-2. Wähle den Modus (Frei/Auswahl/Weniger Übel).
-3. Klicke auf "Neues Spiel". Die Anwendung erstellt 3 Dateien: Spielstatus (.game.json), ein leeres Buch der Welt (.md) und Modus-Metadaten (.mode). Die Erzähldatei (.txt) wird nach der ersten Runde erstellt.
-4. Gib im Feld „Deine Aktion oder Befehl" unten im Panel die erste Aktion ein, z.B. „Ich wache in einem unbekannten Raum auf". Klicke auf "Senden". Die Erzählmaschine öffnet die Welt basierend auf deiner Aktion — Beschreibung des Raumes, Geräusche, Charaktere, erste Entscheidungen.
-5. Jede Runde wird automatisch gespeichert — du kannst die Anwendung jederzeit schließen und das Spiel später mit der Schaltfläche "Laden" laden.
+1. Geben Sie den Namen des Spiels in die Leiste „Spielname" ein (z.B. „mein_abenteuer_1") — unter diesem Namen werden die Erzähl-, Status- und Logdateien gespeichert.
+2. Wählen Sie den Modus (Frei/Wahl/kleineres Übel).
+3. Klicken Sie auf "Neues Spiel". Die Anwendung erstellt 3 Dateien: den Spielstatus (.game.json), ein leeres Weltbuch (.md) und die Modus-Metadaten (.mode). Die Erzähldatei (.txt) wird nach der ersten Runde erstellt.
+4. Geben Sie im Feld „Deine Aktion oder Befehl" unten im Panel die erste Aktion ein, z.B. „Ich wache in einem unbekannten Raum auf". Klicken Sie auf "Senden". Die Erzählmaschine öffnet die Welt basierend auf Ihrer Aktion — Beschreibung des Raums, Geräusche, Charaktere, erste Entscheidungen.
+5. Jede Runde wird automatisch gespeichert — Sie können die Anwendung jederzeit schließen und das Spiel später mit der Taste "Laden" laden.
 
 
+SCHRITT 4: Weltregeln — eigene Regeln, die die Engine während des gesamten Spiels respektiert
 
-SCHRITT 4: Weltregeln — deine eigenen Regeln, die die Engine während des gesamten Spiels respektiert
-
-Ab Version 15.1 findest du über dem Erzählungsfeld die Schaltfläche „Weltregeln bearbeiten…". Sie öffnet ein separates Bearbeitungsfenster mit einem mehrzeiligen Feld, in dem du beliebige Regeln eingeben kannst — phonetische, mechanische oder dramaturgische — die die Erzählmaschine in jeder folgenden Runde dieses spezifischen Spiels respektieren wird. Die Regeln werden zusammen mit dem Spielstand (.game.json) gespeichert, sodass das Laden des Spiels sie unverändert beibehält.
+Ab Version 15.1 findest du über dem Erzählfeld die Schaltfläche "Weltregeln bearbeiten…". Diese öffnet ein separates Bearbeitungsfenster mit einem mehrzeiligen Feld, in das du beliebige Regeln — phonetische, mechanische oder dramaturgische — eingeben kannst, die die Erzähl-Engine in jeder folgenden Runde dieses speziellen Spiels respektieren wird. Die Regeln werden zusammen mit dem Spielstand (.game.json) gespeichert, sodass das Laden des Spiels sie unverändert beibehält.
 
 Drei typische Anwendungen der Weltregeln:
 
-PHONETISCHE REGELN — sie steuern, wie Charakternamen vom TTS (Vocalizer, ElevenLabs) ausgesprochen werden. Beispiel: „Den Namen Joanna immer hart aussprechen, polnisch [dż]; niemals weich [j]." Die Engine wird diese Variante ab der nächsten Runde in die Erzählung einfügen, und die Figur Joanna im Buch der Welt behält den beabsichtigten Klang. Das ist auch eine natürliche Brücke zu den Akzenten des Regisseurs — wenn du nach Spielende das Buch der Welt in das Regisseur-Panel lädst (SCHRITT 9 unten), „übergeht" die phonetische Regel mit dem Spiel als Charaktereigenschaft.
+PHONETISCHE REGELN — steuern die Aussprache von Charakternamen durch TTS (Vocalizer, ElevenLabs). Beispiel: „Der Name Joanna wird immer hart, polnisch [dż] ausgesprochen; niemals weich [j]." Die Engine wird diese Variante ab der nächsten Runde in die Erzählung einfügen, und der Charakter Joanna im Buch der Welt behält die beabsichtigte Klangfarbe. Dies ist auch eine natürliche Brücke zu den Akzenten des Regisseurs — wenn du das Buch nach dem Spiel in das Regisseur-Panel lädst (SCHRITT 9 unten), wird die phonetische Regel als Charaktereigenschaft mit dem Spiel „mitgehen“.
 
-MECHANISCHE REGELN — sie beschreiben die „physikalischen Gesetze" deiner Welt, an die sich das LLM halten muss. Beispiel: „In dieser Welt funktioniert Magie nur nachts; tagsüber sind die Charaktere normale Menschen." Die Engine wird mittags keine Zauber erfinden, selbst wenn deine Spielzughandlung es verlangt — stattdessen schlägt sie eine Alternative vor oder leitet dich in die Dämmerung.
+MECHANISCHE REGELN — beschreiben die „Gesetze der Physik“ deiner Welt, an die sich das LLM halten soll. Beispiel: „In dieser Welt funktioniert Magie nur nachts; tagsüber sind die Charaktere gewöhnliche Menschen." Die Engine wird keine Zauber zur Mittagszeit erfinden, selbst wenn die Handlung deiner Runde dies verlangt — stattdessen wird sie eine Alternative vorschlagen oder dich in Richtung Abenddämmerung führen.
 
-DRAMATURGISCHE REGELN — sie definieren langfristige Spannungen zwischen Charakteren. Beispiel: „Die Antagonistin Joana versucht, die Aussprache des Namens der Protagonistin durch grammatikalische Abwandlung zu mildern." Die Engine webt solche subtilen Signale in Joanas Dialoge ein und erhält den Konflikt über viele Runden aufrecht, ohne dass du die Anweisung wiederholen musst.
+DRAMATURGISCHE REGELN — definieren langfristige Spannungen zwischen den Charakteren. Beispiel: „Die Antagonistin Joana versucht, die Aussprache des Namens der Protagonistin durch grammatische Abwandlung zu beeinflussen." Die Engine fügt solche subtilen Signale in die Dialoge von Joana ein und hält den Konflikt über viele Runden hinweg aufrecht, ohne dass du wiederholt Anweisungen geben musst.
 
-Leeres Regelfeld = keine zusätzlichen Regeln (Standardverhalten wie in v15.0). Du musst die Regeln nicht gleich zu Beginn definieren — du kannst zu jedem Zeitpunkt zum Fenster zurückkehren, im Spielverlauf bemerkte Regeln hinzufügen und auf „Speichern" klicken. Die Änderung tritt ab der nächsten Runde in Kraft.
+Leeres Regel-Feld = keine zusätzlichen Regeln (Standardverhalten wie in v15.0). Du musst die Regeln nicht gleich zu Beginn definieren — du kannst in jeder Runde zum Fenster zurückkehren, Regeln hinzufügen, die im Laufe des Spiels auffallen, und auf "Speichern" klicken. Die Änderung tritt ab der nächsten Runde in Kraft.
 
-Hinweis: Weltregeln erfordern ein aktives Spiel. Wenn du auf „Weltregeln bearbeiten…" klickst, ohne dass ein Spiel geladen/erstellt ist, erhältst du die Meldung „Kein aktives Spiel" — klicke zuerst auf „Neues Spiel" oder lade ein gespeichertes Spiel.
-
-
-
-SCHRITT 5: Slash-Befehle — schnelle Aktionen ohne API
-
-Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Befehle sind lokal (kosten keine Aufrufe an OpenAI) und funktionieren unabhängig vom Spielmodus. Sowohl deutsche als auch englische Varianten werden akzeptiert:
-
-/speichern, /save — erzwingt das manuelle Speichern des Spielstatus. Autosave funktioniert nach jeder Runde, daher ist dieser Befehl hauptsächlich zur Sicherheit vor dem Schließen der Anwendung.
-
-/laden, /load — öffnet einen Dateiauswahldialog aus dem Ordner runtime/opowiesci/. Nach dem Laden werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst von der Runde fortfahren, in der du aufgehört hast.
-
-Die Erzählmaschine wählt das KI-Modell automatisch je nach Modus: für den Auswahlmodus und das Kleinere Übel verwendet sie das teurere gpt-4o (hält sich strikt an die Weltregeln), für den freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, sodass keine schwere Regiearbeit nötig ist).
-
-/visualisiere <beschreibung>, /visualize <beschreibung> — multisensorische Beschreibung der aktuellen Szene. Ändert nicht den Spielstatus, schlägt keine Entscheidungen vor — die Erzählmaschine verwendet alle fünf Sinne (Sehen, Hören, Riechen, Fühlen, Schmecken), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT zur Erzählung hinzugefügt oder in der Hörbuchdatei gespeichert. Beispiel: „/visualisiere wie der Wächter aussieht" oder „/visualisiere den Geruch des Cafés".
-
-/ende, /quit — schließt die Anwendung (nach dem Autosave der laufenden Runde).
+Hinweis: Weltregeln erfordern ein aktives Spiel. Wenn du auf "Weltregeln bearbeiten…" klickst, ohne ein Spiel geladen/erstellt zu haben, erhältst du die Meldung „Kein aktives Spiel" — klicke zuerst auf "Neues Spiel" oder lade ein gespeichertes Spiel.
 
 
+KROK 5: Slash-Befehle — schnelle Aktionen ohne API
 
-SCHRITT 6: Spieldateien — wo du deine Daten findest
+Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Die Befehle sind lokal (sie erfordern keine OpenAI-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl die polnischen als auch die englischen Varianten werden akzeptiert:
+
+/zapisz, /save — erzwingt das manuelle Speichern des Spielstands. Das automatische Speichern erfolgt nach jeder Runde, daher ist dieser Befehl hauptsächlich zur Sicherheit vor dem Schließen der Anwendung gedacht.
+
+/wczytaj, /load — öffnet den Dateiauswahldialog aus dem Ordner runtime/opowiesci/. Nach dem Laden werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst von der Runde aus weitermachen, bei der du aufgehört hast.
+
+Die Erzählmaschine wählt das AI-Modell automatisch je nach Modus: Für die Modi Entscheidungen und Das kleinere Übel wird das teurere gpt-4o verwendet (hält sich streng an die Weltregeln), für den Freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, daher erfordert es keine dramatische Regie).
+
+/wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht, schlägt keine Entscheidungen vor — die Erzählmaschine verwendet alle fünf Sinne (Sehen, Hören, Geruch, Tasten, Geschmack), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT zur Erzählung hinzugefügt oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj jak wygląda strażnik" oder „/wizualizuj zapach kawiarni".
+
+/koniec, /quit — schließt die Anwendung (nach dem automatischen Speichern der laufenden Runde).
+
+
+KROK 6: Spieldateien — wo Sie Ihre Daten finden
 
 Jedes Spiel erzeugt fünf Dateien, jede in einem anderen Ordner, mit unterschiedlichen Rollen:
 
-skripte/<name>.txt — vollständige Erzählung bereit zum Anhören als Hörbuch. Kann im Notepad geöffnet oder in den Audiobook-Architect (Konverter) geladen werden, um eine Word-Datei mit Kapiteln oder ein Timing für ElevenLabs zu generieren.
+skrypty/<nazwa>.txt — vollständige Erzählung, bereit zum Anhören als Hörbuch. Kann im Notepad geöffnet oder in den Audiobook-Architekten (Konverter) geladen werden, um eine Word-Datei mit Kapiteln oder ein Timing für ElevenLabs zu generieren.
 
-skripte/<name>.md — Buch der Welt der Charaktere im Format [Name: Eigenschaften], nach jeder Runde regeneriert. Format kompatibel mit dem Regisseur-Parser! Du kannst diese Datei im Regisseur-Panel laden (Datei → Laden) und erhältst native Charakterakzente in klassischer TTS-Erzählung — eine Brücke zwischen den beiden Hauptmodulen der Anwendung.
+skrypty/<nazwa>.md — Buch der Welt der Charaktere im Format [Name: Eigenschaften], regeneriert nach jeder Runde. Format kompatibel mit dem Regisseur-Parser! Sie können diese Datei im Regisseur-Panel laden (Datei → Laden) und erhalten native Akzente der Charaktere in klassischer TTS-Erzählung — eine Brücke zwischen den beiden Hauptmodulen der Anwendung.
 
-runtime/opowiesci/<name>.game.json — vollständiger Spielstatus: Name, Modus, aktive Charaktere, Standort, Ausrüstung, offene Handlungsstränge, die letzten 6 Runden in verkürzter Form. Dies ist die Quelle der Wahrheit zum Laden des Spiels — ohne diese Datei kann das Spiel nicht fortgesetzt werden.
+runtime/opowiesci/<nazwa>.game.json — vollständiger Spielstatus: Name, Modus, aktive Charaktere, Standort, Ausrüstung, offene Handlungsstränge, die letzten 6 Runden in verkürzter Form. Dies ist die Quelle der Wahrheit zum Laden des Spiels — ohne diese Datei kann das Spiel nicht fortgesetzt werden.
 
-runtime/opowiesci/<name>.story.jsonl — rohes Log jeder Runde (Spieleranfrage + Modellantwort in JSON). Datei wird nicht zum Spielen benötigt — dient zur Fehlerbehebung oder späteren Analyse (z.B. Statistiken, wie viele Runden das Abenteuer dauerte, welche Handlungsstränge das LLM einführte).
+runtime/opowiesci/<nazwa>.story.jsonl — rohes Log jeder Runde (Spieleranfrage + Modellantwort in JSON). Die Datei wird nicht zum Spielen benötigt — sie dient zur Fehlerbehebung oder späteren Analyse (z.B. Statistiken, wie viele Runden das Abenteuer dauerte, welche Handlungsstränge das LLM einführte).
 
-runtime/skripte/<name>.mode — Metadaten der Modusnummer (3=Frei, 4=Auswahl, 5=Weniger Übel). Datei gemeinsam mit dem Regisseur, aber die Nummerierung kollidiert nicht (der Regisseur verwendet 0-2).
+runtime/skrypty/<nazwa>.mode — Metadaten der Modusnummer (3=Frei, 4=Wahl, 5=Kleineres Übel). Gemeinsame Datei mit dem Regisseur, aber die Nummerierung kollidiert nicht (Regisseur verwendet 0-2).
 
 
+SCHRITT 7: Modell-Speicheranzeige — Warum Runden in alten Spielen keine manuelle Arbeit von Ihnen erfordern
 
-SCHRITT 7: Modellgedächtnis-Indikator — warum alte Spiele keine manuelle Arbeit von dir erfordern
-
-Unter dem RadioBox-Modus findest du den Modellgedächtnis-Indikator — eine Fortschrittsleiste (wx.Gauge) mit Statusbeschreibung daneben. Der Indikator zeigt den Prozentsatz der Auslastung des Kontextfensters der Erzählmaschine an (gpt-4o-mini hat einen Puffer von 128.000 Tokens).
+Unter dem RadioBox-Modus finden Sie die Modell-Speicheranzeige — eine Fortschrittsleiste (wx.Gauge) mit einer Statusbeschreibung daneben. Die Anzeige zeigt den Prozentsatz der Auslastung des Kontextfensters der Erzählmaschine an (gpt-4o-mini hat einen Puffer von 128.000 Token).
 
 Vier Auslastungsstufen:
 
 🟢 sauber (0%) — das Spiel hat gerade erst begonnen, keine gespeicherten Runden.
-🟢 OK (1-69%) — alles in Ordnung, du kannst ohne Einschränkungen weitermachen.
-⚠️ Warnung (70-89%) — die Maschine generiert automatisch eine Zusammenfassung der vorherigen Runden im Hintergrund. Es erscheint die Nachricht „Auto-Zusammenfassung des Kontexts im Gange…" — sende keine weitere Runde, bis die Zusammenfassung abgeschlossen ist. Nach Erfolg werden die vorherigen Runden zu einem Kondensat zusammengefasst, der Puffer wird freigegeben, und du erhältst die Bestätigung „Modellspeicher wiederhergestellt" mit der Anzahl der zusammengefassten Runden.
-🚨 ALARM (90%+) — die Auto-Zusammenfassung hat den Puffer nicht freigegeben (seltener Fall nach einem API-Ausfall). Das Senden einer weiteren Runde ist blockiert. Erzwinge das Beenden des Spiels mit /ende, lade es dann erneut — die Maschine lädt den Status aus game.json ohne die Geschichte der letzten Runden, der Puffer ist frisch.
+🟢 OK (1-69%) — alles in Ordnung, Sie können ohne Einschränkungen fortfahren.
+⚠️ Warnung (70-89%) — die Maschine generiert automatisch eine Zusammenfassung der vorherigen Runden im Hintergrund. Eine Meldung „Auto-Zusammenfassung des Kontexts in Bearbeitung..." erscheint — senden Sie keine weitere Runde, bis die Zusammenfassung abgeschlossen ist. Nach Erfolg werden die vorherigen Runden zu einem Kondensat zusammengefasst, der Puffer wird freigegeben und Sie erhalten die Bestätigung „Modell-Speicher wiederhergestellt" mit der Anzahl der zusammengefassten Runden.
+🚨 ALARM (90%+) — die Auto-Zusammenfassung hat den Puffer nicht freigegeben (seltener Fall nach einem API-Fehler). Das Senden einer weiteren Runde ist blockiert. Erzwingen Sie das Ende des Spiels mit /koniec, dann laden Sie es erneut — die Maschine lädt den Zustand aus game.json ohne die Geschichte der letzten Runden, der Puffer wird frisch sein.
 
-In der Praxis ist der Autoreduktionsmechanismus unsichtbar — der Spieler merkt nicht, dass etwas passiert, da der Hintergrundthread das Problem löst, bevor es bemerkt wird. Wichtig ist nur, dass du keine weitere Runde sendest, während die Auto-Zusammenfassung läuft (die Schaltfläche "Senden" ist dann ausgegraut).
-
-
-
-SCHRITT 8: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
-
-Nach 150 Runden in einem Spiel wird die Erzählmaschine EINMAL ein „Cinematic Meta Warning" einfügen — eine meta-narrative dramatische Unterbrechung. Es erscheint in einem separaten Dialog mit einem Glockengeräusch, mit einer direkten Ansprache an dich in der zweiten Person, einer Zusammenfassung der Errungenschaften und einer Warnung über die Bedeutung der getroffenen Entscheidungen.
-
-Cinematic Warning ist NICHT Teil der Audiobuch-Erzählung — der .txt-Filter-Engine schneidet seinen Inhalt automatisch aus (markiert mit ⚠️🚨⚠️), sodass du während des Hörens des Audiobuchs keinen Meta-Kommentar über dein eigenes Spiel hörst. Der Inhalt wird nur im .story.jsonl-Log gespeichert (zur Reflexion oder als Erinnerung) und im GUI-Dialog angezeigt, wo du ihn einmal lesen und fortfahren kannst.
+In der Praxis ist der Autoreduktionsmechanismus unsichtbar — der Spieler merkt nicht, dass etwas passiert, da der Hintergrund-Thread das Problem löst, bevor es bemerkt wird. Wichtig ist nur, dass Sie keine weitere Runde während der Auto-Zusammenfassung senden (der Button "Senden" ist dann ausgegraut).
 
 
+KROK 8: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
 
-SCHRITT 9: Brücke zum Regisseur — nutze das Buch der Welt, das in den Geschichten erstellt wurde
+Nach 150 Runden in einem Spiel fügt die narrative Engine EINMAL ein „Cinematic Meta Warning“ ein — eine meta-narrative dramatische Unterbrechung. Es erscheint in einem separaten Dialog mit einem Glockenton, mit direkter Ansprache an dich in der zweiten Person, einer Zusammenfassung der Errungenschaften und einer Warnung über die Bedeutung der getroffenen Entscheidungen.
 
-Die Datei skripte/<name>.md, die während des Spiels generiert wird, enthält das Buch der Welt mit Charakteren, die in der Erzählung aufgetaucht sind, zusammen mit ihren Eigenschaften, Akzenten und Charakteren. Das Format ist genau das, was der Regisseur-Parser benötigt — [Name: Eigenschaften mit Akzentbeschreibung].
+Das Cinematic Warning ist NICHT Teil der Audiobook-Narration — die .txt-Filter-Engine schneidet seinen Inhalt (markiert mit ⚠️🚨⚠️) automatisch aus, damit du beim Anhören des Audiobooks keinen Meta-Kommentar über dein eigenes Spiel hörst. Der Inhalt wird nur in das Log .story.jsonl (zur Reflexion oder als Erinnerung) und in den Dialog im GUI übertragen, wo du ihn einmal lesen und fortfahren kannst.
+
+
+SCHRITT 9: Brücke zum Regisseur — nutze das Weltbuch, das in Geschichten erstellt wurde
+
+Die Datei skripty/<nazwa>.md, die während des Spiels generiert wird, enthält das Weltbuch mit Charakteren, die in der Erzählung vorkamen, zusammen mit ihren Eigenschaften, Akzenten und Charakterzügen. Das Format entspricht genau den Anforderungen des Regisseur-Parsers — [Name: Eigenschaften mit Akzentbeschreibung].
 
 Was du damit machen kannst:
 
 1. Nach Abschluss des Spiels öffne das Panel "🎬  Regisseur" (Strg+1).
-2. Lade das Projekt mit demselben Namen — der Regisseur lädt die .txt-Datei als Geschichte und die .md-Datei als Buch der Welt.
-3. Du erhältst jetzt die klassische Regisseur-Erzählung (lange, strukturierte Szenen mit Akten und Kapiteln) mit den nativen Akzenten der Charaktere, die du in den Geschichten mochtest. Der Wächter Karmel aus dem Bunker, der in kurzen Sätzen spricht, die Inquisitorin Rosanna mit einem singenden östlichen Akzent — alle Eigenschaften bleiben erhalten.
+2. Lade das Projekt mit demselben Namen — der Regisseur lädt die .txt-Datei als Geschichte und die .md-Datei als Weltbuch.
+3. Du erhältst nun die klassische Erzählung des Regisseurs (lange, strukturierte Szenen mit Akten und Kapiteln) mit den nativen Akzenten der Charaktere, die du in Geschichten liebgewonnen hast. Der Wächter Karmel aus dem Bunker, der in kurzen Sätzen spricht, die Inquisitorin Rosanna mit einem melodischen östlichen Akzent — alle Eigenschaften bleiben erhalten.
 
-Dies ist eine Einbahnstraße: Geschichten produzieren Material, der Regisseur formatiert es. Der umgekehrte Weg ist nicht möglich — der Regisseur lädt keine Spiele aus den Geschichten als interaktiven Zustand.
+Dies ist eine Einbahnstraße: Geschichten produzieren Material, der Regisseur formatiert es. Eine Umkehrung ist nicht möglich — der Regisseur lädt keine Spiele aus Geschichten als interaktiven Zustand.
 
 
+KROK 10: Barrierefreiheit (NVDA und Screenreader) — von Anfang an entworfen
 
-SCHRITT 10: Barrierefreiheit (NVDA und Bildschirmleser) — von Anfang an entworfen
+Das gesamte Modul "Erzählungen" wurde für blinde Spieler optimiert. Was wir konkret getan haben:
 
-Das gesamte Geschichtenmodul wurde für blinde Spieler optimiert. Was wir konkret gemacht haben:
+FELD LETZTE RUNDE — dies ist ein separates wx.TextCtrl, schreibgeschützt, mehrzeilig (~140 px Höhe) ÜBER der vollständigen Erzählung. Nach jeder Runde wird das Feld mit einem neuen Abschnitt ersetzt (Überschrift „--- Runde N ---" + Erzählungstext). NVDA liest es sofort nach dem Fokussieren (Auto-Fokus nach erfolgreicher Runde), ohne durch Hunderte von Zeilen der vollständigen Geschichte navigieren zu müssen. Nach dem Laden eines gespeicherten Spiels zeigt das Feld eine ZUSAMMENFASSUNG der letzten gespeicherten Runde (max. 400 Zeichen aus dem `letzte_runden`-Puffer) mit einem Präfix, das darauf hinweist, dass die vollständige Erzählung im Feld darunter steht.
 
-FELD LETZTE RUNDE — dies ist ein separates wx.TextCtrl readonly multiline (~140 px Höhe) ÜBER der vollständigen Erzählung. Nach jeder Runde wird das Feld durch ein frisches Fragment ersetzt (Überschrift „--- Runde N ---" + Erzählungsinhalt). NVDA liest es sofort nach dem Fokus (Auto-Fokus nach erfolgreicher Runde), ohne durch Hunderte von Zeilen der vollständigen Geschichte navigieren zu müssen. Nach dem Laden eines gespeicherten Spiels zeigt das Feld eine ZUSAMMENFASSUNG der letzten gespeicherten Runde (max. 400 Zeichen aus dem Puffer `letzte_runden`) mit einem Präfix, das informiert, dass die vollständige Erzählung im Feld unten ist.
+FELD VOLLSTÄNDIGE ERZÄHLUNG — dies ist ein wx.TextCtrl, schreibgeschützt, mehrzeilig, das nach jeder Runde anwächst. NVDA liest die gesamte Erzählung linear, du kannst mit den Pfeiltasten im Text navigieren und Abschnitte mit Strg+C kopieren. Das Feld ist nie bearbeitbar — du änderst die Geschichte NUR durch eine neue Runde oder die Bearbeitung der .txt-Datei außerhalb der Anwendung. Dieses Feld ist mit der Datei `skrypty/<name>.txt` synchronisiert, du kannst es als Vorschau für ein Hörbuch betrachten.
 
-FELD VOLLSTÄNDIGE ERZÄHLUNG — dies ist ein wx.TextCtrl readonly multiline, das nach jeder Runde anwächst. NVDA liest linear die gesamte Erzählung, du kannst mit den Pfeiltasten innerhalb des Textes navigieren, Fragmente mit Strg+C kopieren. Das Feld ist niemals editierbar — du änderst die Geschichte NUR durch eine neue Runde oder durch Bearbeitung der .txt-Datei außerhalb der Anwendung. Dieses Feld ist mit der Datei `skripte/<name>.txt` synchronisiert, du kannst es als Vorschau des Audiobuchs betrachten.
+DYNAMISCHE AUSWAHLKNÖPFE — in den Modi "Wahlen" und "Kleineres Übel" erstellt jede Runde neue wx.Buttons im Auswahlbereich. Jeder hat ein Tooltip, das von NVDA gelesen wird („Wähle: weiter in den Wald gehen"). Tab zwischen ihnen funktioniert natürlich. Enter auf dem markierten Knopf sendet diese Auswahl automatisch an die Erzählmaschine.
 
-DYNAMISCHE AUSWAHLKNÖPFE — in den Auswahl- und Weniger-Übel-Modi erzeugt jede Runde neue wx.Buttons im Auswahlbereich. Jeder hat ein Tooltip, das von NVDA gelesen wird („Wähle: gehe weiter in den Wald"). Tab zwischen ihnen funktioniert natürlich. Enter auf dem ausgewählten Knopf sendet diese Auswahl automatisch an die Erzählmaschine.
+VERSTECKEN LEERER BEREICHE — im Freien Modus ist der Auswahlbereich VOLLSTÄNDIG versteckt (wx.Hide), nicht nur ausgegraut — Tab überspringt ihn, NVDA zieht ihn nicht in die Liste der Elemente ein. Dies verhindert, dass der Spieler in einen leeren Platzhalter gerät. In den Modi 4 und 5 erscheint der Bereich nur nach erfolgreicher Validierung der Modellantwort (nicht leere Auswahl); eine Halluzination des Modells (leere Auswahl) führt zu einem Fallback auf freien Text, ohne die Benutzeroberfläche zu überladen.
 
-VERSTECKEN LEERER BEREICHE — im Freien Modus ist der Auswahlbereich VOLLSTÄNDIG versteckt (wx.Hide), nicht nur ausgegraut — Tab überspringt ihn, NVDA zieht ihn nicht in die Liste der Elemente ein. Dies verhindert, dass der Spieler in einen leeren Platzhalter gerät. In den Modi 4 und 5 erscheint der Bereich nur nach erfolgreicher Validierung der Modellantwort (nicht-leeres Auswahlarray); eine Modellhalluzination (leere Auswahl) führt zu einem Fallback auf freien Text, ohne die Schnittstelle zu überladen.
+AKUSTISCHE SIGNAL — jede abgeschlossene Runde wird durch wx.Bell (Systemglocke) signalisiert, gefolgt von einer automatischen Fokusverschiebung auf das Erzählfeld. NVDA liest dann die neue Erzählung ohne manuelle Navigation.
 
-TONSIGNAL — jede abgeschlossene Runde wird durch wx.Bell (Systemglocke) signalisiert, gefolgt von einer automatischen Fokusverschiebung auf das Erzählungsfeld. NVDA liest dann die neue Erzählung, ohne dass manuell navigiert werden muss.
+FARBIGE SPEICHERSTATUS — der Speicheranzeiger des Modells ändert die Schriftfarbe (grün/orange/rot) entsprechend dem Füllstand. Für sehende Benutzer ist dies ein zusätzliches visuelles Signal; NVDA liest den Status jedoch ohnehin, sodass blinde Benutzer keine Informationen verlieren.
 
-FARBIGE STATUSANZEIGEN — der Modellgedächtnis-Indikator ändert die Schriftfarbe (grün/orange/rot) entsprechend dem Füllstand. Für sehende Benutzer ist dies ein zusätzliches visuelles Signal; NVDA liest den Status trotzdem, sodass blinde Benutzer keine Informationen verlieren.
-
-TASTENKÜRZEL — alle Knöpfe haben ein `&`-Zeichen vor einem der Buchstaben des Labels, was den Alt+Buchstabe-Beschleuniger aktiviert. Funktioniert identisch wie in anderen Modulen der Anwendung.
-
+TASTATURKÜRZEL — alle Knöpfe haben ein `&`-Zeichen vor einem der Buchstaben des Labels, was den Alt+Buchstabe-Beschleuniger aktiviert. Funktioniert identisch wie in anderen Modulen der Anwendung.
 
 
 Häufigste Probleme
 
 Problem: Nach dem Klicken auf "Neues Spiel" erscheint die Meldung „Kein API-Schlüssel".
-Ursache und Lösung: Die Datei golden_key.env im Hauptordner der Anwendung hat keinen gültigen OpenAI-Schlüssel. Kehre zum Startbildschirm zurück (Home-Taste), klicke auf "Generiere die Datei golden_key.env und öffne den Texteditor" und folge den Anweisungen (SCHRITT 2 des Haupthandbuchs).
+Ursache und Lösung: Die Datei golden_key.env im Hauptordner der Anwendung enthält keinen gültigen OpenAI-Schlüssel. Gehen Sie zum Startbildschirm zurück (Home-Taste), klicken Sie auf "Generiere die Datei golden_key.env und öffne den Texteditor" und folgen Sie den Anweisungen (SCHRITT 2 des Haupthandbuchs).
 
-Problem: Ich versuche, die nächste Runde zu senden, aber der Knopf "Senden" ist ausgegraut.
-Ursache und Lösung: Eine automatische Kontextzusammenfassung oder die Generierung einer Cinematic Warning läuft im Hintergrund. Der Speicherstatus zeigt „Auto-Zusammenfassung des Kontexts im Gange…". Warte einige Sekunden — der Knopf wird nach Erfolg automatisch freigeschaltet.
+Problem: Ich versuche, eine weitere Runde zu senden, aber die Schaltfläche "Senden" ist ausgegraut.
+Ursache und Lösung: Eine automatische Kontextzusammenfassung oder die Generierung einer Cinematic Warning läuft im Hintergrund. Der Speicherstatus zeigt „Automatische Kontextzusammenfassung läuft…". Warten Sie einige Sekunden — die Schaltfläche wird nach erfolgreichem Abschluss automatisch freigegeben.
 
 Problem: Die Meldung „Modellspeicher überlastet" blockiert das Spiel.
-Ursache und Lösung: Die automatische Zusammenfassung hat den Puffer nicht freigegeben (z.B. OpenAI-Rate-Limit). Beende das Spiel mit /ende oder schließe die Anwendung, dann lade es erneut — die Engine lädt nur den Status aus game.json ohne die Geschichte der letzten Runden.
+Ursache und Lösung: Die automatische Zusammenfassung hat den Puffer nicht freigegeben (z.B. Rate-Limit von OpenAI). Beenden Sie das Spiel mit dem Befehl /ende oder schließen Sie die Anwendung und laden Sie sie erneut — der Motor lädt nur den Zustand aus game.json ohne die Geschichte der letzten Runden.
 
-Problem: Im Auswahlmodus hat die Engine keine Knöpfe generiert, obwohl ich sie erwartet habe.
-Ursache und Lösung: Modellhalluzination — trotz Modus 4 hat das LLM ein leeres Auswahlarray zurückgegeben. Die Anwendung versteckt dann bewusst den Auswahlbereich (anstatt einen leeren Platzhalter anzuzeigen) und erlaubt die Fortsetzung mit freiem Text. Die nächste Runde wird wahrscheinlich die Auswahl korrekt generieren.
+Problem: Im Auswahlmodus hat der Motor keine Schaltflächen generiert, obwohl ich sie erwartet habe.
+Ursache und Lösung: Modellhalluzination — trotz Modus 4 hat LLM ein leeres Auswahlfeld zurückgegeben. Die Anwendung verbirgt dann bewusst den Auswahlbereich (anstatt einen leeren Platzhalter anzuzeigen) und erlaubt die Fortsetzung mit Freitext. Die nächste Runde wird wahrscheinlich die Auswahl korrekt generieren.
 
-Problem: Die Dateien .game.json und .story.jsonl sind nicht auf dem Desktop sichtbar.
-Ursache und Lösung: Das ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Die Erzählungsdateien (.txt, .md) landen in skripte/ — dort findest du sie.
+Problem: Die Dateien .game.json und .story.jsonl sind auf dem Desktop nicht sichtbar.
+Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Erzählungsdateien (.txt, .md) gelangen in skripte/ — dort finden Sie sie.

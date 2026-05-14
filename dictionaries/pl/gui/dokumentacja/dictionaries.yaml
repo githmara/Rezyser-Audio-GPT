@@ -158,7 +158,7 @@ tresc:
     6. Szyfr Cezara (klasyka)
        Najstarszy udokumentowany szyfr w historii (używany już w starożytnym
        Rzymie). Każda litera jest przesuwana o N pozycji w alfabecie polskim
-       (35 liter, z diakrytykami: AĄBCĆ...ZŻŹ). Przesunięcie podajesz w GUI
+       (35 liter, z diakrytykami: AĄBCĆ...ZŹŻ). Przesunięcie podajesz w GUI
        w polu liczbowym; jeśli wpiszesz 0, aplikacja wylosuje wartość w
        zakresie 1-34 i pokaże ją w komunikacie, żebyś mógł potem odszyfrować
        wiadomość. Znaki spoza alfabetu (cyfry, spacje, interpunkcja) zostają

@@ -156,9 +156,9 @@ tresc: |
 
   6. Caesarin Salaus (klassikko)
      Vanhin dokumentoitu salaus historiassa (käytetty jo antiikin Roomassa).
-     Jokainen kirjain siirretään N paikkaa suomen aakkosissa (35 kirjainta,
-     diakriiteillä: AĄBCĆ...ZŻŹ). Siirtymän syötät GUI:ssa numerokenttään; jos
-     syötät 0, sovellus arpoo arvon välillä 1-34 ja näyttää sen viestissä, jotta
+     Jokainen kirjain siirretään N paikkaa suomen aakkosissa (29 kirjainta:
+     ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ). Siirtymän syötät GUI:ssa numerokenttään; jos
+     syötät 0, sovellus arpoo arvon välillä 1-28 ja näyttää sen viestissä, jotta
      voit myöhemmin purkaa viestin. Aakkosten ulkopuoliset merkit (numerot, välilyönnit,
      välimerkit) pysyvät ennallaan.
 

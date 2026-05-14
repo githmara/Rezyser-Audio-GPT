@@ -72,7 +72,7 @@ Los cifrados son juegos de texto para acertijos, ejercicios de lenguaje, rompeca
    Añade tartamudeos al principio de las palabras: "komputer" → "ko-ko-ko-komputer", "prysznic" → "pr-pr-prysznic". Las palabras de menos de 3 letras se omiten. Si la segunda letra de la palabra es una consonante, se repiten las dos primeras (suena más natural); si es una vocal, solo la primera.
 
 6. Cifrado César (clásico)
-   El cifrado documentado más antiguo de la historia (utilizado ya en la antigua Roma). Cada letra se desplaza N posiciones en el alfabeto polaco (35 letras, con diacríticos: AĄBCĆ...ZŻŹ). El desplazamiento lo introduces en la GUI en el campo numérico; si ingresas 0, la aplicación elegirá un valor al azar en el rango 1-34 y lo mostrará en un mensaje para que luego puedas descifrar el mensaje. Los caracteres fuera del alfabeto (números, espacios, puntuación) permanecen sin cambios.
+   El cifrado documentado más antiguo de la historia (utilizado ya en la antigua Roma). Cada letra se desplaza N posiciones en el alfabeto español (27 letras: ABCDEFGHIJKLMNÑOPQRSTUVWXYZ). El desplazamiento lo introduces en la GUI en el campo numérico; si ingresas 0, la aplicación elegirá un valor al azar en el rango 1-25 y lo mostrará en un mensaje para que luego puedas descifrar el mensaje. Los caracteres fuera del alfabeto (números, espacios, puntuación) permanecen sin cambios.
 
 ¿Qué es el "modo Reżyser"?
 ---------------------------

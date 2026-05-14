@@ -242,7 +242,7 @@ Dostępne algorytmy (zaznacz w menu „Wybierz algorytm zniekształcający"):
 
 - Silne Jąkanie / Uszkodzony Robot — dokleja zająknięcia na początku słów: „ko-ko-ko-komputer", „pr-pr-prysznic". Dla krótkich słów (mniej niż 3 znaki) algorytm je pomija. Jeśli druga litera słowa jest spółgłoską, powtarza dwie pierwsze litery (bardziej naturalny efekt); jeśli samogłoską — powtarza tylko pierwszą.
 
-- Szyfr Cezara (przesunięcie alfabetu PL) — klasyczny szyfr podstawieniowy: każda litera jest przesuwana o N pozycji w polskim alfabecie (AĄBCĆ…ZŻŹ, 35 znaków). Wartość przesunięcia wpisujesz w polu liczbowym „Przesunięcie szyfru Cezara (0 = losowe, zakres -35…35)". Jeśli wpiszesz 0 — aplikacja wylosuje przesunięcie w zakresie 1-34 i pokaże je w komunikacie po zakończeniu (żebyś mógł potem odszyfrować). Znaki spoza alfabetu (cyfry, interpunkcja, spacje) zostają bez zmian.
+- Szyfr Cezara (przesunięcie alfabetu PL) — klasyczny szyfr podstawieniowy: każda litera jest przesuwana o N pozycji w polskim alfabecie (AĄBCĆ…ZŹŻ, 35 znaków). Wartość przesunięcia wpisujesz w polu liczbowym „Przesunięcie szyfru Cezara (0 = losowe, zakres -35…35)". Jeśli wpiszesz 0 — aplikacja wylosuje przesunięcie w zakresie 1-34 i pokaże je w komunikacie po zakończeniu (żebyś mógł potem odszyfrować). Znaki spoza alfabetu (cyfry, interpunkcja, spacje) zostają bez zmian.
 
 Praktyczne zastosowanie: szyfry zapisują wynik w tym samym formacie co Tryb Reżysera (.html z tagiem lang lub .docx z tagami XML), czyli NVDA odczyta je głosem odpowiedniego języka. Szczególnie Odwracacz i Samogłoskowiec brzmią w syntezatorze znacznie ciekawiej niż gdy czytasz je oczami — bo mózg przy czytaniu wzrokiem automatycznie próbuje „zdekodować" tekst, a TTS czyta go dokładnie tak, jak zapisany.
 

@@ -1148,7 +1148,7 @@ def _algo_cezar(tekst: str, cfg: dict, podstawy: dict, opcje: dict) -> str:
     ``1..len(alfabet)-1``.
     """
     alfabet = cfg.get("alfabet") or podstawy.get("alfabet") or \
-              "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSTUVWXYZŹŻ"
+              "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"
     n = len(alfabet)
 
     przes = int(opcje.get("przesuniecie_faktyczne",

@@ -1,159 +1,170 @@
-Reżyser Audio GPT — Modúl Interaktívar Sögur (15.1 – Útgáfuútgáfa)
+Reżyser Audio GPT — Modúll Interaktívar Sagna (15.1 – Útgáfuútgáfa)
 
-Annar aðalhamur forritsins við hlið Reżysera — í þetta sinn verður þú leikmaður í sögunni sem er sjálfkrafa búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur um þokukenndan skóg, finnur lyktina af blautum laufum..."), og þú ákveður næsta skref — skrifar hvaða aðgerð sem er með frjálsum texta eða velur einn af númeruðum valkostum.
+Annar aðalhamur forritsins við hlið Reżysera — í þetta skiptið verður þú leikmaður í kviku sögugerð í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lykt af blautum laufum…"), og þú ákveður næstu hreyfingu — með því að skrifa hvaða aðgerð sem er í frjálsum texta eða velja einn af tölusettum valkostum.
 
-Modúllinn var hannaður frá upphafi með blindum leikmönnum í huga — frásögnin er lesin línulega af skjálesara (NVDA) eða TTS-vél, valkostir eru í formi hnappa með raddlýsingum, hver lokið umferð er merkt með bjölluhljóði og sjálfvirkri færslu á nýjan texta.
+Modúllinn var hannaður frá upphafi með blindum leikmönnum í huga — frásögnin er lesin línulega með skjálesara (NVDA) eða TTS-vél, kvikar ákvarðanir í formi hnappa með raddlýsingum, hver lokið umferð er merkt með bjölluhljóði og sjálfvirkri færslu á nýmyndaðan texta.
 
 Þú opnar spjaldið með því að smella á "📖  Sögur" á verkfærastikunni eða með flýtilykli Ctrl+5.
 
-SKREF 1: Þrír leikhamir — veldu leikstíl
 
-Rétt undir leikjatitlinum finnurðu valkassa (RadioBox) fyrir leikham. Hamurinn ákvarðar hvernig frásagnarvélin talar við þig:
+KROK 1: Þrír leikir — veldu leikstíl
 
-FRJÁLS HAMUR — þú skrifar hvaða aðgerð sem er með frjálsum texta („ég reyni að opna dyrnar", „ég spyr vörðinn um leiðina", „ég flý bakdyramegin"). Frásagnarvélin getur lagt til 1-3 tillögur, en þær eru aðeins ábendingar — ekki skyldubundin leið. Mest frjálsi hamurinn, mælt með fyrir reynda leikmenn sem spinna eigin sögu.
+Rétt undir nafnstiku leiksins finnur þú valmöguleika fyrir leikham (RadioBox). Leikhamurinn ákvarðar hvernig frásagnavélin hefur samskipti við þig:
 
-VALKOSTAHAMUR — hver umferð endar með 3-5 númeruðum valkostum A-E í formi smellanlegra hnappa. Hver valkostur er ákveðin aðgerð sem þú getur tekið. Þú getur líka skrifað eigin aðgerð með frjálsum texta — vélin passar hana við næsta valkost merkingarlega. Mest innsæi hamurinn fyrir blinda leikmenn: NVDA les alla valkosti fyrir þig, þú smellir á Tab á milli þeirra, Enter staðfestir.
+FRJÁLS HAMUR — þú slærð inn hvaða aðgerð sem er með frjálsum texta („ég reyni að opna dyrnar“, „ég spyr vörðinn um leiðina“, „ég flý bakdyramegin“). Frásagnavélin getur lagt til 1-3 tillögur, en þær eru aðeins vísbendingar — ekki skyldubundin leið. Mest frjálsi hamurinn, mælt með fyrir reynda leikmenn sem spinna eigin sögu.
 
-MINNA ILLA HAMUR — eins og Valkostir, en hver af 3-5 valkostum er óhagstæður siðferðilega, líkamlega eða strategískt. Enginn „hlutlaus" valkostur, enginn hamingjusamur endir í þessari umferð. Hamur fyrir aðdáendur dökkra skáldskapa í anda „Tales of Consequence" eða siðferðilegra drama.
+VALHAMUR — hver umferð endar með 3-5 tölusettum valkostum A-E í formi smellanlegra hnappa. Hver valkostur er sérstök aðgerð sem þú getur tekið. Þú getur einnig slegið inn eigin aðgerð með frjálsum texta — vélin passar hana við næsta valkost merkingarlega. Mest innsæi hamurinn fyrir blinda leikmenn: NVDA les fyrir þig alla valkosti, þú smellir á Tab á milli þeirra, Enter staðfestir.
 
-Hægt er að breyta hamnum á meðan á leik stendur — í næstu umferð mun frásagnarvélin aðlagast nýja stílnum (frá Frjálsum yfir í Valkosti getur farið í einum smelli).
+MINNA ILLT HAMUR — eins og Valhamur, en hver af 3-5 valkostum er siðferðilega, líkamlega eða strategískt óhagstæður. Enginn „hlutlaus“ valkostur, enginn hamingjusamur endir í þessari umferð. Hamur fyrir aðdáendur dökkra skáldskapa í anda „Tales of Consequence“ eða siðferðilegra drama.
 
-SKREF 2: Quick Start — tilbúnar upphafssögur
+Flaska í Minna illt ham (frá v15.2): eftir fjórar umferðir leiks birtist aukaval, núll-númeraður valkostur „Opna flöskuna“ í valreitnum — og er áfram þar til leiksloka sem endurnýtanlegur valkostur (hverfur ekki eftir notkun, þú getur gripið til hennar ítrekað). Flaskan er valkostur „örvæntingarfullrar björgunar“, en virkni hennar er viljandi óútreiknanleg og því dramatískt þyngri, því sjaldgæfari sem hún gefur jákvæða niðurstöðu: í um 60% tilfella er innihald flöskunnar skaðlegt (eitrun, meiðsli, blindun), í 30% veldur það skyntruflunum eða draugum (ofskynjanir, breytt tal, læti), en aðeins í 10% reynist það sjaldan gagnlegt (tímabundin styrking, hjálplegur draugur, lykilupplýsingar). Dreifingin er þvinguð af Python (`random.choices` í forritinu), LLM fær tilbúinn fræ `{flokkur, lýsing}` og útskýrir það aðeins — líkanið getur ekki „fundið upp“ björgunarafleiðingu nema með útdrætti. Þannig verður flaskan ALDREI deus ex machina: jafnvel þegar gripið er til hennar í algjörri örvæntingu versnar ástandið yfirleitt. Val á frásagnarformi hennar (hvort flaskan brotnar endanlega eða er sett aftur í beltið) er á valdi frásagnavélarinnar — stundum eftir fyrstu af 60%-skaðlegu skömmtunum kemurðu aldrei aftur.
 
-Undir leikjatitlinum finnurðu annan röð með merkinu „Fljótleg byrjun:" og fellival (wx.Choice). Sjálfgefið er "(eigin leikur)" — vélin skapar sjálf heiminn út frá fyrstu aðgerð þinni.
-
-Þú getur þó valið einn af fimm tilbúnum forstillingum til að sökkva þér strax í ákveðinn heim:
-
-EFTIR-APOKALYPTÍSKT SF — öld eftir vistfræðilega hörmung. Leifar mannkyns í skýlum undir Góram Świętokrzyskim. Þú ert ungur sendiboði Klan Sztolnia með fyrsta alvarlega verkefnið. Sjálfgefinn hamur: Valkostir.
-
-DÖKK FANTASÍA — landamæri Þriggja Fljóta Konungsríkisins, níunda ár trúarstríðs. Þú ert yngri Inkvisítor á slóðum þorps þar sem einhver verndar andsetið barn. Sjálfgefinn hamur: Minna illa.
-
-URBAN FANTASY DETECTIVE — Varsjá 2008, októberkvöld. Þú ert einkaspæjari sem sér drauga. Viðskiptavinur vill finna eiginmann sem hvarf undir Konungshöllinni. Sjálfgefinn hamur: Valkostir.
-
-GEIMHROLLUR — árið 2247, rannsóknarstöð á braut um nifteindastjörnu. Þú vaknar úr dvala án skipstjóra — og án ummerkja um að skipstjórinn hafi nokkru sinni verið til. Sjálfgefinn hamur: Frjáls (lovecraftískur andi hvetur til spuna).
-
-RÓMANTÍSK GAMANLEIKUR — Saska Kępa apríl 2024, lítið kaffihús stendur frammi fyrir lokun. Þú ert barista-þjónn sem eigandinn biður um að „vera vingjarnlegur" við ritstjóra-feiminn, sem þú hefur lengi viljað nálgast sjálf. Sjálfgefinn hamur: Frjáls.
-
-Eftir að þú hefur valið forstillingu, smelltu á "Nýr leikur" — vélin mun sprauta stuttum lýsingu á heiminum og hetjunni í sig, stilla sjálfgefinn leikham (þú getur breytt honum með RadioBox áður en þú smellir á „Nýr leikur"). Fyrsta umferð LLM mun leika upphafssenuna.
-
-SKREF 3: Fyrsti leikur frá grunni — án forstillingar
-
-Ef þú vilt fullkomið frelsi, skildu "(eigin leikur)" í Quick Start reitnum og undirbúðu þig til að slá inn fyrstu aðgerðina handvirkt.
-
-1. Sláðu inn nafn leiksins í reitinn „Nafn leiks" (t.d. „mín_ævintýri_1") — undir þessu nafni verða skráðar frásagnir, ástand og logg.
-2. Veldu ham (Frjáls/Valkostir/Minna illa).
-3. Smelltu á "Nýr leikur". Forritið mun búa til 3 skrár: leikástand (.game.json), tóma Heimabók (.md) og hamgögn (.mode). Frásagnarskráin (.txt) verður búin til eftir fyrstu umferð.
-4. Í reitnum „Aðgerð þín eða skipun" neðst á spjaldinu skaltu slá inn fyrstu aðgerðina, t.d. „ég vakna í ókunnu herbergi". Smelltu á "Senda". Frásagnarvélin mun opna heiminn út frá aðgerð þinni — lýsing á herberginu, hljóðum, persónum, fyrstu ákvörðunum.
-5. Hver umferð verður sjálfkrafa vistuð — þú getur lokað forritinu hvenær sem er og hlaðið leikinn aftur með því að smella á "Hlaða".
-
-SKREF 4: Heimsreglur — þínar eigin reglur sem vélin virðir í gegnum allan leikinn
-
-Frá útgáfu 15.1 finnurðu fyrir ofan frásagnarreitinn hnappinn „Breyta heimsreglum…". Hann opnar sérstakan klippiglugga með margra lína reit, þar sem þú getur slegið inn hvaða reglur sem er — hljóðfræðilegar, vélrænar eða dramatískar — sem frásagnarvélin mun virða í hverri síðari umferð þessa tiltekna leiks. Reglurnar eru vistaðar ásamt leikstöðu (.game.json), þannig að við að hlaða leiknum halda þær óbreyttu formi.
-
-Þrjár dæmigerðar notkunarleiðir heimsreglna:
-
-HLJÓÐFRÆÐILEGAR REGLUR — þær stjórna því hvernig TTS (Vocalizer, ElevenLabs) ber fram nöfn persóna. Dæmi: „Nafnið Joanna skal alltaf bera fram með hörðu, pólsku [dʒ]; aldrei mjúku [j]." Vélin setur þessa afbrigði inn í frásögnina frá næstu umferð, og persónan Joanna í Heimabókinni heldur ætluðum hljómi. Þetta er einnig eðlileg brú að áherslum Leikstjórans — ef þú hleður Heimabókinni inn í Leikstjórnar-spjaldið eftir að leiknum er lokið (SKREF 9 að neðan), „færist" hljóðfræðilega reglan með leiknum sem einkenni persónunnar.
-
-VÉLRÆNAR REGLUR — þær lýsa „eðlisfræðilögmálum" heimsins þíns sem LLM verður að virða. Dæmi: „Í þessum heimi virkar galdur aðeins á nóttunni; á daginn eru persónurnar venjulegt fólk." Vélin finnur ekki upp galdra um hádegi þótt aðgerð umferðar þinnar krefjist þess — þess í stað leggur hún til valkost eða leiðir þig í rökkur.
-
-DRAMATÍSKAR REGLUR — þær skilgreina langtíma spennu á milli persóna. Dæmi: „Andstæðingurinn Joana reynir að mýkja framburð nafns aðalpersónunnar með málfræðilegri beygingu." Vélin vefur slík fíngerð merki inn í samtöl Joana og viðheldur ágreiningnum í gegnum margar umferðir án þess að þú þurfir að endurtaka leiðbeininguna.
-
-Tómur reglureitur = engar viðbótarreglur (sjálfgefin hegðun, eins og í v15.0). Þú þarft ekki að skilgreina reglur strax í upphafi — þú getur snúið aftur í gluggann hvenær sem er, bætt við reglum sem þú tókst eftir í leiknum og smellt á „Vista". Breytingin tekur gildi frá næstu umferð.
-
-Athugaðu: heimsreglur krefjast virks leiks. Ef þú smellir á „Breyta heimsreglum…" án hlaðins/búinn leiks, færðu skilaboðin „Enginn virkur leikur" — smelltu fyrst á „Nýr leikur" eða hladdu vistuðum leik.
+Hægt er að skipta um ham á meðan á leik stendur — í næstu umferð aðlagar frásagnavélin sig að nýjum stíl (úr Frjálsum í Valham með einum smelli). Athugið: flaskan er eingöngu eiginleiki Minna illt hams — þegar skipt er í Valham eða Frjálsan í sama leik, er tilvist hennar og umferðarvísir varðveitt í leikástandinu, en þar til þú kemur aftur í Minna illt ham birtist valkosturinn „Opna flöskuna“ ekki.
 
 
+KROK 2: Quick Start — tilbúnir upphafsatburðir
 
-SKREF 5: Slash-skipanir — fljótlegar aðgerðir án API
+Undir leikjanafnareitnum finnurðu annan röð með merkinu „Fljótleg byrjun:" og fellivalmynd (wx.Choice). Sjálfgefið val er "(eigin leikur)" — vélin mun sjálf búa til heiminn út frá fyrstu aðgerð þinni.
 
-Í aðgerðarreitnum geturðu hvenær sem er slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta ekki köll til OpenAI) og virka óháð leikham. Bæði íslensk og ensk afbrigði eru samþykkt:
+Þú getur þó valið einn af fimm tilbúnum forskriftum til að sökkva þér strax í ákveðinn heim:
 
-/vista, /save — þvingar handvirka vistun ástands leiksins. Sjálfvirk vistun virkar eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritinu er lokað.
+POKALYPSU SF — öld eftir vistfræðilega hörmung. Leifar mannkyns í skýlum undir Górami Świętokrzyskimi. Þú ert ungur sendiboði Klan Sztolnia með fyrsta alvarlega verkefnið. Sjálfgefinn hamur: Val.
 
-/hlaða, /load — opnar valglugga fyrir skrá úr möppunni runtime/opowiesci/. Eftir að hlaða er nafn leiksins, hamur og öll frásögn endurheimt — þú getur haldið áfram frá þeirri umferð sem þú endaðir á.
+DÖKK FANTASÍA — landamæri Ríkisins Þriggja Strauma, níunda ár trúarstríðs. Þú ert yngri Rannsóknardómari á slóðum þorps þar sem einhver verndar andsetið barn. Sjálfgefinn hamur: Minna illt.
 
-Frásagnavélin velur AI-líkanið sjálfkrafa eftir stillingu: fyrir Valstillingu og Minna illt notar hún dýrara gpt-4o (heldur sig strangt við reglur heimsins); fyrir Frjálsa stillingu — hraðara og ódýrara gpt-4o-mini (spilarinn stýrir söguþræðinum, svo þung leikstjórn er ekki nauðsynleg).
+URBAN FANTASÍA RANNSÓKNARMAÐUR — Varsjá 2008, októberkvöld. Þú ert einkaspæjari sem sér drauga. Viðskiptavinur vill finna eiginmann sem hvarf undir Konungshöllinni. Sjálfgefinn hamur: Val.
 
-/sjá <lýsing>, /visualize <lýsing> — fjölskynjunar lýsing á núverandi senu. Breytir ekki ástandi leiksins, leggur ekki til valkosti — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snerting, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskránni. Dæmi: „/sjá hvernig vörðurinn lítur út" eða „/sjá lyktina af kaffihúsinu".
+GEIMHROLLVEKJA — árið 2247, rannsóknarstöð á braut um nifteindastjörnu. Þú vaknar úr dvala án skipstjóra — og án ummerkja um að skipstjórinn hafi nokkurn tíma verið til. Sjálfgefinn hamur: Frjáls (lovecraftskur andi verðlaunar spuna).
 
-/enda, /quit — lokar forritinu (eftir sjálfvirka vistun umferðar í gangi).
+RÓMANTÍSKUR GAMANLEIKUR — Saska Kępa apríl 2024, lítið kaffihús stendur frammi fyrir lokun. Þú ert barista-þjónn sem eigandinn segir að „vera vingjarnlegur" við feiminn ritstjóra sem þú hefur lengi viljað tala við sjálf. Sjálfgefinn hamur: Frjáls.
 
-SKREF 6: Leikskrár — hvar þú finnur gögnin þín
+Eftir að hafa valið forskrift skaltu smella á "Nýr leikur" — vélin mun sprauta stuttum lýsingu á heiminum og hetjunni inn í sig, stilla sjálfgefinn leikham (þú getur yfirskrifað hann með RadioBox áður en þú smellir á „Nýr leikur"). Fyrsta umferð LLM mun leika upphafssenuna.
+
+
+KROK 3: Fyrsta leikur frá grunni — án forstillingar
+
+Ef þú kýst fullkomið frelsi, skildu eftir "(eigin leikur)" í reitnum Quick Start og undirbúðu þig fyrir að slá inn fyrstu aðgerðina handvirkt.
+
+1. Sláðu inn nafn leiksins í reitinn „Nafn leiks" (t.d. „min_ævintýri_1") — undir þessu nafni verða skráðar söguskrár, stöðuskrár og skráningarskrár.
+2. Veldu ham (Frjáls/Val/Minna illt).
+3. Smelltu á "Nýr leikur". Forritið mun búa til 3 skrár: stöðuskrá (.game.json), tóma Heimabók (.md) og stillingarskrá (.mode). Söguskráin (.txt) verður búin til eftir fyrstu umferð.
+4. Í reitnum „Aðgerð þín eða skipun" neðst á spjaldinu, sláðu inn fyrstu aðgerðina, t.d. „ég vakna í ókunnu herbergi". Smelltu á "Senda". Frásagnavélin mun opna heiminn byggt á aðgerðinni þinni — lýsing á herberginu, hljóð, persónur, fyrstu ákvarðanir.
+5. Hver umferð verður sjálfkrafa vistuð — þú getur lokað forritinu hvenær sem er og hlaðið leikinn aftur síðar með því að smella á "Hlaða".
+
+
+KROK 4: Reglur heimsins — eigin reglur sem vélin virðir í gegnum allt leikinn
+
+Frá útgáfu 15.1 finnurðu hnappinn "Breyta heimsreglum…" fyrir ofan frásagnarreitinn. Hann opnar sérstakan ritglugga með fjölina línureit, þar sem þú getur slegið inn hvaða reglur sem er — hljóðfræðilegar, vélrænar eða dramatískar — sem frásagnarvélin mun virða í hverri næstu umferð þessa tiltekna leiks. Reglurnar eru vistaðar ásamt stöðu leiksins (.game.json), þannig að þegar leikur er hlaðinn aftur, eru þær varðveittar óbreyttar.
+
+Þrjú dæmigerð notkunarsvið reglna heimsins:
+
+HLJÓÐFRÆÐILEGAR REGLUR — stjórna framburði nafna persóna í TTS (Vocalizer, ElevenLabs). Dæmi: „Nafnið Joanna skal alltaf borið fram hart, pólsk [dż]; aldrei mjúkt [j]." Vélin mun setja þessa útgáfu í frásögnina frá næstu umferð, og persónan Joanna í Heimsbókinni mun halda fyrirhuguðum hljómi. Þetta er líka náttúruleg brú til áherslna Leikstjórans — ef þú hleður Heimsbókinni inn í stjórnborð Leikstjórans eftir að leiknum er lokið (KROK 9 hér að neðan), mun hljóðfræðilega reglan „fara með" leiknum sem eiginleiki persónunnar.
+
+VÉLRÆNAR REGLUR — lýsa „eðlisfræðilögum" heimsins þíns, sem LLM á að fylgja. Dæmi: „Í þessum heimi virkar galdur aðeins á nóttunni; á daginn eru persónurnar venjulegt fólk." Vélin mun ekki búa til galdra í hádegi, jafnvel þótt aðgerð þinnar umferðar krefjist þess — í staðinn mun hún bjóða upp á valkost eða leiða þig að kvöldi.
+
+DRAMATÍSKAR REGLUR — skilgreina langtímaspennu milli persóna. Dæmi: „Andstæðingurinn Joana reynir að mýkja framburð nafns aðalpersónunnar með málfræðilegri beygingu." Vélin fléttar slíkum fíngerðum merkjum inn í samtöl Joönu, viðhalda átökum í mörgum umferðum án þess að þú þurfir að gefa endurteknar leiðbeiningar.
+
+Tómt reglureit = engar viðbótarreglur (sjálfgefin hegðun, eins og í v15.0). Þú þarft ekki að skilgreina reglur strax í upphafi — þú getur snúið aftur í gluggann í hvaða umferð sem er, bætt við reglum sem þú hefur tekið eftir í leiknum og smellt á "Vista". Breytingin tekur gildi frá næstu umferð.
+
+Athugið: reglur heimsins krefjast virks leiks. Ef þú smellir á "Breyta heimsreglum…" án þess að hafa hlaðið/sett upp leik, færðu skilaboðin „Enginn virkur leikur" — smelltu fyrst á "Nýr leikur" eða hlaðið vistaðan leik.
+
+
+KROK 5: Slash-komendy — szybkie akcje bez API
+
+Í aðgerðareitnum geturðu hvenær sem er slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta ekki köll til OpenAI) og virka óháð leikham. Bæði íslensk og ensk afbrigði eru samþykkt:
+
+/vista, /save — þvingar handvirka vistun á stöðu leiksins. Sjálfvirk vistun á sér stað eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritið er lokað.
+
+/hlaða, /load — opnar valglugga fyrir skrá úr möppunni runtime/opowiesci/. Eftir hleðslu er nafn leiksins, hamur og full frásögn endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á.
+
+Frásagnavélin velur AI-líkan sjálfkrafa eftir ham: fyrir ham Val og Minna ills nota það dýrari gpt-4o (fylgir ströngum reglum heimsins), fyrir Frjálsan ham — hraðari og ódýrari gpt-4o-mini (leikmaður stjórnar söguþræði, svo það krefst ekki dramatískrar leikstjórnar).
+
+/sjá <lýsing>, /visualize <lýsing> — fjölskynja lýsing á núverandi senu. Breytir ekki stöðu leiksins, leggur ekki til valkosti — frásagnavélin notar öll fimm skilningarvitin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku samtalsglugga, ER ekki bætt við frásögnina né vistuð í hljóðbókar skrá. Dæmi: „/sjá hvernig vörðurinn lítur út" eða „/sjá lyktina af kaffihúsinu".
+
+/loka, /quit — lokar forritinu (eftir sjálfvirka vistun á umferð í gangi).
+
+
+KROK 6: Leikjaskrár — hvar þú finnur gögnin þín
 
 Hver leikur framleiðir fimm skrár, hver í mismunandi möppu, með mismunandi hlutverkum:
 
-skrypty/<nazwa>.txt — full frásögn tilbúin til að hlusta á sem hljóðbók. Hægt að opna í Notepad eða hlaða inn í Audiobook Architect (Converter) og búa til Word skjal með köflum eða tímasetningu fyrir ElevenLabs.
+skrypty/<nazwa>.txt — fullkomin frásögn tilbúin til hlustunar sem hljóðbók. Hægt að opna í Notepad eða hlaða inn í Hljóðbókararkitektinn (Breytir) og búa til Word skrá með köflum eða tímasetningu fyrir ElevenLabs.
 
-skrypty/<nazwa>.md — Heimabók persóna í formi [Nafn: einkenni], endurmynduð eftir hverja umferð. Format samhæft við Reżyser parser! Þú getur hlaðið þessari skrá inn í Reżyser spjaldið (Skrá → Hlaða) og fengið innfæddar persónuáherslur í klassískri TTS-frásögn — brú milli tveggja aðalmodúla forritsins.
+skrypty/<nazwa>.md — Heimabók persóna á formi [Nafn: einkenni], endurgerð eftir hverja umferð. Samhæft við Reżyser parserinn! Þú getur hlaðið þessari skrá inn í Reżyser spjaldið (Skrá → Hlaða inn) og fengið innfædda hreim persóna í klassískri TTS frásögn — brú milli tveggja aðal eininga forritsins.
 
-runtime/opowiesci/<nazwa>.game.json — fullt leikástand: nafn, hamur, virkar persónur, staðsetning, búnaður, opnir þræðir, síðustu 6 umferðir í styttri formi. Þetta er sannleiksgjafi til að hlaða leik — án þessarar skráar er ekki hægt að halda áfram.
+runtime/opowiesci/<nazwa>.game.json — fullkomið ástand leiksins: nafn, stilling, virkar persónur, staðsetning, búnaður, opnir þræðir, síðustu 6 umferðir í styttri formi. Þetta er sannleiksgjafi til að hlaða leik — án þessarar skráar er ekki hægt að halda áfram.
 
-runtime/opowiesci/<nazwa>.story.jsonl — hrá logg af hverri umferð (beiðni leikmanns + svar líkans í JSON). Skráin er ekki nauðsynleg til leiks — hún er til að afkóða eða greina síðar (t.d. tölfræði um hversu margar umferðir ævintýrið stóð yfir, hvaða þræði LLM kynnti).
+runtime/opowiesci/<nazwa>.story.jsonl — hrátt skrá yfir hverja umferð (beiðni leikmanns + svar líkans í JSON). Skráin er ekki nauðsynleg fyrir leikinn — hún er notuð til villuleitar eða síðari greiningar (t.d. tölfræði um hversu margar umferðir ævintýrið stóð, hvaða þræði LLM kynnti).
 
-runtime/skrypty/<nazwa>.mode — metadata um númer ham (3=Frjáls, 4=Valkostir, 5=Minna illa). Skrá sameiginleg með Reżyser, en númerun stangast ekki á (Reżyser notar 0-2).
+runtime/skrypty/<nazwa>.mode — lýsigögn um stillingarnúmer (3=Frjáls, 4=Valmöguleikar, 5=Minna illt). Skrá sameiginleg með Reżyser, en númeraröð rekst ekki á (Reżyser notar 0-2).
 
-SKREF 7: Minni vísir líkans — af hverju umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
 
-Undir RadioBox hamnum finnurðu minni vísir líkans — framfarastiku (wx.Gauge) með stöðulýsingu við hliðina. Vísirinn sýnir prósentu fyllingar á samhengisglugga frásagnarvélarinnar (gpt-4o-mini hefur 128.000 táknabúffer).
+KROK 7: Vísir minnis líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handavinnu frá þér
+
+Undir RadioBox-stillingunni finnurðu vísir minnis líkans — framvindustiku (wx.Gauge) með stöðu lýsingu við hliðina. Vísirinn sýnir prósentu fyllingar samhengisglugga frásagnavélarinnar (gpt-4o-mini hefur 128.000 táknabúffer).
 
 Fjórir fyllingarstig:
 
-🟢 hreint (0%) — leikurinn er nýbyrjaður, engar vistaðar umferðir.
+🟢 hreint (0%) — leikurinn er nýbyrjaður, engar skráðar umferðir.
 🟢 OK (1-69%) — allt í lagi, þú getur haldið áfram án takmarkana.
-⚠️ viðvörun (70-89%) — vélin býr sjálfkrafa til samantekt fyrri umferða í bakgrunnsþræði. Skilaboðin „Sjálfvirk samantekt á samhenginu í gangi..." munu birtast — ekki senda næstu umferð fyrr en samantektin er lokið. Eftir að það tekst verða fyrri umferðir þjappaðar í einn þétting, búfferinn losnar og þú færð staðfestingu „Minni líkans endurheimt" með fjölda þjappaðra umferða.
-🚨 VIÐVÖRUN (90%+) — sjálfvirk samantekt losaði ekki búfferinn (sjaldgæft tilfelli eftir API bilun). Að senda næstu umferð er læst. Þvingaðu leikslok með /enda, síðan hlaða leikinn aftur — vélin mun hlaða ástandið úr game.json án sögu síðustu umferða, búfferinn verður nýr.
+⚠️ viðvörun (70-89%) — vélin býr sjálfkrafa til útdrátt úr fyrri umferðum í bakgrunnsþræði. Skilaboðin „Sjálfvirk útdráttur samhengis í gangi..." birtast — sendu ekki næstu umferð fyrr en útdrátturinn er lokið. Eftir árangur verða fyrri umferðir dregnar saman í einn þétting, búfferinn losnar og þú færð staðfestingu „Minnis líkan endurheimt" með fjölda samandreginna umferða.
+🚨 VIÐVÖRUN (90%+) — sjálfvirk útdráttur losaði ekki búfferinn (sjaldgæft tilfelli eftir API bilun). Að senda næstu umferð er lokað. Þú þarft að ljúka leiknum með /koniec, síðan hlaða honum aftur — vélin mun hlaða stöðu úr game.json án sögu síðustu umferða, búfferinn verður nýr.
 
-Í reynd er sjálfvirka minnkunarkerfið ósýnilegt — leikmaðurinn finnur ekki fyrir því að eitthvað sé að gerast, því bakgrunnsþráðurinn leysir vandamálið áður en það er tekið eftir. Mikilvægt er aðeins að þú sendir ekki næstu umferð á meðan sjálfvirk samantekt er í gangi (hnappurinn "Senda" er þá gráður).
+Í framkvæmd er sjálfvirka minnkunarkerfið ósýnilegt — leikmaðurinn finnur ekki fyrir því að eitthvað sé að gerast, því bakgrunnsþráðurinn leysir vandamálið áður en það verður áberandi. Það er aðeins mikilvægt að þú sendir ekki næstu umferð á meðan sjálfvirk útdráttur er í gangi (hnappurinn "Senda" er þá gráður).
 
-SKREF 8: Cinematic Meta Warning — dramatísk innskot eftir 150. umferð
 
-Eftir 150 umferðir í einum leik mun frásagnarvélin EINU SINNI setja inn „Cinematic Meta Warning" — dramatískt innskot með meta-frásögn. Það birtist í sérstöku glugga með bjölluhljóði, með beinni ávarpi til þín í annarri persónu, samantekt á afrekum og viðvörun um mikilvægi ákvarðana sem teknar eru.
+KROK 8: Cinematic Meta Warning — dramatískur millikafli eftir 150. umferð
 
-Cinematic Warning ER EKKI hluti af hljóðbókarfrásögninni — sían sem vinnur úr .txt skránni fjarlægir sjálfkrafa efni hennar (merkt með táknum ⚠️🚨⚠️), þannig að þú heyrir ekki meta-athugasemdir um eigin leik þegar þú hlustar á hljóðbókina. Efnið fer aðeins í logg .story.jsonl (til íhugunar eða til að geyma sem minningu) og í viðmótsglugga, þar sem þú getur lesið það einu sinni og haldið áfram.
+Eftir 150 umferðir í einum leik mun frásagnavélin EINU SINNI setja inn „Cinematic Meta Warning" — dramatískan millikafla með meta-frásögn. Hann mun birtast í sérstöku samtali með bjölluhljóði, með beinni ávarpi til þín í annarri persónu, samantekt á afrekum og viðvörun um mikilvægi ákvarðana sem teknar eru.
 
-SKREF 9: Brú til Reżysera — nýttu Heimabókina sem búin er til í Sögum
+Cinematic Warning ER EKKI hluti af hljóðbókarfrásögninni — .txt síuvélin fjarlægir sjálfkrafa innihald hennar (merkt með ⚠️🚨⚠️), svo þú heyrir ekki meta-athugasemd um eigin leik meðan á hlustun hljóðbókar stendur. Innihaldið fer aðeins í .story.jsonl skrána (til íhugunar eða varðveislu) og í samtali í GUI, þar sem þú getur lesið það einu sinni og haldið áfram.
 
-Skráin skrypty/<nazwa>.md sem er búin til í leiknum inniheldur Heimabók með persónum sem birtust í frásögninni, ásamt eiginleikum þeirra, áherslum og persónuleika. Format er nákvæmlega eins og Reżyser parserinn krefst — [Nafn: eiginleikar með lýsingu á áherslu].
 
-Hvað geturðu gert við þetta:
+KROK 9: Brú til Reżyser — nýttu Heimsbókina búin til í Sögum
+
+Skráin skrypty/<nazwa>.md sem er búin til á meðan leik stendur inniheldur Heimsbókina með persónum sem komu fram í frásögninni, ásamt eiginleikum þeirra, hreimum og persónuleika. Sniðið er nákvæmlega eins og Reżyser greinirinn krefst — [Nafn: eiginleikar með lýsingu á hreim].
+
+Hvað þú getur gert með þetta:
 
 1. Eftir að leiknum lýkur, opnaðu spjaldið "🎬  Leikstjóri" (Ctrl+1).
-2. Hladdu inn verkefni með sama nafni — Reżyser mun hlaða .txt skrána sem sögu og .md sem Heimabók.
-3. Þú færð nú klassíska frásögn Reżysera (löng, uppbyggð atriði með þáttum og köflum) með innfæddum áherslum persóna sem þú hafðir gaman af í Sögum. Vörður Karmela úr skýlinu sem talar í stuttum setningum, inkvisítor Rosanna með syngjandi austuráherslu — allir eiginleikar varðveittir.
+2. Hladdu inn verkefni með sama nafni — Reżyser mun hlaða .txt skrá sem sögu og .md sem Heimsbókina.
+3. Þú færð nú klassíska frásögn Reżyser (langar, skipulagðar senur með þáttum og köflum) með innfæddum hreimum persóna sem þú hafðir gaman af í Sögum. Karmelvörðurinn úr skýlinu sem talar í stuttum setningum, inkvisítorinn Rosanna með syngjandi austurhreim — allir eiginleikar varðveittir.
 
-Þetta er einhliða brú: Sögur framleiða efni, Reżyser formatar það. Öfugt er ekki mögulegt — Reżyser hleður ekki inn leikjum úr Sögum sem gagnvirku ástandi.
+Þetta er einhliða brú: Sögur framleiða efni, Reżyser formatar það. Ekki er hægt að fara í hina áttina — Reżyser les ekki leiki úr Sögum sem gagnvirkt ástand.
 
-SKREF 10: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
 
-Allur Sögumódúllinn hefur verið fínstilltur fyrir blinda leikmenn. Hvað við gerðum nákvæmlega:
+KROK 10: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
 
-SVÆÐI SÍÐASTA UMFERÐ — þetta er sérstakt wx.TextCtrl readonly multiline (~140 px hæð) YFIR fullri frásögn. Eftir hverja umferð er svæðið skipt út fyrir ferskan hluta (fyrirsögn „--- Umferð N ---" + frásagnartexti). NVDA les það strax eftir fókus (sjálfvirkur fókus eftir vel heppnaða umferð), án þess að þurfa að fara í gegnum hundruð lína af fullri sögu. Eftir að hlaða inn vistaðan leik sýnir svæðið YFIRLIT yfir síðustu vistaða umferð (hámark 400 stafir úr `síðustu_umferðir` biðminni) með forskeyti sem upplýsir að full frásögn er í svæðinu fyrir neðan.
+Allur söguhlutinn hefur verið fínstilltur fyrir blinda notendur. Hvað við gerðum nákvæmlega:
 
-SVÆÐI FULLRAR FRÁSAGNAR — þetta er wx.TextCtrl readonly multiline sem eykst eftir hverja umferð. NVDA les línulega alla frásögnina, þú getur farið um með örvum innan textans, afritað hluta með Ctrl+C. Svæðið er aldrei breytanlegt — þú breytir sögunni AÐEINS með nýrri umferð eða með því að breyta .txt skrá utan forritsins. Þetta svæði er samstillt við skrána `skrypty/<nazwa>.txt`, þú getur litið á það sem forskoðun á hljóðbókinni.
+REITUR SÍÐASTA UMFERÐ — þetta er sérstakur wx.TextCtrl readonly marglínureitur (~140 px hæð) YFIR fullri frásögn. Eftir hverja umferð er reiturinn uppfærður með nýjum kafla (fyrirsögn „--- Umferð N ---" + innihald frásagnarinnar). NVDA les hann strax eftir fókus (sjálfvirkur fókus eftir vel heppnaða umferð), án þess að þurfa að fletta í gegnum hundruð lína af fullri sögu. Eftir að vistaður leikur er hlaðinn sýnir reiturinn YFIRLIT síðustu vistaðrar umferðar (hámark 400 stafir úr `síðustu_umferðir` buffer) með forskeyti sem upplýsir að full frásögn er í reitnum fyrir neðan.
 
-DÝNAMÍSKIR VALHNAPPAR — í Valkostum og Minna illa hamum býr hver umferð til nýja wx.Button-a í valkostasvæðinu. Hver hefur tooltip sem NVDA les („Veldu: farðu lengra inn í skóginn"). Tab á milli þeirra virkar náttúrulega. Enter á valinn hnapp sendir sjálfkrafa þann valkost til frásagnarvélarinnar.
+REITUR FULLRAR FRÁSAGNAR — þetta er wx.TextCtrl readonly marglínureitur sem vex eftir hverja umferð. NVDA les línulega alla frásögnina, þú getur flett með örvahnöppum innan textans, afritað hluta með Ctrl+C. Reiturinn er aldrei breytanlegur — þú breytir sögunni AÐEINS með nýrri umferð eða með því að breyta .txt skrá utan forritsins. Þessi reitur er samstilltur við skrána `skrypty/<nazwa>.txt`, þú getur litið á hann sem forskoðun á hljóðbók.
 
-FELA TÓM SVÆÐI — í Frjálsum ham er valkostasvæðið ALGERLEGA falið (wx.Hide), ekki bara grátt — Tab sleppir því, NVDA tekur það ekki inn í lista yfir hluti. Þetta kemur í veg fyrir rugling leikmanns sem lendir í tómu staðgengli. Í hamum 4 og 5 birtist svæðið aðeins eftir að líkanssvar hefur verið staðfest (ekki tómur valkostalisti); ofskynjanir líkans (tómir valkostir) leiða til þess að farið er aftur í frjálsan texta án þess að sóða viðmótið.
+DÝNAMÍSKIR VALHNAPPAR — í valmöguleikum og Minna illu stillingum býr hver umferð til nýja wx.Button-a á valmöguleikasvæðinu. Hver hefur tooltip sem NVDA les („Veldu: farðu áfram í skóginn"). Tab á milli þeirra virkar eðlilega. Enter á völdum hnappi sendir sjálfkrafa þetta val til frásagnavélarinnar.
 
-HLJÓÐMERKI — hver lokið umferð er merkt með wx.Bell (kerfisbjöllu), á eftir fylgir sjálfvirk tilfærsla á fókus á frásagnarsvæðið. NVDA mun þá lesa nýja frásögnina án þess að þurfa handvirka leiðsögn.
+FELA TÓM SVÆÐI — í Frjálsum ham er valmöguleikasvæðið ALGJÖRLEGA falið (wx.Hide), ekki bara grátt — Tab sleppir því, NVDA dregur það ekki inn í lista yfir hluti. Þetta kemur í veg fyrir rugling hjá notanda sem lendir í tómum placeholder. Í ham 4 og 5 birtist svæðið aðeins eftir að svar líkaninu hefur verið staðfest (ekki tómur valkostalisti); ofskynjun líkaninu (tómir valkostir) leiðir til fallbacks í frjálsan texta án þess að sóða til viðmótið.
 
-LITASTÖÐUR MINNIS — minnisvísir líkansins breytir leturlit (grænn/appelsínugulur/rauður) í samræmi við fyllingarstig. Fyrir sjónræna notendur er þetta viðbótar sjónrænt merki; NVDA les samt stöðutextann, svo blindir missa ekki af upplýsingum.
+HLJÓÐMERKI — hver lokið umferð er merkt með wx.Bell (kerfisklukku), á eftir fylgir sjálfvirk tilfærsla á fókus á frásagnarreitinn. NVDA mun þá lesa nýja frásögnina án þess að þurfa handvirka leiðsögn.
 
-LYKLAR FLÝTILEIÐIR — allir hnappir hafa táknið `&` fyrir framan einn af stöfunum í merkinu, sem virkjar flýtileið Alt+stafur. Virkar eins og í öðrum modúlum forritsins.
+LITIR Á MINNISSTÖÐU — vísir á minnisstöðu líkaninu breytir lit leturs (grænn/appelsínugulur/rauður) í samræmi við fyllingarstig. Fyrir notendur sem sjá er þetta viðbótar sjónrænt merki; NVDA les samt texta stöðunnar, svo blindir missa ekki af upplýsingum.
 
-Algengustu vandamál
+LYKLARFLÝTILEIÐIR — allir takkar hafa `&` tákn fyrir einni af stöfum merkimiðans, sem virkjar flýtileið Alt+stafur. Virkar eins og í öðrum hlutum forritsins.
 
-Vandamál: Eftir að smella á "Nýr leikur" birtist skilaboðin „Vantar API lykil".
-Ástæða og lausn: Skráin golden_key.env í aðalmöppu forritsins hefur ekki réttan OpenAI lykil. Farðu aftur á upphafsskjáinn (hnappur Home), smelltu á "Búðu til skrána golden_key.env og opnaðu textaritil" og fylgdu leiðbeiningunum (SKREF 2 í aðalhandbókinni).
+
+Algengustu vandamálin
+
+Vandamál: Eftir að smellt er á "Nýr leikur" birtist skilaboðin „Enginn API-lykill".
+Ástæða og lausn: Skráin golden_key.env í aðalmöppu forritsins hefur ekki réttan OpenAI-lykil. Farðu aftur á upphafsskjáinn (Heimhnappur), smelltu á "Búðu til skrána golden_key.env og opnaðu textaritil" og fylgdu leiðbeiningunum (SKREF 2 í aðalhandbókinni).
 
 Vandamál: Ég reyni að senda næstu umferð, en hnappurinn "Senda" er gráður.
-Ástæða og lausn: Sjálfvirk samantekt á samhenginu eða myndun Cinematic Warning er í gangi í bakgrunnsþræði. Minnisstaða sýnir „Sjálfvirk samantekt á samhenginu í gangi...". Bíddu í nokkrar sekúndur — hnappurinn opnast sjálfkrafa eftir að það tekst.
+Ástæða og lausn: Sjálfvirk samantekt á samhengi eða Cinematic Warning er í gangi í bakgrunnsþræði. Staða minnis sýnir „Sjálfvirk samantekt á samhengi í gangi…". Bíddu í nokkrar sekúndur — hnappurinn verður sjálfkrafa virkur eftir árangur.
 
-Vandamál: Skilaboðin „Minnisstaða líkansins ofhlaðin" loka leiknum.
-Ástæða og lausn: Sjálfvirk samantekt losaði ekki biðminni (t.d. vegna takmarkana OpenAI). Lokaðu leiknum með skipuninni /enda eða lokaðu forritinu, síðan hlaða það aftur — vélin mun hlaða aðeins ástand úr game.json án sögu síðustu umferða.
+Vandamál: Skilaboðin „Minni módelsins ofhlaðið" stöðva leikinn.
+Ástæða og lausn: Sjálfvirk samantekt losaði ekki biðminni (t.d. takmörkun á hraða OpenAI). Lokaðu leiknum með skipuninni /loka eða lokaðu forritinu, síðan opnaðu það aftur — vélin mun aðeins hlaða stöðu úr game.json án sögu síðustu umferða.
 
-Vandamál: Í Valkostaham bjó vélin ekki til hnappa, þó ég hafi búist við þeim.
-Ástæða og lausn: Ofskynjun líkans — þrátt fyrir ham 4 skilaði LLM tómum valkostalista. Forritið felur þá meðvitað valkostasvæðið (í stað þess að sýna tóman staðgengil) og leyfir að halda áfram með frjálsum texta. Næsta umferð mun líklega búa til valkosti rétt.
+Vandamál: Í valstillingu bjó vélin ekki til hnappa, þó ég hafi búist við þeim.
+Ástæða og lausn: Ofskynjun módelsins — þrátt fyrir stillingu 4 skilaði LLM tómu valmöguleikatöflu. Forritið felur þá meðvitað valmöguleikasvæðið (í stað þess að sýna tóman placeholder) og leyfir að halda áfram með frjálsum texta. Næsta umferð mun líklega búa til valmöguleika rétt. 
 
 Vandamál: Skrárnar .game.json og .story.jsonl eru ekki sýnilegar á skjáborðinu.
-Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í skrypty/ — þar finnurðu þær.
+Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í skrypty/ — þar finnur þú þær.

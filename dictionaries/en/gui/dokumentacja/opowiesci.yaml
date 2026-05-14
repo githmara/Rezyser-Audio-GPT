@@ -12,183 +12,164 @@
 # =============================================================================
 
 id: opowiesci
-tresc: |
-  Audio Director GPT — Interactive Stories Module ({app.wersja})
+tresc:
+  naglowek: |
+    Audio Director GPT — Interactive Stories Module ({app.wersja})
 
-  The second main mode of the application alongside the Director — this time you become a player in a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by writing any action in free text or choosing one of the numbered options.
+    The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
-  The module was designed from the ground up with blind players in mind — narration is read linearly by a screen reader (NVDA) or TTS engine, dynamic choices appear as buttons with voice descriptions, each completed turn is signaled by a bell sound and automatic focus shift to the newly generated text.
+    The module was designed from the start with blind players in mind — narration is read linearly by a screen reader (NVDA) or TTS engine, dynamic choices are presented as buttons with voice descriptions, each completed turn is signaled by a bell sound and automatic focus shift to the newly generated text.
 
-  You can open the panel with the "{main.btn.opowiesci}" button on the toolbar or the Ctrl+5 keyboard shortcut.
+    You can open the panel with the "{main.btn.opowiesci}" button on the toolbar or the Ctrl+5 keyboard shortcut.
+  krok_1_tryby_gry: |
+    STEP 1: Three Game Modes — Choose Your Play Style
 
+    Just below the game title bar, you'll find a mode selection box (RadioBox). The mode determines how the narrative engine engages in dialogue with you:
 
+    FREE MODE — you enter any action in free text ("I'll try to open the door," "I ask the guard for directions," "I escape through the back stairs"). The narrative engine may suggest 1-3 options, but these are just hints — not mandatory paths. The most free-form mode, recommended for experienced players improvising their own story.
 
-  STEP 1: Three game modes — choose your play style
+    CHOICE MODE — each turn ends with 3-5 numbered options A-E in the form of clickable buttons. Each choice is a specific action you can take. You can also enter your own action in free text — the engine will match it to the closest semantic choice. The most intuitive mode for visually impaired players: NVDA will read all options to you, you can tab between them, and press Enter to confirm.
 
-  Just below the game name bar, you'll find a mode selection field (RadioBox). The mode determines how the narrative engine dialogues with you:
+    LESSER EVIL MODE — similar to Choice Mode, but each of the 3-5 options is morally, physically, or strategically disadvantageous. No "neutral" option, no happy ending in this turn. A mode for fans of dark fiction in the style of "Tales of Consequence" or moral dramas.
 
-  FREE MODE — you enter any action in free text ("I'll try to open the door", "I ask the guard for directions", "I escape through the back stairs"). The narrative engine may suggest 1-3 hints, but these are just suggestions — not a mandatory path. The most free-form mode, recommended for experienced players improvising their own story.
+    Vial in Lesser Evil Mode (from v15.2): after four turns of play, an additional, ZERO-numbered option "Uncork the vial" appears in the choice field — and remains there for the rest of the game as a reusable choice (it doesn't disappear after use, you can reach for it repeatedly). The vial is a "desperate rescue" option, but its effect is intentionally unpredictable and the more dramatically severe, the rarer the beneficial result: in about 60% of cases, the vial's contents are harmful (poisoning, injuring, blinding), in 30% it causes perception or spirit disturbance (hallucinations, altered speech, panic), and only in 10% it proves rarely beneficial (temporary enhancement, helpful spirit, key information). The distribution is enforced by Python (`random.choices` on the application side), the LLM receives a ready seed `{category, description}` and merely narrationalizes it — the model cannot "invent" a salvific outcome beyond the draw. Thanks to this, the vial NEVER becomes a deus ex machina: even reaching for it in a moment of extreme despair usually worsens the situation. The choice of its narrative form (whether the vial definitively shatters or is put back in the belt) belongs to the narrative engine — sometimes after the first of the 60%-harmful doses, you never return.
 
-  CHOICE MODE — each turn ends with 3-5 numbered options A-E in the form of clickable buttons. Each choice is a specific action you can take. You can also enter your own action in free text — the engine will match it to the closest semantic choice. The most intuitive mode for blind players: NVDA will read all options to you, you tab between them, and Enter confirms.
+    The mode can be changed during the game — in the next turn, the narrative engine will adapt to the new style (from Free Mode to Choices can be done in one click). Note: the vial is a feature exclusive to Lesser Evil Mode — when switching in the same game to Choices or Free Mode, its existence and turn counter remain preserved in the game state, but until you return to Lesser Evil, the "Uncork the vial" option will not be displayed.
+  krok_2_quick_start: |
+    STEP 2: Quick Start — ready-made opening scenarios
 
-  LESSER EVIL MODE — like Choice, but each of the 3-5 options is morally, physically, or strategically disadvantageous. No "neutral" option, no happy ending in this turn. A mode for fans of dark fiction in the style of "Tales of Consequence" or moral dramas.
+    Below the game name field, you'll find a second row labeled "{opowiesci.lbl_quick_start}" with a dropdown selection (wx.Choice). The default position is "{opowiesci.quick_start_wlasna}" — the engine will invent the world based on your first action.
 
-  The mode can be changed during the game — in the next turn, the narrative engine will adapt to the new style (from Free to Choice can be done in one click).
+    However, you can choose one of five ready-made presets to immediately immerse yourself in a specific world:
 
+    POST-APOCALYPTIC SF — a century after an ecological disaster. The remnants of humanity in shelters under the Świętokrzyskie Mountains. You are a young courier from the Mine Clan with your first serious assignment. Default mode: Choices.
 
+    DARK FANTASY — the border of the Kingdom of Three Streams, the ninth year of a religious war. You are a junior Inquisitor on the trail of a village where someone is protecting a possessed child. Default mode: Lesser Evil.
 
-  STEP 2: Quick Start — ready-made opening scenarios
+    URBAN FANTASY DETECTIVE — Warsaw 2008, an October evening. You are a private detective who sees ghosts. A client wants to find her husband who disappeared under the Royal Castle. Default mode: Choices.
 
-  Below the game name field, you'll find a second row labeled "{opowiesci.lbl_quick_start}" with a dropdown selection (wx.Choice). The default position is "{opowiesci.quick_start_wlasna}" — the engine will invent the world based on your first action.
+    COSMIC HORROR — the year 2247, a research station orbiting a neutron star. You wake up from hibernation without the captain — and without any traces that the captain ever existed. Default mode: Free (Lovecraftian atmosphere favors improvisation).
 
-  However, you can choose one of five ready-made presets to immediately immerse yourself in a specific world:
+    ROMANTIC COMEDY OF MANNERS — Saska Kępa, April 2024, a small café faces closure. You are a barista-waitress whose owner tells you to "be nice" to a shy editor you've long wanted to approach yourself. Default mode: Free.
 
-  POST-APOCALYPTIC SF — a century after an ecological disaster. The remnants of humanity in shelters under the Świętokrzyskie Mountains. You are a young courier of the Shaft Clan with your first serious assignment. Default mode: Choice.
+    After selecting a preset, click "{opowiesci.btn_nowa_gra_label}" — the engine will inject a short description of the world and the hero, set the default game mode (you can override it with the RadioBox before clicking "New Game"). The first LLM turn will play out the opening scene.
+  krok_3_pierwsza_gra: |
+    STEP 3: First game from scratch — without a preset
 
-  DARK FANTASY — the borderlands of the Kingdom of Three Streams, the ninth year of the religious war. You are a junior Inquisitor on the trail of a village where someone is protecting a possessed child. Default mode: Lesser Evil.
+    If you prefer complete freedom, leave "{opowiesci.quick_start_wlasna}" in the Quick Start field and prepare to enter the first action manually.
 
-  URBAN FANTASY DETECTIVE — Warsaw 2008, an October evening. You are a private detective who sees ghosts. A client wants to find her husband who disappeared under the Royal Castle. Default mode: Choice.
+    1. Enter the name of the game in the "{opowiesci.lbl_nazwa_gry}" bar (e.g., "my_adventure_1") — under this name, the narrative, state, and log files will be saved.
+    2. Choose the mode (Free/Choices/Lesser Evil).
+    3. Click "{opowiesci.btn_nowa_gra_label}". The application will create 3 files: game state (.game.json), an empty World Book (.md), and mode metadata (.mode). The narrative file (.txt) will be created after the first turn.
+    4. In the "{opowiesci.lbl_akcja}" field at the bottom of the panel, enter the first action, e.g., "I wake up in an unknown room." Click "{opowiesci.btn_wyslij_label}". The narrative engine will open the world based on your action — room description, sounds, characters, initial decisions.
+    5. Each turn will be automatically saved — you can close the application at any time and load the game later with the "{opowiesci.btn_wczytaj_label}" button.
+  krok_4_zasady_swiata: |
+    STEP 4: World Rules — custom rules that the engine respects throughout the game
 
-  COSMIC HORROR — year 2247, a research station orbiting a neutron star. You wake up from hibernation without a captain — and with no traces that the captain ever existed. Default mode: Free (the Lovecraftian atmosphere favors improvisation).
+    From version 15.1, you will find a "{opowiesci.btn_zasady_swiata_label}" button above the narration field. It opens a separate editing window with a multiline field where you can enter any rules — phonetic, mechanical, or dramaturgical — that the narrative engine will respect in every subsequent turn of this particular game. The rules are saved together with the game state (.game.json), so loading the game preserves them unchanged.
 
-  ROMANTIC COMEDY DRAMA — Saska Kępa April 2024, a small café faces closure. You are a barista-waitress whose owner tells you to "be nice" to a shy editor you've long wanted to approach yourself. Default mode: Free.
+    Three typical applications of world rules:
 
-  After selecting a preset, click "{opowiesci.btn_nowa_gra_label}" — the engine will inject a short description of the world and character into itself, set the default game mode (you can override it with the RadioBox before clicking "New Game"). The first LLM turn will play the opening scene.
+    PHONETIC RULES — control the pronunciation of character names by TTS (Vocalizer, ElevenLabs). Example: "Always pronounce the name Joanna with a hard, Polish [dʒ]; never soft [j]." The engine will insert this variant into the narration from the next turn, and the character Joanna in the World Book will retain the intended sound. This is also a natural bridge to the Director's accents — if you load the Book into the Director's panel after the game (STEP 9 below), the phonetic rule will "carry over" with the game as a character trait.
 
+    MECHANICAL RULES — describe the "laws of physics" of your world that the LLM must adhere to. Example: "In this world, magic only works at night; during the day, characters are ordinary people." The engine will not invent spells at noon, even if your turn's action demands it — instead, it will propose an alternative or guide you towards dusk.
 
+    DRAMATURGICAL RULES — define long-term tensions between characters. Example: "The antagonist Joana tries to soften the pronunciation of the protagonist's name through grammatical inflection." The engine weaves such subtle signals into Joana's dialogues, maintaining the conflict over many turns without your repeated instruction.
 
-  STEP 3: First game from scratch — without a preset
+    An empty rules field = no additional rules (default behavior, as in v15.0). You don't have to define rules right at the start — you can return to the window in any turn, add rules noticed during the game, and click "{opowiesci.dlg_zasady_swiata_btn_ok}". The change takes effect from the next turn.
 
-  If you prefer full freedom, leave "{opowiesci.quick_start_wlasna}" in the Quick Start field and prepare to enter the first action manually.
+    Note: world rules require an active game. If you click "{opowiesci.btn_zasady_swiata_label}" without a loaded/started game, you will receive the message "{opowiesci.zasady_bez_gry_tytul}" — first click "{opowiesci.btn_nowa_gra_label}" or load a saved game.
+  krok_5_slash_komendy: |
+    STEP 5: Slash Commands — Quick Actions Without API
 
-  1. Enter the game name in the "{opowiesci.lbl_nazwa_gry}" bar (e.g., "my_adventure_1") — under this name, the narrative, state, and log files will be saved.
-  2. Choose a mode (Free/Choice/Lesser Evil).
-  3. Click "{opowiesci.btn_nowa_gra_label}". The application will create 3 files: game state (.game.json), an empty World Book (.md), and mode metadata (.mode). The narrative file (.txt) will be created after the first turn.
-  4. In the "{opowiesci.lbl_akcja}" field at the bottom of the panel, enter the first action, e.g., "I wake up in an unknown room". Click "{opowiesci.btn_wyslij_label}". The narrative engine will open the world based on your action — description of the room, sounds, characters, first decisions.
-  5. Each turn will be automatically saved — you can close the application at any time and load the game later with the "{opowiesci.btn_wczytaj_label}" button.
+    In the action field, you can enter a command starting with a slash `/` at any time. Commands are local (do not cost calls to OpenAI) and work independently of the game mode. Both Polish and English variants are accepted:
 
+    /zapisz, /save — forces a manual save of the game state. Autosave occurs after each turn, so this command is mainly for assurance before closing the application.
 
+    /wczytaj, /load — opens a file selection dialog from the runtime/stories/ folder. After loading, the game name, mode, and full narration are restored — you can continue from the turn where you left off.
 
-  STEP 4: World rules — your own rules that the engine respects throughout the game
+    The narrative engine automatically selects the AI model depending on the mode: for the Choices and Lesser Evil modes, it uses the more expensive gpt-4o (strictly adheres to the world's rules), for the Free mode — the faster and cheaper gpt-4o-mini (the player controls the plot, so dramatic direction is not required).
 
-  From version 15.1, above the narrative field you'll find the "{opowiesci.btn_zasady_swiata_label}" button. It opens a separate edit window with a multiline field where you can enter any rules — phonetic, mechanical, or dramaturgical — that the narrative engine will respect in every subsequent turn of this specific game. The rules are saved together with the game state (.game.json), so loading the game preserves them unchanged.
+    /wizualizuj <description>, /visualize <description> — a multisensory description of the current scene. It does not change the game state, does not propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog, it is NOT added to the narration or saved in the audiobook file. Example: "/wizualizuj how the guard looks" or "/wizualizuj the smell of the café".
 
-  Three typical uses of world rules:
+    /koniec, /quit — closes the application (after autosaving the current turn).
+  krok_6_pliki_gry: |
+    STEP 6: Game Files — where to find your data
 
-  PHONETIC RULES — they control how character names are pronounced by TTS (Vocalizer, ElevenLabs). Example: "Pronounce the name Joanna always hard, Polish [dż]; never soft [j]." The engine will insert that variant into the narration from the next turn, and the character Joanna in the World Book will keep the intended sound. This is also a natural bridge to the Director's accents — if after finishing the game you load the World Book into the Director's panel (STEP 9 below), the phonetic rule "passes" with the game as a character trait.
+    Each game produces five files, each in a different folder, with various roles:
 
-  MECHANICAL RULES — they describe the "laws of physics" of your world that the LLM must respect. Example: "In this world, magic works only at night; during the day, characters are ordinary people." The engine won't invent spells at noon even if your turn's action demands it — instead it will suggest an alternative or steer you toward dusk.
+    scripts/<name>.txt — the full narrative ready for listening as an audiobook. It can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
 
-  DRAMATURGICAL RULES — they define long-term tensions between characters. Example: "The antagonist Joana tries to soften the pronunciation of the protagonist's name through grammatical inflection." The engine weaves such subtle signals into Joana's dialogue, sustaining the conflict across many turns without you re-issuing the instruction.
+    scripts/<name>.md — the World Book of characters in the format [Name: traits], regenerated after each turn. The format is compatible with the Director's parser! You can load this file into the Director's panel (File → Load) and receive native character accents in classic TTS narration — a bridge between the two main modules of the application.
 
-  Empty rules field = no additional rules (default behavior, as in v15.0). You don't have to define rules at the very beginning — you can return to the window at any turn, add rules you've noticed during play, and click "{opowiesci.dlg_zasady_swiata_btn_ok}". The change takes effect from the next turn.
+    runtime/stories/<name>.game.json — the full game state: name, mode, active characters, location, inventory, open threads, the last 6 turns in a summarized form. This is the source of truth for loading the game — without this file, you cannot continue.
 
-  Note: world rules require an active game. If you click "{opowiesci.btn_zasady_swiata_label}" without a loaded/created game, you'll get the "{opowiesci.zasady_bez_gry_tytul}" message — first click "{opowiesci.btn_nowa_gra_label}" or load a saved game.
+    runtime/stories/<name>.story.jsonl — the raw log of each turn (player request + model response in JSON). This file is not needed for the game — it is used for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
 
+    runtime/scripts/<name>.mode — metadata of the mode number (3=Free, 4=Choices, 5=Lesser Evil). This file is shared with the Director, but the numbering does not conflict (the Director uses 0-2).
+  krok_7_pamiec_modelu: |
+    STEP 7: Model Memory Indicator — Why Turns in Old Games Don't Require Manual Work from You
 
+    Below the mode RadioBox, you'll find the model memory indicator — a progress bar (wx.Gauge) with a status description next to it. The indicator shows the percentage of the narrative engine's context window filled (gpt-4o-mini has a buffer of 128,000 tokens).
 
-  STEP 5: Slash commands — quick actions without API
+    Four levels of fill:
 
-  In the action field, you can enter a command starting with a slash `/` at any time. Commands are local (they don't cost OpenAI calls) and work regardless of the game mode. Both Polish and English variants are accepted:
+    🟢 clean (0%) — the game has just started, no turns recorded.
+    🟢 OK (1-69%) — everything is normal, you can continue without restrictions.
+    ⚠️ warning (70-89%) — the engine automatically generates a summary of previous turns in the background thread. A message "Auto-summarizing context in progress..." will appear — do not send another turn until the summarization is complete. Upon success, previous turns will be condensed into a single summary, the buffer will be freed, and you will receive confirmation "Model memory recovered" with the number of condensed turns.
+    🚨 ALARM (90%+) — auto-summarization did not free the buffer (a rare case after an API failure). Sending another turn is blocked. Force the game to end with /end, then reload it — the engine will load the state from game.json without the history of recent turns, and the buffer will be fresh.
 
-  /zapisz, /save — forces a manual save of the game state. Autosave works after each turn, so this command is mainly for assurance before closing the application.
+    In practice, the auto-reduction mechanism is invisible — the player doesn't feel that anything is happening because the background thread solves the problem before it becomes noticeable. It's only important not to send another turn during auto-summarization (the "{opowiesci.btn_wyslij_label}" button is grayed out at that time).
+  krok_8_cinematic_warning: |
+    STEP 8: Cinematic Meta Warning — dramatic interlude after the 150th turn
 
-  /wczytaj, /load — opens a file selection dialog from the runtime/opowiesci/ folder. After loading, the game name, mode, and full narrative are restored — you can continue from the turn you left off.
+    After 150 turns in a single game, the narrative engine will ONCE insert a "Cinematic Meta Warning" — a meta-narrative dramatic interlude. It will appear in a separate dialogue with a bell sound, directly addressing you in the second person, summarizing achievements, and warning about the significance of the decisions being made.
 
-  The narrative engine selects the AI model automatically based on the mode: for Choice mode and Lesser Evil it uses the more expensive gpt-4o (rigorously sticks to the world rules); for Free mode — the faster and cheaper gpt-4o-mini (the player drives the plot, so heavy directorial work is not needed).
+    The Cinematic Warning is NOT part of the audiobook narration — the .txt filtering engine automatically removes its content (marked with ⚠️🚨⚠️) so that you don't hear meta-commentary about your own game during the audiobook playback. The content is only logged in the .story.jsonl file (for reflection or as a keepsake) and in the GUI dialogue, where you can read it once and continue.
+  krok_9_most_do_rezysera: |
+    STEP 9: Bridge to the Director — Utilize the World Book Created in Stories
 
-  /wizualizuj <description>, /visualize <description> — a multisensory description of the current scene. It doesn't change the game state, doesn't propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with more depth. The result appears in a separate dialog, is NOT added to the narrative, nor saved in the audiobook file. Example: "/wizualizuj jak wygląda strażnik" or "/wizualizuj zapach kawiarni".
+    The file scripts/<name>.md generated during gameplay contains the World Book with characters that appeared in the narrative, along with their traits, accents, and character. The format is exactly what the Director's parser requires — [Name: traits with accent description].
 
-  /koniec, /quit — closes the application (after autosaving the current turn).
+    What you can do with it:
 
+    1. After finishing the game, open the "{main.btn.rezyser}" panel (Ctrl+1).
+    2. Load a project with the same name — the Director will load the .txt file as a story and the .md file as the World Book.
+    3. You will now receive the classic Director's narrative (long, structured scenes with acts and chapters) with the native accents of characters you liked in Stories. The Carmel Guardian from the shelter speaking in short sentences, the inquisitor Rosanna with a melodic eastern accent — all traits preserved.
 
+    This is a one-way bridge: Stories produce material, the Director formats it. The reverse is not possible — the Director does not load games from Stories as an interactive state.
+  krok_10_dostepnosc_nvda: |
+    STEP 10: Accessibility (NVDA and screen readers) — designed from the start
 
-  STEP 6: Game files — where to find your data
+    The entire Stories module has been optimized for visually impaired users. Here's what we specifically did:
 
-  Each game produces five files, each in a different folder, with different roles:
+    LAST TURN FIELD — this is a separate wx.TextCtrl readonly multiline (~140 px height) ABOVE the full narration. After each turn, the field is replaced with a fresh fragment (header "--- Turn N ---" + narration content). NVDA reads it immediately upon focus (auto-focus after a successful turn), without navigating through hundreds of lines of the full story. After loading a saved game, the field shows a SUMMARY of the last saved turn (max 400 characters from the `last_turns` buffer) with a prefix informing that the full narration is in the field below.
 
-  scripts/<name>.txt — full narrative ready to be listened to as an audiobook. Can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
+    FULL NARRATION FIELD — this is a wx.TextCtrl readonly multiline that grows with each turn. NVDA reads the entire narration linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn or by editing the .txt file outside the application. This field is synchronized with the `scripts/<name>.txt` file, you can treat it as a preview of the audiobook.
 
-  scripts/<name>.md — World Book of characters in the format [Name: traits], regenerated after each turn. Format compatible with the Director's parser! You can load this file into the Director's panel (File → Load) and get native character accents in classic TTS narration — a bridge between the two main application modules.
+    DYNAMIC CHOICE BUTTONS — in Choices and Lesser Evil modes, each turn creates new wx.Buttons in the choice area. Each has a tooltip read by NVDA ("Choose: go further into the forest"). Tab between them works naturally. Enter on the selected button auto-sends that choice to the narrative engine.
 
-  runtime/opowiesci/<name>.game.json — full game state: name, mode, active characters, location, inventory, open threads, last 6 turns in a shortened form. This is the source of truth for loading the game — without this file, you cannot continue.
+    HIDING EMPTY AREAS — in Free mode, the choice area is COMPLETELY hidden (wx.Hide), not just grayed out — Tab skips it, NVDA won't include it in the list of elements. This prevents player confusion from falling into an empty placeholder. In modes 4 and 5, the area appears only after successful model response validation (non-empty choice array); model hallucination (empty choices) results in a fallback to free-text without cluttering the interface.
 
-  runtime/opowiesci/<name>.story.jsonl — raw log of each turn (player request + model response in JSON). The file is not needed for the game — it serves for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
+    AUDIO SIGNALS — each completed turn is signaled by wx.Bell (system bell), followed by automatic focus transfer to the narration field. NVDA will then read the new narration without the need for manual navigation.
 
-  runtime/scripts/<name>.mode — metadata of the mode number (3=Free, 4=Choice, 5=Lesser Evil). A file shared with the Director, but the numbering does not collide (Director uses 0-2).
+    COLORED MEMORY STATUS — the model memory indicator changes font color (green/orange/red) according to the fill level. For sighted users, this is an additional visual cue; NVDA still reads the status text, so visually impaired users don't miss out on information.
 
+    KEYBOARD ACCELERATORS — all buttons have a `&` sign before one of the label letters, which activates the Alt+letter accelerator. It works identically to other application modules.
+  najczestsze_problemy: |
+    Most Common Problems
 
+    Problem: After clicking "{opowiesci.btn_nowa_gra_label}", the message "No API Key" appears.
+    Cause and Solution: The golden_key.env file in the main application folder does not have a valid OpenAI key. Return to the start screen (Home button), click "{home.btn_generate}" and follow the instructions (STEP 2 of the main manual).
 
-  STEP 7: Model memory indicator — why turns in old games don't require your manual work
+    Problem: I am trying to send another turn, but the "{opowiesci.btn_wyslij_label}" button is grayed out.
+    Cause and Solution: Context auto-summarization or Cinematic Warning generation is in progress in the background thread. The memory status will show "Context auto-summarization in progress...". Wait a few seconds — the button will automatically unlock upon success.
 
-  Below the mode RadioBox, you'll find the model memory indicator — a progress bar (wx.Gauge) with a status description next to it. The indicator shows the percentage of the narrative engine's context window fill (gpt-4o-mini has a 128,000 token buffer).
+    Problem: The message "Model memory overloaded" blocks the game.
+    Cause and Solution: Auto-summarization did not release the buffer (e.g., OpenAI rate limit). End the game with the /end command or close the application, then reload it — the engine will load only the state from game.json without the history of recent turns.
 
-  Four levels of fill:
+    Problem: In Choice mode, the engine did not generate buttons, even though I expected them.
+    Cause and Solution: Model hallucination — despite mode 4, the LLM returned an empty choice array. The application consciously hides the choice area (instead of showing an empty placeholder) and allows continuation with free-text. The next turn will likely generate choices correctly.
 
-  🟢 clean (0%) — the game has just begun, no turns saved.
-  🟢 OK (1-69%) — everything is normal, you can continue without restrictions.
-  ⚠️ warning (70-89%) — the engine automatically generates a summary of previous turns in the background thread. A message "Auto-summary of context in progress..." will appear — do not send the next turn until the summary is complete. Upon success, previous turns will be condensed into one summary, the buffer will be freed, and you will receive confirmation "Model memory recovered" with the number of condensed turns.
-  🚨 ALARM (90%+) — auto-summary did not free the buffer (rare case after API failure). Sending the next turn is blocked. Force end the game with /koniec, then reload it — the engine will load the state from game.json without the history of recent turns, the buffer will be fresh.
-
-  In practice, the auto-reduction mechanism is invisible — the player does not feel that anything is happening because the background thread solves the problem before it is noticed. It is only important that you do not send the next turn during auto-summary (the "{opowiesci.btn_wyslij_label}" button is then grayed out).
-
-
-
-  STEP 8: Cinematic Meta Warning — dramatic interlude after the 150th turn
-
-  After 150 turns of one game, the narrative engine will ONCE insert a "Cinematic Meta Warning" — a meta-narrative dramatic interlude. It will appear in a separate dialog with a bell sound, with a direct address to you in the second person, a summary of achievements, and a warning about the weight of the decisions being made.
-
-  Cinematic Warning is NOT part of the audiobook narration — the .txt filtering engine automatically removes its content (marked with ⚠️🚨⚠️) so that you don't hear a meta-commentary about your own game during the audiobook playback. The content only goes into the .story.jsonl log (for reflection or as a keepsake) and into the GUI dialog, where you can read it once and continue.
-
-
-
-  STEP 9: Bridge to the Director — use the World Book created in Stories
-
-  The file scripts/<name>.md generated during the game contains the World Book with characters that appeared in the narrative, along with their traits, accents, and character. The format is exactly what the Director's parser requires — [Name: traits with accent description].
-
-  What you can do with it:
-
-  1. After finishing the game, open the "{main.btn.rezyser}" panel (Ctrl+1).
-  2. Load a project with the same name — the Director will load the .txt file as a story and the .md file as the World Book.
-  3. You will now get the classic Director's narration (long, structured scenes with acts and chapters) with the native character accents you liked in Stories. The Carmel guard from the shelter speaking in short sentences, Inquisitor Rosanna with a melodic eastern accent — all traits preserved.
-
-  This is a one-way bridge: Stories produce material, the Director formats it. The reverse is not possible — the Director does not load games from Stories as an interactive state.
-
-
-
-  STEP 10: Accessibility (NVDA and screen readers) — designed from the start
-
-  The entire Stories module has been optimized for blind players. What we specifically did:
-
-  LAST TURN FIELD — this is a separate wx.TextCtrl readonly multiline (~140 px height) ABOVE the full narrative. After each turn, the field is replaced with a fresh fragment (header "--- Turn N ---" + narrative content). NVDA reads it immediately upon focus (auto-focus after a successful turn), without navigating through hundreds of lines of full history. After loading a saved game, the field shows a SUMMARY of the last saved turn (max 400 characters from the `last_turns` buffer) with a prefix informing that the full narrative is in the field below.
-
-  FULL NARRATIVE FIELD — this is a wx.TextCtrl readonly multiline growing after each turn. NVDA reads the entire narrative linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn or by editing the .txt file outside the application. This field is synchronized with the `scripts/<name>.txt` file, you can treat it as a preview of the audiobook.
-
-  DYNAMIC CHOICE BUTTONS — in Choice and Lesser Evil modes, each turn creates new wx.Buttons in the choice area. Each has a tooltip read by NVDA ("Choose: go further into the forest"). Tabbing between them works naturally. Enter on the selected button auto-sends that choice to the narrative engine.
-
-  HIDING EMPTY AREAS — in Free mode, the choice area is COMPLETELY hidden (wx.Hide), not just grayed out — Tab skips it, NVDA does not include it in the list of elements. This prevents player confusion from falling into an empty placeholder. In modes 4 and 5, the area appears only after successful model response validation (non-empty choice array); model hallucination (empty choices) results in a fallback to free-text without cluttering the interface.
-
-  SOUND SIGNALS — each completed turn is signaled by wx.Bell (system bell), followed by automatic focus shift to the narrative field. NVDA will then read the new narrative without the need for manual navigation.
-
-  COLOR STATUS MEMORY — the model memory indicator changes font color (green/orange/red) according to the fill level. For sighted users, this is an additional visual signal; NVDA still reads the status text, so blind users do not miss information.
-
-  KEYBOARD ACCELERATORS — all buttons have a `&` sign before one of the label letters, which activates the Alt+letter accelerator. It works identically as in other application modules.
-
-
-
-  Common problems
-
-  Problem: After clicking "{opowiesci.btn_nowa_gra_label}" a "No API key" message appears.
-  Cause and solution: The golden_key.env file in the main application folder does not have a valid OpenAI key. Return to the start screen (Home button), click "{home.btn_generate}" and follow the instructions (STEP 2 of the main manual).
-
-  Problem: I try to send the next turn, but the "{opowiesci.btn_wyslij_label}" button is grayed out.
-  Cause and solution: Auto-summary of context or Cinematic Warning generation is in progress in the background thread. The memory status will show "Auto-summary of context in progress...". Wait a few seconds — the button will unlock automatically upon success.
-
-  Problem: The "Model memory overloaded" message blocks the game.
-  Cause and solution: Auto-summary did not free the buffer (e.g., OpenAI rate limit). End the game with the /quit command or close the application, then reload it — the engine will load only the state from game.json without the history of recent turns.
-
-  Problem: In Choice mode, the engine did not generate buttons, even though I expected them.
-  Cause and solution: Model hallucination — despite mode 4, the LLM returned an empty choice array. The application deliberately hides the choice area then (instead of showing an empty placeholder) and allows continuation with free-text. The next turn will likely generate choices correctly.
-
-  Problem: .game.json and .story.jsonl files are not visible on the desktop.
-  Cause and solution: This is intentional — runtime/ is a system folder for regular users, invisible from the file explorer. Narrative files (.txt, .md) go to scripts/ — that's where you'll find them.
+    Problem: The .game.json and .story.jsonl files are not visible on the desktop.
+    Cause and Solution: This is intentional — runtime/ is a system folder for regular users, invisible from the file explorer. Narrative files (.txt, .md) go to scripts/ — you will find them there.

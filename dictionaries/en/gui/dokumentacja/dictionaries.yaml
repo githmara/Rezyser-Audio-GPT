@@ -159,10 +159,10 @@ tresc: |
 
   6. Caesar Cipher (classic)
      The oldest documented cipher in history (used in ancient Rome). Each
-     letter is shifted by N positions in the Polish alphabet (35 letters,
-     with diacritics: AĄBCĆ...ZŻŹ). You enter the shift in the GUI in a
+     letter is shifted by N positions in the English alphabet (26 letters:
+     ABCDEFGHIJKLMNOPQRSTUVWXYZ). You enter the shift in the GUI in a
      numeric field; if you enter 0, the application will randomly select
-     a value in the range 1-34 and display it in a message so you can
+     a value in the range 1-24 and display it in a message so you can
      later decrypt the message. Characters outside the alphabet (numbers,
      spaces, punctuation) remain unchanged.
 

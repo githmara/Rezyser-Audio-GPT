@@ -136,7 +136,7 @@ polskie_znaki:
 # Alfabet polski – 35 wielkich liter, bez znaków białych.
 # Używany przez szyfr Cezara (plik szyfry/cezar.yaml).
 # -----------------------------------------------------------------------------
-alfabet: "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSTUVWXYZŹŻ"
+alfabet: "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ"
 
 # -----------------------------------------------------------------------------
 # Słowa-wyzwalacze parsera akcentów w Księdze Świata (13.3+).
