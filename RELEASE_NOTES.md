@@ -1,8 +1,79 @@
-# Release Notes — Reżyser Audio GPT 15.2.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.2.2 „Wersja Wydawnicza"
+
+*Patch v15.2.2: wielojęzyczność automatycznego bota `tiflotecnia-patch` w GitHub Actions. Bot do tej pory odpowiadał maili tylko po polsku (jeden szablon hardkodowany), niezależnie od języka issue. Po patchu detektor `lingua-language-detector` rozpoznaje 9 języków zgłoszenia (PL/EN/DE/ES/FI/FR/IS/IT/RU), bot dobiera natywny szablon emaila; nieobsługiwany język lub pusty tekst (sam adres email bez opisu) → fallback EN (najbardziej uniwersalny pojedynczy język wśród niewidomych użytkowników NVDA na świecie). Manual w 9 językach (`krok_5_alarm_detekcja_jezyka`) zachęca do dorzucenia 2-3 zdań opisu w swoim języku, żeby detektor miał na czym pracować. Komentarze workflow na issue (potwierdzenie wysyłki + redact) są bilingual PL/EN. Logika została przetestowana pre-merge (issue testowe ze zduplikowaną wiadomością wykryło bug w workflow trigger — usunięto duplikat akcji `gh issue comment` w starszym commicie bc80c1e). Patch tag X.Y.(Z+1) zgodnie z [[feedback_hotfix_release]] — artefakty v15.2.1 nietknięte, użytkownicy z v15.2.1 dostaną aktualizację do v15.2.2 przez `core_updater.sprawdz_aktualizacje()`.*
 
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 15.2.2 — patch release (motyw przewodni: wielojęzyczność bota tiflotecnia-patch — 9 szablonów email + bilingual komentarze workflow)
+
+*Punkt wyjścia: v15.2.1 (8338f3a) → 1 commit hotfix workflow (bc80c1e: usunięcie duplikatu `gh issue comment` w patch-bot.yml, naprawa logiki bota wysyłającego wiadomość w odpowiedzi na zgłoszenie o patch) → wielojęzyczna refaktoryzacja `send_patch.py` + `patch-bot.yml` → v15.2.2.*
+
+### TL;DR
+
+Wcześniejszy `tiflotecnia-patch` bot odpowiadał użytkownikom wyłącznie po polsku — jeden zahardkodowany szablon `zbuduj_tresc_maila()` z polską treścią, niezależnie od tego czy issue było pisane po angielsku, niemiecku czy fińsku. Dla wielojęzycznej aplikacji wspierającej 9 języków natywnie był to jaskrawy niedopatrzenie user-facing. Patch wprowadza:
+
+1. **Detektor języka `lingua-language-detector`** zacisnięty do 9 wspieranych języków (PL/EN/DE/ES/FI/FR/IS/IT/RU) — `detector.detect_language_of(issue_body)` po usunięciu adresu email z tekstu analizy (żeby `foo@bar.com` nie zaburzał detekcji).
+2. **Słownik `TEMPLATES`** z 9 natywnymi szablonami `{subject, body}` — temat i treść maila tłumaczone ręcznie (kompletne tłumaczenie LLM dla 9 krótkich szablonów to przerost; ryzyko halucynacji per [[feedback_batch_retranslate_review]] vs. ~10 min pracy ręcznej). Sufiks „Marek Uram" + link do patcha + numer issue jako placeholdery `{link}` i `{issue_number}` rozwijane przez `str.format()`.
+3. **Fallback do ENGLISH** dla języków, których lingua wykryje poza listą 9 wspieranych (lub `None` przy ekstremalnie krótkim tekście, w szczególności gdy user prześle samym adresem email bez opisu) — z warningiem do stderr ułatwiającym debug w GitHub Actions. EN wybrany zamiast PL, bo wśród niewidomych użytkowników NVDA z całego świata znajomość angielskiego jest dużo bardziej powszechna niż polskiego.
+4. **Bilingual komentarze workflow** (`patch-bot.yml`): potwierdzenie wysyłki + redact body są w formacie `PL: ... / EN: ...`. Komentarze są dla notyfikacji wątku publicznego — nie ma sensu mnożyć ich na 9 języków, EN + PL pokrywa większość przypadków.
+5. **Sprawdź folder Spam** dodane do każdego z 9 szablonów (klasyczny problem nowych adresatów na Gmailu — pierwszy mail z nieznanej domeny często wpada do junk).
+6. **Manual w 9 językach uszczelniony** — `dictionaries/<kod>/gui/dokumentacja/manual.yaml::tresc.krok_5_alarm_detekcja_jezyka` dostaje wstawkę zachęcającą do dorzucenia 2-3 zdań opisu w swoim języku w treści issue, z explicit listą 9 wspieranych języków + informacją że bez opisu odpowiedź przyjdzie po angielsku. Wcześniejsze brzmienie sugerowało tylko „adres email w treści" — niewidomy niemiec / włoch / hiszpan otwarłby issue z samym mailem, dostałby polski (lub teraz angielski) mail mimo, że bot wspiera jego natywny język. Tłumaczenia wstawki ręczne per jzk (~15 min pracy, vs. koszt API + ryzyko halucynacji LLM przy tak krótkim fragmencie kontekstu).
+
+### Co nowego dla użytkownika końcowego
+
+#### Mail z patchem w języku zgłoszenia
+
+Jeśli zgłosisz issue z labelem `tiflotecnia-patch` po niemiecku, francusku czy fińsku — odpowiedź bota przyjdzie w tym samym języku. Wcześniej każdy dostawał polską wiadomość niezależnie od języka zgłoszenia, co dla użytkowników nieznających polskiego było całkiem niezrozumiałe (poza linkiem do patcha, który zawsze działał).
+
+Wspierane języki maila (lingua-detected): **polski, angielski, niemiecki, hiszpański, fiński, francuski, islandzki, włoski, rosyjski**. Dla zgłoszeń w pozostałych językach świata, lub w przypadku gdy user prześle samym adresem email bez opisu (przy braku tekstu detektor nie ma czego analizować), bot fallbackuje na angielski.
+
+Manuale w 9 językach (sekcja „Krytyczny haczyk Tiflotecnia Voices: zepsuta detekcja języka") zachęcają do dorzucenia w treści issue 2-3 zdań opisu w swoim języku — to wystarczający kontekst dla detektora, żeby zaklasyfikować poprawnie nawet podobne języki (np. polski vs rosyjski, włoski vs hiszpański). Sam pojedynczy zwrot grzecznościowy + email to za krótko (patrz „Pułapka detekcji" w sekcji „Smoke test detektora pre-merge" niżej).
+
+#### Komentarze w wątku issue — PL/EN
+
+Dwa komentarze, które bot dokleja do issue w trakcie obsługi, są teraz bilingual:
+
+- **Potwierdzenie wysyłki**: `PL: Patch wysłany na podany adres, zgłoszenie zostaje zamknięte. Jeśli nie widzisz wiadomości, sprawdź folder Spam lub Wiadomości-śmieci. / EN: The patch has been sent and the issue is now closed. If you don't see the email, please check your Spam or Junk folder.`
+- **Redact body issue** (po wysłaniu patcha kasuje się email z treści): `[redacted by bot — patch wysłany / Patch sent]`
+
+Komentarz awaryjny w przypadku braku emaila w treści też dostał wariant EN: `PL: Nie znalazłem adresu email w treści — uzupełnij proszę. / EN: I couldn't find an email address in the body — please provide one.`
+
+### Pod maską
+
+- `VERSION`: `15.2.1` → `15.2.2` (patch tag, [[feedback_hotfix_release]] — bez nadpisywania artefaktów v15.2.1 Release).
+- `.github/scripts/send_patch.py`: 102 linie → ~210 linii. Sekcje:
+  - `LANGUAGES` + `LanguageDetectorBuilder.from_languages(*LANGUAGES).build()` jako module-level detector (zbudowany raz na proces — `LinguaLanguageDetector` to ciężki obiekt z modelami statystycznymi per język).
+  - `TEMPLATES: dict[Language, dict[str, str]]` — 9 wpisów `{subject, body}` z placeholderami `{issue_number}` i `{link}`.
+  - `KOMENTARZ_BRAK_EMAILA` jako bilingual stała.
+  - `main()` → wykrywa email regexem (jak dotąd) → strip `recipient_email` z `tekst_do_analizy` → `detector.detect_language_of(tekst_do_analizy)` → fallback do `Language.ENGLISH` jeśli wynik nie w TEMPLATES → render subject + body przez `str.format()` → wysyłka SMTP_SSL na `smtp.gmail.com:465` (bez zmian).
+  - Logging do stderr/stdout przywrócony (w poprzednim WIP-diff zostały usunięte) — debug GitHub Actions wymaga konkretnych komunikatów typu „Brak SMTP_USER w env", „gh issue comment zfailowało", „Wykryto język: GERMAN", „Wiadomość wysłana pomyślnie na X".
+- 9 plików `dictionaries/<kod>/gui/dokumentacja/manual.yaml::tresc.krok_5_alarm_detekcja_jezyka` — wstawka zachęcająca do opisu w swoim języku, między „etykietą `tiflotecnia-patch` i adresem email w treści" a „Automatyczny bot natychmiast zamknie issue".
+- 9 plików `docs/manual.<iso>.txt` zregenerowanych (1 nowe zdanie + bump 15.2.1 → 15.2.2). Wszystkie 27 plików `docs/*.txt` + `readme.<iso>.md` mają bumpa numeru wersji w nagłówku.
+- `.github/workflows/patch-bot.yml`: dodano krok `Instalacja zależności: pip install lingua-language-detector` (bo `setup-python@v5` startuje czysty interpreter). Bilingual stringi w komentarzach issue + redact body.
+- Naprawa PL szablonu przy okazji: „Jeśli nie widzisz **załącznika**" → „Jeśli nie widzisz **wiadomości** w skrzynce odbiorczej" (link siedzi w treści maila, nie ma żadnego załącznika — dotychczasowa formuła była mylła).
+
+### Smoke test detektora pre-merge
+
+```
+pl → POLISH       en → ENGLISH      de → GERMAN
+es → SPANISH      fi → FINNISH      fr → FRENCH
+is → ICELANDIC    it (≥2 zdania) → ITALIAN
+ru → RUSSIAN
+```
+
+Pułapka detekcji: ekstremalnie krótki tekst (4-5 słów po włosku typu „Ciao, mandami la patch su X") trafia do GERMAN — to granica możliwości statystycznego detektora przy minimalnym sample. Realne issue body po patchu manuala ma zwykle 1-3 zdania kontekstu („Mam problem z X, proszę o patcha, mój email Y"), bo manual w 9 językach zachęca do dorzucenia opisu w swoim języku. Dla edge case'u „samym adresem email bez opisu" detektor zwróci `None` → fallback ENGLISH. Dla niezdiagnozowanych edge case'ów w przyszłości (np. dwa zdania po włosku idą do GERMAN) do rozważenia: progowanie `compute_language_confidence_values` zamiast top-1 albo dodatkowa heurystyka „jeśli wynik jest GERMAN, ale tekst zawiera typowe IT słowa kluczowe (patch, ciao, mandami), wybierz IT".
+
+### Breaking changes
+
+Subtelne. Bot zachowuje istniejące zachowanie dla zgłoszeń polskich (TEMPLATES[POLISH] zawiera identyczną treść co poprzedni `zbuduj_tresc_maila()` z drobną korektą „załącznik" → „wiadomość"). Zmienia się jednak fallback dla zgłoszeń poza 9 wspieranymi językami: do v15.2.1 dostawały polski mail, od v15.2.2 dostają angielski. W praktyce: niewidomy user z któregoś z pozostałych krajów świata, który wcześniej widziałby polską treść po zaufaniu Google Translate, teraz dostanie angielską (znacznie lepiej dla większości).
+
+### Dependency
+
+Nowa runtime-dependency tylko dla bota w CI (`lingua-language-detector`) — instalowana per-job w `patch-bot.yml`, NIE w `requirements.txt` aplikacji (silnik desktopowy nie potrzebuje detekcji języka — wybiera ją user przez `Język → ...` w menu). Wersja niepinnowana — bot odpala raz na issue z labelem `tiflotecnia-patch`, koszt cold-installa to ~5 sek per uruchomienie, akceptowalnie.
 
 ---
 

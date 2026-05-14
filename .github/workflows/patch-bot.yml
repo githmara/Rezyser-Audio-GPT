@@ -21,6 +21,10 @@ jobs:
         with:
           python-version: '3.11'
 
+      # NOWY KROK: Instalacja Lingua
+      - name: Instalacja zależności
+        run: pip install lingua-language-detector
+
       - name: Wysłanie maila z patchem
         id: send_patch
         env:
@@ -40,7 +44,7 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
-            --body "Patch wysłany na podany adres, zgłoszenie zostaje zamknięte."
+            --body "PL: Patch wysłany na podany adres, zgłoszenie zostaje zamknięte. Jeśli nie widzisz wiadomości, sprawdź folder Spam lub Wiadomości-śmieci. / EN: The patch has been sent and the issue is now closed. If you don't see the email, please check your Spam or Junk folder."
 
       - name: Redact body issue
         if: success()
@@ -49,7 +53,7 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
-            --body "[redacted by bot — patch wysłany]"
+            --body "[redacted by bot — patch wysłany / Patch sent]"
 
       - name: Zamknięcie issue
         if: success()
