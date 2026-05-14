@@ -1,6 +1,47 @@
-# Release Notes — Reżyser Audio GPT 15.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.2.1 „Wersja Wydawnicza"
 
-*Release wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+*Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
+
+*Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 15.2.1 — patch release (motyw przewodni: naprawa halucynowanego tytułu manuala w de/fi/fr/is/it)
+
+*Punkt wyjścia: V15.2 (9344b61) → patch yamli + regen docs → V15.2.1 (8338f3a).*
+
+### TL;DR
+
+Wizualna weryfikacja v15.2 (uruchomienie installera EXE po sanity check pipeline'u updatera z VERSION lokalnie ustawionym na 15.1, żeby Inno fiński installer otworzył `manual.fi.txt`) wykryła PL leak w pierwszej linii manuala:
+
+  fi: „Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 15.2 – Julkaisuversio)"
+
+Czyli polski tytuł + tylko sufiks `app.wersja` rozwinął się natywnie (bo to placeholder z `dictionaries/<kod>/gui/ui.yaml::app.wersja` — tłumaczony per jzk w 13.4+ z natywnym sufiksem typu „Julkaisuversio"). Pozostałe 4 jzk (fr/is/it/de) miały analogiczny problem: w pełni PL w fr/is/it, mieszany w de (przetłumaczył „Komplettanleitung", zostawił początek PL). EN/ES/RU zostały przetłumaczone poprawnie podczas tego samego batch retranslate.
+
+### Co nowego dla użytkownika końcowego
+
+#### Tytuł manuala — pełna lokalizacja w 9 jzk
+
+Po patch wszystkie 9 jzk renderują tytuł w native:
+
+- de: „Audio AI Regisseur Handbuch - Komplettanleitung (Version 15.2.1 – Veröffentlichungsversion)"
+- fi: „Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.2.1 – Julkaisuversio)"
+- fr: „Manuel du Réalisateur Audio AI - Guide complet (Version 15.2.1 – Version de Publication)"
+- is: „Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 15.2.1 – Útgáfuútgáfa)"
+- it: „Manuale del Regista Audio AI - Guida completa (Versione 15.2.1 – Versione di Pubblicazione)"
+
+Konwencja: brand `Audio AI` zostaje literalny (analogicznie do EN „Audio AI Director Manual" — to opisowa nazwa produktu w kontekście manuala, NIE oficjalny `app.nazwa` „Audio Director GPT" z ui.yaml), „Reżyser" tłumaczone na lokalny ekwiwalent (Regisseur/ohjaaja/Réalisateur/leikstjóri/Regista), „Podręcznik" + „Kompletny Przewodnik" tłumaczone idiomatycznie.
+
+### Pod maską
+
+- `VERSION`: `15.2` → `15.2.1` (patch tag, zgodnie z regułą hotfix = X.Y.Z+1, bez nadpisywania artefaktów release'u 15.2 — złoty v15.2 nietknięty, użytkownicy z v15.2 dostaną aktualizację do v15.2.1 przez `core_updater.sprawdz_aktualizacje()` które porównuje semver).
+- 5 plików `dictionaries/<kod>/gui/dokumentacja/manual.yaml::tresc.naglowek` z naprawioną pierwszą linią (tłumaczenia ręczne, nie autotłumacz — koszt API + halucynacje LLM przy ponownej iteracji).
+- 28 plików `docs/<rdzen>.<iso>.txt` + `readme.<iso>.md` zregenerowanych z bumpniętym numerem wersji (placeholder `{numer_wersji}` w nagłówkach + 1 zmieniona linia tytułu manuala).
+- Reguła do `[[feedback_batch_retranslate_review]]` (3-ci powtarzalny hotspot halucynacji LLM): **PL literały w pierwszej linii pliku traktowane jako brand product name** — LLM lubi je zachować 1:1 w obcych jzk, szczególnie gdy fraza zawiera nazwę produktu (np. „Podręcznik Reżysera Audio AI"). Cross-check po batch retranslate: `head -1 docs/manual.<iso>.txt` per każdy obcy jzk, weryfikuj że pierwsze słowo NIE jest polskie.
+
+### Breaking changes
+
+Brak.
 
 ---
 
