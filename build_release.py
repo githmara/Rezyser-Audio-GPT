@@ -324,7 +324,7 @@ def buduj_wpisy_inno(kody: list[str], katalog_inno: Path) -> list[tuple[str, str
 # =============================================================================
 # Reguły wykluczania plików (wspólne dla ZIP-a i filtrów)
 # =============================================================================
-IGNOROWANE_FOLDERY = {'.git', '.vscode', '.cline', '.claude', '__pycache__', 'skrypty', 'venv', '.venv', 'env', 'notatki_dev'}
+IGNOROWANE_FOLDERY = {'.git', '.github', '.vscode', '.cline', '.claude', '__pycache__', 'skrypty', 'venv', '.venv', 'env', 'notatki_dev'}
 # Skrypty infrastruktury developerskiej (nigdy nie trafiają do paczki dla
 # end-usera). Nazwy zangielszczone w 13.1 — patrz changelog manual.yaml:
 #   skonfiguruj_dev.bat  → setup_dev.bat
