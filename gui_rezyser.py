@@ -102,6 +102,16 @@ class RezyserPanel(wx.Panel):
         # przez ``self._projekt.snapshot()``.
         self._projekt: cr.ProjektRezysera = cr.ProjektRezysera()
 
+        # Mirror pliku `.mode` w RAM. Trzyma trwałą decyzję trybu zapisu
+        # projektu (1=Skrypt, 2=Audiobook) niezależnie od bieżącego stanu
+        # `_rb_mode`, który gracz może swobodnie przełączać na Burzę (idx=0)
+        # — Burza pełni rolę awaryjną (streszczenie przy przepełnieniu
+        # okna kontekstowego, opcje fabularne) i musi pozostać dostępna na
+        # każdym etapie. Materializuje się przy wczytaniu projektu z `.mode`,
+        # pierwszym wstawieniu struktury i pierwszej udanej wysyłce
+        # produkcyjnej. Reset tylko przez twardy reset projektu.
+        self._zapisany_tryb: int | None = None
+
         # ── Przepisy twórcze załadowane z YAML-i (dictionaries/<jezyk>/rezyser/) ─
         # 13.2: ładujemy tryby w języku UI z miękkim fallbackiem do EN. Twardego
         # polskiego fallbacku NIE robimy — etykiety i prompty mają być spójne
@@ -885,7 +895,20 @@ class RezyserPanel(wx.Panel):
         _blokada = self._projekt.ostatnia_linia_to_naglowek or _epilog_juz_jest
 
 
-        if tryb_idx == 0:
+        # Panel struktury widoczny tylko gdy bieżący tryb w RadioBox-ie jest
+        # trybem zapisu (1/2) ORAZ zgadza się z utrwaloną decyzją projektu
+        # (`_zapisany_tryb`). Świeży projekt (`_zapisany_tryb is None`) ma
+        # wolny wybór — pierwsza wstawiona struktura lub udana wysyłka
+        # produkcyjna materializuje decyzję. Po materializacji przełączenie
+        # `_rb_mode` na Burzę chowa panel (Burza nie używa Akt/Scena/Rozdział),
+        # a powrót do drugiego trybu zapisu jest zablokowany przez EnableItem
+        # niżej — więc gracz nigdy nie zobaczy „Akt 1" w projekcie Audiobook.
+        tryb_zapisu_aktywny = (
+            tryb_idx in (1, 2)
+            and (self._zapisany_tryb is None or self._zapisany_tryb == tryb_idx)
+        )
+
+        if not tryb_zapisu_aktywny:
             self._pnl_struktura.Hide()
         else:
             self._pnl_struktura.Show()
@@ -921,13 +944,15 @@ class RezyserPanel(wx.Panel):
             self._pnl_struktura.Layout()
 
         # Ochrona przed przypadkową zmianą trybu twórczego.
+        # Burza (idx=0) ZAWSZE aktywna — to mechanizm awaryjny (streszczenie
+        # przy przepełnieniu okna kontekstowego, opcje fabularne), nie tryb
+        # zapisu sensu stricto. Skrypt/Audiobook zamrażamy na utrwalonej
+        # decyzji `_zapisany_tryb`, nie na bieżącym `tryb_idx` — dzięki temu
+        # skok na Burzę nie zwalnia blokady drugiego trybu zapisu.
         self._rb_mode.EnableItem(0, True)
-        if pamiec_zajeta and tryb_idx == 1:
-            self._rb_mode.EnableItem(1, True)
-            self._rb_mode.EnableItem(2, False)
-        elif pamiec_zajeta and tryb_idx == 2:
-            self._rb_mode.EnableItem(1, False)
-            self._rb_mode.EnableItem(2, True)
+        if self._zapisany_tryb in (1, 2):
+            self._rb_mode.EnableItem(1, self._zapisany_tryb == 1)
+            self._rb_mode.EnableItem(2, self._zapisany_tryb == 2)
         else:
             self._rb_mode.EnableItem(1, True)
             self._rb_mode.EnableItem(2, True)
@@ -999,6 +1024,12 @@ class RezyserPanel(wx.Panel):
 
         if wynik.saved_mode in (1, 2):
             self._rb_mode.SetSelection(wynik.saved_mode)
+            self._zapisany_tryb = wynik.saved_mode
+        else:
+            # Stary projekt bez `.mode` lub projekt utworzony tylko w Burzy.
+            # Decyzja trybu zostanie utrwalona przy pierwszej strukturze
+            # albo pierwszej udanej wysyłce produkcyjnej.
+            self._zapisany_tryb = None
 
         # v15.2: rebuild panelu opcji Burzy z `.brainstorm.json` jeśli istnieje.
         # Po wczytaniu projektu gracz wciąż widzi 3 opcje wygenerowane przy
@@ -1072,6 +1103,12 @@ class RezyserPanel(wx.Panel):
             return
 
         self._projekt.twardy_reset()
+        # Mirror `.mode` zwalniamy — nowy projekt zaczyna z pustą decyzją
+        # trybu, wszystkie 3 pozycje RadioBoxa znów wolne do wyboru.
+        # `_on_clear_current` (czyszczenie pamięci bieżącej z zachowaniem
+        # streszczenia) celowo NIE resetuje — projekt trwa, decyzja trybu
+        # została podjęta i obowiązuje dalej.
+        self._zapisany_tryb = None
 
         self._txt_file_name.SetValue("")
         self._txt_file_name.Enable()
@@ -1521,6 +1558,12 @@ class RezyserPanel(wx.Panel):
         self._txt_full_story.SetValue(self.full_story)
         self._dopisz_do_pliku(nazwa, response_text + "\n\n")
         self.last_response = response_text
+        # Pierwsza udana wysyłka produkcyjna utrwala tryb zapisu. Dotychczas
+        # `.mode` powstawał tylko przez kliknięcie Akt/Scena/Rozdział, więc
+        # gracze wysyłający tekst bez wstawiania struktury (typowe dla
+        # wersji finalnych pod ElevenLabs) nie mieli żadnej blokady przed
+        # przypadkowym przeskokiem między Skryptem a Audiobookiem.
+        self._zapisz_tryb_projektu()
         self._btn_wyslij.Enable()
         self._refresh_ui_state()
         wx.Bell()
@@ -1898,3 +1941,8 @@ class RezyserPanel(wx.Panel):
         if self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
         self._projekt.zapisz_tryb_tworczy(tryb_idx)
+        # Synchronizacja mirror'a w RAM. `zapisz_tryb_tworczy` ignoruje
+        # Burzę (idx=0), więc `_zapisany_tryb` nie zostanie nadpisany na 0
+        # — Burza nigdy nie utrwala decyzji trybu zapisu.
+        if tryb_idx in (1, 2):
+            self._zapisany_tryb = tryb_idx
