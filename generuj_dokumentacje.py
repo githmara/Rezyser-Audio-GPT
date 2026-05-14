@@ -101,6 +101,49 @@ NAZWA_UI = "ui.yaml"
 # w wynikowych YAML-ach 1:1 — generator rozwija je dopiero przy renderze .txt).
 _FOLDER_REFERENCYJNY = "pl"   # paczka, z której liczymy referencyjne wartości
 
+# 15.2: per-szablon override domyślnej lokalizacji + nazwy pliku wyjściowego.
+# Domyślnie generujemy `docs/<id>.<iso>.txt` (manual/opowiesci/dictionaries).
+# Wpis w `KONFIG_SZABLONOW` nadpisuje dla konkretnego id:
+#   - katalog:        Path do katalogu docelowego (domyślnie DOCS_DIR)
+#   - rozszerzenie:   'txt' (domyślnie) | 'md' | dowolne inne
+#   - iso_w_nazwie:   'zawsze' (domyślnie, `<id>.<iso>.<ext>`) |
+#                     'smart_en' (en bez ISO: `<id>.<ext>`, reszta z ISO:
+#                                 `<id>.<iso>.<ext>`) — wzorzec README.md
+#                                 (en jako kanoniczny GitHub landing) +
+#                                 README.pl.md/README.de.md/... dla reszty.
+# Lokalizacja+rozszerzenie czytane raz przy generacji; nie potrzebują reloadu
+# między build'ami. Dorzucenie kolejnego szablonu = jeden wpis w tym słowniku
+# + plik `dictionaries/pl/gui/dokumentacja/<id>.yaml` (i analogiczne dla
+# pozostałych jzk po retranslate).
+KONFIG_SZABLONOW: dict[str, dict] = {
+    "readme": {
+        "katalog": ROOT,
+        "rozszerzenie": "md",
+        "iso_w_nazwie": "smart_en",
+    },
+}
+
+
+def _sciezka_wyjscia(
+    id_szablonu: str,
+    jezyk: str,
+    docelowy_katalog: Path,
+) -> Path:
+    """Zwraca docelową ścieżkę pliku wynikowego wg `KONFIG_SZABLONOW`.
+
+    Default (brak wpisu): `docelowy_katalog / "<id>.<jezyk>.txt"`.
+    """
+    cfg = KONFIG_SZABLONOW.get(id_szablonu, {})
+    katalog = cfg.get("katalog", docelowy_katalog)
+    rozszerzenie = cfg.get("rozszerzenie", "txt")
+    tryb_iso = cfg.get("iso_w_nazwie", "zawsze")
+
+    if tryb_iso == "smart_en" and jezyk == "en":
+        nazwa = f"{id_szablonu}.{rozszerzenie}"
+    else:
+        nazwa = f"{id_szablonu}.{jezyk}.{rozszerzenie}"
+    return katalog / nazwa
+
 # Regex placeholdera: {klucz} albo {klucz.zagniezdzony.z.kropkami}
 # - pierwszy znak: litera lub podkreślenie
 # - dalej: litery, cyfry, podkreślenia, kropki (dla ścieżek zagnieżdżonych)
@@ -447,7 +490,7 @@ def generuj(
             if zbieraj_brakujace is not None and brakujace:
                 zbieraj_brakujace[f"{jezyk}/{id_szablonu}"] = sorted(set(brakujace))
 
-            sciezka_wyjscia = docelowy_katalog / f"{id_szablonu}.{jezyk}.txt"
+            sciezka_wyjscia = _sciezka_wyjscia(id_szablonu, jezyk, docelowy_katalog)
             # Piszemy z `newline="\n"` — celowo LF, nie platform-default.
             # Dzięki temu diff na Windowsie vs Linux zwraca ten sam wynik,
             # a `git` może sam zdecydować o konwersji przy checkoucie.

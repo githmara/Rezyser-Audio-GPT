@@ -1,89 +1,112 @@
-# 🎬 Reżyser Audio GPT
+# Audio Director GPT
 
-**Hybrydowe Studio Nagraniowe dla Słuchowisk i Audiobooków**
+**Hybrid Recording Studio for Radio Plays, Audiobooks, and Interactive Stories**
 
-Zestaw przenośnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
-
----
-
-## 🚀 Główne Moduły
-
-Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń i akcentów (Poliglota), narzędzia do budowania struktury pliku (Architekt Audiobooków) oraz — od wersji 13.0 — Managera Reguł, w którym lingwista bez znajomości Pythona może dodać nowy akcent, szyfr albo tryb twórczy wprost z GUI. Wszystkie cztery narzędzia dostępne są w jednym oknie programu i przełączane przyciskami na pasku narzędzi lub skrótami klawiaturowymi (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4).
+**Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
 
 
-### 1. Reżyseria (Kreator AI)
-* **Wieloprojektowa Księga Świata:** System automatycznie ładuje w tle dedykowane zasady uniwersum (`.md`) na podstawie aktywnego pliku źródłowego, zapewniając pełną izolację (zero-click context loading).
-* **Akumulator Fabuły:** Algorytm "nieskończonej pamięci". Gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, system automatycznie generuje streszczenie fabuły i zapisuje je do pola Pamięci Długotrwałej.
-* **Tryby Generacji:** Obsługa formatu słuchowiska (tagi `[SFX]` i `[Postać]`) oraz tradycyjnej, gęstej prozy literackiej. 
+A set of portable AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-### 2. Poliglota (AI Translator & TTS Accents)
-* **Bezpieczny Tłumacz:** Długie teksty są automatycznie dzielone na bloki do 10 000 znaków i tłumaczone sekwencyjnie. Każdy blok jest natychmiast zapisywany do ukrytego pliku `.jsonl`. Wznowienie po wyczerpaniu limitów API jest w pełni automatyczne.
-* **Automatyzacja NVDA:** Tłumaczenia zapisywane są jako gotowe pliki `.html` z wbudowanym tagiem językowym lub pliki `.docx` z tagami wstrzykniętymi bezpośrednio do struktury XML. 
-* **Lokalne Akcenty:** Możliwość celowego wymuszania łamanego akcentu dla lokalnych syntezatorów (Vocalizer, eSpeak, OneCore) dzięki zaawansowanym regułom regex. Obsługiwane akcenty: angielski, rosyjski (z transliteracją na cyrylicę), francuski, niemiecki, hiszpański, włoski, fiński, islandzki.
-* **Naprawiacz Tagów:** Bezinwazyjnie wstrzykuje podany dwuliterowy kod języka ISO do istniejących plików.
-
-### 3. Konwerter / Architekt Audiobooków
-* Przetwarza surowe pliki `.txt` lub `.docx` pod kątem nawigacji klawiszowej dla NVDA i systemów takich jak ElevenLabs.
-* Automatycznie konwertuje słowa kluczowe (Akt, Rozdział, Prolog) na nagłówki "Heading 1" w dokumencie Word, a także czyści zbędne tagi HTML i znaczniki Markdown.
-
-### 4. Manager Reguł (nowość w 13.0, Ctrl+4)
-* **Eksplorator słowników bez Pythona:** Wizualne drzewo wszystkich plików YAML w folderze [`dictionaries/`](dictionaries/README.md) — akcenty fonetyczne, szyfry i tryby twórcze Reżysera. Lingwista lub tłumacz może przeglądać, duplikować, edytować i usuwać reguły wprost z GUI, bez otwierania Eksploratora plików i bez znajomości języka Python.
-* **Kreator nowych reguł:** Formularz z wyborem typu (akcent, szyfr czystych zamian, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny) tworzący gotowy szablon YAML, a dla trudniejszych przypadków generujący sformatowany prompt do wklejenia w ChatGPT / Claude.
-* **Refaktor 13.0 — reguły w YAML-ach:** Wszystkie akcenty, szyfry i tryby pracy Reżysera, które do wersji 12.0 żyły jako „zaszyte" stałe w kodzie Pythona, zostały przeniesione do deklaratywnych plików `.yaml` wczytywanych dynamicznie przy starcie aplikacji. Każdy, kto potrafi obsłużyć Notatnik, może dostroić akcent (np. zamienić `sz → sh` na `sz → sch`), dodać nowy język, a nawet zmienić brzmienie prompta systemowego dla AI — bez kompilowania kodu. Pełna dokumentacja formatu: **[`dictionaries/README.md`](dictionaries/README.md)**.
-
----
-
-## 🧠 Architektura AI i Użyte Modele
+Version: **15.1** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
-Aplikacja inteligentnie rozdziela zadania, optymalizując koszty i szybkość działania API OpenAI:
-* **GPT-4o:** Główny silnik napędzający aplikację. Odpowiada za ciężkie zadania generatywne: reżyserowanie skryptów, pisanie tradycyjnej prozy (Audiobook), generowanie streszczeń oraz zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego.
-* **GPT-4o-mini:** Szybki, lekki model pomocniczy. Używany w tle do mikrozadań wymagających dużej szybkości, takich jak iteracyjne nadawanie literackich tytułów wygenerowanym rozdziałom czy ekstrakcja kodów ISO.
+## Main Modules
 
-### ⚠️ Znane Ograniczenia Modeli (Anti-Closure)
-Pomimo zaimplementowania rygorystycznych dyrektyw systemowych nakazujących ucinanie akcji w momentach napięcia (tzw. dyrektywa Anti-Closure), współczesne modele LLM posiadają silną, wrodzoną tendencję do "zamykania" historii. Skutkuje to częstym wplataniem niechcianych konkluzji, morałów lub fałszywych "happy endów", szczególnie w Trybie Tradycyjnego Audiobooka. 
+The application combines five tools in a single window, switchable via keyboard shortcuts (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4 / Ctrl+5) or toolbar buttons. Each module operates independently, but they all share dictionary packages from the `dictionaries/` folder (accents, ciphers, AI creative modes) and central settings.
 
-Jest to fundamentalne ograniczenie obecnej generacji sztucznej inteligencji. Z tego powodu aplikacja zapisuje projekty w zwykłych, łatwych do edycji plikach tekstowych (`.txt`). Wymaga to od użytkownika przyjęcia roli żywego montażysty – okazjonalnego, ręcznego usunięcia ostatnich, "zamykających" zdań wygenerowanych przez AI, przed wczytaniem pliku ponownie i kontynuacją pracy.
 
----
+### 1. Directing (Ctrl+1)
 
-## 🛠️ Instalacja i Uruchomienie
+The main studio for writing radio plays and audiobooks. You choose a mode — Brainstorming, Script (with `[SFX]`/`[Character: emotion]` tags), Audiobook (traditional prose) — and direct dialogue with the model through the Instruction field + World Book + Long-Term Memory:
 
-Aplikacja jest w pełni przenośna i gotowa do działania na systemach Windows bez konieczności globalnej instalacji środowiska.
+* **Multi-Project World Book:** The system automatically loads dedicated universe rules (`.md`) in the background based on the active source file, ensuring full isolation (zero-click context loading).
+* **Plot Accumulator:** The "infinite memory" algorithm. When the memory indicator enters a red alert state, the system automatically generates a plot summary and saves it to the Long-Term Memory field.
+* **4 creative modes:** Each file in `dictionaries/<lang>/rezyser/` describes a separate AI director "personality" (Brainstorming, Script, Audiobook, Title Postproduction). You can tune their tone without programming — see the Rule Manager below.
 
-1. Sklonuj repozytorium lub pobierz paczkę ZIP.
-2. Uruchom plik `Uruchom_Rezysera.bat`. Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu. Nie musisz otwierać żadnej przeglądarki.
-3. **Konfiguracja API:** Przy pierwszym uruchomieniu aplikacja zasygnalizuje brak klucza w sekcji System Check. Kliknij widoczny przycisk, by wygenerować plik `golden_key.env`, otwórz go w edytorze tekstu i wklej swój klucz (zaczynający się od `sk-proj-`).
 
----
+### 2. Stories (Ctrl+2, second main mode from v15.0)
 
-## 📖 Pełna Dokumentacja i Obieg Pracy
+Interactive text games led by AI as the narrative engine. Unlike Directing (where you generate a finished audiobook), Stories is a turn-by-turn dynamic storyline:
 
-Niniejszy dokument to jedynie zarys architektoniczny projektu. Aby poznać zaawansowane techniki powstrzymywania halucynacji AI, instrukcje instalacji kompatybilnych syntezatorów mowy dla Windows i Apple oraz kompletny poradnik obsługi, **zapoznaj się z plikiem `instrukcja.txt`**.
+* **Choice Mode:** each turn ends with 3-5 numbered options A-E. The most intuitive mode for blind players — NVDA reads the options, you click Tab and Enter.
+* **Lesser Evil Mode:** like Choices, but each option is morally, physically, or strategically disadvantageous. From v15.2 an additional "vial" — a reusable ZERO-numbered desperate rescue option, whose effects are pseudo-random (60% harmful / 30% perception-altering / 10% rarely-beneficial, distribution enforced by Python, LLM cannot invent a miraculous outcome).
+* **Free Mode:** any action in free text ("I'll try to open the door"), the engine suggests 1-3 options but does not enforce a choice.
+* **AI Model per Mode:** Choices and Lesser Evil use gpt-4o (better moral reasoning), Free uses gpt-4o-mini (more economical improvisation).
 
-### Dla programistów (Jak zacząć pracę z kodem)
 
-**Windows:**
-1. Sklonuj repozytorium na swój dysk.
-2. Uruchom plik `skonfiguruj_dev.bat`, aby automatycznie utworzyć wirtualne środowisko i pobrać zależności.
-3. Uruchom aplikację komendą `python main.py` lub przez plik `uruchom_rezysera_dev.bat`.
+### 3. Polyglot (Ctrl+3, AI Translator + TTS Accents)
 
-**macOS / Linux:**
-1. Sklonuj repozytorium i otwórz terminal w jego folderze.
-2. Wykonaj komendę `chmod +x *.sh`, aby nadać skryptom uprawnienia do uruchamiania.
-3. Wykonaj komendę `./skonfiguruj_dev.sh`, aby automatycznie utworzyć wirtualne środowisko i pobrać zależności.
-4. Uruchom aplikację komendą `python main.py` lub `./uruchom_rezysera.sh`.
+* **Safe Translator:** Long texts are automatically split into blocks of up to 10,000 characters and translated sequentially. Each block is immediately saved to a hidden `.jsonl` file. Resumption after API limits are exhausted is fully automatic.
+* **NVDA Automation:** Translations are saved as ready `.html` files with an embedded language tag or `.docx` files with tags injected directly into the XML structure.
+* **8 local accents:** Ability to deliberately enforce a broken accent for local synthesizers (Tiflotecnia Voices, eSpeak, OneCore) through advanced regex rules. Supported foreign accents: Polish, Russian (with transliteration to Cyrillic), French, German, Spanish, Italian, Finnish, Icelandic.
+* **Cipher Mode:** 6 local text-distorting algorithms — from reading backwards, through typoglycemia, to the classic Caesar cipher. Each with the local alphabet of the language pack (e.g., Caesar cipher on a 35-character Polish alphabet with diacritics).
+* **Tag Fixer:** Non-invasively injects the provided two-letter ISO language code into existing files.
 
----
 
-### Dla użytkowników końcowych (Zwykłe użytkowanie)
+### 4. Converter / Audiobook Architect (Ctrl+4)
 
-**Windows:**
-1. Pobierz najnowsze wydanie z zakładki Releases (paczka oznaczona jako *Latest*).
-2. Wypakuj pobrany plik ZIP: kliknij go prawym przyciskiem myszy (lub użyj klawisza aplikacji), wybierz "Wyodrębnij wszystkie..." (lub "Wypakuj pliki", zależnie od programu) i pozostaw domyślne ustawienia, aby utworzył się nowy folder. Możesz też pobrać i uruchomić instalator, aby wypakować pliki automatycznie do wybranego folderu.
-3. Wejdź do wypakowanego folderu, przeczytaj plik `instrukcja.txt` i uruchom `Uruchom_Rezysera.bat`. Miłej zabawy!
+* Processes raw `.txt` or `.docx` files for keyboard navigation for NVDA and systems like ElevenLabs.
+* Automatically converts keywords (Act, Chapter, Prologue) into "Heading 1" headers in a Word document, and also cleans unnecessary HTML tags and Markdown markers.
+* From v15.1, groups 5 turns into scenes with H1 headers (auto-detection of Stories) — prepares a file generated by Story mode for traditional audiobook publication.
 
-**macOS / Linux:**
-Z powodu różnic w architekturze systemów, proces instalacji wygląda identycznie jak dla programistów. Pobierz kod źródłowy projektu (jako ZIP lub klonując repozytorium), otwórz terminal w pobranym folderze, nadaj uprawnienia (`chmod +x *.sh`) i użyj skryptów `.sh` do pierwszej instalacji oraz późniejszego uruchamiania.
 
-> **Ważna uwaga dla deweloperów:** Skrypty do automatycznego budowania wydań (`buduj_wydanie.py` oraz pliki `.iss`) służą wyłącznie do tworzenia paczek dla systemu Windows. Wymagają one specjalnego folderu `runtime/` z przenośną wersją Pythona. Folder ten celowo nie jest częścią tego repozytorium.
+### 5. Rule Manager (Ctrl+5, new from v13.0)
+
+* **Dictionary Explorer without Python:** A visual tree of all YAML files in the `dictionaries/` folder — phonetic accents, ciphers, creative modes for Director and Story. A linguist or translator can browse, duplicate, edit, and delete rules directly from the GUI.
+* **New Rule Creator:** A form with a type selection (accent, pure substitution cipher, Director mode, new base language, algorithmic cipher) creating a ready-made YAML template, and for more complex cases, generating a formatted prompt to paste into ChatGPT / Claude.
+* **Refactor v13.0 — rules in YAMLs:** All accents, ciphers, and AI modes that until version 12.0 existed as "hardcoded" constants in Python code have been moved to declarative `.yaml` files loaded dynamically at application startup. Anyone who can handle Notepad can fine-tune an accent (e.g., change `sz → sh` to `sz → sch`), add a new language, or even change the system prompt tone for AI — without compiling code.
+
+
+## Multilingual Support (9 languages natively)
+
+From version 14.0, the application natively supports 9 base languages: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Each `dictionaries/<code>/` package contains diacritics, alphabet, and phonetic rules operating on text in that specific language — the application automatically detects the source language using the lingua-language-detector (per paragraph) and loads the appropriate package for each fragment separately.
+
+The entire GUI interface, documentation (`docs/manual.<iso>.txt`), and most system messages are natively available in each of the supported languages. AI system prompts in Director and Story modes are written in the target languages (manually, not auto-translated — see `dictionaries/<code>/rezyser/` and `dictionaries/<code>/opowiesci/`).
+
+
+## AI Architecture and Used Models
+
+The application intelligently distributes tasks, optimizing the costs and speed of the OpenAI API:
+
+* **gpt-4o:** The main engine powering the application. Responsible for heavy generative tasks: directing scripts, writing traditional prose (Audiobook), Choices and Lesser Evil modes in Stories, generating summaries, and advanced translations while maintaining multi-block context.
+* **gpt-4o-mini:** A fast, lightweight auxiliary model. Used in the background for micro-tasks requiring high speed: iterative assignment of literary titles to generated chapters, extraction of ISO codes, Free mode in Stories (more economical improvisation of free text).
+
+
+### Known Model Limitations (Anti-Closure)
+
+Despite the implementation of strict system directives mandating the cutting off of actions at moments of tension (known as the Anti-Closure directive), contemporary LLM models have a strong, inherent tendency to "close" stories. This often results in the inclusion of unwanted conclusions, morals, or false "happy endings," especially in Traditional Audiobook Mode.
+
+This is a fundamental limitation of the current generation of artificial intelligence. For this reason, the application saves projects in regular, easily editable text files (`.txt`). This requires the user to assume the role of a live editor — occasionally manually removing the last, "closing" sentences generated by AI before reloading the file and continuing work.
+
+
+## Installation and Launch
+
+### For End Users (Windows)
+
+1. Download the latest release from the **Releases** tab (package marked as *Latest*). Two forms are available:
+   * **Installer EXE** — installs in Program Files (or a chosen folder), creates shortcuts in the Start Menu and on the desktop. Optionally opens the user manual in the default .txt handler upon completion of installation.
+   * **Portable ZIP** — extract to any folder, does not require administrator rights. After extraction, run `run.bat`.
+2. **OpenAI API Configuration:** On first launch, the application will signal the absence of a key in the System Check section. Click the visible button to generate the `golden_key.env` file, open it in a text editor, and paste your key (starting with `sk-proj-`).
+3. **Getting Started:** Open the `docs/manual.pl.txt` file (or in another language) in the installation folder — this is a comprehensive user manual written in a language accessible to all users, not just developers.
+
+
+### For Developers (clone + setup)
+
+1. Clone the repository to your disk.
+2. Run the `setup_dev.bat` file to automatically create a virtual environment (`.venv/`) and download dependencies from `requirements.txt`.
+3. Launch the application with the command `python main.py` or via the `run_dev.bat` file.
+
+`.sh` scripts for macOS/Linux were removed in v13.1 — the development environment is focused on Windows due to the specifics of NVDA accessibility testing. Working with the code on other systems is possible but requires manual setup: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+
+**Scripts for building release packages** (`build_release.py`, `installer.iss`) are intended solely for creating packages for Windows. They require a special `runtime/` folder with a portable version of Python — this folder is deliberately not part of the repository (it is in `.gitignore`).
+
+
+## Full Documentation
+
+This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
+
+* `docs/manual.<iso>.txt` — main user manual (written for the end user).
+* `docs/opowiesci.<iso>.txt` — Story mode manual (interactive text games).
+* `docs/dictionaries.<iso>.txt` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
+
+Each of these files is available in 9 languages — suffix `.<iso>.txt` (e.g., `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

@@ -1,0 +1,115 @@
+# =============================================================================
+# dictionaries/en/gui/dokumentacja/readme.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
+# ze źródła dictionaries/pl/gui/dokumentacja/readme.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
+# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
+#
+# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
+# po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+id: readme
+tresc:
+  naglowek: |
+    # Audio Director GPT
+
+    **Hybrid Recording Studio for Radio Plays, Audiobooks, and Interactive Stories**
+
+    **Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
+  wprowadzenie: |
+    A set of portable AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
+
+    Version: **{numer_wersji}** · Supported languages natively ({liczba_kompletnych_jezykow}): {lista_kompletnych_jezykow_natywnie}.
+  glowne_moduly: |
+    ## Main Modules
+
+    The application combines five tools in a single window, switchable via keyboard shortcuts (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4 / Ctrl+5) or toolbar buttons. Each module operates independently, but they all share dictionary packages from the `dictionaries/` folder (accents, ciphers, AI creative modes) and central settings.
+  modul_rezyseria: |
+    ### 1. Directing (Ctrl+1)
+
+    The main studio for writing radio plays and audiobooks. You choose a mode — Brainstorming, Script (with `[SFX]`/`[Character: emotion]` tags), Audiobook (traditional prose) — and direct dialogue with the model through the Instruction field + World Book + Long-Term Memory:
+
+    * **Multi-Project World Book:** The system automatically loads dedicated universe rules (`.md`) in the background based on the active source file, ensuring full isolation (zero-click context loading).
+    * **Plot Accumulator:** The "infinite memory" algorithm. When the memory indicator enters a red alert state, the system automatically generates a plot summary and saves it to the Long-Term Memory field.
+    * **{liczba_trybow_rezysera} creative modes:** Each file in `dictionaries/<lang>/rezyser/` describes a separate AI director "personality" (Brainstorming, Script, Audiobook, Title Postproduction). You can tune their tone without programming — see the Rule Manager below.
+  modul_opowiesci: |
+    ### 2. Stories (Ctrl+2, second main mode from v15.0)
+
+    Interactive text games led by AI as the narrative engine. Unlike Directing (where you generate a finished audiobook), Stories is a turn-by-turn dynamic storyline:
+
+    * **Choice Mode:** each turn ends with 3-5 numbered options A-E. The most intuitive mode for blind players — NVDA reads the options, you click Tab and Enter.
+    * **Lesser Evil Mode:** like Choices, but each option is morally, physically, or strategically disadvantageous. From v15.2 an additional "vial" — a reusable ZERO-numbered desperate rescue option, whose effects are pseudo-random (60% harmful / 30% perception-altering / 10% rarely-beneficial, distribution enforced by Python, LLM cannot invent a miraculous outcome).
+    * **Free Mode:** any action in free text ("I'll try to open the door"), the engine suggests 1-3 options but does not enforce a choice.
+    * **AI Model per Mode:** Choices and Lesser Evil use gpt-4o (better moral reasoning), Free uses gpt-4o-mini (more economical improvisation).
+  modul_poliglota: |
+    ### 3. Polyglot (Ctrl+3, AI Translator + TTS Accents)
+
+    * **Safe Translator:** Long texts are automatically split into blocks of up to 10,000 characters and translated sequentially. Each block is immediately saved to a hidden `.jsonl` file. Resumption after API limits are exhausted is fully automatic.
+    * **NVDA Automation:** Translations are saved as ready `.html` files with an embedded language tag or `.docx` files with tags injected directly into the XML structure.
+    * **{liczba_akcentow_jezykowych} local accents:** Ability to deliberately enforce a broken accent for local synthesizers (Tiflotecnia Voices, eSpeak, OneCore) through advanced regex rules. Supported foreign accents: Polish, Russian (with transliteration to Cyrillic), French, German, Spanish, Italian, Finnish, Icelandic.
+    * **Cipher Mode:** {liczba_szyfrow} local text-distorting algorithms — from reading backwards, through typoglycemia, to the classic Caesar cipher. Each with the local alphabet of the language pack (e.g., Caesar cipher on a 35-character Polish alphabet with diacritics).
+    * **Tag Fixer:** Non-invasively injects the provided two-letter ISO language code into existing files.
+  modul_konwerter: |
+    ### 4. Converter / Audiobook Architect (Ctrl+4)
+
+    * Processes raw `.txt` or `.docx` files for keyboard navigation for NVDA and systems like ElevenLabs.
+    * Automatically converts keywords (Act, Chapter, Prologue) into "Heading 1" headers in a Word document, and also cleans unnecessary HTML tags and Markdown markers.
+    * From v15.1, groups 5 turns into scenes with H1 headers (auto-detection of Stories) — prepares a file generated by Story mode for traditional audiobook publication.
+  modul_manager_regul: |
+    ### 5. Rule Manager (Ctrl+5, new from v13.0)
+
+    * **Dictionary Explorer without Python:** A visual tree of all YAML files in the `dictionaries/` folder — phonetic accents, ciphers, creative modes for Director and Story. A linguist or translator can browse, duplicate, edit, and delete rules directly from the GUI.
+    * **New Rule Creator:** A form with a type selection (accent, pure substitution cipher, Director mode, new base language, algorithmic cipher) creating a ready-made YAML template, and for more complex cases, generating a formatted prompt to paste into ChatGPT / Claude.
+    * **Refactor v13.0 — rules in YAMLs:** All accents, ciphers, and AI modes that until version 12.0 existed as "hardcoded" constants in Python code have been moved to declarative `.yaml` files loaded dynamically at application startup. Anyone who can handle Notepad can fine-tune an accent (e.g., change `sz → sh` to `sz → sch`), add a new language, or even change the system prompt tone for AI — without compiling code.
+  wielojezycznosc: |
+    ## Multilingual Support ({liczba_kompletnych_jezykow} languages natively)
+
+    From version 14.0, the application natively supports {liczba_kompletnych_jezykow} base languages: {lista_kompletnych_jezykow_natywnie}. Each `dictionaries/<code>/` package contains diacritics, alphabet, and phonetic rules operating on text in that specific language — the application automatically detects the source language using the lingua-language-detector (per paragraph) and loads the appropriate package for each fragment separately.
+
+    The entire GUI interface, documentation (`docs/manual.<iso>.txt`), and most system messages are natively available in each of the supported languages. AI system prompts in Director and Story modes are written in the target languages (manually, not auto-translated — see `dictionaries/<code>/rezyser/` and `dictionaries/<code>/opowiesci/`).
+  architektura_ai: |
+    ## AI Architecture and Used Models
+
+    The application intelligently distributes tasks, optimizing the costs and speed of the OpenAI API:
+
+    * **gpt-4o:** The main engine powering the application. Responsible for heavy generative tasks: directing scripts, writing traditional prose (Audiobook), Choices and Lesser Evil modes in Stories, generating summaries, and advanced translations while maintaining multi-block context.
+    * **gpt-4o-mini:** A fast, lightweight auxiliary model. Used in the background for micro-tasks requiring high speed: iterative assignment of literary titles to generated chapters, extraction of ISO codes, Free mode in Stories (more economical improvisation of free text).
+  ograniczenia_modeli: |
+    ### Known Model Limitations (Anti-Closure)
+
+    Despite the implementation of strict system directives mandating the cutting off of actions at moments of tension (known as the Anti-Closure directive), contemporary LLM models have a strong, inherent tendency to "close" stories. This often results in the inclusion of unwanted conclusions, morals, or false "happy endings," especially in Traditional Audiobook Mode.
+
+    This is a fundamental limitation of the current generation of artificial intelligence. For this reason, the application saves projects in regular, easily editable text files (`.txt`). This requires the user to assume the role of a live editor — occasionally manually removing the last, "closing" sentences generated by AI before reloading the file and continuing work.
+  instalacja_uzytkownicy: |
+    ## Installation and Launch
+
+    ### For End Users (Windows)
+
+    1. Download the latest release from the **Releases** tab (package marked as *Latest*). Two forms are available:
+       * **Installer EXE** — installs in Program Files (or a chosen folder), creates shortcuts in the Start Menu and on the desktop. Optionally opens the user manual in the default .txt handler upon completion of installation.
+       * **Portable ZIP** — extract to any folder, does not require administrator rights. After extraction, run `run.bat`.
+    2. **OpenAI API Configuration:** On first launch, the application will signal the absence of a key in the System Check section. Click the visible button to generate the `golden_key.env` file, open it in a text editor, and paste your key (starting with `sk-proj-`).
+    3. **Getting Started:** Open the `docs/manual.pl.txt` file (or in another language) in the installation folder — this is a comprehensive user manual written in a language accessible to all users, not just developers.
+  instalacja_deweloperzy: |
+    ### For Developers (clone + setup)
+
+    1. Clone the repository to your disk.
+    2. Run the `setup_dev.bat` file to automatically create a virtual environment (`.venv/`) and download dependencies from `requirements.txt`.
+    3. Launch the application with the command `python main.py` or via the `run_dev.bat` file.
+
+    `.sh` scripts for macOS/Linux were removed in v13.1 — the development environment is focused on Windows due to the specifics of NVDA accessibility testing. Working with the code on other systems is possible but requires manual setup: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+
+    **Scripts for building release packages** (`build_release.py`, `installer.iss`) are intended solely for creating packages for Windows. They require a special `runtime/` folder with a portable version of Python — this folder is deliberately not part of the repository (it is in `.gitignore`).
+  dokumentacja: |
+    ## Full Documentation
+
+    This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
+
+    * `docs/manual.<iso>.txt` — main user manual (written for the end user).
+    * `docs/opowiesci.<iso>.txt` — Story mode manual (interactive text games).
+    * `docs/dictionaries.<iso>.txt` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
+
+    Each of these files is available in {liczba_kompletnych_jezykow} languages — suffix `.<iso>.txt` (e.g., `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

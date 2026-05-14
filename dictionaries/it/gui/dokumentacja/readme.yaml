@@ -1,0 +1,115 @@
+# =============================================================================
+# dictionaries/it/gui/dokumentacja/readme.yaml
+#
+# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
+# ze źródła dictionaries/pl/gui/dokumentacja/readme.yaml
+# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
+# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
+#
+# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
+# po weryfikacji parzystości multisetu markerów.
+# =============================================================================
+
+id: readme
+tresc:
+  naglowek: |
+    # Reżyser Audio GPT
+
+    **Studio di Registrazione Ibrido per Radiodrammi, Audiolibri e Racconti Interattivi**
+
+    **Altre versioni linguistiche / Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
+  wprowadzenie: |
+    Zestaw przenośnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
+
+    Wersja: **{numer_wersji}** · Wspierane języki natywnie ({liczba_kompletnych_jezykow}): {lista_kompletnych_jezykow_natywnie}.
+  glowne_moduly: |
+    ## Moduli principali
+
+    L'applicazione combina in una finestra cinque strumenti commutabili tramite scorciatoie da tastiera (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4 / Ctrl+5) o pulsanti sulla barra degli strumenti. Ogni modulo funziona in modo indipendente, ma tutti condividono i pacchetti di dizionari dalla cartella `dictionaries/` (accenti, cifrari, modalità creative AI) e impostazioni centrali.
+  modul_rezyseria: |
+    ### 1. Regia (Ctrl+1)
+
+    Studio principale per scrivere radiodrammi e audiolibri. Scegli la modalità — Brainstorming, Script (con tag `[SFX]`/`[Personaggio: emozione]`), Audiolibro (prosa tradizionale) — e dirigi il dialogo con il modello attraverso il campo Istruzioni + Libro del Mondo + Memoria a Lungo Termine:
+
+    * **Libro del Mondo Multiprogetto:** Il sistema carica automaticamente in background le regole dedicate dell'universo (`.md`) basate sul file sorgente attivo, garantendo un'isolamento completo (caricamento del contesto senza clic).
+    * **Accumulatore di Trama:** Algoritmo di "memoria infinita". Quando l'indicatore di memoria entra in stato di allarme rosso, il sistema genera automaticamente un riassunto della trama e lo salva nel campo Memoria a Lungo Termine.
+    * **{liczba_trybow_rezysera} modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore delle Regole di seguito.
+  modul_opowiesci: |
+    ### 2. Racconti (Ctrl+2, secondo principale modalità da v15.0)
+
+    Giochi di testo interattivi condotti dall'IA come motore narrativo. A differenza della Regia (dove generi un audiolibro finito), i Racconti sono una trama dinamica turno per turno:
+
+    * **Modalità Scelte:** ogni turno termina con 3-5 opzioni numerate A-E. La modalità più intuitiva per i giocatori non vedenti — NVDA legge le opzioni, clicchi Tab e Invio.
+    * **Modalità Minore Male:** come le Scelte, ma ogni opzione è sfavorevole moralmente, fisicamente o strategicamente. Da v15.2 un'ulteriore "fiala" — opzione di salvataggio disperato riutilizzabile numerata ZERO, i cui effetti sono pseudocasuali (60% dannosi / 30% alterano la percezione / 10% raramente vantaggiosi, distribuzione forzata da Python, LLM non può inventare un effetto salvifico).
+    * **Modalità Libera:** azione libera con testo libero ("proverò ad aprire la porta"), il motore propone 1-3 suggerimenti ma non impone una scelta.
+    * **Modello AI per modalità:** Scelte e Minore Male usano gpt-4o (migliore ragionamento morale), Libera usa gpt-4o-mini (economia dell'improvvisazione più economica).
+  modul_poliglota: |
+    ### 3. Poliglotta (Ctrl+3, Traduttore AI + Accenti TTS)
+
+    * **Traduttore Sicuro:** I testi lunghi vengono automaticamente suddivisi in blocchi fino a 10.000 caratteri e tradotti sequenzialmente. Ogni blocco viene immediatamente salvato in un file nascosto `.jsonl`. Il ripristino dopo l'esaurimento dei limiti API è completamente automatico.
+    * **Automazione NVDA:** Le traduzioni vengono salvate come file `.html` pronti con tag di lingua incorporato o file `.docx` con tag iniettati direttamente nella struttura XML.
+    * **{liczba_akcentow_jezykowych} accenti locali:** Possibilità di forzare intenzionalmente un accento spezzato per i sintetizzatori locali (Tiflotecnia Voices, eSpeak, OneCore) grazie a regole regex avanzate. Accenti stranieri supportati: inglese, russo (con traslitterazione in cirillico), francese, tedesco, spagnolo, polacco, finlandese, islandese.
+    * **Modalità Cifrario:** {liczba_szyfrow} algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 35 caratteri con diacritici).
+    * **Riparatore di Tag:** Inietta in modo non invasivo il codice ISO della lingua a due lettere nei file esistenti.
+  modul_konwerter: |
+    ### 4. Convertitore / Architetto Audiolibri (Ctrl+4)
+
+    * Elabora file `.txt` o `.docx` grezzi per la navigazione tramite tastiera per NVDA e sistemi come ElevenLabs.
+    * Converte automaticamente le parole chiave (Atto, Capitolo, Prologo) in intestazioni "Heading 1" nel documento Word e pulisce i tag HTML superflui e i marcatori Markdown.
+    * Dalla versione 15.1 raggruppa 5 turni in scene con intestazioni H1 (rilevamento automatico delle Storie) — prepara il file generato dalla modalità Storie per la pubblicazione tradizionale di audiolibri.
+  modul_manager_regul: |
+    ### 5. Gestore delle Regole (Ctrl+5, novità dalla v13.0)
+
+    * **Esploratore di dizionari senza Python:** Albero visivo di tutti i file YAML nella cartella `dictionaries/` — accenti fonetici, cifrari, modalità creative del Regista e Racconti. Un linguista o traduttore può visualizzare, duplicare, modificare e eliminare regole direttamente dall'interfaccia grafica.
+    * **Creatore di nuove regole:** Modulo con selezione del tipo (accento, cifrario di sostituzioni pure, modalità del Regista, nuova lingua di base, cifrario algoritmico) che crea un modello YAML pronto all'uso e, per i casi più complessi, genera un prompt formattato da incollare in ChatGPT / Claude.
+    * **Refactoring v13.0 — regole nei YAML:** Tutti gli accenti, i cifrari e le modalità AI, che fino alla versione 12.0 erano "incorporati" come costanti nel codice Python, sono stati trasferiti in file `.yaml` dichiarativi caricati dinamicamente all'avvio dell'applicazione. Chiunque sappia usare un editor di testo può regolare un accento (ad esempio, cambiare `sz → sh` in `sz → sch`), aggiungere una nuova lingua o persino modificare il tono del prompt di sistema per l'AI — senza compilare il codice.
+  wielojezycznosc: |
+    ## Multilinguismo ({liczba_kompletnych_jezykow} lingue nativamente)
+
+    Dalla versione v14.0 l'applicazione supporta nativamente {liczba_kompletnych_jezykow} lingue di base: {lista_kompletnych_jezykow_natywnie}. Ogni pacchetto `dictionaries/<codice>/` contiene diacritici, alfabeto e regole fonetiche che operano sul testo in quella specifica lingua — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente.
+
+    L'interfaccia GUI, la documentazione (`docs/manual.<iso>.txt`) e la maggior parte dei messaggi di sistema sono disponibili nativamente in ciascuna delle lingue supportate. I prompt di sistema AI nelle modalità Regista e Racconti sono scritti nelle lingue di destinazione (manualmente, non auto-tradotti — vedi `dictionaries/<codice>/rezyser/` e `dictionaries/<codice>/opowiesci/`).
+  architektura_ai: |
+    ## Architettura AI e modelli utilizzati
+
+    L'applicazione distribuisce intelligentemente i compiti, ottimizzando i costi e la velocità di funzionamento dell'API OpenAI:
+
+    * **gpt-4o:** Il motore principale che alimenta l'applicazione. Si occupa dei compiti generativi più complessi: regia di script, scrittura di prosa tradizionale (Audiolibro), modalità Scelte e Minore Male nelle Storie, generazione di riassunti e traduzioni avanzate mantenendo il contesto multi-blocco.
+    * **gpt-4o-mini:** Modello ausiliario veloce e leggero. Utilizzato in background per micro-compiti che richiedono alta velocità: assegnazione iterativa di titoli letterari ai capitoli generati, estrazione di codici ISO, modalità Libera nelle Storie (economia più economica dell'improvvisazione del testo libero).
+  ograniczenia_modeli: |
+    ### Limitazioni conosciute dei modelli (Anti-Closure)
+
+    Nonostante l'implementazione di rigorose direttive di sistema che impongono di interrompere l'azione nei momenti di tensione (cosiddetta direttiva Anti-Closure), i modelli LLM contemporanei possiedono una forte tendenza innata a "chiudere" le storie. Ciò si traduce in frequenti inserimenti di conclusioni indesiderate, morali o falsi "happy end", specialmente in Modalità Audiolibro Tradizionale.
+
+    Questa è una limitazione fondamentale dell'attuale generazione di intelligenza artificiale. Per questo motivo, l'applicazione salva i progetti in normali file di testo facili da modificare (`.txt`). Ciò richiede all'utente di assumere il ruolo di montatore umano — rimuovendo occasionalmente e manualmente le frasi "conclusive" generate dall'IA, prima di ricaricare nuovamente il file e continuare il lavoro.
+  instalacja_uzytkownicy: |
+    ## Installazione e avvio
+
+    ### Per utenti finali (Windows)
+
+    1. Scarica l'ultima versione dalla scheda **Releases** (pacchetto contrassegnato come *Latest*). Sono disponibili due forme:
+       * **Installer EXE** — installa in Program Files (o nella cartella scelta), crea collegamenti nel Menu Start e sul desktop. Al termine dell'installazione, apre facoltativamente il manuale utente nel gestore predefinito di file .txt.
+       * **Portable ZIP** — estrai in qualsiasi cartella, non richiede diritti di amministratore. Dopo l'estrazione, esegui `run.bat`.
+    2. **Configurazione API OpenAI:** Al primo avvio, l'applicazione segnalerà la mancanza della chiave nella sezione System Check. Clicca sul pulsante visibile per generare il file `golden_key.env`, aprilo in un editor di testo e incolla la tua chiave (che inizia con `sk-proj-`).
+    3. **Primi passi:** Apri il file `docs/manual.pl.txt` (o in un'altra lingua) nella cartella di installazione — è un manuale utente completo scritto in un linguaggio accessibile a tutti gli utenti, non solo agli sviluppatori.
+  instalacja_deweloperzy: |
+    ### Per sviluppatori (clone + setup)
+
+    1. Clona il repository sul tuo disco.
+    2. Esegui il file `setup_dev.bat` per creare automaticamente un ambiente virtuale (`.venv/`) e scaricare le dipendenze da `requirements.txt`.
+    3. Avvia l'applicazione con il comando `python main.py` o tramite il file `run_dev.bat`.
+
+    Gli script `.sh` per macOS/Linux sono stati rimossi nella versione 13.1 — l'ambiente di sviluppo è concentrato su Windows a causa della specificità dei test di accessibilità NVDA. È possibile lavorare con il codice su altri sistemi, ma richiede un setup manuale: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+
+    **Gli script per la creazione dei pacchetti di rilascio** (`build_release.py`, `installer.iss`) servono esclusivamente per creare pacchetti per Windows. Richiedono una cartella speciale `runtime/` con una versione portatile di Python — questa cartella non fa parte del repository di proposito (è in `.gitignore`).
+  dokumentacja: |
+    ## Documentazione completa
+
+    Questo README è solo un contorno architettonico del progetto. Per conoscere le tecniche avanzate per prevenire le allucinazioni dell'IA, le istruzioni per l'installazione di sintetizzatori vocali compatibili (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descrizione completa delle modalità Storie con la fiala e il manuale completo dell'utente, consulta i file nella cartella `docs/`:
+
+    * `docs/manual.<iso>.txt` — manuale principale dell'utente (scritto per l'utente finale).
+    * `docs/opowiesci.<iso>.txt` — manuale della modalità Storie (giochi di testo interattivi).
+    * `docs/dictionaries.<iso>.txt` — istruzioni per linguisti senza Python su come aggiungere accenti/cifrari/modalità AI personalizzati.
+
+    Ognuno di questi file è disponibile in {liczba_kompletnych_jezykow} lingue — suffisso `.<iso>.txt` (ad es. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
