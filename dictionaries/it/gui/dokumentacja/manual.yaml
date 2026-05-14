@@ -14,7 +14,7 @@
 id: manual
 tresc:
   naglowek: |
-    Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja {app.wersja})
+    Manuale del Regista Audio AI - Guida completa (Versione {app.wersja})
 
     Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 

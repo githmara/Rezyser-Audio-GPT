@@ -14,7 +14,7 @@
 id: manual
 tresc:
   naglowek: |
-    Podręcznik Reżysera Audio AI - Komplettanleitung (Version {app.wersja})
+    Audio AI Regisseur Handbuch - Komplettanleitung (Version {app.wersja})
 
     Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 

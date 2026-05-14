@@ -14,7 +14,7 @@
 id: manual
 tresc:
   naglowek: |
-    Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja {app.wersja})
+    Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio {app.wersja})
 
     Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 

@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (15.2 – Version de Publication)
+Reżyser Audio GPT — Module Histoires Interactives (15.2.1 – Version de Publication)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
