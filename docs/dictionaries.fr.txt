@@ -5,6 +5,7 @@ Salut ! Si vous lisez ce fichier, c'est que vous avez jeté un œil au dossier �
 
 Ce fichier est rédigé dans une langue simple pour les écrivains, linguistes, enseignants, parents et plus généralement les curieux. Si vous connaissez les bases de la programmation et que vous cherchez une documentation détaillée du format des fichiers YAML (avec listes de champs, regex, règles du pipeline de traitement), consultez le fichier « README.md » dans le même dossier — mais attention, ce fichier n'est disponible que si vous avez cloné le dépôt depuis GitHub. Dans les paquets de version téléchargés depuis l'onglet Releases, les fichiers Markdown sont filtrés (pour éviter qu'y atterrissent par erreur, par exemple, vos bibles du monde avec des spoilers), donc seul ce fichier « .txt » parvient aux utilisateurs finaux.
 
+
 Qu'y a-t-il là-dedans ?
 -----------------------
 
@@ -23,6 +24,7 @@ Sont actuellement entièrement implémentées : Polski, Deutsch, English, Españ
 (9 langues de base). Chacune dispose de son propre pack
 « dictionaries/<code>/ » avec ses diacritiques, son alphabet et ses règles phonétiques
 qui opèrent sur le texte dans cette langue spécifique — l'application détecte automatiquement la langue d'origine via lingua-language-detector (par paragraphe) et charge le pack approprié pour chaque fragment séparément. D'autres langues sont en préparation (un pack complet exige « podstawy.yaml », « gui/ui.yaml » et au moins un fichier dans « akcenty/ » et « szyfry/ »).
+
 
 Qu'est-ce qu'un accent ?
 ------------------------
@@ -47,6 +49,7 @@ Accents disponibles (8 langues) :
 De plus, dans le menu des accents, il y a deux options « de nettoyage sans accent » :
 l'une sans normalisation des nombres, l'autre avec normalisation (remplace « 15 » par
 « quinze » avant le traitement, parce qu'un étranger ne fléchirait sans doute pas correctement ce nombre — ce qui ajoute de l'authenticité), et le « Réparateur de Balises », qui se contente d'insérer dans le fichier le code de langue ISO sans altérer le contenu (un sauvetage quand votre fichier déjà traduit est sorti avec un code de langue erroné).
+
 
 Qu'est-ce qu'un chiffrement ?
 -----------------------------
@@ -109,6 +112,7 @@ Les chiffrements sont des jeux textuels pour énigmes, exercices linguistiques, 
    que vous puissiez ensuite déchiffrer le message. Les caractères hors
    de l'alphabet (chiffres, espaces, ponctuation) restent inchangés.
 
+
 Qu'est-ce que le « mode Réalisateur » ?
 ---------------------------------------
 
@@ -131,8 +135,27 @@ souvent des solutions magiques, vous pouvez ajuster ces textes selon votre goût
 les sauvegarder, et l'application chargera votre version au prochain démarrage.
 Zéro programmation.
 
+
+Qu'est-ce que le "mode Histoire" ?
+----------------------------------
+
+Le dossier "opowiesci/" contient 8 fichiers décrivant le deuxième mode principal de l'application — des jeux textuels interactifs menés par l'IA en tant que moteur narratif. Contrairement au mode Réalisateur (où vous générez un livre audio PRÊT à être lu en TTS), le mode Histoire est une conversation tour par tour avec le modèle, qui vous guide à travers une session de scénario dynamique :
+
+- tryb_wyborow.yaml      — Choix (3-5 options numérotées A-E à la fin de chaque tour, le mode le plus intuitif pour les joueurs aveugles)
+- tryb_mniejsze_zlo.yaml — Moindre mal (comme Choix, mais chaque option est défavorable ; à partir de la v15.2, une fiole réutilisable comme option de secours désespéré numérotée ZERO)
+- tryb_swobodny.yaml     — Libre (action libre en texte, le moteur propose 1-3 suggestions mais n'impose pas de choix)
+- tryb_burza.yaml        — Brainstorming (dispatch interne générant des propositions de développement de scène pour le moteur narratif)
+- baza.yaml              — règles de base communes (durée du tour, interdictions de résumés, directive anti-clôture)
+- zaczatki.yaml          — amorces d'aventure (3 configurations initiales du monde à choisir pour un nouveau jeu)
+- streszczenie.yaml      — générateur de résumés de jeux longs (compression de l'histoire pour la fenêtre de contexte du modèle)
+- cinematic_warning.yaml — avertissements sur les scènes brutales/dramatiques (conformité avec les préférences du joueur)
+
+Comme dans le mode Réalisateur, chaque fichier contient un "prompt système" à éditer. Vous pouvez ajuster le style du narrateur (par exemple, moins fleuri), changer la durée du tour, ajouter vos propres directives scénaristiques. À partir de la v15.2, le modèle AI est sélectionné automatiquement par mode : Choix et Moindre mal utilisent gpt-4o (meilleur raisonnement moral, important pour le mode avec conséquences), Libre utilise gpt-4o-mini (économie moins coûteuse pour l'improvisation en texte libre).
+
+
 Comment commencer à s'amuser — trois niveaux de difficulté
 ----------------------------------------------------------
+
 
 NIVEAU 1 — petits ajustements d'un accent existant
 
@@ -150,6 +173,7 @@ vous pensez qu'un Anglais dirait plutôt « tch ». Aucun problème.
 5. Sauvegardez le fichier (Ctrl+S), fermez l'éditeur.
 6. Retournez au Gestionnaire de Règles et cliquez sur « Actualiser l'arborescence », puis
    fermez et relancez l'application. Votre modification est déjà active.
+
 
 NIVEAU 2 — ajouter un nouvel accent par duplication
 
@@ -174,6 +198,7 @@ le plus à un existant.
    « [Marek] - a un accent suédois », le Réalisateur le reconnaîtra
    automatiquement et l'appliquera à ses dialogues).
 
+
 NIVEAU 3 — créer quelque chose de complètement nouveau
 
 Vous voulez un argot scolaire ? La langue des chevaliers anciens ? Un langage
@@ -189,6 +214,7 @@ cryptique ? Un chiffrement pour les parents devant les enfants ?
    à coller dans ChatGPT ou Claude. L'IA générera un fichier YAML complet,
    vous le copierez simplement dans le dossier. Pas besoin de savoir programmer —
    il suffit de savoir copier-coller.
+
 
 Quelques idées pour s'amuser
 ----------------------------
@@ -219,6 +245,7 @@ Quelques idées pour s'amuser
   le mieux pour les enfants de 7-12 ans ; les adultes s'en aperçoivent généralement
   rapidement.)
 
+
 Quelque chose peut-il se casser ?
 ---------------------------------
 
@@ -241,5 +268,6 @@ Ne supprimez pas les fichiers originaux du pack (angielski.yaml, cezar.yaml,
 podstawy.yaml etc.) — il vaut mieux les « cacher » en changeant l'extension de
 « .yaml » en « .yaml.backup », si vous voulez qu'ils disparaissent du menu. Si
 vous changez d'avis plus tard, il suffit de restaurer l'extension.
+
 
 Bon amusement !

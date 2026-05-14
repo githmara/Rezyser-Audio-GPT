@@ -185,6 +185,41 @@ tresc:
     "zbyt kwieciście" albo Burza Mózgów za często proponuje magiczne
     rozwiązania, możesz te teksty dostroić pod swój gust, zapisać i aplikacja
     przy następnym uruchomieniu załaduje Twoją wersję. Zero programowania.
+  co_to_tryb_opowiesci: |
+    Co to jest "tryb Opowieści"?
+    ----------------------------
+
+    Folder "opowiesci/" zawiera {liczba_trybow_opowiesci} plików opisujących drugi
+    główny tryb aplikacji — interaktywne gry tekstowe prowadzone przez AI w roli
+    silnika narracyjnego. W odróżnieniu od trybu Reżysera (gdzie generujesz GOTOWY
+    audiobook do odtworzenia w TTS), tryb Opowieści to tura-po-turze konwersacja
+    z modelem, który prowadzi z Tobą sesję dynamicznej fabuły:
+
+    - tryb_wyborow.yaml      — Wybory (3-5 ponumerowanych opcji A-E na końcu
+                               każdej tury, najbardziej intuicyjny tryb dla
+                               niewidomych graczy)
+    - tryb_mniejsze_zlo.yaml — Mniejsze zło (jak Wybory, ale każda opcja jest
+                               niekorzystna; od v15.2 reusable fiolka jako
+                               ZERO-numerowana opcja desperackiego ratunku)
+    - tryb_swobodny.yaml     — Swobodny (dowolna akcja wolnym tekstem, silnik
+                               proponuje 1-3 sugestie ale nie wymusza wyboru)
+    - tryb_burza.yaml        — Burza pomysłów (wewnętrzny dispatch generujący
+                               propozycje rozwoju sceny dla silnika narracyjnego)
+    - baza.yaml              — wspólne reguły bazowe (długość tury, zakazy
+                               podsumowań, dyrektywa anti-closure)
+    - zaczatki.yaml          — startery przygody (3 wstępne setupy świata
+                               do wyboru przy nowej grze)
+    - streszczenie.yaml      — generator streszczeń długich gier (kompresja
+                               historii dla okna kontekstu modelu)
+    - cinematic_warning.yaml — ostrzeżenia o brutalnych/dramatycznych
+                               scenach (zgodność z preferencjami gracza)
+
+    Jak w trybie Reżysera, każdy plik zawiera "prompt systemowy" do edycji.
+    Możesz dostroić styl narratora (np. mniej kwiecisty), zmienić długość
+    tury, dodać własne dyrektywy fabularne. Od v15.2 model AI jest dobierany
+    automatycznie per tryb: Wybory i Mniejsze zło używają gpt-4o (lepsze
+    rozumowanie moralne, ważne dla trybu z konsekwencjami), Swobodny używa
+    gpt-4o-mini (tańsza ekonomia improwizacji wolnego tekstu).
   jak_zaczac: |
     Jak zacząć zabawę — trzy poziomy trudności
     -------------------------------------------

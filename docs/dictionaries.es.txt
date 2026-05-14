@@ -5,6 +5,7 @@ Słowniki Poligloty i Reżysera — Instrukcja dla każdego
 
 Este archivo está escrito en un lenguaje sencillo para escritores, lingüistas, profesores, padres y, en general, curiosos. Si conoces los conceptos básicos de programación y buscas documentación detallada del formato de archivos YAML (con listas de campos, expresiones regulares, reglas de procesamiento de canalización), consulta el archivo "README.md" en la misma carpeta, pero ten en cuenta que este archivo solo está disponible si has clonado el repositorio desde GitHub. En el paquete de lanzamiento descargado desde la pestaña Releases, los archivos Markdown están filtrados (para que no lleguen accidentalmente a tu paquete, por ejemplo, tus libros del mundo con spoilers), así que solo este archivo ".txt" llega a los usuarios finales.
 
+
 ¿Qué hay aquí en general?
 --------------------------
 
@@ -26,6 +27,7 @@ que operan en el texto en ese idioma específico: la aplicación detecta automá
 en preparación (un paquete completo requiere "podstawy.yaml", "gui/ui.yaml"
 y al menos un archivo en "akcenty/" y "szyfry/").
 
+
 ¿Qué es un acento?
 ------------------
 
@@ -43,6 +45,7 @@ Acentos disponibles (8 idiomas):
 - ruso (Milena en Vocalizer, Irina/Pavel/Yuri en OneCore: este es único porque en lugar de "alterar" las letras latinas, realiza una transliteración completa al cirílico; sin esto, la voz rusa no tendría nada que pronunciar)
 
 Además, en el menú de acentos hay dos opciones "limpiadoras sin acento": una sin normalización de números, otra con normalización (cambia "15" a "quince" antes del procesamiento, porque un extranjero probablemente no declinaría correctamente ese número, lo que añade autenticidad) y "Reparador de Etiquetas", que simplemente inserta el código de idioma ISO en el archivo sin alterar el contenido (un salvavidas cuando tu archivo ya traducido salió con un código de idioma incorrecto).
+
 
 ¿Qué es un cifrado?
 -------------------
@@ -74,6 +77,7 @@ Los cifrados son juegos de texto para acertijos, ejercicios de lenguaje, rompeca
 6. Cifrado César (clásico)
    El cifrado documentado más antiguo de la historia (utilizado ya en la antigua Roma). Cada letra se desplaza N posiciones en el alfabeto español (27 letras: ABCDEFGHIJKLMNÑOPQRSTUVWXYZ). El desplazamiento lo introduces en la GUI en el campo numérico; si ingresas 0, la aplicación elegirá un valor al azar en el rango 1-25 y lo mostrará en un mensaje para que luego puedas descifrar el mensaje. Los caracteres fuera del alfabeto (números, espacios, puntuación) permanecen sin cambios.
 
+
 ¿Qué es el "modo Reżyser"?
 ---------------------------
 
@@ -86,8 +90,46 @@ La carpeta "rezyser/" contiene 4 archivos que describen los modos de operación 
 
 Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt del sistema": una larga instrucción para la inteligencia artificial sobre cómo debe comportarse en ese modo. Si sientes que, por ejemplo, el modo Audiolibro escribe "demasiado florido" o la Tormenta de Ideas propone soluciones mágicas con demasiada frecuencia, puedes ajustar estos textos a tu gusto, guardarlos y la aplicación cargará tu versión la próxima vez que se inicie. Cero programación.
 
+
+¿Qué es el "modo Historia"?
+----------------------------
+
+La carpeta "opowiesci/" contiene 8 archivos que describen el segundo
+modo principal de la aplicación: juegos de texto interactivos dirigidos por IA en el papel
+de motor narrativo. A diferencia del modo Director (donde generas un audiolibro COMPLETO
+para reproducir en TTS), el modo Historia es una conversación por turnos
+con el modelo, que lleva a cabo una sesión de narrativa dinámica contigo:
+
+- tryb_wyborow.yaml      — Elecciones (3-5 opciones numeradas A-E al final
+                           de cada turno, el modo más intuitivo para
+                           jugadores ciegos)
+- tryb_mniejsze_zlo.yaml — Menor mal (como Elecciones, pero cada opción es
+                           desfavorable; desde v15.2 frasco reutilizable como
+                           opción de rescate desesperado numerada como CERO)
+- tryb_swobodny.yaml     — Libre (cualquier acción en texto libre, el motor
+                           propone 1-3 sugerencias pero no obliga a elegir)
+- tryb_burza.yaml        — Tormenta de ideas (despacho interno que genera
+                           propuestas de desarrollo de escena para el motor narrativo)
+- baza.yaml              — reglas básicas comunes (duración del turno, prohibiciones
+                           de resúmenes, directiva anti-cierre)
+- zaczatki.yaml          — iniciadores de aventura (3 configuraciones iniciales del mundo
+                           para elegir al comenzar un nuevo juego)
+- streszczenie.yaml      — generador de resúmenes de juegos largos (compresión
+                           de la historia para la ventana de contexto del modelo)
+- cinematic_warning.yaml — advertencias sobre escenas violentas/dramáticas
+                           (compatibilidad con las preferencias del jugador)
+
+Al igual que en el modo Director, cada archivo contiene un "prompt del sistema" para editar.
+Puedes ajustar el estilo del narrador (por ejemplo, menos florido), cambiar la duración
+del turno, añadir tus propias directivas narrativas. Desde la v15.2, el modelo de IA se selecciona
+automáticamente por modo: Elecciones y Menor mal utilizan gpt-4o (mejor razonamiento moral,
+importante para el modo con consecuencias), Libre utiliza gpt-4o-mini (economía más barata para
+la improvisación de texto libre).
+
+
 Cómo empezar a divertirse — tres niveles de dificultad
 ------------------------------------------------------
+
 
 NIVEL 1 — ajuste menor de un acento existente
 
@@ -99,6 +141,7 @@ Imagina que el acento francés de la aplicación cambia "sz" a "sh", pero tú cr
 4. Desplázate hacia abajo hasta la sección "zamiany:". Encuentra la línea con el patrón "sz" y cambia el valor "zamiana" a lo que te convenga.
 5. Guarda el archivo (Ctrl+S), cierra el editor.
 6. Vuelve al Administrador de Reglas y haz clic en "Actualizar árbol", luego cierra y reinicia la aplicación. Tu cambio ya está en efecto.
+
 
 NIVEL 2 — agregar un nuevo acento mediante duplicación
 
@@ -114,6 +157,7 @@ NIVEL 2 — agregar un nuevo acento mediante duplicación
 4. Ajusta la lista de "zamian" a la fonética sueca (por ejemplo, agrega "å → o", "ö → ö", elimina o cambia las que son específicas del finlandés).
 5. Guarda, vuelve a la Página principal, haz clic en "🔄 Actualizar acentos del Reżyser desde YAML" y reinicia la aplicación. El nuevo sueco aparecerá en el menú de acentos de Poliglota (y si agregas al Libro del Mundo un personaje con la etiqueta "[Marek] - ma akcent szwedzki", el Reżyser también lo reconocerá automáticamente y lo aplicará a sus diálogos).
 
+
 NIVEL 3 — crear algo completamente nuevo
 
 ¿Quieres jerga escolar? ¿El idioma de los caballeros antiguos? ¿Lenguaje enredado? ¿Cifrado de padres ante los niños?
@@ -121,6 +165,7 @@ NIVEL 3 — crear algo completamente nuevo
 1. En el Administrador de Reglas, haz clic en "Nuevo archivo de reglas…".
 2. Elige el tipo (acento, cifrado de sustitución, modo Reżyser, nuevo idioma base, cifrado algorítmico). Para casos simples, la aplicación creará inmediatamente una plantilla YAML lista: la editas como en el nivel 2.
 3. Para casos más difíciles (algoritmos como "mezcla de finales" o un nuevo idioma base completo), el Administrador te mostrará un prompt listo para pegar en ChatGPT o Claude. La IA generará un archivo YAML completo, solo tienes que copiarlo a la carpeta. No necesitas saber programar: solo saber copiar y pegar.
+
 
 Algunas ideas para divertirse
 -----------------------------
@@ -135,6 +180,7 @@ Algunas ideas para divertirse
 
 - Tarjeta de cumpleaños con acertijo: desplaza los deseos con el Cifrado César 3 posiciones, añade "clave: mueve cada letra tantas posiciones como años tienes hoy". El cumpleañero debe encontrar la descodificación por sí mismo. (Funciona mejor para niños de 7-12 años; los adultos generalmente se dan cuenta rápidamente).
 
+
 ¿Puede algo salir mal?
 -----------------------
 
@@ -147,5 +193,6 @@ Lo peor que puede pasar es que el nuevo archivo simplemente no aparezca en el me
 - si realmente estás atascado, copia el contenido de tu archivo, abre ChatGPT y escribe "tengo un archivo YAML que la aplicación no carga, encuentra el error y muestra la versión corregida". Pega el archivo. La IA generalmente lo corrige en unos segundos.
 
 No elimines los archivos originales del paquete (angielski.yaml, cezar.yaml, podstawy.yaml, etc.) — es mejor "esconderlos" cambiando la extensión de ".yaml" a ".yaml.backup" si quieres que desaparezcan del menú. Si luego cambias de opinión, simplemente restaura la extensión.
+
 
 ¡Diviértete!

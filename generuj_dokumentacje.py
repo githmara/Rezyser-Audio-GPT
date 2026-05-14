@@ -307,6 +307,7 @@ def _zbuduj_placeholdery_globalne() -> dict[str, str]:
     pl_akcenty_dir = DICT_DIR / _FOLDER_REFERENCYJNY / "akcenty"
     pl_szyfry_dir  = DICT_DIR / _FOLDER_REFERENCYJNY / "szyfry"
     pl_rezyser_dir = DICT_DIR / _FOLDER_REFERENCYJNY / "rezyser"
+    pl_opowiesci_dir = DICT_DIR / _FOLDER_REFERENCYJNY / "opowiesci"
 
     akcenty_lista = cp.lista_wariantow(cp.TRYB_REZYSER, _FOLDER_REFERENCYJNY)
     szyfry_lista  = cp.lista_wariantow(cp.TRYB_SZYFRANT, _FOLDER_REFERENCYJNY)
@@ -329,6 +330,9 @@ def _zbuduj_placeholdery_globalne() -> dict[str, str]:
         "liczba_szyfrow":          str(len(szyfry_lista)),
         "liczba_trybow_rezysera":  str(
             len([p for p in pl_rezyser_dir.glob("*.yaml")]) if pl_rezyser_dir.is_dir() else 0
+        ),
+        "liczba_trybow_opowiesci": str(
+            len([p for p in pl_opowiesci_dir.glob("*.yaml")]) if pl_opowiesci_dir.is_dir() else 0
         ),
         "liczba_kompletnych_jezykow":          str(len(kompletne_jezyki)),
         "lista_kompletnych_jezykow_natywnie":  cp.lista_wspieranych_jezykow_natywnie(),

@@ -84,8 +84,35 @@ Mappan "rezyser/" inniheldur 4 skrár sem lýsa vinnustillingum aðalstúdíósi
 Inni í hverri af þessum skrám er verðmætasti hlutinn "kerfisáreiti" — löng leiðbeining fyrir gervigreindina um hvernig hún á að hegða sér í viðkomandi stillingu. Ef þér finnst t.d. að Hljóðbókarstillingin sé "of blómleg" eða Hugstormurinn leggi of oft til töfralausnir, geturðu stillt þessa texta eftir þínum smekk, vistað og forritið mun hlaða þína útgáfu næst þegar það er ræst. Engin forritun.
 
 
+Hvað er "Söguhamur"?
+---------------------
+
+Mappan "opowiesci/" inniheldur 8 skrár sem lýsa öðrum aðalham forritsins — gagnvirkar textaleikir stýrðir af gervigreind í hlutverki frásagnarmótors. Ólíkt Leikstjórnaham (þar sem þú býrð til LOKIÐ hljóðbók til að spila í TTS), er Söguhamur samtal við líkan, sem leiðir þig í gegnum lotur af kraftmiklum söguþræði:
+
+- tryb_wyborow.yaml      — Val (3-5 tölusettir valkostir A-E í lok
+                           hverrar lotu, mest innsæi fyrir blinda leikmenn)
+- tryb_mniejsze_zlo.yaml — Minna illt (eins og Val, en hver valkostur er
+                           óhagstæður; frá v15.2 endurnýtanleg flaska sem
+                           NÚLL-númeraður valkostur fyrir örvæntingarfulla björgun)
+- tryb_swobodny.yaml     — Frjáls (hvaða aðgerð sem er með frjálsum texta, mótorinn
+                           leggur til 1-3 tillögur en krefst ekki vals)
+- tryb_burza.yaml        — Hugmyndaflóð (innri úthlutun sem býr til
+                           tillögur um þróun senu fyrir frásagnarmótorinn)
+- baza.yaml              — sameiginlegar grunnreglur (lengd lotu, bann við
+                           samantektum, anti-closure tilskipun)
+- zaczatki.yaml          — ævintýra upphaf (3 upphafs uppsetningar heims
+                           til að velja úr í nýjum leik)
+- streszczenie.yaml      — yfirlitsframleiðandi fyrir langa leiki (þjöppun
+                           sögunnar fyrir samhengi glugga líkansins)
+- cinematic_warning.yaml — viðvaranir um ofbeldisfullar/dramatískar
+                           senur (samræmi við óskir leikmanns)
+
+Eins og í Leikstjórnaham, inniheldur hver skrá "kerfisáreiti" til að breyta. Þú getur stillt stíl sögumannsins (t.d. minna blómlegan), breytt lengd lotu, bætt við eigin frásagnartilskipunum. Frá v15.2 er AI líkan valið sjálfkrafa fyrir hvern ham: Val og Minna illt nota gpt-4o (betri siðferðileg rökhugsun, mikilvægt fyrir ham með afleiðingum), Frjáls notar gpt-4o-mini (ódýrari hagfræði frjálsrar texta spuna).
+
+
 Hvernig á að byrja að leika sér — þrjú erfiðleikastig
 -------------------------------------------
+
 
 STIG 1 — smávægileg stilling á núverandi hreim
 
@@ -97,6 +124,7 @@ STIG 1 — smávægileg stilling á núverandi hreim
 4. Skrunaðu niður í "zamiany:" kaflann. Finndu línuna með mynstrinu "sz" og breyttu "zamiana" gildinu í það sem þér hentar.
 5. Vistaðu skrána (Ctrl+S), lokaðu ritlinum.
 6. Farðu aftur í Reglustjóra og smelltu á "Endurnýja tré", lokaðu síðan og ræstu forritið aftur. Breytingin þín er nú virk.
+
 
 STIG 2 — bæta við nýjum hreim með afritun
 
@@ -110,6 +138,7 @@ Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á því sem er líkast 
       - "iso" — tveggja stafa tungumálakóði, fyrir sænsku "sv"
 4. Stilltu "zamiany" listann eftir sænskri hljóðfræði (t.d. bættu við "å → o", "ö → ö", fjarlægðu eða breyttu þeim sem eru sértæk fyrir finnska).
 5. Vistaðu, farðu á Heimasíðuna, smelltu á "🔄 Endurnýja hreima Reżysera úr YAML" og ræstu forritið aftur. Nýja sænska birtist í hreimavalmynd Poligloty (og ef þú bætir við persónu í Heimsbókina með merkinu "[Marek] - hefur sænskan hreim", mun Reżyser einnig þekkja það sjálfkrafa og nota það í samtölum hennar).
+
 
 STIG 3 — búa til eitthvað alveg nýtt
 

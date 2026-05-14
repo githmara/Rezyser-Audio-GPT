@@ -5,6 +5,7 @@ Ciao! Se stai leggendo questo file, significa che hai dato un'occhiata alla cart
 
 Questo file è scritto in un linguaggio semplice per scrittori, linguisti, insegnanti, genitori e in generale per i curiosi. Se conosci le basi della programmazione e stai cercando una documentazione dettagliata del formato dei file YAML (con elenchi di campi, regex, regole di pipeline di elaborazione), consulta il file "README.md" nella stessa cartella — ma attenzione, questo file è disponibile solo se hai clonato il repository da GitHub. Nei pacchetti di rilascio scaricati dalla scheda Releases, i file Markdown sono filtrati (per evitare che nel pacchetto finiscano per sbaglio, ad esempio, i tuoi libri del mondo con spoiler), quindi solo questo file ".txt" arriva agli utenti finali.
 
+
 Cosa c'è qui dentro?
 ---------------------
 
@@ -23,6 +24,7 @@ Attualmente completamente implementati sono: Polski, Deutsch, English, Español,
 (9 lingue di base). Ognuna ha il proprio pacchetto
 "dictionaries/<codice>/" con diacritici, alfabeto e regole fonetiche
 che operano sul testo in quella lingua specifica — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente. Altre lingue sono in preparazione (un pacchetto completo richiede "podstawy.yaml", "gui/ui.yaml" e almeno un file in "akcenty/" e "szyfry/").
+
 
 Cos'è un accento?
 -----------------
@@ -46,6 +48,7 @@ Accenti disponibili (8 lingue):
 
 Inoltre, nel menu degli accenti ci sono due opzioni "di pulizia senza accento":
 una senza normalizzazione dei numeri, l'altra con normalizzazione (sostituisce "15" con "quindici" prima dell'elaborazione, perché uno straniero probabilmente non declinerebbe correttamente questo numero — il che aggiunge autenticità) e "Riparatore di Tag", che semplicemente inserisce nel file il codice lingua ISO senza alterare il contenuto (salvezza quando il tuo file già tradotto è uscito con un codice lingua errato).
+
 
 Cos'è un cifrario?
 ------------------
@@ -109,6 +112,7 @@ I cifrari sono giochi di testo per enigmi, esercizi linguistici, rompicapo. A di
    che tu possa successivamente decifrare il messaggio. I caratteri al di fuori
    dell'alfabeto (numeri, spazi, punteggiatura) rimangono invariati.
 
+
 Cos'è la "modalità Regista"?
 ----------------------------
 
@@ -131,8 +135,37 @@ spesso soluzioni magiche, puoi regolare questi testi secondo il tuo gusto,
 salvarli e l'applicazione al prossimo avvio caricherà la tua versione.
 Zero programmazione.
 
+
+Cos'è la "modalità Storie"?
+----------------------------
+
+La cartella "opowiesci/" contiene 8 file che descrivono la seconda modalità principale dell'applicazione: giochi di testo interattivi condotti dall'AI come motore narrativo. A differenza della modalità Regista (dove generi un audiolibro PRONTO per la riproduzione in TTS), la modalità Storie è una conversazione turno per turno con il modello, che conduce con te una sessione di trama dinamica:
+
+- tryb_wyborow.yaml      — Scelte (3-5 opzioni numerate A-E alla fine di
+                           ogni turno, la modalità più intuitiva per
+                           giocatori non vedenti)
+- tryb_mniejsze_zlo.yaml — Il male minore (come Scelte, ma ogni opzione è
+                           sfavorevole; dalla v15.2 fiala riutilizzabile come
+                           opzione di salvataggio disperato numerata ZERO)
+- tryb_swobodny.yaml     — Libero (qualsiasi azione con testo libero, il motore
+                           propone 1-3 suggerimenti ma non impone una scelta)
+- tryb_burza.yaml        — Brainstorming (dispatch interno che genera
+                           proposte di sviluppo della scena per il motore narrativo)
+- baza.yaml              — regole di base comuni (lunghezza del turno, divieti
+                           di riassunti, direttiva anti-closure)
+- zaczatki.yaml          — iniziatori di avventura (3 setup iniziali del mondo
+                           tra cui scegliere per un nuovo gioco)
+- streszczenie.yaml      — generatore di riassunti di giochi lunghi (compressione
+                           della storia per la finestra di contesto del modello)
+- cinematic_warning.yaml — avvisi su scene brutali/drammatiche (conformità
+                           con le preferenze del giocatore)
+
+Come nella modalità Regista, ogni file contiene un "prompt di sistema" da modificare. Puoi regolare lo stile del narratore (ad esempio, meno fiorito), cambiare la lunghezza del turno, aggiungere le tue direttive narrative. Dalla v15.2 il modello AI viene selezionato automaticamente per modalità: Scelte e Il male minore usano gpt-4o (migliore ragionamento morale, importante per la modalità con conseguenze), Libero usa gpt-4o-mini (economia più conveniente per l'improvvisazione di testo libero).
+
+
 Come iniziare a divertirsi — tre livelli di difficoltà
 ------------------------------------------------------
+
 
 LIVELLO 1 — piccole regolazioni di un accento esistente
 
@@ -150,6 +183,7 @@ tu pensi che un francese direbbe piuttosto "sch" o "ch". Nessun problema.
 5. Salva il file (Ctrl+S), chiudi l'editor.
 6. Torna al Gestore delle Regole e fai clic su "Aggiorna albero", quindi
    chiudi e riavvia l'applicazione. La tua modifica è già attiva.
+
 
 LIVELLO 2 — aggiungere un nuovo accento tramite duplicazione
 
@@ -174,6 +208,7 @@ esistente.
    "[Marek] - ha accento svedese", anche il Regista lo riconoscerà
    automaticamente e lo applicherà ai suoi dialoghi).
 
+
 LIVELLO 3 — creare qualcosa di completamente nuovo
 
 Vuoi un gergo scolastico? La lingua degli antichi cavalieri? Un linguaggio
@@ -189,6 +224,7 @@ criptico? Un cifrario per i genitori davanti ai bambini?
    da incollare in ChatGPT o Claude. L'IA genererà un file YAML completo,
    tu lo copierai semplicemente nella cartella. Non devi sapere programmare —
    basta saper copiare e incollare.
+
 
 Alcune idee per divertirsi
 --------------------------
@@ -219,6 +255,7 @@ Alcune idee per divertirsi
   meglio per bambini di 7-12 anni; gli adulti di solito se ne accorgono
   rapidamente.)
 
+
 C'è qualcosa che può rompersi?
 ------------------------------
 
@@ -241,5 +278,6 @@ Non eliminare i file originali del pacchetto (angielski.yaml, cezar.yaml,
 podstawy.yaml ecc.) — è meglio "nasconderli" cambiando l'estensione da
 ".yaml" a ".yaml.backup", se vuoi che scompaiano dal menu. Se in seguito
 cambi idea, basta ripristinare l'estensione.
+
 
 Buon divertimento!

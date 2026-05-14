@@ -175,8 +175,26 @@ these texts to your taste, save them, and the application will load your
 version the next time it starts. Zero programming.
 
 
+What is "Story Mode"?
+----------------------
+
+The "opowiesci/" folder contains 8 files describing the second main mode of the application — interactive text games led by AI as the narrative engine. Unlike the Director mode (where you generate a READY audiobook for playback in TTS), Story Mode is a turn-by-turn conversation with the model, which conducts a session of dynamic storytelling with you:
+
+- tryb_wyborow.yaml      — Choices (3-5 numbered options A-E at the end of each turn, the most intuitive mode for visually impaired players)
+- tryb_mniejsze_zlo.yaml — Lesser Evil (like Choices, but each option is disadvantageous; from v15.2 a reusable vial as a ZERO-numbered desperate rescue option)
+- tryb_swobodny.yaml     — Free (any action with free text, the engine suggests 1-3 options but does not enforce a choice)
+- tryb_burza.yaml        — Brainstorm (internal dispatch generating scene development proposals for the narrative engine)
+- baza.yaml              — common base rules (turn length, summary prohibitions, anti-closure directive)
+- zaczatki.yaml          — adventure starters (3 initial world setups to choose from when starting a new game)
+- streszczenie.yaml      — long game summary generator (compressing history for the model's context window)
+- cinematic_warning.yaml — warnings about brutal/dramatic scenes (compliance with player preferences)
+
+As in Director mode, each file contains a "system prompt" for editing. You can adjust the narrator's style (e.g., less flowery), change the turn length, add your own narrative directives. From v15.2, the AI model is selected automatically per mode: Choices and Lesser Evil use gpt-4o (better moral reasoning, important for mode with consequences), Free uses gpt-4o-mini (more economical for free text improvisation).
+
+
 How to Start Playing — Three Levels of Difficulty
 -------------------------------------------------
+
 
 LEVEL 1 — minor tuning of an existing accent
 
@@ -194,6 +212,7 @@ think a French person would rather say "sch" or "ch". No problem.
 5. Save the file (Ctrl+S), close the editor.
 6. Return to the Rule Manager and click "Refresh tree", then close and
    restart the application. Your change is already working.
+
 
 LEVEL 2 — adding a new accent by duplication
 
@@ -216,6 +235,7 @@ existing one.
    in the Polyglot accent menu (and if you add to the World Book
    characters the tag "[Marek] - has a Swedish accent", the Director
    will also recognize it automatically and apply it to her dialogues).
+
 
 LEVEL 3 — creating something completely new
 
