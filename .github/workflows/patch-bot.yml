@@ -2,15 +2,15 @@ name: Patch Bot
 
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 jobs:
   handle_patch_request:
-    # Uruchom tylko wtedy, gdy issue ma odpowiednią etykietę
-    if: contains(github.event.issue.labels.*.name, 'tiflotecnia-patch')
+    # Wymagamy, aby etykietą wyzwalającą była DOKŁADNIE tiflotecnia-patch
+    if: github.event.label.name == 'tiflotecnia-patch'
     runs-on: ubuntu-latest
     permissions:
-      issues: write   # close, edit, lock, comment — wystarczy domyślny GITHUB_TOKEN
+      issues: write
 
     steps:
       - name: Pobranie kodu repozytorium
@@ -33,11 +33,6 @@ jobs:
         run: |
           python .github/scripts/send_patch.py "$ISSUE_BODY" "$ISSUE_NUMBER"
 
-      # Poniższe kroki uruchamiają się TYLKO gdy poprzedni step zakończył się sukcesem
-      # (skrypt Python zwrócił exit 0, czyli email został wysłany). Jeśli skrypt
-      # zfailował (np. brak adresu email w treści), workflow kończy się tutaj —
-      # komentarz informujący użytkownika dodaje sam skrypt Python przed exit 1.
-
       - name: Komentarz potwierdzający dla użytkownika
         if: success()
         env:
@@ -47,7 +42,7 @@ jobs:
           gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
             --body "Patch wysłany na podany adres, zgłoszenie zostaje zamknięte."
 
-      - name: Redact body issue (usunięcie adresu email z publicznego wątku)
+      - name: Redact body issue
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

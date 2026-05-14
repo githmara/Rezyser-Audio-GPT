@@ -1,25 +1,3 @@
-"""
-send_patch.py — wysyła patcha Tiflotecnia Voices na adres email z body issue.
-
-Logika:
-  1. Wyciągnij adres email z `argv[1]` (treść issue) używając rygorystycznego
-     regex-u `[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}\\b`.
-  2. Jeśli BRAK adresu — dodaj komentarz do issue „Nie znalazłem adresu email
-     w treści — uzupełnij proszę", po czym EXIT 1. Workflow GitHub Actions
-     wykrywa exit-code, nie kontynuuje kroków redact / close / lock — issue
-     zostaje OPEN dla retry przez użytkownika.
-  3. Jeśli email znaleziony — buduj wiadomość z linkiem do patcha + stopką
-     antyspamową zawierającą numer issue. Wyślij przez Gmail SMTP_SSL,
-     EXIT 0 — workflow kontynuuje redact + close + lock.
-
-Wymagane env-vars (ustawiane w `.github/workflows/patch-bot.yml`):
-  * SMTP_USER, SMTP_PASS — Gmail App Password (NIE hasło konta).
-  * GH_TOKEN — domyślny `secrets.GITHUB_TOKEN` (dla `gh issue comment` przy
-    braku emaila — wystarczy `issues: write`, mamy w permissions workflow).
-  * GITHUB_REPOSITORY — auto-wstrzykiwany przez Actions w formacie `owner/repo`.
-
-CLI: `python send_patch.py "<issue_body>" "<issue_number>"`.
-"""
 import os
 import re
 import smtplib
@@ -27,14 +5,8 @@ import subprocess
 import sys
 from email.message import EmailMessage
 
-
-# Mocniejszy regex: TLD min 2 znaki literowe (nie pasuje już `foo@bar.c`).
-# Granica słowa `\b` na końcu zapobiega łapaniu trailing kropki / przecinka.
 EMAIL_REGEX = re.compile(r"[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}\b")
 
-# Hardkodowany link OneDrive z patchem — autor utrzymuje paczkę poza repo,
-# bo Tiflotecnia Voices for NVDA jest oprogramowaniem komercyjnym i licencja
-# dodatku nie zezwala na publiczną redystrybucję plików .py.
 PATCH_LINK = (
     "https://1drv.ms/u/c/717e0c193b743dcf/"
     "IQDbzNF_k71lR7r54Qtpfc_jASfUF0BwreedEUqqltWDbaU?e=KDJb38"
@@ -44,16 +16,7 @@ KOMENTARZ_BRAK_EMAILA = (
     "Nie znalazłem adresu email w treści — uzupełnij proszę."
 )
 
-
 def dodaj_komentarz_do_issue(numer_issue: str, tresc: str) -> None:
-    """Dodaje komentarz przez `gh issue comment` (env GH_TOKEN + GITHUB_REPOSITORY).
-
-    Nie rzuca wyjątkiem przy błędzie — logujemy do stderr i kontynuujemy.
-    Powód: skrypt jest wywoływany tuż przed exit 1 dla brakującego emaila,
-    więc nawet jeśli komentarz się nie doda, workflow ma się zakończyć
-    z błędem (issue zostaje OPEN). Wyjątek z komentarza tylko zaciemniłby
-    główną przyczynę (brak emaila).
-    """
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if not repo:
         sys.stderr.write("[!] Brak GITHUB_REPOSITORY w env — nie dodaję komentarza.\n")
@@ -75,14 +38,7 @@ def dodaj_komentarz_do_issue(numer_issue: str, tresc: str) -> None:
     except FileNotFoundError:
         sys.stderr.write("[!] `gh` CLI nie znalezione w PATH.\n")
 
-
 def zbuduj_tresc_maila(numer_issue: str) -> str:
-    """Składa treść wiadomości email z linkiem do patcha + stopką antyspamową.
-
-    Stopka jest WAŻNA z powodu spam-wektora: jeśli ktoś otworzy issue
-    z adresem ofiary (third-party), bot wyśle link do tej ofiary. Stopka
-    daje odbiorcy kontekst i pozwala go zignorować bez paniki.
-    """
     return (
         "Cześć!\n\n"
         "Przesyłam patcha — zgłoszenie zostało zamknięte.\n"
@@ -94,7 +50,6 @@ def zbuduj_tresc_maila(numer_issue: str) -> str:
         f"w GitHub Issue #{numer_issue} w repozytorium. "
         "Jeśli to nie Ty zgłaszałeś — zignoruj."
     )
-
 
 def main() -> int:
     if len(sys.argv) < 3:
@@ -127,7 +82,8 @@ def main() -> int:
         return 1
 
     msg = EmailMessage()
-    msg["Subject"] = "Tiflotecnia Voices patch — potwierdzenie zgłoszenia"
+    # Dodano numer issue do tematu, by zapobiec blokadom antyspamowym
+    msg["Subject"] = f"Tiflotecnia Voices patch — potwierdzenie zgłoszenia #{issue_number}"
     msg["From"] = smtp_user
     msg["To"] = recipient_email
     msg.set_content(zbuduj_tresc_maila(issue_number))
@@ -141,7 +97,6 @@ def main() -> int:
     except Exception as exc:
         sys.stderr.write(f"[!] Błąd wysyłki maila: {exc}\n")
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())
