@@ -2,9 +2,9 @@
 # dictionaries/pl/gui/dokumentacja/opowiesci.yaml
 #
 # Manuał użytkownika dla modułu „Interaktywne Opowieści" (v15.1).
-# Generator `generuj_dokumentacje.py` wygeneruje stąd `docs/opowiesci.pl.txt`,
+# Generator `generuj_dokumentacje.py` wygeneruje stąd `docs/tales.pl.txt`,
 # a po batch translation przez `buduj_wielojezyczne_docs.py` analogicznie
-# `docs/opowiesci.<iso>.txt` dla 8 pozostałych języków.
+# `docs/tales.<iso>.txt` dla 8 pozostałych języków.
 #
 # Placeholdery dynamiczne (rozwijane z dictionaries/<kod>/gui/ui.yaml):
 #   * {app.wersja}, {app.nazwa} — globalne
@@ -14,7 +14,7 @@
 #   * {main.btn.opowiesci} — etykieta głównego przycisku przejścia do panelu
 # =============================================================================
 
-id: opowiesci
+id: tales
 tresc:
   naglowek: |
     Reżyser Audio GPT — Moduł Interaktywne Opowieści ({app.wersja})

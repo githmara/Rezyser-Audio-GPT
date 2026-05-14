@@ -106,7 +106,7 @@ Los scripts `.sh` para macOS/Linux fueron eliminados en la versión v13.1 — el
 Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con frasco, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
 
 * `docs/manual.<iso>.txt` — manual principal de usuario (escrito para el usuario final).
-* `docs/opowiesci.<iso>.txt` — manual del modo Historias (juegos de texto interactivos).
+* `docs/tales.<iso>.txt` — manual del modo Historias (juegos de texto interactivos).
 * `docs/dictionaries.<iso>.txt` — instrucciones para lingüistas sin Python sobre cómo añadir sus propios acentos/códigos/modos de IA.
 
 Cada uno de estos archivos está disponible en 9 idiomas — sufijo `.<iso>.txt` (por ejemplo, `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

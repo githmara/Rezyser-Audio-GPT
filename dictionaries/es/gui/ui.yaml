@@ -58,6 +58,10 @@ main:
     zakoncz: "Ter&minar\tAlt+F4"
     jezyk_interfejsu: "&Idioma de la interfaz"
     opowiesci: "&Historias\tCtrl+5"
+    pomoc: 'Ay&uda'
+    pomoc_manual: "&Manual de usuario\tF1"
+    pomoc_tales: 'Modo de &Narración — guía'
+    pomoc_dictionaries: '&Diccionarios — acentos, cifrados, modos de IA'
   menu_status:
     strona_glowna: "Regresa a la pantalla de inicio con la descripción de herramientas y System Check"
     rezyser: "Abre el módulo de Dirección – escritura de guiones y prosa con IA"
@@ -67,6 +71,10 @@ main:
     zakoncz: "Cerrar aplicación"
     jezyk_interfejsu: "Selecciona el idioma de la interfaz de la aplicación (el cambio requiere reiniciar)"
     opowiesci: "Abre el módulo Historias – ficción interactiva en segunda persona generada por IA, leída por TTS/lector de pantalla"
+    pomoc: 'Abrir la documentación de la aplicación en el manejador de archivos de texto predeterminado'
+    pomoc_manual: 'Abre el manual principal (docs/manual en el idioma de la interfaz)'
+    pomoc_tales: 'Abre la guía del modo de Narración (docs/tales en el idioma de la interfaz)'
+    pomoc_dictionaries: 'Abre la descripción de acentos, cifrados y modos de IA (docs/dictionaries en el idioma de la interfaz) — destinado a lingüistas sin Python'
   btn:
     rezyser: "🎬  &Director"
     poliglota: "🌍  &Políglota"
@@ -96,6 +104,9 @@ main:
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
 # -----------------------------------------------------------------------------
+  pomoc:
+    blad_tytul: 'Archivo de documentación ausente'
+    brak_pliku: 'El archivo {sciezka} no existe en el paquete de la aplicación. Reporta un error en el repositorio de GitHub — en un paquete correctamente construido, la carpeta docs/ contiene manual / tales / dictionaries en cada idioma compatible.'
 home:
   panel_name: "Panel de inicio – Página principal"
   welcome_text: |-
@@ -329,10 +340,10 @@ rezyser:
   txt_podglad_name: "Vista previa del historial completo en memoria – solo lectura"
   txt_podglad_hint: "(la memoria está vacía – carga un proyecto o comienza uno nuevo)"
   # Panel de opciones de Lluvia de ideas (v15.2)
-  pnl_opcji_burzy_name:        "Panel de opciones de Lluvia de ideas"
-  lbl_opcji_burzy:             "🌪️ Opciones de Lluvia de ideas — clic para insertar en Instrucciones:"
+  pnl_opcji_burzy_name: "Panel de opciones de Lluvia de ideas"
+  lbl_opcji_burzy: "🌪️ Opciones de Lluvia de ideas — clic para insertar en Instrucciones:"
   txt_streszczenie_burzy_name: "Resumen generado por la Lluvia de ideas — solo lectura"
-  btn_opcja_burzy_format:      "{numer}. {tytul}"
+  btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Instrucciones para el siguiente fragmento (escribe 'resumen' para forzar el guardado en la Memoria a Largo Plazo):

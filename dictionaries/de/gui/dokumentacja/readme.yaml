@@ -109,7 +109,7 @@ tresc:
     Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Fläschchen" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
 
     * `docs/manual.<iso>.txt` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
-    * `docs/opowiesci.<iso>.txt` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
+    * `docs/tales.<iso>.txt` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
     * `docs/dictionaries.<iso>.txt` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
 
     Jede dieser Dateien ist in {liczba_kompletnych_jezykow} Sprachen verfügbar — Suffix `.<iso>.txt` (z.B. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

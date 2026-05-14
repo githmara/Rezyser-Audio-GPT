@@ -157,7 +157,7 @@ tresc:
     Ce README est uniquement un aperçu architectural du projet. Pour découvrir les techniques avancées de prévention des hallucinations de l'IA, les instructions d'installation des synthétiseurs vocaux compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), une description complète des modes Histoires avec fiole, ainsi qu'un guide utilisateur complet, consultez les fichiers dans le dossier `docs/` :
 
     * `docs/manual.<iso>.txt` — le manuel principal (écrit pour l'utilisateur final).
-    * `docs/opowiesci.<iso>.txt` — le manuel du mode Histoires (jeux textuels interactifs).
+    * `docs/tales.<iso>.txt` — le manuel du mode Histoires (jeux textuels interactifs).
     * `docs/dictionaries.<iso>.txt` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
 
     Chacun de ces fichiers est disponible en {liczba_kompletnych_jezykow} langues — suffixe `.<iso>.txt` (par exemple, `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

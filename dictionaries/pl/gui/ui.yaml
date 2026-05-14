@@ -65,6 +65,10 @@ main:
     opowiesci:           "&Opowieści\tCtrl+5"
     zakoncz:             "Za&kończ\tAlt+F4"
     jezyk_interfejsu:    "&Język interfejsu"
+    pomoc:               "Po&moc"
+    pomoc_manual:        "&Instrukcja obsługi\tF1"
+    pomoc_tales:         "Tryb &Opowieści — przewodnik"
+    pomoc_dictionaries:  "&Słowniki — akcenty, szyfry, tryby AI"
   menu_status:
     strona_glowna:       "Wróć do ekranu startowego z opisem narzędzi i System Check"
     rezyser:             "Otwiera moduł Reżyserii – pisanie skryptów i prozy z AI"
@@ -74,6 +78,10 @@ main:
     opowiesci:           "Otwiera moduł Opowieści – interaktywna fikcja II-osobowa generowana przez AI, czytana przez TTS/czytnik ekranu"
     zakoncz:             "Zamknij aplikację"
     jezyk_interfejsu:    "Wybierz język interfejsu aplikacji (zmiana wymaga ponownego uruchomienia)"
+    pomoc:               "Otwórz dokumentację aplikacji w domyślnym handlerze plików tekstowych"
+    pomoc_manual:        "Otwiera główną instrukcję obsługi (docs/manual w języku interfejsu)"
+    pomoc_tales:         "Otwiera przewodnik trybu Opowieści (docs/tales w języku interfejsu)"
+    pomoc_dictionaries:  "Otwiera opis akcentów, szyfrów i trybów AI (docs/dictionaries w języku interfejsu) — przeznaczone dla lingwistów bez Pythona"
   btn:
     rezyser:             "🎬  &Reżyser"
     poliglota:           "🌍  &Poliglota"
@@ -99,6 +107,9 @@ main:
       Zmiana języka interfejsu wymaga ponownego uruchomienia aplikacji.
 
       Kliknij OK, aby zamknąć aplikację. Po ponownym uruchomieniu interfejs będzie w wybranym języku ({nazwa_jezyka}).
+  pomoc:
+    blad_tytul:          "Plik dokumentacji nieobecny"
+    brak_pliku:          "Plik {sciezka} nie istnieje w paczce aplikacji. Zgłoś bug w repozytorium GitHub — w prawidłowo zbudowanej paczce folder docs/ zawiera manual / tales / dictionaries w każdym wspieranym języku."
 
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)

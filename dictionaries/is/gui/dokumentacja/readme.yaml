@@ -132,7 +132,7 @@ tresc:
     Þetta README er aðeins uppbyggingarútdráttur verkefnisins. Til að læra um háþróaðar aðferðir til að koma í veg fyrir ofskynjanir AI, uppsetningarleiðbeiningar fyrir samhæfða talgervla (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), fulla lýsingu á sögumódum með flösku, og fullkomna notendahandbók, skoðaðu skrárnar í `docs/` möppunni:
 
     * `docs/manual.<iso>.txt` — aðalnotendahandbókin (skrifuð fyrir endanotanda).
-    * `docs/opowiesci.<iso>.txt` — handbók fyrir sögumóða (gagnvirkir textaleikir).
+    * `docs/tales.<iso>.txt` — handbók fyrir sögumóða (gagnvirkir textaleikir).
     * `docs/dictionaries.<iso>.txt` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
 
     Hver af þessum skrám er fáanleg á {liczba_kompletnych_jezykow} tungumálum — viðskeyti `.<iso>.txt` (t.d. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

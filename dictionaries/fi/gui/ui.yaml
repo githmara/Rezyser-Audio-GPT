@@ -58,6 +58,10 @@ main:
     zakoncz: "&Lopeta\tAlt+F4"
     jezyk_interfejsu: "&Käyttöliittymän kieli"
     opowiesci: "&Tarinoita\tCtrl+5"
+    pomoc: '&Ohje'
+    pomoc_manual: "Käyttö&ohje\tF1"
+    pomoc_tales: 'Tarina&tila — opas'
+    pomoc_dictionaries: '&Sanakirjat — aksentit, salaukset, AI-tilat'
   menu_status:
     strona_glowna: "Palaa aloitusnäyttöön, jossa on työkalujen kuvaus ja järjestelmän tarkistus"
     rezyser: "Avaa Ohjausmoduuli – kirjoita käsikirjoituksia ja proosaa AI:n avulla"
@@ -67,6 +71,10 @@ main:
     zakoncz: "Sulje sovellus"
     jezyk_interfejsu: "Valitse sovelluksen käyttöliittymän kieli (muutos vaatii uudelleenkäynnistyksen)"
     opowiesci: "Avaa Tarinat-moduulin – interaktiivinen toisen persoonan fiktio, jonka AI luo ja TTS/ruudunlukija lukee"
+    pomoc: 'Avaa sovelluksen dokumentaatio oletustekstitiedostojen käsittelijässä'
+    pomoc_manual: 'Avaa pääkäyttöohjeen (docs/manual käyttöliittymän kielellä)'
+    pomoc_tales: 'Avaa tarinatilan oppaan (docs/tales käyttöliittymän kielellä)'
+    pomoc_dictionaries: 'Avaa aksenttien, salausten ja AI-tilojen kuvauksen (docs/dictionaries käyttöliittymän kielellä) — tarkoitettu lingvisteille ilman Pythonia'
   btn:
     rezyser: "🎬  &Ohjaaja"
     poliglota: "🌍  &Polyglootti"
@@ -96,6 +104,9 @@ main:
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
 # -----------------------------------------------------------------------------
+  pomoc:
+    blad_tytul: 'Dokumentaatiotiedosto puuttuu'
+    brak_pliku: 'Tiedostoa {sciezka} ei ole sovelluksen paketissa. Ilmoita virheestä GitHub-repositoriossa — oikein rakennetussa paketissa docs/ kansio sisältää manual / tales / dictionaries jokaisella tuetulla kielellä.'
 home:
   panel_name: "Aloituspaneeli – Etusivu"
   welcome_text: |-
@@ -330,10 +341,10 @@ rezyser:
   txt_podglad_name: "Täysi historian esikatselu – vain luku"
   txt_podglad_hint: "(muisti on tyhjä – lataa projekti tai aloita uusi)"
   # Aivoriihen vaihtoehtopaneeli (v15.2)
-  pnl_opcji_burzy_name:        "Aivoriihen vaihtoehtopaneeli"
-  lbl_opcji_burzy:             "🌪️ Aivoriihen vaihtoehdot — napsauta lisätäksesi Ohjeisiin:"
+  pnl_opcji_burzy_name: "Aivoriihen vaihtoehtopaneeli"
+  lbl_opcji_burzy: "🌪️ Aivoriihen vaihtoehdot — napsauta lisätäksesi Ohjeisiin:"
   txt_streszczenie_burzy_name: "Aivoriihen tuottama yhteenveto — vain luku"
-  btn_opcja_burzy_format:      "{numer}. {tytul}"
+  btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Ohjeet seuraavalle osalle (kirjoita 'yhteenveto' pakottaaksesi tallennuksen Pitkäaikaismuistiin):

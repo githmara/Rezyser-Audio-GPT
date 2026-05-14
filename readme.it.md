@@ -106,7 +106,7 @@ Gli script `.sh` per macOS/Linux sono stati rimossi nella versione 13.1 — l'am
 Questo README è solo un contorno architettonico del progetto. Per conoscere le tecniche avanzate per prevenire le allucinazioni dell'IA, le istruzioni per l'installazione di sintetizzatori vocali compatibili (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descrizione completa delle modalità Storie con la fiala e il manuale completo dell'utente, consulta i file nella cartella `docs/`:
 
 * `docs/manual.<iso>.txt` — manuale principale dell'utente (scritto per l'utente finale).
-* `docs/opowiesci.<iso>.txt` — manuale della modalità Storie (giochi di testo interattivi).
+* `docs/tales.<iso>.txt` — manuale della modalità Storie (giochi di testo interattivi).
 * `docs/dictionaries.<iso>.txt` — istruzioni per linguisti senza Python su come aggiungere accenti/cifrari/modalità AI personalizzati.
 
 Ognuno di questi file è disponibile in 9 lingue — suffisso `.<iso>.txt` (ad es. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

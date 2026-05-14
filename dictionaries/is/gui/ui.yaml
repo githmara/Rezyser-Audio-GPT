@@ -58,6 +58,10 @@ main:
     zakoncz: "Ljúka&\tAlt+F4"
     jezyk_interfejsu: "&Viðmótstungumál"
     opowiesci: "&Sögur\tCtrl+5"
+    pomoc: '&Hjálp'
+    pomoc_manual: "&Handbók\tF1"
+    pomoc_tales: 'Sögu&hamur — leiðarvísir'
+    pomoc_dictionaries: '&Orðabækur — kommur, dulmál, AI stillingar'
   menu_status:
     strona_glowna: "Farðu aftur á upphafsskjá með lýsingu á verkfærum og System Check"
     rezyser: "Opnar Leikstjórnarstillingu – skrifa handrit og prósa með AI"
@@ -67,6 +71,10 @@ main:
     zakoncz: "Lokaðu forritinu"
     jezyk_interfejsu: "Veldu tungumál viðmótsins (breyting krefst endurræsingar)"
     opowiesci: "Opnar Sögur einingu – gagnvirkar sögur í annarri persónu búnar til af AI, lesnar af TTS/skjálesara"
+    pomoc: 'Opnaðu skjölun forritsins í sjálfgefnum textaskrárlesara'
+    pomoc_manual: 'Opnar aðalhandbókina (docs/manual á viðmótstungumáli)'
+    pomoc_tales: 'Opnar leiðarvísir fyrir söguham (docs/tales á viðmótstungumáli)'
+    pomoc_dictionaries: 'Opnar lýsingu á kommum, dulmálum og AI stillingum (docs/dictionaries á viðmótstungumáli) — ætlað málvísindamönnum án Pythons'
   btn:
     rezyser: "🎬  &Leikstjóri"
     poliglota: "🌍  &Tungumálamaður"
@@ -96,6 +104,9 @@ main:
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
 # -----------------------------------------------------------------------------
+  pomoc:
+    blad_tytul: 'Skjölunarskrá ekki til staðar'
+    brak_pliku: 'Skráin {sciezka} er ekki til í forritapakkanum. Tilkynntu villu í GitHub geymslunni — í rétt byggðum pakka inniheldur docs/ möppuna handbók / sögur / orðabækur á hverju studdu tungumáli.'
 home:
   panel_name: "Upphafsspjald – Heimasíða"
   welcome_text: |-
@@ -330,10 +341,10 @@ rezyser:
   txt_podglad_name: "Forskoðun á allri sögu í minni – aðeins til lesturs"
   txt_podglad_hint: "(minni er tómt – hlaða inn verkefni eða byrja nýtt)"
   # Spjald hugstormunarvalkosta (v15.2)
-  pnl_opcji_burzy_name:        "Spjald hugstormunarvalkosta"
-  lbl_opcji_burzy:             "🌪️ Hugstormunarvalkostir — smelltu til að setja inn í Leiðbeiningar:"
+  pnl_opcji_burzy_name: "Spjald hugstormunarvalkosta"
+  lbl_opcji_burzy: "🌪️ Hugstormunarvalkostir — smelltu til að setja inn í Leiðbeiningar:"
   txt_streszczenie_burzy_name: "Samantekt mynduð af Hugstormun — aðeins til lesturs"
-  btn_opcja_burzy_format:      "{numer}. {tytul}"
+  btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Leiðbeiningar fyrir næsta hluta (sláðu inn 'yfirlit' til að þvinga vistun í Langtímaminni):

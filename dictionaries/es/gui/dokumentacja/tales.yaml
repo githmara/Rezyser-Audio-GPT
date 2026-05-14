@@ -11,7 +11,7 @@
 # po weryfikacji parzystości multisetu markerów.
 # =============================================================================
 
-id: opowiesci
+id: tales
 tresc:
   naglowek: |
     Director de Audio GPT — Módulo de Historias Interactivas ({app.wersja})

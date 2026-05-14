@@ -58,6 +58,10 @@ main:
     zakoncz: "Be&enden\tAlt+F4"
     jezyk_interfejsu: "&Benutzeroberflächensprache"
     opowiesci: "&Geschichten\tCtrl+5"
+    pomoc: '&Hilfe'
+    pomoc_manual: "&Benutzerhandbuch\tF1"
+    pomoc_tales: '&Erzählmodus — Leitfaden'
+    pomoc_dictionaries: '&Wörterbücher — Akzente, Chiffren, KI-Modi'
   menu_status:
     strona_glowna: "Zurück zum Startbildschirm mit Werkzeugbeschreibung und Systemprüfung"
     rezyser: "Öffnet das Regisseur-Modul – Skripte und Prosa mit KI schreiben"
@@ -67,6 +71,10 @@ main:
     zakoncz: "Anwendung schließen"
     jezyk_interfejsu: "Wählen Sie die Sprache der Benutzeroberfläche der Anwendung (Änderung erfordert Neustart)"
     opowiesci: "Öffnet das Geschichten-Modul – interaktive, von KI generierte Zweitperson-Fiktion, gelesen von TTS/Bildschirmleser"
+    pomoc: 'Öffnen Sie die Anwendungsdokumentation im Standard-Textdatei-Handler'
+    pomoc_manual: 'Öffnet das Hauptbenutzerhandbuch (docs/manual in der Schnittstellensprache)'
+    pomoc_tales: 'Öffnet den Leitfaden für den Erzählmodus (docs/tales in der Schnittstellensprache)'
+    pomoc_dictionaries: 'Öffnet die Beschreibung von Akzenten, Chiffren und KI-Modi (docs/dictionaries in der Schnittstellensprache) — für Linguisten ohne Python gedacht'
   btn:
     rezyser: "🎬  &Regisseur"
     poliglota: "🌍  &Polyglott"
@@ -96,6 +104,9 @@ main:
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
 # -----------------------------------------------------------------------------
+  pomoc:
+    blad_tytul: 'Dokumentationsdatei fehlt'
+    brak_pliku: 'Die Datei {sciezka} existiert nicht im Anwendungspaket. Melden Sie einen Fehler im GitHub-Repository — in einem korrekt erstellten Paket enthält der Ordner docs/ das Handbuch / tales / dictionaries in jeder unterstützten Sprache.'
 home:
   panel_name: "Startbildschirm – Startseite"
   welcome_text: |-
@@ -330,10 +341,10 @@ rezyser:
   txt_podglad_name: "Vorschau des gesamten Verlaufs im Speicher – nur lesbar"
   txt_podglad_hint: "(Speicher ist leer – Projekt laden oder neues beginnen)"
   # Brainstorming-Optionen Panel (v15.2)
-  pnl_opcji_burzy_name:        "Panel der Brainstorming-Optionen"
-  lbl_opcji_burzy:             "🌪️ Brainstorming-Optionen — klicke, um in die Anweisungen einzufügen:"
+  pnl_opcji_burzy_name: "Panel der Brainstorming-Optionen"
+  lbl_opcji_burzy: "🌪️ Brainstorming-Optionen — klicke, um in die Anweisungen einzufügen:"
   txt_streszczenie_burzy_name: "Vom Brainstorming erzeugte Zusammenfassung — nur lesbar"
-  btn_opcja_burzy_format:      "{numer}. {tytul}"
+  btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Anweisungen für den nächsten Abschnitt (geben Sie 'Zusammenfassung' ein, um die Speicherung im Langzeitspeicher zu erzwingen):

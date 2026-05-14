@@ -106,7 +106,7 @@ Tämä on nykyisen sukupolven tekoälyn perustavanlaatuinen rajoitus. Tästä sy
 Tämä README on vain projektin arkkitehtoninen luonnos. Jos haluat oppia kehittyneitä tekniikoita AI-harhojen estämiseksi, yhteensopivien puhesyntetisaattoreiden (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices) asennusohjeita, täydellisen kuvauksen Fiolitarinoiden tiloista sekä täydellisen käyttöoppaan, tutustu `docs/`-kansiossa oleviin tiedostoihin:
 
 * `docs/manual.<iso>.txt` — pääasiallinen käyttöohje (kirjoitettu loppukäyttäjälle).
-* `docs/opowiesci.<iso>.txt` — Fiolitarinoiden tilan ohjekirja (interaktiiviset tekstipelit).
+* `docs/tales.<iso>.txt` — Fiolitarinoiden tilan ohjekirja (interaktiiviset tekstipelit).
 * `docs/dictionaries.<iso>.txt` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
 
 Jokainen näistä tiedostoista on saatavilla 9 kielellä — suffiksi `.<iso>.txt` (esim. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

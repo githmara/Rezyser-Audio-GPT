@@ -11,6 +11,7 @@ import os
 import platform
 import subprocess
 import threading
+from pathlib import Path
 
 import wx
 
@@ -36,6 +37,11 @@ ID_TOOL_KONWERTER  = wx.NewIdRef()
 ID_TOOL_MANAGER    = wx.NewIdRef()   # Manager Reguł – nowość w 13.0
 ID_TOOL_OPOWIESCI  = wx.NewIdRef()   # Interaktywne Opowieści – nowość w 15.0
 ID_EXIT            = wx.NewIdRef()
+# Menu Pomoc (15.2): 3 podmenu otwierające docs/<rdzen>.<iso>.txt
+# w domyślnym handlerze .txt. ISO wybierane wg języka interfejsu (i18n).
+ID_HELP_MANUAL       = wx.NewIdRef()
+ID_HELP_TALES        = wx.NewIdRef()
+ID_HELP_DICTIONARIES = wx.NewIdRef()
 
 
 # ---------------------------------------------------------------------------
@@ -590,6 +596,29 @@ class MainFrame(wx.Frame):
                 self._jezyk_menu_ids[int(new_id)] = kod
             menubar.Append(menu_lang, t("main.menu.jezyk_interfejsu"))
 
+        # --- Menu: Pomoc (15.2) — otwiera docs/<rdzen>.<iso>.txt --------
+        # ISO wybierany z i18n.aktualny_jezyk(), rdzeń (manual/tales/
+        # dictionaries) określa _on_pomoc_* handler. Pliki otwierane przez
+        # `os.startfile` (Windows shell association — Notatnik / VS Code
+        # / co użytkownik ma skojarzone z .txt).
+        menu_help = wx.Menu()
+        menu_help.Append(
+            ID_HELP_MANUAL,
+            t("main.menu.pomoc_manual"),
+            t("main.menu_status.pomoc_manual"),
+        )
+        menu_help.Append(
+            ID_HELP_TALES,
+            t("main.menu.pomoc_tales"),
+            t("main.menu_status.pomoc_tales"),
+        )
+        menu_help.Append(
+            ID_HELP_DICTIONARIES,
+            t("main.menu.pomoc_dictionaries"),
+            t("main.menu_status.pomoc_dictionaries"),
+        )
+        menubar.Append(menu_help, t("main.menu.pomoc"))
+
         self.SetMenuBar(menubar)
 
         # Dostępnościowa nazwa paska menu (NVDA odczyta ją po Alt)
@@ -692,6 +721,15 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._on_manager,    id=ID_TOOL_MANAGER)
         self.Bind(wx.EVT_MENU, self._on_opowiesci,  id=ID_TOOL_OPOWIESCI)
         self.Bind(wx.EVT_MENU, self._on_exit,       id=ID_EXIT)
+
+        # Menu: Pomoc — każde podmenu wywołuje `_otworz_dokument` z innym
+        # rdzeniem nazwy pliku w docs/. ISO ustalane wewnątrz funkcji.
+        self.Bind(wx.EVT_MENU, lambda evt: self._otworz_dokument("manual"),
+                  id=ID_HELP_MANUAL)
+        self.Bind(wx.EVT_MENU, lambda evt: self._otworz_dokument("tales"),
+                  id=ID_HELP_TALES)
+        self.Bind(wx.EVT_MENU, lambda evt: self._otworz_dokument("dictionaries"),
+                  id=ID_HELP_DICTIONARIES)
 
         # Menu: Język interfejsu — jeden handler dla wszystkich radio items;
         # rozróżnienie kodu ISO przez `event.GetId()` w `_on_zmien_jezyk`.
@@ -846,6 +884,39 @@ class MainFrame(wx.Frame):
 
     def _on_close(self, event: wx.CloseEvent) -> None:
         event.Skip()  # Pozwól wxPython zniszczyć okno w standardowy sposób
+
+    # ------------------------------------------------------------------
+    # Menu Pomoc: otwieranie dokumentacji w domyślnym handlerze .txt
+    # ------------------------------------------------------------------
+    def _otworz_dokument(self, rdzen: str) -> None:
+        """Otwiera plik `docs/<rdzen>.<iso>.txt` przez Windows shell association.
+
+        Args:
+            rdzen: ``"manual"`` | ``"tales"`` | ``"dictionaries"`` —
+                rdzeń nazwy pliku w ``docs/`` (po refaktorze 15.2 user-facing
+                pliki mają konwencję anglojęzyczną).
+
+        ISO języka brany z ``i18n.aktualny_jezyk()`` — czyli plik otworzy
+        się w tym języku, w którym aktualnie używasz GUI. Jeśli plik nie
+        istnieje (uszkodzona paczka / brak docs/ w trybie deweloperskim
+        przed odpaleniem `generuj_dokumentacje.py`), wyświetla MessageBox
+        z lokalizowanym komunikatem.
+        """
+        iso = i18n.aktualny_jezyk()
+        sciezka = Path(__file__).resolve().parent / "docs" / f"{rdzen}.{iso}.txt"
+        if not sciezka.is_file():
+            wx.MessageBox(
+                t("main.pomoc.brak_pliku", sciezka=str(sciezka)),
+                t("main.pomoc.blad_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            return
+        # os.startfile = Windows shell association (.txt → Notatnik / VS Code
+        # / co użytkownik ma skojarzone). Aplikacja jest Windows-only
+        # (build_release.py + installer.iss), więc bez multiplatformowych
+        # rozgałęzień subprocess.run / xdg-open.
+        os.startfile(str(sciezka))
 
     # ------------------------------------------------------------------
     # Auto-aktualizacja

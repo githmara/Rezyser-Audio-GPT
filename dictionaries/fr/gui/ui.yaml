@@ -58,6 +58,10 @@ main:
     zakoncz: "Quitt&er\tAlt+F4"
     jezyk_interfejsu: "&Langue de l'interface"
     opowiesci: "&Histoires\tCtrl+5"
+    pomoc: 'A&ide'
+    pomoc_manual: "&Manuel d'utilisation\tF1"
+    pomoc_tales: 'Mode &Récit — guide'
+    pomoc_dictionaries: '&Dictionnaires — accents, codes, modes AI'
   menu_status:
     strona_glowna: "Revient à l'écran d'accueil avec la description des outils et System Check"
     rezyser: "Ouvre le module Réalisateur — écriture de scénarios et de prose avec l'IA"
@@ -67,6 +71,10 @@ main:
     zakoncz: "Ferme l'application"
     jezyk_interfejsu: "Sélectionne la langue de l'interface de l'application (le changement nécessite un redémarrage)"
     opowiesci: "Ouvre le module Histoires – fiction interactive à la deuxième personne générée par IA, lue par TTS/lecteur d'écran"
+    pomoc: 'Ouvrir la documentation de l''application dans le gestionnaire de fichiers texte par défaut'
+    pomoc_manual: 'Ouvre le manuel principal (docs/manual dans la langue de l''interface)'
+    pomoc_tales: 'Ouvre le guide du mode Récit (docs/tales dans la langue de l''interface)'
+    pomoc_dictionaries: 'Ouvre la description des accents, codes et modes AI (docs/dictionaries dans la langue de l''interface) — destiné aux linguistes sans Python'
   btn:
     rezyser: "🎬  &Réalisateur"
     poliglota: "🌍  &Polyglotte"
@@ -96,6 +104,9 @@ main:
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
 # -----------------------------------------------------------------------------
+  pomoc:
+    blad_tytul: 'Fichier de documentation absent'
+    brak_pliku: 'Le fichier {sciezka} n''existe pas dans le package de l''application. Signalez un bug dans le dépôt GitHub — dans un package correctement construit, le dossier docs/ contient le manuel / tales / dictionaries dans chaque langue prise en charge.'
 home:
   panel_name: "Panneau de démarrage — Page d'accueil"
   welcome_text: |-
@@ -330,10 +341,10 @@ rezyser:
   txt_podglad_name: "Aperçu de la chronologie complète en mémoire — lecture seule"
   txt_podglad_hint: "(la mémoire est vide — chargez un projet ou commencez-en un nouveau)"
   # Panneau des options de Brainstorming (v15.2)
-  pnl_opcji_burzy_name:        "Panneau des options de Brainstorming"
-  lbl_opcji_burzy:             "🌪️ Options du Brainstorming — clique pour insérer dans Instructions :"
+  pnl_opcji_burzy_name: "Panneau des options de Brainstorming"
+  lbl_opcji_burzy: "🌪️ Options du Brainstorming — clique pour insérer dans Instructions :"
   txt_streszczenie_burzy_name: "Résumé généré par le Brainstorming — lecture seule"
-  btn_opcja_burzy_format:      "{numer}. {tytul}"
+  btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Instructions pour le prochain fragment (tapez « résume » pour forcer la sauvegarde dans la Mémoire à Long Terme) :

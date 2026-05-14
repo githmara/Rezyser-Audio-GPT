@@ -106,7 +106,7 @@ Skrypty `.sh` dla macOS/Linux zostały usunięte w v13.1 — środowisko develop
 Niniejszy README to jedynie zarys architektoniczny projektu. Aby poznać zaawansowane techniki powstrzymywania halucynacji AI, instrukcje instalacji kompatybilnych syntezatorów mowy (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), pełen opis trybów Opowieści z fiolką, oraz kompletny poradnik obsługi, zapoznaj się z plikami w folderze `docs/`:
 
 * `docs/manual.<iso>.txt` — główna instrukcja obsługi (pisana dla użytkownika końcowego).
-* `docs/opowiesci.<iso>.txt` — manual trybu Opowieści (interaktywne gry tekstowe).
+* `docs/tales.<iso>.txt` — manual trybu Opowieści (interaktywne gry tekstowe).
 * `docs/dictionaries.<iso>.txt` — instrukcja dla lingwistów bez Pythona, jak dodawać własne akcenty/szyfry/tryby AI.
 
 Każdy z tych plików dostępny jest w 9 językach — sufiks `.<iso>.txt` (np. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

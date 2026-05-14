@@ -106,7 +106,7 @@ This is a fundamental limitation of the current generation of artificial intelli
 This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
 
 * `docs/manual.<iso>.txt` — main user manual (written for the end user).
-* `docs/opowiesci.<iso>.txt` — Story mode manual (interactive text games).
+* `docs/tales.<iso>.txt` — Story mode manual (interactive text games).
 * `docs/dictionaries.<iso>.txt` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
 
 Each of these files is available in 9 languages — suffix `.<iso>.txt` (e.g., `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).

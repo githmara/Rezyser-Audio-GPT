@@ -58,6 +58,10 @@ main:
     zakoncz: "Ter&mina\tAlt+F4"
     jezyk_interfejsu: "&Lingua dell'interfaccia"
     opowiesci: "&Racconti\tCtrl+5"
+    pomoc: '&Aiuto'
+    pomoc_manual: "&Manuale utente\tF1"
+    pomoc_tales: 'Modalità &Storia — guida'
+    pomoc_dictionaries: '&Dizionari — accenti, cifrari, modalità AI'
   menu_status:
     strona_glowna: "Torna alla schermata iniziale con la descrizione degli strumenti e System Check"
     rezyser: "Apre il modulo Regista – scrittura di script e prosa con AI"
@@ -67,6 +71,10 @@ main:
     zakoncz: "Chiudi l'applicazione"
     jezyk_interfejsu: "Seleziona la lingua dell'interfaccia dell'applicazione (il cambiamento richiede il riavvio)"
     opowiesci: "Apre il modulo Racconti – narrativa interattiva in seconda persona generata da AI, letta da TTS/lettore di schermo"
+    pomoc: 'Apri la documentazione dell''applicazione nel gestore predefinito di file di testo'
+    pomoc_manual: 'Apre il manuale principale (docs/manual nella lingua dell''interfaccia)'
+    pomoc_tales: 'Apre la guida alla modalità Storia (docs/tales nella lingua dell''interfaccia)'
+    pomoc_dictionaries: 'Apre la descrizione di accenti, cifrari e modalità AI (docs/dictionaries nella lingua dell''interfaccia) — destinato ai linguisti senza Python'
   btn:
     rezyser: "🎬  &Regista"
     poliglota: "🌍  &Poliglotta"
@@ -96,6 +104,9 @@ main:
 # -----------------------------------------------------------------------------
 # HOME – panel startowy (HomePanel w main.py)
 # -----------------------------------------------------------------------------
+  pomoc:
+    blad_tytul: 'File di documentazione assente'
+    brak_pliku: 'Il file {sciezka} non esiste nel pacchetto dell''applicazione. Segnala un bug nel repository GitHub — in un pacchetto correttamente costruito, la cartella docs/ contiene manual / tales / dictionaries in ogni lingua supportata.'
 home:
   panel_name: "Pannello iniziale – Pagina principale"
   welcome_text: |-
@@ -330,10 +341,10 @@ rezyser:
   txt_podglad_name: "Anteprima della cronologia completa in memoria – solo lettura"
   txt_podglad_hint: "(la memoria è vuota – carica un progetto o inizia uno nuovo)"
   # Pannello opzioni Brainstorm (v15.2)
-  pnl_opcji_burzy_name:        "Pannello opzioni Brainstorm"
-  lbl_opcji_burzy:             "🌪️ Opzioni del Brainstorm — clicca per inserire nelle Istruzioni:"
+  pnl_opcji_burzy_name: "Pannello opzioni Brainstorm"
+  lbl_opcji_burzy: "🌪️ Opzioni del Brainstorm — clicca per inserire nelle Istruzioni:"
   txt_streszczenie_burzy_name: "Riassunto generato dal Brainstorm — solo lettura"
-  btn_opcja_burzy_format:      "{numer}. {tytul}"
+  btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
     Istruzioni per il prossimo frammento (digita 'riassunto' per forzare il salvataggio nella Memoria a Lungo Termine):
