@@ -5,12 +5,33 @@
 ; dynamicznie tworzony dla każdej wersji; `.gitignore` zawiera wpis `run.bat`).
 #define MyAppExeName "run.bat"
 
+; UWAGA: Ten plik NIE jest wywoływany bezpośrednio przez iscc — `build_release.py`
+; czyta installer.iss i wstrzykuje 3 sekcje dynamicznie (nazwy sekcji
+; w komentarzu zapisuję BEZ nawiasów kwadratowych — split() w
+; build_release.py szuka literalnego `[Section]` i fałszywie matchuje
+; komentarz przed prawdziwą sekcją):
+;   * sekcja Languages       — z `zbierz_jezyki_bazowe()` ∩
+;                              `zbierz_jezyki_z_manualem()` ∩ `INNO_LANG_MAP`
+;                              (kody z `dictionaries/<kod>/podstawy.yaml`
+;                              które mają `docs/manual.<iso>.txt` i oficjalny
+;                              `.isl` w pakiecie Inno Setup); aktualnie 8 jzk
+;                              (en/pl/de/es/fi/fr/it/ru), is pomijany z warningiem.
+;   * sekcja Code            — `function GetManualISO()` z case'ami
+;                              `ActiveLanguage() → ISO`, generowanymi
+;                              z `buduj_blok_kodu_iso(wpisy)`.
+;   * sekcja CustomMessages  — etykiety AdditionalActionsGroup/
+;                              OpenManualTaskDesc/OpenManualRunDesc per jzk,
+;                              z mapy `INNO_MANUAL_MESSAGES_MAP` w build_release.py.
+;
+; Wynik leci do tmp `_installer_tmp.iss` i dopiero przekazywany do `iscc`.
+; Sekcje poniżej to MINIMALNE PLACEHOLDERY (tylko `english`) — żeby
+; `iscc installer.iss` uruchomiony bezpośrednio (sanity check developera)
+; nie zawodził z `Unknown language name "german"` itd. Dodanie języka =
+; (a) wpis w INNO_LANG_MAP, (b) wpis w INNO_MANUAL_MESSAGES_MAP,
+; (c) `dictionaries/<kod>/gui/dokumentacja/manual.yaml`. installer.iss nie
+; wymaga zmian.
 [Languages]
 Name: "english";  MessagesFile: "compiler:Default.isl"
-Name: "polish";   MessagesFile: "compiler:Languages\Polish.isl"
-Name: "italian";  MessagesFile: "compiler:Languages\Italian.isl"
-Name: "russian";  MessagesFile: "compiler:Languages\Russian.isl"
-Name: "finnish";  MessagesFile: "compiler:Languages\Finnish.isl"
 
 [Setup]
 AppId={{12345678-ABCD-1234-ABCD-1234567890AB}
@@ -50,8 +71,9 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 ; v15.2: checkbox „Otwórz instrukcję obsługi po instalacji" — domyślnie zaznaczony.
 ; ISO języka instrukcji wyliczany dynamicznie z ActiveLanguage() przez funkcję
-; GetManualISO() w [Code] (patrz niżej). Fallback do EN dla języków instalatora
-; bez własnego docs/manual.<iso>.txt (np. instalator po angielsku → manual.en.txt).
+; GetManualISO() w sekcji Code (patrz niżej). Fallback do EN dla języków
+; instalatora bez własnego docs/manual.<iso>.txt (np. instalator po angielsku
+; → manual.en.txt).
 Name: "openmanual"; Description: "{cm:OpenManualTaskDesc}"; GroupDescription: "{cm:AdditionalActionsGroup}"
 
 [Run]
@@ -66,32 +88,28 @@ Name: "openmanual"; Description: "{cm:OpenManualTaskDesc}"; GroupDescription: "{
 ; w Excludes w [Files]).
 Filename: "{app}\docs\manual.{code:GetManualISO}.txt"; Description: "{cm:OpenManualRunDesc}"; Flags: shellexec postinstall skipifsilent; Tasks: openmanual
 
+; UWAGA: Sekcje Code (GetManualISO) i CustomMessages poniżej są placeholderami
+; nadpisywanymi przez `build_release.py` dynamicznie (nazwy sekcji w komentarzu
+; BEZ nawiasów kwadratowych — split() szuka literalnie):
+;   * sekcja Code body — generowany z `buduj_blok_kodu_iso(wpisy, kody_z_manualem)`,
+;     mapuje `ActiveLanguage() → kod_iso` dla każdego jzk z Inno-supported listy,
+;     który MA `docs/manual.<iso>.txt`. Reszta → fallback en.
+;   * sekcja CustomMessages — generowana z `buduj_blok_custom_messages(wpisy)`,
+;     iteruje po `INNO_MANUAL_MESSAGES_MAP` (3 etykiety × N jzk).
+;
+; Po co stub: (a) `iscc installer.iss` bezpośrednio (poza pipelineem
+; build_release.py) musi się skompilować bez błędów składniowych — bo iscc
+; parsuje Pascal w sekcji Code i sprawdza CustomMessages cross-reference ze
+; sekcją Languages; (b) developer otwierający installer.iss w repo widzi
+; minimal-but-valid stan funkcjonalny dla EN (jedynego jzk w placeholder
+; Languages obecny u góry).
 [Code]
 function GetManualISO(Param: String): String;
 begin
-  case ActiveLanguage() of
-    'polish':  Result := 'pl';
-    'italian': Result := 'it';
-    'russian': Result := 'ru';
-    'finnish': Result := 'fi';
-  else
-    Result := 'en';
-  end;
+  Result := 'en';
 end;
 
 [CustomMessages]
 english.AdditionalActionsGroup=Additional actions:
 english.OpenManualTaskDesc=Open the user manual after installation
 english.OpenManualRunDesc=Open user manual
-polish.AdditionalActionsGroup=Dodatkowe akcje:
-polish.OpenManualTaskDesc=Otwórz instrukcję obsługi po instalacji
-polish.OpenManualRunDesc=Otwórz instrukcję obsługi
-italian.AdditionalActionsGroup=Azioni aggiuntive:
-italian.OpenManualTaskDesc=Apri il manuale utente dopo l'installazione
-italian.OpenManualRunDesc=Apri il manuale utente
-russian.AdditionalActionsGroup=Дополнительные действия:
-russian.OpenManualTaskDesc=Открыть руководство пользователя после установки
-russian.OpenManualRunDesc=Открыть руководство пользователя
-finnish.AdditionalActionsGroup=Lisätoiminnot:
-finnish.OpenManualTaskDesc=Avaa käyttöohje asennuksen jälkeen
-finnish.OpenManualRunDesc=Avaa käyttöohje

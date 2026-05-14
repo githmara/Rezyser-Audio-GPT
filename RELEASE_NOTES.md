@@ -1,6 +1,117 @@
-# Release Notes — Reżyser Audio GPT 15.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.2 „Wersja Wydawnicza"
 
-*Po fundamencie z 15.0 — moduł „Interaktywne Opowieści" jako drugi główny tryb — wersja 15.1 dojrzewa Opowieści w trzech wymiarach: (a) gracz dostaje pełną kontrolę nad regułami świata przez nowe edytowalne pole „Zasady świata" persistowane razem z grą; (b) wszystkie 9 wdrożonych języków otrzymuje natywne prompty systemowe LLM (zamknięcie tematu fallbacku do PL z 15.0); (c) model AI dobiera się twardo z trybu (gpt-4o dla Wyborów/Mniejszego zła, gpt-4o-mini dla Swobodnego/Burzy) — koniec z `/ustawienia` jako globalnym overridem. Plus konwerter wyłapuje znaczniki tur z Opowieści i grupuje je po 5 jako sceny audiobooka.*
+*Release wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 15.2 — minor release (motyw przewodni: domknięcie user-facing — menu Pomoc, README 9 jzk, Inno akcja, fiolka w Mniejszym Złu)
+
+*Punkt wyjścia: v15.1 (62d18fa) → 16 commitów na `main` realizujących dziesięć równoległych wątków: (1) fiolka task #1; (2) JSON prompts Reżysera + persystencja task #2 (4 fazy); (3) refactor docs YAML + autotłumacz `--klucz` task #3; (4) Tiflotecnia Voices content + bot tiflotecnia-patch task #4 + #8; (5) Inno akcja post-install task #5; (6) README wielojęzyczne 9 jzk task #6; (7) migracja dictionaries.yaml na dict-schemat + sekcja Opowieści task #9; (8) menu Pomoc + refaktor opowiesci→tales task #10; (9) bug pl/podstawy.yaml (Ś); (10) fix `.github` exclude z paczki release.*
+
+### TL;DR
+
+15.2 zamyka serię „polish wszystkiego co user-facing", którą zostawiliśmy świadomie po 15.0/15.1 (one koncentrowały się na silniku Opowieści, ten release koncentruje się na codzienności użytkownika):
+
+**Fiolka w trybie Mniejsze Zło** (nowość) — po czterech turach gry w polu wyborów pojawia się dodatkowa ZERO-numerowana opcja „Odkorkuj fiolkę" i zostaje do końca rozgrywki jako reusable wybór. Działanie celowo nieprzewidywalne: ~60% szkodliwe (zatruwa/kaleczy/oślepia), ~30% zaburza percepcję/ducha (halucynacje/zmieniona mowa/panika), ~10% rzadko-korzystne (chwilowe wzmocnienie/pomocny duch/kluczowa informacja). Rozkład wymusza Python (`random.choices` po stronie aplikacji), LLM dostaje gotowy seed `{kategoria, opis}` i jedynie go narracjonalizuje — model nie ma jak „wymyślić" zbawiennego skutku poza losowaniem. Anti-deus-ex-machina: nawet sięgnięcie po fiolkę w momencie skrajnej beznadziei zwykle pogarsza sytuację, czasem po pierwszej z 60%-szkodliwych dawek już nigdy nie wrócisz.
+
+**Menu Pomoc** (czwarte menu w menubar po Narzędzia/Plik/Język) — 3 podmenu otwierające `docs/manual.<iso>.txt` (F1), `docs/tales.<iso>.txt`, `docs/dictionaries.<iso>.txt` w domyślnym handlerze .txt (Notatnik/VS Code/co użytkownik ma skojarzone). ISO wybiera się dynamicznie z `i18n.aktualny_jezyk()` — czyli plik otwiera się w tym języku, w którym aktualnie używasz GUI. Brak pliku → MessageBox z lokalizowanym komunikatem. Akceleratory ALT zlokalizowane per jzk: `Po&moc` (PL Alt+M, nie kolizjuje z `&Plik=Alt+P`), `&Help` (EN), `&Hilfe` (DE), `A&ide` (FR), `Ay&uda` (ES), `&Aiuto` (IT), `&Ohje` (FI), `&Hjálp` (IS), `&Помощь` (RU).
+
+**README wielojęzyczne 9 jzk** — refaktor z prostego dwujęzycznego pliku (PL ręczny + plan na EN mirror) na pełny generowany szablon w 9 językach. `dictionaries/<kod>/gui/dokumentacja/readme.yaml` z 13 sekcjami → `readme.md` (EN, kanoniczny GitHub landing bez sufiksu ISO przez nowy `smart_en` mode w `generuj_dokumentacje.KONFIG_SZABLONOW`) + 8 wariantów `readme.<iso>.md`. Każda wersja ma blok „Other languages:" z linkami markdown do pozostałych 8 jzk. Treść zaktualizowana do v15.2: tryby Opowieści, fiolka, Tiflotecnia Voices, wielojęzyczność (9 jzk), poprawione nazwy plików (run.bat zamiast Uruchom_Rezysera.bat, setup_dev.bat zamiast skonfiguruj_dev.bat, docs/manual.<iso>.txt zamiast instrukcja.txt).
+
+**Inno installer „Otwórz instrukcję obsługi" po instalacji** (`[Tasks] openmanual` + `[Run]` z flagami `shellexec postinstall skipifsilent`). Domyślnie zaznaczone, na ekranie Finish. Plik wybierany dynamicznie funkcją `GetManualISO()` w `[Code]` przez `ActiveLanguage()` — instalator PL → `manual.pl.txt`, instalator DE → `manual.de.txt`, instalator EN → `manual.en.txt`, itd. Wspierane natywnie 8 z 9 wdrożonych jzk (en/pl/de/es/fi/fr/it/ru — wszystkie z oficjalnym `.isl` w pakiecie Inno Setup 6); tylko `is` (islandzki) jest pomijany przez `build_release.py::buduj_wpisy_inno()` z warningiem `⚠ Skipping language 'is'` (brak `Icelandic.isl` w oficjalnym pakiecie). Etykiety menu Inno w 8 jzk (`AdditionalActions` + opis taska + opis runa) w `[CustomMessages]`.
+
+**Rebrand Vocalizer → Tiflotecnia Voices for NVDA** (kontekst: Nuance Vocalizer poszedł do lamusa wraz z 32-bitowymi bibliotekami w NVDA 2026.1; Cerrence przekompilował głosy na 64-bity, Tiflotecnia wydała je pod nową nazwą jako `.nvda-addon` w NVDA Add-on Store). Rozdział „Tiflotecnia Voices for NVDA" w manualu (9 jzk) z procedurą migracji + alarm o krytycznym haczyku detekcji języka (override per-litera wygrywa pierwszym poziomem nad ISO `lang=fi`, w obrębie tego samego alfabetu) + diagnostyczny patch wysłany do deweloperów Tiflotecnia. **Bot tiflotecnia-patch** w GitHub Actions: użytkownik otwiera issue z labelem `tiflotecnia-patch` + emailem w treści, bot wysyła patcha na podany adres, redaktuje body issue (usunięcie emaila), zamyka i locka issue — wszystko z domyślnym `secrets.GITHUB_TOKEN`, bez PAT.
+
+**JSON prompts Reżysera** (refactor inżynierski) — Burza Mózgów zamiast generować free-form tekst z linią „[Reżyserze: rozważ X]" zwraca strukturyzowany JSON `{opcje: [{tytul, opis, cel_sceny}, ...], streszczenie?: str}`. Python dokleja kontekstualnie linie reżyserskie + dyrektywę z `dictionaries/<jzk>/rezyser/tryb_burza.yaml::doklejka_celu_sceny`, LLM nie może ich naruszyć ani wymyślić własnych. Nowy panel opcji Burzy w GUI Reżysera (`_pnl_opcji_burzy` w `gui_rezyser.py`) z 3 przyciskami + opcjonalnym TextCtrl streszczenia; klik wstawia `[CEL SCENY]: <cel_sceny>` + doklejkę do pola Instrukcji + focus, NIE wysyła automatycznie. Persystencja w `runtime/skrypty/<nazwa>.brainstorm.json` (folder współdzielony z `.mode` dla DRY metadanych) — między wygenerowaniem Burzy a wysyłką prompta produkcyjnego (Skrypt/Audiobook), wtedy GUI woła `usun_brainstorm()`. Po wczytaniu projektu `wczytaj_brainstorm()` rebuilduje panel.
+
+**Refaktor docs YAML na sekcje + surgical batch translation** — szablony `dictionaries/<kod>/gui/dokumentacja/*.yaml` od v15.2 mają `tresc: { klucz_sekcji: |\n... }` zamiast jednego wielkiego block-scalar `|`. Manual.yaml ma 25 sekcji, opowiesci/tales.yaml ma 12, dictionaries.yaml ma 13 (nowa sekcja `co_to_tryb_opowiesci` opisująca drugi główny tryb). Nowy flag `--klucz <key1,key2>` w `buduj_wielojezyczne_docs.py` dla surgical update analogicznie do `buduj_wielojezyczne_ui.py` — tłumaczysz tylko zmienioną sekcję (~2 kB) zamiast całego manuala (~68 kB), tańsze API-wise i bez ryzyka regresu już-naprawionych sekcji w innych częściach pliku. Generator `generuj_dokumentacje._scal_tresc_sekcjami` jest backward-compatible (rozpoznaje stary string-schemat i nowy dict-schemat).
+
+**Refaktor `opowiesci` → `tales` w user-facing files** — konwencja braku polskiego w plikach typowo end-userowych (jak `manual.<iso>.txt` i `dictionaries.<iso>.txt` już są EN). 9× `git mv opowiesci.yaml → tales.yaml` + zmiana `id:` + grep podmiana `docs/opowiesci.<iso>.txt` → `docs/tales.<iso>.txt` w sekcji dokumentacja każdego readme.yaml. **NIE rusza wewnętrznych modułów Python** (`gui_opowiesci.py`, `opowiesci_ai.py`, folder `dictionaries/<kod>/opowiesci/` z YAMLami trybów gry, klucz YAML `co_to_tryb_opowiesci` w dictionaries.yaml, etykieta modułu GUI „Opowieści" w menu Narzędzia Ctrl+5).
+
+**Fix bug pl/podstawy.yaml** — alfabet polski miał deklarowane 35 znaków (zgodnie z klasycznym ujęciem PL alfabet + Q,V,X), faktycznie miał 34 (brakowało `Ś`). Dodanie `Ś` po `S`, przed `T` → 35 znaków matchuje deklarację w manualu i fallback w `core_poliglota._algo_cezar`. Plus poprawiono kolejność końca z błędnego `AĄBC…ZŻŹ` na poprawne `AĄBC…ZŹŻ` (Ź przed Ż w polskim alfabecie).
+
+15.2 to release **domykający tematy zaległe po serii 15.x** (fiolka odłożona z 15.0/15.1, menu Pomoc nigdy wcześniej, README wielojęzyczne nigdy wcześniej, Inno akcja nigdy wcześniej, JSON prompts refactor odłożony z 13.x) — następna duża zmiana (v15.3+) jeszcze nieplanowana.
+
+### Co nowego dla użytkownika końcowego
+
+#### Fiolka w trybie Mniejsze Zło
+- **Aktywacja**: po `fiolka.prog_aktywacji_tur` (default 4) turach w trybie Mniejsze Zło pojawia się dodatkowa opcja `0. Odkorkuj fiolkę` w polu wyborów. Pozostaje tam do końca rozgrywki — reusable wybór.
+- **Rozkład skutków**: ~60% szkodliwy (poison/wound/blind), ~30% perception/spirit disturbance (hallucination/altered speech/panic), ~10% rare_beneficial (temporary boost/helpful spirit/key info). Wagi w `dictionaries/<jzk>/opowiesci/tryb_mniejsze_zlo.yaml::fiolka.wagi_skutkow`, edytowalne bez programowania.
+- **Anti-deus-ex-machina**: Python losuje rozkład PRZED wywołaniem LLM-a, model dostaje seed `{kategoria, opis}` jako wskazówkę do narracjonalizacji. Nie może wymyślić zbawiennego skutku, gdy losowanie powiedziało „60% szkodliwy".
+- **Stłuczenie fiolki**: decyzja LLM-a w narracji — jeśli ustawi `stan.fiolka.zniszczona=True`, fiolka znika z wyborów do końca gry. Pierwsze otwarcie może być ostatnim.
+
+#### Menu Pomoc (Alt+M w PL)
+- **F1** otwiera `docs/manual.<iso>.txt` — główny manual.
+- **Tryb Opowieści — przewodnik** otwiera `docs/tales.<iso>.txt`.
+- **Słowniki — akcenty, szyfry, tryby AI** otwiera `docs/dictionaries.<iso>.txt` — opis paczki słowników pisany dla lingwistów bez Pythona.
+- Plik wybierany dynamicznie z języka GUI (zmiana języka w menu Język interfejsu → następne kliknięcie Pomoc otwiera plik w nowym jzk po restarcie).
+
+#### Inno installer — Otwórz instrukcję obsługi po instalacji
+- Checkbox `Otwórz instrukcję obsługi` (lub odpowiednik per jzk instalatora) na ekranie Finish, domyślnie zaznaczony.
+- Plik otwierany przez Windows shell association (.txt → Notatnik/VS Code).
+- Działa natywnie w 8 wspieranych przez Inno Setup językach (en/pl/de/es/fi/fr/it/ru) — w każdym z nich `GetManualISO()` zwraca odpowiednie ISO, więc kliknięcie Finish otwiera `manual.<iso>.txt`. Islandzki (IS) jest pomijany przez `build_release.py::buduj_wpisy_inno()` z warningiem (brak `Icelandic.isl` w oficjalnym pakiecie Inno Setup), więc instalator nigdy nie wystartuje w trybie 'icelandic'.
+- `installer.iss` nie jest wywoływany bezpośrednio przez iscc — `build_release.py` czyta plik, wycina sekcję `[Languages]…[Setup]` i wstawia dynamicznie wygenerowaną listę z `zbierz_jezyki_bazowe()` + `INNO_LANG_MAP`. Sekcja `[Languages]` w repo to placeholder (5 jzk) dla podglądu, faktyczna lista jest zawsze 8 jzk obsługiwanych przez Inno.
+
+#### README wielojęzyczne na GitHubie
+- `readme.md` — wersja EN, kanoniczny GitHub landing (renderowany domyślnie na stronie repo).
+- `readme.pl.md` / `readme.de.md` / `readme.es.md` / `readme.fi.md` / `readme.fr.md` / `readme.is.md` / `readme.it.md` / `readme.ru.md` — pozostałe 8 wersji.
+- Każda wersja ma na początku blok `**Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · ...` z linkami do pozostałych 8 wersji jzk.
+
+#### Tiflotecnia Voices for NVDA
+- Rozdział „Tiflotecnia Voices for NVDA" w manualu (9 jzk) opisuje migrację z Vocalizera: instalacja jako `.nvda-addon` w Add-on Store, procedura upgrade w niższej cenie, lista dostępnych głosów (rozszerzenie biblioteki Vocalizera).
+- Alarm „Krytyczny haczyk Tiflotecnia Voices: zepsuta detekcja języka" opisuje znaną regresję (override per-litera wygrywa pierwszym poziomem priorytetów nad ISO `lang=fi`, w obrębie tego samego alfabetu).
+- **Bot tiflotecnia-patch** w repo (GitHub Actions, label `tiflotecnia-patch`): otwórz issue z labelem + adresem email w treści → bot wysyła patcha na podany adres + redaktuje body issue + zamyka i locka issue (workflow w `.github/workflows/patch-bot.yml`).
+
+#### Refaktor opowiesci → tales w plikach user-facing
+- `docs/opowiesci.<iso>.txt` → `docs/tales.<iso>.txt` — konwencja angielska analogicznie do `manual.<iso>.txt` i `dictionaries.<iso>.txt`.
+- **NIE rusza** wewnętrznych elementów (folder `dictionaries/<kod>/opowiesci/` z trybami gry, etykieta przycisku/menu „Opowieści" w GUI, klucz YAML `co_to_tryb_opowiesci` w dictionaries.yaml). To zmiana czysto na poziomie nazw plików dokumentacji.
+
+### Pod maską
+
+#### JSON prompts Reżysera
+- `opowiesci_ai.generuj_burze()` zwraca `WynikBurzy(opcje: list[OpcjaBurzy], streszczenie: str | None)`. Stary `generuj_fragment()` z free-form tekstem zachowany jako fallback dla przepisów spoza `id="burza"` z `zapis_do_pliku=false`.
+- `SCHEMA_BURZA` w `opowiesci_ai.py` definiuje JSON schema: `opcje[1-5]` (yaml mówi 3 ale halucynacja 2 nie powinna blokować GUI), każda opcja ma `tytul` + `opis` + `cel_sceny`. Sufiksy alarm/streszczenie wymuszają opcjonalny klucz `streszczenie` (zastąpił wcześniejszy tag `<STRESZCZENIE>...</STRESZCZENIE>`); sufiks optymalizacja jawnie zakazuje klucza.
+- **Persystencja `.brainstorm.json`** w `runtime/skrypty/<nazwa>.brainstorm.json` (DRY z `.mode` w tym samym folderze). Plik istnieje TYLKO między wygenerowaniem Burzy a wysyłką prompta produkcyjnego (Skrypt/Audiobook), wtedy GUI woła `usun_brainstorm()`. Po wczytaniu projektu `wczytaj_brainstorm()` rebuilduje panel opcji w GUI.
+- **Dispatch w GUI**: `_wyslij_worker` rozróżnia `przepis.id == "burza"` → `rai.generuj_burze` (zwraca `WynikBurzy`) vs pozostałe → istniejący `rai.generuj_fragment`. Stary `_on_wyslij_done_burza` zachowany jako fallback.
+- **GUI**: nowy `_pnl_opcji_burzy` (BLOK E.1b w `gui_rezyser.py`) z 3 przyciskami + opcjonalnym TextCtrl streszczenia. Klik opcji wstawia `[CEL SCENY]: <cel_sceny>\n\n<doklejka>` do pola Instrukcji + focus. NIE wysyła automatycznie — gracz dopisuje własne uwagi reżyserskie w linijce `[Reżyserze: ...]` przed wysyłką.
+
+#### Refactor docs YAML
+- `dictionaries/<kod>/gui/dokumentacja/*.yaml::tresc` zmienione ze stringa block-scalar `|` na dict-of-sections `{ klucz: |, ... }`. Generator `generuj_dokumentacje._scal_tresc_sekcjami` rozpoznaje oba schematy (backward-compat dla starych yamlów).
+- Granularność sekcji: `manual.yaml` ma 25 (intro + 4 kroki + 12 podsekcji KROK 5 + 3 dalsze kroki + NVDA + 4 changelog), `tales.yaml` ma 12 (KROK 1-10 + intro + problemy), `dictionaries.yaml` ma 13 (8 underline-sekcji + 3 POZIOM 1/2/3 + intro + zakończenie + nowa sekcja `co_to_tryb_opowiesci`).
+- **Surgical update przez `--klucz`** w `buduj_wielojezyczne_docs.py`: wczytuje istniejący docelowy yaml, podmienia TYLKO wybrane sekcje, scala z resztą, zapisuje. Wymaga że plik docelowy jest w nowym dict-schemacie (po pierwszym FULL retłumaczeniu). Cache wznawiania per-sekcja w `runtime/` (`temp_manual_krok_5_tiflotecnia_pl_to_en_*.jsonl`) — częściowy progress jednej sekcji nie psuje innych.
+
+#### Generator: KONFIG_SZABLONOW (per-szablon override)
+- `generuj_dokumentacje.KONFIG_SZABLONOW` mapuje id_szablonu → `{katalog, rozszerzenie, iso_w_nazwie}`. Default zachowuje `docs/<id>.<iso>.txt`. Wpis dla `readme` przekierowuje na `ROOT/<id>.<iso>.md` z trybem `iso_w_nazwie: smart_en` (en bez sufiksu ISO → `readme.md` jako GitHub landing).
+- Nowy placeholder `{liczba_trybow_opowiesci}` w `_zbuduj_placeholdery_globalne` — analogiczny do `{liczba_trybow_rezysera}`, liczy pliki w `dictionaries/pl/opowiesci/`.
+
+#### Bug pl/podstawy.yaml: brakujące Ś
+- `dictionaries/pl/podstawy.yaml::alfabet` miał 34 znaki: `AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSTUVWXYZŹŻ` (brakowało Ś). Manual mówił 35, `core_poliglota._algo_cezar` fallback też miał 34. Dodanie `Ś` po `S`, przed `T` → 35 znaków matchuje deklarację. Plus poprawiono kolejność końca z błędnego `…ZŻŹ` na `…ZŹŻ`.
+- Skutek dla użytkownika: jeśli ktoś zaszyfrował tekst polskim Cezarem na starszej wersji aplikacji (alfabet 34) i będzie chciał odszyfrować w v15.2 (alfabet 35), wynik dla tekstów z `Ś` rozjedzie się o jeden indeks. Bardzo wąski edge case (kto trzyma zaszyfrowane teksty z czasów v15.1?), ale warto wiedzieć.
+
+#### Bot tiflotecnia-patch w GitHub Actions
+- `.github/workflows/patch-bot.yml` — workflow odpalający się na `issues.opened` + `issues.labeled` jeśli label `tiflotecnia-patch`. Kroki: (1) Python skrypt `send_patch.py` wyciąga email z body issue regexpem, jeśli brak → komentuje issue „Nie znalazłem adresu email — uzupełnij proszę" i zostawia OPEN; (2) jeśli email jest → wysyła patch przez Gmail SMTP_SSL, redaktuje body issue (usunięcie emaila), zamyka, lockuje. Wszystko z domyślnym `secrets.GITHUB_TOKEN` (issues: write) + `secrets.SMTP_USER` + `secrets.SMTP_PASS` (Gmail App Password).
+- **Decyzja architektoniczna**: patch Tiflotecnia jest proprietary (`tiflotecnia.com` w manifest.ini, brak GPL/MIT, brak publicznego repo upstream) — redystrybucja zmodyfikowanych plików `.py` jest nielegalna. Dystrybucja przez prywatny email zamiast Gist/repo. Manual wprost mówi „zakładamy że masz ważną licencję, nie weryfikujemy".
+
+#### build_release.py — dynamiczne wstrzykiwanie 3 sekcji do tmp installer.iss
+- `installer.iss` w repo to **placeholder z minimalnymi sekcjami EN-only** (sanity check przy `iscc installer.iss` bezpośrednio). Pełne 3 sekcje (`[Languages]`, `[Code]::GetManualISO`, `[CustomMessages]`) są wstrzykiwane do tmp `_installer_tmp.iss` przez `build_release.py::main()` przed wywołaniem `iscc`. Idea: cała logika multi-language w jednym miejscu (Python), dodawanie nowego języka nie wymaga ręcznej edycji `.iss`.
+- Wymagania na nowy język: (a) `dictionaries/<kod>/podstawy.yaml` (kryterium `zbierz_jezyki_bazowe`); (b) `dictionaries/<kod>/gui/dokumentacja/manual.yaml` (kryterium `zbierz_jezyki_z_manualem` po regen); (c) wpis w `INNO_LANG_MAP` (mapa kod-ISO → para `(inno_nazwa, .isl)`, pre-populated 30 jzk z oficjalnej dystrybucji Inno Setup 6); (d) wpis w `INNO_MANUAL_MESSAGES_MAP` (pre-populated dla wszystkich 30 jzk z `INNO_LANG_MAP` — zachowawcze tłumaczenia 3 etykiet menu Pomoc per jzk, native speakerzy mogą zgłaszać szlif GitHub issue).
+- **Smart filter printowy w `buduj_wpisy_inno`**: warning `⚠ Skipping language 'X': ...` leci TYLKO dla języków, które mają już folder `dictionaries/<kod>/` (czyli paczka istnieje, ale Inno jej nie obsługuje albo brakuje `.isl` w lokalnej instalacji — np. obecne ostrzeżenie dla `is`). Dla 22 jzk obecnych w mapach Pythona ale BEZ paczki w `dictionaries/` — `zbierz_jezyki_bazowe()` ich w ogóle nie zwraca, więc warning by leciał false-positive („pomijam czeski, którego nigdy nie miałeś"). Mapa nadmiarowa żyje cicho, pełni rolę pre-populated future-proof — dodanie czeskiej paczki kiedyś w przyszłości natychmiast aktywuje natywne etykiety Inno bez modyfikacji Python.
+- **Kryterium dwustopniowe**: język wchodzi do tmp installer'a tylko gdy ma JEDNOCZEŚNIE (a) folder `dictionaries/<kod>/` + (b) `docs/manual.<iso>.txt` istnieje fizycznie (po regen docs w kroku wcześniejszym buildu). Sam `podstawy.yaml` nie wystarcza — manual musi być w paczce, inaczej akcja „Otwórz instrukcję obsługi" w instalatorze otworzy nieistniejący plik z user-friendly fallback'iem (brzydko).
+
+### Breaking changes / migracja
+
+#### opowiesci → tales w docs/
+- `docs/opowiesci.<iso>.txt` przestaje istnieć w paczce v15.2. Zastąpione przez `docs/tales.<iso>.txt`.
+- Skrypty użytkowników, które otwierały `docs/opowiesci.pl.txt` przez bezwzględną ścieżkę, muszą zostać zaktualizowane. Skrypty używające menu Pomoc lub Inno installera otwierającego instrukcję — bez zmian (działają z nową nazwą).
+
+#### opowiesci.yaml → tales.yaml w paczce słowników
+- `dictionaries/<kod>/gui/dokumentacja/opowiesci.yaml` przestaje istnieć — zastąpione przez `tales.yaml` w każdej z 9 paczek. Lingwiści, którzy fork'owali repo i dorabiali własne tłumaczenia dokumentacji trybu Opowieści, muszą przemianować swoje pliki.
+
+#### Folder `dictionaries/<kod>/opowiesci/` — bez zmian
+- Wewnętrzny folder z YAMLami trybów gry (tryb_wyborow.yaml, tryb_mniejsze_zlo.yaml, tryb_swobodny.yaml, tryb_burza.yaml, baza.yaml, cinematic_warning.yaml, streszczenie.yaml, zaczatki.yaml) **nie jest przemianowany** — to pliki konfiguracji silnika narracyjnego, manipulowane przez Manager Reguł, nie pojawiają się w paczce end-userowej jako pliki dokumentacji.
+
+#### docs/dictionaries.<iso>.txt — wskazówka o Cezarze v15.2
+- Sekcja „Co to jest szyfr?" → bullet „Cifrado César (klasyczny)" w `dictionaries.<iso>.txt` (9 jzk) ma teraz lokalny alfabet zgodny z faktycznym `<kod>/podstawy.yaml`. Wcześniej (do v15.1) trzymał stary opis „alfabet polski (AĄBCĆ…ZŻŹ, 35 znaków)" wbrew temu, że każda paczka ma własny lokalny alfabet (DE: 29, IT: 21, RU: 59 itd.). Dla użytkownika oznacza to, że szyfrowanie tekstu polskim Cezarem nadal daje wynik na 35-znakowym alfabecie polskim, ale opis w manualu zgadza się ze stanem faktycznym kodu.
 
 ---
 

@@ -124,6 +124,297 @@ def zbierz_jezyki_bazowe() -> list[str]:
     return kody
 
 
+def zbierz_jezyki_z_manualem(kody: list[str]) -> list[str]:
+    """Filtr `kody` zostawiając tylko te, dla których istnieje docs/manual.<iso>.txt.
+
+    Sens: język bazowy `dictionaries/<kod>/podstawy.yaml` to konieczność, ale
+    sam fakt jego obecności nie wystarcza, żeby instalator otwarł manual po
+    instalacji — `docs/manual.<iso>.txt` musi faktycznie istnieć w paczce.
+    Dlaczego dwa odrębne kryteria: ktoś może dorzucić paczkę `podstawy.yaml`
+    do `dictionaries/cs/` (np. czeski) zanim dotłumaczy `gui/dokumentacja/
+    manual.yaml` przez `buduj_wielojezyczne_docs.py`. Wtedy `zbierz_jezyki_bazowe`
+    zwróci `cs`, generator wyrzuci warning „pusty manual" ale i tak wytworzy
+    plik, a Inno installer próbujący otworzyć `manual.cs.txt` po instalacji
+    pokaże user-friendly tekst typu "brak danych w sekcji X" — średnio
+    elegancko. Lepiej: jeśli plik manual nie istnieje fizycznie, pomiń ten
+    język w mapie Inno (instalator wystartuje w fallbacku en).
+
+    Wywoływane PO `generuj_dokumentacje.generuj()` (krok 6 w main),
+    żeby sprawdzenie istnienia odbywało się na świeżo wygenerowanych
+    plikach, nie na potencjalnie nieaktualnych z poprzedniego buildu.
+    """
+    docs_dir = Path(__file__).parent / "docs"
+    z_manualem: list[str] = []
+    for kod in kody:
+        manual_path = docs_dir / f"manual.{kod}.txt"
+        if manual_path.is_file():
+            z_manualem.append(kod)
+        else:
+            print(f"   ⚠ Skipping language '{kod}' from Inno installer: "
+                  f"'{manual_path.name}' missing in docs/ "
+                  "(install `dictionaries/<kod>/gui/dokumentacja/manual.yaml` "
+                  "and rerun generation).")
+    return z_manualem
+
+
+# =============================================================================
+# Mapa etykiet CustomMessages dla WSZYSTKICH 30 jzk obecnych w `INNO_LANG_MAP`
+# (1:1 z oficjalnymi paczkami Inno Setup 6 — english + 29 z Languages/).
+# Pre-populated dla spójności:
+# dodanie nowej paczki `dictionaries/<iso>/` przy istniejącym wpisie tu daje
+# natywne etykiety od razu, bez modyfikacji build_release.py.
+#
+# Każdy wpis to:
+#   inno_nazwa_jezyka → dict z 3 etykietami:
+#     * AdditionalActionsGroup — nagłówek sekcji „Additional Tasks" obok
+#       desktopicon (konwencja Inno: z dwukropkiem na końcu).
+#     * OpenManualTaskDesc — etykieta CHECKBOX'a na stronie „Select
+#       Additional Tasks", domyślnie zaznaczona (Tasks: openmanual).
+#     * OpenManualRunDesc — etykieta CHECKBOX'a na stronie „Finish"
+#       (Flags: postinstall), ten sam task ale krótszy wariant.
+#
+# Inno Setup w czasie buildu używa wpisu odpowiadającego językowi instalatora
+# wybranemu przez użytkownika; jeśli wpisu zabraknie — fallback do english.*.
+# Po rozszerzeniu na pełne 30 jzk, fallback (teoretycznie) nigdy nie powinien
+# wystrzelić — chyba że ktoś doda nowy język do `INNO_LANG_MAP` zapominając
+# tu dorzucić etykiet.
+#
+# Smart-filter w `buduj_blok_custom_messages`: iterujemy po `wpisy` (czyli
+# tylko jzk wybrane przez `buduj_wpisy_inno` jako Inno-supported i obecne
+# w `dictionaries/<kod>/`). Mapa nadmiarowa dla 22 jzk bez paczki (cs/sk/sv
+# itd. — z 30 w mapie minus aktualne 8 obsługiwanych: en/pl/de/es/fi/fr/it/ru)
+# ŻYJE TU CICHO — nigdy nie generuje wpisu w [CustomMessages] tmp
+# installer'a, bo `buduj_blok_custom_messages` go po prostu nie odwiedza.
+# Żaden warning nie leci, bo brak folderu `dictionaries/<iso>/` jest stanem
+# domyślnym, nie problemem.
+#
+# Tłumaczenia idiomatyczne robione zachowawczo (proste słowa, nie próby
+# literackie). Native speakerzy mogą zgłaszać szlif przez GitHub issue;
+# fallback do english zawsze dostępny.
+INNO_MANUAL_MESSAGES_MAP: dict[str, dict[str, str]] = {
+    "english": {
+        "AdditionalActionsGroup": "Additional actions:",
+        "OpenManualTaskDesc":     "Open the user manual after installation",
+        "OpenManualRunDesc":      "Open user manual",
+    },
+    "arabic": {
+        "AdditionalActionsGroup": "إجراءات إضافية:",
+        "OpenManualTaskDesc":     "افتح دليل المستخدم بعد التثبيت",
+        "OpenManualRunDesc":      "افتح دليل المستخدم",
+    },
+    "armenian": {
+        "AdditionalActionsGroup": "Լրացուցիչ գործողություններ․",
+        "OpenManualTaskDesc":     "Բացել օգտատիրոջ ուղեցույցը տեղադրումից հետո",
+        "OpenManualRunDesc":      "Բացել օգտատիրոջ ուղեցույցը",
+    },
+    "brazilianportuguese": {
+        "AdditionalActionsGroup": "Ações adicionais:",
+        "OpenManualTaskDesc":     "Abrir o manual do usuário após a instalação",
+        "OpenManualRunDesc":      "Abrir o manual do usuário",
+    },
+    "bulgarian": {
+        "AdditionalActionsGroup": "Допълнителни действия:",
+        "OpenManualTaskDesc":     "Отвори ръководството за потребителя след инсталацията",
+        "OpenManualRunDesc":      "Отвори ръководството за потребителя",
+    },
+    "catalan": {
+        "AdditionalActionsGroup": "Accions addicionals:",
+        "OpenManualTaskDesc":     "Obre el manual d'usuari després de la instal·lació",
+        "OpenManualRunDesc":      "Obre el manual d'usuari",
+    },
+    "corsican": {
+        "AdditionalActionsGroup": "Azzioni supplementari:",
+        "OpenManualTaskDesc":     "Apri u manuale di l'utilizatore dopu l'installazione",
+        "OpenManualRunDesc":      "Apri u manuale di l'utilizatore",
+    },
+    "czech": {
+        "AdditionalActionsGroup": "Další akce:",
+        "OpenManualTaskDesc":     "Otevřít uživatelskou příručku po instalaci",
+        "OpenManualRunDesc":      "Otevřít uživatelskou příručku",
+    },
+    "danish": {
+        "AdditionalActionsGroup": "Yderligere handlinger:",
+        "OpenManualTaskDesc":     "Åbn brugervejledningen efter installation",
+        "OpenManualRunDesc":      "Åbn brugervejledningen",
+    },
+    "dutch": {
+        "AdditionalActionsGroup": "Aanvullende acties:",
+        "OpenManualTaskDesc":     "Open de gebruikershandleiding na de installatie",
+        "OpenManualRunDesc":      "Open de gebruikershandleiding",
+    },
+    "finnish": {
+        "AdditionalActionsGroup": "Lisätoiminnot:",
+        "OpenManualTaskDesc":     "Avaa käyttöohje asennuksen jälkeen",
+        "OpenManualRunDesc":      "Avaa käyttöohje",
+    },
+    "french": {
+        "AdditionalActionsGroup": "Actions supplémentaires :",
+        "OpenManualTaskDesc":     "Ouvrir le manuel d'utilisation après l'installation",
+        "OpenManualRunDesc":      "Ouvrir le manuel d'utilisation",
+    },
+    "german": {
+        "AdditionalActionsGroup": "Zusätzliche Aktionen:",
+        "OpenManualTaskDesc":     "Benutzerhandbuch nach der Installation öffnen",
+        "OpenManualRunDesc":      "Benutzerhandbuch öffnen",
+    },
+    "hebrew": {
+        "AdditionalActionsGroup": "פעולות נוספות:",
+        "OpenManualTaskDesc":     "פתח את מדריך המשתמש לאחר ההתקנה",
+        "OpenManualRunDesc":      "פתח את מדריך המשתמש",
+    },
+    "hungarian": {
+        "AdditionalActionsGroup": "További műveletek:",
+        "OpenManualTaskDesc":     "Felhasználói kézikönyv megnyitása a telepítés után",
+        "OpenManualRunDesc":      "Felhasználói kézikönyv megnyitása",
+    },
+    "italian": {
+        "AdditionalActionsGroup": "Azioni aggiuntive:",
+        "OpenManualTaskDesc":     "Apri il manuale utente dopo l'installazione",
+        "OpenManualRunDesc":      "Apri il manuale utente",
+    },
+    "japanese": {
+        "AdditionalActionsGroup": "追加のアクション:",
+        "OpenManualTaskDesc":     "インストール後にユーザーマニュアルを開く",
+        "OpenManualRunDesc":      "ユーザーマニュアルを開く",
+    },
+    "korean": {
+        "AdditionalActionsGroup": "추가 작업:",
+        "OpenManualTaskDesc":     "설치 후 사용자 설명서 열기",
+        "OpenManualRunDesc":      "사용자 설명서 열기",
+    },
+    "norwegian": {
+        "AdditionalActionsGroup": "Tilleggshandlinger:",
+        "OpenManualTaskDesc":     "Åpne brukerveiledningen etter installasjon",
+        "OpenManualRunDesc":      "Åpne brukerveiledningen",
+    },
+    "polish": {
+        "AdditionalActionsGroup": "Dodatkowe akcje:",
+        "OpenManualTaskDesc":     "Otwórz instrukcję obsługi po instalacji",
+        "OpenManualRunDesc":      "Otwórz instrukcję obsługi",
+    },
+    "portuguese": {
+        "AdditionalActionsGroup": "Ações adicionais:",
+        "OpenManualTaskDesc":     "Abrir o manual do utilizador após a instalação",
+        "OpenManualRunDesc":      "Abrir o manual do utilizador",
+    },
+    "russian": {
+        "AdditionalActionsGroup": "Дополнительные действия:",
+        "OpenManualTaskDesc":     "Открыть руководство пользователя после установки",
+        "OpenManualRunDesc":      "Открыть руководство пользователя",
+    },
+    "slovak": {
+        "AdditionalActionsGroup": "Ďalšie akcie:",
+        "OpenManualTaskDesc":     "Otvoriť používateľskú príručku po inštalácii",
+        "OpenManualRunDesc":      "Otvoriť používateľskú príručku",
+    },
+    "slovenian": {
+        "AdditionalActionsGroup": "Dodatna dejanja:",
+        "OpenManualTaskDesc":     "Odpri uporabniški priročnik po namestitvi",
+        "OpenManualRunDesc":      "Odpri uporabniški priročnik",
+    },
+    "spanish": {
+        "AdditionalActionsGroup": "Acciones adicionales:",
+        "OpenManualTaskDesc":     "Abrir el manual de usuario después de la instalación",
+        "OpenManualRunDesc":      "Abrir el manual de usuario",
+    },
+    "swedish": {
+        "AdditionalActionsGroup": "Ytterligare åtgärder:",
+        "OpenManualTaskDesc":     "Öppna användarmanualen efter installationen",
+        "OpenManualRunDesc":      "Öppna användarmanualen",
+    },
+    "tamil": {
+        "AdditionalActionsGroup": "கூடுதல் செயல்கள்:",
+        "OpenManualTaskDesc":     "நிறுவலுக்குப் பிறகு பயனர் கையேட்டைத் திற",
+        "OpenManualRunDesc":      "பயனர் கையேட்டைத் திற",
+    },
+    "thai": {
+        "AdditionalActionsGroup": "การกระทำเพิ่มเติม:",
+        "OpenManualTaskDesc":     "เปิดคู่มือผู้ใช้หลังการติดตั้ง",
+        "OpenManualRunDesc":      "เปิดคู่มือผู้ใช้",
+    },
+    "turkish": {
+        "AdditionalActionsGroup": "Ek eylemler:",
+        "OpenManualTaskDesc":     "Kurulum sonrası kullanıcı kılavuzunu aç",
+        "OpenManualRunDesc":      "Kullanıcı kılavuzunu aç",
+    },
+    "ukrainian": {
+        "AdditionalActionsGroup": "Додаткові дії:",
+        "OpenManualTaskDesc":     "Відкрити посібник користувача після встановлення",
+        "OpenManualRunDesc":      "Відкрити посібник користувача",
+    },
+}
+
+
+def buduj_blok_kodu_iso(wpisy: list[tuple[str, str]], kody_z_manualem: list[str]) -> str:
+    """Generuje pascal-case dla `GetManualISO()` z mapowania Inno → ISO.
+
+    Args:
+        wpisy:           Lista par `(inno_nazwa, plik_isl)` z `buduj_wpisy_inno()`.
+        kody_z_manualem: Lista kodów ISO, dla których `docs/manual.<iso>.txt`
+                         faktycznie istnieje (z `zbierz_jezyki_z_manualem()`).
+
+    Zwraca string typu:
+        case ActiveLanguage() of
+          'polish':  Result := 'pl';
+          'german':  Result := 'de';
+          ...
+        else
+          Result := 'en';
+        end;
+    """
+    # Odwróć INNO_LANG_MAP: ('polish', '...isl') → 'pl'.
+    nazwa_do_iso = {nazwa: iso for iso, (nazwa, _) in INNO_LANG_MAP.items()}
+
+    linie_case = []
+    for nazwa, _plik in wpisy:
+        iso = nazwa_do_iso.get(nazwa)
+        # Pomijamy en w case'ach — leci do `else Result := 'en'`.
+        if iso == "en" or iso is None:
+            continue
+        # Pomijamy języki bez manuala (instalator wystartuje, ale w fallback'u).
+        if iso not in kody_z_manualem:
+            continue
+        linie_case.append(f"    '{nazwa}': Result := '{iso}';")
+
+    if not linie_case:
+        # Pusta lista → tylko fallback do 'en'. Inno Pascal nie pozwala na
+        # case bez żadnego selektora, więc tu degenerujemy do `Result := 'en'`.
+        return "  Result := 'en';"
+
+    case_body = "\n".join(linie_case)
+    return (
+        "  case ActiveLanguage() of\n"
+        f"{case_body}\n"
+        "  else\n"
+        "    Result := 'en';\n"
+        "  end;"
+    )
+
+
+def buduj_blok_custom_messages(wpisy: list[tuple[str, str]]) -> str:
+    """Generuje sekcję `[CustomMessages]` dla 3 kluczy menu Pomoc per jzk Inno.
+
+    Iteruje po `wpisy` (Inno-supported languages), dla każdego patrzy w
+    `INNO_MANUAL_MESSAGES_MAP`. Jeśli język ma wpis — wstawia 3 linie:
+    `<nazwa>.AdditionalActionsGroup=...`, `<nazwa>.OpenManualTaskDesc=...`,
+    `<nazwa>.OpenManualRunDesc=...`. Jeśli brak wpisu (np. czeski/japoński
+    bez tłumaczeń) — Inno użyje english.* fallback (nie generujemy nic dla
+    tego języka, ale english zawsze jest pierwszy w pętli i pierwszy w
+    Inno-language list → fallback działa).
+    """
+    linie: list[str] = []
+    for nazwa, _plik in wpisy:
+        slownik = INNO_MANUAL_MESSAGES_MAP.get(nazwa)
+        if slownik is None:
+            # Brak natywnych etykiet — fallback Inno do english.*.
+            # Brak własnego wpisu w [CustomMessages] dla tego języka jest OK
+            # (Inno nie potrzebuje placeholdera, sam wybiera english.*).
+            continue
+        for klucz, wartosc in slownik.items():
+            linie.append(f"{nazwa}.{klucz}={wartosc}")
+    return "\n".join(linie)
+
+
 def odczytaj_wersje() -> str:
     """Wczytuje numer wersji z pliku ``VERSION`` w roocie projektu.
 
@@ -466,22 +757,69 @@ def main() -> None:
     # handing the path to the compiler.
     katalog_inno = Path(iscc_exe).parent
     kody = zbierz_jezyki_bazowe()
-    wpisy = buduj_wpisy_inno(kody, katalog_inno)
+    # Krzyżowa walidacja: język musi mieć NIE TYLKO `dictionaries/<kod>/
+    # podstawy.yaml`, ale też `docs/manual.<iso>.txt` w paczce (regenerowany
+    # w kroku 6 wyżej). Bez manuala instalator nie ma czego otworzyć po
+    # kliknięciu Finish — pomiń ten język z mapy Inno.
+    kody_z_manualem = zbierz_jezyki_z_manualem(kody)
+    wpisy = buduj_wpisy_inno(kody_z_manualem, katalog_inno)
 
-    # Build the [Languages] block.
+    # Trzy dynamiczne sekcje wstrzykiwane do tmp installer.iss:
+    #   [Languages]      — lista jzk Inno z .isl-em w lokalnej instalacji
+    #   [Code]           — funkcja GetManualISO z case'ami ActiveLanguage()
+    #                      mapującymi inno_nazwa → kod_iso pliku manual.<iso>.txt
+    #   [CustomMessages] — etykiety menu Pomoc (AdditionalActionsGroup +
+    #                      OpenManualTaskDesc + OpenManualRunDesc) per jzk
+    # Wszystkie 3 odbudowane z `wpisy` jako pojedynczego źródła prawdy — żeby
+    # dodanie języka wymagało tylko (a) wpisu w INNO_LANG_MAP, (b) wpisu w
+    # INNO_MANUAL_MESSAGES_MAP, (c) szablonu dokumentacji.
     blok_languages = "\n".join(
         f'Name: "{nazwa}";  MessagesFile: "{plik}"'
         for nazwa, plik in wpisy
     )
+    blok_kod_iso = buduj_blok_kodu_iso(wpisy, kody_z_manualem)
+    blok_custom_messages = buduj_blok_custom_messages(wpisy)
 
-    # Read installer.iss and replace the [Languages] section dynamically.
+    # Read installer.iss and replace 3 sekcje dynamicznie. installer.iss
+    # to placeholder w repo (dla syntax check przez `iscc` bezpośrednio +
+    # czytelnego stanu w diff'ach) — to co tu wstrzykujemy NADPISUJE jego
+    # bloki [Languages], [Code] i [CustomMessages].
     sciezka_iss = Path(__file__).parent / "installer.iss"
     sciezka_tmp = Path(__file__).parent / "_installer_tmp.iss"
     iss_tresc = sciezka_iss.read_text(encoding="utf-8")
-    # Split around [Languages] … [Setup] to replace only that section.
+
+    # Sekcja [Languages] — split around [Languages] … [Setup].
     przed, reszta = iss_tresc.split("[Languages]", 1)
     _, po_setup = reszta.split("[Setup]", 1)
-    nowy_iss = f"{przed}[Languages]\n{blok_languages}\n\n[Setup]{po_setup}"
+    iss_etap_1 = f"{przed}[Languages]\n{blok_languages}\n\n[Setup]{po_setup}"
+
+    # Sekcja [Code] — split around [Code] … [CustomMessages] (lub do EOF
+    # jeśli to ostatnia sekcja). installer.iss MA [Code] przed [CustomMessages]
+    # w stałej kolejności.
+    if "[Code]" in iss_etap_1 and "[CustomMessages]" in iss_etap_1:
+        przed_kodu, reszta_kodu = iss_etap_1.split("[Code]", 1)
+        _, po_messages = reszta_kodu.split("[CustomMessages]", 1)
+        kod_section = (
+            "[Code]\n"
+            "function GetManualISO(Param: String): String;\n"
+            "begin\n"
+            f"{blok_kod_iso}\n"
+            "end;\n\n"
+        )
+        iss_etap_2 = (
+            f"{przed_kodu}{kod_section}"
+            f"[CustomMessages]\n{blok_custom_messages}\n{po_messages}"
+        )
+    else:
+        # Defensywnie: jeśli installer.iss zostanie kiedyś zrefactorowany
+        # i straci [Code] lub [CustomMessages] — leci bez nadpisywania.
+        # Niespójność wykryta w wizualnej weryfikacji (Otwórz instrukcję
+        # otworzy zły plik), nie cichy bug.
+        print("⚠ Skipping [Code]/[CustomMessages] dynamic injection: "
+              "installer.iss missing one of those sections.")
+        iss_etap_2 = iss_etap_1
+
+    nowy_iss = iss_etap_2
 
     print("\n[2/2] Creating the installer...")
     tmp_created = False
