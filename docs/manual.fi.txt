@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.2.3 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.2.4 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -424,7 +424,7 @@ Versio 13.0 esittelee neljännen työkalun työkalupalkissa: Manager Reguł. Sen
 Miksi YAML? Versioon 12.0 asti kaikki aksentit, luovat tilat ja suodattimet olivat "upotettu" Python-koodiin. Uuden aksentin lisääminen vaati ohjelmoijan. Versiossa 13.0 kaikki tämä siirrettiin .yaml-tiedostoihin kansiossa dictionaries/ — kuka tahansa, joka osaa avata Muistion, voi hienosäätää olemassa olevaa aksenttia ("vaihda sz sh:ksi sch:ksi") tai lisätä täysin uuden (ruotsalainen, tanskalainen, venäläinen murre).
 
 Mitä löydät Manager Regułista:
-- Tiedostopuu — täydellinen lista kaikista YAML-tiedostoista dictionaries/-kansiossa jaettuna peruskieliin (tällä hetkellä täysin toteutettu: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский) ja kategorioihin (akcenty/, szyfry/, rezyser/). Navigointi nuolinäppäimillä kuten Windowsin Resurssienhallinnassa, täydellinen NVDA-tuki.
+- Tiedostopuu — täydellinen lista kaikista YAML-tiedostoista dictionaries/-kansiossa jaettuna peruskieliin (tällä hetkellä täysin toteutettu: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский) ja viiteen kategoriaan: aksentit/ (TTS-fonetiikka), salaukset/ (tekstileikit), ohjaaja/ (luovat tilat ja jälkituotanto), gui/ (käyttöliittymän käännökset) ja tarinat/ (Tarinat-moduulin tilat, lisätty 15.2.4:ssä). Navigointi nuolinäppäimillä kuten Windowsin Resurssienhallinnassa, täydellinen NVDA-tuki.
 - Painike „📝  Avaa tekstieditorissa" — avaa valitun tiedoston järjestelmän oletusmuistiossa. Muokkaat, tallennat, napsautat „🔄  Päivitä puu" ja valmis.
 - Painike „📋  Kopioi valittu tiedosto" — nopein tapa uuteen aksenttiin: otat olemassa olevan tiedoston (esim. finski.yaml), annat uuden nimen (esim. ruotsalainen), Manager luo kopion kommentilla "muuta kenttiä etiketti ja kuvaus" ja avaa sen editorissa.
 - Painike „➕  Uusi sääntötiedosto…" — luontityökalu, jossa valitaan tyyppi (aksentti, salaus, ohjaustila, uusi peruskieli, algoritminen salaus). Tavallisille tapauksille (aksentti, kirjainvaihtosalaus) luontityökalu luo valmiin muokattavan YAML-mallin. Tapauksille, jotka vaativat ohjelmoijaa (uusi peruskieli, algoritmi tyyppiä "sanojen keskiosan sekoitus") luontityökalu generoi kehotteen AI-chatbotille — liität sen ChatGPT:hen, saat valmiin YAML-tiedoston, tallennat sen dictionaries/-kansioon ja valmis.

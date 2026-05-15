@@ -1,4 +1,4 @@
-Director de Audio GPT — Módulo de Historias Interactivas (15.2.3 – Versión de Publicación)
+Director de Audio GPT — Módulo de Historias Interactivas (15.2.4 – Versión de Publicación)
 
 El segundo modo principal de la aplicación junto al Director — esta vez te conviertes en el jugador de una historia generada dinámicamente en lugar de su autor. La inteligencia artificial narra en segunda persona del singular ("Caminas por un bosque brumoso, sientes el olor de las hojas mojadas..."), y tú decides el siguiente movimiento — escribiendo cualquier acción en texto libre o eligiendo una de las opciones numeradas.
 
