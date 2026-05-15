@@ -20,61 +20,13 @@ tresc:
 
     **Autres versions linguistiques / Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
   wprowadzenie: |
-    Ensemble d'outils portables alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
+    Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
     Version : **{numer_wersji}** · Langues prises en charge nativement ({liczba_kompletnych_jezykow}) : {lista_kompletnych_jezykow_natywnie}.
   glowne_moduly: |
     ## Modules principaux
 
     L'application combine cinq outils dans une seule fenêtre, commutables par des raccourcis clavier (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4 / Ctrl+5) ou par des boutons sur la barre d'outils. Chaque module fonctionne indépendamment, mais tous partagent les packs de dictionnaires du dossier `dictionaries/` (accents, chiffres, modes créatifs AI) et les paramètres centraux.
-
-    ## Akcenty
-
-    Aplikacja obsługuje wiele akcentów dla syntezatora mowy, co pozwala na dostosowanie brzmienia do potrzeb użytkownika. Dostępne akcenty to:
-
-    - Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
-    - Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
-    - Italien (Alice/Luca dans Vocalizer, Elsa dans OneCore)
-    - Polonais (Ewa dans Vocalizer, Paulina dans OneCore)
-    - Allemand (Stefan/Katja dans Vocalizer, Hedda dans OneCore)
-    - Espagnol (Jorge/Monica dans Vocalizer, Helena dans OneCore)
-
-    ## Szyfr: Odwracacz tekstu
-
-    Ten szyfr odwraca kolejność liter w zdaniu, ale najpierw rozwija niektóre skróty, aby uniknąć fonetycznych nonsensów. Obsługiwane skróty to:
-
-    - "p. ex." → "par exemple"
-    - "c.-à-d." → "c'est-à-dire"
-    - "etc." → "et cetera"
-    - "M." → "Monsieur"
-    - "Dr" → "Docteur"
-
-    Bez rozwinięcia, skróty z kropkami odwróciłyby się w fonetyczny nonsens (przykład: ".xe").
-
-    ## Szyfr: Typoglycémie
-
-    Ce chiffre repose sur l'idée que les gens peuvent lire des mots même si les lettres au milieu sont mélangées, tant que la première et la dernière lettre restent à leur place. Voici un exemple :
-
-    "Seoln une étdue de l'Unviesirté de Cmabrigde, l'odrre des ltteers n'a pas d'imporatnce, ce qui cmopmte c'est que la pmeirère et la draineère soient à la bnnoe pclae."
-
-    ## Pliki konfiguracyjne
-
-    Aplikacja używa plików YAML do konfigurowania różnych aspektów działania. Oto lista dostępnych plików:
-
-    - angielski.yaml
-    - cezar.yaml
-    - podstawy.yaml
-    - finski.yaml
-    - islandzki.yaml
-    - naprawiacz_tagow.yaml
-    - oczyszczenie.yaml
-    - oczyszczenie_bez_liczb.yaml
-    - rosyjski.yaml
-    - wloski.yaml
-    - niemiecki.yaml
-    - francuski.yaml
-    - hiszpanski.yaml
-    - polski.yaml
   modul_rezyseria: |
     ### 1. Réalisation (Ctrl+1)
 
@@ -136,9 +88,7 @@ tresc:
 
     ### Pour les utilisateurs finaux (Windows)
 
-    1. Téléchargez la dernière version depuis l'onglet **Releases** (paquet marqué comme *Latest*). Deux formats sont disponibles :
-       * **Installer EXE** — installe dans Program Files (ou dans le dossier choisi), crée des raccourcis dans le Menu Démarrer et sur le bureau. À la fin de l'installation, ouvre éventuellement le manuel d'utilisation dans le gestionnaire par défaut de fichiers .txt.
-       * **Portable ZIP** — extrayez dans n'importe quel dossier, ne nécessite pas de droits administratifs. Après extraction, lancez `run.bat`.
+    1. Téléchargez la dernière version depuis l'onglet **Releases** (paquet marqué comme *Latest*) — le fichier `Rezyser_Audio_v<numéro>_Installer.exe`. Lancez-le par un double-clic. L'installateur s'installe par défaut dans le répertoire local de votre compte (`%LocalAppData%\Programs\Reżyser Audio GPT`) et ne nécessite pas de droits administratifs ; vous pouvez choisir votre propre chemin avec le bouton « Parcourir ». Une fois terminé, il crée des raccourcis dans le Menu Démarrer et sur le bureau, et ouvre éventuellement le manuel d'utilisation dans l'éditeur par défaut de fichiers `.txt`.
     2. **Configuration de l'API OpenAI :** Lors du premier lancement, l'application signalera l'absence de clé dans la section System Check. Cliquez sur le bouton visible pour générer le fichier `golden_key.env`, ouvrez-le dans un éditeur de texte et collez votre clé (commençant par `sk-proj-`).
     3. **Premiers pas :** Ouvrez le fichier `docs/manual.pl.txt` (ou dans une autre langue) dans le dossier d'installation — c'est un manuel d'utilisation complet rédigé dans un langage accessible à tous les utilisateurs, pas seulement aux développeurs.
   instalacja_deweloperzy: |

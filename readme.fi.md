@@ -5,9 +5,9 @@
 **Muut kieliversiot / Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
 
 
-Zestaw przenośnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
+Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **15.2.4** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **15.2.5** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -83,9 +83,7 @@ Tämä on nykyisen sukupolven tekoälyn perustavanlaatuinen rajoitus. Tästä sy
 
 ### Loppukäyttäjille (Windows)
 
-1. Lataa uusin julkaisu **Releases**-välilehdeltä (paketti merkitty *Latest*). Saatavilla on kaksi muotoa:
-   * **Installer EXE** — asentaa Program Files -kansioon (tai valittuun kansioon), luo pikakuvakkeet Käynnistä-valikkoon ja työpöydälle. Asennuksen päätyttyä avaa valinnaisesti käyttöohjeen oletustekstinkäsittelyohjelmassa.
-   * **Portable ZIP** — pura mihin tahansa kansioon, ei vaadi järjestelmänvalvojan oikeuksia. Purkamisen jälkeen suorita `run.bat`.
+1. Lataa uusin julkaisu **Releases**-välilehdeltä (paketti merkitty *Latest*) — tiedosto `Rezyser_Audio_v<numero>_Installer.exe`. Käynnistä se kaksoisklikkaamalla. Asennusohjelma asentaa oletuksena käyttäjätilisi paikalliseen hakemistoon (`%LocalAppData%\Programs\Reżyser Audio GPT`) eikä se vaadi järjestelmänvalvojan oikeuksia; voit valita oman polun „Selaa"-painikkeella. Asennuksen päätyttyä se luo pikakuvakkeet Käynnistä-valikkoon ja työpöydälle, ja avaa valinnaisesti käyttöohjeen `.txt`-tiedostojen oletuseditorissa.
 2. **OpenAI API:n konfigurointi:** Ensimmäisellä käynnistyskerralla sovellus ilmoittaa avaimen puuttumisesta System Check -osiossa. Napsauta näkyvää painiketta luodaksesi `golden_key.env`-tiedoston, avaa se tekstieditorissa ja liitä avain (alkaen `sk-proj-`).
 3. **Ensimmäiset askeleet:** Avaa tiedosto `docs/manual.pl.txt` (tai muulla kielellä) asennuskansiosta — se on täydellinen käyttöohje, joka on kirjoitettu kielellä, joka on kaikkien käyttäjien, ei vain kehittäjien, ymmärrettävissä.
 

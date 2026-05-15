@@ -20,36 +20,13 @@ tresc:
 
     **Aðrar tungumál útgáfur / Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
   wprowadzenie: |
-    Zestak af flytjanlegum tólum knúnum af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
+    Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
     Útgáfa: **{numer_wersji}** · Stutt tungumál innfædd ({liczba_kompletnych_jezykow}): {lista_kompletnych_jezykow_natywnie}.
   glowne_moduly: |
     ## Helstu einingar
 
     Forritið sameinar fimm verkfæri í einum glugga sem hægt er að skipta á milli með lyklaborðssamsetningum (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4 / Ctrl+5) eða með hnöppum á tækjastikunni. Hver eining virkar sjálfstætt, en allar deila orðabókarskrám úr möppunni `dictionaries/` (hreim, dulmál, skapandi AI stillingar) og miðlægum stillingum.
-
-    ## Akcentar
-
-    - Enska (Samantha/Mark í Vocalizer, Zira/Hazel í OneCore)
-    - Finnska (Satu/Mikko í Vocalizer, Heidi í OneCore)
-    - Ítalska (Alice/Luca í Vocalizer, Elsa í OneCore)
-    - Pólska (Ewa í Vocalizer, Paulina í OneCore)
-
-    ## Dulmál: Textaumhverfa
-
-    Textaumhverfa dulmálið breytir setningum með því að snúa þeim við. Áður en setning er snúið við, stækkar handritið ákveðnar skammstafanir til að koma í veg fyrir hljóðfræðilegt bull. Til dæmis, ".td" verður ".dæt" ef það er ekki stækkað fyrst. Skammstafanir sem eru stækkaðar eru:
-
-    - "t.d." → "til dæmis"
-    - "þ.e." → "það er"
-    - "m.a." → "meðal annars"
-    - "u.þ.b." → "um það bil"
-    - "o.s.frv." → "og svo framvegis"
-
-    ## Dulmál: Typoglycemia
-
-    Samkvæmt rannsóknum við Cambridge háskóla skiptir ekki máli í hvaða röð stafirnir í orði eru, það eina sem skiptir máli er að fyrsti og síðasti stafurinn séu á réttum stað.
-
-    "Samkvæt rnasóknum við Cmabrigde háksóla skiptir ekki máli í hvaða röð stfirnri í oðri eru, það eina sem skiptir máli er að fyrsti og síðasti stafurinn séu á réttum stað."
   modul_rezyseria: |
     ### 1. Leikstjórn (Ctrl+1)
 
@@ -111,9 +88,7 @@ tresc:
 
     ### Fyrir endanotendur (Windows)
 
-    1. Sæktu nýjustu útgáfuna úr **Útgáfur** flipanum (pakki merktur sem *Nýjasta*). Tvær útgáfur eru í boði:
-       * **Installer EXE** — setur upp í Program Files (eða valinn möppu), býr til flýtileiðir í Start-valmyndinni og á skjáborðinu. Eftir uppsetningu opnar valfrjálst notendahandbók í sjálfgefnum .txt lesara.
-       * **Portable ZIP** — pakkaðu út í hvaða möppu sem er, krefst ekki stjórnandaaðgangs. Eftir útpökkun skaltu keyra `run.bat`.
+    1. Sæktu nýjustu útgáfuna úr **Útgáfur** flipanum (pakki merktur sem *Nýjasta*) — skrána `Rezyser_Audio_v<númer>_Installer.exe`. Keyrðu hana með tvísmelli. Uppsetningarforritið lendir sjálfgefið í staðbundinni möppu notandareiknings þíns (`%LocalAppData%\Programs\Reżyser Audio GPT`) og krefst ekki stjórnandaaðgangs; þú getur valið þína eigin slóð með „Vafra"-hnappinum. Eftir uppsetningu býr það til flýtileiðir í Start-valmyndinni og á skjáborðinu, og opnar valfrjálst notendahandbók í sjálfgefnum ritli fyrir `.txt`-skrár.
     2. **Stilling OpenAI API:** Við fyrstu keyrslu mun forritið gefa til kynna skort á lykli í System Check hlutanum. Smelltu á sýnilegan hnapp til að búa til skrána `golden_key.env`, opnaðu hana í textaritli og límdu inn lykilinn þinn (sem byrjar á `sk-proj-`).
     3. **Fyrstu skrefin:** Opnaðu skrána `docs/manual.pl.txt` (eða á öðru tungumáli) í uppsetningarmöppunni — þetta er full leiðarvísir skrifaður á tungumáli sem allir notendur geta skilið, ekki bara forritarar.
   instalacja_deweloperzy: |

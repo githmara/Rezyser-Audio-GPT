@@ -1,4 +1,4 @@
-Audio AI Regisseur Handbuch - Komplettanleitung (Version 15.2.4 – Veröffentlichungsversion)
+Audio AI Regisseur Handbuch - Komplettanleitung (Version 15.2.5 – Veröffentlichungsversion)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -7,9 +7,12 @@ Das Set besteht aus dem Hauptstudio (Regie), einem Übersetzungs- und Akzentwerk
 
 KROK 1: Erste Ausführung (Plattformübergreifend)
 
-Die Anwendung ist vollständig portabel und bereit zur Ausführung unter Windows. Gehe einfach in den Ordner und starte die Datei run.bat (durch Doppelklick oder durch Erstellen einer Verknüpfung auf dem Desktop). Ein kurzes Terminalfenster öffnet sich (verschwindet automatisch), und nach einem Moment erscheint das Hauptfenster des Programms — Audio GPT Regisseur. Kein Browser, kein Hintergrundserver. Wenn du fertig bist, schließe einfach das Programmfenster.
+Lade die neueste Installationsdatei aus dem Releases-Tab auf GitHub herunter (die Datei Rezyser_Audio_v<Nummer>_Installer.exe) und starte sie per Doppelklick. Die Installation schlägt einen Standardzielort vor — den Programs-Ordner im lokalen Verzeichnis deines Benutzerkontos — und erfordert keine Administratorrechte. Mit der Schaltfläche „Durchsuchen" kannst du einen eigenen Pfad wählen; merke ihn dir in diesem Fall (du brauchst ihn bei Aktualisierungen — siehe „Automatische Updates" unten). Nach der Installation startest du das Programm über die Verknüpfung auf dem Desktop oder im Startmenü. Ein kurzes Terminalfenster öffnet sich (verschwindet automatisch), und nach einem Moment erscheint das Hauptfenster des Programms — Audio GPT Regisseur. Kein Browser, kein Hintergrundserver. Wenn du fertig bist, schließe einfach das Programmfenster.
 
-Wichtig: Der Ordner runtime/ ist nur Teil der fertigen Windows-Pakete, die im Bereich Releases auf GitHub heruntergeladen werden können. Er enthält eine isolierte Python-Umgebung, die ohne Installation einsatzbereit ist. Wenn du das Repository klonst, ist dieser Ordner nicht vorhanden und sollte es auch nicht sein — du verwendest dann die virtuelle Umgebung venv, die im Abschnitt für Entwickler unten beschrieben ist.
+Die gesamte Anwendung — die Python-Engine, deine Projekte und der API-Schlüssel — lebt in einem einzigen Ordner unter dem Installationspfad, sodass der gesamte Ordner auf einen USB-Stick, in die Cloud oder auf einen anderen Computer verschoben werden kann (eine ausführliche Anleitung findest du im Abschnitt „Projekte und API-Schlüssel verschieben" unten).
+
+
+Wichtig: Der Ordner runtime/ innerhalb des Installationsordners enthält eine isolierte Python-Umgebung, die ohne separate Systeminstallation einsatzbereit ist. Wenn du das Repository klonst (Entwicklerpfad), ist dieser Ordner nicht vorhanden und sollte es auch nicht sein — du verwendest dann die virtuelle Umgebung venv, die im Abschnitt für Entwickler unten beschrieben ist.
 
 --- Für Entwickler (Windows — Git-Repository) ---
 
@@ -30,9 +33,30 @@ Automatische Updates
 
 Die Anwendung überprüft beim Start, ob eine neuere Version auf GitHub verfügbar ist — die Überprüfung erfolgt im Hintergrund und blockiert die Benutzeroberfläche nicht.
 
-Wenn du das Programm über eine fertige Installationsdatei (.exe) installiert hast: Bei Erkennung einer neueren Version erscheint ein Fenster mit der Frage, ob du sie herunterladen möchtest. Nach der Bestätigung wird ein Fortschrittsbalken angezeigt, und wenn der Download abgeschlossen ist, schließt sich die Anwendung automatisch und der neue Installer startet von selbst — deine Projekte und der API-Schlüssel bleiben unberührt.
+Wenn du das Programm über eine fertige Installationsdatei (.exe) installiert hast: Bei Erkennung einer neueren Version erscheint ein Fenster mit der Frage, ob du sie herunterladen möchtest. Nach der Bestätigung wird ein Fortschrittsbalken angezeigt, und wenn der Download abgeschlossen ist, schließt sich die Anwendung automatisch und der neue Installer startet von selbst. WICHTIG: Vergewissere dich im neuen Installer-Fenster, dass der vorgeschlagene Installationspfad DERSELBE ist wie bei der ersten Installation (meistens im Feld „Zielordner" sichtbar). Wenn du den Standardvorschlag akzeptierst, ursprünglich aber mit „Durchsuchen" einen anderen Ort gewählt hast, erhältst du eine ZWEITE leere Installation ohne deine Projekte und deinen API-Schlüssel — die erste bleibt an ihrem alten Platz, aber die Verknüpfung auf dem Desktop und im Startmenü wird auf die neue Installation umgestellt. Wenn du denselben Pfad wie ursprünglich akzeptierst, überschreibt der Installer die Engine-Dateien und das gesamte Regelpaket (Ordner dictionaries/) — deine Projekte (Ordner skrypty/, opowiesci/) und der API-Schlüssel (golden_key.env) bleiben unberührt. WARNUNG: Wenn du im Regelmanager Dateien bearbeitet hast, die im Paket vorhanden sind (z.B. Akzentanpassungen in `dictionaries/pl/akcenty/wloski.yaml`), werden diese Änderungen durch das Update ÜBERSCHRIEBEN — sichere vor der Bestätigung des Updates den Ordner `dictionaries/` nach der Anleitung im Abschnitt „Projekte und API-Schlüssel verschieben" unten (es genügt, allein den Ordner `dictionaries/` auf einen USB-Stick zu kopieren), und füge ihn nach dem Update wieder über die neuen Dateien ein. Vollständig neue Regeln, die du von Grund auf erstellt hast und die nicht im Paket sind (z.B. eine zusätzliche Basissprache oder eine ganz neue Chiffre), bleiben automatisch erhalten — der Installer löscht keine Dateien, die nicht im Paket sind.
+
+Wenn du dich nicht an deinen Installationspfad erinnerst, gibt es zwei schnelle Wege ihn wiederzubeschaffen. Windows 11: Im Kontextmenü der Desktop-Verknüpfung wähle „Dateipfad öffnen", gehe eine Ebene höher (Backspace-Taste oder der Pfeil „Aufwärts" in der Symbolleiste), markiere den Anwendungsordner und drücke Strg+Umschalt+C (oder wähle „Als Pfad kopieren" aus dem Kontextmenü) — der vollständige Pfad landet in der Zwischenablage in Anführungszeichen (beim Einfügen in den Installer denke daran, nur die Anführungszeichen zu entfernen). Ältere Windows-Versionen (7/8/10): Klicke mit der rechten Maustaste auf die Verknüpfung und wähle „Eigenschaften"; im Tab „Verknüpfung" zeigt das Feld „Ziel" den vollständigen Pfad zu `run.bat` — kopiere ihn und entferne das abschließende `\run.bat`, übrig bleibt der reine Installationsordnerpfad.
 
 Wenn du das Git-Repository verwendest (Entwickler und macOS/Linux-Benutzer): Anstelle des Vorschlags zum Herunterladen siehst du Informationen über die neue Version mit einem direkten Link zur Release-Seite auf GitHub. Lade von dort das „Source code“-Archiv herunter oder aktualisiere das Repository mit dem Befehl git pull.
+
+Projekte und API-Schlüssel verschieben (Migration)
+
+Wenn du deine Projekte, den API-Schlüssel und die lokalen Einstellungen auf einen anderen Computer übertragen möchtest (oder alles nach einer Windows-Neuinstallation wiederherstellen willst), musst du keine einzelnen Dateien manuell kopieren — der gesamte Anwendungsordner ist eigenständig.
+
+1. Stelle sicher, dass die Anwendung VOLLSTÄNDIG geschlossen ist. Wenn du das Programmsymbol im Infobereich (neben der Uhr, rechts auf der Taskleiste) siehst, klicke mit der rechten Maustaste darauf und wähle „Schließen". Geöffnete Dateien blockieren das Kopieren.
+2. Finde die Verknüpfung Audio GPT Regisseur auf dem Desktop. Klicke mit der rechten Maustaste darauf (oder drücke die Anwendungstaste bzw. Shift+F10 bei der Navigation mit NVDA) und wähle die Option „Dateipfad öffnen".
+3. Ein Windows-Explorer-Fenster öffnet sich im Installationsordner des Programms. Drücke die Backspace-Taste oder klicke auf den Pfeil „Aufwärts" in der Symbolleiste, um eine Ebene nach oben zu gehen — dort siehst du den vollständigen Anwendungsordner.
+4. Kopiere den gesamten Ordner auf einen USB-Stick, ein Cloud-Laufwerk (OneDrive, Google Drive, Dropbox) oder eine externe Festplatte. Der Ordner enthält alles, was du brauchst, um deinen Arbeitsstand wiederherzustellen:
+   - Deine Projekte (Ordner skrypty/ — .txt-Erzähldateien, .md Weltbuch-Dateien, _streszczenie.txt Zusammenfassungen; Ordner opowiesci/ — interaktive Spiele).
+   - Den API-Schlüssel (Datei golden_key.env im Hauptordner der Anwendung).
+   - Deine eigenen phonetischen Regeln, Akzente, Chiffren, falls du etwas im Regelmanager bearbeitet hast (Ordner dictionaries/<Sprachcode>/, z.B. dictionaries/pl/akcenty/wloski.yaml).
+   - Anwendungspräferenzen und Auswahl kreativer Modi (Ordner runtime/skrypty/, .mode-Dateien).
+   - Die isolierte Python-Umgebung (Ordner runtime/), wodurch du auf dem neuen Computer nichts zusätzlich installieren musst.
+5. Auf dem neuen Computer: Lade die neueste Installationsdatei aus dem Releases-Tab auf GitHub herunter und installiere die Anwendung normal. Starte das Programm einmal, damit es die leere Konfigurationsdateistruktur erstellt. Schließe die Anwendung. Kopiere anschließend den zuvor gesicherten Ordner über die neue Installation und überschreibe die Dateien — oder wähle gezielt nur die Ordner, die dich interessieren (skrypty/, opowiesci/, golden_key.env), und füge sie an den entsprechenden Stellen der neuen Installation ein.
+
+Tipp für NVDA-Benutzer: Das Kontextmenü „Dateipfad öffnen", das mit der Anwendungstaste aufgerufen wird, ist vollständig zugänglich — NVDA liest jeden Menüpunkt nativ. Nach dem Öffnen des Explorers im Zielordner verwende Alt+Aufwärts, um eine Ebene nach oben zu wechseln, dann Strg+A, um alles auszuwählen, und Strg+C zum Kopieren.
+
+Tipp: „Dateipfad öffnen" ist der native Optionsname unter einer deutschen Windows-Installation. Im englischen System heißt er „Open file location", in anderen Sprachversionen analog in der lokalen Sprache des Betriebssystems.
 
 
 KROK 2: API-Zugang (OpenAI-Schlüssel)

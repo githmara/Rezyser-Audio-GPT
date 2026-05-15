@@ -1,46 +1,18 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.2.4 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.2.5 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
 Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglotti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tarinat.fi.txt). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.
 
-## Akcenty
-
-Dostępne akcenty to:
-- Englanti (Samantha/Mark Vocalizerissa, Zira/Hazel OneCoressa)
-- Puola (Ewa Vocalizerissa, Paulina OneCoressa)
-- Italia (Alice/Luca Vocalizerissa, Elsa OneCoressa)
-- Saksa (Stefan/Katja Vocalizerissa, Hedda OneCoressa)
-- Ranska (Thomas/Amelie/Julie Vocalizerissa)
-- Espanja (Jorge/Monica Vocalizerissa, Helena OneCoressa)
-
-## Szyfr: Odwracacz Tekstu
-
-Odwracacz Tekstu to narzędzie, które odwraca zdania, ale najpierw rozwija skróty, aby uniknąć fonetycznych nonsensów. W przypadku języka suomi, rozwijane są następujące skróty:
-- "esim." → "esimerkiksi"
-- "jne." → "ja niin edelleen"
-- "ym." → "ynnä muuta"
-- "ns." → "niin sanottu"
-- "tms." → "tai muuta sellaista"
-
-Bez rozwinięcia, skróty z kropkami odwróciłyby się w fonetyczne nonsensy, jak ".mies".
-
-## Szyfr: Typoglycemia
-
-Typoglycemia to szyfr, który przestawia litery wewnątrz słów, pozostawiając pierwszą i ostatnią literę na miejscu. Tutkimuksen muknana Cmabrigden Yliopitsolta, ei ole väliä, missä järjsteyksessä kirjaimet ovat sanassa, kunhan ensimmäinen ja viimeinen kirjain ovat oikeilla paikoillaan.
-
-## Pliki i głosy
-
-Nazwy plików (angielski.yaml, cezar.yaml, podstawy.yaml, finski.yaml, islandzki.yaml, naprawiacz_tagow.yaml, oczyszczenie.yaml, oczyszczenie_bez_liczb.yaml, rosyjski.yaml, wloski.yaml, niemiecki.yaml, francuski.yaml, hiszpanski.yaml, polski.yaml) są fizycznymi nazwami w pakiecie — pozostaw je bez zmian.
-
-Nazwy produktów głosowych (Samantha, Mark, Markus, Hedda, Heidi, Gudrun, Milena, Irina, Pavel, Yuri, Satu, Mikko, Thomas, Amelie, Julie, Stefan, Katja, Jorge, Monica, Helena, Alice, Luca, Elsa, Zira, Hazel, Ewa, Paulina) są nazwami produktów — säilytä ne 1:1.
-
 
 KROK 1: Ensimmäinen käynnistys (Cross-Platform)
 
-Sovellus on täysin siirrettävä ja valmis toimimaan Windows-järjestelmässä. Mene vain kansioon ja käynnistä run.bat-tiedosto (kaksoisklikkaamalla sitä tai luomalla pikakuvakkeen työpöydälle). Lyhytaikainen terminaali-ikkuna avautuu (sulkeutuu automaattisesti), ja hetken kuluttua ohjelman pääikkuna ilmestyy — Ääniohjaaja GPT. Ei selainta, ei taustapalvelinta. Kun lopetat työn, sulje vain ohjelmaikkuna.
+Lataa uusin asennusohjelma GitHubin Releases-välilehdeltä (tiedosto Rezyser_Audio_v<numero>_Installer.exe) ja käynnistä se kaksoisklikkaamalla. Asennusohjelma ehdottaa oletussijaintia — Programs-kansiota käyttäjätilisi paikallisessa hakemistossa — eikä se vaadi järjestelmänvalvojan oikeuksia. Voit valita oman polun „Selaa"-painikkeella; siinä tapauksessa MUISTA se (tarvitset sitä päivityksissä — katso „Automaattiset päivitykset" alla). Asennuksen jälkeen käynnistä ohjelma työpöydän pikakuvakkeesta tai Käynnistä-valikosta. Lyhytaikainen terminaali-ikkuna avautuu (sulkeutuu automaattisesti), ja hetken kuluttua ohjelman pääikkuna ilmestyy — Ääniohjaaja GPT. Ei selainta, ei taustapalvelinta. Kun lopetat työn, sulje vain ohjelmaikkuna.
 
-Tärkeää: runtime/-kansio on osa vain valmiita Windows-paketteja, jotka ladataan GitHubin Releases-välilehdeltä. Se sisältää eristetyn Python-ympäristön, joka on valmis käytettäväksi ilman asennusta. Jos kloonaat arkiston, tätä kansiota ei ole eikä sen pitäisi olla — käytät silloin virtuaalista venv-ympäristöä, joka on kuvattu alla olevassa kehittäjäosiossa.
+Koko sovellus — Python-moottori, projektisi ja API-avain — elää yhdessä kansiossa asennuspolun alla, joten koko kansion voi siirtää USB-tikulle, pilvitallennukseen tai toiselle tietokoneelle (yksityiskohtaiset ohjeet kohdassa „Projektien ja API-avaimen siirtäminen" alla).
+
+
+Tärkeää: Asennuskansion sisällä oleva runtime/-kansio sisältää eristetyn Python-ympäristön, joka on valmis käytettäväksi ilman erillistä järjestelmäasennusta. Jos kloonaat arkiston (kehittäjäpolku), tätä kansiota ei ole eikä sen pitäisi olla — käytät silloin virtuaalista venv-ympäristöä, joka on kuvattu alla olevassa kehittäjäosiossa.
 
 --- Kehittäjille (Windows — Git-arkisto) ---
 
@@ -61,9 +33,30 @@ Automaattiset päivitykset
 
 Sovellus tarkistaa käynnistyessään, onko GitHubissa saatavilla uudempi versio — tarkistus tapahtuu taustalla eikä estä käyttöliittymää.
 
-Jos asensit ohjelman valmiilla asennustiedostolla (.exe): kun uudempi versio havaitaan, ilmestyy ikkuna, jossa kysytään, haluatko ladata sen. Vahvistuksen jälkeen käynnistyy edistymispalkki, ja kun lataus on valmis, sovellus sulkeutuu automaattisesti ja uusi asennusohjelma käynnistyy itsestään — projektisi ja API-avaimesi säilyvät ennallaan.
+Jos asensit ohjelman valmiilla asennustiedostolla (.exe): kun uudempi versio havaitaan, ilmestyy ikkuna, jossa kysytään, haluatko ladata sen. Vahvistuksen jälkeen käynnistyy edistymispalkki, ja kun lataus on valmis, sovellus sulkeutuu automaattisesti ja uusi asennusohjelma käynnistyy itsestään. TÄRKEÄÄ: varmista uuden asennusohjelman ikkunassa, että ehdotettu asennuspolku on SAMA kuin ensimmäisellä asennuskerralla (yleensä näkyvissä „Kohdekansio"-kentässä). Jos hyväksyt oletusehdotuksen mutta valitsit alun perin „Selaa"-painikkeella toisen sijainnin, saat TOISEN tyhjän asennuksen ilman projekteja ja API-avainta — ensimmäinen on yhä vanhassa paikassa, mutta työpöydän ja Käynnistä-valikon pikakuvakkeet osoittavat nyt uuteen asennukseen. Jos hyväksyt saman polun kuin alun perin, asennusohjelma korvaa sovelluksen moottoritiedostot ja koko sääntöpaketin (kansio dictionaries/) — projektisi (kansiot skrypty/, opowiesci/) ja API-avain (golden_key.env) säilyvät ennallaan. VAROITUS: jos olet muokannut Sääntöjen Hallinnassa tiedostoja, jotka ovat paketissa (esim. aksentin viilausta tiedostossa `dictionaries/pl/akcenty/wloski.yaml`), nämä muokkaukset YLIKIRJOITETAAN päivityksen yhteydessä — ennen päivityksen vahvistamista varmuuskopioi kansio `dictionaries/` alla olevan kohdan „Projektien ja API-avaimen siirtäminen" ohjeen mukaisesti (riittää kopioida pelkkä kansio `dictionaries/` USB-tikulle), ja liitä se päivityksen jälkeen takaisin uusien tiedostojen päälle. Täysin uudet säännöt, jotka olet luonut alusta alkaen ja joita ei ole paketissa (esim. lisäperuskieli tai aivan uusi salaus), säilyvät automaattisesti — asennusohjelma ei poista tiedostoja, joita ei ole paketissa.
+
+Jos et muista asennuspolkua, sen palauttamiseen on kaksi nopeaa tapaa. Windows 11: työpöydän pikakuvakkeen pikavalikosta valitse „Avaa tiedoston sijainti", siirry yhden tason ylemmäs (Askelpalautin tai työkalupalkin „Ylös"-nuoli), valitse sovelluksen kansio ja paina Ctrl+Shift+C (tai valitse pikavalikosta „Kopioi polkuna") — koko polku menee leikepöydälle lainausmerkkien ympäröimänä (kun liität sen asennusohjelmaan, muista poistaa pelkät lainausmerkit). Vanhemmat Windows-versiot (7/8/10): napsauta pikakuvaketta hiiren oikealla painikkeella ja valitse „Ominaisuudet"; „Pikakuvake"-välilehden „Kohde"-kentässä näkyy täydellinen polku `run.bat`-tiedostoon — kopioi se ja poista lopusta `\run.bat`, jäljelle jää pelkkä asennuskansion polku.
 
 Jos käytät Git-arkistoa (kehittäjät ja macOS/Linux-käyttäjät): latausehdotuksen sijaan näet tiedon uudesta versiosta suoran linkin kanssa GitHubin julkaisusivulle. Lataa sieltä "Source code" -arkisto tai päivitä arkisto komennolla git pull.
+
+Projektien ja API-avaimen siirtäminen (migraatio)
+
+Jos haluat siirtää projektisi, API-avaimesi ja paikalliset asetukset toiselle tietokoneelle (tai palauttaa kaiken Windowsin uudelleenasennuksen jälkeen), yksittäisiä tiedostoja ei tarvitse kopioida käsin — koko sovelluskansio on itsenäinen.
+
+1. Varmista, että sovellus on KOKONAAN suljettu. Jos näet ohjelman kuvakkeen ilmoitusalueella (kellon vieressä, tehtäväpalkin oikeassa reunassa), napsauta sitä hiiren oikealla painikkeella ja valitse „Sulje". Avoimet tiedostot estävät kopioinnin.
+2. Etsi Ääniohjaaja GPT -pikakuvake työpöydältä. Napsauta sitä hiiren oikealla painikkeella (tai Sovellusnäppäimellä, tai Shift+F10 NVDA-navigoinnissa) ja valitse vaihtoehto „Avaa tiedoston sijainti".
+3. Windowsin Resurssienhallinta avautuu ohjelman asennuskansiossa. Paina Askelpalautinta tai napsauta työkalupalkin „Ylös"-nuolta siirtyäksesi yhden tason ylemmäs — siellä näet sovelluksen koko kansion.
+4. Kopioi koko kansio USB-tikulle, pilvitallennukseen (OneDrive, Google Drive, Dropbox) tai ulkoiselle levylle. Kansio sisältää kaiken työtilasi palauttamiseen tarvittavan:
+   - Projektisi (kansio skrypty/ — .txt-kerrontiedostot, .md Maailman Kirja -tiedostot, _streszczenie.txt-tiivistelmät; kansio opowiesci/ — interaktiiviset pelit).
+   - API-avaimen (tiedosto golden_key.env sovelluksen pääkansiossa).
+   - Omat foneettiset sääntösi, aksentit, salakirjoitukset, jos olet muokannut Sääntöjen Hallinnassa (kansio dictionaries/<kielikoodi>/, esim. dictionaries/pl/akcenty/wloski.yaml).
+   - Sovelluksen asetukset ja luovien tilojen valinnat (kansio runtime/skrypty/, .mode-tiedostot).
+   - Eristetyn Python-ympäristön (kansio runtime/), jonka ansiosta sinun ei tarvitse asentaa uudelle tietokoneelle mitään lisäksi.
+5. Uudella tietokoneella: lataa uusin asennusohjelma GitHubin Releases-välilehdeltä ja asenna sovellus tavallisesti. Käynnistä ohjelma kerran, jotta se luo tyhjän konfiguraatiotiedostorakenteen. Sulje sovellus. Kopioi sitten aiemmin tallennettu kansio uuden asennuksen päälle tiedostot ylikirjoittaen — tai valitse vain kiinnostavat kansiot (skrypty/, opowiesci/, golden_key.env) ja liitä ne uuden asennuksen vastaaviin paikkoihin.
+
+Vinkki NVDA-käyttäjille: Sovellusnäppäimellä avattava pikavalikko „Avaa tiedoston sijainti" on täysin saavutettava — NVDA lukee jokaisen kohdan natiivisti. Kun Resurssienhallinta avautuu kohdekansiossa, käytä Alt+Ylös siirtyäksesi yhden tason ylemmäs, sitten Ctrl+A valitaksesi kaiken ja Ctrl+C kopioidaksesi.
+
+Vinkki: „Avaa tiedoston sijainti" on natiivinimi suomenkielisessä Windowsissa. Englanninkielisessä järjestelmässä se on „Open file location", muissa kieliversioissa — vastaavasti käyttöjärjestelmän paikallisella kielellä.
 
 
 KROK 2: Zasilanie API (Klucz OpenAI)

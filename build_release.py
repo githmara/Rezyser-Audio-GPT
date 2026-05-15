@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-import zipfile
 import subprocess
 import sys
 from pathlib import Path
@@ -555,8 +554,8 @@ def weryfikuj_runtime(sciezka_python: str) -> None:
         sys.exit(1)
 
 
-def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
-    """Przerywa budowanie, jeśli paczka tej wersji już leży na dysku.
+def sprawdz_czy_installer_juz_istnieje(nazwa_installer: str) -> None:
+    """Przerywa budowanie, jeśli installer tej wersji już leży na dysku.
 
     Celowo NIE nadpisujemy automatycznie — dzięki temu najnowszy release
     zostaje na dysku do czasu, gdy deweloper świadomie go usunie lub
@@ -568,14 +567,14 @@ def sprawdz_czy_zip_juz_istnieje(nazwa_zip: str) -> None:
     zerowy próg wejścia. Polski interfejs aplikacji dla end-userów
     (dictionaries/pl/gui/ui.yaml) zostaje bez zmian.
     """
-    if os.path.exists(nazwa_zip):
-        print(f"❌ FATAL: Release package {nazwa_zip} already exists in this directory.")
+    if os.path.exists(nazwa_installer):
+        print(f"❌ FATAL: Installer {nazwa_installer} already exists in this directory.")
         print()
         print("Pick one of three:")
         print(f"  (a) Bump the version in {SCIEZKA_VERSION}.")
-        print(f"  (b) Move the existing {nazwa_zip} somewhere else "
+        print(f"  (b) Move the existing {nazwa_installer} somewhere else "
               "(archive of previous releases).")
-        print(f"  (c) Delete {nazwa_zip} on purpose if you want to rebuild it "
+        print(f"  (c) Delete {nazwa_installer} on purpose if you want to rebuild it "
               "from the current state of the repo.")
         sys.exit(1)
 
@@ -610,64 +609,6 @@ def buduj_wpisy_inno(kody: list[str], katalog_inno: Path) -> list[tuple[str, str
         wpisy.append((nazwa, plik))
     return wpisy
 
-
-
-# =============================================================================
-# Reguły wykluczania plików (wspólne dla ZIP-a i filtrów)
-# =============================================================================
-IGNOROWANE_FOLDERY = {'.git', '.github', '.vscode', '.cline', '.claude', '__pycache__', 'skrypty', 'opowiesci', 'venv', '.venv', 'env', 'notatki_dev'}
-# Skrypty infrastruktury developerskiej (nigdy nie trafiają do paczki dla
-# end-usera). Nazwy zangielszczone w 13.1 — patrz changelog manual.yaml:
-#   skonfiguruj_dev.bat  → setup_dev.bat
-#   skonfiguruj_dev.sh   → setup_dev.sh   (filtrowane przez `.sh` w IGNOROWANE_ROZSZERZENIA)
-#   uruchom_rezysera_dev.bat → run_dev.bat
-#   uruchom_rezysera.sh  → run.sh         (filtrowane przez `.sh` w IGNOROWANE_ROZSZERZENIA)
-#   buduj_wydanie.py     → build_release.py
-#   skrypt_instalatora.iss → installer.iss
-IGNOROWANE_PLIKI = {'.clinerules', 'requirements.txt', '.gitignore', 'build_release.py', 'installer.iss', 'golden_key.env', 'setup_dev.bat', 'run_dev.bat', 'buduj_wielojezyczne_docs.py', 'buduj_wielojezyczne_ui.py'}
-IGNOROWANE_ROZSZERZENIA = {'.env', '.pyc', '.md', '.sh', '.jsonl'}
-KATALOG_ZRODLOWY = "."
-
-
-
-def czy_ignorowac(sciezka, nazwa_pliku):
-    """Decyduje, czy dany plik ma być pominięty w paczce ZIP."""
-    sciezka_ukosniki = sciezka.replace('\\', '/')
-    czesci_sciezki = sciezka_ukosniki.split('/')
-    if any(ignorowany in czesci_sciezki for ignorowany in IGNOROWANE_FOLDERY):
-        return True
-
-    # Dane gier modułu Opowieści (v15.0+) — `runtime/opowiesci/<gra>.{game.json,story.jsonl}`.
-    # Tu trzeba precyzyjnej ścieżki, nie samej nazwy folderu, bo `opowiesci`
-    # występuje też w `dictionaries/<kod>/opowiesci/` (prompty systemowe LLM,
-    # MUSZĄ być w paczce). Wykluczamy WYŁĄCZNIE wariant z `runtime/`, zostawiając
-    # paczki promptów nietknięte. `os.walk` zwraca `root` bez trailing slash,
-    # więc sprawdzamy zarówno suffix (sam folder) jak i prefix (pliki w środku).
-    if sciezka_ukosniki.endswith('runtime/opowiesci') or 'runtime/opowiesci/' in sciezka_ukosniki:
-        return True
-
-    # Szablony YAML dokumentacji end-userowej — `dictionaries/<kod>/gui/dokumentacja/*.yaml`.
-    # Te pliki są surowcem developerskim (treść z placeholderami `{app.wersja}`);
-    # end-user dostaje przetworzone wersje w `docs/<id>.<kod>.txt`, generowane
-    # przez `generuj_dokumentacje.py` przed pakowaniem. Do paczki trafiają
-    # tylko docelowe .txt, bez surowych YAML-i — inaczej użytkownik widziałby
-    # w aplikacji DWA warianty tego samego dokumentu i nie wiedział, który czytać.
-    if '/gui/dokumentacja' in sciezka_ukosniki:
-        return True
-
-    if nazwa_pliku in IGNOROWANE_PLIKI:
-        return True
-
-    _, ext = os.path.splitext(nazwa_pliku)
-    if ext.lower() in IGNOROWANE_ROZSZERZENIA:
-        return True
-
-    # --- SMART FILTER: Ochrona runtime/ ---
-    # Ignorujemy pliki .exe i .zip TYLKO jeśli leżą bezpośrednio w głównym folderze ('.')
-    if sciezka == KATALOG_ZRODLOWY and ext.lower() in {'.exe', '.zip'}:
-        return True
-
-    return False
 
 
 # =============================================================================
@@ -711,13 +652,19 @@ def main() -> None:
         sys.exit(1)
     print(f"✅ Version loaded: {wersja}\n")
 
-    nazwa_zip = f"Rezyser_Audio_v{wersja}_Portable.zip"
+    nazwa_installer = f"Rezyser_Audio_v{wersja}_Installer.exe"
 
-    # 4. Refuse to overwrite a previous release package.
-    sprawdz_czy_zip_juz_istnieje(nazwa_zip)
+    # 4. Refuse to overwrite a previous installer of the same version.
+    # Od v15.2.5: ZIP Portable został wycięty z release flow (single deployment
+    # path — patrz RELEASE_NOTES.md::15.2.5). Pozostaje tylko Installer EXE,
+    # który i tak instaluje do per-user %LocalAppData%\Programs (PrivilegesRequired=
+    # lowest w installer.iss), więc nie wymaga praw administratora i jest de facto
+    # equivalent funkcjonalny dawnego ZIP-a, bez ryzyka autoupdate'u nadpisującego
+    # nieznaną lokalizację.
+    sprawdz_czy_installer_juz_istnieje(nazwa_installer)
 
-    # 5. Last-chance developer confirmation before we actually compress.
-    odp = input(f"Build package {nazwa_zip}? (y/n): ").strip().lower()
+    # 5. Last-chance developer confirmation before we actually compile.
+    odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
     if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
         print("Build aborted.")
         sys.exit(0)
@@ -725,25 +672,13 @@ def main() -> None:
     # 6. Regenerate end-user documentation (docs/<id>.<kod>.txt).
     # We call the generator in-process (same Python process, no subprocess) —
     # the module has its own UTF-8 fix and does not need a fresh session.
-    # This guarantees the ZIP package ships fresh docs/ even when the developer
+    # This guarantees the installer ships fresh docs/ even when the developer
     # forgot to run the generator manually after editing a template.
     print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
     generuj_dokumentacje.generuj()
     print("✅ Documentation regenerated.\n")
 
-    # 7. Build the Portable ZIP package.
-    print(f"[1/2] Packing the Portable ZIP: {nazwa_zip}...")
-    with zipfile.ZipFile(nazwa_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(KATALOG_ZRODLOWY):
-            dirs[:] = [d for d in dirs if d not in IGNOROWANE_FOLDERY]
-            for file in files:
-                if not czy_ignorowac(root, file):
-                    pelna_sciezka = os.path.join(root, file)
-                    sciezka_w_zip = os.path.relpath(pelna_sciezka, KATALOG_ZRODLOWY)
-                    zipf.write(pelna_sciezka, sciezka_w_zip)
-    print("✅ Done!")
-
-    # 8. Build the Installer EXE (always — required for GitHub Releases auto-update).
+    # 7. Build the Installer EXE.
     iscc_exe = shutil.which("iscc")
     if iscc_exe is None:
         print("❌ FATAL: 'iscc' not found in PATH.")
@@ -821,7 +756,7 @@ def main() -> None:
 
     nowy_iss = iss_etap_2
 
-    print("\n[2/2] Creating the installer...")
+    print("\nCreating the installer...")
     tmp_created = False
     try:
         sciezka_tmp.write_text(nowy_iss, encoding="utf-8")

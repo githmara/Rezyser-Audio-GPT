@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 15.2.4 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 15.2.5 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -7,10 +7,12 @@ Zestaw składa się z głównego studia (Reżyseria), narzędzia do tłumaczeń 
 
 KROK 1: Pierwsze uruchomienie (Cross-Platform)
 
-Aplikacja jest w pełni przenośna i gotowa do działania na systemie Windows. Po prostu wejdź do folderu i uruchom plik run.bat (klikając w niego dwukrotnie lub tworząc do niego skrót na pulpicie). Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu — Reżyser Audio GPT. Żadnej przeglądarki, żadnego serwera w tle. Gdy skończysz pracę, po prostu zamknij okno programu.
+Pobierz najnowszy instalator z zakładki Releases na GitHubie (plik Rezyser_Audio_v<numer>_Installer.exe) i uruchom go dwukrotnym kliknięciem. Instalator zaproponuje domyślną lokalizację instalacji — folder Programs w katalogu lokalnym Twojego konta — i nie wymaga uprawnień administratora. Możesz wybrać własną ścieżkę przyciskiem „Przeglądaj"; w takim wypadku ZAPAMIĘTAJ ją (przyda się przy aktualizacjach — patrz „Automatyczne aktualizacje" niżej). Po instalacji uruchom program ikoną na pulpicie albo z Menu Start. Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu — Reżyser Audio GPT. Żadnej przeglądarki, żadnego serwera w tle. Gdy skończysz pracę, po prostu zamknij okno programu.
+
+Cała aplikacja, łącznie z silnikiem Pythona, projektami i kluczem API, żyje w jednym folderze pod ścieżką instalacji — cały folder można przenieść na pendrive, do chmury albo na inny komputer (szczegółowa instrukcja w sekcji „Przenoszenie projektów i klucza API" niżej).
 
 
-Ważne: Folder runtime/ jest częścią wyłącznie gotowych paczek dla systemu Windows pobieranych z zakładki Releases na GitHubie. Zawiera izolowane środowisko Pythona gotowe do użycia bez instalacji. Jeśli klonujesz repozytorium, tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
+Ważne: Folder runtime/ wewnątrz folderu instalacyjnego zawiera izolowane środowisko Pythona gotowe do użycia bez osobnej instalacji systemowej. Jeśli klonujesz repozytorium (ścieżka dewelopera), tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
 
 --- Dla Programistów (Windows — repozytorium Git) ---
 
@@ -33,9 +35,30 @@ Automatyczne aktualizacje
 
 Aplikacja sprawdza przy starcie, czy na GitHubie dostępna jest nowsza wersja — sprawdzenie odbywa się w tle i nie blokuje interfejsu.
 
-Jeśli instalowałeś program przez gotowy plik instalatora (.exe): przy wykryciu nowszej wersji pojawi się okienko z pytaniem, czy ją pobrać. Po potwierdzeniu uruchomi się pasek postępu, a gdy pobieranie dobiegnie końca, aplikacja zamknie się automatycznie i nowy instalator uruchomi się samoczynnie — Twoje projekty i klucz API zostają nienaruszone.
+Jeśli instalowałeś program przez gotowy plik instalatora (.exe): przy wykryciu nowszej wersji pojawi się okienko z pytaniem, czy ją pobrać. Po potwierdzeniu uruchomi się pasek postępu, a gdy pobieranie dobiegnie końca, aplikacja zamknie się automatycznie i nowy instalator uruchomi się samoczynnie. WAŻNE: w oknie nowego instalatora upewnij się, że proponowana ścieżka instalacji jest TA SAMA co przy pierwszej instalacji (zwykle widoczna w polu „Folder docelowy"). Jeśli zaakceptujesz domyślną propozycję, a pierwotnie wybrałeś inną lokalizację przyciskiem „Przeglądaj", otrzymasz DRUGĄ pustą instalację bez Twoich projektów i klucza API — pierwsza nadal stoi w starym miejscu, ale skrót na pulpicie i z Menu Start zostanie podmieniony na nową. Jeśli zaakceptujesz tę samą ścieżkę co pierwotnie, instalator nadpisuje pliki silnika aplikacji i całą paczkę reguł (folder dictionaries/) — Twoje projekty (foldery skrypty/, opowiesci/) i klucz API (golden_key.env) pozostają nienaruszone. WAŻNE: jeśli edytowałeś przez Managera Reguł pliki istniejące w paczce (np. zmiany akcentu we `dictionaries/pl/akcenty/wloski.yaml`), te edycje ZOSTANĄ NADPISANE przy aktualizacji — przed potwierdzeniem aktualizacji zrób kopię zapasową folderu `dictionaries/` według procedury z sekcji „Przenoszenie projektów i klucza API" niżej (wystarczy skopiować sam folder `dictionaries/` na pendrive), a po aktualizacji wgraj go z powrotem nadpisując nowsze pliki. Zupełnie nowe reguły, które stworzyłeś od podstaw i których nie ma w paczce (np. własny dodatkowy język bazowy albo własny szyfr), pozostają nietknięte automatycznie — instalator nie usuwa plików spoza paczki.
+
+Jeśli nie pamiętasz swojej ścieżki instalacji, są dwa szybkie sposoby na jej odzyskanie. Windows 11: w menu kontekstowym skrótu na pulpicie wybierz „Otwórz lokalizację pliku", przejdź poziom wyżej (klawisz Backspace lub strzałka „W górę" na pasku narzędzi), zaznacz folder z aplikacją i wciśnij Ctrl+Shift+C (lub wybierz „Kopiuj jako ścieżkę" z menu kontekstowego) — pełna ścieżka trafi do schowka w cudzysłowach (wklejając do instalatora pamiętaj o usunięciu samych cudzysłowów). Starsze wersje Windows (7/8/10): kliknij prawym przyciskiem myszy na skrócie i wybierz „Właściwości"; w zakładce „Skrót" w polu „Element docelowy" zobaczysz pełną ścieżkę do `run.bat` — skopiuj ją i usuń końcowe `\run.bat`, pozostanie sama ścieżka folderu instalacyjnego.
 
 Jeśli korzystasz z repozytorium Git (programiści i użytkownicy macOS/Linux): zamiast propozycji pobrania zobaczysz informację o nowej wersji z bezpośrednim linkiem do strony wydania na GitHubie. Pobierz stamtąd archiwum „Source code" lub zaktualizuj repozytorium komendą git pull.
+
+Przenoszenie projektów i klucza API (migracja)
+
+Jeśli chcesz przenieść swoje projekty, klucz API i lokalne ustawienia na inny komputer (lub odtworzyć całość po przeinstalowaniu systemu Windows), nie ma potrzeby ręcznie kopiować pojedynczych plików — cały folder aplikacji jest samowystarczalny.
+
+1. Upewnij się, że aplikacja jest CAŁKOWICIE zamknięta. Jeśli widzisz ikonę programu w zasobniku systemowym (obok zegara, po prawej stronie paska zadań), kliknij prawym przyciskiem myszy i wybierz „Zamknij". Otwarte pliki blokują kopiowanie.
+2. Znajdź skrót Reżyser Audio GPT na pulpicie. Kliknij na nim prawym przyciskiem myszy (lub klawiszem Aplikacji albo Shift+F10 przy nawigacji NVDA) i wybierz opcję „Otwórz lokalizację pliku".
+3. Otworzy się okno Eksploratora Windows w folderze instalacyjnym programu. Naciśnij klawisz Backspace albo wybierz strzałkę „W górę" na pasku narzędzi, aby przejść jeden poziom wyżej — zobaczysz tam pełny folder z aplikacją.
+4. Skopiuj cały ten folder na pendrive, dysk w chmurze (OneDrive, Google Drive, Dropbox) albo zewnętrzny dysk. Folder zawiera wszystko, co potrzebne do przywrócenia stanu pracy:
+   - Twoje projekty (folder skrypty/ — pliki .txt narracji, .md Księgi Świata, _streszczenie.txt; folder opowiesci/ — gry interaktywne).
+   - Klucz API (plik golden_key.env w głównym folderze aplikacji).
+   - Własne reguły fonetyczne, akcenty, szyfry, jeśli edytowałeś coś w Managerze Reguł (folder dictionaries/<kod_jezyka>/, np. dictionaries/pl/akcenty/wloski.yaml).
+   - Preferencje aplikacji i wybór trybów twórczych (folder runtime/skrypty/, pliki .mode).
+   - Izolowane środowisko Pythona (folder runtime/), dzięki czemu nie musisz nic doinstalowywać na nowym komputerze.
+5. Na nowym komputerze: pobierz najnowszy instalator z zakładki Releases na GitHubie i zainstaluj aplikację standardowo. Uruchom program raz, żeby utworzył pustą strukturę plików konfiguracyjnych. Zamknij aplikację. Następnie skopiuj wcześniej zapisany folder w miejsce instalacji nadpisując pliki — albo wybierz selektywnie tylko interesujące cię foldery (skrypty/, opowiesci/, golden_key.env) i wklej je w odpowiednie miejsca nowej instalacji.
+
+Wskazówka dla użytkowników NVDA: menu kontekstowe „Otwórz lokalizację pliku" wywoływane klawiszem Aplikacji jest w pełni dostępne — NVDA czyta każdą pozycję po polsku. Po otwarciu Eksploratora w docelowym folderze użyj skrótu Alt+W żeby przejść poziom wyżej, a następnie Ctrl+A żeby zaznaczyć wszystko i Ctrl+C żeby skopiować.
+
+Wskazówka: opcja „Otwórz lokalizację pliku" to nazwa natywna dla polskiej wersji Windows. W angielskim systemie brzmi „Open file location", w pozostałych wersjach językowych — analogicznie w lokalnym języku systemu operacyjnego.
 
 
 KROK 2: Zasilanie API (Klucz OpenAI)

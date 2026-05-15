@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida completa (Versione 15.2.4 – Versione di Pubblicazione)
+Manuale del Regista Audio AI - Guida completa (Versione 15.2.5 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
@@ -7,9 +7,12 @@ Il set è composto dallo studio principale (Regia), dallo strumento per traduzio
 
 KROK 1: Primo avvio (Cross-Platform)
 
-L'applicazione è completamente portatile e pronta per funzionare su sistemi Windows. Basta entrare nella cartella e avviare il file run.bat (facendo doppio clic su di esso o creando un collegamento sul desktop). Si aprirà una finestra del terminale a breve termine (scompare automaticamente) e dopo un momento apparirà la finestra principale del programma — Regista Audio GPT. Nessun browser, nessun server in background. Quando hai finito di lavorare, basta chiudere la finestra del programma.
+Scarica l'installatore più recente dalla scheda Releases su GitHub (il file Rezyser_Audio_v<numero>_Installer.exe) ed eseguilo con un doppio clic. L'installatore propone una posizione di installazione predefinita — la cartella Programs all'interno della directory locale del tuo account — e non richiede privilegi di amministratore. Puoi scegliere il tuo percorso con il pulsante „Sfoglia"; in tal caso RICORDALO (ti servirà durante gli aggiornamenti — vedi „Aggiornamenti automatici" sotto). Dopo l'installazione, avvia il programma tramite l'icona sul desktop o dal Menu Start. Si aprirà una finestra del terminale a breve termine (scompare automaticamente) e dopo un momento apparirà la finestra principale del programma — Regista Audio GPT. Nessun browser, nessun server in background. Quando hai finito di lavorare, basta chiudere la finestra del programma.
 
-Importante: La cartella runtime/ è parte esclusivamente dei pacchetti pronti per Windows scaricati dalla scheda Releases su GitHub. Contiene un ambiente Python isolato pronto all'uso senza installazione. Se cloni il repository, questa cartella non c'è e non dovrebbe esserci — in tal caso usi l'ambiente virtuale venv descritto nella sezione per sviluppatori qui sotto.
+L'intera applicazione — il motore Python, i tuoi progetti e la chiave API — vive in un'unica cartella sotto il percorso di installazione, quindi l'intera cartella può essere trasferita su una chiavetta USB, nel cloud o su un altro computer (istruzioni dettagliate nella sezione „Trasferimento di progetti e chiave API" sotto).
+
+
+Importante: La cartella runtime/ all'interno della cartella di installazione contiene un ambiente Python isolato pronto all'uso senza una installazione di sistema separata. Se cloni il repository (percorso dello sviluppatore), questa cartella non c'è e non dovrebbe esserci — in tal caso usi l'ambiente virtuale venv descritto nella sezione per sviluppatori qui sotto.
 
 --- Per Sviluppatori (Windows — repository Git) ---
 
@@ -30,9 +33,30 @@ Aggiornamenti automatici
 
 L'applicazione verifica all'avvio se è disponibile una versione più recente su GitHub — il controllo avviene in background e non blocca l'interfaccia.
 
-Se hai installato il programma tramite un file di installazione pronto (.exe): al rilevamento di una versione più recente apparirà una finestra che chiede se desideri scaricarla. Dopo la conferma, si avvierà una barra di progresso e, al termine del download, l'applicazione si chiuderà automaticamente e il nuovo installatore si avvierà da solo — i tuoi progetti e la chiave API rimangono intatti.
+Se hai installato il programma tramite un file di installazione pronto (.exe): al rilevamento di una versione più recente apparirà una finestra che chiede se desideri scaricarla. Dopo la conferma, si avvierà una barra di progresso e, al termine del download, l'applicazione si chiuderà automaticamente e il nuovo installatore si avvierà da solo. IMPORTANTE: nella finestra del nuovo installatore assicurati che il percorso di installazione proposto sia LO STESSO della prima installazione (di solito visibile nel campo „Cartella di destinazione"). Se accetti la proposta predefinita ma originariamente hai scelto un'altra posizione con il pulsante „Sfoglia", otterrai una SECONDA installazione vuota senza i tuoi progetti né la chiave API — la prima rimane nel vecchio posto, ma il collegamento sul desktop e nel Menu Start verrà sostituito per puntare alla nuova. Se accetti lo stesso percorso di prima, l'installatore sovrascrive i file del motore dell'applicazione e l'intero pacchetto di regole (cartella dictionaries/) — i tuoi progetti (cartelle skrypty/, opowiesci/) e la chiave API (golden_key.env) rimangono intatti. ATTENZIONE: se hai modificato tramite il Gestore delle Regole file che esistono nel pacchetto (ad esempio aggiustamenti di accento in `dictionaries/pl/akcenty/wloski.yaml`), tali modifiche SARANNO SOVRASCRITTE dall'aggiornamento — prima di confermare l'aggiornamento, esegui un backup della cartella `dictionaries/` seguendo la procedura nella sezione „Trasferimento di progetti e chiave API" più sotto (basta copiare la sola cartella `dictionaries/` su una chiavetta USB), e dopo l'aggiornamento incollala di nuovo sopra i nuovi file. Le regole completamente nuove che hai creato da zero e che non sono nel pacchetto (ad esempio una lingua di base aggiuntiva o un cifrario del tutto nuovo) vengono mantenute automaticamente — l'installatore non elimina mai file che non sono nel pacchetto.
+
+Se non ricordi il tuo percorso di installazione, ci sono due modi rapidi per recuperarlo. Windows 11: nel menu contestuale del collegamento sul desktop scegli „Apri percorso file", sali di un livello (tasto Backspace o freccia „Su" nella barra degli strumenti), seleziona la cartella dell'applicazione e premi Ctrl+Maiusc+C (oppure scegli „Copia come percorso" dal menu contestuale) — il percorso completo finisce negli appunti racchiuso tra virgolette (quando lo incolli nell'installatore, ricordati di rimuovere solo le virgolette). Versioni precedenti di Windows (7/8/10): clic destro sul collegamento e scegli „Proprietà"; nella scheda „Collegamento" il campo „Destinazione" mostra il percorso completo a `run.bat` — copialo ed elimina la `\run.bat` finale, rimarrà il puro percorso della cartella di installazione.
 
 Se utilizzi il repository Git (sviluppatori e utenti macOS/Linux): invece della proposta di download vedrai un'informazione sulla nuova versione con un link diretto alla pagina di rilascio su GitHub. Scarica da lì l'archivio "Source code" o aggiorna il repository con il comando git pull.
+
+Trasferimento di progetti e chiave API (migrazione)
+
+Se vuoi trasferire i tuoi progetti, la chiave API e le impostazioni locali su un altro computer (o ripristinare tutto dopo aver reinstallato Windows), non è necessario copiare manualmente i singoli file — l'intera cartella dell'applicazione è autosufficiente.
+
+1. Assicurati che l'applicazione sia COMPLETAMENTE chiusa. Se vedi l'icona del programma nell'area di notifica (accanto all'orologio, sul lato destro della barra delle applicazioni), fai clic con il tasto destro e scegli „Chiudi". I file aperti bloccano la copia.
+2. Trova il collegamento Regista Audio GPT sul desktop. Fai clic con il tasto destro (o premi il tasto Applicazione, o Maiusc+F10 quando navighi con NVDA) e scegli l'opzione „Apri percorso file".
+3. Si apre una finestra di Esplora risorse di Windows nella cartella di installazione del programma. Premi Backspace o clicca sulla freccia „Su" nella barra degli strumenti per salire di un livello — lì vedrai la cartella completa dell'applicazione.
+4. Copia l'intera cartella su una chiavetta USB, un disco cloud (OneDrive, Google Drive, Dropbox) o un disco esterno. La cartella contiene tutto il necessario per ripristinare il tuo stato di lavoro:
+   - I tuoi progetti (cartella skrypty/ — file .txt di narrazione, file .md del Libro del Mondo, _streszczenie.txt riassunti; cartella opowiesci/ — giochi interattivi).
+   - La chiave API (file golden_key.env nella cartella principale dell'applicazione).
+   - Le tue regole fonetiche personalizzate, accenti, cifrari, se hai modificato qualcosa nel Gestore delle Regole (cartella dictionaries/<codice_lingua>/, ad esempio dictionaries/pl/akcenty/wloski.yaml).
+   - Le preferenze dell'applicazione e la selezione delle modalità creative (cartella runtime/skrypty/, file .mode).
+   - L'ambiente Python isolato (cartella runtime/), grazie al quale non devi installare nulla in più sul nuovo computer.
+5. Sul nuovo computer: scarica l'installatore più recente dalla scheda Releases su GitHub e installa l'applicazione normalmente. Avvia il programma una volta per fargli creare la struttura vuota dei file di configurazione. Chiudi l'applicazione. Quindi copia la cartella salvata in precedenza sopra la nuova installazione sovrascrivendo i file — oppure seleziona solo le cartelle che ti interessano (skrypty/, opowiesci/, golden_key.env) e incollale nelle posizioni corrispondenti della nuova installazione.
+
+Suggerimento per gli utenti NVDA: il menu contestuale „Apri percorso file" invocato con il tasto Applicazione è completamente accessibile — NVDA legge ogni voce nativamente. Una volta che Esplora risorse si apre nella cartella di destinazione, usa Alt+Su per salire di un livello, poi Ctrl+A per selezionare tutto e Ctrl+C per copiare.
+
+Suggerimento: „Apri percorso file" è il nome nativo dell'opzione in un'installazione italiana di Windows. Nel sistema in inglese si chiama „Open file location", nelle altre versioni linguistiche — analogamente nella lingua locale del sistema operativo.
 
 
 KROK 2: Zasilanie API (Klucz OpenAI)

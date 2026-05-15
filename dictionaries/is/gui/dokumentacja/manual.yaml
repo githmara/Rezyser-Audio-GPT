@@ -22,9 +22,12 @@ tresc:
   krok_1_pierwsze_uruchomienie: |
     KROK 1: Fyrsta gangsetning (Cross-Platform)
 
-    Forritið er fullkomlega færanlegt og tilbúið til notkunar á Windows kerfi. Farðu einfaldlega inn í möppuna og keyrðu skrána run.bat (með því að tvísmella á hana eða búa til flýtileið á skjáborðinu). Stutt skráargluggi opnast (hverfur sjálfkrafa) og eftir smá stund birtist aðalgluggi forritsins — {app.nazwa}. Enginn vafri, enginn bakgrunnsþjónn. Þegar þú ert búinn að vinna, lokaðu einfaldlega forritsglugganum.
+    Sæktu nýjasta uppsetningarforritið úr Releases-flipanum á GitHub (skráin Rezyser_Audio_v<númer>_Installer.exe) og keyrðu það með tvísmelli. Uppsetningarforritið stingur upp á sjálfgefinni uppsetningarstaðsetningu — Programs-möppunni í staðbundinni möppu reikningsins þíns — og krefst ekki stjórnandaaðgangs. Þú getur valið þína eigin slóð með „Vafra"-hnappinum; í því tilviki SKALTU MUNA hana (þú þarft hana við uppfærslur — sjá „Sjálfvirkar uppfærslur" hér að neðan). Eftir uppsetningu skaltu keyra forritið með flýtileið af skjáborðinu eða úr Start-valmyndinni. Stutt skráargluggi opnast (hverfur sjálfkrafa) og eftir smá stund birtist aðalgluggi forritsins — {app.nazwa}. Enginn vafri, enginn bakgrunnsþjónn. Þegar þú ert búinn að vinna, lokaðu einfaldlega forritsglugganum.
 
-    Mikilvægt: Möppan runtime/ er aðeins hluti af tilbúnum pakkningum fyrir Windows sem hægt er að sækja úr Releases flipanum á GitHub. Hún inniheldur einangrað Python umhverfi tilbúið til notkunar án uppsetningar. Ef þú klónar geymsluna, er þessi mappa ekki til staðar og ætti ekki að vera — þú notar þá sýndarumhverfið venv eins og lýst er í hlutanum fyrir forritara hér að neðan.
+    Allt forritið — Python-vélin, verkefnin þín og API-lykillinn — býr í einni möppu undir uppsetningarslóðinni, þannig að hægt er að færa alla möppuna á USB-lykli, í skýið eða á aðra tölvu (nákvæmar leiðbeiningar í kaflanum „Að flytja verkefni og API-lykil" hér að neðan).
+
+
+    Mikilvægt: Möppan runtime/ innan uppsetningarmöppunnar inniheldur einangrað Python umhverfi tilbúið til notkunar án sérstakrar kerfisuppsetningar. Ef þú klónar geymsluna (þróunaraðilaleið), er þessi mappa ekki til staðar og ætti ekki að vera — þú notar þá sýndarumhverfið venv eins og lýst er í hlutanum fyrir forritara hér að neðan.
 
     --- Fyrir Forritara (Windows — Git geymsla) ---
 
@@ -45,9 +48,30 @@ tresc:
 
     Forritið athugar við gangsetningu hvort nýrri útgáfa sé tiltæk á GitHub — athugunin fer fram í bakgrunni og truflar ekki viðmótið.
 
-    Ef þú settir upp forritið með tilbúinni uppsetningarskrá (.exe): þegar nýrri útgáfa er greind birtist gluggi sem spyr hvort þú viljir sækja hana. Eftir staðfestingu mun framvindustika birtast og þegar niðurhalinu lýkur lokast forritið sjálfkrafa og nýja uppsetningarskráin keyrir sjálfkrafa — verkefnin þín og API lykillinn verða óbreytt.
+    Ef þú settir upp forritið með tilbúinni uppsetningarskrá (.exe): þegar nýrri útgáfa er greind birtist gluggi sem spyr hvort þú viljir sækja hana. Eftir staðfestingu mun framvindustika birtast og þegar niðurhalinu lýkur lokast forritið sjálfkrafa og nýja uppsetningarskráin keyrir sjálfkrafa. MIKILVÆGT: í glugga nýja uppsetningarforritsins skaltu tryggja að uppástungan uppsetningarslóðin sé SÚ SAMA og við fyrstu uppsetninguna (yfirleitt sjáanleg í reitnum „Áfangamappa"). Ef þú samþykkir sjálfgefnu uppástunguna en valdir upphaflega annan stað með „Vafra"-hnappinum, færðu AÐRA tóma uppsetningu án verkefnanna þinna og API-lykils — sú fyrri stendur enn á gamla staðnum, en flýtileiðir á skjáborðinu og í Start-valmyndinni eru færðar yfir á nýju uppsetninguna. Ef þú samþykkir sömu slóð og upphaflega skrifar uppsetningarforritið yfir vélaskrár forritsins og allan reglupakkann (mappa dictionaries/) — verkefnin þín (möppur skrypty/, opowiesci/) og API-lykillinn (golden_key.env) haldast óbreytt. AÐVÖRUN: ef þú hefur breytt skrám í Reglustjóra sem eru í pakkanum (t.d. hreimstillingar í `dictionaries/pl/akcenty/wloski.yaml`), þá VERÐUR SKRIFAÐ YFIR þessar breytingar við uppfærsluna — áður en þú staðfestir uppfærsluna skaltu taka afrit af möppunni `dictionaries/` samkvæmt verklaginu í kaflanum „Að flytja verkefni og API-lykil" hér að neðan (það nægir að afrita aðeins möppuna `dictionaries/` á USB-lykli), og eftir uppfærsluna límdu hana aftur yfir nýju skrárnar. Algjörlega nýjar reglur sem þú hefur búið til frá grunni og eru ekki í pakkanum (t.d. viðbótar grunnmál eða alveg ný dulkóðun) varðveitast sjálfkrafa — uppsetningarforritið eyðir aldrei skrám sem eru ekki í pakkanum.
+
+    Ef þú manst ekki eftir uppsetningarslóð þinni eru tvær fljótlegar leiðir til að endurheimta hana. Windows 11: í samhengisvalmynd flýtileiðar á skjáborðinu skaltu velja „Opna staðsetningu skráar", farðu einu stigi ofar (Backspace-takki eða „Upp"-örin á tækjastikunni), veldu möppu forritsins og ýttu á Ctrl+Shift+C (eða veldu „Afrita sem slóð" úr samhengisvalmyndinni) — heila slóðin fer á klippiborðið með gæsalöppum (þegar þú límir hana inn í uppsetningarforritið, mundu að fjarlægja aðeins gæsalappirnar). Eldri Windows-útgáfur (7/8/10): hægrismelltu á flýtileiðina og veldu „Eiginleikar"; í flipanum „Flýtileið" í reitnum „Mark" sérðu heila slóð að `run.bat` — afritaðu hana og fjarlægðu `\run.bat` í lokin, eftir stendur ein og sér slóð uppsetningarmöppunnar.
 
     Ef þú notar Git geymslu (forritarar og macOS/Linux notendur): í stað þess að fá tillögu um niðurhal sérðu tilkynningu um nýja útgáfu með beinni tengingu á útgáfusíðuna á GitHub. Sæktu þaðan „Source code“ skjalasafnið eða uppfærðu geymsluna með skipuninni git pull.
+
+    Að flytja verkefni og API-lykil (flutningur)
+
+    Ef þú vilt flytja verkefnin þín, API-lykilinn og staðbundnar stillingar á aðra tölvu (eða endurheimta allt eftir endur-uppsetningu á Windows), þarf ekki að afrita einstakar skrár handvirkt — öll mappa forritsins er sjálfstæð.
+
+    1. Tryggðu að forritið sé ALGJÖRLEGA lokað. Ef þú sérð táknmynd forritsins á tilkynningasvæðinu (við hliðina á klukkunni, hægra megin á verkstikunni), hægrismelltu á hana og veldu „Loka". Opnar skrár hindra afritun.
+    2. Finndu flýtileið {app.nazwa} á skjáborðinu. Hægrismelltu á hana (eða ýttu á Forritslykil eða Shift+F10 við NVDA-leiðsögn) og veldu valkostinn „Opna staðsetningu skráar".
+    3. Windows Explorer gluggi opnast í uppsetningarmöppu forritsins. Ýttu á Backspace eða smelltu á „Upp"-örina á tækjastikunni til að fara einu stigi ofar — þar sérðu heila möppu forritsins.
+    4. Afritaðu alla möppuna á USB-lykil, skýjadrif (OneDrive, Google Drive, Dropbox) eða ytri disk. Mappan inniheldur allt sem þarf til að endurheimta vinnustöðu þína:
+       - Verkefnin þín (mappa skrypty/ — .txt frásögnskrár, .md Heimabókarskrár, _streszczenie.txt samantektir; mappa opowiesci/ — gagnvirkir leikir).
+       - API-lykilinn (skráin golden_key.env í aðalmöppu forritsins).
+       - Þínar eigin hljóðfræðireglur, hreim, dulmál, ef þú breyttir einhverju í Reglustjóra (mappa dictionaries/<tungumálakóði>/, t.d. dictionaries/pl/akcenty/wloski.yaml).
+       - Stillingar forritsins og val á sköpunarham (mappa runtime/skrypty/, .mode-skrár).
+       - Einangrað Python-umhverfi (mappa runtime/), þökk sé því þarftu ekki að setja upp neitt aukalega á nýju tölvunni.
+    5. Á nýju tölvunni: sæktu nýjasta uppsetningarforritið úr Releases-flipanum á GitHub og settu forritið upp á venjulegan hátt. Keyrðu forritið einu sinni til að það búi til tóma uppbyggingu stillingaskráa. Lokaðu forritinu. Afritaðu síðan áður vistuðu möppuna yfir nýju uppsetninguna og yfirskrifaðu skrárnar — eða veldu sérstaklega aðeins þær möppur sem þú vilt (skrypty/, opowiesci/, golden_key.env) og límdu þær í samsvarandi staði í nýju uppsetningunni.
+
+    Ábending fyrir NVDA-notendur: samhengisvalmyndin „Opna staðsetningu skráar" sem kölluð er fram með Forritslykli er að fullu aðgengileg — NVDA les hvert atriði innfætt. Þegar Explorer opnast í markmöppunni skaltu nota Alt+Upp til að fara einu stigi ofar, síðan Ctrl+A til að velja allt og Ctrl+C til að afrita.
+
+    Ábending: „Opna staðsetningu skráar" er innfædda nafnið á valkostinum í íslenskri Windows-uppsetningu. Í enska kerfinu heitir hann „Open file location", í öðrum útgáfum tungumáls — á samsvarandi hátt á staðbundnu tungumáli stýrikerfisins.
   krok_2_klucz_api: |
     KROK 2: Zasilanie API (Klucz OpenAI)
 

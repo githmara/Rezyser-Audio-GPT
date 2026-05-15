@@ -20,7 +20,7 @@ tresc:
 
     **Altre versioni linguistiche / Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
   wprowadzenie: |
-    Zestaw przenośnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
+    Insieme di strumenti autonomi alimentati dall'IA per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, nonché per condurre giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata sin dall'inizio con piena accessibilità per i lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra del programma.
 
     Wersja: **{numer_wersji}** · Wspierane języki natywnie ({liczba_kompletnych_jezykow}): {lista_kompletnych_jezykow_natywnie}.
   glowne_moduly: |
@@ -88,9 +88,7 @@ tresc:
 
     ### Per utenti finali (Windows)
 
-    1. Scarica l'ultima versione dalla scheda **Releases** (pacchetto contrassegnato come *Latest*). Sono disponibili due forme:
-       * **Installer EXE** — installa in Program Files (o nella cartella scelta), crea collegamenti nel Menu Start e sul desktop. Al termine dell'installazione, apre facoltativamente il manuale utente nel gestore predefinito di file .txt.
-       * **Portable ZIP** — estrai in qualsiasi cartella, non richiede diritti di amministratore. Dopo l'estrazione, esegui `run.bat`.
+    1. Scarica l'ultima versione dalla scheda **Releases** (pacchetto contrassegnato come *Latest*) — il file `Rezyser_Audio_v<numero>_Installer.exe`. Avvialo con un doppio clic. L'installatore atterra per impostazione predefinita nella directory locale del tuo account (`%LocalAppData%\Programs\Reżyser Audio GPT`) e non richiede diritti di amministratore; puoi scegliere il tuo percorso con il pulsante „Sfoglia". Al termine crea collegamenti nel Menu Start e sul desktop, e apre facoltativamente il manuale utente nell'editor predefinito di file `.txt`.
     2. **Configurazione API OpenAI:** Al primo avvio, l'applicazione segnalerà la mancanza della chiave nella sezione System Check. Clicca sul pulsante visibile per generare il file `golden_key.env`, aprilo in un editor di testo e incolla la tua chiave (che inizia con `sk-proj-`).
     3. **Primi passi:** Apri il file `docs/manual.pl.txt` (o in un'altra lingua) nella cartella di installazione — è un manuale utente completo scritto in un linguaggio accessibile a tutti gli utenti, non solo agli sviluppatori.
   instalacja_deweloperzy: |

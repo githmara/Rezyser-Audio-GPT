@@ -5,9 +5,9 @@
 **Andere Sprachversionen / Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
 
 
-Ein tragbares Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
+Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **15.2.4** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **15.2.5** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -83,9 +83,7 @@ Dies ist eine grundlegende Einschränkung der aktuellen Generation künstlicher 
 
 ### Für Endbenutzer (Windows)
 
-1. Laden Sie die neueste Version aus dem **Releases**-Tab herunter (Paket mit der Bezeichnung *Latest*). Es stehen zwei Formen zur Verfügung:
-   * **Installer EXE** — installiert in Program Files (oder einem ausgewählten Ordner), erstellt Verknüpfungen im Startmenü und auf dem Desktop. Nach Abschluss der Installation wird optional die Bedienungsanleitung im Standard-Handler für .txt-Dateien geöffnet.
-   * **Portable ZIP** — entpacken Sie es in einen beliebigen Ordner, keine Administratorrechte erforderlich. Nach dem Entpacken führen Sie `run.bat` aus.
+1. Laden Sie die neueste Version aus dem **Releases**-Tab herunter (Paket mit der Bezeichnung *Latest*) — die Datei `Rezyser_Audio_v<Nummer>_Installer.exe`. Starten Sie sie per Doppelklick. Der Installer landet standardmäßig im lokalen Verzeichnis Ihres Benutzerkontos (`%LocalAppData%\Programs\Reżyser Audio GPT`) und erfordert keine Administratorrechte; mit der Schaltfläche „Durchsuchen" können Sie einen eigenen Pfad wählen. Nach Abschluss werden Verknüpfungen im Startmenü und auf dem Desktop erstellt, und optional wird die Bedienungsanleitung im Standard-Editor für `.txt`-Dateien geöffnet.
 2. **OpenAI API-Konfiguration:** Beim ersten Start signalisiert die Anwendung das Fehlen eines Schlüssels im Abschnitt System Check. Klicken Sie auf die sichtbare Schaltfläche, um die Datei `golden_key.env` zu generieren, öffnen Sie sie in einem Texteditor und fügen Sie Ihren Schlüssel ein (beginnend mit `sk-proj-`).
 3. **Erste Schritte:** Öffnen Sie die Datei `docs/manual.pl.txt` (oder in einer anderen Sprache) im Installationsordner — dies ist eine vollständige Bedienungsanleitung, die in einer Sprache verfasst ist, die für jeden Benutzer zugänglich ist, nicht nur für Entwickler.
 

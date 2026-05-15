@@ -82,6 +82,13 @@ Wzorzec edycji: najpierw zaktualizuj `pl/` (język bazowy), potem otwórz analog
 
 **Autotłumacz (`buduj_wielojezyczne_docs.py`) — TYLKO dla zupełnie nowych plików szablonów**, tzn. gdy dany `*.yaml` w danym `<kod>/gui/dokumentacja/` w ogóle nie istnieje (np. nowy język bazowy albo nowy szablon dodany do `pl/` bez odpowiednika w `en/fi/...`). Po AI-tłumaczeniu obowiązkowo przejrzyj wyniki i popraw halucynacje używając już zatwierdzonych szablonów jako wzorca.
 
+**Pułapka po autotłumaczeniu: halucynacja wstrzykuje treść SPOZA źródła pl.** Znaleziono 2026-05-15 w trakcie audytu pre-15.2.5: `dictionaries/fi/gui/dokumentacja/manual.yaml::naglowek` zawierał ~30 dodatkowych linii rozdziałów (`## Akcenty`, `## Szyfr: Odwracacz Tekstu`, `## Szyfr: Typoglycemia`, `## Pliki i głosy`) z treścią mieszaną fińsko-polską („Dostępne akcenty to:" w polszczyźnie, lista głosów typu „Englanti (Samantha/Mark…)"), wstrzykniętą prawdopodobnie z sąsiedniej paczki `dictionaries.yaml` lub z fragmentów dialogowych — `pl/manual.yaml::naglowek` nigdy nie miał takich nagłówków. Mechanizm: model widzi całą paczkę dokumentacji w kontekście treningowym i przy słabej walidacji potrafi dosypać „logicznie pasujący" rozdział, którego nie ma w polskim źródle. Skutek: fiński manual w `docs/` zawierał polskie zwroty i listy techniczne nieistniejące w żadnym innym języku.
+
+Sanity check po `buduj_wielojezyczne_docs.py` lub `tlumacz_ai.py` (PRZED commit'em obcojęzycznego szablonu):
+- **Porównaj liczbę linii każdej wartości tekstowej** `dictionaries/<iso>/gui/dokumentacja/<plik>.yaml` vs odpowiadającego klucza w `pl/`. Różnica >40% to silny sygnał halucynacji (autotłumaczenie sensowne podtrzymuje rozmiar 1:1 ± kilka linii na różnice składniowe).
+- **Polskie pozostałości w obcojęzycznych szablonach**: `.venv/Scripts/python -c "import pathlib,re; [print(p,':',i+1,l) for p in pathlib.Path('dictionaries').glob('*/gui/dokumentacja/*.yaml') if p.parts[1]!='pl' for i,l in enumerate(p.read_text(encoding='utf-8').splitlines()) if re.search(r'\bpolski|polska|polsku|po polsku|dostępne|szyfr:?\s|odwracacz', l, re.IGNORECASE)]"`. Wyjątki dozwolone: nazwy plików technicznych typu `polski.yaml` w sekcjach opisujących strukturę paczki silnika (zwykle w `dictionaries.yaml`, nie w `manual.yaml::naglowek`).
+- **Markdown nagłówki `## ` w wartościach `<iso>` których nie ma w `pl`**: niemal pewna halucynacja. Polski oryginał używa zwykłych nagłówków tekstowych bez `##`, więc każde `## ` w obcojęzycznym szablonie zasługuje na manualną weryfikację.
+
 ### Krok 2 — Wygeneruj + zwaliduj
 ```bash
 .venv/Scripts/python generuj_dokumentacje.py --waliduj
