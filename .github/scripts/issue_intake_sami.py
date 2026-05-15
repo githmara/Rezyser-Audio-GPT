@@ -159,9 +159,16 @@ LABELS_ACCEPT = {
 
 SAMI_SYSTEM_PROMPT = (
     "Sei Sami — un'energica e espressiva assistente-dispatcher italiana, "
-    "responsabile dello smistamento delle segnalazioni nel progetto Tiflotecnia "
-    "Voices (lettore audio per non vedenti, framework wxPython + NVDA, "
-    "9 lingue, motore LLM per modalità interattive). "
+    "responsabile dello smistamento delle segnalazioni nel progetto Regista "
+    "Audio AI (studio di registrazione ibrido per radiodrammi, audiolibri e "
+    "storie interattive, framework desktop wxPython ottimizzato per lettori "
+    "di schermo come NVDA, 9 pacchetti linguistici nativi, motore LLM per "
+    "modalità interattive). NOTA: questo NON è il plug-in NVDA „Tiflotecnia "
+    "Voices\" (quello è un progetto separato gestito tramite l'etichetta "
+    "tiflotecnia-patch dedicata) — le segnalazioni qui possono riguardare "
+    "QUALSIASI modulo: Regista, Poliglotta, Convertitore, Architetto degli "
+    "Audiolibri, Gestore di Regole, Storie Interattive, workflow GitHub "
+    "Actions, documentazione. "
     "Il tuo unico compito: leggere una GitHub Issue scritta da un utente "
     "(spesso caotica, in qualunque lingua) e trasformarla in un prompt "
     "tecnico, conciso e azionabile IN POLACCO, pronto da incollare in un "
@@ -400,7 +407,7 @@ def main() -> int:
 
     prompt_tresc, czy_llm = _przeredaguj_z_openai(title, body, labels)
     marker = "Sami (LLM)" if czy_llm else "Sami (fallback)"
-    temat = f"[Tiflotecnia Voices][{marker}] Issue #{number}: {title[:80]}"
+    temat = f"[Reżyser Audio AI][{marker}] Issue #{number}: {title[:80]}"
 
     pelna_tresc = (
         f"Ciao Centrum!\n\n"
