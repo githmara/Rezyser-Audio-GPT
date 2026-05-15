@@ -1261,6 +1261,13 @@ class OpowiesciPanel(wx.Panel):
             t("opowiesci.dlg_wybierz_gre_tytul"),
             gry,
         ) as dlg:
+            # Lokalizacja etykiety „Cancel" — analogicznie jak w
+            # gui_rezyser._on_load. wx.SingleChoiceDialog nie ma metody
+            # SetCancelLabel, więc szukamy buttona po wx.ID_CANCEL i podmieniamy
+            # label ręcznie. Bez tego polski user widzi „Cancel" na PL-systemie.
+            btn_cancel = dlg.FindWindowById(wx.ID_CANCEL)
+            if btn_cancel is not None:
+                btn_cancel.SetLabel(t("common.btn_anuluj"))
             if dlg.ShowModal() != wx.ID_OK:
                 return
             nazwa = dlg.GetStringSelection()

@@ -1045,6 +1045,14 @@ class RezyserPanel(wx.Panel):
                 t("rezyser.dlg_wybierz_projekt_tytul"),
                 projekty,
             ) as dlg:
+                # Lokalizacja etykiety „Cancel" — wbudowane dialogi wxPython
+                # używają lokalizacji systemowej Windows, więc na PL-systemie
+                # przycisk zostałby angielski. SetLabel po znalezieniu po ID
+                # załatwia sprawę bez podmiany wxLocale (która zaburzyłaby
+                # inne wbudowane dialogi, np. FileDialog → tłumaczone „Open").
+                btn_cancel = dlg.FindWindowById(wx.ID_CANCEL)
+                if btn_cancel is not None:
+                    btn_cancel.SetLabel(t("common.btn_anuluj"))
                 if dlg.ShowModal() != wx.ID_OK:
                     return
                 nazwa = dlg.GetStringSelection()

@@ -148,9 +148,26 @@ class ProjektOpowiesci:
     # Ścieżki pomocnicze
     # ------------------------------------------------------------------
     def _sciezka_txt(self, nazwa: str) -> str:
-        return os.path.join(self.app_dir, SKRYPTY_DIR, f"{nazwa}.txt")
+        # v15.2.3: user-facing pliki Opowieści (.txt + .md) wydzielone do
+        # własnego folderu `opowiesci/` — wcześniej leżały w `skrypty/`
+        # razem z projektami Reżysera, co powodowało kolizje w dialogu
+        # wyboru projektu Reżysera (saved_mode 3/4/5 nie pasowało do
+        # zakresu 1/2 Reżysera, fallback otwierał wszystkie tryby).
+        return os.path.join(self.app_dir, OPOWIESCI_DIR, f"{nazwa}.txt")
 
     def _sciezka_md(self, nazwa: str) -> str:
+        return os.path.join(self.app_dir, OPOWIESCI_DIR, f"{nazwa}.md")
+
+    def _sciezka_txt_legacy(self, nazwa: str) -> str:
+        """v15.2.3: ścieżka starych plików Opowieści w `skrypty/` (pre-migracja).
+
+        Używana wyłącznie w `wczytaj()` do detekcji pre-15.2.3 gier i
+        automatycznego przeniesienia ich do nowego folderu `opowiesci/`.
+        """
+        return os.path.join(self.app_dir, SKRYPTY_DIR, f"{nazwa}.txt")
+
+    def _sciezka_md_legacy(self, nazwa: str) -> str:
+        """v15.2.3: legacy Księga Świata w `skrypty/` — patrz `_sciezka_txt_legacy`."""
         return os.path.join(self.app_dir, SKRYPTY_DIR, f"{nazwa}.md")
 
     def _sciezka_game_json(self, nazwa: str) -> str:
@@ -211,8 +228,8 @@ class ProjektOpowiesci:
         Zwraca pełną ścieżkę zapisanego pliku.
         """
         self._wymagaj_nazwy()
-        skrypty = os.path.join(self.app_dir, SKRYPTY_DIR)
-        os.makedirs(skrypty, exist_ok=True)
+        opowiesci = os.path.join(self.app_dir, OPOWIESCI_DIR)
+        os.makedirs(opowiesci, exist_ok=True)
         sciezka = self._sciezka_txt(self.nazwa_pliku)
 
         czyste = self.czysc_meta_warningi(narracja)
@@ -246,8 +263,8 @@ class ProjektOpowiesci:
         Zwraca pełną ścieżkę zapisanego pliku.
         """
         self._wymagaj_nazwy()
-        skrypty = os.path.join(self.app_dir, SKRYPTY_DIR)
-        os.makedirs(skrypty, exist_ok=True)
+        opowiesci = os.path.join(self.app_dir, OPOWIESCI_DIR)
+        os.makedirs(opowiesci, exist_ok=True)
         sciezka = self._sciezka_md(self.nazwa_pliku)
 
         # Komentarze NIE używają nawiasów kwadratowych z dwukropkiem — parser
@@ -382,6 +399,34 @@ class ProjektOpowiesci:
         sciezka_json = self._sciezka_game_json(nazwa)
         if not os.path.exists(sciezka_json):
             raise FileNotFoundError(sciezka_json)
+
+        # v15.2.3: auto-migracja pre-patch gier — pliki .txt / .md Opowieści
+        # przed tą wersją leżały w `skrypty/` razem z projektami Reżysera, co
+        # zlewało domeny i powodowało, że Reżyserowy dialog wyboru projektu
+        # pokazywał też gry Opowieści. Tu jednorazowo przenosimy je do
+        # nowego folderu `opowiesci/`. Warunek bezpieczeństwa: ruch tylko gdy
+        # nowy plik jeszcze nie istnieje I stary plik istnieje I gra ma
+        # `.game.json` (potwierdzenie, że to faktycznie Opowieści, nie
+        # projekt Reżysera o przypadkowo zbieżnej nazwie).
+        for sciezka_nowa_fn, sciezka_legacy_fn in (
+            (self._sciezka_txt, self._sciezka_txt_legacy),
+            (self._sciezka_md,  self._sciezka_md_legacy),
+        ):
+            sciezka_nowa = sciezka_nowa_fn(nazwa)
+            sciezka_legacy = sciezka_legacy_fn(nazwa)
+            if os.path.exists(sciezka_nowa):
+                continue
+            if not os.path.exists(sciezka_legacy):
+                continue
+            try:
+                os.makedirs(os.path.dirname(sciezka_nowa), exist_ok=True)
+                os.rename(sciezka_legacy, sciezka_nowa)
+            except OSError:
+                # Cichy fail — gracz może mieć read-only USB stick albo
+                # plik zablokowany przez Notatnik. Nie blokujemy load-a;
+                # w najgorszym razie txt zostanie w starym folderze i
+                # gracz zobaczy go w obu dialogach do następnej próby.
+                pass
 
         with open(sciezka_json, "r", encoding="utf-8") as fh:
             dane = json.load(fh)
