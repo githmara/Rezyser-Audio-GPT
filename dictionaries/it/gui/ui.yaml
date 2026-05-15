@@ -529,6 +529,12 @@ rezyser:
   dlg_wybierz_projekt_lbl: 'Progetti disponibili:'
   brak_projektow_tytul: Nessun progetto
   brak_projektow_tresc: "Nella cartella skrypty/ non ci sono ancora progetti da caricare. Inizia un nuovo progetto: inserisci il nome nel campo sopra, quindi salva il Libro del Mondo o invia la prima richiesta all'AI."
+  btn_otworz_narracje_label: '&Apri file di narrazione…'
+  btn_otworz_narracje_tooltip: Apre il file di narrazione del progetto (skrypty/<nome>.txt) nell'editor di testo di sistema (Blocco note, VS Code). Utile quando l'AI non chiude la scena — puoi scrivere/modificare manualmente la fine — o quando, dopo aver caricato il progetto con il riassunto, vuoi copiare le ultime scene nel campo Memoria a Lungo Termine, in modo che l'AI abbia il contesto completo del tono e degli ultimi eventi.
+  blad_otwarcia_tytul: Impossibile aprire il file
+  blad_otwarcia_tresc: "Tentativo di apertura del file {sciezka_pliku} non riuscito:\n{tresc_bledu}\n\nApri il file manualmente dall'Esplora file."
+  plik_narracji_brak_tytul: File di narrazione mancante
+  plik_narracji_brak_tresc: Il file di narrazione del progetto "{nazwa_projektu}" non esiste sul disco. Prima carica il progetto o invia la prima richiesta all'AI affinché il file venga creato.
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"
@@ -907,11 +913,11 @@ opowiesci:
   lbl_nazwa_gry: "Nome del gioco"
   txt_nazwa_gry_name: "Campo nome del gioco"
   txt_nazwa_gry_hint: "es. mie_avventure_1"
-  txt_nazwa_gry_tooltip: "Nome del file del gioco — utilizzato per il salvataggio automatico della narrazione in script/<nome>.txt e dello stato in runtime/storie/<nome>.game.json"
+  txt_nazwa_gry_tooltip: "Nome del file del gioco — utilizzato per il salvataggio automatico della narrazione in opowiesci/<nome>.txt e dello stato in runtime/opowiesci/<nome>.game.json"
   btn_nowa_gra_label: "&Nuovo gioco"
   btn_nowa_gra_tooltip: "Inizia un nuovo gioco con il nome fornito — richiede il nome del gioco e la modalità selezionata"
   btn_wczytaj_label: "&Carica"
-  btn_wczytaj_tooltip: "Carica un gioco precedentemente salvato da runtime/storie/<nome>.game.json"
+  btn_wczytaj_tooltip: "Carica un gioco precedentemente salvato da runtime/opowiesci/<nome>.game.json"
   btn_zapisz_label: "&Salva"
   btn_zapisz_tooltip: "Forza il salvataggio manuale dello stato del gioco (il salvataggio automatico avviene anche dopo ogni turno)"
 
@@ -1059,3 +1065,11 @@ opowiesci:
   dlg_wybierz_gre_lbl: 'Giochi disponibili:'
   brak_gier_tytul: Nessun gioco
   brak_gier_tresc: 'Nella cartella runtime/opowiesci/ non ci sono ancora giochi salvati. Inizia un nuovo gioco: inserisci il nome nel campo sopra, scegli la modalità e usa il pulsante Nuovo gioco.'
+  btn_otworz_narracje_label: '&Apri file di narrazione…'
+  btn_otworz_narracje_tooltip: "Apre il file di narrazione del gioco (opowiesci/<nome>.txt) nell'editor di testo di sistema. Usalo in caso di emergenza, quando l'AI non chiude la storia in modalità Scelte/Minor Male e vuoi scrivere manualmente il finale. ATTENZIONE: il .txt contiene solo testo per TTS; lo stato del gioco (personaggi, posizione, equipaggiamento) vive in .game.json e NON verrà aggiornato — il turno successivo di LLM potrebbe non corrispondere alla narrazione modificata. Prima dell'apertura apparirà una finestra di conferma."
+  otworz_narracje_ostrzezenie_tytul: Modifica del file di narrazione — rischio di discrepanza dello stato
+  otworz_narracje_ostrzezenie_tresc: "Stai per aprire il file di narrazione (.txt) nell'editor di testo di sistema.\n\nATTENZIONE: il file .txt contiene solo il testo della narrazione per TTS, mentre lo stato del gioco (personaggi, posizione, equipaggiamento, trame aperte) vive in un file separato .game.json. La modifica del .txt non aggiorna lo stato — il turno successivo di LLM riceverà il mondo prima della tua modifica, quindi potrebbe verificarsi una discrepanza semantica (ad esempio, hai descritto che un personaggio è morto, ma nello stato del gioco è ancora vivo).\n\nCaso tipico sicuro: aggiungere una scena finale quando l'AI non vuole concludere la storia (alternativa alla porta \"Modifica modalità gioco…\" → Libero).\n\nContinuare?"
+  blad_otwarcia_tytul: Impossibile aprire il file
+  blad_otwarcia_tresc: "Tentativo di apertura del file {sciezka_pliku} non riuscito:\n{tresc_bledu}\n\nApri il file manualmente dall'Esplora file."
+  plik_narracji_brak_tytul: File di narrazione mancante
+  plik_narracji_brak_tresc: Il file di narrazione del gioco "{nazwa}" non esiste sul disco. Il file di narrazione viene creato dopo il primo turno — invia la prima azione affinché il motore narrativo crei il file.

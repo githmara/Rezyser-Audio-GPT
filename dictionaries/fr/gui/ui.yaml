@@ -529,6 +529,12 @@ rezyser:
   dlg_wybierz_projekt_lbl: 'Projets disponibles :'
   brak_projektow_tytul: Aucun projet
   brak_projektow_tresc: "Il n'y a pas encore de projets à charger dans le dossier skrypty/. Commencez un nouveau projet : entrez un nom dans le champ ci-dessus, puis enregistrez le Livre du Monde ou envoyez la première requête à l'IA."
+  btn_otworz_narracje_label: '&Ouvrir le fichier de narration…'
+  btn_otworz_narracje_tooltip: Ouvre le fichier de narration du projet (skrypty/<nom>.txt) dans l'éditeur de texte système (Notepad, VS Code). Utile lorsque l'IA ne termine pas la scène — vous pouvez écrire/éditer la fin manuellement — ou lorsque, après avoir chargé le projet avec un résumé, vous souhaitez copier les dernières scènes dans le champ de Mémoire à Long Terme pour que l'IA ait le contexte complet du ton et des événements récents.
+  blad_otwarcia_tytul: Impossible d'ouvrir le fichier
+  blad_otwarcia_tresc: "La tentative d'ouverture du fichier {sciezka_pliku} a échoué :\n{tresc_bledu}\n\nOuvrez le fichier manuellement depuis l'Explorateur de fichiers."
+  plik_narracji_brak_tytul: Fichier de narration manquant
+  plik_narracji_brak_tresc: Le fichier de narration du projet « {nazwa_projektu} » n'existe pas sur le disque. Chargez d'abord le projet ou envoyez la première requête à l'IA pour que le fichier soit créé.
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -902,11 +908,11 @@ opowiesci:
   lbl_nazwa_gry: "Nom du jeu"
   txt_nazwa_gry_name: "Champ du nom du jeu"
   txt_nazwa_gry_hint: "ex. mes_aventures_1"
-  txt_nazwa_gry_tooltip: "Nom du fichier de jeu — utilisé pour la sauvegarde automatique de la narration dans scripts/<nom>.txt et l'état dans runtime/histoires/<nom>.game.json"
+  txt_nazwa_gry_tooltip: "Nom du fichier de jeu — utilisé pour la sauvegarde automatique de la narration dans opowiesci/<nom>.txt et l'état dans runtime/opowiesci/<nom>.game.json"
   btn_nowa_gra_label: "&Nouveau jeu"
   btn_nowa_gra_tooltip: "Commencez un nouveau jeu avec le nom donné — nécessite un nom de jeu et un mode sélectionné"
   btn_wczytaj_label: "&Charger"
-  btn_wczytaj_tooltip: "Charger un jeu précédemment sauvegardé depuis runtime/histoires/<nom>.game.json"
+  btn_wczytaj_tooltip: "Charger un jeu précédemment sauvegardé depuis runtime/opowiesci/<nom>.game.json"
   btn_zapisz_label: "&Sauvegarder"
   btn_zapisz_tooltip: "Forcer la sauvegarde manuelle de l'état du jeu (la sauvegarde automatique fonctionne également après chaque tour)"
 
@@ -1054,3 +1060,11 @@ opowiesci:
   dlg_wybierz_gre_lbl: 'Jeux disponibles :'
   brak_gier_tytul: Aucun jeu
   brak_gier_tresc: "Il n'y a pas encore de jeux enregistrés dans le dossier runtime/opowiesci/. Commencez un nouveau jeu : entrez un nom dans le champ ci-dessus, choisissez un mode et utilisez le bouton Nouveau jeu."
+  btn_otworz_narracje_label: '&Ouvrir le fichier de narration…'
+  btn_otworz_narracje_tooltip: "Ouvre le fichier de narration du jeu (opowiesci/<nom>.txt) dans l'éditeur de texte système. Utilisez en cas d'urgence lorsque l'IA ne termine pas l'histoire en mode Choix/Moindre Mal et que vous souhaitez écrire la fin manuellement. ATTENTION : le .txt ne contient que le texte pour le TTS ; l'état du jeu (personnages, emplacement, inventaire) est dans le .game.json et NE sera PAS mis à jour — le prochain tour du LLM peut diverger de la narration modifiée. Une boîte de dialogue de confirmation apparaîtra avant l'ouverture."
+  otworz_narracje_ostrzezenie_tytul: Édition du fichier de narration — risque de divergence d'état
+  otworz_narracje_ostrzezenie_tresc: "Vous allez ouvrir le fichier de narration (.txt) dans l'éditeur de texte système.\n\nATTENTION : le fichier .txt ne contient que le texte de narration pour le TTS, tandis que l'état du jeu (personnages, emplacement, inventaire, intrigues ouvertes) est dans un fichier séparé .game.json. L'édition du .txt n'actualise pas l'état — le prochain tour du LLM recevra le monde tel qu'il était avant votre édition, ce qui peut entraîner une divergence sémantique (par exemple, vous avez décrit qu'un personnage est mort, mais dans l'état du jeu, il est toujours vivant).\n\nCas typique sûr : ajouter une scène de clôture lorsque l'IA ne veut pas terminer l'histoire (alternative à la porte « Modifier le mode de jeu… » → Libre).\n\nContinuer ?"
+  blad_otwarcia_tytul: Impossible d'ouvrir le fichier
+  blad_otwarcia_tresc: "La tentative d'ouverture du fichier {sciezka_pliku} a échoué :\n{tresc_bledu}\n\nOuvrez le fichier manuellement depuis l'Explorateur de fichiers."
+  plik_narracji_brak_tytul: Fichier de narration manquant
+  plik_narracji_brak_tresc: Le fichier de narration du jeu « {nazwa} » n'existe pas sur le disque. Le fichier de narration est créé après le premier tour — envoyez la première action pour que le moteur narratif crée le fichier.

@@ -240,11 +240,11 @@ rezyser:
   txt_nazwa_pliku_hint: "e.g., chronicles_of_arkonia"
   txt_nazwa_pliku_tooltip: |-
     Enter the project name WITHOUT extension.
-    History file saved as: scripts/<name>.txt
+    History file saved as: skrypty/<name>.txt
     Field locked when memory is occupied.
   btn_wczytaj_label: "Load History"
   btn_wczytaj_tooltip: |-
-    Loads an existing project file (scripts/<name>.txt) into memory.
+    Loads an existing project file (skrypty/<name>.txt) into memory.
     Active only when memory is empty and a name is provided.
   btn_wyczysc_biezaca_label: "Clear Current (Leave Summary)"
   btn_wyczysc_biezaca_tooltip: |-
@@ -269,7 +269,7 @@ rezyser:
     Saving to disk requires providing the project file name.
   btn_zapisz_ksiege_label: "💾 Save the Book Permanently"
   btn_zapisz_ksiege_tooltip: |-
-    Saves the World Book to a file: scripts/<name>.md
+    Saves the World Book to a file: skrypty/<name>.md
     Requires providing the project file name.
   btn_prompt_architekta_label: "📖 Architect's Prompt for AI…"
   btn_prompt_architekta_name: "Show Architect's Prompt for external chatbot button"
@@ -528,6 +528,12 @@ rezyser:
   dlg_wybierz_projekt_lbl: 'Available projects:'
   brak_projektow_tytul: No projects
   brak_projektow_tresc: 'There are no projects to load in the skrypty/ folder yet. Start a new project: enter a name in the field above, then save the World Book or send the first query to the AI.'
+  btn_otworz_narracje_label: '&Open narration file…'
+  btn_otworz_narracje_tooltip: Opens the project narration file (skrypty/<name>.txt) in the system text editor (Notepad, VS Code). Useful when AI doesn't close the scene — you can write/edit the ending manually — or when after loading a project with a summary, you want to copy the last scenes to the Long-Term Memory field so that AI has the full context of the tone and recent events.
+  blad_otwarcia_tytul: Failed to open file
+  blad_otwarcia_tresc: "Attempt to open file {sciezka_pliku} resulted in an error:\n{tresc_bledu}\n\nOpen the file manually from File Explorer."
+  plik_narracji_brak_tytul: Narration file missing
+  plik_narracji_brak_tresc: The project narration file "{nazwa_projektu}" does not exist on disk. First, load the project or send the first query to the AI to create the file.
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -906,11 +912,11 @@ opowiesci:
   lbl_nazwa_gry: "Game Name"
   txt_nazwa_gry_name: "Game Name Field"
   txt_nazwa_gry_hint: "e.g. my_adventures_1"
-  txt_nazwa_gry_tooltip: "Game file name — used for autosaving the narrative to scripts/<name>.txt and state in runtime/stories/<name>.game.json"
+  txt_nazwa_gry_tooltip: "Game file name — used for autosaving the narrative to opowiesci/<name>.txt and state in runtime/opowiesci/<name>.game.json"
   btn_nowa_gra_label: "&New Game"
   btn_nowa_gra_tooltip: "Start a new game with the given name — requires a game name and selected mode"
   btn_wczytaj_label: "&Load"
-  btn_wczytaj_tooltip: "Load a previously saved game from runtime/stories/<name>.game.json"
+  btn_wczytaj_tooltip: "Load a previously saved game from runtime/opowiesci/<name>.game.json"
   btn_zapisz_label: "&Save"
   btn_zapisz_tooltip: "Force a manual save of the game state (autosave also occurs after each turn)"
 
@@ -1058,3 +1064,11 @@ opowiesci:
   dlg_wybierz_gre_lbl: 'Available games:'
   brak_gier_tytul: No games
   brak_gier_tresc: 'There are no saved games in the runtime/opowiesci/ folder yet. Start a new game: enter a name in the field above, choose a mode, and use the New Game button.'
+  btn_otworz_narracje_label: '&Open narration file…'
+  btn_otworz_narracje_tooltip: "Opens the game narration file (opowiesci/<name>.txt) in the system text editor. Use as a fallback when AI doesn't close the story in Choices/Lesser Evil mode and you want to write the ending manually. WARNING: .txt contains only text for TTS; the game state (characters, location, inventory) lives in .game.json and WILL NOT be updated — the next LLM turn may diverge from the changed narration. A confirmation dialog will appear before opening."
+  otworz_narracje_ostrzezenie_tytul: Editing narration file — risk of state divergence
+  otworz_narracje_ostrzezenie_tresc: "You are about to open the narration file (.txt) in the system editor.\n\nWARNING: the .txt file contains only the narration text for TTS, while the game state (characters, location, inventory, open threads) lives in a separate .game.json file. Editing .txt does not update the state — the next LLM turn will receive the world as it was before your edit, so a semantic divergence may occur (e.g., you described a character as dead, but in the game state, they are still alive).\n\nTypical safe case: adding a closing scene when AI doesn't want to finish the story (alternative to the \"Edit game mode…\" → Free mode).\n\nContinue?"
+  blad_otwarcia_tytul: Failed to open file
+  blad_otwarcia_tresc: "Attempt to open file {sciezka_pliku} resulted in an error:\n{tresc_bledu}\n\nOpen the file manually from File Explorer."
+  plik_narracji_brak_tytul: Narration file missing
+  plik_narracji_brak_tresc: The game narration file "{nazwa}" does not exist on disk. The narration file is created after the first turn — send the first action for the narrative engine to create the file.

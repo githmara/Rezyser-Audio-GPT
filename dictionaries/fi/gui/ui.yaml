@@ -241,11 +241,11 @@ rezyser:
   txt_nazwa_pliku_hint: "esim. kronikat_arkonia"
   txt_nazwa_pliku_tooltip: |-
     Kirjoita projektin nimi ILMAN laajennusta.
-    Tarinatiedosto tallennetaan nimellä: käsikirjoitukset/<nimi>.txt
+    Tarinatiedosto tallennetaan nimellä: skrypty/<nimi>.txt
     Kenttä on lukittu, kun muisti on käytössä.
   btn_wczytaj_label: "Lataa tarina"
   btn_wczytaj_tooltip: |-
-    Lataa olemassa oleva projektitiedosto (käsikirjoitukset/<nimi>.txt) muistiin.
+    Lataa olemassa oleva projektitiedosto (skrypty/<nimi>.txt) muistiin.
     Aktiivinen vain, kun muisti on tyhjä ja nimi on annettu.
   btn_wyczysc_biezaca_label: "Tyhjennä nykyinen (jätä Yhteenveto)"
   btn_wyczysc_biezaca_tooltip: |-
@@ -270,7 +270,7 @@ rezyser:
     Tallennus levylle vaatii projektitiedoston nimen.
   btn_zapisz_ksiege_label: "💾 Tallenna Maailmankirja pysyvästi"
   btn_zapisz_ksiege_tooltip: |-
-    Tallentaa Maailmankirjan tiedostoon: käsikirjoitukset/<nimi>.md
+    Tallentaa Maailmankirjan tiedostoon: skrypty/<nimi>.md
     Vaatii projektitiedoston nimen.
   btn_prompt_architekta_label: "📖 Arkkitehdin Kehotus AI:lle…"
   btn_prompt_architekta_name: "Näytä Arkkitehdin Kehotus ulkoiselle chatbotille -painike"
@@ -529,6 +529,12 @@ rezyser:
   dlg_wybierz_projekt_lbl: 'Saatavilla olevat projektit:'
   brak_projektow_tytul: Ei projekteja
   brak_projektow_tresc: 'Kansiossa skrypty/ ei ole vielä projekteja ladattavaksi. Aloita uusi projekti: kirjoita nimi yllä olevaan kenttään ja tallenna sitten Maailmankirja tai lähetä ensimmäinen kysely tekoälylle.'
+  btn_otworz_narracje_label: '&Avaa kertomustiedosto…'
+  btn_otworz_narracje_tooltip: Avaa projektin kertomustiedoston (skrypty/<nazwa>.txt) järjestelmän tekstieditorissa (Notepad, VS Code). Hyödyllinen, kun AI ei sulje kohtausta — voit lisätä/muokata loppua käsin — tai kun haluat kopioida viimeiset kohtaukset Pitkäaikaiseen Muistiin projektin yhteenvedon lataamisen jälkeen, jotta AI:lla on täydellinen konteksti sävystä ja viimeisistä tapahtumista.
+  blad_otwarcia_tytul: Tiedoston avaaminen epäonnistui
+  blad_otwarcia_tresc: "Yritys avata tiedosto {sciezka_pliku} epäonnistui:\n{tresc_bledu}\n\nAvaa tiedosto manuaalisesti Tiedostonhallinnasta."
+  plik_narracji_brak_tytul: Kertomustiedosto puuttuu
+  plik_narracji_brak_tresc: Projektin kertomustiedostoa „{nazwa_projektu}" ei ole levyllä. Lataa ensin projekti tai lähetä ensimmäinen kysely AI:lle, jotta tiedosto luodaan.
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -907,7 +913,7 @@ opowiesci:
   lbl_nazwa_gry: "Pelin nimi"
   txt_nazwa_gry_name: "Pelin nimen kenttä"
   txt_nazwa_gry_hint: "esim. minun_seikkailut_1"
-  txt_nazwa_gry_tooltip: "Pelitiedoston nimi — käytetään automaattiseen tallennukseen hakemistoon skrypty/<nimi>.txt ja tilaan runtime/opowiesci/<nimi>.game.json"
+  txt_nazwa_gry_tooltip: "Pelitiedoston nimi — käytetään automaattiseen tallennukseen hakemistoon opowiesci/<nimi>.txt ja tilaan runtime/opowiesci/<nimi>.game.json"
   btn_nowa_gra_label: "&Uusi peli"
   btn_nowa_gra_tooltip: "Aloita uusi peli annetulla nimellä — vaatii pelin nimen ja valitun tilan"
   btn_wczytaj_label: "&Lataa"
@@ -1059,3 +1065,11 @@ opowiesci:
   dlg_wybierz_gre_lbl: 'Saatavilla olevat pelit:'
   brak_gier_tytul: Ei pelejä
   brak_gier_tresc: 'Kansiossa runtime/opowiesci/ ei ole vielä tallennettuja pelejä. Aloita uusi peli: kirjoita nimi yllä olevaan kenttään, valitse tila ja käytä Uusi peli -painiketta.'
+  btn_otworz_narracje_label: '&Avaa kertomustiedosto…'
+  btn_otworz_narracje_tooltip: 'Avaa pelin kertomustiedoston (opowiesci/<nazwa>.txt) järjestelmän tekstieditorissa. Käytä hätätilanteessa, kun AI ei sulje tarinaa Valintojen/Pienemmän pahan tilassa ja haluat lisätä lopun käsin. HUOMIO: .txt sisältää vain tekstin TTS:lle; pelin tila (hahmot, sijainti, varusteet) on .game.json-tiedostossa eikä sitä päivitetä — seuraava LLM-kierros voi poiketa muutetusta kertomuksesta. Ennen avaamista näytetään vahvistusdialogi.'
+  otworz_narracje_ostrzezenie_tytul: Kertomustiedoston muokkaus — tilan poikkeaman riski
+  otworz_narracje_ostrzezenie_tresc: "Olet avaamassa kertomustiedoston (.txt) järjestelmän tekstieditorissa.\n\nHUOMIO: .txt-tiedosto sisältää vain kertomustekstin TTS:lle, kun taas pelin tila (hahmot, sijainti, varusteet, avoimet juonet) on erillisessä .game.json-tiedostossa. .txt:n muokkaaminen ei päivitä tilaa — seuraava LLM-kierros saa maailman ennen muokkaustasi, joten voi syntyä semanttinen poikkeama (esim. kuvailit hahmon kuolleeksi, mutta pelin tilassa hän on yhä elossa).\n\nTyypillinen turvallinen tapaus: sulkevan kohtauksen lisääminen, kun AI ei halua lopettaa tarinaa (vaihtoehto portille „Muokkaa pelitilaa…\" → Vapaa).\n\nJatketaanko?"
+  blad_otwarcia_tytul: Tiedoston avaaminen epäonnistui
+  blad_otwarcia_tresc: "Yritys avata tiedosto {sciezka_pliku} epäonnistui:\n{tresc_bledu}\n\nAvaa tiedosto manuaalisesti Tiedostonhallinnasta."
+  plik_narracji_brak_tytul: Kertomustiedosto puuttuu
+  plik_narracji_brak_tresc: Pelin kertomustiedostoa „{nazwa}" ei ole levyllä. Kertomustiedosto luodaan ensimmäisen kierroksen jälkeen — lähetä ensimmäinen toiminto, jotta kertomusmoottori luo tiedoston.

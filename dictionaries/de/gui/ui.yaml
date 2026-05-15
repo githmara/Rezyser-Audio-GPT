@@ -241,11 +241,11 @@ rezyser:
   txt_nazwa_pliku_hint: "z.B. kroniken_arkonii"
   txt_nazwa_pliku_tooltip: |-
     Geben Sie den Projektnamen OHNE Erweiterung ein.
-    Geschichtsdatei wird gespeichert als: skripte/<name>.txt
+    Geschichtsdatei wird gespeichert als: skrypty/<name>.txt
     Feld gesperrt, wenn Speicher belegt ist.
   btn_wczytaj_label: "Geschichte laden"
   btn_wczytaj_tooltip: |-
-    Lädt eine bestehende Projektdatei (skripte/<name>.txt) in den Speicher.
+    Lädt eine bestehende Projektdatei (skrypty/<name>.txt) in den Speicher.
     Nur aktiv, wenn der Speicher leer ist und ein Name angegeben wurde.
   btn_wyczysc_biezaca_label: "Aktuellen Speicher löschen (Zusammenfassung behalten)"
   btn_wyczysc_biezaca_tooltip: |-
@@ -270,7 +270,7 @@ rezyser:
     Speichern auf der Festplatte erfordert die Angabe des Projektnamens.
   btn_zapisz_ksiege_label: "💾 Buch dauerhaft speichern"
   btn_zapisz_ksiege_tooltip: |-
-    Speichert das Buch der Welt in einer Datei: skripte/<name>.md
+    Speichert das Buch der Welt in einer Datei: skrypty/<name>.md
     Erfordert die Angabe des Projektnamens.
   btn_prompt_architekta_label: "📖 Architekten-Prompt für KI…"
   btn_prompt_architekta_name: "Schaltfläche Architekten-Prompt für externen Chatbot anzeigen"
@@ -529,6 +529,12 @@ rezyser:
   dlg_wybierz_projekt_lbl: 'Verfügbare Projekte:'
   brak_projektow_tytul: Keine Projekte
   brak_projektow_tresc: 'Im Ordner skrypty/ gibt es noch keine Projekte zum Laden. Beginnen Sie ein neues Projekt: Geben Sie einen Namen in das obige Feld ein und speichern Sie dann das Weltbuch oder senden Sie die erste Anfrage an die KI.'
+  btn_otworz_narracje_label: '&Öffne Erzählungsdatei…'
+  btn_otworz_narracje_tooltip: Öffnet die Erzählungsdatei des Projekts (skrypty/<nazwa>.txt) im systemeigenen Texteditor (Notepad, VS Code). Nützlich, wenn die KI die Szene nicht abschließt — Sie können das Ende manuell hinzufügen/bearbeiten — oder wenn Sie nach dem Laden des Projekts mit einer Zusammenfassung die letzten Szenen in das Langzeitgedächtnisfeld kopieren möchten, damit die KI den vollständigen Kontext des Tons und der letzten Ereignisse hat.
+  blad_otwarcia_tytul: Datei konnte nicht geöffnet werden
+  blad_otwarcia_tresc: "Der Versuch, die Datei {sciezka_pliku} zu öffnen, ist fehlgeschlagen:\n{tresc_bledu}\n\nÖffnen Sie die Datei manuell über den Datei-Explorer."
+  plik_narracji_brak_tytul: Keine Erzählungsdatei vorhanden
+  plik_narracji_brak_tresc: Die Erzählungsdatei des Projekts „{nazwa_projektu}" existiert nicht auf der Festplatte. Laden Sie zuerst das Projekt oder senden Sie die erste Anfrage an die KI, damit die Datei erstellt wird.
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -907,11 +913,11 @@ opowiesci:
   lbl_nazwa_gry: "Spielname"
   txt_nazwa_gry_name: "Spielfeldname"
   txt_nazwa_gry_hint: "z.B. meine_abenteuer_1"
-  txt_nazwa_gry_tooltip: "Spieldateiname — wird für das automatische Speichern der Erzählung in skripte/<name>.txt und den Zustand in runtime/geschichten/<name>.game.json verwendet"
+  txt_nazwa_gry_tooltip: "Spieldateiname — wird für das automatische Speichern der Erzählung in opowiesci/<name>.txt und den Zustand in runtime/opowiesci/<name>.game.json verwendet"
   btn_nowa_gra_label: "&Neues Spiel"
   btn_nowa_gra_tooltip: "Starte ein neues Spiel mit dem angegebenen Namen — erfordert einen Spielnamen und einen ausgewählten Modus"
   btn_wczytaj_label: "&Laden"
-  btn_wczytaj_tooltip: "Lade ein zuvor gespeichertes Spiel aus runtime/geschichten/<name>.game.json"
+  btn_wczytaj_tooltip: "Lade ein zuvor gespeichertes Spiel aus runtime/opowiesci/<name>.game.json"
   btn_zapisz_label: "&Speichern"
   btn_zapisz_tooltip: "Erzwinge das manuelle Speichern des Spielstands (automatisches Speichern erfolgt auch nach jeder Runde)"
 
@@ -1059,3 +1065,11 @@ opowiesci:
   dlg_wybierz_gre_lbl: 'Verfügbare Spiele:'
   brak_gier_tytul: Keine Spiele
   brak_gier_tresc: 'Im Ordner runtime/opowiesci/ gibt es noch keine gespeicherten Spiele. Beginnen Sie ein neues Spiel: Geben Sie einen Namen in das obige Feld ein, wählen Sie den Modus und verwenden Sie die Schaltfläche Neues Spiel.'
+  btn_otworz_narracje_label: '&Öffne Erzählungsdatei…'
+  btn_otworz_narracje_tooltip: 'Öffnet die Erzählungsdatei des Spiels (opowiesci/<nazwa>.txt) im systemeigenen Texteditor. Verwenden Sie dies im Notfall, wenn die KI die Geschichte im Modus Entscheidungen/Weniger Übel nicht abschließt und Sie das Ende manuell hinzufügen möchten. ACHTUNG: .txt enthält nur Text für TTS; der Spielzustand (Charaktere, Ort, Inventar) lebt in .game.json und wird NICHT aktualisiert — die nächste Runde LLM kann mit der geänderten Erzählung nicht übereinstimmen. Vor dem Öffnen erscheint ein Bestätigungsdialog.'
+  otworz_narracje_ostrzezenie_tytul: Bearbeitung der Erzählungsdatei — Risiko der Zustandsabweichung
+  otworz_narracje_ostrzezenie_tresc: "Sie werden gleich die Erzählungsdatei (.txt) im systemeigenen Editor öffnen.\n\nACHTUNG: Die .txt-Datei enthält nur den Erzähltext für TTS, während der Spielzustand (Charaktere, Ort, Inventar, offene Handlungsstränge) in einer separaten Datei .game.json lebt. Die Bearbeitung von .txt aktualisiert den Zustand nicht — die nächste Runde LLM erhält die Welt vor Ihrer Bearbeitung, sodass es zu semantischen Abweichungen kommen kann (z.B. Sie haben beschrieben, dass ein Charakter gestorben ist, aber im Spielzustand lebt er noch).\n\nTypischer sicherer Fall: Hinzufügen einer abschließenden Szene, wenn die KI die Geschichte nicht beenden möchte (Alternative zur Option „Spielmodus bearbeiten…\" → Frei).\n\nFortfahren?"
+  blad_otwarcia_tytul: Datei konnte nicht geöffnet werden
+  blad_otwarcia_tresc: "Der Versuch, die Datei {sciezka_pliku} zu öffnen, ist fehlgeschlagen:\n{tresc_bledu}\n\nÖffnen Sie die Datei manuell über den Datei-Explorer."
+  plik_narracji_brak_tytul: Keine Erzählungsdatei vorhanden
+  plik_narracji_brak_tresc: Die Erzählungsdatei des Spiels „{nazwa}" existiert nicht auf der Festplatte. Die Erzählungsdatei wird nach der ersten Runde erstellt — senden Sie die erste Aktion, damit die Erzählmaschine die Datei erstellt.

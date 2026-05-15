@@ -529,6 +529,12 @@ rezyser:
   dlg_wybierz_projekt_lbl: 'Tiltæk verkefni:'
   brak_projektow_tytul: Engin verkefni
   brak_projektow_tresc: 'Í skránni skrypty/ eru engin verkefni til að hlaða inn ennþá. Byrjaðu nýtt verkefni: sláðu inn nafn í reitinn hér að ofan og vistaðu síðan Heimsbókina eða sendu fyrstu fyrirspurnina til AI.'
+  btn_otworz_narracje_label: '&Opna frásagnarskrá…'
+  btn_otworz_narracje_tooltip: Opnar frásagnarskrá verkefnis (skrypty/<nazwa>.txt) í kerfisritstjóra texta (Notepad, VS Code). Gagnlegt þegar AI lokar ekki senu — þú getur skrifað/breytt endanum handvirkt — eða þegar þú vilt afrita síðustu senur í Langtímaminni eftir að hafa hlaðið inn verkefni með útdrætti, svo AI hafi fullan samhengi tóns og síðustu atburða.
+  blad_otwarcia_tytul: Ekki tókst að opna skrá
+  blad_otwarcia_tresc: "Tilraun til að opna skrána {sciezka_pliku} mistókst:\n{tresc_bledu}\n\nOpnaðu skrána handvirkt úr Skjáborði."
+  plik_narracji_brak_tytul: Engin frásagnarskrá
+  plik_narracji_brak_tresc: Frásagnarskrá verkefnis „{nazwa_projektu}" er ekki til á diskinum. Hladdu fyrst inn verkefni eða sendu fyrstu fyrirspurn til AI til að búa til skrána.
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -907,7 +913,7 @@ opowiesci:
   lbl_nazwa_gry: "Nafn leiks"
   txt_nazwa_gry_name: "Reitur fyrir nafn leiks"
   txt_nazwa_gry_hint: "t.d. ævintýri_mín_1"
-  txt_nazwa_gry_tooltip: "Nafn á leikskrá — notað fyrir sjálfvirka vistun frásagnar í skrypty/<nafn>.txt og stöðu í runtime/opowiesci/<nafn>.game.json"
+  txt_nazwa_gry_tooltip: "Nafn á leikskrá — notað fyrir sjálfvirka vistun frásagnar í opowiesci/<nafn>.txt og stöðu í runtime/opowiesci/<nafn>.game.json"
   btn_nowa_gra_label: "&Nýr leikur"
   btn_nowa_gra_tooltip: "Byrja nýjan leik með gefnu nafni — krefst nafns leiks og valinnar stillingar"
   btn_wczytaj_label: "&Hlaða"
@@ -1059,3 +1065,11 @@ opowiesci:
   dlg_wybierz_gre_lbl: 'Tiltækir leikir:'
   brak_gier_tytul: Engir leikir
   brak_gier_tresc: 'Í skránni runtime/opowiesci/ eru engir vistaðir leikir ennþá. Byrjaðu nýjan leik: sláðu inn nafn í reitinn hér að ofan, veldu stillingu og notaðu hnappinn Nýr leikur.'
+  btn_otworz_narracje_label: '&Opna frásagnarskrá…'
+  btn_otworz_narracje_tooltip: 'Opnar frásagnarskrá leiksins (opowiesci/<nazwa>.txt) í kerfisritstjóra texta. Notaðu í neyð þegar AI lokar ekki sögunni í Valmöguleikum/Minna illt og þú vilt skrifa lokið handvirkt. ATH: .txt inniheldur aðeins texta fyrir TTS; ástand leiksins (persónur, staðsetning, búnaður) er í .game.json og verður EKKI uppfært — næsta umferð LLM gæti farið úr samhengi við breytta frásögn. Staðfestingargluggi birtist áður en opnað er.'
+  otworz_narracje_ostrzezenie_tytul: Breyting á frásagnarskrá — hætta á ósamræmi í ástandi
+  otworz_narracje_ostrzezenie_tresc: "Þú ert að fara að opna frásagnarskrá (.txt) í kerfisritstjóra.\n\nATH: .txt skráin inniheldur aðeins frásagnartexta fyrir TTS, en ástand leiksins (persónur, staðsetning, búnaður, opnir þræðir) er í sérstakri skrá .game.json. Breyting á .txt uppfærir ekki ástandið — næsta umferð LLM fær heiminn eins og hann var fyrir breytinguna þína, svo ósamræmi getur myndast (t.d. þú lýstir því að persóna dó, en í ástandi leiksins lifir hún enn).\n\nDæmigert öruggt tilfelli: að bæta við lokasenu þegar AI vill ekki ljúka sögunni (valkostur við „Breyta leikham…\" → Frjáls).\n\nHalda áfram?"
+  blad_otwarcia_tytul: Ekki tókst að opna skrá
+  blad_otwarcia_tresc: "Tilraun til að opna skrána {sciezka_pliku} mistókst:\n{tresc_bledu}\n\nOpnaðu skrána handvirkt úr Skjáborði."
+  plik_narracji_brak_tytul: Engin frásagnarskrá
+  plik_narracji_brak_tresc: Frásagnarskrá leiksins „{nazwa}" er ekki til á diskinum. Frásagnarskrá verður til eftir fyrstu umferð — sendu fyrstu aðgerðina til að frásagnarkerfið búi til skrána.

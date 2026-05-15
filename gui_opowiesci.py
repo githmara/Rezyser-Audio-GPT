@@ -34,6 +34,8 @@ może w każdej chwili odsłuchać scenę, sprawdzić wybory, wrócić do pisani
 from __future__ import annotations
 
 import os
+import platform
+import subprocess
 import threading
 from typing import Any
 
@@ -297,6 +299,16 @@ class OpowiesciPanel(wx.Panel):
         self._btn_zapisz = wx.Button(self, label=t("opowiesci.btn_zapisz_label"))
         self._btn_zapisz.SetToolTip(t("opowiesci.btn_zapisz_tooltip"))
 
+        # v15.2.3: awaryjna edycja `opowiesci/<gra>.txt` w systemowym edytorze.
+        # Konsystencja z Reżyserem (gui_rezyser._btn_otworz_narracje). W
+        # Opowieściach dodajemy explicit ostrzeżenie o ryzyku rozjazdu z
+        # `.game.json` (stan postaci, lokacji, ekwipunku) — `.txt` jest tylko
+        # narracją dla TTS, a stan gry żyje w `.game.json`. Edycja `.txt`
+        # nie aktualizuje stanu, więc kolejna tura LLM dostanie sytuację
+        # świata sprzed edycji + nową narrację w polu — może powstać dryf.
+        self._btn_otworz_narracje = wx.Button(self, label=t("opowiesci.btn_otworz_narracje_label"))
+        self._btn_otworz_narracje.SetToolTip(t("opowiesci.btn_otworz_narracje_tooltip"))
+
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(self._txt_nazwa_gry, proportion=1,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
@@ -305,6 +317,8 @@ class OpowiesciPanel(wx.Panel):
         row.Add(self._btn_wczytaj,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         row.Add(self._btn_zapisz,
+                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        row.Add(self._btn_otworz_narracje,
                 flag=wx.ALIGN_CENTER_VERTICAL)
 
         # Faza 5: Quick Start preset picker — drugi wiersz w pasku.
@@ -562,6 +576,7 @@ class OpowiesciPanel(wx.Panel):
         self._btn_nowa_gra.Bind(wx.EVT_BUTTON, self._on_nowa_gra)
         self._btn_wczytaj.Bind(wx.EVT_BUTTON, self._on_wczytaj)
         self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_zapisz)
+        self._btn_otworz_narracje.Bind(wx.EVT_BUTTON, self._on_otworz_narracje)
         self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_wyslij)
         # v15.1: edycja zasad świata przez dedykowany dialog.
         self._btn_zasady_swiata.Bind(wx.EVT_BUTTON, self._on_zasady_swiata)
@@ -1092,6 +1107,10 @@ class OpowiesciPanel(wx.Panel):
         ma_projekt = self._projekt is not None
         self._btn_wyslij.Enable(ma_projekt)
         self._btn_zapisz.Enable(ma_projekt)
+        # Otwórz plik narracji wymaga aktywnej gry (plik powstaje po
+        # pierwszej turze — w nowo założonej, bez tury, sam handler
+        # pokaże info zamiast otwarcia pustej ścieżki).
+        self._btn_otworz_narracje.Enable(ma_projekt)
 
         utrwalony = self._zapisany_tryb in self._MAPA_TRYB_RB_NA_INT
         if utrwalony:
@@ -1389,6 +1408,65 @@ class OpowiesciPanel(wx.Panel):
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
+
+    # ------------------------------------------------------------------
+    # v15.2.3 — awaryjne otwarcie pliku narracji w edytorze tekstu
+    # ------------------------------------------------------------------
+    def _on_otworz_narracje(self, _event: wx.Event) -> None:
+        """Otwiera `opowiesci/<gra>.txt` w systemowym edytorze z ostrzeżeniem.
+
+        Konsystencja z Reżyserem (gui_rezyser._on_otworz_narracje), ale z
+        dodatkowym confirmation dialog — w Opowieściach .txt jest tylko
+        narracją dla TTS, a źródłem prawdy stanu gry (postacie, lokacja,
+        ekwipunek, wątki) jest `.game.json`. Edycja .txt nie aktualizuje
+        stanu, więc kolejna tura LLM dostanie świat sprzed edycji + nową
+        narrację — może powstać dryf semantyczny.
+
+        Typowy use-case zgodny z designem: dopisanie ręcznej finałowej sceny
+        gdy AI w trybie Wyborów/Mniejszego zła nie chce zakończyć historii
+        (alternatywa dla furtki „Edytuj tryb gry…" → Swobodny).
+        """
+        if self._projekt is None:
+            wx.MessageBox(
+                t("opowiesci.brak_gry_tresc"),
+                t("opowiesci.brak_gry_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+        nazwa = self._projekt.nazwa_pliku
+        sciezka = self._projekt._sciezka_txt(nazwa)
+        if not os.path.exists(sciezka):
+            wx.MessageBox(
+                t("opowiesci.plik_narracji_brak_tresc", nazwa=nazwa),
+                t("opowiesci.plik_narracji_brak_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+        # Ostrzeżenie z YES_NO — Anuluj jako NO_DEFAULT (bezpieczna akcja).
+        odp = wx.MessageBox(
+            t("opowiesci.otworz_narracje_ostrzezenie_tresc"),
+            t("opowiesci.otworz_narracje_ostrzezenie_tytul"),
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+        )
+        if odp != wx.YES:
+            return
+        try:
+            if platform.system() == "Windows":
+                os.startfile(sciezka)                              # noqa: S606
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", sciezka])                # noqa: S603,S607
+            else:
+                subprocess.Popen(["xdg-open", sciezka])            # noqa: S603,S607
+        except Exception as exc:                                    # noqa: BLE001
+            wx.MessageBox(
+                t(
+                    "opowiesci.blad_otwarcia_tresc",
+                    sciezka_pliku=sciezka,
+                    tresc_bledu=str(exc),
+                ),
+                t("opowiesci.blad_otwarcia_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
 
     # ==================================================================
     # v15.1 — Zasady świata (dedykowany dialog, NIE inline TextCtrl)

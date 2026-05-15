@@ -264,6 +264,17 @@ rezyser:
     CAŁKOWITE wyczyszczenie projektu: historia, streszczenie, Księga Świata.
     Zeruje wszystkie liczniki i odblokowuje pole nazwy pliku.
     Używaj przy zmianie projektu lub zupełnie nowej historii.
+  # v15.2.3: awaryjne otwarcie pliku narracji w systemowym edytorze. Łata
+  # lukę pamięci streszczenia — gdy gracz po reload-zie widzi tylko krótką
+  # notatkę w Pamięci Długotrwałej zamiast pełnej fabuły, plik .txt z
+  # narracją wciąż żyje na dysku w skrypty/<nazwa>.txt i można go
+  # otworzyć/edytować/skopiować ręcznie.
+  btn_otworz_narracje_label:   "&Otwórz plik narracji…"
+  btn_otworz_narracje_tooltip: "Otwiera plik narracji projektu (skrypty/<nazwa>.txt) w systemowym edytorze tekstu (Notatnik, VS Code). Przydatne, gdy AI nie domyka sceny — możesz dopisać/edytować końcówkę ręcznie — albo gdy po wczytaniu projektu ze streszczeniem chcesz skopiować ostatnie sceny do pola Pamięci Długotrwałej, żeby AI miało pełen kontekst tonu i ostatnich wydarzeń."
+  blad_otwarcia_tytul:         "Nie udało się otworzyć pliku"
+  blad_otwarcia_tresc:         "Próba otwarcia pliku {sciezka_pliku} zakończyła się błędem:\n{tresc_bledu}\n\nOtwórz plik ręcznie z Eksploratora plików."
+  plik_narracji_brak_tytul:    "Brak pliku narracji"
+  plik_narracji_brak_tresc:    "Plik narracji projektu „{nazwa_projektu}\" nie istnieje na dysku. Najpierw wczytaj projekt lub wyślij pierwsze zapytanie do AI, żeby plik powstał."
   # Sidebar
   sidebar_heading:       "📖 Pasek Boczny projektu"
   lbl_ksiega_swiata:     "Księga Świata – Zasady i Postacie:"
@@ -931,6 +942,18 @@ opowiesci:
   btn_wczytaj_tooltip:       "Wczytaj wcześniej zapisaną grę z runtime/opowiesci/<nazwa>.game.json"
   btn_zapisz_label:          "&Zapisz"
   btn_zapisz_tooltip:        "Wymuś ręczny zapis stanu gry (autozapis działa też po każdej turze)"
+  # v15.2.3: awaryjne otwarcie pliku narracji w systemowym edytorze.
+  # Konsystencja z Reżyserem; w Opowieściach .txt jest tylko narracją
+  # dla TTS — stan gry żyje w .game.json. Edycja .txt może rozjechać
+  # świat. Dlatego handler wyświetla ostrzeżenie YES_NO przed otwarciem.
+  btn_otworz_narracje_label:        "&Otwórz plik narracji…"
+  btn_otworz_narracje_tooltip:      "Otwiera plik narracji gry (opowiesci/<nazwa>.txt) w systemowym edytorze tekstu. Użyj awaryjnie, gdy AI nie domyka historii w trybie Wyborów/Mniejszego zła i chcesz dopisać finał ręcznie. UWAGA: .txt zawiera tylko tekst dla TTS; stan gry (postacie, lokacja, ekwipunek) żyje w .game.json i NIE zostanie zaktualizowany — kolejna tura LLM może rozjechać się ze zmienioną narracją. Przed otwarciem pojawi się dialog potwierdzenia."
+  otworz_narracje_ostrzezenie_tytul: "Edycja pliku narracji — ryzyko rozjazdu stanu"
+  otworz_narracje_ostrzezenie_tresc: "Zaraz otworzysz plik narracji (.txt) w systemowym edytorze.\n\nUWAGA: plik .txt zawiera tylko tekst narracji dla TTS, natomiast stan gry (postacie, lokacja, ekwipunek, otwarte wątki) żyje w osobnym pliku .game.json. Edycja .txt nie aktualizuje stanu — kolejna tura LLM dostanie świat sprzed Twojej edycji, więc może powstać rozjazd semantyczny (np. opisałeś że postać zginęła, ale w stanie gry nadal żyje).\n\nTypowy bezpieczny przypadek: dopisanie zamykającej sceny gdy AI nie chce zakończyć historii (alternatywa do furtki „Edytuj tryb gry…\" → Swobodny).\n\nKontynuować?"
+  blad_otwarcia_tytul:              "Nie udało się otworzyć pliku"
+  blad_otwarcia_tresc:              "Próba otwarcia pliku {sciezka_pliku} zakończyła się błędem:\n{tresc_bledu}\n\nOtwórz plik ręcznie z Eksploratora plików."
+  plik_narracji_brak_tytul:         "Brak pliku narracji"
+  plik_narracji_brak_tresc:         "Plik narracji gry „{nazwa}\" nie istnieje na dysku. Plik narracji powstaje po pierwszej turze — wyślij pierwszą akcję, żeby silnik narracyjny utworzył plik."
 
   # ---- BLOK C — RadioBox trybu ----------------------------------------------
   rb_tryb_label:             "Tryb gry"

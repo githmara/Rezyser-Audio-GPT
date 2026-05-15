@@ -35,6 +35,8 @@ i tak utrudniały tłumaczenie w przyszłości.
 from __future__ import annotations
 
 import os
+import platform
+import subprocess
 import threading
 
 import openai
@@ -336,11 +338,25 @@ class RezyserPanel(wx.Panel):
         self._btn_hard_reset = wx.Button(self, label=t("rezyser.btn_hard_reset_label"))
         self._btn_hard_reset.SetToolTip(t("rezyser.btn_hard_reset_tooltip"))
 
+        # v15.2.3: awaryjna edycja pliku narracji w systemowym edytorze tekstu.
+        # Łata lukę architektoniczną w pamięci streszczenia: po wczytaniu
+        # projektu z istniejącym .summary.txt skrypt ZEROWAŁ full_story
+        # (priorytet streszczenia nad pełną historią), więc gracz, który
+        # wpisał krótką notatkę i zamknął apkę, po reload miał Księgę
+        # Świata + jednozdaniowe streszczenie i AI „głupiało" bez kontekstu
+        # ostatnich scen. Przycisk pozwala otworzyć plik .txt w Notatniku
+        # (jak `golden_key.env` w main.py / yamle w manager_regul) — gracz
+        # widzi pełną narrację, może z niej skopiować fragmenty do pamięci
+        # albo dopisać/edytować scenę ręcznie przed kolejną wysyłką do AI.
+        self._btn_otworz_narracje = wx.Button(self, label=t("rezyser.btn_otworz_narracje_label"))
+        self._btn_otworz_narracje.SetToolTip(t("rezyser.btn_otworz_narracje_tooltip"))
+
         file_row = wx.BoxSizer(wx.HORIZONTAL)
-        file_row.Add(self._txt_file_name,     proportion=1, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
-        file_row.Add(self._btn_load,          flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
-        file_row.Add(self._btn_clear_current, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
-        file_row.Add(self._btn_hard_reset,    flag=wx.ALIGN_CENTER_VERTICAL)
+        file_row.Add(self._txt_file_name,      proportion=1, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
+        file_row.Add(self._btn_load,           flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        file_row.Add(self._btn_clear_current,  flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        file_row.Add(self._btn_hard_reset,     flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        file_row.Add(self._btn_otworz_narracje, flag=wx.ALIGN_CENTER_VERTICAL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_file, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
@@ -829,6 +845,7 @@ class RezyserPanel(wx.Panel):
         self._btn_load.Bind(wx.EVT_BUTTON,          self._on_load)
         self._btn_clear_current.Bind(wx.EVT_BUTTON, self._on_clear_current)
         self._btn_hard_reset.Bind(wx.EVT_BUTTON,    self._on_hard_reset)
+        self._btn_otworz_narracje.Bind(wx.EVT_BUTTON, self._on_otworz_narracje)
         self._btn_zapisz_ksiege.Bind(wx.EVT_BUTTON, self._on_zapisz_ksiege)
         self._btn_prompt_architekta.Bind(wx.EVT_BUTTON, self._on_prompt_architekta)
         self._btn_zapisz_pamiec.Bind(wx.EVT_BUTTON, self._on_zapisz_pamiec)
@@ -869,6 +886,10 @@ class RezyserPanel(wx.Panel):
         # (bezpośrednia próba wczytania tej konkretnej nazwy).
         self._btn_load.Enable(pamiec_pusta)
         self._btn_clear_current.Enable(pamiec_zajeta)
+        # Otwórz plik narracji — wymaga wpisanej nazwy. Istnienie pliku na
+        # dysku sprawdzamy dopiero w handlerze (cheaper UX: gracz może
+        # kliknąć i dostaje info „brak narracji" zamiast trzymać disabled).
+        self._btn_otworz_narracje.Enable(nazwa_podana)
 
         cos_do_wyczyszczenia = pamiec_zajeta or bool(
             self._txt_file_name.GetValue().strip()
@@ -1992,6 +2013,70 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Zapis trybu twórczego do pliku metadanych projektu
     # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # v15.2.3 — awaryjne otwarcie pliku narracji w edytorze tekstu
+    # ------------------------------------------------------------------
+    def _otworz_w_edytorze(self, sciezka: str) -> None:
+        """Otwiera plik w domyślnym edytorze tekstu systemu.
+
+        Wzorzec identyczny do `gui_manager_regul._otworz_w_edytorze_tekstu`
+        i `main.HomePanel._on_action_btn` dla `golden_key.env`:
+        Windows → `os.startfile`, macOS → `open`, Linux → `xdg-open`.
+        Przy błędzie pokazujemy MessageBox ze ścieżką, żeby gracz mógł
+        otworzyć plik manualnie z Eksploratora.
+        """
+        try:
+            if platform.system() == "Windows":
+                os.startfile(sciezka)                              # noqa: S606
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", sciezka])                # noqa: S603,S607
+            else:
+                subprocess.Popen(["xdg-open", sciezka])            # noqa: S603,S607
+        except Exception as exc:                                    # noqa: BLE001
+            wx.MessageBox(
+                t(
+                    "rezyser.blad_otwarcia_tresc",
+                    sciezka_pliku=sciezka,
+                    tresc_bledu=str(exc),
+                ),
+                t("rezyser.blad_otwarcia_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+
+    def _on_otworz_narracje(self, _event: wx.Event) -> None:
+        """Otwiera `skrypty/<nazwa>.txt` w systemowym edytorze.
+
+        Łata lukę pamięci streszczenia (patrz komentarz przy `_btn_otworz_narracje`
+        w `_zbuduj_pasek_pliku`) — gracz po reload-zie projektu ze streszczeniem
+        widzi tylko Księgę Świata + jednozdaniową notatkę w pamięci długotrwałej,
+        a pełna narracja siedzi nadal na dysku. Przycisk otwiera plik w
+        Notatniku/VS Code — gracz może skopiować ostatnie sceny do pola
+        Pamięci albo dopisać własne domknięcie przed kolejną wysyłką do AI.
+        """
+        nazwa = self._txt_file_name.GetValue().strip()
+        if not nazwa:
+            wx.MessageBox(
+                t("rezyser.brak_nazwy_tresc"),
+                t("rezyser.brak_nazwy_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+            self._txt_file_name.SetFocus()
+            return
+        sciezka = os.path.join(
+            self._projekt.app_dir, cr.SKRYPTY_DIR, f"{nazwa}.txt"
+        )
+        if not os.path.exists(sciezka):
+            wx.MessageBox(
+                t("rezyser.plik_narracji_brak_tresc", nazwa_projektu=nazwa),
+                t("rezyser.plik_narracji_brak_tytul"),
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+            return
+        self._otworz_w_edytorze(sciezka)
+
     def _zapisz_tryb_projektu(self) -> None:
         nazwa    = self._txt_file_name.GetValue().strip()
         tryb_idx = self._rb_mode.GetSelection()
