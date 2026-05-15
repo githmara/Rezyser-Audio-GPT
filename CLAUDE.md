@@ -139,6 +139,18 @@ Workflow PR/branch został świadomie porzucony w v15.2.5. Solo-dev + A11y first
 - Eksperymentalna gałąź (np. port Linux) którą możesz porzucić: feature branch + ewentualne `git branch -D` po decyzji o porzuceniu.
 - Kontrybutor zewnętrzny: oni robią PR, Ty mergujesz przez web (rzadki przypadek, fork-based, nie wymaga zmian po naszej stronie).
 
+## Klauzula awaryjna: bug-issue ma pierwszeństwo nad planowaną treścią
+Jeśli pomiędzy ostatnim Release a planowaną treścią kolejnego patcha (z `RELEASE_NOTES.md::<wersja>::Co nie weszło` lub z agent memory) pojawi się nowe issue z etykietą `bug` od prawdziwego usera — **bug ma pierwszeństwo**. Workflow „Z Południa na Północ" z v15.2.4 zakłada, że każde otwarte issue zostaje zamknięte przez `fixed-in-release`; odkładanie buga na „następny-następny" patch rozjeżdża workflow (issue wisi otwarte, user czeka, Lumi/Vieno/Katla nie mają czego zamknąć).
+
+Procedura przy konflikcie planów:
+1. Odłóż planowaną pracę feature na kolejny cykl — przepisz wpis z `RELEASE_NOTES.md::<wersja>::Co nie weszło` jako fakt do następnego patcha.
+2. Bumpuj VERSION X.Y.(Z+1) (patch tag, [[feedback_hotfix_release]]).
+3. Patch rozwiązuje TYLKO bug-issue (lub grupę powiązanych bug-issues z jednego obszaru — można scalić w jeden patch jeśli leżą blisko siebie tematycznie i nie wymagają osobnych testów regresji).
+4. W `RELEASE_NOTES.md::<wersja>::Co nowego` wymień zamknięte issues (numery + krótkie streszczenie), w `Co nie weszło` przepisz wpisy z poprzedniego cyklu (przeniesienie na kolejny patch).
+5. Po publikacji Release nadaj zamkniętym issues etykietę `fixed-in-release` przez web GitHub UI — workflow `issue-closure.yml` (Lumi/Vieno/Katla) automatycznie skomentuje i zamknie je w języku oryginalnego zgłoszenia z linkiem do nowego Release.
+
+Wyjątek: jeśli bug jest niewykonalny w pojedynczym patchu (wymaga większego refaktoru, np. issue sugerujące split user-data vs seed-data dla `dictionaries/` z roadmapy v15.3+) — przeetykietuj go z `bug` na `enhancement` z komentarzem wyjaśniającym dlaczego ten konkretny bug nie jest blokerem (np. „obejście istnieje przez backup dictionaries/ przed update, opisane w manualu sekcja Automatyczne aktualizacje; pełne rozwiązanie wymaga split architektury zaplanowanego na v15.3+"). Po przeetykietowaniu Sami przerobi to normalnym workflowem na feature-issue dla kolejnego cyklu, bez naruszania reguły „bug = priorytet".
+
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
 - Weryfikuj porządek przez komendę `git status` patrząc na nieśledzone pliki (Untracked files).
