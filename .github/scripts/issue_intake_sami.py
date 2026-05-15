@@ -22,6 +22,9 @@ Wymagane zmienne środowiskowe (wstrzykiwane przez sekcję ``env:`` w YAML):
     SMTP_USER               nadawca + odbiorca (gmail dewelopera)
     SMTP_PASS               hasło aplikacji SMTP (Gmail app password)
     MAINTAINER_EMAIL        (opcjonalnie) odbiorca; fallback = SMTP_USER
+    GH_TOKEN                token gh CLI (auto z secrets.GITHUB_TOKEN) — do
+                            dodania komentarza Sami na issue po wysyłce maila
+    GITHUB_REPOSITORY       owner/repo (auto z runtime'u GH Actions)
 
 Fallback: jeśli OpenAI zawiedzie (brak kredytów, 401/429, timeout) — wysyłamy
 oryginalną treść zgłoszenia z notatką, że Sami chwilowo nie pomogła w
@@ -32,8 +35,106 @@ from __future__ import annotations
 
 import os
 import smtplib
+import subprocess
 import sys
 from email.message import EmailMessage
+
+from lingua import Language, LanguageDetectorBuilder
+
+
+# Lingua singleton zacisnięty do 9 wspieranych języków (te same co
+# `send_patch.py` i `issue_closure_north.py`). Cold-init detektora to ~3 sek;
+# trzymamy go na poziomie modułu, żeby nie inicjalizować przy każdym wywołaniu.
+LANGUAGES = [
+    Language.GERMAN, Language.ENGLISH, Language.SPANISH,
+    Language.FINNISH, Language.FRENCH, Language.ICELANDIC,
+    Language.ITALIAN, Language.POLISH, Language.RUSSIAN,
+]
+_detector = LanguageDetectorBuilder.from_languages(*LANGUAGES).build()
+
+
+# Komentarz Sami zostawiany na issue PO pomyślnej wysyłce maila do Centrum.
+# Jeden wariant per język (Sami to jedyna persona Południa — bez losowania).
+# Styl: włoski temperament, „Ciao!" + „A presto!", bezpośrednio adresuje
+# usera i informuje że jego zgłoszenie nie zostało zignorowane — kolejny
+# meldunek przyjdzie z Północy (Lumi/Vieno/Katla) po wydaniu fix-a.
+COMMENTS: dict[Language, str] = {
+    Language.POLISH: (
+        "Ciao! 🌞 Sami z Południa zauważyła Twoje zgłoszenie i już "
+        "pomknęła z technicznym promptem do Centrum. Za chwilkę "
+        "projektant aplikacji się tym zajmie — a kiedy poprawka wjedzie "
+        "do najnowszego wydania, odezwie się tutaj jedna z moich "
+        "koleżanek z Północy: Lumi, Vieno albo Katla. A presto!\n"
+        "— Sami"
+    ),
+    Language.ENGLISH: (
+        "Ciao! 🌞 Sami from the South has spotted your report and zoomed "
+        "off with a technical prompt to the Centre. The app's designer "
+        "will look into it shortly — and once the fix lands in the "
+        "latest release, one of my Northern colleagues will drop by "
+        "here: Lumi, Vieno or Katla. A presto!\n"
+        "— Sami"
+    ),
+    Language.GERMAN: (
+        "Ciao! 🌞 Sami aus dem Süden hat deine Meldung entdeckt und ist "
+        "mit dem technischen Prompt zum Zentrum geflitzt. Der "
+        "App-Entwickler kümmert sich gleich darum — und sobald die "
+        "Korrektur in der neuesten Veröffentlichung landet, meldet sich "
+        "hier eine meiner nordischen Kolleginnen: Lumi, Vieno oder "
+        "Katla. A presto!\n"
+        "— Sami"
+    ),
+    Language.SPANISH: (
+        "¡Ciao! 🌞 Sami del Sur ha visto tu reporte y ha salido "
+        "disparada con el prompt técnico hacia el Centro. El diseñador "
+        "de la aplicación se ocupará en breve — y cuando la corrección "
+        "llegue a la última versión, aparecerá por aquí una de mis "
+        "colegas del Norte: Lumi, Vieno o Katla. ¡A presto!\n"
+        "— Sami"
+    ),
+    Language.FINNISH: (
+        "Ciao! 🌞 Etelän Sami huomasi ilmoituksesi ja sujahti teknisen "
+        "kehotuksen kanssa Keskukseen. Sovelluksen suunnittelija "
+        "paneutuu siihen pian — ja kun korjaus saapuu uusimpaan "
+        "julkaisuun, täällä piipahtaa joku Pohjolan kollegoistani: "
+        "Lumi, Vieno tai Katla. A presto!\n"
+        "— Sami"
+    ),
+    Language.FRENCH: (
+        "Ciao ! 🌞 Sami du Sud a repéré ton signalement et est partie "
+        "en trombe avec le prompt technique vers le Centre. Le "
+        "concepteur de l'application s'en occupera sous peu — et "
+        "lorsque la correction arrivera dans la dernière version, "
+        "l'une de mes collègues du Nord passera par ici : Lumi, Vieno "
+        "ou Katla. À presto !\n"
+        "— Sami"
+    ),
+    Language.ICELANDIC: (
+        "Ciao! 🌞 Sami að sunnan kom auga á tilkynningu þína og þaut "
+        "af stað með tæknilegan leiðbeini til Miðstöðvarinnar. "
+        "Hönnuður forritsins tekur á henni innan stundar — og þegar "
+        "lagfæringin birtist í nýjustu útgáfu, mun ein af norrænu "
+        "kollegum mínum kíkja við hér: Lumi, Vieno eða Katla. "
+        "A presto!\n"
+        "— Sami"
+    ),
+    Language.ITALIAN: (
+        "Ciao! 🌞 Sami dal Sud ha avvistato la tua segnalazione ed è "
+        "sfrecciata con il prompt tecnico verso il Centro. Il "
+        "progettista dell'app se ne occuperà a breve — e quando la "
+        "correzione arriverà nell'ultima versione, qui passerà una "
+        "delle mie colleghe del Nord: Lumi, Vieno o Katla. A presto!\n"
+        "— Sami"
+    ),
+    Language.RUSSIAN: (
+        "Ciao! 🌞 Сами с Юга заметила твоё обращение и рванула с "
+        "техническим запросом в Центр. Разработчик приложения скоро "
+        "возьмётся за дело — а когда исправление попадёт в новейший "
+        "выпуск, сюда заглянет одна из моих коллег с Севера: Lumi, "
+        "Vieno или Katla. A presto!\n"
+        "— Sami"
+    ),
+}
 
 
 # Etykiety, które IGNORUJEMY (nie wysyłamy maila do Centrum).
@@ -188,6 +289,70 @@ def _fallback(title: str, body: str, labels: list[str]) -> str:
     )
 
 
+def _gh(cmd: list[str]) -> bool:
+    """Uruchamia `gh` z przechwyceniem błędów. Zwraca True przy sukcesie.
+
+    Identyczna semantyka co w `issue_closure_north._gh` — duplikat świadomy,
+    bo skrypty są niezależnymi entrypointami (workflow je odpala bez
+    wspólnego modułu).
+    """
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        return True
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(
+            f"[!] gh zfailowało ({' '.join(cmd[:3])}): "
+            f"{exc.stderr.strip() or exc}\n"
+        )
+        return False
+    except FileNotFoundError:
+        sys.stderr.write("[!] `gh` CLI nie znalezione w PATH.\n")
+        return False
+
+
+def _zostaw_komentarz_sami(
+    issue_number: str, issue_body: str, czy_llm: bool
+) -> None:
+    """Zostawia komentarz Sami na issue po pomyślnej wysyłce maila do Centrum.
+
+    Język komentarza wykrywany lingua-language-detector'em na ciele issue
+    (te same 9 jzk co reszta obiegu). Brak komentarza dla LABELS_IGNORE
+    (skrypt nie dochodzi tu w tym scenariuszu — wcześniejszy return 0).
+
+    `czy_llm` decyduje czy doklejamy sufiks „(tym razem przekazałam
+    oryginalną treść — Centrum przejrzy ręcznie)". User powinien wiedzieć,
+    że Sami nie pomogła z przeredagowaniem, żeby nie czekał na cudowny
+    fix gdy zgłoszenie jest niezrozumiałe.
+    """
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if not repo:
+        sys.stderr.write(
+            "[!] Brak GITHUB_REPOSITORY w env — pomijam komentarz Sami.\n"
+        )
+        return
+
+    wykryty = (
+        _detector.detect_language_of(issue_body)
+        if issue_body.strip()
+        else None
+    )
+    if wykryty not in COMMENTS:
+        wykryty = Language.ENGLISH
+
+    tresc = COMMENTS[wykryty]
+    if not czy_llm:
+        # Sufiks per język byłby przerostem — pojedyncza krótka angielska
+        # adnotacja w nawiasie wystarczy do sygnału „uważaj, fallback".
+        # User i tak rzuci okiem na mail jeśli zechce sprawdzić co Centrum
+        # dostało.
+        tresc += "\n\n*(LLM fallback — original body forwarded raw.)*"
+
+    if _gh(["gh", "issue", "comment", issue_number, "--repo", repo,
+            "--body", tresc]):
+        print(f"Komentarz Sami dodany do issue #{issue_number} "
+              f"(język: {wykryty.name}).")
+
+
 def _wyslij_maila(
     temat: str, tresc: str, recipient: str, smtp_user: str, smtp_pass: str
 ) -> bool:
@@ -258,6 +423,11 @@ def main() -> int:
     )
 
     ok = _wyslij_maila(temat, pelna_tresc, recipient, smtp_user, smtp_pass)
+    if ok:
+        # Komentarz na issue tylko po udanej wysyłce — user nie powinien
+        # dostać fałszywej obietnicy „prompt dotarł do Centrum", gdy SMTP
+        # zfailowało. Sami głośna i ekspresyjna, ale uczciwa.
+        _zostaw_komentarz_sami(number, body, czy_llm)
     return 0 if ok else 1
 
 
