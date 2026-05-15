@@ -1,10 +1,175 @@
-# Release Notes — Reżyser Audio GPT 15.2.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.2.3 „Wersja Wydawnicza"
+
+*Patch v15.2.3: pięć poprawek A11y, jeden breaking change i jedno załatanie luki architektonicznej w pamięci streszczenia. (1) **Prawdziwa ochrona trybu zapisu** w Reżyserze i Opowieściach — od v12.0 manuale deklarowały, że RadioBox blokuje zmianę trybu twórczego w trakcie aktywnego projektu, ale ochrona była udawana: Burza Mózgów (zawsze aktywna jako tryb planowania) była tylną furtką, strzałkami w górę / w dół dało się przejść Audiobook → Burza → Skrypt i odwrotnie, a pierwsze kliknięcie „Wstaw Akt 1" / „Wstaw Rozdział 1" w nowo wybranym trybie nadpisywało plik `.mode` mieszając akty z rozdziałami. Patch wprowadza mirror `.mode` w pamięci panelu (`_zapisany_tryb`) — po utrwaleniu decyzji trybu drugi tryb zapisu jest faktycznie disabled w RadioBoxie. W Opowieściach analogicznie + nowy przycisk „Edytuj tryb gry…" jako furtka awaryjna (modalny dialog z ostrzeżeniem). (2) **Dialog wyboru projektu/gry zamiast wpisywania nazwy z klawiatury** — Reżyser dostaje walk-em po `skrypty/` (eliminacja plików streszczeń), Opowieści walk-em po `runtime/opowiesci/` (kryterium: obecność `.game.json`). Wybór poprzez `wx.SingleChoiceDialog` z listą nazw — NVDA czyta naturalnie, gracz nie musi pamiętać ani przepisywać nazwy. Reżyser zachowuje też ścieżkę eksperta (pole wypełnione + Enter ładuje konkretną nazwę bez dialogu). (3) **Lokalizacja etykiety „Cancel" → „Anuluj"** w obu nowych `SingleChoiceDialog` — wbudowane dialogi wxPython na PL-systemie z polskim UI aplikacji pokazywały angielską etykietę systemową; fix przez `FindWindowById(wx.ID_CANCEL).SetLabel(...)`. (4) **Breaking change — pliki user-facing Opowieści przeniesione ze `skrypty/` do nowego folderu `opowiesci/`**: po fixie (2) dialog wyboru projektu Reżysera widział gry Opowieści (bo zlewały się w jednym folderze), a wczytanie ich dawało fallback `saved_mode` poza zakresem 1/2 → odblokowanie wszystkich trybów Reżysera. Nowy `opowiesci/` w roocie repozytorium, auto-migracja w `ProjektOpowiesci.wczytaj()` przenosi pre-15.2.3 pliki na pierwszym load, manuale w 9 jzk z normalizacją pre-existing halucynacji LLM (folder names typu `scripts/`, `käsikirjoitukset/`, `runtime/historias/` były zlokalizowane zamiast literałów dyskowych). (5) **Załatanie luki architektonicznej w pamięci streszczenia** — przycisk „Otwórz plik narracji…" w pasku pliku Reżysera i obok Zapisz w Opowieściach (analogicznie do `os.startfile(golden_key.env)` w main.py / yamli w manager_regul). Łata scenariusz: gracz wpisał krótką notatkę („AI ostatnio zrobiło coś źle, pomiń ostatnią scenę") w Pamięć Długotrwałą, klika Zapisz Streszczenie, zamyka apkę. Po reload aplikacja PRIORYTETOWO ładuje streszczenie i POMIJA pełną historię — model dostaje tylko Księgę Świata + jednozdaniową notatkę i „głupieje" bez kontekstu tonu i ostatnich scen. Nowy przycisk otwiera plik narracji w Notatniku/TextEdit/xdg-open — gracz może skopiować ostatnie sceny do Pamięci Długotrwałej albo dopisać/edytować końcówkę ręcznie. W Opowieściach przycisk ma dodatkowo modalny dialog ostrzegawczy o ryzyku rozjazdu z `.game.json` (stan postaci, lokacji, ekwipunku — `.txt` to tylko narracja dla TTS, edycja nie aktualizuje stanu). Manuale we wszystkich 9 językach zaktualizowane z przeprosinami za poprzednie wprowadzenie w błąd ws. ochrony trybu + opisem nowego flow wczytywania + nową strukturą folderów + opisem nowego przycisku i luki, którą łata. Patch tag X.Y.(Z+1) zgodnie z [[feedback_hotfix_release]] — artefakty v15.2.2 nietknięte.*
 
 *Patch v15.2.2: wielojęzyczność automatycznego bota `tiflotecnia-patch` w GitHub Actions. Bot do tej pory odpowiadał maili tylko po polsku (jeden szablon hardkodowany), niezależnie od języka issue. Po patchu detektor `lingua-language-detector` rozpoznaje 9 języków zgłoszenia (PL/EN/DE/ES/FI/FR/IS/IT/RU), bot dobiera natywny szablon emaila; nieobsługiwany język lub pusty tekst (sam adres email bez opisu) → fallback EN (najbardziej uniwersalny pojedynczy język wśród niewidomych użytkowników NVDA na świecie). Manual w 9 językach (`krok_5_alarm_detekcja_jezyka`) zachęca do dorzucenia 2-3 zdań opisu w swoim języku, żeby detektor miał na czym pracować. Komentarze workflow na issue (potwierdzenie wysyłki + redact) są bilingual PL/EN. Logika została przetestowana pre-merge (issue testowe ze zduplikowaną wiadomością wykryło bug w workflow trigger — usunięto duplikat akcji `gh issue comment` w starszym commicie bc80c1e). Patch tag X.Y.(Z+1) zgodnie z [[feedback_hotfix_release]] — artefakty v15.2.1 nietknięte, użytkownicy z v15.2.1 dostaną aktualizację do v15.2.2 przez `core_updater.sprawdz_aktualizacje()`.*
 
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 15.2.3 — patch release (motyw przewodni: prawdziwa ochrona trybu zapisu w Reżyserze i Opowieściach)
+
+*Punkt wyjścia: v15.2.2 (1714766) → diagnoza buga zgłoszona przez użytkownika podczas pracy na projekcie `emilia_heist_audiobook` (pomimo zapisanego trybu Audiobook strzałkami przez Burzę dało się dotrzeć do Skryptu, kliknięcie „Wstaw Akt 1" nadpisało `.mode` na Skrypt i wstrzyknęło do narracji obce nagłówki) → fix Reżysera (`ae1a2eb`) + fix Opowieści z furtką awaryjną (`7e67ffb`) + aktualizacja manuali w 9 językach z przeprosinami za poprzednie wprowadzenie w błąd → v15.2.3.*
+
+### TL;DR
+
+Notka historyczna w manualu od v12.0 obiecywała: „od wersji 12.0 interfejs po prostu blokuje zmianę trybu zapisu, gdy w pamięci jest już historia." Praktyka była mniej kategoryczna. Burza Mózgów (idx=0 w RadioBoxie) — celowo zawsze aktywna jako narzędzie planowania i awaryjnego streszczenia przy przepełnieniu okna kontekstowego — była tylną furtką. Sekwencja Audiobook → strzałka w górę → Burza → strzałka w dół → Skrypt (lub analogicznie w drugą stronę) wprowadzała gracza w stan „przeskoczyłem na inny tryb zapisu, ale aplikacja jeszcze nie wie". Pierwsze kliknięcie „Wstaw Akt 1" lub „Wstaw Rozdział 1" w nowo wybranym trybie nadpisywało `.mode` (bo `_zapisz_tryb_projektu` brał aktualny `_rb_mode.GetSelection()`), a do narracji wpadał nagłówek niezgodny z gatunkiem reszty pliku. ElevenLabs ten rozjazd zachowywał już dla siebie — generował audio bez zająknięcia, ale spis treści wyglądał jak avant-garde.
+
+Patch rozdziela dwa pojęcia, które do tej pory były stopione:
+
+- **Bieżący stan RadioBox-a** (`_rb_mode.GetSelection()`) — gracz może go zmieniać swobodnie, bo Burza musi być dostępna w każdym momencie pracy.
+- **Utrwaloną decyzję trybu zapisu** (`_zapisany_tryb` — mirror pliku `.mode` w RAM) — niezmienna od momentu jej zafiksowania (wczytanie projektu, pierwsza wstawiona struktura lub pierwsza udana wysyłka produkcyjna).
+
+Logika `EnableItem` patrzy teraz na `_zapisany_tryb`, nie na `tryb_idx` aktualnie zaznaczony w widgecie. Skutek: po utrwaleniu decyzji (np. Audiobook=2) drugi tryb zapisu (Skrypt=1) jest faktycznie disabled niezależnie od tego, że RadioBox aktualnie wskazuje Burzę (0). Strzałki klawiatury naturalnie pomijają wyłączone pozycje, NVDA czyta tylko enabled — gracz nie ma jak dotrzeć do błędnego stanu UI.
+
+W Opowieściach analogiczny pattern, ale z jedną kluczową różnicą: wszystkie 3 pozycje RadioBox-a są tam trybami zapisu (3=Swobodny, 4=Wyborów, 5=Mniejsze zło) i nie ma odpowiednika „Burzy zawsze enabled" — `/visualize` i auto-streszczenie idą przez slash-komendy, nie przez RadioBox. Po utrwaleniu trybu dwie pozostałe pozycje są disabled. **Furtka awaryjna**: nowy przycisk „Edytuj tryb gry…" obok RadioBox-a otwiera modalny dialog z ostrzeżeniem — typowy use-case to sytuacja, w której AI w trybie Wyborów lub Mniejszego zła uparcie generuje kolejne dylematy zamiast zakończyć historię, a gracz chce przeskoczyć na Swobodny żeby samodzielnie opisać finałową scenę. Bez tej furtki nie dałoby się zamknąć takiej historii bez restartu aplikacji i ręcznej edycji `.mode`.
+
+Dodatkowo: EVT_TEXT na polu nazwy gry odblokowuje RadioBox, gdy gracz wpisuje nazwę różną od aktywnego projektu — dzięki temu można w jednej sesji założyć drugą grę w innej tonacji bez `/koniec` (który i tak zamyka apkę).
+
+### Co nowego dla użytkownika końcowego
+
+#### Reżyser — uczciwe zabezpieczenie trybu
+
+- Burza Mózgów zawsze aktywna jako narzędzie planowania / streszczenia (bez zmian).
+- Skrypt i Audiobook: po utrwaleniu trybu w projekcie drugi tryb zapisu jest pomijany przez strzałki klawiatury (faktycznie disabled, nie tylko „niemoralnie aktywny").
+- Przyciski struktury (Akt / Scena / Rozdział) widoczne tylko gdy aktualny tryb RadioBox-a zgadza się z utrwalonym `.mode` — nie da się już przypadkowo wstawić „Akt 1" w projekcie zapisanym jako Audiobook.
+- Twardy Reset czyści `_zapisany_tryb` (nowy projekt zaczyna od czystej decyzji). Wyczyszczenie pamięci bieżącej (zachowanie streszczenia) — NIE czyści; projekt trwa dalej, decyzja trybu obowiązuje.
+
+#### Opowieści — furtka „Edytuj tryb gry…"
+
+Obok RadioBox-a wyboru trybu pojawia się nowy przycisk „Edytuj tryb gry…" (widoczny tylko gdy gra jest aktywna). Otwiera modalny dialog z trzema częściami:
+
+1. **Ostrzeżenie** (długi tekst u góry, czytany jako pierwszy przez NVDA): wyjaśnia, że zmiana trybu w trakcie aktywnej gry może rozsynchronizować silnik narracyjny, oraz pokazuje typowy use-case (AI uparcie generuje dylematy zamiast zakończyć).
+2. **RadioBox z 3 trybami** — zaznaczony na bieżącym trybie projektu.
+3. **Przyciski OK / Anuluj** — Anuluj jest `SetDefault()` (bezpieczna akcja domyślna).
+
+Po OK aplikacja zapisuje nowy tryb do `.mode`, aktualizuje `_zapisany_tryb` + `_projekt.tryb`, synchronizuje RadioBox i pokazuje potwierdzenie „Tryb gry zmieniony na X". Stan gry (postacie, świat, dotychczasowa narracja) pozostaje nietknięty — zmienia się tylko sposób generowania kolejnych tur.
+
+Drugi flow odblokowujący RadioBox: gracz wpisuje w polu nazwy gry coś innego niż nazwa aktywnego projektu → aplikacja rozpoznaje, że to przygotowanie nowej gry → RadioBox staje się wolny (wszystkie 3 pozycje enabled). Powrót do nazwy aktywnego projektu z powrotem zamraża. Bez tego mechanizmu nie dałoby się w jednej sesji założyć drugiej gry w innej tonacji niż pierwsza (`/koniec` zamyka apkę).
+
+#### Manuale — szczerość historyczna
+
+Notka „dlaczego tryby są teraz chronione przed przypadkową zmianą" w `manual.<iso>.txt` została przepisana we wszystkich 9 językach: dotychczasowe zapewnienie o ochronie od v12.0 przyznaje, że było udawane (z konkretnym opisem mechanizmu omijania przez Burzę), a prawdziwą ochronę dostajemy dopiero w v15.2.3. Analogicznie w `tales.<iso>.txt` — wzmianka „tryb można zmienić w trakcie gry w jeden klik" została zastąpiona opisem furtki „Edytuj tryb gry…" z explicit wyjaśnieniem use-case'u.
+
+#### Dialog wyboru projektu/gry zamiast wpisywania nazwy z klawiatury
+
+Druga gałąź patcha — wcześniej w Reżyserze przycisk „Wczytaj" wymagał ręcznego wpisania nazwy projektu w polu nad listą; w Opowieściach analogiczny przycisk otwierał systemowy `wx.FileDialog` z filtrem `.game.json`. Niespójność wymagała od niewidomego gracza dwóch różnych nawigacji per moduł. Patch ujednolica:
+
+- **Reżyser**: walk po folderze `skrypty/` zbiera wszystkie `.txt` (z wyłączeniem `_streszczenie.txt` — derived artefaktów per-projekt) i pokazuje `wx.SingleChoiceDialog` z listą czystych nazw projektów. Zachowano ścieżkę eksperta: pole nazwy wypełnione + klik Wczytaj (lub Enter w polu) ładuje bezpośrednio tę konkretną nazwę bez dialogu. Pole puste → dialog. Przycisk Wczytaj nie wymaga już wpisanej nazwy do bycia enabled — wystarczy że pamięć bieżąca jest pusta.
+- **Opowieści**: walk po `runtime/opowiesci/` zbiera nazwy z plików `.game.json` (kryterium twarde — to źródło prawdy stanu gry, bez niego load i tak by się nie powiódł). Świeże gry bez `.txt` (przed pierwszą turą) też się pokazują, bo `.game.json` istnieje od momentu „Nowa gra". `wx.FileDialog` z filtrem rozszerzeń znikł — w jego miejsce `wx.SingleChoiceDialog`.
+
+Konsystencja A11y między modułami: w obu narzędziach przycisk „Wczytaj" otwiera ten sam typ dialogu (`SingleChoiceDialog`), NVDA czyta listę naturalnie jako choice items zamiast nawigowania po systemowym dialogu plików z trzema panelami i rozszerzeniami.
+
+Brak projektów / gier → odpowiedni `wx.MessageBox` informacyjny z instrukcją jak zacząć nowy projekt — gracz nie wpada w pusty dialog wyboru.
+
+### Pod maską
+
+- `VERSION`: `15.2.2` → `15.2.3` (patch tag, [[feedback_hotfix_release]] — bez nadpisywania artefaktów v15.2.2 Release).
+
+- `gui_rezyser.py` (commit `ae1a2eb`, 55 inserts / 7 deletes):
+  - Nowy atrybut `self._zapisany_tryb: int | None` w `__init__` (linia ~104).
+  - `_refresh_ui_state` (linie ~888–944): widoczność `_pnl_struktura` warunkowa od `tryb_idx == _zapisany_tryb OR _zapisany_tryb is None`; `EnableItem(0, True)` (Burza zawsze), pozostałe pozycje zamrożone na `_zapisany_tryb`.
+  - `_on_load`: po `SetSelection(wynik.saved_mode)` ustawia `self._zapisany_tryb = wynik.saved_mode` (lub `None` dla starych projektów bez `.mode`).
+  - `_zapisz_tryb_projektu`: po `self._projekt.zapisz_tryb_tworczy(tryb_idx)` synchronizuje mirror, jeśli `tryb_idx in (1, 2)` (Burza nigdy nie utrwala decyzji).
+  - `_on_wyslij_done_zapis`: nowe wywołanie `self._zapisz_tryb_projektu()` po pierwszej udanej wysyłce produkcyjnej — pokrywa graczy nie używających przycisków struktury (typowy flow eksportu finalnego do ElevenLabs).
+  - `_on_hard_reset`: `self._zapisany_tryb = None` (nowy projekt zaczyna od czystej decyzji). `_on_clear_current` CELOWO nie resetuje — projekt trwa dalej z zachowaną decyzją trybu.
+
+- `gui_opowiesci.py` (commit `7e67ffb`, ~125 inserts):
+  - Nowy atrybut `self._zapisany_tryb: int | None` w `__init__`.
+  - Nowy widget `self._btn_edytuj_tryb` w `_zbuduj_radiobox_trybu`, domyślnie ukryty (`Hide()`), dodany do `row` obok `_btn_zasady_swiata`.
+  - `_aktualizuj_uistate`: pętla `EnableItem` na `_rb_tryb` based on `_zapisany_tryb`; `_btn_edytuj_tryb.Show(ma_projekt and utrwalony)` + `Layout()`.
+  - Materializacja `_zapisany_tryb`: `_on_nowa_gra` (po `projekt.zapisz_tryb(tryb)`), `_on_wczytaj` (z `wynik.saved_mode` lub fallback `projekt.tryb`), `_on_zapisz` (idempotentne — pokrywa stare gry bez `.mode`).
+  - Nowy handler `_on_edytuj_tryb`: tworzy `wx.Dialog` z ostrzeżeniem + RadioBox + OK/Anuluj. Po OK: `projekt.zapisz_tryb(nowy_tryb)`, sync `_zapisany_tryb` + `projekt.tryb`, `_ustaw_rb_z_trybu(nowy_tryb)`, `_aktualizuj_uistate()`, MessageBox „Tryb gry zmieniony".
+  - Nowy handler `_on_nazwa_gry_change` (bind EVT_TEXT na `_txt_nazwa_gry`): jeśli nazwa różni się od `_projekt.nazwa_pliku` → `_zapisany_tryb = None` + `_aktualizuj_uistate()` (RadioBox wolny). Powrót do nazwy aktywnego projektu → zamrożenie z powrotem.
+
+- 10 nowych kluczy i18n w `dictionaries/<kod>/gui/ui.yaml` × 9 języków:
+  - `btn_edytuj_tryb_label`, `btn_edytuj_tryb_tooltip`
+  - `dlg_edytuj_tryb_tytul`, `dlg_edytuj_tryb_ostrzezenie`, `dlg_edytuj_tryb_ostrzezenie_name`
+  - `dlg_edytuj_tryb_lbl`, `dlg_edytuj_tryb_name`
+  - `dlg_edytuj_tryb_btn_ok`, `dlg_edytuj_tryb_btn_anuluj`
+  - `status_tryb_zmieniony` (z placeholderem `{tryb_nazwa}`)
+  
+  PL ręcznie, EN/DE/ES/FI/FR/IS/IT/RU przez surgical `--klucz` w `buduj_wielojezyczne_ui.py`. Manualny review halucynacji wykrył 1 rozjazd w ES (LLM użył „El menor de dos males" zamiast „Menor mal" z UI) — skorygowane ręcznie. Pozostałe rozjazdy w fleksyjnych językach (DE „kleineren Übel", IT „Il male minore", FI „Pienemmässä pahassa", RU „Меньшем зле") to naturalna odmiana gramatyczna — gracz rozpozna ten sam termin.
+
+- 9 plików `dictionaries/<kod>/gui/dokumentacja/manual.yaml::tresc.notka_historyczna_chronione_tryby`: ostatnie zdanie („Od wersji 12.0…") wymienione na 4-zdaniowy paragraf z przyznaniem luki + wyjaśnieniem nowej ochrony od v15.2.3. PL ręcznie, 8 lokalizacji ręcznie z zachowaniem nazewnictwa Burzy per język (Brainstorming, Tormenta de Ideas, Aivoriihi, Hugstormun, Мозговой Шторм itd.).
+
+- 9 plików `dictionaries/<kod>/gui/dokumentacja/tales.yaml::tresc.krok_1_tryby_gry`: ostatnie zdanie („Tryb można zmienić w trakcie gry…") wymienione na opis furtki „Edytuj tryb gry…" + dodatkowy passus o EVT_TEXT na polu nazwy gry. Zachowano fragment o fiolce.
+
+- `gui_rezyser.py` (druga gałąź patcha, dialog wyboru):
+  - Nowy helper `_zbierz_dostepne_projekty()` — `os.listdir(skrypty/)` + filtr na `.txt` minus `_streszczenie` suffix; sortowane alfabetycznie.
+  - `_on_load` rozszerzone o dwie ścieżki: pole puste → `wx.SingleChoiceDialog` z listą, brak projektów → MessageBox info; pole wypełnione → bezpośrednia próba load (jak dotąd, kompatybilność z Enter w polu).
+  - `_refresh_ui_state`: `_btn_load.Enable(pamiec_pusta)` — usunięty wymóg `nazwa_podana` (przy pustym polu dialog otwiera się przyciskiem).
+
+- `gui_opowiesci.py` (druga gałąź patcha):
+  - Nowy helper `_zbierz_dostepne_gry()` — `os.listdir(runtime/opowiesci/)` + filtr na `.game.json` (twarde kryterium stanu gry).
+  - `_on_wczytaj` przepisane: `wx.FileDialog` (filtr rozszerzeń) zastąpione `wx.SingleChoiceDialog` z listą nazw. Brak gier → MessageBox info ze wskazówką jak zacząć.
+
+- 8 nowych kluczy i18n × 9 języków w `dictionaries/<kod>/gui/ui.yaml`:
+  - Reżyser: `dlg_wybierz_projekt_tytul`, `dlg_wybierz_projekt_lbl`, `brak_projektow_tytul`, `brak_projektow_tresc`
+  - Opowieści: `dlg_wybierz_gre_tytul`, `dlg_wybierz_gre_lbl`, `brak_gier_tytul`, `brak_gier_tresc`
+  
+  PL ręcznie, 8 lokalizacji przez `--klucz` w `buduj_wielojezyczne_ui.py`. Manualny review halucynacji wykrył 3 rozjazdy ([[feedback_batch_retranslate_review]]): (a) EN użył przetłumaczonych nazw folderów `scripts/` i `runtime/stories/` zamiast literalnych `skrypty/` i `runtime/opowiesci/` z dysku → korekta ręczna; (b) DE zostawił polskie „Księga Świata" w środku niemieckiego komunikatu → korekta na canonical „Weltbuch"; (c) IS użył „leikföng" (zabawki) zamiast „leikir" (gry) → korekta gramatyczna. Pierwotny tekst PL też zawierał halucynacyjny cytat fikcyjnej nazwy przycisku — przepisany na opis bez literalnego cytowania nazwy, co poza akuratnością wprowadza future-proofing przy ewentualnej zmianie nazw przycisków.
+
+- Stare klucze i18n `opowiesci.dlg_wczytaj_tytul` i `opowiesci.dlg_wczytaj_filtr` (używane przez wycofany `wx.FileDialog`) usunięte z `pl/gui/ui.yaml`; w pozostałych 8 językach pozostały jako sieroty (nieużywane, nie szkodzą — sprzątnięte zostaną przy okazji następnego pełnego refactora i18n).
+
+- **Cancel → Anuluj (fix lokalizacji wbudowanych dialogów wxPython)**: po wdrożeniu (2) podczas manualnego testu okazało się, że `wx.SingleChoiceDialog` na PL-systemie pokazuje angielską etykietę „Cancel" — wbudowane dialogi wxPython ignorują nasz i18n, używają lokalizacji systemowej Windows. wxPython nie ma metod `SetCancelLabel` / `SetOKCancelLabels` na tej klasie (sprawdzone dynamicznie: `hasattr(dlg, 'SetCancelLabel') == False`), więc fix przez `dlg.FindWindowById(wx.ID_CANCEL).SetLabel(t("common.btn_anuluj"))` po stworzeniu dialogu. Zastosowane w `_on_load` Reżysera i `_on_wczytaj` Opowieści (2 miejsca, ~5 linii każde + komentarz). Alternatywa przez `wx.Locale` byłaby destrukcyjna dla innych wbudowanych dialogów (FileDialog → „Otwórz"/„Open" rozjazd).
+
+- **Breaking change: pliki Opowieści przeniesione do `opowiesci/`**. Bug source: po wdrożeniu (2) dialog wyboru projektu Reżysera (`_zbierz_dostepne_projekty()` skanujący `skrypty/`) widział też pliki `.txt` gier Opowieści, bo do v15.2.2 oba moduły zapisywały do tego samego folderu. Wczytanie gry Opowieści w Reżyserze dawało `saved_mode in (3,4,5)` poza akceptowanym zakresem `(1,2)` Reżysera → fallback `_zapisany_tryb = None` → wszystkie 3 tryby RadioBox enabled (regresja ochrony z fixu nr 1). Decyzja: rozdzielenie domen przez fizyczne wydzielenie folderów (Opcja B w dyskusji architektonicznej, alternatywa A „zrezygnować z .txt na bieżąco, generować na finał" odrzucona — większy refactor + regresja live-preview).
+
+  Zmiany:
+  - `core_opowiesci.py`: `_sciezka_txt` i `_sciezka_md` używają `OPOWIESCI_DIR` zamiast `SKRYPTY_DIR`. Dodano `_sciezka_txt_legacy` / `_sciezka_md_legacy` (używane wyłącznie do detekcji starych ścieżek w auto-migracji). `dopisz_do_txt` i `rebuild_ksiega_swiata` tworzą folder `opowiesci/` przez `os.makedirs(..., exist_ok=True)`.
+  - `core_opowiesci.ProjektOpowiesci.wczytaj()`: auto-migracja jednorazowa na pierwszy load gry sprzed v15.2.3 — pętla po (`_sciezka_txt`/`_sciezka_md`, legacy fns); jeśli nowy plik nie istnieje, a stary istnieje, i jest `.game.json` (potwierdzenie że to faktycznie gra Opowieści, nie projekt Reżysera o przypadkowej zbieżnej nazwie) → `os.rename`. Cichy `try/except OSError` na wypadek read-only USB / pliku zablokowanego przez Notatnik.
+  - `.gitignore`: dodano `opowiesci/`.
+  - `build_release.py:618`: dodano `'opowiesci'` do `IGNOROWANE_FOLDERY`.
+  - `installer.iss:64`: dodano `opowiesci\*` do `Excludes:` (analogicznie do istniejącego `skrypty\*`).
+  - `gui_konwerter.py`: BEZ ZMIAN — używa `wx.FileDialog` z manualną nawigacją gracza, zadziała z dowolnego folderu. Manuale w 9 jzk dostają tylko aktualizację ścieżki w opisie use-case'u (konwerter wczytuje plik Opowieści → ścieżka `opowiesci/<gra>.txt` zamiast `skrypty/<gra>.txt`).
+
+- **Normalizacja pre-existing halucynacji LLM w manualach × 9 jzk**: przy okazji breaking change zostały wykryte pre-existing halucynacje pochodzące z batch retranslate poprzednich wersji — LLM zlokalizował nazwy folderów na dysku (które powinny być literałami PL: `skrypty/`, `runtime/skrypty/`, `runtime/opowiesci/`) na lokalne tłumaczenia: EN `scripts/`, ES `runtime/historias/`, FI `käsikirjoitukset/`, FR `scripts/<nom>`, itp. Te ścieżki nigdy nie wskazywały na rzeczywiste pliki — bug w docs od kilku wersji wstecz. Naprawione jednym przebiegiem regex (`buduj_wielojezyczne_ui` nie umie tego — to dotyczy plików `dokumentacja/*.yaml`, nie `ui.yaml`): w `tales.yaml × 8 jzk` znormalizowano każdy `<dowolny prefix>/<placeholder>.{txt,md}` w kontekście Opowieści → `opowiesci/<placeholder>.{txt,md}`, plus `runtime/<dowolny>/<placeholder>.mode` → `runtime/skrypty/<placeholder>.mode` (literała ścieżka wspólna z Reżyserem), plus `runtime/<dowolny>/<placeholder>.{game.json,story.jsonl}` → `runtime/opowiesci/<placeholder>...`. Łącznie 40 linii × 8 jzk. PL miało już literalne ścieżki, więc tam tylko fix wzmianki o starym `skrypty/` (replace_all). W `manual.yaml × 9 jzk` linia o konwerter+Opowieści (`plik <prefix>/<X>.txt wygenerowany przez moduł Interaktywnych Opowieści`) znormalizowana na `opowiesci/<X>.txt`.
+
+- **Przycisk „Otwórz plik narracji…" (łata luki pamięci streszczenia)**: drugi bug zgłoszony podczas manualnego testu — luka architektoniczna istniejąca od kilku wersji wstecz, ale zauważona dopiero teraz. Mechanizm: `core_rezyser.ProjektRezysera.wczytaj` w linii 458-467 ma logikę „streszczenie eager bije pełną historię" — gdy plik `.summary.txt` istnieje, `full_story = ""` i `czy_historia = False`. To jest CELOWE dla pełnego flow (gracz wygenerował streszczenie z Burzy, świadomie wyczyścił pamięć bieżącą żeby zwolnić okno kontekstu), ale niewystarczająco zabezpieczone na flow degenerowany (gracz wpisał ręczną notatkę w pole Pamięci Długotrwałej i kliknął Zapisz Streszczenie zanim cokolwiek istotnego było w full_story).
+
+  Po reload AI dostaje: Księga Świata + krótka notatka → halucynuje bez kontekstu tonu i ostatnich scen. Bug istnieje od pierwszej publikacji aplikacji — nie ma jak go naprawić w pełni bez większego refactora (priorytet streszczenia jest globalną konwencją). Łata polega na DODANIU recovery flow, nie na zmianie logiki priorytetu: nowy przycisk otwiera istniejący plik `.txt` (pełna narracja wciąż istnieje na dysku — nigdy nie była kasowana, tylko `full_story` w RAM zerowana) w systemowym edytorze. Gracz może z niego skopiować ostatnie sceny do pola Pamięci albo dopisać/edytować końcówkę ręcznie.
+
+  Zmiany w kodzie:
+  - `gui_rezyser.py`: nowy `_btn_otworz_narracje` w `_zbuduj_pasek_pliku` (file_row obok Hard Reset). Bind do `_on_otworz_narracje` w `_bind_events`. Enable state w `_refresh_ui_state`: `nazwa_podana` (istnienie pliku sprawdzane w handlerze — cheaper UX). Handler woła helper `_otworz_w_edytorze(sciezka)` (`os.startfile` / `subprocess.Popen open|xdg-open`, wzorzec z `gui_manager_regul._otworz_w_edytorze_tekstu`). Nowy import `platform`, `subprocess`.
+  - `gui_opowiesci.py`: analogiczny `_btn_otworz_narracje` w `_zbuduj_pasek_pliku`, ale z modalnym ostrzeżeniem PRZED otwarciem — `.txt` w Opowieściach to TYLKO narracja TTS, źródłem prawdy stanu gry jest `.game.json` (postacie, lokacja, ekwipunek, wątki). Edycja `.txt` może wprowadzić rozjazd: np. gracz opisze że postać zginęła, a w stanie gry nadal żyje. Ostrzeżenie pokazuje dialog YES_NO z NO_DEFAULT (bezpieczna akcja domyślna).
+  - 14 nowych kluczy i18n × 9 jzk (Reżyser: `btn_otworz_narracje_label/tooltip`, `blad_otwarcia_tytul/tresc`, `plik_narracji_brak_tytul/tresc`; Opowieści: te same + `otworz_narracje_ostrzezenie_tytul/tresc`). PL ręcznie, 8 lokalizacji przez `--klucz` w `buduj_wielojezyczne_ui.py`. Manualny review halucynacji wykrył lokalizacje nazw folderów w tooltipach (EN `scripts/<name>` zamiast `skrypty/<name>`, DE `skripte/<nazwa>`, etc.) — naprawione tym samym regex-skryptem co poprzednio (34 linie × 8 jzk).
+  - Manuale × 9 jzk dostały dodatkową pozycję w liście przycisków paska pliku (Reżyser) i dodatkowy paragraf po opisie pola pełnej narracji (Opowieści, z ostrzeżeniem o ryzyku rozjazdu z `.game.json`). W PL manualu dodatkowo rozszerzony paragraf o Pamięci Długotrwałej z explicit opisem luki architektonicznej i wskazaniem na nowy przycisk jako recovery.
+
+- 27 plików `docs/*.txt` zregenerowanych przez `generuj_dokumentacje.py --waliduj` (3 typy × 9 języków): nowa treść notki historycznej + bump 15.2.2 → 15.2.3 w nagłówkach + zaktualizowany opis przycisku „Wczytaj" w manualu (dwa ścieżki) i `/wczytaj` w tales (nowy dialog wyboru gry zamiast systemowego file pickera).
+
+- 9 plików `readme.<iso>.md` + `readme.md` z bumpem numeru wersji.
+
+- Naprawa lokalnego projektu `emilia_heist_audiobook` (poza repo — `skrypty/` i `runtime/` w `.gitignore`): `.mode` 1 → 2, `skrypty/emilia_heist_audiobook.txt` ucięty 26 bajtów (puste linie + „Akt 1" + „Scena 1" wstrzyknięte przez bug). Po naprawie `ProjektRezysera.wczytaj` raportuje `saved_mode=2`, narracja kończy się czysto na frazie „…myślowym pędem hakerki." + CRLF.
+
+### Test plan
+
+- ✅ Smoke test `RezyserPanel` (5 scenariuszy lifecycle `_zapisany_tryb` przez izolowany `wx.App(False)` bez `MainLoop`): start świeży / Skrypt utrwalony / Audiobook utrwalony / przeskok na Burzę po utrwaleniu / przełączenie przed utrwaleniem — wszystkie scenariusze: EnableItem zgodny z oczekiwaniami, panel struktury widoczny dokładnie wtedy gdy gracz może wstawić markery zgodne z `.mode`.
+- ✅ Smoke test `OpowiesciPanel` (6 scenariuszy lifecycle: start bez projektu / utrwalony tryb 4 / pole nazwy zmienione na inną / powrót do bieżącej nazwy / inna nazwa + RB na Swobodny / brak projektu z dowolną nazwą).
+- ✅ Smoke test budowy `OpowiesciPanel` we wszystkich 9 językach (PL/EN/DE/ES/FI/FR/IS/IT/RU): wszystkie 10 nowych kluczy i18n obecne, etykieta `_btn_edytuj_tryb` poprawnie przetłumaczona z akceleratorem `&`.
+- ✅ Smoke test helpera `_zbierz_dostepne_projekty()` na lokalnej kopii repo: zwraca 2 legit projekty (`emilia_heist_audiobook`, `joanna_joana_conflict`), pomija pliki `_streszczenie.txt`.
+- ✅ Smoke test helpera `_zbierz_dostepne_gry()` na lokalnej kopii repo: zwraca 1 grę (`joanna_joana_conflict`).
+- ✅ Walidacja `generuj_dokumentacje.py --waliduj` przeszła po regeneracji 27 plików docs — wszystkie placeholdery rozwijają się.
+- ✅ Manual ręczny w aplikacji (Reżyser): wczytanie projektu Audiobook, próba nawigacji strzałkami przez Burzę — Skrypt faktycznie pomijany.
+- ✅ Manual ręczny SingleChoiceDialog w Reżyserze: wykryty bug Cancel/Anuluj, naprawiony przez `FindWindowById`.
+- ✅ Test auto-migracji folderu na rzeczywistej grze `joanna_joana_conflict`: `.txt` + `.md` przeniesione ze `skrypty/` do `opowiesci/`, `ProjektOpowiesci.wczytaj` raportuje `saved_mode=5`, narracja kompletna.
+- ✅ Helper `_zbierz_dostepne_projekty()` post-migracja zwraca już tylko `emilia_heist_audiobook` (Reżyser), `_zbierz_dostepne_gry()` zwraca `joanna_joana_conflict` (Opowieści) — czysta separacja domen.
+- ⏳ Manual ręczny w aplikacji (Opowieści) — do wykonania post-release (smoke test furtki + EVT_TEXT na polu nazwy + dialog wyboru z Anuluj).
+
+### Migracja z v15.2.2
+
+Brak działań po stronie użytkownika. Aplikacja:
+- Stare projekty Reżysera z istniejącym `.mode` (1 lub 2) — `_on_load` ustawi `_zapisany_tryb` z pliku, RadioBox zamknie się natychmiast po wczytaniu.
+- Stare projekty Reżysera bez `.mode` (np. gracz nigdy nie kliknął przycisku struktury w starej wersji) — `_zapisany_tryb = None`, RadioBox wolny do pierwszej decyzji.
+- Stare gry Opowieści z `.mode` lub `projekt.tryb` w `.game.json` — analogicznie, ze `wynik.saved_mode` lub fallback `projekt.tryb`.
+- Stara ścieżka wczytywania w Reżyserze („wpisz nazwę + Enter") pozostaje funkcjonalna jako ścieżka eksperta — nikt z dotychczasowych workflow nie traci dostępu, gracze pamiętający nazwy projektów wczytują tak jak dotąd. Nowa ścieżka (dialog wyboru przy pustym polu) to dodatek dla niewidomych i nowych użytkowników.
+- Stara ścieżka wczytywania w Opowieściach (systemowy `wx.FileDialog`) jest zastąpiona dialogiem listy — z punktu widzenia gracza zmiana wizualna, ale nawigacja jest prostsza (Tab + strzałki w liście zamiast 3-panelowego dialogu plików). Nie ma żadnych implikacji dla danych na dysku.
+- **Migracja plików Opowieści ze `skrypty/` do `opowiesci/`** odbywa się automatycznie przy pierwszym wczytaniu każdej pre-15.2.3 gry — `ProjektOpowiesci.wczytaj()` wykonuje `os.rename()` z legacy ścieżki na nową. Gracz nie musi nic robić. Jeśli wolisz przyspieszyć — uruchom aplikację, wybierz „Wczytaj" w panelu Opowieści, wybierz po kolei każdą grę. Pliki przeskoczą; po zamknięciu aplikacji folder `skrypty/` zawiera już tylko projekty Reżysera.
+
+Patch jest backward-compatible — auto-migracja pokrywa pre-15.2.3 gry przy pierwszym kontakcie. Nie ma scenariusza wymagającego ręcznej interwencji użytkownika.
 
 ---
 
