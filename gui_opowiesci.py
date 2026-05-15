@@ -1205,29 +1205,65 @@ class OpowiesciPanel(wx.Panel):
         self._txt_akcja.SetFocus()
 
     # ------------------------------------------------------------------
-    # _on_wczytaj: FileDialog → ProjektOpowiesci.wczytaj() → sync UI
+    # Helper: zbiera dostępne gry do wczytania (A11y dialog wyboru)
+    # ------------------------------------------------------------------
+    def _zbierz_dostepne_gry(self) -> list[str]:
+        """Skanuje folder `runtime/opowiesci/` i zwraca nazwy gier.
+
+        Kryterium: plik `.game.json` (twarde źródło prawdy stanu gry —
+        bez niego `ProjektOpowiesci.wczytaj` rzuci FileNotFoundError).
+        Plik narracji `.txt` traktujemy jako opcjonalny, bo świeżo
+        założone gry (przed pierwszą turą) jeszcze go nie mają.
+
+        Zwraca pustą listę gdy folder nie istnieje lub jest pusty —
+        wywołujący `_on_wczytaj` decyduje wtedy o komunikacie informacyjnym.
+        """
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        runtime_op = os.path.join(app_dir, "runtime", "opowiesci")
+        if not os.path.isdir(runtime_op):
+            return []
+        gry: list[str] = []
+        sufiks = ".game.json"
+        for nazwa_pliku in os.listdir(runtime_op):
+            if not nazwa_pliku.endswith(sufiks):
+                continue
+            gry.append(nazwa_pliku[:-len(sufiks)])
+        return sorted(gry)
+
+    # ------------------------------------------------------------------
+    # _on_wczytaj: SingleChoiceDialog → ProjektOpowiesci.wczytaj() → sync UI
     # ------------------------------------------------------------------
     def _on_wczytaj(self, _event: wx.Event) -> None:
-        """Otwiera dialog z plikami `.game.json` i wczytuje wybraną grę."""
-        app_dir = os.path.dirname(os.path.abspath(__file__))
-        default_dir = os.path.join(app_dir, "runtime", "opowiesci")
-        # Folder może nie istnieć (świeża instalacja, brak żadnej gry) —
-        # `wx.FileDialog` poradzi sobie i pokaże pusty katalog.
+        """Otwiera dialog z listą dostępnych gier i wczytuje wybraną.
 
-        with wx.FileDialog(
+        v15.2.3: zastąpiliśmy wx.FileDialog (otwierał system file picker
+        z filtrem `.game.json`) prostszym wx.SingleChoiceDialog z listą
+        nazw gier. Powód: A11y — NVDA czyta listę choice items naturalnie,
+        a niewidomy gracz nie musi nawigować po systemowym dialogu plików
+        z trzema panelami i rozszerzeniami. Konsystentne z dialogiem
+        wyboru projektu w Reżyserze.
+        """
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        gry = self._zbierz_dostepne_gry()
+        if not gry:
+            wx.MessageBox(
+                t("opowiesci.brak_gier_tresc"),
+                t("opowiesci.brak_gier_tytul"),
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+            self._txt_nazwa_gry.SetFocus()
+            return
+
+        with wx.SingleChoiceDialog(
             self,
-            message=t("opowiesci.dlg_wczytaj_tytul"),
-            defaultDir=default_dir,
-            wildcard=t("opowiesci.dlg_wczytaj_filtr"),
-            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST,
+            t("opowiesci.dlg_wybierz_gre_lbl"),
+            t("opowiesci.dlg_wybierz_gre_tytul"),
+            gry,
         ) as dlg:
             if dlg.ShowModal() != wx.ID_OK:
                 return
-            path = dlg.GetPath()
-
-        # Z `<app>/runtime/opowiesci/jakas_gra.game.json` wyciągamy `jakas_gra`.
-        basename = os.path.basename(path)
-        nazwa = basename[:-len(".game.json")] if basename.endswith(".game.json") else basename
+            nazwa = dlg.GetStringSelection()
 
         projekt = ProjektOpowiesci(app_dir)
         try:

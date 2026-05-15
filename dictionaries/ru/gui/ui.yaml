@@ -525,6 +525,10 @@ rezyser:
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
 # -----------------------------------------------------------------------------
+  dlg_wybierz_projekt_tytul: Загрузить проект
+  dlg_wybierz_projekt_lbl: 'Доступные проекты:'
+  brak_projektow_tytul: Нет проектов
+  brak_projektow_tresc: 'В папке skrypty/ пока нет проектов для загрузки. Начните новый проект: введите название в поле выше, затем сохраните Книгу Мира или отправьте первый запрос в AI.'
 poliglota:
   panel_name: "Панель Полиглота AI"
   heading: "🌍  Полиглот AI – Гибридная Студия Переводов"
@@ -1051,3 +1055,7 @@ opowiesci:
   dlg_edytuj_tryb_btn_ok: Изменить &режим
   dlg_edytuj_tryb_btn_anuluj: '&Отмена'
   status_tryb_zmieniony: Режим игры изменен на «{tryb_nazwa}». Следующий ход будет использовать новые правила наррации.
+  dlg_wybierz_gre_tytul: Загрузить игру Истории
+  dlg_wybierz_gre_lbl: 'Доступные игры:'
+  brak_gier_tytul: Нет игр
+  brak_gier_tresc: 'В папке runtime/opowiesci/ пока нет сохраненных игр. Начните новую игру: введите название в поле выше, выберите режим и нажмите кнопку Новая игра.'

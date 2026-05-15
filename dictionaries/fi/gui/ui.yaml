@@ -525,6 +525,10 @@ rezyser:
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
 # -----------------------------------------------------------------------------
+  dlg_wybierz_projekt_tytul: Lataa projekti
+  dlg_wybierz_projekt_lbl: 'Saatavilla olevat projektit:'
+  brak_projektow_tytul: Ei projekteja
+  brak_projektow_tresc: 'Kansiossa skrypty/ ei ole vielä projekteja ladattavaksi. Aloita uusi projekti: kirjoita nimi yllä olevaan kenttään ja tallenna sitten Maailmankirja tai lähetä ensimmäinen kysely tekoälylle.'
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -1051,3 +1055,7 @@ opowiesci:
   dlg_edytuj_tryb_btn_ok: Vaihda &tila
   dlg_edytuj_tryb_btn_anuluj: '&Peruuta'
   status_tryb_zmieniony: Pelitila vaihdettu tilaan „{tryb_nazwa}". Seuraava vuoro käyttää uusia kerrontasääntöjä.
+  dlg_wybierz_gre_tytul: Lataa Tarinapeli
+  dlg_wybierz_gre_lbl: 'Saatavilla olevat pelit:'
+  brak_gier_tytul: Ei pelejä
+  brak_gier_tresc: 'Kansiossa runtime/opowiesci/ ei ole vielä tallennettuja pelejä. Aloita uusi peli: kirjoita nimi yllä olevaan kenttään, valitse tila ja käytä Uusi peli -painiketta.'

@@ -525,6 +525,10 @@ rezyser:
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
 # -----------------------------------------------------------------------------
+  dlg_wybierz_projekt_tytul: Hladdu verkefni
+  dlg_wybierz_projekt_lbl: 'Tiltæk verkefni:'
+  brak_projektow_tytul: Engin verkefni
+  brak_projektow_tresc: 'Í skránni skrypty/ eru engin verkefni til að hlaða inn ennþá. Byrjaðu nýtt verkefni: sláðu inn nafn í reitinn hér að ofan og vistaðu síðan Heimsbókina eða sendu fyrstu fyrirspurnina til AI.'
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -1051,3 +1055,7 @@ opowiesci:
   dlg_edytuj_tryb_btn_ok: Breyta &ham
   dlg_edytuj_tryb_btn_anuluj: '&Hætta við'
   status_tryb_zmieniony: Leikjahamur breyttur í „{tryb_nazwa}". Næsta umferð mun nota nýjar frásagnarreglur.
+  dlg_wybierz_gre_tytul: Hladdu inn Söguleik
+  dlg_wybierz_gre_lbl: 'Tiltækir leikir:'
+  brak_gier_tytul: Engir leikir
+  brak_gier_tresc: 'Í skránni runtime/opowiesci/ eru engir vistaðir leikir ennþá. Byrjaðu nýjan leik: sláðu inn nafn í reitinn hér að ofan, veldu stillingu og notaðu hnappinn Nýr leikur.'

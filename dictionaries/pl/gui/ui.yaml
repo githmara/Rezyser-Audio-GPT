@@ -379,6 +379,13 @@ rezyser:
   # Komunikaty - wczytywanie
   brak_nazwy_tytul:      "Brak nazwy"
   brak_nazwy_tresc:      "Podaj nazwę pliku projektu przed wczytaniem."
+  # Dialog wyboru projektu (v15.2.3) — A11y, otwiera się gdy gracz
+  # klika „Wczytaj" przy pustym polu nazwy. NVDA czyta listę choice items
+  # naturalnie, gracz nie musi pamiętać i wpisywać nazwy z klawiatury.
+  dlg_wybierz_projekt_tytul: "Wczytaj projekt"
+  dlg_wybierz_projekt_lbl:   "Dostępne projekty:"
+  brak_projektow_tytul:      "Brak projektów"
+  brak_projektow_tresc:      "W folderze skrypty/ nie ma jeszcze żadnych projektów do wczytania. Zacznij nowy projekt: wpisz nazwę w polu powyżej, a następnie zapisz Księgę Świata albo wyślij pierwsze zapytanie do AI."
   plik_nie_istnieje_tytul: "Plik nie istnieje"
   plik_nie_istnieje_tresc: |-
     Nie znaleziono pliku:
@@ -1027,8 +1034,13 @@ opowiesci:
   gra_zapisana_tresc:        'Stan gry „{nazwa}" został zapisany na dysk.'
   nowa_gra_zaczatek:         "📖 Gra \"{nazwa}\" rozpoczęta.\n\nWpisz pierwszą akcję w polu poniżej i kliknij \"Wyślij\" — silnik narracyjny opisze świat, w którym się znalazłeś, i przedstawi pierwszą scenę."
   brak_narracji_info:        "📖 Gra \"{nazwa}\" wczytana, ale plik narracji (skrypty/{nazwa}.txt) nie istnieje. Stan gry pochodzi z pliku game.json — możesz kontynuować."
-  dlg_wczytaj_tytul:         "Wczytaj grę Opowieści"
-  dlg_wczytaj_filtr:         "Pliki gry Opowieści (*.game.json)|*.game.json|Wszystkie pliki|*.*"
+  # Dialog wyboru gry (v15.2.3) — A11y, lista dostępnych gier zamiast
+  # systemowego dialogu plików. NVDA czyta SingleChoiceDialog naturalnie,
+  # konsystentne z dialogiem wyboru projektu w Reżyserze.
+  dlg_wybierz_gre_tytul:     "Wczytaj grę Opowieści"
+  dlg_wybierz_gre_lbl:       "Dostępne gry:"
+  brak_gier_tytul:           "Brak gier"
+  brak_gier_tresc:           "W folderze runtime/opowiesci/ nie ma jeszcze żadnych zapisanych gier. Zacznij nową grę: wpisz nazwę w polu powyżej, wybierz tryb i użyj przycisku Nowa gra."
   blad_zapisu_tresc:         "Wystąpił błąd zapisu pliku gry: {tresc_bledu}"
   blad_wczytania_tresc:      'Wystąpił błąd wczytania gry „{nazwa}": {tresc_bledu}'
 

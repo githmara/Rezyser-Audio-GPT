@@ -524,6 +524,10 @@ rezyser:
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
 # -----------------------------------------------------------------------------
+  dlg_wybierz_projekt_tytul: Cargar proyecto
+  dlg_wybierz_projekt_lbl: 'Proyectos disponibles:'
+  brak_projektow_tytul: No hay proyectos
+  brak_projektow_tresc: 'No hay proyectos para cargar en la carpeta skrypty/. Comienza un nuevo proyecto: escribe un nombre en el campo de arriba y luego guarda el Libro del Mundo o envía la primera consulta a la IA.'
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -1050,3 +1054,7 @@ opowiesci:
   dlg_edytuj_tryb_btn_ok: Cambiar &modo
   dlg_edytuj_tryb_btn_anuluj: '&Cancelar'
   status_tryb_zmieniony: Modo de juego cambiado a "{tryb_nazwa}". El siguiente turno usará las nuevas reglas de narración.
+  dlg_wybierz_gre_tytul: Cargar juego de Historias
+  dlg_wybierz_gre_lbl: 'Juegos disponibles:'
+  brak_gier_tytul: No hay juegos
+  brak_gier_tresc: 'No hay juegos guardados en la carpeta runtime/opowiesci/. Comienza un nuevo juego: escribe un nombre en el campo de arriba, elige un modo y usa el botón Nuevo juego.'

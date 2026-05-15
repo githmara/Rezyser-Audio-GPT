@@ -863,7 +863,11 @@ class RezyserPanel(wx.Panel):
         tryb_zapisu = tryb_idx in (1, 2)
 
         self._txt_file_name.Enable(not pamiec_zajeta)
-        self._btn_load.Enable(pamiec_pusta and nazwa_podana)
+        # v15.2.3: przycisk Wczytaj jest aktywny też przy pustym polu nazwy —
+        # otwiera wtedy dialog wyboru projektu (A11y, gracz nie musi
+        # pamiętać/przepisywać nazwy). Pole wypełnione = ścieżka eksperta
+        # (bezpośrednia próba wczytania tej konkretnej nazwy).
+        self._btn_load.Enable(pamiec_pusta)
         self._btn_clear_current.Enable(pamiec_zajeta)
 
         cos_do_wyczyszczenia = pamiec_zajeta or bool(
@@ -985,19 +989,66 @@ class RezyserPanel(wx.Panel):
         self._refresh_ui_state()
 
     # ------------------------------------------------------------------
+    # Helper: zbiera dostępne projekty do wczytania (A11y dialog wyboru)
+    # ------------------------------------------------------------------
+    def _zbierz_dostepne_projekty(self) -> list[str]:
+        """Skanuje folder `skrypty/` i zwraca posortowaną listę nazw projektów.
+
+        Kryterium: plik `.txt` w `skrypty/`, którego nazwa NIE kończy się
+        sufiksem `_streszczenie` (te są derived per-projekt, nie samodzielnymi
+        projektami). Pliki `.md` (Księga Świata) traktujemy jako
+        opcjonalne — gracze, którzy nigdy nie zapisali księgi, też mają
+        prawo zobaczyć swoje projekty na liście wyboru.
+
+        Zwraca pustą listę gdy folder `skrypty/` nie istnieje lub jest
+        pusty po filtracji — wywołujący `_on_load` decyduje wtedy o
+        odpowiednim komunikacie dla gracza.
+        """
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        skrypty_dir = os.path.join(app_dir, cr.SKRYPTY_DIR)
+        if not os.path.isdir(skrypty_dir):
+            return []
+        projekty: list[str] = []
+        for nazwa_pliku in os.listdir(skrypty_dir):
+            if not nazwa_pliku.endswith(".txt"):
+                continue
+            rdzen = nazwa_pliku[:-len(".txt")]
+            if rdzen.endswith("_streszczenie"):
+                continue
+            projekty.append(rdzen)
+        return sorted(projekty)
+
+    # ------------------------------------------------------------------
     # Wczytywanie historii z pliku
     # ------------------------------------------------------------------
     def _on_load(self, _event: wx.Event) -> None:
+        # Dwie ścieżki UX:
+        # • pole nazwy puste → otwieramy dialog wyboru projektu (A11y —
+        #   niewidomy gracz nie musi pamiętać i przepisywać nazwy pliku);
+        # • pole nazwy wypełnione → próba bezpośredniego wczytania (ścieżka
+        #   eksperta — Enter w polu nazwy lub klik po wpisaniu z pamięci).
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
-            wx.MessageBox(
-                t("rezyser.brak_nazwy_tresc"),
-                t("rezyser.brak_nazwy_tytul"),
-                wx.OK | wx.ICON_WARNING,
+            projekty = self._zbierz_dostepne_projekty()
+            if not projekty:
+                wx.MessageBox(
+                    t("rezyser.brak_projektow_tresc"),
+                    t("rezyser.brak_projektow_tytul"),
+                    wx.OK | wx.ICON_INFORMATION,
+                    self,
+                )
+                self._txt_file_name.SetFocus()
+                return
+            with wx.SingleChoiceDialog(
                 self,
-            )
-            self._txt_file_name.SetFocus()
-            return
+                t("rezyser.dlg_wybierz_projekt_lbl"),
+                t("rezyser.dlg_wybierz_projekt_tytul"),
+                projekty,
+            ) as dlg:
+                if dlg.ShowModal() != wx.ID_OK:
+                    return
+                nazwa = dlg.GetStringSelection()
+            self._txt_file_name.SetValue(nazwa)
 
         try:
             wynik = self._projekt.wczytaj(nazwa)

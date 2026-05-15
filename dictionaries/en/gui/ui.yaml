@@ -524,6 +524,10 @@ rezyser:
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
 # -----------------------------------------------------------------------------
+  dlg_wybierz_projekt_tytul: Load project
+  dlg_wybierz_projekt_lbl: 'Available projects:'
+  brak_projektow_tytul: No projects
+  brak_projektow_tresc: 'There are no projects to load in the skrypty/ folder yet. Start a new project: enter a name in the field above, then save the World Book or send the first query to the AI.'
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -1050,3 +1054,7 @@ opowiesci:
   dlg_edytuj_tryb_btn_ok: Change &mode
   dlg_edytuj_tryb_btn_anuluj: '&Cancel'
   status_tryb_zmieniony: Game mode changed to "{tryb_nazwa}". The next turn will use the new narrative rules.
+  dlg_wybierz_gre_tytul: Load Tales game
+  dlg_wybierz_gre_lbl: 'Available games:'
+  brak_gier_tytul: No games
+  brak_gier_tresc: 'There are no saved games in the runtime/opowiesci/ folder yet. Start a new game: enter a name in the field above, choose a mode, and use the New Game button.'
