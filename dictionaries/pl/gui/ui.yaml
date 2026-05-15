@@ -748,6 +748,7 @@ manager:
     szyfry:              "Szyfry (zabawy tekstem)  🔐"
     rezyser:             "Reżyser (tryby i postprodukcja)  🎬"
     gui:                 "Tłumaczenia UI  🌐"
+    opowiesci:           "Opowieści (tryby interaktywne)  📖"
   # Przyciski akcji
   btn_otworz_label:      "📝  &Otwórz w edytorze tekstu"
   btn_otworz_name:       "Przycisk Otwórz zaznaczony plik w edytorze tekstu"

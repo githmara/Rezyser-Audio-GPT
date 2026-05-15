@@ -50,10 +50,15 @@ _ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 DICTIONARIES_DIR = os.path.join(_ROOT_DIR, "dictionaries")
 
 # Nazwy podfolderów rozpoznawane przez silnik
-FOLDER_AKCENTY = "akcenty"
-FOLDER_SZYFRY  = "szyfry"
-FOLDER_REZYSER = "rezyser"
-FOLDER_GUI     = "gui"   # tłumaczenia UI – dodane w 13.1
+FOLDER_AKCENTY   = "akcenty"
+FOLDER_SZYFRY    = "szyfry"
+FOLDER_REZYSER   = "rezyser"
+FOLDER_GUI       = "gui"        # tłumaczenia UI – dodane w 13.1
+FOLDER_OPOWIESCI = "opowiesci"  # tryby Opowieści (v15.0+) — dodane do drzewa
+                                 # Managera Reguł, żeby autor paczki językowej
+                                 # mógł edytować baza.yaml / tryb_*.yaml /
+                                 # zaczatki.yaml / streszczenie.yaml bez
+                                 # grzebania w Eksploratorze plików.
 
 
 # Walidacja id pliku – ASCII snake_case (żeby działało wszędzie, także
@@ -368,9 +373,14 @@ class ManagerRegulPanel(wx.Panel):
                 if zaznacz_sciezke and _ta_sama_sciezka(podstawy, zaznacz_sciezke):
                     do_zaznaczenia = wezel
 
-            # 2) kategorie (akcenty/ / szyfry/ / rezyser/ / gui/)
+            # 2) kategorie (akcenty/ / szyfry/ / rezyser/ / gui/ / opowiesci/)
             # Wersja 13.1: FOLDER_GUI dołożony jako czwarta kategoria.
-            for kat in (FOLDER_AKCENTY, FOLDER_SZYFRY, FOLDER_REZYSER, FOLDER_GUI):
+            # Wersja 15.2.4: FOLDER_OPOWIESCI dołożony jako piąta — tryby
+            # Opowieści (baza.yaml + tryb_*.yaml + zaczatki.yaml +
+            # streszczenie.yaml + cinematic_warning.yaml) edytowalne przez
+            # Managera bez wychodzenia z aplikacji.
+            for kat in (FOLDER_AKCENTY, FOLDER_SZYFRY, FOLDER_REZYSER,
+                        FOLDER_GUI, FOLDER_OPOWIESCI):
                 sciezka_kat = os.path.join(sciezka_jezyka, kat)
                 if not os.path.isdir(sciezka_kat):
                     continue
@@ -713,8 +723,11 @@ class ManagerRegulPanel(wx.Panel):
         if typ == mrs.TYP_JEZYK_BAZOWY:
             folder_jezyka = os.path.join(DICTIONARIES_DIR, id_pliku)
             try:
+                # v15.2.4: dorzucamy też podfolder `opowiesci/`, żeby nowa
+                # paczka miała od razu miejsce na pliki trybu Opowieści
+                # (baza.yaml, tryb_*.yaml, zaczatki.yaml, streszczenie.yaml).
                 for pod in (FOLDER_AKCENTY, FOLDER_SZYFRY,
-                            FOLDER_REZYSER, FOLDER_GUI):
+                            FOLDER_REZYSER, FOLDER_GUI, FOLDER_OPOWIESCI):
                     os.makedirs(os.path.join(folder_jezyka, pod),
                                 exist_ok=True)
             except Exception as exc:                            # noqa: BLE001
@@ -827,6 +840,13 @@ def _zgadnij_typ_z_zaznaczenia(meta: dict | None) -> str:
     if kat == FOLDER_SZYFRY:
         return mrs.TYP_SZYFR_ZAMIANY
     if kat == FOLDER_REZYSER:
+        return mrs.TYP_TRYB_REZYSERA
+    if kat == FOLDER_OPOWIESCI:
+        # v15.2.4: pliki opowiesci/ semantycznie najbliższe trybom Reżysera
+        # (prompt_systemowy + slowa_wyzwalajace), więc kreator startuje
+        # z tego samego szablonu. Dla `baza.yaml` / `zaczatki.yaml` /
+        # `streszczenie.yaml` autor i tak duplikuje istniejący plik
+        # (przycisk „Duplikuj") — kreator obsługuje tylko nowe tryby.
         return mrs.TYP_TRYB_REZYSERA
     # FOLDER_GUI nie ma jeszcze dedykowanego typu w kreatorze (13.1) –
     # trafia do domyślnego (akcent), bo kreator tłumaczeń UI byłby

@@ -1,0 +1,43 @@
+name: Issue Closure (North — Lumi/Vieno/Katla)
+
+# Etap „Polnoc" obiegu „Z Poludnia na Polnoc". Po nadaniu etykiety
+# `fixed-in-release` jedna z bohaterek Polnocy (Lumi/Vieno/Katla)
+# komentuje i zamyka issue w jezyku oryginalnego zgloszenia.
+
+on:
+  issues:
+    types: [labeled]
+
+concurrency:
+  group: issue-closure-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  zamknij_z_polnocy:
+    if: github.event.label.name == 'fixed-in-release'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Pobranie kodu repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja srodowiska Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalacja zaleznosci (lingua)
+        run: pip install lingua-language-detector
+
+      - name: Polnocna bohaterka komentuje i zamyka
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          python .github/scripts/issue_closure_north.py \
+            "$ISSUE_BODY" "$ISSUE_NUMBER"

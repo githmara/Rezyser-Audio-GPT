@@ -733,6 +733,7 @@ manager:
     szyfry: "Chiffren (Textspielereien)  🔐"
     rezyser: "Regisseur (Modi und Postproduktion)  🎬"
     gui: "UI-Übersetzungen  🌐"
+    opowiesci: "Geschichten (interaktive Modi)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Im Texteditor öffnen"
   btn_otworz_name: "Schaltfläche Öffnen Sie die ausgewählte Datei im Texteditor"

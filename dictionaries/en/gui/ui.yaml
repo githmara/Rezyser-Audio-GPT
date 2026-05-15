@@ -732,6 +732,7 @@ manager:
     szyfry: "Ciphers (text fun)  🔐"
     rezyser: "Director (modes and post-production)  🎬"
     gui: "UI Translations  🌐"
+    opowiesci: "Stories (interactive modes)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Open in text editor"
   btn_otworz_name: "Button Open selected file in text editor"

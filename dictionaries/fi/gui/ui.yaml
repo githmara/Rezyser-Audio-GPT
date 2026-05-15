@@ -733,6 +733,7 @@ manager:
     szyfry: "Salaukset (tekstileikit)  🔐"
     rezyser: "Ohjaaja (tilat ja jälkituotanto)  🎬"
     gui: "Käyttöliittymän käännökset  🌐"
+    opowiesci: "Tarinat (interaktiiviset tilat)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Avaa tekstieditorissa"
   btn_otworz_name: "Painike Avaa valittu tiedosto tekstieditorissa"

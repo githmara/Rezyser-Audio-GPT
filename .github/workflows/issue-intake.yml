@@ -1,0 +1,73 @@
+name: Issue Intake (South — Sami)
+
+# Etap „Poludnia" obiegu „Z Poludnia na Polnoc": Sami (wloska dyspozytorka)
+# odbiera nowe zgloszenia, uzywa OpenAI do przerobienia tresci na techniczny
+# prompt po polsku, wysyla mail do Centrum (maintainer).
+
+on:
+  issues:
+    types: [opened, labeled]
+
+# Concurrency: na issue × workflow — jesli ktos kliknie etykiete dwa razy,
+# druga akcja anuluje pierwsza i nie poleci podwojny mail.
+concurrency:
+  group: issue-intake-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  redaguj_i_wyslij:
+    # Filtr na poziomie joba: pomijamy etykiety zarezerwowane dla innych
+    # workflowow (patch-bot, closure) i porzadkowe (wontfix/duplicate).
+    # Logika szczegolowa (akceptowalne etykiety) siedzi w skrypcie Pythonowym,
+    # zeby latwo dodawac nowe bez touchowania YAML-a.
+    if: >-
+      github.event.action == 'opened' ||
+      (github.event.action == 'labeled' &&
+       github.event.label.name != 'tiflotecnia-patch' &&
+       github.event.label.name != 'fixed-in-release' &&
+       github.event.label.name != 'wontfix' &&
+       github.event.label.name != 'duplicate')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read
+
+    steps:
+      - name: Pobranie kodu repozytorium
+        uses: actions/checkout@v4
+
+      - name: Konfiguracja srodowiska Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalacja zaleznosci (openai)
+        run: pip install --upgrade "openai>=1.40,<2.0"
+
+      - name: Zbierz etykiety issue do CSV
+        id: labels
+        env:
+          LABELS_JSON: ${{ toJson(github.event.issue.labels.*.name) }}
+        run: |
+          python - <<'PY'
+          import json, os
+          labels = json.loads(os.environ.get("LABELS_JSON", "[]"))
+          csv = ",".join(labels)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"csv={csv}\n")
+          PY
+
+      - name: Sami przetwarza zgloszenie i wysyla mail
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAINTAINER_EMAIL: ${{ secrets.MAINTAINER_EMAIL }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_LABELS: ${{ steps.labels.outputs.csv }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+        run: |
+          python .github/scripts/issue_intake_sami.py \
+            "$ISSUE_TITLE" "$ISSUE_BODY" "$ISSUE_NUMBER" \
+            "$ISSUE_LABELS" "$ISSUE_URL"

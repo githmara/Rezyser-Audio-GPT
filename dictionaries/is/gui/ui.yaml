@@ -733,6 +733,7 @@ manager:
     szyfry: "Dulmál (textaleikir)  🔐"
     rezyser: "Leikstjóri (stillingar og eftirvinnsla)  🎬"
     gui: "UI þýðingar  🌐"
+    opowiesci: "Sögur (gagnvirkir hættir)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Opna í textaritli"
   btn_otworz_name: "Hnappur Opna valda skrá í textaritli"

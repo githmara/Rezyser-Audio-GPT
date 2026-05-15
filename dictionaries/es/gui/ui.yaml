@@ -732,6 +732,7 @@ manager:
     szyfry: "Cifrados (juegos de texto)  🔐"
     rezyser: "Director (modos y postproducción)  🎬"
     gui: "Traducciones de UI  🌐"
+    opowiesci: "Historias (modos interactivos)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Abrir en editor de texto"
   btn_otworz_name: "Botón Abrir archivo seleccionado en editor de texto"

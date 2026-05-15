@@ -733,6 +733,7 @@ manager:
     szyfry: "Cifrari (giochi di testo)  🔐"
     rezyser: "Regista (modalità e post-produzione)  🎬"
     gui: "Traduzioni UI  🌐"
+    opowiesci: "Storie (modalità interattive)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Apri nell'editor di testo"
   btn_otworz_name: "Pulsante Apri file selezionato nell'editor di testo"

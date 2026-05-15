@@ -728,6 +728,7 @@ manager:
     szyfry: "Chiffrements (jeux de texte)  🔐"
     rezyser: "Réalisateur (modes et post-production)  🎬"
     gui: "Traductions UI  🌐"
+    opowiesci: "Récits (modes interactifs)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Ouvrir dans l'éditeur de texte"
   btn_otworz_name: "Bouton Ouvrir le fichier sélectionné dans l'éditeur de texte"
