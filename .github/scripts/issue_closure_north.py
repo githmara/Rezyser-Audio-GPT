@@ -57,7 +57,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Cześć!\n\n"
             "Śnieg już osiadł, a poprawka dotarła! Wszystko, o co prosiłaś/eś, "
-            "właśnie wylądowało w najnowszym wydaniu Tiflotecnia Voices.\n\n"
+            "właśnie wylądowało w najnowszym wydaniu Reżysera Audio AI.\n\n"
             "Pobierz aktualizację tutaj: {link}\n\n"
             "Zamykam zgłoszenie, żeby nie wiało chłodem. Mroźnych pozdrowień!\n"
             "— Lumi"
@@ -73,7 +73,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Hej!\n\n"
             "Wykute w wulkanicznym ogniu, jeszcze parzy! Twoja sprawa została "
-            "rozwiązana w najnowszym wydaniu Tiflotecnia Voices.\n\n"
+            "rozwiązana w najnowszym wydaniu Reżysera Audio AI.\n\n"
             "Łapiesz tutaj: {link}\n\n"
             "Zamykam zgłoszenie — z wulkanicznym pozdrowieniem!\n"
             "— Katla"
@@ -83,7 +83,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Hi!\n\n"
             "The snow has settled and the fix has arrived! Everything you asked "
-            "for just landed in the latest Tiflotecnia Voices release.\n\n"
+            "for just landed in the latest Audio AI Director release.\n\n"
             "Grab the update here: {link}\n\n"
             "Closing the issue to keep the cold out. Stay frosty!\n"
             "— Lumi"
@@ -99,7 +99,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Hey!\n\n"
             "Forged in volcanic fire and still glowing! Your request has been "
-            "resolved in the latest Tiflotecnia Voices release.\n\n"
+            "resolved in the latest Audio AI Director release.\n\n"
             "Catch it here: {link}\n\n"
             "Closing the issue — volcanic greetings!\n"
             "— Katla"
@@ -109,7 +109,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Hallo!\n\n"
             "Der Schnee hat sich gelegt und der Fix ist da! Alles, worum du "
-            "gebeten hast, ist gerade in der neuesten Tiflotecnia-Voices-"
+            "gebeten hast, ist gerade in der neuesten Audio-AI-Regisseur-"
             "Veröffentlichung gelandet.\n\n"
             "Hol dir das Update hier: {link}\n\n"
             "Ich schließe das Anliegen, damit es nicht kalt hereinzieht. "
@@ -128,7 +128,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Hey!\n\n"
             "Im vulkanischen Feuer geschmiedet und noch glühend! Dein Anliegen "
-            "wurde in der neuesten Tiflotecnia-Voices-Veröffentlichung gelöst.\n\n"
+            "wurde in der neuesten Audio-AI-Regisseur-Veröffentlichung gelöst.\n\n"
             "Greif zu hier: {link}\n\n"
             "Ich schließe das Anliegen — vulkanische Grüße!\n"
             "— Katla"
@@ -138,8 +138,8 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "¡Hola!\n\n"
             "¡La nieve se ha asentado y la corrección ha llegado! Todo lo que "
-            "pediste acaba de aterrizar en la última publicación de "
-            "Tiflotecnia Voices.\n\n"
+            "pediste acaba de aterrizar en la última publicación del "
+            "Director de Audio AI.\n\n"
             "Consigue la actualización aquí: {link}\n\n"
             "Cierro la incidencia para que no entre el frío. ¡Que la escarcha "
             "te acompañe!\n"
@@ -157,7 +157,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "¡Hey!\n\n"
             "¡Forjada en fuego volcánico y todavía al rojo vivo! Tu solicitud "
-            "ha sido resuelta en la última versión de Tiflotecnia Voices.\n\n"
+            "ha sido resuelta en la última versión del Director de Audio AI.\n\n"
             "Recógela aquí: {link}\n\n"
             "Cierro la incidencia — ¡saludos volcánicos!\n"
             "— Katla"
@@ -167,7 +167,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Hei!\n\n"
             "Lumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit "
-            "löytyy nyt uusimmasta Tiflotecnia Voices -julkaisusta.\n\n"
+            "löytyy nyt uusimmasta Audio AI -ohjaajan julkaisusta.\n\n"
             "Nappaa päivitys täältä: {link}\n\n"
             "Suljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n"
             "— Lumi"
@@ -183,7 +183,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Hei!\n\n"
             "Taottu tulivuoren tulessa ja yhä hehkuva! Pyyntösi on "
-            "ratkaistu uusimmassa Tiflotecnia Voices -julkaisussa.\n\n"
+            "ratkaistu uusimmassa Audio AI -ohjaajan julkaisussa.\n\n"
             "Tartu siihen täällä: {link}\n\n"
             "Suljen ilmoituksen — tulivuoriterveisin!\n"
             "— Katla"
@@ -193,8 +193,8 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Bonjour !\n\n"
             "La neige s'est posée et le correctif est arrivé ! Tout ce que vous "
-            "avez demandé vient d'atterrir dans la dernière version de "
-            "Tiflotecnia Voices.\n\n"
+            "avez demandé vient d'atterrir dans la dernière version du "
+            "Réalisateur Audio AI.\n\n"
             "Récupérez la mise à jour ici : {link}\n\n"
             "Je clôture le ticket pour que le froid ne s'engouffre pas. "
             "Glaciales salutations !\n"
@@ -211,7 +211,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Hé !\n\n"
             "Forgée dans le feu volcanique et encore brûlante ! Votre demande "
-            "a été résolue dans la dernière version de Tiflotecnia Voices.\n\n"
+            "a été résolue dans la dernière version du Réalisateur Audio AI.\n\n"
             "Attrapez-la ici : {link}\n\n"
             "Je clôture le ticket — salutations volcaniques !\n"
             "— Katla"
@@ -221,7 +221,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Halló!\n\n"
             "Snjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst "
-            "um er nú komið í nýjustu útgáfu Tiflotecnia Voices.\n\n"
+            "um er nú komið í nýjustu útgáfu Audio AI leikstjórans.\n\n"
             "Næðu uppfærslunni hér: {link}\n\n"
             "Ég loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n"
             "— Lumi"
@@ -237,7 +237,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Hæ!\n\n"
             "Smíðað í eldfjallaeldi og enn glóandi! Beiðni þín hefur verið "
-            "leyst í nýjustu útgáfu Tiflotecnia Voices.\n\n"
+            "leyst í nýjustu útgáfu Audio AI leikstjórans.\n\n"
             "Gríptu hana hér: {link}\n\n"
             "Ég loka málinu — eldfjallakveðjur!\n"
             "— Katla"
@@ -247,8 +247,8 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Ciao!\n\n"
             "La neve si è posata e la correzione è arrivata! Tutto ciò che hai "
-            "chiesto è appena atterrato nell'ultima versione di Tiflotecnia "
-            "Voices.\n\n"
+            "chiesto è appena atterrato nell'ultima versione del Regista "
+            "Audio AI.\n\n"
             "Prendi l'aggiornamento qui: {link}\n\n"
             "Chiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n"
             "— Lumi"
@@ -265,7 +265,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Ehi!\n\n"
             "Forgiata nel fuoco vulcanico e ancora rovente! La tua richiesta "
-            "è stata risolta nell'ultima versione di Tiflotecnia Voices.\n\n"
+            "è stata risolta nell'ultima versione del Regista Audio AI.\n\n"
             "Acchiappala qui: {link}\n\n"
             "Chiudo la segnalazione — saluti vulcanici!\n"
             "— Katla"
@@ -275,7 +275,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Lumi": (
             "Привет!\n\n"
             "Снег улёгся, и исправление прибыло! Всё, о чём ты просил(а), "
-            "только что появилось в новейшем выпуске Tiflotecnia Voices.\n\n"
+            "только что появилось в новейшем выпуске Audio AI Director.\n\n"
             "Забирай обновление здесь: {link}\n\n"
             "Закрываю обращение, чтобы не задувало холодом. Морозного "
             "привета!\n"
@@ -292,7 +292,7 @@ TEMPLATES: dict[Language, dict[str, str]] = {
         "Katla": (
             "Привет!\n\n"
             "Выкована в вулканическом огне и всё ещё раскалена! Твоя "
-            "просьба решена в новейшем выпуске Tiflotecnia Voices.\n\n"
+            "просьба решена в новейшем выпуске Audio AI Director.\n\n"
             "Лови здесь: {link}\n\n"
             "Закрываю обращение — с вулканическим приветом!\n"
             "— Katla"
