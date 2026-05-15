@@ -301,6 +301,266 @@ TEMPLATES: dict[Language, dict[str, str]] = {
 }
 
 
+# Od v15.2.6: szablony dla flow `answered` (pytanie/help wanted dostało odpowiedź
+# od Centrum, NIE poprzez patch w release'ie). Bez `{link}` do release — w tym
+# kontekście link byłby szumem informacyjnym (user nie potrzebuje aktualizować
+# aplikacji, tylko chce dostać odpowiedź na pytanie). Zamiast tego placeholder
+# `{maintainer_answer}` jest wypełniany treścią ostatniego komentarza na issue
+# (konwencja workflow: maintainer komentuje, potem nadaje etykietę `answered`,
+# bot wyciąga ostatni komentarz przez `gh issue view --json comments`).
+#
+# Styl personalności taki sam jak w TEMPLATES wyżej (Lumi mroźno, Vieno
+# szamańsko, Katla wulkanicznie) — żeby user-facing głos Northern operations
+# pozostał spójny niezależnie od typu zgłoszenia (bug-fix vs answer-passing).
+TEMPLATES_ANSWERED: dict[Language, dict[str, str]] = {
+    Language.POLISH: {
+        "Lumi": (
+            "Cześć!\n\n"
+            "Z Centrum dotarła do Północy wieść z odpowiedzią dla Ciebie. "
+            "Podaję ją dalej dokładnie tak, jak została wystosowana:\n\n"
+            "{maintainer_answer}\n\n"
+            "Zamykam zgłoszenie — śnieg już osiadł na tej sprawie. "
+            "Mroźnych pozdrowień!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Witaj.\n\n"
+            "Wiatry Północy przyniosły z Centrum słowa odpowiedzi. "
+            "Przekazuję je w nienaruszonej formie:\n\n"
+            "{maintainer_answer}\n\n"
+            "Zamykam ten krąg — pytanie znalazło swój kres.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Hej!\n\n"
+            "Gorące słowo z Centrum przybyło na Północ — przekazuję Ci wprost:\n\n"
+            "{maintainer_answer}\n\n"
+            "Zamykam zgłoszenie — z wulkanicznym pozdrowieniem!\n"
+            "— Katla"
+        ),
+    },
+    Language.ENGLISH: {
+        "Lumi": (
+            "Hi!\n\n"
+            "Word from the Centre has reached the North with an answer for you. "
+            "Passing it along exactly as it was given:\n\n"
+            "{maintainer_answer}\n\n"
+            "Closing the issue — the snow has settled on this matter. "
+            "Stay frosty!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Greetings.\n\n"
+            "The Northern winds carried words of answer from the Centre. "
+            "I relay them intact:\n\n"
+            "{maintainer_answer}\n\n"
+            "Closing this circle — the question has reached its end.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Hey!\n\n"
+            "A hot word from the Centre arrived at the North — passing it "
+            "on to you directly:\n\n"
+            "{maintainer_answer}\n\n"
+            "Closing the issue — volcanic greetings!\n"
+            "— Katla"
+        ),
+    },
+    Language.GERMAN: {
+        "Lumi": (
+            "Hallo!\n\n"
+            "Vom Zentrum ist eine Nachricht in den Norden gelangt — eine "
+            "Antwort für dich. Ich gebe sie genau so weiter, wie sie "
+            "formuliert wurde:\n\n"
+            "{maintainer_answer}\n\n"
+            "Ich schließe das Anliegen — der Schnee hat sich auf diese "
+            "Sache gelegt. Bleib frostig!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Sei gegrüßt.\n\n"
+            "Die Winde des Nordens haben Worte der Antwort vom Zentrum "
+            "gebracht. Ich überbringe sie unverändert:\n\n"
+            "{maintainer_answer}\n\n"
+            "Ich schließe diesen Kreis — die Frage hat ihr Ende erreicht.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Hey!\n\n"
+            "Ein heißes Wort vom Zentrum ist im Norden eingetroffen — "
+            "ich gebe es dir direkt weiter:\n\n"
+            "{maintainer_answer}\n\n"
+            "Ich schließe das Anliegen — vulkanische Grüße!\n"
+            "— Katla"
+        ),
+    },
+    Language.SPANISH: {
+        "Lumi": (
+            "¡Hola!\n\n"
+            "Una noticia desde el Centro ha llegado al Norte — una "
+            "respuesta para ti. La transmito exactamente tal como fue "
+            "formulada:\n\n"
+            "{maintainer_answer}\n\n"
+            "Cierro la incidencia — la nieve se ha asentado sobre este "
+            "asunto. ¡Que la escarcha te acompañe!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Saludos.\n\n"
+            "Los vientos del Norte han traído palabras de respuesta desde "
+            "el Centro. Las relevo intactas:\n\n"
+            "{maintainer_answer}\n\n"
+            "Cierro este círculo — la pregunta ha llegado a su fin.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "¡Hey!\n\n"
+            "Una palabra ardiente del Centro llegó al Norte — te la paso "
+            "directamente:\n\n"
+            "{maintainer_answer}\n\n"
+            "Cierro la incidencia — ¡saludos volcánicos!\n"
+            "— Katla"
+        ),
+    },
+    Language.FINNISH: {
+        "Lumi": (
+            "Hei!\n\n"
+            "Keskuksesta on saapunut Pohjolaan sana — vastaus sinulle. "
+            "Välitän sen täsmälleen siinä muodossa kuin se annettiin:\n\n"
+            "{maintainer_answer}\n\n"
+            "Suljen ilmoituksen — lumi on laskeutunut tämän asian päälle. "
+            "Pysy kylmänä!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Tervehdys.\n\n"
+            "Pohjolan tuulet ovat tuoneet vastauksen sanat Keskuksesta. "
+            "Välitän ne ehjinä:\n\n"
+            "{maintainer_answer}\n\n"
+            "Suljen tämän piirin — kysymys on saapunut päätökseen.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Hei!\n\n"
+            "Kuuma sana Keskuksesta saapui Pohjolaan — annan sen sinulle "
+            "suoraan:\n\n"
+            "{maintainer_answer}\n\n"
+            "Suljen ilmoituksen — tulivuoriterveisin!\n"
+            "— Katla"
+        ),
+    },
+    Language.FRENCH: {
+        "Lumi": (
+            "Bonjour !\n\n"
+            "Un message du Centre est parvenu au Nord — une réponse pour "
+            "vous. Je vous la transmets exactement comme elle a été "
+            "formulée :\n\n"
+            "{maintainer_answer}\n\n"
+            "Je clôture le ticket — la neige s'est posée sur cette affaire. "
+            "Glaciales salutations !\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Salutations.\n\n"
+            "Les vents du Nord ont porté les mots de réponse du Centre. "
+            "Je vous les relaye intacts :\n\n"
+            "{maintainer_answer}\n\n"
+            "Je referme ce cercle — la question a atteint sa fin.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Hé !\n\n"
+            "Un mot brûlant du Centre est arrivé au Nord — je vous le "
+            "transmets directement :\n\n"
+            "{maintainer_answer}\n\n"
+            "Je clôture le ticket — salutations volcaniques !\n"
+            "— Katla"
+        ),
+    },
+    Language.ICELANDIC: {
+        "Lumi": (
+            "Halló!\n\n"
+            "Skilaboð frá Miðstöðinni hafa borist Norðrinu — svar fyrir "
+            "þig. Ég flyt þau nákvæmlega eins og þau voru sett fram:\n\n"
+            "{maintainer_answer}\n\n"
+            "Ég loka málinu — snjórinn hefur sest yfir þetta mál. "
+            "Frostkveðjur!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Heilsa.\n\n"
+            "Vindar Norðursins hafa borið svarorð frá Miðstöðinni. "
+            "Ég kem þeim óbreyttum til skila:\n\n"
+            "{maintainer_answer}\n\n"
+            "Ég loka þessum hring — spurningin hefur náð sínum enda.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Hæ!\n\n"
+            "Heit orð frá Miðstöðinni komu til Norðursins — ég sendi þér "
+            "þau beint:\n\n"
+            "{maintainer_answer}\n\n"
+            "Ég loka málinu — eldfjallakveðjur!\n"
+            "— Katla"
+        ),
+    },
+    Language.ITALIAN: {
+        "Lumi": (
+            "Ciao!\n\n"
+            "Una notizia dal Centro è giunta al Nord — una risposta per "
+            "te. Te la trasmetto esattamente come è stata formulata:\n\n"
+            "{maintainer_answer}\n\n"
+            "Chiudo la segnalazione — la neve si è posata su questa "
+            "faccenda. Saluti gelidi!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Salve.\n\n"
+            "I venti del Nord hanno portato parole di risposta dal Centro. "
+            "Te le riferisco intatte:\n\n"
+            "{maintainer_answer}\n\n"
+            "Chiudo questo cerchio — la domanda ha raggiunto la sua fine.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Ehi!\n\n"
+            "Una parola rovente dal Centro è arrivata al Nord — te la "
+            "passo direttamente:\n\n"
+            "{maintainer_answer}\n\n"
+            "Chiudo la segnalazione — saluti vulcanici!\n"
+            "— Katla"
+        ),
+    },
+    Language.RUSSIAN: {
+        "Lumi": (
+            "Привет!\n\n"
+            "Из Центра в Север пришла весть — ответ для тебя. "
+            "Передаю его ровно в той форме, в какой он был сформулирован:\n\n"
+            "{maintainer_answer}\n\n"
+            "Закрываю обращение — снег уже улёгся на этом деле. "
+            "Морозного привета!\n"
+            "— Lumi"
+        ),
+        "Vieno": (
+            "Приветствую.\n\n"
+            "Ветра Севера принесли слова ответа из Центра. "
+            "Передаю их в неизменённой форме:\n\n"
+            "{maintainer_answer}\n\n"
+            "Закрываю этот круг — вопрос дошёл до своего конца.\n"
+            "— Vieno"
+        ),
+        "Katla": (
+            "Привет!\n\n"
+            "Горячее слово из Центра прибыло на Север — передаю тебе "
+            "напрямую:\n\n"
+            "{maintainer_answer}\n\n"
+            "Закрываю обращение — с вулканическим приветом!\n"
+            "— Katla"
+        ),
+    },
+}
+
+
 def _zbuduj_link_release() -> str:
     """Konstruuje link do najnowszego release'u na podstawie env GitHub."""
     server = os.environ.get("GITHUB_SERVER_URL", "https://github.com").rstrip("/")
@@ -308,6 +568,38 @@ def _zbuduj_link_release() -> str:
     if not repo:
         return f"{server}/releases/latest"
     return f"{server}/{repo}/releases/latest"
+
+
+def _pobierz_ostatni_komentarz(issue_number: str, repo: str) -> str:
+    """Wyciąga treść OSTATNIEGO komentarza na issue (od v15.2.6, flow `answered`).
+
+    Konwencja workflow: maintainer komentuje z odpowiedzią → nadaje etykietę
+    `answered` → ten skrypt wciąga komentarz i opakowuje go w styl persony
+    Północy (TEMPLATES_ANSWERED). Wymóg dyscypliny: maintainer NIE komentuje
+    nic więcej między nadaniem etykiety a swoją odpowiedzią, bo bot weźmie
+    chronologicznie ostatni komentarz.
+
+    Używa ``gh issue view --json comments --jq '.comments[-1].body'`` —
+    skrypt operuje w GH Actions z dostępnym ``gh`` CLI i tokenem z
+    ``secrets.GITHUB_TOKEN`` (auto-injected). Zwraca pusty string przy
+    błędzie — wówczas wywołujący zdecyduje czy przerwać workflow.
+    """
+    try:
+        wynik = subprocess.run(
+            ["gh", "issue", "view", issue_number, "--repo", repo,
+             "--json", "comments", "--jq", ".comments[-1].body"],
+            check=True, capture_output=True, text=True,
+        )
+        return wynik.stdout.strip()
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(
+            f"[!] Nie udało się pobrać ostatniego komentarza issue "
+            f"#{issue_number}: {exc.stderr.strip() or exc}\n"
+        )
+        return ""
+    except FileNotFoundError:
+        sys.stderr.write("[!] `gh` CLI nie znalezione w PATH.\n")
+        return ""
 
 
 def _gh(cmd: list[str]) -> bool:
@@ -332,6 +624,7 @@ def main() -> int:
     # wklejonym snippetcie kodu pełnym ` i ").
     issue_body = os.environ.get("ISSUE_BODY", "")
     issue_number = os.environ.get("ISSUE_NUMBER", "").strip()
+    label_name = os.environ.get("LABEL_NAME", "").strip()  # od v15.2.6
     if not issue_number:
         sys.stderr.write(
             "[!] Brak ISSUE_NUMBER w env — przerywam (workflow musi "
@@ -349,11 +642,36 @@ def main() -> int:
         wykryty = Language.ENGLISH
 
     persona = random.choice(PERSONAS)
-    print(f"Wykryto język: {wykryty.name}. Dyżur: {persona}.")
+    print(f"Wykryto język: {wykryty.name}. Dyżur: {persona}. "
+          f"Etykieta wyzwalająca: {label_name or '(nieznana)'}.")
 
-    szablon = TEMPLATES[wykryty][persona]
-    link = _zbuduj_link_release()
-    tresc = szablon.format(link=link)
+    # Branching per etykieta (od v15.2.6):
+    #   `fixed-in-release` → klasyczny bug-fix flow: TEMPLATES z {link}
+    #                        do najnowszego Release na GitHubie.
+    #   `answered` → flow odpowiedzi na pytanie/help wanted: wciągnij
+    #                ostatni komentarz maintainera, opakuj w TEMPLATES_ANSWERED
+    #                bez linku do release (w tym kontekście link byłby
+    #                szumem informacyjnym — user nie potrzebuje aktualizować
+    #                aplikacji).
+    #   Fallback (nieznana lub pusta etykieta) → klasyczny flow, jak
+    #                pre-v15.2.6 — backward compat dla starszych webhook
+    #                eventów które nie wstrzyknęły jeszcze LABEL_NAME.
+    if label_name == "answered":
+        maintainer_answer = _pobierz_ostatni_komentarz(issue_number, repo)
+        if not maintainer_answer:
+            sys.stderr.write(
+                "[!] Brak komentarza maintainera do opakowania. "
+                "Czy maintainer napisał odpowiedź PRZED nadaniem etykiety "
+                "`answered`? Workflow zakłada: komentarz → etykieta → "
+                "Północ wyciąga ostatni komentarz i wrapuje.\n"
+            )
+            return 1
+        szablon = TEMPLATES_ANSWERED[wykryty][persona]
+        tresc = szablon.format(maintainer_answer=maintainer_answer)
+    else:
+        szablon = TEMPLATES[wykryty][persona]
+        link = _zbuduj_link_release()
+        tresc = szablon.format(link=link)
 
     if not _gh(["gh", "issue", "comment", issue_number, "--repo", repo,
                 "--body", tresc]):

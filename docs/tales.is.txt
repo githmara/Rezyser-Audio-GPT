@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modúll Interaktívar Sagna (15.2.5 – Útgáfuútgáfa)
+Reżyser Audio GPT — Modúll Interaktívar Sagna (15.2.6 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hlið Reżysera — í þetta skiptið verður þú leikmaður í kviku sögugerð í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lykt af blautum laufum…"), og þú ákveður næstu hreyfingu — með því að skrifa hvaða aðgerð sem er í frjálsum texta eða velja einn af tölusettum valkostum.
 
