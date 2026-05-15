@@ -8,10 +8,16 @@ do agenta AI typu Claude Code), a następnie wysyła ten prompt mailem do Centru
 (maintainer).
 
 Wywołanie z workflow:
-    python .github/scripts/issue_intake_sami.py \\
-        "$ISSUE_TITLE" "$ISSUE_BODY" "$ISSUE_NUMBER" "$ISSUE_LABELS" "$ISSUE_URL"
+    python .github/scripts/issue_intake_sami.py
+    (brak argumentów CLI — dane czytamy z os.environ, żeby uniknąć word-
+    splittingu basha na cudzysłowach / backtickach w treści issue)
 
-Wymagane zmienne środowiskowe:
+Wymagane zmienne środowiskowe (wstrzykiwane przez sekcję ``env:`` w YAML):
+    ISSUE_TITLE             tytuł zgłoszenia
+    ISSUE_BODY              treść zgłoszenia
+    ISSUE_NUMBER            numer issue
+    ISSUE_LABELS            etykiety CSV (przygotowane w kroku poprzednim)
+    ISSUE_URL               link do issue na GitHubie
     OPENAI_API_KEY          klucz OpenAI (sekret GH Actions)
     SMTP_USER               nadawca + odbiorca (gmail dewelopera)
     SMTP_PASS               hasło aplikacji SMTP (Gmail app password)
@@ -82,19 +88,19 @@ SAMI_SYSTEM_PROMPT = (
 )
 
 
-def _wczytaj_argumenty() -> tuple[str, str, str, str, str]:
-    if len(sys.argv) < 6:
-        sys.stderr.write(
-            "Użycie: issue_intake_sami.py "
-            "<title> <body> <number> <labels_csv> <url>\n"
-        )
-        sys.exit(2)
+def _wczytaj_dane_issue() -> tuple[str, str, str, str, str]:
+    """Zwraca (title, body, number, labels_csv, url) z os.environ.
+
+    Czytamy z env zamiast z sys.argv, żeby uniknąć word-splittingu basha
+    na cudzysłowach i backtickach w treści issue (`"$ISSUE_BODY"` rozsypie
+    się, gdy ciało zawiera niesparowany ").
+    """
     return (
-        sys.argv[1],
-        sys.argv[2],
-        sys.argv[3],
-        sys.argv[4],
-        sys.argv[5],
+        os.environ.get("ISSUE_TITLE", ""),
+        os.environ.get("ISSUE_BODY", ""),
+        os.environ.get("ISSUE_NUMBER", ""),
+        os.environ.get("ISSUE_LABELS", ""),
+        os.environ.get("ISSUE_URL", ""),
     )
 
 
@@ -202,7 +208,13 @@ def _wyslij_maila(
 
 
 def main() -> int:
-    title, body, number, labels_csv, url = _wczytaj_argumenty()
+    title, body, number, labels_csv, url = _wczytaj_dane_issue()
+    if not number:
+        sys.stderr.write(
+            "[!] Brak ISSUE_NUMBER w env — przerywam (workflow musi wstrzyknąć "
+            "ISSUE_TITLE/ISSUE_BODY/ISSUE_NUMBER/ISSUE_LABELS/ISSUE_URL).\n"
+        )
+        return 2
 
     czy_przepuscic, labels = _przepuszczalne(labels_csv)
     if not czy_przepuscic:

@@ -16,9 +16,17 @@ Skrypt:
   5. dodaje komentarz przez ``gh issue comment`` i zamyka przez ``gh issue close``.
 
 Wywołanie:
-    python .github/scripts/issue_closure_north.py "$ISSUE_BODY" "$ISSUE_NUMBER"
+    python .github/scripts/issue_closure_north.py
+    (brak argumentów CLI — dane czytamy z os.environ, żeby uniknąć word-
+    splittingu basha na cudzysłowach / backtickach w treści issue)
 
-Env: GH_TOKEN (gh CLI), GITHUB_REPOSITORY, GITHUB_SERVER_URL (do linku Releases).
+Wymagane zmienne środowiskowe (wstrzykiwane przez sekcję ``env:`` w YAML):
+    ISSUE_BODY              oryginalna treść issue (do detekcji języka)
+    ISSUE_NUMBER            numer issue
+    GH_TOKEN                token gh CLI (auto z secrets.GITHUB_TOKEN)
+    GITHUB_REPOSITORY       owner/repo (auto z runtime'u GH Actions)
+    GITHUB_SERVER_URL       https://github.com (auto z runtime'u; do linku
+                            Releases)
 """
 
 from __future__ import annotations
@@ -319,14 +327,18 @@ def _gh(cmd: list[str]) -> bool:
 
 
 def main() -> int:
-    if len(sys.argv) < 3:
+    # Dane issue czytamy z env, żeby uniknąć word-splittingu basha na
+    # cudzysłowach / backtickach w ciele zgłoszenia (czyli przy każdym
+    # wklejonym snippetcie kodu pełnym ` i ").
+    issue_body = os.environ.get("ISSUE_BODY", "")
+    issue_number = os.environ.get("ISSUE_NUMBER", "").strip()
+    if not issue_number:
         sys.stderr.write(
-            "Użycie: issue_closure_north.py <issue_body> <issue_number>\n"
+            "[!] Brak ISSUE_NUMBER w env — przerywam (workflow musi "
+            "wstrzyknąć ISSUE_BODY i ISSUE_NUMBER w sekcji env:).\n"
         )
         return 2
 
-    issue_body = sys.argv[1]
-    issue_number = sys.argv[2]
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     if not repo:
         sys.stderr.write("[!] Brak GITHUB_REPOSITORY w env.\n")

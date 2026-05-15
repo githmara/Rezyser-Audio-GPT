@@ -57,6 +57,9 @@ jobs:
           PY
 
       - name: Sami przetwarza zgloszenie i wysyla mail
+        # UWAGA: argumentow NIE przekazujemy przez CLI, bo bash robi
+        # word-splitting na cudzyslowach / backtickach w tresci issue
+        # (klasyczna pulapka shellu). Skrypt czyta wszystko z os.environ.
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
@@ -67,7 +70,4 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_LABELS: ${{ steps.labels.outputs.csv }}
           ISSUE_URL: ${{ github.event.issue.html_url }}
-        run: |
-          python .github/scripts/issue_intake_sami.py \
-            "$ISSUE_TITLE" "$ISSUE_BODY" "$ISSUE_NUMBER" \
-            "$ISSUE_LABELS" "$ISSUE_URL"
+        run: python .github/scripts/issue_intake_sami.py

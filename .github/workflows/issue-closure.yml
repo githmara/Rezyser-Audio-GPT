@@ -32,12 +32,13 @@ jobs:
         run: pip install lingua-language-detector
 
       - name: Polnocna bohaterka komentuje i zamyka
+        # UWAGA: argumentow NIE przekazujemy przez CLI, bo bash robi
+        # word-splitting na cudzyslowach / backtickach w tresci issue
+        # (klasyczna pulapka shellu). Skrypt czyta wszystko z os.environ.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SERVER_URL: ${{ github.server_url }}
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: |
-          python .github/scripts/issue_closure_north.py \
-            "$ISSUE_BODY" "$ISSUE_NUMBER"
+        run: python .github/scripts/issue_closure_north.py
