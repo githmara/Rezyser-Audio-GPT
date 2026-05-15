@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Moduł Interaktywne Opowieści (15.2.2 – Wersja Wydawnicza)
+Reżyser Audio GPT — Moduł Interaktywne Opowieści (15.2.3 – Wersja Wydawnicza)
 
 Drugi główny tryb aplikacji obok Reżysera — tym razem stajesz się graczem dynamicznie generowanej historii zamiast jej autorem. Sztuczna inteligencja prowadzi narrację w drugiej osobie liczby pojedynczej („Idziesz przez mglisty las, czujesz zapach mokrych liści…"), a Ty decydujesz o kolejnym ruchu — pisząc dowolną akcję wolnym tekstem albo wybierając jedną z ponumerowanych opcji.
 
@@ -19,7 +19,7 @@ TRYB MNIEJSZE ZŁO — jak Wyborów, ale każda z 3-5 opcji jest niekorzystna mo
 
 Fiolka w trybie Mniejsze zło (od v15.2): po czterech turach gry w polu wyborów pojawia się dodatkowa, ZERO-numerowana opcja „Odkorkuj fiolkę" — i pozostaje tam już do końca rozgrywki jako wybór reusable (nie znika po użyciu, możesz po nią sięgać wielokrotnie). Fiolka jest opcją „desperackiego ratunku", ale jej działanie jest celowo nieprzewidywalne i tym bardziej dramaturgicznie ciężkie, im rzadszy daje rezultat: w około 60% przypadków treść flakonu jest szkodliwa (zatruwa, kaleczy, oślepia), w 30% wprowadza zaburzenie postrzegania albo ducha (halucynacje, mowa zmieniona, panika), a tylko w 10% okazuje się rzadko-korzystna (chwilowe wzmocnienie, pomocny duch, kluczowa informacja). Rozkład wymusza Python (`random.choices` po stronie aplikacji), LLM dostaje gotowy seed `{kategoria, opis}` i jedynie go narracjonalizuje — model nie ma jak „wymyślić" zbawiennego skutku poza losowaniem. Dzięki temu fiolka NIGDY nie staje się deus ex machina: nawet sięgnięcie po nią w momencie skrajnej beznadziei zwykle pogarsza sytuację. Wybór jej formy narracyjnej (czy fiolka definitywnie się stłucze, czy zostanie schowana z powrotem za pasem) należy do silnika narracyjnego — czasem po pierwszej z 60%-szkodliwych dawek już nigdy nie wrócisz.
 
-Tryb można zmienić w trakcie gry — przy następnej turze silnik narracyjny zaadoptuje się do nowego stylu (z trybu Swobodnego do Wyborów może przejść w jeden klik). Uwaga: fiolka jest cechą wyłącznie trybu Mniejsze zło — przy przejściu w trybie tej samej gry do Wyborów lub Swobodnego, jej istnienie i licznik tur pozostają zachowane w stanie gry, ale dopóki nie wrócisz do Mniejszego zła, opcja „Odkorkuj fiolkę" się nie wyświetli.
+Tryb można zmienić w trakcie gry, ale wyłącznie przez przycisk awaryjny „Edytuj tryb gry…" obok RadioBox-a (od v15.2.3) — sam RadioBox jest zamrożony na utrwalonym trybie zaraz po założeniu lub wczytaniu gry, analogicznie do zabezpieczenia w Reżyserze. Przycisk otwiera modalny dialog z ostrzeżeniem; typowe użycie tej furtki to sytuacja, w której AI w trybie Wyborów lub Mniejszego zła uparcie generuje kolejne dylematy zamiast zakończyć historię — przeskok na Swobodny pozwala wtedy graczowi samodzielnie opisać finałową scenę. Jeśli chcesz założyć drugą grę w innej tonacji, wystarczy wpisać nową nazwę gry w polu nazwy — RadioBox sam się odblokuje, bo aplikacja rozpoznaje, że szykujesz świeży projekt. Uwaga: fiolka jest cechą wyłącznie trybu Mniejsze zło — przy przejściu (przez furtkę) w trybie tej samej gry do Wyborów lub Swobodnego, jej istnienie i licznik tur pozostają zachowane w stanie gry, ale dopóki nie wrócisz do Mniejszego zła, opcja „Odkorkuj fiolkę" się nie wyświetli.
 
 
 KROK 2: Quick Start — gotowe scenariusze otwierające
@@ -75,7 +75,7 @@ W polu akcji możesz w każdej chwili wpisać komendę zaczynającą się od uko
 
 /zapisz, /save — wymuszenie ręcznego zapisu stanu gry. Autozapis działa po każdej turze, więc ta komenda jest głównie dla pewności przed zamknięciem aplikacji.
 
-/wczytaj, /load — otwiera dialog wyboru pliku z folderu runtime/opowiesci/. Po wczytaniu nazwa gry, tryb i pełna narracja zostają przywrócone — możesz kontynuować od tury, na której skończyłeś.
+/wczytaj, /load — otwiera dialog wyboru gry z listą dostępnych nazw (od v15.2.3 zamiast systemowego dialogu plików — bezpośrednia lista zapisanych gier z folderu runtime/opowiesci/ wykrywanych po obecności pliku .game.json). NVDA czyta listę naturalnie, niewidomy gracz nie musi nawigować po systemowym dialogu plików. Po wybraniu nazwa gry, tryb i pełna narracja zostają przywrócone — możesz kontynuować od tury, na której skończyłeś. Identyczne zachowanie ma przycisk "Wczytaj".
 
 Silnik narracyjny dobiera model AI automatycznie w zależności od trybu: dla trybu Wyborów i Mniejszego zła używa droższego gpt-4o (rygorystycznie trzyma się zasad świata), dla trybu Swobodnego — szybszego i tańszego gpt-4o-mini (gracz steruje fabułą, więc nie wymaga to dramatycznej reżyserii).
 
@@ -88,9 +88,9 @@ KROK 6: Pliki gry — gdzie znajdziesz swoje dane
 
 Każda gra produkuje pięć plików, każdy w innym folderze, z różnymi rolami:
 
-skrypty/<nazwa>.txt — pełna narracja gotowa do odsłuchu jako audiobook. Można otworzyć w Notatniku albo wczytać do Architekta Audiobooków (Konwerter) i wygenerować plik Word z rozdziałami albo timing dla ElevenLabs.
+opowiesci/<nazwa>.txt — pełna narracja gotowa do odsłuchu jako audiobook. Można otworzyć w Notatniku albo wczytać do Architekta Audiobooków (Konwerter) i wygenerować plik Word z rozdziałami albo timing dla ElevenLabs.
 
-skrypty/<nazwa>.md — Księga Świata postaci w formacie [Imię: cechy], regenerowana po każdej turze. Format kompatybilny z parserem Reżysera! Możesz wczytać ten plik do panelu Reżysera (Plik → Wczytaj) i otrzymasz natywne akcenty postaci w klasycznej narracji TTS — most między dwoma głównymi modułami aplikacji.
+opowiesci/<nazwa>.md — Księga Świata postaci w formacie [Imię: cechy], regenerowana po każdej turze. Format kompatybilny z parserem Reżysera! Możesz wczytać ten plik do panelu Reżysera (Plik → Wczytaj) i otrzymasz natywne akcenty postaci w klasycznej narracji TTS — most między dwoma głównymi modułami aplikacji.
 
 runtime/opowiesci/<nazwa>.game.json — pełen stan gry: nazwa, tryb, postacie aktywne, lokacja, ekwipunek, otwarte wątki, ostatnie 6 tur w skróconej formie. To źródło prawdy do wczytania gry — bez tego pliku nie da się kontynuować.
 
@@ -122,7 +122,7 @@ Cinematic Warning NIE jest częścią narracji audiobookowej — silnik filtruj�
 
 KROK 9: Most do Reżysera — wykorzystaj Księgę Świata stworzoną w Opowieściach
 
-Plik skrypty/<nazwa>.md generowany w trakcie gry zawiera Księgę Świata z postaciami, które pojawiały się w narracji, wraz z ich cechami, akcentami i charakterem. Format jest dokładnie taki, jakiego wymaga parser Reżysera — [Imię: cechy z opisem akcentu].
+Plik opowiesci/<nazwa>.md generowany w trakcie gry zawiera Księgę Świata z postaciami, które pojawiały się w narracji, wraz z ich cechami, akcentami i charakterem. Format jest dokładnie taki, jakiego wymaga parser Reżysera — [Imię: cechy z opisem akcentu].
 
 Co możesz z tym zrobić:
 
@@ -139,7 +139,9 @@ Cały moduł Opowieści został zoptymalizowany pod kątem niewidomych graczy. C
 
 POLE OSTATNIA TURA — to oddzielne wx.TextCtrl readonly multiline (~140 px wysokości) NAD pełną narracją. Po każdej turze pole jest podmieniane na świeży fragment (nagłówek „--- Tura N ---" + treść narracji). NVDA wczytuje go natychmiast po focusie (auto-fokus po sukcesie tury), bez nawigowania przez setki linii pełnej historii. Po wczytaniu zapisanej gry pole pokazuje SKRÓT ostatniej zapisanej tury (max 400 znaków z bufora `ostatnie_tury`) z prefixem informującym, że pełna narracja jest w polu poniżej.
 
-POLE PEŁNEJ NARRACJI — to wx.TextCtrl readonly multiline narastający po każdej turze. NVDA czyta liniowo całą narrację, możesz nawigować strzałkami w obrębie tekstu, kopiować fragmenty Ctrl+C. Pole nigdy nie jest edytowalne — modyfikujesz historię TYLKO przez nową turę albo edycję pliku .txt poza aplikacją. To pole jest zsynchronizowane z plikiem `skrypty/<nazwa>.txt`, możesz je traktować jako preview audiobooka.
+POLE PEŁNEJ NARRACJI — to wx.TextCtrl readonly multiline narastający po każdej turze. NVDA czyta liniowo całą narrację, możesz nawigować strzałkami w obrębie tekstu, kopiować fragmenty Ctrl+C. Pole nigdy nie jest edytowalne — modyfikujesz historię TYLKO przez nową turę, przez nowy przycisk „Otwórz plik narracji…" (od v15.2.3, opisany niżej) albo przez bezpośrednią edycję pliku .txt z poziomu Eksploratora plików. To pole jest zsynchronizowane z plikiem `opowiesci/<nazwa>.txt`, możesz je traktować jako preview audiobooka.
+
+PRZYCISK „Otwórz plik narracji…" (od v15.2.3) — obok przycisków „Nowa gra"/„Wczytaj"/„Zapisz" pojawia się czwarty: „Otwórz plik narracji…". Otwiera plik `opowiesci/<nazwa>.txt` w systemowym edytorze tekstu (Notatnik na Windows, TextEdit na macOS, domyślny edytor GUI na Linux — analogicznie do tego, jak Manager Reguł otwiera pliki YAML lub jak panel domowy otwiera `golden_key.env`). Typowy use-case to alternatywa do furtki „Edytuj tryb gry…" → Swobodny: zamiast przeskakiwać na inny tryb żeby napisać finał, możesz po prostu otworzyć plik .txt i dopisać zamykającą scenę ręcznie. UWAGA NA RYZYKO ROZJAZDU: przed otwarciem aplikacja pokazuje modalny dialog ostrzegawczy, bo .txt to TYLKO narracja dla TTS, a źródłem prawdy stanu gry (postacie, lokalizacja, ekwipunek, wątki) jest osobny plik `.game.json`. Edycja .txt nie aktualizuje stanu — kolejna tura LLM dostanie świat sprzed Twojej edycji, więc np. możesz w pliku opisać że postać zginęła, a w stanie gry nadal będzie żywa i pojawi się w następnej turze. Używaj świadomie, najlepiej tylko do dopisania finałowej sceny, po której i tak nie planujesz kolejnych tur.
 
 DYNAMICZNE PRZYCISKI WYBORU — w trybach Wyborów i Mniejsze zło każda tura tworzy nowe wx.Button-y w obszarze wyborów. Każdy ma tooltip czytany przez NVDA („Wybierz: idź dalej do lasu"). Tab między nimi działa naturalnie. Enter na zaznaczonym przycisku auto-wysyła ten wybór do silnika narracyjnego.
 
@@ -167,4 +169,4 @@ Problem: W trybie Wyborów silnik nie wygenerował przycisków, mimo że spodzie
 Przyczyna i rozwiązanie: Halucynacja modelu — mimo trybu 4 LLM zwrócił pustą tablicę wyborów. Aplikacja świadomie ukrywa wtedy obszar wyborów (zamiast pokazać pusty placeholder) i pozwala kontynuować free-textem. Następna tura prawdopodobnie wygeneruje wybory poprawnie.
 
 Problem: Pliki .game.json i .story.jsonl nie są widoczne na pulpicie.
-Przyczyna i rozwiązanie: To celowe — runtime/ jest folderem systemowym dla zwykłych użytkowników, niewidocznym z poziomu eksploratora plików. Pliki narracji (.txt, .md) trafiają do skrypty/ — tam je znajdziesz.
+Przyczyna i rozwiązanie: To celowe — runtime/ jest folderem systemowym dla zwykłych użytkowników, niewidocznym z poziomu eksploratora plików. Pliki narracji (.txt, .md) trafiają do opowiesci/ — tam je znajdziesz.

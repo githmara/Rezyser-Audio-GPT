@@ -34,7 +34,7 @@ tresc:
 
     Pullo Pienempi paha -tilassa (v15.2 alkaen): neljän pelivuoron jälkeen valintaruudussa näkyy lisävaihtoehto, nollanumeroinen "Avaa pullo" — ja se pysyy siellä pelin loppuun asti uudelleenkäytettävänä valintana (ei katoa käytön jälkeen, voit käyttää sitä toistuvasti). Pullo on "epätoivoinen pelastus" -vaihtoehto, mutta sen vaikutus on tarkoituksella arvaamaton ja sitä dramaattisempi, mitä harvinaisempi tulos: noin 60% tapauksista pullon sisältö on haitallista (myrkyttää, vahingoittaa, sokeuttaa), 30% aiheuttaa havaintohäiriöitä tai henkiä (hallusinaatiot, muuttunut puhe, paniikki), ja vain 10% osoittautuu harvoin hyödylliseksi (tilapäinen vahvistus, avulias henki, keskeinen tieto). Jakauma pakotetaan Pythonilla (`random.choices` sovelluksen puolella), LLM saa valmiin siemenen `{kategoria, kuvaus}` ja vain narratisoi sen — malli ei voi "keksiä" pelastavaa vaikutusta ilman arvontaa. Tämän ansiosta pullo EI KOSKAAN muutu deus ex machinaksi: jopa sen käyttö äärimmäisessä epätoivossa yleensä pahentaa tilannetta. Sen narratiivisen muodon valinta (murtuuko pullo lopullisesti vai piilotetaanko se takaisin vyölle) kuuluu kerrontamoottorille — joskus jo ensimmäisen 60%-haitallisen annoksen jälkeen et koskaan palaa.
 
-    Tilaa voi vaihtaa pelin aikana — seuraavalla kierroksella kerrontamoottori mukautuu uuteen tyyliin (Vapaasta tilasta Valintoihin voi siirtyä yhdellä klikkauksella). Huomio: pullo on yksinomaan Pienempi paha -tilan ominaisuus — siirtyessäsi saman pelin aikana Valintoihin tai Vapaaseen tilaan, sen olemassaolo ja kierroslaskuri säilyvät pelitilassa, mutta ennen kuin palaat Pienempään pahaan, vaihtoehto "Avaa pullo" ei näy.
+    Tilaa voi vaihtaa pelin aikana, mutta ainoastaan RadioBoxin viereisellä hätäpainikkeella „Muokkaa pelitilaa…" (versiosta 15.2.3 alkaen) — RadioBox itse on jäädytetty lukitulle tilalle heti pelin luomisen tai lataamisen jälkeen, vastaavasti kuin Ohjaajan suoja. Painike avaa modaalisen valintaikkunan varoituksella; tämän kiertotien tyypillinen käyttötapaus on tilanne, jossa AI Valintojen tai Pienemmän pahan tilassa itsepintaisesti luo lisää dilemmoja sen sijaan, että lopettaisi tarinan — siirtyminen Vapaaseen tilaan antaa pelaajalle mahdollisuuden kuvata loppukohtauksen itse. Jos haluat aloittaa toisen pelin eri tunnelmassa, kirjoita vain uusi pelinimi nimikenttään — RadioBox avautuu itsestään, koska sovellus tunnistaa, että valmistelet uutta projektia. Huomio: pullo on yksinomaan Pienempi paha -tilan ominaisuus — siirtyessäsi (kiertotien kautta) saman pelin aikana Valintoihin tai Vapaaseen tilaan, sen olemassaolo ja kierroslaskuri säilyvät pelitilassa, mutta ennen kuin palaat Pienempään pahaan, vaihtoehto „Avaa pullo" ei näy.
   krok_2_quick_start: |
     KROK 2: Pika-aloitus — valmiit aloitusskenaariot
 
@@ -86,7 +86,7 @@ tresc:
 
     /tallenna, /save — pakottaa manuaalisen pelitilan tallennuksen. Automaattinen tallennus tapahtuu jokaisen vuoron jälkeen, joten tämä komento on lähinnä varmistusta varten ennen sovelluksen sulkemista.
 
-    /lataa, /load — avaa tiedoston valintaikkunan kansiosta runtime/opowiesci/. Lataamisen jälkeen pelin nimi, tila ja koko narratiivi palautetaan — voit jatkaa siitä vuorosta, johon jäit.
+    /lataa, /load — avaa pelin valintaikkunan, jossa on lista saatavilla olevista nimistä (versiosta 15.2.3 alkaen järjestelmän tiedostovalintaikkunan sijaan — suora lista tallennetuista peleistä kansiosta runtime/opowiesci/, tunnistettuna .game.json-tiedoston olemassaolon perusteella). NVDA lukee listan luonnollisesti, sokean pelaajan ei tarvitse navigoida järjestelmän tiedostovalintaikkunassa. Valinnan jälkeen pelin nimi, tila ja koko narratiivi palautetaan — voit jatkaa siitä vuorosta, johon jäit. Painikkeella „{opowiesci.btn_wczytaj_label}" on identtinen toiminta.
 
     Narratiivimoottori valitsee AI-mallin automaattisesti tilan mukaan: Valintojen ja Pienemmän pahan tilassa se käyttää kalliimpaa gpt-4o:ta (noudattaa tiukasti maailman sääntöjä), Vapaassa tilassa — nopeampaa ja halvempaa gpt-4o-miniä (pelaaja ohjaa juonta, joten dramaattista ohjausta ei tarvita).
 
@@ -98,9 +98,9 @@ tresc:
 
     Jokainen peli tuottaa viisi tiedostoa, jokainen eri kansiossa ja eri rooleissa:
 
-    skrypty/<nimi>.txt — täydellinen kertomus valmiina kuunneltavaksi äänikirjana. Voidaan avata Muistiossa tai ladata Audiokirja-arkkitehtiin (Muunnin) ja luoda Word-tiedosto luvuilla tai ajoitus ElevenLabsille.
+    opowiesci/<nimi>.txt — täydellinen kertomus valmiina kuunneltavaksi äänikirjana. Voidaan avata Muistiossa tai ladata Audiokirja-arkkitehtiin (Muunnin) ja luoda Word-tiedosto luvuilla tai ajoitus ElevenLabsille.
 
-    skrypty/<nimi>.md — Hahmojen Maailmakirja muodossa [Nimi: ominaisuudet], regeneroitu jokaisen kierroksen jälkeen. Muoto yhteensopiva Reżyserin parserin kanssa! Voit ladata tämän tiedoston Reżyserin paneeliin (Tiedosto → Lataa) ja saat luonnolliset hahmojen aksentit klassisessa TTS-kertomuksessa — silta sovelluksen kahden päämoduulin välillä.
+    opowiesci/<nimi>.md — Hahmojen Maailmakirja muodossa [Nimi: ominaisuudet], regeneroitu jokaisen kierroksen jälkeen. Muoto yhteensopiva Reżyserin parserin kanssa! Voit ladata tämän tiedoston Reżyserin paneeliin (Tiedosto → Lataa) ja saat luonnolliset hahmojen aksentit klassisessa TTS-kertomuksessa — silta sovelluksen kahden päämoduulin välillä.
 
     runtime/opowiesci/<nimi>.game.json — pelin täydellinen tila: nimi, tila, aktiiviset hahmot, sijainti, varusteet, avoimet juonenkäänteet, viimeiset 6 kierrosta tiivistetyssä muodossa. Tämä on totuuden lähde pelin lataamiseen — ilman tätä tiedostoa peliä ei voi jatkaa.
 
@@ -129,7 +129,7 @@ tresc:
   krok_9_most_do_rezysera: |
     KROK 9: Silta Reżyseriin — käytä Tarinoissa luotua Maailmankirjaa
 
-    Peliä pelatessa luotu tiedosto skrypty/<nazwa>.md sisältää Maailmankirjan hahmoineen, jotka esiintyivät kertomuksessa, sekä niiden piirteet, aksentit ja luonteen. Muoto on täsmälleen sellainen, mitä Reżyserin jäsennin vaatii — [Nimi: piirteet aksentin kuvauksella].
+    Peliä pelatessa luotu tiedosto opowiesci/<nazwa>.md sisältää Maailmankirjan hahmoineen, jotka esiintyivät kertomuksessa, sekä niiden piirteet, aksentit ja luonteen. Muoto on täsmälleen sellainen, mitä Reżyserin jäsennin vaatii — [Nimi: piirteet aksentin kuvauksella].
 
     Mitä voit tehdä tällä:
 
@@ -145,7 +145,9 @@ tresc:
 
     VIIMEINEN KIERROS KENTTÄ — tämä on erillinen wx.TextCtrl vain luku -monirivinen (~140 px korkea) KOKO kertomuksen YLÄPUOLELLA. Jokaisen kierroksen jälkeen kenttä korvataan uudella osalla (otsikko "--- Kierros N ---" + kertomuksen sisältö). NVDA lukee sen heti, kun se on fokuksessa (automaattinen fokus kierroksen onnistumisen jälkeen), ilman että tarvitsee navigoida satojen rivien läpi koko tarinassa. Tallennetun pelin lataamisen jälkeen kenttä näyttää VIIMEISEN tallennetun kierroksen TIIVISTELMÄN (enintään 400 merkkiä `viimeiset_kierrokset` puskurista) etuliitteellä, joka ilmoittaa, että koko kertomus on alla olevassa kentässä.
 
-    KOKO KERTOMUKSEN KENTTÄ — tämä on wx.TextCtrl vain luku -monirivinen, joka kasvaa jokaisen kierroksen jälkeen. NVDA lukee koko kertomuksen lineaarisesti, voit navigoida nuolilla tekstin sisällä, kopioida osia Ctrl+C:llä. Kenttä ei ole koskaan muokattavissa — muokkaat tarinaa VAIN uuden kierroksen kautta tai muokkaamalla .txt-tiedostoa sovelluksen ulkopuolella. Tämä kenttä on synkronoitu tiedoston `käsikirjoitukset/<nimi>.txt` kanssa, voit käsitellä sitä äänikirjan esikatseluna.
+    KOKO KERTOMUKSEN KENTTÄ — tämä on wx.TextCtrl vain luku -monirivinen, joka kasvaa jokaisen kierroksen jälkeen. NVDA lukee koko kertomuksen lineaarisesti, voit navigoida nuolilla tekstin sisällä, kopioida osia Ctrl+C:llä. Kenttä ei ole koskaan muokattavissa — muokkaat tarinaa VAIN uuden kierroksen kautta, uudella „Avaa kertomustiedosto…"-painikkeella (versiosta 15.2.3 alkaen, kuvattu alla) tai muokkaamalla .txt-tiedostoa suoraan Resurssienhallinnasta. Tämä kenttä on synkronoitu tiedoston `opowiesci/<nimi>.txt` kanssa, voit käsitellä sitä äänikirjan esikatseluna.
+
+    PAINIKE „{opowiesci.btn_otworz_narracje_label}" (versiosta 15.2.3 alkaen) — painikkeiden „Uusi peli"/„Lataa"/„Tallenna" vieressä ilmestyy neljäs: „Avaa kertomustiedosto…". Se avaa tiedoston `opowiesci/<nimi>.txt` järjestelmän tekstieditorissa (Muistio Windowsissa, TextEdit macOS:ssa, oletus-GUI-editori Linuxissa — vastaavasti kuin Sääntöhallinta avaa YAML-tiedostoja tai aloituspaneeli avaa `golden_key.env`). Tyypillinen käyttötapaus on vaihtoehto „Muokkaa pelitilaa…"-kiertotielle → Vapaa: sen sijaan että hyppäisit toiseen tilaan kirjoittaaksesi loppupelin, voit yksinkertaisesti avata .txt-tiedoston ja lisätä loppukohtauksen käsin. VAROITUS POIKKEAMARISKISTÄ: ennen avaamista sovellus näyttää modaalisen varoitusdialogi, koska .txt sisältää VAIN kertomuksen TTS:lle, kun taas pelin tilan totuuden lähde (hahmot, sijainti, varusteet, juonenkäänteet) on erillinen tiedosto `.game.json`. .txt:n muokkaaminen ei päivitä tilaa — seuraava LLM-kierros saa maailman ennen muokkaustasi, joten esim. voit kuvata tiedostossa että hahmo kuoli, mutta pelin tilassa hän on edelleen elossa ja ilmestyy seuraavalla kierroksella. Käytä tietoisesti, ihanteellisesti vain lisätäksesi loppukohtauksen, jonka jälkeen et muutenkaan suunnittele lisää kierroksia.
 
     DYNAMIISET VALINTAPAINIKKEET — Valinnat- ja Vähemmän paha -tiloissa jokainen kierros luo uusia wx.Button-painikkeita valinta-alueelle. Jokaisella on NVDA:n lukema vihje ("Valitse: jatka metsään"). Välilehti niiden välillä toimii luonnollisesti. Enter valitulla painikkeella lähettää valinnan automaattisesti kertomuskoneelle.
 
@@ -172,4 +174,4 @@ tresc:
     Syy ja ratkaisu: Mallin hallusinaatio — huolimatta 4 LLM-tilasta, se palautti tyhjän valintataulukon. Sovellus piilottaa silloin tietoisesti valinta-alueen (sen sijaan, että näyttäisi tyhjän paikan) ja sallii jatkamisen vapaalla tekstillä. Seuraava kierros luultavasti luo valinnat oikein.
 
     Ongelma: .game.json ja .story.jsonl tiedostoja ei näy työpöydällä.
-    Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on järjestelmäkansio tavallisille käyttäjille, eikä se ole näkyvissä tiedostoselaimessa. Kertomustiedostot (.txt, .md) tallennetaan skrypty/-kansioon — löydät ne sieltä.
+    Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on järjestelmäkansio tavallisille käyttäjille, eikä se ole näkyvissä tiedostoselaimessa. Kertomustiedostot (.txt, .md) tallennetaan opowiesci/-kansioon — löydät ne sieltä.

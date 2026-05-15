@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modulo Storie Interattive (15.2.2 – Versione di Pubblicazione)
+Reżyser Audio GPT — Modulo Storie Interattive (15.2.3 – Versione di Pubblicazione)
 
 Il secondo principale modo dell'applicazione accanto a Reżyser — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
 
@@ -19,7 +19,7 @@ MODALITÀ MINOR MALE — come Scelte, ma ciascuna delle 3-5 opzioni è moralment
 
 Fiala nella modalità Minor Male (dalla v15.2): dopo quattro turni di gioco, nel campo delle scelte appare un'opzione aggiuntiva numerata ZERO "Stappa la fiala" — e rimane lì fino alla fine del gioco come scelta riutilizzabile (non scompare dopo l'uso, puoi usarla ripetutamente). La fiala è un'opzione di "salvataggio disperato", ma il suo effetto è volutamente imprevedibile e tanto più drammaticamente pesante quanto più raro è il risultato: in circa il 60% dei casi il contenuto della fiala è dannoso (avvelena, ferisce, acceca), nel 30% provoca disturbi della percezione o dello spirito (allucinazioni, linguaggio alterato, panico), e solo nel 10% risulta raramente vantaggioso (potenziamento temporaneo, spirito utile, informazione chiave). La distribuzione è forzata da Python (`random.choices` lato applicazione), LLM riceve il seed `{categoria, descrizione}` e lo narra semplicemente — il modello non può "inventare" un effetto salvifico al di fuori del sorteggio. Grazie a ciò, la fiala NON diventa MAI un deus ex machina: anche prenderla in un momento di estrema disperazione di solito peggiora la situazione. La scelta della sua forma narrativa (se la fiala si romperà definitivamente o verrà riposta di nuovo alla cintura) spetta al motore narrativo — a volte dopo la prima delle dosi 60%-dannose non tornerai mai più.
 
-La modalità può essere cambiata durante il gioco — al turno successivo il motore narrativo si adatterà al nuovo stile (dalla modalità Libera a Scelte può passare con un solo clic). Nota: la fiala è una caratteristica esclusiva della modalità Minor Male — passando nella stessa partita a Scelte o Libera, la sua esistenza e il conteggio dei turni rimangono salvati nello stato del gioco, ma finché non torni a Minor Male, l'opzione "Stappa la fiala" non verrà visualizzata.
+La modalità può essere cambiata durante il gioco, ma solo tramite il pulsante di emergenza «Modifica modalità di gioco…» accanto alla RadioBox (dalla v15.2.3) — la RadioBox stessa è bloccata sulla modalità fissata subito dopo la creazione o il caricamento di una partita, in modo analogo alla protezione del Regista. Il pulsante apre una finestra di dialogo modale con un avviso; il caso d'uso tipico di questa scappatoia è una situazione in cui l'IA in modalità Scelte o Minor Male genera ostinatamente nuovi dilemmi invece di chiudere la storia — passare alla modalità Libera consente allora al giocatore di descrivere lui stesso la scena finale. Se vuoi avviare una seconda partita in un'altra tonalità, basta digitare un nuovo nome di partita nel campo del nome — la RadioBox si sbloccherà da sola, perché l'applicazione riconosce che stai preparando un progetto fresco. Nota: la fiala è una caratteristica esclusiva della modalità Minor Male — passando (attraverso la scappatoia) nella stessa partita a Scelte o Libera, la sua esistenza e il conteggio dei turni rimangono salvati nello stato del gioco, ma finché non torni a Minor Male, l'opzione «Stappa la fiala» non verrà visualizzata.
 
 
 KROK 2: Avvio Rapido — scenari di apertura preimpostati
@@ -75,7 +75,7 @@ Nel campo azione puoi inserire in qualsiasi momento un comando che inizia con la
 
 /zapisz, /save — forza il salvataggio manuale dello stato del gioco. Il salvataggio automatico avviene dopo ogni turno, quindi questo comando è principalmente per sicurezza prima di chiudere l'applicazione.
 
-/wczytaj, /load — apre la finestra di dialogo per la selezione del file dalla cartella runtime/opowiesci/. Dopo il caricamento, il nome del gioco, la modalità e la narrazione completa vengono ripristinati — puoi continuare dal turno in cui hai interrotto.
+/wczytaj, /load — apre una finestra di dialogo di selezione del gioco con l'elenco dei nomi disponibili (dalla v15.2.3 al posto della finestra di dialogo file di sistema — un elenco diretto dei giochi salvati nella cartella runtime/opowiesci/, rilevati dalla presenza di un file .game.json). NVDA legge l'elenco in modo naturale, il giocatore non vedente non deve navigare nella finestra di dialogo file di sistema. Dopo la selezione, il nome del gioco, la modalità e la narrazione completa vengono ripristinati — puoi continuare dal turno in cui hai interrotto. Il pulsante «Carica» ha un comportamento identico.
 
 Il motore narrativo seleziona automaticamente il modello AI in base alla modalità: per la modalità Scelte e Il minore dei mali utilizza il più costoso gpt-4o (aderisce rigorosamente alle regole del mondo), per la modalità Libera — il più veloce e economico gpt-4o-mini (il giocatore controlla la trama, quindi non richiede una drammatica regia).
 
@@ -88,9 +88,9 @@ KROK 6: Pliki gry — gdzie znajdziesz swoje dane
 
 Każda gra produkuje pięć plików, każdy w innym folderze, z różnymi rolami:
 
-skrypty/<nazwa>.txt — pełna narracja gotowa do odsłuchu jako audiobook. Można otworzyć w Notatniku albo wczytać do Architekta Audiobooków (Konwerter) i wygenerować plik Word z rozdziałami albo timing dla ElevenLabs.
+opowiesci/<nazwa>.txt — pełna narracja gotowa do odsłuchu jako audiobook. Można otworzyć w Notatniku albo wczytać do Architekta Audiobooków (Konwerter) i wygenerować plik Word z rozdziałami albo timing dla ElevenLabs.
 
-skrypty/<nazwa>.md — Księga Świata postaci w formacie [Imię: cechy], regenerowana po każdej turze. Format kompatybilny z parserem Reżysera! Możesz wczytać ten plik do panelu Reżysera (Plik → Wczytaj) i otrzymasz natywne akcenty postaci w klasycznej narracji TTS — most między dwoma głównymi modułami aplikacji.
+opowiesci/<nazwa>.md — Księga Świata postaci w formacie [Imię: cechy], regenerowana po każdej turze. Format kompatybilny z parserem Reżysera! Możesz wczytać ten plik do panelu Reżysera (Plik → Wczytaj) i otrzymasz natywne akcenty postaci w klasycznej narracji TTS — most między dwoma głównymi modułami aplikacji.
 
 runtime/opowiesci/<nazwa>.game.json — pełen stan gry: nazwa, tryb, postacie aktywne, lokacja, ekwipunek, otwarte wątki, ostatnie 6 tur w skróconej formie. To źródło prawdy do wczytania gry — bez tego pliku nie da się kontynuować.
 
@@ -122,7 +122,7 @@ Il Cinematic Warning NON fa parte della narrazione dell'audiolibro — il motore
 
 KROK 9: Ponte al Reżyser — utilizza il Libro del Mondo creato in Storie
 
-Il file skrypty/<nazwa>.md generato durante il gioco contiene il Libro del Mondo con i personaggi che sono apparsi nella narrazione, insieme alle loro caratteristiche, accenti e personalità. Il formato è esattamente quello richiesto dal parser di Reżyser — [Nome: caratteristiche con descrizione dell'accento].
+Il file opowiesci/<nazwa>.md generato durante il gioco contiene il Libro del Mondo con i personaggi che sono apparsi nella narrazione, insieme alle loro caratteristiche, accenti e personalità. Il formato è esattamente quello richiesto dal parser di Reżyser — [Nome: caratteristiche con descrizione dell'accento].
 
 Cosa puoi fare con questo:
 
@@ -139,7 +139,9 @@ L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa ab
 
 CAMPO ULTIMO TURNO — è un wx.TextCtrl readonly multiline separato (~140 px di altezza) SOPRA la narrazione completa. Dopo ogni turno, il campo viene sostituito con un nuovo frammento (intestazione "--- Turno N ---" + contenuto della narrazione). NVDA lo legge immediatamente dopo il focus (auto-focus dopo il successo del turno), senza navigare attraverso centinaia di righe della storia completa. Dopo il caricamento di un gioco salvato, il campo mostra un RIASSUNTO dell'ultimo turno salvato (max 400 caratteri dal buffer `ultimi_turni`) con un prefisso che informa che la narrazione completa è nel campo sottostante.
 
-CAMPO NARRAZIONE COMPLETA — è un wx.TextCtrl readonly multiline che cresce dopo ogni turno. NVDA legge linearmente l'intera narrazione, puoi navigare con le frecce all'interno del testo, copiare frammenti con Ctrl+C. Il campo non è mai modificabile — modifichi la storia SOLO attraverso un nuovo turno o l'editing del file .txt fuori dall'applicazione. Questo campo è sincronizzato con il file `sceneggiature/<nome>.txt`, puoi trattarlo come un'anteprima dell'audiolibro.
+CAMPO NARRAZIONE COMPLETA — è un wx.TextCtrl readonly multiline che cresce dopo ogni turno. NVDA legge linearmente l'intera narrazione, puoi navigare con le frecce all'interno del testo, copiare frammenti con Ctrl+C. Il campo non è mai modificabile — modifichi la storia SOLO attraverso un nuovo turno, tramite il nuovo pulsante «Apri file di narrazione…» (dalla v15.2.3, descritto sotto) o tramite la modifica diretta del file .txt da Esplora file. Questo campo è sincronizzato con il file `opowiesci/<nome>.txt`, puoi trattarlo come un'anteprima dell'audiolibro.
+
+PULSANTE «Apri file di narrazione…» (dalla v15.2.3) — accanto ai pulsanti «Nuova partita»/«Carica»/«Salva» appare un quarto: «Apri file di narrazione…». Apre il file `opowiesci/<nome>.txt` nell'editor di testo di sistema (Blocco note su Windows, TextEdit su macOS, editor GUI predefinito su Linux — analogamente a come il Gestore delle Regole apre file YAML o come il pannello iniziale apre `golden_key.env`). Il caso d'uso tipico è un'alternativa alla scappatoia «Modifica modalità di gioco…» → Libera: invece di passare a un'altra modalità per scrivere il finale, puoi semplicemente aprire il file .txt e aggiungere la scena di chiusura manualmente. AVVERTENZA SUL RISCHIO DI DIVERGENZA: prima dell'apertura, l'applicazione mostra una finestra di dialogo modale di avviso, perché .txt è SOLO la narrazione per TTS, mentre la fonte di verità dello stato del gioco (personaggi, luogo, inventario, fili narrativi) è un file separato `.game.json`. Modificare il .txt non aggiorna lo stato — il prossimo turno LLM riceverà il mondo prima della tua modifica, quindi ad es. puoi descrivere nel file che un personaggio è morto, ma nello stato del gioco sarà ancora vivo e apparirà nel turno successivo. Usa consapevolmente, idealmente solo per aggiungere la scena finale dopo la quale non prevedi comunque ulteriori turni.
 
 PULSANTI DI SCELTA DINAMICI — nelle modalità Scelte e Il male minore, ogni turno crea nuovi wx.Button nell'area delle scelte. Ognuno ha un tooltip letto da NVDA ("Scegli: prosegui nel bosco"). Tab tra di loro funziona naturalmente. Enter sul pulsante selezionato invia automaticamente quella scelta al motore narrativo.
 

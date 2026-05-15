@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modúll Interaktívar Sagna (15.2.2 – Útgáfuútgáfa)
+Reżyser Audio GPT — Modúll Interaktívar Sagna (15.2.3 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hlið Reżysera — í þetta skiptið verður þú leikmaður í kviku sögugerð í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lykt af blautum laufum…"), og þú ákveður næstu hreyfingu — með því að skrifa hvaða aðgerð sem er í frjálsum texta eða velja einn af tölusettum valkostum.
 
@@ -19,7 +19,7 @@ MINNA ILLT HAMUR — eins og Valhamur, en hver af 3-5 valkostum er siðferðileg
 
 Flaska í Minna illt ham (frá v15.2): eftir fjórar umferðir leiks birtist aukaval, núll-númeraður valkostur „Opna flöskuna“ í valreitnum — og er áfram þar til leiksloka sem endurnýtanlegur valkostur (hverfur ekki eftir notkun, þú getur gripið til hennar ítrekað). Flaskan er valkostur „örvæntingarfullrar björgunar“, en virkni hennar er viljandi óútreiknanleg og því dramatískt þyngri, því sjaldgæfari sem hún gefur jákvæða niðurstöðu: í um 60% tilfella er innihald flöskunnar skaðlegt (eitrun, meiðsli, blindun), í 30% veldur það skyntruflunum eða draugum (ofskynjanir, breytt tal, læti), en aðeins í 10% reynist það sjaldan gagnlegt (tímabundin styrking, hjálplegur draugur, lykilupplýsingar). Dreifingin er þvinguð af Python (`random.choices` í forritinu), LLM fær tilbúinn fræ `{flokkur, lýsing}` og útskýrir það aðeins — líkanið getur ekki „fundið upp“ björgunarafleiðingu nema með útdrætti. Þannig verður flaskan ALDREI deus ex machina: jafnvel þegar gripið er til hennar í algjörri örvæntingu versnar ástandið yfirleitt. Val á frásagnarformi hennar (hvort flaskan brotnar endanlega eða er sett aftur í beltið) er á valdi frásagnavélarinnar — stundum eftir fyrstu af 60%-skaðlegu skömmtunum kemurðu aldrei aftur.
 
-Hægt er að skipta um ham á meðan á leik stendur — í næstu umferð aðlagar frásagnavélin sig að nýjum stíl (úr Frjálsum í Valham með einum smelli). Athugið: flaskan er eingöngu eiginleiki Minna illt hams — þegar skipt er í Valham eða Frjálsan í sama leik, er tilvist hennar og umferðarvísir varðveitt í leikástandinu, en þar til þú kemur aftur í Minna illt ham birtist valkosturinn „Opna flöskuna“ ekki.
+Hægt er að skipta um ham á meðan á leik stendur, en aðeins með neyðarhnappinum „Breyta leikjaham…" við hliðina á RadioBox-inu (frá og með v15.2.3) — RadioBox-ið sjálft er fryst á þeim ham sem hefur verið læstur inni strax eftir að leikur er búinn til eða hlaðinn, sambærilegt við vörn Leikstjórans. Hnappurinn opnar samtalsglugga með viðvörun; dæmigert notkunartilvik þessarar undankomuleiðar er þegar AI í Valham eða Minna illt heldur þrjósklega áfram að búa til fleiri álitamál í stað þess að ljúka sögunni — að skipta yfir í Frjálsan ham gerir leikmanninum þá kleift að lýsa lokaatriðinu sjálfur. Ef þú vilt byrja annan leik í öðrum tóni, einfaldlega sláðu nýtt leiknafn inn í nafnareitinn — RadioBox-ið mun aflæsa sig sjálfkrafa, því forritið kannast við að þú sért að undirbúa nýtt verkefni. Athugið: flaskan er eingöngu eiginleiki Minna illt hams — þegar skipt er (gegnum undankomuleiðina) í Valham eða Frjálsan í sama leik, er tilvist hennar og umferðarvísir varðveitt í leikástandinu, en þar til þú kemur aftur í Minna illt ham birtist valkosturinn „Opna flöskuna" ekki.
 
 
 KROK 2: Quick Start — tilbúnir upphafsatburðir
@@ -75,7 +75,7 @@ KROK 5: Slash-komendy — szybkie akcje bez API
 
 /vista, /save — þvingar handvirka vistun á stöðu leiksins. Sjálfvirk vistun á sér stað eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritið er lokað.
 
-/hlaða, /load — opnar valglugga fyrir skrá úr möppunni runtime/opowiesci/. Eftir hleðslu er nafn leiksins, hamur og full frásögn endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á.
+/hlaða, /load — opnar valglugga fyrir leik með lista yfir tiltæk nöfn (frá v15.2.3 í staðinn fyrir kerfisskráarglugga — beinn listi yfir vistaða leiki úr möppunni runtime/opowiesci/, greindir út frá tilvist .game.json skrár). NVDA les listann náttúrulega, blindi leikmaðurinn þarf ekki að fletta í gegnum kerfisskráarglugga. Eftir val er nafn leiksins, hamur og full frásögn endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á. Hnappurinn „Hlaða" hefur sömu hegðun.
 
 Frásagnavélin velur AI-líkan sjálfkrafa eftir ham: fyrir ham Val og Minna ills nota það dýrari gpt-4o (fylgir ströngum reglum heimsins), fyrir Frjálsan ham — hraðari og ódýrari gpt-4o-mini (leikmaður stjórnar söguþræði, svo það krefst ekki dramatískrar leikstjórnar).
 
@@ -88,9 +88,9 @@ KROK 6: Leikjaskrár — hvar þú finnur gögnin þín
 
 Hver leikur framleiðir fimm skrár, hver í mismunandi möppu, með mismunandi hlutverkum:
 
-skrypty/<nazwa>.txt — fullkomin frásögn tilbúin til hlustunar sem hljóðbók. Hægt að opna í Notepad eða hlaða inn í Hljóðbókararkitektinn (Breytir) og búa til Word skrá með köflum eða tímasetningu fyrir ElevenLabs.
+opowiesci/<nazwa>.txt — fullkomin frásögn tilbúin til hlustunar sem hljóðbók. Hægt að opna í Notepad eða hlaða inn í Hljóðbókararkitektinn (Breytir) og búa til Word skrá með köflum eða tímasetningu fyrir ElevenLabs.
 
-skrypty/<nazwa>.md — Heimabók persóna á formi [Nafn: einkenni], endurgerð eftir hverja umferð. Samhæft við Reżyser parserinn! Þú getur hlaðið þessari skrá inn í Reżyser spjaldið (Skrá → Hlaða inn) og fengið innfædda hreim persóna í klassískri TTS frásögn — brú milli tveggja aðal eininga forritsins.
+opowiesci/<nazwa>.md — Heimabók persóna á formi [Nafn: einkenni], endurgerð eftir hverja umferð. Samhæft við Reżyser parserinn! Þú getur hlaðið þessari skrá inn í Reżyser spjaldið (Skrá → Hlaða inn) og fengið innfædda hreim persóna í klassískri TTS frásögn — brú milli tveggja aðal eininga forritsins.
 
 runtime/opowiesci/<nazwa>.game.json — fullkomið ástand leiksins: nafn, stilling, virkar persónur, staðsetning, búnaður, opnir þræðir, síðustu 6 umferðir í styttri formi. Þetta er sannleiksgjafi til að hlaða leik — án þessarar skráar er ekki hægt að halda áfram.
 
@@ -122,7 +122,7 @@ Cinematic Warning ER EKKI hluti af hljóðbókarfrásögninni — .txt síuvéli
 
 KROK 9: Brú til Reżyser — nýttu Heimsbókina búin til í Sögum
 
-Skráin skrypty/<nazwa>.md sem er búin til á meðan leik stendur inniheldur Heimsbókina með persónum sem komu fram í frásögninni, ásamt eiginleikum þeirra, hreimum og persónuleika. Sniðið er nákvæmlega eins og Reżyser greinirinn krefst — [Nafn: eiginleikar með lýsingu á hreim].
+Skráin opowiesci/<nazwa>.md sem er búin til á meðan leik stendur inniheldur Heimsbókina með persónum sem komu fram í frásögninni, ásamt eiginleikum þeirra, hreimum og persónuleika. Sniðið er nákvæmlega eins og Reżyser greinirinn krefst — [Nafn: eiginleikar með lýsingu á hreim].
 
 Hvað þú getur gert með þetta:
 
@@ -139,7 +139,9 @@ Allur söguhlutinn hefur verið fínstilltur fyrir blinda notendur. Hvað við g
 
 REITUR SÍÐASTA UMFERÐ — þetta er sérstakur wx.TextCtrl readonly marglínureitur (~140 px hæð) YFIR fullri frásögn. Eftir hverja umferð er reiturinn uppfærður með nýjum kafla (fyrirsögn „--- Umferð N ---" + innihald frásagnarinnar). NVDA les hann strax eftir fókus (sjálfvirkur fókus eftir vel heppnaða umferð), án þess að þurfa að fletta í gegnum hundruð lína af fullri sögu. Eftir að vistaður leikur er hlaðinn sýnir reiturinn YFIRLIT síðustu vistaðrar umferðar (hámark 400 stafir úr `síðustu_umferðir` buffer) með forskeyti sem upplýsir að full frásögn er í reitnum fyrir neðan.
 
-REITUR FULLRAR FRÁSAGNAR — þetta er wx.TextCtrl readonly marglínureitur sem vex eftir hverja umferð. NVDA les línulega alla frásögnina, þú getur flett með örvahnöppum innan textans, afritað hluta með Ctrl+C. Reiturinn er aldrei breytanlegur — þú breytir sögunni AÐEINS með nýrri umferð eða með því að breyta .txt skrá utan forritsins. Þessi reitur er samstilltur við skrána `skrypty/<nazwa>.txt`, þú getur litið á hann sem forskoðun á hljóðbók.
+REITUR FULLRAR FRÁSAGNAR — þetta er wx.TextCtrl readonly marglínureitur sem vex eftir hverja umferð. NVDA les línulega alla frásögnina, þú getur flett með örvahnöppum innan textans, afritað hluta með Ctrl+C. Reiturinn er aldrei breytanlegur — þú breytir sögunni AÐEINS með nýrri umferð, með nýja hnappnum „Opna frásagnarskrá…" (frá v15.2.3, lýst hér að neðan) eða með beinni breytingu á .txt skrá úr skráaskoðaranum. Þessi reitur er samstilltur við skrána `opowiesci/<nazwa>.txt`, þú getur litið á hann sem forskoðun á hljóðbók.
+
+HNAPPUR „Opna frásagnarskrá…" (frá v15.2.3) — við hliðina á hnöppunum „Nýr leikur"/„Hlaða"/„Vista" birtist fjórði: „Opna frásagnarskrá…". Hann opnar skrána `opowiesci/<nazwa>.txt` í kerfis-textaritlinum (Notepad í Windows, TextEdit í macOS, sjálfgefnum GUI ritli í Linux — sambærilegt við hvernig Reglustjórnandinn opnar YAML skrár eða hvernig heimaspjaldið opnar `golden_key.env`). Dæmigert notkunartilvik er valkostur við undankomuleiðina „Breyta leikjaham…" → Frjáls: í stað þess að stökkva í annan ham til að skrifa lokaatriðið, geturðu einfaldlega opnað .txt skrána og bætt við lokaatriðinu handvirkt. VIÐVÖRUN UM HÆTTU Á ÓSAMRÆMI: áður en skráin er opnuð sýnir forritið modal viðvörunardialog, því .txt er AÐEINS frásögnin fyrir TTS, en sannleiksgjafi leikástandsins (persónur, staðsetning, búnaður, þræðir) er sérstök `.game.json` skrá. Breyting á .txt uppfærir ekki ástandið — næsta LLM umferð fær heiminn fyrir breytingu þína, þannig að t.d. þú getur lýst í skránni að persóna dó, en í leikástandinu er hún enn á lífi og birtist í næstu umferð. Notaðu meðvitað, helst aðeins til að bæta við lokaatriðinu, eftir sem þú ætlar hvort sem er ekki að fara í fleiri umferðir.
 
 DÝNAMÍSKIR VALHNAPPAR — í valmöguleikum og Minna illu stillingum býr hver umferð til nýja wx.Button-a á valmöguleikasvæðinu. Hver hefur tooltip sem NVDA les („Veldu: farðu áfram í skóginn"). Tab á milli þeirra virkar eðlilega. Enter á völdum hnappi sendir sjálfkrafa þetta val til frásagnavélarinnar.
 
@@ -167,4 +169,4 @@ Vandamál: Í valstillingu bjó vélin ekki til hnappa, þó ég hafi búist vi�
 Ástæða og lausn: Ofskynjun módelsins — þrátt fyrir stillingu 4 skilaði LLM tómu valmöguleikatöflu. Forritið felur þá meðvitað valmöguleikasvæðið (í stað þess að sýna tóman placeholder) og leyfir að halda áfram með frjálsum texta. Næsta umferð mun líklega búa til valmöguleika rétt. 
 
 Vandamál: Skrárnar .game.json og .story.jsonl eru ekki sýnilegar á skjáborðinu.
-Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í skrypty/ — þar finnur þú þær.
+Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í opowiesci/ — þar finnur þú þær.

@@ -1,4 +1,4 @@
-Audio Director GPT — Interactive Stories Module (15.2.2 – Release Edition)
+Audio Director GPT — Interactive Stories Module (15.2.3 – Release Edition)
 
 The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
@@ -19,7 +19,7 @@ LESSER EVIL MODE — similar to Choice Mode, but each of the 3-5 options is mora
 
 Vial in Lesser Evil Mode (from v15.2): after four turns of play, an additional, ZERO-numbered option "Uncork the vial" appears in the choice field — and remains there for the rest of the game as a reusable choice (it doesn't disappear after use, you can reach for it repeatedly). The vial is a "desperate rescue" option, but its effect is intentionally unpredictable and the more dramatically severe, the rarer the beneficial result: in about 60% of cases, the vial's contents are harmful (poisoning, injuring, blinding), in 30% it causes perception or spirit disturbance (hallucinations, altered speech, panic), and only in 10% it proves rarely beneficial (temporary enhancement, helpful spirit, key information). The distribution is enforced by Python (`random.choices` on the application side), the LLM receives a ready seed `{category, description}` and merely narrationalizes it — the model cannot "invent" a salvific outcome beyond the draw. Thanks to this, the vial NEVER becomes a deus ex machina: even reaching for it in a moment of extreme despair usually worsens the situation. The choice of its narrative form (whether the vial definitively shatters or is put back in the belt) belongs to the narrative engine — sometimes after the first of the 60%-harmful doses, you never return.
 
-The mode can be changed during the game — in the next turn, the narrative engine will adapt to the new style (from Free Mode to Choices can be done in one click). Note: the vial is a feature exclusive to Lesser Evil Mode — when switching in the same game to Choices or Free Mode, its existence and turn counter remain preserved in the game state, but until you return to Lesser Evil, the "Uncork the vial" option will not be displayed.
+The mode can be changed during the game, but only through the emergency "Edit game mode…" button next to the RadioBox (from v15.2.3) — the RadioBox itself is frozen on the locked-in mode immediately after creating or loading a game, analogous to the Director's protection. The button opens a modal dialog with a warning; the typical use of this loophole is a situation in which the AI in Choices or Lesser Evil Mode stubbornly generates further dilemmas instead of ending the story — switching to Free Mode then allows the player to describe the final scene themselves. If you want to start a second game in a different tonality, simply type a new game name in the name field — the RadioBox will unlock by itself, because the application recognizes you are preparing a fresh project. Note: the vial is a feature exclusive to Lesser Evil Mode — when switching (through the loophole) in the same game to Choices or Free Mode, its existence and turn counter remain preserved in the game state, but until you return to Lesser Evil, the "Uncork the vial" option will not be displayed.
 
 
 STEP 2: Quick Start — ready-made opening scenarios
@@ -75,7 +75,7 @@ In the action field, you can enter a command starting with a slash `/` at any ti
 
 /zapisz, /save — forces a manual save of the game state. Autosave occurs after each turn, so this command is mainly for assurance before closing the application.
 
-/wczytaj, /load — opens a file selection dialog from the runtime/stories/ folder. After loading, the game name, mode, and full narration are restored — you can continue from the turn where you left off.
+/wczytaj, /load — opens a game selection dialog with a list of available names (from v15.2.3 instead of the system file dialog — a direct list of saved games from the runtime/opowiesci/ folder, detected by the presence of a .game.json file). NVDA reads the list naturally, the blind player doesn't have to navigate the system file dialog. After selection, the game name, mode, and full narration are restored — you can continue from the turn where you left off. The "Load" button has identical behavior.
 
 The narrative engine automatically selects the AI model depending on the mode: for the Choices and Lesser Evil modes, it uses the more expensive gpt-4o (strictly adheres to the world's rules), for the Free mode — the faster and cheaper gpt-4o-mini (the player controls the plot, so dramatic direction is not required).
 
@@ -88,15 +88,15 @@ STEP 6: Game Files — where to find your data
 
 Each game produces five files, each in a different folder, with various roles:
 
-scripts/<name>.txt — the full narrative ready for listening as an audiobook. It can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
+opowiesci/<name>.txt — the full narrative ready for listening as an audiobook. It can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
 
-scripts/<name>.md — the World Book of characters in the format [Name: traits], regenerated after each turn. The format is compatible with the Director's parser! You can load this file into the Director's panel (File → Load) and receive native character accents in classic TTS narration — a bridge between the two main modules of the application.
+opowiesci/<name>.md — the World Book of characters in the format [Name: traits], regenerated after each turn. The format is compatible with the Director's parser! You can load this file into the Director's panel (File → Load) and receive native character accents in classic TTS narration — a bridge between the two main modules of the application.
 
-runtime/stories/<name>.game.json — the full game state: name, mode, active characters, location, inventory, open threads, the last 6 turns in a summarized form. This is the source of truth for loading the game — without this file, you cannot continue.
+runtime/opowiesci/<name>.game.json — the full game state: name, mode, active characters, location, inventory, open threads, the last 6 turns in a summarized form. This is the source of truth for loading the game — without this file, you cannot continue.
 
-runtime/stories/<name>.story.jsonl — the raw log of each turn (player request + model response in JSON). This file is not needed for the game — it is used for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
+runtime/opowiesci/<name>.story.jsonl — the raw log of each turn (player request + model response in JSON). This file is not needed for the game — it is used for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
 
-runtime/scripts/<name>.mode — metadata of the mode number (3=Free, 4=Choices, 5=Lesser Evil). This file is shared with the Director, but the numbering does not conflict (the Director uses 0-2).
+runtime/skrypty/<name>.mode — metadata of the mode number (3=Free, 4=Choices, 5=Lesser Evil). This file is shared with the Director, but the numbering does not conflict (the Director uses 0-2).
 
 
 STEP 7: Model Memory Indicator — Why Turns in Old Games Don't Require Manual Work from You
@@ -122,7 +122,7 @@ The Cinematic Warning is NOT part of the audiobook narration — the .txt filter
 
 STEP 9: Bridge to the Director — Utilize the World Book Created in Stories
 
-The file scripts/<name>.md generated during gameplay contains the World Book with characters that appeared in the narrative, along with their traits, accents, and character. The format is exactly what the Director's parser requires — [Name: traits with accent description].
+The file opowiesci/<name>.md generated during gameplay contains the World Book with characters that appeared in the narrative, along with their traits, accents, and character. The format is exactly what the Director's parser requires — [Name: traits with accent description].
 
 What you can do with it:
 
@@ -139,7 +139,9 @@ The entire Stories module has been optimized for visually impaired users. Here's
 
 LAST TURN FIELD — this is a separate wx.TextCtrl readonly multiline (~140 px height) ABOVE the full narration. After each turn, the field is replaced with a fresh fragment (header "--- Turn N ---" + narration content). NVDA reads it immediately upon focus (auto-focus after a successful turn), without navigating through hundreds of lines of the full story. After loading a saved game, the field shows a SUMMARY of the last saved turn (max 400 characters from the `last_turns` buffer) with a prefix informing that the full narration is in the field below.
 
-FULL NARRATION FIELD — this is a wx.TextCtrl readonly multiline that grows with each turn. NVDA reads the entire narration linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn or by editing the .txt file outside the application. This field is synchronized with the `scripts/<name>.txt` file, you can treat it as a preview of the audiobook.
+FULL NARRATION FIELD — this is a wx.TextCtrl readonly multiline that grows with each turn. NVDA reads the entire narration linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn, through the new "Open narration file…" button (since v15.2.3, described below), or by direct editing of the .txt file from the file explorer. This field is synchronized with the `opowiesci/<name>.txt` file, you can treat it as a preview of the audiobook.
+
+"Open narration file…" BUTTON (since v15.2.3) — next to the "New Game"/"Load"/"Save" buttons, a fourth one appears: "Open narration file…". It opens the `opowiesci/<name>.txt` file in the system text editor (Notepad on Windows, TextEdit on macOS, default GUI editor on Linux — analogous to how the Rule Manager opens YAML files or how the home panel opens `golden_key.env`). Typical use-case is an alternative to the "Edit game mode…" loophole → Free: instead of jumping to a different mode to write the finale, you can simply open the .txt file and manually add the closing scene. WARNING ABOUT DIVERGENCE RISK: before opening, the application shows a modal warning dialog, because .txt is ONLY the narration for TTS, while the source of truth of the game state (characters, location, inventory, threads) is a separate `.game.json` file. Editing the .txt does not update the state — the next LLM turn will receive the world from before your edit, so e.g. you may describe in the file that a character died, but in the game state they will still be alive and will appear in the next turn. Use deliberately, ideally only to add the closing scene after which you don't plan further turns anyway.
 
 DYNAMIC CHOICE BUTTONS — in Choices and Lesser Evil modes, each turn creates new wx.Buttons in the choice area. Each has a tooltip read by NVDA ("Choose: go further into the forest"). Tab between them works naturally. Enter on the selected button auto-sends that choice to the narrative engine.
 
