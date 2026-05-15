@@ -113,6 +113,32 @@ Dopiero po tym robi się commit release'u (VERSION wraz z RELEASE_NOTES — sam 
 ### Uwaga o build_release.py — sanity check
 `build_release.py` i tak wywołuje `generuj()` wewnętrznie — to jest celowe (paczka ZIP zawsze ma świeże docs). Po prawidłowym pre-commicie (Krok 0a → 2 → 4 w tej kolejności) `git status` po buildzie pokaże „nothing to commit" zamiast zmienionych plików, bo wygenerowana treść będzie identyczna z tą w repo. Jeśli `git status` po buildzie pokazuje `modified: docs/manual.<iso>.txt`, to znaczy że Krok 0a (bump VERSION przed regeneracją) został pominięty albo VERSION zmieniony pomiędzy Krokiem 2 a release commitem — diff pokaże stary numer wersji w nagłówkach i należy zrobić fixup commit `docs: bump numer wersji w docs/ po regeneracji`.
 
+# WORKFLOW RELEASE — direct-to-main, bez PR-ów (od v15.2.5)
+Workflow PR/branch został świadomie porzucony w v15.2.5. Solo-dev + A11y first: Release UI to jedna prosta strona, PR UI to znacznie więcej do nawigacji NVDA i więcej miejsc gdzie coś można pominąć („zapomniałem stworzyć PR" jest objawem, nie wyjątkiem). `RELEASE_NOTES.md` jest single source of truth dla treści Release description — auto-generator GitHub-owy (`Full Changelog: ...compare/X...Y`) jest GORSZY niż nasza ręczna narracja (długie akapity z konkretną diagnozą bugów, lista naprawionych halucynacji, tradeoff-y), więc go nie używamy.
+
+## Procedura release (każdy patch X.Y.(Z+1))
+1. Krok 0a-0b z sekcji `# ZAMYKANIE RELEASU — DOKUMENTACJA` (bump VERSION + odśwież reżysera).
+2. Edytuj `RELEASE_NOTES.md`: na górze pliku zaktualizuj numer wersji w nagłówku (linia 1), dodaj nowy paragraph `*Patch v<wersja>: ...*` jako pierwszy w bloku streszczeń przed `---`, dodaj nową sekcję `## <wersja> — patch release ...` zaraz po `---` separatorze (przed istniejącą sekcją poprzedniej wersji). Wzorzec struktury: TL;DR (3-4 akapity narracyjne) → Co nowego dla użytkownika końcowego → Pod maską (techniczne) → Co nie weszło → Walidacja przed commit'em.
+3. Regeneracja + commit docs (Kroki 1-3 z `# ZAMYKANIE RELEASU — DOKUMENTACJA`). Możesz zcommitować docs/ + RELEASE_NOTES.md + VERSION + edytowane szablony YAML + (opcjonalnie) kod razem jako single release commit, albo rozbić na dwa commity (docs + release). Single commit preferowany dla zwykłych patchy — czytelniejsza historia.
+4. Commit message: `v<wersja>: <jednolinijkowy opis>` w nagłówku, body bullet list głównych zmian. Wzorzec: `git --no-pager show <ostatni tag> --stat | head -5` dla podobnego patcha.
+5. `git push origin main`.
+6. Wygeneruj `release.txt` (gitignored, w roocie repo) zawierający tylko sekcję `## <wersja>` wyciętą z `RELEASE_NOTES.md`. Wzorcowy skrypt:
+   ```
+   .venv/Scripts/python -c "import pathlib, re, sys; sys.stdout.reconfigure(encoding='utf-8'); t = pathlib.Path('RELEASE_NOTES.md').read_text(encoding='utf-8'); m = re.search(r'(## <WERSJA> — patch release.*?)(?=\n## )', t, re.DOTALL); pathlib.Path('release.txt').write_text(m.group(1).rstrip()+chr(10), encoding='utf-8'); print(f'release.txt: {len(m.group(1))} znaków')"
+   ```
+   Płaska nazwa BEZ numeru wersji — plik jest nadpisywany przy każdym kolejnym patchu, nie ma potrzeby aktualizować `.gitignore`.
+7. Web GitHub → nowy Release. „Create new tag: v<wersja> on publish" (Twój ustalony wybór: tagi tworzone WYŁĄCZNIE przez web Release UI, atomowo z Release, brak dryfu między tagiem a publikacją). Otwórz `release.txt` w Notatniku (`start release.txt` w PowerShellu), Ctrl+A → Ctrl+C, wklej w polu Description (markdown renderuje 1:1 w GitHub Release UI). Upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe`. Publish. Po wklejeniu `release.txt` możesz usunąć z dysku — jest gitignored, więc nie zaśmieca historii, a przy następnym patchu i tak zostanie wygenerowany od nowa.
+
+## Czego nie robić
+- NIE twórz feature branchy dla zwykłych patchy. Wszystko bezpośrednio na main.
+- NIE używaj `gh pr create/merge` / `git tag` lokalnie. Tagi tworzone WYŁĄCZNIE przez web Release UI.
+- NIE polegaj na `PULL_REQUEST_COMMENTS.md` — plik usunięty z repo w v15.2.5 fix-up commicie. Komentarze recenzentskie (jeśli pojawią się) trafiają wprost do `RELEASE_NOTES.md::<wersja>::Co nie weszło` jako TODO do następnego cyklu, albo do konwersacji z agentem.
+
+## Wyjątki (kiedy feature branch ma sens)
+- Refaktor większy niż jeden patch (np. planowany v15.3+ split user-data vs seed-data dla `dictionaries/`): feature branch jako logiczna izolacja etapowa, lokalne commity per etap. Finalizujący merge przez `git merge --ff-only` do main BEZ PR-u, web Release standardową ścieżką po merge. Procedura sprzątania po merge zachowana z czasów PR-flow: `git fetch --prune; git checkout main; git pull; git branch -d <gałąź>` (`-d` nie `-D` — `-d` odmówi jeśli nie zmergowane, co jest bezpieczne).
+- Eksperymentalna gałąź (np. port Linux) którą możesz porzucić: feature branch + ewentualne `git branch -D` po decyzji o porzuceniu.
+- Kontrybutor zewnętrzny: oni robią PR, Ty mergujesz przez web (rzadki przypadek, fork-based, nie wymaga zmian po naszej stronie).
+
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
 - Weryfikuj porządek przez komendę `git status` patrząc na nieśledzone pliki (Untracked files).
