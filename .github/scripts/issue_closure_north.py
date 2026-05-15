@@ -360,8 +360,26 @@ def main() -> int:
         return 1
     if not _gh(["gh", "issue", "close", issue_number, "--repo", repo]):
         return 1
+    # Lock po zamknięciu — analogicznie do patch-bot.yml. Reason `resolved`
+    # czytelnie sygnalizuje czytnikom ekranu i bot-watcherom, że dyskusja
+    # zakończyła się rozwiązaniem (a nie spam/duplikat/wontfix). Bez locka
+    # użytkownik mógłby dopisywać komentarze po Lumi/Vieno/Katla — wątek
+    # rozjeżdża się i robot przy następnej etykiecie zbędnie domyka go
+    # ponownie.
+    if not _gh(["gh", "issue", "lock", issue_number, "--repo", repo,
+                "--reason", "resolved"]):
+        # Lock nie jest krytyczny dla samego zamknięcia (komentarz + close
+        # już poszły) — logujemy ostrzeżenie, ale nie kładziemy całego
+        # workflowu. Typowy powód błędu: brak uprawnień `issues: write`
+        # w sekcji `permissions:` (unlikely w naszym setup, ale przewidywalny
+        # gdy ktoś kiedyś skopiuje workflow do innego repo z bardziej
+        # restrykcyjnymi permissions).
+        sys.stderr.write(
+            f"[!] Lock issue #{issue_number} nie powiódł się — "
+            "komentarz i close OK, ale wątek pozostaje odblokowany.\n"
+        )
 
-    print(f"Issue #{issue_number} skomentowane i zamknięte przez {persona}.")
+    print(f"Issue #{issue_number} skomentowane, zamknięte i zablokowane przez {persona}.")
     return 0
 
 
