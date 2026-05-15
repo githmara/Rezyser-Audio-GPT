@@ -27,6 +27,9 @@ jobs:
 
       - name: Wysłanie maila z patchem
         id: send_patch
+        # UWAGA: argumentow NIE przekazujemy przez CLI, bo bash robi
+        # word-splitting na cudzyslowach / backtickach w tresci issue
+        # (klasyczna pulapka shellu). Skrypt czyta wszystko z os.environ.
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -34,8 +37,7 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
-        run: |
-          python .github/scripts/send_patch.py "$ISSUE_BODY" "$ISSUE_NUMBER"
+        run: python .github/scripts/send_patch.py
 
       - name: Komentarz potwierdzający dla użytkownika
         if: success()

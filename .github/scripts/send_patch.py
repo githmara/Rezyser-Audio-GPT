@@ -470,12 +470,19 @@ def dodaj_komentarz_do_issue(numer_issue: str, tresc: str) -> None:
 
 
 def main() -> int:
-    if len(sys.argv) < 3:
-        sys.stderr.write("Użycie: send_patch.py <issue_body> <issue_number>\n")
+    # Dane issue czytamy z env (ISSUE_BODY/ISSUE_NUMBER w sekcji `env:`
+    # workflowu), a nie z sys.argv — bash przy przekazywaniu argumentów
+    # robi word-splitting na cudzysłowach i backtickach w ciele zgłoszenia,
+    # co rozsypuje argv przy treściach typu `Błąd w "Managerze"` albo
+    # snippetcie kodu z `gh issue list`.
+    issue_body = os.environ.get("ISSUE_BODY", "")
+    issue_number = os.environ.get("ISSUE_NUMBER", "").strip()
+    if not issue_number:
+        sys.stderr.write(
+            "[!] Brak ISSUE_NUMBER w env — workflow musi wstrzyknąć "
+            "ISSUE_BODY i ISSUE_NUMBER w sekcji env:.\n"
+        )
         return 1
-
-    issue_body = sys.argv[1]
-    issue_number = sys.argv[2]
 
     email_match = EMAIL_REGEX.search(issue_body)
     if not email_match:
