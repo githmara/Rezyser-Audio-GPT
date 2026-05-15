@@ -1,19 +1,36 @@
 """
 issue_closure_north.py — etap „Północ" obiegu „Z Południa na Północ".
 
-Po nadaniu etykiety ``fixed-in-release`` przez maintainera, pałeczkę przejmują
-bohaterki z Północy:
+Po nadaniu etykiety ``fixed-in-release`` (bug-fix flow) lub ``answered``
+(question flow, od v15.2.6) przez maintainera, pałeczkę przejmują bohaterki
+z Północy:
 
   * Lumi  — śnieżnie, mroźnie, z humorem,
   * Vieno — szamańsko, mgliście, w półszeptach,
   * Katla — wulkanicznie, gorąco, z hukiem.
 
-Skrypt:
-  1. odczytuje tytuł + treść issue z argumentów,
+Skrypt (bug-fix flow, etykieta ``fixed-in-release``):
+  1. odczytuje treść issue z env,
   2. wykrywa język oryginalnej treści (lingua-language-detector; fallback EN),
   3. losuje jedną z trzech bohaterek,
-  4. formatuje komentarz w wykrytym języku,
-  5. dodaje komentarz przez ``gh issue comment`` i zamyka przez ``gh issue close``.
+  4. formatuje komentarz w wykrytym języku z linkiem do najnowszego Release,
+  5. dodaje komentarz przez ``gh issue comment``, zamyka przez ``gh issue close``
+     i lockuje przez ``gh issue lock --reason resolved``.
+
+Skrypt (question flow, etykieta ``answered``, od v15.2.6):
+  1. odczytuje treść issue + wciąga OSTATNI komentarz maintainera (treść,
+     URL, autor) przez ``_pobierz_ostatni_komentarz_z_meta``,
+  2. safety check: jeśli ostatni komentarz pochodzi od bota (intake Sami),
+     przerywa workflow z komunikatem o złej kolejności (maintainer nadał
+     ``answered`` zanim odpowiedział),
+  3. opakowuje komentarz maintainera w styl persony (TEMPLATES_ANSWERED),
+  4. USUWA oryginalny komentarz maintainera przez REST DELETE
+     ``/repos/{repo}/issues/comments/{id}`` (wycięty z URL'a), żeby
+     user-facing wątek nie zawierał duplikatu treści (bez delete'u maintainer
+     comment + wrap'owany komentarz Lumi/Vieno/Katla wyświetlałyby się obok
+     siebie identycznie, a NVDA czytałby tę samą odpowiedź dwukrotnie),
+  5. dodaje wrap'owany komentarz, zamyka issue i lockuje analogicznie jak
+     w bug-fix flow.
 
 Wywołanie:
     python .github/scripts/issue_closure_north.py
@@ -23,6 +40,8 @@ Wywołanie:
 Wymagane zmienne środowiskowe (wstrzykiwane przez sekcję ``env:`` w YAML):
     ISSUE_BODY              oryginalna treść issue (do detekcji języka)
     ISSUE_NUMBER            numer issue
+    LABEL_NAME              etykieta wyzwalająca (``fixed-in-release``
+                            lub ``answered``); od v15.2.6
     GH_TOKEN                token gh CLI (auto z secrets.GITHUB_TOKEN)
     GITHUB_REPOSITORY       owner/repo (auto z runtime'u GH Actions)
     GITHUB_SERVER_URL       https://github.com (auto z runtime'u; do linku
@@ -31,8 +50,10 @@ Wymagane zmienne środowiskowe (wstrzykiwane przez sekcję ``env:`` w YAML):
 
 from __future__ import annotations
 
+import json
 import os
 import random
+import re
 import subprocess
 import sys
 
@@ -570,36 +591,94 @@ def _zbuduj_link_release() -> str:
     return f"{server}/{repo}/releases/latest"
 
 
-def _pobierz_ostatni_komentarz(issue_number: str, repo: str) -> str:
-    """Wyciąga treść OSTATNIEGO komentarza na issue (od v15.2.6, flow `answered`).
+def _pobierz_ostatni_komentarz_z_meta(
+    issue_number: str, repo: str,
+) -> tuple[str, str, str]:
+    """Wyciąga ostatni komentarz na issue + metadane (url, autor).
 
-    Konwencja workflow: maintainer komentuje z odpowiedzią → nadaje etykietę
-    `answered` → ten skrypt wciąga komentarz i opakowuje go w styl persony
-    Północy (TEMPLATES_ANSWERED). Wymóg dyscypliny: maintainer NIE komentuje
-    nic więcej między nadaniem etykiety a swoją odpowiedzią, bo bot weźmie
-    chronologicznie ostatni komentarz.
+    Zwraca tuple ``(body, url, author_login)``. Pusty tuple ``("", "", "")``
+    przy błędzie — wówczas wywołujący zdecyduje czy przerwać workflow.
 
-    Używa ``gh issue view --json comments --jq '.comments[-1].body'`` —
-    skrypt operuje w GH Actions z dostępnym ``gh`` CLI i tokenem z
-    ``secrets.GITHUB_TOKEN`` (auto-injected). Zwraca pusty string przy
-    błędzie — wówczas wywołujący zdecyduje czy przerwać workflow.
+    Konwencja workflow (od v15.2.6, flow `answered`): maintainer komentuje
+    z odpowiedzią → nadaje etykietę `answered` → ten skrypt wciąga komentarz
+    i opakowuje go w styl persony Północy (TEMPLATES_ANSWERED), a następnie
+    usuwa oryginalny komentarz przez ``_usun_komentarz_po_url`` (po to żeby
+    user-facing wątek nie miał duplikatu treści — bez delete'u maintainer
+    comment i wrap'owany komentarz Lumi/Vieno/Katla wyświetlałyby się obok
+    siebie z identyczną treścią, a NVDA odczytywałoby ją dwukrotnie).
+
+    URL i autor potrzebne są dlatego, że:
+      * ``url`` (format ``https://github.com/<repo>/issues/N#issuecomment-XXX``)
+        pozwala wyciągnąć databaseId komentarza do REST DELETE — gh JSON nie
+        eksponuje go bezpośrednio (pole ``id`` zwraca GraphQL Node ID, nie
+        databaseId którego oczekuje REST endpoint
+        ``/repos/{repo}/issues/comments/{id}``),
+      * ``author.login`` służy safety checkowi: jeśli ostatni komentarz jest
+        od bota (np. intake Sami z ``issue-intake.yml``), oznacza że
+        maintainer nadał etykietę PRZED napisaniem odpowiedzi — wrap'owanie
+        komentarza Sami byłoby błędem semantycznym. ``main()`` w takiej
+        sytuacji przerywa workflow z komunikatem korygującym kolejność.
     """
     try:
         wynik = subprocess.run(
             ["gh", "issue", "view", issue_number, "--repo", repo,
-             "--json", "comments", "--jq", ".comments[-1].body"],
+             "--json", "comments"],
             check=True, capture_output=True, text=True,
         )
-        return wynik.stdout.strip()
+        data = json.loads(wynik.stdout)
+        comments = data.get("comments", [])
+        if not comments:
+            return "", "", ""
+        last = comments[-1]
+        return (
+            last.get("body", "") or "",
+            last.get("url", "") or "",
+            (last.get("author") or {}).get("login", "") or "",
+        )
     except subprocess.CalledProcessError as exc:
         sys.stderr.write(
             f"[!] Nie udało się pobrać ostatniego komentarza issue "
             f"#{issue_number}: {exc.stderr.strip() or exc}\n"
         )
-        return ""
+        return "", "", ""
+    except json.JSONDecodeError as exc:
+        sys.stderr.write(
+            f"[!] gh zwrócił nie-JSON output dla issue #{issue_number}: {exc}\n"
+        )
+        return "", "", ""
     except FileNotFoundError:
         sys.stderr.write("[!] `gh` CLI nie znalezione w PATH.\n")
-        return ""
+        return "", "", ""
+
+
+_RE_COMMENT_ID = re.compile(r"#issuecomment-(\d+)\s*$")
+
+
+def _usun_komentarz_po_url(repo: str, url: str) -> bool:
+    """Usuwa komentarz na issue przez REST DELETE.
+
+    URL ma format ``.../issues/<N>#issuecomment-<databaseId>`` — wyciągamy
+    ``databaseId`` regex'em i wołamy ``gh api -X DELETE
+    /repos/{repo}/issues/comments/{databaseId}``. ``gh`` używa swojego
+    tokena (``GH_TOKEN``/``GITHUB_TOKEN`` z env), workflow ma
+    ``permissions: issues: write`` co wystarcza.
+
+    Zwraca True przy sukcesie, False przy błędzie (delete jest non-fatal
+    z perspektywy wywołującego — jeśli się nie uda, wątek dostanie duplikat
+    treści ale komentarz wrap'owany Lumi/Vieno/Katla i tak zostanie dodany,
+    issue zamknięty i zalockowany).
+    """
+    if not url:
+        return False
+    m = _RE_COMMENT_ID.search(url)
+    if not m:
+        sys.stderr.write(
+            f"[!] Nie udało się sparsować comment ID z URL: {url!r}\n"
+        )
+        return False
+    comment_id = m.group(1)
+    return _gh(["gh", "api", "-X", "DELETE",
+                f"/repos/{repo}/issues/comments/{comment_id}"])
 
 
 def _gh(cmd: list[str]) -> bool:
@@ -657,7 +736,9 @@ def main() -> int:
     #                pre-v15.2.6 — backward compat dla starszych webhook
     #                eventów które nie wstrzyknęły jeszcze LABEL_NAME.
     if label_name == "answered":
-        maintainer_answer = _pobierz_ostatni_komentarz(issue_number, repo)
+        maintainer_answer, comment_url, comment_author = (
+            _pobierz_ostatni_komentarz_z_meta(issue_number, repo)
+        )
         if not maintainer_answer:
             sys.stderr.write(
                 "[!] Brak komentarza maintainera do opakowania. "
@@ -666,8 +747,37 @@ def main() -> int:
                 "Północ wyciąga ostatni komentarz i wrapuje.\n"
             )
             return 1
+        # Safety check: ostatni komentarz musi być od człowieka, nie od bota.
+        # Jeśli ostatnim komentarzem jest intake Sami (`github-actions[bot]`),
+        # oznacza że maintainer pomylił kolejność (nadał `answered` zanim
+        # odpowiedział) — wrap'owanie komentarza Sami zamiast odpowiedzi
+        # byłoby błędem semantycznym i pokazałoby userowi „odpowiedź"
+        # zacytowaną z intake'u.
+        if (comment_author.endswith("[bot]")
+                or comment_author == "github-actions"):
+            sys.stderr.write(
+                f"[!] Ostatni komentarz na issue #{issue_number} pochodzi "
+                f"od bota ({comment_author!r}). Maintainer musi napisać "
+                "odpowiedź ZANIM doda etykietę `answered`. Workflow "
+                "przerywany — popraw kolejność (zdejmij `answered`, "
+                "skomentuj z odpowiedzią, nadaj `answered` ponownie).\n"
+            )
+            return 1
         szablon = TEMPLATES_ANSWERED[wykryty][persona]
         tresc = szablon.format(maintainer_answer=maintainer_answer)
+        # Usuń oryginalny komentarz maintainera ZANIM dodamy wrapped wersję.
+        # Bez delete'u user widzi tę samą odpowiedź dwukrotnie (raz jako sam
+        # komentarz, raz wewnątrz wrap'a Lumi/Vieno/Katla) — NVDA też ją
+        # odczyta dwa razy. Delete jest non-fatal: jeśli się nie uda
+        # (np. brak permissions, GitHub rate limit), wciąż wolimy zamknąć
+        # issue z duplikatem niż w ogóle nie odpowiedzieć i nie zamknąć.
+        if not _usun_komentarz_po_url(repo, comment_url):
+            sys.stderr.write(
+                f"[!] Usunięcie oryginalnego komentarza maintainera nie "
+                f"powiodło się — wątek issue #{issue_number} będzie "
+                "zawierał duplikat treści (komentarz maintainera + "
+                "wrap'owana wersja Lumi/Vieno/Katla).\n"
+            )
     else:
         szablon = TEMPLATES[wykryty][persona]
         link = _zbuduj_link_release()
