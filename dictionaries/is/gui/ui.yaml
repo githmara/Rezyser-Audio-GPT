@@ -872,13 +872,20 @@ manager:
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Uppfærsla í boði"
   nowa_wersja_tresc: |-
     Ný útgáfa er í boði: {nowa_wersja}.
     Þín útgáfa: {aktualna_wersja}.
 
+    ATHUGAÐU: ef þú hefur breytt þínum eigin hljóðreglum eða dulmáli í möppunni „dictionaries/" í gegnum Reglustjórann, mun uppsetningarforritið skrifa yfir þær með sjálfgefnu útgáfunum úr pakkanum. Taktu öryggisafrit af möppunni „dictionaries/" ÁÐUR EN þú staðfestir uppfærsluna — smelltu á „Opna dictionaries möppuna" til að fara þangað í Explorer, afritaðu alla möppuna á öruggan stað og endurheimtu skrárnar þínar úr öryggisafritinu eftir uppfærsluna.
+
     Viltu sækja og setja upp uppfærsluna núna?
+  # Przyciski w DialogAktualizacji
+  btn_pobierz:              "&Sækja og setja upp"
+  btn_otworz_dictionaries:  "&Opna dictionaries möppuna"
+  btn_anuluj:               "&Hætta við"
+  blad_otworz_folder:       "Ekki tókst að opna möppuna:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Sæki uppfærslu {nowa_wersja}"
   pobieranie_tresc: "Sæki {nazwa_pliku}…"

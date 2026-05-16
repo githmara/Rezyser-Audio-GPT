@@ -872,13 +872,20 @@ manager:
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Aggiornamento disponibile"
   nowa_wersja_tresc: |-
     È disponibile una nuova versione: {nowa_wersja}.
     La tua versione: {aktualna_wersja}.
 
+    ATTENZIONE: se hai personalizzato le tue regole fonetiche o cifrari nella cartella „dictionaries/" tramite il Gestore delle Regole, il programma di installazione li sovrascriverà con le versioni predefinite del pacchetto. Esegui un backup della cartella „dictionaries/" PRIMA di confermare l'aggiornamento — clicca su „Apri cartella dictionaries" per accedervi in Esplora risorse, copia l'intera cartella in un luogo sicuro e, dopo l'aggiornamento, ripristina i tuoi file dal backup.
+
     Vuoi scaricare e installare l'aggiornamento ora?
+  # Przyciski w DialogAktualizacji (akceleratory różne: &S/A&p/&A — Apri ma &p, nie &A, by nie kolidować z Annulla)
+  btn_pobierz:              "&Scarica e installa"
+  btn_otworz_dictionaries:  "A&pri cartella dictionaries"
+  btn_anuluj:               "&Annulla"
+  blad_otworz_folder:       "Impossibile aprire la cartella:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Scaricamento aggiornamento {nowa_wersja}"
   pobieranie_tresc: "Scaricamento {nazwa_pliku}…"

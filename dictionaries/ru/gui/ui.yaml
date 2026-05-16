@@ -872,13 +872,20 @@ manager:
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Доступно обновление"
   nowa_wersja_tresc: |-
     Доступна новая версия: {nowa_wersja}.
     Ваша версия: {aktualna_wersja}.
 
+    ВНИМАНИЕ: если вы настроили собственные фонетические правила или шифры в папке „dictionaries/" через Менеджер Правил, программа установки перезапишет их версиями по умолчанию из пакета. Сделайте резервную копию папки „dictionaries/" ПЕРЕД подтверждением обновления — нажмите „Открыть папку dictionaries", чтобы перейти туда в Проводнике, скопируйте всю папку в безопасное место и после обновления восстановите свои файлы из резервной копии.
+
     Хотите скачать и установить обновление сейчас?
+  # Przyciski w DialogAktualizacji (Отмена ma akcelerator на &т, by nie kolidować с Открыть &О)
+  btn_pobierz:              "&Скачать и установить"
+  btn_otworz_dictionaries:  "&Открыть папку dictionaries"
+  btn_anuluj:               "О&тмена"
+  blad_otworz_folder:       "Не удалось открыть папку:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Загрузка обновления {nowa_wersja}"
   pobieranie_tresc: "Загрузка {nazwa_pliku}…"

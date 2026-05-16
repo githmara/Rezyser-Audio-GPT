@@ -887,13 +887,20 @@ manager:
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul:        "Dostępna aktualizacja"
   nowa_wersja_tresc: |-
     Dostępna jest nowa wersja: {nowa_wersja}.
     Twoja wersja: {aktualna_wersja}.
 
+    UWAGA: jeśli edytowałeś własne reguły fonetyczne lub szyfry w katalogu „dictionaries/" przez Menedżera Reguł, instalator nadpisze je domyślnymi wersjami z pakietu. Zrób kopię zapasową katalogu „dictionaries/" PRZED potwierdzeniem aktualizacji — kliknij przycisk „Otwórz folder dictionaries", żeby przejść tam w Eksploratorze, skopiuj cały folder w bezpieczne miejsce, a po aktualizacji odzyskaj swoje pliki z kopii.
+
     Czy chcesz pobrać i zainstalować aktualizację teraz?
+  # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A — bez kolizji wewnątrz dialogu)
+  btn_pobierz:              "&Pobierz i zainstaluj"
+  btn_otworz_dictionaries:  "&Otwórz folder dictionaries"
+  btn_anuluj:               "&Anuluj"
+  blad_otworz_folder:       "Nie udało się otworzyć folderu:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul:         "Pobieranie aktualizacji {nowa_wersja}"
   pobieranie_tresc:         "Pobieranie {nazwa_pliku}…"

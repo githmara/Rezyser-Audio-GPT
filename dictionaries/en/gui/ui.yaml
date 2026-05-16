@@ -871,13 +871,20 @@ manager:
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Update available"
   nowa_wersja_tresc: |-
     A new version is available: {nowa_wersja}.
     Your version: {aktualna_wersja}.
 
+    WARNING: if you have customised your own phonetic rules or ciphers in the „dictionaries/" folder through the Rules Manager, the installer will overwrite them with the default versions from the package. Back up the „dictionaries/" folder BEFORE confirming the update — click „Open dictionaries folder" to navigate there in Explorer, copy the entire folder to a safe location, then restore your files from the backup after the update.
+
     Do you want to download and install the update now?
+  # Przyciski w DialogAktualizacji
+  btn_pobierz:              "&Download and install"
+  btn_otworz_dictionaries:  "&Open dictionaries folder"
+  btn_anuluj:               "&Cancel"
+  blad_otworz_folder:       "Could not open folder:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Downloading update {nowa_wersja}"
   pobieranie_tresc: "Downloading {nazwa_pliku}…"

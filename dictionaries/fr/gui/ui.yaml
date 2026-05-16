@@ -867,13 +867,20 @@ manager:
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Mise à jour disponible"
   nowa_wersja_tresc: |-
     Une nouvelle version est disponible : {nowa_wersja}.
     Votre version : {aktualna_wersja}.
 
+    ATTENTION : si vous avez personnalisé vos propres règles phonétiques ou chiffrements dans le dossier « dictionaries/ » via le Gestionnaire de Règles, le programme d'installation les écrasera avec les versions par défaut du paquet. Faites une sauvegarde du dossier « dictionaries/ » AVANT de confirmer la mise à jour — cliquez sur « Ouvrir le dossier dictionaries » pour y accéder dans l'Explorateur, copiez l'ensemble du dossier vers un emplacement sûr et, après la mise à jour, restaurez vos fichiers depuis la sauvegarde.
+
     Voulez-vous télécharger et installer la mise à jour maintenant ?
+  # Przyciski w DialogAktualizacji
+  btn_pobierz:              "&Télécharger et installer"
+  btn_otworz_dictionaries:  "&Ouvrir le dossier dictionaries"
+  btn_anuluj:               "&Annuler"
+  blad_otworz_folder:       "Impossible d'ouvrir le dossier :\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Téléchargement de la mise à jour {nowa_wersja}"
   pobieranie_tresc: "Téléchargement de {nazwa_pliku}…"

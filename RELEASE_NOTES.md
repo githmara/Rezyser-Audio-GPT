@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 15.2.7 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.2.8 „Wersja Wydawnicza"
+
+*Patch v15.2.8: ostrzeżenie inline + przycisk „Otwórz folder dictionaries" w dialogu aktualizacji — odpowiedź na bug-issue #13 (it, smoke-test obiegu Południe→Centrum→Północ dla 9-tego, ostatniego brakującego języka). Włoski user (twórca audiobooków NVDA, Vocalizer/Alice voice) stracił sześć miesięcy własnych modyfikacji w `dictionaries/it/akcenty/polski.yaml` + `dictionaries/it/akcenty/niemiecki.yaml` (po ~30 reguł regex per plik) po upgrade z v15.2.4 do v15.2.5 — instalator nadpisał spakowane seed-pliki. Sekcja „Automatyczne aktualizacje" w manualu v15.2.5+ JUŻ ostrzega o tym ryzyku z explicit procedurą backup folderu `dictionaries/`, ale user widział starą wersję manuala v15.2.4 (bez ostrzeżenia) w momencie decyzji o aktualizacji — manual aktualizuje się razem z softem, więc PRZED update'em zawsze widoczny jest stary. Krytyczna informacja o utracie danych MUSI być w samym dialogu, nie tylko w manualu. Patch wymienia `wx.MessageBox(YES_NO)` na nową klasę `DialogAktualizacji(wx.Dialog)` z trzema przyciskami (Pobierz / Otwórz folder dictionaries / Anuluj), inline paragraph UWAGA z instrukcją backup w treści dialogu, cross-platform akcja otwarcia folderu (`os.startfile` Windows / `open` macOS / `xdg-open` Linux). 4 nowe klucze i18n × 9 paczek językowych (`btn_pobierz`, `btn_otworz_dictionaries`, `btn_anuluj`, `blad_otworz_folder`) + rozszerzony `nowa_wersja_tresc` × 9 paczek z paragraphem UWAGA. Manuali 9 języków uzupełnione o wzmiankę o nowym dialogu (1 zdanie dopisane na końcu paragraph'u o ostrzeżeniu w sekcji „Automatyczne aktualizacje"). Akceleratory dialogu zweryfikowane na unikalność wewnątrz każdego języka (PL &P/&O/&A, EN &D/&O/&C, DE &H/&O/&A, ES &D/&A/&C, FI &L/&A/&P, FR &T/&O/&A, IS &S/&O/&H, IT &S/&p/&A, RU &С/&О/&т). Co NIE weszło: heurystyka mtime-check w `core_updater.py` (wykrywanie czy `dictionaries/*/akcenty/*.yaml` było modyfikowane przez usera od ostatniej instalacji) — odłożona ze względu na pułapkę false positives (Manager Reguł zapisuje atomowo, mtime może nie odzwierciedlać rzeczywistych edycji; user otworzył plik w Notatniku bez zmian → false alarm). Pełny refaktor split user-data vs seed-data dla `dictionaries/` pozostaje w roadmapie v15.3+. Smoke test włoski (#13) zamykany przez release-then-answer flow z osobistą odpowiedzią po włosku zawierającą tip o recovery z `$Recycle.Bin`.*
 
 *Patch v15.2.7: tryb FILE w question-flow — maintainer-NVDA-user może odpowiedzieć na issue z `question`/`help wanted` przez zapis draftu jako `pending_answer.md` w roocie repo (zamiast wklejania komentarza przez web GitHub UI, gdzie kopiowanie z terminala VS Code zawodzi w accessibility buffer). Bot `issue_closure_north.py` po nadaniu etykiety `answered` priorytetowo czyta z pliku, opakowuje w persona-template Lumi/Vieno/Katla, publikuje wrapped komentarz, zamyka i lockuje issue, oraz usuwa `pending_answer.md` commit-em autora `github-actions[bot]` (push na main, wymaga `contents: write` w workflow permissions). Eliminuje też race condition trybu COMMENT z v15.2.6: gdyby ktoś trzeci skomentował między napisaniem odpowiedzi a nadaniem etykiety, COMMENT mode wciągnąłby JEGO komentarz; FILE mode jest niezależny od stanu komentarzy. Smoke test: hiszpański issue z Argentyny (Win 10, locale es-AR) z dwoma pytaniami — (a) potwierdzenie nazwy opcji menu kontekstowego „Abrir ubicación del archivo" bez „la" (poprawne w manualu od v15.2.6, mózg usera podpowiedział „la" przy szybkim czytaniu), (b) stale `run.bat` shortcut po upgrade z v15.2.3 → v15.2.5 (udokumentowane w sekcji „Automatyczne aktualizacje" manuala od v15.2.6 jako oczekiwane zachowanie z procedurą naprawczą — bez zmian w aplikacji ani docs) — pierwsze prawdziwe użycie trybu FILE do zamknięcia issue z konkretnym draftem. Backward compat: brak pliku → fallback do trybu COMMENT (mechanizm v15.2.6 niezmieniony). CLAUDE.md zyskał nową dedykowaną sekcję `# ODPOWIEDZI NA ISSUE — question-flow z pliku (od v15.2.7)` z procedurą per issue + sytuacjami brzegowymi (plik pusty, brak pliku, push fail boota, równoległe issues, etc.). Co NIE weszło: `[it]` część (b) runtime warning autoupdate z poprzedniego cyklu — dalej w kolejce na v15.2.8+, wymaga kluczy i18n w 9 `ui.yaml`.*
 
@@ -15,6 +17,98 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 15.2.8 — patch release (motyw przewodni: ostrzeżenie inline + przycisk „Otwórz folder dictionaries" w dialogu aktualizacji — naprawa luki UX która kosztowała włoskiego usera 6 miesięcy własnych reguł fonetycznych)
+
+*Punkt wyjścia: v15.2.7 (a60f675 post-publish atomic-reset bota) — pierwsze realne bug-issue z obiegu „Z Południa na Północ" dla 9-tego, ostatniego brakującego języka w smoke-testach: #13 po włosku od twórcy audiobooków używającego NVDA + Vocalizer/Alice voice. Sześć miesięcy edytowanych reguł fonetycznych w `dictionaries/it/akcenty/polski.yaml` i `dictionaries/it/akcenty/niemiecki.yaml` (po około 30 reguł regex per plik, dopasowanych do brzmienia konkretnego głosu Alice) zniknęło po aktualizacji v15.2.4 → v15.2.5. User zauważył utratę dopiero po ponownym uruchomieniu Managera Reguł i sprawdzeniu plików. Próbuje recovery przez `$Recycle.Bin` w momencie zgłoszenia. Diagnoza: sekcja „Automatyczne aktualizacje" w manualu v15.2.5+ zawiera explicit ostrzeżenie z procedurą backup (dodane właśnie w v15.2.5 razem ze sprostowaniem fałszywej obietnicy „własne reguły pozostają nienaruszone" — patrz paragraph v15.2.5 wyżej), ALE user czytał stary manual v15.2.4 w momencie decyzji o aktualizacji. Chicken-and-egg: manual aktualizuje się razem z softem, więc PRZED zatwierdzeniem update'u zawsze widoczna jest stara wersja manuala. Konkluzja: krytyczna informacja o ryzyku utraty danych MUSI być w samym dialogu update'u, nie tylko w manualu. Patch wprowadza wymianę prostego `wx.MessageBox(YES_NO)` na pełnoprawny `wx.Dialog` z trzema przyciskami (Pobierz / Otwórz folder dictionaries / Anuluj), inline paragraph UWAGA z instrukcją backup w treści dialogu, akcję przycisku „Otwórz folder dictionaries" przez cross-platform `os.startfile` / `open` / `xdg-open` (dialog pozostaje otwarty, żeby user po backupie wrócił i kliknął Pobierz). Plus 4 nowe klucze i18n × 9 paczek językowych + rozszerzony klucz `nowa_wersja_tresc` × 9 paczek. Co NIE weszło z propozycji usera: heurystyka mtime-check w `core_updater.py` która porównywałaby mtime plików w `dictionaries/*/akcenty/*.yaml` z datą instalacji i wyświetlała dodatkowy bardziej widoczny WARNING gdy wykryje modyfikacje. Powód odłożenia: pułapka false positives. Manager Reguł zapisuje atomowo (rename temp → target), więc mtime niekoniecznie odzwierciedla rzeczywiste edycje treści; user otworzył plik w Notatniku, kliknął Save bez zmian → false alarm. Każdy false alarm który NIE prowadzi do realnej utraty danych zmniejsza skuteczność ostrzeżenia (boy crying wolf). Patch zostawia obecne ostrzeżenie statyczne (zawsze widoczne, niezależnie od stanu plików) jako solidniejszy fundament niż heurystyka. Pełny refaktor split user-data vs seed-data dla `dictionaries/` — który eliminowałby problem strukturalnie (user-data leży poza ścieżką instalatora, seed-data jest nadpisywane) — pozostaje w roadmapie v15.3+, gdzie jest planowany razem z mechanizmem first-launch (kopiowanie seed → user-data przy pierwszym uruchomieniu, ignorowanie seed przy upgrade jeśli user-data istnieje).*
+
+### TL;DR
+
+Wcześniej dialog proponujący aktualizację to był prosty `wx.MessageBox` z dwoma przyciskami Tak/Nie i jednym wieloliniowym tekstem informacyjnym (numer nowej wersji, numer aktualnej, pytanie „czy pobrać"). Manual v15.2.5+ zyskał wprawdzie sekcję „Automatyczne aktualizacje" z explicit ostrzeżeniem o nadpisywaniu `dictionaries/` przez instalator i procedurą backupu, ale ostrzeżenie było widoczne wyłącznie w manualu — który aktualizuje się razem z aplikacją, więc PRZED zatwierdzeniem update'u user wciąż patrzy na starą wersję manuala bez tej sekcji. Włoski user #13 wpadł w tę pułapkę: kliknął „Tak" w prostym dialogu v15.2.4 → v15.2.5, stracił sześć miesięcy własnych reguł fonetycznych, dopiero potem (czytając nową dokumentację v15.2.5) znalazł ostrzeżenie. Patch wprowadza `DialogAktualizacji(wx.Dialog)` z trzema przyciskami: „Pobierz i zainstaluj" (default, ID_YES), „Otwórz folder dictionaries" (uruchamia Eksplorator / Finder / xdg-open w katalogu instalacji, dialog pozostaje otwarty), „Anuluj" (ID_NO). Inline w treści dialogu jest teraz paragraph UWAGA z explicit instrukcją „zrób backup `dictionaries/` PRZED potwierdzeniem aktualizacji" + wskazaniem na konkretny przycisk dialogu który ułatwia tę operację. User nie musi opuszczać dialogu żeby zrobić backup — jeden klik otwiera Eksplorator w odpowiednim miejscu, drugi klik (po skopiowaniu folderu) wraca do dialogu i potwierdza pobranie aktualizacji.
+
+Drugi cel patcha: smoke test obiegu Południe→Centrum→Północ dla 9-tego, ostatniego brakującego języka. Po smoke-testach FI #10, FR #11, IS #12 (wszystkie three PASSED first-try z atomic-reset bot cleanup po release v15.2.7 a60f675 + smoke-testach v15.2.4-v15.2.6 dla pl/en/de/es/fr/fi/is/ru), włoski był ostatnim na liście. Issue #13 zostanie zamknięte przez release-then-answer flow: ten release (v15.2.8) najpierw, potem osobna odpowiedź po włosku przez `pending_answer.md` z personalizowanym tonem (przeprosiny za utratę danych, opis fixu, tip o recovery z `$Recycle.Bin`, link do nowego v15.2.8 Release). Atomic-reset bota wymaże draft z historii main po zamknięciu issue.
+
+### Co nowego dla użytkownika końcowego
+
+#### Dialog aktualizacji z trzema przyciskami i ostrzeżeniem inline
+
+Stary dialog auto-aktualizacji (od v13.4 do v15.2.7) wyglądał jak typowy systemowy `wx.MessageBox`:
+
+- pasek tytułu: „Dostępna aktualizacja"
+- treść: 2 linijki + 1 pytanie (numer wersji, twoja wersja, „Czy chcesz pobrać i zainstalować aktualizację teraz?")
+- dwa przyciski: „Tak" (default), „Nie"
+
+Od v15.2.8 dialog jest pełnoprawnym oknem dialogowym wxPython (`wx.Dialog`) z dłuższą treścią i trzema przyciskami:
+
+- pasek tytułu: bez zmian — „Dostępna aktualizacja"
+- treść: numer nowej wersji + numer twojej wersji + **paragraph UWAGA o backupie `dictionaries/`** + pytanie „Czy chcesz pobrać i zainstalować aktualizację teraz?"
+- trzy przyciski: „&Pobierz i zainstaluj" (default), „&Otwórz folder dictionaries", „&Anuluj"
+
+Paragraph UWAGA w treści dialogu mówi explicit: „jeśli edytowałeś własne reguły fonetyczne lub szyfry w katalogu `dictionaries/` przez Menedżera Reguł, instalator nadpisze je domyślnymi wersjami z pakietu. Zrób kopię zapasową katalogu `dictionaries/` PRZED potwierdzeniem aktualizacji — kliknij przycisk „Otwórz folder dictionaries", żeby przejść tam w Eksploratorze, skopiuj cały folder w bezpieczne miejsce, a po aktualizacji odzyskaj swoje pliki z kopii." (W każdym z 9 obsługiwanych języków idiomatyczne tłumaczenie z zachowaniem dokładnie tego samego flow instrukcji.)
+
+Przycisk „Otwórz folder dictionaries" otwiera natywny menedżer plików w katalogu instalacji aplikacji (Eksplorator Windows / Finder macOS / xdg-open Linux) wskazując bezpośrednio podfolder `dictionaries/`. Dialog NIE zamyka się po kliknięciu — user kopiuje folder w wybrane miejsce (pendrive, OneDrive, Google Drive, Dropbox, drugi dysk), wraca do dialogu (Alt+Tab) i klika „Pobierz i zainstaluj". Cała operacja backupu zajmuje sekundy.
+
+#### Manuali we wszystkich 9 językach z wzmianką o nowym dialogu
+
+Sekcja „Automatyczne aktualizacje" w manualu zyskała dopisaną na końcu paragraph'u-ostrzeżenia jedno zdanie informujące że od v15.2.8 sam dialog aktualizacji zawiera to ostrzeżenie inline i przycisk ułatwiający backup. Idiomatyczne tłumaczenie we wszystkich 9 językach (`pl/en/de/es/fi/fr/is/it/ru`), spójne z ogólnym tonem narracyjnym manuali (krótkie zdania, bezpośrednie instrukcje, bez technicznego żargonu).
+
+### Pod maską
+
+#### Nowa klasa `DialogAktualizacji(wx.Dialog)` w `main.py`
+
+Wstawiona między klasami `HomePanel` i `MainFrame`, ~70 linii. Konstruktor przyjmuje `parent` (główne okno aplikacji) + `info_aktualizacji` (instancja `core_updater.UpdateInfo` z numerem nowej wersji, URL instalatora itp.). Buduje vertical sizer z `wx.StaticText` na treść (auto-wrap przy szerokości 560 pikseli) + horizontal sizer na 3 przyciski. Default focus na „Pobierz" (`SetDefault` + `SetFocus`) — Enter wciska go bez potrzeby Tabowania, NVDA wymawia „domyślny" przy odczycie.
+
+Cross-platform akcja otwarcia folderu w handlerze `_on_otworz_folder`:
+
+- Windows: `os.startfile(self._dictionaries_path)` (natywny Eksplorator)
+- macOS: `subprocess.Popen(["open", self._dictionaries_path])` (Finder)
+- Linux: `subprocess.Popen(["xdg-open", self._dictionaries_path])` (domyślny menedżer plików środowiska graficznego)
+
+Wykrycie platformy przez `platform.system()`. Wyjątek przy otwieraniu (np. xdg-open niezainstalowany na minimalnym Linux desktopie) → `wx.MessageBox` z opisem + ścieżką do skopiowania ręcznie, dialog pozostaje otwarty.
+
+Wymiana w `_on_aktualizacja_dostepna` (main.py ~947): poprzednie `wx.MessageBox(t("updater.nowa_wersja_tresc", ...), ..., wx.YES_NO | wx.YES_DEFAULT | wx.ICON_INFORMATION, self)` zastąpione przez `dlg = DialogAktualizacji(self, info); odpowiedz = dlg.ShowModal(); dlg.Destroy()`. Zwracane `wx.ID_YES` / `wx.ID_NO` mają tę samą semantykę co `wx.YES` / `wx.NO` w starym MessageBox (decyzja: pobierać czy nie). Ścieżka dev (bez `runtime/python.exe`) niezmienione — wciąż `wx.MessageBox` z informacją o pobraniu archiwum Source code z GitHuba.
+
+#### 4 nowe klucze i18n × 9 paczek językowych + rozszerzony `nowa_wersja_tresc`
+
+W każdym `dictionaries/<iso>/gui/ui.yaml::updater`:
+
+- `nowa_wersja_tresc` rozszerzony o wieloliniowy paragraph UWAGA z instrukcją backup w idiomatycznym tłumaczeniu (placeholder'y `{nowa_wersja}` i `{aktualna_wersja}` zachowane)
+- nowy `btn_pobierz` (label głównego przycisku „Pobierz i zainstaluj")
+- nowy `btn_otworz_dictionaries` (label przycisku „Otwórz folder dictionaries")
+- nowy `btn_anuluj` (label przycisku „Anuluj")
+- nowy `blad_otworz_folder` (treść `wx.MessageBox` przy błędzie otwarcia, z placeholder'ami `{sciezka}` i `{tresc_bledu}`)
+
+Każdy klucz przycisku zawiera akcelerator (`&` przed pasującą literą) zweryfikowany na unikalność wewnątrz trzech przycisków danego języka — pełna tabela w nagłówku patcha streszczenia wyżej.
+
+#### Manuali 9 języków z dopisaną wzmianką o nowym dialogu
+
+Sekcja „Automatyczne aktualizacje" w `dictionaries/<iso>/gui/dokumentacja/manual.yaml` zyskała na końcu paragraph'u-ostrzeżenia (zaraz po zdaniu „instalator nie usuwa plików spoza paczki") dopisane jedno zdanie informujące o nowym dialogu v15.2.8 z przyciskiem „Otwórz folder dictionaries" + zalecenie kliknięcia go przed potwierdzeniem aktualizacji. Następnie regeneracja `docs/manual.<iso>.txt` × 9 + `docs/tales.<iso>.txt` × 9 (wszystkie zawierają placeholder `{numer_wersji}` w nagłówku, więc bump VERSION na 15.2.8 wymaga regeneracji wszystkich) + `readme.<iso>.md` × 9 z analogiczną aktualizacją numeru wersji.
+
+### Co NIE weszło
+
+#### Heurystyka mtime-check w `core_updater.py` (propozycja usera #13 P.S.)
+
+User w P.S. zgłoszenia zaproponował dodatkowy flag w `core_updater.py` który porównywałby `mtime` plików w `dictionaries/*/akcenty/*.yaml` z mtime instalacji (np. `runtime/python.exe`) i wyświetlał DODATKOWY ostrzeżeniowy paragraph w dialogu jeśli wykryje modyfikacje. Pomysł logiczny, ale po analizie nie wszedł do v15.2.8 z trzech powodów:
+
+1. **False positives przy edycji bez zmian treści**: user otwiera `polski.yaml` w Notatniku, klika Save (Ctrl+S) z przyzwyczajenia, nie zmieniając żadnej linijki → mtime się odświeża → dialog krzyczy „WYKRYTO MODYFIKACJE!" choć faktycznie nie ma żadnych. Każdy taki false alarm uczy usera ignorować ostrzeżenia (boy crying wolf).
+2. **False negatives przy atomic write**: Manager Reguł zapisuje pliki YAML atomowo (write to `*.tmp` → `os.rename(*.tmp, *.yaml)`). W zależności od systemu plików (NTFS vs ext4) i operacji rename, mtime nowego pliku może odziedziczyć mtime z `*.tmp` (timestamp zapisu, OK) lub zostać zresetowane do bieżącego czasu (też OK), ALE może też w niektórych edge cases (Windows + sieci dysk + Defender hook) zostać ustawione na timestamp ORIGINAL pliku przed renamem — wtedy mtime nie zmieni się mimo faktycznych edycji.
+3. **Mtime nie odróżnia user-data od seed-data**: pliki w paczce instalatora też mają mtime ustawiony przy unpack (Inno Setup używa current time przy domyślnej konfiguracji). Niektóre wersje `installer.iss` mogą używać `Flags: touch` które wyrównuje wszystkie mtime do timestamp'u builda — wtedy fresh install ma wszystkie pliki z identycznym mtime, ale dla heurystyki to wygląda jak „cały folder zmodyfikowany 1 sekundę temu".
+
+Statyczne ostrzeżenie w treści dialogu (zawsze widoczne, niezależnie od stanu plików) jest solidniejszym fundamentem niż heurystyka która może wprowadzać szum. Plus statyczne ostrzeżenie pokrywa też scenariusz w którym user dopiero PLANUJE modyfikować pliki w przyszłości — heurystyka mtime tego nie wykryje (mtime jeszcze nie zmienione bo user jeszcze nie zaczął edytować).
+
+#### Pełny refaktor split user-data vs seed-data dla `dictionaries/`
+
+Zostaje w roadmapie v15.3+ jako większy milestone (mechanizm first-launch: kopiowanie seed-data → user-data przy pierwszym uruchomieniu, ignorowanie seed przy upgrade jeśli user-data już istnieje). To strukturalna eliminacja problemu (user-data poza ścieżką instalatora, niemożliwa do nadpisania), w przeciwieństwie do v15.2.8 który łata UX (lepsze ostrzeżenie + ułatwiony backup). Oba podejścia są complementary — v15.2.8 chroni userów do czasu wdrożenia v15.3+, v15.3+ eliminuje potrzebę ostrzeżeń w ogóle.
+
+### Walidacja przed commit'em
+
+- `.venv/Scripts/python -c "import ast; ast.parse(open('main.py', encoding='utf-8').read())"` → OK syntax, klasy `['HomePanel', 'DialogAktualizacji', 'MainFrame']` obecne.
+- `.venv/Scripts/python -c "import yaml; ..."` × 9 plików `dictionaries/<iso>/gui/ui.yaml` → wszystkie 15 oczekiwanych kluczy w sekcji `updater` (15 oczekiwanych = 11 starych + 4 nowe).
+- Akceleratory `btn_pobierz` / `btn_otworz_dictionaries` / `btn_anuluj` w każdym języku zweryfikowane na unikalność (różne litery `&X` per przycisk) — żadnych kolizji w 9 językach.
+- `.venv/Scripts/python generuj_dokumentacje.py --waliduj` → OK, wszystkie `{placeholder}` mają wartości w `ui.yaml`.
+- Smoke test włoski (#13) zaplanowany po publikacji v15.2.8 Release jako release-then-answer flow.
 
 ---
 

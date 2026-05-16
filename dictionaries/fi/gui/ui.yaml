@@ -872,13 +872,20 @@ manager:
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
 updater:
-  # Powiadomienie o nowej wersji (wx.MessageBox Tak/Nie)
+  # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Päivitys saatavilla"
   nowa_wersja_tresc: |-
     Uusi versio on saatavilla: {nowa_wersja}.
     Sinun versiosi: {aktualna_wersja}.
 
+    HUOMIO: jos olet muokannut omia foneettisia sääntöjäsi tai salakirjoituksiasi „dictionaries/"-kansiossa Sääntöhallinnan kautta, asennusohjelma korvaa ne paketin oletusversioilla. Tee varmuuskopio „dictionaries/"-kansiosta ENNEN päivityksen vahvistamista — napsauta „Avaa dictionaries-kansio" siirtyäksesi sinne Resurssienhallinnassa, kopioi koko kansio turvalliseen paikkaan ja palauta tiedostosi varmuuskopiosta päivityksen jälkeen.
+
     Haluatko ladata ja asentaa päivityksen nyt?
+  # Przyciski w DialogAktualizacji
+  btn_pobierz:              "&Lataa ja asenna"
+  btn_otworz_dictionaries:  "&Avaa dictionaries-kansio"
+  btn_anuluj:               "&Peruuta"
+  blad_otworz_folder:       "Kansiota ei voitu avata:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Ladataan päivitystä {nowa_wersja}"
   pobieranie_tresc: "Ladataan {nazwa_pliku}…"

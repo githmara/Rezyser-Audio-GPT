@@ -497,6 +497,92 @@ class HomePanel(wx.Panel):
 
 
 # ---------------------------------------------------------------------------
+# Dialog auto-aktualizacji (od v15.2.8 — ostrzeżenie o dictionaries/)
+# ---------------------------------------------------------------------------
+class DialogAktualizacji(wx.Dialog):
+    """Dialog proponujący aktualizację z ostrzeżeniem o nadpisaniu dictionaries/.
+
+    Wprowadzony w v15.2.8 po bug-issue #13 (utrata 6-miesięcznych modyfikacji
+    w dictionaries/it/akcenty/*.yaml po update'cie do v15.2.5). Stary wx.MessageBox
+    YES_NO nie ostrzegał inline — manual v15.2.5+ ostrzega, ale user czytał stary
+    v15.2.4 manual w momencie decyzji o update. Krytyczne info o utracie danych
+    MUSI być w samym dialogu, nie tylko w manualu.
+
+    Trzy przyciski (A11y kolejność lewy→prawy + akceleratory z kluczy ui.yaml):
+      - Pobierz (default + ID_YES) — Enter wciska, NVDA wymawia "domyślny"
+      - Otwórz folder dictionaries — uruchamia Eksplorator, NIE zamyka dialogu
+      - Anuluj (ID_NO)
+    """
+
+    def __init__(self, parent, info_aktualizacji):
+        super().__init__(
+            parent,
+            title=t("updater.nowa_wersja_tytul"),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+
+        self._dictionaries_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "dictionaries",
+        )
+
+        tresc_pelna = t(
+            "updater.nowa_wersja_tresc",
+            nowa_wersja=info_aktualizacji.wersja,
+            aktualna_wersja=i18n.NUMER_WERSJI,
+        )
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+
+        tresc_ctrl = wx.StaticText(self, label=tresc_pelna)
+        tresc_ctrl.Wrap(560)
+        sizer.Add(tresc_ctrl, proportion=1, flag=wx.ALL | wx.EXPAND, border=12)
+
+        btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self._btn_pobierz = wx.Button(
+            self, wx.ID_YES, t("updater.btn_pobierz")
+        )
+        self._btn_pobierz.SetDefault()
+
+        self._btn_otworz = wx.Button(
+            self, wx.ID_ANY, t("updater.btn_otworz_dictionaries")
+        )
+        self._btn_otworz.Bind(wx.EVT_BUTTON, self._on_otworz_folder)
+
+        self._btn_anuluj = wx.Button(self, wx.ID_NO, t("updater.btn_anuluj"))
+
+        btn_sizer.Add(self._btn_pobierz, flag=wx.ALL, border=6)
+        btn_sizer.Add(self._btn_otworz, flag=wx.ALL, border=6)
+        btn_sizer.Add(self._btn_anuluj, flag=wx.ALL, border=6)
+
+        sizer.Add(btn_sizer, flag=wx.ALIGN_CENTER | wx.ALL, border=6)
+
+        self.SetSizerAndFit(sizer)
+        self.SetMinSize((600, -1))
+        self._btn_pobierz.SetFocus()
+
+    def _on_otworz_folder(self, _event):
+        """Cross-platform open dictionaries/ folder; dialog pozostaje otwarty."""
+        try:
+            if platform.system() == "Windows":
+                os.startfile(self._dictionaries_path)  # noqa: S606
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", self._dictionaries_path])
+            else:
+                subprocess.Popen(["xdg-open", self._dictionaries_path])
+        except Exception as exc:  # noqa: BLE001
+            wx.MessageBox(
+                t("updater.blad_otworz_folder",
+                  sciezka=self._dictionaries_path,
+                  tresc_bledu=str(exc)),
+                t("updater.blad_pobierania_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+
+
+# ---------------------------------------------------------------------------
 # Główne okno aplikacji
 # ---------------------------------------------------------------------------
 class MainFrame(wx.Frame):
@@ -944,17 +1030,10 @@ class MainFrame(wx.Frame):
         )
 
         if os.path.isfile(_runtime_python):
-            odpowiedz = wx.MessageBox(
-                t(
-                    "updater.nowa_wersja_tresc",
-                    nowa_wersja=info.wersja,
-                    aktualna_wersja=i18n.NUMER_WERSJI,
-                ),
-                t("updater.nowa_wersja_tytul"),
-                wx.YES_NO | wx.YES_DEFAULT | wx.ICON_INFORMATION,
-                self,
-            )
-            if odpowiedz == wx.YES:
+            dlg = DialogAktualizacji(self, info)
+            odpowiedz = dlg.ShowModal()
+            dlg.Destroy()
+            if odpowiedz == wx.ID_YES:
                 self._start_pobieranie(info)
         else:
             url_release = (
