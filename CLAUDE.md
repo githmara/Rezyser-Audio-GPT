@@ -14,6 +14,13 @@
 5. FLAGA `--no-pager` W GIT (KRYTYCZNE A11y): Komendy git, które mogą uruchomić stronicowanie (np. `git diff`, `git log`, `git show`), ZAWSZE wykonuj z flagą `--no-pager`. Brak tej flagi uruchamia tryb interaktywny, blokujący terminal i generujący artefakty niedostępne dla NVDA.
 6. GIT STATUS PRZED COMMITEM: Przed każdym commitowaniem i dodawaniem plików ZAWSZE uruchom `git status`, aby zobaczyć pełny stan repozytorium.
 7. KLUCZ OPENAI DOSTĘPNY (Plik `golden_key.env` w roocie repo jest i zawsze był gitignorowany (`.gitignore` ma wpisy `*.env` i `golden_key.env`), ale **fizycznie obecny na dysku** dewelopera, więc skrypty `buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py` (oraz każda część kodu używająca `tlumacz_ai`) ładują z niego klucz przez `python-dotenv` (`load_dotenv(ROOT / "golden_key.env")` → `os.environ["OPENAI_API_KEY"]`). Agent **może i powinien** odpalać te skrypty bezpośrednio, kiedy tylko zadanie wymaga LLM — nie przekazuj tego kroku użytkownikowi „bo nie masz API". Procedura: jeśli skrypt zwróci błąd „❌ Brak prawidłowego OPENAI_API_KEY" lub błąd HTTP 401 / 429 (rate limit / brak kredytów), **wtedy** zatrzymaj się i poproś użytkownika o uzupełnienie konta (a nie z góry zakładaj). Po wygenerowaniu auto-tłumaczeń ZAWSZE rób manualny review halucynacji (LLM lubi wymyślać niezaszyfrowane przykłady szyfrów albo bezsensowne sklejki — porównuj z zatwierdzonymi szablonami w innym języku jako wzorcem stylu).
+8. KOPIOWANIE Z TERMINALA NIE JEST WIARYGODNE (KRYTYCZNE A11y, lessons learned po smoke teście v15.2.7). Accessibility buffer VS Code (mechanizm pośredniczący między terminalem a NVDA) **tokenizuje treść tnąc ją na fragmenty i powtarzając ciągi znaków** — dotyczy to nawet krótkich wzorców typu HEREDOC commit message (potwierdzone empirycznie 2026-05-16). Praktyczne reguły dla agenta:
+   - **Długie treści (commit messages, release notes, drafty odpowiedzi, hiszpańskie/niemieckie/inne diakrytyczne fragmenty) ZAPISUJ DO PLIKU** i poproś użytkownika żeby otworzył plik w edytorze VS Code (Ctrl+P → nazwa pliku) — edytor pliku ma natywne A11y wsparcie, w przeciwieństwie do panelu Terminal. Wzorce: `pending_answer.md` dla draftów odpowiedzi na issue, `release.txt` dla Release description, `commit_msg.txt` w sytuacjach kiedy musisz dostarczyć użytkownikowi gotowy tekst commit messaga do skopiowania.
+   - **NIE proś użytkownika żeby skopiował tekst z Twojego output'u w terminalu** — nawet jeśli wygląda krótko. Zawsze pisz do pliku i wskazuj ścieżkę.
+   - **AskUserQuestion w CLI ma znany bug renderowania bloków pytań przy multi-question** (potwierdzone 2026-05-16): pierwsze pytanie renderuje się poprawnie, kolejne mają **sklejone treści opcji** (treść opcji 1 z poprzedniego pytania miesza się z opcjami nowego pytania, bałagan w accessibility buffer). Praktyczne workaround'y:
+     * **Preferuj 1 pytanie per turn** — zadawaj wieloetapowo, sekwencyjnie, niż w jednym wywołaniu wielopytaniowym.
+     * Jeśli MUSZ zadać kilka pytań naraz (np. zależne decyzje projektowe), pisz w label'ach opcji **wyraźny prefix kontekstowy** typu „[Plik] pending_answer.md w roocie" zamiast samego „pending_answer.md w roocie" — to redukuje confuse'u w accessibility buffer, bo NVDA czyta prefix przed potencjalną sklejką.
+     * Po AskUserQuestion zawsze powtórz w tekście odpowiedzi co user wybrał („User wybrał: pending_answer.md w roocie + Bot automatycznie") żeby zweryfikować że Twoje rozumienie zgadza się z odpowiedzią faktyczną.
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
 - Narzędzie może się bezgłośnie zamrozić przy próbie nadpisania zbyt wielkiego pliku.
@@ -129,9 +136,37 @@ Workflow PR/branch został świadomie porzucony w v15.2.5. Solo-dev + A11y first
    Płaska nazwa BEZ numeru wersji — plik jest nadpisywany przy każdym kolejnym patchu, nie ma potrzeby aktualizować `.gitignore`.
 7. Web GitHub → nowy Release. „Create new tag: v<wersja> on publish" (Twój ustalony wybór: tagi tworzone WYŁĄCZNIE przez web Release UI, atomowo z Release, brak dryfu między tagiem a publikacją). Otwórz `release.txt` w Notatniku (`start release.txt` w PowerShellu), Ctrl+A → Ctrl+C, wklej w polu Description (markdown renderuje 1:1 w GitHub Release UI). Upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe`. Publish. Po wklejeniu `release.txt` możesz usunąć z dysku — jest gitignored, więc nie zaśmieca historii, a przy następnym patchu i tak zostanie wygenerowany od nowa.
 
+## Heurystyka „cleanup commit boota = force-push tag" (od v15.2.7)
+Jeśli release zawiera draft trybu FILE w question-flow (`pending_answer.md` zcommitowany razem z release commit'em — patrz sekcja `# ODPOWIEDZI NA ISSUE`), archive Release v<wersja> z punktu 7 zawiera ten plik jako kosmetyczny artefakt. Po nadaniu etykiety `answered` i zakończeniu workflow boota (`Issue Closure (North)`), na origin/main pojawia się cleanup commit `chore(answer-bot): cleanup pending_answer.md po odpowiedzi na #<N>`. Wtedy między tagiem v<wersja> a origin/main HEAD jest DOKŁADNIE 1 commit (cleanup boota) — to sygnał że można force-push tagu na HEAD, żeby archive Release UI auto-regenerated był już czysty.
+
+### Kiedy zastosować
+- Tag v<wersja> wskazuje na release commit zawierający `pending_answer.md`.
+- Workflow boota zakończył się sukcesem (issue zamknięte + zalockowane + cleanup commit boota na origin/main).
+- `git log --oneline v<wersja>..origin/main` pokazuje DOKŁADNIE 1 commit (cleanup boota, autor `github-actions[bot]`). Jeśli więcej commit'ów — nie force-pushuj, są inne post-release zmiany do osobnej analizy.
+
+### Kiedy NIE zastosować
+- Release wynika z bug-flow (`fixed-in-release`, nie `answered`) — wtedy cleanup boota nie istnieje (bug-flow nie używa `pending_answer.md`), tag jest atomowy z release commit'em zgodnie z normalną procedurą.
+- Między tagiem a HEAD jest 0 commit'ów (workflow boota jeszcze nie odpalił, lub user jeszcze nie nadał etykiety `answered`) — wtedy force-push byłby NO-OP.
+- Między tagiem a HEAD jest >1 commit (cleanup boota + jakiś inny commit) — analizuj zawartość każdego commit'a; jeśli wszystkie są refinement'em release (np. dodatkowy fix-up CLAUDE.md z lessons learned, jak v15.2.7), tag może wskazywać na HEAD, ale ZAWSZE eksplicytnie zweryfikuj `git --no-pager log --stat` przed force push.
+
+### Procedura
+```bash
+# 1. Zweryfikuj liczbę commit'ów między tagiem a HEAD
+git --no-pager log --oneline v<wersja>..origin/main
+# 2. Jeśli OK, lokalny tag move
+git tag -d v<wersja>          # usuń stary lokalny tag
+git tag v<wersja> HEAD        # nowy tag na aktualnym HEAD
+# 3. Force push tagu na origin (-f / --force tag-only, NIE branch!)
+git push origin v<wersja> --force
+```
+
+Po force push tag'a, web GitHub Release UI auto-regeneruje source-code archive z nowego SHA — bez potrzeby edytować Release description ani re-uploadować Installer EXE. Release artefakty (Installer) zachowują się niezależnie od tag'a (są attachment'ami).
+
+UWAGA: force push do MAIN/MASTER pozostaje zakazany. Force push **tag-only** jest dopuszczalny w tym repo dla scenariusza fix-up post-publish — wzorzec udokumentowany w memory `[[project_v15_2_roadmap]]`.
+
 ## Czego nie robić
 - NIE twórz feature branchy dla zwykłych patchy. Wszystko bezpośrednio na main.
-- NIE używaj `gh pr create/merge` / `git tag` lokalnie. Tagi tworzone WYŁĄCZNIE przez web Release UI.
+- NIE używaj `gh pr create/merge` / `git tag` lokalnie do TWORZENIA tagów. Nowe tagi powstają WYŁĄCZNIE przez web Release UI atomowo z Release. **Wyjątek**: force-push tag-only post-publish dla cleanup commit'a boota — patrz `## Heurystyka „cleanup commit boota = force-push tag"` wyżej w tej sekcji.
 - NIE polegaj na `PULL_REQUEST_COMMENTS.md` — plik usunięty z repo w v15.2.5 fix-up commicie. Komentarze recenzentskie (jeśli pojawią się) trafiają wprost do `RELEASE_NOTES.md::<wersja>::Co nie weszło` jako TODO do następnego cyklu, albo do konwersacji z agentem.
 
 ## Wyjątki (kiedy feature branch ma sens)
