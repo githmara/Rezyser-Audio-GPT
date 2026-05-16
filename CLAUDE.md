@@ -134,12 +134,23 @@ Workflow PR/branch został świadomie porzucony w v15.2.5. Solo-dev + A11y first
    - `(per #N)` / `(scope: #N)` — krótkie
    - pominięcie referencji issue w nagłówku — numer issue można wymienić w body commit'a (bez słowa-keyword przed `#N` LUB ze słowami `addresses`/`re`/`per`) bo full-text scanner GitHub keyword działa na CAŁY commit message, nagłówek + body. „mentions #N" / „relates to #N" / „context: #N" — wszystkie bezpieczne.
 5. `git push origin main`.
-6. Wygeneruj `release.txt` (gitignored, w roocie repo) zawierający tylko sekcję `## <wersja>` wyciętą z `RELEASE_NOTES.md`. Wzorcowy skrypt:
+6. **Preferowana (od v15.2.9)**: odpal workflow `draft-release.yml` przez Web GitHub → Actions → „Draft Release (auto-tag + RELEASE_NOTES.md sekcja → draft)" → Run workflow → input `potwierdz=tak` → Run. Bot wykonuje:
+   - odczytuje VERSION z roota repo,
+   - sprawdza czy tag `v<wersja>` już istnieje (lokalnie + na origin) → fail jeśli tak (bump VERSION lub usuń tag),
+   - tworzy tag `v<wersja>` na obecnym HEAD origin/main + pushuje,
+   - wyciąga sekcję `## <wersja>` z `RELEASE_NOTES.md` (regex identyczny jak w ręcznym skrypcie poniżej),
+   - tworzy draft Release z tytułem „Reżyser Audio GPT, wersja <wersja>" + treścią z wyciętej sekcji.
+
+   Eliminuje user errors: literówka w numerze wersji, błędny commit-target tagu, pomyłka treści notes, duplikat tagu, pominięcie tytułu, zapomnienie o Installerze (workflow zatrzymuje się na draftcie — Publish dopiero po upload EXE). Workflow ma szybę bezpieczeństwa: input `potwierdz` musi być dokładnie „tak" — inaczej no-op.
+
+   **Fallback ręczny** (gdy bot zawiedzie lub workflow_dispatch niedostępne): wygeneruj `release.txt` (gitignored, w roocie repo) zawierający tylko sekcję `## <wersja>` wyciętą z `RELEASE_NOTES.md`. Wzorcowy skrypt:
    ```
    .venv/Scripts/python -c "import pathlib, re, sys; sys.stdout.reconfigure(encoding='utf-8'); t = pathlib.Path('RELEASE_NOTES.md').read_text(encoding='utf-8'); m = re.search(r'(## <WERSJA> — patch release.*?)(?=\n## )', t, re.DOTALL); pathlib.Path('release.txt').write_text(m.group(1).rstrip()+chr(10), encoding='utf-8'); print(f'release.txt: {len(m.group(1))} znaków')"
    ```
    Płaska nazwa BEZ numeru wersji — plik jest nadpisywany przy każdym kolejnym patchu, nie ma potrzeby aktualizować `.gitignore`.
-7. Web GitHub → nowy Release. „Create new tag: v<wersja> on publish" (Twój ustalony wybór: tagi tworzone WYŁĄCZNIE przez web Release UI, atomowo z Release, brak dryfu między tagiem a publikacją). Otwórz `release.txt` w Notatniku (`start release.txt` w PowerShellu), Ctrl+A → Ctrl+C, wklej w polu Description (markdown renderuje 1:1 w GitHub Release UI). Upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe`. Publish. Po wklejeniu `release.txt` możesz usunąć z dysku — jest gitignored, więc nie zaśmieca historii, a przy następnym patchu i tak zostanie wygenerowany od nowa.
+7. **Po workflow `draft-release.yml`**: Web GitHub → Releases → wybierz nowy draft (tytuł „Reżyser Audio GPT, wersja <wersja>") → upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe` → Publish.
+
+   **Fallback ręczny** (gdy używasz `release.txt` z kroku 6 fallback): Web GitHub → nowy Release. „Create new tag: v<wersja> on publish". Otwórz `release.txt` w Notatniku (`start release.txt` w PowerShellu), Ctrl+A → Ctrl+C, wklej w polu Description (markdown renderuje 1:1 w GitHub Release UI). Upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe`. Publish. Po wklejeniu `release.txt` możesz usunąć z dysku — jest gitignored, więc nie zaśmieca historii, a przy następnym patchu i tak zostanie wygenerowany od nowa.
 
 ## Heurystyka „cleanup commit boota = force-push tag" (od v15.2.7, edge case fallback po v15.2.8)
 Od v15.2.8 domyślną ścieżką sprzątania po question-flow jest **atomic-reset** boota (bot wymazuje atomowy commit `pending_answer.md` przez `git reset --hard HEAD~1` + force-push-with-lease, historia main pozostaje czysta jakby draft nigdy nie istniał). Pełny opis i wymóg atomowości commit'a — patrz `# ODPOWIEDZI NA ISSUE`. Heurystyka force-push tag pozostaje w CLAUDE.md jako **fallback dla edge case'u**, gdy bot nie mógł użyć atomic-reset i musiał dorobić cleanup commit boota — w praktyce powinno to być rzadkością, ale wzorzec zachowujemy bo dwie sytuacje wciąż go uruchamiają.
