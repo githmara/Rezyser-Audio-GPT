@@ -151,6 +151,25 @@ Procedura przy konflikcie planów:
 
 Wyjątek: jeśli bug jest niewykonalny w pojedynczym patchu (wymaga większego refaktoru, np. issue sugerujące split user-data vs seed-data dla `dictionaries/` z roadmapy v15.3+) — przeetykietuj go z `bug` na `enhancement` z komentarzem wyjaśniającym dlaczego ten konkretny bug nie jest blokerem (np. „obejście istnieje przez backup dictionaries/ przed update, opisane w manualu sekcja Automatyczne aktualizacje; pełne rozwiązanie wymaga split architektury zaplanowanego na v15.3+"). Po przeetykietowaniu Sami przerobi to normalnym workflowem na feature-issue dla kolejnego cyklu, bez naruszania reguły „bug = priorytet".
 
+# ODPOWIEDZI NA ISSUE — question-flow z pliku (od v15.2.7)
+Wcześniejszy question-flow (v15.2.6) miał dwa problemy: (1) maintainer-NVDA-user musiał wkleić długą odpowiedź przez web GitHub UI, ale kopiowanie z terminala VS Code zawodzi w accessibility buffer (powtarza ciągi znaków); (2) gdyby ktoś trzeci skomentował między napisaniem odpowiedzi a nadaniem etykiety `answered`, bot wciągnął JEGO komentarz zamiast odpowiedzi maintainera (race condition na chronologii komentarzy).
+
+Tryb FILE rozwiązuje obie sprawy: maintainer zapisuje draft jako `pending_answer.md` w roocie repo (Write/Edit tools, bez kopiowania z terminala), pushuje na main, nadaje etykietę `answered`. Bot wczytuje treść Z PLIKU (nie z komentarzy), opakowuje w wrapper Lumi/Vieno/Katla, publikuje, zamyka i lockuje issue, oraz usuwa plik commit-em własnego autora (`github-actions[bot]`).
+
+## Procedura (per issue z question)
+1. Stwórz/zaktualizuj `pending_answer.md` w roocie repo — czysta odpowiedź merytoryczna w języku oryginalnego zgłoszenia (markdown OK), BEZ podpisu maintainera (wrapper Lumi/Vieno/Katla dopisuje swój podpis).
+2. `git add pending_answer.md && git commit -m "answer: draft odpowiedzi na #<N>" && git push origin main`.
+3. Na web GitHub UI nadaj etykietę `answered` na issue #N. Workflow `issue-closure.yml` (job `zamknij_z_polnocy`) odpali się przez webhook `issues.labeled`.
+4. Bot (skrypt `issue_closure_north.py`) wykrywa obecność `pending_answer.md` → tryb FILE: wczytuje treść, opakowuje w persona-template w wykrytym języku, woła `gh issue comment`, `gh issue close`, `gh issue lock --reason resolved`, potem `git rm pending_answer.md && git commit && git push` z autorem `github-actions[bot]`.
+5. Po zakończeniu workflow `git pull` lokalnie (żeby pobrać cleanup commit boota) i `git log` — zobaczysz dwa commity: maintainer-add + bot-rm.
+
+## Sytuacje brzegowe
+- **`pending_answer.md` istnieje, ale jest pusty (whitespace-only)**: bot loguje warning i spada do trybu COMMENT. Mało prawdopodobne w praktyce — pisz draft od razu z treścią.
+- **`pending_answer.md` NIE istnieje przy `answered`**: bot spada do trybu COMMENT (obecny od v15.2.6 mechanizm: wciąga ostatni komentarz). Wstecz-kompatybilne — jeśli komuś pasuje stary flow, może go używać.
+- **Bot cleanup `git push` fail (np. race z innym pushem na main między checkoutem boota a jego pushem, lub brak `contents: write`)**: komentarz/close/lock już przeszły (issue zamknięty user-facing). Plik wisi w repo — usuń ręcznie: `git rm pending_answer.md && git commit -m "cleanup answer-bot fail" && git push`.
+- **Równoległe issue z question**: bot trzyma jeden plik per repo, więc obsługuj jedno question-issue na raz. Drugie czeka aż pierwsze się zamknie (cleanup boota zwolni plik).
+- **Bug-issue zamknięte przez question-flow przez pomyłkę**: nie. Bug-issue ma flag `bug` i workflow `patch-bot` (`tiflotecnia-patch`) lub `issue-closure` (`fixed-in-release`). Question-flow wyzwala TYLKO `answered`. Etykiety są disjunktywne — nie nadawaj `answered` na bug-issue.
+
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
 - Weryfikuj porządek przez komendę `git status` patrząc na nieśledzone pliki (Untracked files).

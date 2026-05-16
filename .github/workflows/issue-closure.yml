@@ -1,15 +1,24 @@
 name: Issue Closure (North — Lumi/Vieno/Katla)
 
 # Etap „Polnoc" obiegu „Z Poludnia na Polnoc". Dwie etykiety wyzwalajace
-# (od v15.2.6):
+# (od v15.2.6, z trybem FILE od v15.2.7):
 #   * `fixed-in-release` — bug-fix flow: jedna z bohaterek Polnocy
 #     (Lumi/Vieno/Katla) komentuje z linkiem do najnowszego Release
 #     i zamyka issue w jezyku oryginalnego zgloszenia.
-#   * `answered` — answer flow: bohaterka Polnocy wyciaga ostatni komentarz
-#     na issue (zostawiony przez maintainera jako odpowiedz na pytanie),
-#     opakowuje go w styl persony BEZ linku do release i zamyka issue.
-#     Konwencja: maintainer komentuje z odpowiedzia, POTEM nadaje etykiete
-#     `answered` — bot bierze chronologicznie ostatni komentarz.
+#   * `answered` — answer flow z dwoma trybami:
+#       - FILE (priorytet, v15.2.7+): jesli `pending_answer.md` istnieje
+#         w roocie repo, bot czyta z pliku, opakowuje, publikuje, zamyka,
+#         lockuje, i usuwa plik commit-em wlasnego autora (push na main).
+#         Wymaga `contents: write` w permissions. Motywacja: eliminacja race
+#         condition COMMENT mode + A11y blokada kopiowania z terminala VS
+#         Code u maintainera-NVDA-usera.
+#       - COMMENT (fallback): bot wyciaga ostatni komentarz na issue
+#         (zostawiony przez maintainera jako odpowiedz na pytanie),
+#         opakowuje go w styl persony BEZ linku do release, zamyka issue,
+#         usuwa oryginalny komentarz przez REST DELETE.
+#     Konwencja FILE: pushnij pending_answer.md, potem nadaj etykiete.
+#     Konwencja COMMENT: skomentuj, potem nadaj etykiete `answered` — bot
+#     bierze chronologicznie ostatni komentarz.
 
 on:
   issues:
@@ -25,6 +34,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      # contents: write — od v15.2.7 bot w trybie FILE usuwa
+      # `pending_answer.md` commit-em wlasnego autora i pushuje na main
+      # (`_usun_pending_answer_z_git` w issue_closure_north.py). W trybie
+      # COMMENT contents: write nie jest uzywane, ale zostawiamy bo workflow
+      # YAML nie wie z gory ktory tryb sie odpali (decyduje obecnosc pliku).
+      contents: write
 
     steps:
       - name: Pobranie kodu repozytorium

@@ -18,19 +18,40 @@ Skrypt (bug-fix flow, etykieta ``fixed-in-release``):
      i lockuje przez ``gh issue lock --reason resolved``.
 
 Skrypt (question flow, etykieta ``answered``, od v15.2.6):
-  1. odczytuje treść issue + wciąga OSTATNI komentarz maintainera (treść,
-     URL, autor) przez ``_pobierz_ostatni_komentarz_z_meta``,
-  2. safety check: jeśli ostatni komentarz pochodzi od bota (intake Sami),
-     przerywa workflow z komunikatem o złej kolejności (maintainer nadał
-     ``answered`` zanim odpowiedział),
-  3. opakowuje komentarz maintainera w styl persony (TEMPLATES_ANSWERED),
-  4. USUWA oryginalny komentarz maintainera przez REST DELETE
-     ``/repos/{repo}/issues/comments/{id}`` (wycięty z URL'a), żeby
-     user-facing wątek nie zawierał duplikatu treści (bez delete'u maintainer
-     comment + wrap'owany komentarz Lumi/Vieno/Katla wyświetlałyby się obok
-     siebie identycznie, a NVDA czytałby tę samą odpowiedź dwukrotnie),
-  5. dodaje wrap'owany komentarz, zamyka issue i lockuje analogicznie jak
-     w bug-fix flow.
+
+  Tryb FILE (od v15.2.7, priorytetowy gdy ``pending_answer.md`` istnieje
+  w roocie repo — eliminuje race condition obecny w trybie COMMENT
+  i obchodzi A11y blokadę kopiowania z terminala VS Code):
+    1. odczytuje treść draftu z ``pending_answer.md`` (working dir
+       po ``actions/checkout@v4`` = root repo),
+    2. opakowuje treść w styl persony (TEMPLATES_ANSWERED),
+    3. dodaje wrap'owany komentarz, zamyka issue i lockuje,
+    4. usuwa plik commit-em boota (``git rm pending_answer.md`` +
+       ``git commit`` + ``git push`` z autorem ``github-actions[bot]``).
+       Wymaga ``contents: write`` w permissions workflow.
+
+  Tryb COMMENT (fallback gdy ``pending_answer.md`` nie istnieje):
+    1. odczytuje treść issue + wciąga OSTATNI komentarz maintainera (treść,
+       URL, autor) przez ``_pobierz_ostatni_komentarz_z_meta``,
+    2. safety check: jeśli ostatni komentarz pochodzi od bota (intake Sami),
+       przerywa workflow z komunikatem o złej kolejności (maintainer nadał
+       ``answered`` zanim odpowiedział),
+    3. opakowuje komentarz maintainera w styl persony (TEMPLATES_ANSWERED),
+    4. USUWA oryginalny komentarz maintainera przez REST DELETE
+       ``/repos/{repo}/issues/comments/{id}`` (wycięty z URL'a), żeby
+       user-facing wątek nie zawierał duplikatu treści (bez delete'u maintainer
+       comment + wrap'owany komentarz Lumi/Vieno/Katla wyświetlałyby się obok
+       siebie identycznie, a NVDA czytałby tę samą odpowiedź dwukrotnie),
+    5. dodaje wrap'owany komentarz, zamyka issue i lockuje analogicznie jak
+       w bug-fix flow.
+
+  Motywacja trybu FILE (v15.2.7): maintainer NVDA-user nie może wygodnie
+  wkleić długiej odpowiedzi przez web GitHub UI (kopiowanie z terminala VS
+  Code zawodzi w accessibility buffer — powtarzanie ciągów znaków). Plus
+  tryb COMMENT ma race condition: gdyby ktoś trzeci skomentował między
+  komentarzem maintainera a nadaniem etykiety, ``_pobierz_ostatni_komentarz``
+  wciągnąłby JEGO komentarz. File mode jest niezależny od stanu komentarzy
+  i deterministyczny.
 
 Wywołanie:
     python .github/scripts/issue_closure_north.py
@@ -654,6 +675,20 @@ def _pobierz_ostatni_komentarz_z_meta(
 _RE_COMMENT_ID = re.compile(r"#issuecomment-(\d+)\s*$")
 
 
+# File mode (v15.2.7+): draft odpowiedzi maintainera leży jako plain markdown
+# w roocie repo. Nazwa flat (jak `release.txt` w workflow direct-to-main) —
+# jeden plik per zgłoszenie pending, drugi musi poczekać aż pierwszy się
+# zamknie. Konwencja: maintainer pushuje plik → nadaje etykietę `answered` →
+# bot czyta, opakowuje, publikuje, usuwa plik commitem własnego autora.
+PENDING_ANSWER_FILE = "pending_answer.md"
+
+# Standardowy noreply-email użytkownika github-actions[bot] (numer 41898282
+# to public ID użytkownika; wzorzec używany w setupach gdzie workflow
+# commituje z powrotem do repo).
+BOT_GIT_NAME = "github-actions[bot]"
+BOT_GIT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
+
+
 def _usun_komentarz_po_url(repo: str, url: str) -> bool:
     """Usuwa komentarz na issue przez REST DELETE.
 
@@ -682,19 +717,78 @@ def _usun_komentarz_po_url(repo: str, url: str) -> bool:
 
 
 def _gh(cmd: list[str]) -> bool:
-    """Uruchamia `gh` z przechwyceniem błędów. Zwraca True przy sukcesie."""
+    """Uruchamia `gh` (lub `git`) z przechwyceniem błędów. Zwraca True przy sukcesie."""
     try:
         subprocess.run(cmd, check=True, capture_output=True, text=True)
         return True
     except subprocess.CalledProcessError as exc:
         sys.stderr.write(
-            f"[!] gh zfailowało ({' '.join(cmd[:3])}): "
+            f"[!] {cmd[0]} zfailowało ({' '.join(cmd[:3])}): "
             f"{exc.stderr.strip() or exc}\n"
         )
         return False
     except FileNotFoundError:
-        sys.stderr.write("[!] `gh` CLI nie znalezione w PATH.\n")
+        sys.stderr.write(f"[!] `{cmd[0]}` CLI nie znalezione w PATH.\n")
         return False
+
+
+def _wczytaj_pending_answer_z_pliku() -> str:
+    """Wczytuje draft odpowiedzi z `pending_answer.md` w roocie repo.
+
+    Zwraca treść (po ``strip()``) albo pusty string, jeśli plik nie istnieje
+    lub jest pusty/whitespace-only. Pusty string sygnalizuje wywołującemu,
+    że trzeba spaść do trybu COMMENT (wciąganie ostatniego komentarza).
+
+    Po ``actions/checkout@v4`` working directory workflowu = root repo,
+    więc ścieżka relatywna ``pending_answer.md`` trafia w roota.
+    """
+    try:
+        with open(PENDING_ANSWER_FILE, "r", encoding="utf-8") as fh:
+            tresc = fh.read().strip()
+        if not tresc:
+            sys.stderr.write(
+                f"[!] {PENDING_ANSWER_FILE} istnieje, ale jest pusty — "
+                "fallback do trybu wciągania ostatniego komentarza.\n"
+            )
+            return ""
+        return tresc
+    except FileNotFoundError:
+        return ""
+    except OSError as exc:
+        sys.stderr.write(
+            f"[!] Nie udało się otworzyć {PENDING_ANSWER_FILE}: {exc}\n"
+        )
+        return ""
+
+
+def _usun_pending_answer_z_git(issue_number: str) -> bool:
+    """Usuwa pending_answer.md commitem boota i pushuje na main.
+
+    Sekwencja: ``git config user.{name,email}`` (z BOT_GIT_*) → ``git rm`` →
+    ``git commit`` → ``git push origin HEAD:main``. Każdy krok przez ``_gh``
+    z przechwytem błędu — przy fail zwraca False i pozostawia plik w repo
+    (wywołujący zaloguje warning, ale workflow zamknięcia issue już zrobił
+    swoje: komentarz + close + lock).
+
+    Wymaga ``contents: write`` w ``permissions:`` workflow (default
+    ``GITHUB_TOKEN`` w workflow z tym scope'm pozwala na push do main —
+    workflow direct-to-main repo nie ma branch protection).
+    """
+    if not _gh(["git", "config", "user.name", BOT_GIT_NAME]):
+        return False
+    if not _gh(["git", "config", "user.email", BOT_GIT_EMAIL]):
+        return False
+    if not _gh(["git", "rm", PENDING_ANSWER_FILE]):
+        return False
+    msg = (
+        f"chore(answer-bot): cleanup {PENDING_ANSWER_FILE} po odpowiedzi "
+        f"na #{issue_number}"
+    )
+    if not _gh(["git", "commit", "-m", msg]):
+        return False
+    if not _gh(["git", "push", "origin", "HEAD:main"]):
+        return False
+    return True
 
 
 def main() -> int:
@@ -735,49 +829,73 @@ def main() -> int:
     #   Fallback (nieznana lub pusta etykieta) → klasyczny flow, jak
     #                pre-v15.2.6 — backward compat dla starszych webhook
     #                eventów które nie wstrzyknęły jeszcze LABEL_NAME.
+    # Flaga ustawiana tylko w trybie FILE: po publikacji wrapped komentarza
+    # + close + lock, bot usunie pending_answer.md commit-em własnego autora.
+    # W trybie COMMENT pozostaje False (nie ma czego sprzątać — komentarz
+    # maintainera został już usunięty REST DELETE w obrębie tej samej gałęzi).
+    cleanup_pending_file = False
+
     if label_name == "answered":
-        maintainer_answer, comment_url, comment_author = (
-            _pobierz_ostatni_komentarz_z_meta(issue_number, repo)
-        )
-        if not maintainer_answer:
-            sys.stderr.write(
-                "[!] Brak komentarza maintainera do opakowania. "
-                "Czy maintainer napisał odpowiedź PRZED nadaniem etykiety "
-                "`answered`? Workflow zakłada: komentarz → etykieta → "
-                "Północ wyciąga ostatni komentarz i wrapuje.\n"
+        # FILE mode priorytetowy (v15.2.7+): jeśli `pending_answer.md` istnieje
+        # w roocie repo, używamy jego treści bez wciągania ostatniego
+        # komentarza. Eliminuje race condition obecny w COMMENT mode (gdyby
+        # ktoś trzeci skomentował między napisaniem odpowiedzi a nadaniem
+        # etykiety, COMMENT mode wciągnąłby JEGO komentarz). Plus omija
+        # A11y blokadę kopiowania długich odpowiedzi przez web GitHub UI
+        # u maintainera-NVDA-usera.
+        draft_z_pliku = _wczytaj_pending_answer_z_pliku()
+        if draft_z_pliku:
+            print(
+                f"Tryb FILE: wciągnięto draft z {PENDING_ANSWER_FILE} "
+                f"({len(draft_z_pliku)} znaków)."
             )
-            return 1
-        # Safety check: ostatni komentarz musi być od człowieka, nie od bota.
-        # Jeśli ostatnim komentarzem jest intake Sami (`github-actions[bot]`),
-        # oznacza że maintainer pomylił kolejność (nadał `answered` zanim
-        # odpowiedział) — wrap'owanie komentarza Sami zamiast odpowiedzi
-        # byłoby błędem semantycznym i pokazałoby userowi „odpowiedź"
-        # zacytowaną z intake'u.
-        if (comment_author.endswith("[bot]")
-                or comment_author == "github-actions"):
-            sys.stderr.write(
-                f"[!] Ostatni komentarz na issue #{issue_number} pochodzi "
-                f"od bota ({comment_author!r}). Maintainer musi napisać "
-                "odpowiedź ZANIM doda etykietę `answered`. Workflow "
-                "przerywany — popraw kolejność (zdejmij `answered`, "
-                "skomentuj z odpowiedzią, nadaj `answered` ponownie).\n"
+            maintainer_answer = draft_z_pliku
+            cleanup_pending_file = True
+        else:
+            # COMMENT mode (fallback): obecny mechanizm pre-15.2.7.
+            print("Tryb COMMENT: brak pending_answer.md — wciągam ostatni komentarz.")
+            maintainer_answer, comment_url, comment_author = (
+                _pobierz_ostatni_komentarz_z_meta(issue_number, repo)
             )
-            return 1
+            if not maintainer_answer:
+                sys.stderr.write(
+                    "[!] Brak draftu w pending_answer.md ANI komentarza "
+                    "maintainera do opakowania. Konwencje (od v15.2.7):\n"
+                    "  (A) FILE mode: zapisz draft w pending_answer.md "
+                    "i pushnij PRZED nadaniem etykiety `answered`,\n"
+                    "  (B) COMMENT mode: skomentuj na issue PRZED "
+                    "nadaniem etykiety `answered`.\n"
+                )
+                return 1
+            # Safety check: ostatni komentarz musi być od człowieka, nie
+            # od bota. Jeśli ostatnim komentarzem jest intake Sami
+            # (`github-actions[bot]`), oznacza że maintainer pomylił
+            # kolejność (nadał `answered` zanim odpowiedział).
+            if (comment_author.endswith("[bot]")
+                    or comment_author == "github-actions"):
+                sys.stderr.write(
+                    f"[!] Ostatni komentarz na issue #{issue_number} pochodzi "
+                    f"od bota ({comment_author!r}). Maintainer musi napisać "
+                    "odpowiedź ZANIM doda etykietę `answered` (lub użyć "
+                    "trybu FILE — pending_answer.md). Workflow przerywany — "
+                    "popraw kolejność.\n"
+                )
+                return 1
+            # Usuń oryginalny komentarz maintainera ZANIM dodamy wrapped
+            # wersję. Bez delete'u user widzi tę samą odpowiedź dwukrotnie
+            # (raz jako sam komentarz, raz wewnątrz wrap'a Lumi/Vieno/Katla).
+            # Delete jest non-fatal: jeśli się nie uda (np. brak permissions,
+            # GitHub rate limit), wciąż wolimy zamknąć issue z duplikatem
+            # niż w ogóle nie odpowiedzieć i nie zamknąć.
+            if not _usun_komentarz_po_url(repo, comment_url):
+                sys.stderr.write(
+                    f"[!] Usunięcie oryginalnego komentarza maintainera nie "
+                    f"powiodło się — wątek issue #{issue_number} będzie "
+                    "zawierał duplikat treści (komentarz maintainera + "
+                    "wrap'owana wersja Lumi/Vieno/Katla).\n"
+                )
         szablon = TEMPLATES_ANSWERED[wykryty][persona]
         tresc = szablon.format(maintainer_answer=maintainer_answer)
-        # Usuń oryginalny komentarz maintainera ZANIM dodamy wrapped wersję.
-        # Bez delete'u user widzi tę samą odpowiedź dwukrotnie (raz jako sam
-        # komentarz, raz wewnątrz wrap'a Lumi/Vieno/Katla) — NVDA też ją
-        # odczyta dwa razy. Delete jest non-fatal: jeśli się nie uda
-        # (np. brak permissions, GitHub rate limit), wciąż wolimy zamknąć
-        # issue z duplikatem niż w ogóle nie odpowiedzieć i nie zamknąć.
-        if not _usun_komentarz_po_url(repo, comment_url):
-            sys.stderr.write(
-                f"[!] Usunięcie oryginalnego komentarza maintainera nie "
-                f"powiodło się — wątek issue #{issue_number} będzie "
-                "zawierał duplikat treści (komentarz maintainera + "
-                "wrap'owana wersja Lumi/Vieno/Katla).\n"
-            )
     else:
         szablon = TEMPLATES[wykryty][persona]
         link = _zbuduj_link_release()
@@ -806,6 +924,22 @@ def main() -> int:
             f"[!] Lock issue #{issue_number} nie powiódł się — "
             "komentarz i close OK, ale wątek pozostaje odblokowany.\n"
         )
+
+    # Cleanup file mode: usuń pending_answer.md commit-em boota. Non-fatal —
+    # jeśli się nie uda (brak contents:write, ktoś pushnął na main między
+    # checkoutem a pushem boota powodując non-fast-forward, etc.), plik
+    # zostaje w repo i maintainer usuwa go ręcznie. Komentarz + close + lock
+    # już przeszły, więc user-facing flow jest kompletny.
+    if cleanup_pending_file:
+        if _usun_pending_answer_z_git(issue_number):
+            print(f"Cleanup {PENDING_ANSWER_FILE} OK (commit boota pushnięty na main).")
+        else:
+            sys.stderr.write(
+                f"[!] Cleanup {PENDING_ANSWER_FILE} nie powiódł się — "
+                "komentarz, close i lock OK, ale plik wisi w repo. Usuń "
+                "ręcznie: `git rm pending_answer.md && git commit -m "
+                "\"cleanup\" && git push`.\n"
+            )
 
     print(f"Issue #{issue_number} skomentowane, zamknięte i zablokowane przez {persona}.")
     return 0
