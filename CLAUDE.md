@@ -249,6 +249,22 @@ Stosuj gdy issue obnaża buga, który chcesz naprawić w nowym release'ie, ALE c
 
 Net effect: historia wygląda tak, jakby `pending_answer.md` nigdy nie istniał. Tag stabilny od momentu publikacji Release. Archive Release UI nigdy nie pokazał draftu.
 
+## Sub-procedura — flow „release-with-answer" (bug-issue + dolepek osobistej wiadomości w jednym Release; od v15.2.8)
+Stosuj gdy bug-issue dostaje fix w nowym release'ie i chcesz dorzucić osobistą wiadomość (przeprosiny za incydent, tip o recovery, kontekstowe wyjaśnienie) PONAD generycznym komentarzem boota z linkiem do Release. To wariant lżejszy niż „release-then-answer" — wszystko domyka się w jednej publikacji Release i jednej etykiecie `fixed-in-release` zamiast osobnych ścieżek release + answered. Wymaga rozszerzenia `issue_closure_north.py` z v15.2.8 (opcjonalny tryb FILE dla `fixed-in-release`).
+
+1. Wszystkie kroki z `# WORKFLOW RELEASE — Procedura release` (bump VERSION, regeneracja docs, edycja RELEASE_NOTES.md, commit release, `git push origin main`). **`pending_answer.md` NIE jest częścią tego commit'a.**
+2. **Atomowy commit `pending_answer.md`** na main, PRZED publikacją Release: `git add pending_answer.md && git commit -m "answer: draft dolepka osobistej wiadomości do release-with-answer #<N>" && git push origin main`. Treść pliku to czysta osobista wiadomość bez podpisu maintainera (bot dolepi własny intro + persona-signature).
+3. Web GitHub UI → utwórz nowy Release z tagiem v<wersja> atomowo. **KRYTYCZNE**: tag „Create new tag: v<wersja> on publish" wskaże na **release commit z kroku 1 (NIE na pending_answer.md commit z kroku 2)** — sprawdź w UI że SHA tagu zgadza się z `git --no-pager log -1 --format=%H <hash-release-commitu>`. Archive Release UI dostanie pristine release commit, draft niewidoczny w paczce źródłowej.
+4. Po publikacji Release: na web GitHub UI nadaj etykietę `fixed-in-release` na bug-issue #N. Workflow `issue-closure.yml` odpala bota.
+5. Bot (skrypt `issue_closure_north.py`, branch `fixed-in-release` z v15.2.8 FILE mode) wykrywa obecność `pending_answer.md` → buduje komentarz: standardowy TEMPLATES[lang][persona] z linkiem do Release, separator `---`, intro `PERSONAL_NOTE_INTRO[lang]` („dodatkowa wiadomość od maintainera"), treść z pliku. `gh issue comment`, `gh issue close`, `gh issue lock --reason resolved`. Następnie atomic-reset HEAD (sprawdza atomowość) — wymazuje `pending_answer.md` commit z kroku 2, historia main = release commit z kroku 1 + 0 więcej commit'ów.
+6. Lokalnie: `git fetch origin && git reset --hard origin/main`. `git log v<wersja>..origin/main` pokazuje 0 commit'ów (atomic-reset zadziałał, jak release-then-answer).
+
+Różnica vs „release-then-answer":
+- `release-then-answer` zamyka issue przez etykietę `answered` (question-flow), bez linku do Release w komentarzu.
+- `release-with-answer` zamyka issue przez `fixed-in-release` (bug-flow), z linkiem do Release + dolepkiem osobistej wiadomości.
+
+Wybór ścieżki: zależy od natury issue. Czysta utrata danych / bug naprawiony w kodzie + chcesz dolepić tip o recovery → `release-with-answer`. Pytanie usera na które odpowiadasz BEZ release → `# Procedura — flow czystego question`. Bug + chcesz osobnym komentarzem skomentować architekturę BEZ linku do Release → `release-then-answer` (rzadko stosowane).
+
 ## Sytuacje brzegowe
 - **`pending_answer.md` istnieje, ale jest pusty (whitespace-only)**: bot loguje warning i spada do trybu COMMENT. Mało prawdopodobne w praktyce — pisz draft od razu z treścią.
 - **`pending_answer.md` NIE istnieje przy `answered`**: bot spada do trybu COMMENT (obecny od v15.2.6 mechanizm: wciąga ostatni komentarz). Wstecz-kompatybilne — jeśli komuś pasuje stary flow, może go używać.
@@ -256,7 +272,9 @@ Net effect: historia wygląda tak, jakby `pending_answer.md` nigdy nie istniał.
 - **Bot atomic-reset `--force-with-lease` odrzucony** (między bot's checkout a push na main pojawił się inny commit — solo-dev edge case, praktycznie niemożliwy): bot spada do fallbacku cleanup commit'a. Jeśli ten też failuje, plik wisi w repo i maintainer usuwa go ręcznie: `git rm pending_answer.md && git commit -m "cleanup answer-bot fail" && git push`.
 - **Bot cleanup `git push` fail (np. brak `contents: write` lub brak `fetch-depth: 2` w workflow YAML)**: komentarz/close/lock już przeszły (issue zamknięty user-facing). Plik wisi w repo — usuń ręcznie jak wyżej. Workflow YAML musi mieć `fetch-depth: 2` na `actions/checkout@v4` — bez tego HEAD~1 nie istnieje lokalnie i atomic-reset failuje na każdym issue.
 - **Równoległe issue z question**: bot trzyma jeden plik per repo, więc obsługuj jedno question-issue na raz. Drugie czeka aż pierwsze się zamknie (atomic-reset lub cleanup boota zwolni plik).
-- **Bug-issue zamknięte przez question-flow przez pomyłkę**: nie. Bug-issue ma flag `bug` i workflow `patch-bot` (`tiflotecnia-patch`) lub `issue-closure` (`fixed-in-release`). Question-flow wyzwala TYLKO `answered`. Etykiety są disjunktywne — nie nadawaj `answered` na bug-issue.
+- **Bug-issue zamknięte przez question-flow przez pomyłkę**: nie. Bug-issue ma flag `bug` i workflow `patch-bot` (`tiflotecnia-patch`) lub `issue-closure` (`fixed-in-release`). Question-flow wyzwala TYLKO `answered`. Etykiety są disjunktywne — nie nadawaj `answered` na bug-issue. Od v15.2.8 bug-issue MOŻE mieć dolepek osobistej wiadomości z `pending_answer.md`, ale przez etykietę `fixed-in-release` (sub-procedura „release-with-answer"), nie przez `answered`.
+- **`pending_answer.md` istnieje przy `fixed-in-release`** (FILE mode v15.2.8): bot dolepia jego treść pod standardowym TEMPLATES separatorem `---` + intro w wykrytym języku. Plik wymazywany atomic-reset/cleanup tą samą ścieżką co `answered`. Sygnał w logach: `Tryb FILE (fixed-in-release): dolepiam treść z pending_answer.md (<N> znaków)`.
+- **`pending_answer.md` NIE istnieje przy `fixed-in-release`**: standardowy bug-flow bez dolepka (jak przed v15.2.8). NIE jest błędem ani fallbackiem na tryb COMMENT — bug-fix sam w sobie nie wymaga osobistej wiadomości od maintainera, link do Release wystarcza. Sygnał w logach: `Brak pending_answer.md przy fixed-in-release — publikuję standardowy TEMPLATES bez dolepka (oczekiwane)`.
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).

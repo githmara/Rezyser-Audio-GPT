@@ -13,7 +13,15 @@ Skrypt (bug-fix flow, etykieta ``fixed-in-release``):
   1. odczytuje treść issue z env,
   2. wykrywa język oryginalnej treści (lingua-language-detector; fallback EN),
   3. losuje jedną z trzech bohaterek,
-  4. formatuje komentarz w wykrytym języku z linkiem do najnowszego Release,
+  4. formatuje komentarz w wykrytym języku z linkiem do najnowszego Release.
+     Od v15.2.8 opcjonalny tryb FILE: jeśli ``pending_answer.md`` istnieje
+     w roocie repo, bot dolepia jego treść pod standardowym TEMPLATES
+     separatorem ``---`` + intro „dodatkowa wiadomość od maintainera" w
+     wykrytym języku (słownik ``PERSONAL_NOTE_INTRO``). Po publikacji bot
+     wymaże plik tą samą ścieżką atomic-reset/cleanup co tryb FILE dla
+     ``answered``. W odróżnieniu od ``answered`` — brak pliku przy
+     ``fixed-in-release`` NIE jest błędem ani fallbackiem na tryb COMMENT,
+     po prostu publikujemy standardowy TEMPLATES bez dolepka.
   5. dodaje komentarz przez ``gh issue comment``, zamyka przez ``gh issue close``
      i lockuje przez ``gh issue lock --reason resolved``.
 
@@ -616,6 +624,29 @@ TEMPLATES_ANSWERED: dict[Language, dict[str, str]] = {
 }
 
 
+# Intro dolepka „dodatkowa wiadomość od maintainera" w flow `fixed-in-release`
+# z opcjonalnym trybem FILE (od v15.2.8). Bug-flow domyślnie publikuje sam
+# generyczny TEMPLATES bez customizacji; jeśli maintainer chce dorzucić
+# osobistą wiadomość (przeprosiny za incydent, tip o recovery, etc.) — zapisuje
+# ją jako `pending_answer.md` w roocie repo PRZED nadaniem `fixed-in-release`,
+# a bot dolepia ją pod TEMPLATES separatorem `---` z poniższym intro.
+# W odróżnieniu od trybu FILE dla `answered`: brak pliku NIE jest błędem ani
+# fallbackiem na tryb COMMENT — po prostu używamy standardowego TEMPLATES bez
+# dolepka (bug-fix sam w sobie nie wymaga osobistej wiadomości — link do
+# Release wystarcza).
+PERSONAL_NOTE_INTRO: dict[Language, str] = {
+    Language.POLISH: "Dodatkowa wiadomość od maintainera dla Ciebie:",
+    Language.ENGLISH: "An additional message from the maintainer for you:",
+    Language.GERMAN: "Eine zusätzliche Nachricht vom Maintainer für dich:",
+    Language.SPANISH: "Un mensaje adicional del maintainer para ti:",
+    Language.FINNISH: "Lisäviesti ylläpitäjältä sinulle:",
+    Language.FRENCH: "Un message supplémentaire du mainteneur pour vous :",
+    Language.ICELANDIC: "Viðbótarskilaboð frá viðhaldsaðila til þín:",
+    Language.ITALIAN: "Un messaggio aggiuntivo dal maintainer per te:",
+    Language.RUSSIAN: "Дополнительное сообщение от мейнтейнера для вас:",
+}
+
+
 def _zbuduj_link_release() -> str:
     """Konstruuje link do najnowszego release'u na podstawie env GitHub."""
     server = os.environ.get("GITHUB_SERVER_URL", "https://github.com").rstrip("/")
@@ -994,9 +1025,34 @@ def main() -> int:
         szablon = TEMPLATES_ANSWERED[wykryty][persona]
         tresc = szablon.format(maintainer_answer=maintainer_answer)
     else:
+        # bug-flow `fixed-in-release` LUB fallback (brak/nieznana etykieta).
+        # Standardowy TEMPLATES z linkiem do najnowszego Release.
         szablon = TEMPLATES[wykryty][persona]
         link = _zbuduj_link_release()
         tresc = szablon.format(link=link)
+        # NOWE od v15.2.8: opcjonalny tryb FILE dla `fixed-in-release`.
+        # Jeśli maintainer zapisał `pending_answer.md` PRZED nadaniem etykiety
+        # (np. żeby dorzucić przeprosiny za incydent + recovery tip), dolepiamy
+        # treść pod TEMPLATES separatorem `---` + intro w wykrytym języku.
+        # W odróżnieniu od `answered`: brak pliku = standardowy TEMPLATES bez
+        # dolepka (link do Release wystarcza dla bug-fix), NIE fallback COMMENT.
+        if label_name == "fixed-in-release":
+            draft_z_pliku = _wczytaj_pending_answer_z_pliku()
+            if draft_z_pliku:
+                print(
+                    f"Tryb FILE (fixed-in-release): dolepiam treść z "
+                    f"{PENDING_ANSWER_FILE} ({len(draft_z_pliku)} znaków)."
+                )
+                intro = PERSONAL_NOTE_INTRO.get(
+                    wykryty, PERSONAL_NOTE_INTRO[Language.ENGLISH]
+                )
+                tresc = f"{tresc}\n\n---\n\n*{intro}*\n\n{draft_z_pliku}"
+                cleanup_pending_file = True
+            else:
+                print(
+                    "Brak pending_answer.md przy `fixed-in-release` — "
+                    "publikuję standardowy TEMPLATES bez dolepka (oczekiwane)."
+                )
 
     if not _gh(["gh", "issue", "comment", issue_number, "--repo", repo,
                 "--body", tresc]):
