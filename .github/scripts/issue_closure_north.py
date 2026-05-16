@@ -26,9 +26,22 @@ Skrypt (question flow, etykieta ``answered``, od v15.2.6):
        po ``actions/checkout@v4`` = root repo),
     2. opakowuje treść w styl persony (TEMPLATES_ANSWERED),
     3. dodaje wrap'owany komentarz, zamyka issue i lockuje,
-    4. usuwa plik commit-em boota (``git rm pending_answer.md`` +
-       ``git commit`` + ``git push`` z autorem ``github-actions[bot]``).
-       Wymaga ``contents: write`` w permissions workflow.
+    4. wymazuje draft z historii main — dwie ścieżki, zależnie od stanu
+       HEAD na origin/main:
+         (a) atomic-reset (preferowana, od v15.2.8): jeśli HEAD = atomowy
+             commit dodający TYLKO pending_answer.md, bot robi
+             ``git reset --hard HEAD~1`` + ``git push --force-with-lease``,
+             wymazując commit jakby nigdy nie istniał. Tag v<wersja>
+             pozostaje stabilny, archive Release UI od razu czysty.
+         (b) cleanup commit boota (fallback): jeśli HEAD zawiera dodatkowe
+             pliki (np. fix-up CLAUDE.md zcommitowany razem z draftem),
+             bot dokłada commit ``git rm pending_answer.md`` z autorem
+             ``github-actions[bot]``. Wtedy tag wymaga force-push
+             post-publish per heurystyka v15.2.7 (CLAUDE.md).
+       Obie ścieżki wymagają ``contents: write`` w workflow permissions;
+       atomic-reset dodatkowo wymaga ``fetch-depth: 2`` na
+       ``actions/checkout`` (default shallow @v4 = depth 1, HEAD~1 nie
+       istnieje lokalnie).
 
   Tryb COMMENT (fallback gdy ``pending_answer.md`` nie istnieje):
     1. odczytuje treść issue + wciąga OSTATNI komentarz maintainera (treść,
@@ -761,8 +774,89 @@ def _wczytaj_pending_answer_z_pliku() -> str:
         return ""
 
 
+def _czy_head_to_atomowy_pending_commit() -> bool:
+    """Sprawdza, czy HEAD commit zawiera DOKŁADNIE jeden plik: pending_answer.md.
+
+    ``git show --name-only --format= HEAD`` zwraca listę plików zmienionych
+    w HEAD commit. Jeśli to dokładnie ``[PENDING_ANSWER_FILE]`` — wybieramy
+    ścieżkę preferowaną (reset --hard HEAD~1 + force-push), która wymazuje
+    commit z historii bez śladu i pozostawia tag v<wersja> stabilny. W każdym
+    innym przypadku (commit modyfikuje też inne pliki, albo HEAD nie jest
+    commit'em dodającym pending) — fallback do klasycznego cleanup commit'a
+    przez ``_usun_pending_answer_z_git``.
+
+    Wzorzec workflow „release-then-answer" (od v15.2.8): release commit
+    pushowany jest NA CZYSTO (bez pending_answer.md), tag tworzony przez web
+    Release UI atomowo z release commit'em, dopiero POTEM osobny atomowy
+    commit z samym ``pending_answer.md``. Tak zorganizowana historia main
+    pozwala bot'owi wymazać draft commit'em zerojedynkowym, a tag pozostaje
+    na release commit'cie bez potrzeby force-push tag'a.
+    """
+    try:
+        wynik = subprocess.run(
+            ["git", "show", "--name-only", "--format=", "HEAD"],
+            check=True, capture_output=True, text=True,
+        )
+        pliki = [linia.strip() for linia in wynik.stdout.splitlines() if linia.strip()]
+        return pliki == [PENDING_ANSWER_FILE]
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(
+            f"[!] git show HEAD nie zwrócił listy plików: "
+            f"{exc.stderr.strip() or exc}\n"
+        )
+        return False
+    except FileNotFoundError:
+        sys.stderr.write("[!] `git` CLI nie znalezione w PATH.\n")
+        return False
+
+
+def _wymaz_pending_commit_force_push() -> bool:
+    """Wymazuje atomowy pending_answer commit przez reset --hard + force-push.
+
+    Działa TYLKO gdy HEAD == atomowy commit dodający TYLKO pending_answer.md
+    — wywołujący MUSI najpierw sprawdzić to przez
+    ``_czy_head_to_atomowy_pending_commit``. Sekwencja:
+
+      1. ``git config user.{name,email}`` z BOT_GIT_* (commit autora nie tworzymy,
+         ale ``git reset`` w niektórych konfiguracjach też wymaga ustawionej
+         tożsamości — ustawiamy preventively),
+      2. ``git reset --hard HEAD~1`` — przesuwamy lokalny ref jeden commit
+         w tył, plik znika z worktree i indeksu,
+      3. ``git push --force-with-lease origin HEAD:main`` — force-push z
+         leasingiem: push przejdzie tylko jeśli zdalny ref jest dokładnie
+         tam, gdzie był przy ostatnim fetch'u (chroni przed nadpisaniem
+         cudzych commit'ów, gdyby — w niemożliwym solo-dev edge case — ktoś
+         pushnął na main między checkoutem boota a jego pushem).
+
+    Wymaga ``contents: write`` w workflow permissions (default token z tym
+    scope'm pozwala na force-push do main — workflow direct-to-main repo
+    nie ma branch protection na main). Wymaga też ``fetch-depth: 2`` na
+    ``actions/checkout`` w workflow YAML — bez tego HEAD~1 nie istnieje
+    lokalnie (default shallow clone @v4 = depth 1).
+
+    Po sukcesie historia main wygląda tak, jakby pending_answer.md nigdy
+    nie istniał: tag v<wersja> nadal wskazuje na release commit, HEAD też,
+    archive Release UI nie zawiera draftu, nie ma cleanup commit'a do
+    sprzątania.
+    """
+    if not _gh(["git", "config", "user.name", BOT_GIT_NAME]):
+        return False
+    if not _gh(["git", "config", "user.email", BOT_GIT_EMAIL]):
+        return False
+    if not _gh(["git", "reset", "--hard", "HEAD~1"]):
+        return False
+    if not _gh(["git", "push", "--force-with-lease", "origin", "HEAD:main"]):
+        return False
+    return True
+
+
 def _usun_pending_answer_z_git(issue_number: str) -> bool:
-    """Usuwa pending_answer.md commitem boota i pushuje na main.
+    """Fallback: usuwa pending_answer.md cleanup commit-em boota.
+
+    Stosowany gdy HEAD NIE jest atomowym commit'em pending_answer.md
+    (np. maintainer zcommitował razem fix-up CLAUDE.md z lessons learned).
+    Wtedy nie możemy wymazać HEAD'a — zniszczyłoby to inne zmiany — więc
+    dodajemy commit boota usuwający tylko sam plik.
 
     Sekwencja: ``git config user.{name,email}`` (z BOT_GIT_*) → ``git rm`` →
     ``git commit`` → ``git push origin HEAD:main``. Każdy krok przez ``_gh``
@@ -770,9 +864,12 @@ def _usun_pending_answer_z_git(issue_number: str) -> bool:
     (wywołujący zaloguje warning, ale workflow zamknięcia issue już zrobił
     swoje: komentarz + close + lock).
 
-    Wymaga ``contents: write`` w ``permissions:`` workflow (default
-    ``GITHUB_TOKEN`` w workflow z tym scope'm pozwala na push do main —
-    workflow direct-to-main repo nie ma branch protection).
+    UWAGA: po tej ścieżce tag v<wersja> wskazuje na release commit
+    zawierający pending_answer.md, a HEAD jest commit boota bez pliku.
+    Należy zastosować heurystykę „cleanup commit boota = force-push tag"
+    z v15.2.7 (CLAUDE.md), żeby Release archive UI był czysty. W praktyce
+    wzorzec „release-then-answer" eliminuje większość przypadków
+    sprowadzających się do tego fallbacku.
     """
     if not _gh(["git", "config", "user.name", BOT_GIT_NAME]):
         return False
@@ -925,21 +1022,67 @@ def main() -> int:
             "komentarz i close OK, ale wątek pozostaje odblokowany.\n"
         )
 
-    # Cleanup file mode: usuń pending_answer.md commit-em boota. Non-fatal —
-    # jeśli się nie uda (brak contents:write, ktoś pushnął na main między
-    # checkoutem a pushem boota powodując non-fast-forward, etc.), plik
-    # zostaje w repo i maintainer usuwa go ręcznie. Komentarz + close + lock
-    # już przeszły, więc user-facing flow jest kompletny.
+    # Cleanup file mode (od v15.2.8): dwie ścieżki, dwa stopnie czystości
+    # historii.
+    #
+    # Preferowana (atomic-reset): jeśli HEAD jest atomowym commit'em
+    # dodającym TYLKO pending_answer.md (wzorzec workflow „release-then-
+    # answer": release commit + tag PRZED commitem pending_answer.md),
+    # wymazujemy commit przez `git reset --hard HEAD~1` + force-push-with-
+    # lease. Historia main wygląda tak, jakby draft nigdy nie istniał — tag
+    # v<wersja> stabilny, archive Release UI czysty, brak cleanup commit'a.
+    #
+    # Fallback (cleanup commit boota, pre-v15.2.8 default): jeśli HEAD
+    # zawiera dodatkowe pliki (np. fix-up CLAUDE.md razem z draftem), nie
+    # możemy wymazać commit'a — dodajemy commit boota usuwający sam plik.
+    # Tag v<wersja> wymaga wtedy force-push post-publish per heurystyka
+    # v15.2.7 (CLAUDE.md sekcja „cleanup commit boota = force-push tag").
+    #
+    # Non-fatal jak w v15.2.7: jeśli obie ścieżki failują, plik zostaje
+    # w repo i maintainer usuwa go ręcznie. Komentarz + close + lock już
+    # przeszły, więc user-facing flow jest kompletny niezależnie od cleanup.
     if cleanup_pending_file:
-        if _usun_pending_answer_z_git(issue_number):
-            print(f"Cleanup {PENDING_ANSWER_FILE} OK (commit boota pushnięty na main).")
-        else:
-            sys.stderr.write(
-                f"[!] Cleanup {PENDING_ANSWER_FILE} nie powiódł się — "
-                "komentarz, close i lock OK, ale plik wisi w repo. Usuń "
-                "ręcznie: `git rm pending_answer.md && git commit -m "
-                "\"cleanup\" && git push`.\n"
+        if _czy_head_to_atomowy_pending_commit():
+            print(
+                f"HEAD = atomowy commit {PENDING_ANSWER_FILE} — ścieżka "
+                "preferowana (reset+force-push, wymazanie z historii)."
             )
+            if _wymaz_pending_commit_force_push():
+                print(
+                    f"Wymazano atomowy commit {PENDING_ANSWER_FILE} "
+                    "przez reset+force-push. Historia main czysta, tag "
+                    "v<wersja> stabilny."
+                )
+            else:
+                # Reset/force-push fail. Lokalny stan boota może być rozjechany
+                # (reset zadziałał, push nie), ale następny workflow run dostanie
+                # świeży checkout, więc to bez znaczenia. Plik wciąż jest na
+                # origin/main — maintainer usuwa ręcznie.
+                sys.stderr.write(
+                    f"[!] Atomic-reset {PENDING_ANSWER_FILE} nie powiódł "
+                    "się — komentarz, close i lock OK, ale plik wisi na "
+                    "origin/main. Usuń ręcznie: `git rm "
+                    f"{PENDING_ANSWER_FILE} && git commit -m \"cleanup\" "
+                    "&& git push`.\n"
+                )
+        else:
+            print(
+                f"HEAD zawiera dodatkowe pliki poza {PENDING_ANSWER_FILE} "
+                "— fallback do cleanup commit'a boota. Tag v<wersja> może "
+                "wymagać force-push post-publish (heurystyka v15.2.7)."
+            )
+            if _usun_pending_answer_z_git(issue_number):
+                print(
+                    f"Cleanup {PENDING_ANSWER_FILE} OK (commit boota "
+                    "pushnięty na main)."
+                )
+            else:
+                sys.stderr.write(
+                    f"[!] Cleanup {PENDING_ANSWER_FILE} nie powiódł się — "
+                    "komentarz, close i lock OK, ale plik wisi w repo. "
+                    "Usuń ręcznie: `git rm pending_answer.md && git commit "
+                    "-m \"cleanup\" && git push`.\n"
+                )
 
     print(f"Issue #{issue_number} skomentowane, zamknięte i zablokowane przez {persona}.")
     return 0

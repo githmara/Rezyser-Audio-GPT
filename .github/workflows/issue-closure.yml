@@ -8,10 +8,17 @@ name: Issue Closure (North — Lumi/Vieno/Katla)
 #   * `answered` — answer flow z dwoma trybami:
 #       - FILE (priorytet, v15.2.7+): jesli `pending_answer.md` istnieje
 #         w roocie repo, bot czyta z pliku, opakowuje, publikuje, zamyka,
-#         lockuje, i usuwa plik commit-em wlasnego autora (push na main).
-#         Wymaga `contents: write` w permissions. Motywacja: eliminacja race
-#         condition COMMENT mode + A11y blokada kopiowania z terminala VS
-#         Code u maintainera-NVDA-usera.
+#         lockuje, i sprzata draft z main. Od v15.2.8 cleanup ma dwie
+#         sciezki: (a) atomic-reset (preferowana, gdy HEAD = atomowy commit
+#         z samym pending_answer.md) wymazuje draft przez reset --hard +
+#         force-push-with-lease — historia czysta jakby plik nigdy nie
+#         istnial; (b) cleanup commit boota (fallback, gdy HEAD zawiera
+#         dodatkowe pliki) dokleja `git rm pending_answer.md`. Wymaga
+#         `contents: write` + `fetch-depth: 2` na checkout. Motywacja
+#         pierwotna trybu FILE: eliminacja race condition COMMENT mode +
+#         A11y blokada kopiowania z terminala VS Code u maintainera-NVDA-
+#         usera. Motywacja v15.2.8 atomic-reset: czystsza historia, brak
+#         koniecznosci force-push tag'a post-publish.
 #       - COMMENT (fallback): bot wyciaga ostatni komentarz na issue
 #         (zostawiony przez maintainera jako odpowiedz na pytanie),
 #         opakowuje go w styl persony BEZ linku do release, zamyka issue,
@@ -44,6 +51,16 @@ jobs:
     steps:
       - name: Pobranie kodu repozytorium
         uses: actions/checkout@v4
+        # fetch-depth: 2 (od v15.2.8) — bot w trybie FILE preferuje
+        # `git reset --hard HEAD~1` + force-push-with-lease (wymazanie
+        # atomowego pending_answer.md commit'a z historii main bez sladu).
+        # Bez `fetch-depth: 2` checkout robi shallow clone depth=1 i HEAD~1
+        # nie istnieje lokalnie — atomic-reset by failowal i bot spadalby
+        # do fallbacku cleanup commit'a. Tryb COMMENT i fallback cleanup
+        # nie wymagaja HEAD~1, ale tu wybieramy bezpieczna opcje na poziomie
+        # checkoutu, zeby preferowana sciezka zawsze byla dostepna.
+        with:
+          fetch-depth: 2
 
       - name: Konfiguracja srodowiska Python
         uses: actions/setup-python@v5
