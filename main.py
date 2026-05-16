@@ -563,7 +563,19 @@ class DialogAktualizacji(wx.Dialog):
         self._btn_pobierz.SetFocus()
 
     def _on_otworz_folder(self, _event):
-        """Cross-platform open dictionaries/ folder; dialog pozostaje otwarty."""
+        """Cross-platform open dictionaries/ folder; dialog pozostaje otwarty.
+
+        Od v15.2.9 (re: #14): po side-effect operacji otwarcia Eksploratora /
+        Findera / xdg-open, fokus systemowy przechodzi na nowe top-level okno
+        zewnętrznej aplikacji. Gdy user zamyka tę aplikację (Alt+F4),
+        Windows/macOS/Linux zwraca fokus do naszego procesu, ale wxPython nie
+        gwarantuje że przekaże fokus konkretnemu widget'owi dialogu — może
+        wylądować w nikt'sland (NVDA milczy, user nie wie gdzie jest). Fix:
+        wx.CallAfter wstawia ponowne SetFocus na default button (Pobierz) DO
+        KOLEJKI EVENT LOOP, więc wykonuje się PO bieżącym handlerze i po
+        ewentualnym domknięciu side-effect przez OS. Wzorzec znany w
+        NVDA-wxPython community jako „fokus-anker-muster nach side-effect".
+        """
         try:
             if platform.system() == "Windows":
                 os.startfile(self._dictionaries_path)  # noqa: S606
@@ -580,6 +592,12 @@ class DialogAktualizacji(wx.Dialog):
                 wx.OK | wx.ICON_ERROR,
                 self,
             )
+        # Restoration fokusu działa OBU ścieżkach (sukces + błąd MessageBox),
+        # bo MessageBox też jest side-effect dialogiem — po jego zamknięciu
+        # fokus default-na-dialog wraca, ale nasz dialog może go nie odzyskać
+        # spod parent frame'a. wx.CallAfter() umieszcza SetFocus po wszystkich
+        # bieżących events w kolejce — bezpieczna kolejność.
+        wx.CallAfter(self._btn_pobierz.SetFocus)
 
 
 # ---------------------------------------------------------------------------
