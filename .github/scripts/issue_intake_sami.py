@@ -388,6 +388,39 @@ def _zostaw_komentarz_sami(
               f"(język: {wykryty.name}).")
 
 
+def _lista_otwartych_issues() -> str:
+    """Pełny output `gh issue list --state open` jako trzecia sekcja maila.
+
+    Wprowadzone 2026-05-16: lokalny PATH agentów Centrum nie zawsze ma
+    `gh` (potwierdzone empirycznie na Git Bash + PowerShell maintainera),
+    co skutkuje powtarzającym się błędem „gh: command not found" przy
+    próbie uzyskania kontekstu repo (duplikaty, powiązane bug-raporty,
+    co czeka w kolejce). Workflow runner zawsze ma `gh` zainstalowane,
+    więc Sami łuska listę tu i wkleja w mailu — Centrum dostaje pełny
+    obraz bez konieczności odpalania `gh` lokalnie.
+
+    Bieżące issue nie jest filtrowane — i tak pojawi się na liście (właśnie
+    zostało utworzone i ma stan open), ale user wie co zgłosił. Limit 50
+    chroni przed wybuchem maila gdy backlog spuchnie.
+    """
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if not repo:
+        return "(brak GITHUB_REPOSITORY w env — listy nie pobrano)"
+    try:
+        wynik = subprocess.run(
+            ["gh", "issue", "list", "--repo", repo,
+             "--state", "open", "--limit", "50"],
+            check=True, capture_output=True, text=True, timeout=30,
+        )
+    except subprocess.CalledProcessError as exc:
+        return f"(gh issue list zfailowało: {exc.stderr.strip() or exc})"
+    except subprocess.TimeoutExpired:
+        return "(gh issue list timeout >30s — pomijam)"
+    except FileNotFoundError:
+        return "(gh CLI nie znalezione w PATH workflow runner'a)"
+    return wynik.stdout.strip() or "(brak otwartych issues)"
+
+
 def _wyslij_maila(
     temat: str, tresc: str, recipient: str, smtp_user: str, smtp_pass: str
 ) -> bool:
@@ -437,6 +470,8 @@ def main() -> int:
     marker = "Sami (LLM)" if czy_llm else "Sami (fallback)"
     temat = f"[Reżyser Audio AI][{marker}] Issue #{number}: {title[:80]}"
 
+    otwarte = _lista_otwartych_issues()
+
     pelna_tresc = (
         f"Ciao Centrum!\n\n"
         f"Sami z Południa melduje nowe zgłoszenie #{number}.\n"
@@ -452,6 +487,10 @@ def main() -> int:
         "=========================================================\n\n"
         f"Tytuł: {title}\n\n"
         f"{body}\n\n"
+        "=========================================================\n"
+        "OTWARTE ISSUES W REPO (snapshot z momentu intake)\n"
+        "=========================================================\n\n"
+        f"{otwarte}\n\n"
         "---\n"
         "Ciao, ciao!\n"
         "Sami"

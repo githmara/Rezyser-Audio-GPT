@@ -193,6 +193,36 @@ Procedura przy konflikcie planów:
 
 Wyjątek: jeśli bug jest niewykonalny w pojedynczym patchu (wymaga większego refaktoru, np. issue sugerujące split user-data vs seed-data dla `dictionaries/` z roadmapy v15.3+) — przeetykietuj go z `bug` na `enhancement` z komentarzem wyjaśniającym dlaczego ten konkretny bug nie jest blokerem (np. „obejście istnieje przez backup dictionaries/ przed update, opisane w manualu sekcja Automatyczne aktualizacje; pełne rozwiązanie wymaga split architektury zaplanowanego na v15.3+"). Po przeetykietowaniu Sami przerobi to normalnym workflowem na feature-issue dla kolejnego cyklu, bez naruszania reguły „bug = priorytet".
 
+# OBIEG ZGŁOSZEŃ Z POŁUDNIA NA PÓŁNOC — INTERPRETACJA PROMPTU SAMI (od v15.2.8 trójsekcyjny)
+Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera każde nowe GitHub Issue (eventy `opened` lub `labeled` z akceptowalną etykietą — patrz `LABELS_ACCEPT` / `LABELS_IGNORE` w skrypcie) i wysyła do Centrum mail w plain text o standardowej **trójsekcyjnej** strukturze:
+
+1. **PROMPT DLA AGENTA AI** — wygenerowany przez `gpt-4o-mini` wg `SAMI_SYSTEM_PROMPT`. Format zależy od etykiet:
+   * **TRYB A — question / help wanted** (etykiety zawierają TYLKO `question` i/lub `help wanted`, BEZ `bug`/`enhancement`/`documentation`):
+     dokładnie 2 sekcje: `## Cel pytania` + `## Co agent powinien zrobić`. Agent czyta i odpowiada przez `pending_answer.md` (patrz `# ODPOWIEDZI NA ISSUE`).
+   * **TRYB B — zmiana w kodzie** (etykiety zawierają `bug`, `enhancement`, `documentation` lub `invalid`, nawet w kombinacji z question/help wanted):
+     dokładnie 4 sekcje: `## Cel` + `## Kontekst techniczny` + `## Kryteria akceptacji` + `## Pułapki do uniknięcia`. Agent implementuje fix.
+
+2. **ORYGINALNY TEKST ZGŁOSZENIA (do weryfikacji)** — surowy `title + body` z GitHub. KRYTYCZNE: ZAWSZE porównuj prompt z oryginałem zanim zaczniesz implementować. LLM `gpt-4o-mini` bywa kreatywny i potrafi:
+   - wpisać nieistniejący moduł (np. „prawdopodobnie `core_translator.py`" gdy takiego pliku nie ma w repo),
+   - zmyślić kroki reprodukcji których nie ma w treści usera,
+   - nadać zgłoszeniu fałszywą diagnozę („to bug w X" gdy user pyta o coś innego).
+   Oryginał jest źródłem prawdy — prompt to sugestia agenta-LLM, nie wyrocznia.
+
+3. **OTWARTE ISSUES W REPO (snapshot z momentu intake)** — surowy output `gh issue list --state open --limit 50` (od v15.2.8). Zastępuje konieczność lokalnego `gh issue list` po stronie maintainera (`gh` CLI nie zawsze w PATH agenta Centrum — Git Bash + PowerShell maintainera empirycznie 2026-05-16 nie miały). Użycie:
+   - sprawdź czy bieżące zgłoszenie nie jest duplikatem otwartego issue,
+   - wykryj powiązane bugi z tego samego obszaru (można scalić w jeden patch wg „klauzuli awaryjnej" `# WORKFLOW RELEASE`),
+   - zorientuj się w backlogu zanim zdecydujesz o priorytecie (np. czy nowy bug ma pierwszeństwo nad planowanym enhancement'em z poprzedniego cyklu).
+
+## Sygnał rozpoznawczy
+Jeśli widzisz w sesji input maintainera otwierający się od `## Cel pytania` / `## Cel` z dalszymi sekcjami w jednej z dwóch struktur (2 lub 4 sekcje), potem separator `==========…` i `ORYGINALNY TEKST ZGŁOSZENIA`, potem separator i `OTWARTE ISSUES W REPO` — **to obieg „Z Południa na Północ"**. Maintainer wkleił do sesji całość z maila Sami; Twoja rola to **Centrum**. Decyzja ścieżki (TRYB A vs TRYB B) wynika z liczby sekcji promptu i etykiet wymienionych w nagłówku maila (linia „Etykiety: ...").
+
+Plik `skrypty/issue.txt` (tymczasowy bufor maintainera na treść maila) jest gitignorowany (`skrypty/` w `.gitignore`) i usuwany ręcznie po zbudowaniu promptu — nie wpływa na stan repo, ślad istnieje tylko w sesji agenta.
+
+## Pułapki przy interpretacji
+- **Halucynacja LLM w sekcji „Pułapki do uniknięcia"** (TRYB B): Sami czasem wkleja generyczne reguły z CLAUDE.md nieadekwatne do zgłoszenia („pamiętaj o `.venv/Scripts/python`" gdy issue dotyczy wyłącznie YAML-a workflowa). Filtruj — implementuj fix wg merytorycznej treści `## Cel` + `## Kontekst techniczny`. „Pułapki" to przypomnienia, nie wymóg blokujący.
+- **Tryb FALLBACK** (gdy OpenAI zawiodło — brak kredytów, 401/429, timeout): mail ma w temacie `[Sami (fallback)]` zamiast `[Sami (LLM)]`, a sekcja PROMPT = surowy `title + body` z notatką „(Sami chwilowo nie pomogła z przeredagowaniem...)". W fallbacku NIE MA podziału na TRYB A/B — Centrum sam decyduje ścieżkę na podstawie etykiet (wymienione zaraz pod linkiem do issue w nagłówku maila).
+- **Pusta sekcja OTWARTE ISSUES**: komunikat `(brak otwartych issues)` lub `(gh ... zfailowało: ...)` / `(gh CLI nie znalezione w PATH workflow runner'a)`. Pierwsze = backlog czysty, drugie = workflow runner miał transient problem z `gh`, ale zgłoszenie nadal idzie do realizacji (sekcja jest informacyjna, nie blokuje obiegu).
+
 # ODPOWIEDZI NA ISSUE — question-flow z pliku (od v15.2.7, atomic-reset od v15.2.8)
 Wcześniejszy question-flow (v15.2.6) miał dwa problemy: (1) maintainer-NVDA-user musiał wkleić długą odpowiedź przez web GitHub UI, ale kopiowanie z terminala VS Code zawodzi w accessibility buffer (powtarza ciągi znaków); (2) gdyby ktoś trzeci skomentował między napisaniem odpowiedzi a nadaniem etykiety `answered`, bot wciągnął JEGO komentarz zamiast odpowiedzi maintainera (race condition na chronologii komentarzy).
 
