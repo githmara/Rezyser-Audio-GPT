@@ -17,16 +17,22 @@
 8. KOPIOWANIE Z TERMINALA NIE JEST WIARYGODNE (KRYTYCZNE A11y, lessons learned po smoke teście v15.2.7). Accessibility buffer VS Code (mechanizm pośredniczący między terminalem a NVDA) **tokenizuje treść tnąc ją na fragmenty i powtarzając ciągi znaków** — dotyczy to nawet krótkich wzorców typu HEREDOC commit message (potwierdzone empirycznie 2026-05-16). Praktyczne reguły dla agenta:
    - **Długie treści (commit messages, release notes, drafty odpowiedzi, hiszpańskie/niemieckie/inne diakrytyczne fragmenty) ZAPISUJ DO PLIKU** i poproś użytkownika żeby otworzył plik w edytorze VS Code (Ctrl+P → nazwa pliku) — edytor pliku ma natywne A11y wsparcie, w przeciwieństwie do panelu Terminal. Wzorce: `pending_answer.md` dla draftów odpowiedzi na issue, `release.txt` dla Release description, `commit_msg.txt` w sytuacjach kiedy musisz dostarczyć użytkownikowi gotowy tekst commit messaga do skopiowania.
    - **NIE proś użytkownika żeby skopiował tekst z Twojego output'u w terminalu** — nawet jeśli wygląda krótko. Zawsze pisz do pliku i wskazuj ścieżkę.
-   - **AskUserQuestion w CLI ma znany bug renderowania bloków pytań przy multi-question** (potwierdzone 2026-05-16): pierwsze pytanie renderuje się poprawnie, kolejne mają **sklejone treści opcji** (treść opcji 1 z poprzedniego pytania miesza się z opcjami nowego pytania, bałagan w accessibility buffer). Praktyczne workaround'y:
-     * **Preferuj 1 pytanie per turn** — zadawaj wieloetapowo, sekwencyjnie, niż w jednym wywołaniu wielopytaniowym.
-     * Jeśli MUSZ zadać kilka pytań naraz (np. zależne decyzje projektowe), pisz w label'ach opcji **wyraźny prefix kontekstowy** typu „[Plik] pending_answer.md w roocie" zamiast samego „pending_answer.md w roocie" — to redukuje confuse'u w accessibility buffer, bo NVDA czyta prefix przed potencjalną sklejką.
-     * Po AskUserQuestion zawsze powtórz w tekście odpowiedzi co user wybrał („User wybrał: pending_answer.md w roocie + Bot automatycznie") żeby zweryfikować że Twoje rozumienie zgadza się z odpowiedzią faktyczną.
+   - **AskUserQuestion w CLI ma znany bug renderowania pytań przy question** (potwierdzone 2026-05-16): bałagan w accessibility buffer). Praktyczne workaround'y:
+     * **standardowy input usera bez terminalowych menu** — zadawaj wieloetapowo, sekwencyjnie, niż w jednym requeście o informację.
+     * Jeśli MUSZ zadać kilka pytań naraz (np. zależne decyzje projektowe), wylistuj wszystkie pytania, na które oczekujesz odpowiedzi, wraz z ewentualnymi propozycjami implementacji, a jeśli na coś krytycznego nie otrzymasz odpowiedzi, przypomnij o tym i jeszcze raz poproś o input przed kontynuacją.
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
 - Narzędzie może się bezgłośnie zamrozić przy próbie nadpisania zbyt wielkiego pliku.
 1. PRACA ETAPOWA: Nigdy nie próbuj przepisać całego pliku w jednym kroku.
 2. DELTA UPDATES: Przy niewielkich zmianach używaj precyzyjnych narzędzi edycji zamiast wypisywać plik w całości na nowo.
 3. Duży refaktor dziel etapami (np. krok 1: klasa/UI, krok 2: zdarzenia, krok 3: skomplikowana logika).
+
+**AUTOKONTROLA ROZMIARU CLAUDE.MD (KRYTYCZNE)**
+Agent MUSI proaktywnie monitorować rozmiar tego pliku przed każdą jego modyfikacją. Jeśli rozmiar pliku zbliży się do progu 35-40 tysięcy znaków, natychmiast uruchom procedurę CLEANUP przed kontynuowaniem jakichkolwiek innych zadań:
+1. **Zidentyfikuj historię:** Znajdź sekcje zawierające zamknięte historie wdrożeń, rozwiązane problemy z poprzednich wersji (np. obszerne logi z v15.2.7) i przestarzałe obejścia.
+2. **Zarchiwizuj:** Przenieś te historyczne dane do osobnego pliku `claude_archive.md`.
+3. **Odchudź główny plik:** W `CLAUDE.md` pozostaw tylko absolutnie krytyczne reguły A11y, wytyczne architektury wxPython, zasady terminala, procedurę release i krótką informację: "Zarchiwizowane procedury znajdują się w `claude_archive.md`".
+4. **Zgłoś do weryfikacji:** Po wykonaniu archiwizacji zapisz raport z tego, co zostało przeniesione, do pliku `cleanup_report.md` i poproś użytkownika o zatwierdzenie zmian w architekturze pamięci, zanim wrócisz do kodowania.
 
 # NUMER WERSJI APLIKACJI (od 13.4)
 - POJEDYNCZE źródło prawdy: plik `VERSION` w roocie repozytorium (plain text, np. `13.4-WIP` lub `13.4`). Bumpa robisz **wyłącznie tam** — wszystkie inne miejsca rozwijają tę wartość automatycznie.
