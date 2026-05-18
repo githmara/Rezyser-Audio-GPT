@@ -13,13 +13,11 @@
 4. KRYTYCZNE ZABEZPIECZENIE: Masz CAŁKOWITY ZAKAZ uruchamiania czegokolwiek z folderu `runtime/` do testowania kodu.
 5. FLAGA `--no-pager` W GIT (KRYTYCZNE A11y): Komendy git, które mogą uruchomić stronicowanie (np. `git diff`, `git log`, `git show`), ZAWSZE wykonuj z flagą `--no-pager`. Brak tej flagi uruchamia tryb interaktywny, blokujący terminal i generujący artefakty niedostępne dla NVDA.
 6. GIT STATUS PRZED COMMITEM: Przed każdym commitowaniem i dodawaniem plików ZAWSZE uruchom `git status`, aby zobaczyć pełny stan repozytorium.
-7. KLUCZ OPENAI DOSTĘPNY (Plik `golden_key.env` w roocie repo jest i zawsze był gitignorowany (`.gitignore` ma wpisy `*.env` i `golden_key.env`), ale **fizycznie obecny na dysku** dewelopera, więc skrypty `buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py` (oraz każda część kodu używająca `tlumacz_ai`) ładują z niego klucz przez `python-dotenv` (`load_dotenv(ROOT / "golden_key.env")` → `os.environ["OPENAI_API_KEY"]`). Agent **może i powinien** odpalać te skrypty bezpośrednio, kiedy tylko zadanie wymaga LLM — nie przekazuj tego kroku użytkownikowi „bo nie masz API". Procedura: jeśli skrypt zwróci błąd „❌ Brak prawidłowego OPENAI_API_KEY" lub błąd HTTP 401 / 429 (rate limit / brak kredytów), **wtedy** zatrzymaj się i poproś użytkownika o uzupełnienie konta (a nie z góry zakładaj). Po wygenerowaniu auto-tłumaczeń ZAWSZE rób manualny review halucynacji (LLM lubi wymyślać niezaszyfrowane przykłady szyfrów albo bezsensowne sklejki — porównuj z zatwierdzonymi szablonami w innym języku jako wzorcem stylu).
-8. KOPIOWANIE Z TERMINALA NIE JEST WIARYGODNE (KRYTYCZNE A11y, lessons learned po smoke teście v15.2.7). Accessibility buffer VS Code (mechanizm pośredniczący między terminalem a NVDA) **tokenizuje treść tnąc ją na fragmenty i powtarzając ciągi znaków** — dotyczy to nawet krótkich wzorców typu HEREDOC commit message (potwierdzone empirycznie 2026-05-16). Praktyczne reguły dla agenta:
-   - **Długie treści (commit messages, release notes, drafty odpowiedzi, hiszpańskie/niemieckie/inne diakrytyczne fragmenty) ZAPISUJ DO PLIKU** i poproś użytkownika żeby otworzył plik w edytorze VS Code (Ctrl+P → nazwa pliku) — edytor pliku ma natywne A11y wsparcie, w przeciwieństwie do panelu Terminal. Wzorce: `pending_answer.md` dla draftów odpowiedzi na issue, `release.txt` dla Release description, `commit_msg.txt` w sytuacjach kiedy musisz dostarczyć użytkownikowi gotowy tekst commit messaga do skopiowania.
-   - **NIE proś użytkownika żeby skopiował tekst z Twojego output'u w terminalu** — nawet jeśli wygląda krótko. Zawsze pisz do pliku i wskazuj ścieżkę.
-   - **AskUserQuestion w CLI ma znany bug renderowania pytań przy question** (potwierdzone 2026-05-16): bałagan w accessibility buffer). Praktyczne workaround'y:
-     * **standardowy input usera bez terminalowych menu** — zadawaj wieloetapowo, sekwencyjnie, niż w jednym requeście o informację.
-     * Jeśli MUSZ zadać kilka pytań naraz (np. zależne decyzje projektowe), wylistuj wszystkie pytania, na które oczekujesz odpowiedzi, wraz z ewentualnymi propozycjami implementacji, a jeśli na coś krytycznego nie otrzymasz odpowiedzi, przypomnij o tym i jeszcze raz poproś o input przed kontynuacją.
+7. KLUCZ OPENAI DOSTĘPNY: `golden_key.env` w roocie repo jest gitignorowany, ale fizycznie obecny u dewelopera. Skrypty `buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py` ładują klucz przez `python-dotenv` → `os.environ["OPENAI_API_KEY"]`. Agent **może i powinien** odpalać te skrypty bezpośrednio — nie przekazuj tego kroku użytkownikowi „bo nie masz API". Stop tylko gdy skrypt zwróci „❌ Brak prawidłowego OPENAI_API_KEY" lub HTTP 401/429 (rate limit / brak kredytów) — wtedy poproś usera o uzupełnienie. Po auto-tłumaczeniach ZAWSZE manualny review halucynacji (LLM wymyśla niezaszyfrowane przykłady szyfrów lub bezsensowne sklejki — porównuj z zatwierdzonymi szablonami w innym języku jako wzorcem stylu).
+8. KOPIOWANIE Z TERMINALA NIE JEST WIARYGODNE (KRYTYCZNE A11y). Accessibility buffer VS Code tokenizuje treść tnąc ją na fragmenty i powtarzając ciągi znaków — dotyczy nawet krótkich HEREDOC commit messages. Reguły:
+   - **Długie treści (commit messages, release notes, drafty odpowiedzi, diakrytyczne fragmenty) ZAPISUJ DO PLIKU** i poproś użytkownika żeby otworzył plik w edytorze VS Code (Ctrl+P → nazwa pliku). Edytor ma natywne A11y, panel Terminal nie. Wzorce nazw: `pending_answer.md` (drafty odpowiedzi na issue), `release.txt` (Release description), `commit_msg.txt` (commit message do wklejenia).
+   - **NIE proś o skopiowanie tekstu z output'u terminala** — nawet jeśli wygląda krótko. Zawsze pisz do pliku i wskazuj ścieżkę.
+   - **CAŁKOWITY ZAKAZ AskUserQuestion i wszelkich interaktywnych menu wyboru w CLI** (potwierdzone 2026-05-18): psuje accessibility buffer VS Code+NVDA, miesza opcje, tokenizuje treść. Pytania zadawaj WYŁĄCZNIE otwartym tekstem — bullet lista propozycji w wiadomości jest OK, użytkownik odpowie tekstem. Jeśli musisz zadać kilka pytań naraz, wylistuj wszystkie w jednej wiadomości z propozycjami i krótkimi opisami konsekwencji, a przy braku krytycznej odpowiedzi przypomnij i poproś ponownie przed kontynuacją.
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
 - Narzędzie może się bezgłośnie zamrozić przy próbie nadpisania zbyt wielkiego pliku.
@@ -54,7 +52,7 @@ Agent MUSI proaktywnie monitorować rozmiar tego pliku przed każdą jego modyfi
  * Rozróżniaj klucze: Tooltip i etykieta to dwa osobne klucze dla jednego obiektu.
 - Skrypt autotłumaczący z użyciem modelu (`tlumacz_ai.py`) zamraża podmieniane zmienne `{...}`, aby LLM nie naruszył struktury programu.
 - Manager Reguł skanuje pliki YAML z folderów `akcenty`, `szyfry`, `rezyser` i `gui`. Tworzenie nowego języka generuje wszystkie cztery podfoldery na raz — dispatch silnika nie wystartuje bez `rezyser/` (wymóg ≥1 trybu).
-- Pułapka kolejności w plikach `akcenty/<kod>.yaml`: silnik aplikuje listę `zamiany:` SEKWENCYJNIE (każda reguła operuje na wyjściu poprzedniej, `str.replace`). Reguły, które wprowadzają literę używaną później jako wzorzec, mogą wpaść w pętlę nadpisań. Klasyczny przypadek przy źródle ES: `ñ → nj` ORAZ `j → <coś>` — jeśli `ñ → nj` idzie pierwsze, nowa „j" zostanie złapana przez `j → <coś>`. Reguła: najpierw `j → <substytut>`, potem `ñ → nj` i `ll → j`. Komentuj kolejność w pliku YAML, żeby przyszły reviewer nie zamienił.
+- Pułapka kolejności w plikach `akcenty/<kod>.yaml`: silnik aplikuje listę `zamiany:` SEKWENCYJNIE (każda reguła operuje na wyjściu poprzedniej, `str.replace`). Reguły, które wprowadzają literę używaną później jako wzorzec, mogą wpaść w pętlę nadpisań — komentuj kolejność w YAML, żeby przyszły reviewer nie zamienił. Przykład empiryczny ES (`ñ → nj` przed `j → <coś>`) w `claude_archive.md`.
 
 # ZAMYKANIE RELEASU — DOKUMENTACJA (KRYTYCZNE)
 `build_release.py` wywołuje `generuj_dokumentacje.generuj()` wewnętrznie, przez co po jego uruchomieniu w repo pojawiają się niezcommitowane zmiany w `docs/*.txt`. Żeby tego uniknąć, dokumentację należy wygenerować i zcommitować **ręcznie** przed commitem release'u, według poniższego schematu.
@@ -65,12 +63,7 @@ Przy każdym release commicie, jeśli w danym cyklu zmieniło się cokolwiek z l
 ## Procedura (w tej kolejności)
 
 ### Krok 0a — Bump VERSION (KRYTYCZNE: PRZED jakąkolwiek regeneracją docs!)
-```bash
-# zaktualizuj plik VERSION w roocie repo, np. 13.9 → 14.0
-```
-**Dlaczego TUTAJ, a nie w commicie release'u?** `generuj_dokumentacje.py` rozwija placeholder `{numer_wersji}` z pliku VERSION przy KAŻDYM wywołaniu. Jeśli zwalidujesz docs (Krok 2) jeszcze ze starym numerem, zcommitujesz docs ze starym numerem, a potem dopiero bumpniesz VERSION w commicie release'u — `build_release.py` zadziała: wewnątrz wywoła `generuj()` z nowym VERSION, regeneruje wszystkie 16 plików `docs/*.txt` z nowym tytułem („Version 14.0" zamiast „Version 13.9") i wygeneruje **niezcommitowany diff** zaraz po buildzie. Symptom: `git status` po `build_release.py` pokazuje `modified: docs/manual.<iso>.txt × 8` — co kontradyktuje obietnicy „dokumentacja zcommitowana ręcznie przed release'em".
-
-Zasada: **najpierw bump VERSION, potem regeneracja docs, potem release commit z VERSION + RELEASE_NOTES** (sam VERSION można zcommitować z release commitem — chodzi o to, żeby docs były generowane już z docelowym numerem). Plik VERSION jest mały (jedna linia) i bumpa robisz raz na release — nie ma kosztu „o, zapomniałem zacommitować VERSION zanim odpaliłem `--waliduj`", bo Krok 4 i tak go scali.
+Zaktualizuj plik `VERSION` w roocie repo (np. 13.9 → 14.0). Zasada: **najpierw bump VERSION, potem regeneracja docs, potem release commit**. `generuj_dokumentacje.py` rozwija `{numer_wersji}` z pliku VERSION przy KAŻDYM wywołaniu — jeśli zwalidujesz docs ze starym numerem i zcommitujesz, `build_release.py` wewnętrznie wywoła `generuj()` z nowym VERSION i wygeneruje niezcommitowany diff `modified: docs/manual.<iso>.txt × 8` zaraz po buildzie. Sam VERSION można zcommitować razem z release commit'em (Krok 4) — chodzi tylko o to, żeby docs były generowane już z docelowym numerem.
 
 ### Krok 0b — Odśwież reżysera (ZAWSZE po dodaniu/usunięciu pliku akcent*.yaml)
 ```bash
@@ -95,12 +88,12 @@ Wzorzec edycji: najpierw zaktualizuj `pl/` (język bazowy), potem otwórz analog
 
 **Autotłumacz (`buduj_wielojezyczne_docs.py`) — TYLKO dla zupełnie nowych plików szablonów**, tzn. gdy dany `*.yaml` w danym `<kod>/gui/dokumentacja/` w ogóle nie istnieje (np. nowy język bazowy albo nowy szablon dodany do `pl/` bez odpowiednika w `en/fi/...`). Po AI-tłumaczeniu obowiązkowo przejrzyj wyniki i popraw halucynacje używając już zatwierdzonych szablonów jako wzorca.
 
-**Pułapka po autotłumaczeniu: halucynacja wstrzykuje treść SPOZA źródła pl.** Znaleziono 2026-05-15 w trakcie audytu pre-15.2.5: `dictionaries/fi/gui/dokumentacja/manual.yaml::naglowek` zawierał ~30 dodatkowych linii rozdziałów (`## Akcenty`, `## Szyfr: Odwracacz Tekstu`, `## Szyfr: Typoglycemia`, `## Pliki i głosy`) z treścią mieszaną fińsko-polską („Dostępne akcenty to:" w polszczyźnie, lista głosów typu „Englanti (Samantha/Mark…)"), wstrzykniętą prawdopodobnie z sąsiedniej paczki `dictionaries.yaml` lub z fragmentów dialogowych — `pl/manual.yaml::naglowek` nigdy nie miał takich nagłówków. Mechanizm: model widzi całą paczkę dokumentacji w kontekście treningowym i przy słabej walidacji potrafi dosypać „logicznie pasujący" rozdział, którego nie ma w polskim źródle. Skutek: fiński manual w `docs/` zawierał polskie zwroty i listy techniczne nieistniejące w żadnym innym języku.
+**Pułapka po autotłumaczeniu: halucynacja wstrzykuje treść SPOZA źródła pl.** Mechanizm: model widzi całą paczkę dokumentacji w kontekście treningowym i przy słabej walidacji potrafi dosypać „logicznie pasujący" rozdział, którego nie ma w polskim źródle. Pełny opis incydentu fi/manual.yaml z 2026-05-15 — `claude_archive.md`.
 
 Sanity check po `buduj_wielojezyczne_docs.py` lub `tlumacz_ai.py` (PRZED commit'em obcojęzycznego szablonu):
 - **Porównaj liczbę linii każdej wartości tekstowej** `dictionaries/<iso>/gui/dokumentacja/<plik>.yaml` vs odpowiadającego klucza w `pl/`. Różnica >40% to silny sygnał halucynacji (autotłumaczenie sensowne podtrzymuje rozmiar 1:1 ± kilka linii na różnice składniowe).
-- **Polskie pozostałości w obcojęzycznych szablonach**: `.venv/Scripts/python -c "import pathlib,re; [print(p,':',i+1,l) for p in pathlib.Path('dictionaries').glob('*/gui/dokumentacja/*.yaml') if p.parts[1]!='pl' for i,l in enumerate(p.read_text(encoding='utf-8').splitlines()) if re.search(r'\bpolski|polska|polsku|po polsku|dostępne|szyfr:?\s|odwracacz', l, re.IGNORECASE)]"`. Wyjątki dozwolone: nazwy plików technicznych typu `polski.yaml` w sekcjach opisujących strukturę paczki silnika (zwykle w `dictionaries.yaml`, nie w `manual.yaml::naglowek`).
-- **Markdown nagłówki `## ` w wartościach `<iso>` których nie ma w `pl`**: niemal pewna halucynacja. Polski oryginał używa zwykłych nagłówków tekstowych bez `##`, więc każde `## ` w obcojęzycznym szablonie zasługuje na manualną weryfikację.
+- **Polskie pozostałości w obcojęzycznych szablonach**: zgrep po `dictionaries/*/gui/dokumentacja/*.yaml` (z wykluczeniem `pl/`) na wzorce `polski|polska|polsku|po polsku|dostępne|szyfr:|odwracacz`. Wyjątki: nazwy plików technicznych typu `polski.yaml` w opisach struktury paczki silnika.
+- **Markdown nagłówki `## ` w wartościach `<iso>` których nie ma w `pl`**: niemal pewna halucynacja. Polski oryginał używa nagłówków tekstowych bez `##`, więc każde `## ` w obcojęzycznym szablonie zasługuje na manualną weryfikację.
 
 ### Krok 2 — Wygeneruj + zwaliduj
 ```bash
@@ -134,11 +127,7 @@ Workflow PR/branch został świadomie porzucony w v15.2.5. Solo-dev + A11y first
 2. Edytuj `RELEASE_NOTES.md`: na górze pliku zaktualizuj numer wersji w nagłówku (linia 1), dodaj nowy paragraph `*Patch v<wersja>: ...*` jako pierwszy w bloku streszczeń przed `---`, dodaj nową sekcję `## <wersja> — patch release ...` zaraz po `---` separatorze (przed istniejącą sekcją poprzedniej wersji). Wzorzec struktury: TL;DR (3-4 akapity narracyjne) → Co nowego dla użytkownika końcowego → Pod maską (techniczne) → Co nie weszło → Walidacja przed commit'em.
 3. Regeneracja + commit docs (Kroki 1-3 z `# ZAMYKANIE RELEASU — DOKUMENTACJA`). Możesz zcommitować docs/ + RELEASE_NOTES.md + VERSION + edytowane szablony YAML + (opcjonalnie) kod razem jako single release commit, albo rozbić na dwa commity (docs + release). Single commit preferowany dla zwykłych patchy — czytelniejsza historia.
 4. Commit message: `v<wersja>: <jednolinijkowy opis>` w nagłówku, body bullet list głównych zmian. Wzorzec: `git --no-pager show <ostatni tag> --stat | head -5` dla podobnego patcha.
-   **KRYTYCZNE: ZAKAZ GitHub auto-close keywords + `#N`** w commit message (nagłówku ANI body), gdy issue ma być zamknięte przez bot workflow `issue-closure.yml`. Zakazane słowa (case-insensitive, GitHub keywords): `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, `resolved` przed `#N`. Wykonują się przy push do main **lub** przy publikacji Release wskazującej na commit zawierający keyword. **Pułapka wykryta empirycznie 2026-05-16 na issue #13** (release-with-answer flow): commit `cd0bd21` miał w nagłówku `(fix #13)`, GitHub auto-zamknął issue zaraz po publikacji Release v15.2.8, workflow boota nie odpalił (etykieta `fixed-in-release` nie została nadana), `pending_answer.md` wisiał w repo, maintainer musiał ręcznie skomentować + zalockować + cleanup commitem usunąć plik. Plus regresja kontrolna GitHub: dla issues zamkniętych przez auto-close keyword **przycisk „Reopen issue" nie jest dostępny** w panelu actions (kiedyś był; od ~2025 GitHub usunął lub schował głęboko). Alternatywy zamiast `(fix #N)`:
-   - `(re: #N)` — neutralna referencja, nie wyzwala auto-close
-   - `(addresses #N)` — semantycznie OK dla bug-issues, nie GitHub keyword
-   - `(per #N)` / `(scope: #N)` — krótkie
-   - pominięcie referencji issue w nagłówku — numer issue można wymienić w body commit'a (bez słowa-keyword przed `#N` LUB ze słowami `addresses`/`re`/`per`) bo full-text scanner GitHub keyword działa na CAŁY commit message, nagłówek + body. „mentions #N" / „relates to #N" / „context: #N" — wszystkie bezpieczne.
+   **KRYTYCZNE: ZAKAZ GitHub auto-close keywords + `#N`** w commit message (nagłówku ANI body), gdy issue ma być zamknięte przez bot workflow `issue-closure.yml`. Zakazane słowa (case-insensitive, GitHub keywords) przed `#N`: `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, `resolved`. Wykonują się przy push do main **lub** przy publikacji Release wskazującej na commit zawierający keyword. Plus: dla issues zamkniętych przez auto-close keyword GitHub od ~2025 ukrył/usunął przycisk „Reopen". Bezpieczne alternatywy: `(re: #N)`, `(addresses #N)`, `(per #N)`, `(scope: #N)`, „mentions #N" / „relates to #N" / „context: #N" — żadne z nich nie jest GitHub keyword. Pełna narracja incydentu #13 (2026-05-16) w `claude_archive.md`.
 5. `git push origin main`.
 6. **Preferowana (od v15.2.9)**: odpal workflow `draft-release.yml` przez Web GitHub → Actions → „Draft Release (auto-tag + RELEASE_NOTES.md sekcja → draft)" → Run workflow → input `potwierdz=tak` → Run. Bot wykonuje:
    - odczytuje VERSION z roota repo,
@@ -158,40 +147,10 @@ Workflow PR/branch został świadomie porzucony w v15.2.5. Solo-dev + A11y first
 
    **Fallback ręczny** (gdy używasz `release.txt` z kroku 6 fallback): Web GitHub → nowy Release. „Create new tag: v<wersja> on publish". Otwórz `release.txt` w Notatniku (`start release.txt` w PowerShellu), Ctrl+A → Ctrl+C, wklej w polu Description (markdown renderuje 1:1 w GitHub Release UI). Upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe`. Publish. Po wklejeniu `release.txt` możesz usunąć z dysku — jest gitignored, więc nie zaśmieca historii, a przy następnym patchu i tak zostanie wygenerowany od nowa.
 
-## Heurystyka „cleanup commit boota = force-push tag" (od v15.2.7, edge case fallback po v15.2.8)
-Od v15.2.8 domyślną ścieżką sprzątania po question-flow jest **atomic-reset** boota (bot wymazuje atomowy commit `pending_answer.md` przez `git reset --hard HEAD~1` + force-push-with-lease, historia main pozostaje czysta jakby draft nigdy nie istniał). Pełny opis i wymóg atomowości commit'a — patrz `# ODPOWIEDZI NA ISSUE`. Heurystyka force-push tag pozostaje w CLAUDE.md jako **fallback dla edge case'u**, gdy bot nie mógł użyć atomic-reset i musiał dorobić cleanup commit boota — w praktyce powinno to być rzadkością, ale wzorzec zachowujemy bo dwie sytuacje wciąż go uruchamiają.
+## Heurystyka „cleanup commit boota = force-push tag" — fallback edge case
+Od v15.2.8 happy path = atomic-reset boota (patrz `# ODPOWIEDZI NA ISSUE`). Jeśli bot nie mógł użyć atomic-reset (HEAD nieatomowy albo `--force-with-lease` odrzucony) i dorobił cleanup commit, dopuszczalny jest force-push **tag-only** post-publish na HEAD, żeby archive Release UI auto-regenerated był czysty. Pełna procedura (warunki kontrolne, kiedy NIE stosować, komendy) — `claude_archive.md`.
 
-### Kiedy zastosować (kiedy heurystyka wciąż żyje)
-1. **`pending_answer.md` zcommitowany razem z release commit'em LUB innymi plikami** (np. fix-up CLAUDE.md w tym samym commicie). Wtedy HEAD NIE jest atomowy, bot spada do fallbacku cleanup commit'a (`chore(answer-bot): cleanup pending_answer.md po odpowiedzi na #<N>`), a archive Release v<wersja> z punktu 7 zawiera draft jako kosmetyczny artefakt.
-2. **Atomic-reset boota failuje** (np. `--force-with-lease` odrzucony, brak `fetch-depth: 2`, transient API error) — bot loguje warning, ale jeśli fallback cleanup commit'a się powiedzie, mamy ten sam stan co w punkcie 1 (cleanup commit między tagiem a HEAD).
-
-W obu sytuacjach: po zakończeniu workflow boota między tagiem v<wersja> a origin/main HEAD jest cleanup commit autora `github-actions[bot]` — to sygnał że można force-push tagu na HEAD, żeby archive Release UI auto-regenerated był już czysty.
-
-### Warunki kontrolne przed force-push'em
-- Tag v<wersja> wskazuje na release commit zawierający `pending_answer.md`.
-- Workflow boota zakończył się sukcesem (issue zamknięte + zalockowane + cleanup commit boota na origin/main).
-- `git log --oneline v<wersja>..origin/main` pokazuje DOKŁADNIE 1 commit (cleanup boota, autor `github-actions[bot]`). Jeśli więcej commit'ów — nie force-pushuj automatycznie, są inne post-release zmiany do osobnej analizy.
-
-### Kiedy NIE zastosować
-- Release wynika z bug-flow (`fixed-in-release`, nie `answered`) — wtedy cleanup boota nie istnieje (bug-flow nie używa `pending_answer.md`), tag jest atomowy z release commit'em zgodnie z normalną procedurą.
-- **Bot użył ścieżki preferowanej atomic-reset** — wtedy tag NADAL wskazuje na release commit, HEAD też wskazuje na release commit, między nimi 0 commit'ów. Force-push tag byłby NO-OP (tag już jest tam, gdzie ma być). To jest oczekiwany happy path od v15.2.8.
-- Między tagiem a HEAD jest 0 commit'ów (workflow boota jeszcze nie odpalił, lub user jeszcze nie nadał etykiety `answered`, lub bot użył atomic-reset) — force-push byłby NO-OP.
-- Między tagiem a HEAD jest >1 commit (cleanup boota + jakiś inny commit) — analizuj zawartość każdego commit'a; jeśli wszystkie są refinement'em release (np. dodatkowy fix-up CLAUDE.md z lessons learned, jak v15.2.7), tag może wskazywać na HEAD, ale ZAWSZE eksplicytnie zweryfikuj `git --no-pager log --stat` przed force push.
-
-### Procedura
-```bash
-# 1. Zweryfikuj liczbę commit'ów między tagiem a HEAD
-git --no-pager log --oneline v<wersja>..origin/main
-# 2. Jeśli OK, lokalny tag move
-git tag -d v<wersja>          # usuń stary lokalny tag
-git tag v<wersja> HEAD        # nowy tag na aktualnym HEAD
-# 3. Force push tagu na origin (-f / --force tag-only, NIE branch!)
-git push origin v<wersja> --force
-```
-
-Po force push tag'a, web GitHub Release UI auto-regeneruje source-code archive z nowego SHA — bez potrzeby edytować Release description ani re-uploadować Installer EXE. Release artefakty (Installer) zachowują się niezależnie od tag'a (są attachment'ami).
-
-UWAGA: force push do MAIN/MASTER przez MAINTAINERA pozostaje zakazany. Dopuszczalne wyjątki w tym repo: (a) force push **tag-only** post-publish dla scenariusza fix-up (wzorzec udokumentowany w memory `[[project_v15_2_roadmap]]`); (b) force push **branch-only** przez `github-actions[bot]` w workflow `issue-closure.yml` przy wymazywaniu atomowego commit'a `pending_answer.md` (`git reset --hard HEAD~1` + `git push --force-with-lease`, od v15.2.8) — bot ma `contents: write` i działa wyłącznie w sytuacji gdy HEAD = single-file commit z samym `pending_answer.md`, więc force-push nie może niczego innego zniszczyć.
+UWAGA: force push do MAIN/MASTER przez MAINTAINERA pozostaje zakazany. Dopuszczalne wyjątki w tym repo: (a) force push **tag-only** post-publish dla scenariusza fix-up (wzorzec udokumentowany w memory `[[project_v15_2_roadmap]]`); (b) force push **branch-only** przez `github-actions[bot]` w workflow `issue-closure.yml` przy atomic-reset commit'a `pending_answer.md` (od v15.2.8) — bot ma `contents: write` i działa wyłącznie gdy HEAD = single-file commit z samym `pending_answer.md`, więc force-push nie może niczego innego zniszczyć.
 
 ## Czego nie robić
 - NIE twórz feature branchy dla zwykłych patchy. Wszystko bezpośrednio na main.
@@ -199,21 +158,14 @@ UWAGA: force push do MAIN/MASTER przez MAINTAINERA pozostaje zakazany. Dopuszcza
 - NIE polegaj na `PULL_REQUEST_COMMENTS.md` — plik usunięty z repo w v15.2.5 fix-up commicie. Komentarze recenzentskie (jeśli pojawią się) trafiają wprost do `RELEASE_NOTES.md::<wersja>::Co nie weszło` jako TODO do następnego cyklu, albo do konwersacji z agentem.
 
 ## Wyjątki (kiedy feature branch ma sens)
-- Refaktor większy niż jeden patch (np. planowany v15.3+ split user-data vs seed-data dla `dictionaries/`): feature branch jako logiczna izolacja etapowa, lokalne commity per etap. Finalizujący merge przez `git merge --ff-only` do main BEZ PR-u, web Release standardową ścieżką po merge. Procedura sprzątania po merge zachowana z czasów PR-flow: `git fetch --prune; git checkout main; git pull; git branch -d <gałąź>` (`-d` nie `-D` — `-d` odmówi jeśli nie zmergowane, co jest bezpieczne).
-- Eksperymentalna gałąź (np. port Linux) którą możesz porzucić: feature branch + ewentualne `git branch -D` po decyzji o porzuceniu.
-- Kontrybutor zewnętrzny: oni robią PR, Ty mergujesz przez web (rzadki przypadek, fork-based, nie wymaga zmian po naszej stronie).
+Rzadkie scenariusze (duży refaktor wielo-patchowy, eksperymentalna gałąź do porzucenia, PR od kontrybutora zewnętrznego) — opisane w `claude_archive.md`.
 
 ## Klauzula awaryjna: bug-issue ma pierwszeństwo nad planowaną treścią
-Jeśli pomiędzy ostatnim Release a planowaną treścią kolejnego patcha (z `RELEASE_NOTES.md::<wersja>::Co nie weszło` lub z agent memory) pojawi się nowe issue z etykietą `bug` od prawdziwego usera — **bug ma pierwszeństwo**. Workflow „Z Południa na Północ" z v15.2.4 zakłada, że każde otwarte issue zostaje zamknięte przez `fixed-in-release`; odkładanie buga na „następny-następny" patch rozjeżdża workflow (issue wisi otwarte, user czeka, Lumi/Vieno/Katla nie mają czego zamknąć).
+Jeśli między ostatnim Release a planowaną treścią kolejnego patcha pojawi się nowe issue z etykietą `bug` od prawdziwego usera — **bug ma pierwszeństwo**. Workflow „Z Południa na Północ" zakłada, że każde otwarte issue zamyka się przez `fixed-in-release`; odkładanie rozjeżdża workflow.
 
-Procedura przy konflikcie planów:
-1. Odłóż planowaną pracę feature na kolejny cykl — przepisz wpis z `RELEASE_NOTES.md::<wersja>::Co nie weszło` jako fakt do następnego patcha.
-2. Bumpuj VERSION X.Y.(Z+1) (patch tag, [[feedback_hotfix_release]]).
-3. Patch rozwiązuje TYLKO bug-issue (lub grupę powiązanych bug-issues z jednego obszaru — można scalić w jeden patch jeśli leżą blisko siebie tematycznie i nie wymagają osobnych testów regresji).
-4. W `RELEASE_NOTES.md::<wersja>::Co nowego` wymień zamknięte issues (numery + krótkie streszczenie), w `Co nie weszło` przepisz wpisy z poprzedniego cyklu (przeniesienie na kolejny patch).
-5. Po publikacji Release nadaj zamkniętym issues etykietę `fixed-in-release` przez web GitHub UI — workflow `issue-closure.yml` (Lumi/Vieno/Katla) automatycznie skomentuje i zamknie je w języku oryginalnego zgłoszenia z linkiem do nowego Release.
+Procedura: (1) odłóż feature na następny cykl (przepisz `Co nie weszło` → następny patch), (2) bumpuj X.Y.(Z+1) [[feedback_hotfix_release]], (3) patch rozwiązuje TYLKO bug-issue (lub grupę powiązanych z jednego obszaru), (4) w `RELEASE_NOTES.md::Co nowego` wymień zamknięte issues, w `Co nie weszło` przepisz poprzedni cykl, (5) po Release nadaj etykietę `fixed-in-release` przez web UI — workflow boota zamyka.
 
-Wyjątek: jeśli bug jest niewykonalny w pojedynczym patchu (wymaga większego refaktoru, np. issue sugerujące split user-data vs seed-data dla `dictionaries/` z roadmapy v15.3+) — przeetykietuj go z `bug` na `enhancement` z komentarzem wyjaśniającym dlaczego ten konkretny bug nie jest blokerem (np. „obejście istnieje przez backup dictionaries/ przed update, opisane w manualu sekcja Automatyczne aktualizacje; pełne rozwiązanie wymaga split architektury zaplanowanego na v15.3+"). Po przeetykietowaniu Sami przerobi to normalnym workflowem na feature-issue dla kolejnego cyklu, bez naruszania reguły „bug = priorytet".
+Wyjątek: bug niewykonalny w jednym patchu (wymaga większego refaktoru, np. split user-data/seed-data z roadmapy v15.3+) — przeetykietuj `bug` → `enhancement` z komentarzem wyjaśniającym workaround + plan strukturalny. Sami przerobi na feature-issue.
 
 # OBIEG ZGŁOSZEŃ Z POŁUDNIA NA PÓŁNOC — INTERPRETACJA PROMPTU SAMI (od v15.2.8 trójsekcyjny)
 Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera każde nowe GitHub Issue (eventy `opened` lub `labeled` z akceptowalną etykietą — patrz `LABELS_ACCEPT` / `LABELS_IGNORE` w skrypcie) i wysyła do Centrum mail w plain text o standardowej **trójsekcyjnej** strukturze:
@@ -245,12 +197,8 @@ Plik `skrypty/issue.txt` (tymczasowy bufor maintainera na treść maila) jest gi
 - **Tryb FALLBACK** (gdy OpenAI zawiodło — brak kredytów, 401/429, timeout): mail ma w temacie `[Sami (fallback)]` zamiast `[Sami (LLM)]`, a sekcja PROMPT = surowy `title + body` z notatką „(Sami chwilowo nie pomogła z przeredagowaniem...)". W fallbacku NIE MA podziału na TRYB A/B — Centrum sam decyduje ścieżkę na podstawie etykiet (wymienione zaraz pod linkiem do issue w nagłówku maila).
 - **Pusta sekcja OTWARTE ISSUES**: komunikat `(brak otwartych issues)` lub `(gh ... zfailowało: ...)` / `(gh CLI nie znalezione w PATH workflow runner'a)`. Pierwsze = backlog czysty, drugie = workflow runner miał transient problem z `gh`, ale zgłoszenie nadal idzie do realizacji (sekcja jest informacyjna, nie blokuje obiegu).
 
-# ODPOWIEDZI NA ISSUE — question-flow z pliku (od v15.2.7, atomic-reset od v15.2.8)
-Wcześniejszy question-flow (v15.2.6) miał dwa problemy: (1) maintainer-NVDA-user musiał wkleić długą odpowiedź przez web GitHub UI, ale kopiowanie z terminala VS Code zawodzi w accessibility buffer (powtarza ciągi znaków); (2) gdyby ktoś trzeci skomentował między napisaniem odpowiedzi a nadaniem etykiety `answered`, bot wciągnął JEGO komentarz zamiast odpowiedzi maintainera (race condition na chronologii komentarzy).
-
-Tryb FILE rozwiązuje obie sprawy: maintainer zapisuje draft jako `pending_answer.md` w roocie repo (Write/Edit tools, bez kopiowania z terminala), pushuje na main, nadaje etykietę `answered`. Bot wczytuje treść Z PLIKU (nie z komentarzy), opakowuje w wrapper Lumi/Vieno/Katla, publikuje, zamyka i lockuje issue, oraz wymazuje draft z historii main.
-
-**Atomic-reset (od v15.2.8) — ulepszenie czystości historii:** zamiast doklejać cleanup commit boota (jak v15.2.7), bot preferuje wymazanie atomowego pending_answer.md commit'a przez `git reset --hard HEAD~1` + `git push --force-with-lease`. Warunek: HEAD na origin/main MUSI być commit'em dodającym DOKŁADNIE jeden plik: `pending_answer.md` (żadnych innych zmian). Jeśli warunek spełniony, draft znika z historii bez śladu — tag v<wersja> pozostaje stabilny, archive Release UI od razu czysty, brak kosmetycznych artefaktów. Jeśli warunek niespełniony (np. maintainer zcommitował razem fix-up CLAUDE.md), bot spada do fallbacku cleanup commit'a z v15.2.7 + heurystyki force-push tag post-publish (`# WORKFLOW RELEASE`).
+# ODPOWIEDZI NA ISSUE — question-flow z pliku (FILE mode + atomic-reset)
+Maintainer zapisuje draft jako `pending_answer.md` w roocie repo (Write/Edit tools, bez kopiowania z terminala), pushuje na main atomowo, nadaje etykietę `answered`. Bot (`issue_closure_north.py`) wczytuje treść Z PLIKU (nie z komentarzy — to eliminuje race condition trzeciego komentującego), opakowuje w wrapper Lumi/Vieno/Katla, publikuje, zamyka i lockuje issue, oraz wymazuje draft z historii main przez atomic-reset: `git reset --hard HEAD~1` + `git push --force-with-lease`. Warunek atomic-reset: HEAD na origin/main MUSI być commit'em dodającym DOKŁADNIE jeden plik `pending_answer.md`. Jeśli warunek niespełniony — bot fallbackuje do cleanup commit'a (patrz heurystyka force-push tag w `# WORKFLOW RELEASE` + szczegóły w `claude_archive.md`). Historia ewolucji v15.2.6 → v15.2.7 → v15.2.8 — `claude_archive.md`.
 
 ## Procedura — flow czystego question (issue NIE wymaga release)
 1. Stwórz/zaktualizuj `pending_answer.md` w roocie repo — czysta odpowiedź merytoryczna w języku oryginalnego zgłoszenia (markdown OK), BEZ podpisu maintainera (wrapper Lumi/Vieno/Katla dopisuje swój podpis).
@@ -261,45 +209,25 @@ Tryb FILE rozwiązuje obie sprawy: maintainer zapisuje draft jako `pending_answe
    * **Nieatomowy** (HEAD zawiera inne pliki): `git rm pending_answer.md && git commit && git push` z autorem `github-actions[bot]` (fallback v15.2.7 cleanup commit).
 5. Po zakończeniu workflow lokalnie zrób `git fetch origin && git reset --hard origin/main` (NIE zwykłe `git pull`! Atomic-reset rewrite'uje historię na origin — `git pull` z domyślnym merge wykryje rozjazd i zacznie histeryzować przy non-fast-forward; `git reset --hard origin/main` po fetchu po prostu synchronizuje lokalny ref z aktualnym remote, niezależnie czy bot użył atomic-reset czy cleanup commit'a). `git log` pokaże 0 commit'ów (atomic-reset) lub 2 commity maintainer-add + bot-rm (fallback).
 
-## Sub-procedura — flow „release-then-answer" (issue wymaga odpowiedzi + release)
-Stosuj gdy issue obnaża buga, który chcesz naprawić w nowym release'ie, ALE chcesz też skomentować na issue (np. doprecyzowanie / wyjaśnienie diagnozy). Bez tego sub-flow trafiasz w pułapkę: zcommitujesz release commit + pending_answer.md razem → release commit nie jest atomowy → bot użyje fallbacku → tag wymaga force-push post-publish. „Release-then-answer" eliminuje pułapkę przez dwustopniowy push:
+## Sub-procedury bug+answer (release-then-answer, release-with-answer)
+Gdy issue wymaga release'u + komentarza/dolepka osobistej wiadomości — wybór ścieżki:
+- **release-then-answer**: bug fix + osobny komentarz BEZ linku do Release. Zamykane przez `answered`. Release commit i `pending_answer.md` commit są ROZBITE na osobne pushe, między nimi publikacja Release (tag wskazuje na czysty release commit). Rzadkie.
+- **release-with-answer** (od v15.2.8): bug-issue + dolepek osobistej wiadomości (tip o recovery, przeprosiny). Zamykane przez `fixed-in-release` z FILE mode boota (dolepia treść `pending_answer.md` pod TEMPLATES separatorem `---`). KRYTYCZNE: tag musi wskazywać na release commit, NIE na pending_answer.md commit — sprawdź SHA w Web UI.
 
-1. Wszystkie kroki z `# WORKFLOW RELEASE — Procedura release` (bump VERSION, regeneracja docs, edycja RELEASE_NOTES.md, commit release, `git push origin main`). **`pending_answer.md` NIE jest częścią tego commit'a.**
-2. Web GitHub UI → utwórz nowy Release z tagiem v<wersja> atomowo (procedura standardowa z `# WORKFLOW RELEASE`). Tag wskazuje na CZYSTY release commit, archive od razu pristine.
-3. `git fetch --tags origin` lokalnie — synchronizujesz lokalny ref tagu (powstał na zdalnym przez web Release UI, lokalnie go jeszcze nie masz).
-4. Wracasz do flow z `## Procedura — flow czystego question` od kroku 1: tworzysz/edytujesz `pending_answer.md`, atomowy commit, push, etykieta `answered`. Bot wymazuje commit atomic-resetem, historia main = release commit (bez draftu, bez cleanup).
+Pełne procedury obu sub-flow'ów (kroki + komendy) → `claude_archive.md`.
 
-Net effect: historia wygląda tak, jakby `pending_answer.md` nigdy nie istniał. Tag stabilny od momentu publikacji Release. Archive Release UI nigdy nie pokazał draftu.
+## Sytuacje brzegowe — kluczowe
+- **Workflow YAML wymóg `fetch-depth: 2`** na `actions/checkout@v4` w `issue-closure.yml` — bez tego HEAD~1 nie istnieje lokalnie i atomic-reset failuje na każdym issue.
+- **Równoległe issue z question**: bot trzyma jeden plik per repo, więc obsługuj jedno question-issue na raz. Drugie czeka aż pierwsze się zamknie.
+- **Bug-issue ≠ question-flow**: etykiety disjunktywne. `answered` TYLKO na question. `fixed-in-release` na bug. Od v15.2.8 bug-issue MOŻE mieć dolepek (release-with-answer), ale wciąż przez `fixed-in-release`, nie przez `answered`.
 
-## Sub-procedura — flow „release-with-answer" (bug-issue + dolepek osobistej wiadomości w jednym Release; od v15.2.8)
-Stosuj gdy bug-issue dostaje fix w nowym release'ie i chcesz dorzucić osobistą wiadomość (przeprosiny za incydent, tip o recovery, kontekstowe wyjaśnienie) PONAD generycznym komentarzem boota z linkiem do Release. To wariant lżejszy niż „release-then-answer" — wszystko domyka się w jednej publikacji Release i jednej etykiecie `fixed-in-release` zamiast osobnych ścieżek release + answered. Wymaga rozszerzenia `issue_closure_north.py` z v15.2.8 (opcjonalny tryb FILE dla `fixed-in-release`).
-
-1. Wszystkie kroki z `# WORKFLOW RELEASE — Procedura release` (bump VERSION, regeneracja docs, edycja RELEASE_NOTES.md, commit release, `git push origin main`). **`pending_answer.md` NIE jest częścią tego commit'a.**
-2. **Atomowy commit `pending_answer.md`** na main, PRZED publikacją Release: `git add pending_answer.md && git commit -m "answer: draft dolepka osobistej wiadomości do release-with-answer #<N>" && git push origin main`. Treść pliku to czysta osobista wiadomość bez podpisu maintainera (bot dolepi własny intro + persona-signature).
-3. Web GitHub UI → utwórz nowy Release z tagiem v<wersja> atomowo. **KRYTYCZNE**: tag „Create new tag: v<wersja> on publish" wskaże na **release commit z kroku 1 (NIE na pending_answer.md commit z kroku 2)** — sprawdź w UI że SHA tagu zgadza się z `git --no-pager log -1 --format=%H <hash-release-commitu>`. Archive Release UI dostanie pristine release commit, draft niewidoczny w paczce źródłowej.
-4. Po publikacji Release: na web GitHub UI nadaj etykietę `fixed-in-release` na bug-issue #N. Workflow `issue-closure.yml` odpala bota.
-5. Bot (skrypt `issue_closure_north.py`, branch `fixed-in-release` z v15.2.8 FILE mode) wykrywa obecność `pending_answer.md` → buduje komentarz: standardowy TEMPLATES[lang][persona] z linkiem do Release, separator `---`, intro `PERSONAL_NOTE_INTRO[lang]` („dodatkowa wiadomość od maintainera"), treść z pliku. `gh issue comment`, `gh issue close`, `gh issue lock --reason resolved`. Następnie atomic-reset HEAD (sprawdza atomowość) — wymazuje `pending_answer.md` commit z kroku 2, historia main = release commit z kroku 1 + 0 więcej commit'ów.
-6. Lokalnie: `git fetch origin && git reset --hard origin/main`. `git log v<wersja>..origin/main` pokazuje 0 commit'ów (atomic-reset zadziałał, jak release-then-answer).
-
-Różnica vs „release-then-answer":
-- `release-then-answer` zamyka issue przez etykietę `answered` (question-flow), bez linku do Release w komentarzu.
-- `release-with-answer` zamyka issue przez `fixed-in-release` (bug-flow), z linkiem do Release + dolepkiem osobistej wiadomości.
-
-Wybór ścieżki: zależy od natury issue. Czysta utrata danych / bug naprawiony w kodzie + chcesz dolepić tip o recovery → `release-with-answer`. Pytanie usera na które odpowiadasz BEZ release → `# Procedura — flow czystego question`. Bug + chcesz osobnym komentarzem skomentować architekturę BEZ linku do Release → `release-then-answer` (rzadko stosowane).
-
-## Sytuacje brzegowe
-- **`pending_answer.md` istnieje, ale jest pusty (whitespace-only)**: bot loguje warning i spada do trybu COMMENT. Mało prawdopodobne w praktyce — pisz draft od razu z treścią.
-- **`pending_answer.md` NIE istnieje przy `answered`**: bot spada do trybu COMMENT (obecny od v15.2.6 mechanizm: wciąga ostatni komentarz). Wstecz-kompatybilne — jeśli komuś pasuje stary flow, może go używać.
-- **HEAD commit dodający `pending_answer.md` zawiera też inne pliki (nieatomowy)**: bot rozpoznaje przez `git show --name-only --format= HEAD` i spada do fallbacku cleanup commit boota (jak v15.2.7). To jest OK — flow działa, tylko zostawia 1 cleanup commit i potencjalnie wymaga force-push tag'a post-publish per heurystyka `# WORKFLOW RELEASE`. Żeby tego uniknąć — zcommituj inne zmiany PRZED `pending_answer.md` (sub-procedura „release-then-answer" lub po prostu dwa osobne commity).
-- **Bot atomic-reset `--force-with-lease` odrzucony** (między bot's checkout a push na main pojawił się inny commit — solo-dev edge case, praktycznie niemożliwy): bot spada do fallbacku cleanup commit'a. Jeśli ten też failuje, plik wisi w repo i maintainer usuwa go ręcznie: `git rm pending_answer.md && git commit -m "cleanup answer-bot fail" && git push`.
-- **Bot cleanup `git push` fail (np. brak `contents: write` lub brak `fetch-depth: 2` w workflow YAML)**: komentarz/close/lock już przeszły (issue zamknięty user-facing). Plik wisi w repo — usuń ręcznie jak wyżej. Workflow YAML musi mieć `fetch-depth: 2` na `actions/checkout@v4` — bez tego HEAD~1 nie istnieje lokalnie i atomic-reset failuje na każdym issue.
-- **Równoległe issue z question**: bot trzyma jeden plik per repo, więc obsługuj jedno question-issue na raz. Drugie czeka aż pierwsze się zamknie (atomic-reset lub cleanup boota zwolni plik).
-- **Bug-issue zamknięte przez question-flow przez pomyłkę**: nie. Bug-issue ma flag `bug` i workflow `patch-bot` (`tiflotecnia-patch`) lub `issue-closure` (`fixed-in-release`). Question-flow wyzwala TYLKO `answered`. Etykiety są disjunktywne — nie nadawaj `answered` na bug-issue. Od v15.2.8 bug-issue MOŻE mieć dolepek osobistej wiadomości z `pending_answer.md`, ale przez etykietę `fixed-in-release` (sub-procedura „release-with-answer"), nie przez `answered`.
-- **`pending_answer.md` istnieje przy `fixed-in-release`** (FILE mode v15.2.8): bot dolepia jego treść pod standardowym TEMPLATES separatorem `---` + intro w wykrytym języku. Plik wymazywany atomic-reset/cleanup tą samą ścieżką co `answered`. Sygnał w logach: `Tryb FILE (fixed-in-release): dolepiam treść z pending_answer.md (<N> znaków)`.
-- **`pending_answer.md` NIE istnieje przy `fixed-in-release`**: standardowy bug-flow bez dolepka (jak przed v15.2.8). NIE jest błędem ani fallbackiem na tryb COMMENT — bug-fix sam w sobie nie wymaga osobistej wiadomości od maintainera, link do Release wystarcza. Sygnał w logach: `Brak pending_answer.md przy fixed-in-release — publikuję standardowy TEMPLATES bez dolepka (oczekiwane)`.
+Pozostałe edge case'y (pusty `pending_answer.md`, brak pliku przy `answered`/`fixed-in-release`, nieatomowy HEAD, `--force-with-lease` odrzucony, push fail bota) → `claude_archive.md`.
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
 - Weryfikuj porządek przez komendę `git status` patrząc na nieśledzone pliki (Untracked files).
 - Commity pośrednie: Możesz, a nawet powinieneś, wykonywać commity po zakończeniu poprawnie działającego małego podetapu dużej rewizji z tagiem "WIP".
 - ZAWSZE zrób review (`git --no-pager diff`) zanim zapiszesz stan na stałe w repozytorium.
+
+# ARCHIWUM HISTORYCZNE
+Zarchiwizowane procedury, incydenty i fallbackowe ścieżki znajdują się w `claude_archive.md` (gitignored — patrz `.gitignore` jeśli nie). Zawartość archiwum: incydent halucynacji autotłumaczenia fi/manual.yaml (2026-05-15), incydent #13 GitHub auto-close keywords (2026-05-16), pełna heurystyka „cleanup commit boota = force-push tag" (v15.2.7 fallback), ewolucja question-flow v15.2.6 → v15.2.7 → v15.2.8, sub-procedury release-then-answer i release-with-answer (kompletne), edge case'y `pending_answer.md` w question-flow, wyjątki feature-branch workflowu, przykład empiryczny pułapki kolejności w `akcenty/es.yaml`. Sięgaj tam gdy debugujesz post-mortem albo gdy główny CLAUDE.md odsyła frazą „pełna procedura w `claude_archive.md`".
