@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import re
 import shutil
@@ -555,6 +556,78 @@ def weryfikuj_runtime(sciezka_python: str) -> None:
         sys.exit(1)
 
 
+_RE_INSTALLER_NAME = re.compile(r"^Rezyser_Audio_v(.+)_Installer\.exe$")
+
+
+def sprzataj_opublikowane_instalatory() -> None:
+    """Usuwa lokalne `Rezyser_Audio_v*_Installer.exe`, których odpowiednik
+    jest już opublikowany jako asset GitHub Release (non-draft).
+
+    Tło: każdy installer waży ~145 MB. Bez automatycznego sprzątania eksplorator
+    szybko zarasta starymi binariami z podobnymi nazwami — utrudniona nawigacja,
+    ryzyko uploadu nie tej wersji. GitHub trzyma całą historię release'ów z
+    assetami pod tagiem, więc lokalna kopia po publikacji jest redundantna.
+
+    Sprzątamy PRZED buildem: jeśli build się wywali, nic nie tracimy — usunięte
+    zostały tylko pliki które i tak są w chmurze. Bieżąca wersja (jeszcze nie
+    zbudowana) z natury rzeczy nie istnieje na dysku, więc nie ma sensu jej
+    osobno chronić.
+
+    Wymaga `gh` CLI w PATH + autoryzacji. Brak `gh`, brak autoryzacji, brak
+    sieci, malformed JSON, timeout → WARN i kontynuuj (cleanup jest wygodą, nie
+    krytyczną częścią builda — fail open, nie blokujemy release flow).
+    """
+    if shutil.which("gh") is None:
+        print("⚠ gh CLI not in PATH — skipping cleanup of published installers.")
+        return
+
+    kandydaci: list[tuple[Path, str]] = []
+    for plik in Path(".").glob("Rezyser_Audio_v*_Installer.exe"):
+        match = _RE_INSTALLER_NAME.match(plik.name)
+        if match:
+            kandydaci.append((plik, match.group(1)))
+
+    if not kandydaci:
+        return
+
+    print("🧹 Cleaning up locally published installers...")
+    for plik, wersja in sorted(kandydaci, key=lambda kv: kv[1]):
+        tag = f"v{wersja}"
+        try:
+            wynik = subprocess.run(
+                ["gh", "release", "view", tag, "--json", "isDraft,assets"],
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
+        except (subprocess.TimeoutExpired, OSError) as exc:
+            print(f"   ⚠ Skipped {plik.name}: gh call failed ({exc}).")
+            continue
+        if wynik.returncode != 0:
+            print(f"   • {plik.name}: no Release {tag} on GitHub — keeping.")
+            continue
+        try:
+            dane = json.loads(wynik.stdout)
+        except json.JSONDecodeError:
+            print(f"   ⚠ Skipped {plik.name}: gh returned malformed JSON.")
+            continue
+        if dane.get("isDraft"):
+            print(f"   • {plik.name}: Release {tag} still in DRAFT — keeping.")
+            continue
+        nazwy_assetow = {a.get("name") for a in (dane.get("assets") or [])}
+        if plik.name not in nazwy_assetow:
+            print(f"   • {plik.name}: Release {tag} published but EXE not uploaded — keeping.")
+            continue
+        rozmiar_mb = plik.stat().st_size / (1024 * 1024)
+        try:
+            plik.unlink()
+        except OSError as exc:
+            print(f"   ⚠ Failed to remove {plik.name}: {exc}.")
+            continue
+        print(f"   ✓ Removed {plik.name} ({rozmiar_mb:.0f} MB) — already on GitHub: {tag}.")
+    print()
+
+
 def sprawdz_czy_installer_juz_istnieje(nazwa_installer: str) -> None:
     """Przerywa budowanie, jeśli installer tej wersji już leży na dysku.
 
@@ -654,14 +727,41 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "zostają aktywne, pomijamy tylko ostatni human-in-the-loop. "
              "Use case: CI/CD lub automatyzacja przez agenta.",
     )
+    grupa_cleanup = parser.add_mutually_exclusive_group()
+    grupa_cleanup.add_argument(
+        "--no-cleanup",
+        action="store_true",
+        help="Skip the pre-build cleanup of locally published installers. "
+             "Default: cleanup runs before build, removing any "
+             "`Rezyser_Audio_v*_Installer.exe` already published as a "
+             "non-draft GitHub Release asset. Use this flag for diagnostic "
+             "builds where you want to keep older EXEs on disk.",
+    )
+    grupa_cleanup.add_argument(
+        "--cleanup-only",
+        action="store_true",
+        help="Run ONLY the cleanup step (delete locally cached installers "
+             "already published on GitHub) and exit. Skips runtime/ check, "
+             "doc regeneration, ISCC compilation. Use case: free up disk "
+             "space after a release without rebuilding.",
+    )
     return parser.parse_args()
 
 
 def main(args: argparse.Namespace | None = None) -> None:
     # Allow main() to be called from CLI (with parser) or programmatically
-    # (with `args=argparse.Namespace(yes=False)` lub None → default).
+    # (with `args=argparse.Namespace(yes=False, no_cleanup=False,
+    # cleanup_only=False)` lub None → default).
     if args is None:
-        args = argparse.Namespace(yes=False)
+        args = argparse.Namespace(yes=False, no_cleanup=False, cleanup_only=False)
+
+    # --- CLEANUP-ONLY MODE (no build, no runtime/ guard) ---
+    # Skrót po publikacji żeby zwolnić miejsce bez ponownego uruchamiania
+    # weryfikacji runtime/ i kompilacji Inno. Bezpieczny niezależnie od tego
+    # czy runtime/ leży na dysku.
+    if getattr(args, "cleanup_only", False):
+        sprzataj_opublikowane_instalatory()
+        return
 
     # --- GUARD CLAUSE (runtime/ folder check) ---
     sciezka_python = os.path.join("runtime", "python.exe")
@@ -694,7 +794,20 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     nazwa_installer = f"Rezyser_Audio_v{wersja}_Installer.exe"
 
-    # 4. Refuse to overwrite a previous installer of the same version.
+    # 4a. Pre-build cleanup of locally cached installers already on GitHub.
+    # Każdy installer waży ~145 MB; bez tego eksplorator zarasta podobnymi
+    # nazwami po kilku patchach. Cleanup leci PRZED `sprawdz_czy_installer_juz_istnieje`
+    # (krok 4b niżej) — jeśli bieżąca wersja siedzi w obu miejscach (dysk +
+    # opublikowany Release), to znaczy że user buduje to samo ponownie:
+    # cleanup ją usunie, guard pójdzie dalej, fresh build powstanie. Jeśli
+    # bieżąca wersja JEST na dysku ale NIE jest jeszcze na GH (typowy patch
+    # przed publikacją), cleanup ją zostawi, a guard zatrzyma build z
+    # komunikatem (zachowane zachowanie). Flaga `--no-cleanup` pomija ten krok
+    # dla buildów diagnostycznych.
+    if not getattr(args, "no_cleanup", False):
+        sprzataj_opublikowane_instalatory()
+
+    # 4b. Refuse to overwrite a previous installer of the same version.
     # Od v15.2.5: ZIP Portable został wycięty z release flow (single deployment
     # path — patrz RELEASE_NOTES.md::15.2.5). Pozostaje tylko Installer EXE,
     # który i tak instaluje do per-user %LocalAppData%\Programs (PrivilegesRequired=
