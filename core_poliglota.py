@@ -330,41 +330,114 @@ def wariant_po_etykiecie(tryb: str, jezyk: str, etykieta: str) -> dict | None:
 # drugie, trzecie `dictionaries/<kod>/`, GUI będzie musiał podmienić hardkod
 # na wynik :func:`wykryj_jezyk_zrodlowy` – infrastruktura jest już gotowa.
 
+# 15.3: dwie bazy referencyjne (pl rdzeń projektu + en międzynarodowy fallback)
+# muszą zawierać identyczny zestaw plików konceptualnie wspólnych. Eliminacja
+# stuba referencyjnego — gdyby en zabrakło pliku `opowiesci/baza.yaml`, fallback
+# `opowiesci_ai._zaladuj_przepis` (pl → en) ciszą zawiedzie.
+_JEZYKI_REFERENCYJNE: tuple[str, ...] = ("pl", "en")
+
+# 15.3: cztery podfoldery językowe + dodatkowy `opowiesci/` (wymóg silnika 5).
+_PODFOLDERY_JEZYKOWE: tuple[str, ...] = ("akcenty", "szyfry", "rezyser", "opowiesci")
+
+# 15.3: pliki w `akcenty/` wspólne dla wszystkich języków (narzędzia czyszczenia).
+# Pozostałe `akcenty/<jezyk>.yaml` to akcenty obcojęzyczne — reguła natywności
+# (każdy z N wdrożonych języków minus własny natywny = N-1 plików) sprawia, że
+# zawartość per-język się różni i nie nadaje się do crosschecku 1:1 między
+# bazami referencyjnymi pl ↔ en.
+_NARZEDZIA_AKCENTOW: frozenset[str] = frozenset({
+    "oczyszczenie.yaml",
+    "oczyszczenie_bez_liczb.yaml",
+    "naprawiacz_tagow.yaml",
+})
+
+
+def _pliki_yaml_jezyka(kod: str) -> set[str]:
+    """Względne ścieżki wszystkich plików ``*.yaml`` w ``dictionaries/<kod>/``.
+
+    Zwraca posixowe ścieżki (``"podstawy.yaml"``, ``"gui/ui.yaml"``,
+    ``"akcenty/angielski.yaml"``, ...) niezależnie od OS-a — porównanie między
+    językami musi być deterministyczne.
+    """
+    folder = os.path.join(DICTIONARIES_DIR, kod)
+    pliki: set[str] = set()
+    if os.path.isfile(os.path.join(folder, "podstawy.yaml")):
+        pliki.add("podstawy.yaml")
+    if os.path.isfile(os.path.join(folder, "gui", "ui.yaml")):
+        pliki.add("gui/ui.yaml")
+    for pod in _PODFOLDERY_JEZYKOWE:
+        pod_dir = os.path.join(folder, pod)
+        if not os.path.isdir(pod_dir):
+            continue
+        for nazwa in os.listdir(pod_dir):
+            if nazwa.endswith(".yaml"):
+                pliki.add(f"{pod}/{nazwa}")
+    return pliki
+
+
+def _zestaw_referencyjny(kod: str) -> set[str]:
+    """Podzbiór plików języka który MUSI być identyczny między pl i en.
+
+    Pomija akcenty obcojęzyczne (``akcenty/<jezyk>.yaml`` poza whitelistą
+    ``_NARZEDZIA_AKCENTOW``), bo te są z definicji per-język inne.
+    """
+    return {
+        p for p in _pliki_yaml_jezyka(kod)
+        if not p.startswith("akcenty/")
+        or os.path.basename(p) in _NARZEDZIA_AKCENTOW
+    }
+
+
 def _jezyk_kompletny(kod: str) -> bool:
     """Czy folder ``dictionaries/<kod>/`` ma komplet plików pełnej obsługi?
 
-    Kryterium kompletności:
+    Kryterium bazowe (każdy język):
 
-      1. ``podstawy.yaml``            – alfabet + transliteracja (Cezar)
-      2. ``gui/ui.yaml``              – tłumaczenie warstwy interfejsu
-      3. ``akcenty/<id>.yaml`` ≥ 1   – tryb Poligloty
-      4. ``szyfry/<id>.yaml``  ≥ 1   – tryb Szyfranta
-      5. ``rezyser/<id>.yaml`` ≥ 1   – tryb Reżysera
+      1. ``podstawy.yaml``             – alfabet + transliteracja (Cezar)
+      2. ``gui/ui.yaml``               – tłumaczenie warstwy interfejsu
+      3. ``akcenty/<id>.yaml``  ≥ 1   – tryb Poligloty
+      4. ``szyfry/<id>.yaml``   ≥ 1   – tryb Szyfranta
+      5. ``rezyser/<id>.yaml``  ≥ 1   – tryb Reżysera
+      6. ``opowiesci/<id>.yaml`` ≥ 1  – tryb Opowieści (15.3)
 
-    Wersja 13.9: kontrakt rozszerzony o wymóg co najmniej jednego pliku
-    w ``rezyser/``. Po wdrożeniu siedmiu kompletnych paczek (pl, en, fi,
-    is, it, ru, de — każda ma 4 pliki ``rezyser/*.yaml``) wiadomo, że
-    nowe języki są obsługiwane bez zmian w kodzie pod warunkiem
-    uruchomienia ``odswiez_rezysera.py`` po dodaniu trybów. Brak tego
-    folderu czyni paczkę „prawie gotową", ale dispatch Reżysera nie ma
-    z czego wystartować — więc to równoprawny warunek kompletności.
+    Wzmocniony kontrakt dla języków referencyjnych (pl, en):
+
+      Oba muszą zawierać **identyczny zestaw plików** poza akcentami
+      obcojęzycznymi (``_zestaw_referencyjny``). Powód: silnik Opowieści
+      fallbackuje brakujące przepisy ``<jezyk>/opowiesci/X.yaml`` na
+      ``en/opowiesci/X.yaml`` (15.3 zmiana z pl→en, dla parytetu
+      międzynarodowego). Jeśli en byłoby stubem fallback cicho zawodzi
+      mid-game. Symetrycznie pl jest rdzeniem projektu — brak czegoś
+      w pl względem en oznacza niedokończony rdzeń. Crosscheck pomija
+      akcenty obcojęzyczne, bo reguła natywności wyklucza akcent własnego
+      języka (pl/akcenty/angielski.yaml vs en/akcenty/polski.yaml).
+
+      Jeśli pl LUB en nie spełnia kontraktu — żaden z nich nie pojawi się
+      w :func:`dostepne_jezyki_bazowe`. Reszta języków NIE jest filtrowana
+      crosscheckiem (brakujące pliki rozwiązuje fallback do en).
+
+    13.9: dodany 5. warunek (``rezyser/``).
+    15.3: dodany 6. warunek (``opowiesci/``) + crosscheck pl/en.
 
     Args:
         kod: dwuliterowy kod języka (nazwa folderu w ``dictionaries/``).
 
     Returns:
-        True gdy wszystkie pięć warunków spełnione, False przy stubach.
+        True gdy wszystkie warunki spełnione, False przy stubach.
     """
     folder = os.path.join(DICTIONARIES_DIR, kod)
     if not os.path.isfile(os.path.join(folder, "podstawy.yaml")):
         return False
     if not os.path.isfile(os.path.join(folder, "gui", "ui.yaml")):
         return False
-    for pod in ("akcenty", "szyfry", "rezyser"):
+    for pod in _PODFOLDERY_JEZYKOWE:
         pod_dir = os.path.join(folder, pod)
         if not os.path.isdir(pod_dir):
             return False
         if not any(p.endswith(".yaml") for p in os.listdir(pod_dir)):
+            return False
+    if kod in _JEZYKI_REFERENCYJNE:
+        druga_baza = next(j for j in _JEZYKI_REFERENCYJNE if j != kod)
+        if _zestaw_referencyjny(kod) != _zestaw_referencyjny(druga_baza):
             return False
     return True
 
@@ -372,17 +445,19 @@ def _jezyk_kompletny(kod: str) -> bool:
 def dostepne_jezyki_bazowe() -> list[str]:
     """Zwraca posortowaną listę kodów KOMPLETNYCH języków w ``dictionaries/``.
 
-    „Kompletny" oznacza folder spełniający wszystkie pięć warunków
+    „Kompletny" oznacza folder spełniający wszystkie sześć warunków
     z :func:`_jezyk_kompletny` (podstawy + gui/ui.yaml + akcenty/ + szyfry/
-    + rezyser/, każdy z minimum jednym plikiem ``*.yaml``). Stuby (np.
-    folder z samym `podstawy.yaml` bez podfolderów) są filtrowane — silnik
-    nie umiałby przetwarzać tekstu w takim języku, więc nie powinny
-    pojawiać się w komunikatach typu „obsługiwane języki" ani w selektorze
-    języka interfejsu w GUI.
+    + rezyser/ + opowiesci/, każdy z minimum jednym plikiem ``*.yaml``).
+    Bazy referencyjne pl/en dodatkowo crosscheckują się 1:1 na zestawie
+    plików (poza akcentami obcojęzycznymi). Stuby (np. folder z samym
+    ``podstawy.yaml`` bez podfolderów) są filtrowane — silnik nie umiałby
+    przetwarzać tekstu w takim języku, więc nie powinny pojawiać się
+    w komunikatach typu „obsługiwane języki" ani w selektorze języka
+    interfejsu w GUI.
 
     Returns:
         Listę kodów ISO języków gotowych do użycia, np. ``["de", "en",
-        "fi", "is", "it", "pl", "ru"]`` po 13.8.
+        "es", "fi", "fr", "is", "it", "pl", "ru"]`` po 14.0.
     """
     if not os.path.isdir(DICTIONARIES_DIR):
         return []
