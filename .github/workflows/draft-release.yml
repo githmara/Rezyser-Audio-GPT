@@ -48,9 +48,9 @@ jobs:
 
     steps:
       - name: Pobranie kodu repozytorium
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         # fetch-depth: 0 — pelna historia, zeby git tag dzialal na obecnym
-        # HEAD. fetch-tags: true (default w v4 ale explicit dla jasnosci) —
+        # HEAD. fetch-tags: true (default w v5 ale explicit dla jasnosci) —
         # bot musi widziec istniejace tagi zeby wykryc duplikat.
         with:
           fetch-depth: 0
