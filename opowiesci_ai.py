@@ -26,6 +26,7 @@ from __future__ import annotations
 import functools
 import json
 import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -254,10 +255,14 @@ def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
 # pozostałe języki dochodzą RĘCZNIE per język (nie ma batch translatora dla
 # promptów — LLM halucynuje na nich).
 #
-# Fallback do PL: jeśli `<jezyk>/opowiesci/<plik>.yaml` nie istnieje (gracz
-# wybrał język, dla którego paczka jeszcze niedopisana), używamy PL żeby
-# aplikacja nie crashowała w trakcie tury — gracz dostanie polski prompt,
-# co jest do akceptacji jako tymczasowy fallback.
+# Fallback do EN (15.3 zmiana z PL → EN): jeśli `<jezyk>/opowiesci/<plik>.yaml`
+# nie istnieje (gracz wybrał język, dla którego paczka jeszcze niedopisana),
+# używamy EN żeby aplikacja nie crashowała w trakcie tury — międzynarodowy
+# fallback jest mniej ostentacyjny niż polski dla user-a niemówiącego po polsku
+# i naturalniejszy dla modelu OpenAI. Crosscheck `_jezyk_kompletny` w
+# `core_poliglota` gwarantuje że pl/en (bazy referencyjne) mają identyczny
+# zestaw plików, więc EN nigdy nie jest stubem w którym fallback by ciszą
+# zawiódł mid-game.
 
 ROOT_DICT = Path(__file__).resolve().parent / "dictionaries"
 
@@ -271,20 +276,31 @@ _NAZWA_PLIKU_PER_TRYB = {
 
 @functools.lru_cache(maxsize=128)
 def _zaladuj_przepis(jezyk: str, nazwa: str) -> dict[str, Any]:
-    """Ładuje plik `dictionaries/<jezyk>/opowiesci/<nazwa>.yaml` z fallbackiem do PL.
+    """Ładuje plik `dictionaries/<jezyk>/opowiesci/<nazwa>.yaml` z fallbackiem do EN.
 
     LRU cache — w typowej grze odpalamy tę funkcję 1-2 razy per tura,
     ale uniknięcie I/O (każdy plik ~1-3 KB) jest tanim optymalizem.
     Cache invalidacja: programatycznie przez `_zaladuj_przepis.cache_clear()`
-    (np. po `/ustawienia` zmieniających język), albo restart aplikacji.
+    (np. po zmianie języka w GUI), albo restart aplikacji.
+
+    15.3 zmiana: fallback z PL na EN. Powód w bloku komentarza powyżej.
+    Aktywacja fallbacku emituje WARN na stderr — pomaga maintainerom
+    lokalizować nieuzupełnione paczki językowe (cisza znaczy że stuba
+    nikt nie zauważy, dopóki gracz nie zgłosi obcojęzycznych odpowiedzi
+    AI w grze, którą myślał że gra w swoim języku).
     """
     sciezka = ROOT_DICT / jezyk / "opowiesci" / f"{nazwa}.yaml"
-    if not sciezka.exists() and jezyk != "pl":
-        sciezka = ROOT_DICT / "pl" / "opowiesci" / f"{nazwa}.yaml"
+    if not sciezka.exists() and jezyk != "en":
+        sys.stderr.write(
+            f"[opowiesci_ai] WARN: brak `{jezyk}/opowiesci/{nazwa}.yaml` — "
+            f"fallback do `en/opowiesci/{nazwa}.yaml`. "
+            f"Czy paczka `{jezyk}` jest kompletna?\n"
+        )
+        sciezka = ROOT_DICT / "en" / "opowiesci" / f"{nazwa}.yaml"
     if not sciezka.exists():
         raise FileNotFoundError(
             f"Brak przepisu opowieści `{nazwa}.yaml` ani w `{jezyk}/opowiesci/` "
-            f"ani w `pl/opowiesci/` (fallback). Czy folder dictionaries jest kompletny?"
+            f"ani w `en/opowiesci/` (fallback). Czy folder dictionaries jest kompletny?"
         )
     with open(sciezka, "r", encoding="utf-8") as fh:
         return _pyyaml.safe_load(fh) or {}
