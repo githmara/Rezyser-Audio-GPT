@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.3.2 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.4 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 

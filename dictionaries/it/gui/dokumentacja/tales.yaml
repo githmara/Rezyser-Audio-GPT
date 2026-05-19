@@ -1,8 +1,8 @@
 # =============================================================================
-# dictionaries/it/gui/dokumentacja/opowiesci.yaml
+# dictionaries/it/gui/dokumentacja/tales.yaml
 #
 # Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
-# ze źródła dictionaries/pl/gui/dokumentacja/opowiesci.yaml
+# ze źródła dictionaries/pl/gui/dokumentacja/tales.yaml
 # (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
 # w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
 #
@@ -80,19 +80,25 @@ tresc:
 
     Nota: le regole del mondo richiedono un gioco attivo. Se clicchi "{opowiesci.btn_zasady_swiata_label}" senza un gioco caricato/creato, riceverai il messaggio "{opowiesci.zasady_bez_gry_tytul}" — prima clicca "{opowiesci.btn_nowa_gra_label}" o carica un gioco salvato.
   krok_5_slash_komendy: |
-    KROK 5: Comandi Slash — azioni rapide senza API
+    KROK 5: Comandi slash — azioni rapide senza API
 
-    Nel campo azione puoi inserire in qualsiasi momento un comando che inizia con la barra `/`. I comandi sono locali (non richiedono chiamate a OpenAI) e funzionano indipendentemente dalla modalità di gioco. Sono accettate sia le varianti polacche che inglesi:
+    Nel campo di azione puoi inserire in qualsiasi momento un comando che inizia con una barra `/`. I comandi sono locali (non richiedono chiamate a OpenAI) e funzionano indipendentemente dalla modalità di gioco. Sono accettate sia le varianti italiane che quelle inglesi:
 
-    /zapisz, /save — forza il salvataggio manuale dello stato del gioco. Il salvataggio automatico avviene dopo ogni turno, quindi questo comando è principalmente per sicurezza prima di chiudere l'applicazione.
+    /salva, /save — forza il salvataggio manuale dello stato del gioco. Il salvataggio automatico avviene dopo ogni turno, quindi questo comando è principalmente per sicurezza prima di chiudere l'applicazione.
 
-    /wczytaj, /load — apre una finestra di dialogo di selezione del gioco con l'elenco dei nomi disponibili (dalla v15.2.3 al posto della finestra di dialogo file di sistema — un elenco diretto dei giochi salvati nella cartella runtime/opowiesci/, rilevati dalla presenza di un file .game.json). NVDA legge l'elenco in modo naturale, il giocatore non vedente non deve navigare nella finestra di dialogo file di sistema. Dopo la selezione, il nome del gioco, la modalità e la narrazione completa vengono ripristinati — puoi continuare dal turno in cui hai interrotto. Il pulsante «{opowiesci.btn_wczytaj_label}» ha un comportamento identico.
+    /carica, /load — apre una finestra di dialogo per la selezione del gioco dall'elenco dei nomi disponibili (dalla versione v15.2.3 invece della finestra di dialogo di sistema dei file — elenco diretto dei giochi salvati dalla cartella runtime/opowiesci/ rilevati dalla presenza del file .game.json). NVDA legge l'elenco naturalmente, il giocatore non vedente non deve navigare nella finestra di dialogo di sistema dei file. Dopo aver selezionato il nome del gioco, la modalità e la narrazione completa vengono ripristinate — puoi continuare dal turno in cui hai interrotto. Il pulsante "{opowiesci.btn_wczytaj_label}" ha lo stesso comportamento.
 
-    Il motore narrativo seleziona automaticamente il modello AI in base alla modalità: per la modalità Scelte e Il minore dei mali utilizza il più costoso gpt-4o (aderisce rigorosamente alle regole del mondo), per la modalità Libera — il più veloce e economico gpt-4o-mini (il giocatore controlla la trama, quindi non richiede una drammatica regia).
+    Il motore narrativo seleziona automaticamente il modello AI in base alla modalità: per la modalità Scelte e Minore dei mali utilizza il più costoso gpt-4o (aderisce rigorosamente alle regole del mondo), per la modalità Libera — il più veloce ed economico gpt-4o-mini (il giocatore controlla la trama, quindi non richiede una regia drammatica).
 
-    /wizualizuj <opis>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata, NON viene aggiunto alla narrazione né salvato nel file dell'audiolibro. Esempio: "/wizualizuj jak wygląda strażnik" o "/wizualizuj zapach kawiarni".
+    /visualizza <descrizione>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata, NON viene aggiunto alla narrazione né salvato nel file audiolibro. Esempio: "/visualizza come appare la guardia" o "/visualizza l'odore del caffè".
 
-    /koniec, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
+    /scena <descrizione>, /scene <descrizione> — evento corrente ALTROVE, raccontato in terza persona. La telecamera si stacca dal tuo personaggio e mostra cosa sta accadendo contemporaneamente a un altro personaggio o in un altro luogo del mondo. Esempio: "/scena Anna al mercato" o "/scena le guardie al cancello". Il motore intreccerà la scena nella narrazione, la contrassegnerà con il prefisso "Scena fuori campo:" e tornerà automaticamente al tuo personaggio nel turno successivo. Non appaiono scelte — il giocatore non prende decisioni nella scena di un altro. Trovi la descrizione completa del meccanismo nel KROK 5B.
+
+    /flashback <descrizione>, /retrospezione <descrizione> — retrospezione in terza persona, ritorno indietro nel tempo. Esempio: "/flashback giorno della morte del padre" o "/flashback primo incontro degli eroi". Apre la narrazione con una formula temporale ("Tre anni prima..."), la contrassegna con il prefisso "Retrospezione:" e ritorna al turno corrente. Identico a /scena — passivo, senza scelte. Descrizione completa nel KROK 5B.
+
+    /aiuto, /help — visualizza una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura e NVDA-friendly — il campo di testo riceve automaticamente il focus, il lettore di schermo legge immediatamente l'intero elenco senza necessità di navigazione.
+
+    /fine, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
   krok_6_pliki_gry: |
     KROK 6: Pliki gry — gdzie znajdziesz swoje dane
 
@@ -175,3 +181,17 @@ tresc:
 
     Problema: I file .game.json e .story.jsonl non sono visibili sul desktop.
     Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per gli utenti comuni, non visibile dall'esploratore di file. I file di narrazione (.txt, .md) vengono salvati in script/ — li troverai lì.
+  krok_5b_druga_kamera: |
+    KROK 5B: Seconda telecamera — scene dietro le quinte e flashback (da v15.4)
+
+    Di norma giochi in prima persona — la narrazione suona come "vai", "senti", "vedi". Dalla versione 15.4 puoi dirigere una scena a distanza, raccontata in terza persona, non direttamente collegata al tuo personaggio. Ci sono due comandi per questo: /scena per eventi paralleli (altrove nel mondo), /flashback per flashback (nel passato). Dopo l'inserto, il motore ritorna al tuo personaggio nel turno successivo.
+
+    Perché esiste. Un gioco narrativo classico limita tutti gli eventi al campo visivo di un solo personaggio. La seconda telecamera consente di costruire una drammaturgia da una prospettiva più ampia — mostrare che l'antagonista sta fuggendo dalla città, che Anna a 30 chilometri di distanza sta leggendo la tua lettera, che dieci anni prima nella stessa locanda è morto tuo padre. Senza questa meccanica, il giocatore viene a conoscenza di tali cose solo attraverso i racconti degli NPC; ora può vederle "dal vivo".
+
+    Come appare dal punto di vista narrativo. Il motore apre la scena con una formula che indica il cambio di prospettiva — per /scena: "Nello stesso momento...", "Cinque chilometri più in là...", per /flashback: "Tre anni prima...", "Quando aveva diciassette anni...". Nel pannello di narrazione e nel campo "Ultimo turno" il testo è preceduto da un prefisso A11y: "Scena dietro le quinte:" o "Flashback:". Questo prefisso viene registrato anche nel file narrativo .txt — quando apri l'audiolibro in un altro lettore TTS, saprai comunque che la telecamera si è spostata.
+
+    Cosa aspettarsi dalle scelte. Nelle scene in terza persona il campo con i pulsanti delle scelte rimane SEMPRE vuoto — il giocatore non prende decisioni per l'antagonista né per il suo precedente "io". Il turno successivo ritorna alla seconda persona e normalmente fornisce scelte conformi alla modalità attiva (Libera, Scelte, Minore male).
+
+    Auto-cuts del motore. Indipendentemente dai tuoi comandi, il motore narrativo può decidere da solo che un determinato momento meriti un taglio cinematografico — inserisce quindi una breve scena dietro le quinte con il prefisso "Nel frattempo altrove:". Questi inserti organici sono limitati: massimo un auto-cut per atto dell'arco narrativo (esposizione, crescita, climax, risoluzione), quindi massimo quattro per l'intera storia. Il limite è calcolato solo per gli inserti autonomi del motore; i tuoi /scena e /flashback sono illimitati. Lo stato del contatore persiste nel file di salvataggio .game.json — quando torni al gioco dopo tre giorni, il limite per fase sarà rispettato.
+
+    Consiglio pratico. Il comando /scena costruisce magnificamente la tensione poco prima del climax ("/scena le guardie si avvicinano dal cancello" — sai che stanno arrivando, il tuo personaggio ancora no). /flashback funziona meglio come spiegazione della motivazione di un NPC che hai appena incontrato ("/flashback Marek da bambino, il giorno dell'incendio"). Non abusarne — una narrazione che si infittisce di cut-scene perde il ritmo in prima persona, che è l'essenza di questa modalità.

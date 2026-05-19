@@ -95,7 +95,27 @@ tresc:
 
     /wizualizuj <opis>, /visualize <opis> — multisensoryczny opis aktualnej sceny. Nie zmienia stanu gry, nie proponuje wyborów — silnik narracyjny używa wszystkich pięciu zmysłów (wzrok, słuch, zapach, dotyk, smak), by pokazać scenę z większą głębią. Wynik pojawia się w osobnym dialogu, NIE jest dopisywany do narracji ani zapisany w pliku audiobooka. Przykład: „/wizualizuj jak wygląda strażnik" lub „/wizualizuj zapach kawiarni".
 
+    /scena <opis>, /scene <opis> — bieżące wydarzenie GDZIE INDZIEJ, opowiedziane w trzeciej osobie. Kamera odrywa się od twojej postaci i pokazuje, co dzieje się równolegle z inną postacią lub w innym miejscu świata. Przykład: „/scena Anna na rynku" lub „/scena strażnicy przy bramie". Silnik wpleci scenę w narrację, oznaczy ją prefiksem „Scena zza kadru:" i automatycznie wróci do twojej postaci w następnej turze. Wybory się nie pojawiają — gracz nie podejmuje decyzji w cudzej scenie. Pełen opis mechanizmu znajdziesz w KROKU 5B.
+
+    /flashback <opis>, /retrospekcja <opis> — retrospekcja w trzeciej osobie, cofnięcie się w czasie. Przykład: „/flashback dzień śmierci ojca" lub „/flashback pierwsze spotkanie bohaterów". Otwiera narrację formułą czasową („Trzy lata wcześniej…"), oznacza prefiksem „Retrospekcja:" i wraca do bieżącej tury. Identycznie jak /scena — pasywna, bez wyborów. Pełen opis w KROKU 5B.
+
+    /pomoc, /help — wyświetla okno dialogowe z listą wszystkich dostępnych komend. Dialog jest readonly i NVDA-friendly — pole tekstowe dostaje fokus automatycznie, czytnik ekranu od razu odczytuje całą listę bez konieczności nawigacji.
+
     /koniec, /quit — zamyka aplikację (po autozapisie tury w toku).
+  krok_5b_druga_kamera: |
+    KROK 5B: Druga kamera — sceny zza kadru i retrospekcje (od v15.4)
+
+    Standardowo grasz w pierwszej osobie — narracja brzmi „idziesz", „czujesz", „widzisz". Od wersji 15.4 możesz wyreżyserować scenę z dystansu, opowiedzianą w trzeciej osobie, niezwiązaną bezpośrednio z twoją postacią. Służą do tego dwie komendy: /scena dla wydarzeń równoległych (gdzieś indziej w świecie), /flashback dla retrospekcji (w przeszłości). Po wstawce silnik wraca do twojej postaci następną turą.
+
+    Po co to istnieje. Klasyczna gra narracyjna ogranicza wszystkie wydarzenia do pola widzenia jednej postaci. Druga kamera pozwala zbudować dramaturgię z większej perspektywy — pokazać, że antagonista właśnie ucieka z miasta, że Anna 30 kilometrów dalej czyta twój list, że dziesięć lat wcześniej w tej samej karczmie zginął twój ojciec. Bez tej mechaniki gracz dowiaduje się o takich rzeczach tylko z relacji NPC-ów; teraz może zobaczyć je „na żywo".
+
+    Jak wygląda od strony narracji. Silnik otwiera scenę formułą wskazującą zmianę perspektywy — dla /scena: „W tym samym czasie…", „Pięć kilometrów dalej…", dla /flashback: „Trzy lata wcześniej…", „Gdy miała siedemnaście lat…". W panelu narracji i w polu „Ostatnia tura" tekst poprzedzony jest dodatkowo prefiksem A11y: „Scena zza kadru:" lub „Retrospekcja:". Prefiks ten zapisywany jest również w pliku narracyjnym .txt — gdy otworzysz audiobook w innym odtwarzaczu TTS, dalej będziesz wiedzieć, że kamera się przeniosła.
+
+    Czego oczekiwać od wyborów. W scenach trzecioosobowych pole z przyciskami wyborów ZAWSZE pozostaje puste — gracz nie podejmuje decyzji za antagonistę ani za swoje wcześniejsze „ja". Następna tura wraca do drugiej osoby i normalnie podaje wybory zgodne z aktywnym trybem (Swobodny, Wyborów, Mniejsze zło).
+
+    Auto-cuty silnika. Niezależnie od twoich komend, silnik narracyjny może sam zdecydować, że dana chwila zasługuje na kinowe cięcie — wstawia wtedy krótką scenę zza kadru z prefiksem „Tymczasem gdzie indziej:". Te organiczne wstawki są limitowane: maksymalnie jeden auto-cut na akt łuku narracyjnego (ekspozycja, narastanie, kulminacja, rozwiązanie), czyli maksymalnie cztery na całą opowieść. Limit liczony jest tylko dla wstawek samodzielnych silnika; twoje /scena i /flashback są nieograniczone. Stan licznika persystuje w pliku zapisu .game.json — gdy wrócisz do gry po trzech dniach, limit per-etap będzie dochowany.
+
+    Praktyczna wskazówka. Komenda /scena świetnie buduje napięcie tuż przed kulminacją („/scena strażnicy zbliżają się od bramy" — wiesz, że nadciągają, twoja postać jeszcze nie). /flashback działa najlepiej jako wyjaśnienie motywacji NPC-a, którego właśnie spotkałeś („/flashback Marek jako dziecko, dzień pożaru"). Nie nadużywaj — narracja gęstniejąca od cut-scen traci rytm pierwszoosobowy, który jest sednem tego trybu.
   krok_6_pliki_gry: |
     KROK 6: Pliki gry — gdzie znajdziesz swoje dane
 

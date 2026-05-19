@@ -1,8 +1,8 @@
 # =============================================================================
-# dictionaries/is/gui/dokumentacja/opowiesci.yaml
+# dictionaries/is/gui/dokumentacja/tales.yaml
 #
 # Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
-# ze źródła dictionaries/pl/gui/dokumentacja/opowiesci.yaml
+# ze źródła dictionaries/pl/gui/dokumentacja/tales.yaml
 # (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
 # w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
 #
@@ -80,17 +80,23 @@ tresc:
 
     Athugið: reglur heimsins krefjast virks leiks. Ef þú smellir á "{opowiesci.btn_zasady_swiata_label}" án þess að hafa hlaðið/sett upp leik, færðu skilaboðin „{opowiesci.zasady_bez_gry_tytul}" — smelltu fyrst á "{opowiesci.btn_nowa_gra_label}" eða hlaðið vistaðan leik.
   krok_5_slash_komendy: |
-    KROK 5: Slash-komendy — szybkie akcje bez API
+    KROK 5: Slash-tilskipanir — hraðar aðgerðir án API
 
-    Í aðgerðareitnum geturðu hvenær sem er slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta ekki köll til OpenAI) og virka óháð leikham. Bæði íslensk og ensk afbrigði eru samþykkt:
+    Í aðgerðarreitnum geturðu á hverjum tíma slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta ekki köll til OpenAI) og virka óháð leikstillingu. Bæði íslensk og ensk afbrigði eru samþykkt:
 
-    /vista, /save — þvingar handvirka vistun á stöðu leiksins. Sjálfvirk vistun á sér stað eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritið er lokað.
+    /vista, /save — þvingar handvirka vistun á stöðu leiksins. Sjálfvirk vistun virkar eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritið er lokað.
 
-    /hlaða, /load — opnar valglugga fyrir leik með lista yfir tiltæk nöfn (frá v15.2.3 í staðinn fyrir kerfisskráarglugga — beinn listi yfir vistaða leiki úr möppunni runtime/opowiesci/, greindir út frá tilvist .game.json skrár). NVDA les listann náttúrulega, blindi leikmaðurinn þarf ekki að fletta í gegnum kerfisskráarglugga. Eftir val er nafn leiksins, hamur og full frásögn endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á. Hnappurinn „{opowiesci.btn_wczytaj_label}" hefur sömu hegðun.
+    /hlaða, /load — opnar valglugga fyrir leik úr lista yfir tiltæk nöfn (frá v15.2.3 í stað kerfisskráargluggans — beinn listi yfir vistaða leiki úr möppunni runtime/opowiesci/ sem greindir eru eftir tilvist .game.json skrár). NVDA les listann náttúrulega, blindur leikmaður þarf ekki að sigla um kerfisskráargluggann. Eftir að hafa valið nafn leiksins, stillingu og fulla frásögn er endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á. Sama hegðun hefur hnappurinn "{opowiesci.btn_wczytaj_label}".
 
-    Frásagnavélin velur AI-líkan sjálfkrafa eftir ham: fyrir ham Val og Minna ills nota það dýrari gpt-4o (fylgir ströngum reglum heimsins), fyrir Frjálsan ham — hraðari og ódýrari gpt-4o-mini (leikmaður stjórnar söguþræði, svo það krefst ekki dramatískrar leikstjórnar).
+    Frásagnavélin velur AI líkan sjálfkrafa eftir stillingu: fyrir valstillingu og Minna illt notar hún dýrara gpt-4o (fylgir ströngum reglum heimsins), fyrir Frjálsa stillingu — hraðara og ódýrara gpt-4o-mini (leikmaður stjórnar söguþræðinum, svo það krefst ekki dramatískrar leikstjórnar).
 
-    /sjá <lýsing>, /visualize <lýsing> — fjölskynja lýsing á núverandi senu. Breytir ekki stöðu leiksins, leggur ekki til valkosti — frásagnavélin notar öll fimm skilningarvitin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku samtalsglugga, ER ekki bætt við frásögnina né vistuð í hljóðbókar skrá. Dæmi: „/sjá hvernig vörðurinn lítur út" eða „/sjá lyktina af kaffihúsinu".
+    /sjónrænt <lýsing>, /visualize <lýsing> — margskynja lýsing á núverandi senu. Breytir ekki stöðu leiksins, leggur ekki til valkosti — frásagnavélin notar öll fimm skilningarvitin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/sjónrænt hvernig lítur vörðurinn út" eða „/sjónrænt lyktin í kaffihúsinu".
+
+    /sena <lýsing>, /scene <lýsing> — núverandi atburður ANNARSTAÐAR, sagður í þriðju persónu. Myndavélin losnar frá persónu þinni og sýnir hvað gerist samhliða hjá annarri persónu eða á öðrum stað í heiminum. Dæmi: „/sena Anna á markaðnum" eða „/sena varðmenn við hliðið". Vélin fléttar senu inn í frásögnina, merkir hana með forskeytinu „Sena utan ramma:" og snýr sjálfkrafa aftur að persónu þinni í næstu umferð. Valkostir birtast ekki — leikmaður tekur ekki ákvarðanir í senu annarra. Full lýsing á kerfinu er að finna í KROKI 5B.
+
+    /endurminning <lýsing>, /retrospekcja <lýsing> — endurminning í þriðju persónu, ferðast aftur í tíma. Dæmi: „/endurminning dagur föðurins dauða" eða „/endurminning fyrsta fundur hetjanna". Opnar frásögn með tímalegri formúlu („Þrjú ár áður…"), merkir með forskeytinu „Endurminning:" og snýr aftur að núverandi umferð. Eins og /sena — óvirk, án valkosta. Full lýsing í KROKI 5B.
+
+    /hjálp, /help — birtir glugga með lista yfir allar tiltækar skipanir. Glugginn er aðeins til lesturs og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
 
     /loka, /quit — lokar forritinu (eftir sjálfvirka vistun á umferð í gangi).
   krok_6_pliki_gry: |
@@ -175,3 +181,17 @@ tresc:
 
     Vandamál: Skrárnar .game.json og .story.jsonl eru ekki sýnilegar á skjáborðinu.
     Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í opowiesci/ — þar finnur þú þær.
+  krok_5b_druga_kamera: |
+    KROK 5B: Önnur myndavél — atriðin bak við tjöldin og endurlit (frá v15.4)
+
+    Venjulega spilarðu í fyrstu persónu — frásögnin hljómar „þú gengur", „þú finnur", „þú sérð". Frá útgáfu 15.4 geturðu leikstýrt atriði úr fjarlægð, sagt í þriðju persónu, sem tengist ekki beint við þína persónu. Til þess eru tvær skipanir: /scena fyrir samhliða atburði (eitthvað annað í heiminum), /flashback fyrir endurlit (í fortíðinni). Eftir innskot snýr vélin aftur til þinnar persónu í næstu umferð.
+
+    Af hverju þetta er til. Klassískur frásagnarleikur takmarkar alla atburði við sjónsvið einnar persónu. Önnur myndavél gerir kleift að byggja upp dramatík frá stærra sjónarhorni — sýna að andstæðingurinn er að flýja úr borginni, að Anna 30 kílómetrum í burtu les bréfið þitt, að fyrir tíu árum dó faðir þinn á sama krá. Án þessa kerfis fær leikmaður aðeins að vita um slíka hluti frá NPC-um; nú getur hann séð þá „í beinni".
+
+    Hvernig það lítur út frá frásagnarhliðinni. Vélin opnar atriði með formúlu sem gefur til kynna breytingu á sjónarhorni — fyrir /scena: „Á sama tíma…", „Fimm kílómetrum í burtu…", fyrir /flashback: „Þremur árum fyrr…", „Þegar hún var sautján ára…". Í frásagnarglugganum og í reitnum „Síðasta umferð" er textinn auk þess með forskeytið A11y: „Atriði bak við tjöldin:" eða „Endurlit:". Þetta forskeyti er einnig vistað í .txt frásagnarskránni — þegar þú opnar hljóðbókina í öðrum TTS spilara, veistu enn að myndavélin hefur færst.
+
+    Hvað á að búast við frá valkostum. Í þriðju persónu atriðum er valhnappasvæðið ALLTAF tómt — leikmaður tekur ekki ákvarðanir fyrir andstæðinginn eða fyrir sitt fyrra „ég". Næsta umferð snýr aftur í aðra persónu og gefur venjulega valkosti í samræmi við virka stillingu (Frjáls, Valkosta, Minna illt).
+
+    Sjálfvirk klipping vélarinnar. Óháð þínum skipunum getur frásagnarvélin sjálf ákveðið að tiltekin stund eigi skilið kvikmyndalega klippingu — þá setur hún inn stutt atriði bak við tjöldin með forskeytinu „Á meðan annars staðar:". Þessi lífrænu innskot eru takmörkuð: mest eitt sjálfvirkt klipp á hverja þáttasögu (kynnir, uppbygging, hápunktur, lausn), sem er mest fjögur fyrir alla söguna. Takmörkunin er aðeins talin fyrir sjálfstæð innskot vélarinnar; þínar /scena og /flashback eru ótakmarkaðar. Staða teljarans er viðvarandi í .game.json skrá — þegar þú kemur aftur í leikinn eftir þrjá daga, verður takmörkun á hverju stigi virt.
+
+    Hagnýt ábending. Skipunin /scena byggir upp spennu rétt fyrir hápunktinn („/scena verðirnir nálgast frá hliðinu" — þú veist að þeir koma, persónan þín veit það ekki enn). /flashback virkar best sem skýring á hvötum NPC sem þú hefur nýlega hitt („/flashback Marek sem barn, daginn eftir brunann"). Notaðu ekki of mikið — frásögn sem er ofhlaðin af klippuatriðum missir fyrsta persónu taktinn, sem er kjarni þessa ham.

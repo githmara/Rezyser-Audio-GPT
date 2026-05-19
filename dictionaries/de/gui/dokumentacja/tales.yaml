@@ -1,8 +1,8 @@
 # =============================================================================
-# dictionaries/de/gui/dokumentacja/opowiesci.yaml
+# dictionaries/de/gui/dokumentacja/tales.yaml
 #
 # Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
-# ze źródła dictionaries/pl/gui/dokumentacja/opowiesci.yaml
+# ze źródła dictionaries/pl/gui/dokumentacja/tales.yaml
 # (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
 # w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
 #
@@ -80,17 +80,23 @@ tresc:
 
     Hinweis: Weltregeln erfordern ein aktives Spiel. Wenn du auf "{opowiesci.btn_zasady_swiata_label}" klickst, ohne ein Spiel geladen/erstellt zu haben, erhältst du die Meldung „{opowiesci.zasady_bez_gry_tytul}" — klicke zuerst auf "{opowiesci.btn_nowa_gra_label}" oder lade ein gespeichertes Spiel.
   krok_5_slash_komendy: |
-    KROK 5: Slash-Befehle — schnelle Aktionen ohne API
+    SCHRITT 5: Slash-Befehle — schnelle Aktionen ohne API
 
-    Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Die Befehle sind lokal (sie erfordern keine OpenAI-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl die polnischen als auch die englischen Varianten werden akzeptiert:
+    Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Die Befehle sind lokal (kosten keine OpenAI-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl polnische als auch englische Varianten werden akzeptiert:
 
     /zapisz, /save — erzwingt das manuelle Speichern des Spielstands. Das automatische Speichern erfolgt nach jeder Runde, daher ist dieser Befehl hauptsächlich zur Sicherheit vor dem Schließen der Anwendung gedacht.
 
-    /wczytaj, /load — öffnet einen Spielauswahldialog mit einer Liste verfügbarer Namen (seit v15.2.3 anstelle des System-Dateidialogs — eine direkte Liste gespeicherter Spiele aus dem Ordner runtime/opowiesci/, erkannt anhand des Vorhandenseins einer .game.json-Datei). NVDA liest die Liste natürlich vor, der blinde Spieler muss nicht durch den System-Dateidialog navigieren. Nach der Auswahl werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst von der Runde aus weitermachen, bei der du aufgehört hast. Die Schaltfläche „{opowiesci.btn_wczytaj_label}" hat identisches Verhalten.
+    /wczytaj, /load — öffnet einen Dialog zur Auswahl eines Spiels aus einer Liste verfügbarer Namen (ab v15.2.3 anstelle des systemeigenen Dateidialogs — direkte Liste der gespeicherten Spiele aus dem Ordner runtime/opowiesci/, die anhand der Anwesenheit der Datei .game.json erkannt werden). NVDA liest die Liste natürlich vor, der blinde Spieler muss nicht im systemeigenen Dateidialog navigieren. Nach der Auswahl werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst von der Runde aus weitermachen, bei der du aufgehört hast. Identisches Verhalten hat die Schaltfläche "{opowiesci.btn_wczytaj_label}".
 
-    Die Erzählmaschine wählt das AI-Modell automatisch je nach Modus: Für die Modi Entscheidungen und Das kleinere Übel wird das teurere gpt-4o verwendet (hält sich streng an die Weltregeln), für den Freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, daher erfordert es keine dramatische Regie).
+    Der Erzählmotor wählt das AI-Modell automatisch je nach Modus: Für den Modus Entscheidungen und Das kleinere Übel wird das teurere gpt-4o verwendet (hält sich streng an die Weltregeln), für den Freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, daher ist keine dramatische Regie erforderlich).
 
-    /wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht, schlägt keine Entscheidungen vor — die Erzählmaschine verwendet alle fünf Sinne (Sehen, Hören, Geruch, Tasten, Geschmack), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT zur Erzählung hinzugefügt oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj jak wygląda strażnik" oder „/wizualizuj zapach kawiarni".
+    /wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht, schlägt keine Entscheidungen vor — der Erzählmotor verwendet alle fünf Sinne (Sehen, Hören, Geruch, Tasten, Geschmack), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT in die Erzählung aufgenommen oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj jak wygląda strażnik" oder „/wizualizuj zapach kawiarni".
+
+    /scena <opis>, /scene <opis> — aktuelles Ereignis ANDERSWO, erzählt in der dritten Person. Die Kamera löst sich von deiner Figur und zeigt, was parallel mit einer anderen Figur oder an einem anderen Ort der Welt passiert. Beispiel: „/scena Anna na rynku" oder „/scena strażnicy przy bramie". Der Motor fügt die Szene in die Erzählung ein, kennzeichnet sie mit dem Präfix „Szene außerhalb des Rahmens:" und kehrt in der nächsten Runde automatisch zu deiner Figur zurück. Es erscheinen keine Entscheidungen — der Spieler trifft keine Entscheidungen in der Szene eines anderen. Eine vollständige Beschreibung des Mechanismus findest du in SCHRITT 5B.
+
+    /flashback <opis>, /retrospekcja <opis> — Rückblende in der dritten Person, zeitliche Rückkehr. Beispiel: „/flashback dzień śmierci ojca" oder „/flashback pierwsze spotkanie bohaterów". Eröffnet die Erzählung mit einer zeitlichen Formel („Drei Jahre zuvor…"), kennzeichnet sie mit dem Präfix „Rückblende:" und kehrt zur aktuellen Runde zurück. Genauso wie /scena — passiv, ohne Entscheidungen. Vollständige Beschreibung in SCHRITT 5B.
+
+    /pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Bildschirmleser liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
 
     /koniec, /quit — schließt die Anwendung (nach dem automatischen Speichern der laufenden Runde).
   krok_6_pliki_gry: |
@@ -175,3 +181,17 @@ tresc:
 
     Problem: Die Dateien .game.json und .story.jsonl sind auf dem Desktop nicht sichtbar.
     Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Erzählungsdateien (.txt, .md) gelangen in skrypty/ — dort finden Sie sie.
+  krok_5b_druga_kamera: |
+    SCHRITT 5B: Zweite Kamera — Szenen hinter den Kulissen und Rückblenden (ab v15.4)
+
+    Standardmäßig spielst du in der ersten Person — die Erzählung klingt „du gehst", „du fühlst", „du siehst". Ab Version 15.4 kannst du eine Szene aus der Distanz inszenieren, erzählt in der dritten Person, die nicht direkt mit deiner Figur verbunden ist. Dafür gibt es zwei Befehle: /szene für parallele Ereignisse (irgendwo anders in der Welt), /rückblende für Rückblicke (in der Vergangenheit). Nach dem Einschub kehrt die Engine in der nächsten Runde zu deiner Figur zurück.
+
+    Warum das existiert. Ein klassisches Erzählspiel beschränkt alle Ereignisse auf das Sichtfeld einer Figur. Die zweite Kamera ermöglicht es, Dramatik aus einer größeren Perspektive zu schaffen — zu zeigen, dass der Antagonist gerade aus der Stadt flieht, dass Anna 30 Kilometer entfernt deinen Brief liest, dass vor zehn Jahren in derselben Taverne dein Vater gestorben ist. Ohne diese Mechanik erfährt der Spieler von solchen Dingen nur aus den Berichten von NPCs; jetzt kann er sie „live" sehen.
+
+    Wie es aus erzählerischer Sicht aussieht. Die Engine eröffnet die Szene mit einer Formel, die den Perspektivwechsel anzeigt — für /szene: „Zur gleichen Zeit…", „Fünf Kilometer weiter…", für /rückblende: „Drei Jahre zuvor…", „Als sie siebzehn war…". Im Erzählpanel und im Feld „Letzte Runde" wird der Text zusätzlich mit einem A11y-Präfix versehen: „Szene hinter den Kulissen:" oder „Rückblende:". Dieses Präfix wird auch in der .txt-Erzähldatei gespeichert — wenn du das Hörbuch in einem anderen TTS-Player öffnest, wirst du weiterhin wissen, dass die Kamera gewechselt hat.
+
+    Was von den Entscheidungen zu erwarten ist. In drittpersonalen Szenen bleibt das Feld mit den Auswahlknöpfen IMMER leer — der Spieler trifft keine Entscheidungen für den Antagonisten oder sein früheres „Ich". Die nächste Runde kehrt zur zweiten Person zurück und bietet normal die Auswahlmöglichkeiten entsprechend dem aktiven Modus (Frei, Auswahl, Kleineres Übel).
+
+    Auto-Cuts der Engine. Unabhängig von deinen Befehlen kann die Erzähl-Engine selbst entscheiden, dass ein bestimmter Moment ein filmisches Schnitt verdient — dann fügt sie eine kurze Szene hinter den Kulissen mit dem Präfix „Inzwischen anderswo:" ein. Diese organischen Einschübe sind limitiert: maximal ein Auto-Cut pro Akt des Erzählbogens (Exposition, Steigerung, Höhepunkt, Auflösung), also maximal vier für die gesamte Geschichte. Das Limit wird nur für die selbstständigen Einschübe der Engine gezählt; deine /szene und /rückblende sind unbegrenzt. Der Zählerstand wird in der .game.json-Speicherdatei gespeichert — wenn du nach drei Tagen zum Spiel zurückkehrst, wird das Limit pro Etappe eingehalten.
+
+    Praktischer Hinweis. Der Befehl /szene baut hervorragend Spannung kurz vor dem Höhepunkt auf („/szene Wächter nähern sich vom Tor" — du weißt, dass sie kommen, deine Figur noch nicht). /rückblende funktioniert am besten als Erklärung der Motivation eines NPCs, dem du gerade begegnet bist („/rückblende Marek als Kind, am Tag nach dem Brand"). Nicht übertreiben — eine Erzählung, die vor Cut-Szenen überquillt, verliert den Rhythmus der ersten Person, der das Wesen dieses Modus ist.

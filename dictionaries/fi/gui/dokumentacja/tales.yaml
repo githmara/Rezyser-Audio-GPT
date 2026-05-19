@@ -1,8 +1,8 @@
 # =============================================================================
-# dictionaries/fi/gui/dokumentacja/opowiesci.yaml
+# dictionaries/fi/gui/dokumentacja/tales.yaml
 #
 # Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py
-# ze źródła dictionaries/pl/gui/dokumentacja/opowiesci.yaml
+# ze źródła dictionaries/pl/gui/dokumentacja/tales.yaml
 # (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
 # w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
 #
@@ -80,19 +80,25 @@ tresc:
 
     Huomio: maailman säännöt vaativat aktiivisen pelin. Jos klikkaat "{opowiesci.btn_zasady_swiata_label}" ilman ladattua/aloitettua peliä, saat viestin "{opowiesci.zasady_bez_gry_tytul}" — klikkaa ensin "{opowiesci.btn_nowa_gra_label}" tai lataa tallennettu peli.
   krok_5_slash_komendy: |
-    KROK 5: Slash-komennot — nopeat toiminnot ilman API:ta
+    KROK 5: Slash-komennot — nopeat toiminnot ilman API:a
 
     Toimintokentässä voit milloin tahansa kirjoittaa komennon, joka alkaa vinoviivalla `/`. Komennot ovat paikallisia (eivät vaadi OpenAI-kutsuja) ja toimivat pelitilasta riippumatta. Hyväksytään sekä suomen- että englanninkieliset versiot:
 
     /tallenna, /save — pakottaa manuaalisen pelitilan tallennuksen. Automaattinen tallennus tapahtuu jokaisen vuoron jälkeen, joten tämä komento on lähinnä varmistusta varten ennen sovelluksen sulkemista.
 
-    /lataa, /load — avaa pelin valintaikkunan, jossa on lista saatavilla olevista nimistä (versiosta 15.2.3 alkaen järjestelmän tiedostovalintaikkunan sijaan — suora lista tallennetuista peleistä kansiosta runtime/opowiesci/, tunnistettuna .game.json-tiedoston olemassaolon perusteella). NVDA lukee listan luonnollisesti, sokean pelaajan ei tarvitse navigoida järjestelmän tiedostovalintaikkunassa. Valinnan jälkeen pelin nimi, tila ja koko narratiivi palautetaan — voit jatkaa siitä vuorosta, johon jäit. Painikkeella „{opowiesci.btn_wczytaj_label}" on identtinen toiminta.
+    /lataa, /load — avaa pelin valintadialogin saatavilla olevien nimien listasta (v15.2.3:sta alkaen järjestelmätiedostodialogin sijaan — suora lista tallennetuista peleistä runtime/opowiesci/ -kansiosta, jotka tunnistetaan .game.json-tiedoston olemassaolon perusteella). NVDA lukee listan luonnollisesti, joten sokea pelaaja ei tarvitse navigoida järjestelmätiedostodialogissa. Kun peli on valittu, pelitila ja koko kerronta palautetaan — voit jatkaa siitä vuorosta, johon jäit. Identtinen toiminta on painikkeella "{opowiesci.btn_wczytaj_label}".
 
-    Narratiivimoottori valitsee AI-mallin automaattisesti tilan mukaan: Valintojen ja Pienemmän pahan tilassa se käyttää kalliimpaa gpt-4o:ta (noudattaa tiukasti maailman sääntöjä), Vapaassa tilassa — nopeampaa ja halvempaa gpt-4o-miniä (pelaaja ohjaa juonta, joten dramaattista ohjausta ei tarvita).
+    Kerrontamoottori valitsee AI-mallin automaattisesti tilasta riippuen: Valintojen ja Pienemmän pahan tilassa käytetään kalliimpaa gpt-4o:ta (noudattaa tiukasti maailman sääntöjä), Vapaassa tilassa käytetään nopeampaa ja edullisempaa gpt-4o-miniä (pelaaja ohjaa juonta, joten dramaattista ohjausta ei tarvita).
 
-    /visualisoi <kuvaus>, /visualize <kuvaus> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — narratiivimoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvällisemmin. Tulos näkyy erillisessä ikkunassa, sitä EI lisätä narratiiviin eikä tallenneta äänikirjatiedostoon. Esimerkki: „/visualisoi miltä vartija näyttää" tai „/visualisoi kahvilan tuoksu".
+    /visualisoi <kuvaus>, /visualize <kuvaus> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvällisemmin. Tulokset ilmestyvät erilliseen dialogiin, niitä EI lisätä kerrontaan eikä tallenneta äänikirjatiedostoon. Esimerkki: „/visualisoi miltä vartija näyttää" tai „/visualisoi kahvilan tuoksu".
 
-    /lopeta, /quit — sulkee sovelluksen (automaattisen vuoron tallennuksen jälkeen).
+    /kohtaus <kuvaus>, /scene <kuvaus> — nykyinen tapahtuma MUUALLA, kerrottu kolmannessa persoonassa. Kamera irtautuu hahmostasi ja näyttää, mitä tapahtuu samanaikaisesti toiselle hahmolle tai toisessa maailman paikassa. Esimerkki: „/kohtaus Anna torilla" tai „/kohtaus vartijat portilla". Moottori liittää kohtauksen kerrontaan, merkitsee sen etuliitteellä „Kohtaus kulissien takaa:" ja palaa automaattisesti hahmoosi seuraavassa vuorossa. Valintoja ei esiinny — pelaaja ei tee päätöksiä toisen kohtauksessa. Täysi kuvaus mekanismista löytyy KROKISTA 5B.
+
+    /takautuma <kuvaus>, /flashback <kuvaus> — takautuma kolmannessa persoonassa, aikamatka taaksepäin. Esimerkki: „/takautuma isän kuolinpäivä" tai „/takautuma sankareiden ensimmäinen kohtaaminen". Avaa kerronnan aikakaavalla („Kolme vuotta aikaisemmin…"), merkitsee etuliitteellä „Takautuma:" ja palaa nykyiseen vuoroon. Samoin kuin /kohtaus — passiivinen, ilman valintoja. Täysi kuvaus KROKISSA 5B.
+
+    /apu, /help — näyttää valintaikkunan, jossa on luettelo kaikista saatavilla olevista komennoista. Dialogi on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee koko listan heti ilman navigointia.
+
+    /lopeta, /quit — sulkee sovelluksen (vuoron automaattisen tallennuksen jälkeen).
   krok_6_pliki_gry: |
     KROK 6: Pelitiedostot — missä löydät tietosi
 
@@ -175,3 +181,17 @@ tresc:
 
     Ongelma: .game.json ja .story.jsonl tiedostoja ei näy työpöydällä.
     Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on järjestelmäkansio tavallisille käyttäjille, eikä se ole näkyvissä tiedostoselaimessa. Kertomustiedostot (.txt, .md) tallennetaan opowiesci/-kansioon — löydät ne sieltä.
+  krok_5b_druga_kamera: |
+    KROK 5B: Toinen kamera — kulissien takaiset kohtaukset ja takaumat (alkaen v15.4)
+
+    Oletuksena pelaat ensimmäisessä persoonassa — kerronta kuuluu "menet", "tunnet", "näet". Versiosta 15.4 alkaen voit ohjata kohtauksen etäältä, kerrottuna kolmannessa persoonassa, joka ei liity suoraan hahmoosi. Tätä varten on kaksi komentoa: /kohtaus rinnakkaisille tapahtumille (jossain muualla maailmassa), /takauma menneisyyden tapahtumille. Lisäyksen jälkeen moottori palaa hahmoosi seuraavalla vuorolla.
+
+    Miksi tämä on olemassa. Klassinen kertomuspeli rajoittaa kaikki tapahtumat yhden hahmon näkökenttään. Toinen kamera mahdollistaa dramaturgian rakentamisen laajemmasta näkökulmasta — näyttää, että antagonisti pakenee juuri kaupungista, että Anna 30 kilometrin päässä lukee kirjeesi, että kymmenen vuotta sitten samassa majatalossa isäsi kuoli. Ilman tätä mekaniikkaa pelaaja saa tietää tällaisista asioista vain NPC-hahmojen kertomana; nyt hän voi nähdä ne "livenä".
+
+    Miltä se näyttää kerronnan kannalta. Moottori avaa kohtauksen kaavalla, joka osoittaa näkökulman muutoksen — /kohtaus: "Samaan aikaan…", "Viisi kilometriä kauempana…", /takauma: "Kolme vuotta aiemmin…", "Kun hän oli seitsemäntoista…". Kertomuspaneelissa ja "Viimeinen vuoro" -kentässä tekstiä edeltää lisäksi A11y-etuliite: "Kulissien takainen kohtaus:" tai "Takauma:". Tämä etuliite tallennetaan myös .txt-kertomustiedostoon — kun avaat äänikirjan toisessa TTS-soittimessa, tiedät edelleen, että kamera on siirtynyt.
+
+    Mitä odottaa valinnoilta. Kolmannen persoonan kohtauksissa valintapainikkeiden kenttä on AINA tyhjä — pelaaja ei tee päätöksiä antagonistille tai aikaisemmalle "minälleen". Seuraava vuoro palaa toiseen persoonaan ja antaa normaalisti valinnat aktiivisen tilan mukaisesti (Vapaa, Valinnat, Pienempi paha).
+
+    Moottorin automaattiset leikkaukset. Riippumatta komennoistasi, kertomusmoottori voi itse päättää, että tietty hetki ansaitsee elokuvallisen leikkauksen — se lisää silloin lyhyen kulissien takaisen kohtauksen etuliitteellä "Samaan aikaan muualla:". Nämä orgaaniset lisäykset ovat rajoitettuja: enintään yksi automaattinen leikkaus narratiivisen kaaren näytöstä (esittely, nousu, huipentuma, ratkaisu), eli enintään neljä koko tarinassa. Rajoitus lasketaan vain moottorin itsenäisille lisäyksille; omat /kohtaus ja /takauma -komennot ovat rajoittamattomia. Laskurin tila säilyy .game.json-tallennustiedostossa — kun palaat peliin kolmen päivän kuluttua, vaihekohtainen rajoitus pysyy voimassa.
+
+    Käytännön vinkki. Komento /kohtaus rakentaa hienosti jännitystä juuri ennen huipentumaa ("/kohtaus vartijat lähestyvät portilta" — tiedät, että he ovat tulossa, hahmosi ei vielä tiedä). /takauma toimii parhaiten NPC:n motivaation selityksenä, jonka juuri kohtasit ("/takauma Marek lapsena, palon jälkeinen päivä"). Älä käytä liikaa — kerronta, joka tihkuu leikkauskohtauksista, menettää ensimmäisen persoonan rytmin, joka on tämän tilan ydin.

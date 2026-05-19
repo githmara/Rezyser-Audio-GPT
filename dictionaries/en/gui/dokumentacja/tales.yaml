@@ -92,7 +92,27 @@ tresc:
 
     /wizualizuj <description>, /visualize <description> — a multisensory description of the current scene. It does not change the game state, does not propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog, it is NOT added to the narration or saved in the audiobook file. Example: "/wizualizuj how the guard looks" or "/wizualizuj the smell of the café".
 
+    /scena <description>, /scene <description> — current event ELSEWHERE, told in the third person. The camera detaches from your character and shows what is happening in parallel with another character or in another part of the world. Example: "/scene Anna at the marketplace" or "/scene the guards at the gate". The engine weaves the scene into the narration, marks it with the "Off-screen scene:" prefix, and automatically returns to your character on the next turn. Choices do not appear — the player does not make decisions inside someone else's scene. Full description of the mechanism in STEP 5B.
+
+    /flashback <description>, /retrospekcja <description> — retrospection in the third person, a step back in time. Example: "/flashback the day father died" or "/flashback the protagonists' first meeting". Opens the narration with a temporal formula ("Three years earlier…"), tags it with the "Flashback:" prefix, and returns to the current turn. Identical to /scene — passive, no choices. Full description in STEP 5B.
+
+    /pomoc, /help — displays a dialog with the list of all available commands. The dialog is read-only and NVDA-friendly — the text field receives focus automatically, the screen reader immediately reads the whole list without manual navigation.
+
     /koniec, /quit — closes the application (after autosaving the current turn).
+  krok_5b_druga_kamera: |
+    STEP 5B: The second camera — off-screen scenes and flashbacks (since v15.4)
+
+    By default you play in first person — the narration says "you walk", "you feel", "you see". Since version 15.4 you can direct a scene from a distance, told in the third person, not tied directly to your character. Two commands do this: /scena for parallel events (somewhere else in the world), /flashback for retrospection (in the past). After the cut the engine returns to your character on the next turn.
+
+    Why this exists. A classic narrative game limits all events to one character's point of view. The second camera lets you build drama from a broader perspective — show the antagonist fleeing the city, Anna reading your letter thirty kilometers away, the same tavern where your father died ten years ago. Without this mechanism the player learns about such things only from NPC accounts; now they can witness them live.
+
+    What the narration looks like. The engine opens the scene with a formula signaling the shift of perspective — for /scena: "Meanwhile…", "Five kilometers away…"; for /flashback: "Three years earlier…", "When she was seventeen…". In the narration panel and in the "Last turn" field the text is additionally preceded by an A11y prefix: "Off-screen scene:" or "Flashback:". This prefix is also written to the narrative .txt file — when you open the audiobook in another TTS reader you will still know the camera has shifted.
+
+    What to expect from choices. In third-person scenes the choice buttons field is ALWAYS empty — the player does not make decisions for the antagonist or for their younger self. The next turn returns to second person and proposes choices according to the active mode (Free, Choices, Lesser Evil).
+
+    Engine auto-cuts. Independently of your commands, the narrative engine may decide on its own that a moment deserves a cinematic cut — it then inserts a short off-screen scene with the "Meanwhile elsewhere:" prefix. These organic interludes are limited: at most one auto-cut per arc stage (exposition, rising action, climax, resolution), so at most four per story. The limit applies only to engine-initiated cuts; your /scena and /flashback are unlimited. The counter persists in the .game.json save file — when you return to the game after three days, the per-stage limit will be honored.
+
+    Practical tip. The /scena command works great for building tension just before the climax ("/scena guards approaching from the gate" — you know they are coming, your character does not yet). /flashback works best as a way to explain an NPC's motivation ("/flashback Marek as a child, the day of the fire"). Do not overuse — narration thick with cut-scenes loses the first-person rhythm that is the core of this mode.
   krok_6_pliki_gry: |
     STEP 6: Game Files — where to find your data
 

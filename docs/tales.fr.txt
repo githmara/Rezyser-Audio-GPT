@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (15.3.2 – Version de Publication)
+Reżyser Audio GPT — Module Histoires Interactives (15.4 – Version de Publication)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
@@ -71,15 +71,21 @@ Remarque : les règles du monde nécessitent un jeu actif. Si vous cliquez sur "
 
 KROK 5 : Commandes Slash — actions rapides sans API
 
-Dans le champ d'action, vous pouvez à tout moment taper une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne consomment pas d'appels à OpenAI) et fonctionnent indépendamment du mode de jeu. Les variantes en polonais et en anglais sont acceptées :
+Dans le champ d'action, vous pouvez à tout moment entrer une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne consomment pas d'appels à OpenAI) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont acceptées :
 
-/zapisz, /save — force l'enregistrement manuel de l'état du jeu. L'enregistrement automatique se fait après chaque tour, donc cette commande est principalement pour s'assurer avant de fermer l'application.
+/zapisz, /save — forcer l'enregistrement manuel de l'état du jeu. L'enregistrement automatique se fait après chaque tour, donc cette commande est principalement pour s'assurer avant de fermer l'application.
 
-/wczytaj, /load — ouvre une boîte de dialogue de sélection de jeu avec la liste des noms disponibles (depuis v15.2.3 à la place de la boîte de dialogue système de fichiers — une liste directe des jeux enregistrés dans le dossier runtime/opowiesci/, détectés par la présence d'un fichier .game.json). NVDA lit la liste naturellement, le joueur aveugle n'a pas à naviguer dans la boîte de dialogue système de fichiers. Après la sélection, le nom du jeu, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous êtes arrêté. Le bouton « Charger » a un comportement identique.
+/wczytaj, /load — ouvre une boîte de dialogue pour choisir un jeu dans la liste des noms disponibles (à partir de la v15.2.3, au lieu de la boîte de dialogue de fichiers système — une liste directe des jeux enregistrés dans le dossier runtime/opowiesci/ détectés par la présence du fichier .game.json). NVDA lit la liste naturellement, le joueur aveugle n'a pas besoin de naviguer dans la boîte de dialogue de fichiers système. Après avoir choisi, le nom du jeu, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous êtes arrêté. Le comportement est identique au bouton "Charger".
 
-Le moteur narratif sélectionne automatiquement le modèle AI en fonction du mode : pour les modes Choix et Moindre Mal, il utilise le plus coûteux gpt-4o (respecte rigoureusement les règles du monde), pour le mode Libre — le plus rapide et moins cher gpt-4o-mini (le joueur contrôle l'intrigue, donc cela ne nécessite pas une mise en scène dramatique).
+Le moteur narratif choisit automatiquement le modèle AI en fonction du mode : pour le mode Choix et Moindre Mal, il utilise le gpt-4o plus coûteux (il suit strictement les règles du monde), pour le mode Libre — le gpt-4o-mini plus rapide et moins cher (le joueur contrôle l'intrigue, donc cela ne nécessite pas de mise en scène dramatique).
 
-/wizualizuj <opis>, /visualize <description> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj jak wygląda strażnik » ou « /wizualizuj zapach kawiarni ».
+/wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj jak wygląda strażnik » ou « /wizualizuj zapach kawiarni ».
+
+/scena <opis>, /scene <opis> — événement en cours AILLEURS, raconté à la troisième personne. La caméra se détache de votre personnage et montre ce qui se passe en parallèle avec un autre personnage ou dans un autre endroit du monde. Exemple : « /scena Anna na rynku » ou « /scena strażnicy przy bramie ». Le moteur intègre la scène dans la narration, la marque avec le préfixe « Scène hors champ : » et revient automatiquement à votre personnage au tour suivant. Aucun choix n'apparaît — le joueur ne prend pas de décisions dans la scène d'autrui. La description complète du mécanisme se trouve dans KROK 5B.
+
+/flashback <opis>, /retrospekcja <opis> — flashback à la troisième personne, retour dans le temps. Exemple : « /flashback dzień śmierci ojca » ou « /flashback pierwsze spotkanie bohaterów ». Ouvre la narration avec une formule temporelle (« Trois ans plus tôt… »), la marque avec le préfixe « Retrospekcja : » et revient au tour en cours. Identique à /scena — passif, sans choix. Description complète dans KROK 5B.
+
+/pomoc, /help — affiche une boîte de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
 
 /koniec, /quit — ferme l'application (après l'enregistrement automatique du tour en cours).
 
@@ -170,3 +176,18 @@ Cause et solution : Hallucination du modèle — malgré le mode 4 LLM a renvoy�
 
 Problème : Les fichiers .game.json et .story.jsonl ne sont pas visibles sur le bureau.
 Cause et solution : C'est intentionnel — runtime/ est un dossier système pour les utilisateurs ordinaires, invisible depuis l'explorateur de fichiers. Les fichiers de narration (.txt, .md) vont dans scripts/ — vous les trouverez là-bas.
+
+
+KROK 5B : Deuxième caméra — scènes en coulisses et flashbacks (à partir de la v15.4)
+
+Par défaut, vous jouez à la première personne — la narration utilise « tu vas », « tu ressens », « tu vois ». À partir de la version 15.4, vous pouvez réaliser une scène à distance, racontée à la troisième personne, non directement liée à votre personnage. Deux commandes sont prévues à cet effet : /scène pour les événements parallèles (ailleurs dans le monde), /flashback pour les rétrospectives (dans le passé). Après l'insertion, le moteur revient à votre personnage au tour suivant.
+
+Pourquoi cela existe-t-il. Un jeu narratif classique limite tous les événements au champ de vision d'un seul personnage. La deuxième caméra permet de construire une dramaturgie avec une perspective plus large — montrer que l'antagoniste est en train de fuir la ville, qu'Anna à 30 kilomètres lit votre lettre, que dix ans plus tôt dans la même auberge, votre père a été tué. Sans cette mécanique, le joueur apprend ces choses uniquement par les récits des PNJ ; maintenant, il peut les voir « en direct ».
+
+Comment cela se présente du point de vue de la narration. Le moteur ouvre la scène avec une formule indiquant le changement de perspective — pour /scène : « En même temps… », « Cinq kilomètres plus loin… », pour /flashback : « Trois ans plus tôt… », « Quand elle avait dix-sept ans… ». Dans le panneau de narration et dans le champ « Dernier tour », le texte est précédé d'un préfixe A11y supplémentaire : « Scène en coulisses : » ou « Rétrospective : ». Ce préfixe est également enregistré dans le fichier narratif .txt — lorsque vous ouvrez l'audiobook dans un autre lecteur TTS, vous savez toujours que la caméra a changé de place.
+
+À quoi s'attendre des choix. Dans les scènes à la troisième personne, le champ avec les boutons de choix RESTE TOUJOURS vide — le joueur ne prend pas de décisions pour l'antagoniste ni pour son « moi » antérieur. Le tour suivant revient à la deuxième personne et propose normalement des choix conformes au mode actif (Libre, Choix, Moindre mal).
+
+Auto-coupures du moteur. Indépendamment de vos commandes, le moteur narratif peut décider lui-même qu'un moment mérite une coupure cinématographique — il insère alors une courte scène en coulisses avec le préfixe « Pendant ce temps ailleurs : ». Ces insertions organiques sont limitées : un maximum d'une auto-coupure par acte de l'arc narratif (exposition, montée, climax, résolution), soit un maximum de quatre pour toute l'histoire. La limite ne concerne que les insertions autonomes du moteur ; vos /scène et /flashback sont illimités. L'état du compteur persiste dans le fichier de sauvegarde .game.json — lorsque vous revenez au jeu après trois jours, la limite par étape est respectée.
+
+Conseil pratique. La commande /scène construit parfaitement la tension juste avant le climax (« /scène les gardes approchent de la porte » — vous savez qu'ils arrivent, votre personnage pas encore). /flashback fonctionne mieux comme explication de la motivation d'un PNJ que vous venez de rencontrer (« /flashback Marek enfant, le jour de l'incendie »). Ne pas en abuser — une narration saturée de cut-scenes perd le rythme à la première personne, qui est l'essence de ce mode.

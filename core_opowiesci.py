@@ -133,6 +133,14 @@ class ProjektOpowiesci:
         self.ostatnie_tury: list[dict[str, str]] = []
         self.zasady_swiata: str = ""
         self.ostatnie_wybory: list[dict[str, str]] = []
+        # v15.4: licznik kinowych cięć narracyjnych per etap łuku
+        # (`narracja_typ != "druga_osoba"`). Persystowany w `.game.json` żeby
+        # przeżyć restart aplikacji — gracz wracający po 3 dniach nie dostaje
+        # zresetowanego limitu auto-cut. Etapy zgodne z `meta.etap_luku`
+        # z odpowiedzi LLM (ekspozycja → narastanie → kulminacja → rozwiązanie).
+        self.cuty_wykorzystane: dict[str, int] = {
+            "ekspozycja": 0, "narastanie": 0, "kulminacja": 0, "rozwiazanie": 0,
+        }
 
     # ------------------------------------------------------------------
     # Walidacja stanu
@@ -321,16 +329,17 @@ class ProjektOpowiesci:
         sciezka = self._sciezka_game_json(self.nazwa_pliku)
 
         payload = {
-            "nazwa_gry":        self.nazwa_pliku,
-            "tryb":             self.tryb,
-            "jezyk_projektu":   self.jezyk_projektu,
-            "seed_swiata":      self.seed_swiata,
-            "numer_tury":       self.numer_tury,
-            "postacie_aktywne": self.postacie_aktywne,
-            "stan":             self.stan,
-            "ostatnie_tury":    self.ostatnie_tury,
-            "zasady_swiata":    self.zasady_swiata,
-            "ostatnie_wybory":  self.ostatnie_wybory,
+            "nazwa_gry":         self.nazwa_pliku,
+            "tryb":              self.tryb,
+            "jezyk_projektu":    self.jezyk_projektu,
+            "seed_swiata":       self.seed_swiata,
+            "numer_tury":        self.numer_tury,
+            "postacie_aktywne":  self.postacie_aktywne,
+            "stan":              self.stan,
+            "ostatnie_tury":     self.ostatnie_tury,
+            "zasady_swiata":     self.zasady_swiata,
+            "ostatnie_wybory":   self.ostatnie_wybory,
+            "cuty_wykorzystane": self.cuty_wykorzystane,   # v15.4
         }
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
@@ -445,6 +454,13 @@ class ProjektOpowiesci:
         self.ostatnie_tury     = list(dane.get("ostatnie_tury", []))
         self.zasady_swiata     = str(dane.get("zasady_swiata", ""))
         self.ostatnie_wybory   = list(dane.get("ostatnie_wybory", []))
+        # v15.4: gry pre-15.4 nie miały pola — fallback do pełnego słownika
+        # zer (gracz dostaje pełen limit auto-cut po update'cie aplikacji).
+        # Hardening: brakujące klucze etapów (gdyby zapis był ucięty) też
+        # uzupełniamy zerami, żeby `cuty_wykorzystane[etap]` nigdy nie rzucił.
+        domyslne_cuty = {"ekspozycja": 0, "narastanie": 0, "kulminacja": 0, "rozwiazanie": 0}
+        wczytane_cuty = dict(dane.get("cuty_wykorzystane", {}))
+        self.cuty_wykorzystane = {etap: int(wczytane_cuty.get(etap, 0)) for etap in domyslne_cuty}
 
         wynik = WynikWczytaniaOpowiesci(
             nazwa=nazwa,
