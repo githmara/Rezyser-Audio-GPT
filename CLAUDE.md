@@ -2,7 +2,7 @@
 - Projekt jest w pełni oparty o framework wxPython (natywne GUI desktopowe), z naciskiem na maksymalną dostępność dla czytników ekranu (A11y, np. NVDA). Punkt wejścia to `main.py`.
 - KOD OBIEKTOWY: Logika podzielona na klasy dziedziczące po `wx.Frame` (`main.py`) i `wx.Panel` (`gui_*.py`). Unikaj kodu proceduralnego.
 - ACCESSIBILITY FIRST: Zawsze dbaj o intuicyjną nawigację z klawiatury. Używaj Sizerów i wstrzymuj się z tworzeniem własnych, niestandardowych kontrolek, jeśli systemowe spełniają zadanie.
-- PLIKI METADANYCH PROJEKTÓW: Folder `runtime/skrypty/` przechowuje pliki `.mode`. Ukrywa to pliki konfiguracyjne przed zwykłymi użytkownikami końcowymi. W folderze `dictionaries` są zapisywane reguły fonetyczne i szyfrujące.
+- SEED vs USER DATA (od 15.3): `dictionaries/` to seed (single source dla silnika, commitowana, wchodzi do paczki release). `runtime/`, `skrypty/`, `opowiesci/` (root), `*.env` to user data — gitignored, poza paczką release. `runtime/skrypty/*.mode` to per-projekt metadane (ukryte przed end-userem).
 - KOMUNIKACJA Z UŻYTKOWNIKIEM (A11y): Krótkie jednorazowe powiadomienia (sukcesy, błędy) → `wx.MessageBox`. Długie komunikaty techniczne → dialog `wx.Dialog` z `wx.TextCtrl` (TE_READONLY) i przyciskiem „Zamknij". Unikaj wzorca „aktualizuj etykietę i ustaw fokus" jako głównego sposobu notyfikowania użytkownika.
 
 # ZARZĄDZANIE TERMINALEM I TESTOWANIEM (BASH & A11y)
@@ -41,9 +41,9 @@ Pamięć agenta jest podzielona na trzy warstwy z różnymi celami i sposobami �
 
 # WIELOJĘZYCZNOŚĆ I TŁUMACZENIA INTERFEJSU
 - Stan post-14.0: 9 w pełni wdrożonych paczek językowych w `dictionaries/`: `pl en de es fi fr is it ru`. Roadmapa wielojęzycznościowa zamknięta — historia wdrożeń (13.3 EN → 14.0 ES, jeden język na minor) jest w `git log` + commitach release'owych.
-- Bezpieczna kolejność wdrażania nowego języka (gdyby pojawił się 10. język w 15.x+): najpierw paczka treściowa (`podstawy.yaml` + `akcenty/` + `szyfry/` + `rezyser/`), potem `gui/ui.yaml` (autotłumacz), potem `gui/dokumentacja/*.yaml` (autotłumacz), na końcu release.
-- Reguła natywności: każdy język otrzymuje standardowe 6 szyfrów + 8 akcentów obcojęzycznych (akcenty 9 wdrożonych języków minus własny natywny) + 3 narzędzia czyszczenia (`oczyszczenie`, `oczyszczenie_bez_liczb`, `naprawiacz_tagow`) = 11 plików w `akcenty/` + 4 tryby w `rezyser/`. To wzorzec wzięty z kompletu istniejących paczek; nie jest egzekwowany przez silnik (silnik wymaga ≥1 plik per podfolder, patrz niżej), ale dla parytetu z resztą paczek trzymaj się tego.
-- WYMÓG SILNIKA (`core_poliglota._jezyk_kompletny`, od 13.9): folder `<kod>/` jest skanowany pod kątem `podstawy.yaml` + minimum **1 pliku** w każdym z czterech podfolderów (`akcenty/`, `szyfry/`, `rezyser/`, `gui/ui.yaml`). Stuby są filtrowane przez `dostepne_jezyki_bazowe()`. Po dodaniu/usunięciu pliku w `rezyser/` lub `akcenty/` uruchom `odswiez_rezysera.py`, żeby zaktualizować dispatch (`core_rezyser._AKCENT_FUNCS` + docstringi `core_poliglota.akcent_*`).
+- Bezpieczna kolejność wdrażania nowego języka (gdyby pojawił się 10. język w 15.x+): najpierw paczka treściowa (`podstawy.yaml` + `akcenty/` + `szyfry/` + `rezyser/` + `opowiesci/`, to ostatnie ręcznie bez batch — [[feedback_yaml_prompty]]), potem `gui/ui.yaml` (autotłumacz), potem `gui/dokumentacja/*.yaml` (autotłumacz), na końcu release.
+- Reguła natywności (parytet paczek; N=9 wdrożonych): `akcenty/` = `N-1` obcych + 3 narzędzia (`oczyszczenie`, `oczyszczenie_bez_liczb`, `naprawiacz_tagow`) = **N+2 plików** (dziś 11). `szyfry/` 6, `rezyser/` 4, `opowiesci/` 8 (`baza`, `cinematic_warning`, `streszczenie`, `tryb_burza`, `tryb_mniejsze_zlo`, `tryb_swobodny`, `tryb_wyborow`, `zaczatki`) — niezmienne od N. Silnik nie egzekwuje liczb (≥1 per podfolder + crosscheck pl/en, patrz niżej), ale parytet trzymaj — np. szwedzki (N=10) wymusza akcent `sv` w 9 starych paczkach + 9 obcych w `sv/akcenty/` = 12 plików per paczka.
+- WYMÓG SILNIKA (`core_poliglota._jezyk_kompletny`; 13.9, rozszerzony 15.3): `<kod>/` wymaga `podstawy.yaml` + `gui/ui.yaml` + min. **1 pliku** w każdym z czterech podfolderów językowych (`akcenty/`, `szyfry/`, `rezyser/`, `opowiesci/` — `opowiesci/` dodany w 15.3 razem z `_zaladuj_przepis` fallbackiem pl→en). Bazy referencyjne **pl i en** dodatkowo crosscheckują zestaw plików 1:1 (poza akcentami obcojęzycznymi — z natury per-natywność różne); rozjazd → oba filtrowane, system krytycznie niekompletny. Patrz [[feedback_pl_en_baza_referencyjna]]. Stuby filtruje `dostepne_jezyki_bazowe()`. Po zmianie pliku w `rezyser/` lub `akcenty/` uruchom `odswiez_rezysera.py`.
 - Tłumaczenia interfejsu rezydują w dedykowanym pliku: `dictionaries/<kod>/gui/ui.yaml`. ZAKAZ hardkodowania etykiet GUI w kodzie źródłowym Pythona.
 - Parametry dynamiczne takie jak `{nazwa_projektu}`, `{liczba_znakow}`, `{min_przesuniecie}` pozostaw w tłumaczeniach nienaruszone. Nie tłumacz literałów technicznych i rozszerzeń (np. `.md`, `skrypty/`) ani nie usuwaj emoji zachowując ich ścisłą pozycję.
 - Konwencje wxPython w i18n:
@@ -52,7 +52,7 @@ Pamięć agenta jest podzielona na trzy warstwy z różnymi celami i sposobami �
  * Długie komunikaty błędów zachowują bezwzględnie wszystkie białe znaki (`\n`), co warunkuje właściwe łamanie tekstu.
  * Rozróżniaj klucze: Tooltip i etykieta to dwa osobne klucze dla jednego obiektu.
 - Skrypt autotłumaczący z użyciem modelu (`tlumacz_ai.py`) zamraża podmieniane zmienne `{...}`, aby LLM nie naruszył struktury programu.
-- Manager Reguł skanuje pliki YAML z folderów `akcenty`, `szyfry`, `rezyser` i `gui`. Tworzenie nowego języka generuje wszystkie cztery podfoldery na raz — dispatch silnika nie wystartuje bez `rezyser/` (wymóg ≥1 trybu).
+- Manager Reguł skanuje pliki YAML z folderów `akcenty`, `szyfry`, `rezyser`, `opowiesci` i `gui` (piąty `opowiesci/` od 15.2.4). Tworzenie nowego języka generuje wszystkie cztery podfoldery językowe naraz — dispatch silnika nie wystartuje bez `rezyser/` (wymóg ≥1 trybu).
 - Pułapka kolejności w `akcenty/<kod>.yaml` (silnik aplikuje `zamiany:` SEKWENCYJNIE przez `str.replace`): patrz [[feedback_kolejnosc_akcenty]].
 
 # ZAMYKANIE RELEASU — DOKUMENTACJA (KRYTYCZNE)
