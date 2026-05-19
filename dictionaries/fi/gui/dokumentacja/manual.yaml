@@ -584,3 +584,21 @@ tresc:
     - Luovatilan automaattinen lataus projektin metatiedostosta.
     - Kaikki aiemmat aksentit (Englanti, Ranska, Saksa, Espanja, Italia, Puola, Islanti) sekä Tagien korjaaja.
     - Täydet AI-toiminnot: Aivoriihi, Käsikirjoitus, Äänikirja, Juonen akkumulaattori, Loputon muisti, Otsikointi.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    KROK 7b (täydennys): `zamiany:`-sääntöjen järjestyksellä on merkitystä
+
+    Tiedostot `dictionaries/<koodi>/akcenty/*.yaml` sisältävät listan `zamiany:`-sääntöjä — pareja `wzor → zamiana`, joita moottori soveltaa SEKVENSIAALISESTI. Jokainen seuraava sääntö toimii edellisen tuotoksella. Tämä mahdollistaa putkistojen rakentamisen, kuten "muunna kaksikirjaiminen `szcz` muotoon `shch` ja sitten vaihda pelkkä `ch` muotoon `h`", mutta avaa myös klassisen ansan kielipaketin tekijälle.
+
+    "Järjestyssilmukan" ansa. Oletetaan, että espanjalaiselle aksentille, joka yrittää saada puolalaisen "ñ":n kuulostamaan Diegon (Loquendo) ääntämiseltä, tekijä lisää kaksi sääntöä:
+    1. `ñ → nj` (jotta puolalainen "ñ" kuulostaisi pehmeältä "nj":ltä)
+    2. `j → x` (jotta puolalainen "j" kuulostaisi espanjalaiselta "j":ltä — foneettisesti /x/)
+
+    Käynnistyksen jälkeen käy ilmi, että sanat, joissa on "ñ", lausutaan "nx", ei "nj". Miksi? Koska kun ensimmäinen sääntö muuntaa "ñ":n muotoon "nj", uusi "j" tarttuu välittömästi toiseen sääntöön ja muutetaan "x":ksi. Tulos: aiotun "ñ → nj" sijaan saamme "ñ → nx".
+
+    Järjestyssääntö (universaali). Kun yksi sääntö tuo merkin, jonka toinen sääntö käyttää mallina, JÄRJESTYKSELLÄ ON MERKITYSTÄ. Turvallinen heuristiikka: ENSIN vaihda TARGET (merkki, jota käytetään myöhemmin `wzor`-sääntönä) johonkin turvalliseen, VASTA SITTEN tuo SOURCE (merkki, joka on tarkoitus hajottaa TARGETiksi). Espanjalaisen esimerkin ollessa oikein: ensin `j → x`, sitten `ñ → nj`. Tulos: "ñ" antaa "nj" (toinen "j" ei enää katoa, koska `j → x`-sääntöä sovellettiin aiemmin, kun "nj" ei vielä ollut olemassa).
+
+    Miten testata. Kun muutat sääntöjen järjestystä aksenttitiedostossa, syötä lause, joka sisältää MOLEMMAT kirjaimet, Reżyser-tilassa. Esimerkiksi ES: "Niño de paja juega" → tuloksessa on oltava sekä ñ-aksentti ("ñ → nj") että j-aksentti ("j → x"), eli jotain tyyliin "Ninjo de paxa xuega". Jos näet "ninxo" "ninjo":n sijaan — järjestys on väärä.
+
+    Moottorin validointi (valinnainen pakettien tekijöille). Sovelluksessa on sisäänrakennettu heuristiikka, joka havaitsee mahdolliset silmukat, mutta se on oletuksena pois päältä — koska monet putkistot näyttävät silmukalta, vaikka ne ovat tarkoituksellisia (klassinen "szcz → shch" + "ch → h"). Sen aktivoimiseksi: aseta ympäristömuuttuja `REZYSER_VALIDATE_ZAMIANY=1` ja käynnistä sovellus konsolista. Moottori tulostaa jokaiselle aksenttitiedostolle yhden koontirivin WARN, jossa on kolme ensimmäistä potentiaalista silmukkaa ja jäljellä olevien määrä. Tarkista tuloksena oleva foneettisuus testilauseella — jos vaikutus on tarkoitettu, jätä WARN huomiotta.
+
+    Sääntöjen siirtopainikkeet GUI Managerissa (drag-and-drop, "Ylös / Alas") ovat erillinen toiminto, joka on suunniteltu myöhempään versiosykliin — se vaatii Managerin uudelleensuunnittelua (tällä hetkellä se delegoi tiedoston muokkauksen ulkoiseen järjestelmän Muistioon, eikä sillä ole omaa sääntönäkymää). Sen käyttöönottoon asti: muokkaa YAML-tiedostoa käsin, siirrä rivejä `zamiany:`-osiossa, käytä validointia ENV-muuttujalla ja testaa kontrollilauseilla.

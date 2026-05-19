@@ -555,3 +555,21 @@ tresc:
     - Carga automática del modo creativo desde el archivo de metadatos del proyecto.
     - Todos los acentos de versiones anteriores (Inglés, Francés, Alemán, Español, Italiano, Finés, Islandés) y el Reparador de Etiquetas.
     - Funciones completas de IA: Tormenta de Ideas, Guion, Audiolibro, Acumulador de Trama, Memoria Infinita, Asignación de Títulos.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    PASO 7b (complemento): El orden de las reglas `zamiany:` importa
+
+    Los archivos en `dictionaries/<codigo>/akcenty/*.yaml` contienen una lista de reglas `zamiany:` — pares `wzor → zamiana`, que el motor aplica SECUENCIALMENTE. Cada regla subsiguiente opera sobre la salida de la anterior. Esto permite construir pipelines del tipo "descomponer el dígrafo `szcz` en `shch`, y luego cambiar solo `ch` por `h`", pero también abre la clásica trampa para el autor del paquete de idioma.
+
+    La trampa del "bucle secuencial". Supongamos que para el acento español que intenta hacer que la "ñ" polaca suene como la pronunciación de Diego (Loquendo), el autor añade dos reglas:
+    1. `ñ → nj` (para que la "ñ" polaca suene como una suave "nj")
+    2. `j → x` (para que la "j" polaca suene como la "j" española — fonéticamente /x/)
+
+    Al ejecutarse, resulta que las palabras con "ñ" se pronuncian como "nx", no "nj". ¿Por qué? Porque cuando la primera regla cambia "ñ" por "nj", la nueva "j" es inmediatamente capturada por la segunda regla y cambiada por "x". Resultado: en lugar del esperado "ñ → nj", obtenemos "ñ → nx".
+
+    Regla de orden (universal). Cuando una regla introduce un carácter que otra regla tiene como patrón, EL ORDEN IMPORTA. Una heurística segura: PRIMERO cambia el TARGET (carácter usado posteriormente como `wzor` en otra regla) a algo seguro, LUEGO introduce el SOURCE (carácter que debe descomponerse en TARGET). Para el ejemplo español correctamente: primero `j → x`, luego `ñ → nj`. Resultado: "ñ" da "nj" (la segunda "j" ya no será consumida, porque la regla `j → x` se aplicó antes, cuando "nj" aún no existía).
+
+    Cómo probar. Después de cambiar el orden de las reglas en el archivo de acento, pasa una oración que contenga AMBAS letras a través del Modo Director. Por ejemplo, ES: "Niño de paja juega" → el resultado debe tener tanto el acento ñ ("ñ → nj") como el acento j ("j → x"), es decir, algo como "Ninjo de paxa xuega". Si ves "ninxo" en lugar de "ninjo" — el orden está al revés.
+
+    Validación en el motor (opt-in para autores de paquetes). La aplicación tiene una heurística incorporada para detectar bucles potenciales, pero está desactivada por defecto — porque muchos pipelines parecen un bucle, aunque son intencionados (el clásico "szcz → shch" + "ch → h"). Para activarla: establece la variable de entorno `REZYSER_VALIDATE_ZAMIANY=1` y ejecuta la aplicación desde la consola. El motor imprimirá para cada archivo de acentos una línea agregada WARN con los primeros tres bucles potenciales y el número restante. Verifica la fonética resultante en una oración de prueba — si el efecto es el deseado, ignora el WARN.
+
+    Los botones para mover reglas en el GUI del Gestor de Reglas (arrastrar y soltar, "Arriba / Abajo") son una función separada planeada para un ciclo de versión posterior — requiere rediseñar el Gestor (actualmente delega la edición del archivo a un Bloc de notas externo del sistema y no tiene su propia vista de reglas). Hasta su implementación: edita el archivo YAML manualmente, mueve las líneas en la sección `zamiany:`, utiliza el validador con la variable ENV y prueba con oraciones de control.

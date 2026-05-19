@@ -418,7 +418,7 @@ tresc:
 
     Pour éviter cela, utilisez un chatbot externe (par exemple, le ChatGPT ou Claude gratuit) comme votre Architecte personnel. Dans la version 13.0, vous n'avez plus besoin de recopier le prompt à partir des instructions — dans le panneau du Réalisateur, juste en dessous du bouton «{rezyser.btn_zapisz_ksiege_label}», vous trouverez le bouton «{rezyser.btn_prompt_architekta_label}». Cliquez dessus, et une fenêtre de dialogue s'ouvrira avec le texte du prompt prêt dans un champ «lecture seule» ainsi qu'un bouton «Copier dans le presse-papiers». NVDA annonce tout le contenu dès l'ouverture de la fenêtre — il suffit de cliquer sur «Copier», de coller (Ctrl+V) dans ChatGPT/Claude et de remplacer le segment «[INSÉREZ VOTRE IDÉE ICI]» par votre propre ébauche d'intrigue.
 
-    Pourquoi ainsi, et non par copie depuis les instructions ? Le dialogue dans l'interface graphique a un avantage clé en termes d'accessibilité : il est natif et lu sans perturbation par le lecteur d'écran, ne nécessite pas de basculer vers un éditeur de texte (où les accents français et les guillemets peuvent être mal copiés) et fonctionne de manière identique sur chaque système d'exploitation. Le même modèle — un dialogue avec un prompt à copier — est également utilisé dans le Gestionnaire de Règles (voir KROK 7b ci-dessous).
+    Pourquoi ainsi, et non par copie depuis les instructions ? Le dialogue dans l'interface graphique a un avantage clé en termes d'accessibilité : il est natif et lu sans perturbation par le lecteur d'écran, ne nécessite pas de basculer vers un éditeur de texte (où les accents français et les guillemets peuvent être mal copiés) et fonctionne de manière identique sur chaque système d'exploitation. Le même modèle — un dialogue avec un prompt à copier — est également utilisé dans le Gestionnaire de Règles (voir ÉTAPE 7b ci-dessous).
 
     Comment l'IA répond : Vous recevrez une réponse en deux parties. La première est le Livre du Monde enfermé dans un bloc de code Markdown (balises ```markdown … ```). Copiez UNIQUEMENT le contenu du bloc de code (sans les balises ```) et collez-le dans le champ «Livre du Monde» dans le Réalisateur, puis cliquez sur «{rezyser.btn_zapisz_ksiege_label}». La deuxième partie est une recommandation sur lequel des modes créatifs (Script ou Audiobook) convient le mieux à votre idée — considérez-la comme une suggestion lors de la sélection du mode dans le RadioBox.
 
@@ -426,7 +426,7 @@ tresc:
 
     Astuce : N'oubliez pas de mettre à jour régulièrement votre Livre du Monde (avec l'expansion de l'intrigue à de nouveaux lieux ou personnages importants). Vous pouvez le faire manuellement ou avec l'aide d'un chatbot externe. Plus le fondement est riche, meilleurs seront les résultats en Réalisation !
   krok_7b_manager_regul: |
-    KROK 7b : Gestionnaire de Règles (Ctrl+4) — dictionnaires pour les linguistes sans Python
+    ÉTAPE 7b : Gestionnaire de Règles (Ctrl+4) — dictionnaires pour les linguistes sans Python
 
     La version 13.0 introduit un quatrième outil dans la barre : le Gestionnaire de Règles. Vous l'ouvrez avec la touche Ctrl+4 ou depuis le menu Outils. C'est un explorateur visuel du dossier dictionaries/, où l'application stocke toutes les règles phonétiques (accents), les chiffres et les modes du Réalisateur dans des fichiers YAML (format lisible par l'homme, plus simple que JSON).
 
@@ -625,3 +625,21 @@ tresc:
     - Chargement automatique du mode créatif à partir du fichier de métadonnées du projet.
     - Tous les accents des versions précédentes (Anglais, Polonais, Allemand, Espagnol, Italien, Finnois, Islandais) ainsi que le Correcteur de Tags.
     - Fonctions AI complètes : Brainstorming, Script, Livre audio, Accumulateur d'Intrigue, Mémoire Infinie, Attribution de Titres.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    ÉTAPE 7b (complément) : L'ordre des règles `zamiany:` est important
+
+    Les fichiers dans `dictionaries/<code>/akcenty/*.yaml` contiennent une liste de règles `zamiany:` — des paires `wzor → zamiana` que le moteur applique SÉQUENTIELLEMENT. Chaque règle suivante opère sur la sortie de la précédente. Cela permet de construire des pipelines du type « décomposer le digramme `szcz` en `shch`, puis remplacer `ch` par `h` », mais cela ouvre également un piège classique pour l'auteur du pack linguistique.
+
+    Le piège de la « boucle séquentielle ». Supposons que pour un accent espagnol visant à faire ressembler le « ñ » polonais à la prononciation de Diego (Loquendo), l'auteur ajoute deux règles :
+    1. `ñ → nj` (pour que le « ñ » polonais sonne comme un « nj » doux)
+    2. `j → x` (pour que le « j » polonais sonne comme le « j » espagnol — phonétiquement /x/)
+
+    Après exécution, il s'avère que les mots avec « ñ » sont prononcés comme « nx », pas « nj ». Pourquoi ? Parce que lorsque la première règle remplace « ñ » par « nj », le nouveau « j » est immédiatement capturé par la deuxième règle et remplacé par « x ». Résultat : au lieu du « ñ → nj » prévu, on obtient « ñ → nx ».
+
+    Règle de l'ordre (universelle). Lorsqu'une règle introduit un caractère qu'une autre règle a comme modèle, L'ORDRE COMPTE. Heuristique sûre : D'ABORD remplacer la CIBLE (le caractère utilisé plus tard comme `wzor` dans une autre règle) par quelque chose de sûr, ENSUITE introduire la SOURCE (le caractère qui doit se décomposer en CIBLE). Pour l'exemple espagnol correctement : d'abord `j → x`, puis `ñ → nj`. Résultat : « ñ » donne « nj » (le deuxième « j » ne sera plus mangé, car la règle `j → x` a été appliquée plus tôt, lorsque « nj » n'existait pas encore).
+
+    Comment tester. Après avoir changé l'ordre des règles dans le fichier accent, passez une phrase contenant LES DEUX lettres par le Mode Réalisateur. Par exemple ES : « Niño de paja juega » → le résultat doit avoir à la fois l'accent ñ (« ñ → nj ») et l'accent j (« j → x »), soit quelque chose comme « Ninjo de paxa xuega ». Si vous voyez « ninxo » au lieu de « ninjo » — l'ordre est inversé.
+
+    Validation dans le moteur (opt-in pour les auteurs de packs). L'application a une heuristique intégrée pour détecter les boucles potentielles, mais elle est désactivée par défaut — car de nombreux pipelines ressemblent à une boucle, bien qu'ils soient intentionnels (le classique « szcz → shch » + « ch → h »). Pour l'activer : définissez la variable d'environnement `REZYSER_VALIDATE_ZAMIANY=1` et lancez l'application depuis la console. Le moteur affichera pour chaque fichier d'accents une ligne WARN agrégée avec les trois premières boucles potentielles et le nombre restant. Vérifiez la phonétique résultante sur une phrase test — si l'effet est intentionnel, ignorez le WARN.
+
+    Les boutons de déplacement des règles dans le GUI du Gestionnaire de Règles (glisser-déposer, « Vers le haut / Vers le bas ») sont une fonction distincte prévue pour un cycle de version ultérieur — cela nécessite de repenser le Gestionnaire (actuellement, il délègue l'édition du fichier à un Bloc-notes externe du système, et n'a pas sa propre vue des règles). En attendant sa mise en œuvre : éditez le fichier YAML manuellement, déplacez les lignes dans la section `zamiany:`, utilisez le validateur avec la variable ENV et testez sur des phrases de contrôle.

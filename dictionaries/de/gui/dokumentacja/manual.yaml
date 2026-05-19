@@ -612,3 +612,21 @@ tresc:
     - Automatisches Laden des kreativen Modus aus der Projekt-Metadatendatei.
     - Alle Akzente aus früheren Versionen (Englisch, Französisch, Deutsch, Spanisch, Italienisch, Finnisch, Isländisch) sowie Tag-Reparatur.
     - Volle AI-Funktionen: Brainstorming, Skript, Hörbuch, Plot-Akkumulator, Unendliches Gedächtnis, Titelvergabe.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    SCHRITT 7b (Ergänzung): Die Reihenfolge der `zamiany:`-Regeln ist wichtig
+
+    Dateien in `dictionaries/<code>/akcenty/*.yaml` enthalten eine Liste von `zamiany:`-Regeln — Paare `wzor → zamiana`, die die Engine SEQUENTIELL anwendet. Jede nachfolgende Regel arbeitet auf der Ausgabe der vorherigen. Dies ermöglicht den Aufbau von Pipelines wie „zerlege den Digraph `szcz` in `shch` und ersetze dann `ch` durch `h`", öffnet aber auch die klassische Falle für den Ersteller eines Sprachpakets.
+
+    Die „sequentielle Schleifen"-Falle. Angenommen, für den spanischen Akzent, der das polnische „ñ" an die Aussprache von Diego (Loquendo) anpassen soll, fügt der Autor zwei Regeln hinzu:
+    1. `ñ → nj` (damit das polnische „ñ" wie ein weiches „nj" klingt)
+    2. `j → x` (damit das polnische „j" wie das spanische „j" klingt — phonetisch /x/)
+
+    Nach dem Start stellt sich heraus, dass Wörter mit „ñ" als „nx" und nicht als „nj" ausgesprochen werden. Warum? Weil, wenn die erste Regel „ñ" in „nj" umwandelt, das neue „j" sofort von der zweiten Regel erfasst und in „x" umgewandelt wird. Ergebnis: Statt des beabsichtigten „ñ → nj" erhalten wir „ñ → nx".
+
+    Die Regel der Reihenfolge (universell). Wenn eine Regel ein Zeichen einführt, das eine andere Regel als Muster hat, IST DIE REIHENFOLGE WICHTIG. Eine sichere Heuristik: ZUERST das TARGET (Zeichen, das später als `wzor` in einer anderen Regel verwendet wird) in etwas Sicheres umwandeln, DANN das SOURCE (Zeichen, das in das TARGET zerlegt werden soll) einführen. Für das spanische Beispiel korrekt: zuerst `j → x`, dann `ñ → nj`. Ergebnis: „ñ" ergibt „nj" (das zweite „j" wird nicht mehr erfasst, da die Regel `j → x` bereits angewendet wurde, als „nj" noch nicht existierte).
+
+    Wie man testet. Nach dem Ändern der Reihenfolge der Regeln in der Akzentdatei ein Satz, der BEIDE Buchstaben enthält, durch den Regisseur-Modus laufen lassen. Für das Beispiel ES: „Niño de paja juega" → das Ergebnis muss sowohl den ñ-Akzent („ñ → nj") als auch den j-Akzent („j → x") haben, also etwas wie „Ninjo de paxa xuega". Wenn du „ninxo" statt „ninjo" siehst — die Reihenfolge ist umgekehrt.
+
+    Validierung in der Engine (opt-in für Paketautoren). Die Anwendung hat eine eingebaute Heuristik zur Erkennung potenzieller Schleifen, ist aber standardmäßig deaktiviert — da viele Pipelines wie Schleifen aussehen, obwohl sie beabsichtigt sind (klassisches „szcz → shch" + „ch → h"). Um sie zu aktivieren: Setze die Umgebungsvariable `REZYSER_VALIDATE_ZAMIANY=1` und starte die Anwendung über die Konsole. Die Engine gibt für jede Akzentdatei eine aggregierte WARN-Zeile mit den ersten drei potenziellen Schleifen und der Anzahl der verbleibenden aus. Überprüfe die resultierende Phonetik am Testsatz — wenn der Effekt beabsichtigt ist, ignoriere die WARN.
+
+    Schaltflächen zum Verschieben von Regeln im GUI-Regelmanager (Drag-and-Drop, „Nach oben / Nach unten") sind eine separate Funktion, die für einen späteren Versionszyklus geplant ist — erfordert eine Neugestaltung des Managers (derzeit delegiert er die Bearbeitung der Datei an einen externen System-Notizblock und hat keine eigene Regelansicht). Bis zur Implementierung: Bearbeite die YAML-Datei manuell, verschiebe Zeilen im Abschnitt `zamiany:`, nutze den Validator mit ENV-Var und teste an Kontrollsätzen.

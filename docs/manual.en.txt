@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 15.3.0 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 15.3.1 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -411,6 +411,25 @@ Practical application: Want to add a Swedish accent? Open the Rule Manager, sele
 Where to find further documentation for the dictionaries/ folder:
 - File `docs/dictionaries.pl.txt` (available in the end-user package from the Releases tab) — a short, simple language description of each subfolder, 6 ready ciphers, 8 ready accents, and ideas for what you can do yourself, without knowing Python.
 - File `dictionaries/README.md` (available only when cloning the repository from GitHub — release packages filter out .md files) — detailed technical documentation of the YAML format with examples, field lists, pipeline rules, regexes. This document is addressed to linguists with basic programming knowledge and developers.
+
+
+STEP 7b (addendum): The order of `zamiany:` rules matters
+
+Files in `dictionaries/<code>/akcenty/*.yaml` contain a list of `zamiany:` rules — `wzor → zamiana` pairs (pattern → replacement) that the engine applies SEQUENTIALLY. Each rule operates on the output of the previous one. This lets you build pipelines like "break the digraph `szcz` into `shch`, then turn the resulting `ch` into `h`", but it also opens a classic trap for the language pack author.
+
+The "sequential loop" trap. Say the author of a Spanish accent (meant to make Polish "ñ" sound right for Diego/Loquendo) adds two rules:
+1. `ñ → nj` (so Polish "ñ" sounds like a soft "nj")
+2. `j → x` (so Polish "j" sounds like Spanish "j" — phonetically /x/)
+
+After running the app, words containing "ñ" come out as "nx", not "nj". Why? Because when the first rule turns "ñ" into "nj", the new "j" is immediately caught by the second rule and turned into "x". Result: instead of the intended "ñ → nj", you get "ñ → nx".
+
+Ordering rule (general). When one rule introduces a character that another rule uses as a pattern, ORDER MATTERS. Safe heuristic: FIRST replace the TARGET (the character later used as a `wzor` in another rule) with something safe, ONLY THEN introduce the SOURCE (the character that decomposes into the TARGET). For the Spanish example, the correct order is: first `j → x`, then `ñ → nj`. Result: "ñ" produces "nj" (the second "j" is no longer eaten, because rule `j → x` had already been applied earlier, before "nj" existed).
+
+How to test. After changing the order of rules in an accent file, run a sentence containing BOTH letters through Director mode. For the Spanish example: "Niño de paja juega" → the output must contain both the ñ effect ("ñ → nj") and the j effect ("j → x"), i.e. something like "Ninjo de paxa xuega". If you see "ninxo" instead of "ninjo" — the order is wrong.
+
+Engine-side validation (opt-in for pack authors). The application has a built-in heuristic for detecting potential loops, but it's disabled by default — because many pipelines look like loops while being entirely intentional (the classic "szcz → shch" + "ch → h" decomposition). To enable it: set the environment variable `REZYSER_VALIDATE_ZAMIANY=1` and launch the app from a console. The engine will print one aggregated WARN line per accent file listing the first three potential loops and the count of remaining ones. Check the resulting phonetics on a test sentence — if the effect is intended, ignore the WARN.
+
+Rule-reordering buttons in the Rule Manager GUI (drag-and-drop, "Move up / Move down") are a separate feature planned for a later version cycle — they require redesigning the Manager (which currently delegates file editing to the system Notepad rather than offering its own rule view). Until that lands: edit the YAML file by hand, move rows within the `zamiany:` section, run the ENV-var validator, and verify on control sentences.
 
 
 Important tips for screen reader users (NVDA)

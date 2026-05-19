@@ -250,8 +250,21 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # --- Właściwe zamiany fonetyczne ---
-# ZŁOTA ZASADA: trigramy/dwuznaki (sch, tsch, ch, cz, sz, rz) PRZED
+# ZŁOTA ZASADA #1 (rozmiar): trigramy/dwuznaki (sch, tsch, ch, cz, sz, rz) PRZED
 # jednoznakami (c, s, z, r), bo inaczej „c → ts" rozwali zapis „ch", „cz".
+#
+# ZŁOTA ZASADA #2 (sekwencyjność — KRYTYCZNE): silnik aplikuje listę
+# `zamiany:` SEKWENCYJNIE przez `str.replace` (lub `re.sub` przy `regex: true`),
+# każda reguła operuje na WYJŚCIU poprzedniej. Jeśli reguła A wprowadza znak,
+# który reguła B (późniejsza) ma jako `wzor`, B ZJE wynik A.
+# Klasyczna pułapka: `ñ → nj` PRZED `j → x` daje `ñ → nx` (nie `nj`!), bo
+# nowe „j" wprowadzone przez pierwszą regułę zostaje złapane przez drugą.
+# Reguła kolejności: NAJPIERW zamień TARGET (literę używaną później jako
+# `zamiana` w innych regułach) na coś bezpiecznego, DOPIERO POTEM wprowadzaj
+# SOURCE wprowadzającą ten target. Dla przykładu ES: najpierw `j → x`,
+# potem `ñ → nj`. Test: zdanie zawierające OBIE litery musi mieć oba akcenty
+# w wyniku (dla ES „Niño de paja juega" → musi mieć i akcent ñ, i akcent j).
+#
 # Dla wzorów regex dodaj `regex: true`.
 zamiany:
   - {{ wzor: "ch", zamiana: "h"  }}
@@ -1335,7 +1348,14 @@ def zbuduj_wynik(
                 f"zaprojektuje listę `zamiany:`, zapisze plik w "
                 f"`dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` i uruchomi "
                 "`odswiez_rezysera.py` (aktualizuje dispatcher). Potem "
-                'kliknij „Odśwież akcenty Reżysera" na Stronie głównej.'
+                'kliknij „Odśwież akcenty Reżysera" na Stronie głównej.\n\n'
+                "UWAGA: lista `zamiany:` jest aplikowana SEKWENCYJNIE — każda "
+                "reguła operuje na wyjściu poprzedniej. Reguła wprowadzająca "
+                "literę używaną później jako `wzor` w innej regule wpadnie "
+                "w pętlę (klasyk: `ñ → nj` przed `j → x` daje `ñ → nx`, nie "
+                "`nj`). Najpierw zamień TARGET na coś bezpiecznego, dopiero "
+                "potem wprowadzaj SOURCE. Po zmianach uruchom aplikację "
+                "z konsoli — silnik wypisze WARN-y o potencjalnych łańcuchach."
             ),
         }
 

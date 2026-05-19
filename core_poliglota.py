@@ -190,6 +190,57 @@ def _zastosuj_zamiany(tekst: str, zamiany: list[dict]) -> str:
     return tekst
 
 
+def _ostrzez_o_lancuchu_zamian(zamiany: list[dict], kontekst: str) -> None:
+    """Loguje WARN, gdy ``zamiana`` reguły #i zawiera ``wzor`` reguły #j>i.
+
+    Wykrywa klasyczną pułapkę sekwencyjnego ``str.replace``: reguła
+    wprowadzająca znak, który łapie późniejsza reguła w tej samej liście,
+    daje niezamierzony wynik (np. ``ñ → nj`` PRZED ``j → x`` produkuje
+    ``ñ → nx``, nie ``nj``). Pomija pary z ``regex: true`` — heurystyka
+    substring jest tam zwodnicza (np. ``\\d`` zawsze pasuje do każdej
+    zamiana zawierającej cyfrę).
+
+    Wywoływana raz przy ładowaniu wariantu (akcent / szyfr) w
+    :func:`_zaladuj_warianty`. Tylko log WARN — nigdy nie blokuje
+    ładowania pliku, bo niektóre „pętle" są celowe (np. transliteracja
+    diakrytyków: ``ó → o``, potem dla docelowego TTS ``o → u``;
+    rozpad dwuznaku ``szcz → shch``, potem ``ch → h``).
+
+    Format outputu: JEDNA linia agregatu per plik. Listujemy maksymalnie
+    3 pierwsze trafienia + ile dodatkowych pominęliśmy. Nie spamujemy
+    stdout przy 60+ regułach w jednym akcencie.
+
+    Issue #15 (v15.3.1): autor paczki ES wpadł w pętlę w GUI Managera
+    Reguł, który nie ostrzegał o sekwencyjności listy. Walidacja w silniku
+    daje WARN w stdout/logu przy starcie aplikacji z konsoli.
+    """
+    pary = [(p.get("wzor", ""), p.get("zamiana", ""), bool(p.get("regex")))
+            for p in zamiany if isinstance(p, dict)]
+    trafienia: list[str] = []
+    for i, (wzor_i, zam_i, regex_i) in enumerate(pary):
+        if not zam_i or regex_i:
+            continue
+        for j in range(i + 1, len(pary)):
+            wzor_j, _, regex_j = pary[j]
+            if not wzor_j or regex_j:
+                continue
+            if wzor_j in zam_i:
+                trafienia.append(
+                    f"#{i+1} ({wzor_i!r}->{zam_i!r}) -> #{j+1} ({wzor_j!r}->...)"
+                )
+                break  # pierwszy match per regula i — nie dubluj diagnostyki
+    if not trafienia:
+        return
+    podglad = "; ".join(trafienia[:3])
+    reszta = f" (+{len(trafienia) - 3} kolejnych)" if len(trafienia) > 3 else ""
+    print(
+        f"[core_poliglota] WARN {kontekst}: {len(trafienia)} potencjalnych "
+        f"petli sekwencyjnego str.replace -> {podglad}{reszta}. "
+        f"Jesli celowe (rozpad dwuznaku w pipeline) - zignoruj; jesli niezamierzone "
+        f"(klasyk: ñ->nj przed j->x daje nx) - zamien TARGET pierwszy, SOURCE potem."
+    )
+
+
 def _usun_polskie_znaki(tekst: str, podstawy: dict) -> str:
     """Transliteruje polskie diakrytyki wg listy z ``podstawy.yaml``.
 
@@ -283,6 +334,19 @@ def _zaladuj_warianty(tryb: str, jezyk: str) -> list[dict]:
         if "etykieta" not in cfg:
             cfg["etykieta"] = cfg["id"]
         cfg.setdefault("kolejnosc", 999)
+        # 15.3.1: WARN dla potencjalnych pętli sekwencyjnego str.replace.
+        # OPT-IN przez ENV var REZYSER_VALIDATE_ZAMIANY=1 — bo wiele celowych
+        # pipeline'ów (rozpad dwuznaków typu szcz→shch→sh) trygruje fałszywie
+        # pozytywne WARN-y, które spamowałyby stdout NVDA-userów przy każdym
+        # starcie aplikacji. Autor paczki debugujący pętlę a la #15
+        # (ñ→nj/j→x) świadomie ustawia ENV var w VS Code / batchu i widzi
+        # diagnostykę zaraz po starcie aplikacji z konsoli.
+        if os.environ.get("REZYSER_VALIDATE_ZAMIANY"):
+            zamiany_cfg = cfg.get("zamiany")
+            if isinstance(zamiany_cfg, list) and zamiany_cfg:
+                _ostrzez_o_lancuchu_zamian(
+                    zamiany_cfg, f"{jezyk}/{podfolder}/{nazwa_pliku}",
+                )
         warianty.append(cfg)
 
     warianty.sort(key=lambda c: (c.get("kolejnosc", 999), c.get("etykieta", "")))

@@ -20,6 +20,11 @@ temp_*.jsonl
 # wklejeniu treści do GitHub Release UI.
 release.txt
 
+# Tymczasowy plik z treścią commit message (workflow A11y: agent zapisuje
+# do pliku, git commit -F commit_msg.txt czyta bez tokenizacji terminalowej).
+# Powstaje przed release commitem, usuwany po pomyślnym commit'cie.
+commit_msg.txt
+
 # --- DANE UŻYTKOWNIKA I KLUCZE (KRYTYCZNE) ---
 # Folder ze skryptami i historiami użytkownika
 skrypty/

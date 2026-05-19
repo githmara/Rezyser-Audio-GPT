@@ -455,6 +455,24 @@ tresc:
     Gdzie szukać dalszej dokumentacji folderu dictionaries/:
     - Plik `docs/dictionaries.pl.txt` (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.
     - Plik `dictionaries/README.md` (dostępny tylko przy klonowaniu repozytorium z GitHuba — paczki wydaniowe filtrują pliki .md) — szczegółowa dokumentacja techniczna formatu YAML z przykładami, listami pól, zasadami pipeline'u, regex-ami. Ten dokument adresowany jest do lingwistów znających podstawy programowania oraz do deweloperów.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    KROK 7b (uzupełnienie): Kolejność reguł `zamiany:` ma znaczenie
+
+    Pliki w `dictionaries/<kod>/akcenty/*.yaml` zawierają listę reguł `zamiany:` — par `wzor → zamiana`, które silnik aplikuje SEKWENCYJNIE. Każda kolejna reguła operuje na wyjściu poprzedniej. To pozwala budować pipeline'y typu „rozłóż dwuznak `szcz` na `shch`, a potem zamień samo `ch` na `h`", ale otwiera też klasyczną pułapkę dla autora paczki językowej.
+
+    Pułapka „pętli sekwencyjnej". Załóżmy, że dla akcentu hiszpańskiego mającego upodobnić polskie „ñ" do wymowy Diego (Loquendo), autor dodaje dwie reguły:
+    1. `ñ → nj` (żeby polska „ñ" brzmiała jak miękkie „nj")
+    2. `j → x` (żeby polska „j" brzmiała jak hiszpańska „j" — fonetycznie /x/)
+
+    Po uruchomieniu okazuje się, że słowa z „ñ" są wymawiane jako „nx", nie „nj". Dlaczego? Bo gdy pierwsza reguła zamienia „ñ" na „nj", nowa „j" zostaje natychmiast złapana przez drugą regułę i zamieniona na „x". Wynik: zamiast zamierzonego „ñ → nj", dostajemy „ñ → nx".
+
+    Reguła kolejności (uniwersalna). Gdy jedna reguła wprowadza znak, który inna reguła ma jako wzór, KOLEJNOŚĆ MA ZNACZENIE. Bezpieczna heurystyka: NAJPIERW zamień TARGET (znak używany później jako `wzor` w innej regule) na coś bezpiecznego, DOPIERO POTEM wprowadzaj SOURCE (znak, który ma się rozpaść na TARGET). Dla przykładu hiszpańskiego poprawnie: najpierw `j → x`, potem `ñ → nj`. Wynik: „ñ" daje „nj" (drugie „j" już nie zostanie zjedzone, bo zasada `j → x` została zastosowana wcześniej, gdy „nj" jeszcze nie istniało).
+
+    Jak testować. Po zmianie kolejności reguł w pliku akcent przepuść zdanie zawierające OBIE litery przez Trybu Reżysera. Dla przykładu ES: „Niño de paja juega" → wynik musi mieć i akcent ñ („ñ → nj"), i akcent j („j → x"), czyli coś w stylu „Ninjo de paxa xuega". Jeśli zobaczysz „ninxo" zamiast „ninjo" — kolejność jest odwrotna.
+
+    Walidacja w silniku (opt-in dla autorów paczek). Aplikacja ma wbudowaną heurystykę wykrywającą potencjalne pętle, ale jest domyślnie wyłączona — bo wiele pipeline'ów wygląda na pętlę, choć są celowe (klasyczny „szcz → shch" + „ch → h"). Żeby ją włączyć: ustaw zmienną środowiskową `REZYSER_VALIDATE_ZAMIANY=1` i uruchom aplikację z konsoli. Silnik wypisze dla każdego pliku akcentów jedną agregowaną linię WARN z pierwszymi trzema potencjalnymi pętlami i liczbą pozostałych. Sprawdź wynikową fonetykę na zdaniu testowym — jeśli efekt zamierzony, zignoruj WARN.
+
+    Przyciski przemieszczania reguł w GUI Managera Reguł (drag-and-drop, „W górę / W dół") to oddzielna funkcja zaplanowana na późniejszy cykl wersji — wymaga przeprojektowania Managera (obecnie deleguje edycję pliku do zewnętrznego Notatnika systemowego, a nie ma własnego widoku reguł). Do czasu jej wdrożenia: edytuj plik YAML ręcznie, przesuwaj wiersze w sekcji `zamiany:`, korzystaj z walidatora ENV-varem i testuj na zdaniach kontrolnych.
   nvda_a11y: |
     Ważne wskazówki dla użytkowników czytników ekranu (NVDA)
 

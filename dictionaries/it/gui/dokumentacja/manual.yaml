@@ -594,3 +594,21 @@ tresc:
     - Caricamento automatico della modalità creativa dal file di metadati del progetto.
     - Tutti gli accenti delle versioni precedenti (Inglese, Francese, Tedesco, Spagnolo, Polacco, Finlandese, Islandese) e il Correttore di Tag.
     - Piene funzionalità AI: Brainstorming, Script, Audiolibro, Accumulatore di Trama, Memoria Infinita, Assegnazione di Titoli.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    KROK 7b (uzupełnienie): L'ordine delle regole `zamiany:` è importante
+
+    I file in `dictionaries/<codice>/akcenty/*.yaml` contengono un elenco di regole `zamiany:` — coppie `wzor → zamiana`, che il motore applica SEQUENZIALMENTE. Ogni regola successiva opera sull'output della precedente. Questo consente di costruire pipeline come "scomporre il digramma `szcz` in `shch`, e poi sostituire `ch` con `h`", ma apre anche la classica trappola per l'autore del pacchetto linguistico.
+
+    La trappola del "ciclo sequenziale". Supponiamo che per l'accento spagnolo, che deve far assomigliare la "ñ" polacca alla pronuncia di Diego (Loquendo), l'autore aggiunga due regole:
+    1. `ñ → nj` (per far sì che la "ñ" polacca suoni come un morbido "nj")
+    2. `j → x` (per far sì che la "j" polacca suoni come la "j" spagnola — foneticamente /x/)
+
+    Dopo l'esecuzione, si scopre che le parole con "ñ" vengono pronunciate come "nx", non "nj". Perché? Perché quando la prima regola sostituisce "ñ" con "nj", la nuova "j" viene immediatamente catturata dalla seconda regola e sostituita con "x". Risultato: invece del previsto "ñ → nj", otteniamo "ñ → nx".
+
+    Regola dell'ordine (universale). Quando una regola introduce un carattere che un'altra regola ha come modello, L'ORDINE È IMPORTANTE. Una euristica sicura: PRIMA sostituisci il TARGET (il carattere utilizzato successivamente come `wzor` in un'altra regola) con qualcosa di sicuro, POI introduci il SOURCE (il carattere che deve scomporsi nel TARGET). Per l'esempio spagnolo correttamente: prima `j → x`, poi `ñ → nj`. Risultato: "ñ" diventa "nj" (la seconda "j" non verrà più catturata, perché la regola `j → x` è stata applicata in precedenza, quando "nj" non esisteva ancora).
+
+    Come testare. Dopo aver cambiato l'ordine delle regole nel file dell'accento, passa una frase contenente ENTRAMBE le lettere attraverso il Modalità Regista. Per esempio ES: "Niño de paja juega" → il risultato deve avere sia l'accento ñ ("ñ → nj"), sia l'accento j ("j → x"), cioè qualcosa come "Ninjo de paxa xuega". Se vedi "ninxo" invece di "ninjo" — l'ordine è sbagliato.
+
+    Validazione nel motore (opt-in per gli autori dei pacchetti). L'applicazione ha un'euristica incorporata che rileva potenziali cicli, ma è disattivata per impostazione predefinita — perché molte pipeline sembrano un ciclo, anche se sono intenzionali (il classico "szcz → shch" + "ch → h"). Per attivarla: imposta la variabile d'ambiente `REZYSER_VALIDATE_ZAMIANY=1` e avvia l'applicazione dalla console. Il motore stamperà per ogni file di accenti una linea aggregata WARN con i primi tre potenziali cicli e il numero rimanente. Controlla la fonetica risultante sulla frase di test — se l'effetto è quello desiderato, ignora il WARN.
+
+    I pulsanti per spostare le regole nel GUI del Gestore delle Regole (drag-and-drop, "Su / Giù") sono una funzione separata pianificata per un ciclo di versione successivo — richiede una riprogettazione del Gestore (attualmente delega l'editing del file a un Blocco note esterno di sistema e non ha una propria vista delle regole). Fino alla sua implementazione: modifica manualmente il file YAML, sposta le righe nella sezione `zamiany:`, utilizza il validatore ENV-var e testa con frasi di controllo.

@@ -557,3 +557,21 @@ tresc:
     - Sjálfvirk hleðsla skapandi stillingar úr verkefnismetaskrá.
     - Allir hreimar frá fyrri útgáfum (Enska, Franska, Þýska, Spænska, Ítalska, Finnska, Pólska) og Merkjaleiðréttari.
     - Fullir AI eiginleikar: Hugstormur, Handrit, Hljóðbók, Söguuppsöfnuður, Óendanlegt minni, Titlagjöf.
+  krok_7b_manager_regul_kolejnosc_zamian: |
+    KROK 7b (viðbót): Röð reglna `zamiany:` skiptir máli
+
+    Skrár í `dictionaries/<kod>/akcenty/*.yaml` innihalda lista yfir reglur `zamiany:` — pör `wzor → zamiana`, sem vélin framkvæmir Í RÖÐ. Hver næsta regla vinnur á útkomu þeirrar fyrri. Þetta gerir kleift að byggja leiðslur eins og „brjóta tvíhljóðið `szcz` niður í `shch`, og svo skipta `ch` út fyrir `h`", en það opnar einnig klassíska gildru fyrir höfund tungumálapakkans.
+
+    Gildra „röðunarhrings". Segjum að fyrir spænska hreiminn sem á að líkja eftir pólsku „ñ" í framburði Diego (Loquendo), bætir höfundur við tveimur reglum:
+    1. `ñ → nj` (til að pólsku „ñ" hljómi eins og mjúkt „nj")
+    2. `j → x` (til að pólsku „j" hljómi eins og spænska „j" — hljóðfræðilega /x/)
+
+    Eftir að keyra forritið kemur í ljós að orð með „ñ" eru borin fram sem „nx", ekki „nj". Hvers vegna? Því að þegar fyrsta reglan skiptir „ñ" út fyrir „nj", er nýja „j" strax gripið af annarri reglunni og skipt út fyrir „x". Útkoma: í stað fyrirhugaðs „ñ → nj", fáum við „ñ → nx".
+
+    Röðunarregla (alhliða). Þegar ein regla kynnir tákn sem önnur regla hefur sem mynstur, SKIPTIR RÖÐIN MÁLI. Öruggur leiðarvísir: FYRST skaltu skipta TARGET (tákn sem er notað síðar sem `wzor` í annarri reglu) út fyrir eitthvað öruggt, SÍÐAN kynna SOURCE (tákn sem á að brotna niður í TARGET). Fyrir spænska dæmið rétt: fyrst `j → x`, svo `ñ → nj`. Útkoma: „ñ" gefur „nj" (seinni „j" verður ekki gripið, því reglan `j → x` var beitt fyrr, þegar „nj" var ekki til).
+
+    Hvernig á að prófa. Eftir að hafa breytt röð reglna í hreimsskrá, keyrðu setningu sem inniheldur BÆÐI stafi í gegnum Leikstjórastillingu. Fyrir dæmi ES: „Niño de paja juega" → útkoman verður að hafa bæði hreim ñ („ñ → nj") og hreim j („j → x"), sem er eitthvað eins og „Ninjo de paxa xuega". Ef þú sérð „ninxo" í stað „ninjo" — er röðin röng.
+
+    Staðfesting í vélinni (opt-in fyrir höfunda pakka). Forritið hefur innbyggða heuristík sem greinir mögulegar lykkjur, en hún er sjálfgefið óvirk — því margar leiðslur líta út eins og lykkja, þó þær séu viljandi (klassíska „szcz → shch" + „ch → h"). Til að virkja hana: stilltu umhverfisbreytuna `REZYSER_VALIDATE_ZAMIANY=1` og keyrðu forritið úr skel. Vélin mun prenta eina samantektarlínu WARN fyrir hverja hreimsskrá með fyrstu þremur mögulegum lykkjum og fjölda hinna. Athugaðu niðurstöðuna á prófunarsetningu — ef áhrifin eru fyrirhuguð, hunsaðu WARN.
+
+    Hnappar til að færa reglur í Reglustjóra GUI (drag-and-drop, „Upp / Niður") er aðskilin virkni sem er áætluð fyrir seinni útgáfutíma — krefst endurhönnunar á Stjóranum (núna sendir hann skráarbreytingar til ytri Kerfisritils, og hefur ekki eigin regluyfirlit). Þangað til það er innleitt: breyttu YAML skránni handvirkt, færðu línur í `zamiany:` hlutanum, notaðu staðfestingar ENV-breytu og prófaðu á prófunarsetningum.
