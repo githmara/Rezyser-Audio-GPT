@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modúll Interaktívar Sagna (15.4 – Útgáfuútgáfa)
+Reżyser Audio GPT — Modúll Interaktívar Sagna (15.4.1 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hlið Reżysera — í þetta skiptið verður þú leikmaður í kviku sögugerð í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lykt af blautum laufum…"), og þú ákveður næstu hreyfingu — með því að skrifa hvaða aðgerð sem er í frjálsum texta eða velja einn af tölusettum valkostum.
 
@@ -7,7 +7,7 @@ Modúllinn var hannaður frá upphafi með blindum leikmönnum í huga — frás
 Þú opnar spjaldið með því að smella á "📖  Sögur" á verkfærastikunni eða með flýtilykli Ctrl+5.
 
 
-KROK 1: Þrír leikir — veldu leikstíl
+SKREF 1: Þrír leikir — veldu leikstíl
 
 Rétt undir nafnstiku leiksins finnur þú valmöguleika fyrir leikham (RadioBox). Leikhamurinn ákvarðar hvernig frásagnavélin hefur samskipti við þig:
 
@@ -22,7 +22,7 @@ Flaska í Minna illt ham (frá v15.2): eftir fjórar umferðir leiks birtist auk
 Hægt er að skipta um ham á meðan á leik stendur, en aðeins með neyðarhnappinum „Breyta leikjaham…" við hliðina á RadioBox-inu (frá og með v15.2.3) — RadioBox-ið sjálft er fryst á þeim ham sem hefur verið læstur inni strax eftir að leikur er búinn til eða hlaðinn, sambærilegt við vörn Leikstjórans. Hnappurinn opnar samtalsglugga með viðvörun; dæmigert notkunartilvik þessarar undankomuleiðar er þegar AI í Valham eða Minna illt heldur þrjósklega áfram að búa til fleiri álitamál í stað þess að ljúka sögunni — að skipta yfir í Frjálsan ham gerir leikmanninum þá kleift að lýsa lokaatriðinu sjálfur. Ef þú vilt byrja annan leik í öðrum tóni, einfaldlega sláðu nýtt leiknafn inn í nafnareitinn — RadioBox-ið mun aflæsa sig sjálfkrafa, því forritið kannast við að þú sért að undirbúa nýtt verkefni. Athugið: flaskan er eingöngu eiginleiki Minna illt hams — þegar skipt er (gegnum undankomuleiðina) í Valham eða Frjálsan í sama leik, er tilvist hennar og umferðarvísir varðveitt í leikástandinu, en þar til þú kemur aftur í Minna illt ham birtist valkosturinn „Opna flöskuna" ekki.
 
 
-KROK 2: Quick Start — tilbúnir upphafsatburðir
+SKREF 2: Quick Start — tilbúnir upphafsatburðir
 
 Undir leikjanafnareitnum finnurðu annan röð með merkinu „Fljótleg byrjun:" og fellivalmynd (wx.Choice). Sjálfgefið val er "(eigin leikur)" — vélin mun sjálf búa til heiminn út frá fyrstu aðgerð þinni.
 
@@ -41,7 +41,7 @@ RÓMANTÍSKUR GAMANLEIKUR — Saska Kępa apríl 2024, lítið kaffihús stendur
 Eftir að hafa valið forskrift skaltu smella á "Nýr leikur" — vélin mun sprauta stuttum lýsingu á heiminum og hetjunni inn í sig, stilla sjálfgefinn leikham (þú getur yfirskrifað hann með RadioBox áður en þú smellir á „Nýr leikur"). Fyrsta umferð LLM mun leika upphafssenuna.
 
 
-KROK 3: Fyrsta leikur frá grunni — án forstillingar
+SKREF 3: Fyrsta leikur frá grunni — án forstillingar
 
 Ef þú kýst fullkomið frelsi, skildu eftir "(eigin leikur)" í reitnum Quick Start og undirbúðu þig fyrir að slá inn fyrstu aðgerðina handvirkt.
 
@@ -52,13 +52,13 @@ Ef þú kýst fullkomið frelsi, skildu eftir "(eigin leikur)" í reitnum Quick 
 5. Hver umferð verður sjálfkrafa vistuð — þú getur lokað forritinu hvenær sem er og hlaðið leikinn aftur síðar með því að smella á "Hlaða".
 
 
-KROK 4: Reglur heimsins — eigin reglur sem vélin virðir í gegnum allt leikinn
+SKREF 4: Reglur heimsins — eigin reglur sem vélin virðir í gegnum allt leikinn
 
 Frá útgáfu 15.1 finnurðu hnappinn "Breyta heimsreglum…" fyrir ofan frásagnarreitinn. Hann opnar sérstakan ritglugga með fjölina línureit, þar sem þú getur slegið inn hvaða reglur sem er — hljóðfræðilegar, vélrænar eða dramatískar — sem frásagnarvélin mun virða í hverri næstu umferð þessa tiltekna leiks. Reglurnar eru vistaðar ásamt stöðu leiksins (.game.json), þannig að þegar leikur er hlaðinn aftur, eru þær varðveittar óbreyttar.
 
 Þrjú dæmigerð notkunarsvið reglna heimsins:
 
-HLJÓÐFRÆÐILEGAR REGLUR — stjórna framburði nafna persóna í TTS (Vocalizer, ElevenLabs). Dæmi: „Nafnið Joanna skal alltaf borið fram hart, pólsk [dż]; aldrei mjúkt [j]." Vélin mun setja þessa útgáfu í frásögnina frá næstu umferð, og persónan Joanna í Heimsbókinni mun halda fyrirhuguðum hljómi. Þetta er líka náttúruleg brú til áherslna Leikstjórans — ef þú hleður Heimsbókinni inn í stjórnborð Leikstjórans eftir að leiknum er lokið (KROK 9 hér að neðan), mun hljóðfræðilega reglan „fara með" leiknum sem eiginleiki persónunnar.
+HLJÓÐFRÆÐILEGAR REGLUR — stjórna framburði nafna persóna í TTS (Vocalizer, ElevenLabs). Dæmi: „Nafnið Joanna skal alltaf borið fram hart, pólsk [dż]; aldrei mjúkt [j]." Vélin mun setja þessa útgáfu í frásögnina frá næstu umferð, og persónan Joanna í Heimsbókinni mun halda fyrirhuguðum hljómi. Þetta er líka náttúruleg brú til áherslna Leikstjórans — ef þú hleður Heimsbókinni inn í stjórnborð Leikstjórans eftir að leiknum er lokið (SKREF 9 hér að neðan), mun hljóðfræðilega reglan „fara með" leiknum sem eiginleiki persónunnar.
 
 VÉLRÆNAR REGLUR — lýsa „eðlisfræðilögum" heimsins þíns, sem LLM á að fylgja. Dæmi: „Í þessum heimi virkar galdur aðeins á nóttunni; á daginn eru persónurnar venjulegt fólk." Vélin mun ekki búa til galdra í hádegi, jafnvel þótt aðgerð þinnar umferðar krefjist þess — í staðinn mun hún bjóða upp á valkost eða leiða þig að kvöldi.
 
@@ -69,7 +69,7 @@ Tómt reglureit = engar viðbótarreglur (sjálfgefin hegðun, eins og í v15.0)
 Athugið: reglur heimsins krefjast virks leiks. Ef þú smellir á "Breyta heimsreglum…" án þess að hafa hlaðið/sett upp leik, færðu skilaboðin „Enginn virkur leikur" — smelltu fyrst á "Nýr leikur" eða hlaðið vistaðan leik.
 
 
-KROK 5: Slash-tilskipanir — hraðar aðgerðir án API
+SKREF 5: Slash-tilskipanir — hraðar aðgerðir án API
 
 Í aðgerðarreitnum geturðu á hverjum tíma slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta ekki köll til OpenAI) og virka óháð leikstillingu. Bæði íslensk og ensk afbrigði eru samþykkt:
 
@@ -81,16 +81,16 @@ Frásagnavélin velur AI líkan sjálfkrafa eftir stillingu: fyrir valstillingu 
 
 /sjónrænt <lýsing>, /visualize <lýsing> — margskynja lýsing á núverandi senu. Breytir ekki stöðu leiksins, leggur ekki til valkosti — frásagnavélin notar öll fimm skilningarvitin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/sjónrænt hvernig lítur vörðurinn út" eða „/sjónrænt lyktin í kaffihúsinu".
 
-/sena <lýsing>, /scene <lýsing> — núverandi atburður ANNARSTAÐAR, sagður í þriðju persónu. Myndavélin losnar frá persónu þinni og sýnir hvað gerist samhliða hjá annarri persónu eða á öðrum stað í heiminum. Dæmi: „/sena Anna á markaðnum" eða „/sena varðmenn við hliðið". Vélin fléttar senu inn í frásögnina, merkir hana með forskeytinu „Sena utan ramma:" og snýr sjálfkrafa aftur að persónu þinni í næstu umferð. Valkostir birtast ekki — leikmaður tekur ekki ákvarðanir í senu annarra. Full lýsing á kerfinu er að finna í KROKI 5B.
+/sena <lýsing>, /scene <lýsing> — núverandi atburður ANNARSTAÐAR, sagður í þriðju persónu. Myndavélin losnar frá persónu þinni og sýnir hvað gerist samhliða hjá annarri persónu eða á öðrum stað í heiminum. Dæmi: „/sena Anna á markaðnum" eða „/sena varðmenn við hliðið". Vélin fléttar senu inn í frásögnina, merkir hana með forskeytinu „Sena utan ramma:" og snýr sjálfkrafa aftur að persónu þinni í næstu umferð. Valkostir birtast ekki — leikmaður tekur ekki ákvarðanir í senu annarra. Full lýsing á kerfinu er að finna í SKREFI 5B.
 
-/endurminning <lýsing>, /retrospekcja <lýsing> — endurminning í þriðju persónu, ferðast aftur í tíma. Dæmi: „/endurminning dagur föðurins dauða" eða „/endurminning fyrsta fundur hetjanna". Opnar frásögn með tímalegri formúlu („Þrjú ár áður…"), merkir með forskeytinu „Endurminning:" og snýr aftur að núverandi umferð. Eins og /sena — óvirk, án valkosta. Full lýsing í KROKI 5B.
+/endurminning <lýsing>, /retrospekcja <lýsing> — endurminning í þriðju persónu, ferðast aftur í tíma. Dæmi: „/endurminning dagur föðurins dauða" eða „/endurminning fyrsta fundur hetjanna". Opnar frásögn með tímalegri formúlu („Þrjú ár áður…"), merkir með forskeytinu „Endurminning:" og snýr aftur að núverandi umferð. Eins og /sena — óvirk, án valkosta. Full lýsing í SKREFI 5B.
 
 /hjálp, /help — birtir glugga með lista yfir allar tiltækar skipanir. Glugginn er aðeins til lesturs og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
 
 /loka, /quit — lokar forritinu (eftir sjálfvirka vistun á umferð í gangi).
 
 
-KROK 6: Leikjaskrár — hvar þú finnur gögnin þín
+SKREF 6: Leikjaskrár — hvar þú finnur gögnin þín
 
 Hver leikur framleiðir fimm skrár, hver í mismunandi möppu, með mismunandi hlutverkum:
 
@@ -105,7 +105,7 @@ runtime/opowiesci/<nazwa>.story.jsonl — hrátt skrá yfir hverja umferð (bei�
 runtime/skrypty/<nazwa>.mode — lýsigögn um stillingarnúmer (3=Frjáls, 4=Valmöguleikar, 5=Minna illt). Skrá sameiginleg með Reżyser, en númeraröð rekst ekki á (Reżyser notar 0-2).
 
 
-KROK 7: Vísir minnis líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handavinnu frá þér
+SKREF 7: Vísir minnis líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handavinnu frá þér
 
 Undir RadioBox-stillingunni finnurðu vísir minnis líkans — framvindustiku (wx.Gauge) með stöðu lýsingu við hliðina. Vísirinn sýnir prósentu fyllingar samhengisglugga frásagnavélarinnar (gpt-4o-mini hefur 128.000 táknabúffer).
 
@@ -119,14 +119,14 @@ Fjórir fyllingarstig:
 Í framkvæmd er sjálfvirka minnkunarkerfið ósýnilegt — leikmaðurinn finnur ekki fyrir því að eitthvað sé að gerast, því bakgrunnsþráðurinn leysir vandamálið áður en það verður áberandi. Það er aðeins mikilvægt að þú sendir ekki næstu umferð á meðan sjálfvirk útdráttur er í gangi (hnappurinn "Senda" er þá gráður).
 
 
-KROK 8: Cinematic Meta Warning — dramatískur millikafli eftir 150. umferð
+SKREF 8: Cinematic Meta Warning — dramatískur millikafli eftir 150. umferð
 
 Eftir 150 umferðir í einum leik mun frásagnavélin EINU SINNI setja inn „Cinematic Meta Warning" — dramatískan millikafla með meta-frásögn. Hann mun birtast í sérstöku samtali með bjölluhljóði, með beinni ávarpi til þín í annarri persónu, samantekt á afrekum og viðvörun um mikilvægi ákvarðana sem teknar eru.
 
 Cinematic Warning ER EKKI hluti af hljóðbókarfrásögninni — .txt síuvélin fjarlægir sjálfkrafa innihald hennar (merkt með ⚠️🚨⚠️), svo þú heyrir ekki meta-athugasemd um eigin leik meðan á hlustun hljóðbókar stendur. Innihaldið fer aðeins í .story.jsonl skrána (til íhugunar eða varðveislu) og í samtali í GUI, þar sem þú getur lesið það einu sinni og haldið áfram.
 
 
-KROK 9: Brú til Reżyser — nýttu Heimsbókina búin til í Sögum
+SKREF 9: Brú til Reżyser — nýttu Heimsbókina búin til í Sögum
 
 Skráin opowiesci/<nazwa>.md sem er búin til á meðan leik stendur inniheldur Heimsbókina með persónum sem komu fram í frásögninni, ásamt eiginleikum þeirra, hreimum og persónuleika. Sniðið er nákvæmlega eins og Reżyser greinirinn krefst — [Nafn: eiginleikar með lýsingu á hreim].
 
@@ -139,7 +139,7 @@ Hvað þú getur gert með þetta:
 Þetta er einhliða brú: Sögur framleiða efni, Reżyser formatar það. Ekki er hægt að fara í hina áttina — Reżyser les ekki leiki úr Sögum sem gagnvirkt ástand.
 
 
-KROK 10: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
+SKREF 10: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
 
 Allur söguhlutinn hefur verið fínstilltur fyrir blinda notendur. Hvað við gerðum nákvæmlega:
 
@@ -178,7 +178,7 @@ Vandamál: Skrárnar .game.json og .story.jsonl eru ekki sýnilegar á skjábor�
 Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í opowiesci/ — þar finnur þú þær.
 
 
-KROK 5B: Önnur myndavél — atriðin bak við tjöldin og endurlit (frá v15.4)
+SKREF 5B: Önnur myndavél — atriðin bak við tjöldin og endurlit (frá v15.4)
 
 Venjulega spilarðu í fyrstu persónu — frásögnin hljómar „þú gengur", „þú finnur", „þú sérð". Frá útgáfu 15.4 geturðu leikstýrt atriði úr fjarlægð, sagt í þriðju persónu, sem tengist ekki beint við þína persónu. Til þess eru tvær skipanir: /scena fyrir samhliða atburði (eitthvað annað í heiminum), /flashback fyrir endurlit (í fortíðinni). Eftir innskot snýr vélin aftur til þinnar persónu í næstu umferð.
 

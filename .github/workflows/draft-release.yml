@@ -8,8 +8,8 @@ name: Draft Release (auto-tag + RELEASE_NOTES.md sekcja -> draft)
 #   2. Sprawdza czy tag v<wersja> juz istnieje lokalnie LUB na origin.
 #      Jesli tak — przerywa workflow z czytelnym komunikatem (bump VERSION
 #      lub usun tag jesli to pomylka).
-#   3. Wyciaga sekcje `## <wersja> — ...` z RELEASE_NOTES.md (regex jak
-#      w skrypcie generujacym release.txt po stronie maintainera).
+#   3. Wyciaga sekcje `## <wersja> — ...` z RELEASE_NOTES.md regexem
+#      lookahead na nastepny naglowek `## ` lub EOF.
 #   4. Tworzy tag v<wersja> wskazujacy na obecny HEAD main, pushuje na origin.
 #   5. Tworzy draft Release przez `gh release create --draft` z tytulem
 #      „Rezyser Audio GPT, wersja <wersja>" (Rezyser z polska litera) i tresc
@@ -88,10 +88,8 @@ jobs:
       - name: Wytnij sekcje `## <wersja>` z RELEASE_NOTES.md
         env:
           WERSJA: ${{ steps.wersja.outputs.wersja }}
-        # Inline Python heredoc — analogicznie do skryptu po stronie
-        # maintainera generujacego release.txt (CLAUDE.md `# WORKFLOW
-        # RELEASE` krok 6). Ta sama logika regex i ta sama nazwa pliku
-        # wyjsciowego, tyle ze /tmp/ w runnerze zamiast roota repo.
+        # Inline Python heredoc — regex lookahead na nastepny naglowek
+        # `## ` lub EOF (struktura RELEASE_NOTES.md od v15.2.5).
         run: |
           python3 - <<'PY'
           import pathlib, re, os, sys

@@ -12,14 +12,6 @@ __pycache__/
 *.pyc
 # Pliki tymczasowe tłumacza
 temp_*.jsonl
-# Tymczasowy wyciąg najnowszej sekcji RELEASE_NOTES do wklejenia w web Release
-# description (workflow direct-to-main od v15.2.5 — patrz CLAUDE.md sekcja
-# WORKFLOW RELEASE). Płaska nazwa BEZ numeru wersji, nadpisywana przy każdym
-# nowym patchu — nie ma potrzeby aktualizować .gitignore co release. Notatnik
-# Windows otwiera .txt domyślnie (`start release.txt`); plik usuwa się po
-# wklejeniu treści do GitHub Release UI.
-release.txt
-
 # Tymczasowy plik z treścią commit message (workflow A11y: agent zapisuje
 # do pliku, git commit -F commit_msg.txt czyta bez tokenizacji terminalowej).
 # Powstaje przed release commitem, usuwany po pomyślnym commit'cie.

@@ -1024,6 +1024,12 @@ opowiesci:
   dlg_visualize_pusta_akcja_tytul: "Keine Visualisierungsbeschreibung"
   dlg_visualize_pusta_akcja_tresc: "Gib nach dem Befehl /visualisieren eine kurze Beschreibung dessen ein, was du genauer sehen möchtest (z.B. /visualisieren wie der Wächter aussieht). Ohne Argument weiß die Maschine nicht, worauf sie sich konzentrieren soll."
   status_wizualizowanie: "Visualisierung wird generiert…"
+  # v15.4.1: A11y-Präfixe vor der Erzählung, wenn `narracja_typ != "druga_osoba"`.
+  # Klares technisches Signal für Screenreader: Spieler wissen sofort, dass
+  # die Kamera gewechselt hat. Auch in `.txt` auf Disk geschrieben.
+  prefiks_flashback: "Rückblende:"
+  prefiks_scena: "Nebenschauplatz:"
+  prefiks_cut: "Unterdessen anderswo:"
   pamiec_status_format: "{procent}% — {tokeny} Tokens ({etap})"
   pamiec_etap_czysta: "🟢 sauber"
   pamiec_etap_ok: "🟢 OK"

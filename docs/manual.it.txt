@@ -1,11 +1,11 @@
-Manuale del Regista Audio AI - Guida completa (Versione 15.4 – Versione di Pubblicazione)
+Manuale del Regista Audio AI - Guida completa (Versione 15.4.1 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
 Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per la costruzione della struttura del file (Architetto Audiolibri), dal Gestore delle Regole (dalla versione 13.0 — senza Python puoi aggiungere un nuovo accento, cifra o modalità creativa, vedi PASSO 7b sotto) e — dalla versione 15.0 — dal modulo Storie (finzione interattiva in seconda persona generata da AI, letta da TTS o lettore dello schermo, descritta nel manuale separato opowiesci.pl.txt). Tutti e cinque gli strumenti sono disponibili in un'unica finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+5.
 
 
-KROK 1: Primo avvio (Cross-Platform)
+PASSO 1: Primo avvio (Cross-Platform)
 
 Scarica l'installatore più recente dalla scheda Releases su GitHub (il file Rezyser_Audio_v<numero>_Installer.exe) ed eseguilo con un doppio clic. L'installatore propone una posizione di installazione predefinita — la cartella Programs all'interno della directory locale del tuo account — e non richiede privilegi di amministratore. Puoi scegliere il tuo percorso con il pulsante „Sfoglia"; in tal caso RICORDALO (ti servirà durante gli aggiornamenti — vedi „Aggiornamenti automatici" sotto). Dopo l'installazione, avvia il programma tramite l'icona sul desktop o dal Menu Start. Si aprirà una finestra del terminale a breve termine (scompare automaticamente) e dopo un momento apparirà la finestra principale del programma — Regista Audio GPT. Nessun browser, nessun server in background. Quando hai finito di lavorare, basta chiudere la finestra del programma.
 
@@ -61,7 +61,7 @@ Suggerimento per gli utenti NVDA: il menu contestuale „Apri percorso file" inv
 Suggerimento: „Apri percorso file" è il nome nativo dell'opzione in un'installazione italiana di Windows. Nel sistema in inglese si chiama „Open file location", nelle altre versioni linguistiche — analogamente nella lingua locale del sistema operativo.
 
 
-KROK 2: Zasilanie API (Klucz OpenAI)
+PASSO 2: Zasilanie API (Klucz OpenAI)
 
 Aby sztuczna inteligencja mogła działać, potrzebuje dostępu do serwerów OpenAI (twórców ChatuGPT).
 
@@ -73,7 +73,7 @@ Aby sztuczna inteligencja mogła działać, potrzebuje dostępu do serwerów Ope
 Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i wyświetli zielony komunikat w sekcji "Controllo del Sistema" — oznacza to, że wszystkie moduły AI są gotowe do pracy. W przeciwnym wypadku jasno ci powie, co jest nie tak i pozwoli otworzyć edytor tekstu, aby szybko dało się naprawić błąd.
 
 
-KROK 3: Studio Principale del Regista
+PASSO 3: Studio Principale del Regista
 
 Questo è il tuo centro di comando per inventare storie e scrivere sceneggiature. Accedici cliccando sul pulsante "🎬  Regista" nella barra dei pulsanti o selezionando Strumenti → Regista dal menu (scorciatoia: Ctrl+1).
 
@@ -187,7 +187,7 @@ Riassunto automatico: Quando la memoria entra in stato di allarme, il Brainstorm
 Caricamento intelligente con file di riassunto: Quando carichi un progetto che ha già un file di riassunto salvato (es. anestesia_riassunto.txt), l'applicazione carica automaticamente il riassunto nella Memoria a Lungo Termine e lascia la Memoria Corrente vuota. In questo modo non sprechi token per ricaricare l'intera storia — il modello conosce il contesto dal riassunto ed è pronto per una continuazione infinita.
 
 
-KROK 4: Postproduzione in Reżyser Audio GPT
+PASSO 4: Postproduzione in Reżyser Audio GPT
 
 Dopo aver scritto la storia, hai a disposizione uno strumento di postproduzione disponibile nella parte inferiore del pannello di Reżyser (compare solo in Modalità Audiobook).
 
@@ -198,7 +198,7 @@ L'IA analizzerà l'intera storia e proporrà titoli descrittivi e letterari per 
 Nota: Il modulo richiede che il file sia già salvato sul disco (generato o caricato). Se il file non esiste, l'applicazione visualizzerà un messaggio appropriato.
 
 
-KROK 5: Poliglota AI
+PASSO 5: Poliglota AI
 
 Applicazione per traduzioni e imposizione di accenti forti sui sintetizzatori dei lettori di schermo. Accedi cliccando il pulsante "🌍  Poliglotta" sulla barra dei pulsanti o selezionando Strumenti → Poliglotta dal menu (scorciatoia: Ctrl+2).
 
@@ -359,7 +359,7 @@ Diagnosi e patch: ho diagnosticato il problema a livello di Python nel codice de
 Cosa fare nel frattempo: se ti interessa il corretto rilevamento della lingua (vale la pena — era una delle killer features del vecchio Vocalizer, vedi "Killer Feature per i non vedenti" sopra), apri un issue nel repository dell'applicazione su GitHub con l'etichetta `tiflotecnia-patch` e l'indirizzo email nel contenuto. Vale la pena aggiungere una breve descrizione del problema nella tua lingua (bastano 2–3 frasi) — il bot riconoscerà la lingua (supportate: polacco, inglese, tedesco, spagnolo, finlandese, francese, islandese, italiano, russo) e risponderà nella stessa; senza descrizione o in un'altra lingua, la risposta arriverà in inglese. Un bot automatico chiuderà immediatamente l'issue con la conferma della segnalazione (senza traccia nel thread pubblico), e riceverai la patch privatamente via email di solito entro pochi giorni. La patch NON è pubblicata nel repository dell'applicazione né come Gist — Tiflotecnia Voices for NVDA è un software commerciale e la licenza dell'add-on non consente la ridistribuzione dei suoi file, anche se modificati. Dopo aver ricevuto la patch, il suo contenuto deve essere copiato in `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`, sostituendo i file. Attenzione durante la copia: se Windows non ha chiesto di sostituire, probabilmente hai copiato l'intera cartella `TiflotecniaVoices_edits` con il suo contenuto INVECE del solo contenuto — in tal caso entra nella sottocartella creata, taglia tutto, incolla un livello più in alto e sovrascrivi. Dopo aver applicato correttamente la patch, riavvia NVDA — goditi la migliore qualità delle voci Cerrence a 64 bit e il corretto rilevamento della lingua, ovvero una combinazione che nessun singolo produttore sul mercato può offrire. Supponiamo ovviamente che tu abbia una licenza valida per Tiflotecnia Voices — non lo verifichiamo, ma senza licenza non potrai applicare la patch su una cartella altrui.
 
 
-KROK 6: Architetto degli Audiolibri
+PASSO 6: Architetto degli Audiolibri
 
 Uno strumento per preparare una struttura professionale del file per i lettori di schermo e ElevenLabs. Accedi a esso facendo clic sul pulsante "📄  Convertitore" sulla barra dei pulsanti o selezionando Strumenti → Convertitore dal menu (scorciatoia: Ctrl+3).
 
@@ -383,13 +383,13 @@ Vantaggio potente per gli utenti NVDA e ElevenLabs
 Il formato "Heading 1" per i capitoli non è solo estetica. In NVDA puoi navigare rapidamente tra le intestazioni premendo il tasto H (o 1 per le intestazioni di primo livello). Invece di scorrere centinaia di pagine, salti da un capitolo all'altro in una frazione di secondo. Questo cambia il modo di lavorare con documenti lunghi. In ElevenLabs hai la certezza che il motore inserirà automaticamente i tagli e non si bloccherà durante la regia dei clip audio.
 
 
-KROK 7: Come scrivere il Libro del Mondo (Prompt dell'Architetto e Mini-corso Markdown)
+PASSO 7: Come scrivere il Libro del Mondo (Prompt dell'Architetto e Mini-corso Markdown)
 
 L'intelligenza artificiale che alimenta lo Studio Principale comprende meglio i comandi quando sono formattati nel linguaggio di markup Markdown. Se fornisci all'AI in Reżyser solo un'idea vaga (ad es. "due sorelle nell'aldilà"), la macchina andrà in panico per mancanza di dettagli e creerà una storia banale e prevedibile, ignorando la logica.
 
 Per evitare ciò, usa un chatbot esterno (ad es. il gratuito ChatGPT o Claude) come tuo Architetto personale. Nella versione 13.0 non devi più riscrivere il prompt dalle istruzioni — nel pannello di Reżyser, appena sotto il pulsante "💾 Salva il Libro in modo permanente", troverai il pulsante "📖 Prompt dell'Architetto per AI…". Cliccalo e si aprirà una finestra di dialogo con il testo del prompt pronto nel campo "solo lettura" e un pulsante "Copia negli appunti". NVDA annuncia tutto il contenuto non appena si apre la finestra — basta cliccare "Copia", incollare (Ctrl+V) in ChatGPT/Claude e sostituire il frammento "[INSERISCI QUI LA TUA IDEA]" con il tuo spunto di trama.
 
-Perché così e non copiando dalle istruzioni? Il dialogo nell'interfaccia grafica ha un vantaggio chiave di accessibilità: è nativo e letto senza interruzioni dal lettore di schermo, non richiede di passare a un editor di testo (dove le "lettere accentate" italiane e le virgolette possono essere copiate male) e funziona identicamente su ogni sistema operativo. Lo stesso schema — dialogo con il prompt da copiare — è utilizzato anche nel Manager delle Regole (vedi KROK 7b sotto).
+Perché così e non copiando dalle istruzioni? Il dialogo nell'interfaccia grafica ha un vantaggio chiave di accessibilità: è nativo e letto senza interruzioni dal lettore di schermo, non richiede di passare a un editor di testo (dove le "lettere accentate" italiane e le virgolette possono essere copiate male) e funziona identicamente su ogni sistema operativo. Lo stesso schema — dialogo con il prompt da copiare — è utilizzato anche nel Manager delle Regole (vedi PASSO 7b sotto).
 
 Come risponde l'AI: In risposta riceverai un testo in due parti. La prima è il Libro del Mondo racchiuso in un blocco di codice Markdown (marcatori ```markdown … ```). Copia SOLO il contenuto del blocco di codice (senza i marcatori ```) e incollalo nel campo "Libro del Mondo" in Reżyser, quindi clicca "💾 Salva il Libro in modo permanente". La seconda parte è una raccomandazione su quale dei modi creativi (Script o Audiolibro) si adatta meglio alla tua idea — considerala come un suggerimento quando selezioni la modalità nel RadioBox.
 
@@ -422,7 +422,7 @@ Esempio di assurdità: ".sa"
 Secondo una ricerca dell'Università di Cambridge, non importa in quale ordine siano le lettere in una parola, l'unica cosa importante è che la prima e l'ultima lettera siano al posto giusto.
 
 
-KROK 7b: Gestore delle Regole (Ctrl+4) — dizionari per linguisti senza Python
+PASSO 7b: Gestore delle Regole (Ctrl+4) — dizionari per linguisti senza Python
 
 La versione 13.0 introduce il quarto strumento nella barra: il Gestore delle Regole. Lo apri con il tasto Ctrl+4 o dal menu Strumenti. È un esploratore visivo della cartella dictionaries/, dove l'applicazione conserva tutte le regole fonetiche (accenti), cifrari e modalità del Regista in file YAML (formato leggibile dall'uomo, più semplice di JSON).
 
@@ -604,7 +604,7 @@ Funzionalità mantenute invariate dalla versione 12.0
 - Piene funzionalità AI: Brainstorming, Script, Audiolibro, Accumulatore di Trama, Memoria Infinita, Assegnazione di Titoli.
 
 
-KROK 7b (uzupełnienie): L'ordine delle regole `zamiany:` è importante
+PASSO 7b (uzupełnienie): L'ordine delle regole `zamiany:` è importante
 
 I file in `dictionaries/<codice>/akcenty/*.yaml` contengono un elenco di regole `zamiany:` — coppie `wzor → zamiana`, che il motore applica SEQUENZIALMENTE. Ogni regola successiva opera sull'output della precedente. Questo consente di costruire pipeline come "scomporre il digramma `szcz` in `shch`, e poi sostituire `ch` con `h`", ma apre anche la classica trappola per l'autore del pacchetto linguistico.
 

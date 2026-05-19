@@ -22,7 +22,7 @@ tresc:
 
     Puoi aprire il pannello con il pulsante "{main.btn.opowiesci}" sulla barra degli strumenti o con la scorciatoia da tastiera Ctrl+5.
   krok_1_tryby_gry: |
-    KROK 1: Tre modalità di gioco — scegli il tuo stile di gioco
+    PASSO 1: Tre modalità di gioco — scegli il tuo stile di gioco
 
     Proprio sotto la barra del nome del gioco troverai un'opzione per selezionare la modalità (RadioBox). La modalità determina come il motore narrativo interagisce con te:
 
@@ -36,7 +36,7 @@ tresc:
 
     La modalità può essere cambiata durante il gioco, ma solo tramite il pulsante di emergenza «Modifica modalità di gioco…» accanto alla RadioBox (dalla v15.2.3) — la RadioBox stessa è bloccata sulla modalità fissata subito dopo la creazione o il caricamento di una partita, in modo analogo alla protezione del Regista. Il pulsante apre una finestra di dialogo modale con un avviso; il caso d'uso tipico di questa scappatoia è una situazione in cui l'IA in modalità Scelte o Minor Male genera ostinatamente nuovi dilemmi invece di chiudere la storia — passare alla modalità Libera consente allora al giocatore di descrivere lui stesso la scena finale. Se vuoi avviare una seconda partita in un'altra tonalità, basta digitare un nuovo nome di partita nel campo del nome — la RadioBox si sbloccherà da sola, perché l'applicazione riconosce che stai preparando un progetto fresco. Nota: la fiala è una caratteristica esclusiva della modalità Minor Male — passando (attraverso la scappatoia) nella stessa partita a Scelte o Libera, la sua esistenza e il conteggio dei turni rimangono salvati nello stato del gioco, ma finché non torni a Minor Male, l'opzione «Stappa la fiala» non verrà visualizzata.
   krok_2_quick_start: |
-    KROK 2: Avvio Rapido — scenari di apertura preimpostati
+    PASSO 2: Avvio Rapido — scenari di apertura preimpostati
 
     Sotto il campo del nome del gioco troverai una seconda riga con l'etichetta "{opowiesci.lbl_quick_start}" e una selezione a discesa (wx.Choice). La posizione predefinita è "{opowiesci.quick_start_wlasna}" — il motore inventerà il mondo basandosi sulla tua prima azione.
 
@@ -54,7 +54,7 @@ tresc:
 
     Dopo aver scelto il preset, clicca su "{opowiesci.btn_nowa_gra_label}" — il motore inietterà una breve descrizione del mondo e del personaggio, impostando la modalità di gioco predefinita (puoi sovrascriverla con il RadioBox prima di cliccare su "Nuovo gioco"). Il primo turno del LLM giocherà la scena di apertura.
   krok_3_pierwsza_gra: |
-    KROK 3: Prima partita da zero — senza preset
+    PASSO 3: Prima partita da zero — senza preset
 
     Se preferisci la massima libertà, lascia "{opowiesci.quick_start_wlasna}" nel campo Quick Start e preparati a inserire manualmente la prima azione.
 
@@ -64,7 +64,7 @@ tresc:
     4. Nel campo "{opowiesci.lbl_akcja}" in fondo al pannello, inserisci la prima azione, ad esempio "mi sveglio in una stanza sconosciuta". Clicca "{opowiesci.btn_wyslij_label}". Il motore narrativo aprirà il mondo basandosi sulla tua azione — descrizione della stanza, suoni, personaggi, prime decisioni.
     5. Ogni turno verrà salvato automaticamente — puoi chiudere l'applicazione in qualsiasi momento e caricare il gioco successivamente con il pulsante "{opowiesci.btn_wczytaj_label}".
   krok_4_zasady_swiata: |
-    KROK 4: Regole del mondo — regole personalizzate che il motore rispetta durante tutto il gioco
+    PASSO 4: Regole del mondo — regole personalizzate che il motore rispetta durante tutto il gioco
 
     Dalla versione 15.1, sopra il campo di narrazione troverai il pulsante "{opowiesci.btn_zasady_swiata_label}". Questo apre una finestra di modifica separata con un campo multilinea, dove puoi inserire qualsiasi regola — fonetica, meccanica o drammaturgica — che il motore narrativo rispetterà in ogni turno successivo di quel particolare gioco. Le regole vengono salvate insieme allo stato del gioco (.game.json), quindi il caricamento del gioco le mantiene inalterate.
 
@@ -80,7 +80,7 @@ tresc:
 
     Nota: le regole del mondo richiedono un gioco attivo. Se clicchi "{opowiesci.btn_zasady_swiata_label}" senza un gioco caricato/creato, riceverai il messaggio "{opowiesci.zasady_bez_gry_tytul}" — prima clicca "{opowiesci.btn_nowa_gra_label}" o carica un gioco salvato.
   krok_5_slash_komendy: |
-    KROK 5: Comandi slash — azioni rapide senza API
+    PASSO 5: Comandi slash — azioni rapide senza API
 
     Nel campo di azione puoi inserire in qualsiasi momento un comando che inizia con una barra `/`. I comandi sono locali (non richiedono chiamate a OpenAI) e funzionano indipendentemente dalla modalità di gioco. Sono accettate sia le varianti italiane che quelle inglesi:
 
@@ -92,15 +92,15 @@ tresc:
 
     /visualizza <descrizione>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata, NON viene aggiunto alla narrazione né salvato nel file audiolibro. Esempio: "/visualizza come appare la guardia" o "/visualizza l'odore del caffè".
 
-    /scena <descrizione>, /scene <descrizione> — evento corrente ALTROVE, raccontato in terza persona. La telecamera si stacca dal tuo personaggio e mostra cosa sta accadendo contemporaneamente a un altro personaggio o in un altro luogo del mondo. Esempio: "/scena Anna al mercato" o "/scena le guardie al cancello". Il motore intreccerà la scena nella narrazione, la contrassegnerà con il prefisso "Scena fuori campo:" e tornerà automaticamente al tuo personaggio nel turno successivo. Non appaiono scelte — il giocatore non prende decisioni nella scena di un altro. Trovi la descrizione completa del meccanismo nel KROK 5B.
+    /scena <descrizione>, /scene <descrizione> — evento corrente ALTROVE, raccontato in terza persona. La telecamera si stacca dal tuo personaggio e mostra cosa sta accadendo contemporaneamente a un altro personaggio o in un altro luogo del mondo. Esempio: "/scena Anna al mercato" o "/scena le guardie al cancello". Il motore intreccerà la scena nella narrazione, la contrassegnerà con il prefisso "Scena fuori campo:" e tornerà automaticamente al tuo personaggio nel turno successivo. Non appaiono scelte — il giocatore non prende decisioni nella scena di un altro. Trovi la descrizione completa del meccanismo nel PASSO 5B.
 
-    /flashback <descrizione>, /retrospezione <descrizione> — retrospezione in terza persona, ritorno indietro nel tempo. Esempio: "/flashback giorno della morte del padre" o "/flashback primo incontro degli eroi". Apre la narrazione con una formula temporale ("Tre anni prima..."), la contrassegna con il prefisso "Retrospezione:" e ritorna al turno corrente. Identico a /scena — passivo, senza scelte. Descrizione completa nel KROK 5B.
+    /flashback <descrizione>, /retrospezione <descrizione> — retrospezione in terza persona, ritorno indietro nel tempo. Esempio: "/flashback giorno della morte del padre" o "/flashback primo incontro degli eroi". Apre la narrazione con una formula temporale ("Tre anni prima..."), la contrassegna con il prefisso "Retrospezione:" e ritorna al turno corrente. Identico a /scena — passivo, senza scelte. Descrizione completa nel PASSO 5B.
 
     /aiuto, /help — visualizza una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura e NVDA-friendly — il campo di testo riceve automaticamente il focus, il lettore di schermo legge immediatamente l'intero elenco senza necessità di navigazione.
 
     /fine, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
   krok_6_pliki_gry: |
-    KROK 6: Pliki gry — gdzie znajdziesz swoje dane
+    PASSO 6: Pliki gry — gdzie znajdziesz swoje dane
 
     Każda gra produkuje pięć plików, każdy w innym folderze, z różnymi rolami:
 
@@ -127,13 +127,13 @@ tresc:
 
     In pratica, il meccanismo di autoriduzione è invisibile — il giocatore non si accorge che sta succedendo qualcosa, perché il thread di sfondo risolve il problema prima che venga notato. È importante solo che tu non invii il turno successivo durante il riassunto automatico (il pulsante "{opowiesci.btn_wyslij_label}" è allora disattivato).
   krok_8_cinematic_warning: |
-    KROK 8: Cinematic Meta Warning — intermezzo drammatico dopo il 150° turno
+    PASSO 8: Cinematic Meta Warning — intermezzo drammatico dopo il 150° turno
 
     Dopo 150 turni di una partita, il motore narrativo inserirà UNA VOLTA un "Cinematic Meta Warning" — un intermezzo drammatico meta-narrativo. Apparirà in un dialogo separato con un suono di campanello, rivolgendosi direttamente a te in seconda persona, con un riassunto dei successi e un avvertimento sull'importanza delle decisioni prese.
 
     Il Cinematic Warning NON fa parte della narrazione dell'audiolibro — il motore di filtraggio .txt elimina automaticamente il suo contenuto (contrassegnato dai marker ⚠️🚨⚠️), in modo che durante l'ascolto dell'audiolibro non si senta un meta-commento sulla propria partita. Il contenuto viene registrato solo nel log .story.jsonl (per riflessione o per conservare come ricordo) e nel dialogo nell'interfaccia grafica, dove puoi leggerlo una volta e continuare.
   krok_9_most_do_rezysera: |
-    KROK 9: Ponte al Reżyser — utilizza il Libro del Mondo creato in Storie
+    PASSO 9: Ponte al Reżyser — utilizza il Libro del Mondo creato in Storie
 
     Il file opowiesci/<nazwa>.md generato durante il gioco contiene il Libro del Mondo con i personaggi che sono apparsi nella narrazione, insieme alle loro caratteristiche, accenti e personalità. Il formato è esattamente quello richiesto dal parser di Reżyser — [Nome: caratteristiche con descrizione dell'accento].
 
@@ -145,7 +145,7 @@ tresc:
 
     Questo è un ponte unidirezionale: le Storie producono materiale, Reżyser lo formatta. Non è possibile il contrario — Reżyser non carica i giochi da Storie come stato interattivo.
   krok_10_dostepnosc_nvda: |
-    KROK 10: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
+    PASSO 10: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
 
     L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa abbiamo fatto nello specifico:
 
@@ -182,7 +182,7 @@ tresc:
     Problema: I file .game.json e .story.jsonl non sono visibili sul desktop.
     Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per gli utenti comuni, non visibile dall'esploratore di file. I file di narrazione (.txt, .md) vengono salvati in script/ — li troverai lì.
   krok_5b_druga_kamera: |
-    KROK 5B: Seconda telecamera — scene dietro le quinte e flashback (da v15.4)
+    PASSO 5B: Seconda telecamera — scene dietro le quinte e flashback (da v15.4)
 
     Di norma giochi in prima persona — la narrazione suona come "vai", "senti", "vedi". Dalla versione 15.4 puoi dirigere una scena a distanza, raccontata in terza persona, non direttamente collegata al tuo personaggio. Ci sono due comandi per questo: /scena per eventi paralleli (altrove nel mondo), /flashback per flashback (nel passato). Dopo l'inserto, il motore ritorna al tuo personaggio nel turno successivo.
 

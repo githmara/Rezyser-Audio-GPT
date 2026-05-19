@@ -127,7 +127,7 @@ tresc:
 
     En la práctica, el mecanismo de autorreducción es invisible: el jugador no siente que algo está sucediendo, ya que el hilo de fondo resuelve el problema antes de que se note. Solo es importante que no envíes otro turno durante el auto-resumen (el botón "{opowiesci.btn_wyslij_label}" está entonces atenuado).
   krok_8_cinematic_warning: |
-    KROK 8: Cinematic Meta Warning — interludio dramático después del turno 150
+    PASO 8: Cinematic Meta Warning — interludio dramático después del turno 150
 
     Después de 150 turnos en un juego, el motor narrativo insertará UNA vez un "Cinematic Meta Warning" — un interludio dramático meta-narrativo. Aparecerá en un diálogo separado con el sonido de una campana, dirigiéndose directamente a ti en segunda persona, con un resumen de logros y una advertencia sobre la importancia de las decisiones que tomes.
 
@@ -168,7 +168,7 @@ tresc:
     Najczęstsze problemy
 
     Problem: Po kliknięciu "{opowiesci.btn_nowa_gra_label}" pojawia się komunikat „Brak klucza API".
-    Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza OpenAI. Wróć do ekranu startowego (przycisk Home), kliknij "{home.btn_generate}" i postępuj zgodnie z instrukcjami (KROK 2 głównego manuala).
+    Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza OpenAI. Wróć do ekranu startowego (przycisk Home), kliknij "{home.btn_generate}" i postępuj zgodnie z instrukcjami (PASO 2 głównego manuala).
 
     Problem: Próbuję wysłać kolejną turę, ale przycisk "{opowiesci.btn_wyslij_label}" jest wyszarzony.
     Przyczyna i rozwiązanie: Trwa auto-resumen del contexto o la generación de Cinematic Warning en el hilo de fondo. El estado de la memoria mostrará „Auto-resumen del contexto en progreso…". Espera unos segundos — el botón se desbloqueará automáticamente tras el éxito.

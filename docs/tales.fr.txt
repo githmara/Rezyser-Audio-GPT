@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (15.4 – Version de Publication)
+Reżyser Audio GPT — Module Histoires Interactives (15.4.1 – Version de Publication)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
@@ -7,7 +7,7 @@ Le module a été conçu dès le départ pour les joueurs aveugles — la narrat
 Vous ouvrirez le panneau avec le bouton "📖  Histoires" sur la barre d'outils ou avec le raccourci clavier Ctrl+5.
 
 
-KROK 1 : Trois modes de jeu — choisissez votre style de jeu
+ÉTAPE 1 : Trois modes de jeu — choisissez votre style de jeu
 
 Juste en dessous de la barre de titre du jeu, vous trouverez une case de sélection de mode (RadioBox). Le mode détermine comment le moteur narratif dialogue avec vous :
 
@@ -22,7 +22,7 @@ Fiole en mode Moindre Mal (à partir de v15.2) : après quatre tours de jeu, une
 Le mode peut être changé en cours de jeu, mais uniquement via le bouton de secours « Modifier le mode de jeu… » à côté de la RadioBox (depuis v15.2.3) — la RadioBox elle-même est figée sur le mode verrouillé dès la création ou le chargement d'une partie, par analogie avec la protection du Réalisateur. Le bouton ouvre une boîte de dialogue modale avec un avertissement ; le cas typique d'utilisation de cette échappatoire est une situation où l'IA en mode Choix ou Moindre Mal s'obstine à générer de nouveaux dilemmes au lieu de clore l'histoire — passer en mode Libre permet alors au joueur de décrire lui-même la scène finale. Si vous souhaitez démarrer une seconde partie dans une autre tonalité, tapez simplement un nouveau nom de partie dans le champ du nom — la RadioBox se déverrouillera d'elle-même, car l'application reconnaît que vous préparez un projet frais. Attention : la fiole est une caractéristique exclusive du mode Moindre Mal — en passant (via l'échappatoire) au mode Choix ou Libre dans le même jeu, son existence et le compteur de tours restent enregistrés dans l'état du jeu, mais tant que vous ne revenez pas au mode Moindre Mal, l'option « Décapsuler la fiole » ne s'affiche pas.
 
 
-KROK 2 : Démarrage rapide — scénarios d'ouverture prêts à l'emploi
+ÉTAPE 2 : Démarrage rapide — scénarios d'ouverture prêts à l'emploi
 
 Sous le champ du nom du jeu, vous trouverez une deuxième rangée avec l'étiquette « Démarrage rapide : » et une sélection déroulante (wx.Choice). La position par défaut est "(jeu personnalisé)" — le moteur inventera le monde en fonction de votre première action.
 
@@ -41,7 +41,7 @@ COMÉDIE ROMANTIQUE DE MŒURS — Saska Kępa avril 2024, un petit café est sur
 Après avoir choisi un préréglage, cliquez sur "Nouveau jeu" — le moteur injectera une courte description du monde et du personnage, et définira le mode de jeu par défaut (vous pouvez le modifier avec le RadioBox avant de cliquer sur « Nouveau jeu »). Le premier tour de LLM jouera la scène d'ouverture.
 
 
-KROK 3 : Première partie à partir de zéro — sans preset
+ÉTAPE 3 : Première partie à partir de zéro — sans preset
 
 Si vous préférez une totale liberté, laissez "(jeu personnalisé)" dans le champ Quick Start et préparez-vous à entrer la première action manuellement.
 
@@ -52,13 +52,13 @@ Si vous préférez une totale liberté, laissez "(jeu personnalisé)" dans le ch
 5. Chaque tour sera automatiquement enregistré — vous pouvez fermer l'application à tout moment et charger le jeu plus tard avec le bouton "Charger".
 
 
-KROK 4 : Règles du monde — règles personnalisées que le moteur respecte tout au long du jeu
+ÉTAPE 4 : Règles du monde — règles personnalisées que le moteur respecte tout au long du jeu
 
 À partir de la version 15.1, au-dessus du champ de narration, vous trouverez un bouton "Éditer les règles du monde…". Il ouvre une fenêtre d'édition séparée avec un champ multiligne où vous pouvez entrer n'importe quelles règles — phonétiques, mécaniques ou dramaturgiques — que le moteur narratif respectera à chaque tour de ce jeu spécifique. Les règles sont enregistrées avec l'état du jeu (.game.json), donc le chargement du jeu les conserve inchangées.
 
 Trois utilisations typiques des règles du monde :
 
-RÈGLES PHONÉTIQUES — contrôlent la prononciation des noms des personnages par TTS (Vocalizer, ElevenLabs). Exemple : « Prononcez toujours le nom Joanna de manière dure, à la polonaise [dż] ; jamais de manière douce [j]. » Le moteur insérera cette variante dans la narration à partir du tour suivant, et le personnage Joanna dans le Livre du Monde conservera la prononciation souhaitée. C'est aussi un pont naturel vers les accents du Réalisateur — si après avoir terminé le jeu, vous chargez le Livre dans le panneau du Réalisateur (KROK 9 ci-dessous), la règle phonétique « passera » avec le jeu comme une caractéristique du personnage.
+RÈGLES PHONÉTIQUES — contrôlent la prononciation des noms des personnages par TTS (Vocalizer, ElevenLabs). Exemple : « Prononcez toujours le nom Joanna de manière dure, à la polonaise [dż] ; jamais de manière douce [j]. » Le moteur insérera cette variante dans la narration à partir du tour suivant, et le personnage Joanna dans le Livre du Monde conservera la prononciation souhaitée. C'est aussi un pont naturel vers les accents du Réalisateur — si après avoir terminé le jeu, vous chargez le Livre dans le panneau du Réalisateur (ÉTAPE 9 ci-dessous), la règle phonétique « passera » avec le jeu comme une caractéristique du personnage.
 
 RÈGLES MÉCANIQUES — décrivent les « lois de la physique » de votre monde que le LLM doit respecter. Exemple : « Dans ce monde, la magie ne fonctionne que la nuit ; le jour, les personnages sont des gens ordinaires. » Le moteur n'inventera pas de sorts à midi, même si l'action de votre tour l'exige — à la place, il proposera une alternative ou vous guidera vers le crépuscule.
 
@@ -69,7 +69,7 @@ Champ de règles vide = pas de règles supplémentaires (comportement par défau
 Remarque : les règles du monde nécessitent un jeu actif. Si vous cliquez sur "Éditer les règles du monde…" sans jeu chargé/établi, vous recevrez le message « Pas de jeu actif » — cliquez d'abord sur "Nouveau jeu" ou chargez un jeu enregistré.
 
 
-KROK 5 : Commandes Slash — actions rapides sans API
+ÉTAPE 5 : Commandes Slash — actions rapides sans API
 
 Dans le champ d'action, vous pouvez à tout moment entrer une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne consomment pas d'appels à OpenAI) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont acceptées :
 
@@ -79,18 +79,18 @@ Dans le champ d'action, vous pouvez à tout moment entrer une commande commença
 
 Le moteur narratif choisit automatiquement le modèle AI en fonction du mode : pour le mode Choix et Moindre Mal, il utilise le gpt-4o plus coûteux (il suit strictement les règles du monde), pour le mode Libre — le gpt-4o-mini plus rapide et moins cher (le joueur contrôle l'intrigue, donc cela ne nécessite pas de mise en scène dramatique).
 
-/wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj jak wygląda strażnik » ou « /wizualizuj zapach kawiarni ».
+/wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj à quoi ressemble le garde » ou « /wizualizuj l'odeur du café ».
 
-/scena <opis>, /scene <opis> — événement en cours AILLEURS, raconté à la troisième personne. La caméra se détache de votre personnage et montre ce qui se passe en parallèle avec un autre personnage ou dans un autre endroit du monde. Exemple : « /scena Anna na rynku » ou « /scena strażnicy przy bramie ». Le moteur intègre la scène dans la narration, la marque avec le préfixe « Scène hors champ : » et revient automatiquement à votre personnage au tour suivant. Aucun choix n'apparaît — le joueur ne prend pas de décisions dans la scène d'autrui. La description complète du mécanisme se trouve dans KROK 5B.
+/scena <opis>, /scene <opis> — événement en cours AILLEURS, raconté à la troisième personne. La caméra se détache de votre personnage et montre ce qui se passe en parallèle avec un autre personnage ou dans un autre endroit du monde. Exemple : « /scena Anna au marché » ou « /scena les gardes à la porte ». Le moteur intègre la scène dans la narration, la marque avec le préfixe « Scène hors champ : » et revient automatiquement à votre personnage au tour suivant. Aucun choix n'apparaît — le joueur ne prend pas de décisions dans la scène d'autrui. La description complète du mécanisme se trouve dans ÉTAPE 5B.
 
-/flashback <opis>, /retrospekcja <opis> — flashback à la troisième personne, retour dans le temps. Exemple : « /flashback dzień śmierci ojca » ou « /flashback pierwsze spotkanie bohaterów ». Ouvre la narration avec une formule temporelle (« Trois ans plus tôt… »), la marque avec le préfixe « Retrospekcja : » et revient au tour en cours. Identique à /scena — passif, sans choix. Description complète dans KROK 5B.
+/flashback <opis>, /retrospekcja <opis> — flashback à la troisième personne, retour dans le temps. Exemple : « /flashback le jour où mon père est mort » ou « /flashback la première rencontre des personnages ». Ouvre la narration avec une formule temporelle (« Trois ans plus tôt… »), la marque avec le préfixe « Retrospekcja : » et revient au tour en cours. Identique à /scena — passif, sans choix. Description complète dans ÉTAPE 5B.
 
 /pomoc, /help — affiche une boîte de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
 
 /koniec, /quit — ferme l'application (après l'enregistrement automatique du tour en cours).
 
 
-KROK 6 : Fichiers de jeu — où trouver vos données
+ÉTAPE 6 : Fichiers de jeu — où trouver vos données
 
 Chaque jeu produit cinq fichiers, chacun dans un dossier différent, avec des rôles variés :
 
@@ -105,7 +105,7 @@ runtime/opowiesci/<nom>.story.jsonl — journal brut de chaque tour (requête du
 runtime/skrypty/<nom>.mode — métadonnées du numéro de mode (3=Libre, 4=Choix, 5=Moindre mal). Fichier commun avec le Réalisateur, mais la numérotation ne se chevauche pas (le Réalisateur utilise 0-2).
 
 
-KROK 7 : Indicateur de mémoire du modèle — pourquoi les tours dans les anciens jeux ne nécessitent pas votre intervention manuelle
+ÉTAPE 7 : Indicateur de mémoire du modèle — pourquoi les tours dans les anciens jeux ne nécessitent pas votre intervention manuelle
 
 Sous le RadioBox du mode, vous trouverez l'indicateur de mémoire du modèle — une barre de progression (wx.Gauge) avec une description du statut à côté. L'indicateur montre le pourcentage de remplissage de la fenêtre contextuelle du moteur narratif (gpt-4o-mini a un tampon de 128 000 tokens).
 
@@ -119,14 +119,14 @@ Quatre niveaux de remplissage :
 En pratique, le mécanisme d'autoréduction est invisible — le joueur ne ressent pas qu'il se passe quelque chose, car le fil de fond résout le problème avant qu'il ne soit remarqué. Il est seulement important de ne pas envoyer le tour suivant pendant l'auto-résumé (le bouton "Envoyer" est alors grisé).
 
 
-KROK 8 : Avertissement Cinématographique Méta — interlude dramatique après le 150e tour
+ÉTAPE 8 : Avertissement Cinématographique Méta — interlude dramatique après le 150e tour
 
 Après 150 tours d'une partie, le moteur narratif insérera UNE FOIS un "Avertissement Cinématographique Méta" — un interlude dramatique méta-narratif. Il apparaîtra dans un dialogue séparé avec un son de cloche, s'adressant directement à vous à la deuxième personne, avec un résumé des réalisations et un avertissement sur l'importance des décisions prises.
 
 L'Avertissement Cinématographique NE fait PAS partie de la narration de l'audiobook — le moteur de filtrage .txt coupe automatiquement son contenu (marqué par des indicateurs ⚠️🚨⚠️), afin que vous n'entendiez pas de méta-commentaire sur votre propre jeu lors de l'écoute de l'audiobook. Le contenu est uniquement enregistré dans le journal .story.jsonl (pour réflexion ou souvenir) et dans le dialogue de l'interface graphique, où vous pouvez le lire une fois et continuer.
 
 
-KROK 9 : Pont vers le Réalisateur — utilisez le Livre du Monde créé dans les Histoires
+ÉTAPE 9 : Pont vers le Réalisateur — utilisez le Livre du Monde créé dans les Histoires
 
 Le fichier opowiesci/<nom>.md généré pendant le jeu contient le Livre du Monde avec les personnages qui sont apparus dans la narration, avec leurs caractéristiques, accents et personnalités. Le format est exactement celui requis par le parseur du Réalisateur — [Nom : caractéristiques avec description de l'accent].
 
@@ -139,7 +139,7 @@ Ce que vous pouvez en faire :
 C'est un pont à sens unique : les Histoires produisent le matériel, le Réalisateur le formate. L'inverse n'est pas possible — le Réalisateur ne charge pas les jeux des Histoires comme état interactif.
 
 
-KROK 10 : Accessibilité (NVDA et lecteurs d'écran) — conçu dès le départ
+ÉTAPE 10 : Accessibilité (NVDA et lecteurs d'écran) — conçu dès le départ
 
 Tout le module Narration a été optimisé pour les joueurs aveugles. Ce que nous avons fait concrètement :
 
@@ -178,7 +178,7 @@ Problème : Les fichiers .game.json et .story.jsonl ne sont pas visibles sur le 
 Cause et solution : C'est intentionnel — runtime/ est un dossier système pour les utilisateurs ordinaires, invisible depuis l'explorateur de fichiers. Les fichiers de narration (.txt, .md) vont dans scripts/ — vous les trouverez là-bas.
 
 
-KROK 5B : Deuxième caméra — scènes en coulisses et flashbacks (à partir de la v15.4)
+ÉTAPE 5B : Deuxième caméra — scènes en coulisses et flashbacks (à partir de la v15.4)
 
 Par défaut, vous jouez à la première personne — la narration utilise « tu vas », « tu ressens », « tu vois ». À partir de la version 15.4, vous pouvez réaliser une scène à distance, racontée à la troisième personne, non directement liée à votre personnage. Deux commandes sont prévues à cet effet : /scène pour les événements parallèles (ailleurs dans le monde), /flashback pour les rétrospectives (dans le passé). Après l'insertion, le moteur revient à votre personnage au tour suivant.
 

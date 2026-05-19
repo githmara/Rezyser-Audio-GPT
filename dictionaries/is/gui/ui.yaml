@@ -1024,6 +1024,12 @@ opowiesci:
   dlg_visualize_pusta_akcja_tytul: "Engin lýsing á senuvísualiseringu"
   dlg_visualize_pusta_akcja_tresc: "Eftir skipunina /sjá, sláðu inn stutta lýsingu á því sem þú vilt sjá nánar (t.d. /sjá hvernig vörðurinn lítur út). Án röksemdar veit vélin ekki á hvað hún á að einbeita sér."
   status_wizualizowanie: "Búa til senuvísualiseringu…"
+  # v15.4.1: A11y-forskeyti á undan frásögninni þegar `narracja_typ != "druga_osoba"`.
+  # Skýrt tæknilegt merki fyrir skjálesara: leikmaðurinn veit strax að
+  # myndavélin hefur færst. Skrifað einnig í `.txt` á diski.
+  prefiks_flashback: "Endurminning:"
+  prefiks_scena: "Hliðaratriði:"
+  prefiks_cut: "Á sama tíma annars staðar:"
   pamiec_status_format: "{procent}% — {tokeny} tákn ({etap})"
   pamiec_etap_czysta: "🟢 hreint"
   pamiec_etap_ok: "🟢 OK"

@@ -86,7 +86,7 @@ tresc:
 
     Consejo: Después de reiniciar, la aplicación verificará el archivo y mostrará un mensaje verde en la sección "{home.heading_system_check}", lo que significa que todos los módulos de IA están listos para funcionar. De lo contrario, te indicará claramente qué está mal y te permitirá abrir el editor de texto para corregir rápidamente el error.
   krok_3_glowne_studio: |
-    KROK 3: Estudio Principal de Dirección
+    PASO 3: Estudio Principal de Dirección
 
     Este es tu centro de mando para idear historias y escribir guiones. Accede a él haciendo clic en el botón "{main.btn.rezyser}" en la barra de botones o seleccionando Herramientas → {main.menu.rezyser} en el menú (atajo: Ctrl+1).
 
@@ -207,7 +207,7 @@ tresc:
 
     Nota: El módulo requiere que el archivo ya esté guardado en el disco (generado o cargado). Si el archivo no existe, la aplicación mostrará un mensaje adecuado.
   krok_5_poliglota_intro: |
-    KROK 5: Poliglota AI
+    PASO 5: Poliglota AI
 
     Aplicación para traducciones y forzar acentos fuertes en sintetizadores de lectores de pantalla. Accede a ella haciendo clic en el botón "{main.btn.poliglota}" en la barra de botones o seleccionando Herramientas → {main.menu.poliglota} del menú (atajo: Ctrl+2).
 

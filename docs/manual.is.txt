@@ -1,11 +1,11 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 15.4 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 15.4.1 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
 Verkfærakistan samanstendur af aðalstúdíóinu (Reżyseria), þýðinga- og hreimaverkfærinu (Poliglota), skráarbyggingarverkfærinu (Architekt Audiobooków), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleidd gagnvirk skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti opowiesci.pl.txt). Öll fimm verkfærin eru aðgengileg í einu forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.
 
 
-KROK 1: Fyrsta gangsetning (Cross-Platform)
+SKREF 1: Fyrsta gangsetning (Cross-Platform)
 
 Sæktu nýjasta uppsetningarforritið úr Releases-flipanum á GitHub (skráin Rezyser_Audio_v<númer>_Installer.exe) og keyrðu það með tvísmelli. Uppsetningarforritið stingur upp á sjálfgefinni uppsetningarstaðsetningu — Programs-möppunni í staðbundinni möppu reikningsins þíns — og krefst ekki stjórnandaaðgangs. Þú getur valið þína eigin slóð með „Vafra"-hnappinum; í því tilviki SKALTU MUNA hana (þú þarft hana við uppfærslur — sjá „Sjálfvirkar uppfærslur" hér að neðan). Eftir uppsetningu skaltu keyra forritið með flýtileið af skjáborðinu eða úr Start-valmyndinni. Stutt skráargluggi opnast (hverfur sjálfkrafa) og eftir smá stund birtist aðalgluggi forritsins — Hljóðstjóri GPT. Enginn vafri, enginn bakgrunnsþjónn. Þegar þú ert búinn að vinna, lokaðu einfaldlega forritsglugganum.
 
@@ -61,7 +61,7 @@ Ef þú vilt flytja verkefnin þín, API-lykilinn og staðbundnar stillingar á 
 Ábending: „Opna staðsetningu skráar" er innfædda nafnið á valkostinum í íslenskri Windows-uppsetningu. Í enska kerfinu heitir hann „Open file location", í öðrum útgáfum tungumáls — á samsvarandi hátt á staðbundnu tungumáli stýrikerfisins.
 
 
-KROK 2: Zasilanie API (Klucz OpenAI)
+SKREF 2: Zasilanie API (Klucz OpenAI)
 
 Til að gervigreindin geti virkað, þarf hún aðgang að netþjónum OpenAI (höfundar ChatGPT).
 
@@ -73,7 +73,7 @@ Til að gervigreindin geti virkað, þarf hún aðgang að netþjónum OpenAI (h
 Ábending: Eftir að forritið hefur verið endurræst mun það athuga skjalið og birta græna skilaboð í hlutanum "Kerfisathugun" — þetta þýðir að allir AI einingar eru tilbúnir til notkunar. Annars mun það skýrt segja þér hvað er að og leyfa þér að opna textaritilinn til að laga villuna fljótt.
 
 
-KROK 3: Aðalstúdíó Leikstjórans
+SKREF 3: Aðalstúdíó Leikstjórans
 
 Þetta er stjórnstöðin þín til að skapa sögur og skrifa handrit. Færðu þig þangað með því að smella á "🎬  Leikstjóri" hnappinn á verkfæraslánni eða velja Verkfæri → Leikstjóri úr valmyndinni (flýtileið: Ctrl+1).
 
@@ -187,7 +187,7 @@ Sjálfvirk samantekt: Þegar minnið fer í viðvörunarástand, skiptir Hugstor
 Snjall hleðsla með samantektarskrá: Þegar þú hleður inn verkefni sem hefur þegar vistaða samantektarskrá (t.d. znieczulica_samantekt.txt), mun forritið sjálfkrafa hlaða samantektinni í Langtímaminni og skilja núverandi minni tómt. Þannig eyðirðu ekki táknum í að hlaða alla söguna aftur — líkanið þekkir samhengið úr samantektinni og er tilbúið til endalausrar áframhalds.
 
 
-KROK 4: Eftirvinnsla í Reżyser Audio GPT
+SKREF 4: Eftirvinnsla í Reżyser Audio GPT
 
 Eftir að hafa skrifað söguna hefurðu aðgang að eftirvinnslutóli sem er aðgengilegt neðst á Reżyser panelnum (kemur aðeins fram í Hljóðbókarham).
 
@@ -198,7 +198,7 @@ Gervigreindin mun greina alla söguna og leggja til lýsandi, bókmenntaleg heit
 Athugið: Einingin krefst þess að skráin sé þegar vistuð á disk (búin til eða hlaðið inn). Ef skráin er ekki til, mun forritið birta viðeigandi skilaboð.
 
 
-KROK 5: Poliglota AI
+SKREF 5: Poliglota AI
 
 Forrit til þýðinga og þvingunar á hreimum á skjálesaralesurum. Fara í það með því að smella á hnappinn "🌍  Tungumálamaður" á hnappastikunni eða velja Verkfæri → Tungumálamaður úr valmyndinni (flýtilykill: Ctrl+2).
 
@@ -347,7 +347,7 @@ Greining og plástur: Ég greindi vandamálið á Python stigi í kóða viðbó
 Hvað á að gera á meðan: ef þú vilt hafa rétta tungumálagreiningu (það er þess virði — þetta var eitt af „killer features" gamla Vocalizer, sjá „Killer Feature fyrir blinda" hér að ofan), opnaðu mál í forritasafni á GitHub með merkimiðanum `tiflotecnia-patch` og netfangið þitt í textanum. Það er þess virði að bæta við stuttri lýsingu á vandamálinu á eigin tungumáli (2–3 setningar duga) — bóturinn greinir tungumálið (stuðningur: pólska, enska, þýska, spænska, finnska, franska, íslenska, ítalska, rússneska) og svarar á sama tungumáli; án lýsingar eða á öðru tungumáli kemur svarið á ensku. Sjálfvirkur botn mun strax loka málinu með staðfestingu á innsendingu (án ummerkja í opinberu þræðinum), og þú færð plásturinn í tölvupósti yfirleitt innan nokkurra daga. Plásturinn er EKKI birtur í forritasafninu né sem Gist — Tiflotecnia Voices fyrir NVDA er viðskiptahugbúnaður, og leyfi viðbótarinnar leyfir ekki endurdreifingu á skrám þess, jafnvel ekki breyttum. Eftir að þú hefur fengið plásturinn þarftu að afrita innihald hans í `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`, skipta út skrám. Varúð við afritun: ef Windows spurði ekki um skipti, þá hefurðu líklega afritað allan `TiflotecniaVoices_edits` möppuna með innihaldi hennar Í STAÐINN FYRIR einungis innihaldið — í slíku tilviki farðu inn í nýju undirmöppuna, klipptu allt, límdu það upp um eitt stig og skrifaðu yfir. Eftir að plásturinn hefur verið beittur með góðum árangri, endurræstu NVDA — njóttu betri gæða Cerrence 64-bita radda og réttrar tungumálagreiningar, sem er sambland sem enginn einstakur framleiðandi á markaðnum býður upp á. Við gerum ráð fyrir að þú hafir gilt leyfi fyrir Tiflotecnia Voices — við staðfestum það ekki, en þú getur ekki beitt plástrinum á möppu annarra án leyfis.
 
 
-KROK 6: Arkitekt Hljóðbóka
+SKREF 6: Arkitekt Hljóðbóka
 
 Tól til að undirbúa faglega uppbyggingu skráar fyrir skjálesara og ElevenLabs. Farðu í það með því að smella á "📄  Breytingartæki" hnappinn á hnappastikunni eða velja Verkfæri → Breytingartæki úr valmyndinni (flýtileið: Ctrl+3).
 
@@ -386,7 +386,7 @@ Mini-námskeið í Markdown í Heimsbókinni: einfalt pundmerki (#) er aðalhlut
 Ábending: Mundu að uppfæra Heimsbókina þína reglulega (með því að bæta við nýjum stöðum eða mikilvægum persónum) þegar sagan þróast. Þú getur gert þetta handvirkt eða með hjálp ytri spjallmenna. Því ríkari grunnur, því betri árangur í Reżyser!
 
 
-KROK 7b: Stjórnandi Reglna (Ctrl+4) — orðabækur fyrir málfræðinga án Python
+SKREF 7b: Stjórnandi Reglna (Ctrl+4) — orðabækur fyrir málfræðinga án Python
 
 Útgáfa 13.0 kynnir fjórða tólið á stikunni: Stjórnandi Reglna. Þú opnar það með Ctrl+4 eða úr Verkfærameninu. Þetta er sjónrænn skoðari fyrir möppuna dictionaries/, þar sem forritið geymir allar hljóðreglur (hreim), dulmál og stillingar Leikstjóra í YAML skrám (mannlesanlegt snið, einfaldara en JSON).
 
@@ -567,7 +567,7 @@ Eiginleikar haldnir óbreyttir frá útgáfu 12.0
 - Fullir AI eiginleikar: Hugstormur, Handrit, Hljóðbók, Söguuppsöfnuður, Óendanlegt minni, Titlagjöf.
 
 
-KROK 7b (viðbót): Röð reglna `zamiany:` skiptir máli
+SKREF 7b (viðbót): Röð reglna `zamiany:` skiptir máli
 
 Skrár í `dictionaries/<kod>/akcenty/*.yaml` innihalda lista yfir reglur `zamiany:` — pör `wzor → zamiana`, sem vélin framkvæmir Í RÖÐ. Hver næsta regla vinnur á útkomu þeirrar fyrri. Þetta gerir kleift að byggja leiðslur eins og „brjóta tvíhljóðið `szcz` niður í `shch`, og svo skipta `ch` út fyrir `h`", en það opnar einnig klassíska gildru fyrir höfund tungumálapakkans.
 

@@ -20,7 +20,7 @@ tresc:
 
     Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglotti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tarinat.fi.txt). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.
   krok_1_pierwsze_uruchomienie: |
-    KROK 1: Ensimmäinen käynnistys (Cross-Platform)
+    VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)
 
     Lataa uusin asennusohjelma GitHubin Releases-välilehdeltä (tiedosto Rezyser_Audio_v<numero>_Installer.exe) ja käynnistä se kaksoisklikkaamalla. Asennusohjelma ehdottaa oletussijaintia — Programs-kansiota käyttäjätilisi paikallisessa hakemistossa — eikä se vaadi järjestelmänvalvojan oikeuksia. Voit valita oman polun „Selaa"-painikkeella; siinä tapauksessa MUISTA se (tarvitset sitä päivityksissä — katso „Automaattiset päivitykset" alla). Asennuksen jälkeen käynnistä ohjelma työpöydän pikakuvakkeesta tai Käynnistä-valikosta. Lyhytaikainen terminaali-ikkuna avautuu (sulkeutuu automaattisesti), ja hetken kuluttua ohjelman pääikkuna ilmestyy — {app.nazwa}. Ei selainta, ei taustapalvelinta. Kun lopetat työn, sulje vain ohjelmaikkuna.
 
@@ -75,7 +75,7 @@ tresc:
 
     Vinkki: „Avaa tiedoston sijainti" on natiivinimi suomenkielisessä Windowsissa. Englanninkielisessä järjestelmässä se on „Open file location", muissa kieliversioissa — vastaavasti käyttöjärjestelmän paikallisella kielellä.
   krok_2_klucz_api: |
-    KROK 2: Zasilanie API (Klucz OpenAI)
+    VAIHE 2: Zasilanie API (Klucz OpenAI)
 
     Jotta tekoäly voi toimia, se tarvitsee pääsyn OpenAI:n palvelimille (ChatGPT:n luojat).
 
@@ -86,7 +86,7 @@ tresc:
 
     Vihje: Sovelluksen uudelleenkäynnistyksen jälkeen se tarkistaa tiedoston ja näyttää vihreän viestin osiossa "{home.heading_system_check}" — tämä tarkoittaa, että kaikki tekoälymoduulit ovat valmiita käyttöön. Muussa tapauksessa se kertoo selkeästi, mikä on vialla, ja antaa mahdollisuuden avata tekstieditori virheen nopeaa korjaamista varten.
   krok_3_glowne_studio: |
-    KROK 3: Pääohjaajan Studio
+    VAIHE 3: Pääohjaajan Studio
 
     Tämä on komentokeskuksesi tarinoiden keksimiseen ja käsikirjoitusten kirjoittamiseen. Siirry siihen napsauttamalla "{main.btn.rezyser}" -painiketta painikepalkissa tai valitsemalla Työkalut → {main.menu.rezyser} valikosta (pikanäppäin: Ctrl+1).
 
@@ -199,7 +199,7 @@ tresc:
 
     Älykäs lataus tiivistelmätiedostolla: Kun lataat projektin, jolla on jo tallennettu tiivistelmätiedosto (esim. tunnottomuus_tiivistelmä.txt), sovellus lataa tiivistelmän automaattisesti Pitkäaikaiseen Muistiin ja jättää Nykyisen Muistin tyhjäksi. Näin et tuhlaa tokeneita koko tarinan uudelleen lataamiseen — malli tuntee kontekstin tiivistelmästä ja on valmis loputtomaan jatkamiseen.
   krok_4_postprodukcja: |
-    KROK 4: Jälkituotanto Reżyser Audio GPT:ssä
+    VAIHE 4: Jälkituotanto Reżyser Audio GPT:ssä
 
     Kun olet kirjoittanut tarinan, sinulla on käytettävissäsi jälkituotantotyökalu, joka on saatavilla Reżyserin paneelin alareunassa (näkyy vain Äänikirjatilassa).
 
@@ -209,7 +209,7 @@ tresc:
 
     Huomio: Moduuli vaatii, että tiedosto on jo tallennettu levylle (luotu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asiaankuuluvan viestin.
   krok_5_poliglota_intro: |
-    KROK 5: Poliglota AI
+    VAIHE 5: Poliglota AI
 
     Sovellus käännöksiin ja kovien aksenttien pakottamiseen näytönlukijoiden synteettisissä äänissä. Siirry siihen napsauttamalla "{main.btn.poliglota}" -painiketta työkalupalkissa tai valitsemalla Työkalut → {main.menu.poliglota} valikosta (pikanäppäin: Ctrl+2).
 
@@ -372,7 +372,7 @@ tresc:
 
     Mitä tehdä sillä välin: jos haluat, että kielentunnistus toimii oikein (kannattaa — tämä oli yksi vanhan Vocalizerin killer-ominaisuuksista, katso "Killer Feature for the Blind" yllä), avaa issue sovelluksen GitHub-repossa etiketillä `tiflotecnia-patch` ja sähköpostiosoitteella viestissä. Kannattaa lisätä lyhyt kuvaus ongelmasta omalla kielelläsi (2–3 lausetta riittää) — botti tunnistaa kielen (tuetut: puola, englanti, saksa, espanja, suomi, ranska, islanti, italia, venäjä) ja vastaa samalla kielellä; ilman kuvausta tai muulla kielellä vastaus tulee englanniksi. Automaattinen botti sulkee issuen heti vahvistuksella (ilman jälkeä julkisessa ketjussa), ja saat korjauksen yksityisesti sähköpostitse yleensä muutaman päivän kuluessa. Itse korjausta EI julkaista sovelluksen repossa eikä Gistinä — Tiflotecnia Voices for NVDA on kaupallinen ohjelmisto, eikä lisäosan lisenssi salli sen tiedostojen, edes muokattujen, uudelleenjakelua. Kun olet saanut korjauksen, sen sisältö on kopioitava `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`-kansioon, korvaten tiedostot. Huomio kopioinnissa: jos Windows ei kysynyt korvaamisesta, olet todennäköisesti kopioinut koko `TiflotecniaVoices_edits`-kansion sen sisällön SIJAAN — siinä tapauksessa mene luotuun alikansioon, leikkaa kaikki, liitä taso ylemmäs ja korvaa. Kun korjaus on onnistuneesti sovellettu, käynnistä NVDA uudelleen — nauti Cerrencen 64-bittisten äänien paremmasta laadusta ja oikeasta kielentunnistuksesta, mikä on yhdistelmä, jota ei saa yhdeltäkään yksittäiseltä valmistajalta markkinoilla. Oletamme tietysti, että sinulla on voimassa oleva Tiflotecnia Voices -lisenssi — emme tarkista sitä, mutta et voi soveltaa korjausta ilman lisenssiä toisen kansioon.
   krok_6_architekt: |
-    KROK 6: Arkkitehti Äänikirjoille
+    VAIHE 6: Arkkitehti Äänikirjoille
 
     Työkalu ammattimaisen tiedostorakenteen valmisteluun ruudunlukijoille ja ElevenLabsille. Siirry siihen napsauttamalla "{main.btn.konwerter}" -painiketta painikerivillä tai valitsemalla Työkalut → {main.menu.konwerter} valikosta (pikanäppäin: Ctrl+3).
 
@@ -395,13 +395,13 @@ tresc:
 
     "Heading 1" -muotoilu luvuissa ei ole vain esteettistä. NVDA:ssa voit navigoida otsikoiden välillä nopeasti painamalla H-näppäintä (tai 1 ensimmäisen tason otsikoille). Sen sijaan, että selaisit satoja sivuja, voit hypätä luvusta toiseen sekunnin murto-osassa. Tämä muuttaa tapaa työskennellä pitkien dokumenttien kanssa. ElevenLabsissa voit olla varma, että moottori lisää leikkaukset automaattisesti eikä jumitu ohjatessaan äänileikkeitä.
   krok_7_ksiega_swiata: |
-    KROK 7: Kuinka kirjoittaa Maailman Kirja (Arkkitehdin Kehote ja Markdown-pikakurssi)
+    VAIHE 7: Kuinka kirjoittaa Maailman Kirja (Arkkitehdin Kehote ja Markdown-pikakurssi)
 
     Päästudioa voimaannuttava tekoäly ymmärtää komennot parhaiten, kun ne on muotoiltu Markdown-merkintäkielellä. Jos annat AI:lle Reżyserissä vain löyhän idean (esim. "kaksi sisarta tuonpuoleisessa"), kone hätääntyy yksityiskohtien puutteesta ja luo banaalin, ennalta-arvattavan tarinan, joka sivuuttaa logiikan.
 
     Tämän estämiseksi käytä ulkoista chatbotia (esim. ilmaista ChatGPT:tä tai Claudea) henkilökohtaisena Arkkitehtinasi. Versiossa 13.0 sinun ei enää tarvitse kirjoittaa kehotetta ohjeista — Reżyserin paneelissa, aivan painikkeen „{rezyser.btn_zapisz_ksiege_label}" alapuolella, löydät painikkeen „{rezyser.btn_prompt_architekta_label}". Napsauta sitä, ja avautuu valintaikkuna, jossa on valmis kehoteteksti "vain luku" -kentässä sekä painike "Kopioi leikepöydälle". NVDA ilmoittaa koko sisällön heti ikkunan avauduttua — riittää, että napsautat "Kopioi", liität (Ctrl+V) ChatGPT:hen/Claudeen ja korvaat kohdan "[TÄHÄN KIRJOITA OMA IDEASI]" omalla juonen alullasi.
 
-    Miksi näin, eikä kopioimalla ohjeista? Käyttöliittymän dialogilla on keskeinen saavutettavuusetu: se on natiivi ja ruudunlukija lukee sen ilman häiriöitä, eikä vaadi siirtymistä tekstieditoriin (missä suomenkieliset merkit ja lainausmerkit voivat kopioitua väärin) ja toimii identtisesti kaikissa käyttöjärjestelmissä. Sama malli — kopioitava kehote dialogissa — käytetään myös Sääntöjen Hallinnassa (katso KROK 7b alla).
+    Miksi näin, eikä kopioimalla ohjeista? Käyttöliittymän dialogilla on keskeinen saavutettavuusetu: se on natiivi ja ruudunlukija lukee sen ilman häiriöitä, eikä vaadi siirtymistä tekstieditoriin (missä suomenkieliset merkit ja lainausmerkit voivat kopioitua väärin) ja toimii identtisesti kaikissa käyttöjärjestelmissä. Sama malli — kopioitava kehote dialogissa — käytetään myös Sääntöjen Hallinnassa (katso VAIHE 7b alla).
 
     Miten AI vastaa: Vastauksena saat tekstin kahdessa osassa. Ensimmäinen on Maailman Kirja, joka on suljettu Markdown-koodilohkoon (merkinnät ```markdown … ```). Kopioi VAIN koodilohkon sisältö (ilman itse merkintöjä ```) ja liitä se Reżyserin "Maailman Kirja" -kenttään, ja napsauta sitten „{rezyser.btn_zapisz_ksiege_label}". Toinen osa on suositus siitä, mikä luova tila (Käsikirjoitus vai Äänikirja) sopii parhaiten ideallesi — pidä sitä vihjeenä, kun valitset tilaa RadioBoxista.
 
@@ -409,7 +409,7 @@ tresc:
 
     Vinkki: Muista päivittää Maailman Kirjaasi säännöllisesti (kun lisäät juoneen uusia paikkoja tai tärkeitä hahmoja). Voit tehdä sen käsin tai ulkoisen chatbotin avulla. Mitä rikkaampi perusta, sitä paremmat tulokset Reżyserissä!
   krok_7b_manager_regul: |
-    KROK 7b: Manager Reguł (Ctrl+4) — sanakirjat kielitieteilijöille ilman Pythonia
+    VAIHE 7b: Manager Reguł (Ctrl+4) — sanakirjat kielitieteilijöille ilman Pythonia
 
     Versio 13.0 esittelee neljännen työkalun työkalupalkissa: Manager Reguł. Sen avaat painamalla Ctrl+4 tai valikosta Työkalut. Tämä on visuaalinen tutkija kansiolle dictionaries/, jossa sovellus säilyttää kaikki foneettiset säännöt (aksentit), salaukset ja ohjaustilat YAML-tiedostoissa (ihmisen luettavissa oleva formaatti, yksinkertaisempi kuin JSON).
 
@@ -585,7 +585,7 @@ tresc:
     - Kaikki aiemmat aksentit (Englanti, Ranska, Saksa, Espanja, Italia, Puola, Islanti) sekä Tagien korjaaja.
     - Täydet AI-toiminnot: Aivoriihi, Käsikirjoitus, Äänikirja, Juonen akkumulaattori, Loputon muisti, Otsikointi.
   krok_7b_manager_regul_kolejnosc_zamian: |
-    KROK 7b (täydennys): `zamiany:`-sääntöjen järjestyksellä on merkitystä
+    VAIHE 7b (täydennys): `zamiany:`-sääntöjen järjestyksellä on merkitystä
 
     Tiedostot `dictionaries/<koodi>/akcenty/*.yaml` sisältävät listan `zamiany:`-sääntöjä — pareja `wzor → zamiana`, joita moottori soveltaa SEKVENSIAALISESTI. Jokainen seuraava sääntö toimii edellisen tuotoksella. Tämä mahdollistaa putkistojen rakentamisen, kuten "muunna kaksikirjaiminen `szcz` muotoon `shch` ja sitten vaihda pelkkä `ch` muotoon `h`", mutta avaa myös klassisen ansan kielipaketin tekijälle.
 

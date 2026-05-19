@@ -1,4 +1,4 @@
-Director de Audio GPT — Módulo de Historias Interactivas (15.4 – Versión de Publicación)
+Director de Audio GPT — Módulo de Historias Interactivas (15.4.1 – Versión de Publicación)
 
 El segundo modo principal de la aplicación junto al Director — esta vez te conviertes en el jugador de una historia generada dinámicamente en lugar de su autor. La inteligencia artificial narra en segunda persona del singular ("Caminas por un bosque brumoso, sientes el olor de las hojas mojadas..."), y tú decides el siguiente movimiento — escribiendo cualquier acción en texto libre o eligiendo una de las opciones numeradas.
 
@@ -119,7 +119,7 @@ Cuatro niveles de llenado:
 En la práctica, el mecanismo de autorreducción es invisible: el jugador no siente que algo está sucediendo, ya que el hilo de fondo resuelve el problema antes de que se note. Solo es importante que no envíes otro turno durante el auto-resumen (el botón "Enviar" está entonces atenuado).
 
 
-KROK 8: Cinematic Meta Warning — interludio dramático después del turno 150
+PASO 8: Cinematic Meta Warning — interludio dramático después del turno 150
 
 Después de 150 turnos en un juego, el motor narrativo insertará UNA vez un "Cinematic Meta Warning" — un interludio dramático meta-narrativo. Aparecerá en un diálogo separado con el sonido de una campana, dirigiéndose directamente a ti en segunda persona, con un resumen de logros y una advertencia sobre la importancia de las decisiones que tomes.
 
@@ -163,7 +163,7 @@ ACELERADORES DE TECLADO — todos los botones tienen el signo `&` antes de una d
 Najczęstsze problemy
 
 Problem: Po kliknięciu "Nuevo juego" pojawia się komunikat „Brak klucza API".
-Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza OpenAI. Wróć do ekranu startowego (przycisk Home), kliknij "Generar archivo golden_key.env y abrir editor de texto" i postępuj zgodnie z instrukcjami (KROK 2 głównego manuala).
+Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza OpenAI. Wróć do ekranu startowego (przycisk Home), kliknij "Generar archivo golden_key.env y abrir editor de texto" i postępuj zgodnie z instrukcjami (PASO 2 głównego manuala).
 
 Problem: Próbuję wysłać kolejną turę, ale przycisk "Enviar" jest wyszarzony.
 Przyczyna i rozwiązanie: Trwa auto-resumen del contexto o la generación de Cinematic Warning en el hilo de fondo. El estado de la memoria mostrará „Auto-resumen del contexto en progreso…". Espera unos segundos — el botón se desbloqueará automáticamente tras el éxito.

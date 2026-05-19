@@ -720,10 +720,10 @@ _RE_COMMENT_ID = re.compile(r"#issuecomment-(\d+)\s*$")
 
 
 # File mode (v15.2.7+): draft odpowiedzi maintainera leży jako plain markdown
-# w roocie repo. Nazwa flat (jak `release.txt` w workflow direct-to-main) —
-# jeden plik per zgłoszenie pending, drugi musi poczekać aż pierwszy się
-# zamknie. Konwencja: maintainer pushuje plik → nadaje etykietę `answered` →
-# bot czyta, opakowuje, publikuje, usuwa plik commitem własnego autora.
+# w roocie repo. Nazwa flat — jeden plik per zgłoszenie pending, drugi musi
+# poczekać aż pierwszy się zamknie. Konwencja: maintainer pushuje plik →
+# nadaje etykietę `answered` → bot czyta, opakowuje, publikuje, usuwa plik
+# commitem własnego autora.
 PENDING_ANSWER_FILE = "pending_answer.md"
 
 # Standardowy noreply-email użytkownika github-actions[bot] (numer 41898282

@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktive Geschichten Modul (15.4 – Veröffentlichungsversion)
+Reżyser Audio GPT — Interaktive Geschichten Modul (15.4.1 – Veröffentlichungsversion)
 
 Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.
 
@@ -7,7 +7,7 @@ Das Modul wurde von Anfang an mit Blick auf blinde Spieler entwickelt — die Er
 Du öffnest das Panel mit der Schaltfläche "📖  Geschichten" in der Symbolleiste oder mit der Tastenkombination Strg+5.
 
 
-KROK 1: Drei Spielmodi — wähle deinen Spielstil
+SCHRITT 1: Drei Spielmodi — wähle deinen Spielstil
 
 Direkt unter der Spieltitelleiste findest du eine Modusauswahl (RadioBox). Der Modus bestimmt, wie der narrative Motor mit dir im Dialog steht:
 
@@ -79,18 +79,18 @@ Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägs
 
 Der Erzählmotor wählt das AI-Modell automatisch je nach Modus: Für den Modus Entscheidungen und Das kleinere Übel wird das teurere gpt-4o verwendet (hält sich streng an die Weltregeln), für den Freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, daher ist keine dramatische Regie erforderlich).
 
-/wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht, schlägt keine Entscheidungen vor — der Erzählmotor verwendet alle fünf Sinne (Sehen, Hören, Geruch, Tasten, Geschmack), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT in die Erzählung aufgenommen oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj jak wygląda strażnik" oder „/wizualizuj zapach kawiarni".
+/wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht, schlägt keine Entscheidungen vor — der Erzählmotor verwendet alle fünf Sinne (Sehen, Hören, Geruch, Tasten, Geschmack), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT in die Erzählung aufgenommen oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj wie der Wächter aussieht" oder „/wizualizuj der Geruch des Cafés".
 
-/scena <opis>, /scene <opis> — aktuelles Ereignis ANDERSWO, erzählt in der dritten Person. Die Kamera löst sich von deiner Figur und zeigt, was parallel mit einer anderen Figur oder an einem anderen Ort der Welt passiert. Beispiel: „/scena Anna na rynku" oder „/scena strażnicy przy bramie". Der Motor fügt die Szene in die Erzählung ein, kennzeichnet sie mit dem Präfix „Szene außerhalb des Rahmens:" und kehrt in der nächsten Runde automatisch zu deiner Figur zurück. Es erscheinen keine Entscheidungen — der Spieler trifft keine Entscheidungen in der Szene eines anderen. Eine vollständige Beschreibung des Mechanismus findest du in SCHRITT 5B.
+/scena <opis>, /scene <opis> — aktuelles Ereignis ANDERSWO, erzählt in der dritten Person. Die Kamera löst sich von deiner Figur und zeigt, was parallel mit einer anderen Figur oder an einem anderen Ort der Welt passiert. Beispiel: „/scena Anna auf dem Markt" oder „/scena die Wachen am Tor". Der Motor fügt die Szene in die Erzählung ein, kennzeichnet sie mit dem Präfix „Szene außerhalb des Rahmens:" und kehrt in der nächsten Runde automatisch zu deiner Figur zurück. Es erscheinen keine Entscheidungen — der Spieler trifft keine Entscheidungen in der Szene eines anderen. Eine vollständige Beschreibung des Mechanismus findest du in SCHRITT 5B.
 
-/flashback <opis>, /retrospekcja <opis> — Rückblende in der dritten Person, zeitliche Rückkehr. Beispiel: „/flashback dzień śmierci ojca" oder „/flashback pierwsze spotkanie bohaterów". Eröffnet die Erzählung mit einer zeitlichen Formel („Drei Jahre zuvor…"), kennzeichnet sie mit dem Präfix „Rückblende:" und kehrt zur aktuellen Runde zurück. Genauso wie /scena — passiv, ohne Entscheidungen. Vollständige Beschreibung in SCHRITT 5B.
+/flashback <opis>, /retrospekcja <opis> — Rückblende in der dritten Person, zeitliche Rückkehr. Beispiel: „/flashback der Tag, an dem Vater starb" oder „/flashback erstes Treffen der Hauptfiguren". Eröffnet die Erzählung mit einer zeitlichen Formel („Drei Jahre zuvor…"), kennzeichnet sie mit dem Präfix „Rückblende:" und kehrt zur aktuellen Runde zurück. Genauso wie /scena — passiv, ohne Entscheidungen. Vollständige Beschreibung in SCHRITT 5B.
 
 /pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Bildschirmleser liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
 
 /koniec, /quit — schließt die Anwendung (nach dem automatischen Speichern der laufenden Runde).
 
 
-KROK 6: Spieldateien — wo Sie Ihre Daten finden
+SCHRITT 6: Spieldateien — wo Sie Ihre Daten finden
 
 Jedes Spiel erzeugt fünf Dateien, jede in einem anderen Ordner, mit unterschiedlichen Rollen:
 
@@ -119,7 +119,7 @@ Vier Auslastungsstufen:
 In der Praxis ist der Autoreduktionsmechanismus unsichtbar — der Spieler merkt nicht, dass etwas passiert, da der Hintergrund-Thread das Problem löst, bevor es bemerkt wird. Wichtig ist nur, dass Sie keine weitere Runde während der Auto-Zusammenfassung senden (der Button "Senden" ist dann ausgegraut).
 
 
-KROK 8: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
+SCHRITT 8: Cinematic Meta Warning — dramatische Unterbrechung nach der 150. Runde
 
 Nach 150 Runden in einem Spiel fügt die narrative Engine EINMAL ein „Cinematic Meta Warning“ ein — eine meta-narrative dramatische Unterbrechung. Es erscheint in einem separaten Dialog mit einem Glockenton, mit direkter Ansprache an dich in der zweiten Person, einer Zusammenfassung der Errungenschaften und einer Warnung über die Bedeutung der getroffenen Entscheidungen.
 
@@ -139,7 +139,7 @@ Was du damit machen kannst:
 Dies ist eine Einbahnstraße: Geschichten produzieren Material, der Regisseur formatiert es. Eine Umkehrung ist nicht möglich — der Regisseur lädt keine Spiele aus Geschichten als interaktiven Zustand.
 
 
-KROK 10: Barrierefreiheit (NVDA und Screenreader) — von Anfang an entworfen
+SCHRITT 10: Barrierefreiheit (NVDA und Screenreader) — von Anfang an entworfen
 
 Das gesamte Modul "Erzählungen" wurde für blinde Spieler optimiert. Was wir konkret getan haben:
 

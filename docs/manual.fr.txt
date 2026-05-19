@@ -1,11 +1,11 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 15.4 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 15.4.1 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
 L'ensemble se compose du studio principal (Réalisation), de l'outil de traduction et d'accents (Polyglotte), de l'outil de construction de structure de fichier (Architecte de Livres Audio), du Gestionnaire de Règles (à partir de la version 13.0 — sans Python, vous pouvez ajouter un nouvel accent, un chiffre ou un mode créatif, voir ÉTAPE 7b ci-dessous) et — à partir de la version 15.0 — du module Récits (fiction interactive à la deuxième personne générée par IA, lue par TTS ou lecteur d'écran, décrite dans le manuel séparé recits.fr.txt). Les cinq outils sont disponibles dans une seule fenêtre de programme, commutable par des boutons sur la barre ou par des raccourcis clavier Ctrl+1..Ctrl+5.
 
 
-KROK 1 : Première exécution (Cross-Platform)
+ÉTAPE 1 : Première exécution (Cross-Platform)
 
 Téléchargez le dernier installateur depuis l'onglet Releases sur GitHub (le fichier Rezyser_Audio_v<numéro>_Installer.exe) et lancez-le par un double-clic. L'installateur propose un emplacement d'installation par défaut — le dossier Programs dans le répertoire local de votre compte — et ne demande pas de privilèges d'administrateur. Vous pouvez choisir votre propre chemin avec le bouton « Parcourir » ; dans ce cas, MÉMORISEZ-le (vous en aurez besoin lors des mises à jour — voir « Mises à jour automatiques » ci-dessous). Après l'installation, lancez le programme depuis l'icône du bureau ou depuis le Menu Démarrer. Une fenêtre de terminal éphémère s'ouvrira (elle disparaît automatiquement), et après un moment, la fenêtre principale du programme apparaîtra — Réalisateur Audio GPT. Pas de navigateur, pas de serveur en arrière-plan. Lorsque vous avez terminé votre travail, il suffit de fermer la fenêtre du programme.
 
@@ -61,7 +61,7 @@ Conseil pour les utilisateurs de NVDA : le menu contextuel « Ouvrir l'emplaceme
 Conseil : « Ouvrir l'emplacement du fichier » est le nom natif de l'option sous une installation française de Windows. Dans le système anglais, elle s'appelle « Open file location », dans les autres versions linguistiques — de manière analogue dans la langue locale du système d'exploitation.
 
 
-KROK 2 : Alimentation de l'API (Clé OpenAI)
+ÉTAPE 2 : Alimentation de l'API (Clé OpenAI)
 
 Pour que l'intelligence artificielle fonctionne, elle a besoin d'accéder aux serveurs d'OpenAI (les créateurs de ChatGPT).
 
@@ -73,7 +73,7 @@ Pour que l'intelligence artificielle fonctionne, elle a besoin d'accéder aux se
 Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera un message vert dans la section "Vérification du Système" — cela signifie que tous les modules AI sont prêts à fonctionner. Sinon, elle vous indiquera clairement ce qui ne va pas et vous permettra d'ouvrir l'éditeur de texte pour corriger rapidement l'erreur.
 
 
-KROK 3 : Studio Principal de Réalisation
+ÉTAPE 3 : Studio Principal de Réalisation
 
 C'est votre centre de commande pour imaginer des histoires et écrire des scénarios. Accédez-y en cliquant sur le bouton "🎬  Réalisateur" dans la barre de boutons ou en sélectionnant Outils → Réalisateur dans le menu (raccourci : Ctrl+1).
 
@@ -222,7 +222,7 @@ Résumé automatique : Lorsque la mémoire entre en état d'alerte, Brainstormin
 Chargement intelligent avec fichier de résumé : Lorsque vous chargez un projet qui a déjà un fichier de résumé enregistré (par exemple, znieczulica_résumé.txt), l'application charge automatiquement le résumé dans la Mémoire à Long Terme et laisse la Mémoire Courante vide. Ainsi, vous ne gaspillez pas de jetons à recharger toute l'histoire — le modèle connaît le contexte à partir du résumé et est prêt pour une continuation infinie.
 
 
-KROK 4 : Postproduction dans Reżyser Audio GPT
+ÉTAPE 4 : Postproduction dans Reżyser Audio GPT
 
 Après avoir écrit votre histoire, vous avez à votre disposition un outil de postproduction disponible en bas du panneau de Reżyser (apparaît uniquement en Mode Audiobook).
 
@@ -233,7 +233,7 @@ L'IA analysera toute l'histoire et proposera des titres descriptifs et littérai
 Remarque : Le module nécessite que le fichier soit déjà enregistré sur le disque (généré ou chargé). Si le fichier n'existe pas, l'application affichera un message approprié.
 
 
-KROK 5 : Polyglotte AI
+ÉTAPE 5 : Polyglotte AI
 
 Application pour la traduction et l'imposition d'accents forts sur les synthétiseurs de lecteurs d'écran. Accédez-y en cliquant sur le bouton "🌍  Polyglotte" dans la barre de boutons ou en sélectionnant Outils → Polyglotte dans le menu (raccourci : Ctrl+2).
 
@@ -390,7 +390,7 @@ Diagnostic et correctif : j'ai diagnostiqué le problème au niveau de Python da
 Que faire en attendant : si vous tenez à une détection correcte de la langue (cela vaut la peine — c'était l'une des fonctionnalités phares de l'ancien Vocalizer, voir « Fonctionnalité phare pour les aveugles » ci-dessus), ouvrez un problème dans le dépôt de l'application sur GitHub avec l'étiquette `tiflotecnia-patch` et votre adresse email dans le contenu. Il vaut la peine d'ajouter une courte description du problème dans votre propre langue (2–3 phrases suffisent) — le bot détectera la langue (prises en charge : polonais, anglais, allemand, espagnol, finnois, français, islandais, italien, russe) et répondra dans la même ; sans description ou dans une autre langue, la réponse arrivera en anglais. Un bot automatique fermera immédiatement le problème avec une confirmation de soumission (sans trace dans le fil public), et vous recevrez le correctif par email généralement dans quelques jours. Le correctif lui-même N'EST PAS publié dans le dépôt de l'application ni comme Gist — Tiflotecnia Voices for NVDA est un logiciel commercial, et la licence de l'extension n'autorise pas la redistribution de ses fichiers, même modifiés. Après avoir reçu le correctif, son contenu doit être copié dans `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`, en remplaçant les fichiers. Attention lors de la copie : si Windows n'a pas demandé de remplacement, vous avez probablement copié tout le dossier `TiflotecniaVoices_edits` avec son contenu AU LIEU du contenu lui-même — dans ce cas, entrez dans le sous-dossier créé, coupez tout, collez un niveau plus haut et écrasez. Après avoir appliqué correctement le correctif, redémarrez NVDA — vous profitez de la meilleure qualité des voix Cerrence 64 bits et de la détection correcte de la langue, soit une combinaison introuvable chez un seul fabricant sur le marché. Nous supposons bien sûr que vous avez une licence valide pour Tiflotecnia Voices — nous ne vérifions pas cela, mais vous ne pourrez pas appliquer le correctif sur un dossier étranger sans licence.
 
 
-KROK 6 : Architecte des Livres Audio
+ÉTAPE 6 : Architecte des Livres Audio
 
 Outil pour préparer une structure de fichier professionnelle pour les lecteurs d'écran et ElevenLabs. Accédez-y en cliquant sur le bouton "📄  Convertisseur" dans la barre de boutons ou en sélectionnant Outils → Convertisseur dans le menu (raccourci : Ctrl+3).
 
@@ -414,7 +414,7 @@ Un avantage puissant pour les utilisateurs de NVDA et ElevenLabs
 Le formatage "Heading 1" pour les chapitres n'est pas seulement esthétique. Dans NVDA, vous pouvez naviguer rapidement entre les en-têtes en appuyant sur la touche H (ou 1 pour les en-têtes de premier niveau). Au lieu de faire défiler des centaines de pages, vous passez d'un chapitre à l'autre en une fraction de seconde. Cela change la façon de travailler avec de longs documents. Dans ElevenLabs, vous avez la garantie que le moteur insérera automatiquement des coupures et ne se bloquera pas lors de la réalisation de clips audio.
 
 
-KROK 7 : Comment écrire le Livre du Monde (Prompt de l'Architecte et Mini-cours Markdown)
+ÉTAPE 7 : Comment écrire le Livre du Monde (Prompt de l'Architecte et Mini-cours Markdown)
 
 L'intelligence artificielle alimentant le Studio Principal comprend le mieux les commandes lorsqu'elles sont formatées en langage de balisage Markdown. Si vous fournissez à l'IA dans le Réalisateur seulement une idée vague (par exemple, "deux sœurs dans l'au-delà"), la machine paniquera par manque de détails et créera une histoire banale et prévisible, ignorant la logique.
 

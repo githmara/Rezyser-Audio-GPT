@@ -20,7 +20,7 @@ tresc:
 
     Das Set besteht aus dem Hauptstudio (Regie), einem Übersetzungs- und Akzentwerkzeug (Polyglott), einem Werkzeug zum Erstellen der Dateistruktur (Hörbucharchitekt), einem Regelmanager (ab Version 13.0 — ohne Python kannst du einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen, siehe SCHRITT 7b unten) und — ab Version 15.0 — einem Geschichtenmodul (interaktive, zweite Person AI-generierte Fiktion, gelesen von TTS oder Screenreader, beschrieben in einem separaten Handbuch opowiesci.pl.txt). Alle fünf Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+5 umgeschaltet werden kann.
   krok_1_pierwsze_uruchomienie: |
-    KROK 1: Erste Ausführung (Plattformübergreifend)
+    SCHRITT 1: Erste Ausführung (Plattformübergreifend)
 
     Lade die neueste Installationsdatei aus dem Releases-Tab auf GitHub herunter (die Datei Rezyser_Audio_v<Nummer>_Installer.exe) und starte sie per Doppelklick. Die Installation schlägt einen Standardzielort vor — den Programs-Ordner im lokalen Verzeichnis deines Benutzerkontos — und erfordert keine Administratorrechte. Mit der Schaltfläche „Durchsuchen" kannst du einen eigenen Pfad wählen; merke ihn dir in diesem Fall (du brauchst ihn bei Aktualisierungen — siehe „Automatische Updates" unten). Nach der Installation startest du das Programm über die Verknüpfung auf dem Desktop oder im Startmenü. Ein kurzes Terminalfenster öffnet sich (verschwindet automatisch), und nach einem Moment erscheint das Hauptfenster des Programms — {app.nazwa}. Kein Browser, kein Hintergrundserver. Wenn du fertig bist, schließe einfach das Programmfenster.
 
@@ -75,7 +75,7 @@ tresc:
 
     Tipp: „Dateispeicherort öffnen" ist der native Optionsname im neuen Windows-11-Kontextmenü (in älteren Windows-Versionen oder im erweiterten Menü heißt er „Dateipfad öffnen"). Im englischen System heißt er „Open file location", in anderen Sprachversionen analog in der lokalen Sprache des Betriebssystems.
   krok_2_klucz_api: |
-    KROK 2: API-Zugang (OpenAI-Schlüssel)
+    SCHRITT 2: API-Zugang (OpenAI-Schlüssel)
 
     Damit die künstliche Intelligenz funktionieren kann, benötigt sie Zugriff auf die Server von OpenAI (den Entwicklern von ChatGPT).
 
@@ -86,7 +86,7 @@ tresc:
 
     Tipp: Nach dem Neustart überprüft die Anwendung die Datei und zeigt eine grüne Meldung im Abschnitt "{home.heading_system_check}" an — das bedeutet, dass alle KI-Module einsatzbereit sind. Andernfalls wird Ihnen klar mitgeteilt, was nicht stimmt, und Sie können den Texteditor öffnen, um den Fehler schnell zu beheben.
   krok_3_glowne_studio: |
-    KROK 3: Hauptregiestudio
+    SCHRITT 3: Hauptregiestudio
 
     Dies ist Ihr Kontrollzentrum zum Erfinden von Geschichten und Schreiben von Drehbüchern. Gehen Sie dorthin, indem Sie auf die Schaltfläche "{main.btn.rezyser}" in der Symbolleiste klicken oder im Menü Werkzeuge → {main.menu.rezyser} auswählen (Tastenkombination: Strg+1).
 
@@ -209,7 +209,7 @@ tresc:
 
     Hinweis: Das Modul erfordert, dass die Datei bereits auf der Festplatte gespeichert ist (generiert oder geladen). Wenn die Datei nicht existiert, zeigt die Anwendung eine entsprechende Meldung an.
   krok_5_poliglota_intro: |
-    KROK 5: Poliglota AI
+    SCHRITT 5: Poliglota AI
 
     Anwendung für Übersetzungen und das Erzwingen starker Akzente auf Screenreader-Synthesizern. Gehe zu ihr, indem du auf die Schaltfläche "{main.btn.poliglota}" in der Symbolleiste klickst oder Werkzeuge → {main.menu.poliglota} aus dem Menü wählst (Tastenkürzel: Strg+2).
 
@@ -417,7 +417,7 @@ tresc:
     ### Chiffre: Typoglycämie
     Laut einer Utnseirchung an der Cmabrigde Uinervtisy ist es eagl, in wlehcer Riehnfolge die Bstuchaben in einem Wrot sind, das Ezniige, was wcihtig ist, ist, dass der erste und ltezte Bstuchabe am rcihtigen Paltz sind.
   krok_7b_manager_regul: |
-    KROK 7b: Manager Reguł (Ctrl+4) — Wörterbücher für Linguisten ohne Python
+    SCHRITT 7b: Manager Reguł (Ctrl+4) — Wörterbücher für Linguisten ohne Python
 
     Version 13.0 führt ein viertes Werkzeug in der Leiste ein: den Manager Reguł. Du öffnest ihn mit der Taste Ctrl+4 oder über das Menü Werkzeuge. Es ist ein visueller Explorer des Ordners dictionaries/, in dem die Anwendung alle phonetischen Regeln (Akzente), Chiffren und Modi des Regisseurs in YAML-Dateien (ein für Menschen lesbares Format, einfacher als JSON) speichert.
 
