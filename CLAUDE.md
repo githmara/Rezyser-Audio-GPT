@@ -13,7 +13,7 @@
 4. KRYTYCZNE ZABEZPIECZENIE: Masz CAŁKOWITY ZAKAZ uruchamiania czegokolwiek z folderu `runtime/` do testowania kodu.
 5. FLAGA `--no-pager` W GIT (KRYTYCZNE A11y): Komendy git, które mogą uruchomić stronicowanie (np. `git diff`, `git log`, `git show`), ZAWSZE wykonuj z flagą `--no-pager`. Brak tej flagi uruchamia tryb interaktywny, blokujący terminal i generujący artefakty niedostępne dla NVDA.
 6. GIT STATUS PRZED COMMITEM: Przed każdym commitowaniem i dodawaniem plików ZAWSZE uruchom `git status`, aby zobaczyć pełny stan repozytorium.
-7. KLUCZ OPENAI DOSTĘPNY: `golden_key.env` w roocie repo jest gitignorowany, ale fizycznie obecny u dewelopera. Skrypty `buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py` ładują klucz przez `python-dotenv` → `os.environ["OPENAI_API_KEY"]`. Agent **może i powinien** odpalać te skrypty bezpośrednio — nie przekazuj tego kroku użytkownikowi „bo nie masz API". Stop tylko gdy skrypt zwróci „❌ Brak prawidłowego OPENAI_API_KEY" lub HTTP 401/429 (rate limit / brak kredytów) — wtedy poproś usera o uzupełnienie. Po auto-tłumaczeniach ZAWSZE manualny review halucynacji (LLM wymyśla niezaszyfrowane przykłady szyfrów lub bezsensowne sklejki — porównuj z zatwierdzonymi szablonami w innym języku jako wzorcem stylu).
+7. KLUCZ OPENAI DOSTĘPNY: `golden_key.env` w roocie repo jest gitignorowany, ale fizycznie obecny u dewelopera. Skrypty `buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py` ładują klucz przez `python-dotenv` → `os.environ["OPENAI_API_KEY"]`. Agent **może i powinien** odpalać te skrypty bezpośrednio — nie przekazuj tego kroku użytkownikowi „bo nie masz API". Stop tylko gdy skrypt zwróci „❌ Brak prawidłowego OPENAI_API_KEY" lub HTTP 401/429 — wtedy poproś usera o uzupełnienie. Po auto-tłumaczeniach ZAWSZE manualny review halucynacji — generyczne sanity checki [[feedback_halucynacje_szablony_obce]], szczegółowe hotspoty per szyfr/sekcja [[feedback_batch_retranslate_review]].
 8. KOPIOWANIE Z TERMINALA NIE JEST WIARYGODNE (KRYTYCZNE A11y). Accessibility buffer VS Code tokenizuje treść tnąc ją na fragmenty i powtarzając ciągi znaków — dotyczy nawet krótkich HEREDOC commit messages. Reguły:
    - **Długie treści (commit messages, release notes, drafty odpowiedzi, diakrytyczne fragmenty) ZAPISUJ DO PLIKU** i poproś użytkownika żeby otworzył plik w edytorze VS Code (Ctrl+P → nazwa pliku). Edytor ma natywne A11y, panel Terminal nie. Wzorce nazw: `pending_answer.md` (drafty odpowiedzi na issue), `release.txt` (Release description), `commit_msg.txt` (commit message do wklejenia).
    - **NIE proś o skopiowanie tekstu z output'u terminala** — nawet jeśli wygląda krótko. Zawsze pisz do pliku i wskazuj ścieżkę.
@@ -25,12 +25,13 @@
 2. DELTA UPDATES: Przy niewielkich zmianach używaj precyzyjnych narzędzi edycji zamiast wypisywać plik w całości na nowo.
 3. Duży refaktor dziel etapami (np. krok 1: klasa/UI, krok 2: zdarzenia, krok 3: skomplikowana logika).
 
-**AUTOKONTROLA ROZMIARU CLAUDE.MD (KRYTYCZNE)**
-Agent MUSI proaktywnie monitorować rozmiar tego pliku przed każdą jego modyfikacją. Jeśli rozmiar pliku zbliży się do progu 35-40 tysięcy znaków, natychmiast uruchom procedurę CLEANUP przed kontynuowaniem jakichkolwiek innych zadań:
-1. **Zidentyfikuj historię:** Znajdź sekcje zawierające zamknięte historie wdrożeń, rozwiązane problemy z poprzednich wersji (np. obszerne logi z v15.2.7) i przestarzałe obejścia.
-2. **Zarchiwizuj:** Przenieś te historyczne dane do osobnego pliku `claude_archive.md`.
-3. **Odchudź główny plik:** W `CLAUDE.md` pozostaw tylko absolutnie krytyczne reguły A11y, wytyczne architektury wxPython, zasady terminala, procedurę release i krótką informację: "Zarchiwizowane procedury znajdują się w `claude_archive.md`".
-4. **Zgłoś do weryfikacji:** Po wykonaniu archiwizacji zapisz raport z tego, co zostało przeniesione, do pliku `cleanup_report.md` i poproś użytkownika o zatwierdzenie zmian w architekturze pamięci, zanim wrócisz do kodowania.
+**TRÓJWARSTWOWY MODEL PAMIĘCI AGENTA (KRYTYCZNE)**
+Pamięć agenta jest podzielona na trzy warstwy z różnymi celami i sposobami ładowania:
+- **CLAUDE.md = Konstytucja** (ten plik): żelazne zasady środowiskowe (A11y, wxPython, terminal), główny cykl wydawniczy (happy path) i drogowskazy do pozostałych warstw. Ładowany przy KAŻDYM, najmniejszym zadaniu. MUSI być jak najlżejszy — bezwzględny limit miękki 25k znaków, twardy 35k.
+- **`claude_archive.md` = Muzeum**: grube post-mortemy, długie historie incydentów (np. halucynacja fi/manual.yaml 2026-05-15, incydent #13 GitHub auto-close 2026-05-16), pełne zapisy starych obejść (np. heurystyka force-push tag v15.2.7 sprzed atomic-reset). Śledzony w repo, czytany TYLKO na żądanie (gdy debugujesz post-mortem albo gdy Konstytucja odsyła „pełna procedura w `claude_archive.md`").
+- **`memory/*.md` = Podświadomość**: specyficzne fixy, lessons learned, zawiłości CI/CD, ścieżki awaryjne (np. word-splitting bash, auto-close keywords, zakaz menu, kolejność reguł akcent, sanity checki halucynacji, pułapki interpretacji Sami). Lokalne pliki narzędzia (poza repo), `MEMORY.md` ładowany automatycznie z indeksem entries, podpliki czytane po referencji `[[name]]`.
+
+**Autokontrola rozmiaru CLAUDE.md:** monitoruj rozmiar przed każdą modyfikacją. Przy zbliżeniu do 25k znaków (miękki) / 35k (twardy) uruchom CLEANUP: (1) klasyfikuj sekcje — post-mortemy → `claude_archive.md`, fixy/lessons learned/CI-CD niuanse → memory (`feedback_<temat>.md` nowy lub rozszerzenie istniejącego), reguły A11y/wxPython/release happy path → zostają; (2) przenieś zachowując treść 1:1; (3) zaktualizuj `MEMORY.md` jednolinikowcami na nowe entries; (4) w miejscu przeniesionych sekcji zostaw drogowskaz (`patrz [[feedback_<temat>]]` lub `→ claude_archive.md`); (5) krótki raport co/gdzie/dlaczego + poproś usera o zatwierdzenie PRZED commitem.
 
 # NUMER WERSJI APLIKACJI (od 13.4)
 - POJEDYNCZE źródło prawdy: plik `VERSION` w roocie repozytorium (plain text, np. `13.4-WIP` lub `13.4`). Bumpa robisz **wyłącznie tam** — wszystkie inne miejsca rozwijają tę wartość automatycznie.
@@ -52,48 +53,25 @@ Agent MUSI proaktywnie monitorować rozmiar tego pliku przed każdą jego modyfi
  * Rozróżniaj klucze: Tooltip i etykieta to dwa osobne klucze dla jednego obiektu.
 - Skrypt autotłumaczący z użyciem modelu (`tlumacz_ai.py`) zamraża podmieniane zmienne `{...}`, aby LLM nie naruszył struktury programu.
 - Manager Reguł skanuje pliki YAML z folderów `akcenty`, `szyfry`, `rezyser` i `gui`. Tworzenie nowego języka generuje wszystkie cztery podfoldery na raz — dispatch silnika nie wystartuje bez `rezyser/` (wymóg ≥1 trybu).
-- Pułapka kolejności w plikach `akcenty/<kod>.yaml`: silnik aplikuje listę `zamiany:` SEKWENCYJNIE (każda reguła operuje na wyjściu poprzedniej, `str.replace`). Reguły, które wprowadzają literę używaną później jako wzorzec, mogą wpaść w pętlę nadpisań — komentuj kolejność w YAML, żeby przyszły reviewer nie zamienił. Przykład empiryczny ES (`ñ → nj` przed `j → <coś>`) w `claude_archive.md`.
+- Pułapka kolejności w `akcenty/<kod>.yaml` (silnik aplikuje `zamiany:` SEKWENCYJNIE przez `str.replace`): patrz [[feedback_kolejnosc_akcenty]].
 
 # ZAMYKANIE RELEASU — DOKUMENTACJA (KRYTYCZNE)
-`build_release.py` wywołuje `generuj_dokumentacje.generuj()` wewnętrznie, przez co po jego uruchomieniu w repo pojawiają się niezcommitowane zmiany w `docs/*.txt`. Żeby tego uniknąć, dokumentację należy wygenerować i zcommitować **ręcznie** przed commitem release'u, według poniższego schematu.
-
-## Kiedy stosować
-Przy każdym release commicie, jeśli w danym cyklu zmieniło się cokolwiek z listy: nowy język, nowa funkcja opisana w manualach, zmiana liczby akcentów/szyfrów/trybów, zmiana numeru wersji (VERSION).
+`build_release.py` wywołuje `generuj_dokumentacje.generuj()` wewnętrznie, co zostawia niezcommitowane `docs/*.txt` w repo po buildzie. Żeby tego uniknąć — wygeneruj i zcommituj docs **ręcznie** przed commit'em release'u. Stosuj przy każdej zmianie z listy: nowy język, nowa funkcja w manualach, zmiana liczby akcentów/szyfrów/trybów, bump VERSION.
 
 ## Procedura (w tej kolejności)
 
 ### Krok 0a — Bump VERSION (KRYTYCZNE: PRZED jakąkolwiek regeneracją docs!)
-Zaktualizuj plik `VERSION` w roocie repo (np. 13.9 → 14.0). Zasada: **najpierw bump VERSION, potem regeneracja docs, potem release commit**. `generuj_dokumentacje.py` rozwija `{numer_wersji}` z pliku VERSION przy KAŻDYM wywołaniu — jeśli zwalidujesz docs ze starym numerem i zcommitujesz, `build_release.py` wewnętrznie wywoła `generuj()` z nowym VERSION i wygeneruje niezcommitowany diff `modified: docs/manual.<iso>.txt × 8` zaraz po buildzie. Sam VERSION można zcommitować razem z release commit'em (Krok 4) — chodzi tylko o to, żeby docs były generowane już z docelowym numerem.
+Zaktualizuj `VERSION` w roocie (np. 13.9 → 14.0). `generuj_dokumentacje.py` rozwija `{numer_wersji}` z VERSION przy KAŻDYM wywołaniu — bez tego kroku `build_release.py` wewnętrznie regeneruje docs z docelowym numerem i zostawia niezcommitowany diff `modified: docs/manual.<iso>.txt × 8`. Sam VERSION zcommitujesz razem z release commit'em w Kroku 4.
 
 ### Krok 0b — Odśwież reżysera (ZAWSZE po dodaniu/usunięciu pliku akcent*.yaml)
-```bash
-.venv/Scripts/python odswiez_rezysera.py
-```
-Skrypt skanuje `dictionaries/*/akcenty/` i aktualizuje dwa bloki generowane w kodzie:
-- `core_poliglota.py` — docstringi wrapperów `akcent_*` (lista plików źródłowych per akcent)
-- `core_rezyser.py` — blok importów i słownik `_AKCENT_FUNCS` (dispatch reżysera)
-
-**Bez tego kroku samo nakładanie akcentów w Poliglocie działa** (czyta YAML bezpośrednio), ale **dynamiczne nakładanie akcentów w Reżyserze na podstawie regexów Księgi Świata — nie** (dispatch nie zna nowych plików). Sprawdź output: każdy nowy akcent/język musi pojawić się na liście wykrytych. Jeśli `core_poliglota.py` lub `core_rezyser.py` ma zmiany — zcommituj je przed przejściem do kroku 1.
+`.venv/Scripts/python odswiez_rezysera.py` skanuje `dictionaries/*/akcenty/` i regeneruje dwa bloki: `core_poliglota.py` (docstringi wrapperów `akcent_*`) i `core_rezyser.py` (importy + słownik `_AKCENT_FUNCS`). Bez tego Poliglota działa (czyta YAML), ale Reżyser nakładający akcenty po regexach Księgi Świata — nie (dispatch nie zna nowych plików). Sprawdź output: każdy nowy akcent musi pojawić się na liście. Jeśli `core_poliglota.py` / `core_rezyser.py` mają zmiany — zcommituj przed Krokiem 1.
 
 ### Krok 1 — Przejrzyj i zaktualizuj szablony źródłowe
-Szablony to `dictionaries/<kod>/gui/dokumentacja/*.yaml` dla **każdego** z 9 wdrożonych języków z osobna (`pl`, `en`, `de`, `es`, `fi`, `fr`, `is`, `it`, `ru`). Istniejące szablony edytuj **ręcznie w danym języku** — nie uruchamiaj autotłumacza na plikach, które już istnieją. Powody: koszt API OpenAI + podatność LLM na halucynacje (niezaszyfrowane przykłady szyfrów, bezsensowne sklejki zdań po przeklejonej informacji).
+Szablony `dictionaries/<kod>/gui/dokumentacja/*.yaml` dla każdego z 9 wdrożonych języków. Istniejące szablony edytuj **ręcznie w danym języku** — autotłumacza NIE uruchamiaj na plikach które już istnieją (koszt API + halucynacje LLM).
 
-Dla każdego istniejącego szablonu sprawdź:
-- Czy opis nowych funkcji (nowy język, nowa funkcja silnika) jest aktualny i przetłumaczony na język szablonu?
-- Czy stare „w przyszłości pojawi się X" zostało usunięte, skoro X już działa?
-- Czy liczby (`liczba_akcentow_jezykowych` itp.) są placeholderami, nie zahardkodowanymi wartościami?
-- Czy usunięte / przemianowane elementy GUI nie mają już swoich akapitów?
+Dla każdego szablonu sprawdź: opis nowych funkcji aktualny i przetłumaczony, stare „w przyszłości pojawi się X" usunięte, liczby (`liczba_akcentow_jezykowych`) są placeholderami nie hardkodami, usunięte/przemianowane elementy GUI nie mają już akapitów. Wzorzec edycji: najpierw `pl/`, potem ta sama zmiana w każdym obcym z zachowaniem istniejącego stylu.
 
-Wzorzec edycji: najpierw zaktualizuj `pl/` (język bazowy), potem otwórz analogiczny fragment w każdym języku obcym i wprowadź tę samą zmianę treści, zachowując istniejące tłumaczenie otoczenia jako wzorzec stylu.
-
-**Autotłumacz (`buduj_wielojezyczne_docs.py`) — TYLKO dla zupełnie nowych plików szablonów**, tzn. gdy dany `*.yaml` w danym `<kod>/gui/dokumentacja/` w ogóle nie istnieje (np. nowy język bazowy albo nowy szablon dodany do `pl/` bez odpowiednika w `en/fi/...`). Po AI-tłumaczeniu obowiązkowo przejrzyj wyniki i popraw halucynacje używając już zatwierdzonych szablonów jako wzorca.
-
-**Pułapka po autotłumaczeniu: halucynacja wstrzykuje treść SPOZA źródła pl.** Mechanizm: model widzi całą paczkę dokumentacji w kontekście treningowym i przy słabej walidacji potrafi dosypać „logicznie pasujący" rozdział, którego nie ma w polskim źródle. Pełny opis incydentu fi/manual.yaml z 2026-05-15 — `claude_archive.md`.
-
-Sanity check po `buduj_wielojezyczne_docs.py` lub `tlumacz_ai.py` (PRZED commit'em obcojęzycznego szablonu):
-- **Porównaj liczbę linii każdej wartości tekstowej** `dictionaries/<iso>/gui/dokumentacja/<plik>.yaml` vs odpowiadającego klucza w `pl/`. Różnica >40% to silny sygnał halucynacji (autotłumaczenie sensowne podtrzymuje rozmiar 1:1 ± kilka linii na różnice składniowe).
-- **Polskie pozostałości w obcojęzycznych szablonach**: zgrep po `dictionaries/*/gui/dokumentacja/*.yaml` (z wykluczeniem `pl/`) na wzorce `polski|polska|polsku|po polsku|dostępne|szyfr:|odwracacz`. Wyjątki: nazwy plików technicznych typu `polski.yaml` w opisach struktury paczki silnika.
-- **Markdown nagłówki `## ` w wartościach `<iso>` których nie ma w `pl`**: niemal pewna halucynacja. Polski oryginał używa nagłówków tekstowych bez `##`, więc każde `## ` w obcojęzycznym szablonie zasługuje na manualną weryfikację.
+**Autotłumacz (`buduj_wielojezyczne_docs.py`) — TYLKO dla zupełnie nowych plików szablonów**. Po AI-tłumaczeniu obowiązkowy review halucynacji: generyczne sanity checki [[feedback_halucynacje_szablony_obce]], szczegółowe hotspoty [[feedback_batch_retranslate_review]].
 
 ### Krok 2 — Wygeneruj + zwaliduj
 ```bash
@@ -117,55 +95,37 @@ git commit -m "docs: regeneracja po 14.X — <krótki opis zmian>"
 Dopiero po tym robi się commit release'u (VERSION wraz z RELEASE_NOTES — sam plik VERSION był już zaktualizowany w Kroku 0a i czeka jako unstaged change w `git status`, więc `git add VERSION RELEASE_NOTES.md && git commit` zamknie release jednym commitem).
 
 ### Uwaga o build_release.py — sanity check
-`build_release.py` i tak wywołuje `generuj()` wewnętrznie — to jest celowe (paczka ZIP zawsze ma świeże docs). Po prawidłowym pre-commicie (Krok 0a → 2 → 4 w tej kolejności) `git status` po buildzie pokaże „nothing to commit" zamiast zmienionych plików, bo wygenerowana treść będzie identyczna z tą w repo. Jeśli `git status` po buildzie pokazuje `modified: docs/manual.<iso>.txt`, to znaczy że Krok 0a (bump VERSION przed regeneracją) został pominięty albo VERSION zmieniony pomiędzy Krokiem 2 a release commitem — diff pokaże stary numer wersji w nagłówkach i należy zrobić fixup commit `docs: bump numer wersji w docs/ po regeneracji`.
+`build_release.py` wywołuje `generuj()` wewnętrznie (paczka ZIP zawsze ma świeże docs). Po prawidłowym pre-commicie (Krok 0a → 2 → 4) `git status` po buildzie pokaże „nothing to commit". Jeśli pokazuje `modified: docs/manual.<iso>.txt` — Krok 0a (bump VERSION przed regeneracją) został pominięty; zrób fixup commit „docs: bump numer wersji w docs/".
 
 # WORKFLOW RELEASE — direct-to-main, bez PR-ów (od v15.2.5)
-Workflow PR/branch został świadomie porzucony w v15.2.5. Solo-dev + A11y first: Release UI to jedna prosta strona, PR UI to znacznie więcej do nawigacji NVDA i więcej miejsc gdzie coś można pominąć („zapomniałem stworzyć PR" jest objawem, nie wyjątkiem). `RELEASE_NOTES.md` jest single source of truth dla treści Release description — auto-generator GitHub-owy (`Full Changelog: ...compare/X...Y`) jest GORSZY niż nasza ręczna narracja (długie akapity z konkretną diagnozą bugów, lista naprawionych halucynacji, tradeoff-y), więc go nie używamy.
+Solo-dev + A11y first: commit prosto na main, tag tworzony atomowo przez web Release UI (lub bota `draft-release.yml`). PR/branch flow porzucone w v15.2.5 [[feedback_pr_workflow]]. `RELEASE_NOTES.md` = single source of truth dla treści Release description (NIE GitHub auto-generator `Full Changelog: …compare/X...Y` — nasza ręczna narracja z diagnozą bugów + tradeoff'ami jest cenniejsza).
 
 ## Procedura release (każdy patch X.Y.(Z+1))
-1. Krok 0a-0b z sekcji `# ZAMYKANIE RELEASU — DOKUMENTACJA` (bump VERSION + odśwież reżysera).
-2. Edytuj `RELEASE_NOTES.md`: na górze pliku zaktualizuj numer wersji w nagłówku (linia 1), dodaj nowy paragraph `*Patch v<wersja>: ...*` jako pierwszy w bloku streszczeń przed `---`, dodaj nową sekcję `## <wersja> — patch release ...` zaraz po `---` separatorze (przed istniejącą sekcją poprzedniej wersji). Wzorzec struktury: TL;DR (3-4 akapity narracyjne) → Co nowego dla użytkownika końcowego → Pod maską (techniczne) → Co nie weszło → Walidacja przed commit'em.
-3. Regeneracja + commit docs (Kroki 1-3 z `# ZAMYKANIE RELEASU — DOKUMENTACJA`). Możesz zcommitować docs/ + RELEASE_NOTES.md + VERSION + edytowane szablony YAML + (opcjonalnie) kod razem jako single release commit, albo rozbić na dwa commity (docs + release). Single commit preferowany dla zwykłych patchy — czytelniejsza historia.
-4. Commit message: `v<wersja>: <jednolinijkowy opis>` w nagłówku, body bullet list głównych zmian. Wzorzec: `git --no-pager show <ostatni tag> --stat | head -5` dla podobnego patcha.
-   **KRYTYCZNE: ZAKAZ GitHub auto-close keywords + `#N`** w commit message (nagłówku ANI body), gdy issue ma być zamknięte przez bot workflow `issue-closure.yml`. Zakazane słowa (case-insensitive, GitHub keywords) przed `#N`: `close`, `closes`, `closed`, `fix`, `fixes`, `fixed`, `resolve`, `resolves`, `resolved`. Wykonują się przy push do main **lub** przy publikacji Release wskazującej na commit zawierający keyword. Plus: dla issues zamkniętych przez auto-close keyword GitHub od ~2025 ukrył/usunął przycisk „Reopen". Bezpieczne alternatywy: `(re: #N)`, `(addresses #N)`, `(per #N)`, `(scope: #N)`, „mentions #N" / „relates to #N" / „context: #N" — żadne z nich nie jest GitHub keyword. Pełna narracja incydentu #13 (2026-05-16) w `claude_archive.md`.
+1. Krok 0a-0b z `# ZAMYKANIE RELEASU` (bump VERSION + odśwież reżysera).
+2. Edytuj `RELEASE_NOTES.md`: zaktualizuj numer wersji w nagłówku (linia 1), dodaj nowy `*Patch v<wersja>: ...*` jako pierwszy paragraph streszczeń przed `---`, dodaj sekcję `## <wersja> — patch release ...` po `---` (przed poprzednią). Struktura: TL;DR (3-4 akapity narracyjne) → Co nowego → Pod maską → Co nie weszło → Walidacja.
+3. Regeneracja + commit docs (Kroki 1-3 z `# ZAMYKANIE RELEASU`). Single release commit (docs/ + RELEASE_NOTES.md + VERSION + szablony + opcjonalnie kod) preferowany dla zwykłych patchy — czytelniejsza historia.
+4. Commit message: `v<wersja>: <jednolinijkowy opis>` w nagłówku, body bullet list głównych zmian. Wzorzec: `git --no-pager show <ostatni tag> --stat | head -5` dla podobnego patcha. **KRYTYCZNE: ZAKAZ GitHub auto-close keywords + `#N`** w commit message (`fix #N`, `closes #N`, itd.) gdy issue ma być zamknięte przez bot workflow `issue-closure.yml` — patrz [[feedback_github_auto_close_keywords]] (lista keywordów + bezpieczne alternatywy: `(re: #N)`, `(addresses #N)`, „mentions #N").
 5. `git push origin main`.
-6. **Preferowana (od v15.2.9)**: odpal workflow `draft-release.yml` przez Web GitHub → Actions → „Draft Release (auto-tag + RELEASE_NOTES.md sekcja → draft)" → Run workflow → input `potwierdz=tak` → Run. Bot wykonuje:
-   - odczytuje VERSION z roota repo,
-   - sprawdza czy tag `v<wersja>` już istnieje (lokalnie + na origin) → fail jeśli tak (bump VERSION lub usuń tag),
-   - tworzy tag `v<wersja>` na obecnym HEAD origin/main + pushuje,
-   - wyciąga sekcję `## <wersja>` z `RELEASE_NOTES.md` (regex identyczny jak w ręcznym skrypcie poniżej),
-   - tworzy draft Release z tytułem „Reżyser Audio GPT, wersja <wersja>" + treścią z wyciętej sekcji.
+6. **Preferowana ścieżka (od v15.2.9)**: Web GitHub → Actions → workflow „Draft Release (auto-tag + RELEASE_NOTES.md sekcja → draft)" → Run workflow → input `potwierdz=tak` → Run. Bot odczytuje VERSION, sprawdza brak duplikatu tagu, tworzy tag na HEAD origin/main, wyciąga sekcję `## <wersja>` z `RELEASE_NOTES.md` i tworzy draft Release z tytułem „Reżyser Audio GPT, wersja <wersja>". Workflow zatrzymuje się na draftcie — Publish dopiero po upload EXE w kroku 7. Szyba bezpieczeństwa: input `potwierdz` musi być dokładnie „tak".
 
-   Eliminuje user errors: literówka w numerze wersji, błędny commit-target tagu, pomyłka treści notes, duplikat tagu, pominięcie tytułu, zapomnienie o Installerze (workflow zatrzymuje się na draftcie — Publish dopiero po upload EXE). Workflow ma szybę bezpieczeństwa: input `potwierdz` musi być dokładnie „tak" — inaczej no-op.
-
-   **Fallback ręczny** (gdy bot zawiedzie lub workflow_dispatch niedostępne): wygeneruj `release.txt` (gitignored, w roocie repo) zawierający tylko sekcję `## <wersja>` wyciętą z `RELEASE_NOTES.md`. Wzorcowy skrypt:
+   **Fallback ręczny** (bot zawiódł lub workflow_dispatch niedostępne): wygeneruj `release.txt` (gitignored, nadpisywany każdym patch'em) z sekcją `## <wersja>` wyciętą z `RELEASE_NOTES.md`:
    ```
-   .venv/Scripts/python -c "import pathlib, re, sys; sys.stdout.reconfigure(encoding='utf-8'); t = pathlib.Path('RELEASE_NOTES.md').read_text(encoding='utf-8'); m = re.search(r'(## <WERSJA> — patch release.*?)(?=\n## )', t, re.DOTALL); pathlib.Path('release.txt').write_text(m.group(1).rstrip()+chr(10), encoding='utf-8'); print(f'release.txt: {len(m.group(1))} znaków')"
+   .venv/Scripts/python -c "import pathlib, re, sys; sys.stdout.reconfigure(encoding='utf-8'); t = pathlib.Path('RELEASE_NOTES.md').read_text(encoding='utf-8'); m = re.search(r'(## <WERSJA> — patch release.*?)(?=\n## )', t, re.DOTALL); pathlib.Path('release.txt').write_text(m.group(1).rstrip()+chr(10), encoding='utf-8')"
    ```
-   Płaska nazwa BEZ numeru wersji — plik jest nadpisywany przy każdym kolejnym patchu, nie ma potrzeby aktualizować `.gitignore`.
-7. **Po workflow `draft-release.yml`**: Web GitHub → Releases → wybierz nowy draft (tytuł „Reżyser Audio GPT, wersja <wersja>") → upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe` → Publish.
+7. **Po draft-release.yml**: Web GitHub → Releases → wybierz draft → upload `Rezyser_Audio_v<wersja>_Installer.exe` → Publish. **Fallback ręczny** (z `release.txt`): nowy Release → „Create new tag: v<wersja> on publish" → otwórz `release.txt` w Notatniku (`start release.txt`), Ctrl+A → Ctrl+C → wklej w Description → upload EXE → Publish.
 
-   **Fallback ręczny** (gdy używasz `release.txt` z kroku 6 fallback): Web GitHub → nowy Release. „Create new tag: v<wersja> on publish". Otwórz `release.txt` w Notatniku (`start release.txt` w PowerShellu), Ctrl+A → Ctrl+C, wklej w polu Description (markdown renderuje 1:1 w GitHub Release UI). Upload artefaktu `Rezyser_Audio_v<wersja>_Installer.exe`. Publish. Po wklejeniu `release.txt` możesz usunąć z dysku — jest gitignored, więc nie zaśmieca historii, a przy następnym patchu i tak zostanie wygenerowany od nowa.
-
-## Heurystyka „cleanup commit boota = force-push tag" — fallback edge case
-Od v15.2.8 happy path = atomic-reset boota (patrz `# ODPOWIEDZI NA ISSUE`). Jeśli bot nie mógł użyć atomic-reset (HEAD nieatomowy albo `--force-with-lease` odrzucony) i dorobił cleanup commit, dopuszczalny jest force-push **tag-only** post-publish na HEAD, żeby archive Release UI auto-regenerated był czysty. Pełna procedura (warunki kontrolne, kiedy NIE stosować, komendy) — `claude_archive.md`.
-
-UWAGA: force push do MAIN/MASTER przez MAINTAINERA pozostaje zakazany. Dopuszczalne wyjątki w tym repo: (a) force push **tag-only** post-publish dla scenariusza fix-up (wzorzec udokumentowany w memory `[[project_v15_2_roadmap]]`); (b) force push **branch-only** przez `github-actions[bot]` w workflow `issue-closure.yml` przy atomic-reset commit'a `pending_answer.md` (od v15.2.8) — bot ma `contents: write` i działa wyłącznie gdy HEAD = single-file commit z samym `pending_answer.md`, więc force-push nie może niczego innego zniszczyć.
+## Force push w tym repo — co dozwolone
+Force push do MAIN/MASTER przez maintainera = zakazany. Dwa dopuszczalne wyjątki:
+- **(a) tag-only post-publish** jako fallback gdy bot answer-flow musiał użyć cleanup commit zamiast atomic-reset — patrz [[feedback_force_push_tag_fallback]].
+- **(b) branch-only przez `github-actions[bot]`** w `issue-closure.yml` przy atomic-reset `pending_answer.md` (warunki konieczne) — patrz [[feedback_atomic_reset_bot]].
 
 ## Czego nie robić
-- NIE twórz feature branchy dla zwykłych patchy. Wszystko bezpośrednio na main.
-- NIE używaj `gh pr create/merge` / `git tag` lokalnie do TWORZENIA tagów. Nowe tagi powstają WYŁĄCZNIE przez web Release UI atomowo z Release. **Wyjątek**: force-push tag-only post-publish dla cleanup commit'a boota — patrz `## Heurystyka „cleanup commit boota = force-push tag"` wyżej w tej sekcji.
-- NIE polegaj na `PULL_REQUEST_COMMENTS.md` — plik usunięty z repo w v15.2.5 fix-up commicie. Komentarze recenzentskie (jeśli pojawią się) trafiają wprost do `RELEASE_NOTES.md::<wersja>::Co nie weszło` jako TODO do następnego cyklu, albo do konwersacji z agentem.
-
-## Wyjątki (kiedy feature branch ma sens)
-Rzadkie scenariusze (duży refaktor wielo-patchowy, eksperymentalna gałąź do porzucenia, PR od kontrybutora zewnętrznego) — opisane w `claude_archive.md`.
+- NIE twórz feature branchy dla zwykłych patchy. Wszystko bezpośrednio na main. Rzadkie wyjątki (duży refaktor wielo-patchowy, eksperymentalna gałąź, PR od kontrybutora zewnętrznego) → `claude_archive.md`.
+- NIE używaj `gh pr create/merge` / `git tag` lokalnie do TWORZENIA tagów. Nowe tagi powstają WYŁĄCZNIE przez web Release UI atomowo z Release (wyjątek: force-push tag-only fallback z [[feedback_force_push_tag_fallback]]).
+- NIE polegaj na `PULL_REQUEST_COMMENTS.md` (usunięty v15.2.5). Komentarze recenzentskie trafiają wprost do `RELEASE_NOTES.md::<wersja>::Co nie weszło` lub do konwersacji z agentem.
 
 ## Klauzula awaryjna: bug-issue ma pierwszeństwo nad planowaną treścią
-Jeśli między ostatnim Release a planowaną treścią kolejnego patcha pojawi się nowe issue z etykietą `bug` od prawdziwego usera — **bug ma pierwszeństwo**. Workflow „Z Południa na Północ" zakłada, że każde otwarte issue zamyka się przez `fixed-in-release`; odkładanie rozjeżdża workflow.
-
-Procedura: (1) odłóż feature na następny cykl (przepisz `Co nie weszło` → następny patch), (2) bumpuj X.Y.(Z+1) [[feedback_hotfix_release]], (3) patch rozwiązuje TYLKO bug-issue (lub grupę powiązanych z jednego obszaru), (4) w `RELEASE_NOTES.md::Co nowego` wymień zamknięte issues, w `Co nie weszło` przepisz poprzedni cykl, (5) po Release nadaj etykietę `fixed-in-release` przez web UI — workflow boota zamyka.
-
-Wyjątek: bug niewykonalny w jednym patchu (wymaga większego refaktoru, np. split user-data/seed-data z roadmapy v15.3+) — przeetykietuj `bug` → `enhancement` z komentarzem wyjaśniającym workaround + plan strukturalny. Sami przerobi na feature-issue.
+Nowy bug-issue od prawdziwego usera = **priorytet** nad planowaną treścią. Procedura: odłóż feature na następny cykl (przepisz `RELEASE_NOTES.md::Co nie weszło`), bumpuj X.Y.(Z+1) [[feedback_hotfix_release]], patch rozwiązuje TYLKO bug (lub grupę powiązanych z jednego obszaru), po Release nadaj etykietę `fixed-in-release` przez web UI (bot zamyka). Wyjątek: bug niewykonalny w jednym patchu (wymaga refaktoru) → przeetykietuj `bug` → `enhancement` z komentarzem wyjaśniającym workaround + plan strukturalny.
 
 # OBIEG ZGŁOSZEŃ Z POŁUDNIA NA PÓŁNOC — INTERPRETACJA PROMPTU SAMI (od v15.2.8 trójsekcyjny)
 Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera każde nowe GitHub Issue (eventy `opened` lub `labeled` z akceptowalną etykietą — patrz `LABELS_ACCEPT` / `LABELS_IGNORE` w skrypcie) i wysyła do Centrum mail w plain text o standardowej **trójsekcyjnej** strukturze:
@@ -176,38 +136,25 @@ Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera każde now
    * **TRYB B — zmiana w kodzie** (etykiety zawierają `bug`, `enhancement`, `documentation` lub `invalid`, nawet w kombinacji z question/help wanted):
      dokładnie 4 sekcje: `## Cel` + `## Kontekst techniczny` + `## Kryteria akceptacji` + `## Pułapki do uniknięcia`. Agent implementuje fix.
 
-2. **ORYGINALNY TEKST ZGŁOSZENIA (do weryfikacji)** — surowy `title + body` z GitHub. KRYTYCZNE: ZAWSZE porównuj prompt z oryginałem zanim zaczniesz implementować. LLM `gpt-4o-mini` bywa kreatywny i potrafi:
-   - wpisać nieistniejący moduł (np. „prawdopodobnie `core_translator.py`" gdy takiego pliku nie ma w repo),
-   - zmyślić kroki reprodukcji których nie ma w treści usera,
-   - nadać zgłoszeniu fałszywą diagnozę („to bug w X" gdy user pyta o coś innego).
-   Oryginał jest źródłem prawdy — prompt to sugestia agenta-LLM, nie wyrocznia.
+2. **ORYGINALNY TEKST ZGŁOSZENIA (do weryfikacji)** — surowy `title + body` z GitHub. ZAWSZE porównuj prompt z oryginałem przed implementacją — oryginał = źródło prawdy, prompt = sugestia LLM.
 
-3. **OTWARTE ISSUES W REPO (snapshot z momentu intake)** — surowy output `gh issue list --state open --limit 50` (od v15.2.8). Zastępuje konieczność lokalnego `gh issue list` po stronie maintainera (`gh` CLI nie zawsze w PATH agenta Centrum — Git Bash + PowerShell maintainera empirycznie 2026-05-16 nie miały). Użycie:
-   - sprawdź czy bieżące zgłoszenie nie jest duplikatem otwartego issue,
-   - wykryj powiązane bugi z tego samego obszaru (można scalić w jeden patch wg „klauzuli awaryjnej" `# WORKFLOW RELEASE`),
-   - zorientuj się w backlogu zanim zdecydujesz o priorytecie (np. czy nowy bug ma pierwszeństwo nad planowanym enhancement'em z poprzedniego cyklu).
+3. **OTWARTE ISSUES W REPO (snapshot z momentu intake)** — output `gh issue list --state open --limit 50` (od v15.2.8). Użycie: detekcja duplikatów, scalanie powiązanych bugów w jeden patch (klauzula awaryjna `# WORKFLOW RELEASE`), priorytet vs planowany feature.
 
 ## Sygnał rozpoznawczy
-Jeśli widzisz w sesji input maintainera otwierający się od `## Cel pytania` / `## Cel` z dalszymi sekcjami w jednej z dwóch struktur (2 lub 4 sekcje), potem separator `==========…` i `ORYGINALNY TEKST ZGŁOSZENIA`, potem separator i `OTWARTE ISSUES W REPO` — **to obieg „Z Południa na Północ"**. Maintainer wkleił do sesji całość z maila Sami; Twoja rola to **Centrum**. Decyzja ścieżki (TRYB A vs TRYB B) wynika z liczby sekcji promptu i etykiet wymienionych w nagłówku maila (linia „Etykiety: ...").
+Input maintainera otwierający się od `## Cel pytania` / `## Cel` z 2 lub 4 sekcjami, potem separator `==========…` i `ORYGINALNY TEKST ZGŁOSZENIA`, potem separator i `OTWARTE ISSUES W REPO` — to obieg „Z Południa na Północ". Twoja rola = **Centrum**. Decyzja TRYB A vs TRYB B z liczby sekcji + etykiet (linia „Etykiety:" w nagłówku maila).
 
-Plik `skrypty/issue.txt` (tymczasowy bufor maintainera na treść maila) jest gitignorowany (`skrypty/` w `.gitignore`) i usuwany ręcznie po zbudowaniu promptu — nie wpływa na stan repo, ślad istnieje tylko w sesji agenta.
-
-## Pułapki przy interpretacji
-- **Halucynacja LLM w sekcji „Pułapki do uniknięcia"** (TRYB B): Sami czasem wkleja generyczne reguły z CLAUDE.md nieadekwatne do zgłoszenia („pamiętaj o `.venv/Scripts/python`" gdy issue dotyczy wyłącznie YAML-a workflowa). Filtruj — implementuj fix wg merytorycznej treści `## Cel` + `## Kontekst techniczny`. „Pułapki" to przypomnienia, nie wymóg blokujący.
-- **Tryb FALLBACK** (gdy OpenAI zawiodło — brak kredytów, 401/429, timeout): mail ma w temacie `[Sami (fallback)]` zamiast `[Sami (LLM)]`, a sekcja PROMPT = surowy `title + body` z notatką „(Sami chwilowo nie pomogła z przeredagowaniem...)". W fallbacku NIE MA podziału na TRYB A/B — Centrum sam decyduje ścieżkę na podstawie etykiet (wymienione zaraz pod linkiem do issue w nagłówku maila).
-- **Pusta sekcja OTWARTE ISSUES**: komunikat `(brak otwartych issues)` lub `(gh ... zfailowało: ...)` / `(gh CLI nie znalezione w PATH workflow runner'a)`. Pierwsze = backlog czysty, drugie = workflow runner miał transient problem z `gh`, ale zgłoszenie nadal idzie do realizacji (sekcja jest informacyjna, nie blokuje obiegu).
+## Pułapki interpretacji
+Trzy non-obvious'y (halucynacja LLM w sekcji „Pułapki do uniknięcia", tryb FALLBACK bez TRYB A/B, pusta sekcja OTWARTE ISSUES) → [[feedback_sami_pulapki]].
 
 # ODPOWIEDZI NA ISSUE — question-flow z pliku (FILE mode + atomic-reset)
-Maintainer zapisuje draft jako `pending_answer.md` w roocie repo (Write/Edit tools, bez kopiowania z terminala), pushuje na main atomowo, nadaje etykietę `answered`. Bot (`issue_closure_north.py`) wczytuje treść Z PLIKU (nie z komentarzy — to eliminuje race condition trzeciego komentującego), opakowuje w wrapper Lumi/Vieno/Katla, publikuje, zamyka i lockuje issue, oraz wymazuje draft z historii main przez atomic-reset: `git reset --hard HEAD~1` + `git push --force-with-lease`. Warunek atomic-reset: HEAD na origin/main MUSI być commit'em dodającym DOKŁADNIE jeden plik `pending_answer.md`. Jeśli warunek niespełniony — bot fallbackuje do cleanup commit'a (patrz heurystyka force-push tag w `# WORKFLOW RELEASE` + szczegóły w `claude_archive.md`). Historia ewolucji v15.2.6 → v15.2.7 → v15.2.8 — `claude_archive.md`.
+Maintainer zapisuje draft jako `pending_answer.md` (Write/Edit, bez kopiowania z terminala), pushuje atomowo na main, nadaje etykietę `answered`. Bot (`issue_closure_north.py`) wczytuje Z PLIKU (eliminuje race condition trzeciego komentującego), opakowuje w wrapper Lumi/Vieno/Katla, publikuje + zamyka + lockuje issue, wymazuje draft z historii przez atomic-reset (`git reset --hard HEAD~1` + `git push --force-with-lease`). Warunek atomic-reset: HEAD = commit dodający DOKŁADNIE jeden plik `pending_answer.md`. Niespełniony → fallback cleanup commit boota. Historia ewolucji v15.2.6→v15.2.7→v15.2.8 → `claude_archive.md`.
 
 ## Procedura — flow czystego question (issue NIE wymaga release)
-1. Stwórz/zaktualizuj `pending_answer.md` w roocie repo — czysta odpowiedź merytoryczna w języku oryginalnego zgłoszenia (markdown OK), BEZ podpisu maintainera (wrapper Lumi/Vieno/Katla dopisuje swój podpis).
-2. `git add pending_answer.md && git commit -m "answer: draft odpowiedzi na #<N>" && git push origin main`. **KRYTYCZNE:** ten commit musi być ATOMOWY (TYLKO `pending_answer.md`, żadnych innych plików). Atomowość = warunek konieczny dla preferowanej ścieżki atomic-reset boota. Jeśli zapomniałeś jakichś zmian (np. lessons learned w CLAUDE.md), zcommituj je PRZED `pending_answer.md` jako osobny commit — wtedy `pending_answer.md` zostaje na HEAD jako atomowy.
-3. Na web GitHub UI nadaj etykietę `answered` na issue #N. Workflow `issue-closure.yml` (job `zamknij_z_polnocy`) odpali się przez webhook `issues.labeled`.
-4. Bot (skrypt `issue_closure_north.py`) wykrywa obecność `pending_answer.md` → tryb FILE: wczytuje treść, opakowuje w persona-template w wykrytym języku, woła `gh issue comment`, `gh issue close`, `gh issue lock --reason resolved`. Następnie sprawdza atomowość HEAD:
-   * **Atomowy** (HEAD = tylko `pending_answer.md`): `git reset --hard HEAD~1` + `git push --force-with-lease`. Draft wymazany z historii, brak cleanup commit'a.
-   * **Nieatomowy** (HEAD zawiera inne pliki): `git rm pending_answer.md && git commit && git push` z autorem `github-actions[bot]` (fallback v15.2.7 cleanup commit).
-5. Po zakończeniu workflow lokalnie zrób `git fetch origin && git reset --hard origin/main` (NIE zwykłe `git pull`! Atomic-reset rewrite'uje historię na origin — `git pull` z domyślnym merge wykryje rozjazd i zacznie histeryzować przy non-fast-forward; `git reset --hard origin/main` po fetchu po prostu synchronizuje lokalny ref z aktualnym remote, niezależnie czy bot użył atomic-reset czy cleanup commit'a). `git log` pokaże 0 commit'ów (atomic-reset) lub 2 commity maintainer-add + bot-rm (fallback).
+1. Stwórz/zaktualizuj `pending_answer.md` w roocie repo — czysta odpowiedź merytoryczna w języku oryginalnego zgłoszenia (markdown OK), BEZ podpisu maintainera (wrapper dopisuje swój).
+2. `git add pending_answer.md && git commit -m "answer: draft odpowiedzi na #<N>" && git push origin main`. **KRYTYCZNE: ten commit musi być ATOMOWY** (TYLKO `pending_answer.md`). Inne zmiany (np. lessons learned w CLAUDE.md) zcommituj PRZED `pending_answer.md` jako osobny commit.
+3. Web GitHub UI → nadaj etykietę `answered` na issue #N. Workflow `issue-closure.yml` (job `zamknij_z_polnocy`) odpala się przez webhook `issues.labeled`.
+4. Bot wykrywa `pending_answer.md` → tryb FILE: wczytuje, opakowuje w persona-template per język, `gh issue comment/close/lock`. Następnie sprawdza atomowość HEAD: atomowy → atomic-reset (draft wymazany z historii), nieatomowy → fallback cleanup commit (autor `github-actions[bot]`).
+5. Lokalnie po workflow: `git fetch origin && git reset --hard origin/main` (NIE `git pull` — atomic-reset rewrite'uje historię origin, `git pull` zacznie histeryzować non-fast-forward).
 
 ## Sub-procedury bug+answer (release-then-answer, release-with-answer)
 Gdy issue wymaga release'u + komentarza/dolepka osobistej wiadomości — wybór ścieżki:
@@ -216,12 +163,8 @@ Gdy issue wymaga release'u + komentarza/dolepka osobistej wiadomości — wybór
 
 Pełne procedury obu sub-flow'ów (kroki + komendy) → `claude_archive.md`.
 
-## Sytuacje brzegowe — kluczowe
-- **Workflow YAML wymóg `fetch-depth: 2`** na `actions/checkout@v4` w `issue-closure.yml` — bez tego HEAD~1 nie istnieje lokalnie i atomic-reset failuje na każdym issue.
-- **Równoległe issue z question**: bot trzyma jeden plik per repo, więc obsługuj jedno question-issue na raz. Drugie czeka aż pierwsze się zamknie.
-- **Bug-issue ≠ question-flow**: etykiety disjunktywne. `answered` TYLKO na question. `fixed-in-release` na bug. Od v15.2.8 bug-issue MOŻE mieć dolepek (release-with-answer), ale wciąż przez `fixed-in-release`, nie przez `answered`.
-
-Pozostałe edge case'y (pusty `pending_answer.md`, brak pliku przy `answered`/`fixed-in-release`, nieatomowy HEAD, `--force-with-lease` odrzucony, push fail bota) → `claude_archive.md`.
+## Sytuacje brzegowe
+3 warunki konieczne dla preferowanej ścieżki atomic-reset (atomowość HEAD, `fetch-depth: 2`, `contents: write`), równoległość issues, etykiety disjunktywne `answered`/`fixed-in-release`, edge case'y pliku w trybach FILE/COMMENT, fail force-with-lease, fail push bota → [[feedback_atomic_reset_bot]]. Pełne sub-procedury release-then-answer i release-with-answer z komendami → `claude_archive.md`.
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
@@ -229,5 +172,8 @@ Pozostałe edge case'y (pusty `pending_answer.md`, brak pliku przy `answered`/`f
 - Commity pośrednie: Możesz, a nawet powinieneś, wykonywać commity po zakończeniu poprawnie działającego małego podetapu dużej rewizji z tagiem "WIP".
 - ZAWSZE zrób review (`git --no-pager diff`) zanim zapiszesz stan na stałe w repozytorium.
 
-# ARCHIWUM HISTORYCZNE
-Zarchiwizowane procedury, incydenty i fallbackowe ścieżki znajdują się w `claude_archive.md` (gitignored — patrz `.gitignore` jeśli nie). Zawartość archiwum: incydent halucynacji autotłumaczenia fi/manual.yaml (2026-05-15), incydent #13 GitHub auto-close keywords (2026-05-16), pełna heurystyka „cleanup commit boota = force-push tag" (v15.2.7 fallback), ewolucja question-flow v15.2.6 → v15.2.7 → v15.2.8, sub-procedury release-then-answer i release-with-answer (kompletne), edge case'y `pending_answer.md` w question-flow, wyjątki feature-branch workflowu, przykład empiryczny pułapki kolejności w `akcenty/es.yaml`. Sięgaj tam gdy debugujesz post-mortem albo gdy główny CLAUDE.md odsyła frazą „pełna procedura w `claude_archive.md`".
+# DROGOWSKAZY DO POZOSTAŁYCH WARSTW PAMIĘCI
+
+**`claude_archive.md` (Muzeum, w repo, on-demand)** — grube post-mortemy i pełne stare obejścia. Główne sekcje: incydent halucynacji autotłumaczenia fi/manual.yaml (2026-05-15), incydent #13 GitHub auto-close keywords (2026-05-16), pełna heurystyka „cleanup commit boota = force-push tag" (v15.2.7 fallback), ewolucja question-flow v15.2.6 → v15.2.7 → v15.2.8, sub-procedury release-then-answer i release-with-answer (kompletne kroki + komendy), edge case'y `pending_answer.md`, wyjątki feature-branch workflowu, przykład empiryczny ES `ñ → nj`. Sięgaj tam gdy debugujesz post-mortem albo gdy Konstytucja odsyła frazą „→ `claude_archive.md`".
+
+**`MEMORY.md` + `memory/*.md` (Podświadomość, poza repo, auto-load)** — techniczne niuanse, lessons learned, ścieżki awaryjne. Indeks w `MEMORY.md`, podpliki czytane po referencji `[[name]]`. Najczęściej linkowane z Konstytucji: [[feedback_github_auto_close_keywords]] (zakaz fix/closes/resolves przed #N), [[feedback_atomic_reset_bot]] (3 warunki + sytuacje brzegowe answer-flow), [[feedback_force_push_tag_fallback]] (post-publish tag fix-up), [[feedback_halucynacje_szablony_obce]] (3 generyczne sanity checki), [[feedback_batch_retranslate_review]] (szczegółowe hotspoty Caesar/Tipoglicemia/fiolka), [[feedback_kolejnosc_akcenty]] (sekwencyjność str.replace), [[feedback_sami_pulapki]] (interpretacja promptu Sami), [[feedback_zakaz_askuserquestion]] (zakaz menu wyboru CLI), [[feedback_gh_actions_env_zamiast_argv]] (env zamiast argv w workflow YAML), [[feedback_hotfix_release]] (patch tag X.Y.Z+1 zamiast edit Release).
