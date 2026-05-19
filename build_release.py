@@ -1,3 +1,4 @@
+import argparse
 import os
 import re
 import shutil
@@ -622,7 +623,46 @@ def buduj_wpisy_inno(kody: list[str], katalog_inno: Path) -> list[tuple[str, str
 #   2. Skrypt staje się zgodny z normalną konwencją Python (import-safe).
 
 
-def main() -> None:
+def _parsuj_argumenty() -> argparse.Namespace:
+    """Parsuje argumenty CLI build_release.py.
+
+    Pojedyncza flaga ``-y/--yes`` — pomija interaktywny prompt potwierdzający
+    przed kompilacją Inno Setupa. Reszta gardów (runtime/ check, VERSION
+    czytany z pliku, sprawdzenie ISCC w PATH, refuse-overwrite istniejącego
+    EXE o tej samej wersji) zostaje aktywna — `-y` pomija TYLKO ostatni
+    human-in-the-loop, nie wyłącza walidacji.
+
+    Use case: skrypt wywoływany przez CI/CD albo przez agenta automatyzacji
+    (np. nowy workflow w GitHub Actions po draft-release, albo lokalny
+    one-liner `python build_release.py -y` w batch'u). Default zachowanie
+    (interaktywny prompt) trzymane dla developera odpalającego ręcznie.
+    """
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build the release Installer EXE for Reżyser Audio GPT. "
+            "Reads VERSION (single source of truth), regenerates docs/*.txt, "
+            "and runs ISCC to compile installer.iss. Output: "
+            "`Rezyser_Audio_v<VERSION>_Installer.exe` in the repo root."
+        ),
+    )
+    parser.add_argument(
+        "-y", "--yes",
+        action="store_true",
+        help="Skip the interactive 'Build X? (y/n):' prompt and proceed "
+             "directly to compilation. Świadoma decyzja — wszystkie inne "
+             "walidacje (runtime/, VERSION, ISCC w PATH, refuse-overwrite) "
+             "zostają aktywne, pomijamy tylko ostatni human-in-the-loop. "
+             "Use case: CI/CD lub automatyzacja przez agenta.",
+    )
+    return parser.parse_args()
+
+
+def main(args: argparse.Namespace | None = None) -> None:
+    # Allow main() to be called from CLI (with parser) or programmatically
+    # (with `args=argparse.Namespace(yes=False)` lub None → default).
+    if args is None:
+        args = argparse.Namespace(yes=False)
+
     # --- GUARD CLAUSE (runtime/ folder check) ---
     sciezka_python = os.path.join("runtime", "python.exe")
 
@@ -664,10 +704,15 @@ def main() -> None:
     sprawdz_czy_installer_juz_istnieje(nazwa_installer)
 
     # 5. Last-chance developer confirmation before we actually compile.
-    odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
-    if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
-        print("Build aborted.")
-        sys.exit(0)
+    # Flaga -y/--yes pomija ten prompt (CI/CD lub automatyzacja agentowa);
+    # bez niej developer manualny musi potwierdzić y/n/t (tak/nie habit pl).
+    if args.yes:
+        print(f"Build {nazwa_installer}? (-y → potwierdzono automatycznie)")
+    else:
+        odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
+        if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
+            print("Build aborted.")
+            sys.exit(0)
 
     # 6. Regenerate end-user documentation (docs/<id>.<kod>.txt).
     # We call the generator in-process (same Python process, no subprocess) —
@@ -775,4 +820,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(_parsuj_argumenty())
