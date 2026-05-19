@@ -704,11 +704,11 @@ def main(args: argparse.Namespace | None = None) -> None:
     sprawdz_czy_installer_juz_istnieje(nazwa_installer)
 
     # 5. Last-chance developer confirmation before we actually compile.
-    # Flaga -y/--yes pomija ten prompt (CI/CD lub automatyzacja agentowa);
-    # bez niej developer manualny musi potwierdzić y/n/t (tak/nie habit pl).
-    if args.yes:
-        print(f"Build {nazwa_installer}? (-y → potwierdzono automatycznie)")
-    else:
+    # Flaga -y/--yes pomija ten prompt całkowicie (CI/CD lub automatyzacja
+    # agentowa) — pierwszym widocznym sygnałem startu buildu jest komunikat
+    # „Regenerating documentation…" z kroku 6. Bez -y developer manualny musi
+    # potwierdzić y/n/t (tak/nie habit pl).
+    if not args.yes:
         odp = input(f"Build {nazwa_installer}? (y/n): ").strip().lower()
         if odp not in ("y", "t"):   # `t` kept as alias — historical tak/nie habit
             print("Build aborted.")
