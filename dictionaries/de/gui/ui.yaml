@@ -184,7 +184,7 @@ home:
   btn_open_manager_tooltip: "Wechselt zum Regelmanager – YAML-Dateiexplorer und Ersteller neuer Akzente / Modi / Chiffren (Strg+4)."
   btn_odswiez_label: "🔄 Regisseur-Akzente aus YAML aktualisieren"
   btn_odswiez_name: "Schaltfläche Regisseur-Akzente aus YAML aktualisieren"
-  btn_odswiez_tooltip: "Scannt dictionaries/*/akzente/ und regeneriert Akzent-Wrapper in core_poliglota.py und core_rezyser.py. Nach erfolgreicher Aktualisierung muss die Anwendung neu gestartet werden."
+  btn_odswiez_tooltip: "Scannt dictionaries/*/akcenty/ und regeneriert akcent_*-Wrapper in core_poliglota.py und core_rezyser.py. Nach erfolgreicher Aktualisierung muss die Anwendung neu gestartet werden."
   # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
   raport_niespodziewany_tytul: "Fehler beim Aktualisieren der Akzente"
   raport_niespodziewany_tresc: "Ein unerwarteter Fehler ist aufgetreten:\n{tresc_bledu}"
@@ -213,7 +213,7 @@ rezyser:
     Skript-Modus        – schreibe ein Rohskript mit [SFX]- und [Charakter: Emotion]-Tags (DATEISPEICHERUNG).
     Hörbuch-Modus     – generiere dichte, klassische literarische Prosa (DATEISPEICHERUNG).
 
-    Projekte werden im Unterordner 'skripte/' neben dem Programm gespeichert.
+    Projekte werden im Unterordner 'skrypty/' neben dem Programm gespeichert.
     Geben Sie den Projektnamen OHNE Erweiterung an (z.B. kroniken_arkonii).
     Um das Projekt zu ändern, müssen Sie zuerst den aktuellen Speicher löschen.
   prompt_architekta_content: |-
@@ -287,7 +287,7 @@ rezyser:
     Ermöglicht die Fortsetzung der Geschichte ohne Einschränkungen des Kontextfensters des Modells.
   btn_zapisz_pamiec_label: "💾 Zusammenfassung speichern"
   btn_zapisz_pamiec_tooltip: |-
-    Speichert die Zusammenfassung in einer Datei: skripte/<name>_zusammenfassung.txt
+    Speichert die Zusammenfassung in einer Datei: skrypty/<name>_zusammenfassung.txt
     Nach dem Speichern können Sie den aktuellen Speicher sicher löschen.
   # Obszar roboczy
   main_heading: "🎬 Arbeitsbereich"
@@ -381,7 +381,7 @@ rezyser:
     Die Datei wird automatisch beim ersten Senden an die KI erstellt.
   blad_odczytu_tresc: "Fehler beim Lesen der Datei:\n{tresc_bledu}"
   status_wczytano_tytul: "Projekt geladen"
-  status_wczytano_ksiega: " Auch das Buch wurde geladen: skripte/{nazwa_projektu}.md."
+  status_wczytano_ksiega: " Auch das Buch wurde geladen: skrypty/{nazwa_projektu}.md."
   status_wczytano_streszczenie: |-
     Projektzusammenfassung '{nazwa_projektu}' geladen.{lore_info}
     Der aktuelle Speicher bleibt leer (Modus Unendlicher Speicher).
@@ -410,7 +410,7 @@ rezyser:
   ksiega_pusta_tytul: "Leeres Weltbuch"
   ksiega_pusta_tresc: "Das Weltbuch ist leer. Nichts zu speichern."
   ksiega_zapisana_tytul: "Buch gespeichert"
-  ksiega_zapisana_tresc: "Weltbuch gespeichert: skripte/{nazwa_projektu}.md"
+  ksiega_zapisana_tresc: "Weltbuch gespeichert: skrypty/{nazwa_projektu}.md"
   blad_zapisu_ksiegi: "Fehler beim Speichern des Weltbuchs:\n{tresc_bledu}"
   # Prompt Architekta dialog
   prompt_arch_dlg_tytul: "Prompt des Architekten – in externen Chatbot einfügen"
@@ -435,7 +435,7 @@ rezyser:
   pamiec_pusta_tresc: "Langzeitspeicher ist leer. Nichts zu speichern."
   streszczenie_zapisane_tytul: "Zusammenfassung gespeichert"
   streszczenie_zapisane_tresc: |-
-    Zusammenfassung gespeichert: skripte/{nazwa_projektu}_zusammenfassung.txt
+    Zusammenfassung gespeichert: skrypty/{nazwa_projektu}_zusammenfassung.txt
 
     Sie können jetzt den aktuellen Speicher sicher löschen.
   blad_zapisu_streszczenia: "Fehler beim Speichern der Zusammenfassung:\n{tresc_bledu}"
@@ -724,7 +724,7 @@ manager:
     Filtert den Baum auf den ausgewählten Ordner in dictionaries/. Standardmäßig auf die Sprache der Benutzeroberfläche eingestellt, damit die Liste für den Bildschirmleser lesbar ist. Wählen Sie „Alle Sprachen", um Ordner nebeneinander zu vergleichen, während Sie ein neues Paket erstellen.
   opcja_wszystkie_jezyki: "🌍  Alle Sprachen"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
-  tree_podstawy: "📄  grundlagen.yaml  (Diakritika + Alphabet)"
+  tree_podstawy: "📄  podstawy.yaml  (Diakritika + Alphabet)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
   tree_plik: "📄  {nazwa_pliku}"
   # Etykiety kategorii drzewa
@@ -863,7 +863,7 @@ manager:
   blad_tworzenia: "Datei konnte nicht erstellt werden:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Unvollständige Sprachstruktur"
   niepelna_struktura_tresc: |-
-    Datei basis.yaml gespeichert, aber Unterordner akzente/, chiffern/, regisseur/ und gui/ konnten nicht erstellt werden:
+    Datei podstawy.yaml gespeichert, aber Unterordner akcenty/, szyfry/, rezyser/, opowiesci/ und gui/ konnten nicht erstellt werden:
     {tresc_bledu}
 
     Erstellen Sie diese manuell im Datei-Explorer, bevor Sie Polyglot starten – andernfalls wird die Engine beim Scannen der neuen Sprache einen Fehler ausgeben.
@@ -1002,7 +1002,7 @@ opowiesci:
   gra_zapisana_tytul: "Spiel gespeichert"
   gra_zapisana_tresc: 'Der Spielstand „{nazwa}" wurde auf die Festplatte gespeichert.'
   nowa_gra_zaczatek: "📖 Spiel \"{nazwa}\" gestartet.\n\nGib die erste Aktion im Feld unten ein und klicke auf \"Senden\" — die Erzählmaschine beschreibt die Welt, in der du dich befindest, und stellt die erste Szene vor."
-  brak_narracji_info: "📖 Spiel \"{nazwa}\" geladen, aber die Erzählungsdatei (skripte/{nazwa}.txt) existiert nicht. Der Spielstand stammt aus der Datei game.json — du kannst fortfahren."
+  brak_narracji_info: "📖 Spiel \"{nazwa}\" geladen, aber die Erzählungsdatei (skrypty/{nazwa}.txt) existiert nicht. Der Spielstand stammt aus der Datei game.json — du kannst fortfahren."
   dlg_wczytaj_tytul: "Geschichtenspiel laden"
   dlg_wczytaj_filtr: "Geschichtenspiel-Dateien (*.game.json)|*.game.json|Alle Dateien|*.*"
   blad_zapisu_tresc: "Ein Fehler beim Speichern der Spieldatei ist aufgetreten: {tresc_bledu}"

@@ -34,7 +34,7 @@ tresc:
 
     * **Libro del Mundo Multiproyecto:** El sistema carga automáticamente en segundo plano las reglas dedicadas del universo (`.md`) basándose en el archivo fuente activo, asegurando un aislamiento completo (carga de contexto sin clics).
     * **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
-    * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/director/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
+    * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
   modul_opowiesci: |
     ### 2. Historias (Ctrl+2, segundo modo principal desde v15.0)
 
@@ -69,7 +69,7 @@ tresc:
 
     Desde la versión v14.0, la aplicación admite de forma nativa {liczba_kompletnych_jezykow} idiomas base: {lista_kompletnych_jezykow_natywnie}. Cada paquete `dictionaries/<código>/` contiene diacríticos, alfabeto y reglas fonéticas que operan en el texto en ese idioma específico: la aplicación detecta automáticamente el idioma de origen a través de lingua-language-detector (por párrafo) y carga el paquete adecuado para cada fragmento por separado.
 
-    Toda la interfaz GUI, la documentación (`docs/manual.<iso>.txt`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<código>/director/` y `dictionaries/<código>/narrativa/`).
+    Toda la interfaz GUI, la documentación (`docs/manual.<iso>.txt`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<código>/rezyser/` y `dictionaries/<código>/opowiesci/`).
   architektura_ai: |
     ## Arquitectura de IA y modelos utilizados
 

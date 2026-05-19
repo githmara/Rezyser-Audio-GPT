@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktive Geschichten Modul (15.3.1 – Veröffentlichungsversion)
+Reżyser Audio GPT — Interaktive Geschichten Modul (15.3.2 – Veröffentlichungsversion)
 
 Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.
 
@@ -169,4 +169,4 @@ Problem: Im Auswahlmodus hat der Motor keine Schaltflächen generiert, obwohl ic
 Ursache und Lösung: Modellhalluzination — trotz Modus 4 hat LLM ein leeres Auswahlfeld zurückgegeben. Die Anwendung verbirgt dann bewusst den Auswahlbereich (anstatt einen leeren Platzhalter anzuzeigen) und erlaubt die Fortsetzung mit Freitext. Die nächste Runde wird wahrscheinlich die Auswahl korrekt generieren.
 
 Problem: Die Dateien .game.json und .story.jsonl sind auf dem Desktop nicht sichtbar.
-Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Erzählungsdateien (.txt, .md) gelangen in skripte/ — dort finden Sie sie.
+Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Erzählungsdateien (.txt, .md) gelangen in skrypty/ — dort finden Sie sie.

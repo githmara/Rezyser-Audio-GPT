@@ -719,7 +719,7 @@ manager:
     Filtre l'arborescence sur le dossier sélectionné dans dictionaries/. Réglé par défaut sur la langue de l'interface, pour rendre la liste lisible pour le lecteur d'écran. Sélectionnez « Toutes les langues » pour comparer les dossiers côte à côte lors de la création d'un nouveau pack.
   opcja_wszystkie_jezyki: "🌍  Toutes les langues"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
-  tree_podstawy: "📄  fondements.yaml  (diacritiques + alphabet)"
+  tree_podstawy: "📄  podstawy.yaml  (diacritiques + alphabet)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
   tree_plik: "📄  {nazwa_pliku}"
   # Etykiety kategorii drzewa

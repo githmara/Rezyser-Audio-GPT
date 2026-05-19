@@ -184,7 +184,7 @@ home:
   btn_open_manager_tooltip: "Siirtyy Sääntöjen Hallintaan – YAML-tiedostojen tutkija ja uusien aksenttien / tilojen / salausten luoja (Ctrl+4)."
   btn_odswiez_label: "🔄 Päivitä Ohjaajan aksentit YAML:stä"
   btn_odswiez_name: "Päivitä Ohjaajan aksentit YAML:stä -painike"
-  btn_odswiez_tooltip: "Skannaa dictionaries/*/aksentit/ ja regeneroi aksentti_* -kääreet core_poliglota.py:ssä ja core_rezyser.py:ssä. Onnistuneen päivityksen jälkeen sovellus on käynnistettävä uudelleen."
+  btn_odswiez_tooltip: "Skannaa dictionaries/*/akcenty/ ja regeneroi akcent_* -kääreet core_poliglota.py:ssä ja core_rezyser.py:ssä. Onnistuneen päivityksen jälkeen sovellus on käynnistettävä uudelleen."
   # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
   raport_niespodziewany_tytul: "Aksenttien päivitysvirhe"
   raport_niespodziewany_tresc: "Odottamaton virhe tapahtui:\n{tresc_bledu}"
@@ -213,7 +213,7 @@ rezyser:
     Käsikirjoitustila        – kirjoita raakakäsikirjoitus äänitehosteilla ja [Hahmo: tunne] -tageilla (TALLENNUS TIEDOSTOON).
     Äänikirjatila     – luo tiheää, klassista kirjallista proosaa (TALLENNUS TIEDOSTOON).
 
-    Projektit tallennetaan ohjelman viereiseen 'käsikirjoitukset/'-alikansioon.
+    Projektit tallennetaan ohjelman viereiseen 'skrypty/'-alikansioon.
     Anna projektin nimi ILMAN laajennusta (esim. kronikat_arkonia).
     Vaihtaaksesi projektia sinun on ensin tyhjennettävä nykyinen muisti.
   prompt_architekta_content: |-
@@ -287,7 +287,7 @@ rezyser:
     Mahdollistaa tarinan jatkamisen ilman mallin kontekstin ikkunan rajoituksia.
   btn_zapisz_pamiec_label: "💾 Tallenna Yhteenveto"
   btn_zapisz_pamiec_tooltip: |-
-    Tallentaa yhteenvedon tiedostoon: käsikirjoitukset/<nimi>_yhteenveto.txt
+    Tallentaa yhteenvedon tiedostoon: skrypty/<nimi>_yhteenveto.txt
     Tallennuksen jälkeen voit turvallisesti tyhjentää nykyisen muistin.
   # Obszar roboczy
   main_heading: "🎬 Työtila"
@@ -724,7 +724,7 @@ manager:
     Suodattaa puun valittuun kansioon dictionaries/-kansiossa. Oletuksena asetettu käyttöliittymän kielelle, jotta lista olisi ruudunlukijalle luettava. Valitse „Kaikki kielet", jotta voit verrata kansioita rinnakkain uuden paketin luomisen aikana.
   opcja_wszystkie_jezyki: "🌍  Kaikki kielet"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
-  tree_podstawy: "📄  perusteet.yaml  (diakriitit + aakkoset)"
+  tree_podstawy: "📄  podstawy.yaml  (diakriitit + aakkoset)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
   tree_plik: "📄  {nazwa_pliku}"
   # Etykiety kategorii drzewa
@@ -863,7 +863,7 @@ manager:
   blad_tworzenia: "Tiedostoa ei voitu luoda:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Kielen rakenne on puutteellinen"
   niepelna_struktura_tresc: |-
-    Tiedosto pohja.yaml tallennettiin, mutta kansioita aksentit/, salaukset/, ohjaaja/ ja gui/ ei voitu luoda:
+    Tiedosto podstawy.yaml tallennettiin, mutta kansioita akcenty/, szyfry/, rezyser/, opowiesci/ ja gui/ ei voitu luoda:
     {tresc_bledu}
 
     Luo ne manuaalisesti Tiedostonhallinnassa ennen kuin käynnistät Polyglotin – muuten moottori antaa virheen uuden kielen skannauksen yhteydessä.

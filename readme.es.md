@@ -7,7 +7,7 @@
 
 Conjunto de herramientas autocontenidas impulsadas por IA para la escritura automática, planificación, formato y traducción de guiones extensos, así como para la ejecución de juegos de texto interactivos. El proyecto es una aplicación de escritorio nativa (wxPython) diseñada desde cero con plena accesibilidad para lectores de pantalla (NVDA, VoiceOver) y compatibilidad con sintetizadores de voz profesionales (TTS). Funciona sin navegador y sin servidor local: se ejecuta como una ventana de programa normal.
 
-Versión: **15.3.1** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versión: **15.3.2** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Módulos principales
@@ -21,7 +21,7 @@ El estudio principal para escribir radioteatros y audiolibros. Eliges el modo �
 
 * **Libro del Mundo Multiproyecto:** El sistema carga automáticamente en segundo plano las reglas dedicadas del universo (`.md`) basándose en el archivo fuente activo, asegurando un aislamiento completo (carga de contexto sin clics).
 * **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
-* **4 modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/director/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
+* **4 modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
 
 
 ### 2. Historias (Ctrl+2, segundo modo principal desde v15.0)
@@ -61,7 +61,7 @@ Juegos de texto interactivos dirigidos por IA como motor narrativo. A diferencia
 
 Desde la versión v14.0, la aplicación admite de forma nativa 9 idiomas base: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Cada paquete `dictionaries/<código>/` contiene diacríticos, alfabeto y reglas fonéticas que operan en el texto en ese idioma específico: la aplicación detecta automáticamente el idioma de origen a través de lingua-language-detector (por párrafo) y carga el paquete adecuado para cada fragmento por separado.
 
-Toda la interfaz GUI, la documentación (`docs/manual.<iso>.txt`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<código>/director/` y `dictionaries/<código>/narrativa/`).
+Toda la interfaz GUI, la documentación (`docs/manual.<iso>.txt`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<código>/rezyser/` y `dictionaries/<código>/opowiesci/`).
 
 
 ## Arquitectura de IA y modelos utilizados

@@ -184,7 +184,7 @@ home:
   btn_open_manager_tooltip: "Переходит в Менеджер Правил – проводник файлов YAML и создатель новых акцентов / режимов / шифров (Ctrl+4)."
   btn_odswiez_label: "🔄 Обновить акценты Режиссера из YAML"
   btn_odswiez_name: "Кнопка Обновить акценты Режиссера из YAML"
-  btn_odswiez_tooltip: "Сканирует dictionaries/*/акценты/ и регенерирует обертки акцент_* в core_poliglota.py и core_rezyser.py. После успешного обновления необходимо перезапустить приложение."
+  btn_odswiez_tooltip: "Сканирует dictionaries/*/akcenty/ и регенерирует обертки akcent_* в core_poliglota.py и core_rezyser.py. После успешного обновления необходимо перезапустить приложение."
   # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
   raport_niespodziewany_tytul: "Ошибка обновления акцентов"
   raport_niespodziewany_tresc: "Произошла непредвиденная ошибка:\n{tresc_bledu}"
@@ -724,7 +724,7 @@ manager:
     Фильтрует дерево до выбранной папки в dictionaries/. По умолчанию установлен на язык интерфейса, чтобы список был читаем для экранного чтеца. Выберите «Все языки", чтобы сравнивать папки рядом при создании нового пакета.
   opcja_wszystkie_jezyki: "🌍  Все языки"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
-  tree_podstawy: "📄  основы.yaml  (диакритика + алфавит)"
+  tree_podstawy: "📄  podstawy.yaml  (диакритика + алфавит)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
   tree_plik: "📄  {nazwa_pliku}"
   # Etykiety kategorii drzewa
@@ -863,7 +863,7 @@ manager:
   blad_tworzenia: "Не удалось создать файл:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Неполная структура языка"
   niepelna_struktura_tresc: |-
-    Файл основы.yaml сохранён, но не удалось создать подпапки акценты/, шифры/, режиссёр/ и gui/:
+    Файл podstawy.yaml сохранён, но не удалось создать подпапки akcenty/, szyfry/, rezyser/, opowiesci/ и gui/:
     {tresc_bledu}
 
     Создайте их вручную в Проводнике, прежде чем запускать Полиглот — иначе движок выдаст ошибку при сканировании нового языка.

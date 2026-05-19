@@ -183,7 +183,7 @@ home:
   btn_open_manager_tooltip: "Va al Gestor de Reglas – explorador de archivos YAML y creador de nuevos acentos / modos / cifrados (Ctrl+4)."
   btn_odswiez_label: "🔄 Actualizar acentos de Director desde YAML"
   btn_odswiez_name: "Botón Actualizar acentos de Director desde YAML"
-  btn_odswiez_tooltip: "Escanea dictionaries/*/acentos/ y regenera los envoltorios acento_* en core_poliglota.py y core_rezyser.py. Después de una actualización exitosa, es necesario reiniciar la aplicación."
+  btn_odswiez_tooltip: "Escanea dictionaries/*/akcenty/ y regenera los envoltorios akcent_* en core_poliglota.py y core_rezyser.py. Después de una actualización exitosa, es necesario reiniciar la aplicación."
   # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
   raport_niespodziewany_tytul: "Error al actualizar acentos"
   raport_niespodziewany_tresc: "Se produjo un error inesperado:\n{tresc_bledu}"
@@ -723,7 +723,7 @@ manager:
     Filtra el árbol a la carpeta seleccionada en dictionaries/. Por defecto está configurado al idioma de la interfaz, para que la lista sea legible para el lector de pantalla. Selecciona "Todos los idiomas" para comparar carpetas lado a lado al crear un nuevo paquete.
   opcja_wszystkie_jezyki: "🌍  Todos los idiomas"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
-  tree_podstawy: "📄  fundamentos.yaml  (diacríticos + alfabeto)"
+  tree_podstawy: "📄  podstawy.yaml  (diacríticos + alfabeto)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
   tree_plik: "📄  {nazwa_pliku}"
   # Etykiety kategorii drzewa
@@ -862,7 +862,7 @@ manager:
   blad_tworzenia: "No se pudo crear el archivo:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Estructura de idioma incompleta"
   niepelna_struktura_tresc: |-
-    El archivo base.yaml se ha guardado, pero no se pudieron crear las subcarpetas acentos/, cifrados/, director/ y gui/:
+    El archivo podstawy.yaml se ha guardado, pero no se pudieron crear las subcarpetas akcenty/, szyfry/, rezyser/, opowiesci/ y gui/:
     {tresc_bledu}
 
     Créelas manualmente en el Explorador de archivos antes de ejecutar Poliglota; de lo contrario, el motor generará un error al escanear el nuevo idioma.

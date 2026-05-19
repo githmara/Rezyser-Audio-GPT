@@ -1,4 +1,4 @@
-Manual del Director de Audio AI - Guía Completa (Versión 15.3.1 – Versión de Publicación)
+Manual del Director de Audio AI - Guía Completa (Versión 15.3.2 – Versión de Publicación)
 
 ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 
@@ -391,7 +391,7 @@ La versión 13.0 introduce la cuarta herramienta en la barra: el Gestor de Regla
 ¿Por qué YAML? Hasta la versión 12.0, todos los acentos, modos creativos y filtros estaban "embebidos" en el código de Python. Añadir un nuevo acento requería un programador. En la versión 13.0, todo eso se trasladó a archivos .yaml en la carpeta dictionaries/ — cualquiera que pueda abrir el Bloc de notas puede ajustar un acento existente ("cambiar sz por sh por sch") o añadir uno completamente nuevo (sueco, danés, dialecto ruso).
 
 ¿Qué encontrarás en el Gestor de Reglas?
-- Árbol de archivos — lista completa de todos los archivos YAML en dictionaries/ divididos por idiomas base (actualmente completamente implementados: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский) y categorías (acentos/, cifrados/, director/). Navegación con flechas como en el Explorador de archivos de Windows, soporte completo para NVDA.
+- Árbol de archivos — lista completa de todos los archivos YAML en dictionaries/ divididos por idiomas base (actualmente completamente implementados: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский) y categorías (akcenty/, szyfry/, rezyser/, opowiesci/, gui/). Navegación con flechas como en el Explorador de archivos de Windows, soporte completo para NVDA.
 - Botón "📝  Abrir en editor de texto" — abre el archivo seleccionado en el Bloc de notas predeterminado del sistema. Editas, guardas, haces clic en "🔄  Actualizar árbol" y listo.
 - Botón "📋  Duplicar archivo seleccionado" — la forma más rápida de un nuevo acento: tomas un archivo existente (por ejemplo, finski.yaml), le das un nuevo nombre (por ejemplo, sueco), el Gestor crea una copia con el comentario "cambiar campos etiqueta y descripción" y lo abre en el editor.
 - Botón "➕  Nuevo archivo de reglas…" — asistente con selección de tipo (acento, cifrado, modo del Director, nuevo idioma base, cifrado algorítmico). Para casos comunes (acento, cifrado tipo "cambio de letras") el asistente crea una plantilla YAML lista para editar. Para casos que requieren un programador (nuevo idioma base, algoritmo tipo "mezcla de medio de palabras") el asistente genera un prompt para el chatbot AI — lo pegas en ChatGPT, obtienes el archivo YAML listo, lo guardas en dictionaries/ y listo.

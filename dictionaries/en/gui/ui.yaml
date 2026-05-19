@@ -183,7 +183,7 @@ home:
   btn_open_manager_tooltip: "Goes to the Rule Manager – YAML file explorer and creator of new accents/modes/ciphers (Ctrl+4)."
   btn_odswiez_label: "🔄 Refresh Director Accents from YAML"
   btn_odswiez_name: "Refresh Director Accents from YAML Button"
-  btn_odswiez_tooltip: "Scans dictionaries/*/accents/ and regenerates accent_* wrappers in core_poliglota.py and core_rezyser.py. After a successful refresh, restart the application."
+  btn_odswiez_tooltip: "Scans dictionaries/*/akcenty/ and regenerates akcent_* wrappers in core_poliglota.py and core_rezyser.py. After a successful refresh, restart the application."
   # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
   raport_niespodziewany_tytul: "Accent Refresh Error"
   raport_niespodziewany_tresc: "An unexpected error occurred:\n{tresc_bledu}"
@@ -448,7 +448,7 @@ rezyser:
   brak_przepisow_tytul: "No recipes"
   brak_przepisow_tresc: |-
     Failed to load any working mode from YAML.
-    Run refresh_director.py or check dictionaries/pl/director/.
+    Run odswiez_rezysera.py or check dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Provide the project file name before generating text for saving.
     ('{tytul_trybu}' mode requires a file name.)
@@ -510,7 +510,7 @@ rezyser:
     Generate and save the project content first.
   tytuly_prep: "Preparing…"
   tytuly_brak_przepisu_tresc: |-
-    Recipe 'titles' not found in YAML (dictionaries/pl/director/postprod_titles.yaml).
+    Recipe 'titles' not found in YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
     Without it, chapter title postproduction is unavailable.
   tytuly_blad_naglowek: "An error occurred while generating chapter titles."
   tytuly_blad_nieznany: "Unknown error during titling."
@@ -723,7 +723,7 @@ manager:
     Filters the tree to the selected folder in dictionaries/. Default set to the interface language for screen reader readability. Select “All languages” to compare folders side by side when creating a new package.
   opcja_wszystkie_jezyki: "🌍  All languages"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
-  tree_podstawy: "📄  basics.yaml  (diacritics + alphabet)"
+  tree_podstawy: "📄  podstawy.yaml  (diacritics + alphabet)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
   tree_plik: "📄  {nazwa_pliku}"
   # Etykiety kategorii drzewa

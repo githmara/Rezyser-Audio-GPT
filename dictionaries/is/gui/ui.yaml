@@ -724,7 +724,7 @@ manager:
     Sía tréð í valda möppu í dictionaries/. Sjálfgefið stillt á viðmótstungumál til að listinn sé læsilegur fyrir skjálesara. Veldu „Öll tungumál" til að bera saman möppur hlið við hlið þegar ný pakki er búin til.
   opcja_wszystkie_jezyki: "🌍  Öll tungumál"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
-  tree_podstawy: "📄  grunnur.yaml  (diakritísk merki + stafróf)"
+  tree_podstawy: "📄  podstawy.yaml  (diakritísk merki + stafróf)"
   tree_kategoria: "{etykieta}  [{liczba_plikow}]"
   tree_plik: "📄  {nazwa_pliku}"
   # Etykiety kategorii drzewa
@@ -863,7 +863,7 @@ manager:
   blad_tworzenia: "Ekki tókst að búa til skrá:\n{tresc_bledu}"
   niepelna_struktura_tytul: "Ófullkomið tungumálauppbygging"
   niepelna_struktura_tresc: |-
-    Skrá grunnur.yaml var vistuð, en ekki tókst að búa til undirmöppur accenter/, kóðar/, leikstjóri/ og gui/:
+    Skrá podstawy.yaml var vistuð, en ekki tókst að búa til undirmöppur akcenty/, szyfry/, rezyser/, opowiesci/ og gui/:
     {tresc_bledu}
 
     Búðu þær til handvirkt í Skjalakönnu áður en þú keyrir Fjöltyngda – annars mun vélin kasta villu við skönnun nýs tungumáls.

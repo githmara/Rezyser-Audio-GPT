@@ -174,4 +174,4 @@ tresc:
     Ursache und Lösung: Modellhalluzination — trotz Modus 4 hat LLM ein leeres Auswahlfeld zurückgegeben. Die Anwendung verbirgt dann bewusst den Auswahlbereich (anstatt einen leeren Platzhalter anzuzeigen) und erlaubt die Fortsetzung mit Freitext. Die nächste Runde wird wahrscheinlich die Auswahl korrekt generieren.
 
     Problem: Die Dateien .game.json und .story.jsonl sind auf dem Desktop nicht sichtbar.
-    Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Erzählungsdateien (.txt, .md) gelangen in skripte/ — dort finden Sie sie.
+    Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Erzählungsdateien (.txt, .md) gelangen in skrypty/ — dort finden Sie sie.

@@ -18,7 +18,7 @@ tresc:
     =============================================
 
     Hei! Jos luet tätä tiedostoa, se tarkoittaa, että olet katsonut
-    "sanakirjat/"-kansioon Reżyser Audio GPT -sovelluksen vieressä ja mietit,
+    "dictionaries/"-kansioon Reżyser Audio GPT -sovelluksen vieressä ja mietit,
     mitä nämä omituiset ".yaml"-päätteiset tiedostot ovat. Ei hätää — sinun ei
     tarvitse osata ohjelmointia tai Pythonia ymmärtääksesi, mitä täällä
     tapahtuu, ja pienellä rohkeudella voit jopa lisätä jotain omaa.
@@ -37,7 +37,7 @@ tresc:
     Mitä täällä oikein on?
     ----------------------
 
-    Kansio "sanakirjat/" on sääntökirjasto, jota Poliglota (käännös- ja
+    Kansio "dictionaries/" on sääntökirjasto, jota Poliglota (käännös- ja
     aksenttityökalu) sekä Reżyserin sisäinen moottori käyttävät. Versioon 12.0
     asti kaikki nämä säännöt olivat "kovakoodattuja" Python-koodiin — jos
     halusit lisätä uuden aksentin tai muuttaa sääntöjä, sinun piti pyytää
@@ -49,21 +49,21 @@ tresc:
 
     Kansion rakenne näyttää tältä:
 
-        sanakirjat/
+        dictionaries/
         └── pl/              peruskielen (puolan) kansio
             ├── podstawy.yaml              puolalaiset diakriitit + aakkoset
-            ├── aksentit/                 {liczba_plikow_w_akcentach} aksenttitiedostot
-            ├── salaukset/                {liczba_szyfrow} salaus- ja leikkitiedostot
+            ├── akcenty/                  {liczba_plikow_w_akcentach} aksenttitiedostot
+            ├── szyfry/                   {liczba_szyfrow} salaus- ja leikkitiedostot
             └── rezyser/                  {liczba_trybow_rezysera} Reżyser AI -tilatiedostot
 
     Tällä hetkellä täysin toteutettuja ovat: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} peruskieliä). Jokaisella on oma paketti
-    "sanakirjat/<koodi>/" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
+    "dictionaries/<koodi>/" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
     toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa
     lähdekielen automaattisesti lingua-language-detector -työkalulla
     (kappaletasolla) ja lataa oikean paketin kullekin katkelmalle erikseen.
     Lisää kieliä on valmisteilla (täydellinen paketti vaatii "podstawy.yaml",
-    "gui/ui.yaml" sekä vähintään yhden tiedoston "aksentit/" ja "salaukset/").
+    "gui/ui.yaml" sekä vähintään yhden tiedoston "akcenty/" ja "szyfry/").
   co_to_akcent: |
     Mikä on aksentti?
     -----------------
