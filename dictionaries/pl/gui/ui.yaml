@@ -981,6 +981,12 @@ opowiesci:
   odswiez_zajete_tytul:             "Operacja w toku"
   odswiez_zajete_tresc:             "Trwa generowanie tury lub streszczenia. Poczekaj, aż operacja się zakończy, zanim odświeżysz narrację z dysku."
 
+  # v15.6: opt-in techniczna edycja surowego stanu gry (.game.json). Przycisk
+  # domyślnie UKRYTY (stała EDYCJA_STANU_GRY_WIDOCZNA w gui_opowiesci.py) —
+  # widoczny tylko w paczce zbudowanej przez technicznego użytkownika.
+  btn_edytuj_stan_label:            "Edytuj stan &gry…"
+  btn_edytuj_stan_tooltip:          "Otwiera surowy plik stanu gry (.game.json) do bezpośredniej edycji w oknie z walidacją JSON. Dla zaawansowanych: pozwala ręcznie poprawić postacie, lokację, ekwipunek, wątki i liczniki, gdy ręczna edycja narracji rozjechała się ze stanem strukturalnym. UWAGA: błędna edycja może uszkodzić zapis — zmiany są walidowane jako JSON przed zapisaniem, ale poprawność treści (sensowność pól) jest na Twojej odpowiedzialności."
+
   # ---- BLOK C — RadioBox trybu ----------------------------------------------
   rb_tryb_label:             "Tryb gry"
   rb_tryb_name:              "Wybór trybu gry"
@@ -1165,3 +1171,15 @@ opowiesci:
   status_zasady_zapisane:    "Zasady świata zaktualizowane i zapisane do pliku gry."
   zasady_bez_gry_tytul:      "Brak aktywnej gry"
   zasady_bez_gry_tresc:      'Załóż nową grę przyciskiem „Nowa gra" albo wczytaj wcześniej zapisaną, zanim zdefiniujesz zasady świata — zasady są zapisywane razem ze stanem gry.'
+
+  # v15.6: dialog opt-in technicznej edycji surowego stanu gry (.game.json).
+  dlg_edytuj_stan_tytul:     "Edycja stanu gry (.game.json)"
+  dlg_edytuj_stan_lbl:       "Surowy stan gry w formacie JSON. Edytuj ostrożnie: po zapisaniu gra zostanie przeładowana z tego pliku. Treść musi pozostać poprawnym obiektem JSON — w przeciwnym razie zapis zostanie odrzucony."
+  dlg_edytuj_stan_name:      "Pole edycji surowego stanu gry w formacie JSON"
+  dlg_edytuj_stan_btn_ok:    "&Zapisz i przeładuj"
+  dlg_edytuj_stan_btn_anuluj: "&Anuluj"
+  edytuj_stan_blad_json_tytul: "Niepoprawny JSON"
+  edytuj_stan_blad_json_tresc: "Treść nie jest poprawnym JSON-em, więc nie została zapisana (gra zostałaby uszkodzona). Popraw składnię i spróbuj ponownie.\n\nSzczegóły błędu:\n{tresc_bledu}"
+  edytuj_stan_blad_typ_tresc: "Główny element stanu gry musi być obiektem JSON (parą klucz–wartość w nawiasach klamrowych), a nie listą ani wartością prostą. Przywróć strukturę obiektu i spróbuj ponownie."
+  edytuj_stan_zapisano_tytul: "Stan gry zapisany"
+  edytuj_stan_zapisano_tresc: 'Stan gry „{nazwa}" został zapisany i przeładowany z dysku. Postacie, lokacja, ekwipunek, wątki i liczniki odzwierciedlają teraz Twoją edycję.'

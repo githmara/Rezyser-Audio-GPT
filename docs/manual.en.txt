@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 15.5.1 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 15.6 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -68,7 +68,7 @@ For the artificial intelligence to function, it needs access to OpenAI's servers
 1. Create an account on platform.openai.com and top up your account in the Billing section.
 2. Generate a key in the API Keys section (it starts with sk-proj-). Note: the key is displayed only once — at the moment of creation. If you close the window without copying it, it will be lost forever, and you will need to revoke the secret key and generate a new one. Copy it immediately before clicking anything else.
 3. On the program's start screen, click the button "Generate the golden_key.env file and open the text editor". The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
-4. In the open file, you will see the line OPENAI_API_KEY=PASTE_YOUR_KEY_HERE. Remove the placeholder text and paste your copied key directly after the equal sign (without spaces). Save the file and restart the application.
+4. In the open file, you will see the line OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Remove the placeholder text and paste your copied key directly after the equal sign (without spaces). Save the file and restart the application.
 
 Tip: Upon restarting, the application will check the file and display a green message in the "System Check" section — this means all AI modules are ready to work. Otherwise, it will clearly tell you what is wrong and allow you to open the text editor to quickly fix the error.
 
@@ -81,9 +81,9 @@ This is your command center for creating stories and writing scripts. Access it 
 
 IMPORTANT: Project File Format — Return to .txt
 
-In version 7, project files were saved in Markdown format (.md), e.g., scripts/anesthesia.md. This was a deliberate experiment — the .md format was intended as a psychological barrier for non-technical users, discouraging them from opening and manually editing the file in Notepad (thus preventing accidental damage to the structure headers).
+In version 7, project files were saved in Markdown format (.md), e.g., skrypty/anesthesia.md. This was a deliberate experiment — the .md format was intended as a psychological barrier for non-technical users, discouraging them from opening and manually editing the file in Notepad (thus preventing accidental damage to the structure headers).
 
-The experiment did not work. AI often inadvertently breaks one of the fundamental prohibitions (more on that shortly). For this reason, version 8 reverted to simple .txt files — more intuitive and readable for everyone. For example, a project named "anesthesia" will now be saved as scripts/anesthesia.txt, and its summary as scripts/anesthesia_summary.txt. This will allow everyone to easily make directorial corrections or text cuts on the fly.
+The experiment did not work. AI often inadvertently breaks one of the fundamental prohibitions (more on that shortly). For this reason, version 8 reverted to simple .txt files — more intuitive and readable for everyone. For example, a project named "anesthesia" will now be saved as skrypty/anesthesia.txt, and its summary as skrypty/anesthesia_streszczenie.txt. This will allow everyone to easily make directorial corrections or text cuts on the fly.
 
 
 ⚠️ CRITICAL EDITOR RULE (READ BEFORE YOU START!) ⚠️
@@ -104,10 +104,10 @@ Edit dialogues, cut action, but leave the structure alone!
 
 How to Use Directing?
 
-- World Book (sidebar on the left): Here you enter the rules of the universe. Each project now has its own Book linked to the file name — if your story file is, for example, emilia_heist_audiobook.txt, the World Book will be saved as scripts/emilia_heist_audiobook.md. Therefore, the order is important: first enter the project file name in the "Project File Name" field, and only then can you save the Book. The "💾 Save the Book Permanently" button remains grayed out until you provide a name. Loading an existing project with the "Load History" button will automatically load the corresponding .md file — you don't have to do anything manually. Note: Without a filled World Book, the application will block sending queries to AI — this is a deliberate safeguard to protect you from generating text without any rules.
+- World Book (sidebar on the left): Here you enter the rules of the universe. Each project now has its own Book linked to the file name — if your story file is, for example, emilia_heist_audiobook.txt, the World Book will be saved as skrypty/emilia_heist_audiobook.md. Therefore, the order is important: first enter the project file name in the "Project File Name" field, and only then can you save the Book. The "💾 Save the Book Permanently" button remains grayed out until you provide a name. Loading an existing project with the "Load History" button will automatically load the corresponding .md file — you don't have to do anything manually. Note: Without a filled World Book, the application will block sending queries to AI — this is a deliberate safeguard to protect you from generating text without any rules.
 - Long-Term Memory (sidebar on the left): The second field in the sidebar. Here, AI automatically saves a summary of the plot when memory starts to overflow. You can also manually enter your own notes here — the model will treat them as "what I already know" before reading the current scene. HISTORICAL GAP (fixed in v15.5): previously, if you typed a very short note here and clicked "Save Summary (permanently)" before there was anything meaningful in the narration file, the next time you loaded the project the application would PRIORITIZE the summary and SKIP the full history — the model then received only the World Book and a one-sentence note, with no context for the tone or the latest scenes. Since v15.5, loading is intelligent: if the entire history fits within the context window, it is loaded in full (and the redundant old summary is deleted), so the model never loses context. And after manually editing the narration file in an editor, use the new "Refresh from disk" button (since v15.5), which synchronizes the internal memory with the disk in a single click; to simply open the file in the editor, "Open narration file…" is still the button to use.
 - Brainstorming Mode: Enter a loose idea, and AI will give you 3 options for plot development. For each option, it will immediately generate a ready block "--- PROMPT SKETCH ---". After choosing one, paste this prompt into Script or Audiobook Mode and make any comments or information for the model. The plot memory does not change during Brainstorming — you can experiment without risk!
-- Raw Script Mode: You paste the "Prompt Sketch" generated in Brainstorming here. AI will write a long fragment with full tags [Speaker X: Name - emotion] for dialogues and effects [SFX: ...] for sounds. The text is automatically appended to your file (e.g., new_scene.txt) in the scripts/ folder.
+- Raw Script Mode: You paste the "Prompt Sketch" generated in Brainstorming here. AI will write a long fragment with full tags [Speaker X: Name - emotion] for dialogues and effects [SFX: ...] for sounds. The text is automatically appended to your file (e.g., new_scene.txt) in the skrypty/ folder.
 - Traditional Audiobook Mode: A mode for writers. AI generates pure literary prose — zero tags, zero phonetics, classic dialogues woven into the narrative. The text is appended to the file just as in Script Mode.
 - Automatic Character Creation: The script is programmed to automatically create new [Speaker] tags if the plot requires a new character. Tip: If AI creates a cool character, copy its tag and paste it into the World Book so the model remembers it permanently!
 
@@ -181,7 +181,7 @@ The "Model Memory" indicator on the screen shows how much space your story alrea
 
 Infinite Memory (from version 6, retained)
 
-When the red alert lights up, you no longer have to manually copy the summary. Enter a command in Brainstorming containing the word "summary" — AI will generate a concise capsule of knowledge about the entire plot so far. Then click the "Save Summary (permanently)" button — the application automatically creates a _summary.txt file in the scripts/ folder and protects it from accidental overwriting. After saving, clear the memory and you can continue creating in the current file. Load the summary into the Long-Term Memory field before the next session — and you can continue the story indefinitely, without any length restrictions.
+When the red alert lights up, you no longer have to manually copy the summary. Enter a command in Brainstorming containing the word "summary" — AI will generate a concise capsule of knowledge about the entire plot so far. Then click the "Save Summary (permanently)" button — the application automatically creates a _streszczenie.txt file in the skrypty/ folder and protects it from accidental overwriting. After saving, clear the memory and you can continue creating in the current file. Load the summary into the Long-Term Memory field before the next session — and you can continue the story indefinitely, without any length restrictions.
 
 When to summarize (updated in v15.5): You no longer have to watch a rigid character threshold "before pausing work". It is best to summarize after the natural close of a larger structural part — after finishing a scene, an act, or a chapter. The reason: when you later manually fix the ending in the narration file and click "Refresh from disk", the application precisely restores the fresh fragment counted from the last header — while the summary of the earlier part stays untouched. This is all the more reason to keep the structure: regularly insert Act/Scene/Chapter headers from the structure panel (long forms with no acts or chapters at all, e.g. a single-stretch "modernist drama", are discouraged). EXCEPTION: if you are running a very long story COMPLETELY without headers, generating and saving the Story Summary before a break remains necessary — without markers the application can only restore the last fragment counted in characters.
 
@@ -369,7 +369,7 @@ How does it work?
 3. The script will scan each line of text and convert keywords (Act, Chapter, Prologue, Epilogue, Foreword) into "Heading 1" headers in the Word document.
 4. Scenes (lines starting with the word "Scene") are converted into bold text — visible in the document but invisible in the ElevenLabs table of contents.
 5. All remaining text (dialogues, descriptions) passes unchanged.
-6. You will receive a file named architecture_[original_name].docx — a professional Word document ready for further work. For example, if your input file was named anesthesia.txt, the resulting file will be named architecture_anesthesia.docx and will appear in the same folder as the original.
+6. You will receive a file named architektura_[original_name].docx — a professional Word document ready for further work. For example, if your input file was named anesthesia.txt, the resulting file will be named architektura_anesthesia.docx and will appear in the same folder as the original.
 
 Incidental Cleaning: The script automatically removes HTML tags (if the text comes from a browser or a local .html file, e.g., generated by Polyglot) and Markdown header markers (e.g., ### or ####) before processing. You don't need to clean the file manually.
 
@@ -468,7 +468,7 @@ Automatic .txt to .html Conversion in Translator Mode (CHANGE)
 Text files (.txt and .md) translated by the AI Translator are now automatically saved in .html format with an embedded language tag. This allows NVDA to immediately read the file with the correct voice — without any additional steps from the user.
 
 Intelligent File Naming in Architect (CHANGE)
-The Audiobook Architect no longer saves the resulting file under the same name architecture_ready.docx. Now, the name is derived from the input file — for example, for znieczulica.txt, the resulting file is architecture_znieczulica.docx. The file appears in the same folder as the original.
+The Audiobook Architect no longer saves the resulting file under the same name architektura_ready.docx. Now, the name is derived from the input file — for example, for znieczulica.txt, the resulting file is architektura_znieczulica.docx. The file appears in the same folder as the original.
 
 Features Retained Without Changes from Version 8
 
@@ -496,7 +496,7 @@ Cleaning Parenthetical Directorial Stage Directions (Polyglot — Director Mode)
 The script removes entire text fragments enclosed in parentheses (e.g., "(whispering)", "(with interspersed breaths)"). ElevenLabs reads only dialogues and narration.
 
 Infinite Memory and Automatic Summarization (Directing — Story Accumulator)
-When the memory indicator enters a red alert state, Brainstorming automatically generates a plot summary and saves it to the Long-Term Memory field. Clicking "Save Summary (permanently)" creates a _summary.txt file. After clearing memory and loading the summary, you can continue the story without any length restrictions.
+When the memory indicator enters a red alert state, Brainstorming automatically generates a plot summary and saves it to the Long-Term Memory field. Clicking "Save Summary (permanently)" creates a _streszczenie.txt file. After clearing memory and loading the summary, you can continue the story without any length restrictions.
 
 Audiobook Architect
 The tool supports keywords Act, Chapter, Prologue, Epilogue, and Opening as first-level headers. Scenes are converted into bold text. The script automatically cleans HTML tags and Markdown markers before processing.
@@ -515,8 +515,8 @@ Script to Audiobook Adaptation (Script Mode) — removed for financial reasons. 
 Features from Version 10.0 (retained without changes in versions 11.0 and 12.0)
 
 - Automatic golden_key.env configuration file generator built directly into the main application interface. The user no longer needs to manually create the file or worry about the .txt extension trap — just one click of the button available on the start screen, and the system creates a clean, ready file in the right place.
-- Complete removal of the outdated repair_api.bat script, which is no longer needed. The problem this script solved (incorrect file extension assigned by Notepad) is now completely eliminated thanks to the built-in generator.
-- Multi-book World Book — each project now has its own lore file (NEW). Previously, there was one shared file, my_lore.md, which was loaded every time the application was launched — regardless of which project you were working on. From version 10, the World Book is strictly tied to the project file name: if your story is scripts/emilia_heist_audiobook.txt, its Book is scripts/emilia_heist_audiobook.md. The "Save Book Permanently" button is grayed out until you enter the file name — the order is intentional and enforced by the interface. Clicking "Load Story" automatically loads the corresponding .md file from the disk, if it exists. The change also has a practical organizational dimension: you can now run several projects simultaneously, each with its own isolated world rules and character list — without the risk of Emilia from the heist suddenly ending up in a space opera.
+- Complete removal of the outdated napraw_api.bat script, which is no longer needed. The problem this script solved (incorrect file extension assigned by Notepad) is now completely eliminated thanks to the built-in generator.
+- Multi-book World Book — each project now has its own lore file (NEW). Previously, there was one shared file, moje_lore.md, which was loaded every time the application was launched — regardless of which project you were working on. From version 10, the World Book is strictly tied to the project file name: if your story is skrypty/emilia_heist_audiobook.txt, its Book is skrypty/emilia_heist_audiobook.md. The "Save Book Permanently" button is grayed out until you enter the file name — the order is intentional and enforced by the interface. Clicking "Load Story" automatically loads the corresponding .md file from the disk, if it exists. The change also has a practical organizational dimension: you can now run several projects simultaneously, each with its own isolated world rules and character list — without the risk of Emilia from the heist suddenly ending up in a space opera.
 
 
 New Features and Changes in Version 11.0

@@ -82,7 +82,7 @@ tresc:
     1. Erstellen Sie ein Konto auf platform.openai.com und laden Sie Ihr Konto im Bereich "Billing" auf.
     2. Generieren Sie einen Schlüssel im Bereich "API Keys" (beginnt mit sk-proj-). Achtung: Der Schlüssel wird nur einmal angezeigt — im Moment der Erstellung. Wenn Sie das Fenster schließen, ohne ihn zu kopieren, geht er unwiderruflich verloren und Sie müssen ihn sperren (Option "revoke secret key") und einen neuen generieren. Kopieren Sie ihn sofort, bevor Sie irgendetwas anklicken.
     3. Klicken Sie auf dem Startbildschirm des Programms auf die Schaltfläche "{home.btn_generate}". Das System erstellt automatisch eine leere Konfigurationsdatei an der richtigen Stelle und öffnet den Notizblock mit einer Vorlage, die zur Bearbeitung bereit ist.
-    4. In der geöffneten Datei sehen Sie die Zeile OPENAI_API_KEY=HIER_IHREN_SCHLÜSSEL_EINFÜGEN. Entfernen Sie den Platzhaltertext und fügen Sie Ihren kopierten Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
+    4. In der geöffneten Datei sehen Sie die Zeile OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Entfernen Sie den Platzhaltertext und fügen Sie Ihren kopierten Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
 
     Tipp: Nach dem Neustart überprüft die Anwendung die Datei und zeigt eine grüne Meldung im Abschnitt "{home.heading_system_check}" an — das bedeutet, dass alle KI-Module einsatzbereit sind. Andernfalls wird Ihnen klar mitgeteilt, was nicht stimmt, und Sie können den Texteditor öffnen, um den Fehler schnell zu beheben.
   krok_3_glowne_studio: |
@@ -194,7 +194,7 @@ tresc:
 
     Unendlicher Speicher (aus Version 6, beibehalten)
 
-    Wenn der rote Alarm aufleuchtet, müssen Sie nicht mehr manuell eine Zusammenfassung kopieren. Geben Sie im Brainstorming-Modus einen Befehl ein, der das Wort "Zusammenfassung" oder "Resümee" enthält — die KI generiert eine prägnante Wissenskapsel über die gesamte bisherige Handlung. Klicken Sie dann auf die Schaltfläche "Zusammenfassung speichern (dauerhaft)" — die Anwendung erstellt automatisch eine Datei _zusammenfassung.txt im Ordner skripty/ und schützt sie vor versehentlichem Überschreiben. Nach dem Speichern leeren Sie den Speicher und können im aktuellen Dokument weiterarbeiten. Die Zusammenfassung laden Sie vor der nächsten Sitzung in das Feld für Langzeitspeicher — und Sie können die Geschichte unendlich fortsetzen, ohne Längenbeschränkungen.
+    Wenn der rote Alarm aufleuchtet, müssen Sie nicht mehr manuell eine Zusammenfassung kopieren. Geben Sie im Brainstorming-Modus einen Befehl ein, der das Wort "Zusammenfassung" oder "Resümee" enthält — die KI generiert eine prägnante Wissenskapsel über die gesamte bisherige Handlung. Klicken Sie dann auf die Schaltfläche "Zusammenfassung speichern (dauerhaft)" — die Anwendung erstellt automatisch eine Datei _streszczenie.txt im Ordner skripty/ und schützt sie vor versehentlichem Überschreiben. Nach dem Speichern leeren Sie den Speicher und können im aktuellen Dokument weiterarbeiten. Die Zusammenfassung laden Sie vor der nächsten Sitzung in das Feld für Langzeitspeicher — und Sie können die Geschichte unendlich fortsetzen, ohne Längenbeschränkungen.
 
     Wann zusammenfassen (aktualisiert in v15.5): Sie müssen keine starre Zeichengrenze „vor dem Beenden der Arbeit" mehr einhalten. Am besten fassen Sie nach dem natürlichen Abschluss eines größeren strukturellen Teils zusammen — nach dem Ende einer Szene, eines Akts oder eines Kapitels. Der Grund: Wenn Sie später das Ende in der Erzählungsdatei manuell korrigieren und auf „{rezyser.btn_odswiez_z_dysku_label}" klicken, stellt die Anwendung präzise das frische Fragment wieder her, das ab der letzten Überschrift gezählt wird — und die Zusammenfassung des früheren Teils bleibt unberührt. Deshalb lohnt es sich umso mehr, die Struktur einzuhalten: Fügen Sie regelmäßig Überschriften Kapitel/Akt/Szene aus dem Strukturpanel ein (lange Formen ganz ohne Akte oder Kapitel, z.B. ein „modernistisches Drama" in einem Zug, sind nicht zu empfehlen). AUSNAHME: Wenn Sie eine sehr lange Geschichte VÖLLIG ohne Überschriften führen, bleibt das Generieren und Speichern einer Zusammenfassung vor einer Pause notwendig — ohne Marker kann die Anwendung nur das letzte, in Zeichen gezählte Fragment wiederherstellen.
 
@@ -378,7 +378,7 @@ tresc:
     3. Das Skript scannt jede Textzeile und wandelt Schlüsselwörter (Akt, Kapitel, Prolog, Epilog, Vorspann) in "Überschrift 1" im Word-Dokument um.
     4. Szenen (Zeilen, die mit dem Wort "Szene" beginnen) werden in fettgedruckten Text umgewandelt — sichtbar im Dokument, aber unsichtbar im Inhaltsverzeichnis von ElevenLabs.
     5. Der gesamte übrige Text (Dialoge, Beschreibungen) bleibt unverändert.
-    6. Du erhältst eine Datei architektur_[originalname].docx — ein professionelles Word-Dokument, bereit für die weitere Bearbeitung. Wenn deine Eingabedatei beispielsweise znieczulica.txt hieß, wird die Ergebnisdatei architektur_znieczulica.docx heißen und im selben Ordner wie das Original erscheinen.
+    6. Du erhältst eine Datei architektura_[originalname].docx — ein professionelles Word-Dokument, bereit für die weitere Bearbeitung. Wenn deine Eingabedatei beispielsweise znieczulica.txt hieß, wird die Ergebnisdatei architektura_znieczulica.docx heißen und im selben Ordner wie das Original erscheinen.
 
     Automatische Bereinigung: Das Skript entfernt automatisch HTML-Tags (wenn der Text aus einem Browser oder einer lokalen .html-Datei stammt, z.B. von Poliglot generiert) sowie Markdown-Überschriften (z.B. ### oder ####) vor der Verarbeitung. Du musst die Datei nicht manuell bereinigen.
 
@@ -498,7 +498,7 @@ tresc:
     Das Skript entfernt ganze Textabschnitte, die in runde Klammern gesetzt sind (z.B. "(flüsternd)", "(mit eingeflochtenen Atemzügen)"). ElevenLabs liest nur Dialoge und Erzählungen.
 
     Unendlicher Speicher und automatisches Zusammenfassen (Regie — Geschichtenspeicher)
-    Wenn der Speicherindikator in den roten Alarmzustand wechselt, generiert das Brainstorming automatisch eine Zusammenfassung der Handlung und speichert sie im Feld für Langzeitspeicher. Ein Klick auf "Zusammenfassung speichern (dauerhaft)" erstellt die Datei _zusammenfassung.txt. Nach dem Löschen des Speichers und dem Laden der Zusammenfassung kann die Geschichte ohne Längenbeschränkungen fortgesetzt werden.
+    Wenn der Speicherindikator in den roten Alarmzustand wechselt, generiert das Brainstorming automatisch eine Zusammenfassung der Handlung und speichert sie im Feld für Langzeitspeicher. Ein Klick auf "Zusammenfassung speichern (dauerhaft)" erstellt die Datei _streszczenie.txt. Nach dem Löschen des Speichers und dem Laden der Zusammenfassung kann die Geschichte ohne Längenbeschränkungen fortgesetzt werden.
 
     Audiobook-Architekt
     Das Tool unterstützt die Schlüsselwörter Akt, Kapitel, Prolog, Epilog und Vorspann als Überschriften der ersten Ebene. Szenen werden in Fettschrift umgewandelt. Das Skript bereinigt automatisch HTML-Tags und Markdown-Markierungen vor der Verarbeitung.

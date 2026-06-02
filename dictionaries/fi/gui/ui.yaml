@@ -889,10 +889,10 @@ updater:
 
     Haluatko ladata ja asentaa päivityksen nyt?
   # Przyciski w DialogAktualizacji
-  btn_pobierz:              "&Lataa ja asenna"
-  btn_otworz_dictionaries:  "&Avaa dictionaries-kansio"
-  btn_anuluj:               "&Peruuta"
-  blad_otworz_folder:       "Kansiota ei voitu avata:\n{sciezka}\n\n{tresc_bledu}"
+  btn_pobierz: "&Lataa ja asenna"
+  btn_otworz_dictionaries: "&Avaa dictionaries-kansio"
+  btn_anuluj: "&Peruuta"
+  blad_otworz_folder: "Kansiota ei voitu avata:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Ladataan päivitystä {nowa_wersja}"
   pobieranie_tresc: "Ladataan {nazwa_pliku}…"
@@ -1102,3 +1102,15 @@ opowiesci:
   odswiez_streszczenie_tresc: "Moottorin konteksti päivitetty tuoreella lopulla levyltä. Aiempien kierrosten yhteenveto jäi koskemattomaksi, joten seuraava yhteenveto ja kierros eivät synny vanhentuneista tiedoista.\n\nHUOMIO: pelin tilaa .game.json-tiedostossa EI muutettu — jos maailman faktat muuttuvat, seuraava kierros voi poiketa."
   odswiez_zajete_tytul: "Toiminto käynnissä"
   odswiez_zajete_tresc: "Kierroksen tai yhteenvedon luonti on käynnissä. Odota sen valmistumista, ennen kuin päivität kertomuksen levyltä."
+  btn_edytuj_stan_label: Muokkaa &peliä…
+  btn_edytuj_stan_tooltip: 'Avaa pelitilan raakamuotoinen tiedosto (.game.json) suoraan muokattavaksi JSON-validoinnilla varustetussa ikkunassa. Edistyneille käyttäjille: mahdollistaa hahmojen, sijainnin, varusteiden, juonien ja laskureiden manuaalisen korjaamisen, kun kerronnan manuaalinen muokkaus on erkaantunut rakenteellisesta tilasta. VAROITUS: virheellinen muokkaus voi vahingoittaa tallennusta — muutokset validoidaan JSON-muodossa ennen tallennusta, mutta sisällön oikeellisuus (kenttien järkevyys) on omalla vastuullasi.'
+  dlg_edytuj_stan_tytul: Pelitilan muokkaus (.game.json)
+  dlg_edytuj_stan_lbl: 'Pelitilan raakamuotoinen JSON. Muokkaa varoen: tallennuksen jälkeen peli ladataan uudelleen tästä tiedostosta. Sisällön on pysyttävä kelvollisena JSON-objektina — muuten tallennus hylätään.'
+  dlg_edytuj_stan_name: Pelitilan raakamuotoisen JSON-tiedoston muokkauskenttä
+  dlg_edytuj_stan_btn_ok: '&Tallenna ja lataa uudelleen'
+  dlg_edytuj_stan_btn_anuluj: '&Peruuta'
+  edytuj_stan_blad_json_tytul: Virheellinen JSON
+  edytuj_stan_blad_json_tresc: "Sisältö ei ole kelvollinen JSON, joten sitä ei tallennettu (peli vahingoittuisi). Korjaa syntaksi ja yritä uudelleen.\n\nVirheen yksityiskohdat:\n{tresc_bledu}"
+  edytuj_stan_blad_typ_tresc: Pelitilan pääelementin on oltava JSON-objekti (avain–arvopari aaltosulkeissa), ei lista tai yksinkertainen arvo. Palauta objektin rakenne ja yritä uudelleen.
+  edytuj_stan_zapisano_tytul: Pelitila tallennettu
+  edytuj_stan_zapisano_tresc: Pelitila "{nazwa}" on tallennettu ja ladattu uudelleen levyltä. Hahmot, sijainti, varusteet, juonet ja laskurit heijastavat nyt muokkauksiasi.

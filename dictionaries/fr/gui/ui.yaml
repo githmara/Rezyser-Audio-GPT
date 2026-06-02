@@ -535,13 +535,13 @@ rezyser:
   blad_otwarcia_tresc: "La tentative d'ouverture du fichier {sciezka_pliku} a échoué :\n{tresc_bledu}\n\nOuvrez le fichier manuellement depuis l'Explorateur de fichiers."
   plik_narracji_brak_tytul: Fichier de narration manquant
   plik_narracji_brak_tresc: Le fichier de narration du projet « {nazwa_projektu} » n'existe pas sur le disque. Chargez d'abord le projet ou envoyez la première requête à l'IA pour que le fichier soit créé.
-  btn_odswiez_z_dysku_label:   "&Actualiser depuis le disque"
+  btn_odswiez_z_dysku_label: "&Actualiser depuis le disque"
   btn_odswiez_z_dysku_tooltip: "Recharge le fichier de narration (skrypty/<nom>.txt) et synchronise la mémoire interne avec les modifications manuelles — sans réinitialisation complète ni rechargement du projet. La narration courte est chargée intégralement ; la narration longue avec résumé est tronquée à la fin depuis le dernier en-tête (Chapitre/Acte/Scène), en conservant le résumé. NE modifie NI la Bible du Monde NI les compteurs de structure."
-  odswiez_z_dysku_tytul:       "Mémoire actualisée depuis le disque"
-  odswiez_calosc_tresc:        "Toute la narration a été chargée depuis le disque ({liczba_znakow} caractères). La mémoire interne est synchronisée avec le fichier.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
+  odswiez_z_dysku_tytul: "Mémoire actualisée depuis le disque"
+  odswiez_calosc_tresc: "Toute la narration a été chargée depuis le disque ({liczba_znakow} caractères). La mémoire interne est synchronisée avec le fichier.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
   odswiez_calosc_skasowano_tresc: "Toute la narration a été chargée depuis le disque ({liczba_znakow} caractères) — l'intégralité du texte tient dans la fenêtre contextuelle, le résumé devenu superflu a donc été supprimé (le moteur travaille sur l'histoire complète).\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
-  odswiez_snap_tresc:          "La fin de la narration a été restaurée depuis l'en-tête {naglowek} ({liczba_znakow} caractères). La partie précédente est représentée par le résumé existant, laissé intact.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
-  odswiez_koncowka_tresc:      "Texte long et sans en-têtes de structure — le dernier fragment de la narration a été restauré ({liczba_znakow} caractères), le résumé est laissé intact. RECOMMANDATION : insérez des en-têtes Chapitre/Acte/Scène pour que l'actualisation tombe sur une limite de scène.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
+  odswiez_snap_tresc: "La fin de la narration a été restaurée depuis l'en-tête {naglowek} ({liczba_znakow} caractères). La partie précédente est représentée par le résumé existant, laissé intact.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
+  odswiez_koncowka_tresc: "Texte long et sans en-têtes de structure — le dernier fragment de la narration a été restauré ({liczba_znakow} caractères), le résumé est laissé intact. RECOMMANDATION : insérez des en-têtes Chapitre/Acte/Scène pour que l'actualisation tombe sur une limite de scène.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -884,10 +884,10 @@ updater:
 
     Voulez-vous télécharger et installer la mise à jour maintenant ?
   # Przyciski w DialogAktualizacji
-  btn_pobierz:              "&Télécharger et installer"
-  btn_otworz_dictionaries:  "&Ouvrir le dossier dictionaries"
-  btn_anuluj:               "&Annuler"
-  blad_otworz_folder:       "Impossible d'ouvrir le dossier :\n{sciezka}\n\n{tresc_bledu}"
+  btn_pobierz: "&Télécharger et installer"
+  btn_otworz_dictionaries: "&Ouvrir le dossier dictionaries"
+  btn_anuluj: "&Annuler"
+  blad_otworz_folder: "Impossible d'ouvrir le dossier :\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Téléchargement de la mise à jour {nowa_wersja}"
   pobieranie_tresc: "Téléchargement de {nazwa_pliku}…"
@@ -1090,10 +1090,22 @@ opowiesci:
   blad_otwarcia_tresc: "La tentative d'ouverture du fichier {sciezka_pliku} a échoué :\n{tresc_bledu}\n\nOuvrez le fichier manuellement depuis l'Explorateur de fichiers."
   plik_narracji_brak_tytul: Fichier de narration manquant
   plik_narracji_brak_tresc: Le fichier de narration du jeu « {nazwa} » n'existe pas sur le disque. Le fichier de narration est créé après le premier tour — envoyez la première action pour que le moteur narratif crée le fichier.
-  btn_odswiez_z_dysku_label:   "&Actualiser depuis le disque"
+  btn_odswiez_z_dysku_label: "&Actualiser depuis le disque"
   btn_odswiez_z_dysku_tooltip: "Recharge le fichier de narration (opowiesci/<nom>.txt) et synchronise la mémoire interne avec les modifications manuelles — sans réinitialisation complète ni rechargement du jeu. La fin fraîche est injectée dans le contexte du moteur ; le résumé existant des tours précédents reste intact. ATTENTION : l'état du jeu (personnages, emplacement, inventaire) dans le .game.json N'est PAS mis à jour — le prochain tour peut diverger en cas de changement des faits du monde."
-  odswiez_z_dysku_tytul:       "Narration actualisée depuis le disque"
-  odswiez_calosc_tresc:        "La narration a été rechargée depuis le disque, le contexte du moteur est synchronisé avec la fin du texte.\n\nATTENTION : l'état du jeu (personnages, emplacement, inventaire, intrigues) dans le .game.json N'a PAS été modifié — si l'édition a changé les faits du monde, le prochain tour peut diverger."
-  odswiez_streszczenie_tresc:  "Le contexte du moteur a été actualisé avec la fin fraîche du disque. Le résumé des tours précédents est intact, le prochain résumé et le prochain tour ne seront donc pas construits sur des données obsolètes.\n\nATTENTION : l'état du jeu dans le .game.json N'a PAS été modifié — en cas de changement des faits du monde, le prochain tour peut diverger."
-  odswiez_zajete_tytul:        "Opération en cours"
-  odswiez_zajete_tresc:        "Un tour ou un résumé est en cours de génération. Attendez la fin avant d'actualiser la narration depuis le disque."
+  odswiez_z_dysku_tytul: "Narration actualisée depuis le disque"
+  odswiez_calosc_tresc: "La narration a été rechargée depuis le disque, le contexte du moteur est synchronisé avec la fin du texte.\n\nATTENTION : l'état du jeu (personnages, emplacement, inventaire, intrigues) dans le .game.json N'a PAS été modifié — si l'édition a changé les faits du monde, le prochain tour peut diverger."
+  odswiez_streszczenie_tresc: "Le contexte du moteur a été actualisé avec la fin fraîche du disque. Le résumé des tours précédents est intact, le prochain résumé et le prochain tour ne seront donc pas construits sur des données obsolètes.\n\nATTENTION : l'état du jeu dans le .game.json N'a PAS été modifié — en cas de changement des faits du monde, le prochain tour peut diverger."
+  odswiez_zajete_tytul: "Opération en cours"
+  odswiez_zajete_tresc: "Un tour ou un résumé est en cours de génération. Attendez la fin avant d'actualiser la narration depuis le disque."
+  btn_edytuj_stan_label: Modifier l'état du &jeu…
+  btn_edytuj_stan_tooltip: "Ouvre le fichier brut de l'état du jeu (.game.json) pour une édition directe dans une fenêtre avec validation JSON. Pour les avancés : permet de corriger manuellement les personnages, la localisation, l'équipement, les intrigues et les compteurs lorsque l'édition manuelle de la narration ne correspond plus à l'état structurel. ATTENTION : une édition incorrecte peut endommager la sauvegarde — les modifications sont validées en tant que JSON avant l'enregistrement, mais la validité du contenu (pertinence des champs) est de votre responsabilité."
+  dlg_edytuj_stan_tytul: Édition de l'état du jeu (.game.json)
+  dlg_edytuj_stan_lbl: "État brut du jeu au format JSON. Éditez avec précaution : après l'enregistrement, le jeu sera rechargé à partir de ce fichier. Le contenu doit rester un objet JSON valide — sinon, l'enregistrement sera rejeté."
+  dlg_edytuj_stan_name: Champ d'édition de l'état brut du jeu au format JSON
+  dlg_edytuj_stan_btn_ok: '&Enregistrer et recharger'
+  dlg_edytuj_stan_btn_anuluj: '&Annuler'
+  edytuj_stan_blad_json_tytul: JSON invalide
+  edytuj_stan_blad_json_tresc: "Le contenu n'est pas un JSON valide, il n'a donc pas été enregistré (le jeu serait endommagé). Corrigez la syntaxe et réessayez.\n\nDétails de l'erreur :\n{tresc_bledu}"
+  edytuj_stan_blad_typ_tresc: L'élément principal de l'état du jeu doit être un objet JSON (paire clé-valeur entre accolades), et non une liste ou une valeur simple. Rétablissez la structure de l'objet et réessayez.
+  edytuj_stan_zapisano_tytul: État du jeu enregistré
+  edytuj_stan_zapisano_tresc: L'état du jeu «{nazwa}» a été enregistré et rechargé depuis le disque. Les personnages, la localisation, l'équipement, les intrigues et les compteurs reflètent maintenant votre édition.

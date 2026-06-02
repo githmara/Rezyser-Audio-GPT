@@ -82,7 +82,7 @@ tresc:
     1. Crea una cuenta en platform.openai.com y recarga tu cuenta en la pestaña de Facturación.
     2. Genera una clave en la pestaña de Claves API (comienza con sk-proj-). Atención: la clave se muestra solo una vez, en el momento de su creación. Si cierras la ventana sin copiarla, se perderá para siempre y tendrás que revocarla (opción revocar clave secreta) y generar una nueva. Cópiela inmediatamente antes de hacer cualquier clic.
     3. En la pantalla de inicio del programa, haz clic en el botón "{home.btn_generate}". El sistema creará automáticamente un archivo de configuración limpio en el lugar adecuado y abrirá el Bloc de notas con una plantilla lista para editar.
-    4. En el archivo abierto, verás la línea OPENAI_API_KEY=AQUÍ_PEGA_TU_CLAVE. Elimina el texto de marcador de posición y pega tu clave copiada directamente después del signo igual (sin espacios). Guarda el archivo y reinicia la aplicación.
+    4. En el archivo abierto, verás la línea OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina el texto de marcador de posición y pega tu clave copiada directamente después del signo igual (sin espacios). Guarda el archivo y reinicia la aplicación.
 
     Consejo: Después de reiniciar, la aplicación verificará el archivo y mostrará un mensaje verde en la sección "{home.heading_system_check}", lo que significa que todos los módulos de IA están listos para funcionar. De lo contrario, te indicará claramente qué está mal y te permitirá abrir el editor de texto para corregir rápidamente el error.
   krok_3_glowne_studio: |
@@ -96,7 +96,7 @@ tresc:
 
     En la versión 7, los archivos de proyectos se guardaban en formato Markdown (.md), por ejemplo, guiones/insensibilidad.md. Fue un experimento deliberado: el formato .md debía ser una barrera psicológica para las personas no técnicas, desalentándolas de abrir y editar manualmente el archivo en el Bloc de notas (y así evitar dañar accidentalmente los encabezados de la estructura).
 
-    El experimento no funcionó. La IA a menudo rompe uno de los tabúes fundamentales (más sobre esto en un momento). Por esta razón, en la versión 8 se ha vuelto a los simples archivos .txt, más intuitivos y legibles para todos. Por ejemplo, un proyecto llamado "insensibilidad" ahora se guardará como guiones/insensibilidad.txt, y su resumen como guiones/insensibilidad_resumen.txt. Esto permitirá a todos realizar correcciones o cortes de texto más fácilmente y al instante.
+    El experimento no funcionó. La IA a menudo rompe uno de los tabúes fundamentales (más sobre esto en un momento). Por esta razón, en la versión 8 se ha vuelto a los simples archivos .txt, más intuitivos y legibles para todos. Por ejemplo, un proyecto llamado "insensibilidad" ahora se guardará como guiones/insensibilidad.txt, y su resumen como guiones/insensibilidad_streszczenie.txt. Esto permitirá a todos realizar correcciones o cortes de texto más fácilmente y al instante.
 
 
     ⚠️ REGLA CRÍTICA DEL EDITOR (¡LEE ANTES DE EMPEZAR!) ⚠️
@@ -192,7 +192,7 @@ tresc:
 
     Memoria Infinita (desde la versión 6, conservada)
 
-    Cuando se enciende la alarma roja, ya no necesitas copiar manualmente el resumen. Escribe en la Tormenta de Ideas un comando que contenga la palabra "resumen" o "síntesis" — la IA generará una cápsula concisa de conocimiento sobre toda la trama hasta el momento. Luego haz clic en el botón "Guardar Resumen (permanente)" — la aplicación crea automáticamente un archivo _resumen.txt en la carpeta guiones/ y lo protege contra sobrescritura accidental. Después de guardar, limpia la memoria y puedes continuar creando en el archivo actual. Cargarás el resumen en el campo de Memoria a Largo Plazo antes de la próxima sesión — y puedes continuar la historia indefinidamente, sin ninguna restricción de longitud.
+    Cuando se enciende la alarma roja, ya no necesitas copiar manualmente el resumen. Escribe en la Tormenta de Ideas un comando que contenga la palabra "resumen" o "síntesis" — la IA generará una cápsula concisa de conocimiento sobre toda la trama hasta el momento. Luego haz clic en el botón "Guardar Resumen (permanente)" — la aplicación crea automáticamente un archivo _streszczenie.txt en la carpeta guiones/ y lo protege contra sobrescritura accidental. Después de guardar, limpia la memoria y puedes continuar creando en el archivo actual. Cargarás el resumen en el campo de Memoria a Largo Plazo antes de la próxima sesión — y puedes continuar la historia indefinidamente, sin ninguna restricción de longitud.
 
     Cuándo resumir (actualizado en la v15.5): Ya no tienes que vigilar un umbral rígido de caracteres „antes de terminar de trabajar". Lo mejor es resumir tras el cierre natural de una parte estructural mayor — al terminar una escena, un acto o un capítulo. Motivo: cuando más tarde corrijas manualmente la cola en el archivo de narración y pulses „{rezyser.btn_odswiez_z_dysku_label}", la aplicación reconstruirá con precisión el fragmento fresco contado desde el último encabezado — y el resumen de la parte anterior quedará intacto. Por eso conviene aún más mantener la estructura: inserta con regularidad encabezados Capítulo/Acto/Escena desde el panel de estructura (se desaconsejan las formas largas sin ningún acto ni capítulo, por ejemplo „drama modernista" de un solo tirón). EXCEPCIÓN: si llevas una historia muy larga COMPLETAMENTE sin encabezados, generar y guardar un Resumen antes de la pausa sigue siendo necesario — sin marcadores, la aplicación solo puede reconstruir el último fragmento contado en caracteres.
 
@@ -358,7 +358,7 @@ tresc:
     3. El script escaneará cada línea de texto y convertirá las palabras clave (Acto, Capítulo, Prólogo, Epílogo, Introducción) en encabezados "Heading 1" en el documento de Word.
     4. Las escenas (líneas que comienzan con la palabra "Escena") se convierten en texto en negrita — visible en el documento, pero invisible en el índice de contenido de ElevenLabs.
     5. Todo el texto restante (diálogos, descripciones) pasa sin cambios.
-    6. Recibirás un archivo arquitectura_[nombre_original].docx — un Word profesional listo para más trabajo. Por ejemplo, si tu archivo de entrada se llamaba insensibilidad.txt, el archivo resultante se llamará arquitectura_insensibilidad.docx y aparecerá en la misma carpeta que el original.
+    6. Recibirás un archivo architektura_[nombre_original].docx — un Word profesional listo para más trabajo. Por ejemplo, si tu archivo de entrada se llamaba insensibilidad.txt, el archivo resultante se llamará architektura_insensibilidad.docx y aparecerá en la misma carpeta que el original.
 
     Limpieza de paso: El script elimina automáticamente las etiquetas HTML (si el texto proviene de un navegador o de un archivo .html local, por ejemplo, generado por Políglota) y los marcadores de encabezados Markdown (por ejemplo, ### o ####) antes del procesamiento. No necesitas limpiar el archivo manualmente.
 
@@ -434,7 +434,7 @@ tresc:
     Los archivos de texto (.txt y .md) traducidos por el Traductor AI ahora se guardan automáticamente en formato .html con una etiqueta de idioma incorporada. Esto permite que NVDA lea el archivo con la voz adecuada de inmediato, sin pasos adicionales por parte del usuario.
 
     Nombramiento inteligente de archivos en el Arquitecto (CAMBIO)
-    El Arquitecto de Audiolibros ya no guarda el archivo resultante siempre con el mismo nombre arquitectura_lista.docx. Ahora el nombre se deriva del archivo de entrada, por ejemplo, para insensibilidad.txt, el archivo resultante es arquitectura_insensibilidad.docx. El archivo aparece en la misma carpeta que el original.
+    El Arquitecto de Audiolibros ya no guarda el archivo resultante siempre con el mismo nombre architektura_lista.docx. Ahora el nombre se deriva del archivo de entrada, por ejemplo, para insensibilidad.txt, el archivo resultante es architektura_insensibilidad.docx. El archivo aparece en la misma carpeta que el original.
 
     Funciones mantenidas sin cambios desde la versión 8
 
@@ -462,7 +462,7 @@ tresc:
     El script elimina fragmentos completos de texto entre paréntesis redondos (por ejemplo, "(en susurros)", "(con respiraciones entrecortadas)"). ElevenLabs solo lee diálogos y narración.
 
     Memoria Infinita y Resumen Automático (Dirección — Acumulador de Trama)
-    Cuando el indicador de memoria entra en estado de alerta roja, Brainstorming genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo. Hacer clic en "Guardar Resumen (permanentemente)" crea un archivo _resumen.txt. Después de limpiar la memoria y cargar el resumen, se puede continuar la historia sin restricciones de longitud.
+    Cuando el indicador de memoria entra en estado de alerta roja, Brainstorming genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo. Hacer clic en "Guardar Resumen (permanentemente)" crea un archivo _streszczenie.txt. Después de limpiar la memoria y cargar el resumen, se puede continuar la historia sin restricciones de longitud.
 
     Arquitecto de Audiolibros
     La herramienta admite palabras clave como Acto, Capítulo, Prólogo, Epílogo y Apertura como encabezados de primer nivel. Las escenas se convierten en texto en negrita. El script limpia automáticamente las etiquetas HTML y los marcadores Markdown antes del procesamiento.
@@ -482,7 +482,7 @@ tresc:
 
     - Generador automático de archivo de configuración golden_key.env integrado directamente en la interfaz principal de la aplicación. El usuario ya no necesita crear manualmente el archivo ni preocuparse por la trampa de extensión .txt: basta con un clic en el botón disponible en la pantalla de inicio, y el sistema crea un archivo limpio y listo en el lugar correcto.
     - Eliminación completa del script obsoleto napraw_api.bat, que ya no es necesario. El problema que resolvía este script (extensión de archivo incorrecta asignada por el Bloc de notas) ahora está completamente eliminado gracias al generador integrado.
-    - Multilibro del Libro del Mundo — cada proyecto tiene ahora su propio archivo de lore (NUEVO). Anteriormente existía un único archivo compartido mi_lore.md que se cargaba cada vez que se iniciaba la aplicación, independientemente del proyecto en el que estuvieras trabajando. Desde la versión 10, el Libro del Mundo está estrechamente vinculado al nombre del archivo del proyecto: si tu historia es scripts/emilia_heist_audiobook.txt, su Libro es scripts/emilia_heist_audiobook.md. El botón "Guardar Libro permanentemente" está desactivado hasta que ingreses el nombre del archivo: el orden es intencional y forzado por la interfaz. Hacer clic en "Cargar historia" carga automáticamente el archivo .md correspondiente desde el disco, si existe. El cambio también tiene un aspecto práctico organizativo: ahora puedes llevar varios proyectos al mismo tiempo, y cada uno tendrá sus propias reglas de mundo y lista de personajes aisladas, sin riesgo de que Emilia del atraco al tesoro termine de repente en una ópera espacial.
+    - Multilibro del Libro del Mundo — cada proyecto tiene ahora su propio archivo de lore (NUEVO). Anteriormente existía un único archivo compartido mi_lore.md que se cargaba cada vez que se iniciaba la aplicación, independientemente del proyecto en el que estuvieras trabajando. Desde la versión 10, el Libro del Mundo está estrechamente vinculado al nombre del archivo del proyecto: si tu historia es skrypty/emilia_heist_audiobook.txt, su Libro es skrypty/emilia_heist_audiobook.md. El botón "Guardar Libro permanentemente" está desactivado hasta que ingreses el nombre del archivo: el orden es intencional y forzado por la interfaz. Hacer clic en "Cargar historia" carga automáticamente el archivo .md correspondiente desde el disco, si existe. El cambio también tiene un aspecto práctico organizativo: ahora puedes llevar varios proyectos al mismo tiempo, y cada uno tendrá sus propias reglas de mundo y lista de personajes aisladas, sin riesgo de que Emilia del atraco al tesoro termine de repente en una ópera espacial.
   changelog_11: |
     Nuevas funciones y cambios en la versión 11.0
 

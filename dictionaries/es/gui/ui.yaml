@@ -536,13 +536,13 @@ rezyser:
   plik_narracji_brak_tresc: El archivo de narración del proyecto "{nazwa_projektu}" no existe en el disco. Primero carga el proyecto o envía la primera consulta a la IA para que se cree el archivo.
   # v15.5: Actualizar desde el disco — sincroniza la memoria interna tras la
   # edición manual de skrypty/<nazwa>.txt (p. ej. recortar un anti-cierre roto).
-  btn_odswiez_z_dysku_label:   "Act&ualizar desde el disco"
+  btn_odswiez_z_dysku_label: "Act&ualizar desde el disco"
   btn_odswiez_z_dysku_tooltip: "Vuelve a cargar el archivo de narración (skrypty/<nazwa>.txt) y sincroniza la memoria interna con tus cambios manuales — sin un reinicio completo ni recargar el proyecto. Una historia corta se carga entera; una larga con resumen se recorta hasta el final desde el último encabezado (Capítulo/Acto/Escena), conservando el resumen. NO modifica el Libro del Mundo ni los contadores de estructura."
-  odswiez_z_dysku_tytul:       "Memoria actualizada desde el disco"
-  odswiez_calosc_tresc:        "Se cargó toda la narración desde el disco ({liczba_znakow} caracteres). La memoria interna está sincronizada con el archivo.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
+  odswiez_z_dysku_tytul: "Memoria actualizada desde el disco"
+  odswiez_calosc_tresc: "Se cargó toda la narración desde el disco ({liczba_znakow} caracteres). La memoria interna está sincronizada con el archivo.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
   odswiez_calosc_skasowano_tresc: "Se cargó toda la narración desde el disco ({liczba_znakow} caracteres) — todo el texto cabe en la ventana de contexto, así que el resumen, ya innecesario, se eliminó (el motor trabaja ahora sobre la historia completa).\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
-  odswiez_snap_tresc:          "Se reconstruyó el final de la narración desde el encabezado «{naglowek}» ({liczba_znakow} caracteres). La parte anterior está representada por el resumen existente, que queda intacto.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
-  odswiez_koncowka_tresc:      "El texto es largo y no contiene encabezados de estructura — se reconstruyó el último fragmento de la narración ({liczba_znakow} caracteres), y el resumen quedó intacto. RECOMENDACIÓN: inserta encabezados Capítulo/Acto/Escena para que la actualización pueda acertar con precisión en el límite de una escena.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
+  odswiez_snap_tresc: "Se reconstruyó el final de la narración desde el encabezado «{naglowek}» ({liczba_znakow} caracteres). La parte anterior está representada por el resumen existente, que queda intacto.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
+  odswiez_koncowka_tresc: "El texto es largo y no contiene encabezados de estructura — se reconstruyó el último fragmento de la narración ({liczba_znakow} caracteres), y el resumen quedó intacto. RECOMENDACIÓN: inserta encabezados Capítulo/Acto/Escena para que la actualización pueda acertar con precisión en el límite de una escena.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -890,10 +890,10 @@ updater:
 
     ¿Deseas descargar e instalar la actualización ahora?
   # Przyciski w DialogAktualizacji
-  btn_pobierz:              "&Descargar e instalar"
-  btn_otworz_dictionaries:  "&Abrir carpeta dictionaries"
-  btn_anuluj:               "&Cancelar"
-  blad_otworz_folder:       "No se pudo abrir la carpeta:\n{sciezka}\n\n{tresc_bledu}"
+  btn_pobierz: "&Descargar e instalar"
+  btn_otworz_dictionaries: "&Abrir carpeta dictionaries"
+  btn_anuluj: "&Cancelar"
+  blad_otworz_folder: "No se pudo abrir la carpeta:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Descargando actualización {nowa_wersja}"
   pobieranie_tresc: "Descargando {nazwa_pliku}…"
@@ -1098,10 +1098,22 @@ opowiesci:
   plik_narracji_brak_tresc: El archivo de narración del juego "{nazwa}" no existe en el disco. El archivo de narración se crea después del primer turno — envía la primera acción para que el motor de narración cree el archivo.
   # v15.5: Actualizar desde el disco — sincroniza la memoria interna tras la
   # edición manual de opowiesci/<nazwa>.txt (p. ej. recortar un corte cinematográfico roto).
-  btn_odswiez_z_dysku_label:   "Act&ualizar desde el disco"
+  btn_odswiez_z_dysku_label: "Act&ualizar desde el disco"
   btn_odswiez_z_dysku_tooltip: "Vuelve a cargar el archivo de narración (opowiesci/<nazwa>.txt) y sincroniza la memoria interna con tus cambios manuales — sin un reinicio completo ni recargar el juego. El final reciente pasa al contexto del motor; el resumen existente de los turnos anteriores queda intacto. ATENCIÓN: el estado del juego (personajes, ubicación, inventario) en .game.json NO se actualiza — el siguiente turno puede desincronizarse si has cambiado hechos del mundo."
-  odswiez_z_dysku_tytul:       "Narración actualizada desde el disco"
-  odswiez_calosc_tresc:        "La narración se volvió a cargar desde el disco y el contexto del motor se sincronizó con el final del texto.\n\nATENCIÓN: el estado del juego (personajes, ubicación, inventario, tramas) en .game.json NO se ha modificado — si la edición cambió hechos del mundo, el siguiente turno puede desincronizarse."
-  odswiez_streszczenie_tresc:  "El contexto del motor se actualizó con el final reciente del disco. El resumen de los turnos anteriores queda intacto, así que el próximo resumen y turno no se construirán sobre datos obsoletos.\n\nATENCIÓN: el estado del juego en .game.json NO se ha modificado — si cambias hechos del mundo, el siguiente turno puede desincronizarse."
-  odswiez_zajete_tytul:        "Operación en curso"
-  odswiez_zajete_tresc:        "Se está generando un turno o un resumen. Espera a que la operación termine antes de actualizar la narración desde el disco."
+  odswiez_z_dysku_tytul: "Narración actualizada desde el disco"
+  odswiez_calosc_tresc: "La narración se volvió a cargar desde el disco y el contexto del motor se sincronizó con el final del texto.\n\nATENCIÓN: el estado del juego (personajes, ubicación, inventario, tramas) en .game.json NO se ha modificado — si la edición cambió hechos del mundo, el siguiente turno puede desincronizarse."
+  odswiez_streszczenie_tresc: "El contexto del motor se actualizó con el final reciente del disco. El resumen de los turnos anteriores queda intacto, así que el próximo resumen y turno no se construirán sobre datos obsoletos.\n\nATENCIÓN: el estado del juego en .game.json NO se ha modificado — si cambias hechos del mundo, el siguiente turno puede desincronizarse."
+  odswiez_zajete_tytul: "Operación en curso"
+  odswiez_zajete_tresc: "Se está generando un turno o un resumen. Espera a que la operación termine antes de actualizar la narración desde el disco."
+  btn_edytuj_stan_label: Editar estado del &juego…
+  btn_edytuj_stan_tooltip: 'Abre el archivo de estado del juego (.game.json) para edición directa en una ventana con validación JSON. Para avanzados: permite corregir manualmente personajes, ubicación, equipamiento, tramas y contadores cuando la edición manual de la narrativa se ha desincronizado con el estado estructural. ADVERTENCIA: una edición incorrecta puede dañar el guardado — los cambios se validan como JSON antes de guardar, pero la corrección del contenido (coherencia de los campos) es tu responsabilidad.'
+  dlg_edytuj_stan_tytul: Edición del estado del juego (.game.json)
+  dlg_edytuj_stan_lbl: 'Estado del juego en bruto en formato JSON. Edita con cuidado: después de guardar, el juego se recargará desde este archivo. El contenido debe seguir siendo un objeto JSON válido, de lo contrario, el guardado será rechazado.'
+  dlg_edytuj_stan_name: Campo de edición del estado del juego en bruto en formato JSON
+  dlg_edytuj_stan_btn_ok: '&Guardar y recargar'
+  dlg_edytuj_stan_btn_anuluj: '&Cancelar'
+  edytuj_stan_blad_json_tytul: JSON no válido
+  edytuj_stan_blad_json_tresc: "El contenido no es un JSON válido, por lo que no se ha guardado (el juego se dañaría). Corrige la sintaxis y vuelve a intentarlo.\n\nDetalles del error:\n{tresc_bledu}"
+  edytuj_stan_blad_typ_tresc: El elemento principal del estado del juego debe ser un objeto JSON (un par clave-valor entre llaves), no una lista ni un valor simple. Restaura la estructura del objeto e inténtalo de nuevo.
+  edytuj_stan_zapisano_tytul: Estado del juego guardado
+  edytuj_stan_zapisano_tresc: El estado del juego "{nazwa}" ha sido guardado y recargado desde el disco. Los personajes, ubicación, equipamiento, tramas y contadores ahora reflejan tu edición.

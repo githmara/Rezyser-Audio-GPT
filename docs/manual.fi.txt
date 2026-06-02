@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.5.1 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 15.6 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -361,7 +361,7 @@ Miten se toimii?
 3. Skripti skannaa jokaisen tekstirivin ja muuntaa avainsanat (Näytös, Luku, Prologi, Epilogi, Alku) Word-dokumentin "Heading 1" -otsikoiksi.
 4. Kohtaukset (rivit, jotka alkavat sanalla "Kohtaus") muutetaan lihavoiduksi tekstiksi — näkyvät dokumentissa, mutta eivät ElevenLabsin sisällysluettelossa.
 5. Kaikki muu teksti (dialogit, kuvaukset) säilyy muuttumattomana.
-6. Saat tiedoston arkkitehtuuri_[alkuperäisnimi].docx — ammattimainen Word-tiedosto, joka on valmis jatkotyöstöön. Esimerkiksi, jos syöttötiedostosi nimi oli tuntemattomuus.txt, tulostiedoston nimi on arkkitehtuuri_tuntemattomuus.docx ja se ilmestyy samaan kansioon kuin alkuperäinen.
+6. Saat tiedoston architektura_[alkuperäisnimi].docx — ammattimainen Word-tiedosto, joka on valmis jatkotyöstöön. Esimerkiksi, jos syöttötiedostosi nimi oli tuntemattomuus.txt, tulostiedoston nimi on architektura_tuntemattomuus.docx ja se ilmestyy samaan kansioon kuin alkuperäinen.
 
 Samalla puhdistus: Skripti poistaa automaattisesti HTML-tunnisteet (jos teksti on peräisin selaimesta tai paikallisesta .html-tiedostosta, esim. Poliglotin luomasta) sekä Markdown-otsikkotunnisteet (esim. ### tai ####) ennen käsittelyä. Sinun ei tarvitse puhdistaa tiedostoa käsin.
 

@@ -18,7 +18,7 @@ tresc:
 
     Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
-    Verkfærakistan samanstendur af aðalstúdíóinu (Reżyseria), þýðinga- og hreimaverkfærinu (Poliglota), skráarbyggingarverkfærinu (Architekt Audiobooków), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleidd gagnvirk skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti opowiesci.pl.txt). Öll fimm verkfærin eru aðgengileg í einu forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.
+    Verkfærakistan samanstendur af aðalstúdíóinu (Leikstjórn), þýðinga- og hreimaverkfærinu (Tungumálamaður), skráarbyggingarverkfærinu (Hljóðbókararkitekt), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleidd gagnvirk skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti opowiesci.pl.txt). Öll fimm verkfærin eru aðgengileg í einu forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.
   krok_1_pierwsze_uruchomienie: |
     SKREF 1: Fyrsta gangsetning (Cross-Platform)
 
@@ -204,7 +204,7 @@ tresc:
   krok_4_postprodukcja: |
     SKREF 4: Eftirvinnsla í Reżyser Audio GPT
 
-    Eftir að hafa skrifað söguna hefurðu aðgang að eftirvinnslutóli sem er aðgengilegt neðst á Reżyser panelnum (kemur aðeins fram í Hljóðbókarham).
+    Eftir að hafa skrifað söguna hefurðu aðgang að eftirvinnslutóli sem er aðgengilegt neðst á Leikstjóra spjaldinu (kemur aðeins fram í Hljóðbókarham).
 
     Að gefa kaflaheiti (Hljóðbókarhamur)
 
@@ -212,7 +212,7 @@ tresc:
 
     Athugið: Einingin krefst þess að skráin sé þegar vistuð á disk (búin til eða hlaðið inn). Ef skráin er ekki til, mun forritið birta viðeigandi skilaboð.
   krok_5_poliglota_intro: |
-    SKREF 5: Poliglota AI
+    SKREF 5: Tungumálamaður AI
 
     Forrit til þýðinga og þvingunar á hreimum á skjálesaralesurum. Fara í það með því að smella á hnappinn "{main.btn.poliglota}" á hnappastikunni eða velja Verkfæri → {main.menu.poliglota} úr valmyndinni (flýtilykill: Ctrl+2).
 
@@ -223,7 +223,7 @@ tresc:
     - Hladdu inn skrá með hnappnum "{poliglota.btn_wczytaj}" eða með því að nota hnappinn "Skoða..." til að velja skrá í kerfisglugganum.
     - Veldu "AI Þýðandi" ham, sláðu inn markmálið (t.d. "Finska").
     - Forritið mun þýða efnið. Ef þú hleður inn .html skrá, mun það aðeins þýða textann sem er sýnilegur lesandanum og uppfæra tungumálakóðann í html taginu.
-    - Ef þú hleður inn venjulegri .txt eða .md skrá (t.d. skrá sem er búin til af Reżyseria), mun forritið sjálfkrafa vista niðurstöðuna sem .html skrá með innbyggðum tungumálakóða eftir þýðingu — tilbúið til að lesa með NVDA án viðbótarvinnu.
+    - Ef þú hleður inn venjulegri .txt eða .md skrá (t.d. skrá sem er búin til af Leikstjóra), mun forritið sjálfkrafa vista niðurstöðuna sem .html skrá með innbyggðum tungumálakóða eftir þýðingu — tilbúið til að lesa með NVDA án viðbótarvinnu.
     - Styður einnig .docx skrár.
 
     Snjöll skipting í blokkir: Langir textar eru sjálfkrafa skiptir í blokkir allt að 10.000 stafi og þýddir í röð með framvindustiku.
@@ -262,7 +262,7 @@ tresc:
   krok_5_tryb_szyfrant: |
     Tryggð 3: Dulritari (NÝTT í 13.0 — skemmtun með texta, frítt, staðbundið)
 
-    Þriðji RadioButton í Poligloti, við hliðina á AI Þýðanda og Leikstjóraham: „Dulritarahamur (skemmtun með texta, tilviljanakennd truflun)". Virkjar sex staðbundnar reiknirit sem afmynda texta — til skemmtunar, gátna, tungumálalegra þrauta. Eftir að hamurinn er valinn birtist fellilisti með reikniritum, og fyrir eitt þeirra (Cæsar dulritið) er viðbótar reitur fyrir færslu.
+    Þriðji RadioButton í Tungumálamanninum, við hliðina á AI Þýðanda og Leikstjóraham: „Dulritarahamur (skemmtun með texta, tilviljanakennd truflun)". Virkjar sex staðbundnar reiknirit sem afmynda texta — til skemmtunar, gátna, tungumálalegra þrauta. Eftir að hamurinn er valinn birtist fellilisti með reikniritum, og fyrir eitt þeirra (Cæsar dulritið) er viðbótar reitur fyrir færslu.
 
     Aðgengileg reiknirit (veldu í valmyndinni „Veldu afmyndar reiknirit"):
 
@@ -305,7 +305,7 @@ tresc:
 
     Tiflotecnia Voices er beinn arftaki Vocalizer frá Nuance — viðskiptahugbúnaður með raddir af nýrri kynslóð frá fyrirtækinu Cerrence, dreift sem .nvda-addon pakki í NVDA Add-on Store. Gamli Vocalizer (32-bita .dll bókasöfn frá Nuance) var lagður af með NVDA 2026.1; Cerrence endursamdi raddirnar í 64-bita og Tiflotecnia gaf þær út undir nýju nafni. Gæði framburðar eru áberandi betri en í fyrri kynslóðinni.
 
-    Hvernig á að setja upp: NVDA → Verkfæri → Add-on Store → leita að „Tiflotecnia Voices for NVDA" → Setja upp. Eftir uppsetningu birtist sérstakt undirvalmynd „Tiflotecnia Voices" í NVDA valmyndinni og eigin flokkur í stillingum NVDA. GUI viðbótarinnar leiðir þig skref fyrir skref í gegnum kaup á leyfi (eða virkjun 7 daga prufutímabils), val og uppsetningu fyrstu raddanna (t.d. pólsku Ewa fyrir fljótlega lestur á kerfisstýringum, finnsku Satu fyrir hreim í Poliglot). Innbyggð hjálp viðbótarinnar er skýr, svo við endurtökum ekki ferlið hér — það er nóg að láta viðbótina leiða þig.
+    Hvernig á að setja upp: NVDA → Verkfæri → Add-on Store → leita að „Tiflotecnia Voices for NVDA" → Setja upp. Eftir uppsetningu birtist sérstakt undirvalmynd „Tiflotecnia Voices" í NVDA valmyndinni og eigin flokkur í stillingum NVDA. GUI viðbótarinnar leiðir þig skref fyrir skref í gegnum kaup á leyfi (eða virkjun 7 daga prufutímabils), val og uppsetningu fyrstu raddanna (t.d. pólsku Ewa fyrir fljótlega lestur á kerfisstýringum, finnsku Satu fyrir hreim í Tungumálamanninum). Innbyggð hjálp viðbótarinnar er skýr, svo við endurtökum ekki ferlið hér — það er nóg að láta viðbótina leiða þig.
 
     Ábending fyrir þá sem flytja frá Vocalizer og Eloquence: uppfærsla á lægra verði er í boði. Ferli: eftir að greiðsla hefur verið staðfest, sendu strax tölvupóst á netfangið sem er tengt á skjánum eftir greiðslu og biðjið um staðfestingu á gamla virkjunarkóðanum — Tiflotecnia mun staðfesta rétt til afsláttar og laga verðið. Án þessa tölvupósts mun kerfið meðhöndla þig sem nýjan viðskiptavin.
 
@@ -343,7 +343,7 @@ tresc:
 
     Fyrst góðu fréttirnar — viðvörunin um NVDA 2026.1 úr fyrri útgáfum handbókarinnar endaði með góðum árangri: Cerrence afhenti 64-bita bókasöfn, Tiflotecnia gaf þau út í .nvda-addon pakka sem er aðgengilegur í Add-on Store (sjá kaflann hér að ofan), og Vocalizer hjá þeim sem héldu honum til loka kom aftur undir nýju nafni — með betri gæðum og án 32-bita takmarkana.
 
-    Með útgáfu Tiflotecnia Voices kom hins vegar nýr kritískur galli — í tungumálagreiningu. Í stillingum viðbótarinnar er hægt að stilla hvaða rödd á að nota fyrir ákveðna stafi (t.d. latneska, kyrillíska) eftir því hvaða raddir eru uppsettar. Vandamálið er í forgangsröðinni: núna er fyrst beitt yfirskrift á hvern staf, síðan fallbakki til ISO tungumálakóða (í reynd óaðgengilegt fyrir SAMA stafróf, sem yfirskriftin hefur nú þegar verið stillt á), og að lokum valin rödd. Afleiðingin birtist innan sama stafrófs: þú ert með texta á finnsku með réttum `lang="fi"` merkimiða, uppsett Satu sem finnska rödd Tiflotecnia, EN í stillingum er valin pólsk rödd fyrir latneska stafi — Satu LES ekki þennan texta, þrátt fyrir réttan ISO merkimiða. Yfirskrift á hvern staf „pólsk rödd fyrir latínu" vinnur á fyrsta stigi, ISO `fi` er aldrei athugað. Fyrir pör með mismunandi stafróf virkar kerfið rétt (rússneskur texti + Milena fyrir kyrillískt + pólsk rödd fyrir latínu — allt kyrillískt fer með Milenu, möguleg latnesk nöfn með pólskri rödd; hvert stafróf er í sinni yfirskrift). Eftir flutning frá Vocalizer, þar sem tungumálaskipting á grundvelli ISO virkaði fullkomlega, munu notendur taka eftir þessari afturför strax — sérstaklega þeir sem nota nokkra evrópska hreima í Poliglot (Satu, Alice, Markus) á sama latneska stafrófi.
+    Með útgáfu Tiflotecnia Voices kom hins vegar nýr kritískur galli — í tungumálagreiningu. Í stillingum viðbótarinnar er hægt að stilla hvaða rödd á að nota fyrir ákveðna stafi (t.d. latneska, kyrillíska) eftir því hvaða raddir eru uppsettar. Vandamálið er í forgangsröðinni: núna er fyrst beitt yfirskrift á hvern staf, síðan fallbakki til ISO tungumálakóða (í reynd óaðgengilegt fyrir SAMA stafróf, sem yfirskriftin hefur nú þegar verið stillt á), og að lokum valin rödd. Afleiðingin birtist innan sama stafrófs: þú ert með texta á finnsku með réttum `lang="fi"` merkimiða, uppsett Satu sem finnska rödd Tiflotecnia, EN í stillingum er valin pólsk rödd fyrir latneska stafi — Satu LES ekki þennan texta, þrátt fyrir réttan ISO merkimiða. Yfirskrift á hvern staf „pólsk rödd fyrir latínu" vinnur á fyrsta stigi, ISO `fi` er aldrei athugað. Fyrir pör með mismunandi stafróf virkar kerfið rétt (rússneskur texti + Milena fyrir kyrillískt + pólsk rödd fyrir latínu — allt kyrillískt fer með Milenu, möguleg latnesk nöfn með pólskri rödd; hvert stafróf er í sinni yfirskrift). Eftir flutning frá Vocalizer, þar sem tungumálaskipting á grundvelli ISO virkaði fullkomlega, munu notendur taka eftir þessari afturför strax — sérstaklega þeir sem nota nokkra evrópska hreima í Tungumálamanninum (Satu, Alice, Markus) á sama latneska stafrófi.
 
     Greining og plástur: Ég greindi vandamálið á Python stigi í kóða viðbótarinnar og útbjó plástur sem breytir forgangsröðinni í: ISO → valin rödd → stafayfirskrift. Plásturinn viðheldur gagnlegri skiptingu á latínu fyrir latnesk nöfn í rússneskum texta, þegar „tungumálagreining á grundvelli Unicode stafa" er virk í stillingum. Ég sendi plásturinn til þróunaraðila Tiflotecnia fyrir 5 dögum — enn án svars.
 
@@ -360,13 +360,13 @@ tresc:
     3. Skiptin skannar hverja línu textans og breytir lykilorðum (Þáttur, Kafli, Formáli, Eftirskrift, Upphaf) í fyrirsagnir "Heading 1" í Word skjalinu.
     4. Senur (línur sem byrja á orðinu "Sena") verða að feitletruðum texta — sýnilegar í skjalinu, en ósýnilegar í innihaldsyfirliti ElevenLabs.
     5. Allur annar texti (samtöl, lýsingar) fer óbreyttur í gegn.
-    6. Þú færð skrána arkitektúr_[nafn_upprunans].docx — faglegt Word skjal tilbúið til frekari vinnslu. Til dæmis, ef upprunaskráin þín hét dofi.txt, verður úttaksskráin nefnd arkitektúr_dofi.docx og birtist í sama möppu og upprunaskráin.
+    6. Þú færð skrána architektura_[nafn_upprunans].docx — faglegt Word skjal tilbúið til frekari vinnslu. Til dæmis, ef upprunaskráin þín hét dofi.txt, verður úttaksskráin nefnd architektura_dofi.docx og birtist í sama möppu og upprunaskráin.
 
-    Hreinsun í leiðinni: Skiptin fjarlægir sjálfkrafa HTML merki (ef textinn kemur úr vafra eða staðbundinni .html skrá, t.d. búin til af Poliglot) og Markdown fyrirsagnamerki (t.d. ### eða ####) áður en hann er unnin. Þú þarft ekki að hreinsa skrána handvirkt.
+    Hreinsun í leiðinni: Skiptin fjarlægir sjálfkrafa HTML merki (ef textinn kemur úr vafra eða staðbundinni .html skrá, t.d. búin til af Tungumálamanninum) og Markdown fyrirsagnamerki (t.d. ### eða ####) áður en hann er unnin. Þú þarft ekki að hreinsa skrána handvirkt.
 
     Söguhamur: sjálfvirk hópun umferða í senur (frá v15.1)
 
-    Ef þú hleður inn í Arkitekt skrá opowiesci/<leikur>.txt búin til af Interaktívu Sögumódúlnum, mun umbreytirinn þekkja umferðarmerki (t.d. „--- Umferð 7 ---") á 9 tungumálum (Umferð, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) og á fimm umferðum mun hann setja nýja fyrirsögn á fyrsta stigi í formi „Sena N" (númer byrjar frá 1, staðbundið fyrir hvert tungumál — á ensku „Scene N", á þýsku „Szene N" o.s.frv.). Önnur umferðarmerki eru fjarlægð — þau birtast ekki í hljóðbókarfrásögninni, því „Umferð 7" lesið af TTS brýtur niðurdýfingu hlustandans. Útkoman er Word skjal með náttúrulegri skiptingu í senur með nokkrum mínútum af hljóði hver, tilbúið til innflutnings í ElevenLabs. Kerfið er sjálfvirkt — venjulegar hljóðbókarskrár án umferðarmerkja (hefðbundin frásögn úr Reżyser) eru unnar nákvæmlega eins og áður.
+    Ef þú hleður inn í Arkitekt skrá opowiesci/<leikur>.txt búin til af Interaktívu Sögumódúlnum, mun umbreytirinn þekkja umferðarmerki (t.d. „--- Umferð 7 ---") á 9 tungumálum (Umferð, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) og á fimm umferðum mun hann setja nýja fyrirsögn á fyrsta stigi í formi „Sena N" (númer byrjar frá 1, staðbundið fyrir hvert tungumál — á ensku „Scene N", á þýsku „Szene N" o.s.frv.). Önnur umferðarmerki eru fjarlægð — þau birtast ekki í hljóðbókarfrásögninni, því „Umferð 7" lesið af TTS brýtur niðurdýfingu hlustandans. Útkoman er Word skjal með náttúrulegri skiptingu í senur með nokkrum mínútum af hljóði hver, tilbúið til innflutnings í ElevenLabs. Kerfið er sjálfvirkt — venjulegar hljóðbókarskrár án umferðarmerkja (hefðbundin frásögn úr Leikstjóra) eru unnar nákvæmlega eins og áður.
 
     Öflugur kostur fyrir NVDA og ElevenLabs notendur
 
@@ -374,17 +374,17 @@ tresc:
   krok_7_ksiega_swiata: |
     SKREF 7: Hvernig á að skrifa Heimsbókina (Arkitekts Prompt og Mini-námskeið í Markdown)
 
-    Gervigreindin sem knýr Aðalstúdíóið skilur best skipanir þegar þær eru sniðnar í Markdown merkingarmáli. Ef þú gefur AI í Reżyser bara lauslega hugmynd (t.d. "tvær systur í undirheimum"), mun vélin verða stressuð vegna skorts á smáatriðum og búa til klisjukennda, fyrirsjáanlega sögu, sem hunsar rökfræði.
+    Gervigreindin sem knýr Aðalstúdíóið skilur best skipanir þegar þær eru sniðnar í Markdown merkingarmáli. Ef þú gefur AI í Leikstjóra bara lauslega hugmynd (t.d. "tvær systur í undirheimum"), mun vélin verða stressuð vegna skorts á smáatriðum og búa til klisjukennda, fyrirsjáanlega sögu, sem hunsar rökfræði.
 
-    Til að koma í veg fyrir þetta, notaðu ytri spjallmenni (t.d. ókeypis ChatGPT eða Claude) sem þinn persónulega Arkitekt. Í útgáfu 13.0 þarftu ekki lengur að afrita prompt úr leiðbeiningunum — í Reżyser spjaldinu, rétt undir hnappnum „{rezyser.btn_zapisz_ksiege_label}", finnurðu hnappinn „{rezyser.btn_prompt_architekta_label}". Smelltu á hann og gluggi með tilbúnum texta prompt í „aðeins til lesturs" reit og hnappinn „Afrita í klippiborð" opnast. NVDA tilkynnir allt innihaldið strax eftir að glugginn opnast — það nægir að smella á „Afrita", líma (Ctrl+V) í ChatGPT/Claude og skipta út hlutanum „[TUTAJ WPISZ SWÓJ POMYSŁ]" með þinni eigin söguþráðarhugmynd.
+    Til að koma í veg fyrir þetta, notaðu ytri spjallmenni (t.d. ókeypis ChatGPT eða Claude) sem þinn persónulega Arkitekt. Í útgáfu 13.0 þarftu ekki lengur að afrita prompt úr leiðbeiningunum — í Leikstjóra spjaldinu, rétt undir hnappnum „{rezyser.btn_zapisz_ksiege_label}", finnurðu hnappinn „{rezyser.btn_prompt_architekta_label}". Smelltu á hann og gluggi með tilbúnum texta prompt í „aðeins til lesturs" reit og hnappinn „Afrita í klippiborð" opnast. NVDA tilkynnir allt innihaldið strax eftir að glugginn opnast — það nægir að smella á „Afrita", líma (Ctrl+V) í ChatGPT/Claude og skipta út hlutanum „[SETTU HUGMYND ÞÍNA HÉR]" með þinni eigin söguþráðarhugmynd.
 
     Af hverju svona, en ekki með því að afrita úr leiðbeiningunum? Samræðan í GUI hefur mikilvægt aðgengisatriði: hún er innfædd og lesin án truflana af skjálesara, krefst ekki þess að skipta yfir í textaritil (þar sem íslenskir stafir og gæsalappir eru oft ranglega afritaðir) og virkar eins á öllum stýrikerfum. Sama mynstur — samræða með prompt til að afrita — er einnig notað í Reglustjóra (sjá SKREF 7b hér að neðan).
 
-    Hvernig AI svarar: Í svarinu færðu texta í tveimur hlutum. Fyrsti hlutinn er Heimsbókin lokuð í Markdown kóða blokk (merki ```markdown … ```). Afritaðu AÐEINS innihald kóðablokkarinnar (án sjálfra merkjanna ```) og límdu í reitinn „Heimsbók" í Reżyser, og smelltu síðan á „{rezyser.btn_zapisz_ksiege_label}". Annar hlutinn er tillaga um, hvaða skapandi hamur (Handrit eða Hljóðbók) passar best við hugmyndina þína — notaðu hana sem vísbendingu þegar þú velur ham í RadioBox.
+    Hvernig AI svarar: Í svarinu færðu texta í tveimur hlutum. Fyrsti hlutinn er Heimsbókin lokuð í Markdown kóða blokk (merki ```markdown … ```). Afritaðu AÐEINS innihald kóðablokkarinnar (án sjálfra merkjanna ```) og límdu í reitinn „Heimsbók" í Leikstjóra, og smelltu síðan á „{rezyser.btn_zapisz_ksiege_label}". Annar hlutinn er tillaga um, hvaða skapandi hamur (Handrit eða Hljóðbók) passar best við hugmyndina þína — notaðu hana sem vísbendingu þegar þú velur ham í RadioBox.
 
     Mini-námskeið í Markdown í Heimsbókinni: einfalt pundmerki (#) er aðalhluti (t.d. „# Persónur"), tvöfalt pundmerki (##) er undirhluti, bandstrik (-) búa til lista, og tvöfaldar stjörnur (**texti**) feitletra algjörlega óhagganlegar reglur (t.d. „**Hetjan LJÚGAR ALDREI**"). Fyrir erlenda persónu, bættu við tagi með hreim, t.d. „[Speaker 1: Marek] - hefur franskan hreim". Lykilorðið „hreim" er NAUÐSYNLEGT — forritsvélin greinir það sjálfkrafa og setur rétt hljóðreglur á samtöl viðkomandi persónu.
 
-    Ábending: Mundu að uppfæra Heimsbókina þína reglulega (með því að bæta við nýjum stöðum eða mikilvægum persónum) þegar sagan þróast. Þú getur gert þetta handvirkt eða með hjálp ytri spjallmenna. Því ríkari grunnur, því betri árangur í Reżyser!
+    Ábending: Mundu að uppfæra Heimsbókina þína reglulega (með því að bæta við nýjum stöðum eða mikilvægum persónum) þegar sagan þróast. Þú getur gert þetta handvirkt eða með hjálp ytri spjallmenna. Því ríkari grunnur, því betri árangur í Leikstjóra!
   krok_7b_manager_regul: |
     SKREF 7b: Stjórnandi Reglna (Ctrl+4) — orðabækur fyrir málfræðinga án Python
 
@@ -460,7 +460,7 @@ tresc:
     Stjórnun Aðgerða og Sena í rauntíma (Leikstjórn — Handritshamur)
     Hrá Handritshamur hefur spjald með hnöppum "Setja inn Aðgerð X" og "Setja inn Sena X". Teljarar uppfærast sjálfkrafa. Hleðsla á núverandi skrá stillir báða teljara á réttan fjölda.
 
-    Hreinsun á sviga leikstjórnarleiðbeiningum (Poliglota — Leikstjórahami)
+    Hreinsun á sviga leikstjórnarleiðbeiningum (Tungumálamaður — Leikstjórahami)
     Skriptið fjarlægir alla textahluta sem eru í sviga (t.d. "(hvíslað)", "(með innfelldum andardráttum)"). ElevenLabs les aðeins samtöl og frásögn.
 
     Óendanlegt Minni og Sjálfvirk Samantekt (Leikstjórn — Sögugeymir)
@@ -484,22 +484,22 @@ tresc:
 
     - Sjálfvirkur stillingaskrárframleiðandi golden_key.env innbyggður beint í aðalviðmót forritsins. Notandi þarf ekki lengur að búa til skrá handvirkt eða hafa áhyggjur af gildru .txt viðbótar — aðeins eitt smell á hnappinn sem er í boði á upphafsskjánum, og kerfið býr til hreina, tilbúna skrá á réttum stað.
     - Algjör fjarlæging úrelts skripts napraw_api.bat, sem er ekki lengur nauðsynlegt. Vandamálið sem þetta skript leysti (röng viðbótarskrá gefin af Notepad) er nú algjörlega útrýmt þökk sé innbyggðum framleiðanda.
-    - Fjölbókmennt Księga Świata — hvert verkefni hefur nú sína eigin lore skrá (NÝTT). Áður var ein sameiginleg skrá moje_lore.md, sem var hlaðin við hvert upphaf forritsins — óháð því hvaða verkefni þú ert að vinna að. Frá útgáfu 10 er Księga Świata náið tengd við nafn verkefnisskrárinnar: ef saga þín er skrypty/emilia_heist_audiobook.txt, þá er Księga hennar skrypty/emilia_heist_audiobook.md. Hnappurinn "Vista Księgę varanlega" er gráður þar til þú slærð inn skráarnafn — röðin er hér markviss og þvinguð af viðmótinu. Að smella á "Hlaða sögu" hleður sjálfkrafa samsvarandi .md skrá af disknum, ef hún er til. Breytingin hefur einnig hagnýtan skipulagsvídd: þú getur nú sinnt nokkrum verkefnum samtímis, og hvert þeirra mun hafa sínar eigin, einangruðu reglur heimsins og persónulista — án áhættu að Emilia úr bankaráninu endi skyndilega í geimóperu.
+    - Fjölbókmennt Heimsbók — hvert verkefni hefur nú sína eigin lore skrá (NÝTT). Áður var ein sameiginleg skrá moje_lore.md, sem var hlaðin við hvert upphaf forritsins — óháð því hvaða verkefni þú ert að vinna að. Frá útgáfu 10 er Heimsbók náið tengd við nafn verkefnisskrárinnar: ef saga þín er skrypty/emilia_heist_audiobook.txt, þá er Heimsbók hennar skrypty/emilia_heist_audiobook.md. Hnappurinn "Vista Heimsbók varanlega" er gráður þar til þú slærð inn skráarnafn — röðin er hér markviss og þvinguð af viðmótinu. Að smella á "Hlaða sögu" hleður sjálfkrafa samsvarandi .md skrá af disknum, ef hún er til. Breytingin hefur einnig hagnýtan skipulagsvídd: þú getur nú sinnt nokkrum verkefnum samtímis, og hvert þeirra mun hafa sínar eigin, einangruðu reglur heimsins og persónulista — án áhættu að Emilia úr bankaráninu endi skyndilega í geimóperu.
   changelog_11: |
     Nýir eiginleikar og breytingar í útgáfu 11.0
 
-    - Nýir hreimsetningar í Poliglot (NÝTT — fjögur ný evrópsk tungumál). Fjórar nýjar valkostir fyrir hljóðfræðilega "spillingu" texta hafa verið bætt við í Leikstjórastillingu: Enska (Samantha / Mark / Zira / Hazel), Franska (Thomas / Amelie / Julie), Þýska (Stefan / Markus / Katja / Hedda), Spænska (Jorge / Monica / Helena). Hver nýr hreimur sprautar sjálfkrafa inn viðeigandi ISO kóða (en, fr, de, es) í framleitt .html eða .docx skjal — NVDA notar strax réttan rödd fyrir unnin texta.
+    - Nýir hreimsetningar í Tungumálamanninum (NÝTT — fjögur ný evrópsk tungumál). Fjórar nýjar valkostir fyrir hljóðfræðilega "spillingu" texta hafa verið bætt við í Leikstjórastillingu: Enska (Samantha / Mark / Zira / Hazel), Franska (Thomas / Amelie / Julie), Þýska (Stefan / Markus / Katja / Hedda), Spænska (Jorge / Monica / Helena). Hver nýr hreimur sprautar sjálfkrafa inn viðeigandi ISO kóða (en, fr, de, es) í framleitt .html eða .docx skjal — NVDA notar strax réttan rödd fyrir unnin texta.
 
     - Þverpallur: Stuðningur fyrir macOS og Linux (BREYTING á skjölum). Kaflinn "Fyrsta keyrsla" hefur verið endurskrifaður frá grunni. Nú greinir hann þrjár leiðir: Windows notendur sækja tilbúið ZIP pakka frá Releases flipanum og keyra run.bat; Windows forritarar setja upp umhverfi með setup_dev.bat; macOS og Linux notendur setja upp umhverfi með ./setup_dev.sh og keyra ./run.sh. (Athugið: í útgáfum 11.x–13.0 hétu sömu skriftur öðruvísi — `Uruchom_Rezysera.bat`, `skonfiguruj_dev.bat`, `skonfiguruj_dev.sh`, `uruchom_rezysera.sh` — þau voru endurnefnd í 13.1 í enskum samsvörunum, því erlendir forritarar sem klónaðu geymsluna kvörtuðu yfir því að pólsku skráarnöfnin gerðu þeim erfitt fyrir að slá inn skipanir í skelinni.)
 
     - Mappa runtime/ — útskýring á stöðu (SKJÖL). Kaflinn "Fyrsta keyrsla" inniheldur nú skýra útskýringu á því að mappan runtime/ (Python umhverfi fyrir ZIP pakka) er aðeins dreift í tilbúnum pökkum fyrir Windows frá Releases flipanum. Í Git geymslunni er þessi mappa ekki til og ætti ekki að vera.
 
-    - Uppfærsla á nöfnum talgervla í Poliglot valmyndinni (BREYTING). Nöfn radda í selectbox valmyndinni fyrir núverandi tungumál hafa verið uppfærð: Ítalska hefur nú einnig Luca (Vocalizer), Finnska hefur nú einnig Mikko (Vocalizer). Pólska hefur haldið nafninu án kommustafa (Ewa í stað Ewa með kommustaf) fyrir betri samhæfni.
+    - Uppfærsla á nöfnum talgervla í valmynd Tungumálamannsins (BREYTING). Nöfn radda í selectbox valmyndinni fyrir núverandi tungumál hafa verið uppfærð: Ítalska hefur nú einnig Luca (Vocalizer), Finnska hefur nú einnig Mikko (Vocalizer). Pólska hefur haldið nafninu án kommustafa (Ewa í stað Ewa með kommustaf) fyrir betri samhæfni.
 
     Eiginleikar haldnir óbreyttir frá útgáfu 10
 
     - Sjálfvirkur lykilskráargjafi golden_key.env innbyggður í viðmótið.
-    - Fjölbókmenntaverk Księga Świata (hver verkefni hefur sína eigin .md skrá með heimi reglum).
+    - Fjölbókmenntaverk Heimsbók (hver verkefni hefur sína eigin .md skrá með heimi reglum).
     - Bilunarþolið þýðingarskráningarferli (skráning í .jsonl).
     - Merkjaviðgerð í Leikstjórastillingu (innsprautun ISO kóða).
   changelog_12: |
@@ -538,7 +538,7 @@ tresc:
 
     - Skipun Arkitektsins beint í Leikstjórans pallborði (A11y BREYTING). Hingað til var skipun fyrir ytri spjallmenni til að búa til Heimsbókina aðeins í þessari leiðbeiningu — notandi þurfti að afrita hana úr textaskrá (sem getur verið vandamál á skjálesurum með íslenskum stöfum og gæsalöppum). Í útgáfu 13.0 hefur Leikstjórans pallborð nýjan hnapp „📖 Skipun Arkitekts fyrir AI…" (rétt undir „Vista Heimsbók varanlega"), sem opnar innfædda glugga með fullum texta skipunar í READONLY reit og sérstökum hnappi „Afrita í klippiborð". A11y sniðið er eins og fyrir niðurstöðugluggann í Reglustjórans töframanni — NVDA les strax allan gluggainnihaldið án viðbótarstillinga. Full lýsing í uppfærðu SKREFI 7.
 
-    - Rússneskur hreimur í Poliglota (NÝTT — áttunda evrópska tungumálið í Leikstjórans stillingavalmynd). Í fellivalmyndinni „Leikstjórans stillingar / Hreimsetningar" bætist við valkosturinn „Rússneska (t.d. Milena / Irina / Yuri / Pavel)". Ólíkt öðrum hreimum, sem aðeins „spilla" íslenskum texta á latnesku stafi (t.d. „sj" → „sh", „v" → „v"), framkvæmir rússneski hreimurinn fulla umritun íslensks texta yfir á kyrillísku — þannig að rússneskumælandi TTS raddir (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") hafa eitthvað til að „bera fram" orðin. Kortlagningin hefur verið bætt með jótun sérhljóða („ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю"), íslenskum mýkingum si/ci/ni/zi + sérhljóða (t.d. „frænka" → „цёця"), sem og sérstökum rússneskum tvíhljóðum: „ść" / „szcz" → „щ", „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х".
+    - Rússneskur hreimur í Tungumálamanninum (NÝTT — áttunda evrópska tungumálið í Leikstjórans stillingavalmynd). Í fellivalmyndinni „Leikstjórans stillingar / Hreimsetningar" bætist við valkosturinn „Rússneska (t.d. Milena / Irina / Yuri / Pavel)". Ólíkt öðrum hreimum, sem aðeins „spilla" íslenskum texta á latnesku stafi (t.d. „sj" → „sh", „v" → „v"), framkvæmir rússneski hreimurinn fulla umritun íslensks texta yfir á kyrillísku — þannig að rússneskumælandi TTS raddir (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") hafa eitthvað til að „bera fram" orðin. Kortlagningin hefur verið bætt með jótun sérhljóða („ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю"), íslenskum mýkingum si/ci/ni/zi + sérhljóða (t.d. „frænka" → „цёця"), sem og sérstökum rússneskum tvíhljóðum: „ść" / „szcz" → „щ", „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х".
 
       Hljóðskýrslun: Hreimurinn er ekki rússnesk fræðileg umritun (ISO 9, GOST, BGN/PCGN). Markmiðið er eingöngu að gera íslenskan texta hljóðlega líkan rússneskum — fyrir talgervil, ekki fyrir alvarlega umritun eiginnafna. Fyrir það verk notaðu sérstök málvísindatól.
 
@@ -546,9 +546,9 @@ tresc:
 
     - Athugasemd um „ź": Í rússnesku er engin nákvæm samsvörun fyrir íslenska „ź", svo þessi stafur er venjulega breytt í „ж" — líkt og „ż". Sumir norður-rússneskir og hvítrússneskir mállýskur bera „ź" nær „зь", en frá sjónarhóli talgervils er munurinn óverulegur. Ef málfræðingur telur að hann kjósi „зь", getur hann sjálfur skipt út þessari einu reglu í skránni `dictionaries/pl/akcenty/rosyjski.yaml` — vélin hleður YAML skrár sjálfvirkt, svo það krefst ekki endursamsetningar forritsins.
 
-    - Útvíkkuð leiðarstika og Verkfæri valmynd (BREYTING). Stikan hefur nú fjórða hnappinn — Reglustjóri — og valmyndin „Verkfæri" styður nýja flýtileiðina Ctrl+4. Fyrri flýtileiðir (Ctrl+0 Heim, Ctrl+1 Leikstjóri, Ctrl+2 Poliglota, Ctrl+3 Breytir) haldast óbreyttar.
+    - Útvíkkuð leiðarstika og Verkfæri valmynd (BREYTING). Stikan hefur nú fjórða hnappinn — Reglustjóri — og valmyndin „Verkfæri" styður nýja flýtileiðina Ctrl+4. Fyrri flýtileiðir (Ctrl+0 Heim, Ctrl+1 Leikstjóri, Ctrl+2 Tungumálamaður, Ctrl+3 Breytir) haldast óbreyttar.
 
-    - Hnappur „Endurnýja hreimsetningar Leikstjórans úr YAML" á Heimssíðu (NÝTT). Eftir að nýr hreimur hefur verið bætt við af Reglustjóra (eða handvirkri breytingu á YAML skrá) mun smella á þennan hnapp endurhlaða hreim_* umbúðir í Poliglota og Leikstjórans vél, svo nýi hreimurinn sé sýnilegur í valmyndinni og í sjálfvirkri greiningu hreima byggt á persónumerkjum í Heimsbókinni. Poliglota greinir YAML skrár sjálfvirkt (án endurnýjunar), en Leikstjórinn þarf að endurbyggja umbúðir — venjulega þarf að endurræsa forritið eftir endurnýjun.
+    - Hnappur „Endurnýja hreimsetningar Leikstjórans úr YAML" á Heimssíðu (NÝTT). Eftir að nýr hreimur hefur verið bætt við af Reglustjóra (eða handvirkri breytingu á YAML skrá) mun smella á þennan hnapp endurhlaða hreim_* umbúðir í Tungumálamanninum og Leikstjórans vél, svo nýi hreimurinn sé sýnilegur í valmyndinni og í sjálfvirkri greiningu hreima byggt á persónumerkjum í Heimsbókinni. Tungumálamaður greinir YAML skrár sjálfvirkt (án endurnýjunar), en Leikstjórinn þarf að endurbyggja umbúðir — venjulega þarf að endurræsa forritið eftir endurnýjun.
 
     Eiginleikar haldnir óbreyttir frá útgáfu 12.0
 

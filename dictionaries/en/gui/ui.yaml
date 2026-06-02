@@ -888,10 +888,10 @@ updater:
 
     Do you want to download and install the update now?
   # Przyciski w DialogAktualizacji
-  btn_pobierz:              "&Download and install"
-  btn_otworz_dictionaries:  "&Open dictionaries folder"
-  btn_anuluj:               "&Cancel"
-  blad_otworz_folder:       "Could not open folder:\n{sciezka}\n\n{tresc_bledu}"
+  btn_pobierz: "&Download and install"
+  btn_otworz_dictionaries: "&Open dictionaries folder"
+  btn_anuluj: "&Cancel"
+  blad_otworz_folder: "Could not open folder:\n{sciezka}\n\n{tresc_bledu}"
   # Pobieranie (wx.ProgressDialog)
   pobieranie_tytul: "Downloading update {nowa_wersja}"
   pobieranie_tresc: "Downloading {nazwa_pliku}…"
@@ -1039,17 +1039,17 @@ opowiesci:
   # Clean, repeatable technical signal for screen readers: the player knows
   # immediately that the camera has shifted. Written to both UI and `.txt`
   # on disk (consistency between in-app reading and external TTS).
-  prefiks_flashback:         "Flashback:"
-  prefiks_scena:             "Off-screen scene:"
-  prefiks_cut:               "Meanwhile elsewhere:"
+  prefiks_flashback: "Flashback:"
+  prefiks_scena: "Off-screen scene:"
+  prefiks_cut: "Meanwhile elsewhere:"
   komenda_kamera_pusta_tytul: "No scene description"
   komenda_kamera_pusta_tresc: "Command /{komenda} requires a description. Example: /{komenda} Anna in the market."
   komenda_kamera_zly_tryb_tytul: "Wrong mode"
   komenda_kamera_zly_tryb_tresc: "Command /{komenda} works only in narrative mode (Free, Choice, Smallest Evil). Start a new game or load an existing one."
-  status_kamera_w_toku:      "Generating /{komenda} scene…"
-  dlg_pomoc_tytul:           "Available commands"
-  dlg_pomoc_lbl:             "List of Tales mode slash commands:"
-  dlg_pomoc_name:            "Command list field"
+  status_kamera_w_toku: "Generating /{komenda} scene…"
+  dlg_pomoc_tytul: "Available commands"
+  dlg_pomoc_lbl: "List of Tales mode slash commands:"
+  dlg_pomoc_name: "Command list field"
   pamiec_status_format: "{procent}% — {tokeny} tokens ({etap})"
   pamiec_etap_czysta: "🟢 clean"
   pamiec_etap_ok: "🟢 OK"
@@ -1114,3 +1114,15 @@ opowiesci:
   odswiez_streszczenie_tresc: "The engine context was refreshed with the fresh tail from disk. The summary of earlier turns was left untouched, so the next summary and turn will no longer be built on outdated data.\n\nWARNING: the game state (characters, location, inventory, threads) in .game.json was NOT changed — if your edit changed world facts, the next turn may diverge from them."
   odswiez_zajete_tytul: "Operation in progress"
   odswiez_zajete_tresc: "A turn or summary is being generated. Wait until the operation finishes before refreshing the narration from disk."
+  btn_edytuj_stan_label: Edit &game state…
+  btn_edytuj_stan_tooltip: 'Opens the raw game state file (.game.json) for direct editing in a window with JSON validation. For advanced users: allows manual correction of characters, location, inventory, plots, and counters when manual narrative editing has diverged from the structural state. WARNING: incorrect editing may corrupt the save — changes are validated as JSON before saving, but content correctness (field sensibility) is your responsibility.'
+  dlg_edytuj_stan_tytul: Game state editing (.game.json)
+  dlg_edytuj_stan_lbl: 'Raw game state in JSON format. Edit carefully: after saving, the game will be reloaded from this file. The content must remain a valid JSON object — otherwise, the save will be rejected.'
+  dlg_edytuj_stan_name: Raw game state editing field in JSON format
+  dlg_edytuj_stan_btn_ok: '&Save and reload'
+  dlg_edytuj_stan_btn_anuluj: '&Cancel'
+  edytuj_stan_blad_json_tytul: Invalid JSON
+  edytuj_stan_blad_json_tresc: "The content is not valid JSON, so it was not saved (the game would be corrupted). Correct the syntax and try again.\n\nError details:\n{tresc_bledu}"
+  edytuj_stan_blad_typ_tresc: The main game state element must be a JSON object (a key-value pair in curly braces), not a list or a simple value. Restore the object structure and try again.
+  edytuj_stan_zapisano_tytul: Game state saved
+  edytuj_stan_zapisano_tresc: Game state “{nazwa}" has been saved and reloaded from disk. Characters, location, inventory, plots, and counters now reflect your edits.

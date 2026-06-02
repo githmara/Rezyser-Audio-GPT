@@ -372,7 +372,7 @@ tresc:
     3. Lo script scansiona ogni riga di testo e converte le parole chiave (Atto, Capitolo, Prologo, Epilogo, Introduzione) in intestazioni "Heading 1" nel documento Word.
     4. Le scene (righe che iniziano con la parola "Scena") vengono trasformate in testo in grassetto — visibile nel documento ma invisibile nell'indice di ElevenLabs.
     5. Tutto il testo rimanente (dialoghi, descrizioni) viene trasferito senza modifiche.
-    6. Riceverai un file architettura_[nome_originale].docx — un documento Word professionale pronto per ulteriori lavori. Ad esempio, se il tuo file di input si chiamava anestesia.txt, il file risultante sarà denominato architettura_anestesia.docx e apparirà nella stessa cartella dell'originale.
+    6. Riceverai un file architektura_[nome_originale].docx — un documento Word professionale pronto per ulteriori lavori. Ad esempio, se il tuo file di input si chiamava anestesia.txt, il file risultante sarà denominato architektura_anestesia.docx e apparirà nella stessa cartella dell'originale.
 
     Pulizia automatica: Lo script rimuove automaticamente i tag HTML (se il testo proviene da un browser o da un file .html locale, ad esempio generato da Poliglotta) e i marcatori di intestazione Markdown (ad es. ### o ####) prima dell'elaborazione. Non è necessario pulire manualmente il file.
 

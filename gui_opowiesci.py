@@ -33,6 +33,7 @@ może w każdej chwili odsłuchać scenę, sprawdzić wybory, wrócić do pisani
 
 from __future__ import annotations
 
+import json
 import os
 import platform
 import subprocess
@@ -54,6 +55,21 @@ from i18n import aktualny_jezyk, t
 # w okrojonym fragmencie nie ma żadnego sensownego końca zdania.
 _SKROT_MAX_ZN = 1200
 _SKROT_MIN_PROG = 0.60   # nie cofaj się wcześniej niż 60% max_znakow
+
+
+# v15.6: opt-in techniczna edycja stanu gry (`.game.json`) dla świadomych
+# userów. Domyka dziurę, którą v15.5.1 tylko zamaskowała (ukryty „Odśwież
+# z dysku" w Opowieściach — rekoncyliacja narracji NIE re-derywowała stanu
+# strukturalnego, cichy dryf). Re-derywacja przez LLM odrzucona (koszt API,
+# którego zwykły user nie oczekuje); zamiast tego dajemy bezpośrednią,
+# walidowaną edycję surowego JSON-a.
+#
+# FLAGA ZASZYTA W KODZIE (NIE env-var, NIE user-facing): przycisk „Edytuj
+# stan gry…" jest widoczny TYLKO gdy ta stała = True. Domyślnie False —
+# zwykły end-user nigdy go nie zobaczy, bo ręczna edycja JSON to ryzyko
+# uszkodzenia zapisu, na które świadomie wystawia się tylko techniczny user
+# (modyfikuje stałą w źródle przed buildem własnej paczki).
+EDYCJA_STANU_GRY_WIDOCZNA = False
 
 
 def _skroc_na_granicy_zdania(tekst: str, max_znakow: int = _SKROT_MAX_ZN) -> str:
@@ -367,6 +383,18 @@ class OpowiesciPanel(wx.Panel):
         self._btn_odswiez_z_dysku.SetToolTip(t("opowiesci.btn_odswiez_z_dysku_tooltip"))
         self._btn_odswiez_z_dysku.Hide()
 
+        # v15.6: opt-in techniczna edycja `.game.json` (stała `EDYCJA_STANU_GRY_WIDOCZNA`).
+        # Przycisk istnieje zawsze (spójny kod budowy paska), ale bez flagi jest
+        # bezwarunkowo ukryty — `_aktualizuj_uistate` steruje jego Enable tylko gdy
+        # flaga włączona. To NOWY przycisk, świadomie odrębny od „Odśwież z dysku":
+        # semantyka inna (bezpośrednia edycja surowego stanu strukturalnego, nie
+        # rekoncyliacja narracji), a handler-hook starego przycisku zostawiamy
+        # nietknięty.
+        self._btn_edytuj_stan = wx.Button(self, label=t("opowiesci.btn_edytuj_stan_label"))
+        self._btn_edytuj_stan.SetToolTip(t("opowiesci.btn_edytuj_stan_tooltip"))
+        if not EDYCJA_STANU_GRY_WIDOCZNA:
+            self._btn_edytuj_stan.Hide()
+
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(self._txt_nazwa_gry, proportion=1,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
@@ -379,6 +407,8 @@ class OpowiesciPanel(wx.Panel):
         row.Add(self._btn_otworz_narracje,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         row.Add(self._btn_odswiez_z_dysku,
+                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        row.Add(self._btn_edytuj_stan,
                 flag=wx.ALIGN_CENTER_VERTICAL)
 
         # Faza 5: Quick Start preset picker — drugi wiersz w pasku.
@@ -638,6 +668,9 @@ class OpowiesciPanel(wx.Panel):
         self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_zapisz)
         self._btn_otworz_narracje.Bind(wx.EVT_BUTTON, self._on_otworz_narracje)
         self._btn_odswiez_z_dysku.Bind(wx.EVT_BUTTON, self._on_odswiez_z_dysku)
+        # v15.6: opt-in techniczna edycja `.game.json` (bind aktywny zawsze;
+        # widoczność/Enable steruje `EDYCJA_STANU_GRY_WIDOCZNA` + `_aktualizuj_uistate`).
+        self._btn_edytuj_stan.Bind(wx.EVT_BUTTON, self._on_edytuj_stan)
         self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_wyslij)
         # v15.1: edycja zasad świata przez dedykowany dialog.
         self._btn_zasady_swiata.Bind(wx.EVT_BUTTON, self._on_zasady_swiata)
@@ -1225,6 +1258,11 @@ class OpowiesciPanel(wx.Panel):
         # v15.5.1: „Odśwież z dysku" jest bezwarunkowo ukryty (cichy dryf stanu —
         # patrz komentarz przy tworzeniu przycisku). Nie sterujemy już jego
         # Enable/Show — pozostaje Hidden do czasu opt-in z v15.6.
+        # v15.6: „Edytuj stan gry…" — Enable tylko gdy flaga włączona ORAZ jest
+        # aktywny projekt (bez gry nie ma `.game.json` do edycji). Bez flagi
+        # przycisk pozostaje ukryty z konstruktora, więc Enable jest no-op.
+        if EDYCJA_STANU_GRY_WIDOCZNA:
+            self._btn_edytuj_stan.Enable(ma_projekt)
 
         utrwalony = self._zapisany_tryb in self._MAPA_TRYB_RB_NA_INT
         if utrwalony:
@@ -1417,6 +1455,37 @@ class OpowiesciPanel(wx.Panel):
             ))
             return
 
+        self._zaladuj_projekt_do_ui(projekt, wynik, nazwa)
+
+        wx.MessageBox(
+            t(
+                "opowiesci.gra_wczytana_tresc",
+                nazwa=nazwa,
+                numer_tury=projekt.numer_tury,
+            ),
+            t("opowiesci.gra_wczytana_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+        self._txt_akcja.SetFocus()
+
+    def _zaladuj_projekt_do_ui(
+        self,
+        projekt: ProjektOpowiesci,
+        wynik: Any,
+        nazwa: str,
+    ) -> None:
+        """Synchronizuje cały widok z właśnie wczytanym projektem.
+
+        Wspólny rdzeń wczytania gry — używany zarówno przez „Wczytaj"
+        (:meth:`_on_wczytaj`), jak i przez opt-in techniczną edycję
+        `.game.json` (:meth:`_on_edytuj_stan`), która po zapisie surowego
+        JSON-a przeładowuje projekt z dysku i musi odświeżyć ten sam zestaw
+        widgetów. Ustawia `_zapisany_tryb`, snapshot, nazwę, RadioBox trybu,
+        narrację, „Ostatnią turę", przyciski wyborów oraz stan UI. NIE
+        pokazuje komunikatu sukcesu — to robi wywołujący (różne treści
+        per kontekst).
+        """
         # Synchronizacja `_zapisany_tryb` z dysku — `.mode` ma priorytet
         # nad polem `tryb` w `.game.json` (analogicznie do `_ustaw_rb_z_trybu`
         # niżej). Brak `.mode` (stara gra) → fallback na `projekt.tryb`.
@@ -1473,18 +1542,6 @@ class OpowiesciPanel(wx.Panel):
         self._przeladuj_wybory(list(projekt.ostatnie_wybory), tryb_z_dysku)
         self._aktualizuj_uistate()
         self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
-
-        wx.MessageBox(
-            t(
-                "opowiesci.gra_wczytana_tresc",
-                nazwa=nazwa,
-                numer_tury=projekt.numer_tury,
-            ),
-            t("opowiesci.gra_wczytana_tytul"),
-            wx.OK | wx.ICON_INFORMATION,
-            self,
-        )
-        self._txt_akcja.SetFocus()
 
     # ------------------------------------------------------------------
     # _on_zapisz: ręczny dump game.json (autozapis działa po każdej turze)
@@ -1682,6 +1739,100 @@ class OpowiesciPanel(wx.Panel):
             wx.OK | wx.ICON_INFORMATION, self,
         )
         self._txt_narracja.SetFocus()
+
+    # ==================================================================
+    # v15.6 — opt-in techniczna edycja stanu gry (`.game.json`)
+    # ==================================================================
+    def _on_edytuj_stan(self, _event: wx.Event) -> None:
+        """Otwiera dialog bezpośredniej edycji surowego `.game.json`.
+
+        Opt-in dla technicznego usera (stała `EDYCJA_STANU_GRY_WIDOCZNA`).
+        Domyka dziurę po v15.5.1: „Odśwież z dysku" rekoncyliowało narrację,
+        ale NIE re-derywowało stanu strukturalnego (postacie, lokacja,
+        ekwipunek, wątki, liczniki). Tu user edytuje ten stan wprost.
+
+        Flow:
+          1. Dump bieżącego stanu z RAM na dysk (`zapisz_game_json`) — gwarantuje
+             że edytowany tekst odzwierciedla żywą sesję, nie stary plik.
+          2. Wczytanie surowego JSON-a do dialogu.
+          3. Po OK (dialog waliduje, że tekst to parsowalny obiekt JSON) —
+             zapis na dysk i PRZEŁADOWANIE projektu z dysku przez `wczytaj`,
+             żeby RAM/snapshot/UI zgadzały się z nowym plikiem.
+
+        Walidacja JSON jest KRYTYCZNA: uszkodzony `.game.json` wywaliłby
+        kolejne `wczytaj`. Dialog nie pozwala zatwierdzić nieparsowalnej treści.
+        """
+        if self._projekt is None:
+            wx.MessageBox(
+                t("opowiesci.brak_gry_tresc"),
+                t("opowiesci.brak_gry_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        # Edycja w trakcie generowania tury/streszczenia = race: worker po
+        # zakończeniu nadpisze `.game.json` własnym stanem, gubiąc edycję
+        # (albo my nadpiszemy jego). Blokujemy — reuse komunikatu „w toku".
+        worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
+        if worker_w_toku or self._meta_w_toku:
+            wx.MessageBox(
+                t("opowiesci.odswiez_zajete_tresc"),
+                t("opowiesci.odswiez_zajete_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+
+        sciezka = self._projekt._sciezka_game_json(self._projekt.nazwa_pliku)
+        try:
+            self._projekt.zapisz_game_json()   # snapshot RAM → dysk (i gwarancja istnienia pliku)
+            with open(sciezka, "r", encoding="utf-8") as fh:
+                surowy = fh.read()
+        except OSError as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_zapisu_tresc",
+                tresc_bledu=str(exc),
+            ))
+            return
+
+        dlg = DialogEdycjaStanuGry(self, initial_text=surowy)
+        if dlg.ShowModal() != wx.ID_OK:
+            dlg.Destroy()
+            return
+        nowy = dlg.tekst   # zwalidowany w dialogu: parsowalny obiekt JSON
+        dlg.Destroy()
+
+        try:
+            with open(sciezka, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(nowy)
+        except OSError as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_zapisu_tresc",
+                tresc_bledu=str(exc),
+            ))
+            return
+
+        # Przeładowanie z dysku — RAM, snapshot i cały widok zgrane z nowym
+        # plikiem (ten sam rdzeń co „Wczytaj").
+        nazwa = self._projekt.nazwa_pliku
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        projekt = ProjektOpowiesci(app_dir)
+        try:
+            wynik = projekt.wczytaj(nazwa)
+        except (FileNotFoundError, OSError, ValueError) as exc:
+            self._wyswietl_blad_ai(t(
+                "opowiesci.blad_wczytania_tresc",
+                nazwa=nazwa,
+                tresc_bledu=str(exc),
+            ))
+            return
+
+        self._zaladuj_projekt_do_ui(projekt, wynik, nazwa)
+        wx.MessageBox(
+            t("opowiesci.edytuj_stan_zapisano_tresc", nazwa=nazwa),
+            t("opowiesci.edytuj_stan_zapisano_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self,
+        )
+        self._txt_akcja.SetFocus()
 
     # ==================================================================
     # v15.1 — Zasady świata (dedykowany dialog, NIE inline TextCtrl)
@@ -2377,4 +2528,93 @@ class DialogZasadySwiata(wx.Dialog):
     def _on_zapisz(self, _event: wx.Event) -> None:
         """Zapisz zawartość pola do `self.tekst` i zamknij dialog z ID_OK."""
         self.tekst = self._txt.GetValue()
+        self.EndModal(wx.ID_OK)
+
+
+class DialogEdycjaStanuGry(wx.Dialog):
+    """Okno bezpośredniej edycji surowego stanu gry (`.game.json`) — v15.6.
+
+    Opt-in dla technicznego usera (przycisk widoczny tylko gdy
+    ``gui_opowiesci.EDYCJA_STANU_GRY_WIDOCZNA``). Pokazuje sformatowany JSON
+    w wieloliniowym, monospaced ``TextCtrl``. Przycisk „Zapisz" NIE zamyka
+    dialogu, dopóki treść nie sparsuje się jako obiekt JSON (``dict``) —
+    uszkodzony `.game.json` wywaliłby kolejne wczytanie gry, więc walidacja
+    jest twardym warunkiem zatwierdzenia.
+
+    Po sukcesie (Zapisz) atrybut :attr:`tekst` zawiera zwalidowany surowy
+    JSON (string). Wywołujący zapisuje go na dysk i przeładowuje projekt
+    (:meth:`OpowiesciPanel._on_edytuj_stan`).
+    """
+
+    def __init__(self, parent: wx.Window, initial_text: str = "") -> None:
+        super().__init__(
+            parent,
+            title=t("opowiesci.dlg_edytuj_stan_tytul"),
+            size=(680, 560),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+
+        # Atrybut publiczny — wywołujący czyta go po `ShowModal() == wx.ID_OK`.
+        self.tekst: str = initial_text
+
+        lbl = wx.StaticText(self, label=t("opowiesci.dlg_edytuj_stan_lbl"))
+        lbl.Wrap(640)
+
+        self._txt = wx.TextCtrl(
+            self,
+            value=initial_text,
+            style=wx.TE_MULTILINE | wx.TE_DONTWRAP,
+            name=t("opowiesci.dlg_edytuj_stan_name"),
+        )
+        # Monospace — JSON czyta się znacznie lepiej wzrokowo z wcięciami
+        # w stałej szerokości znaku; NVDA czyta tak samo, więc bez kosztu A11y.
+        self._txt.SetFont(
+            wx.Font(wx.FontInfo(10).Family(wx.FONTFAMILY_TELETYPE))
+        )
+        self._txt.SetMinSize((-1, 380))
+
+        btn_ok = wx.Button(self, wx.ID_OK, label=t("opowiesci.dlg_edytuj_stan_btn_ok"))
+        btn_anuluj = wx.Button(self, wx.ID_CANCEL, label=t("opowiesci.dlg_edytuj_stan_btn_anuluj"))
+        btn_ok.SetDefault()
+        btn_ok.Bind(wx.EVT_BUTTON, self._on_zapisz)
+
+        row_btn = wx.BoxSizer(wx.HORIZONTAL)
+        row_btn.AddStretchSpacer()
+        row_btn.Add(btn_anuluj, flag=wx.RIGHT, border=8)
+        row_btn.Add(btn_ok)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl,       flag=wx.ALL,                                       border=10)
+        sizer.Add(self._txt, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=10)
+        sizer.Add(row_btn,   flag=wx.EXPAND | wx.ALL,                           border=10)
+        self.SetSizer(sizer)
+
+        wx.CallAfter(self._txt.SetFocus)
+
+    def _on_zapisz(self, _event: wx.Event) -> None:
+        """Waliduje JSON i — jeśli OK — zapisuje do `self.tekst`, zamyka modal.
+
+        Dwa warunki: (1) treść parsuje się jako JSON; (2) korzeń to obiekt
+        (``dict``) — `.game.json` to mapa pól, a `core_opowiesci.wczytaj`
+        woła ``dane.get(...)``, więc lista/skalar na topie wywaliłaby reload.
+        Niespełnienie → komunikat błędu i dialog ZOSTAJE otwarty (user poprawia).
+        """
+        surowy = self._txt.GetValue()
+        try:
+            dane = json.loads(surowy)
+        except json.JSONDecodeError as exc:
+            wx.MessageBox(
+                t("opowiesci.edytuj_stan_blad_json_tresc", tresc_bledu=str(exc)),
+                t("opowiesci.edytuj_stan_blad_json_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+        if not isinstance(dane, dict):
+            wx.MessageBox(
+                t("opowiesci.edytuj_stan_blad_typ_tresc"),
+                t("opowiesci.edytuj_stan_blad_json_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+        self.tekst = surowy
         self.EndModal(wx.ID_OK)
