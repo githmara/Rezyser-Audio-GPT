@@ -9,6 +9,9 @@
 #  zhakować zakazu wymyślania własnych wskazówek reżyserskich.
 #  Sufiksy alarm/streszczenie wymuszają opcjonalny klucz JSON `streszczenie`
 #  (zamiast wcześniejszych tagów `<STRESZCZENIE>...</STRESZCZENIE>`).
+#  v15.5: streszczenie NIE cytuje już ostatnich akapitów ([OSTATNIA SCENA]
+#  usunięte) — końcówkę narracji odtwarza Python przy rekoncyliacji z dysku
+#  (meta-marker struktury w core_rezyser.rekoncyliuj_z_dysku).
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Burza Mózgów (Planowanie, BEZ zapisu do pliku)"
@@ -89,10 +92,9 @@ sufiksy:
   streszczenie: |
 
 
-    [TRYB WYMUSZONEGO STRESZCZENIA]: Użytkownik ręcznie zażądał zapisania stanu fabuły! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą TRZY obowiązkowe elementy:
+    [TRYB WYMUSZONEGO STRESZCZENIA]: Użytkownik ręcznie zażądał zapisania stanu fabuły! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą DWA obowiązkowe elementy:
     1. Zwięzłe podsumowanie dotychczasowych wydarzeń.
-    2. Sekcję [OSTATNIA SCENA]: dokładna kopia (słowo w słowo) ostatnich 2-3 akapitów przesłanego tekstu.
-    3. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
+    2. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
 
   # Gdy pamięć modelu jest w bezpiecznym buforze (< prog_ostrzegawczy).
   # AI ma NIE generować streszczenia, by nie marnować tokenów.
@@ -106,10 +108,9 @@ sufiksy:
   alarm: |
 
 
-    [TRYB ALARMOWY - ZBLIŻA SIĘ KONIEC PAMIĘCI]: Pamięć jest prawie pełna! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą TRZY obowiązkowe elementy:
+    [TRYB ALARMOWY - ZBLIŻA SIĘ KONIEC PAMIĘCI]: Pamięć jest prawie pełna! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą DWA obowiązkowe elementy:
     1. Zwięzłe podsumowanie dotychczasowych wydarzeń.
-    2. Sekcję [OSTATNIA SCENA]: dokładna kopia (słowo w słowo) ostatnich 2-3 akapitów przesłanego tekstu.
-    3. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
+    2. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
 
 # --- Przypomnienie doklejane do instrukcji użytkownika (role=user) ---
 # Ostatnia szansa na przypilnowanie modelu tuż przed "wysłaniem".

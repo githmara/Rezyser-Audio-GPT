@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktive Geschichten Modul (15.4.1 – Veröffentlichungsversion)
+Reżyser Audio GPT — Interaktive Geschichten Modul (15.5 – Veröffentlichungsversion)
 
 Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.
 
@@ -84,6 +84,8 @@ Der Erzählmotor wählt das AI-Modell automatisch je nach Modus: Für den Modus 
 /scena <opis>, /scene <opis> — aktuelles Ereignis ANDERSWO, erzählt in der dritten Person. Die Kamera löst sich von deiner Figur und zeigt, was parallel mit einer anderen Figur oder an einem anderen Ort der Welt passiert. Beispiel: „/scena Anna auf dem Markt" oder „/scena die Wachen am Tor". Der Motor fügt die Szene in die Erzählung ein, kennzeichnet sie mit dem Präfix „Szene außerhalb des Rahmens:" und kehrt in der nächsten Runde automatisch zu deiner Figur zurück. Es erscheinen keine Entscheidungen — der Spieler trifft keine Entscheidungen in der Szene eines anderen. Eine vollständige Beschreibung des Mechanismus findest du in SCHRITT 5B.
 
 /flashback <opis>, /retrospekcja <opis> — Rückblende in der dritten Person, zeitliche Rückkehr. Beispiel: „/flashback der Tag, an dem Vater starb" oder „/flashback erstes Treffen der Hauptfiguren". Eröffnet die Erzählung mit einer zeitlichen Formel („Drei Jahre zuvor…"), kennzeichnet sie mit dem Präfix „Rückblende:" und kehrt zur aktuellen Runde zurück. Genauso wie /scena — passiv, ohne Entscheidungen. Vollständige Beschreibung in SCHRITT 5B.
+
+/odswiez, /refresh — aktualisiert den internen Speicher aus der Erzählungsdatei nach deren manueller Bearbeitung (seit v15.5). Wenn du opowiesci/<nazwa>.txt im Editor öffnest und z.B. ein von der Engine gebrochenes Schließen eines filmischen Schnitts wegschneidest, synchronisiert dieser Befehl (oder die Schaltfläche „Vom Datenträger aktualisieren") das frische Ende mit dem Kontext der Engine — ohne harten Reset und erneutes Laden des Spiels. Falls bereits eine Zusammenfassung früherer Runden existiert, bleibt sie unberührt, sodass die nächste Runde und die nächste Zusammenfassung nicht auf veralteten Daten entstehen. ACHTUNG: Der Spielstand (Figuren, Ort, Inventar, Handlungsfäden) aus der Datei .game.json wird NICHT aktualisiert — wenn die Bearbeitung Weltfakten verändert hat, kann die nächste Runde mit ihnen auseinanderlaufen.
 
 /pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Bildschirmleser liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
 

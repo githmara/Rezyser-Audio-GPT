@@ -56,6 +56,7 @@ testy / narzędzia offline.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 from dataclasses import dataclass
@@ -132,11 +133,129 @@ POZIOM_OK          = ct.POZIOM_OK
 POZIOM_OSTRZEZENIE = ct.POZIOM_OSTRZEZENIE
 POZIOM_ALARM       = ct.POZIOM_ALARM
 
+# v15.5 — rekoncyliacja narracji z dysku (po ręcznej edycji `.txt`, np. ucięciu
+# złamanego anti-closure). Gdy istnieje streszczenie i CAŁY tekst przekracza
+# próg ostrzegawczy, `full_story` odtwarzamy tylko z KOŃCÓWKI `.txt` — od
+# ostatniego użytecznego nagłówka struktury — żeby nie zduplikować starej
+# części już skompresowanej w `summary_text` (re-inflacja kontekstu).
+#   MIN_TRESC_PO_NAGLOWKU — minimalna liczba znaków nie-białych PO nagłówku,
+#       by uznać go za „nagłówek z treścią". Guard przed sytuacją: reżyser
+#       wstawił sam nagłówek + didaskalia/notkę bez właściwej sceny → cofamy
+#       się do poprzedniego nagłówka z istotną treścią.
+#   MAX_TAIL_ZN — twardy limit długości przywracanej końcówki (snap do akapitu)
+#       gdy brak użytecznego markera lub sekcja od markera jest gigantyczna.
+MIN_TRESC_PO_NAGLOWKU = 400
+MAX_TAIL_ZN           = 8000
+
 # Polskie znaki → ASCII (do normalizacji nazw akcentów w Księdze Świata).
 _PL_TO_ASCII = {
     "ą": "a", "ę": "e", "ł": "l", "ó": "o",
     "ś": "s", "ć": "c", "ń": "n", "ż": "z", "ź": "z",
 }
+
+
+# =============================================================================
+# Rekoncyliacja narracji z dysku (v15.5) — wolne funkcje, czysto-Pythonowe,
+# w pełni testowalne bez I/O i bez wxPython.
+# =============================================================================
+
+def _znajdz_naglowki(tekst: str) -> list[tuple[int, str]]:
+    """Zwraca listę ``(offset_startu_linii, tekst_nagłówka)`` dla linii będących
+    czystymi nagłówkami struktury (Rozdział/Akt/Scena/Prolog/Epilog — wszystkie
+    obsługiwane języki, regex :data:`_WZORZEC_NAGLOWEK_LINIA`).
+
+    ``offset`` to indeks znakowy początku linii nagłówka w ``tekst`` — pozwala
+    pociąć ``tekst[offset:]`` tak, by przywrócona końcówka zaczynała się
+    DOKŁADNIE od nagłówka (AI dostaje „Rozdział 7\\n<treść>").
+    """
+    wynik: list[tuple[int, str]] = []
+    offset = 0
+    for linia in tekst.splitlines(keepends=True):
+        rdzen = linia.strip()
+        if rdzen and re.match(_WZORZEC_NAGLOWEK_LINIA, rdzen):
+            wynik.append((offset, rdzen))
+        offset += len(linia)
+    return wynik
+
+
+def _ma_istotna_tresc(tekst: str, offset_naglowka: int) -> bool:
+    """True, gdy PO linii nagłówka (od ``offset_naglowka``) jest co najmniej
+    :data:`MIN_TRESC_PO_NAGLOWKU` znaków nie-białych.
+
+    Guard przed snapowaniem do „pustego" nagłówka albo nagłówka, po którym
+    reżyser wpisał ręcznie tylko didaskalia/krótką notkę — wtedy snap dałby AI
+    nagłówek bez właściwej sceny.
+    """
+    po = tekst[offset_naglowka:]
+    nl = po.find("\n")
+    reszta = po[nl + 1:] if nl != -1 else ""
+    niebiale = sum(1 for znak in reszta if not znak.isspace())
+    return niebiale >= MIN_TRESC_PO_NAGLOWKU
+
+
+def _ostatni_uzyteczny_naglowek(
+    tekst: str, preferowany: str | None = None,
+) -> int | None:
+    """Zwraca offset początku końcówki do przywrócenia — od ostatniego nagłówka
+    z istotną treścią. ``None`` gdy w tekście nie ma żadnego użytecznego nagłówka.
+
+    Kolejność wyboru:
+      1. Jeśli ``preferowany`` (z meta-markera streszczenia) występuje w tekście
+         i ma istotną treść — używamy jego OSTATNIEGO wystąpienia.
+      2. W przeciwnym razie skanujemy nagłówki od końca i bierzemy pierwszy,
+         który ma istotną treść (guard cofa nas przed pusty/sam-didaskalia
+         nagłówek do poprzedniego pełnego).
+    """
+    naglowki = _znajdz_naglowki(tekst)
+    if not naglowki:
+        return None
+    if preferowany:
+        for offset, txt in reversed(naglowki):
+            if txt == preferowany and _ma_istotna_tresc(tekst, offset):
+                return offset
+    for offset, _txt in reversed(naglowki):
+        if _ma_istotna_tresc(tekst, offset):
+            return offset
+    return None
+
+
+def _koncowka_po_znakach(tekst: str, max_zn: int = MAX_TAIL_ZN) -> str:
+    """Ostatnie ~``max_zn`` znaków ``tekst``, snapnięte do granicy akapitu, by
+    przywrócona końcówka nie zaczynała się w środku zdania.
+
+    Zwraca cały ``tekst`` jeśli mieści się pod limitem. Inaczej tnie okno
+    końcowe i przeskakuje do pierwszego ``\\n\\n`` w jego wczesnej części;
+    brak akapitu → ``lstrip`` okna.
+    """
+    if len(tekst) <= max_zn:
+        return tekst
+    okno = tekst[-max_zn:]
+    idx = okno.find("\n\n")
+    if idx != -1 and idx < max_zn // 2:
+        return okno[idx + 2:].lstrip()
+    return okno.lstrip()
+
+
+def _rozbij_naglowek(naglowek: str) -> tuple[str, int | None]:
+    """Rozbija tekst nagłówka na ``(typ, numer)``.
+
+    ``typ`` ∈ {rozdzial, akt, scena, prolog, epilog, inny}; ``numer`` to int
+    dla rozdziału/aktu/sceny, ``None`` dla prologu/epilogu/innego.
+    """
+    for typ, wzorzec in (
+        ("rozdzial", _WZORZEC_ROZDZIAL),
+        ("akt",      _WZORZEC_AKT),
+        ("scena",    _WZORZEC_SCENA),
+    ):
+        m = re.search(wzorzec, naglowek)
+        if m:
+            return typ, int(m.group(1))
+    low = naglowek.lower()
+    if any(s in low for s in ("prolog", "formáli", "пролог")):
+        return "prolog", None
+    if any(s in low for s in ("epilog", "eftirorð", "эпилог")):
+        return "epilog", None
+    return "inny", None
 
 
 # =============================================================================
@@ -293,6 +412,28 @@ class WynikWczytania:
 
 
 @dataclass
+class WynikRekoncyliacji:
+    """Rezultat :meth:`ProjektRezysera.rekoncyliuj_z_dysku` (v15.5).
+
+    Attributes:
+        tryb:                   "calosc"   – cały `.txt` zmieścił się pod progiem,
+                                              streszczenie skasowane (D1);
+                                "snap"     – długa historia + streszczenie,
+                                              przywrócono końcówkę od nagłówka;
+                                "koncowka" – brak użytecznego markera, przywrócono
+                                              ostatnie MAX_TAIL_ZN znaków.
+        skasowano_streszczenie: czy usunięto `_streszczenie.txt` + meta (D1).
+        liczba_znakow:          długość przywróconego `full_story`.
+        naglowek_uzyty:         tekst nagłówka, od którego snapowano (lub None).
+    """
+
+    tryb: str
+    skasowano_streszczenie: bool = False
+    liczba_znakow: int = 0
+    naglowek_uzyty: str | None = None
+
+
+@dataclass
 class StatusPamieciModelu:
     """Stan wskaźnika pamięci modelu – gotowe dane dla GUI.
 
@@ -407,16 +548,33 @@ class ProjektRezysera:
             self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}.brainstorm.json"
         )
 
+    def _sciezka_streszczenie_meta(self, nazwa: str) -> str:
+        # v15.5: metadane streszczenia — ostatni nagłówek struktury wykryty
+        # w momencie zapisu streszczenia. Anchor do rekoncyliacji końcówki
+        # `.txt` po ręcznej edycji. runtime/skrypty/ (ukryte, gitignored) —
+        # ten sam katalog co `.mode` / `.brainstorm.json`.
+        return os.path.join(
+            self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}_streszczenie_meta.json"
+        )
+
     # ------------------------------------------------------------------
     # Wczytywanie
     # ------------------------------------------------------------------
-    def wczytaj(self, nazwa: str) -> WynikWczytania:
+    def wczytaj(
+        self, nazwa: str, model: str = ct.MODEL_DOMYSLNY_REZYSER,
+    ) -> WynikWczytania:
         """Wczytuje projekt: historię / streszczenie / Księgę Świata / tryb .mode.
 
         Ustawia liczniki rozdziałów/aktów/scen na podstawie treści historii.
-        Implementuje regułę Nieskończonej Pamięci: jeśli istnieje plik
-        streszczenia, to wczytujemy streszczenie a ``full_story`` zostaje
-        puste (można kontynuować historię operując tylko na streszczeniu).
+
+        v15.5: regułę Nieskończonej Pamięci („streszczenie → full_story=''")
+        zastąpiła INTELIGENTNA REKONCYLIACJA (:meth:`_zastosuj_rekoncyliacje`):
+          * cały `.txt` mieści się pod progiem ostrzegawczym → wczytujemy CAŁOŚĆ
+            bez kompresji (nawet jeśli istnieje streszczenie — wtedy je kasujemy);
+          * tekst przekracza próg i jest streszczenie → `full_story` to tylko
+            KOŃCÓWKA `.txt` (od ostatniego użytecznego nagłówka), streszczenie
+            zostaje. To realnie domyka lukę „po wczytaniu z _streszczenie.txt AI
+            głupiało bez kontekstu fabuły".
 
         Raises:
             FileNotFoundError: gdy nie istnieje plik ``skrypty/<nazwa>.txt``.
@@ -454,28 +612,161 @@ class ProjektRezysera:
                 # Cichy fail – Księga nie jest krytyczna dla wczytania historii.
                 pass
 
-        # --- Streszczenie PRIORYTETOWE nad pełną historią ---
-        sciezka_strsz = self._sciezka_streszczenia(nazwa)
-        if os.path.exists(sciezka_strsz):
-            try:
-                with open(sciezka_strsz, "r", encoding="utf-8") as fh:
-                    self.summary_text = fh.read()
-                wynik.czy_streszczenie = True
-            except Exception:
-                pass
-            self.full_story = ""
-            wynik.czy_historia = False
-            wynik.liczba_znakow = 0
-        else:
-            self.full_story = content
-            self.summary_text = ""
-            wynik.czy_historia = True
-            wynik.liczba_znakow = len(content)
+        # --- Inteligentna rekoncyliacja (v15.5) ---
+        # nazwa_pliku MUSI być ustawiona przed rekoncyliacją — używa jej przez
+        # `_wymagaj_nazwy` i ścieżkowe helpery.
+        self.nazwa_pliku = nazwa
+        rek = self._zastosuj_rekoncyliacje(content, model)
+        wynik.czy_historia    = bool(self.full_story.strip())
+        wynik.czy_streszczenie = bool(self.summary_text.strip())
+        wynik.liczba_znakow   = len(self.full_story)
 
         # --- Tryb twórczy (.mode) ---
         wynik.saved_mode = self.wczytaj_tryb_tworczy(nazwa)
-        self.nazwa_pliku = nazwa
         return wynik
+
+    # ------------------------------------------------------------------
+    # Rekoncyliacja narracji z dysku (v15.5)
+    # ------------------------------------------------------------------
+    def rekoncyliuj_z_dysku(
+        self, model: str = ct.MODEL_DOMYSLNY_REZYSER,
+    ) -> WynikRekoncyliacji:
+        """Ponownie wczytuje `skrypty/<nazwa>.txt` i uzgadnia `full_story` /
+        `summary_text` (po ręcznej edycji pliku narracji, np. ucięciu złamanego
+        anti-closure). NIE dotyka `world_lore`, liczników struktury ani `.txt`.
+
+        Raises:
+            ValueError:        gdy projekt nie ma ustawionej nazwy.
+            FileNotFoundError: gdy nie istnieje `skrypty/<nazwa>.txt`.
+        """
+        self._wymagaj_nazwy()
+        sciezka = self._sciezka_historii(self.nazwa_pliku)
+        if not os.path.exists(sciezka):
+            raise FileNotFoundError(sciezka)
+        with open(sciezka, "r", encoding="utf-8") as fh:
+            content = fh.read()
+        return self._zastosuj_rekoncyliacje(content, model)
+
+    def _zastosuj_rekoncyliacje(
+        self, content: str, model: str = ct.MODEL_DOMYSLNY_REZYSER,
+    ) -> WynikRekoncyliacji:
+        """Czysta logika rekoncyliacji (oddzielona od I/O dla testowalności).
+
+        Ustawia `self.full_story` (+ ewentualnie `self.summary_text`) na
+        podstawie ``content`` (treść `.txt`) i obecności streszczenia. Zwraca
+        :class:`WynikRekoncyliacji`. Wymaga ustawionej `nazwa_pliku`.
+        """
+        self._wymagaj_nazwy()
+        sciezka_strsz = self._sciezka_streszczenia(self.nazwa_pliku)
+        ma_streszczenie = os.path.exists(sciezka_strsz) or bool(self.summary_text.strip())
+
+        # Próg: czy CAŁA narracja (+ Księga Świata) mieści się pod ostrzeżeniem?
+        # summary_text="" w teście — sprawdzamy sam tekst narracji.
+        test = SnapshotProjektu(
+            nazwa=self.nazwa_pliku, full_story=content,
+            summary_text="", world_lore=self.world_lore,
+        )
+        tokeny = policz_tokeny_payloadu_snapshot(test, model)
+        miesci_sie = tokeny < int(OKNO_KONTEKSTU_MAX * PROG_OSTRZEZENIE)
+
+        # --- Wariant „całość": krótka historia LUB brak streszczenia ---
+        if miesci_sie or not ma_streszczenie:
+            self.full_story = content
+            skasowano = False
+            if not miesci_sie:
+                # Brak streszczenia + tekst > próg: wymóg streszczenia w gestii
+                # usera (doc). Nie kompresujemy — `.txt` jest źródłem prawdy.
+                pass
+            if ma_streszczenie and miesci_sie:
+                # D1: streszczenie zbędne (całość się mieści) → skasuj plik+meta.
+                skasowano = self._skasuj_streszczenie_i_meta()
+            else:
+                self.summary_text = ""
+            return WynikRekoncyliacji(
+                tryb="calosc",
+                skasowano_streszczenie=skasowano,
+                liczba_znakow=len(self.full_story),
+            )
+
+        # --- Wariant „snap": długa historia + istnieje streszczenie ---
+        # Doładuj streszczenie z dysku jeśli nie ma go jeszcze w RAM.
+        if not self.summary_text.strip() and os.path.exists(sciezka_strsz):
+            try:
+                with open(sciezka_strsz, "r", encoding="utf-8") as fh:
+                    self.summary_text = fh.read()
+            except OSError:
+                pass
+
+        meta = self._wczytaj_streszczenie_meta()
+        preferowany = meta.get("marker_naglowek_tekst") if meta else None
+        offset = _ostatni_uzyteczny_naglowek(content, preferowany or None)
+
+        if offset is not None:
+            koncowka = content[offset:]
+            naglowek = content[offset:].splitlines()[0].strip() if koncowka else None
+            if len(koncowka) > MAX_TAIL_ZN:
+                # Sekcja od markera gigantyczna → twardy limit znakowy.
+                self.full_story = _koncowka_po_znakach(content, MAX_TAIL_ZN)
+                return WynikRekoncyliacji(
+                    tryb="koncowka", liczba_znakow=len(self.full_story),
+                )
+            self.full_story = koncowka
+            return WynikRekoncyliacji(
+                tryb="snap", liczba_znakow=len(self.full_story),
+                naglowek_uzyty=naglowek,
+            )
+
+        # Brak użytecznego markera (reżyser wymazał nagłówki) → limit znakowy.
+        self.full_story = _koncowka_po_znakach(content, MAX_TAIL_ZN)
+        return WynikRekoncyliacji(tryb="koncowka", liczba_znakow=len(self.full_story))
+
+    def _skasuj_streszczenie_i_meta(self) -> bool:
+        """D1: usuwa `_streszczenie.txt` + `_streszczenie_meta.json` i zeruje
+        `summary_text`. Zwraca True jeśli skasowano przynajmniej jeden plik."""
+        skasowano = False
+        for sciezka in (
+            self._sciezka_streszczenia(self.nazwa_pliku),
+            self._sciezka_streszczenie_meta(self.nazwa_pliku),
+        ):
+            if os.path.exists(sciezka):
+                try:
+                    os.remove(sciezka)
+                    skasowano = True
+                except OSError:
+                    pass
+        self.summary_text = ""
+        return skasowano
+
+    def _wczytaj_streszczenie_meta(self) -> dict[str, Any] | None:
+        """Wczytuje `_streszczenie_meta.json` lub None (brak / błąd parsowania)."""
+        sciezka = self._sciezka_streszczenie_meta(self.nazwa_pliku)
+        if not os.path.exists(sciezka):
+            return None
+        try:
+            with open(sciezka, "r", encoding="utf-8") as fh:
+                return json.load(fh)
+        except (OSError, ValueError):
+            return None
+
+    def _zapisz_streszczenie_meta(self) -> None:
+        """Wykrywa ostatni nagłówek struktury w `full_story` i zapisuje meta JSON
+        (anchor rekoncyliacji). Wołane z :meth:`zapisz_streszczenie`."""
+        naglowki = _znajdz_naglowki(self.full_story)
+        if naglowki:
+            _, tekst_naglowka = naglowki[-1]
+            marker_typ, marker_numer = _rozbij_naglowek(tekst_naglowka)
+        else:
+            marker_typ, marker_numer, tekst_naglowka = "brak", None, ""
+        meta = {
+            "marker_typ": marker_typ,
+            "marker_numer": marker_numer,
+            "marker_naglowek_tekst": tekst_naglowka,
+            "dlugosc_full_story_przy_streszczeniu": len(self.full_story),
+        }
+        sciezka = self._sciezka_streszczenie_meta(self.nazwa_pliku)
+        os.makedirs(os.path.dirname(sciezka), exist_ok=True)
+        with open(sciezka, "w", encoding="utf-8") as fh:
+            json.dump(meta, fh, ensure_ascii=False, indent=2)
 
     # ------------------------------------------------------------------
     # Zapis na dysk
@@ -508,6 +799,13 @@ class ProjektRezysera:
         with open(sciezka, "w", encoding="utf-8") as fh:
             fh.write(tresc)
         self.summary_text = tresc
+        # v15.5: zapisz meta-marker (ostatni nagłówek struktury w full_story
+        # w momencie streszczania) — anchor do rekoncyliacji końcówki `.txt`.
+        # Niekrytyczne: brak meta → rekoncyliacja użyje fallbacku po znakach.
+        try:
+            self._zapisz_streszczenie_meta()
+        except OSError:
+            pass
         return sciezka
 
     def dopisz_do_pliku_historii(self, content: str, mode: str = "a") -> None:

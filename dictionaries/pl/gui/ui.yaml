@@ -275,6 +275,15 @@ rezyser:
   blad_otwarcia_tresc:         "Próba otwarcia pliku {sciezka_pliku} zakończyła się błędem:\n{tresc_bledu}\n\nOtwórz plik ręcznie z Eksploratora plików."
   plik_narracji_brak_tytul:    "Brak pliku narracji"
   plik_narracji_brak_tresc:    "Plik narracji projektu „{nazwa_projektu}\" nie istnieje na dysku. Najpierw wczytaj projekt lub wyślij pierwsze zapytanie do AI, żeby plik powstał."
+  # v15.5: Odśwież z dysku — synchronizacja pamięci wewnętrznej po ręcznej
+  # edycji skrypty/<nazwa>.txt (np. ucięciu złamanego anti-closure).
+  btn_odswiez_z_dysku_label:   "Odś&wież z dysku"
+  btn_odswiez_z_dysku_tooltip: "Wczytuje ponownie plik narracji (skrypty/<nazwa>.txt) i synchronizuje pamięć wewnętrzną z Twoimi ręcznymi zmianami — bez twardego resetu i ponownego wczytywania projektu. Krótką historię wczytuje w całości; długą ze streszczeniem skraca do końcówki od ostatniego nagłówka (Rozdział/Akt/Scena), zachowując streszczenie. NIE zmienia Księgi Świata ani liczników struktury."
+  odswiez_z_dysku_tytul:       "Pamięć odświeżona z dysku"
+  odswiez_calosc_tresc:        "Wczytano całą narrację z dysku ({liczba_znakow} znaków). Pamięć wewnętrzna jest zsynchronizowana z plikiem.\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
+  odswiez_calosc_skasowano_tresc: "Wczytano całą narrację z dysku ({liczba_znakow} znaków) — cały tekst zmieścił się w oknie kontekstu, więc zbędne streszczenie zostało usunięte (silnik pracuje teraz na pełnej historii).\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
+  odswiez_snap_tresc:          "Odtworzono końcówkę narracji od nagłówka „{naglowek}\" ({liczba_znakow} znaków). Wcześniejszą część historii reprezentuje istniejące streszczenie, które pozostało nietknięte.\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
+  odswiez_koncowka_tresc:      "Tekst jest długi i nie zawiera nagłówków struktury — odtworzono ostatni fragment narracji ({liczba_znakow} znaków), a streszczenie pozostało nietknięte. ZALECENIE: wstawiaj nagłówki Rozdział/Akt/Scena, aby odświeżanie mogło precyzyjnie trafić w granicę sceny.\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
   # Sidebar
   sidebar_heading:       "📖 Pasek Boczny projektu"
   lbl_ksiega_swiata:     "Księga Świata – Zasady i Postacie:"
@@ -962,6 +971,15 @@ opowiesci:
   blad_otwarcia_tresc:              "Próba otwarcia pliku {sciezka_pliku} zakończyła się błędem:\n{tresc_bledu}\n\nOtwórz plik ręcznie z Eksploratora plików."
   plik_narracji_brak_tytul:         "Brak pliku narracji"
   plik_narracji_brak_tresc:         "Plik narracji gry „{nazwa}\" nie istnieje na dysku. Plik narracji powstaje po pierwszej turze — wyślij pierwszą akcję, żeby silnik narracyjny utworzył plik."
+  # v15.5: Odśwież z dysku — synchronizacja pamięci wewnętrznej po ręcznej
+  # edycji opowiesci/<nazwa>.txt (np. ucięciu złamanego kinowego cięcia).
+  btn_odswiez_z_dysku_label:        "Odś&wież z dysku"
+  btn_odswiez_z_dysku_tooltip:      "Wczytuje ponownie plik narracji (opowiesci/<nazwa>.txt) i synchronizuje pamięć wewnętrzną z Twoimi ręcznymi zmianami — bez twardego resetu i ponownego wczytywania gry. Świeża końcówka trafia do kontekstu silnika; istniejące streszczenie wcześniejszych tur pozostaje nietknięte. UWAGA: stan gry (postacie, lokacja, ekwipunek) w .game.json NIE jest aktualizowany — kolejna tura może się rozjechać, jeśli zmieniłeś fakty świata."
+  odswiez_z_dysku_tytul:            "Narracja odświeżona z dysku"
+  odswiez_calosc_tresc:             "Narracja została wczytana ponownie z dysku, a kontekst silnika zsynchronizowany z końcówką tekstu.\n\nUWAGA: stan gry (postacie, lokacja, ekwipunek, wątki) zapisany w .game.json NIE został zmieniony — jeśli edycja zmieniła fakty świata, kolejna tura może się z nimi rozjechać."
+  odswiez_streszczenie_tresc:       "Kontekst silnika został odświeżony świeżą końcówką z dysku. Streszczenie wcześniejszych tur pozostało nietknięte, więc kolejne streszczenie i tura nie powstaną już na nieaktualnych danych.\n\nUWAGA: stan gry (postacie, lokacja, ekwipunek, wątki) w .game.json NIE został zmieniony — jeśli edycja zmieniła fakty świata, kolejna tura może się z nimi rozjechać."
+  odswiez_zajete_tytul:             "Operacja w toku"
+  odswiez_zajete_tresc:             "Trwa generowanie tury lub streszczenia. Poczekaj, aż operacja się zakończy, zanim odświeżysz narrację z dysku."
 
   # ---- BLOK C — RadioBox trybu ----------------------------------------------
   rb_tryb_label:             "Tryb gry"
@@ -1086,6 +1104,7 @@ opowiesci:
     /wizualizuj <opis>, /visualize    — multisensoryczny opis sceny (bez zapisu)
     /scena <opis>, /scene             — III osoba, bieżąca scena gdzie indziej
     /flashback <opis>, /retrospekcja  — III osoba, retrospekcja w przeszłości
+    /odswiez, /refresh                — odśwież narrację z dysku po ręcznej edycji
     /pomoc, /help                     — pokaż tę listę komend
     /koniec, /quit                    — zamknij aplikację
   dlg_visualize_tytul:       "🌅 Wizualizacja sceny"

@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Moduł Interaktywne Opowieści (15.4.1 – Wersja Wydawnicza)
+Reżyser Audio GPT — Moduł Interaktywne Opowieści (15.5 – Wersja Wydawnicza)
 
 Drugi główny tryb aplikacji obok Reżysera — tym razem stajesz się graczem dynamicznie generowanej historii zamiast jej autorem. Sztuczna inteligencja prowadzi narrację w drugiej osobie liczby pojedynczej („Idziesz przez mglisty las, czujesz zapach mokrych liści…"), a Ty decydujesz o kolejnym ruchu — pisząc dowolną akcję wolnym tekstem albo wybierając jedną z ponumerowanych opcji.
 
@@ -84,6 +84,8 @@ Silnik narracyjny dobiera model AI automatycznie w zależności od trybu: dla tr
 /scena <opis>, /scene <opis> — bieżące wydarzenie GDZIE INDZIEJ, opowiedziane w trzeciej osobie. Kamera odrywa się od twojej postaci i pokazuje, co dzieje się równolegle z inną postacią lub w innym miejscu świata. Przykład: „/scena Anna na rynku" lub „/scena strażnicy przy bramie". Silnik wpleci scenę w narrację, oznaczy ją prefiksem „Scena zza kadru:" i automatycznie wróci do twojej postaci w następnej turze. Wybory się nie pojawiają — gracz nie podejmuje decyzji w cudzej scenie. Pełen opis mechanizmu znajdziesz w KROKU 5B.
 
 /flashback <opis>, /retrospekcja <opis> — retrospekcja w trzeciej osobie, cofnięcie się w czasie. Przykład: „/flashback dzień śmierci ojca" lub „/flashback pierwsze spotkanie bohaterów". Otwiera narrację formułą czasową („Trzy lata wcześniej…"), oznacza prefiksem „Retrospekcja:" i wraca do bieżącej tury. Identycznie jak /scena — pasywna, bez wyborów. Pełen opis w KROKU 5B.
+
+/odswiez, /refresh — odświeża pamięć wewnętrzną z pliku narracji po jego ręcznej edycji (od v15.5). Gdy otworzysz opowiesci/<nazwa>.txt w edytorze i np. utniesz złamane przez silnik domknięcie kinowego cięcia, ta komenda (lub przycisk „Odśwież z dysku") synchronizuje świeżą końcówkę z kontekstem silnika — bez twardego resetu i ponownego wczytywania gry. Jeśli istnieje już streszczenie wcześniejszych tur, pozostaje ono nietknięte, więc kolejna tura i kolejne streszczenie nie powstaną na nieaktualnych danych. UWAGA: stan gry (postacie, lokacja, ekwipunek, wątki) z pliku .game.json NIE jest aktualizowany — jeśli edycja zmieniła fakty świata, kolejna tura może się z nimi rozjechać.
 
 /pomoc, /help — wyświetla okno dialogowe z listą wszystkich dostępnych komend. Dialog jest readonly i NVDA-friendly — pole tekstowe dostaje fokus automatycznie, czytnik ekranu od razu odczytuje całą listę bez konieczności nawigacji.
 

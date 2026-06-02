@@ -535,6 +535,13 @@ rezyser:
   blad_otwarcia_tresc: "Yritys avata tiedosto {sciezka_pliku} epäonnistui:\n{tresc_bledu}\n\nAvaa tiedosto manuaalisesti Tiedostonhallinnasta."
   plik_narracji_brak_tytul: Kertomustiedosto puuttuu
   plik_narracji_brak_tresc: Projektin kertomustiedostoa „{nazwa_projektu}" ei ole levyllä. Lataa ensin projekti tai lähetä ensimmäinen kysely AI:lle, jotta tiedosto luodaan.
+  btn_odswiez_z_dysku_label: "&Päivitä levyltä"
+  btn_odswiez_z_dysku_tooltip: "Lataa kertomustiedoston (skrypty/<nazwa>.txt) uudelleen ja täsmäyttää sisäisen muistin käsin tehtyihin muutoksiin — ilman kovaa nollausta ja projektin uudelleenlatausta. Lyhyen kertomuksen lataa kokonaan; pitkän, jossa on yhteenveto, lyhentää loppuun viimeisestä otsikosta (prologi/näytös/kohtaus) alkaen säilyttäen yhteenvedon. EI muuta Maailmankirjaa eikä rakenteen laskureita."
+  odswiez_z_dysku_tytul: "Muisti päivitetty levyltä"
+  odswiez_calosc_tresc: "Koko kertomus ladattu levyltä ({liczba_znakow} merkkiä). Sisäinen muisti täsmäytetty tiedoston kanssa.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
+  odswiez_calosc_skasowano_tresc: "Koko kertomus ladattu levyltä ({liczba_znakow} merkkiä) — koko teksti mahtui konteksti-ikkunaan, joten tarpeeton yhteenveto poistettiin.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
+  odswiez_snap_tresc: "Kertomuksen loppu otsikosta „{naglowek}” palautettu ({liczba_znakow} merkkiä). Aiempaa osaa edustaa olemassa oleva yhteenveto, joka jäi koskemattomaksi.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
+  odswiez_koncowka_tresc: "Teksti pitkä eikä siinä ole rakenteen otsikoita — kertomuksen viimeinen pätkä palautettu ({liczba_znakow} merkkiä), yhteenveto jäi koskemattomaksi. SUOSITUS: lisää otsikoita, jotta päivitys osuu kohtauksen rajalle.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -1017,6 +1024,7 @@ opowiesci:
     /tallenna, /save                    — pakota pelin tallennus
     /lataa, /load                   — avaa latausdialogi
     /visualisoi <kuvaus>, /visualize    — moniaistinen kohtauksen kuvaus (ei tallennusta)
+    /odswiez, /refresh                — päivitä kertomus levyltä käsin muokkauksen jälkeen
     /lopeta, /quit                    — sulje sovellus
   dlg_visualize_tytul: "🌅 Kohtauksen visualisointi"
   dlg_visualize_lbl: "Moniaistinen kuvaus nykyisestä kohtauksesta (ei muuta pelin tilaa):"
@@ -1087,3 +1095,10 @@ opowiesci:
   blad_otwarcia_tresc: "Yritys avata tiedosto {sciezka_pliku} epäonnistui:\n{tresc_bledu}\n\nAvaa tiedosto manuaalisesti Tiedostonhallinnasta."
   plik_narracji_brak_tytul: Kertomustiedosto puuttuu
   plik_narracji_brak_tresc: Pelin kertomustiedostoa „{nazwa}" ei ole levyllä. Kertomustiedosto luodaan ensimmäisen kierroksen jälkeen — lähetä ensimmäinen toiminto, jotta kertomusmoottori luo tiedoston.
+  btn_odswiez_z_dysku_label: "&Päivitä levyltä"
+  btn_odswiez_z_dysku_tooltip: "Lataa kertomustiedoston (opowiesci/<nazwa>.txt) uudelleen ja täsmäyttää sisäisen muistin käsin tehtyihin muutoksiin — ilman kovaa nollausta ja pelin uudelleenlatausta. Tuore loppu siirtyy moottorin kontekstiin; aiempien kierrosten olemassa oleva yhteenveto jää koskemattomaksi. HUOMIO: pelin tilaa (hahmot, sijainti, varusteet) .game.json-tiedostossa EI päivitetä — seuraava kierros voi poiketa, jos maailman faktat muuttuvat."
+  odswiez_z_dysku_tytul: "Kertomus päivitetty levyltä"
+  odswiez_calosc_tresc: "Kertomus ladattu uudelleen levyltä, moottorin konteksti täsmäytetty tekstin loppuun.\n\nHUOMIO: pelin tilaa (hahmot, sijainti, varusteet, juonet) .game.json-tiedostossa EI muutettu — jos muokkaus muutti maailman faktoja, seuraava kierros voi poiketa."
+  odswiez_streszczenie_tresc: "Moottorin konteksti päivitetty tuoreella lopulla levyltä. Aiempien kierrosten yhteenveto jäi koskemattomaksi, joten seuraava yhteenveto ja kierros eivät synny vanhentuneista tiedoista.\n\nHUOMIO: pelin tilaa .game.json-tiedostossa EI muutettu — jos maailman faktat muuttuvat, seuraava kierros voi poiketa."
+  odswiez_zajete_tytul: "Toiminto käynnissä"
+  odswiez_zajete_tresc: "Kierroksen tai yhteenvedon luonti on käynnissä. Odota sen valmistumista, ennen kuin päivität kertomuksen levyltä."

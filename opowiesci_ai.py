@@ -68,6 +68,14 @@ POZIOM_OK          = ct.POZIOM_OK
 POZIOM_OSTRZEZENIE = ct.POZIOM_OSTRZEZENIE
 POZIOM_ALARM       = ct.POZIOM_ALARM
 
+# v15.5 — sentinel-e wpisów `ostatnie_tury`. Po streszczeniu (>70% okna) lista
+# zwija się do JEDNEGO wpisu z `akcja_gracza == AKCJA_STRESZCZENIE` (cały
+# backstory w `narracja_skrot`). AKCJA_SYNC oznacza wpis-końcówkę dorzucony
+# przy ręcznym odświeżeniu narracji z dysku. Stałe (zamiast literałów),
+# żeby tworzenie i detekcja sentinela nie rozjechały się.
+AKCJA_STRESZCZENIE = "(streszczenie poprzednich tur)"
+AKCJA_SYNC         = "(narracja zsynchronizowana z dysku)"
+
 # =============================================================================
 # JSON-schema dla strukturyzowanej tury
 # =============================================================================

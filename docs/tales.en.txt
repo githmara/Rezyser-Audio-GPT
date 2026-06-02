@@ -1,4 +1,4 @@
-Audio Director GPT — Interactive Stories Module (15.4.1 – Release Edition)
+Audio Director GPT — Interactive Stories Module (15.5 – Release Edition)
 
 The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
@@ -84,6 +84,8 @@ The narrative engine automatically selects the AI model depending on the mode: f
 /scena <description>, /scene <description> — current event ELSEWHERE, told in the third person. The camera detaches from your character and shows what is happening in parallel with another character or in another part of the world. Example: "/scene Anna at the marketplace" or "/scene the guards at the gate". The engine weaves the scene into the narration, marks it with the "Off-screen scene:" prefix, and automatically returns to your character on the next turn. Choices do not appear — the player does not make decisions inside someone else's scene. Full description of the mechanism in STEP 5B.
 
 /flashback <description>, /retrospekcja <description> — retrospection in the third person, a step back in time. Example: "/flashback the day father died" or "/flashback the protagonists' first meeting". Opens the narration with a temporal formula ("Three years earlier…"), tags it with the "Flashback:" prefix, and returns to the current turn. Identical to /scene — passive, no choices. Full description in STEP 5B.
+
+/odswiez, /refresh — refreshes the internal memory from the narration file after you have edited it by hand (since v15.5). When you open opowiesci/<name>.txt in an editor and, for example, cut off a cinematic cut that the engine wrongly closed, this command (or the "Refresh from disk" button) synchronizes the fresh ending with the engine's context — without a hard reset and a full reload of the game. If a summary of earlier turns already exists, it stays untouched, so the next turn and the next summary are not built on stale data. NOTE: the game state (characters, location, inventory, threads) from the .game.json file is NOT updated — if your edit changed facts of the world, the next turn may drift out of sync with them.
 
 /pomoc, /help — displays a dialog with the list of all available commands. The dialog is read-only and NVDA-friendly — the text field receives focus automatically, the screen reader immediately reads the whole list without manual navigation.
 

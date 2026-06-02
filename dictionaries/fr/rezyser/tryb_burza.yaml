@@ -11,6 +11,9 @@
 #  ses propres indications de mise en scène. Les suffixes alarm/streszczenie
 #  exigent la clé JSON facultative `streszczenie` (remplaçant les anciennes
 #  balises `<STRESZCZENIE>...</STRESZCZENIE>`).
+#
+#  v15.5 : le résumé ne cite plus les derniers paragraphes — Python reconstruit
+#  la fin narrative lors de la réconciliation avec le disque.
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Brainstorming (planification, SANS écriture vers fichier)"
@@ -86,10 +89,9 @@ sufiksy:
   streszczenie: |
 
 
-    [MODE RÉSUMÉ FORCÉ] : L'utilisateur a manuellement demandé de sauvegarder l'état de l'intrigue ! Dans la réponse JSON AJOUTE LA CLÉ `"streszczenie"` (au même niveau que `opcje`) avec une valeur texte contenant TROIS éléments obligatoires :
+    [MODE RÉSUMÉ FORCÉ] : L'utilisateur a manuellement demandé de sauvegarder l'état de l'intrigue ! Dans la réponse JSON AJOUTE LA CLÉ `"streszczenie"` (au même niveau que `opcje`) avec une valeur texte contenant DEUX éléments obligatoires :
     1. Un résumé concis des événements jusqu'à présent.
-    2. Une section [DERNIÈRE SCÈNE] : copie exacte (mot pour mot) des 2-3 derniers paragraphes du texte soumis.
-    3. Une section [STYLE ET TON] : une note d'une phrase sur l'atmosphère narrative.
+    2. Une section [STYLE ET TON] : une note d'une phrase sur l'atmosphère narrative.
 
   optymalizacja: |
 
@@ -99,10 +101,9 @@ sufiksy:
   alarm: |
 
 
-    [MODE ALARME - LIMITE DE MÉMOIRE APPROCHE] : La mémoire est presque pleine ! Dans la réponse JSON AJOUTE LA CLÉ `"streszczenie"` (au même niveau que `opcje`) avec une valeur texte contenant TROIS éléments obligatoires :
+    [MODE ALARME - LIMITE DE MÉMOIRE APPROCHE] : La mémoire est presque pleine ! Dans la réponse JSON AJOUTE LA CLÉ `"streszczenie"` (au même niveau que `opcje`) avec une valeur texte contenant DEUX éléments obligatoires :
     1. Un résumé concis des événements jusqu'à présent.
-    2. Une section [DERNIÈRE SCÈNE] : copie exacte (mot pour mot) des 2-3 derniers paragraphes du texte soumis.
-    3. Une section [STYLE ET TON] : une note d'une phrase sur l'atmosphère narrative.
+    2. Une section [STYLE ET TON] : une note d'une phrase sur l'atmosphère narrative.
 
 # --- Rappel ajouté aux instructions utilisateur (role=user) ---
 przypomnienie_uzytkownika: |

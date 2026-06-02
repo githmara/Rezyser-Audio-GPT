@@ -10,6 +10,8 @@
 #  I suffissi alarm/streszczenie richiedono la chiave JSON opzionale
 #  `streszczenie` (in sostituzione delle precedenti etichette
 #  `<STRESZCZENIE>...</STRESZCZENIE>`).
+#  v15.5: il riassunto non cita più gli ultimi paragrafi — Python ricostruisce
+#  il finale narrativo durante la riconciliazione con il disco.
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Brainstorm (pianificazione, SENZA scrittura su file)"
@@ -84,10 +86,9 @@ sufiksy:
   streszczenie: |
 
 
-    [MODALITÀ RIASSUNTO FORZATO]: L'utente ha richiesto manualmente di salvare lo stato della trama! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente TRE elementi obbligatori:
+    [MODALITÀ RIASSUNTO FORZATO]: L'utente ha richiesto manualmente di salvare lo stato della trama! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente DUE elementi obbligatori:
     1. Un riassunto conciso degli eventi finora.
-    2. Una sezione [ULTIMA SCENA]: copia esatta (parola per parola) degli ultimi 2-3 paragrafi del testo inviato.
-    3. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
+    2. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
 
   optymalizacja: |
 
@@ -97,10 +98,9 @@ sufiksy:
   alarm: |
 
 
-    [MODALITÀ ALLARME - LIMITE DI MEMORIA IN AVVICINAMENTO]: La memoria è quasi piena! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente TRE elementi obbligatori:
+    [MODALITÀ ALLARME - LIMITE DI MEMORIA IN AVVICINAMENTO]: La memoria è quasi piena! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente DUE elementi obbligatori:
     1. Un riassunto conciso degli eventi finora.
-    2. Una sezione [ULTIMA SCENA]: copia esatta (parola per parola) degli ultimi 2-3 paragrafi del testo inviato.
-    3. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
+    2. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
 
 # --- Promemoria aggiunto alle istruzioni dell'utente (role=user) ---
 przypomnienie_uzytkownika: |

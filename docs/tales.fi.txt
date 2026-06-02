@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (15.4.1 – Julkaisuversio)
+Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (15.5 – Julkaisuversio)
 
 Toinen sovelluksen päätila Reżyserin rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly ohjaa kerrontaa yksikön toisessa persoonassa ("Kävelet sumuisen metsän läpi, tunnet märän lehden tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla vapaamuotoisen toiminnon tai valitsemalla yhden numeroiduista vaihtoehdoista.
 
@@ -84,6 +84,8 @@ Kerrontamoottori valitsee AI-mallin automaattisesti tilasta riippuen: Valintojen
 /kohtaus <kuvaus>, /scene <kuvaus> — nykyinen tapahtuma MUUALLA, kerrottu kolmannessa persoonassa. Kamera irtautuu hahmostasi ja näyttää, mitä tapahtuu samanaikaisesti toiselle hahmolle tai toisessa maailman paikassa. Esimerkki: „/kohtaus Anna torilla" tai „/kohtaus vartijat portilla". Moottori liittää kohtauksen kerrontaan, merkitsee sen etuliitteellä „Kohtaus kulissien takaa:" ja palaa automaattisesti hahmoosi seuraavassa vuorossa. Valintoja ei esiinny — pelaaja ei tee päätöksiä toisen kohtauksessa. Täysi kuvaus mekanismista löytyy VAIHEISTA 5B.
 
 /takautuma <kuvaus>, /flashback <kuvaus> — takautuma kolmannessa persoonassa, aikamatka taaksepäin. Esimerkki: „/takautuma isän kuolinpäivä" tai „/takautuma sankareiden ensimmäinen kohtaaminen". Avaa kerronnan aikakaavalla („Kolme vuotta aikaisemmin…"), merkitsee etuliitteellä „Takautuma:" ja palaa nykyiseen vuoroon. Samoin kuin /kohtaus — passiivinen, ilman valintoja. Täysi kuvaus VAIHEISSA 5B.
+
+/paivita, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen jälkeen, kun olet muokannut sitä käsin (versiosta 15.5 alkaen). Kun avaat opowiesci/<nimi>.txt editorissa ja esim. leikkaat moottorin rikkoman elokuvallisen leikkauksen sulkemisen, tämä komento (tai painike „Päivitä levyltä") synkronoi tuoreen lopun moottorin kontekstin kanssa — ilman kovaa nollausta ja pelin uudelleenlatausta. Jos aiempien vuorojen tiivistelmä on jo olemassa, se jää koskemattomaksi, joten seuraava vuoro ja seuraava tiivistelmä eivät synny vanhentuneista tiedoista. HUOMIO: pelitilaa (hahmot, sijainti, varusteet, juonisäikeet) tiedostosta .game.json EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro voi olla ristiriidassa niiden kanssa.
 
 /apu, /help — näyttää valintaikkunan, jossa on luettelo kaikista saatavilla olevista komennoista. Dialogi on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee koko listan heti ilman navigointia.
 

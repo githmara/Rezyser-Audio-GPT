@@ -535,6 +535,15 @@ rezyser:
   blad_otwarcia_tresc: "Tilraun til að opna skrána {sciezka_pliku} mistókst:\n{tresc_bledu}\n\nOpnaðu skrána handvirkt úr Skjáborði."
   plik_narracji_brak_tytul: Engin frásagnarskrá
   plik_narracji_brak_tresc: Frásagnarskrá verkefnis „{nazwa_projektu}" er ekki til á diskinum. Hladdu fyrst inn verkefni eða sendu fyrstu fyrirspurn til AI til að búa til skrána.
+  # v15.5: Endurhlaða af diski — samstilling innra minnis eftir handvirka
+  # breytingu á skrypty/<nazwa>.txt (t.d. eftir að klippa brotið anti-closure).
+  btn_odswiez_z_dysku_label:   "Endur&hlaða af diski"
+  btn_odswiez_z_dysku_tooltip: "Les frásagnarskrána (skrypty/<nazwa>.txt) að nýju og samstillir innra minnið við handvirkar breytingar þínar — án harðrar endurstillingar og endurhleðslu verkefnis. Stutta sögu les hún í heild sinni; langa sögu með samantekt styttir hún niður í endann frá síðasta fyrirsagnarmerki (Kafli/Þáttur/Atriði) og varðveitir samantektina. BREYTIR EKKI Heimsbókinni né byggingarteljurum."
+  odswiez_z_dysku_tytul:       "Minni endurhlaðið af diski"
+  odswiez_calosc_tresc:        "Öll frásögnin var lesin af diski ({liczba_znakow} stafir). Innra minnið er samstillt við skrána.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
+  odswiez_calosc_skasowano_tresc: "Öll frásögnin var lesin af diski ({liczba_znakow} stafir) — allur textinn komst fyrir í samhengisglugganum, svo óþarfa samantektin var fjarlægð.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
+  odswiez_snap_tresc:          "Endir frásagnarinnar var endurgerður frá fyrirsögninni „{naglowek}\" ({liczba_znakow} stafir). Fyrri hluta sögunnar er lýst af núverandi samantekt, sem stendur óhreyfð.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
+  odswiez_koncowka_tresc:      "Textinn er langur og inniheldur engin byggingarfyrirsagnir — síðasti hluti frásagnarinnar var endurgerður ({liczba_znakow} stafir) og samantektin stendur óhreyfð. RÁÐLEGGING: settu inn fyrirsagnir svo endurhleðslan rati nákvæmlega á atriðamörk.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -1017,6 +1026,7 @@ opowiesci:
     /vista, /save                    — þvinga vistun leiks
     /hlaða, /load                   — opna hleðsluskjá
     /sjá <lýsing>, /visualize    — fjölskynja lýsing á senu (án vistunar)
+    /endurhlaða, /refresh           — endurhlaða frásögn af diski eftir handvirka breytingu
     /enda, /quit                    — loka forritinu
   dlg_visualize_tytul: "🌅 Senuvísualisering"
   dlg_visualize_lbl: "Fjölskynja lýsing á núverandi senu (breytir ekki stöðu leiks):"
@@ -1087,3 +1097,12 @@ opowiesci:
   blad_otwarcia_tresc: "Tilraun til að opna skrána {sciezka_pliku} mistókst:\n{tresc_bledu}\n\nOpnaðu skrána handvirkt úr Skjáborði."
   plik_narracji_brak_tytul: Engin frásagnarskrá
   plik_narracji_brak_tresc: Frásagnarskrá leiksins „{nazwa}" er ekki til á diskinum. Frásagnarskrá verður til eftir fyrstu umferð — sendu fyrstu aðgerðina til að frásagnarkerfið búi til skrána.
+  # v15.5: Endurhlaða af diski — samstilling samhengis vélarinnar eftir
+  # handvirka breytingu á opowiesci/<nazwa>.txt.
+  btn_odswiez_z_dysku_label:   "&Endurhlaða af diski"
+  btn_odswiez_z_dysku_tooltip: "Les frásagnarskrána (opowiesci/<nazwa>.txt) að nýju og samstillir innra minnið við handvirkar breytingar þínar — án harðrar endurstillingar og endurhleðslu leiks. Ferski endirinn fer í samhengi vélarinnar; núverandi samantekt fyrri umferða stendur óhreyfð. ATH: ástand leiksins (persónur, staðsetning, búnaður) í .game.json er EKKI uppfært — næsta umferð getur orðið ósamræmd ef heimsstaðreyndum var breytt."
+  odswiez_z_dysku_tytul:       "Frásögn endurhlaðin af diski"
+  odswiez_calosc_tresc:        "Frásögnin var lesin að nýju af diski og samhengi vélarinnar samstillt við endi textans.\n\nATH: ástand leiksins (persónur, staðsetning, búnaður, þræðir) í .game.json var EKKI breytt — ef breyting breytti heimsstaðreyndum getur næsta umferð orðið ósamræmd."
+  odswiez_streszczenie_tresc:  "Samhengi vélarinnar var endurnýjað með ferskum endi af diski. Samantekt fyrri umferða stendur óhreyfð, svo næsta samantekt og umferð verða ekki byggðar á úreltum gögnum.\n\nATH: ástand leiksins í .game.json var EKKI breytt — ef heimsstaðreyndum var breytt getur næsta umferð orðið ósamræmd."
+  odswiez_zajete_tytul:        "Aðgerð í gangi"
+  odswiez_zajete_tresc:        "Verið er að búa til umferð eða samantekt. Bíddu þar til aðgerðinni lýkur áður en þú endurhleður frásögnina af diski."

@@ -249,6 +249,26 @@ class ProjektOpowiesci:
         self.full_story = (self.full_story or "") + naglowek + czyste
         return sciezka
 
+    def przeladuj_narracje_z_dysku(self) -> str:
+        """v15.5: ponownie wczytuje `opowiesci/<nazwa>.txt` do ``full_story``.
+
+        Czyste I/O — synchronizuje cache narracji w RAM z ręcznymi zmianami
+        na dysku (np. ucięciem złamanego kinowego cięcia). NIE dotyka
+        ``ostatnie_tury`` (kontekst LLM) — rekoncyliację tej struktury robi
+        GUI, bo wymaga decyzji o streszczeniu. Zwraca nową treść.
+
+        Raises:
+            ValueError:        gdy projekt nie ma ustawionej nazwy.
+            FileNotFoundError: gdy nie istnieje `opowiesci/<nazwa>.txt`.
+        """
+        self._wymagaj_nazwy()
+        sciezka = self._sciezka_txt(self.nazwa_pliku)
+        if not os.path.exists(sciezka):
+            raise FileNotFoundError(sciezka)
+        with open(sciezka, "r", encoding="utf-8") as fh:
+            self.full_story = fh.read()
+        return self.full_story
+
     def rebuild_ksiega_swiata(self) -> str:
         """Idempotentny rebuild `skrypty/<nazwa>.md` z ``postacie_aktywne``.
 

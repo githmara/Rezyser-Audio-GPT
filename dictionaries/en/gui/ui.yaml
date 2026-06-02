@@ -534,6 +534,13 @@ rezyser:
   blad_otwarcia_tresc: "Attempt to open file {sciezka_pliku} resulted in an error:\n{tresc_bledu}\n\nOpen the file manually from File Explorer."
   plik_narracji_brak_tytul: Narration file missing
   plik_narracji_brak_tresc: The project narration file "{nazwa_projektu}" does not exist on disk. First, load the project or send the first query to the AI to create the file.
+  btn_odswiez_z_dysku_label: "Re&fresh from disk"
+  btn_odswiez_z_dysku_tooltip: "Reloads the narration file (skrypty/<name>.txt) and synchronizes the internal memory with your manual edits — without a hard reset or reloading the project. A short story is loaded in full; a long one with a summary is trimmed to the tail following the last header (Chapter/Act/Scene), keeping the summary intact. Does NOT change the World Book or the structure counters."
+  odswiez_z_dysku_tytul: "Memory refreshed from disk"
+  odswiez_calosc_tresc: "The full narration was loaded from disk ({liczba_znakow} characters). The internal memory is synchronized with the file.\n\nThe World Book and structure counters are unchanged."
+  odswiez_calosc_skasowano_tresc: "The full narration was loaded from disk ({liczba_znakow} characters) — the entire text fit within the context window, so the redundant summary was removed (the engine now works on the full story).\n\nThe World Book and structure counters are unchanged."
+  odswiez_snap_tresc: "Restored the narration tail from the \"{naglowek}\" header ({liczba_znakow} characters). The earlier part of the story is represented by the existing summary, which was left untouched.\n\nThe World Book and structure counters are unchanged."
+  odswiez_koncowka_tresc: "The text is long and contains no structure headers — the last fragment of the narration was restored ({liczba_znakow} characters), and the summary was left untouched. RECOMMENDATION: insert Chapter/Act/Scene headers so that the refresh can land precisely on a scene boundary.\n\nThe World Book and structure counters are unchanged."
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -1018,6 +1025,7 @@ opowiesci:
     /visualize <desc>, /wizualizuj      — multisensory scene description (no save)
     /scene <desc>, /scena               — third person, current scene elsewhere
     /flashback <desc>, /retrospekcja    — third person, retrospection
+    /refresh, /odswiez                  — reload narration from disk after manual edits
     /help, /pomoc                       — show this command list
     /quit, /koniec                      — close the application
   dlg_visualize_tytul: "🌅 Scene Visualization"
@@ -1099,3 +1107,10 @@ opowiesci:
   blad_otwarcia_tresc: "Attempt to open file {sciezka_pliku} resulted in an error:\n{tresc_bledu}\n\nOpen the file manually from File Explorer."
   plik_narracji_brak_tytul: Narration file missing
   plik_narracji_brak_tresc: The game narration file "{nazwa}" does not exist on disk. The narration file is created after the first turn — send the first action for the narrative engine to create the file.
+  btn_odswiez_z_dysku_label: "&Refresh from disk"
+  btn_odswiez_z_dysku_tooltip: "Reloads the narration file (opowiesci/<name>.txt) and synchronizes the internal memory with your manual edits — without a hard reset or reloading the game. The fresh tail goes into the engine context; the existing summary of earlier turns is left untouched. WARNING: the game state (characters, location, inventory) in .game.json is NOT updated — the next turn may diverge if you changed world facts."
+  odswiez_z_dysku_tytul: "Narration refreshed from disk"
+  odswiez_calosc_tresc: "The narration was reloaded from disk, and the engine context synchronized with the tail of the text.\n\nWARNING: the game state (characters, location, inventory, threads) saved in .game.json was NOT changed — if your edit changed world facts, the next turn may diverge from them."
+  odswiez_streszczenie_tresc: "The engine context was refreshed with the fresh tail from disk. The summary of earlier turns was left untouched, so the next summary and turn will no longer be built on outdated data.\n\nWARNING: the game state (characters, location, inventory, threads) in .game.json was NOT changed — if your edit changed world facts, the next turn may diverge from them."
+  odswiez_zajete_tytul: "Operation in progress"
+  odswiez_zajete_tresc: "A turn or summary is being generated. Wait until the operation finishes before refreshing the narration from disk."

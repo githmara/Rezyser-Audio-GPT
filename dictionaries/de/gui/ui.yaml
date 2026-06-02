@@ -535,6 +535,15 @@ rezyser:
   blad_otwarcia_tresc: "Der Versuch, die Datei {sciezka_pliku} zu öffnen, ist fehlgeschlagen:\n{tresc_bledu}\n\nÖffnen Sie die Datei manuell über den Datei-Explorer."
   plik_narracji_brak_tytul: Keine Erzählungsdatei vorhanden
   plik_narracji_brak_tresc: Die Erzählungsdatei des Projekts „{nazwa_projektu}" existiert nicht auf der Festplatte. Laden Sie zuerst das Projekt oder senden Sie die erste Anfrage an die KI, damit die Datei erstellt wird.
+  # v15.5: Vom Datenträger aktualisieren — Synchronisierung des internen
+  # Gedächtnisses nach manueller Bearbeitung von skrypty/<nazwa>.txt.
+  btn_odswiez_z_dysku_label:   "Vom Datenträger &aktualisieren"
+  btn_odswiez_z_dysku_tooltip: "Lädt die Erzählungsdatei (skrypty/<nazwa>.txt) erneut und synchronisiert das interne Gedächtnis mit Ihren manuellen Änderungen — ohne harten Reset und erneutes Laden des Projekts. Eine kurze Geschichte wird vollständig geladen; eine lange mit Zusammenfassung wird auf das Ende ab der letzten Überschrift (Kapitel/Akt/Szene) gekürzt, wobei die Zusammenfassung erhalten bleibt. Ändert NICHT das Weltbuch und nicht die Strukturzähler."
+  odswiez_z_dysku_tytul:       "Gedächtnis vom Datenträger aktualisiert"
+  odswiez_calosc_tresc:        "Die gesamte Erzählung wurde vom Datenträger geladen ({liczba_znakow} Zeichen). Das interne Gedächtnis ist mit der Datei synchronisiert.\n\nWeltbuch und Strukturzähler bleiben unverändert."
+  odswiez_calosc_skasowano_tresc: "Die gesamte Erzählung wurde vom Datenträger geladen ({liczba_znakow} Zeichen) — der gesamte Text passte in das Kontextfenster, daher wurde die überflüssige Zusammenfassung entfernt (die Engine arbeitet nun mit der vollständigen Geschichte).\n\nWeltbuch und Strukturzähler bleiben unverändert."
+  odswiez_snap_tresc:          "Das Ende der Erzählung ab der Überschrift „{naglowek}“ wurde wiederhergestellt ({liczba_znakow} Zeichen). Den früheren Teil repräsentiert die bestehende Zusammenfassung, die unberührt bleibt.\n\nWeltbuch und Strukturzähler bleiben unverändert."
+  odswiez_koncowka_tresc:      "Der Text ist lang und enthält keine Strukturüberschriften — der letzte Abschnitt der Erzählung wurde wiederhergestellt ({liczba_znakow} Zeichen), die Zusammenfassung bleibt unberührt. EMPFEHLUNG: Fügen Sie Überschriften Kapitel/Akt/Szene ein, damit die Aktualisierung genau die Szenengrenze trifft.\n\nWeltbuch und Strukturzähler bleiben unverändert."
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -1087,3 +1096,12 @@ opowiesci:
   blad_otwarcia_tresc: "Der Versuch, die Datei {sciezka_pliku} zu öffnen, ist fehlgeschlagen:\n{tresc_bledu}\n\nÖffnen Sie die Datei manuell über den Datei-Explorer."
   plik_narracji_brak_tytul: Keine Erzählungsdatei vorhanden
   plik_narracji_brak_tresc: Die Erzählungsdatei des Spiels „{nazwa}" existiert nicht auf der Festplatte. Die Erzählungsdatei wird nach der ersten Runde erstellt — senden Sie die erste Aktion, damit die Erzählmaschine die Datei erstellt.
+  # v15.5: Vom Datenträger aktualisieren — Synchronisierung des internen
+  # Gedächtnisses nach manueller Bearbeitung von opowiesci/<nazwa>.txt.
+  btn_odswiez_z_dysku_label:        "Vom Datenträger &aktualisieren"
+  btn_odswiez_z_dysku_tooltip:      "Lädt die Erzählungsdatei (opowiesci/<nazwa>.txt) erneut und synchronisiert das interne Gedächtnis mit Ihren manuellen Änderungen — ohne harten Reset und erneutes Laden des Spiels. Das frische Ende gelangt in den Kontext der Engine; die bestehende Zusammenfassung früherer Runden bleibt unberührt. ACHTUNG: der Spielstand (Figuren, Ort, Inventar) in .game.json wird NICHT aktualisiert — die nächste Runde kann auseinanderlaufen, wenn Sie Weltfakten geändert haben."
+  odswiez_z_dysku_tytul:            "Erzählung vom Datenträger aktualisiert"
+  odswiez_calosc_tresc:             "Die Erzählung wurde erneut vom Datenträger geladen, der Kontext der Engine ist mit dem Ende des Textes synchronisiert.\n\nACHTUNG: der Spielstand (Figuren, Ort, Inventar, Handlungsfäden) in .game.json wurde NICHT geändert — wenn die Bearbeitung Weltfakten verändert hat, kann die nächste Runde mit ihnen auseinanderlaufen."
+  odswiez_streszczenie_tresc:       "Der Kontext der Engine wurde mit dem frischen Ende vom Datenträger aktualisiert. Die Zusammenfassung früherer Runden bleibt unberührt, sodass die nächste Zusammenfassung und Runde nicht auf veralteten Daten entstehen.\n\nACHTUNG: der Spielstand in .game.json wurde NICHT geändert — bei geänderten Weltfakten kann die nächste Runde auseinanderlaufen."
+  odswiez_zajete_tytul:             "Vorgang läuft"
+  odswiez_zajete_tresc:             "Es wird gerade eine Runde oder Zusammenfassung generiert. Warten Sie, bis der Vorgang abgeschlossen ist, bevor Sie die Erzählung vom Datenträger aktualisieren."

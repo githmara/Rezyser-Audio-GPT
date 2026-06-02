@@ -535,6 +535,15 @@ rezyser:
   blad_otwarcia_tresc: "Tentativo di apertura del file {sciezka_pliku} non riuscito:\n{tresc_bledu}\n\nApri il file manualmente dall'Esplora file."
   plik_narracji_brak_tytul: File di narrazione mancante
   plik_narracji_brak_tresc: Il file di narrazione del progetto "{nazwa_projektu}" non esiste sul disco. Prima carica il progetto o invia la prima richiesta all'AI affinché il file venga creato.
+  # v15.5: Aggiorna dal disco — sincronizzazione della memoria interna dopo la
+  # modifica manuale di skrypty/<nome>.txt (p. es. taglio di un anti-closure rotto).
+  btn_odswiez_z_dysku_label:   "A&ggiorna dal disco"
+  btn_odswiez_z_dysku_tooltip: "Ricarica il file di narrazione (skrypty/<nome>.txt) e sincronizza la memoria interna con le tue modifiche manuali — senza reset completo né ricaricamento del progetto. La cronologia breve viene caricata per intero; quella lunga con riassunto viene accorciata alla parte finale a partire dall'ultima intestazione (capitolo/atto/scena), conservando il riassunto. NON modifica il Libro del Mondo né i contatori di struttura."
+  odswiez_z_dysku_tytul:       "Memoria aggiornata dal disco"
+  odswiez_calosc_tresc:        "Caricata l'intera narrazione dal disco ({liczba_znakow} caratteri). La memoria interna è sincronizzata con il file.\n\nIl Libro del Mondo e i contatori di struttura sono invariati."
+  odswiez_calosc_skasowano_tresc: "Caricata l'intera narrazione dal disco ({liczba_znakow} caratteri) — l'intero testo è entrato nella finestra di contesto, quindi il riassunto superfluo è stato rimosso (il motore lavora ora sulla cronologia completa).\n\nIl Libro del Mondo e i contatori di struttura sono invariati."
+  odswiez_snap_tresc:          "Ricostruita la parte finale della narrazione a partire dall'intestazione «{naglowek}» ({liczba_znakow} caratteri). La parte precedente è rappresentata dal riassunto esistente, rimasto intatto.\n\nIl Libro del Mondo e i contatori di struttura sono invariati."
+  odswiez_koncowka_tresc:      "Testo lungo e privo di intestazioni di struttura — ricostruito l'ultimo frammento della narrazione ({liczba_znakow} caratteri), il riassunto è rimasto intatto. CONSIGLIO: inserisci intestazioni, affinché l'aggiornamento centri il confine di scena.\n\nIl Libro del Mondo e i contatori di struttura sono invariati."
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"
@@ -1017,6 +1026,7 @@ opowiesci:
     /salva, /save                    — forza il salvataggio del gioco
     /carica, /load                   — apri il dialogo di caricamento
     /visualizza <descrizione>, /visualize    — descrizione multisensoriale della scena (senza salvataggio)
+    /aggiorna, /refresh              — aggiorna la narrazione dal disco dopo una modifica manuale
     /fine, /quit                     — chiudi l'applicazione
   dlg_visualize_tytul: "🌅 Visualizzazione della scena"
   dlg_visualize_lbl: "Descrizione multisensoriale della scena attuale (non cambia lo stato del gioco):"
@@ -1087,3 +1097,10 @@ opowiesci:
   blad_otwarcia_tresc: "Tentativo di apertura del file {sciezka_pliku} non riuscito:\n{tresc_bledu}\n\nApri il file manualmente dall'Esplora file."
   plik_narracji_brak_tytul: File di narrazione mancante
   plik_narracji_brak_tresc: Il file di narrazione del gioco "{nazwa}" non esiste sul disco. Il file di narrazione viene creato dopo il primo turno — invia la prima azione affinché il motore narrativo crei il file.
+  btn_odswiez_z_dysku_label:   "A&ggiorna dal disco"
+  btn_odswiez_z_dysku_tooltip: "Ricarica il file di narrazione (opowiesci/<nome>.txt) e sincronizza la memoria interna con le tue modifiche manuali — senza reset completo né ricaricamento del gioco. La parte finale aggiornata entra nel contesto del motore; il riassunto esistente dei turni precedenti rimane intatto. ATTENZIONE: lo stato del gioco (personaggi, posizione, equipaggiamento) nel .game.json NON viene aggiornato — il turno successivo potrebbe non corrispondere se sono cambiati i fatti del mondo."
+  odswiez_z_dysku_tytul:       "Narrazione aggiornata dal disco"
+  odswiez_calosc_tresc:        "Narrazione ricaricata dal disco, contesto del motore sincronizzato con la parte finale del testo.\n\nATTENZIONE: lo stato del gioco (personaggi, posizione, equipaggiamento, trame) nel .game.json NON è stato modificato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe non corrispondere."
+  odswiez_streszczenie_tresc:  "Contesto del motore aggiornato con la parte finale fresca dal disco. Il riassunto dei turni precedenti è intatto, quindi il riassunto successivo e il turno non si baseranno su dati non aggiornati.\n\nATTENZIONE: lo stato del gioco nel .game.json NON è stato modificato — se cambiano i fatti del mondo, il turno successivo potrebbe non corrispondere."
+  odswiez_zajete_tytul:        "Operazione in corso"
+  odswiez_zajete_tresc:        "È in corso la generazione di un turno o di un riassunto. Attendi il completamento prima di aggiornare la narrazione dal disco."

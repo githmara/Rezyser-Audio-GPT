@@ -96,6 +96,8 @@ tresc:
 
     /flashback <descrizione>, /retrospezione <descrizione> — retrospezione in terza persona, ritorno indietro nel tempo. Esempio: "/flashback giorno della morte del padre" o "/flashback primo incontro degli eroi". Apre la narrazione con una formula temporale ("Tre anni prima..."), la contrassegna con il prefisso "Retrospezione:" e ritorna al turno corrente. Identico a /scena — passivo, senza scelte. Descrizione completa nel PASSO 5B.
 
+    /aggiorna, /refresh — aggiorna la memoria interna dal file di narrazione dopo averlo modificato manualmente (dalla v15.5). Quando apri opowiesci/<nome>.txt nell'editor e ad esempio tagli una chiusura del cut cinematografico infranta dal motore, questo comando (o il pulsante "{opowiesci.btn_odswiez_z_dysku_label}") sincronizza la coda fresca con il contesto del motore — senza un reset completo e senza ricaricare il gioco. Se esiste già un riassunto dei turni precedenti, esso resta intatto, così il turno successivo e il riassunto successivo non nasceranno su dati non aggiornati. ATTENZIONE: lo stato del gioco (personaggi, luogo, inventario, fili narrativi) dal file .game.json NON viene aggiornato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe divergere da essi.
+
     /aiuto, /help — visualizza una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura e NVDA-friendly — il campo di testo riceve automaticamente il focus, il lettore di schermo legge immediatamente l'intero elenco senza necessità di navigazione.
 
     /fine, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).

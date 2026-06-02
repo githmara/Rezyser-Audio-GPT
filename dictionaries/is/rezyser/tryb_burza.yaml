@@ -10,6 +10,8 @@
 #  svo það getur ekki rænt bann við að finna upp eigin leikstjórnarvísbendingar.
 #  Viðvörun-/samantektarviðauki krefst valkvæða JSON-lykilsins `streszczenie`
 #  (kemur í staðinn fyrir fyrri `<STRESZCZENIE>...</STRESZCZENIE>`-merki).
+#  v15.5: samantektin vitnar ekki lengur í síðustu málsgreinar — Python
+#  endurgerir enda frásagnarinnar við samstillingu við disk.
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Hugstormun (skipulagning, ENGIN skrif í skrá)"
@@ -84,10 +86,9 @@ sufiksy:
   streszczenie: |
 
 
-    [ÞVINGAÐUR SAMANTEKTARHAMUR]: Notandinn bað handvirkt um að vista söguástandið! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur ÞRJÁ skyldubundnu þætti:
+    [ÞVINGAÐUR SAMANTEKTARHAMUR]: Notandinn bað handvirkt um að vista söguástandið! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur TVÖ skyldubundnu þætti:
     1. Hnitmiðuð samantekt á atburðum hingað til.
-    2. Hluta [SÍÐASTA ATRIÐI]: nákvæmt (orð-fyrir-orð) afrit af síðustu 2-3 efnisgreinum innsenda textans.
-    3. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
+    2. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
 
   optymalizacja: |
 
@@ -97,10 +98,9 @@ sufiksy:
   alarm: |
 
 
-    [VIÐVÖRUNARHAMUR - ENDIR MINNIS NÁLGAST]: Minnið er næstum fullt! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur ÞRJÁ skyldubundnu þætti:
+    [VIÐVÖRUNARHAMUR - ENDIR MINNIS NÁLGAST]: Minnið er næstum fullt! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur TVÖ skyldubundnu þætti:
     1. Hnitmiðuð samantekt á atburðum hingað til.
-    2. Hluta [SÍÐASTA ATRIÐI]: nákvæmt (orð-fyrir-orð) afrit af síðustu 2-3 efnisgreinum innsenda textans.
-    3. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
+    2. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
 
 # --- Áminning bætt við notendaleiðbeiningar (role=user) ---
 przypomnienie_uzytkownika: |

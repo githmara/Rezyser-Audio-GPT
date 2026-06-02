@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (15.4.1 – Version de Publication)
+Reżyser Audio GPT — Module Histoires Interactives (15.5 – Version de Publication)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
@@ -84,6 +84,8 @@ Le moteur narratif choisit automatiquement le modèle AI en fonction du mode : p
 /scena <opis>, /scene <opis> — événement en cours AILLEURS, raconté à la troisième personne. La caméra se détache de votre personnage et montre ce qui se passe en parallèle avec un autre personnage ou dans un autre endroit du monde. Exemple : « /scena Anna au marché » ou « /scena les gardes à la porte ». Le moteur intègre la scène dans la narration, la marque avec le préfixe « Scène hors champ : » et revient automatiquement à votre personnage au tour suivant. Aucun choix n'apparaît — le joueur ne prend pas de décisions dans la scène d'autrui. La description complète du mécanisme se trouve dans ÉTAPE 5B.
 
 /flashback <opis>, /retrospekcja <opis> — flashback à la troisième personne, retour dans le temps. Exemple : « /flashback le jour où mon père est mort » ou « /flashback la première rencontre des personnages ». Ouvre la narration avec une formule temporelle (« Trois ans plus tôt… »), la marque avec le préfixe « Retrospekcja : » et revient au tour en cours. Identique à /scena — passif, sans choix. Description complète dans ÉTAPE 5B.
+
+/odswiez, /refresh — actualise la mémoire interne à partir du fichier de narration après son édition manuelle (depuis la v15.5). Lorsque vous ouvrez opowiesci/<nom>.txt dans l'éditeur et que, par exemple, vous coupez une clôture de coupure cinématographique enfreinte par le moteur, cette commande (ou le bouton "Actualiser depuis le disque") synchronise la fin fraîche avec le contexte du moteur — sans réinitialisation complète ni rechargement du jeu. S'il existe déjà un résumé des tours précédents, celui-ci reste intact, de sorte que le tour suivant et le résumé suivant ne se construiront pas sur des données obsolètes. ATTENTION : l'état du jeu (personnages, localisation, équipement, intrigues) du fichier .game.json N'EST PAS mis à jour — si votre édition a changé des faits du monde, le tour suivant peut entrer en décalage avec eux.
 
 /pomoc, /help — affiche une boîte de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
 

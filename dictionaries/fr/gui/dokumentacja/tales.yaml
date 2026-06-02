@@ -96,6 +96,8 @@ tresc:
 
     /flashback <opis>, /retrospekcja <opis> — flashback à la troisième personne, retour dans le temps. Exemple : « /flashback le jour où mon père est mort » ou « /flashback la première rencontre des personnages ». Ouvre la narration avec une formule temporelle (« Trois ans plus tôt… »), la marque avec le préfixe « Retrospekcja : » et revient au tour en cours. Identique à /scena — passif, sans choix. Description complète dans ÉTAPE 5B.
 
+    /odswiez, /refresh — actualise la mémoire interne à partir du fichier de narration après son édition manuelle (depuis la v15.5). Lorsque vous ouvrez opowiesci/<nom>.txt dans l'éditeur et que, par exemple, vous coupez une clôture de coupure cinématographique enfreinte par le moteur, cette commande (ou le bouton "{opowiesci.btn_odswiez_z_dysku_label}") synchronise la fin fraîche avec le contexte du moteur — sans réinitialisation complète ni rechargement du jeu. S'il existe déjà un résumé des tours précédents, celui-ci reste intact, de sorte que le tour suivant et le résumé suivant ne se construiront pas sur des données obsolètes. ATTENTION : l'état du jeu (personnages, localisation, équipement, intrigues) du fichier .game.json N'EST PAS mis à jour — si votre édition a changé des faits du monde, le tour suivant peut entrer en décalage avec eux.
+
     /pomoc, /help — affiche une boîte de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
 
     /koniec, /quit — ferme l'application (après l'enregistrement automatique du tour en cours).

@@ -10,6 +10,9 @@
 #  joten se ei voi kaapata ohjaajavihjeen kieltoa. Hälytys-/yhteenvetosuffiksit
 #  vaativat valinnaisen JSON-avaimen `streszczenie` (korvaa aiemmat
 #  `<STRESZCZENIE>...</STRESZCZENIE>`-tunnisteet).
+#
+#  v15.5: tiivistelmä ei enää lainaa viimeisiä kappaleita — Python rakentaa
+#  kerronnan lopun levyltä täsmäytyksessä.
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Aivoriihi (suunnittelu, EI tallennusta tiedostoon)"
@@ -84,10 +87,9 @@ sufiksy:
   streszczenie: |
 
 
-    [PAKOTETTU YHTEENVETOTILA]: Käyttäjä pyysi manuaalisesti tallentaa juonen tilan! Lisää JSON-vastaukseen AVAIN `"streszczenie"` (samalla tasolla kuin `opcje`) tekstiarvolla, joka sisältää KOLME pakollista elementtiä:
+    [PAKOTETTU YHTEENVETOTILA]: Käyttäjä pyysi manuaalisesti tallentaa juonen tilan! Lisää JSON-vastaukseen AVAIN `"streszczenie"` (samalla tasolla kuin `opcje`) tekstiarvolla, joka sisältää KAKSI pakollista elementtiä:
     1. Tiivis yhteenveto tähänastisista tapahtumista.
-    2. Osio [VIIMEINEN KOHTAUS]: tarkka (sanasanainen) kopio lähetetyn tekstin viimeisistä 2-3 kappaleesta.
-    3. Osio [TYYLI JA SÄVY]: yhden lauseen huomautus kerronnan tunnelmasta.
+    2. Osio [TYYLI JA SÄVY]: yhden lauseen huomautus kerronnan tunnelmasta.
 
   optymalizacja: |
 
@@ -97,10 +99,9 @@ sufiksy:
   alarm: |
 
 
-    [HÄLYTYSTILA - MUISTIN LOPPU LÄHESTYY]: Muisti on lähes täynnä! Lisää JSON-vastaukseen AVAIN `"streszczenie"` (samalla tasolla kuin `opcje`) tekstiarvolla, joka sisältää KOLME pakollista elementtiä:
+    [HÄLYTYSTILA - MUISTIN LOPPU LÄHESTYY]: Muisti on lähes täynnä! Lisää JSON-vastaukseen AVAIN `"streszczenie"` (samalla tasolla kuin `opcje`) tekstiarvolla, joka sisältää KAKSI pakollista elementtiä:
     1. Tiivis yhteenveto tähänastisista tapahtumista.
-    2. Osio [VIIMEINEN KOHTAUS]: tarkka (sanasanainen) kopio lähetetyn tekstin viimeisistä 2-3 kappaleesta.
-    3. Osio [TYYLI JA SÄVY]: yhden lauseen huomautus kerronnan tunnelmasta.
+    2. Osio [TYYLI JA SÄVY]: yhden lauseen huomautus kerronnan tunnelmasta.
 
 # --- Muistutus, joka liitetään käyttäjän ohjeisiin (role=user) ---
 przypomnienie_uzytkownika: |

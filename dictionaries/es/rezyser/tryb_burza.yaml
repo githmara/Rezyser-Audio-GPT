@@ -12,6 +12,9 @@
 #  sufijos alarm/streszczenie requieren la clave JSON opcional
 #  `streszczenie` (sustituyendo a las antiguas etiquetas
 #  `<STRESZCZENIE>...</STRESZCZENIE>`).
+#
+#  v15.5: el resumen ya no cita los últimos párrafos — Python reconstruye el
+#  final narrativo al reconciliar con el disco.
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Lluvia de ideas (planificación, SIN escritura a archivo)"
@@ -86,10 +89,9 @@ sufiksy:
   streszczenie: |
 
 
-    [MODO RESUMEN FORZADO]: ¡El usuario ha pedido manualmente guardar el estado de la trama! En la respuesta JSON AÑADE LA CLAVE `"streszczenie"` (al mismo nivel que `opcje`) con un valor de texto que contenga TRES elementos obligatorios:
+    [MODO RESUMEN FORZADO]: ¡El usuario ha pedido manualmente guardar el estado de la trama! En la respuesta JSON AÑADE LA CLAVE `"streszczenie"` (al mismo nivel que `opcje`) con un valor de texto que contenga DOS elementos obligatorios:
     1. Un resumen conciso de los acontecimientos hasta ahora.
-    2. Una sección [ÚLTIMA ESCENA]: copia exacta (palabra por palabra) de los últimos 2-3 párrafos del texto enviado.
-    3. Una sección [ESTILO Y TONO]: una nota de una frase sobre el clima narrativo.
+    2. Una sección [ESTILO Y TONO]: una nota de una frase sobre el clima narrativo.
 
   optymalizacja: |
 
@@ -99,10 +101,9 @@ sufiksy:
   alarm: |
 
 
-    [MODO ALARMA - SE ACERCA EL LÍMITE DE MEMORIA]: ¡La memoria está casi llena! En la respuesta JSON AÑADE LA CLAVE `"streszczenie"` (al mismo nivel que `opcje`) con un valor de texto que contenga TRES elementos obligatorios:
+    [MODO ALARMA - SE ACERCA EL LÍMITE DE MEMORIA]: ¡La memoria está casi llena! En la respuesta JSON AÑADE LA CLAVE `"streszczenie"` (al mismo nivel que `opcje`) con un valor de texto que contenga DOS elementos obligatorios:
     1. Un resumen conciso de los acontecimientos hasta ahora.
-    2. Una sección [ÚLTIMA ESCENA]: copia exacta (palabra por palabra) de los últimos 2-3 párrafos del texto enviado.
-    3. Una sección [ESTILO Y TONO]: una nota de una frase sobre el clima narrativo.
+    2. Una sección [ESTILO Y TONO]: una nota de una frase sobre el clima narrativo.
 
 # --- Recordatorio añadido a las instrucciones del usuario (role=user) ---
 przypomnienie_uzytkownika: |

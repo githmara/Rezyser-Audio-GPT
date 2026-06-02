@@ -10,6 +10,9 @@
 #  director hints. The alarm/summary suffixes require the optional JSON
 #  key `streszczenie` (replacing the earlier `<STRESZCZENIE>...</STRESZCZENIE>`
 #  tags).
+#
+#  v15.5: summary no longer quotes the last paragraphs — Python reconstructs
+#  the narrative tail on disk reconciliation.
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Brainstorm (Planning, NO file write)"
@@ -84,10 +87,9 @@ sufiksy:
   streszczenie: |
 
 
-    [FORCED SUMMARY MODE]: The user has manually requested saving the plot state! In the JSON response ADD THE KEY `"streszczenie"` (at the same level as `opcje`) with a text value containing THREE mandatory elements:
+    [FORCED SUMMARY MODE]: The user has manually requested saving the plot state! In the JSON response ADD THE KEY `"streszczenie"` (at the same level as `opcje`) with a text value containing TWO mandatory elements:
     1. A concise summary of events so far.
-    2. A [LAST SCENE] section: an exact (word-for-word) copy of the last 2-3 paragraphs of the submitted text.
-    3. A [STYLE AND TONE] section: a one-sentence note about the narrative mood.
+    2. A [STYLE AND TONE] section: a one-sentence note about the narrative mood.
 
   optymalizacja: |
 
@@ -97,10 +99,9 @@ sufiksy:
   alarm: |
 
 
-    [ALARM MODE - APPROACHING MEMORY LIMIT]: Memory is nearly full! In the JSON response ADD THE KEY `"streszczenie"` (at the same level as `opcje`) with a text value containing THREE mandatory elements:
+    [ALARM MODE - APPROACHING MEMORY LIMIT]: Memory is nearly full! In the JSON response ADD THE KEY `"streszczenie"` (at the same level as `opcje`) with a text value containing TWO mandatory elements:
     1. A concise summary of events so far.
-    2. A [LAST SCENE] section: an exact (word-for-word) copy of the last 2-3 paragraphs of the submitted text.
-    3. A [STYLE AND TONE] section: a one-sentence note about the narrative mood.
+    2. A [STYLE AND TONE] section: a one-sentence note about the narrative mood.
 
 # --- Reminder appended to user instructions (role=user) ---
 przypomnienie_uzytkownika: |

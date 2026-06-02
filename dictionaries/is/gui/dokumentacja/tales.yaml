@@ -96,6 +96,8 @@ tresc:
 
     /endurminning <lýsing>, /retrospekcja <lýsing> — endurminning í þriðju persónu, ferðast aftur í tíma. Dæmi: „/endurminning dagur föðurins dauða" eða „/endurminning fyrsta fundur hetjanna". Opnar frásögn með tímalegri formúlu („Þrjú ár áður…"), merkir með forskeytinu „Endurminning:" og snýr aftur að núverandi umferð. Eins og /sena — óvirk, án valkosta. Full lýsing í SKREFI 5B.
 
+    /endurhlaða, /refresh — endurhleður innra minnið úr frásagnarskránni eftir handvirka breytingu á henni (frá v15.5). Þegar þú opnar opowiesci/<nafn>.txt í textaritli og t.d. klippir burt lokun á kvikmyndalegri klippingu sem vélin braut, samstillir þessi skipun (eða hnappurinn „{opowiesci.btn_odswiez_z_dysku_label}") ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. Ef samantekt fyrri umferða er þegar til, helst hún ósnortin, þannig að næsta umferð og næsta samantekt verða ekki til á úreltum gögnum. ATHUGIÐ: leikstaðan (persónur, staðsetning, búnaður, þræðir) úr .game.json skránni er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins getur næsta umferð rekist á þær.
+
     /hjálp, /help — birtir glugga með lista yfir allar tiltækar skipanir. Glugginn er aðeins til lesturs og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
 
     /loka, /quit — lokar forritinu (eftir sjálfvirka vistun á umferð í gangi).

@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modulo Storie Interattive (15.4.1 – Versione di Pubblicazione)
+Reżyser Audio GPT — Modulo Storie Interattive (15.5 – Versione di Pubblicazione)
 
 Il secondo principale modo dell'applicazione accanto a Reżyser — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
 
@@ -84,6 +84,8 @@ Il motore narrativo seleziona automaticamente il modello AI in base alla modalit
 /scena <descrizione>, /scene <descrizione> — evento corrente ALTROVE, raccontato in terza persona. La telecamera si stacca dal tuo personaggio e mostra cosa sta accadendo contemporaneamente a un altro personaggio o in un altro luogo del mondo. Esempio: "/scena Anna al mercato" o "/scena le guardie al cancello". Il motore intreccerà la scena nella narrazione, la contrassegnerà con il prefisso "Scena fuori campo:" e tornerà automaticamente al tuo personaggio nel turno successivo. Non appaiono scelte — il giocatore non prende decisioni nella scena di un altro. Trovi la descrizione completa del meccanismo nel PASSO 5B.
 
 /flashback <descrizione>, /retrospezione <descrizione> — retrospezione in terza persona, ritorno indietro nel tempo. Esempio: "/flashback giorno della morte del padre" o "/flashback primo incontro degli eroi". Apre la narrazione con una formula temporale ("Tre anni prima..."), la contrassegna con il prefisso "Retrospezione:" e ritorna al turno corrente. Identico a /scena — passivo, senza scelte. Descrizione completa nel PASSO 5B.
+
+/aggiorna, /refresh — aggiorna la memoria interna dal file di narrazione dopo averlo modificato manualmente (dalla v15.5). Quando apri opowiesci/<nome>.txt nell'editor e ad esempio tagli una chiusura del cut cinematografico infranta dal motore, questo comando (o il pulsante "Aggiorna dal disco") sincronizza la coda fresca con il contesto del motore — senza un reset completo e senza ricaricare il gioco. Se esiste già un riassunto dei turni precedenti, esso resta intatto, così il turno successivo e il riassunto successivo non nasceranno su dati non aggiornati. ATTENZIONE: lo stato del gioco (personaggi, luogo, inventario, fili narrativi) dal file .game.json NON viene aggiornato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe divergere da essi.
 
 /aiuto, /help — visualizza una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura e NVDA-friendly — il campo di testo riceve automaticamente il focus, il lettore di schermo legge immediatamente l'intero elenco senza necessità di navigazione.
 

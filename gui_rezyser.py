@@ -351,12 +351,20 @@ class RezyserPanel(wx.Panel):
         self._btn_otworz_narracje = wx.Button(self, label=t("rezyser.btn_otworz_narracje_label"))
         self._btn_otworz_narracje.SetToolTip(t("rezyser.btn_otworz_narracje_tooltip"))
 
+        # v15.5: odświeżenie pamięci wewnętrznej po ręcznej edycji `.txt`
+        # (np. ucięciu złamanego anti-closure). Domyka cykl „Otwórz narrację →
+        # edytuj w edytorze → Odśwież z dysku" bez twardego resetu i ponownego
+        # wczytania projektu. Rekoncyliacja w `core_rezyser.rekoncyliuj_z_dysku`.
+        self._btn_odswiez_z_dysku = wx.Button(self, label=t("rezyser.btn_odswiez_z_dysku_label"))
+        self._btn_odswiez_z_dysku.SetToolTip(t("rezyser.btn_odswiez_z_dysku_tooltip"))
+
         file_row = wx.BoxSizer(wx.HORIZONTAL)
         file_row.Add(self._txt_file_name,      proportion=1, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
         file_row.Add(self._btn_load,           flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         file_row.Add(self._btn_clear_current,  flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         file_row.Add(self._btn_hard_reset,     flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
-        file_row.Add(self._btn_otworz_narracje, flag=wx.ALIGN_CENTER_VERTICAL)
+        file_row.Add(self._btn_otworz_narracje, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        file_row.Add(self._btn_odswiez_z_dysku, flag=wx.ALIGN_CENTER_VERTICAL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_file, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
@@ -846,6 +854,7 @@ class RezyserPanel(wx.Panel):
         self._btn_clear_current.Bind(wx.EVT_BUTTON, self._on_clear_current)
         self._btn_hard_reset.Bind(wx.EVT_BUTTON,    self._on_hard_reset)
         self._btn_otworz_narracje.Bind(wx.EVT_BUTTON, self._on_otworz_narracje)
+        self._btn_odswiez_z_dysku.Bind(wx.EVT_BUTTON, self._on_odswiez_z_dysku)
         self._btn_zapisz_ksiege.Bind(wx.EVT_BUTTON, self._on_zapisz_ksiege)
         self._btn_prompt_architekta.Bind(wx.EVT_BUTTON, self._on_prompt_architekta)
         self._btn_zapisz_pamiec.Bind(wx.EVT_BUTTON, self._on_zapisz_pamiec)
@@ -890,6 +899,10 @@ class RezyserPanel(wx.Panel):
         # dysku sprawdzamy dopiero w handlerze (cheaper UX: gracz może
         # kliknąć i dostaje info „brak narracji" zamiast trzymać disabled).
         self._btn_otworz_narracje.Enable(nazwa_podana)
+        # v15.5: Odśwież z dysku — wymaga nazwy i braku trwającej generacji AI
+        # (rekoncyliacja mutuje full_story/summary_text; nie kolidujemy z workerem).
+        worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
+        self._btn_odswiez_z_dysku.Enable(nazwa_podana and not worker_w_toku)
 
         cos_do_wyczyszczenia = pamiec_zajeta or bool(
             self._txt_file_name.GetValue().strip()
@@ -2076,6 +2089,75 @@ class RezyserPanel(wx.Panel):
             )
             return
         self._otworz_w_edytorze(sciezka)
+
+    # ------------------------------------------------------------------
+    # v15.5 — odświeżenie pamięci wewnętrznej z dysku (po ręcznej edycji .txt)
+    # ------------------------------------------------------------------
+    def _on_odswiez_z_dysku(self, _event: wx.Event) -> None:
+        """Ponownie wczytuje `skrypty/<nazwa>.txt` i uzgadnia pamięć wewnętrzną.
+
+        Domyka cykl „Otwórz narrację → edytuj ręcznie → Odśwież z dysku" bez
+        twardego resetu i ponownego wczytywania projektu. Rekoncyliacja
+        (:meth:`core_rezyser.ProjektRezysera.rekoncyliuj_z_dysku`) decyduje
+        sama: krótki tekst → całość; długi + streszczenie → końcówka od
+        ostatniego nagłówka; brak markerów → ostatni fragment tekstu.
+        NIE rusza Księgi Świata ani liczników struktury.
+        """
+        nazwa = self._txt_file_name.GetValue().strip()
+        if not nazwa:
+            wx.MessageBox(
+                t("rezyser.brak_nazwy_tresc"),
+                t("rezyser.brak_nazwy_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            self._txt_file_name.SetFocus()
+            return
+        if self._projekt.nazwa_pliku != nazwa:
+            self._projekt.nazwa_pliku = nazwa
+        sciezka = self._projekt._sciezka_historii(nazwa)
+        if not os.path.exists(sciezka):
+            wx.MessageBox(
+                t("rezyser.plik_narracji_brak_tresc", nazwa_projektu=nazwa),
+                t("rezyser.plik_narracji_brak_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+        try:
+            wynik = self._projekt.rekoncyliuj_z_dysku()
+        except (FileNotFoundError, OSError, ValueError) as exc:
+            self._wyswietl_blad_ai(
+                t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
+            )
+            return
+
+        # Sync widgetów z odświeżoną pamięcią.
+        self._txt_full_story.SetValue(self.full_story)
+        self._txt_full_story.SetInsertionPointEnd()
+        self._txt_pamiec.SetValue(self.summary_text)
+
+        # Komunikat zależny od trybu rekoncyliacji.
+        if wynik.tryb == "calosc":
+            if wynik.skasowano_streszczenie:
+                tresc = t("rezyser.odswiez_calosc_skasowano_tresc",
+                          liczba_znakow=wynik.liczba_znakow)
+            else:
+                tresc = t("rezyser.odswiez_calosc_tresc",
+                          liczba_znakow=wynik.liczba_znakow)
+        elif wynik.tryb == "snap":
+            tresc = t("rezyser.odswiez_snap_tresc",
+                      naglowek=wynik.naglowek_uzyty or "",
+                      liczba_znakow=wynik.liczba_znakow)
+        else:   # "koncowka"
+            tresc = t("rezyser.odswiez_koncowka_tresc",
+                      liczba_znakow=wynik.liczba_znakow)
+
+        self._refresh_ui_state()
+        wx.MessageBox(
+            tresc,
+            t("rezyser.odswiez_z_dysku_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self,
+        )
+        self._txt_full_story.SetFocus()
 
     def _zapisz_tryb_projektu(self) -> None:
         nazwa    = self._txt_file_name.GetValue().strip()

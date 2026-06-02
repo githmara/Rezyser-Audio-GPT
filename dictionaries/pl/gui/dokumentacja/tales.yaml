@@ -99,6 +99,8 @@ tresc:
 
     /flashback <opis>, /retrospekcja <opis> — retrospekcja w trzeciej osobie, cofnięcie się w czasie. Przykład: „/flashback dzień śmierci ojca" lub „/flashback pierwsze spotkanie bohaterów". Otwiera narrację formułą czasową („Trzy lata wcześniej…"), oznacza prefiksem „Retrospekcja:" i wraca do bieżącej tury. Identycznie jak /scena — pasywna, bez wyborów. Pełen opis w KROKU 5B.
 
+    /odswiez, /refresh — odświeża pamięć wewnętrzną z pliku narracji po jego ręcznej edycji (od v15.5). Gdy otworzysz opowiesci/<nazwa>.txt w edytorze i np. utniesz złamane przez silnik domknięcie kinowego cięcia, ta komenda (lub przycisk „{opowiesci.btn_odswiez_z_dysku_label}") synchronizuje świeżą końcówkę z kontekstem silnika — bez twardego resetu i ponownego wczytywania gry. Jeśli istnieje już streszczenie wcześniejszych tur, pozostaje ono nietknięte, więc kolejna tura i kolejne streszczenie nie powstaną na nieaktualnych danych. UWAGA: stan gry (postacie, lokacja, ekwipunek, wątki) z pliku .game.json NIE jest aktualizowany — jeśli edycja zmieniła fakty świata, kolejna tura może się z nimi rozjechać.
+
     /pomoc, /help — wyświetla okno dialogowe z listą wszystkich dostępnych komend. Dialog jest readonly i NVDA-friendly — pole tekstowe dostaje fokus automatycznie, czytnik ekranu od razu odczytuje całą listę bez konieczności nawigacji.
 
     /koniec, /quit — zamyka aplikację (po autozapisie tury w toku).

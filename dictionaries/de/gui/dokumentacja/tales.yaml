@@ -96,6 +96,8 @@ tresc:
 
     /flashback <opis>, /retrospekcja <opis> — Rückblende in der dritten Person, zeitliche Rückkehr. Beispiel: „/flashback der Tag, an dem Vater starb" oder „/flashback erstes Treffen der Hauptfiguren". Eröffnet die Erzählung mit einer zeitlichen Formel („Drei Jahre zuvor…"), kennzeichnet sie mit dem Präfix „Rückblende:" und kehrt zur aktuellen Runde zurück. Genauso wie /scena — passiv, ohne Entscheidungen. Vollständige Beschreibung in SCHRITT 5B.
 
+    /odswiez, /refresh — aktualisiert den internen Speicher aus der Erzählungsdatei nach deren manueller Bearbeitung (seit v15.5). Wenn du opowiesci/<nazwa>.txt im Editor öffnest und z.B. ein von der Engine gebrochenes Schließen eines filmischen Schnitts wegschneidest, synchronisiert dieser Befehl (oder die Schaltfläche „{opowiesci.btn_odswiez_z_dysku_label}") das frische Ende mit dem Kontext der Engine — ohne harten Reset und erneutes Laden des Spiels. Falls bereits eine Zusammenfassung früherer Runden existiert, bleibt sie unberührt, sodass die nächste Runde und die nächste Zusammenfassung nicht auf veralteten Daten entstehen. ACHTUNG: Der Spielstand (Figuren, Ort, Inventar, Handlungsfäden) aus der Datei .game.json wird NICHT aktualisiert — wenn die Bearbeitung Weltfakten verändert hat, kann die nächste Runde mit ihnen auseinanderlaufen.
+
     /pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Bildschirmleser liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
 
     /koniec, /quit — schließt die Anwendung (nach dem automatischen Speichern der laufenden Runde).

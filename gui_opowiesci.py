@@ -82,6 +82,35 @@ def _skroc_na_granicy_zdania(tekst: str, max_znakow: int = _SKROT_MAX_ZN) -> str
     return okrojony.rstrip() + "…"
 
 
+# v15.5: lustro `_skroc_na_granicy_zdania`, ale trzyma KONIEC tekstu — używane
+# przy odświeżeniu narracji z dysku do wyciągnięcia świeżej końcówki dla
+# `ostatnie_tury` (kontekst LLM). Limit spójny ze `_SKROT_MAX_ZN` (~1200) +
+# zapas, bo to pojedynczy wpis kontekstu.
+_FRAGMENT_MAX_ZN = 1500
+
+
+def _ostatni_fragment(tekst: str, max_znakow: int = _FRAGMENT_MAX_ZN) -> str:
+    """Zwraca KOŃCÓWKĘ `tekst` (~`max_znakow`), snapniętą do początku zdania.
+
+    Cały `tekst` jeśli mieści się pod limitem. Inaczej bierze ostatnie
+    `max_znakow` znaków i obcina wiodące zdanie urwane w połowie: szuka
+    najwcześniejszej granicy `.!?` lub nowej linii w pierwszej połowie okna
+    i zaczyna tuż za nią; brak granicy → samo okno (lstrip).
+    """
+    if len(tekst) <= max_znakow:
+        return tekst.strip()
+    okno = tekst[-max_znakow:]
+    prog = max_znakow // 2
+    najwczesniejszy = -1
+    for znak in (".", "!", "?", "\n"):
+        idx = okno.find(znak)
+        if 0 <= idx <= prog and (najwczesniejszy == -1 or idx < najwczesniejszy):
+            najwczesniejszy = idx
+    if najwczesniejszy != -1:
+        return okno[najwczesniejszy + 1:].strip()
+    return okno.strip()
+
+
 class OpowiesciPanel(wx.Panel):
     """Panel modułu „Interaktywne Opowieści" — szkielet Fazy 1 v15.0.
 
@@ -134,6 +163,9 @@ class OpowiesciPanel(wx.Panel):
         # MessageBox z TextCtrl readonly.
         "/pomoc":      "_komenda_pomoc",
         "/help":       "_komenda_pomoc",
+        # v15.5: odświeżenie narracji z dysku po ręcznej edycji `.txt`.
+        "/odswiez":    "_komenda_odswiez",
+        "/refresh":    "_komenda_odswiez",
     }
 
     # Mapowanie kolorów dla wskaźnika pamięci modelu (analog `gui_rezyser._KOLORY_POZIOMOW`).
@@ -320,6 +352,12 @@ class OpowiesciPanel(wx.Panel):
         self._btn_otworz_narracje = wx.Button(self, label=t("opowiesci.btn_otworz_narracje_label"))
         self._btn_otworz_narracje.SetToolTip(t("opowiesci.btn_otworz_narracje_tooltip"))
 
+        # v15.5: odświeżenie pamięci wewnętrznej po ręcznej edycji `.txt`
+        # (np. ucięciu złamanego kinowego cięcia). Domyka cykl „Otwórz narrację
+        # → edytuj → Odśwież z dysku" bez twardego resetu i wczytania gry.
+        self._btn_odswiez_z_dysku = wx.Button(self, label=t("opowiesci.btn_odswiez_z_dysku_label"))
+        self._btn_odswiez_z_dysku.SetToolTip(t("opowiesci.btn_odswiez_z_dysku_tooltip"))
+
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(self._txt_nazwa_gry, proportion=1,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
@@ -330,6 +368,8 @@ class OpowiesciPanel(wx.Panel):
         row.Add(self._btn_zapisz,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         row.Add(self._btn_otworz_narracje,
+                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        row.Add(self._btn_odswiez_z_dysku,
                 flag=wx.ALIGN_CENTER_VERTICAL)
 
         # Faza 5: Quick Start preset picker — drugi wiersz w pasku.
@@ -588,6 +628,7 @@ class OpowiesciPanel(wx.Panel):
         self._btn_wczytaj.Bind(wx.EVT_BUTTON, self._on_wczytaj)
         self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_zapisz)
         self._btn_otworz_narracje.Bind(wx.EVT_BUTTON, self._on_otworz_narracje)
+        self._btn_odswiez_z_dysku.Bind(wx.EVT_BUTTON, self._on_odswiez_z_dysku)
         self._btn_wyslij.Bind(wx.EVT_BUTTON, self._on_wyslij)
         # v15.1: edycja zasad świata przez dedykowany dialog.
         self._btn_zasady_swiata.Bind(wx.EVT_BUTTON, self._on_zasady_swiata)
@@ -1172,6 +1213,12 @@ class OpowiesciPanel(wx.Panel):
         # pierwszej turze — w nowo założonej, bez tury, sam handler
         # pokaże info zamiast otwarcia pustej ścieżki).
         self._btn_otworz_narracje.Enable(ma_projekt)
+        # v15.5: Odśwież z dysku — aktywne z grą i bez trwającej operacji LLM
+        # (tura / streszczenie / cinematic), bo rekoncyliacja mutuje snapshot.
+        worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
+        self._btn_odswiez_z_dysku.Enable(
+            ma_projekt and not worker_w_toku and not self._meta_w_toku
+        )
 
         utrwalony = self._zapisany_tryb in self._MAPA_TRYB_RB_NA_INT
         if utrwalony:
@@ -1531,6 +1578,105 @@ class OpowiesciPanel(wx.Panel):
                 wx.OK | wx.ICON_ERROR, self,
             )
 
+    # ------------------------------------------------------------------
+    # v15.5 — odświeżenie pamięci wewnętrznej z dysku (po ręcznej edycji .txt)
+    # ------------------------------------------------------------------
+    def _on_odswiez_z_dysku(self, _event: wx.Event) -> None:
+        """Wczytuje ponownie `opowiesci/<gra>.txt` i uzgadnia kontekst LLM.
+
+        Domyka cykl „Otwórz narrację → edytuj ręcznie → Odśwież z dysku" bez
+        twardego resetu i ponownego wczytywania gry. Rekoncyliacja
+        `ostatnie_tury`:
+          * krótka historia (brak streszczenia) → nadpisujemy `narracja_skrot`
+            ostatniego wpisu świeżą końcówką z dysku;
+          * istnieje streszczenie (sentinel `AKCJA_STRESZCZENIE` na idx 0)
+            zwinięte do 1 wpisu → DOPISUJEMY świeży wpis-końcówkę, streszczenie
+            (stara wiedza) zostaje nietknięte;
+          * streszczenie + późniejsze tury → nadpisujemy ostatnią turę.
+        NIE rusza `stan` (lokacja, ekwipunek, wątki) ani `postacie_aktywne`
+        w `.game.json` — to ostrzegamy w komunikacie (możliwy dryf).
+        """
+        if self._projekt is None:
+            wx.MessageBox(
+                t("opowiesci.brak_gry_tresc"),
+                t("opowiesci.brak_gry_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+        worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
+        if worker_w_toku or self._meta_w_toku:
+            wx.MessageBox(
+                t("opowiesci.odswiez_zajete_tresc"),
+                t("opowiesci.odswiez_zajete_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+        try:
+            full = self._projekt.przeladuj_narracje_z_dysku()
+        except (FileNotFoundError, OSError, ValueError):
+            wx.MessageBox(
+                t("opowiesci.plik_narracji_brak_tresc", nazwa=self._projekt.nazwa_pliku),
+                t("opowiesci.plik_narracji_brak_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+
+        # Narracja w widgecie.
+        self._txt_narracja.SetValue(full)
+        self._txt_narracja.SetInsertionPointEnd()
+
+        # Rekoncyliacja kontekstu LLM (ostatnie_tury).
+        tail = _ostatni_fragment(full)
+        ot = list(self._snapshot.ostatnie_tury)
+        ma_streszczenie = bool(ot) and ot[0].get("akcja_gracza") == oai.AKCJA_STRESZCZENIE
+        if not ot:
+            ot = [{"akcja_gracza": oai.AKCJA_SYNC, "narracja_skrot": tail}]
+        elif ma_streszczenie and len(ot) == 1:
+            ot.append({"akcja_gracza": oai.AKCJA_SYNC, "narracja_skrot": tail})
+        else:
+            ot[-1] = {
+                "akcja_gracza":  ot[-1].get("akcja_gracza", oai.AKCJA_SYNC),
+                "narracja_skrot": tail,
+            }
+
+        self._snapshot = oai.SnapshotOpowiesci(
+            nazwa_gry=self._snapshot.nazwa_gry,
+            numer_tury=self._snapshot.numer_tury,
+            ostatnie_tury=ot,
+            postacie_aktywne=list(self._snapshot.postacie_aktywne),
+            stan_poprzedni=dict(self._snapshot.stan_poprzedni),
+            seed_swiata=self._snapshot.seed_swiata,
+            jezyk_projektu=self._snapshot.jezyk_projektu,
+            zasady_swiata=self._snapshot.zasady_swiata,
+            cuty_wykorzystane=dict(self._snapshot.cuty_wykorzystane),
+        )
+
+        # Pole „Ostatnia tura" — świeża końcówka (NVDA usłyszy po fokusie).
+        self._txt_ostatnia_tura.SetValue(
+            t("opowiesci.txt_ostatnia_tura_skrot_naglowek") + tail
+        )
+        self._txt_ostatnia_tura.SetInsertionPoint(0)
+
+        # Persystencja kontekstu do `.game.json` (inaczej restart cofa efekt).
+        self._projekt.ostatnie_tury = list(ot)
+        try:
+            self._projekt.zapisz_game_json()
+        except OSError:
+            pass
+        self._aktualizuj_pamiec_modelu()
+
+        tresc = (
+            t("opowiesci.odswiez_streszczenie_tresc")
+            if ma_streszczenie else
+            t("opowiesci.odswiez_calosc_tresc")
+        )
+        wx.MessageBox(
+            tresc,
+            t("opowiesci.odswiez_z_dysku_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self,
+        )
+        self._txt_narracja.SetFocus()
+
     # ==================================================================
     # v15.1 — Zasady świata (dedykowany dialog, NIE inline TextCtrl)
     # ==================================================================
@@ -1753,6 +1899,10 @@ class OpowiesciPanel(wx.Panel):
     def _komenda_wczytaj(self, _arg: str) -> None:
         """`/wczytaj` / `/load` — proxy do :meth:`_on_wczytaj`."""
         self._on_wczytaj(None)
+
+    def _komenda_odswiez(self, _arg: str) -> None:
+        """`/odswiez` / `/refresh` — proxy do :meth:`_on_odswiez_z_dysku`."""
+        self._on_odswiez_z_dysku(None)
 
     def _komenda_koniec(self, _arg: str) -> None:
         """`/koniec` / `/quit` — zamyka aplikację."""
@@ -2018,7 +2168,7 @@ class OpowiesciPanel(wx.Panel):
             nazwa_gry=self._snapshot.nazwa_gry,
             numer_tury=self._snapshot.numer_tury,
             ostatnie_tury=[{
-                "akcja_gracza":   "(streszczenie poprzednich tur)",
+                "akcja_gracza":   oai.AKCJA_STRESZCZENIE,
                 "narracja_skrot": streszczenie,
             }],
             postacie_aktywne=self._snapshot.postacie_aktywne,

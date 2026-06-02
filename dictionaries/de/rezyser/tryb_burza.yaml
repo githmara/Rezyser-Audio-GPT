@@ -11,6 +11,8 @@
 #  zu erfinden, nicht umgehen. Die alarm-/Zusammenfassungs-Suffixe verlangen
 #  den optionalen JSON-Schlüssel `streszczenie` (ersetzt frühere
 #  `<STRESZCZENIE>...</STRESZCZENIE>`-Tags).
+#  v15.5: Zusammenfassung zitiert die letzten Absätze nicht mehr — Python
+#  rekonstruiert das Erzähl-Ende bei der Datenträger-Abgleichung.
 # -----------------------------------------------------------------------------
 id: burza
 etykieta: "Brainstorming (Planung, KEIN Datei-Schreiben)"
@@ -85,10 +87,9 @@ sufiksy:
   streszczenie: |
 
 
-    [ERZWUNGENER ZUSAMMENFASSUNGSMODUS]: Die Nutzerin hat manuell um die Speicherung des Handlungsstands gebeten! Füge in der JSON-Antwort DEN SCHLÜSSEL `"streszczenie"` (auf gleicher Ebene wie `opcje`) mit einem Textwert hinzu, der DREI Pflichtelemente enthält:
+    [ERZWUNGENER ZUSAMMENFASSUNGSMODUS]: Die Nutzerin hat manuell um die Speicherung des Handlungsstands gebeten! Füge in der JSON-Antwort DEN SCHLÜSSEL `"streszczenie"` (auf gleicher Ebene wie `opcje`) mit einem Textwert hinzu, der ZWEI Pflichtelemente enthält:
     1. Eine prägnante Zusammenfassung der bisherigen Ereignisse.
-    2. Einen Abschnitt [LETZTE SZENE]: eine wörtliche Kopie der letzten 2-3 Absätze des übermittelten Textes.
-    3. Einen Abschnitt [STIL UND TON]: eine einsätzige Notiz zur erzählerischen Atmosphäre.
+    2. Einen Abschnitt [STIL UND TON]: eine einsätzige Notiz zur erzählerischen Atmosphäre.
 
   optymalizacja: |
 
@@ -98,10 +99,9 @@ sufiksy:
   alarm: |
 
 
-    [ALARMMODUS - GEDÄCHTNIS BALD VOLL]: Das Gedächtnis ist fast voll! Füge in der JSON-Antwort DEN SCHLÜSSEL `"streszczenie"` (auf gleicher Ebene wie `opcje`) mit einem Textwert hinzu, der DREI Pflichtelemente enthält:
+    [ALARMMODUS - GEDÄCHTNIS BALD VOLL]: Das Gedächtnis ist fast voll! Füge in der JSON-Antwort DEN SCHLÜSSEL `"streszczenie"` (auf gleicher Ebene wie `opcje`) mit einem Textwert hinzu, der ZWEI Pflichtelemente enthält:
     1. Eine prägnante Zusammenfassung der bisherigen Ereignisse.
-    2. Einen Abschnitt [LETZTE SZENE]: eine wörtliche Kopie der letzten 2-3 Absätze des übermittelten Textes.
-    3. Einen Abschnitt [STIL UND TON]: eine einsätzige Notiz zur erzählerischen Atmosphäre.
+    2. Einen Abschnitt [STIL UND TON]: eine einsätzige Notiz zur erzählerischen Atmosphäre.
 
 # --- Erinnerung, die an die Nutzeranweisungen (role=user) angehängt wird ---
 przypomnienie_uzytkownika: |
