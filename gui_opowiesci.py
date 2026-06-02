@@ -355,8 +355,17 @@ class OpowiesciPanel(wx.Panel):
         # v15.5: odświeżenie pamięci wewnętrznej po ręcznej edycji `.txt`
         # (np. ucięciu złamanego kinowego cięcia). Domyka cykl „Otwórz narrację
         # → edytuj → Odśwież z dysku" bez twardego resetu i wczytania gry.
+        # v15.5.1: BEZWARUNKOWO UKRYTY. Rekoncyliacja wsiąka edytowaną narrację
+        # do `ostatnie_tury`/`.game.json`, ale NIE re-derywuje `stan`,
+        # `postacie_aktywne` ani liczników — powstaje cichy dryf między narracją
+        # a stanem strukturalnym, który mści się dopiero w kolejnych turach.
+        # Wierna re-derywacja wymaga ekstrakcji stanu przez LLM (koszt API,
+        # którego zwykły user nie oczekuje) — to świadomie odłożone na v15.6 jako
+        # opt-in dla technicznych (bezpośrednia edycja `.game.json` za flagą
+        # zaszytą w kodzie). Do tego czasu przycisk pozostaje ukryty.
         self._btn_odswiez_z_dysku = wx.Button(self, label=t("opowiesci.btn_odswiez_z_dysku_label"))
         self._btn_odswiez_z_dysku.SetToolTip(t("opowiesci.btn_odswiez_z_dysku_tooltip"))
+        self._btn_odswiez_z_dysku.Hide()
 
         row = wx.BoxSizer(wx.HORIZONTAL)
         row.Add(self._txt_nazwa_gry, proportion=1,
@@ -1213,12 +1222,9 @@ class OpowiesciPanel(wx.Panel):
         # pierwszej turze — w nowo założonej, bez tury, sam handler
         # pokaże info zamiast otwarcia pustej ścieżki).
         self._btn_otworz_narracje.Enable(ma_projekt)
-        # v15.5: Odśwież z dysku — aktywne z grą i bez trwającej operacji LLM
-        # (tura / streszczenie / cinematic), bo rekoncyliacja mutuje snapshot.
-        worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
-        self._btn_odswiez_z_dysku.Enable(
-            ma_projekt and not worker_w_toku and not self._meta_w_toku
-        )
+        # v15.5.1: „Odśwież z dysku" jest bezwarunkowo ukryty (cichy dryf stanu —
+        # patrz komentarz przy tworzeniu przycisku). Nie sterujemy już jego
+        # Enable/Show — pozostaje Hidden do czasu opt-in z v15.6.
 
         utrwalony = self._zapisany_tryb in self._MAPA_TRYB_RB_NA_INT
         if utrwalony:

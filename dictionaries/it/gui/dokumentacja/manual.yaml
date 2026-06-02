@@ -75,16 +75,16 @@ tresc:
 
     Suggerimento: „Apri percorso file" è il nome nativo dell'opzione in un'installazione italiana di Windows. Nel sistema in inglese si chiama „Open file location", nelle altre versioni linguistiche — analogamente nella lingua locale del sistema operativo.
   krok_2_klucz_api: |
-    PASSO 2: Zasilanie API (Klucz OpenAI)
+    PASSO 2: Alimentazione API (Chiave OpenAI)
 
-    Aby sztuczna inteligencja mogła działać, potrzebuje dostępu do serwerów OpenAI (twórców ChatuGPT).
+    Perché l'intelligenza artificiale possa funzionare, ha bisogno di accedere ai server di OpenAI (i creatori di ChatGPT).
 
-    1. Załóż konto na platform.openai.com i doładuj konto w zakładce Billing.
-    2. Wygeneruj klucz w zakładce API Keys (zaczyna się od sk-proj-). Uwaga: klucz jest wyświetlany tylko raz — w momencie tworzenia. Jeśli zamkniesz okno bez skopiowania, przepada bezpowrotnie i trzeba będzie go zastrzec (opcja revoke secret key) i wygenerować nowy. Skopiuj go od razu, zanim cokolwiek klikniesz.
-    3. Na ekranie startowym programu kliknij przycisk "{home.btn_generate}". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
-    4. W otwartym pliku zobaczysz linię OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój skopiowany klucz bezpośrednio po znaku równości (bez spacji). Zapisz plik i uruchom aplikację ponownie.
+    1. Crea un account su platform.openai.com e ricarica il credito nella scheda Billing.
+    2. Genera una chiave nella scheda API Keys (inizia con sk-proj-). Attenzione: la chiave viene mostrata una sola volta — nel momento della creazione. Se chiudi la finestra senza copiarla, va persa irrimediabilmente e dovrai revocarla (opzione revoke secret key) e generarne una nuova. Copiala subito, prima di cliccare qualsiasi cosa.
+    3. Nella schermata iniziale del programma clicca il pulsante "{home.btn_generate}". Il sistema creerà automaticamente un file di configurazione pulito nel posto giusto e aprirà il Blocco Note con un modello pronto per la modifica.
+    4. Nel file aperto vedrai la riga OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina il testo segnaposto e incolla la chiave copiata subito dopo il segno di uguale (senza spazi). Salva il file e riavvia l'applicazione.
 
-    Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i wyświetli zielony komunikat w sekcji "{home.heading_system_check}" — oznacza to, że wszystkie moduły AI są gotowe do pracy. W przeciwnym wypadku jasno ci powie, co jest nie tak i pozwoli otworzyć edytor tekstu, aby szybko dało się naprawić błąd.
+    Suggerimento: Dopo il riavvio l'applicazione controllerà il file e mostrerà un messaggio verde nella sezione "{home.heading_system_check}" — significa che tutti i moduli AI sono pronti all'uso. In caso contrario ti dirà chiaramente cosa non va e ti permetterà di aprire l'editor di testo per correggere rapidamente l'errore.
   krok_3_glowne_studio: |
     PASSO 3: Studio Principale del Regista
 
@@ -440,88 +440,88 @@ tresc:
     - File `docs/dictionaries.pl.txt` (disponibile nel pacchetto per gli utenti finali dalla scheda Releases) — breve descrizione in linguaggio semplice di ogni sottocartella, 6 cifrari pronti, 8 accenti pronti e idee su cosa si può fare da soli, senza conoscenza di Python.
     - File `dictionaries/README.md` (disponibile solo clonando il repository da GitHub — i pacchetti di rilascio filtrano i file .md) — documentazione tecnica dettagliata del formato YAML con esempi, elenchi di campi, regole del pipeline, regex. Questo documento è indirizzato a linguisti con conoscenze di base di programmazione e a sviluppatori.
   nvda_a11y: |
-    Ważne wskazówki dla użytkowników czytników ekranu (NVDA)
+    Indicazioni importanti per gli utenti dei lettori di schermo (NVDA)
 
-    1. Komunikaty o sukcesie i błędach
+    1. Messaggi di successo ed errore
 
-    Gdy aplikacja zakończy działanie (np. zapisze plik lub napotka błąd), pojawi się okno dialogowe z tytułem takim jak "Sukces", "Ostrzeżenie" lub "Błąd". NVDA od razu ogłosi to okno i odczyta jego treść. Nie musisz nic robić — dialogi są w pełni dostępne z klawiatury, a fokus automatycznie ląduje na przycisku "OK". Nie ma już sztuczek z prefiksem "Alert" — natywne okna dialogowe wxPython są obsługiwane bezpośrednio przez czytnik.
+    Quando l'applicazione termina un'operazione (ad es. salva un file o incontra un errore), comparirà una finestra di dialogo con un titolo come "Successo", "Avviso" o "Errore". NVDA annuncerà subito la finestra e ne leggerà il contenuto. Non devi fare nulla — le finestre di dialogo sono pienamente accessibili da tastiera e il focus atterra automaticamente sul pulsante "OK". Non ci sono più trucchi con il prefisso "Alert" — le finestre di dialogo native di wxPython sono gestite direttamente dal lettore di schermo.
 
-    2. Ważne ostrzeżenie: ciche przetwarzanie w tle
+    2. Avviso importante: elaborazione silenziosa in background
 
-    Po kliknięciu przycisków takich jak "{rezyser.btn_wyslij_label}" lub "{poliglota.btn_process}", program natychmiast rozpoczyna przetwarzanie w tle. Na ekranie pojawia się pasek postępu (Gauge), ale NVDA NIE odczytuje jego wartości w czasie rzeczywistym — czytnik ekranu milczy podczas pracy. Nie klikaj przycisku ponownie. Poczekaj, aż pojawi się okno dialogowe z wynikiem lub komunikatem o błędzie — NVDA ogłosi je automatycznie.
+    Dopo aver cliccato pulsanti come "{rezyser.btn_wyslij_label}" o "{poliglota.btn_process}", il programma avvia immediatamente l'elaborazione in background. Sullo schermo appare una barra di avanzamento (Gauge), ma NVDA NON ne legge il valore in tempo reale — il lettore di schermo resta in silenzio durante il lavoro. Non cliccare di nuovo il pulsante. Attendi finché non compare la finestra di dialogo con il risultato o con il messaggio di errore — NVDA la annuncerà automaticamente.
 
-    3. Nawigacja między narzędziami
+    3. Navigazione tra gli strumenti
 
-    Poruszanie się między narzędziami (Reżyser, Poliglota, Konwerter, Manager Reguł) odbywa się w jednym oknie programu za pomocą czterech przycisków na pasku narzędzi lub przez menu Narzędzia (Alt, a następnie N). Dostępne skróty klawiaturowe: Ctrl+0 (Strona główna), Ctrl+1 (Reżyser), Ctrl+2 (Poliglota), Ctrl+3 (Konwerter), Ctrl+4 (Manager Reguł — nowość w 13.0). Po przełączeniu narzędzia fokus automatycznie ląduje na opisie nowego modułu — NVDA od razu zaczyna czytać nowy widok.
+    Lo spostamento tra gli strumenti (Regista, Poliglotta, Convertitore, Gestore delle Regole) avviene in un'unica finestra del programma tramite quattro pulsanti sulla barra degli strumenti o tramite il menu Strumenti (Alt, poi N). Scorciatoie da tastiera disponibili: Ctrl+0 (Pagina iniziale), Ctrl+1 (Regista), Ctrl+2 (Poliglotta), Ctrl+3 (Convertitore), Ctrl+4 (Gestore delle Regole — novità nella 13.0). Dopo aver cambiato strumento il focus atterra automaticamente sulla descrizione del nuovo modulo — NVDA inizia subito a leggere la nuova vista.
 
-    4. Kolejność tabulatora i nazwy widżetów
+    4. Ordine di tabulazione e nomi dei widget
 
-    Każdy element interfejsu ma nadaną czytelną polską nazwę — NVDA odczyta ją przy sfocusowaniu. Kolejność tabulatora jest logiczna: od opisu narzędzia, przez pola konfiguracyjne, aż po przyciski akcji. Nie ma tu zaskoczeń — nawigacja klawiaturą działa tak samo jak w każdym innym natywnym programie Windows. Wszystkie menu i przyciski są w języku polskim i NVDA odczyta je polskim głosem bez żadnych dodatkowych ustawień.
+    Ogni elemento dell'interfaccia ha un nome chiaro in italiano — NVDA lo leggerà al momento del focus. L'ordine di tabulazione è logico: dalla descrizione dello strumento, attraverso i campi di configurazione, fino ai pulsanti d'azione. Non ci sono sorprese — la navigazione da tastiera funziona come in qualsiasi altro programma nativo di Windows. Tutti i menu e i pulsanti sono in italiano e NVDA li leggerà con una voce italiana senza alcuna impostazione aggiuntiva.
   changelog_9: |
-    Ważne uwagi do wersji 9.0 / Changelog
+    Note importanti per la versione 9.0 / Changelog
 
-    Nowe funkcje i zmiany w wersji 9
+    Nuove funzionalità e modifiche nella versione 9
 
-    Odporny na awarie zapis postępu tłumaczenia (ZMIANA — naprawa krytycznego buga)
-    W wersji 8 wznawianie przerwanego tłumaczenia było obarczone cichą, destrukcyjną pułapką: jeśli użytkownik zastosował się do instrukcji (ręczne wycięcie przetłumaczonego fragmentu), a potem od razu wznowił tłumaczenie reszty, aplikacja otwierała plik wyjściowy w trybie nadpisywania — bezpowrotnie i bezwiednie kasując cały opłacony postęp. W wersji 9 cały mechanizm został przeprojektowany. Każdy przetłumaczony blok jest teraz natychmiast zapisywany do pliku tymczasowego (.jsonl) z przypisanym indeksem. Wznowienie jest w pełni automatyczne — aplikacja sama wykrywa plik i odtwarza postęp bez żadnej ingerencji użytkownika. Po udanym zakończeniu plik tymczasowy jest automatycznie usuwany.
+    Salvataggio del progresso di traduzione resistente ai crash (MODIFICA — correzione di un bug critico)
+    Nella versione 8, la ripresa di una traduzione interrotta nascondeva una trappola silenziosa e distruttiva: se l'utente seguiva le istruzioni (ritagliando manualmente il frammento già tradotto) e poi riprendeva immediatamente la traduzione del resto, l'applicazione apriva il file di output in modalità sovrascrittura — cancellando irrimediabilmente e inconsapevolmente tutto il progresso pagato. Nella versione 9 l'intero meccanismo è stato riprogettato. Ogni blocco tradotto viene ora salvato immediatamente in un file temporaneo (.jsonl) con un indice assegnato. La ripresa è completamente automatica — l'applicazione rileva da sola il file e ripristina il progresso senza alcun intervento dell'utente. Al termine con successo, il file temporaneo viene eliminato automaticamente.
 
-    Naprawiacz Tagów w Trybie Reżysera (NOWOŚĆ)
-    Do menu Trybu Reżysera dodano nową opcję — Naprawiacz Tagów. Wstrzykuje do pliku wyłącznie podany przez użytkownika dwuliterowy kod języka ISO, bez stosowania jakichkolwiek reguł fonetycznych ani czyszczenia. Narzędzie ratunkowe na wypadek, gdy gotowy już plik wyszedł z błędnym lub brakującym tagiem językowym.
+    Correttore di Tag nella Modalità Regista (NOVITÀ)
+    Al menu della Modalità Regista è stata aggiunta una nuova opzione — il Correttore di Tag. Inietta nel file esclusivamente il codice di lingua ISO di due lettere indicato dall'utente, senza applicare alcuna regola fonetica né pulizia. È uno strumento di emergenza nel caso in cui un file già pronto sia uscito con un tag di lingua errato o mancante.
 
-    Automatyczna konwersja .txt na .html w Trybie Tłumacza (ZMIANA)
-    Pliki tekstowe (.txt oraz .md) tłumaczone przez Tłumacza AI są teraz automatycznie zapisywane w formacie .html z wbudowanym tagiem językowym. Dzięki temu NVDA od razu odczytuje plik właściwym głosem — bez żadnych dodatkowych kroków ze strony użytkownika.
+    Conversione automatica da .txt a .html nella Modalità Traduttore (MODIFICA)
+    I file di testo (.txt e .md) tradotti dal Traduttore AI vengono ora salvati automaticamente in formato .html con un tag di lingua incorporato. In questo modo NVDA legge subito il file con la voce corretta — senza alcun passaggio aggiuntivo da parte dell'utente.
 
-    Inteligentne nazewnictwo pliku w Architekcie (ZMIANA)
-    Architekt Audiobooków nie zapisuje już wynikowego pliku zawsze pod tą samą nazwą architektura_gotowa.docx. Teraz nazwa wynika z pliku wejściowego — np. dla znieczulica.txt wynikowy plik to architektura_znieczulica.docx. Plik pojawia się w tym samym folderze co oryginał.
+    Denominazione intelligente del file nell'Architetto (MODIFICA)
+    L'Architetto degli Audiolibri non salva più il file risultante sempre con lo stesso nome architektura_gotowa.docx. Ora il nome deriva dal file di input — ad esempio, per znieczulica.txt il file risultante è architektura_znieczulica.docx. Il file appare nella stessa cartella dell'originale.
 
-    Funkcje zachowane bez zmian z wersji 8
+    Funzionalità mantenute senza modifiche dalla versione 8
 
-    Powrót do formatu .txt dla plików projektów (ZMIANA)
-    Pliki projektów i streszczenia zapisują się teraz w formacie .txt zamiast .md (Markdown). Eksperyment z formatem .md jako psychologiczną barierą przed edycją okazał się nieskuteczny — AI często notorycznie łamie zasadę anti-closure i często lepiej edytować plik na bieżąco i potem przeładowywać pamięć, by AI, w miarę możliwości, nie dostawało ukrytego przyzwolenia na łamanie zakazu. Format .txt jest bardziej intuicyjny i czytelny dla każdego.
+    Ritorno al formato .txt per i file di progetto (MODIFICA)
+    I file di progetto e i riassunti vengono ora salvati in formato .txt invece di .md (Markdown). L'esperimento con il formato .md come barriera psicologica contro la modifica si è rivelato inefficace — l'IA infrange spesso e notoriamente la regola anti-closure, ed è spesso meglio modificare il file al volo e poi ricaricare la memoria affinché l'IA, per quanto possibile, non riceva un permesso nascosto di violare il divieto. Il formato .txt è più intuitivo e leggibile per tutti.
 
-    Zasada Montażysty — nowe ostrzeżenie
-    W instrukcji (i w przyszłych wersjach interfejsu) dodano wyraźne ostrzeżenie wyjaśniające, co wolno, a czego nie wolno edytować w plikach projektów. Użytkownik ma pełne prawo do edycji dialogów i treści, ale absolutnie nie może modyfikować linii struktury (Akt, Scena, Rozdział, Prolog, Epilog) — ich uszkodzenie psuje nawigację NVDA, podział w ElevenLabs i spis treści w Wordzie.
+    Regola del Montatore — nuovo avviso
+    Nelle istruzioni (e nelle future versioni dell'interfaccia) è stato aggiunto un avviso chiaro che spiega cosa si può e cosa non si può modificare nei file di progetto. L'utente ha pieno diritto di modificare dialoghi e contenuti, ma non può assolutamente modificare le righe di struttura (Atto, Scena, Capitolo, Prologo, Epilogo) — il loro danneggiamento rovina la navigazione di NVDA, la suddivisione in ElevenLabs e l'indice in Word.
 
-    Zaktualizowany Prompt Architekta (ZMIANA)
-    Prompt do zewnętrznego chatbota (ChatGPT/Claude) został przeprojektowany. Zamiast zwracać surowy kod Markdown, AI teraz zwraca odpowiedź w dwóch wyraźnie oddzielonych częściach: Część 1 to Księga Świata zamknięta w bloku kodu Markdown (łatwa do skopiowania bez znaczników), a Część 2 to Rekomendacja Trybu jako zwykły tekst poza blokiem — doradza, czy lepiej użyć Trybu Surowego Skryptu, czy Trybu Tradycyjnego Audiobooka. Zmieniono też opis tagów postaci: zamiast "dźwiękowych" mowa teraz o akcencie i tonie głosu w tagu, np. [Speaker 1: Imię] - sepleni i akcent francuski.
+    Prompt dell'Architetto aggiornato (MODIFICA)
+    Il prompt per il chatbot esterno (ChatGPT/Claude) è stato riprogettato. Invece di restituire codice Markdown grezzo, l'IA ora restituisce la risposta in due parti chiaramente separate: la Parte 1 è il Libro del Mondo racchiuso in un blocco di codice Markdown (facile da copiare senza marcatori), e la Parte 2 è la Raccomandazione di Modalità come testo semplice fuori dal blocco — consiglia se sia meglio usare la Modalità Script Grezzo o la Modalità Audiobook Tradizionale. È stata cambiata anche la descrizione dei tag dei personaggi: invece di "sonori", ora si parla di accento e tono di voce nel tag, ad es. [Speaker 1: Nome] - blesa e accento francese.
 
-    Wyjaśnienie stanu dyrektywy Anti-Closure (DOKUMENTACJA)
-    Instrukcja zawiera teraz szczere wyjaśnienie, że mimo wbudowanych zakazów Anti-Closure model nadal notorycznie łamie tę zasadę, szczególnie w Trybie Audiobooka. Zamiast ukrywać ten problem, wersja 8 stawia sprawę jasno i przekazuje odpowiedzialność za "ręczne domykanie" z powrotem do Reżysera — stąd Zasada Montażysty jako oficjalne narzędzie pracy i powrót do zwykłego formatu tekstowego.
+    Spiegazione dello stato della direttiva Anti-Closure (DOCUMENTAZIONE)
+    Le istruzioni includono ora una spiegazione sincera del fatto che, nonostante i divieti Anti-Closure incorporati, il modello infrange ancora notoriamente questa regola, soprattutto nella Modalità Audiobook. Invece di nascondere questo problema, la versione 8 mette le cose in chiaro e restituisce la responsabilità della "chiusura manuale" al Regista — da qui la Regola del Montatore come strumento di lavoro ufficiale e il ritorno al normale formato testo.
 
-    Funkcje zachowane bez zmian z wersji 7
+    Funzionalità mantenute senza modifiche dalla versione 7
 
-    Prompty Showrunnerowe — Dyrektywa Anti-Closure (Reżyseria — wszystkie tryby)
-    Wszystkie trzy tryby Reżyserii zachowują wbudowane dyrektywy showrunnerowe. Burza Mózgów działa jak scenarzysta serialu wielosezonowego. Tryb Surowego Skryptu i Tryb Audiobooka mają zakaz kończenia tekstu podsumowaniami, morałami i klamrami narracyjnymi — z wyjątkiem sytuacji, gdy użytkownik wprost prosi o finał lub epilog.
+    Prompt Showrunner — Direttiva Anti-Closure (Regia — tutte le modalità)
+    Tutte e tre le modalità di Regia mantengono le direttive showrunner incorporate. Il Brainstorming agisce come uno sceneggiatore di una serie a più stagioni. La Modalità Script Grezzo e la Modalità Audiobook hanno il divieto di concludere il testo con riassunti, morali e chiusure narrative — tranne quando l'utente richiede esplicitamente un finale o un epilogo.
 
-    Zarządzanie Aktami i Scenami w czasie rzeczywistym (Reżyseria — Tryb Skryptu)
-    Tryb Surowego Skryptu posiada panel z przyciskami "Wstaw Akt X" i "Wstaw Scenę X". Liczniki aktualizują się automatycznie. Wczytanie istniejącego pliku ustawia oba liczniki na właściwe numery.
+    Gestione di Atti e Scene in tempo reale (Regia — Modalità Script)
+    La Modalità Script Grezzo dispone di un pannello con i pulsanti "Inserisci Atto X" e "Inserisci Scena X". I contatori si aggiornano automaticamente. Il caricamento di un file esistente imposta entrambi i contatori sui numeri corretti.
 
-    Czyszczenie nawiasowych didaskaliów reżyserskich (Poliglota — Tryb Reżysera)
-    Skrypt usuwa całe fragmenty tekstu ujęte w nawiasy okrągłe (np. "(szeptem)", "(z wplecionymi wdechami)"). ElevenLabs czyta wyłącznie dialogi i narrację.
+    Pulizia delle didascalie registiche tra parentesi (Poliglotta — Modalità Regista)
+    Lo script rimuove interi frammenti di testo racchiusi tra parentesi tonde (ad es. "(sussurrando)", "(con respiri intervallati)"). ElevenLabs legge esclusivamente dialoghi e narrazione.
 
-    Nieskończona Pamięć i Automatyczne Streszczowanie (Reżyseria — Akumulator Fabuły)
-    Gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, Burza Mózgów automatycznie generuje streszczenie fabuły i zapisuje je do pola Pamięci Długotrwałej. Kliknięcie "Zapisz Streszczenie (na stałe)" tworzy plik _streszczenie.txt. Po wyczyszczeniu pamięci i wczytaniu streszczenia można kontynuować historię bez żadnych ograniczeń długości.
+    Memoria Infinita e Riassunto Automatico (Regia — Accumulatore di Trama)
+    Quando l'indicatore di memoria entra nello stato di allarme rosso, il Brainstorming genera automaticamente un riassunto della trama e lo salva nel campo della Memoria a Lungo Termine. Cliccando "Salva Riassunto (in modo permanente)" si crea un file _streszczenie.txt. Dopo aver svuotato la memoria e caricato il riassunto, è possibile continuare la storia senza alcun limite di lunghezza.
 
-    Architekt Audiobooków
-    Narzędzie obsługuje słowa kluczowe Akt, Rozdział, Prolog, Epilog i Czołówka jako nagłówki pierwszego poziomu. Sceny zamieniają się w pogrubiony tekst. Skrypt automatycznie czyści tagi HTML i znaczniki Markdown przed przetworzeniem.
+    Architetto degli Audiolibri
+    Lo strumento supporta le parole chiave Atto, Capitolo, Prologo, Epilogo e Sigla come intestazioni di primo livello. Le scene vengono convertite in testo in grassetto. Lo script pulisce automaticamente i tag HTML e i marcatori Markdown prima dell'elaborazione.
 
-    Inteligentne Zarządzanie Rozdziałami (Tryb Audiobooka)
-    Dedykowany panel z przyciskami do wstawiania Prologu, Epilogów i cięć rozdziałów bezpośrednio z interfejsu. Licznik rozdziałów aktualizuje się automatycznie. Wczytanie istniejącego pliku ustawia licznik na właściwy numer bez ręcznego liczenia.
+    Gestione Intelligente dei Capitoli (Modalità Audiobook)
+    Un pannello dedicato con pulsanti per inserire Prologo, Epiloghi e tagli di capitolo direttamente dall'interfaccia. Il contatore dei capitoli si aggiorna automaticamente. Il caricamento di un file esistente imposta il contatore sul numero corretto senza conteggio manuale.
 
-    Nadawanie Tytułów Rozdziałom (Postprodukcja — Tryb Audiobooka)
-    Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki, literacki tytuł przy użyciu szybkiego modelu AI, analizując tylko początki każdego rozdziału.
+    Assegnazione dei Titoli ai Capitoli (Postproduzione — Modalità Audiobook)
+    Il modulo itera sui capitoli del file salvato e assegna loro un titolo breve e letterario utilizzando un modello AI veloce, analizzando solo l'inizio di ogni capitolo.
 
-    Usunięte funkcje (niezmienione od wersji 7)
+    Funzionalità rimosse (invariate dalla versione 7)
 
-    Mapa Cięć (Tryb Skryptu) — zastąpiona panelem zarządzania Aktami i Scenami w czasie rzeczywistym.
-    Adaptacja Skryptu na Audiobooka (Tryb Skryptu) — usunięta z powodów finansowych. Przepływ pracy generował trzy osobne koszty: generowanie skryptu, potencjalne streszczowanie przy przepełnieniu pamięci, a na końcu ponowne generowanie całości jako prozy audiobookowej. Zalecamy pisanie bezpośrednio w Trybie Tradycyjnego Audiobooka od samego początku.
+    Mappa dei Tagli (Modalità Script) — sostituita dal pannello di gestione di Atti e Scene in tempo reale.
+    Adattamento da Script ad Audiobook (Modalità Script) — rimosso per motivi finanziari. Il flusso di lavoro generava tre costi separati: la generazione dello script, l'eventuale riassunto in caso di overflow della memoria e, infine, la rigenerazione dell'intero testo come prosa da audiolibro. Consigliamo di scrivere direttamente nella Modalità Audiobook Tradizionale fin dall'inizio.
 
 
-    Funkcje z wersji 10.0 (zachowane bez zmian w wersjach 11.0 i 12.0)
+    Funzionalità della versione 10.0 (mantenute senza modifiche nelle versioni 11.0 e 12.0)
 
-    - Automatyczny generator pliku konfiguracyjnego golden_key.env wbudowany prosto w główny interfejs aplikacji. Użytkownik nie musi już ręcznie tworzyć pliku ani martwić się pułapką rozszerzenia .txt — wystarczy jeden klik przycisku dostępnego na ekranie startowym, a system tworzy czysty, gotowy plik we właściwym miejscu.
-    - Całkowite usunięcie przestarzałego skryptu napraw_api.bat, który nie jest już potrzebny. Problem, który ten skrypt rozwiązywał (błędne rozszerzenie pliku nadawane przez Notatnik), jest teraz całkowicie wyeliminowany dzięki wbudowanemu generatorowi.
-    - Wieloksiążkowość Księgi Świata — każdy projekt ma teraz własny plik lore (NOWOŚĆ). Dawniej istniał jeden, wspólny plik moje_lore.md, który był ładowany przy każdym uruchomieniu aplikacji — niezależnie od tego, nad którym projektem pracujesz. Od wersji 10 Księga Świata jest ściśle powiązana z nazwą pliku projektu: jeśli Twoja fabuła to skrypty/emilia_heist_audiobook.txt, to jej Księga to skrypty/emilia_heist_audiobook.md. Przycisk "Zapisz Księgę na stałe" jest wyszarzony, dopóki nie wpiszesz nazwy pliku — kolejność jest tu celowa i wymuszana przez interfejs. Kliknięcie "Wczytaj historię" automatycznie ładuje odpowiadający plik .md z dysku, o ile istnieje. Zmiana ma też praktyczny wymiar organizacyjny: możesz teraz prowadzić kilka projektów jednocześnie, a każdy będzie miał swoje własne, odizolowane zasady świata i listę postaci — bez ryzyka, że Emilia z napadu na skarbiec nagle wyląduje w kosmicznej operze.
+    - Generatore automatico del file di configurazione golden_key.env integrato direttamente nell'interfaccia principale dell'applicazione. L'utente non deve più creare manualmente il file né preoccuparsi della trappola dell'estensione .txt — basta un clic sul pulsante disponibile nella schermata iniziale e il sistema crea un file pulito e pronto nel posto giusto.
+    - Rimozione completa dell'obsoleto script napraw_api.bat, che non è più necessario. Il problema che questo script risolveva (estensione di file errata assegnata dal Blocco Note) è ora completamente eliminato grazie al generatore integrato.
+    - Multi-libro del Libro del Mondo — ogni progetto ha ora il proprio file di lore (NOVITÀ). In precedenza esisteva un unico file condiviso, moje_lore.md, che veniva caricato a ogni avvio dell'applicazione — indipendentemente dal progetto su cui stavi lavorando. Dalla versione 10 il Libro del Mondo è strettamente legato al nome del file di progetto: se la tua storia è skrypty/emilia_heist_audiobook.txt, il suo Libro è skrypty/emilia_heist_audiobook.md. Il pulsante "Salva Libro in modo permanente" è disattivato finché non inserisci il nome del file — l'ordine è intenzionale e imposto dall'interfaccia. Cliccando "Carica storia" si carica automaticamente il file .md corrispondente dal disco, se esiste. La modifica ha anche una dimensione organizzativa pratica: puoi ora gestire diversi progetti contemporaneamente, ognuno con le proprie regole del mondo isolate e la propria lista di personaggi — senza il rischio che Emilia del colpo alla cassaforte finisca all'improvviso in un'opera spaziale.
   changelog_11: |
     Nuove funzionalità e modifiche nella versione 11.0
 

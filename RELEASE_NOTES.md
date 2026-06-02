@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 15.5 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 15.5.1 „Wersja Wydawnicza"
+
+*Patch v15.5.1: sprzątanie długu świadomie odłożonego przy v15.5, dwa rozłączne fronty. (1) **Cichy dryf stanu w trybie Opowieści** — przycisk „Odśwież z dysku" (v15.5) wczytywał edytowaną narrację i uzgadniał kontekst LLM (`ostatnie_tury`), ale NIE re-derywował stanu strukturalnego w `.game.json` (lokacja, ekwipunek, wątki, postacie, liczniki tur i kinowych cięć). Ostrzeżenie w UI informowało o ryzyku, ale rozjazd narracja↔stan jest cichy i ujawnia się dopiero w kolejnych turach. Wierna re-derywacja wymagałaby ekstrakcji stanu przez dodatkowe zapytanie do LLM (koszt API, którego zwykły użytkownik nie oczekuje) — świadoma decyzja: przycisk `_btn_odswiez_z_dysku` zostaje **bezwarunkowo ukryty** (`Hide()`), handler pozostaje jako zaczątek przyszłej funkcji. „Otwórz plik narracji…" (sama edycja `.txt`, bez wsiąkania do silnika) działa bez zmian. Pełnoprawna edycja `.game.json` dla użytkowników technicznych — za świadomie zaszytą w kodzie flagą, domyślnie ukryta — planowana na v15.6 (NIE przez LLM). (2) **Polskie pozostałości w obcych manualach** świadomie odłożone przy poprzednich cyklach: pełne polskie sekcje `changelog_9` w trzech paczkach (fi/fr/it) plus wycieki onboardingu (it/`krok_2_klucz_api` i it/`nvda_a11y` w całości po polsku), osierocony blok „## Dostępne akcenty" + zdublowane opisy szyfrów w fi/`krok_5_akcenty_nvda` (przycięty do samego intro jak pl/en/de/es — właściwe fińskie opisy szyfrów są w `krok_5_tryb_szyfrant`) oraz drobiazg fi/`changelog_13` („Nowe"→„Uudet"). Przetłumaczone ręcznie z paralelą en/de/es; zachowane wierne literały, których kod hardkoduje po polsku (`TUTAJ_WKLEJ_SWOJ_KLUCZ` z `main.py`, `architektura_<nazwa>.docx` z `gui_konwerter.py`, `_streszczenie.txt`, `golden_key.env`, `moje_lore.md`, `napraw_api.bat`, `skrypty/` — CLAUDE.md wprost zakazuje tłumaczyć `skrypty/`). Przy okazji dwa izolowane „Księga Świata" w `changelog_11` es i fr → natywne „Libro del Mundo" / „Livre du Monde".*
 
 *Release v15.5: odświeżanie pamięci wewnętrznej z dysku w obu głównych modułach (Reżyser + Opowieści). Wykryta luka architektoniczna: udostępniliśmy ręczną edycję pliku narracji w edytorze („Otwórz plik narracji…"), ale po zapisaniu zmian nie było jak szybko zsynchronizować pamięci Pythona z dyskiem — przy krótkiej historii ratował twardy reset + ponowne wczytanie, przy długiej trzeba było generować streszczenie na nieaktualnych danych i poprawiać końcówkę w dwóch miejscach. Nowy przycisk „Odśwież z dysku" (komenda `/odswiez` w Opowieściach) domyka cykl „Otwórz → edytuj → Odśwież" jednym kliknięciem. Rekoncyliacja jest inteligentna: jeśli cała historia mieści się w oknie kontekstu — wczytuje ją w całości (a w Reżyserze kasuje zbędne stare streszczenie); jeśli jest długa i ma streszczenie — zachowuje streszczenie nietknięte i odtwarza tylko świeżą końcówkę liczoną od ostatniego nagłówka struktury (Rozdział/Akt/Scena, z guardem przed nagłówkiem bez treści; fallback do limitu znaków gdy brak markerów). To realnie domyka znaną od v15.2.3 lukę, w której wczytanie projektu ze streszczeniem dawało modelowi sam kondensat bez kontekstu ostatnich scen. Przy okazji: z promptu Burzy usunięto wymóg cytowania `[OSTATNIA SCENA]` (dosłownej kopii ostatnich akapitów do streszczenia) — odpowiedzialność za końcówkę przejął Python, więc obce manuale tracą nieaktualne już zdanie „AI dorzuca ostatnie akapity". Obowiązek „streszcz przed zakończeniem pracy" złagodzony w dokumentacji 9 języków na „streszczaj po naturalnym domknięciu sceny/aktu/rozdziału" — z utrzymanym wyjątkiem dla bardzo długich historii BEZ żadnych nagłówków (tam streszczenie nadal konieczne, inaczej fallback tnie po znakach).*
 
@@ -33,6 +35,44 @@
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
 
 ---
+
+## 15.5.1 — patch release (sprzątanie długu: cichy dryf stanu + polskie pozostałości w manualach)
+
+### TL;DR
+
+v15.5 dodała przycisk „Odśwież z dysku" zamykający cykl „Otwórz → edytuj → Odśwież" w trybie Opowieści. Świadomie odłożyliśmy wtedy jeden problem: rekoncyliacja uzgadnia kontekst LLM (`ostatnie_tury`), ale stan strukturalny gry w `.game.json` (lokacja, ekwipunek, wątki, aktywne postacie, licznik tur, liczniki kinowych cięć) NIE jest przeliczany ponownie. Ostrzeżenie w UI o tym mówiło, ale dryf między edytowaną narracją a stanem jest cichy — nie boli od razu, tylko w kolejnej turze, gdy model dostaje świat sprzed edycji.
+
+Wierne przeliczenie stanu z dowolnie zredagowanego tekstu nie jest deterministyczne — stan generuje LLM, więc jedyną rzetelną drogą byłoby dodatkowe zapytanie do modelu o ekstrakcję. To realny koszt API, którego zwykły użytkownik nie oczekuje (i który z czasem mógłby się zemścić zaskoczeniem na rachunku). Dlatego decyzja jest konserwatywna: dopóki nie ma bezpiecznego mechanizmu, **przycisk „Odśwież z dysku" zostaje ukryty**. Pełnoprawna, bezpośrednia edycja `.game.json` dla użytkowników technicznych przyjdzie w v15.6 — za flagą zaszytą w kodzie, domyślnie niewidoczna, bez udziału (i kosztu) LLM.
+
+Druga połowa patcha to czysto dokumentacyjne domknięcie starych polskich pozostałości w obcych manualach.
+
+### Co nowego
+
+- **Przycisk „Odśwież z dysku" (Opowieści) ukryty.** `_btn_odswiez_z_dysku.Hide()` przy tworzeniu; logika włączania w `_aktualizuj_uistate` zneutralizowana. „Otwórz plik narracji…" działa jak dawniej (edytuje tylko `.txt` dla TTS, nie wsiąka do silnika, więc nie tworzy dryfu stanu). Handler `_on_odswiez_z_dysku` pozostaje w kodzie jako zaczątek funkcji v15.6.
+- **fi/fr/it `changelog_9` → natywne tłumaczenia** całych bloków (po 65 linii), które dotąd były w 100% po polsku.
+- **it/`krok_2_klucz_api` i it/`nvda_a11y`** — całe sekcje onboardingu (konfiguracja klucza OpenAI, wskazówki NVDA) były po polsku → włoski; punkt 4 `nvda_a11y` zaadaptowany lokalizacyjnie („nome chiaro in italiano", „voce italiana") jak w de/es.
+- **fi/`krok_5_akcenty_nvda` przycięty do intro** — zawierał osierocony blok „## Dostępne akcenty" + zdublowane (i polskie) opisy szyfrów Odwracacz/Typoglikemia. pl/en/de/es mają tu samo intro; właściwe fińskie opisy szyfrów żyją w `krok_5_tryb_szyfrant`. Tłumaczenie duplikatu tylko mnożyłoby treść — usunięto.
+- **fi/`changelog_13`**: „Nowe ominaisuudet" → „Uudet ominaisuudet" (literówka kopii).
+- **es/fr `changelog_11`**: izolowane „Księga Świata" → „Libro del Mundo" / „Livre du Monde".
+
+### Pod maską
+
+- **Reguła wiernych literałów.** Część manuali (en/de/es, miejscami it/fr) lokalizowała stringi, które kod hardkoduje po polsku — placeholder `.env` `TUTAJ_WKLEJ_SWOJ_KLUCZ` (`main.py` zapisuje i sprawdza ten literał), prefiks pliku Architekta `architektura_<nazwa>.docx` (`gui_konwerter.py`), a en nawet `skrypty/`→`scripts/`. To znaczy, że manual opisuje napis, którego użytkownik nigdy nie zobaczy. W nowych tłumaczeniach trzymamy **wierne literały** (zgodnie z CLAUDE.md, które wprost wymienia `skrypty/` jako nietłumaczalny) — tłumaczymy wyłącznie prozę.
+- Bump `VERSION` 15.5 → 15.5.1; regeneracja `docs/manual.<iso>.txt` × 9, `docs/tales.<iso>.txt` × 9, `readme.<iso>.md` × 9 (większość plików to tylko podmiana numeru wersji w nagłówku; realne zmiany treści w manualach es/fi/fr/it).
+
+### Co nie weszło (świadomie odłożone na v15.6 / osobny cykl)
+
+- **Bezpośrednia edycja `.game.json`** dla użytkowników technicznych za flagą w kodzie (domyślnie ukryta) — następca ukrytego „Odśwież z dysku". NIE re-derywacja przez LLM (odrzucona z powodu kosztu API).
+- **Pełny review islandzkiego manuala (`is`)** — systemowo trzyma polskie nazwy narzędzi w prozie („(Reżyseria)", „(Poliglota)", „(Architekt Audiobooków)", „Reglustjóra", „Księga Świata"; is World Book = „Heimsbók"). To nie pojedynczy remnant, lecz konwencja całego pliku — wymaga osobnego, spójnego przejścia.
+- **Stała wersja w nagłówku fr/`manual.yaml`** („Reżyser Audio GPT 13.4") — drobny, pre-existing.
+- **Ujednolicenie polityki literałów** w całym korpusie (albo de-lokalizować doc en/de/es, albo zlokalizować literały w kodzie wraz z detekcją) — większy sweep.
+
+### Walidacja
+
+- `generuj_dokumentacje.py --waliduj` → Exit 0 (wszystkie placeholdery rozwinięte).
+- `changelog_9` = 65 linii w pl/it/fr/fi (treść 1:1, nic nie zgubione ani dodane).
+- 0 polskiej prozy (jednoznaczne stopwordy `się/oraz/że/...`) w fi/fr/it; 0 osieroconych nagłówków „## "; fi/`krok_5_akcenty_nvda` = 6 linii (równo z pl/en).
+- `gui_opowiesci.py` — test konstrukcji panelu bez `MainLoop()`: „Odśwież z dysku" ukryty, „Otwórz plik narracji" widoczny.
 
 ## 15.5 — minor release (motyw przewodni: odświeżanie pamięci wewnętrznej z dysku po ręcznej edycji narracji — Reżyser + Opowieści)
 

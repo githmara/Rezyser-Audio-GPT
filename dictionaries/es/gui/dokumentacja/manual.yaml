@@ -497,7 +497,7 @@ tresc:
     Funciones mantenidas sin cambios desde la versión 10
 
     - Generador automático de archivo golden_key.env integrado en la interfaz.
-    - Multilibro de la Księga Świata (cada proyecto tiene su propio archivo .md con reglas del mundo).
+    - Multilibro del Libro del Mundo (cada proyecto tiene su propio archivo .md con reglas del mundo).
     - Mecanismo resistente a fallos para reanudar la traducción (guardado en .jsonl).
     - Reparador de Tags en el Modo Director (inyección de código ISO).
   changelog_12: |

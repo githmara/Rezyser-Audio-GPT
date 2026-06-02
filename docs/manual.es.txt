@@ -1,4 +1,4 @@
-Manual del Director de Audio AI - Guía Completa (Versión 15.5 – Versión de Publicación)
+Manual del Director de Audio AI - Guía Completa (Versión 15.5.1 – Versión de Publicación)
 
 ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 
@@ -503,7 +503,7 @@ Nuevas funciones y cambios en la versión 11.0
 Funciones mantenidas sin cambios desde la versión 10
 
 - Generador automático de archivo golden_key.env integrado en la interfaz.
-- Multilibro de la Księga Świata (cada proyecto tiene su propio archivo .md con reglas del mundo).
+- Multilibro del Libro del Mundo (cada proyecto tiene su propio archivo .md con reglas del mundo).
 - Mecanismo resistente a fallos para reanudar la traducción (guardado en .jsonl).
 - Reparador de Tags en el Modo Director (inyección de código ISO).
 

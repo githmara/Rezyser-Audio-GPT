@@ -293,32 +293,6 @@ tresc:
     Akentit on suunniteltu 100-prosenttisesti paikallisille, ilmaisille ja maksullisille ruudunlukijoiden synteesiohjelmille — Vocalizer ja eSpeak NVDA:ssa. Tämä takaa vakauden ja ennustettavuuden vaikutuksen jokaisella tietokoneella.
 
     Miksi ei ElevenLabs? Testit pidemmillä asiakirjoilla osoittivat, että fonettinen tekstin vääristely moottoreissa, kuten ElevenLabs, ei pakota haluttua aksenttia — moottori yksinkertaisesti "arvaa" kielen ja tekee siitä pikemminkin länsi-/eteläslaavilaisen aksentin. Paikalliset NVDA-synteesiohjelmat ovat tässä suhteessa huomattavasti tottelevaisempia.
-
-    ## Dostępne akcenty
-
-    - Englanti (Samantha/Mark Vocalizerissa, Zira/Hazel OneCoressa)
-    - Puola (Ewa Vocalizerissa, Paulina OneCoressa)
-    - Italia (Alice/Luca Vocalizerissa, Elsa OneCoressa)
-    - Saksa (Stefan Vocalizerissa, Katja OneCoressa)
-    - Ranska (Thomas/Amelie Vocalizerissa, Julie OneCoressa)
-    - Espanja (Jorge/Monica Vocalizerissa, Helena OneCoressa)
-
-    ## Szyfr: Odwracacz tekstu
-
-    Odwracacz tekstu to prosty skrypt, który odwraca kolejność liter w zdaniu. Przed odwróceniem, skrypt rozwija pewne skróty, aby uniknąć fonetycznych nonsensów. Na przykład, skrót "esim." zostanie rozwinięty do "esimerkiksi", aby uniknąć nonsensu ".mise".
-
-    Obsługiwane skróty:
-    - "esim." → "esimerkiksi"
-    - "jne." → "ja niin edelleen"
-    - "ym." → "ynnä muuta"
-    - "ns." → "niin sanottu"
-    - "tms." → "tai muuta sellaista"
-
-    ## Szyfr: Typoglycemia
-
-    Typoglycemia to efekt, w którym tekst pozostaje czytelny, nawet jeśli litery w środku wyrazów są pomieszane, pod warunkiem, że pierwsza i ostatnia litera pozostają na swoim miejscu. Oto przykład:
-
-    "Voin lkeaä teskitä, josa kirjaimet ovat sekaisin, kunhan ensimäinen ja vika kirjan ovat oikeilla paikolla."
   krok_5_specyfika_tts: |
     Paikallisten synteesien erityispiirteet (TTS)
 
@@ -448,70 +422,70 @@ tresc:
 
     Jokaisella käyttöliittymän elementillä on selkeä suomenkielinen nimi — NVDA lukee sen, kun kohdistus siirtyy siihen. Välilehtijärjestys on looginen: työkalun kuvauksesta, konfigurointikenttien kautta, toimintopainikkeisiin. Ei yllätyksiä — näppäimistönavigointi toimii kuten missä tahansa muussa Windowsin alkuperäisessä ohjelmassa. Kaikki valikot ja painikkeet ovat suomeksi, ja NVDA lukee ne suomenkielisellä äänellä ilman lisäasetuksia.
   changelog_9: |
-    Ważne uwagi do wersji 9.0 / Changelog
+    Tärkeitä huomioita versioon 9.0 / Muutosloki
 
-    Nowe funkcje i zmiany w wersji 9
+    Uudet ominaisuudet ja muutokset versiossa 9
 
-    Odporny na awarie zapis postępu tłumaczenia (ZMIANA — naprawa krytycznego błędu)
-    W wersji 8 wznawianie przerwanego tłumaczenia było obarczone cichą, destrukcyjną pułapką: jeśli użytkownik zastosował się do instrukcji (ręczne wycięcie przetłumaczonego fragmentu), a potem od razu wznowił tłumaczenie reszty, aplikacja otwierała plik wyjściowy w trybie nadpisywania — bezpowrotnie i bezwiednie kasując cały opłacony postęp. W wersji 9 cały mechanizm został przeprojektowany. Każdy przetłumaczony blok jest teraz natychmiast zapisywany do pliku tymczasowego (.jsonl) z przypisanym indeksem. Wznowienie jest w pełni automatyczne — aplikacja sama wykrywa plik i odtwarza postęp bez żadnej ingerencji użytkownika. Po udanym zakończeniu plik tymczasowy jest automatycznie usuwany.
+    Kaatumisenkestävä käännöksen edistymisen tallennus (MUUTOS — kriittisen virheen korjaus)
+    Versiossa 8 keskeytetyn käännöksen jatkaminen sisälsi hiljaisen, tuhoavan ansan: jos käyttäjä noudatti ohjeita (leikkasi käsin pois jo käännetyn katkelman) ja jatkoi sitten heti lopun kääntämistä, sovellus avasi tulostiedoston ylikirjoitustilassa — pyyhkien peruuttamattomasti ja huomaamatta pois kaiken maksetun edistymisen. Versiossa 9 koko mekanismi on suunniteltu uudelleen. Jokainen käännetty lohko tallennetaan nyt välittömästi väliaikaistiedostoon (.jsonl) sille annetulla indeksillä. Jatkaminen on täysin automaattista — sovellus havaitsee tiedoston itse ja palauttaa edistymisen ilman käyttäjän väliintuloa. Onnistuneen valmistumisen jälkeen väliaikaistiedosto poistetaan automaattisesti.
 
-    Naprawiacz Tagów w Trybie Reżysera (NOWOŚĆ)
-    Do menu Trybu Reżysera dodano nową opcję — Naprawiacz Tagów. Wstrzykuje do pliku wyłącznie podany przez użytkownika dwuliterowy kod języka ISO, bez stosowania jakichkolwiek reguł fonetycznych ani czyszczenia. Narzędzie ratunkowe na wypadek, gdy gotowy już plik wyszedł z błędnym lub brakującym tagiem językowym.
+    Tagien korjaaja Ohjaajan tilassa (UUTUUS)
+    Ohjaajan tilan valikkoon on lisätty uusi vaihtoehto — Tagien korjaaja. Se injektoi tiedostoon ainoastaan käyttäjän antaman kaksikirjaimisen ISO-kielikoodin soveltamatta mitään foneettisia sääntöjä tai puhdistusta. Pelastustyökalu siltä varalta, että jo valmis tiedosto on tullut ulos väärällä tai puuttuvalla kielitägillä.
 
-    Automatyczna konwersja .txt na .html w Trybie Tłumacza (ZMIANA)
-    Pliki tekstowe (.txt oraz .md) tłumaczone przez Tłumacza AI są teraz automatycznie zapisywane w formacie .html z wbudowanym tagiem językowym. Dzięki temu NVDA od razu odczytuje plik właściwym głosem — bez żadnych dodatkowych kroków ze strony użytkownika.
+    Automaattinen .txt-tiedostojen muunnos .html-muotoon Kääntäjän tilassa (MUUTOS)
+    AI-kääntäjän kääntämät tekstitiedostot (.txt ja .md) tallennetaan nyt automaattisesti .html-muotoon sisäänrakennetulla kielitägillä. Näin NVDA lukee tiedoston heti oikealla äänellä — ilman käyttäjän lisätoimia.
 
-    Inteligentne nazewnictwo pliku w Architekcie (ZMIANA)
-    Architekt Audiobooków nie zapisuje już wynikowego pliku zawsze pod tą samą nazwą architektura_gotowa.docx. Teraz nazwa wynika z pliku wejściowego — np. dla znieczulica.txt wynikowy plik to architektura_znieczulica.docx. Plik pojawia się w tym samym folderze co oryginał.
+    Älykäs tiedoston nimeäminen Arkkitehdissä (MUUTOS)
+    Äänikirjojen arkkitehti ei tallenna enää tulostiedostoa aina samalla nimellä architektura_gotowa.docx. Nyt nimi johdetaan syöttötiedostosta — esim. tiedostolle znieczulica.txt tulostiedosto on architektura_znieczulica.docx. Tiedosto ilmestyy samaan kansioon kuin alkuperäinen.
 
-    Funkcje zachowane bez zmian z wersji 8
+    Versiosta 8 muuttumattomina säilyneet ominaisuudet
 
-    Powrót do formatu .txt dla plików projektów (ZMIANA)
-    Pliki projektów i streszczenia zapisują się teraz w formacie .txt zamiast .md (Markdown). Eksperyment z formatem .md jako psychologiczną barierą przed edycją okazał się nieskuteczny — AI często notorycznie łamie zasadę anti-closure i często lepiej edytować plik na bieżąco i potem przeładowywać pamięć, by AI, w miarę możliwości, nie dostawało ukrytego przyzwolenia na łamanie zakazu. Format .txt jest bardziej intuicyjny i czytelny dla każdego.
+    Paluu .txt-muotoon projektitiedostoissa (MUUTOS)
+    Projektitiedostot ja yhteenvedot tallennetaan nyt .txt-muotoon .md:n (Markdown) sijaan. Kokeilu .md-muodosta psykologisena esteenä muokkaamista vastaan osoittautui tehottomaksi — AI rikkoo usein ja toistuvasti anti-closure-sääntöä, ja usein on parempi muokata tiedostoa lennossa ja ladata sitten muisti uudelleen, jotta AI ei mahdollisuuksien mukaan saisi piilotettua lupaa rikkoa kieltoa. .txt-muoto on intuitiivisempi ja luettavampi kaikille.
 
-    Zasada Montażysty — nowe ostrzeżenie
-    W instrukcji (i w przyszłych wersjach interfejsu) dodano wyraźne ostrzeżenie wyjaśniające, co wolno, a czego nie wolno edytować w plikach projektów. Użytkownik ma pełne prawo do edycji dialogów i treści, ale absolutnie nie może modyfikować linii struktury (Akt, Scena, Rozdział, Prolog, Epilog) — ich uszkodzenie psuje nawigację NVDA, podział w ElevenLabs i spis treści w Wordzie.
+    Leikkaajan sääntö — uusi varoitus
+    Ohjeisiin (ja käyttöliittymän tuleviin versioihin) on lisätty selkeä varoitus, joka selittää, mitä projektitiedostoissa saa ja mitä ei saa muokata. Käyttäjällä on täysi oikeus muokata dialogeja ja sisältöä, mutta hän ei missään tapauksessa saa muokata rakennerivejä (Näytös, Kohtaus, Luku, Prologi, Epilogi) — niiden vahingoittaminen pilaa NVDA:n navigoinnin, jaon ElevenLabsissa ja sisällysluettelon Wordissa.
 
-    Zaktualizowany Prompt Architekta (ZMIANA)
-    Prompt do zewnętrznego chatbota (ChatGPT/Claude) został przeprojektowany. Zamiast zwracać surowy kod Markdown, AI teraz zwraca odpowiedź w dwóch wyraźnie oddzielonych częściach: Część 1 to Księga Świata zamknięta w bloku kodu Markdown (łatwa do skopiowania bez znaczników), a Część 2 to Rekomendacja Trybu jako zwykły tekst poza blokiem — doradza, czy lepiej użyć Trybu Surowego Skryptu, czy Trybu Tradycyjnego Audiobooka. Zmieniono też opis tagów postaci: zamiast "dźwiękowych" mowa teraz o akcencie i tonie głosu w tagu, np. [Speaker 1: Imię] - sepleni i akcent francuski.
+    Päivitetty Arkkitehdin prompti (MUUTOS)
+    Ulkoisen chatbotin (ChatGPT/Claude) prompti on suunniteltu uudelleen. Sen sijaan, että se palauttaisi raakaa Markdown-koodia, AI palauttaa nyt vastauksen kahdessa selkeästi erotetussa osassa: Osa 1 on Maailmankirja suljettuna Markdown-koodilohkoon (helppo kopioida ilman merkintöjä), ja Osa 2 on Tilasuositus tavallisena tekstinä lohkon ulkopuolella — se neuvoo, kannattaako käyttää Raakakäsikirjoitustilaa vai Perinteistä Äänikirjatilaa. Myös hahmotägien kuvaus on muutettu: "äänellisten" sijaan puhutaan nyt aksentista ja äänensävystä tägissä, esim. [Speaker 1: Nimi] - sammaltaa ja ranskalainen aksentti.
 
-    Wyjaśnienie stanu dyrektywy Anti-Closure (DOKUMENTACJA)
-    Instrukcja zawiera teraz szczere wyjaśnienie, że mimo wbudowanych zakazów Anti-Closure model nadal notorycznie łamie tę zasadę, szczególnie w Trybie Audiobooka. Zamiast ukrywać ten problem, wersja 8 stawia sprawę jasno i przekazuje odpowiedzialność za "ręczne domykanie" z powrotem do Reżysera — stąd Zasada Montażysty jako oficjalne narzędzie pracy i powrót do zwykłego formatu tekstowego.
+    Anti-Closure-direktiivin tilan selitys (DOKUMENTAATIO)
+    Ohjeet sisältävät nyt rehellisen selityksen siitä, että sisäänrakennetuista Anti-Closure-kielloista huolimatta malli rikkoo edelleen toistuvasti tätä sääntöä, erityisesti Äänikirjatilassa. Sen sijaan, että tämä ongelma piilotettaisiin, versio 8 sanoo asian suoraan ja palauttaa vastuun "manuaalisesta sulkemisesta" takaisin Ohjaajalle — tästä Leikkaajan sääntö virallisena työkaluna ja paluu tavalliseen tekstimuotoon.
 
-    Funkcje zachowane bez zmian z wersji 7
+    Versiosta 7 muuttumattomina säilyneet ominaisuudet
 
-    Prompty Showrunnerowe — Dyrektywa Anti-Closure (Reżyseria — wszystkie tryby)
-    Wszystkie trzy tryby Reżyserii zachowują wbudowane dyrektywy showrunnerowe. Burza Mózgów działa jak scenarzysta serialu wielosezonowego. Tryb Surowego Skryptu i Tryb Audiobooka mają zakaz kończenia tekstu podsumowaniami, morałami i klamrami narracyjnymi — z wyjątkiem sytuacji, gdy użytkownik wprost prosi o finał lub epilog.
+    Showrunner-promptit — Anti-Closure-direktiivi (Ohjaus — kaikki tilat)
+    Kaikki kolme Ohjaustilaa säilyttävät sisäänrakennetut showrunner-direktiivit. Aivoriihi toimii kuin monikautisen sarjan käsikirjoittaja. Raakakäsikirjoitustilassa ja Äänikirjatilassa on kielletty tekstin lopettaminen yhteenvedoilla, opetuksilla ja kerronnallisilla sulkemisilla — paitsi silloin, kun käyttäjä nimenomaisesti pyytää loppuhuipennusta tai epilogia.
 
-    Zarządzanie Aktami i Scenami w czasie rzeczywistym (Reżyseria — Tryb Skryptu)
-    Tryb Surowego Skryptu posiada panel z przyciskami "Wstaw Akt X" i "Wstaw Scenę X". Liczniki aktualizują się automatycznie. Wczytanie istniejącego pliku ustawia oba liczniki na właściwe numery.
+    Näytösten ja Kohtausten reaaliaikainen hallinta (Ohjaus — Käsikirjoitustila)
+    Raakakäsikirjoitustilassa on paneeli, jossa on painikkeet "Lisää Näytös X" ja "Lisää Kohtaus X". Laskurit päivittyvät automaattisesti. Olemassa olevan tiedoston lataaminen asettaa molemmat laskurit oikeisiin numeroihin.
 
-    Czyszczenie nawiasowych didaskaliów reżyserskich (Poliglota — Tryb Reżysera)
-    Skrypt usuwa całe fragmenty tekstu ujęte w nawiasy okrągłe (np. "(szeptem)", "(z wplecionymi wdechami)"). ElevenLabs czyta wyłącznie dialogi i narrację.
+    Sulkeissa olevien ohjauksellisten näyttämöohjeiden puhdistus (Polyglotti — Ohjaajan tila)
+    Skripti poistaa kokonaiset kaarisulkeisiin sijoitetut tekstinpätkät (esim. "(kuiskaten)", "(hengähdysten kera)"). ElevenLabs lukee vain dialogit ja kerronnan.
 
-    Nieskończona Pamięć i Automatyczne Streszczowanie (Reżyseria — Akumulator Fabuły)
-    Gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, Burza Mózgów automatycznie generuje streszczenie fabuły i zapisuje je do pola Pamięci Długotrwałej. Kliknięcie "Zapisz Streszczenie (na stałe)" tworzy plik _streszczenie.txt. Po wyczyszczeniu pamięci i wczytaniu streszczenia można kontynuować historię bez żadnych ograniczeń długości.
+    Ääretön Muisti ja Automaattinen Yhteenveto (Ohjaus — Juonen Akku)
+    Kun muisti-ilmaisin siirtyy punaisen hälytyksen tilaan, Aivoriihi luo automaattisesti juonen yhteenvedon ja tallentaa sen Pitkäkestoisen Muistin kenttään. Painikkeen "Tallenna Yhteenveto (pysyvästi)" napsauttaminen luo tiedoston _streszczenie.txt. Muistin tyhjentämisen ja yhteenvedon lataamisen jälkeen tarinaa voi jatkaa ilman pituusrajoituksia.
 
-    Architekt Audiobooków
-    Narzędzie obsługuje słowa kluczowe Akt, Rozdział, Prolog, Epilog i Czołówka jako nagłówki pierwszego poziomu. Sceny zamieniają się w pogrubiony tekst. Skrypt automatycznie czyści tagi HTML i znaczniki Markdown przed przetworzeniem.
+    Äänikirjojen arkkitehti
+    Työkalu tukee avainsanoja Näytös, Luku, Prologi, Epilogi ja Alkutekstit ensimmäisen tason otsikoina. Kohtaukset muuttuvat lihavoiduksi tekstiksi. Skripti puhdistaa automaattisesti HTML-tägit ja Markdown-merkinnät ennen käsittelyä.
 
-    Inteligentne Zarządzanie Rozdziałami (Tryb Audiobooka)
-    Dedykowany panel z przyciskami do wstawiania Prologu, Epilogów i cięć rozdziałów bezpośrednio z interfejsu. Licznik rozdziałów aktualizuje się automatycznie. Wczytanie istniejącego pliku ustawia licznik na właściwy numer bez ręcznego liczenia.
+    Älykäs Lukujen Hallinta (Äänikirjatila)
+    Oma paneeli, jossa on painikkeet Prologin, Epilogien ja lukuleikkausten lisäämiseen suoraan käyttöliittymästä. Lukulaskuri päivittyy automaattisesti. Olemassa olevan tiedoston lataaminen asettaa laskurin oikeaan numeroon ilman manuaalista laskemista.
 
-    Nadawanie Tytułów Rozdziałom (Postprodukcja — Tryb Audiobooka)
-    Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki, literacki tytuł przy użyciu szybkiego modelu AI, analizując tylko początki każdego rozdziału.
+    Lukujen Otsikointi (Jälkituotanto — Äänikirjatila)
+    Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen, kirjallisen otsikon nopean AI-mallin avulla analysoiden vain kunkin luvun alkuja.
 
-    Usunięte funkcje (niezmienione od wersji 7)
+    Poistetut ominaisuudet (muuttumattomia versiosta 7)
 
-    Mapa Cięć (Tryb Skryptu) — zastąpiona panelem zarządzania Aktami i Scenami w czasie rzeczywistym.
-    Adaptacja Skryptu na Audiobooka (Tryb Skryptu) — usunięta z powodów finansowych. Przepływ pracy generował trzy osobne koszty: generowanie skryptu, potencjalne streszczowanie przy przepełnieniu pamięci, a na końcu ponowne generowanie całości jako prozy audiobookowej. Zalecamy pisanie bezpośrednio w Trybie Tradycyjnego Audiobooka od samego początku.
+    Leikkauskartta (Käsikirjoitustila) — korvattu Näytösten ja Kohtausten reaaliaikaisella hallintapaneelilla.
+    Käsikirjoituksen muuntaminen Äänikirjaksi (Käsikirjoitustila) — poistettu taloudellisista syistä. Työnkulku aiheutti kolme erillistä kustannusta: käsikirjoituksen luominen, mahdollinen yhteenveto muistin täyttyessä ja lopuksi koko tekstin uudelleenluominen äänikirjaproosana. Suosittelemme kirjoittamaan suoraan Perinteisessä Äänikirjatilassa alusta alkaen.
 
 
-    Funkcje z wersji 10.0 (zachowane bez zmian w wersjach 11.0 i 12.0)
+    Version 10.0 ominaisuudet (säilytetty muuttumattomina versioissa 11.0 ja 12.0)
 
-    - Automatyczny generator pliku konfiguracyjnego golden_key.env wbudowany prosto w główny interfejs aplikacji. Użytkownik nie musi już ręcznie tworzyć pliku ani martwić się pułapką rozszerzenia .txt — wystarczy jeden klik przycisku dostępnego na ekranie startowym, a system tworzy czysty, gotowy plik we właściwym miejscu.
-    - Całkowite usunięcie przestarzałego skryptu napraw_api.bat, który nie jest już potrzebny. Problem, który ten skrypt rozwiązywał (błędne rozszerzenie pliku nadawane przez Notatnik), jest teraz całkowicie wyeliminowany dzięki wbudowanemu generatorowi.
-    - Wieloksiążkowość Księgi Świata — każdy projekt ma teraz własny plik lore (NOWOŚĆ). Dawniej istniał jeden, wspólny plik moje_lore.md, który był ładowany przy każdym uruchomieniu aplikacji — niezależnie od tego, nad którym projektem pracujesz. Od wersji 10 Księga Świata jest ściśle powiązana z nazwą pliku projektu: jeśli Twoja fabuła to skrypty/emilia_heist_audiobook.txt, to jej Księga to skrypty/emilia_heist_audiobook.md. Przycisk "Zapisz Księgę na stałe" jest wyszarzony, dopóki nie wpiszesz nazwy pliku — kolejność jest tu celowa i wymuszana przez interfejs. Kliknięcie "Wczytaj historię" automatycznie ładuje odpowiadający plik .md z dysku, o ile istnieje. Zmiana ma też praktyczny wymiar organizacyjny: możesz teraz prowadzić kilka projektów jednocześnie, a każdy będzie miał swoje własne, odizolowane zasady świata i listę postaci — bez ryzyka, że Emilia z napadu na skarbiec nagle wyląduje w kosmicznej operze.
+    - Automaattinen golden_key.env-konfiguraatiotiedoston generaattori, joka on rakennettu suoraan sovelluksen pääkäyttöliittymään. Käyttäjän ei tarvitse enää luoda tiedostoa käsin eikä huolehtia .txt-päätteen ansasta — riittää yksi napsautus aloitusnäytöllä olevasta painikkeesta, ja järjestelmä luo puhtaan, valmiin tiedoston oikeaan paikkaan.
+    - Vanhentuneen napraw_api.bat-skriptin täydellinen poisto, sillä sitä ei enää tarvita. Ongelma, jonka tämä skripti ratkaisi (Muistion antama väärä tiedostopääte), on nyt täysin eliminoitu sisäänrakennetun generaattorin ansiosta.
+    - Maailmankirjan monikirjaisuus — jokaisella projektilla on nyt oma lore-tiedostonsa (UUTUUS). Aiemmin oli yksi yhteinen tiedosto, moje_lore.md, joka ladattiin joka kerta sovelluksen käynnistyessä — riippumatta siitä, minkä projektin parissa työskentelit. Versiosta 10 lähtien Maailmankirja on tiukasti sidottu projektitiedoston nimeen: jos tarinasi on skrypty/emilia_heist_audiobook.txt, sen Kirja on skrypty/emilia_heist_audiobook.md. Painike "Tallenna Kirja pysyvästi" on harmaana, kunnes syötät tiedoston nimen — järjestys on tarkoituksellinen ja käyttöliittymän pakottama. Painikkeen "Lataa tarina" napsauttaminen lataa automaattisesti vastaavan .md-tiedoston levyltä, jos se on olemassa. Muutoksella on myös käytännöllinen organisatorinen ulottuvuus: voit nyt pitää useita projekteja käynnissä samanaikaisesti, ja jokaisella on omat eristetyt maailmansääntönsä ja hahmolistansa — ilman riskiä, että kassakaappiryöstön Emilia päätyisi yhtäkkiä avaruusoopperaan.
   changelog_11: |
     Uudet ominaisuudet ja muutokset versiossa 11.0
 
@@ -557,7 +531,7 @@ tresc:
     - Tagikorjaaja Ohjaajan tilassa (ISO-koodin injektointi).
     - Kaikki AI-toiminnot: Aivoriihi, Käsikirjoitus, Äänikirja, Juonen Akunlataus, Loputon Muisti, Otsikointi.
   changelog_13: |
-    Nowe ominaisuudet ja muutokset versiossa 13.0 — Release Candidate
+    Uudet ominaisuudet ja muutokset versiossa 13.0 — Release Candidate
 
     - Refaktorointi YAML:iin — aksentit, salakirjoitukset ja ohjaustilat tekstimuotoisissa tiedostoissa (ARKKITEHTUURINEN MUUTOS, suurin sitten wxPython-migraation). Versioon 12.0 asti kaikki foneettiset säännöt (aksentit) ja ohjaustilat (Myrsky, Käsikirjoitus, Äänikirja, otsikoiden jälkituotanto) olivat "kovakoodattuina" Python-koodiin vakioina, funktioina ja jäykkinä merkkijonoina, eikä koko salakirjoitusten/tekstileikkien kategoriaa ollut olemassa — ne tuodaan nyt refaktoroinnin 13.0 myötä. Versiossa 13.0 kaikki tämä sijaitsee .yaml-tiedostoissa uudessa `dictionaries/`-kansiossa — moottori (`core_poliglota.py`, `core_rezyser.py`, `przepisy_rezysera.py`) lataa ne dynaamisesti käynnistyksen yhteydessä. Käytännön vaikutus: uuden aksentin, uuden salakirjoituksen tai ohjaustilan järjestelmäkehotteen äänen muuttaminen ei vaadi Pythonin tuntemusta — riittää tekstieditori. Lyhyt kuvaus loppukäyttäjille löytyy `docs/dictionaries.pl.txt`-tiedostosta (liitetty julkaisupaketteihin); täydellinen tekninen dokumentaatio formaatista on `dictionaries/README.md`-tiedostossa (vain Git-repositoriossa, koska julkaisupaketit suodattavat .md-tiedostot).
 

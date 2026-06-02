@@ -487,70 +487,70 @@ tresc:
 
     Chaque élément de l'interface a un nom français lisible — NVDA le lira lorsqu'il sera focalisé. L'ordre de tabulation est logique : de la description de l'outil, en passant par les champs de configuration, jusqu'aux boutons d'action. Il n'y a pas de surprises ici — la navigation au clavier fonctionne comme dans n'importe quel autre programme natif Windows. Tous les menus et boutons sont en français et NVDA les lira avec une voix française sans aucun réglage supplémentaire.
   changelog_9: |
-    Ważne uwagi do wersji 9.0 / Changelog
+    Notes importantes pour la version 9.0 / Changelog
 
-    Nowe funkcje i zmiany w wersji 9
+    Nouvelles fonctionnalités et changements dans la version 9
 
-    Odporny na awarie zapis postępu tłumaczenia (ZMIANA — naprawa krytycznego buga)
-    W wersji 8 wznawianie przerwanego tłumaczenia było obarczone cichą, destrukcyjną pułapką: jeśli użytkownik zastosował się do instrukcji (ręczne wycięcie przetłumaczonego fragmentu), a potem od razu wznowił tłumaczenie reszty, aplikacja otwierała plik wyjściowy w trybie nadpisywania — bezpowrotnie i bezwiednie kasując cały opłacony postęp. W wersji 9 cały mechanizm został przeprojektowany. Każdy przetłumaczony blok jest teraz natychmiast zapisywany do pliku tymczasowego (.jsonl) z przypisanym indeksem. Wznowienie jest w pełni automatyczne — aplikacja sama wykrywa plik i odtwarza postęp bez żadnej ingerencji użytkownika. Po udanym zakończeniu plik tymczasowy jest automatycznie usuwany.
+    Sauvegarde de la progression de traduction résistante aux plantages (CHANGEMENT — correction d'un bug critique)
+    Dans la version 8, la reprise d'une traduction interrompue cachait un piège silencieux et destructeur : si l'utilisateur suivait les instructions (en découpant manuellement le fragment déjà traduit) puis reprenait immédiatement la traduction du reste, l'application ouvrait le fichier de sortie en mode écrasement — effaçant irrémédiablement et inconsciemment toute la progression payée. Dans la version 9, l'ensemble du mécanisme a été repensé. Chaque bloc traduit est désormais immédiatement enregistré dans un fichier temporaire (.jsonl) avec un index attribué. La reprise est entièrement automatique — l'application détecte elle-même le fichier et restaure la progression sans aucune intervention de l'utilisateur. Une fois l'opération terminée avec succès, le fichier temporaire est automatiquement supprimé.
 
-    Naprawiacz Tagów w Trybie Reżysera (NOWOŚĆ)
-    Do menu Trybu Reżysera dodano nową opcję — Naprawiacz Tagów. Wstrzykuje do pliku wyłącznie podany przez użytkownika dwuliterowy kod języka ISO, bez stosowania jakichkolwiek reguł fonetycznych ani czyszczenia. Narzędzie ratunkowe na wypadek, gdy gotowy już plik wyszedł z błędnym lub brakującym tagiem językowym.
+    Réparateur de Balises dans le Mode Réalisateur (NOUVEAUTÉ)
+    Une nouvelle option a été ajoutée au menu du Mode Réalisateur — le Réparateur de Balises. Il injecte dans le fichier uniquement le code de langue ISO à deux lettres indiqué par l'utilisateur, sans appliquer aucune règle phonétique ni nettoyage. C'est un outil de secours au cas où un fichier déjà prêt serait sorti avec une balise de langue incorrecte ou manquante.
 
-    Automatyczna konwersja .txt na .html w Trybie Tłumacza (ZMIANA)
-    Pliki tekstowe (.txt oraz .md) tłumaczone przez Tłumacza AI są teraz automatycznie zapisywane w formacie .html z wbudowanym tagiem językowym. Dzięki temu NVDA od razu odczytuje plik właściwym głosem — bez żadnych dodatkowych kroków ze strony użytkownika.
+    Conversion automatique de .txt en .html dans le Mode Traducteur (CHANGEMENT)
+    Les fichiers texte (.txt et .md) traduits par le Traducteur IA sont désormais automatiquement enregistrés au format .html avec une balise de langue intégrée. Ainsi, NVDA lit immédiatement le fichier avec la voix correcte — sans aucune étape supplémentaire de la part de l'utilisateur.
 
-    Inteligentne nazewnictwo pliku w Architekcie (ZMIANA)
-    Architekt Audiobooków nie zapisuje już wynikowego pliku zawsze pod tą samą nazwą architektura_gotowa.docx. Teraz nazwa wynika z pliku wejściowego — np. dla znieczulica.txt wynikowy plik to architektura_znieczulica.docx. Plik pojawia się w tym samym folderze co oryginał.
+    Nommage intelligent du fichier dans l'Architecte (CHANGEMENT)
+    L'Architecte des Livres Audio n'enregistre plus le fichier résultant toujours sous le même nom architektura_gotowa.docx. Désormais, le nom dérive du fichier d'entrée — par exemple, pour znieczulica.txt, le fichier résultant est architektura_znieczulica.docx. Le fichier apparaît dans le même dossier que l'original.
 
-    Funkcje zachowane bez zmian z wersji 8
+    Fonctionnalités conservées sans changement depuis la version 8
 
-    Powrót do formatu .txt dla plików projektów (ZMIANA)
-    Pliki projektów i streszczenia zapisują się teraz w formacie .txt zamiast .md (Markdown). Eksperyment z formatem .md jako psychologiczną barierą przed edycją okazał się nieskuteczny — AI często notorycznie łamie zasadę anti-closure i często lepiej edytować plik na bieżąco i potem przeładowywać pamięć, by AI, w miarę możliwości, nie dostawało ukrytego przyzwolenia na łamanie zakazu. Format .txt jest bardziej intuicyjny i czytelny dla każdego.
+    Retour au format .txt pour les fichiers de projet (CHANGEMENT)
+    Les fichiers de projet et les résumés sont désormais enregistrés au format .txt au lieu de .md (Markdown). L'expérience du format .md comme barrière psychologique contre la modification s'est révélée inefficace — l'IA enfreint souvent et notoirement la règle anti-closure, et il vaut souvent mieux modifier le fichier à la volée puis recharger la mémoire afin que l'IA, dans la mesure du possible, ne reçoive pas une permission cachée de violer l'interdiction. Le format .txt est plus intuitif et lisible pour tous.
 
-    Zasada Montażysty — nowe ostrzeżenie
-    W instrukcji (i w przyszłych wersjach interfejsu) dodano wyraźne ostrzeżenie wyjaśniające, co wolno, a czego nie wolno edytować w plikach projektów. Użytkownik ma pełne prawo do edycji dialogów i treści, ale absolutnie nie może modyfikować linii struktury (Akt, Scena, Rozdział, Prolog, Epilog) — ich uszkodzenie psuje nawigację NVDA, podział w ElevenLabs i spis treści w Wordzie.
+    Règle du Monteur — nouvel avertissement
+    Dans les instructions (et dans les futures versions de l'interface), un avertissement clair a été ajouté, expliquant ce qui peut et ne peut pas être modifié dans les fichiers de projet. L'utilisateur a pleinement le droit de modifier les dialogues et le contenu, mais ne peut absolument pas modifier les lignes de structure (Acte, Scène, Chapitre, Prologue, Épilogue) — leur détérioration perturbe la navigation NVDA, le découpage dans ElevenLabs et la table des matières dans Word.
 
-    Zaktualizowany Prompt Architekta (ZMIANA)
-    Prompt do zewnętrznego chatbota (ChatGPT/Claude) został przeprojektowany. Zamiast zwracać surowy kod Markdown, AI teraz zwraca odpowiedź w dwóch wyraźnie oddzielonych częściach: Część 1 to Księga Świata zamknięta w bloku kodu Markdown (łatwa do skopiowania bez znaczników), a Część 2 to Rekomendacja Trybu jako zwykły tekst poza blokiem — doradza, czy lepiej użyć Trybu Surowego Skryptu, czy Trybu Tradycyjnego Audiobooka. Zmieniono też opis tagów postaci: zamiast "dźwiękowych" mowa teraz o akcencie i tonie głosu w tagu, np. [Speaker 1: Imię] - sepleni i akcent francuski.
+    Prompt de l'Architecte mis à jour (CHANGEMENT)
+    Le prompt pour le chatbot externe (ChatGPT/Claude) a été repensé. Au lieu de renvoyer du code Markdown brut, l'IA renvoie maintenant la réponse en deux parties clairement séparées : la Partie 1 est le Livre du Monde enfermé dans un bloc de code Markdown (facile à copier sans les marqueurs), et la Partie 2 est la Recommandation de Mode sous forme de texte simple en dehors du bloc — elle conseille s'il vaut mieux utiliser le Mode Script Brut ou le Mode Audiobook Traditionnel. La description des balises de personnage a également été modifiée : au lieu de « sonores », on parle désormais de l'accent et du ton de la voix dans la balise, par ex. [Speaker 1: Nom] - zézaie et accent français.
 
-    Wyjaśnienie stanu dyrektywy Anti-Closure (DOKUMENTACJA)
-    Instrukcja zawiera teraz szczere wyjaśnienie, że mimo wbudowanych zakazów Anti-Closure model nadal notorycznie łamie tę zasadę, szczególnie w Trybie Audiobooka. Zamiast ukrywać ten problem, wersja 8 stawia sprawę jasno i przekazuje odpowiedzialność za "ręczne domykanie" z powrotem do Reżysera — stąd Zasada Montażysty jako oficjalne narzędzie pracy i powrót do zwykłego formatu tekstowego.
+    Explication du statut de la directive Anti-Closure (DOCUMENTATION)
+    Les instructions incluent désormais une explication franche du fait que, malgré les interdictions Anti-Closure intégrées, le modèle enfreint toujours notoirement cette règle, en particulier dans le Mode Audiobook. Au lieu de cacher ce problème, la version 8 met les choses au clair et renvoie la responsabilité de la « clôture manuelle » au Réalisateur — d'où la Règle du Monteur comme outil de travail officiel et le retour au format texte ordinaire.
 
-    Funkcje zachowane bez zmian z wersji 7
+    Fonctionnalités conservées sans changement depuis la version 7
 
-    Prompty Showrunnerowe — Dyrektywa Anti-Closure (Reżyseria — wszystkie tryby)
-    Wszystkie trzy tryby Reżyserii zachowują wbudowane dyrektywy showrunnerowe. Burza Mózgów działa jak scenarzysta serialu wielosezonowego. Tryb Surowego Skryptu i Tryb Audiobooka mają zakaz kończenia tekstu podsumowaniami, morałami i klamrami narracyjnymi — z wyjątkiem sytuacji, gdy użytkownik wprost prosi o finał lub epilog.
+    Prompts Showrunner — Directive Anti-Closure (Réalisation — tous les modes)
+    Les trois modes de Réalisation conservent les directives showrunner intégrées. Le Brainstorming agit comme un scénariste de série à plusieurs saisons. Le Mode Script Brut et le Mode Audiobook ont l'interdiction de terminer le texte par des résumés, des morales et des clôtures narratives — sauf lorsque l'utilisateur demande explicitement un final ou un épilogue.
 
-    Zarządzanie Aktami i Scenami w czasie rzeczywistym (Reżyseria — Tryb Skryptu)
-    Tryb Surowego Skryptu posiada panel z przyciskami "Wstaw Akt X" i "Wstaw Scenę X". Liczniki aktualizują się automatycznie. Wczytanie istniejącego pliku ustawia oba liczniki na właściwe numery.
+    Gestion des Actes et des Scènes en temps réel (Réalisation — Mode Script)
+    Le Mode Script Brut dispose d'un panneau avec les boutons « Insérer Acte X » et « Insérer Scène X ». Les compteurs se mettent à jour automatiquement. Le chargement d'un fichier existant règle les deux compteurs sur les bons numéros.
 
-    Czyszczenie nawiasowych didaskaliów reżyserskich (Poliglota — Tryb Reżysera)
-    Skrypt usuwa całe fragmenty tekstu ujęte w nawiasy okrągłe (np. "(szeptem)", "(z wplecionymi wdechami)"). ElevenLabs czyta wyłącznie dialogi i narrację.
+    Nettoyage des didascalies de mise en scène entre parenthèses (Polyglot — Mode Réalisateur)
+    Le script supprime des fragments de texte entiers placés entre parenthèses (par ex. « (en chuchotant) », « (avec des respirations entrecoupées) »). ElevenLabs ne lit que les dialogues et la narration.
 
-    Nieskończona Pamięć i Automatyczne Streszczowanie (Reżyseria — Akumulator Fabuły)
-    Gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, Burza Mózgów automatycznie generuje streszczenie fabuły i zapisuje je do pola Pamięci Długotrwałej. Kliknięcie "Zapisz Streszczenie (na stałe)" tworzy plik _streszczenie.txt. Po wyczyszczeniu pamięci i wczytaniu streszczenia można kontynuować historię bez żadnych ograniczeń długości.
+    Mémoire Infinie et Résumé Automatique (Réalisation — Accumulateur d'Intrigue)
+    Lorsque l'indicateur de mémoire passe en état d'alerte rouge, le Brainstorming génère automatiquement un résumé de l'intrigue et l'enregistre dans le champ de Mémoire à Long Terme. Cliquer sur « Enregistrer le Résumé (de façon permanente) » crée un fichier _streszczenie.txt. Après avoir vidé la mémoire et chargé le résumé, vous pouvez continuer l'histoire sans aucune restriction de longueur.
 
-    Architekt Audiobooków
-    Narzędzie obsługuje słowa kluczowe Akt, Rozdział, Prolog, Epilog i Czołówka jako nagłówki pierwszego poziomu. Sceny zamieniają się w pogrubiony tekst. Skrypt automatycznie czyści tagi HTML i znaczniki Markdown przed przetworzeniem.
+    Architecte des Livres Audio
+    L'outil prend en charge les mots-clés Acte, Chapitre, Prologue, Épilogue et Générique comme en-têtes de premier niveau. Les scènes sont converties en texte gras. Le script nettoie automatiquement les balises HTML et les marqueurs Markdown avant le traitement.
 
-    Inteligentne Zarządzanie Rozdziałami (Tryb Audiobooka)
-    Dedykowany panel z przyciskami do wstawiania Prologu, Epilogów i cięć rozdziałów bezpośrednio z interfejsu. Licznik rozdziałów aktualizuje się automatycznie. Wczytanie istniejącego pliku ustawia licznik na właściwy numer bez ręcznego liczenia.
+    Gestion Intelligente des Chapitres (Mode Audiobook)
+    Un panneau dédié avec des boutons pour insérer Prologue, Épilogues et coupes de chapitre directement depuis l'interface. Le compteur de chapitres se met à jour automatiquement. Le chargement d'un fichier existant règle le compteur sur le bon numéro sans comptage manuel.
 
-    Nadawanie Tytułów Rozdziałom (Postprodukcja — Tryb Audiobooka)
-    Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki, literacki tytuł przy użyciu szybkiego modelu AI, analizując tylko początki każdego rozdziału.
+    Attribution de Titres aux Chapitres (Postproduction — Mode Audiobook)
+    Le module parcourt les chapitres du fichier enregistré et leur attribue un titre court et littéraire à l'aide d'un modèle d'IA rapide, en analysant uniquement les débuts de chaque chapitre.
 
-    Usunięte funkcje (niezmienione od wersji 7)
+    Fonctionnalités supprimées (inchangées depuis la version 7)
 
-    Mapa Cięć (Tryb Skryptu) — zastąpiona panelem zarządzania Aktami i Scenami w czasie rzeczywistym.
-    Adaptacja Skryptu na Audiobooka (Tryb Skryptu) — usunięta z powodów finansowych. Przepływ pracy generował trzy osobne koszty: generowanie skryptu, potencjalne streszczowanie przy przepełnieniu pamięci, a na końcu ponowne generowanie całości jako prozy audiobookowej. Zalecamy pisanie bezpośrednio w Trybie Tradycyjnego Audiobooka od samego początku.
+    Carte des Coupes (Mode Script) — remplacée par le panneau de gestion des Actes et des Scènes en temps réel.
+    Adaptation du Script en Audiobook (Mode Script) — supprimée pour des raisons financières. Le flux de travail générait trois coûts distincts : la génération du script, le résumé éventuel en cas de dépassement de la mémoire et, enfin, la régénération de l'ensemble en prose d'audiolivre. Nous recommandons d'écrire directement en Mode Audiobook Traditionnel dès le départ.
 
 
-    Funkcje z wersji 10.0 (zachowane bez zmian w wersjach 11.0 i 12.0)
+    Fonctionnalités de la version 10.0 (conservées sans changement dans les versions 11.0 et 12.0)
 
-    - Automatyczny generator pliku konfiguracyjnego golden_key.env wbudowany prosto w główny interfejs aplikacji. Użytkownik nie musi już ręcznie tworzyć pliku ani martwić się pułapką rozszerzenia .txt — wystarczy jeden klik przycisku dostępnego na ekranie startowym, a system tworzy czysty, gotowy plik we właściwym miejscu.
-    - Całkowite usunięcie przestarzałego skryptu napraw_api.bat, który nie jest już potrzebny. Problem, który ten skrypt rozwiązywał (błędne rozszerzenie pliku nadawane przez Notatnik), jest teraz całkowicie wyeliminowany dzięki wbudowanemu generatorowi.
-    - Wieloksiążkowość Księgi Świata — każdy projekt ma teraz własny plik lore (NOWOŚĆ). Dawniej istniał jeden, wspólny plik moje_lore.md, który był ładowany przy każdym uruchomieniu aplikacji — niezależnie od tego, nad którym projektem pracujesz. Od wersji 10 Księga Świata jest ściśle powiązana z nazwą pliku projektu: jeśli Twoja fabuła to skrypty/emilia_heist_audiobook.txt, to jej Księga to skrypty/emilia_heist_audiobook.md. Przycisk "Zapisz Księgę na stałe" jest wyszarzony, dopóki nie wpiszesz nazwy pliku — kolejność jest tu celowa i wymuszana przez interfejs. Kliknięcie "Wczytaj historię" automatycznie ładuje odpowiadający plik .md z dysku, o ile istnieje. Zmiana ma też praktyczny wymiar organizacyjny: możesz teraz prowadzić kilka projektów jednocześnie, a każdy będzie miał swoje własne, odizolowane zasady świata i listę postaci — bez ryzyka, że Emilia z napadu na skarbiec nagle wyląduje w kosmicznej operze.
+    - Générateur automatique du fichier de configuration golden_key.env intégré directement dans l'interface principale de l'application. L'utilisateur n'a plus besoin de créer le fichier manuellement ni de se soucier du piège de l'extension .txt — un seul clic sur le bouton disponible sur l'écran d'accueil, et le système crée un fichier propre et prêt au bon endroit.
+    - Suppression complète du script obsolète napraw_api.bat, qui n'est plus nécessaire. Le problème que ce script résolvait (extension de fichier incorrecte attribuée par le Bloc-notes) est désormais totalement éliminé grâce au générateur intégré.
+    - Multi-livres du Livre du Monde — chaque projet possède désormais son propre fichier de lore (NOUVEAUTÉ). Auparavant, il existait un seul fichier partagé, moje_lore.md, qui était chargé à chaque lancement de l'application — quel que soit le projet sur lequel vous travailliez. Depuis la version 10, le Livre du Monde est étroitement lié au nom du fichier de projet : si votre histoire est skrypty/emilia_heist_audiobook.txt, son Livre est skrypty/emilia_heist_audiobook.md. Le bouton « Enregistrer le Livre de façon permanente » est grisé tant que vous n'avez pas saisi le nom du fichier — l'ordre est intentionnel et imposé par l'interface. Cliquer sur « Charger l'histoire » charge automatiquement le fichier .md correspondant depuis le disque, s'il existe. Le changement a aussi une dimension organisationnelle pratique : vous pouvez désormais mener plusieurs projets simultanément, chacun avec ses propres règles du monde isolées et sa propre liste de personnages — sans risquer qu'Emilia du casse du coffre-fort se retrouve soudain dans un opéra spatial.
   changelog_11: |
     Nouvelles fonctionnalités et changements dans la version 11.0
 
@@ -565,7 +565,7 @@ tresc:
     Fonctionnalités conservées sans changement depuis la version 10
 
     - Générateur automatique de fichier golden_key.env intégré dans l'interface.
-    - Multi-livre de la Księga Świata (chaque projet a son propre fichier .md avec les règles du monde).
+    - Multi-livre du Livre du Monde (chaque projet a son propre fichier .md avec les règles du monde).
     - Mécanisme de reprise de traduction résistant aux pannes (enregistrement en .jsonl).
     - Correcteur de Tags en Mode Réalisateur (injection de code ISO).
   changelog_12: |
