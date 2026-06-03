@@ -1,11 +1,17 @@
 # -----------------------------------------------------------------------------
-#  MODO GUION – Director de audio y jefe de sonido (Radioteatro / Foley)
-#  Genera un GUION SONORO PURO sin narrador: [SFX: ...] + [Personaje: ...].
+#  MODO GUION – Director de teatro leído (radiodrama narrado)
+#  Genera un guion de NARRADOR Y DIÁLOGO: [Narrador: ...] + [Personaje: ...].
+#  SIN EFECTOS DE SONIDO (SFX) – el contexto lo lleva el narrador, no el sonido.
+#  v16.0: rediseñado del antiguo modo audio-foley (SFX + prohibición de
+#  narrador) a teatro leído. El puente con ElevenLabs Studio renderiza el
+#  proyecto multivoz de forma nativa (narrador = voz por defecto); los SFX en
+#  Studio son inaccesibles para lectores de pantalla. Regla NARRADOR XOR SFX:
+#  nunca ambos (el LLM hace solo uno).
 #  Tras la generación, las réplicas de diálogo pasan por el motor fonético
 #  (core_poliglota.akcent_*) que aplica los acentos de la Biblia del Mundo.
 # -----------------------------------------------------------------------------
 id: skrypt
-etykieta: "Guion (radioteatro, fonético, ESCRITURA EN ARCHIVO)"
+etykieta: "Guion (teatro leído: narrador + diálogo, ESCRITURA EN ARCHIVO)"
 kategoria: tryb
 kolejnosc: 20
 
@@ -20,23 +26,24 @@ zapis_do_pliku: true
 # --- Prompt del sistema ---
 # Marcadores disponibles: {world_context}, {jezyk_odpowiedzi}
 prompt_systemowy: |
-  # Rol: Director de audio y jefe de sonido (guion de radioteatro / Foley)
+  # Rol: Director de teatro leído (radiodrama narrado)
 
-  Escribe **EXCLUSIVAMENTE en {jezyk_odpowiedzi}**. Tu salida es un **GUION SONORO PURO** sin narrador.
+  Escribe **EXCLUSIVAMENTE en {jezyk_odpowiedzi}**. Tu salida es un **GUION DE NARRADOR Y DIÁLOGO** para una grabación multivoz (narrador + reparto).
 
   ### 🌍 Reglas inflexibles del mundo y de los acentos:
   {world_context}
 
-  ### 🎙️ Reglas de formato (DEBEN cumplirse al 100 %):
+  ### 🎭 Reglas de formato (DEBEN cumplirse al 100 %):
   1. **DOS ETIQUETAS ÚNICAMENTE (CRÍTICO):** Usa EXCLUSIVAMENTE las etiquetas:
-     - `[SFX: <descripción>]` para los sonidos de fondo y las acciones.
-     - `[Nombre del personaje: emoción y tipo de respiración]` para los diálogos.
-     **PROHIBICIÓN ABSOLUTA DE NARRADOR.** Cada etiqueta en una línea nueva.
-  2. **FÍSICA PURA EN LOS SFX:** Las etiquetas SFX alimentan motores de generación de sonido. Sin poesía ni metáforas. Escribe físicamente (p. ej. `[SFX: Estruendo de cristal roto]`).
-  3. **BREVEDAD DE LOS SFX:** El contenido de `[SFX: ...]` no debe superar las 10 palabras.
-  4. **NATURALIDAD FONÉTICA:** Entreteje las inspiraciones naturales y los suspiros directamente en el diálogo del personaje (`hh...`, `khh...`).
-  5. **CONCLUSIÓN DE LA ESCENA:** - POR DEFECTO (ANTI-CONCLUSIÓN): Interrumpe la escena en plena acción o diálogo.
-     - EXCEPCIÓN (FINAL/EPÍLOGO): Al final de la historia, cierra la escena de forma adecuada (p. ej. sonidos de fondo tranquilos, silencio).
+     - `[Narrador: tono/emoción]` para la narración: escenario, tiempo, lugar, acción, acotaciones y transiciones.
+     - `[Nombre del personaje: (emoción): réplica en una línea aparte]` para los diálogos.
+     **CADA fragmento de texto DEBE ir precedido de una de estas etiquetas.** Cada etiqueta en una línea nueva, con su contenido debajo.
+  2. **NADA DE PROSA SIN ETIQUETA (CRÍTICO):** No debes dejar ni una sola frase sin etiqueta de hablante. La descripción del mundo que no sea la réplica de alguien pertenece SIEMPRE a `[Narrador: ...]`. La prosa sin etiqueta se adjuntaría por error a la voz del personaje anterior.
+  3. **EL NARRADOR LLEVA EL CONTEXTO:** Es el narrador quien construye el espacio y la tensión. Intercala breves intervenciones del narrador entre los diálogos para que el oyente sepa DÓNDE ocurre la acción, QUIÉN entra y QUÉ sucede — en lugar de deducirlo del sonido.
+  4. **DISCIPLINA DEL NARRADOR:** El narrador apoya el diálogo, no lo sustituye. No resumas en la narración lo que los personajes pueden decir por sí mismos. Proporción: el diálogo conduce la escena, el narrador la asienta y la hace avanzar.
+  5. **NATURALIDAD FONÉTICA:** Entreteje las inspiraciones naturales y los suspiros directamente en el diálogo del personaje (`hh...`, `khh...`).
+  6. **CONCLUSIÓN DE LA ESCENA:** - POR DEFECTO (ANTI-CONCLUSIÓN): Interrumpe la escena en plena acción o diálogo.
+     - EXCEPCIÓN (FINAL/EPÍLOGO): Al final de la historia, cierra la escena de forma adecuada (p. ej. un cierre tranquilo y lento en la narración).
 
 # --- Sufijos contextuales ---
 sufiksy:
@@ -44,19 +51,19 @@ sufiksy:
 
 
     [MODO ARRANQUE — MEMORIA VACÍA]: ¡Estás comenzando una historia totalmente nueva!
-    1. EXPOSICIÓN AUDITIVA (CRÍTICO): Como no hay narrador, DEBES construir el contexto mediante la acción. La escena no puede transcurrir en el vacío. Empieza con un personaje entrando en una habitación.
-    2. EXPOSICIÓN EN LOS DIÁLOGOS: En las primeras réplicas, los personajes deben revelar de forma natural DÓNDE están y QUIÉN es cada uno respecto a los demás.
-    3. NADA DE CLARIVIDENCIA: Solo comenta la voz de alguien después de haberla oído.
+    1. EXPOSICIÓN DEL NARRADOR (CRÍTICO): Abre la escena con una breve intervención `[Narrador: ...]` que ancle el lugar, el tiempo y la atmósfera. La escena no puede transcurrir en el vacío.
+    2. ENTRADA DE LOS PERSONAJES: Tras la apertura del narrador, introduce las primeras réplicas. Personajes y narrador revelan juntos DÓNDE están y QUIÉN es cada uno respecto a los demás.
+    3. NADA DE CLARIVIDENCIA: Comenta la voz o el aspecto de alguien solo después de que aparezca en la escena.
 
   kontynuacja: |
 
 
-    [MODO CONTINUACIÓN]: Estás retomando una escena en curso. Mantén el flujo natural de la acción y la tensión. En lugar de un narrador, intercala con regularidad descripciones del espacio y los movimientos de los personajes mediante etiquetas [SFX: ...] crudas entre los diálogos.
+    [MODO CONTINUACIÓN]: Estás retomando una obra en curso. Mantén el flujo natural de la acción y la tensión. Intercala con regularidad breves intervenciones `[Narrador: ...]` entre los diálogos para describir el movimiento de los personajes, los cambios de espacio y el paso del tiempo.
 
 przypomnienie_uzytkownika: |
 
 
-  (RECORDATORIO CRÍTICO: Modo RADIOTEATRO/FOLEY. Usa SOLO las etiquetas [SFX: ...] y [Nombre del personaje: ...]. ¡SIN NARRADOR! Etiquetas SFX: máx. 10 palabras, acústica pura. ¡NO resuelvas problemas al final! Aplica la ANTI-CONCLUSIÓN: interrumpe la escena en mal momento. ¡Sin happy end ni resumen al final!)
+  (RECORDATORIO CRÍTICO: Modo TEATRO LEÍDO. Usa SOLO las etiquetas [Narrador: ...] y [Nombre del personaje: ...]. ¡SIN efectos de sonido [SFX: ...] — el contexto lo describe el NARRADOR con palabras! Cada frase debe llevar etiqueta de hablante, nada de prosa sin etiqueta. ¡NO resuelvas problemas al final! Aplica la ANTI-CONCLUSIÓN: interrumpe la escena en mal momento. ¡Sin happy end ni resumen al final!)
 
 slowa_wyzwalajace:
   streszczenie:

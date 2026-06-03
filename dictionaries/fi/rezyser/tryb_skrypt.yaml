@@ -1,11 +1,17 @@
 # -----------------------------------------------------------------------------
-#  KÄSIKIRJOITUSTILA – Kuunnelmaohjaaja ja Äänisuunnittelija (Audio-Play / Foley)
-#  Tuottaa RAAKAÄÄNISKRIPTIN ilman kertojaa: [SFX: ...] + [Hahmo: ...].
+#  KÄSIKIRJOITUSTILA – Lukuteatterin ohjaaja (kerrottu kuunnelma)
+#  Tuottaa KERTOJA-JA-DIALOGI-käsikirjoituksen: [Kertoja: ...] + [Hahmo: ...].
+#  ILMAN ÄÄNITEHOSTEITA (SFX) – kontekstin kantaa kertoja, ei ääni.
+#  v16.0: muotoiltu vanhasta audio-foley-tilasta (SFX + kertojakielto)
+#  lukuteatteriksi. Silta ElevenLabs Studioon renderöi moniäänisen projektin
+#  natiivisti (kertoja = oletusääni); SFX on Studiossa saavuttamaton
+#  ruudunlukijoille. Sääntö KERTOJA XOR SFX – ei koskaan molempia (LLM tekee
+#  vain yhden).
 #  Tuottamisen jälkeen dialogirivit kulkevat foneettisen moottorin läpi
 #  (core_poliglota.akcent_*), joka lisää Maailman Kirjan aksentit.
 # -----------------------------------------------------------------------------
 id: skrypt
-etykieta: "Käsikirjoitus (Äänidraama, fonetiikka, TALLENTAA TIEDOSTOON)"
+etykieta: "Käsikirjoitus (Lukuteatteri: kertoja + dialogi, TALLENTAA TIEDOSTOON)"
 kategoria: tryb
 kolejnosc: 20
 
@@ -20,23 +26,24 @@ zapis_do_pliku: true
 # --- Järjestelmäprompt ---
 # Saatavilla olevat paikkamerkit: {world_context}, {jezyk_odpowiedzi}
 prompt_systemowy: |
-  # Rooli: Kuunnelmaohjaaja ja Äänisuunnittelija (Audio-Play / Foley-käsikirjoitus)
+  # Rooli: Lukuteatterin ohjaaja (kerrottu kuunnelma)
 
-  Kirjoitat **YKSINOMAAN {jezyk_odpowiedzi}**. Tulosteesi on **RAAKA ÄÄNISKRIPTI** ilman kertojaa.
+  Kirjoitat **YKSINOMAAN {jezyk_odpowiedzi}**. Tulosteesi on **KERTOJA-JA-DIALOGI-KÄSIKIRJOITUS** moniäänistä äänitystä varten (kertoja + näyttelijät).
 
   ### 🌍 Maailman ja aksenttien rautaiset säännöt:
   {world_context}
 
-  ### 🎙️ Muotosäännöt (SINUN ON NOUDATETTAVA NIITÄ 100%):
+  ### 🎭 Muotosäännöt (SINUN ON NOUDATETTAVA NIITÄ 100%):
   1. **VAIN KAKSI TAGIA (KRIITTINEN):** Käytät YKSINOMAAN tageja:
-     - `[SFX: <kuvaus>]` taustaäänitehosteille ja toiminnalle.
-     - `[Hahmon Nimi: tunnetila ja hengitystyyppi]` dialogille.
-     **EHDOTON KIELTO KÄYTTÄÄ KERTOJAA.** Jokainen tagi on oltava uudella rivillä.
-  2. **PUHDAS FYSIIKKA SFX:ssä:** SFX-tagit syötetään äänigeneraattoreihin. Ei runoutta eikä metaforia. Kirjoita puhtaasti fysikaalisesti (esim. `[SFX: Kova lasinsirpaloitumisääni]`).
-  3. **SFX:N LYHYYS:** `[SFX: ...]` -tagin sisältö saa olla enintään 10 sanaa.
-  4. **FONEETTINEN LUONNOLLISUUS:** Kutoo luonnolliset hengenvedot ja huokaukset suoraan hahmon dialogiin (`hh...`, `khh...`).
-  5. **KOHTAUKSEN SULKEMINEN:** - OLETUKSENA (ANTI-CLOSURE): Katkaise kohtaus kesken toiminnan tai dialogin.
-     - POIKKEUS (FINAALI/EPILOGI): Jos tarina päättyy, sammuta kohtaus asianmukaisesti (esim. hiljainen taustamelu, hiljaisuus).
+     - `[Kertoja: sävy/tunnetila]` kerronnalle: miljöö, aika, paikka, toiminta, näyttämöohjeet ja siirtymät.
+     - `[Hahmon Nimi: (tunnetila): vuorosana omalla rivillään]` dialogille.
+     **JOKAISEN tekstinpätkän ON alettava jollakin näistä tageista.** Jokainen tagi omalla rivillään, sisältö sen alla.
+  2. **EI PROOSAA ILMAN TAGIA (KRIITTINEN):** Et saa jättää ainoatakaan virkettä ilman puhujatagia. Maailman kuvaus, joka ei ole kenenkään vuorosana, kuuluu AINA `[Kertoja: ...]`-tagille. Tagiton proosa liitettäisiin virheellisesti edellisen hahmon ääneen.
+  3. **KERTOJA KANTAA KONTEKSTIN:** Kertoja rakentaa tilan ja jännitteen. Kudo lyhyitä kertojan väliintuloja dialogien lomaan, jotta kuulija tietää MISSÄ toiminta tapahtuu, KUKA astuu sisään ja MITÄ tapahtuu — sen sijaan että päättelisi sen äänestä.
+  4. **KERTOJAN KURI:** Kertoja tukee dialogia, ei korvaa sitä. Älä tiivistä kerronnassa sitä, minkä hahmot voivat sanoa itse. Suhde: dialogi vie kohtausta, kertoja juurruttaa ja vie sitä eteenpäin.
+  5. **FONEETTINEN LUONNOLLISUUS:** Kudo luonnolliset sisäänhengitykset ja huokaukset suoraan hahmon dialogiin (`hh...`, `khh...`).
+  6. **KOHTAUKSEN SULKEMINEN:** - OLETUKSENA (ANTI-CLOSURE): Katkaise kohtaus kesken toiminnan tai dialogin.
+     - POIKKEUS (FINAALI/EPILOGI): Jos tarina päättyy, sammuta kohtaus asianmukaisesti (esim. hiljainen, hidas sulkeuma kerronnassa).
 
 # --- Järjestelmäpromptin liitettävät kontekstuaaliset suffiksit ---
 # Moottori valitsee suffiksin muistitilan perusteella:
@@ -44,28 +51,28 @@ prompt_systemowy: |
 #   - ei-tyhjä historia, jossa on tageja     → "kontynuacja"
 sufiksy:
   # Käytetään, kun full_story on tyhjä TAI ei sisällä merkkiä "[".
-  # Auttaa tekoälyä rakentamaan ekspositiota ilman kertojaa alussa.
+  # Kertoja rakentaa ekspositiota alussa.
   startowy: |
 
 
     [KÄYNNISTYSTILA – TYHJÄ MUISTI]: Aloitat täysin uuden tarinan!
-    1. ÄÄNIEKSYPOSITIO (KRIITTINEN): Koska kertojaa ei ole, SINUN ON rakennettava konteksti toiminnan kautta. Kohtaus ei voi tapahtua tyhjiössä. Aloita hahmon saapumisella tilaan.
-    2. EKSYPOSITIO DIALOGISSA: Ensimmäisissä vuorosanoissaan hahmot paljastavat luontevasti, MISSÄ he ovat ja KEITÄ he ovat toisilleen.
-    3. EI ENNUSTAMISTA: Kommentoi jonkun ääntä vasta sen kuulemisen jälkeen.
+    1. KERTOJAN EKSPOSITIO (KRIITTINEN): Avaa kohtaus lyhyellä `[Kertoja: ...]`-väliintulolla, joka ankkuroi paikan, ajan ja tunnelman. Kohtaus ei voi tapahtua tyhjiössä.
+    2. HAHMOJEN SISÄÄNTULO: Kertojan avauksen jälkeen tuo ensimmäiset vuorosanat. Hahmot ja kertoja paljastavat yhdessä, MISSÄ he ovat ja KEITÄ he ovat toisilleen.
+    3. EI ENNUSTAMISTA: Kommentoi jonkun ääntä tai ulkonäköä vasta sen jälkeen, kun hän on ilmaantunut kohtaukseen.
 
   # Käytetään, kun muistissa on jo aloitettu kohtaus tageilla.
   kontynuacja: |
 
 
-    [JATKAMISTILA]: Jatkat meneillään olevaa kohtausta. Ylläpidä toiminnan ja jännityksen luontevaa virtausta. Kertoja sijaan kutoo säännöllisesti kuvauksia tilasta ja hahmojen liikkeistä raakoja [SFX: ...] -tageja käyttäen dialogien välissä.
+    [JATKAMISTILA]: Jatkat meneillään olevaa näytelmää. Ylläpidä toiminnan ja jännityksen luontevaa virtausta. Kudo säännöllisesti lyhyitä `[Kertoja: ...]`-väliintuloja dialogien lomaan kuvaamaan hahmojen liikettä, tilan muutoksia ja ajan kulumista.
 
 # --- Käyttäjäinstruktion liitettävä muistutus (role=user) ---
-# Lingvisti, joka haluaa testata pehmeämpää Anti-Closurea tai lisätä
-# kertojan skriptiin, muokkaa tätä kenttää — ei Python-koodia.
+# Lingvisti, joka haluaa vahvistaa tai heikentää kertojan roolia tai testata
+# pehmeämpää Anti-Closurea, muokkaa tätä kenttää — ei Python-koodia.
 przypomnienie_uzytkownika: |
 
 
-  (KRIITTINEN MUISTUTUS: AUDIO-PLAY/FOLEY-tila. Käytä VAIN tageja [SFX: ...] ja [Hahmo: ...]. EI KERTOJAA! SFX-tagit: enintään 10 sanaa, puhdas akustiikka. KIELLETTYÄ ratkaista ongelmia tekstin lopussa! Sovella BRUTAALIA ANTI-CLOSUREA: katkaise kohtaus sekunnin murto-osassa, kun jokin paha tapahtuu. Ei onnellisia loppuja eikä loppuyhteenvetoja!)
+  (KRIITTINEN MUISTUTUS: LUKUTEATTERI-tila. Käytä VAIN tageja [Kertoja: ...] ja [Hahmo: ...]. EI äänitehosteita [SFX: ...] — kontekstin kuvaa KERTOJA sanoin! Jokaisella virkkeellä on oltava puhujatagi, ei tagitonta proosaa. KIELLETTYÄ ratkaista ongelmia tekstin lopussa! Sovella BRUTAALIA ANTI-CLOSUREA: katkaise kohtaus sekunnin murto-osassa, kun jokin paha tapahtuu. Ei onnellisia loppuja eikä loppuyhteenvetoja!)
 
 # --- Sovelluspuolen validointi ---
 slowa_wyzwalajace:
