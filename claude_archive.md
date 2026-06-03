@@ -133,3 +133,1089 @@ Wybór ścieżki: zależy od natury issue. Czysta utrata danych / bug naprawiony
 Silnik aplikuje listę `zamiany:` SEKWENCYJNIE (każda reguła operuje na wyjściu poprzedniej, `str.replace`). Reguły, które wprowadzają literę używaną później jako wzorzec, mogą wpaść w pętlę nadpisań.
 
 Klasyczny przypadek przy źródle ES: `ñ → nj` ORAZ `j → <coś>` — jeśli `ñ → nj` idzie pierwsze, nowa „j" zostanie złapana przez `j → <coś>`. Reguła: najpierw `j → <substytut>`, potem `ñ → nj` i `ll → j`. Komentuj kolejność w pliku YAML, żeby przyszły reviewer nie zamienił.
+
+
+# =====================================================================
+# CMENTARZYSKO ROADMAP — zarchiwizowane pliki project_*.md (2026-06-03)
+# Przeniesione z memory/ podczas Wielkiego Sprzątania Kontekstu.
+# Wszystkie dotyczą wydań zamkniętych (13.7 → v16.0). Treść 1:1.
+# =====================================================================
+
+<!-- ===== ARCHIWUM: project_wersja_13_7.md ===== -->
+
+---
+name: Status projektu po release 13.7
+description: Informacja o stanie wdrożenia języków po wydaniu 13.7 (włoski). Który język jest następny w kolejce.
+type: project
+originSessionId: e81a86dd-1e5c-4832-b630-2f07e75f7d74
+---
+Wersja 13.7 (wydana 2026-05-06) — kompletna paczka włoska (`it`):
+- 6 szyfrów, 4 reżyserów, 8 akcentów fonetycznych
+- TODO_wielojezycznosc.md: włoski odznaczony ✅
+
+**Why:** Cykl jeden język = jeden release minor kontynuowany.
+
+**How to apply:** Następne w kolejce to języki z sekcji 3.2 TODO (fr, de, es) — te NIE mają gotowych regexów skrótowców z notebooka, trzeba je stworzyć od podstaw. Gdy TODO_wielojezycznosc.md zostanie wyczerpany (all done), następny release = 14.0, a plik można usunąć.
+
+<!-- ===== ARCHIWUM: project_wersja_13_8.md ===== -->
+
+---
+name: Status po 13.8.1 — Deutsch kompletny + alarm NVDA 2026.1
+description: Stan projektu po patch release 13.8.1 — paczka DE z 13.8 + dodany alarm dokumentacyjny dla użytkowników Vocalizera
+type: project
+originSessionId: 9064fdeb-cefb-4764-a70f-208189a80d9c
+---
+13.8.1 (2026-05-07): patch release — alarm dokumentacyjny w 7 manualach o tym, że NVDA 2026.1 łamie wszystkie dodatki Vocalizerowe (Python 3.13 + porzucenie 32-bitów wymaga rekompilacji .dll z głosami przez Tiflotecnia). Commity: e698fe0 (docs+szablony), 4792659 (release). Sekcja umieszczona po istniejącym akapicie o „API Breaking Changes / One Core Autolang", ścieżki ratunkowe: downgrade do 2025.x lub komercyjna paczka SAPI5 (np. A T Guys) z bezwzględnym wymogiem wybrania w NVDA syntezatora „SAPI5 — 32 bit", a NIE zwykłego „SAPI5".
+
+13.8 zamknięte (2026-05-06). Commity: 7b92a05 (manager), 5fac26f (docs), 760c015 (WIP DE), db330cd (docs DE), c3b8d75 (build), 904337c (release).
+
+**Why:** Dwa zadania równoległe: refaktor KreatorNowejRegulyDialog (i18n Cancel, ukryte ISO, dynamiczne etykiety) + pełna paczka Deutsch jako 7. język bazowy.
+
+**How to apply:** Następne języki: fr/es (brak regexów z notebooka — trzeba od zera). Wzorzec budowania: podstawy.yaml → szyfry → akcenty → odswiez_rezysera → gui/ui.yaml (buduj_wielojezyczne_ui.py) → docs (buduj_wielojezyczne_docs.py + ręczna korekta halucynacji) → generuj_dokumentacje --waliduj → release.
+
+**Uwagi DE:**
+- ß NIE jest w alfabet (ß.upper()=="SS" łamie Cezara) — obsłużone przez polskie_znaki
+- Autotłumacz docs (buduj_wielojezyczne_docs.py) nie poradził sobie z dictionaries.yaml DE — zostawił ~75% po polsku; konieczne ręczne pełne tłumaczenie
+- build_release.py: teraz auto-wykrywa języki przez zbierz_jezyki_bazowe() + INNO_LANG_MAP; `is` pomijany (brak .isl w Inno Setup)
+
+<!-- ===== ARCHIWUM: project_wersja_13_9.md ===== -->
+
+---
+name: Status 13.9-WIP — audyt A11y managera + rezyser/ jako kontrakt silnika
+description: Po commicie 8cc4800 — kreator naprawiony pod NVDA, _jezyk_kompletny wymaga rezyser/ ≥1, kontrakt silnika rozszerzony zanim padło 14.0
+type: project
+originSessionId: 38140e09-d08c-43e0-b0b5-3725bc2241d3
+---
+13.9-WIP (2026-05-09). Commity: cb2810c (build_release: weryfikacja zależności runtime/), 8cc4800 (audyt A11y managera), 41d082d (kolejność widgetów dla NVDA), 12f692f (audyt promptów — natywność + 3 nowe prompty), a9c8ce3 (prompty agentowe — luka architektoniczna), 17b2e7c (rozdziel TYP_AKCENT na 3 podtypy — luka semantyczna).
+
+**UWAGA wersjonowanie**: 13.9 nie jest wydane. Zgodnie z konwencją todo_wielojezycznosc numer minor wymaga pełnego wdrożenia języka — czysta sesja domknie fr (planowany 13.10) lub powiązany. Folder `dictionaries/fr/` zostawiony untracked po teście kreatora przez usera (do podjęcia w czystej sesji).
+
+**Co zrobione w audycie A11y (8cc4800 + 41d082d):**
+- A11y: WynikKreatoraDialog.naglowek dostał `name=` (NVDA czytało jako gołe „edit"); KreatorNowejRegulyDialog._lbl_id zachowany jako pole klasy i przełączany dynamicznie między „Identyfikator (nazwa pliku)" ↔ „Kod języka (ISO 639-1)".
+- Kontrakt silnika: `core_poliglota._jezyk_kompletny` wymaga teraz minimum 1 plik `*.yaml` w `rezyser/` (piąty warunek). Zaplanowane na 14.0+, ale wzorzec się ustabilizował po 7 paczkach (każda ma 4 pliki rezyser/).
+- Manager przy nowym języku tworzy 4 podfoldery (akcenty/, szyfry/, rezyser/, gui/) zamiast 3.
+- 2 nowe klucze i18n × 7 języków: `kreator_jezyk_bazowy_id_label`, `wynik_naglowek_name`.
+
+**Why:** Użytkownik NVDA zgłosił niezatytułowane pole edycji w managerze + brak rezyser/ przy tworzeniu języka oznaczał, że paczka „prawie gotowa" wymagała ręcznego mkdir w konsoli — w sprzeczności z duchem managera (klikalna obsługa bez Pythona).
+
+**How to apply:** Po dodaniu/usunięciu trybu w `rezyser/` lub akcentu w `akcenty/` ZAWSZE odpalaj `odswiez_rezysera.py` — aktualizuje dispatch `core_rezyser._AKCENT_FUNCS` + docstringi `core_poliglota.akcent_*`. Klauzula CLAUDE.md o „14.x reanaliza rezyser/" już nieaktualna — silnik wymaga rezyser/ od 13.9.
+
+**Co zrobione w audycie promptów (12f692f):**
+- Helpery natywności: `_NATYWNE_JEZYK_ODPOWIEDZI` (mapa 7 wdrożonych: PL→polsku, DE→Deutsch, IT→italiano, RU→по-русски, FI→suomeksi, IS→á íslensku, EN→English), `_NATYWNE_STRESZCZENIE` (4 słowa per język), `_NATYWNA_NAZWA_JEZYKA` (endonim, też FR→Français, ES→Español dla planowanych).
+- prompt_jezyk_bazowy: dodana sekcja slowo_akcent (kontrakt 13.3+, wszystkie 7 paczek go ma), tabela natywnych etykiet, wymóg natywnych komentarzy, aktualna info o 4 podfolderach.
+- prompt_akcent: zasada bazy reaguje dynamicznie na jezyk_bazowy (DE bazą Umlauty+ASCII, RU cyrylica), wzorzec `dictionaries/<jezyk_bazowy>/akcenty/<>.yaml`.
+- 3 nowe prompty: prompt_szyfr_zamiany, prompt_tryb_rezysera, prompt_postprodukcja — wcześniej te typy zwracały tylko SZABLON, teraz SZABLON_I_PROMPT.
+- Szablony parametryzowane jezyk_bazowy: jezyk_odpowiedzi/streszczenie z mapy, markery `<UZUPEŁNIJ NATYWNIE>` owinięte apostrofami (żeby YAML się parsował).
+- Wszystkie 20 kombinacji typ × jezyk weryfikowanych yaml.safe_load.
+
+**Co zrobione w refaktorze agentowym (a9c8ce3):**
+- Wszystkie 6 promptów (jezyk_bazowy, akcent, szyfr_zamiany, tryb_rezysera, postprodukcja, szyfr_algorytm) przepisane na format ROLA → KONTEKST PROJEKTU → ZADANIE → PLIKI REFERENCYJNE (ścieżki do Read, nie wbudowane YAML-y) → WYMAGANIA → PROCEDURA (Write + Bash z yaml.safe_load + odswiez_rezysera.py).
+- Plik schudł z ~1170 do ~660 linii (-510): wycięliśmy ~500 linii literalnych przykładów YAML, dodaliśmy struktualne sekcje ROLA/KONTEKST. Tradeoff: prompt zakłada że AI ma dostęp do projektu (Claude Code, Cursor, Aider), nie zwykły chatbot.
+- Helper _PACZKI_WDROZONE + _paczki_referencyjne(jezyk_bazowy) zwraca listę wdrożonych paczek bez paczki bazowej zadania.
+- uwagi: w zbuduj_wynik + i18n (wynik_lbl_prompt, wynik_skopiowano_tresc × 7 języków) kierują do „agenta AI z dostępem do projektu" zamiast „ChatGPT/Claude".
+
+**Why luka architektoniczna**: Stary tekst „użytkownik wklei plik" nie skaluje się: chatboty mają limit tokenów na odpowiedź (podstawy.yaml z 70+ par diakrytyków łatwo go przekracza), nie obsługują wielu plików o tej samej nazwie (`podstawy.yaml` × 7 paczek), a komunikat „skopiuj prompt do AI" nie pasował do realnego workflow (user pracuje z agentem mającym Read/Write/Bash).
+
+**Co zrobione w rozdzieleniu typów akcentów (17b2e7c):**
+- Każda paczka ma 11 plików w `akcenty/` w 3 kategoriach silnika: 8× `kategoria: akcent` (fonetyczne cross-language), 2× `kategoria: oczyszczenie`, 1× `kategoria: naprawiacz`. Manager dotąd traktował wszystkie jako fonetyczne — naprawiacz_tagow w paczce FR generował absurdalny prompt o transliteracji „Français → fr".
+- Stałe: TYP_AKCENT (fonetyczny), TYP_AKCENT_OCZYSZCZENIE, TYP_AKCENT_NAPRAWIACZ.
+- Szablon oczyszczenie: heurystyka `bez_liczb` w id → normalizuj_liczby: false.
+- Szablon naprawiacz: iso="", kategoria: naprawiacz, wszystko OFF.
+- Prompty oczyszczenie/naprawiacz: „skopiuj wzorzec z wdrożonej paczki + przetłumacz tekstowe pola" (struktura plików identyczna we wszystkich 7 paczkach).
+- prompt_akcent fonetyczny: WALIDACJA SCENARIUSZA — agent przerywa jeśli iso==jezyk_bazowy lub iso pusty.
+- gui_manager_regul._zgadnij_typ_z_zaznaczenia: rozpoznaje podtyp po prefiksie nazwy (oczyszczenie* / naprawiacz_*).
+
+**Następne (czysta sesja):** fr — z gotowymi promptami audytu wystarczy:
+1. Kreator → "Nowy język bazowy" → wpisz `fr`, etykieta `Français`, tworzy folder + szablon + prompt z natywnymi instrukcjami.
+2. Skopiuj prompt do AI → otrzymasz `podstawy.yaml` po francusku (etykieta `Français – fondements phonétiques`, slowo_akcent natywne, lingua FRENCH, alfabet z œ/ç/à/é/è/ê/î/ô/ù/û/ÿ).
+3. Akcenty: prompt akcentowy odwoła się do `dictionaries/fr/...` jako wzorca (po wdrożeniu istniejącego). Szyfry: prompt szyfrowy generuje natywne komentarze.
+4. Tryby Reżysera: kopia z pl/rezyser/ + prompt tłumaczy prompt_systemowy/streszczenie na francuski.
+5. Manager Reguł nie wymaga zmian — to ostatnia ramka audytu spięta z A11y w 13.9.
+
+Wzorzec budowania bez zmian: podstawy.yaml → szyfry → akcenty → odswiez_rezysera → tryby → gui/ui.yaml → docs → generuj_dokumentacje --waliduj → release.
+
+<!-- ===== ARCHIWUM: project_v15_opowiesci.md ===== -->
+
+---
+name: v15.0 — drugi główny tryb (Opowieści): Faza 4 ukończona, Faza 5 następna
+description: Plan 6 faz wdrożenia interaktywnej fikcji II-osobowej + locked decyzje + stan gałęzi v15.0-opowiesci (5 commitów, slash-komendy + tiktoken + cinematic warning)
+type: project
+originSessionId: 4d150f40-d397-4350-8c47-d201fddcd602
+---
+
+## STAN AKTUALNY (2026-05-10)
+
+- **Gałąź:** `v15.0-opowiesci` (11 commitów, working tree clean, **tag `v15.0` na commicie `37c1cb1`**, gotowe do push + PR do main).
+- **Commity:** 11 — `13dab14` (housekeeping) + `35909c5` (Faza 1 GUI) + `b2d3491` (Faza 2 silnik LLM) + `7b325ba` (Faza 3 lifecycle plików) + `03ff4f9` (Faza 4 slash + tiktoken + cinematic) + `3607c8c` (Faza 5a YAML PL + Quick Start PL) + `0f64ab5` (Faza 5d UI batch 8 języków) + `7827720` (Faza 5e manuał + docs 8 języków) + `747d10b` (docs 15.0: wzmianka o piątym module w 9 manualach + bump nagłówków) + `b7b56c1` (release: VERSION 15.0 + RELEASE_NOTES) + `37c1cb1` (release polish: wykluczenia paczki runtime/opowiesci + widget Ostatnia tura + TODO v15.1 z real testów). Tag `v15.0` przesunięty z `b7b56c1` na `37c1cb1` przed pushem (tag był wyłącznie lokalny).
+- **Working tree:** czysty.
+- **Pliki referencyjne** w `notatki_dev/` (instrukcje_modelu.md + tales_mechanics.md, GPT-style "Tales of Consequence"). Folder wykluczony z release przez `build_release.py::IGNOROWANE_FOLDERY` + `installer.iss::Excludes`. **Nie usuwać** — to specyfikacja źródłowa.
+
+## ZATWIERDZONE DECYZJE ARCHITEKTONICZNE
+
+- **Triada modułowa** (wzorzec Reżysera): `gui_opowiesci.py` + `core_opowiesci.py` + `opowiesci_ai.py`. Zakładka w głównym oknie (swap-pattern `_switch_tool` w `main.py`), NIE `wx.Notebook` (mimo że user mówi "notes" kolokwialnie — taka jest istniejąca architektura).
+- **Numeracja `.mode` ciągła z Reżyserem**: 0=Burza (też nasze `/visualize`), 1=Reżyser tryb 1, 2=Reżyser tryb 2, **3=Swobodny, 4=Wyborów, 5=Mniejsze zło**. Plain text 1 cyfra w `runtime/skrypty/[gra].mode` (tak jak `core_rezyser.py:499`).
+- **Lifecycle plików (5 ścieżek):**
+  - `skrypty/[gra].txt` — append narracji, BEZ meta-warningów (helper `czysc_meta_warningi()`)
+  - `skrypty/[gra].md` — księga świata, idempotentny rebuild z `postacie_aktywne[]` w formacie `[Imię: cechy]` zgodnym z parserem `core_rezyser.py:199`. **Output Opowieści = wejście Reżysera** (kluczowy bridge międzymodułowy)
+  - `runtime/opowiesci/[gra].game.json` — pełny stan (overwrite)
+  - `runtime/opowiesci/[gra].story.jsonl` — append-only log surowych tur (request+response JSON)
+  - `runtime/skrypty/[gra].mode` — tryb 3/4/5
+- **JSON-schema response** (wzorzec `buduj_wielojezyczne_ui.py:373` z `response_format={"type": "json_object"}`):
+  ```json
+  {"narracja": "...", "wybory": [{"id": "A", "tekst": "..."}], "postacie_aktywne": [{"imie": "...", "cechy": "..."}], "stan": {"lokacja": "...", "ekwipunek_zmiany": [], "watki_otwarte": []}, "meta": {"etap_luku": "ekspozycja", "powod_wyborow": "..."}}
+  ```
+- **Modele**: domyślnie `gpt-4o-mini` (Standard), opcjonalnie `gpt-4o` (Quality) z `/ustawienia`.
+- **Cinematic Meta Warning**: po **150 turach** (próg trigger'owany przez Python licznik), treść generuje LLM. NIE zapisywany do `.txt` — `czysc_meta_warningi()` wycina `⚠️🚨⚠️.*?⚠️🚨⚠️` przed appendem.
+- **`/visualize` = tryb 0/Burza** — multisensoryczny opis sceny do GUI, BEZ zapisu do plików.
+- **Brak `/undo`** (chaos kontekstu).
+- **Slash-komendy** parsowane lokalnie bez API. Lokalizowane per język w `dictionaries/<kod>/gui/ui.yaml::opowiesci.komendy` + EN-fallback ZAWSZE aktywny dla wszystkich języków.
+- **Wybory** ekstrachowane z JSON jako dynamiczne `wx.Button` w `_sizer_wyborow` (A11y-first).
+- **Auto-streszczenie** kontekstu na ~70% okna tokenów (`tiktoken`); LLM streszcza, Python decyduje kiedy.
+- **Integracja silników** szyfrów/akcentów: LLM emituje `postacie_aktywne[]` z cechami → my budujemy `.md` lokalnie. Halucynacje szyfrów eliminowane (Python szyfruje przez `core_poliglota`, LLM tylko proponuje który szyfr/akcent).
+
+## MODEL ODPOWIEDZIALNOŚCI Python ↔ LLM
+
+- **Python**: liczniki (tury, tokeny), stan (ekwipunek/postacie z `.game.json`), walidacja struct (`jsonschema`), trigger Cinematic Warning (próg 150), trigger streszczenia (próg 70%), cięcie meta z `.txt`.
+- **LLM**: kreatywność (narracja, wybory 3-5, treść Cinematic Warning, streszczenie), proponowanie akcentów/szyfrów per postać.
+- **Wzorzec retry**: każda halucynacja struktury → re-prompt max 2× → soft error (`wx.MessageBox`). Każda halucynacja faktów → wstrzykujemy `.game.json` jako system message przy każdej turze.
+
+## PLAN 6 FAZ — STATUS
+
+| # | Faza | Status |
+|---|---|---|
+| **1** | Szkielet GUI + i18n stub | ✅ **DONE** (commit `35909c5`) |
+| **2** | Silnik LLM + JSON-schema | ✅ **DONE** (commit `b2d3491`) |
+| **3** | Engine + lifecycle plików | ✅ **DONE** (commit `7b325ba`) |
+| **4** | Slash-komendy + wskaźnik pamięci modelu | ✅ **DONE** (commit `03ff4f9`) |
+| **5a** | YAML-izacja promptów PL + Quick Start PL | ✅ **DONE** (commit `3607c8c`) |
+| **5b** | Prompty 8 języków RĘCZNIE | open (odłożone — patrz poniżej) |
+| **5c** | Quick Start zaczatki 8 języków RĘCZNIE | open (odłożone — patrz poniżej) |
+| **5d** | UI batch translation 8 języków | ✅ **DONE** (commit `0f64ab5`) |
+| **5e** | Manuał PL + autotłumacz docs 8 języków | ✅ **DONE** (commit `7827720`) |
+| **6** | Release v15.0 (bump 14.x → 15.0 + tag) | ✅ **DONE** (commits `747d10b` + `b7b56c1`, tag `v15.0`) |
+
+## CO ZAWIERA FAZA 1 (commit `35909c5`)
+
+**Pliki:**
+- `gui_opowiesci.py` (332 linii, NOWY) — klasa `OpowiesciPanel(wx.Panel)` z 7 blokami A-G:
+  - A: nagłówek (heading + description multiline readonly)
+  - B: pasek pliku gry (`_txt_nazwa_gry` + `_btn_nowa_gra`/`_btn_wczytaj`/`_btn_zapisz`)
+  - C: RadioBox trybu `_rb_tryb` (3 wybory: swobodny/wyborów/mniejsze zło)
+  - D: wskaźnik pamięci modelu (`_gauge_pamiec` + `_lbl_pamiec_status` — placeholder Faza 4)
+  - E: obszar narracji `_txt_narracja` (TE_MULTILINE | TE_READONLY | TE_BESTWRAP)
+  - F: obszar wyborów (`_lbl_wybory` + `_panel_wyborow` + `_sizer_wyborow` + `_lbl_placeholder_wyborow`) — **schowany domyślnie** przez `_aktywuj_obszar_wyborow(False)` w `__init__`
+  - G: pole akcji (`_txt_akcja` + `_btn_wyslij`)
+- `dictionaries/pl/gui/ui.yaml` (+74 linii) — 5 wpisów w `main.*` (menu/menu_status/btn/tooltip/nazwy_narzedzi) + pełna sekcja `opowiesci.*` z 39 kluczami
+- `main.py` (+25 linii) — `ID_TOOL_OPOWIESCI`, import `OpowiesciPanel`, menu Append (Ctrl+5, akcelerator `&O`), btn 📖, MoveBeforeInTabOrder, 2× Bind, dispatcher w `_switch_tool` (`elif name == n_opowiesci`), mapping w `_update_button_states`, handler `_on_opowiesci`
+
+**Wszystkie callbacki** w `gui_opowiesci.py` → `_on_placeholder` (`wx.MessageBox` z komunikatem „Funkcja jeszcze niedostępna"). Faza 2/3/4 podmieniają.
+
+**Krytyczne A11y rzeczy już zrobione:**
+- Narracja `READONLY + MULTILINE` (NVDA tylko czyta)
+- Obszar wyborów `Hide()` w Fazie 1 — Tab/NVDA pominie
+- Akceleratory `&` na różnych polskich literach (N/W/Z/M/W/s/y)
+- Logiczna kolejność tabulacji: nazwa gry → tryb → narracja → wybory (ukryte) → pole akcji → Wyślij
+
+**Helper kluczowy dla Fazy 2:**
+```python
+def _aktywuj_obszar_wyborow(self, visible: bool) -> None:
+    """Pokazuje/ukrywa label + panel wyborów. Hide() pomija w tabulacji."""
+    self._lbl_wybory.Show(visible)
+    self._panel_wyborow.Show(visible)
+    self.Layout()
+```
+
+## CO ZAWIERA FAZA 2 (commit `b2d3491`)
+
+**Pliki:**
+- `opowiesci_ai.py` (~330 linii, NOWY) — silnik LLM + JSON-schema:
+  - **Stałe trybów**: `TRYB_BURZA=0`, `TRYB_SWOBODNY=3`, `TRYB_WYBOROW=4`, `TRYB_MNIEJSZE_ZLO=5`
+  - **`SCHEMA_TURA`** dict — egzekwowane PRZEZ `response_format={"type": "json_object"}` (gwarancja składni JSON) ORAZ `jsonschema.validate()` (gwarancja typów + obecności wymaganych pól)
+  - **`@dataclass SnapshotOpowiesci`**: nazwa_gry, numer_tury, ostatnie_tury (lista par akcja/narracja_skrót), postacie_aktywne, stan_poprzedni, seed_swiata, jezyk_projektu
+  - **`@dataclass WynikTury`**: narracja, wybory, postacie_aktywne, stan, meta + `surowy_json` (do logu `.story.jsonl` w Fazie 3)
+  - **`inicjalizuj_klienta(app_dir)`** → `OpenAI | None` (wzorzec `gui_rezyser:232-245`, ale jako wolna funkcja — modułu da się testować izolowane)
+  - **`generuj_ture(klient, snapshot, user_input, tryb, model)`** → `WynikTury` z retry max 2× przy `JSONDecodeError`/`ValidationError`, każdy retry dokleja system message z poprzednim błędem jako wskazówką (self-correction wzorzec)
+  - **`wygeneruj_wizualizacje(...)`** → `str` dla `/visualize` — bez schemy, krótszy timeout (60s), niższy `max_tokens` (1000)
+  - Prompt systemowy: hardkodowany PL stub (`_PROMPT_BAZA` + `_PROMPT_TRYB_3/4/5`); Faza 5 przeniesie do `dictionaries/<kod>/opowiesci/przepisy/*.yaml`
+
+- `gui_opowiesci.py` (+~250 linii) — Faza 2 podpina silnik:
+  - Konstruktor: `_client`, `_api_dostepne`, `_snapshot: SnapshotOpowiesci`, `_worker_thread` + `_init_api()`
+  - `_MAPA_TRYB_RB_NA_INT = (3, 4, 5)` — odwzorowanie indeksu RadioBox-a na numer trybu w `.mode`
+  - `_on_wyslij(event)`: walidacja (klucz API / niepuste pole / niepusta nazwa) → mutacja snapshotu (numer_tury+1) → spawn daemon thread
+  - `_wyslij_worker(snapshot, user_input, tryb)`: woła `oai.generuj_ture()`, wynik/błąd przez `wx.CallAfter`
+  - `_obsluz_ture(wynik, user_input, tryb)`: AppendText narracji z nagłówkiem `--- Tura N ---`, FIFO snapshotu (ostatnie 6 par), `_przeladuj_wybory(...)`, `wx.Bell()` + focus na narrację
+  - `_przeladuj_wybory(wybory, tryb)`: kasuje stare przyciski, tworzy nowe `wx.Button` z `lambda evt, t_wyb=...: ...` (closure default arg uniknia late-binding gotcha), wywołuje `Layout()` na panelu i panelu rodzica PRZED `_aktywuj_obszar_wyborow(visible)`
+  - `_obsluz_blad(exc)`: mapuje `RateLimitError`/`APITimeoutError`/heurystyka „niewłaściwą strukturę" → klucze i18n; długi błąd → dialog z `TextCtrl(TE_READONLY)` (NVDA czyta, user kopiuje)
+  - **Reguły trybów dla wyborów** (potwierdzone testami):
+    - tryb 3 (Swobodny) → ZAWSZE `_aktywuj_obszar_wyborow(False)`, nawet jeśli LLM zwrócił sugestie
+    - tryb 4/5 → `True` tylko jeśli `len(wybory) > 0`; pusta tablica = halucynacja → ukrywamy
+
+- `dictionaries/pl/gui/ui.yaml` (+19 kluczy) — `tura_naglowek_format`, `brak_api_*`, `puste_pole_*`, `puste_nazwa_*`, `status_wysylanie/gotowe/blad`, `btn_wybor_tooltip_format`, `blad_ai_*` (×5), `err_rate_limit/timeout/struktura`
+
+- `requirements.txt` — dodane `jsonschema`
+
+**Test izolowany (bez `MainLoop`, 10 asercji wszystkie zielone):**
+1. Import modułu, walidacja `SCHEMA_TURA` na dummy payload, snapshot, prompt, klient (`golden_key.env` na dysku)
+2. 19 nowych kluczy i18n dostępnych przez `t()`
+3. `OpowiesciPanel` instancjuje się + ma wszystkie atrybuty Fazy 2
+4. `_btn_wyslij` wpięty w `_on_wyslij` (nie placeholder)
+5. `_aktualny_tryb_int` mapuje 0/1/2 → 3/4/5
+6. Po init: obszar wyborów schowany (A11y)
+7. `_przeladuj_wybory(tryb=4, 3wybory)` → 3 wx.Button + obszar widoczny
+8. `_przeladuj_wybory(tryb=3, 1wybor)` → ukryte (Swobodny zawsze)
+9. `_przeladuj_wybory(tryb=4, [])` → ukryte (halucynacja safe)
+
+## CO ZAWIERA FAZA 3 (commit `7b325ba`)
+
+**Pliki:**
+- `core_opowiesci.py` (~270 linii, NOWY) — `ProjektOpowiesci` (analog `ProjektRezysera`):
+  - Atrybuty: `app_dir`, `nazwa_pliku`, `full_story`, `postacie_aktywne`, `stan`, `tryb`, `jezyk_projektu`, `seed_swiata`, `numer_tury`, `ostatnie_tury`
+  - 5 helper-properties: `_sciezka_txt` (`skrypty/<n>.txt`), `_sciezka_md` (`skrypty/<n>.md`), `_sciezka_game_json` (`runtime/opowiesci/<n>.game.json`), `_sciezka_story_jsonl` (`runtime/opowiesci/<n>.story.jsonl`), `_sciezka_mode` (`runtime/skrypty/<n>.mode` — wspólne z Reżyserem)
+  - **`czysc_meta_warningi(tekst)`** — `re.DOTALL`, regex `⚠️🚨⚠️.*?⚠️🚨⚠️` (Faza 4 wprowadzi treść, ale filter już działa)
+  - **`dopisz_do_txt(narracja, naglowek="")`** — append + meta-cleanse, mkdir parents
+  - **`rebuild_ksiega_swiata()`** — idempotentny rebuild MD z `postacie_aktywne[]` w formacie `[Imię: cechy]`. Nagłówek pliku używa `(Imię: cechy)` z OKRĄGŁYMI nawiasami, żeby parser Reżysera (`core_rezyser.py:199`, regex `r"\[([^:\]\-]+).*?\]"`) nie złapał komentarza jako fałszywej postaci. **To kluczowy bridge Opowieści → Reżyser** zweryfikowany testem (parser znalazł tylko prawdziwe „Strażnik" i „Czarodziej").
+  - **`zapisz_game_json()`** — overwrite, JSON dump (ensure_ascii=False, indent=2). Schema: `nazwa_gry/tryb/jezyk_projektu/seed_swiata/numer_tury/postacie_aktywne/stan/ostatnie_tury`. NIE zapisuje `full_story` (żyje w `.txt` — jeden plik, jedna prawda).
+  - **`dopisz_story_jsonl(payload)`** — append-only, jedna linia per tura, każda samodzielnym JSON-em (tolerancyjne na ucięcie pliku w połowie linii)
+  - **`zapisz_tryb(tryb_int)`** — plain text 1 cyfra; cichy fail przy I/O error; ignoruje wartości spoza `(3, 4, 5)`
+  - **`wczytaj(nazwa) -> WynikWczytaniaOpowiesci`** — hardenowane: `dane.get(klucz, default)` per pole, tolerancja braku pól dla forward-compat; brak `.game.json` → `FileNotFoundError`
+  - **`istnieje(nazwa, app_dir)`** — staticmethod, sprawdza `.game.json` (NIE `.txt`, bo `.txt` może być z Reżysera — kolizja nazw)
+  - `WynikWczytaniaOpowiesci` (@dataclass): `nazwa`, `czy_game_json`, `czy_narracja`, `czy_story_jsonl`, `saved_mode`, `numer_tury`, `liczba_znakow_narracji`
+
+- `gui_opowiesci.py` (+~200 linii):
+  - W `__init__`: `self._projekt: ProjektOpowiesci | None = None`; po `_init_api()` wywołanie `_aktualizuj_uistate()` (disabled `_btn_wyslij`/`_btn_zapisz` przed założeniem gry)
+  - `_bind_events`: wszystkie przyciski mają realne handlery (`_on_nowa_gra`/`_on_wczytaj`/`_on_zapisz`/`_on_wyslij`)
+  - W `_on_wyslij` PRZESUNIĘTA walidacja nazwy → `_on_nowa_gra` (tutaj sprawdzamy `_projekt is None` → MessageBox „brak_gry")
+  - **`_on_nowa_gra`**: walidacja nazwy → `ProjektOpowiesci.istnieje()` → confirmation `YES_NO` → tworzy projekt, `zapisz_tryb` + `zapisz_game_json` + `rebuild_ksiega_swiata` (.txt powstaje pierwszą turą), reset `_snapshot`, narracja → `nowa_gra_zaczatek`, `_aktualizuj_uistate`, focus na `_txt_akcja`
+  - **`_on_wczytaj`**: `wx.FileDialog` filtrowany na `runtime/opowiesci/*.game.json` → `projekt.wczytaj(nazwa)` → sync `_snapshot` + `_txt_nazwa_gry` + `_txt_narracja` + `_ustaw_rb_z_trybu(saved_mode lub projekt.tryb)`, `_aktywuj_obszar_wyborow(False)` (ostatnie wybory się utraciły, force free-text)
+  - **`_on_zapisz`**: walidacja `_projekt is None` → `zapisz_game_json` + `zapisz_tryb` + MessageBox
+  - **`_zsynchronizuj_projekt_z_wynikiem(wynik, user_input, tryb, naglowek)`** — wydzielone z `_obsluz_ture`, można testować bez wxPython:
+    ```python
+    projekt.numer_tury = snapshot.numer_tury
+    projekt.tryb = tryb
+    projekt.postacie_aktywne = wynik.postacie_aktywne
+    projekt.stan = wynik.stan
+    projekt.ostatnie_tury = list(snapshot.ostatnie_tury)
+    projekt.dopisz_do_txt(wynik.narracja, naglowek=naglowek)
+    projekt.rebuild_ksiega_swiata()
+    projekt.zapisz_game_json()
+    projekt.dopisz_story_jsonl({"tura", "akcja_gracza", "tryb", "response_json"})
+    ```
+  - `_aktualizuj_uistate()` — `_btn_wyslij/Zapisz.Enable(_projekt is not None)` (analog `gui_rezyser._refresh_ui_state`)
+  - `_ustaw_rb_z_trybu(int)` — odwrotne mapowanie 3/4/5 → indeks RadioBox-a 0/1/2
+
+- `dictionaries/pl/gui/ui.yaml` (+16 kluczy): `brak_gry_*`, `gra_istnieje_*` (confirmation), `gra_nowa_*`, `gra_wczytana_*`, `gra_zapisana_*`, `nowa_gra_zaczatek` (placeholder narracji), `brak_narracji_info`, `dlg_wczytaj_tytul/filtr`, `blad_zapisu_tresc`, `blad_wczytania_tresc`
+
+**Test izolowany core_opowiesci (12 asercji wszystkie zielone):**
+- `istnieje()` False przed zapisem, True po
+- `czysc_meta_warningi()` wycina wielolinijkowe ostrzeżenie, zachowuje narrację
+- 5 plików powstaje z prawidłową zawartością (txt + md + game.json + story.jsonl + mode)
+- Format `.md` zgodny z parserem Reżysera (regex znajduje TYLKO prawdziwe postaci, nie komentarze nagłówka)
+- `zapisz_tryb(0)`/`zapisz_tryb(99)` to noop
+- Round-trip: `wczytaj()` po `zapisz_*` daje identyczny stan
+- `wczytaj(brak)` rzuca `FileNotFoundError`
+- `_wymagaj_nazwy()` rzuca `ValueError` przy braku nazwy
+
+**Test integracyjny GUI z mockowanym LLM (7 scenariuszy):**
+1. Init: `_projekt=None`, `_btn_wyslij/Zapisz` disabled
+2. Nowa gra: 3 pliki utworzone (.game.json + .md + .mode), `.txt` powstanie z 1. turą
+3. Tura 1: 4 pliki zaktualizowane (.txt + .md + .game.json + .story.jsonl)
+4. Wybory widoczne (3 wx.Button w trybie 4)
+5. Zapis ręczny zachowuje stan
+6. Wczytanie nowej instancji panelu odzyskuje stan (numer_tury, postaci, RadioBox)
+7. Bridge Reżysera: parser MD zwraca dokładnie 'Strażnik' + 'Czarodziej'
+
+## CO ZAWIERA FAZA 4 (commit `03ff4f9`)
+
+**Pliki:**
+- `opowiesci_ai.py` (+~210 linii):
+  - Stałe: `OKNO_KONTEKSTU_MAX=128_000`, `PROG_OSTRZEZENIE=0.70`, `PROG_ALARM=0.90`, `TURY_DO_CINEMATIC=150`, `POZIOM_CZYSTA/OK/OSTRZEZENIE/ALARM`
+  - **`@dataclass StatusPamieci`**: `procent`, `tokeny`, `komunikat`, `poziom`
+  - **`_kodowanie_dla_modelu(model)`**: `tiktoken.encoding_for_model` z fallback `tiktoken.get_encoding("o200k_base")` na wypadek nowych modeli OpenAI
+  - **`policz_tokeny(snapshot, tryb, model)`**: input only (output liczy się po stronie OpenAI), wzorzec OpenAI cookbook „Counting tokens for chat" — `4 tokens per msg` + `2 tokens response header`
+  - **`oblicz_status_pamieci(...)`**: zero tury → CZYSTA; tokeny ≥ 90% → ALARM (z komunikatem o auto-streszczeniu nieudanym); ≥ 70% → OSTRZEZENIE; reszta → OK
+  - **`streszczaj_kontekst(klient, snapshot, model)`**: temp 0.3, 800 max_tokens, prompt instruuje neutralne streszczenie 200-400 słów (NIE narracja gracza)
+  - **`generuj_cinematic_warning(klient, snapshot, model)`**: temp 0.85, 600 max_tokens, prompt wymusza markery `⚠️🚨⚠️` na początku i końcu, treść meta-narracyjna 100-200 słów
+
+- `gui_opowiesci.py` (+~450 linii):
+  - **`_DISPATCH_KOMEND`** dict z PL+EN aliasami → nazwy metod-handlerów (string, late-binding przez `getattr`); EN ZAWSZE aktywny niezależnie od UI lang
+  - **`_KOLORY_POZIOMOW`** mapa POZIOM_* → RGB; analog `gui_rezyser._KOLORY_POZIOMOW`
+  - **Konstruktor**: `_aktualny_model=MODEL_DOMYSLNY`, `_meta_w_toku=False` (race-condition guard)
+  - **`_on_wyslij` reorganizacja**: walidacja `puste_pole` → slash dispatcher (przed wszystkim) → walidacja `_api_dostepne` → `_projekt is None` → ALARM blokada → spawn LLM
+  - **`_obsluz_komende(text)`**: tokenizacja `czesci=text.split(None, 1)`, lookup w `_DISPATCH_KOMEND`, wywołanie handlera przez `getattr`. Nieznana komenda → MessageBox z `komendy_dostepne_lista`
+  - **`_komenda_zapisz/_wczytaj/_koniec`**: proxy do `_on_zapisz`/`_on_wczytaj`/`wx.GetTopLevelParent.Close()`
+  - **`_komenda_ustawienia(arg)`**: `wx.Dialog` z RadioBox model picker (Standard=gpt-4o-mini, Quality=gpt-4o); aktualizacja `_aktualny_model` po OK
+  - **`_komenda_visualize(arg)`**: walidacje (API/projekt/niepusta akcja) → daemon thread → `wx.Dialog(TE_READONLY)` z `txt.SetFocus()` (NVDA czyta opis); **NIE blokuje `_btn_wyslij`** (side-quest)
+  - **`_aktualizuj_pamiec_modelu()`**: po każdej turze + po streszczeniu; ustawia `_gauge_pamiec.SetValue(procent)` + `_lbl_pamiec_status.SetLabel(format z {procent}/{tokeny}/{etap})` + foreground colour wg poziomu
+  - **`_spawn_streszczenie()`** + worker + `_streszczenie_done(streszczenie, liczba_tur)`: zwija `ostatnie_tury` do 1 elementu typu `{"akcja_gracza": "(streszczenie poprzednich tur)", "narracja_skrot": <streszczenie>}`, persistuje w `_projekt.zapisz_game_json()`, MessageBox potwierdzenie
+  - **`_spawn_cinematic_warning()`** + worker + `_cinematic_done(tekst)`: zapisuje do `.story.jsonl` z `typ="cinematic_meta_warning"`, ustawia flagę `_projekt.stan["cinematic_pokazany"]=True` + `zapisz_game_json()`, pokazuje `wx.Dialog` z `wx.Bell()`. NIE pisze do `.txt` (filtr Fazy 3 by go wyciął)
+  - **Trigger w `_obsluz_ture`**: po update snapshotu → jeśli `numer_tury>=150 && !cinematic_pokazany && !_meta_w_toku` → spawn cinematic (return); else jeśli `status==OSTRZEZENIE && !_meta_w_toku` → spawn streszczenie
+
+- `dictionaries/pl/gui/ui.yaml` (+29 kluczy): dispatcher (`komenda_nieznana_*`, `komendy_dostepne_lista` multiline z `\n`), ustawienia (`dlg_ustawienia_*` ×7), visualize (`dlg_visualize_*` + `dlg_visualize_pusta_akcja_*` + `status_wizualizowanie`), pamięć (`pamiec_status_format` z 3 placeholderami, `pamiec_etap_*` ×4 z emoji), streszczenie (`status_streszczanie`, `streszczenie_skonczone_*`), cinematic (`cinematic_warning_dlg_*`), alarm (`alarm_blokada_*`)
+
+- `requirements.txt` — dodane `tiktoken`
+
+**Test izolowany (15 asercji wszystkie zielone):**
+- 29 kluczy i18n Fazy 4 dostępnych
+- `oblicz_status_pamieci` poprawnie klasyfikuje: pusty (CZYSTA 0%), 6 tur (OK 0%, 1097 tokenów), duży (OSTRZEZENIE 78%, 100k tokenów)
+- `_aktualny_model` startuje na `MODEL_DOMYSLNY`
+- Dispatcher slash: nieznana → MessageBox + pole wyczyszczone, `/save` PL+EN → `_komenda_zapisz`, `/load` EN → `_komenda_wczytaj`, `/koniec` → handler
+- `/wizualizuj` bez gry → MessageBox `brak_gry` (gating)
+- ALARM pamięci → blokada wysłania kolejnej tury
+- Cinematic Warning trigger DOKŁADNIE przy `numer_tury==150` (`spawn_cinematic_warning` wywołany)
+
+**Pułapki naprawione w trakcie:**
+- `int(tokeny / 128_000 * 100)` daje 0% dla snapshotów z <1280 tokenów — to realne na początku gry, nie błąd. Asercja testowa sprawdza `tokeny>0`, nie `procent>0`.
+- Słowniki `_DISPATCH_KOMEND` z **string nazwami metod**, nie callable — pozwala mockowi w teście podmienić `panel._komenda_X = lambda...` bez konieczności rebuildowania dispatchera (late-binding zadziała).
+
+## FAZA 4 — KONKRETNY BRIEF DO WYKONANIA (HISTORYCZNY)
+
+**Cel:** parser slash-komend lokalny (bez API), wskaźnik pamięci modelu (`tiktoken`), `/visualize` jako tryb 0/Burza, Cinematic Meta Warning po 150 turach.
+
+**Pliki do stworzenia/zmodyfikowania:**
+
+1. **`gui_opowiesci.py`:**
+   - W `_on_wyslij` PRZED walidacją API/projekt sprawdź `if user_text.startswith("/"):` → przekieruj na `_obsluz_komende(user_text)` (lokalna obsługa slash, NIE LLM)
+   - Nowy `_obsluz_komende(user_text)`: dispatcher na PL+EN nazwy komend; `/zapisz`+`/save` → `_on_zapisz(None)`; `/wczytaj`+`/load` → `_on_wczytaj(None)`; `/koniec`+`/quit` → `wx.GetTopLevelParent(self).Close()`; `/wizualizuj`+`/visualize` → `_obsluz_visualize(arg)`; `/ustawienia`+`/settings` → wx.Dialog z RadioBox model (gpt-4o-mini vs gpt-4o); nieznana komenda → `wx.MessageBox` z listą dostępnych
+   - **EN-fallback ZAWSZE aktywny** — niezależnie od języka UI, slash może być w PL/EN; gracz angielski może pisać w polskim UI. Mapping w słowniku Pythona, nie w YAML.
+   - `_obsluz_visualize(arg)`: spawn daemon thread → `oai.wygeneruj_wizualizacje(klient, snapshot, arg)` → wynik w `wx.Dialog(TextCtrl TE_READONLY TE_MULTILINE)` (NIE do `_txt_narracja`, NIE zapis do plików)
+   - **Wskaźnik pamięci modelu** (`_aktualizuj_pamiec_modelu()` po każdej turze):
+     - `tiktoken.encoding_for_model(model)` na: `_PROMPT_BAZA + _PROMPT_TRYB_X + JSON payload + ostatnie_tury skróty + system msgs`
+     - Próg 70% → wywołanie `oai.streszczaj_kontekst(klient, snapshot)` w wątku tła; po sukcesie zastępuje `_snapshot.ostatnie_tury` jednym dictem z polem `"streszczenie"`
+     - Wartości: `gauge.SetValue(procent)`, `lbl_status.SetLabel(t("opowiesci.pamiec_status_format", procent=X, etap=Y))`; etap = czysta/ostrzeżenie/alarm
+     - Próg 150 tur → `_obsluz_cinematic_warning()` — LLM generuje treść (osobny mini-prompt), Python NIE pisze do `.txt` (`czysc_meta_warningi` filtr już istnieje), pisze do `.story.jsonl` + pokazuje w `wx.Dialog` z `wx.Bell()`
+
+2. **`opowiesci_ai.py`:**
+   - Nowa funkcja `streszczaj_kontekst(klient, snapshot, model=MODEL_DOMYSLNY) -> str` — LLM streszcza `ostatnie_tury[]` do ~500 słów; bez schemy, response = goły tekst
+   - Nowa funkcja `generuj_cinematic_warning(klient, snapshot, model) -> str` — osobny mini-prompt: „graję 150 tur, przerwij narrację dramatycznym ostrzeżeniem (between ⚠️🚨⚠️ markers) o stanie gry/postaci/świata, użyj II osoby, 100-200 słów"
+
+3. **`requirements.txt`** — dodać `tiktoken>=0.5`
+
+4. **i18n** (klucze TYLKO PL, Faza 5 zrobi tłumaczenia):
+   - `opowiesci.komenda_nieznana`, `opowiesci.komendy_dostepne`
+   - `opowiesci.dlg_ustawienia_*` (model picker)
+   - `opowiesci.dlg_visualize_tytul/lbl/name`
+   - `opowiesci.pamiec_status_format` (z `{procent}` i `{etap}`)
+   - `opowiesci.pamiec_etap_czysta/ostrzezenie/alarm`
+   - `opowiesci.cinematic_warning_dlg_tytul/lbl`
+   - `opowiesci.streszczanie_status` (info dla user-a podczas auto-streszczenia)
+
+**Pułapki do uniknięcia:**
+- `tiktoken.encoding_for_model("gpt-4o-mini")` — encoding dla nowych modeli OpenAI; jeśli nie zwraca, fallback `tiktoken.get_encoding("o200k_base")`
+- W trakcie `streszczaj_kontekst` blokada `_btn_wyslij` (Disable) — tury nie wolno wysłać dopóki streszczenie jest in-flight (race condition na `_snapshot.ostatnie_tury`)
+- `_obsluz_visualize` MUSI zachować `_btn_wyslij.Enable()` po sukcesie (różnie od `_obsluz_ture` — nie blokuje gracza, bo `/visualize` to side-quest)
+- Cinematic Warning ZAWSZE pokazywany w `wx.Dialog`, NIGDY w `_txt_narracja` — zachowanie spójne z filtrem `czysc_meta_warningi`
+
+## FAZA 5 — KONKRETNY BRIEF DO WYKONANIA
+
+**Cel:** YAML-izacja promptów systemowych (anty-spaghetti, patrz `feedback_yaml_prompty.md`), Quick Start presety, tłumaczenie UI komunikatów na 8 pozostałych języków przez batch-translator. Prompty systemowe i zaczatki tłumaczone RĘCZNIE per język (LLM halucynuje na nich; skrypt obsługuje wyłącznie `gui/ui.yaml`).
+
+**Co tłumaczy `buduj_wielojezyczne_ui.py`** (przeczytaj zanim ruszysz): WYŁĄCZNIE `dictionaries/<kod>/gui/ui.yaml` (komunikaty user-facing). Ma flagę **`--klucz <prefix>`** do surgical update — tłumaczy tylko wskazane poddrzewo, reszta pliku bez zmian. **Wymaga, żeby `<kod>/gui/ui.yaml` już istniał** dla każdego języka docelowego (mamy 9 kompletnych pakietów po Fazie 14, więc warunek spełniony).
+
+**Kolejność kroków (krytyczna — nie zamieniać):**
+
+1. **Migracja promptów systemowych PL → YAML** (refaktor `opowiesci_ai.py`):
+   - Stwórz `dictionaries/pl/opowiesci/`: `baza.yaml` (treść `_PROMPT_BAZA`), `tryb_swobodny.yaml` (`_PROMPT_TRYB_3`), `tryb_wyborow.yaml` (`_PROMPT_TRYB_4`), `tryb_mniejsze_zlo.yaml` (`_PROMPT_TRYB_5`), `tryb_burza.yaml` (`_PROMPT_VISUALIZE` dla `/visualize`), `streszczenie.yaml` (Faza 4), `cinematic_warning.yaml` (Faza 4) — wzorzec `dictionaries/pl/rezyser/tryb_*.yaml`: `id`, `etykieta`, `kategoria`, `kolejnosc`, `model`, `temperatura`, `prompt_systemowy: |`, komentarz placeholderów
+   - Refaktor `opowiesci_ai.py`: `_zbuduj_prompt_systemowy(tryb)` ładuje z YAML zgodnie z `snapshot.jezyk_projektu` (analog `przepisy_rezysera.buduj_pelny_prompt_systemowy`); usuwa hardkodowane `_PROMPT_BAZA`/`_PROMPT_TRYB_*`/`_PROMPT_VISUALIZE`
+   - **Test izolowany regresji**: identyczny prompt build per tryb przed/po migracji; mock LLM zwraca ten sam JSON
+
+2. **Quick Start presety PL** (ręcznie):
+   - `dictionaries/pl/opowiesci/zaczatki.yaml` — 5 presetów: `po_apokaliptyczna_sf`, `mroczne_fantasy`, `urban_fantasy_detective`, `kosmiczny_horror`, `romantyczna_komedia_obyczajowa`. Każdy: `etykieta`, `opis_krotki` (GUI dropdown), `seed_swiata` (1-2 paragrafy ustawiające scenę dla LLM), `tryb_domyslny` (3/4/5)
+   - GUI: rozszerzenie `_on_nowa_gra` o RadioBox/Choice z presetami; po wybraniu → autouzupełnia `_txt_nazwa_gry` (`<preset>_001`), `_rb_tryb`, `_projekt.seed_swiata`
+
+3. **Prompty systemowe pozostałe 8 języków** (RĘCZNIE per język):
+   - Dla każdego z `{en, de, es, fi, fr, is, it, ru}` ręcznie napisz `dictionaries/<kod>/opowiesci/*.yaml` analogicznie do PL. Używaj PL jako wzorca **stylu i struktury** — nie kalka literacka. Pola `id`/`kategoria`/`kolejnosc`/`model`/`temperatura` kopiuj 1:1; `etykieta`/`prompt_systemowy` pisz natywnie, używając idiomów docelowego języka i kulturowo wiarygodnych przykładów.
+   - **Czemu ręczne**: prompty są strukturyzowane (instrukcje warunkowe, formaty wymagane od LLM, klauzule krytyczne dla zachowania modelu). LLM tłumaczący prompt często zmienia semantykę („generuj 3-5 wyborów" → „generuj 3 lub 5 wyborów") albo gubi krytyczne instrukcje. Koszt manualnego przetłumaczenia 7 plików × 8 języków ~30-50 stron tekstu jest dużo niższy niż koszt debug-owania halucynacji w runtime.
+   - **Patrz `feedback_yaml_prompty.md`** dla pełnej zasady.
+
+4. **Quick Start zaczatki pozostałe 8 języków** (RĘCZNIE per język):
+   - Ze względu na wysoką kreatywność (zaczatki to literatura, nie przepisy LLM), pisz natywnie używając motywów docelowej kultury. Gracz hiszpańskojęzyczny dostaje seed inspirowany hiszpańskojęzyczną literaturą, nie kalkę z polskiej.
+
+5. **UI komunikaty (ui.yaml::opowiesci.*) wszystkich języków** (BATCH przez `buduj_wielojezyczne_ui.py`):
+   - **WARUNEK WSTĘPNY**: zaktualizowany `dictionaries/pl/gui/ui.yaml::opowiesci.*` — wszystkie klucze dodane przez Fazy 1+2+3+4+5 (35-50+ kluczy), żaden nie zostanie później dorzucony.
+   - Odpal: `.venv/Scripts/python buduj_wielojezyczne_ui.py --wszystkie --klucz opowiesci`. Skrypt zrobi surgical update poddrzewa `opowiesci.*` we wszystkich `<kod>/gui/ui.yaml`, reszta plików nietknięta. Nazwa klucza `opowiesci` dopasuje się do całego poddrzewa (logika `_klucz_pasuje_do_lisca` w skrypcie: prefix + '.children').
+   - **Manualny review halucynacji obowiązkowy** (CLAUDE.md): spójność placeholderów `{}` (LLM lubi je tłumaczyć), idiomatyczność nazw trybów (`feedback_lokalizacja_nazw.md`: „Lesser Evil" nie „Smallest Evil"), zachowanie skrótów `\\tCtrl+5` w menu, zachowanie akceleratora `&` na sensownej literze.
+
+6. **Manuał użytkownika**:
+   - `dictionaries/pl/gui/dokumentacja/opowiesci.yaml` — ręcznie PL (rozdział pełny pod styl manuali Reżysera/Poliglota)
+   - Pozostałe języki przez `buduj_wielojezyczne_docs.py` (skrypt zaprojektowany dla dokumentacji, ma własną logikę chunking + walidacja); review halucynacji jak w kroku 5
+
+## FAZA 6 (skrót)
+
+- testy izolowane bez `MainLoop` (rozszerzenie istniejących)
+- bump `VERSION` 14.x → 15.0 (pojedyncze źródło prawdy)
+- pełna procedura release (CLAUDE.md: KROK 0a bump VERSION → 0b odswiez_rezysera (Opowieści NIE modyfikują akcentów, ale dla pewności sprawdź) → 1 review szablonów docs → 2 generuj_dokumentacje --waliduj → 3 review docs/ → 4 commit docs)
+- tag `v15.0`, merge do `main` przez PR (NIE fast-forward, żeby zachować historię gałęzi)
+
+## REGUŁY OBOWIĄZUJĄCE PRZEZ CAŁY V15.0
+
+- **Lokalizacja nazw**: zawsze idiom języka docelowego, nie kalka (patrz `feedback_lokalizacja_nazw.md`). „Mniejsze zło" nie „Najmniejsze zło"; „Lesser Evil" nie „Smallest Evil".
+- **A11y first** (CLAUDE.md): krótkie powiadomienia → `wx.MessageBox`, długie błędy → `wx.Dialog` z `wx.TextCtrl(TE_READONLY)`. NIE wzorzec „aktualizuj etykietę i ustaw fokus" jako głównego sposobu notyfikacji.
+- **Test wxPython**: bez `MainLoop` (`app = wx.App(False); panel = OpowiesciPanel(parent); panel.Destroy()`).
+- **Bash**: `.venv/Scripts/python` (Bash w VS Code nie aktywuje venv).
+- **Print z emoji**: `PYTHONIOENCODING=utf-8` (Windows cp1250 łamie 📖).
+- **Commity**: WIP po każdej fazie z tagiem `wip(15.0): faza N — opis`.
+- **Release**: dopiero w Fazie 6 i tylko z gałęzi `v15.0-opowiesci` po merge do `main`.
+
+**Status końcowy Fazy 5 (decyzja user-a 2026-05-10):**
+- Wykonane: 5a (YAML refaktor + Quick Start PL), 5d (UI batch 8 języków), 5e (manuał PL + docs 8 języków).
+- **Odłożone do v15.1**: 5b (prompty systemowe 8 języków RĘCZNIE) + 5c (Quick Start zaczatki 8 języków RĘCZNIE). User wybrał strategię „Recommended: najpierw 5d+5e, potem 5b+5c". 5b+5c to ~5-9h pracy ręcznej per język (literatura natywna, brak skryptu), więc rozsądnie odłożyć poza ścieżkę krytyczną v15.0.
+- **Co działa dla 8 języków bez 5b/5c**: GUI w pełni przetłumaczone (przyciski, błędy, statusy, manuał). System fallback w `opowiesci_ai._zaladuj_przepis` ładuje PL przy braku przepisu w danym języku — gracz EN pisze po angielsku, LLM (multi-lingual) odpowiada po angielsku, ale system prompt przychodzi po polsku. Jakość narracji zauważalnie niższa niż z natywnym promptem, ale aplikacja w pełni grywalna.
+
+**How to apply:** Gdy user wraca z prośbą o pracę na v15.0, zacznij od `git status` (sprawdź gałąź) i `git --no-pager log --oneline -5` (zobacz ostatnie commity). Jeśli `working tree clean` na `v15.0-opowiesci` z commitem `7827720` jako HEAD → ruszaj z **Fazą 6 (release)** wedle briefu wyżej. Pliki referencyjne `notatki_dev/instrukcje_modelu.md` + `tales_mechanics.md` to specyfikacja mechaniki narracyjnej.
+
+**Faza 6 — uwagi specjalne**:
+- Bump VERSION 14.x → 15.0 (KROK 0a CLAUDE.md, PRZED regeneracją docs!).
+- Krok 0b (`odswiez_rezysera.py`): Opowieści NIE modyfikują akcentów ani trybów Reżysera, ale dla pewności przelać skrypt — zero-diff oczekiwany.
+- Manuał Opowieści `docs/opowiesci.<iso>.txt` ZOSTANIE zregenerowany przy `--waliduj`, żaden problem (są w `docs/`).
+- Tag `v15.0`, merge do `main` przez PR (NIE fast-forward).
+
+**Faza 5b/5c gdy gotowość**: napisz prompty/zaczatki ręcznie per język w `dictionaries/<kod>/opowiesci/*.yaml`. Wzorzec stylu: `dictionaries/pl/opowiesci/*.yaml` (struktura) + lokalizacja idiomatyczna (zob. `feedback_lokalizacja_nazw.md` — „Lesser Evil" nie „Smallest Evil"; preset zaczatkowy ma być pisany natywnie z motywami docelowej kultury, nie kalką literacką).
+
+<!-- ===== ARCHIWUM: project_v15_1_roadmap.md ===== -->
+
+---
+name: v15.1 — release zamknięty lokalnie + tag + push
+description: v15.1 zamknięty 2026-05-11 (tag v15.1 na 62d18fa, pushed do origin/v15.1-zasady-swiata); 5 zadań z TODO + Zasady świata + bonus konwerter scen wdrożone. Następne: PR do main, potem v15.2 (Fiolka odłożona)
+type: project
+originSessionId: ee7659e8-e14f-42f5-b629-f2ed7fcbc31b
+---
+## Status v15.1 (2026-05-11)
+
+Release zamknięty lokalnie + push do origin/v15.1-zasady-swiata. Tag v15.1 na commicie release'u 62d18fa.
+
+**Ostatnie 3 commity:**
+- 62d18fa `release: 15.1 — Zasady świata, natywne prompty Opowieści 9/9 jzk, model AI per tryb, konwerter scen`
+- 8a231a2 `docs: regeneracja po 15.1 — KROK 4 Zasady świata (9 jzk) + akapit grupowania tur w Architekcie + bump numeru wersji`
+- 6f0be94 `wip(15.1): konwerter — grupowanie 5 tur w sceny H1 (auto-detekcja Opowieści)`
+
+**Co dalej (po stronie usera):** PR `v15.1-zasady-swiata` → `main` przez GitHub web UI (per memory feedback_pr_workflow.md — agent nie używa `gh`). Po mergu: zaktualizować PULL_REQUEST_COMMENTS.md + cleanup branchu.
+
+## Wdrożone w v15.1 (15 commitów od v15.0)
+
+**Główne wątki:**
+1. **Zasady świata** (66b9ae5 + 11dfc25 + batch jzk) — edytowalna mini-księga koncepcji w GUI Opowieści (`wx.Dialog` z TextCtrl multiline). Persistowane w `.game.json` jako `zasady_swiata: str`, propagowane do system promptu LLM.
+2. **Natywne prompty Opowieści 9/9** (a1a0ade DE/ES, 1497ce6 FI/FR, cdd066d IS/IT, b60a476 RU) — 7 promptów × 7 nowych jzk + wzmocnienie PL/EN. Koniec fallbacku do PL z 15.0.
+3. **EN zaczątki Quick Start** (a2119d9) — 5 natywnych presetów EN osadzonych w anglojęzycznym kontekście.
+4. **Model AI per tryb** (5c1d151) — `gpt-4o` dla Wyborów/Mniejszego zła, `gpt-4o-mini` dla Swobodnego/Burzy. `/ustawienia` zlikwidowane (7 kluczy `dlg_ustawienia_*` usunięte z 9 ui.yaml).
+5. **core_tokeny — wspólny tiktoken** (2b148ab) — DRY: Opowieści + Reżyser.
+6. **Konwerter — grupowanie tur w sceny** (6f0be94, *ta sesja*) — `_REGEX_TURA` w 9 jzk + `TURY_NA_SCENE=5` + i18n `konwerter.scena_naglowek_format`. Auto-detekcyjne.
+
+**Bugfixy GUI:** (e5deda2, d63f538) skrót Ostatniej tury cięty na granicy zdania, persist wyborów po wczytaniu, klik wyboru nie wysyła automatycznie.
+
+## Odłożone na v15.2+
+
+**Fiolka** — pełna mechanika dynamicznego ekwipunku z losowymi przedmiotami + auto-użycie/losowy fallback. Powód odłożenia z 15.1: 4o-mini sobie dynamicznie z tym nie poradzi; dodatkowe state machine + LLM losowanie + decision logic to skala wymagająca własnego minor. Doprecyzowana definicja:
+
+- **Stan:** Fiolka jest przedmiotem **zdobywanym** w trakcie gry (nie startowym).
+- **Aktywacja:** Dowolna liczba użyć (NIE one-shot).
+- **Mechanika otwarcia:** za każdym razem losowy przedmiot z LLM (broń, kanapka, pluszowy miś, klucz do nieistniejących drzwi…).
+- **Auto-użycie:** jeśli wylosowany item pomaga w sytuacji → automat; jeśli nie → losowy z dostępnych wyborów A/B/C (zabezpieczenie przed zamrożeniem fabuły).
+
+## How to apply
+
+- Po mergu PR-a: cleanup branchu (`git fetch --prune` → `checkout main` → `pull` → `branch -d v15.1-zasady-swiata`). Tag v15.1 zostaje (zarówno na origin jak i lokalnie).
+- Następna sesja: zacząć od `git checkout main && git pull` żeby mieć zmergowane v15.1. Nowy branch dla v15.2 (Fiolka albo inny temat).
+- Aktualizacja PULL_REQUEST_COMMENTS.md po merge (komentarze z PR-a przepisane ręcznie, najnowszy na górze).
+
+<!-- ===== ARCHIWUM: project_v15_2_roadmap.md ===== -->
+
+---
+name: ""
+metadata: 
+  node_type: memory
+  originSessionId: 1c03aae4-9dbc-4adc-a0b0-6fe7e292931e
+---
+
+Stan po v15.2.2 (2026-05-14, branch main, on origin/main): **HEAD `1714766` (infra: dusze bota)** — tag v15.2.2 force-przesunięty z `201bb9b` na `1714766`, żeby GitHub Release UI nie pokazywał „X commits to main since this release". Dusze bota (Lumi/Vieno/Katla × 9 jzk) to infrastruktura GitHub Actions wokół release'u, nie sam release — bez bumpu VERSION ani regen docs. Wcześniejszy ground truth: v15.2 + v15.2.1 ZAMKNIĘTE z tagami na origin/main (`v15.2` na 9344b61, `v15.2.1` na 8338f3a). Patch v15.2.2 znaleziony przy konsultacji wcześniejszego hot fixa workflow (bc80c1e) — bot odpowiadał maili tylko po polsku, nowy implementacja używa lingua-language-detector dla 9 jzk + fallback EN dla scenariusza „user prześle samym mailem bez opisu".
+
+**Why:** v15.2 łączy fiolkę z trybu Opowieści (długo odraczana z v15.0) z większym refaktorem Reżysera (prompty JSON + persystencja) + 3 mniejsze zadania porządkowe. Cały release jeden commit po zamknięciu wszystkich 7, nie hotfix-stylem.
+**How to apply:** kontynuując pracę, najpierw `git log --oneline -10` żeby zobaczyć 5 wymienionych niżej commitów, potem TaskList do sprawdzenia ID 3-7.
+
+## Wykonane (16 commitów na origin/main, tag v15.2)
+
+- `de8962b` wip(15.2): fiolka w trybie Mniejsze Zło (9 jzk) — task #1
+- `9dc16ba` wip(15.2): silnik Burzy w trybie JSON — task #2 faza A
+- `d1e4ac9` wip(15.2): yaml-e Burzy w JSON-mode (9 jzk) — task #2 faza B
+- `c2a596d` wip(15.2): persystencja Burzy `.brainstorm.json` — task #2 faza C
+- `34e3d11` release(15.2 task #2): GUI Reżysera — panel opcji Burzy + dispatch JSON — task #2 faza D
+- `6f2776e` wip(15.2): refactor docs YAML — tresc na sekcje + --klucz w autotłumaczu — task #3
+- `0c2b4b1` wip(15.2 task #4 faza A): treść PL — Tiflotecnia Voices + fiolka + alarm detekcji
+- `accd147` wip(15.2 task #8): bot tiflotecnia-patch — auto-handle issues z labelem (workflow + send_patch.py)
+- `6e8c4c3` Fix: update GitHub Actions patch bot logic — usunięto `gh issue delete` (wymagał PAT), zastąpiono sekwencją comment→redact→close→lock (działa z domyślnym GITHUB_TOKEN); mocniejszy regex emaila, fallback przy braku adresu, stopka antyspamowa z numerem issue
+- `a2dc022` wip(15.2 task #4 faza B): batch retranslate 8 jzk × manual+opowiesci + naprawa halucynacji Caesar/Tipoglicemia + bug PL alfabetu (dodanie Ś, kolejność ZŹŻ)
+- `122fb53` wip(15.2 task #9): migracja dictionaries.yaml na dict-schemat (9 jzk) + nowa sekcja `co_to_tryb_opowiesci` + placeholder `liczba_trybow_opowiesci`; surgical `--klucz` zamiast FULL (16 kB API zamiast 112 kB), naprawione 2 halucynacje (IS folder „opowiesci/", RU fiolka „флакон")
+- `e4be20f` wip(15.2 task #5): Inno Setup — akcja „Otwórz instrukcję obsługi" po instalacji; [Tasks] openmanual + [Run] z postinstall+shellexec+skipifsilent + [Code] GetManualISO() przez ActiveLanguage() + [CustomMessages] dla 5 jzk; niewspierane (de/fr/es/is) → fallback en. Test syntax przez build_release.py w izolowanym pipeline (artefakty v15.1 czasowo odsunięte). Wizualna weryfikacja Additional Tasks + Finish ekranów planowana w task #7
+- `d2ea2a5` wip(15.2 task #6): README wielojęzyczne 9 jzk — generuj_dokumentacje.KONFIG_SZABLONOW (smart_en: en bez ISO → `readme.md` jako GitHub landing); PL readme.yaml z 13 sekcjami zaktualizowanymi do v15.2; batch retranslate na 8 jzk obcych + naprawa halucynacji (fiolka ES/FI/RU + IS/RU dorzucone zmyślone sekcje do naglowek)
+- `d9513be` wip(15.2 task #10): menu Pomoc (4-te w menubar) + refaktor opowiesci → tales (user-facing). 3 ID_HELP_* + `_otworz_dokument(rdzen)` przez os.startfile; akceleratory zlokalizowane per jzk (Po&moc PL Alt+M / &Help EN / etc.); 10 nowych kluczy w main.menu i main.pomoc (PL ręcznie + surgical buduj_wielojezyczne_ui.py --klucz dla 8 jzk). Refaktor: 9× git mv opowiesci.yaml→tales.yaml + id zmiana + grep podmiana docs/opowiesci→docs/tales w 9 readmes + 1 PL komentarz; folder dictionaries/<kod>/opowiesci/ i kod Pythonie NIE rusza (wewnętrzne)
+- `7df815e` fix(15.2): wyklucz folder .github z paczki release (Portable ZIP + Installer)
+- `3c98035` docs: regeneracja po 15.2 — bump numeru wersji w nagłówkach (27 plików docs/ + readme.md × 9)
+- `9344b61` release: 15.2 — domknięcie user-facing (menu Pomoc + README 9 jzk + Inno akcja + fiolka). build_release.py: nowa `zbierz_jezyki_z_manualem` + `INNO_MANUAL_MESSAGES_MAP` (30 jzk × 3 etykiety, pre-populated) + `buduj_blok_kodu_iso` + `buduj_blok_custom_messages`; main() wstrzykuje 3 sekcje dynamicznie do tmp installer.iss (Languages, Code::GetManualISO, CustomMessages). installer.iss: zminimalizowane stuby EN-only. RELEASE_NOTES.md: pełna sekcja 15.2 (TL;DR + 9 „Co nowego" + 4 „Pod maską" + 4 breaking changes)
+- tag `v15.2` na `9344b61`, pushnięte do origin
+- `8338f3a` release: 15.2.1 — patch naprawy halucynowanego tytułu manuala w de/fi/fr/is/it (LLM zostawił polskie „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand product; naprawione ręcznie w 5 yamlach z lokalnymi tłumaczeniami — Audio AI Regisseur Handbuch / Audio AI -ohjaajan käsikirja / Manuel du Réalisateur Audio AI / Handbók Audio AI leikstjórans / Manuale del Regista Audio AI)
+- tag `v15.2.1` na `8338f3a`, pushnięte do origin
+- `825b3f9` docs: RELEASE_NOTES sekcja v15.2.1 (fixup po release commit, plik .md i tak wykluczany z paczki przez installer.iss + build_release.py — bez wpływu na artefakty)
+- `bc80c1e` Hot fix - naprawa logiki bota wysyłającego wiadomości w odpowiedzi na zgłoszenia o patch (usunięto duplikat `gh issue comment` w patch-bot.yml — bot dubelował komentarz potwierdzenia wysyłki)
+- `b098250` docs: regeneracja po 15.2.2 — uszczelnienie krok_5_alarm_detekcja_jezyka w 9 jzk (zachęta do dorzucenia 2-3 zdań opisu w swoim języku) + bump VERSION 15.2.1 → 15.2.2 + regen 27 docs/readme
+- `201bb9b` release: 15.2.2 — patch: i18n bota tiflotecnia-patch (9 szablonów email + bilingual workflow + fallback EN). lingua-language-detector module-level + TEMPLATES dict[Language, dict] z 9 wpisami {subject, body}, fallback ENGLISH (zamiast PL) dla scenariusza „sam email bez opisu / nieobsługiwany jzk" — wśród niewidomych userów NVDA na świecie EN >> PL. Bilingual PL/EN komentarze workflow (potwierdzenie wysyłki + redact body)
+- `1714766` infra: dusze bota tiflotecnia-patch — losowanie 3 postaci (Lumi/Vieno/Katla) × 9 jzk zamiast podpisu „Marek Uram". Lumi zimowo-śnieżna („Niech mróz będzie z Tobą"), Vieno mistyczna „Duchy Północy" („Słuchaj wiatru"), Katla wulkaniczna „prosto z kuźni" („Z wulkanicznym pozdrowieniem"). PERSONAS + TEMPLATES[lang][postac]{subject,body} + FOOTERS[lang] wyodrębniona (doklejana po `---` niezależnie od postaci). `random.choice(PERSONAS)` w main(). Naprawione przy okazji: złamana składnia `}` po Language.ENGLISH (poza dictem), indent 0 w main() dla `temat/tresc_glowna/...`, `msg.set_content(tresc)` → `pelna_tresc`
+- tag v15.2.2 force-przesunięty z `201bb9b` na `1714766` (origin: `git push --force origin refs/tags/v15.2.2`) — uzasadnienie: dusze bota to infrastruktura wokół release'u (GitHub Actions, nie binarka aplikacji), VERSION/docs/.exe v15.2.2 niezmienione. Bez tego ruchu GitHub Release UI pokazywałby „1 commit to main since this release"
+
+## Szczegóły task #3 — refaktor docs YAML (commit `6f2776e`)
+
+Refactor docs YAML zrealizowany w 3 fazach, w commicie:
+- `generuj_dokumentacje.py` — backward-compat dla `tresc` jako string (stary v15.1) i dict (nowy v15.2). Sekcje scalane joinerem `\n\n\n` (= 2 puste linie). Funkcja `_scal_tresc_sekcjami` w generatorze.
+- `dictionaries/pl/gui/dokumentacja/manual.yaml` — rozbity na 25 sekcji (`naglowek`, `krok_1_*`...`krok_7b_*`, `nvda_a11y`, `changelog_9/11/12/13`). Sekcja `krok_5_vocalizer` wydzielona osobno (atomic target dla task #4).
+- `dictionaries/pl/gui/dokumentacja/opowiesci.yaml` — 12 sekcji (`naglowek`, `krok_1_tryby_gry` ... `krok_10_dostepnosc_nvda`, `najczestsze_problemy`).
+- `dictionaries/pl/gui/dokumentacja/dictionaries.yaml` — 12 sekcji.
+- `buduj_wielojezyczne_docs.py` — per-sekcja tłumaczenie, cache wznawiania per-sekcja w runtime/ (`temp_<rdzen>_<klucz>_pl_to_<kod>_*.jsonl`). Nowy flag `--klucz <key1,key2>` dla surgical update (analogicznie do `buduj_wielojezyczne_ui.py`). Backward-compat: stary schemat (`string tresc`) opakowany w `{_legacy: str}` przez `KLUCZ_LEGACY`.
+- `docs/*.pl.txt` — cosmetic regen (granice sekcji wyrównane do dokładnie 2 pustych linii; treść 1:1). Pliki obce-języków bez zmian content (CRLF re-render).
+
+## Do zrobienia po release v15.2.2
+
+- **build_release.py + paczki** — wygenerować `Rezyser_Audio_v15.2.2_Portable.zip` + `Rezyser_Audio_v15.2.2_Installer.exe`, upload na GitHub Release.
+- **Wizualna weryfikacja bota po pierwszym realnym issue 15.2.2** — sprawdzić, że dla zgłoszenia po niemiecku/francusku/itd. bot odsyła mail w tym samym języku w tonie wylosowanej postaci (Lumi/Vieno/Katla); sprawdzić, że dla zgłoszenia z samym mailem (bez opisu) bot odsyła EN (fallback) — losowanie postaci niezależne od jzk.
+- **Smoke test edge case'u IT** — bardzo krótki tekst po włosku (4-5 słów) lingua myli z DE. Manual zachęca do 2-3 zdań co rozwiązuje większość przypadków, ale jeśli pojawi się powtarzający się problem realnego usera — wprowadzić `compute_language_confidence_values` z progowaniem zamiast top-1 albo heurystykę słowo-kluczową.
+- **Wcześniejsze pre-15.2.2 TODO**:
+  - **Upload artefaktów na GitHub Release** (`v15.2` tag) — paczki v15.2 i v15.2.1 wygenerowane lokalnie ale czy upload Marek już zrobił? Sprawdzić.
+  - **Wizualna weryfikacja instalator + GUI** — checkbox „Otwórz instrukcję obsługi" + menu Pomoc + treść Tiflotecnia Voices.
+
+## Decyzje produktowe v15.2 task #4 (commit `0c2b4b1`)
+
+- **Patch jest proprietary** — Tiflotecnia Voices for NVDA nie ma pliku LICENSE z GPL/MIT, URL w manifest.ini idzie na tiflotecnia.com (brak publicznego repo upstream). Redystrybucja zmodyfikowanych plików .py jest nielegalna.
+- **Dystrybucja przez prywatny email** zamiast Gist/repo. Bot zamyka issues z label `tiflotecnia-patch` natychmiast po utworzeniu (z potwierdzeniem), patcha wysyłamy z osobnego skryptu local (poza repo) który batch-pobiera emaile z nowych issues.
+- **Brak weryfikacji licencji Tiflotecnia po stronie autora** — manual wprost mówi „zakładamy że masz ważną licencję; nie weryfikujemy, ale patcha bez licencji i tak nie zaaplikujesz na cudzy folder". Świadome odsunięcie odpowiedzialności weryfikacyjnej.
+
+## Kluczowe decyzje architektoniczne v15.2
+
+### Fiolka (task #1)
+- **Python kontroluje rozkład skutków**: 60% harmful / 30% distortion / 10% rare_beneficial (wagi w `tryb_mniejsze_zlo.yaml::fiolka.wagi_skutkow`), `random.choices` po stronie Pythona. LLM dostaje wylosowany seed `{kategoria, opis}` w user payload jako wskazówkę do narracjonalizacji — nigdy nie wymyśla skutku samodzielnie. Anti-halucynacja, anti-deus-ex-machina. „Never guaranteed salvation" wynika z rozkładu 10% rare_beneficial.
+- **Stała pozycja wyboru**: gdy `stan.fiolka.obecna=True` i `zniszczona=False`, LLM MUSI dodać `{"id": "0", "tekst": "Odkorkuj fiolkę"}` jako pierwszy w `wybory[]`. Reusable: nie znika po użyciu. Decyzja o zniszczeniu (`zniszczona=True`) leży po stronie LLM-a w narracji — definitywna.
+- **Próg aktywacji** parametryzowany w yaml (`fiolka.prog_aktywacji_tur`, default 4). Python sygnałuje LLM-owi `fiolka_aktywacja_w_tej_turze=True` w turze kiedy fiolka się pojawia.
+- **Implementacja**: schema `stan.fiolka` w `opowiesci_ai.SCHEMA_TURA`, funkcje `czy_fiolka_powinna_sie_pojawic`/`wylosuj_seed_fiolki`/`prog_aktywacji_fiolki`/`etykieta_wyboru_fiolki` w `opowiesci_ai.py`. GUI: flaga `_fiolka_klikneto_w_tej_turze` w `gui_opowiesci.py` zerowana w `_obsluz_ture`. 9 yaml-ów `dictionaries/<jzk>/opowiesci/tryb_mniejsze_zlo.yaml` z sekcją `fiolka:`.
+
+### Refactor docs YAML (task #3)
+- **`tresc` jako dict, nie string**: każdy szablon w `dictionaries/<jzk>/gui/dokumentacja/*.yaml` od v15.2 ma `tresc: { klucz_sekcji: |\n... }` zamiast jednego wielkiego block-scalar `|`. Generator (`generuj_dokumentacje._scal_tresc_sekcjami`) backward-compatible: rozpoznaje oba schematy. Joiner `\n\n\n` (= 2 puste linie) wymuszany na granicach sekcji — drobne whitespace cleanup w docs/*.txt akceptowalne (treść 1:1).
+- **Granularność sekcji**: każda sekcja PL to atom updateu. `manual.yaml` ma 25 (intro + 4 kroki + 12 podsekcji KROK 5 + 3 dalsze kroki + NVDA + 4 changelog), `opowiesci.yaml` ma 12 (KROK 1-10 + intro + problemy), `dictionaries.yaml` ma 12. Klucz `krok_5_vocalizer` wydzielony **specjalnie** pod task #4 (rebrand Vocalizer → Tiflotecnia) — pozwala retłumaczyć ~2 kB zamiast ~68 kB całego manuala.
+- **Surgical update przez `buduj_wielojezyczne_docs.py --klucz`**: wczytuje istniejący docelowy yaml, podmienia TYLKO wybrane sekcje, scala z resztą, zapisuje. Wymaga że plik docelowy już jest w nowym schemacie (po pierwszym FULL retłumaczeniu). Cache wznawiania per-sekcja w runtime/ (`temp_manual_krok_5_vocalizer_pl_to_en_*.jsonl`) — częściowy progress jednej sekcji nie psuje innych.
+- **Backward-compat dla 24 istniejących obcych yamlów**: pozostają W STARYM SCHEMACIE (string `tresc`). Generator je obsłuży. Surgical `--klucz` na nich zwraca błąd „docelowy plik w starym schemacie — uruchom najpierw bez --klucz". Migracja przy task #4 (FULL retłumaczenie wprowadzi nowy schemat naraz z update'em treści).
+
+### JSON prompts Reżysera (task #2)
+- **Python doklei `[Reżyserze: ...]` i `[DYREKTYWA]: ...`** z nowego klucza `doklejka_celu_sceny` w `dictionaries/<jzk>/rezyser/tryb_burza.yaml`. LLM zwraca strukturyzowany JSON `{opcje: [{tytul, opis, cel_sceny}, ...], streszczenie?: str}` — tylko `cel_sceny` zawiera treść LLM-a. Linie reżyserskie nie są generowane przez model, więc nie może ich naruszyć ani wymyślić własnych „[Reżyserze, rozważ X]".
+- **Schema liberalna**: `opcje[1-5]` (yaml mówi 3, ale halucynacja 2 nie powinna blokować GUI). Sufiksy alarm/streszczenie wymuszają opcjonalny JSON-klucz `streszczenie` (zastąpiony wcześniejszy tag `<STRESZCZENIE>...</STRESZCZENIE>`); sufiks optymalizacja jawnie zakazuje klucza.
+- **Persystencja `.brainstorm.json`** w `runtime/skrypty/<nazwa>.brainstorm.json` (ten sam folder co `.mode`, DRY metadanych). Plik istnieje TYLKO między wygenerowaniem Burzy a wysyłką prompta produkcyjnego (Skrypt/Audiobook) — wtedy GUI woła `usun_brainstorm()`. Po wczytaniu projektu: `wczytaj_brainstorm()` + rebuild panelu opcji w GUI.
+- **Dispatch w GUI**: `_wyslij_worker` rozróżnia `przepis.id == "burza"` → `rai.generuj_burze` (zwraca `WynikBurzy`) vs pozostałe → istniejący `rai.generuj_fragment`. Stary `_on_wyslij_done_burza` zachowany jako fallback dla hipotetycznych przepisów spoza id="burza" z `zapis_do_pliku=false`.
+- **GUI**: nowy `_pnl_opcji_burzy` (BLOK E.1b w `gui_rezyser.py`) z 3 przyciskami + opcjonalnym TextCtrl streszczenia. Klik opcji wstawia `[CEL SCENY]: <cel_sceny>\n\n<doklejka>` do pola Instrukcji + focus. NIE wysyła automatycznie — gracz dopisuje własne uwagi reżyserskie w linijce `[Reżyserze: ...]` przed wysyłką.
+
+## Patch v15.2.3 — A11y + breaking change folderu Opowieści + łata luki pamięci streszczenia (2026-05-15, tag `v15.2.3` na `77c3bb8`)
+
+Stan po v15.2.3 (origin/main = HEAD = `77c3bb8`, tag `v15.2.3` pushnięty). 7 commitów po v15.2.2 (`1714766`):
+
+- `ae1a2eb` WIP: ochrona RadioBox w Reżyserze (`_zapisany_tryb` mirror `.mode`)
+- `7e67ffb` WIP: ochrona RadioBox w Opowieściach + furtka „Edytuj tryb gry…"
+- `f9e8789` WIP: dialog wyboru projektu/gry (A11y)
+- `44d7bc9` WIP: Cancel→Anuluj + breaking change folderu Opowieści
+- `b43d28e` WIP: przycisk „Otwórz plik narracji" (łata luki pamięci streszczenia)
+- `d728730` docs: regeneracja po 15.2.3
+- `77c3bb8` release: 15.2.3
+
+Force-push 3× w trakcie iteracyjnego patcha — pierwsze 2 WIP zostały push'nięte wcześnie w sesji, potem przy kolejnych dodaniach (`44d7bc9` Cancel/folder, `b43d28e` przycisk narracji) cofnięte 2 ostatnie commits (`reset --soft HEAD~2`) i nadpisane nowymi. User explicit zgadzał się na każdy force-push (przy bardzo świeżej publikacji 15.2.3 na origin nikt nie pobrał starych wersji, tag v15.2.3 pojawia się dopiero po finalnym push).
+
+**Why** każda gałąź patcha:
+1. **Ochrona trybu zapisu (commit ae1a2eb+7e67ffb)** — `_zapisany_tryb` jako mirror `.mode` w RAM. Bug: od v12.0 manual deklarował ochronę, ale Burza (zawsze enabled) była tylną furtką — strzałkami przez nią dało się przejść Audiobook → Skrypt i odwrotnie, pierwsze kliknięcie struktury nadpisywało `.mode` mieszając akty z rozdziałami. Prawdziwa ochrona: `EnableItem(False)` na drugim trybie zapisu zależy od mirror'a, nie bieżącego `_rb_mode.GetSelection()`. W Opowieściach analogicznie + furtka „Edytuj tryb gry…" jako modal z ostrzeżeniem (typowy use-case: AI nie kończy w Wyborów/Mniejsze zło).
+2. **Dialog wyboru projektu/gry (commit f9e8789)** — `wx.SingleChoiceDialog` z listą nazw zamiast wpisywania z klawiatury. Reżyser: walk po `skrypty/` exclude `_streszczenie`; Opowieści: walk po `runtime/opowiesci/` po obecności `.game.json`. Reżyser zachowuje ścieżkę eksperta (pole wypełnione + Enter = direct load).
+3. **Cancel → Anuluj (commit 44d7bc9 fragment)** — `wx.SingleChoiceDialog` nie ma `SetCancelLabel`; fix przez `FindWindowById(wx.ID_CANCEL).SetLabel(t("common.btn_anuluj"))`. Alternatywa `wx.Locale` byłaby destrukcyjna dla innych wbudowanych dialogów (FileDialog → „Open"/„Otwórz" konflikt).
+4. **Breaking change folder Opowieści (commit 44d7bc9)** — po dialogu wyboru z (2) Reżyserowy dialog zaczął widzieć gry Opowieści (zlewały się w `skrypty/`). Decyzja: nowy folder `opowiesci/` w roocie dla user-facing `.txt + .md` Opowieści, auto-migracja w `ProjektOpowiesci.wczytaj()` przez `os.rename` (strażnik: `.game.json` musi istnieć — potwierdzenie że to gra Opowieści). Infra: `.gitignore` + `build_release.IGNOROWANE_FOLDERY` + `installer.iss Excludes`. Konwerter audio bez zmian (file picker manualny).
+5. **Przycisk „Otwórz plik narracji" (commit b43d28e)** — łata luki architektonicznej istniejącej OD PIERWSZEJ PUBLIKACJI: `core_rezyser.ProjektRezysera.wczytaj` linia 458-467 priorytetyzuje plik streszczenia nad pełną historią (`full_story = ""` gdy `.summary.txt` istnieje). Działa OK dla normalnego flow (wygenerowanie streszczenia po przepełnieniu okna kontekstu), ale degeneruje gdy gracz wpisał krótką ręczną notatkę w polu Pamięci Długotrwałej i kliknął Zapisz Streszczenie zanim w pliku narracji było coś istotnego. Po reload AI dostaje Księgę + jednozdaniową notatkę. **Brak fix-a w pełni** (priorytet streszczenia jest globalną konwencją, refactor wymagałby decyzji architektonicznej UI/UX). Workaround: nowy przycisk otwiera plik `.txt` w systemowym edytorze (`os.startfile` / `subprocess.Popen open|xdg-open`, wzorzec z `gui_manager_regul._otworz_w_edytorze_tekstu` i `main.HomePanel._on_action_btn` dla `golden_key.env`). Pełna narracja siedzi nadal na dysku — gracz może z niej skopiować ostatnie sceny do pola Pamięci albo dopisać końcówkę ręcznie. W Opowieściach przycisk ma dodatkowy modalny ostrzeżenie YES_NO o ryzyku rozjazdu z `.game.json` (stan postaci/lokacji żyje w game.json, .txt to tylko narracja TTS).
+
+**Naprawione pre-existing halucynacje LLM przy okazji**: w tales.yaml × 8 jzk LLM zlokalizował nazwy folderów dyskowych (które powinny być literalami PL: `skrypty/`, `runtime/opowiesci/`, `runtime/skrypty/`) na lokalne tłumaczenia (EN `scripts/`, ES `runtime/historias/`, FI `käsikirjoitukset/`, FR `scripts/<nom>`, itp.). Te ścieżki nigdy nie wskazywały na rzeczywiste pliki — bug w docs od kilku wersji wstecz. Naprawione regex-script-em (40 linii × 8 jzk w tales.yaml + 14 linii w ui.yaml + 9 linii w manual.yaml).
+
+**Local data migration podczas dev session**:
+- `emilia_heist_audiobook` (Reżyser): `runtime/skrypty/emilia_heist_audiobook.mode` 1 → 2 (bug fix po starym glitchu); `skrypty/emilia_heist_audiobook.txt` ucięty 26 bajtów (puste linie + „Akt 1" + „Scena 1" wstrzyknięte przez bug).
+- `joanna_joana_conflict` (Opowieści): auto-migracja przez `ProjektOpowiesci.wczytaj` ze `skrypty/` do `opowiesci/` (txt + md). Reżyserowy dialog wyboru pokazuje teraz tylko `emilia_heist_audiobook`, Opowieściowy tylko `joanna_joana_conflict`.
+
+## Kluczowe decyzje architektoniczne v15.2.3
+
+### Luka pamięci streszczenia — workaround zamiast fix-a
+
+`core_rezyser.ProjektRezysera.wczytaj` priorytetyzuje `.summary.txt` nad pełną historią. Decyzja JEST CELOWA dla normalnego flow (wygenerowanie streszczenia z Burzy po przepełnieniu okna kontekstu, świadome wyczyszczenie pamięci bieżącej żeby zwolnić bufor). Ale w degenerowanym scenariuszu (krótka ręczna notatka „AI zrobiło coś źle, pomiń ostatnią scenę") powoduje że po reload AI dostaje tylko Księgę + 1 zdanie i halucynuje bez kontekstu.
+
+**Workaround zamiast fix-a**: dodanie nowego przycisku do otwierania pliku narracji w edytorze. Plik wciąż jest na dysku (nie był kasowany, tylko `full_story` w RAM zerowane). Gracz może skopiować ostatnie sceny do pola Pamięci albo dopisać końcówkę ręcznie. Fix in-place wymagałby zmiany logiki priorytetu (np. wczytanie OBYDWU — full_story + summary_text — i zostawienie decyzji w UI), co jest decyzją architektoniczną wymagającą consciousnessu UX. Workaround jest 5-liniowy i nie zmienia istniejącego flow.
+
+**How to apply**: jeśli przyszły patch dotyka logiki ładowania (`ProjektRezysera.wczytaj` lub `ProjektOpowiesci.wczytaj`), rozważ zmianę z eager-priority streszczenia na lazy-fallback (pełna historia load-uje się ZAWSZE, streszczenie tylko jako dodatkowy kontekst). Wymaga zmiany schemat `WynikWczytania` + logiki `_btn_wyslij` (jak Pamięć Bieżąca obecna, użyj jej; jeśli pusta, fall back do summary_text).
+
+### Breaking change `opowiesci/` — separacja domen Reżyser/Opowieści
+
+Do v15.2.3 oba moduły zapisywały user-facing pliki (.txt narracja + .md Księga Świata) do tego samego folderu `skrypty/`. To powodowało:
+- Dialog wyboru projektu Reżysera widział też gry Opowieści (z `.mode` poza zakresem 1/2 → fallback all enabled).
+- Manualne grzebanie w Eksploratorze plików mylące (gracz nie wiedział czy emilia_heist to Reżyser czy Opowieści).
+- Brak naturalnego punktu w kodzie żeby rozróżnić co należy do której funkcji.
+
+**Decyzja v15.2.3**: fizyczne wydzielenie `opowiesci/` w roocie repo (literalna nazwa PL, niezlokalizowana — analogicznie do `skrypty/`). 4 pliki infra do zmiany (.gitignore, build_release.py IGNOROWANE_FOLDERY, installer.iss Excludes, core_opowiesci.py ścieżki). Auto-migracja w `ProjektOpowiesci.wczytaj` przenosi pliki ze `skrypty/` do `opowiesci/` przy pierwszym wczytaniu pre-15.2.3 gry — strażnik `.game.json` istnieje (potwierdzenie że to faktycznie gra, nie projekt Reżysera o przypadkowo zbieżnej nazwie). `runtime/skrypty/<gra>.mode` ZOSTAJE wspólny z Reżyserem (numeracja 0-2 vs 3-5 nie koliduje — patrz `core_rezyser.zapisz_tryb_tworczy` linia 544 vs `core_opowiesci.zapisz_tryb` linia 358).
+
+**How to apply**: gdyby w przyszłości pojawił się trzeci moduł zapisujący user-facing pliki (np. Konwerter zapisujący `.docx`), wybierz nową nazwę folderu w stylu istniejących (literalna PL, np. `audiobooki/` dla Word export). NIE wsadzaj do `skrypty/` ani `opowiesci/` — separacja domen jest celowa.
+
+## Patch v15.2.4 — piąta kategoria w Managerze Reguł + obieg zgłoszeń „Z Południa na Północ" (2026-05-15, tag `v15.2.4` force-przesunięty na `34be1f2`, Release #28)
+
+Stan po v15.2.4 (origin/main = HEAD = `34be1f2`, tag `v15.2.4` force-przesunięty z `d6357bf` przez `2f82f66`, `d5afee5`, `1ada06c` na `34be1f2` analogicznie do dusz bota v15.2.2, Release #28 na GitHub z binarkami + RELEASE_NOTES.md). 9 commitów po v15.2.3 (`77c3bb8`):
+
+- `6dab955` docs: regeneracja po 15.2.4 — 5. kategoria Opowieści w Managerze Reguł
+- `661a0ce` release: 15.2.4 — Manager Reguł kategoria Opowieści + obieg zgłoszeń Z Południa na Północ
+- `3d3ee4a` fix-up 15.2.4: GH Actions czytają issue z env (uniknięcie bash word-splittingu)
+- `8e44fe7` fix-up 15.2.4: patch-bot.yml + send_patch.py też czytają issue z env
+- `d6357bf` docs: RELEASE_NOTES.md — sekcja patcha 15.2.4 *(tu pierwotnie stał tag v15.2.4 i Release #28 został opublikowany)*
+- `2f82f66` fix-up 15.2.4: usuń mylne wzmianki o „Tiflotecnia Voices" w issue closure templates (post-release fix-up #1)
+- `d5afee5` fix-up 15.2.4: dodaj `gh issue lock --reason resolved` po close w issue_closure_north.py (post-release fix-up #2)
+- `1ada06c` fix-up 15.2.4: Sami melduje na issue po wysyłce maila (komentarz w 9 jzk) — post-release fix-up #3, znaleziony przez user smoke test obiegu Południe→Północ na issue #5
+- `34be1f2` fix-up 15.2.4: usuń wzmianki o Tiflotecnia z tematu maila + system promptu Sami (post-release fix-up #4)
+
+Pierwsze 5 commitów puszczonych jako Release #28. Cztery post-release fix-upy poszły osobnymi commitami po review/smoke teście usera, wszystkie z force-push tagu (analogicznie do v15.2.2 → 1714766 — infrastruktura GH Actions wokół release'u, nie binarka aplikacji):
+
+1. **Fix-up #1 (2f82f66)** — krytyczna gafa wzorcowa: 27 templates w `issue_closure_north.py` zostało skopiowane z `send_patch.py` (gdzie „Tiflotecnia Voices" było dosłownie tematem — dystrybucja paczki dodatku NVDA), ale to repo to Reżyser Audio AI a issues mogą dotyczyć dowolnego modułu. Lumi × 9 + Katla × 9 wymieniają teraz idiomatyczną nazwę produktu per język, Vieno × 9 było już stylistycznie neutralne.
+2. **Fix-up #2 (d5afee5)** — brakujący 4. krok sekwencji bota: `patch-bot.yml` od v15.2.2 ma `comment → edit → close → lock --reason resolved`, `issue_closure_north.py` miał tylko `comment → close`. Bez locka użytkownik mógłby dopisywać komentarze po Lumi/Vieno/Katla — wątek się rozjeżdża, robot przy następnej etykiecie zbędnie domyka issue ponownie. Lock-error nie kładzie workflowu (comment + close już poszły), tylko warning do stderr.
+3. **Fix-up #3 (1ada06c)** — brakujący meldunek Sami na issue: po wysyłce maila do Centrum user widział tylko „czarną dziurę" między nadaną etykietą a komentarzem Lumi/Vieno/Katla po fix-ie (czasem dni). Sami zostawia teraz komentarz w wykrytym języku (lingua, 9 jzk + fallback EN) w swoim włoskim stylu („Ciao!", „A presto!", emoji słońca) informując że zgłoszenie odebrane i prompt techniczny dotarł. Sufiks „LLM fallback — original body forwarded raw" jeśli OpenAI zawiodło. Wymagało zmiany permissions workflow `issues: read` → `issues: write` + dorzucenia `lingua-language-detector` do `pip install` + GH_TOKEN/GITHUB_REPOSITORY w env. Komentarz NIE idzie gdy etykiety odfiltrowane (LABELS_IGNORE) ani gdy SMTP zfailowało (bez fałszywej obietnicy).
+4. **Fix-up #4 (34be1f2)** — kontynuacja sprzątania brandu po fix-upie #1, znaleziona przez user review wiadomości mailowej trafiającej do Centrum: (a) temat maila miał prefix `[Tiflotecnia Voices]` (fałszywa obietnica analogiczna do gafy z templates Lumi/Katla) → wymieniony na `[Reżyser Audio AI]`; (b) `SAMI_SYSTEM_PROMPT` opisywał projekt po włosku jako „nel progetto Tiflotecnia Voices (lettore audio per non vedenti)" — to naprowadzało LLM na fałszywy kontekst (myślała że pomaga przy plug-inie NVDA, a to studio nagraniowe wxPython) → zastąpiony pełnym opisem „nel progetto Regista Audio AI (studio di registrazione ibrido per radiodrammi, audiolibri e storie interattive, framework desktop wxPython ottimizzato per lettori di schermo come NVDA)" + explicit disambiguation „NOTA: questo NON è il plug-in NVDA Tiflotecnia Voices" + lista modułów. Lekcja: fix-up #1 ograniczył się TYLKO do `TEMPLATES` dict, nie zaaudytował reszty pliku — `feedback_template_marka_review` zaktualizowane o regułę „WSZYSTKIE pola, nie tylko user-facing templates".
+
+User explicit zgodził się na force-push przy wszystkich czterech fix-upach. `git push --force origin refs/tags/v15.2.4`.
+
+**Walidacja przez user smoke test (issue #5 „Kontrolowany test autora repo — pełny obieg południe-północ", 2026-05-15)**: pełny obieg działa technicznie, LLM Mini potraktował docelowe niejasne zgłoszenie zbyt dosłownie (oczekiwany był żart, dostał formalny prompt; nie traktowane jako bug). Po fix-upie #3 user widzi melodunek Sami na issue zaraz po wysłaniu maila + komentarz Lumi/Vieno/Katla po fix-ie — pełna ścieżka audytowa user-facing.
+
+**Why** dwóch ścieżek patcha:
+1. **Manager Reguł — piąta kategoria (gui_manager_regul.py + 9 ui.yaml + 5 manual.yaml)** — folder `dictionaries/<iso>/opowiesci/` istnieje od v15.0 (Interaktywne Opowieści), ale drzewo Managera Reguł (od v13.0) nie skanowało go. Patch dorzuca `FOLDER_OPOWIESCI = "opowiesci"` jako piątą gałąź w pętli `_zaladuj_drzewo`, podfolder przy tworzeniu nowego języka bazowego (`_obsluz_wynik_kreatora`), klucz `manager.kategorie.opowiesci` we wszystkich 9 paczkach z idiomatycznymi tłumaczeniami (Opowieści/Stories/Geschichten/Historias/Tarinat/Récits/Sögur/Storie/Истории), mapping w `_zgadnij_typ_z_zaznaczenia` → `TYP_TRYB_REZYSERA` (najbliższe semantycznie — prompt_systemowy + slowa_wyzwalajace). Manual w 5 językach (pl/en/de/fi/it) zaktualizowany — pozostałe 4 (es/fr/is/ru) nie miały jawnej wzmianki o liście kategorii drzewa.
+2. **Obieg zgłoszeń „Z Południa na Północ" (2 nowe workflow + 2 nowe skrypty)** — pełen lifecycle dla wszystkich issues poza `tiflotecnia-patch`. Etap Południa (Sami, włoska dyspozytorka): trigger `issues: [opened, labeled]` z filtrem (ignoruje wontfix/duplicate/tiflotecnia-patch/fixed-in-release), OpenAI gpt-4o-mini przerabia treść na polski prompt z 4 sekcjami (Cel/Kontekst/Kryteria/Pułapki z CLAUDE.md), mail do Centrum przez SMTP. Fallback przy braku klucza/401/429 → oryginalna treść. Etap Północy (Lumi/Vieno/Katla): trigger `fixed-in-release`, lingua wykrywa język oryginału (9 jzk + fallback EN), losowanie persony, komentarz w stylu (śnieżny/szamański/wulkaniczny) + `gh issue close`. 27 templates (9×3) z pełnymi diakrytykami dla NVDA. Wzorzec persony 1:1 z `send_patch.py` v15.2.2.
+
+**Fix-up env-vars (commity 3d3ee4a + 8e44fe7)**: pierwsza iteracja używała `python skrypt.py "$ISSUE_BODY" "$ISSUE_NUMBER"`. Bash robi word-splitting na " i ` w treści issue — klasyczna pułapka shellu, `sys.argv[2]` rozsypuje się przy każdym snippetcie kodu. Naprawa: skrypty czytają `os.environ.get("ISSUE_BODY", "")` (sekcja `env:` w YAML i tak już wstrzykiwała te pola), workflowy uruchamiają `python skrypt.py` bez argumentów. Przy okazji ten sam bug naprawiony w istniejącym `send_patch.py` + `patch-bot.yml` z v15.2.2 — żył od pół roku. Memory `feedback_gh_actions_env_zamiast_argv.md` zarejestrowane na przyszłe workflowy.
+
+## Kluczowe decyzje architektoniczne v15.2.4
+
+### Manager Reguł — typ pliku dla `opowiesci/` używa `TYP_TRYB_REZYSERA` (zamiast dedykowanego TYP_TRYB_OPOWIESCI)
+
+`_zgadnij_typ_z_zaznaczenia` dla pliku w kategorii `opowiesci/` zwraca `mrs.TYP_TRYB_REZYSERA`, nie nowy `TYP_TRYB_OPOWIESCI`. Decyzja celowa: pliki opowiesci/ semantycznie są najbliższe trybom Reżysera (oba zawierają `prompt_systemowy` + `slowa_wyzwalajace`), więc kreator startuje z istniejącego szablonu. Dedykowany typ wymagałby nowego szablonu w `manager_regul_szablony.py` z konkretnym formatem JSON-schema response i dispatch w `core_opowiesci.py`. W praktyce autor paczki i tak **duplikuje** istniejący tryb (np. `tryb_swobodny.yaml` z `pl/opowiesci/`) i tłumaczy `prompt_systemowy` na natywny — przycisk Duplikuj wystarczy. Dedykowany szablon odłożony na v15.3 (jeśli się pojawi realny use-case wymagający go).
+
+**How to apply**: gdyby przyszły patch chciał kreatorować pliki opowiesci/ z dedykowanym szablonem, dorzuć `TYP_TRYB_OPOWIESCI` w `manager_regul_szablony.py` (analogicznie do `TYP_TRYB_REZYSERA`), uruchom `odswiez_rezysera.py` (lub odpowiednik dla opowieści jeśli powstanie), zmień gałąź w `_zgadnij_typ_z_zaznaczenia`. Wzorzec stylu prompta — patrz `prompt_tryb_rezysera` w `manager_regul_szablony.py`.
+
+### Env-vars zamiast argv w GH Actions workflowach z user-input
+
+Wzorzec docelowy dla każdego workflow, który przekazuje dowolne user-input pole (issue title/body/comment, PR description itd.) do skryptu Pythona:
+1. Pole w sekcji `env:` kroku: `ISSUE_BODY: ${{ github.event.issue.body }}`.
+2. `run: python skrypt.py` BEZ argumentów dodawanych z `"$..."`.
+3. Skrypt czyta: `os.environ.get("ISSUE_BODY", "")`.
+
+Bezpieczne przez bash są tylko liczby (np. `gh issue close $ISSUE_NUMBER` — bash nie rozsypie inta) oraz hardkodowane stringi z YAML (bilingual komentarze z `patch-bot.yml`). Wszystko od użytkownika idzie przez env. Zapisane w [[feedback_gh_actions_env_zamiast_argv]] — reguła egzekwowana dla każdego nowego workflow.
+
+### Lifecycle issue: trzy bohaterki Północy + dyspozytorka z Południa
+
+Cały głos „Northern operations" w GitHub Actions to teraz Lumi/Vieno/Katla — wprowadzone w v15.2.2 dla `send_patch.py` (patch-bot dystrybuujący `tiflotecnia-patch`), użyte ponownie w v15.2.4 dla `issue_closure_north.py` (zamykanie issues z `fixed-in-release`). Wzorzec stylów (śnieżny / szamański / wulkaniczny) i konwencja templates `dict[Language, dict[str, str]]` powtórzona 1:1. Etap Południa (Sami, włoska dyspozytorka) jest nowy w v15.2.4 — wprowadzony żeby zbalansować geografię (Sami z Włoch deleguje do Lumi/Vieno/Katla z Północy, „Z Południa na Północ" jako metafora obiegu zgłoszeń).
+
+**How to apply**: jeśli kiedyś pojawi się trzeci punkt obiegu (np. „pierwsza linia weryfikacji" przed Sami albo „archiwizator" po Lumi/Vieno/Katla), wybierz spójną geograficznie postać + język/styl. Konwencja: postacie z mapy świata (Sami=Włochy, Lumi=Skandynawia, Vieno=Finlandia, Katla=Islandia).
+
+## Patch v15.2.5 — koniec Portable ZIP + sekcja migracji + sprostowanie autoupdate (2026-05-15, tag `v15.2.5` na `03ee3ea` z fix-up `aaf46c4`)
+
+Stan po v15.2.5: tag pushnięty na origin, Release opublikowany z artefaktem `Rezyser_Audio_v15.2.5_Installer.exe`. Trzy gałęzie:
+1. **Wycięcie Portable ZIP** z `build_release.py` (deployment path simplification po footgun'ie z autoupdate — user wypakowuje ZIP do `D:\Apki\`, autoupdater pobiera Installer.exe → akceptuje DOMYŚLNĄ `%LocalAppData%\Programs\` zamiast ZIP-owej → DRUGA pusta instalacja, brak projektów/klucza API).
+2. **Przepisanie 9× manual.yaml + 9× readme.yaml** pod single-installer narrative — sekcja migracji „Przenoszenie projektów i klucza API" z 5-krokową procedurą + 2 triki Win11/Win7-10 do odzyskania zapomnianej ścieżki + slownik nazwy „Otwórz lokalizację pliku" per locale (PL/EN/DE/ES/FI/FR/IS/IT/RU).
+3. **Uczciwe sprostowanie autoupdate** — pierwotne zdanie obiecywało że `dictionaries/` przeżywa upgrade, FALSZ (installer.iss `Excludes` pokrywa tylko `dictionaries\*\gui\dokumentacja\*`, reszta z `Flags: ignoreversion`). Sekcja zyskała mocne ostrzeżenie + instrukcję backupu `dictionaries/` przed potwierdzeniem aktualizacji. Refaktor architektury (split user-data vs seed-data) odłożony na v15.3+.
+
+Sanity check 18 yamli przy okazji wyłapał **7 historycznych halucynacji LLM** (fi/manual::naglowek + fi/readme::wprowadzenie + fr/readme::glowne_moduly + is/readme::wprowadzenie + is/readme::glowne_moduly + it/readme::wprowadzenie + ru/manual::naglowek + ru/readme::instalacja_uzytkownicy) — wszystkie wycięte/przepisane. CLAUDE.md zyskał regułę detekcji halucynacji po batch retranslate (porównanie liczby linii pl vs `<iso>`, grep za polskimi pozostałościami, sprawdzanie nieoczekiwanych `## ` headers).
+
+Fix-up `aaf46c4` (post-publish): ustal workflow release direct-to-main (porzucenie PR/branch dla solo-dev + A11y), `RELEASE_NOTES.md` jako single source dla Release description. `PULL_REQUEST_COMMENTS.md` usunięty z repo. Zapisane w [[feedback_pr_workflow]]. (Workflow ostatecznie ustalony w v15.2.9: bot `draft-release.yml` zastąpił ręczne kroki.)
+
+## Patch v15.2.6 — refaktor obiegu bug-flow vs question-flow + 5 docs fixów po smoke-testach (2026-05-15, tag `v15.2.6` force-przesunięty na `8400805` z fix-up `8400805` post-publish)
+
+Stan po v15.2.6: origin/main = HEAD = `8400805`, tag v15.2.6 force-przesunięty z `ee67737` na `8400805`. Release opublikowany z artefaktem `Rezyser_Audio_v15.2.6_Installer.exe` przed force-pushem fix-upu (binarka pozostała nietknięta — pure-infrastructure fix-up, patrz [[feedback_iteracyjny_patch_force_push]]).
+
+Główne zmiany:
+1. **Question-flow równolegle do bug-flow** w obiegu „Z Południa na Północ". Stary v15.2.4 zakładał że każdy issue kończy się patch'em w Release: Sami 4-sekcyjny prompt → maintainer → `fixed-in-release` → Lumi/Vieno/Katla z linkiem. Dla `question`/`help wanted` było absurdalnie (Sami generowała „Kryteria akceptacji" i „Pułapki" dla zwykłego pytania, Lumi/Vieno/Katla dodawały link do Release który dla pytania jest szumem). Refaktor: nowa etykieta `answered`, Sami uproszczony 2-sekcyjny prompt dla pytań, 27 nowych szablonów `TEMPLATES_ANSWERED` w `issue_closure_north.py` (9 jzk × 3 persony) z placeholderem `{maintainer_answer}` zamiast `{link}`, bot wciąga ostatni komentarz przez `gh issue view --json comments`.
+2. **5 cross-language docs fixów** po smoke-testach (9 manual.yaml): Win 11 reduced context menu hint („Pokaż więcej opcji" / Shift+F10 ×2), Backspace jako primary zamiast Alt+Up (Alt+Up działa tylko gdy fokus na liście plików, nie na adres baru), stale `run.bat` shortcut warning dla upgrade z v15.2.4. Plus per-language extras: `de` (dwa warianty „Dateipfad öffnen" Win 10 / „Dateispeicherort öffnen" Win 11), `es` (oficjalne MS naming „Abrir ubicación..." bez „la"), `is` (wzmianka o islandzkiej Dóra czytającej „Backspace" literowo — limit syntezatora, nie bug), `it` (rozszerzone ostrzeżenie autoupdate „ATTENZIONE CRITICA").
+
+Post-publish fix-up `8400805` (force-push tagu): **bot usuwa komentarz maintainera po wciągnięciu w question-flow**. Pierwszy realny test question-flow (issue #8 DE smoke-test) ujawnił UX bug: bot wciąga komentarz maintainera, wrapuje w Katla, ale oryginał zostaje na issue → duplikat treści, NVDA czyta dwa razy. Fix w `.github/scripts/issue_closure_north.py`:
+- `_pobierz_ostatni_komentarz()` → `_pobierz_ostatni_komentarz_z_meta()` zwraca tuple (body, url, author_login)
+- Nowa `_usun_komentarz_po_url(repo, url)` — regex `#issuecomment-(\d+)$` z URL'a → `gh api -X DELETE /repos/{repo}/issues/comments/{id}`
+- Safety check w gałęzi `answered`: jeśli ostatni komentarz to bot (`endswith('[bot]')` lub `== 'github-actions'`) → ABORT z komunikatem o złej kolejności (maintainer nadał `answered` zanim odpowiedział)
+- Delete oryginalnego komentarza ZANIM bot doda wrapped wersję; non-fatal — jeśli się nie uda, zostaje duplikat ale issue zostaje zamknięte
+
+User explicit zgodził się na force-push tagu post-publish (precedens: v15.2.2, v15.2.4 × 4). Zaktualizowane memory [[feedback_iteracyjny_patch_force_push]] o wyjątek dla pure-infrastructure fix-upów.
+
+Do zrobienia (planuje user, kolejna sesja po /clear): 5 pozostałych smoke-testów (es/fi/is/it/fr + jeszcze jeden) z `skrypty/issue.txt` (gitignored), każdy jako prawdziwy GitHub issue żeby zweryfikować dedup fix + ewentualnie wyłapać kolejne UX bugi w question-flow lub bug-flow.
+
+## Patch v15.2.7 — tryb FILE w question-flow + force-push tag heurystyka (2026-05-16, tag `v15.2.7` force-przesunięty na `3d041da`)
+
+Stan po v15.2.7: origin/main = HEAD = `3d041da`, tag v15.2.7 force-przesunięty z `4024126` (release commit) na `3d041da` (fix-up CLAUDE.md). Release opublikowany z `Rezyser_Audio_v15.2.7_Installer.exe` po release commicie, fix-up dodany post-publish — binarka nietknięta.
+
+Pierwszy realny smoke test question-flow z v15.2.6 (es issue #9, smoke test 3 — hiszpański, Argentyna locale es-AR, NVDA) ujawnił dwie luki obecnego mechanizmu COMMENT mode:
+1. **A11y blokada kopiowania**: maintainer-NVDA-user nie może wkleić długiej odpowiedzi przez web GitHub UI, bo accessibility buffer VS Code TOKENIZUJE treść z terminala (powtarza ciągi znaków nawet dla krótkich wzorców HEREDOC — empirycznie potwierdzone 2026-05-16). Edytor pliku w VS Code ma natywne A11y, terminal nie.
+2. **Race condition w COMMENT mode**: `_pobierz_ostatni_komentarz_z_meta` wciąga chronologicznie ostatni komentarz; gdyby ktoś trzeci skomentował między odpowiedzią maintainera a nadaniem etykiety `answered`, bot wciągnie cudzy komentarz.
+
+**Refaktor**: tryb FILE priorytetowy nad COMMENT. Maintainer zapisuje draft jako `pending_answer.md` w roocie, pushuje, nadaje etykietę → bot wczytuje z pliku (nie z komentarzy), opakowuje w persona-template Lumi/Vieno/Katla, publikuje, zamyka, lockuje, i `git rm pending_answer.md` jako autor `github-actions[bot]` (push na main z `contents: write`). Backward compat: brak pliku → fallback do trybu COMMENT.
+
+3 commity v15.2.7:
+- `4024126` v15.2.7: tryb FILE w question-flow + smoke test hiszpańskiego issue (release commit, zawiera `pending_answer.md` jako draft)
+- `57dd78d` chore(answer-bot): cleanup pending_answer.md po odpowiedzi na #9 (bot push z github-actions[bot])
+- `3d041da` fix-up v15.2.7: lessons learned A11y + heurystyka force-push tag po cleanup commit boota
+
+**Smoke test ES issue #9 PRZESZEDŁ** poprawnie po nadaniu `answered`: bot wczytał plik, wykrył hiszpański przez lingua, wylosował Lumi, opublikował wrapped odpowiedź, zamknął i zalockował issue, pushnął cleanup commit. Race resilience zweryfikowana — bot zignorował polski awaryjny komentarz maintainera (test fallback) i wziął treść z pliku. Tryb FILE jest production-ready.
+
+**Nowa sekcja w CLAUDE.md `## Heurystyka „cleanup commit boota = force-push tag"`**: jeśli między tagiem v<wersja> a HEAD jest DOKŁADNIE 1 commit (cleanup boota od trybu FILE), force-push tag-only daje czyste archive Release UI (auto-regeneracja source-code ZIP z nowego SHA bez `pending_answer.md`). Procedura: `git tag -d v<wersja> && git tag v<wersja> HEAD && git push origin v<wersja> --force`. Wyjątek udokumentowany jako kontrast do globalnego zakazu force push main.
+
+**Nowa sekcja w CLAUDE.md `# ZARZĄDZANIE TERMINALEM` punkt 8**: kopiowanie z terminala VS Code jest niewiarygodne (accessibility buffer). Reguły dla agenta: długie treści zapisuj do PLIKU, AskUserQuestion preferuj 1 pytanie per turn (multi-question ma sklejone opcje w accessibility buffer), zawsze potwierdzaj rozumienie odpowiedzi.
+
+## Patch post-v15.2.7 — atomic-reset workflow (2026-05-16, infra commit `a60f675`, tag v15.2.7 force-przesunięty post-publish)
+
+Stan: origin/main = HEAD = `a60f675`, tag `v15.2.7` force-przesunięty post-publish z `3d041da` (fix-up CLAUDE.md) na `a60f675` (infra atomic-reset) — analogicznie do v15.2.2 / v15.2.4 × 4 / v15.2.6 (heurystyka force-push tag z `# WORKFLOW RELEASE`, kwalifikujący się przypadek: 1 commit po release, refinement workflow boota nie aplikacji, backward-compatible). Decyzja podjęta przed v15.3 refactorem split user-data, żeby `v15.2` cykl zamknąć z atomic-reset baked w archive Release source-code. 1 commit po v15.2.7 (`3d041da` przed move):
+
+- `a60f675` infra(answer-bot): atomic-reset jako preferowana sciezka cleanup pending_answer.md
+
+**Why**: po v15.2.7 user-zadane pytanie podczas konsultacji obnażyło dwustopniową słabość workflow „bot publikuje + cleanup commit":
+1. Bot dokładał commit `chore(answer-bot): cleanup pending_answer.md po #N` → źródłowy archive Release UI zawierał `pending_answer.md` jako kosmetyczny artefakt, dopóki nie zrobiło się force-push tagu post-publish (heurystyka v15.2.7).
+2. Dyskusja architektoniczna w sesji 2026-05-16: jeśli commit maintainera dodający `pending_answer.md` jest ATOMOWY (TYLKO ten jeden plik), bot może zamiast cleanup commit'a zrobić `git reset --hard HEAD~1 && git push --force-with-lease`. Wymazuje commit z historii bez śladu, tag pozostaje stabilny, brak cleanup commit'a. Pomysł użytkownika z kontekstu „solo-dev + jedyny autor repo, ja czekam na dźwięk zakończonej komendy przed labelem — edge case'y race-condition nie wystąpią".
+
+**Implementacja (3 pliki)**:
+- `.github/scripts/issue_closure_north.py`: nowe funkcje `_czy_head_to_atomowy_pending_commit` (sprawdza `git show --name-only --format= HEAD` == `['pending_answer.md']`) + `_wymaz_pending_commit_force_push` (`reset --hard HEAD~1` + `push --force-with-lease`). `main()` próbuje atomic-reset najpierw; fallback do dotychczasowego `_usun_pending_answer_z_git` (cleanup commit) gdy HEAD zawiera dodatkowe pliki LUB force-push fail.
+- `.github/workflows/issue-closure.yml`: `fetch-depth: 2` na `actions/checkout@v4` — bez tego HEAD~1 nie istnieje lokalnie (default shallow @v4 = depth 1) i atomic-reset by failował.
+- `CLAUDE.md`: sekcja `# ODPOWIEDZI NA ISSUE` rozszerzona o wymóg atomowości commit'a + sub-procedurę „release-then-answer" (gdy issue wymaga odpowiedzi + release: najpierw release commit + tag przez web Release UI, dopiero potem atomowy `pending_answer.md`); heurystyka force-push tag z v15.2.7 oznaczona jako **edge-case fallback** (rzadko używany od v15.2.8); UWAGA o force-push main rozszerzona o wyjątek dla bota.
+
+**Smoke test #10 (fiński, „Smoke test 4/7", Alt+Up vs Backspace + opowieści feedback) PRZESZEDŁ first-try**:
+- Atomowy commit `e653e44 answer: draft odpowiedzi na #10` (1 file, 7 insertions) → push → user nadał etykietę `answered` → bot.
+- Logi Actions potwierdziły wybór preferowanej ścieżki: bot wczytał plik, opakował w Lumi (random), opublikował komentarz po fińsku, zamknął i zalockował issue.
+- Cleanup atomic-reset: `git fetch` lokalnie pokazał `+ e653e44...a60f675 main -> origin/main (forced update)` — klasyczny sygnał forced-update. HEAD na origin wrócił na `a60f675`. Commit `e653e44` zniknął z historii bez śladu (brak nowego cleanup commit'a `chore(answer-bot): cleanup po #10`, w przeciwieństwie do #9 gdzie `57dd78d` istnieje w log).
+
+**Zweryfikowane fakty infra (do reuse w przyszłych workflowach)**:
+- Default `secrets.GITHUB_TOKEN` z `contents: write` permission POZWALA na force-push branch (`--force-with-lease`) na main bez branch protection — nie trzeba PAT.
+- `fetch-depth: 2` na `actions/checkout@v4` wystarcza dla `git reset --hard HEAD~1` (`HEAD~1` istnieje lokalnie, ale nie `HEAD~2`).
+- Webhook `issues.labeled` odpala workflow po commit-em maintainera dotrze na origin (brak race condition w solo-dev — user czeka na „dźwięk zakończonej komendy" przed nadaniem etykiety).
+
+**Wniosek architektoniczny**: heurystyka force-push tag z v15.2.7 NIE jest dead code — wciąż żyje dla dwóch edge cases: (1) maintainer zcommitował `pending_answer.md` razem z innymi plikami (nieatomowy), (2) atomic-reset boota failuje i bot spada do fallbacku. W obu przypadkach cleanup commit boota istnieje i tag wymaga force-push. W praktyce powinno być rzadkością przy dyscyplinie commit'a atomowego.
+
+**Decyzja braku osobnego release v15.2.8 + force-push tag v15.2.7 zamiast bumpu**: zmiana 220 linii kodu nie wymaga release X.Y.(Z+1), bo:
+- VERSION nieruszony (15.2.7).
+- Żaden plik aplikacji (`*.py` poza `.github/scripts/`, `dictionaries/`, `docs/`, `RELEASE_NOTES.md`) niezmieniony.
+- User-facing nikt nie odczuje (instalator v15.2.7 działa identycznie).
+
+ALE: pierwotnie infra commit miał zostać BEZ tagu w ogóle. User przeanalizował i zdecydował **force-push istniejącego tagu v15.2.7** z `3d041da` na `a60f675`, żeby archive Release v15.2.7 source-code zawierało atomic-reset workflow „od początku". Rationale: cykl v15.2 zamykany przed v15.3 refactorem split user-data — atomic-reset jest legitymowanym refinement'em workflow tego cyklu (kontynuacja heurystyki force-push tag z v15.2.7 fix-up `3d041da`), więc lepiej baked w v15.2.7 niż osierocony bez tagu między cyklami. Procedura per `# WORKFLOW RELEASE :: ## Heurystyka „cleanup commit boota = force-push tag"` w CLAUDE.md (sekcja Edge case fallback) — kwalifikujący się przypadek: 1 commit po release commitcie, refinement infra workflow boota nie aplikacji, backward-compatible (nowy bot ma fallback do v15.2.7 cleanup commit'a gdy HEAD nieatomowy).
+
+Wykonanie force-push tagu (2026-05-16, sesja kontynuacyjna po smoke teście #10):
+```
+git tag -d v15.2.7              # was 3d041da
+git tag v15.2.7 HEAD            # → a60f675
+git push origin v15.2.7 --force # + 3d041da...a60f675 v15.2.7 -> v15.2.7 (forced update)
+```
+
+Po force-push: web GitHub Release UI auto-regeneruje source-code archive z `a60f675` SHA (zawierający `.github/scripts/issue_closure_north.py` + `.github/workflows/issue-closure.yml` z atomic-reset + CLAUDE.md z release-then-answer sub-procedurą). Release artefakt `Rezyser_Audio_v15.2.7_Installer.exe` (attachment) NIETKNIĘTY — binarka pre-atomic-reset działa identycznie (atomic-reset to bot infra, nie aplikacja).
+
+Jeśli przyszły patch v15.2.8 chciałby się powołać na ten infra change, niech reference'uje commit `a60f675` lub tag `v15.2.7` w RELEASE_NOTES sekcja „Pod maską".
+
+## Patch v15.2.8 — DialogAktualizacji + bot extension `fixed-in-release` FILE mode (2026-05-16, tag v15.2.8 → `34faadd`)
+
+Geneza: bug-issue #13 (IT smoke test) — włoski user-NVDA stracił 6 miesięcy modyfikacji w `dictionaries/it/akcenty/{polski,niemiecki}.yaml` po update v15.2.4 → v15.2.5. Manual v15.2.5+ JUŻ ostrzega o backup `dictionaries/`, ale user czytał stary manual v15.2.4 podczas decyzji — manual aktualizuje się razem z softem (chicken-and-egg). Wniosek: krytyczne info MUSI być w samym dialogu, nie tylko w manualu.
+
+Fix v15.2.8:
+- `main.py`: nowa klasa `DialogAktualizacji(wx.Dialog)` wymienia stary `wx.MessageBox(YES_NO)`. Trzy przyciski: Pobierz (default) / Otwórz folder dictionaries / Anuluj. Inline paragraph UWAGA z instrukcją backup. Cross-platform open folder przez `os.startfile`/`open`/`xdg-open`.
+- 4 nowe klucze i18n × 9 paczek (`btn_pobierz`, `btn_otworz_dictionaries`, `btn_anuluj`, `blad_otworz_folder`) + rozszerzony `nowa_wersja_tresc` × 9.
+- Akceleratory zweryfikowane na unikalność per dialog × 9 jzk: PL &P/&O/&A, EN &D/&O/&C, DE &H/&O/&A, ES &D/&A/&C, FI &L/&A/&P, FR &T/&O/&A, IS &S/&O/&H, IT &S/&p/&A, RU &С/&О/&т.
+- 9 manuali z dopisanym 1 zdaniem o nowym dialogu na końcu paragraph'u ostrzegawczego w sekcji „Automatyczne aktualizacje".
+- Commit `cd0bd21` (release) + `34faadd` (infra: bot extension `fixed-in-release` FILE mode). Tag v15.2.8 → `34faadd`.
+
+Bot extension `34faadd` (`issue_closure_north.py` rozszerzenie): dla etykiety `fixed-in-release` opcjonalny tryb FILE — jeśli `pending_answer.md` istnieje, bot dolepia treść pod standardowym TEMPLATES separatorem `---` + intro w wykrytym języku ze słownika `PERSONAL_NOTE_INTRO` (9 jzk). W odróżnieniu od `answered`: brak pliku przy `fixed-in-release` = standardowy TEMPLATES bez dolepka (NIE fallback COMMENT). `cleanup_pending_file` ustawiany identycznie jak w `answered` → atomic-reset wymazuje plik.
+
+**Incydent #13 (release-with-answer flow zaburzony)**: release commit `cd0bd21` zawierał w nagłówku `(fix #13)` — GitHub wykrył auto-close keyword przy publikacji Release v15.2.8 i zamknął issue zaraz po publikacji, ZANIM maintainer nadał `fixed-in-release`. Workflow boota nie odpalił, `pending_answer.md` zwisał na origin. Bonus: GitHub usunął przycisk „Reopen issue" dla issues zamkniętych przez auto-close keyword. Recovery ścieżką B: maintainer skomentował ręcznie symulując TEMPLATES[ITALIAN][Vieno] + dolepek (przez gitignored `skrypty/bot_comment_recovery.md` skopiowany z Notatnika), lock conversation → resolved, cleanup commit `1c58efa` zwykły (BEZ force-push, 2 commits między tagiem a HEAD akceptowalne). Lessons-learned commit `9ee1c2a` + memory [[feedback_github_auto_close_keywords]].
+
+## Patch v15.2.9 — focus restore w DialogAktualizacji po side-effect + smoke test bot extension FILE mode dla `fixed-in-release` w czystej formie (2026-05-16, tag v15.2.9 → `4e99a8e`)
+
+Geneza: bug-issue #14 (DE smoke test) — niemiecki NVDA-podcaster zauważył A11y pułapkę w nowym dialogu z v15.2.8. Po kliknięciu „Ordner dictionaries öffnen" Eksplorator się otwiera, user robi backup, Alt+F4 zamyka — ale fokus aplikacji nie wraca deterministycznie do dialogu. NVDA milczy, user nie wie który przycisk ma focus, blind Enter to ruletka 1/3.
+
+Fix v15.2.9: jedna linia `wx.CallAfter(self._btn_pobierz.SetFocus)` na końcu metody `_on_otworz_folder` (po try/except, działa dla obu ścieżek — sukces side-effect ORAZ błąd MessageBox). Standardowy NVDA-wxPython pattern „focus-anchor after side-effect". Bez zmian w i18n / manualach (1-linijkowy bug-fix nie wymaga aktualizacji user-facing docs).
+
+Sekundarny cel: weryfikacja bot extension FILE mode dla `fixed-in-release` z commit `34faadd` w czystej formie (incydent #13 zaburzył pierwsze próby). Release commit `4e99a8e` świadomie zawierał `(addresses #14)` zamiast `fix #14` per [[feedback_github_auto_close_keywords]]. Pending_answer.md commit `9249ca5` z keywordem `(per #14)`. Workflow boota odpalił normalnie po nadaniu `fixed-in-release`:
+- Bot losował personę **Vieno** dla DE (sign-off „Die Winde des Nordens haben Kunde gebracht...")
+- TEMPLATES[GERMAN][Vieno] z linkiem do `releases/latest` (= v15.2.9)
+- Separator `---` + intro DE `Eine zusätzliche Nachricht vom Maintainer für dich:` (italics)
+- Pełna treść `pending_answer.md` po niemiecku
+- `gh issue comment` + close + lock --reason resolved
+- **Atomic-reset zadziałał perfekcyjnie**: `9249ca5...4e99a8e main -> origin/main (forced update)`. `git log v15.2.9..origin/main` zwraca 0 commit'ów. Tag stabilny na `4e99a8e`, archive Release UI pristine.
+
+Powyższe = pierwsze REAL użycie mechanizmu z `34faadd` w produkcji. Sukces stwierdza że logika bot extension dla `fixed-in-release` FILE mode była poprawna od początku — niepowodzenie na #13 wynikało z GitHub keyword scanner, nie z błędu w kodzie.
+
+## Smoke testy obiegu Południe→Centrum→Północ — pełen 9-cio języczny cykl ZAMKNIĘTY
+
+Stan na 2026-05-16: **7 prawdziwych GitHub issues × 7 języków, 1 incydent procesowy (#13 recovery ścieżką B), 0 błędów logiki bot kodu, atomic-reset działa w 100% przypadkach gdy commit pending_answer.md jest atomowy**.
+
+Real GitHub issues (po publikacji):
+- **EN #8** (v15.2.6 baseline question-flow, opublikowany jako jedyny prawdziwy issue z 6 smoke-testów batch)
+- **ES #9** (v15.2.7 question-flow FILE mode tryb FIRST USE, hiszpański Argentyna locale)
+- **FI #10** (post-a60f675 atomic-reset PASSED first-try, persona fińska)
+- **FR #11** (post-a60f675 atomic-reset PASSED first-try, persona Katla wylosowana)
+- **IS #12** (post-a60f675 atomic-reset PASSED first-try, persona Vieno, IS NVDA Dóra "Backspace literuje")
+- **IT #13** (v15.2.8 release-with-answer flow — incydent GitHub auto-close keyword, recovery ścieżką B przez ręczną symulację TEMPLATES + lock conversation + cleanup commit `1c58efa` zwykły)
+- **DE #14** (v15.2.9 release-with-answer flow CZYSTA FORMA — bot extension FILE mode dla `fixed-in-release` PIERWSZE REAL UŻYCIE, persona Vieno, atomic-reset PASSED, tag v15.2.9 stabilny)
+
+Preventywnie testowane (skrypty/issue.txt buffer w v15.2.6, niepublikowane jako prawdziwe issues): DE/IT/RU/PL — wszystkie zaowocowały fixami włączonymi do v15.2.6 manuala bez tworzenia GitHub issues.
+
+**Wnioski**:
+1. **Tryb FILE + atomic-reset niezależny od języka**: 5 niezależnych testów w językach z różnych rodzin (uralska/fińska, romańska/francuska, germańska/islandzka, romańska/włoska, germańska/niemiecka) bez modyfikacji bot kodu.
+2. **Persona losowana niezależnie od języka issue**: Katla dla FR, Vieno dla IS i DE, Lumi dla ES, fińska persona dla FI — to feature 3-osobowości × 9-jzk, nie 1:1 mapping. Memory [[project_v15_2_roadmap]] sprostowane (sekcja Lumi=Skandynawia/Vieno=Finlandia/Katla=Islandia opisuje POCHODZENIE postaci, NIE wymuszenie języka komentarza).
+3. **Bot extension `fixed-in-release` FILE mode w produkcji**: zweryfikowany na #14, działa identycznie jak `answered` FILE mode ale z linkiem do Release w pierwszej części komentarza + dolepkiem osobistym w drugiej. Komentarz wizualnie czytelny dla NVDA przez separator `---` i intro w italics.
+4. **GitHub auto-close keyword** = jedyna realna pułapka procesowa wykryta przez 7 smoke testów. Bezpieczne sformułowania: `re:`/`addresses`/`per`/`scope:`/`mentions`/`relates to`/`context:` przed `#N`. Zakazane: `fix`/`fixes`/`fixed`/`close`/`closes`/`closed`/`resolve`/`resolves`/`resolved`. Pełna lista w CLAUDE.md sekcja `# WORKFLOW RELEASE → Procedura release → Krok 4`.
+
+**v15.2.x roadmapa ZAMKNIĘTA na v15.2.9**. Wszystkie issues v15.2.x (#1-#14) zaadresowane (zamknięte lub udokumentowane jako enhancement na v15.3+). Następny cykl = v15.3+ z planowanym split user-data vs seed-data dla `dictionaries/` + mechanizm first-launch + utility module `gui_a11y` dla NVDA-anchor patterns.
+
+## Powiązane
+
+- [[feedback_yaml_prompty]] — prompty LLM trzymane w yaml ale tłumaczone ręcznie. v15.2 potwierdza (9 yaml-ów Burzy + 9 yaml-ów fiolki ręcznie).
+- [[feedback_lokalizacja_nazw]] — idiomatyczna lokalizacja, nie kalka. v15.2: „Odkorkuj fiolkę"/„Uncork the vial"/„Phiole entkorken"/„Откупорь склянку" + „Reżyser"/„Director"/„Regisseur"/„Режиссёр". v15.2.4: etykieta kategorii Opowieści idiomatycznie (Stories nie „Tales", Récits nie „Histoires", Sögur nie „Sagas" itd.).
+- [[feedback_batch_retranslate_review]] — pre-existing halucynacje folder names w docs × 8 jzk znalezione i naprawione przy okazji v15.2.3 breaking change'a. Hotspot udokumentowany w sekcji „Powtarzalne hotspoty halucynacji". W v15.2.5 dorzucone 7 kolejnych halucynacji (porównanie liczby linii pl vs `<iso>`, grep polskie pozostałości, `## ` headers).
+- [[feedback_gh_actions_env_zamiast_argv]] — env zamiast argv dla user-input w GH Actions workflowach. Naprawione w v15.2.4 dla 3 workflow naraz.
+- [[feedback_iteracyjny_patch_force_push]] — wyjątek dla pure-infrastructure fix-upów post-publication (v15.2.4 × 4, v15.2.6 × 1).
+- [[feedback_pr_workflow]] — release direct-to-main od v15.2.5 (porzucenie PR/branch).
+- [[project_v15_1_roadmap]] — v15.1 zamknięty, na nim oparta architektura `_zaladuj_przepis` i Snapshot wzorzec używany w fiolce.
+
+<!-- ===== ARCHIWUM: project_v15_3_seed_user_split.md ===== -->
+
+---
+name: project-v15-3-seed-user-split
+description: v15.3.0 ZAMKNIĘTY (2026-05-19, tag → 7b202ef) — seed/user split + opowiesci/ w _jezyk_kompletny + reguła natywności jako formuła N+2; post-release infra bump workflow actions Node 20→24
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: a952824f-1475-4f39-bc08-3bfc24b31c58
+---
+
+v15.3.0 (ZAMKNIĘTY 2026-05-19, tag `v15.3.0` na release commit `7b202ef`, release opublikowany przez draft-release.yml + ręczne Publish; HEAD main na `4f823ae` post-release infra chore): refaktor konceptualny **rozdzielenie seed data vs user data** + załatanie luk silnika ujawnionych przez tryb Opowieści (wprowadzony w 15.0) + bump GitHub Actions na Node 24 (deprecation Node 20: default 2026-06-02, removal 2026-09-16).
+
+**Why:** v15.2.x roadmap zamknięta, brak issues od end-userów. Wykryta luka: `core_poliglota._jezyk_kompletny` sprawdzał 4 podfoldery (akcenty/szyfry/rezyser/gui), ale od 15.0 paczki językowe mają piąty językowy `opowiesci/` z promptami LLM. Niekompletna paczka z `opowiesci/` pustym lub brakującym przechodziła walidację cicho (fallback w `opowiesci_ai._zaladuj_przepis` na `pl/opowiesci/` ją maskował). Plus istniejąca dokumentacja w CLAUDE.md mówiła hardkodowane „11 plików w akcenty/" — niezgeneralizowane na przyszły 10. język.
+
+**How to apply:** kontynuując 15.3, najpierw `git log --oneline -10` żeby zobaczyć poniższe 5 commitów (commit 6 = release). Jeśli pojawi się bug-issue od end-usera = klauzula awaryjna z CLAUDE.md `# WORKFLOW RELEASE` (bug ma pierwszeństwo, feature 15.3 odłożony na 15.4).
+
+## Wykonane (na origin/main)
+
+- `14a314f` chore: bump VERSION 15.3-WIP
+- `adf84ee` refactor(15.3): `_jezyk_kompletny` — `opowiesci/` jako 6. warunek + crosscheck pl/en jako bazy referencyjne (`_pliki_yaml_jezyka`, `_zestaw_referencyjny`, konstanty `_JEZYKI_REFERENCYJNE`/`_PODFOLDERY_JEZYKOWE`/`_NARZEDZIA_AKCENTOW`). Smoke test: 9 wdrożonych zwraca True, pl/en zestawy referencyjne identyczne (23 pliki), temp folder bez opowiesci/ → False, rozjazd pl↔en → oba False.
+- `fad24b5` refactor(15.3): `opowiesci_ai._zaladuj_przepis` fallback pl→en + WARN log na sys.stderr przy aktywacji. Bezpieczeństwo: crosscheck pl/en w `_jezyk_kompletny` gwarantuje że en/opowiesci/ ma identyczny zestaw plików — fallback nigdy nie zawiedzie po stronie disku.
+- `7d685eb` docs(claude-md): reguła natywności jako formuła N+2 + WYMÓG SILNIKA z opowiesci/ + seed/user split jawny. **Uwaga: CLAUDE.md urósł do 27223 znaków (soft limit 25000), zalecany cleanup** — kandydaty do przeniesienia: część sekcji ZAMYKANIE RELEASU / ODPOWIEDZI NA ISSUE / SAMI → memory/ lub claude_archive.md.
+- `7b202ef` **v15.3.0 release commit** (VERSION + RELEASE_NOTES sekcja 15.3.0 + regen docs/* + readme.*). Tag `v15.3.0` na tym commicie utworzony przez draft-release.yml + ręczne Publish z uploadem `Rezyser_Audio_v15.3.0_Installer.exe`.
+- `4f823ae` infra(workflows) post-release: bump `actions/checkout@v4`→`@v5`, `actions/setup-python@v5`→`@v6` (Node 24, deprecation Node 20: default 2026-06-02, removal 2026-09-16). Pierwsze REAL użycie tych wersji nastąpi przy następnym uruchomieniu któregokolwiek workflowu. Bot draft-release dla 15.3.0 jeszcze działał na v4 z ostrzeżeniem o deprecated Node 20 — uznane za acceptable jednorazowo.
+
+## Stan koncepcyjny seed vs user
+
+- **Seed** (dictionaries/, single source of truth, commitowana, wchodzi do paczki release):
+  - 9 paczek językowych (pl/en/de/es/fi/fr/is/it/ru)
+  - Per paczka: `podstawy.yaml` + `gui/ui.yaml` + 4 podfoldery językowe (akcenty/, szyfry/, rezyser/, opowiesci/)
+  - Reguła natywności (formuła post-15.3): `akcenty/` = N+2 plików dla N wdrożonych języków; `szyfry/` 6, `rezyser/` 4, `opowiesci/` 8 niezmienne.
+  - Crosscheck pl ↔ en na zestawie plików (poza akcentami obcojęzycznymi).
+- **User data** (gitignored, NIE wchodzi do paczki release, per-deweloper / per-user):
+  - `runtime/` (ciężki lokalny Python, paczka napompowana stamtąd)
+  - `skrypty/` (historie skryptów Reżysera, audiobooki — user-facing .txt + .md)
+  - `opowiesci/` (root) (gry modułu Opowieści — user-facing .txt + .md od 15.2.3)
+  - `runtime/opowiesci/` (game.json + story.jsonl per-projekt)
+  - `runtime/skrypty/*.mode` (per-projekt zapisane tryby, globalna numeracja 0=Burza/1=Reżyser1/.../5=Mniejsze zło)
+  - `*.env`, `golden_key.env` (klucze API, gitignored)
+
+## TODO post-15.3.0 (zostają na osobny patch lub na 15.4)
+
+- [ ] **CLAUDE.md cleanup do <25k znaków** (po release 15.3.0 stoi na 27223). Kandydaci do przeniesienia → `memory/feedback_*` lub `claude_archive.md`: ZAMYKANIE RELEASU (procedurka ustabilizowała się po draft-release.yml smoke test), ODPOWIEDZI NA ISSUE (rozbudowana w 15.2.7-9), SAMI trójsekcyjna (v15.2.8). Konstytucja powinna zostać tylko z żelaznymi zasadami środowiskowymi + happy path release.
+- [ ] **Smoke test workflowów na Node 24**: następne uruchomienie któregokolwiek z 4 workflowów zweryfikuje że `checkout@v5`/`setup-python@v6` działają poprawnie z naszymi parametrami (`fetch-depth: 2/0`, `fetch-tags: true`, `python-version: 3.11`). Realny test przy najbliższym nowym issue albo następnym release cycle.
+- [ ] Mechanizm first-launch + utility module `gui_a11y` dla NVDA-anchor patterns (wzmiankowane w `project_v15_2_roadmap`) — odłożone na 15.4 lub późniejszy patch.
+
+## Powiązane
+
+- [[feedback_pl_en_baza_referencyjna]] — kontrakt pl/en, fallback en w opowiesci_ai.
+- [[feedback_yaml_prompty]] — prompty ręcznie, bez batch (15.3 zaktualizowane: 4 podfoldery językowe to teraz akcenty/szyfry/rezyser/opowiesci/, paczka treściowa zawiera wszystkie naraz).
+- [[project_v15_2_roadmap]] — v15.2.x zamknięty na 15.2.9, lista issue'ów EN#8-DE#14.
+- [[project_v15_opowiesci]] — v15.0 wdrożył tryb Opowieści; v15.3 dopina lukę kontraktu silnika.
+
+<!-- ===== ARCHIWUM: project_v15_5_odswiez_z_dysku.md ===== -->
+
+---
+name: project-v15-5-odswiez-z-dysku
+description: "v15.5 — odświeżanie pamięci wewnętrznej z dysku (Reżyser+Opowieści); OPUBLIKOWANE 2026-06-02"
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 4a7db939-3bf1-48ad-ac16-94aa5d075d46
+---
+
+**v15.5 OPUBLIKOWANE 2026-06-02** (commit `0139393` na origin/main, tag `v15.5` → 0139393, GitHub Release z `Rezyser_Audio_v15.5_Installer.exe`, 70 plików +1004/-160). Podział pracy przy wydaniu: user zrobił push + `draft-release.yml` + build EXE; agent zweryfikował draft (tag na release commit, treść = sekcja `## 15.5`), zrobił `gh release upload` instalatora i `gh release edit --draft=false`.
+
+**Co weszło:** ręczne odświeżanie pamięci wewnętrznej z dysku po edycji pliku narracji, w OBU modułach.
+- **Reżyser** (`core_rezyser.py`): `rekoncyliuj_z_dysku()` + czysta `_zastosuj_rekoncyliacje()` (warianty `calosc`/`snap`/`koncowka`). `wczytaj()` używa teraz rekoncyliacji zamiast bezwarunkowego `full_story=""` — domyka lukę v15.2.3 (wczytanie ze streszczeniem dawało sam kondensat). Meta-marker `runtime/skrypty/<nazwa>_streszczenie_meta.json` zapisywany w `zapisz_streszczenie()` jako anchor końcówki. Stałe `MIN_TRESC_PO_NAGLOWKU=400`, `MAX_TAIL_ZN=8000`. D1: gdy całość mieści się pod progiem 70% → wczytaj całość + skasuj zbędne streszczenie+meta.
+- **Opowieści** (`core_opowiesci.przeladuj_narracje_z_dysku()` + GUI): rekoncyliacja `ostatnie_tury` — sentinel `oai.AKCJA_STRESZCZENIE` (idx 0) nietknięty, świeża końcówka (`_ostatni_fragment`, ~1500 zn) dopisywana/nadpisywana. Stałe `AKCJA_STRESZCZENIE`/`AKCJA_SYNC` w `opowiesci_ai`.
+- **GUI**: przycisk „Odśwież z dysku" w pasku pliku obu paneli + slash `/odswiez`,`/refresh` (Opowieści). Guard `_worker_thread`/`_meta_w_toku`.
+- **Prompt Burzy** (`tryb_burza.yaml` × 9): usunięty wymóg `[OSTATNIA SCENA]` (Python przejął końcówkę) — streszczenie ma 2 elementy zamiast 3.
+- **Docs** (manual+tales × 9): obowiązek „streszcz przed zakończeniem" złagodzony na „po domknięciu sceny/aktu/rozdziału", wyjątek dla historii bez markerów; usunięte fałszywe „AI dorzuca ostatnie akapity".
+- **i18n**: 14 kluczy `ui.yaml` × 9 języków.
+
+**Decyzje (od usera):** D1 kasuj stale streszczenie; D2 wartości 400/8000; D3 szkice promptów do `skrypty/ai_odpowiedz.txt` (git-diffy słabo dostępne). Pełna propagacja docs na 8 obcych przez subagentów (review halucynacji: 0 polskich pozostałości w nowych kluczach, `[OSTATNIA SCENA]` usunięte z 9 paczek).
+
+**Dług świadomie poza scope:** stan strukturalny (`.game.json` postacie/lokacja, liczniki+Księga Świata Reżysera) NIE jest re-derywowany przy odświeżeniu — ostrzeżenie o dryfie w komunikatach. Pre-existing polskie pozostałości w starych sekcjach changelogowych obcych manuali — osobny sweep [[feedback_stare_bledy_tlumaczen_krok]].
+
+<!-- ===== ARCHIWUM: project_v15_5_1_dlug.md ===== -->
+
+---
+name: project_v15_5_1_dlug
+description: v15.5.1 patch — sprzątanie długu po v15.5 (wyłączenie edycji historii + tłumaczenia manuali); plan feature v15.6
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 9ff10d93-bf3c-4c8b-af5e-1f4b8d74a7ad
+---
+
+Patch v15.5.1 (po opublikowanym v15.5 → 0139393). Czysto sprzątający dług, dwa obszary.
+
+**Obszar 1 — re-derywacja stanu .game.json: ścieżka B + natychmiastowe wyłączenie.**
+`gui_opowiesci._on_odswiez_z_dysku()` (przycisk „Odśwież z dysku", v15.5) wsiąkał edytowaną narrację do `ostatnie_tury`/`.game.json`, ale NIE re-derywował `stan`/`postacie_aktywne`/liczników → cichy dryf. Wierna re-derywacja wymaga ekstrakcji stanu przez LLM (koszt API). Decyzja usera: **zwykły user nie chce płacić za naprawę stanu** (może się zemścić). Więc:
+- v15.5.1: przycisk `_btn_odswiez_z_dysku` **bezwarunkowo `Hide()`** (przy tworzeniu w `gui_opowiesci.py`; logika Enable w `_aktualizuj_uistate` zneutralizowana). Handler `_on_odswiez_z_dysku` zostaje jako hook. „Otwórz narrację" (`_btn_otworz_narracje`) zostaje — nie dotyka stanu.
+- **v15.6 (przyszły feature, NIE zrobiony)**: edycja `.game.json` BEZPOŚREDNIO, dla technicznych userów, **za świadomie zaszytą w kodzie flagą** — bez flagi opcja UKRYTA. Nie re-derywacja przez LLM (odrzucona z powodu kosztu).
+
+**Obszar 2 — polskie pozostałości w obcych manualach (`dictionaries/<kod>/gui/dokumentacja/manual.yaml`).**
+Realny zakres (Explorer przeszacował): wholesale-polskie bloki tylko w **fi/fr/it changelog_9** + wycieki: it/krok_2_klucz_api, it/nvda_a11y (całe po polsku), fi/krok_5_akcenty_nvda (orphaned blok „## Dostępne akcenty"+duplikaty szyfrów — PRZYCIĘTY do intro jak pl/en/de/es, bo właściwe fińskie szyfry są w krok_5_tryb_szyfrant), fi/changelog_13 „Nowe"→„Uudet". Przetłumaczone ręcznie (en/de/es jako paralela), bez autotłumacza.
+
+**KLUCZOWA REGUŁA literałów (rozstrzygnięta):** zachowuj WIERNE realne literały zamiast lokalizować — `architektura_<nazwa>.docx` (hardkod `gui_konwerter.py:352`), `TUTAJ_WKLEJ_SWOJ_KLUCZ` (hardkod `main.py:396`+detekcja `:314`), `_streszczenie.txt`, `golden_key.env`, `moje_lore.md`, `napraw_api.bat`, `skrypty/`. CLAUDE.md wprost wymienia `skrypty/` jako literał. Patrz [[feedback_literaly_manuali_vs_kod]].
+
+Sanity OK: changelog_9 = 65 linii pl/it/fr/fi, 0 prozy PL, 0 osieroconych `## `, generuj_dokumentacje --waliduj Exit 0.
+
+<!-- ===== ARCHIWUM: project_v15_6_roadmap.md ===== -->
+
+---
+name: project_v15_6_roadmap
+description: v15.6 OPUBLIKOWANY — techniczna edycja .game.json za flagą w kodzie + spłata długu is/fr/polityka literałów
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 9ff10d93-bf3c-4c8b-af5e-1f4b8d74a7ad
+---
+
+**v15.6 OPUBLIKOWANY 2026-06-02** (tag v15.6 → commit d8096e7, Release „Reżyser Audio GPT, wersja 15.6" z EXE 145 MB). Geneza: [[project_v15_5_1_dlug]]. Następny cykl rusza z czystej sesji.
+
+## Co weszło
+
+**Feature — techniczna edycja stanu gry (.game.json) w Opowieściach.**
+- Nowy przycisk `_btn_edytuj_stan` „Edytuj stan gry…" w `gui_opowiesci.py` — świadomie ODRĘBNY od „Odśwież z dysku" (inna semantyka: edycja twardego stanu, nie rekoncyliacja narracji). Stary `_btn_odswiez_z_dysku` (Opowieści) zostaje ukryty, jego handler-hook nietknięty.
+- `DialogEdycjaStanuGry` (koniec pliku): monospaced `TextCtrl` z surowym JSON; `_on_zapisz` waliduje, że treść to parsowalny **obiekt** JSON (dict) — inaczej MessageBox + dialog ZOSTAJE otwarty (chroni `core_opowiesci.wczytaj` przed `.get` na liście/skalarze).
+- Handler `_on_edytuj_stan`: guard brak gry + guard worker w toku (`_worker_thread`/`_meta_w_toku` — race z autozapisem), dump RAM→dysk (`zapisz_game_json`, gwarancja świeżości+istnienia), edycja, zapis, reload przez `wczytaj` + odświeżenie UI.
+- **Flaga `EDYCJA_STANU_GRY_WIDOCZNA = False`** (stała modułowa w `gui_opowiesci.py`, NIE env-var, NIE user-facing) — przycisk ukryty z konstruktora bez flagi; `Enable` w `_aktualizuj_uistate` sterowane tylko gdy flaga ON. Techniczny user włącza stałą przed buildem własnej paczki.
+- **DRY**: wspólny rdzeń wczytania `_zaladuj_projekt_do_ui(projekt, wynik, nazwa)` wyodrębniony z `_on_wczytaj` (sync `_zapisany_tryb`+snapshot+RadioBox+narracja+„Ostatnia tura"+wybory+uistate); komunikat sukcesu zostaje w wywołującym.
+- i18n: 12 kluczy `opowiesci.*` ×9 (pl ręcznie + autotłumacz `--klucz` 8 języków). KRYTYCZNE YAML: wartość z polskim cudzysłowem `„{nazwa}"` musi iść w single-quote (`'...'`), bo ASCII `"` zamyka double-quoted scalar przedwcześnie.
+
+**DECYZJA twarda (od usera):** re-derywacja stanu przez LLM ODRZUCONA (koszt API). Reżyser „Odśwież z dysku" (`gui_rezyser.py`) ZOSTAJE bez zmian — killer-feature v15.5 (odśwież pamięć Pythona bez zamykania projektu); Reżyser nie ma twardego `.game.json`, liczniki derywowalne z nagłówków → brak dryfu.
+
+**Dług spłacony (Etap 2):** patrz [[feedback_literaly_manuali_vs_kod]] (zaktualizowany — items 1-4 zrobione).
+- is manual: pełny sweep nazw narzędzi → islandzkie wg UI-ground-truth (`(Reżyseria)`→`(Leikstjórn)`, `(Poliglota)`→`(Tungumálamaður)`, `(Architekt Audiobooków)`→`(Hljóðbókararkitekt)`, `Reżyser`-feature→`Leikstjóri/Leikstjóra`, `Księga Świata`→`Heimsbók`). Brand „Reżyser Audio GPT" zostaje. Placeholder pomysłu `[TUTAJ WPISZ SWÓJ POMYSŁ]`→`[SETTU HUGMYND ÞÍNA HÉR]` (bo żyje w `ui.yaml::rezyser.prompt_architekta_content`).
+- fr: stała „Reżyser Audio GPT 13.4" → `{numer_wersji}`.
+- polityka literałów (user wybrał: de-lokalizuj manuale, nie kod): de-lokalizacja w 9 manualach — `architektura_` (8 obcych), `TUTAJ_WKLEJ_SWOJ_KLUCZ` (de/en/es), `_streszczenie.txt` (de/en/es/fr/ru), `skrypty/` (en/es/fr — nie tylko en!), `napraw_api.bat`/`moje_lore.md` (en). WYJĄTEK: placeholder pomysłu zostaje zlokalizowany (żyje w ui.yaml per język).
+
+## Niuanse na przyszłość
+- Autotłumacz `--klucz` (chirurgiczny) ruszył round-trip ruamel → **normalizuje białe znaki w całym pliku** (zwija wyrównanie kolumn do 1 spacji). Diff obcych ui.yaml duży, ale merytorycznie tylko nowe klucze (zweryfikuj `git diff --ignore-all-space`).
+- `build_release.py` ma interaktywny prompt `(y/n)` — w tle/CI MUSI iść z flagą `-y/--yes` (inaczej EOFError). Kolejność: `git push` → `gh workflow run draft-release.yml -f potwierdz=tak` → `build_release.py -y` → `gh release upload v<X> <exe>` → `gh release edit v<X> --draft=false`.
+- Rozróżnienie literał-vs-lokalizacja: jeśli string żyje w `gui/ui.yaml` (per język) → manual ma go LOKALIZOWAĆ (pasować do realnej paczki); jeśli hardkod w `.py` → manual trzyma WERNIE polski.
+
+<!-- ===== ARCHIWUM: project_v16_plan_wdrozenia.md ===== -->
+
+---
+name: project_v16_plan_wdrozenia
+description: "START v16.0 — actionable plan (TEATR CZYTANY: narrator+dialog, BEZ SFX, projekt ElevenLabs Studio); czytaj przy prompcie \"start v16.0\""
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 99645afe-6b77-4f1b-8d37-8ab84627d322
+---
+
+**✅ v16.0 OPUBLIKOWANY 2026-06-03** (tag v16.0 → 1eb2ee7, Release „Reżyser Audio GPT, wersja 16.0" z EXE, isDraft=false). Wszystkie 7 etapów + rewizje (most w trybie Skrypt nie Audiobook; drop list_voices; fix wycieku runtime [[feedback_runtime_niewidoczny_dla_usera]]) zrealizowane przez checkpointowe commity. Live e2e mostu potwierdzony (delta salda 0). Poniżej oryginalny plan (zachowany jako referencja).
+
+**START v16.0 — czytaj to najpierw przy prompcie „start v16.0".** Tło, analiza, historia spike'ów (Path B, hybryda, pivoty): [[project_v16_postprodukcja_elevenlabs]]. Reguły wydawnicze: CLAUDE.md (direct-to-main, bump VERSION, regen docs --waliduj, bot draft-release, bez auto-close keywords). v15.6 opublikowany [[project_v15_6_roadmap]].
+
+## CZYM JEST FEATURE (kierunek OSTATECZNY, 2026-06-02 — Wariant 1)
+**Teatr czytany.** Tryb Skrypt Reżysera zostaje **przeprojektowany na narratorsko-dialogowy** (narracja + dialog wielogłosowy, **BEZ SFX**). Dispatcher buduje z niego wielogłosowy projekt ElevenLabs Studio renderowany NATYWNIE w Studio (eksport / publikacja do Eleven Reader działa bez kolizji). **Opcjonalny** feature (bez `ELEVENLABS_API_KEY` działa stary flow + konwerter .docx). Dla świadomego usera.
+
+## DLACZEGO TAK (twarde wnioski z testów i bet)
+- **Narrator XOR SFX — nie oba (doświadczenie usera z wczesnych prywatnych bet na Streamlit).** Gdy prompt oferuje i narratora, i SFX, LLM realizuje JEDNO (zwykle narratora) albo słucha dyrektywy kosztem replik. Niestabilne. → SFX **wypada całkowicie** z trybu Skrypt.
+- **Teatr czytany wymaga, by narrator miał realną treść.** Stary Skrypt (czysty dialog + SFX, „Brak Narratora") niósł kontekst (miejsce/czas/akcja) przez SFX. Bez SFX i bez narratora → gołe repliki bez kontekstu. Narrator daje kontekst BARDZIEJ dostępnie (słuchacz słyszy scenerię, nie wnioskuje z dźwięku, którego sam nie umie umieścić).
+- **SFX w Studio = niedostępna oś czasu; hybryda upload-do-Studio PADA** (Studio regeneruje tekst przy eksporcie i niszczy miks); lokalny miks z SFX (Path B) = „średnio dostępny". Wszystkie drogi z SFX odpadły. Pełna historia: [[project_v16_postprodukcja_elevenlabs]].
+- **Backward-compatibility ŁAMANA świadomie** — stare skrypty (dialog+SFX) renderowałyby się bez kontekstu. Akceptowalne: nikt jeszcze nie używał, user ma 1 roboczy draft do redakcji.
+
+## FORMAT po redesignie (tryb Skrypt)
+- **Narracja** (sceneria, czas, akcja, didaskalia) → tag `[Narrator: …]` (narrator = osobny „mówca"). Mapuje na **default voice** projektu (`default_paragraph_voice_id` + `default_title_voice_id`). UWAGA na parser: `core_rezyser._parsuj` przypisuje tekst nietagowany do OSTATNIEGO mówcy — dlatego narracja MUSI być jawnym tagiem `[Narrator:]`, nie gołą prozą (inaczej dokleiłaby się do poprzedniej postaci).
+- **Dialog** → `[Postać: emocja] kwestia` → głos tej postaci.
+- **ZERO `[SFX:…]`** — prompt nie wspomina o efektach dźwiękowych.
+- Tytuły rozdziałów (Prolog/Akt/Scena) → h1, czytane narratorem.
+
+## Receptura API (ze spike'ów — skrypty usunięte, to jest źródło)
+- Auth: header `xi-api-key: <key>`. Klucz **`sk_`** (PODKREŚLNIK, nie `sk-`). Scope'y: **`projects_write`** + `voices_read`. (TTS/sound_generation NIEpotrzebne — render natywny w Studio.) Brak scope → HTTP 401 `detail.status=="missing_permissions"` (401 nic nie spala).
+- Saldo: `GET /v1/user/subscription` → `character_count`.
+- **Tworzenie projektu** (rdzeń): `POST /v1/studio/projects` MULTIPART (requests: `files={'pole':(None,wartość)}`): `name`(wym.) + `default_title_voice_id`=narrator + `default_paragraph_voice_id`=narrator + `default_model_id`="eleven_multilingual_v2" + `from_content_json` (JSON-string: `[{name:"Prolog", blocks:[{sub_type:"h1", nodes:[{voice_id:NARRATOR,text:"Prolog",type:"tts_node"}]}, {sub_type:"p", nodes:[{voice_id:NARRATOR,text:"narracja…",type:"tts_node"}]}, {sub_type:"p", nodes:[{voice_id:GLOS_POSTACI,text:"kwestia",type:"tts_node"}]}, …]}]`). `auto_convert` POMIŃ (=false) → **0 kredytów**. Odpowiedź: `project.project_id`. Sprzątanie: `DELETE /v1/studio/projects/{id}`.
+- Klient: **requests** (w venv). NIE `elevenlabs` SDK. stdout UTF-8 reconfigure na win32 (cp1250).
+- Głosy z `C:\Users\marek\accessible_text_analyst\config.json` klucz `voices`: lumi `pUEtt4pU7X9b37sFg0AT`, vieno `8sFBTJ5ynDNOlgL3fkhK`, katla `tHhVsbh6Ja6xNrg9ijOe`, sami `kAzI34nYjizE0zON6rXv`.
+
+## Reuse z istniejącego kodu
+Parser postaci/tagów: NIE `_parsuj` (nie istnieje) — logika splitu tagów żyła inline w `core_rezyser.zastosuj_akcenty_uniwersalne` (~360-395, `re.split(r"(\[[^\]]+\])")` + mówca `^\[([^:\]\-]+)`); na v16.0 wyekstrahowany jako `core_elevenlabs.buduj_chapters`/`wykryj_postacie`. Regex aktów `gui_konwerter.py:~320-330` zsynchronizowany do `core_elevenlabs._RE_CHAPTER`/`_RE_SCENE`. System-check `main.py:307-355` (klon dla ElevenLabs — ZROBIONE Etap 1). **REWIZJA rozmieszczenia (user): panel mostu w trybie SKRYPT, NIE w postprodukcji Audiobooka** — to dla Skryptu przerobiono tryb na teatr czytany; ochrona `_zapisany_tryb` blokowałaby dotarcie do Audiobooka dla projektu-Skryptu. Audiobook zachowuje tylko nadawanie tytułów rozdziałów. Konwerter .docx powinien dalej działać (narracja `[Narrator:]` jak każdy mówca; brak SFX) — ZWERYFIKOWAĆ (Etap 6 sanity).
+
+## Etapy implementacji (kolejność)
+0. **Redesign promptu trybu Skrypt** (`dictionaries/<kod>/rezyser/*.yaml` ×9): USUŃ instrukcje SFX, PRZYWRÓĆ narratora (`[Narrator:]` dla narracji/scenerii/akcji + `[Postać: emocja]` dla dialogu). To fundament — bez tego reszta nie ma sensu. Re-edytuj też 1 roboczy draft usera + fiksturę joanna_joana jeśli używana do testów. **ZROBIONE — commit 36940db** (9 promptów, tag narratora zlokalizowany ×9; fikstura + Księga joanna_joana przeredagowane). User upr. prompt: usunął jawny zakaz SFX (AI i tak ich nie robi).
+1. **System-check klucza** — `main.py`: opcjonalny `ELEVENLABS_API_KEY` (`sk_`), osobny status w Home; brak → feature ukryty/disabled, reszta apki bez zmian. **ZROBIONE — commit 96f1ce0** (`core_elevenlabs.diagnoza_klucza` 7 statusów + `HomePanel._run_elevenlabs_check`; i18n `home.el_*` ×9; generowany golden_key.env z zakomentowaną podpowiedzią EL).
+2. **core_elevenlabs.py** — klient requests: `saldo`, `create_project(name, narrator_voice, chapters)`, `delete_project`; obsługa missing_permissions (`BrakUprawnien`/`BladElevenLabs`). **REWIZJA zakresu (user, podczas implementacji): BEZ `list_voices`** — reżyser wkleja voice ID skopiowane z weba (Voices → odnajdź głos → **odtwórz próbkę dla pewności** → More actions → Copy Voice ID), bo lista API zwraca tylko głosy premade, a user może chcieć własnych (Voice Design) albo dowolnych innych. (BEZ tts/sound_generation/ffmpeg.) ZROBIONE — commit 3bd8583, zweryfikowane offline (mock requests).
+3. **Parser → from_content_json**: skrypt → chapters (akty/Prolog/Scena=h1 narratorem) → bloki: `[Narrator:]`→tts_node narratorem, `[Postać:]`→tts_node głosem postaci. **ZROBIONE — commit 03a46a1** (`buduj_chapters`/`wykryj_postacie`/`liczba_rozdzialow` w `core_elevenlabs`; `NARRATOR_WORDS` unia ×9 + `NARRATOR_KEY`; strażnik nagłówków: linia >60 zn lub z `.!?` to nie nagłówek; zweryfikowane na fiksturze).
+4. **Dialog obsady** (A11y, wzorzec `DialogEdycjaStanuGry`): wykryj postacie Z KWESTIAMI + **slot NARRATOR (zawsze)**; pole `voice_id` per postać + narrator; walidacja kompletności; zapis `<gra>.obsada.json` (runtime/, mapa `{postać: voice_id, "__narrator__": voice_id}`). Tworzony przez okienko. Pobieranie voice ID: find voice → more actions → copy voice ID. **ZROBIONE — commit 0b936c5 + rewizja 7537018** (`DialogObsady` A11y; `ProjektRezysera.zapisz_obsada/wczytaj_obsada` → `runtime/skrypty/<nazwa>.obsada.json`; SZKIC = niekompletność dozwolona, komplet waliduje dispatcher; źródło postaci z DYSKU; i18n `dlg_obsada_*`/`el_*` ×9; **rewizja: panel w trybie Skrypt nie Audiobook**).
+5. **Dispatcher** (panel mostu w trybie **SKRYPT**, nie Audiobook): drugi przycisk w `_pnl_el`; walidacja (≥1 rozdział `liczba_rozdzialow` + komplet obsady z dysku) → buduj `from_content_json` (narrator=default) → `create_project` (auto_convert=false, wątek tła jak Tytuły AI) → raport: project_id + link do Studio + instrukcja „otwórz w web → wyrenderuj/eksportuj/opublikuj do Eleven Reader". Tworzenie 0 kredytów; render po stronie usera (~1 kredyt/znak). **ZROBIONE — commit c11a0eb** (przycisk budowy w `_pnl_el`; walidacja rozdziału+kompletu obsady; watek tła; raport read-only + `STUDIO_URL` + webbrowser; i18n `el_btn_build_*`/`el_build_*`/`el_raport_*` ×9; offline-verified). Live e2e mostu (create+delete) potwierdzony już w Etapie 2 na fiksturze.
+6. **Manual ×9 + RELEASE_NOTES** — opis nowego formatu Skryptu (narrator+dialog, retired SFX i dlaczego), restricted key + scope'y, jak pobrać voice ID, rola narratora=default voice, flow obsady+dispatcher, koszty, że render robi user w Studio.
+7. **Release v16.0** — normalny cykl wydawniczy.
+
+## Otwarte do decyzji w trakcie
+- Czy „≥1 akt" twardo blokuje (decyzja: tak — „dramatów modernistycznych nie przyjmujemy"), czy fallback jednochapterowy.
+- Jak elegancko re-edytować istniejący draft usera do nowego formatu (ręcznie).
+- Czy w prompcie narrator dostaje limit „proporcji" (żeby nie zdominował dialogu) — do strojenia na podstawie outputu.
+
+<!-- ===== ARCHIWUM: project_v16_postprodukcja_elevenlabs.md ===== -->
+
+---
+name: project_v16_postprodukcja_elevenlabs
+description: "Rozważany feature v16.0 — postprodukcja ElevenLabs (skrypt→audiobook); analiza architektury, API zweryfikowane, otwarte decyzje"
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 99645afe-6b77-4f1b-8d37-8ab84627d322
+---
+
+**Rozważany feature v16.0 (NIE zatwierdzony jeszcze do implementacji).** Analiza wykonana 2026-06-02. Pełny dokument roboczy był w `skrypty/ai_odpowiedz.txt` (user-data, nadpisywalny — te wnioski są trwałą wersją).
+
+**Pomysł usera:** most od surowego skryptu (tryb Skrypt Reżysera) do faktycznego audiobooka przez ElevenLabs. Opcjonalny `ELEVENLABS_API_KEY` w `golden_key.env` (bez klucza = feature ukryty, stary flow działa). Reżyser przypisuje voice_id do postaci → dispatcher tworzy projekt ElevenLabs Studio z chapterami (po aktach), głosami per postać, klipami SFX; reżyser w web renderuje mowę (kredyty) i umiejscawia SFX.
+
+**API ZWERYFIKOWANE (make-or-break zdjęty, WebSearch+WebFetch tej sesji):**
+- `POST /v1/studio/projects`: chaptery = blocks→nodes; KAŻDY `tts_node` ma własny `voice_id` → multi-voice per postać działa. Głos też project-level (`default_paragraph_voice_id`).
+- `auto_convert` default **false** → utworzenie projektu NIE spala kredytów; render to osobny krok (web lub convert endpoint). Dokładnie model usera.
+- Node types: tylko `tts_node`. **BRAK node SFX** → SFX nie wstawimy programowo; generujemy klipy (Sound Effects API, billed per generation) + manifest, reżyser umiejscawia w web.
+- Klucze API restricted by default (wybór scope + limit kredytów + IP) → minimalny restricted key dokumentowalny.
+
+**Reuse (~60% w istniejących klockach):** parser postaci `core_rezyser._parsuj` (~279-336, bloki `[Postać:…]` + iteracja `[Speaker]`); tagi `[Speaker X: Imię - emocja]`+`[SFX: …]`; regex aktów `gui_konwerter.py:~326` (`Akt|Act|Акт|Näytös|Þáttur`→H1) = chaptery + walidacja „brak aktu = dramat modernistyczny, odrzucony"; system-check `main.py:307-355` (klon dla ElevenLabs — UWAGA: schemat klucza `sk_` z PODKREŚLNIKIEM, nie `sk-` jak OpenAI).
+
+**Nowe:** `core_elevenlabs.py` (cienki klient), `<nazwa>.obsada.json` (mapa postać→voice_id, runtime/), dialog obsady (A11y, wzorzec DialogEdycjaStanuGry), dispatcher, manual ×9 (restricted key + jak pobrać voice ID: find voice→more actions→copy voice ID).
+
+**Główne ryzyko = NIE API, lecz R2: A11y kroku WEB** (render + drag&drop SFX w ElevenLabs Studio może być nieużywalny z NVDA — sprzeczne z blind-first). Alternatywa: render przez TTS API LOKALNIE (per chapter .mp3, w dostępnym GUI, kredyty na świadome kliknięcie) + SFX jako klipy+manifest, mix w Reaper+OSARA. Model renderu (web vs API-lokalnie) determinuje ~połowę architektury.
+
+**DECYZJE USERA (rozstrzygnięte 2026-06-02 — architektura uproszczona):**
+- P1 RENDER = **WEB** (NIE lokalny TTS). User potwierdza: ElevenLabs Studio jest dostępny z NVDA, najlepiej ustawiać głosy/render przez web z real-time preview. Niedostępna **TYLKO precyzyjna oś czasu**. → R2 (A11y) w dużej mierze znika; mój alternatywny lokalny-render NIEPOTRZEBNY. Dispatcher tworzy projekt (auto_convert=false), reżyser renderuje w web.
+- P2 SFX = **COLLECT-ONLY**. Dispatcher NIE generuje (uniknięcie niekontrolowanego wysypu + niektóre efekty reused). Wyłuskuje prompty `[SFX:…]`, **DEDUPLIKUJE**, tworzy MANIFEST. Reżyser generuje każdy unikat raz i reużywa.
+- P3 ZAKRES = **tylko tryb Skrypt** (Reżyser). Opowieści wykluczone.
+- P4 = **bez voice_settings**, sam voice_id per postać.
+
+**LINCHPIN ARCHITEKTURY — manifest SFX kotwiczony do tekstu.** Skoro jedyne niedostępne to precyzyjna oś czasu, a SFX bywają narracyjną bronią w dokładnym momencie (fikstura: forma „Joannan" → `[SFX: trzask lodu]`), manifest MUSI wiązać każde wystąpienie SFX do dokładnego miejsca (chapter + kwestia przed/po). To dostępnościowa rekompensata za nieczytelną oś czasu — rdzeń wartości dla niewidomego reżysera. Struktura: unikalne SFX (deduplikowane) × lista wystąpień {chapter, anchor=cytat sąsiedniej kwestii}.
+
+**FIKSTURA TESTOWA:** `skrypty/joanna_joana_script.txt` (+ `.md` Księga) — niedokończony, ale wzorcowy. Potwierdza: format tagów `[Imię: opis]` (parser `_parsuj` łapie; NIE `[Speaker X:…]` z manuala — manual nieaktualny względem realnego formatu), znaczniki `Prolog`/`Akt 1`/`Scena 1`, brak narratora (czysty multi-voice), SFX powtarzalne (uzasadnia dedup). Obsada dialog: listuj postacie Z KWESTIAMI (Emilia w Księdze, ale bez kwestii w niedokończonym skrypcie → nie wymaga głosu).
+
+**SPIKE WYKONANY 2026-06-02 (`skrypty/spike_elevenlabs.py`, gitignored) — POTWIERDZONE EMPIRYCZNIE:**
+- `POST /v1/studio/projects` z `from_content_json` (multipart, pole `name` wymagane) + `auto_convert` pominięty (=false) → **character_count delta = 0 → utworzenie projektu NIE spala kredytów** (krytyczne założenie kosztowe potwierdzone).
+- Multi-voice działa: Joanna→Lumi (`pUEtt4pU7X9b37sFg0AT`), Joana→Vieno (`8sFBTJ5ynDNOlgL3fkhK`) — voice ID z `C:\Users\marek\accessible_text_analyst\config.json` (klucz `voices`: vieno/katla/lumi/sami). Model `eleven_multilingual_v2` (PL).
+- Chaptery po aktach (Prolog+Akt 1), 18 nodes, SFX dedup 12/13 — wszystko z fikstury joanna_joana.
+- **Wymagane scope klucza:** `projects_write` (initially brakował → 401 `missing_permissions`; user dodał w web) + `voices_read` + user/subscription read. Na pełny feature dojdzie **`sound_generation`** (SFX).
+- Klient: `requests` (jest w venv transitively; `elevenlabs` SDK BRAK i niepotrzebny). Header `xi-api-key`. multipart przez `files={'pole':(None,wartość)}`.
+- Saldo testowego konta: character_limit=200000 (starter), zostało ~196k.
+- Testowy projekt `v6DePXTExypq95RTeH8l` zostawiony w Studio usera (do inspekcji A11y z NVDA / ręcznego usunięcia).
+- NIE zmierzono jeszcze: realny koszt RENDERU (spala kredyty — user zmierzy w web lub osobny mini-render za zgodą).
+
+**SFX W STUDIO = NIEDOSTĘPNE (zbadane 2026-06-02, docs + test usera na żywo):** efekty żyją na osobnym torze osi czasu, pozycjonowane klikiem+przeciąganiem; BRAK wejścia numerycznego/timestamp, BRAK kotwiczenia do akapitu, BRAK metody klawiaturowej, przyciski SFX nieetykietowane. Test usera: SFX nałożył się na początek 1. kwestii, brak kontroli pozycji. → wizja „niewidomy reżyser układa SFX w spektaklu w Studio web" NIEOSIĄGALNA. Empiria kosztów web: TTS = 1 kredyt/znak; SFX web ≈ 200/klip (etykieta myląco mówi 50; zależne od długości ~4s).
+
+**ŚCIEŻKA B (lokalny render+miks) — PRZETESTOWANA 2026-06-02, DZIAŁA (`skrypty/spike_pathB.py`):** klucz: tagi `[SFX:…]` stoją MIĘDZY kwestiami, więc składamy bez osi czasu — render każdej kwestii (TTS API, voice per postać) + każdy unikalny SFX (Sound Effects API, dedup) → sklejka **ffmpeg concat filter** (NIE pydub — Python za nowy; ffmpeg 8.0 w PATH) w kolejności skryptu. Wynik: Prolog fikstury → `skrypty/prolog_pathB.mp3`, 31 segmentów (18 kwestii Lumi/Vieno + 11 unik. SFX + 1 cisza), 91,6s/128kbps, **koszt realny 1100 kredytów** (taniej niż szac. 3414 — SFX przez API bez `duration_seconds` dużo tańsze niż web ~200). Scope'y: `text_to_speech` + `sound_generation` (+ projects_write) — user nadał. SFX-DYREKTYWY (wyciszenie/cisza/fade — regex) → wstawka ciszy ffmpegiem, 0 API/0 kredytów.
+- **CAVEATY jakości (do szlifu jeśli wejdziemy):** sklejka na twardo bez crossfade; tła ambient (szum rozmów/wiatru) grają jako klipy punktowe NIE ciągłe podkłady (problem loopów — user świadom); brak duckingu/normalizacji poziomów. NVDA undo w web jest wyszarzone po zmianie zakładki (user stracił możliwość cofnięcia 1. kwestii w projekcie testowym v6DePXTExypq95RTeH8l).
+- **JEŚLI WCHODZIMY W ŚCIEŻKĘ B — wymaga przeprojektowania SFX w prompcie systemowym trybu Skrypt:** LLM obecnie wpisuje w `[SFX:…]` także loopowane tła i dyrektywy („Wyciszenie dźwięków tła") — niekompatybilne z modelem „klip między replikami". Trzeba rozdzielić: SFX punktowy vs podkład-ambient (osobna ścieżka/loop) vs dyrektywa-cisza.
+- **WERDYKT USERA (po odsłuchu prolog_pathB.mp3): „całkiem obiecujące".** Generator słaby na niektórych dźwiękach (szuranie) — wina silnika SFX, nie skryptu. → reframe v16.0 na ŚCIEŻKĘ B (gotowy plik audio). Pełny plan: [[project_v16_plan_wdrozenia]].
+- **HYBRYDA (lokalny miks + upload do Studio) PRZETESTOWANA = PADA (user, 2026-06-02).** Studio traktuje wgrane klipy jako DODATEK; przy eksporcie/publikacji do Eleven Reader **regeneruje tekst (kolejne kredyty) i wrzuca generację do nagrania z SFX** — niszczy miks. → hybryda martwa.
+- **DECYZJA OSTATECZNA (Wariant 1) → TEATR CZYTANY z PRZEPROJEKTOWANYM trybem Skrypt.** Teatr czytany bez narracji = gołe repliki bez kontekstu (zła wizja). Stary Skrypt niósł kontekst przez SFX („Brak Narratora"). Więc tryb Skrypt zostaje przeprojektowany na **narratorsko-dialogowy, BEZ SFX**: narracja `[Narrator:]` (→ default voice) + dialog `[Postać:]` (→ głos postaci). **KLUCZ — narrator XOR SFX, nie oba** (doświadczenie usera z wczesnych prywatnych bet Streamlit: LLM mając oba realizuje jedno, zwykle narratora, albo słucha dyrektywy kosztem replik → niestabilne). Backward-compat ŁAMANA świadomie (brak userów, 1 draft do redakcji). Projekt Studio renderowany NATYWNIE (multi-voice), narrator=default voice. Bez SFX/ffmpeg/Path B/hybrydy. Pełny plan + etapy: [[project_v16_plan_wdrozenia]].
+- **Sprzątnięte 2026-06-02:** testowy projekt web `v6DePXTExypq95RTeH8l` usunięty (DELETE 200); artefakty lokalne (`_pathB_segments/`, `prolog_pathB.mp3`, skrypty spike) usunięte; fikstura `skrypty/joanna_joana_script.{txt,md}` zachowana (skrypt usera). Receptura API przeniesiona do [[project_v16_plan_wdrozenia]].
+
+**Rekomendacja:** ZIELONE ŚWIATŁO na v16.0 — rdzeń techniczny i kosztowy zweryfikowany na żywym API. Implementacja etapami: system-check klucza (`sk_`, opcjonalny) → `core_elevenlabs.py` (reuse wzorca ze spike'u) → parser obsady + dialog (A11y) → dispatcher (projekt Studio + manifest SFX kotwiczony do tekstu) → manual ×9 → release. Czeka na zielone światło do IMPLEMENTACJI (spike to nie implementacja).
