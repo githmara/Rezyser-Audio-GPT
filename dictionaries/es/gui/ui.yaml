@@ -400,7 +400,7 @@ rezyser:
     Asegúrate de que sea un guion de teatro leído con las etiquetas [Narrador: …] y [Personaje: …].
   el_obsada_blad_tytul: "Error al guardar el reparto"
   el_obsada_zapisana_tytul: "Reparto guardado"
-  el_obsada_zapisana_tresc: "El borrador del reparto de voces se ha guardado:\n{sciezka_pliku}"
+  el_obsada_zapisana_tresc: "El borrador del reparto de voces para «{nazwa}» se ha guardado."
   # Ventana del reparto de voces (ElevenLabs)
   dlg_obsada_tytul: "Reparto de voces (ElevenLabs Studio)"
   dlg_obsada_instrukcja: |-

@@ -428,7 +428,7 @@ rezyser:
     Upewnij się, że to skrypt teatru czytanego z tagami [Narrator: …] oraz [Postać: …].
   el_obsada_blad_tytul: "Błąd zapisu obsady"
   el_obsada_zapisana_tytul: "Obsada zapisana"
-  el_obsada_zapisana_tresc: "Szkic obsady głosowej został zapisany:\n{sciezka_pliku}"
+  el_obsada_zapisana_tresc: "Szkic obsady głosowej dla „{nazwa}” został zapisany."
   # Okno obsady głosowej (ElevenLabs)
   dlg_obsada_tytul: "Obsada głosowa (ElevenLabs Studio)"
   dlg_obsada_instrukcja: |-

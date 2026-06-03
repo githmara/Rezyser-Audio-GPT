@@ -401,7 +401,7 @@ rezyser:
     Gakktu úr skugga um að þetta sé leiklestrarhandrit með taggunum [Sögumaður: …] og [Persóna: …].
   el_obsada_blad_tytul: "Villa við vistun raddavals"
   el_obsada_zapisana_tytul: "Raddaval vistað"
-  el_obsada_zapisana_tresc: "Drög að raddavali hafa verið vistuð:\n{sciezka_pliku}"
+  el_obsada_zapisana_tresc: "Drög að raddavali fyrir „{nazwa}“ hafa verið vistuð."
   # Raddavalsgluggi (ElevenLabs)
   dlg_obsada_tytul: "Raddaval (ElevenLabs Studio)"
   dlg_obsada_instrukcja: |-

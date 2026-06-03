@@ -50,7 +50,7 @@ from typing import Any
 # Stałe folderów dzielimy z Reżyserem — `core_rezyser.SKRYPTY_DIR`/`RUNTIME_DIR`.
 # DRY: jeden punkt prawdy, jakby kiedyś zmieniła się nazwa folderu, oba moduły
 # dostaną zmianę.
-from core_rezyser import RUNTIME_DIR, SKRYPTY_DIR
+from core_rezyser import RUNTIME_DIR, SKRYPTY_DIR, _dev_log_runtime
 
 # Podfolder runtime/ specyficzny dla Opowieści — `runtime/opowiesci/<nazwa>.{game.json,story.jsonl}`.
 OPOWIESCI_DIR = "opowiesci"
@@ -363,6 +363,7 @@ class ProjektOpowiesci:
         }
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
+        _dev_log_runtime(sciezka)
         return sciezka
 
     def dopisz_story_jsonl(self, payload: dict[str, Any]) -> str:
@@ -388,6 +389,7 @@ class ProjektOpowiesci:
 
         with open(sciezka, "a", encoding="utf-8") as fh:
             fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
+        _dev_log_runtime(sciezka)
         return sciezka
 
     def zapisz_tryb(self, tryb_int: int) -> None:
@@ -409,6 +411,7 @@ class ProjektOpowiesci:
         try:
             with open(sciezka, "w", encoding="utf-8") as fh:
                 fh.write(str(tryb_int))
+            _dev_log_runtime(sciezka)
         except Exception:
             pass
 

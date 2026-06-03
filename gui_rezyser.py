@@ -2018,7 +2018,9 @@ class RezyserPanel(wx.Panel):
         try:
             if dlg.ShowModal() == wx.ID_OK:
                 try:
-                    sciezka = self._projekt.zapisz_obsada(dlg.glosy, nazwa=nazwa)
+                    # zapisz_obsada loguje ścieżkę runtime na konsolę dewelopera;
+                    # userowi pokazujemy tylko czystą nazwę projektu (runtime ukryty).
+                    self._projekt.zapisz_obsada(dlg.glosy, nazwa=nazwa)
                 except Exception as exc:
                     wx.MessageBox(
                         str(exc),
@@ -2027,7 +2029,7 @@ class RezyserPanel(wx.Panel):
                     )
                     return
                 wx.MessageBox(
-                    t("rezyser.el_obsada_zapisana_tresc", sciezka_pliku=sciezka),
+                    t("rezyser.el_obsada_zapisana_tresc", nazwa=nazwa),
                     t("rezyser.el_obsada_zapisana_tytul"),
                     wx.OK | wx.ICON_INFORMATION, self,
                 )

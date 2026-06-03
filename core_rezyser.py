@@ -59,6 +59,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 from dataclasses import dataclass
 from typing import Any
 
@@ -117,6 +118,23 @@ _WZORZEC_NAGLOWEK_LINIA = (
 # Foldery projektu (relatywne względem ``app_dir``)
 SKRYPTY_DIR = "skrypty"          # pliki .txt / .md / _streszczenie.txt
 RUNTIME_DIR = "runtime"          # ukryta metadata – tam leżą .mode
+
+
+def _dev_log_runtime(sciezka: str) -> None:
+    """Loguje zapis do `runtime/` WYŁĄCZNIE na konsolę dewelopera.
+
+    `runtime/` jest folderem systemowym, niewidocznym dla end-usera — w GUI
+    komunikaty NIGDY nie mówią o nim wprost (używają nazwy projektu, jak
+    Poliglota/Opowieści). Jedyne dozwolone miejsce na wzmiankę o `runtime` to
+    konsola dewelopera: w paczce release aplikacja chodzi bez konsoli
+    (``sys.stdout`` bywa None/zamknięty), więc print jest strażowany i nigdy
+    nie wywróci aplikacji końcowego użytkownika.
+    """
+    try:
+        if sys.stdout is not None:
+            print(f"[runtime] zapis: {sciezka}")
+    except Exception:  # noqa: BLE001 — log dev nie może nigdy ubić apki
+        pass
 
 # Pamięć modelu — od v15.1 wspólne ze ścieżką Opowieści przez `core_tokeny`.
 # Liczymy faktyczne tokeny payloadu (tiktoken), nie znaki — gpt-4o ma 128k
@@ -776,6 +794,7 @@ class ProjektRezysera:
         os.makedirs(os.path.dirname(sciezka), exist_ok=True)
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(meta, fh, ensure_ascii=False, indent=2)
+        _dev_log_runtime(sciezka)
 
     # ------------------------------------------------------------------
     # Zapis na dysk
@@ -856,6 +875,7 @@ class ProjektRezysera:
         try:
             with open(sciezka, "w", encoding="utf-8") as fh:
                 fh.write(str(tryb_idx))
+            _dev_log_runtime(sciezka)
         except Exception:
             # Metadata trybu to quality-of-life, a nie coś, bez czego
             # aplikacja nie działa – milczymy w razie awarii.
@@ -938,6 +958,7 @@ class ProjektRezysera:
         import json  # noqa: PLC0415  (lazy — używane tylko przy I/O brainstorm)
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
+        _dev_log_runtime(sciezka)
         return sciezka
 
     def wczytaj_brainstorm(
@@ -1031,6 +1052,7 @@ class ProjektRezysera:
         import json  # noqa: PLC0415  (lazy — tylko przy I/O obsady)
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
+        _dev_log_runtime(sciezka)
         return sciezka
 
     def wczytaj_obsada(self, nazwa: str | None = None) -> dict[str, str]:

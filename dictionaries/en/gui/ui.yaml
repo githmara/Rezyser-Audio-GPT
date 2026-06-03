@@ -400,7 +400,7 @@ rezyser:
     Make sure it is a reader's theatre script with [Narrator: …] and [Character: …] tags.
   el_obsada_blad_tytul: "Cast save error"
   el_obsada_zapisana_tytul: "Cast saved"
-  el_obsada_zapisana_tresc: "The voice cast draft has been saved:\n{sciezka_pliku}"
+  el_obsada_zapisana_tresc: "The voice cast draft for \"{nazwa}\" has been saved."
   # Voice cast window (ElevenLabs)
   dlg_obsada_tytul: "Voice cast (ElevenLabs Studio)"
   dlg_obsada_instrukcja: |-
