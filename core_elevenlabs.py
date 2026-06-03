@@ -14,8 +14,13 @@ Ten moduł celowo nie importuje ``wx`` — może być używany zarówno przez
 ``HomePanel`` (System Check), jak i przez dispatcher w panelu Reżysera,
 bez ryzyka cyklicznych importów.
 
-Warstwa klienta HTTP (``requests``: ``list_voices``, ``create_project``,
-``delete_project``) dochodzi w Etapie 2 — patrz dół pliku.
+Warstwa klienta HTTP (``requests``): ``saldo``, ``create_project``,
+``delete_project`` — patrz dół pliku. Świadomie BEZ ``list_voices``:
+reżyser wkleja voice ID skopiowane z weba ElevenLabs (zakładka Voices →
+odnajdź głos → odtwórz próbkę dla pewności → More actions → Copy Voice ID),
+bo lista API zwróciłaby tylko głosy premade, a użytkownik może chcieć
+własnych (Voice Design) albo dowolnych innych. Wybór głosów następuje więc
+przez okienko obsady z polem na wklejone ID (Etap 4), nie przez listowanie.
 """
 
 from __future__ import annotations
@@ -132,13 +137,149 @@ def wczytaj_klucz(env_path: str) -> str | None:
 
 
 # =============================================================================
-# Klient HTTP (requests) — DOCHODZI W ETAPIE 2
+# Klient HTTP (requests) — most do ElevenLabs Studio (v16.0, Etap 2)
 # =============================================================================
-# Planowane API (receptura ze spike'u v16.0):
-#   - list_voices(klucz) -> list[dict]                     GET  /v1/voices
-#   - saldo(klucz) -> int                                  GET  /v1/user/subscription
-#   - create_project(klucz, name, narrator_voice, chapters) POST /v1/studio/projects
-#     (multipart from_content_json, auto_convert pominięty = 0 kredytów)
-#   - delete_project(klucz, project_id) -> None            DELETE /v1/studio/projects/{id}
-# Auth: header ``xi-api-key``. Scope'y: projects_write + voices_read.
-# Brak scope → HTTP 401 detail.status == "missing_permissions".
+# Receptura potwierdzona empirycznie spike'iem v16.0:
+#   - auth: header ``xi-api-key``
+#   - scope'y restricted key: projects_write + voices_read
+#   - tworzenie projektu z ``auto_convert`` pominiętym (=false) NIE spala
+#     kredytów (render robi użytkownik później w webie Studio)
+# ``requests`` importowane leniwie wewnątrz funkcji — dzięki temu walidacja
+# klucza (System Check, Etap 1) działa nawet bez tej zależności.
+
+API_BASE = "https://api.elevenlabs.io"
+#: Model wielojęzyczny — pokrywa wszystkie 9 języków paczek (w tym PL).
+DEFAULT_MODEL_ID = "eleven_multilingual_v2"
+_TIMEOUT_ODCZYT = 30
+_TIMEOUT_PROJEKT = 120
+
+
+class BladElevenLabs(Exception):
+    """Ogólny błąd komunikacji z API ElevenLabs (HTTP nie-2xx lub zła struktura)."""
+
+
+class BrakUprawnien(BladElevenLabs):
+    """HTTP 401 z ``detail.status == "missing_permissions"``.
+
+    Klucz jest poprawny, ale restricted key nie ma wymaganych scope'ów
+    (``projects_write`` + ``voices_read``). Użytkownik musi je dodać w panelu
+    ElevenLabs (Profile → API key → edit → scopes). 401 niczego nie spala.
+    """
+
+
+def _naglowki(klucz: str) -> dict:
+    return {"xi-api-key": klucz}
+
+
+def _sprawdz_odpowiedz(r) -> None:
+    """Mapuje odpowiedź HTTP na wyjątki; przy 2xx nie robi nic.
+
+    Wyróżnia 401 ``missing_permissions`` jako :class:`BrakUprawnien`, by GUI
+    mogło pokazać konkretną instrukcję o scope'ach zamiast generycznego błędu.
+    """
+    if r.status_code == 401:
+        detail = None
+        try:
+            detail = r.json().get("detail")
+        except ValueError:
+            detail = None
+        if isinstance(detail, dict) and detail.get("status") == "missing_permissions":
+            raise BrakUprawnien(
+                "Klucz ElevenLabs nie ma wymaganych uprawnień (scope'ów). "
+                "Dodaj projects_write oraz voices_read w panelu ElevenLabs."
+            )
+        raise BladElevenLabs("HTTP 401 — nieautoryzowany (sprawdź klucz ElevenLabs).")
+    if not r.ok:
+        raise BladElevenLabs(f"HTTP {r.status_code} z ElevenLabs: {r.text[:300]}")
+
+
+def saldo(klucz: str) -> dict:
+    """``GET /v1/user/subscription`` — stan konta (0 kredytów).
+
+    Zwraca surowy słownik subskrypcji; istotne pola to ``character_count``
+    (zużyte znaki) i ``character_limit`` (limit). Pozwala dispatcherowi
+    pokazać świadomość kosztu przed renderem.
+    """
+    import requests
+    r = requests.get(
+        f"{API_BASE}/v1/user/subscription",
+        headers=_naglowki(klucz),
+        timeout=_TIMEOUT_ODCZYT,
+    )
+    _sprawdz_odpowiedz(r)
+    return r.json()
+
+
+def create_project(
+    klucz: str,
+    name: str,
+    narrator_voice_id: str,
+    chapters: list,
+    *,
+    model_id: str = DEFAULT_MODEL_ID,
+) -> str:
+    """Tworzy wielogłosowy projekt Studio. ``auto_convert`` POMINIĘTY → 0 kredytów.
+
+    ``POST /v1/studio/projects`` jako multipart (``requests`` wymaga formy
+    ``files={'pole': (None, wartość)}`` dla pól tekstowych). Render mowy to
+    osobny krok po stronie użytkownika w webie Studio — tutaj powstaje tylko
+    edytowalny projekt.
+
+    Args:
+        name:              Nazwa projektu (wymagana przez API).
+        narrator_voice_id: Głos domyślny — tytuły rozdziałów i akapity
+                           narratora (``default_title_voice_id`` +
+                           ``default_paragraph_voice_id``).
+        chapters:          Lista rozdziałów w formacie ``from_content_json``
+                           (budowana w Etapie 3): każdy rozdział to
+                           ``{"name": str, "blocks": [...]}``, blok to
+                           ``{"sub_type": "h1"|"p", "nodes": [tts_node, ...]}``,
+                           a tts_node to ``{"voice_id", "text", "type": "tts_node"}``.
+        model_id:          Domyślnie ``eleven_multilingual_v2``.
+
+    Returns:
+        ``project_id`` utworzonego projektu.
+
+    Raises:
+        BrakUprawnien:  401 missing_permissions (brak scope'ów).
+        BladElevenLabs: inny błąd HTTP lub nieoczekiwana struktura odpowiedzi.
+    """
+    import json
+    import requests
+
+    from_content = json.dumps(chapters, ensure_ascii=False)
+    files = {
+        "name": (None, name),
+        "default_title_voice_id": (None, narrator_voice_id),
+        "default_paragraph_voice_id": (None, narrator_voice_id),
+        "default_model_id": (None, model_id),
+        "from_content_json": (None, from_content),
+    }
+    r = requests.post(
+        f"{API_BASE}/v1/studio/projects",
+        headers=_naglowki(klucz),
+        files=files,
+        timeout=_TIMEOUT_PROJEKT,
+    )
+    _sprawdz_odpowiedz(r)
+
+    dane = r.json()
+    projekt = dane.get("project", dane) if isinstance(dane, dict) else {}
+    project_id = (projekt.get("project_id") if isinstance(projekt, dict) else None) \
+        or (dane.get("project_id") if isinstance(dane, dict) else None)
+    if not project_id:
+        raise BladElevenLabs(
+            f"Nieoczekiwana struktura odpowiedzi przy tworzeniu projektu: {str(dane)[:300]}"
+        )
+    return project_id
+
+
+def delete_project(klucz: str, project_id: str) -> None:
+    """``DELETE /v1/studio/projects/{id}`` — sprzątanie (np. projektu testowego)."""
+    import requests
+    r = requests.delete(
+        f"{API_BASE}/v1/studio/projects/{project_id}",
+        headers=_naglowki(klucz),
+        timeout=_TIMEOUT_ODCZYT,
+    )
+    _sprawdz_odpowiedz(r)
