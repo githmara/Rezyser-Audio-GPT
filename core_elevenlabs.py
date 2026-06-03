@@ -25,6 +25,7 @@ przez okienko obsady z polem na wklejone ID (Etap 4), nie przez listowanie.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 # --- Stałe konfiguracyjne klucza ---------------------------------------------
@@ -283,3 +284,225 @@ def delete_project(klucz: str, project_id: str) -> None:
         timeout=_TIMEOUT_ODCZYT,
     )
     _sprawdz_odpowiedz(r)
+
+
+# =============================================================================
+# Parser skryptu teatru czytanego → from_content_json (v16.0, Etap 3)
+# =============================================================================
+# Wejście: surowy skrypt trybu Skrypt (``[Narrator: …]`` / ``[Postać: …]`` +
+# nagłówki Prolog/Akt/Scena). Wyjście: lista rozdziałów ``from_content_json``
+# dla ``create_project``.
+
+#: Klucz głosu narratora w mapie obsady (zob. ``buduj_chapters``).
+NARRATOR_KEY = "__narrator__"
+
+#: Słowa-wyzwalacze tagu narratora — zlokalizowane per język (małe litery).
+#: Tag narratora jest tłumaczony w promptach (``[Narrator:]``/`[Erzähler:]`/…),
+#: więc detekcja idzie po unii wszystkich 9 wariantów (są dostatecznie
+#: rozróżnialne, by zbiór mógł być wspólny niezależnie od języka projektu).
+NARRATOR_WORDS = {
+    "narrator",     # pl, en
+    "erzähler",     # de
+    "narrador",     # es
+    "kertoja",      # fi
+    "narrateur",    # fr
+    "sögumaður",    # is
+    "narratore",    # it
+    "рассказчик",   # ru
+}
+
+# Markery rozdziałów (→ nowy rozdział, tytuł = h1 narratorem) i scen
+# (→ h1 wewnątrz bieżącego rozdziału). Wzorce zsynchronizowane z
+# ``gui_konwerter.py`` (9 języków: pl/en/de/es/fi/fr/is/it/ru).
+_RE_CHAPTER = re.compile(
+    r"^[=\-\s]*("
+    r"Czołówka"
+    r"|Rozdzia[łl]|Chapter|Kapitel|Luku|Kafli|Capitolo|Chapitre|Cap[íi]tulo|Глава"
+    r"|Prolog(?:ue|i|o)?|Formáli|Пролог"
+    r"|Epilog(?:ue|i|o)?|Eftirorð|Эпилог"
+    r"|Akt|Act|Acte|Acto|Atto|Акт|Näytös|Þáttur"
+    r")",
+    re.IGNORECASE,
+)
+_RE_SCENE = re.compile(
+    r"^[=\-\s]*(Scena|Scene|Szene|Kohtaus|Atriði|Сцена)",
+    re.IGNORECASE,
+)
+
+
+def _czysty_naglowek(linia: str) -> str:
+    """Obcina dekoracje ``= - spacja`` z obu stron linii nagłówka."""
+    return re.sub(r"^[=\-\s]+|[=\-\s]+$", "", linia).strip()
+
+
+def _klasyfikuj_naglowek(linia: str):
+    """Zwraca ``("chapter"|"scene"|None, czysty_tekst)`` dla linii.
+
+    Strażnik przeciw fałszywym trafieniom w erze narratora: linia opisowa
+    narratora może zaczynać się od słowa „Scena"/„Akt". Nagłówkiem jest tylko
+    linia KRÓTKA (≤ 60 znaków) i BEZ interpunkcji zdaniowej ``.!?`` — zdania
+    narratora („Scena była pusta.") przepadają przez filtr i trafiają do
+    bufora mówcy jako zwykły tekst.
+    """
+    czysty = _czysty_naglowek(linia)
+    if not czysty or len(czysty) > 60 or re.search(r"[.!?]", czysty):
+        return (None, czysty)
+    if _RE_CHAPTER.match(linia):
+        return ("chapter", czysty)
+    if _RE_SCENE.match(linia):
+        return ("scene", czysty)
+    return (None, czysty)
+
+
+def _wytnij_mowce(tag: str) -> str | None:
+    """Wyłuskuje nazwę mówcy z tagu ``[Imię: emocja]`` → ``"imię"`` (bez emocji).
+
+    Mirror ``core_rezyser`` (``^\\[([^:\\]\\-]+)``): nazwa = tekst do pierwszego
+    ``:``, ``]`` lub ``-``.
+    """
+    m = re.match(r"^\[([^:\]\-]+)", tag)
+    return m.group(1).strip() if m else None
+
+
+_RE_TAG = re.compile(r"\s*(\[[^\]]+\])(.*)")
+
+
+def wykryj_postacie(tekst: str):
+    """Skanuje skrypt → ``(lista_postaci_z_kwestiami, czy_uzyto_narratora)``.
+
+    Postacie w kolejności pierwszego wystąpienia, w oryginalnej pisowni tagu
+    (narrator wykluczony z listy — ma osobny, zawsze obecny slot w obsadzie).
+    Liczą się tylko mówcy z NIEPUSTĄ kwestią. Feed dla okienka obsady (Etap 4).
+    """
+    postacie: list[str] = []
+    widziane: set[str] = set()
+    czy_narrator = False
+    mowca = None          # nazwa małymi literami
+    mowca_oryg = None     # oryginalna pisownia
+    ma_tekst = False
+
+    def _flush():
+        nonlocal mowca, mowca_oryg, ma_tekst, czy_narrator
+        if mowca is not None and ma_tekst:
+            if mowca in NARRATOR_WORDS:
+                czy_narrator = True
+            elif mowca not in widziane:
+                widziane.add(mowca)
+                postacie.append(mowca_oryg)
+        mowca = None
+        mowca_oryg = None
+        ma_tekst = False
+
+    for linia in tekst.splitlines():
+        typ, _ = _klasyfikuj_naglowek(linia)
+        if typ is not None:
+            _flush()
+            continue
+        m = _RE_TAG.match(linia)
+        if m:
+            _flush()
+            sp = _wytnij_mowce(m.group(1))
+            mowca_oryg = sp.strip() if sp else None
+            mowca = mowca_oryg.lower() if mowca_oryg else None
+            ma_tekst = bool(m.group(2).strip())
+            continue
+        if linia.strip() and mowca is not None:
+            ma_tekst = True
+    _flush()
+    return postacie, czy_narrator
+
+
+def liczba_rozdzialow(tekst: str) -> int:
+    """Liczy markery rozdziałów (Prolog/Akt/Rozdział/…) — do walidacji „≥1 akt"."""
+    return sum(
+        1 for linia in tekst.splitlines()
+        if _klasyfikuj_naglowek(linia)[0] == "chapter"
+    )
+
+
+def _tts_node(voice_id, text: str) -> dict:
+    return {"voice_id": voice_id, "text": text, "type": "tts_node"}
+
+
+def buduj_chapters(tekst: str, obsada: dict, *, domyslny_tytul: str = "1") -> list:
+    """Buduje listę rozdziałów ``from_content_json`` ze skryptu + mapy obsady.
+
+    Args:
+        obsada: mapa ``{nazwa_postaci_lower: voice_id, NARRATOR_KEY: voice_id}``.
+                Narrator (``NARRATOR_KEY``) jest głosem domyślnym — tytuły
+                rozdziałów/scen (h1) i kwestie narratora.
+        domyslny_tytul: nazwa rozdziału, gdy treść pojawia się PRZED pierwszym
+                markerem (np. nazwa projektu); zwykle nieużywana, bo skrypt
+                zaczyna się od „Prolog"/„Akt".
+
+    Każda tura mówcy (tag + jego tekst do następnego tagu/nagłówka) → jeden
+    blok ``p`` z jednym ``tts_node`` głosem mówcy. Nagłówek rozdziału → nowy
+    rozdział + h1 narratorem; nagłówek sceny → h1 narratorem w bieżącym
+    rozdziale. Tekst nieotagowanego mówcy (sierota) jest pomijany — nowy
+    format wymaga tagu przy każdej linii.
+    """
+    narrator_voice = obsada.get(NARRATOR_KEY)
+    chapters: list = []
+    stan = {"biezacy": None, "mowca": None, "bufor": []}
+
+    def _voice_dla(speaker_lower: str):
+        if speaker_lower in NARRATOR_WORDS:
+            return narrator_voice
+        if speaker_lower in obsada:
+            return obsada[speaker_lower]
+        # Dopasowanie rozmyte (jak silnik akcentów): podciąg w obie strony.
+        for k, v in obsada.items():
+            if k == NARRATOR_KEY:
+                continue
+            if k and (k in speaker_lower or speaker_lower in k):
+                return v
+        return None
+
+    def _zapewnij_chapter():
+        if stan["biezacy"] is None:
+            stan["biezacy"] = {"name": domyslny_tytul, "blocks": []}
+            chapters.append(stan["biezacy"])
+
+    def _h1(text: str):
+        _zapewnij_chapter()
+        stan["biezacy"]["blocks"].append(
+            {"sub_type": "h1", "nodes": [_tts_node(narrator_voice, text)]}
+        )
+
+    def _flush():
+        mowca = stan["mowca"]
+        bufor = stan["bufor"]
+        if mowca is not None:
+            text = " ".join(s.strip() for s in bufor if s.strip()).strip()
+            if text:
+                _zapewnij_chapter()
+                stan["biezacy"]["blocks"].append(
+                    {"sub_type": "p", "nodes": [_tts_node(_voice_dla(mowca), text)]}
+                )
+        stan["mowca"] = None
+        stan["bufor"] = []
+
+    for linia in tekst.splitlines():
+        typ, czysty = _klasyfikuj_naglowek(linia)
+        if typ == "chapter":
+            _flush()
+            stan["biezacy"] = {"name": czysty, "blocks": []}
+            chapters.append(stan["biezacy"])
+            _h1(czysty)
+            continue
+        if typ == "scene":
+            _flush()
+            _h1(czysty)
+            continue
+        m = _RE_TAG.match(linia)
+        if m:
+            _flush()
+            sp = _wytnij_mowce(m.group(1))
+            stan["mowca"] = sp.lower().strip() if sp else None
+            reszta = m.group(2).strip()
+            stan["bufor"] = [reszta] if reszta else []
+            continue
+        if linia.strip() and stan["mowca"] is not None:
+            stan["bufor"].append(linia)
+    _flush()
+    return chapters
