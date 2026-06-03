@@ -171,6 +171,34 @@ home:
     Fügen Sie Ihren API-Schlüssel ein, speichern Sie die Datei (Strg+S) und starten Sie die Anwendung neu.
   blad_otwarcia_pliku_tytul: "Information"
   blad_otwarcia_pliku_tresc: "Die Datei konnte nicht automatisch geöffnet werden.\nÖffnen Sie sie manuell:\n{sciezka_pliku}"
+  # Audio-Postproduktion (ElevenLabs) — optional (v16.0)
+  heading_elevenlabs:    "Audio-Postproduktion (ElevenLabs) — optional"
+  el_brak: |-
+    ℹ️ Der ElevenLabs-Schlüssel ist nicht konfiguriert (optional).
+    Die Brücke zu ElevenLabs Studio ist inaktiv — der Rest des Programms funktioniert normal.
+    Zum Aktivieren füge in golden_key.env die Zeile ELEVENLABS_API_KEY=sk_… hinzu (ein Schlüssel mit Unterstrich).
+  el_placeholder: |-
+    ⚠️ Der ElevenLabs-Schlüssel wurde nicht eingegeben!
+    In golden_key.env steht noch der Platzhaltertext.
+    Öffne die Datei, entferne den Platzhalter und füge deinen ElevenLabs-Schlüssel (sk_…) ein — oder lösche die Zeile, wenn du diese Funktion nicht möchtest.
+  el_cudzyslowy: |-
+    🚨 Überflüssige Anführungszeichen um den ElevenLabs-Schlüssel!
+    Der Schlüssel wurde in Anführungszeichen eingefügt. Öffne golden_key.env und entferne die Anführungszeichen —
+    der Wert muss direkt nach dem '='-Zeichen stehen, ohne zusätzliche Zeichen.
+  el_spacje: |-
+    🚨 Unzulässige Zeichen um den ElevenLabs-Schlüssel!
+    Vor oder nach dem Schlüssel wurde ein Leerzeichen oder ein anderes unsichtbares Zeichen erkannt.
+    Öffne golden_key.env und stelle sicher, dass der Wert direkt nach dem '='-Zeichen beginnt.
+  el_format: |-
+    🚨 Verdächtiges Format des ElevenLabs-Schlüssels!
+    Ein ElevenLabs-Schlüssel beginnt immer mit sk_ (mit UNTERSTRICH, nicht sk- wie bei OpenAI).
+    Stelle sicher, dass du einen Schlüssel von ElevenLabs eingefügt hast und nicht von einer anderen Plattform.
+  el_zbyt_krotki: |-
+    ⚠️ Der ElevenLabs-Schlüssel scheint zu kurz zu sein ({liczba_znakow} Zeichen erkannt, mindestens {minimum_znakow} erwartet).
+    Wahrscheinlich hast du nur einen Teil des Schlüssels kopiert. Erzeuge einen neuen Schlüssel im ElevenLabs-Panel und füge ihn vollständig ein.
+  el_ok: |-
+    ✅ ElevenLabs-Schlüssel erkannt und korrekt formatiert.
+    Die Brücke zu ElevenLabs Studio (Audio-Postproduktion) ist im Regie-Panel aktiv.
   # Sekcja: Narzędzia słownikowe
   heading_narzedzia_slownikowe: "Wörterbuchwerkzeuge"
   narzedzia_slownikowe_name: "Beschreibung der Wörterbuchwerkzeuge"

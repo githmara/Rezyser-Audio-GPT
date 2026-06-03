@@ -171,6 +171,34 @@ home:
     Collez votre clé API, sauvegardez le fichier (Ctrl+S) et redémarrez l'application.
   blad_otwarcia_pliku_tytul: "Information"
   blad_otwarcia_pliku_tresc: "Impossible d'ouvrir automatiquement le fichier.\nOuvrez-le manuellement :\n{sciezka_pliku}"
+  # Post-production audio (ElevenLabs) — optionnel (v16.0)
+  heading_elevenlabs:    "Post-production audio (ElevenLabs) — optionnel"
+  el_brak: |-
+    ℹ️ La clé ElevenLabs n'est pas configurée (optionnel).
+    Le pont vers ElevenLabs Studio est inactif — le reste du programme fonctionne normalement.
+    Pour l'activer, ajoute dans golden_key.env la ligne ELEVENLABS_API_KEY=sk_… (une clé avec un tiret bas).
+  el_placeholder: |-
+    ⚠️ La clé ElevenLabs n'a pas été saisie !
+    Le texte d'espace réservé est toujours présent dans golden_key.env.
+    Ouvre le fichier, supprime l'espace réservé et colle ta clé ElevenLabs (sk_…) — ou supprime la ligne si tu ne veux pas cette fonction.
+  el_cudzyslowy: |-
+    🚨 Guillemets superflus autour de la clé ElevenLabs !
+    La clé a été collée entre guillemets. Ouvre golden_key.env et supprime les guillemets —
+    la valeur doit être saisie directement après le signe '=', sans caractères supplémentaires.
+  el_spacje: |-
+    🚨 Caractères non autorisés autour de la clé ElevenLabs !
+    Un espace ou un autre caractère invisible a été détecté avant ou après la clé.
+    Ouvre golden_key.env et assure-toi que la valeur commence immédiatement après le signe '='.
+  el_format: |-
+    🚨 Format suspect de la clé ElevenLabs !
+    Une clé ElevenLabs commence toujours par sk_ (avec un TIRET BAS, pas sk- comme OpenAI).
+    Assure-toi d'avoir collé une clé d'ElevenLabs et non d'une autre plateforme.
+  el_zbyt_krotki: |-
+    ⚠️ La clé ElevenLabs semble trop courte ({liczba_znakow} caractères détectés, au moins {minimum_znakow} attendus).
+    Tu n'as probablement copié qu'une partie de la clé. Génère une nouvelle clé dans le panneau ElevenLabs et colle-la en entier.
+  el_ok: |-
+    ✅ Clé ElevenLabs détectée et correctement formatée.
+    Le pont vers ElevenLabs Studio (post-production audio) est actif dans le panneau du Réalisateur.
   # Sekcja: Narzędzia słownikowe
   heading_narzedzia_slownikowe: "Outils de dictionnaire"
   narzedzia_slownikowe_name: "Description des outils de dictionnaire"

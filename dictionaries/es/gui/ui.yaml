@@ -170,6 +170,34 @@ home:
     Pega tu clave API, guarda el archivo (Ctrl+S) y reinicia la aplicación.
   blad_otwarcia_pliku_tytul: "Información"
   blad_otwarcia_pliku_tresc: "No se pudo abrir el archivo automáticamente.\nÁbrelo manualmente:\n{sciezka_pliku}"
+  # Posproducción de audio (ElevenLabs) — opcional (v16.0)
+  heading_elevenlabs:    "Posproducción de audio (ElevenLabs) — opcional"
+  el_brak: |-
+    ℹ️ La clave de ElevenLabs no está configurada (opcional).
+    El puente con ElevenLabs Studio está inactivo — el resto del programa funciona con normalidad.
+    Para activarlo, añade en golden_key.env la línea ELEVENLABS_API_KEY=sk_… (una clave con guion bajo).
+  el_placeholder: |-
+    ⚠️ ¡No se ha introducido la clave de ElevenLabs!
+    En golden_key.env sigue estando el texto de marcador.
+    Abre el archivo, elimina el marcador y pega tu clave de ElevenLabs (sk_…) — o borra la línea si no quieres esta función.
+  el_cudzyslowy: |-
+    🚨 ¡Comillas innecesarias alrededor de la clave de ElevenLabs!
+    La clave se pegó entre comillas. Abre golden_key.env y elimina las comillas —
+    el valor debe escribirse directamente después del signo '=', sin caracteres adicionales.
+  el_spacje: |-
+    🚨 ¡Caracteres no permitidos alrededor de la clave de ElevenLabs!
+    Se detectó un espacio u otro carácter invisible antes o después de la clave.
+    Abre golden_key.env y asegúrate de que el valor empiece inmediatamente después del signo '='.
+  el_format: |-
+    🚨 ¡Formato sospechoso de la clave de ElevenLabs!
+    Una clave de ElevenLabs siempre empieza por sk_ (con GUION BAJO, no sk- como OpenAI).
+    Asegúrate de haber pegado una clave de ElevenLabs y no de otra plataforma.
+  el_zbyt_krotki: |-
+    ⚠️ La clave de ElevenLabs parece demasiado corta (se detectaron {liczba_znakow} caracteres, se esperaban al menos {minimum_znakow}).
+    Probablemente copiaste solo una parte de la clave. Genera una nueva clave en el panel de ElevenLabs y pégala completa.
+  el_ok: |-
+    ✅ Clave de ElevenLabs detectada y con el formato correcto.
+    El puente con ElevenLabs Studio (posproducción de audio) está activo en el panel del Director.
   # Sekcja: Narzędzia słownikowe
   heading_narzedzia_slownikowe: "Herramientas de diccionario"
   narzedzia_slownikowe_name: "Descripción de herramientas de diccionario"

@@ -15,6 +15,7 @@ from pathlib import Path
 
 import wx
 
+import core_elevenlabs
 import core_poliglota
 import core_updater
 import i18n
@@ -161,6 +162,7 @@ class HomePanel(wx.Panel):
         self.SetName(t("home.panel_name"))
         self._build_ui()
         self._run_system_check()
+        self._run_elevenlabs_check()
 
     # ------------------------------------------------------------------
     # Właściwość: bezwzględna ścieżka do golden_key.env
@@ -217,6 +219,28 @@ class HomePanel(wx.Panel):
         self._action_btn.Hide()
         self.Bind(wx.EVT_BUTTON, self._on_action_btn, self._action_btn)
         main_sizer.Add(self._action_btn, flag=wx.LEFT | wx.BOTTOM, border=16)
+
+        # --- Sekcja: Postprodukcja audio (ElevenLabs) — opcjonalna (v16.0) ---
+        # Klucz ELEVENLABS_API_KEY jest opcjonalny; brak = stan informacyjny,
+        # nie błąd. Status liczony niezależnie od System Check OpenAI.
+        main_sizer.Add(
+            wx.StaticLine(self), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8
+        )
+
+        heading_el = wx.StaticText(self, label=t("home.heading_elevenlabs"))
+        font_el = heading_el.GetFont()
+        font_el.SetPointSize(13)
+        font_el.MakeBold()
+        heading_el.SetFont(font_el)
+        main_sizer.Add(heading_el, flag=wx.TOP | wx.LEFT | wx.RIGHT, border=16)
+
+        self._el_status_lbl = wx.TextCtrl(
+            self,
+            value=t("home.checking"),
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
+        )
+        self._el_status_lbl.SetBackgroundColour(self.GetBackgroundColour())
+        main_sizer.Add(self._el_status_lbl, flag=wx.ALL | wx.EXPAND, border=16)
 
         # --- Sekcja: Narzędzia słownikowe (dla lingwistów) ---
         main_sizer.Add(
@@ -355,24 +379,73 @@ class HomePanel(wx.Panel):
         self._set_status(t("home.ok_klucz_wykryty"), kind="ok")
 
     # ------------------------------------------------------------------
+    # Logika walidacji klucza ElevenLabs (opcjonalny — v16.0)
+    # ------------------------------------------------------------------
+    def _run_elevenlabs_check(self) -> None:
+        """Diagnozuje opcjonalny klucz ElevenLabs i aktualizuje osobny status.
+
+        Niezależny od System Check OpenAI: brak pliku lub brak zmiennej
+        ``ELEVENLABS_API_KEY`` to stan informacyjny (feature wyłączony),
+        nie błąd. Mapuje ``core_elevenlabs.STATUS_*`` na komunikat i18n.
+        """
+        env_path = self._env_path
+        try:
+            with open(env_path, "r", encoding="utf-8-sig") as fh:
+                zawartosc = fh.read()
+        except OSError:
+            # Brak pliku golden_key.env → feature po prostu nieskonfigurowany.
+            zawartosc = ""
+
+        diag = core_elevenlabs.diagnoza_klucza(zawartosc)
+
+        # status → (klucz i18n, rodzaj koloru)
+        mapowanie = {
+            core_elevenlabs.STATUS_BRAK:        ("home.el_brak",        "info"),
+            core_elevenlabs.STATUS_PLACEHOLDER: ("home.el_placeholder", "warning"),
+            core_elevenlabs.STATUS_CUDZYSLOWY:  ("home.el_cudzyslowy",  "error"),
+            core_elevenlabs.STATUS_SPACJE:      ("home.el_spacje",      "error"),
+            core_elevenlabs.STATUS_FORMAT:      ("home.el_format",      "error"),
+            core_elevenlabs.STATUS_OK:          ("home.el_ok",          "ok"),
+        }
+
+        if diag.status == core_elevenlabs.STATUS_ZBYT_KROTKI:
+            message = t(
+                "home.el_zbyt_krotki",
+                liczba_znakow=diag.liczba_znakow,
+                minimum_znakow=core_elevenlabs.MINIMUM_ZNAKOW_KLUCZA,
+            )
+            kind = "warning"
+        else:
+            klucz_i18n, kind = mapowanie.get(diag.status, ("home.el_brak", "info"))
+            message = t(klucz_i18n)
+
+        self._apply_status(self._el_status_lbl, message, kind)
+
+    # ------------------------------------------------------------------
     # Pomocnicze metody UI
     # ------------------------------------------------------------------
+    _COLOUR_MAP = {
+        "ok":      wx.Colour(0, 128, 0),    # zielony
+        "warning": wx.Colour(180, 100, 0),  # pomarańczowy
+        "error":   wx.Colour(180, 0, 0),    # czerwony
+        "info":    wx.Colour(0, 90, 160),   # niebieski (stan neutralny/opcjonalny)
+    }
+
+    def _apply_status(self, lbl: wx.TextCtrl, message: str, kind: str) -> None:
+        """Ustawia tekst i kolor na wskazanej etykiecie statusu (A11y: SetName)."""
+        lbl.SetValue(message)
+        # Ustawienie nazwy = NVDA odczyta komunikat po sfocusowaniu kontrolki
+        lbl.SetName(message)
+        lbl.SetForegroundColour(self._COLOUR_MAP.get(kind, self._COLOUR_MAP["ok"]))
+
     def _set_status(self, message: str, kind: str = "ok") -> None:
-        """Ustawia tekst i kolor etykiety statusu.
+        """Ustawia tekst i kolor etykiety System Check (golden_key.env OpenAI).
 
         Args:
             message: Treść komunikatu widoczna w interfejsie.
-            kind:    ``"ok"`` | ``"warning"`` | ``"error"``
+            kind:    ``"ok"`` | ``"warning"`` | ``"error"`` | ``"info"``
         """
-        colour_map = {
-            "ok":      wx.Colour(0, 128, 0),    # zielony
-            "warning": wx.Colour(180, 100, 0),  # pomarańczowy
-            "error":   wx.Colour(180, 0, 0),    # czerwony
-        }
-        self._status_lbl.SetValue(message)
-        # Ustawienie nazwy = NVDA odczyta komunikat po sfocusowaniu kontrolki
-        self._status_lbl.SetName(message)
-        self._status_lbl.SetForegroundColour(colour_map.get(kind, colour_map["ok"]))
+        self._apply_status(self._status_lbl, message, kind)
 
     def _show_action_btn(self, action: str, label: str) -> None:
         """Pokazuje przycisk akcji z odpowiednią etykietą."""
@@ -393,7 +466,14 @@ class HomePanel(wx.Panel):
         if action == "generate":
             try:
                 with open(env_path, "w", encoding="utf-8") as fh:
-                    fh.write("OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ")
+                    fh.write(
+                        "OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ\n"
+                        "\n"
+                        "# Opcjonalnie — postprodukcja audio w ElevenLabs Studio (v16.0).\n"
+                        "# Odkomentuj poniższą linię i wklej klucz typu sk_ "
+                        "(z podkreślnikiem, nie sk-):\n"
+                        "# ELEVENLABS_API_KEY=\n"
+                    )
             except Exception as exc:
                 wx.MessageBox(
                     t("home.blad_tworzenia_env_tresc", tresc_bledu=str(exc)),

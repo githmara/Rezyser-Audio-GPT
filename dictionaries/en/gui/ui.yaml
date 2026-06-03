@@ -170,6 +170,34 @@ home:
     Paste your API key, save the file (Ctrl+S), and restart the application.
   blad_otwarcia_pliku_tytul: "Information"
   blad_otwarcia_pliku_tresc: "Failed to open the file automatically.\nOpen it manually:\n{sciezka_pliku}"
+  # Audio post-production (ElevenLabs) — optional (v16.0)
+  heading_elevenlabs:    "Audio post-production (ElevenLabs) — optional"
+  el_brak: |-
+    ℹ️ The ElevenLabs key is not configured (optional).
+    The bridge to ElevenLabs Studio is inactive — the rest of the program works normally.
+    To enable it, add a line ELEVENLABS_API_KEY=sk_… to golden_key.env (a key with an underscore).
+  el_placeholder: |-
+    ⚠️ The ElevenLabs key has not been entered!
+    The placeholder text is still in golden_key.env.
+    Open the file, remove the placeholder and paste your ElevenLabs key (sk_…) — or delete the line if you don't want this feature.
+  el_cudzyslowy: |-
+    🚨 Unnecessary quotation marks around the ElevenLabs key!
+    The key was pasted in quotes. Open golden_key.env and remove the quotes —
+    the value must be entered directly after the '=' sign, with no extra characters.
+  el_spacje: |-
+    🚨 Illegal characters around the ElevenLabs key!
+    A space or other invisible character was detected before or after the key.
+    Open golden_key.env and make sure the value starts immediately after the '=' sign.
+  el_format: |-
+    🚨 Suspicious ElevenLabs key format!
+    An ElevenLabs key always starts with sk_ (with an UNDERSCORE, not sk- like OpenAI).
+    Make sure you pasted a key from ElevenLabs and not from another platform.
+  el_zbyt_krotki: |-
+    ⚠️ The ElevenLabs key seems too short ({liczba_znakow} characters detected, at least {minimum_znakow} expected).
+    You probably copied only part of the key. Generate a new key in the ElevenLabs panel and paste it in full.
+  el_ok: |-
+    ✅ ElevenLabs key detected and correctly formatted.
+    The bridge to ElevenLabs Studio (audio post-production) is active in the Director panel.
   # Sekcja: Narzędzia słownikowe
   heading_narzedzia_slownikowe: "Dictionary Tools"
   narzedzia_slownikowe_name: "Dictionary Tools Description"

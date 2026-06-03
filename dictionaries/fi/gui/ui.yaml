@@ -171,6 +171,34 @@ home:
     Liitä API-avaimesi, tallenna tiedosto (Ctrl+S) ja käynnistä sovellus uudelleen.
   blad_otwarcia_pliku_tytul: "Tieto"
   blad_otwarcia_pliku_tresc: "Tiedostoa ei voitu avata automaattisesti.\nAvaa se manuaalisesti:\n{sciezka_pliku}"
+  # Äänen jälkituotanto (ElevenLabs) — valinnainen (v16.0)
+  heading_elevenlabs:    "Äänen jälkituotanto (ElevenLabs) — valinnainen"
+  el_brak: |-
+    ℹ️ ElevenLabs-avainta ei ole määritetty (valinnainen).
+    Silta ElevenLabs Studioon on epäaktiivinen — muu ohjelma toimii normaalisti.
+    Ota se käyttöön lisäämällä golden_key.env-tiedostoon rivi ELEVENLABS_API_KEY=sk_… (avain, jossa on alaviiva).
+  el_placeholder: |-
+    ⚠️ ElevenLabs-avainta ei ole syötetty!
+    Tiedostossa golden_key.env on yhä paikkamerkkiteksti.
+    Avaa tiedosto, poista paikkamerkki ja liitä ElevenLabs-avaimesi (sk_…) — tai poista rivi, jos et halua tätä toimintoa.
+  el_cudzyslowy: |-
+    🚨 Tarpeettomat lainausmerkit ElevenLabs-avaimen ympärillä!
+    Avain liitettiin lainausmerkeissä. Avaa golden_key.env ja poista lainausmerkit —
+    arvon on oltava heti '='-merkin jälkeen, ilman ylimääräisiä merkkejä.
+  el_spacje: |-
+    🚨 Kiellettyjä merkkejä ElevenLabs-avaimen ympärillä!
+    Avaimen edestä tai takaa havaittiin välilyönti tai muu näkymätön merkki.
+    Avaa golden_key.env ja varmista, että arvo alkaa heti '='-merkin jälkeen.
+  el_format: |-
+    🚨 Epäilyttävä ElevenLabs-avaimen muoto!
+    ElevenLabs-avain alkaa aina sk_ (ALAVIIVALLA, ei sk- kuten OpenAI).
+    Varmista, että liitit avaimen ElevenLabsista etkä toiselta alustalta.
+  el_zbyt_krotki: |-
+    ⚠️ ElevenLabs-avain vaikuttaa liian lyhyeltä (havaittu {liczba_znakow} merkkiä, odotettiin vähintään {minimum_znakow}).
+    Kopioit todennäköisesti vain osan avaimesta. Luo uusi avain ElevenLabs-paneelissa ja liitä se kokonaisuudessaan.
+  el_ok: |-
+    ✅ ElevenLabs-avain havaittu ja oikein muotoiltu.
+    Silta ElevenLabs Studioon (äänen jälkituotanto) on aktiivinen Ohjaaja-paneelissa.
   # Sekcja: Narzędzia słownikowe
   heading_narzedzia_slownikowe: "Sanakirjatyökalut"
   narzedzia_slownikowe_name: "Sanakirjatyökalujen kuvaus"

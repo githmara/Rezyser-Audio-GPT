@@ -178,6 +178,34 @@ home:
     Wklej swój klucz API, zapisz plik (Ctrl+S) i uruchom aplikację ponownie.
   blad_otwarcia_pliku_tytul: "Informacja"
   blad_otwarcia_pliku_tresc: "Nie udało się automatycznie otworzyć pliku.\nOtwórz go ręcznie:\n{sciezka_pliku}"
+  # Postprodukcja audio (ElevenLabs) — opcjonalna (v16.0)
+  heading_elevenlabs:    "Postprodukcja audio (ElevenLabs) — opcjonalnie"
+  el_brak: |-
+    ℹ️ Klucz ElevenLabs nie został skonfigurowany (opcjonalnie).
+    Most do ElevenLabs Studio jest nieaktywny — reszta programu działa normalnie.
+    Aby go włączyć, dopisz w golden_key.env linię ELEVENLABS_API_KEY=sk_… (klucz z podkreślnikiem).
+  el_placeholder: |-
+    ⚠️ Klucz ElevenLabs nie został wprowadzony!
+    W pliku golden_key.env pozostał tekst zastępczy.
+    Otwórz plik, usuń tekst zastępczy i wklej swój klucz ElevenLabs (sk_…) — albo usuń linię, jeśli nie chcesz tej funkcji.
+  el_cudzyslowy: |-
+    🚨 Zbędne cudzysłowy wokół klucza ElevenLabs!
+    Klucz wklejono w cudzysłowach. Otwórz golden_key.env i usuń cudzysłowy —
+    wartość musi być wpisana bezpośrednio po znaku '=', bez żadnych dodatkowych znaków.
+  el_spacje: |-
+    🚨 Niedozwolone znaki wokół klucza ElevenLabs!
+    Przed lub za kluczem wykryto spację bądź inny niewidoczny znak.
+    Otwórz golden_key.env i upewnij się, że wartość zaczyna się natychmiast po znaku '='.
+  el_format: |-
+    🚨 Podejrzany format klucza ElevenLabs!
+    Klucz ElevenLabs zawsze zaczyna się od znaków sk_ (z PODKREŚLNIKIEM, nie sk- jak OpenAI).
+    Upewnij się, że wkleiłeś klucz z ElevenLabs, a nie z innej platformy.
+  el_zbyt_krotki: |-
+    ⚠️ Klucz ElevenLabs wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow}).
+    Prawdopodobnie skopiowałeś tylko fragment klucza. Wygeneruj nowy klucz w panelu ElevenLabs i wklej go w całości.
+  el_ok: |-
+    ✅ Klucz ElevenLabs wykryty i poprawnie sformatowany.
+    Most do ElevenLabs Studio (postprodukcja audio) jest aktywny w panelu Reżysera.
   # Sekcja: Narzędzia słownikowe
   heading_narzedzia_slownikowe: "Narzędzia słownikowe"
   narzedzia_slownikowe_name: "Opis narzędzi słownikowych"

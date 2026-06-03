@@ -171,6 +171,34 @@ home:
     Límdu inn API lykilinn þinn, vistaðu skrána (Ctrl+S) og ræstu forritið aftur.
   blad_otwarcia_pliku_tytul: "Upplýsingar"
   blad_otwarcia_pliku_tresc: "Ekki tókst að opna skrána sjálfkrafa.\nOpnaðu hana handvirkt:\n{sciezka_pliku}"
+  # Hljóðeftirvinnsla (ElevenLabs) — valfrjáls (v16.0)
+  heading_elevenlabs:    "Hljóðeftirvinnsla (ElevenLabs) — valfrjáls"
+  el_brak: |-
+    ℹ️ ElevenLabs-lykillinn er ekki stilltur (valfrjálst).
+    Brúin að ElevenLabs Studio er óvirk — restin af forritinu virkar eðlilega.
+    Til að virkja hana, bættu við línunni ELEVENLABS_API_KEY=sk_… í golden_key.env (lykill með undirstriki).
+  el_placeholder: |-
+    ⚠️ ElevenLabs-lykillinn hefur ekki verið sleginn inn!
+    Staðgengilstextinn er enn í golden_key.env.
+    Opnaðu skrána, fjarlægðu staðgengilinn og límdu ElevenLabs-lykilinn þinn (sk_…) — eða eyddu línunni ef þú vilt ekki þessa virkni.
+  el_cudzyslowy: |-
+    🚨 Óþarfar gæsalappir í kringum ElevenLabs-lykilinn!
+    Lykillinn var límdur innan gæsalappa. Opnaðu golden_key.env og fjarlægðu gæsalappirnar —
+    gildið verður að standa beint á eftir '='-tákninu, án aukatákna.
+  el_spacje: |-
+    🚨 Óleyfileg tákn í kringum ElevenLabs-lykilinn!
+    Bil eða annað ósýnilegt tákn fannst fyrir framan eða aftan lykilinn.
+    Opnaðu golden_key.env og gakktu úr skugga um að gildið byrji strax á eftir '='-tákninu.
+  el_format: |-
+    🚨 Grunsamlegt snið ElevenLabs-lykilsins!
+    ElevenLabs-lykill byrjar alltaf á sk_ (með UNDIRSTRIKI, ekki sk- eins og OpenAI).
+    Gakktu úr skugga um að þú hafir límt lykil frá ElevenLabs en ekki frá öðrum vettvangi.
+  el_zbyt_krotki: |-
+    ⚠️ ElevenLabs-lykillinn virðist of stuttur ({liczba_znakow} tákn fundust, búist var við að minnsta kosti {minimum_znakow}).
+    Þú afritaðir líklega aðeins hluta lykilsins. Búðu til nýjan lykil í ElevenLabs-spjaldinu og límdu hann í heild.
+  el_ok: |-
+    ✅ ElevenLabs-lykill fannst og er rétt sniðinn.
+    Brúin að ElevenLabs Studio (hljóðeftirvinnsla) er virk í Leikstjóra-spjaldinu.
   # Sekcja: Narzędzia słownikowe
   heading_narzedzia_slownikowe: "Orðabókarverkfæri"
   narzedzia_slownikowe_name: "Lýsing á orðabókarverkfærum"
