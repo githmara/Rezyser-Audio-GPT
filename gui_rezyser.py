@@ -46,6 +46,7 @@ import wx
 
 # Refaktor wersji 13.0: logika modelu, przepisy i silnik AI są wydzielone
 # z tego pliku. Panel zostaje cienką warstwą widoku wxPython.
+import core_elevenlabs as ce
 import core_rezyser as cr
 import przepisy_rezysera as pr
 import rezyser_ai as rai
@@ -151,6 +152,11 @@ class RezyserPanel(wx.Panel):
         self._worker_thread: threading.Thread | None = None
         self._init_api()
 
+        # ── Most ElevenLabs (opcjonalny, v16.0) ────────────────────────────
+        self._el_klucz: str | None = None
+        self._el_dostepne: bool = False
+        self._init_elevenlabs()
+
         self._build_ui()
         self._bind_events()
         self._refresh_ui_state()
@@ -255,6 +261,18 @@ class RezyserPanel(wx.Panel):
                     self._api_dostepne = True
                 except Exception:
                     self._api_dostepne = False
+
+    def _init_elevenlabs(self) -> None:
+        """Wczytuje opcjonalny klucz ElevenLabs z golden_key.env (v16.0).
+
+        Brak/zły klucz → ``_el_dostepne = False`` i UI mostu pozostaje ukryte;
+        reszta panelu działa bez zmian. Walidacja w ``core_elevenlabs``
+        (prefix ``sk_``, długość) — single source of truth z System Check.
+        """
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        env_path = os.path.join(app_dir, self.ENV_FILENAME)
+        self._el_klucz = ce.wczytaj_klucz(env_path)
+        self._el_dostepne = self._el_klucz is not None
 
     # ------------------------------------------------------------------
     # Budowanie interfejsu (kompozer)
@@ -795,6 +813,11 @@ class RezyserPanel(wx.Panel):
         self._lbl_postprod_status = wx.StaticText(self._pnl_postprodukcja, label="")
         self._lbl_postprod_status.Hide()
 
+        # --- Pod-panel: most ElevenLabs Studio (opcjonalny, v16.0) ---
+        # Cały blok chowamy, gdy brak ważnego klucza ElevenLabs
+        # (`_el_dostepne` False) — non-EL user nie widzi nic nowego.
+        self._pnl_el = self._zbuduj_pod_panel_elevenlabs(self._pnl_postprodukcja, BORDER)
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_postprod,              flag=wx.ALL,                              border=BORDER)
         sizer.Add(lbl_tytuly_info,           flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,      border=BORDER)
@@ -805,8 +828,48 @@ class RezyserPanel(wx.Panel):
             border=BORDER,
         )
         sizer.Add(self._lbl_postprod_status, flag=wx.LEFT | wx.BOTTOM,                 border=BORDER)
+        sizer.Add(
+            self._pnl_el,
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+            border=BORDER,
+        )
         self._pnl_postprodukcja.SetSizer(sizer)
         return self._pnl_postprodukcja
+
+    def _zbuduj_pod_panel_elevenlabs(self, parent: wx.Window, BORDER: int) -> wx.Panel:
+        """Pod-panel mostu ElevenLabs Studio (obsada + budowa projektu).
+
+        Osadzony w panelu postprodukcji (tryb Audiobook). Widoczność całości
+        steruje ``_el_dostepne`` (klucz ElevenLabs) — patrz ``_refresh_ui_state``.
+        Przycisk budowy projektu dochodzi w Etapie 5.
+        """
+        pnl = wx.Panel(parent)
+
+        sep = wx.StaticLine(pnl)
+
+        lbl_el = wx.StaticText(pnl, label=t("rezyser.el_heading"))
+        ef = lbl_el.GetFont()
+        ef.SetPointSize(10)
+        ef.MakeBold()
+        lbl_el.SetFont(ef)
+
+        lbl_el_info = wx.StaticText(pnl, label=t("rezyser.el_info"))
+
+        self._btn_el_obsada = wx.Button(
+            pnl,
+            label=t("rezyser.el_btn_obsada_label"),
+            name=t("rezyser.el_btn_obsada_name"),
+        )
+        self._btn_el_obsada.SetToolTip(t("rezyser.el_btn_obsada_tooltip"))
+        self._btn_el_obsada.Bind(wx.EVT_BUTTON, self._on_el_obsada)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(sep,                 flag=wx.EXPAND | wx.BOTTOM,         border=BORDER)
+        sizer.Add(lbl_el,              flag=wx.BOTTOM,                     border=BORDER)
+        sizer.Add(lbl_el_info,         flag=wx.BOTTOM,                     border=BORDER)
+        sizer.Add(self._btn_el_obsada, flag=wx.BOTTOM,                     border=BORDER)
+        pnl.SetSizer(sizer)
+        return pnl
 
     # ------------------------------------------------------------------
     # BLOK G – Wskaźnik okna kontekstowego AI
@@ -1000,6 +1063,11 @@ class RezyserPanel(wx.Panel):
             self._btn_tytuly_ai.Enable(
                 self._api_dostepne and nazwa_podana and _historia_niepusta
             )
+            # Most ElevenLabs (v16.0): cały pod-panel tylko gdy klucz EL ważny;
+            # obsadę można edytować, gdy podano nazwę projektu (źródło z dysku).
+            self._pnl_el.Show(self._el_dostepne)
+            if self._el_dostepne:
+                self._btn_el_obsada.Enable(nazwa_podana)
         else:
             self._pnl_postprodukcja.Hide()
 
@@ -1879,6 +1947,77 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Postprodukcja – Nadaj Tytuły Rozdziałom
     # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Most ElevenLabs (v16.0): obsada głosowa
+    # ------------------------------------------------------------------
+    def _on_el_obsada(self, _event: wx.Event) -> None:
+        """Otwiera okienko obsady głosowej ElevenLabs i zapisuje szkic.
+
+        Źródło postaci = plik ``skrypty/<nazwa>.txt`` z dysku (postprodukcja
+        zakończonej sztuki, nie bieżąca pamięć). Narrator zawsze obecny
+        (głos domyślny — tytuły rozdziałów + narracja). Pre-fill z istniejącego
+        szkicu; zapis → ``runtime/skrypty/<nazwa>.obsada.json`` (może być
+        niekompletny — komplet waliduje dopiero dispatcher).
+        """
+        nazwa = self._txt_file_name.GetValue().strip()
+        if not nazwa:
+            wx.MessageBox(
+                t("rezyser.el_brak_nazwy_tresc"),
+                t("rezyser.el_brak_nazwy_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        filepath = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
+        if not os.path.exists(filepath):
+            wx.MessageBox(
+                t("rezyser.plik_narracji_brak_tresc", nazwa_projektu=nazwa),
+                t("rezyser.plik_narracji_brak_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+        try:
+            with open(filepath, "r", encoding="utf-8") as fh:
+                tekst = fh.read()
+        except Exception as exc:
+            wx.MessageBox(
+                t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
+                t("common.blad_odczytu_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+
+        postacie, czy_narrator = ce.wykryj_postacie(tekst)
+        if not postacie and not czy_narrator:
+            wx.MessageBox(
+                t("rezyser.el_brak_postaci_tresc"),
+                t("rezyser.el_brak_postaci_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        prefill = self._projekt.wczytaj_obsada(nazwa)
+        dlg = DialogObsady(self, postacie, prefill)
+        try:
+            if dlg.ShowModal() == wx.ID_OK:
+                try:
+                    sciezka = self._projekt.zapisz_obsada(dlg.glosy, nazwa=nazwa)
+                except Exception as exc:
+                    wx.MessageBox(
+                        str(exc),
+                        t("rezyser.el_obsada_blad_tytul"),
+                        wx.OK | wx.ICON_ERROR, self,
+                    )
+                    return
+                wx.MessageBox(
+                    t("rezyser.el_obsada_zapisana_tresc", sciezka_pliku=sciezka),
+                    t("rezyser.el_obsada_zapisana_tytul"),
+                    wx.OK | wx.ICON_INFORMATION, self,
+                )
+        finally:
+            dlg.Destroy()
+
     def _on_tytuly_ai(self, _event: wx.Event) -> None:
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
@@ -2172,3 +2311,88 @@ class RezyserPanel(wx.Panel):
         # — Burza nigdy nie utrwala decyzji trybu zapisu.
         if tryb_idx in (1, 2):
             self._zapisany_tryb = tryb_idx
+
+
+class DialogObsady(wx.Dialog):
+    """Okno obsady głosowej ElevenLabs — przypisanie voice_id do mówców (v16.0).
+
+    Wzorzec A11y jak :class:`gui_opowiesci.DialogEdycjaStanuGry`: wx.Dialog,
+    pola z czytelnymi etykietami (``SetName`` dla NVDA), ``wx.CallAfter`` fokus.
+    NARRATOR jest zawsze pierwszym wierszem (głos domyślny — tytuły rozdziałów
+    i narracja). Pozostałe wiersze to postacie Z KWESTIAMI (z ``wykryj_postacie``).
+
+    To okno ZAPISUJE SZKIC — pola mogą zostać puste/niekompletne (reżyser może
+    wrócić później). Komplet obsady waliduje dopiero dispatcher przed budową
+    projektu. Po ``ShowModal() == wx.ID_OK`` atrybut :attr:`glosy` zawiera mapę
+    ``{klucz: voice_id}`` (klucz postaci = nazwa małymi literami; narrator =
+    ``core_elevenlabs.NARRATOR_KEY``).
+    """
+
+    def __init__(self, parent: wx.Window, postacie: list[str], prefill: dict[str, str]) -> None:
+        super().__init__(
+            parent,
+            title=t("rezyser.dlg_obsada_tytul"),
+            size=(640, 500),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+
+        # Atrybut publiczny — wywołujący czyta po ID_OK.
+        self.glosy: dict[str, str] = {}
+
+        # Lista (klucz, kontrolka) w kolejności wyświetlania (narrator pierwszy).
+        self._wiersze: list[tuple[str, wx.TextCtrl]] = []
+
+        instrukcja = wx.StaticText(self, label=t("rezyser.dlg_obsada_instrukcja"))
+        instrukcja.Wrap(600)
+
+        # Siatka: etykieta | pole na voice_id.
+        grid = wx.FlexGridSizer(cols=2, vgap=8, hgap=10)
+        grid.AddGrowableCol(1, 1)
+
+        def _dodaj_wiersz(klucz: str, etykieta: str) -> None:
+            lbl = wx.StaticText(self, label=etykieta)
+            txt = wx.TextCtrl(self, value=prefill.get(klucz, ""), name=etykieta)
+            txt.SetHint(t("rezyser.dlg_obsada_hint"))
+            grid.Add(lbl, flag=wx.ALIGN_CENTER_VERTICAL)
+            grid.Add(txt, flag=wx.EXPAND)
+            self._wiersze.append((klucz, txt))
+
+        # Narrator zawsze pierwszy.
+        _dodaj_wiersz(ce.NARRATOR_KEY, t("rezyser.dlg_obsada_narrator_label"))
+        # Postacie z kwestiami — klucz = nazwa małymi literami (spójnie z parserem).
+        for nazwa in postacie:
+            _dodaj_wiersz(
+                nazwa.lower().strip(),
+                t("rezyser.dlg_obsada_postac_label", nazwa=nazwa),
+            )
+
+        btn_ok = wx.Button(self, wx.ID_OK, label=t("rezyser.dlg_obsada_btn_zapisz"))
+        btn_anuluj = wx.Button(self, wx.ID_CANCEL, label=t("rezyser.dlg_obsada_btn_anuluj"))
+        btn_ok.SetDefault()
+        btn_ok.Bind(wx.EVT_BUTTON, self._on_zapisz)
+
+        row_btn = wx.BoxSizer(wx.HORIZONTAL)
+        row_btn.AddStretchSpacer()
+        row_btn.Add(btn_anuluj, flag=wx.RIGHT, border=8)
+        row_btn.Add(btn_ok)
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(instrukcja, flag=wx.ALL, border=10)
+        sizer.Add(grid, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=10)
+        sizer.Add(row_btn, flag=wx.EXPAND | wx.ALL, border=10)
+        self.SetSizer(sizer)
+
+        if self._wiersze:
+            wx.CallAfter(self._wiersze[0][1].SetFocus)
+
+    def _on_zapisz(self, _event: wx.Event) -> None:
+        """Zbiera wpisane voice_id do :attr:`glosy` i zamyka modal.
+
+        Szkic — żadnego twardego wymogu kompletności. Puste pola trafiają do
+        mapy jako pusty string; ``ProjektRezysera.zapisz_obsada`` je odfiltruje.
+        """
+        self.glosy = {
+            klucz: txt.GetValue().strip()
+            for klucz, txt in self._wiersze
+        }
+        self.EndModal(wx.ID_OK)

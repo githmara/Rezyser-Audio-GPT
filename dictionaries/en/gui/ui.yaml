@@ -385,6 +385,31 @@ rezyser:
     Requires an active API key and a completed World Book.
   # Postprodukcja
   postprod_heading: "🎛️ Postproduction"
+  # ElevenLabs Studio bridge (audio post-production, optional — v16.0)
+  el_heading: "🎚️ Bridge to ElevenLabs Studio (reader's theatre)"
+  el_info: |-
+    Turn a finished reader's theatre script into a multi-voice ElevenLabs Studio project. Assign voices to the narrator and the characters (by pasting voice IDs from the web), then build the project — you run the render yourself in the browser.
+  el_btn_obsada_label: "Voice cast…"
+  el_btn_obsada_name: "ElevenLabs voice cast"
+  el_btn_obsada_tooltip: "Assign voice IDs to the narrator and characters (saves a cast draft)"
+  el_brak_nazwy_tytul: "No project name"
+  el_brak_nazwy_tresc: "Enter a project name in the file name field to load the script from disk and assign voices."
+  el_brak_postaci_tytul: "No speakers in the script"
+  el_brak_postaci_tresc: |-
+    No narrator or characters with lines were detected in this script.
+    Make sure it is a reader's theatre script with [Narrator: …] and [Character: …] tags.
+  el_obsada_blad_tytul: "Cast save error"
+  el_obsada_zapisana_tytul: "Cast saved"
+  el_obsada_zapisana_tresc: "The voice cast draft has been saved:\n{sciezka_pliku}"
+  # Voice cast window (ElevenLabs)
+  dlg_obsada_tytul: "Voice cast (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Assign a voice to the narrator and to each character by pasting a voice ID from ElevenLabs. How to get one: open the Voices tab, find the voice, play a sample to be sure, open "More actions" and choose "Copy Voice ID". You can use premade voices or your own (Voice Design). You may leave fields empty and come back later — this is a draft.
+  dlg_obsada_narrator_label: "Narrator (default voice):"
+  dlg_obsada_postac_label: "Voice for character “{nazwa}”:"
+  dlg_obsada_hint: "paste voice ID (e.g. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Save draft"
+  dlg_obsada_btn_anuluj: "Cancel"
   postprod_info: |-
     The module iterates over chapters from the saved file and assigns them a short literary title (AI analysis).
   btn_tytuly_ai_label: "📜 Assign Chapter Titles (AI)"

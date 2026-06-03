@@ -386,6 +386,31 @@ rezyser:
     Richiede una chiave API attiva e un Libro del Mondo compilato.
   # Postprodukcja
   postprod_heading: "🎛️ Post-produzione"
+  # Ponte con ElevenLabs Studio (postproduzione audio, opzionale — v16.0)
+  el_heading: "🎚️ Ponte con ElevenLabs Studio (teatro di lettura)"
+  el_info: |-
+    Trasforma una sceneggiatura di teatro di lettura finita in un progetto multivoce di ElevenLabs Studio. Assegna le voci al narratore e ai personaggi (incollando i voice ID dal web), poi costruisci il progetto — il render lo avvii tu nel browser.
+  el_btn_obsada_label: "Cast vocale…"
+  el_btn_obsada_name: "Cast vocale ElevenLabs"
+  el_btn_obsada_tooltip: "Assegna i voice ID al narratore e ai personaggi (salva una bozza del cast)"
+  el_brak_nazwy_tytul: "Nessun nome di progetto"
+  el_brak_nazwy_tresc: "Inserisci un nome di progetto nel campo del nome file per caricare la sceneggiatura dal disco e assegnare le voci."
+  el_brak_postaci_tytul: "Nessun parlante nella sceneggiatura"
+  el_brak_postaci_tresc: |-
+    In questa sceneggiatura non è stato rilevato né un narratore né personaggi con battute.
+    Assicurati che sia una sceneggiatura di teatro di lettura con i tag [Narratore: …] e [Personaggio: …].
+  el_obsada_blad_tytul: "Errore di salvataggio del cast"
+  el_obsada_zapisana_tytul: "Cast salvato"
+  el_obsada_zapisana_tresc: "La bozza del cast vocale è stata salvata:\n{sciezka_pliku}"
+  # Finestra del cast vocale (ElevenLabs)
+  dlg_obsada_tytul: "Cast vocale (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Assegna una voce al narratore e a ogni personaggio incollando un voice ID da ElevenLabs. Come ottenerlo: apri la scheda Voices, trova la voce, riproduci un campione per sicurezza, apri «More actions» e scegli «Copy Voice ID». Puoi usare voci premade o tue (Voice Design). Puoi lasciare i campi vuoti e tornare più tardi — è una bozza.
+  dlg_obsada_narrator_label: "Narratore (voce predefinita):"
+  dlg_obsada_postac_label: "Voce del personaggio «{nazwa}»:"
+  dlg_obsada_hint: "incolla il voice ID (es. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Salva bozza"
+  dlg_obsada_btn_anuluj: "Annulla"
   postprod_info: |-
     Il modulo itera sui capitoli del file salvato e assegna loro un breve titolo letterario (analisi AI).
   btn_tytuly_ai_label: "📜 Assegna Titoli ai Capitoli (AI)"

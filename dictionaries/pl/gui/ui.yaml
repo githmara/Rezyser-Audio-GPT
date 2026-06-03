@@ -413,6 +413,31 @@ rezyser:
     Wymaga aktywnego klucza API i uzupełnionej Księgi Świata.
   # Postprodukcja
   postprod_heading:      "🎛️ Postprodukcja"
+  # Most ElevenLabs Studio (postprodukcja audio, opcjonalny — v16.0)
+  el_heading: "🎚️ Most do ElevenLabs Studio (teatr czytany)"
+  el_info: |-
+    Zamień gotowy skrypt teatru czytanego w wielogłosowy projekt ElevenLabs Studio. Przypisz głosy narratorowi i postaciom (wklejając voice ID z weba), potem zbuduj projekt — render uruchomisz sam w przeglądarce.
+  el_btn_obsada_label: "Obsada głosowa…"
+  el_btn_obsada_name: "Obsada głosowa ElevenLabs"
+  el_btn_obsada_tooltip: "Przypisz voice ID narratorowi i postaciom (zapisuje szkic obsady)"
+  el_brak_nazwy_tytul: "Brak nazwy projektu"
+  el_brak_nazwy_tresc: "Wpisz nazwę projektu w polu nazwy pliku, aby wczytać skrypt z dysku i przypisać głosy."
+  el_brak_postaci_tytul: "Brak mówców w skrypcie"
+  el_brak_postaci_tresc: |-
+    W tym skrypcie nie wykryto ani narratora, ani postaci z kwestiami.
+    Upewnij się, że to skrypt teatru czytanego z tagami [Narrator: …] oraz [Postać: …].
+  el_obsada_blad_tytul: "Błąd zapisu obsady"
+  el_obsada_zapisana_tytul: "Obsada zapisana"
+  el_obsada_zapisana_tresc: "Szkic obsady głosowej został zapisany:\n{sciezka_pliku}"
+  # Okno obsady głosowej (ElevenLabs)
+  dlg_obsada_tytul: "Obsada głosowa (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Przypisz głos narratorowi i każdej postaci, wklejając voice ID z ElevenLabs. Jak je zdobyć: wejdź w zakładkę Voices, odnajdź głos, odtwórz próbkę dla pewności, otwórz „More actions” i wybierz „Copy Voice ID”. Możesz użyć głosów premade albo własnych (Voice Design). Pola możesz zostawić puste i wrócić później — to szkic.
+  dlg_obsada_narrator_label: "Narrator (głos domyślny):"
+  dlg_obsada_postac_label: "Głos postaci „{nazwa}”:"
+  dlg_obsada_hint: "wklej voice ID (np. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Zapisz szkic"
+  dlg_obsada_btn_anuluj: "Anuluj"
   postprod_info: |-
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"

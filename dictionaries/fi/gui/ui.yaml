@@ -386,6 +386,31 @@ rezyser:
     Vaatii aktiivisen API-avaimen ja täytetyn Maailmankirjan.
   # Postprodukcja
   postprod_heading: "🎛️ Jälkituotanto"
+  # Silta ElevenLabs Studioon (äänen jälkituotanto, valinnainen — v16.0)
+  el_heading: "🎚️ Silta ElevenLabs Studioon (lukuteatteri)"
+  el_info: |-
+    Muunna valmis lukuteatterin käsikirjoitus moniääniseksi ElevenLabs Studio -projektiksi. Määritä äänet kertojalle ja hahmoille (liittämällä voice ID:t webistä) ja rakenna sitten projekti — renderöinnin teet itse selaimessa.
+  el_btn_obsada_label: "Ääniroolitus…"
+  el_btn_obsada_name: "ElevenLabs-ääniroolitus"
+  el_btn_obsada_tooltip: "Määritä voice ID:t kertojalle ja hahmoille (tallentaa roolitusluonnoksen)"
+  el_brak_nazwy_tytul: "Ei projektin nimeä"
+  el_brak_nazwy_tresc: "Kirjoita projektin nimi tiedostonimikenttään ladataksesi käsikirjoituksen levyltä ja määrittääksesi äänet."
+  el_brak_postaci_tytul: "Ei puhujia käsikirjoituksessa"
+  el_brak_postaci_tresc: |-
+    Tästä käsikirjoituksesta ei havaittu kertojaa eikä hahmoja, joilla on vuorosanoja.
+    Varmista, että kyseessä on lukuteatterin käsikirjoitus tageilla [Kertoja: …] ja [Hahmo: …].
+  el_obsada_blad_tytul: "Roolituksen tallennusvirhe"
+  el_obsada_zapisana_tytul: "Roolitus tallennettu"
+  el_obsada_zapisana_tresc: "Ääniroolituksen luonnos on tallennettu:\n{sciezka_pliku}"
+  # Ääniroolitusikkuna (ElevenLabs)
+  dlg_obsada_tytul: "Ääniroolitus (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Määritä ääni kertojalle ja jokaiselle hahmolle liittämällä voice ID ElevenLabsista. Näin saat sen: avaa Voices-välilehti, etsi ääni, toista näyte varmuuden vuoksi, avaa ”More actions” ja valitse ”Copy Voice ID”. Voit käyttää premade-ääniä tai omiasi (Voice Design). Voit jättää kentät tyhjiksi ja palata myöhemmin — tämä on luonnos.
+  dlg_obsada_narrator_label: "Kertoja (oletusääni):"
+  dlg_obsada_postac_label: "Hahmon ”{nazwa}” ääni:"
+  dlg_obsada_hint: "liitä voice ID (esim. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Tallenna luonnos"
+  dlg_obsada_btn_anuluj: "Peruuta"
   postprod_info: |-
     Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen kirjallisen otsikon (AI-analyysi).
   btn_tytuly_ai_label: "📜 Anna Luvuille Otsikot (AI)"

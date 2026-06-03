@@ -386,6 +386,31 @@ rezyser:
     Krefst virks API lykils og útfylltrar Heimsbókar.
   # Postprodukcja
   postprod_heading: "🎛️ Eftirvinnsla"
+  # Brú að ElevenLabs Studio (hljóðeftirvinnsla, valfrjáls — v16.0)
+  el_heading: "🎚️ Brú að ElevenLabs Studio (leiklestur)"
+  el_info: |-
+    Breyttu tilbúnu leiklestrarhandriti í margradda ElevenLabs Studio-verkefni. Úthlutaðu röddum til sögumanns og persóna (með því að líma voice ID úr vefnum) og byggðu svo verkefnið — þú keyrir myndgerðina sjálf(ur) í vafranum.
+  el_btn_obsada_label: "Raddaval…"
+  el_btn_obsada_name: "ElevenLabs raddaval"
+  el_btn_obsada_tooltip: "Úthlutaðu voice ID til sögumanns og persóna (vistar drög að raddavali)"
+  el_brak_nazwy_tytul: "Ekkert verkefnaheiti"
+  el_brak_nazwy_tresc: "Sláðu inn verkefnaheiti í skráarnafnsreitinn til að hlaða handritinu af diski og úthluta röddum."
+  el_brak_postaci_tytul: "Engir mælendur í handritinu"
+  el_brak_postaci_tresc: |-
+    Hvorki sögumaður né persónur með línur fundust í þessu handriti.
+    Gakktu úr skugga um að þetta sé leiklestrarhandrit með taggunum [Sögumaður: …] og [Persóna: …].
+  el_obsada_blad_tytul: "Villa við vistun raddavals"
+  el_obsada_zapisana_tytul: "Raddaval vistað"
+  el_obsada_zapisana_tresc: "Drög að raddavali hafa verið vistuð:\n{sciezka_pliku}"
+  # Raddavalsgluggi (ElevenLabs)
+  dlg_obsada_tytul: "Raddaval (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Úthlutaðu rödd til sögumanns og hverrar persónu með því að líma voice ID úr ElevenLabs. Hvernig á að ná í það: opnaðu Voices-flipann, finndu röddina, spilaðu sýnishorn til öryggis, opnaðu „More actions“ og veldu „Copy Voice ID“. Þú getur notað premade-raddir eða þínar eigin (Voice Design). Þú mátt skilja reiti eftir auða og koma aftur síðar — þetta eru drög.
+  dlg_obsada_narrator_label: "Sögumaður (sjálfgefin rödd):"
+  dlg_obsada_postac_label: "Rödd persónunnar „{nazwa}“:"
+  dlg_obsada_hint: "límdu voice ID (t.d. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Vista drög"
+  dlg_obsada_btn_anuluj: "Hætta við"
   postprod_info: |-
     Einingin fer yfir kafla úr vistaðri skrá og gefur þeim stutt bókmenntatitil (AI greining).
   btn_tytuly_ai_label: "📜 Gefa Kaflatitla (AI)"

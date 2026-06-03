@@ -386,6 +386,31 @@ rezyser:
     Требуется активный API-ключ и заполненная Книга Мира.
   # Postprodukcja
   postprod_heading: "🎛️ Постобработка"
+  # Мост к ElevenLabs Studio (постпродакшн аудио, опционально — v16.0)
+  el_heading: "🎚️ Мост к ElevenLabs Studio (сценическая читка)"
+  el_info: |-
+    Преврати готовый сценарий сценической читки в многоголосый проект ElevenLabs Studio. Назначь голоса рассказчику и персонажам (вставив voice ID из веба), затем собери проект — рендер запустишь сам в браузере.
+  el_btn_obsada_label: "Голосовой состав…"
+  el_btn_obsada_name: "Голосовой состав ElevenLabs"
+  el_btn_obsada_tooltip: "Назначь voice ID рассказчику и персонажам (сохраняет черновик состава)"
+  el_brak_nazwy_tytul: "Нет имени проекта"
+  el_brak_nazwy_tresc: "Введите имя проекта в поле имени файла, чтобы загрузить сценарий с диска и назначить голоса."
+  el_brak_postaci_tytul: "В сценарии нет говорящих"
+  el_brak_postaci_tresc: |-
+    В этом сценарии не обнаружены ни рассказчик, ни персонажи с репликами.
+    Убедитесь, что это сценарий сценической читки с тегами [Рассказчик: …] и [Персонаж: …].
+  el_obsada_blad_tytul: "Ошибка сохранения состава"
+  el_obsada_zapisana_tytul: "Состав сохранён"
+  el_obsada_zapisana_tresc: "Черновик голосового состава сохранён:\n{sciezka_pliku}"
+  # Окно голосового состава (ElevenLabs)
+  dlg_obsada_tytul: "Голосовой состав (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Назначь голос рассказчику и каждому персонажу, вставив voice ID из ElevenLabs. Как его получить: открой вкладку Voices, найди голос, воспроизведи образец для уверенности, открой «More actions» и выбери «Copy Voice ID». Можешь использовать premade-голоса или свои (Voice Design). Поля можно оставить пустыми и вернуться позже — это черновик.
+  dlg_obsada_narrator_label: "Рассказчик (голос по умолчанию):"
+  dlg_obsada_postac_label: "Голос персонажа «{nazwa}»:"
+  dlg_obsada_hint: "вставь voice ID (напр. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Сохранить черновик"
+  dlg_obsada_btn_anuluj: "Отмена"
   postprod_info: |-
     Модуль проходит по главам из сохраненного файла и присваивает им короткое литературное название (анализ AI).
   btn_tytuly_ai_label: "📜 Присвоить Названия Главам (AI)"

@@ -385,6 +385,31 @@ rezyser:
     Requiere una clave API activa y un Libro del Mundo completado.
   # Postprodukcja
   postprod_heading: "🎛️ Postproducción"
+  # Puente con ElevenLabs Studio (posproducción de audio, opcional — v16.0)
+  el_heading: "🎚️ Puente con ElevenLabs Studio (teatro leído)"
+  el_info: |-
+    Convierte un guion de teatro leído terminado en un proyecto multivoz de ElevenLabs Studio. Asigna voces al narrador y a los personajes (pegando los voice ID de la web) y luego construye el proyecto — el render lo ejecutas tú en el navegador.
+  el_btn_obsada_label: "Reparto de voces…"
+  el_btn_obsada_name: "Reparto de voces de ElevenLabs"
+  el_btn_obsada_tooltip: "Asigna voice ID al narrador y a los personajes (guarda un borrador del reparto)"
+  el_brak_nazwy_tytul: "Sin nombre de proyecto"
+  el_brak_nazwy_tresc: "Escribe un nombre de proyecto en el campo del nombre de archivo para cargar el guion del disco y asignar voces."
+  el_brak_postaci_tytul: "Sin hablantes en el guion"
+  el_brak_postaci_tresc: |-
+    En este guion no se detectó ni narrador ni personajes con réplicas.
+    Asegúrate de que sea un guion de teatro leído con las etiquetas [Narrador: …] y [Personaje: …].
+  el_obsada_blad_tytul: "Error al guardar el reparto"
+  el_obsada_zapisana_tytul: "Reparto guardado"
+  el_obsada_zapisana_tresc: "El borrador del reparto de voces se ha guardado:\n{sciezka_pliku}"
+  # Ventana del reparto de voces (ElevenLabs)
+  dlg_obsada_tytul: "Reparto de voces (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Asigna una voz al narrador y a cada personaje pegando un voice ID de ElevenLabs. Cómo conseguirlo: abre la pestaña Voices, busca la voz, reproduce una muestra para asegurarte, abre «More actions» y elige «Copy Voice ID». Puedes usar voces premade o propias (Voice Design). Puedes dejar campos vacíos y volver más tarde — es un borrador.
+  dlg_obsada_narrator_label: "Narrador (voz por defecto):"
+  dlg_obsada_postac_label: "Voz del personaje «{nazwa}»:"
+  dlg_obsada_hint: "pega el voice ID (p. ej. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Guardar borrador"
+  dlg_obsada_btn_anuluj: "Cancelar"
   postprod_info: |-
     El módulo itera sobre los capítulos del archivo guardado y les asigna un breve título literario (análisis de IA).
   btn_tytuly_ai_label: "📜 Asignar Títulos a los Capítulos (IA)"

@@ -557,6 +557,15 @@ class ProjektRezysera:
             self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}_streszczenie_meta.json"
         )
 
+    def _sciezka_obsada(self, nazwa: str) -> str:
+        # v16.0: szkic obsady głosowej ElevenLabs (mapa postać→voice_id +
+        # narrator). Trwały szkic — przeżywa reload i jest bazą dla dispatchera
+        # mostu do ElevenLabs Studio. runtime/skrypty/ (ukryte, gitignored,
+        # poza paczką release) — ten sam katalog co `.mode` / `.brainstorm.json`.
+        return os.path.join(
+            self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}.obsada.json"
+        )
+
     # ------------------------------------------------------------------
     # Wczytywanie
     # ------------------------------------------------------------------
@@ -988,6 +997,65 @@ class ProjektRezysera:
         except Exception:
             # Jak `.mode` — metadata, cichy fail.
             pass
+
+    # ------------------------------------------------------------------
+    # Obsada głosowa ElevenLabs (v16.0) — szkic postać→voice_id + narrator
+    # ------------------------------------------------------------------
+    def zapisz_obsada(self, glosy: dict[str, str], nazwa: str | None = None) -> str:
+        """Zapisuje szkic obsady do `runtime/skrypty/<nazwa>.obsada.json`.
+
+        Args:
+            glosy: mapa ``{nazwa_postaci_lower: voice_id, "__narrator__": voice_id}``.
+                   Szkic MOŻE być niekompletny (puste/brakujące wpisy) — komplet
+                   waliduje dopiero dispatcher przed budową projektu. Puste
+                   wartości są odfiltrowywane (zapisujemy tylko realne ID).
+            nazwa: opcjonalna nazwa projektu. Postprodukcja bierze nazwę wprost
+                   z pola GUI (sztuka z dysku), więc nie wymaga załadowanego
+                   projektu. Gdy None — używa ``self.nazwa_pliku``.
+
+        Zwraca ścieżkę zapisanego pliku. Nadpisuje (overwrite, jak brainstorm).
+        """
+        nazwa = nazwa or self.nazwa_pliku
+        if not nazwa:
+            raise ValueError("Brak nazwy projektu — nie mogę zapisać obsady.")
+        meta_dir = os.path.join(self.app_dir, RUNTIME_DIR, SKRYPTY_DIR)
+        os.makedirs(meta_dir, exist_ok=True)
+        sciezka = self._sciezka_obsada(nazwa)
+
+        glosy_clean = {
+            str(k): str(v).strip()
+            for k, v in (glosy or {}).items()
+            if k and str(v).strip()
+        }
+        payload = {"wersja": 1, "glosy": glosy_clean}
+        import json  # noqa: PLC0415  (lazy — tylko przy I/O obsady)
+        with open(sciezka, "w", encoding="utf-8") as fh:
+            json.dump(payload, fh, ensure_ascii=False, indent=2)
+        return sciezka
+
+    def wczytaj_obsada(self, nazwa: str | None = None) -> dict[str, str]:
+        """Wczytuje szkic obsady. Zwraca mapę ``{nazwa: voice_id}`` (pustą gdy brak).
+
+        Brak pliku / błąd parsowania / zła struktura → pusty dict (feature
+        opcjonalny, nigdy nie wywraca panelu). Pre-fill okienka obsady i baza
+        dla dispatchera.
+        """
+        nazwa = nazwa or self.nazwa_pliku
+        if not nazwa:
+            return {}
+        sciezka = self._sciezka_obsada(nazwa)
+        if not os.path.exists(sciezka):
+            return {}
+        try:
+            import json  # noqa: PLC0415
+            with open(sciezka, "r", encoding="utf-8") as fh:
+                dane = json.load(fh)
+        except Exception:
+            return {}
+        glosy = dane.get("glosy") if isinstance(dane, dict) else None
+        if not isinstance(glosy, dict):
+            return {}
+        return {str(k): str(v) for k, v in glosy.items() if k and str(v).strip()}
 
     # ------------------------------------------------------------------
     # Zarządzanie strukturą (Prolog/Epilog/Rozdział/Akt/Scena)

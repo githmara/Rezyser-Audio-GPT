@@ -386,6 +386,31 @@ rezyser:
     Nécessite une clé API active et une Bible du Monde remplie.
   # Postprodukcja
   postprod_heading: "🎛️ Post-production"
+  # Pont vers ElevenLabs Studio (post-production audio, optionnel — v16.0)
+  el_heading: "🎚️ Pont vers ElevenLabs Studio (théâtre lu)"
+  el_info: |-
+    Transforme un scénario de théâtre lu terminé en un projet multivoix ElevenLabs Studio. Attribue des voix au narrateur et aux personnages (en collant les voice ID depuis le web), puis construis le projet — tu lances le rendu toi-même dans le navigateur.
+  el_btn_obsada_label: "Distribution des voix…"
+  el_btn_obsada_name: "Distribution des voix ElevenLabs"
+  el_btn_obsada_tooltip: "Attribue les voice ID au narrateur et aux personnages (enregistre un brouillon de distribution)"
+  el_brak_nazwy_tytul: "Pas de nom de projet"
+  el_brak_nazwy_tresc: "Saisis un nom de projet dans le champ du nom de fichier pour charger le scénario depuis le disque et attribuer les voix."
+  el_brak_postaci_tytul: "Aucun locuteur dans le scénario"
+  el_brak_postaci_tresc: |-
+    Aucun narrateur ni personnage avec des répliques n'a été détecté dans ce scénario.
+    Assure-toi qu'il s'agit d'un scénario de théâtre lu avec les balises [Narrateur: …] et [Personnage: …].
+  el_obsada_blad_tytul: "Erreur d'enregistrement de la distribution"
+  el_obsada_zapisana_tytul: "Distribution enregistrée"
+  el_obsada_zapisana_tresc: "Le brouillon de distribution des voix a été enregistré :\n{sciezka_pliku}"
+  # Fenêtre de distribution des voix (ElevenLabs)
+  dlg_obsada_tytul: "Distribution des voix (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Attribue une voix au narrateur et à chaque personnage en collant un voice ID d'ElevenLabs. Comment l'obtenir : ouvre l'onglet Voices, trouve la voix, écoute un échantillon pour être sûr, ouvre « More actions » et choisis « Copy Voice ID ». Tu peux utiliser des voix premade ou les tiennes (Voice Design). Tu peux laisser des champs vides et revenir plus tard — c'est un brouillon.
+  dlg_obsada_narrator_label: "Narrateur (voix par défaut) :"
+  dlg_obsada_postac_label: "Voix du personnage « {nazwa} » :"
+  dlg_obsada_hint: "colle le voice ID (par ex. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Enregistrer le brouillon"
+  dlg_obsada_btn_anuluj: "Annuler"
   postprod_info: |-
     Le module itère sur les chapitres du fichier sauvegardé et leur attribue un court titre littéraire (analyse IA).
   btn_tytuly_ai_label: "📜 Attribuer les Titres aux Chapitres (IA)"

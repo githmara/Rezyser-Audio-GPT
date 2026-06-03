@@ -386,6 +386,31 @@ rezyser:
     Erfordert einen aktiven API-Schlüssel und ein ausgefülltes Weltbuch.
   # Postprodukcja
   postprod_heading: "🎛️ Postproduktion"
+  # Brücke zu ElevenLabs Studio (Audio-Postproduktion, optional — v16.0)
+  el_heading: "🎚️ Brücke zu ElevenLabs Studio (Lesetheater)"
+  el_info: |-
+    Verwandle ein fertiges Lesetheater-Drehbuch in ein mehrstimmiges ElevenLabs-Studio-Projekt. Weise dem Erzähler und den Figuren Stimmen zu (durch Einfügen von Voice-IDs aus dem Web) und baue dann das Projekt — das Rendern startest du selbst im Browser.
+  el_btn_obsada_label: "Sprecherbesetzung…"
+  el_btn_obsada_name: "ElevenLabs-Sprecherbesetzung"
+  el_btn_obsada_tooltip: "Weise dem Erzähler und den Figuren Voice-IDs zu (speichert einen Besetzungsentwurf)"
+  el_brak_nazwy_tytul: "Kein Projektname"
+  el_brak_nazwy_tresc: "Gib einen Projektnamen im Dateinamenfeld ein, um das Drehbuch von der Festplatte zu laden und Stimmen zuzuweisen."
+  el_brak_postaci_tytul: "Keine Sprecher im Drehbuch"
+  el_brak_postaci_tresc: |-
+    In diesem Drehbuch wurden weder ein Erzähler noch Figuren mit Repliken erkannt.
+    Stelle sicher, dass es ein Lesetheater-Drehbuch mit den Tags [Erzähler: …] und [Figur: …] ist.
+  el_obsada_blad_tytul: "Fehler beim Speichern der Besetzung"
+  el_obsada_zapisana_tytul: "Besetzung gespeichert"
+  el_obsada_zapisana_tresc: "Der Besetzungsentwurf wurde gespeichert:\n{sciezka_pliku}"
+  # Fenster der Sprecherbesetzung (ElevenLabs)
+  dlg_obsada_tytul: "Sprecherbesetzung (ElevenLabs Studio)"
+  dlg_obsada_instrukcja: |-
+    Weise dem Erzähler und jeder Figur eine Stimme zu, indem du eine Voice-ID aus ElevenLabs einfügst. So bekommst du sie: öffne den Tab Voices, finde die Stimme, spiele eine Probe ab, öffne „More actions“ und wähle „Copy Voice ID“. Du kannst vorgefertigte Stimmen oder eigene (Voice Design) verwenden. Du kannst Felder leer lassen und später zurückkehren — das ist ein Entwurf.
+  dlg_obsada_narrator_label: "Erzähler (Standardstimme):"
+  dlg_obsada_postac_label: "Stimme der Figur „{nazwa}“:"
+  dlg_obsada_hint: "Voice-ID einfügen (z. B. pUEtt4pU7X9b37sFg0AT)"
+  dlg_obsada_btn_zapisz: "Entwurf speichern"
+  dlg_obsada_btn_anuluj: "Abbrechen"
   postprod_info: |-
     Das Modul iteriert über die Kapitel der gespeicherten Datei und gibt ihnen einen kurzen literarischen Titel (KI-Analyse).
   btn_tytuly_ai_label: "📜 Kapitel betiteln (KI)"
