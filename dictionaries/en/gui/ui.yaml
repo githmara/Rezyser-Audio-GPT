@@ -410,6 +410,41 @@ rezyser:
   dlg_obsada_hint: "paste voice ID (e.g. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Save draft"
   dlg_obsada_btn_anuluj: "Cancel"
+  # ElevenLabs bridge — project build (dispatcher, v16.0)
+  el_btn_build_label: "Create ElevenLabs Studio project…"
+  el_btn_build_name: "Create ElevenLabs Studio project"
+  el_btn_build_tooltip: "Build a multi-voice Studio project from the finished script and cast (0 credits — you render in the browser)"
+  el_build_status: "Creating the project in ElevenLabs Studio…"
+  el_brak_rozdzialu_tytul: "No chapters"
+  el_brak_rozdzialu_tresc: |-
+    No chapter was detected in the script (Prologue, Act, Chapter…).
+    ElevenLabs Studio splits the project into chapters — add at least one structure heading and try again.
+  el_obsada_brak_tytul: "No cast"
+  el_obsada_brak_tresc: "Assign voices first — click \"Voice cast…\", paste voice IDs for the narrator and characters, save the draft, then build the project."
+  el_obsada_niekompletna_tytul: "Incomplete cast"
+  el_obsada_niekompletna_tresc: |-
+    Missing voice IDs for: {brakujace}.
+    Open "Voice cast…", fill in the missing voices and save the draft, then build the project.
+  el_build_blad_tytul: "ElevenLabs error"
+  el_build_blad_uprawnienia_tresc: |-
+    The ElevenLabs key lacks the required permissions (scopes).
+    In the ElevenLabs panel (Profile → API key → edit) add the projects_write and voices_read permissions and try again.
+  el_build_blad_tresc: "Failed to create the ElevenLabs Studio project:\n{tresc_bledu}"
+  el_raport_tytul: "ElevenLabs Studio project created"
+  el_raport_tresc: |-
+    ✅ The project "{nazwa}" has been created in ElevenLabs Studio (0 credits — creating a project uses no characters).
+
+    Project ID: {project_id}
+
+    What's next (in the browser):
+    1. Open ElevenLabs Studio (button below).
+    2. Find the project "{nazwa}".
+    3. Render the speech — this uses credits (~1 credit per character).
+    4. Export the audio file or publish the project to Eleven Reader.
+
+    Voices: the narrator is the default voice (chapter titles and narration); the other speakers use the voices from the assigned cast.
+  el_btn_otworz_studio: "Open ElevenLabs Studio"
+  el_raport_btn_zamknij: "Close"
   postprod_info: |-
     The module iterates over chapters from the saved file and assigns them a short literary title (AI analysis).
   btn_tytuly_ai_label: "📜 Assign Chapter Titles (AI)"

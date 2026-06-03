@@ -410,6 +410,41 @@ rezyser:
   dlg_obsada_hint: "pega el voice ID (p. ej. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Guardar borrador"
   dlg_obsada_btn_anuluj: "Cancelar"
+  # Puente ElevenLabs — construir proyecto (dispatcher, v16.0)
+  el_btn_build_label: "Crear proyecto en ElevenLabs Studio…"
+  el_btn_build_name: "Crear proyecto en ElevenLabs Studio"
+  el_btn_build_tooltip: "Construye un proyecto multivoz en Studio a partir del guion terminado y el reparto (0 créditos — el render lo haces en el navegador)"
+  el_build_status: "Creando el proyecto en ElevenLabs Studio…"
+  el_brak_rozdzialu_tytul: "Sin capítulos"
+  el_brak_rozdzialu_tresc: |-
+    No se detectó ningún capítulo en el guion (Prólogo, Acto, Capítulo…).
+    ElevenLabs Studio divide el proyecto en capítulos — añade al menos un encabezado de estructura e inténtalo de nuevo.
+  el_obsada_brak_tytul: "Sin reparto"
+  el_obsada_brak_tresc: "Asigna primero las voces — pulsa «Reparto de voces…», pega los voice ID del narrador y los personajes, guarda el borrador y luego construye el proyecto."
+  el_obsada_niekompletna_tytul: "Reparto incompleto"
+  el_obsada_niekompletna_tresc: |-
+    Faltan voice ID para: {brakujace}.
+    Abre «Reparto de voces…», completa las voces que faltan y guarda el borrador, luego construye el proyecto.
+  el_build_blad_tytul: "Error de ElevenLabs"
+  el_build_blad_uprawnienia_tresc: |-
+    La clave de ElevenLabs no tiene los permisos necesarios (scopes).
+    En el panel de ElevenLabs (Profile → API key → edit) añade los permisos projects_write y voices_read e inténtalo de nuevo.
+  el_build_blad_tresc: "No se pudo crear el proyecto de ElevenLabs Studio:\n{tresc_bledu}"
+  el_raport_tytul: "Proyecto de ElevenLabs Studio creado"
+  el_raport_tresc: |-
+    ✅ El proyecto «{nazwa}» se ha creado en ElevenLabs Studio (0 créditos — crear un proyecto no consume caracteres).
+
+    ID del proyecto: {project_id}
+
+    Qué sigue (en el navegador):
+    1. Abre ElevenLabs Studio (botón de abajo).
+    2. Busca el proyecto «{nazwa}».
+    3. Renderiza la voz — esto consume créditos (~1 crédito por carácter).
+    4. Exporta el archivo de audio o publica el proyecto en Eleven Reader.
+
+    Voces: el narrador es la voz por defecto (títulos de capítulo y narración); los demás hablantes usan las voces del reparto asignado.
+  el_btn_otworz_studio: "Abrir ElevenLabs Studio"
+  el_raport_btn_zamknij: "Cerrar"
   postprod_info: |-
     El módulo itera sobre los capítulos del archivo guardado y les asigna un breve título literario (análisis de IA).
   btn_tytuly_ai_label: "📜 Asignar Títulos a los Capítulos (IA)"

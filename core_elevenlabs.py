@@ -149,6 +149,10 @@ def wczytaj_klucz(env_path: str) -> str | None:
 # klucza (System Check, Etap 1) działa nawet bez tej zależności.
 
 API_BASE = "https://api.elevenlabs.io"
+#: Strona webowa Studio — raport dispatchera linkuje tu, by user otworzył
+#: projekt i wyrenderował mowę (deep-link per-projekt celowo pominięty —
+#: format URL bywa zmienny; user odnajduje projekt po nazwie/ID).
+STUDIO_URL = "https://elevenlabs.io/app/studio"
 #: Model wielojęzyczny — pokrywa wszystkie 9 języków paczek (w tym PL).
 DEFAULT_MODEL_ID = "eleven_multilingual_v2"
 _TIMEOUT_ODCZYT = 30

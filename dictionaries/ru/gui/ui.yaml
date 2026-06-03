@@ -411,6 +411,41 @@ rezyser:
   dlg_obsada_hint: "вставь voice ID (напр. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Сохранить черновик"
   dlg_obsada_btn_anuluj: "Отмена"
+  # Мост ElevenLabs — сборка проекта (dispatcher, v16.0)
+  el_btn_build_label: "Создать проект ElevenLabs Studio…"
+  el_btn_build_name: "Создать проект ElevenLabs Studio"
+  el_btn_build_tooltip: "Собери многоголосый проект Studio из готового сценария и состава (0 кредитов — рендер делаешь в браузере)"
+  el_build_status: "Создание проекта в ElevenLabs Studio…"
+  el_brak_rozdzialu_tytul: "Нет глав"
+  el_brak_rozdzialu_tresc: |-
+    В сценарии не обнаружено ни одной главы (Пролог, Акт, Глава…).
+    ElevenLabs Studio делит проект на главы — добавь хотя бы один структурный заголовок и попробуй снова.
+  el_obsada_brak_tytul: "Нет состава"
+  el_obsada_brak_tresc: "Сначала назначь голоса — нажми «Голосовой состав…», вставь voice ID для рассказчика и персонажей, сохрани черновик, затем собери проект."
+  el_obsada_niekompletna_tytul: "Неполный состав"
+  el_obsada_niekompletna_tresc: |-
+    Отсутствуют voice ID для: {brakujace}.
+    Открой «Голосовой состав…», заполни недостающие голоса и сохрани черновик, затем собери проект.
+  el_build_blad_tytul: "Ошибка ElevenLabs"
+  el_build_blad_uprawnienia_tresc: |-
+    У ключа ElevenLabs нет необходимых разрешений (scopes).
+    В панели ElevenLabs (Profile → API key → edit) добавь разрешения projects_write и voices_read и попробуй снова.
+  el_build_blad_tresc: "Не удалось создать проект ElevenLabs Studio:\n{tresc_bledu}"
+  el_raport_tytul: "Проект ElevenLabs Studio создан"
+  el_raport_tresc: |-
+    ✅ Проект «{nazwa}» создан в ElevenLabs Studio (0 кредитов — создание проекта не расходует символы).
+
+    ID проекта: {project_id}
+
+    Что дальше (в браузере):
+    1. Открой ElevenLabs Studio (кнопка ниже).
+    2. Найди проект «{nazwa}».
+    3. Отрендери речь — это расходует кредиты (~1 кредит за символ).
+    4. Экспортируй аудиофайл или опубликуй проект в Eleven Reader.
+
+    Голоса: рассказчик — голос по умолчанию (заголовки глав и повествование); остальные говорящие используют голоса назначенного состава.
+  el_btn_otworz_studio: "Открыть ElevenLabs Studio"
+  el_raport_btn_zamknij: "Закрыть"
   postprod_info: |-
     Модуль проходит по главам из сохраненного файла и присваивает им короткое литературное название (анализ AI).
   btn_tytuly_ai_label: "📜 Присвоить Названия Главам (AI)"

@@ -411,6 +411,41 @@ rezyser:
   dlg_obsada_hint: "liitä voice ID (esim. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Tallenna luonnos"
   dlg_obsada_btn_anuluj: "Peruuta"
+  # ElevenLabs-silta — projektin rakentaminen (dispatcher, v16.0)
+  el_btn_build_label: "Luo ElevenLabs Studio -projekti…"
+  el_btn_build_name: "Luo ElevenLabs Studio -projekti"
+  el_btn_build_tooltip: "Rakenna moniääninen Studio-projekti valmiista käsikirjoituksesta ja roolituksesta (0 krediittiä — renderöinnin teet selaimessa)"
+  el_build_status: "Luodaan projektia ElevenLabs Studioon…"
+  el_brak_rozdzialu_tytul: "Ei lukuja"
+  el_brak_rozdzialu_tresc: |-
+    Käsikirjoituksesta ei havaittu yhtään lukua (Prologi, Näytös, Luku…).
+    ElevenLabs Studio jakaa projektin lukuihin — lisää vähintään yksi rakenneotsikko ja yritä uudelleen.
+  el_obsada_brak_tytul: "Ei roolitusta"
+  el_obsada_brak_tresc: "Määritä ensin äänet — napsauta ”Ääniroolitus…”, liitä voice ID:t kertojalle ja hahmoille, tallenna luonnos ja rakenna sitten projekti."
+  el_obsada_niekompletna_tytul: "Puutteellinen roolitus"
+  el_obsada_niekompletna_tresc: |-
+    Puuttuvat voice ID:t: {brakujace}.
+    Avaa ”Ääniroolitus…”, täydennä puuttuvat äänet ja tallenna luonnos, rakenna sitten projekti.
+  el_build_blad_tytul: "ElevenLabs-virhe"
+  el_build_blad_uprawnienia_tresc: |-
+    ElevenLabs-avaimelta puuttuvat tarvittavat oikeudet (scopet).
+    Lisää ElevenLabs-paneelissa (Profile → API key → edit) oikeudet projects_write ja voices_read ja yritä uudelleen.
+  el_build_blad_tresc: "ElevenLabs Studio -projektin luonti epäonnistui:\n{tresc_bledu}"
+  el_raport_tytul: "ElevenLabs Studio -projekti luotu"
+  el_raport_tresc: |-
+    ✅ Projekti ”{nazwa}” on luotu ElevenLabs Studioon (0 krediittiä — projektin luonti ei kuluta merkkejä).
+
+    Projektin ID: {project_id}
+
+    Mitä seuraavaksi (selaimessa):
+    1. Avaa ElevenLabs Studio (painike alla).
+    2. Etsi projekti ”{nazwa}”.
+    3. Renderöi puhe — tämä kuluttaa krediittejä (~1 krediitti per merkki).
+    4. Vie äänitiedosto tai julkaise projekti Eleven Readeriin.
+
+    Äänet: kertoja on oletusääni (lukujen otsikot ja kerronta); muut puhujat käyttävät roolituksen ääniä.
+  el_btn_otworz_studio: "Avaa ElevenLabs Studio"
+  el_raport_btn_zamknij: "Sulje"
   postprod_info: |-
     Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen kirjallisen otsikon (AI-analyysi).
   btn_tytuly_ai_label: "📜 Anna Luvuille Otsikot (AI)"

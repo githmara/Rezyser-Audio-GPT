@@ -857,10 +857,27 @@ class RezyserPanel(wx.Panel):
         self._btn_el_obsada.SetToolTip(t("rezyser.el_btn_obsada_tooltip"))
         self._btn_el_obsada.Bind(wx.EVT_BUTTON, self._on_el_obsada)
 
+        self._btn_el_build = wx.Button(
+            self._pnl_el,
+            label=t("rezyser.el_btn_build_label"),
+            name=t("rezyser.el_btn_build_name"),
+        )
+        self._btn_el_build.SetToolTip(t("rezyser.el_btn_build_tooltip"))
+        self._btn_el_build.Bind(wx.EVT_BUTTON, self._on_el_build)
+
+        # Status budowy (A11y: SetName czytane przez NVDA). Domyślnie ukryty.
+        self._lbl_el_status = wx.StaticText(self._pnl_el, label="")
+        self._lbl_el_status.Hide()
+
+        btn_row = wx.BoxSizer(wx.HORIZONTAL)
+        btn_row.Add(self._btn_el_obsada, flag=wx.RIGHT, border=BORDER)
+        btn_row.Add(self._btn_el_build)
+
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(lbl_el,              flag=wx.ALL,                         border=BORDER)
-        sizer.Add(lbl_el_info,         flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
-        sizer.Add(self._btn_el_obsada, flag=wx.LEFT | wx.BOTTOM,            border=BORDER)
+        sizer.Add(lbl_el,             flag=wx.ALL,                         border=BORDER)
+        sizer.Add(lbl_el_info,        flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        sizer.Add(btn_row,            flag=wx.LEFT | wx.BOTTOM,            border=BORDER)
+        sizer.Add(self._lbl_el_status, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
         self._pnl_el.SetSizer(sizer)
         return self._pnl_el
 
@@ -1066,6 +1083,7 @@ class RezyserPanel(wx.Panel):
         if tryb_idx == 1 and self._el_dostepne:
             self._pnl_el.Show()
             self._btn_el_obsada.Enable(nazwa_podana)
+            self._btn_el_build.Enable(nazwa_podana)
         else:
             self._pnl_el.Hide()
 
@@ -2013,6 +2031,185 @@ class RezyserPanel(wx.Panel):
                     t("rezyser.el_obsada_zapisana_tytul"),
                     wx.OK | wx.ICON_INFORMATION, self,
                 )
+        finally:
+            dlg.Destroy()
+
+    # ------------------------------------------------------------------
+    # Most ElevenLabs (v16.0): dispatcher — budowa projektu Studio
+    # ------------------------------------------------------------------
+    def _on_el_build(self, _event: wx.Event) -> None:
+        """Buduje wielogłosowy projekt ElevenLabs Studio z gotowego skryptu.
+
+        Walidacja: ≥1 rozdział (Prolog/Akt/…) + komplet obsady (narrator i każda
+        postać z kwestiami mają voice_id w szkicu z dysku). Budowa projektu idzie
+        w wątku tła (``create_project``, 0 kredytów — render robi user w webie).
+        """
+        nazwa = self._txt_file_name.GetValue().strip()
+        if not nazwa:
+            wx.MessageBox(
+                t("rezyser.el_brak_nazwy_tresc"),
+                t("rezyser.el_brak_nazwy_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        if self._worker_thread and self._worker_thread.is_alive():
+            wx.MessageBox(
+                t("rezyser.tytuly_zajety_tresc"),
+                t("rezyser.tytuly_zajety_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
+
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        filepath = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
+        if not os.path.exists(filepath):
+            wx.MessageBox(
+                t("rezyser.plik_narracji_brak_tresc", nazwa_projektu=nazwa),
+                t("rezyser.plik_narracji_brak_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+        try:
+            with open(filepath, "r", encoding="utf-8") as fh:
+                tekst = fh.read()
+        except Exception as exc:
+            wx.MessageBox(
+                t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
+                t("common.blad_odczytu_tytul"),
+                wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+
+        # Walidacja struktury: ≥1 rozdział („dramatów modernistycznych" bez
+        # żadnego Prologu/Aktu/Rozdziału nie przyjmujemy — Studio potrzebuje chapterów).
+        if ce.liczba_rozdzialow(tekst) < 1:
+            wx.MessageBox(
+                t("rezyser.el_brak_rozdzialu_tresc"),
+                t("rezyser.el_brak_rozdzialu_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        # Walidacja kompletności obsady (szkic z dysku).
+        postacie, _czy_narrator = ce.wykryj_postacie(tekst)
+        obsada = self._projekt.wczytaj_obsada(nazwa)
+        if not obsada:
+            wx.MessageBox(
+                t("rezyser.el_obsada_brak_tresc"),
+                t("rezyser.el_obsada_brak_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        wymagane = [ce.NARRATOR_KEY] + [p.lower().strip() for p in postacie]
+        brakujace = [k for k in wymagane if not obsada.get(k)]
+        if brakujace:
+            czytelne = []
+            for k in brakujace:
+                if k == ce.NARRATOR_KEY:
+                    czytelne.append(t("rezyser.dlg_obsada_narrator_label").rstrip(": "))
+                else:
+                    czytelne.append(
+                        next((p for p in postacie if p.lower().strip() == k), k)
+                    )
+            wx.MessageBox(
+                t("rezyser.el_obsada_niekompletna_tresc", brakujace=", ".join(czytelne)),
+                t("rezyser.el_obsada_niekompletna_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        # Komplet — buduj w wątku tła.
+        self._btn_el_build.Disable()
+        self._btn_el_obsada.Disable()
+        self._lbl_el_status.SetLabel(t("rezyser.el_build_status"))
+        self._lbl_el_status.SetName(t("rezyser.el_build_status"))
+        self._lbl_el_status.Show()
+        self._pnl_el.Layout()
+        self.Layout()
+
+        th = threading.Thread(
+            target=self._el_build_worker,
+            args=(nazwa, tekst, obsada),
+            daemon=True,
+        )
+        self._worker_thread = th
+        th.start()
+
+    def _el_build_worker(self, nazwa: str, tekst: str, obsada: dict) -> None:
+        """Wątek tła: buduje from_content_json i tworzy projekt Studio."""
+        try:
+            chapters = ce.buduj_chapters(tekst, obsada)
+            project_id = ce.create_project(
+                self._el_klucz, nazwa, obsada[ce.NARRATOR_KEY], chapters
+            )
+        except ce.BrakUprawnien as exc:
+            wx.CallAfter(self._on_el_build_error, "uprawnienia", str(exc))
+            return
+        except ce.BladElevenLabs as exc:
+            wx.CallAfter(self._on_el_build_error, "ogolny", str(exc))
+            return
+        except Exception as exc:  # noqa: BLE001 — sieć/parsowanie; pokaż userowi
+            wx.CallAfter(self._on_el_build_error, "ogolny", str(exc))
+            return
+        wx.CallAfter(self._on_el_build_done, project_id, nazwa)
+
+    def _reset_el_busy(self) -> None:
+        self._btn_el_build.Enable()
+        self._btn_el_obsada.Enable()
+        self._lbl_el_status.Hide()
+        self._pnl_el.Layout()
+        self.Layout()
+
+    def _on_el_build_error(self, rodzaj: str, msg: str) -> None:
+        self._reset_el_busy()
+        if rodzaj == "uprawnienia":
+            tresc = t("rezyser.el_build_blad_uprawnienia_tresc")
+        else:
+            tresc = t("rezyser.el_build_blad_tresc", tresc_bledu=msg)
+        wx.MessageBox(tresc, t("rezyser.el_build_blad_tytul"), wx.OK | wx.ICON_ERROR, self)
+
+    def _on_el_build_done(self, project_id: str, nazwa: str) -> None:
+        self._reset_el_busy()
+        self._show_el_report(project_id, nazwa)
+
+    def _show_el_report(self, project_id: str, nazwa: str) -> None:
+        """Raport read-only: ID projektu + link do Studio + instrukcja renderu."""
+        tresc = t("rezyser.el_raport_tresc", nazwa=nazwa, project_id=project_id)
+        dlg = wx.Dialog(
+            self,
+            title=t("rezyser.el_raport_tytul"),
+            size=(620, 460),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+        txt = wx.TextCtrl(
+            dlg, value=tresc,
+            style=wx.TE_MULTILINE | wx.TE_READONLY,
+            name=t("rezyser.el_raport_tytul"),
+        )
+        btn_studio = wx.Button(dlg, label=t("rezyser.el_btn_otworz_studio"))
+        btn_close = wx.Button(dlg, wx.ID_OK, label=t("rezyser.el_raport_btn_zamknij"))
+        btn_close.SetDefault()
+
+        def _otworz_studio(_e: wx.Event) -> None:
+            import webbrowser  # noqa: PLC0415
+            webbrowser.open(ce.STUDIO_URL)
+
+        btn_studio.Bind(wx.EVT_BUTTON, _otworz_studio)
+
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(btn_studio, flag=wx.RIGHT, border=8)
+        row.AddStretchSpacer()
+        row.Add(btn_close)
+
+        s = wx.BoxSizer(wx.VERTICAL)
+        s.Add(txt, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
+        s.Add(row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=10)
+        dlg.SetSizer(s)
+        wx.CallAfter(txt.SetFocus)
+        try:
+            dlg.ShowModal()
         finally:
             dlg.Destroy()
 

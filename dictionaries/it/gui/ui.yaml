@@ -411,6 +411,41 @@ rezyser:
   dlg_obsada_hint: "incolla il voice ID (es. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Salva bozza"
   dlg_obsada_btn_anuluj: "Annulla"
+  # Ponte ElevenLabs — costruzione del progetto (dispatcher, v16.0)
+  el_btn_build_label: "Crea progetto ElevenLabs Studio…"
+  el_btn_build_name: "Crea progetto ElevenLabs Studio"
+  el_btn_build_tooltip: "Costruisci un progetto multivoce in Studio dalla sceneggiatura finita e dal cast (0 crediti — il render lo fai nel browser)"
+  el_build_status: "Creazione del progetto in ElevenLabs Studio…"
+  el_brak_rozdzialu_tytul: "Nessun capitolo"
+  el_brak_rozdzialu_tresc: |-
+    Nessun capitolo rilevato nella sceneggiatura (Prologo, Atto, Capitolo…).
+    ElevenLabs Studio divide il progetto in capitoli — aggiungi almeno un'intestazione di struttura e riprova.
+  el_obsada_brak_tytul: "Nessun cast"
+  el_obsada_brak_tresc: "Assegna prima le voci — clicca «Cast vocale…», incolla i voice ID per il narratore e i personaggi, salva la bozza e poi costruisci il progetto."
+  el_obsada_niekompletna_tytul: "Cast incompleto"
+  el_obsada_niekompletna_tresc: |-
+    Voice ID mancanti per: {brakujace}.
+    Apri «Cast vocale…», completa le voci mancanti e salva la bozza, poi costruisci il progetto.
+  el_build_blad_tytul: "Errore ElevenLabs"
+  el_build_blad_uprawnienia_tresc: |-
+    La chiave ElevenLabs non ha i permessi richiesti (scope).
+    Nel pannello ElevenLabs (Profile → API key → edit) aggiungi i permessi projects_write e voices_read e riprova.
+  el_build_blad_tresc: "Impossibile creare il progetto ElevenLabs Studio:\n{tresc_bledu}"
+  el_raport_tytul: "Progetto ElevenLabs Studio creato"
+  el_raport_tresc: |-
+    ✅ Il progetto «{nazwa}» è stato creato in ElevenLabs Studio (0 crediti — creare un progetto non consuma caratteri).
+
+    ID progetto: {project_id}
+
+    Cosa fare ora (nel browser):
+    1. Apri ElevenLabs Studio (pulsante sotto).
+    2. Trova il progetto «{nazwa}».
+    3. Renderizza la voce — questo consuma crediti (~1 credito per carattere).
+    4. Esporta il file audio o pubblica il progetto su Eleven Reader.
+
+    Voci: il narratore è la voce predefinita (titoli dei capitoli e narrazione); gli altri parlanti usano le voci del cast assegnato.
+  el_btn_otworz_studio: "Apri ElevenLabs Studio"
+  el_raport_btn_zamknij: "Chiudi"
   postprod_info: |-
     Il modulo itera sui capitoli del file salvato e assegna loro un breve titolo letterario (analisi AI).
   btn_tytuly_ai_label: "📜 Assegna Titoli ai Capitoli (AI)"

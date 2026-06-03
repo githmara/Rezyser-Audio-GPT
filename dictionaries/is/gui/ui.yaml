@@ -411,6 +411,41 @@ rezyser:
   dlg_obsada_hint: "límdu voice ID (t.d. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Vista drög"
   dlg_obsada_btn_anuluj: "Hætta við"
+  # ElevenLabs-brú — bygging verkefnis (dispatcher, v16.0)
+  el_btn_build_label: "Búa til ElevenLabs Studio-verkefni…"
+  el_btn_build_name: "Búa til ElevenLabs Studio-verkefni"
+  el_btn_build_tooltip: "Byggðu margradda Studio-verkefni úr tilbúnu handriti og raddavali (0 inneignir — þú keyrir myndgerðina í vafranum)"
+  el_build_status: "Bý til verkefni í ElevenLabs Studio…"
+  el_brak_rozdzialu_tytul: "Engir kaflar"
+  el_brak_rozdzialu_tresc: |-
+    Enginn kafli fannst í handritinu (Formáli, Þáttur, Kafli…).
+    ElevenLabs Studio skiptir verkefninu í kafla — bættu við að minnsta kosti einni byggingarfyrirsögn og reyndu aftur.
+  el_obsada_brak_tytul: "Ekkert raddaval"
+  el_obsada_brak_tresc: "Úthlutaðu fyrst röddum — smelltu á „Raddaval…“, límdu voice ID fyrir sögumann og persónur, vistaðu drögin og byggðu svo verkefnið."
+  el_obsada_niekompletna_tytul: "Ófullkomið raddaval"
+  el_obsada_niekompletna_tresc: |-
+    Vantar voice ID fyrir: {brakujace}.
+    Opnaðu „Raddaval…“, fylltu inn raddirnar sem vantar og vistaðu drögin, byggðu svo verkefnið.
+  el_build_blad_tytul: "ElevenLabs-villa"
+  el_build_blad_uprawnienia_tresc: |-
+    ElevenLabs-lykilinn vantar nauðsynlegar heimildir (scopes).
+    Í ElevenLabs-spjaldinu (Profile → API key → edit) bættu við heimildunum projects_write og voices_read og reyndu aftur.
+  el_build_blad_tresc: "Ekki tókst að búa til ElevenLabs Studio-verkefnið:\n{tresc_bledu}"
+  el_raport_tytul: "ElevenLabs Studio-verkefni búið til"
+  el_raport_tresc: |-
+    ✅ Verkefnið „{nazwa}“ hefur verið búið til í ElevenLabs Studio (0 inneignir — að búa til verkefni eyðir engum stöfum).
+
+    Verkefnis-ID: {project_id}
+
+    Hvað næst (í vafranum):
+    1. Opnaðu ElevenLabs Studio (hnappur að neðan).
+    2. Finndu verkefnið „{nazwa}“.
+    3. Myndgerðu talið — það eyðir inneignum (~1 inneign á staf).
+    4. Flyttu út hljóðskrána eða birtu verkefnið í Eleven Reader.
+
+    Raddir: sögumaður er sjálfgefin rödd (kaflatitlar og frásögn); aðrir mælendur nota raddir úr úthlutuðu raddavali.
+  el_btn_otworz_studio: "Opna ElevenLabs Studio"
+  el_raport_btn_zamknij: "Loka"
   postprod_info: |-
     Einingin fer yfir kafla úr vistaðri skrá og gefur þeim stutt bókmenntatitil (AI greining).
   btn_tytuly_ai_label: "📜 Gefa Kaflatitla (AI)"

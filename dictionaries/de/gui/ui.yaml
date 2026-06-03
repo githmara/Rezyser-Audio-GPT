@@ -411,6 +411,41 @@ rezyser:
   dlg_obsada_hint: "Voice-ID einfügen (z. B. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Entwurf speichern"
   dlg_obsada_btn_anuluj: "Abbrechen"
+  # ElevenLabs-Brücke — Projekt erstellen (Dispatcher, v16.0)
+  el_btn_build_label: "ElevenLabs-Studio-Projekt erstellen…"
+  el_btn_build_name: "ElevenLabs-Studio-Projekt erstellen"
+  el_btn_build_tooltip: "Baue ein mehrstimmiges Studio-Projekt aus dem fertigen Drehbuch und der Besetzung (0 Kredits — das Rendern machst du im Browser)"
+  el_build_status: "Projekt wird in ElevenLabs Studio erstellt…"
+  el_brak_rozdzialu_tytul: "Keine Kapitel"
+  el_brak_rozdzialu_tresc: |-
+    Im Drehbuch wurde kein Kapitel erkannt (Prolog, Akt, Kapitel…).
+    ElevenLabs Studio teilt das Projekt in Kapitel auf — füge mindestens eine Strukturüberschrift hinzu und versuche es erneut.
+  el_obsada_brak_tytul: "Keine Besetzung"
+  el_obsada_brak_tresc: "Weise zuerst Stimmen zu — klicke auf „Sprecherbesetzung…“, füge Voice-IDs für Erzähler und Figuren ein, speichere den Entwurf und baue dann das Projekt."
+  el_obsada_niekompletna_tytul: "Unvollständige Besetzung"
+  el_obsada_niekompletna_tresc: |-
+    Fehlende Voice-IDs für: {brakujace}.
+    Öffne „Sprecherbesetzung…“, ergänze die fehlenden Stimmen und speichere den Entwurf, dann baue das Projekt.
+  el_build_blad_tytul: "ElevenLabs-Fehler"
+  el_build_blad_uprawnienia_tresc: |-
+    Dem ElevenLabs-Schlüssel fehlen die erforderlichen Berechtigungen (Scopes).
+    Füge im ElevenLabs-Panel (Profile → API key → edit) die Berechtigungen projects_write und voices_read hinzu und versuche es erneut.
+  el_build_blad_tresc: "Das ElevenLabs-Studio-Projekt konnte nicht erstellt werden:\n{tresc_bledu}"
+  el_raport_tytul: "ElevenLabs-Studio-Projekt erstellt"
+  el_raport_tresc: |-
+    ✅ Das Projekt „{nazwa}“ wurde in ElevenLabs Studio erstellt (0 Kredits — das Erstellen eines Projekts verbraucht keine Zeichen).
+
+    Projekt-ID: {project_id}
+
+    Wie geht es weiter (im Browser):
+    1. Öffne ElevenLabs Studio (Schaltfläche unten).
+    2. Finde das Projekt „{nazwa}“.
+    3. Rendere die Sprache — das verbraucht Kredits (~1 Kredit pro Zeichen).
+    4. Exportiere die Audiodatei oder veröffentliche das Projekt im Eleven Reader.
+
+    Stimmen: der Erzähler ist die Standardstimme (Kapiteltitel und Erzählung); die anderen Sprecher verwenden die Stimmen der zugewiesenen Besetzung.
+  el_btn_otworz_studio: "ElevenLabs Studio öffnen"
+  el_raport_btn_zamknij: "Schließen"
   postprod_info: |-
     Das Modul iteriert über die Kapitel der gespeicherten Datei und gibt ihnen einen kurzen literarischen Titel (KI-Analyse).
   btn_tytuly_ai_label: "📜 Kapitel betiteln (KI)"

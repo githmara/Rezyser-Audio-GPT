@@ -438,6 +438,41 @@ rezyser:
   dlg_obsada_hint: "wklej voice ID (np. pUEtt4pU7X9b37sFg0AT)"
   dlg_obsada_btn_zapisz: "Zapisz szkic"
   dlg_obsada_btn_anuluj: "Anuluj"
+  # Most ElevenLabs — budowa projektu (dispatcher, v16.0)
+  el_btn_build_label: "Stwórz projekt ElevenLabs Studio…"
+  el_btn_build_name: "Stwórz projekt ElevenLabs Studio"
+  el_btn_build_tooltip: "Zbuduj wielogłosowy projekt Studio z gotowego skryptu i obsady (0 kredytów — render robisz w przeglądarce)"
+  el_build_status: "Tworzenie projektu w ElevenLabs Studio…"
+  el_brak_rozdzialu_tytul: "Brak rozdziałów"
+  el_brak_rozdzialu_tresc: |-
+    W skrypcie nie wykryto żadnego rozdziału (Prolog, Akt, Rozdział…).
+    ElevenLabs Studio dzieli projekt na rozdziały — dodaj przynajmniej jeden nagłówek struktury i spróbuj ponownie.
+  el_obsada_brak_tytul: "Brak obsady"
+  el_obsada_brak_tresc: "Najpierw przypisz głosy — kliknij „Obsada głosowa…”, wklej voice ID narratorowi i postaciom, zapisz szkic, a potem zbuduj projekt."
+  el_obsada_niekompletna_tytul: "Niekompletna obsada"
+  el_obsada_niekompletna_tresc: |-
+    Brakuje voice ID dla: {brakujace}.
+    Otwórz „Obsada głosowa…”, uzupełnij brakujące głosy i zapisz szkic, a potem zbuduj projekt.
+  el_build_blad_tytul: "Błąd ElevenLabs"
+  el_build_blad_uprawnienia_tresc: |-
+    Klucz ElevenLabs nie ma wymaganych uprawnień (scope'ów).
+    W panelu ElevenLabs (Profile → API key → edit) dodaj uprawnienia projects_write oraz voices_read i spróbuj ponownie.
+  el_build_blad_tresc: "Nie udało się utworzyć projektu ElevenLabs Studio:\n{tresc_bledu}"
+  el_raport_tytul: "Projekt ElevenLabs Studio utworzony"
+  el_raport_tresc: |-
+    ✅ Projekt „{nazwa}” został utworzony w ElevenLabs Studio (0 kredytów — tworzenie projektu nie zużywa znaków).
+
+    ID projektu: {project_id}
+
+    Co dalej (w przeglądarce):
+    1. Otwórz ElevenLabs Studio (przycisk poniżej).
+    2. Odnajdź projekt „{nazwa}”.
+    3. Wyrenderuj mowę — to zużywa kredyty (~1 kredyt za znak).
+    4. Wyeksportuj plik audio lub opublikuj projekt do Eleven Reader.
+
+    Głosy: narrator jest głosem domyślnym (tytuły rozdziałów i narracja); pozostali mówcy mają głosy z przypisanej obsady.
+  el_btn_otworz_studio: "Otwórz ElevenLabs Studio"
+  el_raport_btn_zamknij: "Zamknij"
   postprod_info: |-
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"
