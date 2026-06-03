@@ -484,6 +484,7 @@ class RezyserPanel(wx.Panel):
         panel_opcji_burzy   = self._zbuduj_panel_opcji_burzy(BORDER)
         pole_instrukcji     = self._zbuduj_pole_instrukcji(BORDER)
         panel_postprodukcji = self._zbuduj_panel_postprodukcji(BORDER)
+        panel_elevenlabs    = self._zbuduj_panel_elevenlabs(BORDER)
         wskaznik_sizer      = self._zbuduj_wskaznik_pamieci_modelu(BORDER)
 
 
@@ -509,6 +510,9 @@ class RezyserPanel(wx.Panel):
         sizer.Add(pole_instrukcji, flag=wx.EXPAND)
         sizer.Add(sep(), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
         sizer.Add(panel_postprodukcji, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        # Most ElevenLabs (v16.0) — należy do trybu Skrypt (teatr czytany),
+        # nie do postprodukcji Audiobooka. Widoczność w `_refresh_ui_state`.
+        sizer.Add(panel_elevenlabs, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
         return sizer
 
     # ------------------------------------------------------------------
@@ -813,11 +817,6 @@ class RezyserPanel(wx.Panel):
         self._lbl_postprod_status = wx.StaticText(self._pnl_postprodukcja, label="")
         self._lbl_postprod_status.Hide()
 
-        # --- Pod-panel: most ElevenLabs Studio (opcjonalny, v16.0) ---
-        # Cały blok chowamy, gdy brak ważnego klucza ElevenLabs
-        # (`_el_dostepne` False) — non-EL user nie widzi nic nowego.
-        self._pnl_el = self._zbuduj_pod_panel_elevenlabs(self._pnl_postprodukcja, BORDER)
-
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_postprod,              flag=wx.ALL,                              border=BORDER)
         sizer.Add(lbl_tytuly_info,           flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,      border=BORDER)
@@ -828,35 +827,30 @@ class RezyserPanel(wx.Panel):
             border=BORDER,
         )
         sizer.Add(self._lbl_postprod_status, flag=wx.LEFT | wx.BOTTOM,                 border=BORDER)
-        sizer.Add(
-            self._pnl_el,
-            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-            border=BORDER,
-        )
         self._pnl_postprodukcja.SetSizer(sizer)
         return self._pnl_postprodukcja
 
-    def _zbuduj_pod_panel_elevenlabs(self, parent: wx.Window, BORDER: int) -> wx.Panel:
-        """Pod-panel mostu ElevenLabs Studio (obsada + budowa projektu).
+    def _zbuduj_panel_elevenlabs(self, BORDER: int) -> wx.Panel:
+        """Panel mostu ElevenLabs Studio — należy do trybu SKRYPT (teatr czytany).
 
-        Osadzony w panelu postprodukcji (tryb Audiobook). Widoczność całości
-        steruje ``_el_dostepne`` (klucz ElevenLabs) — patrz ``_refresh_ui_state``.
-        Przycisk budowy projektu dochodzi w Etapie 5.
+        Świadomie NIE w panelu postprodukcji Audiobooka: most buduje wielogłosowy
+        projekt z teatru czytanego (tryb Skrypt), a nie z prozy audiobooka. Dodatkowo
+        ochrona trybu (`_zapisany_tryb`) zablokowałaby dotarcie do Audiobooka dla
+        projektu zapisanego jako Skrypt. Widoczność: tryb Skrypt + ważny klucz EL
+        (`_el_dostepne`) — patrz ``_refresh_ui_state``. Przycisk budowy: Etap 5.
         """
-        pnl = wx.Panel(parent)
+        self._pnl_el = wx.Panel(self)
 
-        sep = wx.StaticLine(pnl)
-
-        lbl_el = wx.StaticText(pnl, label=t("rezyser.el_heading"))
+        lbl_el = wx.StaticText(self._pnl_el, label=t("rezyser.el_heading"))
         ef = lbl_el.GetFont()
         ef.SetPointSize(10)
         ef.MakeBold()
         lbl_el.SetFont(ef)
 
-        lbl_el_info = wx.StaticText(pnl, label=t("rezyser.el_info"))
+        lbl_el_info = wx.StaticText(self._pnl_el, label=t("rezyser.el_info"))
 
         self._btn_el_obsada = wx.Button(
-            pnl,
+            self._pnl_el,
             label=t("rezyser.el_btn_obsada_label"),
             name=t("rezyser.el_btn_obsada_name"),
         )
@@ -864,12 +858,11 @@ class RezyserPanel(wx.Panel):
         self._btn_el_obsada.Bind(wx.EVT_BUTTON, self._on_el_obsada)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(sep,                 flag=wx.EXPAND | wx.BOTTOM,         border=BORDER)
-        sizer.Add(lbl_el,              flag=wx.BOTTOM,                     border=BORDER)
-        sizer.Add(lbl_el_info,         flag=wx.BOTTOM,                     border=BORDER)
-        sizer.Add(self._btn_el_obsada, flag=wx.BOTTOM,                     border=BORDER)
-        pnl.SetSizer(sizer)
-        return pnl
+        sizer.Add(lbl_el,              flag=wx.ALL,                         border=BORDER)
+        sizer.Add(lbl_el_info,         flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        sizer.Add(self._btn_el_obsada, flag=wx.LEFT | wx.BOTTOM,            border=BORDER)
+        self._pnl_el.SetSizer(sizer)
+        return self._pnl_el
 
     # ------------------------------------------------------------------
     # BLOK G – Wskaźnik okna kontekstowego AI
@@ -1058,18 +1051,23 @@ class RezyserPanel(wx.Panel):
             self._rb_mode.EnableItem(1, True)
             self._rb_mode.EnableItem(2, True)
 
+        # Postprodukcja Audiobooka (tytuły AI rozdziałów) — tylko tryb Audiobook.
         if tryb_idx == 2:
             self._pnl_postprodukcja.Show()
             self._btn_tytuly_ai.Enable(
                 self._api_dostepne and nazwa_podana and _historia_niepusta
             )
-            # Most ElevenLabs (v16.0): cały pod-panel tylko gdy klucz EL ważny;
-            # obsadę można edytować, gdy podano nazwę projektu (źródło z dysku).
-            self._pnl_el.Show(self._el_dostepne)
-            if self._el_dostepne:
-                self._btn_el_obsada.Enable(nazwa_podana)
         else:
             self._pnl_postprodukcja.Hide()
+
+        # Most ElevenLabs (v16.0) — należy do trybu SKRYPT (teatr czytany),
+        # nie do Audiobooka. Cały panel tylko gdy klucz EL ważny; obsadę można
+        # edytować, gdy podano nazwę projektu (źródło skryptu z dysku).
+        if tryb_idx == 1 and self._el_dostepne:
+            self._pnl_el.Show()
+            self._btn_el_obsada.Enable(nazwa_podana)
+        else:
+            self._pnl_el.Hide()
 
         self._aktualizuj_pamiec_modelu()
 
