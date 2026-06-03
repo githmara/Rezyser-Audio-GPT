@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 15.6 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 16.0 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -107,7 +107,7 @@ Hvernig á að nota Leikstjórn?
 - Heimabók (hliðarslá til vinstri): Hér skrifarðu reglur heimsins. Hvert verkefni hefur nú sína eigin Heimabók tengda við skráarnafnið — ef sagan þín heitir t.d. emilia_heist_audiobook.txt, verður Heimabókin vistuð sem handrit/emilia_heist_audiobook.md. Þess vegna skiptir röðin máli: fyrst skaltu slá inn nafn verkefnisskrárinnar í reitinn "Nafn verkefnisskrár", og þá geturðu vistað Heimabókina. Hnappurinn "💾 Vista Księgę varanlega" verður gráður þar til þú gefur upp nafn. Að hlaða inn núverandi verkefni með hnappinum "Hlaða sögu" mun sjálfkrafa hlaða viðeigandi .md skrá — þú þarft ekki að gera neitt handvirkt. Athugið: Án útfylltrar Heimabókar mun forritið læsa fyrirspurnum til AI — þetta er viljandi öryggisráðstöfun sem verndar þig frá því að búa til texta án nokkurra reglna.
 - Langtímaminni (hliðarslá til vinstri): Annar reiturinn í hliðarslánni. Hér skráir AI sjálfkrafa samantekt á söguþræði þegar minnið byrjar að fyllast. Þú getur líka skrifað þínar eigin athugasemdir handvirkt — líkanið mun líta á þær sem "hvað ég veit nú þegar" áður en það les núverandi atriði. SÖGULEG GLUFA (löguð í v15.5): áður fyrr, ef þú slóst hér inn mjög stutta athugasemd og smelltir á „Vista Samantekt" áður en eitthvað marktækt var komið í frásagnarskrána, hlóð forritið eftir næstu hleðslu samantektina í FORGANGI og SLEPPTI fullri sögu — líkanið fékk þá aðeins Heimsbókina og eins-setningar athugasemd, án samhengis um tón og síðustu atriði. Frá og með v15.5 er hleðslan greind: ef öll sagan kemst fyrir í samhengisglugganum, er hún hlaðin í heild sinni (og óþarfa gamla samantektin þurrkuð út), þannig að líkanið tapar ekki samhengi. Og eftir handvirka breytingu á frásagnarskránni í textaritli skaltu nota nýja hnappinn „Endurhlaða af diski" (frá v15.5), sem samstillir innra minnið við diskinn með einum smelli; til að opna skrána sjálfa í textaritli þjónar áfram „Opna frásagnarskrá…".
 - Hugstormunarhamur: Skrifaðu lauslega hugmynd og AI mun gefa þér 3 valkosti fyrir þróun söguþráðar. Fyrir hvern valkost mun það strax búa til tilbúinn blokk "--- SKISSU PROMPTUR ---". Þegar þú hefur valið einn þeirra, límdu þennan prompt í Handrits- eða Hljóðbókaham og bættu við athugasemdum eða upplýsingum fyrir líkanið. Söguþráðurinn breytist ekki í Hugstormun — þú getur gert tilraunir án áhættu!
-- Grófur Handritshamur: Hér límirðu "Skissu Prompt" sem var búinn til í Hugstormun. AI mun skrifa langan bút með fullum merkjum [Speaker X: Nafn - tilfinning] fyrir samtöl og áhrifum [SFX: ...] fyrir hljóð. Textinn bætist sjálfkrafa við skrána þína (t.d. nýtt_atriði.txt) í handritamöppunni.
+- Grófur Handritshamur (frá v16.0 — leiklestur): Hér límirðu "Skissu Prompt" sem var búinn til í Hugstormun. AI mun skrifa langan sögumanns-og-samtals-bút: frásögn (sviðsmynd, tími, aðgerð) í [Sögumaður: ...] merkjum og persónulínur í [Nafn: tilfinning] merkjum. Engin hljóðáhrif — samhengið ber sögumaðurinn með orðum. Textinn bætist sjálfkrafa við skrána þína (t.d. nýtt_atriði.txt) í handritamöppunni. Slíkt tilbúið handrit geturðu svo breytt í margradda hljóðbók (brúin að ElevenLabs Studio — sérstakur kafli neðar).
 - Hefðbundinn Hljóðbókahamur: Hamur fyrir rithöfunda. AI býr til hreina bókmenntaprósa — engin merki, engin hljóðfræði, klassísk samtöl fléttuð inn í frásögnina. Textinn bætist við skrána á sama hátt og í Handritsham.
 - Sjálfvirk persónusköpun: Handritið er forritað til að búa sjálfkrafa til ný merki [Speaker] ef söguþráðurinn krefst nýrrar persónu. Ábending: Ef AI býr til áhugaverða persónu, afritaðu merkið hennar og límdu í Heimabókina, svo líkanið muni hana til frambúðar!
 
@@ -188,6 +188,31 @@ Hvenær á að taka saman (uppfært í v15.5): Þú þarft ekki lengur að fylgj
 Sjálfvirk samantekt: Þegar minnið fer í viðvörunarástand, skiptir Hugstormun sjálfkrafa yfir í neyðarham — í stað þess að búa til valkosti strax, býr það fyrst til nákvæma samantekt á allri fyrri söguþræðinum og vistar hana í merkjum <SAMANTEKT>. Forritið greinir þessi merki og flytur samantektina sjálfkrafa í Langtímaminni. Engin handvirk vinna!
 
 Snjöll hleðsla og endurhleðsla af diski (uppfært í v15.5): Bæði við hleðslu verkefnis og eftir smell á nýja hnappinn „Endurhlaða af diski" (eftir handvirka breytingu á frásagnarskránni í textaritli) ákveður forritið sjálft hvernig það samræmir minnið við diskinn. Ef ÖLL sagan kemst fyrir í samhengisglugganum — hleður það henni í heild sinni og þurrkar út óþarfa gamla samantekt, svo vélin vinni á fullum texta (þetta lokar gömlu glufunni, þar sem líkanið fékk aðeins samantektina án samhengis síðustu atriða). Ef sagan er LÖNG og á vistaða samantektarskrá — heldur það samantektinni ósnertri og setur aðeins ferska endann inn í Núverandi minni, talinn frá síðustu byggingarfyrirsögn (Kafli/Þáttur/Atriði). Þannig sóarðu ekki táknum í að hlaða alla söguna aftur, og um leið verður næsta samantekt ekki til á úreltum gögnum.
+
+
+KROK 3b: Brú til ElevenLabs Studio (leikhúslestrar → margra radda hljóðbók)
+
+Frá útgáfu 16.0 geturðu breytt tilbúnum leikhússkrifum (Skjalastilling) í margra radda verkefni í ElevenLabs Studio — sögumaður og hver persóna fá sér rödd. Þetta er VALFRJÁLS eiginleiki, fullkomlega aðskilinn frá restinni af forritinu: án ElevenLabs lykils breytist ekkert, hefðbundið flæði með breytara heldur áfram.
+
+ElevenLabs lykill (valfrjáls)
+
+Límdu ElevenLabs lykilinn þinn í skrána golden_key.env, á sér línu: ELEVENLABS_API_KEY=sk_... Athugið: ElevenLabs lykill byrjar á sk_ (með UNDIRSTRIKI), ólíkt OpenAI lykli (sk-). Ef þú notar lykil með takmörkunum (restricted key), gefðu honum heimildir (scope) projects_write og voices_read. Staða lykilsins sést á aðalskjánum (System Check) — skortur á lykli er ekki villa, brúin er einfaldlega falin.
+
+Brúin birtist í Stjórnborði í Skjalastillingu (þegar lykillinn er réttur). Hún virkar á tilbúinni leikriti sem er vistað á disknum — fyrst skaltu búa til eða hlaða inn verkefni, síðan fara í brúna.
+
+Skref 1 — Raddsetning
+
+Smelltu á „Raddsetning…". Forritið les inn persónur úr skjalinu þínu sem hafa línur og bætir alltaf við rauf fyrir Sögumann (sögumaður er sjálfgefin rödd — les titla kafla og alla frásögn). Fyrir hvern ræðumann skaltu líma inn voice ID. Hvernig á að fá voice ID í ElevenLabs (í vafra): farðu í flipann Voices, finndu röddina og spilaðu sýnishorn til að vera viss um að það sé rétt; opnaðu „More actions" við þá rödd og veldu „Copy Voice ID"; límdu afritaða auðkennið í viðeigandi reit. Þú getur notað tilbúnar raddir (premade) eða þínar eigin, þar á meðal þær sem eru búnar til í flipanum Voice Design. Þú getur skilið reitina eftir tóma og komið aftur seinna — skráningin er drög.
+
+Skref 2 — Byggja verkefni
+
+Smelltu á „Búa til verkefni ElevenLabs Studio…". Forritið athugar hvort skjalið hafi að minnsta kosti einn kafla (Prolog/Akt/Kafli) og hvort hver ræðumaður og sögumaður hafi úthlutað rödd, og síðan býr það til margra radda Studio verkefni á reikningnum þínum skipt í kafla. Sjálf verkefnissköpunin EYÐIR EKKI inneignum.
+
+Skref 3 — Útgáfa í vafra
+
+Eftir að verkefnið hefur verið búið til sýnir forritið auðkenni þess og hnapp sem opnar ElevenLabs Studio. Í vafranum skaltu finna verkefnið, búa til tal (það eyðir inneignum — um það bil 1 inneign á tákn), og síðan flytja út hljóðskrána eða birta verkefnið í Eleven Reader. Útgáfa og birting fer fram þér megin, meðvitað — forritið byggir aðeins verkefnið.
+
+Af hverju leikhúslestrar, en ekki hljóðáhrif? Í fyrri útgáfum framleiddi Skjalastilling hrá hljóðáhrif [SFX: ...] án sögumanns. Brúin til tilbúins, margra radda upptöku krefst þess hins vegar að samhengi (staðsetning, tími, aðgerð) sé flutt af sögumanni með orðum: hljóðáhrif í Studio eru ekki aðgengileg fyrir skjálesara, og líkanið framkvæmir hvort sem er sögumann eða áhrif — aldrei stöðugt bæði í einu. Þess vegna er Skjalastilling núna leikhúslestrar: sögumaður plús samtal, án SFX.
 
 
 SKREF 4: Eftirvinnsla í Reżyser Audio GPT

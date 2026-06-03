@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 15.6 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 16.0 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -107,7 +107,7 @@ Comment utiliser la Réalisation ?
 - Livre du Monde (barre latérale à gauche) : C'est ici que vous entrez les règles de l'univers. Chaque projet a désormais son propre Livre lié au nom du fichier — si votre fichier d'histoire est par exemple emilia_heist_audiobook.txt, le Livre du Monde sera enregistré sous forme de skrypty/emilia_heist_audiobook.md. C'est pourquoi l'ordre est important : entrez d'abord le nom du fichier de projet dans le champ "Nom du fichier de projet", puis vous pouvez enregistrer le Livre. Le bouton "💾 Sauvegarder la Bible de manière permanente" reste grisé tant que vous n'avez pas fourni de nom. Charger un projet existant avec le bouton "Charger l'histoire" chargera automatiquement le fichier .md correspondant — vous n'avez rien à faire manuellement. Remarque : Sans Livre du Monde rempli, l'application bloquera l'envoi de requêtes à l'IA — c'est une mesure de sécurité délibérée qui vous protège contre la génération de texte sans aucune règle.
 - Mémoire à Long Terme (barre latérale à gauche) : Le deuxième champ de la barre latérale. Ici, l'IA enregistre automatiquement le résumé de l'intrigue lorsque la mémoire commence à se remplir. Vous pouvez également y inscrire vos propres notes manuellement — le modèle les traitera comme "ce que je sais déjà" avant de lire la scène en cours. LACUNE HISTORIQUE (corrigée en v15.5) : autrefois, si vous tapiez ici une note très courte et cliquiez sur « Enregistrer le Résumé » avant que le fichier de narration ne contienne quelque chose de significatif, lors du chargement suivant l'application chargeait EN PRIORITÉ le résumé et IGNORAIT l'historique complet — le modèle ne recevait alors que le Livre du Monde et une note d'une seule phrase, sans contexte du ton ni des dernières scènes. Depuis la v15.5, le chargement est intelligent : si tout l'historique tient dans la fenêtre de contexte, il est chargé en entier (et le vieux résumé désormais superflu est effacé), de sorte que le modèle ne perd pas le contexte. Et après une édition manuelle du fichier de narration dans l'éditeur, utilisez le nouveau bouton "Actualiser depuis le disque" (depuis la v15.5), qui synchronise en un seul clic la mémoire interne avec le disque ; pour la simple ouverture du fichier dans l'éditeur, c'est toujours "Ouvrir le fichier de narration…" qui sert.
 - Mode Brainstorming : Entrez une idée libre, et l'IA vous proposera 3 options de développement de l'intrigue. Pour chaque option, elle générera immédiatement un bloc "--- ÉBAUCHE DE PROMPT ---". Après avoir choisi l'une d'elles, collez ce prompt dans le Mode Script ou Audiobook et ajoutez éventuellement des remarques ou des informations pour le modèle. La mémoire de l'intrigue ne change pas pendant le Brainstorming — vous pouvez expérimenter sans risque !
-- Mode Script Brut : Vous collez ici "l'Ébauche de Prompt" générée dans le Brainstorming. L'IA écrira un long fragment avec des balises complètes [Speaker X: Nom - émotion] pour les dialogues et des effets [SFX: ...] pour les sons. Le texte est automatiquement ajouté à votre fichier (par exemple, nouvelle_scene.txt) dans le dossier skrypty/.
+- Mode Script Brut (depuis v16.0 — théâtre lu) : Vous collez ici "l'Ébauche de Prompt" générée dans le Brainstorming. L'IA écrira un long fragment de narrateur et dialogue : la narration (décor, temps, action) dans des balises [Narrateur: ...] et les répliques des personnages dans des balises [Nom: émotion]. Pas d'effets sonores — le contexte est porté par le narrateur avec des mots. Le texte est automatiquement ajouté à votre fichier (par exemple, nouvelle_scene.txt) dans le dossier skrypty/. Vous pouvez ensuite transformer ce scénario terminé en livre audio multivoix (le pont vers ElevenLabs Studio — un chapitre distinct plus bas).
 - Mode Audiobook Traditionnel : Mode pour les écrivains. L'IA génère une prose littéraire pure — zéro balise, zéro phonétique, dialogues classiques intégrés dans la narration. Le texte est ajouté au fichier de la même manière que dans le Mode Script.
 - Création automatique de personnages : Le script est programmé pour créer automatiquement de nouvelles balises [Speaker] si l'intrigue nécessite un nouveau personnage. Astuce : Si l'IA crée un personnage intéressant, copiez sa balise et collez-la dans le Livre du Monde pour que le modèle s'en souvienne de façon permanente !
 
@@ -151,7 +151,7 @@ Le Mode Script Brut possède un panneau dédié "✂️ Gestion de la Structure"
 - Insérer Scène X : Insère uniquement l'en-tête de la scène (par exemple, "Scène 3") dans l'acte en cours. Le compteur de scènes augmente automatiquement.
 
 
-Accents disponibles dans Reżyser Audio GPT 15.6 :
+Accents disponibles dans Reżyser Audio GPT 16.0 :
 
 - Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
 - Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
@@ -221,6 +221,31 @@ Lorsque l'alerte rouge s'allume, vous n'avez plus besoin de copier manuellement 
 Résumé automatique : Lorsque la mémoire entre en état d'alerte, Brainstorming passe automatiquement en mode de secours — au lieu de générer immédiatement des options, il crée d'abord un résumé détaillé de toute l'intrigue jusqu'à présent et l'enregistre dans des balises <RÉSUMÉ>. L'application détecte ces balises et transfère automatiquement le résumé dans le champ de Mémoire à Long Terme. Zéro travail manuel !
 
 Chargement intelligent et actualisation depuis le disque (mis à jour en v15.5) : Aussi bien lors du chargement d'un projet qu'après un clic sur le nouveau bouton "Actualiser depuis le disque" (après une édition manuelle du fichier de narration dans l'éditeur), l'application décide elle-même comment concilier la mémoire avec le disque. Si TOUT l'historique tient dans la fenêtre de contexte — elle le charge en entier et efface le vieux résumé devenu superflu, pour que le moteur travaille sur le texte complet (cela comble la lacune d'autrefois, où le modèle ne recevait que le résumé sans le contexte des dernières scènes). Si l'historique est LONG et possède un fichier de résumé enregistré — elle conserve le résumé intact et n'insère dans la Mémoire Courante que la fin fraîche, comptée à partir du dernier en-tête de structure (Chapitre/Acte/Scène). Ainsi, vous ne gaspillez pas de jetons à recharger toute l'histoire, et en même temps le résumé suivant ne se construit pas sur des données obsolètes.
+
+
+KROK 3b : Pont vers ElevenLabs Studio (théâtre lu → livre audio multivoix)
+
+À partir de la version 16.0, le script de théâtre lu prêt (mode Script) peut être transformé en projet multivoix dans ElevenLabs Studio — le narrateur et chaque personnage reçoivent une voix distincte. Cette fonction est OPTIONNELLE, entièrement séparée du reste du programme : sans clé ElevenLabs, rien ne change, le flux classique avec le convertisseur fonctionne.
+
+Clé ElevenLabs (optionnelle)
+
+Collez votre clé ElevenLabs dans le fichier golden_key.env, sur une ligne séparée : ELEVENLABS_API_KEY=sk_... Remarque : la clé ElevenLabs commence par sk_ (avec un SOULIGNEMENT), contrairement à la clé OpenAI (sk-). Si vous utilisez une clé avec des restrictions (restricted key), attribuez-lui les autorisations (scopes) projects_write et voices_read. Le statut de la clé est visible sur l'écran principal (System Check) — l'absence de clé n'est pas une erreur, le pont reste simplement caché.
+
+Le pont apparaît dans le panneau du Réalisateur en mode Script (lorsque la clé est correcte). Il fonctionne sur une pièce prête enregistrée sur le disque — générez ou chargez d'abord le projet, puis passez au pont.
+
+Étape 1 — Distribution vocale
+
+Cliquez sur « Distribution vocale… ». L'application chargera les personnages ayant des répliques dans votre script et ajoutera toujours un slot pour le Narrateur (le narrateur est la voix par défaut — il lit les titres des chapitres et toute la narration). Pour chaque locuteur, collez l'ID de la voix. Comment obtenir l'ID de la voix dans ElevenLabs (dans le navigateur) : allez dans l'onglet Voices, trouvez la voix et écoutez un échantillon pour vous assurer que c'est la bonne ; ouvrez « More actions » pour cette voix et sélectionnez « Copy Voice ID » ; collez l'identifiant copié dans le champ approprié. Vous pouvez utiliser des voix prêtes à l'emploi (premade) ou vos propres voix, y compris celles créées dans l'onglet Voice Design. Vous pouvez laisser les champs vides et revenir plus tard — l'enregistrement est un brouillon.
+
+Étape 2 — Construire le projet
+
+Cliquez sur « Créer un projet ElevenLabs Studio… ». L'application vérifiera si le script contient au moins un chapitre (Prologue/Acte/Chapitre) et si chaque locuteur ainsi que le narrateur ont une voix attribuée, puis elle créera un projet Studio multivoix sur votre compte, divisé en chapitres. La création du projet NE consomme pas de crédits.
+
+Étape 3 — Rendu dans le navigateur
+
+Après la création du projet, l'application affichera son identifiant ainsi qu'un bouton pour ouvrir ElevenLabs Studio. Dans le navigateur, trouvez le projet, rendez le discours (cela consomme des crédits — environ 1 crédit par caractère), puis exportez le fichier audio ou publiez le projet sur Eleven Reader. Le rendu et la publication se font de votre côté, en toute conscience — l'application ne fait que construire le projet.
+
+Pourquoi un théâtre lu, et non des effets sonores ? Dans les versions précédentes, le mode Script produisait des effets bruts [SFX: ...] sans narrateur. Le pont vers un enregistrement multivoix prêt nécessite cependant que le contexte (lieu, temps, action) soit porté par le narrateur avec des mots : les effets sonores dans le Studio ne sont pas accessibles aux lecteurs d'écran, et le modèle réalise soit le narrateur, soit les effets — jamais les deux de manière stable. C'est pourquoi le mode Script est désormais un théâtre lu : narrateur plus dialogue, sans SFX.
 
 
 ÉTAPE 4 : Postproduction dans Reżyser Audio GPT

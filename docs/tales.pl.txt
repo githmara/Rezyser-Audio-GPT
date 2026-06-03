@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Moduł Interaktywne Opowieści (15.6 – Wersja Wydawnicza)
+Reżyser Audio GPT — Moduł Interaktywne Opowieści (16.0 – Wersja Wydawnicza)
 
 Drugi główny tryb aplikacji obok Reżysera — tym razem stajesz się graczem dynamicznie generowanej historii zamiast jej autorem. Sztuczna inteligencja prowadzi narrację w drugiej osobie liczby pojedynczej („Idziesz przez mglisty las, czujesz zapach mokrych liści…"), a Ty decydujesz o kolejnym ruchu — pisząc dowolną akcję wolnym tekstem albo wybierając jedną z ponumerowanych opcji.
 

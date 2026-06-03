@@ -7,7 +7,7 @@
 
 Insieme di strumenti autonomi alimentati dall'IA per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, nonché per condurre giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata sin dall'inizio con piena accessibilità per i lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra del programma.
 
-Wersja: **15.6** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **16.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali

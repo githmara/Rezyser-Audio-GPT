@@ -1,4 +1,4 @@
-Audio Director GPT — Interactive Stories Module (15.6 – Release Edition)
+Audio Director GPT — Interactive Stories Module (16.0 – Release Edition)
 
 The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
