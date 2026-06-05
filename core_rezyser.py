@@ -171,6 +171,48 @@ _PL_TO_ASCII = {
     "ś": "s", "ć": "c", "ń": "n", "ż": "z", "ź": "z",
 }
 
+# Audio-tagi ElevenLabs v3 (od v16.1). Słowa w nawiasach kwadratowych, które
+# model v3 interpretuje jako dyrektywy aktorskie/dźwiękowe — NIE jako mówcę.
+# `zastosuj_akcenty_uniwersalne` pomija je przy detekcji mówcy (inaczej tag
+# typu [whispers] zresetowałby atrybucję akcentu). Tagi są ANGIELSKIE i wspólne
+# dla wszystkich języków projektu (v3 honoruje je niezależnie od języka mowy).
+#
+# To NIE jest pełna lista (zestaw v3 jest otwarty i zależny od głosu/kontekstu)
+# — to lista DOMYŚLNIE DOZWOLONA, którą prompt trybu Skrypt (E3,
+# `dictionaries/<kod>/rezyser/tryb_skrypt.yaml`) narzuca modelowi. Tag spoza
+# zbioru nie wywala niczego — most jest na to odporny, a tu degraduje się
+# najwyżej akcent jednego fragmentu (nie krytyczne). Porównanie po pierwszym
+# tokenie tagu, małymi literami (tak jak parser wyłuskuje mówcę).
+AUDIO_TAGS: frozenset[str] = frozenset({
+    # — emocje / ton (szeroka paleta; prompt Skryptu zaleca głównie tę grupę) —
+    "happy", "joyful", "ecstatic", "cheerful", "playful", "amused",
+    "sad", "sorrowful", "melancholic", "heartbroken", "wistful", "bitter",
+    "angry", "furious", "indignant", "annoyed", "frustrated", "stern",
+    "excited", "enthusiastic", "eager", "hopeful", "proud", "confident",
+    "nervous", "anxious", "fearful", "terrified", "panicked", "desperate",
+    "sarcastic", "mocking", "contemptuous", "dismissive", "scornful",
+    "curious", "surprised", "confused", "suspicious", "thoughtful",
+    "disappointed", "resigned", "weary", "tired", "bored",
+    "ashamed", "guilty", "jealous", "disgusted",
+    "calm", "gentle", "tender", "warmly", "reassuring", "sincere", "solemn",
+    "coldly", "hesitant", "shy", "flirtatious", "pleading", "relieved",
+    "mischievously", "dramatic", "urgent", "defensive", "awe",
+    # — sposób podania —
+    "whispers", "whispering", "shouts", "shouting", "yelling", "mutters",
+    "murmurs", "stammers", "stuttering", "sings", "singing", "humming",
+    "breathless", "trembling", "voice breaking", "through gritted teeth",
+    "under breath",
+    # — niewerbalne (wokalne) —
+    "laughs", "laughing", "giggles", "chuckles", "snickers", "scoffs",
+    "sighs", "exhales", "inhales", "gasps", "groans", "grunts", "yawns",
+    "sniffs", "sniffles", "clears throat", "coughs", "gulps", "swallows",
+    "snorts", "sobs", "crying", "screams", "pauses", "short pause",
+    "long pause", "breathes",
+    # — efekty dźwiękowe (passthrough; prompt teatru ich NIE zaleca, „zero SFX") —
+    "gunshot", "applause", "clapping", "explosion", "footsteps", "thunder",
+    "wind", "door slam", "knocking",
+})
+
 
 # =============================================================================
 # Rekoncyliacja narracji z dysku (v15.5) — wolne funkcje, czysto-Pythonowe,
@@ -287,6 +329,46 @@ def _usun_polskie(nazwa: str) -> str:
     return nazwa.strip()
 
 
+def zbuduj_mape_akcentow(lore_text: str, jezyk_projektu: str = "pl") -> dict[str, dict]:
+    """Parsuje Księgę Świata → ``{nazwa_postaci_lower: {"nazwa", "reguly"}}``.
+
+    ``nazwa`` to rozpoznana nazwa akcentu (np. ``"fiński"``) albo ``None``;
+    ``reguly`` to lista par ad-hoc ``[("w","v"), …]`` z zapisów typu
+    ``'w' na 'v'``. Postać bez żadnej definicji akcentu nie trafia do mapy.
+
+    Wyłuskane z :func:`zastosuj_akcenty_uniwersalne` w v16.1, bo korzysta z tego
+    również generator wersji dla czytników ekranu (``core_screen_reader``) —
+    potrzebuje wiedzieć, którzy mówcy mają akcent (i jaki), by owinąć ich kwestie
+    w ``<span lang="…">``. Patrz [[reguly_architektury]].
+    """
+    slowa = slowa_akcentu(jezyk_projektu)
+    alt_slow = "|".join(re.escape(s) for s in slowa)
+    wzorzec_akcentu = re.compile(
+        rf"(?:{alt_slow})\s+(\w+)|(\w+)\s+(?:{alt_slow})",
+        re.UNICODE,
+    )
+    wzorzec_regul_lore = re.compile(
+        r"[\"'](\w)[\"']\s+na\s+[\"'](\w)[\"']",
+        re.IGNORECASE | re.UNICODE,
+    )
+
+    akcenty_map: dict[str, dict] = {}
+    postacie_bloki = re.split(r"\[([^:\]\-]+).*?\]", lore_text)
+    for i in range(1, len(postacie_bloki), 2):
+        imie = postacie_bloki[i].strip().lower()
+        opis = postacie_bloki[i + 1].lower() if i + 1 < len(postacie_bloki) else ""
+        akcent_match = wzorzec_akcentu.search(opis)
+        nazwa_akcentu = (
+            (akcent_match.group(1) or akcent_match.group(2))
+            if akcent_match
+            else None
+        )
+        reguly_lore = wzorzec_regul_lore.findall(opis)
+        if nazwa_akcentu or reguly_lore:
+            akcenty_map[imie] = {"nazwa": nazwa_akcentu, "reguly": reguly_lore}
+    return akcenty_map
+
+
 def zastosuj_akcenty_uniwersalne(
     tekst: str,
     lore_text: str,
@@ -315,43 +397,10 @@ def zastosuj_akcenty_uniwersalne(
                          przy aplikacji reguł fonetycznych — domyślnie
                          ``"pl"`` (zachowanie sprzed 13.3).
     """
-    # ── 1. Wyciąganie mapowania postaci → akcent z Księgi Świata ──
-    # 13.3: regex zbudowany dynamicznie z ``slowa_akcentu(jezyk_projektu)``.
-    # Słowa-wyzwalacze pochodzą z ``dictionaries/<jezyk>/podstawy.yaml`` (np.
-    # PL: ["akcent"], EN: ["accent", "accented"], FI: ["aksentti", "korostus"]).
-    # ``\w+`` z flagą ``re.UNICODE`` (domyślną w Py3) łapie diakrytyki
-    # skandynawskie/niemieckie/francuskie/cyrylicę — żaden alfabet nie blokuje
-    # parsowania tylko dlatego, że nie był na białej liście znaków.
-    slowa = slowa_akcentu(jezyk_projektu)
-    alt_slow = "|".join(re.escape(s) for s in slowa)
-    wzorzec_akcentu = re.compile(
-        rf"(?:{alt_slow})\s+(\w+)|(\w+)\s+(?:{alt_slow})",
-        re.UNICODE,
-    )
-    # Reguły ad-hoc Lore: pojedyncze litery zamieniane łącznikiem „na".
-    # Same litery na ``\w`` (Unicode) — `na` jako łącznik zostawiamy
-    # polski w 13.3, wielojęzyczne łączniki to osobny TODO na 13.x+.
-    wzorzec_regul_lore = re.compile(
-        r"[\"'](\w)[\"']\s+na\s+[\"'](\w)[\"']",
-        re.IGNORECASE | re.UNICODE,
-    )
-
-    akcenty_map: dict[str, dict] = {}
-    postacie_bloki = re.split(r"\[([^:\]\-]+).*?\]", lore_text)
-
-    for i in range(1, len(postacie_bloki), 2):
-        imie = postacie_bloki[i].strip().lower()
-        opis = postacie_bloki[i + 1].lower() if i + 1 < len(postacie_bloki) else ""
-
-        akcent_match = wzorzec_akcentu.search(opis)
-        nazwa_akcentu = (
-            (akcent_match.group(1) or akcent_match.group(2))
-            if akcent_match
-            else None
-        )
-        reguly_lore = wzorzec_regul_lore.findall(opis)
-        if nazwa_akcentu or reguly_lore:
-            akcenty_map[imie] = {"nazwa": nazwa_akcentu, "reguly": reguly_lore}
+    # ── 1. Mapa postaci → akcent z Księgi Świata ──
+    # Wyłuskane do :func:`zbuduj_mape_akcentow` (v16.1), bo z tej samej mapy
+    # korzysta generator wersji dla czytników ekranu (core_screen_reader).
+    akcenty_map = zbuduj_mape_akcentow(lore_text, jezyk_projektu)
 
     if not akcenty_map:
         return tekst
@@ -384,7 +433,17 @@ def zastosuj_akcenty_uniwersalne(
         if frag.startswith("[") and frag.endswith("]"):
             nowe_fragmenty.append(frag)
             m = re.match(r"^\[([^:\]\-]+)", frag)
-            current_speaker = m.group(1).strip().lower() if m else None
+            nazwa_w_tagu = m.group(1).strip().lower() if m else None
+            # v16.1: audio-tagi ElevenLabs v3 ([whispers], [sighs]…) mają tę samą
+            # składnię co tag mówcy, ale są wplecione w treść kwestii. NIE wolno
+            # ich brać za nowego mówcę — zresetowałyby atrybucję akcentu (dialog
+            # po [whispers] straciłby akcent postaci). Zostają passthrough
+            # (dopisane wyżej), a `current_speaker` się nie zmienia. Most
+            # (`core_elevenlabs`) jest na to odporny inaczej — parsuje liniowo,
+            # więc audio-tag w group(2) nigdy nie jest re-skanowany.
+            if nazwa_w_tagu in AUDIO_TAGS:
+                continue
+            current_speaker = nazwa_w_tagu
         else:
             dialog = frag
             if current_speaker and dialog.strip():

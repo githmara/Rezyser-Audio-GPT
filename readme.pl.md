@@ -7,7 +7,7 @@
 
 Zestaw samowystarczalnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
 
-Wersja: **16.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **16.1** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Główne moduły
@@ -76,7 +76,7 @@ Aplikacja inteligentnie rozdziela zadania, optymalizując koszty i szybkość dz
 
 Pomimo zaimplementowania rygorystycznych dyrektyw systemowych nakazujących ucinanie akcji w momentach napięcia (tzw. dyrektywa Anti-Closure), współczesne modele LLM posiadają silną, wrodzoną tendencję do „zamykania" historii. Skutkuje to częstym wplataniem niechcianych konkluzji, morałów lub fałszywych „happy endów", szczególnie w Trybie Tradycyjnego Audiobooka.
 
-Jest to fundamentalne ograniczenie obecnej generacji sztucznej inteligencji. Z tego powodu aplikacja zapisuje projekty w zwykłych, łatwych do edycji plikach tekstowych (`.txt`). Wymaga to od użytkownika przyjęcia roli żywego montażysty — okazjonalnego, ręcznego usunięcia ostatnich, „zamykających" zdań wygenerowanych przez AI, przed wczytaniem pliku ponownie i kontynuacją pracy.
+Jest to fundamentalne ograniczenie obecnej generacji sztucznej inteligencji. Z tego powodu aplikacja zapisuje projekty w zwykłych, łatwych do edycji plikach tekstowych (`.txt`). Wymaga to od użytkownika przyjęcia roli żywego montażysty — okazjonalnego, ręcznego usunięcia ostatnich, „zamykających" zdań wygenerowanych przez AI, a następnie zsynchronizowania pamięci z poprawionym plikiem przyciskiem „Odśwież z dysku" i kontynuacji pracy.
 
 
 ## Instalacja i uruchomienie

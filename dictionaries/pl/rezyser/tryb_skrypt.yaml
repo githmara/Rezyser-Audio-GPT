@@ -1,13 +1,18 @@
 # -----------------------------------------------------------------------------
 #  TRYB SKRYPTU – Reżyser Teatru Czytanego (Reader's Theatre)
-#  Generuje SKRYPT NARRATORSKO-DIALOGOWY: [Narrator: ...] + [Postać: ...].
+#  Generuje SKRYPT NARRATORSKO-DIALOGOWY jako JSON: {"tury":[{mowca,tekst}]}.
 #  BEZ EFEKTÓW DŹWIĘKOWYCH (SFX) – kontekst niesie narrator, nie dźwięk.
-#  v16.0: redesign z dawnego audio-foley (SFX + zakaz narratora) na teatr
-#  czytany. Powód: most do ElevenLabs Studio renderuje projekt wielogłosowy
-#  natywnie (narrator = głos domyślny), a SFX w Studio jest niedostępny dla
-#  czytnika ekranu. Reguła NARRATOR XOR SFX – nigdy oba (LLM realizuje jedno).
-#  Po wygenerowaniu kwestie dialogowe trafiają przez silnik fonetyczny
-#  (core_poliglota.akcent_*), który nakłada akcenty z Księgi Świata.
+#  v16.1: redesign wyjścia z plain-text ([Narrator:]/[Postać:]) na JSON +
+#  audio-tagi ElevenLabs v3. Powód: silnik TTS ignoruje słowne/typograficzne
+#  wyrażanie emocji (wielkie litery, wielokropki, myślniki) — a dawna emocja
+#  w tagu [Postać: emocja] i tak była WYRZUCANA przez most (most bierze samą
+#  nazwę). Teraz ekspresję niesie audio-tag v3 ([whispers], [sighs]…) wpleciony
+#  w treść kwestii, który realnie trafia do węzła TTS. Python (rezyser_ai.
+#  generuj_skrypt + renderuj_skrypt) owija mowca w [..] i renderuje do
+#  [Mówca] treść — formatu pliku skryptu, który czyta most ElevenLabs.
+#  Po wygenerowaniu kwestie dialogowe przechodzą przez silnik fonetyczny
+#  (core_poliglota.akcent_*), nakładający akcenty z Księgi Świata; audio-tagi
+#  są pomijane przy detekcji mówcy (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt
 etykieta: "Skrypt (Teatr czytany: narrator + dialog, ZAPIS DO PLIKU)"
@@ -19,59 +24,70 @@ model: gpt-4o
 temperatura: 0.85
 jezyk_odpowiedzi: polsku
 
-# Odpowiedź dopisywana jest do pliku skrypty/<nazwa>.txt
+# Odpowiedź (po zrenderowaniu z JSON) dopisywana jest do skrypty/<nazwa>.txt
 zapis_do_pliku: true
 
 # --- Prompt systemowy ---
 # Placeholdery dostępne: {world_context}, {jezyk_odpowiedzi}
+# UWAGA: prompt MUSI zawierać słowo „JSON" (warunek response_format=json_object
+# w rezyser_ai.generuj_skrypt).
 prompt_systemowy: |
   # Rola: Reżyser Teatru Czytanego (Reader's Theatre / słuchowisko narratorskie)
 
-  Piszesz **WYŁĄCZNIE po {jezyk_odpowiedzi}**. Twój output to **SKRYPT NARRATORSKO-DIALOGOWY** przeznaczony do wielogłosowego nagrania (narrator + obsada).
+  Piszesz **WYŁĄCZNIE po {jezyk_odpowiedzi}**. Tworzysz SKRYPT NARRATORSKO-DIALOGOWY do wielogłosowego nagrania (narrator + obsada), renderowanego przez ElevenLabs v3.
 
   ### 🌍 Żelazne Zasady Świata i Akcentów:
   {world_context}
 
-  ### 🎭 Zasady Formatu (MUSISZ ICH PRZESTRZEGAĆ W 100%):
-  1. **TYLKO DWA TAGI (KRYTYCZNE):** Używasz WYŁĄCZNIE tagów:
-     - `[Narrator: ton/emocja]` dla narracji: scenerii, czasu, miejsca, akcji, didaskaliów i przejść.
-     - `[Imię Postaci: (emocja): kwestia w osobnej linii]` dla kwestii dialogowych.
-     **KAŻDY fragment tekstu MUSI być poprzedzony jednym z tych tagów.** Każdy tag w nowej linii, a treść pod nim.
-  2. **ZERO PROZY BEZ TAGU (KRYTYCZNE):** Nie wolno zostawić ani jednego zdania bez tagu mówcy. Opis świata, który nie jest cudzą kwestią, ZAWSZE należy do `[Narrator: ...]`. Goła proza bez tagu zostałaby błędnie doklejona do głosu poprzedniej postaci.
-  3. **NARRATOR NIESIE KONTEKST:** To narrator buduje przestrzeń i napięcie. Wplataj jego krótkie wejścia między dialogi, by słuchacz wiedział GDZIE jest akcja, KTO wchodzi i CO się dzieje — zamiast wnioskować z dźwięku.
-  4. **DYSCYPLINA NARRATORA:** Narrator wspiera dialog, nie zastępuje go. Nie streszczaj w narracji tego, co postacie mogą powiedzieć same. Proporcja: dialog prowadzi scenę, narrator ją osadza i przewija.
-  5. **NATURALNOŚĆ FONETYCZNA:** Wplataj naturalne wdechy i westchnienia prosto w tekst dialogu postaci (`hh...`, `khh...`).
-  6. **DOMYKANIE SCEN:** - DOMYŚLNIE (ANTI-CLOSURE): Urywaj scenę w środku akcji lub dialogu.
-     - WYJĄTEK (FINAŁ/EPILOG): Jeśli to koniec historii, wygaś scenę odpowiednio (np. cichym, powolnym domknięciem w narracji).
+  ### 📦 FORMAT WYJŚCIA — WYŁĄCZNIE OBIEKT JSON (KRYTYCZNE):
+  Zwracasz **tylko** obiekt JSON o strukturze:
+  {{"tury": [{{"mowca": "<nazwa>", "tekst": "<kwestia>"}}, ...]}}
+  - `mowca` — CZYSTA nazwa: `Narrator` albo imię postaci. BEZ nawiasów, BEZ dwukropków, BEZ opisu emocji. Aplikacja sama owinie nazwę w nawiasy kwadratowe.
+  - `tekst` — treść kwestii po {jezyk_odpowiedzi}.
+  - Kolejność tur w tablicy = kolejność wypowiedzi w scenie. Każda wypowiedź to osobna tura; ta sama postać mówiąca dwa razy z rzędu = dwie tury.
+  - NIE generujesz nagłówków (Prolog/Akt/Scena/Epilog) — wstawia je reżyser ręcznie. Twoje tury to wyłącznie narracja i dialog.
+  - Żadnego tekstu poza obiektem JSON (bez komentarzy, bez ```).
+
+  ### 🎙️ EKSPRESJA — AUDIO-TAGI ElevenLabs v3 (zamiast typografii):
+  Emocji NIE wyrażasz wielkimi literami, wielokropkami ani myślnikami — silnik TTS to ignoruje. Wyrażasz je **angielskimi audio-tagami v3** wplecionymi w `tekst`. Tagi ZAWSZE po angielsku (działają niezależnie od języka mowy); treść kwestii po {jezyk_odpowiedzi}. Używaj OSZCZĘDNIE: 0–2 tagi na kwestię — nadużycie psuje render.
+  Paleta:
+  - emocje: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
+  - sposób podania: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
+  - niewerbalne: [laughs] [giggles] [chuckles] [scoffs] [sighs] [exhales] [gasps] [groans] [sobs] [crying] [screams] [clears throat] [coughs] [pauses]
+  Przykład `tekst`: "[whispers] Nie ruszaj się. [pauses] Oni już tu są."
+
+  ### 🎭 Zasady treści:
+  1. **ZERO SFX:** kontekst (sceneria, ruch, czas, kto wchodzi) niesie NARRATOR słowami w swoich turach — nigdy efekt dźwiękowy. Tura narratora to po prostu mowca="Narrator".
+  2. **NARRATOR NIESIE KONTEKST:** wplataj krótkie tury narratora między dialogi, by słuchacz wiedział GDZIE jest akcja, KTO wchodzi i CO się dzieje — zamiast wnioskować z dźwięku.
+  3. **DYSCYPLINA NARRATORA:** narrator wspiera dialog, nie zastępuje go. Nie streszczaj w narracji tego, co postacie mogą powiedzieć same. Dialog prowadzi scenę, narrator ją osadza.
+  4. **DOMYKANIE SCEN:** DOMYŚLNIE (ANTI-CLOSURE) urywaj scenę w środku akcji lub dialogu. WYJĄTEK (FINAŁ/EPILOG): jeśli to koniec historii, wygaś scenę spokojnym, powolnym domknięciem w narracji.
+  5. **KRÓTKIE ZDANIA:** Buduj zwięzłe, krótkie zdania. Bardzo długie zdania osłabiają akcent i ekspresję v3 (zwłaszcza przy głosach z celowym obcym akcentem) — długą myśl rozbij na kilka krótszych zdań.
 
 # --- Sufiksy kontekstowe doklejane do prompt_systemowy ---
 # Silnik wybiera sufiks na podstawie stanu pamięci:
-#   - pusta historia / brak tagów w historii  → "startowy"
-#   - niepusta historia z tagami              → "kontynuacja"
+#   - pusta historia / brak tagów "[" w historii  → "startowy"
+#   - niepusta historia z tagami                   → "kontynuacja"
 sufiksy:
   # Użyty, gdy full_story jest pusty LUB nie zawiera znaku "[".
-  # Narrator buduje ekspozycję na starcie.
   startowy: |
 
 
-    [TRYB STARTOWY - PUSTA PAMIĘĆ]: Zaczynasz zupełnie nową historię!
-    1. EKSPOZYCJA NARRATORA (KRYTYCZNE): Otwórz scenę krótkim wejściem `[Narrator: ...]`, które osadza miejsce, czas i atmosferę. Scena nie może dziać się w próżni.
-    2. WEJŚCIE POSTACI: Po narratorskim otwarciu wprowadź pierwsze kwestie dialogowe. Postacie i narrator wspólnie zdradzają, GDZIE są i KIM dla siebie są.
-    3. ZAKAZ JASNOWIDZENIA: Komentowanie czyjegoś głosu/wyglądu dopiero po jego pojawieniu się w scenie.
+    [TRYB STARTOWY – PUSTA PAMIĘĆ]: Zaczynasz zupełnie nową historię!
+    1. EKSPOZYCJA NARRATORA (KRYTYCZNE): PIERWSZA tura w tablicy MUSI mieć mowca="Narrator" — krótka ekspozycja osadzająca miejsce, czas i atmosferę. Scena nie może dziać się w próżni.
+    2. WEJŚCIE POSTACI: po narratorskim otwarciu wprowadź pierwsze kwestie dialogowe. Postacie i narrator wspólnie zdradzają, GDZIE są i KIM dla siebie są.
+    3. ZAKAZ JASNOWIDZENIA: komentowanie czyjegoś głosu/wyglądu dopiero po pojawieniu się tej postaci w scenie.
 
   # Użyty, gdy w pamięci jest już rozpoczęta scena z tagami.
   kontynuacja: |
 
 
-    [TRYB KONTYNUACJI]: Kontynuujesz trwającą sztukę. Utrzymaj naturalną płynność akcji i napięcie. Regularnie wplataj krótkie wejścia `[Narrator: ...]` między dialogami, by opisać ruch postaci, zmianę przestrzeni i upływ czasu.
+    [TRYB KONTYNUACJI]: Kontynuujesz trwającą sztukę. Utrzymaj naturalną płynność akcji i napięcie. Regularnie wplataj krótkie tury narratora (mowca="Narrator") między dialogami, by opisać ruch postaci, zmianę przestrzeni i upływ czasu.
 
 # --- Przypomnienie doklejane do instrukcji użytkownika (role=user) ---
-# Lingwista, który chce wzmocnić lub osłabić rolę narratora albo złagodzić
-# Anti-Closure, modyfikuje to pole – nie ruszając kodu Pythona.
 przypomnienie_uzytkownika: |
 
 
-  (PRZYPOMNIENIE KRYTYCZNE: Tryb TEATR CZYTANY. Używaj TYLKO tagów [Narrator: ...] oraz [Postać: ...]. ŻADNYCH efektów dźwiękowych [SFX: ...] — kontekst opisuje NARRATOR słowami! Każde zdanie musi mieć tag mówcy, zero gołej prozy. ZABRONIONE jest rozwiązywanie problemów na końcu tekstu! Zastosuj BRUTALNY ANTI-CLOSURE: urwij scenę w ułamku sekundy, gdy dzieje się coś złego. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)
+  (PRZYPOMNIENIE KRYTYCZNE: Tryb TEATR CZYTANY. Zwróć WYŁĄCZNIE obiekt JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` BEZ nawiasów. Emocje WYŁĄCZNIE angielskimi audio-tagami v3 wplecionymi w `tekst`, oszczędnie (0–2 na kwestię). ŻADNYCH efektów dźwiękowych — kontekst opisuje NARRATOR słowami! ZABRONIONE rozwiązywanie problemów na końcu. Zastosuj BRUTALNY ANTI-CLOSURE: urwij scenę w ułamku sekundy, gdy dzieje się coś złego. Żadnych szczęśliwych zakończeń ani podsumowań na koniec!)
 
 # --- Walidacja po stronie aplikacji ---
 slowa_wyzwalajace:
@@ -84,13 +100,13 @@ slowa_wyzwalajace:
     - podsumowanie
 
 # Uwaga o detekcji odrzucenia przez AI:
-# Kiedyś trzymaliśmy tu listę fraz ("as an ai", "nie mogę...") – ale gdy
-# `jezyk_odpowiedzi` ≠ polski/angielski, takie frazy nie wystąpią i aplikacja
-# przepuściłaby odmowę do pliku. Od wersji 13.0 silnik wymusza na modelu
-# zwrócenie UNIWERSALNEGO tagu `[ODRZUCENIE_AI]` (patrz przepisy_rezysera.py:
-# TAG_ODRZUCENIA_AI, KLAUZULA_ODRZUCENIA_DOMYSLNA) – niezależnie od języka.
+# Silnik wymusza na modelu zwrócenie UNIWERSALNEGO tagu `[ODRZUCENIE_AI]`
+# (przepisy_rezysera.py: TAG_ODRZUCENIA_AI, KLAUZULA_ODRZUCENIA_DOMYSLNA) –
+# niezależnie od języka. generuj_skrypt wykrywa go PRZED walidacją JSON
+# (odmowa zwraca sam tag, nie JSON — to legalny przypadek).
 
 # --- Post-processing ---
-# true → po otrzymaniu odpowiedzi uruchamiany jest silnik fonetyczny
-# (nakłada akcenty z Księgi Świata na kwestie dialogowe).
-stosuj_akcenty_fonetyczne: true
+# true → po zrenderowaniu JSON→[Mówca] treść uruchamiany jest silnik fonetyczny
+# (nakłada akcenty z Księgi Świata; audio-tagi v3 są pomijane przy detekcji
+# mówcy — patrz core_rezyser.AUDIO_TAGS).
+stosuj_akcenty_fonetyczne: false   # v16.1: OFF — tekst do v3 musi mieć czystą ortografię; akcenty przeniesione do post-produkcji „wersja dla czytników ekranu"

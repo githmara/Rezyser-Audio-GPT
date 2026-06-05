@@ -544,6 +544,245 @@ def generuj_burze(
 
 
 # =============================================================================
+# Tryb Skrypt (v16.1): strukturyzowane JSON wyjście (lista tur) + audio-tagi v3
+# =============================================================================
+# Do v16.0 Skrypt zwracał plain text `[Narrator: ton]` / `[Postać: emocja]` +
+# kwestia. Problem: most ElevenLabs i tak WYRZUCAŁ emocję z tagu (``_wytnij_mowce``
+# bierze nazwę do pierwszego ``:``), więc słownie wyrażone emocje NIGDY nie
+# docierały do TTS — a multilingual_v2 i tak ich nie czytał.
+#
+# v16.1: LLM zwraca STRUKTURYZOWANY JSON ``{"tury":[{"mowca","tekst"}]}``:
+#   - ``mowca``  — CZYSTA nazwa (bez nawiasów). Python owija ją w ``[...]``.
+#   - ``tekst``  — kwestia JUŻ sformatowana pod TTS: z audio-tagami ElevenLabs
+#                  v3 (``[whispers]``, ``[sighs]``, ``[excited]``…) wplecionymi
+#                  w treść. W przeciwieństwie do dawnej emocji-w-tagu, te tagi
+#                  trafiają do ``tts_node.text`` i realnie sterują renderem v3.
+# Nagłówków (Prolog/Akt/Scena/Epilog) LLM NIE generuje — wstawia je reżyser
+# z panelu struktury (``gui_rezyser._on_wstaw_*``). Stąd schema to płaska lista
+# tur, bez pola ``typ``. Wzorzec self-correction (retry+walidacja) jak w
+# ``generuj_burze`` / ``opowiesci_ai.generuj_ture``.
+# -----------------------------------------------------------------------------
+
+SCHEMA_SKRYPT: dict[str, Any] = {
+    "type": "object",
+    "required": ["tury"],
+    "additionalProperties": False,
+    "properties": {
+        "tury": {
+            "type": "array",
+            # Liberalnie ≥1 — pojedyncza tura (np. samo wejście narratora) jest
+            # legalna; GUI nie powinno blokować się na „za mało" tur.
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "required": ["mowca", "tekst"],
+                "additionalProperties": False,
+                "properties": {
+                    # Czysta nazwa mówcy / narratora — bez nawiasów, bez emocji.
+                    # Python owija w [...] przy renderowaniu (``renderuj_skrypt``).
+                    "mowca": {"type": "string", "minLength": 1, "maxLength": 100},
+                    # Kwestia sformatowana pod TTS (może zawierać audio-tagi v3).
+                    "tekst": {"type": "string", "minLength": 1},
+                },
+            },
+        },
+    },
+}
+
+
+@dataclass
+class TuraSkryptu:
+    """Pojedyncza tura skryptu: kto mówi + co (już sformatowane pod TTS).
+
+    Attributes:
+        mowca: Czysta nazwa mówcy / narratora (bez nawiasów). Renderer owija
+               ją w ``[...]``; most ElevenLabs mapuje na voice_id z obsady.
+        tekst: Treść kwestii, opcjonalnie z audio-tagami v3 (``[whispers]`` itd.)
+               wplecionymi przez LLM. Renderer normalizuje ją do JEDNEJ linii.
+    """
+    mowca: str
+    tekst: str
+
+
+@dataclass
+class WynikSkryptu:
+    """Wynik :func:`generuj_skrypt`.
+
+    Attributes:
+        tekst_odpowiedzi: Wyrenderowany skrypt w formacie pliku — linie
+                          ``[Mówca] treść`` (po nałożeniu akcentów fonetycznych,
+                          jeśli przepis tego wymaga). To jest to, co GUI dopisuje
+                          do ``skrypty/<nazwa>.txt`` i co czyta most ElevenLabs.
+        tury:             Surowa lista :class:`TuraSkryptu` (diagnostyka / testy).
+        odrzucone:        True, gdy LLM zwrócił sam tag ``[ODRZUCENIE_AI]``.
+        uzyty_sufiks:     Diagnostyczne — nazwa doklejonego sufiksu
+                          (``"startowy"`` / ``"kontynuacja"`` / ``None``).
+        surowy_json:      Sucha odpowiedź modelu (log / debug).
+        liczba_prob:      Ile wywołań LLM zużyto (1 = bez retry). Sygnał do
+                          diagnostyki „struktura sypie się przy N% kontekstu".
+    """
+    tekst_odpowiedzi: str = ""
+    tury:             list[TuraSkryptu] = field(default_factory=list)
+    odrzucone:        bool = False
+    uzyty_sufiks:     str | None = None
+    surowy_json:      str = ""
+    liczba_prob:      int = 0
+
+
+def renderuj_skrypt(tury: list[TuraSkryptu]) -> str:
+    """Renderuje listę tur do formatu pliku skryptu: ``[Mówca] treść`` / tura.
+
+    KAŻDA tura to dokładnie JEDNA linia. Treść jest normalizowana do jednej
+    linii (wewnętrzne ``\\n`` → spacja, scalone białe znaki), bo most
+    (``buduj_chapters`` / ``wykryj_postacie``) i silnik akcentów rozpoznają
+    nową turę po linii zaczynającej się od ``[``. Gdyby kwestia łamała się na
+    kolejne linie, a któraś zaczynała się od audio-tagu (np. ``[sighs] …``),
+    parser liniowy wziąłby ją za nowego mówcę „sighs". Trzymanie jednej linii
+    na turę usuwa to ryzyko po stronie mostu u źródła (audio-tag zostaje wtedy
+    w treści węzła TTS, nie jako tag mówcy).
+
+    Tury z pustym mówcą lub pustą treścią są pomijane (defensywnie — schema
+    i tak wymusza ``minLength: 1``, ale po ``strip()`` mogą zostać puste).
+    """
+    linie: list[str] = []
+    for tura in tury:
+        mowca = (tura.mowca or "").strip()
+        tekst = re.sub(r"\s+", " ", (tura.tekst or "").replace("\n", " ")).strip()
+        if not mowca or not tekst:
+            continue
+        linie.append(f"[{mowca}] {tekst}")
+    return "\n".join(linie)
+
+
+def generuj_skrypt(
+    klient:    Any,
+    przepis:   pr.PrzepisRezysera,
+    snapshot:  cr.SnapshotProjektu,
+    user_text: str,
+    on_postep: PostepCallback | None = None,
+    timeout:   float = 120.0,
+    max_retry: int = 2,
+) -> WynikSkryptu:
+    """Generuje turę trybu Skrypt jako JSON (lista tur) + waliduje + renderuje.
+
+    Wzorzec self-correction via error feedback — identyczny jak
+    :func:`generuj_burze`. Przy halucynacji struktury (brak klucza / zły typ)
+    dopinamy poprzedni błąd jako system message i wołamy ponownie; max
+    ``max_retry`` powtórzeń (default 2 → łącznie 3 wywołania).
+
+    WYMÓG: ``przepis.prompt_systemowy`` MUSI instruować model, by zwracał JSON
+    zgodny ze :data:`SCHEMA_SKRYPT`, i zawierać słowo „json" (warunek konieczny
+    ``response_format={"type": "json_object"}`` w OpenAI). To zadanie przepisu
+    YAML (Etap E3), nie tego modułu.
+
+    Args:
+        klient:    Klient OpenAI.
+        przepis:   ``PrzepisRezysera`` z ``id="skrypt"`` (``zapis_do_pliku=True``).
+        snapshot:  Niezmienny snapshot stanu projektu.
+        user_text: Instrukcja użytkownika.
+        on_postep: Callback postępu.
+        timeout:   Limit czasu pojedynczego wywołania (sekundy).
+        max_retry: Maks. liczba RETRY (default 2; łącznie max 3 wywołania).
+
+    Returns:
+        :class:`WynikSkryptu` z wyrenderowanym ``tekst_odpowiedzi`` (po akcentach,
+        gdy ``przepis.stosuj_akcenty_fonetyczne``) i surową listą ``tury``.
+
+    Raises:
+        RuntimeError: wyczerpane retry (halucynacja struktury) ALBO
+                      finish_reason="length" (ucięty JSON).
+        Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) — propagowane.
+    """
+    if on_postep:
+        on_postep("Budowanie payloadu Skryptu…", 10)
+
+    messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+
+    if on_postep:
+        on_postep(f"Wysyłanie do {przepis.model} (JSON mode)…", 30)
+
+    ostatni_blad: str | None = None
+    surowy_text: str = ""
+
+    for proba in range(max_retry + 1):
+        if ostatni_blad is not None:
+            messages.append({
+                "role": "system",
+                "content": (
+                    f"POPRZEDNIA PRÓBA NIE PRZESZŁA WALIDACJI. Błąd: {ostatni_blad}. "
+                    "Wygeneruj ponownie ZGODNIE ze schemą JSON podaną w prompt_systemowy. "
+                    "Wszystkie pola wymagane MUSZĄ być obecne i mieć właściwy typ."
+                ),
+            })
+
+        response = klient.chat.completions.create(
+            model=przepis.model,
+            messages=messages,
+            temperature=przepis.temperatura,
+            timeout=timeout,
+            response_format={"type": "json_object"},
+        )
+
+        finish = getattr(response.choices[0], "finish_reason", None)
+        if finish == "length":
+            raise RuntimeError(
+                "Model osiągnął limit max_tokens — odpowiedź Skryptu została ucięta "
+                "przed zamknięciem JSON. Skróć kontekst lub zwiększ max_tokens."
+            )
+
+        surowy_text = response.choices[0].message.content or ""
+
+        # Detekcja odrzucenia PRZED walidacją JSON — klauzula odrzucenia wymusza
+        # ZWROT samego tagu, NIE JSON-a (JSONDecodeError byłby tu legalnym
+        # skutkiem „LLM odmówił, zwrócił tag").
+        if pr.wykryto_odrzucenie(surowy_text):
+            if on_postep:
+                on_postep("AI odrzuciło prompt (tag wykryty).", 100)
+            return WynikSkryptu(
+                odrzucone=True,
+                uzyty_sufiks=sufiks_nazwa,
+                surowy_json=surowy_text,
+                liczba_prob=proba + 1,
+            )
+
+        try:
+            dane = json.loads(surowy_text)
+            jsonschema.validate(instance=dane, schema=SCHEMA_SKRYPT)
+        except json.JSONDecodeError as exc:
+            ostatni_blad = f"JSONDecodeError: {exc.msg}"
+            continue
+        except jsonschema.ValidationError as exc:
+            ostatni_blad = (
+                f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+            )
+            continue
+
+        # Sukces — mapujemy do dataclass, renderujemy, nakładamy akcenty.
+        tury = [TuraSkryptu(mowca=o["mowca"], tekst=o["tekst"]) for o in dane["tury"]]
+        tekst = renderuj_skrypt(tury)
+
+        if przepis.stosuj_akcenty_fonetyczne:
+            tekst = cr.zastosuj_akcenty_uniwersalne(tekst, snapshot.world_lore)
+
+        if on_postep:
+            on_postep("Gotowe.", 100)
+
+        return WynikSkryptu(
+            tekst_odpowiedzi=tekst,
+            tury=tury,
+            odrzucone=False,
+            uzyty_sufiks=sufiks_nazwa,
+            surowy_json=surowy_text,
+            liczba_prob=proba + 1,
+        )
+
+    raise RuntimeError(
+        f"LLM wygenerował niewłaściwą strukturę JSON {max_retry + 1} razy z rzędu "
+        f"dla Skryptu. Ostatni błąd: {ostatni_blad}"
+    )
+
+
+# =============================================================================
 # Główna funkcja: generowanie fragmentu historii
 # =============================================================================
 

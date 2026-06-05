@@ -171,7 +171,7 @@ home:
   blad_otwarcia_pliku_tytul: "Information"
   blad_otwarcia_pliku_tresc: "Failed to open the file automatically.\nOpen it manually:\n{sciezka_pliku}"
   # Audio post-production (ElevenLabs) — optional (v16.0)
-  heading_elevenlabs:    "Audio post-production (ElevenLabs) — optional"
+  heading_elevenlabs: "Audio post-production (ElevenLabs) — optional"
   el_brak: |-
     ℹ️ The ElevenLabs key is not configured (optional).
     The bridge to ElevenLabs Studio is inactive — the rest of the program works normally.
@@ -629,6 +629,15 @@ rezyser:
   odswiez_calosc_skasowano_tresc: "The full narration was loaded from disk ({liczba_znakow} characters) — the entire text fit within the context window, so the redundant summary was removed (the engine now works on the full story).\n\nThe World Book and structure counters are unchanged."
   odswiez_snap_tresc: "Restored the narration tail from the \"{naglowek}\" header ({liczba_znakow} characters). The earlier part of the story is represented by the existing summary, which was left untouched.\n\nThe World Book and structure counters are unchanged."
   odswiez_koncowka_tresc: "The text is long and contains no structure headers — the last fragment of the narration was restored ({liczba_znakow} characters), and the summary was left untouched. RECOMMENDATION: insert Chapter/Act/Scene headers so that the refresh can land precisely on a scene boundary.\n\nThe World Book and structure counters are unchanged."
+  sr_heading: 📖 Screen Reader Version (NVDA)
+  sr_info: 'Build a separate HTML file from the ready script for screen readers: character lines with an accent receive a phonetic transcription and a language tag (lang), so the screen reader reads them with the correct accent. The ElevenLabs bridge uses plain text and an accented voice for this — these are two independent outputs of the same script.'
+  btn_sr_label: 📖 Generate Screen Reader Version
+  btn_sr_name: Generate Screen Reader Version
+  btn_sr_tooltip: "Creates file skrypty/<name>_screen_reader.html: accents by misspelling + language tag, audio tags removed.\nRequires a saved project file; the World Book determines which character has which accent."
+  sr_sukces_tytul: Screen Reader Version Ready
+  sr_sukces_tresc: 'Screen reader file saved: skrypty/{nazwa_pliku}_screen_reader.html'
+  sr_blad_tytul: Error Generating Screen Reader Version
+  sr_blad_tresc: "Failed to generate screen reader version:\n{tresc_bledu}"
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"

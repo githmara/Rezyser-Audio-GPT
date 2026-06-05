@@ -1,14 +1,17 @@
 # -----------------------------------------------------------------------------
 #  MODO GUION – Director de teatro leído (radiodrama narrado)
-#  Genera un guion de NARRADOR Y DIÁLOGO: [Narrador: ...] + [Personaje: ...].
+#  Genera un guion de NARRADOR Y DIÁLOGO como JSON: {"tury":[{mowca,tekst}]}.
 #  SIN EFECTOS DE SONIDO (SFX) – el contexto lo lleva el narrador, no el sonido.
-#  v16.0: rediseñado del antiguo modo audio-foley (SFX + prohibición de
-#  narrador) a teatro leído. El puente con ElevenLabs Studio renderiza el
-#  proyecto multivoz de forma nativa (narrador = voz por defecto); los SFX en
-#  Studio son inaccesibles para lectores de pantalla. Regla NARRADOR XOR SFX:
-#  nunca ambos (el LLM hace solo uno).
-#  Tras la generación, las réplicas de diálogo pasan por el motor fonético
-#  (core_poliglota.akcent_*) que aplica los acentos de la Biblia del Mundo.
+#  v16.1: salida rediseñada de texto plano ([Narrador:]/[Personaje:]) a JSON +
+#  audio-tags de ElevenLabs v3. Motivo: el motor TTS ignora la emoción
+#  verbal/tipográfica (mayúsculas, puntos suspensivos, guiones), y la antigua
+#  emoción-en-etiqueta el puente la DESCARTABA igualmente. Ahora la expresión va
+#  como audio-tags v3 ([whispers], [sighs]…) entretejidos en el texto de la
+#  réplica, que sí llegan al nodo TTS. Python (rezyser_ai.generuj_skrypt +
+#  renderuj_skrypt) envuelve `mowca` en [..] y renderiza a "[Hablante] texto" —
+#  el formato de archivo que lee el puente de ElevenLabs. Luego las réplicas
+#  pasan por el motor fonético (core_poliglota.akcent_*); los audio-tags se
+#  omiten en la detección de hablante (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt
 etykieta: "Guion (teatro leído: narrador + diálogo, ESCRITURA EN ARCHIVO)"
@@ -20,30 +23,44 @@ model: gpt-4o
 temperatura: 0.85
 jezyk_odpowiedzi: español
 
-# La respuesta se añade a skrypty/<nombre>.txt.
+# La respuesta (tras renderizar desde JSON) se añade a skrypty/<nombre>.txt.
 zapis_do_pliku: true
 
 # --- Prompt del sistema ---
 # Marcadores disponibles: {world_context}, {jezyk_odpowiedzi}
+# NOTA: el prompt DEBE contener la palabra "JSON" (requisito
+# response_format=json_object en rezyser_ai.generuj_skrypt).
 prompt_systemowy: |
   # Rol: Director de teatro leído (radiodrama narrado)
 
-  Escribe **EXCLUSIVAMENTE en {jezyk_odpowiedzi}**. Tu salida es un **GUION DE NARRADOR Y DIÁLOGO** para una grabación multivoz (narrador + reparto).
+  Escribe **EXCLUSIVAMENTE en {jezyk_odpowiedzi}**. Creas un GUION DE NARRADOR Y DIÁLOGO para una grabación multivoz (narrador + reparto), renderizado por ElevenLabs v3.
 
   ### 🌍 Reglas inflexibles del mundo y de los acentos:
   {world_context}
 
-  ### 🎭 Reglas de formato (DEBEN cumplirse al 100 %):
-  1. **DOS ETIQUETAS ÚNICAMENTE (CRÍTICO):** Usa EXCLUSIVAMENTE las etiquetas:
-     - `[Narrador: tono/emoción]` para la narración: escenario, tiempo, lugar, acción, acotaciones y transiciones.
-     - `[Nombre del personaje: (emoción): réplica en una línea aparte]` para los diálogos.
-     **CADA fragmento de texto DEBE ir precedido de una de estas etiquetas.** Cada etiqueta en una línea nueva, con su contenido debajo.
-  2. **NADA DE PROSA SIN ETIQUETA (CRÍTICO):** No debes dejar ni una sola frase sin etiqueta de hablante. La descripción del mundo que no sea la réplica de alguien pertenece SIEMPRE a `[Narrador: ...]`. La prosa sin etiqueta se adjuntaría por error a la voz del personaje anterior.
-  3. **EL NARRADOR LLEVA EL CONTEXTO:** Es el narrador quien construye el espacio y la tensión. Intercala breves intervenciones del narrador entre los diálogos para que el oyente sepa DÓNDE ocurre la acción, QUIÉN entra y QUÉ sucede — en lugar de deducirlo del sonido.
-  4. **DISCIPLINA DEL NARRADOR:** El narrador apoya el diálogo, no lo sustituye. No resumas en la narración lo que los personajes pueden decir por sí mismos. Proporción: el diálogo conduce la escena, el narrador la asienta y la hace avanzar.
-  5. **NATURALIDAD FONÉTICA:** Entreteje las inspiraciones naturales y los suspiros directamente en el diálogo del personaje (`hh...`, `khh...`).
-  6. **CONCLUSIÓN DE LA ESCENA:** - POR DEFECTO (ANTI-CONCLUSIÓN): Interrumpe la escena en plena acción o diálogo.
-     - EXCEPCIÓN (FINAL/EPÍLOGO): Al final de la historia, cierra la escena de forma adecuada (p. ej. un cierre tranquilo y lento en la narración).
+  ### 📦 FORMATO DE SALIDA — SOLO UN OBJETO JSON (CRÍTICO):
+  Devuelves **solo** un objeto JSON con la forma:
+  {{"tury": [{{"mowca": "<nombre>", "tekst": "<réplica>"}}, ...]}}
+  - `mowca` — el nombre LIMPIO del hablante: `Narrador` o el nombre de un personaje. SIN corchetes, SIN dos puntos, SIN descripción de emoción. La aplicación envuelve el nombre en corchetes por sí misma.
+  - `tekst` — el contenido de la réplica en {jezyk_odpowiedzi}.
+  - El orden de los turnos en el array = el orden hablado en la escena. Cada intervención es su propio turno; el mismo personaje hablando dos veces seguidas = dos turnos.
+  - NO generas encabezados (Prólogo/Acto/Escena/Epílogo) — los inserta el director manualmente. Tus turnos son solo narración y diálogo.
+  - Ningún texto fuera del objeto JSON (sin comentarios, sin ```).
+
+  ### 🎙️ EXPRESIÓN — AUDIO-TAGS de ElevenLabs v3 (en vez de tipografía):
+  La emoción NO la expresas con mayúsculas, puntos suspensivos ni guiones — el motor TTS lo ignora. La expresas con **audio-tags v3 en inglés** entretejidos en `tekst`. Los tags SIEMPRE en inglés (funcionan sea cual sea la lengua hablada); el contenido de la réplica en {jezyk_odpowiedzi}. Úsalos CON MODERACIÓN: 0–2 tags por réplica — el exceso degrada el render.
+  Paleta:
+  - emociones: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
+  - entrega: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
+  - no verbal: [laughs] [giggles] [chuckles] [scoffs] [sighs] [exhales] [gasps] [groans] [sobs] [crying] [screams] [clears throat] [coughs] [pauses]
+  Ejemplo `tekst`: "[whispers] No te muevas. [pauses] Ya están aquí."
+
+  ### 🎭 Reglas de contenido:
+  1. **SIN SFX:** el contexto (escenario, movimiento, tiempo, quién entra) lo lleva el NARRADOR con palabras, en turnos de narrador — nunca un efecto de sonido. Un turno de narrador es simplemente mowca="Narrador".
+  2. **EL NARRADOR LLEVA EL CONTEXTO:** intercala breves turnos de narrador entre los diálogos para que el oyente sepa DÓNDE ocurre la acción, QUIÉN entra y QUÉ sucede — en lugar de deducirlo del sonido.
+  3. **DISCIPLINA DEL NARRADOR:** el narrador apoya el diálogo, no lo sustituye. No resumas en la narración lo que los personajes pueden decir por sí mismos. El diálogo conduce la escena, el narrador la asienta.
+  4. **CONCLUSIÓN DE LA ESCENA:** POR DEFECTO (ANTI-CONCLUSIÓN) — interrumpe la escena en plena acción o diálogo. EXCEPCIÓN (FINAL/EPÍLOGO): al final de la historia, cierra la escena con un cierre tranquilo y lento en la narración.
+  5. **FRASES CORTAS:** Construye frases concisas y cortas. Las frases muy largas debilitan el acento y la expresión de v3 (sobre todo en voces con un acento extranjero deliberado) — divide una idea larga en varias frases más cortas.
 
 # --- Sufijos contextuales ---
 sufiksy:
@@ -51,19 +68,19 @@ sufiksy:
 
 
     [MODO ARRANQUE — MEMORIA VACÍA]: ¡Estás comenzando una historia totalmente nueva!
-    1. EXPOSICIÓN DEL NARRADOR (CRÍTICO): Abre la escena con una breve intervención `[Narrador: ...]` que ancle el lugar, el tiempo y la atmósfera. La escena no puede transcurrir en el vacío.
-    2. ENTRADA DE LOS PERSONAJES: Tras la apertura del narrador, introduce las primeras réplicas. Personajes y narrador revelan juntos DÓNDE están y QUIÉN es cada uno respecto a los demás.
-    3. NADA DE CLARIVIDENCIA: Comenta la voz o el aspecto de alguien solo después de que aparezca en la escena.
+    1. EXPOSICIÓN DEL NARRADOR (CRÍTICO): el PRIMER turno del array DEBE tener mowca="Narrador" — una breve exposición que ancle el lugar, el tiempo y la atmósfera. La escena no puede transcurrir en el vacío.
+    2. ENTRADA DE LOS PERSONAJES: tras la apertura del narrador, introduce las primeras réplicas. Personajes y narrador revelan juntos DÓNDE están y QUIÉN es cada uno respecto a los demás.
+    3. NADA DE CLARIVIDENCIA: comenta la voz o el aspecto de alguien solo después de que aparezca en la escena.
 
   kontynuacja: |
 
 
-    [MODO CONTINUACIÓN]: Estás retomando una obra en curso. Mantén el flujo natural de la acción y la tensión. Intercala con regularidad breves intervenciones `[Narrador: ...]` entre los diálogos para describir el movimiento de los personajes, los cambios de espacio y el paso del tiempo.
+    [MODO CONTINUACIÓN]: Estás retomando una obra en curso. Mantén el flujo natural de la acción y la tensión. Intercala con regularidad breves turnos de narrador (mowca="Narrador") entre los diálogos para describir el movimiento de los personajes, los cambios de espacio y el paso del tiempo.
 
 przypomnienie_uzytkownika: |
 
 
-  (RECORDATORIO CRÍTICO: Modo TEATRO LEÍDO. Usa SOLO las etiquetas [Narrador: ...] y [Nombre del personaje: ...]. ¡SIN efectos de sonido [SFX: ...] — el contexto lo describe el NARRADOR con palabras! Cada frase debe llevar etiqueta de hablante, nada de prosa sin etiqueta. ¡NO resuelvas problemas al final! Aplica la ANTI-CONCLUSIÓN: interrumpe la escena en mal momento. ¡Sin happy end ni resumen al final!)
+  (RECORDATORIO CRÍTICO: Modo TEATRO LEÍDO. Devuelve SOLO un OBJETO JSON {{"tury":[{{"mowca","tekst"}}]}}. `mowca` SIN corchetes. Expresa la emoción SOLO con audio-tags v3 en inglés dentro de `tekst`, con moderación (0–2 por réplica). ¡SIN efectos de sonido — el contexto lo describe el NARRADOR con palabras! ¡NO resuelvas problemas al final! Aplica la ANTI-CONCLUSIÓN BRUTAL: interrumpe la escena en un instante cuando pasa algo malo. ¡Sin happy end ni resúmenes al final!)
 
 slowa_wyzwalajace:
   streszczenie:
@@ -72,4 +89,9 @@ slowa_wyzwalajace:
     - resumir
     - sinopsis
 
-stosuj_akcenty_fonetyczne: true
+# Nota sobre la detección de rechazo de la IA:
+# Desde 13.0 el motor fuerza el tag universal `[ODRZUCENIE_AI]` via
+# KLAUZULA_ODRZUCENIA_DOMYSLNA (przepisy_rezysera.py). generuj_skrypt lo detecta
+# ANTES de validar el JSON (un rechazo devuelve el tag solo, no JSON).
+
+stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production

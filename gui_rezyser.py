@@ -48,6 +48,7 @@ import wx
 # z tego pliku. Panel zostaje cienką warstwą widoku wxPython.
 import core_elevenlabs as ce
 import core_rezyser as cr
+import core_screen_reader as csr
 import przepisy_rezysera as pr
 import rezyser_ai as rai
 from i18n import aktualny_jezyk, t
@@ -485,6 +486,7 @@ class RezyserPanel(wx.Panel):
         pole_instrukcji     = self._zbuduj_pole_instrukcji(BORDER)
         panel_postprodukcji = self._zbuduj_panel_postprodukcji(BORDER)
         panel_elevenlabs    = self._zbuduj_panel_elevenlabs(BORDER)
+        panel_screen_reader = self._zbuduj_panel_screen_reader(BORDER)
         wskaznik_sizer      = self._zbuduj_wskaznik_pamieci_modelu(BORDER)
 
 
@@ -513,6 +515,9 @@ class RezyserPanel(wx.Panel):
         # Most ElevenLabs (v16.0) — należy do trybu Skrypt (teatr czytany),
         # nie do postprodukcji Audiobooka. Widoczność w `_refresh_ui_state`.
         sizer.Add(panel_elevenlabs, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
+        # Wersja dla czytników ekranu (v16.1) — też tryb Skrypt, ale NIEZALEŻNIE
+        # od klucza ElevenLabs (akcent przez ortografię + lang, nie przez API).
+        sizer.Add(panel_screen_reader, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
         return sizer
 
     # ------------------------------------------------------------------
@@ -882,6 +887,41 @@ class RezyserPanel(wx.Panel):
         return self._pnl_el
 
     # ------------------------------------------------------------------
+    # BLOK F2 – Wersja dla czytników ekranu (v16.1) — tryb SKRYPT
+    # ------------------------------------------------------------------
+    def _zbuduj_panel_screen_reader(self, BORDER: int) -> wx.Panel:
+        """Panel generatora HTML dla czytników ekranu — tryb SKRYPT.
+
+        Niezależny od mostu ElevenLabs: akcent realizowany przez psucie
+        ortografii + ``<span lang>``, nie przez API. Widoczny zawsze w trybie
+        Skrypt (bez wymogu klucza EL) — patrz ``_refresh_ui_state``. Generacja
+        jest synchroniczna (czysty tekst, bez sieci), więc bez wątku tła.
+        """
+        self._pnl_sr = wx.Panel(self)
+
+        lbl_sr = wx.StaticText(self._pnl_sr, label=t("rezyser.sr_heading"))
+        sf = lbl_sr.GetFont()
+        sf.SetPointSize(10)
+        sf.MakeBold()
+        lbl_sr.SetFont(sf)
+
+        lbl_sr_info = wx.StaticText(self._pnl_sr, label=t("rezyser.sr_info"))
+
+        self._btn_sr = wx.Button(
+            self._pnl_sr,
+            label=t("rezyser.btn_sr_label"),
+            name=t("rezyser.btn_sr_name"),
+        )
+        self._btn_sr.SetToolTip(t("rezyser.btn_sr_tooltip"))
+
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(lbl_sr,      flag=wx.ALL,                         border=BORDER)
+        sizer.Add(lbl_sr_info, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=BORDER)
+        sizer.Add(self._btn_sr, flag=wx.LEFT | wx.BOTTOM,           border=BORDER)
+        self._pnl_sr.SetSizer(sizer)
+        return self._pnl_sr
+
+    # ------------------------------------------------------------------
     # BLOK G – Wskaźnik okna kontekstowego AI
     # ------------------------------------------------------------------
     def _zbuduj_wskaznik_pamieci_modelu(self, BORDER: int) -> wx.BoxSizer:
@@ -947,6 +987,7 @@ class RezyserPanel(wx.Panel):
         self._btn_scena.Bind(wx.EVT_BUTTON,    self._on_wstaw_scena)
 
         self._btn_tytuly_ai.Bind(wx.EVT_BUTTON, self._on_tytuly_ai)
+        self._btn_sr.Bind(wx.EVT_BUTTON, self._on_sr_generate)
 
     # ------------------------------------------------------------------
     # Odświeżanie stanu przycisków (Enable/Disable)
@@ -1086,6 +1127,14 @@ class RezyserPanel(wx.Panel):
             self._btn_el_build.Enable(nazwa_podana)
         else:
             self._pnl_el.Hide()
+
+        # Wersja dla czytników ekranu (v16.1) — tryb Skrypt, NIEZALEŻNIE od
+        # klucza EL (akcent przez ortografię + lang, nie przez API).
+        if tryb_idx == 1:
+            self._pnl_sr.Show()
+            self._btn_sr.Enable(nazwa_podana)
+        else:
+            self._pnl_sr.Hide()
 
         self._aktualizuj_pamiec_modelu()
 
@@ -1678,7 +1727,34 @@ class RezyserPanel(wx.Panel):
             wx.CallAfter(self._on_wyslij_done_burza_json, wynik_b)
             return
 
-        # --- Tryby produkcyjne (Skrypt / Audiobook / postprodukcja) ---
+        # v16.1: Skrypt idzie ścieżką JSON-mode (`generuj_skrypt` → WynikSkryptu):
+        # LLM zwraca {"tury":[{mowca,tekst}]}, Python renderuje do [Mówca] treść
+        # (+ akcenty) i dopisuje do pliku jak każdy tryb zapisu. Audiobook /
+        # postprodukcja zostają na starej ścieżce tekstowej (`generuj_fragment`).
+        if przepis.id == "skrypt":
+            try:
+                wynik_s = rai.generuj_skrypt(
+                    klient=self._client,
+                    przepis=przepis,
+                    snapshot=snapshot,
+                    user_text=user_text,
+                    on_postep=None,
+                )
+            except openai.RateLimitError:
+                wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
+                return
+            except Exception as exc:  # noqa: BLE001
+                wx.CallAfter(self._on_wyslij_error, str(exc))
+                return
+
+            if wynik_s.odrzucone:
+                wx.CallAfter(self._on_wyslij_error, t("rezyser.err_odrzucenie"))
+                return
+
+            wx.CallAfter(self._on_wyslij_done_zapis, wynik_s.tekst_odpowiedzi, nazwa)
+            return
+
+        # --- Tryby produkcyjne (Audiobook / postprodukcja) ---
         try:
             wynik = rai.generuj_fragment(
                 klient=self._client,
@@ -2143,8 +2219,12 @@ class RezyserPanel(wx.Panel):
         """Wątek tła: buduje from_content_json i tworzy projekt Studio."""
         try:
             chapters = ce.buduj_chapters(tekst, obsada)
+            # v16.1: język projektu = aktualny kod paczki (pl/en/de/…), który jest
+            # zarazem kodem ISO 639-1 dla Studio. Naprawia nagłówki (v3 bez języka
+            # bywa na nich niespójny). Kod paczek == ISO 639-1 dla wszystkich 9.
             project_id = ce.create_project(
-                self._el_klucz, nazwa, obsada[ce.NARRATOR_KEY], chapters
+                self._el_klucz, nazwa, obsada[ce.NARRATOR_KEY], chapters,
+                language=aktualny_jezyk(),
             )
         except ce.BrakUprawnien as exc:
             wx.CallAfter(self._on_el_build_error, "uprawnienia", str(exc))
@@ -2156,6 +2236,70 @@ class RezyserPanel(wx.Panel):
             wx.CallAfter(self._on_el_build_error, "ogolny", str(exc))
             return
         wx.CallAfter(self._on_el_build_done, project_id, nazwa)
+
+    def _on_sr_generate(self, _event: wx.Event) -> None:
+        """Generuje ``skrypty/<nazwa>_screen_reader.html`` z bieżącego skryptu.
+
+        Tryb Skrypt, niezależny od ElevenLabs. Akcenty z Księgi Świata przez
+        psucie ortografii + ``<span lang>``; audio-tagi v3 usuwane. Czysty tekst
+        → generacja synchroniczna (bez wątku tła).
+        """
+        nazwa = self._txt_file_name.GetValue().strip()
+        if not nazwa:
+            wx.MessageBox(
+                t("rezyser.el_brak_nazwy_tresc"), t("rezyser.el_brak_nazwy_tytul"),
+                wx.OK | wx.ICON_WARNING, self,
+            )
+            return
+
+        app_dir = os.path.dirname(os.path.abspath(__file__))
+        sciezka_txt = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
+        if not os.path.exists(sciezka_txt):
+            wx.MessageBox(
+                t("rezyser.plik_narracji_brak_tresc", nazwa_projektu=nazwa),
+                t("rezyser.plik_narracji_brak_tytul"), wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+        try:
+            with open(sciezka_txt, "r", encoding="utf-8") as fh:
+                tekst = fh.read()
+        except Exception as exc:  # noqa: BLE001
+            wx.MessageBox(
+                t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
+                t("common.blad_odczytu_tytul"), wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+
+        # Księga Świata (.md) — opcjonalna; bez niej HTML powstaje bez akcentów.
+        lore = ""
+        sciezka_md = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.md")
+        if os.path.exists(sciezka_md):
+            try:
+                with open(sciezka_md, "r", encoding="utf-8") as fh:
+                    lore = fh.read()
+            except Exception:  # noqa: BLE001 — Księga opcjonalna, błąd nie blokuje
+                lore = ""
+
+        try:
+            html = csr.generuj_html(
+                tekst, lore, jezyk_projektu=aktualny_jezyk(), tytul=nazwa,
+            )
+            sciezka_out = os.path.join(
+                app_dir, self.SKRYPTY_DIR, f"{nazwa}_screen_reader.html"
+            )
+            with open(sciezka_out, "w", encoding="utf-8") as fh:
+                fh.write(html)
+        except Exception as exc:  # noqa: BLE001
+            wx.MessageBox(
+                t("rezyser.sr_blad_tresc", tresc_bledu=str(exc)),
+                t("rezyser.sr_blad_tytul"), wx.OK | wx.ICON_ERROR, self,
+            )
+            return
+
+        wx.MessageBox(
+            t("rezyser.sr_sukces_tresc", nazwa_pliku=nazwa),
+            t("rezyser.sr_sukces_tytul"), wx.OK | wx.ICON_INFORMATION, self,
+        )
 
     def _reset_el_busy(self) -> None:
         self._btn_el_build.Enable()

@@ -103,7 +103,7 @@ tresc:
 
     Kaikki luomasi käsikirjoitukset ja kirjat tallentuvat tavallisina tekstitiedostoina (.txt), jotka voit helposti avata Muistiossa.
 
-    Ohjaajana sinulla on TÄYSI OIKEUS (ja jopa velvollisuus) muokata tätä tiedostoa! Jos tekoäly innostuu liikaa ja esimerkiksi ratkaisee hahmojen ongelman lopussa luodussa katkelmassa, avaa tiedosto, poista viimeiset rivit ja jätä teksti katkeamaan jännittävään kohtaan ennen kuin tyhjennät muistin, lataat tiedoston uudelleen kontekstin lataamiseksi ja napsautat "{rezyser.btn_wyslij_label}" jatkaaksesi.
+    Ohjaajana sinulla on TÄYSI OIKEUS (ja jopa velvollisuus) muokata tätä tiedostoa! Jos tekoäly innostuu liikaa ja esimerkiksi ratkaisee hahmojen ongelman lopussa luodussa katkelmassa, avaa tiedosto, poista viimeiset rivit ja jätä teksti katkeamaan jännittävään kohtaan ja napsauta sitten "{rezyser.btn_odswiez_z_dysku_label}" synkronoidaksesi mallin muistin korjatun tiedoston kanssa, ja "{rezyser.btn_wyslij_label}" jatkaaksesi.
 
     🔴 KUITENKIN - MITÄ ET SAA KOSKEA:
 
@@ -126,8 +126,8 @@ tresc:
 
     Projektinhallinta — kolme toimintopainiketta:
     - {rezyser.btn_wczytaj_label}: Lataa olemassa olevan projektin muistiin. Saatavilla kun nykyinen muisti on tyhjä. Versiosta 15.2.3 alkaen tukee kahta polkua: jos projektinimi-kenttä on tyhjä, avautuu valintaikkuna, jossa on lista kaikista projekteista, jotka löytyvät skrypty/-kansiosta (yhteenvetotiedostot suodatetaan pois) — NVDA lukee listan luonnollisesti, pelaajan ei tarvitse muistaa ja kirjoittaa nimeä uudelleen näppäimistöltä. Jos nimi-kenttä on täytetty, sovellus yrittää suoraan ladata projektin sillä nimellä (asiantuntijapolku: Enter nimi-kentässä tai napsautus muistista kirjoittamisen jälkeen).
-    - Tyhjennä nykyinen (jätä Tiivistelmä): Tyhjentää vain nykyisen tarinan. Pitkäaikaisen Muistin tiivistelmä ja Maailman Kirja säilyvät — ihanteellinen pitkän kirjan jatkamiseen tiivistelmän luomisen jälkeen.
-    - Sulje Projekti (Kova Nollaus): Tyhjentää projektin kokonaan. Poistaa tarinan, tiivistelmän, Maailman Kirjan ja nollaa kaikki laskurit. Käytä projektin vaihtamiseen tai uuteen tarinaan.
+    - {rezyser.btn_wyczysc_biezaca_label}: Tyhjentää vain nykyisen tarinan. Pitkäaikaisen Muistin tiivistelmä ja Maailman Kirja säilyvät — ihanteellinen pitkän kirjan jatkamiseen tiivistelmän luomisen jälkeen.
+    - {rezyser.btn_hard_reset_label}: Tyhjentää projektin kokonaan. Poistaa tarinan, tiivistelmän, Maailman Kirjan ja nollaa kaikki laskurit. Käytä projektin vaihtamiseen tai uuteen tarinaan.
     - {rezyser.btn_otworz_narracje_label} (versiosta 15.2.3 alkaen): Hätätila kertomustiedoston muokkaukseen järjestelmän tekstieditorissa. Edellyttää projektinimen kentässä. Sovellus avaa skrypty/<nimi>.txt-tiedoston Muistio-ohjelmassa (Windows), TextEditissä (macOS) tai oletus-GUI-editorissa (Linux). Tyypilliset skenaariot: (a) AI ei sulje kohtausta ja haluat kirjoittaa lopun käsin; (b) latasit projektin tiivistelmällä ja haluat kopioida viimeiset kohtaukset Pitkäaikaiseen Muistiin, jotta mallilla on täydellinen sävyn konteksti (yllä kuvattu arkkitehtoninen aukko); (c) haluat tehdä tekstileikkauksen luvun keskelle, jota sovellusmoottori ei tue natiivisti.
     - {rezyser.btn_odswiez_z_dysku_label} (versiosta 15.5 alkaen): Synkronoi sovelluksen sisäisen muistin kerrontatiedoston kanssa sen jälkeen, kun olet muokannut sitä käsin — ilman kovaa nollausta ja projektin uudelleenlatausta. Päättää itse: jos koko historia mahtuu kontekstiruutuun, se lataa sen kokonaisuudessaan (ja poistaa tarpeettoman vanhan tiivistelmän, jotta moottori työskentelee koko tekstillä); jos historia on pitkä ja sillä on tallennettu tiivistelmä, se säilyttää tiivistelmän koskemattomana ja palauttaa vain tuoreen lopun, joka lasketaan viimeisestä rakenneotsikosta (Luku/Näytös/Kohtaus) — siksi kannattaa pitää rakenne kunnossa. Se ei muuta Maailman Kirjaa eikä laskureita. Tyypillinen skenaario: AI sulki kohtauksen virheellisesti (rikkoi anti-closure-säännön), sinä leikkaat huonon lopun editorissa ja napsautat Päivitä — eikä tarvitse enää korjata kahdessa paikassa.
 
@@ -145,7 +145,7 @@ tresc:
 
     Erilaisten lähestymistapojen testaamisesta huolimatta Anti-Closure-kieltoa rikotaan usein mallin toimesta, erityisesti Perinteisessä Äänikirjatilassa. AI:lla on vahva taipumus "sulkea" tarina aina tilaisuuden tullen — se lisää juonta yhteen vetäviä lauseita, luo vääriä onnellisia loppuja tai sulkee juonen keskellä lukua, ikään kuin jokainen katkelma olisi viimeinen. Tulos on se, että seuraava katkelma alkaa tyhjästä, ilman luonnollista jatkuvuutta.
 
-    Juuri siksi leikkaajan sääntö, joka on kuvattu yllä, on niin tärkeä: jos AI rikkoo kieltoa ja sulkee kohtauksen itse, sinun tehtäväsi ohjaajana on avata .txt-tiedosto, poistaa nämä viimeiset lauseet ja jättää teksti katkeamaan jännittävään kohtaan ennen kuin lataat sen takaisin sovellukseen.
+    Juuri siksi leikkaajan sääntö, joka on kuvattu yllä, on niin tärkeä: jos AI rikkoo kieltoa ja sulkee kohtauksen itse, sinun tehtäväsi ohjaajana on avata .txt-tiedosto, poistaa nämä viimeiset lauseet, jättää teksti katkeamaan jännittävään kohtaan ja napsauttaa sitten "{rezyser.btn_odswiez_z_dysku_label}" synkronoidaksesi muistin korjatun tiedoston kanssa.
 
     Jokaisessa tilassa on sisäänrakennettu Anti-Closure-direktiivi:
 
@@ -187,10 +187,12 @@ tresc:
 
     Mallin muistiin tallentuu vain puhdas tarinateksti — se, mitä AI on todella kirjoittanut. Ohjeet, vaihtoehdot ja suunnitelmat katoavat käytön jälkeen eivätkä täytä kontekstia. Tulos? Malli säilyttää keskittymisensä pidempään, muistaa paremmin hahmojen aksentit ja harvemmin "karkaa" Maailman Kirjan säännöistä.
 
-    Näytön "Mallin Muisti" -indikaattori näyttää, kuinka paljon tilaa tarinasi jo vie:
-    - Vihreä (jopa 150 000 merkkiä): Malli on täysin keskittynyt, sinulla on turvallinen puskuri.
-    - Keltainen (150 000 – 175 000 merkkiä): Lähestyt rajaa. AI saattaa alkaa lyhentää puheenvuoroja ja jättää huomiotta sääntöjä. Ala hitaasti sulkea juonta.
-    - Punainen (yli 175 000 merkkiä): Kriittinen ylikuormitus!
+    "Mallin Muisti" -indikaattori näyttää, kuinka täynnä mallin kontekstiruutu on. Versiosta 15.1 alkaen tämä EI ole enää tarinan merkkien laskenta — sovellus laskee todelliset TOKENIT (samalla tavalla kuin malli) ja summaa KOKO AI:lle lähetettävän kuorman: nykyisen tarinan, Pitkäaikaisen Muistin (tiivistelmän) JA Maailman Kirjan. Siksi indikaattori nousee myös, kun laajennat Maailman Kirjaa tai sinulla on pitkä tiivistelmä — ei vain itse kerronnasta. Arvo näytetään prosentteina ruudusta:
+    - Vihreä (n. 70 % asti): Malli on täysin keskittynyt, sinulla on turvallinen puskuri.
+    - Keltainen (n. 70–90 %): Lähestyt rajaa. AI saattaa alkaa lyhentää puheenvuoroja ja jättää huomiotta sääntöjä; suunnittelutilassa (Aivoriihi) moottori alkaa pakottaa tiivistelmää. Ala hitaasti sulkea juonta.
+    - Punainen (yli n. 90 %): Kriittinen ylikuormitus!
+
+    Tiivistelmäkynnyksen diagnostiikka (kun AI hallusinoi aikaisemmin kuin kynnys olettaa): kynnykset (varoitus ~70 %, hälytys ~90 %) on arvioitu empiirisesti. Jos huomaat toistuvan taipumuksen, että malli "ajautuu" pois säännöistä tai alkaa hallusinoida ENNEN kuin indikaattori muuttuu keltaiseksi/punaiseksi — eli aikaisemmin kuin kynnys olettaa — avaa issue sovelluksen repositoryyn ja kuvaa, millä suunnilleen täyttöasteella (prosentilla) se todella alkaa hajota, mieluiten esimerkin kanssa. Jos tämä taipumus vahvistuu laajemmin (useilla käyttäjillä, eri projekteissa), automaattisen tiivistelmän kynnystä lasketaan tulevassa korjauspäivityksessä. Tämä on tietoisesti iteratiivinen mekanismi — parempi virittää todellisella datalla kuin arvata etukäteen.
 
     Loputon Muisti (versiosta 6, säilytetty)
 
@@ -202,29 +204,47 @@ tresc:
 
     Älykäs lataus ja päivitys levyltä (päivitetty versiossa 15.5): Sekä projektia ladattaessa että uutta painiketta „{rezyser.btn_odswiez_z_dysku_label}" napsautettaessa (kun olet muokannut kerrontatiedostoa käsin editorissa) sovellus päättää itse, kuinka sovittaa muisti yhteen levyn kanssa. Jos KOKO historia mahtuu kontekstiruutuun — se lataa sen kokonaisuudessaan ja poistaa tarpeettoman vanhan tiivistelmän, jotta moottori työskentelee koko tekstillä (tämä sulkee vanhan aukon, jossa malli sai pelkän tiivistelmän ilman viimeisten kohtausten kontekstia). Jos historia on PITKÄ ja sillä on tallennettu tiivistelmätiedosto — se säilyttää tiivistelmän koskemattomana ja lisää Nykyiseen Muistiin vain tuoreen lopun, joka lasketaan viimeisestä rakenneotsikosta (Luku/Näytös/Kohtaus). Näin et tuhlaa tokeneita koko historian uudelleen lataamiseen, ja samalla seuraava tiivistelmä ei synny vanhentuneista tiedoista.
   krok_3b_most_elevenlabs: |
-    KROK 3b: Silta ElevenLabs Studioon (luettava teatteri → monikielinen äänikirja)
+    KROK 3b: Käsikirjoituksen kaksi ulostuloa — monikielinen äänikirja (ElevenLabs) ja näytönlukijaversio
 
-    Versiosta 16.0 alkaen voit muuttaa valmiin luettavan teatterikäsikirjoituksen (käsikirjoitustila) monikieliseksi projektiksi ElevenLabs Studiossa — kertoja ja jokainen hahmo saavat oman äänensä. Tämä on VAPAAEHTOINEN toiminto, täysin erillinen muusta ohjelmasta: ilman ElevenLabs-avainta mikään ei muutu, klassinen työnkulku muuntimella toimii edelleen.
+    Valmiilla luettavan teatterin käsikirjoituksella (käsikirjoitustila) on kaksi itsenäistä ulostuloa: monikielinen ElevenLabs Studio -projekti (ääni) ja HTML-versio näytönlukijoille. Ne ovat kaksi tapaa „kuulla" sama näytelmä — voit käyttää toista, toista tai molempia. Molemmat ovat vapaaehtoisia eivätkä muuta klassista työnkulkua muuntimella.
+
+    ─────────── Silta ElevenLabs Studioon (ääni, vapaaehtoinen) ───────────
+
+    Silta muuttaa käsikirjoituksen monikieliseksi Studio-projektiksi — kertoja ja jokainen hahmo saavat oman äänensä. Ilman ElevenLabs-avainta mikään ei muutu: silta pysyy vain piilossa.
 
     ElevenLabs-avain (vapaaehtoinen)
 
-    Liitä ElevenLabs-avaimesi tiedostoon golden_key.env erilliselle riville: ELEVENLABS_API_KEY=sk_... Huomio: ElevenLabs-avain alkaa sk_ (ALAVIIVALLA), toisin kuin OpenAI-avain (sk-). Jos käytät rajoitettua avainta (restricted key), anna sille oikeudet (scope) projects_write ja voices_read. Avaimen tila näkyy pääruudulla (System Check) — avaimen puuttuminen ei ole virhe, silta pysyy vain piilossa.
+    Liitä ElevenLabs-avaimesi tiedostoon golden_key.env erilliselle riville: ELEVENLABS_API_KEY=sk_... Huomio: ElevenLabs-avain alkaa sk_ (ALAVIIVALLA), toisin kuin OpenAI-avain (sk-). Rajoitettu avain tarvitsee oikeudet (scope) projects_write ja voices_read. Avaimen tila näkyy pääruudulla (System Check) — avaimen puuttuminen ei ole virhe, silta pysyy vain piilossa.
 
-    Silta ilmestyy Ohjaajan paneeliin käsikirjoitustilassa (kun avain on oikein). Se toimii valmiilla näytelmällä, joka on tallennettu levylle — ensin luo tai lataa projekti, sitten siirry sillalle.
+    Silta ilmestyy Ohjaajan paneeliin käsikirjoitustilassa (kun avain on oikein). Se toimii valmiilla näytelmällä, joka on tallennettu levylle — ensin luo tai lataa projekti.
 
     Vaihe 1 — Ääninäyttelijät
 
-    Klikkaa "Ääninäyttelijät…". Sovellus lataa käsikirjoituksestasi hahmot, joilla on repliikkejä, ja lisää aina Kertojan paikan (kertoja on oletusääni — lukee lukujen otsikot ja koko kertomuksen). Liitä jokaiselle puhujalle voice ID. Kuinka saada voice ID ElevenLabsissa (selaimessa): mene välilehdelle Voices, etsi ääni ja toista näyte varmistaaksesi, että se on oikea; avaa "More actions" kyseisen äänen kohdalla ja valitse "Copy Voice ID"; liitä kopioitu tunniste oikeaan kenttään. Voit käyttää valmiita ääniä (premade) tai omia, mukaan lukien Voice Design -välilehdellä luotuja. Kentät voi jättää tyhjiksi ja palata myöhemmin — tallennus on luonnos.
+    Klikkaa "Ääninäyttelijät…". Sovellus lataa hahmot, joilla on repliikkejä, ja lisää aina Kertojan paikan (kertoja on oletusääni — lukujen otsikot ja koko kertomus). Liitä jokaiselle puhujalle voice ID: mene selaimessa välilehdelle Voices, etsi ääni ja toista näyte, avaa "More actions" → "Copy Voice ID" ja liitä se kenttään. Voit käyttää valmiita ääniä (premade) tai omia (Voice Design). Kentät voi jättää tyhjiksi ja palata myöhemmin — tallennus on luonnos.
 
     Vaihe 2 — Rakenna projekti
 
-    Klikkaa "Luo projekti ElevenLabs Studiossa…". Sovellus tarkistaa, onko käsikirjoituksessa vähintään yksi luku (Prologi/Näytös/Luku) ja onko jokaiselle puhujalle ja kertojalle annettu ääni, ja luo sitten tilillesi monikielisen Studio-projektin jaettuna lukuihin. Pelkkä projektin luominen EI kuluta krediittejä.
+    Klikkaa "Luo projekti ElevenLabs Studiossa…". Sovellus tarkistaa, että käsikirjoituksessa on vähintään yksi luku (Prologi/Näytös/Luku) ja että jokaiselle äänelle on annettu ääni, ja luo sitten tilillesi lukuihin jaetun monikielisen Studio-projektin. Pelkkä projektin luominen EI kuluta krediittejä. Sovellus asettaa myös heti projektin kielen (otsikkorivien oikea ääntäminen) sekä äänenvoimakkuuden normalisoinnin äänikirjastandardiin — se tekee tämän API:n kautta, jotta sinun ei tarvitse avata projektin asetuksia selaimessa.
 
     Vaihe 3 — Renderöinti selaimessa
 
-    Projektin luomisen jälkeen sovellus näyttää sen tunnisteen ja painikkeen, joka avaa ElevenLabs Studion. Selaimessa etsi projekti, renderöi puhe (tämä vasta kuluttaa krediittejä — noin 1 krediitti merkkiä kohden), ja sitten vie äänitiedosto tai julkaise projekti Eleven Readeriin. Renderöinti ja julkaisu tapahtuvat sinun puolellasi, tietoisesti — sovellus vain rakentaa projektin.
+    Projektin luomisen jälkeen sovellus näyttää sen tunnisteen ja painikkeen, joka avaa ElevenLabs Studion. Etsi projekti selaimessa, renderöi puhe (tämä vasta kuluttaa krediittejä — noin 1 krediitti merkkiä kohden), ja vie sitten äänitiedosto tai julkaise projekti Eleven Readeriin. Renderöinti ja julkaisu tapahtuvat sinun puolellasi, tietoisesti — sovellus vain rakentaa projektin.
+
+    Ilmaisu ja aksentit (malli Eleven v3)
+
+    Projekti luodaan Eleven v3 -mallilla (yli 70 kieltä). Tunteita EI ilmaista isoilla kirjaimilla, kolmella pisteellä äläkä ajatusviivoilla — moottori jättää sen huomiotta. Sen sijaan Ohjaaja kutoo repliikkeihin englanninkielisiä v3-äänitageja, esim. [whispers], [sighs], [angry], [laughs] — ne ohjaavat ilmaisua ja toimivat puhutusta kielestä riippumatta. Hahmon AKSENTTI sen sijaan tulee ÄÄNINÄYTTEESTÄ: jos haluat jonkun puhuvan esim. suomea vieraalla aksentilla, valitse tai suunnittele (Voice Design) ääni, jonka näytteessä on tuo aksentti. Kokeile käytännössä äänen promptia, kunnes kuulet esim. suomenkielisen näytteen ranskalaisella aksentilla — malli v3 säilyttää tämän aksentin valmiissa nauhoituksessa. Vinkki: hyvin pitkät virkkeet heikentävät aksenttia, minkä vuoksi Ohjaajaa pyydetään promptissa jo käyttämään lyhyitä virkkeitä.
+
+    Tietoisuus mallista v3 (alfa-vaihe)
+
+    Eleven v3 on ilmaisuvoimaisin mutta yhä alfa-vaiheessa. Toisinaan yksittäinen repliikki renderöityy rätinänä puheen sijaan — riittää, että regeneroit sen Studiossa (jokaisella lohkolla on muutama ilmainen regenerointi). ElevenLabsin projektiasetukset voivat myös näyttää suosituksia mallin vaihtamisesta (Eleven Flash v2.5 tai Multilingual v2) — tämä EI ole virhe, vain moottorin vihje. Jos et halua nähdä näitä viestejä, älä yksinkertaisesti avaa projektin asetuksia: sovellus on jo asettanut API:n kautta kaiken tarvittavan (malli, kieli, äänenvoimakkuuden normalisointi).
 
     Miksi luettava teatteri eikä äänitehosteet? Aikaisemmissa versioissa käsikirjoitustila tuotti raakoja tehosteita [SFX: ...] ilman kertojaa. Silta valmiiseen, monikieliseen nauhoitukseen vaatii kuitenkin, että konteksti (paikka, aika, toiminta) välittyy kertojan sanoin: äänitehosteet Studiossa eivät ole saatavilla ruudunlukijoille, ja malli toteuttaa joko kertojan tai tehosteet — ei koskaan vakaasti molempia samanaikaisesti. Siksi käsikirjoitustila on nyt luettava teatteri: kertoja ja dialogi, ilman SFX.
+
+    ─────────── Näytönlukijaversio (HTML, ilman ElevenLabsia) ───────────
+
+    Käsikirjoitustilassa sinulla on ElevenLabs-avaimesta riippumatta painike „Luo näytönlukijan versio". Se luo tiedoston skrypty/<nimi>_screen_reader.html — erillisen ulostulon näytönlukijoiden (esim. NVDA) käyttäjille. Se toimii näin: hahmojen repliikit, joilla on Maailman Kirjassa määritelty aksentti (esim. merkintä „[Joana] suomalainen aksentti"), saavat foneettisen kirjoitusasun (tarkoituksella „rikottu" oikeinkirjoitus) ja kielitunnisteen (lang-attribuutti), jolloin näytönlukija lukee ne oikealla vieraalla aksentilla. v3-äänitagit (esim. [whispers]) poistetaan tästä versiosta — lukijan ei pidä lukea niitä ääneen. Prologi/Näytös/Kohtaus-otsikoista tulee HTML-otsikoita, joten dokumentissa on helppo navigoida.
+
+    Tämä täydentää tietoisesti äänisiltaa: mallille v3 aksentti tulee ääninäytteestä, ja näytönlukijalle — oikeinkirjoituksesta plus kielitunnisteesta. Siksi oikeinkirjoitus ääniversiossa pysyy puhtaana (v3 valitsee kielen itse), ja oikeinkirjoituksen „rikkominen" menee vain erilliseen HTML-tiedostoon, jossa se on toivottavaa.
   krok_4_postprodukcja: |
     VAIHE 4: Jälkituotanto Reżyser Audio GPT:ssä
 
@@ -369,7 +389,7 @@ tresc:
 
     Tiflotecnia Voicesin julkaisun myötä ilmestyi kuitenkin uusi kriittinen ongelma — kielentunnistuksessa. Lisäosan asetuksissa voi määrittää, mitä ääntä käytetään tiettyjen kirjainten (esim. latinalaisten, kyrillisten) kanssa riippuen asennetuista äänistä. Ongelma on prioriteettijärjestyksessä: tällä hetkellä ensin sovelletaan override per-kirjain, sitten fallback ISO-kielikoodiin (käytännössä saavuttamaton SAMALLE aakkostolle, johon override on jo sovitettu), ja lopuksi valittu ääni. Tämä aiheuttaa ongelmia saman aakkoston sisällä: sinulla on suomenkielinen teksti oikealla `lang="fi"`-tagilla, asennettuna Satu suomen ääneksi Tiflotecniaan, MUTTA asetuksissa on valittu puolalainen ääni latinalaisille kirjaimille — Satu EI lue tätä tekstiä, vaikka ISO-tagi on oikea. Override per-kirjain "puolalainen ääni latinalaisille" voittaa ensimmäisellä tasolla, ISO `fi` ei koskaan tarkisteta. Eriaakkostopareille mekanismi toimii oikein (venäjänkielinen teksti + Milena kyrillisiin + puolalainen ääni latinalaisiin — koko kyrillinen osa menee Milenalla, mahdolliset latinalaiset nimet puolalaisella äänellä; jokainen aakkosto pysyy omassa override-tilassaan). Vocalizerista siirtymisen jälkeen, jossa kielenvaihto ISO:n perusteella toimi erinomaisesti, käyttäjät huomaavat tämän taantuman heti — erityisesti ne, jotka käyttävät Polyglotissa useita eurooppalaisia aksentteja (Satu, Alice, Markus) samassa latinalaisessa kirjainjoukossa.
 
-    Diagnoosi ja korjaus: diagnosoin ongelman Python-tasolla lisäosan koodissa ja valmistelin korjauksen, joka muuttaa prioriteettijärjestyksen: ISO → valittu ääni → kirjain-override. Korjaus säilyttää hyödyllisen vaihtamisen latinalaisiin venäläisessä tekstissä, kun asetuksissa on päällä "kielentunnistus Unicode-merkkien perusteella". Lähetin korjauksen Tiflotecnian kehittäjille 5 päivää sitten — toistaiseksi ilman vastausta.
+    Diagnoosi ja korjaus: diagnosoin ongelman Python-tasolla lisäosan koodissa ja valmistelin korjauksen, joka muuttaa prioriteettijärjestyksen: ISO → valittu ääni → kirjain-override. Korjaus säilyttää hyödyllisen vaihtamisen latinalaisiin venäläisessä tekstissä, kun asetuksissa on päällä "kielentunnistus Unicode-merkkien perusteella". Lähetin korjauksen Tiflotecnian kehittäjille — toistaiseksi ilman vastausta, joten he todennäköisesti pitäytyvät omassa ratkaisussaan. Jos lisäosa saa päivityksen, päivitän korjauksen tarvittaessa.
 
     Mitä tehdä sillä välin: jos haluat, että kielentunnistus toimii oikein (kannattaa — tämä oli yksi vanhan Vocalizerin killer-ominaisuuksista, katso "Killer Feature for the Blind" yllä), avaa issue sovelluksen GitHub-repossa etiketillä `tiflotecnia-patch` ja sähköpostiosoitteella viestissä. Kannattaa lisätä lyhyt kuvaus ongelmasta omalla kielelläsi (2–3 lausetta riittää) — botti tunnistaa kielen (tuetut: puola, englanti, saksa, espanja, suomi, ranska, islanti, italia, venäjä) ja vastaa samalla kielellä; ilman kuvausta tai muulla kielellä vastaus tulee englanniksi. Automaattinen botti sulkee issuen heti vahvistuksella (ilman jälkeä julkisessa ketjussa), ja saat korjauksen yksityisesti sähköpostitse yleensä muutaman päivän kuluessa. Itse korjausta EI julkaista sovelluksen repossa eikä Gistinä — Tiflotecnia Voices for NVDA on kaupallinen ohjelmisto, eikä lisäosan lisenssi salli sen tiedostojen, edes muokattujen, uudelleenjakelua. Kun olet saanut korjauksen, sen sisältö on kopioitava `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`-kansioon, korvaten tiedostot. Huomio kopioinnissa: jos Windows ei kysynyt korvaamisesta, olet todennäköisesti kopioinut koko `TiflotecniaVoices_edits`-kansion sen sisällön SIJAAN — siinä tapauksessa mene luotuun alikansioon, leikkaa kaikki, liitä taso ylemmäs ja korvaa. Kun korjaus on onnistuneesti sovellettu, käynnistä NVDA uudelleen — nauti Cerrencen 64-bittisten äänien paremmasta laadusta ja oikeasta kielentunnistuksesta, mikä on yhdistelmä, jota ei saa yhdeltäkään yksittäiseltä valmistajalta markkinoilla. Oletamme tietysti, että sinulla on voimassa oleva Tiflotecnia Voices -lisenssi — emme tarkista sitä, mutta et voi soveltaa korjausta ilman lisenssiä toisen kansioon.
   krok_6_architekt: |

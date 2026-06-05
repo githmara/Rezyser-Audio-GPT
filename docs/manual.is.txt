@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 16.0 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 16.1 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -90,7 +90,7 @@ Tilraunin mistókst. AI brýtur oft eitt af grundvallarreglunum (meira um það 
 
 Öll handritin þín og bækurnar eru vistaðar í venjulegum textaskrám (.txt), sem þú getur auðveldlega opnað í Textaritli.
 
-Sem Leikstjóri hefurðu FULLT LEYFI (og jafnvel skyldu) til að breyta þessari skrá! Ef gervigreindin fer á flug og t.d. leysir sjálf vandamál hetjanna í lok bútsins, opnaðu skrána, fjarlægðu síðustu línurnar og láttu textann enda á spennandi stað, áður en þú hreinsar minni, hleður skránni aftur til að endurhlaða samhengisgluggann og smellir á "Senda til AI" til að halda áfram.
+Sem Leikstjóri hefurðu FULLT LEYFI (og jafnvel skyldu) til að breyta þessari skrá! Ef gervigreindin fer á flug og t.d. leysir sjálf vandamál hetjanna í lok bútsins, opnaðu skrána, fjarlægðu síðustu línurnar og láttu textann enda á spennandi stað og smelltu síðan á "Endurhlaða af diski" til að samstilla minni líkansins við leiðréttu skrána, og á "Senda til AI" til að halda áfram.
 
 🔴 EN - HVAÐ ÞÚ MÁTT EKKI BREYTA:
 
@@ -113,8 +113,8 @@ Hvernig á að nota Leikstjórn?
 
 Verkefnastjórnun — þrír aðgerðahnappir:
 - Hlaða sögu: Hleður inn núverandi verkefni í minni. Tiltækt þegar núverandi minni er tómt. Frá og með útgáfu 15.2.3 styður tvær leiðir: ef nafnsreitur verkefnisins er tómur opnast valgluggi með lista yfir öll verkefni sem finnast í möppunni skrypty/ (samantektarskrár eru síaðar út) — NVDA les listann náttúrulega, leikmaður þarf ekki að muna og slá nafnið inn aftur á lyklaborði. Ef nafnsreiturinn er fylltur, reynir forritið beint að hlaða inn verkefni með því nafni (sérfræðileið: Enter í nafnsreitnum eða smella eftir að hafa slegið inn úr minninu).
-- Hreinsa núverandi (skilja eftir Samantekt): Hreinsar aðeins núverandi sögu. Samantekt í Langtímaminni og Heimabókin eru varðveittar — fullkomið til að halda áfram með langa bók eftir að samantekt hefur verið búin til.
-- Loka Verkefni (Harður Endurstilling): Hreinsar verkefnið alveg. Fjarlægir sögu, samantekt, Heimabók og núllstillar alla teljara. Notaðu þegar þú skiptir um verkefni eða byrjar nýja sögu.
+- Hreinsa núverandi (halda samantekt): Hreinsar aðeins núverandi sögu. Samantekt í Langtímaminni og Heimabókin eru varðveittar — fullkomið til að halda áfram með langa bók eftir að samantekt hefur verið búin til.
+- Loka verkefni (Harður endurstilling): Hreinsar verkefnið alveg. Fjarlægir sögu, samantekt, Heimabók og núllstillar alla teljara. Notaðu þegar þú skiptir um verkefni eða byrjar nýja sögu.
 - Opna frásagnarskrá… (frá v15.2.3): Neyðar-breyting á frásagnarskrá í kerfis-textaritlinum. Krefst nafns verkefnis í reitnum. Forritið opnar skrypty/<nafn>.txt í Notepad (Windows), TextEdit (macOS) eða sjálfgefnum GUI ritli (Linux). Dæmigert tilvik: (a) AI lokar ekki atriði og þú vilt skrifa endann handvirkt; (b) þú hleður inn verkefni með samantekt og vilt afrita síðustu atriðin í Langtímaminni svo líkanið hafi fullt tónsamhengi (arkitektónisk götur lýst að ofan); (c) þú vilt gera textaklippingu í miðjum kafla sem forritsvélin styður ekki innfædd.
 - Endurhlaða af diski (frá v15.5): Samstillir innra minni forritsins við frásagnarskrána eftir handvirka breytingu á henni — án harðrar endurstillingar og endurhleðslu verkefnisins. Það ákveður sjálft: ef öll sagan kemst fyrir í samhengisglugganum, hleður það henni í heild sinni (og þurrkar út óþarfa gamla samantekt, svo vélin vinni á fullum texta); ef sagan er löng og á vistaða samantekt, heldur það henni ósnertri og endurgerir aðeins ferska endann sem talinn er frá síðustu byggingarfyrirsögn (Kafli/Þáttur/Atriði) — þess vegna er þess virði að halda byggingu. Það breytir ekki Heimsbókinni né teljurum. Dæmigert tilvik: AI lokaði atriði ranglega (braut anti-closure), þú klippir slæma endann í textaritlinum og smellir á Endurhlaða — engin leiðrétting á tveimur stöðum lengur.
 
@@ -132,7 +132,7 @@ Anti-Closure fyrirmæli — staða í útgáfu 8
 
 Þrátt fyrir að prófa mismunandi nálganir er Anti-Closure bannið oft brotið af líkaninu, sérstaklega í Hefðbundnum Hljóðbókaham. AI hefur sterka tilhneigingu til að "loka" sögum við hvert tækifæri — það fléttar inn setningar sem draga saman söguþráðinn, býr til falska hamingjusama enda eða lokar sögulínum í miðjum kafla, eins og hver bútur væri sá síðasti. Áhrifin eru þau að næsti bútur byrjar frá grunni, án náttúrulegrar samfellu.
 
-Þess vegna er svo mikilvægt að fylgja reglu klipparans sem lýst er hér að ofan: ef AI brýtur bannið og lokar sjálft atriði, er þitt verkefni sem Leikstjóri að opna .txt skrána, fjarlægja þessar síðustu setningar og láta textann enda á spennandi stað áður en þú hleður honum aftur inn í forritið.
+Þess vegna er svo mikilvægt að fylgja reglu klipparans sem lýst er hér að ofan: ef AI brýtur bannið og lokar sjálft atriði, er þitt verkefni sem Leikstjóri að opna .txt skrána, fjarlægja þessar síðustu setningar, láta textann enda á spennandi stað og smella síðan á "Endurhlaða af diski" til að samstilla minnið við leiðréttu skrána.
 
 Hver hamur hefur innbyggð Anti-Closure fyrirmæli:
 
@@ -174,10 +174,12 @@ Söguuppsöfnun — hvernig AI minnið virkar
 
 Aðeins hreinn texti sögunnar fer í minni líkansins — það sem AI hefur í raun skrifað. Leiðbeiningar, valkostir og áætlanir hverfa eftir notkun og trufla ekki samhengið. Áhrifin? Líkanið heldur lengur einbeitingu, man betur eftir áherslum persóna og fer sjaldnar frá reglum Heimabókarinnar.
 
-Vísirinn "Minni Líkans" á skjánum sýnir hversu mikið pláss sagan þín tekur nú þegar:
-- Grænt (allt að 150.000 stafir): Líkanið er fullkomlega einbeitt, þú hefur öruggt svigrúm.
-- Gult (150.000 – 175.000 stafir): Þú nálgast mörkin. AI getur byrjað að stytta setningar og hunsa reglur. Byrjaðu að loka þræðinum hægt.
-- Rautt (yfir 175.000 stafir): Gagnrýnin ofhleðsla!
+Vísirinn "Minni Líkans" sýnir hversu fullur samhengisgluggi líkansins er. Frá útgáfu 15.1 er þetta EKKI lengur talning á stöfum sögunnar — forritið telur raunveruleg TÓKEN (á sama hátt og líkanið) og leggur saman ALLT álagið sem sent er til gervigreindarinnar: núverandi sögu, Langtímaminni (samantektina) OG Heimabókina. Þess vegna hækkar vísirinn líka þegar þú stækkar Heimabókina eða ert með langa samantekt — ekki bara vegna frásagnarinnar. Gildið er sýnt sem hlutfall af glugganum:
+- Grænt (allt að ~70%): Líkanið er fullkomlega einbeitt, þú hefur öruggt svigrúm.
+- Gult (~70–90%): Þú nálgast mörkin. AI getur byrjað að stytta setningar og hunsa reglur; í skipulagsstillingu (Hugarflug) byrjar vélin að þvinga fram samantekt. Byrjaðu að loka þræðinum hægt.
+- Rautt (yfir ~90%): Gagnrýnin ofhleðsla!
+
+Greining á samantektarmörkum (þegar AI ofskynjar fyrr en mörkin gera ráð fyrir): mörkin (viðvörun ~70%, neyðarstig ~90%) eru metin reynslubundið. Ef þú tekur eftir endurtekinni tilhneigingu til að líkanið „reki" frá reglunum eða byrji að ofskynja ÁÐUR EN vísirinn verður gulur/rauður — þ.e. fyrr en mörkin gera ráð fyrir — opnaðu issue í geymslu forritsins og lýstu við hvaða áætlaða fyllingarstig (prósentu) það byrjar í raun að hrynja, helst með dæmi. Ef þessi tilhneiging staðfestist víðar (hjá fleiri notendum, í mismunandi verkefnum), verða sjálfvirku samantektarmörkin lækkuð í framtíðar plástri. Þetta er meðvitað ítrekað kerfi — betra að stilla það á raunverulegum gögnum en að giska fyrirfram.
 
 Óendanlegt Minni (frá útgáfu 6, varðveitt)
 
@@ -190,29 +192,47 @@ Sjálfvirk samantekt: Þegar minnið fer í viðvörunarástand, skiptir Hugstor
 Snjöll hleðsla og endurhleðsla af diski (uppfært í v15.5): Bæði við hleðslu verkefnis og eftir smell á nýja hnappinn „Endurhlaða af diski" (eftir handvirka breytingu á frásagnarskránni í textaritli) ákveður forritið sjálft hvernig það samræmir minnið við diskinn. Ef ÖLL sagan kemst fyrir í samhengisglugganum — hleður það henni í heild sinni og þurrkar út óþarfa gamla samantekt, svo vélin vinni á fullum texta (þetta lokar gömlu glufunni, þar sem líkanið fékk aðeins samantektina án samhengis síðustu atriða). Ef sagan er LÖNG og á vistaða samantektarskrá — heldur það samantektinni ósnertri og setur aðeins ferska endann inn í Núverandi minni, talinn frá síðustu byggingarfyrirsögn (Kafli/Þáttur/Atriði). Þannig sóarðu ekki táknum í að hlaða alla söguna aftur, og um leið verður næsta samantekt ekki til á úreltum gögnum.
 
 
-KROK 3b: Brú til ElevenLabs Studio (leikhúslestrar → margra radda hljóðbók)
+KROK 3b: Tvær úttakar Skjals — margra radda hljóðbók (ElevenLabs) og útgáfa fyrir skjálesara
 
-Frá útgáfu 16.0 geturðu breytt tilbúnum leikhússkrifum (Skjalastilling) í margra radda verkefni í ElevenLabs Studio — sögumaður og hver persóna fá sér rödd. Þetta er VALFRJÁLS eiginleiki, fullkomlega aðskilinn frá restinni af forritinu: án ElevenLabs lykils breytist ekkert, hefðbundið flæði með breytara heldur áfram.
+Tilbúið leikhússkrif (Skjalastilling) hefur tvær sjálfstæðar úttakar: margra radda ElevenLabs Studio verkefni (hljóð) og HTML útgáfu fyrir skjálesara. Þetta eru tvær leiðir til að „heyra" sama leikritið — þú getur notað aðra, hina eða báðar. Báðar eru valfrjálsar og breyta ekki hefðbundnu flæði með breytara.
+
+─────────── Brú til ElevenLabs Studio (hljóð, valfrjáls) ───────────
+
+Brúin breytir skjalinu í margra radda Studio verkefni — sögumaður og hver persóna fá sér rödd. Án ElevenLabs lykils breytist ekkert: brúin er einfaldlega falin.
 
 ElevenLabs lykill (valfrjáls)
 
-Límdu ElevenLabs lykilinn þinn í skrána golden_key.env, á sér línu: ELEVENLABS_API_KEY=sk_... Athugið: ElevenLabs lykill byrjar á sk_ (með UNDIRSTRIKI), ólíkt OpenAI lykli (sk-). Ef þú notar lykil með takmörkunum (restricted key), gefðu honum heimildir (scope) projects_write og voices_read. Staða lykilsins sést á aðalskjánum (System Check) — skortur á lykli er ekki villa, brúin er einfaldlega falin.
+Límdu ElevenLabs lykilinn þinn í skrána golden_key.env, á sér línu: ELEVENLABS_API_KEY=sk_... Athugið: ElevenLabs lykill byrjar á sk_ (með UNDIRSTRIKI), ólíkt OpenAI lykli (sk-). Lykill með takmörkunum þarf heimildir (scope) projects_write og voices_read. Staða lykilsins sést á aðalskjánum (System Check) — skortur á lykli er ekki villa, brúin er einfaldlega falin.
 
-Brúin birtist í Stjórnborði í Skjalastillingu (þegar lykillinn er réttur). Hún virkar á tilbúinni leikriti sem er vistað á disknum — fyrst skaltu búa til eða hlaða inn verkefni, síðan fara í brúna.
+Brúin birtist í Stjórnborði í Skjalastillingu (þegar lykillinn er réttur). Hún virkar á tilbúnu leikriti sem er vistað á disknum — fyrst skaltu búa til eða hlaða inn verkefni.
 
 Skref 1 — Raddsetning
 
-Smelltu á „Raddsetning…". Forritið les inn persónur úr skjalinu þínu sem hafa línur og bætir alltaf við rauf fyrir Sögumann (sögumaður er sjálfgefin rödd — les titla kafla og alla frásögn). Fyrir hvern ræðumann skaltu líma inn voice ID. Hvernig á að fá voice ID í ElevenLabs (í vafra): farðu í flipann Voices, finndu röddina og spilaðu sýnishorn til að vera viss um að það sé rétt; opnaðu „More actions" við þá rödd og veldu „Copy Voice ID"; límdu afritaða auðkennið í viðeigandi reit. Þú getur notað tilbúnar raddir (premade) eða þínar eigin, þar á meðal þær sem eru búnar til í flipanum Voice Design. Þú getur skilið reitina eftir tóma og komið aftur seinna — skráningin er drög.
+Smelltu á „Raddsetning…". Forritið les inn persónur sem hafa línur og bætir alltaf við rauf fyrir Sögumann (sögumaður er sjálfgefin rödd — titla kafla og alla frásögn). Fyrir hvern ræðumann skaltu líma inn voice ID: í vafra farðu í flipann Voices, finndu röddina og spilaðu sýnishorn, opnaðu „More actions" → „Copy Voice ID" og límdu það í reitinn. Þú getur notað tilbúnar raddir (premade) eða þínar eigin (Voice Design). Þú getur skilið reitina eftir tóma og komið aftur seinna — skráningin er drög.
 
 Skref 2 — Byggja verkefni
 
-Smelltu á „Búa til verkefni ElevenLabs Studio…". Forritið athugar hvort skjalið hafi að minnsta kosti einn kafla (Prolog/Akt/Kafli) og hvort hver ræðumaður og sögumaður hafi úthlutað rödd, og síðan býr það til margra radda Studio verkefni á reikningnum þínum skipt í kafla. Sjálf verkefnissköpunin EYÐIR EKKI inneignum.
+Smelltu á „Búa til verkefni ElevenLabs Studio…". Forritið athugar hvort skjalið hafi að minnsta kosti einn kafla (Prolog/Akt/Kafli) og hvort hver rödd sé úthlutuð, og býr síðan til margra radda Studio verkefni á reikningnum þínum skipt í kafla. Sjálf verkefnissköpunin EYÐIR EKKI inneignum. Forritið stillir einnig strax tungumál verkefnisins (réttan framburð fyrirsagnalína) og hljóðstyrksjöfnun að hljóðbókastaðli — það gerir þetta í gegnum API svo þú þurfir ekki að opna stillingar verkefnisins í vafranum.
 
 Skref 3 — Útgáfa í vafra
 
-Eftir að verkefnið hefur verið búið til sýnir forritið auðkenni þess og hnapp sem opnar ElevenLabs Studio. Í vafranum skaltu finna verkefnið, búa til tal (það eyðir inneignum — um það bil 1 inneign á tákn), og síðan flytja út hljóðskrána eða birta verkefnið í Eleven Reader. Útgáfa og birting fer fram þér megin, meðvitað — forritið byggir aðeins verkefnið.
+Forritið sýnir auðkenni verkefnisins og hnapp sem opnar ElevenLabs Studio. Í vafranum finndu verkefnið, búðu til tal (það eyðir inneignum — um það bil 1 inneign á tákn), og flyttu síðan út hljóðskrána eða birtu verkefnið í Eleven Reader. Útgáfa og birting fer fram þér megin, meðvitað — forritið byggir aðeins verkefnið.
+
+Tjáning og hreimar (líkan Eleven v3)
+
+Verkefnið er búið til með líkaninu Eleven v3 (yfir 70 tungumál). Tilfinningar eru EKKI tjáðar með hástöfum, úrfellingum eða bandstrikum — vélin hunsar það. Þess í stað vefur Leikstjórinn enskum v3 hljóðtöggum inn í línurnar, t.d. [whispers], [sighs], [angry], [laughs] — þeir stýra tjáningunni og virka óháð töluðu tungumáli. HREIMUR persónu kemur hins vegar úr RADDSÝNINU: ef þú vilt að einhver tali t.d. íslensku með erlendum hreim, veldu eða hannaðu (í Voice Design) rödd þar sem sýnið ber þennan hreim. Í reynd skaltu gera tilraunir með raddpromptinn þar til þú heyrir t.d. íslenskt sýni með finnskum hreim — líkanið v3 varðveitir þennan hreim í tilbúnu upptökunni. Ábending: mjög langar setningar veikja hreiminn, þess vegna er Leikstjórinn nú þegar beðinn í promptinu um stuttar setningar.
+
+Vitund um líkanið v3 (alfa-stig)
+
+Eleven v3 er tjáningarríkast en enn á alfa-stigi. Stundum er ein lína gerð sem snark í stað tals — það nægir að endurgera hana í Studio (hver blokk hefur nokkrar ókeypis endurgerðir). Stillingar verkefnisins í ElevenLabs geta einnig sýnt ráðleggingar um að skipta um líkan (yfir í Eleven Flash v2.5 eða Multilingual v2) — þetta er EKKI villa, aðeins ábending frá vélinni. Ef þú vilt ekki sjá þessi skilaboð, opnaðu einfaldlega ekki stillingar verkefnisins: forritið hefur þegar stillt allt sem þarf í gegnum API (líkan, tungumál, hljóðstyrksjöfnun).
 
 Af hverju leikhúslestrar, en ekki hljóðáhrif? Í fyrri útgáfum framleiddi Skjalastilling hrá hljóðáhrif [SFX: ...] án sögumanns. Brúin til tilbúins, margra radda upptöku krefst þess hins vegar að samhengi (staðsetning, tími, aðgerð) sé flutt af sögumanni með orðum: hljóðáhrif í Studio eru ekki aðgengileg fyrir skjálesara, og líkanið framkvæmir hvort sem er sögumann eða áhrif — aldrei stöðugt bæði í einu. Þess vegna er Skjalastilling núna leikhúslestrar: sögumaður plús samtal, án SFX.
+
+─────────── Útgáfa fyrir skjálesara (HTML, án ElevenLabs) ───────────
+
+Í Skjalastillingu hefurðu, óháð ElevenLabs lyklinum, hnapp „Búa til útgáfu fyrir skjálesara". Hann býr til skrána skrypty/<nafn>_screen_reader.html — sér úttak fyrir fólk sem notar skjálesara (t.d. NVDA). Svona virkar það: persónulínur sem hafa skilgreindan hreim í Heimabókinni (t.d. færslan „[Joana] finnskur hreimur") fá hljóðfræðilega stafsetningu (viljandi „brotin" stafsetning) og tungumálatagg (lang-eigindina), þannig að skjálesarinn les þær með réttum erlendum hreim. v3 hljóðtögg (t.d. [whispers]) eru fjarlægð í þessari útgáfu — lesarinn á ekki að lesa þau upphátt. Prolog/Akt/Atriði fyrirsagnir verða að HTML fyrirsögnum, svo auðvelt er að fletta um skjalið.
+
+Þetta er meðvituð viðbót við hljóðbrúna: fyrir líkanið v3 kemur hreimurinn úr raddsýninu, og fyrir skjálesarann — úr stafsetningunni plús tungumálatagginu. Þess vegna helst stafsetningin í hljóðútgáfunni hrein (v3 velur tungumálið sjálft), og „að brjóta" stafsetninguna fer aðeins í sér HTML skrána, þar sem það er æskilegt.
 
 
 SKREF 4: Eftirvinnsla í Reżyser Audio GPT
@@ -370,7 +390,7 @@ Fyrst góðu fréttirnar — viðvörunin um NVDA 2026.1 úr fyrri útgáfum han
 
 Með útgáfu Tiflotecnia Voices kom hins vegar nýr kritískur galli — í tungumálagreiningu. Í stillingum viðbótarinnar er hægt að stilla hvaða rödd á að nota fyrir ákveðna stafi (t.d. latneska, kyrillíska) eftir því hvaða raddir eru uppsettar. Vandamálið er í forgangsröðinni: núna er fyrst beitt yfirskrift á hvern staf, síðan fallbakki til ISO tungumálakóða (í reynd óaðgengilegt fyrir SAMA stafróf, sem yfirskriftin hefur nú þegar verið stillt á), og að lokum valin rödd. Afleiðingin birtist innan sama stafrófs: þú ert með texta á finnsku með réttum `lang="fi"` merkimiða, uppsett Satu sem finnska rödd Tiflotecnia, EN í stillingum er valin pólsk rödd fyrir latneska stafi — Satu LES ekki þennan texta, þrátt fyrir réttan ISO merkimiða. Yfirskrift á hvern staf „pólsk rödd fyrir latínu" vinnur á fyrsta stigi, ISO `fi` er aldrei athugað. Fyrir pör með mismunandi stafróf virkar kerfið rétt (rússneskur texti + Milena fyrir kyrillískt + pólsk rödd fyrir latínu — allt kyrillískt fer með Milenu, möguleg latnesk nöfn með pólskri rödd; hvert stafróf er í sinni yfirskrift). Eftir flutning frá Vocalizer, þar sem tungumálaskipting á grundvelli ISO virkaði fullkomlega, munu notendur taka eftir þessari afturför strax — sérstaklega þeir sem nota nokkra evrópska hreima í Tungumálamanninum (Satu, Alice, Markus) á sama latneska stafrófi.
 
-Greining og plástur: Ég greindi vandamálið á Python stigi í kóða viðbótarinnar og útbjó plástur sem breytir forgangsröðinni í: ISO → valin rödd → stafayfirskrift. Plásturinn viðheldur gagnlegri skiptingu á latínu fyrir latnesk nöfn í rússneskum texta, þegar „tungumálagreining á grundvelli Unicode stafa" er virk í stillingum. Ég sendi plásturinn til þróunaraðila Tiflotecnia fyrir 5 dögum — enn án svars.
+Greining og plástur: Ég greindi vandamálið á Python stigi í kóða viðbótarinnar og útbjó plástur sem breytir forgangsröðinni í: ISO → valin rödd → stafayfirskrift. Plásturinn viðheldur gagnlegri skiptingu á latínu fyrir latnesk nöfn í rússneskum texta, þegar „tungumálagreining á grundvelli Unicode stafa" er virk í stillingum. Ég sendi plásturinn til þróunaraðila Tiflotecnia — enn án svars, svo þeir halda sig líklega við sína eigin lausn. Ef viðbótin fær uppfærslu mun ég uppfæra plásturinn ef þörf krefur.
 
 Hvað á að gera á meðan: ef þú vilt hafa rétta tungumálagreiningu (það er þess virði — þetta var eitt af „killer features" gamla Vocalizer, sjá „Killer Feature fyrir blinda" hér að ofan), opnaðu mál í forritasafni á GitHub með merkimiðanum `tiflotecnia-patch` og netfangið þitt í textanum. Það er þess virði að bæta við stuttri lýsingu á vandamálinu á eigin tungumáli (2–3 setningar duga) — bóturinn greinir tungumálið (stuðningur: pólska, enska, þýska, spænska, finnska, franska, íslenska, ítalska, rússneska) og svarar á sama tungumáli; án lýsingar eða á öðru tungumáli kemur svarið á ensku. Sjálfvirkur botn mun strax loka málinu með staðfestingu á innsendingu (án ummerkja í opinberu þræðinum), og þú færð plásturinn í tölvupósti yfirleitt innan nokkurra daga. Plásturinn er EKKI birtur í forritasafninu né sem Gist — Tiflotecnia Voices fyrir NVDA er viðskiptahugbúnaður, og leyfi viðbótarinnar leyfir ekki endurdreifingu á skrám þess, jafnvel ekki breyttum. Eftir að þú hefur fengið plásturinn þarftu að afrita innihald hans í `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`, skipta út skrám. Varúð við afritun: ef Windows spurði ekki um skipti, þá hefurðu líklega afritað allan `TiflotecniaVoices_edits` möppuna með innihaldi hennar Í STAÐINN FYRIR einungis innihaldið — í slíku tilviki farðu inn í nýju undirmöppuna, klipptu allt, límdu það upp um eitt stig og skrifaðu yfir. Eftir að plásturinn hefur verið beittur með góðum árangri, endurræstu NVDA — njóttu betri gæða Cerrence 64-bita radda og réttrar tungumálagreiningar, sem er sambland sem enginn einstakur framleiðandi á markaðnum býður upp á. Við gerum ráð fyrir að þú hafir gilt leyfi fyrir Tiflotecnia Voices — við staðfestum það ekki, en þú getur ekki beitt plástrinum á möppu annarra án leyfis.
 

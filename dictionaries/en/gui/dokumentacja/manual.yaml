@@ -103,7 +103,7 @@ tresc:
 
     All your generated scripts and books are saved in plain text files (.txt), which you can easily open in Notepad.
 
-    As a Director, you have FULL RIGHT (and indeed an obligation) to edit this file! If the artificial intelligence gets ahead of itself and, for example, resolves the characters' problems at the end of a generated fragment, open the file, delete the last lines, and leave the text cut off at the most tense moment before clearing the memory, reloading the file to refresh the context window, and clicking "{rezyser.btn_wyslij_label}" to continue.
+    As a Director, you have FULL RIGHT (and indeed an obligation) to edit this file! If the artificial intelligence gets ahead of itself and, for example, resolves the characters' problems at the end of a generated fragment, open the file, delete the last lines, and leave the text cut off at the most tense moment, then click "{rezyser.btn_odswiez_z_dysku_label}" to sync the model's memory with the corrected file, and "{rezyser.btn_wyslij_label}" to continue.
 
     🔴 HOWEVER - WHAT YOU MUST NOT TOUCH:
 
@@ -126,8 +126,8 @@ tresc:
 
     Project Management — three action buttons:
     - {rezyser.btn_wczytaj_label}: Loads an existing project into memory. Available when the current memory is empty. From version 15.2.3 it supports two paths: if the project name field is empty, a selection dialog opens with a list of all projects found in the skrypty/ folder (summary files are filtered out) — NVDA reads the list naturally, the player doesn't have to remember and retype the name from the keyboard. If the name field is filled, the application tries to load a project with that name directly (expert path: Enter in the name field or click after typing from memory).
-    - Clear Current (Keep Summary): Clears only the current story. The Summary in Long-Term Memory and the World Book are preserved — ideal for continuing a long book after generating a summary.
-    - Close Project (Hard Reset): Completely clears the project. Deletes the story, summary, World Book, and resets all counters. Use when changing the project or starting a new story.
+    - {rezyser.btn_wyczysc_biezaca_label}: Clears only the current story. The Summary in Long-Term Memory and the World Book are preserved — ideal for continuing a long book after generating a summary.
+    - {rezyser.btn_hard_reset_label}: Completely clears the project. Deletes the story, summary, World Book, and resets all counters. Use when changing the project or starting a new story.
     - {rezyser.btn_otworz_narracje_label} (since v15.2.3): Emergency editing of the narration file in the system text editor. Requires a project name in the field. The application opens skrypty/<name>.txt in Notepad (Windows), TextEdit (macOS), or the default GUI editor (Linux). Typical scenarios: (a) AI doesn't close a scene and you want to write the ending manually; (b) you loaded a project with a summary and want to copy the last scenes into Long-Term Memory so the model has the full tone context (architectural gap described above); (c) you want to make a textual cut in the middle of a chapter that the application engine doesn't support natively.
     - {rezyser.btn_odswiez_z_dysku_label} (since v15.5): Synchronizes the application's internal memory with the narration file after you have edited it by hand — without a hard reset and a full reload of the project. It decides for itself: if the entire history fits within the context window, it loads it in full (and deletes the redundant old summary, so the engine works on the complete text); if the history is long and has a saved summary, it keeps the summary untouched and restores only the fresh ending, counted from the last structure header (Act/Scene/Chapter) — which is why it pays to keep the structure. It does not change the World Book or any counters. Typical scenario: the AI mistakenly closed a scene (broke anti-closure), you cut off the bad ending in the editor and click Refresh — no more fixing the same thing in two places.
 
@@ -145,7 +145,7 @@ tresc:
 
     Despite testing various approaches, the Anti-Closure ban is often notoriously broken by the model, especially in Traditional Audiobook Mode. AI has a strong tendency to "close" stories at every opportunity — it weaves summary sentences into the plot, creates false happy endings, or closes threads in the middle of a chapter, as if each fragment were the last. The effect is that the next fragment starts from scratch, without natural continuity.
 
-    That's why the editor's rule described above is so important: if AI breaks the ban and closes the scene itself, your task as a Director is to open the .txt file, remove those last sentences, and leave the text cut off at a tense moment before reloading it back into the application.
+    That's why the editor's rule described above is so important: if AI breaks the ban and closes the scene itself, your task as a Director is to open the .txt file, remove those last sentences, leave the text cut off at a tense moment, and then click "{rezyser.btn_odswiez_z_dysku_label}" to sync memory with the corrected file.
 
     Each mode has a built-in Anti-Closure directive:
 
@@ -187,10 +187,12 @@ tresc:
 
     Only the pure text of the story enters the model's memory — what the AI actually wrote. Instructions, options, and plans disappear after use and do not clutter the context. The effect? The model maintains focus longer, remembers character accents better, and less frequently "escapes" from the rules of the World Book.
 
-    The "Model Memory" indicator on the screen shows how much space your story already occupies:
-    - Green (up to 150,000 characters): The model is fully focused, you have a safe buffer.
-    - Yellow (150,000 – 175,000 characters): You're approaching the limit. AI may start shortening statements and ignoring rules. Begin slowly closing the thread.
-    - Red (over 175,000 characters): Critical overload!
+    The "Model Memory" indicator shows how full the model's context window is. Since version 15.1 this is NO longer a count of story characters — the application counts real TOKENS (the same way the model does) and sums the ENTIRE payload sent to the AI: the current story, Long-Term Memory (the summary), AND the World Book. That is why the indicator also rises when you expand the World Book or have a long summary — not just from the narration itself. The value is shown as a percentage of the window:
+    - Green (up to ~70%): The model is fully focused, you have a safe buffer.
+    - Yellow (~70–90%): You are approaching the limit. AI may start shortening statements and ignoring rules; in planning mode (Brainstorm) the engine begins to force a summary. Begin slowly closing the thread.
+    - Red (over ~90%): Critical overload!
+
+    Summary-threshold diagnostics (when AI hallucinates earlier than the threshold assumes): the thresholds (warning ~70%, alarm ~90%) are estimated empirically. If you notice a repeatable tendency for the model to "drift" from the rules or start hallucinating BEFORE the indicator turns yellow/red — i.e. earlier than the threshold assumes — open an issue in the application repository and describe at roughly what fill level (percentage) it actually starts to fall apart, ideally with an example. If this tendency is confirmed more broadly (across users and projects), the automatic-summary threshold will be lowered in a future patch. This is a deliberately iterative mechanism — better tuned on real data than guessed up front.
 
     Infinite Memory (from version 6, retained)
 
@@ -202,29 +204,47 @@ tresc:
 
     Intelligent loading and refreshing from disk (updated in v15.5): Both when loading a project and after clicking the new "{rezyser.btn_odswiez_z_dysku_label}" button (after manually editing the narration file in an editor), the application decides for itself how to reconcile the memory with the disk. If the ENTIRE history fits within the context window — it loads it in full and deletes the redundant old summary, so the engine works on the complete text (this closes the old gap in which the model received only the summary without the context of the latest scenes). If the history is LONG and has a saved summary file — it keeps the summary untouched and inserts into the Current Memory only the fresh ending, counted from the last structure header (Act/Scene/Chapter). This way you don't waste tokens reloading the whole story, and at the same time the next summary is not built on stale data.
   krok_3b_most_elevenlabs: |
-    STEP 3b: Bridge to ElevenLabs Studio (reader's theatre → multi-voice audiobook)
+    STEP 3b: Two outputs of the Script — multi-voice audiobook (ElevenLabs) and a screen-reader version
 
-    From version 16.0, you can convert a ready reader's theatre script (Script mode) into a multi-voice ElevenLabs Studio project — the narrator and each character receive a separate voice. This is an OPTIONAL feature, completely separate from the rest of the program: without an ElevenLabs key, nothing changes, and the classic flow with the converter remains operational.
+    A completed reader's theatre script (Script mode) has two independent outputs: a multi-voice ElevenLabs Studio project (audio) and an HTML version for screen readers. These are two ways to "hear" the same play — you can use one, the other, or both. Both are optional and do not change the classic flow with the converter.
+
+    ─────────── Bridge to ElevenLabs Studio (audio, optional) ───────────
+
+    The bridge converts the script into a multi-voice Studio project — the narrator and each character receive a separate voice. Without an ElevenLabs key nothing changes: the bridge simply stays hidden.
 
     ElevenLabs Key (optional)
 
-    Paste your ElevenLabs key into the golden_key.env file, on a separate line: ELEVENLABS_API_KEY=sk_... Note: the ElevenLabs key starts with sk_ (with an UNDERSCORE), unlike the OpenAI key (sk-). If you use a restricted key, grant it the permissions (scopes) projects_write and voices_read. The key status is visible on the main screen (System Check) — the absence of a key is not an error, the bridge simply remains hidden.
+    Paste your ElevenLabs key into the golden_key.env file, on a separate line: ELEVENLABS_API_KEY=sk_... Note: the ElevenLabs key starts with sk_ (with an UNDERSCORE), unlike the OpenAI key (sk-). A restricted key needs the permissions (scopes) projects_write and voices_read. The key status is visible on the main screen (System Check) — the absence of a key is not an error, the bridge simply remains hidden.
 
-    The bridge appears in the Director's panel in Script mode (when the key is valid). It operates on a completed play saved on disk — first generate or load a project, then proceed to the bridge.
+    The bridge appears in the Director's panel in Script mode (when the key is valid). It operates on a completed play saved on disk — first generate or load a project.
 
     Step 1 — Voice Cast
 
-    Click "Voice Cast…". The application will load the characters with lines from your script and will always add a Narrator slot (the narrator is the default voice — reads chapter titles and all narration). For each speaker, paste the voice ID. How to obtain a voice ID in ElevenLabs (in the browser): go to the Voices tab, find the voice and play a sample to ensure it's the right one; open "More actions" for that voice and select "Copy Voice ID"; paste the copied identifier into the appropriate field. You can use premade voices or your own, including those created in the Voice Design tab. You can leave fields empty and return later — the save is a draft.
+    Click "Voice Cast…". The application loads the characters that have lines and always adds a Narrator slot (the narrator is the default voice — chapter titles and all narration). For each speaker, paste the voice ID: in the browser go to the Voices tab, find the voice and play a sample, open "More actions" → "Copy Voice ID", and paste it into the field. You can use premade voices or your own (Voice Design). You can leave fields empty and return later — the save is a draft.
 
     Step 2 — Build the Project
 
-    Click "Create ElevenLabs Studio Project…". The application will check if the script has at least one chapter (Prologue/Act/Chapter) and if each speaker and narrator have an assigned voice, then create a multi-voice Studio project divided into chapters in your account. Creating the project itself does NOT consume credits.
+    Click "Create ElevenLabs Studio Project…". The application checks that the script has at least one chapter (Prologue/Act/Chapter) and that every voice is assigned, then creates a multi-voice Studio project divided into chapters in your account. Creating the project itself does NOT consume credits. The application also sets the project language right away (correct pronunciation of heading lines) and volume normalization to the audiobook standard — it does this via the API so you don't have to open the project settings in the browser.
 
     Step 3 — Render in the Browser
 
-    After creating the project, the application will display its identifier and a button to open ElevenLabs Studio. In the browser, find the project, render the speech (this is what consumes credits — approximately 1 credit per character), and then export the audio file or publish the project to Eleven Reader. Rendering and publishing are done on your side, consciously — the application only builds the project.
+    After creating the project, the application displays its identifier and a button to open ElevenLabs Studio. In the browser, find the project, render the speech (this is what consumes credits — roughly 1 credit per character), then export the audio file or publish the project to Eleven Reader. Rendering and publishing are done on your side, consciously — the application only builds the project.
 
-    Why reader's theatre and not sound effects? In earlier versions, Script mode produced raw effects [SFX: ...] without a narrator. The bridge to a finished, multi-voice recording requires the context (place, time, action) to be conveyed by the narrator's words: sound effects in Studio are not accessible to screen readers, and the model either realizes the narrator or effects — never both stably at once. Therefore, Script mode is now reader's theatre: narrator plus dialogue, without SFX.
+    Expression and accents (Eleven v3 model)
+
+    The project is built on the Eleven v3 model (over 70 languages). Emotion is NOT expressed with capital letters, ellipses, or dashes — the engine ignores that. Instead, the Director weaves English v3 audio tags into the lines, e.g. [whispers], [sighs], [angry], [laughs] — these drive the expression and work regardless of the spoken language. A character's ACCENT, however, comes from the VOICE SAMPLE: if you want someone to speak, say, English with a foreign accent, pick or design (in Voice Design) a voice whose sample carries that accent. In practice, experiment with the voice prompt until you hear, for example, an English sample with a Finnish accent — the v3 model preserves that accent in the finished recording. Tip: very long sentences weaken the accent, which is why the Director is already asked in the prompt to keep sentences short.
+
+    Awareness of the v3 model (alpha stage)
+
+    Eleven v3 is the most expressive but still in alpha. Occasionally a single line renders as crackling instead of speech — just regenerate it in Studio (each block has a few free regenerations). The ElevenLabs project settings may also display recommendations to switch the model (to Eleven Flash v2.5 or Multilingual v2) — this is NOT an error, just an engine hint. If you don't want to see these messages, simply don't open the project settings: the application has already set everything needed via the API (model, language, volume normalization).
+
+    Why reader's theatre and not sound effects? In earlier versions, Script mode produced raw effects [SFX: ...] without a narrator. A bridge to a finished, multi-voice recording, however, requires the context (place, time, action) to be conveyed by the narrator's words: sound effects in Studio are not accessible to screen readers, and the model realizes either the narrator or the effects — never both stably at once. Therefore, Script mode is now reader's theatre: narrator plus dialogue, without SFX.
+
+    ─────────── Screen-reader version (HTML, without ElevenLabs) ───────────
+
+    In Script mode, regardless of the ElevenLabs key, you have a "Generate Screen Reader Version" button. It creates the file skrypty/<name>_screen_reader.html — a separate output for people who use screen readers (e.g. NVDA). It works like this: character lines that have an accent defined in the World Book (e.g. an entry "[Joana] Finnish accent") receive a phonetic spelling (deliberately "broken" orthography) and a language tag (the lang attribute), so the screen reader reads them with the correct foreign accent. v3 audio tags (e.g. [whispers]) are removed in this version — the reader is not supposed to read them aloud. Prologue/Act/Scene headers become HTML headings, so the document is easy to navigate.
+
+    This deliberately complements the audio bridge: for the v3 model the accent comes from the voice sample, and for the screen reader — from orthography plus the language tag. That is why the orthography in the audio version stays clean (v3 picks the language itself), and "breaking" the orthography goes only into the separate HTML file, where it is desirable.
   krok_4_postprodukcja: |
     STEP 4: Postproduction in Directing
 
@@ -377,7 +397,7 @@ tresc:
 
     However, with the release of Tiflotecnia Voices, a new critical catch emerged — in language detection. In the add-on settings, you can configure which voice should be used for specific letters (e.g., Latin, Cyrillic) depending on the installed voices. The problem lies in the priority order: currently, it first applies an override per letter, then falls back to the ISO language code (practically unreachable for the SAME alphabet to which the override has already matched), and finally the selected voice. The effect appears within the same alphabet: you have Finnish text with the correct `lang="fi"` tag, Satu installed as the Finnish Tiflotecnia voice, BUT in the settings, a Polish voice is set for Latin letters — Satu WILL NOT read this text, despite the correct ISO tag. The per-letter "Polish voice for Latin" override wins at the first level, and ISO `fi` is never checked. For different alphabet pairs, the mechanism works correctly (Russian text + Milena for Cyrillic + Polish voice for Latin — all Cyrillic goes to Milena, any Latin proper names with the Polish voice; each alphabet stays in its override). After migrating from Vocalizer, where language switching based on ISO worked flawlessly, users will notice this regression immediately — especially those who use several European accents (Satu, Alice, Markus) in Polyglot on the same Latin letter pool.
 
-    Diagnosis and patch: I diagnosed the issue at the Python level in the add-on code and prepared a patch changing the priority order to: ISO → selected voice → letter override. The patch retains useful switching to Latin for Latin names in Russian text when "language detection based on Unicode characters" is enabled in the settings. I sent the patch to Tiflotecnia developers 5 days ago — no response yet.
+    Diagnosis and patch: I diagnosed the issue at the Python level in the add-on code and prepared a patch changing the priority order to: ISO → selected voice → letter override. The patch retains useful switching to Latin for Latin names in Russian text when "language detection based on Unicode characters" is enabled in the settings. I sent the patch to the Tiflotecnia developers — no response so far, so they most likely stand by their own solution. If the add-on gets an update, I will update the patch if needed.
 
     What to do in the meantime: if you care about correct language detection (it's worth it — it was one of the killer features of the old Vocalizer, see "Killer Feature for the Blind" above), open an issue in the application's GitHub repository with the label `tiflotecnia-patch` and your email address in the content. It's a good idea to add a short description of your problem in your own language (2–3 sentences are enough) — the bot will detect the language (supported: Polish, English, German, Spanish, Finnish, French, Icelandic, Italian, Russian) and reply in the same one; without a description or in another language, the reply will come in English. An automatic bot will immediately close the issue with a confirmation of submission (without a trace in the public thread), and you will usually receive the patch privately via email within a few days. The patch itself is NOT published in the application repository or as a Gist — Tiflotecnia Voices for NVDA is commercial software, and the add-on license does not allow redistribution of its files, even modified. After receiving the patch, its contents must be copied to `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`, replacing the files. Be careful when copying: if Windows did not ask for a replacement, you most likely copied the entire `TiflotecniaVoices_edits` folder with its contents INSTEAD of just the contents — in such a case, go into the created subfolder, cut everything, paste it one level up, and overwrite. After successfully applying the patch, restart NVDA — enjoy better quality Cerrence 64-bit voices and correct language detection, a combo not available from any single manufacturer on the market. We assume, of course, that you have a valid Tiflotecnia Voices license — we do not verify this, but you won't be able to apply the patch to someone else's folder without a license.
   krok_6_architekt: |

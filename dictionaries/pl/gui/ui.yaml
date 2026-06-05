@@ -473,6 +473,20 @@ rezyser:
     Głosy: narrator jest głosem domyślnym (tytuły rozdziałów i narracja); pozostali mówcy mają głosy z przypisanej obsady.
   el_btn_otworz_studio: "Otwórz ElevenLabs Studio"
   el_raport_btn_zamknij: "Zamknij"
+  # Wersja dla czytników ekranu (v16.1) — osobne wyjście Skryptu: HTML z akcentem
+  # przez psucie ortografii + atrybut lang (NVDA), audio-tagi usuwane.
+  sr_heading: "📖 Wersja dla czytników ekranu (NVDA)"
+  sr_info: |-
+    Zbuduj z gotowego skryptu osobny plik HTML dla czytników ekranu: kwestie postaci z akcentem dostają zapis fonetyczny i znacznik języka (lang), więc czytnik ekranu czyta je z właściwym akcentem. Most ElevenLabs używa do tego czystego tekstu i głosu z akcentem — to dwa niezależne wyjścia tego samego skryptu.
+  btn_sr_label: "📖 Generuj wersję dla czytników ekranu"
+  btn_sr_name: "Generuj wersję dla czytników ekranu"
+  btn_sr_tooltip: |-
+    Tworzy plik skrypty/<nazwa>_screen_reader.html: akcenty przez psucie ortografii + znacznik języka, audio-tagi usunięte.
+    Wymaga zapisanego pliku projektu; Księga Świata określa, która postać ma jaki akcent.
+  sr_sukces_tytul: "Wersja dla czytników ekranu gotowa"
+  sr_sukces_tresc: "Zapisano plik dla czytników ekranu: skrypty/{nazwa_pliku}_screen_reader.html"
+  sr_blad_tytul: "Błąd generowania wersji dla czytników ekranu"
+  sr_blad_tresc: "Nie udało się wygenerować wersji dla czytników ekranu:\n{tresc_bledu}"
   postprod_info: |-
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"

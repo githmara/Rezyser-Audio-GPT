@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 16.0 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 16.1 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -92,7 +92,7 @@ Eksperyment się nie sprawdził. AI często donorycznie łamie jeden z fundament
 
 Wszystkie Twoje wygenerowane skrypty i książki zapisują się w zwykłych plikach tekstowych (.txt), które z łatwością otworzysz w Notatniku.
 
-Jako Reżyser masz PEŁNE PRAWO (a wręcz obowiązek) edytować ten plik! Jeśli sztuczna inteligencja zagalopuje się i np. sama rozwiąże problem bohaterów na końcu wygenerowanego fragmentu, otwórz plik, usuń ostatnie linijki i zostaw tekst urwany w najbardziej napiętym momencie, zanim wyczyścisz pamięć, wczytasz plik na nowo w celu przeładowania okna kontekstowego i klikniesz "Wyślij do AI" w celu kontynuacji.
+Jako Reżyser masz PEŁNE PRAWO (a wręcz obowiązek) edytować ten plik! Jeśli sztuczna inteligencja zagalopuje się i np. sama rozwiąże problem bohaterów na końcu wygenerowanego fragmentu, otwórz plik, usuń ostatnie linijki i zostaw tekst urwany w najbardziej napiętym momencie, a następnie kliknij "Odśwież z dysku", aby zsynchronizować pamięć modelu z poprawionym plikiem, i "Wyślij do AI" w celu kontynuacji.
 
 🔴 JEDNAKŻE - CZEGO NIE WOLNO CI DOTYKAĆ:
 
@@ -134,7 +134,7 @@ Dyrektywa Anti-Closure — stan w wersji 8
 
 Mimo testowania różnych podejść, zakaz Anti-Closure jest często notorycznie łamany przez model, szczególnie w Trybie Tradycyjnego Audiobooka. AI ma silną tendencję do "zamykania" historii przy każdej okazji — wplata zdania podsumowujące fabułę, tworzy fałszywe happy endy lub domyka wątki w środku rozdziału, jakby każdy fragment był ostatnim. Efekt jest taki, że kolejny fragment zaczyna się od zera, bez naturalnej ciągłości.
 
-Właśnie dlatego tak ważna jest zasada montażysty opisana powyżej: jeśli AI złamie zakaz i samo zamknie scenę, Twoim zadaniem jako Reżysera jest otworzyć plik .txt, usunąć te ostatnie zdania i zostawić tekst urwany w napiętym momencie przed wczytaniem go z powrotem do aplikacji.
+Właśnie dlatego tak ważna jest zasada montażysty opisana powyżej: jeśli AI złamie zakaz i samo zamknie scenę, Twoim zadaniem jako Reżysera jest otworzyć plik .txt, usunąć te ostatnie zdania i zostawić tekst urwany w napiętym momencie, a potem kliknąć "Odśwież z dysku", by zsynchronizować pamięć z poprawionym plikiem.
 
 Każdy tryb posiada wbudowaną dyrektywę Anti-Closure:
 
@@ -176,10 +176,12 @@ Akumulator Fabuły — jak działa pamięć AI
 
 Do pamięci modelu trafia wyłącznie czysty tekst opowieści — to, co AI faktycznie napisało. Instrukcje, opcje i plany znikają po użyciu i nie zaśmiecają kontekstu. Efekt? Model dłużej utrzymuje skupienie, lepiej pamięta akcenty postaci i rzadziej "ucieka" od zasad Księgi Świata.
 
-Wskaźnik "Pamięć Modelu" na ekranie pokazuje, ile miejsca zajmuje już Twoja historia:
-- Zielony (do 150 000 znaków): Model jest w pełni skupiony, masz bezpieczny bufor.
-- Żółty (150 000 – 175 000 znaków): Zbliżasz się do granicy. AI może zacząć skracać wypowiedzi i ignorować zasady. Zacznij powoli domykać wątek.
-- Czerwony (powyżej 175 000 znaków): Krytyczne przeładowanie!
+Wskaźnik "Pamięć Modelu" na ekranie pokazuje, jak bardzo zapełnione jest okno kontekstowe modelu. Od wersji 15.1 to NIE jest już liczenie samych znaków historii — aplikacja liczy realne TOKENY (tą samą metodą, którą posługuje się model) i sumuje CAŁY ładunek wysyłany do AI: bieżącą historię, Pamięć Długotrwałą (streszczenie) ORAZ Księgę Świata. Dlatego wskaźnik rośnie także wtedy, gdy rozbudowujesz Księgę Świata albo masz długie streszczenie — nie tylko od samej narracji. Wartość pokazywana jest jako procent zapełnienia okna:
+- Zielony (do ok. 70%): Model jest w pełni skupiony, masz bezpieczny bufor.
+- Żółty (ok. 70–90%): Zbliżasz się do granicy. AI może zacząć skracać wypowiedzi i ignorować zasady; w trybie planowania (Burza Mózgów) silnik zaczyna wymuszać streszczenie. Zacznij powoli domykać wątek.
+- Czerwony (powyżej ok. 90%): Krytyczne przeładowanie!
+
+Diagnostyka progu streszczenia (gdy AI halucynuje wcześniej, niż zakłada próg): progi (ostrzeżenie ~70%, alarm ~90%) są oszacowane empirycznie. Jeśli zauważysz powtarzalną tendencję, że model „ucieka" od zasad albo zaczyna halucynować ZANIM wskaźnik wejdzie w żółty/czerwony — czyli wcześniej, niż zakłada próg — otwórz issue w repozytorium aplikacji i opisz, przy jakim mniej więcej zapełnieniu (procencie) faktycznie zaczyna się sypać, najlepiej z przykładem. Jeśli ta tendencja potwierdzi się szerzej (u innych użytkowników, na różnych projektach), próg automatycznego streszczenia zostanie obniżony w kolejnym patchu. To świadomie iteracyjny mechanizm — lepiej dostroić go na realnych danych niż zgadywać z góry.
 
 Nieskończona Pamięć (z wersji 6, zachowana)
 
@@ -192,9 +194,13 @@ Automatyczne streszczowanie: Gdy pamięć wejdzie w stan alarmowy, Burza Mózgó
 Inteligentne wczytywanie i odświeżanie z dysku (zaktualizowane w v15.5): Zarówno przy wczytywaniu projektu, jak i po kliknięciu nowego przycisku „Odśwież z dysku" (po ręcznej edycji pliku narracji w edytorze), aplikacja sama decyduje, jak pogodzić pamięć z dyskiem. Jeśli CAŁA historia mieści się w oknie kontekstu — wczytuje ją w całości, a zbędne stare streszczenie kasuje, żeby silnik pracował na pełnym tekście (to domyka dawną lukę, w której model dostawał samo streszczenie bez kontekstu ostatnich scen). Jeśli historia jest DŁUGA i ma zapisany plik streszczenia — zachowuje streszczenie nietknięte, a do Pamięci Bieżącej wstawia tylko świeżą końcówkę liczoną od ostatniego nagłówka struktury (Rozdział/Akt/Scena). Dzięki temu nie marnujesz tokenów na ponowne ładowanie całej historii, a jednocześnie kolejne streszczenie nie powstaje na nieaktualnych danych.
 
 
-KROK 3b: Most do ElevenLabs Studio (teatr czytany → wielogłosowy audiobook)
+KROK 3b: Dwa wyjścia Skryptu — wielogłosowy audiobook (ElevenLabs) i wersja dla czytników ekranu
 
-Od wersji 16.0 gotowy skrypt teatru czytanego (tryb Skrypt) możesz zamienić w wielogłosowy projekt ElevenLabs Studio — narrator i każda postać dostają osobny głos. To funkcja OPCJONALNA, w pełni odrębna od reszty programu: bez klucza ElevenLabs nic się nie zmienia, działa klasyczny przepływ z konwerterem.
+Gotowy skrypt teatru czytanego (tryb Skrypt) ma dwa niezależne wyjścia: wielogłosowy projekt ElevenLabs Studio (audio) oraz wersję HTML dla czytników ekranu. To dwa sposoby „usłyszenia" tej samej sztuki — możesz użyć jednego, drugiego albo obu. Oba są opcjonalne i nie zmieniają klasycznego przepływu z konwerterem.
+
+─────────── Most do ElevenLabs Studio (audio, opcjonalny) ───────────
+
+Most zamienia skrypt w wielogłosowy projekt Studio — narrator i każda postać dostają osobny głos. Bez klucza ElevenLabs nic się nie zmienia: most po prostu pozostaje ukryty.
 
 Klucz ElevenLabs (opcjonalny)
 
@@ -208,13 +214,27 @@ Kliknij „Obsada głosowa…". Aplikacja wczyta z Twojego skryptu postacie, kt�
 
 Krok 2 — Zbuduj projekt
 
-Kliknij „Stwórz projekt ElevenLabs Studio…". Aplikacja sprawdzi, czy skrypt ma przynajmniej jeden rozdział (Prolog/Akt/Rozdział) i czy każdy mówca oraz narrator mają przypisany głos, a następnie utworzy w Twoim koncie wielogłosowy projekt Studio podzielony na rozdziały. Samo utworzenie projektu NIE zużywa kredytów.
+Kliknij „Stwórz projekt ElevenLabs Studio…". Aplikacja sprawdzi, czy skrypt ma przynajmniej jeden rozdział (Prolog/Akt/Rozdział) i czy każdy mówca oraz narrator mają przypisany głos, a następnie utworzy w Twoim koncie wielogłosowy projekt Studio podzielony na rozdziały. Samo utworzenie projektu NIE zużywa kredytów. Aplikacja od razu ustawia język projektu (poprawna wymowa linii nagłówkowych) oraz normalizację głośności do standardu audiobooka — robi to przez API, żebyś nie musiał wchodzić w ustawienia projektu w przeglądarce.
 
 Krok 3 — Render w przeglądarce
 
 Po utworzeniu projektu aplikacja pokaże jego identyfikator oraz przycisk otwierający ElevenLabs Studio. W przeglądarce odnajdź projekt, wyrenderuj mowę (to dopiero zużywa kredyty — orientacyjnie 1 kredyt za znak), a potem wyeksportuj plik audio lub opublikuj projekt do Eleven Reader. Render i publikacja odbywają się po Twojej stronie, świadomie — aplikacja jedynie buduje projekt.
 
-Dlaczego teatr czytany, a nie efekty dźwiękowe? We wcześniejszych wersjach tryb Skrypt produkował surowe efekty [SFX: ...] bez narratora. Most do gotowego, wielogłosowego nagrania wymaga jednak, by kontekst (miejsce, czas, akcja) niósł narrator słowami: efekty dźwiękowe w Studio nie są dostępne dla czytników ekranu, a model i tak realizuje albo narratora, albo efekty — nigdy stabilnie obu naraz. Dlatego tryb Skrypt to teraz teatr czytany: narrator plus dialog, bez SFX.
+Ekspresja i akcenty (model Eleven v3)
+
+Projekt powstaje na modelu Eleven v3 (ponad 70 języków). Emocji NIE wyraża się wielkimi literami, wielokropkami ani myślnikami — silnik to ignoruje. Zamiast tego Reżyser wplata w kwestie angielskie audio-tagi v3, na przykład [whispers], [sighs], [angry], [laughs] — to one sterują ekspresją i działają niezależnie od języka mowy. AKCENT postaci bierze się natomiast z PRÓBKI GŁOSU: jeśli chcesz, by ktoś mówił np. po polsku z obcym akcentem, dobierz lub zaprojektuj w Voice Design głos, którego próbka ma ten akcent. W praktyce eksperymentuj z promptem głosu, aż usłyszysz np. polską próbkę z fińskim akcentem — model v3 ten akcent zachowa w gotowym nagraniu. Wskazówka: bardzo długie zdania osłabiają akcent, dlatego Reżyser jest już proszony w prompcie o krótkie zdania.
+
+Świadomość modelu v3 (faza alpha)
+
+Eleven v3 jest najbardziej ekspresyjny, ale wciąż w fazie alpha. Bywa, że pojedyncza replika wyrenderuje się jako trzeszczenie zamiast mowy — wystarczy ją zregenerować w Studio (każdy blok ma kilka darmowych regeneracji). W ustawieniach projektu ElevenLabs może też wyświetlać rekomendacje zmiany modelu (na Eleven Flash v2.5 lub Multilingual v2) — to NIE jest błąd, tylko podpowiedź silnika. Jeśli nie chcesz tych komunikatów widzieć, po prostu nie otwieraj ustawień projektu: aplikacja ustawiła już przez API wszystko, co potrzebne (model, język, normalizację głośności).
+
+Dlaczego teatr czytany, a nie efekty dźwiękowe? We wcześniejszych wersjach tryb Skrypt produkował surowe efekty [SFX: ...] bez narratora. Most do gotowego, wielogłosowego nagrania wymaga jednak, by kontekst (miejsce, czas, akcja) niósł narrator słowami: efekty dźwiękowe w Studio nie są dostępne dla czytników ekranu, a model i tak realizuje albo narratora, albo efekty — nigdy stabilnie obu naraz. Dlatego tryb Skrypt to teatr czytany: narrator plus dialog, bez SFX.
+
+─────────── Wersja dla czytników ekranu (HTML, bez ElevenLabs) ───────────
+
+W trybie Skrypt, niezależnie od klucza ElevenLabs, masz przycisk „Generuj wersję dla czytników ekranu". Tworzy on plik skrypty/<nazwa>_screen_reader.html — osobne wyjście dla osób korzystających z czytników ekranu (np. NVDA). Działa tak: kwestie postaci, które w Księdze Świata mają zdefiniowany akcent (np. wpis „[Joana] akcent fiński"), dostają zapis fonetyczny (celowo „psuta" ortografia) oraz znacznik języka (atrybut lang), dzięki czemu czytnik ekranu czyta je z właściwym, obcym akcentem. Audio-tagi v3 (np. [whispers]) są w tej wersji usuwane — czytnik nie ma ich czytać na głos. Nagłówki Prolog/Akt/Scena stają się nagłówkami HTML, więc po dokumencie wygodnie się nawiguje.
+
+To świadome dopełnienie mostu audio: akcent dla modelu v3 niesie próbka głosu, a dla czytnika ekranu — ortografia plus znacznik języka. Dlatego ortografia w wersji audio pozostaje czysta (v3 sam dobiera język), a „psucie" ortografii trafia wyłącznie do osobnego pliku HTML, gdzie jest pożądane.
 
 
 KROK 4: Postprodukcja w Reżyserii
@@ -374,7 +394,7 @@ Najpierw dobra wiadomość — alarm o NVDA 2026.1 z poprzednich wersji manuala 
 
 Wraz z premierą Tiflotecnia Voices pojawił się jednak nowy krytyczny haczyk — w detekcji języka. W ustawieniach dodatku można skonfigurować, jaki głos ma być używany dla określonych liter (np. łacińskich, cyrylicznych) zależnie od zainstalowanych głosów. Problem jest w kolejności priorytetów: aktualnie najpierw stosuje się override per-litera, potem fallback do kodu ISO języka (w praktyce nieosiągalny dla TEGO SAMEGO alfabetu, do którego już dopasował się override), na końcu wybrany głos. Skutek pojawia się w obrębie tego samego alfabetu: masz tekst po fińsku z poprawnym tagiem `lang="fi"`, zainstalowaną Satu jako fiński głos Tiflotecnia, ALE w ustawieniach ustawiony polski głos dla liter łacińskich — Satu NIE odczyta tego tekstu, mimo właściwego tagu ISO. Override per-litera „polski głos dla łaciny" wygrywa pierwszym poziomem, ISO `fi` nigdy nie jest sprawdzane. Dla par różnoalfabetowych mechanizm działa poprawnie (rosyjski tekst + Milena dla cyrylicy + polski głos dla łaciny — cała cyrylica idzie Mileną, ewentualne łacińskie nazwy własne polskim głosem; każdy alfabet siedzi w swoim override-cie). Po migracji z Vocalizera, w którym przełączanie języka na podstawie ISO działało wzorowo, użytkownicy zauważą tę regresję od razu — szczególnie ci, którzy w Poliglocie korzystają z kilku akcentów europejskich (Satu, Alice, Markus) na tej samej łacińskiej puli liter.
 
-Diagnoza i patch: zdiagnozowałem problem na poziomie Pythona w kodzie dodatku i przygotowałem patch zmieniający kolejność priorytetów na: ISO → wybrany głos → litera-override. Patch zachowuje pożyteczne przełączanie na łacinę dla łacińskich nazw w rosyjskim tekście, gdy w ustawieniach włączone jest „wykrywanie języka na podstawie znaków Unicode". Wysłałem patch do deweloperów Tiflotecnia 5 dni temu — póki co bez odpowiedzi.
+Diagnoza i patch: zdiagnozowałem problem na poziomie Pythona w kodzie dodatku i przygotowałem patch zmieniający kolejność priorytetów na: ISO → wybrany głos → litera-override. Patch zachowuje pożyteczne przełączanie na łacinę dla łacińskich nazw w rosyjskim tekście, gdy w ustawieniach włączone jest „wykrywanie języka na podstawie znaków Unicode". Wysłałem patch do deweloperów Tiflotecnia — póki co bez odpowiedzi, więc najpewniej pozostają przy swoim rozwiązaniu. Jeśli dodatek doczeka się aktualizacji, w razie potrzeby zaktualizuję patcha.
 
 Co zrobić w międzyczasie: jeśli zależy Ci na poprawnym wykrywaniu języka (warto — to było jednym z killer features starego Vocalizera, patrz „Killer Feature dla niewidomych" wyżej), otwórz issue w repozytorium aplikacji na GitHubie z etykietą `tiflotecnia-patch` i adresem email w treści. Warto dorzucić krótki opis problemu w swoim języku (wystarczą 2-3 zdania) — bot rozpozna język (wspierane: polski, angielski, niemiecki, hiszpański, fiński, francuski, islandzki, włoski, rosyjski) i odeśle maila w tym samym; bez opisu lub w innym języku odpowiedź przyjdzie po angielsku. Automatyczny bot natychmiast zamknie issue z potwierdzeniem zgłoszenia (bez śladu w wątku publicznym), a patcha otrzymasz prywatnie emailem zwykle w ciągu kilku dni. Sam patch NIE jest publikowany w repo aplikacji ani jako Gist — Tiflotecnia Voices for NVDA jest oprogramowaniem komercyjnym, a licencja dodatku nie zezwala na redystrybucję jego plików, nawet zmodyfikowanych. Po otrzymaniu patcha jego zawartość trzeba skopiować do `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`, zamieniając pliki. Uwaga przy kopiowaniu: jeśli Windows nie zapytał o zamianę, najprawdopodobniej skopiowałeś cały folder `TiflotecniaVoices_edits` z jego zawartością ZAMIAST samej zawartości — w takim wypadku wejdź do utworzonego podfolderu, wytnij wszystko, wklej poziom wyżej i nadpisz. Po pomyślnym zaaplikowaniu patcha uruchom ponownie NVDA — cieszysz się lepszą jakością głosów Cerrence 64-bit oraz poprawnym wykrywaniem języka, czyli combo nie do dostania od żadnego pojedynczego producenta na rynku. Zakładamy oczywiście, że masz ważną licencję Tiflotecnia Voices — nie weryfikujemy tego, ale patcha bez licencji i tak nie zaaplikujesz na cudzy folder.
 

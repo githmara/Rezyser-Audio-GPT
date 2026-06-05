@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **16.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **16.1** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -76,7 +76,7 @@ Forritið skiptir verkefnum á snjallan hátt til að hámarka kostnað og hrað
 
 Þrátt fyrir innleiðingu strangra kerfisleiðbeininga sem krefjast þess að stöðva aðgerðir á spennustundum (svokölluð Anti-Closure leiðbeining), hafa nútíma LLM módel sterka, meðfædda tilhneigingu til að „loka" sögum. Þetta leiðir oft til óæskilegra niðurstaðna, siðferðis eða falskra „hamingjusamra enda", sérstaklega í Hefðbundnum Hljóðbókaham.
 
-Þetta er grundvallartakmörkun núverandi kynslóðar gervigreindar. Af þessum sökum geymir forritið verkefni í venjulegum, auðveldum til að breyta textaskrám (`.txt`). Þetta krefst þess að notandinn taki á sig hlutverk lifandi klippara — að fjarlægja handvirkt síðustu, „loka" setningar sem AI hefur búið til, áður en skráin er hlaðin aftur og vinnan heldur áfram.
+Þetta er grundvallartakmörkun núverandi kynslóðar gervigreindar. Af þessum sökum geymir forritið verkefni í venjulegum, auðveldum til að breyta textaskrám (`.txt`). Þetta krefst þess að notandinn taki á sig hlutverk lifandi klippara — að fjarlægja handvirkt síðustu, „loka" setningar sem AI hefur búið til, og samstilla síðan minnið við leiðréttu skrána með hnappnum „Endurhlaða af diski", og halda vinnunni áfram.
 
 
 ## Uppsetning og keyrsla

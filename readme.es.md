@@ -7,7 +7,7 @@
 
 Conjunto de herramientas autocontenidas impulsadas por IA para la escritura automática, planificación, formato y traducción de guiones extensos, así como para la ejecución de juegos de texto interactivos. El proyecto es una aplicación de escritorio nativa (wxPython) diseñada desde cero con plena accesibilidad para lectores de pantalla (NVDA, VoiceOver) y compatibilidad con sintetizadores de voz profesionales (TTS). Funciona sin navegador y sin servidor local: se ejecuta como una ventana de programa normal.
 
-Versión: **16.0** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versión: **16.1** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Módulos principales
@@ -76,7 +76,7 @@ La aplicación distribuye inteligentemente las tareas, optimizando los costos y 
 
 A pesar de la implementación de directrices sistemáticas rigurosas que ordenan cortar la acción en momentos de tensión (la llamada directriz Anti-Closure), los modelos LLM modernos tienen una fuerte tendencia innata a "cerrar" las historias. Esto resulta en la frecuente inclusión de conclusiones no deseadas, moralejas o falsos "finales felices", especialmente en el Modo de Audiolibro Tradicional.
 
-Esta es una limitación fundamental de la generación actual de inteligencia artificial. Por esta razón, la aplicación guarda los proyectos en archivos de texto simples y fáciles de editar (`.txt`). Esto requiere que el usuario asuma el papel de un editor humano, eliminando manualmente las últimas oraciones "cerradoras" generadas por la IA antes de volver a cargar el archivo y continuar trabajando.
+Esta es una limitación fundamental de la generación actual de inteligencia artificial. Por esta razón, la aplicación guarda los proyectos en archivos de texto simples y fáciles de editar (`.txt`). Esto requiere que el usuario asuma el papel de un editor humano, eliminando manualmente las últimas oraciones "cerradoras" generadas por la IA, y luego sincronizando la memoria con el archivo corregido mediante el botón "Actualizar desde disco", y continuando trabajando.
 
 
 ## Instalación y ejecución

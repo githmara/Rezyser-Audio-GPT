@@ -153,8 +153,12 @@ API_BASE = "https://api.elevenlabs.io"
 #: projekt i wyrenderował mowę (deep-link per-projekt celowo pominięty —
 #: format URL bywa zmienny; user odnajduje projekt po nazwie/ID).
 STUDIO_URL = "https://elevenlabs.io/app/studio"
-#: Model wielojęzyczny — pokrywa wszystkie 9 języków paczek (w tym PL).
-DEFAULT_MODEL_ID = "eleven_multilingual_v2"
+#: Model wielojęzyczny. v16.1: eleven_v3 — 70+ języków (pokrywa wszystkie 9
+#: paczek) ORAZ honoruje audio-tagi ([whispers], [sighs]…), których tryb Skrypt
+#: wplata w treść replik. Spike v16.1 potwierdził, że Studio Projects
+#: (from_content_json) przyjmuje ten model_id. Poprzednio: eleven_multilingual_v2
+#: (29 języków, ZERO tagów audio).
+DEFAULT_MODEL_ID = "eleven_v3"
 _TIMEOUT_ODCZYT = 30
 _TIMEOUT_PROJEKT = 120
 
@@ -222,6 +226,8 @@ def create_project(
     chapters: list,
     *,
     model_id: str = DEFAULT_MODEL_ID,
+    language: str | None = None,
+    volume_normalization: bool = True,
 ) -> str:
     """Tworzy wielogłosowy projekt Studio. ``auto_convert`` POMINIĘTY → 0 kredytów.
 
@@ -240,7 +246,20 @@ def create_project(
                            ``{"name": str, "blocks": [...]}``, blok to
                            ``{"sub_type": "h1"|"p", "nodes": [tts_node, ...]}``,
                            a tts_node to ``{"voice_id", "text", "type": "tts_node"}``.
-        model_id:          Domyślnie ``eleven_multilingual_v2``.
+        model_id:          Domyślnie ``eleven_v3`` (:data:`DEFAULT_MODEL_ID`).
+        language:          Kod ISO 639-1 języka projektu (np. ``"pl"``, ``"de"``).
+                           Ustawia domyślny język Studio — bez niego v3 bywa
+                           niespójny na liniach nagłówkowych (Prolog/Akt/Scena).
+                           ``None`` → pole pomijane (Studio decyduje samo).
+                           UWAGA: dla głosu z celowo obcym akcentem (np. fiński
+                           akcent na polskim tekście) ustawienie języka może
+                           osłabić ten efekt — to świadomy tradeoff renderu.
+        volume_normalization: Włącza „Volume normalization" Studio („Normalize
+                           volume to meet audiobook standards"). Domyślnie ``True``
+                           — wyrównuje głośność do standardu audiobooka i, co
+                           ważne, ustawia to przez API, więc reżyser nie musi
+                           otwierać ustawień projektu w webie (gdzie v3-alpha
+                           wyświetla nagabywania o zmianę modelu na Flash/v2).
 
     Returns:
         ``project_id`` utworzonego projektu.
@@ -260,6 +279,10 @@ def create_project(
         "default_model_id": (None, model_id),
         "from_content_json": (None, from_content),
     }
+    if language:
+        files["language"] = (None, language)
+    # Boolean jako string "true"/"false" — multipart nie ma typu bool.
+    files["volume_normalization"] = (None, "true" if volume_normalization else "false")
     r = requests.post(
         f"{API_BASE}/v1/studio/projects",
         headers=_naglowki(klucz),

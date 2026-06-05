@@ -172,7 +172,7 @@ home:
   blad_otwarcia_pliku_tytul: "Information"
   blad_otwarcia_pliku_tresc: "Impossible d'ouvrir automatiquement le fichier.\nOuvrez-le manuellement :\n{sciezka_pliku}"
   # Post-production audio (ElevenLabs) — optionnel (v16.0)
-  heading_elevenlabs:    "Post-production audio (ElevenLabs) — optionnel"
+  heading_elevenlabs: "Post-production audio (ElevenLabs) — optionnel"
   el_brak: |-
     ℹ️ La clé ElevenLabs n'est pas configurée (optionnel).
     Le pont vers ElevenLabs Studio est inactif — le reste du programme fonctionne normalement.
@@ -630,6 +630,15 @@ rezyser:
   odswiez_calosc_skasowano_tresc: "Toute la narration a été chargée depuis le disque ({liczba_znakow} caractères) — l'intégralité du texte tient dans la fenêtre contextuelle, le résumé devenu superflu a donc été supprimé (le moteur travaille sur l'histoire complète).\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
   odswiez_snap_tresc: "La fin de la narration a été restaurée depuis l'en-tête {naglowek} ({liczba_znakow} caractères). La partie précédente est représentée par le résumé existant, laissé intact.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
   odswiez_koncowka_tresc: "Texte long et sans en-têtes de structure — le dernier fragment de la narration a été restauré ({liczba_znakow} caractères), le résumé est laissé intact. RECOMMANDATION : insérez des en-têtes Chapitre/Acte/Scène pour que l'actualisation tombe sur une limite de scène.\n\nLa Bible du Monde et les compteurs de structure sont inchangés."
+  sr_heading: 📖 Version pour lecteurs d'écran (NVDA)
+  sr_info: "Construisez à partir d'un script prêt un fichier HTML séparé pour les lecteurs d'écran : les répliques des personnages avec un accent reçoivent une transcription phonétique et une balise de langue (lang), de sorte que le lecteur d'écran les lit avec le bon accent. Le pont ElevenLabs utilise pour cela du texte brut et une voix avec accent — ce sont deux sorties indépendantes du même script."
+  btn_sr_label: 📖 Générer une version pour lecteurs d'écran
+  btn_sr_name: Générer une version pour lecteurs d'écran
+  btn_sr_tooltip: "Crée un fichier skrypty/<nazwa>_screen_reader.html : accents par altération orthographique + balise de langue, balises audio supprimées.\nNécessite un fichier de projet enregistré ; le Livre du Monde détermine quel personnage a quel accent."
+  sr_sukces_tytul: Version pour lecteurs d'écran prête
+  sr_sukces_tresc: "Fichier pour lecteurs d'écran enregistré : skrypty/{nazwa_pliku}_screen_reader.html"
+  sr_blad_tytul: Erreur de génération de la version pour lecteurs d'écran
+  sr_blad_tresc: "Échec de la génération de la version pour lecteurs d'écran :\n{tresc_bledu}"
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"

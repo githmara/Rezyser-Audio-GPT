@@ -172,7 +172,7 @@ home:
   blad_otwarcia_pliku_tytul: "Upplýsingar"
   blad_otwarcia_pliku_tresc: "Ekki tókst að opna skrána sjálfkrafa.\nOpnaðu hana handvirkt:\n{sciezka_pliku}"
   # Hljóðeftirvinnsla (ElevenLabs) — valfrjáls (v16.0)
-  heading_elevenlabs:    "Hljóðeftirvinnsla (ElevenLabs) — valfrjáls"
+  heading_elevenlabs: "Hljóðeftirvinnsla (ElevenLabs) — valfrjáls"
   el_brak: |-
     ℹ️ ElevenLabs-lykillinn er ekki stilltur (valfrjálst).
     Brúin að ElevenLabs Studio er óvirk — restin af forritinu virkar eðlilega.
@@ -632,6 +632,15 @@ rezyser:
   odswiez_calosc_skasowano_tresc: "Öll frásögnin var lesin af diski ({liczba_znakow} stafir) — allur textinn komst fyrir í samhengisglugganum, svo óþarfa samantektin var fjarlægð.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
   odswiez_snap_tresc: "Endir frásagnarinnar var endurgerður frá fyrirsögninni „{naglowek}\" ({liczba_znakow} stafir). Fyrri hluta sögunnar er lýst af núverandi samantekt, sem stendur óhreyfð.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
   odswiez_koncowka_tresc: "Textinn er langur og inniheldur engin byggingarfyrirsagnir — síðasti hluti frásagnarinnar var endurgerður ({liczba_znakow} stafir) og samantektin stendur óhreyfð. RÁÐLEGGING: settu inn fyrirsagnir svo endurhleðslan rati nákvæmlega á atriðamörk.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
+  sr_heading: 📖 Útgáfa fyrir skjálesara (NVDA)
+  sr_info: 'Byggðu sérstaka HTML skrá fyrir skjálesara úr tilbúnu handriti: persónur með hreim fá hljóðritun og tungumálamerki (lang), þannig að skjálesarinn les þær með réttum hreim. Most ElevenLabs notar hreinan texta og rödd með hreim til að gera þetta — þetta eru tvö sjálfstæð úttök úr sama handriti.'
+  btn_sr_label: 📖 Búðu til útgáfu fyrir skjálesara
+  btn_sr_name: Búðu til útgáfu fyrir skjálesara
+  btn_sr_tooltip: "Býr til skrána skrypty/<nazwa>_screen_reader.html: hreim með því að skemma stafsetningu + tungumálamerki, hljóðmerki fjarlægð.\nKrefst vistaðrar verkefnaskrár; Heimabók ákvarðar hvaða persóna hefur hvaða hreim."
+  sr_sukces_tytul: Útgáfa fyrir skjálesara tilbúin
+  sr_sukces_tresc: 'Skrá fyrir skjálesara vistuð: skrypty/{nazwa_pliku}_screen_reader.html'
+  sr_blad_tytul: Villa við að búa til útgáfu fyrir skjálesara
+  sr_blad_tresc: "Ekki tókst að búa til útgáfu fyrir skjálesara:\n{tresc_bledu}"
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"

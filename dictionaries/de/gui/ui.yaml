@@ -172,7 +172,7 @@ home:
   blad_otwarcia_pliku_tytul: "Information"
   blad_otwarcia_pliku_tresc: "Die Datei konnte nicht automatisch geöffnet werden.\nÖffnen Sie sie manuell:\n{sciezka_pliku}"
   # Audio-Postproduktion (ElevenLabs) — optional (v16.0)
-  heading_elevenlabs:    "Audio-Postproduktion (ElevenLabs) — optional"
+  heading_elevenlabs: "Audio-Postproduktion (ElevenLabs) — optional"
   el_brak: |-
     ℹ️ Der ElevenLabs-Schlüssel ist nicht konfiguriert (optional).
     Die Brücke zu ElevenLabs Studio ist inaktiv — der Rest des Programms funktioniert normal.
@@ -632,6 +632,15 @@ rezyser:
   odswiez_calosc_skasowano_tresc: "Die gesamte Erzählung wurde vom Datenträger geladen ({liczba_znakow} Zeichen) — der gesamte Text passte in das Kontextfenster, daher wurde die überflüssige Zusammenfassung entfernt (die Engine arbeitet nun mit der vollständigen Geschichte).\n\nWeltbuch und Strukturzähler bleiben unverändert."
   odswiez_snap_tresc: "Das Ende der Erzählung ab der Überschrift „{naglowek}“ wurde wiederhergestellt ({liczba_znakow} Zeichen). Den früheren Teil repräsentiert die bestehende Zusammenfassung, die unberührt bleibt.\n\nWeltbuch und Strukturzähler bleiben unverändert."
   odswiez_koncowka_tresc: "Der Text ist lang und enthält keine Strukturüberschriften — der letzte Abschnitt der Erzählung wurde wiederhergestellt ({liczba_znakow} Zeichen), die Zusammenfassung bleibt unberührt. EMPFEHLUNG: Fügen Sie Überschriften Kapitel/Akt/Szene ein, damit die Aktualisierung genau die Szenengrenze trifft.\n\nWeltbuch und Strukturzähler bleiben unverändert."
+  sr_heading: 📖 Version für Bildschirmleser (NVDA)
+  sr_info: 'Erstellen Sie aus dem fertigen Skript eine separate HTML-Datei für Bildschirmleser: Figurenrollen mit Akzent erhalten eine phonetische Schreibweise und ein Sprachkennzeichen (lang), sodass der Bildschirmleser sie mit dem richtigen Akzent liest. Die ElevenLabs-Brücke verwendet dafür reinen Text und eine Stimme mit Akzent – das sind zwei unabhängige Ausgaben desselben Skripts.'
+  btn_sr_label: 📖 Version für Bildschirmleser generieren
+  btn_sr_name: Version für Bildschirmleser generieren
+  btn_sr_tooltip: "Erstellt die Datei skrypty/<nazwa>_screen_reader.html: Akzente durch Rechtschreibfehler + Sprachkennzeichen, Audio-Tags entfernt.\nErfordert eine gespeicherte Projektdatei; das Buch der Welt bestimmt, welche Figur welchen Akzent hat."
+  sr_sukces_tytul: Version für Bildschirmleser fertig
+  sr_sukces_tresc: 'Datei für Bildschirmleser gespeichert: skrypty/{nazwa_pliku}_screen_reader.html'
+  sr_blad_tytul: Fehler beim Generieren der Version für Bildschirmleser
+  sr_blad_tresc: "Version für Bildschirmleser konnte nicht generiert werden:\n{tresc_bledu}"
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"

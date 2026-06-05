@@ -1,13 +1,18 @@
-# MODUS DREHBUCH – Regisseur des Lesetheaters (erzähltes Hörspiel)
-# Erzeugt ein ERZÄHLER-UND-DIALOG-Drehbuch: [Erzähler: ...] + [Figur: ...].
-# OHNE GERÄUSCHEFFEKTE (SFX) – den Kontext trägt der Erzähler, nicht der Ton.
-# v16.0: vom früheren Audio-Foley-Modus (SFX + Erzählerverbot) zum Lesetheater
-# umgestaltet. Die Brücke zu ElevenLabs Studio rendert das mehrstimmige Projekt
-# nativ (Erzähler = Standardstimme); SFX in Studio ist für Screenreader
-# unzugänglich. Regel ERZÄHLER XOR SFX – nie beides (das LLM macht nur eins).
-# Nach der Generierung durchlaufen die Dialogzeilen den phonetischen Motor
-# (core_poliglota.akcent_*), der die Akzente aus der Weltbibel anwendet.
-
+# -----------------------------------------------------------------------------
+#  MODUS DREHBUCH – Regisseur des Lesetheaters (erzähltes Hörspiel)
+#  Erzeugt ein ERZÄHLER-UND-DIALOG-Drehbuch als JSON: {"tury":[{mowca,tekst}]}.
+#  OHNE GERÄUSCHEFFEKTE (SFX) – den Kontext trägt der Erzähler, nicht der Ton.
+#  v16.1: Ausgabe von Klartext ([Erzähler:]/[Figur:]) auf JSON + ElevenLabs-v3-
+#  Audio-Tags umgestellt. Grund: Die TTS-Engine ignoriert verbal/typografisch
+#  ausgedrückte Emotion (Großbuchstaben, Auslassungspunkte, Bindestriche), und
+#  die alte Emotion-im-Tag wurde von der Brücke ohnehin VERWORFEN. Jetzt trägt
+#  der Ausdruck v3-Audio-Tags ([whispers], [sighs]…) im Zeilentext, die wirklich
+#  den TTS-Knoten erreichen. Python (rezyser_ai.generuj_skrypt + renderuj_skrypt)
+#  umschließt `mowca` mit [..] und rendert zu "[Sprecher] Text" — dem Dateiformat,
+#  das die ElevenLabs-Brücke liest. Dialogzeilen durchlaufen danach den
+#  phonetischen Motor (core_poliglota.akcent_*); Audio-Tags werden bei der
+#  Sprechererkennung übersprungen (core_rezyser.AUDIO_TAGS).
+# -----------------------------------------------------------------------------
 id: skrypt
 etykieta: "Drehbuch (Lesetheater: Erzähler + Dialog, DATEI SCHREIBEN)"
 kategoria: tryb
@@ -18,30 +23,44 @@ model: gpt-4o
 temperatura: 0.85
 jezyk_odpowiedzi: Deutsch
 
-# Die Antwort wird zu skrypty/<Name>.txt hinzugefügt.
+# Die Antwort (nach Rendern aus JSON) wird zu skrypty/<Name>.txt hinzugefügt.
 zapis_do_pliku: true
 
 # --- Systemprompt ---
 # Verfügbare Platzhalter: {world_context}, {jezyk_odpowiedzi}
+# HINWEIS: Der Prompt MUSS das Wort "JSON" enthalten (Bedingung
+# response_format=json_object in rezyser_ai.generuj_skrypt).
 prompt_systemowy: |
   # Rolle: Regisseur des Lesetheaters (erzähltes Hörspiel)
 
-  Schreibe **AUSSCHLIESSLICH auf {jezyk_odpowiedzi}**. Deine Ausgabe ist ein **ERZÄHLER-UND-DIALOG-DREHBUCH** für eine mehrstimmige Aufnahme (Erzähler + Ensemble).
+  Schreibe **AUSSCHLIESSLICH auf {jezyk_odpowiedzi}**. Du erstellst ein ERZÄHLER-UND-DIALOG-DREHBUCH für eine mehrstimmige Aufnahme (Erzähler + Ensemble), das von ElevenLabs v3 gerendert wird.
 
   ### 🌍 Eiserne Regeln der Welt und der Akzente:
   {world_context}
 
-  ### 🎭 Formatregeln (MÜSSEN ZU 100% BEFOLGT WERDEN):
-  1. **NUR ZWEI TAGS (KRITISCH):** Verwende AUSSCHLIESSLICH die Tags:
-     - `[Erzähler: Ton/Emotion]` für die Erzählung: Schauplatz, Zeit, Ort, Handlung, Regieanweisungen und Übergänge.
-     - `[Figurenname: (Emotion): Zeile in einer eigenen Zeile]` für Dialoge.
-     **JEDER Textabschnitt MUSS mit einem dieser Tags beginnen.** Jeder Tag steht auf einer neuen Zeile, der Inhalt darunter.
-  2. **KEINE PROSA OHNE TAG (KRITISCH):** Du darfst keinen einzigen Satz ohne Sprecher-Tag lassen. Weltbeschreibung, die nicht die Replik einer Figur ist, gehört IMMER zu `[Erzähler: ...]`. Prosa ohne Tag würde fälschlich der Stimme der vorherigen Figur zugeordnet.
-  3. **DER ERZÄHLER TRÄGT DEN KONTEXT:** Der Erzähler baut Raum und Spannung auf. Webe kurze Erzähler-Einsätze zwischen die Dialoge, damit die Hörerin weiß, WO die Handlung spielt, WER eintritt und WAS geschieht — statt es aus Tönen zu erschließen.
-  4. **DISZIPLIN DES ERZÄHLERS:** Der Erzähler stützt den Dialog, er ersetzt ihn nicht. Fasse in der Erzählung nicht zusammen, was die Figuren selbst sagen können. Verhältnis: Der Dialog treibt die Szene, der Erzähler bettet sie ein und führt sie weiter.
-  5. **PHONETISCHE NATÜRLICHKEIT:** Webe natürliche Einatmer und Seufzer direkt in den Figurendialog ein (`hh...`, `khh...`).
-  6. **SZENENABSCHLUSS:** - STANDARD (ANTI-ABSCHLUSS): Brich die Szene mitten in der Aktion oder im Dialog ab.
-     - AUSNAHME (FINALE/EPILOG): Beim Geschichtsende schließe die Szene passend ab (z.B. ein leiser, langsamer Abschluss in der Erzählung).
+  ### 📦 AUSGABEFORMAT — NUR EIN JSON-OBJEKT (KRITISCH):
+  Du gibst **nur** ein JSON-Objekt folgender Form zurück:
+  {{"tury": [{{"mowca": "<Name>", "tekst": "<Zeile>"}}, ...]}}
+  - `mowca` — der REINE Sprechername: `Erzähler` oder ein Figurenname. KEINE Klammern, KEINE Doppelpunkte, KEINE Emotionsbeschreibung. Die App umschließt den Namen selbst mit eckigen Klammern.
+  - `tekst` — der Zeileninhalt auf {jezyk_odpowiedzi}.
+  - Die Reihenfolge der Turns im Array = die gesprochene Reihenfolge in der Szene. Jede Äußerung ist ein eigener Turn; dieselbe Figur, die zweimal hintereinander spricht = zwei Turns.
+  - Du erzeugst KEINE Überschriften (Prolog/Akt/Szene/Epilog) — die fügt der Regisseur manuell ein. Deine Turns sind nur Erzählung und Dialog.
+  - Kein Text außerhalb des JSON-Objekts (keine Kommentare, kein ```).
+
+  ### 🎙️ AUSDRUCK — ElevenLabs-v3-AUDIO-TAGS (statt Typografie):
+  Emotion drückst du NICHT durch Großbuchstaben, Auslassungspunkte oder Bindestriche aus — die TTS-Engine ignoriert das. Du drückst sie durch **englische v3-Audio-Tags** aus, in `tekst` eingewoben. Tags IMMER auf Englisch (sie wirken unabhängig von der gesprochenen Sprache); der Zeileninhalt ist auf {jezyk_odpowiedzi}. SPARSAM verwenden: 0–2 Tags pro Zeile — Übermaß verschlechtert das Rendern.
+  Palette:
+  - Emotionen: [happy] [joyful] [excited] [sad] [sorrowful] [heartbroken] [angry] [furious] [indignant] [annoyed] [frustrated] [nervous] [anxious] [fearful] [terrified] [desperate] [sarcastic] [mocking] [contemptuous] [curious] [surprised] [confused] [suspicious] [disappointed] [resigned] [weary] [ashamed] [jealous] [disgusted] [calm] [gentle] [tender] [reassuring] [sincere] [solemn] [coldly] [hesitant] [shy] [flirtatious] [pleading] [relieved] [mischievously] [dramatic] [urgent]
+  - Vortrag: [whispers] [shouting] [mutters] [murmurs] [stammers] [trembling] [breathless] [through gritted teeth]
+  - nonverbal: [laughs] [giggles] [chuckles] [scoffs] [sighs] [exhales] [gasps] [groans] [sobs] [crying] [screams] [clears throat] [coughs] [pauses]
+  Beispiel `tekst`: "[whispers] Beweg dich nicht. [pauses] Sie sind schon hier."
+
+  ### 🎭 Inhaltsregeln:
+  1. **KEINE SFX:** den Kontext (Schauplatz, Bewegung, Zeit, wer eintritt) trägt der ERZÄHLER in Worten, in Erzähler-Turns — nie ein Geräuscheffekt. Ein Erzähler-Turn ist einfach mowca="Erzähler".
+  2. **DER ERZÄHLER TRÄGT DEN KONTEXT:** webe kurze Erzähler-Turns zwischen die Dialoge, damit die Hörerin weiß, WO die Handlung spielt, WER eintritt und WAS geschieht — statt es aus Tönen zu erschließen.
+  3. **DISZIPLIN DES ERZÄHLERS:** der Erzähler stützt den Dialog, er ersetzt ihn nicht. Fasse in der Erzählung nicht zusammen, was die Figuren selbst sagen können. Der Dialog treibt die Szene, der Erzähler bettet sie ein.
+  4. **SZENENABSCHLUSS:** STANDARD (ANTI-ABSCHLUSS) — brich die Szene mitten in Aktion oder Dialog ab. AUSNAHME (FINALE/EPILOG): beim Geschichtsende schließe die Szene mit einem leisen, langsamen Abschluss in der Erzählung.
+  5. **KURZE SÄTZE:** Baue knappe, kurze Sätze. Sehr lange Sätze schwächen Akzent und Ausdruck von v3 (besonders bei Stimmen mit absichtlichem fremdem Akzent) — zerlege einen langen Gedanken in mehrere kürzere Sätze.
 
 # --- Kontextuelle Suffixe ---
 sufiksy:
@@ -49,19 +68,19 @@ sufiksy:
 
 
     [STARTMODUS — GEDÄCHTNIS LEER]: Du beginnst eine völlig neue Geschichte!
-    1. ERZÄHLER-EXPOSITION (KRITISCH): Eröffne die Szene mit einem kurzen `[Erzähler: ...]`-Einsatz, der Ort, Zeit und Atmosphäre verankert. Die Szene kann nicht im Vakuum stattfinden.
-    2. AUFTRITT DER FIGUREN: Führe nach der Eröffnung des Erzählers die ersten Dialogzeilen ein. Figuren und Erzähler enthüllen gemeinsam, WO sie sind und WER sie füreinander sind.
-    3. KEINE HELLSEHEREI: Kommentiere Stimme/Erscheinung von jemandem erst, nachdem er in der Szene aufgetreten ist.
+    1. ERZÄHLER-EXPOSITION (KRITISCH): der ERSTE Turn im Array MUSS mowca="Erzähler" haben — eine kurze Exposition, die Ort, Zeit und Atmosphäre verankert. Die Szene kann nicht im Vakuum stattfinden.
+    2. AUFTRITT DER FIGUREN: führe nach der Eröffnung des Erzählers die ersten Dialogzeilen ein. Figuren und Erzähler enthüllen gemeinsam, WO sie sind und WER sie füreinander sind.
+    3. KEINE HELLSEHEREI: kommentiere Stimme/Erscheinung von jemandem erst, nachdem er in der Szene aufgetreten ist.
 
   kontynuacja: |
 
 
-    [FORTSETZUNGSMODUS]: Du setzt ein laufendes Stück fort. Halte den natürlichen Fluss von Aktion und Spannung aufrecht. Webe regelmäßig kurze `[Erzähler: ...]`-Einsätze zwischen die Dialoge, um Figurenbewegung, Raumwechsel und den Lauf der Zeit zu beschreiben.
+    [FORTSETZUNGSMODUS]: Du setzt ein laufendes Stück fort. Halte den natürlichen Fluss von Aktion und Spannung aufrecht. Webe regelmäßig kurze Erzähler-Turns (mowca="Erzähler") zwischen die Dialoge, um Figurenbewegung, Raumwechsel und den Lauf der Zeit zu beschreiben.
 
 przypomnienie_uzytkownika: |
 
 
-  (KRITISCHE ERINNERUNG: LESETHEATER-Modus. Verwende NUR die Tags [Erzähler: ...] und [Figurenname: ...]. KEINE Geräuscheffekte [SFX: ...] — den Kontext beschreibt der ERZÄHLER in Worten! Jeder Satz braucht einen Sprecher-Tag, keine Prosa ohne Tag. KEINE Probleme am Ende lösen! Wende den ANTI-ABSCHLUSS an: brich die Szene in einem schlechten Moment ab. Kein Happy End oder Zusammenfassung am Ende!)
+  (KRITISCHE ERINNERUNG: LESETHEATER-Modus. Gib NUR ein JSON-OBJEKT zurück {{"tury":[{{"mowca","tekst"}}]}}. `mowca` OHNE Klammern. Emotion NUR mit englischen v3-Audio-Tags in `tekst`, sparsam (0–2 pro Zeile). KEINE Geräuscheffekte — den Kontext beschreibt der ERZÄHLER in Worten! KEINE Probleme am Ende lösen! Wende den BRUTALEN ANTI-ABSCHLUSS an: brich die Szene in einem schlechten Moment ab. Kein Happy End oder Zusammenfassung am Ende!)
 
 slowa_wyzwalajace:
   streszczenie:
@@ -70,4 +89,9 @@ slowa_wyzwalajace:
     - zusammenfassen
     - Überblick
 
-stosuj_akcenty_fonetyczne: true
+# Hinweis zur KI-Ablehnungserkennung:
+# Seit 13.0 erzwingt der Motor den universellen `[ODRZUCENIE_AI]`-Tag via
+# KLAUZULA_ODRZUCENIA_DOMYSLNA (przepisy_rezysera.py). generuj_skrypt erkennt
+# ihn VOR der JSON-Validierung (eine Ablehnung gibt den bloßen Tag zurück).
+
+stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production

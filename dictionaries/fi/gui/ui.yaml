@@ -172,7 +172,7 @@ home:
   blad_otwarcia_pliku_tytul: "Tieto"
   blad_otwarcia_pliku_tresc: "Tiedostoa ei voitu avata automaattisesti.\nAvaa se manuaalisesti:\n{sciezka_pliku}"
   # Äänen jälkituotanto (ElevenLabs) — valinnainen (v16.0)
-  heading_elevenlabs:    "Äänen jälkituotanto (ElevenLabs) — valinnainen"
+  heading_elevenlabs: "Äänen jälkituotanto (ElevenLabs) — valinnainen"
   el_brak: |-
     ℹ️ ElevenLabs-avainta ei ole määritetty (valinnainen).
     Silta ElevenLabs Studioon on epäaktiivinen — muu ohjelma toimii normaalisti.
@@ -630,6 +630,15 @@ rezyser:
   odswiez_calosc_skasowano_tresc: "Koko kertomus ladattu levyltä ({liczba_znakow} merkkiä) — koko teksti mahtui konteksti-ikkunaan, joten tarpeeton yhteenveto poistettiin.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
   odswiez_snap_tresc: "Kertomuksen loppu otsikosta „{naglowek}” palautettu ({liczba_znakow} merkkiä). Aiempaa osaa edustaa olemassa oleva yhteenveto, joka jäi koskemattomaksi.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
   odswiez_koncowka_tresc: "Teksti pitkä eikä siinä ole rakenteen otsikoita — kertomuksen viimeinen pätkä palautettu ({liczba_znakow} merkkiä), yhteenveto jäi koskemattomaksi. SUOSITUS: lisää otsikoita, jotta päivitys osuu kohtauksen rajalle.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
+  sr_heading: 📖 Näytönlukijan versio (NVDA)
+  sr_info: 'Luo valmiista skriptistä erillinen HTML-tiedosto näytönlukijoille: hahmojen repliikit, joissa on aksentti, saavat foneettisen kirjoitusasun ja kielitunnisteen (lang), joten näytönlukija lukee ne oikealla aksentilla. Most ElevenLabs käyttää tähän pelkkää tekstiä ja aksentilla varustettua ääntä — nämä ovat kaksi erillistä ulostuloa samasta skriptistä.'
+  btn_sr_label: 📖 Luo näytönlukijan versio
+  btn_sr_name: Luo näytönlukijan versio
+  btn_sr_tooltip: "Luo tiedosto skrypty/<nazwa>_screen_reader.html: aksentit ortografian rikkomisen kautta + kielitunniste, äänitunnisteet poistettu.\nVaatii tallennetun projektitiedoston; Maailman Kirja määrittää, millä hahmolla on mikä aksentti."
+  sr_sukces_tytul: Näytönlukijan versio valmis
+  sr_sukces_tresc: 'Näytönlukijan tiedosto tallennettu: skrypty/{nazwa_pliku}_screen_reader.html'
+  sr_blad_tytul: Virhe näytönlukijan version luomisessa
+  sr_blad_tresc: "Näytönlukijan version luominen epäonnistui:\n{tresc_bledu}"
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"

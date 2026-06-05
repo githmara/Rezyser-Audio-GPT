@@ -7,7 +7,7 @@
 
 Insieme di strumenti autonomi alimentati dall'IA per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, nonché per condurre giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata sin dall'inizio con piena accessibilità per i lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra del programma.
 
-Wersja: **16.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **16.1** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -76,7 +76,7 @@ L'applicazione distribuisce intelligentemente i compiti, ottimizzando i costi e 
 
 Nonostante l'implementazione di rigorose direttive di sistema che impongono di interrompere l'azione nei momenti di tensione (cosiddetta direttiva Anti-Closure), i modelli LLM contemporanei possiedono una forte tendenza innata a "chiudere" le storie. Ciò si traduce in frequenti inserimenti di conclusioni indesiderate, morali o falsi "happy end", specialmente in Modalità Audiolibro Tradizionale.
 
-Questa è una limitazione fondamentale dell'attuale generazione di intelligenza artificiale. Per questo motivo, l'applicazione salva i progetti in normali file di testo facili da modificare (`.txt`). Ciò richiede all'utente di assumere il ruolo di montatore umano — rimuovendo occasionalmente e manualmente le frasi "conclusive" generate dall'IA, prima di ricaricare nuovamente il file e continuare il lavoro.
+Questa è una limitazione fondamentale dell'attuale generazione di intelligenza artificiale. Per questo motivo, l'applicazione salva i progetti in normali file di testo facili da modificare (`.txt`). Ciò richiede all'utente di assumere il ruolo di montatore umano — rimuovendo occasionalmente e manualmente le frasi "conclusive" generate dall'IA, poi sincronizzando la memoria con il file corretto tramite il pulsante "Aggiorna dal disco", e continuando il lavoro.
 
 
 ## Installazione e avvio

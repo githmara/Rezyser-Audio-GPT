@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **16.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **16.1** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -76,7 +76,7 @@ L'application répartit intelligemment les tâches, optimisant les coûts et la 
 
 Malgré l'implémentation de directives systémiques rigoureuses visant à couper les actions aux moments de tension (dite directive Anti-Closure), les modèles LLM contemporains possèdent une forte tendance innée à « clore » les histoires. Cela se traduit souvent par l'insertion de conclusions indésirables, de morales ou de faux « happy ends », en particulier en Mode Livre Audio Traditionnel.
 
-C'est une limitation fondamentale de la génération actuelle d'intelligence artificielle. Pour cette raison, l'application enregistre les projets dans des fichiers texte ordinaires, faciles à éditer (`.txt`). Cela nécessite que l'utilisateur assume le rôle de monteur vivant — en supprimant occasionnellement et manuellement les phrases « de clôture » générées par l'IA, avant de recharger le fichier et de poursuivre le travail.
+C'est une limitation fondamentale de la génération actuelle d'intelligence artificielle. Pour cette raison, l'application enregistre les projets dans des fichiers texte ordinaires, faciles à éditer (`.txt`). Cela nécessite que l'utilisateur assume le rôle de monteur vivant — en supprimant occasionnellement et manuellement les phrases « de clôture » générées par l'IA, puis en synchronisant la mémoire avec le fichier corrigé via le bouton « Actualiser depuis le disque », et en poursuivant le travail.
 
 
 ## Installation et démarrage
