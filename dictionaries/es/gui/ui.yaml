@@ -640,6 +640,8 @@ rezyser:
   sr_sukces_tresc: 'Archivo para lectores de pantalla guardado: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Error al generar la versión para lectores de pantalla
   sr_blad_tresc: "No se pudo generar la versión para lectores de pantalla:\n{tresc_bledu}"
+  err_struktura: El modelo generó una estructura de respuesta incorrecta a pesar de varios intentos de corrección. Intenta de nuevo o formula la instrucción de otra manera.
+  err_dlugosc: La respuesta del modelo fue cortada antes de que pudiera completarla (se excedió el límite de longitud). Acorta el contexto — por ejemplo, el Libro del Mundo o la instrucción — e intenta de nuevo.
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -1214,3 +1216,4 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: El elemento principal del estado del juego debe ser un objeto JSON (un par clave-valor entre llaves), no una lista ni un valor simple. Restaura la estructura del objeto e inténtalo de nuevo.
   edytuj_stan_zapisano_tytul: Estado del juego guardado
   edytuj_stan_zapisano_tresc: El estado del juego "{nazwa}" ha sido guardado y recargado desde el disco. Los personajes, ubicación, equipamiento, tramas y contadores ahora reflejan tu edición.
+  err_dlugosc: La respuesta del modelo fue cortada antes de que pudiera completarla (se excedió el límite de longitud). Acorta el contexto e intenta de nuevo.

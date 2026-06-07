@@ -641,6 +641,8 @@ rezyser:
   sr_sukces_tresc: 'Datei für Bildschirmleser gespeichert: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Fehler beim Generieren der Version für Bildschirmleser
   sr_blad_tresc: "Version für Bildschirmleser konnte nicht generiert werden:\n{tresc_bledu}"
+  err_struktura: Das Modell hat trotz mehrerer Korrekturversuche eine falsche Antwortstruktur generiert. Versuchen Sie es erneut oder formulieren Sie die Anweisung anders.
+  err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext — z.B. das Buch der Welt oder die Anleitung — und versuchen Sie es erneut.
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -1214,3 +1216,4 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: Das Hauptelement des Spielstands muss ein JSON-Objekt sein (ein Schlüssel-Wert-Paar in geschweiften Klammern), keine Liste oder ein einfacher Wert. Stellen Sie die Objektstruktur wieder her und versuchen Sie es erneut.
   edytuj_stan_zapisano_tytul: Spielstand gespeichert
   edytuj_stan_zapisano_tresc: Der Spielstand „{nazwa}" wurde gespeichert und von der Festplatte neu geladen. Charaktere, Standort, Ausrüstung, Handlungsstränge und Zähler spiegeln jetzt Ihre Bearbeitung wider.
+  err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext und versuchen Sie es erneut.

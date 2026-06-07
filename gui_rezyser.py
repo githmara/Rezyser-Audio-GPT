@@ -50,7 +50,9 @@ import core_elevenlabs as ce
 import core_rezyser as cr
 import core_screen_reader as csr
 import przepisy_rezysera as pr
+import sciezki
 import rezyser_ai as rai
+from bledy_ai import BladGeneracjiAI
 from i18n import aktualny_jezyk, t
 
 
@@ -177,6 +179,24 @@ class RezyserPanel(wx.Panel):
             return self._przepisy[idx]
         return None
 
+    def _przepis_burzy(self) -> pr.PrzepisRezysera | None:
+        """Zwraca przepis Burzy (``id == "burza"``) NIEZALEŻNIE od RadioBoxa.
+
+        Doklejka ``[Reżyserze: ...]`` / ``[DYREKTYWA]: ...`` mieszka WYŁĄCZNIE
+        w przepisie Burzy (``tryb_burza.yaml::doklejka_celu_sceny``) — tryby
+        produkcyjne (Skrypt/Audiobook) mają to pole puste. Opcje Burzy są
+        zawsze owocem Burzy, więc doklejkę bierzemy z jej przepisu, nie z
+        aktualnie zaznaczonego trybu. Inaczej po wczytaniu projektu z
+        ``saved_mode`` 1/2 (RadioBox przeskakuje na tryb produkcyjny, patrz
+        :meth:`_on_load`) ``_aktualny_przepis()`` zwracałby tryb bez
+        doklejki i przyciski opcji wstawiałyby sam ``[CEL SCENY]`` — bug
+        „znikających tagów [Reżyserze]/[DYREKTYWA] po wczytaniu projektu".
+        """
+        for przepis in self._przepisy:
+            if przepis.id == "burza":
+                return przepis
+        return None
+
     # ==================================================================
     # SHIMY WŁAŚCIWOŚCI delegujące do self._projekt
     # ==================================================================
@@ -250,7 +270,7 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     def _init_api(self) -> None:
         """Ładuje golden_key.env i inicjuje klienta OpenAI (jeśli klucz poprawny)."""
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
         if os.path.exists(env_path):
             load_dotenv(env_path)
@@ -270,7 +290,7 @@ class RezyserPanel(wx.Panel):
         reszta panelu działa bez zmian. Walidacja w ``core_elevenlabs``
         (prefix ``sk_``, długość) — single source of truth z System Check.
         """
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
         self._el_klucz = ce.wczytaj_klucz(env_path)
         self._el_dostepne = self._el_klucz is not None
@@ -705,11 +725,15 @@ class RezyserPanel(wx.Panel):
         else:
             self._txt_opcji_burzy_streszczenie.Hide()
 
-        # Pobranie doklejki z bieżącego przepisu (Burza w aktywnym języku).
-        # Cache yaml — `rezyser_ai.doklejka_celu_sceny` patrzy do atrybutu
-        # PrzepisRezysera, więc jest tani.
-        przepis = self._aktualny_przepis()
-        doklejka = rai.doklejka_celu_sceny(przepis) if przepis else ""
+        # Doklejkę pobieramy z przepisu BURZY, nie z aktualnie zaznaczonego
+        # trybu w RadioBox-ie — opcje Burzy są zawsze owocem Burzy, a doklejka
+        # `[Reżyserze]/[DYREKTYWA]` żyje wyłącznie w `tryb_burza.yaml`. Dzięki
+        # temu działa też ścieżka wczytania projektu z `saved_mode` 1/2, gdzie
+        # RadioBox przeskakuje na tryb produkcyjny (Skrypt/Audiobook) PRZED tym
+        # przeładowaniem. Patrz :meth:`_przepis_burzy`. Cache yaml —
+        # `rezyser_ai.doklejka_celu_sceny` czyta atrybut PrzepisRezysera, tani.
+        przepis_burzy = self._przepis_burzy()
+        doklejka = rai.doklejka_celu_sceny(przepis_burzy) if przepis_burzy else ""
 
         for i, opcja in enumerate(opcje, start=1):
             tytul = (opcja.get("tytul") or "").strip()
@@ -1171,7 +1195,7 @@ class RezyserPanel(wx.Panel):
         pusty po filtracji — wywołujący `_on_load` decyduje wtedy o
         odpowiednim komunikacie dla gracza.
         """
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         skrypty_dir = os.path.join(app_dir, cr.SKRYPTY_DIR)
         if not os.path.isdir(skrypty_dir):
             return []
@@ -1636,6 +1660,18 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Wyświetlanie błędów AI
     # ------------------------------------------------------------------
+    def _komunikat_bledu_ai(self, exc: Exception) -> str:
+        """Mapuje wyjątek workera na treść dla użytkownika.
+
+        Typowane błędy generacji AI (struktura/długość) niosą `klucz_i18n` —
+        zwracamy komunikat lokalizowany w namespace `rezyser`, żeby user nigdy
+        nie zobaczył surowej, angielskiej treści technicznej (ta zostaje w
+        wyjątku dla error_log.txt / maintainera). Reszta wyjątków → `str(exc)`.
+        """
+        if isinstance(exc, BladGeneracjiAI):
+            return t(f"rezyser.{exc.klucz_i18n}")
+        return str(exc)
+
     def _wyswietl_blad_ai(self, tresc_bledu: str, custom_msg: str | None = None) -> None:
         """Krótki błąd → MessageBox; długi → dialog z polem do skopiowania."""
         msg_header  = custom_msg or t("rezyser.blad_ai_naglowek")
@@ -1712,7 +1748,7 @@ class RezyserPanel(wx.Panel):
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
             except Exception as exc:  # noqa: BLE001
-                wx.CallAfter(self._on_wyslij_error, str(exc))
+                wx.CallAfter(self._on_wyslij_error, self._komunikat_bledu_ai(exc))
                 return
 
             if wynik_b.odrzucone:
@@ -1744,7 +1780,7 @@ class RezyserPanel(wx.Panel):
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
             except Exception as exc:  # noqa: BLE001
-                wx.CallAfter(self._on_wyslij_error, str(exc))
+                wx.CallAfter(self._on_wyslij_error, self._komunikat_bledu_ai(exc))
                 return
 
             if wynik_s.odrzucone:
@@ -1770,7 +1806,7 @@ class RezyserPanel(wx.Panel):
             )
             return
         except Exception as exc:  # noqa: BLE001
-            wx.CallAfter(self._on_wyslij_error, str(exc))
+            wx.CallAfter(self._on_wyslij_error, self._komunikat_bledu_ai(exc))
             return
 
         if wynik.odrzucone:
@@ -2060,7 +2096,7 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         filepath = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
         if not os.path.exists(filepath):
             wx.MessageBox(
@@ -2139,7 +2175,7 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         filepath = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
         if not os.path.exists(filepath):
             wx.MessageBox(
@@ -2252,7 +2288,7 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         sciezka_txt = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
         if not os.path.exists(sciezka_txt):
             wx.MessageBox(
@@ -2379,7 +2415,7 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        app_dir  = os.path.dirname(os.path.abspath(__file__))
+        app_dir  = sciezki.KATALOG_BAZOWY_STR
         filepath = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.txt")
         if not os.path.exists(filepath):
             wx.MessageBox(

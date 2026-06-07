@@ -96,11 +96,11 @@ tresc:
 
     1. Clone the repository to your disk.
     2. Run the `setup_dev.bat` file to automatically create a virtual environment (`.venv/`) and download dependencies from `requirements.txt`.
-    3. Launch the application with the command `python main.py` or via the `run_dev.bat` file.
+    3. Launch the application with the command `python main.py` or through the `run_dev.bat` file.
 
     `.sh` scripts for macOS/Linux were removed in v13.1 — the development environment is focused on Windows due to the specifics of NVDA accessibility testing. Working with the code on other systems is possible but requires manual setup: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-    **Scripts for building release packages** (`build_release.py`, `installer.iss`) are intended solely for creating packages for Windows. They require a special `runtime/` folder with a portable version of Python — this folder is deliberately not part of the repository (it is in `.gitignore`).
+    **Scripts for building release packages** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) are used exclusively for creating packages for Windows. From version 17.0, `build_release.py` freezes the application with PyInstaller (onedir + windowed) according to `rezyser_audio.spec` — it produces `dist/` with a native `.exe` and a `runtime/` bundle folder (interpreter + libraries). No portable Python manually uploaded to the repository is needed anymore; the `dist/` and `build/` directories are in `.gitignore`.
   dokumentacja: |
     ## Full Documentation
 
@@ -111,3 +111,22 @@ tresc:
     * `docs/dictionaries.<iso>.txt` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
 
     Each of these files is available in {liczba_kompletnych_jezykow} languages — suffix `.<iso>.txt` (e.g., `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+  polskie_nazewnictwo: |
+    ### Polish Naming — Guide for Non-Polish Speakers
+
+    The primary language of this project is Polish. Module names, class names, code comments, as well as directory and data file names are in Polish and — for backward compatibility and multilingual engine contract reasons — are intentionally NOT translated or changed. The following glossary will help developers and macOS/Linux system users navigate the structure.
+
+    **User Data Directories (next to the executable file or in the project directory):**
+
+    * `skrypty/` — *scripts*: Director module projects (`.txt` with narration, `.md` with the Book of the World, `_streszczenie.txt`).
+    * `opowiesci/` — *stories*: records of interactive Stories.
+    * `runtime/` — dual role: frozen application bundle directory (interpreter + libraries) AND container of hidden project metadata (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+    **Source Data Subfolders in `dictionaries/<language-code>/` (visible in the Rule Manager):**
+
+    * `podstawy.yaml` — *basics*: language pack configuration and metadata.
+    * `akcenty/` — *accents*: phonetic rules for speech synthesizers.
+    * `szyfry/` — *ciphers*: text encryption modes.
+    * `rezyser/` — *director*: creative modes of the Director module.
+    * `opowiesci/` — *stories*: interactive Story modes.
+    * `gui/` — interface texts (`ui.yaml`) and documentation templates.

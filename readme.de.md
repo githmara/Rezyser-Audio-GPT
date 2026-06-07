@@ -59,9 +59,9 @@ Interaktive Textspiele, die von KI als Erzählmotor geführt werden. Im Gegensat
 
 ## Mehrsprachigkeit (9 Sprachen nativ)
 
-Ab Version 14.0 unterstützt die Anwendung nativ 9 Basissprachen: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Jedes Paket `dictionaries/<code>/` enthält Diakritika, Alphabet und phonetische Regeln, die auf Text in dieser spezifischen Sprache operieren — die Anwendung erkennt die Quellsprache automatisch durch den lingua-language-detector (pro Absatz) und lädt das entsprechende Paket für jeden Abschnitt separat.
+Ab Version 14.0 unterstützt die Anwendung nativ 9 Basissprachen: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Jedes Paket `dictionaries/<kod>/` enthält Diakritika, Alphabet und phonetische Regeln, die auf Text in dieser spezifischen Sprache operieren — die Anwendung erkennt die Quellsprache automatisch durch den lingua-language-detector (pro Absatz) und lädt das entsprechende Paket für jeden Abschnitt separat.
 
-Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.txt`) und die meisten Systemmeldungen sind nativ in jeder der unterstützten Sprachen verfügbar. Die AI-Systemaufforderungen im Regisseur- und Erzählmodus sind in den Zielsprache verfasst (manuell, nicht automatisch übersetzt — siehe `dictionaries/<code>/rezyser/` und `dictionaries/<code>/opowiesci/`).
+Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.txt`) und die meisten Systemmeldungen sind nativ in jeder der unterstützten Sprachen verfügbar. Die AI-Systemaufforderungen im Regisseur- und Erzählmodus sind in den Zielsprache verfasst (manuell, nicht automatisch übersetzt — siehe `dictionaries/<kod>/rezyser/` und `dictionaries/<kod>/opowiesci/`).
 
 
 ## Architektur der KI und verwendete Modelle
@@ -88,15 +88,15 @@ Dies ist eine grundlegende Einschränkung der aktuellen Generation künstlicher 
 3. **Erste Schritte:** Öffnen Sie die Datei `docs/manual.pl.txt` (oder in einer anderen Sprache) im Installationsordner — dies ist eine vollständige Bedienungsanleitung, die in einer Sprache verfasst ist, die für jeden Benutzer zugänglich ist, nicht nur für Entwickler.
 
 
-### Für Entwickler (Klonen + Setup)
+### Für Entwickler (Klonen + Einrichtung)
 
 1. Klonen Sie das Repository auf Ihre Festplatte.
 2. Führen Sie die Datei `setup_dev.bat` aus, um automatisch eine virtuelle Umgebung (`.venv/`) zu erstellen und die Abhängigkeiten aus `requirements.txt` herunterzuladen.
-3. Starten Sie die Anwendung mit dem Befehl `python main.py` oder über die Datei `run_dev.bat`.
+3. Starten Sie die Anwendung mit dem Befehl `python main.py` oder durch die Datei `run_dev.bat`.
 
-Die `.sh`-Skripte für macOS/Linux wurden in v13.1 entfernt — die Entwicklungsumgebung ist auf Windows konzentriert aufgrund der Spezifik der NVDA-Zugänglichkeitstests. Die Arbeit mit dem Code auf anderen Systemen ist möglich, erfordert jedoch ein manuelles Setup: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+Die `.sh`-Skripte für macOS/Linux wurden in v13.1 entfernt — die Entwicklungsumgebung konzentriert sich auf Windows aufgrund der Spezifik der NVDA-Zugänglichkeitstests. Die Arbeit mit dem Code auf anderen Systemen ist möglich, erfordert jedoch eine manuelle Einrichtung: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-**Skripte zum Erstellen von Release-Paketen** (`build_release.py`, `installer.iss`) dienen ausschließlich zur Erstellung von Paketen für Windows. Sie erfordern einen speziellen `runtime/`-Ordner mit einer portablen Version von Python — dieser Ordner ist absichtlich nicht Teil des Repositories (ist in `.gitignore`).
+**Skripte zum Erstellen von Release-Paketen** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) dienen ausschließlich zum Erstellen von Paketen für Windows. Ab Version 17.0 friert `build_release.py` die Anwendung mit PyInstaller ein (onedir + windowed) gemäß `rezyser_audio.spec` — es erzeugt `dist/` mit einer nativen `.exe` und einem Bundle-Ordner `runtime/` (Interpreter + Bibliotheken). Es ist kein tragbares Python mehr erforderlich, das manuell in das Repository geladen wird; die Verzeichnisse `dist/` und `build/` sind in `.gitignore`.
 
 
 ## Vollständige Dokumentation
@@ -108,3 +108,23 @@ Dieses README ist nur ein architektonischer Überblick über das Projekt. Um for
 * `docs/dictionaries.<iso>.txt` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
 
 Jede dieser Dateien ist in 9 Sprachen verfügbar — Suffix `.<iso>.txt` (z.B. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+
+
+### Polnische Benennungen — Leitfaden für Personen außerhalb des polnischen Sprachraums
+
+Die Hauptsprache dieses Projekts ist Polnisch. Die Namen der Module, Klassen, Kommentare im Code sowie die Namen der Verzeichnisse und Datendateien sind polnisch und werden — aus Gründen der Rückwärtskompatibilität und des Mehrsprachigkeits-Engines — bewusst NICHT übersetzt oder geändert. Das folgende Glossar hilft Entwicklern und Nutzern von macOS/Linux-Systemen, sich in der Struktur zurechtzufinden.
+
+**Benutzerdatenverzeichnisse (neben der ausführbaren Datei oder im Projektverzeichnis):**
+
+* `skrypty/` — *Skripte*: Projekte des Moduls Regisseur (`.txt` mit Erzählung, `.md` mit Weltbuch, `_streszczenie.txt`).
+* `opowiesci/` — *Geschichten*: Aufzeichnungen interaktiver Geschichten.
+* `runtime/` — doppelte Rolle: Verzeichnis des gebündelten, eingefrorenen Anwendungspakets (Interpreter + Bibliotheken) UND Container für versteckte Projektdaten (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+**Unterordner der Quelldaten in `dictionaries/<kod>/` (sichtbar im Regelmanager):**
+
+* `podstawy.yaml` — *Grundlagen*: Konfiguration und Metadaten des Sprachpakets.
+* `akcenty/` — *Akzente*: phonetische Regeln für Sprachsynthesizer.
+* `szyfry/` — *Chiffren*: Textverschlüsselungsmodi.
+* `rezyser/` — *Regisseur*: kreative Modi des Regisseur-Moduls.
+* `opowiesci/` — *Geschichten*: Modi interaktiver Geschichten.
+* `gui/` — Benutzeroberflächentexte (`ui.yaml`) und Dokumentationsvorlagen.

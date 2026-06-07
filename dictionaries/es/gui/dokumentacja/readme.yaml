@@ -67,9 +67,9 @@ tresc:
   wielojezycznosc: |
     ## Multilingüismo ({liczba_kompletnych_jezykow} idiomas nativos)
 
-    Desde la versión v14.0, la aplicación admite de forma nativa {liczba_kompletnych_jezykow} idiomas base: {lista_kompletnych_jezykow_natywnie}. Cada paquete `dictionaries/<código>/` contiene diacríticos, alfabeto y reglas fonéticas que operan en el texto en ese idioma específico: la aplicación detecta automáticamente el idioma de origen a través de lingua-language-detector (por párrafo) y carga el paquete adecuado para cada fragmento por separado.
+    Desde la versión v14.0, la aplicación admite de forma nativa {liczba_kompletnych_jezykow} idiomas base: {lista_kompletnych_jezykow_natywnie}. Cada paquete `dictionaries/<kod>/` contiene diacríticos, alfabeto y reglas fonéticas que operan en el texto en ese idioma específico: la aplicación detecta automáticamente el idioma de origen a través de lingua-language-detector (por párrafo) y carga el paquete adecuado para cada fragmento por separado.
 
-    Toda la interfaz GUI, la documentación (`docs/manual.<iso>.txt`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<código>/rezyser/` y `dictionaries/<código>/opowiesci/`).
+    Toda la interfaz GUI, la documentación (`docs/manual.<iso>.txt`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<kod>/rezyser/` y `dictionaries/<kod>/opowiesci/`).
   architektura_ai: |
     ## Arquitectura de IA y modelos utilizados
 
@@ -95,12 +95,12 @@ tresc:
     ### Para desarrolladores (clonar + configurar)
 
     1. Clona el repositorio en tu disco.
-    2. Ejecuta el archivo `setup_dev.bat` para crear automáticamente un entorno virtual (`.venv/`) y descargar las dependencias de `requirements.txt`.
-    3. Ejecuta la aplicación con el comando `python main.py` o a través del archivo `run_dev.bat`.
+    2. Ejecuta el archivo `setup_dev.bat` para crear automáticamente un entorno virtual (`.venv/`) y descargar las dependencias desde `requirements.txt`.
+    3. Ejecuta la aplicación con el comando `python main.py` o mediante el archivo `run_dev.bat`.
 
-    Los scripts `.sh` para macOS/Linux fueron eliminados en la versión v13.1 — el entorno de desarrollo está centrado en Windows debido a la especificidad de las pruebas de accesibilidad de NVDA. Trabajar con el código en otros sistemas es posible, pero requiere una configuración manual: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+    Los scripts `.sh` para macOS/Linux fueron eliminados en la versión v13.1 — el entorno de desarrollo está centrado en Windows debido a la especificidad de las pruebas de accesibilidad de NVDA. Trabajar con el código en otros sistemas es posible, pero requiere configuración manual: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-    **Los scripts para construir paquetes de lanzamiento** (`build_release.py`, `installer.iss`) se utilizan exclusivamente para crear paquetes para Windows. Requieren una carpeta especial `runtime/` con una versión portátil de Python — esta carpeta no es parte del repositorio intencionalmente (está en `.gitignore`).
+    **Scripts para construir paquetes de lanzamiento** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) se utilizan exclusivamente para crear paquetes para Windows. Desde la versión 17.0, `build_release.py` congela la aplicación con PyInstaller (onedir + windowed) según `rezyser_audio.spec` — produce `dist/` con un `.exe` nativo y una carpeta de bundle `runtime/` (intérprete + bibliotecas). Ya no es necesario ningún Python portátil cargado manualmente en el repositorio; los directorios `dist/` y `build/` están en `.gitignore`.
   dokumentacja: |
     ## Documentación completa
 
@@ -111,3 +111,22 @@ tresc:
     * `docs/dictionaries.<iso>.txt` — instrucciones para lingüistas sin Python sobre cómo añadir sus propios acentos/códigos/modos de IA.
 
     Cada uno de estos archivos está disponible en {liczba_kompletnych_jezykow} idiomas — sufijo `.<iso>.txt` (por ejemplo, `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+  polskie_nazewnictwo: |
+    ### Guía de nombres polacos — para personas fuera del ámbito lingüístico polaco
+
+    El idioma principal de este proyecto es el polaco. Los nombres de los módulos, clases, comentarios en el código, así como los nombres de directorios y archivos de datos están en polaco y — debido a la compatibilidad retroactiva y al contrato del motor multilingüe — deliberadamente NO se traducen ni cambian. El siguiente glosario ayudará a los desarrolladores y usuarios de sistemas macOS/Linux a orientarse en la estructura.
+
+    **Directorios de datos del usuario (junto al archivo ejecutable o en el directorio del proyecto):**
+
+    * `skrypty/` — *scripts*: proyectos del módulo Director (`.txt` con la narración, `.md` con el Libro del Mundo, `_streszczenie.txt`).
+    * `opowiesci/` — *stories*: registros de Historias interactivas.
+    * `runtime/` — doble función: directorio del paquete de la aplicación congelada (intérprete + bibliotecas) Y contenedor de metadatos ocultos de los proyectos (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+    **Subcarpetas de datos fuente en `dictionaries/<código-idioma>/` (visibles en el Gestor de Reglas):**
+
+    * `podstawy.yaml` — *basics*: configuración y metadatos del paquete de idioma.
+    * `akcenty/` — *accents*: reglas fonéticas para los sintetizadores de voz.
+    * `szyfry/` — *ciphers*: modos de cifrado de texto.
+    * `rezyser/` — *director*: modos creativos del módulo Director.
+    * `opowiesci/` — *stories*: modos de Historias interactivas.
+    * `gui/` — textos de la interfaz (`ui.yaml`) y plantillas de documentación.

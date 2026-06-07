@@ -14,17 +14,17 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Słowniki Poligloty i Reżysera — Instrukcja dla każdego
+    Sistemas de Diccionarios del Políglota y del Director — Instrucción para todos
     =======================================================
 
-    ¡Hola! Si estás leyendo este archivo, significa que has echado un vistazo a la carpeta "dictionaries/" junto a la aplicación Reżyser Audio GPT y te preguntas qué son esos archivos con extensiones extrañas ".yaml". Tranquilo, no necesitas saber programación ni Python para entender lo que está pasando aquí, y con un poco de valentía, incluso puedes agregar algo propio.
+    ¡Hola! Si estás leyendo este archivo, significa que has echado un vistazo a la carpeta "dictionaries/" junto a la aplicación Reżyser Audio GPT y te preguntas qué son esos archivos con las extrañas extensiones ".yaml". Tranquilo — no necesitas saber de programación ni de Python para entender lo que sucede aquí, y con un poco de valentía incluso puedes agregar algo propio.
 
-    Este archivo está escrito en un lenguaje sencillo para escritores, lingüistas, profesores, padres y, en general, curiosos. Si conoces los conceptos básicos de programación y buscas documentación detallada del formato de archivos YAML (con listas de campos, expresiones regulares, reglas de procesamiento de canalización), consulta el archivo "README.md" en la misma carpeta, pero ten en cuenta que este archivo solo está disponible si has clonado el repositorio desde GitHub. En el paquete de lanzamiento descargado desde la pestaña Releases, los archivos Markdown están filtrados (para que no lleguen accidentalmente a tu paquete, por ejemplo, tus libros del mundo con spoilers), así que solo este archivo ".txt" llega a los usuarios finales.
+    Este archivo está escrito en un lenguaje sencillo para escritores, lingüistas, maestros, padres y, en general, curiosos. Si conoces los fundamentos de la programación y buscas documentación detallada sobre el formato de archivos YAML (con listas de campos, expresiones regulares, reglas de procesamiento de pipeline), consulta el archivo "README.md" en la misma carpeta — pero ten en cuenta que este archivo solo está disponible si has clonado el repositorio desde GitHub. En el paquete de lanzamiento descargado desde la pestaña de Releases, los archivos Markdown están filtrados (para que no lleguen por accidente a la carpeta, por ejemplo, tus libros del mundo con spoilers), así que solo este archivo ".txt" llega a los usuarios finales.
   co_tu_jest: |
     ¿Qué hay aquí en general?
     --------------------------
 
-    La carpeta "dictionaries/" es una biblioteca de reglas utilizadas por Poliglota (herramienta para traducciones y acentos) y el motor interno del Reżyser. Hasta la versión 12.0, todas estas reglas estaban "codificadas" en el código Python; si querías agregar un nuevo acento o cambiar las reglas, tenías que pedirle a un programador. Desde la versión 13.0, todo está guardado en archivos de texto simples (extensión ".yaml": simplemente texto formateado de manera especial). Los abres con cualquier editor (Bloc de notas, VS Code, Notepad++) y los editas como cualquier otro documento.
+    La carpeta "dictionaries/" es una biblioteca de reglas utilizadas por Políglota (herramienta para traducciones y acentos) y el motor interno del Director. Hasta la versión 12.0, todas estas reglas estaban "codificadas" en el código Python; si querías agregar un nuevo acento o cambiar las reglas, tenías que pedirle a un programador. Desde la versión 13.0, todo está guardado en archivos de texto simples (extensión ".yaml": simplemente texto formateado de manera especial). Los abres con cualquier editor (Bloc de notas, VS Code, Notepad++) y los editas como cualquier otro documento.
 
     La estructura de la carpeta es la siguiente:
 
@@ -33,11 +33,11 @@ tresc:
             ├── podstawy.yaml              diacríticos polacos + alfabeto
             ├── akcenty/                   {liczba_plikow_w_akcentach} archivos con acentos
             ├── szyfry/                    {liczba_szyfrow} archivos con cifrados y juegos
-            └── rezyser/                   {liczba_trybow_rezysera} archivos con modos del Reżyser AI
+            └── rezyser/                   {liczba_trybow_rezysera} archivos con modos del Director AI
 
     Actualmente están completamente implementados: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} idiomas base). Cada uno tiene su propio paquete
-    "dictionaries/<código>/" con diacríticos, alfabeto y reglas fonéticas
+    "dictionaries/<kod>/" con diacríticos, alfabeto y reglas fonéticas
     que operan en el texto en ese idioma específico: la aplicación detecta automáticamente el idioma de origen a través de lingua-language-detector (por párrafo) y carga el paquete adecuado para cada fragmento por separado. Otros idiomas están
     en preparación (un paquete completo requiere "podstawy.yaml", "gui/ui.yaml"
     y al menos un archivo en "akcenty/" y "szyfry/").
@@ -90,7 +90,7 @@ tresc:
     6. Cifrado César (clásico)
        El cifrado documentado más antiguo de la historia (utilizado ya en la antigua Roma). Cada letra se desplaza N posiciones en el alfabeto español (27 letras: ABCDEFGHIJKLMNÑOPQRSTUVWXYZ). El desplazamiento lo introduces en la GUI en el campo numérico; si ingresas 0, la aplicación elegirá un valor al azar en el rango 1-25 y lo mostrará en un mensaje para que luego puedas descifrar el mensaje. Los caracteres fuera del alfabeto (números, espacios, puntuación) permanecen sin cambios.
   co_to_tryb_rezysera: |
-    ¿Qué es el "modo Reżyser"?
+    ¿Qué es el "modo Director"?
     ---------------------------
 
     La carpeta "rezyser/" contiene {liczba_trybow_rezysera} archivos que describen los modos de operación del Estudio Principal del Director de la aplicación:
@@ -163,20 +163,20 @@ tresc:
           - "opis": breve descripción para ti en el futuro
           - "iso": código de idioma de dos letras, para sueco "sv"
     4. Ajusta la lista de "zamian" a la fonética sueca (por ejemplo, agrega "å → o", "ö → ö", elimina o cambia las que son específicas del finlandés).
-    5. Guarda, vuelve a la Página principal, haz clic en "🔄 Actualizar acentos del Reżyser desde YAML" y reinicia la aplicación. El nuevo sueco aparecerá en el menú de acentos de Poliglota (y si agregas al Libro del Mundo un personaje con la etiqueta "[Marek] - ma akcent szwedzki", el Reżyser también lo reconocerá automáticamente y lo aplicará a sus diálogos).
+    5. Guarda, vuelve a la Página principal, haz clic en "🔄 Actualizar acentos del Director desde YAML" y reinicia la aplicación. El nuevo sueco aparecerá en el menú de acentos de Políglota (y si agregas al Libro del Mundo un personaje con la etiqueta "[Marek] - ma akcent szwedzki", el Director también lo reconocerá automáticamente y lo aplicará a sus diálogos).
   poziom_3_cos_nowego: |
     NIVEL 3 — crear algo completamente nuevo
 
     ¿Quieres jerga escolar? ¿El idioma de los caballeros antiguos? ¿Lenguaje enredado? ¿Cifrado de padres ante los niños?
 
     1. En el Administrador de Reglas, haz clic en "Nuevo archivo de reglas…".
-    2. Elige el tipo (acento, cifrado de sustitución, modo Reżyser, nuevo idioma base, cifrado algorítmico). Para casos simples, la aplicación creará inmediatamente una plantilla YAML lista: la editas como en el nivel 2.
+    2. Elige el tipo (acento, cifrado de sustitución, modo Director, nuevo idioma base, cifrado algorítmico). Para casos simples, la aplicación creará inmediatamente una plantilla YAML lista: la editas como en el nivel 2.
     3. Para casos más difíciles (algoritmos como "mezcla de finales" o un nuevo idioma base completo), el Administrador te mostrará un prompt listo para pegar en ChatGPT o Claude. La IA generará un archivo YAML completo, solo tienes que copiarlo a la carpeta. No necesitas saber programar: solo saber copiar y pegar.
   pomysly: |
     Algunas ideas para divertirse
     -----------------------------
 
-    - Clase escolar en la lección de polaco: tarea "carga un fragmento de la lectura en Poliglota con acento ruso: ¿puedes reconocer al autor?". Especialmente valioso para niños ciegos, ya que obtienen un sonido interesante sin tener que leer el cartel con la vista.
+    - Clase escolar en la lección de polaco: tarea "carga un fragmento de la lectura en Políglota con acento ruso: ¿puedes reconocer al autor?". Especialmente valioso para niños ciegos, ya que obtienen un sonido interesante sin tener que leer el cartel con la vista.
 
     - Escape room en la biblioteca: prepara un fragmento de un poema en el Inversor de Texto, imprímelo (o envíalo en un mensaje), los participantes deben leerlo en voz alta y grabarlo, luego reproducirlo al revés, o simplemente escanearlo con la vista desde el final. Obtienen la clave del armario aquellos que reconocen el título del poema.
 

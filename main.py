@@ -7,13 +7,18 @@ Wersja 13.1: cały widoczny dla użytkownika tekst pochodzi z
 stringi zostały zastąpione wywołaniami ``t("klucz", **parametry)``.
 """
 
+import datetime
 import os
 import platform
 import subprocess
+import sys
 import threading
+import traceback
 from pathlib import Path
 
 import wx
+
+import sciezki
 
 import core_elevenlabs
 import core_poliglota
@@ -51,6 +56,128 @@ ID_HELP_DICTIONARIES = wx.NewIdRef()
 # ---------------------------------------------------------------------------
 _NAZWA_APP_CONFIG  = "RezyserAudioGPT"
 _KLUCZ_CONFIG_JEZYK = "/JezykInterfejsu"
+
+
+# ---------------------------------------------------------------------------
+# Globalny przechwytywacz nieobsłużonych wyjątków (od v17.0)
+# ---------------------------------------------------------------------------
+# Po migracji na PyInstaller (--windowed) aplikacja chodzi BEZ konsoli, więc
+# nieobsłużony traceback leciał dotąd „donikąd" — end-user widział tylko nagłe
+# zniknięcie okna, bez żadnej wskazówki co zgłosić. Instalujemy `sys.excepthook`,
+# który: (1) dopisuje pełny traceback do `error_log.txt` w katalogu bazowym
+# (obok exe), (2) pokazuje zwykłemu userowi czytelny dialog z prośbą o załączenie
+# tego pliku do zgłoszenia (Issue) na GitHubie.
+#
+# Plik nazwy `error_log.txt` zaczyna się od stałego markera CRASH_MARKER — obieg
+# „Z Południa na Północ" (`.github/scripts/issue_intake_sami.py`) rozpoznaje po
+# nim (oraz po sygnaturze `Traceback (most recent call last)`) zgłoszenie-crash i
+# POMIJA detekcję języka Lingua (surowy traceback myli detektor n-gramowy).
+CRASH_MARKER = "=== REŻYSER AUDIO GPT — CRASH REPORT ==="
+_PLIK_LOGU_BLEDOW = "error_log.txt"
+
+
+def _zapisz_log_bledu(typ, wartosc, tb) -> str | None:
+    """Dopisuje sformatowany traceback do error_log.txt. Zwraca ścieżkę lub None.
+
+    Nigdy nie rzuca — to ostatnia linia obrony; wyjątek przy logowaniu wyjątku
+    nie może zamaskować oryginalnego błędu ani wywrócić handlera.
+    """
+    try:
+        sciezka = os.path.join(sciezki.KATALOG_BAZOWY_STR, _PLIK_LOGU_BLEDOW)
+        wersja = getattr(i18n, "NUMER_WERSJI", "?")
+        stempel = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        slad = "".join(traceback.format_exception(typ, wartosc, tb))
+        wpis = (
+            f"{CRASH_MARKER}\n"
+            f"Wersja / Version: {wersja}\n"
+            f"Data / Time: {stempel}\n"
+            f"Platforma / Platform: {platform.platform()}\n"
+            f"{'-' * 60}\n"
+            f"{slad}\n"
+            f"{'=' * 60}\n\n"
+        )
+        # Dopisujemy (a nie nadpisujemy) — kolejne crashe w jednej sesji
+        # zostają zachowane; user załącza cały plik.
+        with open(sciezka, "a", encoding="utf-8") as fh:
+            fh.write(wpis)
+        return sciezka
+    except Exception:  # noqa: BLE001 — logowanie błędu nie może rzucić
+        return None
+
+
+def _pokaz_dialog_crash(sciezka_logu: str | None) -> None:
+    """Pokazuje zwykłemu userowi dialog o crashu (bilingual PL+EN).
+
+    CELOWO NIE korzysta z i18n/`t()`: handler crashy musi działać nawet gdy to
+    właśnie i18n (wczytywanie YAML, format) był przyczyną wyjątku. Stały tekst
+    PL+EN to świadomy wyjątek od reguły „etykiety w ui.yaml" — odporność handlera
+    ostatniej szansy jest tu ważniejsza niż lokalizacja. URL Issues budujemy z
+    `core_updater` (single source of truth dla repo).
+    """
+    url_issues = (
+        f"https://github.com/{core_updater.GITHUB_USER}"
+        f"/{core_updater.GITHUB_REPO}/issues/new"
+    )
+    info_plik = sciezka_logu or _PLIK_LOGU_BLEDOW
+    tresc = (
+        "Aplikacja napotkała nieoczekiwany błąd i może działać niestabilnie.\n\n"
+        f"Szczegóły zapisaliśmy w pliku:\n{info_plik}\n\n"
+        "Pomóż go naprawić: utwórz nowe zgłoszenie (Issue) na GitHubie i ZAŁĄCZ "
+        "ten plik (albo wklej jego treść):\n"
+        f"{url_issues}\n\n"
+        "----------------------------------------------------------------\n\n"
+        "[EN] The application encountered an unexpected error and may be "
+        "unstable.\n\n"
+        f"Details were saved to the file:\n{info_plik}\n\n"
+        "Please help fix it: open a new GitHub Issue and ATTACH that file "
+        "(or paste its contents):\n"
+        f"{url_issues}"
+    )
+    tytul = "Reżyser Audio GPT — błąd / error"
+
+    # Preferujemy wx (spójny wygląd, dostępny dla NVDA), ale gdy crash nastąpił
+    # PRZED utworzeniem wx.App, wx.MessageBox by sam rzucił — wtedy natywny
+    # MessageBox WinAPI przez ctypes. Aplikacja jest Windows-only (build_release
+    # + installer.iss), więc ctypes.windll jest zawsze dostępne.
+    try:
+        if wx.GetApp() is not None:
+            wx.MessageBox(tresc, tytul, wx.OK | wx.ICON_ERROR)
+            return
+    except Exception:  # noqa: BLE001 — spadamy do natywnego fallbacku
+        pass
+    try:
+        import ctypes  # noqa: PLC0415
+        ctypes.windll.user32.MessageBoxW(0, tresc, tytul, 0x10)  # MB_ICONERROR
+    except Exception:  # noqa: BLE001 — nie mamy już jak pokazać dialogu
+        pass
+
+
+def _zainstaluj_obsluge_bledow() -> None:
+    """Instaluje globalny `sys.excepthook` (log do pliku + dialog dla usera).
+
+    wxPython (Phoenix) przepuszcza nieobsłużone wyjątki z handlerów zdarzeń do
+    `sys.excepthook`, więc jeden hook pokrywa zarówno crash startowy (przed
+    MainLoop), jak i wyjątek w obsłudze zdarzenia. `KeyboardInterrupt` i
+    `SystemExit` przepuszczamy do domyślnego zachowania (czyste zamknięcie,
+    nie „crash").
+    """
+    poprzedni_hook = sys.excepthook
+
+    def _hook(typ, wartosc, tb):
+        if issubclass(typ, (KeyboardInterrupt, SystemExit)):
+            poprzedni_hook(typ, wartosc, tb)
+            return
+        sciezka_logu = _zapisz_log_bledu(typ, wartosc, tb)
+        # Zachowujemy domyślne zachowanie (traceback na stderr) — w trybie dev
+        # z konsolą deweloper nadal widzi ślad; w paczce windowed stderr jest
+        # None, więc to no-op, a użytkownik dostaje dialog niżej.
+        try:
+            poprzedni_hook(typ, wartosc, tb)
+        except Exception:  # noqa: BLE001
+            pass
+        _pokaz_dialog_crash(sciezka_logu)
+
+    sys.excepthook = _hook
 
 
 # 13.4: lokalny `_natywna_nazwa` zastąpiony publicznym `core_poliglota.natywna_nazwa`
@@ -169,9 +296,8 @@ class HomePanel(wx.Panel):
     # ------------------------------------------------------------------
     @property
     def _env_path(self) -> str:
-        """Ścieżka do golden_key.env w tym samym katalogu co main.py."""
-        app_dir = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(app_dir, self.ENV_FILENAME)
+        """Ścieżka do golden_key.env w katalogu bazowym (obok exe / w roocie repo)."""
+        return os.path.join(sciezki.KATALOG_BAZOWY_STR, self.ENV_FILENAME)
 
     # ------------------------------------------------------------------
     # Budowanie UI
@@ -602,7 +728,7 @@ class DialogAktualizacji(wx.Dialog):
         )
 
         self._dictionaries_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
+            sciezki.KATALOG_BAZOWY_STR,
             "dictionaries",
         )
 
@@ -1087,7 +1213,7 @@ class MainFrame(wx.Frame):
         z lokalizowanym komunikatem.
         """
         iso = i18n.aktualny_jezyk()
-        sciezka = Path(__file__).resolve().parent / "docs" / f"{rdzen}.{iso}.txt"
+        sciezka = sciezki.KATALOG_BAZOWY / "docs" / f"{rdzen}.{iso}.txt"
         if not sciezka.is_file():
             wx.MessageBox(
                 t("main.pomoc.brak_pliku", sciezka=str(sciezka)),
@@ -1119,15 +1245,19 @@ class MainFrame(wx.Frame):
     def _on_aktualizacja_dostepna(self, info: core_updater.UpdateInfo) -> None:
         """Główny wątek: rozgałęzia na dwa tryby w zależności od środowiska.
 
-        runtime/python.exe istnieje → paczka Inno Setup → oferuj pobranie .exe.
-        Brak pliku → środowisko deweloperskie lub inny OS → informuj o ręcznej
+        Aplikacja zamrożona PyInstallerem (``sys.frozen``) → paczka Inno Setup →
+        oferuj pobranie .exe. Uruchomienie ze źródła (dev) → informuj o ręcznej
         aktualizacji (sklonuj repo lub pobierz archiwum „Source code" z Releases).
-        """
-        _runtime_python = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "runtime", "python.exe"
-        )
 
-        if os.path.isfile(_runtime_python):
+        Od v17.0: detekcja oparta o ``sys.frozen`` zamiast obecności
+        ``runtime/python.exe``. Przed migracją na PyInstaller paczka wożona była
+        z przenośnym ``runtime/python.exe``, którego obecność rozróżniała paczkę
+        od dev-a. Po migracji interpreter jest wbudowany w bundla, a folder
+        ``runtime/`` przechowuje już tylko metadane projektów — więc jego
+        obecność nie świadczy o tym, czy chodzimy z paczki. Jedynym wiarygodnym
+        sygnałem „to skompilowana paczka" jest ``sys.frozen``.
+        """
+        if getattr(sys, "frozen", False):
             dlg = DialogAktualizacji(self, info)
             odpowiedz = dlg.ShowModal()
             dlg.Destroy()
@@ -1239,6 +1369,11 @@ def main() -> None:
     #      cache, dzięki czemu konstruktory paneli mogą wołać `t()` bez
     #      narzutu I/O w wątku GUI.
     #   4. MainFrame() buduje okno na bazie już-aktywnego języka.
+    # Handler crashy instalujemy NAJPIERW — łapie też wyjątki z kroków 1-4
+    # (np. uszkodzona paczka dictionaries przy starcie), zanim w ogóle powstanie
+    # okno. Dla crashy przed `wx.App` dialog leci natywnym MessageBoxem WinAPI.
+    _zainstaluj_obsluge_bledow()
+
     app = wx.App(False)
     kod_jezyka = _wybierz_jezyk_startowy()
     i18n.ustaw_jezyk(kod_jezyka)

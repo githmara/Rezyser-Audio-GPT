@@ -604,6 +604,8 @@ rezyser:
     AI odrzuciło prompt (wykryto tag [ODRZUCENIE_AI]).
     Tekst NIE zostanie zapisany do pliku historii.
     Możesz zmodyfikować instrukcję i spróbować ponownie.
+  err_struktura:         "Model wygenerował niewłaściwą strukturę odpowiedzi mimo kilku prób korekty. Spróbuj ponownie albo sformułuj polecenie inaczej."
+  err_dlugosc:           "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst — np. Księgę Świata lub instrukcję — i spróbuj ponownie."
   blad_ai_tytul:         "Błąd AI"
   blad_ai_szczegoly_tytul: "Błąd AI – Szczegóły techniczne"
   blad_ai_naglowek:      "Wystąpił nieoczekiwany błąd podczas przetwarzania."
@@ -1177,6 +1179,7 @@ opowiesci:
   err_rate_limit:            "Limit zapytań do OpenAI został wyczerpany. Odczekaj chwilę albo sprawdź stan konta."
   err_timeout:               "Czas oczekiwania na odpowiedź modelu został przekroczony (powyżej 120 sekund). Spróbuj ponownie."
   err_struktura:             "Model wygenerował niewłaściwą strukturę odpowiedzi mimo dwóch prób korekty. Spróbuj ponownie albo sformułuj akcję inaczej."
+  err_dlugosc:               "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst i spróbuj ponownie."
 
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul:            "Brak aktywnej gry"

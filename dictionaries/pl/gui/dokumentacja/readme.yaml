@@ -111,7 +111,26 @@ tresc:
 
     Skrypty `.sh` dla macOS/Linux zostały usunięte w v13.1 — środowisko developerskie skoncentrowane jest na Windows ze względu na specyfikę testów dostępności NVDA. Praca z kodem na innych systemach jest możliwa, ale wymaga ręcznego setupu: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-    **Skrypty buildujące paczki release** (`build_release.py`, `installer.iss`) służą wyłącznie do tworzenia paczek dla Windows. Wymagają specjalnego folderu `runtime/` z przenośną wersją Pythona — folder ten celowo nie jest częścią repozytorium (jest w `.gitignore`).
+    **Skrypty buildujące paczki release** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) służą wyłącznie do tworzenia paczek dla Windows. Od wersji 17.0 `build_release.py` zamraża aplikację PyInstallerem (onedir + windowed) wg `rezyser_audio.spec` — produkuje `dist/` z natywnym `.exe` i folderem bundla `runtime/` (interpreter + biblioteki). Nie jest już potrzebny żaden przenośny Python wgrany ręcznie do repozytorium; katalogi `dist/` i `build/` są w `.gitignore`.
+  polskie_nazewnictwo: |
+    ### Polskie nazewnictwo — przewodnik dla osób spoza polskiego kręgu językowego
+
+    Językiem głównym tego projektu jest polski. Nazwy modułów, klas, komentarze w kodzie oraz nazwy katalogów i plików danych są polskie i — z uwagi na zgodność wstecz oraz kontrakt silnika wielojęzyczności — celowo NIE są tłumaczone ani zmieniane. Poniższy słowniczek pomoże deweloperom oraz użytkownikom systemów macOS/Linux zorientować się w strukturze.
+
+    **Katalogi danych użytkownika (obok pliku wykonywalnego lub w katalogu projektu):**
+
+    * `skrypty/` — *scripts*: projekty modułu Reżyser (`.txt` z narracją, `.md` z Księgą Świata, `_streszczenie.txt`).
+    * `opowiesci/` — *stories*: zapisy interaktywnych Opowieści.
+    * `runtime/` — podwójna rola: katalog bundla zamrożonej aplikacji (interpreter + biblioteki) ORAZ kontener ukrytych metadanych projektów (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+    **Podfoldery danych źródłowych w `dictionaries/<kod-języka>/` (widoczne w Managerze Reguł):**
+
+    * `podstawy.yaml` — *basics*: konfiguracja i metadane paczki językowej.
+    * `akcenty/` — *accents*: reguły fonetyczne pod syntezatory mowy.
+    * `szyfry/` — *ciphers*: tryby szyfrowania tekstu.
+    * `rezyser/` — *director*: tryby twórcze modułu Reżyser.
+    * `opowiesci/` — *stories*: tryby interaktywnych Opowieści.
+    * `gui/` — teksty interfejsu (`ui.yaml`) oraz szablony dokumentacji.
   dokumentacja: |
     ## Pełna dokumentacja
 

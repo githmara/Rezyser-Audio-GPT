@@ -43,6 +43,8 @@ from typing import Any
 import wx
 
 import opowiesci_ai as oai
+import sciezki
+from bledy_ai import BladGeneracjiAI
 from core_opowiesci import ProjektOpowiesci
 from i18n import aktualny_jezyk, t
 
@@ -706,7 +708,7 @@ class OpowiesciPanel(wx.Panel):
         :func:`opowiesci_ai.inicjalizuj_klienta` — moduł silnika i tak
         potrzebuje tej funkcji do testów izolowanych.
         """
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         klient = oai.inicjalizuj_klienta(app_dir)
         if klient is not None:
             self._client = klient
@@ -1164,22 +1166,23 @@ class OpowiesciPanel(wx.Panel):
         # Lazy import — `openai` może nie być dostępne (brak klucza, brak
         # paczki w środowisku testowym), a wtedy `import openai` na górze
         # pliku rzuciłby ImportError i zablokowałby otwarcie panelu.
-        try:
-            import openai  # noqa: PLC0415
-            if isinstance(exc, openai.RateLimitError):
-                msg = t("opowiesci.err_rate_limit")
-            elif isinstance(exc, openai.APITimeoutError):
-                msg = t("opowiesci.err_timeout")
-            else:
+        # Typowane błędy generacji AI (struktura/długość) niosą `klucz_i18n` —
+        # mapujemy TYP na komunikat lokalizowany w namespace `opowiesci`, żeby
+        # użytkownik nigdy nie zobaczył surowej, angielskiej treści technicznej
+        # (ta zostaje w wyjątku dla error_log.txt / maintainera).
+        if isinstance(exc, BladGeneracjiAI):
+            msg = t(f"opowiesci.{exc.klucz_i18n}")
+        else:
+            try:
+                import openai  # noqa: PLC0415
+                if isinstance(exc, openai.RateLimitError):
+                    msg = t("opowiesci.err_rate_limit")
+                elif isinstance(exc, openai.APITimeoutError):
+                    msg = t("opowiesci.err_timeout")
+                else:
+                    msg = str(exc)
+            except ImportError:
                 msg = str(exc)
-        except ImportError:
-            msg = str(exc)
-
-        # Heurystyka: nasz custom RuntimeError o niewłaściwej strukturze
-        # ma w treści „niewłaściwą strukturę JSON" — podmieniamy na klucz
-        # lokalizowany żeby user nie widział angielskiej technicznej treści.
-        if "niewłaściwą strukturę JSON" in msg:
-            msg = t("opowiesci.err_struktura")
 
         self._lbl_pamiec_status.SetLabel(t("opowiesci.status_blad"))
         self._btn_wyslij.Enable()
@@ -1308,7 +1311,7 @@ class OpowiesciPanel(wx.Panel):
             self._txt_nazwa_gry.SetFocus()
             return
 
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         if ProjektOpowiesci.istnieje(nazwa, app_dir):
             potwierdzenie = wx.MessageBox(
                 t("opowiesci.gra_istnieje_tresc", nazwa=nazwa),
@@ -1390,7 +1393,7 @@ class OpowiesciPanel(wx.Panel):
         Zwraca pustą listę gdy folder nie istnieje lub jest pusty —
         wywołujący `_on_wczytaj` decyduje wtedy o komunikacie informacyjnym.
         """
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         runtime_op = os.path.join(app_dir, "runtime", "opowiesci")
         if not os.path.isdir(runtime_op):
             return []
@@ -1415,7 +1418,7 @@ class OpowiesciPanel(wx.Panel):
         z trzema panelami i rozszerzeniami. Konsystentne z dialogiem
         wyboru projektu w Reżyserze.
         """
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         gry = self._zbierz_dostepne_gry()
         if not gry:
             wx.MessageBox(
@@ -1814,7 +1817,7 @@ class OpowiesciPanel(wx.Panel):
         # Przeładowanie z dysku — RAM, snapshot i cały widok zgrane z nowym
         # plikiem (ten sam rdzeń co „Wczytaj").
         nazwa = self._projekt.nazwa_pliku
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         projekt = ProjektOpowiesci(app_dir)
         try:
             wynik = projekt.wczytaj(nazwa)

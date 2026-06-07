@@ -638,6 +638,8 @@ rezyser:
   sr_sukces_tresc: 'Screen reader file saved: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Error Generating Screen Reader Version
   sr_blad_tresc: "Failed to generate screen reader version:\n{tresc_bledu}"
+  err_struktura: The model generated an incorrect response structure despite several correction attempts. Try again or rephrase the command.
+  err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -1223,3 +1225,4 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: The main game state element must be a JSON object (a key-value pair in curly braces), not a list or a simple value. Restore the object structure and try again.
   edytuj_stan_zapisano_tytul: Game state saved
   edytuj_stan_zapisano_tresc: Game state “{nazwa}" has been saved and reloaded from disk. Characters, location, inventory, plots, and counters now reflect your edits.
+  err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context and try again.

@@ -59,9 +59,9 @@ Jeux textuels interactifs dirigés par l'IA en tant que moteur narratif. Contrai
 
 ## Multilinguisme (9 langues nativement)
 
-À partir de la version 14.0, l'application prend en charge nativement 9 langues de base : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Chaque paquet `dictionaries/<code>/` contient des diacritiques, un alphabet et des règles phonétiques opérant sur le texte dans cette langue spécifique — l'application détecte automatiquement la langue source grâce au détecteur de langue lingua (par paragraphe) et charge le paquet approprié pour chaque fragment individuellement.
+À partir de la version 14.0, l'application prend en charge nativement 9 langues de base : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Chaque paquet `dictionaries/<kod>/` contient des diacritiques, un alphabet et des règles phonétiques opérant sur le texte dans cette langue spécifique — l'application détecte automatiquement la langue source grâce au détecteur de langue lingua (par paragraphe) et charge le paquet approprié pour chaque fragment individuellement.
 
-Toute l'interface GUI, la documentation (`docs/manual.<iso>.txt`) et la plupart des messages système sont disponibles nativement dans chacune des langues prises en charge. Les invites système AI dans les modes Réalisateur et Histoire sont écrites dans les langues cibles (manuellement, non traduites automatiquement — voir `dictionaries/<code>/rezyser/` et `dictionaries/<code>/opowiesci/`).
+Toute l'interface GUI, la documentation (`docs/manual.<iso>.txt`) et la plupart des messages système sont disponibles nativement dans chacune des langues prises en charge. Les invites système AI dans les modes Réalisateur et Histoire sont écrites dans les langues cibles (manuellement, non traduites automatiquement — voir `dictionaries/<kod>/rezyser/` et `dictionaries/<kod>/opowiesci/`).
 
 
 ## Architecture de l'IA et modèles utilisés
@@ -91,12 +91,12 @@ C'est une limitation fondamentale de la génération actuelle d'intelligence art
 ### Pour les développeurs (clone + configuration)
 
 1. Clonez le dépôt sur votre disque.
-2. Exécutez le fichier `setup_dev.bat` pour créer automatiquement un environnement virtuel (`.venv/`) et télécharger les dépendances de `requirements.txt`.
+2. Exécutez le fichier `setup_dev.bat` pour créer automatiquement un environnement virtuel (`.venv/`) et télécharger les dépendances depuis `requirements.txt`.
 3. Lancez l'application avec la commande `python main.py` ou via le fichier `run_dev.bat`.
 
 Les scripts `.sh` pour macOS/Linux ont été supprimés dans la version 13.1 — l'environnement de développement est concentré sur Windows en raison des spécificités des tests d'accessibilité NVDA. Travailler avec le code sur d'autres systèmes est possible, mais nécessite une configuration manuelle : `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-**Les scripts de construction des paquets de release** (`build_release.py`, `installer.iss`) sont uniquement destinés à créer des paquets pour Windows. Ils nécessitent un dossier spécial `runtime/` avec une version portable de Python — ce dossier n'est délibérément pas inclus dans le dépôt (il est dans `.gitignore`).
+**Les scripts de construction des paquets de release** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) servent uniquement à créer des paquets pour Windows. À partir de la version 17.0, `build_release.py` fige l'application avec PyInstaller (onedir + windowed) selon `rezyser_audio.spec` — il produit `dist/` avec un `.exe` natif et un dossier bundle `runtime/` (interpréteur + bibliothèques). Il n'est plus nécessaire d'avoir un Python portable installé manuellement dans le dépôt ; les répertoires `dist/` et `build/` sont dans `.gitignore`.
 
 
 ## Documentation complète
@@ -108,3 +108,47 @@ Ce README est uniquement un aperçu architectural du projet. Pour découvrir les
 * `docs/dictionaries.<iso>.txt` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
 
 Chacun de ces fichiers est disponible en 9 langues — suffixe `.<iso>.txt` (par exemple, `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+
+
+### Nomenclature polonaise — guide pour les non-locuteurs du polonais
+
+La langue principale de ce projet est le polonais. Les noms des modules, des classes, les commentaires dans le code ainsi que les noms des répertoires et des fichiers de données sont en polonais et — pour assurer la rétrocompatibilité et le contrat du moteur multilingue — ne sont pas traduits ni modifiés intentionnellement. Le glossaire ci-dessous aidera les développeurs et les utilisateurs des systèmes macOS/Linux à se repérer dans la structure.
+
+**Répertoires de données utilisateur (à côté du fichier exécutable ou dans le répertoire du projet) :**
+
+* `skrypty/` — *scripts*: projets du module Réalisateur (`.txt` avec narration, `.md` avec le Livre du Monde, `_streszczenie.txt`).
+* `opowiesci/` — *histoires*: enregistrements d'histoires interactives.
+* `runtime/` — double rôle : répertoire du bundle de l'application figée (interpréteur + bibliothèques) ET conteneur de métadonnées cachées des projets (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+**Sous-dossiers de données sources dans `dictionaries/<kod>/` (visibles dans le Gestionnaire de Règles) :**
+
+* `podstawy.yaml` — *basics*: configuration et métadonnées du pack linguistique.
+* `akcenty/` — *accents*: règles phonétiques pour les synthétiseurs vocaux.
+* `szyfry/` — *chiffres*: modes de chiffrement du texte.
+* `rezyser/` — *réalisateur*: modes créatifs du module Réalisateur.
+* `opowiesci/` — *histoires*: modes d'histoires interactives.
+* `gui/` — textes de l'interface (`ui.yaml`) et modèles de documentation.
+
+### Accents disponibles
+
+- Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
+- Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
+- Italien (Alice/Luca dans Vocalizer, Elsa dans OneCore)
+- Polonais (Ewa dans Vocalizer, Paulina dans OneCore)
+- Allemand (Stefan/Katja dans Vocalizer, Hedda dans OneCore)
+- Espagnol (Jorge/Monica dans Vocalizer, Helena dans OneCore)
+- Russe (Irina/Pavel dans Vocalizer, Yuri dans OneCore)
+
+### Chiffre : Inverseur de texte
+
+Ce chiffre inverse chaque phrase, mais d'abord il développe certaines abréviations pour éviter des inversions phonétiquement absurdes (par exemple : ".xel"). Les abréviations développées sont :
+
+- "p. ex." → "par exemple"
+- "c.-à-d." → "c'est-à-dire"
+- "etc." → "et cetera"
+- "M." → "Monsieur"
+- "Dr" → "Docteur"
+
+### Chiffre : Typoglycémie
+
+Selon une rechreche à l'Université de Cmabrigde, il n'importe pas dans quel odrre les lettres dans un mot sont, la seule chose ipmrotnate est que la première et la dernière lettre soient à la bonne place.

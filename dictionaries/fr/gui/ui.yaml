@@ -639,6 +639,8 @@ rezyser:
   sr_sukces_tresc: "Fichier pour lecteurs d'écran enregistré : skrypty/{nazwa_pliku}_screen_reader.html"
   sr_blad_tytul: Erreur de génération de la version pour lecteurs d'écran
   sr_blad_tresc: "Échec de la génération de la version pour lecteurs d'écran :\n{tresc_bledu}"
+  err_struktura: Le modèle a généré une structure de réponse incorrecte malgré plusieurs tentatives de correction. Réessayez ou reformulez la commande différemment.
+  err_dlugosc: La réponse du modèle a été coupée avant qu'il ne puisse la terminer (limite de longueur dépassée). Raccourcissez le contexte — par exemple, le Livre du Monde ou l'instruction — et réessayez.
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -1206,3 +1208,4 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: L'élément principal de l'état du jeu doit être un objet JSON (paire clé-valeur entre accolades), et non une liste ou une valeur simple. Rétablissez la structure de l'objet et réessayez.
   edytuj_stan_zapisano_tytul: État du jeu enregistré
   edytuj_stan_zapisano_tresc: L'état du jeu «{nazwa}» a été enregistré et rechargé depuis le disque. Les personnages, la localisation, l'équipement, les intrigues et les compteurs reflètent maintenant votre édition.
+  err_dlugosc: La réponse du modèle a été coupée avant qu'il ne puisse la terminer (limite de longueur dépassée). Raccourcissez le contexte et réessayez.

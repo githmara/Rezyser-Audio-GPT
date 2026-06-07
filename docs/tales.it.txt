@@ -1,6 +1,6 @@
 Reżyser Audio GPT — Modulo Storie Interattive (16.1 – Versione di Pubblicazione)
 
-Il secondo principale modo dell'applicazione accanto a Reżyser — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
+Il secondo principale modo dell'applicazione accanto a Regista — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
 
 Il modulo è stato progettato fin dall'inizio pensando ai giocatori non vedenti — la narrazione viene letta linearmente da un lettore di schermo (NVDA) o da un motore TTS, le scelte dinamiche sono presentate sotto forma di pulsanti con descrizioni vocali, ogni turno concluso è segnalato da un suono di campanello e dal trasferimento automatico del focus sul testo appena generato.
 
@@ -85,26 +85,26 @@ Il motore narrativo seleziona automaticamente il modello AI in base alla modalit
 
 /flashback <descrizione>, /retrospezione <descrizione> — retrospezione in terza persona, ritorno indietro nel tempo. Esempio: "/flashback giorno della morte del padre" o "/flashback primo incontro degli eroi". Apre la narrazione con una formula temporale ("Tre anni prima..."), la contrassegna con il prefisso "Retrospezione:" e ritorna al turno corrente. Identico a /scena — passivo, senza scelte. Descrizione completa nel PASSO 5B.
 
-/aggiorna, /refresh — aggiorna la memoria interna dal file di narrazione dopo averlo modificato manualmente (dalla v15.5). Quando apri opowiesci/<nome>.txt nell'editor e ad esempio tagli una chiusura del cut cinematografico infranta dal motore, questo comando (o il pulsante "Aggiorna dal disco") sincronizza la coda fresca con il contesto del motore — senza un reset completo e senza ricaricare il gioco. Se esiste già un riassunto dei turni precedenti, esso resta intatto, così il turno successivo e il riassunto successivo non nasceranno su dati non aggiornati. ATTENZIONE: lo stato del gioco (personaggi, luogo, inventario, fili narrativi) dal file .game.json NON viene aggiornato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe divergere da essi.
+/aggiorna, /refresh — aggiorna la memoria interna dal file di narrazione dopo averlo modificato manualmente (dalla v15.5). Quando apri opowiesci/<nazwa>.txt nell'editor e ad esempio tagli una chiusura del cut cinematografico infranta dal motore, questo comando (o il pulsante "Aggiorna dal disco") sincronizza la coda fresca con il contesto del motore — senza un reset completo e senza ricaricare il gioco. Se esiste già un riassunto dei turni precedenti, esso resta intatto, così il turno successivo e il riassunto successivo non nasceranno su dati non aggiornati. ATTENZIONE: lo stato del gioco (personaggi, luogo, inventario, fili narrativi) dal file .game.json NON viene aggiornato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe divergere da essi.
 
 /aiuto, /help — visualizza una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura e NVDA-friendly — il campo di testo riceve automaticamente il focus, il lettore di schermo legge immediatamente l'intero elenco senza necessità di navigazione.
 
 /fine, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
 
 
-PASSO 6: Pliki gry — gdzie znajdziesz swoje dane
+PASSO 6: File di gioco — dove trovare i tuoi dati
 
-Każda gra produkuje pięć plików, każdy w innym folderze, z różnymi rolami:
+Ogni gioco produce cinque file, ciascuno in una cartella diversa, con ruoli differenti:
 
-opowiesci/<nazwa>.txt — pełna narracja gotowa do odsłuchu jako audiobook. Można otworzyć w Notatniku albo wczytać do Architekta Audiobooków (Konwerter) i wygenerować plik Word z rozdziałami albo timing dla ElevenLabs.
+opowiesci/<nazwa>.txt — narrazione completa pronta per l'ascolto come audiolibro. Può essere aperto in Blocco note o caricato nell'Architetto Audiobook (Convertitore) per generare un file Word con capitoli o un timing per ElevenLabs.
 
-opowiesci/<nazwa>.md — Księga Świata postaci w formacie [Imię: cechy], regenerowana po każdej turze. Format kompatybilny z parserem Reżysera! Możesz wczytać ten plik do panelu Reżysera (Plik → Wczytaj) i otrzymasz natywne akcenty postaci w klasycznej narracji TTS — most między dwoma głównymi modułami aplikacji.
+opowiesci/<nazwa>.md — Libro del Mondo dei personaggi nel formato [Nome: caratteristiche], rigenerato dopo ogni turno. Formato compatibile con il parser del Regista! Puoi caricare questo file nel pannello del Regista (File → Carica) e otterrai accenti nativi dei personaggi nella narrazione classica TTS — un ponte tra i due principali moduli dell'applicazione.
 
-runtime/opowiesci/<nazwa>.game.json — pełen stan gry: nazwa, tryb, postacie aktywne, lokacja, ekwipunek, otwarte wątki, ostatnie 6 tur w skróconej formie. To źródło prawdy do wczytania gry — bez tego pliku nie da się kontynuować.
+runtime/opowiesci/<nazwa>.game.json — stato completo del gioco: nome, modalità, personaggi attivi, posizione, equipaggiamento, trame aperte, ultime 6 mosse in forma abbreviata. Questa è la fonte di verità per caricare il gioco — senza questo file non è possibile continuare.
 
-runtime/opowiesci/<nazwa>.story.jsonl — surowy log każdej tury (request gracza + odpowiedź modelu w JSON). Plik nie jest potrzebny do gry — służy do debugowania albo analizy późniejszej (np. statystyki ile tur trwała przygoda, jakie wątki LLM wprowadzał).
+runtime/opowiesci/<nazwa>.story.jsonl — log grezzo di ogni turno (richiesta del giocatore + risposta del modello in JSON). Il file non è necessario per il gioco — serve per il debug o l'analisi successiva (ad esempio, statistiche su quanto è durata l'avventura, quali trame ha introdotto LLM).
 
-runtime/skrypty/<nazwa>.mode — metadane numeru trybu (3=Swobodny, 4=Wyborów, 5=Mniejsze zło). Plik wspólny z Reżyserem, ale numeracja nie koliduje (Reżyser używa 0-2).
+runtime/skrypty/<nazwa>.mode — metadati del numero di modalità (3=Libero, 4=Scelte, 5=Il minore dei mali). File condiviso con il Regista, ma la numerazione non collide (il Regista usa 0-2).
 
 
 PASSO 7: Indicatore di memoria del modello — perché i turni nei vecchi giochi non richiedono il tuo intervento manuale
@@ -128,17 +128,17 @@ Dopo 150 turni di una partita, il motore narrativo inserirà UNA VOLTA un "Cinem
 Il Cinematic Warning NON fa parte della narrazione dell'audiolibro — il motore di filtraggio .txt elimina automaticamente il suo contenuto (contrassegnato dai marker ⚠️🚨⚠️), in modo che durante l'ascolto dell'audiolibro non si senta un meta-commento sulla propria partita. Il contenuto viene registrato solo nel log .story.jsonl (per riflessione o per conservare come ricordo) e nel dialogo nell'interfaccia grafica, dove puoi leggerlo una volta e continuare.
 
 
-PASSO 9: Ponte al Reżyser — utilizza il Libro del Mondo creato in Storie
+PASSO 9: Ponte al Regista — utilizza il Libro del Mondo creato in Storie
 
-Il file opowiesci/<nazwa>.md generato durante il gioco contiene il Libro del Mondo con i personaggi che sono apparsi nella narrazione, insieme alle loro caratteristiche, accenti e personalità. Il formato è esattamente quello richiesto dal parser di Reżyser — [Nome: caratteristiche con descrizione dell'accento].
+Il file opowiesci/<nazwa>.md generato durante il gioco contiene il Libro del Mondo con i personaggi che sono apparsi nella narrazione, insieme alle loro caratteristiche, accenti e personalità. Il formato è esattamente quello richiesto dal parser di Regista — [Nome: caratteristiche con descrizione dell'accento].
 
 Cosa puoi fare con questo:
 
 1. Al termine del gioco, apri il pannello "🎬  Regista" (Ctrl+1).
-2. Carica il progetto con lo stesso nome — Reżyser caricherà il file .txt come storia e il .md come Libro del Mondo.
-3. Otterrai ora una narrazione classica di Reżyser (scene lunghe e strutturate con atti e capitoli) con gli accenti nativi dei personaggi che hai apprezzato in Storie. Il Guardiano del Carmelo dal rifugio che parla con frasi brevi, l'inquisitrice Rosanna con un accento orientale melodioso — tutte le caratteristiche conservate.
+2. Carica il progetto con lo stesso nome — Regista caricherà il file .txt come storia e il .md come Libro del Mondo.
+3. Otterrai ora una narrazione classica di Regista (scene lunghe e strutturate con atti e capitoli) con gli accenti nativi dei personaggi che hai apprezzato in Storie. Il Guardiano del Carmelo dal rifugio che parla con frasi brevi, l'inquisitrice Rosanna con un accento orientale melodioso — tutte le caratteristiche conservate.
 
-Questo è un ponte unidirezionale: le Storie producono materiale, Reżyser lo formatta. Non è possibile il contrario — Reżyser non carica i giochi da Storie come stato interattivo.
+Questo è un ponte unidirezionale: le Storie producono materiale, Regista lo formatta. Non è possibile il contrario — Regista non carica i giochi da Storie come stato interattivo.
 
 
 PASSO 10: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
@@ -147,9 +147,9 @@ L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa ab
 
 CAMPO ULTIMO TURNO — è un wx.TextCtrl readonly multiline separato (~140 px di altezza) SOPRA la narrazione completa. Dopo ogni turno, il campo viene sostituito con un nuovo frammento (intestazione "--- Turno N ---" + contenuto della narrazione). NVDA lo legge immediatamente dopo il focus (auto-focus dopo il successo del turno), senza navigare attraverso centinaia di righe della storia completa. Dopo il caricamento di un gioco salvato, il campo mostra un RIASSUNTO dell'ultimo turno salvato (max 400 caratteri dal buffer `ultimi_turni`) con un prefisso che informa che la narrazione completa è nel campo sottostante.
 
-CAMPO NARRAZIONE COMPLETA — è un wx.TextCtrl readonly multiline che cresce dopo ogni turno. NVDA legge linearmente l'intera narrazione, puoi navigare con le frecce all'interno del testo, copiare frammenti con Ctrl+C. Il campo non è mai modificabile — modifichi la storia SOLO attraverso un nuovo turno, tramite il nuovo pulsante «Apri file di narrazione…» (dalla v15.2.3, descritto sotto) o tramite la modifica diretta del file .txt da Esplora file. Questo campo è sincronizzato con il file `opowiesci/<nome>.txt`, puoi trattarlo come un'anteprima dell'audiolibro.
+CAMPO NARRAZIONE COMPLETA — è un wx.TextCtrl readonly multiline che cresce dopo ogni turno. NVDA legge linearmente l'intera narrazione, puoi navigare con le frecce all'interno del testo, copiare frammenti con Ctrl+C. Il campo non è mai modificabile — modifichi la storia SOLO attraverso un nuovo turno, tramite il nuovo pulsante «Apri file di narrazione…» (dalla v15.2.3, descritto sotto) o tramite la modifica diretta del file .txt da Esplora file. Questo campo è sincronizzato con il file `opowiesci/<nazwa>.txt`, puoi trattarlo come un'anteprima dell'audiolibro.
 
-PULSANTE «Apri file di narrazione…» (dalla v15.2.3) — accanto ai pulsanti «Nuova partita»/«Carica»/«Salva» appare un quarto: «Apri file di narrazione…». Apre il file `opowiesci/<nome>.txt` nell'editor di testo di sistema (Blocco note su Windows, TextEdit su macOS, editor GUI predefinito su Linux — analogamente a come il Gestore delle Regole apre file YAML o come il pannello iniziale apre `golden_key.env`). Il caso d'uso tipico è un'alternativa alla scappatoia «Modifica modalità di gioco…» → Libera: invece di passare a un'altra modalità per scrivere il finale, puoi semplicemente aprire il file .txt e aggiungere la scena di chiusura manualmente. AVVERTENZA SUL RISCHIO DI DIVERGENZA: prima dell'apertura, l'applicazione mostra una finestra di dialogo modale di avviso, perché .txt è SOLO la narrazione per TTS, mentre la fonte di verità dello stato del gioco (personaggi, luogo, inventario, fili narrativi) è un file separato `.game.json`. Modificare il .txt non aggiorna lo stato — il prossimo turno LLM riceverà il mondo prima della tua modifica, quindi ad es. puoi descrivere nel file che un personaggio è morto, ma nello stato del gioco sarà ancora vivo e apparirà nel turno successivo. Usa consapevolmente, idealmente solo per aggiungere la scena finale dopo la quale non prevedi comunque ulteriori turni.
+PULSANTE «Apri file di narrazione…» (dalla v15.2.3) — accanto ai pulsanti «Nuova partita»/«Carica»/«Salva» appare un quarto: «Apri file di narrazione…». Apre il file `opowiesci/<nazwa>.txt` nell'editor di testo di sistema (Blocco note su Windows, TextEdit su macOS, editor GUI predefinito su Linux — analogamente a come il Gestore delle Regole apre file YAML o come il pannello iniziale apre `golden_key.env`). Il caso d'uso tipico è un'alternativa alla scappatoia «Modifica modalità di gioco…» → Libera: invece di passare a un'altra modalità per scrivere il finale, puoi semplicemente aprire il file .txt e aggiungere la scena di chiusura manualmente. AVVERTENZA SUL RISCHIO DI DIVERGENZA: prima dell'apertura, l'applicazione mostra una finestra di dialogo modale di avviso, perché .txt è SOLO la narrazione per TTS, mentre la fonte di verità dello stato del gioco (personaggi, luogo, inventario, fili narrativi) è un file separato `.game.json`. Modificare il .txt non aggiorna lo stato — il prossimo turno LLM riceverà il mondo prima della tua modifica, quindi ad es. puoi descrivere nel file che un personaggio è morto, ma nello stato del gioco sarà ancora vivo e apparirà nel turno successivo. Usa consapevolmente, idealmente solo per aggiungere la scena finale dopo la quale non prevedi comunque ulteriori turni.
 
 PULSANTI DI SCELTA DINAMICI — nelle modalità Scelte e Il male minore, ogni turno crea nuovi wx.Button nell'area delle scelte. Ognuno ha un tooltip letto da NVDA ("Scegli: prosegui nel bosco"). Tab tra di loro funziona naturalmente. Enter sul pulsante selezionato invia automaticamente quella scelta al motore narrativo.
 
@@ -177,7 +177,7 @@ Problema: In modalità Scelte il motore non ha generato pulsanti, nonostante mi 
 Causa e soluzione: Allucinazione del modello — nonostante la modalità 4 LLM abbia restituito una tabella di scelte vuota. L'applicazione nasconde consapevolmente l'area delle scelte (invece di mostrare un placeholder vuoto) e permette di continuare con il testo libero. Il turno successivo probabilmente genererà le scelte correttamente.
 
 Problema: I file .game.json e .story.jsonl non sono visibili sul desktop.
-Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per gli utenti comuni, non visibile dall'esploratore di file. I file di narrazione (.txt, .md) vengono salvati in script/ — li troverai lì.
+Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per gli utenti comuni, non visibile dall'esploratore di file. I file di narrazione (.txt, .md) vengono salvati in skrypty/ — li troverai lì.
 
 
 PASSO 5B: Seconda telecamera — scene dietro le quinte e flashback (da v15.4)

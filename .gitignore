@@ -44,6 +44,14 @@ pages/
 # stary wzorzec, żeby `git status` ich nie dziwił.)
 run.bat
 Uruchom_Rezysera.bat
+# Foldery robocze PyInstallera (od v17.0). `dist/` = gotowa paczka onedir
+# (exe + bundla `runtime/`), `build/` = cache analizy/COLLECT. Oba ciężkie i
+# w pełni regenerowalne z `rezyser_audio.spec` — nie wersjonujemy.
+build/
+dist/
+# Log nieobsłużonych wyjątków (globalny handler `main._zapisz_log_bledu`).
+# User-data: powstaje obok exe u końcowego użytkownika, nie w repo.
+error_log.txt
 
 
 # --- USTAWIENIA EDYTORA ---

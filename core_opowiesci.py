@@ -50,6 +50,7 @@ from typing import Any
 # Stałe folderów dzielimy z Reżyserem — `core_rezyser.SKRYPTY_DIR`/`RUNTIME_DIR`.
 # DRY: jeden punkt prawdy, jakby kiedyś zmieniła się nazwa folderu, oba moduły
 # dostaną zmianę.
+import sciezki
 from core_rezyser import RUNTIME_DIR, SKRYPTY_DIR, _dev_log_runtime
 
 # Podfolder runtime/ specyficzny dla Opowieści — `runtime/opowiesci/<nazwa>.{game.json,story.jsonl}`.
@@ -121,7 +122,7 @@ class ProjektOpowiesci:
     """
 
     def __init__(self, app_dir: str | None = None) -> None:
-        self.app_dir: str = app_dir or os.path.dirname(os.path.abspath(__file__))
+        self.app_dir: str = app_dir or sciezki.KATALOG_BAZOWY_STR
         self.nazwa_pliku: str = ""
         self.full_story: str = ""
         self.postacie_aktywne: list[dict[str, str]] = []
@@ -201,7 +202,7 @@ class ProjektOpowiesci:
         może istnieć z Reżysera (kolizja nazw) — to NIE oznacza, że gra
         Opowieści istnieje. Stąd ten helper bazuje wyłącznie na `.game.json`.
         """
-        base = app_dir or os.path.dirname(os.path.abspath(__file__))
+        base = app_dir or sciezki.KATALOG_BAZOWY_STR
         return os.path.exists(
             os.path.join(base, RUNTIME_DIR, OPOWIESCI_DIR, f"{nazwa}.game.json")
         )

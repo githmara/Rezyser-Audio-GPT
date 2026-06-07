@@ -34,6 +34,7 @@ import subprocess
 import wx
 
 import manager_regul_szablony as mrs
+import sciezki
 from i18n import aktualny_jezyk, t
 
 
@@ -46,7 +47,7 @@ _OPCJA_WSZYSTKIE = "__all__"
 # =============================================================================
 # Stałe i helpery
 # =============================================================================
-_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+_ROOT_DIR = sciezki.KATALOG_BAZOWY_STR
 DICTIONARIES_DIR = os.path.join(_ROOT_DIR, "dictionaries")
 
 # Nazwy podfolderów rozpoznawane przez silnik

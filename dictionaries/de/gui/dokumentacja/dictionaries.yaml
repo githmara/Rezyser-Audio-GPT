@@ -59,7 +59,7 @@ tresc:
 
     Derzeit vollständig implementiert sind: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} Basissprachen). Jede hat ein eigenes Paket
-    "dictionaries/<code>/" mit Diakritika, Alphabet und phonetischen Regeln,
+    "dictionaries/<kod>/" mit Diakritika, Alphabet und phonetischen Regeln,
     die auf Texte in genau dieser Sprache wirken — die Anwendung erkennt die
     Quellsprache automatisch über den lingua-language-detector (per Absatz) und
     lädt das passende Paket für jeden Textabschnitt separat. Weitere Sprachen

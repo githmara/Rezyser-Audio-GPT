@@ -72,12 +72,12 @@ tresc:
   krok_1_pierwsze_uruchomienie: |
     KROK 1: Pierwsze uruchomienie (Cross-Platform)
 
-    Pobierz najnowszy instalator z zakładki Releases na GitHubie (plik Rezyser_Audio_v<numer>_Installer.exe) i uruchom go dwukrotnym kliknięciem. Instalator zaproponuje domyślną lokalizację instalacji — folder Programs w katalogu lokalnym Twojego konta — i nie wymaga uprawnień administratora. Możesz wybrać własną ścieżkę przyciskiem „Przeglądaj"; w takim wypadku ZAPAMIĘTAJ ją (przyda się przy aktualizacjach — patrz „Automatyczne aktualizacje" niżej). Po instalacji uruchom program ikoną na pulpicie albo z Menu Start. Otworzy się krótkotrwałe okno terminala (znika automatycznie), a po chwili pojawi się główne okno programu — {app.nazwa}. Żadnej przeglądarki, żadnego serwera w tle. Gdy skończysz pracę, po prostu zamknij okno programu.
+    Pobierz najnowszy instalator z zakładki Releases na GitHubie (plik Rezyser_Audio_v<numer>_Installer.exe) i uruchom go dwukrotnym kliknięciem. Instalator zaproponuje domyślną lokalizację instalacji — folder Programs w katalogu lokalnym Twojego konta — i nie wymaga uprawnień administratora. Możesz wybrać własną ścieżkę przyciskiem „Przeglądaj"; w takim wypadku ZAPAMIĘTAJ ją (przyda się przy aktualizacjach — patrz „Automatyczne aktualizacje" niżej). Po instalacji uruchom program ikoną na pulpicie albo z Menu Start. Po chwili pojawi się główne okno programu — {app.nazwa}. Od wersji 17.0 aplikacja jest zamrożona jako natywny plik wykonywalny w trybie okienkowym, więc nie miga już żadne okno terminala, a uruchamia się szybciej niż wcześniej. Żadnej przeglądarki, żadnego serwera w tle. Gdy skończysz pracę, po prostu zamknij okno programu.
 
     Cała aplikacja, łącznie z silnikiem Pythona, projektami i kluczem API, żyje w jednym folderze pod ścieżką instalacji — cały folder można przenieść na pendrive, do chmury albo na inny komputer (szczegółowa instrukcja w sekcji „Przenoszenie projektów i klucza API" niżej).
 
 
-    Ważne: Folder runtime/ wewnątrz folderu instalacyjnego zawiera izolowane środowisko Pythona gotowe do użycia bez osobnej instalacji systemowej. Jeśli klonujesz repozytorium (ścieżka dewelopera), tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
+    Ważne: Folder runtime/ wewnątrz folderu instalacyjnego to bundla PyInstallera (od wersji 17.0) — zawiera izolowany interpreter Pythona i biblioteki, gotowe do użycia bez osobnej instalacji systemowej; pełni też rolę kontenera ukrytych metadanych projektów. Jeśli klonujesz repozytorium (ścieżka dewelopera), tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
 
     --- Dla Programistów (Windows — repozytorium Git) ---
 
@@ -517,9 +517,24 @@ tresc:
 
     Jak testować. Po zmianie kolejności reguł w pliku akcent przepuść zdanie zawierające OBIE litery przez Trybu Reżysera. Dla przykładu ES: „Niño de paja juega" → wynik musi mieć i akcent ñ („ñ → nj"), i akcent j („j → x"), czyli coś w stylu „Ninjo de paxa xuega". Jeśli zobaczysz „ninxo" zamiast „ninjo" — kolejność jest odwrotna.
 
-    Walidacja w silniku (opt-in dla autorów paczek). Aplikacja ma wbudowaną heurystykę wykrywającą potencjalne pętle, ale jest domyślnie wyłączona — bo wiele pipeline'ów wygląda na pętlę, choć są celowe (klasyczny „szcz → shch" + „ch → h"). Żeby ją włączyć: ustaw zmienną środowiskową `REZYSER_VALIDATE_ZAMIANY=1` i uruchom aplikację z konsoli. Silnik wypisze dla każdego pliku akcentów jedną agregowaną linię WARN z pierwszymi trzema potencjalnymi pętlami i liczbą pozostałych. Sprawdź wynikową fonetykę na zdaniu testowym — jeśli efekt zamierzony, zignoruj WARN.
+    Walidacja w silniku (opt-in dla autorów paczek). Aplikacja ma wbudowaną heurystykę wykrywającą potencjalne pętle, ale jest domyślnie wyłączona — bo wiele pipeline'ów wygląda na pętlę, choć są celowe (klasyczny „szcz → shch" + „ch → h"). Żeby ją włączyć: ustaw zmienną środowiskową `REZYSER_VALIDATE_ZAMIANY=1` i uruchom aplikację z konsoli — ze źródła przez `python main.py`, bo zamrożony `.exe` w trybie okienkowym (od wersji 17.0) nie ma okna konsoli. Silnik wypisze dla każdego pliku akcentów jedną agregowaną linię WARN z pierwszymi trzema potencjalnymi pętlami i liczbą pozostałych. Sprawdź wynikową fonetykę na zdaniu testowym — jeśli efekt zamierzony, zignoruj WARN.
 
     Przyciski przemieszczania reguł w GUI Managera Reguł (drag-and-drop, „W górę / W dół") to oddzielna funkcja zaplanowana na późniejszy cykl wersji — wymaga przeprojektowania Managera (obecnie deleguje edycję pliku do zewnętrznego Notatnika systemowego, a nie ma własnego widoku reguł). Do czasu jej wdrożenia: edytuj plik YAML ręcznie, przesuwaj wiersze w sekcji `zamiany:`, korzystaj z walidatora ENV-varem i testuj na zdaniach kontrolnych.
+  krok_7b_polskie_nazewnictwo: |
+    KROK 7b — Polskie nazwy folderów i plików (dla użytkowników spoza Polski)
+
+    Programem rządzi język polski — to język główny projektu. Przeglądając folder dictionaries/ w Managerze Reguł (Ctrl+4) albo zaglądając do folderów z zapisami, natkniesz się na polskie nazwy. NIE są one błędem ani usterką tłumaczenia: pozostają polskie celowo, bo to wewnętrzne identyfikatory silnika. Poniższy słowniczek wyjaśnia, co oznaczają.
+
+    Podfoldery w dictionaries/<kod-języka>/ (to widzisz w Managerze Reguł):
+    - podstawy (basics) — konfiguracja paczki językowej
+    - akcenty (accents) — reguły fonetyczne pod syntezatory mowy
+    - szyfry (ciphers) — tryby szyfrowania tekstu
+    - rezyser (director) — tryby twórcze modułu Reżyser
+    - opowiesci (stories) — tryby interaktywnych Opowieści
+
+    Foldery z Twoimi zapisami (obok programu):
+    - skrypty (scripts) — projekty Reżysera: narracja .txt, Księga Świata .md
+    - opowiesci (stories) — zapisy interaktywnych Opowieści
   nvda_a11y: |
     Ważne wskazówki dla użytkowników czytników ekranu (NVDA)
 

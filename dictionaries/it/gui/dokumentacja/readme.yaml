@@ -20,9 +20,9 @@ tresc:
 
     **Altre versioni linguistiche / Other languages:** [English](readme.md) · [Deutsch](readme.de.md) · [Español](readme.es.md) · [Suomi](readme.fi.md) · [Français](readme.fr.md) · [Íslenska](readme.is.md) · [Italiano](readme.it.md) · [Polski](readme.pl.md) · [Русский](readme.ru.md)
   wprowadzenie: |
-    Insieme di strumenti autonomi alimentati dall'IA per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, nonché per condurre giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata sin dall'inizio con piena accessibilità per i lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra del programma.
+    Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-    Wersja: **{numer_wersji}** · Wspierane języki natywnie ({liczba_kompletnych_jezykow}): {lista_kompletnych_jezykow_natywnie}.
+    Versione: **{numer_wersji}** · Lingue supportate nativamente ({liczba_kompletnych_jezykow}): {lista_kompletnych_jezykow_natywnie}.
   glowne_moduly: |
     ## Moduli principali
 
@@ -67,9 +67,9 @@ tresc:
   wielojezycznosc: |
     ## Multilinguismo ({liczba_kompletnych_jezykow} lingue nativamente)
 
-    Dalla versione v14.0 l'applicazione supporta nativamente {liczba_kompletnych_jezykow} lingue di base: {lista_kompletnych_jezykow_natywnie}. Ogni pacchetto `dictionaries/<codice>/` contiene diacritici, alfabeto e regole fonetiche che operano sul testo in quella specifica lingua — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente.
+    Dalla versione v14.0 l'applicazione supporta nativamente {liczba_kompletnych_jezykow} lingue di base: {lista_kompletnych_jezykow_natywnie}. Ogni pacchetto `dictionaries/<kod>/` contiene diacritici, alfabeto e regole fonetiche che operano sul testo in quella specifica lingua — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente.
 
-    L'interfaccia GUI, la documentazione (`docs/manual.<iso>.txt`) e la maggior parte dei messaggi di sistema sono disponibili nativamente in ciascuna delle lingue supportate. I prompt di sistema AI nelle modalità Regista e Racconti sono scritti nelle lingue di destinazione (manualmente, non auto-tradotti — vedi `dictionaries/<codice>/rezyser/` e `dictionaries/<codice>/opowiesci/`).
+    L'interfaccia GUI, la documentazione (`docs/manual.<iso>.txt`) e la maggior parte dei messaggi di sistema sono disponibili nativamente in ciascuna delle lingue supportate. I prompt di sistema AI nelle modalità Regista e Racconti sono scritti nelle lingue di destinazione (manualmente, non auto-tradotti — vedi `dictionaries/<kod>/rezyser/` e `dictionaries/<kod>/opowiesci/`).
   architektura_ai: |
     ## Architettura AI e modelli utilizzati
 
@@ -98,9 +98,9 @@ tresc:
     2. Esegui il file `setup_dev.bat` per creare automaticamente un ambiente virtuale (`.venv/`) e scaricare le dipendenze da `requirements.txt`.
     3. Avvia l'applicazione con il comando `python main.py` o tramite il file `run_dev.bat`.
 
-    Gli script `.sh` per macOS/Linux sono stati rimossi nella versione 13.1 — l'ambiente di sviluppo è concentrato su Windows a causa della specificità dei test di accessibilità NVDA. È possibile lavorare con il codice su altri sistemi, ma richiede un setup manuale: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+    Gli script `.sh` per macOS/Linux sono stati rimossi nella v13.1 — l'ambiente di sviluppo è concentrato su Windows a causa delle specifiche dei test di accessibilità NVDA. È possibile lavorare con il codice su altri sistemi, ma richiede un setup manuale: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-    **Gli script per la creazione dei pacchetti di rilascio** (`build_release.py`, `installer.iss`) servono esclusivamente per creare pacchetti per Windows. Richiedono una cartella speciale `runtime/` con una versione portatile di Python — questa cartella non fa parte del repository di proposito (è in `.gitignore`).
+    **Gli script per costruire i pacchetti di rilascio** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) sono utilizzati esclusivamente per creare pacchetti per Windows. Dalla versione 17.0 `build_release.py` congela l'applicazione con PyInstaller (onedir + windowed) secondo `rezyser_audio.spec` — produce `dist/` con un `.exe` nativo e una cartella bundle `runtime/` (interprete + librerie). Non è più necessario alcun Python portatile caricato manualmente nel repository; le directory `dist/` e `build/` sono in `.gitignore`.
   dokumentacja: |
     ## Documentazione completa
 
@@ -111,3 +111,22 @@ tresc:
     * `docs/dictionaries.<iso>.txt` — istruzioni per linguisti senza Python su come aggiungere accenti/cifrari/modalità AI personalizzati.
 
     Ognuno di questi file è disponibile in {liczba_kompletnych_jezykow} lingue — suffisso `.<iso>.txt` (ad es. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+  polskie_nazewnictwo: |
+    ### Guida alla nomenclatura polacca — per chi non parla polacco
+
+    La lingua principale di questo progetto è il polacco. I nomi dei moduli, delle classi, i commenti nel codice, così come i nomi delle cartelle e dei file di dati sono in polacco e — per garantire la retrocompatibilità e il contratto del motore multilingue — NON vengono tradotti né modificati intenzionalmente. Il seguente glossario aiuterà gli sviluppatori e gli utenti dei sistemi macOS/Linux a orientarsi nella struttura.
+
+    **Cartelle dati utente (accanto al file eseguibile o nella cartella del progetto):**
+
+    * `skrypty/` — *scripts*: progetti del modulo Regista (`.txt` con narrazione, `.md` con il Libro del Mondo, `_streszczenie.txt`).
+    * `opowiesci/` — *stories*: registrazioni di Storie interattive.
+    * `runtime/` — doppio ruolo: cartella del bundle dell'applicazione congelata (interprete + librerie) E contenitore di metadati nascosti dei progetti (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+    **Sottocartelle dei dati sorgente in `dictionaries/<codice-lingua>/` (visibili nel Gestore delle Regole):**
+
+    * `podstawy.yaml` — *basics*: configurazione e metadati del pacchetto linguistico.
+    * `akcenty/` — *accents*: regole fonetiche per i sintetizzatori vocali.
+    * `szyfry/` — *ciphers*: modalità di cifratura del testo.
+    * `rezyser/` — *director*: modalità creative del modulo Regista.
+    * `opowiesci/` — *stories*: modalità di Storie interattive.
+    * `gui/` — testi dell'interfaccia (`ui.yaml`) e modelli di documentazione.

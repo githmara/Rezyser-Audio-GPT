@@ -38,13 +38,15 @@ from typing import Any
 
 import yaml
 
+import sciezki
+
 
 # ---------------------------------------------------------------------------
 # Stałe / ścieżki
 # ---------------------------------------------------------------------------
 JEZYK_DOMYSLNY = "pl"
 
-_ROOT_DIR = Path(__file__).resolve().parent
+_ROOT_DIR = sciezki.KATALOG_BAZOWY
 _DICTIONARIES_DIR = _ROOT_DIR / "dictionaries"
 _NAZWA_PLIKU_UI = "ui.yaml"
 _FOLDER_GUI = "gui"

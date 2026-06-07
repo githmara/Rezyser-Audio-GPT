@@ -17,6 +17,7 @@ import docx
 import wx
 import yaml
 
+import sciezki
 from i18n import t
 
 
@@ -42,7 +43,7 @@ TURY_NA_SCENE = 5
 # prefiksów A11y ze wszystkich paczek językowych. Konwerter nie zna języka
 # pliku wejściowego, więc detekcja jest unifikowana: rozpoznajemy prefiksy
 # z dowolnej paczki (gracz mógł zmienić język aplikacji w trakcie projektu).
-_DICTIONARIES_DIR = Path(__file__).resolve().parent / "dictionaries"
+_DICTIONARIES_DIR = sciezki.KATALOG_BAZOWY / "dictionaries"
 
 
 @lru_cache(maxsize=1)

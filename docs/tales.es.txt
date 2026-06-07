@@ -85,7 +85,7 @@ El motor narrativo selecciona el modelo de IA automáticamente dependiendo del m
 
 /flashback <opis>, /retrospekcja <opis> — retrospección en tercera persona, retroceso en el tiempo. Ejemplo: "/flashback el día de la muerte del padre" o "/flashback el primer encuentro de los héroes". Abre la narración con una fórmula temporal ("Tres años antes…"), la marca con el prefijo "Retrospección:" y regresa al turno actual. Igual que /scena — pasiva, sin elecciones. Descripción completa en el PASO 5B.
 
-/odswiez, /refresh — actualiza la memoria interna a partir del archivo de narración tras editarlo manualmente (desde la v15.5). Cuando abres opowiesci/<nombre>.txt en el editor y, por ejemplo, cortas un cierre de corte cinematográfico que el motor cerró por error, este comando (o el botón „Actualizar desde el disco") sincroniza la cola fresca con el contexto del motor — sin un reinicio completo ni recargar el juego. Si ya existe un resumen de los turnos anteriores, queda intacto, de modo que el siguiente turno y el siguiente resumen no se generan sobre datos desactualizados. ATENCIÓN: el estado del juego (personajes, ubicación, inventario, hilos) del archivo .game.json NO se actualiza — si la edición cambió hechos del mundo, el siguiente turno puede desviarse de ellos.
+/odswiez, /refresh — actualiza la memoria interna a partir del archivo de narración tras editarlo manualmente (desde la v15.5). Cuando abres opowiesci/<nazwa>.txt en el editor y, por ejemplo, cortas un cierre de corte cinematográfico que el motor cerró por error, este comando (o el botón „Actualizar desde el disco") sincroniza la cola fresca con el contexto del motor — sin un reinicio completo ni recargar el juego. Si ya existe un resumen de los turnos anteriores, queda intacto, de modo que el siguiente turno y el siguiente resumen no se generan sobre datos desactualizados. ATENCIÓN: el estado del juego (personajes, ubicación, inventario, hilos) del archivo .game.json NO se actualiza — si la edición cambió hechos del mundo, el siguiente turno puede desviarse de ellos.
 
 /pomoc, /help — muestra una ventana de diálogo con una lista de todos los comandos disponibles. El diálogo es de solo lectura y amigable con NVDA — el campo de texto recibe el foco automáticamente, el lector de pantalla lee toda la lista de inmediato sin necesidad de navegación.
 
@@ -96,15 +96,15 @@ PASO 6: Archivos del juego — dónde encontrarás tus datos
 
 Cada juego produce cinco archivos, cada uno en una carpeta diferente, con roles distintos:
 
-opowiesci/<nombre>.txt — narrativa completa lista para ser escuchada como audiolibro. Se puede abrir en el Bloc de notas o cargar en el Arquitecto de Audiolibros (Convertidor) y generar un archivo Word con capítulos o un cronometraje para ElevenLabs.
+opowiesci/<nazwa>.txt — narrativa completa lista para ser escuchada como audiolibro. Se puede abrir en el Bloc de notas o cargar en el Arquitecto de Audiolibros (Convertidor) y generar un archivo Word con capítulos o un cronometraje para ElevenLabs.
 
-opowiesci/<nombre>.md — Libro del Mundo de los personajes en formato [Nombre: características], regenerado después de cada turno. ¡Formato compatible con el analizador del Director! Puedes cargar este archivo en el panel del Director (Archivo → Cargar) y obtendrás acentos nativos de los personajes en la narrativa clásica TTS — un puente entre los dos módulos principales de la aplicación.
+opowiesci/<nazwa>.md — Libro del Mundo de los personajes en formato [Nombre: características], regenerado después de cada turno. ¡Formato compatible con el analizador del Director! Puedes cargar este archivo en el panel del Director (Archivo → Cargar) y obtendrás acentos nativos de los personajes en la narrativa clásica TTS — un puente entre los dos módulos principales de la aplicación.
 
-runtime/opowiesci/<nombre>.game.json — estado completo del juego: nombre, modo, personajes activos, ubicación, equipamiento, tramas abiertas, últimos 6 turnos en forma resumida. Es la fuente de verdad para cargar el juego — sin este archivo no se puede continuar.
+runtime/opowiesci/<nazwa>.game.json — estado completo del juego: nombre, modo, personajes activos, ubicación, equipamiento, tramas abiertas, últimos 6 turnos en forma resumida. Es la fuente de verdad para cargar el juego — sin este archivo no se puede continuar.
 
-runtime/opowiesci/<nombre>.story.jsonl — registro bruto de cada turno (solicitud del jugador + respuesta del modelo en JSON). El archivo no es necesario para jugar — se utiliza para depuración o análisis posterior (por ejemplo, estadísticas de cuántos turnos duró la aventura, qué tramas introdujo el LLM).
+runtime/opowiesci/<nazwa>.story.jsonl — registro bruto de cada turno (solicitud del jugador + respuesta del modelo en JSON). El archivo no es necesario para jugar — se utiliza para depuración o análisis posterior (por ejemplo, estadísticas de cuántos turnos duró la aventura, qué tramas introdujo el LLM).
 
-runtime/skrypty/<nombre>.mode — metadatos del número de modo (3=Libre, 4=Elecciones, 5=Mal menor). Archivo compartido con el Director, pero la numeración no colisiona (el Director usa 0-2).
+runtime/skrypty/<nazwa>.mode — metadatos del número de modo (3=Libre, 4=Elecciones, 5=Mal menor). Archivo compartido con el Director, pero la numeración no colisiona (el Director usa 0-2).
 
 
 PASO 7: Indicador de memoria del modelo — por qué los turnos en los juegos antiguos no requieren tu intervención manual
@@ -130,7 +130,7 @@ El Cinematic Warning NO es parte de la narración del audiolibro — el motor de
 
 PASO 9: Puente al Director — utiliza el Libro del Mundo creado en Historias
 
-El archivo opowiesci/<nombre>.md generado durante el juego contiene el Libro del Mundo con los personajes que aparecieron en la narración, junto con sus características, acentos y personalidad. El formato es exactamente el que requiere el parser del Director — [Nombre: características con descripción del acento].
+El archivo opowiesci/<nazwa>.md generado durante el juego contiene el Libro del Mundo con los personajes que aparecieron en la narración, junto con sus características, acentos y personalidad. El formato es exactamente el que requiere el parser del Director — [Nombre: características con descripción del acento].
 
 Qué puedes hacer con esto:
 
@@ -147,9 +147,9 @@ Todo el módulo de Historias ha sido optimizado para jugadores ciegos. Lo que es
 
 CAMPO ÚLTIMO TURNO — es un wx.TextCtrl separado de solo lectura, multilinea (~140 px de altura) SOBRE la narrativa completa. Después de cada turno, el campo se reemplaza con un fragmento nuevo (encabezado "--- Turno N ---" + contenido de la narrativa). NVDA lo lee inmediatamente después de enfocar (autoenfoque tras el éxito del turno), sin tener que navegar por cientos de líneas de la historia completa. Después de cargar un juego guardado, el campo muestra un RESUMEN del último turno guardado (máx. 400 caracteres del búfer `últimos_turnos`) con un prefijo informando que la narrativa completa está en el campo de abajo.
 
-CAMPO DE NARRATIVA COMPLETA — es un wx.TextCtrl de solo lectura, multilinea, que crece después de cada turno. NVDA lee linealmente toda la narrativa, puedes navegar con las flechas dentro del texto, copiar fragmentos con Ctrl+C. El campo nunca es editable — modificas la historia SOLO a través de un nuevo turno, mediante el nuevo botón «Abrir archivo de narración…» (desde v15.2.3, descrito abajo) o editando directamente el archivo .txt desde el Explorador de archivos. Este campo está sincronizado con el archivo `opowiesci/<nombre>.txt`, puedes tratarlo como una vista previa de un audiolibro.
+CAMPO DE NARRATIVA COMPLETA — es un wx.TextCtrl de solo lectura, multilinea, que crece después de cada turno. NVDA lee linealmente toda la narrativa, puedes navegar con las flechas dentro del texto, copiar fragmentos con Ctrl+C. El campo nunca es editable — modificas la historia SOLO a través de un nuevo turno, mediante el nuevo botón «Abrir archivo de narración…» (desde v15.2.3, descrito abajo) o editando directamente el archivo .txt desde el Explorador de archivos. Este campo está sincronizado con el archivo `opowiesci/<nazwa>.txt`, puedes tratarlo como una vista previa de un audiolibro.
 
-BOTÓN «Abrir archivo de narración…» (desde v15.2.3) — junto a los botones «Nueva partida»/«Cargar»/«Guardar» aparece un cuarto: «Abrir archivo de narración…». Abre el archivo `opowiesci/<nombre>.txt` en el editor de texto del sistema (Bloc de notas en Windows, TextEdit en macOS, editor GUI predeterminado en Linux — análogo a cómo el Administrador de Reglas abre archivos YAML o cómo el panel de inicio abre `golden_key.env`). El caso de uso típico es una alternativa a la puerta trasera «Editar modo de juego…» → Libre: en lugar de saltar a otro modo para escribir el final, puedes simplemente abrir el archivo .txt y añadir la escena de cierre manualmente. ADVERTENCIA SOBRE RIESGO DE DIVERGENCIA: antes de abrir, la aplicación muestra un diálogo modal de advertencia, porque .txt es SOLO la narración para TTS, mientras que la fuente de verdad del estado del juego (personajes, ubicación, inventario, hilos) es un archivo separado `.game.json`. Editar el .txt no actualiza el estado — el siguiente turno del LLM recibirá el mundo de antes de tu edición, por lo que p.ej. puedes describir en el archivo que un personaje murió, pero en el estado del juego seguirá vivo y aparecerá en el siguiente turno. Úsalo conscientemente, idealmente solo para añadir la escena final tras la cual ya no planeas más turnos.
+BOTÓN «Abrir archivo de narración…» (desde v15.2.3) — junto a los botones «Nueva partida»/«Cargar»/«Guardar» aparece un cuarto: «Abrir archivo de narración…». Abre el archivo `opowiesci/<nazwa>.txt` en el editor de texto del sistema (Bloc de notas en Windows, TextEdit en macOS, editor GUI predeterminado en Linux — análogo a cómo el Administrador de Reglas abre archivos YAML o cómo el panel de inicio abre `golden_key.env`). El caso de uso típico es una alternativa a la puerta trasera «Editar modo de juego…» → Libre: en lugar de saltar a otro modo para escribir el final, puedes simplemente abrir el archivo .txt y añadir la escena de cierre manualmente. ADVERTENCIA SOBRE RIESGO DE DIVERGENCIA: antes de abrir, la aplicación muestra un diálogo modal de advertencia, porque .txt es SOLO la narración para TTS, mientras que la fuente de verdad del estado del juego (personajes, ubicación, inventario, hilos) es un archivo separado `.game.json`. Editar el .txt no actualiza el estado — el siguiente turno del LLM recibirá el mundo de antes de tu edición, por lo que p.ej. puedes describir en el archivo que un personaje murió, pero en el estado del juego seguirá vivo y aparecerá en el siguiente turno. Úsalo conscientemente, idealmente solo para añadir la escena final tras la cual ya no planeas más turnos.
 
 BOTONES DE SELECCIÓN DINÁMICOS — en los modos de Elecciones y Menor Mal, cada turno crea nuevos wx.Buttons en el área de elecciones. Cada uno tiene un tooltip leído por NVDA ("Elige: sigue adelante hacia el bosque"). Tab entre ellos funciona naturalmente. Enter en el botón seleccionado envía automáticamente esa elección al motor narrativo.
 
@@ -162,22 +162,22 @@ ESTADOS DE MEMORIA EN COLOR — el indicador de memoria del modelo cambia el col
 ACELERADORES DE TECLADO — todos los botones tienen el signo `&` antes de una de las letras de la etiqueta, lo que activa el acelerador Alt+letra. Funciona de manera idéntica a otros módulos de la aplicación.
 
 
-Najczęstsze problemy
+Problemas más comunes
 
-Problem: Po kliknięciu "Nuevo juego" pojawia się komunikat „Brak klucza API".
-Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza OpenAI. Wróć do ekranu startowego (przycisk Home), kliknij "Generar archivo golden_key.env y abrir editor de texto" i postępuj zgodnie z instrukcjami (PASO 2 głównego manuala).
+Problema: Al hacer clic en "Nuevo juego" aparece el mensaje "Falta la clave API".
+Causa y solución: El archivo golden_key.env en la carpeta principal de la aplicación no tiene la clave OpenAI correcta. Regresa a la pantalla de inicio (botón Home), haz clic en "Generar archivo golden_key.env y abrir editor de texto" y sigue las instrucciones (PASO 2 del manual principal).
 
-Problem: Próbuję wysłać kolejną turę, ale przycisk "Enviar" jest wyszarzony.
-Przyczyna i rozwiązanie: Trwa auto-resumen del contexto o la generación de Cinematic Warning en el hilo de fondo. El estado de la memoria mostrará „Auto-resumen del contexto en progreso…". Espera unos segundos — el botón se desbloqueará automáticamente tras el éxito.
+Problema: Intento enviar otro turno, pero el botón "Enviar" está atenuado.
+Causa y solución: Se está realizando un auto-resumen del contexto o la generación de Cinematic Warning en el hilo de fondo. El estado de la memoria mostrará "Auto-resumen del contexto en progreso…". Espera unos segundos — el botón se desbloqueará automáticamente después del éxito.
 
-Problem: El mensaje „Memoria del modelo sobrecargada" bloquea el juego.
-Przyczyna i rozwiązanie: El auto-resumen no liberó el búfer (por ejemplo, límite de tasa de OpenAI). Termina el juego con el comando /fin o cierra la aplicación, luego vuelve a cargarla — el motor cargará solo el estado de game.json sin el historial de los últimos turnos.
+Problema: El mensaje "Memoria del modelo sobrecargada" bloquea el juego.
+Causa y solución: El auto-resumen no liberó el búfer (por ejemplo, límite de tasa de OpenAI). Termina el juego con el comando /fin o cierra la aplicación, luego vuelve a cargarla — el motor cargará solo el estado desde game.json sin el historial de los últimos turnos.
 
-Problem: En el modo de Elecciones, el motor no generó botones, aunque los esperaba.
-Przyczyna i rozwiązanie: Alucinación del modelo — a pesar del modo 4 LLM devolvió una tabla de elecciones vacía. La aplicación oculta conscientemente el área de elecciones (en lugar de mostrar un marcador de posición vacío) y permite continuar con texto libre. El siguiente turno probablemente generará elecciones correctamente.
+Problema: En el modo de Elecciones, el motor no generó botones, aunque los esperaba.
+Causa y solución: Alucinación del modelo — a pesar del modo 4 LLM devolvió una tabla de elecciones vacía. La aplicación oculta conscientemente el área de elecciones (en lugar de mostrar un marcador de posición vacío) y permite continuar con texto libre. Es probable que el siguiente turno genere elecciones correctamente.
 
-Problem: Los archivos .game.json y .story.jsonl no son visibles en el escritorio.
-Przyczyna i rozwiązanie: Es intencionado — runtime/ es una carpeta del sistema para usuarios normales, invisible desde el explorador de archivos. Los archivos de narración (.txt, .md) van a scripts/ — allí los encontrarás.
+Problema: Los archivos .game.json y .story.jsonl no son visibles en el escritorio.
+Causa y solución: Es intencionado — runtime/ es una carpeta del sistema para usuarios normales, invisible desde el explorador de archivos. Los archivos de narración (.txt, .md) van a opowiesci/ — ahí los encontrarás.
 
 
 PASO 5B: Segunda cámara — escenas fuera de cuadro y retrospecciones (desde v15.4)

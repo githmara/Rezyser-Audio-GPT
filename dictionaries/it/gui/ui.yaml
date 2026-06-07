@@ -641,6 +641,8 @@ rezyser:
   sr_sukces_tresc: 'File per lettori di schermo salvato: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Errore nella generazione della versione per lettori di schermo
   sr_blad_tresc: "Impossibile generare la versione per lettori di schermo:\n{tresc_bledu}"
+  err_struktura: Il modello ha generato una struttura di risposta errata nonostante diversi tentativi di correzione. Prova di nuovo o formula il comando in modo diverso.
+  err_dlugosc: La risposta del modello è stata troncata prima che potesse completarla (superato il limite di lunghezza). Accorcia il contesto — ad esempio, il Libro del Mondo o le istruzioni — e riprova.
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"
@@ -1213,3 +1215,4 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: L'elemento principale dello stato del gioco deve essere un oggetto JSON (una coppia chiave-valore tra parentesi graffe), non un elenco o un valore semplice. Ripristina la struttura dell'oggetto e riprova.
   edytuj_stan_zapisano_tytul: Stato del gioco salvato
   edytuj_stan_zapisano_tresc: Lo stato del gioco "{nazwa}" è stato salvato e ricaricato dal disco. Personaggi, posizione, equipaggiamento, trame e contatori ora riflettono la tua modifica.
+  err_dlugosc: La risposta del modello è stata troncata prima che potesse completarla (superato il limite di lunghezza). Accorcia il contesto e riprova.

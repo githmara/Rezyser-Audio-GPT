@@ -78,6 +78,7 @@ import jsonschema
 
 import core_rezyser as cr
 import przepisy_rezysera as pr
+from bledy_ai import BladDlugosciOdpowiedzi, BladStrukturyJSON
 
 # ``openai`` potrzebne tylko do łapania ``RateLimitError``. Import leniwy
 # wewnątrz funkcji – by testy jednostkowe mogły działać bez SDK, a samo
@@ -468,9 +469,11 @@ def generuj_burze(
             messages.append({
                 "role": "system",
                 "content": (
-                    f"POPRZEDNIA PRÓBA NIE PRZESZŁA WALIDACJI. Błąd: {ostatni_blad}. "
-                    "Wygeneruj ponownie ZGODNIE ze schemą JSON podaną w prompt_systemowy. "
-                    "Wszystkie pola wymagane MUSZĄ być obecne i mieć właściwy typ."
+                    f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
+                    "Regenerate the response STRICTLY conforming to the JSON schema "
+                    "defined in the system prompt. Every required field MUST be present "
+                    "and MUST have the correct type. Return ONLY a single valid JSON "
+                    "object — no prose, no markdown code fences, no commentary."
                 ),
             })
 
@@ -484,9 +487,10 @@ def generuj_burze(
 
         finish = getattr(response.choices[0], "finish_reason", None)
         if finish == "length":
-            raise RuntimeError(
-                "Model osiągnął limit max_tokens — odpowiedź Burzy została ucięta "
-                "przed zamknięciem JSON. Skróć kontekst lub zwiększ max_tokens."
+            raise BladDlugosciOdpowiedzi(
+                "The model hit its max_tokens limit — the Brainstorm response was "
+                "cut off before the JSON could be closed. Shorten the context or "
+                "raise max_tokens."
             )
 
         surowy_text = response.choices[0].message.content or ""
@@ -537,9 +541,9 @@ def generuj_burze(
             surowy_json=surowy_text,
         )
 
-    raise RuntimeError(
-        f"LLM wygenerował niewłaściwą strukturę JSON {max_retry + 1} razy z rzędu "
-        f"dla Burzy. Ostatni błąd: {ostatni_blad}"
+    raise BladStrukturyJSON(
+        f"The AI returned a malformed JSON structure {max_retry + 1} times in a row "
+        f"for Brainstorm mode. Last error: {ostatni_blad}"
     )
 
 
@@ -709,9 +713,11 @@ def generuj_skrypt(
             messages.append({
                 "role": "system",
                 "content": (
-                    f"POPRZEDNIA PRÓBA NIE PRZESZŁA WALIDACJI. Błąd: {ostatni_blad}. "
-                    "Wygeneruj ponownie ZGODNIE ze schemą JSON podaną w prompt_systemowy. "
-                    "Wszystkie pola wymagane MUSZĄ być obecne i mieć właściwy typ."
+                    f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
+                    "Regenerate the response STRICTLY conforming to the JSON schema "
+                    "defined in the system prompt. Every required field MUST be present "
+                    "and MUST have the correct type. Return ONLY a single valid JSON "
+                    "object — no prose, no markdown code fences, no commentary."
                 ),
             })
 
@@ -725,9 +731,10 @@ def generuj_skrypt(
 
         finish = getattr(response.choices[0], "finish_reason", None)
         if finish == "length":
-            raise RuntimeError(
-                "Model osiągnął limit max_tokens — odpowiedź Skryptu została ucięta "
-                "przed zamknięciem JSON. Skróć kontekst lub zwiększ max_tokens."
+            raise BladDlugosciOdpowiedzi(
+                "The model hit its max_tokens limit — the Script response was cut "
+                "off before the JSON could be closed. Shorten the context or raise "
+                "max_tokens."
             )
 
         surowy_text = response.choices[0].message.content or ""
@@ -776,9 +783,9 @@ def generuj_skrypt(
             liczba_prob=proba + 1,
         )
 
-    raise RuntimeError(
-        f"LLM wygenerował niewłaściwą strukturę JSON {max_retry + 1} razy z rzędu "
-        f"dla Skryptu. Ostatni błąd: {ostatni_blad}"
+    raise BladStrukturyJSON(
+        f"The AI returned a malformed JSON structure {max_retry + 1} times in a row "
+        f"for Script mode. Last error: {ostatni_blad}"
     )
 
 

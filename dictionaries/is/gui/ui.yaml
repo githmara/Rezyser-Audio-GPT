@@ -64,9 +64,9 @@ main:
     pomoc_dictionaries: '&Orðabækur — kommur, dulmál, AI stillingar'
   menu_status:
     strona_glowna: "Farðu aftur á upphafsskjá með lýsingu á verkfærum og System Check"
-    rezyser: "Opnar Leikstjórnarstillingu – skrifa handrit og prósa með AI"
-    poliglota: "Opnar Tungumálamannsstillingu – áherslur og þýðing texta"
-    konwerter: "Opnar Breytingartækisstillingu – búa til Word skrár"
+    rezyser: "Opnar Leikstjórnarham – skrifa handrit og prósa með AI"
+    poliglota: "Opnar Tungumálamannsham – áherslur og þýðing texta"
+    konwerter: "Opnar Breytingartækisham – búa til Word skrár"
     manager: "Opnar Reglustjóra – YAML skráarkönnuður í dictionaries/ og nýr áherslu / stillinga / dulritunarsmiður"
     zakoncz: "Lokaðu forritinu"
     jezyk_interfejsu: "Veldu tungumál viðmótsins (breyting krefst endurræsingar)"
@@ -82,10 +82,10 @@ main:
     manager: "📚  &Reglustjóri"
     opowiesci: "📖  &Sögur"
   tooltip:
-    rezyser: "Leikstjórnarstilling (Ctrl+1): Skrifaðu handrit og prósa með hjálp AI"
-    poliglota: "Tungumálamannsstilling (Ctrl+2): Áherslur og þýðing texta"
-    konwerter: "Breytingartækisstilling (Ctrl+3): Búðu til Word skrár með fyrirsögnum"
-    manager: "Reglustjórastilling (Ctrl+4): Skoðaðu YAND skrár í dictionaries/, búðu til nýjar áherslur, dulritanir og stillingar (sniðmát eða ábending fyrir AI)"
+    rezyser: "Leikstjórnarhamur (Ctrl+1): Skrifaðu handrit og prósa með hjálp AI"
+    poliglota: "Tungumálamannshamur (Ctrl+2): Áherslur og þýðing texta"
+    konwerter: "Breytingartækishamur (Ctrl+3): Búðu til Word skrár með fyrirsögnum"
+    manager: "Reglustjórahamur (Ctrl+4): Skoðaðu YAND skrár í dictionaries/, búðu til nýjar áherslur, dulritanir og stillingar (sniðmát eða ábending fyrir AI)"
     opowiesci: "Sögur eining (Ctrl+5): Gagnvirkar sögur í annarri persónu — búnar til af AI, lesnar af TTS"
   nazwy_narzedzi:
     dom: "Heim"
@@ -113,7 +113,7 @@ home:
     Þetta er samþætt upptökustúdíó þitt.
     Veldu verkfæri úr hnappastikunni eða úr Verkfæri valmyndinni:
 
-      •  Leikstjóri       –  Skrifaðu handrit og prósa með AI; stjórnaðu Księga Świata á dýnamískan hátt.
+      •  Leikstjóri       –  Skrifaðu handrit og prósa með AI; stjórnaðu Heimsbók á dýnamískan hátt.
       •  Tungumálamaður     –  Settu á hörð áherslur fyrir staðbundna talgervla (NVDA/Vocalizer) og þýddu texta.
       •  Breytingartæki     –  Búðu fljótt til faglegar Word skrár með fyrirsögnum á stigi 1.
       •  Reglustjóri –  Skoðaðu og búðu til orðabókarreglur án þess að fara handvirkt í YAML skrár.
@@ -203,10 +203,10 @@ home:
   heading_narzedzia_slownikowe: "Orðabókarverkfæri"
   narzedzia_slownikowe_name: "Lýsing á orðabókarverkfærum"
   tools_info: |-
-    Viltu bæta við nýjum áherslum, dulritun eða Leikstjórnarstillingu?
+    Viltu bæta við nýjum áherslum, dulritun eða Leikstjórnarham?
     Opnaðu Reglustjóra (Ctrl+4) – þar finnur þú tré allra YAML skráa í dictionaries/ og smið sem býr sjálfkrafa til sniðmát eða býr til ábendingu fyrir AI chatbot.
 
-    Eftir að hafa bætt við nýjum ÁHERSLUM, smelltu á hnappinn „Endurnýja áherslur Leikstjóra úr YAML" hér að neðan – þetta gerir Leikstjórnarstillingu kleift að taka eftir nýjum áherslum (Tungumálamaður greinir YAML skrár sjálfkrafa). Eftir endurnýjun skaltu ræsa forritið aftur.
+    Eftir að hafa bætt við nýjum ÁHERSLUM, smelltu á hnappinn „Endurnýja áherslur Leikstjóra úr YAML" hér að neðan – þetta gerir Leikstjórnarham kleift að taka eftir nýjum áherslum (Tungumálamaður greinir YAML skrár sjálfkrafa). Eftir endurnýjun skaltu ræsa forritið aftur.
   btn_open_manager_label: "📚 Opnaðu Reglustjóra"
   btn_open_manager_name: "Hnappur Opna Reglustjóra"
   btn_open_manager_tooltip: "Fer í Reglustjóra – YAML skráarkönnuður og nýr áherslu / stillinga / dulritunarsmiður (Ctrl+4)."
@@ -221,7 +221,7 @@ home:
   raport_tytul_sukces: "Endurnýja áherslur Leikstjóra – Árangur"
   raport_header_sukces: |-
     ✅ Skrár fyrir {liczba_akcentow} áherslur hafa verið breyttar.
-    Til að nýjar áherslur birtist í Leikstjórnarstillingu, ræstu forritið aftur.
+    Til að nýjar áherslur birtist í Leikstjórnarham, ræstu forritið aftur.
   raport_tytul_bez_zmian: "Endurnýja áherslur Leikstjóra – Engar breytingar"
   raport_header_bez_zmian: "ℹ️ Engar breytingar. {liczba_akcentow} áherslur fundust – umbúðir eru nú þegar uppfærðar."
   raport_lbl_log: "Fullur log (Ctrl+A, Ctrl+C afritar í klippiborð):"
@@ -237,23 +237,23 @@ rezyser:
   tool_description: |-
     Hljóðstjóri GPT er blandað skapandi stúdíó.
 
-    Hugstormunarstilling  – skipuleggðu söguþráð, búa til 3 valkosti (ENGIN skráning í skrá).
-    Handritsstilling        – skrifaðu hrátt hljóðhandrit með merkjum [SFX] og [Persóna: tilfinning] (SKRÁNING Í SKRÁ).
-    Hljóðbókarstilling     – búa til þétt, klassískt bókmenntaprósa (SKRÁNING Í SKRÁ).
+    Hugstormunarhamur  – skipuleggðu söguþráð, búa til 3 valkosti (ENGIN skráning í skrá).
+    Handritshamur        – skrifaðu hrátt hljóðhandrit með merkjum [SFX] og [Persóna: tilfinning] (SKRÁNING Í SKRÁ).
+    Hljóðbókarhamur     – búa til þétt, klassískt bókmenntaprósa (SKRÁNING Í SKRÁ).
 
     Verkefni eru vistuð í undirmöppu 'skrypty/' við hlið forritsins.
     Sláðu inn nafn verkefnis án viðbótar (t.d. kroniki_arkonii).
     Til að breyta verkefni þarftu fyrst að hreinsa núverandi minni.
   prompt_architekta_content: |-
-    Þú ert framúrskarandi heimabyggingameistari (Worldbuilder) og bókmenntaráðgjafi. Ég hef lauslega hugmynd um söguþráð: [SETTU HUGMYND ÞÍNA HÉR]. Verkefni þitt er að þróa þetta í faglega „Księga Świata".
+    Þú ert framúrskarandi heimabyggingameistari (Worldbuilder) og bókmenntaráðgjafi. Ég hef lauslega hugmynd um söguþráð: [SETTU HUGMYND ÞÍNA HÉR]. Verkefni þitt er að þróa þetta í faglega „Heimsbók".
     Aðlagaðu tón og reglur að hugmynd minni. Forðastu ódýrar, ævintýralegar styttingar og klisjur AI.
 
     FORMATREGLUR (MIKILVÆGAR):
     Þú verður að skila svari í tveimur aðskildum hlutum:
 
-    HLUTI 1: KSIĘGA ŚWIATA
+    HLUTI 1: HEIMSBÓK
     Þennan hluta verður þú að loka í EINUM Markdown kóðablokk (notaðu merkin ```markdown í upphafi og ``` í lokin). Innan kóðablokkarins skaltu fylgja þessum reglum:
-    1. Byrjaðu á opnu bókamerki og vinnutitli, t.d. 📖 Księga Świata: [Titill].
+    1. Byrjaðu á opnu bókamerki og vinnutitli, t.d. 📖 Heimsbók: [Titill].
     2. Notaðu einn hashtag (#) fyrir aðalhluta (t.d. # Reglur Heimsins, # Persónur).
     3. Notaðu tvöfalt hashtag (##) fyrir undirhluta.
     4. Notaðu bandstrik (-) til að búa til læsilegar lista.
@@ -261,7 +261,7 @@ rezyser:
     6. Lýstu sálfræði persóna, stærstu göllum þeirra og hvötum. Fyrir erlendar persónur, bættu við upplýsingum um áherslu beint við merkið, t.d. `[Speaker 1: Nafn] - seplar og hefur franskan hreim`. **Tæknileg ábending:** Notkun lykilorðsins `áhersla` er algjörlega nauðsynleg, þar sem ytri skrift forritsins greinir og setur sjálfkrafa réttar hljóðreglur á samtöl viðkomandi persónu.
 
     HLUTI 2: TILLAGA UM STÖÐU
-    Þennan hluta skaltu setja UTAN kóðablokkarins, sem venjulegan texta fyrir neðan. Ráðleggðu mér hvaða stilling forritsins míns verður best til að framkvæma þessa hugmynd: 🎬 Hrá Handritsstilling (hljóðleikir, SFX, hljóðfræði), eða 📖 Hefðbundin Hljóðbókarstilling (klassísk bókmenntaprósa).
+    Þennan hluta skaltu setja UTAN kóðablokkarins, sem venjulegan texta fyrir neðan. Ráðleggðu mér hvaða hamur forritsins míns verður best til að framkvæma þessa hugmynd: 🎬 Hrá Handritshamur (hljóðleikir, SFX, hljóðfræði), eða 📖 Hefðbundin Hljóðbókarhamur (klassísk bókmenntaprósa).
 
   # Pasek pliku
   lbl_nazwa_pliku: "Skráarnafn verkefnis (án viðbótar, t.d. kroniki_arkonii):"
@@ -278,17 +278,17 @@ rezyser:
   btn_wyczysc_biezaca_label: "Hreinsa núverandi (halda samantekt)"
   btn_wyczysc_biezaca_tooltip: |-
     Hreinsar aðeins núverandi sögu úr minni.
-    Samantekt (Langtímaminni) og Księga Świata eru varðveitt.
+    Samantekt (Langtímaminni) og Heimsbók eru varðveitt.
     Notaðu til að halda áfram með langa bók eftir að samantekt hefur verið búin til.
   btn_hard_reset_label: "Loka verkefni (Harður endurstilling)"
   btn_hard_reset_tooltip: |-
-    ALGER hreinsun verkefnis: saga, samantekt, Księga Świata.
+    ALGER hreinsun verkefnis: saga, samantekt, Heimsbók.
     Núllstillir alla teljara og opnar skráarheiti reitinn.
     Notaðu við breytingu á verkefni eða alveg nýja sögu.
   # Sidebar
   sidebar_heading: "📖 Hliðarstika verkefnis"
-  lbl_ksiega_swiata: "Księga Świata – Reglur og Persónur:"
-  txt_ksiega_name: "Reitur Księga Świata – reglur og persónur"
+  lbl_ksiega_swiata: "Heimsbók – Reglur og Persónur:"
+  txt_ksiega_name: "Reitur Heimsbók – reglur og persónur"
   txt_ksiega_hint: |-
     Sláðu inn reglur heimsins, lýsingu á persónum og hljóðfræðilegum áherslum þeirra…
     T.d. [Geralt: áhersla á íslensku]
@@ -296,15 +296,15 @@ rezyser:
   txt_ksiega_tooltip: |-
     Samhengi stöðugt bætt við AI: reglur heimsins, persónur, hljóðfræðilegar áherslur.
     Skráning á disk krefst skráarheitis verkefnis.
-  btn_zapisz_ksiege_label: "💾 Vista Księgę varanlega"
+  btn_zapisz_ksiege_label: "💾 Vista Heimsbók varanlega"
   btn_zapisz_ksiege_tooltip: |-
-    Vista Księgę Świata í skrá: skrypty/<nafn>.md
+    Vista Heimsbók í skrá: skrypty/<nafn>.md
     Krefst skráarheitis verkefnis.
   btn_prompt_architekta_label: "📖 Ábending Arkitekts fyrir AI…"
   btn_prompt_architekta_name: "Hnappur Sýna Ábendingu Arkitekts fyrir ytri chatbot"
   btn_prompt_architekta_tooltip: |-
     Opnar glugga með tilbúinni ábendingu fyrir ytri chatbot (ChatGPT, Claude).
-    Límdu inn hugmynd þína um söguþráð, og AI mun búa til faglega Księgę Świata sniðna í Markdown – til að líma í reitinn „Księga Świata" hér að ofan.
+    Límdu inn hugmynd þína um söguþráð, og AI mun búa til faglega Heimsbók sniðna í Markdown – til að líma í reitinn „Heimsbók" hér að ofan.
   lbl_pamiec_dlugotrwala: "🧠 Langtímaminni (Samantekt):"
   txt_pamiec_name: "Reitur Langtímaminnis – samantekt atburða"
   txt_pamiec_hint: |-
@@ -319,19 +319,19 @@ rezyser:
     Eftir vistun geturðu örugglega hreinsað núverandi minni.
   # Obszar roboczy
   main_heading: "🎬 Vinnusvæði"
-  rb_tryb_label: "Vinnustilling:"
-  rb_tryb_name: "Val á vinnustillingu AI"
+  rb_tryb_label: "Vinnuhamur:"
+  rb_tryb_name: "Val á vinnuham AI"
   rb_tryb_tooltip: |-
     Hugstormun – skipulagning án skráningar í skrá.
     Handrit        – hrátt hljóðhandrit (vistað í skrá).
     Hljóðbók     – hefðbundin bókmenntaprósa (vistað í skrá).
   # 13.2: komunikaty fallbacku reżysera (gdy brak reguł dla języka UI ani EN)
   brak_trybow_dla_jezyka: |-
-    Fyrir tungumálið „{jezyk}" fundust engar Leikstjórnarstillingar AI né enskur varabúnaður
-    (dictionaries/en/rezyser/). Bættu YAML skrá með stillingu
+    Fyrir tungumálið „{jezyk}" fundust engar Leikstjórnarhamir AI né enskur varabúnaður
+    (dictionaries/en/rezyser/). Bættu YAML skrá með ham
     við tungumálareglusafnið eða endurheimtu sjálfgefna ensku pakkann.
-  brak_trybow_tytul: "Engar Leikstjórnarstillingar"
-  placeholder_brak_trybow: "(engar stillingar til að velja)"
+  brak_trybow_tytul: "Engar Leikstjórnarhamir"
+  placeholder_brak_trybow: "(engir hamir til að velja)"
   # Panel struktury
   struktura_heading: "✂️ Stjórnun á Uppbyggingu"
   btn_prolog_label: "📜 Setja inn Prolog"
@@ -348,17 +348,17 @@ rezyser:
   btn_rozdzial_name: "Hnappur Setja inn Kafla"
   btn_rozdzial_tooltip: |-
     Setur fyrirsögn næsta kafla í söguna og skrána.
-    Aðeins í boði í Hljóðbókarstillingu.
+    Aðeins í boði í Hljóðbókarham.
   btn_akt_label: "🎭 Setja inn Þátt {numer_aktu}"
   btn_akt_name: "Hnappur Setja inn Þátt"
   btn_akt_tooltip: |-
     Setur fyrirsögn 'Þáttur N' og sjálfkrafa 'Atriði 1' í söguna og skrána.
-    Aðeins í boði í Handritsstillingu.
+    Aðeins í boði í Handritsham.
   btn_scena_label: "🎬 Setja inn Atriði {numer_sceny}"
   btn_scena_name: "Hnappur Setja inn Atriði"
   btn_scena_tooltip: |-
     Setur fyrirsögn næsta atriðis í söguna og skrána.
-    Aðeins í boði í Handritsstillingu.
+    Aðeins í boði í Handritsham.
   naglowek_prolog: "Prolog"
   naglowek_epilog: "Epilog"
   naglowek_rozdzial: "Kafli"
@@ -472,7 +472,7 @@ rezyser:
   status_wczytano_ksiega: " Einnig var hlaðið Heimsbók: skrypty/{nazwa_projektu}.md."
   status_wczytano_streszczenie: |-
     Yfirlit verkefnis '{nazwa_projektu}' hefur verið hlaðið inn.{lore_info}
-    Núverandi minni er enn tómt (Endalaus Minni stilling).
+    Núverandi minni er enn tómt (Endalaus Minni hamur).
     Þú getur haldið áfram með söguna — AI vinnur með yfirlitið.
   status_wczytano_historia: "Saga '{nazwa_projektu}' hlaðin ({liczba_znakow} stafir).{lore_info}"
   # Komunikaty - czyszczenie
@@ -536,21 +536,21 @@ rezyser:
   puste_pole_tresc: "Sláðu inn leiðbeiningar fyrir AI áður en þú sendir."
   brak_przepisow_tytul: "Engar uppskriftir"
   brak_przepisow_tresc: |-
-    Ekki tókst að hlaða neinum vinnustillingum úr YAML.
+    Ekki tókst að hlaða neinum vinnuhömum úr YAML.
     Keyrðu odswiez_rezysera.py eða athugaðu dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Gefðu nafn á verkefnaskrá áður en þú býrð til texta til vistunar.
-    (Stilling '{tytul_trybu}' krefst skráarnafns.)
+    (Hamur '{tytul_trybu}' krefst skráarnafns.)
   brak_ksiegi_tytul: "Engin Heimsbók"
   brak_ksiegi_tresc: |-
     Fylltu út Heimsbók áður en þú sendir fyrirspurn til AI.
     Reglur heimsins og persónur eru nauðsynlegar fyrir líkanið.
-  blad_trybu_tytul: "Stillingarvilla"
+  blad_trybu_tytul: "Hamvilla"
   blad_trybu_tresc: |-
-    Þú ert að reyna að búa til yfirlit í vistunarstillingu!
+    Þú ert að reyna að búa til yfirlit í vistunarham!
     Þetta gæti skemmt söguna þína.
 
-    Skiptu yfir í 'Hugstorm' stillingu og reyndu aftur.
+    Skiptu yfir í 'Hugstorm' ham og reyndu aftur.
   err_rate_limit: "Engin OpenAI inneign! Hladdu reikninginn og reyndu aftur."
   err_odrzucenie: |-
     AI hafnaði prompt (greindist merki [ODRZUCENIE_AI]).
@@ -636,17 +636,19 @@ rezyser:
   sr_info: 'Byggðu sérstaka HTML skrá fyrir skjálesara úr tilbúnu handriti: persónur með hreim fá hljóðritun og tungumálamerki (lang), þannig að skjálesarinn les þær með réttum hreim. Most ElevenLabs notar hreinan texta og rödd með hreim til að gera þetta — þetta eru tvö sjálfstæð úttök úr sama handriti.'
   btn_sr_label: 📖 Búðu til útgáfu fyrir skjálesara
   btn_sr_name: Búðu til útgáfu fyrir skjálesara
-  btn_sr_tooltip: "Býr til skrána skrypty/<nazwa>_screen_reader.html: hreim með því að skemma stafsetningu + tungumálamerki, hljóðmerki fjarlægð.\nKrefst vistaðrar verkefnaskrár; Heimabók ákvarðar hvaða persóna hefur hvaða hreim."
+  btn_sr_tooltip: "Býr til skrána skrypty/<nazwa>_screen_reader.html: hreim með því að skemma stafsetningu + tungumálamerki, hljóðmerki fjarlægð.\nKrefst vistaðrar verkefnaskrár; Heimsbók ákvarðar hvaða persóna hefur hvaða hreim."
   sr_sukces_tytul: Útgáfa fyrir skjálesara tilbúin
   sr_sukces_tresc: 'Skrá fyrir skjálesara vistuð: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Villa við að búa til útgáfu fyrir skjálesara
   sr_blad_tresc: "Ekki tókst að búa til útgáfu fyrir skjálesara:\n{tresc_bledu}"
+  err_struktura: Líkanið bjó til ranga uppbyggingu svars þrátt fyrir nokkrar tilraunir til leiðréttingar. Reyndu aftur eða mótaðu skipunina á annan hátt.
+  err_dlugosc: Svar líkansins var skorið af áður en það náði að ljúka því (lengdarmörk voru brotin). Styttu samhengi — t.d. Heimsbókina eða leiðbeiningarnar — og reyndu aftur.
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
   description_name: "Lýsing á Fjöltyngur einingu"
   tool_description: |-
-    Fjöltyngur einingin er notuð til að leggja áherslu á hljóðfræðilega áherslu fyrir staðbundna talgervla (NVDA/Vocalizer/eSpeak), til textaleikja í Dulkóðunarstillingu og til að þýða texta með AI (OpenAI gpt-4o).
+    Fjöltyngur einingin er notuð til að leggja áherslu á hljóðfræðilega áherslu fyrir staðbundna talgervla (NVDA/Vocalizer/eSpeak), til textaleikja í Dulkóðunarham og til að þýða texta með AI (OpenAI gpt-4o).
 
     Styður skrár: .txt, .html, .htm, .docx.
     Niðurstaðan er vistuð í sama skráasafni og upprunaskráin.
@@ -678,7 +680,7 @@ poliglota:
     Skrá hlaðin: {nazwa_pliku}
     ({liczba_znakow} stafir).
 
-    Þú getur nú stillt vinnustillingu og keyrt vinnslu.
+    Þú getur nú stillt vinnuham og keyrt vinnslu.
   # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
   # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
   # przeczytało, że etykiety akcentów/szyfrów się zmienią.
@@ -692,14 +694,14 @@ poliglota:
     JÁ – merkingar áherslna og dulkóða og hljóðfræðireglur breytast í „{jezyk_wykryty}", í samræmi við innihald skráar.
     NEI – ég læt reglur fyrir „{jezyk_aktywny}". Áhrif á texta á erlendu tungumáli gætu verið ófyrirsjáanleg.
   # Sekcja 2: konfiguracja trybu pracy
-  section2_heading: "2. Vinnustilling"
+  section2_heading: "2. Vinnuhamur"
   rb_ai: "AI Þýðandi (OpenAI gpt-4o – krefst API lykils, kostar inneign)"
   rb_ai_disabled: "AI Þýðandi (óvirkur – engin rétt skrá golden_key.env)"
-  rb_ai_name: "AI Þýðandi Stilling"
-  rb_rezyser: "Režisér Stilling (ókeypis hljóðfræðireglur úr YAML)"
-  rb_rezyser_name: "Režisér ókeypis stilling"
-  rb_szyfrant: "Dulkóðunarstilling (textaleikir, handahófskennd hik)"
-  rb_szyfrant_name: "Dulkóðunarstilling og textaleikir"
+  rb_ai_name: "AI Þýðandi Hamur"
+  rb_rezyser: "Režisér Hamur (ókeypis hljóðfræðireglur úr YAML)"
+  rb_rezyser_name: "Režisér ókeypis hamur"
+  rb_szyfrant: "Dulkóðunarhamur (textaleikir, handahófskennd hik)"
+  rb_szyfrant_name: "Dulkóðunarhamur og textaleikir"
   # Panel AI
   lbl_jezyk_docelowy: "Markmálsþýðing (t.d. Finnska, Íslenska, Enska, Arabíska):"
   txt_jezyk_name: "Reitur markmáls"
@@ -846,7 +848,7 @@ manager:
   btn_otworz_tooltip: "Opnar valda YAML skrá í sjálfgefnum textaritli kerfisins (Notepad á Windows, TextEdit á macOS)."
   btn_nowy_label: "➕  &Ný regla skrá…"
   btn_nowy_name: "Hnappur Búa til nýja regluskjal"
-  btn_nowy_tooltip: "Opnar nýja skráar töframann: veldu tegund (hreimur, dulmál, Leikstjóri stilling, grunn tungumál), Reglustjóri býr til sniðmát eða býr til prompt fyrir AI."
+  btn_nowy_tooltip: "Opnar nýja skráar töframann: veldu tegund (hreimur, dulmál, Leikstjórahamur, grunn tungumál), Reglustjóri býr til sniðmát eða býr til prompt fyrir AI."
   btn_duplikuj_label: "📋  &Afrita valda skrá"
   btn_duplikuj_name: "Hnappur Afrita valda skrá"
   btn_duplikuj_tooltip: "Býr til afrit af valinni YAML skrá undir nýju nafni – fljótleg byrjun fyrir afbrigði af núverandi reglu."
@@ -1019,9 +1021,9 @@ opowiesci:
   description_name: "Lýsing á sögueiningu"
   heading: "📖  Gagnvirkar sögur"
   tool_description: |-
-    Þú leikur hetju í sögunni sem er kviklega búin til. Sláðu inn nafn á nýjum leik og veldu stillingu til að byrja — frásögnin er í annarri persónu og lesin af skjálesara eða TTS.
+    Þú leikur hetju í sögunni sem er kviklega búin til. Sláðu inn nafn á nýjum leik og veldu ham til að byrja — frásögnin er í annarri persónu og lesin af skjálesara eða TTS.
 
-    Frjáls stilling leyfir þér að prófa hvaða aðgerð sem er sem þú slærð inn í reitinn neðst. Valstilling gefur 3-5 tölusett val sem hægt er að velja með hnöppum. Stillingin „minna illt" býður aðeins upp á óhagstæð val — þú velur það sem er minna óhagstætt. Skipanir sem byrja á skástriki (/vista, /hlaða, /enda, /sjá) virka hvenær sem er.
+    Frjáls hamur leyfir þér að prófa hvaða aðgerð sem er sem þú slærð inn í reitinn neðst. Valhamur gefur 3-5 tölusett val sem hægt er að velja með hnöppum. Hamurinn „minna illt" býður aðeins upp á óhagstæð val — þú velur það sem er minna óhagstætt. Skipanir sem byrja á skástriki (/vista, /hlaða, /enda, /sjá) virka hvenær sem er.
 
   # ---- BLOK B — Pasek pliku gry ---------------------------------------------
   lbl_nazwa_gry: "Nafn leiks"
@@ -1029,18 +1031,18 @@ opowiesci:
   txt_nazwa_gry_hint: "t.d. ævintýri_mín_1"
   txt_nazwa_gry_tooltip: "Nafn á leikskrá — notað fyrir sjálfvirka vistun frásagnar í opowiesci/<nafn>.txt og stöðu í runtime/opowiesci/<nafn>.game.json"
   btn_nowa_gra_label: "&Nýr leikur"
-  btn_nowa_gra_tooltip: "Byrja nýjan leik með gefnu nafni — krefst nafns leiks og valinnar stillingar"
+  btn_nowa_gra_tooltip: "Byrja nýjan leik með gefnu nafni — krefst nafns leiks og valins hams"
   btn_wczytaj_label: "&Hlaða"
   btn_wczytaj_tooltip: "Hlaða áður vistaðan leik úr runtime/opowiesci/<nafn>.game.json"
   btn_zapisz_label: "&Vista"
   btn_zapisz_tooltip: "Þvinga handvirka vistun á stöðu leiks (sjálfvirk vistun á sér einnig stað eftir hverja umferð)"
 
   # ---- BLOK C — RadioBox trybu ----------------------------------------------
-  rb_tryb_label: "Leikstilling"
-  rb_tryb_name: "Val á leikstillingu"
-  rb_tryb_tooltip: "Stilling ákvarðar eðli frásagnar og samskiptamátann"
-  tryb_swobodny: "Frjáls &stilling"
-  tryb_wyborow: "Val&stilling"
+  rb_tryb_label: "Leikhamur"
+  rb_tryb_name: "Val á leikham"
+  rb_tryb_tooltip: "Hamur ákvarðar eðli frásagnar og samskiptamátann"
+  tryb_swobodny: "Frjáls &hamur"
+  tryb_wyborow: "Val&hamur"
   tryb_mniejsze_zlo: "&Minna illt"
 
   # ---- BLOK D — Wskaźnik pamięci modelu (placeholder; logika w Fazie 4) -----
@@ -1054,14 +1056,14 @@ opowiesci:
   txt_narracja_name: "Reitur fullrar frásagnar"
   txt_narracja_tooltip: "Full saga leiksins, sem eykst eftir hverja umferð. Aðeins til lesturs; sláðu inn ákvarðanir þínar í aðgerðarreitinn hér að neðan. Reiturinn „Síðasta umferð\" hér að ofan sýnir nýja senu án þess að fara í gegnum alla söguna."
   txt_narracja_init: |-
-    Til að hefja sögu, sláðu inn nafn leiks í reitinn hér að ofan, veldu stillingu og smelltu á „Nýr leikur".
+    Til að hefja sögu, sláðu inn nafn leiks í reitinn hér að ofan, veldu ham og smelltu á „Nýr leikur".
 
     Þú getur einnig hlaðið fyrri leik með því að smella á „Hlaða".
 
   # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
   lbl_wybory: "Val þín"
   panel_wyborow_name: "Svæði fyrir val"
-  panel_wyborow_placeholder: "Val birtast hér í valstillingu eða minna illu. Í frjálsri stillingu er þetta svæði tómt — lýstu aðgerðum með frjálsum texta í reitnum hér að neðan."
+  panel_wyborow_placeholder: "Val birtast hér í valham eða minna illu. Í frjálsum ham er þetta svæði tómt — lýstu aðgerðum með frjálsum texta í reitnum hér að neðan."
 
   # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
   lbl_akcja: "Aðgerð þín eða skipun"
@@ -1155,7 +1157,7 @@ opowiesci:
   lbl_quick_start: "Fljótleg byrjun:"
   quick_start_wlasna: "(eigin leikur)"
   choice_quick_start_name: "Val á tilbúnu Quick Start atburðarás"
-  choice_quick_start_tooltip: 'Veldu tilbúinn heim til að sökkva þér strax í frásögnina. Forsetning mun sprauta stutta lýsingu á heiminum og hetjunni í vélina, stilla sjálfgefna leikstillingu. „(eigin leikur)" skilur eftir frjálsa byrjun — vélin mun sjálf búa til heiminn út frá fyrstu aðgerð.'
+  choice_quick_start_tooltip: 'Veldu tilbúinn heim til að sökkva þér strax í frásögnina. Forsetning mun sprauta stutta lýsingu á heiminum og hetjunni í vélina, stilla sjálfgefna leikham. „(eigin leikur)" skilur eftir frjálsa byrjun — vélin mun sjálf búa til heiminn út frá fyrstu aðgerð.'
   lbl_ostatnia_tura: "Síðasta umferð"
   txt_ostatnia_tura_name: "Reitur með efni síðustu umferðar"
   txt_ostatnia_tura_tooltip: "Flýtileið sem inniheldur eingöngu nýlega myndaða senu — NVDA les hér nýja frásögn án þess að fara í gegnum hundruð lína af allri sögunni. Eftir hverja næstu umferð er reitnum skipt út fyrir nýtt efni."
@@ -1185,7 +1187,7 @@ opowiesci:
   dlg_wybierz_gre_tytul: Hladdu inn Söguleik
   dlg_wybierz_gre_lbl: 'Tiltækir leikir:'
   brak_gier_tytul: Engir leikir
-  brak_gier_tresc: 'Í skránni runtime/opowiesci/ eru engir vistaðir leikir ennþá. Byrjaðu nýjan leik: sláðu inn nafn í reitinn hér að ofan, veldu stillingu og notaðu hnappinn Nýr leikur.'
+  brak_gier_tresc: 'Í skránni runtime/opowiesci/ eru engir vistaðir leikir ennþá. Byrjaðu nýjan leik: sláðu inn nafn í reitinn hér að ofan, veldu ham og notaðu hnappinn Nýr leikur.'
   btn_otworz_narracje_label: '&Opna frásagnarskrá…'
   btn_otworz_narracje_tooltip: 'Opnar frásagnarskrá leiksins (opowiesci/<nazwa>.txt) í kerfisritstjóra texta. Notaðu í neyð þegar AI lokar ekki sögunni í Valmöguleikum/Minna illt og þú vilt skrifa lokið handvirkt. ATH: .txt inniheldur aðeins texta fyrir TTS; ástand leiksins (persónur, staðsetning, búnaður) er í .game.json og verður EKKI uppfært — næsta umferð LLM gæti farið úr samhengi við breytta frásögn. Staðfestingargluggi birtist áður en opnað er.'
   otworz_narracje_ostrzezenie_tytul: Breyting á frásagnarskrá — hætta á ósamræmi í ástandi
@@ -1215,3 +1217,4 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: Aðalatriði leikstöðu verður að vera JSON-hlutur (par af lykli og gildi í slaufusviga), ekki listi eða einfalt gildi. Endurheimtu hlutabyggingu og reyndu aftur.
   edytuj_stan_zapisano_tytul: Leikstaða vistuð
   edytuj_stan_zapisano_tresc: Leikstaða „{nazwa}" hefur verið vistuð og endurhlaðin af diski. Persónur, staðsetning, búnaður, þræðir og teljarar endurspegla nú breytingar þínar.
+  err_dlugosc: Svar líkansins var skorið af áður en það náði að ljúka því (lengdarmörk voru brotin). Styttu samhengi og reyndu aftur.

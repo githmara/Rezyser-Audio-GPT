@@ -696,6 +696,110 @@ def buduj_wpisy_inno(kody: list[str], katalog_inno: Path) -> list[tuple[str, str
 #   2. Skrypt staje się zgodny z normalną konwencją Python (import-safe).
 
 
+# Nazwa folderu/EXE produkowanego przez rezyser_audio.spec (COLLECT/EXE name).
+# Single source of truth współdzielone z installer.iss (placeholder
+# {#MyAppDistDir} podstawiany dynamicznie, patrz niżej).
+NAZWA_DIST = "Rezyser Audio GPT"
+SPEC_PLIK = "rezyser_audio.spec"
+
+
+def buduj_pyinstaller() -> Path:
+    """Buduje paczkę onedir PyInstallerem z ``rezyser_audio.spec``.
+
+    Uruchamia ``python -m PyInstaller --noconfirm --clean rezyser_audio.spec``
+    bieżącym interpreterem (zwykle ``.venv`` — to jego środowisko zostaje
+    zamrożone, więc to ono musi mieć komplet zależności z requirements.txt).
+    ``--clean`` czyści cache PyInstallera, ``--noconfirm`` nadpisuje ``dist/``
+    bez interaktywnego pytania (build bywa odpalany przez agenta / CI).
+
+    Zwraca ścieżkę do ``dist/<NAZWA_DIST>/``. Przerywa build (exit 1), gdy spec
+    nie istnieje, PyInstaller zwróci błąd albo brak oczekiwanego ``.exe``.
+    """
+    spec = Path(__file__).parent / SPEC_PLIK
+    if not spec.exists():
+        print(f"❌ FATAL: '{SPEC_PLIK}' not found at {spec}.")
+        print("It defines the PyInstaller onedir/windowed build. Restore it from the repo.")
+        sys.exit(1)
+
+    print("🔨 Freezing the app with PyInstaller (onedir, windowed)...")
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", str(spec)],
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        print("❌ FATAL: PyInstaller returned a non-zero exit code. Build aborted.")
+        print("Tip: run it manually for the full log:")
+        print(f"   {sys.executable} -m PyInstaller --noconfirm --clean {SPEC_PLIK}")
+        sys.exit(1)
+    except FileNotFoundError:
+        print("❌ FATAL: PyInstaller is not installed in the current environment.")
+        print(f"   {sys.executable} -m pip install -r requirements.txt")
+        sys.exit(1)
+
+    dist_dir = Path(__file__).parent / "dist" / NAZWA_DIST
+    exe = dist_dir / f"{NAZWA_DIST}.exe"
+    if not exe.is_file():
+        print(f"❌ FATAL: PyInstaller finished but '{exe.name}' is missing in {dist_dir}.")
+        print("Check the spec's EXE/COLLECT `name` matches NAZWA_DIST in build_release.py.")
+        sys.exit(1)
+    print(f"✅ PyInstaller build complete: {dist_dir}\n")
+    return dist_dir
+
+
+def skompletuj_dist(dist_dir: Path) -> None:
+    """Kopiuje ``dictionaries/`` (bez ``gui/dokumentacja/``) + ``docs/`` do
+    ``dist_dir``, czyniąc paczkę samowystarczalną (Opcja A: zasoby OBOK exe).
+
+    Bez tego surowy ``dist/<app>/`` ma tylko exe + folder bundla ``runtime/`` —
+    aplikacja STARTUJE, ale i18n nie znajduje słowników i pokazuje placeholdery
+    ``[klucz]`` (a Reżyser/Opowieści nic nie tworzą). Po skompletowaniu: (a)
+    ``installer.iss`` pakuje po prostu cały ``dist\\<app>\\*`` jednym wpisem,
+    (b) ``dist/`` jest gotowy do ręcznego smoke-testu bez budowania instalatora.
+
+    Kopia jest ŚWIEŻA przy każdym buildzie. Edytowalność seed-data (Manager
+    Reguł) dotyczy ZAINSTALOWANEJ kopii obok exe, nie tej w ``dist/`` — rebuild
+    nadpisuje tylko `dist/`, nie ruszając instalacji użytkownika.
+    """
+    root = Path(__file__).parent
+
+    # Czyścimy katalogi docelowe PRZED kopią — deterministyczny wynik niezależnie
+    # od pozostałości (np. po ręcznym smoke-teście dewelopera albo gdyby
+    # PyInstaller nie wymiótł starych podfolderów). Bez tego stare/usunięte pliki
+    # słownika mogłyby przetrwać w paczce.
+    for podfolder in ("dictionaries", "docs"):
+        cel = dist_dir / podfolder
+        if cel.is_dir():
+            shutil.rmtree(cel)
+
+    src_docs = root / "docs"
+    if src_docs.is_dir():
+        shutil.copytree(src_docs, dist_dir / "docs")
+
+    def _pomin_dokumentacje(katalog: str, nazwy: list[str]) -> list[str]:
+        # Surowe szablony dev (dictionaries/<kod>/gui/dokumentacja/*.yaml) nie
+        # wchodzą do paczki end-usera — analogicznie do dawnego Excludes w iss.
+        if os.path.basename(katalog) == "gui" and "dokumentacja" in nazwy:
+            return ["dokumentacja"]
+        return []
+
+    src_dict = root / "dictionaries"
+    if src_dict.is_dir():
+        shutil.copytree(
+            src_dict, dist_dir / "dictionaries", ignore=_pomin_dokumentacje,
+        )
+
+    # VERSION — single source of truth numeru wersji. i18n czyta go z
+    # sciezki.KATALOG_BAZOWY/"VERSION" (= dir(exe) gdy frozen); bez niego
+    # NUMER_WERSJI fallbackuje na "?" i GUI pokazuje wersję jako „?".
+    # MUSI leżeć OBOK exe, nie w bundlu runtime/ (KATALOG_BAZOWY to dir exe).
+    src_version = root / "VERSION"
+    if src_version.is_file():
+        shutil.copy2(src_version, dist_dir / "VERSION")
+
+    print("   ✓ Completed dist payload: dictionaries/ + docs/ + VERSION copied next to the exe.\n")
+
+
 def _parsuj_argumenty() -> argparse.Namespace:
     """Parsuje argumenty CLI build_release.py.
 
@@ -763,27 +867,15 @@ def main(args: argparse.Namespace | None = None) -> None:
         sprzataj_opublikowane_instalatory()
         return
 
-    # --- GUARD CLAUSE (runtime/ folder check) ---
-    sciezka_python = os.path.join("runtime", "python.exe")
+    # --- (v17.0) PyInstaller zastąpił portable runtime/python.exe ---
+    # Dawniej tu stał guard sprawdzający `runtime/python.exe` + `weryfikuj_runtime()`
+    # (czy portable Python istnieje i ma komplet zależności z requirements.txt).
+    # Po migracji na PyInstaller paczka jest budowana ze środowiska, w którym
+    # uruchamiamy ten skrypt (zwykle `.venv`), a interpreter + zależności wchodzą
+    # do bundla. Walidacja środowiska sprowadza się więc do tego, czy bieżący
+    # Python ma PyInstaller — sprawdzane w `buduj_pyinstaller()` niżej.
 
-    # 1. Check if the portable Python file exists at all.
-    if not os.path.exists("runtime") or not os.path.exists(sciezka_python):
-        print("❌ FATAL: 'runtime/' folder with the portable Python environment not found!")
-        print("The Git repo does not ship runtime libraries.")
-        print("Drop a portable Python into the 'runtime/' folder before building a release.")
-        sys.exit(1)
-
-    # 2. Validate that it behaves like a real Python interpreter AND that every
-    #    package from requirements.txt is installed inside it. The old check
-    #    just ran `print('OK')` — that confirmed the binary launches, but said
-    #    nothing about whether wxpython/openai/lingua etc. are present. Result:
-    #    the build would happily pack a runtime/ that throws ModuleNotFoundError
-    #    on first launch at the user. weryfikuj_runtime() closes that gap.
-    print("🔍 Verifying the runtime Python environment + release dependencies...")
-    weryfikuj_runtime(sciezka_python)
-    print("✅ Portable Python environment + release dependencies verified.\n")
-
-    # 3. Read the release version (single source of truth: VERSION in repo root).
+    # 1. Read the release version (single source of truth: VERSION in repo root).
     print(f"🔍 Detecting release version ({SCIEZKA_VERSION})...")
     try:
         wersja = odczytaj_wersje()
@@ -836,7 +928,14 @@ def main(args: argparse.Namespace | None = None) -> None:
     generuj_dokumentacje.generuj()
     print("✅ Documentation regenerated.\n")
 
-    # 7. Build the Installer EXE.
+    # 7. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,
+    # następnie skompletuj paczkę (dictionaries/ + docs/ OBOK exe), żeby dist/
+    # był samowystarczalny. installer.iss pakuje potem cały dist/<app>/* jednym
+    # wpisem, więc PyInstaller + skompletowanie MUSZĄ zakończyć się przed ISCC.
+    dist_dir = buduj_pyinstaller()
+    skompletuj_dist(dist_dir)
+
+    # 8. Build the Installer EXE.
     iscc_exe = shutil.which("iscc")
     if iscc_exe is None:
         print("❌ FATAL: 'iscc' not found in PATH.")

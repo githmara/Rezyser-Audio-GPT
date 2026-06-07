@@ -53,6 +53,25 @@ LANGUAGES = [
 _detector = LanguageDetectorBuilder.from_languages(*LANGUAGES).build()
 
 
+# Markery zgłoszenia-crash (od v17.0). Globalny handler wyjątków aplikacji
+# (`main._zapisz_log_bledu`) zapisuje traceback do `error_log.txt` z nagłówkiem
+# `CRASH_MARKER`; zwykły user wkleja/załącza ten plik do Issue. Takie ciało to
+# surowy traceback (angielskie nazwy wyjątków, ścieżki Windows, fragmenty kodu)
+# — Lingua (detektor n-gramowy) myliłaby się na nim, a i tak chcemy uniwersalnej
+# odpowiedzi po angielsku. Wykrywamy crash po DOWOLNYM z markerów. Sygnatura
+# `Traceback (most recent call last)` jest gwarantowana w każdym tracebacku
+# Pythona (nawet gdy user wklei sam ślad bez nagłówka pliku).
+_CRASH_MARKERY = (
+    "=== REŻYSER AUDIO GPT — CRASH REPORT ===",
+    "Traceback (most recent call last)",
+)
+
+
+def _czy_crash_report(issue_body: str) -> bool:
+    """Czy ciało zgłoszenia wygląda na raport o crashu (error_log.txt)?"""
+    return any(marker in issue_body for marker in _CRASH_MARKERY)
+
+
 # Komentarz Sami zostawiany na issue PO pomyślnej wysyłce maila do Centrum.
 # Jeden wariant per język (Sami to jedyna persona Południa — bez losowania).
 # Styl: włoski temperament, „Ciao!" + „A presto!", bezpośrednio adresuje
@@ -366,13 +385,18 @@ def _zostaw_komentarz_sami(
         )
         return
 
-    wykryty = (
-        _detector.detect_language_of(issue_body)
-        if issue_body.strip()
-        else None
-    )
-    if wykryty not in COMMENTS:
+    if _czy_crash_report(issue_body):
+        # Crash-report → POMIJAMY Lingua (traceback myli detektor) i odpowiadamy
+        # po angielsku, uniwersalnie. Patrz `_CRASH_MARKERY`.
         wykryty = Language.ENGLISH
+    else:
+        wykryty = (
+            _detector.detect_language_of(issue_body)
+            if issue_body.strip()
+            else None
+        )
+        if wykryty not in COMMENTS:
+            wykryty = Language.ENGLISH
 
     tresc = COMMENTS[wykryty]
     if not czy_llm:

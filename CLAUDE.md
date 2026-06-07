@@ -2,7 +2,7 @@
 - Projekt jest w pełni oparty o framework wxPython (natywne GUI desktopowe), z naciskiem na maksymalną dostępność dla czytników ekranu (A11y, np. NVDA). Punkt wejścia to `main.py`.
 - KOD OBIEKTOWY: Logika podzielona na klasy dziedziczące po `wx.Frame` (`main.py`) i `wx.Panel` (`gui_*.py`). Unikaj kodu proceduralnego.
 - ACCESSIBILITY FIRST: Zawsze dbaj o intuicyjną nawigację z klawiatury. Używaj Sizerów i wstrzymuj się z tworzeniem własnych, niestandardowych kontrolek, jeśli systemowe spełniają zadanie.
-- SEED vs USER DATA (od 15.3): `dictionaries/` to seed (single source dla silnika, commitowana, wchodzi do paczki release). `runtime/`, `skrypty/`, `opowiesci/` (root), `*.env` to user data — gitignored, poza paczką release. `runtime/skrypty/*.mode` to per-projekt metadane (ukryte przed end-userem).
+- SEED vs USER DATA (od 15.3): `dictionaries/` to seed (single source dla silnika, commitowana, w paczce release leży OBOK exe — patrz `# DEPLOYMENT`). `runtime/`, `skrypty/`, `opowiesci/` (root), `*.env`, `error_log.txt` to user data — gitignored, poza paczką. `runtime/skrypty/*.mode` to per-projekt metadane (ukryte przed end-userem). **Od v17.0 (PyInstaller onedir) `runtime/` pełni PODWÓJNĄ rolę**: w paczce to folder bundla (`--contents-directory runtime` → interpreter + biblioteki) ORAZ kontener metadanych projektów — oba obok exe, w jednym „onieśmielającym" folderze. Ścieżki liczy `sciezki.KATALOG_BAZOWY` (= dir(exe) gdy `sys.frozen`, inaczej dir(`__file__`)). Pełna architektura → [[reguly_architektury]].
 - KOMUNIKACJA Z UŻYTKOWNIKIEM (A11y): Krótkie jednorazowe powiadomienia (sukcesy, błędy) → `wx.MessageBox`. Długie komunikaty techniczne → dialog `wx.Dialog` z `wx.TextCtrl` (TE_READONLY) i przyciskiem „Zamknij". Unikaj wzorca „aktualizuj etykietę i ustaw fokus" jako głównego sposobu notyfikowania użytkownika.
 
 # ZARZĄDZANIE TERMINALEM I TESTOWANIEM (BASH & A11y)
@@ -10,7 +10,7 @@
 1. ŚRODOWISKO WIRTUALNE (BASH): Bash nie honoruje automatycznej aktywacji `.venv` przez VS Code. Zawsze używaj pełnej ścieżki uniksowej do interpretera venv: `.venv/Scripts/python -c "..."` albo `.venv/Scripts/python -m pytest ...`. Analogicznie dla menedżera pakietów: `.venv/Scripts/pip install ...`.
 2. ZAKAZ BLOKOWANIA TERMINALA (KRYTYCZNE A11y): Pod żadnym pozorem nie uruchamiaj aplikacji GUI w sposób ciągły (np. z aktywnym `app.MainLoop()`). Spowoduje to całkowite zawieszenie procesu i zablokuje nawigację czytnikiem ekranu. Testuj logikę wykonując izolowane fragmenty, które kończą się natychmiast.
 3. BEZPIECZNE TESTY WXPYTHON (BEZ MAINLOOP): Żeby sprawdzić interfejs bez blokowania terminala, stosuj wzorzec z obejściem pętli zdarzeń : `app = wx.App(False)`, wywołaj konstruktor, a następnie użyj `frame.Destroy()`. Omija to `MainLoop()` i okno zamyka się natychmiastowo po sprawdzeniu struktury.
-4. KRYTYCZNE ZABEZPIECZENIE: Masz CAŁKOWITY ZAKAZ uruchamiania czegokolwiek z folderu `runtime/` do testowania kodu.
+4. KRYTYCZNE ZABEZPIECZENIE (od v17.0): ZAKAZ uruchamiania zamrożonego `.exe` (z `dist/` ani `build/`) do testowania logiki — to ciągłe GUI (łamie pkt 2, A11y). Dodatkowo `build/` to katalog ROBOCZY PyInstallera (nie dystrybucja): jego exe i tak nie wystartuje (DLL-e montowane dopiero w `dist/` → „nie można odnaleźć python311.dll"). Runnable jest tylko `dist/` (z `dictionaries/`+`docs/` obok) lub zainstalowana lokalizacja. Logikę testuj izolowanymi fragmentami ze ŹRÓDŁA przez `.venv/Scripts/python`. Metadane projektów w `runtime/` (root, dev) też zostaw w spokoju.
 5. FLAGA `--no-pager` W GIT (KRYTYCZNE A11y): Komendy git, które mogą uruchomić stronicowanie (np. `git diff`, `git log`, `git show`), ZAWSZE wykonuj z flagą `--no-pager`. Brak tej flagi uruchamia tryb interaktywny, blokujący terminal i generujący artefakty niedostępne dla NVDA.
 6. GIT STATUS PRZED COMMITEM: Przed każdym commitowaniem i dodawaniem plików ZAWSZE uruchom `git status`, aby zobaczyć pełny stan repozytorium.
 7. KLUCZ OPENAI DOSTĘPNY: `golden_key.env` w roocie repo jest gitignorowany, ale fizycznie obecny u dewelopera. Skrypty `buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py` ładują klucz przez `python-dotenv` → `os.environ["OPENAI_API_KEY"]`. Agent **może i powinien** odpalać te skrypty bezpośrednio — nie przekazuj tego kroku użytkownikowi „bo nie masz API". Stop tylko gdy skrypt zwróci „❌ Brak prawidłowego OPENAI_API_KEY" lub HTTP 401/429 — wtedy poproś usera o uzupełnienie. Po auto-tłumaczeniach ZAWSZE manualny review halucynacji — generyczne sanity checki + szczegółowe hotspoty per szyfr/sekcja w [[reguly_tlumaczen]].
@@ -56,46 +56,10 @@ Pamięć agenta jest podzielona na trzy warstwy z różnymi celami i sposobami �
 - Pułapka kolejności w `akcenty/<kod>.yaml` (silnik aplikuje `zamiany:` SEKWENCYJNIE przez `str.replace`): patrz [[reguly_architektury]].
 
 # ZAMYKANIE RELEASU — DOKUMENTACJA (KRYTYCZNE)
-`build_release.py` wywołuje `generuj_dokumentacje.generuj()` wewnętrznie, co zostawia niezcommitowane `docs/*.txt` w repo po buildzie. Żeby tego uniknąć — wygeneruj i zcommituj docs **ręcznie** przed commit'em release'u. Stosuj przy każdej zmianie z listy: nowy język, nowa funkcja w manualach, zmiana liczby akcentów/szyfrów/trybów, bump VERSION.
+Pełna procedura Krok 0a→4 (bump VERSION PRZED regeneracją docs → `odswiez_rezysera.py` → edycja szablonów `dokumentacja/*.yaml` ręcznie per język → `generuj_dokumentacje.py --waliduj` → review `git diff docs/` → commit docs przed release commitem) przeniesiona do **[[reguly_git_workflow]]** (sekcja „ZAMYKANIE RELEASU — DOKUMENTACJA"). Klucz: regeneruj i commituj `docs/*.txt` RĘCZNIE przed release commitem, bo `build_release.py` woła `generuj()` wewnętrznie i zostawiłby niezcommitowany diff. Stosuj przy: nowy język, nowa funkcja w manualach, zmiana liczby akcentów/szyfrów/trybów, bump VERSION.
 
-## Procedura (w tej kolejności)
-
-### Krok 0a — Bump VERSION (KRYTYCZNE: PRZED jakąkolwiek regeneracją docs!)
-Zaktualizuj `VERSION` w roocie (np. 13.9 → 14.0). `generuj_dokumentacje.py` rozwija `{numer_wersji}` z VERSION przy KAŻDYM wywołaniu — bez tego kroku `build_release.py` wewnętrznie regeneruje docs z docelowym numerem i zostawia niezcommitowany diff `modified: docs/manual.<iso>.txt × 8`. Sam VERSION zcommitujesz razem z release commit'em w Kroku 4.
-
-### Krok 0b — Odśwież reżysera (ZAWSZE po dodaniu/usunięciu pliku akcent*.yaml)
-`.venv/Scripts/python odswiez_rezysera.py` skanuje `dictionaries/*/akcenty/` i regeneruje dwa bloki: `core_poliglota.py` (docstringi wrapperów `akcent_*`) i `core_rezyser.py` (importy + słownik `_AKCENT_FUNCS`). Bez tego Poliglota działa (czyta YAML), ale Reżyser nakładający akcenty po regexach Księgi Świata — nie (dispatch nie zna nowych plików). Sprawdź output: każdy nowy akcent musi pojawić się na liście. Jeśli `core_poliglota.py` / `core_rezyser.py` mają zmiany — zcommituj przed Krokiem 1.
-
-### Krok 1 — Przejrzyj i zaktualizuj szablony źródłowe
-Szablony `dictionaries/<kod>/gui/dokumentacja/*.yaml` dla każdego z 9 wdrożonych języków. Istniejące szablony edytuj **ręcznie w danym języku** — autotłumacza NIE uruchamiaj na plikach które już istnieją (koszt API + halucynacje LLM).
-
-Dla każdego szablonu sprawdź: opis nowych funkcji aktualny i przetłumaczony, stare „w przyszłości pojawi się X" usunięte, liczby (`liczba_akcentow_jezykowych`) są placeholderami nie hardkodami, usunięte/przemianowane elementy GUI nie mają już akapitów. Wzorzec edycji: najpierw `pl/`, potem ta sama zmiana w każdym obcym z zachowaniem istniejącego stylu.
-
-**Autotłumacz (`buduj_wielojezyczne_docs.py`) — TYLKO dla zupełnie nowych plików szablonów**. Po AI-tłumaczeniu obowiązkowy review halucynacji: generyczne sanity checki + szczegółowe hotspoty w [[reguly_tlumaczen]].
-
-### Krok 2 — Wygeneruj + zwaliduj
-```bash
-.venv/Scripts/python generuj_dokumentacje.py --waliduj
-```
-- `--waliduj` generuje wszystkie `docs/*.txt` i sprawdza czy żaden `{placeholder}` nie pozostał nierozwinięty (brakujący klucz w `ui.yaml`). Exit 0 = OK, Exit 1 = błąd który **blokuje build**.
-- Bez flagi generuje cicho; używaj `--waliduj` zawsze przed commitem.
-
-### Krok 3 — Przejrzyj wygenerowane pliki
-```bash
-git --no-pager diff docs/
-git --no-pager status   # sprawdź czy nie ma nowych plików (np. docs/manual.fi.txt)
-```
-Zweryfikuj czy zmiany są sensowne: numer wersji zaktualizowany, lista języków poprawna, nowe rozdziały obecne, stare „w przyszłości" usunięte.
-
-### Krok 4 — Zcommituj docs przed release commitem
-```bash
-git add docs/
-git commit -m "docs: regeneracja po 14.X — <krótki opis zmian>"
-```
-Dopiero po tym robi się commit release'u (VERSION wraz z RELEASE_NOTES — sam plik VERSION był już zaktualizowany w Kroku 0a i czeka jako unstaged change w `git status`, więc `git add VERSION RELEASE_NOTES.md && git commit` zamknie release jednym commitem).
-
-### Uwaga o build_release.py — sanity check
-`build_release.py` wywołuje `generuj()` wewnętrznie (paczka ZIP zawsze ma świeże docs). Po prawidłowym pre-commicie (Krok 0a → 2 → 4) `git status` po buildzie pokaże „nothing to commit". Jeśli pokazuje `modified: docs/manual.<iso>.txt` — Krok 0a (bump VERSION przed regeneracją) został pominięty; zrób fixup commit „docs: bump numer wersji w docs/".
+# DEPLOYMENT — PyInstaller onedir/windowed (od v17.0)
+Aplikacja jest zamrażana PyInstallerem (koniec przenośnego `runtime/python.exe` + `run.bat` z ≤v16.x). `build_release.py::buduj_pyinstaller()` woła `python -m PyInstaller --noconfirm --clean rezyser_audio.spec` (PRZED ISCC) → `dist/Rezyser Audio GPT/` = `Rezyser Audio GPT.exe` + folder bundla `runtime/`. `installer.iss` pakuje `dist\<app>\*` + `dictionaries\*` (Excludes `*\gui\dokumentacja\*`) + `docs\*` — słowniki/docs OBOK exe, NIE w bundlu (seed-data edytowalna przez Manager Reguł; Opcja A). Kluczowe: `sciezki.KATALOG_BAZOWY` (dir(exe) gdy `sys.frozen`), `rezyser_audio.spec` (PUŁAPKA: `contents_directory="runtime"` to kwarg **EXE**, nie COLLECT). Detekcja packaged = `sys.frozen` (nie obecność `runtime/python.exe`). Globalny handler crashy (`main._zainstaluj_obsluge_bledow`) → `error_log.txt` (marker rozpoznawany przez `issue_intake_sami`, który dla crashy pomija Lingua). NIGDY nie uruchamiaj exe z `build/` (cache, nie dystrybucja). Pełna architektura + pułapki → [[reguly_architektury]].
 
 # WORKFLOW RELEASE — direct-to-main, bez PR-ów (od v15.2.5)
 Solo-dev + A11y first: commit prosto na main, tag tworzony atomowo przez web Release UI (lub bota `draft-release.yml`). PR/branch flow porzucone w v15.2.5 [[reguly_git_workflow]]. `RELEASE_NOTES.md` = single source of truth dla treści Release description (NIE GitHub auto-generator `Full Changelog: …compare/X...Y` — nasza ręczna narracja z diagnozą bugów + tradeoff'ami jest cenniejsza).

@@ -101,6 +101,17 @@ NAZWA_UI = "ui.yaml"
 # w wynikowych YAML-ach 1:1 — generator rozwija je dopiero przy renderze .txt).
 _FOLDER_REFERENCYJNY = "pl"   # paczka, z której liczymy referencyjne wartości
 
+# Sekcje trzymane w PL źródle WYŁĄCZNIE po to, by autotłumacz (buduj_wielojezyczne
+# _docs.py) przełożył je na pozostałe języki — ale POMIJANE w wyjściu PL. Wzorzec:
+# wyjaśnienie polskiego nazewnictwa katalogów/folderów (skrypty, opowiesci,
+# podstawy, akcenty…) jest cenne dla użytkownika/dewelopera spoza PL, ale Polak
+# go nie potrzebuje. Klucz mapy = `id` szablonu (== nazwa pliku bez .yaml dla
+# readme/manual), wartość = zbiór nazw sekcji do pominięcia, gdy jezyk == 'pl'.
+SEKCJE_POMIJANE_W_PL: dict[str, set[str]] = {
+    "readme": {"polskie_nazewnictwo"},
+    "manual": {"krok_7b_polskie_nazewnictwo"},
+}
+
 # 15.2: per-szablon override domyślnej lokalizacji + nazwy pliku wyjściowego.
 # Domyślnie generujemy `docs/<id>.<iso>.txt` (manual/opowiesci/dictionaries).
 # Wpis w `KONFIG_SZABLONOW` nadpisuje dla konkretnego id:
@@ -239,7 +250,17 @@ def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
         if not isinstance(id_szablonu, str):
             print(f"⚠️  Pomijam {plik}: pole 'id' musi być stringiem.")
             continue
-        tresc_scalona = _scal_tresc_sekcjami(dane.get("tresc", ""))
+        tresc_raw = dane.get("tresc", "")
+        # Skip-w-PL: usuń sekcje trzymane wyłącznie pod autotłumacz, których
+        # Polak nie potrzebuje (patrz SEKCJE_POMIJANE_W_PL). Tylko dla schematu
+        # dict-sekcji i tylko gdy generujemy paczkę referencyjną (pl).
+        if jezyk == _FOLDER_REFERENCYJNY and isinstance(tresc_raw, dict):
+            do_pominiecia = SEKCJE_POMIJANE_W_PL.get(id_szablonu, set())
+            if do_pominiecia:
+                tresc_raw = {
+                    k: v for k, v in tresc_raw.items() if k not in do_pominiecia
+                }
+        tresc_scalona = _scal_tresc_sekcjami(tresc_raw)
         if tresc_scalona is None:
             print(f"⚠️  Pomijam {plik}: 'tresc' musi być stringiem albo słownikiem sekcji.")
             continue

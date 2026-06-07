@@ -38,6 +38,7 @@ import wx
 
 import core_poliglota
 import i18n
+import sciezki
 import tlumacz_ai
 from i18n import t
 
@@ -132,7 +133,7 @@ class PoliglotaPanel(wx.Panel):
     # Inicjowanie klienta OpenAI
     # ------------------------------------------------------------------
     def _init_api(self) -> None:
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
         if os.path.exists(env_path):
             load_dotenv(env_path)
@@ -815,7 +816,7 @@ class PoliglotaPanel(wx.Panel):
         self._txt_result.SetValue("")
         self.Layout()
 
-        app_dir = os.path.dirname(os.path.abspath(__file__))
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         runtime_dir = os.path.join(app_dir, "runtime")
 
         self._worker_thread = threading.Thread(

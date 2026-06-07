@@ -64,6 +64,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import core_tokeny as ct
+import sciezki
 
 # Silnik fonetyczny – punktowy import akcentów z core_poliglota.
 # Blok poniżej jest generowany automatycznie przez ``odswiez_rezysera.py``
@@ -579,7 +580,7 @@ class ProjektRezysera:
         # Katalog aplikacji – punkt odniesienia dla folderów skrypty/ i runtime/.
         # Domyślnie wyciąga się z lokalizacji tego modułu, ale dla testów
         # można wskazać dowolny katalog (np. tmp).
-        self.app_dir: str = app_dir or os.path.dirname(os.path.abspath(__file__))
+        self.app_dir: str = app_dir or sciezki.KATALOG_BAZOWY_STR
 
         # --- Stan fabuły ---
         self.full_story: str = ""        # bieżąca historia w pamięci

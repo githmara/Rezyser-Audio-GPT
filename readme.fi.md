@@ -59,9 +59,9 @@ Interaktiivisia tekstipelejä, joissa AI toimii kertomuksen moottorina. Toisin k
 
 ## Monikielisyys (9 kieltä luonnollisesti)
 
-Versiosta v14.0 lähtien sovellus tukee luonnollisesti 9 peruskieltä: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Jokainen `dictionaries/<koodi>/`-paketti sisältää diakriittiset merkit, aakkoset ja foneettiset säännöt, jotka toimivat kyseisen kielen tekstissä — sovellus tunnistaa lähdekielen automaattisesti lingua-language-detectorin avulla (kappaleittain) ja lataa sopivan paketin jokaiselle osalle erikseen.
+Versiosta v14.0 lähtien sovellus tukee luonnollisesti 9 peruskieltä: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Jokainen `dictionaries/<kod>/`-paketti sisältää diakriittiset merkit, aakkoset ja foneettiset säännöt, jotka toimivat kyseisen kielen tekstissä — sovellus tunnistaa lähdekielen automaattisesti lingua-language-detectorin avulla (kappaleittain) ja lataa sopivan paketin jokaiselle osalle erikseen.
 
-Koko käyttöliittymä, dokumentaatio (`docs/manual.<iso>.txt`) ja suurin osa järjestelmäviesteistä ovat luonnollisesti saatavilla kaikilla tuetuilla kielillä. AI-järjestelmäkehotteet Ohjaajan ja Tarinan tiloissa on kirjoitettu kohdekielillä (käsin, ei automaattisesti käännettynä — katso `dictionaries/<koodi>/rezyser/` ja `dictionaries/<koodi>/opowiesci/`).
+Koko käyttöliittymä, dokumentaatio (`docs/manual.<iso>.txt`) ja suurin osa järjestelmäviesteistä ovat luonnollisesti saatavilla kaikilla tuetuilla kielillä. AI-järjestelmäkehotteet Ohjaajan ja Tarinan tiloissa on kirjoitettu kohdekielillä (käsin, ei automaattisesti käännettynä — katso `dictionaries/<kod>/rezyser/` ja `dictionaries/<kod>/opowiesci/`).
 
 
 ## AI-arkkitehtuuri ja käytetyt mallit
@@ -91,12 +91,12 @@ Tämä on nykyisen sukupolven tekoälyn perustavanlaatuinen rajoitus. Tästä sy
 ### Kehittäjille (clone + setup)
 
 1. Kloonaa arkisto levyllesi.
-2. Suorita `setup_dev.bat` -tiedosto luodaksesi automaattisesti virtuaalisen ympäristön (`.venv/`) ja ladataksesi riippuvuudet `requirements.txt` -tiedostosta.
-3. Käynnistä sovellus komennolla `python main.py` tai `run_dev.bat` -tiedoston kautta.
+2. Suorita tiedosto `setup_dev.bat` luodaksesi automaattisesti virtuaalisen ympäristön (`.venv/`) ja ladataksesi riippuvuudet `requirements.txt`-tiedostosta.
+3. Käynnistä sovellus komennolla `python main.py` tai tiedoston `run_dev.bat` kautta.
 
-`.sh`-skriptit macOS/Linuxille poistettiin versiossa v13.1 — kehitysympäristö keskittyy Windowsiin NVDA:n saavutettavuustestien erityispiirteiden vuoksi. Koodin kanssa työskentely muilla järjestelmillä on mahdollista, mutta vaatii manuaalista asennusta: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+`.sh`-skriptit macOS/Linuxille poistettiin versiossa 13.1 — kehitysympäristö keskittyy Windowsiin NVDA:n saavutettavuustestien erityispiirteiden vuoksi. Koodin kanssa työskentely muilla järjestelmillä on mahdollista, mutta vaatii manuaalista asennusta: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-**Julkaisupakettien rakennusskriptit** (`build_release.py`, `installer.iss`) on tarkoitettu vain Windows-pakettien luomiseen. Ne vaativat erityisen `runtime/`-kansion siirrettävällä Python-versiolla — tämä kansio ei ole tarkoituksella osa arkistoa (se on `.gitignore`-tiedostossa).
+**Julkaisupakettien rakennusskriptit** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) on tarkoitettu ainoastaan Windows-pakettien luomiseen. Versiosta 17.0 alkaen `build_release.py` jäädyttää sovelluksen PyInstallerilla (onedir + windowed) `rezyser_audio.spec`-tiedoston mukaisesti — tuottaa `dist/`-hakemiston, jossa on alkuperäinen `.exe` ja bundlen `runtime/`-kansio (tulkki + kirjastot). Manuaalisesti ladattua siirrettävää Pythonia ei enää tarvita arkistoon; `dist/` ja `build/`-hakemistot ovat `.gitignore`-tiedostossa.
 
 
 ## Täydellinen dokumentaatio
@@ -108,3 +108,23 @@ Tämä README on vain projektin arkkitehtoninen luonnos. Jos haluat oppia kehitt
 * `docs/dictionaries.<iso>.txt` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
 
 Jokainen näistä tiedostoista on saatavilla 9 kielellä — suffiksi `.<iso>.txt` (esim. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+
+
+### Puolan kielinen nimistö — opas ei-puolankielisille käyttäjille
+
+Tämän projektin pääkieli on puola. Moduulien nimet, luokat, koodikommentit sekä hakemistojen ja datatiedostojen nimet ovat puolankielisiä, ja — taaksepäin yhteensopivuuden ja monikielimoottorin sopimuksen vuoksi — niitä EI tarkoituksella käännetä tai muuteta. Seuraava sanasto auttaa kehittäjiä ja macOS/Linux-käyttäjiä hahmottamaan rakennetta.
+
+**Käyttäjädatan hakemistot (suoritettavan tiedoston vieressä tai projektihakemistossa):**
+
+* `skrypty/` — *scripts*: Ohjaaja-moduulin projektit (`.txt` kerronta, `.md` Maailman Kirja, `_streszczenie.txt`).
+* `opowiesci/` — *stories*: interaktiivisten Tarinoiden tallenteet.
+* `runtime/` — kaksoisrooli: jäädytetyn sovelluksen bundlen hakemisto (tulkki + kirjastot) SEKÄ projektien piilotettujen metatietojen säiliö (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+**Lähdedatan alikansiot `dictionaries/<kod>/` (näkyvissä Sääntöjen Hallinnassa):**
+
+* `podstawy.yaml` — *basics*: kielipaketin konfiguraatio ja metatiedot.
+* `akcenty/` — *accents*: fonetiikan säännöt puhesyntetisaattoreille.
+* `szyfry/` — *ciphers*: tekstin salausmoodit.
+* `rezyser/` — *director*: Ohjaaja-moduulin luovat tilat.
+* `opowiesci/` — *stories*: interaktiivisten Tarinoiden tilat.
+* `gui/` — käyttöliittymän tekstit (`ui.yaml`) ja dokumentaatiomallit.

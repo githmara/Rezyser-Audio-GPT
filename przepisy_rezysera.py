@@ -51,11 +51,13 @@ from typing import Any
 
 import yaml
 
+import sciezki
+
 
 # =============================================================================
 # Ścieżki i stałe
 # =============================================================================
-_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+_ROOT_DIR = sciezki.KATALOG_BAZOWY_STR
 DICTIONARIES_DIR = os.path.join(_ROOT_DIR, "dictionaries")
 
 # Podfolder w ``dictionaries/<jezyk>/`` w którym trzymane są przepisy reżysera.

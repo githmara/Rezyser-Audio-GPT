@@ -61,6 +61,8 @@ from docx.oxml.shared import OxmlElement
 
 from num2words import num2words
 
+import sciezki
+
 # 13.5: detekcja języka oparta na ``lingua-language-detector``.
 # Lingua jest deterministyczna z założenia (operuje na n-gramowych modelach
 # statystycznych, nie na losowych próbkach), znacznie dokładniejsza dla
@@ -83,7 +85,7 @@ except ImportError:                                             # pragma: no cov
 # =============================================================================
 # Ścieżki, stałe i cache
 # =============================================================================
-_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+_ROOT_DIR = sciezki.KATALOG_BAZOWY_STR
 DICTIONARIES_DIR = os.path.join(_ROOT_DIR, "dictionaries")
 
 # Mapowanie nazw trybów → podfolderów języka

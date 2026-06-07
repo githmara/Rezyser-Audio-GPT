@@ -36,6 +36,8 @@ import yaml as _pyyaml
 from dotenv import load_dotenv
 
 import core_tokeny as ct
+import sciezki
+from bledy_ai import BladDlugosciOdpowiedzi, BladStrukturyJSON
 
 # =============================================================================
 # Stałe konfiguracyjne
@@ -260,7 +262,7 @@ def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
     wtedy ``brak_api_tresc`` w MessageBox przy próbie wysyłki). Nigdy nie
     rzuca — błąd inicjalizacji nie powinien blokować otwarcia panelu.
     """
-    base = app_dir or os.path.dirname(os.path.abspath(__file__))
+    base = app_dir or sciezki.KATALOG_BAZOWY_STR
     env_path = os.path.join(base, ENV_FILENAME)
     if not os.path.exists(env_path):
         return None
@@ -293,7 +295,7 @@ def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
 # zestaw plików, więc EN nigdy nie jest stubem w którym fallback by ciszą
 # zawiódł mid-game.
 
-ROOT_DICT = Path(__file__).resolve().parent / "dictionaries"
+ROOT_DICT = sciezki.KATALOG_BAZOWY / "dictionaries"
 
 _NAZWA_PLIKU_PER_TRYB = {
     TRYB_BURZA:        "tryb_burza",
@@ -350,7 +352,7 @@ def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl", zasady_swiata: str = 
     """
     nazwa = _NAZWA_PLIKU_PER_TRYB.get(tryb)
     if nazwa is None:
-        raise ValueError(f"Nieznany tryb opowieści: {tryb} (oczekiwane 0/3/4/5)")
+        raise ValueError(f"Unknown story mode: {tryb} (expected 0/3/4/5)")
 
     zasady_blok = ""
     if zasady_swiata and zasady_swiata.strip():
@@ -613,9 +615,11 @@ def generuj_ture(
             messages.append({
                 "role": "system",
                 "content": (
-                    f"POPRZEDNIA PRÓBA NIE PRZESZŁA WALIDACJI. Błąd: {ostatni_blad}. "
-                    f"Wygeneruj ponownie ZGODNIE ze schemą JSON z prompt-systemowy. "
-                    f"Wszystkie pola wymagane MUSZĄ być obecne i mieć właściwy typ."
+                    f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
+                    f"Regenerate the response STRICTLY conforming to the JSON schema "
+                    f"defined in the system prompt. Every required field MUST be present "
+                    f"and MUST have the correct type. Return ONLY a single valid JSON "
+                    f"object — no prose, no markdown code fences, no commentary."
                 ),
             })
 
@@ -630,10 +634,10 @@ def generuj_ture(
 
         finish = getattr(resp.choices[0], "finish_reason", None)
         if finish == "length":
-            raise RuntimeError(
-                f"Model osiągnął limit max_tokens={MAX_TOKENS_OUT} — odpowiedź "
-                f"została ucięta przed zamknięciem JSON. Skróć kontekst lub "
-                f"zwiększ MAX_TOKENS_OUT."
+            raise BladDlugosciOdpowiedzi(
+                f"The model hit its max_tokens={MAX_TOKENS_OUT} limit — the response "
+                f"was cut off before the JSON could be closed. Shorten the context "
+                f"or raise MAX_TOKENS_OUT."
             )
 
         surowa = resp.choices[0].message.content or ""
@@ -645,18 +649,18 @@ def generuj_ture(
             # ergonomicznie, więc robimy to ręcznie i feed-back'ujemy do retry.
             if dane["narracja_typ"] != "druga_osoba" and dane["wybory"]:
                 raise jsonschema.ValidationError(
-                    f"narracja_typ='{dane['narracja_typ']}' wymaga pustego pola "
-                    f"`wybory` (otrzymano {len(dane['wybory'])} wyborów). "
-                    f"Trzecioosobowe sceny są pasywne dla gracza — nie pokazujesz "
-                    f"opcji do wyboru."
+                    f"narracja_typ='{dane['narracja_typ']}' REQUIRES an empty "
+                    f"`wybory` field (received {len(dane['wybory'])} choices). "
+                    f"Third-person scenes are passive for the player — you MUST NOT "
+                    f"present any choices."
                 )
             # v15.4: gracz wymusił `tryb_kamery` przez `/scena`/`/flashback` —
             # LLM zignorował i odpowiedział `druga_osoba`. Retry z naciskiem.
             if tryb_kamery in ("scena", "flashback") and dane["narracja_typ"] != tryb_kamery:
                 raise jsonschema.ValidationError(
-                    f"Gracz wymusił narracja_typ='{tryb_kamery}' komendą /{tryb_kamery}, "
-                    f"a otrzymano '{dane['narracja_typ']}'. Wygeneruj ponownie z "
-                    f"właściwym typem kamery i pustym `wybory`."
+                    f"The player forced narracja_typ='{tryb_kamery}' via the "
+                    f"/{tryb_kamery} command, but received '{dane['narracja_typ']}'. "
+                    f"Regenerate with the correct camera type and an empty `wybory`."
                 )
         except json.JSONDecodeError as exc:
             ostatni_blad = f"JSONDecodeError: {exc.msg}"
@@ -676,9 +680,9 @@ def generuj_ture(
             surowy_json=surowa,
         )
 
-    raise RuntimeError(
-        f"LLM wygenerował niewłaściwą strukturę JSON {MAX_RETRIES + 1} razy z rzędu. "
-        f"Ostatni błąd: {ostatni_blad}"
+    raise BladStrukturyJSON(
+        f"The AI returned a malformed JSON structure {MAX_RETRIES + 1} times in a "
+        f"row. Last error: {ostatni_blad}"
     )
 
 

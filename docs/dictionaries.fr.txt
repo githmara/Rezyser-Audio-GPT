@@ -22,7 +22,7 @@ La structure du dossier est la suivante :
 
 Sont actuellement entièrement implémentées : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский
 (9 langues de base). Chacune dispose de son propre pack
-« dictionaries/<code>/ » avec ses diacritiques, son alphabet et ses règles phonétiques
+« dictionaries/<kod>/ » avec ses diacritiques, son alphabet et ses règles phonétiques
 qui opèrent sur le texte dans cette langue spécifique — l'application détecte automatiquement la langue d'origine via lingua-language-detector (par paragraphe) et charge le pack approprié pour chaque fragment séparément. D'autres langues sont en préparation (un pack complet exige « podstawy.yaml », « gui/ui.yaml » et au moins un fichier dans « akcenty/ » et « szyfry/ »).
 
 

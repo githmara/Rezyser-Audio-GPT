@@ -7,58 +7,57 @@ The set consists of the main studio (Direction), a translation and accent tool (
 
 STEP 1: First Launch (Cross-Platform)
 
-Download the latest installer from the Releases tab on GitHub (the file Rezyser_Audio_v<number>_Installer.exe) and run it by double-clicking. The installer suggests a default installation location — the Programs folder inside your local user directory — and does not require administrator privileges. You can choose your own path with the "Browse" button; in that case REMEMBER it (you will need it during updates — see "Automatic Updates" below). After installation, launch the program from the desktop icon or the Start Menu. A brief terminal window will open (disappears automatically), and after a moment, the main program window will appear — Audio Director GPT. No browser, no background server. When you're done working, just close the program window.
+Download the latest installer from the Releases tab on GitHub (file Rezyser_Audio_v<version>_Installer.exe) and run it by double-clicking. The installer will suggest a default installation location — the Programs folder in your local account directory — and does not require administrator privileges. You can choose your own path with the "Browse" button; in that case, REMEMBER it (it will be useful for updates — see "Automatic Updates" below). After installation, launch the program using the desktop icon or from the Start Menu. After a moment, the main program window will appear — Audio Director GPT. From version 17.0, the application is frozen as a native executable in windowed mode, so no terminal window flickers, and it starts faster than before. No browser, no background server. When you're done working, simply close the program window.
 
-The entire application — the Python engine, your projects, and the API key — lives inside a single folder under the installation path, so the whole folder can be moved to a USB stick, to the cloud, or to another computer (detailed instructions in the "Moving Projects and API Key" section below).
+The entire application, including the Python engine, projects, and API key, resides in one folder under the installation path — the entire folder can be moved to a USB drive, the cloud, or another computer (detailed instructions in the "Transferring Projects and API Key" section below).
 
-
-Important: The runtime/ folder inside the installation folder contains an isolated Python environment ready to use without a separate system-level installation. If you clone the repository (developer path), this folder is not present and should not be — you will then use the virtual environment venv described in the developer section below.
+Important: The runtime/ folder inside the installation folder is a PyInstaller bundle (from version 17.0) — it contains an isolated Python interpreter and libraries, ready to use without a separate system installation; it also serves as a container for hidden project metadata. If you clone the repository (developer path), this folder is absent and should not be there — you then use the virtual environment venv described in the developer section below.
 
 --- For Developers (Windows — Git Repository) ---
 
 1. Clone the repository to your disk.
 2. Run the setup_dev.bat file. The script will automatically create a Python virtual environment (venv) and install all required dependencies from the requirements.txt file.
-3. Launch the application with the command python main.py or via the run_dev.bat file — the script will automatically detect the venv folder and start the program.
+3. Run the application with the command python main.py or through the run_dev.bat file — the script will automatically detect the venv folder and launch the program.
 
 --- For Developers and Regular Users (macOS / Linux) ---
 
 1. Clone the repository to your disk.
 2. Open a terminal in the project folder and grant execution permissions to the scripts: chmod +x *.sh
-3. Run the setup script: ./setup_dev.sh — the script will create a venv environment and install the dependencies.
-4. Launch the application: python main.py or ./run.sh
+3. Run the setup script: ./setup_dev.sh — the script will create a venv environment and install dependencies.
+4. Run the application: python main.py or ./run.sh
 
-What you'll see upon launch: After starting the program, a window with the start screen opens. You will find a brief description of the available tools and the "System Check" section. If the API key is not yet configured, you will see a red message indicating that AI-based modules (Director, Translator) will not work — free local features (accents, Architect) are active immediately. The API key configuration is described in the next step.
+What you'll see upon launch: After launching the program, a window with the start screen opens. You will find a brief description of available tools and the "System Check" section. If the API key is not yet configured, you will see a red message informing you that AI-based modules (Directing, Translator) will not work — free local features (accents, Architect) are active immediately. The configuration of the key is described in the next step.
 
 Automatic Updates
 
-The application checks at startup if a newer version is available on GitHub — the check is performed in the background and does not block the interface.
+The application checks at startup if a newer version is available on GitHub — the check occurs in the background and does not block the interface.
 
-If you installed the program via the ready-made installer (.exe): upon detecting a newer version, a window will appear asking if you want to download it. After confirmation, a progress bar will start, and when the download is complete, the application will close automatically, and the new installer will launch by itself. IMPORTANT: in the new installer window, make sure the proposed installation path is THE SAME as during the first installation (usually visible in the "Destination Folder" field). If you accept the default proposal but originally chose a different location with the "Browse" button, you will end up with a SECOND empty installation without your projects and API key — the first one still sits in the old place, but the desktop shortcut and the one in the Start Menu will be replaced to point at the new install. If you accept the same path as before, the installer overwrites the application engine files and the whole rule pack (folder dictionaries/) — your projects (folders skrypty/, opowiesci/) and API key (golden_key.env) remain intact. WARNING: if you edited via the Rule Manager any files that exist in the package (e.g. accent tweaks in `dictionaries/pl/akcenty/wloski.yaml`), those edits WILL BE OVERWRITTEN by the update — before confirming the update, back up the `dictionaries/` folder using the procedure in "Moving Projects and API Key" below (just copy the `dictionaries/` folder to a USB stick), and after the update paste it back over the new files. Completely new rules you created from scratch that are not in the package (e.g. an additional base language or a brand-new cipher) are kept automatically — the installer never deletes files that are not in the package. As of version 15.2.8 the update prompt itself displays this warning inline and includes an „Open dictionaries folder" button that opens Explorer at the right location with a single click — just press it before confirming the update to make a backup conveniently, then return to the dialog and click „Download and install".
+If you installed the program via the ready installer file (.exe): when a newer version is detected, a window will appear asking if you want to download it. After confirmation, a progress bar will appear, and when the download is complete, the application will automatically close, and the new installer will launch itself. IMPORTANT: in the new installer window, make sure that the proposed installation path is the SAME as during the first installation (usually visible in the "Destination Folder" field). If you accept the default proposal and originally chose a different location with the "Browse" button, you will receive a SECOND empty installation without your projects and API key — the first one still stands in the old place, but the desktop shortcut and Start Menu will be replaced with the new one. If you accept the same path as originally, the installer overwrites the application engine files and the entire rule pack (dictionaries/ folder) — your projects (scripts/, stories/ folders) and API key (golden_key.env) remain untouched. IMPORTANT: if you edited existing files in the package through the Rule Manager (e.g., accent changes in `dictionaries/pl/akcenty/wloski.yaml`), these edits WILL BE OVERWRITTEN during the update — before confirming the update, make a backup of the `dictionaries/` folder according to the procedure in the "Transferring Projects and API Key" section below (just copy the `dictionaries/` folder to a USB drive), and after the update, upload it back overwriting the newer files. Completely new rules you created from scratch and that are not in the package (e.g., your own additional base language or your own cipher) remain untouched automatically — the installer does not remove files outside the package. From version 15.2.8, the dialog proposing the update displays this warning directly in the content and includes a "Open dictionaries folder" button, which opens Explorer in the right place with one click — just press it before confirming the update to conveniently make a backup, and then return to the dialog and click "Download and Install".
 
-If you do not remember your installation path, there are two quick ways to recover it. Windows 11: in the context menu of the desktop shortcut choose "Open file location" (if the option isn't visible in the new reduced context menu, pick "Show more options" first, or press Shift+F10 twice to go straight to the full menu), go one level up with Backspace, select the application folder and press Ctrl+Shift+C (or choose "Copy as path" from the context menu) — the full path lands in the clipboard wrapped in quotation marks (when pasting it into the installer, remember to strip those quotation marks). Older Windows versions (7/8/10): right-click the shortcut and choose "Properties"; in the "Shortcut" tab, the "Target" field shows the full path to the program's launcher file (`.exe` in v15.2.5+ or `run.bat` in older versions) — copy it and delete the trailing filename, leaving the bare installation folder path.
+If you don't remember your installation path, there are two quick ways to retrieve it. Windows 11: in the context menu of the desktop shortcut, select "Open file location" (if the option is not visible in the new simplified context menu, first select "Show more options" or press Shift+F10 twice to immediately open the full menu), go up one level with the Backspace key, select the application folder and press Ctrl+Shift+C (or choose "Copy as path" from the context menu) — the full path will go to the clipboard in quotes (when pasting into the installer, remember to remove the quotes themselves). Older versions of Windows (7/8/10): right-click on the shortcut and select "Properties"; in the "Shortcut" tab in the "Target" field, you will see the full path to the executable file (`.exe` in version 15.2.5+ or `run.bat` in older versions) — copy it and remove the final file name, leaving only the installation folder path.
 
-Note when upgrading from older versions (v15.2.4 or earlier, when the app launched via `run.bat` from the Portable ZIP package): your existing desktop shortcut may point at `run.bat` in the old location, which no longer exists after upgrading to v15.2.5+ — versions 15.2.5+ use a standalone `.exe` created by the installer. If your shortcut stops working after the upgrade, delete it manually and let the installer create a fresh one during the next install.
+Note when updating from older versions (v15.2.4 or older, when the application was launched via `run.bat` from the Portable ZIP package): the existing desktop shortcut may point to `run.bat` in the old location, which after updating to v15.2.5+ is no longer there — versions 15.2.5+ use a standalone `.exe` file created by the installer. If the shortcut stops working after the update, delete it manually and allow the installer to create a new one during reinstallation.
 
-If you are using the Git repository (developers and macOS/Linux users): instead of a download proposal, you will see information about the new version with a direct link to the release page on GitHub. Download the "Source code" archive from there or update the repository with the command git pull.
+If you are using the Git repository (developers and macOS/Linux users): instead of a download proposal, you will see information about the new version with a direct link to the release page on GitHub. Download the "Source code" archive from there or update the repository with the git pull command.
 
-Moving Projects and API Key (migration)
+Transferring Projects and API Key (Migration)
 
-If you want to move your projects, API key, and local settings to another computer (or restore everything after reinstalling Windows), there is no need to copy individual files manually — the whole application folder is self-contained.
+If you want to transfer your projects, API key, and local settings to another computer (or restore everything after reinstalling Windows), there is no need to manually copy individual files — the entire application folder is self-sufficient.
 
-1. Make sure the application is COMPLETELY closed. If you see the program icon in the system tray (next to the clock, on the right side of the taskbar), right-click on it and choose "Close". Open files block copying.
-2. Locate the Audio Director GPT shortcut on the desktop. Right-click on it (or press the Application key, or Shift+F10 when navigating with NVDA) and choose "Open file location". NOTE on Windows 11: in the new reduced context menu this option may be hidden — pick "Show more options" first (or press Shift+F10 twice to open the full menu with the option straight away).
-3. A Windows Explorer window opens in the program's installation folder. Press Backspace (simplest, always works) or click the "Up" arrow on the toolbar, to go one level up — you will see the full application folder. Note: the Alt+Up shortcut only works when focus is on the file list — if Explorer opens with focus on the address bar (the typical case), Alt+Up does nothing; use Backspace instead.
-4. Copy the whole folder to a USB stick, a cloud drive (OneDrive, Google Drive, Dropbox), or an external disk. The folder contains everything needed to restore your working state:
-   - Your projects (folder skrypty/ — narrative .txt files, World Book .md files, _streszczenie.txt summaries; folder opowiesci/ — interactive games).
-   - Your API key (the file golden_key.env in the main application folder).
-   - Your custom phonetic rules, accents, ciphers, if you edited anything in the Rule Manager (folder dictionaries/<language_code>/, e.g. dictionaries/pl/akcenty/wloski.yaml).
-   - Application preferences and creative mode selections (folder runtime/skrypty/, .mode files).
-   - The isolated Python environment (folder runtime/), so you do not need to install anything extra on the new computer.
-5. On the new computer: download the latest installer from the Releases tab on GitHub and install the application normally. Launch it once so that it creates the empty configuration file structure. Close the application. Then either copy the previously saved folder over the new installation overwriting files — or selectively pick only the folders you care about (skrypty/, opowiesci/, golden_key.env) and paste them into the corresponding locations of the new installation.
+1. Make sure the application is COMPLETELY closed. If you see the program icon in the system tray (next to the clock, on the right side of the taskbar), right-click and select "Close". Open files block copying.
+2. Find the shortcut Audio Director GPT on the desktop. Right-click on it (or use the Applications key or Shift+F10 when navigating with NVDA) and select "Open file location". NOTE on Windows 11: in the new, simplified context menu, this option may be hidden — first select "Show more options" (or press Shift+F10 twice to immediately open the full menu with the option).
+3. A Windows Explorer window will open in the program's installation folder. Press the Backspace key (the simplest way, always works) or click the "Up" arrow on the toolbar to go up one level — you will see the full application folder there. Note: the Alt+Up Arrow shortcut only works when the focus is on the file list — if Explorer opened with the focus on the address bar (typical), Alt+Up Arrow will do nothing, use Backspace instead.
+4. Copy this entire folder to a USB drive, cloud storage (OneDrive, Google Drive, Dropbox), or external drive. The folder contains everything needed to restore the work state:
+   - Your projects (scripts/ folder — narration .txt files, World Book .md files, _summary.txt; stories/ folder — interactive games).
+   - API key (golden_key.env file in the main application folder).
+   - Your own phonetic rules, accents, ciphers if you edited something in the Rule Manager (dictionaries/<language_code>/ folder, e.g., dictionaries/pl/akcenty/wloski.yaml).
+   - Application preferences and creative mode selection (runtime/scripts/ folder, .mode files).
+   - Isolated Python environment (runtime/ folder), so you don't need to install anything on the new computer.
+5. On the new computer: download the latest installer from the Releases tab on GitHub and install the application as usual. Run the program once to create an empty configuration file structure. Close the application. Then copy the previously saved folder to the installation location, overwriting the files — or selectively choose only the folders you are interested in (scripts/, stories/, golden_key.env) and paste them into the appropriate places of the new installation.
 
-Tip for NVDA users: the context menu "Open file location" reached with the Application key is fully accessible — NVDA reads each item natively. After Explorer opens in the target folder, use Backspace to go one level up (always works regardless of whether focus is on the file list or the address bar), then Ctrl+A to select everything and Ctrl+C to copy.
+Tip for NVDA users: the "Open file location" context menu option invoked with the Applications key is fully accessible — NVDA reads each item in Polish. After opening Explorer in the target folder, use the Backspace key to go up one level (works always, regardless of whether the focus is on the file list or the address bar), then Ctrl+A to select everything and Ctrl+C to copy.
 
-Tip: "Open file location" is the native option name on an English Windows installation. On a Polish system it reads "Otwórz lokalizację pliku", on other locales — the analogous wording in the operating system's local language.
+Tip: the "Open file location" option is the native name for the Polish version of Windows. In the English system, it is "Open file location", in other language versions — similarly in the local operating system language.
 
 
 STEP 2: Powering the API (OpenAI Key)
@@ -461,23 +460,23 @@ Where to find further documentation for the dictionaries/ folder:
 - File `dictionaries/README.md` (available only when cloning the repository from GitHub — release packages filter out .md files) — detailed technical documentation of the YAML format with examples, field lists, pipeline rules, regexes. This document is addressed to linguists with basic programming knowledge and developers.
 
 
-STEP 7b (addendum): The order of `zamiany:` rules matters
+STEP 7b (supplement): The order of `replacement:` rules matters
 
-Files in `dictionaries/<code>/akcenty/*.yaml` contain a list of `zamiany:` rules — `wzor → zamiana` pairs (pattern → replacement) that the engine applies SEQUENTIALLY. Each rule operates on the output of the previous one. This lets you build pipelines like "break the digraph `szcz` into `shch`, then turn the resulting `ch` into `h`", but it also opens a classic trap for the language pack author.
+Files in `dictionaries/<code>/accents/*.yaml` contain a list of `replacement:` rules — `pattern → replacement` pairs that the engine applies SEQUENTIALLY. Each subsequent rule operates on the output of the previous one. This allows building pipelines like "break down the digraph `szcz` into `shch`, then replace `ch` with `h`", but it also opens up a classic trap for the language pack author.
 
-The "sequential loop" trap. Say the author of a Spanish accent (meant to make Polish "ñ" sound right for Diego/Loquendo) adds two rules:
-1. `ñ → nj` (so Polish "ñ" sounds like a soft "nj")
-2. `j → x` (so Polish "j" sounds like Spanish "j" — phonetically /x/)
+The "sequential loop" trap. Let's assume that for the Spanish accent trying to make the Polish "ñ" sound like Diego (Loquendo), the author adds two rules:
+1. `ñ → nj` (so that the Polish "ñ" sounds like a soft "nj")
+2. `j → x` (so that the Polish "j" sounds like the Spanish "j" — phonetically /x/)
 
-After running the app, words containing "ñ" come out as "nx", not "nj". Why? Because when the first rule turns "ñ" into "nj", the new "j" is immediately caught by the second rule and turned into "x". Result: instead of the intended "ñ → nj", you get "ñ → nx".
+Upon execution, it turns out that words with "ñ" are pronounced as "nx", not "nj". Why? Because when the first rule changes "ñ" to "nj", the new "j" is immediately caught by the second rule and changed to "x". Result: instead of the intended "ñ → nj", we get "ñ → nx".
 
-Ordering rule (general). When one rule introduces a character that another rule uses as a pattern, ORDER MATTERS. Safe heuristic: FIRST replace the TARGET (the character later used as a `wzor` in another rule) with something safe, ONLY THEN introduce the SOURCE (the character that decomposes into the TARGET). For the Spanish example, the correct order is: first `j → x`, then `ñ → nj`. Result: "ñ" produces "nj" (the second "j" is no longer eaten, because rule `j → x` had already been applied earlier, before "nj" existed).
+Order rule (universal). When one rule introduces a character that another rule uses as a pattern, ORDER MATTERS. A safe heuristic: FIRST replace the TARGET (character later used as `pattern` in another rule) with something safe, THEN introduce the SOURCE (character that should break down into the TARGET). For the Spanish example correctly: first `j → x`, then `ñ → nj`. Result: "ñ" gives "nj" (the second "j" will not be eaten, because the `j → x` rule was applied earlier, when "nj" did not yet exist).
 
-How to test. After changing the order of rules in an accent file, run a sentence containing BOTH letters through Director mode. For the Spanish example: "Niño de paja juega" → the output must contain both the ñ effect ("ñ → nj") and the j effect ("j → x"), i.e. something like "Ninjo de paxa xuega". If you see "ninxo" instead of "ninjo" — the order is wrong.
+How to test. After changing the order of rules in the accent file, pass a sentence containing BOTH letters through the Director Mode. For example ES: "Niño de paja juega" → the result must have both the ñ accent ("ñ → nj") and the j accent ("j → x"), something like "Ninjo de paxa xuega". If you see "ninxo" instead of "ninjo" — the order is reversed.
 
-Engine-side validation (opt-in for pack authors). The application has a built-in heuristic for detecting potential loops, but it's disabled by default — because many pipelines look like loops while being entirely intentional (the classic "szcz → shch" + "ch → h" decomposition). To enable it: set the environment variable `REZYSER_VALIDATE_ZAMIANY=1` and launch the app from a console. The engine will print one aggregated WARN line per accent file listing the first three potential loops and the count of remaining ones. Check the resulting phonetics on a test sentence — if the effect is intended, ignore the WARN.
+Engine validation (opt-in for pack authors). The application has a built-in heuristic for detecting potential loops, but it is disabled by default — because many pipelines look like a loop, though they are intentional (classic "szcz → shch" + "ch → h"). To enable it: set the environment variable `REZYSER_VALIDATE_ZAMIANY=1` and run the application from the console — from source via `python main.py`, because the frozen `.exe` in windowed mode (from version 17.0) does not have a console window. The engine will print one aggregated WARN line for each accent file with the first three potential loops and the number of remaining ones. Check the resulting phonetics on the test sentence — if the effect is intended, ignore the WARN.
 
-Rule-reordering buttons in the Rule Manager GUI (drag-and-drop, "Move up / Move down") are a separate feature planned for a later version cycle — they require redesigning the Manager (which currently delegates file editing to the system Notepad rather than offering its own rule view). Until that lands: edit the YAML file by hand, move rows within the `zamiany:` section, run the ENV-var validator, and verify on control sentences.
+Rule movement buttons in the GUI Rule Manager (drag-and-drop, "Up / Down") are a separate feature planned for a later version cycle — it requires redesigning the Manager (currently delegates file editing to an external system Notepad and does not have its own rule view). Until its implementation: edit the YAML file manually, move lines in the `replacement:` section, use the validator ENV-var, and test on control sentences.
 
 
 Important tips for screen reader users (NVDA)
@@ -656,3 +655,19 @@ The Reverser cipher section lists English abbreviations (e.g., i.e., etc., U.S.,
 
 ### Cipher: Typoglycemia
 According to a rscheearch at Cmabrigde Uinervtisy, it deosn't mttaer in waht oredr the ltteers in a wrod are, the olny iprmoatnt tihng is taht the frist and lsat ltteer be at the rghit pclae.
+
+
+STEP 7b — Polish Folder and File Names (for Users Outside Poland)
+
+The program is governed by the Polish language — it is the main language of the project. When browsing the dictionaries/ folder in the Rule Manager (Ctrl+4) or looking into save folders, you will encounter Polish names. These are NOT errors or translation issues: they remain Polish on purpose, as they are internal engine identifiers. The glossary below explains their meanings.
+
+Subfolders in dictionaries/<language-code>/ (as seen in the Rule Manager):
+- podstawy (basics) — language pack configuration
+- akcenty (accents) — phonetic rules for speech synthesizers
+- szyfry (ciphers) — text encryption modes
+- rezyser (director) — creative modes of the Director module
+- opowiesci (stories) — modes of interactive Stories
+
+Folders with your saves (next to the program):
+- skrypty (scripts) — Director projects: narration .txt, World Book .md
+- opowiesci (stories) — saves of interactive Stories

@@ -639,6 +639,8 @@ rezyser:
   sr_sukces_tresc: 'Näytönlukijan tiedosto tallennettu: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Virhe näytönlukijan version luomisessa
   sr_blad_tresc: "Näytönlukijan version luominen epäonnistui:\n{tresc_bledu}"
+  err_struktura: Malli tuotti väärän vastausrakenteen useista korjausyrityksistä huolimatta. Yritä uudelleen tai muotoile komento toisin.
+  err_dlugosc: Mallin vastaus katkaistiin ennen kuin se ehti lopettaa sen (pituusraja ylitetty). Lyhennä kontekstia — esim. Maailmankirjaa tai ohjetta — ja yritä uudelleen.
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -1211,3 +1213,4 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: Pelitilan pääelementin on oltava JSON-objekti (avain–arvopari aaltosulkeissa), ei lista tai yksinkertainen arvo. Palauta objektin rakenne ja yritä uudelleen.
   edytuj_stan_zapisano_tytul: Pelitila tallennettu
   edytuj_stan_zapisano_tresc: Pelitila "{nazwa}" on tallennettu ja ladattu uudelleen levyltä. Hahmot, sijainti, varusteet, juonet ja laskurit heijastavat nyt muokkauksiasi.
+  err_dlugosc: Mallin vastaus katkaistiin ennen kuin se ehti lopettaa sen (pituusraja ylitetty). Lyhennä kontekstia ja yritä uudelleen.

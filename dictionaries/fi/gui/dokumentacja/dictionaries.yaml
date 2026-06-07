@@ -14,7 +14,7 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Słowniki Poligloty i Reżysera — Ohje kaikille
+    Polyglootin ja Ohjaajan sanakirjat — Ohje kaikille
     =============================================
 
     Hei! Jos luet tätä tiedostoa, se tarkoittaa, että olet katsonut
@@ -37,8 +37,8 @@ tresc:
     Mitä täällä oikein on?
     ----------------------
 
-    Kansio "dictionaries/" on sääntökirjasto, jota Poliglota (käännös- ja
-    aksenttityökalu) sekä Reżyserin sisäinen moottori käyttävät. Versioon 12.0
+    Kansio "dictionaries/" on sääntökirjasto, jota Polyglootti (käännös- ja
+    aksenttityökalu) sekä Ohjaajan sisäinen moottori käyttävät. Versioon 12.0
     asti kaikki nämä säännöt olivat "kovakoodattuja" Python-koodiin — jos
     halusit lisätä uuden aksentin tai muuttaa sääntöjä, sinun piti pyytää
     ohjelmoijaa. Versiosta 13.0 alkaen kaikki on tallennettu tavallisiin
@@ -54,11 +54,11 @@ tresc:
             ├── podstawy.yaml              puolalaiset diakriitit + aakkoset
             ├── akcenty/                  {liczba_plikow_w_akcentach} aksenttitiedostot
             ├── szyfry/                   {liczba_szyfrow} salaus- ja leikkitiedostot
-            └── rezyser/                  {liczba_trybow_rezysera} Reżyser AI -tilatiedostot
+            └── rezyser/                  {liczba_trybow_rezysera} Ohjaaja AI -tilatiedostot
 
     Tällä hetkellä täysin toteutettuja ovat: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} peruskieliä). Jokaisella on oma paketti
-    "dictionaries/<koodi>/" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
+    "dictionaries/<kod>/" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
     toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa
     lähdekielen automaattisesti lingua-language-detector -työkalulla
     (kappaletasolla) ja lataa oikean paketin kullekin katkelmalle erikseen.
@@ -160,7 +160,7 @@ tresc:
        voit myöhemmin purkaa viestin. Aakkosten ulkopuoliset merkit (numerot, välilyönnit,
        välimerkit) pysyvät ennallaan.
   co_to_tryb_rezysera: |
-    Mikä on "Reżyser-tila"?
+    Mikä on "Ohjaaja-tila"?
     -----------------------
 
     Kansio "rezyser/" sisältää {liczba_trybow_rezysera} tiedostoa, jotka kuvaavat sovelluksen
@@ -245,10 +245,10 @@ tresc:
     4. Säädä "korvaukset" -listaa ruotsalaiselle foneettisuudelle (esim.
        lisää "å → o", "ö → ö", poista tai muuta ne, jotka ovat erityisiä
        suomelle).
-    5. Tallenna, palaa Pääsivulle, klikkaa "🔄 Päivitä Reżyserin aksentit
+    5. Tallenna, palaa Pääsivulle, klikkaa "🔄 Päivitä Ohjaajan aksentit
        YAML:stä" ja käynnistä sovellus uudelleen. Uusi ruotsalainen ilmestyy
-       Poliglotan aksenttivalikkoon (ja jos lisäät Maailmankirjaan hahmon
-       tagilla "[Marek] - puhuu ruotsalaisella aksentilla", Reżyser tunnistaa
+       Polyglootin aksenttivalikkoon (ja jos lisäät Maailmankirjaan hahmon
+       tagilla "[Marek] - puhuu ruotsalaisella aksentilla", Ohjaaja tunnistaa
        sen automaattisesti ja soveltaa sitä hänen dialogeihinsa).
   poziom_3_cos_nowego: |
     TASO 3 — täysin uuden luominen
@@ -257,7 +257,7 @@ tresc:
     salakielen lapsilta?
 
     1. Sääntöjen Hallinnassa klikkaa "Uusi sääntötiedosto…".
-    2. Valitse tyyppi (aksentti, korvaussalaus, Reżyser-tila, uusi
+    2. Valitse tyyppi (aksentti, korvaussalaus, Ohjaaja-tila, uusi
        peruskieli, algoritminen salaus). Tavallisissa tapauksissa sovellus
        luo heti valmiin YAML-mallin — muokkaat sitä kuten tasolla 2.
     3. Vaikeammissa tapauksissa (algoritmit, kuten "päätteiden sekoittaminen"
@@ -270,7 +270,7 @@ tresc:
     -------------------------
 
     - Koululuokka suomen kielen tunnilla: tehtävä "lue katkelma kirjasta
-      Poliglotassa venäläisellä aksentilla — tunnistatko kirjailijan?".
+      Polyglootissa venäläisellä aksentilla — tunnistatko kirjailijan?".
       Erityisesti näkövammaisille lapsille arvokasta, koska he saavat
       mielenkiintoisen äänen ilman, että heidän tarvitsee lukea julistetta
       silmillään.

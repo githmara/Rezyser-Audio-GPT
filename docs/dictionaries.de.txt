@@ -44,7 +44,7 @@ Die Ordnerstruktur sieht so aus:
 
 Derzeit vollständig implementiert sind: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский
 (9 Basissprachen). Jede hat ein eigenes Paket
-"dictionaries/<code>/" mit Diakritika, Alphabet und phonetischen Regeln,
+"dictionaries/<kod>/" mit Diakritika, Alphabet und phonetischen Regeln,
 die auf Texte in genau dieser Sprache wirken — die Anwendung erkennt die
 Quellsprache automatisch über den lingua-language-detector (per Absatz) und
 lädt das passende Paket für jeden Textabschnitt separat. Weitere Sprachen

@@ -30,9 +30,9 @@ tresc:
   modul_rezyseria: |
     ### 1. Leikstjórn (Ctrl+1)
 
-    Aðalstúdíó fyrir skrif á hljóðleikritum og hljóðbókum. Þú velur ham — Hugstormun, Handrit (með merkjum `[SFX]`/`[Persóna: tilfinning]`), Hljóðbók (hefðbundið prósa) — og stýrir samtali við líkanið í gegnum leiðbeiningareitinn + Heimabók + Langtímaminni:
+    Aðalstúdíó fyrir skrif á hljóðleikritum og hljóðbókum. Þú velur ham — Hugstormun, Handrit (með merkjum `[SFX]`/`[Persóna: tilfinning]`), Hljóðbók (hefðbundið prósa) — og stýrir samtali við líkanið í gegnum leiðbeiningareitinn + Heimsbók + Langtímaminni:
 
-    * **Heimabók margra verkefna:** Kerfið hleður sjálfkrafa í bakgrunni sérstökum reglum alheimsins (`.md`) á grundvelli virks upprunaskrár, sem tryggir fullkomna einangrun (núll-smell samhengishleðsla).
+    * **Heimsbók margra verkefna:** Kerfið hleður sjálfkrafa í bakgrunni sérstökum reglum alheimsins (`.md`) á grundvelli virks upprunaskrár, sem tryggir fullkomna einangrun (núll-smell samhengishleðsla).
     * **Sögugeymir:** „Óendanlegt minni“ reiknirit. Þegar minnivísirinn fer í rauða viðvörunarástandið, býr kerfið sjálfkrafa til sögusamantekt og skráir hana í Langtímaminni.
     * **{liczba_trybow_rezysera} skapandi hamir:** Hver skrá í `dictionaries/<jzk>/rezyser/` lýsir sérstakri „persónuleika“ AI leikstjórans (Hugstormun, Handrit, Hljóðbók, Eftirvinnsla titla). Þú getur stillt hljóm þeirra án forritunar — sjá Reglustjóri hér að neðan.
   modul_opowiesci: |
@@ -61,8 +61,8 @@ tresc:
   modul_manager_regul: |
     ### 5. Reglustjóri (Ctrl+5, nýjung frá v13.0)
 
-    * **Orðabókarleitari án Pythons:** Sjónrænt tré allra YAML skráa í `dictionaries/` möppunni — hljóðblæir, dulmál, skapandi stillingar Leikstjóra og Sagna. Málfræðingur eða þýðandi getur skoðað, afritað, breytt og eytt reglum beint úr GUI.
-    * **Nýr reglusköpunarforritari:** Form með val á tegund (hljóðblær, hreint skiptidulmál, Leikstjórastilling, nýtt grunnmál, reikniritadulmál) sem býr til tilbúið YAML sniðmát, og fyrir erfiðari tilfelli býr til sniðinn prompt til að líma í ChatGPT / Claude.
+    * **Orðabókarleitari án Pythons:** Sjónrænt tré allra YAML skráa í `dictionaries/` möppunni — hljóðblæir, dulmál, skapandi hamir Leikstjóra og Sagna. Málfræðingur eða þýðandi getur skoðað, afritað, breytt og eytt reglum beint úr GUI.
+    * **Nýr reglusköpunarforritari:** Form með val á tegund (hljóðblær, hreint skiptidulmál, Leikstjórahamur, nýtt grunnmál, reikniritadulmál) sem býr til tilbúið YAML sniðmát, og fyrir erfiðari tilfelli býr til sniðinn prompt til að líma í ChatGPT / Claude.
     * **Endurskipulagning v13.0 — reglur í YAML-skrám:** Allir hljóðblæir, dulmál og AI-stillingar, sem í útgáfu 12.0 voru „innbyggðar" fastar í Python kóða, hafa verið færðar yfir í lýsandi `.yaml` skrár sem eru lesnar inn á dynamískan hátt við ræsingu forritsins. Hver sem er sem getur notað Notepad getur stillt hljóðblæ (t.d. breytt `sz → sh` í `sz → sch`), bætt við nýju tungumáli, eða jafnvel breytt hljómi kerfisprompt fyrir AI — án þess að þurfa að umbreyta kóða.
   wielojezycznosc: |
     ## Fjöltyngd ({liczba_kompletnych_jezykow} tungumál innfædd)
@@ -92,15 +92,15 @@ tresc:
     2. **Stilling OpenAI API:** Við fyrstu keyrslu mun forritið gefa til kynna skort á lykli í System Check hlutanum. Smelltu á sýnilegan hnapp til að búa til skrána `golden_key.env`, opnaðu hana í textaritli og límdu inn lykilinn þinn (sem byrjar á `sk-proj-`).
     3. **Fyrstu skrefin:** Opnaðu skrána `docs/manual.pl.txt` (eða á öðru tungumáli) í uppsetningarmöppunni — þetta er full leiðarvísir skrifaður á tungumáli sem allir notendur geta skilið, ekki bara forritarar.
   instalacja_deweloperzy: |
-    ### Fyrir þróunaraðila (afrit + uppsetning)
+    ### Fyrir forritara (afrita + uppsetning)
 
     1. Afritaðu geymsluna á diskinn þinn.
-    2. Keyrðu skrána `setup_dev.bat` til að búa sjálfkrafa til sýndarumhverfi (`.venv/`) og sækja nauðsynlegar skrár úr `requirements.txt`.
-    3. Keyrðu forritið með skipuninni `python main.py` eða með skránni `run_dev.bat`.
+    2. Keyrðu skrána `setup_dev.bat` til að búa sjálfkrafa til sýndarumhverfi (`.venv/`) og sækja nauðsynjar úr `requirements.txt`.
+    3. Keyrðu forritið með skipuninni `python main.py` eða í gegnum skrána `run_dev.bat`.
 
-    `.sh` skriftur fyrir macOS/Linux voru fjarlægðar í v13.1 — þróunarumhverfið er einbeitt á Windows vegna sérkenna NVDA aðgengisprófa. Vinna með kóðann á öðrum kerfum er möguleg, en krefst handvirkrar uppsetningar: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
+    `.sh` skriftur fyrir macOS/Linux voru fjarlægðar í v13.1 — þróunarumhverfið er einbeitt á Windows vegna sérstöðu NVDA aðgengisprófa. Vinna með kóðann á öðrum kerfum er möguleg, en krefst handvirkrar uppsetningar: `python -m venv .venv && .venv/bin/pip install -r requirements.txt`.
 
-    **Skráir til að byggja útgáfupakka** (`build_release.py`, `installer.iss`) eru eingöngu ætlaðar til að búa til pakka fyrir Windows. Þær krefjast sérstaks möppu `runtime/` með flytjanlegri útgáfu af Python — þessi mappa er viljandi ekki hluti af geymslunni (hún er í `.gitignore`).
+    **Byggingarskriftur fyrir útgáfupakka** (`build_release.py`, `rezyser_audio.spec`, `installer.iss`) eru eingöngu til að búa til pakka fyrir Windows. Frá útgáfu 17.0 frystir `build_release.py` forritið með PyInstaller (onedir + windowed) samkvæmt `rezyser_audio.spec` — framleiðir `dist/` með innfæddri `.exe` og möppu `runtime/` (túlkur + bókasöfn). Engin þörf er lengur á flutningshæfu Python sem er hlaðið handvirkt inn í geymsluna; möppur `dist/` og `build/` eru í `.gitignore`.
   dokumentacja: |
     ## Full skjal
 
@@ -111,3 +111,22 @@ tresc:
     * `docs/dictionaries.<iso>.txt` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
 
     Hver af þessum skrám er fáanleg á {liczba_kompletnych_jezykow} tungumálum — viðskeyti `.<iso>.txt` (t.d. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+  polskie_nazewnictwo: |
+    ### Pólskt heiti — leiðarvísir fyrir þá sem eru utan pólska tungumálasvæðisins
+
+    Aðaltungumál þessa verkefnis er pólska. Nöfn eininga, flokka, athugasemdir í kóða, sem og nöfn skráa og gagnamöppur eru á pólsku og — vegna afturvirkrar samhæfni og margmálavélar — eru vísvitandi EKKI þýdd eða breytt. Eftirfarandi orðalisti mun hjálpa forriturum og notendum macOS/Linux kerfa að átta sig á uppbyggingunni.
+
+    **Notendagagnamöppur (við hlið keyranlegrar skráar eða í verkefnamöppu):**
+
+    * `skrypty/` — *scripts*: verkefni Leikstjóraeiningarinnar (`.txt` með frásögn, `.md` með Heimsbók, `_streszczenie.txt`).
+    * `opowiesci/` — *stories*: skráningar á gagnvirkum sögum.
+    * `runtime/` — tvíþætt hlutverk: möppubúnt frystu forritsins (túlkur + bókasöfn) OG ílát fyrir falin verkefnagögn (`runtime/skrypty/`, `runtime/opowiesci/`).
+
+    **Undirmöppur fyrir frumgögn í `dictionaries/<tungumálakóði>/` (sýnilegt í Reglustjóra):**
+
+    * `podstawy.yaml` — *basics*: uppsetning og lýsigögn tungumálapakka.
+    * `akcenty/` — *accents*: hljóðreglur fyrir talgervla.
+    * `szyfry/` — *ciphers*: textadulkóðunarstillingar.
+    * `rezyser/` — *director*: skapandi hamir Leikstjóraeiningarinnar.
+    * `opowiesci/` — *stories*: hamir fyrir gagnvirkar sögur.
+    * `gui/` — viðmótstextar (`ui.yaml`) og skjalasniðmát.
