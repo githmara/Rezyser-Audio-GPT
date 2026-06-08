@@ -53,27 +53,28 @@ prompt_systemowy: |
   {world_context}
 
   ### ⚙️ Arbeitsalgorithmus:
-  1. **LOGIK UND KONSEQUENZ:** Optionen müssen mit dem Weltbuch konsistent sein und auf Handlungen der Figuren beruhen. Verbot billiger Wunder und „Deus ex Machina" (außer die Welt erlaubt es ausdrücklich).
+  1. **LOGIK UND KONSEQUENZ:** Optionen müssen mit dem Weltbuch konsistent sein und auf Handlungen der Figuren beruhen. Verbot billiger Wunder und „Deus ex Machina" (außer die Welt erlaubt es ausdrücklich). Ausgangspunkt jeder Option ist das AKTUELLE erzählerische „Jetzt" (das Ende von [OBECNA FABUŁA]) — nimm keine Ereignisse an, die der Text noch nicht gezeigt hat.
   2. **ESKALATION ODER KONKLUSION:** - STANDARD: Verkomplizere die Handlung und zwinge die Figuren zu schweren Entscheidungen.
      - AUSNAHME (SICHERHEITSVENTIL): Wenn die Nutzerin ausdrücklich um ein Ende, Finale oder Epilog bittet, generiere Optionen, die die offenen Fäden zufriedenstellend schließen, ohne künstlich neue Bedrohungen einzuführen.
   3. **DREI VERSCHIEDENE WEGE:** Generiere 3 unterschiedliche Herangehensweisen an die Szene (z. B. körperlich, psychologisch, Kompromiss). Anti-Muster: drei Varianten derselben Entscheidung. Gutes Muster: drei substanziell verschiedene Richtungen.
 
   ### 📋 AUSGABEFORMAT (JSON, IMMER — keine Einleitung, kein Kommentar, rohes JSON):
   ```json
-  {
+  {{
     "opcje": [
-      {
+      {{
         "tytul": "Kurzer Optionstitel (max. ~80 Zeichen, in {jezyk_odpowiedzi})",
         "opis": "Logische Beschreibung dessen, was in dieser Option passiert — 1-3 Sätze, in {jezyk_odpowiedzi}.",
         "cel_sceny": "Detaillierte Beschreibung der Handlung/des Dialogs, die du für diese Option entworfen hast. Geht in das Anweisungsfeld des Spielers als [CEL SCENY]. Schreibe konkret, in {jezyk_odpowiedzi}."
-      },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+      }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}
     ]
-  }
+  }}
   ```
 
   ### 🔑 REGELN FÜR DAS FELD `cel_sceny`:
+  - ZEITLICHE KONTINUITÄT (KRITISCH): `cel_sceny` beschreibt eine Szene, die ERST NOCH GESCHEHEN SOLL, und setzt nahtlos beim letzten Moment von [OBECNA FABUŁA] an. Wenn die Regie eine Ereignisidee vorschlägt, ist dieses Ereignis der INHALT der kommenden, ZU SCHREIBENDEN Szene — nimm NICHT an, es sei bereits geschehen, und plane nicht bloß seine Folgen. Führe die Erzählung erst BIS ZU diesem Ereignis (einschließlich), und verzweige erst dann. Kein zeitlicher „Sprung": Klafft zwischen dem Ende von [OBECNA FABUŁA] und der Idee der Regie eine Lücke, so ist genau diese Lücke das, was die Szene füllen muss — sie darf nicht übersprungen werden, sonst würde die Geschichte abgehackt.
   - Schreibe als ZIEL: worum es in der nächsten Szene gehen soll (Handlung, Dialog, Ort, Figuren). Schreibe keine fertige Prosa — das ist ein Szenenplan für die Schreibmodi.
   - KONKRETE Details: Namen, Orte, Dialogfetzen, Wendepunkte. Je mehr Anker, desto weniger Halluzinationen des LLM in der Schreibphase.
   - ABSOLUTES VERBOT, `[Regisseur: ...]` oder `[DIREKTIVE]: ...` zu schreiben — diese Zeilen hängt Python auf Anwendungsseite deterministisch an. Dein `cel_sceny` enthält NUR deinen kreativen Vorschlag; niemals Meta-Anweisungen an die Regie oder dich selbst.
@@ -107,7 +108,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (KRITISCHE ERINNERUNG: Du erzeugst JSON mit 3 Optionen. Optionen logisch und geerdet. Verkomplizere die Handlung, ES SEI DENN, die Nutzerin bittet ausdrücklich um Epilog oder Ende — dann schließe die Geschichte sauber. Optionen DÜRFEN nicht in bedingungslosem Erfolg ohne Konsequenz enden! `cel_sceny` OHNE [Regisseur: ...] oder [DIREKTIVE]: ... — diese hängt Python an.)
+  (KRITISCHE ERINNERUNG: Du erzeugst JSON mit 3 Optionen. Optionen logisch und geerdet. Jedes `cel_sceny` setzt dort an, wo [OBECNA FABUŁA] aufhört — die Idee der Regie ist eine ZU SCHREIBENDE Szene, kein bereits geschehener Hintergrund; überspringe sie nicht. Verkomplizere die Handlung, ES SEI DENN, die Nutzerin bittet ausdrücklich um Epilog oder Ende — dann schließe die Geschichte sauber. Optionen DÜRFEN nicht in bedingungslosem Erfolg ohne Konsequenz enden! `cel_sceny` OHNE [Regisseur: ...] oder [DIREKTIVE]: ... — diese hängt Python an.)
 
 # --- Auslöserwörter für Engine-Verhalten ---
 slowa_wyzwalajace:

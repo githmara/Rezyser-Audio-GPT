@@ -9,15 +9,31 @@ from lingua import Language, LanguageDetectorBuilder
 
 EMAIL_REGEX = re.compile(r"[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,}\b")
 
-PATCH_LINK = (
-    "https://1drv.ms/u/c/717e0c193b743dcf/"
-    "IQDbzNF_k71lR7r54Qtpfc_jASfUF0BwreedEUqqltWDbaU?e=KDJb38"
-)
+# Link patcha NIE jest już zahardkodowany — czytamy go z sekretu
+# TIFLO_PATCH_LINK (env). Aktualizacja = `gh secret set TIFLO_PATCH_LINK`:
+# atomowo i natychmiast dla następnego runu, BEZ commita/pusha → znika okno
+# wyścigu „stary link w trakcie aktualizacji". Bonus: link nie leży jawnie
+# w repo. Patrz reguly_github_bot „wyścig nieaktualnego linku Tiflotecnia".
 
 KOMENTARZ_BRAK_EMAILA = (
     "PL: Nie znalazłem adresu email w treści — uzupełnij proszę.\n"
     "EN: I couldn't find an email address in the body — please provide one."
 )
+
+# Wysyłany, gdy patch jest w trakcie aktualizacji (TIFLO_PATCH_PAUSED=tak)
+# ALBO gdy sekret TIFLO_PATCH_LINK nie jest ustawiony. W obu przypadkach
+# NIE wysyłamy linku i NIE zamykamy issue — zostaje OTWARTE z etykietą
+# on-hold, żeby martwy/pusty link nigdy nie poszedł w parze z zamknięciem.
+KOMENTARZ_PAUZA = (
+    "PL: Trwa właśnie aktualizacja patcha Tiflotecnia Voices. Zostawiam to "
+    "zgłoszenie otwarte i wrócę z aktualnym linkiem, gdy tylko skończę — "
+    "nie musisz nic robić.\n"
+    "EN: The Tiflotecnia Voices patch is being updated right now. I'm keeping "
+    "this issue open and will get back to you with the current link as soon "
+    "as I'm done — no action needed on your part."
+)
+
+ETYKIETA_ON_HOLD = "on-hold"
 
 LANGUAGES = [
     Language.GERMAN, Language.ENGLISH, Language.SPANISH,
@@ -469,6 +485,47 @@ def dodaj_komentarz_do_issue(numer_issue: str, tresc: str) -> None:
         sys.stderr.write("[!] `gh` CLI nie znalezione w PATH.\n")
 
 
+def oznacz_etykieta(numer_issue: str, etykieta: str) -> None:
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if not repo:
+        sys.stderr.write("[!] Brak GITHUB_REPOSITORY w env — nie nadaję etykiety.\n")
+        return
+    try:
+        subprocess.run(
+            [
+                "gh", "issue", "edit", numer_issue,
+                "--repo", repo,
+                "--add-label", etykieta,
+            ],
+            check=True, capture_output=True, text=True,
+        )
+        print(f"Nadano etykietę '{etykieta}' issue #{numer_issue}.")
+    except subprocess.CalledProcessError as exc:
+        sys.stderr.write(
+            f"[!] gh issue edit --add-label zfailowało: {exc.stderr.strip() or exc}\n"
+        )
+    except FileNotFoundError:
+        sys.stderr.write("[!] `gh` CLI nie znalezione w PATH.\n")
+
+
+def ustaw_status(status: str) -> None:
+    """Zapisuje `status=<...>` do $GITHUB_OUTPUT — workflow YAML odpala kroki
+    redact/close/lock TYLKO gdy status == 'sent' (patrz patch-bot.yml)."""
+    out = os.environ.get("GITHUB_OUTPUT")
+    if not out:
+        return
+    try:
+        with open(out, "a", encoding="utf-8") as fh:
+            fh.write(f"status={status}\n")
+    except OSError as exc:
+        sys.stderr.write(f"[!] Nie udało się zapisać status={status}: {exc}\n")
+
+
+def czy_pauza() -> bool:
+    """TIFLO_PATCH_PAUSED == 'tak' → maintainer aktualizuje link, wstrzymujemy."""
+    return os.environ.get("TIFLO_PATCH_PAUSED", "").strip().lower() == "tak"
+
+
 def main() -> int:
     # Dane issue czytamy z env (ISSUE_BODY/ISSUE_NUMBER w sekcji `env:`
     # workflowu), a nie z sys.argv — bash przy przekazywaniu argumentów
@@ -484,10 +541,34 @@ def main() -> int:
         )
         return 1
 
+    # --- PAUZA: maintainer właśnie aktualizuje link patcha ---
+    # Wstrzymujemy CAŁY flow: komentarz „trwa aktualizacja", etykieta on-hold,
+    # issue zostaje OTWARTE. Nie wysyłamy, nie zamykamy, nie lockujemy.
+    if czy_pauza():
+        dodaj_komentarz_do_issue(issue_number, KOMENTARZ_PAUZA)
+        oznacz_etykieta(issue_number, ETYKIETA_ON_HOLD)
+        ustaw_status("paused")
+        print("Tryb PAUZY (TIFLO_PATCH_PAUSED=tak) — issue otwarte, link NIE wysłany.")
+        return 0
+
     email_match = EMAIL_REGEX.search(issue_body)
     if not email_match:
         dodaj_komentarz_do_issue(issue_number, KOMENTARZ_BRAK_EMAILA)
+        ustaw_status("no_email")
         return 1
+
+    # Link czytany z sekretu (env). Brak sekretu = traktujemy jak pauzę:
+    # NIGDY nie wysyłaj pustego linku ani nie zamykaj issue (fail-safe).
+    patch_link = os.environ.get("TIFLO_PATCH_LINK", "").strip()
+    if not patch_link:
+        sys.stderr.write(
+            "[!] Brak TIFLO_PATCH_LINK w env — sekret nieustawiony. "
+            "Wstrzymuję (on-hold), nie wysyłam.\n"
+        )
+        dodaj_komentarz_do_issue(issue_number, KOMENTARZ_PAUZA)
+        oznacz_etykieta(issue_number, ETYKIETA_ON_HOLD)
+        ustaw_status("paused")
+        return 0
 
     recipient_email = email_match.group(0)
     tekst_do_analizy = issue_body.replace(recipient_email, "").strip()
@@ -506,7 +587,7 @@ def main() -> int:
     stopka = FOOTERS[wykryty_jezyk]
 
     temat = szablon["subject"].format(issue_number=issue_number)
-    tresc_glowna = szablon["body"].format(link=PATCH_LINK)
+    tresc_glowna = szablon["body"].format(link=patch_link)
     stopka_sformatowana = stopka.format(issue_number=issue_number)
     pelna_tresc = f"{tresc_glowna}\n\n---\n{stopka_sformatowana}"
 
@@ -529,9 +610,11 @@ def main() -> int:
             server.login(smtp_user, smtp_pass)
             server.send_message(msg)
         print(f"Wiadomość wysłana pomyślnie na {recipient_email}.")
+        ustaw_status("sent")
         return 0
     except Exception as exc:
         sys.stderr.write(f"[!] Błąd wysyłki maila: {exc}\n")
+        ustaw_status("error")
         return 1
 
 

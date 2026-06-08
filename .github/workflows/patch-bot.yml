@@ -37,10 +37,16 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          # Link patcha z sekretu (aktualizacja: gh secret set TIFLO_PATCH_LINK).
+          # Czytany w runtime → podmiana działa od razu, bez commita/pusha.
+          TIFLO_PATCH_LINK: ${{ secrets.TIFLO_PATCH_LINK }}
+          # Kill-switch na czas aktualizacji linku, gdy nowy link jeszcze nie
+          # istnieje: gh variable set TIFLO_PATCH_PAUSED --body tak  (zdjęcie: --body nie).
+          TIFLO_PATCH_PAUSED: ${{ vars.TIFLO_PATCH_PAUSED }}
         run: python .github/scripts/send_patch.py
 
       - name: Komentarz potwierdzający dla użytkownika
-        if: success()
+        if: steps.send_patch.outputs.status == 'sent'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -49,7 +55,7 @@ jobs:
             --body "PL: Patch wysłany na podany adres, zgłoszenie zostaje zamknięte. Jeśli nie widzisz wiadomości, sprawdź folder Spam lub Wiadomości-śmieci. / EN: The patch has been sent and the issue is now closed. If you don't see the email, please check your Spam or Junk folder."
 
       - name: Redact body issue
-        if: success()
+        if: steps.send_patch.outputs.status == 'sent'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -58,7 +64,7 @@ jobs:
             --body "[redacted by bot — patch wysłany / Patch sent]"
 
       - name: Zamknięcie issue
-        if: success()
+        if: steps.send_patch.outputs.status == 'sent'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -66,7 +72,7 @@ jobs:
           gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY"
 
       - name: Zablokowanie dalszej dyskusji
-        if: success()
+        if: steps.send_patch.outputs.status == 'sent'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}

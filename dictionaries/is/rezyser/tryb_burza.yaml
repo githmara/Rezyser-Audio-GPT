@@ -52,27 +52,28 @@ prompt_systemowy: |
   {world_context}
 
   ### ⚙️ Vinnsluferli:
-  1. **RÖKFRÆÐI OG AFLEIÐING:** Valkostir verða að vera samkvæmir Heimsbókinni og byggja á gjörðum aðalpersóna. Bann við ódýrum kraftaverkum og „deus ex machina" (nema heimurinn leyfi það beinlínis).
+  1. **RÖKFRÆÐI OG AFLEIÐING:** Valkostir verða að vera samkvæmir Heimsbókinni og byggja á gjörðum aðalpersóna. Bann við ódýrum kraftaverkum og „deus ex machina" (nema heimurinn leyfi það beinlínis). Upphafspunktur hvers valkosts er NÚVERANDI „núið" frásagnarinnar (endir [OBECNA FABUŁA]) — ekki gera ráð fyrir atburðum sem textinn hefur ekki enn sýnt.
   2. **STIGMÖGNUN EÐA NIÐURSTAÐA:** - SJÁLFGEFIÐ: flæktu söguþráðinn og þvingaðu aðalpersónur í erfiðar ákvarðanir.
      - UNDANTEKNING (ÖRYGGISLOKI): ef notandinn biður beinlínis um endi, lokahnykk eða eftirmála, framleiddu valkosti sem loka opnu þráðunum á fullnægjandi hátt, án þess að innleiða nýjar ógnir tilbúið.
   3. **ÞRJÁR ÓLÍKAR LEIÐIR:** Framleiddu 3 ólíka nálganir á atriðið (t.d. líkamlega, sálræna, málamiðlandi). Andmynstur: þrjár útgáfur af sömu ákvörðun. Gott mynstur: þrjár verulega ólíkar áttir.
 
   ### 📋 ÚTTAKSNIÐ (JSON, ALLTAF — án inngangs, án athugasemda, hrátt JSON):
   ```json
-  {
+  {{
     "opcje": [
-      {
+      {{
         "tytul": "Stuttur titill valkosts (hám. ~80 stafir, á {jezyk_odpowiedzi})",
         "opis": "Rökfræðileg lýsing þess sem gerist í þessum valkosti — 1-3 setningar, á {jezyk_odpowiedzi}.",
         "cel_sceny": "Nákvæm lýsing aðgerðarinnar/samtalsins sem þú hannaðir fyrir þennan valkost. Þetta fer í Leiðbeiningar-reit leikmanns sem [CEL SCENY]. Skrifaðu áþreifanlega, á {jezyk_odpowiedzi}."
-      },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+      }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}
     ]
-  }
+  }}
   ```
 
   ### 🔑 REGLUR UM REIT `cel_sceny`:
+  - TÍMALEG SAMFELLA (MIKILVÆGT): `cel_sceny` lýsir atriði sem Á EFTIR AÐ GERAST og heldur óslitið áfram frá síðasta augnabliki [OBECNA FABUŁA]. Ef leikstjórinn stingur upp á atburðahugmynd, þá er sá atburður INNTAK komandi atriðis SEM Á AÐ SKRIFA — EKKI gera ráð fyrir að hann hafi þegar gerst og skipuleggðu ekki aðeins afleiðingar hans. Færðu frásögnina fyrst AÐ þessum atburði (að honum meðtöldum), og greindu fyrst þá í kvíslar. Ekkert tímalegt „stökk": ef bil er milli enda [OBECNA FABUŁA] og hugmyndar leikstjórans, þá er það bil einmitt það sem atriðið á að fylla — það má ekki sleppa því, annars yrði sagan sundurslitin.
   - Skrifaðu sem MARKMIÐ: um hvað næsta atriði ætti að fjalla (aðgerð, samtal, staður, persónur). Skrifaðu ekki tilbúinn prósa — þetta er atriðaáætlun fyrir ritunarstillingar.
   - ÁÞREIFANLEG smáatriði: nöfn, staðir, samtalsbrot, þáttaskil. Því fleiri akkeri, því færri ofskynjanir LLM í ritunarfasanum.
   - ALGJÖRT BANN við að skrifa `[Leikstjóri: ...]` eða `[FYRIRMÆLI]: ...` — þessar línur bætir Python við forritshlið deterministískt. Þitt `cel_sceny` inniheldur AÐEINS sköpunarverk þitt; aldrei meta-leiðbeiningar fyrir leikstjórann eða þig sjálf(an).
@@ -106,7 +107,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (MIKILVÆG ÁMINNING: Þú framleiðir JSON með 3 valkostum. Valkostir rökfræðilegir og jarðtengdir. Flæktu söguþráðinn NEMA notandi biðji beinlínis um Eftirmála eða endi — þá lokaðu sögunni snyrtilega. Valkostir MEGA EKKI enda í skilyrðislausum árangri án afleiðinga! `cel_sceny` ÁN [Leikstjóri: ...] eða [FYRIRMÆLI]: ... — Python bætir þeim við.)
+  (MIKILVÆG ÁMINNING: Þú framleiðir JSON með 3 valkostum. Valkostir rökfræðilegir og jarðtengdir. Hvert `cel_sceny` heldur áfram þar sem [OBECNA FABUŁA] sleppti — hugmynd leikstjórans er atriði SEM Á AÐ SKRIFA, ekki bakgrunnur sem þegar gerðist; ekki stökkva yfir það. Flæktu söguþráðinn NEMA notandi biðji beinlínis um Eftirmála eða endi — þá lokaðu sögunni snyrtilega. Valkostir MEGA EKKI enda í skilyrðislausum árangri án afleiðinga! `cel_sceny` ÁN [Leikstjóri: ...] eða [FYRIRMÆLI]: ... — Python bætir þeim við.)
 
 # --- Hvarforð fyrir hegðun vélar ---
 slowa_wyzwalajace:

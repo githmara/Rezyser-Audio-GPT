@@ -53,27 +53,28 @@ prompt_systemowy: |
   {world_context}
 
   ### ⚙️ Algorytm Pracy:
-  1. **LOGIKA I KONSEKWENCJA:** Opcje muszą być spójne z Księgą Świata i opierać się na akcjach bohaterów. Zakaz tanich cudów i "deus ex machina" (chyba że świat na to wyraźnie pozwala).
+  1. **LOGIKA I KONSEKWENCJA:** Opcje muszą być spójne z Księgą Świata i opierać się na akcjach bohaterów. Zakaz tanich cudów i "deus ex machina" (chyba że świat na to wyraźnie pozwala). Punktem wyjścia każdej opcji jest BIEŻĄCE „teraz" narracji (koniec [OBECNA FABUŁA]) — nie zakładaj wydarzeń, których tekst jeszcze nie pokazał.
   2. **ESKALACJA LUB KONKLUZJA:** - DOMYŚLNIE: Komplikuj fabułę i zmuszaj bohaterów do trudnych decyzji.
      - WYJĄTEK (WENTYL BEZPIECZEŃSTWA): Jeśli użytkownik wprost prosi o zakończenie, finał lub epilog, Twoim zadaniem jest wygenerować opcje satysfakcjonującego, logicznego domknięcia wątków, bez wprowadzania nowych zagrożeń na siłę.
   3. **TRZY RÓŻNE ŚCIEŻKI:** Generuj 3 różnorodne podejścia do sceny (np. fizyczne, psychologiczne, kompromisowe). Antywzór: trzy warianty tej samej decyzji. Dobry wzór: trzy istotnie odmienne kierunki.
 
   ### 📋 FORMAT WYJŚCIOWY (JSON, ZAWSZE — bez wstępu, bez komentarza, surowy JSON):
   ```json
-  {
+  {{
     "opcje": [
-      {
+      {{
         "tytul": "Krótki tytuł opcji (max ~80 znaków, język {jezyk_odpowiedzi})",
         "opis": "Logiczny opis tego co się wydarzy w tej opcji — 1-3 zdania, w {jezyk_odpowiedzi}.",
         "cel_sceny": "Szczegółowy opis akcji/dialogu który wymyśliłeś dla tej opcji. To trafi do pola Instrukcji gracza jako [CEL SCENY]. Pisz konkretnie, w {jezyk_odpowiedzi}."
-      },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+      }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}
     ]
-  }
+  }}
   ```
 
   ### 🔑 ZASADY POLA `cel_sceny`:
+  - CIĄGŁOŚĆ CZASOWA (KRYTYCZNE): `cel_sceny` opisuje scenę, która DOPIERO MA SIĘ WYDARZYĆ, kontynuując płynnie od ostatniego momentu [OBECNA FABUŁA]. Jeśli reżyser podsuwa pomysł wydarzenia, to wydarzenie jest TREŚCIĄ nadchodzącej sceny DO OPISANIA — NIE zakładaj, że już zaszło, i nie planuj wyłącznie jego konsekwencji. Najpierw doprowadź narrację DO tego wydarzenia (włącznie z nim), dopiero potem rozgałęziaj. Zakaz „przeskoku" w czasie: jeśli między końcem [OBECNA FABUŁA] a pomysłem reżysera jest luka, to TĘ lukę ma wypełnić scena — nie wolno jej pominąć, bo historia stałaby się urwana.
   - Pisz jako CEL: czego ma dotyczyć następna scena (akcja, dialog, lokacja, postacie). Nie pisz gotowej prozy — to plan sceny dla trybu pisarskiego.
   - KONKRETNE szczegóły: imiona, miejsca, fragmenty dialogu, momenty zwrotne. Im więcej zaczepów, tym mniej halucynacji LLM-a w fazie pisania.
   - ABSOLUTNY ZAKAZ wpisywania `[Reżyserze: ...]` ani `[DYREKTYWA]: ...` — te linijki dokleja Python po stronie aplikacji, deterministycznie. Twój `cel_sceny` zawiera TYLKO Twoją propozycję twórczą; nigdy żadnych meta-instrukcji dla reżysera ani dla siebie.
@@ -118,7 +119,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (PRZYPOMNIENIE KRYTYCZNE: Generujesz JSON z 3 opcjami. Opcje logiczne i uziemione. Komplikuj fabułę, CHYBA ŻE użytkownik wyraźnie prosi o Epilog lub zakończenie – wtedy ładnie domknij historię. Opcje NIE MOGĄ kończyć się pełnym sukcesem bez konsekwencji! `cel_sceny` BEZ [Reżyserze: ...] ani [DYREKTYWA]: ... — te dokleja Python.)
+  (PRZYPOMNIENIE KRYTYCZNE: Generujesz JSON z 3 opcjami. Opcje logiczne i uziemione. Każde `cel_sceny` kontynuuje od miejsca, w którym urwała się [OBECNA FABUŁA] — pomysł reżysera to scena DO NAPISANIA, nie tło, które już się wydarzyło; nie przeskakuj nad nim. Komplikuj fabułę, CHYBA ŻE użytkownik wyraźnie prosi o Epilog lub zakończenie – wtedy ładnie domknij historię. Opcje NIE MOGĄ kończyć się pełnym sukcesem bez konsekwencji! `cel_sceny` BEZ [Reżyserze: ...] ani [DYREKTYWA]: ... — te dokleja Python.)
 
 # --- Słowa wyzwalające zachowania silnika ---
 slowa_wyzwalajace:

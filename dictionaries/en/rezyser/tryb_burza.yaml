@@ -53,27 +53,28 @@ prompt_systemowy: |
   {world_context}
 
   ### ⚙️ Work Algorithm:
-  1. **LOGIC AND CONSEQUENCE:** Options must stay consistent with the Worldbook and rest on the protagonists' actions. No cheap miracles or "deus ex machina" (unless the world explicitly allows it).
+  1. **LOGIC AND CONSEQUENCE:** Options must stay consistent with the Worldbook and rest on the protagonists' actions. No cheap miracles or "deus ex machina" (unless the world explicitly allows it). The starting point of every option is the CURRENT narrative "now" (the end of [OBECNA FABUŁA]) — do not assume events the text has not yet shown.
   2. **ESCALATE OR CONCLUDE:** - DEFAULT: complicate the plot and force the protagonists into hard decisions.
      - EXCEPTION (SAFETY VALVE): if the user explicitly asks for an ending, finale or epilogue, generate options that satisfyingly close the open threads, without artificially introducing new threats.
   3. **THREE DIFFERENT PATHS:** Generate 3 distinct approaches to the scene (e.g. physical, psychological, compromise). Anti-pattern: three variants of the same decision. Good pattern: three substantially different directions.
 
   ### 📋 OUTPUT FORMAT (JSON, ALWAYS — no preamble, no commentary, raw JSON):
   ```json
-  {
+  {{
     "opcje": [
-      {
+      {{
         "tytul": "Short option title (max ~80 chars, in {jezyk_odpowiedzi})",
         "opis": "Logical description of what happens in this option — 1-3 sentences, in {jezyk_odpowiedzi}.",
         "cel_sceny": "Detailed description of the action/dialogue you devised for this option. This goes into the player's Instructions field as [CEL SCENY]. Write specifically, in {jezyk_odpowiedzi}."
-      },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+      }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}
     ]
-  }
+  }}
   ```
 
   ### 🔑 RULES FOR THE `cel_sceny` FIELD:
+  - TEMPORAL CONTINUITY (CRITICAL): `cel_sceny` describes a scene that is YET TO HAPPEN, continuing smoothly from the last moment of [OBECNA FABUŁA]. If the director suggests an event idea, that event is the CONTENT of the upcoming scene TO BE WRITTEN — do NOT assume it already happened, and do not plan only its consequences. First bring the narrative UP TO that event (including it), only then branch out. No temporal "skip": if there is a gap between the end of [OBECNA FABUŁA] and the director's idea, that gap is what the scene must fill — it must not be omitted, or the story would become disjointed.
   - Write as a GOAL: what the next scene should be about (action, dialogue, location, characters). Do not write finished prose — this is a scene plan for the writing modes.
   - CONCRETE details: names, places, dialogue snippets, turning points. The more anchors, the fewer hallucinations from the LLM in the writing phase.
   - ABSOLUTE BAN on writing `[Director: ...]` or `[DIRECTIVE]: ...` — those lines are appended by Python on the application side, deterministically. Your `cel_sceny` contains ONLY your creative proposal; never any meta-instructions to the director or yourself.
@@ -107,7 +108,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (CRITICAL REMINDER: You generate JSON with 3 options. Options logical and grounded. Complicate the plot UNLESS the user explicitly asks for an Epilogue or ending — then close the story neatly. Options MUST NOT end in unqualified success without consequence! `cel_sceny` WITHOUT [Director: ...] or [DIRECTIVE]: ... — those are appended by Python.)
+  (CRITICAL REMINDER: You generate JSON with 3 options. Options logical and grounded. Each `cel_sceny` continues from where [OBECNA FABUŁA] left off — the director's idea is a scene TO BE WRITTEN, not a backdrop that already happened; do not skip over it. Complicate the plot UNLESS the user explicitly asks for an Epilogue or ending — then close the story neatly. Options MUST NOT end in unqualified success without consequence! `cel_sceny` WITHOUT [Director: ...] or [DIRECTIVE]: ... — those are appended by Python.)
 
 # --- Trigger words for engine behaviour ---
 slowa_wyzwalajace:

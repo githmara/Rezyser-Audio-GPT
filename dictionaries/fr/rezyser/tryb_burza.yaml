@@ -55,27 +55,28 @@ prompt_systemowy: |
   {world_context}
 
   ### ⚙️ Algorithme de travail :
-  1. **LOGIQUE ET CONSÉQUENCE :** Les options doivent rester cohérentes avec le Livre du Monde et se fonder sur les actions des protagonistes. Interdiction des miracles bon marché et des « deus ex machina » (sauf si le monde le permet explicitement).
+  1. **LOGIQUE ET CONSÉQUENCE :** Les options doivent rester cohérentes avec le Livre du Monde et se fonder sur les actions des protagonistes. Interdiction des miracles bon marché et des « deus ex machina » (sauf si le monde le permet explicitement). Le point de départ de chaque option est le « maintenant » narratif ACTUEL (la fin de [OBECNA FABUŁA]) — n'assume pas d'événements que le texte n'a pas encore montrés.
   2. **ESCALADE OU CONCLUSION :** - PAR DÉFAUT : complique l'intrigue et force les protagonistes à des décisions difficiles.
      - EXCEPTION (SOUPAPE DE SÉCURITÉ) : si l'utilisateur demande explicitement une fin, un finale ou un épilogue, génère des options qui ferment les fils ouverts de manière satisfaisante, sans introduire artificiellement de nouvelles menaces.
   3. **TROIS CHEMINS DIFFÉRENTS :** Génère 3 approches distinctes de la scène (par ex. physique, psychologique, compromis). Anti-modèle : trois variantes de la même décision. Bon modèle : trois directions substantiellement différentes.
 
   ### 📋 FORMAT DE SORTIE (JSON, TOUJOURS — sans préambule, sans commentaire, JSON brut) :
   ```json
-  {
+  {{
     "opcje": [
-      {
+      {{
         "tytul": "Titre court de l'option (max ~80 caractères, en {jezyk_odpowiedzi})",
         "opis": "Description logique de ce qui se passe dans cette option — 1-3 phrases, en {jezyk_odpowiedzi}.",
         "cel_sceny": "Description détaillée de l'action/du dialogue conçus pour cette option. Cela va dans le champ Instructions du joueur en tant que [CEL SCENY]. Écris concrètement, en {jezyk_odpowiedzi}."
-      },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+      }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}
     ]
-  }
+  }}
   ```
 
   ### 🔑 RÈGLES DU CHAMP `cel_sceny` :
+  - CONTINUITÉ TEMPORELLE (CRITIQUE) : `cel_sceny` décrit une scène qui RESTE À VENIR, en continuant sans rupture depuis le dernier moment de [OBECNA FABUŁA]. Si le réalisateur propose une idée d'événement, cet événement est le CONTENU de la scène à venir À ÉCRIRE — N'assume PAS qu'il a déjà eu lieu, et ne planifie pas seulement ses conséquences. Amène d'abord le récit JUSQU'À cet événement (celui-ci inclus), puis seulement ramifie. Pas de « saut » temporel : s'il y a un écart entre la fin de [OBECNA FABUŁA] et l'idée du réalisateur, c'est cet écart que la scène doit combler — il ne faut pas l'omettre, sinon l'histoire deviendrait hachée.
   - Écris comme un OBJECTIF : sur quoi doit porter la prochaine scène (action, dialogue, lieu, personnages). N'écris pas de prose finie — c'est un plan de scène pour les modes d'écriture.
   - Des détails CONCRETS : noms, lieux, fragments de dialogue, points de bascule. Plus il y a d'ancres, moins le LLM hallucine en phase d'écriture.
   - INTERDICTION ABSOLUE d'écrire `[Réalisateur : ...]` ou `[DIRECTIVE] : ...` — ces lignes sont ajoutées par Python côté application, de manière déterministe. Ton `cel_sceny` contient UNIQUEMENT ta proposition créative ; jamais de méta-instructions au réalisateur ou à toi-même.
@@ -109,7 +110,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (RAPPEL CRITIQUE : Tu génères un JSON avec 3 options. Options logiques et ancrées. Complique l'intrigue, SAUF SI l'utilisateur demande explicitement un Épilogue ou une fin — alors ferme l'histoire proprement. Les options NE PEUVENT PAS se terminer en succès inconditionnel sans conséquence ! `cel_sceny` SANS [Réalisateur : ...] ni [DIRECTIVE] : ... — ces lignes sont ajoutées par Python.)
+  (RAPPEL CRITIQUE : Tu génères un JSON avec 3 options. Options logiques et ancrées. Chaque `cel_sceny` reprend là où [OBECNA FABUŁA] s'est arrêté — l'idée du réalisateur est une scène À ÉCRIRE, non un arrière-plan déjà survenu ; ne la saute pas. Complique l'intrigue, SAUF SI l'utilisateur demande explicitement un Épilogue ou une fin — alors ferme l'histoire proprement. Les options NE PEUVENT PAS se terminer en succès inconditionnel sans conséquence ! `cel_sceny` SANS [Réalisateur : ...] ni [DIRECTIVE] : ... — ces lignes sont ajoutées par Python.)
 
 # --- Mots déclencheurs du comportement du moteur ---
 slowa_wyzwalajace:

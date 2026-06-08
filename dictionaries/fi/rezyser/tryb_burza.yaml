@@ -53,27 +53,28 @@ prompt_systemowy: |
   {world_context}
 
   ### ⚙️ Työalgoritmi:
-  1. **LOGIIKKA JA SEURAUS:** Vaihtoehtojen on oltava johdonmukaisia Maailmankirjan kanssa ja perustuttava hahmojen tekoihin. Halpojen ihmeiden ja "deus ex machinan" kielto (paitsi jos maailma nimenomaisesti sallii).
+  1. **LOGIIKKA JA SEURAUS:** Vaihtoehtojen on oltava johdonmukaisia Maailmankirjan kanssa ja perustuttava hahmojen tekoihin. Halpojen ihmeiden ja "deus ex machinan" kielto (paitsi jos maailma nimenomaisesti sallii). Jokaisen vaihtoehdon lähtökohta on kerronnan NYKYINEN „nyt" ([OBECNA FABUŁA]:n loppu) — älä oleta tapahtumia, joita teksti ei ole vielä näyttänyt.
   2. **ESKALAATIO TAI PÄÄTÖS:** - OLETUS: monimutkaista juonta ja pakota hahmot vaikeisiin päätöksiin.
      - POIKKEUS (TURVAVENTTIILI): jos käyttäjä pyytää nimenomaisesti loppua, finaalia tai epilogia, tuota vaihtoehdot, jotka päättävät avoimet säikeet tyydyttävästi ilman keinotekoisia uusia uhkia.
   3. **KOLME ERILAISTA POLKUA:** Tuota 3 erilaista lähestymistapaa kohtaukseen (esim. fyysinen, psykologinen, kompromissi). Anti-malli: kolme saman päätöksen muunnelmaa. Hyvä malli: kolme oleellisesti erilaista suuntaa.
 
   ### 📋 TULOSMUOTO (JSON, AINA — ei alkusanoja, ei kommentteja, raaka JSON):
   ```json
-  {
+  {{
     "opcje": [
-      {
+      {{
         "tytul": "Lyhyt vaihtoehdon otsikko (enintään ~80 merkkiä, kielellä {jezyk_odpowiedzi})",
         "opis": "Looginen kuvaus tämän vaihtoehdon tapahtumista — 1-3 lausetta, kielellä {jezyk_odpowiedzi}.",
         "cel_sceny": "Yksityiskohtainen kuvaus toiminnasta/dialogista, jonka olet keksinyt tähän vaihtoehtoon. Tämä menee pelaajan Ohjeet-kenttään muodossa [CEL SCENY]. Kirjoita konkreettisesti, kielellä {jezyk_odpowiedzi}."
-      },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." },
-      { "tytul": "...", "opis": "...", "cel_sceny": "..." }
+      }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }},
+      {{ "tytul": "...", "opis": "...", "cel_sceny": "..." }}
     ]
-  }
+  }}
   ```
 
   ### 🔑 SÄÄNNÖT KENTÄLLE `cel_sceny`:
+  - AJALLINEN JATKUVUUS (KRIITTINEN): `cel_sceny` kuvaa kohtauksen, joka EI OLE VIELÄ TAPAHTUNUT, ja jatkaa saumattomasti [OBECNA FABUŁA]:n viimeisestä hetkestä. Jos ohjaaja ehdottaa tapahtumaideaa, se tapahtuma on tulevan, KIRJOITETTAVAN kohtauksen SISÄLTÖ — ÄLÄ oleta sen jo tapahtuneen äläkä suunnittele pelkkiä sen seurauksia. Vie kerronta ensin TÄHÄN tapahtumaan asti (se mukaan lukien), ja haaroita vasta sitten. Ei ajallista „hyppyä": jos [OBECNA FABUŁA]:n lopun ja ohjaajan idean välissä on aukko, juuri se aukko on kohtauksen täytettävä — sitä ei saa ohittaa, muuten tarinasta tulisi katkonainen.
   - Kirjoita TAVOITTEENA: mistä seuraavan kohtauksen pitäisi kertoa (toiminta, dialogi, paikka, hahmot). Älä kirjoita valmista proosaa — tämä on kohtaussuunnitelma kirjoitustiloille.
   - KONKREETTISIA yksityiskohtia: nimet, paikat, dialogin pätkät, käännekohdat. Mitä enemmän ankkureita, sitä vähemmän LLM:n hallusinointia kirjoitusvaiheessa.
   - EHDOTON KIELTO kirjoittaa `[Ohjaaja: ...]` tai `[DIREKTIIVI]: ...` — nämä rivit Python liittää sovelluksen puolella deterministisesti. Sinun `cel_sceny` sisältää VAIN luovan ehdotuksesi; ei koskaan meta-ohjeita ohjaajalle tai itsellesi.
@@ -107,7 +108,7 @@ sufiksy:
 przypomnienie_uzytkownika: |
 
 
-  (KRIITTINEN MUISTUTUS: Tuotat JSON:n 3 vaihtoehdolla. Vaihtoehdot loogisia ja maanläheisiä. Monimutkaista juonta, ELLEI käyttäjä pyydä nimenomaisesti Epilogia tai loppua — silloin sulje tarina siististi. Vaihtoehdot EIVÄT SAA päättyä ehdottomaan menestykseen ilman seurausta! `cel_sceny` ILMAN [Ohjaaja: ...] tai [DIREKTIIVI]: ... — Python lisää ne.)
+  (KRIITTINEN MUISTUTUS: Tuotat JSON:n 3 vaihtoehdolla. Vaihtoehdot loogisia ja maanläheisiä. Jokainen `cel_sceny` jatkaa siitä, mihin [OBECNA FABUŁA] jäi — ohjaajan idea on KIRJOITETTAVA kohtaus, ei jo tapahtunut tausta; älä hyppää sen yli. Monimutkaista juonta, ELLEI käyttäjä pyydä nimenomaisesti Epilogia tai loppua — silloin sulje tarina siististi. Vaihtoehdot EIVÄT SAA päättyä ehdottomaan menestykseen ilman seurausta! `cel_sceny` ILMAN [Ohjaaja: ...] tai [DIREKTIIVI]: ... — Python lisää ne.)
 
 # --- Käynnistyssanat moottorin käyttäytymiselle ---
 slowa_wyzwalajace:
