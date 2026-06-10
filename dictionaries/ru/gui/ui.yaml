@@ -426,6 +426,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Отсутствуют voice ID для: {brakujace}.
     Открой «Голосовой состав…», заполни недостающие голоса и сохрани черновик, затем собери проект.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Строки без тега говорящего
+  el_sieroty_naglowek: 'Внимание: {liczba} строк(и) в сценарии не имеют тега говорящего (напр. [Рассказчик: …] или [Персонаж: …]) и не являются структурным заголовком (Пролог, Акт, Сцена, Глава).
+  
+    Мост ElevenLabs Studio пропускает такие строки при создании проекта — им не назначается голос, поэтому готовый проект может разойтись с вашим файлом.'
+  el_sieroty_pozycja: '  • строка {nr}: {tekst}'
+  el_sieroty_wiecej: '  … и ещё {liczba}.'
+  el_sieroty_stopka: Что дальше? Можно отменить, открыть сценарий кнопкой «Открыть файл повествования…», добавить недостающие теги говорящего (или удалить эти строки) и собрать заново — либо собрать всё равно, осознанно соглашаясь с тем, что строки выше будут пропущены.
+  el_sieroty_btn_buduj: '&Создать всё равно'
+  el_sieroty_btn_anuluj: '&Отмена и правка'
   el_build_blad_tytul: "Ошибка ElevenLabs"
   el_build_blad_uprawnienia_tresc: |-
     У ключа ElevenLabs нет необходимых разрешений (scopes).

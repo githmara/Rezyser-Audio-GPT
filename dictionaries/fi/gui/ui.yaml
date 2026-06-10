@@ -426,6 +426,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Puuttuvat voice ID:t: {brakujace}.
     Avaa ”Ääniroolitus…”, täydennä puuttuvat äänet ja tallenna luonnos, rakenna sitten projekti.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Rivit ilman puhujamerkintää
+  el_sieroty_naglowek: 'Huomio: {liczba} rivillä käsikirjoituksessa ei ole puhujamerkintää (esim. [Kertoja: …] tai [Hahmo: …]) eivätkä ne ole rakenneotsikko (Prologi, Näytös, Kohtaus, Luku).
+  
+    ElevenLabs Studio -silta ohittaa tällaiset rivit projektia rakennettaessa — niille ei tule ääntä, joten valmis projekti voi poiketa tiedostostasi.'
+  el_sieroty_pozycja: '  • rivi {nr}: {tekst}'
+  el_sieroty_wiecej: '  … ja {liczba} lisää.'
+  el_sieroty_stopka: Mitä tehdä? Voit peruuttaa, avata käsikirjoituksen painikkeella ”Avaa kertomustiedosto…”, lisätä puuttuvat puhujamerkinnät (tai poistaa nämä rivit) ja rakentaa uudelleen — tai rakentaa silti ja hyväksyä tietoisesti, että yllä olevat rivit ohitetaan.
+  el_sieroty_btn_buduj: '&Luo silti'
+  el_sieroty_btn_anuluj: '&Peruuta ja korjaa'
   el_build_blad_tytul: "ElevenLabs-virhe"
   el_build_blad_uprawnienia_tresc: |-
     ElevenLabs-avaimelta puuttuvat tarvittavat oikeudet (scopet).

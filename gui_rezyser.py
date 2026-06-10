@@ -2234,6 +2234,15 @@ class RezyserPanel(wx.Panel):
             )
             return
 
+        # Strażnik formatu mostu (v17.2 — rozszerzenie Zasady Montażysty): linie
+        # bez znacznika mówcy i niebędące nagłówkiem są w buduj_chapters po cichu
+        # pomijane, więc projekt Studio może rozjechać się z plikiem. Ostrzegamy
+        # i oddajemy decyzję reżyserowi (Reżyser rządzi — twarde limity tylko
+        # przeciw samowoli modelu, nie reżysera).
+        sieroty = ce.wykryj_sieroty(tekst)
+        if sieroty and not self._potwierdz_sieroty(sieroty):
+            return
+
         # Komplet — buduj w wątku tła.
         self._btn_el_build.Disable()
         self._btn_el_obsada.Disable()
@@ -2392,6 +2401,67 @@ class RezyserPanel(wx.Panel):
         wx.CallAfter(txt.SetFocus)
         try:
             dlg.ShowModal()
+        finally:
+            dlg.Destroy()
+
+    #: Ile linii-sierot wypisać w dialogu, zanim dołożymy notkę „… i N więcej"
+    #: (NVDA nie powinno czytać tysięcy linii, gdy reżyser wczytał całą prozę).
+    MAX_SIEROTY_POKAZ = 50
+
+    def _potwierdz_sieroty(self, sieroty: list) -> bool:
+        """Ostrzega o liniach-sierotach mostu i pyta, czy budować mimo to.
+
+        ``sieroty`` to lista ``(numer_linii, tekst)`` z ``ce.wykryj_sieroty``.
+        Dialog wyboru (read-only lista + „Buduj mimo to" / „Anuluj i popraw"):
+        zwraca True, gdy reżyser świadomie akceptuje pominięcie tych linii.
+        Domyślny przycisk to bezpieczne „Anuluj" — Enter nie buduje przez pomyłkę.
+        """
+        pokazane = sieroty[: self.MAX_SIEROTY_POKAZ]
+        linie = [
+            t("rezyser.el_sieroty_pozycja", nr=nr, tekst=tekst)
+            for nr, tekst in pokazane
+        ]
+        if len(sieroty) > len(pokazane):
+            linie.append(
+                t("rezyser.el_sieroty_wiecej", liczba=len(sieroty) - len(pokazane))
+            )
+        tresc = (
+            t("rezyser.el_sieroty_naglowek", liczba=len(sieroty))
+            + "\n\n" + "\n".join(linie)
+            + "\n\n" + t("rezyser.el_sieroty_stopka")
+        )
+
+        dlg = wx.Dialog(
+            self,
+            title=t("rezyser.el_sieroty_tytul"),
+            size=(640, 480),
+            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+        )
+        txt = wx.TextCtrl(
+            dlg, value=tresc,
+            style=wx.TE_MULTILINE | wx.TE_READONLY,
+            name=t("rezyser.el_sieroty_tytul"),
+        )
+        btn_buduj = wx.Button(
+            dlg, wx.ID_OK, label=t("rezyser.el_sieroty_btn_buduj")
+        )
+        btn_anuluj = wx.Button(
+            dlg, wx.ID_CANCEL, label=t("rezyser.el_sieroty_btn_anuluj")
+        )
+        btn_anuluj.SetDefault()  # bezpieczny domyślny — Enter anuluje, nie buduje
+
+        row = wx.BoxSizer(wx.HORIZONTAL)
+        row.Add(btn_buduj, flag=wx.RIGHT, border=8)
+        row.AddStretchSpacer()
+        row.Add(btn_anuluj)
+
+        s = wx.BoxSizer(wx.VERTICAL)
+        s.Add(txt, proportion=1, flag=wx.EXPAND | wx.ALL, border=10)
+        s.Add(row, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, border=10)
+        dlg.SetSizer(s)
+        wx.CallAfter(txt.SetFocus)
+        try:
+            return dlg.ShowModal() == wx.ID_OK
         finally:
             dlg.Destroy()
 

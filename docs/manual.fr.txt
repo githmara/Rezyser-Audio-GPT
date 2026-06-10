@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 17.1 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 17.2 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -169,7 +169,7 @@ Le Mode Script Brut possède un panneau dédié "✂️ Gestion de la Structure"
 - Insérer Scène X : Insère uniquement l'en-tête de la scène (par exemple, "Scène 3") dans l'acte en cours. Le compteur de scènes augmente automatiquement.
 
 
-Accents disponibles dans Reżyser Audio GPT 17.1 :
+Accents disponibles dans Reżyser Audio GPT 17.2 :
 
 - Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
 - Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
@@ -264,6 +264,8 @@ Cliquez sur « Distribution vocale… ». L'application charge les personnages a
 Étape 2 — Construire le projet
 
 Cliquez sur « Créer un projet ElevenLabs Studio… ». L'application vérifie que le script contient au moins un chapitre (Prologue/Acte/Chapitre) et que chaque voix est attribuée, puis crée sur votre compte un projet Studio multivoix divisé en chapitres. La création du projet NE consomme pas de crédits. L'application règle aussi immédiatement la langue du projet (prononciation correcte des lignes de titre) et la normalisation du volume au standard du livre audio — elle le fait via l'API afin que vous n'ayez pas à ouvrir les paramètres du projet dans le navigateur.
+
+Gardien de format (une extension de la Règle du Monteur) : le pont exige que dans le scénario CHAQUE ligne soit soit une réplique avec une balise de locuteur ([Narrateur: …] ou [Personnage: …]), soit un titre de structure (Prologue, Acte, Scène, Chapitre). La prose ordinaire sans balise saisie « en vrac » — par exemple une note de l'auteur ou un fragment de narration sans balise — n'est attribuée à aucune voix et est ignorée en silence lors de la construction, si bien que le projet final pourrait diverger de ton fichier. C'est pourquoi, si l'application détecte de telles lignes orphelines, elle affiche leur liste avec les numéros de ligne et demande s'il faut construire quand même : tu peux alors annuler et corriger le scénario (ouvre-le avec le bouton « Ouvrir le fichier de narration… », ajoute les balises de locuteur manquantes ou supprime ces lignes) ou construire quand même en connaissance de cause, en acceptant qu'elles soient ignorées. C'est une extension naturelle de la Règle du Monteur : tout comme tu ne dois pas casser les titres de structure, dans un scénario destiné au pont chaque ligne devrait avoir son locuteur ou être un titre.
 
 Étape 3 — Rendu dans le navigateur
 

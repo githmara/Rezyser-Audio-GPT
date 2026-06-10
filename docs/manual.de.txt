@@ -1,4 +1,4 @@
-Audio AI Regisseur Handbuch - Komplettanleitung (Version 17.1 – Veröffentlichungsversion)
+Audio AI Regisseur Handbuch - Komplettanleitung (Version 17.2 – Veröffentlichungsversion)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -212,6 +212,8 @@ Klicke auf „Stimmverteilung…". Die Anwendung lädt die Figuren mit Text und 
 Schritt 2 — Projekt erstellen
 
 Klicke auf „Erstelle ElevenLabs Studio-Projekt…". Die Anwendung überprüft, ob das Skript mindestens ein Kapitel (Prolog/Akt/Kapitel) hat und ob jede Stimme zugewiesen ist, und erstellt dann in deinem Konto ein mehrstimmiges, in Kapitel unterteiltes Studio-Projekt. Das Erstellen des Projekts verbraucht KEINE Credits. Die Anwendung stellt außerdem sofort die Projektsprache (korrekte Aussprache der Überschriftenzeilen) sowie die Lautstärke-Normalisierung auf den Hörbuch-Standard ein — sie tut dies über die API, damit du die Projekteinstellungen im Browser nicht öffnen musst.
+
+Format-Wächter (eine Erweiterung der Regel für den Schnittmeister): Die Brücke verlangt, dass im Drehbuch JEDE Zeile entweder eine Replik mit Sprecher-Tag ([Erzähler: …] oder [Figur: …]) oder eine Strukturüberschrift (Prolog, Akt, Szene, Kapitel) ist. Gewöhnliche, nicht getaggte Prosa, die „lose” eingetippt wird — etwa eine Anmerkung des Autors oder ein Erzählfragment ohne Tag — erhält keine Stimme und wird beim Erstellen stillschweigend übersprungen, sodass das fertige Projekt von deiner Datei abweichen könnte. Erkennt die Anwendung solche verwaisten Zeilen, zeigt sie daher deren Liste mit Zeilennummern und fragt, ob trotzdem erstellt werden soll: Du kannst dann abbrechen und das Drehbuch korrigieren (öffne es mit der Schaltfläche „Öffne Erzählungsdatei…”, ergänze die fehlenden Sprecher-Tags oder lösche diese Zeilen) oder bewusst trotzdem erstellen und in Kauf nehmen, dass sie übersprungen werden. Das ist eine natürliche Erweiterung der Regel für den Schnittmeister: So wie du Strukturüberschriften nicht beschädigen darfst, sollte in einem für die Brücke bestimmten Drehbuch jede Zeile ihren Sprecher haben oder eine Überschrift sein.
 
 Schritt 3 — Rendern im Browser
 

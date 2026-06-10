@@ -426,6 +426,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Vantar voice ID fyrir: {brakujace}.
     Opnaðu „Raddaval…“, fylltu inn raddirnar sem vantar og vistaðu drögin, byggðu svo verkefnið.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Línur án talmerkis
+  el_sieroty_naglowek: 'Athugið: {liczba} lína/línur í handritinu hafa ekkert talmerki (t.d. [Sögumaður: …] eða [Persóna: …]) og eru ekki byggingarfyrirsögn (Formáli, Þáttur, Atriði, Kafli).
+  
+    ElevenLabs Studio-brúin sleppir slíkum línum þegar verkefnið er búið til — þær fá enga rödd, svo fullbúna verkefnið getur vikið frá skránni þinni.'
+  el_sieroty_pozycja: '  • lína {nr}: {tekst}'
+  el_sieroty_wiecej: '  … og {liczba} til viðbótar.'
+  el_sieroty_stopka: Hvað nú? Þú getur hætt við, opnað handritið með hnappnum „Opna frásagnarskrá…”, bætt við talmerkjunum sem vantar (eða eytt þessum línum) og búið til aftur — eða búið til samt og samþykkt vitandi vits að línunum hér að ofan sé sleppt.
+  el_sieroty_btn_buduj: '&Búa til samt'
+  el_sieroty_btn_anuluj: '&Hætta við og laga'
   el_build_blad_tytul: "ElevenLabs-villa"
   el_build_blad_uprawnienia_tresc: |-
     ElevenLabs-lykilinn vantar nauðsynlegar heimildir (scopes).

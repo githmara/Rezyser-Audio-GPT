@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 17.1 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 17.2 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -212,6 +212,8 @@ Click "Voice Cast…". The application loads the characters that have lines and 
 Step 2 — Build the Project
 
 Click "Create ElevenLabs Studio Project…". The application checks that the script has at least one chapter (Prologue/Act/Chapter) and that every voice is assigned, then creates a multi-voice Studio project divided into chapters in your account. Creating the project itself does NOT consume credits. The application also sets the project language right away (correct pronunciation of heading lines) and volume normalization to the audiobook standard — it does this via the API so you don't have to open the project settings in the browser.
+
+Format guard (an extension of the Editor Rule): the bridge requires that in the script EVERY line be either an utterance with a speaker tag ([Narrator: …] or [Character: …]) or a structure heading (Prologue, Act, Scene, Chapter). Plain, untagged prose written “loose” — for example an author's note or a fragment of narration without a tag — is not assigned any voice and is silently skipped when building, so the finished project could diverge from your file. That is why, if the application detects such orphan lines, it shows their list with line numbers and asks whether to build anyway: you can then cancel and fix the script (open it with the “Open narration file…” button, add the missing speaker tags or delete those lines) or knowingly build anyway, accepting that they will be skipped. This is a natural extension of the Editor Rule: just as you must not break structure headings, every line in a script meant for the bridge should have its speaker or be a heading.
 
 Step 3 — Render in the Browser
 

@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 17.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 17.2 „Wersja Wydawnicza"
+
+*Patch v17.2: strażnik restrykcyjnego formatu mostu Studio — zaplanowana w „Co nie weszło" v17.1 i tu zrealizowana funkcja. Format `.txt` pozwala wpisać dowolny nietagowany tekst w dowolnym miejscu sztuki, ale most do ElevenLabs Studio wymaga, by KAŻDA linia była albo wypowiedzią ze znacznikiem mówcy (`[Narrator: …]`/`[Imię: …]`), albo nagłówkiem struktury (Prolog/Akt/Scena/Rozdział). Dotąd linie-sieroty (nieotagowana proza wpisana „luzem") były w `buduj_chapters` po cichu pomijane, więc renderowany projekt mógł rozjechać się z intencją reżysera — bez żadnego sygnału. Nowy detektor `core_elevenlabs.wykryj_sieroty` (wierna replika stanu mówcy z `buduj_chapters`, więc wykrywa DOKŁADNIE to, co parser dziś gubi) zasila strażnik w panelu Reżysera: przed budową projektu, gdy wykryto sieroty, pojawia się dialog z ich listą (numery linii + treść) i wyborem „Buduj mimo to" / „Anuluj i popraw skrypt". Zgodnie z filozofią „Reżyser rządzi" to ostrzeżenie z informed consent, nie twarda blokada — cichy drop staje się GŁOŚNY, a decyzja zostaje przy reżyserze (domyślny przycisk = bezpieczny „Anuluj", Enter nie buduje przez pomyłkę). 7 nowych kluczy i18n × 9 paczek (dialog A11y read-only) oraz jawne rozszerzenie Zasady Montażysty w manualu × 9 (sekcja mostu, przed „Krok 3 — Render").*
 
 *Release v17.1: trzy fronty sprzątająco-dokumentacyjne. (1) **Most ElevenLabs na natywnym SDK** — koniec ręcznego składania URL-i i multipart-hacków na `requests`; `core_elevenlabs` używa oficjalnego `elevenlabs` (`studio.projects.create/delete`, `user.subscription.get`), spójnie z natywnym klientem OpenAI. Behawioralnie neutralne (ten sam model `eleven_v3`, te same 0 kredytów przy tworzeniu projektu), zweryfikowane end-to-end w ZAMROŻONEJ aplikacji (create + delete). (2) **Zamykacz issue odchudzony** — flow odpowiedzi na pytania przeniesiony z maszynerii `pending_answer.md` + commit + bot + atomic-reset/force-push do prostego LOKALNEGO skryptu `odpowiedz_lokalnie.py` (lokalny `gh` CLI). ~600 linii git-maszynerii w bocie znika; `issue_closure_north.py` obsługuje już tylko `fixed-in-release`. (3) **Dokumentacja obsady głosowej** — instrukcja w 9 językach rozszerzona o wymóg „My Voices", zakładkę „Explore"/„Add to My Voices", skrót „Copy Voice ID" i rekomendację kolekcji „Best for Eleven v3" (oraz Voice Design / IVC / PVC).*
 
@@ -45,6 +47,44 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 17.2 — minor release (strażnik restrykcyjnego formatu mostu Studio — rozszerzenie Zasady Montażysty)
+
+### TL;DR
+
+Domknięcie jedynej pozycji „Co nie weszło" z v17.1 — twardszy strażnik formatu mostu do ElevenLabs Studio. Jeden, skupiony front.
+
+Format projektów to zwykły `.txt`: w trybie Skrypt możesz wpisać dowolny tekst w dowolnym miejscu sztuki. Ale most Studio ma surowszy kontrakt — przy automatycznym tworzeniu projektu KAŻDA linia musi być albo wypowiedzią ze znacznikiem mówcy (`[Narrator: …]`, `[Imię: emocja]`), albo nagłówkiem struktury (Prolog, Akt, Scena, Rozdział). Linia nietagowana i niebędąca nagłówkiem — odautorska notatka, fragment narracji wklejony „luzem", przypadkowo rozspojona kwestia — nie ma jak trafić do żadnego głosu. Dotąd `buduj_chapters` pomijał takie linie-sieroty **po cichu**: projekt budował się bez błędu, ale renderowana sztuka mogła rozjechać się z plikiem reżysera, który o utracie nie wiedział.
+
+v17.2 czyni ten drop GŁOŚNYM. Nowy detektor `wykryj_sieroty` przechodzi skrypt tą samą logiką stanu mówcy co parser budujący rozdziały, więc zwraca dokładnie ten zbiór linii, który `buduj_chapters` dziś gubi — ani mniej, ani więcej. Gdy strażnik coś znajdzie, przed wysłaniem czegokolwiek do API pojawia się dialog: lista sierot z numerami linii i ich treścią, a pod nią wybór „Buduj mimo to" / „Anuluj i popraw skrypt".
+
+Świadomie wybraliśmy ostrzeżenie z informed consent, a nie twardą blokadę. Filozofia „Reżysera Audio" jest konsekwentna: twarde limity bronią narracji przed samowolą modelu, nie przed reżyserem. Reżyser może mieć dobry powód, by zbudować mimo sierot (np. wie, że to świadomy komentarz do usunięcia później) — i ma do tego prawo. Bezpieczeństwo daje detal A11y: domyślnym przyciskiem dialogu jest „Anuluj", więc odruchowy Enter niczego nie zbuduje przez pomyłkę, a NVDA odczyta listę w przewijalnym polu read-only.
+
+### Co nowego
+
+- **Strażnik formatu mostu Studio.** Przed budową projektu aplikacja wykrywa linie bez znacznika mówcy i niebędące nagłówkiem struktury. Jeśli takie są — pokazuje je (numer linii + treść) i pyta, czy budować mimo to. Brak sierot = zero zmian w dotychczasowym przepływie (dialog się nie pojawia).
+- **Jawne rozszerzenie Zasady Montażysty** w manualu × 9 języków — sekcja mostu (przed „Krok 3 — Render") zyskała akapit tłumaczący wymóg „każda linia to znacznik mówcy albo nagłówek" i działanie strażnika, powiązany wprost z istniejącą Zasadą Montażysty (Editor Rule / Regel für den Schnittmeister / Regla del Editor / Leikkaajan sääntö / Règle du Monteur / Regla Klipparans / Regola del Montatore / Правило монтажёра).
+
+### Pod maską
+
+- **`core_elevenlabs.wykryj_sieroty(tekst) -> list[(nr, tekst)]`** — wierna replika stanu `stan["mowca"]` z `buduj_chapters`: linia jest sierotą, gdy jest niepusta, nie jest nagłówkiem, nie jest tagiem i pojawia się bez aktywnego mówcy (przed pierwszym tagiem albo zaraz po nagłówku, który zeruje mówcę). Linie kontynuujące mówcę (po jego tagu, także przez puste linie) NIE są sierotami. Edge: tag o niesparsowalnej nazwie (`[: x]`) nie aktywuje mówcy — tekst po nim również wpada w sieroty (zgodnie z zachowaniem parsera).
+- **`gui_rezyser._potwierdz_sieroty`** — dialog wyboru (read-only `TextCtrl` + „Buduj mimo to"/„Anuluj"), domyślny przycisk = Anuluj. Wpięty w `_on_el_build` PO walidacji obsady (żeby „Buduj mimo to" realnie przechodziło do budowy), PRZED wątkiem tła. Lista sierot ucinana do 50 pozycji z notką „… oraz N więcej" (NVDA nie czyta tysięcy linii, gdy ktoś wczyta całą prozę).
+- **7 kluczy i18n × 9 paczek** (`el_sieroty_tytul`, `_naglowek`, `_pozycja`, `_wiecej`, `_stopka`, `_btn_buduj`, `_btn_anuluj`). Nazwy nagłówków struktury i tagi mówcy zlokalizowane per język; akceleratory `&` unikalne w obrębie dialogu w każdym języku. Placeholdery `{liczba}`/`{nr}`/`{tekst}` — `t()` przez `str.format`; treść sieroty z `{…}`/`%` jest bezpieczna (wartość nie jest re-parsowana).
+
+### Co nie weszło
+
+- **Strażnik w samym kroku „Obsada głosowa…"** (ostrzeżenie o sierotach już przy przypisywaniu głosów, nie dopiero przy budowie) — rozważone, odłożone: obsada operuje na `wykryj_postacie` (mówcy z kwestiami), a sieroty z definicji nie mają mówcy, więc naturalnym i wystarczającym punktem kontroli jest moment budowy. Dublowanie ostrzeżenia w dwóch miejscach tylko hałasowałoby.
+- **Auto-naprawa sierot** (np. zaproponowanie owinięcia w `[Narrator: …]`) — odrzucone: zgadywanie mówcy za reżysera łamałoby tę samą filozofię, którą strażnik chroni. Decyzja, czy linia to narracja, kwestia czy śmieć do usunięcia, należy do reżysera.
+
+### Walidacja
+
+- **Detektor** (`wykryj_sieroty`) na scenariuszach: czysty skrypt → 0 sierot; sierota przed pierwszym tagiem i tuż po nagłówku → wykryte; linia kontynuująca mówcę (także przez pustą linię) → NIE sierota; tekst po niesparsowalnym tagu → sierota (zgodnie z `buduj_chapters`). `liczba_rozdzialow` niezmienione.
+- **i18n** × 9: wszystkie `ui.yaml` parsują się, komplet 7 kluczy, `i18n.t()` rozwija `{liczba}`/`{nr}`/`{tekst}` bez wycieku placeholderów; treść sieroty zawierająca `{klamra}` i `100%` zachowana dosłownie; akceleratory `&` obecne i unikalne (Buduj vs Anuluj) w każdym języku.
+- **Składanie komunikatu** (replika logiki `_potwierdz_sieroty` poza wx) dla 3 sierot i 120 sierot (ucięcie do 50 + nota „… więcej") × 9 języków — bez błędów formatowania.
+- **Manual** × 9: każdy `krok_3b_most_elevenlabs` parsuje się i zawiera akapit strażnika przed nagłówkiem „Krok 3"; `generuj_dokumentacje.py --waliduj` — wszystkie placeholdery rozwinięte, nagłówki wersji 17.2.
+- `py_compile` na `core_elevenlabs.py` / `gui_rezyser.py` / `i18n.py` — OK.
 
 ---
 

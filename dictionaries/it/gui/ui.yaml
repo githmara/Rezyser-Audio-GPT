@@ -426,6 +426,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Voice ID mancanti per: {brakujace}.
     Apri «Cast vocale…», completa le voci mancanti e salva la bozza, poi costruisci il progetto.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Righe senza tag del parlante
+  el_sieroty_naglowek: 'Attenzione: {liczba} riga/righe nella sceneggiatura non hanno il tag del parlante (es. [Narratore: …] o [Personaggio: …]) e non sono un''intestazione di struttura (Prologo, Atto, Scena, Capitolo).
+  
+    Il ponte ElevenLabs Studio salta queste righe durante la creazione del progetto — non vengono assegnate ad alcuna voce, quindi il progetto finito può divergere dal tuo file.'
+  el_sieroty_pozycja: '  • riga {nr}: {tekst}'
+  el_sieroty_wiecej: '  … e altre {liczba}.'
+  el_sieroty_stopka: Cosa fare? Puoi annullare, aprire la sceneggiatura con il pulsante «Apri file di narrazione…», aggiungere i tag del parlante mancanti (o eliminare queste righe) e ricreare — oppure creare comunque, accettando consapevolmente che le righe qui sopra vengano saltate.
+  el_sieroty_btn_buduj: '&Crea comunque'
+  el_sieroty_btn_anuluj: '&Annulla e correggi'
   el_build_blad_tytul: "Errore ElevenLabs"
   el_build_blad_uprawnienia_tresc: |-
     La chiave ElevenLabs non ha i permessi richiesti (scope).

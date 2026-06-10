@@ -425,6 +425,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Missing voice IDs for: {brakujace}.
     Open "Voice cast…", fill in the missing voices and save the draft, then build the project.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Lines without a speaker tag
+  el_sieroty_naglowek: 'Warning: {liczba} line(s) in the script have no speaker tag (e.g. [Narrator: …] or [Character: …]) and are not a structure heading (Prologue, Act, Scene, Chapter).
+  
+    The ElevenLabs Studio bridge skips such lines when building the project — they will not be assigned any voice, so the finished project may diverge from your file.'
+  el_sieroty_pozycja: '  • line {nr}: {tekst}'
+  el_sieroty_wiecej: '  … and {liczba} more.'
+  el_sieroty_stopka: What now? You can cancel, open the script with the “Open narration file…” button, add the missing speaker tags (or delete those lines) and build again — or build anyway, knowingly accepting that the lines above will be skipped.
+  el_sieroty_btn_buduj: '&Build anyway'
+  el_sieroty_btn_anuluj: '&Cancel and fix'
   el_build_blad_tytul: "ElevenLabs error"
   el_build_blad_uprawnienia_tresc: |-
     The ElevenLabs key lacks the required permissions (scopes).

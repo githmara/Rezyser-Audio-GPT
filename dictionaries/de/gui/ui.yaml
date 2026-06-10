@@ -426,6 +426,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Fehlende Voice-IDs für: {brakujace}.
     Öffne „Sprecherbesetzung…“, ergänze die fehlenden Stimmen und speichere den Entwurf, dann baue das Projekt.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Zeilen ohne Sprecher-Tag
+  el_sieroty_naglowek: 'Achtung: {liczba} Zeile(n) im Drehbuch haben kein Sprecher-Tag (z. B. [Erzähler: …] oder [Figur: …]) und sind keine Strukturüberschrift (Prolog, Akt, Szene, Kapitel).
+  
+    Die ElevenLabs-Studio-Brücke überspringt solche Zeilen beim Erstellen des Projekts — sie erhalten keine Stimme, daher kann das fertige Projekt von deiner Datei abweichen.'
+  el_sieroty_pozycja: '  • Zeile {nr}: {tekst}'
+  el_sieroty_wiecej: '  … und {liczba} weitere.'
+  el_sieroty_stopka: Was nun? Du kannst abbrechen, das Drehbuch mit „Öffne Erzählungsdatei…” öffnen, die fehlenden Sprecher-Tags ergänzen (oder die Zeilen löschen) und erneut erstellen — oder trotzdem erstellen und bewusst in Kauf nehmen, dass die obigen Zeilen übersprungen werden.
+  el_sieroty_btn_buduj: '&Trotzdem erstellen'
+  el_sieroty_btn_anuluj: '&Abbrechen und korrigieren'
   el_build_blad_tytul: "ElevenLabs-Fehler"
   el_build_blad_uprawnienia_tresc: |-
     Dem ElevenLabs-Schlüssel fehlen die erforderlichen Berechtigungen (Scopes).

@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida completa (Versione 17.1 – Versione di Pubblicazione)
+Manuale del Regista Audio AI - Guida completa (Versione 17.2 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
@@ -215,6 +215,8 @@ Clicca su "Cast vocale…". L'applicazione carica i personaggi che hanno battute
 Passo 2 — Costruisci il progetto
 
 Clicca su "Crea progetto ElevenLabs Studio…". L'applicazione verifica che il copione abbia almeno un capitolo (Prologo/Atto/Capitolo) e che ogni voce sia assegnata, quindi crea sul tuo account un progetto Studio multivocale diviso in capitoli. La semplice creazione del progetto NON consuma crediti. L'applicazione imposta anche subito la lingua del progetto (pronuncia corretta delle righe di intestazione) e la normalizzazione del volume allo standard dell'audiolibro — lo fa tramite l'API così non devi aprire le impostazioni del progetto nel browser.
+
+Guardiano del formato (un'estensione della Regola del Montatore): il ponte richiede che nella sceneggiatura OGNI riga sia o una battuta con tag del parlante ([Narratore: …] o [Personaggio: …]) oppure un'intestazione di struttura (Prologo, Atto, Scena, Capitolo). La prosa comune senza tag scritta «alla rinfusa» — per esempio una nota dell'autore o un frammento di narrazione senza tag — non viene assegnata ad alcuna voce e viene saltata in silenzio durante la costruzione, quindi il progetto finito potrebbe divergere dal tuo file. Per questo, se l'applicazione rileva tali righe orfane, ne mostra l'elenco con i numeri di riga e chiede se costruire comunque: puoi allora annullare e correggere la sceneggiatura (aprila con il pulsante «Apri file di narrazione…», aggiungi i tag del parlante mancanti o elimina quelle righe) oppure costruire comunque consapevolmente, accettando che vengano saltate. È un'estensione naturale della Regola del Montatore: così come non devi rompere le intestazioni di struttura, in una sceneggiatura destinata al ponte ogni riga dovrebbe avere il suo parlante o essere un'intestazione.
 
 Passo 3 — Rendering nel browser
 

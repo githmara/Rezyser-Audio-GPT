@@ -453,6 +453,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Brakuje voice ID dla: {brakujace}.
     Otwórz „Obsada głosowa…”, uzupełnij brakujące głosy i zapisz szkic, a potem zbuduj projekt.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Linie bez znacznika mówcy
+  el_sieroty_naglowek: 'Uwaga: {liczba} linii w skrypcie nie ma znacznika mówcy (np. [Narrator: …] albo [Postać: …]) i nie jest nagłówkiem struktury (Prolog, Akt, Scena, Rozdział).
+  
+    Most ElevenLabs Studio pomija takie linie przy budowie projektu — nie trafią one do żadnego głosu, więc gotowy projekt może rozjechać się z Twoim plikiem.'
+  el_sieroty_pozycja: '  • linia {nr}: {tekst}'
+  el_sieroty_wiecej: '  … oraz {liczba} więcej.'
+  el_sieroty_stopka: Co dalej? Możesz anulować, otworzyć skrypt przyciskiem „Otwórz plik narracji…”, dodać brakujące znaczniki mówcy (albo usunąć te linie) i zbudować ponownie — albo zbudować mimo to, świadomie godząc się na pominięcie powyższych linii.
+  el_sieroty_btn_buduj: '&Buduj mimo to'
+  el_sieroty_btn_anuluj: '&Anuluj i popraw skrypt'
   el_build_blad_tytul: "Błąd ElevenLabs"
   el_build_blad_uprawnienia_tresc: |-
     Klucz ElevenLabs nie ma wymaganych uprawnień (scope'ów).

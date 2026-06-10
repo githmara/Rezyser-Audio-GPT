@@ -458,6 +458,47 @@ def liczba_rozdzialow(tekst: str) -> int:
     )
 
 
+def wykryj_sieroty(tekst: str) -> list:
+    """Wykrywa linie-sieroty, które ``buduj_chapters`` po cichu pomija (v17.2).
+
+    Format ``.txt`` pozwala wpisać dowolny nietagowany tekst w dowolnym miejscu,
+    ale most Studio wymaga, by KAŻDA linia była albo wypowiedzią ze znacznikiem
+    mówcy (``[Imię: …]``/`[Narrator: …]`), albo nagłówkiem struktury
+    (Prolog/Akt/Scena/Rozdział…). Linia nietagowana i niebędąca nagłówkiem,
+    która pojawia się, gdy żaden mówca nie jest aktywny (przed pierwszym tagiem
+    albo zaraz po nagłówku, który zeruje bieżącego mówcę), nie trafia do żadnego
+    ``tts_node`` — renderowany projekt rozjeżdża się z intencją reżysera. Ten
+    strażnik pozwala GUI ostrzec PRZED budową (Zasada Montażysty, sekcja mostu).
+
+    Stan ``mowca_aktywny`` jest wierną repliką stanu ``stan["mowca"]`` z
+    :func:`buduj_chapters` — dzięki temu zwrócony zbiór to dokładnie linie, które
+    parser dziś milcząco gubi. Linie kontynuujące bieżącego mówcę (po jego tagu,
+    także przez puste linie) NIE są sierotami.
+
+    Edge: tag o niesparsowalnej nazwie mówcy (np. ``[: x]`` — ``_wytnij_mowce``
+    zwraca None) nie aktywuje mówcy, więc tekst po nim również wpada w sieroty
+    (zgodnie z zachowaniem ``buduj_chapters``); sama taka linia-tag nie jest
+    flagowana, bo to skrajny przypadek formatu, nie nietagowana proza.
+
+    Returns:
+        Lista ``(numer_linii_1based, tekst_linii_strip)`` w kolejności wystąpienia.
+    """
+    sieroty: list = []
+    mowca_aktywny = False
+    for nr, linia in enumerate(tekst.splitlines(), start=1):
+        typ, _ = _klasyfikuj_naglowek(linia)
+        if typ is not None:
+            mowca_aktywny = False
+            continue
+        m = _RE_TAG.match(linia)
+        if m:
+            mowca_aktywny = bool(_wytnij_mowce(m.group(1)))
+            continue
+        if linia.strip() and not mowca_aktywny:
+            sieroty.append((nr, linia.strip()))
+    return sieroty
+
+
 def _tts_node(voice_id, text: str) -> dict:
     return {"voice_id": voice_id, "text": text, "type": "tts_node"}
 

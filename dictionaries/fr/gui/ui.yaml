@@ -426,6 +426,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Voice ID manquants pour : {brakujace}.
     Ouvre « Distribution des voix… », complète les voix manquantes et enregistre le brouillon, puis construis le projet.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Lignes sans balise de locuteur
+  el_sieroty_naglowek: 'Attention : {liczba} ligne(s) du scénario n''ont pas de balise de locuteur (p. ex. [Narrateur: …] ou [Personnage: …]) et ne sont pas un titre de structure (Prologue, Acte, Scène, Chapitre).
+  
+    Le pont ElevenLabs Studio ignore ces lignes lors de la création du projet — elles ne reçoivent aucune voix, donc le projet final peut différer de ton fichier.'
+  el_sieroty_pozycja: '  • ligne {nr} : {tekst}'
+  el_sieroty_wiecej: '  … et {liczba} de plus.'
+  el_sieroty_stopka: Que faire ? Tu peux annuler, ouvrir le scénario avec le bouton « Ouvrir le fichier de narration… », ajouter les balises de locuteur manquantes (ou supprimer ces lignes) et recréer — ou créer quand même, en acceptant sciemment que les lignes ci-dessus soient ignorées.
+  el_sieroty_btn_buduj: '&Créer quand même'
+  el_sieroty_btn_anuluj: '&Annuler et corriger'
   el_build_blad_tytul: "Erreur ElevenLabs"
   el_build_blad_uprawnienia_tresc: |-
     La clé ElevenLabs n'a pas les autorisations requises (scopes).

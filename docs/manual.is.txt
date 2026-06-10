@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.1 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.2 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -212,6 +212,8 @@ Smelltu á „Raddsetning…". Forritið les inn persónur sem hafa línur og b�
 Skref 2 — Byggja verkefni
 
 Smelltu á „Búa til verkefni ElevenLabs Studio…". Forritið athugar hvort skjalið hafi að minnsta kosti einn kafla (Prolog/Akt/Kafli) og hvort hver rödd sé úthlutuð, og býr síðan til margra radda Studio verkefni á reikningnum þínum skipt í kafla. Sjálf verkefnissköpunin EYÐIR EKKI inneignum. Forritið stillir einnig strax tungumál verkefnisins (réttan framburð fyrirsagnalína) og hljóðstyrksjöfnun að hljóðbókastaðli — það gerir þetta í gegnum API svo þú þurfir ekki að opna stillingar verkefnisins í vafranum.
+
+Sniðvörður (útvíkkun á Reglu Klipparans): brúin krefst þess að í handritinu sé HVER lína annaðhvort replík með talmerki ([Sögumaður: …] eða [Persóna: …]) eða byggingarfyrirsögn (Formáli, Þáttur, Atriði, Kafli). Venjulegur, ómerktur „laus” texti — til dæmis athugasemd höfundar eða frásagnarbrot án taggs — fær enga rödd og er sleppt þegjandi við byggingu, svo fullbúna verkefnið gæti vikið frá skránni þinni. Þess vegna, ef forritið greinir slíkar munaðarlausar línur, sýnir það lista yfir þær með línunúmerum og spyr hvort byggja eigi samt: þú getur þá hætt við og lagað handritið (opnaðu það með hnappnum „Opna frásagnarskrá…”, bættu við talmerkjunum sem vantar eða eyddu þessum línum) eða byggt samt af ásetningi og sætt þig við að þeim sé sleppt. Þetta er eðlileg útvíkkun á Reglu Klipparans: rétt eins og þú mátt ekki skemma byggingarfyrirsagnir ætti hver lína í handriti sem ætlað er fyrir brúna að hafa sinn talanda eða vera fyrirsögn.
 
 Skref 3 — Útgáfa í vafra
 

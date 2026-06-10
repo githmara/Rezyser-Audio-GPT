@@ -425,6 +425,19 @@ rezyser:
   el_obsada_niekompletna_tresc: |-
     Faltan voice ID para: {brakujace}.
     Abre «Reparto de voces…», completa las voces que faltan y guarda el borrador, luego construye el proyecto.
+  # Strażnik formatu mostu (v17.2) — linie bez znacznika mówcy i niebędące
+  # nagłówkiem struktury są w buduj_chapters pomijane; ostrzegamy przed
+  # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
+  # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
+  el_sieroty_tytul: Líneas sin etiqueta de hablante
+  el_sieroty_naglowek: 'Atención: {liczba} línea(s) del guion no tienen etiqueta de hablante (p. ej. [Narrador: …] o [Personaje: …]) ni son un encabezado de estructura (Prólogo, Acto, Escena, Capítulo).
+  
+    El puente de ElevenLabs Studio omite esas líneas al crear el proyecto — no se asignan a ninguna voz, por lo que el proyecto final puede desviarse de tu archivo.'
+  el_sieroty_pozycja: '  • línea {nr}: {tekst}'
+  el_sieroty_wiecej: '  … y {liczba} más.'
+  el_sieroty_stopka: ¿Qué hacer? Puedes cancelar, abrir el guion con el botón «Abrir archivo de narración…», añadir las etiquetas de hablante que faltan (o borrar esas líneas) y volver a crear — o crear de todos modos, aceptando conscientemente que las líneas anteriores se omitan.
+  el_sieroty_btn_buduj: '&Crear de todos modos'
+  el_sieroty_btn_anuluj: C&ancelar y corregir
   el_build_blad_tytul: "Error de ElevenLabs"
   el_build_blad_uprawnienia_tresc: |-
     La clave de ElevenLabs no tiene los permisos necesarios (scopes).
