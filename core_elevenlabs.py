@@ -14,13 +14,23 @@ Ten moduł celowo nie importuje ``wx`` — może być używany zarówno przez
 ``HomePanel`` (System Check), jak i przez dispatcher w panelu Reżysera,
 bez ryzyka cyklicznych importów.
 
-Warstwa klienta HTTP (``requests``): ``saldo``, ``create_project``,
-``delete_project`` — patrz dół pliku. Świadomie BEZ ``list_voices``:
-reżyser wkleja voice ID skopiowane z weba ElevenLabs (zakładka Voices →
-odnajdź głos → odtwórz próbkę dla pewności → More actions → Copy Voice ID),
-bo lista API zwróciłaby tylko głosy premade, a użytkownik może chcieć
-własnych (Voice Design) albo dowolnych innych. Wybór głosów następuje więc
-przez okienko obsady z polem na wklejone ID (Etap 4), nie przez listowanie.
+Warstwa klienta API (natywny SDK ``elevenlabs``): ``saldo``, ``create_project``,
+``delete_project`` — patrz dół pliku. Od v17.1 używamy oficjalnego SDK
+(``pip install elevenlabs``, ``ElevenLabs.studio.projects.*``) zamiast ręcznie
+budowanych żądań ``requests`` — spójność z natywnym klientem OpenAI, koniec
+multipart-hacków i ręcznego mapowania kodów HTTP.
+
+Świadomie BEZ ``list_voices``: reżyser wkleja voice ID skopiowane z weba
+ElevenLabs. Wybór głosów następuje przez okienko obsady z polem na wklejone ID
+(Etap 4), nie przez listowanie API (lista zwróciłaby tylko głosy premade, a
+użytkownik może chcieć własnych). Praktyka kopiowania ID (pełna instrukcja
+end-userowa → docs ``manual``, sekcja „Krok 1 — Obsada głosowa"):
+  - Głos UŻYTY w sztuce MUSI być w „My Voices". Głosy z biblioteki publicznej
+    (zakładka „Explore") dodaje się przyciskiem „Add to My Voices".
+  - Gdy głos jest już w „My Voices", przycisk „Copy Voice ID" jest dostępny od
+    razu — bez rozwijania „More actions".
+  - By zminimalizować ewentualne regeneracje, najlepiej brać głosy z kolekcji
+    „Best for Eleven v3"; alternatywnie „Voice Design", a dla odważnych IVC/PVC.
 """
 
 from __future__ import annotations
@@ -138,17 +148,16 @@ def wczytaj_klucz(env_path: str) -> str | None:
 
 
 # =============================================================================
-# Klient HTTP (requests) — most do ElevenLabs Studio (v16.0, Etap 2)
+# Klient API (natywny SDK ``elevenlabs``) — most do ElevenLabs Studio (v17.1)
 # =============================================================================
-# Receptura potwierdzona empirycznie spike'iem v16.0:
-#   - auth: header ``xi-api-key``
-#   - scope'y restricted key: projects_write + voices_read
-#   - tworzenie projektu z ``auto_convert`` pominiętym (=false) NIE spala
-#     kredytów (render robi użytkownik później w webie Studio)
-# ``requests`` importowane leniwie wewnątrz funkcji — dzięki temu walidacja
-# klucza (System Check, Etap 1) działa nawet bez tej zależności.
+# Od v17.1 oficjalny SDK zamiast ręcznych żądań ``requests``. Receptura
+# (potwierdzona spike'iem v16.0/v16.1) bez zmian:
+#   - scope'y restricted key: projects_write + voices_read,
+#   - tworzenie projektu z ``auto_convert`` POMINIĘTYM (=domyślne) NIE spala
+#     kredytów (render robi użytkownik później w webie Studio).
+# SDK importowany leniwie wewnątrz ``_klient`` — dzięki temu walidacja klucza
+# (System Check, Etap 1) działa nawet bez tej zależności.
 
-API_BASE = "https://api.elevenlabs.io"
 #: Strona webowa Studio — raport dispatchera linkuje tu, by user otworzył
 #: projekt i wyrenderował mowę (deep-link per-projekt celowo pominięty —
 #: format URL bywa zmienny; user odnajduje projekt po nazwie/ID).
@@ -176,47 +185,54 @@ class BrakUprawnien(BladElevenLabs):
     """
 
 
-def _naglowki(klucz: str) -> dict:
-    return {"xi-api-key": klucz}
+def _klient(klucz: str):
+    """Tworzy klienta SDK ElevenLabs. Import leniwy — feature opcjonalny,
+    walidacja klucza (System Check) działa nawet bez zainstalowanego SDK."""
+    from elevenlabs.client import ElevenLabs
+    return ElevenLabs(api_key=klucz)
 
 
-def _sprawdz_odpowiedz(r) -> None:
-    """Mapuje odpowiedź HTTP na wyjątki; przy 2xx nie robi nic.
+def _opcje(timeout: int) -> dict:
+    """RequestOptions SDK z timeoutem (SDK liczy w sekundach)."""
+    return {"timeout_in_seconds": timeout}
+
+
+def _mapuj_blad(exc) -> BladElevenLabs:
+    """Mapuje ``ApiError`` SDK na nasze wyjątki fasadowe.
 
     Wyróżnia 401 ``missing_permissions`` jako :class:`BrakUprawnien`, by GUI
     mogło pokazać konkretną instrukcję o scope'ach zamiast generycznego błędu.
+    Zachowuje kontrakt sprzed migracji SDK — ``gui_rezyser`` łapie te same dwa
+    typy (:class:`BrakUprawnien`, :class:`BladElevenLabs`).
     """
-    if r.status_code == 401:
-        detail = None
-        try:
-            detail = r.json().get("detail")
-        except ValueError:
-            detail = None
+    status = getattr(exc, "status_code", None)
+    body = getattr(exc, "body", None)
+    if status == 401:
+        detail = body.get("detail") if isinstance(body, dict) else None
         if isinstance(detail, dict) and detail.get("status") == "missing_permissions":
-            raise BrakUprawnien(
+            return BrakUprawnien(
                 "Klucz ElevenLabs nie ma wymaganych uprawnień (scope'ów). "
                 "Dodaj projects_write oraz voices_read w panelu ElevenLabs."
             )
-        raise BladElevenLabs("HTTP 401 — nieautoryzowany (sprawdź klucz ElevenLabs).")
-    if not r.ok:
-        raise BladElevenLabs(f"HTTP {r.status_code} z ElevenLabs: {r.text[:300]}")
+        return BladElevenLabs("HTTP 401 — nieautoryzowany (sprawdź klucz ElevenLabs).")
+    return BladElevenLabs(f"Błąd ElevenLabs (HTTP {status}): {str(body)[:300]}")
 
 
 def saldo(klucz: str) -> dict:
-    """``GET /v1/user/subscription`` — stan konta (0 kredytów).
+    """``user.subscription.get`` — stan konta (0 kredytów).
 
-    Zwraca surowy słownik subskrypcji; istotne pola to ``character_count``
-    (zużyte znaki) i ``character_limit`` (limit). Pozwala dispatcherowi
-    pokazać świadomość kosztu przed renderem.
+    Zwraca słownik subskrypcji (``model_dump`` typu SDK); istotne pola to
+    ``character_count`` (zużyte znaki) i ``character_limit`` (limit). Pozwala
+    dispatcherowi pokazać świadomość kosztu przed renderem.
     """
-    import requests
-    r = requests.get(
-        f"{API_BASE}/v1/user/subscription",
-        headers=_naglowki(klucz),
-        timeout=_TIMEOUT_ODCZYT,
-    )
-    _sprawdz_odpowiedz(r)
-    return r.json()
+    from elevenlabs.core import ApiError
+    try:
+        sub = _klient(klucz).user.subscription.get(
+            request_options=_opcje(_TIMEOUT_ODCZYT)
+        )
+    except ApiError as exc:
+        raise _mapuj_blad(exc) from exc
+    return sub.model_dump()
 
 
 def create_project(
@@ -231,10 +247,8 @@ def create_project(
 ) -> str:
     """Tworzy wielogłosowy projekt Studio. ``auto_convert`` POMINIĘTY → 0 kredytów.
 
-    ``POST /v1/studio/projects`` jako multipart (``requests`` wymaga formy
-    ``files={'pole': (None, wartość)}`` dla pól tekstowych). Render mowy to
-    osobny krok po stronie użytkownika w webie Studio — tutaj powstaje tylko
-    edytowalny projekt.
+    ``studio.projects.create`` (SDK). Render mowy to osobny krok po stronie
+    użytkownika w webie Studio — tutaj powstaje tylko edytowalny projekt.
 
     Args:
         name:              Nazwa projektu (wymagana przez API).
@@ -269,48 +283,45 @@ def create_project(
         BladElevenLabs: inny błąd HTTP lub nieoczekiwana struktura odpowiedzi.
     """
     import json
-    import requests
+    from elevenlabs.core import ApiError
 
-    from_content = json.dumps(chapters, ensure_ascii=False)
-    files = {
-        "name": (None, name),
-        "default_title_voice_id": (None, narrator_voice_id),
-        "default_paragraph_voice_id": (None, narrator_voice_id),
-        "default_model_id": (None, model_id),
-        "from_content_json": (None, from_content),
-    }
-    if language:
-        files["language"] = (None, language)
-    # Boolean jako string "true"/"false" — multipart nie ma typu bool.
-    files["volume_normalization"] = (None, "true" if volume_normalization else "false")
-    r = requests.post(
-        f"{API_BASE}/v1/studio/projects",
-        headers=_naglowki(klucz),
-        files=files,
-        timeout=_TIMEOUT_PROJEKT,
+    # ``auto_convert`` POMINIĘTY (nie przekazujemy) → projekt powstaje bez
+    # renderu = 0 kredytów. ``language`` przekazujemy tylko gdy ustawiony —
+    # inaczej Studio wybiera samo (SDK pomija nieprzekazane pola).
+    kwargs = dict(
+        name=name,
+        default_title_voice_id=narrator_voice_id,
+        default_paragraph_voice_id=narrator_voice_id,
+        default_model_id=model_id,
+        from_content_json=json.dumps(chapters, ensure_ascii=False),
+        volume_normalization=volume_normalization,
+        request_options=_opcje(_TIMEOUT_PROJEKT),
     )
-    _sprawdz_odpowiedz(r)
+    if language:
+        kwargs["language"] = language
+    try:
+        resp = _klient(klucz).studio.projects.create(**kwargs)
+    except ApiError as exc:
+        raise _mapuj_blad(exc) from exc
 
-    dane = r.json()
-    projekt = dane.get("project", dane) if isinstance(dane, dict) else {}
-    project_id = (projekt.get("project_id") if isinstance(projekt, dict) else None) \
-        or (dane.get("project_id") if isinstance(dane, dict) else None)
+    projekt = getattr(resp, "project", None)
+    project_id = getattr(projekt, "project_id", None)
     if not project_id:
         raise BladElevenLabs(
-            f"Nieoczekiwana struktura odpowiedzi przy tworzeniu projektu: {str(dane)[:300]}"
+            f"Nieoczekiwana struktura odpowiedzi przy tworzeniu projektu: {str(resp)[:300]}"
         )
     return project_id
 
 
 def delete_project(klucz: str, project_id: str) -> None:
-    """``DELETE /v1/studio/projects/{id}`` — sprzątanie (np. projektu testowego)."""
-    import requests
-    r = requests.delete(
-        f"{API_BASE}/v1/studio/projects/{project_id}",
-        headers=_naglowki(klucz),
-        timeout=_TIMEOUT_ODCZYT,
-    )
-    _sprawdz_odpowiedz(r)
+    """``studio.projects.delete`` — sprzątanie (np. projektu testowego)."""
+    from elevenlabs.core import ApiError
+    try:
+        _klient(klucz).studio.projects.delete(
+            project_id, request_options=_opcje(_TIMEOUT_ODCZYT)
+        )
+    except ApiError as exc:
+        raise _mapuj_blad(exc) from exc
 
 
 # =============================================================================

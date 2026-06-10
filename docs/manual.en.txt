@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 17.0.1 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 17.1 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -207,7 +207,7 @@ The bridge appears in the Director's panel in Script mode (when the key is valid
 
 Step 1 — Voice Cast
 
-Click "Voice Cast…". The application loads the characters that have lines and always adds a Narrator slot (the narrator is the default voice — chapter titles and all narration). For each speaker, paste the voice ID: in the browser go to the Voices tab, find the voice and play a sample, open "More actions" → "Copy Voice ID", and paste it into the field. You can use premade voices or your own (Voice Design). You can leave fields empty and return later — the save is a draft.
+Click "Voice Cast…". The application loads the characters that have lines and always adds a Narrator slot (the narrator is the default voice — chapter titles and all narration). For each speaker, paste the voice ID. IMPORTANT: every voice used in the play must first be in your "My Voices" — voices you create yourself (e.g. in "Voice Design") land there automatically, while voices from the public library are browsed in the "Explore" tab and added with "Add to My Voices". How to get a voice ID in ElevenLabs (in the browser): find the voice, play a sample to be sure it is the right one, and copy its identifier with "Copy Voice ID"; once a voice is in "My Voices", that button is available right away — without expanding "More actions". Choosing voices: to limit possible regenerations, the easiest option is to pick from the "Best for Eleven v3" collection (voices vetted for the v3 model the project is built on); alternatively design your own voice in "Voice Design", and for the bold there is IVC (Instant Voice Cloning) or even PVC (Professional Voice Cloning). You can leave fields empty and return later — the save is a draft.
 
 Step 2 — Build the Project
 

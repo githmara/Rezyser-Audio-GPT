@@ -1,5 +1,6 @@
 wxpython
 openai
+elevenlabs
 python-dotenv
 python-docx
 lingua-language-detector

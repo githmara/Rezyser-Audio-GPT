@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 17.0.1 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 17.1 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -210,7 +210,7 @@ Most pojawia się w panelu Reżysera w trybie Skrypt (gdy klucz jest poprawny). 
 
 Krok 1 — Obsada głosowa
 
-Kliknij „Obsada głosowa…". Aplikacja wczyta z Twojego skryptu postacie, które mają kwestie, i zawsze doda slot Narratora (narrator to głos domyślny — czyta tytuły rozdziałów i całą narrację). Dla każdego mówcy wklej voice ID. Jak zdobyć voice ID w ElevenLabs (w przeglądarce): wejdź w zakładkę Voices, odnajdź głos i odtwórz próbkę, żeby mieć pewność, że to właściwy; otwórz „More actions" przy tym głosie i wybierz „Copy Voice ID"; wklej skopiowany identyfikator w odpowiednie pole. Możesz użyć głosów gotowych (premade) albo własnych, w tym stworzonych w zakładce Voice Design. Pola możesz zostawić puste i wrócić później — zapis jest szkicem.
+Kliknij „Obsada głosowa…". Aplikacja wczyta z Twojego skryptu postacie, które mają kwestie, i zawsze doda slot Narratora (narrator to głos domyślny — czyta tytuły rozdziałów i całą narrację). Dla każdego mówcy wklej voice ID. WAŻNE: każdy głos użyty w sztuce musi najpierw znaleźć się w Twoich „My Voices" — głosy, które tworzysz sam (np. w „Voice Design"), trafiają tam automatycznie, a głosy z publicznej biblioteki przeglądasz w zakładce „Explore" i dodajesz przyciskiem „Add to My Voices". Jak zdobyć voice ID w ElevenLabs (w przeglądarce): odnajdź głos, odtwórz próbkę, żeby mieć pewność, że to właściwy, i skopiuj jego identyfikator przyciskiem „Copy Voice ID"; gdy głos jest już w „My Voices", przycisk ten jest dostępny od razu — bez rozwijania „More actions". Dobór głosów: aby ograniczyć ewentualne regeneracje, najłatwiej wybierać z kolekcji „Best for Eleven v3" (głosy sprawdzone pod kątem modelu v3, na którym powstaje projekt); alternatywnie zaprojektuj własny głos w „Voice Design", a dla odważnych zostaje klonowanie IVC (Instant Voice Cloning) lub PVC (Professional Voice Cloning). Pola możesz zostawić puste i wrócić później — zapis jest szkicem.
 
 Krok 2 — Zbuduj projekt
 

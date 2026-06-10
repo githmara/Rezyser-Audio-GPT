@@ -1219,3 +1219,18 @@ metadata:
 - **Sprzątnięte 2026-06-02:** testowy projekt web `v6DePXTExypq95RTeH8l` usunięty (DELETE 200); artefakty lokalne (`_pathB_segments/`, `prolog_pathB.mp3`, skrypty spike) usunięte; fikstura `skrypty/joanna_joana_script.{txt,md}` zachowana (skrypt usera). Receptura API przeniesiona do [[project_v16_plan_wdrozenia]].
 
 **Rekomendacja:** ZIELONE ŚWIATŁO na v16.0 — rdzeń techniczny i kosztowy zweryfikowany na żywym API. Implementacja etapami: system-check klucza (`sk_`, opcjonalny) → `core_elevenlabs.py` (reuse wzorca ze spike'u) → parser obsady + dialog (A11y) → dispatcher (projekt Studio + manifest SFX kotwiczony do tekstu) → manual ×9 → release. Czeka na zielone światło do IMPLEMENTACJI (spike to nie implementacja).
+
+
+## Answer-flow przez pending_answer.md + atomic-reset — ZNIESIONE w v17.1 (2026-06-10)
+
+Cały mechanizm question-flow opisany w sekcjach wyżej (ewolucja v15.2.6→v15.2.8: tryb FILE/COMMENT, atomic-reset `git reset --hard HEAD~1` + `git push --force-with-lease`, fallback cleanup-commit boota autorstwa `github-actions[bot]`, 3 warunki konieczne [atomowość HEAD / `fetch-depth: 2` / `contents: write`], sub-procedury release-then-answer i release-with-answer, edge case'y równoległych issues, pustego pliku, `--force-with-lease` odrzuconego i fail push) został w v17.1 USUNIĘTY z żywego kodu.
+
+**Powód zniesienia:** maszyneria powstała WYŁĄCZNIE dlatego, że maintainer-NVDA-user nie mógł wygodnie wkleić długiej odpowiedzi w web GitHub UI (kopiowanie z accessibility buffer VS Code gubiło znaki). Lokalny `gh` CLI — dostępny u maintainera od >miesiąca i już używany do `gh workflow run` / `gh release upload` — eliminuje ten pierwotny powód. Odpowiedzi publikujemy teraz wprost z maszyny, więc ~600 linii git-maszynerii w bocie + cała klasa edge case'ów stały się zbędne.
+
+**Stan po v17.1:**
+- `issue_closure_north.py` = SLIM bot, obsługuje TYLKO `fixed-in-release` (wykryj język → persona Lumi/Vieno/Katla → TEMPLATES z linkiem do Release → `gh issue comment/close/lock`, ZERO operacji git). Templatki personalne (`TEMPLATES`, `TEMPLATES_ANSWERED`, `PERSONAL_NOTE_INTRO`, `PERSONAS`, detektor lingua) zostają w tym module jako single source.
+- `odpowiedz_lokalnie.py` (root repo, NOWY) = flow `answered` (TEMPLATES_ANSWERED, draft obowiązkowy) + opcjonalnie `fixed-in-release` z osobistą notką (dawny release-with-answer, dolepek pod `---`). Lokalnie przez `gh`, draft w gitignorowanym `skrypty/pending_answer.md`, bez commitów/pushy/atomic-reset. Importuje templatki z bota (`sys.path` → `.github/scripts`). Flagi: `--dry-run`, `--persona`, `--plik`, `--etykieta`.
+- Workflow `issue-closure.yml`: trigger zawężony do `fixed-in-release`; usunięte `contents: write` i `fetch-depth: 2` (zwykły checkout, `permissions: issues: write`).
+- Etykieta `answered` SKASOWANA z repo (`gh label delete answered`) + usunięta z `issue_intake_sami.LABELS_IGNORE`. `fixed-in-release` zachowana.
+
+Sekcje archiwum o atomic-reset/FILE/COMMENT/sub-procedurach (wyżej) zachowane jako zapis HISTORYCZNY — NIE są już aktualnym zachowaniem. Aktualny opis flow → CLAUDE.md „# ODPOWIEDZI NA ISSUE" oraz [[reguly_github_bot]] sekcja „v17.1: answer-flow zniesiony".

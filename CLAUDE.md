@@ -17,7 +17,7 @@
 8. KOMUNIKACJA Z UŻYTKOWNIKIEM (od 2026-06-02 — czysty PowerShell, A11y). Pełne reguły → [[reguly_architektury]]. Skrót:
    - **Pytania są MILE WIDZIANE** — dziel proces na kroki z punktami decyzyjnymi, pytaj otwartym tekstem. AskUserQuestion dozwolone (stary „całkowity zakaz" z czasów zepsutego accessibility buffer VS Code został ZNIESIONY 2026-06-02; domyślnie i tak preferuj pytania otwartym tekstem, chyba że user wprost poprosi o menu).
    - **Terminal = tylko krótkie treści** (próg ≈2500 znaków): podsumowania + pytania o zgodę na kolejny krok. Długie raporty / plany / duże bloki kodu → `skrypty/ai_odpowiedz.txt` (Write/Edit), w terminalu zostaw notę „zaktualizowałem plik" (user otworzy w edytorze VS Code z natywnym A11y).
-   - **Drafty odpowiedzi na issue** → `pending_answer.md`; commit message / release notes do wklejenia → `commit_msg.txt`. Nie proś o kopiowanie z output'u terminala — pisz do pliku i wskazuj ścieżkę.
+   - **Drafty odpowiedzi na issue** → `skrypty/pending_answer.md` (gitignorowany, czytany przez `odpowiedz_lokalnie.py`); commit message / release notes do wklejenia → `commit_msg.txt`. Nie proś o kopiowanie z output'u terminala — pisz do pliku i wskazuj ścieżkę.
 
 # ZARZĄDZANIE LIMITAMI KONTEKSTU (TOKENY)
 - Narzędzie może się bezgłośnie zamrozić przy próbie nadpisania zbyt wielkiego pliku.
@@ -29,7 +29,7 @@
 Pamięć agenta jest podzielona na trzy warstwy z różnymi celami i sposobami ładowania:
 - **CLAUDE.md = Konstytucja** (ten plik): żelazne zasady środowiskowe (A11y, wxPython, terminal), główny cykl wydawniczy (happy path) i drogowskazy do pozostałych warstw. Ładowany przy KAŻDYM, najmniejszym zadaniu. MUSI być jak najlżejszy — bezwzględny limit miękki 25k znaków, twardy 35k.
 - **`claude_archive.md` = Muzeum**: grube post-mortemy, długie historie incydentów (np. halucynacja fi/manual.yaml 2026-05-15, incydent #13 GitHub auto-close 2026-05-16), pełne zapisy starych obejść (np. heurystyka force-push tag v15.2.7 sprzed atomic-reset) oraz zarchiwizowane roadmapy zamkniętych wydań (13.7 → v16.0). Śledzony w repo. **ŻELAZNA ZASADA: `claude_archive.md` to ZAMKNIĘTE archiwum historyczne. MASZ KATEGORYCZNY ZAKAZ ładowania go do kontekstu i czytania jego zawartości na start — chyba że użytkownik wyda bezpośredni rozkaz „przeszukaj archiwum".** Zapis (dopisywanie zarchiwizowanych sekcji) jest dozwolony bez tego rozkazu; zakaz dotyczy CZYTANIA.
-- **`memory/*.md` = Podświadomość**: techniczne niuanse, lessons learned, ścieżki awaryjne — skonsolidowane w **4 tematycznych filarach**: [[reguly_tlumaczen]] (autotłumacz/halucynacje/literały/słowniki), [[reguly_github_bot]] (boty, atomic-reset, zakaz auto-close), [[reguly_git_workflow]] (direct-to-main, force-push tagów, iteracyjne patche), [[reguly_architektury]] (prompty YAML, kolejność akcentów, runtime niewidoczny, model per tryb, staging, komunikacja). Lokalne pliki narzędzia (poza repo), `MEMORY.md` ładowany automatycznie jako indeks tych filarów, podpliki czytane po referencji `[[name]]`. **ŻELAZNA ZASADA ANTY-ROZMNAŻANIA: nowy lesson learned DOPISUJ jako sekcję `##` do pasującego filaru — NIE twórz nowych mikro-plików `feedback_*.md`. Nowy filar zakładaj tylko gdy temat nie mieści się w żadnym z czterech, i wtedy dodaj jego link do `MEMORY.md`.**
+- **`memory/*.md` = Podświadomość**: techniczne niuanse, lessons learned, ścieżki awaryjne — skonsolidowane w **4 tematycznych filarach**: [[reguly_tlumaczen]] (autotłumacz/halucynacje/literały/słowniki), [[reguly_github_bot]] (slim bot + lokalny zamykacz issue, zakaz auto-close), [[reguly_git_workflow]] (direct-to-main, force-push tagów, iteracyjne patche), [[reguly_architektury]] (prompty YAML, kolejność akcentów, runtime niewidoczny, model per tryb, staging, komunikacja). Lokalne pliki narzędzia (poza repo), `MEMORY.md` ładowany automatycznie jako indeks tych filarów, podpliki czytane po referencji `[[name]]`. **ŻELAZNA ZASADA ANTY-ROZMNAŻANIA: nowy lesson learned DOPISUJ jako sekcję `##` do pasującego filaru — NIE twórz nowych mikro-plików `feedback_*.md`. Nowy filar zakładaj tylko gdy temat nie mieści się w żadnym z czterech, i wtedy dodaj jego link do `MEMORY.md`.**
 
 **Autokontrola rozmiaru CLAUDE.md:** monitoruj rozmiar przed każdą modyfikacją. Przy zbliżeniu do 25k znaków (miękki) / 35k (twardy) uruchom CLEANUP: (1) klasyfikuj sekcje — post-mortemy → `claude_archive.md`, fixy/lessons learned/CI-CD niuanse → DOPISZ jako sekcję `##` do pasującego filaru `memory/reguly_*.md` (zgodnie z zasadą anty-rozmnażania — NIE twórz nowych mikro-plików), reguły A11y/wxPython/release happy path → zostają; (2) przenieś zachowując treść 1:1; (3) `MEMORY.md` aktualizuj tylko gdy powstał nowy filar; (4) w miejscu przeniesionych sekcji zostaw drogowskaz (`patrz [[reguly_<filar>]]` lub `→ claude_archive.md`); (5) krótki raport co/gdzie/dlaczego + poproś usera o zatwierdzenie PRZED commitem.
 
@@ -74,9 +74,7 @@ Solo-dev + A11y first: commit prosto na main, tag tworzony atomowo przez web Rel
 7. Web GitHub → Releases → wybierz draft → upload `Rezyser_Audio_v<wersja>_Installer.exe` → Publish. Agent: `gh release upload v<wersja> <plik.exe>` + `gh release edit v<wersja> --draft=false`.
 
 ## Force push w tym repo — co dozwolone
-Force push do MAIN/MASTER przez maintainera = zakazany. Dwa dopuszczalne wyjątki:
-- **(a) tag-only post-publish** jako fallback gdy bot answer-flow musiał użyć cleanup commit zamiast atomic-reset — patrz [[reguly_git_workflow]].
-- **(b) branch-only przez `github-actions[bot]`** w `issue-closure.yml` przy atomic-reset `pending_answer.md` (warunki konieczne) — patrz [[reguly_github_bot]].
+Force push do MAIN/MASTER przez maintainera = zakazany. Jedyny wąski wyjątek: **tag-only post-publish** — rzadki, czysto infrastrukturalny (np. tag wskazuje na zły commit po pomyłce przy publikacji Release) → [[reguly_git_workflow]]. (Do v17.0 istniał drugi wyjątek — branch-only force-push przez `github-actions[bot]` przy atomic-reset `pending_answer.md` w answer-flow; ZNIESIONY w v17.1, bo answer-flow przeniesiony do lokalnego `odpowiedz_lokalnie.py` bez commitów. Historia → `claude_archive.md`.)
 
 ## Czego nie robić
 - NIE twórz feature branchy dla zwykłych patchy. Wszystko bezpośrednio na main. Rzadkie wyjątki (duży refaktor wielo-patchowy, eksperymentalna gałąź, PR od kontrybutora zewnętrznego) → `claude_archive.md`.
@@ -91,7 +89,7 @@ Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera każde now
 
 1. **PROMPT DLA AGENTA AI** — wygenerowany przez `gpt-4o-mini` wg `SAMI_SYSTEM_PROMPT`. Format zależy od etykiet:
    * **TRYB A — question / help wanted** (etykiety zawierają TYLKO `question` i/lub `help wanted`, BEZ `bug`/`enhancement`/`documentation`):
-     dokładnie 2 sekcje: `## Cel pytania` + `## Co agent powinien zrobić`. Agent czyta i odpowiada przez `pending_answer.md` (patrz `# ODPOWIEDZI NA ISSUE`).
+     dokładnie 2 sekcje: `## Cel pytania` + `## Co agent powinien zrobić`. Agent odpowiada LOKALNIE skryptem `odpowiedz_lokalnie.py` (patrz `# ODPOWIEDZI NA ISSUE`).
    * **TRYB B — zmiana w kodzie** (etykiety zawierają `bug`, `enhancement`, `documentation` lub `invalid`, nawet w kombinacji z question/help wanted):
      dokładnie 4 sekcje: `## Cel` + `## Kontekst techniczny` + `## Kryteria akceptacji` + `## Pułapki do uniknięcia`. Agent implementuje fix.
 
@@ -105,25 +103,19 @@ Input maintainera otwierający się od `## Cel pytania` / `## Cel` z 2 lub 4 sek
 ## Pułapki interpretacji
 Trzy non-obvious'y (halucynacja LLM w sekcji „Pułapki do uniknięcia", tryb FALLBACK bez TRYB A/B, pusta sekcja OTWARTE ISSUES) → [[reguly_github_bot]].
 
-# ODPOWIEDZI NA ISSUE — question-flow z pliku (FILE mode + atomic-reset)
-Maintainer zapisuje draft jako `pending_answer.md` (Write/Edit, bez kopiowania z terminala), pushuje atomowo na main, nadaje etykietę `answered`. Bot (`issue_closure_north.py`) wczytuje Z PLIKU (eliminuje race condition trzeciego komentującego), opakowuje w wrapper Lumi/Vieno/Katla, publikuje + zamyka + lockuje issue, wymazuje draft z historii przez atomic-reset (`git reset --hard HEAD~1` + `git push --force-with-lease`). Warunek atomic-reset: HEAD = commit dodający DOKŁADNIE jeden plik `pending_answer.md`. Niespełniony → fallback cleanup commit boota. Historia ewolucji v15.2.6→v15.2.7→v15.2.8 → `claude_archive.md`.
+# ODPOWIEDZI NA ISSUE — lokalny skrypt (od v17.1)
+Flow odpowiedzi na pytanie/help wanted domykasz LOKALNIE skryptem `odpowiedz_lokalnie.py` (root repo) przez lokalny `gh` CLI. Koniec dawnej maszynerii `pending_answer.md` + commit + bot + atomic-reset/force-push (ZNIESIONA w v17.1; powody i historia ewolucji v15.2.6→v15.2.8 → `claude_archive.md`). Draft odpowiedzi leży w pliku GITIGNOROWANYM i nigdy nie dotyka repo.
 
 ## Procedura — flow czystego question (issue NIE wymaga release)
-1. Stwórz/zaktualizuj `pending_answer.md` w roocie repo — czysta odpowiedź merytoryczna w języku oryginalnego zgłoszenia (markdown OK), BEZ podpisu maintainera (wrapper dopisuje swój).
-2. `git add pending_answer.md && git commit -m "answer: draft odpowiedzi na #<N>" && git push origin main`. **KRYTYCZNE: ten commit musi być ATOMOWY** (TYLKO `pending_answer.md`). Inne zmiany (np. lessons learned w CLAUDE.md) zcommituj PRZED `pending_answer.md` jako osobny commit.
-3. Web GitHub UI → nadaj etykietę `answered` na issue #N. Workflow `issue-closure.yml` (job `zamknij_z_polnocy`) odpala się przez webhook `issues.labeled`.
-4. Bot wykrywa `pending_answer.md` → tryb FILE: wczytuje, opakowuje w persona-template per język, `gh issue comment/close/lock`. Następnie sprawdza atomowość HEAD: atomowy → atomic-reset (draft wymazany z historii), nieatomowy → fallback cleanup commit (autor `github-actions[bot]`).
-5. Lokalnie po workflow: `git fetch origin && git reset --hard origin/main` (NIE `git pull` — atomic-reset rewrite'uje historię origin, `git pull` zacznie histeryzować non-fast-forward).
+1. Zapisz odpowiedź (Write/Edit) w `skrypty/pending_answer.md` — czysta treść merytoryczna w języku oryginalnego zgłoszenia (markdown OK), BEZ podpisu (wrapper Lumi/Vieno/Katla dopisze swój). Plik gitignorowany.
+2. `.venv/Scripts/python odpowiedz_lokalnie.py <N>` — pobiera treść issue przez `gh` (detekcja języka), losuje personę, opakowuje w TEMPLATES_ANSWERED i robi `gh issue comment/close/lock`. Podgląd przed wysyłką: `--dry-run`. Wymuszenie persony: `--persona Lumi|Vieno|Katla`. Inny plik draftu: `--plik`.
+3. Gotowe — żadnych commitów, pushy ani etykiet (etykieta `answered` skasowana z repo w v17.1).
 
-## Sub-procedury bug+answer (release-then-answer, release-with-answer)
-Gdy issue wymaga release'u + komentarza/dolepka osobistej wiadomości — wybór ścieżki:
-- **release-then-answer**: bug fix + osobny komentarz BEZ linku do Release. Zamykane przez `answered`. Release commit i `pending_answer.md` commit są ROZBITE na osobne pushe, między nimi publikacja Release (tag wskazuje na czysty release commit). Rzadkie.
-- **release-with-answer** (od v15.2.8): bug-issue + dolepek osobistej wiadomości (tip o recovery, przeprosiny). Zamykane przez `fixed-in-release` z FILE mode boota (dolepia treść `pending_answer.md` pod TEMPLATES separatorem `---`). KRYTYCZNE: tag musi wskazywać na release commit, NIE na pending_answer.md commit — sprawdź SHA w Web UI.
+## Bug + osobista notka (dawny release-with-answer)
+PO opublikowaniu Release: zapisz notkę w `skrypty/pending_answer.md` i `.venv/Scripts/python odpowiedz_lokalnie.py <N> --tryb fixed-in-release` — dolepi notkę pod linkiem do najnowszego Release (separator `---`). Bez notki zwykły bug i tak domyka **slim bot** przez web-label `fixed-in-release`.
 
-Pełne procedury obu sub-flow'ów (kroki + komendy) → `claude_archive.md`.
-
-## Sytuacje brzegowe
-3 warunki konieczne dla preferowanej ścieżki atomic-reset (atomowość HEAD, `fetch-depth: 2`, `contents: write`), równoległość issues, etykiety disjunktywne `answered`/`fixed-in-release`, edge case'y pliku w trybach FILE/COMMENT, fail force-with-lease, fail push bota → [[reguly_github_bot]]. Pełne sub-procedury release-then-answer i release-with-answer z komendami → `claude_archive.md`.
+## Slim bot (fixed-in-release)
+`issue_closure_north.py` obsługuje już TYLKO `fixed-in-release` (web label → komentarz z linkiem do Release + close + lock, bez żadnych operacji git). Templatki personalne (TEMPLATES/TEMPLATES_ANSWERED/PERSONAL_NOTE_INTRO + detektor lingua) zostają w nim jako single source — importuje je `odpowiedz_lokalnie.py`. Detale botów → [[reguly_github_bot]].
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
@@ -137,6 +129,6 @@ Pełne procedury obu sub-flow'ów (kroki + komendy) → `claude_archive.md`.
 
 **`MEMORY.md` + `memory/*.md` (Podświadomość, poza repo, auto-load)** — techniczne niuanse, lessons learned, ścieżki awaryjne w 4 filarach. Indeks w `MEMORY.md`, filary czytane po referencji `[[name]]`:
 - [[reguly_tlumaczen]] — autotłumacz, review halucynacji (Caesar/Tipoglicemia/fiolka/PL-leak), generyczne sanity-checki, literały kod-vs-`ui.yaml`, idiomatyczna lokalizacja nazw, pl/en bazy referencyjne, review marki w templatkach.
-- [[reguly_github_bot]] — atomic-reset (3 warunki + edge case'y answer-flow), ZAKAZ auto-close keywords (fix/closes/resolves przed #N), env-zamiast-argv w workflowach, interpretacja promptu Sami.
+- [[reguly_github_bot]] — slim bot `fixed-in-release` + lokalny `odpowiedz_lokalnie.py` (od v17.1; dawny atomic-reset/FILE/COMMENT → archiwum), ZAKAZ auto-close keywords (fix/closes/resolves przed #N), env-zamiast-argv w workflowach, interpretacja promptu Sami.
 - [[reguly_git_workflow]] — direct-to-main, hotfix = patch tag, iteracyjny patch przez force-push rewrite, force-push tag-only post-publish, gh CLI release-flow.
 - [[reguly_architektury]] — prompty LLM w YAML (ręcznie), sekwencyjność `str.replace` w akcentach, `runtime/` niewidoczny, model per tryb Opowieści, staging + maskowanie, komunikacja (pytania mile widziane).

@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.0.1 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.1 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -207,7 +207,7 @@ Brúin birtist í Stjórnborði í Skjalaham (þegar lykillinn er réttur). Hún
 
 Skref 1 — Raddsetning
 
-Smelltu á „Raddsetning…". Forritið les inn persónur sem hafa línur og bætir alltaf við rauf fyrir Sögumann (sögumaður er sjálfgefin rödd — titla kafla og alla frásögn). Fyrir hvern ræðumann skaltu líma inn voice ID: í vafra farðu í flipann Voices, finndu röddina og spilaðu sýnishorn, opnaðu „More actions" → „Copy Voice ID" og límdu það í reitinn. Þú getur notað tilbúnar raddir (premade) eða þínar eigin (Voice Design). Þú getur skilið reitina eftir tóma og komið aftur seinna — skráningin er drög.
+Smelltu á „Raddsetning…". Forritið les inn persónur sem hafa línur og bætir alltaf við rauf fyrir Sögumann (sögumaður er sjálfgefin rödd — titla kafla og alla frásögn). Fyrir hvern ræðumann skaltu líma inn voice ID. MIKILVÆGT: hver rödd sem notuð er í verkinu verður fyrst að vera í „My Voices" hjá þér — raddir sem þú býrð til sjálf(ur) (t.d. í „Voice Design") lenda þar sjálfkrafa, en raddir úr almenna safninu skoðarðu í flipanum „Explore" og bætir við með „Add to My Voices". Svona nærðu í voice ID í ElevenLabs (í vafra): finndu röddina, spilaðu sýnishorn til að vera viss um að það sé rétta röddin, og afritaðu auðkennið með „Copy Voice ID"; þegar rödd er komin í „My Voices" er þessi hnappur aðgengilegur strax — án þess að opna „More actions". Val á röddum: til að takmarka mögulegar endurgerðir er einfaldast að velja úr safninu „Best for Eleven v3" (raddir prófaðar fyrir v3-líkanið sem verkefnið byggir á); að öðrum kosti hannaðu þína eigin rödd í „Voice Design", og fyrir hugrakka stendur eftir klónun með IVC (Instant Voice Cloning) eða jafnvel PVC (Professional Voice Cloning). Þú getur skilið reitina eftir tóma og komið aftur seinna — skráningin er drög.
 
 Skref 2 — Byggja verkefni
 

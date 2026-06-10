@@ -47,6 +47,14 @@ datas += collect_data_files("docx")
 # tiktoken ładuje enkodery jako pluginy z namespace tiktoken_ext (entry-points).
 hiddenimports += collect_submodules("tiktoken_ext")
 
+# elevenlabs (od v17.1): SDK Fern-generated; namespace'y `studio`/`user` ładujemy
+# lazy-importem w core_elevenlabs (`from elevenlabs.client import ElevenLabs`),
+# więc dla pewności zbieramy WSZYSTKIE submoduły — inaczej frozen build mógłby
+# wywalić się na ModuleNotFoundError przy budowie projektu Studio. SDK to czysty
+# kod (httpx+pydantic, brak data-plików), więc collect_submodules wystarcza
+# (lżejsze od collect_all). openai analizuje się statycznie i collect nie wymaga.
+hiddenimports += collect_submodules("elevenlabs")
+
 block_cipher = None
 
 a = Analysis(

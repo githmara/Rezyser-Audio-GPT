@@ -1,31 +1,16 @@
 name: Issue Closure (North — Lumi/Vieno/Katla)
 
-# Etap „Polnoc" obiegu „Z Poludnia na Polnoc". Dwie etykiety wyzwalajace
-# (od v15.2.6, z trybem FILE od v15.2.7):
-#   * `fixed-in-release` — bug-fix flow: jedna z bohaterek Polnocy
-#     (Lumi/Vieno/Katla) komentuje z linkiem do najnowszego Release
-#     i zamyka issue w jezyku oryginalnego zgloszenia.
-#   * `answered` — answer flow z dwoma trybami:
-#       - FILE (priorytet, v15.2.7+): jesli `pending_answer.md` istnieje
-#         w roocie repo, bot czyta z pliku, opakowuje, publikuje, zamyka,
-#         lockuje, i sprzata draft z main. Od v15.2.8 cleanup ma dwie
-#         sciezki: (a) atomic-reset (preferowana, gdy HEAD = atomowy commit
-#         z samym pending_answer.md) wymazuje draft przez reset --hard +
-#         force-push-with-lease — historia czysta jakby plik nigdy nie
-#         istnial; (b) cleanup commit boota (fallback, gdy HEAD zawiera
-#         dodatkowe pliki) dokleja `git rm pending_answer.md`. Wymaga
-#         `contents: write` + `fetch-depth: 2` na checkout. Motywacja
-#         pierwotna trybu FILE: eliminacja race condition COMMENT mode +
-#         A11y blokada kopiowania z terminala VS Code u maintainera-NVDA-
-#         usera. Motywacja v15.2.8 atomic-reset: czystsza historia, brak
-#         koniecznosci force-push tag'a post-publish.
-#       - COMMENT (fallback): bot wyciaga ostatni komentarz na issue
-#         (zostawiony przez maintainera jako odpowiedz na pytanie),
-#         opakowuje go w styl persony BEZ linku do release, zamyka issue,
-#         usuwa oryginalny komentarz przez REST DELETE.
-#     Konwencja FILE: pushnij pending_answer.md, potem nadaj etykiete.
-#     Konwencja COMMENT: skomentuj, potem nadaj etykiete `answered` — bot
-#     bierze chronologicznie ostatni komentarz.
+# Etap „Polnoc" obiegu „Z Poludnia na Polnoc". Od v17.1 JEDNA etykieta
+# wyzwalajaca: `fixed-in-release` (bug-fix flow). Jedna z bohaterek Polnocy
+# (Lumi/Vieno/Katla) komentuje issue z linkiem do najnowszego Release i zamyka
+# je w jezyku oryginalnego zgloszenia.
+#
+# Flow `answered` (odpowiedzi na pytania) zostal w v17.1 PRZENIESIONY do
+# LOKALNEGO skryptu `odpowiedz_lokalnie.py` — maintainer ma lokalny gh CLI, wiec
+# nie potrzeba juz obiegu przez zacommitowany plik. Zniknela maszyneria
+# pending_answer.md + commit + atomic-reset / cleanup-commit / force-push + tryb
+# COMMENT. Dlatego ten workflow nie potrzebuje juz `contents: write` ani
+# `fetch-depth: 2` na checkout — robi wylacznie comment/close/lock przez gh.
 
 on:
   issues:
@@ -37,30 +22,14 @@ concurrency:
 
 jobs:
   zamknij_z_polnocy:
-    if: github.event.label.name == 'fixed-in-release' || github.event.label.name == 'answered'
+    if: github.event.label.name == 'fixed-in-release'
     runs-on: ubuntu-latest
     permissions:
       issues: write
-      # contents: write — od v15.2.7 bot w trybie FILE usuwa
-      # `pending_answer.md` commit-em wlasnego autora i pushuje na main
-      # (`_usun_pending_answer_z_git` w issue_closure_north.py). W trybie
-      # COMMENT contents: write nie jest uzywane, ale zostawiamy bo workflow
-      # YAML nie wie z gory ktory tryb sie odpali (decyduje obecnosc pliku).
-      contents: write
 
     steps:
       - name: Pobranie kodu repozytorium
         uses: actions/checkout@v5
-        # fetch-depth: 2 (od v15.2.8) — bot w trybie FILE preferuje
-        # `git reset --hard HEAD~1` + force-push-with-lease (wymazanie
-        # atomowego pending_answer.md commit'a z historii main bez sladu).
-        # Bez `fetch-depth: 2` checkout robi shallow clone depth=1 i HEAD~1
-        # nie istnieje lokalnie — atomic-reset by failowal i bot spadalby
-        # do fallbacku cleanup commit'a. Tryb COMMENT i fallback cleanup
-        # nie wymagaja HEAD~1, ale tu wybieramy bezpieczna opcje na poziomie
-        # checkoutu, zeby preferowana sciezka zawsze byla dostepna.
-        with:
-          fetch-depth: 2
 
       - name: Konfiguracja srodowiska Python
         uses: actions/setup-python@v6
@@ -72,8 +41,8 @@ jobs:
 
       - name: Polnocna bohaterka komentuje i zamyka
         # UWAGA: argumentow NIE przekazujemy przez CLI, bo bash robi
-        # word-splitting na cudzyslowach / backtickach w tresci issue
-        # (klasyczna pulapka shellu). Skrypt czyta wszystko z os.environ.
+        # word-splitting na cudzyslowach / backtickach w tresci issue.
+        # Skrypt czyta wszystko z os.environ.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}

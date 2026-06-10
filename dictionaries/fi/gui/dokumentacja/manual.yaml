@@ -219,7 +219,7 @@ tresc:
 
     Vaihe 1 — Ääninäyttelijät
 
-    Klikkaa "Ääninäyttelijät…". Sovellus lataa hahmot, joilla on repliikkejä, ja lisää aina Kertojan paikan (kertoja on oletusääni — lukujen otsikot ja koko kertomus). Liitä jokaiselle puhujalle voice ID: mene selaimessa välilehdelle Voices, etsi ääni ja toista näyte, avaa "More actions" → "Copy Voice ID" ja liitä se kenttään. Voit käyttää valmiita ääniä (premade) tai omia (Voice Design). Kentät voi jättää tyhjiksi ja palata myöhemmin — tallennus on luonnos.
+    Klikkaa "Ääninäyttelijät…". Sovellus lataa hahmot, joilla on repliikkejä, ja lisää aina Kertojan paikan (kertoja on oletusääni — lukujen otsikot ja koko kertomus). Liitä jokaiselle puhujalle voice ID. TÄRKEÄÄ: jokaisen näytelmässä käytetyn äänen on ensin oltava omissa "My Voices" -äänissäsi — äänet, jotka luot itse (esim. "Voice Design" -työkalussa), päätyvät sinne automaattisesti, kun taas julkisen kirjaston äänet selataan "Explore"-välilehdellä ja lisätään painikkeella "Add to My Voices". Näin saat voice ID:n ElevenLabsissa (selaimessa): etsi ääni, toista näyte varmistaaksesi, että se on oikea, ja kopioi sen tunniste painikkeella "Copy Voice ID"; kun ääni on jo "My Voices" -äänissä, tämä painike on heti käytettävissä — ilman "More actions" -valikon avaamista. Äänten valinta: mahdollisten uudelleengenerointien rajoittamiseksi helpointa on valita "Best for Eleven v3" -kokoelmasta (äänet, jotka on tarkistettu v3-mallia varten, jolle projekti rakennetaan); vaihtoehtoisesti suunnittele oma ääni "Voice Design" -työkalussa, ja rohkeille jää kloonaus IVC (Instant Voice Cloning) tai jopa PVC (Professional Voice Cloning). Kentät voi jättää tyhjiksi ja palata myöhemmin — tallennus on luonnos.
 
     Vaihe 2 — Rakenna projekti
 

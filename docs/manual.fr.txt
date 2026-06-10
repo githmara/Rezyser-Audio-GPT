@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 17.0.1 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 17.1 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -169,7 +169,7 @@ Le Mode Script Brut possède un panneau dédié "✂️ Gestion de la Structure"
 - Insérer Scène X : Insère uniquement l'en-tête de la scène (par exemple, "Scène 3") dans l'acte en cours. Le compteur de scènes augmente automatiquement.
 
 
-Accents disponibles dans Reżyser Audio GPT 17.0.1 :
+Accents disponibles dans Reżyser Audio GPT 17.1 :
 
 - Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
 - Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
@@ -259,7 +259,7 @@ Le pont apparaît dans le panneau du Réalisateur en mode Script (lorsque la cl�
 
 Étape 1 — Distribution vocale
 
-Cliquez sur « Distribution vocale… ». L'application charge les personnages ayant des répliques et ajoute toujours un slot pour le Narrateur (le narrateur est la voix par défaut — titres des chapitres et toute la narration). Pour chaque locuteur, collez l'ID de la voix : dans le navigateur, allez dans l'onglet Voices, trouvez la voix et écoutez un échantillon, ouvrez « More actions » → « Copy Voice ID » et collez-le dans le champ. Vous pouvez utiliser des voix prêtes à l'emploi (premade) ou vos propres voix (Voice Design). Vous pouvez laisser les champs vides et revenir plus tard — l'enregistrement est un brouillon.
+Cliquez sur « Distribution vocale… ». L'application charge les personnages ayant des répliques et ajoute toujours un slot pour le Narrateur (le narrateur est la voix par défaut — titres des chapitres et toute la narration). Pour chaque locuteur, collez l'ID de la voix. IMPORTANT : toute voix utilisée dans la pièce doit d'abord se trouver dans vos « My Voices » — les voix que vous créez vous-même (par exemple dans « Voice Design ») y arrivent automatiquement, tandis que les voix de la bibliothèque publique se parcourent dans l'onglet « Explore » et s'ajoutent avec « Add to My Voices ». Comment obtenir un ID de voix dans ElevenLabs (dans le navigateur) : trouvez la voix, écoutez un échantillon pour être sûr que c'est la bonne, et copiez son identifiant avec « Copy Voice ID » ; une fois qu'une voix est dans « My Voices », ce bouton est disponible immédiatement — sans dérouler « More actions ». Choix des voix : pour limiter d'éventuelles régénérations, le plus simple est de choisir dans la collection « Best for Eleven v3 » (des voix vérifiées pour le modèle v3 sur lequel le projet est construit) ; sinon, concevez votre propre voix dans « Voice Design », et pour les plus audacieux il reste le clonage IVC (Instant Voice Cloning) ou même PVC (Professional Voice Cloning). Vous pouvez laisser les champs vides et revenir plus tard — l'enregistrement est un brouillon.
 
 Étape 2 — Construire le projet
 

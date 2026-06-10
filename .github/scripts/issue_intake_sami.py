@@ -162,7 +162,9 @@ LABELS_IGNORE = {
     "duplicate",
     "tiflotecnia-patch",
     "fixed-in-release",
-    "answered",  # od v15.2.6: Centrum już odpisał, Północ zamyka przez issue_closure_north
+    # `answered` USUNIĘTE w v17.1: flow odpowiedzi przeniesiony do lokalnego
+    # odpowiedz_lokalnie.py (zamyka issue od razu, bez etykiety-triggera),
+    # a sama etykieta skasowana z repo dla czytelności listy Issues.
 }
 
 # Etykiety, które AKCEPTUJEMY (przynajmniej jedna musi się pojawić).
