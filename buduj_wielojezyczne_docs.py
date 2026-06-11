@@ -381,8 +381,9 @@ META_INSTRUKCJA = (
 def rozdziel_meta(tekst: str) -> tuple[str, str]:
     """Dzieli odpowiedź LLM na (tłumaczenie, meta-komentarz) po `===META===`.
 
-    Split na PIERWSZYM markerze (sekcje doc są jednoblokowe — patrz limit
-    max_znakow_na_blok; meta pojawia się raz, na końcu). Brak markera → ("", tekst, "")
+    Split na PIERWSZYM markerze (sekcje doc są jednoblokowe — patrz jawny
+    `max_tokenow_na_blok=4_000` przy wywołaniu `tlumacz_dlugi_tekst`; meta
+    pojawia się raz, na końcu). Brak markera → ("", tekst, "")
     tzn. całość to tłumaczenie, meta puste.
     """
     if META_MARKER in tekst:
@@ -806,6 +807,12 @@ def _tlumacz_pojedyncza_sekcje(
         on_blad_miekki=_on_blad_miekki,
         model_tlumacz=model,
         prompt_dodatkowy=prompt_z_meta,
+        # Jawnie ponad domyślne 2 500: sekcje doc MUSZĄ być jednoblokowe
+        # (inaczej `===META===` wylądowałby w środku sklejki — patrz
+        # `rozdziel_meta`). 4 000 tokenów ≈ stary limit znakowy 14-16k;
+        # bezpieczne, bo docs tłumaczymy wyłącznie na języki łacińskie
+        # i cyrylicę (nie token-gęste CJK).
+        max_tokenow_na_blok=4_000,
     )
     if wynik is None:
         komunikat = blad_kryt["msg"] or "nieznany błąd silnika tlumacz_ai.py"

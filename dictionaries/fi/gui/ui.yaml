@@ -726,9 +726,9 @@ poliglota:
   lbl_akcent: "Valitse aksentti tai puhdistustila:"
   combo_akcent_name: "Aksenttien ja puhdistustilojen lista"
   combo_akcent_tooltip: "Valitse foneettinen aksentti tai tekstin puhdistustila ruudunlukijoille"
-  lbl_iso: "Kielen ISO-koodi (2 kirjainta, esim. en, fr, de):"
+  lbl_iso: "Kielen ISO-koodi (esim. en, fr, de; alueelliset variantit esim. pt-BR, zh-CN):"
   txt_iso_name: "Kielen ISO-koodin kenttä"
-  txt_iso_hint: "esim. en"
+  txt_iso_hint: "esim. en tai pt-BR"
   # Panel Szyfranta
   lbl_szyfr: "Valitse vääristävä algoritmi:"
   combo_szyfr_name: "Salausalgoritmien lista"
@@ -753,7 +753,7 @@ poliglota:
   nie_wybrano_akcentu: "Ei valittua aksenttia."
   nie_wybrano_szyfru: "Ei valittua salausta."
   brak_iso_tytul: "Ei ISO-koodia"
-  brak_iso_tresc: "Anna kelvollinen kaksikirjaiminen ISO-koodi kielelle (esim. en, fr, de)."
+  brak_iso_tresc: "Anna kelvollinen kielen ISO-koodi — kaksikirjaiminen (esim. en, fr, de) tai alue-/kirjoitusjärjestelmätarkenteella (esim. pt-BR, zh-CN, zh-Hans)."
   ostrzezenie_jezyk: |-
     Huomio: Tekstin pääkieli havaittu olevan tuettujen ulkopuolella. Foneettiset säännöt on tällä hetkellä mukautettu kielille: {wspierane_jezyki}. Vaikutus voi olla arvaamaton.
   # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu

@@ -1446,10 +1446,11 @@ def przetworz(
 # =============================================================================
 
 def kod_iso(tryb: str, jezyk: str, wariant: str, opcje: dict | None = None) -> str:
-    """Zwraca dwuliterowy kod ISO języka dla pliku wynikowego.
+    """Zwraca kod języka dla pliku wynikowego (ISO 639-1 lub BCP-47).
 
     Dla naprawiacza tagów ``iso`` jest podawane ręcznie przez użytkownika
-    (w ``opcje["iso_reczne"]``). Dla pozostałych wariantów pochodzi z YAML-a.
+    (w ``opcje["iso_reczne"]``; od v17.2.1 może zawierać podtag regionu/pisma,
+    np. ``pt-BR``). Dla pozostałych wariantów pochodzi z YAML-a.
     """
     cfg = wariant_po_id(tryb, jezyk, wariant) or wariant_po_etykiecie(tryb, jezyk, wariant)
     if cfg is None:

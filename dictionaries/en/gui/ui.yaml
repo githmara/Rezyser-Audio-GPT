@@ -725,9 +725,9 @@ poliglota:
   lbl_akcent: "Select accent or cleaning mode:"
   combo_akcent_name: "List of accents and cleaning modes"
   combo_akcent_tooltip: "Select phonetic accent or text cleaning mode for screen readers"
-  lbl_iso: "ISO language code (2 letters, e.g., en, fr, de):"
+  lbl_iso: "ISO language code (e.g., en, fr, de; regional variants e.g. pt-BR, zh-CN):"
   txt_iso_name: "ISO language code field"
-  txt_iso_hint: "e.g. en"
+  txt_iso_hint: "e.g. en or pt-BR"
   # Panel Szyfranta
   lbl_szyfr: "Select a distorting algorithm:"
   combo_szyfr_name: "List of encryption algorithms"
@@ -752,7 +752,7 @@ poliglota:
   nie_wybrano_akcentu: "No accent selected."
   nie_wybrano_szyfru: "No cipher selected."
   brak_iso_tytul: "No ISO code"
-  brak_iso_tresc: "Provide a valid two-letter ISO language code (e.g. en, fr, de)."
+  brak_iso_tresc: "Provide a valid ISO language code — two letters (e.g. en, fr, de) or with a region/script subtag (e.g. pt-BR, zh-CN, zh-Hans)."
   ostrzezenie_jezyk: |-
     Note: A primary text language outside of supported ones was detected. Phonetic rules are currently adapted for languages: {wspierane_jezyki}. The effect may be unpredictable.
   # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu

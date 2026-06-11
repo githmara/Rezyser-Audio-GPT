@@ -324,7 +324,9 @@ class PoliglotaPanel(wx.Panel):
 
         self._lbl_iso = wx.StaticText(panel, label=t("poliglota.lbl_iso"))
         self._txt_iso = wx.TextCtrl(panel, name=t("poliglota.txt_iso_name"))
-        self._txt_iso.SetMaxLength(2)
+        # BCP-47: najdłuższy akceptowany kod to język+pismo, np. "zh-Hans"
+        # (7 znaków). Do v17.2 limit 2 blokował kody regionalne (issue #16).
+        self._txt_iso.SetMaxLength(7)
         self._txt_iso.SetHint(t("poliglota.txt_iso_hint"))
         self._lbl_iso.Hide(); self._txt_iso.Hide()
 
@@ -639,8 +641,11 @@ class PoliglotaPanel(wx.Panel):
 
         opcje: dict = {}
         if cfg.get("kategoria") == "naprawiacz":
-            kod_iso = self._txt_iso.GetValue().strip().lower()
-            if not kod_iso or len(kod_iso) > 2:
+            # Wspólny walidator BCP-47 z Tłumaczem AI: akceptuje "en", ale
+            # też odmiany regionalne/pisma ("pt-BR", "zh-Hans") i normalizuje
+            # wielkość liter ("pt-br" → "pt-BR").
+            kod_iso = tlumacz_ai.normalizuj_kod_jezyka(self._txt_iso.GetValue())
+            if not kod_iso:
                 wx.MessageBox(t("poliglota.brak_iso_tresc"),
                               t("poliglota.brak_iso_tytul"),
                               wx.OK | wx.ICON_WARNING, self)

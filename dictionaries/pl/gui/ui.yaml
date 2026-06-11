@@ -748,9 +748,9 @@ poliglota:
   lbl_akcent:            "Wybierz akcent lub tryb czyszczenia:"
   combo_akcent_name:     "Lista akcentów i trybów czyszczenia"
   combo_akcent_tooltip:  "Wybierz akcent fonetyczny lub tryb czyszczenia tekstu pod czytniki ekranu"
-  lbl_iso:               "Kod ISO języka (2 litery, np. en, fr, de):"
+  lbl_iso:               "Kod ISO języka (np. en, fr, de; odmiany regionalne np. pt-BR, zh-CN):"
   txt_iso_name:          "Pole kodu ISO języka"
-  txt_iso_hint:          "np. en"
+  txt_iso_hint:          "np. en lub pt-BR"
   # Panel Szyfranta
   lbl_szyfr:             "Wybierz algorytm zniekształcający:"
   combo_szyfr_name:      "Lista algorytmów szyfrujących"
@@ -775,7 +775,7 @@ poliglota:
   nie_wybrano_akcentu:   "Nie wybrano żadnego akcentu."
   nie_wybrano_szyfru:    "Nie wybrano żadnego szyfru."
   brak_iso_tytul:        "Brak kodu ISO"
-  brak_iso_tresc:        "Podaj poprawny dwuliterowy kod ISO języka (np. en, fr, de)."
+  brak_iso_tresc:        "Podaj poprawny kod ISO języka — dwuliterowy (np. en, fr, de) lub z podtagiem regionu/pisma (np. pt-BR, zh-CN, zh-Hans)."
   ostrzezenie_jezyk: |-
     Uwaga: Wykryto język główny tekstu spoza wspieranych. Reguły fonetyczne są obecnie przystosowane do języków: {wspierane_jezyki}. Efekt może być nieprzewidywalny.
   # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu

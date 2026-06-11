@@ -728,9 +728,9 @@ poliglota:
   lbl_akcent: "Выберите акцент или режим очистки:"
   combo_akcent_name: "Список акцентов и режимов очистки"
   combo_akcent_tooltip: "Выберите фонетический акцент или режим очистки текста для экранных чтецов"
-  lbl_iso: "Код ISO языка (2 буквы, например, en, fr, de):"
+  lbl_iso: "Код ISO языка (например, en, fr, de; региональные варианты, например, pt-BR, zh-CN):"
   txt_iso_name: "Поле кода ISO языка"
-  txt_iso_hint: "например, en"
+  txt_iso_hint: "например, en или pt-BR"
   # Panel Szyfranta
   lbl_szyfr: "Выберите искажающий алгоритм:"
   combo_szyfr_name: "Список шифрующих алгоритмов"
@@ -755,7 +755,7 @@ poliglota:
   nie_wybrano_akcentu: "Не выбран ни один акцент."
   nie_wybrano_szyfru: "Не выбран ни один шифр."
   brak_iso_tytul: "Нет кода ISO"
-  brak_iso_tresc: "Укажите правильный двухбуквенный код ISO языка (например, en, fr, de)."
+  brak_iso_tresc: "Укажите правильный код ISO языка — двухбуквенный (например, en, fr, de) или с субтегом региона/письменности (например, pt-BR, zh-CN, zh-Hans)."
   ostrzezenie_jezyk: |-
     Внимание: Обнаружен основной язык текста, не поддерживаемый системой. Фонетические правила в настоящее время адаптированы для языков: {wspierane_jezyki}. Эффект может быть непредсказуемым.
   # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu

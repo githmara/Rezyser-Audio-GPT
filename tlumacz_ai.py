@@ -12,18 +12,27 @@ przekazane callbacki. Dzięki temu GUI może wywoływać :func:`tlumacz_dlugi_te
 w wątku tła i odbierać postęp/wyniki bez tzw. GUI freeze.
 
 Szczegółowy przebieg:
-  1. Tekst dzielony jest na bloki po maksymalnie ``max_znakow_na_blok`` znaków,
-     z zachowaniem podziału na akapity (``\\n``).
+  1. Tekst dzielony jest na bloki po maksymalnie ``max_tokenow_na_blok``
+     tokenów (tiktoken przez ``core_tokeny`` — ten sam licznik co tryby
+     Reżysera/Opowieści), z zachowaniem podziału na akapity (``\\n``).
+     Limit tokenowy (nie znakowy!) chroni języki token-gęste (CJK itp.)
+     przed przekroczeniem limitu tokenów WYJŚCIA modelu.
   2. Jeśli ostatni blok jest krótki, sklejany jest z przedostatnim.
   3. Dla każdego bloku wysyłane jest zapytanie ``chat.completions`` do modelu
      ``model_tlumacz``. Ostatni tłumaczony blok podawany jest jako kontekst
      do kolejnego wywołania – dzięki temu model trzyma spójną terminologię.
+     Odpowiedź ucięta limitem wyjścia (``finish_reason == "length"``) NIE
+     jest akceptowana — blok jest dzielony na pół i tłumaczony rekurencyjnie
+     (:func:`_tlumacz_blok`), zamiast bezgłośnie gubić końcówkę tekstu.
   4. Po każdym udanym bloku treść dopisywana jest do pliku tymczasowego
      ``runtime/temp_<nazwa_bazowa>.jsonl``. Jeśli użytkownik przerwie
      tłumaczenie i ponownie je uruchomi z tym samym plikiem źródłowym,
      gotowe bloki są odtwarzane z tego pliku (oszczędność kredytów API).
+     Pierwsza linia pliku to metryka zgodności (wersja chunkowania +
+     liczba bloków) — cache z innego podziału jest odrzucany w całości.
   5. Na końcu wywoływana jest druga, tania konsultacja (``model_iso``)
-     w celu ustalenia dwuliterowego kodu ISO języka docelowego.
+     w celu ustalenia kodu języka BCP-47 (dwuliterowy ISO 639-1,
+     dla odmian regionalnych/pisma z podtagiem, np. ``pt-BR``, ``zh-Hans``).
 """
 
 from __future__ import annotations
@@ -33,6 +42,8 @@ import os
 import re
 from dataclasses import dataclass, field
 from typing import Any, Callable
+
+import core_tokeny as ct
 
 
 # =============================================================================
@@ -44,7 +55,7 @@ class WynikTlumaczenia:
     """Zbiorczy rezultat przekazywany do GUI po zakończeniu tłumaczenia."""
 
     tekst: str                     # pełna, sklejona treść tłumaczenia
-    iso: str                       # kod ISO 639-1 języka docelowego
+    iso: str                       # kod języka BCP-47 (ISO 639-1, opcjonalnie z podtagiem regionu/pisma)
     base_name: str                 # nazwa pliku wynikowego bez rozszerzenia
     jezyk_docelowy: str            # tekstowa nazwa języka (z pola GUI)
     ostrzezenia: list[str] = field(default_factory=list)   # miękkie błędy ISO itp.
@@ -94,28 +105,73 @@ def _prompt_systemowy(jezyk_docelowy: str) -> str:
 # =============================================================================
 # Podział tekstu na bloki
 # =============================================================================
-def _podziel_na_bloki(tekst: str, max_znakow: int = 10_000) -> list[str]:
-    """Dzieli długi tekst na bloki ≤ ``max_znakow`` znaków, respektując linie."""
+# Wersja algorytmu chunkowania — zapisywana w metryce pliku tymczasowego.
+# Bump przy każdej zmianie podziału na bloki: cache z innym podziałem ma
+# niekompatybilne indeksy i sklejony z nowymi blokami dałby tekst z dziurami.
+# Wersja 2 = przejście ze znaków (10k) na tokeny (v17.2.1, issue #16).
+_WERSJA_CHUNKOWANIA = 2
+
+
+def _podziel_na_bloki(tekst: str, max_tokenow: int = 2_500,
+                      model: str = "gpt-4o") -> list[str]:
+    """Dzieli długi tekst na bloki ≤ ``max_tokenow`` tokenów, respektując linie.
+
+    Do v17.2 limit liczony był w ZNAKACH (10k) — dla języków token-gęstych
+    (chiński, japoński...) tłumaczenie takiego bloku potrafiło przekroczyć
+    limit tokenów WYJŚCIA modelu i kończyło się bezgłośnym ucięciem
+    końcówki. Tokeny tiktoken (ten sam licznik co Reżyser/Opowieści) dają
+    przewidywalny rozmiar niezależnie od alfabetu. Proporcje sklejania
+    ostatniego bloku odpowiadają staremu 4k/16k znaków (40% / 160% limitu).
+    """
+    encoder = ct.kodowanie_dla_modelu(model)
+
+    def tokeny(fragment: str) -> int:
+        return len(encoder.encode(fragment))
+
     akapity = tekst.split("\n")
     bloki: list[str] = []
     obecny = ""
+    obecny_tok = 0
     for akapit in akapity:
-        if len(obecny) + len(akapit) < max_znakow:
+        tok_akapitu = tokeny(akapit + "\n")
+        if obecny_tok + tok_akapitu < max_tokenow:
             obecny += akapit + "\n"
+            obecny_tok += tok_akapitu
         else:
             if obecny.strip():
                 bloki.append(obecny.strip())
             obecny = akapit + "\n"
+            obecny_tok = tok_akapitu
     if obecny.strip():
         bloki.append(obecny.strip())
 
     # Sklej ostatni krótki blok z przedostatnim (gdy się mieszczą), by uniknąć
     # marnowania jednego zapytania na kilka zdań końcowych.
-    if len(bloki) > 1 and len(bloki[-1]) < 4_000:
-        if len(bloki[-2]) + len(bloki[-1]) < 16_000:
+    if len(bloki) > 1 and tokeny(bloki[-1]) < max_tokenow * 2 // 5:
+        if tokeny(bloki[-2]) + tokeny(bloki[-1]) < max_tokenow * 8 // 5:
             bloki[-2] += "\n\n" + bloki[-1]
             bloki.pop()
     return bloki
+
+
+def _podziel_blok_na_pol(blok: str) -> tuple[str, str]:
+    """Dzieli blok na dwie niepuste połowy, możliwie blisko środka.
+
+    Preferencja granic cięcia: koniec akapitu (``\\n``) → koniec zdania
+    (``. ``) → twardy środek. Używane przy ponawianiu bloku, którego
+    tłumaczenie zostało ucięte limitem tokenów wyjścia.
+    """
+    srodek = len(blok) // 2
+    for separator in ("\n", ". "):
+        idx = blok.rfind(separator, 0, srodek)
+        if idx == -1:
+            idx = blok.find(separator, srodek)
+        if idx != -1:
+            ciecie = idx + len(separator)
+            lewa, prawa = blok[:ciecie].strip(), blok[ciecie:].strip()
+            if lewa and prawa:
+                return lewa, prawa
+    return blok[:srodek].strip(), blok[srodek:].strip()
 
 
 # =============================================================================
@@ -147,14 +203,51 @@ def _sciezka_pliku_tymczasowego(runtime_dir: str, base_name: str) -> str:
 
 
 # =============================================================================
-# Pobranie kodu ISO docelowego (drugie, tańsze zapytanie)
+# Pobranie kodu języka docelowego (drugie, tańsze zapytanie)
 # =============================================================================
+# Kod języka w formacie BCP-47: 2-3-literowy kod ISO 639 + opcjonalny podtag
+# regionu (2 litery) lub pisma (4 litery). Separator "_" tolerowany na wejściu,
+# normalizowany do "-".
+_WZORZEC_BCP47 = re.compile(r"^([A-Za-z]{2,3})(?:[-_]([A-Za-z]{2}|[A-Za-z]{4}))?$")
+
+
+def normalizuj_kod_jezyka(surowy: str) -> str:
+    """Waliduje i normalizuje kod języka BCP-47 (``pt-br`` → ``pt-BR``).
+
+    Akceptuje sam kod ISO 639 (``zh`` → ``zh``) oraz podtag regionu
+    (``zh-cn`` → ``zh-CN``) lub pisma (``zh_hans`` → ``zh-Hans``). Zwraca
+    ``""``, gdy ciąg nie wygląda na poprawny kod — fallback wybiera
+    wołający. Wspólny walidator Tłumacza AI (odpowiedź modelu) i pola
+    „Kod ISO" Naprawiacza Tagów w GUI Poligloty; do v17.2 oba miejsca
+    odrzucały kody regionalne (regex wycinał myślnik, pole GUI blokowało
+    wpis po 2 znakach) — patrz issue #16.
+    """
+    kandydat = (surowy or "").strip().strip("\"'`.,;:()[]{}")
+    dopasowanie = _WZORZEC_BCP47.match(kandydat)
+    if not dopasowanie:
+        return ""
+    jezyk = dopasowanie.group(1).lower()
+    podtag = dopasowanie.group(2)
+    if not podtag:
+        return jezyk
+    if len(podtag) == 2:
+        return f"{jezyk}-{podtag.upper()}"
+    return f"{jezyk}-{podtag.capitalize()}"
+
+
 def _pobierz_iso(klient: Any, jezyk_docelowy: str, model: str) -> tuple[str, str]:
-    """Pobiera kod ISO 639-1 dla podanego języka. Zwraca (iso, surowa_odpowiedz)."""
+    """Pobiera kod języka BCP-47. Zwraca (kod, surowa_odpowiedz).
+
+    Dla zwykłych języków model zwraca dwuliterowy ISO 639-1; dla odmian
+    regionalnych/pisma kod z podtagiem (``pt-BR``, ``zh-CN``, ``zh-Hans``)
+    — HTML ``lang=`` i DOCX ``w:lang`` przyjmują oba formaty.
+    """
     prompt = (
-        f"Podaj WYŁĄCZNIE dwuliterowy kod języka ISO 639-1 "
+        f"Podaj WYŁĄCZNIE kod języka w formacie BCP-47 "
         f"dla języka: {jezyk_docelowy}. "
-        f"Odpowiedź musi zawierać tylko dwuliterowy kod, np.: fi, it, en."
+        f"Dla zwykłych języków zwróć sam dwuliterowy kod ISO 639-1, np.: fi, it, en. "
+        f"Dla odmiany regionalnej lub odmiany pisma dodaj podtag, np.: pt-BR, zh-CN, zh-Hans. "
+        f"Odpowiedź ma zawierać wyłącznie sam kod — bez kropki i bez komentarza."
     )
     resp = klient.chat.completions.create(
         model=model,
@@ -162,10 +255,72 @@ def _pobierz_iso(klient: Any, jezyk_docelowy: str, model: str) -> tuple[str, str
         temperature=0.0,
     )
     surowa = (resp.choices[0].message.content or "").strip()
-    iso = re.sub(r"[^a-z]", "", surowa.lower())
-    if not iso or len(iso) > 3:
+    iso = normalizuj_kod_jezyka(surowa)
+    if not iso:
         return "", surowa
     return iso, surowa
+
+
+# =============================================================================
+# Tłumaczenie pojedynczego bloku (z bisekcją przy uciętej odpowiedzi)
+# =============================================================================
+def _tlumacz_blok(
+    klient: Any,
+    model: str,
+    sys_prompt: str,
+    blok: str,
+    kontekst: str,
+    glebokosc: int = 5,
+) -> str:
+    """Tłumaczy jeden blok; odpowiedź uciętą limitem wyjścia ponawia bisekcją.
+
+    ``finish_reason == "length"`` oznacza, że model wyczerpał limit tokenów
+    WYJŚCIA zanim dokończył tłumaczenie. Do v17.2 taka odpowiedź była
+    bezgłośnie sklejana z resztą — bug „uciętej końcówki" przy językach
+    token-gęstych (issue #16). Bisekcja: blok dzielimy możliwie po granicy
+    akapitu/zdania (:func:`_podziel_blok_na_pol`); lewa połowa dziedziczy
+    dotychczasowy kontekst, prawa dostaje jako kontekst świeżo
+    przetłumaczoną lewą (spójność terminologii). Wyjątki sieciowe
+    (RateLimitError itp.) przepuszczamy wyżej — obsługuje je pętla główna.
+    """
+    payload: list[dict[str, str]] = [{"role": "system", "content": sys_prompt}]
+    if kontekst:
+        payload.append({"role": "assistant", "content": kontekst})
+        user_content = (
+            "[KRYTYCZNE: Kontynuuj tłumaczenie poniższego tekstu. "
+            "Zachowaj absolutną spójność terminologii, tonu i stylu "
+            "z Twoją poprzednią odpowiedzią.]\n\n" + blok
+        )
+    else:
+        user_content = blok
+    payload.append({"role": "user", "content": user_content})
+
+    response = klient.chat.completions.create(
+        model=model,
+        messages=payload,
+        temperature=0.3,
+    )
+    wybor = response.choices[0]
+    fragment = (wybor.message.content or "").strip()
+    if getattr(wybor, "finish_reason", "") != "length":
+        return fragment
+
+    if glebokosc <= 0:
+        raise RuntimeError(
+            "Model uciął tłumaczenie bloku (limit tokenów wyjścia) i nie udało "
+            "się go dokończyć mimo wielokrotnego podziału na mniejsze części. "
+            "Podziel plik źródłowy na mniejsze fragmenty i spróbuj ponownie."
+        )
+    lewa, prawa = _podziel_blok_na_pol(blok)
+    if not lewa or not prawa:
+        raise RuntimeError(
+            "Model uciął tłumaczenie bloku (limit tokenów wyjścia), a bloku "
+            "nie da się już podzielić na mniejsze części. Podziel plik "
+            "źródłowy na mniejsze fragmenty i spróbuj ponownie."
+        )
+    czesc_lewa = _tlumacz_blok(klient, model, sys_prompt, lewa, kontekst, glebokosc - 1)
+    czesc_prawa = _tlumacz_blok(klient, model, sys_prompt, prawa, czesc_lewa, glebokosc - 1)
+    return f"{czesc_lewa}\n\n{czesc_prawa}"
 
 
 # =============================================================================
@@ -183,7 +338,7 @@ def tlumacz_dlugi_tekst(
     on_blad_miekki: BladMiekki | None = None,
     model_tlumacz: str = "gpt-4o",
     model_iso: str = "gpt-4o-mini",
-    max_znakow_na_blok: int = 10_000,
+    max_tokenow_na_blok: int = 2_500,
     prompt_dodatkowy: str = "",
 ) -> WynikTlumaczenia | None:
     """Tłumaczy długi tekst przez OpenAI z wznawianiem po przerwaniu.
@@ -205,8 +360,9 @@ def tlumacz_dlugi_tekst(
         on_blad_miekki:    Callback ``(msg, tytul)`` dla problemów z ISO
                            (nie przerywają tłumaczenia).
         model_tlumacz:     Nazwa modelu do głównego tłumaczenia.
-        model_iso:         Nazwa tańszego modelu do wykrycia kodu ISO.
-        max_znakow_na_blok: Rozmiar bloku przy dzieleniu długiego tekstu.
+        model_iso:         Nazwa tańszego modelu do wykrycia kodu języka.
+        max_tokenow_na_blok: Rozmiar bloku (w tokenach tiktoken) przy
+                           dzieleniu długiego tekstu.
         prompt_dodatkowy:  13.4. Doklejany do `_PROMPT_SYSTEMOWY_TEMPLATE` jako
                            dodatkowy kontekst projektowy — np. lista skrótowców
                            per język, wskazówki dotyczące szyfrów, polityka
@@ -230,19 +386,21 @@ def tlumacz_dlugi_tekst(
         # Doklejony jako kolejna sekcja system-message — model traktuje całość
         # jako jeden blok instrukcji, więc nie ma ryzyka „I'm just an AI" itp.
         sys_prompt = sys_prompt + "\n\n" + prompt_dodatkowy
-    bloki = _podziel_na_bloki(tresc, max_znakow=max_znakow_na_blok)
+    bloki = _podziel_na_bloki(
+        tresc, max_tokenow=max_tokenow_na_blok, model=model_tlumacz,
+    )
 
     # -------- Odzyskanie wcześniej opłaconych bloków ----------------------
+    # Pierwsza linia pliku zapisu to metryka {"meta": wersja, "bloki": n}.
+    # Cache z innej wersji chunkowania (lub o innej liczbie bloków) ma
+    # indeksy niekompatybilne z bieżącym podziałem — sklejenie go z nowymi
+    # blokami dałoby tekst z dziurami/duplikatami, więc odrzucamy go w
+    # całości i tłumaczymy od zera.
     wczytane: dict[int, str] = {}
     if os.path.exists(plik_temp):
-        if on_postep:
-            on_postep("Wykryto plik zapisu – odtwarzanie opłaconego postępu…", 0)
         try:
             with open(plik_temp, "r", encoding="utf-8") as fh:
-                for linia in fh:
-                    if linia.strip():
-                        dane = json.loads(linia)
-                        wczytane[dane["id"]] = dane["text"]
+                wiersze = [json.loads(linia) for linia in fh if linia.strip()]
         except Exception as exc:  # noqa: BLE001
             if on_blad_krytyczny:
                 on_blad_krytyczny(
@@ -250,6 +408,27 @@ def tlumacz_dlugi_tekst(
                     "",
                 )
             return None
+        metryka = wiersze[0] if wiersze and "meta" in wiersze[0] else None
+        if (
+            metryka
+            and metryka.get("meta") == _WERSJA_CHUNKOWANIA
+            and metryka.get("bloki") == len(bloki)
+        ):
+            if on_postep:
+                on_postep("Wykryto plik zapisu – odtwarzanie opłaconego postępu…", 0)
+            wczytane = {dane["id"]: dane["text"] for dane in wiersze[1:]}
+        else:
+            try:
+                os.remove(plik_temp)
+            except Exception:  # noqa: BLE001
+                pass
+
+    if not os.path.exists(plik_temp):
+        with open(plik_temp, "w", encoding="utf-8") as fh:
+            fh.write(
+                json.dumps({"meta": _WERSJA_CHUNKOWANIA, "bloki": len(bloki)})
+                + "\n"
+            )
 
     # -------- Właściwe tłumaczenie ---------------------------------------
     n = len(bloki)
@@ -266,25 +445,12 @@ def tlumacz_dlugi_tekst(
                 int(i / n * 100),
             )
 
-        payload: list[dict[str, str]] = [{"role": "system", "content": sys_prompt}]
-        if i > 0 and (i - 1) in wczytane:
-            payload.append({"role": "assistant", "content": wczytane[i - 1]})
-            user_content = (
-                "[KRYTYCZNE: Kontynuuj tłumaczenie poniższego tekstu. "
-                "Zachowaj absolutną spójność terminologii, tonu i stylu "
-                "z Twoją poprzednią odpowiedzią.]\n\n" + blok
-            )
-        else:
-            user_content = blok
-        payload.append({"role": "user", "content": user_content})
+        kontekst = wczytane.get(i - 1, "") if i > 0 else ""
 
         try:
-            response = klient.chat.completions.create(
-                model=model_tlumacz,
-                messages=payload,
-                temperature=0.3,
+            fragment = _tlumacz_blok(
+                klient, model_tlumacz, sys_prompt, blok, kontekst,
             )
-            fragment = (response.choices[0].message.content or "").strip()
             wczytane[i] = fragment
             with open(plik_temp, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"id": i, "text": fragment}, ensure_ascii=False) + "\n")

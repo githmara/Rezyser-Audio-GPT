@@ -728,9 +728,9 @@ poliglota:
   lbl_akcent: "Veldu áherslu eða hreinsunarstillingu:"
   combo_akcent_name: "Listi yfir áherslur og hreinsunarstillingar"
   combo_akcent_tooltip: "Veldu hljóðfræðilega áherslu eða hreinsunarstillingu texta fyrir skjálesara"
-  lbl_iso: "ISO tungumálakóði (2 stafir, t.d. en, fr, de):"
+  lbl_iso: "ISO tungumálakóði (t.d. en, fr, de; svæðisbundin afbrigði t.d. pt-BR, zh-CN):"
   txt_iso_name: "Reitur ISO tungumálakóða"
-  txt_iso_hint: "t.d. en"
+  txt_iso_hint: "t.d. en eða pt-BR"
   # Panel Szyfranta
   lbl_szyfr: "Veldu afmyndunaralgrím:"
   combo_szyfr_name: "Listi yfir dulkóðunaraðferðir"
@@ -755,7 +755,7 @@ poliglota:
   nie_wybrano_akcentu: "Enginn hreimur valinn."
   nie_wybrano_szyfru: "Engin dulmál valin."
   brak_iso_tytul: "Enginn ISO kóði"
-  brak_iso_tresc: "Sláðu inn réttan tveggja stafa ISO kóða tungumáls (t.d. en, fr, de)."
+  brak_iso_tresc: "Sláðu inn gildan ISO kóða tungumáls — tveggja stafa (t.d. en, fr, de) eða með svæðis-/leturmerki (t.d. pt-BR, zh-CN, zh-Hans)."
   ostrzezenie_jezyk: |-
     Athugið: Aðal tungumál textans sem greindist er ekki stutt. Hljóðfræðilegar reglur eru nú aðlagaðar fyrir tungumál: {wspierane_jezyki}. Áhrifin geta verið ófyrirsjáanleg.
   # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu
