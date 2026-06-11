@@ -70,6 +70,7 @@ from typing import Any
 
 import yaml
 
+import przeglad_tlumaczen
 from tlumacz_ai import tlumacz_dlugi_tekst
 
 
@@ -142,7 +143,8 @@ MAPA_JEZYKOW: dict[str, str] = {
 # ---------------------------------------------------------------------------
 # 13.4: tabela skrótowców per język docelowy (do custom system promptu)
 # ---------------------------------------------------------------------------
-# Zaczerpnięte z `TODO_wielojezycznosc.md` § 3.1 (notebook autora projektu).
+# Tabela skrótowców per język (notatki autora projektu — dawniej w nieistniejącym
+# już `TODO_wielojezycznosc.md`, dziś trzymana inline tutaj jako single source).
 # Po 5 najpopularniejszych pozycji per język — nie chcemy obciążać promptu
 # pełnymi tabelami (10-16 pozycji), bo to zwiększa koszt każdego call'a API
 # bez znaczącej poprawy wyniku. Lista służy LLM jako konkretne dane do
@@ -576,6 +578,8 @@ def zbuduj_yaml_wynikowy(
     id_szablonu: str,
     tresc: str | dict[str, str],
     nazwa_pliku: str,
+    *,
+    tryb_draft: bool = False,
 ) -> str:
     """Składa ``dictionaries/<kod>/gui/dokumentacja/<plik>.yaml`` do zapisu.
 
@@ -590,21 +594,30 @@ def zbuduj_yaml_wynikowy(
         Każda wartość zapisana jako osobny block-scalar `|` wcięty 4 spacjami
         (klucz sekcji wcięty 2 spaceami pod `tresc:`).
     """
-    naglowek = (
-        "# =============================================================================\n"
-        f"# dictionaries/{kod_jezyka}/gui/dokumentacja/{nazwa_pliku}\n"
-        "#\n"
-        "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py\n"
-        f"# ze źródła dictionaries/{KOD_ZRODLOWY}/gui/dokumentacja/{nazwa_pliku}\n"
-        "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj\n"
-        "# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.\n"
-        "#\n"
-        "# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}\n"
-        "# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1\n"
-        "# po weryfikacji parzystości multisetu markerów.\n"
-        "# =============================================================================\n"
-        "\n"
-    )
+    sciezka_rel = f"dictionaries/{kod_jezyka}/gui/dokumentacja/{nazwa_pliku}"
+    zrodlo_rel = f"dictionaries/{KOD_ZRODLOWY}/gui/dokumentacja/{nazwa_pliku}"
+    if tryb_draft:
+        # Tryb roboczy: neutralny nagłówek zachęcający do edycji (review
+        # halucynacji przez osobę trzecią / agenta bez naszej konstytucji).
+        naglowek = przeglad_tlumaczen.naglowek_roboczy(
+            sciezka_rel, zrodlo_rel, "buduj_wielojezyczne_docs.py",
+        )
+    else:
+        naglowek = (
+            "# =============================================================================\n"
+            f"# {sciezka_rel}\n"
+            "#\n"
+            "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py\n"
+            f"# ze źródła {zrodlo_rel}\n"
+            "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj\n"
+            "# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.\n"
+            "#\n"
+            "# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}\n"
+            "# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1\n"
+            "# po weryfikacji parzystości multisetu markerów.\n"
+            "# =============================================================================\n"
+            "\n"
+        )
 
     if isinstance(tresc, str):
         # Stary schemat: jeden block-scalar `|`
@@ -852,6 +865,7 @@ def tlumacz_szablon(
     klucze_filtru: list[str] | None = None,
     retry: bool = False,
     input_krytyki: dict[str, str] | None = None,
+    tryb_draft: bool = False,
 ) -> bool:
     """Pełny przebieg tłumaczenia jednego pliku-szablonu na jeden język.
 
@@ -965,12 +979,16 @@ def tlumacz_szablon(
     else:
         tresc_do_zapisu = wynikowy_dict
 
-    zawartosc_yaml = zbuduj_yaml_wynikowy(kod, id_szablonu, tresc_do_zapisu, nazwa_pliku)
+    zawartosc_yaml = zbuduj_yaml_wynikowy(
+        kod, id_szablonu, tresc_do_zapisu, nazwa_pliku, tryb_draft=tryb_draft,
+    )
     cel.parent.mkdir(parents=True, exist_ok=True)
     with open(cel, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(zawartosc_yaml)
 
     tryb = "SURGICAL" if klucze_filtru else "FULL"
+    if tryb_draft:
+        tryb += " DRAFT"
     n_sekcji = len(sekcje_przetlumaczone)
     print(
         f"✅  {kod}/{nazwa_pliku}: zapisano {cel.relative_to(ROOT)} "
@@ -1057,6 +1075,17 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "retłumaczy sekcję z PL źródła. Omija cache temp_*.jsonl (świeże "
              "tłumaczenie). Zwykły --klucz NIE naprawia leaków (blind spot LLM) — "
              "ta flaga to analog self-correction z rezyser_ai. WYMAGA --klucz.",
+    )
+    parser.add_argument(
+        "--draft",
+        action="store_true",
+        help="Tryb ROBOCZY DO PRZEGLĄDU. Zamiast kanonicznego nagłówka „NIE edytuj "
+             "ręcznie” wstrzykuje neutralny nagłówek zachęcający do edycji i po "
+             "przebiegu emituje checklistę przeglądu halucynacji do "
+             "`skrypty/przeglad_docs.md`. Użycie: paczka kontrybucji nowego języka "
+             "wysyłana osobie trzeciej / agentowi do recenzji (recenzent bez naszej "
+             "konstytucji nie dostaje sprzecznego rozkazu). Pliki lądują w normalnej "
+             "ścieżce — po akceptacji regeneruj bez --draft (kanoniczny nagłówek).",
     )
     parser.add_argument(
         "--input",
@@ -1219,6 +1248,7 @@ def main() -> int:
 
     sukcesy: list[str] = []
     porazki: list[str] = []
+    wytworzone_drafty: list[tuple[str, str]] = []
 
     klucze_filtru: list[str] | None = None
     if args.klucz:
@@ -1265,9 +1295,12 @@ def main() -> int:
                 klucze_filtru=kl_filtru,
                 retry=args.retry,
                 input_krytyki=input_krytyki,
+                tryb_draft=args.draft,
             )
             if not ok:
                 wszystko_ok = False
+            elif args.draft and not args.dry_run:
+                wytworzone_drafty.append((kod, nazwa_pliku))
         (sukcesy if wszystko_ok else porazki).append(kod)
 
     # --input: skonsumowany input.log kasujemy (pętla ograniczona — bez kotka-myszki;
@@ -1279,6 +1312,15 @@ def main() -> int:
                   f"(kolejna runda: przeczytaj, dopisz krytykę, --input ponownie).")
         except OSError:
             pass
+
+    if args.draft and not args.dry_run:
+        sciezka_prompt = przeglad_tlumaczen.zapisz_prompt_przegladu(
+            "buduj_wielojezyczne_docs.py", wytworzone_drafty, ROOT,
+        )
+        if sciezka_prompt is not None:
+            print(f"\n📋 DRAFT: checklista przeglądu zapisana → "
+                  f"{sciezka_prompt.relative_to(ROOT)} "
+                  f"({len(wytworzone_drafty)} plik(ów) do recenzji).")
 
     print("\n========== PODSUMOWANIE ==========")
     print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")

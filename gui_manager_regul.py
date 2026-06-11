@@ -849,9 +849,10 @@ def _zgadnij_typ_z_zaznaczenia(meta: dict | None) -> str:
         # `streszczenie.yaml` autor i tak duplikuje istniejący plik
         # (przycisk „Duplikuj") — kreator obsługuje tylko nowe tryby.
         return mrs.TYP_TRYB_REZYSERA
-    # FOLDER_GUI nie ma jeszcze dedykowanego typu w kreatorze (13.1) –
-    # trafia do domyślnego (akcent), bo kreator tłumaczeń UI byłby
-    # dużym osobnym skryptem (patrz TODO_wielojezycznosc.md).
+    # FOLDER_GUI nie ma dedykowanego typu w kreatorze — trafia do domyślnego
+    # (akcent). Tłumaczenia UI/dokumentacji obsługują standalone dev-toole
+    # (buduj_wielojezyczne_ui.py / buduj_wielojezyczne_docs.py), nie kreator
+    # w aplikacji — świadoma decyzja (paczka end-usera nie zawiera autotłumaczy).
     return mrs.TYP_AKCENT
 
 

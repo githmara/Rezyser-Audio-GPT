@@ -72,6 +72,8 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+import przeglad_tlumaczen
+
 
 # ---------------------------------------------------------------------------
 # STDOUT UTF-8 (spójnie z resztą skryptów buildowych — cmd.exe vs cp1250)
@@ -451,14 +453,24 @@ def wywolaj_llm(
 # ---------------------------------------------------------------------------
 # Podmiana topowego comment-block na auto-nagłówek
 # ---------------------------------------------------------------------------
-def _auto_naglowek(kod_jezyka: str) -> str:
-    """Buduje top-of-file komentarz dla wynikowego ui.yaml danego języka."""
+def _auto_naglowek(kod_jezyka: str, *, tryb_draft: bool = False) -> str:
+    """Buduje top-of-file komentarz dla wynikowego ui.yaml danego języka.
+
+    ``tryb_draft=True`` → neutralny nagłówek zachęcający do edycji (paczka
+    do przeglądu halucynacji); inaczej kanoniczny „NIE edytuj ręcznie".
+    """
+    sciezka_rel = f"dictionaries/{kod_jezyka}/gui/ui.yaml"
+    zrodlo_rel = f"dictionaries/{KOD_ZRODLOWY}/gui/ui.yaml"
+    if tryb_draft:
+        return przeglad_tlumaczen.naglowek_roboczy(
+            sciezka_rel, zrodlo_rel, "buduj_wielojezyczne_ui.py",
+        )
     return (
         "# =============================================================================\n"
-        f"# dictionaries/{kod_jezyka}/gui/ui.yaml\n"
+        f"# {sciezka_rel}\n"
         "#\n"
         "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_ui.py\n"
-        f"# ze źródła dictionaries/{KOD_ZRODLOWY}/gui/ui.yaml\n"
+        f"# ze źródła {zrodlo_rel}\n"
         "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany\n"
         "# wprowadzaj w pliku źródłowym PL i uruchom ponownie skrypt.\n"
         "#\n"
@@ -472,7 +484,7 @@ def _auto_naglowek(kod_jezyka: str) -> str:
     )
 
 
-def podmien_top_comment(yaml_str: str, kod_jezyka: str) -> str:
+def podmien_top_comment(yaml_str: str, kod_jezyka: str, *, tryb_draft: bool = False) -> str:
     """Usuwa nagłówkowy blok komentarzy i wstawia auto-nagłówek.
 
     Top-of-file w PL ui.yaml ma strukturę:
@@ -496,7 +508,7 @@ def podmien_top_comment(yaml_str: str, kod_jezyka: str) -> str:
     if i < len(linie) and linie[i].strip() == "":
         i += 1
     reszta = "\n".join(linie[i:])
-    return _auto_naglowek(kod_jezyka) + reszta
+    return _auto_naglowek(kod_jezyka, tryb_draft=tryb_draft) + reszta
 
 
 # ---------------------------------------------------------------------------
@@ -514,6 +526,7 @@ def tlumacz_jezyk(
     dry_run: bool,
     model: str,
     klucze: list[str] | None = None,
+    tryb_draft: bool = False,
 ) -> bool:
     """Pełen pipeline dla jednego języka. Zwraca True przy sukcesie.
 
@@ -663,14 +676,15 @@ def tlumacz_jezyk(
     buf = io.StringIO()
     yaml_io.dump(drzewo_kopia, buf)
     yaml_str = buf.getvalue()
-    yaml_str = podmien_top_comment(yaml_str, kod)
+    yaml_str = podmien_top_comment(yaml_str, kod, tryb_draft=tryb_draft)
 
     cel.parent.mkdir(parents=True, exist_ok=True)
     with open(cel, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(yaml_str)
 
+    znacznik_draft = " DRAFT" if tryb_draft else ""
     print(
-        f"✅ {kod}: zapisano {cel.relative_to(ROOT)} "
+        f"✅ {kod}: zapisano {cel.relative_to(ROOT)}{znacznik_draft} "
         f"({len(liscie_pl)} liści OK, {len(yaml_str):,} znaków)."
     )
     return True
@@ -716,6 +730,16 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "--model",
         default="gpt-4o",
         help="Model OpenAI do tłumaczenia (domyślnie: gpt-4o).",
+    )
+    parser.add_argument(
+        "--draft",
+        action="store_true",
+        help="Tryb ROBOCZY DO PRZEGLĄDU. Zamiast kanonicznego nagłówka „NIE edytuj "
+             "ręcznie” wstrzykuje neutralny nagłówek zachęcający do edycji i po "
+             "przebiegu emituje checklistę przeglądu do `skrypty/przeglad_ui.md`. "
+             "Użycie: paczka kontrybucji nowego języka wysyłana osobie trzeciej / "
+             "agentowi do recenzji. Pliki lądują w normalnej ścieżce — po akceptacji "
+             "regeneruj bez --draft (kanoniczny nagłówek).",
     )
     parser.add_argument(
         "--klucz",
@@ -800,6 +824,7 @@ def main() -> int:
 
     sukcesy: list[str] = []
     porazki: list[str] = []
+    wytworzone_drafty: list[tuple[str, str]] = []
     for kod in kody:
         nazwa_pl = MAPA_JEZYKOW[kod]
         print(f"\n========== {kod.upper()} ({nazwa_pl}) ==========")
@@ -814,8 +839,20 @@ def main() -> int:
             dry_run=args.dry_run,
             model=args.model,
             klucze=klucze_filtru,
+            tryb_draft=args.draft,
         )
         (sukcesy if ok else porazki).append(kod)
+        if ok and args.draft and not args.dry_run:
+            wytworzone_drafty.append((kod, NAZWA_UI))
+
+    if args.draft and not args.dry_run:
+        sciezka_prompt = przeglad_tlumaczen.zapisz_prompt_przegladu(
+            "buduj_wielojezyczne_ui.py", wytworzone_drafty, ROOT,
+        )
+        if sciezka_prompt is not None:
+            print(f"\n📋 DRAFT: checklista przeglądu zapisana → "
+                  f"{sciezka_prompt.relative_to(ROOT)} "
+                  f"({len(wytworzone_drafty)} plik(ów) do recenzji).")
 
     print("\n========== PODSUMOWANIE ==========")
     print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
