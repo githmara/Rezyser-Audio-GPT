@@ -599,6 +599,11 @@ rezyser:
   burza_dlg_tytul: "KI-Antwort – Brainstorming"
   burza_dlg_lbl: "Markierten Text kopieren (Ctrl+A, Ctrl+C) oder schließen:"
   burza_dlg_name: "KI-Antwort – Brainstorming"
+  burza_shortcut_brak_trybu_tytul: "Kreativmodus wählen"
+  burza_shortcut_brak_trybu_tresc: |-
+    Das Anweisungsfeld enthält einen Szenenentwurf aus dem Brainstorming (Tag [CEL SCENY]), aber für dieses Projekt ist noch kein Kreativmodus festgelegt.
+
+    Wählen Sie den Modus Drehbuch oder Hörbuch und klicken Sie erneut auf Senden — der Inhalt des Anweisungsfelds bleibt erhalten.
   # Postprodukcja
   tytuly_brak_nazwy_tytul: "Kein Projektname"
   tytuly_brak_nazwy_tresc: "Geben Sie den Projektnamen an, bevor Sie Titel vergeben."

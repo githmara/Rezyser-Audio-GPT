@@ -598,6 +598,11 @@ rezyser:
   burza_dlg_tytul: "AI Response – Brainstorm"
   burza_dlg_lbl: "Copy the selected text (Ctrl+A, Ctrl+C) or close:"
   burza_dlg_name: "AI Response – Brainstorm"
+  burza_shortcut_brak_trybu_tytul: "Choose a creative mode"
+  burza_shortcut_brak_trybu_tresc: |-
+    The instructions field contains a Brainstorm scene draft (the [CEL SCENY] tag), but this project has no creative mode selected yet.
+
+    Select the Script or Audiobook mode and press Send again — the contents of the instructions field have been preserved.
   # Postprodukcja
   tytuly_brak_nazwy_tytul: "No project name"
   tytuly_brak_nazwy_tresc: "Provide the project name before assigning titles."

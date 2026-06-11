@@ -599,6 +599,11 @@ rezyser:
   burza_dlg_tytul: "Risposta AI – Brainstorming"
   burza_dlg_lbl: "Copia il testo selezionato (Ctrl+A, Ctrl+C) o chiudi:"
   burza_dlg_name: "Risposta AI – Brainstorming"
+  burza_shortcut_brak_trybu_tytul: "Scegli una modalità creativa"
+  burza_shortcut_brak_trybu_tresc: |-
+    Il campo delle istruzioni contiene una bozza di scena del Brainstorming (tag [CEL SCENY]), ma questo progetto non ha ancora una modalità creativa selezionata.
+
+    Seleziona la modalità Sceneggiatura o Audiobook e premi di nuovo Invia — il contenuto del campo delle istruzioni è stato conservato.
   # Postprodukcja
   tytuly_brak_nazwy_tytul: "Nessun nome progetto"
   tytuly_brak_nazwy_tresc: "Fornisci un nome per il progetto prima di assegnare i titoli."

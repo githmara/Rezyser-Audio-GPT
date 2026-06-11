@@ -598,6 +598,11 @@ rezyser:
   burza_dlg_tytul: "Respuesta de IA – Lluvia de Ideas"
   burza_dlg_lbl: "Copia el texto seleccionado (Ctrl+A, Ctrl+C) o cierra:"
   burza_dlg_name: "Respuesta de IA – Lluvia de Ideas"
+  burza_shortcut_brak_trybu_tytul: "Elige un modo creativo"
+  burza_shortcut_brak_trybu_tresc: |-
+    El campo de instrucciones contiene un borrador de escena de la Lluvia de Ideas (etiqueta [CEL SCENY]), pero este proyecto aún no tiene un modo creativo seleccionado.
+
+    Selecciona el modo Guion o Audiolibro y pulsa Enviar de nuevo — el contenido del campo de instrucciones se ha conservado.
   # Postprodukcja
   tytuly_brak_nazwy_tytul: "Sin nombre de proyecto"
   tytuly_brak_nazwy_tresc: "Proporciona un nombre de proyecto antes de asignar títulos."

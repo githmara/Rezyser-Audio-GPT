@@ -599,6 +599,11 @@ rezyser:
   burza_dlg_tytul: "Svar AI – Hugstorm"
   burza_dlg_lbl: "Afritaðu valinn texta (Ctrl+A, Ctrl+C) eða lokaðu:"
   burza_dlg_name: "Svar AI – Hugstorm"
+  burza_shortcut_brak_trybu_tytul: "Veldu skapandi ham"
+  burza_shortcut_brak_trybu_tresc: |-
+    Fyrirmælareiturinn inniheldur senudrög úr Hugstormun (merkið [CEL SCENY]), en fyrir þetta verkefni hefur ekki enn verið valinn skapandi hamur.
+
+    Veldu haminn Handrit eða Hljóðbók og smelltu aftur á Senda — innihald fyrirmælareitsins hefur verið varðveitt.
   # Postprodukcja
   tytuly_brak_nazwy_tytul: "Nafn verkefnis vantar"
   tytuly_brak_nazwy_tresc: "Gefðu nafn á verkefni áður en þú gefur titla."

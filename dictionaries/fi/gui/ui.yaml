@@ -599,6 +599,11 @@ rezyser:
   burza_dlg_tytul: "AI-vastaus – Aivoriihi"
   burza_dlg_lbl: "Kopioi valittu teksti (Ctrl+A, Ctrl+C) tai sulje:"
   burza_dlg_name: "AI-vastaus – Aivoriihi"
+  burza_shortcut_brak_trybu_tytul: "Valitse luova tila"
+  burza_shortcut_brak_trybu_tresc: |-
+    Ohjekentässä on aivoriihen kohtausluonnos (tagi [CEL SCENY]), mutta projektille ei ole vielä valittu luovaa tilaa.
+
+    Valitse Käsikirjoitus- tai Äänikirja-tila ja paina Lähetä uudelleen — ohjekentän sisältö on säilytetty.
   # Postprodukcja
   tytuly_brak_nazwy_tytul: "Projektin nimi puuttuu"
   tytuly_brak_nazwy_tresc: "Anna projektin nimi ennen otsikoiden antamista."

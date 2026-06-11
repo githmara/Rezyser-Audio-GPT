@@ -649,6 +649,11 @@ rezyser:
   burza_dlg_tytul:       "Odpowiedź AI – Burza Mózgów"
   burza_dlg_lbl:         "Skopiuj zaznaczony tekst (Ctrl+A, Ctrl+C) lub zamknij:"
   burza_dlg_name:        "Odpowiedź AI – Burza Mózgów"
+  burza_shortcut_brak_trybu_tytul: "Wybierz tryb twórczy"
+  burza_shortcut_brak_trybu_tresc: |-
+    W polu instrukcji wykryto szkic sceny z Burzy Mózgów (tag [CEL SCENY]), ale projekt nie ma jeszcze wybranego trybu twórczego.
+
+    Zaznacz tryb Skrypt lub Audiobook i kliknij Wyślij ponownie — treść pola instrukcji została zachowana.
   # Postprodukcja
   tytuly_brak_nazwy_tytul: "Brak nazwy projektu"
   tytuly_brak_nazwy_tresc: "Podaj nazwę projektu przed nadaniem tytułów."

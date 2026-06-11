@@ -1581,6 +1581,40 @@ class RezyserPanel(wx.Panel):
                 self,
             )
             return
+        # Shortcut Burzy: tag produkcyjny w Instrukcji przy zaznaczonej Burzy
+        # = gracz kliknął opcję Burzy (lub wkleił szkic) i zapomniał przełączyć
+        # RadioBox na tryb zapisu. Zamiast odpalać Burzę na jej własnym owocu,
+        # przeskakujemy na utrwalony tryb projektu. Wyzwalaczem jest wyłącznie
+        # ``[CEL SCENY]`` — literał hardkodowany w :meth:`_on_kliknieto_opcje_burzy`,
+        # niezależny od języka UI ([DYREKTYWA] z doklejki jest lokalizowana,
+        # więc nie nadaje się na sygnaturę).
+        if przepis.id == "burza" and "[cel sceny]" in user_text.lower():
+            if self._zapisany_tryb in (1, 2):
+                self._rb_mode.SetSelection(self._zapisany_tryb)
+                self._refresh_ui_state()
+                przepis = self._aktualny_przepis()
+                if przepis is None:
+                    wx.MessageBox(
+                        t("rezyser.brak_przepisow_tresc"),
+                        t("rezyser.brak_przepisow_tytul"),
+                        wx.OK | wx.ICON_ERROR,
+                        self,
+                    )
+                    return
+            else:
+                # Projekt nie ma jeszcze utrwalonej decyzji trybu twórczego —
+                # wybór należy do gracza. Instrukcji NIE czyścimy (czyszczenie
+                # następuje dopiero przy faktycznej wysyłce), więc szkic
+                # przeżywa komunikat i czeka na ponowne Wyślij.
+                wx.MessageBox(
+                    t("rezyser.burza_shortcut_brak_trybu_tresc"),
+                    t("rezyser.burza_shortcut_brak_trybu_tytul"),
+                    wx.OK | wx.ICON_WARNING,
+                    self,
+                )
+                self._rb_mode.SetFocus()
+                return
+
         tryb_zapisu = przepis.zapis_do_pliku
 
         if tryb_zapisu and not nazwa:
