@@ -505,12 +505,7 @@ def generuj(
         for id_szablonu, tresc_szablonu in szablony:
             wynik_tresc, brakujace = _rozwin_placeholdery(
                 tresc_szablonu, ui, placeholdery_globalne)
-            if brakujace:
-                # Ostrzeżenie CELOWO niezależne od `cicho` — surowy `{klucz}` w
-                # docs/*.txt to realny błąd, który musi przebić się nawet w
-                # cichym buildzie (build_release woła nas z cicho=True dla
-                # wyciszenia rutynowych ✅, ale chce widzieć rozjazdy). Per-plikowe
-                # ✅ i ℹ️ (brak folderów/szablonów) zostają pod `cicho`.
+            if brakujace and not cicho:
                 unikalne = sorted(set(brakujace))
                 print(f"⚠️  {jezyk}/{id_szablonu}: brakujące placeholdery w ui.yaml: {unikalne}")
             if zbieraj_brakujace is not None and brakujace:

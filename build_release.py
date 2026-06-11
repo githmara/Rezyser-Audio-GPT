@@ -1,4 +1,6 @@
 import argparse
+import contextlib
+import io
 import json
 import os
 import re
@@ -924,15 +926,53 @@ def main(args: argparse.Namespace | None = None) -> None:
     # the module has its own UTF-8 fix and does not need a fresh session.
     # This guarantees the installer ships fresh docs/ even when the developer
     # forgot to run the generator manually after editing a template.
-    # cicho=True — docs zostały już zregenerowane + zwalidowane RĘCZNIE przed
-    # release commitem (Konstytucja, Krok 1-3), więc per-plikowe ✅ z generatora
-    # to tu tylko powtórzony szum (kilkadziesiąt linii tonących resztę logu
-    # buildu). Ostrzeżenia o brakujących placeholderach (⚠️) są w generatorze
-    # niezależne od `cicho` — gdyby coś rozjechało się od ręcznej regeneracji,
-    # i tak przebiją się przez ciszę.
+    # We import generuj_dokumentacje and call it IN-PROCESS, which has a subtle
+    # consequence: the generator is a Polish-language developer tool (its
+    # warnings read "⚠️  …brakujące placeholdery…"), whereas this build log is
+    # English by design (since 13.1 — zero entry bar for foreign contributors).
+    # A bare call would leak Polish lines into the English build output and,
+    # worse, would happily build on top of broken docs if the developer skipped
+    # the standalone `--waliduj` step.
+    #
+    # So we (a) run with cicho=True to mute the routine ✅/ℹ️ chatter, (b) capture
+    # whatever the generator still prints (the deep warnings about malformed
+    # YAML / wrong-typed sections aren't gated by cicho), (c) collect unresolved
+    # placeholders structurally via `zbieraj_brakujace`, and (d) ESCALATE any of
+    # those signals — captured warning text, collected placeholders, or an empty
+    # result set — to a FATAL that aborts the build. In a standalone run these
+    # are warnings; in a release build they are fatal, so an installer never
+    # ships docs/*.txt that didn't validate. The Polish detail only ever appears
+    # indented under the English FATAL header (diagnostics for the dev), never in
+    # the normal flow.
     print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
-    generuj_dokumentacje.generuj(cicho=True)
-    print("✅ Documentation regenerated.\n")
+    brakujace_docs: dict[str, list[str]] = {}
+    bufor_generatora = io.StringIO()
+    with contextlib.redirect_stdout(bufor_generatora):
+        wyniki_docs = generuj_dokumentacje.generuj(
+            cicho=True, zbieraj_brakujace=brakujace_docs,
+        )
+    szum_generatora = bufor_generatora.getvalue().strip()
+
+    if brakujace_docs or szum_generatora or not wyniki_docs:
+        print("❌ FATAL: documentation regeneration is not clean — refusing to build.")
+        print("In a standalone run these are warnings; in a release build they are")
+        print("fatal, so the installer never ships docs/*.txt that didn't validate.")
+        print("Fix the source, then re-run `python generuj_dokumentacje.py --waliduj`.")
+        if not wyniki_docs:
+            print("   • No documentation files were generated at all "
+                  "(missing dictionaries/<kod>/gui/dokumentacja/?).")
+        if brakujace_docs:
+            print("   Unresolved placeholders:")
+            for nazwa, klucze in sorted(brakujace_docs.items()):
+                wypis = ", ".join("{" + k + "}" for k in klucze)
+                print(f"      • {nazwa}: {wypis}")
+        if szum_generatora:
+            print("   Generator warnings:")
+            for linia in szum_generatora.splitlines():
+                print(f"      {linia}")
+        sys.exit(1)
+
+    print(f"✅ Documentation regenerated ({len(wyniki_docs)} files, clean).\n")
 
     # 7. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,
     # następnie skompletuj paczkę (dictionaries/ + docs/ OBOK exe), żeby dist/

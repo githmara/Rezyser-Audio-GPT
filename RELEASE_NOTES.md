@@ -61,7 +61,7 @@ Przegląd kodu wszystkich narzędzi (w tym deweloperskich) wyłapał trzy niedos
 
 Naprawa idzie po linii, którą ten moduł już raz przyjął dla kinowych prefiksów A11y: zamiast listy języków wbitej w Pythona, słowa-klucze żyją teraz w `ui.yaml` każdej paczki (`konwerter.naglowki_rozdzialow`, `konwerter.naglowki_scen`) i są zbierane **unią ze wszystkich 9 paczek naraz**. Konwerter świadomie nie zgaduje języka pliku wejściowego (użytkownik mógł zmienić język aplikacji w trakcie projektu, plik bywa mieszany albo zbyt krótki dla detektora) — rozpoznaje słowo z dowolnej paczki. Efekt uboczny: dodanie 10. języka to teraz nowy folder + wypełniony `ui.yaml`, zero edycji kodu.
 
-Dwa pozostałe szlify są deweloperskie i niewidoczne dla użytkownika: wyciszenie szumu generatora dokumentacji w logu builda oraz potwierdzenie (audyt), że mapy języków, które mają pozostać zahardkodowane, faktycznie nie powinny trafić pod odświeżacz Reżysera.
+Dwa pozostałe szlify są deweloperskie i niewidoczne dla użytkownika: wyciszenie i ZAOSTRZENIE kroku regeneracji docs w buildzie (cisza w logu + brak pl-leaku polskich ostrzeżeń generatora do angielskiego logu builda + eskalacja KAŻDEGO problemu po stronie docs do FATAL, by instalator nigdy nie powstał na niezwalidowanych docs) oraz potwierdzenie (audyt), że mapy języków, które mają pozostać zahardkodowane, faktycznie nie powinny trafić pod odświeżacz Reżysera.
 
 ### Co nowego
 - **Architekt Audiobooków rozumie wszystkie 9 języków.** Nagłówki rozdziałów (Czołówka/Rozdział/Prolog/Epilog/Akt oraz Kapitel/Capítulo/Chapitre/Capitolo/Luku/Kafli/Глава + Vorspann/Näytös/Formáli/Þáttur…) i scen (Scena/Scene/Szene/Escena/Scène/Kohtaus/Atriði/Сцена) wykrywane natywnie dla każdego z 9 języków. Wcześniej de/es/fr były pomijane.
@@ -70,7 +70,7 @@ Dwa pozostałe szlify są deweloperskie i niewidoczne dla użytkownika: wyciszen
 ### Pod maską
 - `gui_konwerter.py`: cztery detektory (tura, prefiks kinowy, rozdział, scena) zasila JEDEN przebieg po `ui.yaml` wszystkich paczek (`_slowa_kluczowe_konwertera`, `lru_cache`). Słowo nagłówka tury wyłuskiwane z istniejącego `opowiesci.tura_naglowek_format` (bez dublowania klucza); `_regex_prefiksow_kamery` wchłonięty do wspólnego loadera. Hardkodowany `_REGEX_TURA` i regexy „6 języków" usunięte.
 - Każda z 9 paczek `dictionaries/<kod>/gui/ui.yaml` dostała `konwerter.naglowki_rozdzialow` + `konwerter.naglowki_scen` (natywne formy; dopasowanie prefiksowe, case-insensitive).
-- `build_release.py` woła `generuj_dokumentacje.generuj(cicho=True)` — kilkadziesiąt linii „✅ docs/…" znika z logu builda (docs regenerujemy i walidujemy ręcznie przed commitem; krok w builderze to tylko siatka bezpieczeństwa). W `generuj_dokumentacje.py` ostrzeżenie o brakujących placeholderach (`⚠️`) odpięte od trybu cichego — realny rozjazd przebije się nawet w cichym buildzie.
+- `build_release.py` woła `generuj_dokumentacje.generuj(cicho=True, zbieraj_brakujace=…)` z przechwyconym stdout. `cicho=True` ucisza rutynowe „✅ docs/…" (kilkadziesiąt linii tonących log builda), a ponieważ generator to POLSKOJĘZYCZNE narzędzie dev, a log builda jest z założenia angielski (zerowy próg dla zagranicznych kontrybutorów) — wyciszenie zamyka też pl-leak jego ostrzeżeń do anglojęzycznego logu. Dodatkowo: każdy sygnał problemu po stronie docs — niesparowane placeholdery (zebrane strukturalnie), jakiekolwiek przechwycone ostrzeżenie (np. uszkodzony YAML, niewłaściwy typ sekcji) albo PUSTY zestaw wygenerowanych plików — eskaluje w buildzie do **FATAL** i przerywa build. W samodzielnym uruchomieniu generatora to tylko ostrzeżenia; w buildzie są krytyczne, żeby instalator nigdy nie wiózł `docs/*.txt`, które się nie zwalidowały (gdyby ktoś liczył na regenerację w builderze bez standalone `--waliduj`). Polski detal ostrzeżenia pojawia się wyłącznie wcięty pod angielskim nagłówkiem FATAL (diagnostyka dla dewelopera), nigdy w normalnym przepływie. `generuj_dokumentacje.py` bez zmian zachowania w trybie standalone.
 
 ### Co nie weszło
 - **Detekcja języka pliku wejściowego (lingua) w Konwerterze.** Rozważona (infrastruktura `core_poliglota._wykryj_jezyk_fragmentu` już istnieje), ale odrzucona: bliźniacza logika prefiksów kinowych w tym samym module świadomie NIE zgaduje języka, a detekcja na krótkim/mieszanym pliku wejściowym jest krucha. Unia słów ze wszystkich paczek jest prostsza i spójna z istniejącym wzorcem.
@@ -78,7 +78,7 @@ Dwa pozostałe szlify są deweloperskie i niewidoczne dla użytkownika: wyciszen
 
 ### Walidacja
 - Izolowany test detektorów (bez MainLoop): 14 nagłówków rozdziałów + 8 scen + 6 znaczników tur dla wszystkich 9 języków → wszystkie wykryte; zdania-negatywy → poprawnie pominięte.
-- `generuj_dokumentacje.py --waliduj` → wszystkie placeholdery rozwinięte; `generuj(cicho=True)` → 0 linii szumu (było 36) przy zachowanym strumieniu ostrzeżeń.
+- `generuj_dokumentacje.py --waliduj` → wszystkie placeholdery rozwinięte; w buildzie `generuj(cicho=True, zbieraj_brakujace=…)` z przechwyconym stdout → 36 plików, 0 linii szumu, pusty zbiór braków (ścieżka czysta = brak abortu); warunek FATAL potwierdzony dla niepustych braków oraz dla pustego zestawu wyników.
 - 9× `ui.yaml` parsuje się poprawnie z nowymi kluczami; `odswiez_rezysera.py` → „bez zmian" (idempotentny, brak zmian akcentów).
 
 ---
