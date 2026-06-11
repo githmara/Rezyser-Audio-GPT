@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 17.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 17.2.1 „Wersja Wydawnicza"
+
+*Patch v17.2.1: Tłumacz AI bez uciętych końcówek i z regionalnymi kodami języka — odpowiedź na issue #16, pierwsze zgłoszenie bugowe, które przeszło pełny obieg „Z Południa na Północ". Chunkowanie tłumaczeń przeszło ze znaków (sztywne 10 000) na tokeny tiktoken — ten sam licznik, którym okno kontekstowe mierzą Reżyser i Opowieści — więc języki o gęstym zapisie (chiński, japoński) nie przebijają już limitu tokenów WYJŚCIA modelu. Do tego strażnik, którego dotąd nie było wcale: odpowiedź ucięta limitem (`finish_reason="length"`) nie jest bezgłośnie sklejana z resztą — blok dzieli się bisekcją po granicy akapitu/zdania i tłumaczy rekurencyjnie, z dziedziczeniem kontekstu terminologicznego. Detekcja kodu języka i Naprawiacz Tagów akceptują teraz BCP-47 (pt-BR, zh-CN, zh-Hans; pole rozszerzone z 2 do 7 znaków, wspólny walidator normalizuje wielkość liter), zamiast wycinać myślnik i spadać na tag „pl" — koniec czytania chińskiego tekstu polskim głosem NVDA. Plik wznowień `temp_*.jsonl` dostał metrykę wersji chunkowania (stary cache znakowy odrzucany w całości, nie sklejany z dziurami). Bonus spoza zgłoszenia: shortcut Burzy — tag `[CEL SCENY]` w polu Instrukcji przy zaznaczonej Burzy automatycznie przekierowuje wysyłkę do utrwalonego trybu produkcyjnego, a przy świeżym projekcie bez trybu ostrzega i NIE czyści pola.*
 
 *Patch v17.2: strażnik restrykcyjnego formatu mostu Studio — zaplanowana w „Co nie weszło" v17.1 i tu zrealizowana funkcja. Format `.txt` pozwala wpisać dowolny nietagowany tekst w dowolnym miejscu sztuki, ale most do ElevenLabs Studio wymaga, by KAŻDA linia była albo wypowiedzią ze znacznikiem mówcy (`[Narrator: …]`/`[Imię: …]`), albo nagłówkiem struktury (Prolog/Akt/Scena/Rozdział). Dotąd linie-sieroty (nieotagowana proza wpisana „luzem") były w `buduj_chapters` po cichu pomijane, więc renderowany projekt mógł rozjechać się z intencją reżysera — bez żadnego sygnału. Nowy detektor `core_elevenlabs.wykryj_sieroty` (wierna replika stanu mówcy z `buduj_chapters`, więc wykrywa DOKŁADNIE to, co parser dziś gubi) zasila strażnik w panelu Reżysera: przed budową projektu, gdy wykryto sieroty, pojawia się dialog z ich listą (numery linii + treść) i wyborem „Buduj mimo to" / „Anuluj i popraw skrypt". Zgodnie z filozofią „Reżyser rządzi" to ostrzeżenie z informed consent, nie twarda blokada — cichy drop staje się GŁOŚNY, a decyzja zostaje przy reżyserze (domyślny przycisk = bezpieczny „Anuluj", Enter nie buduje przez pomyłkę). 7 nowych kluczy i18n × 9 paczek (dialog A11y read-only) oraz jawne rozszerzenie Zasady Montażysty w manualu × 9 (sekcja mostu, przed „Krok 3 — Render").*
 
@@ -47,6 +49,47 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 17.2.1 — patch release (Tłumacz AI: chunkowanie tokenowe + kody BCP-47; shortcut Burzy)
+
+### TL;DR
+
+Pierwszy patch wymuszony przez pełny obieg zgłoszeń: issue #16 (FR) opisuje tłumaczenie powieści na chiński uproszczony, które kończy się w połowie zdania, dostaje tag językowy „pl" (NVDA czyta chiński tekst polskim głosem), a zalecany w ostrzeżeniu Naprawiacz Tagów nie pozwala nawet wpisać kodu „zh-CN" — pole blokuje po dwóch znakach. Diagnoza potwierdziła trzy splecione wady i wszystkie trzy domyka ten patch.
+
+**Ucięta końcówka — chunkowanie znakowe bez strażnika.** `tlumacz_ai._podziel_na_bloki` ciął tekst po 10 000 ZNAKÓW (z doklejaniem krótkiej końcówki do 16 000), choć limit, o który naprawdę chodzi, jest tokenowy — a dla języków o gęstym zapisie (chiński ≈ 1 token na znak) blok znakowy potrafi wyprodukować tłumaczenie przebijające limit tokenów WYJŚCIA modelu. Co gorsza, kod w ogóle nie sprawdzał `finish_reason` — ucięta odpowiedź była bez słowa sklejana z resztą, a aplikacja raportowała sukces. Po patchu bloki mierzy tiktoken przez wspólny `core_tokeny` (limit 2 500 tokenów, proporcje sklejania zachowane), a `finish_reason="length"` uruchamia bisekcję: blok dzieli się możliwie po granicy akapitu/zdania i tłumaczy rekurencyjnie — lewa połowa dziedziczy dotychczasowy kontekst, prawa dostaje świeżo przetłumaczoną lewą (spójna terminologia). Dopiero wyczerpanie głębokości podziału daje JAWNY błąd zamiast cichej dziury w tekście.
+
+**Kody regionalne — regex wycinał myślnik.** Tania konsultacja o kod ISO żądała wyłącznie dwuliterowego ISO 639-1, a odpowiedź filtrowano regexem `[^a-z]`: gdy model dla chińskiego uproszczonego odpowiadał „zh-CN", zostawało czteroznakowe „zhcn" → odrzucone → fallback na tag „pl". Nowy wspólny walidator `normalizuj_kod_jezyka` przyjmuje BCP-47 (kod 2-3-literowy + opcjonalny podtag regionu lub pisma) i normalizuje wielkość liter (`pt-br` → `pt-BR`, `zh_hans` → `zh-Hans`); prompt jawnie dopuszcza podtagi. Ten sam walidator zasila pole „Kod ISO" Naprawiacza Tagów — `SetMaxLength` rozszerzony z 2 do 7 znaków (mieści `zh-Hans`), a HTML `lang=` i DOCX `w:lang` od zawsze przyjmowały oba formaty, więc wstrzykiwanie nie wymagało zmian.
+
+**Shortcut Burzy (planowany feature, dołączony do patcha).** Kliknięcie opcji Burzy wkleja do Instrukcji szkic `[CEL SCENY]: … + [DYREKTYWA]`, ale wysyłkę produkcyjną trzeba było ręcznie poprzedzić przełączeniem RadioBoxa — a zapominalscy odpalali Burzę na jej własnym owocu. Teraz parser inputu wykrywa tag `[CEL SCENY]` (literał hardkodowany przez Pythona, niezależny od języka UI) przy zaznaczonej Burzy i automatycznie przeskakuje na utrwalony tryb projektu (Skrypt/Audiobook). Świeży projekt bez utrwalonego trybu dostaje ostrzegawczy komunikat „wybierz tryb twórczy" — i co najważniejsze, pole Instrukcji NIE jest czyszczone, więc szkic czeka na ponowne Wyślij.
+
+### Co nowego
+
+- **Tłumacz AI dzieli tekst po tokenach** (tiktoken, wspólny licznik z Reżyserem/Opowieściami) zamiast po znakach — języki o gęstym zapisie przestają przebijać limit odpowiedzi modelu.
+- **Strażnik uciętej odpowiedzi**: `finish_reason="length"` → automatyczna bisekcja bloku i dotłumaczenie mniejszych fragmentów; w patologicznym przypadku jawny błąd zamiast cichego ubytku tekstu.
+- **Kody regionalne BCP-47** w automatycznej detekcji języka (pt-BR, zh-CN, zh-Hans) — fallback na „pl" tylko, gdy odpowiedź modelu naprawdę nie wygląda na kod.
+- **Naprawiacz Tagów przyjmuje kody regionalne** — pole rozszerzone do 7 znaków, walidacja wspólnym walidatorem z normalizacją wielkości liter; etykieta, hint i komunikat błędu zaktualizowane we wszystkich 9 paczkach.
+- **Shortcut Burzy**: tag `[CEL SCENY]` w Instrukcji przy zaznaczonej Burzy automatycznie kieruje wysyłkę do utrwalonego trybu produkcyjnego; brak trybu → ostrzeżenie bez czyszczenia pola (nowe klucze `rezyser.burza_shortcut_brak_trybu_*` ×9).
+
+### Pod maską
+
+- **`temp_*.jsonl` z metryką zgodności** (`{"meta": wersja_chunkowania, "bloki": n}` w pierwszej linii): cache wznowień ze starego podziału znakowego ma niekompatybilne indeksy — jest odrzucany w całości zamiast sklejać tłumaczenie z dziurami/duplikatami.
+- **`buduj_wielojezyczne_docs.py` z jawnym `max_tokenow_na_blok=4_000`** — sekcje dokumentacji muszą pozostać jednoblokowe (marker `===META===` pojawia się raz, na końcu odpowiedzi); 4 000 tokenów odpowiada staremu pułapowi znakowemu, a docs tłumaczymy wyłącznie na języki łacińskie/cyrylicę.
+- **`tlumacz_ai` importuje `core_tokeny`** (tiktoken, LRU-cached encoder) — moduł nadal nie zależy od wxPython.
+- **`gui_poliglota`** używa `tlumacz_ai.normalizuj_kod_jezyka` zamiast lokalnego `len() > 2`; `kod_iso()` w `core_poliglota` przepuszcza BCP-47 bez zmian logiki.
+- **Manuale i readme ×9** zaktualizowane ręcznie (sekcja podziału na bloki + opis Naprawiacza); changelogi historyczne (v9) celowo nietknięte.
+
+### Co nie weszło
+
+- **i18n komunikatów błędów `tlumacz_ai`** — moduł zgłasza błędy krytyczne (limit API, nieczytelny cache, wyczerpana bisekcja) po polsku, jak dotąd; objęcie ich mechanizmem `klucz_i18n` (wzorem błędów AI Reżysera z v17.0) to osobny, większy wątek.
+- **Walidacja istnienia podtagu regionu** — akceptujemy poprawny FORMAT BCP-47 (`xx-YY`), nie sprawdzamy, czy region istnieje w rejestrze IANA; czytniki ekranu i tak degradują nieznany podtag do języka bazowego.
+
+### Walidacja
+
+- **Testy z fake-klientem OpenAI** (bez sieci): normalizacja BCP-47 (16 przypadków, w tym `pt_BR`, śmieciowe odpowiedzi), podział tokenowy (tekst PL i pseudo-CJK — bloki w limicie, treść bez ubytków), bisekcja po `finish_reason="length"` (ucięty fragment nie trafia do wyniku), RuntimeError po wyczerpaniu głębokości, end-to-end (`iso=zh-CN`, cache posprzątany), odrzucenie cache bez metryki, wznowienie z metryką bez wywołań API, fallback „pl" + ostrzeżenie.
+- **Smoke GUI bez MainLoop**: konstrukcja `PoliglotaPanel`; shortcut Burzy w 3 scenariuszach (brak trybu → komunikat + input zachowany; auto-skok na Skrypt + dalsza walidacja nazwy; brak tagu → Burza bez zmian).
+- **`generuj_dokumentacje.py --waliduj`**: wszystkie placeholdery rozwinięte; `odswiez_rezysera.py` bez zmian w `core_*`.
 
 ---
 

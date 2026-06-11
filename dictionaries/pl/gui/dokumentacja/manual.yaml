@@ -325,7 +325,7 @@ tresc:
     - Jeśli wczytasz zwykły plik .txt lub .md (np. skrypt wygenerowany przez Reżyserię), skrypt po przetłumaczeniu automatycznie zapisze wynik jako plik .html z wbudowanym tagiem językowym — gotowy do czytania przez NVDA bez żadnej dodatkowej pracy.
     - Obsługuje również pliki .docx.
 
-    Inteligentny podział na bloki: Długie teksty są automatycznie dzielone na bloki do 10 000 znaków i tłumaczone sekwencyjnie z paskiem postępu.
+    Inteligentny podział na bloki: Długie teksty są automatycznie dzielone na bloki mierzone w tokenach modelu (a nie w znakach) i tłumaczone sekwencyjnie z paskiem postępu. Dzięki temu także języki o gęstym zapisie, jak chiński czy japoński, mieszczą się w limicie odpowiedzi modelu, a ucięta odpowiedź jest wykrywana i automatycznie ponawiana na mniejszych fragmentach.
 
     Odporny na awarie zapis postępu (NOWOŚĆ w wersji 9): Każdy przetłumaczony blok jest natychmiast zapisywany do ukrytego pliku tymczasowego w folderze systemowym aplikacji. Jeśli tłumaczenie zostanie przerwane z powodu wyczerpania limitu API, przy kolejnym uruchomieniu aplikacja automatycznie wykryje ten plik, odtworzy już opłacony postęp i spokojnie dokończy pracę od miejsca przerwania — bez żadnego ręcznego kopiowania. Po pomyślnym zakończeniu plik tymczasowy jest automatycznie usuwany.
 
@@ -350,7 +350,7 @@ tresc:
     Opcja z normalizacją liczb automatycznie zamienia cyfry na ich słowny zapis (np. 15 staje się "piętnaście") przed przetworzeniem — dzięki temu NVDA czyta liczby płynnie, a jeśli tekst ma wymuszony akcent, liczba też go dostanie, bez żadnych wyjątków.
     Zapytacie pewnie, czy syntezator będzie umiał odmieniać tak znormalizowane liczby w zależności od kontekstu? Odpowiedź brzmi: nie. I jest to celowy feature. Jak powszechnie wiadomo: "język polski być trudny" — a obcokrajowiec kaleczący naszą gramatykę tylko dodaje autentyczności łamanemu akcentowi!
 
-    Naprawiacz Tagów (NOWOŚĆ w wersji 9): Na końcu listy znajdziesz dodatkową opcję — Naprawiacz Tagów. Nie stosuje żadnych reguł fonetycznych ani czyszczenia. Robi jedną rzecz: wstrzykuje do pliku podany przez Ciebie dwuliterowy kod języka ISO (np. "fi" dla fińskiego, "en" dla angielskiego). Przydaje się, gdy masz już gotowy plik — np. przetłumaczony wcześniej przez Tłumacza AI — ale z jakiegoś powodu wyszedł z błędnym albo brakującym tagiem językowym. Zamiast tłumaczyć go od nowa, po prostu uruchamiasz Naprawiacz z właściwym kodem ISO i po chwili masz poprawny plik.
+    Naprawiacz Tagów (NOWOŚĆ w wersji 9): Na końcu listy znajdziesz dodatkową opcję — Naprawiacz Tagów. Nie stosuje żadnych reguł fonetycznych ani czyszczenia. Robi jedną rzecz: wstrzykuje do pliku podany przez Ciebie kod języka ISO — dwuliterowy (np. "fi" dla fińskiego, "en" dla angielskiego) albo z podtagiem regionu czy pisma (np. "pt-BR" dla portugalskiego brazylijskiego, "zh-Hans" dla chińskiego uproszczonego). Przydaje się, gdy masz już gotowy plik — np. przetłumaczony wcześniej przez Tłumacza AI — ale z jakiegoś powodu wyszedł z błędnym albo brakującym tagiem językowym. Zamiast tłumaczyć go od nowa, po prostu uruchamiasz Naprawiacz z właściwym kodem ISO i po chwili masz poprawny plik.
 
     Skrypt czyści nawiasowe didaskalia reżyserskie — usuwa całe fragmenty tekstu ujęte w nawiasy okrągłe (np. "(z wplecionymi wdechami)", "(szeptem)", "(ironicznie)"). ElevenLabs ma czytać wyłącznie dialogi i narrację, a nie instrukcje reżyserskie wplecione w tekst.
 

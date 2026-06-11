@@ -47,11 +47,11 @@ tresc:
   modul_poliglota: |
     ### 3. Fjöltyngdur (Ctrl+3, AI Þýðandi + TTS Hreimur)
 
-    * **Öruggur Þýðandi:** Langir textar eru sjálfkrafa skiptir í einingar allt að 10.000 stöfum og þýddir í röð. Hver eining er samstundis vistuð í falinni `.jsonl` skrá. Endurræsing eftir að API takmörk eru náð er fullkomlega sjálfvirk.
+    * **Öruggur Þýðandi:** Langir textar eru sjálfkrafa skiptir í einingar sem mældar eru í tókum líkansins (öruggt einnig fyrir þétt rituð tungumál, t.d. kínversku) og þýddir í röð; afklippt svar líkansins er greint og reynt aftur á minni hlutum. Hver eining er samstundis vistuð í falinni `.jsonl` skrá. Endurræsing eftir að API takmörk eru náð er fullkomlega sjálfvirk.
     * **Sjálfvirkni NVDA:** Þýðingar eru vistaðar sem tilbúnar `.html` skrár með innbyggðum tungumálamerkjum eða `.docx` skrár með merkjum sem eru sprautað beint inn í XML uppbygginguna.
     * **{liczba_akcentow_jezykowych} staðbundnir hreimar:** Möguleiki á að þvinga fram brotinn hreim fyrir staðbundna hljóðgjafa (Tiflotecnia Voices, eSpeak, OneCore) með háþróuðum regex reglum. Studdir erlendir hreimar: enska, rússneska (með transliteringu á kyrillísku), franska, þýska, spænska, ítalska, finnska, pólsku.
     * **Dulkóðunarhamur:** {liczba_szyfrow} staðbundin reiknirit til að afmynda texta — frá því að lesa afturábak, í gegnum typoglycemíu, til klassískrar Cæsar dulkóðunar. Hvert með staðbundnu stafrófi tungumálapakkans (t.d. Cæsar dulkóðun með 35-stafa íslensku stafrófi með diakritískum merkjum).
-    * **Merkingarviðgerð:** Sprautar á óskaðlegan hátt inn gefnum tveggja stafa ISO tungumálakóða í núverandi skrár.
+    * **Merkingarviðgerð:** Sprautar á óskaðlegan hátt inn gefnum ISO tungumálakóða — einnig svæðisbundnum, t.d. pt-BR eða zh-CN — í núverandi skrár.
   modul_konwerter: |
     ### 4. Umbreytingartæki / Hljóðbókararkitekt (Ctrl+4)
 
