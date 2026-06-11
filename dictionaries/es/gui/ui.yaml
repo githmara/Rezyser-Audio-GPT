@@ -1156,12 +1156,6 @@ opowiesci:
   dlg_visualize_pusta_akcja_tytul: "No hay descripción de visualización"
   dlg_visualize_pusta_akcja_tresc: "Después del comando /visualizar, ingresa una breve descripción de lo que deseas ver con más detalle (ej. /visualizar cómo se ve el guardia). Sin argumento, el motor no sabe en qué enfocarse."
   status_wizualizowanie: "Generando visualización…"
-  # v15.4.1: prefijos A11y antes de la narración cuando `narracja_typ != "druga_osoba"`.
-  # Señal técnica clara para lectores de pantalla: el jugador sabe al instante
-  # que la cámara ha cambiado. Se escribe también en `.txt` en disco.
-  prefiks_flashback: "Retrospectiva:"
-  prefiks_scena: "Escena paralela:"
-  prefiks_cut: "Mientras tanto en otro lugar:"
   pamiec_status_format: "{procent}% — {tokeny} tokens ({etap})"
   pamiec_etap_czysta: "🟢 limpio"
   pamiec_etap_ok: "🟢 OK"

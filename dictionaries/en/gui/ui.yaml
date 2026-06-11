@@ -1146,8 +1146,6 @@ opowiesci:
     /save, /zapisz                      — force game save
     /load, /wczytaj                     — open load dialog
     /visualize <desc>, /wizualizuj      — multisensory scene description (no save)
-    /scene <desc>, /scena               — third person, current scene elsewhere
-    /flashback <desc>, /retrospekcja    — third person, retrospection
     /refresh, /odswiez                  — reload narration from disk after manual edits
     /help, /pomoc                       — show this command list
     /quit, /koniec                      — close the application
@@ -1157,19 +1155,7 @@ opowiesci:
   dlg_visualize_pusta_akcja_tytul: "No Visualization Description"
   dlg_visualize_pusta_akcja_tresc: "After the /visualize command, enter a short description of what you want to see in more detail (e.g., /visualize what the guard looks like). Without an argument, the engine doesn't know what to focus on."
   status_wizualizowanie: "Generating Visualization…"
-  # ---- v15.4: second narrative camera (third person) + quick help ----
-  # A11y prefixes injected BEFORE narration when `narracja_typ != "druga_osoba"`.
-  # Clean, repeatable technical signal for screen readers: the player knows
-  # immediately that the camera has shifted. Written to both UI and `.txt`
-  # on disk (consistency between in-app reading and external TTS).
-  prefiks_flashback: "Flashback:"
-  prefiks_scena: "Off-screen scene:"
-  prefiks_cut: "Meanwhile elsewhere:"
-  komenda_kamera_pusta_tytul: "No scene description"
-  komenda_kamera_pusta_tresc: "Command /{komenda} requires a description. Example: /{komenda} Anna in the market."
-  komenda_kamera_zly_tryb_tytul: "Wrong mode"
-  komenda_kamera_zly_tryb_tresc: "Command /{komenda} works only in narrative mode (Free, Choice, Smallest Evil). Start a new game or load an existing one."
-  status_kamera_w_toku: "Generating /{komenda} scene…"
+  # ---- v15.4: quick help (slash command list) ----
   dlg_pomoc_tytul: "Available commands"
   dlg_pomoc_lbl: "List of Tales mode slash commands:"
   dlg_pomoc_name: "Command list field"

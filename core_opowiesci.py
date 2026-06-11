@@ -134,14 +134,6 @@ class ProjektOpowiesci:
         self.ostatnie_tury: list[dict[str, str]] = []
         self.zasady_swiata: str = ""
         self.ostatnie_wybory: list[dict[str, str]] = []
-        # v15.4: licznik kinowych cięć narracyjnych per etap łuku
-        # (`narracja_typ != "druga_osoba"`). Persystowany w `.game.json` żeby
-        # przeżyć restart aplikacji — gracz wracający po 3 dniach nie dostaje
-        # zresetowanego limitu auto-cut. Etapy zgodne z `meta.etap_luku`
-        # z odpowiedzi LLM (ekspozycja → narastanie → kulminacja → rozwiązanie).
-        self.cuty_wykorzystane: dict[str, int] = {
-            "ekspozycja": 0, "narastanie": 0, "kulminacja": 0, "rozwiazanie": 0,
-        }
 
     # ------------------------------------------------------------------
     # Walidacja stanu
@@ -341,6 +333,10 @@ class ProjektOpowiesci:
               "ostatnie_wybory":  list[{"id","tekst"}]    # v15.1+
             }
 
+        (Pole ``cuty_wykorzystane`` istniało w schemacie v15.4–v17.2; usunięte
+        w v17.3 razem z funkcją „druga kamera". Stare zapisy z tym polem
+        wczytują się czysto — ``wczytaj`` po prostu je ignoruje.)
+
         Pole ``full_story`` celowo NIE jest tu zapisane — narracja żyje
         w `.txt` (jeden plik, jedna prawda; uniknięcie podwójnej synchronizacji).
         """
@@ -360,7 +356,6 @@ class ProjektOpowiesci:
             "ostatnie_tury":     self.ostatnie_tury,
             "zasady_swiata":     self.zasady_swiata,
             "ostatnie_wybory":   self.ostatnie_wybory,
-            "cuty_wykorzystane": self.cuty_wykorzystane,   # v15.4
         }
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
@@ -478,13 +473,8 @@ class ProjektOpowiesci:
         self.ostatnie_tury     = list(dane.get("ostatnie_tury", []))
         self.zasady_swiata     = str(dane.get("zasady_swiata", ""))
         self.ostatnie_wybory   = list(dane.get("ostatnie_wybory", []))
-        # v15.4: gry pre-15.4 nie miały pola — fallback do pełnego słownika
-        # zer (gracz dostaje pełen limit auto-cut po update'cie aplikacji).
-        # Hardening: brakujące klucze etapów (gdyby zapis był ucięty) też
-        # uzupełniamy zerami, żeby `cuty_wykorzystane[etap]` nigdy nie rzucił.
-        domyslne_cuty = {"ekspozycja": 0, "narastanie": 0, "kulminacja": 0, "rozwiazanie": 0}
-        wczytane_cuty = dict(dane.get("cuty_wykorzystane", {}))
-        self.cuty_wykorzystane = {etap: int(wczytane_cuty.get(etap, 0)) for etap in domyslne_cuty}
+        # v17.3: pole `cuty_wykorzystane` (v15.4 „druga kamera") usunięte —
+        # stare zapisy mogą je jeszcze zawierać, po prostu je ignorujemy.
 
         wynik = WynikWczytaniaOpowiesci(
             nazwa=nazwa,

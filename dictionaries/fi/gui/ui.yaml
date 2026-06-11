@@ -1155,12 +1155,6 @@ opowiesci:
   dlg_visualize_pusta_akcja_tytul: "Visualisoinnin kuvaus puuttuu"
   dlg_visualize_pusta_akcja_tresc: "Komennon /visualisoi jälkeen kirjoita lyhyt kuvaus siitä, mitä haluat nähdä tarkemmin (esim. /visualisoi miltä vartija näyttää). Ilman argumenttia moottori ei tiedä, mihin keskittyä."
   status_wizualizowanie: "Visualisointi luodaan…"
-  # v15.4.1: A11y-etuliitteet ennen kerrontaa kun `narracja_typ != "druga_osoba"`.
-  # Selkeä tekninen signaali ruudunlukijalle: pelaaja tietää heti, että
-  # kamera on vaihtunut. Kirjoitetaan myös `.txt`-tiedostoon levylle.
-  prefiks_flashback: "Takauma:"
-  prefiks_scena: "Sivukohtaus:"
-  prefiks_cut: "Samaan aikaan toisaalla:"
   pamiec_status_format: "{procent}% — {tokeny} tokenia ({etap})"
   pamiec_etap_czysta: "🟢 puhdas"
   pamiec_etap_ok: "🟢 OK"

@@ -1238,8 +1238,6 @@ opowiesci:
     /zapisz, /save                    — wymuszenie zapisu gry
     /wczytaj, /load                   — otwórz dialog wczytania
     /wizualizuj <opis>, /visualize    — multisensoryczny opis sceny (bez zapisu)
-    /scena <opis>, /scene             — III osoba, bieżąca scena gdzie indziej
-    /flashback <opis>, /retrospekcja  — III osoba, retrospekcja w przeszłości
     /odswiez, /refresh                — odśwież narrację z dysku po ręcznej edycji
     /pomoc, /help                     — pokaż tę listę komend
     /koniec, /quit                    — zamknij aplikację
@@ -1249,19 +1247,7 @@ opowiesci:
   dlg_visualize_pusta_akcja_tytul: "Brak opisu wizualizacji"
   dlg_visualize_pusta_akcja_tresc: "Po komendzie /wizualizuj wpisz krótki opis tego, co chcesz zobaczyć dokładniej (np. /wizualizuj jak wygląda strażnik). Bez argumentu silnik nie wie na czym się skupić."
   status_wizualizowanie:     "Generowanie wizualizacji…"
-  # ---- v15.4: druga kamera narracyjna (III osoba) + szybka pomoc ----
-  # Prefiksy A11y wstrzykiwane PRZED narracją gdy `narracja_typ != "druga_osoba"`.
-  # Czysty, powtarzalny sygnał techniczny dla NVDA: gracz natychmiast wie,
-  # że kamera przeskoczyła. Wstrzykiwane do UI i do `.txt` na dysku (spójność
-  # odczytu w aplikacji vs otwarcie pliku osobnym TTS).
-  prefiks_flashback:         "Retrospekcja:"
-  prefiks_scena:             "Scena zza kadru:"
-  prefiks_cut:               "Tymczasem gdzie indziej:"
-  komenda_kamera_pusta_tytul: "Brak opisu sceny"
-  komenda_kamera_pusta_tresc: "Komenda /{komenda} wymaga opisu. Przykład: /{komenda} Anna na rynku."
-  komenda_kamera_zly_tryb_tytul: "Niewłaściwy tryb"
-  komenda_kamera_zly_tryb_tresc: "Komenda /{komenda} działa tylko w trybie narracyjnym (Swobodny, Wyborów, Mniejsze zło). Załóż nową grę albo wczytaj istniejącą."
-  status_kamera_w_toku:      "Generowanie sceny /{komenda}…"
+  # ---- v15.4: szybka pomoc (lista slash-komend) ----
   dlg_pomoc_tytul:           "Dostępne komendy"
   dlg_pomoc_lbl:             "Lista slash-komend trybu Opowieści:"
   dlg_pomoc_name:            "Pole z listą komend"

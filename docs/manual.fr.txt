@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 17.2.2 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 17.3.0 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -169,7 +169,7 @@ Le Mode Script Brut possède un panneau dédié "✂️ Gestion de la Structure"
 - Insérer Scène X : Insère uniquement l'en-tête de la scène (par exemple, "Scène 3") dans l'acte en cours. Le compteur de scènes augmente automatiquement.
 
 
-Accents disponibles dans Reżyser Audio GPT 17.2.2 :
+Accents disponibles dans Reżyser Audio GPT 17.3.0 :
 
 - Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
 - Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)

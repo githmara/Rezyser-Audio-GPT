@@ -7,7 +7,7 @@
 
 Conjunto de herramientas autocontenidas impulsadas por IA para la escritura automática, planificación, formato y traducción de guiones extensos, así como para la ejecución de juegos de texto interactivos. El proyecto es una aplicación de escritorio nativa (wxPython) diseñada desde cero con plena accesibilidad para lectores de pantalla (NVDA, VoiceOver) y compatibilidad con sintetizadores de voz profesionales (TTS). Funciona sin navegador y sin servidor local: se ejecuta como una ventana de programa normal.
 
-Versión: **17.2.2** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versión: **17.3.0** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Módulos principales

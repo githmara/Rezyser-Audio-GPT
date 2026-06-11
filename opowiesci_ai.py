@@ -90,21 +90,12 @@ AKCJA_SYNC         = "(narracja zsynchronizowana z dysku)"
 
 SCHEMA_TURA: dict[str, Any] = {
     "type": "object",
-    "required": ["narracja", "narracja_typ", "wybory", "postacie_aktywne", "stan", "meta"],
+    "required": ["narracja", "wybory", "postacie_aktywne", "stan", "meta"],
     "additionalProperties": False,
     "properties": {
         "narracja": {
             "type": "string",
             "minLength": 1,
-        },
-        "narracja_typ": {
-            # v15.4: tryb kamery narracyjnej. `druga_osoba` (default) = gracz JEST
-            # protagonistą. `flashback`/`scena`/`cut` = III osoba; wtedy `wybory`
-            # MUSI być pustą tablicą (walidacja krzyżowa egzekwowana w
-            # `generuj_ture` po `jsonschema.validate` — schema sama nie wyraża
-            # conditional ergonomicznie).
-            "type": "string",
-            "enum": ["druga_osoba", "flashback", "scena", "cut"],
         },
         "wybory": {
             "type": "array",
@@ -203,14 +194,6 @@ class SnapshotOpowiesci:
                            niepusty → wstrzykiwany przez
                            :func:`_zbuduj_prompt_systemowy` jako dodatkowa
                            sekcja między bazą a addonem trybu.
-        cuty_wykorzystane: licznik kinowych cięć (`narracja_typ != "druga_osoba"`)
-                           per etap łuku narracyjnego. v15.4+. Top-level
-                           (nie w `stan_poprzedni`), żeby LLM nie mógł go
-                           nadpisać halucynacją w odsyłanym `stan`. Python
-                           jest autorytatywnym źródłem prawdy. Limit:
-                           1 auto-cut per etap (`narracja_typ == "cut"`);
-                           komendy gracza (`/scena`, `/flashback`) zwiększają
-                           licznik dla statystyki, ale nie wchodzą w limit.
     """
     nazwa_gry:        str
     numer_tury:       int
@@ -220,16 +203,12 @@ class SnapshotOpowiesci:
     seed_swiata:      str                   = ""
     jezyk_projektu:   str                   = "pl"
     zasady_swiata:    str                   = ""
-    cuty_wykorzystane: dict[str, int] = field(default_factory=lambda: {
-        "ekspozycja": 0, "narastanie": 0, "kulminacja": 0, "rozwiazanie": 0,
-    })
 
 
 @dataclass
 class WynikTury:
     """Wynik :func:`generuj_ture` — strukturyzowana tura po walidacji."""
     narracja:         str
-    narracja_typ:     str   # "druga_osoba" | "flashback" | "scena" | "cut" (v15.4)
     wybory:           list[dict[str, str]]
     postacie_aktywne: list[dict[str, str]]
     stan:             dict[str, Any]
@@ -387,7 +366,6 @@ def _zbuduj_user_payload(
     user_input:       str,
     fiolka_aktywacja: bool = False,
     fiolka_seed:      dict[str, str] | None = None,
-    tryb_kamery:      str | None = None,
 ) -> str:
     """Konwertuje snapshot + input gracza na JSON payload dla LLM.
 
@@ -404,11 +382,6 @@ def _zbuduj_user_payload(
             ``fiolka.opisy_skutkow.<kategoria>`` w yaml — LLM dostaje gotowy
             seed do znarracjonalizowania, NIE wymyśla skutku samodzielnie
             (anti-halucynacja, kontrola rozkładu prawdopodobieństw).
-        tryb_kamery: v15.4. Gracz wywołał komendę ``/scena <opis>`` →
-            ``"scena"``, ``/flashback <opis>`` → ``"flashback"``. Wymusza
-            ``narracja_typ`` w odpowiedzi LLM (instrukcja w payloadzie).
-            ``None`` = standardowa tura (LLM sam decyduje, czy II czy
-            ``cut`` w ramach limitu).
     """
     payload = {
         "tura_numer":         snapshot.numer_tury,
@@ -418,11 +391,6 @@ def _zbuduj_user_payload(
         "postacie_aktywne":   snapshot.postacie_aktywne,
         "stan":               snapshot.stan_poprzedni,
         "akcja_gracza":       user_input,
-        # v15.4: licznik kinowych cięć per etap łuku. LLM CZYTA przed
-        # decyzją o `narracja_typ = cut`; NIE odsyła w polu `stan`
-        # (Python jest autorytatywnym źródłem — patrz docstring
-        # `SnapshotOpowiesci.cuty_wykorzystane`).
-        "cuty_wykorzystane":  snapshot.cuty_wykorzystane,
     }
 
     # Fiolka — bloki tylko gdy istotne. LLM ignoruje brakujące klucze; obecne
@@ -432,26 +400,10 @@ def _zbuduj_user_payload(
     if fiolka_seed is not None:
         payload["fiolka_efekt_seed"] = fiolka_seed
 
-    # v15.4: gracz wymusił tryb kamery przez `/scena` lub `/flashback`.
-    # Instrukcja na sam dół, żeby model nie zapomniał — bliżej zamknięcia
-    # promptu, większa siła pull-throughu w generacji.
-    instrukcja_kamery = ""
-    if tryb_kamery in ("scena", "flashback"):
-        instrukcja_kamery = (
-            f"\n\nKAMERA WYMUSZONA PRZEZ GRACZA: w polu `akcja_gracza` powyżej "
-            f"znajdziesz prefiks `/{tryb_kamery} ` z opisem. Twoja odpowiedź MUSI "
-            f"mieć `narracja_typ = \"{tryb_kamery}\"` ORAZ `wybory: []`. Otwórz "
-            f"narrację formułą "
-            + ("czasową („Trzy lata wcześniej...\", „Gdy miała siedemnaście lat...\")."
-               if tryb_kamery == "flashback"
-               else "równoczesności („W tym samym czasie...\", „Pięć kilometrów dalej...\").")
-        )
-
     return (
         "Stan gry i akcja gracza poniżej. Wygeneruj kolejną turę zgodnie "
         "ze schemą JSON podaną w prompt-systemowy.\n\n"
         + json.dumps(payload, ensure_ascii=False, indent=2)
-        + instrukcja_kamery
     )
 
 
@@ -550,7 +502,6 @@ def generuj_ture(
     model:            str | None = None,
     fiolka_aktywacja: bool = False,
     fiolka_seed:      dict[str, str] | None = None,
-    tryb_kamery:      str | None = None,
 ) -> WynikTury:
     """Wysyła turę do LLM i zwraca strukturyzowany wynik.
 
@@ -570,12 +521,6 @@ def generuj_ture(
                            ``{"kategoria","opis"}`` (patrz :func:`wylosuj_seed_fiolki`)
                            i wstrzykuje jako seed do narracjonalizacji. LLM ma się
                            trzymać KATEGORII i OPISU; nie wymyślać nowego skutku.
-        tryb_kamery      : v15.4. Gracz wywołał ``/scena <opis>`` lub
-                           ``/flashback <opis>`` → odpowiednio ``"scena"`` /
-                           ``"flashback"``. Wymusza ``narracja_typ`` w odpowiedzi
-                           LLM. ``None`` → standardowa tura (LLM sam decyduje:
-                           ``druga_osoba`` albo ``cut`` w ramach limitu
-                           ``cuty_wykorzystane``).
 
     Returns:
         :class:`WynikTury` z zwalidowaną zawartością.
@@ -593,7 +538,6 @@ def generuj_ture(
         user_input,
         fiolka_aktywacja=fiolka_aktywacja,
         fiolka_seed=fiolka_seed,
-        tryb_kamery=tryb_kamery,
     )
 
     # Parametry: priorytet to argument funkcji (GUI może override przez
@@ -644,24 +588,6 @@ def generuj_ture(
         try:
             dane = json.loads(surowa)
             jsonschema.validate(instance=dane, schema=SCHEMA_TURA)
-            # v15.4: walidacja krzyżowa — III-osobowe narracje (flashback/scena/cut)
-            # MUSZĄ mieć puste `wybory`. jsonschema nie wyraża conditional
-            # ergonomicznie, więc robimy to ręcznie i feed-back'ujemy do retry.
-            if dane["narracja_typ"] != "druga_osoba" and dane["wybory"]:
-                raise jsonschema.ValidationError(
-                    f"narracja_typ='{dane['narracja_typ']}' REQUIRES an empty "
-                    f"`wybory` field (received {len(dane['wybory'])} choices). "
-                    f"Third-person scenes are passive for the player — you MUST NOT "
-                    f"present any choices."
-                )
-            # v15.4: gracz wymusił `tryb_kamery` przez `/scena`/`/flashback` —
-            # LLM zignorował i odpowiedział `druga_osoba`. Retry z naciskiem.
-            if tryb_kamery in ("scena", "flashback") and dane["narracja_typ"] != tryb_kamery:
-                raise jsonschema.ValidationError(
-                    f"The player forced narracja_typ='{tryb_kamery}' via the "
-                    f"/{tryb_kamery} command, but received '{dane['narracja_typ']}'. "
-                    f"Regenerate with the correct camera type and an empty `wybory`."
-                )
         except json.JSONDecodeError as exc:
             ostatni_blad = f"JSONDecodeError: {exc.msg}"
             continue
@@ -672,7 +598,6 @@ def generuj_ture(
         # Sukces — żaden błąd schemy.
         return WynikTury(
             narracja=dane["narracja"],
-            narracja_typ=dane["narracja_typ"],
             wybory=dane["wybory"],
             postacie_aktywne=dane["postacie_aktywne"],
             stan=dane["stan"],

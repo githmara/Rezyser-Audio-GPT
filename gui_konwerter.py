@@ -21,12 +21,10 @@ import sciezki
 from i18n import t
 
 
-# Co ile tur II-osobowych konwerter wstawia nagłówek H1 „Scena N" (cięcie
-# rozdziału w ElevenLabs). 5 tur ≈ 5-7,5 tys. znaków, czyli kilka minut audio
-# na scenę — zbliżone do naturalnego rozdziału audiobooka. Krótszy próg
-# sztucznie tnie narrację; dłuższy traci nawigację dla NVDA.
-# v15.4.1: licznik resetuje się po każdym KINOWYM cięciu (`/scena`,
-# `/flashback`, auto-cut LLMa) — patrz `_regex_prefiksow_kamery` niżej.
+# Co ile tur konwerter wstawia nagłówek H1 „Scena N" (cięcie rozdziału w
+# ElevenLabs). 5 tur ≈ 5-7,5 tys. znaków, czyli kilka minut audio na scenę —
+# zbliżone do naturalnego rozdziału audiobooka. Krótszy próg sztucznie tnie
+# narrację; dłuższy traci nawigację dla NVDA.
 TURY_NA_SCENE = 5
 
 # Katalog `dictionaries/` w roocie repo (lub obok exe po zamrożeniu) — źródło
@@ -53,13 +51,11 @@ def _wyluskaj_slowo_tury(fmt: str) -> str:
 def _slowa_kluczowe_konwertera() -> dict[str, frozenset[str]]:
     """Skanuje ``ui.yaml`` WSZYSTKICH paczek raz i zwraca zbiory słów-kluczy.
 
-    Tło: konwerter rozpoznaje cztery rodzaje markerów struktury dokumentu, a
+    Tło: konwerter rozpoznaje trzy rodzaje markerów struktury dokumentu, a
     wszystkie pochodzą z tłumaczeń w ``dictionaries/<kod>/gui/ui.yaml``:
 
     * ``"tura"``     – słowo nagłówka tury Opowieści, wyłuskane z
       ``opowiesci.tura_naglowek_format`` (``"--- Tura {numer} ---"`` → ``Tura``);
-    * ``"kamera"``   – kinowe prefiksy A11y (``opowiesci.prefiks_{flashback,
-      scena,cut}``), sklejane przez ``gui_opowiesci`` z narracją LLM;
     * ``"rozdzial"`` – słowa nagłówków H1 tnących rozdział (``konwerter.
       naglowki_rozdzialow``);
     * ``"scena"``    – słowa nagłówków scen pogrubianych bez wpisu w TOC
@@ -71,10 +67,10 @@ def _slowa_kluczowe_konwertera() -> dict[str, frozenset[str]]:
     plik bywa mieszany albo zbyt krótki dla detektora), więc rozpoznaje słowa
     z dowolnej paczki. Dodanie 10. języka = nowy folder + wypełnione ``ui.yaml``,
     zero edycji tego pliku (zero-touch). Jeden przebieg po YAML-ach
-    (``lru_cache``) zasila wszystkie cztery regexy poniżej.
+    (``lru_cache``) zasila wszystkie trzy regexy poniżej.
     """
     zbiory: dict[str, set[str]] = {
-        "tura": set(), "kamera": set(), "rozdzial": set(), "scena": set(),
+        "tura": set(), "rozdzial": set(), "scena": set(),
     }
     if not _DICTIONARIES_DIR.is_dir():
         return {k: frozenset(v) for k, v in zbiory.items()}
@@ -93,10 +89,6 @@ def _slowa_kluczowe_konwertera() -> dict[str, frozenset[str]]:
             slowo = _wyluskaj_slowo_tury(fmt)
             if slowo:
                 zbiory["tura"].add(slowo)
-        for klucz in ("prefiks_flashback", "prefiks_scena", "prefiks_cut"):
-            wartosc = opowiesci.get(klucz)
-            if isinstance(wartosc, str) and wartosc.strip():
-                zbiory["kamera"].add(wartosc.strip())
         konwerter = dane.get("konwerter") or {}
         for klucz, cel in (("naglowki_rozdzialow", "rozdzial"),
                            ("naglowki_scen", "scena")):
@@ -127,21 +119,6 @@ def _regex_tury() -> re.Pattern:
         r"^---\s*(?:" + _alternatywa(slowa) + r")\s+(\d+)\s*---$",
         re.IGNORECASE,
     )
-
-
-@lru_cache(maxsize=1)
-def _regex_prefiksow_kamery() -> re.Pattern:
-    """Regex kinowych prefiksów A11y od początku linii (unia wszystkich paczek).
-
-    ``gui_opowiesci._obsluz_ture`` skleja prefiks A11y z narracją LLM i zapisuje
-    do ``skrypty/<nazwa>.txt``; konwerter widzi tę linię na początku akapitu
-    tury i traktuje jako sygnał KINOWEGO cięcia (osobny H1, reset licznika tur).
-    Zwraca regex niezgodny z niczym, gdy żadna paczka nie ma prefiksów.
-    """
-    prefiksy = _slowa_kluczowe_konwertera()["kamera"]
-    if not prefiksy:
-        return re.compile(r"$^")
-    return re.compile(r"^(?:" + _alternatywa(prefiksy) + r")", re.IGNORECASE)
 
 
 @lru_cache(maxsize=1)
@@ -336,23 +313,18 @@ class KonwerterPanel(wx.Panel):
         nowy_doc.core_properties.author = t("konwerter.author_metadata")
         nowy_doc.core_properties.comments = ""
 
-        # v15.1: liczniki dla trybu Opowieści — co TURY_NA_SCENE tur II-osobowych
-        # wstawiamy H1 „Scena N", pozostałe znaczniki `--- Tura N ---`
-        # strippujemy (meta-info „Tura 7" w audiobooku łamie immersję).
-        # v15.4.1: licznik tur II-osobowych liczy się OD OSTATNIEGO H1 — każda
-        # kinowa narracja (`/scena`, `/flashback`, auto-cut LLMa) wymusza
-        # osobne H1 i resetuje licznik. Bez tego kilkanaście kinowych
-        # przeskoków pod rząd siedziało pod jednym wspólnym H1 i ElevenLabs
-        # nie tnęło rozdziału przy zmianie kamery.
+        # v15.1: liczniki dla trybu Opowieści — co TURY_NA_SCENE tur wstawiamy
+        # H1 „Scena N", pozostałe znaczniki `--- Tura N ---` strippujemy
+        # (meta-info „Tura 7" w audiobooku łamie immersję). Licznik `tury_od_h1`
+        # liczy się od ostatniego wstawionego H1 i resetuje przy każdym nowym H1.
         # Inicjalizacja `tury_od_h1 = TURY_NA_SCENE` żeby pierwsza tura
         # dokumentu wymusiła H1 „Scena 1" (warunek `>=` spełniony od razu).
         tury_od_h1 = TURY_NA_SCENE
         scena_counter = 0
-        # Cztery regexy zasilane jednym przebiegiem po ui.yaml wszystkich paczek
+        # Trzy regexy zasilane jednym przebiegiem po ui.yaml wszystkich paczek
         # (unia słów-kluczy, bez detekcji języka pliku — patrz
         # `_slowa_kluczowe_konwertera`). Liczone raz przed pętlą.
         regex_tura = _regex_tury()
-        regex_kamera = _regex_prefiksow_kamery()
         regex_rozdzial = _regex_naglowkow_rozdzialow()
         regex_scena = _regex_scen()
 
@@ -384,20 +356,6 @@ class KonwerterPanel(wx.Panel):
                 if tury_od_h1 >= TURY_NA_SCENE:
                     _wstaw_h1_sceny()
                 tury_od_h1 += 1
-                continue
-
-            # v15.4.1: Detekcja kinowego prefiksu A11y („Retrospekcja:",
-            # „Scena zza kadru:", „Tymczasem gdzie indziej:" + odpowiedniki
-            # w 8 pozostałych językach). Każdy taki prefiks startuje nową
-            # scenę z osobnym H1; treść po prefiksie idzie jako zwykły
-            # paragraf pod H1, bez prefiksu meta (w pliku audio mówca
-            # nie powinien czytać „Retrospekcja:" jako część fabuły).
-            match_kamera = regex_kamera.match(linia)
-            if match_kamera:
-                _wstaw_h1_sceny()
-                ostatek = linia[match_kamera.end():].strip()
-                if ostatek:
-                    nowy_doc.add_paragraph(ostatek)
                 continue
 
             # Detekcja nagłówków głównych (tnących plik na rozdziały w ElevenLabs).

@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 17.2.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 17.3.0 „Wersja Wydawnicza"
+
+*Release v17.3.0: świadoma regresja trybu Opowieści — powrót do czystej narracji drugoosobowej. Funkcja „druga kamera" z v15.4 (komendy `/scena` i `/flashback`, automatyczne kinowe cięcia, pole `narracja_typ`, licznik `cuty_wykorzystane`) zostaje w całości usunięta. Powód jest architektoniczny, nie techniczny: III-osobę, sceny zza kadru i retrospekcje znacznie lepiej obsługują tryby Reżysera (Skrypt + Audiobook), które mają „nieskończoną pamięć" zamiast limitu tur i potrafią nakreślać nowe miejsca scen oraz rozdziały. Kontrolę akcji z zewnątrz — kiedyś planowaną dla Opowieści na daleką przyszłość — realizuje dziś prompt w zrefaktoryzowanej Burzy Mózgów, budującej warianty fabuły jako przyciski. Tryb Opowieści wraca więc do tego, czym był w pierwszych etapach wdrażania: gry z immersyjną narracją „w Ty" i niczym więcej. Odciąża to LLM od domyślnych flashbacków i sztucznego tworzenia perspektyw, a podział ról między modułami staje się rozłączny i czytelny. Cięcie chirurgiczne: `/visualize` (Burza), przerywnik Cinematic Meta Warning po 150. turze oraz grupowanie tur w rozdziały H1 w Architekcie Audiobooków (mechanika z v15.1, niezależna od kamery) — wszystkie ZOSTAJĄ nietknięte. Stare zapisy gier post-15.4 z polem `cuty_wykorzystane` wczytują się czysto (pole jest po prostu ignorowane).*
 
 *Patch v17.2.2: trzy szlify wyłapane przy przeglądzie kodu narzędzi — jeden user-facing, dwa deweloperskie. (1) **Architekt Audiobooków** znów rozumie wszystkie 9 języków: niemieckie „Kapitel", hiszpańskie „Capítulo", francuskie „Chapitre" (i sceny „Szene"/„Escena"/„Scène") gubiły się w zahardkodowanych regexach z czasów sprzed 14.0 i leciały jako zwykłe akapity — ElevenLabs nie ciął rozdziału, NVDA traciło nawigację po nagłówkach. Teraz słowa-klucze nagłówków żyją w `ui.yaml` każdej paczki i są zbierane unią ze wszystkich języków (jak wcześniej kinowe prefiksy A11y), więc 10. język zadziała zero-touch po utworzeniu folderu. (2) `build_release` woła generator dokumentacji w trybie cichym — kilkadziesiąt linii „✅ docs/…" tonęło resztę logu builda (docs i tak regenerujemy + walidujemy ręcznie przed commitem); ostrzeżenia o brakujących placeholderach odpięto od trybu cichego, więc realny rozjazd nadal krzyczy. (3) Bonus z audytu: mapy języków Inno Setup i botów GitHub mają świadomie pozostać zahardkodowane (lustro paczek Inno / ręczne persony CI), więc odświeżacz Reżysera nie wymagał zmian.*
 
@@ -51,6 +53,47 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 17.3.0 — release (świadoma regresja: tryb Opowieści wraca do czystej drugiej osoby)
+
+### TL;DR
+
+Tryb Opowieści cofamy do stanu sprzed v15.4 — czystej gry z narracją drugoosobową („idziesz", „czujesz", „widzisz") i niczym więcej. Wprowadzona w v15.4 „druga kamera" (komendy gracza `/scena` i `/flashback`, automatyczne kinowe cięcia silnika z prefiksem „Tymczasem gdzie indziej:", wymagane pole `narracja_typ` w kontrakcie JSON, persystowany licznik `cuty_wykorzystane`) zostaje usunięta w całości — w silniku, w GUI, w konwerterze, w słownikach 9 języków i w dokumentacji.
+
+To decyzja architektoniczna, nie reakcja na bug. Po dojrzeniu pozostałych modułów III-osobowa narracja ma już znacznie lepszy dom: tryby Reżysera (Skrypt i Audiobook) operują narracją trzecioosobową natywnie, mają „nieskończoną pamięć" zamiast limitu tur Opowieści i potrafią nakreślać nowe miejsca scen oraz rozdziały. Zewnętrzną kontrolę akcji — kiedyś planowaną dla Opowieści na daleką przyszłość — realizuje dziś prompt w zrefaktoryzowanej Burzy Mózgów, która buduje warianty fabuły jako przyciski. Utrzymywanie drugiej kamery w Opowieściach dublowało więc zdolności Reżysera i obciążało LLM domyślnymi flashbackami oraz sztucznym tworzeniem perspektyw. Po regresji podział ról między modułami jest rozłączny i czytelny.
+
+Cięcie jest chirurgiczne. NIE ruszamy trzech rzeczy, które tylko z nazwy bywają mylone z kamerą: `/visualize` (multisensoryczny opis sceny w trybie Burza), Cinematic Meta Warning (dramatyczny przerywnik po 150. turze) oraz grupowanie tur w rozdziały H1 w Architekcie Audiobooków — ta ostatnia mechanika pochodzi z v15.1 i jest niezależna od kamery (konwerter dalej wstawia „Scena N" co 5 tur). Z konwertera znika wyłącznie warstwa v15.4.1: detekcja kinowych prefiksów A11y i reset licznika po cięciu.
+
+### Co się zmieniło
+
+- **Komendy `/scena`, `/scene`, `/flashback`, `/retrospekcja` usunięte** z trybu Opowieści. Pozostają `/wizualizuj`, `/odswiez`, `/pomoc`, `/zapisz`, `/wczytaj`, `/koniec` (i ich angielskie warianty).
+- **Brak narracji III-osobowej w Opowieściach** — silnik znów pisze wyłącznie w drugiej osobie. Prompt systemowy `baza.yaml` wrócił do wersji sprzed v15.4 we wszystkich 9 paczkach.
+- **Konwerter (Architekt Audiobooków)** — kinowe prefiksy nie tworzą już osobnych H1; grupowanie rozdziałów co 5 tur działa jak dawniej.
+- **Dokumentacja 9 języków** — usunięta sekcja „Druga kamera" (KROK/STEP/SCHRITT… 5B) i wpisy `/scena`/`/flashback` z listy komend; przykład komendy `/odswiez` przestał odwoływać się do nieistniejącego już „kinowego cięcia".
+
+### Pod maską
+
+- `opowiesci_ai.py` — `narracja_typ` (enum) usunięte ze `SCHEMA_TURA` i `WynikTury`; `cuty_wykorzystane` usunięte ze `SnapshotOpowiesci`; wycięta walidacja krzyżowa (III-osoba ⇒ puste wybory) i parametr `tryb_kamery`.
+- `core_opowiesci.py` — `cuty_wykorzystane` znika z `ProjektOpowiesci` (init/zapis/wczyt). Wsteczna zgodność: zapisy post-15.4 z tym polem wczytują się bez błędu, pole jest ignorowane i nie wraca przy ponownym zapisie.
+- `gui_opowiesci.py` — usunięty dispatch komend kamerowych, funkcje `_komenda_scena`/`_komenda_flashback`/`_wywolaj_ture_z_tryb_kamery`, wstrzykiwanie prefiksów A11y i propagacja licznika przez snapshoty.
+- `gui_konwerter.py` — usunięty `_regex_prefiksow_kamery` i zbiór słów-kluczy „kamera"; zachowane `TURY_NA_SCENE=5` oraz regexy tury/rozdziału/sceny.
+- 9× `gui/ui.yaml` — usunięte klucze `opowiesci.prefiks_{flashback,scena,cut}`; w pl/en dodatkowo `komenda_kamera_*` i `status_kamera_w_toku`.
+
+### Co zostaje (świadomie nietknięte)
+
+- `/visualize` (tryb Burza) — osobna funkcja, bez związku z kamerą.
+- Cinematic Meta Warning po 150. turze — niezależny przerywnik dramatyczny.
+- Grupowanie tur w rozdziały H1 w konwerterze (v15.1).
+
+### Walidacja
+
+- Izolowane testy silnika (bez `MainLoop`): `SCHEMA_TURA`/`SnapshotOpowiesci`/payload bez śladów kamery; stara gra z `cuty_wykorzystane` wczytuje się i pole nie wraca do zapisu.
+- Smoke GUI: konstrukcja `OpowiesciPanel` + `KonwerterPanel` (`wx.App(False)` → `Destroy`) bez błędów; dispatch komend czysty.
+- Konwerter: regexy tury/rozdziału/sceny działają, `TURY_NA_SCENE=5`.
+- `generuj_dokumentacje.py --waliduj` — wszystkie placeholdery rozwinięte; `git grep` potwierdza zero pozostałości kamery w kodzie, słownikach i `docs/`.
+- Kompletność 9 paczek językowych (`dostepne_jezyki_bazowe`) zachowana.
 
 ---
 

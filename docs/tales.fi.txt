@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (17.2.2 – Julkaisuversio)
+Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (17.3.0 – Julkaisuversio)
 
 Toinen sovelluksen päätila Ohjaajan rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly ohjaa kerrontaa yksikön toisessa persoonassa ("Kävelet sumuisen metsän läpi, tunnet märän lehden tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla vapaamuotoisen toiminnon tai valitsemalla yhden numeroiduista vaihtoehdoista.
 
@@ -81,11 +81,7 @@ Kerrontamoottori valitsee AI-mallin automaattisesti tilasta riippuen: Valintojen
 
 /visualisoi <kuvaus>, /visualize <kuvaus> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvällisemmin. Tulokset ilmestyvät erilliseen dialogiin, niitä EI lisätä kerrontaan eikä tallenneta äänikirjatiedostoon. Esimerkki: „/visualisoi miltä vartija näyttää" tai „/visualisoi kahvilan tuoksu".
 
-/kohtaus <kuvaus>, /scene <kuvaus> — nykyinen tapahtuma MUUALLA, kerrottu kolmannessa persoonassa. Kamera irtautuu hahmostasi ja näyttää, mitä tapahtuu samanaikaisesti toiselle hahmolle tai toisessa maailman paikassa. Esimerkki: „/kohtaus Anna torilla" tai „/kohtaus vartijat portilla". Moottori liittää kohtauksen kerrontaan, merkitsee sen etuliitteellä „Kohtaus kulissien takaa:" ja palaa automaattisesti hahmoosi seuraavassa vuorossa. Valintoja ei esiinny — pelaaja ei tee päätöksiä toisen kohtauksessa. Täysi kuvaus mekanismista löytyy VAIHEISTA 5B.
-
-/takautuma <kuvaus>, /flashback <kuvaus> — takautuma kolmannessa persoonassa, aikamatka taaksepäin. Esimerkki: „/takautuma isän kuolinpäivä" tai „/takautuma sankareiden ensimmäinen kohtaaminen". Avaa kerronnan aikakaavalla („Kolme vuotta aikaisemmin…"), merkitsee etuliitteellä „Takautuma:" ja palaa nykyiseen vuoroon. Samoin kuin /kohtaus — passiivinen, ilman valintoja. Täysi kuvaus VAIHEISSA 5B.
-
-/paivita, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen jälkeen, kun olet muokannut sitä käsin (versiosta 15.5 alkaen). Kun avaat opowiesci/<nazwa>.txt editorissa ja esim. leikkaat moottorin rikkoman elokuvallisen leikkauksen sulkemisen, tämä komento (tai painike „Päivitä levyltä") synkronoi tuoreen lopun moottorin kontekstin kanssa — ilman kovaa nollausta ja pelin uudelleenlatausta. Jos aiempien vuorojen tiivistelmä on jo olemassa, se jää koskemattomaksi, joten seuraava vuoro ja seuraava tiivistelmä eivät synny vanhentuneista tiedoista. HUOMIO: pelitilaa (hahmot, sijainti, varusteet, juonisäikeet) tiedostosta .game.json EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro voi olla ristiriidassa niiden kanssa.
+/paivita, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen jälkeen, kun olet muokannut sitä käsin (versiosta 15.5 alkaen). Kun avaat opowiesci/<nazwa>.txt editorissa ja esim. korjaat kirjoitusvirheen tai poistat ylimääräisen kappaleen, tämä komento (tai painike „Päivitä levyltä") synkronoi tuoreen lopun moottorin kontekstin kanssa — ilman kovaa nollausta ja pelin uudelleenlatausta. Jos aiempien vuorojen tiivistelmä on jo olemassa, se jää koskemattomaksi, joten seuraava vuoro ja seuraava tiivistelmä eivät synny vanhentuneista tiedoista. HUOMIO: pelitilaa (hahmot, sijainti, varusteet, juonisäikeet) tiedostosta .game.json EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro voi olla ristiriidassa niiden kanssa.
 
 /apu, /help — näyttää valintaikkunan, jossa on luettelo kaikista saatavilla olevista komennoista. Dialogi on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee koko listan heti ilman navigointia.
 
@@ -178,18 +174,3 @@ Syy ja ratkaisu: Mallin hallusinaatio — huolimatta 4 LLM-tilasta, se palautti 
 
 Ongelma: .game.json ja .story.jsonl tiedostoja ei näy työpöydällä.
 Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on järjestelmäkansio tavallisille käyttäjille, eikä se ole näkyvissä tiedostoselaimessa. Kertomustiedostot (.txt, .md) tallennetaan opowiesci/-kansioon — löydät ne sieltä.
-
-
-VAIHE 5B: Toinen kamera — kulissien takaiset kohtaukset ja takaumat (alkaen v15.4)
-
-Oletuksena pelaat ensimmäisessä persoonassa — kerronta kuuluu "menet", "tunnet", "näet". Versiosta 15.4 alkaen voit ohjata kohtauksen etäältä, kerrottuna kolmannessa persoonassa, joka ei liity suoraan hahmoosi. Tätä varten on kaksi komentoa: /kohtaus rinnakkaisille tapahtumille (jossain muualla maailmassa), /takauma menneisyyden tapahtumille. Lisäyksen jälkeen moottori palaa hahmoosi seuraavalla vuorolla.
-
-Miksi tämä on olemassa. Klassinen kertomuspeli rajoittaa kaikki tapahtumat yhden hahmon näkökenttään. Toinen kamera mahdollistaa dramaturgian rakentamisen laajemmasta näkökulmasta — näyttää, että antagonisti pakenee juuri kaupungista, että Anna 30 kilometrin päässä lukee kirjeesi, että kymmenen vuotta sitten samassa majatalossa isäsi kuoli. Ilman tätä mekaniikkaa pelaaja saa tietää tällaisista asioista vain NPC-hahmojen kertomana; nyt hän voi nähdä ne "livenä".
-
-Miltä se näyttää kerronnan kannalta. Moottori avaa kohtauksen kaavalla, joka osoittaa näkökulman muutoksen — /kohtaus: "Samaan aikaan…", "Viisi kilometriä kauempana…", /takauma: "Kolme vuotta aiemmin…", "Kun hän oli seitsemäntoista…". Kertomuspaneelissa ja "Viimeinen vuoro" -kentässä tekstiä edeltää lisäksi A11y-etuliite: "Kulissien takainen kohtaus:" tai "Takauma:". Tämä etuliite tallennetaan myös .txt-kertomustiedostoon — kun avaat äänikirjan toisessa TTS-soittimessa, tiedät edelleen, että kamera on siirtynyt.
-
-Mitä odottaa valinnoilta. Kolmannen persoonan kohtauksissa valintapainikkeiden kenttä on AINA tyhjä — pelaaja ei tee päätöksiä antagonistille tai aikaisemmalle "minälleen". Seuraava vuoro palaa toiseen persoonaan ja antaa normaalisti valinnat aktiivisen tilan mukaisesti (Vapaa, Valinnat, Pienempi paha).
-
-Moottorin automaattiset leikkaukset. Riippumatta komennoistasi, kertomusmoottori voi itse päättää, että tietty hetki ansaitsee elokuvallisen leikkauksen — se lisää silloin lyhyen kulissien takaisen kohtauksen etuliitteellä "Samaan aikaan muualla:". Nämä orgaaniset lisäykset ovat rajoitettuja: enintään yksi automaattinen leikkaus narratiivisen kaaren näytöstä (esittely, nousu, huipentuma, ratkaisu), eli enintään neljä koko tarinassa. Rajoitus lasketaan vain moottorin itsenäisille lisäyksille; omat /kohtaus ja /takauma -komennot ovat rajoittamattomia. Laskurin tila säilyy .game.json-tallennustiedostossa — kun palaat peliin kolmen päivän kuluttua, vaihekohtainen rajoitus pysyy voimassa.
-
-Käytännön vinkki. Komento /kohtaus rakentaa hienosti jännitystä juuri ennen huipentumaa ("/kohtaus vartijat lähestyvät portilta" — tiedät, että he ovat tulossa, hahmosi ei vielä tiedä). /takauma toimii parhaiten NPC:n motivaation selityksenä, jonka juuri kohtasit ("/takauma Marek lapsena, palon jälkeinen päivä"). Älä käytä liikaa — kerronta, joka tihkuu leikkauskohtauksista, menettää ensimmäisen persoonan rytmin, joka on tämän tilan ydin.

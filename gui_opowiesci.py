@@ -170,12 +170,6 @@ class OpowiesciPanel(wx.Panel):
         "/visualize":  "_komenda_visualize",
         "/koniec":     "_komenda_koniec",
         "/quit":       "_komenda_koniec",
-        # v15.4: druga kamera narracyjna — sceny zza kadru i retrospekcje.
-        # Komendy mają wariant PL i EN (fallback) jak pozostałe.
-        "/scena":      "_komenda_scena",
-        "/scene":      "_komenda_scena",
-        "/flashback":  "_komenda_flashback",
-        "/retrospekcja": "_komenda_flashback",
         # v15.4: szybka pomoc — pokazuje listę dostępnych komend bez
         # konieczności wywoływania błędnej komendy. NVDA-friendly: dialog
         # MessageBox z TextCtrl readonly.
@@ -816,9 +810,6 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._projekt.zasady_swiata,
-            # v15.4: licznik kinowych cięć ze stanu projektu (źródło prawdy
-            # po persystencji); kopia żeby mutacja jednego nie mutowała drugiego.
-            cuty_wykorzystane=dict(self._projekt.cuty_wykorzystane),
         )
 
         # v15.2: mechanika fiolki — wyliczana TYLKO w trybie Mniejsze zło.
@@ -869,7 +860,6 @@ class OpowiesciPanel(wx.Panel):
         tryb:             int,
         fiolka_aktywacja: bool = False,
         fiolka_seed:      dict[str, str] | None = None,
-        tryb_kamery:      str | None = None,
     ) -> None:
         """Worker w tle — wątek nigdy nie dotyka widgetów wxPython bezpośrednio.
 
@@ -880,11 +870,6 @@ class OpowiesciPanel(wx.Panel):
         v15.2: parametry ``fiolka_aktywacja`` / ``fiolka_seed`` propagowane
         do :func:`opowiesci_ai.generuj_ture`. Domyślnie False/None — w trybach
         Swobodny/Wyborów no-op.
-
-        v15.4: ``tryb_kamery`` propagowany do silnika gdy gracz wywołał
-        ``/scena`` lub ``/flashback`` — wymusza ``narracja_typ`` w odpowiedzi
-        LLM. ``None`` (default) → standardowa tura (LLM sam decyduje:
-        ``druga_osoba`` albo ``cut`` w ramach limitu).
         """
         try:
             wynik = oai.generuj_ture(
@@ -895,7 +880,6 @@ class OpowiesciPanel(wx.Panel):
                 model=self._model_dla_trybu(tryb),
                 fiolka_aktywacja=fiolka_aktywacja,
                 fiolka_seed=fiolka_seed,
-                tryb_kamery=tryb_kamery,
             )
         except Exception as exc:  # noqa: BLE001
             # Łapiemy wszystko (RateLimitError, APITimeoutError, RuntimeError
@@ -916,30 +900,19 @@ class OpowiesciPanel(wx.Panel):
         tryb:       int,
     ) -> None:
         """Aktualizacja UI po sukcesie tury — wszystko w wątku głównym."""
-        # v15.4: A11y prefiks dla III-osobowych narracji — gracz korzystający
-        # z NVDA musi natychmiast wiedzieć, że kamera przeskoczyła. Czysty,
-        # powtarzalny komunikat techniczny przed narracją jest bezpieczniejszy
-        # niż poleganie na formule otwierającej („Trzy lata wcześniej...").
-        # Klucz prefiksu z `ui.yaml`; gdy `druga_osoba` (default) — bez prefiksu.
-        prefiks_a11y = ""
-        if wynik.narracja_typ != "druga_osoba":
-            klucz_prefiksu = f"opowiesci.prefiks_{wynik.narracja_typ}"
-            prefiks_a11y = t(klucz_prefiksu) + " "
-        narracja_z_prefiksem = prefiks_a11y + wynik.narracja
-
         # 1. Append narracji do TextCtrl. AppendText jest tańszy niż SetValue
         # (nie kasuje historii) i zachowuje pozycję kursora bliską końca.
         naglowek = t(
             "opowiesci.tura_naglowek_format",
             numer=self._snapshot.numer_tury,
         )
-        self._txt_narracja.AppendText(naglowek + narracja_z_prefiksem)
+        self._txt_narracja.AppendText(naglowek + wynik.narracja)
         self._txt_narracja.SetInsertionPointEnd()
 
         # 1b. Pole „Ostatnia tura" — zastępujemy całość świeżym fragmentem.
         # NVDA usłyszy go natychmiast po focusie (wx.CallAfter w pkt 5 niżej),
         # bez konieczności nawigowania przez setki linii pełnej narracji.
-        self._txt_ostatnia_tura.SetValue(naglowek.lstrip() + narracja_z_prefiksem)
+        self._txt_ostatnia_tura.SetValue(naglowek.lstrip() + wynik.narracja)
         self._txt_ostatnia_tura.SetInsertionPoint(0)
 
         # 2. Aktualizacja snapshotu: nowe `ostatnie_tury` + postacie + stan.
@@ -955,16 +928,6 @@ class OpowiesciPanel(wx.Panel):
         })
         nowe_ostatnie = nowe_ostatnie[-6:]
 
-        # v15.4: jeśli LLM zwrócił `narracja_typ == "cut"`, zwiększamy licznik
-        # dla bieżącego etapu łuku PRZED konstrukcją snapshotu, żeby kolejna
-        # tura widziała aktualizację w payload do LLM. Komendy gracza
-        # (/scena, /flashback) NIE inkrementują — gracz ma niezależną kamerę.
-        nowe_cuty = dict(self._snapshot.cuty_wykorzystane)
-        if wynik.narracja_typ == "cut":
-            etap = (wynik.meta or {}).get("etap_luku", "ekspozycja")
-            if etap in nowe_cuty:
-                nowe_cuty[etap] = nowe_cuty[etap] + 1
-
         self._snapshot = oai.SnapshotOpowiesci(
             nazwa_gry=self._snapshot.nazwa_gry,
             numer_tury=self._snapshot.numer_tury,
@@ -974,7 +937,6 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._snapshot.zasady_swiata,
-            cuty_wykorzystane=nowe_cuty,
         )
 
         # 3. Faza 3: synchronizacja stanu z dyskiem — 4 pliki per tura.
@@ -983,12 +945,9 @@ class OpowiesciPanel(wx.Panel):
         # rebuild księgi świata, na końcu game.json + story.jsonl. Błąd
         # I/O w którymkolwiek kroku idzie w `_zglos_blad_zapisu` —
         # narracja jest już w UI, więc gracz nie traci tury.
-        # v15.4: zapisujemy `narracja_z_prefiksem` do `.txt` — gracz otwierając
-        # surowy plik w Notatniku/TTS dostaje ten sam sygnał A11y co w aplikacji.
         if self._projekt is not None:
             self._zsynchronizuj_projekt_z_wynikiem(
                 wynik, user_input, tryb, naglowek,
-                narracja_do_zapisu=narracja_z_prefiksem,
             )
 
         # 4. Wybory: w trybie Swobodnym (3) zawsze ukryte, w 4/5 widoczne
@@ -1035,18 +994,11 @@ class OpowiesciPanel(wx.Panel):
         user_input:         str,
         tryb:               int,
         naglowek:           str,
-        narracja_do_zapisu: str | None = None,
     ) -> None:
         """Wpisuje wynik tury w stan projektu i serializuje 4 pliki na dysk.
 
         Ten helper jest celowo wydzielony z :meth:`_obsluz_ture` — UI części
         nie da się testować bez wxPython, ale tę synchronizację tak.
-
-        ``narracja_do_zapisu`` (v15.4): jeśli ``None`` zapisujemy ``wynik.narracja``
-        bez modyfikacji (stary tryb). Jeśli string — używamy tej wartości (UI
-        dorzuca prefiks A11y „Retrospekcja:" / „Scena zza kadru:" dla
-        III-osobowych narracji; surowy .txt zapisujemy z tym samym prefiksem
-        żeby gracz otwierający plik osobnym TTS dostał ten sam sygnał).
         """
         assert self._projekt is not None, "wywoływane tylko gdy _projekt nie None"
 
@@ -1059,15 +1011,9 @@ class OpowiesciPanel(wx.Panel):
         # w trybie 4/5 zobaczył te same przyciski (bez tego musiałby pisać
         # free-text dopóki nie zrobi pierwszej własnej akcji).
         self._projekt.ostatnie_wybory  = list(wynik.wybory)
-        # v15.4: licznik kinowych cięć — snapshot jest aktualny (po inkrementacji
-        # w `_obsluz_ture`), kopiujemy do projektu żeby `zapisz_game_json`
-        # poniżej zapisał właściwą wartość. Gracz wracający po restarcie ma
-        # licznik dochowany w `.game.json`.
-        self._projekt.cuty_wykorzystane = dict(self._snapshot.cuty_wykorzystane)
 
-        narracja_zapis = narracja_do_zapisu if narracja_do_zapisu is not None else wynik.narracja
         try:
-            self._projekt.dopisz_do_txt(narracja_zapis, naglowek=naglowek)
+            self._projekt.dopisz_do_txt(wynik.narracja, naglowek=naglowek)
             self._projekt.rebuild_ksiega_swiata()
             self._projekt.zapisz_game_json()
             self._projekt.dopisz_story_jsonl({
@@ -1364,7 +1310,6 @@ class OpowiesciPanel(wx.Panel):
             nazwa_gry=nazwa, numer_tury=0,
             seed_swiata=seed_swiata, jezyk_projektu=aktualny_jezyk(),
             zasady_swiata=projekt.zasady_swiata,
-            cuty_wykorzystane=dict(projekt.cuty_wykorzystane),   # v15.4
         )
         self._txt_narracja.SetValue(t("opowiesci.nowa_gra_zaczatek", nazwa=nazwa))
         self._txt_ostatnia_tura.SetValue(t("opowiesci.txt_ostatnia_tura_init"))
@@ -1511,7 +1456,6 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=projekt.seed_swiata,
             jezyk_projektu=projekt.jezyk_projektu,
             zasady_swiata=projekt.zasady_swiata,
-            cuty_wykorzystane=dict(projekt.cuty_wykorzystane),   # v15.4
         )
 
         self._txt_nazwa_gry.SetValue(projekt.nazwa_pliku)
@@ -1714,7 +1658,6 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._snapshot.zasady_swiata,
-            cuty_wykorzystane=dict(self._snapshot.cuty_wykorzystane),
         )
 
         # Pole „Ostatnia tura" — świeża końcówka (NVDA usłyszy po fokusie).
@@ -1875,7 +1818,6 @@ class OpowiesciPanel(wx.Panel):
                 seed_swiata=self._snapshot.seed_swiata,
                 jezyk_projektu=self._snapshot.jezyk_projektu,
                 zasady_swiata=nowe_zasady,
-                cuty_wykorzystane=dict(self._snapshot.cuty_wykorzystane),   # v15.4
             )
             try:
                 self._projekt.zapisz_game_json()
@@ -2140,102 +2082,6 @@ class OpowiesciPanel(wx.Panel):
             return
         wx.CallAfter(self._pokaz_visualize_dialog, tekst)
 
-    # ------------------------------------------------------------------
-    # v15.4: /scena i /flashback — druga kamera narracyjna (III osoba)
-    # ------------------------------------------------------------------
-    def _komenda_scena(self, arg: str) -> None:
-        """`/scena <opis>` / `/scene <opis>` — bieżąca scena gdzie indziej (III osoba)."""
-        self._wywolaj_ture_z_tryb_kamery("scena", arg)
-
-    def _komenda_flashback(self, arg: str) -> None:
-        """`/flashback <opis>` / `/retrospekcja <opis>` — retrospekcja (III osoba)."""
-        self._wywolaj_ture_z_tryb_kamery("flashback", arg)
-
-    def _wywolaj_ture_z_tryb_kamery(self, tryb_kamery: str, arg: str) -> None:
-        """Shared dispatcher dla `/scena` i `/flashback` — pełna tura z wymuszoną kamerą.
-
-        Różnice względem standardowego ``_on_wyslij`` (oprócz ``tryb_kamery``):
-        - akcja gracza budowana jako ``/scena <opis>`` / ``/flashback <opis>``,
-          żeby pojawiła się w `.txt` / `.story.jsonl` z czytelnym oznaczeniem
-          (gracz wracający do gry po dniu wie, że to była komenda, nie zwykła
-          akcja postaci),
-        - nie ma logiki fiolki — kamera zza kadru nie wprowadza/odkorkowuje
-          fiolki (gracz nie jest protagonistą w tej scenie).
-        """
-        if not self._api_dostepne:
-            wx.MessageBox(
-                t("opowiesci.brak_api_tresc"),
-                t("opowiesci.brak_api_tytul"),
-                wx.OK | wx.ICON_ERROR, self,
-            )
-            return
-        if self._projekt is None:
-            wx.MessageBox(
-                t("opowiesci.brak_gry_tresc"),
-                t("opowiesci.brak_gry_tytul"),
-                wx.OK | wx.ICON_WARNING, self,
-            )
-            return
-        arg = arg.strip()
-        if not arg:
-            wx.MessageBox(
-                t("opowiesci.komenda_kamera_pusta_tresc", komenda=tryb_kamery),
-                t("opowiesci.komenda_kamera_pusta_tytul"),
-                wx.OK | wx.ICON_WARNING, self,
-            )
-            return
-
-        tryb = self._aktualny_tryb_int()
-        if tryb not in (oai.TRYB_SWOBODNY, oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO):
-            # Burza (0) i ewentualne nieoczekiwane tryby — nie ma sensu
-            # wymuszać kamery przez `generuj_ture`, bo Burza ma własny mini-engine.
-            wx.MessageBox(
-                t("opowiesci.komenda_kamera_zly_tryb_tresc", komenda=tryb_kamery),
-                t("opowiesci.komenda_kamera_zly_tryb_tytul"),
-                wx.OK | wx.ICON_WARNING, self,
-            )
-            return
-
-        # Alarm pamięci — taka sama bramka jak w `_on_wyslij`.
-        status_pamieci = oai.oblicz_status_pamieci(
-            self._snapshot, tryb, oai.MODEL_DOMYSLNY,
-        )
-        if status_pamieci.poziom == oai.POZIOM_ALARM:
-            wx.MessageBox(
-                t("opowiesci.alarm_blokada_tresc", procent=status_pamieci.procent),
-                t("opowiesci.alarm_blokada_tytul"),
-                wx.OK | wx.ICON_ERROR, self,
-            )
-            return
-
-        user_input = f"/{tryb_kamery} {arg}"
-
-        self._snapshot = oai.SnapshotOpowiesci(
-            nazwa_gry=self._projekt.nazwa_pliku,
-            numer_tury=self._snapshot.numer_tury + 1,
-            ostatnie_tury=self._snapshot.ostatnie_tury,
-            postacie_aktywne=self._snapshot.postacie_aktywne,
-            stan_poprzedni=self._snapshot.stan_poprzedni,
-            seed_swiata=self._snapshot.seed_swiata,
-            jezyk_projektu=self._snapshot.jezyk_projektu,
-            zasady_swiata=self._projekt.zasady_swiata,
-            cuty_wykorzystane=dict(self._projekt.cuty_wykorzystane),
-        )
-
-        self._btn_wyslij.Disable()
-        self._lbl_pamiec_status.SetLabel(
-            t("opowiesci.status_kamera_w_toku", komenda=tryb_kamery)
-        )
-
-        snapshot_kopia = self._snapshot
-        self._worker_thread = threading.Thread(
-            target=self._wyslij_worker,
-            args=(snapshot_kopia, user_input, tryb),
-            kwargs={"tryb_kamery": tryb_kamery},
-            daemon=True,
-        )
-        self._worker_thread.start()
-
     def _pokaz_visualize_dialog(self, tekst: str) -> None:
         """Dialog z multisensorycznym opisem — readonly, NVDA-friendly, nie zapisuje plików."""
         self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
@@ -2336,7 +2182,6 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._snapshot.zasady_swiata,
-            cuty_wykorzystane=dict(self._snapshot.cuty_wykorzystane),   # v15.4
         )
         if self._projekt is not None:
             self._projekt.ostatnie_tury = list(self._snapshot.ostatnie_tury)
@@ -2418,7 +2263,6 @@ class OpowiesciPanel(wx.Panel):
                 seed_swiata=self._snapshot.seed_swiata,
                 jezyk_projektu=self._snapshot.jezyk_projektu,
                 zasady_swiata=self._snapshot.zasady_swiata,
-                cuty_wykorzystane=dict(self._snapshot.cuty_wykorzystane),   # v15.4
             )
 
         self._meta_w_toku = False

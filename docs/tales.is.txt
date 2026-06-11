@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Samtalslegar Sögur (17.2.2 – Útgáfuútgáfa)
+Reżyser Audio GPT — Samtalslegar Sögur (17.3.0 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hliðina á Leikstjóra — í þetta sinn verður þú leikmaður í sögunni sem er dynamískt búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lyktina af blautum laufum…"), og þú ákveður næstu aðgerð — skrifar hvaða aðgerð sem er með frjálsum texta eða velur eina af tölusettum valkostum.
 
@@ -81,11 +81,7 @@ Frásagnavélin velur AI líkan sjálfkrafa eftir ham: fyrir valham og Minna ill
 
 /sjónrænt <lýsing>, /visualize <lýsing> — margskynja lýsing á núverandi senu. Breytir ekki stöðu leiksins, leggur ekki til valkosti — frásagnavélin notar öll fimm skilningarvitin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/sjónrænt hvernig lítur vörðurinn út" eða „/sjónrænt lyktin í kaffihúsinu".
 
-/sena <lýsing>, /scene <lýsing> — núverandi atburður ANNARSTAÐAR, sagður í þriðju persónu. Myndavélin losnar frá persónu þinni og sýnir hvað gerist samhliða hjá annarri persónu eða á öðrum stað í heiminum. Dæmi: „/sena Anna á markaðnum" eða „/sena varðmenn við hliðið". Vélin fléttar senu inn í frásögnina, merkir hana með forskeytinu „Sena utan ramma:" og snýr sjálfkrafa aftur að persónu þinni í næstu umferð. Valkostir birtast ekki — leikmaður tekur ekki ákvarðanir í senu annarra. Full lýsing á kerfinu er að finna í SKREFI 5B.
-
-/endurminning <lýsing>, /retrospekcja <lýsing> — endurminning í þriðju persónu, ferðast aftur í tíma. Dæmi: „/endurminning dagur föðurins dauða" eða „/endurminning fyrsta fundur hetjanna". Opnar frásögn með tímalegri formúlu („Þrjú ár áður…"), merkir með forskeytinu „Endurminning:" og snýr aftur að núverandi umferð. Eins og /sena — óvirk, án valkosta. Full lýsing í SKREFI 5B.
-
-/endurhlaða, /refresh — endurhleður innra minnið úr frásagnarskránni eftir handvirka breytingu á henni (frá v15.5). Þegar þú opnar opowiesci/<nazwa>.txt í textaritli og t.d. klippir burt lokun á kvikmyndalegri klippingu sem vélin braut, samstillir þessi skipun (eða hnappurinn „Endurhlaða af diski") ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. Ef samantekt fyrri umferða er þegar til, helst hún ósnortin, þannig að næsta umferð og næsta samantekt verða ekki til á úreltum gögnum. ATHUGIÐ: leikstaðan (persónur, staðsetning, búnaður, þræðir) úr .game.json skránni er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins getur næsta umferð rekist á þær.
+/endurhlaða, /refresh — endurhleður innra minnið úr frásagnarskránni eftir handvirka breytingu á henni (frá v15.5). Þegar þú opnar opowiesci/<nazwa>.txt í textaritli og t.d. lagar innsláttarvillu eða styttir óþarfa málsgrein, samstillir þessi skipun (eða hnappurinn „Endurhlaða af diski") ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. Ef samantekt fyrri umferða er þegar til, helst hún ósnortin, þannig að næsta umferð og næsta samantekt verða ekki til á úreltum gögnum. ATHUGIÐ: leikstaðan (persónur, staðsetning, búnaður, þræðir) úr .game.json skránni er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins getur næsta umferð rekist á þær.
 
 /hjálp, /help — birtir glugga með lista yfir allar tiltækar skipanir. Glugginn er aðeins til lesturs og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
 
@@ -178,18 +174,3 @@ Vandamál: Í valham bjó vélin ekki til hnappa, þó ég hafi búist við þei
 
 Vandamál: Skrárnar .game.json og .story.jsonl eru ekki sýnilegar á skjáborðinu.
 Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í opowiesci/ — þar finnur þú þær.
-
-
-SKREF 5B: Önnur myndavél — atriðin bak við tjöldin og endurlit (frá v15.4)
-
-Venjulega spilarðu í fyrstu persónu — frásögnin hljómar „þú gengur", „þú finnur", „þú sérð". Frá útgáfu 15.4 geturðu leikstýrt atriði úr fjarlægð, sagt í þriðju persónu, sem tengist ekki beint við þína persónu. Til þess eru tvær skipanir: /scena fyrir samhliða atburði (eitthvað annað í heiminum), /flashback fyrir endurlit (í fortíðinni). Eftir innskot snýr vélin aftur til þinnar persónu í næstu umferð.
-
-Af hverju þetta er til. Klassískur frásagnarleikur takmarkar alla atburði við sjónsvið einnar persónu. Önnur myndavél gerir kleift að byggja upp dramatík frá stærra sjónarhorni — sýna að andstæðingurinn er að flýja úr borginni, að Anna 30 kílómetrum í burtu les bréfið þitt, að fyrir tíu árum dó faðir þinn á sama krá. Án þessa kerfis fær leikmaður aðeins að vita um slíka hluti frá NPC-um; nú getur hann séð þá „í beinni".
-
-Hvernig það lítur út frá frásagnarhliðinni. Vélin opnar atriði með formúlu sem gefur til kynna breytingu á sjónarhorni — fyrir /scena: „Á sama tíma…", „Fimm kílómetrum í burtu…", fyrir /flashback: „Þremur árum fyrr…", „Þegar hún var sautján ára…". Í frásagnarglugganum og í reitnum „Síðasta umferð" er textinn auk þess með forskeytið A11y: „Atriði bak við tjöldin:" eða „Endurlit:". Þetta forskeyti er einnig vistað í .txt frásagnarskránni — þegar þú opnar hljóðbókina í öðrum TTS spilara, veistu enn að myndavélin hefur færst.
-
-Hvað á að búast við frá valkostum. Í þriðju persónu atriðum er valhnappasvæðið ALLTAF tómt — leikmaður tekur ekki ákvarðanir fyrir andstæðinginn eða fyrir sitt fyrra „ég". Næsta umferð snýr aftur í aðra persónu og gefur venjulega valkosti í samræmi við virkan ham (Frjáls, Valkosta, Minna illt).
-
-Sjálfvirk klipping vélarinnar. Óháð þínum skipunum getur frásagnarvélin sjálf ákveðið að tiltekin stund eigi skilið kvikmyndalega klippingu — þá setur hún inn stutt atriði bak við tjöldin með forskeytinu „Á meðan annars staðar:". Þessi lífrænu innskot eru takmörkuð: mest eitt sjálfvirkt klipp á hverja þáttasögu (kynnir, uppbygging, hápunktur, lausn), sem er mest fjögur fyrir alla söguna. Takmörkunin er aðeins talin fyrir sjálfstæð innskot vélarinnar; þínar /scena og /flashback eru ótakmarkaðar. Staða teljarans er viðvarandi í .game.json skrá — þegar þú kemur aftur í leikinn eftir þrjá daga, verður takmörkun á hverju stigi virt.
-
-Hagnýt ábending. Skipunin /scena byggir upp spennu rétt fyrir hápunktinn („/scena verðirnir nálgast frá hliðinu" — þú veist að þeir koma, persónan þín veit það ekki enn). /flashback virkar best sem skýring á hvötum NPC sem þú hefur nýlega hitt („/flashback Marek sem barn, daginn eftir brunann"). Notaðu ekki of mikið — frásögn sem er ofhlaðin af klippuatriðum missir fyrsta persónu taktinn, sem er kjarni þessa ham.
