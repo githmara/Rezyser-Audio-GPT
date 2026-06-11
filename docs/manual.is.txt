@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.2.1 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.2.2 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 

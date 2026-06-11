@@ -924,8 +924,14 @@ def main(args: argparse.Namespace | None = None) -> None:
     # the module has its own UTF-8 fix and does not need a fresh session.
     # This guarantees the installer ships fresh docs/ even when the developer
     # forgot to run the generator manually after editing a template.
+    # cicho=True — docs zostały już zregenerowane + zwalidowane RĘCZNIE przed
+    # release commitem (Konstytucja, Krok 1-3), więc per-plikowe ✅ z generatora
+    # to tu tylko powtórzony szum (kilkadziesiąt linii tonących resztę logu
+    # buildu). Ostrzeżenia o brakujących placeholderach (⚠️) są w generatorze
+    # niezależne od `cicho` — gdyby coś rozjechało się od ręcznej regeneracji,
+    # i tak przebiją się przez ciszę.
     print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
-    generuj_dokumentacje.generuj()
+    generuj_dokumentacje.generuj(cicho=True)
     print("✅ Documentation regenerated.\n")
 
     # 7. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,

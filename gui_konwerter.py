@@ -21,51 +21,63 @@ import sciezki
 from i18n import t
 
 
-# v15.1: detekcja znaczników tury wstawianych przez Opowieści
-# (dopisz_do_txt(naglowek="\n\n--- Tura N ---\n\n") w core_opowiesci.py).
-# Alternatywa pokrywa wszystkie 9 wdrożonych języków zgodnie z kluczem
-# `opowiesci.tura_naglowek_format` w dictionaries/<kod>/gui/ui.yaml.
-_REGEX_TURA = re.compile(
-    r"^---\s*"
-    r"(?:Tura|Turn|Runde|Turno|Vuoro|Tour|Umferð|Ход)"
-    r"\s+(\d+)\s*---$",
-    re.IGNORECASE,
-)
 # Co ile tur II-osobowych konwerter wstawia nagłówek H1 „Scena N" (cięcie
 # rozdziału w ElevenLabs). 5 tur ≈ 5-7,5 tys. znaków, czyli kilka minut audio
 # na scenę — zbliżone do naturalnego rozdziału audiobooka. Krótszy próg
 # sztucznie tnie narrację; dłuższy traci nawigację dla NVDA.
 # v15.4.1: licznik resetuje się po każdym KINOWYM cięciu (`/scena`,
-# `/flashback`, auto-cut LLMa) — patrz `_REGEX_PREFIKS_KAMERA` niżej.
+# `/flashback`, auto-cut LLMa) — patrz `_regex_prefiksow_kamery` niżej.
 TURY_NA_SCENE = 5
 
-# v15.4.1: katalog `dictionaries/` w roocie repo — używany do zebrania
-# prefiksów A11y ze wszystkich paczek językowych. Konwerter nie zna języka
-# pliku wejściowego, więc detekcja jest unifikowana: rozpoznajemy prefiksy
-# z dowolnej paczki (gracz mógł zmienić język aplikacji w trakcie projektu).
+# Katalog `dictionaries/` w roocie repo (lub obok exe po zamrożeniu) — źródło
+# wszystkich słów-kluczy, którymi konwerter rozpoznaje strukturę dokumentu.
 _DICTIONARIES_DIR = sciezki.KATALOG_BAZOWY / "dictionaries"
 
 
-@lru_cache(maxsize=1)
-def _regex_prefiksow_kamery() -> re.Pattern:
-    """Buduje regex prefiksów A11y kinowych narracji ze WSZYSTKICH paczek językowych.
+def _wyluskaj_slowo_tury(fmt: str) -> str:
+    """Z formatu ``"\\n\\n--- Tura {numer} ---\\n\\n"`` wyłuskuje słowo ``"Tura"``.
 
-    Tło: ``gui_opowiesci._obsluz_ture`` skleja prefiks A11y (z
-    ``opowiesci.prefiks_{flashback,scena,cut}``) z narracją LLM i zapisuje do
-    ``skrypty/<nazwa>.txt``. Konwerter widzi tę sklejoną linię na początku
-    akapitu tury i traktuje jako sygnał KINOWEGO cięcia: osobny H1, reset
-    licznika tur II-osobowych. Bez tego kilkanaście tur kinowych pod rząd
-    siedziało pod jednym H1 „Scena N" (ElevenLabs nie tnie rozdziału).
-
-    Dynamiczny pickup z YAML zamiast hardcode'u dlatego, że dodanie kolejnego
-    języka w przyszłości (10. paczka) działa zero-touch dla konwertera.
-
-    Zwraca regex case-insensitive matchujący od początku linii; jeśli żadna
-    paczka nie ma prefiksów (świeże repo), zwraca regex niezgodny z niczym.
+    Bierze fragment przed ``{numer}``, zdejmuje myślniki i białe znaki. Zwraca
+    ``""`` gdy formatu nie da się sparsować (brak ``{numer}``). Dzięki temu
+    słowo nagłówka tury jest pochodną istniejącego klucza
+    ``opowiesci.tura_naglowek_format`` — nie trzeba go dublować osobnym kluczem
+    ani hardkodować listy języków w Pythonie.
     """
-    prefiksy: list[str] = []
+    przed, sep, _ = fmt.partition("{numer}")
+    if not sep:
+        return ""
+    return przed.strip().strip("-").strip()
+
+
+@lru_cache(maxsize=1)
+def _slowa_kluczowe_konwertera() -> dict[str, frozenset[str]]:
+    """Skanuje ``ui.yaml`` WSZYSTKICH paczek raz i zwraca zbiory słów-kluczy.
+
+    Tło: konwerter rozpoznaje cztery rodzaje markerów struktury dokumentu, a
+    wszystkie pochodzą z tłumaczeń w ``dictionaries/<kod>/gui/ui.yaml``:
+
+    * ``"tura"``     – słowo nagłówka tury Opowieści, wyłuskane z
+      ``opowiesci.tura_naglowek_format`` (``"--- Tura {numer} ---"`` → ``Tura``);
+    * ``"kamera"``   – kinowe prefiksy A11y (``opowiesci.prefiks_{flashback,
+      scena,cut}``), sklejane przez ``gui_opowiesci`` z narracją LLM;
+    * ``"rozdzial"`` – słowa nagłówków H1 tnących rozdział (``konwerter.
+      naglowki_rozdzialow``);
+    * ``"scena"``    – słowa nagłówków scen pogrubianych bez wpisu w TOC
+      (``konwerter.naglowki_scen``).
+
+    Unia ze WSZYSTKICH paczek, BEZ detekcji języka pliku wejściowego — to
+    świadoma, ugruntowana filozofia tego modułu (D1/D2 = A, v17.2.2): konwerter
+    nie zna języka pliku (user mógł zmienić język aplikacji w trakcie projektu,
+    plik bywa mieszany albo zbyt krótki dla detektora), więc rozpoznaje słowa
+    z dowolnej paczki. Dodanie 10. języka = nowy folder + wypełnione ``ui.yaml``,
+    zero edycji tego pliku (zero-touch). Jeden przebieg po YAML-ach
+    (``lru_cache``) zasila wszystkie cztery regexy poniżej.
+    """
+    zbiory: dict[str, set[str]] = {
+        "tura": set(), "kamera": set(), "rozdzial": set(), "scena": set(),
+    }
     if not _DICTIONARIES_DIR.is_dir():
-        return re.compile(r"$^")
+        return {k: frozenset(v) for k, v in zbiory.items()}
     for jezyk_dir in sorted(_DICTIONARIES_DIR.iterdir()):
         ui_path = jezyk_dir / "gui" / "ui.yaml"
         if not ui_path.is_file():
@@ -76,16 +88,82 @@ def _regex_prefiksow_kamery() -> re.Pattern:
         except (OSError, yaml.YAMLError):
             continue
         opowiesci = dane.get("opowiesci") or {}
+        fmt = opowiesci.get("tura_naglowek_format")
+        if isinstance(fmt, str):
+            slowo = _wyluskaj_slowo_tury(fmt)
+            if slowo:
+                zbiory["tura"].add(slowo)
         for klucz in ("prefiks_flashback", "prefiks_scena", "prefiks_cut"):
             wartosc = opowiesci.get(klucz)
             if isinstance(wartosc, str) and wartosc.strip():
-                prefiksy.append(re.escape(wartosc.strip()))
+                zbiory["kamera"].add(wartosc.strip())
+        konwerter = dane.get("konwerter") or {}
+        for klucz, cel in (("naglowki_rozdzialow", "rozdzial"),
+                           ("naglowki_scen", "scena")):
+            lista = konwerter.get(klucz)
+            if isinstance(lista, list):
+                for slowo in lista:
+                    if isinstance(slowo, str) and slowo.strip():
+                        zbiory[cel].add(slowo.strip())
+    return {k: frozenset(v) for k, v in zbiory.items()}
+
+
+def _alternatywa(slowa: frozenset[str]) -> str:
+    """Buduje bezpieczną alternatywę regexa ``(?:a|b|c)`` z escapowanych słów.
+
+    Sortowanie po długości malejąco jest kosmetyczne (dla dopasowania boolowego
+    kolejność alternatyw nie ma znaczenia), ale czyni regex deterministycznym.
+    """
+    return "|".join(re.escape(s) for s in sorted(slowa, key=len, reverse=True))
+
+
+@lru_cache(maxsize=1)
+def _regex_tury() -> re.Pattern:
+    """Regex znacznika tury ``"--- <słowo> N ---"`` ze słów wszystkich paczek."""
+    slowa = _slowa_kluczowe_konwertera()["tura"]
+    if not slowa:
+        return re.compile(r"$^")
+    return re.compile(
+        r"^---\s*(?:" + _alternatywa(slowa) + r")\s+(\d+)\s*---$",
+        re.IGNORECASE,
+    )
+
+
+@lru_cache(maxsize=1)
+def _regex_prefiksow_kamery() -> re.Pattern:
+    """Regex kinowych prefiksów A11y od początku linii (unia wszystkich paczek).
+
+    ``gui_opowiesci._obsluz_ture`` skleja prefiks A11y z narracją LLM i zapisuje
+    do ``skrypty/<nazwa>.txt``; konwerter widzi tę linię na początku akapitu
+    tury i traktuje jako sygnał KINOWEGO cięcia (osobny H1, reset licznika tur).
+    Zwraca regex niezgodny z niczym, gdy żadna paczka nie ma prefiksów.
+    """
+    prefiksy = _slowa_kluczowe_konwertera()["kamera"]
     if not prefiksy:
         return re.compile(r"$^")
-    # Unikalizacja — ten sam prefiks może powtarzać się między paczkami
-    # (np. en "Flashback:" i de "Flashback:" — anglicyzm w branży filmowej).
-    unikalne = sorted(set(prefiksy), key=len, reverse=True)
-    return re.compile(r"^(?:" + "|".join(unikalne) + r")", re.IGNORECASE)
+    return re.compile(r"^(?:" + _alternatywa(prefiksy) + r")", re.IGNORECASE)
+
+
+@lru_cache(maxsize=1)
+def _regex_naglowkow_rozdzialow() -> re.Pattern:
+    """Regex nagłówków H1 (Rozdział/Prolog/Epilog/Akt/… ze wszystkich paczek).
+
+    Dopasowanie prefiksowe po opcjonalnych ozdobnikach ``=-`` i białych znakach
+    (np. ``"=== Rozdział 1 ==="`` albo ``"Rozdział 1: Początek"``).
+    """
+    slowa = _slowa_kluczowe_konwertera()["rozdzial"]
+    if not slowa:
+        return re.compile(r"$^")
+    return re.compile(r"^[=\-\s]*(?:" + _alternatywa(slowa) + r")", re.IGNORECASE)
+
+
+@lru_cache(maxsize=1)
+def _regex_scen() -> re.Pattern:
+    """Regex nagłówków scen (Scena/Scene/Szene/… ze wszystkich paczek)."""
+    slowa = _slowa_kluczowe_konwertera()["scena"]
+    if not slowa:
+        return re.compile(r"$^")
+    return re.compile(r"^[=\-\s]*(?:" + _alternatywa(slowa) + r")", re.IGNORECASE)
 
 
 class KonwerterPanel(wx.Panel):
@@ -270,7 +348,13 @@ class KonwerterPanel(wx.Panel):
         # dokumentu wymusiła H1 „Scena 1" (warunek `>=` spełniony od razu).
         tury_od_h1 = TURY_NA_SCENE
         scena_counter = 0
+        # Cztery regexy zasilane jednym przebiegiem po ui.yaml wszystkich paczek
+        # (unia słów-kluczy, bez detekcji języka pliku — patrz
+        # `_slowa_kluczowe_konwertera`). Liczone raz przed pętlą.
+        regex_tura = _regex_tury()
         regex_kamera = _regex_prefiksow_kamery()
+        regex_rozdzial = _regex_naglowkow_rozdzialow()
+        regex_scena = _regex_scen()
 
         def _wstaw_h1_sceny() -> None:
             nonlocal scena_counter, tury_od_h1
@@ -296,7 +380,7 @@ class KonwerterPanel(wx.Panel):
             # Pierwsza tura w dokumencie i każda po TURY_NA_SCENE turach
             # II-osobowych od ostatniego H1 dostają osobną H1 „Scena N".
             # Same znaczniki `--- Tura N ---` są strippowane.
-            if _REGEX_TURA.match(linia):
+            if regex_tura.match(linia):
                 if tury_od_h1 >= TURY_NA_SCENE:
                     _wstaw_h1_sceny()
                 tury_od_h1 += 1
@@ -316,29 +400,18 @@ class KonwerterPanel(wx.Panel):
                     nowy_doc.add_paragraph(ostatek)
                 continue
 
-            # Detekcja nagłówków głównych (tnących plik na rozdziały w ElevenLabs)
-            # Obsługuje wszystkie 6 języków: pl/en/fi/is/it/ru
-            if re.match(
-                r"^[=\-\s]*("
-                r"Czołówka"
-                r"|Rozdzia[łl]|Chapter|Luku|Kafli|Capitolo|Глава"
-                r"|Prolog(?:ue|i|o)?|Formáli|Пролог"
-                r"|Epilog(?:ue|i|o)?|Eftirorð|Эпилог"
-                r"|Akt|Act|Акт|Näytös|Þáttur"
-                r")",
-                linia,
-                re.IGNORECASE,
-            ):
+            # Detekcja nagłówków głównych (tnących plik na rozdziały w ElevenLabs).
+            # Słowa-klucze (Rozdział/Prolog/Epilog/Akt/…) z `konwerter.
+            # naglowki_rozdzialow` WSZYSTKICH paczek — pełna obsługa 9 języków,
+            # zero-touch dla 10. (v17.2.2).
+            if regex_rozdzial.match(linia):
                 czysty = re.sub(r'^[=\-\s]+|[=\-\s]+$', '', linia)
                 nowy_doc.add_heading(czysty, level=1)
 
-            # Detekcja scen (pogrubiony tekst, bez wpisu w spisie treści)
-            # Obsługuje wszystkie 6 języków: pl/en/fi/is/it/ru
-            elif re.match(
-                r"^[=\-\s]*(?:Scena|Scene|Kohtaus|Atriði|Сцена)",
-                linia,
-                re.IGNORECASE,
-            ):
+            # Detekcja scen (pogrubiony tekst, bez wpisu w spisie treści).
+            # Słowa-klucze (Scena/Scene/Szene/…) z `konwerter.naglowki_scen`
+            # WSZYSTKICH paczek (v17.2.2).
+            elif regex_scena.match(linia):
                 czysty = re.sub(r'^[=\-\s]+|[=\-\s]+$', '', linia)
                 p = nowy_doc.add_paragraph()
                 run = p.add_run(czysty)

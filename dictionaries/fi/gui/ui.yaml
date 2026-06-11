@@ -806,6 +806,12 @@ konwerter:
   # v15.1: nagłówek H1 wstawiany co 5 tur w wynikach trybu Opowieści
   # (znaczniki „--- Vuoro N ---" są wykrywane i grupowane w sceny).
   scena_naglowek_format: "Kohtaus {numer}"
+  # v17.2.2: słowa-klucze nagłówków wykrywane przez Architekta Audiobooków
+  # (gui_konwerter.py). Unia ze WSZYSTKICH paczek — dopisanie 10. języka =
+  # nowy folder + te listy, bez edycji regexów w Pythonie. Dopasowanie
+  # prefiksowe, case-insensitive. rozdzialow → H1; sceny → pogrubienie bez TOC.
+  naglowki_rozdzialow: ["Luku", "Prologi", "Epilogi", "Näytös"]
+  naglowki_scen:       ["Kohtaus"]
   # Dialog wyboru pliku
   file_dlg_title: "Valitse lähdetiedosto"
   file_dlg_wildcard: "Kaikki tuetut tiedostot (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word-dokumentit (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*"
