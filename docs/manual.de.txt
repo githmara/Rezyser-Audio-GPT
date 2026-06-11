@@ -1,4 +1,4 @@
-Audio AI Regisseur Handbuch - Komplettanleitung (Version 17.2 – Veröffentlichungsversion)
+Audio AI Regisseur Handbuch - Komplettanleitung (Version 17.2.1 – Veröffentlichungsversion)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -261,7 +261,7 @@ Ideal zum Anhören von Geschichten in einer schönen, korrekten Fremdsprache.
 - Wenn du eine normale .txt- oder .md-Datei lädst (z.B. ein vom Regisseur generiertes Skript), speichert das Skript das Ergebnis nach der Übersetzung automatisch als .html-Datei mit eingebettetem Sprach-Tag — bereit für NVDA ohne zusätzliche Arbeit.
 - Unterstützt auch .docx-Dateien.
 
-Intelligente Blockaufteilung: Lange Texte werden automatisch in Blöcke von bis zu 10.000 Zeichen aufgeteilt und sequentiell mit Fortschrittsbalken übersetzt.
+Intelligente Blockaufteilung: Lange Texte werden automatisch in Blöcke aufgeteilt, die in Modell-Tokens (nicht in Zeichen) gemessen werden, und sequentiell mit Fortschrittsbalken übersetzt. Dadurch passen auch dicht geschriebene Sprachen wie Chinesisch oder Japanisch in das Antwortlimit des Modells, und eine abgeschnittene Antwort wird erkannt und automatisch auf kleineren Fragmenten wiederholt.
 
 Fehlerresistentes Fortschrittsspeichern (NEU in Version 9): Jeder übersetzte Block wird sofort in einer versteckten temporären Datei im Systemordner der Anwendung gespeichert. Wenn die Übersetzung aufgrund eines erschöpften API-Limits unterbrochen wird, erkennt die Anwendung beim nächsten Start diese Datei automatisch, stellt den bereits bezahlten Fortschritt wieder her und setzt die Arbeit ruhig an der Unterbrechungsstelle fort — ohne manuelles Kopieren. Nach erfolgreichem Abschluss wird die temporäre Datei automatisch gelöscht.
 
@@ -286,7 +286,7 @@ Und zwei Optionen zur Bereinigung ohne Akzent:
 Die Option mit Zahlen-Normalisierung wandelt automatisch Ziffern in ihre ausgeschriebene Form um (z.B. wird 15 zu "fünfzehn") vor der Verarbeitung — so liest NVDA Zahlen flüssig, und wenn der Text einen erzwungenen Akzent hat, bekommt die Zahl ihn auch, ohne Ausnahmen.
 Ihr fragt euch sicherlich, ob der Synthesizer in der Lage sein wird, solche normalisierten Zahlen je nach Kontext zu deklinieren? Die Antwort lautet: nein. Und das ist ein beabsichtigtes Feature. Wie allgemein bekannt ist: "Polnisch ist eine schwierige Sprache" — und ein Ausländer, der unsere Grammatik bricht, fügt dem gebrochenen Akzent nur Authentizität hinzu!
 
-Tag-Reparierer (NEU in Version 9): Am Ende der Liste findest du eine zusätzliche Option — den Tag-Reparierer. Er wendet keine phonetischen Regeln oder Bereinigungen an. Er macht nur eine Sache: Er injiziert in die Datei den von dir angegebenen zweibuchstabigen ISO-Sprachcode (z.B. "fi" für Finnisch, "en" für Englisch). Nützlich, wenn du bereits eine fertige Datei hast — z.B. zuvor vom AI-Übersetzer übersetzt — aber aus irgendeinem Grund mit einem falschen oder fehlenden Sprach-Tag herausgekommen ist. Anstatt sie neu zu übersetzen, startest du einfach den Reparierer mit dem richtigen ISO-Code und hast in Kürze eine korrekte Datei.
+Tag-Reparierer (NEU in Version 9): Am Ende der Liste findest du eine zusätzliche Option — den Tag-Reparierer. Er wendet keine phonetischen Regeln oder Bereinigungen an. Er macht nur eine Sache: Er injiziert in die Datei den von dir angegebenen ISO-Sprachcode — zweibuchstabig (z.B. "fi" für Finnisch, "en" für Englisch) oder mit Regions- bzw. Schrift-Subtag (z.B. "pt-BR" für brasilianisches Portugiesisch, "zh-Hans" für vereinfachtes Chinesisch). Nützlich, wenn du bereits eine fertige Datei hast — z.B. zuvor vom AI-Übersetzer übersetzt — aber aus irgendeinem Grund mit einem falschen oder fehlenden Sprach-Tag herausgekommen ist. Anstatt sie neu zu übersetzen, startest du einfach den Reparierer mit dem richtigen ISO-Code und hast in Kürze eine korrekte Datei.
 
 Das Skript bereinigt Regieanweisungen in Klammern — es entfernt ganze Textabschnitte, die in runden Klammern stehen (z.B. "(mit eingeflochtenen Atemzügen)", "(flüsternd)", "(ironisch)"). ElevenLabs soll ausschließlich Dialoge und Erzählungen lesen, nicht in den Text eingeflochtene Regieanweisungen.
 

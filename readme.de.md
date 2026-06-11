@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **17.2** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **17.2.1** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -36,11 +36,11 @@ Interaktive Textspiele, die von KI als Erzählmotor geführt werden. Im Gegensat
 
 ### 3. Polyglott (Ctrl+3, AI-Übersetzer + TTS-Akzente)
 
-* **Sicherer Übersetzer:** Lange Texte werden automatisch in Blöcke von bis zu 10.000 Zeichen aufgeteilt und sequenziell übersetzt. Jeder Block wird sofort in einer versteckten `.jsonl`-Datei gespeichert. Die Wiederaufnahme nach Erschöpfung der API-Limits erfolgt vollautomatisch.
+* **Sicherer Übersetzer:** Lange Texte werden automatisch in Blöcke aufgeteilt, die in Modell-Tokens gemessen werden (sicher auch für dicht geschriebene Sprachen, z.B. Chinesisch), und sequenziell übersetzt; eine abgeschnittene Modellantwort wird erkannt und auf kleineren Fragmenten wiederholt. Jeder Block wird sofort in einer versteckten `.jsonl`-Datei gespeichert. Die Wiederaufnahme nach Erschöpfung der API-Limits erfolgt vollautomatisch.
 * **NVDA-Automatisierung:** Übersetzungen werden als fertige `.html`-Dateien mit eingebettetem Sprach-Tag oder `.docx`-Dateien mit direkt in die XML-Struktur injizierten Tags gespeichert.
 * **8 lokale Akzente:** Möglichkeit, absichtlich einen gebrochenen Akzent für lokale Synthesizer (Tiflotecnia Voices, eSpeak, OneCore) durch fortgeschrittene Regex-Regeln zu erzwingen. Unterstützte fremdsprachige Akzente: Englisch, Russisch (mit Transliteration in Kyrillisch), Französisch, Spanisch, Italienisch, Finnisch, Isländisch, Polnisch.
 * **Verschlüsselungsmodus:** 6 lokale Algorithmen zur Textverzerrung — von Rückwärtslesen über Typoglycämie bis hin zur klassischen Cäsar-Verschlüsselung. Jeder mit lokalem Alphabet des Sprachpakets (z.B. Cäsar-Verschlüsselung mit 35-Zeichen-Alphabet DE mit Diakritika).
-* **Tag-Reparatur:** Injektiert nicht-invasiv den angegebenen zweibuchstabigen ISO-Sprachcode in bestehende Dateien.
+* **Tag-Reparatur:** Injektiert nicht-invasiv den angegebenen ISO-Sprachcode — auch regionale Codes, z.B. pt-BR oder zh-CN — in bestehende Dateien.
 
 
 ### 4. Konverter / Audiobook-Architekt (Ctrl+4)

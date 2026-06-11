@@ -7,7 +7,7 @@
 
 Conjunto de herramientas autocontenidas impulsadas por IA para la escritura automática, planificación, formato y traducción de guiones extensos, así como para la ejecución de juegos de texto interactivos. El proyecto es una aplicación de escritorio nativa (wxPython) diseñada desde cero con plena accesibilidad para lectores de pantalla (NVDA, VoiceOver) y compatibilidad con sintetizadores de voz profesionales (TTS). Funciona sin navegador y sin servidor local: se ejecuta como una ventana de programa normal.
 
-Versión: **17.2** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versión: **17.2.1** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Módulos principales
@@ -36,11 +36,11 @@ Juegos de texto interactivos dirigidos por IA como motor narrativo. A diferencia
 
 ### 3. Políglota (Ctrl+3, Traductor AI + Acentos TTS)
 
-* **Traductor Seguro:** Los textos largos se dividen automáticamente en bloques de hasta 10,000 caracteres y se traducen secuencialmente. Cada bloque se guarda inmediatamente en un archivo `.jsonl` oculto. La reanudación después de alcanzar los límites de la API es completamente automática.
+* **Traductor Seguro:** Los textos largos se dividen automáticamente en bloques medidos en tokens del modelo (seguro también para idiomas de escritura densa, p. ej. el chino) y se traducen secuencialmente; una respuesta cortada del modelo se detecta y se reintenta en fragmentos más pequeños. Cada bloque se guarda inmediatamente en un archivo `.jsonl` oculto. La reanudación después de alcanzar los límites de la API es completamente automática.
 * **Automatización NVDA:** Las traducciones se guardan como archivos `.html` listos con la etiqueta de idioma incorporada o archivos `.docx` con etiquetas inyectadas directamente en la estructura XML.
 * **8 acentos locales:** Posibilidad de forzar intencionadamente un acento roto para los sintetizadores locales (Tiflotecnia Voices, eSpeak, OneCore) mediante reglas avanzadas de regex. Acentos extranjeros soportados: inglés, ruso (con transliteración al cirílico), francés, alemán, español, italiano, finlandés, islandés.
 * **Modo Cifrador:** 6 algoritmos locales que distorsionan el texto, desde la lectura al revés, pasando por tipoglicemia, hasta el clásico cifrado César. Cada uno con el alfabeto local del paquete de idioma (por ejemplo, cifrado César en un alfabeto PL de 35 caracteres con diacríticos).
-* **Reparador de Etiquetas:** Inyecta de manera no invasiva el código de idioma ISO de dos letras proporcionado en archivos existentes.
+* **Reparador de Etiquetas:** Inyecta de manera no invasiva el código de idioma ISO proporcionado — también regional, p. ej. pt-BR o zh-CN — en archivos existentes.
 
 
 ### 4. Convertidor / Arquitecto de Audiolibros (Ctrl+4)

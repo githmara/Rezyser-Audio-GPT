@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **17.2** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **17.2.1** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -36,11 +36,11 @@ Jeux textuels interactifs dirigés par l'IA en tant que moteur narratif. Contrai
 
 ### 3. Polyglotte (Ctrl+3, Traducteur IA + Accents TTS)
 
-* **Traducteur Sécurisé :** Les longs textes sont automatiquement divisés en blocs de 10 000 caractères maximum et traduits séquentiellement. Chaque bloc est immédiatement enregistré dans un fichier caché `.jsonl`. La reprise après l'épuisement des limites de l'API est entièrement automatique.
+* **Traducteur Sécurisé :** Les longs textes sont automatiquement divisés en blocs mesurés en tokens du modèle (sûr aussi pour les langues à écriture dense, par ex. le chinois) et traduits séquentiellement ; une réponse tronquée du modèle est détectée et retentée sur des fragments plus petits. Chaque bloc est immédiatement enregistré dans un fichier caché `.jsonl`. La reprise après l'épuisement des limites de l'API est entièrement automatique.
 * **Automatisation NVDA :** Les traductions sont enregistrées sous forme de fichiers `.html` prêts à l'emploi avec une balise linguistique intégrée ou de fichiers `.docx` avec des balises injectées directement dans la structure XML.
 * **8 accents locaux :** Possibilité d'imposer intentionnellement un accent cassé pour les synthétiseurs locaux (Tiflotecnia Voices, eSpeak, OneCore) grâce à des règles regex avancées. Accents étrangers pris en charge : anglais, russe (avec translittération en cyrillique), allemand, espagnol, italien, finlandais, islandais, polonais.
 * **Mode Chiffreur :** 6 algorithmes locaux de distorsion de texte — de la lecture à l'envers, à la typoglycémie, en passant par le chiffre de César classique. Chacun avec l'alphabet local du pack linguistique (par exemple, le chiffre de César sur un alphabet FR de 35 caractères avec diacritiques).
-* **Réparateur de Balises :** Injecte de manière non invasive le code de langue ISO à deux lettres fourni dans les fichiers existants.
+* **Réparateur de Balises :** Injecte de manière non invasive le code de langue ISO fourni — y compris régional, par ex. pt-BR ou zh-CN — dans les fichiers existants.
 
 
 ### 4. Convertisseur / Architecte d'Audiobooks (Ctrl+4)

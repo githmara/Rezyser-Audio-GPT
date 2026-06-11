@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **17.2** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **17.2.1** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -36,11 +36,11 @@ Interaktiivisia tekstipelejä, joissa AI toimii kertomuksen moottorina. Toisin k
 
 ### 3. Polyglot (Ctrl+3, AI-kääntäjä + TTS-aksentit)
 
-* **Turvallinen Kääntäjä:** Pitkät tekstit jaetaan automaattisesti enintään 10 000 merkin lohkoihin ja käännetään peräkkäin. Jokainen lohko tallennetaan välittömästi piilotettuun `.jsonl`-tiedostoon. API-rajoitusten täyttyessä jatkaminen on täysin automaattista.
+* **Turvallinen Kääntäjä:** Pitkät tekstit jaetaan automaattisesti lohkoihin, jotka mitataan mallin tokeneina (turvallista myös tiheästi kirjoitetuille kielille, esim. kiinalle), ja käännetään peräkkäin; katkennut mallin vastaus tunnistetaan ja yritetään uudelleen pienemmissä osissa. Jokainen lohko tallennetaan välittömästi piilotettuun `.jsonl`-tiedostoon. API-rajoitusten täyttyessä jatkaminen on täysin automaattista.
 * **NVDA Automaatio:** Käännökset tallennetaan valmiina `.html`-tiedostoina, joissa on sisäänrakennettu kielitagi, tai `.docx`-tiedostoina, joissa tagit on injektoitu suoraan XML-rakenteeseen.
 * **8 paikallisia aksentteja:** Mahdollisuus tarkoituksellisesti pakottaa murrettu aksentti paikallisille synteesilaitteille (Tiflotecnia Voices, eSpeak, OneCore) kehittyneiden regex-sääntöjen avulla. Tuetut vieraskieliset aksentit: englanti, venäjä (kyrilliseen translitterointi), ranska, saksa, espanja, italia, puola, islanti.
 * **Siffrin tila:** 6 paikallisia tekstin vääristämisalgoritmeja — tekstin kääntämisestä taaksepäin, typoglykemiaan ja klassiseen Caesarin salaukseen. Jokainen paikallisella kielipaketin aakkostolla (esim. Caesarin salaus 35-merkkisellä FI-aakkostolla diakriittisillä merkeillä).
-* **Tagien Korjaaja:** Injektoi häiritsemättä annetun kaksikirjaimisen ISO-kielikoodin olemassa oleviin tiedostoihin.
+* **Tagien Korjaaja:** Injektoi häiritsemättä annetun ISO-kielikoodin — myös alueellisen, esim. pt-BR tai zh-CN — olemassa oleviin tiedostoihin.
 
 
 ### 4. Muuntaja / Äänikirjojen Arkkitehti (Ctrl+4)

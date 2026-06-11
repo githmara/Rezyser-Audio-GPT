@@ -7,7 +7,7 @@
 
 Zestaw samowystarczalnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
 
-Wersja: **17.2** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **17.2.1** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Główne moduły
@@ -36,11 +36,11 @@ Interaktywne gry tekstowe prowadzone przez AI w roli silnika narracyjnego. W odr
 
 ### 3. Poliglota (Ctrl+3, Tłumacz AI + Akcenty TTS)
 
-* **Bezpieczny Tłumacz:** Długie teksty są automatycznie dzielone na bloki do 10 000 znaków i tłumaczone sekwencyjnie. Każdy blok jest natychmiast zapisywany do ukrytego pliku `.jsonl`. Wznowienie po wyczerpaniu limitów API jest w pełni automatyczne.
+* **Bezpieczny Tłumacz:** Długie teksty są automatycznie dzielone na bloki mierzone w tokenach modelu (bezpieczne także dla języków o gęstym zapisie, np. chińskiego) i tłumaczone sekwencyjnie; ucięta odpowiedź modelu jest wykrywana i ponawiana na mniejszych fragmentach. Każdy blok jest natychmiast zapisywany do ukrytego pliku `.jsonl`. Wznowienie po wyczerpaniu limitów API jest w pełni automatyczne.
 * **Automatyzacja NVDA:** Tłumaczenia zapisywane są jako gotowe pliki `.html` z wbudowanym tagiem językowym lub pliki `.docx` z tagami wstrzykniętymi bezpośrednio do struktury XML.
 * **8 lokalnych akcentów:** Możliwość celowego wymuszania łamanego akcentu dla lokalnych syntezatorów (Tiflotecnia Voices, eSpeak, OneCore) dzięki zaawansowanym regułom regex. Obsługiwane akcenty obcojęzyczne: angielski, rosyjski (z transliteracją na cyrylicę), francuski, niemiecki, hiszpański, włoski, fiński, islandzki.
 * **Tryb Szyfrant:** 6 lokalnych algorytmów zniekształcających tekst — od czytania wspak, przez typoglikemię, po klasyczny szyfr Cezara. Każdy z lokalnym alfabetem paczki językowej (np. szyfr Cezara na 35-znakowym alfabecie PL z diakrytykami).
-* **Naprawiacz Tagów:** Bezinwazyjnie wstrzykuje podany dwuliterowy kod języka ISO do istniejących plików.
+* **Naprawiacz Tagów:** Bezinwazyjnie wstrzykuje podany kod języka ISO — także regionalny, np. pt-BR czy zh-CN — do istniejących plików.
 
 
 ### 4. Konwerter / Architekt Audiobooków (Ctrl+4)

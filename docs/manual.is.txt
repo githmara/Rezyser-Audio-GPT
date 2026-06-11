@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.2 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 17.2.1 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -261,7 +261,7 @@ Tilvalið til að hlusta á sögur á fallegu, réttmætu erlendu máli.
 - Ef þú hleður inn venjulegri .txt eða .md skrá (t.d. skrá sem er búin til af Leikstjóra), mun forritið sjálfkrafa vista niðurstöðuna sem .html skrá með innbyggðum tungumálakóða eftir þýðingu — tilbúið til að lesa með NVDA án viðbótarvinnu.
 - Styður einnig .docx skrár.
 
-Snjöll skipting í blokkir: Langir textar eru sjálfkrafa skiptir í blokkir allt að 10.000 stafi og þýddir í röð með framvindustiku.
+Snjöll skipting í blokkir: Langir textar eru sjálfkrafa skiptir í blokkir sem mældar eru í tókum líkansins (ekki stöfum) og þýddir í röð með framvindustiku. Þannig rúmast einnig þétt rituð tungumál, eins og kínverska eða japanska, innan svarmarka líkansins, og afklippt svar er greint og sjálfkrafa reynt aftur á minni hlutum.
 
 Öruggt framvinduvistun (NÝTT í útgáfu 9): Hver þýdd blokk er strax vistuð í falda tímabundna skrá í kerfismöppu forritsins. Ef þýðingin er rofin vegna þess að API kvótinn er uppurinn, mun forritið sjálfkrafa greina þessa skrá við næstu ræsingu, endurheimta þegar greidda framvindu og ljúka verkinu rólega frá því sem var rofið — án handvirkrar afritunar. Eftir árangursríka lokun er tímabundna skráin sjálfkrafa fjarlægð.
 
@@ -286,7 +286,7 @@ Og einnig tvær hreinsunarvalkostir án hreims:
 Valmöguleikinn með talnaviðmiðunar breytir sjálfkrafa tölum í orðform (t.d. 15 verður "fimmtán") fyrir vinnslu — þannig les NVDA tölur áreynslulaust, og ef textinn hefur þvingaðan hreim, fær talan hann líka, án undantekninga.
 Þú spyrð kannski hvort talgervillinn muni geta beygt slíkar tölur eftir samhengi? Svarið er: nei. Og það er viljandi eiginleiki. Eins og alkunna er: "pólska erfið mál" — og útlendingur sem brýtur málfræðina okkar bætir aðeins við áreiðanleika brotins hreims!
 
-Tagaviðgerðarmaður (NÝTT í útgáfu 9): Neðst á listanum finnurðu viðbótarvalkost — Tagaviðgerðarmaður. Hann beitir engum hljóðreglum eða hreinsun. Hann gerir eitt: sprautar inn í skrána þann tveggja stafa ISO tungumálakóða sem þú gefur upp (t.d. "fi" fyrir finska, "en" fyrir enska). Gagnlegt þegar þú hefur þegar tilbúna skrá — t.d. áður þýdda af AI Þýðanda — en af einhverjum ástæðum kom hún út með röngum eða vantar tungumálamerki. Í stað þess að þýða hana aftur, einfaldlega keyrirðu Tagaviðgerðarmanninn með réttum ISO kóða og eftir smá stund hefurðu rétta skrá.
+Tagaviðgerðarmaður (NÝTT í útgáfu 9): Neðst á listanum finnurðu viðbótarvalkost — Tagaviðgerðarmaður. Hann beitir engum hljóðreglum eða hreinsun. Hann gerir eitt: sprautar inn í skrána þann ISO tungumálakóða sem þú gefur upp — tveggja stafa (t.d. "fi" fyrir finska, "en" fyrir enska) eða með svæðis- eða leturmerki (t.d. "pt-BR" fyrir brasilíska portúgölsku, "zh-Hans" fyrir einfaldaða kínversku). Gagnlegt þegar þú hefur þegar tilbúna skrá — t.d. áður þýdda af AI Þýðanda — en af einhverjum ástæðum kom hún út með röngum eða vantar tungumálamerki. Í stað þess að þýða hana aftur, einfaldlega keyrirðu Tagaviðgerðarmanninn með réttum ISO kóða og eftir smá stund hefurðu rétta skrá.
 
 Forritið hreinsar leikstjóraleiðbeiningar í sviga — fjarlægir alla texta sem eru í sviga (t.d. "(með innfelldum andardráttum)", "(hvíslað)", "(háðslega)"). ElevenLabs á að lesa aðeins samtöl og frásögn, ekki leikstjóraleiðbeiningar innfelldar í textann.
 

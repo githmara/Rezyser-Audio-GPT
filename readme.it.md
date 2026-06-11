@@ -7,7 +7,7 @@
 
 Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-Versione: **17.2** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versione: **17.2.1** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -36,11 +36,11 @@ Giochi di testo interattivi condotti dall'IA come motore narrativo. A differenza
 
 ### 3. Poliglotta (Ctrl+3, Traduttore AI + Accenti TTS)
 
-* **Traduttore Sicuro:** I testi lunghi vengono automaticamente suddivisi in blocchi fino a 10.000 caratteri e tradotti sequenzialmente. Ogni blocco viene immediatamente salvato in un file nascosto `.jsonl`. Il ripristino dopo l'esaurimento dei limiti API è completamente automatico.
+* **Traduttore Sicuro:** I testi lunghi vengono automaticamente suddivisi in blocchi misurati in token del modello (sicuro anche per lingue a scrittura densa, ad es. il cinese) e tradotti sequenzialmente; una risposta troncata del modello viene rilevata e ritentata su frammenti più piccoli. Ogni blocco viene immediatamente salvato in un file nascosto `.jsonl`. Il ripristino dopo l'esaurimento dei limiti API è completamente automatico.
 * **Automazione NVDA:** Le traduzioni vengono salvate come file `.html` pronti con tag di lingua incorporato o file `.docx` con tag iniettati direttamente nella struttura XML.
 * **8 accenti locali:** Possibilità di forzare intenzionalmente un accento spezzato per i sintetizzatori locali (Tiflotecnia Voices, eSpeak, OneCore) grazie a regole regex avanzate. Accenti stranieri supportati: inglese, russo (con traslitterazione in cirillico), francese, tedesco, spagnolo, polacco, finlandese, islandese.
 * **Modalità Cifrario:** 6 algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 35 caratteri con diacritici).
-* **Riparatore di Tag:** Inietta in modo non invasivo il codice ISO della lingua a due lettere nei file esistenti.
+* **Riparatore di Tag:** Inietta in modo non invasivo il codice ISO della lingua fornito — anche regionale, ad es. pt-BR o zh-CN — nei file esistenti.
 
 
 ### 4. Convertitore / Architetto Audiolibri (Ctrl+4)

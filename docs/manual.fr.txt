@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 17.2 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 17.2.1 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -169,7 +169,7 @@ Le Mode Script Brut possède un panneau dédié "✂️ Gestion de la Structure"
 - Insérer Scène X : Insère uniquement l'en-tête de la scène (par exemple, "Scène 3") dans l'acte en cours. Le compteur de scènes augmente automatiquement.
 
 
-Accents disponibles dans Reżyser Audio GPT 17.2 :
+Accents disponibles dans Reżyser Audio GPT 17.2.1 :
 
 - Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
 - Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
@@ -313,7 +313,7 @@ Idéal pour écouter des histoires dans une belle langue étrangère correcte.
 - Si vous chargez un fichier .txt ou .md ordinaire (par exemple, un script généré par le Réalisateur), le script enregistrera automatiquement le résultat comme un fichier .html avec une balise de langue intégrée — prêt à être lu par NVDA sans aucun travail supplémentaire.
 - Prend également en charge les fichiers .docx.
 
-Division intelligente en blocs : Les longs textes sont automatiquement divisés en blocs de 10 000 caractères maximum et traduits séquentiellement avec une barre de progression.
+Division intelligente en blocs : Les longs textes sont automatiquement divisés en blocs mesurés en tokens du modèle (et non en caractères) et traduits séquentiellement avec une barre de progression. Ainsi, même les langues à écriture dense, comme le chinois ou le japonais, tiennent dans la limite de réponse du modèle, et une réponse tronquée est détectée et automatiquement retentée sur des fragments plus petits.
 
 Enregistrement de progression résistant aux pannes (NOUVEAUTÉ dans la version 9) : Chaque bloc traduit est immédiatement enregistré dans un fichier temporaire caché dans le dossier système de l'application. Si la traduction est interrompue en raison de l'épuisement de la limite API, lors du prochain lancement, l'application détectera automatiquement ce fichier, restaurera la progression déjà payée et terminera tranquillement le travail à partir du point d'interruption — sans aucun copier-coller manuel. Après une fin réussie, le fichier temporaire est automatiquement supprimé.
 
@@ -338,7 +338,7 @@ Et aussi deux options de nettoyage sans accent :
 L'option avec normalisation des nombres convertit automatiquement les chiffres en leur forme écrite (par exemple, 15 devient "quinze") avant le traitement — ainsi NVDA lit les nombres de manière fluide, et si le texte a un accent imposé, le nombre l'aura aussi, sans aucune exception.
 Vous vous demandez probablement si le synthétiseur saura décliner ces nombres normalisés en fonction du contexte ? La réponse est : non. Et c'est une fonctionnalité délibérée. Comme on le sait bien : "la langue polonaise être difficile" — et un étranger écorchant notre grammaire ne fait qu'ajouter à l'authenticité de l'accent cassé !
 
-Réparateur de Balises (NOUVEAUTÉ dans la version 9) : À la fin de la liste, vous trouverez une option supplémentaire — le Réparateur de Balises. Il n'applique aucune règle phonétique ni de nettoyage. Il fait une chose : injecte dans le fichier le code de langue ISO à deux lettres que vous fournissez (par exemple, "fi" pour le finnois, "en" pour l'anglais). Utile lorsque vous avez déjà un fichier prêt — par exemple, précédemment traduit par le Traducteur IA — mais qui est sorti avec une balise de langue incorrecte ou manquante. Au lieu de le traduire à nouveau, vous lancez simplement le Réparateur avec le bon code ISO et en un rien de temps, vous avez un fichier corrigé.
+Réparateur de Balises (NOUVEAUTÉ dans la version 9) : À la fin de la liste, vous trouverez une option supplémentaire — le Réparateur de Balises. Il n'applique aucune règle phonétique ni de nettoyage. Il fait une chose : injecte dans le fichier le code de langue ISO que vous fournissez — à deux lettres (par exemple, "fi" pour le finnois, "en" pour l'anglais) ou avec un sous-tag de région ou d'écriture (par exemple, "pt-BR" pour le portugais brésilien, "zh-Hans" pour le chinois simplifié). Utile lorsque vous avez déjà un fichier prêt — par exemple, précédemment traduit par le Traducteur IA — mais qui est sorti avec une balise de langue incorrecte ou manquante. Au lieu de le traduire à nouveau, vous lancez simplement le Réparateur avec le bon code ISO et en un rien de temps, vous avez un fichier corrigé.
 
 Le script nettoie les didascalies entre parenthèses — il supprime tous les fragments de texte entre parenthèses (par exemple, "(avec des respirations intégrées)", "(en chuchotant)", "(ironiquement)"). ElevenLabs doit lire uniquement les dialogues et la narration, et non les instructions de mise en scène intégrées dans le texte.
 

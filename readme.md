@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **17.2** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **17.2.1** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -36,11 +36,11 @@ Interactive text games led by AI as the narrative engine. Unlike Directing (wher
 
 ### 3. Polyglot (Ctrl+3, AI Translator + TTS Accents)
 
-* **Safe Translator:** Long texts are automatically split into blocks of up to 10,000 characters and translated sequentially. Each block is immediately saved to a hidden `.jsonl` file. Resumption after API limits are exhausted is fully automatic.
+* **Safe Translator:** Long texts are automatically split into blocks measured in model tokens (safe also for densely written languages, e.g. Chinese) and translated sequentially; a truncated model response is detected and retried on smaller fragments. Each block is immediately saved to a hidden `.jsonl` file. Resumption after API limits are exhausted is fully automatic.
 * **NVDA Automation:** Translations are saved as ready `.html` files with an embedded language tag or `.docx` files with tags injected directly into the XML structure.
 * **8 local accents:** Ability to deliberately enforce a broken accent for local synthesizers (Tiflotecnia Voices, eSpeak, OneCore) through advanced regex rules. Supported foreign accents: Polish, Russian (with transliteration to Cyrillic), French, German, Spanish, Italian, Finnish, Icelandic.
 * **Cipher Mode:** 6 local text-distorting algorithms — from reading backwards, through typoglycemia, to the classic Caesar cipher. Each with the local alphabet of the language pack (e.g., Caesar cipher on a 35-character Polish alphabet with diacritics).
-* **Tag Fixer:** Non-invasively injects the provided two-letter ISO language code into existing files.
+* **Tag Fixer:** Non-invasively injects the provided ISO language code — including regional ones, e.g. pt-BR or zh-CN — into existing files.
 
 
 ### 4. Converter / Audiobook Architect (Ctrl+4)

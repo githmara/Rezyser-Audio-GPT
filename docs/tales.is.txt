@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Samtalslegar Sögur (17.2 – Útgáfuútgáfa)
+Reżyser Audio GPT — Samtalslegar Sögur (17.2.1 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hliðina á Leikstjóra — í þetta sinn verður þú leikmaður í sögunni sem er dynamískt búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lyktina af blautum laufum…"), og þú ákveður næstu aðgerð — skrifar hvaða aðgerð sem er með frjálsum texta eða velur eina af tölusettum valkostum.
 

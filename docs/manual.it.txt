@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida completa (Versione 17.2 – Versione di Pubblicazione)
+Manuale del Regista Audio AI - Guida completa (Versione 17.2.1 – Versione di Pubblicazione)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
@@ -264,7 +264,7 @@ Ideale per ascoltare storie in una lingua straniera bella e corretta.
 - Se carichi un normale file .txt o .md (ad es. uno script generato da Regista), lo script salverà automaticamente il risultato come file .html con un tag di lingua incorporato — pronto per essere letto da NVDA senza alcun lavoro aggiuntivo.
 - Supporta anche i file .docx.
 
-Divisione intelligente in blocchi: I testi lunghi vengono automaticamente suddivisi in blocchi fino a 10.000 caratteri e tradotti sequenzialmente con una barra di avanzamento.
+Divisione intelligente in blocchi: I testi lunghi vengono automaticamente suddivisi in blocchi misurati in token del modello (non in caratteri) e tradotti sequenzialmente con una barra di avanzamento. In questo modo anche le lingue a scrittura densa, come il cinese o il giapponese, rientrano nel limite di risposta del modello, e una risposta troncata viene rilevata e ritentata automaticamente su frammenti più piccoli.
 
 Salvataggio del progresso resistente ai guasti (NOVITÀ nella versione 9): Ogni blocco tradotto viene immediatamente salvato in un file temporaneo nascosto nella cartella di sistema dell'applicazione. Se la traduzione viene interrotta a causa dell'esaurimento del limite API, al successivo avvio l'applicazione rileverà automaticamente questo file, ripristinerà il progresso già pagato e completerà tranquillamente il lavoro dal punto di interruzione — senza alcuna copia manuale. Al termine con successo, il file temporaneo viene automaticamente eliminato.
 
@@ -289,7 +289,7 @@ E anche due opzioni di pulizia senza accento:
 L'opzione con normalizzazione dei numeri converte automaticamente i numeri in parole (ad es. 15 diventa "quindici") prima dell'elaborazione — in questo modo NVDA legge i numeri fluentemente, e se il testo ha un accento imposto, anche il numero lo avrà, senza eccezioni.
 Vi chiederete se il sintetizzatore sarà in grado di declinare tali numeri normalizzati a seconda del contesto? La risposta è: no. Ed è una caratteristica voluta. Come è noto: "la lingua polacca è difficile" — e uno straniero che storpia la nostra grammatica aggiunge solo autenticità all'accento spezzato!
 
-Correttore di Tag (NOVITÀ nella versione 9): Alla fine dell'elenco troverai un'opzione aggiuntiva — Correttore di Tag. Non applica alcuna regola fonetica o di pulizia. Fa una cosa: inietta nel file il codice ISO a due lettere della lingua che fornisci (ad es. "fi" per il finlandese, "en" per l'inglese). È utile quando hai già un file pronto — ad esempio tradotto in precedenza dal Traduttore AI — ma per qualche motivo è uscito con un tag di lingua errato o mancante. Invece di tradurlo di nuovo, basta eseguire il Correttore con il codice ISO corretto e in poco tempo avrai un file corretto.
+Correttore di Tag (NOVITÀ nella versione 9): Alla fine dell'elenco troverai un'opzione aggiuntiva — Correttore di Tag. Non applica alcuna regola fonetica o di pulizia. Fa una cosa: inietta nel file il codice ISO della lingua che fornisci — a due lettere (ad es. "fi" per il finlandese, "en" per l'inglese) o con sottotag di regione o scrittura (ad es. "pt-BR" per il portoghese brasiliano, "zh-Hans" per il cinese semplificato). È utile quando hai già un file pronto — ad esempio tradotto in precedenza dal Traduttore AI — ma per qualche motivo è uscito con un tag di lingua errato o mancante. Invece di tradurlo di nuovo, basta eseguire il Correttore con il codice ISO corretto e in poco tempo avrai un file corretto.
 
 Lo script pulisce le didascalie registiche tra parentesi — rimuove interi frammenti di testo racchiusi tra parentesi tonde (ad es. "(con respiri intrecciati)", "(sussurrando)", "(ironicamente)"). ElevenLabs deve leggere solo dialoghi e narrazione, non istruzioni registiche intrecciate nel testo.
 

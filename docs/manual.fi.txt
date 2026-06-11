@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 17.2 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 17.2.1 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -261,7 +261,7 @@ Ihanteellinen tarinoiden kuuntelemiseen kauniilla, oikealla vieraalla kielellä.
 - Jos lataat tavallisen .txt- tai .md-tiedoston (esim. Ohjaaja-skriptin tuottama), skripti tallentaa käännöksen automaattisesti .html-tiedostona, jossa on sisäänrakennettu kielitunniste — valmis NVDA:n lukemiseen ilman lisätyötä.
 - Tukee myös .docx-tiedostoja.
 
-Älykäs lohkojen jako: Pitkät tekstit jaetaan automaattisesti enintään 10 000 merkin lohkoihin ja käännetään peräkkäin edistymispalkin avulla.
+Älykäs lohkojen jako: Pitkät tekstit jaetaan automaattisesti lohkoihin, jotka mitataan mallin tokeneina (ei merkkeinä), ja käännetään peräkkäin edistymispalkin avulla. Näin myös tiheästi kirjoitetut kielet, kuten kiina tai japani, mahtuvat mallin vastausrajaan, ja katkennut vastaus tunnistetaan ja yritetään automaattisesti uudelleen pienemmissä osissa.
 
 Vikasietoinen edistymisen tallennus (UUTTA versiossa 9): Jokainen käännetty lohko tallennetaan välittömästi piilotettuun väliaikaiseen tiedostoon sovelluksen järjestelmäkansiossa. Jos käännös keskeytyy API-rajoituksen vuoksi, seuraavalla käynnistyskerralla sovellus tunnistaa tämän tiedoston, palauttaa jo maksetun edistyksen ja jatkaa työtä rauhallisesti keskeytyskohdasta — ilman manuaalista kopiointia. Onnistuneen lopetuksen jälkeen väliaikainen tiedosto poistetaan automaattisesti.
 
@@ -286,7 +286,7 @@ Ja kaksi puhdistusvaihtoehtoa ilman aksenttia:
 Numeroiden normalisointivaihtoehto muuntaa numerot automaattisesti sanalliseksi muodoksi (esim. 15 muuttuu "viisitoista") ennen käsittelyä — näin NVDA lukee numerot sujuvasti, ja jos tekstillä on pakotettu aksentti, myös numero saa sen, ilman poikkeuksia.
 Saatatte kysyä, osaako synteettinen ääni taivuttaa näin normalisoituja numeroita kontekstin mukaan? Vastaus on: ei. Ja tämä on tarkoituksellinen ominaisuus. Kuten yleisesti tiedetään: "puolan kieli olla vaikea" — ja ulkomaalainen, joka rikkoo kielioppia, lisää vain autenttisuutta murrettuun aksenttiin!
 
-Tagien Korjaaja (UUTTA versiossa 9): Listan lopussa löydät lisävaihtoehdon — Tagien Korjaaja. Se ei sovella mitään foneettisia sääntöjä tai puhdistusta. Se tekee yhden asian: se lisää tiedostoon antamasi kaksikirjaimisen ISO-kielikoodin (esim. "fi" suomelle, "en" englannille). Tämä on hyödyllistä, kun sinulla on jo valmis tiedosto — esim. aiemmin AI-kääntäjän kääntämä — mutta jostain syystä se on virheellisellä tai puuttuvalla kielitunnisteella. Sen sijaan, että kääntäisit sen uudelleen, käynnistä vain Korjaaja oikealla ISO-koodilla ja hetken kuluttua sinulla on korjattu tiedosto.
+Tagien Korjaaja (UUTTA versiossa 9): Listan lopussa löydät lisävaihtoehdon — Tagien Korjaaja. Se ei sovella mitään foneettisia sääntöjä tai puhdistusta. Se tekee yhden asian: se lisää tiedostoon antamasi ISO-kielikoodin — kaksikirjaimisen (esim. "fi" suomelle, "en" englannille) tai alue- tai kirjoitusjärjestelmätarkenteella varustetun (esim. "pt-BR" Brasilian portugalille, "zh-Hans" yksinkertaistetulle kiinalle). Tämä on hyödyllistä, kun sinulla on jo valmis tiedosto — esim. aiemmin AI-kääntäjän kääntämä — mutta jostain syystä se on virheellisellä tai puuttuvalla kielitunnisteella. Sen sijaan, että kääntäisit sen uudelleen, käynnistä vain Korjaaja oikealla ISO-koodilla ja hetken kuluttua sinulla on korjattu tiedosto.
 
 Skripti puhdistaa ohjaajan sulkeissa olevat didaskaliat — poistaa kaikki tekstin osat, jotka on suljettu pyöreisiin sulkuihin (esim. "(sisään hengitettynä)", "(kuiskaten)", "(ironisesti)"). ElevenLabsin tulee lukea vain dialogit ja kerronta, ei ohjaajan ohjeita, jotka on upotettu tekstiin.
 

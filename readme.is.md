@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **17.2** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **17.2.1** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -36,11 +36,11 @@ Gagnvirkir textaleikir stjórnaðir af AI sem frásagnavél. Ólíkt Leikstjórn
 
 ### 3. Fjöltyngdur (Ctrl+3, AI Þýðandi + TTS Hreimur)
 
-* **Öruggur Þýðandi:** Langir textar eru sjálfkrafa skiptir í einingar allt að 10.000 stöfum og þýddir í röð. Hver eining er samstundis vistuð í falinni `.jsonl` skrá. Endurræsing eftir að API takmörk eru náð er fullkomlega sjálfvirk.
+* **Öruggur Þýðandi:** Langir textar eru sjálfkrafa skiptir í einingar sem mældar eru í tókum líkansins (öruggt einnig fyrir þétt rituð tungumál, t.d. kínversku) og þýddir í röð; afklippt svar líkansins er greint og reynt aftur á minni hlutum. Hver eining er samstundis vistuð í falinni `.jsonl` skrá. Endurræsing eftir að API takmörk eru náð er fullkomlega sjálfvirk.
 * **Sjálfvirkni NVDA:** Þýðingar eru vistaðar sem tilbúnar `.html` skrár með innbyggðum tungumálamerkjum eða `.docx` skrár með merkjum sem eru sprautað beint inn í XML uppbygginguna.
 * **8 staðbundnir hreimar:** Möguleiki á að þvinga fram brotinn hreim fyrir staðbundna hljóðgjafa (Tiflotecnia Voices, eSpeak, OneCore) með háþróuðum regex reglum. Studdir erlendir hreimar: enska, rússneska (með transliteringu á kyrillísku), franska, þýska, spænska, ítalska, finnska, pólsku.
 * **Dulkóðunarhamur:** 6 staðbundin reiknirit til að afmynda texta — frá því að lesa afturábak, í gegnum typoglycemíu, til klassískrar Cæsar dulkóðunar. Hvert með staðbundnu stafrófi tungumálapakkans (t.d. Cæsar dulkóðun með 35-stafa íslensku stafrófi með diakritískum merkjum).
-* **Merkingarviðgerð:** Sprautar á óskaðlegan hátt inn gefnum tveggja stafa ISO tungumálakóða í núverandi skrár.
+* **Merkingarviðgerð:** Sprautar á óskaðlegan hátt inn gefnum ISO tungumálakóða — einnig svæðisbundnum, t.d. pt-BR eða zh-CN — í núverandi skrár.
 
 
 ### 4. Umbreytingartæki / Hljóðbókararkitekt (Ctrl+4)
