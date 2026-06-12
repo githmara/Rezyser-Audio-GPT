@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 17.4.0 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 17.5.0 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -169,7 +169,7 @@ Le Mode Script Brut possède un panneau dédié "✂️ Gestion de la Structure"
 - Insérer Scène X : Insère uniquement l'en-tête de la scène (par exemple, "Scène 3") dans l'acte en cours. Le compteur de scènes augmente automatiquement.
 
 
-Accents disponibles dans Reżyser Audio GPT 17.4.0 :
+Accents disponibles dans Reżyser Audio GPT 17.5.0 :
 
 - Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
 - Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
@@ -507,7 +507,7 @@ Ce que vous trouverez dans le Gestionnaire de Règles :
 - Bouton « 📋  Dupliquer le fichier sélectionné » — le moyen le plus rapide pour un nouvel accent : vous prenez un fichier existant (par exemple finski.yaml), donnez un nouveau nom (par exemple suédois), le Gestionnaire crée une copie avec le commentaire « changez les champs étiquette et description » et l'ouvre dans l'éditeur.
 - Bouton « ➕  Nouveau fichier de règles… » — assistant avec choix du type (accent, chiffre, mode Réalisateur, nouvelle langue source, chiffre algorithmique). Pour les cas simples (accent, chiffre de type « remplacement de lettres »), l'assistant crée un modèle YAML prêt à éditer. Pour les cas nécessitant un programmeur (nouvelle langue source, algorithme de type « mélange du milieu des mots »), l'assistant génère une invite pour le chatbot AI — vous collez dans ChatGPT, obtenez un fichier YAML prêt, enregistrez dans dictionaries/ et c'est prêt.
 
-Application pratique : Vous voulez ajouter un accent suédois ? Ouvrez le Gestionnaire de Règles, choisissez dictionaries/pl/accents/finski.yaml, cliquez sur « Dupliquer », nommez le fichier suédois, changez dans celui-ci le champ étiquette en "Suédois (Alva / Oskar)", le code iso en sv, modifiez quelques règles de remplacement et enregistrez. Retournez à la Page d'accueil, cliquez sur « 🔄 Actualiser les accents Réalisateur depuis YAML » et relancez l'application. Le nouvel accent apparaîtra dans le menu Polyglotte (en Mode Réalisateur) et — si vous l'ajoutez au Livre du Monde des personnages (« [Marek] - a un accent suédois ») — également dans la détection automatique des accents du Réalisateur.
+Application pratique : Vous voulez ajouter un accent suédois ? Ouvrez le Gestionnaire de Règles, choisissez dictionaries/pl/accents/finski.yaml, cliquez sur « Dupliquer », nommez le fichier suédois, changez dans celui-ci le champ étiquette en "Suédois (Alva / Oskar)", le code iso en sv, modifiez quelques règles de remplacement et enregistrez. Retournez à la Page d'accueil et relancez l'application. Le nouvel accent apparaîtra dans le menu Polyglotte (en Mode Réalisateur) et — si vous l'ajoutez au Livre du Monde des personnages (« [Marek] - a un accent suédois ») — également dans la détection automatique des accents du Réalisateur.
 
 Où chercher plus de documentation sur le dossier dictionaries/ :
 - Fichier `docs/dictionaries.pl.txt` (disponible dans le package pour les utilisateurs finaux depuis l'onglet Releases) — description courte, en langage simple, de chaque sous-dossier, 6 chiffres prêts, 8 accents prêts et des idées de ce que vous pouvez faire vous-même, sans connaissance de Python.
@@ -686,8 +686,6 @@ Nouvelles fonctionnalités et modifications de la version 13.0 — Release Candi
 - Remarque sur « ź » : En russe, il n'y a pas d'équivalent exact du « ź » polonais, donc ce caractère est normalisé en « ж » — tout comme « ż ». Certains dialectes du nord de la Russie et le biélorusse prononcent « ź » plus proche de « зь », mais du point de vue du synthétiseur vocal, la différence est négligeable. Si un linguiste préfère « зь », il peut remplacer cette règle dans le fichier `dictionaries/pl/akcenty/rosyjski.yaml` — le moteur charge les YAML de manière dynamique, donc cela ne nécessite pas de recompilation de l'application.
 
 - Barre de navigation étendue et menu Outils (CHANGEMENT). La barre a maintenant un quatrième bouton — Gestionnaire de Règles — et le menu « Outils » prend en charge le nouveau raccourci Ctrl+4. Les raccourcis existants (Ctrl+0 Accueil, Ctrl+1 Réalisateur, Ctrl+2 Polyglotte, Ctrl+3 Convertisseur) restent inchangés.
-
-- Bouton « Rafraîchir les accents du Réalisateur à partir de YAML » sur la page d'accueil (NOUVEAUTÉ). Après avoir ajouté un nouvel accent via le Gestionnaire de Règles (ou une édition manuelle du fichier YAML), cliquer sur ce bouton rechargera les wrappers accent_* dans le moteur du Polyglotte et du Réalisateur, afin que le nouvel accent soit visible dans le menu et dans la détection automatique des accents basée sur les tags de personnages dans le Livre du Monde. Le Polyglotte détecte les YAML automatiquement (sans rafraîchissement), mais le Réalisateur nécessite une régénération des wrappers — généralement, après le rafraîchissement, il faut encore redémarrer l'application.
 
 Fonctionnalités conservées sans changement depuis la version 12.0
 

@@ -205,26 +205,10 @@ home:
     Want to add a new accent, cipher, or Director mode?
     Open the Rule Manager (Ctrl+4) – you'll find a tree of all YAML files in dictionaries/ and a creator that will create a template or generate a prompt for the AI chatbot.
 
-    After adding a new ACCENT, additionally click the "Refresh Director Accents from YAML" button below – this will allow the Director Mode to notice the new accent (Polyglot detects YAMLs automatically). After refreshing, restart the application.
+    After adding a new file, restart the application – Director Mode and Polyglot detect all YAML files in dictionaries/ automatically.
   btn_open_manager_label: "📚 Open Rule Manager"
   btn_open_manager_name: "Open Rule Manager Button"
   btn_open_manager_tooltip: "Goes to the Rule Manager – YAML file explorer and creator of new accents/modes/ciphers (Ctrl+4)."
-  btn_odswiez_label: "🔄 Refresh Director Accents from YAML"
-  btn_odswiez_name: "Refresh Director Accents from YAML Button"
-  btn_odswiez_tooltip: "Scans dictionaries/*/akcenty/ and regenerates akcent_* wrappers in core_poliglota.py and core_rezyser.py. After a successful refresh, restart the application."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Accent Refresh Error"
-  raport_niespodziewany_tresc: "An unexpected error occurred:\n{tresc_bledu}"
-  raport_tytul_blad: "Refresh Director Accents – ERROR"
-  raport_header_blad: "⛔ Generator encountered errors – see log below."
-  raport_tytul_sukces: "Refresh Director Accents – Success"
-  raport_header_sukces: |-
-    ✅ Files for {liczba_akcentow} accents modified.
-    To see the new accents in Director Mode, restart the application.
-  raport_tytul_bez_zmian: "Refresh Director Accents – No Changes"
-  raport_header_bez_zmian: "ℹ️ No changes. {liczba_akcentow} accents detected – wrappers are already up to date."
-  raport_lbl_log: "Full log (Ctrl+A, Ctrl+C copies to clipboard):"
-  raport_log_name: "Director Accent Generator Log"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -549,7 +533,7 @@ rezyser:
   brak_przepisow_tytul: "No recipes"
   brak_przepisow_tresc: |-
     Failed to load any working mode from YAML.
-    Run odswiez_rezysera.py or check dictionaries/pl/rezyser/.
+    Check the files in dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Provide the project file name before generating text for saving.
     ('{tytul_trybu}' mode requires a file name.)
@@ -880,8 +864,8 @@ manager:
   btn_odswiez_name: "Button Refresh file tree"
   btn_odswiez_tooltip: "Reloads the tree from the disk – use if you changed files manually in Explorer or after saving in a text editor."
   info_stopka: |-
-    After creating a new accent, return to the Home page
-    and click “Refresh Director accents from YAML”.
+    After creating a new file, restart the application –
+    the new rules will be detected automatically.
   # Otwarcie w edytorze
   plik_wne_tytul: "Cannot open file"
   plik_wne_tresc: |-
@@ -927,7 +911,7 @@ manager:
   usun_blad: "Failed to delete file:\n{tresc_bledu}"
   usun_ok_tytul: "Deleted"
   usun_ok_tresc: |-
-    File deleted. Remember to click “Refresh Director accents from YAML” on the Home page after deleting an accent.
+    File deleted. To apply the change to Director Mode, restart the application.
   # Kreator
   kreator_tytul: "New rule file – wizard"
   kreator_co_utworzyc: "What do you want to create?"

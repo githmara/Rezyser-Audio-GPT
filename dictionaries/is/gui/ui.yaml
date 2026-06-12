@@ -206,26 +206,10 @@ home:
     Viltu bæta við nýjum áherslum, dulritun eða Leikstjórnarham?
     Opnaðu Reglustjóra (Ctrl+4) – þar finnur þú tré allra YAML skráa í dictionaries/ og smið sem býr sjálfkrafa til sniðmát eða býr til ábendingu fyrir AI chatbot.
 
-    Eftir að hafa bætt við nýjum ÁHERSLUM, smelltu á hnappinn „Endurnýja áherslur Leikstjóra úr YAML" hér að neðan – þetta gerir Leikstjórnarham kleift að taka eftir nýjum áherslum (Tungumálamaður greinir YAML skrár sjálfkrafa). Eftir endurnýjun skaltu ræsa forritið aftur.
+    Eftir að hafa bætt við nýrri skrá skaltu ræsa forritið aftur – Leikstjórnarhamur og Tungumálamaður greina sjálfkrafa allar YAML skrár í dictionaries/.
   btn_open_manager_label: "📚 Opnaðu Reglustjóra"
   btn_open_manager_name: "Hnappur Opna Reglustjóra"
   btn_open_manager_tooltip: "Fer í Reglustjóra – YAML skráarkönnuður og nýr áherslu / stillinga / dulritunarsmiður (Ctrl+4)."
-  btn_odswiez_label: "🔄 Endurnýja áherslur Leikstjóra úr YAML"
-  btn_odswiez_name: "Hnappur Endurnýja áherslur Leikstjóra úr YAML"
-  btn_odswiez_tooltip: "Skannar dictionaries/*/áherslur/ og endurbyggir áherslu_* umbúðir í core_poliglota.py og core_rezyser.py. Eftir vel heppnaða endurnýjun þarf að ræsa forritið aftur."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Villa við endurnýjun áherslna"
-  raport_niespodziewany_tresc: "Óvænt villa kom upp:\n{tresc_bledu}"
-  raport_tytul_blad: "Endurnýja áherslur Leikstjóra – VILLA"
-  raport_header_blad: "⛔ Framleiðandi rakst á villur – sjá log hér að neðan."
-  raport_tytul_sukces: "Endurnýja áherslur Leikstjóra – Árangur"
-  raport_header_sukces: |-
-    ✅ Skrár fyrir {liczba_akcentow} áherslur hafa verið breyttar.
-    Til að nýjar áherslur birtist í Leikstjórnarham, ræstu forritið aftur.
-  raport_tytul_bez_zmian: "Endurnýja áherslur Leikstjóra – Engar breytingar"
-  raport_header_bez_zmian: "ℹ️ Engar breytingar. {liczba_akcentow} áherslur fundust – umbúðir eru nú þegar uppfærðar."
-  raport_lbl_log: "Fullur log (Ctrl+A, Ctrl+C afritar í klippiborð):"
-  raport_log_name: "Log framleiðanda áherslna Leikstjóra"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -550,7 +534,7 @@ rezyser:
   brak_przepisow_tytul: "Engar uppskriftir"
   brak_przepisow_tresc: |-
     Ekki tókst að hlaða neinum vinnuhömum úr YAML.
-    Keyrðu odswiez_rezysera.py eða athugaðu dictionaries/pl/rezyser/.
+    Athugaðu skrárnar í dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Gefðu nafn á verkefnaskrá áður en þú býrð til texta til vistunar.
     (Hamur '{tytul_trybu}' krefst skráarnafns.)
@@ -883,8 +867,8 @@ manager:
   btn_odswiez_name: "Hnappur Endurnýja skráatré"
   btn_odswiez_tooltip: "Endurhleður tréð af diski – notaðu ef þú breyttir skrám handvirkt í könnuð eða eftir vistun í textaritli."
   info_stopka: |-
-    Eftir að nýr hreimur hefur verið búinn til, farðu aftur á Heimaskjá
-    og smelltu á „Endurnýja hreima Leikstjóra úr YAML".
+    Eftir að hafa búið til nýja skrá skaltu ræsa forritið aftur –
+    nýju reglurnar greinast sjálfkrafa.
   # Otwarcie w edytorze
   plik_wne_tytul: "Ekki hægt að opna skrá"
   plik_wne_tresc: |-
@@ -930,7 +914,7 @@ manager:
   usun_blad: "Ekki tókst að eyða skrá:\n{tresc_bledu}"
   usun_ok_tytul: "Eytt"
   usun_ok_tresc: |-
-    Skrá eytt. Mundu að eftir að hreim hefur verið eytt, smelltu á „Endurnýja hreima Leikstjóra úr YAML" á Heimaskjá.
+    Skrá eytt. Til að breytingin taki gildi í Leikstjórnarham skaltu ræsa forritið aftur.
   # Kreator
   kreator_tytul: "Ný regla skrá – töframaður"
   kreator_co_utworzyc: "Hvað viltu búa til?"

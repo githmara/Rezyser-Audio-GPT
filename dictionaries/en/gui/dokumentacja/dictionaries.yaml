@@ -238,8 +238,7 @@ tresc:
           - "iso" — two-letter language code, for Swedish "sv"
     4. Tune the "zamiany" list for Swedish phonetics (e.g., add "å → o",
        "ö → ö", remove or change those specific to Finnish).
-    5. Save, return to the Home Page, click "🔄 Refresh Director accents
-       from YAML" and restart the application. The new Swedish will appear
+    5. Save and restart the application. The new Swedish will appear
        in the Polyglot accent menu (and if you add to the World Book
        characters the tag "[Marek] - has a Swedish accent", the Director
        will also recognize it automatically and apply it to her dialogues).

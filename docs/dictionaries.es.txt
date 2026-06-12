@@ -155,7 +155,7 @@ NIVEL 2 — agregar un nuevo acento mediante duplicación
       - "opis": breve descripción para ti en el futuro
       - "iso": código de idioma de dos letras, para sueco "sv"
 4. Ajusta la lista de "zamian" a la fonética sueca (por ejemplo, agrega "å → o", "ö → ö", elimina o cambia las que son específicas del finlandés).
-5. Guarda, vuelve a la Página principal, haz clic en "🔄 Actualizar acentos del Director desde YAML" y reinicia la aplicación. El nuevo sueco aparecerá en el menú de acentos de Políglota (y si agregas al Libro del Mundo un personaje con la etiqueta "[Marek] - ma akcent szwedzki", el Director también lo reconocerá automáticamente y lo aplicará a sus diálogos).
+5. Guarda y reinicia la aplicación. El nuevo sueco aparecerá en el menú de acentos de Políglota (y si agregas al Libro del Mundo un personaje con la etiqueta "[Marek] - ma akcent szwedzki", el Director también lo reconocerá automáticamente y lo aplicará a sus diálogos).
 
 
 NIVEL 3 — crear algo completamente nuevo

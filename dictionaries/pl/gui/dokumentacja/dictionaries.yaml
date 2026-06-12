@@ -257,8 +257,7 @@ tresc:
           - "iso" — dwuliterowy kod języka, dla szwedzkiego "sv"
     4. Dostrój listę "zamian" pod fonetykę szwedzką (np. dodaj "å → o",
        "ö → ö", usuń albo zmień te, które są specyficzne dla fińskiego).
-    5. Zapisz, wróć na Stronę główną, kliknij "🔄 Odśwież akcenty Reżysera
-       z YAML" i uruchom aplikację ponownie. Nowy szwedzki pojawi się w
+    5. Zapisz i uruchom aplikację ponownie. Nowy szwedzki pojawi się w
        menu akcentów Poligloty (a jeśli dodasz do Księgi Świata postaci
        tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna
        automatycznie i zastosuje do jej dialogów).

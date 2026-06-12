@@ -213,26 +213,10 @@ home:
     Chcesz dodać nowy akcent, szyfr albo tryb Reżysera?
     Otwórz Manager Reguł (Ctrl+4) – znajdziesz tam drzewo wszystkich plików YAML w dictionaries/ oraz kreator, który sam utworzy szablon lub wygeneruje prompt dla chatbota AI.
 
-    Po dodaniu nowego AKCENTU kliknij dodatkowo przycisk „Odśwież akcenty Reżysera z YAML" poniżej – pozwoli to Trybowi Reżysera zauważyć nowy akcent (Poliglota wykrywa YAML-e automatycznie). Po odświeżeniu uruchom aplikację ponownie.
+    Po dodaniu nowego pliku uruchom aplikację ponownie – Tryb Reżysera i Poliglota wykrywają wszystkie pliki YAML z dictionaries/ automatycznie.
   btn_open_manager_label:   "📚 Otwórz Manager Reguł"
   btn_open_manager_name:    "Przycisk Otwórz Manager Reguł"
   btn_open_manager_tooltip: "Przechodzi do Managera Reguł – eksploratora plików YAML i kreatora nowych akcentów / trybów / szyfrów (Ctrl+4)."
-  btn_odswiez_label:        "🔄 Odśwież akcenty Reżysera z YAML"
-  btn_odswiez_name:         "Przycisk Odśwież akcenty Reżysera z YAML"
-  btn_odswiez_tooltip:      "Skanuje dictionaries/*/akcenty/ i regeneruje wrappery akcent_* w core_poliglota.py oraz core_rezyser.py. Po udanym odświeżeniu należy uruchomić aplikację ponownie."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Błąd odświeżania akcentów"
-  raport_niespodziewany_tresc: "Wystąpił nieoczekiwany błąd:\n{tresc_bledu}"
-  raport_tytul_blad:        "Odśwież akcenty Reżysera – BŁĄD"
-  raport_header_blad:       "⛔ Generator napotkał błędy – patrz log poniżej."
-  raport_tytul_sukces:      "Odśwież akcenty Reżysera – Sukces"
-  raport_header_sukces: |-
-    ✅ Zmodyfikowano pliki dla {liczba_akcentow} akcentów.
-    Aby nowe akcenty pojawiły się w Trybie Reżysera, uruchom aplikację ponownie.
-  raport_tytul_bez_zmian:   "Odśwież akcenty Reżysera – Bez zmian"
-  raport_header_bez_zmian:  "ℹ️ Brak zmian. Wykryto {liczba_akcentow} akcentów – wrappery są już aktualne."
-  raport_lbl_log:           "Pełny log (Ctrl+A, Ctrl+C kopiuje do schowka):"
-  raport_log_name:          "Log generatora akcentów Reżysera"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -598,7 +582,7 @@ rezyser:
   brak_przepisow_tytul:  "Brak przepisów"
   brak_przepisow_tresc: |-
     Nie udało się załadować żadnego trybu pracy z YAML.
-    Uruchom odswiez_rezysera.py lub sprawdź dictionaries/pl/rezyser/.
+    Sprawdź pliki w dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Podaj nazwę pliku projektu, zanim wygenerujesz tekst do zapisu.
     (Tryb '{tytul_trybu}' wymaga nazwy pliku.)
@@ -904,8 +888,8 @@ manager:
   btn_odswiez_name:      "Przycisk Odśwież drzewo plików"
   btn_odswiez_tooltip:   "Przeładowuje drzewo z dysku – użyj, jeśli zmieniłeś pliki ręcznie w Eksploratorze lub po zapisie w edytorze tekstu."
   info_stopka: |-
-    Po utworzeniu nowego akcentu wróć na Stronę główną
-    i kliknij „Odśwież akcenty Reżysera z YAML".
+    Po utworzeniu nowego pliku uruchom aplikację ponownie –
+    nowe reguły zostaną wykryte automatycznie.
   # Otwarcie w edytorze
   plik_wne_tytul:        "Nie można otworzyć pliku"
   plik_wne_tresc: |-
@@ -951,7 +935,7 @@ manager:
   usun_blad:             "Nie udało się usunąć pliku:\n{tresc_bledu}"
   usun_ok_tytul:         "Usunięto"
   usun_ok_tresc: |-
-    Plik usunięty. Pamiętaj, aby po usunięciu akcentu kliknąć „Odśwież akcenty Reżysera z YAML" na Stronie głównej.
+    Plik usunięty. Aby zmiana objęła Tryb Reżysera, uruchom aplikację ponownie.
   # Kreator
   kreator_tytul:         "Nowy plik reguł – kreator"
   kreator_co_utworzyc:   "Co chcesz utworzyć?"

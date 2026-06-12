@@ -206,26 +206,10 @@ home:
     Vuoi aggiungere un nuovo accento, cifrario o modalità Regista?
     Apri il Gestore Regole (Ctrl+4) – troverai lì l'albero di tutti i file YAML in dictionaries/ e un creatore che creerà automaticamente un modello o genererà un prompt per il chatbot AI.
 
-    Dopo aver aggiunto un nuovo ACCENTO, clicca inoltre il pulsante "Aggiorna accenti Regista da YAML" qui sotto – questo permetterà alla Modalità Regista di rilevare il nuovo accento (Poliglotta rileva automaticamente gli YAML). Dopo l'aggiornamento, riavvia l'applicazione.
+    Dopo aver aggiunto un nuovo file, riavvia l'applicazione – la Modalità Regista e Poliglotta rilevano automaticamente tutti i file YAML in dictionaries/.
   btn_open_manager_label: "📚 Apri Gestore Regole"
   btn_open_manager_name: "Pulsante Apri Gestore Regole"
   btn_open_manager_tooltip: "Passa al Gestore Regole – esploratore di file YAML e creatore di nuovi accenti / modalità / cifrari (Ctrl+4)."
-  btn_odswiez_label: "🔄 Aggiorna accenti Regista da YAML"
-  btn_odswiez_name: "Pulsante Aggiorna accenti Regista da YAML"
-  btn_odswiez_tooltip: "Scansiona dictionaries/*/akcenty/ e rigenera i wrapper akcent_* in core_poliglota.py e core_rezyser.py. Dopo un aggiornamento riuscito, è necessario riavviare l'applicazione."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Errore di aggiornamento accenti"
-  raport_niespodziewany_tresc: "Si è verificato un errore imprevisto:\n{tresc_bledu}"
-  raport_tytul_blad: "Aggiorna accenti Regista – ERRORE"
-  raport_header_blad: "⛔ Il generatore ha incontrato errori – vedi log qui sotto."
-  raport_tytul_sukces: "Aggiorna accenti Regista – Successo"
-  raport_header_sukces: |-
-    ✅ Modificati i file per {liczba_akcentow} accenti.
-    Per far apparire i nuovi accenti nella Modalità Regista, riavvia l'applicazione.
-  raport_tytul_bez_zmian: "Aggiorna accenti Regista – Nessuna modifica"
-  raport_header_bez_zmian: "ℹ️ Nessuna modifica. Rilevati {liczba_akcentow} accenti – i wrapper sono già aggiornati."
-  raport_lbl_log: "Log completo (Ctrl+A, Ctrl+C copia negli appunti):"
-  raport_log_name: "Log del generatore di accenti Regista"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -550,7 +534,7 @@ rezyser:
   brak_przepisow_tytul: "Nessuna ricetta"
   brak_przepisow_tresc: |-
     Impossibile caricare alcuna modalità di lavoro da YAML.
-    Esegui odswiez_rezysera.py o controlla dictionaries/pl/rezyser/.
+    Controlla i file in dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Fornisci un nome per il file del progetto prima di generare il testo da salvare.
     (La modalità '{tytul_trybu}' richiede un nome file.)
@@ -883,8 +867,8 @@ manager:
   btn_odswiez_name: "Pulsante Aggiorna albero file"
   btn_odswiez_tooltip: "Ricarica l'albero dal disco – usa se hai modificato i file manualmente nell'Esplora file o dopo il salvataggio nell'editor di testo."
   info_stopka: |-
-    Dopo aver creato un nuovo accento, torna alla Pagina principale
-    e fai clic su "Aggiorna accenti Regista da YAML".
+    Dopo aver creato un nuovo file, riavvia l'applicazione –
+    le nuove regole verranno rilevate automaticamente.
   # Otwarcie w edytorze
   plik_wne_tytul: "Impossibile aprire il file"
   plik_wne_tresc: |-
@@ -930,7 +914,7 @@ manager:
   usun_blad: "Impossibile eliminare il file:\n{tresc_bledu}"
   usun_ok_tytul: "Eliminato"
   usun_ok_tresc: |-
-    File eliminato. Ricorda di fare clic su "Aggiorna accenti Regista da YAML" sulla Pagina principale dopo aver eliminato un accento.
+    File eliminato. Affinché la modifica abbia effetto nella Modalità Regista, riavvia l'applicazione.
   # Kreator
   kreator_tytul: "Nuovo file regole – creatore"
   kreator_co_utworzyc: "Cosa vuoi creare?"

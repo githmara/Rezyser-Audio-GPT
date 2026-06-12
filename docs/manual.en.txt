@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 17.4.0 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 17.5.0 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -455,7 +455,7 @@ What you'll find in the Rule Manager:
 - "📋  Duplicate selected file" button — the fastest way to a new accent: take an existing file (e.g., finski.yaml), give it a new name (e.g., Swedish), the Manager creates a copy with the comment "change label and description fields" and opens it in the editor.
 - "➕  New rule file…" button — wizard with type selection (accent, cipher, Director mode, new source language, algorithmic cipher). For common cases (accent, letter substitution cipher), the wizard creates a ready-to-edit YAML template. For cases requiring a programmer (new source language, algorithm like "word middle scrambling"), the wizard generates a prompt for an AI chatbot — paste it into ChatGPT, get a ready YAML file, save it in dictionaries/ and you're done.
 
-Practical application: Want to add a Swedish accent? Open the Rule Manager, select dictionaries/pl/accents/finski.yaml, click "Duplicate," name the file Swedish, change the label field to "Swedish (Alva / Oskar)," ISO code to sv, modify a few substitution rules and save. Return to the Home page, click "🔄 Refresh Director Accents from YAML" and restart the application. The new accent will appear in the Polyglot menu (in Director Mode) and — if you add it to the World Book of Characters ("[Mark] - has a Swedish accent") — also in the Director's automatic accent detection.
+Practical application: Want to add a Swedish accent? Open the Rule Manager, select dictionaries/pl/accents/finski.yaml, click "Duplicate," name the file Swedish, change the label field to "Swedish (Alva / Oskar)," ISO code to sv, modify a few substitution rules and save. Return to the Home page and restart the application. The new accent will appear in the Polyglot menu (in Director Mode) and — if you add it to the World Book of Characters ("[Mark] - has a Swedish accent") — also in the Director's automatic accent detection.
 
 Where to find further documentation for the dictionaries/ folder:
 - File `docs/dictionaries.pl.txt` (available in the end-user package from the Releases tab) — a short, simple language description of each subfolder, 6 ready ciphers, 8 ready accents, and ideas for what you can do yourself, without knowing Python.
@@ -628,8 +628,6 @@ New Features and Changes in Version 13.0 — Release Candidate
 - Note on "ź": There is no exact equivalent of the Polish "ź" in Russian, so this character is normalized to "ж" — similar to "ż". Some northern Russian dialects and Belarusian pronounce "ź" closer to "зь", but from the perspective of a speech synthesizer, the difference is negligible. If a linguist prefers "зь", they can independently replace this one rule in the `dictionaries/pl/akcenty/rosyjski.yaml` file — the engine loads YAMLs dynamically, so no recompilation of the application is required.
 
 - Expanded navigation bar and Tools menu (CHANGE). The bar now has a fourth button — Rule Manager — and the "Tools" menu supports the new shortcut Ctrl+4. Existing shortcuts (Ctrl+0 Home, Ctrl+1 Director, Ctrl+2 Polyglot, Ctrl+3 Converter) remain unchanged.
-
-- "Refresh Director Accents from YAML" button on the Home Page (NEW). After adding a new accent via the Rule Manager (or manually editing the YAML file), clicking this button will reload the accent_* wrappers in the Polyglot and Director engines, so the new accent is visible in the menu and in automatic accent detection based on character tags in the World Book. Polyglot detects YAMLs automatically (without refreshing), but the Director requires wrapper regeneration — usually, after refreshing, you need to restart the application.
 
 Features retained unchanged from version 12.0
 

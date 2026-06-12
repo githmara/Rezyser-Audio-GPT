@@ -443,7 +443,7 @@ tresc:
     - Hnappur „{manager.btn_duplikuj_label}" — fljótlegasta leiðin til nýs hreims: þú tekur núverandi skrá (t.d. finski.yaml), gefur nýtt nafn (t.d. sænska), Stjórnandi býr til afrit með athugasemd „breyta reitnum merki og lýsing" og opnar hana í ritli.
     - Hnappur „{manager.btn_nowy_label}" — skapalón með vali á tegund (hreim, dulmál, ham Leikstjóra, nýtt grunnmál, reiknirit dulmál). Fyrir venjuleg tilfelli (hreim, dulmál eins og „skipta um stafi") býr skapalónið til tilbúið YAML sniðmát til að breyta. Fyrir tilfelli sem krefjast forritara (nýtt grunnmál, reiknirit eins og „blanda miðju orða") býr skapalónið til skeyti fyrir AI spjallmenni — þú límir það í ChatGPT, færð tilbúna YAML skrá, vistar í dictionaries/ og búið.
 
-    Hagnýt notkun: Viltu bæta við sænskum hreim? Opnaðu Stjórnanda Reglna, veldu dictionaries/pl/akcenty/finski.yaml, smelltu á „Afrita", nefndu skrána sænska, breyttu reitnum merki í "Sænska (Alva / Oskar)", iso kóða í sv, breyttu nokkrum reglum um skipti og vistaðu. Farðu aftur á Heimaskjáinn, smelltu á „{home.btn_odswiez_label}" og ræstu forritið aftur. Nýi hreimurinn birtist í fjöltyngismeninu (í Leikstjóraham) og — ef þú bætir honum við Persónuheimsbókina („[Marek] - hefur sænskan hreim") — einnig í sjálfvirkri hreimsgreiningu Leikstjórans.
+    Hagnýt notkun: Viltu bæta við sænskum hreim? Opnaðu Stjórnanda Reglna, veldu dictionaries/pl/akcenty/finski.yaml, smelltu á „Afrita", nefndu skrána sænska, breyttu reitnum merki í "Sænska (Alva / Oskar)", iso kóða í sv, breyttu nokkrum reglum um skipti og vistaðu. Farðu aftur á Heimaskjáinn og ræstu forritið aftur. Nýi hreimurinn birtist í fjöltyngismeninu (í Leikstjóraham) og — ef þú bætir honum við Persónuheimsbókina („[Marek] - hefur sænskan hreim") — einnig í sjálfvirkri hreimsgreiningu Leikstjórans.
 
     Hvar á að leita að frekari skjölum um möppuna dictionaries/:
     - Skjal `docs/dictionaries.pl.txt` (aðgengilegt í pakkanum fyrir endanotendur frá Releases flipanum) — stutt, einföld lýsing á hverri undirmöppu, 6 tilbúin dulmál, 8 tilbúnir hreimar og hugmyndir um hvað hægt er að gera sjálfstætt, án Python þekkingar.
@@ -592,8 +592,6 @@ tresc:
     - Athugasemd um „ź": Í rússnesku er engin nákvæm samsvörun fyrir íslenska „ź", svo þessi stafur er venjulega breytt í „ж" — líkt og „ż". Sumir norður-rússneskir og hvítrússneskir mállýskur bera „ź" nær „зь", en frá sjónarhóli talgervils er munurinn óverulegur. Ef málfræðingur telur að hann kjósi „зь", getur hann sjálfur skipt út þessari einu reglu í skránni `dictionaries/pl/akcenty/rosyjski.yaml` — vélin hleður YAML skrár sjálfvirkt, svo það krefst ekki endursamsetningar forritsins.
 
     - Útvíkkuð leiðarstika og Verkfæri valmynd (BREYTING). Stikan hefur nú fjórða hnappinn — Reglustjóri — og valmyndin „Verkfæri" styður nýja flýtileiðina Ctrl+4. Fyrri flýtileiðir (Ctrl+0 Heim, Ctrl+1 Leikstjóri, Ctrl+2 Tungumálamaður, Ctrl+3 Breytir) haldast óbreyttar.
-
-    - Hnappur „Endurnýja hreimsetningar Leikstjórans úr YAML" á Heimssíðu (NÝTT). Eftir að nýr hreimur hefur verið bætt við af Reglustjóra (eða handvirkri breytingu á YAML skrá) mun smella á þennan hnapp endurhlaða hreim_* umbúðir í Tungumálamanninum og Leikstjórans vél, svo nýi hreimurinn sé sýnilegur í valmyndinni og í sjálfvirkri greiningu hreima byggt á persónumerkjum í Heimsbókinni. Tungumálamaður greinir YAML skrár sjálfvirkt (án endurnýjunar), en Leikstjórinn þarf að endurbyggja umbúðir — venjulega þarf að endurræsa forritið eftir endurnýjun.
 
     Eiginleikar haldnir óbreyttir frá útgáfu 12.0
 

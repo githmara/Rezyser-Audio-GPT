@@ -244,8 +244,7 @@ tresc:
           - "iso" — zweistelliger Sprachcode, für Schwedisch "sv"
     4. Passen Sie die Liste der Ersetzungen an die schwedische Phonetik an
        (z.B. "å → o", löschen oder ändern Sie die finnischen Spezifika).
-    5. Speichern, zur Startseite zurück, auf "🔄 Regisseur-Akzente aus YAML
-       neu laden" klicken und Anwendung neu starten. Das neue Schwedisch
+    5. Speichern und Anwendung neu starten. Das neue Schwedisch
        erscheint im Polyglott-Akzentmenü (und wenn Sie im Weltbuch des Projekts
        den Tag "[Marek] — hat schwedischen Akzent" hinzufügen, erkennt der
        Regisseur ihn automatisch und wendet ihn auf Dialoge dieser Figur an).

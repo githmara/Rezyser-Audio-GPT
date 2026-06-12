@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 17.4.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 17.5.0 „Wersja Wydawnicza"
+
+*Patch v17.5.0: tryb Reżysera dyspatchuje akcenty w pełni **dynamicznie** — koniec generatora kodu `odswiez_rezysera.py` i przycisku „Odśwież akcenty Reżysera z YAML". Sednem jest diagnoza architektoniczna: generator dopisywał wrappery `akcent_*` i słownik `_AKCENT_FUNCS` do źródeł `.py`, co po przejściu na PyInstaller (v17.0) stało się **martwe** — w zamrożonej paczce nie ma źródeł `.py` do regeneracji, a nawet gdyby były, działający interpreter by ich nie przeładował (przycisk skanował `dictionaries/` wewnątrz bundla `runtime/` i meldował „brak akcentów"). Przy okazji okazało się, że cała ta maszyneria była zbędna także w dev: `akcent_<id>(tekst, jezyk)` było czystym aliasem `zastosuj_reguly_fonetyczne(tekst, "<id>", jezyk)`, a ten silnik i tak czyta YAML-e dynamicznie — dokładnie jak Poliglota, która tego kroku nigdy nie wymagała. `core_rezyser.zastosuj_akcenty_uniwersalne` sprawdza teraz, czy istnieje YAML akcentu o nazwie z Księgi Świata (`wariant_po_id`, `kategoria=='akcent'`) i woła silnik wprost; nieznana nazwa spada do reguł ad-hoc — drobna, świadoma poprawa względem dawnego statycznego whitelistu, który markował fragment jako zmodyfikowany nawet bez reguł fonetycznych dla danego języka. Efekt dla użytkownika: dorzucenie pliku akcentu OBOK exe działa po zwykłym restarcie, bez żadnego kroku „odświeżania". Sprzątanie objęło i18n ×9 (martwe klucze `home.btn_odswiez_*`/`raport_*`, instrukcje „kliknij przycisk" → „uruchom aplikację ponownie") oraz manuale ×9 (usunięty bullet o przycisku, naprawiony placeholder `{home.btn_odswiez_label}` w akapicie o szwedzkim akcencie — inaczej walidacja docs eskalowałaby do FATAL). Zero zmian w kontrakcie LLM i w samych regułach fonetycznych.*
 
 *Patch v17.4.0: porządki w obu głównych modułach po przeglądzie kodu — krytyczny cichy bug danych + pięć szlifów A11y/parytetu, plus usunięcie martwego mostu. Sednem jest **rozdzielenie przestrzeni nazw pliku trybu `.mode`**: Opowieści i Reżyser dzieliły jeden `runtime/skrypty/<nazwa>.mode` mimo rozłącznych zakresów wartości (Reżyser 1/2, Opowieści 3/4/5), więc gra i projekt Reżysera o tej samej nazwie po cichu nadpisywały sobie tryb — ochrona trybu padała otwarta („furtki dowolnych wyborów"). To dokładnie ta klasa kolizji, którą v15.2.3 naprawiła dla `.txt`/`.md`, przeoczając `.mode`. Opowieści dostają własny `runtime/opowiesci/<nazwa>.mode` (obok pozostałych ich plików stanu), z jednorazową migracją starych plików 3/4/5 (z gwardią zakresu, by nie ukraść Reżyserowi jego 1/2) i walidacją zakresu przy odczycie. Przy okazji usunięto **martwy most Opowieści→Reżyser**: rebuild Księgi Świata `.md` po każdej turze produkował plik „zgodny z parserem Reżysera", ale Reżyser czytał księgę z `skrypty/`, a Opowieści pisały do `opowiesci/` (inny folder od v15.2.3) — udokumentowany most nie działał od ponad roku, więc rebuild był czystym kosztem I/O; usunięty wraz z opisem mostu w manualach 9 języków. Pięć szlifów dostępności: panel struktury Reżysera nie łapie już fokusu NVDA, gdy wszystkie jego przyciski są nieaktywne (historia kończąca się nagłówkiem) — chowany w całości jak panel wyborów w Opowieściach; status pamięci Opowieści to teraz nawigowalne/kopiowalne pole readonly (parytet z Reżyserem, zgodnie z regułą A11y o komunikatach technicznych); presety Quick Start chowają się w trakcie aktywnej gry; fokus po każdej turze trafia na „Ostatnią turę" (świeża scena od początku), a nie na początek pełnej narracji (poprawka kłamliwego komentarza i realnej regresji); przycisk „Odśwież z dysku" w Opowieściach przestaje być martwy — wraca jako opcja techniczna pod tą samą flagą `EDYCJA_STANU_GRY_WIDOCZNA` co „Edytuj stan gry…" (świadomy user domyka cichy dryf stanu ręcznie). Zero zmian w silniku akcentów, i18n UI ani w kontrakcie LLM.*
 
@@ -55,6 +57,41 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 17.5.0 — patch release (dynamiczny dispatch akcentów Reżysera + retire `odswiez_rezysera.py`)
+
+### TL;DR
+
+Tryb Reżysera nakłada akcenty fonetyczne, dopasowując nazwę akcentu z Księgi Świata (`[Geralt] akcent islandzki`) do reguł YAML w `dictionaries/<kod>/akcenty/`. Do v17.4 robił to przez **wygenerowany** słownik `_AKCENT_FUNCS` i wrappery `akcent_*` w `core_poliglota.py` — kod dopisywany do źródeł przez skrypt `odswiez_rezysera.py` (lingwista dodawał YAML, klikał przycisk „Odśwież akcenty Reżysera z YAML", generator regenerował kod). Działało, dopóki aplikacja chodziła ze źródła.
+
+Po zamrożeniu PyInstallerem (v17.0) ten model stał się **strukturalnie martwy**: w paczce frozen nie ma plików `.py` do edycji (są skompilowane do bytecode'u w bundlu `runtime/`), a nawet gdyby były — działający interpreter nie przeładuje podmienionego źródła. Przycisk w zamrożonej apce skanował `dictionaries/` *wewnątrz* bundla (gdzie ich nie ma) i meldował „nie wykryto żadnego akcentu".
+
+Diagnoza poszła głębiej: generator był zbędny także w dev. Każdy wrapper `akcent_<id>(tekst, jezyk)` to było czyste `return zastosuj_reguly_fonetyczne(tekst, "<id>", jezyk)`, a `zastosuj_reguly_fonetyczne` i tak ładuje reguły z YAML dynamicznie przez `wariant_po_id` — czyli nazwa akcentu JEST jego id. Tryb Reżysera może więc dyspatchować dynamicznie, dokładnie jak Poliglota (która tego kroku nigdy nie wymagała). v17.5 to wdraża i usuwa cały martwy aparat.
+
+### Co nowego
+
+- **Dorzucenie akcentu „po prostu działa".** Nowy plik `dictionaries/<kod>/akcenty/*.yaml` położony obok exe jest wykrywany po zwykłym restarcie aplikacji — bez osobnego kroku „odświeżania", w obu trybach (Poliglota i Reżyser). Zniknął przycisk „Odśwież akcenty Reżysera z YAML" na Stronie głównej (był martwy w paczce i wprowadzał w błąd).
+- **Instrukcje zaktualizowane ×9 języków.** Manager Reguł, Strona główna i manuale mówią teraz „dodaj plik i uruchom aplikację ponownie" zamiast „kliknij przycisk".
+
+### Pod maską
+
+- `core_rezyser.zastosuj_akcenty_uniwersalne`: zamiast statycznego `_AKCENT_FUNCS` sprawdza `wariant_po_id(TRYB_REZYSER, jezyk, znorm)` z `kategoria=='akcent'` i woła `zastosuj_reguly_fonetyczne` wprost. **Zmiana zachowania (świadoma):** akcent bez YAML w języku projektu spada teraz do reguł ad-hoc z Księgi Świata (`'w' na 'v'`), zamiast — jak dawny whitelist scalający wszystkie języki — markować fragment jako zmodyfikowany mimo braku reguł fonetycznych.
+- Usunięte: `odswiez_rezysera.py` (cały plik), generowany blok `akcent_*` + markery w `core_poliglota.py`, martwy przycisk + handler + `_pokaz_raport_dialog` w `main.py` (−640 linii w commicie kodu).
+- `manager_regul_szablony.py`: prompty dla agenta AI nie każą już uruchamiać generatora (zastąpione walidacją `REZYSER_VALIDATE_ZAMIANY=1` + „akcent wykrywany dynamicznie po restarcie").
+- i18n ×9: usunięte klucze `home.btn_odswiez_*` (3) i `home.raport_*` (~10); `manager.btn_odswiez_*` („Odśwież drzewo") to inny, żywy przycisk — nietknięty.
+- Docs ×9: usunięty bullet „(NOWOŚĆ) przycisk…" z manuala, naprawiony placeholder `{home.btn_odswiez_label}` w akapicie „praktyczne zastosowanie / dodaj szwedzki akcent" (po usunięciu klucza zostałby surowym literałem → walidator docs eskaluje do FATAL), krok-5 w `dictionaries.yaml` (6 języków) bez kliknięcia przycisku.
+
+### Co nie weszło
+
+- Sam mechanizm dynamiczny obsługuje już ewentualny 10. język zero-touch; nie dotykano reguł fonetycznych ani kontraktu LLM.
+
+### Walidacja
+
+- Izolowane testy ze źródła (bez MainLoop): znany akcent (islandzki) daje wynik bit-w-bit identyczny z bezpośrednim `zastosuj_reguly_fonetyczne` (`Witaj → Vitaj`); nieznany akcent + reguły ad-hoc → poprawny fallback (`Walka → Wolko`).
+- `py_compile` + import 7 modułów; `HomePanel` konstruuje się bez przycisku; `i18n` ładuje wszystkie 9 paczek.
+- `generuj_dokumentacje.py --waliduj` → exit 0, zero nierozwiniętych placeholderów; leak-sweep szablonów i wygenerowanych `docs/*.txt` → 0 martwych odwołań.
 
 ---
 

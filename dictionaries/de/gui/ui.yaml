@@ -206,26 +206,10 @@ home:
     Möchten Sie einen neuen Akzent, eine Chiffre oder einen Regisseur-Modus hinzufügen?
     Öffnen Sie den Regelmanager (Strg+4) – dort finden Sie den Baum aller YAML-Dateien in dictionaries/ sowie einen Ersteller, der automatisch eine Vorlage erstellt oder einen Prompt für den Chatbot generiert.
 
-    Nach dem Hinzufügen eines neuen AKZENTS klicken Sie zusätzlich auf die Schaltfläche „Regisseur-Akzente aus YAML aktualisieren“ unten – dies ermöglicht es dem Regisseur-Modus, den neuen Akzent zu erkennen (Polyglott erkennt YAMLs automatisch). Nach der Aktualisierung starten Sie die Anwendung neu.
+    Nach dem Hinzufügen einer neuen Datei starten Sie die Anwendung neu – der Regisseur-Modus und Polyglott erkennen alle YAML-Dateien in dictionaries/ automatisch.
   btn_open_manager_label: "📚 Öffne Regelmanager"
   btn_open_manager_name: "Schaltfläche Öffne Regelmanager"
   btn_open_manager_tooltip: "Wechselt zum Regelmanager – YAML-Dateiexplorer und Ersteller neuer Akzente / Modi / Chiffren (Strg+4)."
-  btn_odswiez_label: "🔄 Regisseur-Akzente aus YAML aktualisieren"
-  btn_odswiez_name: "Schaltfläche Regisseur-Akzente aus YAML aktualisieren"
-  btn_odswiez_tooltip: "Scannt dictionaries/*/akcenty/ und regeneriert akcent_*-Wrapper in core_poliglota.py und core_rezyser.py. Nach erfolgreicher Aktualisierung muss die Anwendung neu gestartet werden."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Fehler beim Aktualisieren der Akzente"
-  raport_niespodziewany_tresc: "Ein unerwarteter Fehler ist aufgetreten:\n{tresc_bledu}"
-  raport_tytul_blad: "Regisseur-Akzente aktualisieren – FEHLER"
-  raport_header_blad: "⛔ Generator hat Fehler festgestellt – siehe Protokoll unten."
-  raport_tytul_sukces: "Regisseur-Akzente aktualisieren – Erfolg"
-  raport_header_sukces: |-
-    ✅ Dateien für {liczba_akcentow} Akzente wurden modifiziert.
-    Um die neuen Akzente im Regisseur-Modus anzuzeigen, starten Sie die Anwendung neu.
-  raport_tytul_bez_zmian: "Regisseur-Akzente aktualisieren – Keine Änderungen"
-  raport_header_bez_zmian: "ℹ️ Keine Änderungen. {liczba_akcentow} Akzente erkannt – Wrapper sind bereits aktuell."
-  raport_lbl_log: "Vollständiges Protokoll (Strg+A, Strg+C kopiert in die Zwischenablage):"
-  raport_log_name: "Protokoll des Akzentgenerators des Regisseurs"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -550,7 +534,7 @@ rezyser:
   brak_przepisow_tytul: "Keine Rezepte"
   brak_przepisow_tresc: |-
     Kein Arbeitsmodus konnte aus YAML geladen werden.
-    Führen Sie odswiez_rezysera.py aus oder überprüfen Sie dictionaries/pl/rezyser/.
+    Überprüfen Sie die Dateien in dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Geben Sie den Projektdateinamen an, bevor Sie Text zum Speichern generieren.
     (Der Modus '{tytul_trybu}' erfordert einen Dateinamen.)
@@ -883,8 +867,8 @@ manager:
   btn_odswiez_name: "Schaltfläche Aktualisieren Sie den Dateibaum"
   btn_odswiez_tooltip: "Lädt den Baum von der Festplatte neu – verwenden Sie dies, wenn Sie Dateien manuell im Explorer geändert haben oder nach dem Speichern im Texteditor."
   info_stopka: |-
-    Nach dem Erstellen eines neuen Akzents kehren Sie zur Startseite zurück
-    und klicken Sie auf „Regisseur-Akzente aus YAML aktualisieren".
+    Nach dem Erstellen einer neuen Datei starten Sie die Anwendung neu –
+    die neuen Regeln werden automatisch erkannt.
   # Otwarcie w edytorze
   plik_wne_tytul: "Datei kann nicht geöffnet werden"
   plik_wne_tresc: |-
@@ -930,7 +914,7 @@ manager:
   usun_blad: "Datei konnte nicht gelöscht werden:\n{tresc_bledu}"
   usun_ok_tytul: "Gelöscht"
   usun_ok_tresc: |-
-    Datei gelöscht. Denken Sie daran, nach dem Löschen eines Akzents auf der Startseite auf „Regisseur-Akzente aus YAML aktualisieren" zu klicken.
+    Datei gelöscht. Damit die Änderung im Regisseur-Modus wirksam wird, starten Sie die Anwendung neu.
   # Kreator
   kreator_tytul: "Neue Regeldatei – Assistent"
   kreator_co_utworzyc: "Was möchten Sie erstellen?"

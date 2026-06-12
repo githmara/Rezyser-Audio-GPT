@@ -205,26 +205,10 @@ home:
     ¿Quieres añadir un nuevo acento, cifrado o modo de Director?
     Abre el Gestor de Reglas (Ctrl+4) – encontrarás allí un árbol de todos los archivos YAML en dictionaries/ y un creador que generará automáticamente una plantilla o un prompt para el chatbot de IA.
 
-    Después de añadir un nuevo ACENTO, haz clic adicionalmente en el botón "Actualizar acentos de Director desde YAML" a continuación – esto permitirá al Modo de Director notar el nuevo acento (Políglota detecta los YAML automáticamente). Después de actualizar, reinicia la aplicación.
+    Después de añadir un nuevo archivo, reinicia la aplicación – el Modo de Director y Políglota detectan automáticamente todos los archivos YAML en dictionaries/.
   btn_open_manager_label: "📚 Abrir Gestor de Reglas"
   btn_open_manager_name: "Botón Abrir Gestor de Reglas"
   btn_open_manager_tooltip: "Va al Gestor de Reglas – explorador de archivos YAML y creador de nuevos acentos / modos / cifrados (Ctrl+4)."
-  btn_odswiez_label: "🔄 Actualizar acentos de Director desde YAML"
-  btn_odswiez_name: "Botón Actualizar acentos de Director desde YAML"
-  btn_odswiez_tooltip: "Escanea dictionaries/*/akcenty/ y regenera los envoltorios akcent_* en core_poliglota.py y core_rezyser.py. Después de una actualización exitosa, es necesario reiniciar la aplicación."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Error al actualizar acentos"
-  raport_niespodziewany_tresc: "Se produjo un error inesperado:\n{tresc_bledu}"
-  raport_tytul_blad: "Actualizar acentos de Director – ERROR"
-  raport_header_blad: "⛔ El generador encontró errores – ver log a continuación."
-  raport_tytul_sukces: "Actualizar acentos de Director – Éxito"
-  raport_header_sukces: |-
-    ✅ Archivos modificados para {liczba_akcentow} acentos.
-    Para que los nuevos acentos aparezcan en el Modo de Director, reinicia la aplicación.
-  raport_tytul_bez_zmian: "Actualizar acentos de Director – Sin cambios"
-  raport_header_bez_zmian: "ℹ️ Sin cambios. Se detectaron {liczba_akcentow} acentos – los envoltorios ya están actualizados."
-  raport_lbl_log: "Log completo (Ctrl+A, Ctrl+C copia al portapapeles):"
-  raport_log_name: "Log del generador de acentos de Director"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -549,7 +533,7 @@ rezyser:
   brak_przepisow_tytul: "Faltan recetas"
   brak_przepisow_tresc: |-
     No se pudo cargar ningún modo de trabajo desde YAML.
-    Ejecuta odswiez_rezysera.py o verifica dictionaries/pl/rezyser/.
+    Verifica los archivos en dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Proporciona un nombre de archivo de proyecto antes de generar texto para guardar.
     (El modo '{tytul_trybu}' requiere un nombre de archivo.)
@@ -882,8 +866,8 @@ manager:
   btn_odswiez_name: "Botón Actualizar árbol de archivos"
   btn_odswiez_tooltip: "Recarga el árbol desde el disco – úsalo si cambiaste archivos manualmente en el Explorador o después de guardar en el editor de texto."
   info_stopka: |-
-    Después de crear un nuevo acento, regresa a la Página principal
-    y haz clic en "Actualizar acentos del Director desde YAML".
+    Después de crear un nuevo archivo, reinicia la aplicación –
+    las nuevas reglas se detectarán automáticamente.
   # Otwarcie w edytorze
   plik_wne_tytul: "No se puede abrir el archivo"
   plik_wne_tresc: |-
@@ -929,7 +913,7 @@ manager:
   usun_blad: "No se pudo eliminar el archivo:\n{tresc_bledu}"
   usun_ok_tytul: "Eliminado"
   usun_ok_tresc: |-
-    Archivo eliminado. Recuerda, después de eliminar un acento, hacer clic en "Actualizar acentos del Director desde YAML" en la Página principal.
+    Archivo eliminado. Para que el cambio surta efecto en el Modo de Director, reinicia la aplicación.
   # Kreator
   kreator_tytul: "Nuevo archivo de reglas – asistente"
   kreator_co_utworzyc: "¿Qué deseas crear?"

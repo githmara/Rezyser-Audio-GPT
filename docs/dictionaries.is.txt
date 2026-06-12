@@ -143,7 +143,7 @@ Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á því að velja þann
       - "iso" — tveggja stafa tungumálakóði, fyrir sænsku "sv"
 4. Aðlagaðu listann "skipti" að sænskri hljóðfræði (t.d. bættu við "å → o",
    "ö → ö", fjarlægðu eða breyttu þeim sem eru sértæk fyrir finnsku).
-5. Vistaðu, farðu aftur á Heimaskjáinn, smelltu á "🔄 Endurnýja hreima Leikstjóra úr YAML" og endurræstu forritið. Nýja sænska mun birtast í hreimavalmynd Fjöltyngis (og ef þú bætir við í Heimsbók persónu merkimiðanum "[Marek] - hefur sænskan hreim", þá mun Leikstjórinn einnig þekkja það sjálfkrafa og nota það í samræðum hennar).
+5. Vistaðu og endurræstu forritið. Nýja sænska mun birtast í hreimavalmynd Fjöltyngis (og ef þú bætir við í Heimsbók persónu merkimiðanum "[Marek] - hefur sænskan hreim", þá mun Leikstjórinn einnig þekkja það sjálfkrafa og nota það í samræðum hennar).
 
 
 POFI 3 — að skapa eitthvað alveg nýtt

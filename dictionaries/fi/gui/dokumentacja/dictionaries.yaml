@@ -245,8 +245,7 @@ tresc:
     4. Säädä "korvaukset" -listaa ruotsalaiselle foneettisuudelle (esim.
        lisää "å → o", "ö → ö", poista tai muuta ne, jotka ovat erityisiä
        suomelle).
-    5. Tallenna, palaa Pääsivulle, klikkaa "🔄 Päivitä Ohjaajan aksentit
-       YAML:stä" ja käynnistä sovellus uudelleen. Uusi ruotsalainen ilmestyy
+    5. Tallenna ja käynnistä sovellus uudelleen. Uusi ruotsalainen ilmestyy
        Polyglootin aksenttivalikkoon (ja jos lisäät Maailmankirjaan hahmon
        tagilla "[Marek] - puhuu ruotsalaisella aksentilla", Ohjaaja tunnistaa
        sen automaattisesti ja soveltaa sitä hänen dialogeihinsa).

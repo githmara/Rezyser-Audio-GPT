@@ -29,7 +29,7 @@
 #     bo `main.menu.*` w ui.yaml ma tylko `&Litera\tCtrl+N` bez ozdobników).
 #   * Etykiety „żywych" przycisków, które user realnie klika w sekcjach
 #     instrukcyjnych (KROK 3-7b, sekcja A11y NVDA): {home.heading_system_check},
-#     {home.btn_generate}, {home.btn_odswiez_label}, {rezyser.btn_wyslij_label},
+#     {home.btn_generate}, {rezyser.btn_wyslij_label},
 #     {rezyser.btn_wczytaj_label}, {rezyser.btn_zapisz_ksiege_label},
 #     {rezyser.btn_prompt_architekta_label}, {rezyser.btn_prolog_label},
 #     {rezyser.btn_epilog_label}, {rezyser.struktura_heading},
@@ -499,7 +499,7 @@ tresc:
     - Przycisk „{manager.btn_duplikuj_label}" — najszybsza droga do nowego akcentu: bierzesz istniejący plik (np. finski.yaml), podajesz nową nazwę (np. szwedzki), Manager tworzy kopię z komentarzem „zmień pola etykieta i opis" i otwiera ją w edytorze.
     - Przycisk „{manager.btn_nowy_label}" — kreator z wyborem typu (akcent, szyfr, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny). Dla zwykłych przypadków (akcent, szyfr typu „zamiana liter") kreator tworzy gotowy do edycji szablon YAML. Dla przypadków wymagających programisty (nowy język bazowy, algorytm typu „mieszanie środka słów") kreator generuje prompt dla chatbota AI — wklejasz do ChatGPT, dostajesz gotowy plik YAML, zapisujesz w dictionaries/ i gotowe.
 
-    Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć na Stronę główną, kliknij „{home.btn_odswiez_label}" i uruchom aplikację ponownie. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.
+    Praktyczne zastosowanie: Chcesz dodać akcent szwedzki? Otwórz Manager Reguł, wybierz dictionaries/pl/akcenty/finski.yaml, kliknij „Duplikuj", nazwij plik szwedzki, zmień w nim pole etykieta na "Szwedzki (Alva / Oskar)", kod iso na sv, zmień kilka reguł zamiany i zapisz. Wróć na Stronę główną i uruchom aplikację ponownie. Nowy akcent pojawi się w menu Poligloty (w Trybie Reżysera) i — jeśli dodasz go do Księgi Świata postaci („[Marek] - ma akcent szwedzki") — również w automatycznym wykrywaniu akcentów Reżysera.
 
     Gdzie szukać dalszej dokumentacji folderu dictionaries/:
     - Plik `docs/dictionaries.pl.txt` (dostępny w paczce dla end-userów z zakładki Releases) — krótki, prostym językiem opis każdego podfolderu, 6 gotowych szyfrów, 8 gotowych akcentów oraz pomysły, co można zrobić samodzielnie, bez znajomości Pythona.
@@ -685,8 +685,6 @@ tresc:
     - Uwaga o „ź": W rosyjskim nie ma dokładnego odpowiednika polskiego „ź", więc ten znak normalizujemy do „ж" — podobnie jak „ż". Część dialektów północnorosyjskich i białoruski wymawia „ź" bliżej „зь", ale z perspektywy syntezatora mowy różnica jest pomijalna. Gdyby lingwista uznał, że preferuje „зь", może samodzielnie podmienić tę jedną regułę w pliku `dictionaries/pl/akcenty/rosyjski.yaml` — silnik ładuje YAML-e dynamicznie, więc nie wymaga to przekompilowania aplikacji.
 
     - Rozszerzony pasek nawigacji i menu Narzędzia (ZMIANA). Pasek ma teraz czwarty przycisk — Manager Reguł — a menu „Narzędzia" obsługuje nowy skrót Ctrl+4. Dotychczasowe skróty (Ctrl+0 Strona główna, Ctrl+1 Reżyser, Ctrl+2 Poliglota, Ctrl+3 Konwerter) pozostają bez zmian.
-
-    - Przycisk „Odśwież akcenty Reżysera z YAML" na Stronie głównej (NOWOŚĆ). Po dodaniu nowego akcentu przez Manager Reguł (lub ręcznej edycji pliku YAML) kliknięcie tego przycisku przeładuje wrappery akcent_* w silniku Poligloty i Reżysera, tak by nowy akcent był widoczny w menu oraz w automatycznym wykrywaniu akcentów na podstawie tagów postaci w Księdze Świata. Poliglota wykrywa YAML-e automatycznie (bez odświeżania), ale Reżyser potrzebuje regeneracji wrapperów — zwykle po odświeżeniu trzeba jeszcze uruchomić aplikację ponownie.
 
     Funkcje zachowane bez zmian z wersji 12.0
 

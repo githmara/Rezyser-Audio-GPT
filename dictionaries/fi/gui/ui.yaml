@@ -206,26 +206,10 @@ home:
     Haluatko lisätä uuden aksentin, salauksen tai ohjaustilan?
     Avaa Sääntöjen Hallinta (Ctrl+4) – löydät sieltä kaikki YAML-tiedostot dictionaries/-hakemistossa sekä luojan, joka luo mallin tai generoi kehotuksen AI-chatbotille.
 
-    Kun olet lisännyt uuden AKSENTIN, napsauta lisäksi alla olevaa "Päivitä Ohjaajan aksentit YAML:stä" -painiketta – tämä antaa Ohjaustilalle mahdollisuuden havaita uusi aksentti (Polyglootti havaitsee YAML-tiedostot automaattisesti). Päivityksen jälkeen käynnistä sovellus uudelleen.
+    Kun olet lisännyt uuden tiedoston, käynnistä sovellus uudelleen – Ohjaustila ja Polyglootti havaitsevat kaikki dictionaries/-hakemiston YAML-tiedostot automaattisesti.
   btn_open_manager_label: "📚 Avaa Sääntöjen Hallinta"
   btn_open_manager_name: "Avaa Sääntöjen Hallinta -painike"
   btn_open_manager_tooltip: "Siirtyy Sääntöjen Hallintaan – YAML-tiedostojen tutkija ja uusien aksenttien / tilojen / salausten luoja (Ctrl+4)."
-  btn_odswiez_label: "🔄 Päivitä Ohjaajan aksentit YAML:stä"
-  btn_odswiez_name: "Päivitä Ohjaajan aksentit YAML:stä -painike"
-  btn_odswiez_tooltip: "Skannaa dictionaries/*/akcenty/ ja regeneroi akcent_* -kääreet core_poliglota.py:ssä ja core_rezyser.py:ssä. Onnistuneen päivityksen jälkeen sovellus on käynnistettävä uudelleen."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Aksenttien päivitysvirhe"
-  raport_niespodziewany_tresc: "Odottamaton virhe tapahtui:\n{tresc_bledu}"
-  raport_tytul_blad: "Päivitä Ohjaajan aksentit – VIRHE"
-  raport_header_blad: "⛔ Generaattori kohtasi virheitä – katso loki alla."
-  raport_tytul_sukces: "Päivitä Ohjaajan aksentit – Onnistui"
-  raport_header_sukces: |-
-    ✅ Muokattu tiedostoja {liczba_akcentow} aksentille.
-    Jotta uudet aksentit näkyvät Ohjaustilassa, käynnistä sovellus uudelleen.
-  raport_tytul_bez_zmian: "Päivitä Ohjaajan aksentit – Ei muutoksia"
-  raport_header_bez_zmian: "ℹ️ Ei muutoksia. Havaittu {liczba_akcentow} aksenttia – kääreet ovat jo ajan tasalla."
-  raport_lbl_log: "Täysi loki (Ctrl+A, Ctrl+C kopioi leikepöydälle):"
-  raport_log_name: "Ohjaajan aksenttigeneraattorin loki"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -550,7 +534,7 @@ rezyser:
   brak_przepisow_tytul: "Ei reseptejä"
   brak_przepisow_tresc: |-
     Yhtään toimintatilaa ei voitu ladata YAML:stä.
-    Suorita odswiez_rezysera.py tai tarkista dictionaries/pl/rezyser/.
+    Tarkista tiedostot hakemistossa dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Anna projektitiedoston nimi ennen tekstin luomista tallennettavaksi.
     (Tila '{tytul_trybu}' vaatii tiedoston nimen.)
@@ -881,8 +865,8 @@ manager:
   btn_odswiez_name: "Painike Päivitä tiedostopuu"
   btn_odswiez_tooltip: "Lataa puu uudelleen levyltä – käytä, jos muutit tiedostoja manuaalisesti Explorerissa tai tallennuksen jälkeen tekstieditorissa."
   info_stopka: |-
-    Kun olet luonut uuden aksentin, palaa etusivulle
-    ja napsauta „Päivitä ohjaajan aksentit YAML:stä".
+    Kun olet luonut uuden tiedoston, käynnistä sovellus uudelleen –
+    uudet säännöt havaitaan automaattisesti.
   # Otwarcie w edytorze
   plik_wne_tytul: "Tiedostoa ei voi avata"
   plik_wne_tresc: |-
@@ -928,7 +912,7 @@ manager:
   usun_blad: "Tiedoston poistaminen epäonnistui:\n{tresc_bledu}"
   usun_ok_tytul: "Poistettu"
   usun_ok_tresc: |-
-    Tiedosto poistettu. Muista, että aksentin poistamisen jälkeen napsauta „Päivitä ohjaajan aksentit YAML:stä" etusivulla.
+    Tiedosto poistettu. Jotta muutos tulee voimaan Ohjaustilassa, käynnistä sovellus uudelleen.
   # Kreator
   kreator_tytul: "Uusi sääntötiedosto – luontityökalu"
   kreator_co_utworzyc: "Mitä haluat luoda?"

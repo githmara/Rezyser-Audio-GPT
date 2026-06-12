@@ -206,26 +206,10 @@ home:
     Vous voulez ajouter un nouvel accent, chiffrement ou mode Réalisateur ?
     Ouvrez le Gestionnaire de Règles (Ctrl+4) — vous y trouverez l'arborescence de tous les fichiers YAML de dictionaries/ et un créateur qui crée automatiquement un modèle ou génère un prompt pour le chatbot IA.
 
-    Après avoir ajouté un nouvel ACCENT, cliquez en plus sur le bouton « Actualiser les accents Réalisateur depuis YAML » ci-dessous — cela permettra au Mode Réalisateur de détecter le nouvel accent (le Polyglotte détecte automatiquement les YAML). Après l'actualisation, redémarrez l'application.
+    Après avoir ajouté un nouveau fichier, redémarrez l'application – le Mode Réalisateur et le Polyglotte détectent automatiquement tous les fichiers YAML de dictionaries/.
   btn_open_manager_label: "📚 Ouvrir le Gestionnaire de Règles"
   btn_open_manager_name: "Bouton Ouvrir le Gestionnaire de Règles"
   btn_open_manager_tooltip: "Passe au Gestionnaire de Règles — explorateur de fichiers YAML et créateur de nouveaux accents / modes / chiffrements (Ctrl+4)."
-  btn_odswiez_label: "🔄 Actualiser les accents Réalisateur depuis YAML"
-  btn_odswiez_name: "Bouton Actualiser les accents Réalisateur depuis YAML"
-  btn_odswiez_tooltip: "Scanne dictionaries/*/akcenty/ et regénère les wrappers akcent_* dans core_poliglota.py et core_rezyser.py. Après une actualisation réussie, il faut redémarrer l'application."
-  # Raport po kliknięciu „Odśwież akcenty Reżysera z YAML"
-  raport_niespodziewany_tytul: "Erreur de mise à jour des accents"
-  raport_niespodziewany_tresc: "Une erreur inattendue s'est produite :\n{tresc_bledu}"
-  raport_tytul_blad: "Actualiser les accents Réalisateur — ERREUR"
-  raport_header_blad: "⛔ Le générateur a rencontré des erreurs — voir le journal ci-dessous."
-  raport_tytul_sukces: "Actualiser les accents Réalisateur — Succès"
-  raport_header_sukces: |-
-    ✅ Fichiers modifiés pour {liczba_akcentow} accents.
-    Pour faire apparaître les nouveaux accents en Mode Réalisateur, redémarrez l'application.
-  raport_tytul_bez_zmian: "Actualiser les accents Réalisateur — Aucune modification"
-  raport_header_bez_zmian: "ℹ️ Aucune modification. {liczba_akcentow} accents détectés — les wrappers sont déjà à jour."
-  raport_lbl_log: "Journal complet (Ctrl+A, Ctrl+C copie dans le presse-papiers) :"
-  raport_log_name: "Journal du générateur d'accents Réalisateur"
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -550,7 +534,7 @@ rezyser:
   brak_przepisow_tytul: "Aucune recette"
   brak_przepisow_tresc: |-
     Impossible de charger un mode de travail depuis YAML.
-    Exécutez odswiez_rezysera.py ou vérifiez dictionaries/pl/rezyser/.
+    Vérifiez les fichiers dans dictionaries/pl/rezyser/.
   brak_nazwy_wyslanie_tresc: |-
     Indiquez un nom pour le fichier de projet avant de générer le texte à sauvegarder.
     (Le mode '{tytul_trybu}' nécessite un nom de fichier.)
@@ -876,8 +860,8 @@ manager:
   btn_odswiez_name: "Bouton Actualiser l'arborescence des fichiers"
   btn_odswiez_tooltip: "Recharge l'arborescence depuis le disque — utilisez si vous avez modifié les fichiers manuellement dans l'Explorateur ou après une sauvegarde dans l'éditeur de texte."
   info_stopka: |-
-    Après avoir créé un nouvel accent, retournez à la Page d'accueil
-    et cliquez sur « Actualiser les accents Réalisateur depuis YAML ».
+    Après avoir créé un nouveau fichier, redémarrez l'application –
+    les nouvelles règles seront détectées automatiquement.
   # Otwarcie w edytorze
   plik_wne_tytul: "Impossible d'ouvrir le fichier"
   plik_wne_tresc: |-
@@ -923,7 +907,7 @@ manager:
   usun_blad: "Impossible de supprimer le fichier :\n{tresc_bledu}"
   usun_ok_tytul: "Supprimé"
   usun_ok_tresc: |-
-    Fichier supprimé. N'oubliez pas de cliquer sur « Actualiser les accents Réalisateur depuis YAML » sur la Page d'accueil après avoir supprimé un accent.
+    Fichier supprimé. Pour que la modification s'applique au Mode Réalisateur, redémarrez l'application.
   # Kreator
   kreator_tytul: "Nouveau fichier de règles — créateur"
   kreator_co_utworzyc: "Que voulez-vous créer ?"
