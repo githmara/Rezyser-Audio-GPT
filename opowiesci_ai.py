@@ -113,10 +113,11 @@ SCHEMA_TURA: dict[str, Any] = {
             },
         },
         "postacie_aktywne": {
-            # Format kompatybilny z parserem Księgi Świata Reżysera
-            # (`core_rezyser.py:199` — regex `[Imię: cechy]`). Faza 3
-            # zbuduje z tej tablicy plik `skrypty/[gra].md` przez
-            # idempotentny rebuild — output Opowieści = wejście Reżysera.
+            # Lista postaci obecnych w bieżącej turze — część stanu gry
+            # (snapshot LLM, persystowana w `.game.json`). v17.4 (P6A):
+            # dawniej budowano z niej `.md` „Księgę Świata" jako most do
+            # Reżysera; most usunięty (nigdy nie powstała ścieżka wczytania),
+            # więc to pole służy już tylko jako pamięć postaci między turami.
             "type": "array",
             "items": {
                 "type": "object",

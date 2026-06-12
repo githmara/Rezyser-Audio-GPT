@@ -60,7 +60,7 @@ tresc:
 
     1. Escribe el nombre del juego en la barra "{opowiesci.lbl_nazwa_gry}" (por ejemplo, "mi_aventura_1") — bajo este nombre se guardarán los archivos de narración, estado y registro.
     2. Elige el modo (Libre/Elecciones/Mal Menor).
-    3. Haz clic en "{opowiesci.btn_nowa_gra_label}". La aplicación creará 3 archivos: estado del juego (.game.json), un Libro del Mundo vacío (.md) y metadatos del modo (.mode). El archivo de narración (.txt) se generará después del primer turno.
+    3. Haz clic en "{opowiesci.btn_nowa_gra_label}". La aplicación creará 2 archivos: estado del juego (.game.json) y metadatos del modo (.mode). El archivo de narración (.txt) se generará después del primer turno.
     4. En el campo "{opowiesci.lbl_akcja}" en la parte inferior del panel, ingresa la primera acción, por ejemplo, "me despierto en una habitación desconocida". Haz clic en "{opowiesci.btn_wyslij_label}". El motor narrativo abrirá el mundo basado en tu acción — descripción de la habitación, sonidos, personajes, primeras decisiones.
     5. Cada turno se guardará automáticamente — puedes cerrar la aplicación en cualquier momento y cargar el juego más tarde con el botón "{opowiesci.btn_wczytaj_label}".
   krok_4_zasady_swiata: |
@@ -70,7 +70,7 @@ tresc:
 
     Tres usos típicos de las reglas del mundo:
 
-    REGLAS FONÉTICAS — controlan la pronunciación de los nombres de los personajes por TTS (Vocalizer, ElevenLabs). Ejemplo: "El nombre Joanna siempre se pronuncia fuerte, polaco [dż]; nunca suave [j]." El motor insertará esta variante en la narración desde el siguiente turno, y el personaje Joanna en el Libro del Mundo mantendrá el sonido deseado. También es un puente natural hacia los acentos del Director — si después de terminar el juego cargas el Libro en el panel del Director (PASO 9 más abajo), la regla fonética "pasará" con el juego como una característica del personaje.
+    REGLAS FONÉTICAS — controlan la pronunciación de los nombres de los personajes por TTS (Vocalizer, ElevenLabs). Ejemplo: "El nombre Joanna siempre se pronuncia fuerte, polaco [dż]; nunca suave [j]." El motor insertará esta variante en la narración desde el siguiente turno, de modo que el nombre conservará el sonido deseado en cada escena siguiente de ese juego.
 
     REGLAS MECÁNICAS — describen las "leyes de la física" de tu mundo que el LLM debe seguir. Ejemplo: "En este mundo, la magia solo funciona de noche; durante el día los personajes son personas normales." El motor no inventará hechizos al mediodía, incluso si la acción de tu turno lo requiere — en su lugar, propondrá una alternativa o te guiará hacia el anochecer.
 
@@ -92,7 +92,7 @@ tresc:
 
     /wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo usa los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo separado, NO se añade a la narración ni se guarda en el archivo de audiolibro. Ejemplo: "/wizualizuj cómo luce el guardia" o "/wizualizuj el olor de la cafetería".
 
-    /odswiez, /refresh — actualiza la memoria interna a partir del archivo de narración tras editarlo manualmente (desde la v15.5). Cuando abres opowiesci/<nazwa>.txt en el editor y, por ejemplo, corriges una errata o recortas un párrafo sobrante, este comando (o el botón „{opowiesci.btn_odswiez_z_dysku_label}") sincroniza la cola fresca con el contexto del motor — sin un reinicio completo ni recargar el juego. Si ya existe un resumen de los turnos anteriores, queda intacto, de modo que el siguiente turno y el siguiente resumen no se generan sobre datos desactualizados. ATENCIÓN: el estado del juego (personajes, ubicación, inventario, hilos) del archivo .game.json NO se actualiza — si la edición cambió hechos del mundo, el siguiente turno puede desviarse de ellos.
+    /odswiez, /refresh — actualiza la memoria interna a partir del archivo de narración tras editarlo manualmente (desde la v15.5). Cuando abres opowiesci/<nazwa>.txt en el editor y, por ejemplo, corriges una errata o recortas un párrafo sobrante, este comando sincroniza la cola fresca con el contexto del motor — sin un reinicio completo ni recargar el juego. Si ya existe un resumen de los turnos anteriores, queda intacto, de modo que el siguiente turno y el siguiente resumen no se generan sobre datos desactualizados. ATENCIÓN: el estado del juego (personajes, ubicación, inventario, hilos) del archivo .game.json NO se actualiza — si la edición cambió hechos del mundo, el siguiente turno puede desviarse de ellos. (El botón equivalente „{opowiesci.btn_odswiez_z_dysku_label}" es una opción técnica, oculta por defecto — el comando siempre funciona.)
 
     /pomoc, /help — muestra una ventana de diálogo con una lista de todos los comandos disponibles. El diálogo es de solo lectura y amigable con NVDA — el campo de texto recibe el foco automáticamente, el lector de pantalla lee toda la lista de inmediato sin necesidad de navegación.
 
@@ -100,17 +100,15 @@ tresc:
   krok_6_pliki_gry: |
     PASO 6: Archivos del juego — dónde encontrarás tus datos
 
-    Cada juego produce cinco archivos, cada uno en una carpeta diferente, con roles distintos:
+    Cada juego produce cuatro archivos, cada uno en una carpeta diferente, con roles distintos:
 
     opowiesci/<nazwa>.txt — narrativa completa lista para ser escuchada como audiolibro. Se puede abrir en el Bloc de notas o cargar en el Arquitecto de Audiolibros (Convertidor) y generar un archivo Word con capítulos o un cronometraje para ElevenLabs.
-
-    opowiesci/<nazwa>.md — Libro del Mundo de los personajes en formato [Nombre: características], regenerado después de cada turno. ¡Formato compatible con el analizador del Director! Puedes cargar este archivo en el panel del Director (Archivo → Cargar) y obtendrás acentos nativos de los personajes en la narrativa clásica TTS — un puente entre los dos módulos principales de la aplicación.
 
     runtime/opowiesci/<nazwa>.game.json — estado completo del juego: nombre, modo, personajes activos, ubicación, equipamiento, tramas abiertas, últimos 6 turnos en forma resumida. Es la fuente de verdad para cargar el juego — sin este archivo no se puede continuar.
 
     runtime/opowiesci/<nazwa>.story.jsonl — registro bruto de cada turno (solicitud del jugador + respuesta del modelo en JSON). El archivo no es necesario para jugar — se utiliza para depuración o análisis posterior (por ejemplo, estadísticas de cuántos turnos duró la aventura, qué tramas introdujo el LLM).
 
-    runtime/skrypty/<nazwa>.mode — metadatos del número de modo (3=Libre, 4=Elecciones, 5=Mal menor). Archivo compartido con el Director, pero la numeración no colisiona (el Director usa 0-2).
+    runtime/opowiesci/<nazwa>.mode — metadatos del número de modo (3=Libre, 4=Elecciones, 5=Mal menor). Desde v17.4 en su propia carpeta de Historias. Antes residía en runtime/skrypty/ junto con el Director — si una partida y un proyecto del Director tenían el mismo nombre, el guardado de un módulo podía sobrescribir silenciosamente el modo del otro; ahora los espacios de nombres están separados, y los archivos antiguos se migran una sola vez al cargar.
   krok_7_pamiec_modelu: |
     PASO 7: Indicador de memoria del modelo — por qué los turnos en los juegos antiguos no requieren tu intervención manual
 
@@ -130,24 +128,12 @@ tresc:
     Después de 150 turnos en un juego, el motor narrativo insertará UNA vez un "Cinematic Meta Warning" — un interludio dramático meta-narrativo. Aparecerá en un diálogo separado con el sonido de una campana, dirigiéndose directamente a ti en segunda persona, con un resumen de logros y una advertencia sobre la importancia de las decisiones que tomes.
 
     El Cinematic Warning NO es parte de la narración del audiolibro — el motor de filtrado .txt automáticamente elimina su contenido (marcado con ⚠️🚨⚠️) para que no escuches un meta-comentario sobre tu propio juego durante la reproducción del audiolibro. El contenido solo se registra en el archivo .story.jsonl (para reflexión o como recuerdo) y en el diálogo en la interfaz gráfica, donde puedes leerlo una vez y continuar.
-  krok_9_most_do_rezysera: |
-    PASO 9: Puente al Director — utiliza el Libro del Mundo creado en Historias
-
-    El archivo opowiesci/<nazwa>.md generado durante el juego contiene el Libro del Mundo con los personajes que aparecieron en la narración, junto con sus características, acentos y personalidad. El formato es exactamente el que requiere el parser del Director — [Nombre: características con descripción del acento].
-
-    Qué puedes hacer con esto:
-
-    1. Al finalizar el juego, abre el panel "{main.btn.rezyser}" (Ctrl+1).
-    2. Carga el proyecto con el mismo nombre — el Director cargará el archivo .txt como historia y el .md como el Libro del Mundo.
-    3. Ahora obtendrás una narración clásica del Director (escenas largas y estructuradas con actos y capítulos) con los acentos nativos de los personajes que te gustaron en Historias. El Guardián Carmel del refugio hablando en frases cortas, la inquisidora Rosanna con su acento oriental melodioso — todas las características preservadas.
-
-    Este es un puente unidireccional: Historias produce el material, el Director lo formatea. No es posible lo contrario — el Director no carga juegos de Historias como un estado interactivo.
   krok_10_dostepnosc_nvda: |
-    PASO 10: Accesibilidad (NVDA y lectores de pantalla) — diseñado desde el principio
+    PASO 9: Accesibilidad (NVDA y lectores de pantalla) — diseñado desde el principio
 
     Todo el módulo de Historias ha sido optimizado para jugadores ciegos. Lo que específicamente hicimos:
 
-    CAMPO ÚLTIMO TURNO — es un wx.TextCtrl separado de solo lectura, multilinea (~140 px de altura) SOBRE la narrativa completa. Después de cada turno, el campo se reemplaza con un fragmento nuevo (encabezado "--- Turno N ---" + contenido de la narrativa). NVDA lo lee inmediatamente después de enfocar (autoenfoque tras el éxito del turno), sin tener que navegar por cientos de líneas de la historia completa. Después de cargar un juego guardado, el campo muestra un RESUMEN del último turno guardado (máx. 400 caracteres del búfer `últimos_turnos`) con un prefijo informando que la narrativa completa está en el campo de abajo.
+    CAMPO ÚLTIMO TURNO — es un wx.TextCtrl separado de solo lectura, multilinea (~140 px de altura) SOBRE la narrativa completa. Después de cada turno, el campo se reemplaza con un fragmento nuevo (encabezado "--- Turno N ---" + contenido de la narrativa). NVDA lo lee inmediatamente después de enfocar (autoenfoque tras el éxito del turno), sin tener que navegar por cientos de líneas de la historia completa. Después de cargar un juego guardado, el campo muestra un RESUMEN del último turno guardado (del búfer `ostatnie_tury`, cortado en el límite de una frase hasta ~1200 caracteres, sin truncar a mitad de palabra) con un prefijo informando que la narrativa completa está en el campo de abajo.
 
     CAMPO DE NARRATIVA COMPLETA — es un wx.TextCtrl de solo lectura, multilinea, que crece después de cada turno. NVDA lee linealmente toda la narrativa, puedes navegar con las flechas dentro del texto, copiar fragmentos con Ctrl+C. El campo nunca es editable — modificas la historia SOLO a través de un nuevo turno, mediante el nuevo botón «Abrir archivo de narración…» (desde v15.2.3, descrito abajo) o editando directamente el archivo .txt desde el Explorador de archivos. Este campo está sincronizado con el archivo `opowiesci/<nazwa>.txt`, puedes tratarlo como una vista previa de un audiolibro.
 
@@ -157,7 +143,7 @@ tresc:
 
     OCULTAR ÁREAS VACÍAS — en el modo Libre, el área de elecciones está COMPLETAMENTE oculta (wx.Hide), no solo desactivada — Tab lo omite, NVDA no lo incluye en la lista de elementos. Esto previene la desorientación del jugador al caer en un marcador de posición vacío. En los modos 4 y 5, el área aparece solo después de la validación exitosa de la respuesta del modelo (matriz de elecciones no vacía); una alucinación del modelo (elecciones vacías) resulta en una caída al texto libre sin desordenar la interfaz.
 
-    SEÑALES SONORAS — cada turno completado se señala con wx.Bell (campana del sistema), seguido de un enfoque automático en el campo de narrativa. NVDA entonces leerá la nueva narrativa sin necesidad de navegación manual.
+    SEÑALES SONORAS — cada turno completado se señala con wx.Bell (campana del sistema), seguido de un enfoque automático en el campo "Último turno". NVDA entonces leerá el turno recién generado desde el principio, sin necesidad de navegar por todo el historial anterior.
 
     ESTADOS DE MEMORIA EN COLOR — el indicador de memoria del modelo cambia el color de la fuente (verde/naranja/rojo) según el nivel de llenado. Para los usuarios videntes, es una señal visual adicional; NVDA de todas formas lee el texto del estado, por lo que los ciegos no pierden información.
 
@@ -178,4 +164,4 @@ tresc:
     Causa y solución: Alucinación del modelo — a pesar del modo 4 LLM devolvió una tabla de elecciones vacía. La aplicación oculta conscientemente el área de elecciones (en lugar de mostrar un marcador de posición vacío) y permite continuar con texto libre. Es probable que el siguiente turno genere elecciones correctamente.
 
     Problema: Los archivos .game.json y .story.jsonl no son visibles en el escritorio.
-    Causa y solución: Es intencionado — runtime/ es una carpeta del sistema para usuarios normales, invisible desde el explorador de archivos. Los archivos de narración (.txt, .md) van a opowiesci/ — ahí los encontrarás.
+    Causa y solución: Es intencionado — runtime/ es una carpeta del sistema para usuarios normales, invisible desde el explorador de archivos. El archivo de narración (.txt) va a opowiesci/ — ahí lo encontrarás.

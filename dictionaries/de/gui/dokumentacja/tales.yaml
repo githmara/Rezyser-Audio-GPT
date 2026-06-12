@@ -60,7 +60,7 @@ tresc:
 
     1. Geben Sie den Namen des Spiels in die Leiste „{opowiesci.lbl_nazwa_gry}" ein (z.B. „mein_abenteuer_1") — unter diesem Namen werden die Erzähl-, Status- und Logdateien gespeichert.
     2. Wählen Sie den Modus (Frei/Wahl/kleineres Übel).
-    3. Klicken Sie auf "{opowiesci.btn_nowa_gra_label}". Die Anwendung erstellt 3 Dateien: den Spielstatus (.game.json), ein leeres Weltbuch (.md) und die Modus-Metadaten (.mode). Die Erzähldatei (.txt) wird nach der ersten Runde erstellt.
+    3. Klicken Sie auf "{opowiesci.btn_nowa_gra_label}". Die Anwendung erstellt 2 Dateien: den Spielstatus (.game.json) und die Modus-Metadaten (.mode). Die Erzähldatei (.txt) wird nach der ersten Runde erstellt.
     4. Geben Sie im Feld „{opowiesci.lbl_akcja}" unten im Panel die erste Aktion ein, z.B. „Ich wache in einem unbekannten Raum auf". Klicken Sie auf "{opowiesci.btn_wyslij_label}". Die Erzählmaschine öffnet die Welt basierend auf Ihrer Aktion — Beschreibung des Raums, Geräusche, Charaktere, erste Entscheidungen.
     5. Jede Runde wird automatisch gespeichert — Sie können die Anwendung jederzeit schließen und das Spiel später mit der Taste "{opowiesci.btn_wczytaj_label}" laden.
   krok_4_zasady_swiata: |
@@ -70,7 +70,7 @@ tresc:
 
     Drei typische Anwendungen der Weltregeln:
 
-    PHONETISCHE REGELN — steuern die Aussprache von Charakternamen durch TTS (Vocalizer, ElevenLabs). Beispiel: „Der Name Joanna wird immer hart, polnisch [dż] ausgesprochen; niemals weich [j]." Die Engine wird diese Variante ab der nächsten Runde in die Erzählung einfügen, und der Charakter Joanna im Buch der Welt behält die beabsichtigte Klangfarbe. Dies ist auch eine natürliche Brücke zu den Akzenten des Regisseurs — wenn du das Buch nach dem Spiel in das Regisseur-Panel lädst (SCHRITT 9 unten), wird die phonetische Regel als Charaktereigenschaft mit dem Spiel „mitgehen“.
+    PHONETISCHE REGELN — steuern die Aussprache von Charakternamen durch TTS (Vocalizer, ElevenLabs). Beispiel: „Der Name Joanna wird immer hart, polnisch [dż] ausgesprochen; niemals weich [j]." Die Engine fügt diese Variante ab der nächsten Runde in die Erzählung ein, sodass der Name in jeder weiteren Szene dieses Spiels die beabsichtigte Klangfarbe behält.
 
     MECHANISCHE REGELN — beschreiben die „Gesetze der Physik“ deiner Welt, an die sich das LLM halten soll. Beispiel: „In dieser Welt funktioniert Magie nur nachts; tagsüber sind die Charaktere gewöhnliche Menschen." Die Engine wird keine Zauber zur Mittagszeit erfinden, selbst wenn die Handlung deiner Runde dies verlangt — stattdessen wird sie eine Alternative vorschlagen oder dich in Richtung Abenddämmerung führen.
 
@@ -92,7 +92,7 @@ tresc:
 
     /wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht, schlägt keine Entscheidungen vor — der Erzählmotor verwendet alle fünf Sinne (Sehen, Hören, Geruch, Tasten, Geschmack), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT in die Erzählung aufgenommen oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj wie der Wächter aussieht" oder „/wizualizuj der Geruch des Cafés".
 
-    /odswiez, /refresh — aktualisiert den internen Speicher aus der Erzählungsdatei nach deren manueller Bearbeitung (seit v15.5). Wenn du opowiesci/<nazwa>.txt im Editor öffnest und z.B. einen Tippfehler korrigierst oder einen überflüssigen Absatz kürzt, synchronisiert dieser Befehl (oder die Schaltfläche „{opowiesci.btn_odswiez_z_dysku_label}") das frische Ende mit dem Kontext der Engine — ohne harten Reset und erneutes Laden des Spiels. Falls bereits eine Zusammenfassung früherer Runden existiert, bleibt sie unberührt, sodass die nächste Runde und die nächste Zusammenfassung nicht auf veralteten Daten entstehen. ACHTUNG: Der Spielstand (Figuren, Ort, Inventar, Handlungsfäden) aus der Datei .game.json wird NICHT aktualisiert — wenn die Bearbeitung Weltfakten verändert hat, kann die nächste Runde mit ihnen auseinanderlaufen.
+    /odswiez, /refresh — aktualisiert den internen Speicher aus der Erzählungsdatei nach deren manueller Bearbeitung (seit v15.5). Wenn du opowiesci/<nazwa>.txt im Editor öffnest und z.B. einen Tippfehler korrigierst oder einen überflüssigen Absatz kürzt, synchronisiert dieser Befehl das frische Ende mit dem Kontext der Engine — ohne harten Reset und erneutes Laden des Spiels. Falls bereits eine Zusammenfassung früherer Runden existiert, bleibt sie unberührt, sodass die nächste Runde und die nächste Zusammenfassung nicht auf veralteten Daten entstehen. ACHTUNG: Der Spielstand (Figuren, Ort, Inventar, Handlungsfäden) aus der Datei .game.json wird NICHT aktualisiert — wenn die Bearbeitung Weltfakten verändert hat, kann die nächste Runde mit ihnen auseinanderlaufen. (Die entsprechende Schaltfläche „{opowiesci.btn_odswiez_z_dysku_label}" ist eine technische Option, standardmäßig ausgeblendet — der Befehl funktioniert immer.)
 
     /pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Bildschirmleser liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
 
@@ -100,17 +100,15 @@ tresc:
   krok_6_pliki_gry: |
     SCHRITT 6: Spieldateien — wo Sie Ihre Daten finden
 
-    Jedes Spiel erzeugt fünf Dateien, jede in einem anderen Ordner, mit unterschiedlichen Rollen:
+    Jedes Spiel erzeugt vier Dateien, jede in einem anderen Ordner, mit unterschiedlichen Rollen:
 
     opowiesci/<nazwa>.txt — vollständige Erzählung, bereit zum Anhören als Hörbuch. Kann im Notepad geöffnet oder in den Audiobook-Architekten (Konverter) geladen werden, um eine Word-Datei mit Kapiteln oder ein Timing für ElevenLabs zu generieren.
-
-    opowiesci/<nazwa>.md — Buch der Welt der Charaktere im Format [Name: Eigenschaften], regeneriert nach jeder Runde. Format kompatibel mit dem Regisseur-Parser! Sie können diese Datei im Regisseur-Panel laden (Datei → Laden) und erhalten native Akzente der Charaktere in klassischer TTS-Erzählung — eine Brücke zwischen den beiden Hauptmodulen der Anwendung.
 
     runtime/opowiesci/<nazwa>.game.json — vollständiger Spielstatus: Name, Modus, aktive Charaktere, Standort, Ausrüstung, offene Handlungsstränge, die letzten 6 Runden in verkürzter Form. Dies ist die Quelle der Wahrheit zum Laden des Spiels — ohne diese Datei kann das Spiel nicht fortgesetzt werden.
 
     runtime/opowiesci/<nazwa>.story.jsonl — rohes Log jeder Runde (Spieleranfrage + Modellantwort in JSON). Die Datei wird nicht zum Spielen benötigt — sie dient zur Fehlerbehebung oder späteren Analyse (z.B. Statistiken, wie viele Runden das Abenteuer dauerte, welche Handlungsstränge das LLM einführte).
 
-    runtime/skrypty/<nazwa>.mode — Metadaten der Modusnummer (3=Frei, 4=Wahl, 5=Kleineres Übel). Gemeinsame Datei mit dem Regisseur, aber die Nummerierung kollidiert nicht (Regisseur verwendet 0-2).
+    runtime/opowiesci/<nazwa>.mode — Metadaten der Modusnummer (3=Frei, 4=Wahl, 5=Kleineres Übel). Seit v17.4 in einem eigenen Geschichten-Ordner. Zuvor lag die Datei in runtime/skrypty/ gemeinsam mit dem Regisseur — bei einem Spiel und einem Regisseur-Projekt mit demselben Namen konnte das Speichern des einen Moduls den Modus des anderen stillschweigend überschreiben; nun sind die Namensräume getrennt, und alte Dateien werden beim Laden des Spiels einmalig migriert.
   krok_7_pamiec_modelu: |
     SCHRITT 7: Modell-Speicheranzeige — Warum Runden in alten Spielen keine manuelle Arbeit von Ihnen erfordern
 
@@ -130,24 +128,12 @@ tresc:
     Nach 150 Runden in einem Spiel fügt die narrative Engine EINMAL ein „Cinematic Meta Warning“ ein — eine meta-narrative dramatische Unterbrechung. Es erscheint in einem separaten Dialog mit einem Glockenton, mit direkter Ansprache an dich in der zweiten Person, einer Zusammenfassung der Errungenschaften und einer Warnung über die Bedeutung der getroffenen Entscheidungen.
 
     Das Cinematic Warning ist NICHT Teil der Audiobook-Narration — die .txt-Filter-Engine schneidet seinen Inhalt (markiert mit ⚠️🚨⚠️) automatisch aus, damit du beim Anhören des Audiobooks keinen Meta-Kommentar über dein eigenes Spiel hörst. Der Inhalt wird nur in das Log .story.jsonl (zur Reflexion oder als Erinnerung) und in den Dialog im GUI übertragen, wo du ihn einmal lesen und fortfahren kannst.
-  krok_9_most_do_rezysera: |
-    SCHRITT 9: Brücke zum Regisseur — nutze das Weltbuch, das in Geschichten erstellt wurde
-
-    Die Datei opowiesci/<nazwa>.md, die während des Spiels generiert wird, enthält das Weltbuch mit Charakteren, die in der Erzählung vorkamen, zusammen mit ihren Eigenschaften, Akzenten und Charakterzügen. Das Format entspricht genau den Anforderungen des Regisseur-Parsers — [Name: Eigenschaften mit Akzentbeschreibung].
-
-    Was du damit machen kannst:
-
-    1. Nach Abschluss des Spiels öffne das Panel "{main.btn.rezyser}" (Strg+1).
-    2. Lade das Projekt mit demselben Namen — der Regisseur lädt die .txt-Datei als Geschichte und die .md-Datei als Weltbuch.
-    3. Du erhältst nun die klassische Erzählung des Regisseurs (lange, strukturierte Szenen mit Akten und Kapiteln) mit den nativen Akzenten der Charaktere, die du in Geschichten liebgewonnen hast. Der Wächter Karmel aus dem Bunker, der in kurzen Sätzen spricht, die Inquisitorin Rosanna mit einem melodischen östlichen Akzent — alle Eigenschaften bleiben erhalten.
-
-    Dies ist eine Einbahnstraße: Geschichten produzieren Material, der Regisseur formatiert es. Eine Umkehrung ist nicht möglich — der Regisseur lädt keine Spiele aus Geschichten als interaktiven Zustand.
   krok_10_dostepnosc_nvda: |
-    SCHRITT 10: Barrierefreiheit (NVDA und Screenreader) — von Anfang an entworfen
+    SCHRITT 9: Barrierefreiheit (NVDA und Screenreader) — von Anfang an entworfen
 
     Das gesamte Modul "Erzählungen" wurde für blinde Spieler optimiert. Was wir konkret getan haben:
 
-    FELD LETZTE RUNDE — dies ist ein separates wx.TextCtrl, schreibgeschützt, mehrzeilig (~140 px Höhe) ÜBER der vollständigen Erzählung. Nach jeder Runde wird das Feld mit einem neuen Abschnitt ersetzt (Überschrift „--- Runde N ---" + Erzählungstext). NVDA liest es sofort nach dem Fokussieren (Auto-Fokus nach erfolgreicher Runde), ohne durch Hunderte von Zeilen der vollständigen Geschichte navigieren zu müssen. Nach dem Laden eines gespeicherten Spiels zeigt das Feld eine ZUSAMMENFASSUNG der letzten gespeicherten Runde (max. 400 Zeichen aus dem `letzte_runden`-Puffer) mit einem Präfix, das darauf hinweist, dass die vollständige Erzählung im Feld darunter steht.
+    FELD LETZTE RUNDE — dies ist ein separates wx.TextCtrl, schreibgeschützt, mehrzeilig (~140 px Höhe) ÜBER der vollständigen Erzählung. Nach jeder Runde wird das Feld mit einem neuen Abschnitt ersetzt (Überschrift „--- Runde N ---" + Erzählungstext). NVDA liest es sofort nach dem Fokussieren (Auto-Fokus nach erfolgreicher Runde), ohne durch Hunderte von Zeilen der vollständigen Geschichte navigieren zu müssen. Nach dem Laden eines gespeicherten Spiels zeigt das Feld eine ZUSAMMENFASSUNG der letzten gespeicherten Runde (aus dem `ostatnie_tury`-Puffer, an der Satzgrenze auf ~1200 Zeichen gekürzt, sodass kein Wort mittendrin abbricht) mit einem Präfix, das darauf hinweist, dass die vollständige Erzählung im Feld darunter steht.
 
     FELD VOLLSTÄNDIGE ERZÄHLUNG — dies ist ein wx.TextCtrl, schreibgeschützt, mehrzeilig, das nach jeder Runde anwächst. NVDA liest die gesamte Erzählung linear, du kannst mit den Pfeiltasten im Text navigieren und Abschnitte mit Strg+C kopieren. Das Feld ist nie bearbeitbar — du änderst die Geschichte NUR durch eine neue Runde, durch die neue Schaltfläche „Erzählungsdatei öffnen…" (seit v15.2.3, unten beschrieben) oder durch direkte Bearbeitung der .txt-Datei vom Datei-Explorer aus. Dieses Feld ist mit der Datei `opowiesci/<nazwa>.txt` synchronisiert, du kannst es als Vorschau für ein Hörbuch betrachten.
 
@@ -157,7 +143,7 @@ tresc:
 
     VERSTECKEN LEERER BEREICHE — im Freien Modus ist der Auswahlbereich VOLLSTÄNDIG versteckt (wx.Hide), nicht nur ausgegraut — Tab überspringt ihn, NVDA zieht ihn nicht in die Liste der Elemente ein. Dies verhindert, dass der Spieler in einen leeren Platzhalter gerät. In den Modi 4 und 5 erscheint der Bereich nur nach erfolgreicher Validierung der Modellantwort (nicht leere Auswahl); eine Halluzination des Modells (leere Auswahl) führt zu einem Fallback auf freien Text, ohne die Benutzeroberfläche zu überladen.
 
-    AKUSTISCHE SIGNAL — jede abgeschlossene Runde wird durch wx.Bell (Systemglocke) signalisiert, gefolgt von einer automatischen Fokusverschiebung auf das Erzählfeld. NVDA liest dann die neue Erzählung ohne manuelle Navigation.
+    AKUSTISCHE SIGNAL — jede abgeschlossene Runde wird durch wx.Bell (Systemglocke) signalisiert, gefolgt von einer automatischen Fokusverschiebung auf das Feld „Letzte Runde". NVDA liest dann die frische Runde von Anfang an, ohne durch die gesamte bisherige Geschichte navigieren zu müssen.
 
     FARBIGE SPEICHERSTATUS — der Speicheranzeiger des Modells ändert die Schriftfarbe (grün/orange/rot) entsprechend dem Füllstand. Für sehende Benutzer ist dies ein zusätzliches visuelles Signal; NVDA liest den Status jedoch ohnehin, sodass blinde Benutzer keine Informationen verlieren.
 
@@ -178,4 +164,4 @@ tresc:
     Ursache und Lösung: Modellhalluzination — trotz Modus 4 hat LLM ein leeres Auswahlfeld zurückgegeben. Die Anwendung verbirgt dann bewusst den Auswahlbereich (anstatt einen leeren Platzhalter anzuzeigen) und erlaubt die Fortsetzung mit Freitext. Die nächste Runde wird wahrscheinlich die Auswahl korrekt generieren.
 
     Problem: Die Dateien .game.json und .story.jsonl sind auf dem Desktop nicht sichtbar.
-    Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Erzählungsdateien (.txt, .md) gelangen in skrypty/ — dort finden Sie sie.
+    Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Die Erzählungsdatei (.txt) gelangt in opowiesci/ — dort finden Sie sie.

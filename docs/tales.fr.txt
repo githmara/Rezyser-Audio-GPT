@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (17.3.0 – Version de Publication)
+Reżyser Audio GPT — Module Histoires Interactives (17.4.0 – Version de Publication)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
@@ -47,7 +47,7 @@ Si vous préférez une totale liberté, laissez "(jeu personnalisé)" dans le ch
 
 1. Entrez le nom du jeu dans la barre « Nom du jeu » (par exemple, « mon_aventure_1 ») — sous ce nom seront enregistrés les fichiers de narration, d'état et de log.
 2. Choisissez le mode (Libre/Choix/Moindre mal).
-3. Cliquez sur "Nouveau jeu". L'application créera 3 fichiers : état du jeu (.game.json), Livre du Monde vide (.md) et métadonnées du mode (.mode). Le fichier de narration (.txt) sera créé après le premier tour.
+3. Cliquez sur "Nouveau jeu". L'application créera 2 fichiers : état du jeu (.game.json) et métadonnées du mode (.mode). Le fichier de narration (.txt) sera créé après le premier tour.
 4. Dans le champ « Votre action ou commande » en bas du panneau, entrez la première action, par exemple, « je me réveille dans une chambre inconnue ». Cliquez sur "Envoyer". Le moteur narratif ouvrira le monde en fonction de votre action — description de la pièce, sons, personnages, premières décisions.
 5. Chaque tour sera automatiquement enregistré — vous pouvez fermer l'application à tout moment et charger le jeu plus tard avec le bouton "Charger".
 
@@ -58,7 +58,7 @@ Si vous préférez une totale liberté, laissez "(jeu personnalisé)" dans le ch
 
 Trois utilisations typiques des règles du monde :
 
-RÈGLES PHONÉTIQUES — contrôlent la prononciation des noms des personnages par TTS (Vocalizer, ElevenLabs). Exemple : « Prononcez toujours le nom Joanna de manière dure, à la polonaise [dż] ; jamais de manière douce [j]. » Le moteur insérera cette variante dans la narration à partir du tour suivant, et le personnage Joanna dans le Livre du Monde conservera la prononciation souhaitée. C'est aussi un pont naturel vers les accents du Réalisateur — si après avoir terminé le jeu, vous chargez le Livre dans le panneau du Réalisateur (ÉTAPE 9 ci-dessous), la règle phonétique « passera » avec le jeu comme une caractéristique du personnage.
+RÈGLES PHONÉTIQUES — contrôlent la prononciation des noms des personnages par TTS (Vocalizer, ElevenLabs). Exemple : « Prononcez toujours le nom Joanna de manière dure, à la polonaise [dż] ; jamais de manière douce [j]. » Le moteur insérera cette variante dans la narration à partir du tour suivant, de sorte que le nom conservera la sonorité souhaitée dans chaque scène ultérieure de cette partie.
 
 RÈGLES MÉCANIQUES — décrivent les « lois de la physique » de votre monde que le LLM doit respecter. Exemple : « Dans ce monde, la magie ne fonctionne que la nuit ; le jour, les personnages sont des gens ordinaires. » Le moteur n'inventera pas de sorts à midi, même si l'action de votre tour l'exige — à la place, il proposera une alternative ou vous guidera vers le crépuscule.
 
@@ -81,7 +81,7 @@ Le moteur narratif choisit automatiquement le modèle AI en fonction du mode : p
 
 /wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj à quoi ressemble le garde » ou « /wizualizuj l'odeur du café ».
 
-/odswiez, /refresh — actualise la mémoire interne à partir du fichier de narration après son édition manuelle (depuis la v15.5). Lorsque vous ouvrez opowiesci/<nazwa>.txt dans l'éditeur et que, par exemple, vous corrigez une faute de frappe ou supprimez un paragraphe superflu, cette commande (ou le bouton "Actualiser depuis le disque") synchronise la fin fraîche avec le contexte du moteur — sans réinitialisation complète ni rechargement du jeu. S'il existe déjà un résumé des tours précédents, celui-ci reste intact, de sorte que le tour suivant et le résumé suivant ne se construiront pas sur des données obsolètes. ATTENTION : l'état du jeu (personnages, localisation, équipement, intrigues) du fichier .game.json N'EST PAS mis à jour — si votre édition a changé des faits du monde, le tour suivant peut entrer en décalage avec eux.
+/odswiez, /refresh — actualise la mémoire interne à partir du fichier de narration après son édition manuelle (depuis la v15.5). Lorsque vous ouvrez opowiesci/<nazwa>.txt dans l'éditeur et que, par exemple, vous corrigez une faute de frappe ou supprimez un paragraphe superflu, cette commande synchronise la fin fraîche avec le contexte du moteur — sans réinitialisation complète ni rechargement du jeu. S'il existe déjà un résumé des tours précédents, celui-ci reste intact, de sorte que le tour suivant et le résumé suivant ne se construiront pas sur des données obsolètes. ATTENTION : l'état du jeu (personnages, localisation, équipement, intrigues) du fichier .game.json N'EST PAS mis à jour — si votre édition a changé des faits du monde, le tour suivant peut entrer en décalage avec eux. (Le bouton équivalent « Actualiser depuis le disque » est une option technique, masquée par défaut — la commande fonctionne toujours.)
 
 /pomoc, /help — affiche une boîte de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
 
@@ -90,17 +90,15 @@ Le moteur narratif choisit automatiquement le modèle AI en fonction du mode : p
 
 ÉTAPE 6 : Fichiers de jeu — où trouver vos données
 
-Chaque jeu produit cinq fichiers, chacun dans un dossier différent, avec des rôles variés :
+Chaque jeu produit quatre fichiers, chacun dans un dossier différent, avec des rôles variés :
 
 opowiesci/<nazwa>.txt — narration complète prête à être écoutée comme un livre audio. Peut être ouvert dans le Bloc-notes ou importé dans l'Architecte de Livres Audio (Convertisseur) pour générer un fichier Word avec des chapitres ou un timing pour ElevenLabs.
-
-opowiesci/<nazwa>.md — Livre du Monde des personnages au format [Nom : caractéristiques], régénéré après chaque tour. Format compatible avec le parseur du Réalisateur ! Vous pouvez importer ce fichier dans le panneau du Réalisateur (Fichier → Charger) et obtenir des accents natifs des personnages dans la narration classique TTS — un pont entre les deux principaux modules de l'application.
 
 runtime/opowiesci/<nazwa>.game.json — état complet du jeu : nom, mode, personnages actifs, localisation, équipement, intrigues ouvertes, les 6 derniers tours sous forme abrégée. C'est la source de vérité pour charger le jeu — sans ce fichier, il est impossible de continuer.
 
 runtime/opowiesci/<nazwa>.story.jsonl — journal brut de chaque tour (requête du joueur + réponse du modèle en JSON). Le fichier n'est pas nécessaire pour jouer — il sert au débogage ou à l'analyse ultérieure (par exemple, des statistiques sur la durée de l'aventure, quels fils narratifs le LLM a introduits).
 
-runtime/skrypty/<nazwa>.mode — métadonnées du numéro de mode (3=Libre, 4=Choix, 5=Moindre mal). Fichier commun avec le Réalisateur, mais la numérotation ne se chevauche pas (le Réalisateur utilise 0-2).
+runtime/opowiesci/<nazwa>.mode — métadonnées du numéro de mode (3=Libre, 4=Choix, 5=Moindre mal). Depuis v17.4 dans son propre dossier Histoires. Auparavant, le fichier se trouvait dans runtime/skrypty/ en commun avec le Réalisateur — lorsqu'une partie et un projet du Réalisateur portaient le même nom, l'enregistrement d'un module pouvait écraser silencieusement le mode de l'autre ; désormais les espaces de noms sont séparés, et les anciens fichiers sont migrés une seule fois au chargement de la partie.
 
 
 ÉTAPE 7 : Indicateur de mémoire du modèle — pourquoi les tours dans les anciens jeux ne nécessitent pas votre intervention manuelle
@@ -124,24 +122,11 @@ Après 150 tours d'une partie, le moteur narratif insérera UNE FOIS un "Avertis
 L'Avertissement Cinématographique NE fait PAS partie de la narration de l'audiobook — le moteur de filtrage .txt coupe automatiquement son contenu (marqué par des indicateurs ⚠️🚨⚠️), afin que vous n'entendiez pas de méta-commentaire sur votre propre jeu lors de l'écoute de l'audiobook. Le contenu est uniquement enregistré dans le journal .story.jsonl (pour réflexion ou souvenir) et dans le dialogue de l'interface graphique, où vous pouvez le lire une fois et continuer.
 
 
-ÉTAPE 9 : Pont vers le Réalisateur — utilisez le Livre du Monde créé dans les Histoires
-
-Le fichier opowiesci/<nazwa>.md généré pendant le jeu contient le Livre du Monde avec les personnages qui sont apparus dans la narration, avec leurs caractéristiques, accents et personnalités. Le format est exactement celui requis par le parseur du Réalisateur — [Nom : caractéristiques avec description de l'accent].
-
-Ce que vous pouvez en faire :
-
-1. Après avoir terminé le jeu, ouvrez le panneau "🎬  Réalisateur" (Ctrl+1).
-2. Chargez le projet du même nom — le Réalisateur chargera le fichier .txt comme histoire et le .md comme Livre du Monde.
-3. Vous obtiendrez maintenant une narration classique du Réalisateur (des scènes longues et structurées avec des actes et des chapitres) avec les accents natifs des personnages que vous avez appréciés dans les Histoires. Le Gardien de Carmel du refuge parlant en phrases courtes, l'inquisitrice Rosanna avec son accent chantant de l'Est — toutes les caractéristiques sont préservées.
-
-C'est un pont à sens unique : les Histoires produisent le matériel, le Réalisateur le formate. L'inverse n'est pas possible — le Réalisateur ne charge pas les jeux des Histoires comme état interactif.
-
-
-ÉTAPE 10 : Accessibilité (NVDA et lecteurs d'écran) — conçu dès le départ
+ÉTAPE 9 : Accessibilité (NVDA et lecteurs d'écran) — conçu dès le départ
 
 Tout le module Narration a été optimisé pour les joueurs aveugles. Ce que nous avons fait concrètement :
 
-CHAMP DERNIER TOUR — c'est un wx.TextCtrl readonly multiline séparé (~140 px de hauteur) AU-DESSUS de la narration complète. Après chaque tour, le champ est remplacé par un nouvel extrait (en-tête « --- Tour N --- » + contenu de la narration). NVDA le lit immédiatement après le focus (auto-focus après le succès du tour), sans naviguer à travers des centaines de lignes de l'histoire complète. Après le chargement d'une partie sauvegardée, le champ affiche un RÉSUMÉ du dernier tour sauvegardé (max 400 caractères du tampon `derniers_tours`) avec un préfixe informant que la narration complète est dans le champ ci-dessous.
+CHAMP DERNIER TOUR — c'est un wx.TextCtrl readonly multiline séparé (~140 px de hauteur) AU-DESSUS de la narration complète. Après chaque tour, le champ est remplacé par un nouvel extrait (en-tête « --- Tour N --- » + contenu de la narration). NVDA le lit immédiatement après le focus (auto-focus après le succès du tour), sans naviguer à travers des centaines de lignes de l'histoire complète. Après le chargement d'une partie sauvegardée, le champ affiche un RÉSUMÉ du dernier tour sauvegardé (depuis le tampon `ostatnie_tury`, coupé à la limite d'une phrase jusqu'à ~1200 caractères, sans interrompre un mot au milieu) avec un préfixe informant que la narration complète est dans le champ ci-dessous.
 
 CHAMP DE NARRATION COMPLÈTE — c'est un wx.TextCtrl readonly multiline qui s'accumule après chaque tour. NVDA lit linéairement toute la narration, vous pouvez naviguer avec les flèches à l'intérieur du texte, copier des extraits avec Ctrl+C. Le champ n'est jamais éditable — vous modifiez l'histoire UNIQUEMENT par un nouveau tour, par le nouveau bouton « Ouvrir le fichier de narration… » (depuis v15.2.3, décrit ci-dessous) ou par l'édition directe du fichier .txt depuis l'Explorateur de fichiers. Ce champ est synchronisé avec le fichier `opowiesci/<nazwa>.txt`, vous pouvez le considérer comme un aperçu de livre audio.
 
@@ -151,7 +136,7 @@ BOUTONS DE CHOIX DYNAMIQUES — dans les modes Choix et Moindre mal, chaque tour
 
 MASQUER LES ZONES VIDES — en mode Libre, la zone de choix est COMPLÈTEMENT masquée (wx.Hide), pas seulement grisée — Tab l'ignore, NVDA ne l'inclut pas dans la liste des éléments. Cela évite la désorientation du joueur tombant dans un espace réservé vide. Dans les modes 4 et 5, la zone apparaît uniquement après une validation réussie de la réponse du modèle (tableau de choix non vide) ; une hallucination du modèle (choix vides) entraîne un retour au texte libre sans encombrer l'interface.
 
-SIGNAL SONORE — chaque tour terminé est signalé par wx.Bell (sonnerie système), suivi d'un transfert automatique du focus sur le champ de narration. NVDA lira alors la nouvelle narration sans nécessiter de navigation manuelle.
+SIGNAL SONORE — chaque tour terminé est signalé par wx.Bell (sonnerie système), suivi d'un transfert automatique du focus sur le champ « Dernier tour ». NVDA lira alors le tour frais depuis le début, sans avoir à naviguer à travers tout l'historique.
 
 STATUTS MÉMOIRE COLORÉS — l'indicateur de mémoire du modèle change la couleur de la police (vert/orange/rouge) en fonction du niveau de remplissage. Pour les utilisateurs voyants, c'est un signal visuel supplémentaire ; NVDA lit quand même le texte du statut, donc les aveugles ne perdent pas d'information.
 
@@ -173,4 +158,4 @@ Problème : En mode Choix, le moteur n'a pas généré de boutons, bien que je m
 Cause et solution : Hallucination du modèle — malgré le mode 4 LLM a renvoyé un tableau de choix vide. L'application masque alors consciemment la zone de choix (au lieu de montrer un espace réservé vide) et permet de continuer avec du texte libre. Le tour suivant générera probablement les choix correctement.
 
 Problème : Les fichiers .game.json et .story.jsonl ne sont pas visibles sur le bureau.
-Cause et solution : C'est intentionnel — runtime/ est un dossier système pour les utilisateurs ordinaires, invisible depuis l'explorateur de fichiers. Les fichiers de narration (.txt, .md) vont dans skrypty/ — vous les trouverez là-bas.
+Cause et solution : C'est intentionnel — runtime/ est un dossier système pour les utilisateurs ordinaires, invisible depuis l'explorateur de fichiers. Le fichier de narration (.txt) va dans opowiesci/ — vous l'y trouverez.

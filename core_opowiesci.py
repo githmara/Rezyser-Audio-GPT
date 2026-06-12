@@ -11,28 +11,30 @@ stan z powrotem po każdej mutacji.
                                                      BEZ meta-warningów (Cinematic
                                                      Warning z Fazy 4 jest cięty
                                                      przez :meth:`czysc_meta_warningi`)
-    * ``skrypty/<nazwa>.md``                       — Księga Świata, idempotentny
-                                                     rebuild z ``postacie_aktywne``;
-                                                     format ``[Imię: cechy]`` zgodny
-                                                     z parserem :func:`core_rezyser`,
-                                                     wiersz 199 (regex
-                                                     ``r"\\[([^:\\]\\-]+).*?\\]"``).
-                                                     Plik jest **mostem** Opowieści →
-                                                     Reżyser: gracz może wczytać tę
-                                                     samą grę w drugim module i
-                                                     dostać natywne akcenty postaci.
+    * ``opowiesci/<nazwa>.md``                     — (DEPRECATED, v17.4 / P6A)
+                                                     dawna Księga Świata Opowieści.
+                                                     Rebuild usunięty: miał być
+                                                     mostem do Reżysera, którego
+                                                     nigdy nie zbudowano, więc plik
+                                                     był martwym kosztem. Nowe gry
+                                                     go nie tworzą; ``wczytaj`` wciąż
+                                                     migruje legacy `.md` z `skrypty/`
+                                                     (de-clutter dialogu Reżysera).
     * ``runtime/opowiesci/<nazwa>.game.json``      — pełny stan gry (overwrite per tura)
     * ``runtime/opowiesci/<nazwa>.story.jsonl``    — append-only log surowych tur
                                                      (request payload + response JSON)
-    * ``runtime/skrypty/<nazwa>.mode``             — zapisany tryb (3/4/5) — TEN SAM
-                                                     folder co Reżyser, bo numeracja
-                                                     ``.mode`` jest globalna
-                                                     (0=Burza, 1=Reżyser1,
-                                                     2=Reżyser2, 3=Swobodny,
-                                                     4=Wybory, 5=Mniejsze zło);
-                                                     różne nazwy projektu nie
-                                                     kolidują, ten sam folder upraszcza
-                                                     management metadanych
+    * ``runtime/opowiesci/<nazwa>.mode``           — zapisany tryb (3/4/5).
+                                                     v17.4: WŁASNY folder Opowieści
+                                                     (koniec współdzielenia z
+                                                     Reżyserem, który trzyma swój
+                                                     ``.mode`` 1/2 w
+                                                     ``runtime/skrypty/``). Dawniej
+                                                     wspólny plik powodował, że przy
+                                                     zbieżnej nazwie projektu zapis
+                                                     jednego modułu cicho nadpisywał
+                                                     tryb drugiego; ``wczytaj`` migruje
+                                                     stare pliki 3/4/5 do nowej
+                                                     lokalizacji
 
 Faza 3 NIE robi auto-streszczenia ani wskaźnika pamięci modelu — to Faza 4.
 ``wczytaj()`` toleruje uszkodzone pliki (cichy fail per element nieobowiązkowy),
@@ -178,9 +180,25 @@ class ProjektOpowiesci:
         return os.path.join(self.app_dir, RUNTIME_DIR, OPOWIESCI_DIR, f"{nazwa}.story.jsonl")
 
     def _sciezka_mode(self, nazwa: str) -> str:
-        # Współdzielone z Reżyserem — `core_rezyser._sciezka_mode` używa
-        # tej samej ścieżki. Numeracja `.mode` jest globalna (0/1/2/3/4/5),
-        # więc jedno repo metadanych eliminuje ryzyko desynchronizacji.
+        # v17.4: WŁASNY folder `runtime/opowiesci/` — koniec współdzielenia
+        # `.mode` z Reżyserem. Dawniej oba moduły pisały do
+        # `runtime/skrypty/<nazwa>.mode`, mimo rozłącznych zakresów wartości
+        # (Reżyser 1/2, Opowieści 3/4/5). Przy tej samej nazwie projektu w obu
+        # narzędziach zapis jednego CICHO NADPISYWAŁ tryb drugiego — ochrona
+        # trybu padała otwarta („furtki dowolnych wyborów"). To dokładnie ta
+        # sama klasa kolizji, którą v15.2.3 naprawiła dla `.txt`/`.md`,
+        # przeoczając `.mode`. Teraz `.mode` Opowieści leży obok pozostałych
+        # ich plików stanu (`.game.json`/`.story.jsonl`); migracja starych
+        # plików z wartością 3/4/5 → `wczytaj` (z gwardią zakresu, żeby NIE
+        # ukraść Reżyserowi jego pliku 1/2).
+        return os.path.join(self.app_dir, RUNTIME_DIR, OPOWIESCI_DIR, f"{nazwa}.mode")
+
+    def _sciezka_mode_legacy(self, nazwa: str) -> str:
+        """Pre-v17.4 ścieżka `.mode` współdzielona z Reżyserem (`runtime/skrypty/`).
+
+        Używana wyłącznie w `wczytaj()` do jednorazowej migracji starych
+        plików trybu Opowieści (wartość 3/4/5) do nowego folderu.
+        """
         return os.path.join(self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}.mode")
 
     # ------------------------------------------------------------------
@@ -262,56 +280,14 @@ class ProjektOpowiesci:
             self.full_story = fh.read()
         return self.full_story
 
-    def rebuild_ksiega_swiata(self) -> str:
-        """Idempotentny rebuild `skrypty/<nazwa>.md` z ``postacie_aktywne``.
-
-        Format zgodny z parserem :func:`core_rezyser.zastosuj_akcenty_uniwersalne`
-        (wiersz 199, regex ``r"\\[([^:\\]\\-]+).*?\\]"``):
-
-            # Księga Świata — gra <nazwa>
-            # Generowana automatycznie po każdej turze Opowieści.
-            # Parser Reżysera wymaga formatu [Imię: cechy].
-
-            [Imię1: cechy]
-            [Imię2: cechy]
-
-        Po zapisie ten sam plik może zostać wczytany przez panel Reżysera
-        (Plik → Wczytaj → wybierz nazwę gry) — Reżyser potraktuje postaci
-        jako Księgę Świata i będzie aplikować akcenty + reguły ad-hoc Lore.
-        Dlatego ZAWSZE jest rebuild ze stanu bieżącego (overwrite), nigdy
-        append — żeby usunięte postacie znikały z pliku.
-
-        Zwraca pełną ścieżkę zapisanego pliku.
-        """
-        self._wymagaj_nazwy()
-        opowiesci = os.path.join(self.app_dir, OPOWIESCI_DIR)
-        os.makedirs(opowiesci, exist_ok=True)
-        sciezka = self._sciezka_md(self.nazwa_pliku)
-
-        # Komentarze NIE używają nawiasów kwadratowych z dwukropkiem — parser
-        # Reżysera (`core_rezyser.py:199`, `re.split(r"\[([^:\]\-]+).*?\]", ...)`)
-        # nie odróżnia komentarzy od linii postaci, więc każde `[X:...]` w
-        # nagłówku zostałoby potraktowane jak fałszywa postać. Stąd okrągłe
-        # nawiasy w prozie metadanych.
-        linie: list[str] = [
-            f"# Księga Świata — gra {self.nazwa_pliku}",
-            "# Generowana automatycznie po każdej turze Opowieści (v15.0).",
-            "# Parser Reżysera wymaga formatu (Imię: cechy) — nie zmieniaj ręcznie",
-            "# w trakcie aktywnej rozgrywki, bo nadpisze następna tura.",
-            "",
-        ]
-        for postac in self.postacie_aktywne:
-            imie = (postac.get("imie") or "").strip()
-            cechy = (postac.get("cechy") or "").strip()
-            if not imie:
-                continue   # bez imienia parser i tak by tej linii nie złapał
-            # Sanity: wycinamy `[`/`]`/`:` z imienia, żeby nie rozwalić parsera.
-            imie_safe = imie.replace("[", "(").replace("]", ")").replace(":", " ")
-            linie.append(f"[{imie_safe}: {cechy}]")
-
-        with open(sciezka, "w", encoding="utf-8") as fh:
-            fh.write("\n".join(linie) + "\n")
-        return sciezka
+    # v17.4 (P6A): `rebuild_ksiega_swiata` USUNIĘTE. Generowało po każdej
+    # turze `<nazwa>.md` w formacie `[Imię: cechy]` „zgodnym z parserem
+    # Reżysera" jako rzekomy MOST Opowieści → Reżyser. Mostu jednak nigdy
+    # nie zbudowano (brak jakiejkolwiek ścieżki UI wczytania opowieści do
+    # Reżysera), a parser Reżysera czyta z tego formatu wyłącznie akcenty —
+    # więc plik był martwym kosztem I/O na każdej turze. Stara migracja `.md`
+    # w `wczytaj()` zostaje (odsuwa legacy księgę z `skrypty/`, by nie
+    # kolidowała z Księgą Świata Reżysera); nowe pliki `.md` nie powstają.
 
     def zapisz_game_json(self) -> str:
         """Overwrite pełnego stanu gry do `runtime/opowiesci/<nazwa>.game.json`.
@@ -389,19 +365,21 @@ class ProjektOpowiesci:
         return sciezka
 
     def zapisz_tryb(self, tryb_int: int) -> None:
-        """Zapisuje aktualny tryb do `runtime/skrypty/<nazwa>.mode` (cichy fail).
+        """Zapisuje aktualny tryb do `runtime/opowiesci/<nazwa>.mode` (cichy fail).
 
         Akceptowane wartości: ``3`` (Swobodny), ``4`` (Wybory), ``5``
         (Mniejsze zło). Inne (0=Burza, 1/2=Reżyser) są ignorowane —
         Reżyser ma własny zapis dla swoich trybów.
 
-        Wzorzec dokładnie jak :meth:`core_rezyser.ProjektRezysera.zapisz_tryb_tworczy`:
-        metadata trybu to quality-of-life feature, więc cichy fail przy
-        problemie z dyskiem (np. read-only USB stick) — gra zostaje grywalna.
+        v17.4: własny folder `runtime/opowiesci/` (koniec współdzielenia
+        z Reżyserem — patrz :meth:`_sciezka_mode`). Wzorzec dokładnie jak
+        :meth:`core_rezyser.ProjektRezysera.zapisz_tryb_tworczy`: metadata
+        trybu to quality-of-life feature, więc cichy fail przy problemie
+        z dyskiem (np. read-only USB stick) — gra zostaje grywalna.
         """
         if not self.nazwa_pliku or tryb_int not in (3, 4, 5):
             return
-        meta_dir = os.path.join(self.app_dir, RUNTIME_DIR, SKRYPTY_DIR)
+        meta_dir = os.path.join(self.app_dir, RUNTIME_DIR, OPOWIESCI_DIR)
         os.makedirs(meta_dir, exist_ok=True)
         sciezka = self._sciezka_mode(self.nazwa_pliku)
         try:
@@ -498,14 +476,35 @@ class ProjektOpowiesci:
         # stan z `.game.json` w zupełności wystarczy do kontynuacji).
         wynik.czy_story_jsonl = os.path.exists(self._sciezka_story_jsonl(nazwa))
 
-        # Tryb z `.mode` — może być None jeśli plik nie istnieje albo
-        # zawiera śmiecia. Jeśli jest sensowny, mamy szansę zsynchronizować
-        # GUI bez polegania na `dane["tryb"]` (defensywny double-check).
+        # Tryb z `.mode` (v17.4: własny folder `runtime/opowiesci/`).
+        # Jednorazowa migracja starych plików ze współdzielonego
+        # `runtime/skrypty/<nazwa>.mode` — TYLKO gdy stara wartość należy do
+        # zakresu Opowieści (3/4/5). Plik 1/2 zostaje nietknięty: należy do
+        # Reżysera o przypadkowo zbieżnej nazwie, a jego kradzież odtworzyłaby
+        # dawną kolizję w drugą stronę.
+        sciezka_mode = self._sciezka_mode(nazwa)
+        if not os.path.exists(sciezka_mode):
+            sciezka_mode_legacy = self._sciezka_mode_legacy(nazwa)
+            if os.path.exists(sciezka_mode_legacy):
+                try:
+                    with open(sciezka_mode_legacy, "r", encoding="utf-8") as fh:
+                        surowy_legacy = fh.read().strip()
+                    if surowy_legacy.isdigit() and int(surowy_legacy) in (3, 4, 5):
+                        os.makedirs(os.path.dirname(sciezka_mode), exist_ok=True)
+                        os.rename(sciezka_mode_legacy, sciezka_mode)
+                except OSError:
+                    # Cichy fail (read-only nośnik / plik zablokowany) — tryb
+                    # wczyta się przez fallback `dane["tryb"]` z game.json.
+                    pass
+
+        # Odczyt z WALIDACJĄ ZAKRESU — akceptujemy tylko 3/4/5. Wartość spoza
+        # zakresu (np. resztka po starej kolizji z Reżyserem) traktujemy jak
+        # brak, by GUI spadło na `dane["tryb"]` zamiast otwierać złe furtki.
         try:
-            with open(self._sciezka_mode(nazwa), "r", encoding="utf-8") as fh:
+            with open(sciezka_mode, "r", encoding="utf-8") as fh:
                 surowy = fh.read().strip()
-                if surowy.isdigit():
-                    wynik.saved_mode = int(surowy)
+            if surowy.isdigit() and int(surowy) in (3, 4, 5):
+                wynik.saved_mode = int(surowy)
         except Exception:
             wynik.saved_mode = None
 

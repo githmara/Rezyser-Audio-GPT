@@ -1087,8 +1087,6 @@ class RezyserPanel(wx.Panel):
         if not tryb_zapisu_aktywny:
             self._pnl_struktura.Hide()
         else:
-            self._pnl_struktura.Show()
-
             jest_skrypt   = (tryb_idx == 1)
             jest_audiobok = (tryb_idx == 2)
 
@@ -1107,17 +1105,35 @@ class RezyserPanel(wx.Panel):
                 t("rezyser.btn_scena_label", numer_sceny=self.scena_counter),
             )
 
-            self._btn_prolog.Enable(
-                nazwa_podana and not _historia_niepusta and not _prolog_juz_jest
-            )
-            self._btn_epilog.Enable(
-                nazwa_podana and _historia_niepusta and not _blokada
-            )
-            self._btn_rozdzial.Enable(nazwa_podana and not _blokada)
-            self._btn_akt.Enable(nazwa_podana and not _blokada)
-            self._btn_scena.Enable(nazwa_podana and not _blokada)
+            prolog_on   = nazwa_podana and not _historia_niepusta and not _prolog_juz_jest
+            epilog_on   = nazwa_podana and _historia_niepusta and not _blokada
+            rozdzial_on = nazwa_podana and not _blokada
+            akt_on      = nazwa_podana and not _blokada
+            scena_on    = nazwa_podana and not _blokada
 
-            self._pnl_struktura.Layout()
+            self._btn_prolog.Enable(prolog_on)
+            self._btn_epilog.Enable(epilog_on)
+            self._btn_rozdzial.Enable(rozdzial_on)
+            self._btn_akt.Enable(akt_on)
+            self._btn_scena.Enable(scena_on)
+
+            # P2 (v17.4): panel struktury chowamy całkowicie, gdy żaden
+            # WIDOCZNY w danym trybie przycisk nie jest aktywny. Bez tego —
+            # gdy ostatnia linia historii to nagłówek (akt/scena/rozdział) lub
+            # jest epilog (`_blokada`) — wszystkie przyciski lądowały disabled,
+            # a wciąż pokazany, martwy panel łapał fokus NVDA przy tabulacji
+            # („panel" bez żadnej akcji). To ten sam wzorzec, którym Opowieści
+            # od początku chowają pusty panel wyborów (`_aktywuj_obszar_wyborow`).
+            # Prolog/Epilog są zawsze widoczne; Rozdział tylko w Audiobooku,
+            # Akt/Scena tylko w Skrypcie — liczymy więc per tryb.
+            strukturalne_aktywne = prolog_on or epilog_on or (
+                rozdzial_on if jest_audiobok else (akt_on or scena_on)
+            )
+            if strukturalne_aktywne:
+                self._pnl_struktura.Show()
+                self._pnl_struktura.Layout()
+            else:
+                self._pnl_struktura.Hide()
 
         # Ochrona przed przypadkową zmianą trybu twórczego.
         # Burza (idx=0) ZAWSZE aktywna — to mechanizm awaryjny (streszczenie

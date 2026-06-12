@@ -60,7 +60,7 @@ tresc:
 
     1. Kirjoita pelin nimi kenttään „{opowiesci.lbl_nazwa_gry}" (esim. „seikkailuni_1") — tällä nimellä tallennetaan narratiivin, tilan ja lokin tiedostot.
     2. Valitse tila (Vapaa/Valinnat/Pienempi paha).
-    3. Klikkaa "{opowiesci.btn_nowa_gra_label}". Sovellus luo 3 tiedostoa: pelitila (.game.json), tyhjä Maailmankirja (.md) ja tilan metatiedot (.mode). Narratiivin tiedosto (.txt) luodaan ensimmäisen kierroksen jälkeen.
+    3. Klikkaa "{opowiesci.btn_nowa_gra_label}". Sovellus luo 2 tiedostoa: pelitila (.game.json) ja tilan metatiedot (.mode). Narratiivin tiedosto (.txt) luodaan ensimmäisen kierroksen jälkeen.
     4. Kirjoita ensimmäinen toiminto paneelin alareunan kenttään „{opowiesci.lbl_akcja}", esim. „herään tuntemattomassa huoneessa". Klikkaa "{opowiesci.btn_wyslij_label}". Narratiivimoottori avaa maailman toimintosi perusteella — huoneen kuvaus, äänet, hahmot, ensimmäiset päätökset.
     5. Jokainen kierros tallennetaan automaattisesti — voit milloin tahansa sulkea sovelluksen ja ladata pelin myöhemmin painikkeella "{opowiesci.btn_wczytaj_label}".
   krok_4_zasady_swiata: |
@@ -70,7 +70,7 @@ tresc:
 
     Kolme tyypillistä maailman sääntöjen käyttötapaa:
 
-    FONEETTISET SÄÄNNÖT — ohjaavat hahmojen nimien ääntämistä TTS:n (Vocalizer, ElevenLabs) kautta. Esimerkki: "Nimi Joanna äännetään aina kovasti, puolalaisittain [dż]; ei koskaan pehmeästi [j]." Moottori lisää tämän variantin kerrontaan seuraavasta kierroksesta alkaen, ja hahmo Joanna Maailmankirjassa säilyttää tarkoitetun ääntämyksen. Tämä on myös luonnollinen silta Ohjaajan aksentteihin — jos lataat Maailmankirjan Ohjaajan paneeliin pelin päätyttyä (VAIHE 9 alla), foneettinen sääntö "siirtyy" peliin hahmon ominaisuutena.
+    FONEETTISET SÄÄNNÖT — ohjaavat hahmojen nimien ääntämistä TTS:n (Vocalizer, ElevenLabs) kautta. Esimerkki: "Nimi Joanna äännetään aina kovasti, puolalaisittain [dż]; ei koskaan pehmeästi [j]." Moottori lisää tämän variantin kerrontaan seuraavasta kierroksesta alkaen, joten nimi säilyttää tarkoitetun ääntämyksen jokaisessa tämän pelin seuraavassa kohtauksessa.
 
     MEKAANISET SÄÄNNÖT — kuvaavat maailman "fysiikan lakeja", joita LLM:n on noudatettava. Esimerkki: "Tässä maailmassa magia toimii vain yöllä; päivällä hahmot ovat tavallisia ihmisiä." Moottori ei keksi loitsuja keskipäivällä, vaikka kierroksesi toiminta sitä vaatisi — sen sijaan se ehdottaa vaihtoehtoa tai ohjaa sinut kohti iltaa.
 
@@ -92,7 +92,7 @@ tresc:
 
     /visualisoi <kuvaus>, /visualize <kuvaus> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvällisemmin. Tulokset ilmestyvät erilliseen dialogiin, niitä EI lisätä kerrontaan eikä tallenneta äänikirjatiedostoon. Esimerkki: „/visualisoi miltä vartija näyttää" tai „/visualisoi kahvilan tuoksu".
 
-    /paivita, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen jälkeen, kun olet muokannut sitä käsin (versiosta 15.5 alkaen). Kun avaat opowiesci/<nazwa>.txt editorissa ja esim. korjaat kirjoitusvirheen tai poistat ylimääräisen kappaleen, tämä komento (tai painike „{opowiesci.btn_odswiez_z_dysku_label}") synkronoi tuoreen lopun moottorin kontekstin kanssa — ilman kovaa nollausta ja pelin uudelleenlatausta. Jos aiempien vuorojen tiivistelmä on jo olemassa, se jää koskemattomaksi, joten seuraava vuoro ja seuraava tiivistelmä eivät synny vanhentuneista tiedoista. HUOMIO: pelitilaa (hahmot, sijainti, varusteet, juonisäikeet) tiedostosta .game.json EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro voi olla ristiriidassa niiden kanssa.
+    /paivita, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen jälkeen, kun olet muokannut sitä käsin (versiosta 15.5 alkaen). Kun avaat opowiesci/<nazwa>.txt editorissa ja esim. korjaat kirjoitusvirheen tai poistat ylimääräisen kappaleen, tämä komento synkronoi tuoreen lopun moottorin kontekstin kanssa — ilman kovaa nollausta ja pelin uudelleenlatausta. Jos aiempien vuorojen tiivistelmä on jo olemassa, se jää koskemattomaksi, joten seuraava vuoro ja seuraava tiivistelmä eivät synny vanhentuneista tiedoista. HUOMIO: pelitilaa (hahmot, sijainti, varusteet, juonisäikeet) tiedostosta .game.json EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro voi olla ristiriidassa niiden kanssa. (Vastaava painike „{opowiesci.btn_odswiez_z_dysku_label}" on tekninen vaihtoehto, oletuksena piilotettu — komento toimii aina.)
 
     /apu, /help — näyttää valintaikkunan, jossa on luettelo kaikista saatavilla olevista komennoista. Dialogi on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee koko listan heti ilman navigointia.
 
@@ -100,17 +100,15 @@ tresc:
   krok_6_pliki_gry: |
     VAIHE 6: Pelitiedostot — missä löydät tietosi
 
-    Jokainen peli tuottaa viisi tiedostoa, jokainen eri kansiossa ja eri rooleissa:
+    Jokainen peli tuottaa neljä tiedostoa, jokainen eri kansiossa ja eri rooleissa:
 
     opowiesci/<nazwa>.txt — täydellinen kertomus valmiina kuunneltavaksi äänikirjana. Voidaan avata Muistiossa tai ladata Audiokirja-arkkitehtiin (Muunnin) ja luoda Word-tiedosto luvuilla tai ajoitus ElevenLabsille.
-
-    opowiesci/<nazwa>.md — Hahmojen Maailmakirja muodossa [Nimi: ominaisuudet], regeneroitu jokaisen kierroksen jälkeen. Muoto yhteensopiva Ohjaajan parserin kanssa! Voit ladata tämän tiedoston Ohjaajan paneeliin (Tiedosto → Lataa) ja saat luonnolliset hahmojen aksentit klassisessa TTS-kertomuksessa — silta sovelluksen kahden päämoduulin välillä.
 
     runtime/opowiesci/<nazwa>.game.json — pelin täydellinen tila: nimi, tila, aktiiviset hahmot, sijainti, varusteet, avoimet juonenkäänteet, viimeiset 6 kierrosta tiivistetyssä muodossa. Tämä on totuuden lähde pelin lataamiseen — ilman tätä tiedostoa peliä ei voi jatkaa.
 
     runtime/opowiesci/<nazwa>.story.jsonl — jokaisen kierroksen raakalogit (pelaajan pyyntö + mallin vastaus JSON-muodossa). Tiedostoa ei tarvita peliin — se on tarkoitettu debuggaamiseen tai myöhempään analyysiin (esim. tilastot kuinka monta kierrosta seikkailu kesti, mitä juonenkäänteitä LLM esitteli).
 
-    runtime/skrypty/<nazwa>.mode — tilanumeron metadata (3=Vapaa, 4=Valinnat, 5=Pienempi paha). Yhteinen tiedosto Ohjaajan kanssa, mutta numerointi ei mene päällekkäin (Ohjaaja käyttää 0-2).
+    runtime/opowiesci/<nazwa>.mode — tilanumeron metadata (3=Vapaa, 4=Valinnat, 5=Pienempi paha). Versiosta 17.4 alkaen omassa Tarinat-kansiossaan. Aiemmin tiedosto sijaitsi kansiossa runtime/skrypty/ yhdessä Ohjaajan kanssa — kun pelillä ja Ohjaajan projektilla oli sama nimi, toisen moduulin tallennus saattoi hiljaa ylikirjoittaa toisen tilan; nyt nimiavaruudet on eriytetty, ja vanhat tiedostot siirretään kertaluonteisesti pelin latauksen yhteydessä.
   krok_7_pamiec_modelu: |
     VAIHE 7: Mallimallin muistin osoitin — miksi vanhojen pelien vuorot eivät vaadi sinulta manuaalista työtä
 
@@ -130,24 +128,12 @@ tresc:
     150 kierroksen jälkeen yhdessä pelissä narratiivimoottori lisää KERRAN "Cinematic Meta Warning" — meta-narratiivisen dramaattisen keskeytyksen. Se ilmestyy erilliseen dialogiin kellon äänellä, suoraan sinulle suunnattuna toisessa persoonassa, saavutusten yhteenvedolla ja varoituksella päätösten merkityksestä.
 
     Cinematic Warning EI ole osa äänikirjan narratiivia — .txt-suodatinmoottori poistaa sen sisällön automaattisesti (merkitty merkeillä ⚠️🚨⚠️), jotta et kuule äänikirjaa kuunnellessasi meta-kommenttia omasta pelistäsi. Sisältö tallennetaan vain .story.jsonl-lokiin (reflektointia tai muistoksi säilyttämistä varten) ja GUI-dialogiin, jossa voit lukea sen kerran ja jatkaa.
-  krok_9_most_do_rezysera: |
-    VAIHE 9: Silta Ohjaajaan — käytä Tarinoissa luotua Maailmankirjaa
-
-    Peliä pelatessa luotu tiedosto opowiesci/<nazwa>.md sisältää Maailmankirjan hahmoineen, jotka esiintyivät kertomuksessa, sekä niiden piirteet, aksentit ja luonteen. Muoto on täsmälleen sellainen, mitä Ohjaajan jäsennin vaatii — [Nimi: piirteet aksentin kuvauksella].
-
-    Mitä voit tehdä tällä:
-
-    1. Pelin päätyttyä avaa paneeli "{main.btn.rezyser}" (Ctrl+1).
-    2. Lataa samanniminen projekti — Ohjaaja lataa .txt-tiedoston tarinana ja .md-tiedoston Maailmankirjana.
-    3. Saat nyt klassisen Ohjaajan kerronnan (pitkät, jäsennellyt kohtaukset näytöksineen ja lukuineen) alkuperäisillä aksenteilla, joista pidit Tarinoissa. Karmelin vartija turvapaikasta puhuu lyhyin lausein, inkvisiittori Rosanna laulaen itäisellä aksentilla — kaikki piirteet säilytettyinä.
-
-    Tämä on yksisuuntainen silta: Tarinat tuottavat materiaalia, Ohjaaja muotoilee sen. Käänteinen ei ole mahdollista — Ohjaaja ei lataa Tarinoiden pelejä interaktiivisena tilana.
   krok_10_dostepnosc_nvda: |
-    VAIHE 10: Saavutettavuus (NVDA ja ruudunlukijat) — suunniteltu alusta alkaen
+    VAIHE 9: Saavutettavuus (NVDA ja ruudunlukijat) — suunniteltu alusta alkaen
 
     Koko Tarinat-moduuli on optimoitu sokeille pelaajille. Tässä mitä olemme tehneet:
 
-    VIIMEINEN KIERROS KENTTÄ — tämä on erillinen wx.TextCtrl vain luku -monirivinen (~140 px korkea) KOKO kertomuksen YLÄPUOLELLA. Jokaisen kierroksen jälkeen kenttä korvataan uudella osalla (otsikko "--- Kierros N ---" + kertomuksen sisältö). NVDA lukee sen heti, kun se on fokuksessa (automaattinen fokus kierroksen onnistumisen jälkeen), ilman että tarvitsee navigoida satojen rivien läpi koko tarinassa. Tallennetun pelin lataamisen jälkeen kenttä näyttää VIIMEISEN tallennetun kierroksen TIIVISTELMÄN (enintään 400 merkkiä `viimeiset_kierrokset` puskurista) etuliitteellä, joka ilmoittaa, että koko kertomus on alla olevassa kentässä.
+    VIIMEINEN KIERROS KENTTÄ — tämä on erillinen wx.TextCtrl vain luku -monirivinen (~140 px korkea) KOKO kertomuksen YLÄPUOLELLA. Jokaisen kierroksen jälkeen kenttä korvataan uudella osalla (otsikko "--- Kierros N ---" + kertomuksen sisältö). NVDA lukee sen heti, kun se on fokuksessa (automaattinen fokus kierroksen onnistumisen jälkeen), ilman että tarvitsee navigoida satojen rivien läpi koko tarinassa. Tallennetun pelin lataamisen jälkeen kenttä näyttää VIIMEISEN tallennetun kierroksen TIIVISTELMÄN (`viimeiset_kierrokset` puskurista, katkaistuna lauseen rajalla noin 1200 merkkiin, joten se ei katkea kesken sanan) etuliitteellä, joka ilmoittaa, että koko kertomus on alla olevassa kentässä.
 
     KOKO KERTOMUKSEN KENTTÄ — tämä on wx.TextCtrl vain luku -monirivinen, joka kasvaa jokaisen kierroksen jälkeen. NVDA lukee koko kertomuksen lineaarisesti, voit navigoida nuolilla tekstin sisällä, kopioida osia Ctrl+C:llä. Kenttä ei ole koskaan muokattavissa — muokkaat tarinaa VAIN uuden kierroksen kautta, uudella „Avaa kertomustiedosto…"-painikkeella (versiosta 15.2.3 alkaen, kuvattu alla) tai muokkaamalla .txt-tiedostoa suoraan Resurssienhallinnasta. Tämä kenttä on synkronoitu tiedoston `opowiesci/<nazwa>.txt` kanssa, voit käsitellä sitä äänikirjan esikatseluna.
 
@@ -157,7 +143,7 @@ tresc:
 
     TYHJÄN ALUEEN PIILOTTAMINEN — Vapaassa tilassa valinta-alue on TÄYSIN piilotettu (wx.Hide), ei vain harmaana — Välilehti ohittaa sen, NVDA ei vedä sitä elementtilistaan. Tämä estää pelaajaa eksymästä tyhjään paikkamerkkiin. Tiloissa 4 ja 5 alue näkyy vain mallin vastauksen onnistuneen validoinnin jälkeen (ei-tyhjä valintataulukko); mallin hallusinaatio (tyhjät valinnat) johtaa paluuseen vapaaseen tekstiin ilman käyttöliittymän sotkemista.
 
-    ÄÄNISIGNALIT — jokainen päättynyt kierros ilmoitetaan wx.Bell (järjestelmäkello) jälkeen, jota seuraa automaattinen fokuksen siirto kertomuskenttään. NVDA lukee sitten uuden kertomuksen ilman manuaalista navigointia.
+    ÄÄNISIGNALIT — jokainen päättynyt kierros ilmoitetaan wx.Bell (järjestelmäkello) jälkeen, jota seuraa automaattinen fokuksen siirto kenttään „Viimeinen kierros". NVDA lukee sitten tuoreen kierroksen alusta alkaen ilman, että koko siihenastista historiaa tarvitsee navigoida läpi.
 
     VÄRILLISET MUISTITILAT — mallin muistimittari muuttaa fontin väriä (vihreä/oranssi/punainen) täyttötason mukaan. Näkeville käyttäjille tämä on lisävisuaalinen signaali; NVDA lukee kuitenkin tilatekstin, joten sokeat eivät menetä tietoa.
 
@@ -178,4 +164,4 @@ tresc:
     Syy ja ratkaisu: Mallin hallusinaatio — huolimatta 4 LLM-tilasta, se palautti tyhjän valintataulukon. Sovellus piilottaa silloin tietoisesti valinta-alueen (sen sijaan, että näyttäisi tyhjän paikan) ja sallii jatkamisen vapaalla tekstillä. Seuraava kierros luultavasti luo valinnat oikein.
 
     Ongelma: .game.json ja .story.jsonl tiedostoja ei näy työpöydällä.
-    Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on järjestelmäkansio tavallisille käyttäjille, eikä se ole näkyvissä tiedostoselaimessa. Kertomustiedostot (.txt, .md) tallennetaan opowiesci/-kansioon — löydät ne sieltä.
+    Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on järjestelmäkansio tavallisille käyttäjille, eikä se ole näkyvissä tiedostoselaimessa. Kertomustiedosto (.txt) tallennetaan opowiesci/-kansioon — löydät sen sieltä.

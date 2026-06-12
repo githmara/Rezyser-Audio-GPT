@@ -60,7 +60,7 @@ tresc:
 
     1. Sláðu inn nafn leiksins í reitinn „{opowiesci.lbl_nazwa_gry}" (t.d. „min_ævintýri_1") — undir þessu nafni verða skráðar söguskrár, stöðuskrár og skráningarskrár.
     2. Veldu ham (Frjáls/Val/Minna illt).
-    3. Smelltu á "{opowiesci.btn_nowa_gra_label}". Forritið mun búa til 3 skrár: stöðuskrá (.game.json), tóma Heimsbók (.md) og stillingarskrá (.mode). Söguskráin (.txt) verður búin til eftir fyrstu umferð.
+    3. Smelltu á "{opowiesci.btn_nowa_gra_label}". Forritið mun búa til 2 skrár: stöðuskrá (.game.json) og stillingarskrá (.mode). Söguskráin (.txt) verður búin til eftir fyrstu umferð.
     4. Í reitnum „{opowiesci.lbl_akcja}" neðst á spjaldinu, sláðu inn fyrstu aðgerðina, t.d. „ég vakna í ókunnu herbergi". Smelltu á "{opowiesci.btn_wyslij_label}". Frásagnavélin mun opna heiminn byggt á aðgerðinni þinni — lýsing á herberginu, hljóð, persónur, fyrstu ákvarðanir.
     5. Hver umferð verður sjálfkrafa vistuð — þú getur lokað forritinu hvenær sem er og hlaðið leikinn aftur síðar með því að smella á "{opowiesci.btn_wczytaj_label}".
   krok_4_zasady_swiata: |
@@ -70,7 +70,7 @@ tresc:
 
     Þrjú dæmigerð notkunarsvið reglna heimsins:
 
-    HLJÓÐFRÆÐILEGAR REGLUR — stjórna framburði nafna persóna í TTS (Vocalizer, ElevenLabs). Dæmi: „Nafnið Joanna skal alltaf borið fram hart, pólsk [dż]; aldrei mjúkt [j]." Vélin mun setja þessa útgáfu í frásögnina frá næstu umferð, og persónan Joanna í Heimsbókinni mun halda fyrirhuguðum hljómi. Þetta er líka náttúruleg brú til áherslna Leikstjórans — ef þú hleður Heimsbókinni inn í stjórnborð Leikstjórans eftir að leiknum er lokið (SKREF 9 hér að neðan), mun hljóðfræðilega reglan „fara með" leiknum sem eiginleiki persónunnar.
+    HLJÓÐFRÆÐILEGAR REGLUR — stjórna framburði nafna persóna í TTS (Vocalizer, ElevenLabs). Dæmi: „Nafnið Joanna skal alltaf borið fram hart, pólsk [dż]; aldrei mjúkt [j]." Vélin mun setja þennan valkost inn í frásögnina frá næstu umferð, þannig að nafnið heldur fyrirhuguðum hljómi í hverri næstu senu þessa leiks.
 
     VÉLRÆNAR REGLUR — lýsa „eðlisfræðilögum" heimsins þíns, sem LLM á að fylgja. Dæmi: „Í þessum heimi virkar galdur aðeins á nóttunni; á daginn eru persónurnar venjulegt fólk." Vélin mun ekki búa til galdra í hádegi, jafnvel þótt aðgerð þinnar umferðar krefjist þess — í staðinn mun hún bjóða upp á valkost eða leiða þig að kvöldi.
 
@@ -92,7 +92,7 @@ tresc:
 
     /sjónrænt <lýsing>, /visualize <lýsing> — margskynja lýsing á núverandi senu. Breytir ekki stöðu leiksins, leggur ekki til valkosti — frásagnavélin notar öll fimm skilningarvitin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/sjónrænt hvernig lítur vörðurinn út" eða „/sjónrænt lyktin í kaffihúsinu".
 
-    /endurhlaða, /refresh — endurhleður innra minnið úr frásagnarskránni eftir handvirka breytingu á henni (frá v15.5). Þegar þú opnar opowiesci/<nazwa>.txt í textaritli og t.d. lagar innsláttarvillu eða styttir óþarfa málsgrein, samstillir þessi skipun (eða hnappurinn „{opowiesci.btn_odswiez_z_dysku_label}") ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. Ef samantekt fyrri umferða er þegar til, helst hún ósnortin, þannig að næsta umferð og næsta samantekt verða ekki til á úreltum gögnum. ATHUGIÐ: leikstaðan (persónur, staðsetning, búnaður, þræðir) úr .game.json skránni er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins getur næsta umferð rekist á þær.
+    /endurhlaða, /refresh — endurhleður innra minnið úr frásagnarskránni eftir handvirka breytingu á henni (frá v15.5). Þegar þú opnar opowiesci/<nazwa>.txt í textaritli og t.d. lagar innsláttarvillu eða styttir óþarfa málsgrein, samstillir þessi skipun ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. (Samsvarandi hnappurinn „{opowiesci.btn_odswiez_z_dysku_label}" er tæknilegur valkostur, sjálfgefið falinn — skipunin virkar alltaf.) Ef samantekt fyrri umferða er þegar til, helst hún ósnortin, þannig að næsta umferð og næsta samantekt verða ekki til á úreltum gögnum. ATHUGIÐ: leikstaðan (persónur, staðsetning, búnaður, þræðir) úr .game.json skránni er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins getur næsta umferð rekist á þær.
 
     /hjálp, /help — birtir glugga með lista yfir allar tiltækar skipanir. Glugginn er aðeins til lesturs og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
 
@@ -100,17 +100,15 @@ tresc:
   krok_6_pliki_gry: |
     SKREF 6: Leikjaskrár — hvar þú finnur gögnin þín
 
-    Hver leikur framleiðir fimm skrár, hver í mismunandi möppu, með mismunandi hlutverkum:
+    Hver leikur framleiðir fjórar skrár, hver í mismunandi möppu, með mismunandi hlutverkum:
 
     opowiesci/<nazwa>.txt — fullkomin frásögn tilbúin til að hlusta á sem hljóðbók. Hægt að opna í Notepad eða hlaða inn í Hljóðbókaarkitektinn (Breyti) og búa til Word-skrá með köflum eða tímasetningu fyrir ElevenLabs.
-
-    opowiesci/<nazwa>.md — Heimsbók persóna á formi [Nafn: einkenni], endurmynduð eftir hverja umferð. Samhæft form við parser Leikstjórans! Þú getur hlaðið þessari skrá inn í spjald Leikstjórans (Skrá → Hlaða inn) og fengið innfædda hreim persóna í klassískri TTS-frásögn — brú milli tveggja aðal eininga forritsins.
 
     runtime/opowiesci/<nazwa>.game.json — fullkomið ástand leiksins: nafn, hamur, virkar persónur, staðsetning, búnaður, opnir þræðir, síðustu 6 umferðir í styttri formi. Þetta er sannleiksgjafi til að hlaða leiknum — án þessarar skrár er ekki hægt að halda áfram.
 
     runtime/opowiesci/<nazwa>.story.jsonl — hrátt skrá yfir hverja umferð (beiðni leikmanns + svar módels í JSON). Skráin er ekki nauðsynleg fyrir leikinn — hún er notuð til villuleitar eða síðari greiningar (t.d. tölfræði um hversu margar umferðir ævintýrið stóð, hvaða þræði LLM kynnti).
 
-    runtime/skrypty/<nazwa>.mode — lýsigögn um númer ham (3=Frjáls, 4=Val, 5=Minna illt). Skrá sameiginleg með Leikstjóranum, en númerun rekst ekki á (Leikstjórinn notar 0-2).
+    runtime/opowiesci/<nazwa>.mode — lýsigögn um númer ham (3=Frjáls, 4=Val, 5=Minna illt). Frá v17.4 í eigin Sögu-möppu. Áður lá skráin í runtime/skrypty/ sameiginlega með Leikstjóranum — þegar leikur og verkefni Leikstjórans báru sama nafn gat vistun annars einingarinnar þaggað niður og yfirskrifað ham hins; nú eru nafnrýmin aðskilin og gamlar skrár fluttar í eitt skipti við hleðslu leiksins.
   krok_7_pamiec_modelu: |
     SKREF 7: Vísir minnis líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handavinnu frá þér
 
@@ -130,24 +128,12 @@ tresc:
     Eftir 150 umferðir í einum leik mun frásagnavélin EINU SINNI setja inn „Cinematic Meta Warning" — dramatískan millikafla með meta-frásögn. Hann mun birtast í sérstöku samtali með bjölluhljóði, með beinni ávarpi til þín í annarri persónu, samantekt á afrekum og viðvörun um mikilvægi ákvarðana sem teknar eru.
 
     Cinematic Warning ER EKKI hluti af hljóðbókarfrásögninni — .txt síuvélin fjarlægir sjálfkrafa innihald hennar (merkt með ⚠️🚨⚠️), svo þú heyrir ekki meta-athugasemd um eigin leik meðan á hlustun hljóðbókar stendur. Innihaldið fer aðeins í .story.jsonl skrána (til íhugunar eða varðveislu) og í samtali í GUI, þar sem þú getur lesið það einu sinni og haldið áfram.
-  krok_9_most_do_rezysera: |
-    SKREF 9: Brú til Leikstjórans — nýttu Heimsbókina búna til í Sögum
-
-    Skráin opowiesci/<nazwa>.md sem er búin til á meðan leik stendur inniheldur Heimsbókina með persónum sem komu fram í frásögninni, ásamt eiginleikum þeirra, hreim og persónuleika. Sniðið er nákvæmlega eins og parser Leikstjórans krefst — [Nafn: eiginleikar með lýsingu á hreim].
-
-    Hvað þú getur gert við þetta:
-
-    1. Eftir að leiknum lýkur, opnaðu spjaldið "{main.btn.rezyser}" (Ctrl+1).
-    2. Hladdu inn verkefni með sama nafni — Leikstjórinn mun hlaða .txt skrá sem sögu og .md sem Heimsbók.
-    3. Þú færð nú klassíska frásögn Leikstjórans (löng, skipulögð atriði með þáttum og köflum) með innfæddum hreimum persóna sem þú hafðir gaman af í Sögum. Karmel vörðurinn úr skýlinu sem talar í stuttum setningum, rannsóknardómarinn Rosanna með syngjandi austurhreim — allir eiginleikar varðveittir.
-
-    Þetta er einhliða brú: Sögur framleiða efni, Leikstjórinn formatar það. Öfugt er ekki mögulegt — Leikstjórinn les ekki leiki úr Sögum sem gagnvirkt ástand.
   krok_10_dostepnosc_nvda: |
-    SKREF 10: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
+    SKREF 9: Aðgengi (NVDA og skjálesarar) — hannað frá upphafi
 
     Allur söguhlutinn hefur verið fínstilltur fyrir blinda notendur. Hvað við gerðum nákvæmlega:
 
-    REITUR SÍÐASTA UMFERÐ — þetta er sérstakur wx.TextCtrl readonly marglínureitur (~140 px hæð) YFIR fullri frásögn. Eftir hverja umferð er reiturinn uppfærður með nýjum kafla (fyrirsögn „--- Umferð N ---" + innihald frásagnarinnar). NVDA les hann strax eftir fókus (sjálfvirkur fókus eftir vel heppnaða umferð), án þess að þurfa að fletta í gegnum hundruð lína af fullri sögu. Eftir að vistaður leikur er hlaðinn sýnir reiturinn YFIRLIT síðustu vistaðrar umferðar (hámark 400 stafir úr `síðustu_umferðir` buffer) með forskeyti sem upplýsir að full frásögn er í reitnum fyrir neðan.
+    REITUR SÍÐASTA UMFERÐ — þetta er sérstakur wx.TextCtrl readonly marglínureitur (~140 px hæð) YFIR fullri frásögn. Eftir hverja umferð er reiturinn uppfærður með nýjum kafla (fyrirsögn „--- Umferð N ---" + innihald frásagnarinnar). NVDA les hann strax eftir fókus (sjálfvirkur fókus eftir vel heppnaða umferð), án þess að þurfa að fletta í gegnum hundruð lína af fullri sögu. Eftir að vistaður leikur er hlaðinn sýnir reiturinn YFIRLIT síðustu vistaðrar umferðar (úr `ostatnie_tury` buffer, skorið á setningamörkum niður í ~1200 stafi, þannig að það slítur ekki í miðju orði) með forskeyti sem upplýsir að full frásögn er í reitnum fyrir neðan.
 
     REITUR FULLRAR FRÁSAGNAR — þetta er wx.TextCtrl readonly marglínureitur sem vex eftir hverja umferð. NVDA les línulega alla frásögnina, þú getur flett með örvahnöppum innan textans, afritað hluta með Ctrl+C. Reiturinn er aldrei breytanlegur — þú breytir sögunni AÐEINS með nýrri umferð, með nýja hnappnum „Opna frásagnarskrá…" (frá v15.2.3, lýst hér að neðan) eða með beinni breytingu á .txt skrá úr skráaskoðaranum. Þessi reitur er samstilltur við skrána `opowiesci/<nazwa>.txt`, þú getur litið á hann sem forskoðun á hljóðbók.
 
@@ -157,7 +143,7 @@ tresc:
 
     FELA TÓM SVÆÐI — í Frjálsum ham er valmöguleikasvæðið ALGJÖRLEGA falið (wx.Hide), ekki bara grátt — Tab sleppir því, NVDA dregur það ekki inn í lista yfir hluti. Þetta kemur í veg fyrir rugling hjá notanda sem lendir í tómum placeholder. Í ham 4 og 5 birtist svæðið aðeins eftir að svar líkaninu hefur verið staðfest (ekki tómur valkostalisti); ofskynjun líkaninu (tómir valkostir) leiðir til fallbacks í frjálsan texta án þess að sóða til viðmótið.
 
-    HLJÓÐMERKI — hver lokið umferð er merkt með wx.Bell (kerfisklukku), á eftir fylgir sjálfvirk tilfærsla á fókus á frásagnarreitinn. NVDA mun þá lesa nýja frásögnina án þess að þurfa handvirka leiðsögn.
+    HLJÓÐMERKI — hver lokið umferð er merkt með wx.Bell (kerfisklukku), á eftir fylgir sjálfvirk tilfærsla á fókus á reitinn „Síðasta umferð". NVDA mun þá lesa ferska umferð frá upphafi, án þess að þurfa að sigla í gegnum alla söguna fram að þessu.
 
     LITIR Á MINNISSTÖÐU — vísir á minnisstöðu líkaninu breytir lit leturs (grænn/appelsínugulur/rauður) í samræmi við fyllingarstig. Fyrir notendur sem sjá er þetta viðbótar sjónrænt merki; NVDA les samt texta stöðunnar, svo blindir missa ekki af upplýsingum.
 
@@ -178,4 +164,4 @@ tresc:
     Ástæða og lausn: Ofskynjun módelsins — þrátt fyrir ham 4 skilaði LLM tómu valmöguleikatöflu. Forritið felur þá meðvitað valmöguleikasvæðið (í stað þess að sýna tóman placeholder) og leyfir að halda áfram með frjálsum texta. Næsta umferð mun líklega búa til valmöguleika rétt. 
 
     Vandamál: Skrárnar .game.json og .story.jsonl eru ekki sýnilegar á skjáborðinu.
-    Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskrár (.txt, .md) fara í opowiesci/ — þar finnur þú þær.
+    Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskráin (.txt) fer í opowiesci/ — þar finnur þú hana.

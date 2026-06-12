@@ -1,4 +1,4 @@
-Audio Director GPT — Interactive Stories Module (17.3.0 – Release Edition)
+Audio Director GPT — Interactive Stories Module (17.4.0 – Release Edition)
 
 The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
@@ -47,7 +47,7 @@ If you prefer complete freedom, leave "(custom game)" in the Quick Start field a
 
 1. Enter the name of the game in the "Game Name" bar (e.g., "my_adventure_1") — under this name, the narrative, state, and log files will be saved.
 2. Choose the mode (Free/Choices/Lesser Evil).
-3. Click "New Game". The application will create 3 files: game state (.game.json), an empty World Book (.md), and mode metadata (.mode). The narrative file (.txt) will be created after the first turn.
+3. Click "New Game". The application will create 2 files: game state (.game.json) and mode metadata (.mode). The narrative file (.txt) will be created after the first turn.
 4. In the "Your Action or Command" field at the bottom of the panel, enter the first action, e.g., "I wake up in an unknown room." Click "Send". The narrative engine will open the world based on your action — room description, sounds, characters, initial decisions.
 5. Each turn will be automatically saved — you can close the application at any time and load the game later with the "Load" button.
 
@@ -58,7 +58,7 @@ From version 15.1, you will find a "Edit world rules…" button above the narrat
 
 Three typical applications of world rules:
 
-PHONETIC RULES — control the pronunciation of character names by TTS (Vocalizer, ElevenLabs). Example: "Always pronounce the name Joanna with a hard, Polish [dʒ]; never soft [j]." The engine will insert this variant into the narration from the next turn, and the character Joanna in the World Book will retain the intended sound. This is also a natural bridge to the Director's accents — if you load the Book into the Director's panel after the game (STEP 9 below), the phonetic rule will "carry over" with the game as a character trait.
+PHONETIC RULES — control the pronunciation of character names by TTS (Vocalizer, ElevenLabs). Example: "Always pronounce the name Joanna with a hard, Polish [dʒ]; never soft [j]." The engine will insert this variant into the narration from the next turn, so that the name (e.g., Joanna) retains its intended sound in every subsequent scene of this game.
 
 MECHANICAL RULES — describe the "laws of physics" of your world that the LLM must adhere to. Example: "In this world, magic only works at night; during the day, characters are ordinary people." The engine will not invent spells at noon, even if your turn's action demands it — instead, it will propose an alternative or guide you towards dusk.
 
@@ -81,7 +81,7 @@ The narrative engine automatically selects the AI model depending on the mode: f
 
 /wizualizuj <description>, /visualize <description> — a multisensory description of the current scene. It does not change the game state, does not propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog, it is NOT added to the narration or saved in the audiobook file. Example: "/wizualizuj how the guard looks" or "/wizualizuj the smell of the café".
 
-/odswiez, /refresh — refreshes the internal memory from the narration file after you have edited it by hand (since v15.5). When you open opowiesci/<name>.txt in an editor and, for example, fix a typo or trim an excess paragraph, this command (or the "Refresh from disk" button) synchronizes the fresh ending with the engine's context — without a hard reset and a full reload of the game. If a summary of earlier turns already exists, it stays untouched, so the next turn and the next summary are not built on stale data. NOTE: the game state (characters, location, inventory, threads) from the .game.json file is NOT updated — if your edit changed facts of the world, the next turn may drift out of sync with them.
+/odswiez, /refresh — refreshes the internal memory from the narration file after you have edited it by hand (since v15.5). When you open opowiesci/<name>.txt in an editor and, for example, fix a typo or trim an excess paragraph, this command synchronizes the fresh ending with the engine's context — without a hard reset and a full reload of the game. If a summary of earlier turns already exists, it stays untouched, so the next turn and the next summary are not built on stale data. NOTE: the game state (characters, location, inventory, threads) from the .game.json file is NOT updated — if your edit changed facts of the world, the next turn may drift out of sync with them. (The equivalent "Refresh from disk" button is a technical option, hidden by default — the command always works.)
 
 /pomoc, /help — displays a dialog with the list of all available commands. The dialog is read-only and NVDA-friendly — the text field receives focus automatically, the screen reader immediately reads the whole list without manual navigation.
 
@@ -90,17 +90,15 @@ The narrative engine automatically selects the AI model depending on the mode: f
 
 STEP 6: Game Files — where to find your data
 
-Each game produces five files, each in a different folder, with various roles:
+Each game produces four files, each in a different folder, with various roles:
 
 opowiesci/<name>.txt — the full narrative ready for listening as an audiobook. It can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
-
-opowiesci/<name>.md — the World Book of characters in the format [Name: traits], regenerated after each turn. The format is compatible with the Director's parser! You can load this file into the Director's panel (File → Load) and receive native character accents in classic TTS narration — a bridge between the two main modules of the application.
 
 runtime/opowiesci/<name>.game.json — the full game state: name, mode, active characters, location, inventory, open threads, the last 6 turns in a summarized form. This is the source of truth for loading the game — without this file, you cannot continue.
 
 runtime/opowiesci/<name>.story.jsonl — the raw log of each turn (player request + model response in JSON). This file is not needed for the game — it is used for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
 
-runtime/skrypty/<name>.mode — metadata of the mode number (3=Free, 4=Choices, 5=Lesser Evil). This file is shared with the Director, but the numbering does not conflict (the Director uses 0-2).
+runtime/opowiesci/<name>.mode — metadata of the mode number (3=Free, 4=Choices, 5=Lesser Evil). Since v17.4, it lives in its own Stories folder. Previously, the file resided in runtime/skrypty/ together with the Director — with a game and a Director project of the same name, saving one module could silently overwrite the other's mode; now the namespaces are separated, and old files are migrated once upon loading a game.
 
 
 STEP 7: Model Memory Indicator — Why Turns in Old Games Don't Require Manual Work from You
@@ -124,24 +122,11 @@ After 150 turns in a single game, the narrative engine will ONCE insert a "Cinem
 The Cinematic Warning is NOT part of the audiobook narration — the .txt filtering engine automatically removes its content (marked with ⚠️🚨⚠️) so that you don't hear meta-commentary about your own game during the audiobook playback. The content is only logged in the .story.jsonl file (for reflection or as a keepsake) and in the GUI dialogue, where you can read it once and continue.
 
 
-STEP 9: Bridge to the Director — Utilize the World Book Created in Stories
-
-The file opowiesci/<name>.md generated during gameplay contains the World Book with characters that appeared in the narrative, along with their traits, accents, and character. The format is exactly what the Director's parser requires — [Name: traits with accent description].
-
-What you can do with it:
-
-1. After finishing the game, open the "🎬  Director" panel (Ctrl+1).
-2. Load a project with the same name — the Director will load the .txt file as a story and the .md file as the World Book.
-3. You will now receive the classic Director's narrative (long, structured scenes with acts and chapters) with the native accents of characters you liked in Stories. The Carmel Guardian from the shelter speaking in short sentences, the inquisitor Rosanna with a melodic eastern accent — all traits preserved.
-
-This is a one-way bridge: Stories produce material, the Director formats it. The reverse is not possible — the Director does not load games from Stories as an interactive state.
-
-
-STEP 10: Accessibility (NVDA and screen readers) — designed from the start
+STEP 9: Accessibility (NVDA and screen readers) — designed from the start
 
 The entire Stories module has been optimized for visually impaired users. Here's what we specifically did:
 
-LAST TURN FIELD — this is a separate wx.TextCtrl readonly multiline (~140 px height) ABOVE the full narration. After each turn, the field is replaced with a fresh fragment (header "--- Turn N ---" + narration content). NVDA reads it immediately upon focus (auto-focus after a successful turn), without navigating through hundreds of lines of the full story. After loading a saved game, the field shows a SUMMARY of the last saved turn (max 400 characters from the `last_turns` buffer) with a prefix informing that the full narration is in the field below.
+LAST TURN FIELD — this is a separate wx.TextCtrl readonly multiline (~140 px height) ABOVE the full narration. After each turn, the field is replaced with a fresh fragment (header "--- Turn N ---" + narration content). NVDA reads it immediately upon focus (auto-focus after a successful turn), without navigating through hundreds of lines of the full story. After loading a saved game, the field shows a SUMMARY of the last saved turn (from the `last_turns` buffer, cut at a sentence boundary to ~1200 characters, so it doesn't break off mid-word) with a prefix informing that the full narration is in the field below.
 
 FULL NARRATION FIELD — this is a wx.TextCtrl readonly multiline that grows with each turn. NVDA reads the entire narration linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn, through the new "Open narration file…" button (since v15.2.3, described below), or by direct editing of the .txt file from the file explorer. This field is synchronized with the `opowiesci/<name>.txt` file, you can treat it as a preview of the audiobook.
 
@@ -151,7 +136,7 @@ DYNAMIC CHOICE BUTTONS — in Choices and Lesser Evil modes, each turn creates n
 
 HIDING EMPTY AREAS — in Free mode, the choice area is COMPLETELY hidden (wx.Hide), not just grayed out — Tab skips it, NVDA won't include it in the list of elements. This prevents player confusion from falling into an empty placeholder. In modes 4 and 5, the area appears only after successful model response validation (non-empty choice array); model hallucination (empty choices) results in a fallback to free-text without cluttering the interface.
 
-AUDIO SIGNALS — each completed turn is signaled by wx.Bell (system bell), followed by automatic focus transfer to the narration field. NVDA will then read the new narration without the need for manual navigation.
+AUDIO SIGNALS — each completed turn is signaled by wx.Bell (system bell), followed by automatic focus transfer to the "Last turn" field. NVDA will then read the fresh turn from the beginning, without the need to navigate through the entire previous history.
 
 COLORED MEMORY STATUS — the model memory indicator changes font color (green/orange/red) according to the fill level. For sighted users, this is an additional visual cue; NVDA still reads the status text, so visually impaired users don't miss out on information.
 
@@ -173,4 +158,4 @@ Problem: In Choice mode, the engine did not generate buttons, even though I expe
 Cause and Solution: Model hallucination — despite mode 4, the LLM returned an empty choice array. The application consciously hides the choice area (instead of showing an empty placeholder) and allows continuation with free-text. The next turn will likely generate choices correctly.
 
 Problem: The .game.json and .story.jsonl files are not visible on the desktop.
-Cause and Solution: This is intentional — runtime/ is a system folder for regular users, invisible from the file explorer. Narrative files (.txt, .md) go to scripts/ — you will find them there.
+Cause and Solution: This is intentional — runtime/ is a system folder for regular users, invisible from the file explorer. The narrative file (.txt) goes to opowiesci/ — you will find it there.

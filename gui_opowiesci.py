@@ -4,12 +4,12 @@ gui_opowiesci.py — Cienka warstwa widoku panelu „Interaktywne Opowieści" (w
 Faza 1 wdrożenia v15.0 — szkielet UI z zaślepionymi callbackami. Kolejne fazy:
     • Faza 2: silnik LLM (``opowiesci_ai.py``), JSON-schema response, daemon thread.
     • Faza 3: engine + lifecycle plików (``core_opowiesci.py``):
-              - ``skrypty/[gra].txt`` (narracja bez meta-warningów)
-              - ``skrypty/[gra].md``  (księga świata, format ``[Imię: cechy]`` —
-                ten sam parser co Reżyser → output Opowieści jest wejściem Reżysera)
+              - ``opowiesci/[gra].txt`` (narracja bez meta-warningów)
               - ``runtime/opowiesci/[gra].game.json`` (pełny stan)
               - ``runtime/opowiesci/[gra].story.jsonl`` (append-only log tur)
-              - ``runtime/skrypty/[gra].mode`` (3=Swobodny, 4=Wybory, 5=Mniejsze zło)
+              - ``runtime/opowiesci/[gra].mode`` (3=Swobodny, 4=Wybory, 5=Mniejsze zło;
+                v17.4: własny folder, koniec współdzielenia z Reżyserem)
+              (księga świata ``.md`` usunięta w v17.4 / P6A — była martwym mostem)
     • Faza 4: parser slash-komend (lokalny, bez API), wskaźnik pamięci modelu,
               auto-streszczenie na 70% okna, ``/visualize`` jako tryb 0/Burza
               (bez zapisu do plików).
@@ -367,17 +367,19 @@ class OpowiesciPanel(wx.Panel):
         # v15.5: odświeżenie pamięci wewnętrznej po ręcznej edycji `.txt`
         # (np. ucięciu złamanego kinowego cięcia). Domyka cykl „Otwórz narrację
         # → edytuj → Odśwież z dysku" bez twardego resetu i wczytania gry.
-        # v15.5.1: BEZWARUNKOWO UKRYTY. Rekoncyliacja wsiąka edytowaną narrację
-        # do `ostatnie_tury`/`.game.json`, ale NIE re-derywuje `stan`,
+        # P4 (v17.4): OPT-IN pod tą samą flagą `EDYCJA_STANU_GRY_WIDOCZNA` co
+        # „Edytuj stan gry…". Rekoncyliacja wsiąka edytowaną narrację do
+        # `ostatnie_tury`/`.game.json`, ale NIE re-derywuje `stan`,
         # `postacie_aktywne` ani liczników — powstaje cichy dryf między narracją
-        # a stanem strukturalnym, który mści się dopiero w kolejnych turach.
-        # Wierna re-derywacja wymaga ekstrakcji stanu przez LLM (koszt API,
-        # którego zwykły user nie oczekuje) — to świadomie odłożone na v15.6 jako
-        # opt-in dla technicznych (bezpośrednia edycja `.game.json` za flagą
-        # zaszytą w kodzie). Do tego czasu przycisk pozostaje ukryty.
+        # a stanem strukturalnym. v15.5.1 chowała przycisk bezwarunkowo; teraz,
+        # gdy istnieje już ścieżka ręcznego domknięcia dryfu („Edytuj stan gry"),
+        # odsłaniamy oba razem dla świadomego, technicznego usera (który modyfikuje
+        # stałą w źródle przed buildem własnej paczki). Bez flagi przycisk
+        # pozostaje ukryty, a handler `_on_odswiez_z_dysku` nie jest martwy.
         self._btn_odswiez_z_dysku = wx.Button(self, label=t("opowiesci.btn_odswiez_z_dysku_label"))
         self._btn_odswiez_z_dysku.SetToolTip(t("opowiesci.btn_odswiez_z_dysku_tooltip"))
-        self._btn_odswiez_z_dysku.Hide()
+        if not EDYCJA_STANU_GRY_WIDOCZNA:
+            self._btn_odswiez_z_dysku.Hide()
 
         # v15.6: opt-in techniczna edycja `.game.json` (stała `EDYCJA_STANU_GRY_WIDOCZNA`).
         # Przycisk istnieje zawsze (spójny kod budowy paska), ale bez flagi jest
@@ -420,7 +422,12 @@ class OpowiesciPanel(wx.Panel):
             zaczatki_dict[k]["etykieta"] for k in self._klucze_zaczatkow
         ]
 
-        lbl_qs = wx.StaticText(self, label=t("opowiesci.lbl_quick_start"))
+        # P5 (v17.4): referencja na labelu zachowana (`_lbl_quick_start`) —
+        # `_aktualizuj_uistate` chowa Quick Start (label + Choice) w trakcie
+        # aktywnej gry. Presety mają sens tylko przy zakładaniu nowej gry;
+        # w trakcie rozgrywki gracz nic z nimi nie zrobi, a NVDA i tak czytał
+        # je przy tabulacji = szum.
+        self._lbl_quick_start = wx.StaticText(self, label=t("opowiesci.lbl_quick_start"))
         self._choice_zaczatek = wx.Choice(
             self, choices=opcje_choice,
             name=t("opowiesci.choice_quick_start_name"),
@@ -429,7 +436,7 @@ class OpowiesciPanel(wx.Panel):
         self._choice_zaczatek.SetToolTip(t("opowiesci.choice_quick_start_tooltip"))
 
         row_qs = wx.BoxSizer(wx.HORIZONTAL)
-        row_qs.Add(lbl_qs,                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
+        row_qs.Add(self._lbl_quick_start, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
         row_qs.Add(self._choice_zaczatek, proportion=1,
                    flag=wx.ALIGN_CENTER_VERTICAL)
 
@@ -498,19 +505,33 @@ class OpowiesciPanel(wx.Panel):
         self._gauge_pamiec = wx.Gauge(self, range=100, name=t("opowiesci.pamiec_gauge_name"))
         self._gauge_pamiec.SetValue(0)
 
-        self._lbl_pamiec_status = wx.StaticText(
-            self, label=t("opowiesci.pamiec_status_init"),
+        # P3 (v17.4): status pamięci to readonly `wx.TextCtrl`, nie `StaticText`
+        # — parytet z Reżyserem (`_zbuduj_wskaznik_pamieci_modelu`) i zgodnie
+        # z regułą A11y z CLAUDE.md (komunikaty techniczne → nawigowalne,
+        # kopiowalne pole readonly, nie „aktualizuj label + ustaw fokus").
+        # NO_BORDER + tło panelu maskują, że to pole edycji; treść ustawiamy
+        # przez SetValue (NIE SetLabel) + SetForegroundColour dla poziomu.
+        self._lbl_pamiec_status = wx.TextCtrl(
+            self,
+            value=t("opowiesci.pamiec_status_init"),
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
             name=t("opowiesci.pamiec_status_name"),
         )
+        self._lbl_pamiec_status.SetBackgroundColour(self.GetBackgroundColour())
+        self._lbl_pamiec_status.SetMinSize((-1, 48))
 
         row = wx.BoxSizer(wx.HORIZONTAL)
-        row.Add(lbl,                     flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=8)
-        row.Add(self._gauge_pamiec,      proportion=1,
-                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=8)
-        row.Add(self._lbl_pamiec_status, flag=wx.ALIGN_CENTER_VERTICAL)
+        row.Add(lbl,                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=8)
+        row.Add(self._gauge_pamiec, proportion=1,
+                flag=wx.ALIGN_CENTER_VERTICAL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(row, flag=wx.EXPAND | wx.ALL, border=BORDER)
+        sizer.Add(
+            self._lbl_pamiec_status,
+            flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+            border=BORDER,
+        )
         return sizer
 
     # ------------------------------------------------------------------
@@ -839,7 +860,7 @@ class OpowiesciPanel(wx.Panel):
         # Lock UI: zapobiega podwójnej wysyłce, dezorientacji NVDA.
         self._btn_wyslij.Disable()
         self._txt_akcja.SetValue("")
-        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_wysylanie"))
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_wysylanie"))
 
         # Daemon thread — proces nie czeka na nas przy zamknięciu aplikacji.
         snapshot_kopia = self._snapshot
@@ -962,7 +983,13 @@ class OpowiesciPanel(wx.Panel):
         # 5. Status + odblokowanie + dźwięk + fokus.
         self._btn_wyslij.Enable()
         wx.Bell()  # A11y: NVDA usłyszy „pinga" — sygnał gotowości
-        self._txt_narracja.SetFocus()  # NVDA przeczyta nową narrację
+        # P1-min (v17.4): fokus na „Ostatnia tura", NIE na pełną narrację.
+        # Pełna narracja (`_txt_narracja`) po AppendText + SetFocus stawia
+        # kursor na początku — NVDA odczytałby historię od pierwszej linii
+        # zamiast świeżej sceny. Pole „Ostatnia tura" trzyma wyłącznie skrót
+        # właśnie wygenerowanej tury (SetInsertionPoint(0) w pkt 1b), więc to
+        # ono jest właściwym celem fokusu po wysyłce.
+        self._txt_ostatnia_tura.SetFocus()  # NVDA przeczyta świeżą turę od początku
 
         # 6. Faza 4: aktualizacja wskaźnika pamięci modelu (po update snapshotu).
         self._aktualizuj_pamiec_modelu()
@@ -1014,7 +1041,6 @@ class OpowiesciPanel(wx.Panel):
 
         try:
             self._projekt.dopisz_do_txt(wynik.narracja, naglowek=naglowek)
-            self._projekt.rebuild_ksiega_swiata()
             self._projekt.zapisz_game_json()
             self._projekt.dopisz_story_jsonl({
                 "tura":          self._snapshot.numer_tury,
@@ -1130,7 +1156,7 @@ class OpowiesciPanel(wx.Panel):
             except ImportError:
                 msg = str(exc)
 
-        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_blad"))
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_blad"))
         self._btn_wyslij.Enable()
         self._wyswietl_blad_ai(msg)
 
@@ -1204,14 +1230,18 @@ class OpowiesciPanel(wx.Panel):
         # pierwszej turze — w nowo założonej, bez tury, sam handler
         # pokaże info zamiast otwarcia pustej ścieżki).
         self._btn_otworz_narracje.Enable(ma_projekt)
-        # v15.5.1: „Odśwież z dysku" jest bezwarunkowo ukryty (cichy dryf stanu —
-        # patrz komentarz przy tworzeniu przycisku). Nie sterujemy już jego
-        # Enable/Show — pozostaje Hidden do czasu opt-in z v15.6.
-        # v15.6: „Edytuj stan gry…" — Enable tylko gdy flaga włączona ORAZ jest
-        # aktywny projekt (bez gry nie ma `.game.json` do edycji). Bez flagi
-        # przycisk pozostaje ukryty z konstruktora, więc Enable jest no-op.
+        # P4 + v15.6: „Odśwież z dysku" oraz „Edytuj stan gry…" są opt-in dla
+        # technicznych userów — oba pod tą samą flagą `EDYCJA_STANU_GRY_WIDOCZNA`.
+        # Rekoncyliacja narracji NIE re-derywuje stanu strukturalnego (cichy
+        # dryf, patrz komentarz przy tworzeniu „Odśwież z dysku"), ale techniczny
+        # user domyka dryf ręcznie przez „Edytuj stan gry" — dlatego wiążemy je
+        # razem zamiast trzymać martwy, niewywoływalny handler. Enable tylko gdy
+        # flaga włączona ORAZ jest aktywny projekt (bez gry nie ma `.game.json`
+        # ani `.txt` do edycji/rekoncyliacji). Bez flagi oba pozostają ukryte
+        # z konstruktora, więc Enable jest no-op.
         if EDYCJA_STANU_GRY_WIDOCZNA:
             self._btn_edytuj_stan.Enable(ma_projekt)
+            self._btn_odswiez_z_dysku.Enable(ma_projekt)
 
         utrwalony = self._zapisany_tryb in self._MAPA_TRYB_RB_NA_INT
         if utrwalony:
@@ -1227,6 +1257,11 @@ class OpowiesciPanel(wx.Panel):
         # projektu) gracz ma swobodny wybór z poziomu RadioBoxa — dialog
         # byłby tu redundantny.
         self._btn_edytuj_tryb.Show(ma_projekt and utrwalony)
+
+        # P5 (v17.4): Quick Start (label + Choice presetów) chowamy w trakcie
+        # aktywnej gry — presety dotyczą wyłącznie zakładania nowej gry.
+        self._lbl_quick_start.Show(not ma_projekt)
+        self._choice_zaczatek.Show(not ma_projekt)
         self.Layout()
 
     def _ustaw_rb_z_trybu(self, tryb_int: int) -> None:
@@ -1235,7 +1270,7 @@ class OpowiesciPanel(wx.Panel):
             self._rb_tryb.SetSelection(self._MAPA_TRYB_RB_NA_INT.index(tryb_int))
 
     # ------------------------------------------------------------------
-    # _on_nowa_gra: zakłada projekt + 5 plików (.txt/.md/.game.json/.story.jsonl/.mode)
+    # _on_nowa_gra: zakłada projekt + pliki (.game.json/.mode; .txt po 1. turze)
     # ------------------------------------------------------------------
     def _on_nowa_gra(self, _event: wx.Event) -> None:
         """Tworzy nową grę pod podaną nazwą.
@@ -1292,7 +1327,7 @@ class OpowiesciPanel(wx.Panel):
             projekt.zapisz_tryb(tryb)
             self._zapisany_tryb = tryb           # utrwalenie decyzji w RAM
             projekt.zapisz_game_json()           # initial state na dysku
-            projekt.rebuild_ksiega_swiata()      # pusta księga (brak postaci na start)
+            # v17.4 (P6A): brak rebuildu księgi świata — patrz core_opowiesci.
             # `.txt` nie tworzymy w „Nowa gra" — pierwsza tura LLM go założy
             # (`dopisz_do_txt` ma `mode="a"` z domyślnym tworzeniem pliku).
         except OSError as exc:
@@ -1488,7 +1523,7 @@ class OpowiesciPanel(wx.Panel):
         # obszar dla trybu Swobodnego (3) i dla pustej listy.
         self._przeladuj_wybory(list(projekt.ostatnie_wybory), tryb_z_dysku)
         self._aktualizuj_uistate()
-        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_gotowe"))
 
     # ------------------------------------------------------------------
     # _on_zapisz: ręczny dump game.json (autozapis działa po każdej turze)
@@ -2059,7 +2094,7 @@ class OpowiesciPanel(wx.Panel):
             )
             return
 
-        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_wizualizowanie"))
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_wizualizowanie"))
         snapshot_kopia = self._snapshot
         threading.Thread(
             target=self._visualize_worker,
@@ -2084,7 +2119,7 @@ class OpowiesciPanel(wx.Panel):
 
     def _pokaz_visualize_dialog(self, tekst: str) -> None:
         """Dialog z multisensorycznym opisem — readonly, NVDA-friendly, nie zapisuje plików."""
-        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_gotowe"))
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_gotowe"))
 
         dlg = wx.Dialog(self, title=t("opowiesci.dlg_visualize_tytul"), size=(720, 520))
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -2115,7 +2150,7 @@ class OpowiesciPanel(wx.Panel):
         """
         if self._projekt is None:
             self._gauge_pamiec.SetValue(0)
-            self._lbl_pamiec_status.SetLabel(t("opowiesci.pamiec_status_init"))
+            self._lbl_pamiec_status.SetValue(t("opowiesci.pamiec_status_init"))
             return
 
         status = oai.oblicz_status_pamieci(
@@ -2128,7 +2163,7 @@ class OpowiesciPanel(wx.Panel):
             oai.POZIOM_OSTRZEZENIE: "opowiesci.pamiec_etap_ostrzezenie",
             oai.POZIOM_ALARM:       "opowiesci.pamiec_etap_alarm",
         }[status.poziom]
-        self._lbl_pamiec_status.SetLabel(t(
+        self._lbl_pamiec_status.SetValue(t(
             "opowiesci.pamiec_status_format",
             procent=status.procent,
             tokeny=status.tokeny,
@@ -2144,7 +2179,7 @@ class OpowiesciPanel(wx.Panel):
         """Spawn wątku tła z LLM-streszczeniem `ostatnie_tury`."""
         self._meta_w_toku = True
         self._btn_wyslij.Disable()  # blokada: race condition na ostatnie_tury
-        self._lbl_pamiec_status.SetLabel(t("opowiesci.status_streszczanie"))
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_streszczanie"))
 
         snapshot_kopia = self._snapshot
         liczba_tur = len(snapshot_kopia.ostatnie_tury)

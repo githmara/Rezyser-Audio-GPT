@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modulo Storie Interattive (17.3.0 – Versione di Pubblicazione)
+Reżyser Audio GPT — Modulo Storie Interattive (17.4.0 – Versione di Pubblicazione)
 
 Il secondo principale modo dell'applicazione accanto a Regista — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
 
@@ -47,7 +47,7 @@ Se preferisci la massima libertà, lascia "(gioco personalizzato)" nel campo Qui
 
 1. Inserisci il nome del gioco nella barra "Nome del gioco" (ad es. "mia_avventura_1") — con questo nome verranno salvati i file di narrazione, stato e log.
 2. Seleziona la modalità (Libera/Scelte/Minore male).
-3. Clicca "Nuovo gioco". L'applicazione creerà 3 file: stato del gioco (.game.json), un Libro del Mondo vuoto (.md) e metadati della modalità (.mode). Il file di narrazione (.txt) verrà generato dopo il primo turno.
+3. Clicca "Nuovo gioco". L'applicazione creerà 2 file: stato del gioco (.game.json) e metadati della modalità (.mode). Il file di narrazione (.txt) verrà generato dopo il primo turno.
 4. Nel campo "La tua azione o comando" in fondo al pannello, inserisci la prima azione, ad esempio "mi sveglio in una stanza sconosciuta". Clicca "Invia". Il motore narrativo aprirà il mondo basandosi sulla tua azione — descrizione della stanza, suoni, personaggi, prime decisioni.
 5. Ogni turno verrà salvato automaticamente — puoi chiudere l'applicazione in qualsiasi momento e caricare il gioco successivamente con il pulsante "Carica".
 
@@ -58,7 +58,7 @@ Dalla versione 15.1, sopra il campo di narrazione troverai il pulsante "Modifica
 
 Tre usi tipici delle regole del mondo:
 
-REGOLE FONETICHE — controllano la pronuncia dei nomi dei personaggi tramite TTS (Vocalizer, ElevenLabs). Esempio: "Pronuncia sempre il nome Joanna in modo duro, polacco [dż]; mai morbido [j]." Il motore inserirà questa variante nella narrazione dal turno successivo, e il personaggio Joanna nel Libro del Mondo manterrà l'intenzione sonora. Questo è anche un ponte naturale verso gli accenti del Regista — se dopo aver finito il gioco carichi il Libro nel pannello del Regista (PASSO 9 sotto), la regola fonetica "passerà" con il gioco come caratteristica del personaggio.
+REGOLE FONETICHE — controllano la pronuncia dei nomi dei personaggi tramite TTS (Vocalizer, ElevenLabs). Esempio: "Pronuncia sempre il nome Joanna in modo duro, polacco [dż]; mai morbido [j]." Il motore inserirà questa variante nella narrazione dal turno successivo, così che il nome conserverà l'intenzione sonora in ogni scena successiva di questo gioco.
 
 REGOLE MECCANICHE — descrivono le "leggi della fisica" del tuo mondo che l'LLM deve rispettare. Esempio: "In questo mondo la magia funziona solo di notte; di giorno i personaggi sono persone comuni." Il motore non inventerà incantesimi a mezzogiorno, anche se l'azione del tuo turno lo richiede — invece proporrà un'alternativa o ti guiderà verso il tramonto.
 
@@ -81,7 +81,7 @@ Il motore narrativo seleziona automaticamente il modello AI in base alla modalit
 
 /visualizza <descrizione>, /visualize <descrizione> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata, NON viene aggiunto alla narrazione né salvato nel file audiolibro. Esempio: "/visualizza come appare la guardia" o "/visualizza l'odore del caffè".
 
-/aggiorna, /refresh — aggiorna la memoria interna dal file di narrazione dopo averlo modificato manualmente (dalla v15.5). Quando apri opowiesci/<nazwa>.txt nell'editor e ad esempio correggi un refuso o accorci un paragrafo superfluo, questo comando (o il pulsante "Aggiorna dal disco") sincronizza la coda fresca con il contesto del motore — senza un reset completo e senza ricaricare il gioco. Se esiste già un riassunto dei turni precedenti, esso resta intatto, così il turno successivo e il riassunto successivo non nasceranno su dati non aggiornati. ATTENZIONE: lo stato del gioco (personaggi, luogo, inventario, fili narrativi) dal file .game.json NON viene aggiornato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe divergere da essi.
+/aggiorna, /refresh — aggiorna la memoria interna dal file di narrazione dopo averlo modificato manualmente (dalla v15.5). Quando apri opowiesci/<nazwa>.txt nell'editor e ad esempio correggi un refuso o accorci un paragrafo superfluo, questo comando sincronizza la coda fresca con il contesto del motore — senza un reset completo e senza ricaricare il gioco. Se esiste già un riassunto dei turni precedenti, esso resta intatto, così il turno successivo e il riassunto successivo non nasceranno su dati non aggiornati. ATTENZIONE: lo stato del gioco (personaggi, luogo, inventario, fili narrativi) dal file .game.json NON viene aggiornato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe divergere da essi. (Il pulsante equivalente "Aggiorna dal disco" è un'opzione tecnica, nascosta per impostazione predefinita — il comando funziona sempre.)
 
 /aiuto, /help — visualizza una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura e NVDA-friendly — il campo di testo riceve automaticamente il focus, il lettore di schermo legge immediatamente l'intero elenco senza necessità di navigazione.
 
@@ -90,17 +90,15 @@ Il motore narrativo seleziona automaticamente il modello AI in base alla modalit
 
 PASSO 6: File di gioco — dove trovare i tuoi dati
 
-Ogni gioco produce cinque file, ciascuno in una cartella diversa, con ruoli differenti:
+Ogni gioco produce quattro file, ciascuno in una cartella diversa, con ruoli differenti:
 
 opowiesci/<nazwa>.txt — narrazione completa pronta per l'ascolto come audiolibro. Può essere aperto in Blocco note o caricato nell'Architetto Audiobook (Convertitore) per generare un file Word con capitoli o un timing per ElevenLabs.
-
-opowiesci/<nazwa>.md — Libro del Mondo dei personaggi nel formato [Nome: caratteristiche], rigenerato dopo ogni turno. Formato compatibile con il parser del Regista! Puoi caricare questo file nel pannello del Regista (File → Carica) e otterrai accenti nativi dei personaggi nella narrazione classica TTS — un ponte tra i due principali moduli dell'applicazione.
 
 runtime/opowiesci/<nazwa>.game.json — stato completo del gioco: nome, modalità, personaggi attivi, posizione, equipaggiamento, trame aperte, ultime 6 mosse in forma abbreviata. Questa è la fonte di verità per caricare il gioco — senza questo file non è possibile continuare.
 
 runtime/opowiesci/<nazwa>.story.jsonl — log grezzo di ogni turno (richiesta del giocatore + risposta del modello in JSON). Il file non è necessario per il gioco — serve per il debug o l'analisi successiva (ad esempio, statistiche su quanto è durata l'avventura, quali trame ha introdotto LLM).
 
-runtime/skrypty/<nazwa>.mode — metadati del numero di modalità (3=Libero, 4=Scelte, 5=Il minore dei mali). File condiviso con il Regista, ma la numerazione non collide (il Regista usa 0-2).
+runtime/opowiesci/<nazwa>.mode — metadati del numero di modalità (3=Libero, 4=Scelte, 5=Il minore dei mali). Dalla v17.4 nella propria cartella Storie. In precedenza il file si trovava in runtime/skrypty/ insieme al Regista — con un gioco e un progetto del Regista dallo stesso nome, il salvataggio di un modulo poteva sovrascrivere silenziosamente la modalità dell'altro; ora gli spazi dei nomi sono separati e i vecchi file vengono migrati una sola volta al caricamento del gioco.
 
 
 PASSO 7: Indicatore di memoria del modello — perché i turni nei vecchi giochi non richiedono il tuo intervento manuale
@@ -124,24 +122,11 @@ Dopo 150 turni di una partita, il motore narrativo inserirà UNA VOLTA un "Cinem
 Il Cinematic Warning NON fa parte della narrazione dell'audiolibro — il motore di filtraggio .txt elimina automaticamente il suo contenuto (contrassegnato dai marker ⚠️🚨⚠️), in modo che durante l'ascolto dell'audiolibro non si senta un meta-commento sulla propria partita. Il contenuto viene registrato solo nel log .story.jsonl (per riflessione o per conservare come ricordo) e nel dialogo nell'interfaccia grafica, dove puoi leggerlo una volta e continuare.
 
 
-PASSO 9: Ponte al Regista — utilizza il Libro del Mondo creato in Storie
-
-Il file opowiesci/<nazwa>.md generato durante il gioco contiene il Libro del Mondo con i personaggi che sono apparsi nella narrazione, insieme alle loro caratteristiche, accenti e personalità. Il formato è esattamente quello richiesto dal parser di Regista — [Nome: caratteristiche con descrizione dell'accento].
-
-Cosa puoi fare con questo:
-
-1. Al termine del gioco, apri il pannello "🎬  Regista" (Ctrl+1).
-2. Carica il progetto con lo stesso nome — Regista caricherà il file .txt come storia e il .md come Libro del Mondo.
-3. Otterrai ora una narrazione classica di Regista (scene lunghe e strutturate con atti e capitoli) con gli accenti nativi dei personaggi che hai apprezzato in Storie. Il Guardiano del Carmelo dal rifugio che parla con frasi brevi, l'inquisitrice Rosanna con un accento orientale melodioso — tutte le caratteristiche conservate.
-
-Questo è un ponte unidirezionale: le Storie producono materiale, Regista lo formatta. Non è possibile il contrario — Regista non carica i giochi da Storie come stato interattivo.
-
-
-PASSO 10: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
+PASSO 9: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
 
 L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa abbiamo fatto nello specifico:
 
-CAMPO ULTIMO TURNO — è un wx.TextCtrl readonly multiline separato (~140 px di altezza) SOPRA la narrazione completa. Dopo ogni turno, il campo viene sostituito con un nuovo frammento (intestazione "--- Turno N ---" + contenuto della narrazione). NVDA lo legge immediatamente dopo il focus (auto-focus dopo il successo del turno), senza navigare attraverso centinaia di righe della storia completa. Dopo il caricamento di un gioco salvato, il campo mostra un RIASSUNTO dell'ultimo turno salvato (max 400 caratteri dal buffer `ultimi_turni`) con un prefisso che informa che la narrazione completa è nel campo sottostante.
+CAMPO ULTIMO TURNO — è un wx.TextCtrl readonly multiline separato (~140 px di altezza) SOPRA la narrazione completa. Dopo ogni turno, il campo viene sostituito con un nuovo frammento (intestazione "--- Turno N ---" + contenuto della narrazione). NVDA lo legge immediatamente dopo il focus (auto-focus dopo il successo del turno), senza navigare attraverso centinaia di righe della storia completa. Dopo il caricamento di un gioco salvato, il campo mostra un RIASSUNTO dell'ultimo turno salvato (dal buffer `ostatnie_tury`, tagliato al confine di frase fino a ~1200 caratteri, senza interrompere a metà parola) con un prefisso che informa che la narrazione completa è nel campo sottostante.
 
 CAMPO NARRAZIONE COMPLETA — è un wx.TextCtrl readonly multiline che cresce dopo ogni turno. NVDA legge linearmente l'intera narrazione, puoi navigare con le frecce all'interno del testo, copiare frammenti con Ctrl+C. Il campo non è mai modificabile — modifichi la storia SOLO attraverso un nuovo turno, tramite il nuovo pulsante «Apri file di narrazione…» (dalla v15.2.3, descritto sotto) o tramite la modifica diretta del file .txt da Esplora file. Questo campo è sincronizzato con il file `opowiesci/<nazwa>.txt`, puoi trattarlo come un'anteprima dell'audiolibro.
 
@@ -151,7 +136,7 @@ PULSANTI DI SCELTA DINAMICI — nelle modalità Scelte e Il male minore, ogni tu
 
 NASCONDERE AREE VUOTE — nella modalità Libera, l'area delle scelte è COMPLETAMENTE nascosta (wx.Hide), non solo disattivata — Tab la salta, NVDA non la include nella lista degli elementi. Questo previene la confusione del giocatore che si imbatte in un placeholder vuoto. Nelle modalità 4 e 5, l'area appare solo dopo una valida risposta del modello (tabella delle scelte non vuota); un'allucinazione del modello (scelte vuote) comporta un fallback al testo libero senza ingombrare l'interfaccia.
 
-SEGNALI SONORI — ogni turno completato è segnalato da wx.Bell (campanello di sistema), seguito da un trasferimento automatico del focus sul campo della narrazione. NVDA leggerà quindi la nuova narrazione senza necessità di navigazione manuale.
+SEGNALI SONORI — ogni turno completato è segnalato da wx.Bell (campanello di sistema), seguito da un trasferimento automatico del focus sul campo "Ultimo turno". NVDA leggerà quindi il turno fresco dall'inizio, senza necessità di navigare attraverso l'intera cronologia.
 
 STATUS DI MEMORIA COLORATI — l'indicatore di memoria del modello cambia il colore del carattere (verde/arancione/rosso) in base al livello di riempimento. Per gli utenti vedenti è un ulteriore segnale visivo; NVDA legge comunque il testo dello status, quindi i non vedenti non perdono informazioni.
 
@@ -173,4 +158,4 @@ Problema: In modalità Scelte il motore non ha generato pulsanti, nonostante mi 
 Causa e soluzione: Allucinazione del modello — nonostante la modalità 4 LLM abbia restituito una tabella di scelte vuota. L'applicazione nasconde consapevolmente l'area delle scelte (invece di mostrare un placeholder vuoto) e permette di continuare con il testo libero. Il turno successivo probabilmente genererà le scelte correttamente.
 
 Problema: I file .game.json e .story.jsonl non sono visibili sul desktop.
-Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per gli utenti comuni, non visibile dall'esploratore di file. I file di narrazione (.txt, .md) vengono salvati in skrypty/ — li troverai lì.
+Causa e soluzione: È intenzionale — runtime/ è una cartella di sistema per gli utenti comuni, non visibile dall'esploratore di file. Il file di narrazione (.txt) viene salvato in opowiesci/ — lo troverai lì.
