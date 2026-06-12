@@ -28,9 +28,9 @@ obok exe — dokładnie tam, gdzie wcześniej (obok interpretera), więc ciekaws
 użytkownik nadal traktuje go jak folder systemowy.
 
 NARZĘDZIA DEWELOPERSKIE (``build_release.py``, ``generuj_dokumentacje.py``,
-``odswiez_rezysera.py``, ``buduj_wielojezyczne_*.py``, ``tlumacz_ai.py``) celowo
-NIE importują tego modułu — uruchamiają się wyłącznie ze źródła, nigdy w paczce
-frozen, więc ``Path(__file__).parent`` jest tam zawsze poprawne i prostsze.
+``buduj_wielojezyczne_*.py``, ``tlumacz_ai.py``) celowo NIE importują tego
+modułu — uruchamiają się wyłącznie ze źródła, nigdy w paczce frozen, więc
+``Path(__file__).parent`` jest tam zawsze poprawne i prostsze.
 """
 
 from __future__ import annotations

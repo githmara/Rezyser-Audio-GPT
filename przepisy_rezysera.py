@@ -127,7 +127,8 @@ class PrzepisRezysera:
                           ``skrypty/<nazwa>.txt``.
         stosuj_akcenty_fonetyczne:
                           (tylko tryb) True → odpowiedź przechodzi przez
-                          silnik akcentów (``core_poliglota.akcent_*``).
+                          silnik akcentów
+                          (``core_poliglota.zastosuj_reguly_fonetyczne``).
         przypomnienie_uzytkownika:
                           (tylko tryb) Tekst doklejany do treści
                           ``role=user`` tuż przed wysłaniem.
@@ -352,9 +353,8 @@ def zaladuj_przepis(
 def wyczysc_cache() -> None:
     """Zapomina wczytane przepisy – użyteczne po edycji YAML-i w runtime.
 
-    Wywoływane m.in. przez ``odswiez_rezysera.py`` po aktualizacji akcentów
-    (choć ten konkretny generator dotyka innych YAML-i, to cache może
-    przedawnić się także tutaj).
+    Wołane po ręcznej edycji plików ``rezyser/`` / ``akcenty/``, by kolejne
+    odczyty wzięły świeżą treść z dysku zamiast przeterminowanego cache.
     """
     _CACHE_PRZEPISOW.clear()
 

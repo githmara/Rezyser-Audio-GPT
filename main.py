@@ -24,7 +24,6 @@ import core_elevenlabs
 import core_poliglota
 import core_updater
 import i18n
-import odswiez_rezysera
 from gui_konwerter import KonwerterPanel
 from gui_manager_regul import ManagerRegulPanel
 from gui_opowiesci import OpowiesciPanel
@@ -399,15 +398,7 @@ class HomePanel(wx.Panel):
         )
         self._btn_open_manager.SetToolTip(t("home.btn_open_manager_tooltip"))
         self.Bind(wx.EVT_BUTTON, self._on_open_manager, self._btn_open_manager)
-        tools_btn_sizer.Add(self._btn_open_manager, flag=wx.RIGHT, border=8)
-
-        self._btn_odswiez = wx.Button(
-            self, label=t("home.btn_odswiez_label"),
-            name=t("home.btn_odswiez_name"),
-        )
-        self._btn_odswiez.SetToolTip(t("home.btn_odswiez_tooltip"))
-        self.Bind(wx.EVT_BUTTON, self._on_odswiez_rezysera, self._btn_odswiez)
-        tools_btn_sizer.Add(self._btn_odswiez)
+        tools_btn_sizer.Add(self._btn_open_manager)
 
         main_sizer.Add(tools_btn_sizer, flag=wx.ALL, border=16)
 
@@ -632,74 +623,6 @@ class HomePanel(wx.Panel):
                 wx.OK | wx.ICON_INFORMATION,
                 self,
             )
-
-    # ------------------------------------------------------------------
-    # Handler: Odśwież akcenty Reżysera z YAML
-    # ------------------------------------------------------------------
-    def _on_odswiez_rezysera(self, _event: wx.Event) -> None:
-        """Skanuje dictionaries/ i regeneruje wrappery akcent_* w module Reżysera.
-
-        Zbiera log generatora do listy, a potem pokazuje go w dialogu
-        z polem TextCtrl (dostępne dla NVDA – Ctrl+A, Ctrl+C kopiuje całość).
-        Przy sukcesie informuje o konieczności ponownego uruchomienia
-        aplikacji; przy błędzie wyświetla pełną treść błędu.
-        """
-        linie: list[str] = []
-        try:
-            raport = odswiez_rezysera.uruchom(on_log=linie.append)
-        except Exception as exc:  # noqa: BLE001
-            wx.MessageBox(
-                t("home.raport_niespodziewany_tresc", tresc_bledu=str(exc)),
-                t("home.raport_niespodziewany_tytul"),
-                wx.OK | wx.ICON_ERROR,
-                self,
-            )
-            return
-
-        # Zbuduj nagłówek dialogu w zależności od wyniku
-        if raport["errors"]:
-            tytul  = t("home.raport_tytul_blad")
-            header = t("home.raport_header_blad")
-        elif raport["core_changed"] or raport["rezyser_changed"]:
-            tytul  = t("home.raport_tytul_sukces")
-            n = len(raport["akcenty"])
-            header = t("home.raport_header_sukces", liczba_akcentow=n)
-        else:
-            tytul  = t("home.raport_tytul_bez_zmian")
-            n = len(raport["akcenty"])
-            header = t("home.raport_header_bez_zmian", liczba_akcentow=n)
-
-        self._pokaz_raport_dialog(tytul, header, "\n".join(linie))
-
-    def _pokaz_raport_dialog(
-        self, tytul: str, header: str, tresc_logu: str,
-    ) -> None:
-        """Wyświetla raport generatora w dialogu z polem do skopiowania.
-
-        Dialog jest w pełni dostępny z klawiatury i NVDA: pole TextCtrl
-        (TE_READONLY) odczytuje treść linia po linii strzałkami, Ctrl+A
-        + Ctrl+C kopiuje wszystko do schowka.
-        """
-        dlg = wx.Dialog(self, title=tytul, size=(640, 420))
-        sizer = wx.BoxSizer(wx.VERTICAL)
-
-        lbl_head = wx.StaticText(dlg, label=header)
-        lbl_copy = wx.StaticText(dlg, label=t("home.raport_lbl_log"))
-        txt = wx.TextCtrl(
-            dlg, value=tresc_logu,
-            style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name=t("home.raport_log_name"),
-        )
-        btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
-
-        sizer.Add(lbl_head, flag=wx.ALL,                                       border=8)
-        sizer.Add(lbl_copy, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,               border=8)
-        sizer.Add(txt,      proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
-        sizer.Add(btn_ok,   flag=wx.ALL | wx.ALIGN_RIGHT,                      border=8)
-        dlg.SetSizer(sizer)
-        txt.SetFocus()
-        dlg.ShowModal()
-        dlg.Destroy()
 
 
 # ---------------------------------------------------------------------------

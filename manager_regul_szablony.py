@@ -289,9 +289,9 @@ Twoja praca: utworzyć regułę fonetyczną w drzewie projektu.
 
 # KONTEKST PROJEKTU
 - `core_poliglota.py` — silnik fonetyczny. Akcenty są ładowane z
-  `dictionaries/<kod>/akcenty/*.yaml`; dispatcher (`_AKCENT_FUNCS`
-  w `core_rezyser.py`) jest generowany automatycznie przez
-  `odswiez_rezysera.py` po dodaniu/usunięciu pliku.
+  `dictionaries/<kod>/akcenty/*.yaml` DYNAMICZNIE (od v17.5): tryb
+  Reżysera dyspatchuje po id akcentu w locie, bez kroku generowania
+  kodu — dodanie pliku YAML wystarcza.
 - Paczki wdrożone (stan 13.9): {inne_paczki} — to Twoje wzorce stylu
   i fonetyki dla podobnych celów (np. akcent finski jest w każdej z nich).
 - Paczka bazowa tego zadania: `dictionaries/{jezyk_bazowy}/`
@@ -358,13 +358,13 @@ zamiast „Akcent fonetyczny"). Nie da się sensownie napisać listy
    (Write).
 4. Zweryfikuj parsowalność:
    `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
-5. Uruchom `python odswiez_rezysera.py` (Bash) — skrypt dopisze do
-   `core_poliglota.akcent_*` docstring listę plików źródłowych
-   i do `core_rezyser._AKCENT_FUNCS` wpis dispatchera. Output zawiera
-   czerwone ostrzeżenia, jeśli akcent o tym samym id ma niespójną
-   strukturę między paczkami.
-6. W odpowiedzi raportuj: ile par ma `zamiany:`, którą paczkę wzięto
-   za wzorzec stylu, i czy `odswiez_rezysera.py` wyrzucił ostrzeżenia.
+5. (opcjonalnie) Włącz walidację pętli sekwencyjnych `zamiany:`:
+   uruchom aplikację ze źródła z `REZYSER_VALIDATE_ZAMIANY=1` — silnik
+   wypisze na konsoli ostrzeżenia, jeśli reguły zapętlają się przez
+   `str.replace`. Regeneracji kodu NIE trzeba — akcent jest wykrywany
+   dynamicznie po dodaniu pliku.
+6. W odpowiedzi raportuj: ile par ma `zamiany:` i którą paczkę wzięto
+   za wzorzec stylu.
 """
 
 
@@ -470,11 +470,9 @@ charakterystyka co dokładnie robi pipeline.
    (Write) z tą samą strukturą, ale natywną treścią pól tekstowych.
 4. Zweryfikuj parsowalność:
    `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
-5. Uruchom `python odswiez_rezysera.py` (Bash) — dispatcher zauważy
-   plik. W ostrzeżeniach silnika nie powinno być info o niespójnościach
-   (struktura jest standardowa).
-6. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec i ostrzeżenia
-   `odswiez_rezysera.py`.
+5. Gotowe — akcent oczyszczający jest wykrywany dynamicznie przy starcie
+   aplikacji, bez regeneracji kodu.
+6. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec.
 """
 
 
@@ -576,10 +574,9 @@ w {natywna_baza}. Konwencja etykiety wdrożonych paczek (z emoji 🔧):
    (Write) z tą samą strukturą, natywną treścią pól tekstowych.
 3. Zweryfikuj parsowalność:
    `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
-4. Uruchom `python odswiez_rezysera.py` (Bash) — dispatcher dorzuci
-   plik do mapy.
-5. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec i ewentualne
-   ostrzeżenia z `odswiez_rezysera.py`.
+4. Gotowe — naprawiacz tagów jest wykrywany dynamicznie przy starcie
+   aplikacji, bez regeneracji kodu.
+5. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec.
 """
 
 
@@ -1345,10 +1342,10 @@ def zbuduj_wynik(
                 "Szablon ma pusty pipeline zamian fonetycznych. Skopiuj "
                 "prompt do agenta AI z dostępem do projektu (Claude Code, "
                 "Cursor, Aider) — agent otworzy pliki referencyjne, "
-                f"zaprojektuje listę `zamiany:`, zapisze plik w "
-                f"`dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` i uruchomi "
-                "`odswiez_rezysera.py` (aktualizuje dispatcher). Potem "
-                'kliknij „Odśwież akcenty Reżysera" na Stronie głównej.\n\n'
+                f"zaprojektuje listę `zamiany:` i zapisze plik w "
+                f"`dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`. "
+                "Akcent jest wykrywany dynamicznie — wystarczy zrestartować "
+                "aplikację (od v17.5 nie ma już kroku regeneracji kodu).\n\n"
                 "UWAGA: lista `zamiany:` jest aplikowana SEKWENCYJNIE — każda "
                 "reguła operuje na wyjściu poprzedniej. Reguła wprowadzająca "
                 "literę używaną później jako `wzor` w innej regule wpadnie "

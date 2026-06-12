@@ -33,7 +33,9 @@ import core_elevenlabs as ce
 import core_rezyser as cr
 
 #: Nazwa akcentu (znormalizowana ``_usun_polskie``, małe litery) → kod ISO 639-1
-#: do atrybutu ``lang``. Klucze pokrywają ``_AKCENT_FUNCS`` z ``core_rezyser``.
+#: do atrybutu ``lang``. Klucze pokrywają id-y akcentów z
+#: ``dictionaries/<jezyk>/akcenty/`` (te same, których szuka dynamiczny
+#: dispatch ``core_rezyser.zastosuj_akcenty_uniwersalne``).
 #: Dopasowanie jest prefiksowe (patrz :func:`_iso_dla_mowcy`), więc fleksja
 #: („fińskim", „fińskiego") też trafia na ``finski`` → ``fi``.
 _AKCENT_ISO: dict[str, str] = {

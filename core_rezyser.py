@@ -66,29 +66,22 @@ from typing import Any
 import core_tokeny as ct
 import sciezki
 
-# Silnik fonetyczny – punktowy import akcentów z core_poliglota.
-# Blok poniżej jest generowany automatycznie przez ``odswiez_rezysera.py``
-# na podstawie YAML-i z ``dictionaries/<jezyk>/akcenty/``. NIE edytuj
-# ręcznie – uruchom "Odśwież akcenty Reżysera z YAML" w aplikacji.
-# <GENEROWANE_IMPORTY_AKCENTOW_START>
+# Silnik fonetyczny trybu Reżysera. Od v17.5 akcenty są dyspatchowane
+# DYNAMICZNIE: nazwa akcentu z Księgi Świata jest wprost ``id`` wariantu YAML,
+# a ``zastosuj_reguly_fonetyczne`` ładuje reguły z
+# ``dictionaries/<jezyk>/akcenty/`` w locie — dokładnie jak tryb Poligloty.
+# Dzięki temu dorzucenie nowego pliku akcentu OBOK exe działa bez regeneracji
+# kodu; zniknął generator ``odswiez_rezysera.py`` i statyczne wrappery
+# ``akcent_*`` (martwy whitelist niemożliwy do odświeżenia w paczce frozen).
+# Patrz [[reguly_architektury]].
+#   ``slowa_akcentu`` – słowa-wyzwalacze parsera akcentów (Księga Świata),
+#   ``wariant_po_id`` – sprawdza, czy istnieje YAML akcentu o danej nazwie.
 from core_poliglota import (
-    akcent_wl,
-    akcent_angielski,
-    akcent_francuski,
-    akcent_niemiecki,
-    akcent_rosyjski,
-    akcent_hiszpanski,
-    akcent_polski,
-    akcent_hiszp,
-    akcent_wloski,
-    akcent_finski,
-    akcent_islandzki,
+    TRYB_REZYSER,
+    slowa_akcentu,
+    wariant_po_id,
+    zastosuj_reguly_fonetyczne,
 )
-# <GENEROWANE_IMPORTY_AKCENTOW_END>
-
-# 13.3: helper do dynamicznego budowania regexa parsera akcentów —
-# importowany ręcznie poza blokiem generatora, żeby odświerzacz go nie ruszał.
-from core_poliglota import slowa_akcentu
 
 # Wzorce nagłówków dla wszystkich 6 obsługiwanych języków aplikacji.
 # Używane przez parsing liczników, detekcję ostatniej linii oraz konwerter.
@@ -406,25 +399,6 @@ def zastosuj_akcenty_uniwersalne(
     if not akcenty_map:
         return tekst
 
-    # Mapa: znormalizowana nazwa akcentu → funkcja fonetyczna z core_poliglota.
-    # Blok generowany automatycznie przez ``odswiez_rezysera.py`` po każdym
-    # dodaniu nowego pliku YAML w dictionaries/<język>/akcenty/.
-    # <GENEROWANY_SLOWNIK_AKCENTOW_START>
-    _AKCENT_FUNCS = {
-        "wl":        akcent_wl,
-        "angielski": akcent_angielski,
-        "francuski": akcent_francuski,
-        "niemiecki": akcent_niemiecki,
-        "rosyjski":  akcent_rosyjski,
-        "hiszpanski":akcent_hiszpanski,
-        "polski":    akcent_polski,
-        "hiszp":     akcent_hiszp,
-        "wloski":    akcent_wloski,
-        "finski":    akcent_finski,
-        "islandzki": akcent_islandzki,
-    }
-# <GENEROWANY_SLOWNIK_AKCENTOW_END>
-
     # ── 2. Podział skryptu po tagach i aplikacja akcentów ──
     fragmenty = re.split(r"(\[[^\]]+\])", tekst)
     nowe_fragmenty: list[str] = []
@@ -457,9 +431,16 @@ def zastosuj_akcenty_uniwersalne(
                     zmodyfikowano = False
                     if dopasowane_dane["nazwa"]:
                         znorm = _usun_polskie(dopasowane_dane["nazwa"])
-                        fn = _AKCENT_FUNCS.get(znorm)
-                        if fn:
-                            dialog = fn(dialog, jezyk_projektu)
+                        # Dynamiczny dispatch (v17.5): akcent jest „znany", gdy
+                        # istnieje jego YAML (kategoria=='akcent') w języku
+                        # projektu. Brak pliku → spadamy do reguł ad-hoc niżej,
+                        # zamiast — jak dawny statyczny whitelist — oznaczać
+                        # fragment jako zmodyfikowany mimo braku reguł fonetycznych.
+                        cfg_akc = wariant_po_id(TRYB_REZYSER, jezyk_projektu, znorm)
+                        if cfg_akc and cfg_akc.get("kategoria") == "akcent":
+                            dialog = zastosuj_reguly_fonetyczne(
+                                dialog, znorm, jezyk_projektu
+                            )
                             zmodyfikowano = True
                     if not zmodyfikowano and dopasowane_dane["reguly"]:
                         for z, na in dopasowane_dane["reguly"]:
