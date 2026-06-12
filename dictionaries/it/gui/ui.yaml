@@ -761,6 +761,23 @@ poliglota:
   ai_zakonczone_tytul: "Successo"
   ai_zakonczone_tresc: "Traduzione completata!\n\nFile salvato come:\n{sciezka_pliku}"
   ai_blad_zapisu: "Errore di salvataggio del file risultante:\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    Nessun credito o limite API OpenAI superato! Traduzione interrotta al blocco {blok}.
+
+    Il progresso è stato automaticamente salvato. Ricarica il credito API e ricarica l'originale per continuare da questo punto.
+  ai_blad_cache: |-
+    Impossibile leggere il file temporaneo (cache di ripresa della traduzione):
+    {plik}
+
+    Elimina manualmente questo file e riprova.
+  ai_blad_uciety: |-
+    Il modello ha troncato la traduzione del blocco (superato il limite di lunghezza della risposta) e non è riuscito a completarla nonostante ripetute divisioni in parti più piccole. Dividi il file sorgente in frammenti più piccoli e riprova.
+  ai_ostrzezenie_iso_tytul: "Avviso tag linguistico"
+  ai_ostrzezenie_iso: |-
+    Impossibile recuperare automaticamente il codice ISO dall'API. È stato utilizzato il tag predefinito "pl". In caso di problemi con il lettore di schermo, utilizza il "Riparatore di Tag" in Modalità Regista.
+
+    Dettagli: {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul: "Errore"
   blad_ai_szczegoly_tytul: "Errore – Dettagli tecnici"

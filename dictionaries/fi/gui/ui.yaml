@@ -759,6 +759,23 @@ poliglota:
   ai_zakonczone_tytul: "Onnistui"
   ai_zakonczone_tresc: "Käännös valmis!\n\nTiedosto tallennettu nimellä:\n{sciezka_pliku}"
   ai_blad_zapisu: "Virhe tulostiedoston tallennuksessa:\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    Ei luottoja tai OpenAI API -raja ylittynyt! Käännös keskeytettiin lohkossa {blok}.
+
+    Edistyminen on tallennettu automaattisesti. Lisää API-tilille ja lataa alkuperäinen uudelleen jatkaaksesi tästä kohdasta.
+  ai_blad_cache: |-
+    Väliaikaistiedostoa (käännöksen jatkamisen välimuisti) ei voitu lukea:
+    {plik}
+
+    Poista tämä tiedosto manuaalisesti ja yritä uudelleen.
+  ai_blad_uciety: |-
+    Malli katkaisi lohkon käännöksen (vastauspituusraja ylittyi) eikä sitä voitu suorittaa loppuun useista pienemmistä osista huolimatta. Jaa lähdetiedosto pienempiin osiin ja yritä uudelleen.
+  ai_ostrzezenie_iso_tytul: "Kielitagin varoitus"
+  ai_ostrzezenie_iso: |-
+    ISO-koodia ei voitu hakea automaattisesti API:sta. Oletustagi "pl" on käytössä. Jos sinulla on ongelmia ruudunlukijan kanssa, käytä "Tunnistekorjainta" Ohjaajan tilassa.
+
+    Yksityiskohdat: {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul: "Virhe"
   blad_ai_szczegoly_tytul: "Virhe – Tekninen yksityiskohta"

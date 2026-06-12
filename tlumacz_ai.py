@@ -58,7 +58,45 @@ class WynikTlumaczenia:
     iso: str                       # kod języka BCP-47 (ISO 639-1, opcjonalnie z podtagiem regionu/pisma)
     base_name: str                 # nazwa pliku wynikowego bez rozszerzenia
     jezyk_docelowy: str            # tekstowa nazwa języka (z pola GUI)
-    ostrzezenia: list[str] = field(default_factory=list)   # miękkie błędy ISO itp.
+    ostrzezenia: list[str] = field(default_factory=list)   # miękkie błędy ISO itp. (techniczne, do logu)
+
+
+# =============================================================================
+# Mostek i18n: strukturalny sygnał błędu silnik → GUI (wzorem bledy_ai.py / v17.0)
+# =============================================================================
+# tlumacz_ai POZOSTAJE wolny od wxPython i i18n (moduł neutralny, woła go też
+# batchowy `buduj_wielojezyczne_docs.py`). Zamiast budować polską prozę błędu,
+# przekazuje GOŁĄ nazwę klucza w `ui.yaml` (namespace `poliglota.` dokłada GUI)
+# plus kwargs do `t(...)` — komunikat staje się natywny w każdym z 9 języków.
+# `detal` to techniczny opis po angielsku (log / dialog „szczegóły" / CLI docs);
+# `__str__` go zwraca, więc `buduj_wielojezyczne_docs.py` (traktuje komunikat
+# jak string: `.splitlines()`) działa bez zmian. Pusty `klucz_i18n` = błąd
+# nieoczekiwany — GUI pokaże `detal` pod domyślnym nagłówkiem (do zgłoszenia).
+
+
+@dataclass
+class InfoBleduTlumaczenia:
+    """Strukturalny sygnał błędu z silnika tłumacza (mostek i18n ↔ GUI)."""
+
+    klucz_i18n: str                                  # goła nazwa klucza w `poliglota.` (pusta = błąd nieoczekiwany)
+    detal: str = ""                                  # techniczny opis EN (log / dialog szczegółów / CLI)
+    kwargs: dict[str, Any] = field(default_factory=dict)   # parametry do t(klucz, **kwargs)
+    klucz_tytul: str = ""                            # opcjonalny klucz tytułu/nagłówka (soft-warning ISO)
+
+    def __str__(self) -> str:                        # batchowy docs-autotłumacz traktuje błąd jak string
+        return self.detal or self.klucz_i18n
+
+
+class BladUcietegoTlumaczenia(RuntimeError):
+    """Model uciął tłumaczenie bloku (limit wyjścia) i bisekcja go nie domknęła.
+
+    Treść (argument) zostaje po angielsku — trafia do `error_log.txt` / loga
+    CLI. GUI mapuje TYP na `klucz_i18n` (`ai_blad_uciety`), więc user widzi
+    komunikat natywny. Dziedziczy po `RuntimeError`, więc istniejące klauzule
+    `except Exception` w pętli głównej łapią ją bez zmian.
+    """
+
+    klucz_i18n = "ai_blad_uciety"
 
 
 # =============================================================================
@@ -67,9 +105,9 @@ class WynikTlumaczenia:
 # Wszystkie callbacki są opcjonalne – gdy nie zostaną podane, moduł po prostu
 # ich nie wywoła. GUI z wxPython zwykle zawija każdy callback w ``wx.CallAfter``.
 
-PostepCallback    = Callable[[str, int], None]   # (komunikat, procent 0–100)
-BladKrytyczny     = Callable[[str, str], None]   # (pełna treść błędu, częściowe tłumaczenie)
-BladMiekki        = Callable[[str, str], None]   # (szczegóły, tytuł dialogu)
+PostepCallback    = Callable[[str, int], None]                   # (komunikat, procent 0–100)
+BladKrytyczny     = Callable[[InfoBleduTlumaczenia, str], None]  # (info i18n, częściowe tłumaczenie)
+BladMiekki        = Callable[[InfoBleduTlumaczenia], None]       # (info i18n — miękki, nie przerywa)
 
 
 # =============================================================================
@@ -306,17 +344,15 @@ def _tlumacz_blok(
         return fragment
 
     if glebokosc <= 0:
-        raise RuntimeError(
-            "Model uciął tłumaczenie bloku (limit tokenów wyjścia) i nie udało "
-            "się go dokończyć mimo wielokrotnego podziału na mniejsze części. "
-            "Podziel plik źródłowy na mniejsze fragmenty i spróbuj ponownie."
+        raise BladUcietegoTlumaczenia(
+            "Output truncated (finish_reason='length'); recursive bisection "
+            "depth exhausted without completing the block."
         )
     lewa, prawa = _podziel_blok_na_pol(blok)
     if not lewa or not prawa:
-        raise RuntimeError(
-            "Model uciął tłumaczenie bloku (limit tokenów wyjścia), a bloku "
-            "nie da się już podzielić na mniejsze części. Podziel plik "
-            "źródłowy na mniejsze fragmenty i spróbuj ponownie."
+        raise BladUcietegoTlumaczenia(
+            "Output truncated (finish_reason='length'); block can no longer "
+            "be split into smaller parts."
         )
     czesc_lewa = _tlumacz_blok(klient, model, sys_prompt, lewa, kontekst, glebokosc - 1)
     czesc_prawa = _tlumacz_blok(klient, model, sys_prompt, prawa, czesc_lewa, glebokosc - 1)
@@ -355,10 +391,12 @@ def tlumacz_dlugi_tekst(
 
     Keyword Args:
         on_postep:         Callback ``(msg, procent)`` wołany po każdym bloku.
-        on_blad_krytyczny: Callback ``(msg, partial_text)`` przy przerwaniu.
-                           Gdy użyty – funkcja zwraca ``None``.
-        on_blad_miekki:    Callback ``(msg, tytul)`` dla problemów z ISO
-                           (nie przerywają tłumaczenia).
+        on_blad_krytyczny: Callback ``(info, partial_text)`` przy przerwaniu,
+                           gdzie ``info`` to :class:`InfoBleduTlumaczenia`
+                           (mostek i18n — GUI mapuje ``klucz_i18n`` na natywny
+                           komunikat). Gdy użyty – funkcja zwraca ``None``.
+        on_blad_miekki:    Callback ``(info)`` dla problemów z ISO (nie
+                           przerywają tłumaczenia); ``info`` jak wyżej.
         model_tlumacz:     Nazwa modelu do głównego tłumaczenia.
         model_iso:         Nazwa tańszego modelu do wykrycia kodu języka.
         max_tokenow_na_blok: Rozmiar bloku (w tokenach tiktoken) przy
@@ -404,7 +442,11 @@ def tlumacz_dlugi_tekst(
         except Exception as exc:  # noqa: BLE001
             if on_blad_krytyczny:
                 on_blad_krytyczny(
-                    f"Błąd odczytu pliku tymczasowego ({plik_temp}):\n{exc}",
+                    InfoBleduTlumaczenia(
+                        klucz_i18n="ai_blad_cache",
+                        detal=f"Resume-cache read error ({plik_temp}): {exc}",
+                        kwargs={"plik": plik_temp},
+                    ),
                     "",
                 )
             return None
@@ -459,17 +501,31 @@ def tlumacz_dlugi_tekst(
             partial = "\n\n".join(wczytane[k] for k in sorted(wczytane))
             if on_blad_krytyczny:
                 on_blad_krytyczny(
-                    f"BRAK ŚRODKÓW LUB LIMIT API! Przerwano na bloku {i + 1}.\n\n"
-                    "Postęp został automatycznie zabezpieczony.\n"
-                    "Zasil konto API i wczytaj oryginał ponownie, "
-                    "by kontynuować od tego miejsca.",
+                    InfoBleduTlumaczenia(
+                        klucz_i18n="ai_blad_limit_api",
+                        detal=f"RateLimitError on block {i + 1}/{n} (out of credits or rate limit).",
+                        kwargs={"blok": i + 1},
+                    ),
+                    partial,
+                )
+            return None
+        except BladUcietegoTlumaczenia as exc:
+            partial = "\n\n".join(wczytane[k] for k in sorted(wczytane))
+            if on_blad_krytyczny:
+                on_blad_krytyczny(
+                    InfoBleduTlumaczenia(klucz_i18n=exc.klucz_i18n, detal=str(exc)),
                     partial,
                 )
             return None
         except Exception as exc:  # noqa: BLE001
+            # Błąd nieoczekiwany — pusty klucz: GUI pokaże techniczny `detal`
+            # pod domyślnym nagłówkiem (do skopiowania / zgłoszenia jako issue).
             partial = "\n\n".join(wczytane[k] for k in sorted(wczytane))
             if on_blad_krytyczny:
-                on_blad_krytyczny(str(exc), partial)
+                on_blad_krytyczny(
+                    InfoBleduTlumaczenia(klucz_i18n="", detal=str(exc)),
+                    partial,
+                )
             return None
 
     # -------- Pobranie kodu ISO -----------------------------------------
@@ -478,30 +534,34 @@ def tlumacz_dlugi_tekst(
 
     ostrzezenia: list[str] = []
     iso_code = "pl"
+
+    def _ostrzezenie_iso(szczegoly: str, detal: str) -> None:
+        """Rejestruje miękkie ostrzeżenie ISO (struktura i18n + techniczny log)."""
+        ostrzezenia.append(detal)
+        if on_blad_miekki:
+            on_blad_miekki(InfoBleduTlumaczenia(
+                klucz_i18n="ai_ostrzezenie_iso",
+                detal=detal,
+                kwargs={"szczegoly": szczegoly},
+                klucz_tytul="ai_ostrzezenie_iso_tytul",
+            ))
+
     try:
         iso_code_pobrany, surowa = _pobierz_iso(klient, jezyk_docelowy, model_iso)
         if iso_code_pobrany:
             iso_code = iso_code_pobrany
         else:
-            komunikat = (
-                "Nie udało się automatycznie pobrać kodu ISO z API. "
-                "Użyto domyślnego tagu 'pl'. W razie problemów z czytnikiem ekranu, "
-                "użyj 'Naprawiacza Tagów' w Trybie Reżysera.\n\n"
-                f"Odpowiedź modelu: {surowa}"
+            _ostrzezenie_iso(
+                surowa,
+                f"ISO autodetect returned no valid code; defaulted to 'pl'. "
+                f"Model response: {surowa}",
             )
-            ostrzezenia.append(komunikat)
-            if on_blad_miekki:
-                on_blad_miekki(komunikat, "Ostrzeżenie tagu językowego")
     except Exception as iso_exc:  # noqa: BLE001
-        komunikat = (
-            "Nie udało się automatycznie pobrać kodu ISO z API. "
-            "Użyto domyślnego tagu 'pl'. W razie problemów z czytnikiem ekranu, "
-            "użyj 'Naprawiacza Tagów' w Trybie Reżysera.\n\n"
-            f"Szczegóły błędu: {iso_exc}"
+        _ostrzezenie_iso(
+            str(iso_exc),
+            f"ISO autodetect raised an exception; defaulted to 'pl'. "
+            f"Details: {iso_exc}",
         )
-        ostrzezenia.append(komunikat)
-        if on_blad_miekki:
-            on_blad_miekki(komunikat, "Ostrzeżenie tagu językowego")
 
     # -------- Posprzątanie cache'u i złożenie wyniku --------------------
     if os.path.exists(plik_temp):

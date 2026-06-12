@@ -781,6 +781,23 @@ poliglota:
   ai_zakonczone_tytul:   "Sukces"
   ai_zakonczone_tresc:   "Tłumaczenie ukończone!\n\nPlik zapisany jako:\n{sciezka_pliku}"
   ai_blad_zapisu:        "Błąd zapisu pliku wynikowego:\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    Brak kredytów lub przekroczony limit API OpenAI! Tłumaczenie przerwano na bloku {blok}.
+
+    Postęp został automatycznie zabezpieczony. Zasil konto API i wczytaj oryginał ponownie, by kontynuować od tego miejsca.
+  ai_blad_cache: |-
+    Nie udało się odczytać pliku tymczasowego (cache wznawiania tłumaczenia):
+    {plik}
+
+    Usuń ten plik ręcznie i spróbuj ponownie.
+  ai_blad_uciety: |-
+    Model uciął tłumaczenie bloku (przekroczono limit długości odpowiedzi) i nie udało się go dokończyć mimo wielokrotnego podziału na mniejsze części. Podziel plik źródłowy na mniejsze fragmenty i spróbuj ponownie.
+  ai_ostrzezenie_iso_tytul: "Ostrzeżenie tagu językowego"
+  ai_ostrzezenie_iso: |-
+    Nie udało się automatycznie pobrać kodu ISO z API. Użyto domyślnego tagu „pl". W razie problemów z czytnikiem ekranu użyj „Naprawiacza Tagów" w Trybie Reżysera.
+
+    Szczegóły: {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul:         "Błąd"
   blad_ai_szczegoly_tytul: "Błąd – Szczegóły techniczne"

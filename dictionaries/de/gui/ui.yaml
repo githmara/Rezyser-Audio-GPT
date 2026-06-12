@@ -761,6 +761,23 @@ poliglota:
   ai_zakonczone_tytul: "Erfolg"
   ai_zakonczone_tresc: "Übersetzung abgeschlossen!\n\nDatei gespeichert als:\n{sciezka_pliku}"
   ai_blad_zapisu: "Fehler beim Speichern der Ergebnisdatei:\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    Keine Credits oder OpenAI-API-Limit überschritten! Übersetzung bei Block {blok} abgebrochen.
+
+    Der Fortschritt wurde automatisch gesichert. Laden Sie Ihr API-Konto auf und laden Sie das Original erneut, um von dieser Stelle aus fortzufahren.
+  ai_blad_cache: |-
+    Die temporäre Datei (Cache für die Wiederaufnahme der Übersetzung) konnte nicht gelesen werden:
+    {plik}
+
+    Löschen Sie diese Datei manuell und versuchen Sie es erneut.
+  ai_blad_uciety: |-
+    Das Modell hat die Übersetzung des Blocks abgeschnitten (Antwortlängenlimit überschritten) und konnte sie trotz mehrfacher Aufteilung in kleinere Teile nicht abschließen. Teilen Sie die Quelldatei in kleinere Fragmente und versuchen Sie es erneut.
+  ai_ostrzezenie_iso_tytul: "Warnung vor Sprach-Tag"
+  ai_ostrzezenie_iso: |-
+    Der ISO-Code konnte nicht automatisch über die API abgerufen werden. Der Standard-Tag „pl" wurde verwendet. Bei Problemen mit dem Bildschirmleser verwenden Sie den „Tag-Reparateur" im Regisseurmodus.
+
+    Details: {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul: "Fehler"
   blad_ai_szczegoly_tytul: "Fehler – Technische Details"

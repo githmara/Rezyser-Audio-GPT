@@ -838,11 +838,21 @@ class PoliglotaPanel(wx.Panel):
         def _cb_postep(msg: str, pct: int) -> None:
             wx.CallAfter(self._update_progress_label, msg, pct)
 
-        def _cb_blad_kryt(msg: str, partial: str) -> None:
-            wx.CallAfter(self._on_ai_error, msg, partial)
+        def _cb_blad_kryt(info: tlumacz_ai.InfoBleduTlumaczenia, partial: str) -> None:
+            # Typowany błąd → natywny komunikat z `poliglota.<klucz>`; pusty klucz
+            # = błąd nieoczekiwany → techniczny `detal` (EN) pod domyślnym nagłówkiem,
+            # w polu do skopiowania (zgłoszenie issue).
+            if info.klucz_i18n:
+                wx.CallAfter(self._on_ai_error,
+                             t(f"poliglota.{info.klucz_i18n}", **info.kwargs), partial)
+            else:
+                wx.CallAfter(self._on_ai_error, info.detal, partial,
+                             t("poliglota.blad_ai_naglowek"))
 
-        def _cb_blad_miekki(msg: str, tytul: str) -> None:
-            wx.CallAfter(self._wyswietl_blad_ai, msg, tytul)
+        def _cb_blad_miekki(info: tlumacz_ai.InfoBleduTlumaczenia) -> None:
+            naglowek = t(f"poliglota.{info.klucz_tytul}") if info.klucz_tytul else None
+            wx.CallAfter(self._wyswietl_blad_ai,
+                         t(f"poliglota.{info.klucz_i18n}", **info.kwargs), naglowek)
 
         wynik = tlumacz_ai.tlumacz_dlugi_tekst(
             tresc=content,
@@ -867,7 +877,8 @@ class PoliglotaPanel(wx.Panel):
         self._lbl_progress.SetName(msg)
         self._gauge.SetValue(max(0, min(100, percent)))
 
-    def _on_ai_error(self, msg: str, partial_text: str = "") -> None:
+    def _on_ai_error(self, msg: str, partial_text: str = "",
+                     naglowek: str | None = None) -> None:
         self._btn_process.Enable()
         self._gauge.Hide();        self._lbl_progress.Hide()
         self.Layout()
@@ -876,7 +887,7 @@ class PoliglotaPanel(wx.Panel):
             self._txt_result.SetValue(partial_text)
             self._txt_result.SetFocus()
 
-        self._wyswietl_blad_ai(msg)
+        self._wyswietl_blad_ai(msg, naglowek)
 
     def _on_ai_done(self, wynik: tlumacz_ai.WynikTlumaczenia, ext: str) -> None:
         self._txt_result.SetValue(wynik.tekst)

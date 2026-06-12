@@ -757,6 +757,23 @@ poliglota:
   ai_zakonczone_tytul: "Succès"
   ai_zakonczone_tresc: "Traduction terminée !\n\nFichier sauvegardé sous :\n{sciezka_pliku}"
   ai_blad_zapisu: "Erreur de sauvegarde du fichier résultant :\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    Pas de crédits ou limite API OpenAI dépassée ! Traduction interrompue au bloc {blok}.
+
+    La progression a été automatiquement sauvegardée. Approvisionnez votre compte API et rechargez l'original pour continuer à partir de cet endroit.
+  ai_blad_cache: |-
+    Impossible de lire le fichier temporaire (cache de reprise de traduction) :
+    {plik}
+
+    Supprimez ce fichier manuellement et réessayez.
+  ai_blad_uciety: |-
+    Le modèle a coupé la traduction du bloc (limite de longueur de réponse dépassée) et n'a pas pu la terminer malgré plusieurs divisions en parties plus petites. Divisez le fichier source en fragments plus petits et réessayez.
+  ai_ostrzezenie_iso_tytul: "Avertissement de balise linguistique"
+  ai_ostrzezenie_iso: |-
+    Impossible de récupérer automatiquement le code ISO depuis l'API. La balise par défaut « pl » a été utilisée. En cas de problèmes avec le lecteur d'écran, utilisez le « Réparateur de balises » en Mode Réalisateur.
+
+    Détails : {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul: "Erreur"
   blad_ai_szczegoly_tytul: "Erreur — Détails techniques"

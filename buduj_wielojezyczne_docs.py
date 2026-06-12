@@ -282,11 +282,20 @@ For English, a well-known canonical version exists you can use as a reference:
 
 For other languages, generate an equivalent in the same spirit.
 
-### Filenames and voice names — KEEP 1:1
+### Filenames, folders, placeholders and voice names — KEEP 1:1
 Polish filenames (angielski.yaml, cezar.yaml, podstawy.yaml, finski.yaml, islandzki.yaml,
 naprawiacz_tagow.yaml, oczyszczenie.yaml, oczyszczenie_bez_liczb.yaml, rosyjski.yaml,
 wloski.yaml, niemiecki.yaml, francuski.yaml, hiszpanski.yaml, polski.yaml) are PHYSICAL
 filenames in the package — keep them verbatim, do NOT translate.
+
+Physical FOLDER names are literal identifiers on disk, NOT words to translate:
+skrypty/, opowiesci/, runtime/, rezyser/, akcenty/, szyfry/, dictionaries/, golden_key.env,
+etc. KEEP the Polish spelling (e.g. do NOT render "opowiesci/" with a {nazwa_natywna} word
+for "stories", do NOT render "szyfry/" with a word for "ciphers").
+
+Angle-bracket placeholders such as <nazwa>, <kod>, <name> are template tokens: copy the
+brackets and the inner text character-for-character, do NOT translate the inner word
+(e.g. do NOT render <nazwa> with a {nazwa_natywna} word for "name").
 
 Voice product names (Samantha, Mark, Markus, Hedda, Heidi, Gudrun, Milena, Irina,
 Pavel, Yuri, Satu, Mikko, Thomas, Amelie, Julie, Stefan, Katja, Jorge, Monica, Helena,
@@ -799,12 +808,14 @@ def _tlumacz_pojedyncza_sekcje(
     def _on_postep(msg: str, pct: int) -> None:
         sys.stderr.write(f"   [{kod}/{rdzen}{sufiks} {pct:3d}%] {msg}\n")
 
-    def _on_blad_krytyczny(msg: str, partial: str) -> None:
-        blad_kryt["msg"] = msg
+    def _on_blad_krytyczny(info: Any, partial: str) -> None:
+        # `info` to InfoBleduTlumaczenia — str() zwraca techniczny detal EN
+        # (mostek i18n nieistotny dla CLI dev-toola; liczy się czytelny log).
+        blad_kryt["msg"] = str(info)
         blad_kryt["partial"] = partial
 
-    def _on_blad_miekki(msg: str, tytul: str) -> None:
-        print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: {tytul} — {msg.splitlines()[0]}")
+    def _on_blad_miekki(info: Any) -> None:
+        print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: {str(info).splitlines()[0]}")
 
     # META zawsze-on (doc-autotłumacz): LLM dokleja `===META===` + komentarz.
     prompt_z_meta = (prompt_dodatkowy + "\n\n" + META_INSTRUKCJA).strip()

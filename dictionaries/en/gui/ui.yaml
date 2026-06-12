@@ -758,6 +758,23 @@ poliglota:
   ai_zakonczone_tytul: "Success"
   ai_zakonczone_tresc: "Translation completed!\n\nFile saved as:\n{sciezka_pliku}"
   ai_blad_zapisu: "Error saving the result file:\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    Out of OpenAI credits or API rate limit exceeded! Translation was interrupted at block {blok}.
+
+    Your progress has been saved automatically. Top up your API account and load the original again to continue from this point.
+  ai_blad_cache: |-
+    Could not read the temporary file (translation resume cache):
+    {plik}
+
+    Delete this file manually and try again.
+  ai_blad_uciety: |-
+    The model cut off the block translation (response length limit exceeded) and it could not be completed despite splitting it into smaller parts repeatedly. Split the source file into smaller chunks and try again.
+  ai_ostrzezenie_iso_tytul: "Language tag warning"
+  ai_ostrzezenie_iso: |-
+    Could not retrieve the ISO code automatically from the API. The default tag “pl” was used. If you run into screen-reader issues, use the “Tag Repair” in Director Mode.
+
+    Details: {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul: "Error"
   blad_ai_szczegoly_tytul: "Error – Technical Details"

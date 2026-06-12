@@ -761,6 +761,23 @@ poliglota:
   ai_zakonczone_tytul: "Árangur"
   ai_zakonczone_tresc: "Þýðing lokið!\n\nSkrá vistuð sem:\n{sciezka_pliku}"
   ai_blad_zapisu: "Villa við vistun niðurstöðuskrár:\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    Engin inneign eða API OpenAI kvóti uppurinn! Þýðingu hætt við á kubb {blok}.
+
+    Framvinda hefur verið sjálfkrafa vistuð. Fjármagnaðu API reikninginn og hlaðið upprunalegu skjali aftur til að halda áfram frá þessum stað.
+  ai_blad_cache: |-
+    Ekki tókst að lesa tímabundna skrá (endurræsingu skyndiminni þýðingar):
+    {plik}
+
+    Fjarlægðu þessa skrá handvirkt og reyndu aftur.
+  ai_blad_uciety: |-
+    Líkan klippti þýðingu kubbs (lengdarmörk svars náð) og tókst ekki að ljúka henni þrátt fyrir ítrekaða skiptingu í smærri hluta. Skiptu upprunaskjalinu í smærri bita og reyndu aftur.
+  ai_ostrzezenie_iso_tytul: "Viðvörun tungumálamerkis"
+  ai_ostrzezenie_iso: |-
+    Ekki tókst að sækja ISO kóða sjálfkrafa frá API. Sjálfgefið merki „pl" var notað. Ef vandamál koma upp með skjálesara, notaðu „Merkjaviðgerð" í Režisér Hamur.
+
+    Upplýsingar: {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul: "Villa"
   blad_ai_szczegoly_tytul: "Villa – Tæknilegar upplýsingar"

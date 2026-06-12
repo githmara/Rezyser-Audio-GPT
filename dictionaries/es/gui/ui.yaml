@@ -760,6 +760,23 @@ poliglota:
   ai_zakonczone_tytul: "Éxito"
   ai_zakonczone_tresc: "¡Traducción completada!\n\nArchivo guardado como:\n{sciezka_pliku}"
   ai_blad_zapisu: "Error al guardar el archivo resultante:\n{tresc_bledu}"
+  # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
+  ai_blad_limit_api: |-
+    ¡Sin créditos o límite de API de OpenAI excedido! Traducción interrumpida en el bloque {blok}.
+
+    El progreso se ha guardado automáticamente. Recarga la cuenta de API y carga el original nuevamente para continuar desde este punto.
+  ai_blad_cache: |-
+    No se pudo leer el archivo temporal (caché de reanudación de traducción):
+    {plik}
+
+    Elimina este archivo manualmente e intenta de nuevo.
+  ai_blad_uciety: |-
+    El modelo cortó la traducción del bloque (se excedió el límite de longitud de respuesta) y no se pudo completar a pesar de múltiples divisiones en partes más pequeñas. Divide el archivo fuente en fragmentos más pequeños e intenta de nuevo.
+  ai_ostrzezenie_iso_tytul: "Advertencia de etiqueta de idioma"
+  ai_ostrzezenie_iso: |-
+    No se pudo obtener automáticamente el código ISO del API. Se utilizó la etiqueta predeterminada "pl". Si tienes problemas con el lector de pantalla, usa el "Reparador de etiquetas" en el Modo Director.
+
+    Detalles: {szczegoly}
   # Wyświetlanie błędu AI
   blad_ai_tytul: "Error"
   blad_ai_szczegoly_tytul: "Error – Detalles técnicos"
