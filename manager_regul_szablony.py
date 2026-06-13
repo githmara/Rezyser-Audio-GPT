@@ -1,9 +1,15 @@
 """
 manager_regul_szablony.py – Szablony i prompty dla Managera Reguł.
 
-Moduł CZYSTO DEKLARATYWNY: trzyma gotowe teksty YAML-i do utworzenia
-(szablony) oraz prompty dla chatbotów AI (ChatGPT / Claude), które
+Moduł trzyma gotowe teksty YAML-i do utworzenia (szablony) oraz prompty
+(po angielsku — język roboczy agentów kodujących) dla agentów AI, które
 wygenerują trudne merytorycznie reguły zamiast zwykłego Kowalskiego.
+
+Szablony (``yaml``) i prompty (``prompt``) są budowane bezpośrednio tutaj.
+Jedyny element lokalizowany to ``uwagi`` (notatka „Dalsze kroki" widoczna
+w GUI) — od E2 składana z kluczy ``manager.uwagi.*`` w
+``dictionaries/<kod>/gui/ui.yaml`` przez :func:`_uwagi`, więc moduł importuje
+:mod:`i18n` (i podąża za językiem UI aplikacji).
 
 Używany przez ``gui_manager_regul.ManagerRegulPanel`` podczas akcji
 „Nowy…". Dla każdego typu reguły funkcja zwraca słownik:
@@ -22,6 +28,43 @@ zsynchronizować szablony tutaj.
 """
 
 from __future__ import annotations
+
+import sys
+
+import i18n
+
+
+# =============================================================================
+# Pomocnicze: składanie notatki „Dalsze kroki" (uwagi) z kluczy i18n
+# =============================================================================
+def _czy_frozen() -> bool:
+    """``True`` w paczce PyInstaller (zainstalowana apka), ``False`` ze źródła.
+
+    Wzorzec spójny z ``sciezki._wyznacz_baze`` i ``main._on_aktualizacja_dostepna``
+    — jedynym wiarygodnym sygnałem „to skompilowana paczka" jest ``sys.frozen``.
+    """
+    return bool(getattr(sys, "frozen", False))
+
+
+def _uwagi(klucz_typu: str, **kwargs: str) -> str:
+    """Składa lokalizowaną notatkę „Dalsze kroki" dla :class:`WynikKreatoraDialog`.
+
+    Trzy akapity (klucze ``manager.uwagi.*`` w ``ui.yaml``):
+      1. nota specyficzna dla typu reguły (``klucz_typu``),
+      2. ``jezyk_agenta`` — prompt jest po angielsku, język wyjścia natywny,
+      3. akapit środowiskowy: ``srodowisko_frozen`` (zainstalowana paczka) albo
+         ``srodowisko_zrodlo`` (uruchomienie ze źródła repo) — wg :func:`_czy_frozen`.
+
+    ``kwargs`` (``jezyk_bazowy``, ``id_pliku``) trafiają do ``str.format`` w
+    :func:`i18n.t`; nadmiarowe klucze są ignorowane, więc bezpiecznie podajemy
+    je do wszystkich trzech wywołań.
+    """
+    srodowisko = "srodowisko_frozen" if _czy_frozen() else "srodowisko_zrodlo"
+    return "\n\n".join((
+        i18n.t(f"manager.uwagi.{klucz_typu}", **kwargs),
+        i18n.t("manager.uwagi.jezyk_agenta", **kwargs),
+        i18n.t(f"manager.uwagi.{srodowisko}", **kwargs),
+    ))
 
 
 # =============================================================================
@@ -1325,15 +1368,8 @@ def zbuduj_wynik(
             "yaml":     szablon_oczyszczenie(id_pliku, etykieta, jezyk_bazowy),
             "prompt":   prompt_oczyszczenie(id_pliku, etykieta, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/akcenty/{id_pliku}.yaml",
-            "uwagi": (
-                f"Akcent czyszczący w paczce `{jezyk_bazowy}/` "
-                "(`kategoria: oczyszczenie`). Struktura plików tego typu "
-                "jest identyczna we wszystkich wdrożonych paczkach — "
-                "różni się TYLKO etykieta + opis + komentarze (natywne). "
-                "Skopiuj prompt do agenta AI z dostępem do projektu — "
-                "agent otworzy gotowy wzorzec z innej paczki, przetłumaczy "
-                "tekstowe pola na język natywny i zapisze plik."
-            ),
+            "uwagi": _uwagi("akcent_oczyszczenie",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     if typ == TYP_AKCENT_NAPRAWIACZ:
@@ -1342,14 +1378,8 @@ def zbuduj_wynik(
             "yaml":     szablon_naprawiacz(id_pliku, etykieta, jezyk_bazowy),
             "prompt":   prompt_naprawiacz(id_pliku, etykieta, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/akcenty/{id_pliku}.yaml",
-            "uwagi": (
-                f"Naprawiacz tagów w paczce `{jezyk_bazowy}/` "
-                "(`kategoria: naprawiacz`). Tryb specjalny — wstrzykuje kod "
-                "ISO do plików wynikowych (HTML/DOCX), nie modyfikuje "
-                "treści. Skopiuj prompt do agenta AI z dostępem do projektu "
-                "— agent otworzy gotowy wzorzec z innej paczki, przetłumaczy "
-                "tekstowe pola na język natywny i zapisze plik."
-            ),
+            "uwagi": _uwagi("akcent_naprawiacz",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     if typ == TYP_AKCENT:
@@ -1358,22 +1388,8 @@ def zbuduj_wynik(
             "yaml":     szablon_akcent(id_pliku, etykieta, iso, jezyk_bazowy),
             "prompt":   prompt_akcent(id_pliku, etykieta, iso, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/akcenty/{id_pliku}.yaml",
-            "uwagi": (
-                "Szablon ma pusty pipeline zamian fonetycznych. Skopiuj "
-                "prompt do agenta AI z dostępem do projektu (Claude Code, "
-                "Cursor, Aider) — agent otworzy pliki referencyjne, "
-                f"zaprojektuje listę `zamiany:` i zapisze plik w "
-                f"`dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`. "
-                "Akcent jest wykrywany dynamicznie — wystarczy zrestartować "
-                "aplikację (od v17.5 nie ma już kroku regeneracji kodu).\n\n"
-                "UWAGA: lista `zamiany:` jest aplikowana SEKWENCYJNIE — każda "
-                "reguła operuje na wyjściu poprzedniej. Reguła wprowadzająca "
-                "literę używaną później jako `wzor` w innej regule wpadnie "
-                "w pętlę (klasyk: `ñ → nj` przed `j → x` daje `ñ → nx`, nie "
-                "`nj`). Najpierw zamień TARGET na coś bezpiecznego, dopiero "
-                "potem wprowadzaj SOURCE. Po zmianach uruchom aplikację "
-                "z konsoli — silnik wypisze WARN-y o potencjalnych łańcuchach."
-            ),
+            "uwagi": _uwagi("akcent",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     if typ == TYP_SZYFR_ZAMIANY:
@@ -1382,13 +1398,8 @@ def zbuduj_wynik(
             "yaml":     szablon_szyfr_zamiany(id_pliku, etykieta, jezyk_bazowy),
             "prompt":   prompt_szyfr_zamiany(id_pliku, etykieta, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/szyfry/{id_pliku}.yaml",
-            "uwagi": (
-                f"Szablon gotowy do edycji w paczce `{jezyk_bazowy}/`. "
-                "Skopiuj prompt do agenta AI z dostępem do projektu "
-                "(Claude Code, Cursor, Aider) — agent otworzy wzorce stylu "
-                "z innych paczek, zaprojektuje listę `zamiany:` realizującą "
-                "efekt i zapisze plik w lokalizacji docelowej."
-            ),
+            "uwagi": _uwagi("szyfr_zamiany",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     if typ == TYP_TRYB_REZYSERA:
@@ -1400,14 +1411,8 @@ def zbuduj_wynik(
             "yaml":     szablon_tryb_rezysera(id_pliku, etykieta, jezyk_bazowy),
             "prompt":   prompt_tryb_rezysera(id_pliku, etykieta, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/rezyser/{nazwa_pliku}.yaml",
-            "uwagi": (
-                f"Szablon oparty o tryb Audiobook (paczka `{jezyk_bazowy}/`). "
-                "Skopiuj prompt do agenta AI z dostępem do projektu (Claude "
-                "Code, Cursor, Aider) — agent otworzy `tryb_audiobook.yaml` "
-                "z innej wdrożonej paczki, zaprojektuje `prompt_systemowy`, "
-                "`przypomnienie_uzytkownika` i `slowa_wyzwalajace` w języku "
-                "natywnym i zapisze plik w lokalizacji docelowej."
-            ),
+            "uwagi": _uwagi("tryb_rezysera",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     if typ == TYP_POSTPRODUKCJA:
@@ -1418,14 +1423,8 @@ def zbuduj_wynik(
             "yaml":     szablon_postprodukcja(id_pliku, etykieta, jezyk_bazowy),
             "prompt":   prompt_postprodukcja(id_pliku, etykieta, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/rezyser/{nazwa_pliku}.yaml",
-            "uwagi": (
-                f"Szablon postprodukcji iteruje po rozdziałach (paczka "
-                f"`{jezyk_bazowy}/`). Skopiuj prompt do agenta AI z dostępem "
-                "do projektu — agent zaprojektuje `prompt_systemowy`, "
-                "`prompt_uzytkownika_szablon` (z placeholderami `{naglowek}`, "
-                "`{probka}`) i `regex_podzial_rozdzialow` dopasowany do "
-                "natywnych nazw rozdziałów (Rozdział/Kapitel/Capitolo/Глава/...)."
-            ),
+            "uwagi": _uwagi("postprodukcja",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     if typ == TYP_JEZYK_BAZOWY:
@@ -1434,18 +1433,8 @@ def zbuduj_wynik(
             "yaml":     szablon_podstawy(id_pliku, etykieta),
             "prompt":   prompt_jezyk_bazowy(id_pliku, etykieta),
             "docelowy": f"{id_pliku}/podstawy.yaml",
-            "uwagi": (
-                f"Manager utworzy folder `dictionaries/{id_pliku}/` z podfolderami "
-                f"`akcenty/`, `szyfry/`, `rezyser/` i `gui/`. Szablon `podstawy.yaml` "
-                f"ma markery `<UZUPEŁNIJ NATYWNIE>`. Skopiuj prompt do agenta AI "
-                f"z dostępem do projektu (Claude Code, Cursor, Aider) — agent "
-                f"otworzy `dictionaries/de/podstawy.yaml` lub `it/podstawy.yaml` "
-                f"jako wzorzec i zapisze kompletną zawartość. Tłumaczenie UI "
-                f"(`gui/ui.yaml`) generuje `buduj_wielojezyczne_ui.py`. Tryby "
-                f"Reżysera (`rezyser/tryb_*.yaml`) skopiuj z `pl/rezyser/` lub "
-                f"poproś agenta o przetłumaczenie ich na język natywny — silnik "
-                f"wymaga ≥1 pliku w `rezyser/`, żeby uznać język za kompletny."
-            ),
+            "uwagi": _uwagi("jezyk_bazowy",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     if typ == TYP_SZYFR_ALGORYTM:
@@ -1454,14 +1443,8 @@ def zbuduj_wynik(
             "yaml":     "",
             "prompt":   prompt_szyfr_algorytm(id_pliku, etykieta, opis_efektu, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/szyfry/{id_pliku}.yaml",
-            "uwagi": (
-                "UWAGA: szyfry algorytmiczne wymagają funkcji w "
-                "`core_poliglota.py`. Manager NIE tworzy żadnego pliku — "
-                "skopiuj prompt do agenta AI z dostępem do projektu "
-                "(Claude Code, Cursor, Aider). Agent doda funkcję do "
-                "`core_poliglota.py` + wpis w mapie `_ALGORYTMY` + plik YAML "
-                f"w `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`."
-            ),
+            "uwagi": _uwagi("szyfr_algorytm",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 
     raise ValueError(f"Nieznany typ reguły: {typ!r}")

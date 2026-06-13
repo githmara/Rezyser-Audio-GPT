@@ -1024,6 +1024,35 @@ manager:
     {tresc_bledu}
 
     Utwórz je ręcznie w Eksploratorze plików, zanim uruchomisz Poliglotę – inaczej silnik wyrzuci błąd przy skanowaniu nowego języka.
+  # Notatki „Dalsze kroki" w WynikKreatoraDialog. Składane w
+  # manager_regul_szablony._uwagi(): nota typu reguły + jezyk_agenta + akapit
+  # środowiskowy (źródło vs zainstalowana paczka, wg sys.frozen). Placeholdery
+  # {jezyk_bazowy}/{id_pliku} są podstawiane; {{naglowek}}/{{probka}} to literały.
+  uwagi:
+    akcent: |-
+      Szablon w `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` ma pusty pipeline zamian fonetycznych. Akcent jest wykrywany dynamicznie — wystarczy zrestartować aplikację (od v17.5 bez kroku regeneracji kodu).
+
+      UWAGA: lista `zamiany:` jest aplikowana SEKWENCYJNIE — każda reguła operuje na wyjściu poprzedniej. Reguła wprowadzająca literę używaną później jako `wzor` w innej regule wpadnie w pętlę (klasyk: `ñ → nj` przed `j → x` daje `ñ → nx`, nie `nj`). Najpierw zamień TARGET na coś bezpiecznego, dopiero potem wprowadzaj SOURCE.
+    akcent_oczyszczenie: |-
+      Akcent czyszczący (`kategoria: oczyszczenie`) w paczce `{jezyk_bazowy}/`. Struktura plików tego typu jest identyczna we wszystkich wdrożonych paczkach — różni się TYLKO etykieta, opis i komentarze (natywne).
+    akcent_naprawiacz: |-
+      Naprawiacz tagów (`kategoria: naprawiacz`) w paczce `{jezyk_bazowy}/`. Tryb specjalny: wstrzykuje kod ISO do plików wynikowych (HTML/DOCX), nie modyfikuje treści.
+    szyfr_zamiany: |-
+      Szablon szyfru „czyste zamiany" w `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + lista `zamiany:` (jak akcent, ale bez pipeline'u fonetycznego). Wzorzec STRUKTURY bierz z akcentów — wszystkie wdrożone szyfry to algorytmy (inny format, bez listy `zamiany:`).
+    tryb_rezysera: |-
+      Szablon oparty o tryb Audiobook (paczka `{jezyk_bazowy}/`). Agent zaprojektuje `prompt_systemowy`, `przypomnienie_uzytkownika` i `slowa_wyzwalajace` w języku natywnym paczki.
+    postprodukcja: |-
+      Szablon postprodukcji iteruje po rozdziałach (paczka `{jezyk_bazowy}/`). Agent zaprojektuje `prompt_systemowy`, `prompt_uzytkownika_szablon` (placeholdery {{naglowek}}, {{probka}}) i `regex_podzial_rozdzialow` dopasowany do natywnych nazw rozdziałów (Rozdział/Kapitel/Capitolo/Глава…).
+    jezyk_bazowy: |-
+      Manager utworzy `dictionaries/{id_pliku}/` z podfolderami `akcenty/`, `szyfry/`, `rezyser/`, `gui/` i `opowiesci/`. Szablon `podstawy.yaml` ma markery `<UZUPEŁNIJ NATYWNIE>`. Agent wzoruje się na `de/podstawy.yaml` lub `it/podstawy.yaml`. Tłumaczenie UI (`gui/ui.yaml`) generuje `buduj_wielojezyczne_ui.py`. Silnik wymaga ≥1 pliku w `rezyser/`, by uznać język za kompletny.
+    szyfr_algorytm: |-
+      Szyfr ALGORYTMICZNY — wymaga funkcji w `core_poliglota.py` obok pliku YAML. Manager NIE tworzy żadnego pliku; agent doda funkcję `_algorytm_*` + wpis w mapie `_ALGORYTMY` + plik YAML w `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. To JEDYNY typ reguły wymagający edycji kodu źródłowego — z zainstalowanej aplikacji (bez repozytorium) jest niewykonalny, potrzebna wersja źródłowa.
+    jezyk_agenta: |-
+      Prompt poniżej jest po angielsku (język roboczy agentów kodujących); treść tworzonych plików i tak powstaje w języku natywnym paczki. Jeśli wolisz, by agent komunikował się z Tobą w Twoim języku, ustaw to w jego konfiguracji (np. w Claude Code przez `/config`).
+    srodowisko_zrodlo: |-
+      Workflow: skopiuj poniższy prompt do agenta AI z dostępem do tego repozytorium (Claude Code, Cursor, Aider). Agent otworzy pliki referencyjne, utworzy/uzupełni plik i zweryfikuje go. Zmiany w `akcenty/`, `szyfry/`, `rezyser/` są wykrywane po restarcie aplikacji.
+    srodowisko_frozen: |-
+      Korzystasz z zainstalowanej aplikacji (bez źródeł repozytorium). Poniższy prompt zakłada dewelopera z repozytorium i agentem AI — pełny workflow agentowy wymaga wersji źródłowej. Z samej aplikacji możesz jednak ręcznie uzupełnić wygenerowany szablon YAML (pliki `dictionaries/` leżą obok programu i są edytowalne); zmiany zobaczysz po restarcie aplikacji.
 
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
