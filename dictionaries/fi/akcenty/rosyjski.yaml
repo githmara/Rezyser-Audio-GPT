@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: Milena / Irina / Yuri / Pavel (venäläinen TTS).
 # -----------------------------------------------------------------------------
 id: rosyjski
-etykieta: "Venäjä (esim. Milena / Irina / Yuri / Pavel)"
+etykieta: "Venäläinen (esim. Milena / Irina / Yuri / Pavel)"
 opis: |
   Translitteroi suomenkielisen tekstin kyrilliseksi niin, että venäläinen
   puhesyntetisaattori (NVDA → Vocalizer Milena, eSpeak "ru", OneCore

@@ -5,7 +5,7 @@
 id: cezar
 etykieta: "Caesar-dulmál (Flutningur í íslensku stafrófinu)"
 opis: |
-  Klassískt Caesar-dulmál: hverjum staf er flt N stig í íslensku stafrófinu
+  Klassískt Caesar-dulmál: hverjum staf er flutt N stig í íslensku stafrófinu
   (AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ, 32 stafir, engin bil). Stafir utan
   stafrófsins (tölur, greinarmerki) haldast óbreyttir.
 

@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: Hedda / Stefan / Katja / Markus (saksalainen TTS).
 # -----------------------------------------------------------------------------
 id: niemiecki
-etykieta: "Saksa (esim. Hedda / Stefan / Katja)"
+etykieta: "Saksalainen (esim. Hedda / Stefan / Katja)"
 opis: |
   Mukauttaa suomenkielisen tekstin saksalaiselle puhesyntetisaattorille
   (Hedda / Stefan / Katja / Markus).

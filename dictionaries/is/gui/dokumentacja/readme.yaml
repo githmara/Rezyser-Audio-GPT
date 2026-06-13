@@ -130,3 +130,7 @@ tresc:
     * `rezyser/` — *director*: skapandi hamir Leikstjóraeiningarinnar.
     * `opowiesci/` — *stories*: hamir fyrir gagnvirkar sögur.
     * `gui/` — viðmótstextar (`ui.yaml`) og skjalasniðmát.
+  licencja: |
+    ## Leyfi
+
+    Verkefnið er gefið út undir **MIT** leyfi — fullur texti er í skránni [`LICENSE`](LICENSE) í aðalmöppu geymslunnar. Í stuttu máli: þú getur frjálst notað, afritað, breytt og dreift hugbúnaðinum (einnig í viðskiptalegum tilgangi), að því tilskildu að höfundarréttartilkynningin sé varðveitt. Hugbúnaðurinn er afhentur „eins og hann er", án nokkurrar ábyrgðar.

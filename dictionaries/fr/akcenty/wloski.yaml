@@ -8,7 +8,7 @@ opis: |
   Adapte le texte français au synthétiseur vocal italien (Elsa / Cosimo /
   Carla). Deux langues romanes très proches — peu de modifications nécessaires.
 
-  Différences fonétiques critiques français → italien :
+  Différences phonétiques critiques français → italien :
     - « ch » fr = /ʃ/, « ch » it = /k/ (devant e/i) → on écrit « sci ».
     - « j »  fr = /ʒ/, absent en italien → on écrit « gi » (it g+e/i = /dʒ/,
       approximation la plus lisible par TTS italien).

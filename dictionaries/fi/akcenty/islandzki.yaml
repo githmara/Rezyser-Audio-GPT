@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: Guðrún / eSpeak "is" (islantilainen TTS).
 # -----------------------------------------------------------------------------
 id: islandzki
-etykieta: "Islanti (esim. Guðrún / eSpeak)"
+etykieta: "Islantilainen (esim. Guðrún / eSpeak)"
 opis: |
   Mukauttaa suomenkielisen tekstin islantilaiselle puhesyntetisaattorille
   (Guðrún tai eSpeak asetettu kielelle "is"). Suomen ja islannin

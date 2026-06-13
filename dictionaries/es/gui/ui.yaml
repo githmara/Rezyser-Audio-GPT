@@ -1041,7 +1041,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novedades en la versión {nowa_wersja}:'
-  co_nowego_tresc: 'Modo Director: la sincronización de la memoria con el disco después de la edición manual del archivo de narración ahora es una recarga real de todo el proyecto: la aplicación recalcula toda la estructura (capítulos, actos, escenas) y levanta el Libro del Mundo y el modo. Cuando la historia es demasiado larga para caber en la memoria, la aplicación pregunta desde qué encabezado debe comenzar la memoria de trabajo de la IA. Se simplificó el panel del proyecto y se unificaron las traducciones de la interfaz (incluyendo islandés y ruso).'
+  co_nowego_tresc: 'Lanzamiento de mantenimiento tras la revisión de calidad de todos los paquetes de idiomas. Se unificaron las etiquetas de acentos (incluyendo finlandés, italiano e islandés — ahora nombran el idioma, no el país) y se corrigieron pequeños errores tipográficos e imprecisiones en las descripciones de reglas y mensajes dirigidos a la IA. También se añadió información sobre la licencia del proyecto (MIT). Sin cambios en el funcionamiento del generador de historias, cifrados y traductor.'
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
 opowiesci:

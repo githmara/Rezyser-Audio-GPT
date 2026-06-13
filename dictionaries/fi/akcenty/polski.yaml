@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: Ewa / Adam / Maja (puolalainen TTS).
 # -----------------------------------------------------------------------------
 id: polski
-etykieta: "Puola (esim. Ewa / Adam / Maja)"
+etykieta: "Puolalainen (esim. Ewa / Adam / Maja)"
 opis: |
   Mukauttaa suomenkielisen tekstin puolalaiselle puhesyntetisaattorille
   (Ewa / Adam / Maja). Puolan ja suomen konsonantisto on yllättävän

@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: Lucia / Cosimo / Pierina (italialainen TTS).
 # -----------------------------------------------------------------------------
 id: wloski
-etykieta: "Italia (esim. Lucia / Cosimo / Pierina)"
+etykieta: "Italialainen (esim. Lucia / Cosimo / Pierina)"
 opis: |
   Mukauttaa suomenkielisen tekstin italialaiselle puhesyntetisaattorille
   (Lucia / Cosimo / Pierina). Italian fonetiikka sopii hyvin suomen kanssa

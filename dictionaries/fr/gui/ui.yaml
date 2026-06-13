@@ -1035,7 +1035,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Quoi de neuf dans la version {nowa_wersja} :'
-  co_nowego_tresc: "Mode Réalisateur : la synchronisation de la mémoire avec le disque après l'édition manuelle du fichier de narration est désormais un rechargement effectif de tout le projet — l'application recalcul toute la structure (chapitres, actes, scènes) et élève le Livre du Monde ainsi que le mode. Lorsque l'histoire est trop longue pour tenir en mémoire, l'application demande à partir de quel en-tête la mémoire de travail de l'IA doit démarrer. Le panneau de projet a été simplifié et les traductions de l'interface ont été unifiées (y compris islandais et russe)."
+  co_nowego_tresc: "Édition de maintenance après révision de la qualité de tous les packs linguistiques. Les étiquettes d'accents ont été unifiées (y compris finnois, italien et islandais — elles désignent maintenant la langue, pas le pays) et de petites fautes de frappe et incohérences dans les descriptions des règles et des messages adressés à l'IA ont été corrigées. Des informations sur la licence du projet (MIT) ont également été ajoutées. Aucun changement dans le fonctionnement du générateur d'histoires, de codes et du traducteur."
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
 opowiesci:

@@ -20,8 +20,7 @@ opis: |
     - Ö/ö (/ø/) → e    Enska /ɛ/ er nánast /ø/.
     - Sérhljóðar með broddmerki → ASCII (enskur TTS les þá ófyrirsjáanlega).
 
-  KRITIKAL RÖÐUN: j → y ÁÐUR EN Þ → th (til að koma í veg fyrir
-  tvöfaldar skiptingar í orðum sem innihalda bæði j og þ).
+  (Röð skiptir ekki máli: j → y og Þ → th vinna á aðgreindum stöfum.)
 iso: en
 kategoria: akcent
 kolejnosc: 40
@@ -33,8 +32,8 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # --- Hljóðfræðilegar skiptingar ---
-# KRITIKAL RÖÐUN:
-#   1. j → y   (FYRST: enska j = /dʒ/, þarf leiðréttingu)
+# RÖÐ (ekki afgerandi — stafir aðgreindir):
+#   1. j → y   (enska j = /dʒ/, þarf leiðréttingu)
 #   2. Þ/þ → th, Ð/ð → th  (séríslenskir stafir)
 #   3. Æ/æ, Ö/ö
 #   4. Sérhljóðar með broddmerki → ASCII

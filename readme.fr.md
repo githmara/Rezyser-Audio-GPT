@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **17.6.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **17.6.1** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -152,3 +152,8 @@ Ce chiffre inverse chaque phrase, mais d'abord il développe certaines abréviat
 ### Chiffre : Typoglycémie
 
 Selon une rechreche à l'Université de Cmabrigde, il n'importe pas dans quel odrre les lettres dans un mot sont, la seule chose ipmrotnate est que la première et la dernière lettre soient à la bonne place.
+
+
+## Licence
+
+Le projet est distribué sous la licence **MIT** — le texte complet se trouve dans le fichier [`LICENSE`](LICENSE) dans le répertoire racine du dépôt. En résumé : vous pouvez librement utiliser, copier, modifier et distribuer le logiciel (y compris à des fins commerciales), à condition de conserver la mention des droits d'auteur. Le logiciel est fourni "tel quel", sans aucune garantie.

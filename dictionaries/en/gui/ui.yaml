@@ -1039,7 +1039,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: "What's new in version {nowa_wersja}:"
-  co_nowego_tresc: 'Director Mode: synchronizing memory with disk after manual editing of the narration file now actually reloads the entire project — the application recalculates the entire structure (chapters, acts, scenes) and raises the World Book and mode. When the story is too long to fit in memory, the application asks from which header the AI working memory should start. The project panel has been simplified and interface translations have been unified (including Icelandic and Russian).'
+  co_nowego_tresc: 'Orderly release after quality review of all language packs. Accent labels have been standardized (including Finnish, Italian, and Icelandic — now naming the language, not the country) and minor typos and inconsistencies in rule descriptions and messages directed to AI have been corrected. Information about the project license (MIT) has also been added. No changes in the operation of the story generator, ciphers, and translator.'
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
 opowiesci:

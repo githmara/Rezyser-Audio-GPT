@@ -3,7 +3,7 @@
 #  Fyrir talgervla: Milena / Irina / Yuri / Pavel (rússneskur TTS).
 # -----------------------------------------------------------------------------
 id: rosyjski
-etykieta: "Rússland (t.d. Milena / Irina / Yuri / Pavel)"
+etykieta: "Rússneska (t.d. Milena / Irina / Yuri / Pavel)"
 opis: |
   Þýðir íslenskan texta yfir á kýrilískt letur þannig að rússneskur talgervill
   (NVDA → Vocalizer Milena, eSpeak "ru", OneCore Irina/Pavel/Yuri) les

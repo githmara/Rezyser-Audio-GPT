@@ -1040,7 +1040,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Mitä uutta versiossa {nowa_wersja}:'
-  co_nowego_tresc: 'Ohjaajan tila: muistin synkronointi levylle käsin muokatun kertomustiedoston jälkeen on nyt koko projektin todellinen uudelleenlataus — sovellus laskee koko rakenteen (luvut, näytökset, kohtaukset) ja nostaa Maailmankirjan sekä tilan. Kun tarina on liian pitkä mahtuakseen muistiin, sovellus kysyy, mistä otsikosta AI:n työmuisti aloitetaan. Projektipaneelia on yksinkertaistettu ja käyttöliittymän käännökset on yhdenmukaistettu (mm. islanti ja venäjä).'
+  co_nowego_tresc: 'Järjestyksen julkaisu kaikkien kielipakettien laadun tarkistuksen jälkeen. Yhdenmukaistettiin aksenttien etiketit (mm. suomi, italia ja islanti — nyt ne nimeävät kielen, eivät valtiota) sekä korjattiin pieniä kirjoitusvirheitä ja epätarkkuuksia sääntöjen ja AI:lle suunnattujen viestien kuvauksissa. Lisättiin myös tieto projektin lisenssistä (MIT). Ei muutoksia tarinageneraattorin, salakirjoitusten ja kääntäjän toimintaan.'
   co_nowego_online_pl: Julkaisun koko sivu (verkossa) on saatavilla puolaksi.
   btn_szczegoly_online: '&Yksityiskohdat verkossa'
 opowiesci:

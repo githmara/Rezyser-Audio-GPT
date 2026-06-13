@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **17.6.0** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **17.6.1** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -128,3 +128,8 @@ Tämän projektin pääkieli on puola. Moduulien nimet, luokat, koodikommentit s
 * `rezyser/` — *director*: Ohjaaja-moduulin luovat tilat.
 * `opowiesci/` — *stories*: interaktiivisten Tarinoiden tilat.
 * `gui/` — käyttöliittymän tekstit (`ui.yaml`) ja dokumentaatiomallit.
+
+
+## Lisenssi
+
+Projekti on julkaistu **MIT**-lisenssillä — täydellinen teksti löytyy tiedostosta [`LICENSE`](LICENSE) pääkansiossa. Lyhyesti: voit vapaasti käyttää, kopioida, muokata ja levittää ohjelmistoa (myös kaupallisesti), kunhan säilytät tekijänoikeusilmoituksen. Ohjelmisto toimitetaan "sellaisena kuin se on", ilman minkäänlaista takuuta.

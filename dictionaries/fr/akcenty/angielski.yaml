@@ -8,7 +8,7 @@ opis: |
   Adapte le texte français au synthétiseur vocal anglais (David / Zira /
   Samantha / Hazel).
 
-  Différences fonétiques critiques français → anglais :
+  Différences phonétiques critiques français → anglais :
     - « ch » fr = /ʃ/, « ch » en = /tʃ/ → on écrit « sh ».
     - « j »  fr = /ʒ/, « j »  en = /dʒ/ → on écrit « zh » (digramme russe).
     - « gn » fr = /ɲ/, « gn » en = /gn/ → on écrit « ny ».

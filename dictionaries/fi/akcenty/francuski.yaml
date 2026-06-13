@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: Hortense / Paul / Julie (ranskalainen TTS).
 # -----------------------------------------------------------------------------
 id: francuski
-etykieta: "Ranska (esim. Hortense / Paul / Julie)"
+etykieta: "Ranskalainen (esim. Hortense / Paul / Julie)"
 opis: |
   Mukauttaa suomenkielisen tekstin ranskalaiselle puhesyntetisaattorille
   (Hortense / Paul / Julie). Ranskan fonetiikka tarjoaa kaksi erinomaista

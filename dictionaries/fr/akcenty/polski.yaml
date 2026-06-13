@@ -8,7 +8,7 @@ opis: |
   Adapte le texte français au synthétiseur vocal polonais (Ewa / Adam /
   Maja).
 
-  Différences fonétiques critiques français → polonais :
+  Différences phonétiques critiques français → polonais :
     - « ch » fr = /ʃ/, « ch » pl = /x/ → on écrit « sz » (= /ʃ/ pl).
     - « j »  fr = /ʒ/, « j »  pl = /j/ → on écrit « ż » (= /ʒ/ pl).
     - « gn » fr = /ɲ/, « gn » pl = /gn/ → on écrit « ń ».

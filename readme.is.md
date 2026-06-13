@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **17.6.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **17.6.1** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -128,3 +128,8 @@ Aðaltungumál þessa verkefnis er pólska. Nöfn eininga, flokka, athugasemdir 
 * `rezyser/` — *director*: skapandi hamir Leikstjóraeiningarinnar.
 * `opowiesci/` — *stories*: hamir fyrir gagnvirkar sögur.
 * `gui/` — viðmótstextar (`ui.yaml`) og skjalasniðmát.
+
+
+## Leyfi
+
+Verkefnið er gefið út undir **MIT** leyfi — fullur texti er í skránni [`LICENSE`](LICENSE) í aðalmöppu geymslunnar. Í stuttu máli: þú getur frjálst notað, afritað, breytt og dreift hugbúnaðinum (einnig í viðskiptalegum tilgangi), að því tilskildu að höfundarréttartilkynningin sé varðveitt. Hugbúnaðurinn er afhentur „eins og hann er", án nokkurrar ábyrgðar.

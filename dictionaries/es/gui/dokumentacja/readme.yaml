@@ -130,3 +130,7 @@ tresc:
     * `rezyser/` — *director*: modos creativos del módulo Director.
     * `opowiesci/` — *stories*: modos de Historias interactivas.
     * `gui/` — textos de la interfaz (`ui.yaml`) y plantillas de documentación.
+  licencja: |
+    ## Licencia
+
+    El proyecto se distribuye bajo la licencia **MIT** — el texto completo se encuentra en el archivo [`LICENSE`](LICENSE) en el directorio principal del repositorio. En resumen: puedes usar, copiar, modificar y distribuir el software libremente (incluso comercialmente), siempre que mantengas la nota de derechos de autor. El software se proporciona "tal cual", sin ninguna garantía.

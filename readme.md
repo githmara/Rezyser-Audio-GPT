@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **17.6.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **17.6.1** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -128,3 +128,8 @@ The primary language of this project is Polish. Module names, class names, code 
 * `rezyser/` — *director*: creative modes of the Director module.
 * `opowiesci/` — *stories*: interactive Story modes.
 * `gui/` — interface texts (`ui.yaml`) and documentation templates.
+
+
+## License
+
+The project is released under the **MIT** license — the full text is available in the [`LICENSE`](LICENSE) file in the main repository directory. In short: you are free to use, copy, modify, and distribute the software (including commercially), provided that you retain the copyright notice. The software is provided "as is," without any warranty.

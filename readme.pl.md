@@ -7,7 +7,7 @@
 
 Zestaw samowystarczalnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
 
-Wersja: **17.6.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **17.6.1** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Główne moduły
@@ -108,3 +108,8 @@ Niniejszy README to jedynie zarys architektoniczny projektu. Aby poznać zaawans
 * `docs/dictionaries.<iso>.txt` — instrukcja dla lingwistów bez Pythona, jak dodawać własne akcenty/szyfry/tryby AI.
 
 Każdy z tych plików dostępny jest w 9 językach — sufiks `.<iso>.txt` (np. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+
+
+## Licencja
+
+Projekt jest udostępniony na licencji **MIT** — pełna treść w pliku [`LICENSE`](LICENSE) w katalogu głównym repozytorium. W skrócie: możesz swobodnie używać, kopiować, modyfikować i rozpowszechniać oprogramowanie (także komercyjnie), pod warunkiem zachowania noty o prawach autorskich. Oprogramowanie dostarczane jest „tak jak jest", bez jakiejkolwiek gwarancji.

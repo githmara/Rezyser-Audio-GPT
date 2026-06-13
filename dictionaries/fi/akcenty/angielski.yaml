@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: David / Zira / Samantha / Hazel (englantilainen TTS).
 # -----------------------------------------------------------------------------
 id: angielski
-etykieta: "Englanti (esim. David / Zira)"
+etykieta: "Englantilainen (esim. David / Zira)"
 opis: |
   Mukauttaa suomenkielisen tekstin englantilaiselle puhesyntetisaattorille
   (David / Zira / Samantha / Hazel). Muuttaa j-kirjaimen y-kirjaimeksi

@@ -12,7 +12,7 @@
 #  frá uppkastaða fræinu; finnur ekki upp ný áhrif.
 # -----------------------------------------------------------------------------
 id: tryb_mniejsze_zlo
-etykieta: "Minna illa — hver valkostur óhagstæður"
+etykieta: "Minna illt — hver valkostur óhagstæður"
 kategoria: tryb
 kolejnosc: 50
 
@@ -67,7 +67,7 @@ fiolka:
 prompt_systemowy: |
   HAMUR: MINNA ILLA. Reiturinn `wybory` inniheldur 3-5 stök A-E, þar sem HVER valkostur er óhagstæður siðferðilega, líkamlega eða stefnumótandi — leikmaðurinn velur minna illa, ekki meira gott. Engin „hlutlaus" valkostur. Enginn „farsæll endir" innan þessarar umferðar.
 
-  VALKOSTAFORM (STRANGT): hver `tekst` í `wybory[]` VERÐUR að vera orðaður sem **boðháttur í annarri persónu eintölu** („hlauptu eftir skógarveginum", „opnaðu hurðina", „spurðu öldunginn um stúlkuna", „skildu eftir særðan"). BANNAD form: nafnháttur („að hlaupa eftir veginum"), fyrsta persóna („ég hleyp"), lýsing í þriðju persónu („persónan hleypur"). Ef aðgerðin krefst hlutar — taktu hann með („sláðu prestinn með rýtingnum", ekki bara „sláðu").
+  VALKOSTAFORM (STRANGT): hver `tekst` í `wybory[]` VERÐUR að vera orðaður sem **boðháttur í annarri persónu eintölu** („hlauptu eftir skógarveginum", „opnaðu hurðina", „spurðu öldunginn um stúlkuna", „skildu eftir særðan"). BANNAÐ form: nafnháttur („að hlaupa eftir veginum"), fyrsta persóna („ég hleyp"), lýsing í þriðju persónu („persónan hleypur"). Ef aðgerðin krefst hlutar — taktu hann með („sláðu prestinn með rýtingnum", ekki bara „sláðu").
 
   FYRSTU 5 UMFERÐIRNAR — STIGMÖGNUN: í fyrstu fimm umferðum leiksins VERÐUR HVERT val að stigmagna áhættu, drama eða siðferðilegan þunga atriði eftir atriði. „Auðveldar útgöngur" BANNAÐAR fyrstu 5 umferðirnar: valkostir eins og „flýja", „fela sig", „hunsa", „ganga í burtu" eru LEYFÐAR AÐEINS ef þeim fylgir verulegur og skýr kostnaður — missir bandamanns, afhjúpun leyndarmáls, þriðji aðili tekinn á sig afleiðingum, missir verðmæts búnaðar, opnun hefndarþráðs persónu. Lélegt dæmi í umferð 2: „flýja veginn". Gott dæmi: „flýja veginn og skilja særðan félaga eftir fyrir úlfana".
 
@@ -79,11 +79,11 @@ prompt_systemowy: |
 
   ### HVENÆR KYNNA FLÖSKUNA
 
-  Þú kynnir flöskuna AÐEINS þegar user payload inniheldur lykilinn `"fiolka_aktywacja_w_tej_turze": true`. Þetta er Python-merki um að nógu margar umferðir af erfiðleika hafa liðið (þröskuldurinn er paramatrískur — Python talaði, þú þarft þess ekki). Ekki kynna flöskuna sjálfkrafa, án þessa merkis. Ekki neita að kynna hana þegar merkið er til staðar.
+  Þú kynnir flöskuna AÐEINS þegar user payload inniheldur lykilinn `"fiolka_aktywacja_w_tej_turze": true`. Þetta er Python-merki um að nógu margar umferðir af erfiðleika hafa liðið (þröskuldurinn er parametrískur — Python taldi, þú þarft þess ekki). Ekki kynna flöskuna sjálfkrafa, án þessa merkis. Ekki neita að kynna hana þegar merkið er til staðar.
 
   Kynntu hana DIEGETÍSKT — leikmaðurinn finnur hana í vasa dauðs ókunnugs manns, fær hana frá persónu, sér hana í gröf, dregur hana úr frakkavasa sem áður var hunsaður. Val hvers vegs er þitt, en það verður að passa við atriðið. Eftir kynninguna fyrir í úttaks-JSON: `stan.fiolka.obecna: true`, `stan.fiolka.uzyto_razy: 0`, `stan.fiolka.zniszczona: false`.
 
-  Lýsing flöskunnar í frásögn: stutt, viðsemjandi, EKKI leiðbeinandi. Dæmi: „Í frakkavasa dauðs ókunnugs manns finnurðu glerflösku með dökkum vökva. Engin merking — lyktin er beisk, þú getur ekki nefnt hana."
+  Lýsing flöskunnar í frásögn: stutt, áleitin, EKKI leiðbeinandi. Dæmi: „Í frakkavasa dauðs ókunnugs manns finnurðu glerflösku með dökkum vökva. Engin merking — lyktin er beisk, þú getur ekki nefnt hana."
 
   BANNAÐ: EKKI segja leikmanninum hvað flaskan gerir. EKKI lofa björgun. EKKI gefa í skyn að hún muni hjálpa. Flaskan er gáta.
 

@@ -52,7 +52,6 @@ zamiany:
   - { wzor: "ch", zamiana: "tsch" }
   - { wzor: "Ch", zamiana: "Tsch" }
   - { wzor: "CH", zamiana: "TSCH" }
-  # --- ñ → nj ---
   # --- gu + e/i → g (u muda) ---
   - { wzor: "gue", zamiana: "ge" }
   - { wzor: "Gue", zamiana: "Ge" }

@@ -10,7 +10,7 @@ opis: |
   on translittère les digrammes français pour qu'ils correspondent à
   l'orthographe latine adaptée au russe.
 
-  Différences fonétiques critiques français → russe :
+  Différences phonétiques critiques français → russe :
     - « ch » fr = /ʃ/, « sch » est l'écriture latine la plus lisible en russe.
     - « j »  fr = /ʒ/ → on écrit « zh » (transcription standard).
     - « ou » fr = /u/ → on écrit « u » (TTS russe lit u comme /u/ ✓).

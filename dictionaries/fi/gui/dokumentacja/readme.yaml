@@ -130,3 +130,7 @@ tresc:
     * `rezyser/` — *director*: Ohjaaja-moduulin luovat tilat.
     * `opowiesci/` — *stories*: interaktiivisten Tarinoiden tilat.
     * `gui/` — käyttöliittymän tekstit (`ui.yaml`) ja dokumentaatiomallit.
+  licencja: |
+    ## Lisenssi
+
+    Projekti on julkaistu **MIT**-lisenssillä — täydellinen teksti löytyy tiedostosta [`LICENSE`](LICENSE) pääkansiossa. Lyhyesti: voit vapaasti käyttää, kopioida, muokata ja levittää ohjelmistoa (myös kaupallisesti), kunhan säilytät tekijänoikeusilmoituksen. Ohjelmisto toimitetaan "sellaisena kuin se on", ilman minkäänlaista takuuta.

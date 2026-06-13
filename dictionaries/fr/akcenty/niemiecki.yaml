@@ -8,7 +8,7 @@ opis: |
   Adapte le texte français au synthétiseur vocal allemand (Hedda / Stefan /
   Katja).
 
-  Différences fonétiques critiques français → allemand :
+  Différences phonétiques critiques français → allemand :
     - « ch » fr = /ʃ/, « ch » de = /x/ → on écrit « sch ».
     - « j »  fr = /ʒ/, « j »  de = /j/ → on écrit « sch » (approximation).
     - « ou » fr = /u/, « ou » de inhabituel → on écrit « u ».

@@ -130,3 +130,7 @@ tresc:
     * `rezyser/` — *Regisseur*: kreative Modi des Regisseur-Moduls.
     * `opowiesci/` — *Geschichten*: Modi interaktiver Geschichten.
     * `gui/` — Benutzeroberflächentexte (`ui.yaml`) und Dokumentationsvorlagen.
+  licencja: |
+    ## Lizenz
+
+    Das Projekt wird unter der **MIT**-Lizenz bereitgestellt — der vollständige Text befindet sich in der Datei [`LICENSE`](LICENSE) im Hauptverzeichnis des Repositories. Kurz gesagt: Du kannst die Software frei verwenden, kopieren, modifizieren und verbreiten (auch kommerziell), vorausgesetzt, dass der Urheberrechtshinweis beibehalten wird. Die Software wird „wie besehen“ bereitgestellt, ohne jegliche Gewährleistung.

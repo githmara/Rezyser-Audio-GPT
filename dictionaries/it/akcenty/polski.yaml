@@ -3,7 +3,7 @@
 #  Per i sintetizzatori: Ewa / Adam / Maja (TTS polacco).
 # -----------------------------------------------------------------------------
 id: polski
-etykieta: "Polonia (es. Ewa / Adam / Maja)"
+etykieta: "Polacco (es. Ewa / Adam / Maja)"
 opis: |
   Adatta il testo italiano al sintetizzatore vocale polacco (Ewa / Adam / Maja).
   L'italiano e il polacco condividono molti suoni latini di base:

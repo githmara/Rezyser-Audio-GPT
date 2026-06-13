@@ -130,3 +130,7 @@ tresc:
     * `rezyser/` — *director*: creative modes of the Director module.
     * `opowiesci/` — *stories*: interactive Story modes.
     * `gui/` — interface texts (`ui.yaml`) and documentation templates.
+  licencja: |
+    ## License
+
+    The project is released under the **MIT** license — the full text is available in the [`LICENSE`](LICENSE) file in the main repository directory. In short: you are free to use, copy, modify, and distribute the software (including commercially), provided that you retain the copyright notice. The software is provided "as is," without any warranty.

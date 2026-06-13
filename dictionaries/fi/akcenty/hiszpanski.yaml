@@ -3,7 +3,7 @@
 #  Syntetisaattoreille: Helena / Pablo / Sabina (espanjalainen TTS).
 # -----------------------------------------------------------------------------
 id: hiszpanski
-etykieta: "Espanja (esim. Helena / Pablo)"
+etykieta: "Espanjalainen (esim. Helena / Pablo)"
 opis: |
   Mukauttaa suomenkielisen tekstin espanjalaiselle puhesyntetisaattorille
   (Helena / Pablo / Sabina). Korvaa h-kirjaimen j-kirjaimella (frikatiivi)

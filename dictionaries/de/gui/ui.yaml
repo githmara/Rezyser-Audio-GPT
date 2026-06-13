@@ -1042,7 +1042,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Was ist neu in Version {nowa_wersja}:'
-  co_nowego_tresc: 'Regiemodus: Die Synchronisation des Speichers mit der Festplatte nach manueller Bearbeitung der Erzählungsdatei ist jetzt ein tatsächliches Neuladen des gesamten Projekts — die Anwendung berechnet die gesamte Struktur (Kapitel, Akte, Szenen) neu und hebt das Buch der Welt sowie den Modus an. Wenn die Geschichte zu lang ist, um in den Speicher zu passen, fragt die Anwendung, ab welcher Überschrift der Arbeitsspeicher der KI starten soll. Das Projektpanel wurde vereinfacht und die Schnittstellenübersetzungen (u.a. isländisch und russisch) vereinheitlicht.'
+  co_nowego_tresc: 'Ordnungsausgabe nach der Qualitätsprüfung aller Sprachpakete. Akzentetiketten wurden vereinheitlicht (u.a. finnisch, italienisch und isländisch — jetzt benennen sie die Sprache und nicht das Land) und kleine Tippfehler und Ungenauigkeiten in den Regelbeschreibungen und AI-Nachrichten wurden korrigiert. Außerdem wurde die Projektlizenzinformation (MIT) hinzugefügt. Keine Änderungen in der Funktionsweise des Geschichtengenerators, der Chiffren und des Übersetzers.'
   co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
   btn_szczegoly_online: '&Details online'
 opowiesci:

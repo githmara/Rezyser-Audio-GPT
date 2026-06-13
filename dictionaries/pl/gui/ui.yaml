@@ -1045,7 +1045,7 @@ updater:
   # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
   co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
   co_nowego_tresc: |-
-    Tryb Reżysera: synchronizacja pamięci z dyskiem po ręcznej edycji pliku narracji to teraz faktyczne przeładowanie całego projektu — aplikacja przelicza całą strukturę (rozdziały, akty, sceny) i podnosi Księgę Świata oraz tryb. Gdy historia jest zbyt długa, by zmieścić się w pamięci, aplikacja pyta, od którego nagłówka ma startować pamięć robocza AI. Uproszczono panel projektu i ujednolicono tłumaczenia interfejsu (m.in. islandzkie i rosyjskie).
+    Wydanie porządkowe po przeglądzie jakości wszystkich paczek językowych. Ujednolicono etykiety akcentów (m.in. fińskie, włoską i islandzkie — teraz nazywają język, a nie państwo) oraz poprawiono drobne literówki i nieścisłości w opisach reguł i komunikatach kierowanych do AI. Dodano także informację o licencji projektu (MIT). Bez zmian w działaniu generatora opowieści, szyfrów i tłumacza.
   co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
   btn_szczegoly_online:     "&Szczegóły online"
   # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)

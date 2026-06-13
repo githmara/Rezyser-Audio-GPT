@@ -9,7 +9,7 @@ opis: |
   Pablo / Lucia). Deux langues romanes — l'espagnol n'a ni /ʒ/ ni /ʃ/
   ni /z/, donc plusieurs digrammes français doivent être réécrits.
 
-  Différences fonétiques critiques français → espagnol :
+  Différences phonétiques critiques français → espagnol :
     - « ch » fr = /ʃ/, « ch » es = /tʃ/ → on conserve « ch » (accent naturel).
     - « j »  fr = /ʒ/, absent en es → on écrit « ll » (es ll = /ʝ/, le
       plus proche TTS-friendly).

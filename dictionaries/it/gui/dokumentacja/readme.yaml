@@ -130,3 +130,7 @@ tresc:
     * `rezyser/` — *director*: modalità creative del modulo Regista.
     * `opowiesci/` — *stories*: modalità di Storie interattive.
     * `gui/` — testi dell'interfaccia (`ui.yaml`) e modelli di documentazione.
+  licencja: |
+    ## Licenza
+
+    Il progetto è distribuito sotto la licenza **MIT** — il testo completo si trova nel file [`LICENSE`](LICENSE) nella directory principale del repository. In sintesi: puoi utilizzare, copiare, modificare e distribuire liberamente il software (anche a fini commerciali), a condizione di mantenere l'avviso di copyright. Il software è fornito "così com'è", senza alcuna garanzia.

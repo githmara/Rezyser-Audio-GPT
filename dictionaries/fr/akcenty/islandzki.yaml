@@ -10,7 +10,7 @@ opis: |
   nasalisation, mais possède /θ/ (þ) et /ð/ qui n'existent pas en français.
   L'accent islandais sur le français est très reconnaissable.
 
-  Différences fonétiques critiques français → islandais :
+  Différences phonétiques critiques français → islandais :
     - « ch » fr = /ʃ/, absent en is → on écrit « sh » (le TTS islandais
       le lira comme /s/ + /h/, ce qui est l'accent recherché).
     - « j »  fr = /ʒ/, « j » is = /j/ → on écrit « zh » (transcription

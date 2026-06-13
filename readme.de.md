@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **17.6.0** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **17.6.1** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -128,3 +128,8 @@ Die Hauptsprache dieses Projekts ist Polnisch. Die Namen der Module, Klassen, Ko
 * `rezyser/` — *Regisseur*: kreative Modi des Regisseur-Moduls.
 * `opowiesci/` — *Geschichten*: Modi interaktiver Geschichten.
 * `gui/` — Benutzeroberflächentexte (`ui.yaml`) und Dokumentationsvorlagen.
+
+
+## Lizenz
+
+Das Projekt wird unter der **MIT**-Lizenz bereitgestellt — der vollständige Text befindet sich in der Datei [`LICENSE`](LICENSE) im Hauptverzeichnis des Repositories. Kurz gesagt: Du kannst die Software frei verwenden, kopieren, modifizieren und verbreiten (auch kommerziell), vorausgesetzt, dass der Urheberrechtshinweis beibehalten wird. Die Software wird „wie besehen“ bereitgestellt, ohne jegliche Gewährleistung.

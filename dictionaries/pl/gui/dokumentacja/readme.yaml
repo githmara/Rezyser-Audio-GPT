@@ -141,3 +141,7 @@ tresc:
     * `docs/dictionaries.<iso>.txt` — instrukcja dla lingwistów bez Pythona, jak dodawać własne akcenty/szyfry/tryby AI.
 
     Każdy z tych plików dostępny jest w {liczba_kompletnych_jezykow} językach — sufiks `.<iso>.txt` (np. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+  licencja: |
+    ## Licencja
+
+    Projekt jest udostępniony na licencji **MIT** — pełna treść w pliku [`LICENSE`](LICENSE) w katalogu głównym repozytorium. W skrócie: możesz swobodnie używać, kopiować, modyfikować i rozpowszechniać oprogramowanie (także komercyjnie), pod warunkiem zachowania noty o prawach autorskich. Oprogramowanie dostarczane jest „tak jak jest", bez jakiejkolwiek gwarancji.
