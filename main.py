@@ -661,11 +661,31 @@ class DialogAktualizacji(wx.Dialog):
             aktualna_wersja=i18n.NUMER_WERSJI,
         )
 
+        # v17.6: strona Release (html_url) do przycisku „Szczegóły online".
+        self._url_release = getattr(info_aktualizacji, "url_release", "") or ""
+
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         tresc_ctrl = wx.StaticText(self, label=tresc_pelna)
         tresc_ctrl.Wrap(560)
         sizer.Add(tresc_ctrl, proportion=1, flag=wx.ALL | wx.EXPAND, border=12)
+
+        # v17.6: „Co nowego" — krótka, nietechniczna treść o bieżącym wydaniu w
+        # języku użytkownika (domyka „aktualizacja na ślepo"). Pełna strona online
+        # jest po polsku — mówimy o tym wprost (GitHub wymusza ISO=en i nie
+        # zaproponuje nie-polskiemu userowi tłumaczenia strony Release).
+        co_nowego = (
+            t("updater.co_nowego_naglowek", nowa_wersja=info_aktualizacji.wersja)
+            + "\n" + t("updater.co_nowego_tresc")
+        )
+        co_ctrl = wx.StaticText(self, label=co_nowego)
+        co_ctrl.Wrap(560)
+        sizer.Add(co_ctrl, proportion=1, flag=wx.ALL | wx.EXPAND, border=12)
+
+        if self._url_release:
+            uwaga_ctrl = wx.StaticText(self, label=t("updater.co_nowego_online_pl"))
+            uwaga_ctrl.Wrap(560)
+            sizer.Add(uwaga_ctrl, flag=wx.LEFT | wx.RIGHT | wx.BOTTOM, border=12)
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -683,6 +703,13 @@ class DialogAktualizacji(wx.Dialog):
 
         btn_sizer.Add(self._btn_pobierz, flag=wx.ALL, border=6)
         btn_sizer.Add(self._btn_otworz, flag=wx.ALL, border=6)
+        # „Szczegóły online" tylko gdy znamy URL strony Release.
+        if self._url_release:
+            self._btn_szczegoly = wx.Button(
+                self, wx.ID_ANY, t("updater.btn_szczegoly_online")
+            )
+            self._btn_szczegoly.Bind(wx.EVT_BUTTON, self._on_szczegoly_online)
+            btn_sizer.Add(self._btn_szczegoly, flag=wx.ALL, border=6)
         btn_sizer.Add(self._btn_anuluj, flag=wx.ALL, border=6)
 
         sizer.Add(btn_sizer, flag=wx.ALIGN_CENTER | wx.ALL, border=6)
@@ -726,6 +753,14 @@ class DialogAktualizacji(wx.Dialog):
         # fokus default-na-dialog wraca, ale nasz dialog może go nie odzyskać
         # spod parent frame'a. wx.CallAfter() umieszcza SetFocus po wszystkich
         # bieżących events w kolejce — bezpieczna kolejność.
+        wx.CallAfter(self._btn_pobierz.SetFocus)
+
+    def _on_szczegoly_online(self, _event):
+        """Otwiera stronę Release na GitHubie w domyślnej przeglądarce; dialog
+        pozostaje otwarty (jak „Otwórz folder dictionaries"). Treść strony jest
+        po polsku — uprzedza o tym `co_nowego_online_pl` w samym dialogu."""
+        if self._url_release:
+            wx.LaunchDefaultBrowser(self._url_release)
         wx.CallAfter(self._btn_pobierz.SetFocus)
 
 

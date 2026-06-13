@@ -583,6 +583,8 @@ class WynikRekoncyliacji:
     liczba_znakow: int = 0
     naglowek_uzyty: str | None = None
     sekcja_przekroczyla_limit: bool = False
+    interaktywny: bool = False   # (v17.6) True gdy uruchomiono chooser (anchor był
+                                 # nieaktualny) — GUI pokazuje wtedy punkt odniesienia.
 
 
 @dataclass
@@ -883,24 +885,39 @@ class ProjektRezysera:
                 naglowek_uzyty=naglowek,
             )
 
-        # Tor interaktywny (v17.6): GUI wybiera punkt odniesienia pamięci roboczej.
-        if wybor_markera is not None:
+        # Anchor zapisany w meta streszczenia: czy jest WCIĄŻ ważny w bieżącej
+        # treści (preferowany nagłówek obecny + ma istotną treść)?
+        meta = self._wczytaj_streszczenie_meta()
+        preferowany = meta.get("marker_naglowek_tekst") if meta else None
+        anchor_offset = None
+        if preferowany:
+            for off, txt in reversed(_znajdz_naglowki(content)):
+                if txt == preferowany and _ma_istotna_tresc(content, off):
+                    anchor_offset = off
+                    break
+
+        # Tor interaktywny (v17.6) TYLKO gdy anchor nieaktualny (reżyser uciął/
+        # przesunął nagłówek po ostatnim streszczeniu) ALBO brak meta — wtedy
+        # automat by chybił, więc pytamy gracza, od którego nagłówka startować.
+        # Gdy anchor wciąż ważny, używamy go CICHO (zachowanie v15.5), bez dialogu.
+        if wybor_markera is not None and anchor_offset is None:
             markery = wyliczy_markery(content, tryb_struktury or 2)
             offset = wybor_markera(markery, tryb_struktury or 2) if markery else None
             if offset is None:
-                # Anuluj / brak markerów → fallback znakowy. BEZ flagi
-                # `sekcja_przekroczyla_limit` (to świadoma rezygnacja gracza,
-                # nie przekroczenie limitu przez wybraną sekcję).
+                # Anuluj / brak markerów → fallback znakowy (świadoma rezygnacja;
+                # BEZ flagi `sekcja_przekroczyla_limit`).
                 self.full_story = _koncowka_po_znakach(content, MAX_TAIL_ZN)
                 return WynikRekoncyliacji(
                     tryb="koncowka", liczba_znakow=len(self.full_story),
+                    interaktywny=True,
                 )
-            return _od_offsetu(offset)
+            wynik_rek = _od_offsetu(offset)
+            wynik_rek.interaktywny = True
+            return wynik_rek
 
-        # Tor automatyczny (brak callbacku — testy/headless): anchor z meta.
-        meta = self._wczytaj_streszczenie_meta()
-        preferowany = meta.get("marker_naglowek_tekst") if meta else None
-        offset = _ostatni_uzyteczny_naglowek(content, preferowany or None)
+        # Anchor ważny (użyj cicho) LUB brak callbacku (testy/headless) → automat.
+        offset = (anchor_offset if anchor_offset is not None
+                  else _ostatni_uzyteczny_naglowek(content, preferowany or None))
         if offset is not None:
             return _od_offsetu(offset)
 

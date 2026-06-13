@@ -1041,6 +1041,10 @@ updater:
 
     {url_release}
 
+  co_nowego_naglowek: 'Hvað er nýtt í útgáfu {nowa_wersja}:'
+  co_nowego_tresc: 'Leikstjórastilling: samstilling minni við disk eftir handvirka breytingu á frásagnarskrá er nú raunveruleg endurhleðsla á öllu verkefninu — forritið endurreiknar alla uppbyggingu (kafla, þætti, senur) og lyftir Heimsbókinni og stillingu. Þegar sagan er of löng til að rúmast í minni, spyr forritið frá hvaða fyrirsögn vinnsluminni AI á að byrja. Verkefnaspjaldið hefur verið einfaldað og viðmótstúlkanir samræmdar (m.a. íslenskar og rússneskar).'
+  co_nowego_online_pl: Heill útgáfusíða (á netinu) er fáanleg á pólsku.
+  btn_szczegoly_online: '&Upplýsingar á netinu'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Sögupanel"

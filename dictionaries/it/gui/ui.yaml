@@ -1041,6 +1041,10 @@ updater:
 
     {url_release}
 
+  co_nowego_naglowek: 'Novità nella versione {nowa_wersja}:'
+  co_nowego_tresc: "Modalità Regista: la sincronizzazione della memoria con il disco dopo la modifica manuale del file di narrazione è ora un effettivo ricaricamento dell'intero progetto — l'applicazione ricalcola l'intera struttura (capitoli, atti, scene) e solleva il Libro del Mondo e la modalità. Quando la storia è troppo lunga per entrare nella memoria, l'applicazione chiede da quale intestazione deve partire la memoria di lavoro dell'AI. Il pannello del progetto è stato semplificato e le traduzioni dell'interfaccia sono state uniformate (inclusi islandese e russo)."
+  co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
+  btn_szczegoly_online: '&Dettagli online'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Pannello delle Storie"

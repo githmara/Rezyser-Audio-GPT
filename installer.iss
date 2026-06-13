@@ -43,6 +43,11 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
+; Strona licencji w kreatorze instalacji (MIT). Ścieżka względna wobec katalogu,
+; z którego iscc czyta plik — build_release odpala iscc z roota repo, więc
+; `LICENSE` (root) rozwiązuje się poprawnie. Plik jest plain-text (Inno czyta
+; dowolny tekst; .rtf tylko gdy rozszerzenie .rtf).
+LicenseFile=LICENSE
 OutputBaseFilename=Rezyser_Audio_v{#MyAppVersion}_Installer
 Compression=lzma
 SolidCompression=yes

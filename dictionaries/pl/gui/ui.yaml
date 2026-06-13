@@ -1038,7 +1038,17 @@ updater:
     UWAGA: jeśli edytowałeś własne reguły fonetyczne lub szyfry w katalogu „dictionaries/" przez Menedżera Reguł, instalator nadpisze je domyślnymi wersjami z pakietu. Zrób kopię zapasową katalogu „dictionaries/" PRZED potwierdzeniem aktualizacji — kliknij przycisk „Otwórz folder dictionaries", żeby przejść tam w Eksploratorze, skopiuj cały folder w bezpieczne miejsce, a po aktualizacji odzyskaj swoje pliki z kopii.
 
     Czy chcesz pobrać i zainstalować aktualizację teraz?
-  # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A — bez kolizji wewnątrz dialogu)
+  # v17.6: „Co nowego" w DialogAktualizacji — krótka, NIETECHNICZNA treść o bieżącym
+  # wydaniu, nadpisywana co wydanie, tłumaczona autotłumaczem ui. Domyka lukę
+  # „user aktualizuje na ślepo". Pełna strona wydania (GitHub) jest po polsku —
+  # mówimy o tym wprost (co_nowego_online_pl), bo GitHub i tak wymusza ISO=en
+  # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
+  co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
+  co_nowego_tresc: |-
+    Tryb Reżysera: synchronizacja pamięci z dyskiem po ręcznej edycji pliku narracji to teraz faktyczne przeładowanie całego projektu — aplikacja przelicza całą strukturę (rozdziały, akty, sceny) i podnosi Księgę Świata oraz tryb. Gdy historia jest zbyt długa, by zmieścić się w pamięci, aplikacja pyta, od którego nagłówka ma startować pamięć robocza AI. Uproszczono panel projektu i ujednolicono tłumaczenia interfejsu (m.in. islandzkie i rosyjskie).
+  co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
+  btn_szczegoly_online:     "&Szczegóły online"
+  # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)
   btn_pobierz:              "&Pobierz i zainstaluj"
   btn_otworz_dictionaries:  "&Otwórz folder dictionaries"
   btn_anuluj:               "&Anuluj"

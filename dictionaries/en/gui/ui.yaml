@@ -1038,6 +1038,10 @@ updater:
 
     {url_release}
 
+  co_nowego_naglowek: "What's new in version {nowa_wersja}:"
+  co_nowego_tresc: 'Director Mode: synchronizing memory with disk after manual editing of the narration file now actually reloads the entire project — the application recalculates the entire structure (chapters, acts, scenes) and raises the World Book and mode. When the story is too long to fit in memory, the application asks from which header the AI working memory should start. The project panel has been simplified and interface translations have been unified (including Icelandic and Russian).'
+  co_nowego_online_pl: The full release page (online) is available in Polish.
+  btn_szczegoly_online: '&Details online'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Story Panel"

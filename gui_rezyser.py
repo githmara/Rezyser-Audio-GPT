@@ -1307,9 +1307,13 @@ class RezyserPanel(wx.Panel):
 
         wx.MessageBox(status_msg, t("rezyser.status_wczytano_tytul"),
                       wx.OK | wx.ICON_INFORMATION, self)
-        # Gdy historia była za długa i pamięć robocza została ucięta — jawnie
-        # poinformuj o punkcie odniesienia (snap/fallback). Dla 'calosc' no-op.
-        self._pokaz_punkt_odniesienia(wynik.rekoncyliacja)
+        # Punkt odniesienia pokazujemy przy WCZYTANIU tylko gdy faktycznie trzeba
+        # było pytać o marker (anchor nieaktualny) lub zadziałał fallback sekcji
+        # za długiej — przy normalnym wczytaniu (anchor z meta ważny) box byłby
+        # zbędny obok statusu. Reload ma własną, bezwarunkową konfirmację.
+        rek = wynik.rekoncyliacja
+        if rek is not None and (rek.interaktywny or rek.sekcja_przekroczyla_limit):
+            self._pokaz_punkt_odniesienia(rek)
 
     # ------------------------------------------------------------------
     # Wspólne sianie GUI po wczytaniu/przeładowaniu projektu (v17.6)

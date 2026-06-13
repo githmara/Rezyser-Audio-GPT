@@ -54,6 +54,8 @@ class UpdateInfo:
     url_instalatora: str     # bezpośredni link do .exe
     nazwa_pliku: str         # np. "rezyser_audio_13.4.1_Installer.exe"
     rozmiar_bajtow: int      # 0 jeśli GitHub nie podał Content-Length
+    url_release: str = ""    # (v17.6) strona Release na GitHubie (html_url) —
+                             # „Szczegóły online" w DialogAktualizacji. Treść po PL.
 
 
 # ---------------------------------------------------------------------------
@@ -163,6 +165,7 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
             url_instalatora=asset["browser_download_url"],
             nazwa_pliku=asset["name"],
             rozmiar_bajtow=asset.get("size", 0),
+            url_release=dane.get("html_url", ""),
         )
 
     except (HTTPError, URLError, OSError, KeyError, ValueError):
