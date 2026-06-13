@@ -42,8 +42,7 @@ Publiczne API:
     print(status.procent, status.poziom, status.komunikat)
 
     # Mutacje
-    proj.wyczysc_biezaca()       # zostaw Księgę i streszczenie
-    proj.twardy_reset()          # wyzeruj wszystko
+    proj.twardy_reset()          # wyzeruj wszystko (dysk nietknięty)
 
     # Snapshot dla wątku tła AI (odcina go od zmian w wątku GUI)
     snap = proj.snapshot()
@@ -60,8 +59,8 @@ import json
 import os
 import re
 import sys
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Callable
 
 import core_tokeny as ct
 import sciezki
@@ -313,6 +312,86 @@ def _rozbij_naglowek(naglowek: str) -> tuple[str, int | None]:
 
 
 # =============================================================================
+# Wybór punktu odniesienia pamięci roboczej (v17.6)
+# =============================================================================
+# Gdy historia jest za długa, by zmieścić ją w całości, pamięć robocza AI
+# musi zacząć się od któregoś nagłówka struktury (wcześniejsze wydarzenia
+# reprezentuje Streszczenie Długotrwałe). Do v17.5 ten punkt wybierał silnik
+# automatycznie (`_ostatni_uzyteczny_naglowek`). Od v17.6 GUI może go wybrać
+# interaktywnie — dla nietechnicznego reżysera — a `wyliczy_markery` dostarcza
+# czytelną, zależną od trybu listę dostępnych punktów (rozdziały dla Audiobooka;
+# akty z zagnieżdżonymi scenami dla Skryptu).
+
+@dataclass
+class MarkerStruktury:
+    """Jeden wybieralny punkt odniesienia (nagłówek struktury) + jego pozycja.
+
+    Attributes:
+        offset:           indeks znakowy początku linii nagłówka w `.txt`
+                          (do pocięcia ``content[offset:]``).
+        etykieta:         czytelny tekst nagłówka (np. ``"Rozdział 7"``).
+        typ:              ``"rozdzial"`` | ``"akt"`` | ``"scena"`` |
+                          ``"prolog"`` | ``"epilog"`` | ``"inny"``.
+        numer:            numer struktury (int) lub ``None`` (prolog/epilog/inny).
+        ma_istotna_tresc: czy PO nagłówku jest ≥ ``MIN_TRESC_PO_NAGLOWKU`` znaków
+                          (guard przed snapem do pustego nagłówka).
+        sceny:            podrzędne markery scen — wypełnione TYLKO dla aktów
+                          (tryb Skrypt); puste dla płaskiej listy Audiobooka.
+    """
+
+    offset: int
+    etykieta: str
+    typ: str
+    numer: int | None
+    ma_istotna_tresc: bool
+    sceny: list["MarkerStruktury"] = field(default_factory=list)
+
+
+def wyliczy_markery(content: str, tryb: int) -> list[MarkerStruktury]:
+    """Buduje listę wybieralnych punktów odniesienia z treści `.txt`.
+
+    Args:
+        content: pełna treść narracji (`skrypty/<nazwa>.txt`).
+        tryb:    1 = Skrypt (akty z zagnieżdżonymi scenami), 2 = Audiobook
+                 (płaska lista rozdziałów). Inne wartości → płaska lista.
+
+    Returns:
+        Lista top-levelowych :class:`MarkerStruktury`. Dla Skryptu akty niosą
+        swoje sceny w ``sceny``; prolog/epilog oraz sceny przed pierwszym aktem
+        trafiają jako top-level (gracz wciąż może od nich wystartować pamięć).
+        Płaska lista (Audiobook) zawiera wszystkie nagłówki w kolejności.
+    """
+    surowe = [
+        (off, txt, *_rozbij_naglowek(txt))
+        for off, txt in _znajdz_naglowki(content)
+    ]
+
+    def _mk(off: int, txt: str, typ: str, numer: int | None) -> MarkerStruktury:
+        return MarkerStruktury(
+            offset=off, etykieta=txt, typ=typ, numer=numer,
+            ma_istotna_tresc=_ma_istotna_tresc(content, off),
+        )
+
+    # Skrypt: zagnieżdżamy sceny pod ostatnim napotkanym aktem.
+    if tryb == 1:
+        wynik: list[MarkerStruktury] = []
+        biezacy_akt: MarkerStruktury | None = None
+        for off, txt, typ, numer in surowe:
+            if typ == "akt":
+                biezacy_akt = _mk(off, txt, typ, numer)
+                wynik.append(biezacy_akt)
+            elif typ == "scena" and biezacy_akt is not None:
+                biezacy_akt.sceny.append(_mk(off, txt, typ, numer))
+            else:
+                # Prolog/Epilog/inny LUB scena przed pierwszym aktem → top-level.
+                wynik.append(_mk(off, txt, typ, numer))
+        return wynik
+
+    # Audiobook / nieznany tryb: płaska lista wszystkich nagłówków.
+    return [_mk(off, txt, typ, numer) for off, txt, typ, numer in surowe]
+
+
+# =============================================================================
 # Silnik fonetyczny (dawna RezyserPanel.zastosuj_akcenty_uniwersalne)
 # =============================================================================
 
@@ -460,7 +539,13 @@ def zastosuj_akcenty_uniwersalne(
 
 @dataclass
 class WynikWczytania:
-    """Rezultat :meth:`ProjektRezysera.wczytaj` – co i w jakiej ilości trafiło do pamięci."""
+    """Rezultat :meth:`ProjektRezysera.wczytaj` – co i w jakiej ilości trafiło do pamięci.
+
+    Od v17.6 osadza :class:`WynikRekoncyliacji` (``rekoncyliacja``) — wczytanie
+    zawsze przepuszcza narrację przez rekoncyliację, a GUI potrzebuje jej trybu
+    (calosc/snap/koncowka), użytego nagłówka i flag, by pokazać punkt odniesienia
+    pamięci roboczej. Pole jest opcjonalne dla zgodności (None gdy nieustawione).
+    """
 
     nazwa: str
     czy_historia: bool = False
@@ -468,28 +553,36 @@ class WynikWczytania:
     czy_ksiega_swiata: bool = False
     liczba_znakow: int = 0
     saved_mode: int | None = None   # 1=Skrypt, 2=Audiobook, None=brak metadanej
+    rekoncyliacja: "WynikRekoncyliacji | None" = None
 
 
 @dataclass
 class WynikRekoncyliacji:
-    """Rezultat :meth:`ProjektRezysera.rekoncyliuj_z_dysku` (v15.5).
+    """Rezultat rekoncyliacji narracji z dysku (v15.5; rdzeń
+    :meth:`ProjektRezysera._zastosuj_rekoncyliacje`).
 
     Attributes:
         tryb:                   "calosc"   – cały `.txt` zmieścił się pod progiem,
                                               streszczenie skasowane (D1);
                                 "snap"     – długa historia + streszczenie,
                                               przywrócono końcówkę od nagłówka;
-                                "koncowka" – brak użytecznego markera, przywrócono
-                                              ostatnie MAX_TAIL_ZN znaków.
+                                "koncowka" – brak/anulowano marker LUB wybrana
+                                              sekcja za długa → ostatnie
+                                              MAX_TAIL_ZN znaków (fallback znakowy).
         skasowano_streszczenie: czy usunięto `_streszczenie.txt` + meta (D1).
         liczba_znakow:          długość przywróconego `full_story`.
         naglowek_uzyty:         tekst nagłówka, od którego snapowano (lub None).
+        sekcja_przekroczyla_limit: (v17.6) True gdy WYBRANY marker istniał, ale
+                                jego sekcja sama przekroczyła MAX_TAIL_ZN i spadliśmy
+                                na fallback znakowy. Sygnał dla GUI, by JEDNORAZOWO
+                                ujawnić istnienie fallbacku zamiast kolejnych dialogów.
     """
 
     tryb: str
     skasowano_streszczenie: bool = False
     liczba_znakow: int = 0
     naglowek_uzyty: str | None = None
+    sekcja_przekroczyla_limit: bool = False
 
 
 @dataclass
@@ -629,9 +722,17 @@ class ProjektRezysera:
     # Wczytywanie
     # ------------------------------------------------------------------
     def wczytaj(
-        self, nazwa: str, model: str = ct.MODEL_DOMYSLNY_REZYSER,
+        self,
+        nazwa: str,
+        model: str = ct.MODEL_DOMYSLNY_REZYSER,
+        wybor_markera: "Callable[[list[MarkerStruktury], int], int | None] | None" = None,
     ) -> WynikWczytania:
         """Wczytuje projekt: historię / streszczenie / Księgę Świata / tryb .mode.
+
+        Od v17.6 jest JEDYNYM wejściem wczytania/przeładowania z dysku — także
+        „Przeładuj projekt z dysku" w GUI woła tę metodę (przelicza liczniki,
+        podnosi Księgę/tryb/rekoncyliację jednym torem, eliminując desync
+        liczników i meta streszczenia po ręcznej edycji `.txt`).
 
         Ustawia liczniki rozdziałów/aktów/scen na podstawie treści historii.
 
@@ -640,9 +741,17 @@ class ProjektRezysera:
           * cały `.txt` mieści się pod progiem ostrzegawczym → wczytujemy CAŁOŚĆ
             bez kompresji (nawet jeśli istnieje streszczenie — wtedy je kasujemy);
           * tekst przekracza próg i jest streszczenie → `full_story` to tylko
-            KOŃCÓWKA `.txt` (od ostatniego użytecznego nagłówka), streszczenie
-            zostaje. To realnie domyka lukę „po wczytaniu z _streszczenie.txt AI
-            głupiało bez kontekstu fabuły".
+            KOŃCÓWKA `.txt` (od wybranego/ostatniego użytecznego nagłówka),
+            streszczenie zostaje. To realnie domyka lukę „po wczytaniu z
+            _streszczenie.txt AI głupiało bez kontekstu fabuły".
+
+        Args:
+            wybor_markera: (v17.6) opcjonalny callback wyboru punktu odniesienia
+                pamięci roboczej, wołany TYLKO gdy historia za długa (wariant
+                snap). Dostaje ``(markery, tryb)`` z :func:`wyliczy_markery`
+                i zwraca wybrany ``offset`` lub ``None`` (anuluj → fallback
+                znakowy). Brak callbacku = automatyczny wybór anchora z meta
+                (zachowanie sprzed v17.6, używane przez testy/headless).
 
         Raises:
             FileNotFoundError: gdy nie istnieje plik ``skrypty/<nazwa>.txt``.
@@ -680,43 +789,33 @@ class ProjektRezysera:
                 # Cichy fail – Księga nie jest krytyczna dla wczytania historii.
                 pass
 
+        # --- Tryb twórczy (.mode) ---
+        # Czytany PRZED rekoncyliacją (v17.6): enumeracja markerów punktu
+        # odniesienia musi znać tryb (Skrypt=akty+sceny / Audiobook=rozdziały).
+        self.nazwa_pliku = nazwa
+        wynik.saved_mode = self.wczytaj_tryb_tworczy(nazwa)
+
         # --- Inteligentna rekoncyliacja (v15.5) ---
         # nazwa_pliku MUSI być ustawiona przed rekoncyliacją — używa jej przez
         # `_wymagaj_nazwy` i ścieżkowe helpery.
-        self.nazwa_pliku = nazwa
-        rek = self._zastosuj_rekoncyliacje(content, model)
-        wynik.czy_historia    = bool(self.full_story.strip())
+        rek = self._zastosuj_rekoncyliacje(
+            content, model, wybor_markera, wynik.saved_mode,
+        )
+        wynik.rekoncyliacja    = rek
+        wynik.czy_historia     = bool(self.full_story.strip())
         wynik.czy_streszczenie = bool(self.summary_text.strip())
-        wynik.liczba_znakow   = len(self.full_story)
-
-        # --- Tryb twórczy (.mode) ---
-        wynik.saved_mode = self.wczytaj_tryb_tworczy(nazwa)
+        wynik.liczba_znakow    = len(self.full_story)
         return wynik
 
     # ------------------------------------------------------------------
-    # Rekoncyliacja narracji z dysku (v15.5)
+    # Rekoncyliacja narracji z dysku (v15.5; rdzeń prywatny od v17.6)
     # ------------------------------------------------------------------
-    def rekoncyliuj_z_dysku(
-        self, model: str = ct.MODEL_DOMYSLNY_REZYSER,
-    ) -> WynikRekoncyliacji:
-        """Ponownie wczytuje `skrypty/<nazwa>.txt` i uzgadnia `full_story` /
-        `summary_text` (po ręcznej edycji pliku narracji, np. ucięciu złamanego
-        anti-closure). NIE dotyka `world_lore`, liczników struktury ani `.txt`.
-
-        Raises:
-            ValueError:        gdy projekt nie ma ustawionej nazwy.
-            FileNotFoundError: gdy nie istnieje `skrypty/<nazwa>.txt`.
-        """
-        self._wymagaj_nazwy()
-        sciezka = self._sciezka_historii(self.nazwa_pliku)
-        if not os.path.exists(sciezka):
-            raise FileNotFoundError(sciezka)
-        with open(sciezka, "r", encoding="utf-8") as fh:
-            content = fh.read()
-        return self._zastosuj_rekoncyliacje(content, model)
-
     def _zastosuj_rekoncyliacje(
-        self, content: str, model: str = ct.MODEL_DOMYSLNY_REZYSER,
+        self,
+        content: str,
+        model: str = ct.MODEL_DOMYSLNY_REZYSER,
+        wybor_markera: "Callable[[list[MarkerStruktury], int], int | None] | None" = None,
+        tryb_struktury: int | None = None,
     ) -> WynikRekoncyliacji:
         """Czysta logika rekoncyliacji (oddzielona od I/O dla testowalności).
 
@@ -765,24 +864,45 @@ class ProjektRezysera:
             except OSError:
                 pass
 
-        meta = self._wczytaj_streszczenie_meta()
-        preferowany = meta.get("marker_naglowek_tekst") if meta else None
-        offset = _ostatni_uzyteczny_naglowek(content, preferowany or None)
-
-        if offset is not None:
+        def _od_offsetu(offset: int) -> WynikRekoncyliacji:
+            """Ustawia ``full_story`` od ``offset`` (nagłówka). Spada na fallback
+            znakowy z flagą ``sekcja_przekroczyla_limit``, gdy sama sekcja od
+            markera przekracza :data:`MAX_TAIL_ZN` — sygnał dla GUI, by
+            JEDNORAZOWO ujawnić istnienie fallbacku (K3 v17.6)."""
             koncowka = content[offset:]
-            naglowek = content[offset:].splitlines()[0].strip() if koncowka else None
+            naglowek = koncowka.splitlines()[0].strip() if koncowka else None
             if len(koncowka) > MAX_TAIL_ZN:
-                # Sekcja od markera gigantyczna → twardy limit znakowy.
                 self.full_story = _koncowka_po_znakach(content, MAX_TAIL_ZN)
                 return WynikRekoncyliacji(
                     tryb="koncowka", liczba_znakow=len(self.full_story),
+                    naglowek_uzyty=naglowek, sekcja_przekroczyla_limit=True,
                 )
             self.full_story = koncowka
             return WynikRekoncyliacji(
                 tryb="snap", liczba_znakow=len(self.full_story),
                 naglowek_uzyty=naglowek,
             )
+
+        # Tor interaktywny (v17.6): GUI wybiera punkt odniesienia pamięci roboczej.
+        if wybor_markera is not None:
+            markery = wyliczy_markery(content, tryb_struktury or 2)
+            offset = wybor_markera(markery, tryb_struktury or 2) if markery else None
+            if offset is None:
+                # Anuluj / brak markerów → fallback znakowy. BEZ flagi
+                # `sekcja_przekroczyla_limit` (to świadoma rezygnacja gracza,
+                # nie przekroczenie limitu przez wybraną sekcję).
+                self.full_story = _koncowka_po_znakach(content, MAX_TAIL_ZN)
+                return WynikRekoncyliacji(
+                    tryb="koncowka", liczba_znakow=len(self.full_story),
+                )
+            return _od_offsetu(offset)
+
+        # Tor automatyczny (brak callbacku — testy/headless): anchor z meta.
+        meta = self._wczytaj_streszczenie_meta()
+        preferowany = meta.get("marker_naglowek_tekst") if meta else None
+        offset = _ostatni_uzyteczny_naglowek(content, preferowany or None)
+        if offset is not None:
+            return _od_offsetu(offset)
 
         # Brak użytecznego markera (reżyser wymazał nagłówki) → limit znakowy.
         self.full_story = _koncowka_po_znakach(content, MAX_TAIL_ZN)
@@ -1210,19 +1330,6 @@ class ProjektRezysera:
         self.last_response = tekst
         # Oddzielny blok akapitem, jak w oryginale.
         self.dopisz_do_pliku_historii(tekst + "\n\n")
-
-    def wyczysc_biezaca(self) -> None:
-        """Czyści tylko ``full_story`` i ``last_response``. Reszta zostaje.
-
-        Scenariusz użycia: projekt-audiobook jest już długi, wygenerowano
-        streszczenie, chcemy kontynuować pisanie operując na streszczeniu
-        jako kontekście – a pamięć bieżąca ma być czysta, by zmieściła
-        się w oknie kontekstowym modelu.
-        """
-        self.full_story = ""
-        self.last_response = ""
-        # NIE zmieniamy: chapter_counter, akt_counter, scena_counter,
-        # nazwa_pliku, world_lore, summary_text – bo projekt trwa dalej.
 
     def twardy_reset(self) -> None:
         """Całkowicie zapomina o projekcie. Pliki na dysku zostają nietknięte."""

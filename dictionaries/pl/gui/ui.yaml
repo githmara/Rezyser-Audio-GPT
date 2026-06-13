@@ -266,11 +266,6 @@ rezyser:
   btn_wczytaj_tooltip: |-
     Wczytuje istniejący plik projektu (skrypty/<nazwa>.txt) do pamięci.
     Aktywny tylko gdy pamięć jest pusta i podano nazwę.
-  btn_wyczysc_biezaca_label: "Wyczyść bieżącą (zostaw Streszczenie)"
-  btn_wyczysc_biezaca_tooltip: |-
-    Czyści wyłącznie historię bieżącą z pamięci.
-    Streszczenie (Pamięć Długotrwała) i Księga Świata zostają zachowane.
-    Używaj do kontynuacji długiej książki po wygenerowaniu streszczenia.
   btn_hard_reset_label:  "Zamknij Projekt (Twardy Reset)"
   btn_hard_reset_tooltip: |-
     CAŁKOWITE wyczyszczenie projektu: historia, streszczenie, Księga Świata.
@@ -287,15 +282,27 @@ rezyser:
   blad_otwarcia_tresc:         "Próba otwarcia pliku {sciezka_pliku} zakończyła się błędem:\n{tresc_bledu}\n\nOtwórz plik ręcznie z Eksploratora plików."
   plik_narracji_brak_tytul:    "Brak pliku narracji"
   plik_narracji_brak_tresc:    "Plik narracji projektu „{nazwa_projektu}\" nie istnieje na dysku. Najpierw wczytaj projekt lub wyślij pierwsze zapytanie do AI, żeby plik powstał."
-  # v15.5: Odśwież z dysku — synchronizacja pamięci wewnętrznej po ręcznej
-  # edycji skrypty/<nazwa>.txt (np. ucięciu złamanego anti-closure).
-  btn_odswiez_z_dysku_label:   "Odś&wież z dysku"
-  btn_odswiez_z_dysku_tooltip: "Wczytuje ponownie plik narracji (skrypty/<nazwa>.txt) i synchronizuje pamięć wewnętrzną z Twoimi ręcznymi zmianami — bez twardego resetu i ponownego wczytywania projektu. Krótką historię wczytuje w całości; długą ze streszczeniem skraca do końcówki od ostatniego nagłówka (Rozdział/Akt/Scena), zachowując streszczenie. NIE zmienia Księgi Świata ani liczników struktury."
-  odswiez_z_dysku_tytul:       "Pamięć odświeżona z dysku"
-  odswiez_calosc_tresc:        "Wczytano całą narrację z dysku ({liczba_znakow} znaków). Pamięć wewnętrzna jest zsynchronizowana z plikiem.\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
-  odswiez_calosc_skasowano_tresc: "Wczytano całą narrację z dysku ({liczba_znakow} znaków) — cały tekst zmieścił się w oknie kontekstu, więc zbędne streszczenie zostało usunięte (silnik pracuje teraz na pełnej historii).\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
-  odswiez_snap_tresc:          "Odtworzono końcówkę narracji od nagłówka „{naglowek}\" ({liczba_znakow} znaków). Wcześniejszą część historii reprezentuje istniejące streszczenie, które pozostało nietknięte.\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
-  odswiez_koncowka_tresc:      "Tekst jest długi i nie zawiera nagłówków struktury — odtworzono ostatni fragment narracji ({liczba_znakow} znaków), a streszczenie pozostało nietknięte. ZALECENIE: wstawiaj nagłówki Rozdział/Akt/Scena, aby odświeżanie mogło precyzyjnie trafić w granicę sceny.\n\nKsięga Świata i liczniki struktury pozostały bez zmian."
+  # v17.6: Przeładuj projekt z dysku — pełny reload (liczniki + Księga + tryb +
+  # Burza + rekoncyliacja) po ręcznej edycji skrypty/<nazwa>.txt. Zastąpił
+  # częściowy „Odśwież z dysku" z v15.5 (eliminacja desyncu liczników/meta).
+  btn_przeladuj_label:   "&Przeładuj projekt z dysku"
+  btn_przeladuj_tooltip: "Wczytuje CAŁY projekt na nowo z dysku po Twoich ręcznych zmianach w pliku narracji (skrypty/<nazwa>.txt) — przelicza liczniki Rozdziałów/Aktów/Scen, podnosi Księgę Świata, tryb i opcje Burzy oraz synchronizuje pamięć roboczą. Krótką historię wczytuje w całości; przy długiej zapyta, od którego nagłówka ma startować pamięć robocza AI (resztę reprezentuje Streszczenie). UWAGA: nadpisuje zawartość pól wersją z dysku — zapisz najpierw niezapisane zmiany."
+  przeladuj_ostrzezenie_tytul: "Przeładować projekt z dysku?"
+  przeladuj_ostrzezenie_tresc: "Przeładowanie zastąpi bieżącą zawartość (Księga Świata, Pamięć Długotrwała, narracja, liczniki struktury) wersją zapisaną na dysku. Niezapisane zmiany w polach zostaną utracone.\n\nKontynuować?"
+  przeladuj_tytul:             "Projekt przeładowany z dysku"
+  przeladuj_calosc_tresc:      "Przeładowano cały projekt z dysku ({liczba_znakow} znaków). Liczniki struktury, Księga Świata, tryb i pamięć robocza są zsynchronizowane z plikiem."
+  przeladuj_calosc_skasowano_tresc: "Przeładowano cały projekt z dysku ({liczba_znakow} znaków) — cały tekst zmieścił się w oknie kontekstu, więc zbędne streszczenie zostało usunięte (silnik pracuje teraz na pełnej historii). Liczniki i Księga Świata zsynchronizowane z plikiem."
+  # v17.6: interaktywny wybór punktu odniesienia pamięci roboczej (gdy historia
+  # za długa, by zmieścić ją w całości). Listy zależne od trybu projektu.
+  marker_dlg_tytul:            "Punkt odniesienia pamięci roboczej"
+  marker_dlg_plaski_lbl:       "Historia jest za długa, by zmieścić ją w całości. Od którego Rozdziału ma startować pamięć robocza AI? (Wcześniejsze wydarzenia reprezentuje Streszczenie. Anuluj = ostatni fragment tekstu.)"
+  marker_dlg_akt_lbl:          "Historia jest za długa, by zmieścić ją w całości. Od którego Aktu ma startować pamięć robocza AI? (Anuluj = ostatni fragment tekstu.)"
+  marker_dlg_scena_lbl:        "Od której Sceny tego Aktu ma startować pamięć robocza AI?"
+  marker_dlg_caly_akt:         "← cały Akt (od nagłówka aktu)"
+  punkt_odniesienia_tytul:     "Punkt odniesienia pamięci roboczej"
+  punkt_odniesienia_snap_tresc: "Pamięć robocza AI zaczyna się od nagłówka „{naglowek}\" ({liczba_znakow} znaków). Wcześniejsze wydarzenia reprezentuje Streszczenie Długotrwałe (pozostało nietknięte)."
+  punkt_odniesienia_fallback_tresc: "Nie wskazano punktu odniesienia — do pamięci roboczej trafił ostatni fragment narracji ({liczba_znakow} znaków). Streszczenie pozostało nietknięte. Wskazówka: wstawiaj nagłówki Rozdział/Akt/Scena, aby móc precyzyjnie wybrać początek pamięci."
+  punkt_odniesienia_za_dluga_tresc: "Wybrany fragment „{naglowek}\" jest tak rozległy, że sam nie mieści się w oknie pamięci roboczej — zastosowano awaryjne cięcie do ostatnich {liczba_znakow} znaków. Reżyserze, to odrobinę szaleństwo: rozważ dzielenie Aktów/Rozdziałów na mniejsze Sceny — krótsze sekcje pozwolą AI trzymać spójny kontekst."
   # Sidebar
   sidebar_heading:       "📖 Pasek Boczny projektu"
   lbl_ksiega_swiata:     "Księga Świata – Zasady i Postacie:"
@@ -520,10 +527,6 @@ rezyser:
     Pamięć bieżąca pozostaje pusta (tryb Nieskończonej Pamięci).
     Możesz kontynuować historię — AI operuje na streszczeniu.
   status_wczytano_historia: "Wczytano historię '{nazwa_projektu}' ({liczba_znakow} znaków).{lore_info}"
-  # Komunikaty - czyszczenie
-  pamiec_wyczyszczona_tytul: "Pamięć wyczyszczona"
-  pamiec_wyczyszczona_tresc: "Pamięć bieżąca wyczyszczona."
-  pamiec_wyczyszczona_streszczenie_zostaje: "\nStreszczenie w Pamięci Długotrwałej zostało zachowane."
   hard_reset_pytanie_tytul: "Zamknij Projekt – Twardy Reset"
   hard_reset_pytanie: |-
     Czy na pewno chcesz zamknąć projekt?

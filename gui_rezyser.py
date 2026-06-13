@@ -18,7 +18,7 @@ Panel dziedziczy po :class:`wx.Panel`; podpinany do ``MainFrame`` z ``main.py``.
 
 Główne sekcje UI (zobacz metody ``_zbuduj_*``):
     • BLOK A – nagłówek + opis narzędzia.
-    • BLOK B – pole nazwy pliku + przyciski wczytaj/wyczyść/reset.
+    • BLOK B – pole nazwy pliku + przyciski wczytaj/reset/otwórz/przeładuj.
     • BLOK C – sidebar: Księga Świata + Pamięć Długotrwała (lewa kolumna).
     • BLOK D – obszar roboczy (prawa kolumna, kompozycja pod-bloków).
     • BLOK E – panel struktury (Prolog/Epilog/Akt/Scena/Rozdział).
@@ -355,7 +355,7 @@ class RezyserPanel(wx.Panel):
         return sizer
 
     # ------------------------------------------------------------------
-    # BLOK B – Pole nazwy pliku + przyciski wczytaj / wyczyść / reset
+    # BLOK B – Pole nazwy pliku + przyciski wczytaj / reset / otwórz / przeładuj
     # ------------------------------------------------------------------
     def _zbuduj_pasek_pliku(self, BORDER: int) -> wx.BoxSizer:
         lbl_file = wx.StaticText(self, label=t("rezyser.lbl_nazwa_pliku"))
@@ -370,9 +370,6 @@ class RezyserPanel(wx.Panel):
 
         self._btn_load = wx.Button(self, label=t("rezyser.btn_wczytaj_label"))
         self._btn_load.SetToolTip(t("rezyser.btn_wczytaj_tooltip"))
-
-        self._btn_clear_current = wx.Button(self, label=t("rezyser.btn_wyczysc_biezaca_label"))
-        self._btn_clear_current.SetToolTip(t("rezyser.btn_wyczysc_biezaca_tooltip"))
 
         self._btn_hard_reset = wx.Button(self, label=t("rezyser.btn_hard_reset_label"))
         self._btn_hard_reset.SetToolTip(t("rezyser.btn_hard_reset_tooltip"))
@@ -390,20 +387,23 @@ class RezyserPanel(wx.Panel):
         self._btn_otworz_narracje = wx.Button(self, label=t("rezyser.btn_otworz_narracje_label"))
         self._btn_otworz_narracje.SetToolTip(t("rezyser.btn_otworz_narracje_tooltip"))
 
-        # v15.5: odświeżenie pamięci wewnętrznej po ręcznej edycji `.txt`
-        # (np. ucięciu złamanego anti-closure). Domyka cykl „Otwórz narrację →
-        # edytuj w edytorze → Odśwież z dysku" bez twardego resetu i ponownego
-        # wczytania projektu. Rekoncyliacja w `core_rezyser.rekoncyliuj_z_dysku`.
-        self._btn_odswiez_z_dysku = wx.Button(self, label=t("rezyser.btn_odswiez_z_dysku_label"))
-        self._btn_odswiez_z_dysku.SetToolTip(t("rezyser.btn_odswiez_z_dysku_tooltip"))
+        # v15.5/v17.6: pełne PRZEŁADOWANIE projektu z dysku po ręcznej edycji
+        # `.txt` (np. ucięciu złamanego anti-closure, dopisaniu/usunięciu
+        # rozdziału). Domyka cykl „Otwórz narrację → edytuj w edytorze →
+        # Przeładuj z dysku". Od v17.6 to faktyczny reload przez
+        # `core_rezyser.ProjektRezysera.wczytaj` — przelicza liczniki struktury,
+        # podnosi Księgę/tryb/Burzę i rekoncyliuje pamięć roboczą jednym torem
+        # (koniec desyncu liczników i meta streszczenia z czasów częściowego
+        # `rekoncyliuj_z_dysku`).
+        self._btn_przeladuj = wx.Button(self, label=t("rezyser.btn_przeladuj_label"))
+        self._btn_przeladuj.SetToolTip(t("rezyser.btn_przeladuj_tooltip"))
 
         file_row = wx.BoxSizer(wx.HORIZONTAL)
         file_row.Add(self._txt_file_name,      proportion=1, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=6)
         file_row.Add(self._btn_load,           flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
-        file_row.Add(self._btn_clear_current,  flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         file_row.Add(self._btn_hard_reset,     flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         file_row.Add(self._btn_otworz_narracje, flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
-        file_row.Add(self._btn_odswiez_z_dysku, flag=wx.ALIGN_CENTER_VERTICAL)
+        file_row.Add(self._btn_przeladuj,      flag=wx.ALIGN_CENTER_VERTICAL)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_file, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=BORDER)
@@ -988,10 +988,9 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     def _bind_events(self) -> None:
         self._btn_load.Bind(wx.EVT_BUTTON,          self._on_load)
-        self._btn_clear_current.Bind(wx.EVT_BUTTON, self._on_clear_current)
         self._btn_hard_reset.Bind(wx.EVT_BUTTON,    self._on_hard_reset)
         self._btn_otworz_narracje.Bind(wx.EVT_BUTTON, self._on_otworz_narracje)
-        self._btn_odswiez_z_dysku.Bind(wx.EVT_BUTTON, self._on_odswiez_z_dysku)
+        self._btn_przeladuj.Bind(wx.EVT_BUTTON,     self._on_przeladuj_z_dysku)
         self._btn_zapisz_ksiege.Bind(wx.EVT_BUTTON, self._on_zapisz_ksiege)
         self._btn_prompt_architekta.Bind(wx.EVT_BUTTON, self._on_prompt_architekta)
         self._btn_zapisz_pamiec.Bind(wx.EVT_BUTTON, self._on_zapisz_pamiec)
@@ -1032,15 +1031,15 @@ class RezyserPanel(wx.Panel):
         # pamiętać/przepisywać nazwy). Pole wypełnione = ścieżka eksperta
         # (bezpośrednia próba wczytania tej konkretnej nazwy).
         self._btn_load.Enable(pamiec_pusta)
-        self._btn_clear_current.Enable(pamiec_zajeta)
         # Otwórz plik narracji — wymaga wpisanej nazwy. Istnienie pliku na
         # dysku sprawdzamy dopiero w handlerze (cheaper UX: gracz może
         # kliknąć i dostaje info „brak narracji" zamiast trzymać disabled).
         self._btn_otworz_narracje.Enable(nazwa_podana)
-        # v15.5: Odśwież z dysku — wymaga nazwy i braku trwającej generacji AI
-        # (rekoncyliacja mutuje full_story/summary_text; nie kolidujemy z workerem).
+        # v15.5/v17.6: Przeładuj z dysku — wymaga nazwy i braku trwającej
+        # generacji AI (pełny reload mutuje liczniki/full_story/summary_text;
+        # nie kolidujemy z workerem).
         worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
-        self._btn_odswiez_z_dysku.Enable(nazwa_podana and not worker_w_toku)
+        self._btn_przeladuj.Enable(nazwa_podana and not worker_w_toku)
 
         cos_do_wyczyszczenia = pamiec_zajeta or bool(
             self._txt_file_name.GetValue().strip()
@@ -1266,7 +1265,9 @@ class RezyserPanel(wx.Panel):
             self._txt_file_name.SetValue(nazwa)
 
         try:
-            wynik = self._projekt.wczytaj(nazwa)
+            wynik = self._projekt.wczytaj(
+                nazwa, wybor_markera=self._dialog_wyboru_markera,
+            )
         except FileNotFoundError as exc:
             wx.MessageBox(
                 t("rezyser.plik_nie_istnieje_tresc", tresc_bledu=str(exc)),
@@ -1284,9 +1285,47 @@ class RezyserPanel(wx.Panel):
             )
             return
 
+        self._zasiej_gui_po_wczytaniu(wynik, nazwa)
+
+        lore_info = (
+            t("rezyser.status_wczytano_ksiega", nazwa_projektu=nazwa)
+            if wynik.czy_ksiega_swiata else ""
+        )
+        if wynik.czy_streszczenie:
+            status_msg = t(
+                "rezyser.status_wczytano_streszczenie",
+                nazwa_projektu=nazwa,
+                lore_info=lore_info,
+            )
+        else:
+            status_msg = t(
+                "rezyser.status_wczytano_historia",
+                nazwa_projektu=nazwa,
+                liczba_znakow=wynik.liczba_znakow,
+                lore_info=lore_info,
+            )
+
+        wx.MessageBox(status_msg, t("rezyser.status_wczytano_tytul"),
+                      wx.OK | wx.ICON_INFORMATION, self)
+        # Gdy historia była za długa i pamięć robocza została ucięta — jawnie
+        # poinformuj o punkcie odniesienia (snap/fallback). Dla 'calosc' no-op.
+        self._pokaz_punkt_odniesienia(wynik.rekoncyliacja)
+
+    # ------------------------------------------------------------------
+    # Wspólne sianie GUI po wczytaniu/przeładowaniu projektu (v17.6)
+    # ------------------------------------------------------------------
+    def _zasiej_gui_po_wczytaniu(
+        self, wynik: "cr.WynikWczytania", nazwa: str,
+    ) -> None:
+        """Synchronizuje WSZYSTKIE widgety ze świeżo wczytanym stanem projektu.
+
+        Wspólne dla „Wczytaj" i „Przeładuj projekt z dysku" — jeden tor, by
+        oba zachowywały się identycznie (Księga, Pamięć, narracja, tryb, Burza).
+        """
         self._txt_ksiega_swiata.SetValue(self.world_lore)
         self._txt_pamiec.SetValue(self.summary_text)
         self._txt_full_story.SetValue(self.full_story)
+        self._txt_full_story.SetInsertionPointEnd()
 
         if wynik.saved_mode in (1, 2):
             self._rb_mode.SetSelection(wynik.saved_mode)
@@ -1317,41 +1356,122 @@ class RezyserPanel(wx.Panel):
             # chowamy go żeby nie wprowadzać w błąd.
             self._ukryj_panel_opcji_burzy()
 
-        lore_info = (
-            t("rezyser.status_wczytano_ksiega", nazwa_projektu=nazwa)
-            if wynik.czy_ksiega_swiata else ""
-        )
-        if wynik.czy_streszczenie:
-            status_msg = t(
-                "rezyser.status_wczytano_streszczenie",
-                nazwa_projektu=nazwa,
-                lore_info=lore_info,
+        self._refresh_ui_state()
+
+    # ------------------------------------------------------------------
+    # Wybór punktu odniesienia pamięci roboczej (v17.6) — callback dla core
+    # ------------------------------------------------------------------
+    def _lokalizuj_anuluj(self, dlg: wx.Dialog) -> None:
+        """Tłumaczy systemowy przycisk „Cancel" wbudowanego dialogu na język UI.
+
+        Wbudowane dialogi wxPython biorą etykietę z lokalizacji systemowej
+        Windows — na PL-systemie zostałaby angielska. SetLabel po ID załatwia
+        sprawę bez podmiany wxLocale (która zaburzyłaby inne dialogi systemowe).
+        """
+        btn_cancel = dlg.FindWindowById(wx.ID_CANCEL)
+        if btn_cancel is not None:
+            btn_cancel.SetLabel(t("common.btn_anuluj"))
+
+    def _dialog_wyboru_markera(
+        self, markery: "list[cr.MarkerStruktury]", tryb: int,
+    ) -> int | None:
+        """Callback przekazywany do `core_rezyser.wczytaj` — pozwala graczowi
+        wskazać punkt odniesienia pamięci roboczej, gdy historia jest za długa.
+
+        Audiobook (tryb 2) → płaska lista Rozdziałów. Skrypt (tryb 1) →
+        dwustopniowo: Akty, potem Sceny wybranego aktu (z opcją „cały Akt").
+        Anuluj na dowolnym etapie → ``None`` (silnik użyje fallbacku znakowego).
+        """
+        if tryb == 1 and any(m.typ == "akt" for m in markery):
+            return self._wybierz_marker_skrypt(markery)
+        return self._wybierz_marker_plaski(markery)
+
+    def _wybierz_marker_plaski(
+        self, markery: "list[cr.MarkerStruktury]",
+    ) -> int | None:
+        """Płaski wybór (Audiobook): jedna lista nagłówków. Domyślnie zaznaczony
+        ostatni (najbliższy końca — najczęstszy wybór)."""
+        etykiety = [m.etykieta for m in markery]
+        with wx.SingleChoiceDialog(
+            self,
+            t("rezyser.marker_dlg_plaski_lbl"),
+            t("rezyser.marker_dlg_tytul"),
+            etykiety,
+        ) as dlg:
+            self._lokalizuj_anuluj(dlg)
+            dlg.SetSelection(len(etykiety) - 1)
+            if dlg.ShowModal() != wx.ID_OK:
+                return None
+            return markery[dlg.GetSelection()].offset
+
+    def _wybierz_marker_skrypt(
+        self, markery: "list[cr.MarkerStruktury]",
+    ) -> int | None:
+        """Dwustopniowy wybór (Skrypt): Akt → Scena. Wybór samego Aktu (pozycja
+        „cały Akt") startuje pamięć od nagłówka aktu; prolog/epilog/akt bez scen
+        startują od własnego nagłówka."""
+        etykiety = [m.etykieta for m in markery]
+        with wx.SingleChoiceDialog(
+            self,
+            t("rezyser.marker_dlg_akt_lbl"),
+            t("rezyser.marker_dlg_tytul"),
+            etykiety,
+        ) as dlg:
+            self._lokalizuj_anuluj(dlg)
+            dlg.SetSelection(len(etykiety) - 1)
+            if dlg.ShowModal() != wx.ID_OK:
+                return None
+            wybrany = markery[dlg.GetSelection()]
+
+        if not wybrany.sceny:
+            # Prolog/Epilog/akt bez scen → bierzemy jego własny nagłówek.
+            return wybrany.offset
+
+        opcje = [t("rezyser.marker_dlg_caly_akt")] + [s.etykieta for s in wybrany.sceny]
+        with wx.SingleChoiceDialog(
+            self,
+            t("rezyser.marker_dlg_scena_lbl"),
+            t("rezyser.marker_dlg_tytul"),
+            opcje,
+        ) as dlg2:
+            self._lokalizuj_anuluj(dlg2)
+            dlg2.SetSelection(len(opcje) - 1)
+            if dlg2.ShowModal() != wx.ID_OK:
+                return None
+            idx = dlg2.GetSelection()
+        if idx == 0:
+            return wybrany.offset            # „cały Akt" — od nagłówka aktu
+        return wybrany.sceny[idx - 1].offset
+
+    def _pokaz_punkt_odniesienia(
+        self, rek: "cr.WynikRekoncyliacji | None",
+    ) -> None:
+        """Po wczytaniu/przeładowaniu jawnie informuje, od którego nagłówka
+        startuje pamięć robocza AI (snap) lub że zadziałał fallback znakowy.
+        Dla wariantu 'calosc' (cała historia w pamięci) — nic nie pokazuje."""
+        if rek is None or rek.tryb == "calosc":
+            return
+        if rek.tryb == "snap":
+            tresc = t(
+                "rezyser.punkt_odniesienia_snap_tresc",
+                naglowek=rek.naglowek_uzyty or "",
+                liczba_znakow=rek.liczba_znakow,
+            )
+        elif rek.sekcja_przekroczyla_limit:
+            # K3: wybrany akt/rozdział sam za długi — JEDEN szczery komunikat
+            # ujawniający fallback zamiast bombardowania kolejnymi dialogami.
+            tresc = t(
+                "rezyser.punkt_odniesienia_za_dluga_tresc",
+                naglowek=rek.naglowek_uzyty or "",
+                liczba_znakow=rek.liczba_znakow,
             )
         else:
-            status_msg = t(
-                "rezyser.status_wczytano_historia",
-                nazwa_projektu=nazwa,
-                liczba_znakow=wynik.liczba_znakow,
-                lore_info=lore_info,
+            tresc = t(
+                "rezyser.punkt_odniesienia_fallback_tresc",
+                liczba_znakow=rek.liczba_znakow,
             )
-
-        self._refresh_ui_state()
-        wx.MessageBox(status_msg, t("rezyser.status_wczytano_tytul"),
-                      wx.OK | wx.ICON_INFORMATION, self)
-
-    # ------------------------------------------------------------------
-    # Czyszczenie pamięci bieżącej
-    # ------------------------------------------------------------------
-    def _on_clear_current(self, _event: wx.Event) -> None:
-        self._projekt.wyczysc_biezaca()
-        self._txt_full_story.SetValue("")
-
-        self._refresh_ui_state()
-        komunikat = t("rezyser.pamiec_wyczyszczona_tresc")
-        if self.summary_text.strip():
-            komunikat += t("rezyser.pamiec_wyczyszczona_streszczenie_zostaje")
         wx.MessageBox(
-            komunikat, t("rezyser.pamiec_wyczyszczona_tytul"),
+            tresc, t("rezyser.punkt_odniesienia_tytul"),
             wx.OK | wx.ICON_INFORMATION, self,
         )
 
@@ -1371,9 +1491,8 @@ class RezyserPanel(wx.Panel):
         self._projekt.twardy_reset()
         # Mirror `.mode` zwalniamy — nowy projekt zaczyna z pustą decyzją
         # trybu, wszystkie 3 pozycje RadioBoxa znów wolne do wyboru.
-        # `_on_clear_current` (czyszczenie pamięci bieżącej z zachowaniem
-        # streszczenia) celowo NIE resetuje — projekt trwa, decyzja trybu
-        # została podjęta i obowiązuje dalej.
+        # (Twardy Reset zapomina o projekcie; „Przeładuj z dysku" przeciwnie —
+        # synchronizuje pamięć z plikiem, zachowując tożsamość projektu.)
         self._zapisany_tryb = None
 
         self._txt_file_name.SetValue("")
@@ -2727,17 +2846,18 @@ class RezyserPanel(wx.Panel):
         self._otworz_w_edytorze(sciezka)
 
     # ------------------------------------------------------------------
-    # v15.5 — odświeżenie pamięci wewnętrznej z dysku (po ręcznej edycji .txt)
+    # v15.5/v17.6 — PEŁNE przeładowanie projektu z dysku (po ręcznej edycji .txt)
     # ------------------------------------------------------------------
-    def _on_odswiez_z_dysku(self, _event: wx.Event) -> None:
-        """Ponownie wczytuje `skrypty/<nazwa>.txt` i uzgadnia pamięć wewnętrzną.
+    def _on_przeladuj_z_dysku(self, _event: wx.Event) -> None:
+        """Przeładowuje CAŁY projekt z dysku przez wspólny tor `wczytaj`.
 
-        Domyka cykl „Otwórz narrację → edytuj ręcznie → Odśwież z dysku" bez
-        twardego resetu i ponownego wczytywania projektu. Rekoncyliacja
-        (:meth:`core_rezyser.ProjektRezysera.rekoncyliuj_z_dysku`) decyduje
-        sama: krótki tekst → całość; długi + streszczenie → końcówka od
-        ostatniego nagłówka; brak markerów → ostatni fragment tekstu.
-        NIE rusza Księgi Świata ani liczników struktury.
+        Domyka cykl „Otwórz narrację → edytuj ręcznie → Przeładuj z dysku".
+        Od v17.6 to faktyczny reload: przelicza liczniki struktury, podnosi
+        Księgę Świata / tryb / Burzę i rekoncyliuje pamięć roboczą jednym torem
+        (koniec desyncu liczników i meta streszczenia po ręcznej edycji `.txt`).
+        Gdy historia za długa — pyta gracza o punkt odniesienia pamięci roboczej
+        (`_dialog_wyboru_markera`). Ostrzega przed nadpisaniem niezapisanych
+        edycji w polach Księga/Pamięć (D2).
         """
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
@@ -2748,8 +2868,6 @@ class RezyserPanel(wx.Panel):
             )
             self._txt_file_name.SetFocus()
             return
-        if self._projekt.nazwa_pliku != nazwa:
-            self._projekt.nazwa_pliku = nazwa
         sciezka = self._projekt._sciezka_historii(nazwa)
         if not os.path.exists(sciezka):
             wx.MessageBox(
@@ -2758,41 +2876,46 @@ class RezyserPanel(wx.Panel):
                 wx.OK | wx.ICON_INFORMATION, self,
             )
             return
+
+        # D2: pełny reload nadpisze pola wersją z dysku — ostrzeż, gdy w polach
+        # Księga/Pamięć jest treść (ryzyko porzucenia niezapisanych zmian).
+        if (self._txt_ksiega_swiata.GetValue().strip()
+                or self._txt_pamiec.GetValue().strip()):
+            odp = wx.MessageBox(
+                t("rezyser.przeladuj_ostrzezenie_tresc"),
+                t("rezyser.przeladuj_ostrzezenie_tytul"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING, self,
+            )
+            if odp != wx.YES:
+                return
+
         try:
-            wynik = self._projekt.rekoncyliuj_z_dysku()
+            wynik = self._projekt.wczytaj(
+                nazwa, wybor_markera=self._dialog_wyboru_markera,
+            )
         except (FileNotFoundError, OSError, ValueError) as exc:
             self._wyswietl_blad_ai(
                 t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
             )
             return
 
-        # Sync widgetów z odświeżoną pamięcią.
-        self._txt_full_story.SetValue(self.full_story)
-        self._txt_full_story.SetInsertionPointEnd()
-        self._txt_pamiec.SetValue(self.summary_text)
+        self._zasiej_gui_po_wczytaniu(wynik, nazwa)
 
-        # Komunikat zależny od trybu rekoncyliacji.
-        if wynik.tryb == "calosc":
-            if wynik.skasowano_streszczenie:
-                tresc = t("rezyser.odswiez_calosc_skasowano_tresc",
-                          liczba_znakow=wynik.liczba_znakow)
+        rek = wynik.rekoncyliacja
+        if rek is not None and rek.tryb == "calosc":
+            if rek.skasowano_streszczenie:
+                tresc = t("rezyser.przeladuj_calosc_skasowano_tresc",
+                          liczba_znakow=rek.liczba_znakow)
             else:
-                tresc = t("rezyser.odswiez_calosc_tresc",
-                          liczba_znakow=wynik.liczba_znakow)
-        elif wynik.tryb == "snap":
-            tresc = t("rezyser.odswiez_snap_tresc",
-                      naglowek=wynik.naglowek_uzyty or "",
-                      liczba_znakow=wynik.liczba_znakow)
-        else:   # "koncowka"
-            tresc = t("rezyser.odswiez_koncowka_tresc",
-                      liczba_znakow=wynik.liczba_znakow)
-
-        self._refresh_ui_state()
-        wx.MessageBox(
-            tresc,
-            t("rezyser.odswiez_z_dysku_tytul"),
-            wx.OK | wx.ICON_INFORMATION, self,
-        )
+                tresc = t("rezyser.przeladuj_calosc_tresc",
+                          liczba_znakow=rek.liczba_znakow)
+            wx.MessageBox(
+                tresc, t("rezyser.przeladuj_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+        else:
+            # snap / fallback — pokaż punkt odniesienia pamięci roboczej.
+            self._pokaz_punkt_odniesienia(rek)
         self._txt_full_story.SetFocus()
 
     def _zapisz_tryb_projektu(self) -> None:
