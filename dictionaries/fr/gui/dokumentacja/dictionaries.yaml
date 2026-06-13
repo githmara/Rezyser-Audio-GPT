@@ -119,11 +119,11 @@ tresc:
     6. Chiffrement de César (classique)
        Le plus ancien chiffrement documenté de l'histoire (utilisé déjà dans la
        Rome antique). Chaque lettre est décalée de N positions dans l'alphabet français
-       (40 lettres, avec diacritiques : ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÇÉÈÊËÎÏÔÙÛÜŸ). Le décalage est saisi
+       (26 lettres : ABCDEFGHIJKLMNOPQRSTUVWXYZ). Le décalage est saisi
        dans l'interface graphique dans le champ numérique ; si vous saisissez 0, l'application
-       choisira une valeur aléatoire entre 1 et 39 et l'affichera dans un message, afin
+       choisira une valeur aléatoire entre 1 et 25 et l'affichera dans un message, afin
        que vous puissiez ensuite déchiffrer le message. Les caractères hors
-       de l'alphabet (chiffres, espaces, ponctuation) restent inchangés.
+       de l'alphabet (chiffres, espaces, ponctuation, lettres accentuées) restent inchangés.
   co_to_tryb_rezysera: |
     Qu'est-ce que le « mode Réalisateur » ?
     ---------------------------------------

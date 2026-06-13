@@ -1105,7 +1105,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: "What's new in version {nowa_wersja}:"
-  co_nowego_tresc: 'A purely maintenance release closing three minor items from the previous patch. Fixed a spelling inconsistency in one Russian interface label, updated outdated technical comments in rule files, and corrected examples of the "Stuttering" cipher in descriptions and documentation — in several languages, they showed letter doubling contrary to the described rule (vowel as the second letter → only the first is repeated). No changes in the operation of the story generator, ciphers, and translator.'
+  co_nowego_tresc: 'The New Rule Wizard (Rule Manager) is now fully in your language — names and descriptions of rule types and "next steps" hints were previously partially in Polish, and now they are displayed natively in all supported languages. Instructions for the AI agent generating rules have been standardized (in English, regardless of the tool and system shell used). The Caesar cipher for French has also been fixed: the alphabet now counts 26 letters, and the shift range is ±25 (accented letters remain unchanged, as do digits). No changes in the operation of the story generator, other ciphers, and the translator.'
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
 opowiesci:

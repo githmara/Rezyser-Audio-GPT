@@ -1105,7 +1105,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Hvað er nýtt í útgáfu {nowa_wersja}:'
-  co_nowego_tresc: 'Útgáfa eingöngu til að loka þremur smáatriðum frá fyrri plástri. Ósamræmi í stafsetningu í einu rússnesku viðmótsmerki hefur verið lagað, úreltar tæknilegar athugasemdir í regluskjölum hafa verið uppfærðar og dæmi um dulmál „Stam" í lýsingum og skjölum hafa verið leiðrétt — á nokkrum tungumálum sýndu þau tvöföldun stafa í mótsögn við lýsta reglu (sérhljóði sem annar stafur → aðeins fyrsti stafur er endurtekinn). Engar breytingar á virkni sögugjafa, dulmáls og þýðanda.'
+  co_nowego_tresc: 'Nýr regluþjónn (Reglustjóri) er nú að fullu á þínu tungumáli — nöfn og lýsingar á reglutegundum og leiðbeiningar um „næstu skref" voru áður að hluta til á pólsku, en birtast nú á innfæddum tungumálum í öllum studdum tungumálum. Leiðbeiningar fyrir AI umboðsmann sem býr til reglur hafa verið samræmdar (á ensku, óháð notuðu tóli og kerfisskel). Einnig hefur verið lagað Cæsar dulmálið fyrir frönsku: stafrófið telur nú 26 stafi og hliðrunarsviðið er ±25 (stafir með kommum breytast ekki, eins og tölur). Engar breytingar á starfsemi sögugjafa, annarra dulmála og þýðanda.'
   co_nowego_online_pl: Heill útgáfusíða (á netinu) er fáanleg á pólsku.
   btn_szczegoly_online: '&Upplýsingar á netinu'
 opowiesci:

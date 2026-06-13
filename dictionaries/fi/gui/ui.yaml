@@ -1103,7 +1103,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Mitä uutta versiossa {nowa_wersja}:'
-  co_nowego_tresc: 'Puhdas järjestelyjulkaisu, joka sulkee kolme pientä kohtaa edellisestä korjauspäivityksestä. Korjattiin kirjoitusasun epäjohdonmukaisuus yhdessä venäläisessä käyttöliittymätekstissä, päivitettiin vanhentuneet tekniset kommentit sääntötiedostoissa ja korjattiin esimerkkejä "Änkytys"-salauksesta kuvauksissa ja dokumentaatiossa — joissakin kielissä näytettiin kirjainten kaksinkertaistuminen vastoin kuvattua sääntöä (vokaali toisena kirjaimena → vain ensimmäinen toistetaan). Ei muutoksia tarinageneraattorin, salausten ja kääntäjän toimintaan.'
+  co_nowego_tresc: 'Uusien sääntöjen luoja (Sääntöjen hallinta) on nyt täysin omalla kielelläsi — sääntötyyppien nimet ja kuvaukset sekä "seuraavat vaiheet" -ohjeet olivat aiemmin osittain puolaksi, mutta nyt ne näkyvät luonnollisesti kaikilla tuetuilla kielillä. AI-agentin sääntöjä generoiville ohjeille on tehty yhdenmukaistaminen (englanniksi, riippumatta käytetystä työkalusta ja järjestelmän kuoresta). Myös ranskan kielen Caesar-salaus on korjattu: aakkoset sisältävät nyt 26 kirjainta ja siirtymäalue on ±25 (aksentoidut kirjaimet pysyvät ennallaan, kuten numerot). Ei muutoksia tarinageneraattorin, muiden salausten ja kääntäjän toimintaan.'
   co_nowego_online_pl: Julkaisun koko sivu (verkossa) on saatavilla puolaksi.
   btn_szczegoly_online: '&Yksityiskohdat verkossa'
 opowiesci:

@@ -1098,7 +1098,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Quoi de neuf dans la version {nowa_wersja} :'
-  co_nowego_tresc: "Une version purement de maintenance clôturant trois petites entrées du patch précédent. Incohérence d'orthographe corrigée dans une étiquette d'interface en russe, commentaires techniques obsolètes mis à jour dans les fichiers de règles et exemples de chiffrement « Bégaiement » corrigés dans les descriptions et la documentation — dans plusieurs langues, ils montraient un doublement des lettres contrairement à la règle décrite (voyelle comme deuxième lettre → seule la première est répétée). Pas de changements dans le fonctionnement du générateur d'histoires, des chiffrements et du traducteur."
+  co_nowego_tresc: "L'assistant de nouvelles règles (Gestionnaire de Règles) est maintenant entièrement dans votre langue — les noms et descriptions des types de règles ainsi que les conseils \"étapes suivantes\" étaient jusqu'à présent partiellement en polonais, et maintenant ils s'affichent nativement dans toutes les langues prises en charge. Les instructions pour l'agent IA générant des règles ont été unifiées (en anglais, indépendamment de l'outil utilisé et de l'environnement système). Le chiffre de César pour le français a également été corrigé : l'alphabet compte maintenant 26 lettres, et la plage de décalage est de ±25 (les lettres accentuées passent sans changement, comme les chiffres). Pas de changement dans le fonctionnement du générateur d'histoires, des autres chiffres et du traducteur."
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
 opowiesci:

@@ -1105,7 +1105,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Was ist neu in Version {nowa_wersja}:'
-  co_nowego_tresc: 'Eine rein ordnende Veröffentlichung, die drei kleine Punkte aus dem vorherigen Patch abschließt. Eine Inkonsistenz in der Schreibweise in einer russischen Benutzeroberflächenbeschriftung wurde behoben, veraltete technische Kommentare in Regeldateien wurden aktualisiert und Beispiele für die Verschlüsselung „Stottern" in Beschreibungen und Dokumentationen wurden korrigiert — in einigen Sprachen wurde die Verdopplung von Buchstaben entgegen der beschriebenen Regel angezeigt (Vokal als zweiter Buchstabe → nur der erste wird wiederholt). Keine Änderungen an der Funktionsweise des Geschichtengenerators, der Verschlüsselungen und des Übersetzers.'
+  co_nowego_tresc: 'Der neue Regel-Assistent (Regel-Manager) ist jetzt vollständig in Ihrer Sprache verfügbar — Namen und Beschreibungen von Regeltypen sowie „nächste Schritte"-Hinweise waren bisher teilweise auf Polnisch, werden jetzt aber in allen unterstützten Sprachen nativ angezeigt. Die Anweisungen für den AI-Agenten zur Regelgenerierung wurden vereinheitlicht (auf Englisch, unabhängig von verwendetem Tool und System-Shell). Die Caesar-Verschlüsselung für die französische Sprache wurde ebenfalls behoben: Das Alphabet zählt jetzt 26 Buchstaben, und der Verschiebungsbereich beträgt ±25 (akzentuierte Buchstaben bleiben unverändert, ebenso wie Ziffern). Keine Änderungen am Betrieb des Geschichtengenerators, der übrigen Verschlüsselungen und des Übersetzers.'
   co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
   btn_szczegoly_online: '&Details online'
 opowiesci:

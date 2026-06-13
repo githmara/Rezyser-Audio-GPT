@@ -1111,7 +1111,7 @@ updater:
   # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
   co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
   co_nowego_tresc: |-
-    Wydanie czysto porządkowe domykające trzy drobne pozycje z poprzedniego patcha. Naprawiono niespójność pisowni w jednym rosyjskim napisie interfejsu, zaktualizowano przeterminowane komentarze techniczne w plikach reguł oraz poprawiono przykłady szyfru „Jąkanie" w opisach i dokumentacji — w kilku językach pokazywały podwojenie liter sprzecznie z opisaną regułą (samogłoska jako druga litera → powtarzana jest tylko pierwsza). Bez zmian w działaniu generatora opowieści, szyfrów i tłumacza.
+    Kreator nowych reguł (Manager Reguł) jest teraz w pełni w Twoim języku — nazwy i opisy typów reguł oraz wskazówki „następne kroki" były dotąd częściowo po polsku, a teraz wyświetlają się natywnie we wszystkich obsługiwanych językach. Instrukcje dla agenta AI generującego reguły ujednolicono (po angielsku, niezależnie od używanego narzędzia i powłoki systemowej). Naprawiono również szyfr Cezara dla języka francuskiego: alfabet liczy teraz 26 liter, a zakres przesunięcia to ±25 (litery akcentowane przechodzą bez zmian, jak cyfry). Bez zmian w działaniu generatora opowieści, pozostałych szyfrów i tłumacza.
   co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
   btn_szczegoly_online:     "&Szczegóły online"
   # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)

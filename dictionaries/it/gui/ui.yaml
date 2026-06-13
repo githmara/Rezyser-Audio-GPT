@@ -1105,7 +1105,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novità nella versione {nowa_wersja}:'
-  co_nowego_tresc: "Rilascio puramente ordinativo che chiude tre piccole voci dalla patch precedente. Corretto un'incoerenza ortografica in un'etichetta dell'interfaccia russa, aggiornati i commenti tecnici obsoleti nei file delle regole e corretti gli esempi del cifrario \"Balbuzie\" nelle descrizioni e nella documentazione — in alcune lingue mostravano il raddoppio delle lettere in contrasto con la regola descritta (vocale come seconda lettera → viene ripetuta solo la prima). Nessuna modifica nel funzionamento del generatore di storie, cifrari e traduttore."
+  co_nowego_tresc: "Il creatore di nuove regole (Gestore delle Regole) è ora completamente nella tua lingua — i nomi e le descrizioni dei tipi di regole e i suggerimenti per i \"prossimi passi\" erano finora parzialmente in polacco, ma ora vengono visualizzati nativamente in tutte le lingue supportate. Le istruzioni per l'agente AI che genera le regole sono state unificate (in inglese, indipendentemente dallo strumento utilizzato e dalla shell di sistema). È stato anche corretto il cifrario di Cesare per la lingua francese: l'alfabeto ora conta 26 lettere e l'intervallo di spostamento è ±25 (le lettere accentate passano senza modifiche, come i numeri). Nessuna modifica nel funzionamento del generatore di storie, degli altri cifrari e del traduttore."
   co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
   btn_szczegoly_online: '&Dettagli online'
 opowiesci:

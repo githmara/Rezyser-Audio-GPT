@@ -1104,7 +1104,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novedades en la versión {nowa_wersja}:'
-  co_nowego_tresc: 'Lanzamiento puramente de mantenimiento que cierra tres pequeños elementos del parche anterior. Se corrigió una inconsistencia ortográfica en una etiqueta de interfaz en ruso, se actualizaron los comentarios técnicos obsoletos en los archivos de reglas y se corrigieron los ejemplos del cifrado "Tartamudeo" en descripciones y documentación: en varios idiomas mostraban duplicación de letras en contra de la regla descrita (vocal como segunda letra → solo se repite la primera). Sin cambios en el funcionamiento del generador de historias, cifrados y traductor.'
+  co_nowego_tresc: 'El creador de nuevas reglas (Administrador de Reglas) ahora está completamente en tu idioma: los nombres y descripciones de los tipos de reglas y las sugerencias de "próximos pasos" estaban parcialmente en polaco, y ahora se muestran de forma nativa en todos los idiomas compatibles. Las instrucciones para el agente de IA que genera reglas se han unificado (en inglés, independientemente de la herramienta utilizada y la interfaz del sistema). También se ha corregido el cifrado César para el idioma francés: el alfabeto ahora tiene 26 letras, y el rango de desplazamiento es ±25 (las letras acentuadas pasan sin cambios, al igual que los números). Sin cambios en el funcionamiento del generador de historias, otros cifrados y el traductor.'
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
 opowiesci:
