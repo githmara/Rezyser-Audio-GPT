@@ -1002,6 +1002,32 @@ manager:
 
     Creale manualmente in Esplora file prima di avviare Poliglotta – altrimenti il motore genererà un errore durante la scansione della nuova lingua.
 
+  uwagi:
+    akcent: |-
+      Il modello in `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` ha una pipeline di sostituzioni fonetiche vuota. L'accento viene rilevato dinamicamente — basta riavviare l'applicazione (dalla v17.5 senza il passaggio di rigenerazione del codice).
+
+      ATTENZIONE: la lista `zamiany:` viene applicata SEQUENZIALMENTE — ogni regola opera sull'output della precedente. Una regola che introduce una lettera usata successivamente come `wzor` in un'altra regola entrerà in un loop (classico: `ñ → nj` prima di `j → x` dà `ñ → nx`, non `nj`). Prima sostituisci il TARGET con qualcosa di sicuro, poi introduci il SOURCE.
+    akcent_oczyszczenie: |-
+      Accento di pulizia (`kategoria: oczyszczenie`) nel pacchetto `{jezyk_bazowy}/`. La struttura dei file di questo tipo è identica in tutti i pacchetti implementati — differisce SOLO per etichetta, descrizione e commenti (nativi).
+    akcent_naprawiacz: |-
+      Riparatore di tag (`kategoria: naprawiacz`) nel pacchetto `{jezyk_bazowy}/`. Modalità speciale: inietta il codice ISO nei file di output (HTML/DOCX), non modifica il contenuto.
+    szyfr_zamiany: |-
+      Modello di cifratura "sostituzioni pure" in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Formato = `kategoria: szyfr` + lista `zamiany:` (come l'accento, ma senza pipeline fonetica). Prendi il modello di STRUTTURA dagli accenti — tutte le cifrature implementate sono algoritmi (altro formato, senza lista `zamiany:`).
+    tryb_rezysera: |-
+      Modello basato sulla modalità Audiobook (pacchetto `{jezyk_bazowy}/`). L'agente progetterà `prompt_systemowy`, `przypomnienie_uzytkownika` e `slowa_wyzwalajace` nella lingua nativa del pacchetto.
+    postprodukcja: |-
+      Modello di post-produzione itera sui capitoli (pacchetto `{jezyk_bazowy}/`). L'agente progetterà `prompt_systemowy`, `prompt_uzytkownika_szablon` (segnaposto {{naglowek}}, {{probka}}) e `regex_podzial_rozdzialow` adattato ai nomi nativi dei capitoli (Rozdział/Kapitel/Capitolo/Глава…).
+    jezyk_bazowy: |-
+      Il manager creerà `dictionaries/{id_pliku}/` con le sottocartelle `akcenty/`, `szyfry/`, `rezyser/`, `gui/` e `opowiesci/`. Il modello `podstawy.yaml` ha i marcatori `<UZUPEŁNIJ NATYWNIE>`. L'agente si ispira a `de/podstawy.yaml` o `it/podstawy.yaml`. La traduzione dell'interfaccia utente (`gui/ui.yaml`) genera `buduj_wielojezyczne_ui.py`. Il motore richiede ≥1 file in `rezyser/` per considerare la lingua completa.
+    szyfr_algorytm: |-
+      Cifratura ALGORITMICA — richiede una funzione in `core_poliglota.py` accanto al file YAML. Il manager NON crea alcun file; l'agente aggiungerà la funzione `_algorytm_*` + una voce nella mappa `_ALGORYTMY` + un file YAML in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Questo è l'UNICO tipo di regola che richiede la modifica del codice sorgente — dall'applicazione installata (senza repository) è impraticabile, è necessaria la versione sorgente.
+    jezyk_agenta: |-
+      Il prompt qui sotto è in inglese (lingua di lavoro degli agenti di codifica); il contenuto dei file creati è comunque generato nella lingua nativa del pacchetto. Se preferisci che l'agente comunichi con te nella tua lingua, impostalo nella sua configurazione (ad esempio in Claude Code tramite `/config`).
+    srodowisko_zrodlo: |-
+      Flusso di lavoro: copia il prompt qui sotto nell'agente AI con accesso a questo repository (Claude Code, Cursor, Aider). L'agente aprirà i file di riferimento, creerà/completerà il file e lo verificherà. Le modifiche in `akcenty/`, `szyfry/`, `rezyser/` vengono rilevate al riavvio dell'applicazione.
+    srodowisko_frozen: |-
+      Stai utilizzando l'applicazione installata (senza sorgenti del repository). Il prompt qui sotto presuppone uno sviluppatore con repository e agente AI — il flusso di lavoro completo dell'agente richiede la versione sorgente. Tuttavia, dall'applicazione stessa puoi completare manualmente il modello YAML generato (i file `dictionaries/` si trovano accanto al programma e sono modificabili); vedrai le modifiche al riavvio dell'applicazione.
+
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------

@@ -1000,6 +1000,32 @@ manager:
 
     Luo ne manuaalisesti Tiedostonhallinnassa ennen kuin käynnistät Polyglotin – muuten moottori antaa virheen uuden kielen skannauksen yhteydessä.
 
+  uwagi:
+    akcent: |-
+      Malli tiedostossa `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` sisältää tyhjän foneettisen muunnosputken. Aksentti tunnistetaan dynaamisesti — riittää, että käynnistät sovelluksen uudelleen (v17.5 alkaen ilman koodin uudelleenluontia).
+
+      HUOMIO: lista `zamiany:` sovelletaan SEKVENSIAALISESTI — jokainen sääntö toimii edellisen tuloksen perusteella. Sääntö, joka tuo kirjaimen, jota käytetään myöhemmin `wzor`-sääntönä toisessa säännössä, joutuu silmukkaan (klassikko: `ñ → nj` ennen `j → x` antaa `ñ → nx`, ei `nj`). Vaihda ensin TARGET turvalliseen muotoon, sitten tuo SOURCE.
+    akcent_oczyszczenie: |-
+      Puhdistusaksentti (`kategoria: oczyszczenie`) paketissa `{jezyk_bazowy}/`. Tämän tyyppisten tiedostojen rakenne on identtinen kaikissa käyttöön otetuissa paketeissa — eroaa VAIN etiketissä, kuvauksessa ja kommenteissa (natiivi).
+    akcent_naprawiacz: |-
+      Tagien korjaaja (`kategoria: naprawiacz`) paketissa `{jezyk_bazowy}/`. Erikoistila: injektoi ISO-koodin tulostiedostoihin (HTML/DOCX), ei muuta sisältöä.
+    szyfr_zamiany: |-
+      Salauksen malli "puhtaat muunnokset" tiedostossa `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Muoto = `kategoria: szyfr` + lista `zamiany:` (kuten aksentti, mutta ilman foneettista putkea). Rakennekuvio otetaan aksenteista — kaikki käyttöön otetut salaukset ovat algoritmeja (eri muoto, ilman `zamiany:`-listaa).
+    tryb_rezysera: |-
+      Malli perustuu Audiobook-tilaan (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `przypomnienie_uzytkownika` ja `slowa_wyzwalajace` paketin natiivikielellä.
+    postprodukcja: |-
+      Jälkituotantomalli iteroi lukujen läpi (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `prompt_uzytkownika_szablon` (paikkamerkit {{naglowek}}, {{probka}}) ja `regex_podzial_rozdzialow`, joka on sovitettu natiivien lukujen nimiin (Rozdział/Kapitel/Capitolo/Глава…).
+    jezyk_bazowy: |-
+      Manager luo `dictionaries/{id_pliku}/` alikansioilla `akcenty/`, `szyfry/`, `rezyser/`, `gui/` ja `opowiesci/`. Malli `podstawy.yaml` sisältää merkit `<UZUPEŁNIJ NATYWNIE>`. Agentti perustuu `de/podstawy.yaml` tai `it/podstawy.yaml`. UI-käännös (`gui/ui.yaml`) generoi `buduj_wielojezyczne_ui.py`. Moottori vaatii ≥1 tiedoston `rezyser/`, jotta kieli katsotaan täydelliseksi.
+    szyfr_algorytm: |-
+      ALGORYTMISEN salauksen — vaatii funktion tiedostossa `core_poliglota.py` YAML-tiedoston vieressä. Manager EI luo mitään tiedostoa; agentti lisää funktion `_algorytm_*` + merkinnän karttaan `_ALGORYTMY` + YAML-tiedoston `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Tämä on AINOA sääntötyyppi, joka vaatii lähdekoodin muokkausta — asennetusta sovelluksesta (ilman arkistoa) se on mahdotonta, tarvitaan lähdeversio.
+    jezyk_agenta: |-
+      Alla oleva kehotus on englanniksi (agenttien koodauskieli); luotujen tiedostojen sisältö syntyy kuitenkin paketin natiivikielellä. Jos haluat, että agentti kommunikoi kanssasi omalla kielelläsi, aseta se sen kokoonpanossa (esim. Claude Codessa `/config`).
+    srodowisko_zrodlo: |-
+      Työnkulku: kopioi alla oleva kehotus AI-agentille, jolla on pääsy tähän arkistoon (Claude Code, Cursor, Aider). Agentti avaa viitetiedostot, luo/täydentää tiedoston ja tarkistaa sen. Muutokset `akcenty/`, `szyfry/`, `rezyser/` havaitaan sovelluksen uudelleenkäynnistyksen jälkeen.
+    srodowisko_frozen: |-
+      Käytät asennettua sovellusta (ilman arkiston lähteitä). Alla oleva kehotus olettaa kehittäjän arkistosta ja AI-agentin — täydellinen agenttityönkulku vaatii lähdeversion. Pelkästä sovelluksesta voit kuitenkin manuaalisesti täydentää luodun YAML-mallin (tiedostot `dictionaries/` sijaitsevat ohjelman vieressä ja ovat muokattavissa); muutokset näkyvät sovelluksen uudelleenkäynnistyksen jälkeen.
+
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------

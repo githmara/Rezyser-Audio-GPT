@@ -1002,6 +1002,32 @@ manager:
 
     Búðu þær til handvirkt í Skjalakönnu áður en þú keyrir Fjöltyngda – annars mun vélin kasta villu við skönnun nýs tungumáls.
 
+  uwagi:
+    akcent: |-
+      Sniðmát í `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` hefur tómt hljóðfræðilegt skipti. Áherslan er greind á dýnamískan hátt — það nægir að endurræsa forritið (frá v17.5 án kóðagjafar skrefs).
+
+      VIÐVÖRUN: listinn `zamiany:` er beittur Í RÖÐ — hver regla vinnur á úttaki fyrri reglu. Regla sem kynnir staf sem síðar er notaður sem `wzor` í annarri reglu mun lenda í lykkju (klassískt: `ñ → nj` fyrir `j → x` gefur `ñ → nx`, ekki `nj`). Skiptu fyrst TARGET í eitthvað öruggt, þá kynntu SOURCE.
+    akcent_oczyszczenie: |-
+      Hreinsandi áhersla (`kategoria: oczyszczenie`) í pakkanum `{jezyk_bazowy}/`. Skráarskipulag af þessu tagi er eins í öllum innleiddum pökkum — aðeins merki, lýsing og athugasemdir (innfæddar) eru mismunandi.
+    akcent_naprawiacz: |-
+      Merki lagfærir (`kategoria: naprawiacz`) í pakkanum `{jezyk_bazowy}/`. Sérstakur hamur: sprautar ISO kóða í niðurstöðuskrár (HTML/DOCX), breytir ekki innihaldi.
+    szyfr_zamiany: |-
+      Dulkóðunarsniðmát „hrein skipti" í `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Snið = `kategoria: szyfr` + listi `zamiany:` (eins og áhersla, en án hljóðfræðilegs skipti). STRUKTÚRUMYNSTUR er tekið frá áherslum — allar innleiddar dulkóðanir eru reiknirit (annað snið, án lista `zamiany:`).
+    tryb_rezysera: |-
+      Sniðmát byggt á Audiobook ham (pakki `{jezyk_bazowy}/`). Umboðsmaður mun hanna `prompt_systemowy`, `przypomnienie_uzytkownika` og `slowa_wyzwalajace` á innfæddu tungumáli pakkans.
+    postprodukcja: |-
+      Eftirvinnslusniðmát endurtekur eftir köflum (pakki `{jezyk_bazowy}/`). Umboðsmaður mun hanna `prompt_systemowy`, `prompt_uzytkownika_szablon` (staðgenglar {{naglowek}}, {{probka}}) og `regex_podzial_rozdzialow` sem passar við innfædd nöfn kafla (Rozdział/Kapitel/Capitolo/Глава…).
+    jezyk_bazowy: |-
+      Stjórnandi mun búa til `dictionaries/{id_pliku}/` með undirmöppum `akcenty/`, `szyfry/`, `rezyser/`, `gui/` og `opowiesci/`. Sniðmát `podstawy.yaml` hefur merki `<UZUPEŁNIJ NATYWNIE>`. Umboðsmaðurinn tekur fyrirmynd af `de/podstawy.yaml` eða `it/podstawy.yaml`. Þýðing á notendaviðmóti (`gui/ui.yaml`) býr til `buduj_wielojezyczne_ui.py`. Vél þarf ≥1 skrá í `rezyser/` til að telja tungumálið fullkomið.
+    szyfr_algorytm: |-
+      ALGORITMISK dulkóðun — krefst aðgerðar í `core_poliglota.py` við hlið YAML skrárinnar. Stjórnandi býr ekki til neina skrá; umboðsmaður bætir við aðgerð `_algorytm_*` + færslu í kortið `_ALGORYTMY` + YAML skrá í `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Þetta er EINNIG tegund reglu sem krefst breytinga á frumkóða — frá uppsettum forriti (án geymslu) er það óframkvæmanlegt, þarf frumkóðaversjón.
+    jezyk_agenta: |-
+      Promptið hér að neðan er á ensku (vinnumál kóðunarumboðsmanna); innihald skráa sem eru búnar til verður samt á innfæddu tungumáli pakkans. Ef þú vilt að umboðsmaðurinn hafi samskipti við þig á þínu tungumáli, stilltu það í stillingum hans (t.d. í Claude Code með `/config`).
+    srodowisko_zrodlo: |-
+      Vinnuflæði: afritaðu promptið hér að neðan til AI umboðsmanns með aðgang að þessu geymslu (Claude Code, Cursor, Aider). Umboðsmaðurinn opnar tilvísunarskrár, býr til/uppfærir skrá og sannreynir hana. Breytingar í `akcenty/`, `szyfry/`, `rezyser/` eru greindar eftir endurræsingu forritsins.
+    srodowisko_frozen: |-
+      Þú notar uppsett forrit (án geymslu). Promptið hér að neðan gerir ráð fyrir þróunaraðila með geymslu og AI umboðsmanni — fullkomið umboðsmannavinnuflæði krefst frumkóðaversjónar. Frá forritinu sjálfu geturðu þó handvirkt fyllt út búið YAML sniðmát (skrár `dictionaries/` liggja við hlið forritsins og eru breytanlegar); breytingar sjást eftir endurræsingu forritsins.
+
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------

@@ -1002,6 +1002,32 @@ manager:
 
     Erstellen Sie diese manuell im Datei-Explorer, bevor Sie Polyglot starten – andernfalls wird die Engine beim Scannen der neuen Sprache einen Fehler ausgeben.
 
+  uwagi:
+    akcent: |-
+      Die Vorlage in `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` hat eine leere phonetische Ersetzungspipeline. Der Akzent wird dynamisch erkannt — ein Neustart der Anwendung reicht aus (ab v17.5 ohne Code-Regenerierungsschritt).
+
+      ACHTUNG: Die Liste `zamiany:` wird SEQUENTIELL angewendet — jede Regel operiert auf der Ausgabe der vorherigen. Eine Regel, die einen Buchstaben einführt, der später als `wzor` in einer anderen Regel verwendet wird, gerät in eine Schleife (Klassiker: `ñ → nj` vor `j → x` ergibt `ñ → nx`, nicht `nj`). Ersetze zuerst das ZIEL durch etwas Sicheres, bevor du die QUELLE einführst.
+    akcent_oczyszczenie: |-
+      Reinigungsakzent (`kategoria: oczyszczenie`) im Paket `{jezyk_bazowy}/`. Die Dateistruktur dieses Typs ist in allen implementierten Paketen identisch — es unterscheiden sich NUR das Etikett, die Beschreibung und die (nativen) Kommentare.
+    akcent_naprawiacz: |-
+      Tag-Reparierer (`kategoria: naprawiacz`) im Paket `{jezyk_bazowy}/`. Spezieller Modus: injiziert ISO-Code in die Ergebnisdateien (HTML/DOCX), ohne den Inhalt zu ändern.
+    szyfr_zamiany: |-
+      Verschlüsselungsvorlage „reine Ersetzungen" in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + Liste `zamiany:` (wie Akzent, aber ohne phonetische Pipeline). Nimm das STRUKTURMUSTER von den Akzenten — alle implementierten Verschlüsselungen sind Algorithmen (anderes Format, ohne Liste `zamiany:`).
+    tryb_rezysera: |-
+      Vorlage basierend auf dem Audiobook-Modus (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `przypomnienie_uzytkownika` und `slowa_wyzwalajace` in der nativen Sprache des Pakets.
+    postprodukcja: |-
+      Postproduktionsvorlage iteriert über Kapitel (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `prompt_uzytkownika_szablon` (Platzhalter {{naglowek}}, {{probka}}) und `regex_podzial_rozdzialow`, angepasst an die nativen Kapitelnamen (Rozdział/Kapitel/Capitolo/Глава…).
+    jezyk_bazowy: |-
+      Der Manager erstellt `dictionaries/{id_pliku}/` mit Unterordnern `akcenty/`, `szyfry/`, `rezyser/`, `gui/` und `opowiesci/`. Die Vorlage `podstawy.yaml` enthält Marker `<UZUPEŁNIJ NATYWNIE>`. Der Agent orientiert sich an `de/podstawy.yaml` oder `it/podstawy.yaml`. Die UI-Übersetzung (`gui/ui.yaml`) generiert `buduj_wielojezyczne_ui.py`. Der Motor erfordert ≥1 Datei in `rezyser/`, um die Sprache als vollständig zu betrachten.
+    szyfr_algorytm: |-
+      ALGORITHMISCHE Verschlüsselung — erfordert eine Funktion in `core_poliglota.py` neben der YAML-Datei. Der Manager erstellt keine Datei; der Agent fügt die Funktion `_algorytm_*` + einen Eintrag in der Karte `_ALGORYTMY` + eine YAML-Datei in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml` hinzu. Dies ist der EINZIGE Regeltyp, der eine Bearbeitung des Quellcodes erfordert — aus der installierten Anwendung (ohne Repository) ist es nicht machbar, eine Quellversion ist erforderlich.
+    jezyk_agenta: |-
+      Der untenstehende Prompt ist auf Englisch (Arbeitssprache der kodierenden Agenten); der Inhalt der erstellten Dateien wird dennoch in der nativen Sprache des Pakets erstellt. Wenn du möchtest, dass der Agent mit dir in deiner Sprache kommuniziert, stelle dies in seiner Konfiguration ein (z.B. in Claude Code über `/config`).
+    srodowisko_zrodlo: |-
+      Workflow: Kopiere den untenstehenden Prompt in einen AI-Agenten mit Zugriff auf dieses Repository (Claude Code, Cursor, Aider). Der Agent öffnet Referenzdateien, erstellt/ergänzt die Datei und überprüft sie. Änderungen in `akcenty/`, `szyfry/`, `rezyser/` werden nach einem Neustart der Anwendung erkannt.
+    srodowisko_frozen: |-
+      Du verwendest die installierte Anwendung (ohne Repository-Quellen). Der untenstehende Prompt setzt einen Entwickler mit Repository und AI-Agent voraus — der vollständige agentenbasierte Workflow erfordert eine Quellversion. Aus der Anwendung selbst kannst du jedoch die generierte YAML-Vorlage manuell ergänzen (Dateien `dictionaries/` liegen neben dem Programm und sind editierbar); Änderungen siehst du nach einem Neustart der Anwendung.
+
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
