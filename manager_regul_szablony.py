@@ -150,7 +150,7 @@ LISTA_TYPOW: list[tuple[str, str, str]] = [
 # kompletnych paczek (pl/en/fi/is/it/ru/de) szablony i prompty zaczynają
 # zwracać domyślne wartości w języku bazowym, jeśli ten jest już w projekcie.
 # Dla nieobecnych paczek (np. fr/es) szablon dostaje marker
-# „<UZUPEŁNIJ NATYWNIE: …>", żeby AI lub user świadomie domknęli temat.
+# „<FILL NATIVELY: …>", żeby AI lub user świadomie domknęli temat.
 # =============================================================================
 _NATYWNE_JEZYK_ODPOWIEDZI: dict[str, str] = {
     # forma zależna od idiomu prompta — tak jak istnieje w paczce po wdrożeniu
@@ -202,7 +202,7 @@ def _natywne_jezyk_odpowiedzi(kod: str) -> str:
 
     Returns:
         ``"polsku"``, ``"Deutsch"``, ``"по-русски"`` itp. dla wdrożonych paczek
-        lub ``"<UZUPEŁNIJ NATYWNIE: forma typu 'polsku'/'Deutsch'>"`` dla nowych
+        lub ``"<FILL NATIVELY: forma typu 'polsku'/'Deutsch'>"`` dla nowych
         kodów (fr/es itp.) — komunikuje, że AI musi wybrać właściwą formę
         gramatyczną sama.
     """
@@ -211,7 +211,7 @@ def _natywne_jezyk_odpowiedzi(kod: str) -> str:
     # w testach (real-world: i tak user MUSI zastąpić marker natywną wartością).
     return _NATYWNE_JEZYK_ODPOWIEDZI.get(
         kod,
-        "'<UZUPEŁNIJ NATYWNIE: forma odpowiednia dla prompta, np. polsku / Deutsch / italiano>'",
+        "'<FILL NATIVELY: the form appropriate for the prompt, e.g. polsku / Deutsch / italiano>'",
     )
 
 
@@ -224,7 +224,7 @@ def _natywne_streszczenie_yaml(kod: str) -> str:
     """
     slowa = _NATYWNE_STRESZCZENIE.get(kod)
     if slowa is None:
-        return "    - <UZUPEŁNIJ NATYWNIE: 4 słowa typu 'streszcz'/'summarize'/'fasse zusammen'>"
+        return "    - <FILL NATIVELY: 4 words like 'streszcz'/'summarize'/'fasse zusammen'>"
     return "\n".join(f"    - {slowo}" for slowo in slowa)
 
 
@@ -262,59 +262,59 @@ def szablon_akcent(id_pliku: str, etykieta: str, iso: str,
 
     Format trzymany 1-do-1 z istniejącymi plikami, żeby silnik
     (``core_poliglota.py``) bez modyfikacji wciągnął akcent. Komentarze
-    pozostawione w neutralnej formie z markerami ``<UZUPEŁNIJ NATYWNIE>``
+    pozostawione w neutralnej formie z markerami ``<FILL NATIVELY>``
     — finalna wersja powinna mieć je w języku paczki bazowej (DE, IT itd.).
     """
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     return f"""# -----------------------------------------------------------------------------
-#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: AKZENT {etykieta} / ACCENTO {etykieta} / ...>
-#  <Krótki nagłówek o przeznaczeniu akcentu, wzorzec:
-#   dictionaries/{jezyk_bazowy}/akcenty/<dowolny>.yaml>
+#  <FILL NATIVELY in {natywna_baza}: AKZENT {etykieta} / ACCENTO {etykieta} / ...>
+#  <A short header describing the accent's purpose; model:
+#   dictionaries/{jezyk_bazowy}/akcenty/<any>.yaml>
 # -----------------------------------------------------------------------------
 id: {id_pliku}
 etykieta: "{etykieta}"
 opis: |
-  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: 2-4 zdania o tym, pod jaki
-  syntezator TTS przeznaczony jest ten akcent i jakie zjawiska fonetyczne
-  wymusza (ubezdźwięcznienie, tłumienie syczenia, transliteracja itd.).>
+  <FILL NATIVELY in {natywna_baza}: 2-4 sentences on which TTS synthesizer
+  this accent targets and which phonetic phenomena it forces (devoicing,
+  sibilant softening, transliteration, etc.).>
 iso: {iso}
 kategoria: akcent
 kolejnosc: 100
 
-# --- Pipeline przetwarzania (true/false) ---
-# czysc_tekst_tts        – usuwa bełkot („khh", gwiazdki, hashtagi)
-# normalizuj_liczby      – zamienia cyfry na słowa (zgodnie z gramatyką {natywna_baza})
-# usun_polskie_znaki     – usuwa diakrytyki języka bazowego ({jezyk_bazowy}) wg
-#                          mapowania w `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`
-# skleja_pojedyncze_litery – scala wiszące pojedyncze litery („w y s" → „wys")
+# --- Processing pipeline (true/false) ---
+# czysc_tekst_tts        – removes gibberish („khh", asterisks, hashtags)
+# normalizuj_liczby      – turns digits into words (per {natywna_baza} grammar)
+# usun_polskie_znaki     – strips the base-language ({jezyk_bazowy}) diacritics per
+#                          the map in `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`
+# skleja_pojedyncze_litery – joins dangling single letters („w y s" → „wys")
 czysc_tekst_tts: true
 normalizuj_liczby: true
 usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
-# --- Właściwe zamiany fonetyczne ---
-# ZŁOTA ZASADA #1 (rozmiar): trigramy/dwuznaki (sch, tsch, ch, cz, sz, rz) PRZED
-# jednoznakami (c, s, z, r), bo inaczej „c → ts" rozwali zapis „ch", „cz".
+# --- The actual phonetic replacements ---
+# GOLDEN RULE #1 (size): trigraphs/digraphs (sch, tsch, ch, cz, sz, rz) BEFORE
+# single letters (c, s, z, r), otherwise „c → ts" breaks the „ch", „cz" spellings.
 #
-# ZŁOTA ZASADA #2 (sekwencyjność — KRYTYCZNE): silnik aplikuje listę
-# `zamiany:` SEKWENCYJNIE przez `str.replace` (lub `re.sub` przy `regex: true`),
-# każda reguła operuje na WYJŚCIU poprzedniej. Jeśli reguła A wprowadza znak,
-# który reguła B (późniejsza) ma jako `wzor`, B ZJE wynik A.
-# Klasyczna pułapka: `ñ → nj` PRZED `j → x` daje `ñ → nx` (nie `nj`!), bo
-# nowe „j" wprowadzone przez pierwszą regułę zostaje złapane przez drugą.
-# Reguła kolejności: NAJPIERW zamień TARGET (literę używaną później jako
-# `zamiana` w innych regułach) na coś bezpiecznego, DOPIERO POTEM wprowadzaj
-# SOURCE wprowadzającą ten target. Dla przykładu ES: najpierw `j → x`,
-# potem `ñ → nj`. Test: zdanie zawierające OBIE litery musi mieć oba akcenty
-# w wyniku (dla ES „Niño de paja juega" → musi mieć i akcent ñ, i akcent j).
+# GOLDEN RULE #2 (sequencing — CRITICAL): the engine applies the `zamiany:`
+# list SEQUENTIALLY via `str.replace` (or `re.sub` when `regex: true`); each
+# rule operates on the OUTPUT of the previous one. If rule A introduces a
+# character that a later rule B has as its `wzor`, B WILL EAT A's result.
+# Classic trap: `ñ → nj` BEFORE `j → x` yields `ñ → nx` (not `nj`!), because
+# the new „j" introduced by the first rule gets caught by the second.
+# Ordering rule: FIRST replace the TARGET (a letter later used as a `zamiana`
+# in other rules) with something safe, ONLY THEN introduce the SOURCE that
+# produces that target. For ES: first `j → x`, then `ñ → nj`. Test: a sentence
+# containing BOTH letters must show both accents in the result (for ES
+# „Niño de paja juega" → must carry both the ñ and the j accent).
 #
-# Dla wzorów regex dodaj `regex: true`.
+# For regex patterns add `regex: true`.
 zamiany:
   - {{ wzor: "ch", zamiana: "h"  }}
   - {{ wzor: "Ch", zamiana: "H"  }}
-  # <UZUPEŁNIJ: kolejne pary specyficzne dla języka docelowego.
-  # Skopiuj prompt z Managera Reguł do AI po pełną listę zamian
-  # — prompt zna kontekst paczki {jezyk_bazowy} i wygeneruje natywne komentarze.>
+  # <FILL IN: further pairs specific to the target language.
+  # Copy the prompt from Manager Reguł to an AI for the full replacement list
+  # — the prompt knows the {jezyk_bazowy} pack context and produces native comments.>
 """
 
 
@@ -430,17 +430,17 @@ def szablon_oczyszczenie(id_pliku: str, etykieta: str,
     bez_liczb = "bez_liczb" in id_pliku
     normalizuj_liczby = "false" if bez_liczb else "true"
     return f"""# -----------------------------------------------------------------------------
-#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: nagłówek pliku, np. dla DE:
-#   „TEXTBEREINIGUNG MIT ZAHLENNORMALISIERUNG"; dla IT: „PULIZIA DEL TESTO
+#  <FILL NATIVELY in {natywna_baza}: file header, e.g. for DE:
+#   „TEXTBEREINIGUNG MIT ZAHLENNORMALISIERUNG"; for IT: „PULIZIA DEL TESTO
 #   CON NORMALIZZAZIONE DEI NUMERI">
-#  Domyślny wariant „Żaden akcent" — sprząta tekst pod czytnik ekranu.
+#  Default „no accent" variant — cleans the text for a screen reader.
 # -----------------------------------------------------------------------------
 id: {id_pliku}
 etykieta: "{etykieta}"
 opis: |
-  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: 2-4 zdania o tym, że ten „akcent"
-  nie nakłada fonetyki, a tylko uruchamia czyszczenie pod TTS (usuwa
-  bełkot typu „khh", gwiazdki, hashtagi, kropki) {"oraz zamienia cyfry na słowa" if not bez_liczb else "(BEZ normalizacji liczb — przydatne dla książek z dużą liczbą dat/numerów)"}.>
+  <FILL NATIVELY in {natywna_baza}: 2-4 sentences explaining that this
+  „accent" applies no phonetics and only runs TTS cleaning (removes
+  gibberish like „khh", asterisks, hashtags, dots) {"and turns digits into words" if not bez_liczb else "(WITHOUT number normalization — useful for books with many dates/numbers)"}.>
 iso: {jezyk_bazowy}
 kategoria: oczyszczenie
 kolejnosc: 20
@@ -535,27 +535,27 @@ def szablon_naprawiacz(id_pliku: str, etykieta: str,
     """
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     return f"""# -----------------------------------------------------------------------------
-#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: nagłówek pliku, np. dla DE:
-#   „TAG-REPARATEUR (Sondermodus)"; dla IT: „RIPARATORE DI TAG (modalità
-#   speciale)"; dla RU: „ВОССТАНОВИТЕЛЬ ТЕГОВ (специальный режим)">
-#  NIE modyfikuje treści — wstrzykuje TYLKO kod ISO języka do pliku
-#  wynikowego (HTML <html lang>, DOCX <w:lang>).
+#  <FILL NATIVELY in {natywna_baza}: file header, e.g. for DE:
+#   „TAG-REPARATEUR (Sondermodus)"; for IT: „RIPARATORE DI TAG (modalità
+#   speciale)"; for RU: „ВОССТАНОВИТЕЛЬ ТЕГОВ (специальный режим)">
+#  Does NOT modify the content — it ONLY injects the language ISO code into
+#  the output file (HTML <html lang>, DOCX <w:lang>).
 # -----------------------------------------------------------------------------
 id: {id_pliku}
 etykieta: "{etykieta}"
 opis: |
-  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: 2-4 zdania:
-  - Ten „akcent" NIE modyfikuje treści ani fonetyki tekstu.
-  - Wstrzykuje kod ISO języka do pliku wynikowego:
-      HTML: atrybut lang="..." w znaczniku <html>
-      DOCX: element <w:lang w:val="..."/> dla każdego biegu tekstu
-  - Czytnik ekranu (NVDA/JAWS) poprawnie przełącza głos syntezatora.
-  - Kod ISO podaje user ręcznie w polu „Kod ISO" w GUI — `iso:` jest puste.>
+  <FILL NATIVELY in {natywna_baza}: 2-4 sentences:
+  - This „accent" does NOT modify the text content or phonetics.
+  - It injects the language ISO code into the output file:
+      HTML: the lang="..." attribute on the <html> tag
+      DOCX: a <w:lang w:val="..."/> element for every text run
+  - A screen reader (NVDA/JAWS) then switches the synthesizer voice correctly.
+  - The ISO code is supplied by the user in the „Kod ISO" GUI field — `iso:` is empty.>
 iso: ""
 kategoria: naprawiacz
 kolejnosc: 100
 
-# Tryb specjalny — NIE uruchamia żadnego etapu przetwarzania tekstu.
+# Special mode — runs NO text-processing stage.
 czysc_tekst_tts: false
 normalizuj_liczby: false
 usun_polskie_znaki: false
@@ -637,41 +637,41 @@ def szablon_szyfr_zamiany(id_pliku: str, etykieta: str,
                           jezyk_bazowy: str = "pl") -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     return f"""# -----------------------------------------------------------------------------
-#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: nagłówek pliku, np. „CHIFFRE: {etykieta}"
+#  <FILL NATIVELY in {natywna_baza}: file header, e.g. „CHIFFRE: {etykieta}"
 #   (DE) / „CIFRARIO: {etykieta}" (IT) / „ШИФР: {etykieta}" (RU)>
-#  Szablon „czyste zamiany" – nie wymaga kodu Pythona.
+#  „Pure replacements" template – needs no Python code.
 # -----------------------------------------------------------------------------
 id: {id_pliku}
 etykieta: "{etykieta}"
 opis: |
-  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: opisz efekt tekstowy, jaki uzyskuje
-  ten szyfr (np. „każde »a« staje się »@«, każde »o« staje się »0«").
-  Szyfry tego typu działają jak akcent, tylko bez pipeline'u fonetycznego —
-  używają wyłącznie listy `zamiany`.>
+  <FILL NATIVELY in {natywna_baza}: describe the text effect this cipher
+  produces (e.g. „every »a« becomes »@«, every »o« becomes »0«").
+  Ciphers of this kind work like an accent but without the phonetic
+  pipeline — they use only the `zamiany` list.>
 iso: {jezyk_bazowy}
 kategoria: szyfr
 kolejnosc: 100
 
-# Pipeline – dla szyfrów zwykle wszystko OFF poza listą zamian.
+# Pipeline – for ciphers usually everything OFF except the replacements list.
 czysc_tekst_tts: false
 normalizuj_liczby: false
 usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 
-# Właściwe zamiany. Lista jest aplikowana SEKWENCYJNIE (str.replace) — każda
-# reguła operuje na WYJŚCIU poprzedniej. Dwa wnioski:
-#   1. dwuznaki/trigramy PRZED jednoznakami (np. „ch" przed „c"), inaczej
-#      reguła jednoznaku rozbije zapis dwuznaku;
-#   2. uważaj na łańcuchy — jeśli reguła wprowadza znak, który PÓŹNIEJSZA
-#      reguła ma jako `wzor`, ten znak też zostanie zamieniony.
-# Pary leet poniżej (a→@, o→0) są od kolejności niezależne (rozłączne
-# jednoznaki); kolejność zaczyna mieć znaczenie dopiero przy wzorach
-# wieloznakowych. Dla wzorów regex dodaj `regex: true`.
+# The actual replacements. The list is applied SEQUENTIALLY (str.replace) —
+# each rule operates on the OUTPUT of the previous one. Two consequences:
+#   1. digraphs/trigraphs BEFORE single letters (e.g. „ch" before „c"),
+#      otherwise the single-letter rule breaks the digraph spelling;
+#   2. watch for chains — if a rule introduces a character that a LATER rule
+#      has as its `wzor`, that character will be replaced too.
+# The leet pairs below (a→@, o→0) are order-independent (disjoint single
+# letters); order only starts to matter with multi-character patterns. For
+# regex patterns add `regex: true`.
 zamiany:
   - {{ wzor: "a", zamiana: "@" }}
   - {{ wzor: "o", zamiana: "0" }}
-  # <UZUPEŁNIJ: kolejne pary realizujące efekt opisany w polu `opis:`.
-  # Skopiuj prompt z Managera Reguł do AI po pełną listę i natywny opis.>
+  # <FILL IN: further pairs producing the effect described in the `opis:` field.
+  # Copy the prompt from Manager Reguł to an AI for the full list and native description.>
 """
 
 
@@ -761,72 +761,72 @@ def szablon_tryb_rezysera(id_pliku: str, etykieta: str,
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     natywne_streszcz = _natywne_streszczenie_yaml(jezyk_bazowy)
     return f"""# -----------------------------------------------------------------------------
-#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: nagłówek pliku, np. „MODUS HÖRBUCH"
+#  <FILL NATIVELY in {natywna_baza}: file header, e.g. „MODUS HÖRBUCH"
 #   (DE) / „MODALITÀ AUDIOLIBRO" (IT) / „РЕЖИМ АУДИОКНИГА" (RU)>
-#  Szablon oparty o tryb Audiobook – uzupełnij rolę, zasady i prompt.
+#  Template based on the Audiobook mode – fill in the role, rules and prompt.
 # -----------------------------------------------------------------------------
 id: {id_pliku}
 etykieta: "{etykieta}"
 kategoria: tryb
 kolejnosc: 40
 
-# --- Parametry OpenAI ---
+# --- OpenAI parameters ---
 model: gpt-4o
 temperatura: 0.85
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
-# Czy odpowiedź zapisywać do pliku projektu (.txt)?
+# Should the response be saved to the project file (.txt)?
 zapis_do_pliku: true
 
-# --- Prompt systemowy ---
-# Placeholdery: {{world_context}}, {{jezyk_odpowiedzi}}
-# UWAGA: cały prompt systemowy MUSI być w języku {natywna_baza}.
-# Wzorcuj się na `dictionaries/{jezyk_bazowy}/rezyser/tryb_audiobook.yaml`.
+# --- System prompt ---
+# Placeholders: {{world_context}}, {{jezyk_odpowiedzi}}
+# NOTE: the entire system prompt MUST be in {natywna_baza}.
+# Use `dictionaries/{jezyk_bazowy}/rezyser/tryb_audiobook.yaml` as a model.
 prompt_systemowy: |
-  # <UZUPEŁNIJ NATYWNIE w {natywna_baza}: Rola/Rolle/Ruolo: NAZWA ROLI AI>
+  # <FILL NATIVELY in {natywna_baza}: Rola/Rolle/Ruolo: THE AI ROLE NAME>
 
-  <UZUPEŁNIJ NATYWNIE: pierwsze zdanie z instrukcją „Piszesz WYŁĄCZNIE
-  po {{jezyk_odpowiedzi}}".>
+  <FILL NATIVELY: the first sentence with the instruction „You write ONLY
+  in {{jezyk_odpowiedzi}}".>
 
-  <UZUPEŁNIJ NATYWNIE: opis trybu i oczekiwanego formatu wyjściowego.>
+  <FILL NATIVELY: a description of the mode and the expected output format.>
 
-  ### 🌍 <UZUPEŁNIJ NATYWNIE: nagłówek typu „Żelazne Zasady Świata"
+  ### 🌍 <FILL NATIVELY: a header like „Iron Rules of the World"
   / „Eiserne Regeln der Welt" / „Regole Ferree del Mondo">:
   {{world_context}}
 
-  ### 📖 <UZUPEŁNIJ NATYWNIE: nagłówek typu „Zasady tego trybu"
+  ### 📖 <FILL NATIVELY: a header like „Rules of this mode"
   / „Regeln des Modus" / „Regole della modalità">:
-  1. <UZUPEŁNIJ NATYWNIE: pierwsza zasada (styl, ograniczenia formatu)>.
-  2. <UZUPEŁNIJ NATYWNIE: druga zasada>.
-  3. **<UZUPEŁNIJ NATYWNIE: nagłówek „DOMYKANIE SCEN" / „SZENENABSCHLUSS"
-     / „CHIUSURA DELLE SCENE">:** - <NATYWNIE: „DOMYŚLNIE (ANTI-CLOSURE):
-     Urwij w środku akcji.">
-     - <NATYWNIE: „WYJĄTEK (FINAŁ/EPILOG): Jeśli to zakończenie, domknij
-       scenę naturalnie.">
+  1. <FILL NATIVELY: the first rule (style, format constraints)>.
+  2. <FILL NATIVELY: the second rule>.
+  3. **<FILL NATIVELY: a header „SCENE CLOSING" / „SZENENABSCHLUSS"
+     / „CHIUSURA DELLE SCENE">:** - <NATIVELY: „DEFAULT (ANTI-CLOSURE):
+     Cut off mid-action.">
+     - <NATIVELY: „EXCEPTION (FINALE/EPILOGUE): If this is the ending, close
+       the scene naturally.">
 
-# --- Sufiksy kontekstowe (opcjonalne) ---
-# Puste {{}} oznacza „silnik nie dokleja żadnego sufiksu zależnego od stanu
-# pamięci". Jeśli chcesz dodać sufiksy – patrz tryb_burza.yaml jako wzorzec.
+# --- Contextual suffixes (optional) ---
+# Empty {{}} means „the engine appends no memory-state-dependent suffix".
+# If you want to add suffixes – see tryb_burza.yaml as a model.
 sufiksy: {{}}
 
-# --- Przypomnienie doklejane do instrukcji użytkownika ---
-# Również NATYWNIE w {natywna_baza}.
+# --- Reminder appended to the user instruction ---
+# Also NATIVELY in {natywna_baza}.
 przypomnienie_uzytkownika: |
 
 
-  (<UZUPEŁNIJ NATYWNIE: PRZYPOMNIENIE / ERINNERUNG / RICORDO: krótka
-  rekapitulacja kluczowych zasad tego trybu w 1-2 zdaniach>.)
+  (<FILL NATIVELY: REMINDER / ERINNERUNG / RICORDO: a short recap of the
+  mode's key rules in 1-2 sentences>.)
 
-# --- Walidacja po stronie aplikacji ---
-# Słowa wyzwalające „streszczenie" — natywne w {natywna_baza} (porównanie
-# robione lower-case, więc wpisuj zwykle małymi).
+# --- Application-side validation ---
+# „Summary" trigger words — native in {natywna_baza} (the comparison is
+# lower-case, so usually type them in lowercase).
 slowa_wyzwalajace:
   streszczenie:
 {natywne_streszcz}
 
-# Czy uruchamiać silnik fonetyczny na odpowiedzi?
-# true  – wymagane, jeśli tryb generuje dialogi z tagami postaci.
-# false – dla prozy literackiej bez tagów.
+# Should the phonetic engine run on the response?
+# true  – required if the mode generates dialogue with character tags.
+# false – for literary prose without tags.
 stosuj_akcenty_fonetyczne: false
 """
 
@@ -924,48 +924,48 @@ def szablon_postprodukcja(id_pliku: str, etykieta: str,
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     return f"""# -----------------------------------------------------------------------------
-#  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: nagłówek pliku, np. „NACHBEARBEITUNG"
+#  <FILL NATIVELY in {natywna_baza}: file header, e.g. „NACHBEARBEITUNG"
 #   (DE) / „POSTPRODUZIONE" (IT) / „ПОСТОБРАБОТКА" (RU)>
-#  Szablon oparty o postprod_tytuly.yaml — iteracja po rozdziałach.
+#  Template based on postprod_tytuly.yaml — iteration over chapters.
 # -----------------------------------------------------------------------------
 id: {id_pliku}
 etykieta: "{etykieta}"
 kategoria: postprodukcja
 kolejnosc: 20
 
-# --- Parametry OpenAI ---
+# --- OpenAI parameters ---
 model: gpt-4o-mini
 temperatura: 0.7
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
-# --- Prompt systemowy ---
-# UWAGA: cały prompt MUSI być w języku {natywna_baza}.
+# --- System prompt ---
+# NOTE: the entire prompt MUST be in {natywna_baza}.
 prompt_systemowy: |
-  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: rola AI + jednozdaniowa instrukcja
-  formatu odpowiedzi (np. „Jesteś redaktorem audiobooków. Odpowiadasz
-  jednym zdaniem zawierającym tylko tytuł rozdziału.").>
+  <FILL NATIVELY in {natywna_baza}: the AI role + a one-sentence
+  output-format instruction (e.g. „You are an audiobook editor. You reply
+  with a single sentence containing only the chapter title.").>
 
-# --- Szablon instrukcji użytkownika (role=user) ---
-# Placeholdery: {{naglowek}}, {{probka}}
+# --- User instruction template (role=user) ---
+# Placeholders: {{naglowek}}, {{probka}}
 prompt_uzytkownika_szablon: |
-  <UZUPEŁNIJ NATYWNIE w {natywna_baza}: fragment z placeholderem {{naglowek}},
-  potem polecenie dla AI, na końcu blok:
-    TREŚĆ:
+  <FILL NATIVELY in {natywna_baza}: a fragment with the {{naglowek}}
+  placeholder, then the instruction for the AI, ending with the block:
+    CONTENT:
     {{probka}}>
 
-# --- Parametry iteracji po pliku projektu ---
-# Regex łapiący nagłówki rozdziałów. WZORZEC dopasuj do języka:
+# --- Project-file iteration parameters ---
+# Regex matching chapter headers. Adapt the PATTERN to the language:
 #   PL: "(?i)\\\\n*(Prolog|Rozdział \\\\d+|Epilog)\\\\n*"
 #   DE: "(?i)\\\\n*(Prolog|Kapitel \\\\d+|Epilog)\\\\n*"
 #   IT: "(?i)\\\\n*(Prologo|Capitolo \\\\d+|Epilogo)\\\\n*"
 #   EN: "(?i)\\\\n*(Prologue|Chapter \\\\d+|Epilogue)\\\\n*"
-regex_podzial_rozdzialow: '<UZUPEŁNIJ: regex łapiący nagłówki rozdziałów w {natywna_baza}>'
+regex_podzial_rozdzialow: '<FILL IN: regex matching chapter headers in {natywna_baza}>'
 min_dlugosc_fragmentu: 50
 max_dlugosc_probki: 6000
 
-# Komunikaty widoczne dla użytkownika w oknie wyników (NATYWNIE w {natywna_baza}):
-etykieta_fragment_zbyt_krotki: '<UZUPEŁNIJ NATYWNIE: np. (Fragment zbyt krótki)>'
-etykieta_bled_brak_kredytow: '<UZUPEŁNIJ NATYWNIE: np. (Błąd – brak kredytów API)>'
+# Messages shown to the user in the results window (NATIVELY in {natywna_baza}):
+etykieta_fragment_zbyt_krotki: '<FILL NATIVELY: e.g. (Fragment too short)>'
+etykieta_bled_brak_kredytow: '<FILL NATIVELY: e.g. (Error – no API credits)>'
 """
 
 
@@ -1062,77 +1062,77 @@ All „human-facing" text in the file — label, header, YAML comments,
 def szablon_podstawy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
     return f"""# =============================================================================
-#  <UZUPEŁNIJ NATYWNIE: nagłówek pliku w języku {natywna}, np. dla DE:
-#  „GRUNDLAGEN DER DEUTSCHEN SPRACHE"; dla IT: „FONDAMENTI DELLA LINGUA ITALIANA">
+#  <FILL NATIVELY: file header in {natywna}, e.g. for DE:
+#  „GRUNDLAGEN DER DEUTSCHEN SPRACHE"; for IT: „FONDAMENTI DELLA LINGUA ITALIANA">
 # =============================================================================
-#  Plik bazowy dla `dictionaries/{kod_jezyka}/`. Manager Reguł utworzył już
-#  cztery podfoldery (akcenty/, szyfry/, rezyser/, gui/) — Twoja praca
-#  ogranicza się do uzupełnienia poniższych sekcji.
+#  Base file for `dictionaries/{kod_jezyka}/`. Manager Reguł already created
+#  the four subfolders (akcenty/, szyfry/, rezyser/, gui/) — your work is
+#  limited to filling in the sections below.
 #
-#  Sekcje wymagane przez silnik (`core_poliglota._jezyk_kompletny`):
-#    1. lingua          – nazwa enum-a `lingua.Language` dla detektora
-#                         (POLISH/GERMAN/FRENCH/...). Lista:
+#  Sections required by the engine (`core_poliglota._jezyk_kompletny`):
+#    1. lingua          – the `lingua.Language` enum name for the detector
+#                         (POLISH/GERMAN/FRENCH/...). List:
 #                         https://github.com/pemistahl/lingua-py
-#    2. polskie_znaki   – mapowanie diakrytyków języka „{kod_jezyka}" na
-#                         litery ASCII (używane przez `usun_polskie_znaki:
-#                         true` w akcentach).
-#    3. alfabet         – pełny alfabet wielkich liter (używany przez szyfr
-#                         Cezara). UWAGA: litery rosnące przy `.upper()`
-#                         (np. ß→SS) NIE wchodzą do alfabetu.
-#    4. slowo_akcent    – natywne słowa wyzwalające parser akcentów
-#                         w trybie Reżysera (od 13.3+).
+#    2. polskie_znaki   – mapping of the „{kod_jezyka}" language diacritics
+#                         to ASCII letters (used by `usun_polskie_znaki:
+#                         true` in accents).
+#    3. alfabet         – the full uppercase alphabet (used by the Caesar
+#                         cipher). NOTE: letters that grow under `.upper()`
+#                         (e.g. ß→SS) do NOT enter the alphabet.
+#    4. slowo_akcent    – native words that trigger the accent parser in
+#                         Director mode (since 13.3+).
 #
-#  Komentarze i opisy w tym pliku piszemy w języku {natywna} — porównaj
-#  z `dictionaries/de/podstawy.yaml` lub `dictionaries/it/podstawy.yaml`,
-#  jeśli zatrzymałeś się przy uzupełnianiu.
+#  Write the comments and descriptions in this file in {natywna} — compare
+#  with `dictionaries/de/podstawy.yaml` or `dictionaries/it/podstawy.yaml`
+#  if you get stuck while filling it in.
 # =============================================================================
 
 id: podstawy
 jezyk: {kod_jezyka}
-# Nazwa enum-a `lingua.Language` (wielkimi, bez prefiksu).
-# Brak wyłącza język z detektora — w GUI wybierze się ręcznie,
-# ale fragmenty mieszane nie będą rozpoznawane.
-lingua: <UZUPEŁNIJ_NAZWE_ENUMA_NP_GERMAN>
-# Etykieta MUSI być w 100% w języku natywnym {natywna}.
-# Wzorce z wdrożonych paczek: PL: „Polski – podstawy fonetyczne"; DE:
+# The `lingua.Language` enum name (uppercase, no prefix).
+# Leaving it out drops the language from the detector — it can be chosen
+# manually in the GUI, but mixed fragments will not be recognized.
+lingua: <FILL_IN_ENUM_NAME_E_G_GERMAN>
+# The label MUST be 100% in the native language {natywna}.
+# Models from the deployed packs: PL: „Polski – podstawy fonetyczne"; DE:
 # „Deutsch – phonetische Grundlagen"; IT: „Italiano – fondamenti
 # fonetici"; RU: „Русский – фонетические основы"; FI: „Suomi –
 # foneettiset perusteet"; IS: „Íslenska – hljóðfræðilegur grunnur".
-etykieta: '<UZUPEŁNIJ NATYWNIE: endonim + sufiks po {natywna}, np. {natywna} – phonetische Grundlagen / fondamenti fonetici>'
+etykieta: '<FILL NATIVELY: endonym + suffix in {natywna}, e.g. {natywna} – phonetische Grundlagen / fondamenti fonetici>'
 opis: |
-  <UZUPEŁNIJ NATYWNIE w języku {natywna}: 2-4 zdania o tym, co opisuje
-  ten plik. Wzorzec PL:
-    Bazowe reguły dla języka <natywna nazwa>:
-      1. Transliteracja diakrytyków (...) — usuwana przez
-         `usun_polskie_znaki: true` w akcentach.
-      2. Alfabet (<N> liter, wielkie) — używany przez szyfr Cezara.>
+  <FILL NATIVELY in {natywna}: 2-4 sentences on what this file describes.
+  PL model:
+    Base rules for the <native name> language:
+      1. Transliteration of diacritics (...) — stripped by
+         `usun_polskie_znaki: true` in accents.
+      2. Alphabet (<N> letters, uppercase) — used by the Caesar cipher.>
 
 polskie_znaki:
-  # Pary {{ wzor: "<diakrytyk>", zamiana: "<ASCII>" }} — wariant mały i wielki.
-  # <UZUPEŁNIJ: minimum diakrytyki języka {natywna}, plus opcjonalnie inne
-  # europejskie (np. polskie ąęłóśćńżź) — wzorzec: dictionaries/de/podstawy.yaml>
+  # Pairs {{ wzor: "<diacritic>", zamiana: "<ASCII>" }} — lower and upper variant.
+  # <FILL IN: at minimum the diacritics of {natywna}, plus optionally other
+  # European ones (e.g. Polish ąęłóśćńżź) — model: dictionaries/de/podstawy.yaml>
   - {{ wzor: "?", zamiana: "?" }}
 
-# Pełny alfabet wielkich liter, bez znaków białych. Użyj NATYWNEGO alfabetu
-# w jego NATYWNEJ kolejności. Litera akcentowana wchodzi do alfabetu TYLKO,
-# jeśli jest w danym języku osobną literą — i stoi tam, gdzie stawia ją
-# natywna kolejność, NIE automatycznie na końcu (np. FI „...XYZÅÄÖ" — Å Ä Ö
-# są natywne i kończą fiński alfabet; ES Ñ stoi między N a O). Formy
-# akcentowane, które NIE są osobnymi literami (np. FR é/à, IT à/è), do
-# alfabetu NIE wchodzą — przechodzą przez Cezara jak cyfry. Litery rosnące
-# przy `.upper()` (np. ß→SS) są pomijane zawsze.
-alfabet: '<UZUPEŁNIJ: natywny alfabet wielkimi literami w natywnej kolejności>'
+# Full uppercase alphabet, no whitespace. Use the NATIVE alphabet in its
+# NATIVE ORDER. An accented letter enters the alphabet ONLY if it is a
+# distinct letter in that language — and it sits where the native order puts
+# it, NOT automatically at the end (e.g. FI „...XYZÅÄÖ" — Å Ä Ö are native and
+# end the Finnish alphabet; ES Ñ sits between N and O). Accented forms that
+# are NOT distinct letters (e.g. FR é/à, IT à/è) do NOT enter the alphabet —
+# they pass through the Caesar cipher like digits. Letters that grow under
+# `.upper()` (e.g. ß→SS) are always omitted.
+alfabet: '<FILL IN: native alphabet in uppercase, in native order>'
 
 # -----------------------------------------------------------------------------
-# Słowa wyzwalające parser akcentów w trybie Reżysera (od 13.3+).
-# core_rezyser.zastosuj_akcenty_uniwersalne tworzy z tej listy regex łapiący
-# frazy „<słowo> X" lub „X <słowo>" (np. dla PL „akcent włoski" / „włoski
-# akcent"). Wpisy MUSZĄ być w języku natywnym, małymi literami.
-# Wzorce: PL ["akcent"]; IT ["accento", "accentato"]; RU ["акцент",
+# Words that trigger the accent parser in Director mode (since 13.3+).
+# core_rezyser.zastosuj_akcenty_uniwersalne builds a regex from this list that
+# catches phrases „<word> X" or „X <word>" (e.g. for PL „akcent włoski" /
+# „włoski akcent"). Entries MUST be in the native language, lowercase.
+# Models: PL ["akcent"]; IT ["accento", "accentato"]; RU ["акцент",
 # "акцентом", "говор"]; DE ["akzent", "aussprache"].
 # -----------------------------------------------------------------------------
 slowo_akcent:
-  - "<UZUPEŁNIJ NATYWNIE: minimum 1 słowo, np. 'akzent'/'accento'/'akcent'>"
+  - "<FILL NATIVELY: at least 1 word, e.g. 'akzent'/'accento'/'akcent'>"
 """
 
 
