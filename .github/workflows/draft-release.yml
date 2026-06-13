@@ -12,7 +12,9 @@ name: Draft Release (auto-tag + RELEASE_NOTES.md sekcja -> draft)
 #      lookahead na nastepny naglowek `## ` lub EOF.
 #   4. Tworzy tag v<wersja> wskazujacy na obecny HEAD main, pushuje na origin.
 #   5. Tworzy draft Release przez `gh release create --draft` z tytulem
-#      „Rezyser Audio GPT, wersja <wersja>" (Rezyser z polska litera) i tresc
+#      „Reżyser Audio GPT — version <wersja>" (tytul EN od v17.6.0 — A11y:
+#      body Release zaczyna sie od EN, screen reader nie wpada w PL bez ostrzezenia)
+#      i tresc
 #      z wyciagnietej sekcji RELEASE_NOTES.md.
 #
 # Co maintainer ROBI po workflow:
@@ -137,7 +139,7 @@ jobs:
         run: |
           gh release create "$TAG" \
             --draft \
-            --title "Reżyser Audio GPT, wersja $WERSJA" \
+            --title "Reżyser Audio GPT — version $WERSJA" \
             --notes-file "/tmp/release_notes.md"
           echo "Draft Release dla $TAG utworzony."
           echo "Nastepny krok (rola maintainera): Web Releases -> wybierz draft -> upload Installer EXE -> Publish."
