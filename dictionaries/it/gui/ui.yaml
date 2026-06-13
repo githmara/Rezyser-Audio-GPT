@@ -1042,7 +1042,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novità nella versione {nowa_wersja}:'
-  co_nowego_tresc: "Rilascio ordinario dopo la revisione della qualità di tutti i pacchetti linguistici. Sono state uniformate le etichette degli accenti (ad es. finlandese, italiano e islandese — ora indicano la lingua, non il paese) e sono stati corretti piccoli errori di battitura e imprecisioni nelle descrizioni delle regole e nei messaggi indirizzati all'AI. È stata inoltre aggiunta l'informazione sulla licenza del progetto (MIT). Nessuna modifica nel funzionamento del generatore di storie, cifrari e traduttore."
+  co_nowego_tresc: "Rilascio puramente ordinativo che chiude tre piccole voci dalla patch precedente. Corretto un'incoerenza ortografica in un'etichetta dell'interfaccia russa, aggiornati i commenti tecnici obsoleti nei file delle regole e corretti gli esempi del cifrario \"Balbuzie\" nelle descrizioni e nella documentazione — in alcune lingue mostravano il raddoppio delle lettere in contrasto con la regola descritta (vocale come seconda lettera → viene ripetuta solo la prima). Nessuna modifica nel funzionamento del generatore di storie, cifrari e traduttore."
   co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
   btn_szczegoly_online: '&Dettagli online'
 opowiesci:

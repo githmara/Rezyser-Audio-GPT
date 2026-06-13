@@ -335,7 +335,7 @@ tresc:
 
     - Vocalizzatore (Tutto rimbomba con "O") — ogni vocale nel testo viene sostituita con "o", mantenendo le morbidezze polacche. "Buongiorno" → "Boongiorno". Più lungo è il testo, più divertente è l'effetto (e il lettore di schermo lo legge con piena convinzione).
 
-    - Balbuzie Forte / Robot Danneggiato — aggiunge balbuzie all'inizio delle parole: "co-co-co-computer", "do-do-doccia". Per le parole brevi (meno di 3 caratteri) l'algoritmo le ignora. Se la seconda lettera della parola è una consonante, ripete le prime due lettere (effetto più naturale); se è una vocale — ripete solo la prima.
+    - Balbuzie Forte / Robot Danneggiato — aggiunge balbuzie all'inizio delle parole: "c-c-c-computer", "st-st-strada". Per le parole brevi (meno di 3 caratteri) l'algoritmo le ignora. Se la seconda lettera della parola è una consonante, ripete le prime due lettere (effetto più naturale); se è una vocale — ripete solo la prima.
 
     - Cifrario di Cesare (spostamento dell'alfabeto IT) — classico cifrario sostitutivo: ogni lettera viene spostata di N posizioni nell'alfabeto italiano (ABCDEFGHILMNOPQRSTUVZ, 21 caratteri — senza J, K, W, X, Y). Inserisci il valore dello spostamento nel campo numerico "Spostamento cifrario di Cesare (0 = casuale, intervallo -20…20)". Se inserisci 0 — l'applicazione sceglierà casualmente uno spostamento nell'intervallo 1-19 e lo mostrerà in un messaggio alla fine (così potrai decifrare successivamente). I caratteri al di fuori dell'alfabeto (numeri, punteggiatura, spazi) rimangono invariati.
 

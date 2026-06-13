@@ -7,7 +7,7 @@ etykieta: "Balbuzie Intensa / Robot Rotto"
 opis: |
   Per ogni parola di lunghezza >= `min_dlugosc_slowa`, estrae un numero
   casuale di ripetizioni della prima (o delle prime due) lettere e le
-  prepende con trattini: "computer" → "co-co-co-computer", "io" → "io".
+  prepende con trattini: "computer" → "c-c-c-computer", "io" → "io".
 
   Se la seconda lettera della parola è una consonante (non presente nella
   stringa `samogloski`), la balbuzie include DUE lettere iniziali — dà

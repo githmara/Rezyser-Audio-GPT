@@ -10,7 +10,7 @@
 #  den TTS-Knoten erreichen. Python (rezyser_ai.generuj_skrypt + renderuj_skrypt)
 #  umschließt `mowca` mit [..] und rendert zu "[Sprecher] Text" — dem Dateiformat,
 #  das die ElevenLabs-Brücke liest. Dialogzeilen durchlaufen danach den
-#  phonetischen Motor (core_poliglota.akcent_*); Audio-Tags werden bei der
+#  phonetischen Motor (core_rezyser.zastosuj_akcenty_uniwersalne); Audio-Tags werden bei der
 #  Sprechererkennung übersprungen (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

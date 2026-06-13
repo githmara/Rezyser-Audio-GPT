@@ -98,8 +98,8 @@ I cifrari sono giochi di testo per enigmi, esercizi linguistici, rompicapo. A di
    convinzione, senza tentare di decodificarlo.
 
 5. Forte Balbuzie / Robot Danneggiato
-   Aggiunge balbuzie all'inizio delle parole: "computer" → "co-co-co-computer",
-   "doccia" → "do-do-doccia". Le parole più corte di 3 caratteri sono ignorate.
+   Aggiunge balbuzie all'inizio delle parole: "computer" → "c-c-c-computer",
+   "strada" → "st-st-strada". Le parole più corte di 3 caratteri sono ignorate.
    Se la seconda lettera della parola è una consonante, vengono ripetute le
    prime due (suona più naturale); se è una vocale — solo la prima.
 

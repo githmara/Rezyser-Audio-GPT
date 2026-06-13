@@ -1039,7 +1039,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: "What's new in version {nowa_wersja}:"
-  co_nowego_tresc: 'Orderly release after quality review of all language packs. Accent labels have been standardized (including Finnish, Italian, and Icelandic — now naming the language, not the country) and minor typos and inconsistencies in rule descriptions and messages directed to AI have been corrected. Information about the project license (MIT) has also been added. No changes in the operation of the story generator, ciphers, and translator.'
+  co_nowego_tresc: 'A purely maintenance release closing three minor items from the previous patch. Fixed a spelling inconsistency in one Russian interface label, updated outdated technical comments in rule files, and corrected examples of the "Stuttering" cipher in descriptions and documentation — in several languages, they showed letter doubling contrary to the described rule (vowel as the second letter → only the first is repeated). No changes in the operation of the story generator, ciphers, and translator.'
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
 opowiesci:

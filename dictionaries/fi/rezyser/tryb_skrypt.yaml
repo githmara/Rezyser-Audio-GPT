@@ -10,7 +10,7 @@
 #  jotka todella saavuttavat TTS-solmun. Python (rezyser_ai.generuj_skrypt +
 #  renderuj_skrypt) kietoo `mowca`:n [..]-merkkeihin ja renderöi muotoon
 #  "[Puhuja] teksti" — tiedostomuoto, jota ElevenLabs-silta lukee. Sen jälkeen
-#  dialogirivit kulkevat foneettisen moottorin läpi (core_poliglota.akcent_*);
+#  dialogirivit kulkevat foneettisen moottorin läpi (core_rezyser.zastosuj_akcenty_uniwersalne);
 #  äänitagit ohitetaan puhujantunnistuksessa (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

@@ -132,7 +132,7 @@ Dostępne szyfry (6):
    przekonaniem, bez próby dekodowania.
 
 5. Silne Jąkanie / Uszkodzony Robot
-   Dokleja zająknięcia na początku słów: "komputer" → "ko-ko-ko-komputer",
+   Dokleja zająknięcia na początku słów: "komputer" → "k-k-k-komputer",
    "prysznic" → "pr-pr-prysznic". Słowa krótsze niż 3 znaki są pomijane.
    Jeśli druga litera słowa jest spółgłoską, powtarzane są dwie pierwsze
    (brzmi bardziej naturalnie); jeśli samogłoską — tylko pierwsza.

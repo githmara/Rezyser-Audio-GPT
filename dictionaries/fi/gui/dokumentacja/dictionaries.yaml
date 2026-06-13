@@ -147,8 +147,8 @@ tresc:
        yrittämättä purkaa sitä.
 
     5. Vahva Änkytys / Rikkoutunut Robotti
-       Lisää änkytystä sanojen alkuun: "tietokone" → "ti-ti-ti-tietokone",
-       "suihku" → "su-su-suihku". Alle 3 merkin pituiset sanat ohitetaan. Jos
+       Lisää änkytystä sanojen alkuun: "tietokone" → "t-t-t-tietokone",
+       "prinsessa" → "pr-pr-prinsessa". Alle 3 merkin pituiset sanat ohitetaan. Jos
        sanan toinen kirjain on konsonantti, toistetaan kaksi ensimmäistä (kuulostaa
        luonnollisemmalta); jos vokaali — vain ensimmäinen.
 

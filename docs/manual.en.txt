@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 17.6.1 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 17.6.2 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -318,7 +318,7 @@ Available algorithms (select in the menu "Choose a distorting algorithm"):
 
 - Vowelizer (Everything booms on "O") — every vowel in the text is replaced with "o", preserving Polish softening. "Dzień dobry" → "Dźoń doboro". The longer the text, the funnier the effect (and a screen reader reads it with full conviction).
 
-- Strong Stuttering / Broken Robot — attaches stuttering at the beginning of words: "co-co-co-computer", "sh-sh-shower". For short words (less than 3 characters), the algorithm skips them. If the second letter of the word is a consonant, it repeats the first two letters (more natural effect); if a vowel — it repeats only the first.
+- Strong Stuttering / Broken Robot — attaches stuttering at the beginning of words: "c-c-c-computer", "sh-sh-shower". For short words (less than 3 characters), the algorithm skips them. If the second letter of the word is a consonant, it repeats the first two letters (more natural effect); if a vowel — it repeats only the first.
 
 - Caesar Cipher (EN alphabet shift) — a classic substitution cipher: each letter is shifted by N positions in the English alphabet (ABCD…XYZ, 26 characters). You enter the shift value in the numeric field "Caesar Cipher Shift (0 = random, range -25…25)". If you enter 0 — the application will randomly select a shift in the range 1-24 and display it in a message after completion (so you can decrypt it later). Characters outside the alphabet (numbers, punctuation, spaces) remain unchanged.
 

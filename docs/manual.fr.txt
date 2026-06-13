@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 17.6.1 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 17.6.2 – Version de Publication)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -338,7 +338,7 @@ Algorithmes disponibles (sélectionnez dans le menu « Choisir l'algorithme de d
 
 - Voyelliseur (Tout résonne en « O ») — chaque voyelle dans le texte est remplacée par « o », en conservant les adoucissements polonais. « Bonjour » → « Bonjoor ». Plus le texte est long, plus l'effet est amusant (et le lecteur d'écran le lit avec pleine conviction).
 
-- Bégaiement Fort / Robot Endommagé — ajoute des bégaiements au début des mots : « co-co-co-computer », « do-do-do-douche ». Pour les mots courts (moins de 3 lettres), l'algorithme les ignore. Si la deuxième lettre du mot est une consonne, il répète les deux premières lettres (effet plus naturel) ; si c'est une voyelle — il ne répète que la première.
+- Bégaiement Fort / Robot Endommagé — ajoute des bégaiements au début des mots : « or-or-or-ordinateur », « st-st-stratégie ». Pour les mots courts (moins de 3 lettres), l'algorithme les ignore. Si la deuxième lettre du mot est une consonne, il répète les deux premières lettres (effet plus naturel) ; si c'est une voyelle — il ne répète que la première.
 
 - Chiffre de César (décalage de l'alphabet FR) — chiffre de substitution classique : chaque lettre est décalée de N positions dans l'alphabet français (ABCD…ÛÜŸ, 40 caractères avec lettres accentuées). Vous entrez la valeur du décalage dans le champ numérique « Décalage du chiffre de César (0 = aléatoire, plage -39…39) ». Si vous entrez 0 — l'application choisira un décalage aléatoire dans la plage 1-38 et l'affichera dans un message après la fin (pour que vous puissiez ensuite déchiffrer). Les caractères hors alphabet (chiffres, ponctuation, espaces) restent inchangés.
 

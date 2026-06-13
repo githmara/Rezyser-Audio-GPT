@@ -1,4 +1,4 @@
-Manual del Director de Audio AI - Guía Completa (Versión 17.6.1 – Versión de Publicación)
+Manual del Director de Audio AI - Guía Completa (Versión 17.6.2 – Versión de Publicación)
 
 ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 
@@ -305,7 +305,7 @@ Algoritmos disponibles (selecciona en el menú "Elige algoritmo de distorsión")
 
 - Vocalizador (Todo retumba en "O") — cada vocal en el texto se reemplaza por "o", manteniendo las suavizaciones polacas. "Buenos días" → "Boenos doas". Cuanto más largo el texto, más divertido el efecto (y el lector de pantalla lo lee con total convicción).
 
-- Tartamudeo Fuerte / Robot Dañado — agrega tartamudeos al comienzo de las palabras: "co-co-co-computadora", "du-du-ducha". Para palabras cortas (menos de 3 letras) el algoritmo las omite. Si la segunda letra de la palabra es una consonante, repite las dos primeras letras (efecto más natural); si es vocal, repite solo la primera.
+- Tartamudeo Fuerte / Robot Dañado — agrega tartamudeos al comienzo de las palabras: "or-or-or-ordenador", "cr-cr-cristal". Para palabras cortas (menos de 3 letras) el algoritmo las omite. Si la segunda letra de la palabra es una consonante, repite las dos primeras letras (efecto más natural); si es vocal, repite solo la primera.
 
 - Cifrado César (desplazamiento del alfabeto ES) — clásico cifrado de sustitución: cada letra se desplaza N posiciones en el alfabeto español (ABCDEFGHIJKLMNÑOPQRSTUVWXYZ, 27 caracteres). Introduces el valor de desplazamiento en el campo numérico "Desplazamiento del cifrado César (0 = aleatorio, rango -26…26)". Si introduces 0 — la aplicación elegirá aleatoriamente un desplazamiento en el rango 1-25 y lo mostrará en un mensaje al finalizar (para que luego puedas descifrarlo). Los caracteres fuera del alfabeto (números, puntuación, espacios) permanecen sin cambios.
 

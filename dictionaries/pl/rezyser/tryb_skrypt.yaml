@@ -11,7 +11,7 @@
 #  generuj_skrypt + renderuj_skrypt) owija mowca w [..] i renderuje do
 #  [Mówca] treść — formatu pliku skryptu, który czyta most ElevenLabs.
 #  Po wygenerowaniu kwestie dialogowe przechodzą przez silnik fonetyczny
-#  (core_poliglota.akcent_*), nakładający akcenty z Księgi Świata; audio-tagi
+#  (core_rezyser.zastosuj_akcenty_uniwersalne), nakładający akcenty z Księgi Świata; audio-tagi
 #  są pomijane przy detekcji mówcy (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

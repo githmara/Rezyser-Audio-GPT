@@ -1041,7 +1041,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novedades en la versión {nowa_wersja}:'
-  co_nowego_tresc: 'Lanzamiento de mantenimiento tras la revisión de calidad de todos los paquetes de idiomas. Se unificaron las etiquetas de acentos (incluyendo finlandés, italiano e islandés — ahora nombran el idioma, no el país) y se corrigieron pequeños errores tipográficos e imprecisiones en las descripciones de reglas y mensajes dirigidos a la IA. También se añadió información sobre la licencia del proyecto (MIT). Sin cambios en el funcionamiento del generador de historias, cifrados y traductor.'
+  co_nowego_tresc: 'Lanzamiento puramente de mantenimiento que cierra tres pequeños elementos del parche anterior. Se corrigió una inconsistencia ortográfica en una etiqueta de interfaz en ruso, se actualizaron los comentarios técnicos obsoletos en los archivos de reglas y se corrigieron los ejemplos del cifrado "Tartamudeo" en descripciones y documentación: en varios idiomas mostraban duplicación de letras en contra de la regla descrita (vocal como segunda letra → solo se repite la primera). Sin cambios en el funcionamiento del generador de historias, cifrados y traductor.'
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
 opowiesci:

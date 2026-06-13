@@ -9,7 +9,7 @@
 #  [sighs]…) woven into the line text, which actually reach the TTS node. Python
 #  (rezyser_ai.generuj_skrypt + renderuj_skrypt) wraps `mowca` in [..] and renders
 #  to "[Speaker] text" — the script-file format read by the ElevenLabs bridge.
-#  Dialogue lines then pass through the phonetic engine (core_poliglota.akcent_*);
+#  Dialogue lines then pass through the phonetic engine (core_rezyser.zastosuj_akcenty_uniwersalne);
 #  audio tags are skipped during speaker detection (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

@@ -338,7 +338,7 @@ tresc:
 
     - Vokalisierer (Alles dröhnt auf „O") — jeder Vokal im Text wird durch „o" ersetzt, wobei die deutschen Umlaute erhalten bleiben. „Guten Tag" → „Goton Tog". Je länger der Text, desto lustiger der Effekt (und der Screenreader liest es mit voller Überzeugung).
 
-    - Starkes Stottern / Beschädigter Roboter — fügt Stottern am Anfang von Wörtern hinzu: „Ko-ko-ko-komputer", „du-du-dusche". Bei kurzen Wörtern (weniger als 3 Zeichen) ignoriert der Algorithmus sie. Wenn der zweite Buchstabe des Wortes ein Konsonant ist, werden die ersten beiden Buchstaben wiederholt (natürlicherer Effekt); wenn ein Vokal, wird nur der erste wiederholt.
+    - Starkes Stottern / Beschädigter Roboter — fügt Stottern am Anfang von Wörtern hinzu: „C-c-c-Computer", „St-st-Straße". Bei kurzen Wörtern (weniger als 3 Zeichen) ignoriert der Algorithmus sie. Wenn der zweite Buchstabe des Wortes ein Konsonant ist, werden die ersten beiden Buchstaben wiederholt (natürlicherer Effekt); wenn ein Vokal, wird nur der erste wiederholt.
 
     - Caesar-Verschlüsselung (Verschiebung des deutschen Alphabets) — klassischer Substitutionscode: Jeder Buchstabe wird um N Positionen im deutschen Alphabet verschoben (ABCD…ÄÖÜ, 29 Zeichen). Den Verschiebungswert gibst du im Zahlenfeld „Caesar-Verschlüsselungsverschiebung (0 = zufällig, Bereich -28…28)" ein. Wenn du 0 eingibst — wählt die Anwendung eine Verschiebung im Bereich 1-27 zufällig aus und zeigt sie nach Abschluss in einer Nachricht an (damit du später entschlüsseln kannst). Zeichen außerhalb des Alphabets (Zahlen, Interpunktion, Leerzeichen) bleiben unverändert.
 

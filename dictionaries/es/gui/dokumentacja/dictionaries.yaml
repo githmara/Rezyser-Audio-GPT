@@ -85,7 +85,7 @@ tresc:
        Cada vocal en el texto se cambia por "o", manteniendo las suavizaciones polacas (ci, si, ni, zi, dzi se manejan correctamente): "Dzień dobry, witam panią" → "Dźoń doboro, wotom poną". Cuanto más largo es el texto, más divertido es el efecto, y el lector de pantalla lo lee con total convicción, sin intentar decodificar.
 
     5. Tartamudeo Fuerte / Robot Dañado
-       Añade tartamudeos al principio de las palabras: "komputer" → "ko-ko-ko-komputer", "prysznic" → "pr-pr-prysznic". Las palabras de menos de 3 letras se omiten. Si la segunda letra de la palabra es una consonante, se repiten las dos primeras (suena más natural); si es una vocal, solo la primera.
+       Añade tartamudeos al principio de las palabras: "ordenador" → "or-or-or-ordenador", "cristal" → "cr-cr-cristal". Las palabras de menos de 3 letras se omiten. Si la segunda letra de la palabra es una consonante, se repiten las dos primeras (suena más natural); si es una vocal, solo la primera.
 
     6. Cifrado César (clásico)
        El cifrado documentado más antiguo de la historia (utilizado ya en la antigua Roma). Cada letra se desplaza N posiciones en el alfabeto español (27 letras: ABCDEFGHIJKLMNÑOPQRSTUVWXYZ). El desplazamiento lo introduces en la GUI en el campo numérico; si ingresas 0, la aplicación elegirá un valor al azar en el rango 1-25 y lo mostrará en un mensaje para que luego puedas descifrar el mensaje. Los caracteres fuera del alfabeto (números, espacios, puntuación) permanecen sin cambios.

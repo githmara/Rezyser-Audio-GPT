@@ -10,8 +10,9 @@
 #  nel testo della battuta, che raggiungono davvero il nodo TTS. Python
 #  (rezyser_ai.generuj_skrypt + renderuj_skrypt) avvolge `mowca` in [..] e
 #  renderizza "[Parlante] testo" — il formato di file che legge il ponte
-#  ElevenLabs. Le battute passano poi per il motore fonetico (core_poliglota.
-#  akcent_*); gli audio-tag sono ignorati nel rilevamento del parlante
+#  ElevenLabs. Le battute passano poi per il motore fonetico
+#  (core_rezyser.zastosuj_akcenty_uniwersalne); gli audio-tag sono ignorati
+#  nel rilevamento del parlante
 #  (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

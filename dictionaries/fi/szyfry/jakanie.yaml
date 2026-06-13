@@ -7,7 +7,7 @@ etykieta: "Vaikea Änkytys / Rikkinäinen Robotti"
 opis: |
   Jokaiselle sanalle, jonka pituus on >= `min_dlugosc_slowa`, arvotaan
   ensimmäisen (tai kahden ensimmäisen) kirjaimen toistojen määrä, jotka
-  lisätään sanan alkuun yhdysmerkillä: "tietokone" → "ti-ti-ti-tietokone",
+  lisätään sanan alkuun yhdysmerkillä: "tietokone" → "t-t-t-tietokone",
   "se" → "se" (liian lyhyt).
 
   Jos sanan toinen kirjain on konsonantti (ei kuulu merkkijonoon

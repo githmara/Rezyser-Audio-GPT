@@ -8,7 +8,7 @@ etykieta: "Heavy Stutter / Broken Robot"
 opis: |
   For each word longer than `min_dlugosc_slowa`, draws a number of
   repetitions of the first (or first two) letters and prepends them with
-  hyphens: "computer" → "co-co-co-computer", "is" → "is" (too short).
+  hyphens: "computer" → "c-c-c-computer", "is" → "is" (too short).
 
   If the second letter of the word is a consonant (not in the `samogloski`
   string), the stutter includes TWO leading letters — gives a more natural

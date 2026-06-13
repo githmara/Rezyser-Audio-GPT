@@ -320,7 +320,7 @@ tresc:
 
     - Sérhljóðari (Allt hljómar á „O") — hver sérhljóði í textanum er breytt í „o", með varðveislu íslenskra mýkinga. „Góðan daginn" → „Góðon doginn". Því lengri texti, því skemmtilegri áhrif (og skjálesari les þetta með fullri sannfæringu).
 
-    - Sterkt Stam / Skemmdur Vélmenni — bætir við stami í upphafi orða: „to-to-to-tölva", „st-st-sturta". Fyrir stutt orð (minna en 3 stafir) sleppir reikniritið þeim. Ef annar stafur orðsins er samhljóði, endurtekur það fyrstu tvo stafina (náttúrulegri áhrif); ef sérhljóði — endurtekur aðeins fyrsta.
+    - Sterkt Stam / Skemmdur Vélmenni — bætir við stami í upphafi orða: „st-st-stelpa", „þr-þr-þrjótur". Fyrir stutt orð (minna en 3 stafir) sleppir reikniritið þeim. Ef annar stafur orðsins er samhljóði, endurtekur það fyrstu tvo stafina (náttúrulegri áhrif); ef sérhljóði — endurtekur aðeins fyrsta.
 
     - Cæsar Dulrit (færslu íslenska stafrófsins) — klassískt staðgengils dulrit: hver stafur er færður um N stöður í íslenska stafrófinu (AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ, 32 stafir). Færslugildið slærðu inn í reitinn „Færsla Cæsar dulrits (0 = tilviljun, bil -32…32)". Ef þú slærð inn 0 — forritið velur tilviljanakennda færslu á bilinu 1-31 og sýnir hana í skilaboðum eftir að ljúka (svo þú getir síðan afkóðað). Stafir utan stafrófsins (tölur, greinarmerki, bil) eru óbreyttir.
 

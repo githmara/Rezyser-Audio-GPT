@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 17.6.1 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 17.6.2 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -308,7 +308,7 @@ Saatavilla olevat algoritmit (valitse valikosta "Valitse vääristysalgoritmi"):
 
 - Vokaalinvaihtaja (Kaikki kumisee "O":lla) — jokainen vokaali tekstissä korvataan "o":lla, säilyttäen suomen kielen pehmennykset. "Hyvää päivää" → "Hovoo povoo". Mitä pidempi teksti, sitä hauskempi vaikutus (ja ruudunlukija lukee sen täydellä vakuutuksella).
 
-- Vahva Änkytys / Viallinen Robotti — lisää änkytyksiä sanojen alkuun: "ko-ko-ko-kompuutteri", "su-su-suihku". Lyhyitä sanoja (alle 3 merkkiä) algoritmi jättää huomiotta. Jos sanan toinen kirjain on konsonantti, se toistaa kaksi ensimmäistä kirjainta (luonnollisempi vaikutus); jos vokaali, se toistaa vain ensimmäisen.
+- Vahva Änkytys / Viallinen Robotti — lisää änkytyksiä sanojen alkuun: "t-t-t-tietokone", "pr-pr-prinsessa". Lyhyitä sanoja (alle 3 merkkiä) algoritmi jättää huomiotta. Jos sanan toinen kirjain on konsonantti, se toistaa kaksi ensimmäistä kirjainta (luonnollisempi vaikutus); jos vokaali, se toistaa vain ensimmäisen.
 
 - Caesarin Salakirjoitus (FI-alfabetin siirto) — klassinen korvaussalaus: jokainen kirjain siirretään N paikkaa eteenpäin suomen aakkosissa (ABCD…ÅÄÖ, 29 merkkiä). Siirron arvo syötetään numerokenttään "Caesarin salauksen siirto (0 = satunnainen, alue -29…29)". Jos syötät 0 — sovellus arpoo siirron alueella 1-28 ja näyttää sen viestissä lopuksi (jotta voit myöhemmin purkaa salauksen). Aakkosten ulkopuoliset merkit (numerot, välimerkit, välilyönnit) pysyvät ennallaan.
 

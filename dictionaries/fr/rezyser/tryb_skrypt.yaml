@@ -11,7 +11,7 @@
 #  Python (rezyser_ai.generuj_skrypt + renderuj_skrypt) enveloppe `mowca` dans
 #  [..] et rend "[Locuteur] texte" — le format de fichier que lit le pont
 #  ElevenLabs. Les répliques passent ensuite par le moteur phonétique
-#  (core_poliglota.akcent_*) ; les audio-tags sont ignorés lors de la détection
+#  (core_rezyser.zastosuj_akcenty_uniwersalne) ; les audio-tags sont ignorés lors de la détection
 #  du locuteur (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

@@ -139,8 +139,8 @@ Verfügbare Chiffren (6):
    es zu dekodieren.
 
 5. Starkes Stottern / Kaputter Roboter
-   Fügt Stottern am Anfang der Wörter hinzu: "Sch-Sch-Schrank",
-   "Ko-Ko-Koffer". Wörter kürzer als 3 Zeichen werden übersprungen. Wenn
+   Fügt Stottern am Anfang der Wörter hinzu: "Computer" → "C-c-c-Computer",
+   "Straße" → "St-st-Straße". Wörter kürzer als 3 Zeichen werden übersprungen. Wenn
    der zweite Buchstabe des Wortes ein Konsonant ist, werden die ersten
    beiden wiederholt (klingt natürlicher); wenn ein Vokal — nur der erste.
 

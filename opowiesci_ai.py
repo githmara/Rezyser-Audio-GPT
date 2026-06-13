@@ -261,7 +261,7 @@ def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
 # Ładowanie przepisów (prompty + parametry OpenAI) z YAML
 # =============================================================================
 # Anty-spaghetti: prompty systemowe trzymane w `dictionaries/<kod>/opowiesci/`,
-# nie hardkodowane w Pythonie (patrz `feedback_yaml_prompty.md`). Wzorzec
+# nie hardkodowane w Pythonie (patrz `reguly_architektury.md`). Wzorzec
 # kopiuje strukturę `dictionaries/<kod>/rezyser/`. Faza 5 zmigrowała PL;
 # pozostałe języki dochodzą RĘCZNIE per język (nie ma batch translatora dla
 # promptów — LLM halucynuje na nich).

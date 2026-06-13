@@ -9,7 +9,7 @@
 #  sem v3 hljóðtaggar ([whispers], [sighs]…) ofnir inn í línutexta, sem ná í raun
 #  TTS-hnútnum. Python (rezyser_ai.generuj_skrypt + renderuj_skrypt) vefur
 #  `mowca` í [..] og gerir "[Mælandi] texti" — skráarsniðið sem ElevenLabs-brúin
-#  les. Samtalslínur fara síðan í gegnum hljóðfræðivélina (core_poliglota.akcent_*);
+#  les. Samtalslínur fara síðan í gegnum hljóðfræðivélina (core_rezyser.zastosuj_akcenty_uniwersalne);
 #  hljóðtaggar eru hunsaðir við mælandagreiningu (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

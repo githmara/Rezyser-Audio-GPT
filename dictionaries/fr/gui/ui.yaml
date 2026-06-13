@@ -1035,7 +1035,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Quoi de neuf dans la version {nowa_wersja} :'
-  co_nowego_tresc: "Édition de maintenance après révision de la qualité de tous les packs linguistiques. Les étiquettes d'accents ont été unifiées (y compris finnois, italien et islandais — elles désignent maintenant la langue, pas le pays) et de petites fautes de frappe et incohérences dans les descriptions des règles et des messages adressés à l'IA ont été corrigées. Des informations sur la licence du projet (MIT) ont également été ajoutées. Aucun changement dans le fonctionnement du générateur d'histoires, de codes et du traducteur."
+  co_nowego_tresc: "Une version purement de maintenance clôturant trois petites entrées du patch précédent. Incohérence d'orthographe corrigée dans une étiquette d'interface en russe, commentaires techniques obsolètes mis à jour dans les fichiers de règles et exemples de chiffrement « Bégaiement » corrigés dans les descriptions et la documentation — dans plusieurs langues, ils montraient un doublement des lettres contrairement à la règle décrite (voyelle comme deuxième lettre → seule la première est répétée). Pas de changements dans le fonctionnement du générateur d'histoires, des chiffrements et du traducteur."
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
 opowiesci:

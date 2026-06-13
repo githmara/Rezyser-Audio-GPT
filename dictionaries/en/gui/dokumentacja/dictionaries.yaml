@@ -150,7 +150,7 @@ tresc:
 
     5. Strong Stuttering / Broken Robot
        Attaches stuttering at the beginning of words: "computer" →
-       "co-co-co-computer", "shower" → "sh-sh-shower". Words shorter than
+       "c-c-c-computer", "shower" → "sh-sh-shower". Words shorter than
        3 characters are skipped. If the second letter of a word is a
        consonant, the first two are repeated (sounds more natural); if a
        vowel — only the first one.

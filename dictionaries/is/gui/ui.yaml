@@ -1042,7 +1042,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Hvað er nýtt í útgáfu {nowa_wersja}:'
-  co_nowego_tresc: 'Útgáfa til að koma á reglu eftir gæðaskoðun á öllum tungumálapökkum. Samræmdar áherslumerkingar (m.a. finnska, ítalska og íslenska — nú nefna þau tungumál, ekki ríki) og leiðréttar smávægilegar stafsetningarvillur og ónákvæmni í lýsingum á reglum og skilaboðum til AI. Einnig bætt við upplýsingum um leyfi verkefnisins (MIT). Engar breytingar á virkni sögugjafa, dulritunar og þýðanda.'
+  co_nowego_tresc: 'Útgáfa eingöngu til að loka þremur smáatriðum frá fyrri plástri. Ósamræmi í stafsetningu í einu rússnesku viðmótsmerki hefur verið lagað, úreltar tæknilegar athugasemdir í regluskjölum hafa verið uppfærðar og dæmi um dulmál „Stam" í lýsingum og skjölum hafa verið leiðrétt — á nokkrum tungumálum sýndu þau tvöföldun stafa í mótsögn við lýsta reglu (sérhljóði sem annar stafur → aðeins fyrsti stafur er endurtekinn). Engar breytingar á virkni sögugjafa, dulmáls og þýðanda.'
   co_nowego_online_pl: Heill útgáfusíða (á netinu) er fáanleg á pólsku.
   btn_szczegoly_online: '&Upplýsingar á netinu'
 opowiesci:

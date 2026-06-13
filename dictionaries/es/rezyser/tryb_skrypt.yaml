@@ -10,7 +10,7 @@
 #  réplica, que sí llegan al nodo TTS. Python (rezyser_ai.generuj_skrypt +
 #  renderuj_skrypt) envuelve `mowca` en [..] y renderiza a "[Hablante] texto" —
 #  el formato de archivo que lee el puente de ElevenLabs. Luego las réplicas
-#  pasan por el motor fonético (core_poliglota.akcent_*); los audio-tags se
+#  pasan por el motor fonético (core_rezyser.zastosuj_akcenty_uniwersalne); los audio-tags se
 #  omiten en la detección de hablante (core_rezyser.AUDIO_TAGS).
 # -----------------------------------------------------------------------------
 id: skrypt

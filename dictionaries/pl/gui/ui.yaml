@@ -1045,7 +1045,7 @@ updater:
   # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
   co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
   co_nowego_tresc: |-
-    Wydanie porządkowe po przeglądzie jakości wszystkich paczek językowych. Ujednolicono etykiety akcentów (m.in. fińskie, włoską i islandzkie — teraz nazywają język, a nie państwo) oraz poprawiono drobne literówki i nieścisłości w opisach reguł i komunikatach kierowanych do AI. Dodano także informację o licencji projektu (MIT). Bez zmian w działaniu generatora opowieści, szyfrów i tłumacza.
+    Wydanie czysto porządkowe domykające trzy drobne pozycje z poprzedniego patcha. Naprawiono niespójność pisowni w jednym rosyjskim napisie interfejsu, zaktualizowano przeterminowane komentarze techniczne w plikach reguł oraz poprawiono przykłady szyfru „Jąkanie" w opisach i dokumentacji — w kilku językach pokazywały podwojenie liter sprzecznie z opisaną regułą (samogłoska jako druga litera → powtarzana jest tylko pierwsza). Bez zmian w działaniu generatora opowieści, szyfrów i tłumacza.
   co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
   btn_szczegoly_online:     "&Szczegóły online"
   # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)

@@ -7,7 +7,7 @@ etykieta: "Silne Jąkanie / Uszkodzony Robot"
 opis: |
   Dla każdego słowa o długości >= `min_dlugosc_slowa` losuje liczbę
   powtórzeń pierwszej (lub dwóch pierwszych) liter i dokleja je
-  z myślnikami: „komputer” → „ko-ko-ko-komputer”, „ja” → „ja”.
+  z myślnikami: „komputer” → „k-k-k-komputer”, „ja” → „ja”.
 
   Jeśli druga litera słowa jest spółgłoską (nie występuje w stringu
   `samogloski`), zająknięcie zawiera DWIE pierwsze litery – to daje

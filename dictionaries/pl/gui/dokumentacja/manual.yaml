@@ -374,7 +374,7 @@ tresc:
 
     - Samogłoskowiec (Wszystko dudni na „O") — każda samogłoska w tekście zamieniana jest na „o", z zachowaniem polskich zmiękczeń. „Dzień dobry" → „Dźoń doboro". Im dłuższy tekst, tym zabawniejszy efekt (a czytnik ekranu czyta to z pełnym przekonaniem).
 
-    - Silne Jąkanie / Uszkodzony Robot — dokleja zająknięcia na początku słów: „ko-ko-ko-komputer", „pr-pr-prysznic". Dla krótkich słów (mniej niż 3 znaki) algorytm je pomija. Jeśli druga litera słowa jest spółgłoską, powtarza dwie pierwsze litery (bardziej naturalny efekt); jeśli samogłoską — powtarza tylko pierwszą.
+    - Silne Jąkanie / Uszkodzony Robot — dokleja zająknięcia na początku słów: „k-k-k-komputer", „pr-pr-prysznic". Dla krótkich słów (mniej niż 3 znaki) algorytm je pomija. Jeśli druga litera słowa jest spółgłoską, powtarza dwie pierwsze litery (bardziej naturalny efekt); jeśli samogłoską — powtarza tylko pierwszą.
 
     - Szyfr Cezara (przesunięcie alfabetu PL) — klasyczny szyfr podstawieniowy: każda litera jest przesuwana o N pozycji w polskim alfabecie (AĄBCĆ…ZŹŻ, 35 znaków). Wartość przesunięcia wpisujesz w polu liczbowym „Przesunięcie szyfru Cezara (0 = losowe, zakres -35…35)". Jeśli wpiszesz 0 — aplikacja wylosuje przesunięcie w zakresie 1-34 i pokaże je w komunikacie po zakończeniu (żebyś mógł potem odszyfrować). Znaki spoza alfabetu (cyfry, interpunkcja, spacje) zostają bez zmian.
 

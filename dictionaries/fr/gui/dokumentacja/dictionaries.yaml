@@ -112,7 +112,7 @@ tresc:
 
     5. Bégaiement Intense / Robot Endommagé
        Ajoute des bégaiements en début de mot : « ordinateur » → « or-or-or-ordinateur »,
-       « douche » → « do-do-douche ». Les mots de moins de 3 caractères sont ignorés.
+       « stratégie » → « st-st-stratégie ». Les mots de moins de 3 caractères sont ignorés.
        Si la deuxième lettre du mot est une consonne, les deux premières sont répétées
        (cela sonne plus naturel) ; si c'est une voyelle — seule la première l'est.
 

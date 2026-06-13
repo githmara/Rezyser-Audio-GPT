@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktive Geschichten Modul (17.6.1 – Veröffentlichungsversion)
+Reżyser Audio GPT — Interaktive Geschichten Modul (17.6.2 – Veröffentlichungsversion)
 
 Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.
 
