@@ -701,8 +701,8 @@ poliglota:
   rb_ai: "AI Þýðandi (OpenAI gpt-4o – krefst API lykils, kostar inneign)"
   rb_ai_disabled: "AI Þýðandi (óvirkur – engin rétt skrá golden_key.env)"
   rb_ai_name: "AI Þýðandi Hamur"
-  rb_rezyser: "Režisér Hamur (ókeypis hljóðfræðireglur úr YAML)"
-  rb_rezyser_name: "Režisér ókeypis hamur"
+  rb_rezyser: "Leikstjórnarhamur (ókeypis hljóðfræðireglur úr YAML)"
+  rb_rezyser_name: "Leikstjórnarhamur (ókeypis)"
   rb_szyfrant: "Dulkóðunarhamur (textaleikir, handahófskennd hik)"
   rb_szyfrant_name: "Dulkóðunarhamur og textaleikir"
   # Panel AI
@@ -776,7 +776,7 @@ poliglota:
     Líkan klippti þýðingu kubbs (lengdarmörk svars náð) og tókst ekki að ljúka henni þrátt fyrir ítrekaða skiptingu í smærri hluta. Skiptu upprunaskjalinu í smærri bita og reyndu aftur.
   ai_ostrzezenie_iso_tytul: "Viðvörun tungumálamerkis"
   ai_ostrzezenie_iso: |-
-    Ekki tókst að sækja ISO kóða sjálfkrafa frá API. Sjálfgefið merki „pl" var notað. Ef vandamál koma upp með skjálesara, notaðu „Merkjaviðgerð" í Režisér Hamur.
+    Ekki tókst að sækja ISO kóða sjálfkrafa frá API. Sjálfgefið merki „pl" var notað. Ef vandamál koma upp með skjálesara, notaðu „Merkjaviðgerð" í Leikstjórnarham.
 
     Upplýsingar: {szczegoly}
   # Wyświetlanie błędu AI
