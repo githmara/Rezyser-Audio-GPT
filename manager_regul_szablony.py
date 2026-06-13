@@ -608,7 +608,15 @@ normalizuj_liczby: false
 usun_polskie_znaki: false
 skleja_pojedyncze_litery: false
 
-# Właściwe zamiany (ZŁOTA ZASADA: dwuznaki PRZED jednoznakami).
+# Właściwe zamiany. Lista jest aplikowana SEKWENCYJNIE (str.replace) — każda
+# reguła operuje na WYJŚCIU poprzedniej. Dwa wnioski:
+#   1. dwuznaki/trigramy PRZED jednoznakami (np. „ch" przed „c"), inaczej
+#      reguła jednoznaku rozbije zapis dwuznaku;
+#   2. uważaj na łańcuchy — jeśli reguła wprowadza znak, który PÓŹNIEJSZA
+#      reguła ma jako `wzor`, ten znak też zostanie zamieniony.
+# Pary leet poniżej (a→@, o→0) są od kolejności niezależne (rozłączne
+# jednoznaki); kolejność zaczyna mieć znaczenie dopiero przy wzorach
+# wieloznakowych. Dla wzorów regex dodaj `regex: true`.
 zamiany:
   - {{ wzor: "a", zamiana: "@" }}
   - {{ wzor: "o", zamiana: "0" }}
@@ -633,9 +641,15 @@ plik szyfru „czyste zamiany" w drzewie projektu.
 - `core_poliglota.py` — silnik fonetyczny. Szyfry typu „czyste zamiany"
   działają jak akcenty bez pipeline'u fonetycznego: tylko lista
   `zamiany:` jest aplikowana do tekstu.
-- Paczki wdrożone (stan 13.9): {inne_paczki} — mają każda po 6 szyfrów
-  (cezar, jakanie, odwracanie, samogloskowiec, typoglikemia, waz).
-  Wzorcuj się na tych plikach.
+- KRYTYCZNE o wzorcach: WSZYSTKIE 6 szyfrów wdrożonych w paczkach (cezar,
+  jakanie, odwracanie, samogloskowiec, typoglikemia, waz) to szyfry
+  ALGORYTMICZNE — mają pole `algorytm:` i NIE zawierają listy `zamiany:`.
+  NIE bierz ich za wzorzec struktury. Jedyne pliki w projekcie używające
+  formatu `kategoria` + lista `zamiany:` to AKCENTY (`akcenty/*.yaml`) —
+  i to one są Twoim wzorcem STRUKTURY dla tego szyfru.
+- Paczki wdrożone (stan 13.9): {inne_paczki}. Ich pliki `cezar.yaml`
+  przydają się wyłącznie jako wzorzec STYLU JĘZYKOWEGO metadanych
+  (etykieta/opis/komentarze natywne), nie struktury.
 - Paczka tego zadania: `dictionaries/{jezyk_bazowy}/`
   (język {natywna_baza}).
 
@@ -644,10 +658,16 @@ Utwórz plik `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml` —
 szyfr „czyste zamiany" o nazwie **{etykieta}**.
 
 # PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `dictionaries/<inna paczka>/szyfry/jakanie.yaml` lub `samogloskowiec.yaml`
-   — wzorzec stylu szyfru opartego na zamianach (komentarze natywne dla
-   tej paczki). Glob: `dictionaries/*/szyfry/*.yaml`.
-2. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — alfabet i diakrytyki
+1. `dictionaries/<inna paczka>/akcenty/<dowolny fonetyczny>.yaml` — wzorzec
+   STRUKTURY listy `zamiany:` (pary `wzor`→`zamiana`, kolejność dwuznaki
+   przed jednoznakami, opcjonalne `regex: true`). Akcent ma WŁĄCZONY
+   pipeline fonetyczny — w szyfrze zostawiasz go wyłączony (patrz niżej).
+   Glob: `dictionaries/*/akcenty/*.yaml`.
+2. `dictionaries/{jezyk_bazowy}/szyfry/cezar.yaml` — wzorzec STYLU
+   metadanych szyfru w paczce bazowej (etykieta/opis/komentarze natywne,
+   nagłówek pliku). NIE kopiuj jego ciała — to szyfr algorytmiczny
+   (`algorytm: cezar`), bez listy `zamiany:`.
+3. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — alfabet i diakrytyki
    paczki bazowej (przydatne, jeśli efekt szyfru ma działać też na
    literach z diakrytykami).
 
