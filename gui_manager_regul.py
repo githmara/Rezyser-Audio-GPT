@@ -904,8 +904,8 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         # Reprezentacja w ComboBox: etykieta widoczna ↔ id typu
         self._etykiety_typow: list[str] = []
         self._id_typow: list[str] = []
-        for tid, lbl, _ in mrs.LISTA_TYPOW:
-            self._etykiety_typow.append(lbl)
+        for tid in mrs.LISTA_TYPOW:
+            self._etykiety_typow.append(t(f"manager.typ.{tid}.etykieta"))
             self._id_typow.append(tid)
 
         self._cb_typ = wx.ComboBox(
@@ -1014,7 +1014,7 @@ class KreatorNowejRegulyDialog(wx.Dialog):
         typ = self._id_typow[idx]
 
         # Opis typu pod ComboBoxem
-        _, _, opis = mrs.LISTA_TYPOW[idx]
+        opis = t(f"manager.typ.{typ}.opis")
         self._lbl_opis_typu.SetValue(opis)
         self._lbl_opis_typu.SetName(opis)   # NVDA odczyta po sfocusowaniu
 

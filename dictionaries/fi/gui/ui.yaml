@@ -1016,7 +1016,7 @@ manager:
     postprodukcja: |-
       Jälkituotantomalli iteroi lukujen läpi (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `prompt_uzytkownika_szablon` (paikkamerkit {{naglowek}}, {{probka}}) ja `regex_podzial_rozdzialow`, joka on sovitettu natiivien lukujen nimiin (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
-      Manager luo `dictionaries/{id_pliku}/` alikansioilla `akcenty/`, `szyfry/`, `rezyser/`, `gui/` ja `opowiesci/`. Malli `podstawy.yaml` sisältää merkit `<UZUPEŁNIJ NATYWNIE>`. Agentti perustuu `de/podstawy.yaml` tai `it/podstawy.yaml`. UI-käännös (`gui/ui.yaml`) generoi `buduj_wielojezyczne_ui.py`. Moottori vaatii ≥1 tiedoston `rezyser/`, jotta kieli katsotaan täydelliseksi.
+      Manager luo `dictionaries/{id_pliku}/` alikansioilla `akcenty/`, `szyfry/`, `rezyser/`, `gui/` ja `opowiesci/`. Malli `podstawy.yaml` sisältää merkit `<FILL NATIVELY>`. Agentti perustuu `de/podstawy.yaml` tai `it/podstawy.yaml`. UI-käännös (`gui/ui.yaml`) generoi `buduj_wielojezyczne_ui.py`. Moottori vaatii ≥1 tiedoston `rezyser/`, jotta kieli katsotaan täydelliseksi.
     szyfr_algorytm: |-
       ALGORYTMISEN salauksen — vaatii funktion tiedostossa `core_poliglota.py` YAML-tiedoston vieressä. Manager EI luo mitään tiedostoa; agentti lisää funktion `_algorytm_*` + merkinnän karttaan `_ALGORYTMY` + YAML-tiedoston `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Tämä on AINOA sääntötyyppi, joka vaatii lähdekoodin muokkausta — asennetusta sovelluksesta (ilman arkistoa) se on mahdotonta, tarvitaan lähdeversio.
     jezyk_agenta: |-
@@ -1025,6 +1025,43 @@ manager:
       Työnkulku: kopioi alla oleva kehotus AI-agentille, jolla on pääsy tähän arkistoon (Claude Code, Cursor, Aider). Agentti avaa viitetiedostot, luo/täydentää tiedoston ja tarkistaa sen. Muutokset `akcenty/`, `szyfry/`, `rezyser/` havaitaan sovelluksen uudelleenkäynnistyksen jälkeen.
     srodowisko_frozen: |-
       Käytät asennettua sovellusta (ilman arkiston lähteitä). Alla oleva kehotus olettaa kehittäjän arkistosta ja AI-agentin — täydellinen agenttityönkulku vaatii lähdeversion. Pelkästä sovelluksesta voit kuitenkin manuaalisesti täydentää luodun YAML-mallin (tiedostot `dictionaries/` sijaitsevat ohjelman vieressä ja ovat muokattavissa); muutokset näkyvät sovelluksen uudelleenkäynnistyksen jälkeen.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
+# -----------------------------------------------------------------------------
+  typ:
+    akcent:
+      etykieta: "Foneettinen aksentti (kielirajat ylittävä, esim. ruotsi, suomi)"
+      opis: |-
+        Tiedosto <jezyk>/akcenty/<id>.yaml, jossa `kategoria: akcent`. Peruspaketin teksti (jezyk_bazowy) translitteroidaan kohdesynteesin ääntämiseen (iso != jezyk_bazowy). Manager luo mallin + kehotteen AI-agentille, joka suunnittelee listan `zamiany:`.
+    akcent_oczyszczenie:
+      etykieta: "Puhdistusaksentti (esikäsittelijä, ilman fonetiikkaa)"
+      opis: |-
+        Tiedosto <jezyk>/akcenty/<id>.yaml, jossa `kategoria: oczyszczenie`. Puhdistaa tekstin TTS:lle (poistaa sekavuuden, normalisoi numerot) ILMAN fonetiikan muutosta. iso == jezyk_bazowy. Manager luo mallin (valmis malli) + kehotteen etiketin/kuvauksen kääntämiseksi äidinkielelle.
+    akcent_naprawiacz:
+      etykieta: "Tunnisteiden korjaaja (injektoi ISO:n HTML/DOCX:ään)"
+      opis: |-
+        Tiedosto <jezyk>/akcenty/<id>.yaml, jossa `kategoria: naprawiacz`. EI muuta sisältöä — injektoi kielen ISO-koodin tulostiedostoihin (<html lang>, <w:lang>). iso tyhjä (käyttäjä antaa koodin GUI:ssa). Manager luo mallin + kehotteen etiketin/kuvauksen kääntämiseksi äidinkielelle.
+    szyfr_zamiany:
+      etykieta: 'Uusi salaus tyyppiä "puhtaat muutokset"'
+      opis: |-
+        Tiedosto <jezyk>/szyfry/. Manager luo mallin + kehotteen AI:lle, joka kääntää etiketit/kommentit paketin äidinkielelle ja generoi parilistan malli→muutos.
+    tryb_rezysera:
+      etykieta: "Uusi Ohjaajan tila (luova tila)"
+      opis: |-
+        Tiedosto <jezyk>/rezyser/tryb_*.yaml. Malli perustuu Äänikirjatilaan + kehotus AI:lle kääntämään prompt_systemowy, przypomnienie_uzytkownika ja slowa_wyzwalajace peruspaketin äidinkielelle.
+    postprodukcja:
+      etykieta: "Uusi jälkituotanto (iterointi lukujen mukaan)"
+      opis: |-
+        Tiedosto <jezyk>/rezyser/postprod_*.yaml. Malli, jossa kentät kehotteelle, regexille ja iterointiparametreille + kehotus AI:lle generoi äidinkielisen prompt_systemowy ja regex_podzial_rozdzialow.
+    jezyk_bazowy:
+      etykieta: "Uusi peruskieli (esim. en, de, fr)"
+      opis: |-
+        Luo kansion <jezyk>/ podstawy.yaml ja alikansiot akcenty/, szyfry/, rezyser/, gui/. Foneettiset tiedot generoi AI kehotteesta; UI-käännös – buduj_wielojezyczne_ui.py; Ohjaajan tilat kopioidaan pl/rezyser/ (vaaditaan ≥1 tiedosto tryb_*.yaml, jotta moottori tunnistaa kielen täydelliseksi).
+    szyfr_algorytm:
+      etykieta: "Uusi algoritminen salaus (VAATII OHJELMOIJAA)"
+      opis: |-
+        Algoritmit (esim. kääntäminen, typoglykemia) vaativat toimintoja core_poliglota.py:ssä. Manager antaa vain kehotteen AI:lle tehtävän kuvauksella.
 
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)

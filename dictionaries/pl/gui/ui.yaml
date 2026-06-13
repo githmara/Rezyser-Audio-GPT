@@ -1044,7 +1044,7 @@ manager:
     postprodukcja: |-
       Szablon postprodukcji iteruje po rozdziałach (paczka `{jezyk_bazowy}/`). Agent zaprojektuje `prompt_systemowy`, `prompt_uzytkownika_szablon` (placeholdery {{naglowek}}, {{probka}}) i `regex_podzial_rozdzialow` dopasowany do natywnych nazw rozdziałów (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
-      Manager utworzy `dictionaries/{id_pliku}/` z podfolderami `akcenty/`, `szyfry/`, `rezyser/`, `gui/` i `opowiesci/`. Szablon `podstawy.yaml` ma markery `<UZUPEŁNIJ NATYWNIE>`. Agent wzoruje się na `de/podstawy.yaml` lub `it/podstawy.yaml`. Tłumaczenie UI (`gui/ui.yaml`) generuje `buduj_wielojezyczne_ui.py`. Silnik wymaga ≥1 pliku w `rezyser/`, by uznać język za kompletny.
+      Manager utworzy `dictionaries/{id_pliku}/` z podfolderami `akcenty/`, `szyfry/`, `rezyser/`, `gui/` i `opowiesci/`. Szablon `podstawy.yaml` ma markery `<FILL NATIVELY>`. Agent wzoruje się na `de/podstawy.yaml` lub `it/podstawy.yaml`. Tłumaczenie UI (`gui/ui.yaml`) generuje `buduj_wielojezyczne_ui.py`. Silnik wymaga ≥1 pliku w `rezyser/`, by uznać język za kompletny.
     szyfr_algorytm: |-
       Szyfr ALGORYTMICZNY — wymaga funkcji w `core_poliglota.py` obok pliku YAML. Manager NIE tworzy żadnego pliku; agent doda funkcję `_algorytm_*` + wpis w mapie `_ALGORYTMY` + plik YAML w `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. To JEDYNY typ reguły wymagający edycji kodu źródłowego — z zainstalowanej aplikacji (bez repozytorium) jest niewykonalny, potrzebna wersja źródłowa.
     jezyk_agenta: |-
@@ -1053,6 +1053,43 @@ manager:
       Workflow: skopiuj poniższy prompt do agenta AI z dostępem do tego repozytorium (Claude Code, Cursor, Aider). Agent otworzy pliki referencyjne, utworzy/uzupełni plik i zweryfikuje go. Zmiany w `akcenty/`, `szyfry/`, `rezyser/` są wykrywane po restarcie aplikacji.
     srodowisko_frozen: |-
       Korzystasz z zainstalowanej aplikacji (bez źródeł repozytorium). Poniższy prompt zakłada dewelopera z repozytorium i agentem AI — pełny workflow agentowy wymaga wersji źródłowej. Z samej aplikacji możesz jednak ręcznie uzupełnić wygenerowany szablon YAML (pliki `dictionaries/` leżą obok programu i są edytowalne); zmiany zobaczysz po restarcie aplikacji.
+  # manager_regul_szablony.LISTA_TYPOW — etykieta (ComboBox kreatora) + opis
+  # (TextCtrl pod ComboBoxem) każdego typu reguły. <jezyk>/<id> w opisach to
+  # ilustracyjne ścieżki (nie placeholdery i18n); identyfikatory w `backtikach`
+  # i nazwy plików (.py/.yaml) zostają nietłumaczone.
+  typ:
+    akcent:
+      etykieta: "Akcent fonetyczny (cross-language, np. szwedzki, fiński)"
+      opis: |-
+        Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: akcent`. Tekst paczki bazowej (jezyk_bazowy) jest transliterowany pod wymowę docelowego syntezatora (iso != jezyk_bazowy). Manager tworzy szablon + prompt dla agenta AI, który zaprojektuje listę `zamiany:`.
+    akcent_oczyszczenie:
+      etykieta: "Akcent czyszczący (preprocessor, bez fonetyki)"
+      opis: |-
+        Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: oczyszczenie`. Czyści tekst pod TTS (usuwa bełkot, normalizuje liczby) BEZ zmiany fonetyki. iso == jezyk_bazowy. Manager tworzy szablon (gotowy wzorzec) + prompt do tłumaczenia etykiety/opisu na natywny.
+    akcent_naprawiacz:
+      etykieta: "Naprawiacz tagów (wstrzykuje ISO do HTML/DOCX)"
+      opis: |-
+        Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: naprawiacz`. NIE modyfikuje treści — wstrzykuje kod ISO języka do plików wynikowych (<html lang>, <w:lang>). iso pusty (kod podaje user w GUI). Manager tworzy szablon + prompt do tłumaczenia etykiety/opisu na natywny.
+    szyfr_zamiany:
+      etykieta: 'Nowy szyfr typu „czyste zamiany"'
+      opis: |-
+        Plik w <jezyk>/szyfry/. Manager tworzy szablon + prompt dla AI, który przetłumaczy etykiety/komentarze na język natywny paczki i wygeneruje listę par wzor→zamiana.
+    tryb_rezysera:
+      etykieta: "Nowy tryb Reżysera (tryb twórczy)"
+      opis: |-
+        Plik w <jezyk>/rezyser/tryb_*.yaml. Szablon oparty o tryb Audiobook + prompt dla AI tłumaczący prompt_systemowy, przypomnienie_uzytkownika i slowa_wyzwalajace na język natywny paczki bazowej.
+    postprodukcja:
+      etykieta: "Nowa postprodukcja (iteracja po rozdziałach)"
+      opis: |-
+        Plik w <jezyk>/rezyser/postprod_*.yaml. Szablon z polami na prompt, regex i parametry iteracji + prompt dla AI generujący natywny prompt_systemowy i regex_podzial_rozdzialow.
+    jezyk_bazowy:
+      etykieta: "Nowy język bazowy (np. en, de, fr)"
+      opis: |-
+        Tworzy folder <jezyk>/ z podstawy.yaml i podfolderami akcenty/, szyfry/, rezyser/, gui/. Dane fonetyczne generuje AI z promptu; tłumaczenie UI – buduj_wielojezyczne_ui.py; tryby Reżysera kopiuje się z pl/rezyser/ (wymagany ≥1 plik tryb_*.yaml, żeby silnik uznał język za kompletny).
+    szyfr_algorytm:
+      etykieta: "Nowy szyfr algorytmiczny (WYMAGA PROGRAMISTY)"
+      opis: |-
+        Algorytmy (np. odwracanie, typoglikemia) wymagają funkcji w core_poliglota.py. Manager daje tylko prompt dla AI z opisem zadania.
 
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)

@@ -79,69 +79,20 @@ TYP_SZYFR_ALGORYTM       = "szyfr_algorytm"
 TYP_TRYB_REZYSERA        = "tryb_rezysera"
 TYP_POSTPRODUKCJA        = "postprodukcja"
 
-# Metadane prezentowane w ComboBox-ie kreatora (kolejność = priorytet A11y)
-LISTA_TYPOW: list[tuple[str, str, str]] = [
-    # (id, etykieta, krótki opis)
-    (
-        TYP_AKCENT,
-        "Akcent fonetyczny (cross-language, np. szwedzki, fiński)",
-        "Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: akcent`. Tekst paczki "
-        "bazowej (jezyk_bazowy) jest transliterowany pod wymowę docelowego "
-        "syntezatora (iso != jezyk_bazowy). Manager tworzy szablon + prompt "
-        "dla agenta AI, który zaprojektuje listę `zamiany:`.",
-    ),
-    (
-        TYP_AKCENT_OCZYSZCZENIE,
-        "Akcent czyszczący (preprocessor, bez fonetyki)",
-        "Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: oczyszczenie`. "
-        "Czyści tekst pod TTS (usuwa bełkot, normalizuje liczby) BEZ zmiany "
-        "fonetyki. iso == jezyk_bazowy. Manager tworzy szablon (gotowy "
-        "wzorzec) + prompt do tłumaczenia etykiety/opisu na natywny.",
-    ),
-    (
-        TYP_AKCENT_NAPRAWIACZ,
-        "Naprawiacz tagów (wstrzykuje ISO do HTML/DOCX)",
-        "Plik w <jezyk>/akcenty/<id>.yaml z `kategoria: naprawiacz`. NIE "
-        "modyfikuje treści — wstrzykuje kod ISO języka do plików wynikowych "
-        "(<html lang>, <w:lang>). iso pusty (kod podaje user w GUI). Manager "
-        "tworzy szablon + prompt do tłumaczenia etykiety/opisu na natywny.",
-    ),
-    (
-        TYP_SZYFR_ZAMIANY,
-        'Nowy szyfr typu „czyste zamiany"',
-        "Plik w <jezyk>/szyfry/. Manager tworzy szablon + prompt dla AI, "
-        "który przetłumaczy etykiety/komentarze na język natywny paczki "
-        "i wygeneruje listę par wzor→zamiana.",
-    ),
-    (
-        TYP_TRYB_REZYSERA,
-        "Nowy tryb Reżysera (tryb twórczy)",
-        "Plik w <jezyk>/rezyser/tryb_*.yaml. Szablon oparty o tryb "
-        "Audiobook + prompt dla AI tłumaczący prompt_systemowy, "
-        "przypomnienie_uzytkownika i slowa_wyzwalajace na język natywny "
-        "paczki bazowej.",
-    ),
-    (
-        TYP_POSTPRODUKCJA,
-        "Nowa postprodukcja (iteracja po rozdziałach)",
-        "Plik w <jezyk>/rezyser/postprod_*.yaml. Szablon z polami na "
-        "prompt, regex i parametry iteracji + prompt dla AI generujący "
-        "natywny prompt_systemowy i regex_podzial_rozdzialow.",
-    ),
-    (
-        TYP_JEZYK_BAZOWY,
-        "Nowy język bazowy (np. en, de, fr)",
-        "Tworzy folder <jezyk>/ z podstawy.yaml i podfolderami akcenty/, szyfry/, "
-        "rezyser/, gui/. Dane fonetyczne generuje AI z promptu; tłumaczenie UI – "
-        "buduj_wielojezyczne_ui.py; tryby Reżysera kopiuje się z pl/rezyser/ "
-        "(wymagany ≥1 plik tryb_*.yaml, żeby silnik uznał język za kompletny).",
-    ),
-    (
-        TYP_SZYFR_ALGORYTM,
-        "Nowy szyfr algorytmiczny (WYMAGA PROGRAMISTY)",
-        "Algorytmy (np. odwracanie, typoglikemia) wymagają funkcji w "
-        "core_poliglota.py. Manager daje tylko prompt dla AI z opisem zadania.",
-    ),
+# Kolejność typów w ComboBox-ie kreatora (= priorytet A11y). Etykiety i opisy
+# NIE są tu hardkodowane — rezydują w i18n pod kluczami `manager.typ.<id>.etykieta`
+# i `manager.typ.<id>.opis` (patrz dictionaries/<kod>/gui/ui.yaml). GUI rozwija je
+# przez `t()` w momencie budowy dialogu, gdy język jest już załadowany (lista jest
+# stałą modułową, więc `t()` na poziomie importu byłoby przedwczesne).
+LISTA_TYPOW: list[str] = [
+    TYP_AKCENT,
+    TYP_AKCENT_OCZYSZCZENIE,
+    TYP_AKCENT_NAPRAWIACZ,
+    TYP_SZYFR_ZAMIANY,
+    TYP_TRYB_REZYSERA,
+    TYP_POSTPRODUKCJA,
+    TYP_JEZYK_BAZOWY,
+    TYP_SZYFR_ALGORYTM,
 ]
 
 

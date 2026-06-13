@@ -1018,7 +1018,7 @@ manager:
     postprodukcja: |-
       Шаблон постпродакшена итерации по главам (пакет `{jezyk_bazowy}/`). Агент разработает `prompt_systemowy`, `prompt_uzytkownika_szablon` (плейсхолдеры {{naglowek}}, {{probka}}) и `regex_podzial_rozdzialow` подстроенный под родные названия глав (Глава/Capitolo/Kapitel/Chapter…).
     jezyk_bazowy: |-
-      Менеджер создаст `dictionaries/{id_pliku}/` с подкаталогами `akcenty/`, `szyfry/`, `rezyser/`, `gui/` и `opowiesci/`. Шаблон `podstawy.yaml` имеет маркеры `<UZUPEŁNIJ NATYWNIE>`. Агент ориентируется на `de/podstawy.yaml` или `it/podstawy.yaml`. Перевод UI (`gui/ui.yaml`) генерирует `buduj_wielojezyczne_ui.py`. Движок требует ≥1 файла в `rezyser/`, чтобы считать язык полным.
+      Менеджер создаст `dictionaries/{id_pliku}/` с подкаталогами `akcenty/`, `szyfry/`, `rezyser/`, `gui/` и `opowiesci/`. Шаблон `podstawy.yaml` имеет маркеры `<FILL NATIVELY>`. Агент ориентируется на `de/podstawy.yaml` или `it/podstawy.yaml`. Перевод UI (`gui/ui.yaml`) генерирует `buduj_wielojezyczne_ui.py`. Движок требует ≥1 файла в `rezyser/`, чтобы считать язык полным.
     szyfr_algorytm: |-
       АЛГОРИТМИЧЕСКИЙ шифр — требует функции в `core_poliglota.py` рядом с файлом YAML. Менеджер НЕ создает никакого файла; агент добавит функцию `_algorytm_*` + запись в карте `_ALGORYTMY` + файл YAML в `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Это ЕДИНСТВЕННЫЙ тип правила, требующий редактирования исходного кода — из установленного приложения (без репозитория) невыполнимо, нужна исходная версия.
     jezyk_agenta: |-
@@ -1027,6 +1027,43 @@ manager:
       Рабочий процесс: скопируйте приведенную ниже подсказку в AI-агента с доступом к этому репозиторию (Claude Code, Cursor, Aider). Агент откроет справочные файлы, создаст/дополнит файл и проверит его. Изменения в `akcenty/`, `szyfry/`, `rezyser/` обнаруживаются после перезапуска приложения.
     srodowisko_frozen: |-
       Вы используете установленное приложение (без исходников репозитория). Приведенная ниже подсказка предполагает разработчика с репозиторием и AI-агентом — полный агентный рабочий процесс требует исходной версии. Однако из самого приложения вы можете вручную дополнить сгенерированный шаблон YAML (файлы `dictionaries/` лежат рядом с программой и редактируемы); изменения увидите после перезапуска приложения.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
+# -----------------------------------------------------------------------------
+  typ:
+    akcent:
+      etykieta: "Фонетическое ударение (межъязыковое, например, шведский, финский)"
+      opis: |-
+        Файл в <jezyk>/akcenty/<id>.yaml с `kategoria: akcent`. Текст базового пакета (jezyk_bazowy) транслитерируется под произношение целевого синтезатора (iso != jezyk_bazowy). Менеджер создает шаблон + подсказку для агента AI, который разработает список `zamiany:`.
+    akcent_oczyszczenie:
+      etykieta: "Очистка акцента (предобработка, без фонетики)"
+      opis: |-
+        Файл в <jezyk>/akcenty/<id>.yaml с `kategoria: oczyszczenie`. Очищает текст для TTS (удаляет шум, нормализует числа) БЕЗ изменения фонетики. iso == jezyk_bazowy. Менеджер создает шаблон (готовый образец) + подсказку для перевода метки/описания на родной язык.
+    akcent_naprawiacz:
+      etykieta: "Исправитель тегов (вставляет ISO в HTML/DOCX)"
+      opis: |-
+        Файл в <jezyk>/akcenty/<id>.yaml с `kategoria: naprawiacz`. НЕ изменяет содержимое — вставляет код ISO языка в выходные файлы (<html lang>, <w:lang>). iso пустой (код указывает пользователь в GUI). Менеджер создает шаблон + подсказку для перевода метки/описания на родной язык.
+    szyfr_zamiany:
+      etykieta: 'Новый шифр типа «чистые замены»'
+      opis: |-
+        Файл в <jezyk>/szyfry/. Менеджер создает шаблон + подсказку для AI, который переведет метки/комментарии на родной язык пакета и сгенерирует список пар wzor→zamiana.
+    tryb_rezysera:
+      etykieta: "Новый режим Режиссера (творческий режим)"
+      opis: |-
+        Файл в <jezyk>/rezyser/tryb_*.yaml. Шаблон основан на режиме Audiobook + подсказка для AI, переводящая prompt_systemowy, przypomnienie_uzytkownika и slowa_wyzwalajace на родной язык базового пакета.
+    postprodukcja:
+      etykieta: "Новая постпродакшн (итерация по главам)"
+      opis: |-
+        Файл в <jezyk>/rezyser/postprod_*.yaml. Шаблон с полями для подсказки, regex и параметров итерации + подсказка для AI, генерирующая родной prompt_systemowy и regex_podzial_rozdzialow.
+    jezyk_bazowy:
+      etykieta: "Новый базовый язык (например, en, de, fr)"
+      opis: |-
+        Создает папку <jezyk>/ с podstawy.yaml и подкаталогами akcenty/, szyfry/, rezyser/, gui/. Фонетические данные генерирует AI из подсказки; перевод UI – buduj_wielojezyczne_ui.py; режимы Режиссера копируются из pl/rezyser/ (требуется ≥1 файл tryb_*.yaml, чтобы движок признал язык полным).
+    szyfr_algorytm:
+      etykieta: "Новый алгоритмический шифр (ТРЕБУЕТ ПРОГРАММИСТА)"
+      opis: |-
+        Алгоритмы (например, реверсирование, типогликемия) требуют функций в core_poliglota.py. Менеджер дает только подсказку для AI с описанием задачи.
 
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)

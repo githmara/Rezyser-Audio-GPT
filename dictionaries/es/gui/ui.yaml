@@ -1017,7 +1017,7 @@ manager:
     postprodukcja: |-
       La plantilla de postproducción itera por capítulos (paquete `{jezyk_bazowy}/`). El agente diseñará `prompt_systemowy`, `prompt_uzytkownika_szablon` (marcadores de posición {{naglowek}}, {{probka}}) y `regex_podzial_rozdzialow` adaptado a los nombres nativos de los capítulos (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
-      El gestor creará `dictionaries/{id_pliku}/` con subcarpetas `akcenty/`, `szyfry/`, `rezyser/`, `gui/` y `opowiesci/`. La plantilla `podstawy.yaml` tiene marcadores `<UZUPEŁNIJ NATYWNIE>`. El agente se basa en `de/podstawy.yaml` o `it/podstawy.yaml`. La traducción de la interfaz de usuario (`gui/ui.yaml`) genera `buduj_wielojezyczne_ui.py`. El motor requiere ≥1 archivo en `rezyser/` para considerar el idioma como completo.
+      El gestor creará `dictionaries/{id_pliku}/` con subcarpetas `akcenty/`, `szyfry/`, `rezyser/`, `gui/` y `opowiesci/`. La plantilla `podstawy.yaml` tiene marcadores `<FILL NATIVELY>`. El agente se basa en `de/podstawy.yaml` o `it/podstawy.yaml`. La traducción de la interfaz de usuario (`gui/ui.yaml`) genera `buduj_wielojezyczne_ui.py`. El motor requiere ≥1 archivo en `rezyser/` para considerar el idioma como completo.
     szyfr_algorytm: |-
       Cifrado ALGORÍTMICO: requiere una función en `core_poliglota.py` junto al archivo YAML. El gestor NO crea ningún archivo; el agente añadirá la función `_algorytm_*` + entrada en el mapa `_ALGORYTMY` + archivo YAML en `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Este es el ÚNICO tipo de regla que requiere edición del código fuente: desde la aplicación instalada (sin repositorio) es inviable, se necesita la versión de código fuente.
     jezyk_agenta: |-
@@ -1026,6 +1026,43 @@ manager:
       Flujo de trabajo: copia el siguiente prompt al agente de IA con acceso a este repositorio (Claude Code, Cursor, Aider). El agente abrirá archivos de referencia, creará/completará el archivo y lo verificará. Los cambios en `akcenty/`, `szyfry/`, `rezyser/` se detectan al reiniciar la aplicación.
     srodowisko_frozen: |-
       Estás utilizando la aplicación instalada (sin fuentes del repositorio). El siguiente prompt asume un desarrollador con el repositorio y un agente de IA: el flujo de trabajo completo del agente requiere la versión de código fuente. Sin embargo, desde la aplicación puedes completar manualmente la plantilla YAML generada (los archivos `dictionaries/` están junto al programa y son editables); verás los cambios al reiniciar la aplicación.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
+# -----------------------------------------------------------------------------
+  typ:
+    akcent:
+      etykieta: "Acento fonético (cross-language, por ejemplo, sueco, finlandés)"
+      opis: |-
+        Archivo en <jezyk>/akcenty/<id>.yaml con `kategoria: akcent`. El texto del paquete base (jezyk_bazowy) se translitera según la pronunciación del sintetizador de destino (iso != jezyk_bazowy). El gestor crea una plantilla + prompt para el agente de IA, que diseñará la lista `zamiany:`.
+    akcent_oczyszczenie:
+      etykieta: "Acento limpiador (preprocesador, sin fonética)"
+      opis: |-
+        Archivo en <jezyk>/akcenty/<id>.yaml con `kategoria: oczyszczenie`. Limpia el texto para TTS (elimina el galimatías, normaliza los números) SIN cambiar la fonética. iso == jezyk_bazowy. El gestor crea una plantilla (patrón listo) + prompt para traducir la etiqueta/descripción al idioma nativo.
+    akcent_naprawiacz:
+      etykieta: "Reparador de etiquetas (inyecta ISO en HTML/DOCX)"
+      opis: |-
+        Archivo en <jezyk>/akcenty/<id>.yaml con `kategoria: naprawiacz`. NO modifica el contenido — inyecta el código ISO del idioma en los archivos de salida (<html lang>, <w:lang>). iso vacío (el código lo proporciona el usuario en la GUI). El gestor crea una plantilla + prompt para traducir la etiqueta/descripción al idioma nativo.
+    szyfr_zamiany:
+      etykieta: 'Nuevo cifrado tipo "cambios puros"'
+      opis: |-
+        Archivo en <jezyk>/szyfry/. El gestor crea una plantilla + prompt para la IA, que traducirá las etiquetas/comentarios al idioma nativo del paquete y generará una lista de pares patrón→cambio.
+    tryb_rezysera:
+      etykieta: "Nuevo modo Director (modo creativo)"
+      opis: |-
+        Archivo en <jezyk>/rezyser/tryb_*.yaml. Plantilla basada en el modo Audiobook + prompt para la IA que traduce prompt_systemowy, przypomnienie_uzytkownika y slowa_wyzwalajace al idioma nativo del paquete base.
+    postprodukcja:
+      etykieta: "Nueva postproducción (iteración por capítulos)"
+      opis: |-
+        Archivo en <jezyk>/rezyser/postprod_*.yaml. Plantilla con campos para prompt, regex y parámetros de iteración + prompt para la IA que genera el prompt_systemowy nativo y regex_podzial_rozdzialow.
+    jezyk_bazowy:
+      etykieta: "Nuevo idioma base (por ejemplo, en, de, fr)"
+      opis: |-
+        Crea la carpeta <jezyk>/ con podstawy.yaml y subcarpetas akcenty/, szyfry/, rezyser/, gui/. Los datos fonéticos los genera la IA a partir del prompt; la traducción de la UI – buduj_wielojezyczne_ui.py; los modos del Director se copian de pl/rezyser/ (se requiere ≥1 archivo tryb_*.yaml para que el motor considere el idioma como completo).
+    szyfr_algorytm:
+      etykieta: "Nuevo cifrado algorítmico (REQUIERE PROGRAMADOR)"
+      opis: |-
+        Los algoritmos (por ejemplo, inversión, tipoglicemia) requieren funciones en core_poliglota.py. El gestor solo proporciona un prompt para la IA con la descripción de la tarea.
 
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)

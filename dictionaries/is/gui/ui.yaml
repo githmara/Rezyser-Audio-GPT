@@ -1018,7 +1018,7 @@ manager:
     postprodukcja: |-
       Eftirvinnslusniðmát endurtekur eftir köflum (pakki `{jezyk_bazowy}/`). Umboðsmaður mun hanna `prompt_systemowy`, `prompt_uzytkownika_szablon` (staðgenglar {{naglowek}}, {{probka}}) og `regex_podzial_rozdzialow` sem passar við innfædd nöfn kafla (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
-      Stjórnandi mun búa til `dictionaries/{id_pliku}/` með undirmöppum `akcenty/`, `szyfry/`, `rezyser/`, `gui/` og `opowiesci/`. Sniðmát `podstawy.yaml` hefur merki `<UZUPEŁNIJ NATYWNIE>`. Umboðsmaðurinn tekur fyrirmynd af `de/podstawy.yaml` eða `it/podstawy.yaml`. Þýðing á notendaviðmóti (`gui/ui.yaml`) býr til `buduj_wielojezyczne_ui.py`. Vél þarf ≥1 skrá í `rezyser/` til að telja tungumálið fullkomið.
+      Stjórnandi mun búa til `dictionaries/{id_pliku}/` með undirmöppum `akcenty/`, `szyfry/`, `rezyser/`, `gui/` og `opowiesci/`. Sniðmát `podstawy.yaml` hefur merki `<FILL NATIVELY>`. Umboðsmaðurinn tekur fyrirmynd af `de/podstawy.yaml` eða `it/podstawy.yaml`. Þýðing á notendaviðmóti (`gui/ui.yaml`) býr til `buduj_wielojezyczne_ui.py`. Vél þarf ≥1 skrá í `rezyser/` til að telja tungumálið fullkomið.
     szyfr_algorytm: |-
       ALGORITMISK dulkóðun — krefst aðgerðar í `core_poliglota.py` við hlið YAML skrárinnar. Stjórnandi býr ekki til neina skrá; umboðsmaður bætir við aðgerð `_algorytm_*` + færslu í kortið `_ALGORYTMY` + YAML skrá í `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Þetta er EINNIG tegund reglu sem krefst breytinga á frumkóða — frá uppsettum forriti (án geymslu) er það óframkvæmanlegt, þarf frumkóðaversjón.
     jezyk_agenta: |-
@@ -1027,6 +1027,43 @@ manager:
       Vinnuflæði: afritaðu promptið hér að neðan til AI umboðsmanns með aðgang að þessu geymslu (Claude Code, Cursor, Aider). Umboðsmaðurinn opnar tilvísunarskrár, býr til/uppfærir skrá og sannreynir hana. Breytingar í `akcenty/`, `szyfry/`, `rezyser/` eru greindar eftir endurræsingu forritsins.
     srodowisko_frozen: |-
       Þú notar uppsett forrit (án geymslu). Promptið hér að neðan gerir ráð fyrir þróunaraðila með geymslu og AI umboðsmanni — fullkomið umboðsmannavinnuflæði krefst frumkóðaversjónar. Frá forritinu sjálfu geturðu þó handvirkt fyllt út búið YAML sniðmát (skrár `dictionaries/` liggja við hlið forritsins og eru breytanlegar); breytingar sjást eftir endurræsingu forritsins.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
+# -----------------------------------------------------------------------------
+  typ:
+    akcent:
+      etykieta: "Hljóðfræðilegur hreimur (milli tungumála, t.d. sænska, finnska)"
+      opis: |-
+        Skrá í <jezyk>/akcenty/<id>.yaml með `kategoria: akcent`. Texti grunnpakka (jezyk_bazowy) er umritaður fyrir framburð markraddgerðar (iso != jezyk_bazowy). Stjórnandi býr til sniðmát + prompt fyrir AI umboðsmann, sem mun hanna lista `zamiany:`.
+    akcent_oczyszczenie:
+      etykieta: "Hreinsunarhreimur (forvinnsla, án hljóðfræði)"
+      opis: |-
+        Skrá í <jezyk>/akcenty/<id>.yaml með `kategoria: oczyszczenie`. Hreinsar texta fyrir TTS (fjarlægir bull, eðlilegar tölur) ÁN þess að breyta hljóðfræði. iso == jezyk_bazowy. Stjórnandi býr til sniðmát (tilbúið mynstur) + prompt til að þýða merki/lýsingu á móðurmálið.
+    akcent_naprawiacz:
+      etykieta: "Merkingarviðgerð (sprautar ISO í HTML/DOCX)"
+      opis: |-
+        Skrá í <jezyk>/akcenty/<id>.yaml með `kategoria: naprawiacz`. BREYTIR EKKI innihaldi — sprautar ISO tungumálakóða í úttaksskrár (<html lang>, <w:lang>). iso er tómt (notandi gefur kóða í GUI). Stjórnandi býr til sniðmát + prompt til að þýða merki/lýsingu á móðurmálið.
+    szyfr_zamiany:
+      etykieta: 'Nýr dulmál af gerðinni „hreinar skiptingar"'
+      opis: |-
+        Skrá í <jezyk>/szyfry/. Stjórnandi býr til sniðmát + prompt fyrir AI, sem mun þýða merki/athugasemdir á móðurmál pakkans og búa til lista af mynstur→skipting.
+    tryb_rezysera:
+      etykieta: "Nýr Leikstjórastilling (sköpunarstilling)"
+      opis: |-
+        Skrá í <jezyk>/rezyser/tryb_*.yaml. Sniðmát byggt á Hljóðbókastillingu + prompt fyrir AI sem þýðir prompt_systemowy, przypomnienie_uzytkownika og slowa_wyzwalajace á móðurmál grunnpakkans.
+    postprodukcja:
+      etykieta: "Ný eftirvinnsla (endurtekning eftir köflum)"
+      opis: |-
+        Skrá í <jezyk>/rezyser/postprod_*.yaml. Sniðmát með reitum fyrir prompt, regex og endurtekningarbreytur + prompt fyrir AI sem býr til móðurmál prompt_systemowy og regex_podzial_rozdzialow.
+    jezyk_bazowy:
+      etykieta: "Nýtt grunnmál (t.d. en, de, fr)"
+      opis: |-
+        Býr til möppu <jezyk>/ með podstawy.yaml og undirmöppum akcenty/, szyfry/, rezyser/, gui/. Hljóðfræðileg gögn eru búin til af AI úr prompti; þýðing UI – buduj_wielojezyczne_ui.py; Leikstjórastillingar eru afritaðar úr pl/rezyser/ (krafist er ≥1 skráar tryb_*.yaml, svo vélin viðurkenni tungumálið sem fullkomið).
+    szyfr_algorytm:
+      etykieta: "Nýr reiknirit dulmál (KREFST FORRITARA)"
+      opis: |-
+        Reiknirit (t.d. umsnúningur, typoglycemia) krefjast aðgerða í core_poliglota.py. Stjórnandi gefur aðeins prompt fyrir AI með lýsingu á verkefninu.
 
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)

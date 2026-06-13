@@ -1018,7 +1018,7 @@ manager:
     postprodukcja: |-
       Postproduktionsvorlage iteriert über Kapitel (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `prompt_uzytkownika_szablon` (Platzhalter {{naglowek}}, {{probka}}) und `regex_podzial_rozdzialow`, angepasst an die nativen Kapitelnamen (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
-      Der Manager erstellt `dictionaries/{id_pliku}/` mit Unterordnern `akcenty/`, `szyfry/`, `rezyser/`, `gui/` und `opowiesci/`. Die Vorlage `podstawy.yaml` enthält Marker `<UZUPEŁNIJ NATYWNIE>`. Der Agent orientiert sich an `de/podstawy.yaml` oder `it/podstawy.yaml`. Die UI-Übersetzung (`gui/ui.yaml`) generiert `buduj_wielojezyczne_ui.py`. Der Motor erfordert ≥1 Datei in `rezyser/`, um die Sprache als vollständig zu betrachten.
+      Der Manager erstellt `dictionaries/{id_pliku}/` mit Unterordnern `akcenty/`, `szyfry/`, `rezyser/`, `gui/` und `opowiesci/`. Die Vorlage `podstawy.yaml` enthält Marker `<FILL NATIVELY>`. Der Agent orientiert sich an `de/podstawy.yaml` oder `it/podstawy.yaml`. Die UI-Übersetzung (`gui/ui.yaml`) generiert `buduj_wielojezyczne_ui.py`. Der Motor erfordert ≥1 Datei in `rezyser/`, um die Sprache als vollständig zu betrachten.
     szyfr_algorytm: |-
       ALGORITHMISCHE Verschlüsselung — erfordert eine Funktion in `core_poliglota.py` neben der YAML-Datei. Der Manager erstellt keine Datei; der Agent fügt die Funktion `_algorytm_*` + einen Eintrag in der Karte `_ALGORYTMY` + eine YAML-Datei in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml` hinzu. Dies ist der EINZIGE Regeltyp, der eine Bearbeitung des Quellcodes erfordert — aus der installierten Anwendung (ohne Repository) ist es nicht machbar, eine Quellversion ist erforderlich.
     jezyk_agenta: |-
@@ -1027,6 +1027,43 @@ manager:
       Workflow: Kopiere den untenstehenden Prompt in einen AI-Agenten mit Zugriff auf dieses Repository (Claude Code, Cursor, Aider). Der Agent öffnet Referenzdateien, erstellt/ergänzt die Datei und überprüft sie. Änderungen in `akcenty/`, `szyfry/`, `rezyser/` werden nach einem Neustart der Anwendung erkannt.
     srodowisko_frozen: |-
       Du verwendest die installierte Anwendung (ohne Repository-Quellen). Der untenstehende Prompt setzt einen Entwickler mit Repository und AI-Agent voraus — der vollständige agentenbasierte Workflow erfordert eine Quellversion. Aus der Anwendung selbst kannst du jedoch die generierte YAML-Vorlage manuell ergänzen (Dateien `dictionaries/` liegen neben dem Programm und sind editierbar); Änderungen siehst du nach einem Neustart der Anwendung.
+
+# -----------------------------------------------------------------------------
+# UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
+# -----------------------------------------------------------------------------
+  typ:
+    akcent:
+      etykieta: "Phonetischer Akzent (cross-language, z.B. Schwedisch, Finnisch)"
+      opis: |-
+        Datei in <jezyk>/akcenty/<id>.yaml mit `kategoria: akcent`. Der Text des Basispakets (jezyk_bazowy) wird in die Aussprache des Zielsynthetisators transliteriert (iso != jezyk_bazowy). Der Manager erstellt eine Vorlage + Prompt für den KI-Agenten, der die Liste `zamiany:` entwirft.
+    akcent_oczyszczenie:
+      etykieta: "Reinigungsakzent (Preprozessor, ohne Phonetik)"
+      opis: |-
+        Datei in <jezyk>/akcenty/<id>.yaml mit `kategoria: oczyszczenie`. Reinigt den Text für TTS (entfernt Kauderwelsch, normalisiert Zahlen) OHNE die Phonetik zu ändern. iso == jezyk_bazowy. Der Manager erstellt eine Vorlage (fertiges Muster) + Prompt zur Übersetzung des Labels/Beschreibung ins Native.
+    akcent_naprawiacz:
+      etykieta: "Tag-Reparatur (injiziert ISO in HTML/DOCX)"
+      opis: |-
+        Datei in <jezyk>/akcenty/<id>.yaml mit `kategoria: naprawiacz`. Ändert den Inhalt NICHT — injiziert den ISO-Sprachcode in die Ergebnisdateien (<html lang>, <w:lang>). iso leer (Code wird vom Benutzer im GUI angegeben). Der Manager erstellt eine Vorlage + Prompt zur Übersetzung des Labels/Beschreibung ins Native.
+    szyfr_zamiany:
+      etykieta: 'Neuer Chiffretyp „reine Ersetzungen"'
+      opis: |-
+        Datei in <jezyk>/szyfry/. Der Manager erstellt eine Vorlage + Prompt für die KI, die Labels/Kommentare in die native Sprache des Pakets übersetzt und eine Liste von Muster→Ersetzung-Paaren generiert.
+    tryb_rezysera:
+      etykieta: "Neuer Regisseurmodus (kreativer Modus)"
+      opis: |-
+        Datei in <jezyk>/rezyser/tryb_*.yaml. Vorlage basierend auf dem Audiobook-Modus + Prompt für die KI, die prompt_systemowy, przypomnienie_uzytkownika und slowa_wyzwalajace in die native Sprache des Basispakets übersetzt.
+    postprodukcja:
+      etykieta: "Neue Postproduktion (Iteration über Kapitel)"
+      opis: |-
+        Datei in <jezyk>/rezyser/postprod_*.yaml. Vorlage mit Feldern für Prompt, Regex und Iterationsparameter + Prompt für die KI, die einen nativen prompt_systemowy und regex_podzial_rozdzialow generiert.
+    jezyk_bazowy:
+      etykieta: "Neue Basissprache (z.B. en, de, fr)"
+      opis: |-
+        Erstellt Ordner <jezyk>/ mit podstawy.yaml und Unterordnern akcenty/, szyfry/, rezyser/, gui/. Phonetische Daten werden von der KI aus dem Prompt generiert; UI-Übersetzung – buduj_wielojezyczne_ui.py; Regisseurmodi werden aus pl/rezyser/ kopiert (mindestens 1 Datei tryb_*.yaml erforderlich, damit die Engine die Sprache als vollständig erkennt).
+    szyfr_algorytm:
+      etykieta: "Neue algorithmische Chiffre (ERFORDERT PROGRAMMIERER)"
+      opis: |-
+        Algorithmen (z.B. Umkehrung, Typoglykämie) erfordern Funktionen in core_poliglota.py. Der Manager gibt nur einen Prompt für die KI mit der Aufgabenbeschreibung.
 
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
