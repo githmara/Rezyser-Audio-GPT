@@ -259,11 +259,6 @@ rezyser:
   btn_wczytaj_tooltip: |-
     Lädt eine bestehende Projektdatei (skrypty/<name>.txt) in den Speicher.
     Nur aktiv, wenn der Speicher leer ist und ein Name angegeben wurde.
-  btn_wyczysc_biezaca_label: "Aktuellen Speicher löschen (Zusammenfassung behalten)"
-  btn_wyczysc_biezaca_tooltip: |-
-    Löscht nur die aktuelle Geschichte aus dem Speicher.
-    Zusammenfassung (Langzeitspeicher) und Buch der Welt bleiben erhalten.
-    Verwenden Sie dies, um eine lange Geschichte nach der Generierung der Zusammenfassung fortzusetzen.
   btn_hard_reset_label: "Projekt schließen (Harter Reset)"
   btn_hard_reset_tooltip: |-
     VOLLSTÄNDIGES Löschen des Projekts: Geschichte, Zusammenfassung, Buch der Welt.
@@ -416,7 +411,7 @@ rezyser:
   # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
   el_sieroty_tytul: Zeilen ohne Sprecher-Tag
   el_sieroty_naglowek: 'Achtung: {liczba} Zeile(n) im Drehbuch haben kein Sprecher-Tag (z. B. [Erzähler: …] oder [Figur: …]) und sind keine Strukturüberschrift (Prolog, Akt, Szene, Kapitel).
-  
+
     Die ElevenLabs-Studio-Brücke überspringt solche Zeilen beim Erstellen des Projekts — sie erhalten keine Stimme, daher kann das fertige Projekt von deiner Datei abweichen.'
   el_sieroty_pozycja: '  • Zeile {nr}: {tekst}'
   el_sieroty_wiecej: '  … und {liczba} weitere.'
@@ -473,9 +468,6 @@ rezyser:
     Sie können die Geschichte fortsetzen – KI arbeitet mit der Zusammenfassung.
   status_wczytano_historia: "Geschichte '{nazwa_projektu}' geladen ({liczba_znakow} Zeichen).{lore_info}"
   # Komunikaty - czyszczenie
-  pamiec_wyczyszczona_tytul: "Speicher gelöscht"
-  pamiec_wyczyszczona_tresc: "Aktueller Speicher gelöscht."
-  pamiec_wyczyszczona_streszczenie_zostaje: "\nZusammenfassung im Langzeitspeicher wurde gespeichert."
   hard_reset_pytanie_tytul: "Projekt schließen – Harte Rücksetzung"
   hard_reset_pytanie: |-
     Sind Sie sicher, dass Sie das Projekt schließen möchten?
@@ -627,13 +619,6 @@ rezyser:
   plik_narracji_brak_tresc: Die Erzählungsdatei des Projekts „{nazwa_projektu}" existiert nicht auf der Festplatte. Laden Sie zuerst das Projekt oder senden Sie die erste Anfrage an die KI, damit die Datei erstellt wird.
   # v15.5: Vom Datenträger aktualisieren — Synchronisierung des internen
   # Gedächtnisses nach manueller Bearbeitung von skrypty/<nazwa>.txt.
-  btn_odswiez_z_dysku_label: "Vom Datenträger &aktualisieren"
-  btn_odswiez_z_dysku_tooltip: "Lädt die Erzählungsdatei (skrypty/<nazwa>.txt) erneut und synchronisiert das interne Gedächtnis mit Ihren manuellen Änderungen — ohne harten Reset und erneutes Laden des Projekts. Eine kurze Geschichte wird vollständig geladen; eine lange mit Zusammenfassung wird auf das Ende ab der letzten Überschrift (Kapitel/Akt/Szene) gekürzt, wobei die Zusammenfassung erhalten bleibt. Ändert NICHT das Weltbuch und nicht die Strukturzähler."
-  odswiez_z_dysku_tytul: "Gedächtnis vom Datenträger aktualisiert"
-  odswiez_calosc_tresc: "Die gesamte Erzählung wurde vom Datenträger geladen ({liczba_znakow} Zeichen). Das interne Gedächtnis ist mit der Datei synchronisiert.\n\nWeltbuch und Strukturzähler bleiben unverändert."
-  odswiez_calosc_skasowano_tresc: "Die gesamte Erzählung wurde vom Datenträger geladen ({liczba_znakow} Zeichen) — der gesamte Text passte in das Kontextfenster, daher wurde die überflüssige Zusammenfassung entfernt (die Engine arbeitet nun mit der vollständigen Geschichte).\n\nWeltbuch und Strukturzähler bleiben unverändert."
-  odswiez_snap_tresc: "Das Ende der Erzählung ab der Überschrift „{naglowek}“ wurde wiederhergestellt ({liczba_znakow} Zeichen). Den früheren Teil repräsentiert die bestehende Zusammenfassung, die unberührt bleibt.\n\nWeltbuch und Strukturzähler bleiben unverändert."
-  odswiez_koncowka_tresc: "Der Text ist lang und enthält keine Strukturüberschriften — der letzte Abschnitt der Erzählung wurde wiederhergestellt ({liczba_znakow} Zeichen), die Zusammenfassung bleibt unberührt. EMPFEHLUNG: Fügen Sie Überschriften Kapitel/Akt/Szene ein, damit die Aktualisierung genau die Szenengrenze trifft.\n\nWeltbuch und Strukturzähler bleiben unverändert."
   sr_heading: 📖 Version für Bildschirmleser (NVDA)
   sr_info: 'Erstellen Sie aus dem fertigen Skript eine separate HTML-Datei für Bildschirmleser: Figurenrollen mit Akzent erhalten eine phonetische Schreibweise und ein Sprachkennzeichen (lang), sodass der Bildschirmleser sie mit dem richtigen Akzent liest. Die ElevenLabs-Brücke verwendet dafür reinen Text und eine Stimme mit Akzent – das sind zwei unabhängige Ausgaben desselben Skripts.'
   btn_sr_label: 📖 Version für Bildschirmleser generieren
@@ -645,6 +630,22 @@ rezyser:
   sr_blad_tresc: "Version für Bildschirmleser konnte nicht generiert werden:\n{tresc_bledu}"
   err_struktura: Das Modell hat trotz mehrerer Korrekturversuche eine falsche Antwortstruktur generiert. Versuchen Sie es erneut oder formulieren Sie die Anweisung anders.
   err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext — z.B. das Buch der Welt oder die Anleitung — und versuchen Sie es erneut.
+  btn_przeladuj_label: '&Projekt von der Festplatte neu laden'
+  btn_przeladuj_tooltip: 'Lädt das gesamte Projekt erneut von der Festplatte, nachdem Sie manuelle Änderungen an der Erzählungsdatei (skrypty/<name>.txt) vorgenommen haben — berechnet die Zähler für Kapitel/Akte/Szenen neu, hebt das Weltbuch, den Modus und die Brainstorming-Optionen an und synchronisiert den Arbeitsspeicher. Eine kurze Geschichte wird vollständig geladen; bei einer langen wird gefragt, ab welcher Überschrift der Arbeitsspeicher der KI starten soll (der Rest wird durch die Zusammenfassung dargestellt). ACHTUNG: überschreibt den Inhalt der Felder mit der Version von der Festplatte — speichern Sie zuerst ungespeicherte Änderungen.'
+  przeladuj_ostrzezenie_tytul: Projekt von der Festplatte neu laden?
+  przeladuj_ostrzezenie_tresc: "Das Neuladen ersetzt den aktuellen Inhalt (Weltbuch, Langzeitspeicher, Erzählung, Strukturzähler) mit der auf der Festplatte gespeicherten Version. Ungespeicherte Änderungen in den Feldern gehen verloren.\n\nFortfahren?"
+  przeladuj_tytul: Projekt von der Festplatte neu geladen
+  przeladuj_calosc_tresc: Gesamtes Projekt von der Festplatte neu geladen ({liczba_znakow} Zeichen). Strukturzähler, Weltbuch, Modus und Arbeitsspeicher sind mit der Datei synchronisiert.
+  przeladuj_calosc_skasowano_tresc: Gesamtes Projekt von der Festplatte neu geladen ({liczba_znakow} Zeichen) — der gesamte Text passte in das Kontextfenster, daher wurde die überflüssige Zusammenfassung entfernt (die Engine arbeitet jetzt mit der vollständigen Geschichte). Zähler und Weltbuch sind mit der Datei synchronisiert.
+  marker_dlg_tytul: Referenzpunkt des Arbeitsspeichers
+  marker_dlg_plaski_lbl: Die Geschichte ist zu lang, um vollständig zu passen. Ab welchem Kapitel soll der Arbeitsspeicher der KI starten? (Frühere Ereignisse werden durch die Zusammenfassung dargestellt. Abbrechen = letzter Textabschnitt.)
+  marker_dlg_akt_lbl: Die Geschichte ist zu lang, um vollständig zu passen. Ab welchem Akt soll der Arbeitsspeicher der KI starten? (Abbrechen = letzter Textabschnitt.)
+  marker_dlg_scena_lbl: Ab welcher Szene dieses Aktes soll der Arbeitsspeicher der KI starten?
+  marker_dlg_caly_akt: ← ganzer Akt (ab Aktüberschrift)
+  punkt_odniesienia_tytul: Referenzpunkt des Arbeitsspeichers
+  punkt_odniesienia_snap_tresc: Der Arbeitsspeicher der KI beginnt mit der Überschrift „{naglowek}" ({liczba_znakow} Zeichen). Frühere Ereignisse werden durch die Langzeit-Zusammenfassung dargestellt (unberührt geblieben).
+  punkt_odniesienia_fallback_tresc: 'Kein Referenzpunkt angegeben — der letzte Erzählungsabschnitt ({liczba_znakow} Zeichen) wurde in den Arbeitsspeicher übernommen. Die Zusammenfassung blieb unberührt. Tipp: Fügen Sie Kapitel-/Akt-/Szenenüberschriften ein, um den Beginn des Speichers genau auszuwählen.'
+  punkt_odniesienia_za_dluga_tresc: 'Der ausgewählte Abschnitt „{naglowek}" ist so umfangreich, dass er allein nicht in das Arbeitsspeicherfenster passt — ein Notfall-Schnitt wurde auf die letzten {liczba_znakow} Zeichen angewendet. Regisseur, das ist ein wenig verrückt: Erwägen Sie, Akte/Kapitel in kleinere Szenen zu unterteilen — kürzere Abschnitte ermöglichen es der KI, den Kontext konsistent zu halten.'
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -814,7 +815,7 @@ konwerter:
   # nowy folder + te listy, bez edycji regexów w Pythonie. Dopasowanie
   # prefiksowe, case-insensitive. rozdzialow → H1; sceny → pogrubienie bez TOC.
   naglowki_rozdzialow: ["Kapitel", "Prolog", "Epilog", "Akt", "Vorspann"]
-  naglowki_scen:       ["Szene"]
+  naglowki_scen: ["Szene"]
   # Dialog wyboru pliku
   file_dlg_title: "Wählen Sie die Quelldatei"
   file_dlg_wildcard: "Alle unterstützten Dateien (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word-Dokumente (*.docx)|*.docx|Alle Dateien (*.*)|*.*"

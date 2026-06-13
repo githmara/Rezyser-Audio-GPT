@@ -259,11 +259,6 @@ rezyser:
   btn_wczytaj_tooltip: |-
     Hleður inn núverandi verkefnaskrá (skrypty/<nafn>.txt) í minni.
     Virkur aðeins þegar minni er tómt og nafn hefur verið gefið.
-  btn_wyczysc_biezaca_label: "Hreinsa núverandi (halda samantekt)"
-  btn_wyczysc_biezaca_tooltip: |-
-    Hreinsar aðeins núverandi sögu úr minni.
-    Samantekt (Langtímaminni) og Heimsbók eru varðveitt.
-    Notaðu til að halda áfram með langa bók eftir að samantekt hefur verið búin til.
   btn_hard_reset_label: "Loka verkefni (Harður endurstilling)"
   btn_hard_reset_tooltip: |-
     ALGER hreinsun verkefnis: saga, samantekt, Heimsbók.
@@ -416,7 +411,7 @@ rezyser:
   # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
   el_sieroty_tytul: Línur án talmerkis
   el_sieroty_naglowek: 'Athugið: {liczba} lína/línur í handritinu hafa ekkert talmerki (t.d. [Sögumaður: …] eða [Persóna: …]) og eru ekki byggingarfyrirsögn (Formáli, Þáttur, Atriði, Kafli).
-  
+
     ElevenLabs Studio-brúin sleppir slíkum línum þegar verkefnið er búið til — þær fá enga rödd, svo fullbúna verkefnið getur vikið frá skránni þinni.'
   el_sieroty_pozycja: '  • lína {nr}: {tekst}'
   el_sieroty_wiecej: '  … og {liczba} til viðbótar.'
@@ -473,9 +468,6 @@ rezyser:
     Þú getur haldið áfram með söguna — AI vinnur með yfirlitið.
   status_wczytano_historia: "Saga '{nazwa_projektu}' hlaðin ({liczba_znakow} stafir).{lore_info}"
   # Komunikaty - czyszczenie
-  pamiec_wyczyszczona_tytul: "Minni hreinsað"
-  pamiec_wyczyszczona_tresc: "Núverandi minni hreinsað."
-  pamiec_wyczyszczona_streszczenie_zostaje: "\nYfirlit í Langtímaminni hefur verið vistað."
   hard_reset_pytanie_tytul: "Loka Verkefni – Harður Endurstilling"
   hard_reset_pytanie: |-
     Ertu viss um að þú viljir loka verkefninu?
@@ -627,13 +619,6 @@ rezyser:
   plik_narracji_brak_tresc: Frásagnarskrá verkefnis „{nazwa_projektu}" er ekki til á diskinum. Hladdu fyrst inn verkefni eða sendu fyrstu fyrirspurn til AI til að búa til skrána.
   # v15.5: Endurhlaða af diski — samstilling innra minnis eftir handvirka
   # breytingu á skrypty/<nazwa>.txt (t.d. eftir að klippa brotið anti-closure).
-  btn_odswiez_z_dysku_label: "Endur&hlaða af diski"
-  btn_odswiez_z_dysku_tooltip: "Les frásagnarskrána (skrypty/<nazwa>.txt) að nýju og samstillir innra minnið við handvirkar breytingar þínar — án harðrar endurstillingar og endurhleðslu verkefnis. Stutta sögu les hún í heild sinni; langa sögu með samantekt styttir hún niður í endann frá síðasta fyrirsagnarmerki (Kafli/Þáttur/Atriði) og varðveitir samantektina. BREYTIR EKKI Heimsbókinni né byggingarteljurum."
-  odswiez_z_dysku_tytul: "Minni endurhlaðið af diski"
-  odswiez_calosc_tresc: "Öll frásögnin var lesin af diski ({liczba_znakow} stafir). Innra minnið er samstillt við skrána.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
-  odswiez_calosc_skasowano_tresc: "Öll frásögnin var lesin af diski ({liczba_znakow} stafir) — allur textinn komst fyrir í samhengisglugganum, svo óþarfa samantektin var fjarlægð.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
-  odswiez_snap_tresc: "Endir frásagnarinnar var endurgerður frá fyrirsögninni „{naglowek}\" ({liczba_znakow} stafir). Fyrri hluta sögunnar er lýst af núverandi samantekt, sem stendur óhreyfð.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
-  odswiez_koncowka_tresc: "Textinn er langur og inniheldur engin byggingarfyrirsagnir — síðasti hluti frásagnarinnar var endurgerður ({liczba_znakow} stafir) og samantektin stendur óhreyfð. RÁÐLEGGING: settu inn fyrirsagnir svo endurhleðslan rati nákvæmlega á atriðamörk.\n\nHeimsbókin og byggingarteljarar standa óbreytt."
   sr_heading: 📖 Útgáfa fyrir skjálesara (NVDA)
   sr_info: 'Byggðu sérstaka HTML skrá fyrir skjálesara úr tilbúnu handriti: persónur með hreim fá hljóðritun og tungumálamerki (lang), þannig að skjálesarinn les þær með réttum hreim. Most ElevenLabs notar hreinan texta og rödd með hreim til að gera þetta — þetta eru tvö sjálfstæð úttök úr sama handriti.'
   btn_sr_label: 📖 Búðu til útgáfu fyrir skjálesara
@@ -645,6 +630,22 @@ rezyser:
   sr_blad_tresc: "Ekki tókst að búa til útgáfu fyrir skjálesara:\n{tresc_bledu}"
   err_struktura: Líkanið bjó til ranga uppbyggingu svars þrátt fyrir nokkrar tilraunir til leiðréttingar. Reyndu aftur eða mótaðu skipunina á annan hátt.
   err_dlugosc: Svar líkansins var skorið af áður en það náði að ljúka því (lengdarmörk voru brotin). Styttu samhengi — t.d. Heimsbókina eða leiðbeiningarnar — og reyndu aftur.
+  btn_przeladuj_label: '&Endurhlaða verkefni af diski'
+  btn_przeladuj_tooltip: 'Hleður ÖLLU verkefninu aftur af diski eftir handvirkar breytingar þínar á frásagnarskránni (skrypty/<nafn>.txt) — endurreiknar teljara Kafla/Þátta/Sena, lyftir Heimsbók, ham og Hugstorm-valkostum og samstillir vinnuminni. Stutta sögu hleður hún í heild sinni; fyrir langa spyr hún frá hvaða fyrirsögn vinnuminni AI á að byrja (afgangurinn er táknaður með Samantekt). VARÚÐ: skrifar yfir innihald reita með útgáfu af diski — vistaðu óvistaðar breytingar fyrst.'
+  przeladuj_ostrzezenie_tytul: Endurhlaða verkefni af diski?
+  przeladuj_ostrzezenie_tresc: "Endurhleðsla mun skipta út núverandi innihaldi (Heimsbók, Langtímaminni, frásögn, uppbyggingarteljara) með útgáfu sem er vistuð á diski. Óvistaðar breytingar í reitum munu tapast.\n\nHalda áfram?"
+  przeladuj_tytul: Verkefni endurhlaðið af diski
+  przeladuj_calosc_tresc: Öllu verkefninu var endurhlaðið af diski ({liczba_znakow} stafir). Uppbyggingarteljarar, Heimsbók, stilling og vinnuminni eru samstillt við skrána.
+  przeladuj_calosc_skasowano_tresc: Öllu verkefninu var endurhlaðið af diski ({liczba_znakow} stafir) — allur textinn passaði í samhengi gluggans, svo óþarfa samantekt var fjarlægð (vélin vinnur nú með alla söguna). Teljarar og Heimsbók eru samstillt við skrána.
+  marker_dlg_tytul: Viðmiðunarpunktur vinnuminnis
+  marker_dlg_plaski_lbl: Sagans er of löng til að rúmast í heild sinni. Frá hvaða Kafla á vinnuminni AI að byrja? (Fyrri atburðir eru táknaðir með Samantekt. Hætta við = síðasti textabútur.)
+  marker_dlg_akt_lbl: Sagans er of löng til að rúmast í heild sinni. Frá hvaða Þætti á vinnuminni AI að byrja? (Hætta við = síðasti textabútur.)
+  marker_dlg_scena_lbl: Frá hvaða Senu þessa Þáttar á vinnuminni AI að byrja?
+  marker_dlg_caly_akt: ← allur Þáttur (frá fyrirsögn þáttar)
+  punkt_odniesienia_tytul: Viðmiðunarpunktur vinnuminnis
+  punkt_odniesienia_snap_tresc: Vinnuminni AI byrjar frá fyrirsögn „{naglowek}" ({liczba_znakow} stafir). Fyrri atburðir eru táknaðir með Langtíma Samantekt (óbreytt).
+  punkt_odniesienia_fallback_tresc: 'Enginn viðmiðunarpunktur gefinn — síðasti hluti frásagnarinnar ({liczba_znakow} stafir) fór í vinnuminni. Samantektin er óbreytt. Ábending: settu inn fyrirsagnir Kafla/Þáttar/Senu til að geta valið upphaf vinnuminnis nákvæmlega.'
+  punkt_odniesienia_za_dluga_tresc: 'Valinn hluti „{naglowek}" er svo umfangsmikill að hann passar ekki einn í vinnuminnisglugganum — neyðarskurður var gerður á síðustu {liczba_znakow} stafi. Leikstjóri, þetta er smá brjálæði: íhugaðu að skipta Þáttum/Köflum í minni Senur — styttri hlutar gera AI kleift að halda samræmdu samhengi.'
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -814,7 +815,7 @@ konwerter:
   # nowy folder + te listy, bez edycji regexów w Pythonie. Dopasowanie
   # prefiksowe, case-insensitive. rozdzialow → H1; sceny → pogrubienie bez TOC.
   naglowki_rozdzialow: ["Kafli", "Formáli", "Eftirorð", "Þáttur"]
-  naglowki_scen:       ["Atriði"]
+  naglowki_scen: ["Atriði"]
   # Dialog wyboru pliku
   file_dlg_title: "Veldu upprunaskrá"
   file_dlg_wildcard: "Öll studd skjöl (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word skjöl (*.docx)|*.docx|Öll skjöl (*.*)|*.*"

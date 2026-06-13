@@ -258,11 +258,6 @@ rezyser:
   btn_wczytaj_tooltip: |-
     Carga un archivo de proyecto existente (skrypty/<nombre>.txt) en la memoria.
     Activo solo cuando la memoria está vacía y se ha proporcionado un nombre.
-  btn_wyczysc_biezaca_label: "Limpiar actual (dejar Resumen)"
-  btn_wyczysc_biezaca_tooltip: |-
-    Limpia solo la historia actual de la memoria.
-    El Resumen (Memoria a Largo Plazo) y el Libro del Mundo se conservan.
-    Úsalo para continuar un libro largo después de generar un resumen.
   btn_hard_reset_label: "Cerrar Proyecto (Reinicio Completo)"
   btn_hard_reset_tooltip: |-
     Limpieza COMPLETA del proyecto: historia, resumen, Libro del Mundo.
@@ -415,7 +410,7 @@ rezyser:
   # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
   el_sieroty_tytul: Líneas sin etiqueta de hablante
   el_sieroty_naglowek: 'Atención: {liczba} línea(s) del guion no tienen etiqueta de hablante (p. ej. [Narrador: …] o [Personaje: …]) ni son un encabezado de estructura (Prólogo, Acto, Escena, Capítulo).
-  
+
     El puente de ElevenLabs Studio omite esas líneas al crear el proyecto — no se asignan a ninguna voz, por lo que el proyecto final puede desviarse de tu archivo.'
   el_sieroty_pozycja: '  • línea {nr}: {tekst}'
   el_sieroty_wiecej: '  … y {liczba} más.'
@@ -472,9 +467,6 @@ rezyser:
     Puedes continuar la historia: la IA opera sobre el resumen.
   status_wczytano_historia: "Historia '{nazwa_projektu}' cargada ({liczba_znakow} caracteres).{lore_info}"
   # Komunikaty - czyszczenie
-  pamiec_wyczyszczona_tytul: "Memoria borrada"
-  pamiec_wyczyszczona_tresc: "Memoria actual borrada."
-  pamiec_wyczyszczona_streszczenie_zostaje: "\nEl resumen en Memoria a Largo Plazo ha sido guardado."
   hard_reset_pytanie_tytul: "Cerrar Proyecto – Reinicio Completo"
   hard_reset_pytanie: |-
     ¿Estás seguro de que deseas cerrar el proyecto?
@@ -626,13 +618,6 @@ rezyser:
   plik_narracji_brak_tresc: El archivo de narración del proyecto "{nazwa_projektu}" no existe en el disco. Primero carga el proyecto o envía la primera consulta a la IA para que se cree el archivo.
   # v15.5: Actualizar desde el disco — sincroniza la memoria interna tras la
   # edición manual de skrypty/<nazwa>.txt (p. ej. recortar un anti-cierre roto).
-  btn_odswiez_z_dysku_label: "Act&ualizar desde el disco"
-  btn_odswiez_z_dysku_tooltip: "Vuelve a cargar el archivo de narración (skrypty/<nazwa>.txt) y sincroniza la memoria interna con tus cambios manuales — sin un reinicio completo ni recargar el proyecto. Una historia corta se carga entera; una larga con resumen se recorta hasta el final desde el último encabezado (Capítulo/Acto/Escena), conservando el resumen. NO modifica el Libro del Mundo ni los contadores de estructura."
-  odswiez_z_dysku_tytul: "Memoria actualizada desde el disco"
-  odswiez_calosc_tresc: "Se cargó toda la narración desde el disco ({liczba_znakow} caracteres). La memoria interna está sincronizada con el archivo.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
-  odswiez_calosc_skasowano_tresc: "Se cargó toda la narración desde el disco ({liczba_znakow} caracteres) — todo el texto cabe en la ventana de contexto, así que el resumen, ya innecesario, se eliminó (el motor trabaja ahora sobre la historia completa).\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
-  odswiez_snap_tresc: "Se reconstruyó el final de la narración desde el encabezado «{naglowek}» ({liczba_znakow} caracteres). La parte anterior está representada por el resumen existente, que queda intacto.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
-  odswiez_koncowka_tresc: "El texto es largo y no contiene encabezados de estructura — se reconstruyó el último fragmento de la narración ({liczba_znakow} caracteres), y el resumen quedó intacto. RECOMENDACIÓN: inserta encabezados Capítulo/Acto/Escena para que la actualización pueda acertar con precisión en el límite de una escena.\n\nEl Libro del Mundo y los contadores de estructura permanecen sin cambios."
   sr_heading: 📖 Versión para lectores de pantalla (NVDA)
   sr_info: 'Construye a partir de un script existente un archivo HTML separado para lectores de pantalla: los diálogos de personajes con acento reciben una transcripción fonética y una etiqueta de idioma (lang), por lo que el lector de pantalla los lee con el acento correcto. El puente ElevenLabs utiliza texto puro y voz con acento para esto: son dos salidas independientes del mismo script.'
   btn_sr_label: 📖 Generar versión para lectores de pantalla
@@ -644,6 +629,22 @@ rezyser:
   sr_blad_tresc: "No se pudo generar la versión para lectores de pantalla:\n{tresc_bledu}"
   err_struktura: El modelo generó una estructura de respuesta incorrecta a pesar de varios intentos de corrección. Intenta de nuevo o formula la instrucción de otra manera.
   err_dlugosc: La respuesta del modelo fue cortada antes de que pudiera completarla (se excedió el límite de longitud). Acorta el contexto — por ejemplo, el Libro del Mundo o la instrucción — e intenta de nuevo.
+  btn_przeladuj_label: '&Recargar proyecto desde el disco'
+  btn_przeladuj_tooltip: 'Carga TODO el proyecto nuevamente desde el disco después de tus cambios manuales en el archivo de narración (skrypty/<nombre>.txt) — recalcula los contadores de Capítulos/Actos/Escenas, levanta el Libro del Mundo, el modo y las opciones de Lluvia de Ideas y sincroniza la memoria de trabajo. La historia corta se carga por completo; para una larga, preguntará desde qué encabezado debe comenzar la memoria de trabajo de la IA (el resto se representa como Resumen). ATENCIÓN: sobrescribe el contenido de los campos con la versión del disco — guarda primero los cambios no guardados.'
+  przeladuj_ostrzezenie_tytul: ¿Recargar el proyecto desde el disco?
+  przeladuj_ostrzezenie_tresc: "La recarga reemplazará el contenido actual (Libro del Mundo, Memoria a Largo Plazo, narración, contadores de estructura) con la versión guardada en el disco. Los cambios no guardados en los campos se perderán.\n\n¿Continuar?"
+  przeladuj_tytul: Proyecto recargado desde el disco
+  przeladuj_calosc_tresc: Todo el proyecto recargado desde el disco ({liczba_znakow} caracteres). Los contadores de estructura, el Libro del Mundo, el modo y la memoria de trabajo están sincronizados con el archivo.
+  przeladuj_calosc_skasowano_tresc: Todo el proyecto recargado desde el disco ({liczba_znakow} caracteres) — todo el texto cabía en la ventana de contexto, por lo que el resumen innecesario fue eliminado (el motor ahora trabaja con la historia completa). Los contadores y el Libro del Mundo están sincronizados con el archivo.
+  marker_dlg_tytul: Punto de referencia de la memoria de trabajo
+  marker_dlg_plaski_lbl: La historia es demasiado larga para caber por completo. ¿Desde qué Capítulo debe comenzar la memoria de trabajo de la IA? (Los eventos anteriores se representan como Resumen. Cancelar = último fragmento de texto).
+  marker_dlg_akt_lbl: La historia es demasiado larga para caber por completo. ¿Desde qué Acto debe comenzar la memoria de trabajo de la IA? (Cancelar = último fragmento de texto).
+  marker_dlg_scena_lbl: ¿Desde qué Escena de este Acto debe comenzar la memoria de trabajo de la IA?
+  marker_dlg_caly_akt: ← todo el Acto (desde el encabezado del acto)
+  punkt_odniesienia_tytul: Punto de referencia de la memoria de trabajo
+  punkt_odniesienia_snap_tresc: La memoria de trabajo de la IA comienza desde el encabezado "{naglowek}" ({liczba_znakow} caracteres). Los eventos anteriores se representan como Resumen a Largo Plazo (permanece intacto).
+  punkt_odniesienia_fallback_tresc: 'No se indicó un punto de referencia — el último fragmento de la narración ({liczba_znakow} caracteres) se transfirió a la memoria de trabajo. El resumen permanece intacto. Consejo: inserta encabezados de Capítulo/Acto/Escena para poder elegir con precisión el inicio de la memoria.'
+  punkt_odniesienia_za_dluga_tresc: 'El fragmento seleccionado "{naglowek}" es tan extenso que no cabe por sí solo en la ventana de memoria de trabajo — se aplicó un corte de emergencia a los últimos {liczba_znakow} caracteres. Director, esto es un poco de locura: considera dividir Actos/Capítulos en Escenas más pequeñas — secciones más cortas permitirán a la IA mantener un contexto coherente.'
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -813,7 +814,7 @@ konwerter:
   # nowy folder + te listy, bez edycji regexów w Pythonie. Dopasowanie
   # prefiksowe, case-insensitive. rozdzialow → H1; sceny → pogrubienie bez TOC.
   naglowki_rozdzialow: ["Capítulo", "Prólogo", "Epílogo", "Acto"]
-  naglowki_scen:       ["Escena"]
+  naglowki_scen: ["Escena"]
   # Dialog wyboru pliku
   file_dlg_title: "Selecciona archivo fuente"
   file_dlg_wildcard: "Todos los archivos soportados (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Documentos Word (*.docx)|*.docx|Todos los archivos (*.*)|*.*"

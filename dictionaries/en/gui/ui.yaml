@@ -258,11 +258,6 @@ rezyser:
   btn_wczytaj_tooltip: |-
     Loads an existing project file (skrypty/<name>.txt) into memory.
     Active only when memory is empty and a name is provided.
-  btn_wyczysc_biezaca_label: "Clear Current (Leave Summary)"
-  btn_wyczysc_biezaca_tooltip: |-
-    Clears only the current history from memory.
-    Summary (Long-Term Memory) and World Book are retained.
-    Use to continue a long book after generating a summary.
   btn_hard_reset_label: "Close Project (Hard Reset)"
   btn_hard_reset_tooltip: |-
     COMPLETE project clearance: history, summary, World Book.
@@ -415,7 +410,7 @@ rezyser:
   # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
   el_sieroty_tytul: Lines without a speaker tag
   el_sieroty_naglowek: 'Warning: {liczba} line(s) in the script have no speaker tag (e.g. [Narrator: …] or [Character: …]) and are not a structure heading (Prologue, Act, Scene, Chapter).
-  
+
     The ElevenLabs Studio bridge skips such lines when building the project — they will not be assigned any voice, so the finished project may diverge from your file.'
   el_sieroty_pozycja: '  • line {nr}: {tekst}'
   el_sieroty_wiecej: '  … and {liczba} more.'
@@ -472,9 +467,6 @@ rezyser:
     You can continue the story — AI operates on the summary.
   status_wczytano_historia: "Story '{nazwa_projektu}' loaded ({liczba_znakow} characters).{lore_info}"
   # Komunikaty - czyszczenie
-  pamiec_wyczyszczona_tytul: "Memory cleared"
-  pamiec_wyczyszczona_tresc: "Current memory cleared."
-  pamiec_wyczyszczona_streszczenie_zostaje: "\nSummary in Long-Term Memory has been preserved."
   hard_reset_pytanie_tytul: "Close Project – Hard Reset"
   hard_reset_pytanie: |-
     Are you sure you want to close the project?
@@ -624,13 +616,6 @@ rezyser:
   blad_otwarcia_tresc: "Attempt to open file {sciezka_pliku} resulted in an error:\n{tresc_bledu}\n\nOpen the file manually from File Explorer."
   plik_narracji_brak_tytul: Narration file missing
   plik_narracji_brak_tresc: The project narration file "{nazwa_projektu}" does not exist on disk. First, load the project or send the first query to the AI to create the file.
-  btn_odswiez_z_dysku_label: "Re&fresh from disk"
-  btn_odswiez_z_dysku_tooltip: "Reloads the narration file (skrypty/<name>.txt) and synchronizes the internal memory with your manual edits — without a hard reset or reloading the project. A short story is loaded in full; a long one with a summary is trimmed to the tail following the last header (Chapter/Act/Scene), keeping the summary intact. Does NOT change the World Book or the structure counters."
-  odswiez_z_dysku_tytul: "Memory refreshed from disk"
-  odswiez_calosc_tresc: "The full narration was loaded from disk ({liczba_znakow} characters). The internal memory is synchronized with the file.\n\nThe World Book and structure counters are unchanged."
-  odswiez_calosc_skasowano_tresc: "The full narration was loaded from disk ({liczba_znakow} characters) — the entire text fit within the context window, so the redundant summary was removed (the engine now works on the full story).\n\nThe World Book and structure counters are unchanged."
-  odswiez_snap_tresc: "Restored the narration tail from the \"{naglowek}\" header ({liczba_znakow} characters). The earlier part of the story is represented by the existing summary, which was left untouched.\n\nThe World Book and structure counters are unchanged."
-  odswiez_koncowka_tresc: "The text is long and contains no structure headers — the last fragment of the narration was restored ({liczba_znakow} characters), and the summary was left untouched. RECOMMENDATION: insert Chapter/Act/Scene headers so that the refresh can land precisely on a scene boundary.\n\nThe World Book and structure counters are unchanged."
   sr_heading: 📖 Screen Reader Version (NVDA)
   sr_info: 'Build a separate HTML file from the ready script for screen readers: character lines with an accent receive a phonetic transcription and a language tag (lang), so the screen reader reads them with the correct accent. The ElevenLabs bridge uses plain text and an accented voice for this — these are two independent outputs of the same script.'
   btn_sr_label: 📖 Generate Screen Reader Version
@@ -642,6 +627,22 @@ rezyser:
   sr_blad_tresc: "Failed to generate screen reader version:\n{tresc_bledu}"
   err_struktura: The model generated an incorrect response structure despite several correction attempts. Try again or rephrase the command.
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
+  btn_przeladuj_label: '&Reload project from disk'
+  btn_przeladuj_tooltip: 'Reloads the ENTIRE project from disk after your manual changes in the narration file (skrypty/<name>.txt) — recalculates Chapter/Act/Scene counters, raises the World Book, mode and Brainstorm options, and synchronizes working memory. Loads a short story in full; for a long one, it will ask from which header the AI working memory should start (the rest is represented by the Summary). WARNING: overwrites field contents with the version from disk — save unsaved changes first.'
+  przeladuj_ostrzezenie_tytul: Reload project from disk?
+  przeladuj_ostrzezenie_tresc: "Reloading will replace the current content (World Book, Long-term Memory, narration, structure counters) with the version saved on disk. Unsaved changes in fields will be lost.\n\nContinue?"
+  przeladuj_tytul: Project reloaded from disk
+  przeladuj_calosc_tresc: The entire project reloaded from disk ({liczba_znakow} characters). Structure counters, World Book, mode, and working memory are synchronized with the file.
+  przeladuj_calosc_skasowano_tresc: The entire project reloaded from disk ({liczba_znakow} characters) — the entire text fit into the context window, so the unnecessary summary was removed (the engine now works on the full history). Counters and World Book synchronized with the file.
+  marker_dlg_tytul: Working memory reference point
+  marker_dlg_plaski_lbl: The story is too long to fit in full. From which Chapter should the AI working memory start? (Earlier events are represented by the Summary. Cancel = last text fragment.)
+  marker_dlg_akt_lbl: The story is too long to fit in full. From which Act should the AI working memory start? (Cancel = last text fragment.)
+  marker_dlg_scena_lbl: From which Scene of this Act should the AI working memory start?
+  marker_dlg_caly_akt: ← entire Act (from act header)
+  punkt_odniesienia_tytul: Working memory reference point
+  punkt_odniesienia_snap_tresc: AI working memory starts from the header “{naglowek}" ({liczba_znakow} characters). Earlier events are represented by the Long-term Summary (remained untouched).
+  punkt_odniesienia_fallback_tresc: 'No reference point indicated — the last fragment of the narration ({liczba_znakow} characters) entered the working memory. The summary remained untouched. Tip: insert Chapter/Act/Scene headers to precisely choose the start of memory.'
+  punkt_odniesienia_za_dluga_tresc: "The selected fragment “{naglowek}\" is so extensive that it doesn't fit into the working memory window by itself — emergency cutting to the last {liczba_znakow} characters was applied. Director, this is a bit of madness: consider dividing Acts/Chapters into smaller Scenes — shorter sections will allow the AI to maintain consistent context."
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -811,7 +812,7 @@ konwerter:
   # nowy folder + te listy, bez edycji regexów w Pythonie. Dopasowanie
   # prefiksowe, case-insensitive. rozdzialow → H1; sceny → pogrubienie bez TOC.
   naglowki_rozdzialow: ["Chapter", "Prolog", "Prologue", "Epilog", "Epilogue", "Act"]
-  naglowki_scen:       ["Scene"]
+  naglowki_scen: ["Scene"]
   # Dialog wyboru pliku
   file_dlg_title: "Select source file"
   file_dlg_wildcard: "All supported files (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word Documents (*.docx)|*.docx|All files (*.*)|*.*"

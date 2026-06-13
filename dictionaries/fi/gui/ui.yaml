@@ -259,11 +259,6 @@ rezyser:
   btn_wczytaj_tooltip: |-
     Lataa olemassa oleva projektitiedosto (skrypty/<nimi>.txt) muistiin.
     Aktiivinen vain, kun muisti on tyhjä ja nimi on annettu.
-  btn_wyczysc_biezaca_label: "Tyhjennä nykyinen (jätä Yhteenveto)"
-  btn_wyczysc_biezaca_tooltip: |-
-    Tyhjentää vain nykyisen tarinan muistista.
-    Yhteenveto (Pysyvä Muisti) ja Maailmankirja säilyvät.
-    Käytä pitkän kirjan jatkamiseen yhteenvedon luomisen jälkeen.
   btn_hard_reset_label: "Sulje Projekti (Kova Nollaus)"
   btn_hard_reset_tooltip: |-
     PROJEKTIN KOKONAISTYHJENNYS: tarina, yhteenveto, Maailmankirja.
@@ -416,7 +411,7 @@ rezyser:
   # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
   el_sieroty_tytul: Rivit ilman puhujamerkintää
   el_sieroty_naglowek: 'Huomio: {liczba} rivillä käsikirjoituksessa ei ole puhujamerkintää (esim. [Kertoja: …] tai [Hahmo: …]) eivätkä ne ole rakenneotsikko (Prologi, Näytös, Kohtaus, Luku).
-  
+
     ElevenLabs Studio -silta ohittaa tällaiset rivit projektia rakennettaessa — niille ei tule ääntä, joten valmis projekti voi poiketa tiedostostasi.'
   el_sieroty_pozycja: '  • rivi {nr}: {tekst}'
   el_sieroty_wiecej: '  … ja {liczba} lisää.'
@@ -473,9 +468,6 @@ rezyser:
     Voit jatkaa tarinaa — AI toimii yhteenvedon perusteella.
   status_wczytano_historia: "Tarinan '{nazwa_projektu}' lataus ({liczba_znakow} merkkiä).{lore_info}"
   # Komunikaty - czyszczenie
-  pamiec_wyczyszczona_tytul: "Muisti tyhjennetty"
-  pamiec_wyczyszczona_tresc: "Nykyinen muisti tyhjennetty."
-  pamiec_wyczyszczona_streszczenie_zostaje: "\nPitkäaikaismuistin yhteenveto on tallennettu."
   hard_reset_pytanie_tytul: "Sulje Projekti – Kova Nollaus"
   hard_reset_pytanie: |-
     Haluatko varmasti sulkea projektin?
@@ -625,13 +617,6 @@ rezyser:
   blad_otwarcia_tresc: "Yritys avata tiedosto {sciezka_pliku} epäonnistui:\n{tresc_bledu}\n\nAvaa tiedosto manuaalisesti Tiedostonhallinnasta."
   plik_narracji_brak_tytul: Kertomustiedosto puuttuu
   plik_narracji_brak_tresc: Projektin kertomustiedostoa „{nazwa_projektu}" ei ole levyllä. Lataa ensin projekti tai lähetä ensimmäinen kysely AI:lle, jotta tiedosto luodaan.
-  btn_odswiez_z_dysku_label: "&Päivitä levyltä"
-  btn_odswiez_z_dysku_tooltip: "Lataa kertomustiedoston (skrypty/<nazwa>.txt) uudelleen ja täsmäyttää sisäisen muistin käsin tehtyihin muutoksiin — ilman kovaa nollausta ja projektin uudelleenlatausta. Lyhyen kertomuksen lataa kokonaan; pitkän, jossa on yhteenveto, lyhentää loppuun viimeisestä otsikosta (prologi/näytös/kohtaus) alkaen säilyttäen yhteenvedon. EI muuta Maailmankirjaa eikä rakenteen laskureita."
-  odswiez_z_dysku_tytul: "Muisti päivitetty levyltä"
-  odswiez_calosc_tresc: "Koko kertomus ladattu levyltä ({liczba_znakow} merkkiä). Sisäinen muisti täsmäytetty tiedoston kanssa.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
-  odswiez_calosc_skasowano_tresc: "Koko kertomus ladattu levyltä ({liczba_znakow} merkkiä) — koko teksti mahtui konteksti-ikkunaan, joten tarpeeton yhteenveto poistettiin.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
-  odswiez_snap_tresc: "Kertomuksen loppu otsikosta „{naglowek}” palautettu ({liczba_znakow} merkkiä). Aiempaa osaa edustaa olemassa oleva yhteenveto, joka jäi koskemattomaksi.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
-  odswiez_koncowka_tresc: "Teksti pitkä eikä siinä ole rakenteen otsikoita — kertomuksen viimeinen pätkä palautettu ({liczba_znakow} merkkiä), yhteenveto jäi koskemattomaksi. SUOSITUS: lisää otsikoita, jotta päivitys osuu kohtauksen rajalle.\n\nMaailmankirja ja rakenteen laskurit muuttumattomina."
   sr_heading: 📖 Näytönlukijan versio (NVDA)
   sr_info: 'Luo valmiista skriptistä erillinen HTML-tiedosto näytönlukijoille: hahmojen repliikit, joissa on aksentti, saavat foneettisen kirjoitusasun ja kielitunnisteen (lang), joten näytönlukija lukee ne oikealla aksentilla. Most ElevenLabs käyttää tähän pelkkää tekstiä ja aksentilla varustettua ääntä — nämä ovat kaksi erillistä ulostuloa samasta skriptistä.'
   btn_sr_label: 📖 Luo näytönlukijan versio
@@ -643,6 +628,22 @@ rezyser:
   sr_blad_tresc: "Näytönlukijan version luominen epäonnistui:\n{tresc_bledu}"
   err_struktura: Malli tuotti väärän vastausrakenteen useista korjausyrityksistä huolimatta. Yritä uudelleen tai muotoile komento toisin.
   err_dlugosc: Mallin vastaus katkaistiin ennen kuin se ehti lopettaa sen (pituusraja ylitetty). Lyhennä kontekstia — esim. Maailmankirjaa tai ohjetta — ja yritä uudelleen.
+  btn_przeladuj_label: '&Lataa projekti uudelleen levyltä'
+  btn_przeladuj_tooltip: 'Lataa KOKO projekti uudelleen levyltä manuaalisten muutostesi jälkeen kertomustiedostossa (skrypty/<nimi>.txt) — laskee luvut Luvuista/Näytöksistä/Kohtauksista, nostaa Maailmankirjan, tilan ja Aivoriihen asetukset sekä synkronoi työmuistin. Lyhyt tarina ladataan kokonaisuudessaan; pitkässä kysytään, mistä otsikosta AI:n työmuisti alkaa (loput edustaa Yhteenveto). HUOMIO: korvaa kenttien sisällön levyn versiolla — tallenna ensin tallentamattomat muutokset.'
+  przeladuj_ostrzezenie_tytul: Ladataanko projekti uudelleen levyltä?
+  przeladuj_ostrzezenie_tresc: "Uudelleenlataus korvaa nykyisen sisällön (Maailmankirja, Pitkäaikainen Muisti, kertomus, rakenteen laskurit) levylle tallennetulla versiolla. Tallentamattomat muutokset kentissä menetetään.\n\nJatketaanko?"
+  przeladuj_tytul: Projekti ladattu uudelleen levyltä
+  przeladuj_calosc_tresc: Koko projekti ladattu uudelleen levyltä ({liczba_znakow} merkkiä). Rakenteen laskurit, Maailmankirja, tila ja työmuisti on synkronoitu tiedoston kanssa.
+  przeladuj_calosc_skasowano_tresc: Koko projekti ladattu uudelleen levyltä ({liczba_znakow} merkkiä) — koko teksti mahtui konteksti-ikkunaan, joten tarpeeton yhteenveto poistettiin (moottori toimii nyt täydellä historialla). Laskurit ja Maailmankirja synkronoitu tiedoston kanssa.
+  marker_dlg_tytul: Työmuistin viitekohta
+  marker_dlg_plaski_lbl: Tarina on liian pitkä mahtuakseen kokonaan. Mistä Luvusta AI:n työmuisti alkaa? (Aiemmat tapahtumat edustaa Yhteenveto. Peruuta = viimeinen tekstikatkelma.)
+  marker_dlg_akt_lbl: Tarina on liian pitkä mahtuakseen kokonaan. Mistä Näytöksestä AI:n työmuisti alkaa? (Peruuta = viimeinen tekstikatkelma.)
+  marker_dlg_scena_lbl: Mistä tämän Näytöksen Kohtauksesta AI:n työmuisti alkaa?
+  marker_dlg_caly_akt: ← koko Näytös (näytöksen otsikosta)
+  punkt_odniesienia_tytul: Työmuistin viitekohta
+  punkt_odniesienia_snap_tresc: AI:n työmuisti alkaa otsikosta „{naglowek}" ({liczba_znakow} merkkiä). Aiemmat tapahtumat edustaa Pitkäaikainen Yhteenveto (jäänyt koskemattomaksi).
+  punkt_odniesienia_fallback_tresc: 'Viitekohtaa ei ole määritetty — työmuistiin siirtyi viimeinen kertomuksen katkelma ({liczba_znakow} merkkiä). Yhteenveto jäi koskemattomaksi. Vihje: lisää Luku/Näytös/Kohtaus otsikoita, jotta voit tarkasti valita muistin aloituskohdan.'
+  punkt_odniesienia_za_dluga_tresc: 'Valittu katkelma „{naglowek}" on niin laaja, ettei se mahdu yksinään työmuisti-ikkunaan — hätäleikkaus viimeisiin {liczba_znakow} merkkiin on tehty. Ohjaaja, tämä on hieman hullua: harkitse Näytösten/Lukujen jakamista pienempiin Kohtauksiin — lyhyemmät osiot auttavat AI:ta pitämään yhtenäisen kontekstin.'
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -812,7 +813,7 @@ konwerter:
   # nowy folder + te listy, bez edycji regexów w Pythonie. Dopasowanie
   # prefiksowe, case-insensitive. rozdzialow → H1; sceny → pogrubienie bez TOC.
   naglowki_rozdzialow: ["Luku", "Prologi", "Epilogi", "Näytös"]
-  naglowki_scen:       ["Kohtaus"]
+  naglowki_scen: ["Kohtaus"]
   # Dialog wyboru pliku
   file_dlg_title: "Valitse lähdetiedosto"
   file_dlg_wildcard: "Kaikki tuetut tiedostot (*.txt;*.html;*.htm;*.md;*.docx)|*.txt;*.html;*.htm;*.md;*.docx|Word-dokumentit (*.docx)|*.docx|Kaikki tiedostot (*.*)|*.*"
