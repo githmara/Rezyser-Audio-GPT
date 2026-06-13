@@ -325,89 +325,92 @@ def prompt_akcent(id_pliku: str, etykieta: str, iso: str,
                   jezyk_bazowy: str) -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT"
-(wxPython + OpenAI). Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash.
-Twoja praca: utworzyć regułę fonetyczną w drzewie projektu.
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project (wxPython + OpenAI). You have tools: Read, Write, Edit, Glob, Grep,
+Bash. Your job: create a phonetic rule inside the project tree.
 
-# KONTEKST PROJEKTU
-- `core_poliglota.py` — silnik fonetyczny. Akcenty są ładowane z
-  `dictionaries/<kod>/akcenty/*.yaml` DYNAMICZNIE (od v17.5): tryb
-  Reżysera dyspatchuje po id akcentu w locie, bez kroku generowania
-  kodu — dodanie pliku YAML wystarcza.
-- Paczki wdrożone (stan 13.9): {inne_paczki} — to Twoje wzorce stylu
-  i fonetyki dla podobnych celów (np. akcent finski jest w każdej z nich).
-- Paczka bazowa tego zadania: `dictionaries/{jezyk_bazowy}/`
-  (język {natywna_baza}). Manager Reguł utworzył już strukturę.
+# PROJECT CONTEXT
+- `core_poliglota.py` — the phonetic engine. Accents are loaded from
+  `dictionaries/<code>/akcenty/*.yaml` DYNAMICALLY (since v17.5): the
+  Director mode dispatches by accent id on the fly, with no
+  code-generation step — dropping in a YAML file is enough.
+- Deployed packs (as of 13.9): {inne_paczki} — these are your reference for
+  style and phonetics for similar goals (e.g. the Finnish accent exists in
+  each of them).
+- Base pack for this task: `dictionaries/{jezyk_bazowy}/`
+  (language {natywna_baza}). Manager Reguł already created the structure.
 
-# ZADANIE
-Utwórz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
-akcent fonetyczny **{etykieta}**, który upodobni tekst pisany w języku
-**{natywna_baza}** do wymowy w języku o kodzie ISO **{iso}** (docelowy
-syntezator TTS).
+# TASK
+Create the file `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
+a phonetic accent **{etykieta}** that makes text written in
+**{natywna_baza}** resemble the pronunciation of the language with ISO
+code **{iso}** (the target TTS synthesizer).
 
-# WALIDACJA SCENARIUSZA (zanim cokolwiek napiszesz)
-Sprawdź, czy `iso` ({iso}) różni się od `jezyk_bazowy` ({jezyk_bazowy}).
-Jeśli `iso == jezyk_bazowy` lub `iso` jest puste — ten plik NIE jest
-akcentem fonetycznym, tylko narzędziowym preprocessorem
-(`kategoria: oczyszczenie`) lub naprawiaczem tagów (`kategoria:
-naprawiacz`). PRZERWIJ pracę i poproś usera, żeby uruchomił Manager
-Reguł z odpowiednim podtypem („Akcent czyszczący" lub „Naprawiacz tagów"
-zamiast „Akcent fonetyczny"). Nie da się sensownie napisać listy
-`zamiany:` upodabniającej język do samego siebie.
+# SCENARIO VALIDATION (before you write anything)
+Check that `iso` ({iso}) differs from `jezyk_bazowy` ({jezyk_bazowy}).
+If `iso == jezyk_bazowy` or `iso` is empty — this file is NOT a phonetic
+accent but a utility preprocessor (`kategoria: oczyszczenie`) or a tag
+fixer (`kategoria: naprawiacz`). STOP and ask the user to run Manager
+Reguł with the right subtype („Akcent czyszczący" or „Naprawiacz tagów"
+instead of „Akcent fonetyczny"). You cannot meaningfully write a
+`zamiany:` list that makes a language resemble itself.
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — alfabet i mapa
-   diakrytyków `polskie_znaki` paczki bazowej. Twoje wzory zamian MUSZĄ
-   operować na tekście po `usun_polskie_znaki: true` (czyli po
-   transliteracji opisanej w tym pliku).
-2. `dictionaries/<inna paczka>/akcenty/<dowolny>.yaml` — wzorzec stylu.
-   Wybierz paczkę, której baza ma najbliższy charakter do {natywna_baza}
-   (alfabet łaciński/cyrylicki, obecność/brak diakrytyków). Glob
-   `dictionaries/*/akcenty/*.yaml` pokaże wszystko, co masz pod ręką.
-3. (Opcjonalnie) `dictionaries/<dowolna>/akcenty/<ten sam id>.yaml` —
-   jeśli akcent o tym samym `id` istnieje w innej paczce, sprawdź jak
-   tam dostosowano listę `zamiany` do bazy tej paczki. Pomocne dla
-   identyfikatorów typu `finski`, `szwedzki`, `oczyszczenie` które
-   zwykle istnieją we wszystkich wdrożonych paczkach.
+# REFERENCE FILES (open before writing)
+1. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — the alphabet and the
+   `polskie_znaki` diacritics map of the base pack. Your replacement
+   patterns MUST operate on the text after `usun_polskie_znaki: true`
+   (i.e. after the transliteration described in that file).
+2. `dictionaries/<another pack>/akcenty/<any>.yaml` — a style reference.
+   Pick the pack whose base is closest in character to {natywna_baza}
+   (Latin/Cyrillic alphabet, presence/absence of diacritics). The glob
+   `dictionaries/*/akcenty/*.yaml` shows everything you have at hand.
+3. (Optional) `dictionaries/<any>/akcenty/<same id>.yaml` — if an accent
+   with the same `id` exists in another pack, check how its `zamiany`
+   list was adapted to that pack's base. Useful for identifiers like
+   `finski`, `szwedzki`, `oczyszczenie` that usually exist in every
+   deployed pack.
 
-# WYMAGANIA STRUKTURY
-1. Pola `id`, `etykieta`, `iso`, `kategoria: akcent`, `kolejnosc`.
+# STRUCTURE REQUIREMENTS
+1. Fields `id`, `etykieta`, `iso`, `kategoria: akcent`, `kolejnosc`.
 2. Pipeline (boolean): `czysc_tekst_tts`, `normalizuj_liczby`,
-   `usun_polskie_znaki`, `skleja_pojedyncze_litery`. Domyślnie `true`
-   dla typowych akcentów fonetycznych.
-3. Lista `zamiany:` uporządkowana: TRIGRAMY → DWUZNAKI → JEDNOZNAKI
-   (inaczej `c → ts` rozwali zapis `ch` / `cz`). Każdy dwuznak/trigram
-   w wariancie `mały` + `Wielką pierwszą`; dla języków używających ALL-CAPS
-   częstych skrótów (np. niemieckie SCH, CH) dodaj trzeci wariant.
-4. Regex: dodaj `regex: true` w wierszu zamiany.
-5. **Flaga `usun_polskie_znaki: true`** (mimo nazwy historycznej!) usuwa
-   diakrytyki języka {jezyk_bazowy} zgodnie z mapą w
-   `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`. Twoje
-   wzory MUSZĄ działać NA TEKŚCIE PO tej transliteracji — czyli operuj
-   na ASCII (lub bezdiakrytycznym) odpowiedniku alfabetu {natywna_baza}.
+   `usun_polskie_znaki`, `skleja_pojedyncze_litery`. Default `true`
+   for typical phonetic accents.
+3. The `zamiany:` list ordered: TRIGRAPHS → DIGRAPHS → SINGLE LETTERS
+   (otherwise `c → ts` breaks the `ch` / `cz` spellings). Each
+   digraph/trigraph in a `lowercase` + `Capitalized` variant; for
+   languages that use frequent ALL-CAPS forms (e.g. German SCH, CH) add a
+   third variant.
+4. Regex: add `regex: true` on the replacement row.
+5. **The `usun_polskie_znaki: true` flag** (despite its historical name!)
+   strips the diacritics of language {jezyk_bazowy} per the map in
+   `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`. Your
+   patterns MUST work ON THE TEXT AFTER that transliteration — i.e.
+   operate on the ASCII (or diacritic-free) equivalent of the
+   {natywna_baza} alphabet.
 
-# WYMAGANIA NATYWNOŚCI
-- `etykieta`, `opis`, nagłówek pliku, komentarze YAML — wszystko w języku
-  **{natywna_baza}**. Mieszanie polskiego z natywnym jest BŁĘDEM (np.
-  dla paczki FR „Akcent finski" jest błędem; powinno być
-  „Accent finlandais" lub równoważnie).
+# NATIVE-LANGUAGE REQUIREMENTS
+- `etykieta`, `opis`, the file header, the YAML comments — everything in
+  **{natywna_baza}**. Mixing Polish with the native language is an ERROR
+  (e.g. for the FR pack „Akcent finski" is wrong; it should be
+  „Accent finlandais" or equivalent).
 
-# PROCEDURA
-1. Otwórz pliki referencyjne (Read).
-2. Zaprojektuj listę `zamiany:` adekwatną do akcentu {etykieta}, używając
-   konwencji stylu paczki, z której bierzesz wzorzec.
-3. Zapisz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
+# PROCEDURE
+1. Open the reference files (Read).
+2. Design a `zamiany:` list appropriate to the {etykieta} accent, using the
+   style convention of the pack you take as a model.
+3. Save the file `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
    (Write).
-4. Zweryfikuj parsowalność:
-   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
-5. (opcjonalnie) Włącz walidację pętli sekwencyjnych `zamiany:`:
-   uruchom aplikację ze źródła z `REZYSER_VALIDATE_ZAMIANY=1` — silnik
-   wypisze na konsoli ostrzeżenia, jeśli reguły zapętlają się przez
-   `str.replace`. Regeneracji kodu NIE trzeba — akcent jest wykrywany
-   dynamicznie po dodaniu pliku.
-6. W odpowiedzi raportuj: ile par ma `zamiany:` i którą paczkę wzięto
-   za wzorzec stylu.
+4. Validate that the file parses as YAML using whatever YAML tooling you
+   have available (any YAML loader/linter — do not assume a particular
+   shell or that Python is on PATH).
+5. (Optional) Enable the sequential-`zamiany:` loop check: run the app from
+   source with `REZYSER_VALIDATE_ZAMIANY=1` — the engine prints warnings to
+   the console if rules feed into each other through `str.replace`. No code
+   regeneration is needed — the accent is detected dynamically once the
+   file is added.
+6. In your reply report: how many pairs `zamiany:` has and which pack you
+   took as the style model.
 """
 
 
@@ -456,66 +459,67 @@ def prompt_oczyszczenie(id_pliku: str, etykieta: str,
                         jezyk_bazowy: str) -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
-Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: zaadaptować
-plik „akcentu czyszczącego" (preprocessor TTS) do nowej paczki językowej.
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: adapt a
+„cleaning accent" file (a TTS preprocessor) to a new language pack.
 
-# KONTEKST PROJEKTU
-- Akcenty „czyszczące" (`kategoria: oczyszczenie`) NIE nakładają fonetyki —
-  uruchamiają wyłącznie pipeline `czysc_tekst_tts` + ewentualnie
-  `normalizuj_liczby` (cyfry → słowa). Lista `zamiany:` jest pusta.
-- Struktura tych plików jest IDENTYCZNA we wszystkich 7 wdrożonych
-  paczkach ({inne_paczki}); różni się TYLKO treść etykiety, opisu
-  i komentarzy YAML — wszystko natywne.
-- Każda paczka zawiera dwa warianty: `oczyszczenie.yaml` (z normalizacją
-  liczb) i `oczyszczenie_bez_liczb.yaml` (bez — dla książek z datami,
-  numerami stron itp.).
+# PROJECT CONTEXT
+- „Cleaning" accents (`kategoria: oczyszczenie`) apply NO phonetics — they
+  run only the `czysc_tekst_tts` pipeline plus optionally
+  `normalizuj_liczby` (digits → words). The `zamiany:` list is empty.
+- The structure of these files is IDENTICAL across all 7 deployed packs
+  ({inne_paczki}); ONLY the label, description and YAML comments differ —
+  all native.
+- Each pack ships two variants: `oczyszczenie.yaml` (with number
+  normalization) and `oczyszczenie_bez_liczb.yaml` (without — for books
+  with many dates, page numbers etc.).
 
-# ZADANIE
-Utwórz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
-akcent czyszczący w paczce {natywna_baza}, etykieta widoczna w GUI:
+# TASK
+Create the file `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
+a cleaning accent in the {natywna_baza} pack, GUI-visible label:
 **{etykieta}**.
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `dictionaries/<dowolna z wdrożonych>/akcenty/{id_pliku}.yaml` — gotowy
-   wzorzec stylu (struktura, kolejnosc, pipeline). Jedyne, co zmieniasz,
-   to etykieta + opis + komentarze przekładane na {natywna_baza}.
-2. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — sprawdzenie konwencji
-   stylu komentarzy YAML w paczce bazowej.
+# REFERENCE FILES (open before writing)
+1. `dictionaries/<any deployed>/akcenty/{id_pliku}.yaml` — a ready-made
+   style model (structure, kolejnosc, pipeline). The only things you change
+   are the label + description + comments translated into {natywna_baza}.
+2. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — to check the YAML comment
+   style convention of the base pack.
 
-# WYMAGANIA STRUKTURY
-1. `kategoria: oczyszczenie` (silnik traktuje takie pliki jako
-   preprocessor, nie fonetyczny akcent).
-2. `iso: {jezyk_bazowy}` (operuje na tekście paczki bazowej).
+# STRUCTURE REQUIREMENTS
+1. `kategoria: oczyszczenie` (the engine treats such files as a
+   preprocessor, not a phonetic accent).
+2. `iso: {jezyk_bazowy}` (operates on the base-pack text).
 3. Pipeline:
-   - `oczyszczenie` (z normalizacją liczb): `czysc_tekst_tts: true`,
+   - `oczyszczenie` (with number normalization): `czysc_tekst_tts: true`,
      `normalizuj_liczby: true`, `usun_polskie_znaki: false`,
      `skleja_pojedyncze_litery: false`.
-   - `oczyszczenie_bez_liczb`: jak wyżej, ale `normalizuj_liczby: false`.
-4. `zamiany: []` (pusta lista — to nie fonetyczny akcent).
-5. `kolejnosc: 20` (umieszcza w GUI nad fonetycznymi).
+   - `oczyszczenie_bez_liczb`: as above but `normalizuj_liczby: false`.
+4. `zamiany: []` (empty list — this is not a phonetic accent).
+5. `kolejnosc: 20` (places it above the phonetic accents in the GUI).
 
-# WYMAGANIA NATYWNOŚCI
-`etykieta`, `opis`, nagłówek pliku, komentarze YAML — wszystko
-w {natywna_baza}. Zwróć uwagę na konwencję etykiety wdrożonych paczek:
+# NATIVE-LANGUAGE REQUIREMENTS
+`etykieta`, `opis`, the file header, the YAML comments — everything in
+{natywna_baza}. Note the label convention of the deployed packs:
 - PL: „Żaden (Czyszczenie Z normalizacją liczb)"
 - DE: „Keiner (Bereinigung MIT Zahlennormalisierung)"
 - IT: „Nessuno (Pulizia CON normalizzazione numeri)"
-Pierwsze słowo to „brak akcentu" w {natywna_baza}, w nawiasie krótka
-charakterystyka co dokładnie robi pipeline.
+The first word is „no accent" in {natywna_baza}, with a short note in
+parentheses describing exactly what the pipeline does.
 
-# PROCEDURA
-1. Otwórz `dictionaries/<wdrożona>/akcenty/{id_pliku}.yaml` (Read).
-2. Otwórz `dictionaries/{jezyk_bazowy}/podstawy.yaml` żeby zobaczyć
-   konwencję komentarzy paczki bazowej.
-3. Zapisz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
-   (Write) z tą samą strukturą, ale natywną treścią pól tekstowych.
-4. Zweryfikuj parsowalność:
-   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
-5. Gotowe — akcent oczyszczający jest wykrywany dynamicznie przy starcie
-   aplikacji, bez regeneracji kodu.
-6. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec.
+# PROCEDURE
+1. Open `dictionaries/<deployed>/akcenty/{id_pliku}.yaml` (Read).
+2. Open `dictionaries/{jezyk_bazowy}/podstawy.yaml` to see the comment
+   convention of the base pack.
+3. Save the file `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
+   (Write) with the same structure but native text in the text fields.
+4. Validate that the file parses as YAML using whatever YAML tooling you
+   have available (any YAML loader/linter — do not assume a particular
+   shell or that Python is on PATH).
+5. Done — the cleaning accent is detected dynamically on app start, with no
+   code regeneration.
+6. In your reply report: which pack you took as the model.
 """
 
 
@@ -567,59 +571,62 @@ def prompt_naprawiacz(id_pliku: str, etykieta: str,
                       jezyk_bazowy: str) -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
-Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: zaadaptować
-plik „naprawiacza tagów" do nowej paczki językowej.
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: adapt a
+„tag fixer" file to a new language pack.
 
-# KONTEKST PROJEKTU
-- Naprawiacz tagów (`kategoria: naprawiacz`) to TRYB SPECJALNY: NIE
-  modyfikuje treści tekstu ani jego fonetyki. Wstrzykuje wyłącznie kod
-  ISO języka do plików wynikowych:
-    * HTML: atrybut `lang="..."` w znaczniku `<html>`
-    * DOCX: element `<w:lang w:val="..."/>` dla każdego biegu tekstu
-  Dzięki temu czytnik ekranu (NVDA/JAWS) poprawnie przełącza głos
-  syntezatora na właściwy język.
-- Kod ISO podaje user ręcznie w GUI (pole „Kod ISO") — wartość `iso:`
-  w pliku jest pusta (`iso: ""`).
-- Struktura pliku jest IDENTYCZNA we wszystkich 7 wdrożonych paczkach
-  ({inne_paczki}); różni się TYLKO treść etykiety, opisu i komentarzy
-  YAML — wszystko natywne.
+# PROJECT CONTEXT
+- The tag fixer (`kategoria: naprawiacz`) is a SPECIAL MODE: it does NOT
+  modify the text content or its phonetics. It only injects the language
+  ISO code into the output files:
+    * HTML: the `lang="..."` attribute on the `<html>` tag
+    * DOCX: a `<w:lang w:val="..."/>` element for every text run
+  This lets a screen reader (NVDA/JAWS) switch the synthesizer voice to the
+  correct language.
+- The ISO code is supplied by the user in the GUI (the „Kod ISO" field) —
+  the `iso:` value in the file is empty (`iso: ""`).
+- The file structure is IDENTICAL across all 7 deployed packs
+  ({inne_paczki}); ONLY the label, description and YAML comments differ —
+  all native.
 
-# ZADANIE
-Utwórz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
-naprawiacz tagów w paczce {natywna_baza}, etykieta widoczna w GUI:
+# TASK
+Create the file `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml` —
+a tag fixer in the {natywna_baza} pack, GUI-visible label:
 **{etykieta}**.
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `dictionaries/<dowolna z wdrożonych>/akcenty/naprawiacz_tagow.yaml` —
-   gotowy wzorzec stylu. Jedyne, co zmieniasz: etykieta + opis +
-   komentarze przekładane na {natywna_baza}.
+# REFERENCE FILES (open before writing)
+1. `dictionaries/<any deployed>/akcenty/naprawiacz_tagow.yaml` — a
+   ready-made style model. The only things you change: label + description
+   + comments translated into {natywna_baza}.
 
-# WYMAGANIA STRUKTURY (silnik)
-1. `kategoria: naprawiacz` — silnik wykrywa tryb specjalny po tej wartości.
-2. `iso: ""` (pusty string — kod podawany przez user w GUI).
-3. Wszystkie flagi pipeline `false`: `czysc_tekst_tts`,
+# STRUCTURE REQUIREMENTS (engine)
+1. `kategoria: naprawiacz` — the engine detects the special mode by this
+   value.
+2. `iso: ""` (empty string — the code is supplied by the user in the GUI).
+3. All pipeline flags `false`: `czysc_tekst_tts`,
    `normalizuj_liczby`, `usun_polskie_znaki`, `skleja_pojedyncze_litery`.
-4. `zamiany: []` (pusta lista — silnik nie aplikuje żadnych zamian).
-5. `kolejnosc: 100` (na końcu listy w GUI).
+4. `zamiany: []` (empty list — the engine applies no replacements).
+5. `kolejnosc: 100` (at the end of the GUI list).
 
-# WYMAGANIA NATYWNOŚCI
-`etykieta`, `opis`, nagłówek pliku, komentarze YAML — wszystko
-w {natywna_baza}. Konwencja etykiety wdrożonych paczek (z emoji 🔧):
+# NATIVE-LANGUAGE REQUIREMENTS
+`etykieta`, `opis`, the file header, the YAML comments — everything in
+{natywna_baza}. The label convention of the deployed packs (with the 🔧
+emoji):
 - PL: „🔧 Naprawiacz Tagów (Tylko wstrzyknięcie kodu ISO)"
 - DE: „🔧 Tag-Reparateur (Nur ISO-Code-Injektion)"
 - IT: „🔧 Riparatore di tag (solo iniezione del codice ISO)"
 
-# PROCEDURA
-1. Otwórz `dictionaries/<wdrożona>/akcenty/naprawiacz_tagow.yaml` (Read).
-2. Zapisz plik `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
-   (Write) z tą samą strukturą, natywną treścią pól tekstowych.
-3. Zweryfikuj parsowalność:
-   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml', encoding='utf-8'))"`.
-4. Gotowe — naprawiacz tagów jest wykrywany dynamicznie przy starcie
-   aplikacji, bez regeneracji kodu.
-5. W odpowiedzi raportuj: którą paczkę wzięto za wzorzec.
+# PROCEDURE
+1. Open `dictionaries/<deployed>/akcenty/naprawiacz_tagow.yaml` (Read).
+2. Save the file `dictionaries/{jezyk_bazowy}/akcenty/{id_pliku}.yaml`
+   (Write) with the same structure and native text in the text fields.
+3. Validate that the file parses as YAML using whatever YAML tooling you
+   have available (any YAML loader/linter — do not assume a particular
+   shell or that Python is on PATH).
+4. Done — the tag fixer is detected dynamically on app start, with no code
+   regeneration.
+5. In your reply report: which pack you took as the model.
 """
 
 
@@ -675,71 +682,73 @@ def prompt_szyfr_zamiany(id_pliku: str, etykieta: str,
                          jezyk_bazowy: str) -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
-Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: utworzyć
-plik szyfru „czyste zamiany" w drzewie projektu.
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: create
+a „pure replacements" cipher file inside the project tree.
 
-# KONTEKST PROJEKTU
-- `core_poliglota.py` — silnik fonetyczny. Szyfry typu „czyste zamiany"
-  działają jak akcenty bez pipeline'u fonetycznego: tylko lista
-  `zamiany:` jest aplikowana do tekstu.
-- KRYTYCZNE o wzorcach: WSZYSTKIE 6 szyfrów wdrożonych w paczkach (cezar,
-  jakanie, odwracanie, samogloskowiec, typoglikemia, waz) to szyfry
-  ALGORYTMICZNE — mają pole `algorytm:` i NIE zawierają listy `zamiany:`.
-  NIE bierz ich za wzorzec struktury. Jedyne pliki w projekcie używające
-  formatu `kategoria` + lista `zamiany:` to AKCENTY (`akcenty/*.yaml`) —
-  i to one są Twoim wzorcem STRUKTURY dla tego szyfru.
-- Paczki wdrożone (stan 13.9): {inne_paczki}. Ich pliki `cezar.yaml`
-  przydają się wyłącznie jako wzorzec STYLU JĘZYKOWEGO metadanych
-  (etykieta/opis/komentarze natywne), nie struktury.
-- Paczka tego zadania: `dictionaries/{jezyk_bazowy}/`
-  (język {natywna_baza}).
+# PROJECT CONTEXT
+- `core_poliglota.py` — the phonetic engine. „Pure replacements" ciphers
+  work like accents without the phonetic pipeline: only the `zamiany:`
+  list is applied to the text.
+- CRITICAL about reference models: ALL 6 ciphers deployed in the packs
+  (cezar, jakanie, odwracanie, samogloskowiec, typoglikemia, waz) are
+  ALGORITHMIC ciphers — they have an `algorytm:` field and do NOT contain a
+  `zamiany:` list. Do NOT take them as a structure model. The only files in
+  the project using the `kategoria` + `zamiany:` list format are ACCENTS
+  (`akcenty/*.yaml`) — and those are your STRUCTURE model for this cipher.
+- Deployed packs (as of 13.9): {inne_paczki}. Their `cezar.yaml` files are
+  useful ONLY as a model of the LANGUAGE STYLE of the metadata
+  (native label/description/comments), not of the structure.
+- Pack for this task: `dictionaries/{jezyk_bazowy}/`
+  (language {natywna_baza}).
 
-# ZADANIE
-Utwórz plik `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml` —
-szyfr „czyste zamiany" o nazwie **{etykieta}**.
+# TASK
+Create the file `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml` —
+a „pure replacements" cipher named **{etykieta}**.
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `dictionaries/<inna paczka>/akcenty/<dowolny fonetyczny>.yaml` — wzorzec
-   STRUKTURY listy `zamiany:` (pary `wzor`→`zamiana`, kolejność dwuznaki
-   przed jednoznakami, opcjonalne `regex: true`). Akcent ma WŁĄCZONY
-   pipeline fonetyczny — w szyfrze zostawiasz go wyłączony (patrz niżej).
+# REFERENCE FILES (open before writing)
+1. `dictionaries/<another pack>/akcenty/<any phonetic>.yaml` — the STRUCTURE
+   model for the `zamiany:` list (`wzor`→`zamiana` pairs, digraphs before
+   single letters, optional `regex: true`). An accent has the phonetic
+   pipeline ENABLED — in a cipher you leave it disabled (see below).
    Glob: `dictionaries/*/akcenty/*.yaml`.
-2. `dictionaries/{jezyk_bazowy}/szyfry/cezar.yaml` — wzorzec STYLU
-   metadanych szyfru w paczce bazowej (etykieta/opis/komentarze natywne,
-   nagłówek pliku). NIE kopiuj jego ciała — to szyfr algorytmiczny
-   (`algorytm: cezar`), bez listy `zamiany:`.
-3. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — alfabet i diakrytyki
-   paczki bazowej (przydatne, jeśli efekt szyfru ma działać też na
-   literach z diakrytykami).
+2. `dictionaries/{jezyk_bazowy}/szyfry/cezar.yaml` — the model for the
+   metadata STYLE of a cipher in the base pack (native
+   label/description/comments, file header). Do NOT copy its body — it is
+   an algorithmic cipher (`algorytm: cezar`), with no `zamiany:` list.
+3. `dictionaries/{jezyk_bazowy}/podstawy.yaml` — the alphabet and
+   diacritics of the base pack (useful if the cipher effect should also act
+   on letters with diacritics).
 
-# WYMAGANIA STRUKTURY
-1. Pola: `id`, `etykieta`, `opis`, `iso: {jezyk_bazowy}`,
+# STRUCTURE REQUIREMENTS
+1. Fields: `id`, `etykieta`, `opis`, `iso: {jezyk_bazowy}`,
    `kategoria: szyfr`, `kolejnosc`.
-2. Pipeline (typowo wszystko OFF dla szyfrów):
+2. Pipeline (typically all OFF for ciphers):
    `czysc_tekst_tts: false`, `normalizuj_liczby: false`,
    `usun_polskie_znaki: false`, `skleja_pojedyncze_litery: false`.
-3. Lista `zamiany:` uporządkowana: dwuznaki/trigramy PRZED jednoznakami.
-   Dla każdego wzoru rozważ warianty `mały` i `Wielki`. Jeśli efekt ma
-   działać też na diakrytykach (à, é, ä, ё), uwzględnij je explicit lub
-   dodaj wzór z `regex: true`.
+3. The `zamiany:` list ordered: digraphs/trigraphs BEFORE single letters.
+   For each pattern consider a `lowercase` and a `Capitalized` variant. If
+   the effect should also act on diacritics (à, é, ä, ё), include them
+   explicitly or add a pattern with `regex: true`.
 
-# WYMAGANIA NATYWNOŚCI
-`etykieta`, `opis`, nagłówek pliku, komentarze YAML — w języku
-**{natywna_baza}**. Wzorzec dla wdrożonych paczek widać w `cezar.yaml`
-każdej paczki (komentarze niemieckie / włoskie / rosyjskie itd.).
+# NATIVE-LANGUAGE REQUIREMENTS
+`etykieta`, `opis`, the file header, the YAML comments — in
+**{natywna_baza}**. The model for the deployed packs is visible in each
+pack's `cezar.yaml` (German / Italian / Russian etc. comments).
 
-# PROCEDURA
-1. Otwórz pliki referencyjne (Read).
-2. Zaprojektuj listę `zamiany:` realizującą efekt {etykieta}.
-3. Zapisz plik `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml` (Write).
-4. Zweryfikuj parsowalność:
-   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml', encoding='utf-8'))"`.
-5. Szyfry są ładowane dynamicznie — nie ma dodatkowego skryptu do
-   uruchomienia. „Odśwież drzewo" w GUI Managera + restart aplikacji.
-6. W odpowiedzi raportuj: ile par ma `zamiany:` i którą paczkę wzięto
-   za wzorzec stylu.
+# PROCEDURE
+1. Open the reference files (Read).
+2. Design a `zamiany:` list that produces the {etykieta} effect.
+3. Save the file `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`
+   (Write).
+4. Validate that the file parses as YAML using whatever YAML tooling you
+   have available (any YAML loader/linter — do not assume a particular
+   shell or that Python is on PATH).
+5. Ciphers are loaded dynamically — there is no extra script to run.
+   „Odśwież drzewo" in the Manager GUI + restart the app.
+6. In your reply report: how many pairs `zamiany:` has and which pack you
+   took as the style model.
 """
 
 
@@ -830,79 +839,80 @@ def prompt_tryb_rezysera(id_pliku: str, etykieta: str,
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
-Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: utworzyć
-nowy tryb Reżysera (prompt systemowy + walidacja słów wyzwalających).
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: create
+a new Director mode (system prompt + trigger-word validation).
 
-# KONTEKST PROJEKTU
-- `core_rezyser.py` — silnik trybów AI (sklejanie promptu z `world_context`
-  + `prompt_systemowy` + instrukcji użytkownika).
-- `przepisy_rezysera.py` — loader YAML-i z `dictionaries/<kod>/rezyser/`.
-  Tryby ładowane dynamicznie; nie ma dodatkowego skryptu do uruchomienia
-  po dodaniu pliku.
-- Paczki wdrożone (stan 13.9): {inne_paczki} — każda ma 4 pliki w
-  `rezyser/` (3 tryby: audiobook/burza/skrypt + 1 postprodukcja). To
-  Twoje wzorce stylu i konwencji prompt_systemowy.
-- Paczka tego zadania: `dictionaries/{jezyk_bazowy}/`
-  (język {natywna_baza}).
+# PROJECT CONTEXT
+- `core_rezyser.py` — the AI-mode engine (assembles the prompt from
+  `world_context` + `prompt_systemowy` + the user instruction).
+- `przepisy_rezysera.py` — the YAML loader for `dictionaries/<code>/rezyser/`.
+  Modes are loaded dynamically; there is no extra script to run after
+  adding a file.
+- Deployed packs (as of 13.9): {inne_paczki} — each has 4 files in
+  `rezyser/` (3 modes: audiobook/burza/skrypt + 1 postproduction). These
+  are your reference for the style and convention of prompt_systemowy.
+- Pack for this task: `dictionaries/{jezyk_bazowy}/`
+  (language {natywna_baza}).
 
-# ZADANIE
-Utwórz plik `dictionaries/{jezyk_bazowy}/rezyser/tryb_{id_pliku}.yaml` —
-tryb twórczy AI o nazwie **{etykieta}**.
+# TASK
+Create the file `dictionaries/{jezyk_bazowy}/rezyser/tryb_{id_pliku}.yaml` —
+a creative AI mode named **{etykieta}**.
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `dictionaries/{jezyk_bazowy}/rezyser/tryb_audiobook.yaml` — jeśli
-   istnieje, najlepszy wzorzec stylu prompt_systemowy w {natywna_baza}.
-   Jeśli paczka jest dopiero tworzona, użyj wzorca z innej wdrożonej.
-2. `dictionaries/<inna paczka>/rezyser/tryb_audiobook.yaml` — referencja
-   konwencji: nagłówki sekcji z emoji (🌍, 📖), format
-   `**TYTUŁ ZASADY:** opis` dla zasad numerowanych, etykieta z natywnym
-   nawiasem („Hörbuch (Prosa, Kapitel, DATEI SCHREIBEN)" DE,
+# REFERENCE FILES (open before writing)
+1. `dictionaries/{jezyk_bazowy}/rezyser/tryb_audiobook.yaml` — if it
+   exists, the best style model for prompt_systemowy in {natywna_baza}.
+   If the pack is only being created, use a model from another deployed pack.
+2. `dictionaries/<another pack>/rezyser/tryb_audiobook.yaml` — a convention
+   reference: section headers with emoji (🌍, 📖), the
+   `**RULE TITLE:** description` format for numbered rules, a label with a
+   native parenthetical („Hörbuch (Prosa, Kapitel, DATEI SCHREIBEN)" DE,
    „Аудиокнига (Проза, главы, ЗАПИСЫВАЕТ В ФАЙЛ)" RU).
-3. `dictionaries/<inna paczka>/rezyser/tryb_burza.yaml` lub
-   `tryb_skrypt.yaml` — alternatywne wzorce dla trybów innych niż
-   literacka proza.
+3. `dictionaries/<another pack>/rezyser/tryb_burza.yaml` or
+   `tryb_skrypt.yaml` — alternative models for modes other than literary
+   prose.
 
-# WYMAGANIA STRUKTURY (silnik)
-1. Pola identyfikujące: `id`, `etykieta`, `kategoria: tryb`, `kolejnosc`
-   (int 10-90; 30 = audiobook, 40 = burza mózgów, 50 = skrypt).
-2. Parametry OpenAI: `model: gpt-4o` (lub `gpt-4o-mini` dla szybkich
-   trybów), `temperatura` (0.7-0.9 dla literackich, 0.5 dla skryptowych),
-   `jezyk_odpowiedzi: {natywny_jezyk_odp}` (już dopasowane do paczki),
+# STRUCTURE REQUIREMENTS (engine)
+1. Identifying fields: `id`, `etykieta`, `kategoria: tryb`, `kolejnosc`
+   (int 10-90; 30 = audiobook, 40 = brainstorm, 50 = script).
+2. OpenAI parameters: `model: gpt-4o` (or `gpt-4o-mini` for fast modes),
+   `temperatura` (0.7-0.9 for literary, 0.5 for scripting),
+   `jezyk_odpowiedzi: {natywny_jezyk_odp}` (already matched to the pack),
    `zapis_do_pliku: true`.
-3. **`prompt_systemowy:`** doklejany do każdego callu OpenAI. MUSI
-   zawierać placeholdery `{{world_context}}` i `{{jezyk_odpowiedzi}}`
-   (silnik je podstawia). Pierwsza linia ZAWSZE zawiera frazę
-   „WYŁĄCZNIE po {{jezyk_odpowiedzi}}" w odpowiedniej formie idiomu
+3. **`prompt_systemowy:`** appended to every OpenAI call. It MUST contain
+   the placeholders `{{world_context}}` and `{{jezyk_odpowiedzi}}` (the
+   engine substitutes them). The first line ALWAYS contains the phrase
+   „ONLY in {{jezyk_odpowiedzi}}" in the appropriate idiom form
    (DE: „AUSSCHLIESSLICH auf"; IT: „ESCLUSIVAMENTE in"; RU: „ИСКЛЮЧИТЕЛЬНО на").
-4. **`przypomnienie_uzytkownika:`** krótka 1-2-zdaniowa rekapitulacja
-   kluczowych zasad trybu, doklejana do instrukcji użytkownika.
-5. **`slowa_wyzwalajace.streszczenie:`** lista 3-5 natywnych słów typowo
-   używanych w {natywna_baza} gdy ktoś prosi AI o streszczenie. Małymi
-   literami (silnik robi lower-case porównanie).
-6. **`stosuj_akcenty_fonetyczne:`** `true` dla trybów generujących
-   dialogi z tagami postaci, `false` dla prozy literackiej.
-7. `sufiksy: {{}}` (puste — chyba że wzorzec z `tryb_burza.yaml` pokazuje
-   sufiksy zależne od stanu pamięci jako użyteczne dla tego trybu).
+4. **`przypomnienie_uzytkownika:`** a short 1-2 sentence recap of the
+   mode's key rules, appended to the user instruction.
+5. **`slowa_wyzwalajace.streszczenie:`** a list of 3-5 native words
+   typically used in {natywna_baza} when someone asks the AI for a summary.
+   Lowercase (the engine does a lower-case comparison).
+6. **`stosuj_akcenty_fonetyczne:`** `true` for modes that generate dialogue
+   with character tags, `false` for literary prose.
+7. `sufiksy: {{}}` (empty — unless the `tryb_burza.yaml` model shows
+   memory-state-dependent suffixes that are useful for this mode).
 
-# WYMAGANIA NATYWNOŚCI
-Wszystkie teksty „dla człowieka" w pliku — etykieta, nagłówek, komentarze
-YAML, `prompt_systemowy`, `przypomnienie_uzytkownika`, lista
-`slowa_wyzwalajace.streszczenie` — w języku **{natywna_baza}**.
+# NATIVE-LANGUAGE REQUIREMENTS
+All „human-facing" text in the file — label, header, YAML comments,
+`prompt_systemowy`, `przypomnienie_uzytkownika`, the
+`slowa_wyzwalajace.streszczenie` list — in **{natywna_baza}**.
 
-# PROCEDURA
-1. Otwórz pliki referencyjne (Read).
-2. Zaprojektuj `prompt_systemowy` — rola AI, zasady stylu, formuła
-   domykania scen (DOMYŚLNIE anti-closure / WYJĄTEK finał).
-3. Zapisz plik
+# PROCEDURE
+1. Open the reference files (Read).
+2. Design `prompt_systemowy` — the AI role, the style rules, the
+   scene-closing formula (DEFAULT anti-closure / EXCEPTION finale).
+3. Save the file
    `dictionaries/{jezyk_bazowy}/rezyser/tryb_{id_pliku}.yaml` (Write).
-4. Zweryfikuj parsowalność:
-   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/rezyser/tryb_{id_pliku}.yaml', encoding='utf-8'))"`.
-5. Tryby Reżysera są ładowane dynamicznie — nie ma dodatkowego skryptu.
-   „Odśwież drzewo" w Managerze + restart aplikacji.
-6. W odpowiedzi raportuj: model, temperatura, ile słów wyzwalających
-   streszczenie, którą paczkę wzięto za wzorzec.
+4. Validate that the file parses as YAML using whatever YAML tooling you
+   have available (any YAML loader/linter — do not assume a particular
+   shell or that Python is on PATH).
+5. Director modes are loaded dynamically — there is no extra script.
+   „Odśwież drzewo" in the Manager + restart the app.
+6. In your reply report: the model, the temperature, how many summary
+   trigger words, and which pack you took as the model.
 """
 
 
@@ -967,80 +977,82 @@ def prompt_postprodukcja(id_pliku: str, etykieta: str,
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
     natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
-Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: utworzyć
-postprodukcję (iteracyjne przetwarzanie pliku rozdział-po-rozdziale).
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: create
+a postproduction (iterative chapter-by-chapter file processing).
 
-# KONTEKST PROJEKTU
-- `core_rezyser.py` + `przepisy_rezysera.py` — silnik trybów AI; ładuje
-  postprodukcje z `dictionaries/<kod>/rezyser/postprod_*.yaml`.
-- Postprodukcja iteruje po pliku projektu (.txt) — silnik dzieli go po
-  `regex_podzial_rozdzialow` i wysyła każdy fragment do AI z
-  `prompt_systemowy` + `prompt_uzytkownika_szablon` (placeholdery
-  `{{naglowek}}` i `{{probka}}`).
-- Paczki wdrożone (stan 13.9): {inne_paczki} — każda ma 1 postprodukcję
-  (`postprod_tytuly.yaml`). Wzorzec stylu.
-- Paczka tego zadania: `dictionaries/{jezyk_bazowy}/`
-  (język {natywna_baza}).
+# PROJECT CONTEXT
+- `core_rezyser.py` + `przepisy_rezysera.py` — the AI-mode engine; it loads
+  postproductions from `dictionaries/<code>/rezyser/postprod_*.yaml`.
+- A postproduction iterates over the project file (.txt) — the engine
+  splits it by `regex_podzial_rozdzialow` and sends each chunk to the AI
+  with `prompt_systemowy` + `prompt_uzytkownika_szablon` (placeholders
+  `{{naglowek}}` and `{{probka}}`).
+- Deployed packs (as of 13.9): {inne_paczki} — each has 1 postproduction
+  (`postprod_tytuly.yaml`). A style model.
+- Pack for this task: `dictionaries/{jezyk_bazowy}/`
+  (language {natywna_baza}).
 
-# ZADANIE
-Utwórz plik `dictionaries/{jezyk_bazowy}/rezyser/postprod_{id_pliku}.yaml` —
-postprodukcja o nazwie **{etykieta}**.
+# TASK
+Create the file `dictionaries/{jezyk_bazowy}/rezyser/postprod_{id_pliku}.yaml` —
+a postproduction named **{etykieta}**.
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `dictionaries/{jezyk_bazowy}/rezyser/postprod_tytuly.yaml` — jeśli
-   istnieje, gotowy wzorzec konwencji w {natywna_baza}.
-2. `dictionaries/<inna paczka>/rezyser/postprod_tytuly.yaml` — referencja
-   konwencji dla wdrożonych paczek (PL/DE/IT/RU/FI/IS/EN). Zwróć uwagę
-   na natywne `regex_podzial_rozdzialow` (PL: Rozdział, DE: Kapitel,
+# REFERENCE FILES (open before writing)
+1. `dictionaries/{jezyk_bazowy}/rezyser/postprod_tytuly.yaml` — if it
+   exists, a ready-made convention model in {natywna_baza}.
+2. `dictionaries/<another pack>/rezyser/postprod_tytuly.yaml` — a
+   convention reference for the deployed packs (PL/DE/IT/RU/FI/IS/EN). Note
+   the native `regex_podzial_rozdzialow` (PL: Rozdział, DE: Kapitel,
    IT: Capitolo, RU: Глава, EN: Chapter).
-3. (Opcjonalnie) Pliki projektowe użytkownika `.txt` — jeśli masz dostęp
-   do przykładów, otwórz jeden żeby zweryfikować jak realnie nazwane są
-   nagłówki rozdziałów w {natywna_baza}.
+3. (Optional) The user's `.txt` project files — if you have access to
+   examples, open one to verify how chapter headers are actually named in
+   {natywna_baza}.
 
-# WYMAGANIA STRUKTURY (silnik)
-1. Pola: `id`, `etykieta`, `kategoria: postprodukcja`, `kolejnosc`
-   (int 10-90, np. 20 dla generatora tytułów).
-2. Parametry OpenAI: `model: gpt-4o-mini` (lub `gpt-4o` jeśli zadanie
-   wymaga rozumowania), `temperatura` 0.5-0.8 (chcemy stabilności),
+# STRUCTURE REQUIREMENTS (engine)
+1. Fields: `id`, `etykieta`, `kategoria: postprodukcja`, `kolejnosc`
+   (int 10-90, e.g. 20 for a title generator).
+2. OpenAI parameters: `model: gpt-4o-mini` (or `gpt-4o` if the task
+   requires reasoning), `temperatura` 0.5-0.8 (we want stability),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}`.
-3. **`prompt_systemowy:`** rola AI, 1-2 zdania o oczekiwanym formacie
-   wyjścia. Wzorzec PL: „Jesteś redaktorem audiobooków. Twoja odpowiedź
+3. **`prompt_systemowy:`** the AI role, 1-2 sentences on the expected
+   output format. PL model: „Jesteś redaktorem audiobooków. Twoja odpowiedź
    zawiera WYŁĄCZNIE tytuł rozdziału — jedno zdanie, bez komentarzy."
-4. **`prompt_uzytkownika_szablon:`** MUSI zawierać oba placeholdery:
-   `{{naglowek}}` (silnik wstawia tytuł) i `{{probka}}` (treść rozdziału).
-5. **`regex_podzial_rozdzialow:`** dopasowany do tego, jak rozdziały są
-   nazwane w plikach .txt projektu w {natywna_baza}. Wzorce per język:
+4. **`prompt_uzytkownika_szablon:`** MUST contain both placeholders:
+   `{{naglowek}}` (the engine inserts the title) and `{{probka}}` (the
+   chapter content).
+5. **`regex_podzial_rozdzialow:`** matched to how chapters are named in the
+   project .txt files in {natywna_baza}. Patterns per language:
      - PL: `(?i)\\n*(Prolog|Rozdział \\d+|Epilog)\\n*`
      - DE: `(?i)\\n*(Prolog|Kapitel \\d+|Epilog)\\n*`
      - IT: `(?i)\\n*(Prologo|Capitolo \\d+|Epilogo)\\n*`
      - EN: `(?i)\\n*(Prologue|Chapter \\d+|Epilogue)\\n*`
      - RU: `(?i)\\n*(Пролог|Глава \\d+|Эпилог)\\n*`
-6. `min_dlugosc_fragmentu` (typowo 50 znaków, krótsze fragmenty pomijane
-   z komunikatem `etykieta_fragment_zbyt_krotki`).
-7. `max_dlugosc_probki` (typowo 4000-8000 znaków dla gpt-4o-mini —
-   kontekstowy budżet wysyłany do API).
+6. `min_dlugosc_fragmentu` (typically 50 chars; shorter chunks are skipped
+   with the `etykieta_fragment_zbyt_krotki` message).
+7. `max_dlugosc_probki` (typically 4000-8000 chars for gpt-4o-mini — the
+   context budget sent to the API).
 
-# WYMAGANIA NATYWNOŚCI
-Wszystkie teksty „dla człowieka" w pliku — etykieta, nagłówek, komentarze
-YAML, `prompt_systemowy`, `prompt_uzytkownika_szablon`, oba pola
-komunikatu (`etykieta_fragment_zbyt_krotki`, `etykieta_bled_brak_kredytow`)
-— w języku **{natywna_baza}**.
+# NATIVE-LANGUAGE REQUIREMENTS
+All „human-facing" text in the file — label, header, YAML comments,
+`prompt_systemowy`, `prompt_uzytkownika_szablon`, both message fields
+(`etykieta_fragment_zbyt_krotki`, `etykieta_bled_brak_kredytow`) — in
+**{natywna_baza}**.
 
-# PROCEDURA
-1. Otwórz pliki referencyjne (Read).
-2. Zaprojektuj `prompt_systemowy` i `prompt_uzytkownika_szablon` adekwatne
-   do zadania {etykieta}.
-3. Zapisz plik
+# PROCEDURE
+1. Open the reference files (Read).
+2. Design `prompt_systemowy` and `prompt_uzytkownika_szablon` appropriate
+   to the {etykieta} task.
+3. Save the file
    `dictionaries/{jezyk_bazowy}/rezyser/postprod_{id_pliku}.yaml` (Write).
-4. Zweryfikuj parsowalność:
-   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/rezyser/postprod_{id_pliku}.yaml', encoding='utf-8'))"`.
-5. Postprodukcje ładowane dynamicznie — „Odśwież drzewo" w Managerze
-   + restart aplikacji.
-6. W odpowiedzi raportuj: model, temperatura, regex_podzial_rozdzialow
-   którego użyłeś, czy `prompt_uzytkownika_szablon` zawiera oba
-   placeholdery.
+4. Validate that the file parses as YAML using whatever YAML tooling you
+   have available (any YAML loader/linter — do not assume a particular
+   shell or that Python is on PATH).
+5. Postproductions are loaded dynamically — „Odśwież drzewo" in the Manager
+   + restart the app.
+6. In your reply report: the model, the temperature, the
+   `regex_podzial_rozdzialow` you used, and whether
+   `prompt_uzytkownika_szablon` contains both placeholders.
 """
 
 
@@ -1101,9 +1113,15 @@ polskie_znaki:
   # europejskie (np. polskie ąęłóśćńżź) — wzorzec: dictionaries/de/podstawy.yaml>
   - {{ wzor: "?", zamiana: "?" }}
 
-# Pełny alfabet wielkich liter, bez znaków białych. Diakrytyki, które nie
-# rosną przy `.upper()`, mogą być DOŁĄCZONE NA KOŃCU (np. „...XYZÄÖÜ" dla DE).
-alfabet: '<UZUPEŁNIJ: ABCDEFGHIJKLMNOPQRSTUVWXYZ + ewentualne diakrytyki na końcu>'
+# Pełny alfabet wielkich liter, bez znaków białych. Użyj NATYWNEGO alfabetu
+# w jego NATYWNEJ kolejności. Litera akcentowana wchodzi do alfabetu TYLKO,
+# jeśli jest w danym języku osobną literą — i stoi tam, gdzie stawia ją
+# natywna kolejność, NIE automatycznie na końcu (np. FI „...XYZÅÄÖ" — Å Ä Ö
+# są natywne i kończą fiński alfabet; ES Ñ stoi między N a O). Formy
+# akcentowane, które NIE są osobnymi literami (np. FR é/à, IT à/è), do
+# alfabetu NIE wchodzą — przechodzą przez Cezara jak cyfry. Litery rosnące
+# przy `.upper()` (np. ß→SS) są pomijane zawsze.
+alfabet: '<UZUPEŁNIJ: natywny alfabet wielkimi literami w natywnej kolejności>'
 
 # -----------------------------------------------------------------------------
 # Słowa wyzwalające parser akcentów w trybie Reżysera (od 13.3+).
@@ -1124,61 +1142,70 @@ slowo_akcent:
 def prompt_jezyk_bazowy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     natywna = _natywna_nazwa_jezyka(kod_jezyka)
     inne_paczki = _paczki_referencyjne(kod_jezyka)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT"
-(wxPython + OpenAI). Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash.
-Twoja praca: utworzyć plik bazowy nowego języka i przygotować paczkę do
-weryfikacji silnika.
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project (wxPython + OpenAI). You have tools: Read, Write, Edit, Glob, Grep,
+Bash. Your job: create the base file for a new language and prepare the
+pack for engine verification.
 
-# KONTEKST PROJEKTU
-- `core_poliglota.py` — silnik fonetyczny (akcenty + szyfry).
-  Funkcja `_jezyk_kompletny(kod)` filtruje paczki: wymaga `podstawy.yaml`
-  + 4 podfoldery (`akcenty/`, `szyfry/`, `rezyser/`, `gui/`), każdy
-  z ≥1 plikiem `*.yaml`.
-- Paczki wdrożone (stan 13.9): {inne_paczki} — to Twoje wzorce stylu.
-- Paczka tworzona: `dictionaries/{kod_jezyka}/` — Manager Reguł utworzył
-  już cztery podfoldery. Twoje zadanie to TYLKO `podstawy.yaml`.
-  Akcenty, szyfry, tryby Reżysera i tłumaczenie UI generujesz
-  oddzielnymi promptami z Managera lub kopiujesz z istniejących paczek.
+# PROJECT CONTEXT
+- `core_poliglota.py` — the phonetic engine (accents + ciphers).
+  The `_jezyk_kompletny(code)` function filters packs: it requires
+  `podstawy.yaml` + 4 subfolders (`akcenty/`, `szyfry/`, `rezyser/`,
+  `gui/`), each with ≥1 `*.yaml` file.
+- Deployed packs (as of 13.9): {inne_paczki} — these are your style models.
+- Pack being created: `dictionaries/{kod_jezyka}/` — Manager Reguł already
+  created the four subfolders. Your task is ONLY `podstawy.yaml`.
+  You generate accents, ciphers, Director modes and the UI translation with
+  separate Manager prompts, or copy them from existing packs.
 
-# ZADANIE
-Utwórz plik `dictionaries/{kod_jezyka}/podstawy.yaml` dla języka
-**{etykieta_jezyka}** (kod ISO 639-1: `{kod_jezyka}`, endonim:
+# TASK
+Create the file `dictionaries/{kod_jezyka}/podstawy.yaml` for the language
+**{etykieta_jezyka}** (ISO 639-1 code: `{kod_jezyka}`, endonym:
 **{natywna}**).
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-- `dictionaries/de/podstawy.yaml` — najbogatszy wzorzec: zawiera ß, Umlauty,
-  pełen zestaw europejskich diakrytyków (á/à/â/ã/é/í/ñ/ó/ø/ú/ý/ÿ).
-- `dictionaries/it/podstawy.yaml` — wzorzec łaciński z minimalnymi diakrytykami.
-- `dictionaries/ru/podstawy.yaml` — wzorzec dla alfabetu niełacińskiego.
-- `dictionaries/pl/podstawy.yaml` — referencja minimalna, bazowa paczka.
-Wybierz wzorzec najbliższy charakterystyce języka {natywna} (alfabet
-łaciński/cyrylicki, obecność/brak diakrytyków typu ä/ö/ç/ß).
+# REFERENCE FILES (open before writing)
+- `dictionaries/de/podstawy.yaml` — the richest model: contains ß, umlauts,
+  the full set of European diacritics (á/à/â/ã/é/í/ñ/ó/ø/ú/ý/ÿ).
+- `dictionaries/it/podstawy.yaml` — a Latin model with minimal diacritics.
+- `dictionaries/ru/podstawy.yaml` — a model for a non-Latin alphabet.
+- `dictionaries/pl/podstawy.yaml` — the minimal reference, the base pack.
+Pick the model closest in character to {natywna} (Latin/Cyrillic alphabet,
+presence/absence of diacritics such as ä/ö/ç/ß).
 
-# WYMAGANIA STRUKTURY (silnik)
-1. **`id: podstawy`** i **`jezyk: {kod_jezyka}`** — pola identyfikacyjne.
-2. **`lingua:`** — nazwa enuma `lingua.Language` WIELKIMI LITERAMI po
-   angielsku, bez prefiksu. Lista (74 języki):
+# STRUCTURE REQUIREMENTS (engine)
+1. **`id: podstawy`** and **`jezyk: {kod_jezyka}`** — identifying fields.
+2. **`lingua:`** — the `lingua.Language` enum name in UPPERCASE English,
+   without prefix. List (74 languages):
    https://github.com/pemistahl/lingua-py.
-   Najczęstsze: POLISH, ENGLISH, GERMAN, FRENCH, SPANISH, PORTUGUESE,
+   Most common: POLISH, ENGLISH, GERMAN, FRENCH, SPANISH, PORTUGUESE,
    ITALIAN, RUSSIAN, FINNISH, ICELANDIC, JAPANESE, CHINESE.
-   Jeśli język brakuje, w komentarzu nad polem zapisz `# BRAK_W_LINGUA`
-   i zostaw pole zakomentowane (silnik fallbackuje na ręczny wybór).
-3. **`polskie_znaki:`** — lista par `{{ wzor, zamiana }}` opisująca
-   diakrytyki języka {kod_jezyka} → ASCII. Każdy diakrytyk w obu
-   wariantach: mały + wielki. Litery rosnące przy `.upper()` (np. ß→SS)
-   ZAWSZE tu, NIGDY w `alfabet`.
-4. **`alfabet:`** — ciąg WIELKICH LITER bez spacji. Diakrytyki nieroskie
-   (np. Ä, Ö, Ü, Å) mogą trafiać NA KONIEC alfabetu. Używany przez Cezara.
-5. **`slowo_akcent:`** (kontrakt 13.3+) — lista natywnych słów
-   wyzwalających parser akcentów w trybie Reżysera. Wszystkie wpisy
-   małymi literami. Wzorce: PL `["akcent"]`; DE `["akzent", "aussprache"]`;
+   If the language is missing, write `# BRAK_W_LINGUA` in a comment above
+   the field and leave the field commented out (the engine falls back to
+   manual selection).
+3. **`polskie_znaki:`** — a list of `{{ wzor, zamiana }}` pairs describing
+   the diacritics of language {kod_jezyka} → ASCII. Each diacritic in both
+   variants: lower + upper. Letters that grow under `.upper()` (e.g. ß→SS)
+   ALWAYS go here, NEVER in `alfabet`.
+4. **`alfabet:`** — a string of UPPERCASE letters with no spaces. Use the
+   NATIVE alphabet of the language in its NATIVE ORDER. Accented letters go
+   into the alphabet ONLY if they are genuinely distinct letters in that
+   language's order — and they belong wherever that order places them, not
+   automatically at the end (e.g. FI Å Ä Ö are native, so they sit at the
+   end as in Finnish; ES Ñ sits between N and O; IS keeps its full native
+   sequence). Accented forms that are NOT distinct letters (e.g. FR é/à, IT
+   à/è) do NOT enter `alfabet` at all — they pass through the Caesar cipher
+   unchanged, like digits. And any letter that grows under `.upper()`
+   (ß→SS) is omitted regardless. Used by the Caesar cipher.
+5. **`slowo_akcent:`** (13.3+ contract) — a list of native words that
+   trigger the accent parser in Director mode. All entries lowercase.
+   Models: PL `["akcent"]`; DE `["akzent", "aussprache"]`;
    IT `["accento", "accentato"]`; RU `["акцент", "акцентом", "говор"]`.
-   Dla idiomów z fleksją dodaj 2-3 najczęstsze formy.
+   For inflecting languages add the 2-3 most common forms.
 
-# WYMAGANIA NATYWNOŚCI
-Pole `etykieta:`, `opis:` i wszystkie komentarze YAML w pliku piszesz
-w języku **{natywna}**. Wzorzec etykiety z 7 wdrożonych paczek:
+# NATIVE-LANGUAGE REQUIREMENTS
+You write the `etykieta:` and `opis:` fields and all YAML comments in the
+file in **{natywna}**. The label model from the 7 deployed packs:
 - pl: „Polski – podstawy fonetyczne"
 - en: „English – phonetic basics"
 - de: „Deutsch – phonetische Grundlagen"
@@ -1186,23 +1213,25 @@ w języku **{natywna}**. Wzorzec etykiety z 7 wdrożonych paczek:
 - ru: „Русский – фонетические основы"
 - fi: „Suomi – foneettiset perusteet"
 - is: „Íslenska – hljóðfræðilegur grunnur"
-Mieszanie polskich fraz z natywnymi (np. „French – podstawy fonetyczne")
-jest BŁĘDEM krytycznym.
+Mixing Polish phrases with native ones (e.g. „French – podstawy fonetyczne")
+is a CRITICAL error.
 
-# PROCEDURA
-1. Otwórz pliki referencyjne (Read).
-2. Zaprojektuj zawartość `podstawy.yaml` — kompletna sekcja
-   `polskie_znaki` (wszystkie diakrytyki języka {natywna} obu wielkości),
-   pełen `alfabet`, lista `slowo_akcent`.
-3. Zapisz plik w `dictionaries/{kod_jezyka}/podstawy.yaml` (Write).
-4. Zweryfikuj: `python -c "import yaml; yaml.safe_load(open('dictionaries/{kod_jezyka}/podstawy.yaml', encoding='utf-8'))"`
-   nie wyrzuca wyjątku.
-5. Zweryfikuj: `python -c "import core_poliglota; print(core_poliglota._jezyk_kompletny('{kod_jezyka}'))"` —
-   zwróci `False`, dopóki paczka nie ma akcentów/szyfrów/trybów. To
-   oczekiwane na tym etapie; raportuj userowi że potrzebne są kolejne
-   prompty z Managera Reguł.
-6. W odpowiedzi raportuj: ile pozycji ma `polskie_znaki`, ile liter ma
-   `alfabet`, jakie wartości ustawiłeś dla `lingua`, `etykieta`, `slowo_akcent`.
+# PROCEDURE
+1. Open the reference files (Read).
+2. Design the contents of `podstawy.yaml` — a complete `polskie_znaki`
+   section (all diacritics of language {natywna} in both cases), the full
+   `alfabet`, the `slowo_akcent` list.
+3. Save the file at `dictionaries/{kod_jezyka}/podstawy.yaml` (Write).
+4. Validate that the file parses as YAML using whatever YAML tooling you
+   have available (any YAML loader/linter — do not assume a particular
+   shell or that Python is on PATH).
+5. Confirm completeness: loading `core_poliglota._jezyk_kompletny(
+   '{kod_jezyka}')` returns `False` until the pack has accents/ciphers/modes.
+   That is expected at this stage; report to the user that further Manager
+   Reguł prompts are needed.
+6. In your reply report: how many entries `polskie_znaki` has, how many
+   letters `alfabet` has, and the values you set for `lingua`, `etykieta`,
+   `slowo_akcent`.
 """
 
 
@@ -1213,94 +1242,98 @@ def prompt_szyfr_algorytm(id_pliku: str, etykieta: str,
                           opis_efektu: str,
                           jezyk_bazowy: str = "pl") -> str:
     natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
-    return f"""# ROLA
-Jesteś agentem AI z dostępem do plików projektu „Reżyser Audio GPT".
-Masz narzędzia: Read, Write, Edit, Glob, Grep, Bash. Zadanie: dodać do
-projektu nowy szyfr algorytmiczny — wymaga to **dwóch** zmian: pliku YAML
-+ funkcji Python w `core_poliglota.py`.
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: add a
+new algorithmic cipher to the project — this requires **two** changes: a
+YAML file + a Python function in `core_poliglota.py`.
 
-# KONTEKST PROJEKTU
-- `core_poliglota.py` — silnik fonetyczny + dispatcher algorytmów. Mapa
-  `_ALGORYTMY` mapuje `id` szyfru na funkcję Pythona implementującą
-  algorytm. Plik YAML `kategoria: szyfr` z polem `algorytm: <id>` mówi
-  silnikowi, żeby zamiast listy `zamiany:` wywołać funkcję `_algorytm_<id>`.
-- Istniejące algorytmy (referencja): odwracanie, typoglikemia, jakanie,
-  samogloskowiec, waz. Wszystkie w `core_poliglota.py` jako `_algorytm_*`.
-- Paczka tego zadania: `dictionaries/{jezyk_bazowy}/`
-  (język {natywna_baza}).
+# PROJECT CONTEXT
+- `core_poliglota.py` — the phonetic engine + algorithm dispatcher. The
+  `_ALGORYTMY` map maps a cipher `id` to the Python function implementing
+  the algorithm. A `kategoria: szyfr` YAML file with an `algorytm: <id>`
+  field tells the engine to call `_algorytm_<id>` instead of a `zamiany:`
+  list.
+- Existing algorithms (reference): odwracanie, typoglikemia, jakanie,
+  samogloskowiec, waz. All in `core_poliglota.py` as `_algorytm_*`.
+- Pack for this task: `dictionaries/{jezyk_bazowy}/`
+  (language {natywna_baza}).
 
-# ZADANIE
-Zaprojektuj i wdroż szyfr algorytmiczny **{etykieta}** (id: `{id_pliku}`).
+# TASK
+Design and implement the algorithmic cipher **{etykieta}** (id: `{id_pliku}`).
 
-OPIS EFEKTU (od użytkownika):
+EFFECT DESCRIPTION (from the user):
 > {opis_efektu}
 
-# PLIKI REFERENCYJNE (otwórz przed pisaniem)
-1. `core_poliglota.py` — szukaj funkcji `_algorytm_*` (np. `_algorytm_odwracanie`,
-   `_algorytm_typoglikemia`) i mapy `_ALGORYTMY`. Zwróć uwagę na sygnaturę
-   `(tekst: str, regula: dict) -> str` i na sposób korzystania z `random`.
-2. `dictionaries/pl/szyfry/odwracanie.yaml` — wzorzec konwencji
-   `rozwiniecia:` (regexy podstawiające skrótowce „itd." → „i tak dalej"
-   PRZED właściwym przetwarzaniem). Zasady: granice słowa `\\b...\\b`,
-   kropka opcjonalna `\\.?`, przecinek opcjonalny `,?`, dwa warianty dla
-   częstych typo („m.in." vs „mi.in."), spacja po rozwinięciu.
-3. `dictionaries/{jezyk_bazowy}/szyfry/cezar.yaml` — wzorzec stylu YAML
-   dla paczki bazowej (komentarze natywne).
+# REFERENCE FILES (open before writing)
+1. `core_poliglota.py` — look for the `_algorytm_*` functions (e.g.
+   `_algorytm_odwracanie`, `_algorytm_typoglikemia`) and the `_ALGORYTMY`
+   map. Note the signature `(tekst: str, regula: dict) -> str` and how
+   `random` is used.
+2. `dictionaries/pl/szyfry/odwracanie.yaml` — the model for the
+   `rozwiniecia:` convention (regexes expanding abbreviations „itd." → „i
+   tak dalej" BEFORE the main processing). Rules: word boundaries
+   `\\b...\\b`, optional dot `\\.?`, optional comma `,?`, two variants for
+   common typos („m.in." vs „mi.in."), a space after the expansion.
+3. `dictionaries/{jezyk_bazowy}/szyfry/cezar.yaml` — the YAML style model
+   for the base pack (native comments).
 
-# WYMAGANIA STRUKTURY YAML
+# YAML STRUCTURE REQUIREMENTS
 ```yaml
 id: {id_pliku}
 etykieta: "{etykieta}"
 opis: |
-  <2-4 zdania w języku {natywna_baza} — co robi szyfr>.
+  <2-4 sentences in {natywna_baza} — what the cipher does>.
 iso: {jezyk_bazowy}
 kategoria: szyfr
 kolejnosc: 100
 algorytm: {id_pliku}
 
-# <Opcjonalne parametry czytane z regula['<klucz>'] przez funkcję Python>
-# parametr_1: wartosc
+# <Optional parameters read from regula['<key>'] by the Python function>
+# parametr_1: value
 ```
 
-# WYMAGANIA KODU PYTHON (`core_poliglota.py`)
-1. Funkcja `_algorytm_{id_pliku}(tekst: str, regula: dict) -> str` —
-   sygnatura jak istniejące algorytmy.
-2. Wpis w mapie `_ALGORYTMY`: `"{id_pliku}": _algorytm_{id_pliku}`.
-3. **Idempotentność**: dwukrotne uruchomienie z tym samym seedem zwraca
-   ten sam wynik (chyba że losowość jest celowa — wtedy udokumentuj).
-4. Operuj znak-po-znaku lub słowo-po-słowie, **zachowuj** białe znaki
-   i interpunkcję (chyba że efekt wymaga ich zmiany).
-5. Losowość: użyj `random` (już zaimportowany w core_poliglota.py).
-6. **NIE** wprowadzaj nowych zależności zewnętrznych.
+# PYTHON CODE REQUIREMENTS (`core_poliglota.py`)
+1. A function `_algorytm_{id_pliku}(tekst: str, regula: dict) -> str` —
+   the same signature as the existing algorithms.
+2. An entry in the `_ALGORYTMY` map: `"{id_pliku}": _algorytm_{id_pliku}`.
+3. **Idempotence**: running twice with the same seed returns the same
+   result (unless randomness is intentional — then document it).
+4. Operate char-by-char or word-by-word, **preserve** whitespace and
+   punctuation (unless the effect requires changing them).
+5. Randomness: use `random` (already imported in core_poliglota.py).
+6. Do **NOT** introduce new external dependencies.
 
-# WYMAGANIA NATYWNOŚCI
-`etykieta`, `opis`, komentarze YAML w {natywna_baza}. Komentarze
-i docstring w `core_poliglota.py` po polsku (zgodnie z konwencją silnika
-— polski jest językiem deweloperskim projektu).
+# NATIVE-LANGUAGE REQUIREMENTS
+`etykieta`, `opis`, the YAML comments in {natywna_baza}. The comments and
+docstring in `core_poliglota.py` stay in Polish (per the engine convention
+— Polish is the project's development language).
 
-# PROCEDURA
-1. Otwórz pliki referencyjne (Read).
-2. Zaprojektuj algorytm w głowie + ewentualne parametry konfigurowalne
-   z YAML.
-3. Edit `core_poliglota.py` — dopisz funkcję `_algorytm_{id_pliku}`
-   i wpis w `_ALGORYTMY`.
+# PROCEDURE
+1. Open the reference files (Read).
+2. Design the algorithm in your head + any YAML-configurable parameters.
+3. Edit `core_poliglota.py` — add the `_algorytm_{id_pliku}` function and
+   the `_ALGORYTMY` entry.
 4. Write `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`.
-5. Zweryfikuj parsowalność:
-   `python -c "import yaml; yaml.safe_load(open('dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml', encoding='utf-8'))"`.
-6. Zweryfikuj import: `python -c "import core_poliglota; print('{id_pliku}' in core_poliglota._ALGORYTMY)"` — powinno zwrócić `True`.
-7. Rozważ napisanie testu jednostkowego (idempotentność, zachowanie
-   białych znaków).
-8. W odpowiedzi raportuj: ile linii kodu dodałeś w `core_poliglota.py`,
-   parametry algorytmu i wynik testu idempotentności (jeśli zrobiłeś).
+5. Validate that the YAML file parses using whatever YAML tooling you have
+   available (any YAML loader/linter — do not assume a particular shell or
+   that Python is on PATH).
+6. Confirm the dispatch wiring: `{id_pliku}` must be present as a key in
+   `core_poliglota._ALGORYTMY` (load the module with your Python tooling and
+   check, or grep the `_ALGORYTMY` map literal).
+7. Consider writing a unit test (idempotence, whitespace preservation).
+8. In your reply report: how many lines of code you added in
+   `core_poliglota.py`, the algorithm parameters, and the idempotence test
+   result (if you ran one).
 
-# WSKAZÓWKA: KONWENCJA `rozwiniecia:` (jeśli używasz)
-Jeśli algorytm dokonuje podstawień tekstowych PRZED właściwym
-przetwarzaniem (np. rozwija skrótowce „itd." w „i tak dalej"), wzoruj się
-na `dictionaries/pl/szyfry/odwracanie.yaml::rozwiniecia` — zachowaj
-zasady (granice słowa, kropka/przecinek opcjonalne, kolejność szczegółowe
-przed ogólnymi, brak `regex: true` w `rozwiniecia` — regex tam jest
-domyślny). Bez tych zasad regex łapie fragmenty słów (np. „tj"
-w „atakujący") i tworzy artefakty.
+# HINT: THE `rozwiniecia:` CONVENTION (if you use it)
+If the algorithm performs text substitutions BEFORE the main processing
+(e.g. expanding abbreviations „itd." into „i tak dalej"), follow
+`dictionaries/pl/szyfry/odwracanie.yaml::rozwiniecia` — keep the rules
+(word boundaries, optional dot/comma, specific-before-general ordering, no
+`regex: true` in `rozwiniecia` — regex is the default there). Without these
+rules the regex catches word fragments (e.g. „tj" inside „atakujący") and
+creates artifacts.
 """
 
 
