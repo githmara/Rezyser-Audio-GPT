@@ -1014,11 +1014,11 @@ manager:
     szyfr_zamiany: |-
       Verschlüsselungsvorlage „reine Ersetzungen" in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + Liste `zamiany:` (wie Akzent, aber ohne phonetische Pipeline). Nimm das STRUKTURMUSTER von den Akzenten — alle implementierten Verschlüsselungen sind Algorithmen (anderes Format, ohne Liste `zamiany:`).
     tryb_rezysera: |-
-      Vorlage basierend auf dem Audiobook-Modus (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `przypomnienie_uzytkownika` und `slowa_wyzwalajace` in der nativen Sprache des Pakets.
+      Vorlage basierend auf dem Hörbuch-Modus (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `przypomnienie_uzytkownika` und `slowa_wyzwalajace` in der nativen Sprache des Pakets.
     postprodukcja: |-
       Postproduktionsvorlage iteriert über Kapitel (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `prompt_uzytkownika_szablon` (Platzhalter {{naglowek}}, {{probka}}) und `regex_podzial_rozdzialow`, angepasst an die nativen Kapitelnamen (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
-      Der Manager erstellt `dictionaries/{id_pliku}/` mit Unterordnern `akcenty/`, `szyfry/`, `rezyser/`, `gui/` und `opowiesci/`. Die Vorlage `podstawy.yaml` enthält Marker `<FILL NATIVELY>`. Der Agent orientiert sich an `de/podstawy.yaml` oder `it/podstawy.yaml`. Die UI-Übersetzung (`gui/ui.yaml`) generiert `buduj_wielojezyczne_ui.py`. Der Motor erfordert ≥1 Datei in `rezyser/`, um die Sprache als vollständig zu betrachten.
+      Der Manager erstellt `dictionaries/{id_pliku}/` mit Unterordnern `akcenty/`, `szyfry/`, `rezyser/`, `gui/` und `opowiesci/`. Die Vorlage `podstawy.yaml` enthält Marker `<FILL NATIVELY>`. Der Agent orientiert sich an `de/podstawy.yaml` oder `it/podstawy.yaml`. Die UI-Übersetzung (`gui/ui.yaml`) generiert `buduj_wielojezyczne_ui.py`. Die Engine erfordert ≥1 Datei in `rezyser/`, um die Sprache als vollständig zu betrachten.
     szyfr_algorytm: |-
       ALGORITHMISCHE Verschlüsselung — erfordert eine Funktion in `core_poliglota.py` neben der YAML-Datei. Der Manager erstellt keine Datei; der Agent fügt die Funktion `_algorytm_*` + einen Eintrag in der Karte `_ALGORYTMY` + eine YAML-Datei in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml` hinzu. Dies ist der EINZIGE Regeltyp, der eine Bearbeitung des Quellcodes erfordert — aus der installierten Anwendung (ohne Repository) ist es nicht machbar, eine Quellversion ist erforderlich.
     jezyk_agenta: |-
@@ -1035,7 +1035,7 @@ manager:
     akcent:
       etykieta: "Phonetischer Akzent (cross-language, z.B. Schwedisch, Finnisch)"
       opis: |-
-        Datei in <jezyk>/akcenty/<id>.yaml mit `kategoria: akcent`. Der Text des Basispakets (jezyk_bazowy) wird in die Aussprache des Zielsynthetisators transliteriert (iso != jezyk_bazowy). Der Manager erstellt eine Vorlage + Prompt für den KI-Agenten, der die Liste `zamiany:` entwirft.
+        Datei in <jezyk>/akcenty/<id>.yaml mit `kategoria: akcent`. Der Text des Basispakets (jezyk_bazowy) wird in die Aussprache des Zielsynthesizers transliteriert (iso != jezyk_bazowy). Der Manager erstellt eine Vorlage + Prompt für den KI-Agenten, der die Liste `zamiany:` entwirft.
     akcent_oczyszczenie:
       etykieta: "Reinigungsakzent (Preprozessor, ohne Phonetik)"
       opis: |-
@@ -1051,7 +1051,7 @@ manager:
     tryb_rezysera:
       etykieta: "Neuer Regisseurmodus (kreativer Modus)"
       opis: |-
-        Datei in <jezyk>/rezyser/tryb_*.yaml. Vorlage basierend auf dem Audiobook-Modus + Prompt für die KI, die prompt_systemowy, przypomnienie_uzytkownika und slowa_wyzwalajace in die native Sprache des Basispakets übersetzt.
+        Datei in <jezyk>/rezyser/tryb_*.yaml. Vorlage basierend auf dem Hörbuch-Modus + Prompt für die KI, die prompt_systemowy, przypomnienie_uzytkownika und slowa_wyzwalajace in die native Sprache des Basispakets übersetzt.
     postprodukcja:
       etykieta: "Neue Postproduktion (Iteration über Kapitel)"
       opis: |-

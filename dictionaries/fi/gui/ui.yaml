@@ -1012,13 +1012,13 @@ manager:
     szyfr_zamiany: |-
       Salauksen malli "puhtaat muunnokset" tiedostossa `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Muoto = `kategoria: szyfr` + lista `zamiany:` (kuten aksentti, mutta ilman foneettista putkea). Rakennekuvio otetaan aksenteista — kaikki käyttöön otetut salaukset ovat algoritmeja (eri muoto, ilman `zamiany:`-listaa).
     tryb_rezysera: |-
-      Malli perustuu Audiobook-tilaan (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `przypomnienie_uzytkownika` ja `slowa_wyzwalajace` paketin natiivikielellä.
+      Malli perustuu Äänikirjatilaan (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `przypomnienie_uzytkownika` ja `slowa_wyzwalajace` paketin natiivikielellä.
     postprodukcja: |-
       Jälkituotantomalli iteroi lukujen läpi (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `prompt_uzytkownika_szablon` (paikkamerkit {{naglowek}}, {{probka}}) ja `regex_podzial_rozdzialow`, joka on sovitettu natiivien lukujen nimiin (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
       Manager luo `dictionaries/{id_pliku}/` alikansioilla `akcenty/`, `szyfry/`, `rezyser/`, `gui/` ja `opowiesci/`. Malli `podstawy.yaml` sisältää merkit `<FILL NATIVELY>`. Agentti perustuu `de/podstawy.yaml` tai `it/podstawy.yaml`. UI-käännös (`gui/ui.yaml`) generoi `buduj_wielojezyczne_ui.py`. Moottori vaatii ≥1 tiedoston `rezyser/`, jotta kieli katsotaan täydelliseksi.
     szyfr_algorytm: |-
-      ALGORYTMISEN salauksen — vaatii funktion tiedostossa `core_poliglota.py` YAML-tiedoston vieressä. Manager EI luo mitään tiedostoa; agentti lisää funktion `_algorytm_*` + merkinnän karttaan `_ALGORYTMY` + YAML-tiedoston `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Tämä on AINOA sääntötyyppi, joka vaatii lähdekoodin muokkausta — asennetusta sovelluksesta (ilman arkistoa) se on mahdotonta, tarvitaan lähdeversio.
+      ALGORITMINEN salaus — vaatii funktion tiedostossa `core_poliglota.py` YAML-tiedoston vieressä. Manager EI luo mitään tiedostoa; agentti lisää funktion `_algorytm_*` + merkinnän karttaan `_ALGORYTMY` + YAML-tiedoston `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Tämä on AINOA sääntötyyppi, joka vaatii lähdekoodin muokkausta — asennetusta sovelluksesta (ilman arkistoa) se on mahdotonta, tarvitaan lähdeversio.
     jezyk_agenta: |-
       Alla oleva kehotus on englanniksi (agenttien koodauskieli); luotujen tiedostojen sisältö syntyy kuitenkin paketin natiivikielellä. Jos haluat, että agentti kommunikoi kanssasi omalla kielelläsi, aseta se sen kokoonpanossa (esim. Claude Codessa `/config`).
     srodowisko_zrodlo: |-

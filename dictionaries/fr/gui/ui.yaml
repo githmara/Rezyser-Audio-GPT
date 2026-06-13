@@ -1007,7 +1007,7 @@ manager:
     szyfr_zamiany: |-
       Modèle de chiffrement « substitutions pures » dans `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + liste `zamiany:` (comme l'accent, mais sans pipeline phonétique). Prenez le modèle de STRUCTURE des accents — tous les chiffrement déployés sont des algorithmes (autre format, sans liste `zamiany:`).
     tryb_rezysera: |-
-      Modèle basé sur le mode Audiobook (paquet `{jezyk_bazowy}/`). L'agent concevra `prompt_systemowy`, `przypomnienie_uzytkownika` et `slowa_wyzwalajace` dans la langue native du paquet.
+      Modèle basé sur le mode Livre audio (paquet `{jezyk_bazowy}/`). L'agent concevra `prompt_systemowy`, `przypomnienie_uzytkownika` et `slowa_wyzwalajace` dans la langue native du paquet.
     postprodukcja: |-
       Le modèle de postproduction itère sur les chapitres (paquet `{jezyk_bazowy}/`). L'agent concevra `prompt_systemowy`, `prompt_uzytkownika_szablon` (placeholders {{naglowek}}, {{probka}}) et `regex_podzial_rozdzialow` adapté aux noms de chapitres natifs (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1044,7 +1044,7 @@ manager:
     tryb_rezysera:
       etykieta: "Nouveau mode Réalisateur (mode créatif)"
       opis: |-
-        Fichier dans <jezyk>/rezyser/tryb_*.yaml. Modèle basé sur le mode Audiobook + prompt pour l'AI traduisant prompt_systemowy, przypomnienie_uzytkownika et slowa_wyzwalajace dans la langue native du paquet de base.
+        Fichier dans <jezyk>/rezyser/tryb_*.yaml. Modèle basé sur le mode Livre audio + prompt pour l'AI traduisant prompt_systemowy, przypomnienie_uzytkownika et slowa_wyzwalajace dans la langue native du paquet de base.
     postprodukcja:
       etykieta: "Nouvelle postproduction (itération par chapitres)"
       opis: |-

@@ -1013,7 +1013,7 @@ manager:
     szyfr_zamiany: |-
       Plantilla de cifrado "sustituciones puras" en `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Formato = `kategoria: szyfr` + lista `zamiany:` (como el acento, pero sin la canalización fonética). Toma el patrón de ESTRUCTURA de los acentos: todos los cifrados implementados son algoritmos (otro formato, sin lista `zamiany:`).
     tryb_rezysera: |-
-      Plantilla basada en el modo Audiobook (paquete `{jezyk_bazowy}/`). El agente diseñará `prompt_systemowy`, `przypomnienie_uzytkownika` y `slowa_wyzwalajace` en el idioma nativo del paquete.
+      Plantilla basada en el modo Audiolibro (paquete `{jezyk_bazowy}/`). El agente diseñará `prompt_systemowy`, `przypomnienie_uzytkownika` y `slowa_wyzwalajace` en el idioma nativo del paquete.
     postprodukcja: |-
       La plantilla de postproducción itera por capítulos (paquete `{jezyk_bazowy}/`). El agente diseñará `prompt_systemowy`, `prompt_uzytkownika_szablon` (marcadores de posición {{naglowek}}, {{probka}}) y `regex_podzial_rozdzialow` adaptado a los nombres nativos de los capítulos (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1044,13 +1044,13 @@ manager:
       opis: |-
         Archivo en <jezyk>/akcenty/<id>.yaml con `kategoria: naprawiacz`. NO modifica el contenido — inyecta el código ISO del idioma en los archivos de salida (<html lang>, <w:lang>). iso vacío (el código lo proporciona el usuario en la GUI). El gestor crea una plantilla + prompt para traducir la etiqueta/descripción al idioma nativo.
     szyfr_zamiany:
-      etykieta: 'Nuevo cifrado tipo "cambios puros"'
+      etykieta: 'Nuevo cifrado tipo "sustituciones puras"'
       opis: |-
-        Archivo en <jezyk>/szyfry/. El gestor crea una plantilla + prompt para la IA, que traducirá las etiquetas/comentarios al idioma nativo del paquete y generará una lista de pares patrón→cambio.
+        Archivo en <jezyk>/szyfry/. El gestor crea una plantilla + prompt para la IA, que traducirá las etiquetas/comentarios al idioma nativo del paquete y generará una lista de pares patrón→sustitución.
     tryb_rezysera:
       etykieta: "Nuevo modo Director (modo creativo)"
       opis: |-
-        Archivo en <jezyk>/rezyser/tryb_*.yaml. Plantilla basada en el modo Audiobook + prompt para la IA que traduce prompt_systemowy, przypomnienie_uzytkownika y slowa_wyzwalajace al idioma nativo del paquete base.
+        Archivo en <jezyk>/rezyser/tryb_*.yaml. Plantilla basada en el modo Audiolibro + prompt para la IA que traduce prompt_systemowy, przypomnienie_uzytkownika y slowa_wyzwalajace al idioma nativo del paquete base.
     postprodukcja:
       etykieta: "Nueva postproducción (iteración por capítulos)"
       opis: |-

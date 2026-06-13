@@ -1033,11 +1033,11 @@ manager:
 # -----------------------------------------------------------------------------
   typ:
     akcent:
-      etykieta: "Фонетическое ударение (межъязыковое, например, шведский, финский)"
+      etykieta: "Фонетический акцент (межъязыковой, например, шведский, финский)"
       opis: |-
         Файл в <jezyk>/akcenty/<id>.yaml с `kategoria: akcent`. Текст базового пакета (jezyk_bazowy) транслитерируется под произношение целевого синтезатора (iso != jezyk_bazowy). Менеджер создает шаблон + подсказку для агента AI, который разработает список `zamiany:`.
     akcent_oczyszczenie:
-      etykieta: "Очистка акцента (предобработка, без фонетики)"
+      etykieta: "Акцент очистки (предобработка, без фонетики)"
       opis: |-
         Файл в <jezyk>/akcenty/<id>.yaml с `kategoria: oczyszczenie`. Очищает текст для TTS (удаляет шум, нормализует числа) БЕЗ изменения фонетики. iso == jezyk_bazowy. Менеджер создает шаблон (готовый образец) + подсказку для перевода метки/описания на родной язык.
     akcent_naprawiacz:
@@ -1051,9 +1051,9 @@ manager:
     tryb_rezysera:
       etykieta: "Новый режим Режиссера (творческий режим)"
       opis: |-
-        Файл в <jezyk>/rezyser/tryb_*.yaml. Шаблон основан на режиме Audiobook + подсказка для AI, переводящая prompt_systemowy, przypomnienie_uzytkownika и slowa_wyzwalajace на родной язык базового пакета.
+        Файл в <jezyk>/rezyser/tryb_*.yaml. Шаблон основан на режиме Аудиокнига + подсказка для AI, переводящая prompt_systemowy, przypomnienie_uzytkownika и slowa_wyzwalajace на родной язык базового пакета.
     postprodukcja:
-      etykieta: "Новая постпродакшн (итерация по главам)"
+      etykieta: "Новый постпродакшн (итерация по главам)"
       opis: |-
         Файл в <jezyk>/rezyser/postprod_*.yaml. Шаблон с полями для подсказки, regex и параметров итерации + подсказка для AI, генерирующая родной prompt_systemowy и regex_podzial_rozdzialow.
     jezyk_bazowy:
