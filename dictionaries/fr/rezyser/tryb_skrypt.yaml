@@ -19,6 +19,9 @@ etykieta: "Scénario (théâtre lu : narrateur + dialogue, ÉCRITURE FICHIER)"
 kategoria: tryb
 kolejnosc: 20
 
+# Format de sortie → dispatch du moteur (gui_rezyser). NE PAS modifier — lie le mode au parseur JSON Python.
+format_wyjscia: skrypt_json
+
 # --- Paramètres OpenAI ---
 model: gpt-4o
 temperatura: 0.85

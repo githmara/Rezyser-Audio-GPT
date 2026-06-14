@@ -19,6 +19,9 @@ etykieta: "Aivoriihi (suunnittelu, EI tallennusta tiedostoon)"
 kategoria: tryb
 kolejnosc: 10
 
+# Tulostusmuoto → moottorin reititys (gui_rezyser). ÄLÄ muuta — sitoo tilan Pythonin JSON-jäsentimeen.
+format_wyjscia: burza_json
+
 # --- OpenAI-parametrit ---
 model: gpt-4o
 temperatura: 0.85

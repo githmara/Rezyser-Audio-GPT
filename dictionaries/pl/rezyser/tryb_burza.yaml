@@ -18,6 +18,9 @@ etykieta: "Burza Mózgów (Planowanie, BEZ zapisu do pliku)"
 kategoria: tryb
 kolejnosc: 10
 
+# Format wyjścia → dispatch w silniku (gui_rezyser). NIE zmieniaj — wiąże tryb z parserem JSON w Pythonie.
+format_wyjscia: burza_json
+
 # --- Parametry OpenAI ---
 model: gpt-4o
 temperatura: 0.85

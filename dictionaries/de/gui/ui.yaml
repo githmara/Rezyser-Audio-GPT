@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 app:
   nazwa: "Audio GPT Regisseur"
-  wersja: "{numer_wersji} – Veröffentlichungsversion"
+  wersja: "{numer_wersji} – Release-Version"
   title_home: "{nazwa_aplikacji}  |  {wersja}"
   title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
   banner: "🎬  {nazwa_aplikacji}"
@@ -67,10 +67,10 @@ main:
     rezyser: "Öffnet das Regisseur-Modul – Skripte und Prosa mit KI schreiben"
     poliglota: "Öffnet das Polyglott-Modul – Akzente und Textübersetzung"
     konwerter: "Öffnet das Konverter-Modul – Word-Dokumente erstellen"
-    manager: "Öffnet den Regelmanager – YAML-Dateiexplorer in dictionaries/ und Ersteller neuer Akzente / Modi / Chiffren"
+    manager: "Öffnet den Regelmanager – YAML-Dateiexplorer in dictionaries/ und Assistent für neue Akzente / Modi / Chiffren"
     zakoncz: "Anwendung schließen"
     jezyk_interfejsu: "Wählen Sie die Sprache der Benutzeroberfläche der Anwendung (Änderung erfordert Neustart)"
-    opowiesci: "Öffnet das Geschichten-Modul – interaktive, von KI generierte Zweitperson-Fiktion, gelesen von TTS/Bildschirmleser"
+    opowiesci: "Öffnet das Geschichten-Modul – interaktive, von KI generierte Zweitperson-Fiktion, gelesen von TTS/Screenreader"
     pomoc: 'Öffnen Sie die Anwendungsdokumentation im Standard-Textdatei-Handler'
     pomoc_manual: 'Öffnet das Hauptbenutzerhandbuch (docs/manual in der Schnittstellensprache)'
     pomoc_tales: 'Öffnet den Leitfaden für den Erzählmodus (docs/tales in der Schnittstellensprache)'
@@ -204,12 +204,12 @@ home:
   narzedzia_slownikowe_name: "Beschreibung der Wörterbuchwerkzeuge"
   tools_info: |-
     Möchten Sie einen neuen Akzent, eine Chiffre oder einen Regisseur-Modus hinzufügen?
-    Öffnen Sie den Regelmanager (Strg+4) – dort finden Sie den Baum aller YAML-Dateien in dictionaries/ sowie einen Ersteller, der automatisch eine Vorlage erstellt oder einen Prompt für den Chatbot generiert.
+    Öffnen Sie den Regelmanager (Strg+4) – dort finden Sie den Baum aller YAML-Dateien in dictionaries/ sowie einen Assistenten, der automatisch eine Vorlage erstellt oder einen Prompt für den Chatbot generiert.
 
     Nach dem Hinzufügen einer neuen Datei starten Sie die Anwendung neu – der Regisseur-Modus und Polyglott erkennen alle YAML-Dateien in dictionaries/ automatisch.
   btn_open_manager_label: "📚 Öffne Regelmanager"
   btn_open_manager_name: "Schaltfläche Öffne Regelmanager"
-  btn_open_manager_tooltip: "Wechselt zum Regelmanager – YAML-Dateiexplorer und Ersteller neuer Akzente / Modi / Chiffren (Strg+4)."
+  btn_open_manager_tooltip: "Wechselt zum Regelmanager – YAML-Dateiexplorer und Assistent für neue Akzente / Modi / Chiffren (Strg+4)."
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -230,7 +230,7 @@ rezyser:
     Um das Projekt zu ändern, müssen Sie zuerst den aktuellen Speicher löschen.
   prompt_architekta_content: |-
     Sie sind ein herausragender Weltenarchitekt (Worldbuilder) und literarischer Berater. Ich habe eine lose Idee für eine Handlung: [HIER IHRE IDEE EINFÜGEN]. Ihre Aufgabe ist es, dies zu einem professionellen „Buch der Welt“ auszubauen.
-    Passen Sie Ton und Regeln an meine Idee an. Vermeiden Sie billige, märchenhafte Abkürzungen und KI-Klischees.
+    Passen Sie Ton und Regeln an meine Idee an. Vermeiden Sie billige Handlungskniffe und KI-Klischees.
 
     FORMATIERUNGSREGELN (KRITISCH):
     Sie müssen die Antwort in zwei getrennten Teilen zurückgeben:
@@ -541,6 +541,9 @@ rezyser:
 
     Wechseln Sie in den Modus 'Brainstorming' und versuchen Sie es erneut.
   err_rate_limit: "Keine OpenAI-Kredite! Laden Sie Ihr Konto auf und versuchen Sie es erneut."
+  err_surowy_json: |-
+    Dieser Modus hat Daten im JSON-Format zurückgegeben, ist jedoch nicht als JSON-Modus konfiguriert, sodass der Text NICHT gespeichert wurde (Vermeidung des Einfügens von rohem JSON in die Datei).
+    Häufigste Ursache: Der Modus wurde aus einem Duplikat des Skripts erstellt. Stellen Sie in seiner YAML-Datei `format_wyjscia: skrypt_json` ein (für Dialog Erzähler+Charakter) — oder, wenn es sich um ein neues Schema handelt, wenden Sie sich an den Entwickler.
   err_odrzucenie: |-
     KI hat den Prompt abgelehnt (Tag [ODRZUCENIE_AI] erkannt).
     Der Text wird NICHT in die Geschichtsdatei gespeichert.
@@ -619,15 +622,15 @@ rezyser:
   plik_narracji_brak_tresc: Die Erzählungsdatei des Projekts „{nazwa_projektu}" existiert nicht auf der Festplatte. Laden Sie zuerst das Projekt oder senden Sie die erste Anfrage an die KI, damit die Datei erstellt wird.
   # v15.5: Vom Datenträger aktualisieren — Synchronisierung des internen
   # Gedächtnisses nach manueller Bearbeitung von skrypty/<nazwa>.txt.
-  sr_heading: 📖 Version für Bildschirmleser (NVDA)
-  sr_info: 'Erstellen Sie aus dem fertigen Skript eine separate HTML-Datei für Bildschirmleser: Figurenrollen mit Akzent erhalten eine phonetische Schreibweise und ein Sprachkennzeichen (lang), sodass der Bildschirmleser sie mit dem richtigen Akzent liest. Die ElevenLabs-Brücke verwendet dafür reinen Text und eine Stimme mit Akzent – das sind zwei unabhängige Ausgaben desselben Skripts.'
-  btn_sr_label: 📖 Version für Bildschirmleser generieren
-  btn_sr_name: Version für Bildschirmleser generieren
+  sr_heading: 📖 Version für Screenreader (NVDA)
+  sr_info: 'Erstellen Sie aus dem fertigen Skript eine separate HTML-Datei für Screenreader: Figurenrollen mit Akzent erhalten eine phonetische Schreibweise und ein Sprachkennzeichen (lang), sodass der Screenreader sie mit dem richtigen Akzent liest. Die ElevenLabs-Brücke verwendet dafür reinen Text und eine Stimme mit Akzent – das sind zwei unabhängige Ausgaben desselben Skripts.'
+  btn_sr_label: 📖 Version für Screenreader generieren
+  btn_sr_name: Version für Screenreader generieren
   btn_sr_tooltip: "Erstellt die Datei skrypty/<nazwa>_screen_reader.html: Akzente durch Rechtschreibfehler + Sprachkennzeichen, Audio-Tags entfernt.\nErfordert eine gespeicherte Projektdatei; das Buch der Welt bestimmt, welche Figur welchen Akzent hat."
-  sr_sukces_tytul: Version für Bildschirmleser fertig
-  sr_sukces_tresc: 'Datei für Bildschirmleser gespeichert: skrypty/{nazwa_pliku}_screen_reader.html'
-  sr_blad_tytul: Fehler beim Generieren der Version für Bildschirmleser
-  sr_blad_tresc: "Version für Bildschirmleser konnte nicht generiert werden:\n{tresc_bledu}"
+  sr_sukces_tytul: Version für Screenreader fertig
+  sr_sukces_tresc: 'Datei für Screenreader gespeichert: skrypty/{nazwa_pliku}_screen_reader.html'
+  sr_blad_tytul: Fehler beim Generieren der Version für Screenreader
+  sr_blad_tresc: "Version für Screenreader konnte nicht generiert werden:\n{tresc_bledu}"
   err_struktura: Das Modell hat trotz mehrerer Korrekturversuche eine falsche Antwortstruktur generiert. Versuchen Sie es erneut oder formulieren Sie die Anweisung anders.
   err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext — z.B. das Buch der Welt oder die Anleitung — und versuchen Sie es erneut.
   btn_przeladuj_label: '&Projekt von der Festplatte neu laden'
@@ -712,7 +715,7 @@ poliglota:
   # Panel Reżysera
   lbl_akcent: "Wählen Sie Akzent oder Reinigungsmodus:"
   combo_akcent_name: "Liste der Akzente und Reinigungsmodi"
-  combo_akcent_tooltip: "Wählen Sie phonetischen Akzent oder Reinigungsmodus für Bildschirmleser"
+  combo_akcent_tooltip: "Wählen Sie phonetischen Akzent oder Reinigungsmodus für Screenreader"
   lbl_iso: "ISO-Sprachcode (z.B. en, fr, de; regionale Varianten z.B. pt-BR, zh-CN):"
   txt_iso_name: "Feld für den ISO-Sprachcode"
   txt_iso_hint: "z.B. en oder pt-BR"
@@ -776,7 +779,7 @@ poliglota:
     Das Modell hat die Übersetzung des Blocks abgeschnitten (Antwortlängenlimit überschritten) und konnte sie trotz mehrfacher Aufteilung in kleinere Teile nicht abschließen. Teilen Sie die Quelldatei in kleinere Fragmente und versuchen Sie es erneut.
   ai_ostrzezenie_iso_tytul: "Warnung vor Sprach-Tag"
   ai_ostrzezenie_iso: |-
-    Der ISO-Code konnte nicht automatisch über die API abgerufen werden. Der Standard-Tag „pl" wurde verwendet. Bei Problemen mit dem Bildschirmleser verwenden Sie den „Tag-Reparateur" im Regisseurmodus.
+    Der ISO-Code konnte nicht automatisch über die API abgerufen werden. Der Standard-Tag „pl" wurde verwendet. Bei Problemen mit dem Screenreader verwenden Sie den „Tag-Reparateur" im Regisseurmodus.
 
     Details: {szczegoly}
   # Wyświetlanie błędu AI
@@ -793,7 +796,7 @@ konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   heading: "📄  Hörbucharchitekt"
   tool_description: |-
-    Dieses Modul dient zur Vorbereitung der Dateistruktur für Bildschirmleser (Navigation mit den Tasten 1 und h über Überschriften) und ElevenLabs. Es ändert Schlüsselwörter (Vorspann, Akt, Kapitel, Prolog, Epilog) in Überschriften der ersten Ebene, während der Rest des Skripts unverändert bleibt.
+    Dieses Modul dient zur Vorbereitung der Dateistruktur für Screenreader (Navigation mit den Tasten 1 und h über Überschriften) und ElevenLabs. Es ändert Schlüsselwörter (Vorspann, Akt, Kapitel, Prolog, Epilog) in Überschriften der ersten Ebene, während der Rest des Skripts unverändert bleibt.
   lbl_plik: |-
     Name oder vollständiger Pfad der Quelldatei
     (z.B. .txt, .html, .md oder .docx Dokument):
@@ -855,7 +858,7 @@ manager:
   # a osobna opcja „Wszystkie języki" jest dla autorów paczek językowych.
   dropdown_jezyk_label: "&Sprache:"
   dropdown_jezyk_tooltip: |-
-    Filtert den Baum auf den ausgewählten Ordner in dictionaries/. Standardmäßig auf die Sprache der Benutzeroberfläche eingestellt, damit die Liste für den Bildschirmleser lesbar ist. Wählen Sie „Alle Sprachen", um Ordner nebeneinander zu vergleichen, während Sie ein neues Paket erstellen.
+    Filtert den Baum auf den ausgewählten Ordner in dictionaries/. Standardmäßig auf die Sprache der Benutzeroberfläche eingestellt, damit die Liste für den Screenreader lesbar ist. Wählen Sie „Alle Sprachen", um Ordner nebeneinander zu vergleichen, während Sie ein neues Paket erstellen.
   opcja_wszystkie_jezyki: "🌍  Alle Sprachen"
   tree_jezyk: "🌐  {kod_jezyka}  ({nazwa_jezyka})"
   tree_podstawy: "📄  podstawy.yaml  (Diakritika + Alphabet)"
@@ -915,6 +918,13 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplikat von: {nazwa_pliku}
     # ACHTUNG: Ändern Sie die Felder `label` und `description`, und speichern Sie dann die Datei.
+  dup_opowiesci_ostrzezenie_tytul: "Der Erzählmodus erfordert einen Entwickler"
+  dup_opowiesci_ostrzezenie_tresc: |-
+    Sie duplizieren die Datei des Erzählmodus. Eine einfache YAML-Kopie reicht NICHT aus, damit der neue Modus im Spiel erscheint — die Engine erkennt Modi anhand von Konstanten und Dictionaries im Python-Code, sodass eine nicht eingebundene Datei toter Code ist.
+
+    Wenn Sie einen NEUEN Erzählmodus hinzufügen möchten, verwenden Sie „Neue Regeldatei…" → „Neuer Erzählmodus", der einen vollständigen Leitfaden für den Entwickler generiert.
+
+    Trotzdem mit der Duplizierung fortfahren?
   dup_ok_tytul: "Duplikat erstellt"
   dup_ok_tresc: |-
     Duplikat erstellt: {nazwa_pliku}
@@ -1015,6 +1025,8 @@ manager:
       Verschlüsselungsvorlage „reine Ersetzungen" in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + Liste `zamiany:` (wie Akzent, aber ohne phonetische Pipeline). Nimm das STRUKTURMUSTER von den Akzenten — alle implementierten Verschlüsselungen sind Algorithmen (anderes Format, ohne Liste `zamiany:`).
     tryb_rezysera: |-
       Vorlage basierend auf dem Hörbuch-Modus (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `przypomnienie_uzytkownika` und `slowa_wyzwalajace` in der nativen Sprache des Pakets.
+    tryb_opowiesci: |-
+      Der Erzählmodus ERFORDERT die Bearbeitung des Quellcodes — der Manager erstellt keine Datei, sondern gibt nur einen Prompt für den Agenten. Spielmodi werden anhand von Konstanten und Dictionaries in `opowiesci_ai.py`/`gui_opowiesci.py` erkannt, sodass ein neuer Modus eingebunden werden muss (int-Konstante am Ende hinzugefügt, Einträge in Dictionaries, RadioBox-Label, Modell pro Modus). Aus einer installierten Anwendung (ohne Repository) ist dies nicht machbar — eine Quellversion ist erforderlich.
     postprodukcja: |-
       Postproduktionsvorlage iteriert über Kapitel (Paket `{jezyk_bazowy}/`). Der Agent entwirft `prompt_systemowy`, `prompt_uzytkownika_szablon` (Platzhalter {{naglowek}}, {{probka}}) und `regex_podzial_rozdzialow`, angepasst an die nativen Kapitelnamen (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1052,6 +1064,10 @@ manager:
       etykieta: "Neuer Regisseurmodus (kreativer Modus)"
       opis: |-
         Datei in <jezyk>/rezyser/tryb_*.yaml. Vorlage basierend auf dem Hörbuch-Modus + Prompt für die KI, die prompt_systemowy, przypomnienie_uzytkownika und slowa_wyzwalajace in die native Sprache des Basispakets übersetzt.
+    tryb_opowiesci:
+      etykieta: "Neuer Erzählmodus (ERFORDERT ENTWICKLER)"
+      opis: |-
+        Interaktiver Spielmodus (Erzählungen). Im Gegensatz zu Regisseur-Modi ist er NICHT datengetrieben: Die YAML-Datei allein ist toter Code — die Engine erkennt Modi anhand von Konstanten und Dictionaries in Python. Der Manager erstellt keine Datei; er gibt nur einen Prompt für die KI/den Entwickler mit einer vollständigen Liste von Anknüpfungspunkten im Code (int-Konstante, zwei Dictionaries, RadioBox, Modell pro Modus).
     postprodukcja:
       etykieta: "Neue Postproduktion (Iteration über Kapitel)"
       opis: |-
@@ -1105,7 +1121,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Was ist neu in Version {nowa_wersja}:'
-  co_nowego_tresc: 'Der neue Regel-Assistent (Regel-Manager) ist jetzt vollständig in Ihrer Sprache verfügbar — Namen und Beschreibungen von Regeltypen sowie „nächste Schritte"-Hinweise waren bisher teilweise auf Polnisch, werden jetzt aber in allen unterstützten Sprachen nativ angezeigt. Die Anweisungen für den AI-Agenten zur Regelgenerierung wurden vereinheitlicht (auf Englisch, unabhängig von verwendetem Tool und System-Shell). Die Caesar-Verschlüsselung für die französische Sprache wurde ebenfalls behoben: Das Alphabet zählt jetzt 26 Buchstaben, und der Verschiebungsbereich beträgt ±25 (akzentuierte Buchstaben bleiben unverändert, ebenso wie Ziffern). Keine Änderungen am Betrieb des Geschichtengenerators, der übrigen Verschlüsselungen und des Übersetzers.'
+  co_nowego_tresc: 'Es ist einfacher, Modi zu erstellen und sicherer zu duplizieren. Der Dialogmodus (Skript) kann jetzt im Regelmanager ohne Hilfe eines Entwicklers vervielfältigt werden — das Antwortformat wird durch ein Feld in der Modusdatei bestimmt, sodass die Kopie sofort korrekt funktioniert. Außerdem, wenn ein einfacher Textmodus versehentlich technische Daten (JSON) zurückgibt, wird die Anwendung diese nicht mehr stillschweigend in Ihre Datei einfügen, sondern Sie warnen. Der neue Regelassistent hat einen eigenen Eintrag „Neuer Erzählmodus" erhalten, der einen vollständigen Leitfaden für den Entwickler generiert (diese Modi erfordern Änderungen im Code), und der Versuch, eine Erzählmodusdatei einfach zu kopieren, warnt deutlich davor. Keine Änderungen am Betrieb des Erzählgenerators, der anderen Modi und des Übersetzers.'
   co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
   btn_szczegoly_online: '&Details online'
 opowiesci:
@@ -1195,7 +1211,7 @@ opowiesci:
   brak_gry_tytul: "Kein aktives Spiel"
   brak_gry_tresc: 'Starte ein neues Spiel mit der Schaltfläche „Neues Spiel" oder lade ein zuvor gespeichertes mit der Schaltfläche „Laden", bevor du versuchst, eine Aktion zu senden.'
   gra_istnieje_tytul: "Ein Spiel mit diesem Namen existiert bereits"
-  gra_istnieje_tresc: 'Das Spiel „{nazwa}" hat bereits einen gespeicherten Zustand auf der Festplatte. Möchtest du es mit einem Null-Spiel überschreiben? Die gesamte bisherige Erzählung, Charaktere und Ausrüstung gehen verloren (Dateien .txt, .md und .game.json werden zurückgesetzt).'
+  gra_istnieje_tresc: 'Das Spiel „{nazwa}" hat bereits einen gespeicherten Zustand auf der Festplatte. Möchtest du es mit einem leeren Spiel überschreiben? Die gesamte bisherige Erzählung, Charaktere und Ausrüstung gehen verloren (Dateien .txt, .md und .game.json werden zurückgesetzt).'
   gra_nowa_tytul: "Neues Spiel erstellt"
   gra_nowa_tresc: 'Das Spiel „{nazwa}" wurde erstellt. Gib die erste Aktion im Feld unter der Erzählung ein und klicke auf „Senden", um die Geschichte zu beginnen.'
   gra_wczytana_tytul: "Spiel geladen"

@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 app:
   nazwa: "Director de Audio GPT"
-  wersja: "{numer_wersji} – Versión de Publicación"
+  wersja: "{numer_wersji} – Versión de Lanzamiento"
   title_home: "{nazwa_aplikacji}  |  {wersja}"
   title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
   banner: "🎬  {nazwa_aplikacji}"
@@ -67,7 +67,7 @@ main:
     rezyser: "Abre el módulo de Dirección – escritura de guiones y prosa con IA"
     poliglota: "Abre el módulo Políglota – acentos y traducción de textos"
     konwerter: "Abre el módulo Convertidor – creación de archivos Word"
-    manager: "Abre el Gestor de Reglas – explorador de archivos YAML en dictionaries/ y creador de nuevos acentos / modos / cifrados"
+    manager: "Abre el Gestor de Reglas – explorador de archivos YAML en dictionaries/ y asistente para nuevos acentos / modos / cifrados"
     zakoncz: "Cerrar aplicación"
     jezyk_interfejsu: "Selecciona el idioma de la interfaz de la aplicación (el cambio requiere reiniciar)"
     opowiesci: "Abre el módulo Historias – ficción interactiva en segunda persona generada por IA, leída por TTS/lector de pantalla"
@@ -203,12 +203,12 @@ home:
   narzedzia_slownikowe_name: "Descripción de herramientas de diccionario"
   tools_info: |-
     ¿Quieres añadir un nuevo acento, cifrado o modo de Director?
-    Abre el Gestor de Reglas (Ctrl+4) – encontrarás allí un árbol de todos los archivos YAML en dictionaries/ y un creador que generará automáticamente una plantilla o un prompt para el chatbot de IA.
+    Abre el Gestor de Reglas (Ctrl+4) – encontrarás allí un árbol de todos los archivos YAML en dictionaries/ y un asistente que generará automáticamente una plantilla o un prompt para el chatbot de IA.
 
     Después de añadir un nuevo archivo, reinicia la aplicación – el Modo de Director y Políglota detectan automáticamente todos los archivos YAML en dictionaries/.
   btn_open_manager_label: "📚 Abrir Gestor de Reglas"
   btn_open_manager_name: "Botón Abrir Gestor de Reglas"
-  btn_open_manager_tooltip: "Va al Gestor de Reglas – explorador de archivos YAML y creador de nuevos acentos / modos / cifrados (Ctrl+4)."
+  btn_open_manager_tooltip: "Va al Gestor de Reglas – explorador de archivos YAML y asistente para nuevos acentos / modos / cifrados (Ctrl+4)."
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -229,7 +229,7 @@ rezyser:
     Para cambiar de proyecto, primero debes limpiar la memoria actual.
   prompt_architekta_content: |-
     Eres un destacado arquitecto de mundos (Worldbuilder) y consultor literario. Tengo una idea vaga para una trama: [ESCRIBE TU IDEA AQUÍ]. Tu tarea es expandir esto a un "Libro del Mundo" profesional.
-    Ajusta el tono y las reglas a mi idea. Evita atajos baratos y clichés de IA.
+    Ajusta el tono y las reglas a mi idea. Evita recursos narrativos baratos y clichés de IA.
 
     REGLAS DE FORMATO (CRÍTICAS):
     Debes devolver la respuesta en dos partes separadas:
@@ -540,6 +540,9 @@ rezyser:
 
     Cambia al modo 'Lluvia de Ideas' e inténtalo de nuevo.
   err_rate_limit: "¡Faltan créditos de OpenAI! Recarga tu cuenta e inténtalo de nuevo."
+  err_surowy_json: |-
+    Este modo devolvió datos en formato JSON, pero no está configurado como modo JSON, por lo que el texto NO fue guardado (se evitó pegar JSON sin procesar en el archivo).
+    La causa más común: el modo se creó a partir de un duplicado del Script. Establece en su archivo YAML `format_wyjscia: skrypt_json` (para el diálogo narrador+personaje) — o, si es un nuevo esquema, contacta al desarrollador.
   err_odrzucenie: |-
     La IA rechazó el prompt (se detectó la etiqueta [ODRZUCENIE_AI]).
     El texto NO será guardado en el archivo de historia.
@@ -702,7 +705,7 @@ poliglota:
   rb_ai_name: "Modo Traductor IA"
   rb_rezyser: "Modo Director (reglas fonéticas gratuitas de YAML)"
   rb_rezyser_name: "Modo Director gratuito"
-  rb_szyfrant: "Modo Cifrador (juegos de texto, cortes aleatorios)"
+  rb_szyfrant: "Modo Cifrador (juegos de texto, tartamudeos aleatorios)"
   rb_szyfrant_name: "Modo Cifrador y juegos de texto"
   # Panel AI
   lbl_jezyk_docelowy: "Idioma de destino de la traducción (p. ej., Finés, Islandés, Inglés, Árabe):"
@@ -914,6 +917,13 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplicado de: {nazwa_pliku}
     # ATENCIÓN: cambia los campos `etiqueta` y `descripción`, luego guarda el archivo.
+  dup_opowiesci_ostrzezenie_tytul: "El modo de Narración requiere un desarrollador"
+  dup_opowiesci_ostrzezenie_tresc: |-
+    Estás duplicando el archivo del modo de Narración. Solo una copia del YAML NO es suficiente para que el nuevo modo aparezca en el juego — el motor reconoce los modos por constantes numéricas y diccionarios en el código Python, por lo que un archivo no integrado en el código es código muerto.
+
+    Si deseas agregar un NUEVO modo de Narración, usa "Nuevo archivo de reglas…" → "Nuevo modo de Narración", que generará una guía completa para el desarrollador.
+
+    ¿Continuar con la duplicación de todos modos?
   dup_ok_tytul: "Duplicado creado"
   dup_ok_tresc: |-
     Duplicado creado: {nazwa_pliku}
@@ -1014,6 +1024,8 @@ manager:
       Plantilla de cifrado "sustituciones puras" en `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Formato = `kategoria: szyfr` + lista `zamiany:` (como el acento, pero sin la canalización fonética). Toma el patrón de ESTRUCTURA de los acentos: todos los cifrados implementados son algoritmos (otro formato, sin lista `zamiany:`).
     tryb_rezysera: |-
       Plantilla basada en el modo Audiolibro (paquete `{jezyk_bazowy}/`). El agente diseñará `prompt_systemowy`, `przypomnienie_uzytkownika` y `slowa_wyzwalajace` en el idioma nativo del paquete.
+    tryb_opowiesci: |-
+      El modo de Narración REQUIERE edición del código fuente — el Manager NO crea el archivo, solo da un prompt para el agente. Los modos de juego son reconocidos por constantes numéricas y diccionarios en `opowiesci_ai.py`/`gui_opowiesci.py`, por lo que el nuevo modo debe ser integrado (constante int añadida al final, entradas en diccionarios, etiqueta RadioBox, modelo por modo). Desde la aplicación instalada (sin repositorio) esto es inviable — se necesita la versión de código fuente.
     postprodukcja: |-
       La plantilla de postproducción itera por capítulos (paquete `{jezyk_bazowy}/`). El agente diseñará `prompt_systemowy`, `prompt_uzytkownika_szablon` (marcadores de posición {{naglowek}}, {{probka}}) y `regex_podzial_rozdzialow` adaptado a los nombres nativos de los capítulos (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1051,6 +1063,10 @@ manager:
       etykieta: "Nuevo modo Director (modo creativo)"
       opis: |-
         Archivo en <jezyk>/rezyser/tryb_*.yaml. Plantilla basada en el modo Audiolibro + prompt para la IA que traduce prompt_systemowy, przypomnienie_uzytkownika y slowa_wyzwalajace al idioma nativo del paquete base.
+    tryb_opowiesci:
+      etykieta: "Nuevo modo de Narración (REQUIERE DESARROLLADOR)"
+      opis: |-
+        Modo de juego interactivo (Historias). A diferencia de los modos de Director NO es data-driven: el archivo YAML por sí solo es código muerto — el motor reconoce los modos por constantes numéricas y diccionarios en Python. El Manager NO crea el archivo; solo da un prompt para la IA/desarrollador con una lista completa de puntos de anclaje en el código (constante int, dos diccionarios, RadioBox, modelo por modo).
     postprodukcja:
       etykieta: "Nueva postproducción (iteración por capítulos)"
       opis: |-
@@ -1104,7 +1120,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novedades en la versión {nowa_wersja}:'
-  co_nowego_tresc: 'El creador de nuevas reglas (Administrador de Reglas) ahora está completamente en tu idioma: los nombres y descripciones de los tipos de reglas y las sugerencias de "próximos pasos" estaban parcialmente en polaco, y ahora se muestran de forma nativa en todos los idiomas compatibles. Las instrucciones para el agente de IA que genera reglas se han unificado (en inglés, independientemente de la herramienta utilizada y la interfaz del sistema). También se ha corregido el cifrado César para el idioma francés: el alfabeto ahora tiene 26 letras, y el rango de desplazamiento es ±25 (las letras acentuadas pasan sin cambios, al igual que los números). Sin cambios en el funcionamiento del generador de historias, otros cifrados y el traductor.'
+  co_nowego_tresc: 'Es más fácil crear y más seguro duplicar modos. El modo de diálogo (Script) ahora se puede duplicar en el Manager de Reglas sin la ayuda de un desarrollador — el formato de respuesta lo decide un campo en el archivo del modo, por lo que la copia funciona correctamente de inmediato. Además, si un modo de texto simple por error devuelve datos técnicos (JSON), la aplicación ya no los pegará silenciosamente en tu archivo, sino que te advertirá. El asistente para nuevas reglas ha ganado una posición separada "Nuevo modo de Narración", que genera una guía completa para el desarrollador (estos modos requieren cambios en el código), y el intento de copiar simplemente un archivo de modo de Narración lo advierte claramente. Sin cambios en el funcionamiento del generador de historias, otros modos y el traductor.'
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
 opowiesci:

@@ -77,6 +77,7 @@ TYP_AKCENT_NAPRAWIACZ    = "akcent_naprawiacz"    # wstrzykuje ISO do HTML/DOCX
 TYP_SZYFR_ZAMIANY        = "szyfr_zamiany"
 TYP_SZYFR_ALGORYTM       = "szyfr_algorytm"
 TYP_TRYB_REZYSERA        = "tryb_rezysera"
+TYP_TRYB_OPOWIESCI       = "tryb_opowiesci"   # PROMPT-only: wymaga okablowania w Pythonie
 TYP_POSTPRODUKCJA        = "postprodukcja"
 
 # Kolejność typów w ComboBox-ie kreatora (= priorytet A11y). Etykiety i opisy
@@ -90,6 +91,7 @@ LISTA_TYPOW: list[str] = [
     TYP_AKCENT_NAPRAWIACZ,
     TYP_SZYFR_ZAMIANY,
     TYP_TRYB_REZYSERA,
+    TYP_TRYB_OPOWIESCI,
     TYP_POSTPRODUKCJA,
     TYP_JEZYK_BAZOWY,
     TYP_SZYFR_ALGORYTM,
@@ -868,6 +870,118 @@ All „human-facing" text in the file — label, header, YAML comments,
 
 
 # =============================================================================
+# PROMPT 5B: Nowy tryb Opowieści — WYMAGA PROGRAMISTY (prompt-only)
+# =============================================================================
+# Tryby Opowieści są znacznie głębiej sprzężone z Pythonem niż tryby Reżysera:
+# sama duplikacja pliku YAML to MARTWY KOD (nie pojawi się w GUI ani nie
+# zadziała). Dlatego — analogicznie do szyfru algorytmicznego — Manager NIE
+# zapisuje szablonu udającego, że działa; generuje kompletny prompt dla agenta
+# AI / programisty z pełną listą punktów zaczepienia w kodzie.
+# =============================================================================
+def prompt_tryb_opowiesci(id_pliku: str, etykieta: str,
+                          jezyk_bazowy: str) -> str:
+    natywna_baza = _natywna_nazwa_jezyka(jezyk_bazowy)
+    natywny_jezyk_odp = _natywne_jezyk_odpowiedzi(jezyk_bazowy)
+    inne_paczki = _paczki_referencyjne(jezyk_bazowy)
+    return f"""# ROLE
+You are an AI agent with access to the files of the „Reżyser Audio GPT"
+project (wxPython + OpenAI). You have tools: Read, Write, Edit, Glob, Grep,
+Bash. Task: add a new INTERACTIVE STORY mode (Opowieści). Unlike Director
+modes, a Story mode is NOT data-driven — it requires BOTH a YAML file AND
+several wiring changes in Python. Dropping in a YAML file alone is dead code.
+
+# WHY THIS NEEDS CODE (the core difference vs Director modes)
+Story modes are identified by hard-coded INTEGER constants and the engine
+branches on them in many places. A new mode must be threaded through every
+one of those places, or it will not appear in the GUI and will crash on load.
+
+# PROJECT CONTEXT
+- `opowiesci_ai.py` — the Story engine + the mode constants and per-mode
+  recipe loader (`_zaladuj_przepis`, with a pl→en fallback).
+- `gui_opowiesci.py` — the Story panel: the mode RadioBox, the per-turn
+  loop, the model selection, the choice-buttons logic, bespoke mechanics
+  (e.g. the „fiolka" in the „Mniejsze Zło" mode).
+- Recipe YAMLs live in `dictionaries/<code>/opowiesci/*.yaml`
+  (baza.yaml + tryb_*.yaml + zaczatki.yaml + streszczenie.yaml + …).
+- Deployed packs (as of 13.9): {inne_paczki}.
+- Pack for this task: `dictionaries/{jezyk_bazowy}/` (language {natywna_baza}).
+
+# TASK
+Add an interactive Story mode **{etykieta}** (id stem: `{id_pliku}`),
+creating `dictionaries/{jezyk_bazowy}/opowiesci/tryb_{id_pliku}.yaml` AND
+wiring it into the Python engine + GUI.
+
+# REFERENCE FILES (open before writing)
+1. `dictionaries/{jezyk_bazowy}/opowiesci/tryb_swobodny.yaml` — the simplest
+   model (free narration, no choice buttons). Best starting point for a new
+   mode without bespoke mechanics.
+2. `dictionaries/{jezyk_bazowy}/opowiesci/tryb_wyborow.yaml` — model for a
+   mode that presents A–E choice buttons.
+3. `dictionaries/{jezyk_bazowy}/opowiesci/tryb_mniejsze_zlo.yaml` — model for
+   a choice mode with a bespoke mechanic (the „fiolka").
+4. `opowiesci_ai.py` — the constants block and `_NAZWA_PLIKU_PER_TRYB`.
+5. `gui_opowiesci.py` — the RadioBox builder, `_model_dla_trybu`, the
+   choice-area activation, and the fiolka block.
+
+# WIRING CHECKLIST (every item is mandatory — grep to find the exact lines)
+1. **New integer constant** in `opowiesci_ai.py` (near `TRYB_BURZA=0`,
+   `TRYB_SWOBODNY=3`, `TRYB_WYBOROW=4`, `TRYB_MNIEJSZE_ZLO=5`). APPEND the
+   next free integer (e.g. `TRYB_{id_pliku.upper()} = 6`). Do NOT renumber
+   the existing constants — they are persisted verbatim in each project's
+   `runtime/skrypty/<nazwa>.mode`, so changing them breaks saved games.
+2. **`_NAZWA_PLIKU_PER_TRYB`** in `opowiesci_ai.py`: add
+   `TRYB_{id_pliku.upper()}: "tryb_{id_pliku}"`. Missing entry → `KeyError`
+   when the engine loads the recipe.
+3. **`_MAPA_TRYB_RB_NA_INT`** in `gui_opowiesci.py` (RadioBox index → int):
+   APPEND the new constant at the END of the tuple. Appending keeps the
+   existing indices (and thus old `.mode` files) intact.
+4. **RadioBox labels** in `gui_opowiesci.py` (`_zbuduj_radiobox_trybu`): add
+   a `t("opowiesci.tryb_{id_pliku}")` entry, in the SAME order as
+   `_MAPA_TRYB_RB_NA_INT`. Then add the key `opowiesci.tryb_{id_pliku}` to
+   `dictionaries/<code>/gui/ui.yaml` for EVERY deployed pack (use
+   `buduj_wielojezyczne_ui.py` for the non-pl languages, or add by hand and
+   proofread).
+5. **`_model_dla_trybu`** in `gui_opowiesci.py`: decide the model. Choice
+   modes that must respect world rules use `MODEL_QUALITY` (gpt-4o); light
+   free modes use `MODEL_DOMYSLNY` (gpt-4o-mini). If the new mode needs 4o,
+   extend the `if tryb in (TRYB_WYBOROW, TRYB_MNIEJSZE_ZLO)` condition.
+6. **Choice buttons** (`gui_opowiesci.py`, the `_aktywuj_obszar_wyborow` /
+   visibility condition `tryb in (TRYB_WYBOROW, TRYB_MNIEJSZE_ZLO)`): if the
+   new mode shows A–E option buttons, add the constant to that condition.
+   Otherwise leave it — the choice area stays hidden.
+7. **Bespoke mechanics**: if the mode has a special mechanic like the fiolka
+   (currently gated by `if tryb == TRYB_MNIEJSZE_ZLO`), that logic is pure
+   Python — model it on the fiolka block, gate it on the new constant.
+
+# RECIPE YAML STRUCTURE (`tryb_{id_pliku}.yaml`)
+Copy the field set from the model file (tryb_swobodny / tryb_wyborow):
+`prompt_systemowy` (placeholders such as `{{world_context}}`,
+`{{jezyk_odpowiedzi}}` — keep them DOUBLED `{{ }}` if the prompt also
+contains a literal JSON example, so `str.format_map` does not eat them),
+`jezyk_odpowiedzi: {natywny_jezyk_odp}`, plus any per-mode keys the model
+uses. All human-facing text in **{natywna_baza}**.
+
+# NATIVE-LANGUAGE REQUIREMENTS
+`prompt_systemowy`, the RadioBox label and all human-facing strings in
+**{natywna_baza}**. The English checklist above is for the agent only.
+
+# PROCEDURE
+1. Read the reference files; pick the closest model (free vs choice).
+2. Write `dictionaries/{jezyk_bazowy}/opowiesci/tryb_{id_pliku}.yaml`.
+3. Apply the WIRING CHECKLIST edits (constant, two maps, RadioBox, model,
+   choices, mechanics). Append, never renumber.
+4. Add the `opowiesci.tryb_{id_pliku}` i18n key to every pack's `ui.yaml`.
+5. Validate the YAML parses (any YAML loader/linter — do not assume a
+   particular shell or that Python is on PATH).
+6. Sanity-check `.mode` back-compat: an old saved game with mode 3/4/5 must
+   still load (the integers did not move).
+7. In your reply report: which integer you assigned, the model you chose,
+   whether the mode uses choice buttons / bespoke mechanics, and the list of
+   files you edited.
+"""
+
+
+# =============================================================================
 # SZABLON 4: Postprodukcja (wzorowany na postprod_tytuly.yaml)
 # =============================================================================
 def szablon_postprodukcja(id_pliku: str, etykieta: str,
@@ -1396,6 +1510,21 @@ def zbuduj_wynik(
             "prompt":   prompt_tryb_rezysera(id_pliku, etykieta, jezyk_bazowy),
             "docelowy": f"{jezyk_bazowy}/rezyser/{nazwa_pliku}.yaml",
             "uwagi": _uwagi("tryb_rezysera",
+                            jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
+        }
+
+    if typ == TYP_TRYB_OPOWIESCI:
+        # Prompt-only (jak szyfr algorytmiczny): tryb Opowieści wymaga
+        # okablowania w Pythonie (stała int + dwie mapy + RadioBox + model),
+        # więc Manager NIE zapisuje szablonu udającego, że działa.
+        nazwa_pliku = f"tryb_{id_pliku}" if not id_pliku.startswith("tryb_") \
+                      else id_pliku
+        return {
+            "tryb":     "PROMPT",
+            "yaml":     "",
+            "prompt":   prompt_tryb_opowiesci(id_pliku, etykieta, jezyk_bazowy),
+            "docelowy": f"{jezyk_bazowy}/opowiesci/{nazwa_pliku}.yaml",
+            "uwagi": _uwagi("tryb_opowiesci",
                             jezyk_bazowy=jezyk_bazowy, id_pliku=id_pliku),
         }
 

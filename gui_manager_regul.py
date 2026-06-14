@@ -495,6 +495,22 @@ class ManagerRegulPanel(wx.Panel):
         if not meta or meta["typ"] != "plik":
             return
 
+        # Ostrzeżenie dla plików trybów Opowieści: duplikat YAML sam w sobie nie
+        # wystarczy — silnik rozpoznaje tryby po stałych int + mapach w Pythonie,
+        # więc nowy plik bez okablowania w kodzie to martwy kod (nie pojawi się
+        # w grze). Dla plików danych (baza/zaczatki/streszczenie) duplikacja jest
+        # OK — ostrzegamy tylko przy `tryb_*.yaml`.
+        if meta.get("kategoria") == FOLDER_OPOWIESCI and \
+                os.path.basename(meta["sciezka"]).startswith("tryb_"):
+            odp = wx.MessageBox(
+                t("manager.dup_opowiesci_ostrzezenie_tresc"),
+                t("manager.dup_opowiesci_ostrzezenie_tytul"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+                self,
+            )
+            if odp != wx.YES:
+                return
+
         stary = meta["sciezka"]
         folder = os.path.dirname(stary)
         stara_nazwa = os.path.basename(stary)
@@ -843,12 +859,13 @@ def _zgadnij_typ_z_zaznaczenia(meta: dict | None) -> str:
     if kat == FOLDER_REZYSER:
         return mrs.TYP_TRYB_REZYSERA
     if kat == FOLDER_OPOWIESCI:
-        # v15.2.4: pliki opowiesci/ semantycznie najbliższe trybom Reżysera
-        # (prompt_systemowy + slowa_wyzwalajace), więc kreator startuje
-        # z tego samego szablonu. Dla `baza.yaml` / `zaczatki.yaml` /
-        # `streszczenie.yaml` autor i tak duplikuje istniejący plik
-        # (przycisk „Duplikuj") — kreator obsługuje tylko nowe tryby.
-        return mrs.TYP_TRYB_REZYSERA
+        # Tryby Opowieści są znacznie głębiej sprzężone z silnikiem niż tryby
+        # Reżysera (stała int + dwie mapy + RadioBox + model per tryb), więc
+        # kreator startuje z dedykowanego typu PROMPT-only, który generuje
+        # przewodnik dla programisty zamiast szablonu udającego, że działa.
+        # Pliki danych (`baza.yaml` / `zaczatki.yaml` / `streszczenie.yaml`)
+        # autor i tak edytuje/duplikuje istniejące — kreator dotyczy trybów.
+        return mrs.TYP_TRYB_OPOWIESCI
     # FOLDER_GUI nie ma dedykowanego typu w kreatorze — trafia do domyślnego
     # (akcent). Tłumaczenia UI/dokumentacji obsługują standalone dev-toole
     # (buduj_wielojezyczne_ui.py / buduj_wielojezyczne_docs.py), nie kreator

@@ -135,8 +135,8 @@ home:
   err_odczyt:            "🚨 Nie udało się odczytać pliku golden_key.env:\n{tresc_bledu}"
   err_struktura: |-
     🚨 Błąd struktury pliku!
-    Brakuje wymaganego parametru OPENAI_API_KEY=.
-    Prawdopodobnie skasowałeś znak równości lub nazwę zmiennej.
+    Brakuje wymaganej zmiennej OPENAI_API_KEY=.
+    Prawdopodobnie usunąłeś znak równości lub nazwę zmiennej.
     Usuń plik, wygeneruj go ponownie i wklej klucz ostrożniej.
   err_tekst_zastepczy: |-
     ⚠️ Klucz nie został wprowadzony!
@@ -237,7 +237,7 @@ rezyser:
     Aby zmienić projekt, musisz najpierw wyczyścić pamięć bieżącą.
   prompt_architekta_content: |-
     Jesteś wybitnym architektem światów (Worldbuilder) i konsultantem literackim. Mam luźny pomysł na fabułę: [TUTAJ WPISZ SWÓJ POMYSŁ]. Twoim zadaniem jest rozbudowanie tego do profesjonalnej „Księgi Świata".
-    Dostosuj ton i zasady do mojego pomysłu. Unikaj tanich, baśniowych skrótów i klisz AI.
+    Dostosuj ton i zasady do mojego pomysłu. Unikaj tanich chwytów fabularnych, nielogicznych uproszczeń i klisz AI.
 
     ZASADY FORMATOWANIA (KRYTYCZNE):
     Musisz zwrócić odpowiedź w dwóch oddzielnych częściach:
@@ -345,8 +345,8 @@ rezyser:
     Audiobook     – tradycyjna proza literacka (zapisywana do pliku).
   # 13.2: komunikaty fallbacku reżysera (gdy brak reguł dla języka UI ani EN)
   brak_trybow_dla_jezyka: |-
-    Dla języka „{jezyk}" nie znaleziono trybów reżysera AI ani fallbacku
-    angielskiego (dictionaries/en/rezyser/). Dodaj plik YAML z trybem
+    Dla języka „{jezyk}" nie znaleziono trybów reżysera AI ani zapasowych reguł
+    angielskich (dictionaries/en/rezyser/). Dodaj plik YAML z trybem
     do folderu reguł języka albo przywróć domyślny pakiet angielski.
   brak_trybow_tytul:     "Brak trybów reżysera"
   placeholder_brak_trybow: "(brak trybów do wyboru)"
@@ -481,7 +481,7 @@ rezyser:
   # przez psucie ortografii + atrybut lang (NVDA), audio-tagi usuwane.
   sr_heading: "📖 Wersja dla czytników ekranu (NVDA)"
   sr_info: |-
-    Zbuduj z gotowego skryptu osobny plik HTML dla czytników ekranu: kwestie postaci z akcentem dostają zapis fonetyczny i znacznik języka (lang), więc czytnik ekranu czyta je z właściwym akcentem. Most ElevenLabs używa do tego czystego tekstu i głosu z akcentem — to dwa niezależne wyjścia tego samego skryptu.
+    Wygeneruj z gotowego skryptu osobny plik HTML dla czytników ekranu: kwestie dialogowe postaci z akcentem dostają zapis fonetyczny i znacznik języka (lang), więc czytnik ekranu czyta je z właściwym akcentem. Most ElevenLabs używa do tego czystego tekstu i głosu z akcentem — to dwa niezależne wyjścia tego samego skryptu.
   btn_sr_label: "📖 Generuj wersję dla czytników ekranu"
   btn_sr_name: "Generuj wersję dla czytników ekranu"
   btn_sr_tooltip: |-
@@ -606,6 +606,9 @@ rezyser:
     Możesz zmodyfikować instrukcję i spróbować ponownie.
   err_struktura:         "Model wygenerował niewłaściwą strukturę odpowiedzi mimo kilku prób korekty. Spróbuj ponownie albo sformułuj polecenie inaczej."
   err_dlugosc:           "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst — np. Księgę Świata lub instrukcję — i spróbuj ponownie."
+  err_surowy_json: |-
+    Model w tym trybie zwrócił dane w formacie JSON, ale tryb nie jest skonfigurowany jako tryb JSON, więc tekst NIE został zapisany (uniknięto wklejenia surowego JSON-a do pliku).
+    Najczęstsza przyczyna: tryb powstał z duplikatu Skryptu. Ustaw w jego pliku YAML `format_wyjscia: skrypt_json` (dla dialogu narrator+postać) — albo, jeśli to nowy schemat, skontaktuj się z programistą.
   blad_ai_tytul:         "Błąd AI"
   blad_ai_szczegoly_tytul: "Błąd AI – Szczegóły techniczne"
   blad_ai_naglowek:      "Wystąpił nieoczekiwany błąd podczas przetwarzania."
@@ -706,7 +709,7 @@ poliglota:
     ({liczba_znakow} znaków).
 
     Możesz teraz skonfigurować tryb pracy i uruchomić przetwarzanie.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
+  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny zestaw reguł.
   # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
   # przeczytało, że etykiety akcentów/szyfrów się zmienią.
   zmiana_jezyka_pipeline_tytul: "Wykryto inny język niż aktywny"
@@ -725,8 +728,8 @@ poliglota:
   rb_ai_name:            "Tryb Tłumacza AI"
   rb_rezyser:            "Tryb Reżysera (darmowe reguły fonetyczne z YAML)"
   rb_rezyser_name:       "Tryb Reżysera darmowy"
-  rb_szyfrant:           "Tryb Szyfranta (zabawy tekstem, losowe zacinanie)"
-  rb_szyfrant_name:      "Tryb Szyfranta i zabaw tekstowych"
+  rb_szyfrant:           "Tryb Szyfranta (zabawy słowne, losowe jąkanie)"
+  rb_szyfrant_name:      "Tryb Szyfranta i zabaw słownych"
   # Panel AI
   lbl_jezyk_docelowy:    "Język docelowy tłumaczenia (np. Fiński, Islandzki, Angielski, Arabski):"
   txt_jezyk_name:        "Pole języka docelowego"
@@ -790,7 +793,7 @@ poliglota:
 
     Postęp został automatycznie zabezpieczony. Zasil konto API i wczytaj oryginał ponownie, by kontynuować od tego miejsca.
   ai_blad_cache: |-
-    Nie udało się odczytać pliku tymczasowego (cache wznawiania tłumaczenia):
+    Nie udało się odczytać pliku tymczasowego (pamięci podręcznej wznawiania tłumaczenia):
     {plik}
 
     Usuń ten plik ręcznie i spróbuj ponownie.
@@ -887,7 +890,7 @@ manager:
   # Etykiety kategorii drzewa
   kategorie:
     akcenty:             "Akcenty (fonetyka dla TTS)  🎙️"
-    szyfry:              "Szyfry (zabawy tekstem)  🔐"
+    szyfry:              "Szyfry (zabawy słowne)  🔐"
     rezyser:             "Reżyser (tryby i postprodukcja)  🎬"
     gui:                 "Tłumaczenia UI  🌐"
     opowiesci:           "Opowieści (tryby interaktywne)  📖"
@@ -938,6 +941,13 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplikat z: {nazwa_pliku}
     # UWAGA: zmień pola `etykieta` i `opis`, a potem zapisz plik.
+  dup_opowiesci_ostrzezenie_tytul: "Tryb Opowieści wymaga programisty"
+  dup_opowiesci_ostrzezenie_tresc: |-
+    Duplikujesz plik trybu Opowieści. Sama kopia YAML NIE wystarczy, by nowy tryb pojawił się w grze — silnik rozpoznaje tryby po stałych liczbowych i słownikach w kodzie Pythona, więc niezintegrowany w kodzie plik to martwy kod.
+
+    Jeśli chcesz dodać NOWY tryb Opowieści, użyj „Nowy plik reguł…" → „Nowy tryb Opowieści", który wygeneruje kompletny przewodnik dla programisty.
+
+    Kontynuować duplikację mimo to?
   dup_ok_tytul:          "Duplikat utworzony"
   dup_ok_tresc: |-
     Utworzono duplikat: {nazwa_pliku}
@@ -1041,6 +1051,8 @@ manager:
       Szablon szyfru „czyste zamiany" w `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + lista `zamiany:` (jak akcent, ale bez pipeline'u fonetycznego). Wzorzec STRUKTURY bierz z akcentów — wszystkie wdrożone szyfry to algorytmy (inny format, bez listy `zamiany:`).
     tryb_rezysera: |-
       Szablon oparty o tryb Audiobook (paczka `{jezyk_bazowy}/`). Agent zaprojektuje `prompt_systemowy`, `przypomnienie_uzytkownika` i `slowa_wyzwalajace` w języku natywnym paczki.
+    tryb_opowiesci: |-
+      Tryb Opowieści WYMAGA edycji kodu źródłowego — Manager NIE tworzy pliku, daje tylko prompt dla agenta. Tryby gry są rozpoznawane po stałych liczbowych i słownikach w `opowiesci_ai.py`/`gui_opowiesci.py`, więc nowy tryb trzeba zintegrować (stała int dopisana na końcu, wpisy w słownikach, etykieta RadioBox, model per tryb). Z zainstalowanej aplikacji (bez repozytorium) jest to niewykonalne — potrzebna wersja źródłowa.
     postprodukcja: |-
       Szablon postprodukcji iteruje po rozdziałach (paczka `{jezyk_bazowy}/`). Agent zaprojektuje `prompt_systemowy`, `prompt_uzytkownika_szablon` (placeholdery {{naglowek}}, {{probka}}) i `regex_podzial_rozdzialow` dopasowany do natywnych nazw rozdziałów (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1078,6 +1090,10 @@ manager:
       etykieta: "Nowy tryb Reżysera (tryb twórczy)"
       opis: |-
         Plik w <jezyk>/rezyser/tryb_*.yaml. Szablon oparty o tryb Audiobook + prompt dla AI tłumaczący prompt_systemowy, przypomnienie_uzytkownika i slowa_wyzwalajace na język natywny paczki bazowej.
+    tryb_opowiesci:
+      etykieta: "Nowy tryb Opowieści (WYMAGA PROGRAMISTY)"
+      opis: |-
+        Interaktywny tryb gry (Opowieści). W odróżnieniu od trybów Reżysera NIE jest data-driven: sam plik YAML to martwy kod — silnik rozpoznaje tryby po stałych liczbowych i słownikach w Pythonie. Manager NIE tworzy pliku; daje tylko prompt dla AI/programisty z pełną listą punktów zaczepienia w kodzie (stała int, dwa słowniki, RadioBox, model per tryb).
     postprodukcja:
       etykieta: "Nowa postprodukcja (iteracja po rozdziałach)"
       opis: |-
@@ -1111,7 +1127,7 @@ updater:
   # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
   co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
   co_nowego_tresc: |-
-    Kreator nowych reguł (Manager Reguł) jest teraz w pełni w Twoim języku — nazwy i opisy typów reguł oraz wskazówki „następne kroki" były dotąd częściowo po polsku, a teraz wyświetlają się natywnie we wszystkich obsługiwanych językach. Instrukcje dla agenta AI generującego reguły ujednolicono (po angielsku, niezależnie od używanego narzędzia i powłoki systemowej). Naprawiono również szyfr Cezara dla języka francuskiego: alfabet liczy teraz 26 liter, a zakres przesunięcia to ±25 (litery akcentowane przechodzą bez zmian, jak cyfry). Bez zmian w działaniu generatora opowieści, pozostałych szyfrów i tłumacza.
+    Łatwiej tworzyć i bezpieczniej duplikować tryby. Tryb dialogowy (Skrypt) można teraz powielić w Managerze Reguł bez pomocy programisty — o formacie odpowiedzi decyduje pole w pliku trybu, więc kopia od razu działa poprawnie. Dodatkowo, jeśli zwykły tryb tekstowy przez pomyłkę zwróci dane techniczne (JSON), aplikacja nie wklei ich już po cichu do Twojego pliku, tylko Cię ostrzeże. Kreator nowych reguł zyskał osobną pozycję „Nowy tryb Opowieści", która generuje kompletny przewodnik dla programisty (te tryby wymagają zmian w kodzie), a próba zwykłego skopiowania pliku trybu Opowieści jasno o tym uprzedza. Bez zmian w działaniu generatora opowieści, pozostałych trybów i tłumacza.
   co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
   btn_szczegoly_online:     "&Szczegóły online"
   # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)
@@ -1250,13 +1266,13 @@ opowiesci:
   # ---- BLOK F — Obszar wyborów (placeholder; dynamic w Fazie 2) -------------
   lbl_wybory:                "Twoje wybory"
   panel_wyborow_name:        "Obszar wyborów"
-  panel_wyborow_placeholder: "Wybory pojawią się tutaj w trybie wyborów lub mniejszego zła. W trybie swobodnym ten obszar pozostaje pusty — opisuj akcje free-textem w polu poniżej."
+  panel_wyborow_placeholder: "Wybory pojawią się tutaj w trybie wyborów lub mniejszego zła. W trybie swobodnym ten obszar pozostaje pusty — opisuj akcje własnymi słowami w polu poniżej."
 
   # ---- BLOK G — Pole akcji + przycisk Wyślij --------------------------------
   lbl_akcja:                 "Twoja akcja lub komenda"
   txt_akcja_name:            "Pole akcji gracza"
   txt_akcja_hint:            "Opisz, co robisz, lub wpisz komendę zaczynającą się od /"
-  txt_akcja_tooltip:         "Wpisz dowolną akcję (free-text) lub komendę systemową: /zapisz /wczytaj /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
+  txt_akcja_tooltip:         "Wpisz dowolną akcję (własnymi słowami) lub komendę systemową: /zapisz /wczytaj /koniec /wizualizuj. Akcję zatwierdza przycisk Wyślij."
   btn_wyslij_label:          "&Wyślij"
   btn_wyslij_tooltip:        "Wyślij akcję do silnika narracyjnego"
 
@@ -1290,7 +1306,7 @@ opowiesci:
   brak_gry_tytul:            "Brak aktywnej gry"
   brak_gry_tresc:            'Załóż nową grę przyciskiem „Nowa gra" albo wczytaj wcześniej zapisaną przyciskiem „Wczytaj", zanim spróbujesz wysłać akcję.'
   gra_istnieje_tytul:        "Gra o tej nazwie już istnieje"
-  gra_istnieje_tresc:        'Gra „{nazwa}" już ma zapisany stan na dysku. Czy chcesz nadpisać ją zerową grą? Cała dotychczasowa narracja, postacie i ekwipunek zostaną utracone (pliki .txt, .md i .game.json zostaną zresetowane).'
+  gra_istnieje_tresc:        'Gra „{nazwa}" już ma zapisany stan na dysku. Czy chcesz rozpocząć nową, pustą grę i ją nadpisać? Cała dotychczasowa narracja, postacie i ekwipunek zostaną utracone (pliki .txt, .md i .game.json zostaną zresetowane).'
   gra_nowa_tytul:            "Nowa gra utworzona"
   gra_nowa_tresc:            'Gra „{nazwa}" została utworzona. Wpisz pierwszą akcję w polu poniżej narracji i kliknij „Wyślij", aby rozpocząć opowieść.'
   gra_wczytana_tytul:        "Gra wczytana"

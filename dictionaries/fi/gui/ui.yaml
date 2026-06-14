@@ -410,7 +410,7 @@ rezyser:
   # budową (rozszerzenie Zasady Montażysty). Tagi [Narrator/Postać: …] i
   # nazwy nagłówków zlokalizowane; {liczba}/{nr}/{tekst} to placeholdery.
   el_sieroty_tytul: Rivit ilman puhujamerkintää
-  el_sieroty_naglowek: 'Huomio: {liczba} rivillä käsikirjoituksessa ei ole puhujamerkintää (esim. [Kertoja: …] tai [Hahmo: …]) eivätkä ne ole rakenneotsikko (Prologi, Näytös, Kohtaus, Luku).
+  el_sieroty_naglowek: 'Huomio: {liczba} rivillä käsikirjoituksessa ei ole puhujamerkintää (esim. [Kertoja: …] tai [Hahmo: …]) eivätkä ne ole rakenneotsikoita (Prologi, Näytös, Kohtaus, Luku).
 
     ElevenLabs Studio -silta ohittaa tällaiset rivit projektia rakennettaessa — niille ei tule ääntä, joten valmis projekti voi poiketa tiedostostasi.'
   el_sieroty_pozycja: '  • rivi {nr}: {tekst}'
@@ -490,9 +490,9 @@ rezyser:
   ksiega_zapisana_tresc: "Maailmankirja tallennettu: skrypty/{nazwa_projektu}.md"
   blad_zapisu_ksiegi: "Maailmankirjan tallennusvirhe:\n{tresc_bledu}"
   # Prompt Architekta dialog
-  prompt_arch_dlg_tytul: "Arkkitehdin Prompti – liitä ulkoiseen chatbotin"
+  prompt_arch_dlg_tytul: "Arkkitehdin Prompti – liitä ulkoiseen chatbotiin"
   prompt_arch_instrukcja: |-
-    Tämä valmis prompti liitä ulkoiseen chatbotin (esim. ilmainen ChatGPT tai Claude) ja korvaa teksti "[TÄHÄN KIRJOITA OMA IDEASI]" omalla tarinan alullasi.
+    Liitä tämä valmis prompti ulkoiseen chatbotiin (esim. ilmainen ChatGPT tai Claude) ja korvaa teksti "[TÄHÄN KIRJOITA OMA IDEASI]" omalla tarinan alullasi.
 
     AI palauttaa sinulle valmiin Maailmankirjan Markdown-koodilohkossa — kopioi sen sisältö (ilman ympäröiviä merkkejä ```) ja liitä se yllä olevaan "Maailmankirja"-kenttään ja napsauta sitten "Tallenna Kirja pysyvästi".
   prompt_arch_instrukcja_name: "Arkkitehdin Promptin käyttöohje"
@@ -541,6 +541,9 @@ rezyser:
 
     Vaihda 'Aivoriihi'-tilaan ja yritä uudelleen.
   err_rate_limit: "OpenAI-krediitit puuttuvat! Lataa tilisi ja yritä uudelleen."
+  err_surowy_json: |-
+    Tämä tila palautti tiedot JSON-muodossa, mutta sitä ei ole määritetty JSON-tilaksi, joten tekstiä EI tallennettu (vältettiin raaka-JSONin liittämistä tiedostoon).
+    Yleisin syy: tila on luotu Skriptin kaksoiskappaleesta. Aseta sen YAML-tiedostoon `format_wyjscia: skrypt_json` (kertoja+hahmo-dialogille) — tai, jos kyseessä on uusi kaavio, ota yhteyttä kehittäjään.
   err_odrzucenie: |-
     AI hylkäsi promptin (tunnistettu tagi [ODRZUCENIE_AI]).
     Tekstiä EI tallenneta tiedostoon.
@@ -618,7 +621,7 @@ rezyser:
   plik_narracji_brak_tytul: Kertomustiedosto puuttuu
   plik_narracji_brak_tresc: Projektin kertomustiedostoa „{nazwa_projektu}" ei ole levyllä. Lataa ensin projekti tai lähetä ensimmäinen kysely AI:lle, jotta tiedosto luodaan.
   sr_heading: 📖 Näytönlukijan versio (NVDA)
-  sr_info: 'Luo valmiista skriptistä erillinen HTML-tiedosto näytönlukijoille: hahmojen repliikit, joissa on aksentti, saavat foneettisen kirjoitusasun ja kielitunnisteen (lang), joten näytönlukija lukee ne oikealla aksentilla. Most ElevenLabs käyttää tähän pelkkää tekstiä ja aksentilla varustettua ääntä — nämä ovat kaksi erillistä ulostuloa samasta skriptistä.'
+  sr_info: 'Luo valmiista skriptistä erillinen HTML-tiedosto näytönlukijoille: hahmojen repliikit, joissa on aksentti, saavat foneettisen kirjoitusasun ja kielitunnisteen (lang), joten näytönlukija lukee ne oikealla aksentilla. ElevenLabs-silta käyttää tähän pelkkää tekstiä ja aksentilla varustettua ääntä — nämä ovat kaksi erillistä ulostuloa samasta skriptistä.'
   btn_sr_label: 📖 Luo näytönlukijan versio
   btn_sr_name: Luo näytönlukijan versio
   btn_sr_tooltip: "Luo tiedosto skrypty/<nazwa>_screen_reader.html: aksentit ortografian rikkomisen kautta + kielitunniste, äänitunnisteet poistettu.\nVaatii tallennetun projektitiedoston; Maailman Kirja määrittää, millä hahmolla on mikä aksentti."
@@ -740,7 +743,7 @@ poliglota:
   brak_iso_tytul: "Ei ISO-koodia"
   brak_iso_tresc: "Anna kelvollinen kielen ISO-koodi — kaksikirjaiminen (esim. en, fr, de) tai alue-/kirjoitusjärjestelmätarkenteella (esim. pt-BR, zh-CN, zh-Hans)."
   ostrzezenie_jezyk: |-
-    Huomio: Tekstin pääkieli havaittu olevan tuettujen ulkopuolella. Foneettiset säännöt on tällä hetkellä mukautettu kielille: {wspierane_jezyki}. Vaikutus voi olla arvaamaton.
+    Huomio: Tekstin pääkielen on havaittu olevan tuettujen ulkopuolella. Foneettiset säännöt on tällä hetkellä mukautettu kielille: {wspierane_jezyki}. Vaikutus voi olla arvaamaton.
   # 13.2: twardy filtr po języku — komunikaty braku reguł dla języka projektu
   brak_akcentow_dla_jezyka: |-
     Kielelle „{jezyk}" ei ole asennettu foneettisia aksentteja. Säännöt liittyvät tiiviisti lähdekieleen eikä niitä voi lainata muista dictionaries/-kansioista.
@@ -913,6 +916,13 @@ manager:
   dup_komentarz_naglowek: |-
     # Kopioitu: {nazwa_pliku}
     # HUOMIO: muuta kenttiä `etiketti` ja `kuvaus`, sitten tallenna tiedosto.
+  dup_opowiesci_ostrzezenie_tytul: "Tarinatila vaatii kehittäjää"
+  dup_opowiesci_ostrzezenie_tresc: |-
+    Kopioit Tarinatilan tiedoston. Pelkkä YAML-kopio EI riitä, jotta uusi tila ilmestyisi peliin — moottori tunnistaa tilat numeeristen vakioiden ja Python-koodin karttojen perusteella, joten kytkemätön tiedosto on kuollutta koodia.
+
+    Jos haluat lisätä UUDEN Tarinatilan, käytä "Uusi sääntötiedosto…" → "Uusi Tarinatila", joka luo täydellisen oppaan kehittäjälle.
+
+    Jatketaanko kopiointia siitä huolimatta?
   dup_ok_tytul: "Kopio luotu"
   dup_ok_tresc: |-
     Kopio luotu: {nazwa_pliku}
@@ -1008,11 +1018,13 @@ manager:
     akcent_oczyszczenie: |-
       Puhdistusaksentti (`kategoria: oczyszczenie`) paketissa `{jezyk_bazowy}/`. Tämän tyyppisten tiedostojen rakenne on identtinen kaikissa käyttöön otetuissa paketeissa — eroaa VAIN etiketissä, kuvauksessa ja kommenteissa (natiivi).
     akcent_naprawiacz: |-
-      Tagien korjaaja (`kategoria: naprawiacz`) paketissa `{jezyk_bazowy}/`. Erikoistila: injektoi ISO-koodin tulostiedostoihin (HTML/DOCX), ei muuta sisältöä.
+      Tunnisteiden korjaaja (`kategoria: naprawiacz`) paketissa `{jezyk_bazowy}/`. Erikoistila: injektoi ISO-koodin tulostiedostoihin (HTML/DOCX), ei muuta sisältöä.
     szyfr_zamiany: |-
       Salauksen malli "puhtaat muunnokset" tiedostossa `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Muoto = `kategoria: szyfr` + lista `zamiany:` (kuten aksentti, mutta ilman foneettista putkea). Rakennekuvio otetaan aksenteista — kaikki käyttöön otetut salaukset ovat algoritmeja (eri muoto, ilman `zamiany:`-listaa).
     tryb_rezysera: |-
       Malli perustuu Äänikirjatilaan (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `przypomnienie_uzytkownika` ja `slowa_wyzwalajace` paketin natiivikielellä.
+    tryb_opowiesci: |-
+      Tarinatila VAATII lähdekoodin muokkausta — Manager EI luo tiedostoa, se antaa vain kehotteen agentille. Pelitilat tunnistetaan numeeristen vakioiden ja karttojen perusteella `opowiesci_ai.py`/`gui_opowiesci.py`-tiedostoissa, joten uusi tila on kytkettävä (vakio int lisätään loppuun, merkinnät kartoissa, RadioBox-etiketti, malli per tila). Asennetusta sovelluksesta (ilman arkistoa) tämä on mahdotonta — tarvitaan lähdekoodiversio.
     postprodukcja: |-
       Jälkituotantomalli iteroi lukujen läpi (paketti `{jezyk_bazowy}/`). Agentti suunnittelee `prompt_systemowy`, `prompt_uzytkownika_szablon` (paikkamerkit {{naglowek}}, {{probka}}) ja `regex_podzial_rozdzialow`, joka on sovitettu natiivien lukujen nimiin (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1050,6 +1062,10 @@ manager:
       etykieta: "Uusi Ohjaajan tila (luova tila)"
       opis: |-
         Tiedosto <jezyk>/rezyser/tryb_*.yaml. Malli perustuu Äänikirjatilaan + kehotus AI:lle kääntämään prompt_systemowy, przypomnienie_uzytkownika ja slowa_wyzwalajace peruspaketin äidinkielelle.
+    tryb_opowiesci:
+      etykieta: "Uusi Tarinatila (VAATII KEHITTÄJÄÄ)"
+      opis: |-
+        Interaktiivinen pelitila (Tarina). Toisin kuin Ohjaajan tilat, se EI ole dataohjattu: pelkkä YAML-tiedosto on kuollutta koodia — moottori tunnistaa tilat numeeristen vakioiden ja Python-koodin karttojen perusteella. Manager EI luo tiedostoa; se antaa vain kehotteen AI/kehittäjälle täydellisellä listalla koodin kiintopisteistä (vakio int, kaksi karttaa, RadioBox, malli per tila).
     postprodukcja:
       etykieta: "Uusi jälkituotanto (iterointi lukujen mukaan)"
       opis: |-
@@ -1103,7 +1119,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Mitä uutta versiossa {nowa_wersja}:'
-  co_nowego_tresc: 'Uusien sääntöjen luoja (Sääntöjen hallinta) on nyt täysin omalla kielelläsi — sääntötyyppien nimet ja kuvaukset sekä "seuraavat vaiheet" -ohjeet olivat aiemmin osittain puolaksi, mutta nyt ne näkyvät luonnollisesti kaikilla tuetuilla kielillä. AI-agentin sääntöjä generoiville ohjeille on tehty yhdenmukaistaminen (englanniksi, riippumatta käytetystä työkalusta ja järjestelmän kuoresta). Myös ranskan kielen Caesar-salaus on korjattu: aakkoset sisältävät nyt 26 kirjainta ja siirtymäalue on ±25 (aksentoidut kirjaimet pysyvät ennallaan, kuten numerot). Ei muutoksia tarinageneraattorin, muiden salausten ja kääntäjän toimintaan.'
+  co_nowego_tresc: 'Helpompi luoda ja turvallisempi kopioida tiloja. Dialogitilan (Skripti) voi nyt monistaa Sääntöjen Hallinnassa ilman kehittäjän apua — vastausmuodosta päättää tilan tiedoston kenttä, joten kopio toimii heti oikein. Lisäksi, jos tavallinen tekstimuotoinen tila palauttaa vahingossa teknisiä tietoja (JSON), sovellus ei enää liitä niitä hiljaa tiedostoosi, vaan varoittaa sinua. Uusien sääntöjen luontityökaluun on lisätty erillinen kohta "Uusi Tarinatila", joka luo täydellisen oppaan kehittäjälle (nämä tilat vaativat muutoksia koodiin), ja yritys kopioida Tarinatilan tiedosto selvästi varoittaa siitä. Ei muutoksia tarinageneraattorin, muiden tilojen ja kääntäjän toimintaan.'
   co_nowego_online_pl: Julkaisun koko sivu (verkossa) on saatavilla puolaksi.
   btn_szczegoly_online: '&Yksityiskohdat verkossa'
 opowiesci:

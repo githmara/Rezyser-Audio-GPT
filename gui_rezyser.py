@@ -34,6 +34,7 @@ i tak utrudniały tłumaczenie w przyszłości.
 
 from __future__ import annotations
 
+import json
 import os
 import platform
 import subprocess
@@ -1896,6 +1897,25 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Wątek tła – główna logika AI
     # ------------------------------------------------------------------
+    @staticmethod
+    def _wyglada_na_surowy_json(tekst: str) -> bool:
+        """``True``, gdy odpowiedź tekstowa wygląda na nierozparsowany obiekt JSON.
+
+        Bezpiecznik dispatchu `format_wyjscia`: tryb produkcyjny z
+        `format_wyjscia: tekst`, którego prompt każe modelowi zwracać JSON
+        (typowo: ktoś zduplikował Skrypt i tylko zmienił `id`), zwróciłby
+        `{"tury": [...]}` na ścieżce tekstowej — a ta dopisałaby surowy JSON
+        wprost do pliku projektu `.txt`. Wykrywamy KOMPLETNY obiekt JSON
+        (proza praktycznie nigdy nie parsuje się jako dict) i blokujemy zapis.
+        """
+        fragment = (tekst or "").strip()
+        if not fragment.startswith("{"):
+            return False
+        try:
+            return isinstance(json.loads(fragment), dict)
+        except (ValueError, TypeError):
+            return False
+
     def _wyslij_worker(
         self,
         przepis: pr.PrzepisRezysera,
@@ -1904,11 +1924,14 @@ class RezyserPanel(wx.Panel):
         nazwa: str,
         tryb_zapisu: bool,
     ) -> None:
-        # v15.2: dispatch na podstawie `przepis.id`. Burza idzie ścieżką
-        # JSON-mode (`generuj_burze` → :class:`WynikBurzy`), pozostałe tryby
-        # pozostają na starej ścieżce tekstowej (`generuj_fragment` →
-        # :class:`WynikGeneracji`).
-        if przepis.id == "burza":
+        # Dispatch na podstawie `przepis.format_wyjscia` (zastąpił dawne
+        # `if przepis.id == "burza"/"skrypt"` — patrz przepisy_rezysera.py).
+        # Dzięki temu nowy tryb JSON powstaje przez samą duplikację YAML
+        # (pole jedzie razem z plikiem), bez dopisywania warunku w kodzie.
+        # Burza idzie ścieżką JSON-mode (`generuj_burze` → :class:`WynikBurzy`),
+        # Skrypt ścieżką JSON-mode (`generuj_skrypt` → WynikSkryptu), reszta
+        # zostaje na ścieżce tekstowej (`generuj_fragment` → WynikGeneracji).
+        if przepis.format_wyjscia == "burza_json":
             try:
                 wynik_b = rai.generuj_burze(
                     klient=self._client,
@@ -1940,7 +1963,7 @@ class RezyserPanel(wx.Panel):
         # LLM zwraca {"tury":[{mowca,tekst}]}, Python renderuje do [Mówca] treść
         # (+ akcenty) i dopisuje do pliku jak każdy tryb zapisu. Audiobook /
         # postprodukcja zostają na starej ścieżce tekstowej (`generuj_fragment`).
-        if przepis.id == "skrypt":
+        if przepis.format_wyjscia == "skrypt_json":
             try:
                 wynik_s = rai.generuj_skrypt(
                     klient=self._client,
@@ -1995,6 +2018,14 @@ class RezyserPanel(wx.Panel):
             )
 
         if tryb_zapisu:
+            # Bezpiecznik: tryb tekstowy (`format_wyjscia: tekst`), którego prompt
+            # został tak zaprojektowany (np. przez duplikację Skryptu), że model
+            # zwrócił surowy JSON, NIE może po cichu dopisać tego JSON-a do pliku
+            # — most ElevenLabs/NVDA dostałby śmieci zamiast prozy. Lepiej jawnie
+            # ostrzec, że tryb wymaga skonfigurowania `format_wyjscia` (+ kodu).
+            if self._wyglada_na_surowy_json(wynik.tekst_odpowiedzi):
+                wx.CallAfter(self._on_wyslij_error, t("rezyser.err_surowy_json"))
+                return
             wx.CallAfter(self._on_wyslij_done_zapis, wynik.tekst_odpowiedzi, nazwa)
         else:
             wx.CallAfter(self._on_wyslij_done_burza, wynik.tekst_odpowiedzi)

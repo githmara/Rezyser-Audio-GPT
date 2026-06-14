@@ -18,6 +18,9 @@ etykieta: "Hugstormun (skipulagning, ENGIN skrif í skrá)"
 kategoria: tryb
 kolejnosc: 10
 
+# Úttakssnið → sending vélar (gui_rezyser). EKKI breyta — tengir haminn við JSON-þáttara Python.
+format_wyjscia: burza_json
+
 # --- OpenAI-stillingar ---
 model: gpt-4o
 temperatura: 0.85

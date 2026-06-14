@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 app:
   nazwa: "Réalisateur Audio GPT"
-  wersja: "{numer_wersji} – Version de Publication"
+  wersja: "{numer_wersji} – Version de Lancement"
   title_home: "{nazwa_aplikacji}  |  {wersja}"
   title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
   banner: "🎬  {nazwa_aplikacji}"
@@ -67,7 +67,7 @@ main:
     rezyser: "Ouvre le module Réalisateur — écriture de scénarios et de prose avec l'IA"
     poliglota: "Ouvre le module Polyglotte — accents et traduction de textes"
     konwerter: "Ouvre le module Convertisseur — création de fichiers Word"
-    manager: "Ouvre le Gestionnaire de Règles — explorateur de fichiers YAML dans dictionaries/ et créateur de nouveaux accents / modes / chiffrements"
+    manager: "Ouvre le Gestionnaire de Règles — explorateur de fichiers YAML dans dictionaries/ et assistant pour de nouveaux accents / modes / chiffrements"
     zakoncz: "Ferme l'application"
     jezyk_interfejsu: "Sélectionne la langue de l'interface de l'application (le changement nécessite un redémarrage)"
     opowiesci: "Ouvre le module Histoires – fiction interactive à la deuxième personne générée par IA, lue par TTS/lecteur d'écran"
@@ -204,12 +204,12 @@ home:
   narzedzia_slownikowe_name: "Description des outils de dictionnaire"
   tools_info: |-
     Vous voulez ajouter un nouvel accent, chiffrement ou mode Réalisateur ?
-    Ouvrez le Gestionnaire de Règles (Ctrl+4) — vous y trouverez l'arborescence de tous les fichiers YAML de dictionaries/ et un créateur qui crée automatiquement un modèle ou génère un prompt pour le chatbot IA.
+    Ouvrez le Gestionnaire de Règles (Ctrl+4) — vous y trouverez l'arborescence de tous les fichiers YAML de dictionaries/ et un assistant qui crée automatiquement un modèle ou génère un prompt pour le chatbot IA.
 
     Après avoir ajouté un nouveau fichier, redémarrez l'application – le Mode Réalisateur et le Polyglotte détectent automatiquement tous les fichiers YAML de dictionaries/.
   btn_open_manager_label: "📚 Ouvrir le Gestionnaire de Règles"
   btn_open_manager_name: "Bouton Ouvrir le Gestionnaire de Règles"
-  btn_open_manager_tooltip: "Passe au Gestionnaire de Règles — explorateur de fichiers YAML et créateur de nouveaux accents / modes / chiffrements (Ctrl+4)."
+  btn_open_manager_tooltip: "Passe au Gestionnaire de Règles — explorateur de fichiers YAML et assistant pour de nouveaux accents / modes / chiffrements (Ctrl+4)."
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -230,7 +230,7 @@ rezyser:
     Pour changer de projet, il faut d'abord effacer la mémoire actuelle.
   prompt_architekta_content: |-
     Tu es un excellent architecte de mondes (Worldbuilder) et conseiller littéraire. J'ai une idée vague d'intrigue : [INSÈRE ICI TON IDÉE]. Ta mission est de la développer en une « Bible du Monde » professionnelle.
-    Adapte le ton et les règles à mon idée. Évite les raccourcis de conte de fées et les clichés de l'IA.
+    Adapte le ton et les règles à mon idée. Évite les ficelles scénaristiques faciles et les clichés de l'IA.
 
     RÈGLES DE FORMATAGE (CRITIQUES) :
     Tu dois renvoyer ta réponse en deux parties séparées :
@@ -541,6 +541,9 @@ rezyser:
 
     Passez en mode « Brainstorming » et réessayez.
   err_rate_limit: "Pas de crédit OpenAI ! Rechargez votre compte et réessayez."
+  err_surowy_json: |-
+    Ce mode a renvoyé des données au format JSON, mais n'est pas configuré comme mode JSON, donc le texte n'a PAS été enregistré (évité de coller du JSON brut dans le fichier).
+    Cause la plus fréquente : le mode a été créé à partir d'un duplicata de Script. Définissez dans son fichier YAML `format_wyjscia: skrypt_json` (pour le dialogue narrateur+personnage) — ou, si c'est un nouveau schéma, contactez le développeur.
   err_odrzucenie: |-
     L'IA a rejeté le prompt (balise [REJECT_AI] détectée).
     Le texte NE sera PAS sauvegardé dans le fichier de l'histoire.
@@ -867,7 +870,7 @@ manager:
   btn_otworz_tooltip: "Ouvre le fichier YAML sélectionné dans l'éditeur de texte par défaut du système (Bloc-notes sous Windows, TextEdit sous macOS)."
   btn_nowy_label: "➕  &Nouveau fichier de règles…"
   btn_nowy_name: "Bouton Créer un nouveau fichier de règles"
-  btn_nowy_tooltip: "Ouvre le créateur de nouveaux fichiers : choisissez le type (accent, chiffrement, mode Réalisateur, langue de base), le Gestionnaire crée un modèle ou génère un prompt pour l'IA."
+  btn_nowy_tooltip: "Ouvre l'assistant pour de nouveaux fichiers : choisissez le type (accent, chiffrement, mode Réalisateur, langue de base), le Gestionnaire crée un modèle ou génère un prompt pour l'IA."
   btn_duplikuj_label: "📋  &Dupliquer le fichier sélectionné"
   btn_duplikuj_name: "Bouton Dupliquer le fichier sélectionné"
   btn_duplikuj_tooltip: "Crée une copie du fichier YAML sélectionné avec un nouveau nom — démarrage rapide pour une variante d'une règle existante."
@@ -908,6 +911,13 @@ manager:
   dup_komentarz_naglowek: |-
     # Dupliqué depuis : {nazwa_pliku}
     # ATTENTION : modifiez les champs `etykieta` et `opis`, puis sauvegardez le fichier.
+  dup_opowiesci_ostrzezenie_tytul: "Le mode Récit nécessite un développeur"
+  dup_opowiesci_ostrzezenie_tresc: |-
+    Vous dupliquez un fichier de mode Récit. Une simple copie YAML NE suffit PAS pour qu'un nouveau mode apparaisse dans le jeu — le moteur reconnaît les modes par des constantes numériques et des mappages dans le code Python, donc un fichier non intégré au code est un code mort.
+
+    Si vous souhaitez ajouter un NOUVEAU mode Récit, utilisez « Nouveau fichier de règles… » → « Nouveau mode Récit », qui générera un guide complet pour le développeur.
+
+    Continuer la duplication malgré tout ?
   dup_ok_tytul: "Doublon créé"
   dup_ok_tresc: |-
     Doublon créé : {nazwa_pliku}
@@ -927,7 +937,7 @@ manager:
   usun_ok_tresc: |-
     Fichier supprimé. Pour que la modification s'applique au Mode Réalisateur, redémarrez l'application.
   # Kreator
-  kreator_tytul: "Nouveau fichier de règles — créateur"
+  kreator_tytul: "Nouveau fichier de règles — assistant"
   kreator_co_utworzyc: "Que voulez-vous créer ?"
   kreator_cb_name: "Sélection du type de nouveau fichier de règles"
   kreator_opis_name: "Description du type de règle sélectionné"
@@ -1008,6 +1018,8 @@ manager:
       Modèle de chiffrement « substitutions pures » dans `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + liste `zamiany:` (comme l'accent, mais sans pipeline phonétique). Prenez le modèle de STRUCTURE des accents — tous les chiffrement déployés sont des algorithmes (autre format, sans liste `zamiany:`).
     tryb_rezysera: |-
       Modèle basé sur le mode Livre audio (paquet `{jezyk_bazowy}/`). L'agent concevra `prompt_systemowy`, `przypomnienie_uzytkownika` et `slowa_wyzwalajace` dans la langue native du paquet.
+    tryb_opowiesci: |-
+      Le mode Récit NÉCESSITE une édition du code source — le Manager NE crée PAS de fichier, il donne seulement une invite pour l'agent. Les modes de jeu sont reconnus par des constantes numériques et des mappages dans `opowiesci_ai.py`/`gui_opowiesci.py`, donc un nouveau mode doit être intégré (constante int ajoutée à la fin, entrées dans les mappages, étiquette RadioBox, modèle par mode). À partir de l'application installée (sans dépôt), c'est irréalisable — une version source est nécessaire.
     postprodukcja: |-
       Le modèle de postproduction itère sur les chapitres (paquet `{jezyk_bazowy}/`). L'agent concevra `prompt_systemowy`, `prompt_uzytkownika_szablon` (placeholders {{naglowek}}, {{probka}}) et `regex_podzial_rozdzialow` adapté aux noms de chapitres natifs (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1045,6 +1057,10 @@ manager:
       etykieta: "Nouveau mode Réalisateur (mode créatif)"
       opis: |-
         Fichier dans <jezyk>/rezyser/tryb_*.yaml. Modèle basé sur le mode Livre audio + prompt pour l'AI traduisant prompt_systemowy, przypomnienie_uzytkownika et slowa_wyzwalajace dans la langue native du paquet de base.
+    tryb_opowiesci:
+      etykieta: "Nouveau mode Récit (NÉCESSITE UN DÉVELOPPEUR)"
+      opis: |-
+        Mode de jeu interactif (Histoire). Contrairement aux modes Réalisateur, il n'est PAS axé sur les données : le fichier YAML seul est un code mort — le moteur reconnaît les modes par des constantes numériques et des mappages en Python. Le Manager NE crée PAS de fichier ; il donne seulement une invite pour l'IA/développeur avec une liste complète des points d'ancrage dans le code (constante int, deux mappages, RadioBox, modèle par mode).
     postprodukcja:
       etykieta: "Nouvelle postproduction (itération par chapitres)"
       opis: |-
@@ -1098,7 +1114,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Quoi de neuf dans la version {nowa_wersja} :'
-  co_nowego_tresc: "L'assistant de nouvelles règles (Gestionnaire de Règles) est maintenant entièrement dans votre langue — les noms et descriptions des types de règles ainsi que les conseils \"étapes suivantes\" étaient jusqu'à présent partiellement en polonais, et maintenant ils s'affichent nativement dans toutes les langues prises en charge. Les instructions pour l'agent IA générant des règles ont été unifiées (en anglais, indépendamment de l'outil utilisé et de l'environnement système). Le chiffre de César pour le français a également été corrigé : l'alphabet compte maintenant 26 lettres, et la plage de décalage est de ±25 (les lettres accentuées passent sans changement, comme les chiffres). Pas de changement dans le fonctionnement du générateur d'histoires, des autres chiffres et du traducteur."
+  co_nowego_tresc: "Il est plus facile de créer et plus sûr de dupliquer des modes. Le mode dialogué (Script) peut maintenant être dupliqué dans le Manager de Règles sans l'aide d'un développeur — le format de réponse est déterminé par un champ dans le fichier de mode, donc la copie fonctionne immédiatement correctement. De plus, si un mode texte ordinaire renvoie par erreur des données techniques (JSON), l'application ne les collera plus discrètement dans votre fichier, mais vous avertira. L'assistant pour de nouvelles règles a gagné une entrée séparée « Nouveau mode Récit », qui génère un guide complet pour le développeur (ces modes nécessitent des modifications dans le code), et une tentative de simple copie d'un fichier de mode Récit vous en avertit clairement. Pas de changement dans le fonctionnement du générateur d'histoires, des autres modes et du traducteur."
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
 opowiesci:

@@ -17,6 +17,9 @@ etykieta: "Script (Reader's theatre: narrator + dialogue, WRITES TO FILE)"
 kategoria: tryb
 kolejnosc: 20
 
+# Output format → engine dispatch (gui_rezyser). Do NOT change — binds the mode to the Python JSON parser.
+format_wyjscia: skrypt_json
+
 # --- OpenAI parameters ---
 model: gpt-4o
 temperatura: 0.85

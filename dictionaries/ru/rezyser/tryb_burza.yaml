@@ -18,6 +18,9 @@ etykieta: "Мозговой штурм (планирование, БЕЗ зап�
 kategoria: tryb
 kolejnosc: 10
 
+# Формат вывода → диспетчеризация движка (gui_rezyser). НЕ менять — связывает режим с JSON-парсером Python.
+format_wyjscia: burza_json
+
 # --- Параметры OpenAI ---
 model: gpt-4o
 temperatura: 0.85

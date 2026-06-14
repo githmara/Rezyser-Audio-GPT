@@ -19,6 +19,9 @@ etykieta: "Brainstorm (Planning, NO file write)"
 kategoria: tryb
 kolejnosc: 10
 
+# Output format → engine dispatch (gui_rezyser). Do NOT change — binds the mode to the Python JSON parser.
+format_wyjscia: burza_json
+
 # --- OpenAI parameters ---
 model: gpt-4o
 temperatura: 0.85

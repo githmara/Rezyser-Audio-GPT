@@ -20,6 +20,9 @@ etykieta: "Sceneggiatura (Teatro di lettura: narratore + dialogo, SCRITTURA SU F
 kategoria: tryb
 kolejnosc: 20
 
+# Formato di output → dispatch del motore (gui_rezyser). NON modificare — lega la modalità al parser JSON Python.
+format_wyjscia: skrypt_json
+
 # --- Parametri OpenAI ---
 model: gpt-4o
 temperatura: 0.85

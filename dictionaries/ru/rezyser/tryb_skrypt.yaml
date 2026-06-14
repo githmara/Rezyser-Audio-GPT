@@ -18,6 +18,9 @@ etykieta: "Сценарий (Сценическая читка: рассказч
 kategoria: tryb
 kolejnosc: 20
 
+# Формат вывода → диспетчеризация движка (gui_rezyser). НЕ менять — связывает режим с JSON-парсером Python.
+format_wyjscia: skrypt_json
+
 # --- Параметры OpenAI ---
 model: gpt-4o
 temperatura: 0.85

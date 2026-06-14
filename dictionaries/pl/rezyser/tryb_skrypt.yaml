@@ -19,6 +19,9 @@ etykieta: "Skrypt (Teatr czytany: narrator + dialog, ZAPIS DO PLIKU)"
 kategoria: tryb
 kolejnosc: 20
 
+# Format wyjścia → dispatch w silniku (gui_rezyser). NIE zmieniaj — wiąże tryb z parserem JSON w Pythonie.
+format_wyjscia: skrypt_json
+
 # --- Parametry OpenAI ---
 model: gpt-4o
 temperatura: 0.85

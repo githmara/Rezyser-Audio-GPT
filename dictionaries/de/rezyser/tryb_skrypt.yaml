@@ -18,6 +18,9 @@ etykieta: "Drehbuch (Lesetheater: Erzähler + Dialog, DATEI SCHREIBEN)"
 kategoria: tryb
 kolejnosc: 20
 
+# Ausgabeformat → Engine-Dispatch (gui_rezyser). NICHT ändern — bindet den Modus an den Python-JSON-Parser.
+format_wyjscia: skrypt_json
+
 # --- OpenAI-Parameter ---
 model: gpt-4o
 temperatura: 0.85

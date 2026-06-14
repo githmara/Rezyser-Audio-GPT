@@ -18,7 +18,7 @@
 # -----------------------------------------------------------------------------
 app:
   nazwa: "Regista Audio GPT"
-  wersja: "{numer_wersji} – Versione di Pubblicazione"
+  wersja: "{numer_wersji} – Versione di Rilascio"
   title_home: "{nazwa_aplikacji}  |  {wersja}"
   title_z_narzedziem: "{nazwa_aplikacji}  –  {nazwa_narzedzia}  |  {wersja}"
   banner: "🎬  {nazwa_aplikacji}"
@@ -67,7 +67,7 @@ main:
     rezyser: "Apre il modulo Regista – scrittura di script e prosa con AI"
     poliglota: "Apre il modulo Poliglotta – accenti e traduzione testi"
     konwerter: "Apre il modulo Convertitore – creazione di file Word"
-    manager: "Apre il Gestore Regole – esploratore di file YAML in dictionaries/ e creatore di nuovi accenti / modalità / cifrari"
+    manager: "Apre il Gestore Regole – esploratore di file YAML in dictionaries/ e procedura guidata per nuovi accenti / modalità / cifrari"
     zakoncz: "Chiudi l'applicazione"
     jezyk_interfejsu: "Seleziona la lingua dell'interfaccia dell'applicazione (il cambiamento richiede il riavvio)"
     opowiesci: "Apre il modulo Racconti – narrativa interattiva in seconda persona generata da AI, letta da TTS/lettore di schermo"
@@ -204,12 +204,12 @@ home:
   narzedzia_slownikowe_name: "Descrizione degli strumenti di dizionario"
   tools_info: |-
     Vuoi aggiungere un nuovo accento, cifrario o modalità Regista?
-    Apri il Gestore Regole (Ctrl+4) – troverai lì l'albero di tutti i file YAML in dictionaries/ e un creatore che creerà automaticamente un modello o genererà un prompt per il chatbot AI.
+    Apri il Gestore Regole (Ctrl+4) – troverai lì l'albero di tutti i file YAML in dictionaries/ e una procedura guidata che creerà automaticamente un modello o genererà un prompt per il chatbot AI.
 
     Dopo aver aggiunto un nuovo file, riavvia l'applicazione – la Modalità Regista e Poliglotta rilevano automaticamente tutti i file YAML in dictionaries/.
   btn_open_manager_label: "📚 Apri Gestore Regole"
   btn_open_manager_name: "Pulsante Apri Gestore Regole"
-  btn_open_manager_tooltip: "Passa al Gestore Regole – esploratore di file YAML e creatore di nuovi accenti / modalità / cifrari (Ctrl+4)."
+  btn_open_manager_tooltip: "Passa al Gestore Regole – esploratore di file YAML e procedura guidata per nuovi accenti / modalità / cifrari (Ctrl+4)."
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
@@ -230,7 +230,7 @@ rezyser:
     Per cambiare progetto, devi prima cancellare la memoria corrente.
   prompt_architekta_content: |-
     Sei un eccezionale architetto di mondi (Worldbuilder) e consulente letterario. Ho un'idea vaga per una trama: [INSERISCI QUI LA TUA IDEA]. Il tuo compito è espandere questo in un "Libro del Mondo" professionale.
-    Adatta il tono e le regole alla mia idea. Evita scorciatoie fiabesche e cliché AI.
+    Adatta il tono e le regole alla mia idea. Evita banali espedienti narrativi e cliché AI.
 
     REGOLE DI FORMATTAZIONE (CRITICHE):
     Devi restituire la risposta in due parti separate:
@@ -541,6 +541,9 @@ rezyser:
 
     Passa alla modalità 'Brainstorming' e riprova.
   err_rate_limit: "Nessun credito OpenAI! Ricarica il tuo account e riprova."
+  err_surowy_json: |-
+    Questa modalità ha restituito dati in formato JSON, ma non è configurata come modalità JSON, quindi il testo NON è stato salvato (evitato di incollare JSON grezzo nel file).
+    Causa più comune: la modalità è stata creata da un duplicato dello Script. Imposta nel suo file YAML `format_wyjscia: skrypt_json` (per dialogo narratore+personaggio) — oppure, se è un nuovo schema, contatta lo sviluppatore.
   err_odrzucenie: |-
     L'AI ha rifiutato il prompt (rilevato tag [RIFIUTO_AI]).
     Il testo NON verrà salvato nel file della storia.
@@ -703,7 +706,7 @@ poliglota:
   rb_ai_name: "Modalità Traduttore AI"
   rb_rezyser: "Modalità Regista (regole fonetiche gratuite da YAML)"
   rb_rezyser_name: "Modalità Regista gratuita"
-  rb_szyfrant: "Modalità Cifrante (giochi di parole, inceppamenti casuali)"
+  rb_szyfrant: "Modalità Cifrante (giochi di parole, balbuzie casuali)"
   rb_szyfrant_name: "Modalità Cifrante e giochi di parole"
   # Panel AI
   lbl_jezyk_docelowy: "Lingua di destinazione della traduzione (es. Finlandese, Islandese, Inglese, Arabo):"
@@ -874,7 +877,7 @@ manager:
   btn_otworz_tooltip: "Apre il file YAML selezionato nell'editor di testo predefinito del sistema (Blocco note su Windows, TextEdit su macOS)."
   btn_nowy_label: "➕  &Nuovo file regole…"
   btn_nowy_name: "Pulsante Crea nuovo file regole"
-  btn_nowy_tooltip: "Apre il creatore di nuovi file: scegli il tipo (accento, cifrario, modalità Regista, lingua base), il Manager crea un modello o genera un prompt per l'AI."
+  btn_nowy_tooltip: "Apre la procedura guidata per nuovi file: scegli il tipo (accento, cifrario, modalità Regista, lingua base), il Manager crea un modello o genera un prompt per l'AI."
   btn_duplikuj_label: "📋  &Duplica file selezionato"
   btn_duplikuj_name: "Pulsante Duplica file selezionato"
   btn_duplikuj_tooltip: "Crea una copia del file YAML selezionato con un nuovo nome – avvio rapido per una variante di una regola esistente."
@@ -915,6 +918,13 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplicato da: {nazwa_pliku}
     # ATTENZIONE: cambia i campi `etichetta` e `descrizione`, poi salva il file.
+  dup_opowiesci_ostrzezenie_tytul: "La modalità Storia richiede uno sviluppatore"
+  dup_opowiesci_ostrzezenie_tresc: |-
+    Stai duplicando il file della modalità Storia. La sola copia del file YAML NON è sufficiente per far apparire la nuova modalità nel gioco — il motore riconosce le modalità tramite costanti numeriche e mappe nel codice Python, quindi un file non integrato nel codice è codice morto.
+
+    Se vuoi aggiungere una NUOVA modalità Storia, usa "Nuovo file regole…" → "Nuova modalità Storia", che genererà una guida completa per lo sviluppatore.
+
+    Continuare comunque con la duplicazione?
   dup_ok_tytul: "Duplicato creato"
   dup_ok_tresc: |-
     Duplicato creato: {nazwa_pliku}
@@ -934,7 +944,7 @@ manager:
   usun_ok_tresc: |-
     File eliminato. Affinché la modifica abbia effetto nella Modalità Regista, riavvia l'applicazione.
   # Kreator
-  kreator_tytul: "Nuovo file regole – creatore"
+  kreator_tytul: "Nuovo file regole – procedura guidata"
   kreator_co_utworzyc: "Cosa vuoi creare?"
   kreator_cb_name: "Selezione tipo di nuovo file regole"
   kreator_opis_name: "Descrizione del tipo di regola selezionato"
@@ -1015,6 +1025,8 @@ manager:
       Modello di cifratura "sostituzioni pure" in `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Formato = `kategoria: szyfr` + lista `zamiany:` (come l'accento, ma senza pipeline fonetica). Prendi il modello di STRUTTURA dagli accenti — tutte le cifrature implementate sono algoritmi (altro formato, senza lista `zamiany:`).
     tryb_rezysera: |-
       Modello basato sulla modalità Audiobook (pacchetto `{jezyk_bazowy}/`). L'agente progetterà `prompt_systemowy`, `przypomnienie_uzytkownika` e `slowa_wyzwalajace` nella lingua nativa del pacchetto.
+    tryb_opowiesci: |-
+      La modalità Storia RICHIEDE la modifica del codice sorgente — il Manager NON crea il file, fornisce solo un prompt per l'agente. Le modalità di gioco sono riconosciute tramite costanti numeriche e mappe in `opowiesci_ai.py`/`gui_opowiesci.py`, quindi la nuova modalità deve essere integrata (costante int aggiunta alla fine, voci nelle mappe, etichetta RadioBox, modello per modalità). Dall'applicazione installata (senza repository) è impossibile — è necessaria la versione sorgente.
     postprodukcja: |-
       Modello di post-produzione itera sui capitoli (pacchetto `{jezyk_bazowy}/`). L'agente progetterà `prompt_systemowy`, `prompt_uzytkownika_szablon` (segnaposto {{naglowek}}, {{probka}}) e `regex_podzial_rozdzialow` adattato ai nomi nativi dei capitoli (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1052,6 +1064,10 @@ manager:
       etykieta: "Nuova modalità Regista (modalità creativa)"
       opis: |-
         File in <jezyk>/rezyser/tryb_*.yaml. Modello basato sulla modalità Audiobook + prompt per l'AI che traduce prompt_systemowy, przypomnienie_uzytkownika e slowa_wyzwalajace nella lingua nativa del pacchetto base.
+    tryb_opowiesci:
+      etykieta: "Nuova modalità Storia (RICHIEDE UNO SVILUPPATORE)"
+      opis: |-
+        Modalità di gioco interattiva (Storia). A differenza delle modalità Regista, NON è guidata dai dati: il solo file YAML è codice morto — il motore riconosce le modalità tramite costanti numeriche e mappe in Python. Il Manager NON crea il file; fornisce solo un prompt per l'AI/sviluppatore con un elenco completo di punti di ancoraggio nel codice (costante int, due mappe, RadioBox, modello per modalità).
     postprodukcja:
       etykieta: "Nuova post-produzione (iterazione per capitoli)"
       opis: |-
@@ -1105,7 +1121,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novità nella versione {nowa_wersja}:'
-  co_nowego_tresc: "Il creatore di nuove regole (Gestore delle Regole) è ora completamente nella tua lingua — i nomi e le descrizioni dei tipi di regole e i suggerimenti per i \"prossimi passi\" erano finora parzialmente in polacco, ma ora vengono visualizzati nativamente in tutte le lingue supportate. Le istruzioni per l'agente AI che genera le regole sono state unificate (in inglese, indipendentemente dallo strumento utilizzato e dalla shell di sistema). È stato anche corretto il cifrario di Cesare per la lingua francese: l'alfabeto ora conta 26 lettere e l'intervallo di spostamento è ±25 (le lettere accentate passano senza modifiche, come i numeri). Nessuna modifica nel funzionamento del generatore di storie, degli altri cifrari e del traduttore."
+  co_nowego_tresc: "È più facile creare e più sicuro duplicare le modalità. La modalità dialogo (Script) può ora essere duplicata nel Manager delle Regole senza l'aiuto di uno sviluppatore — il formato della risposta è determinato dal campo nel file della modalità, quindi la copia funziona immediatamente correttamente. Inoltre, se una modalità di testo normale restituisce per errore dati tecnici (JSON), l'applicazione non li incollerà più silenziosamente nel tuo file, ma ti avviserà. La procedura guidata per nuove regole ha guadagnato una voce separata \"Nuova modalità Storia\", che genera una guida completa per lo sviluppatore (queste modalità richiedono modifiche al codice), e il tentativo di copiare semplicemente il file della modalità Storia lo avverte chiaramente. Nessuna modifica nel funzionamento del generatore di storie, delle altre modalità e del traduttore."
   co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
   btn_szczegoly_online: '&Dettagli online'
 opowiesci:

@@ -184,6 +184,15 @@ class PrzepisRezysera:
     prompt_systemowy: str = ""
 
     # --- Tryb ---
+    # Format odpowiedzi modelu, wg którego GUI dobiera ścieżkę przetwarzania
+    # (`gui_rezyser._wyslij_worker`). Zastępuje dawny dispatch po `id`
+    # (zahardkodowane `if id == "skrypt"/"burza"`), dzięki czemu nowy tryb
+    # JSON powstaje przez samą duplikację YAML — bez zmiany w kodzie:
+    #   "tekst"       – zwykła proza (generuj_fragment, bez response_format),
+    #   "skrypt_json" – {"tury":[{mowca,tekst}]} → renderuj_skrypt (Teatr czytany),
+    #   "burza_json"  – 3 opcje fabuły (generuj_burze, BEZ zapisu do pliku).
+    # Nowy SCHEMAT JSON (inny niż dwa powyższe) nadal wymaga programisty.
+    format_wyjscia: str = "tekst"
     zapis_do_pliku: bool = False
     stosuj_akcenty_fonetyczne: bool = False
     przypomnienie_uzytkownika: str = ""
@@ -240,6 +249,17 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     if kategoria not in (KATEGORIA_TRYB, KATEGORIA_POSTPROD):
         return None
 
+    # Format wyjścia steruje dispatchem w gui_rezyser. Jeśli YAML nie ma pola
+    # (paczki sprzed wprowadzenia `format_wyjscia`), wnioskujemy je z `id` dla
+    # dwóch trybów JSON istniejących od v15.2/v16.1 — czysto wsteczna zgodność,
+    # kanonicznym źródłem jest odtąd samo pole w YAML.
+    format_wyjscia = str(data.get("format_wyjscia", "")).strip().lower()
+    if not format_wyjscia:
+        format_wyjscia = {
+            "burza": "burza_json",
+            "skrypt": "skrypt_json",
+        }.get(str(id_), "tekst")
+
     return PrzepisRezysera(
         id=str(id_),
         etykieta=str(etykieta),
@@ -249,6 +269,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
         temperatura=float(data.get("temperatura", 0.85)),
         jezyk_odpowiedzi=str(data.get("jezyk_odpowiedzi", "polsku")),
         prompt_systemowy=str(data.get("prompt_systemowy", "")),
+        format_wyjscia=format_wyjscia,
         zapis_do_pliku=bool(data.get("zapis_do_pliku", False)),
         stosuj_akcenty_fonetyczne=bool(data.get("stosuj_akcenty_fonetyczne", False)),
         przypomnienie_uzytkownika=str(data.get("przypomnienie_uzytkownika", "")),

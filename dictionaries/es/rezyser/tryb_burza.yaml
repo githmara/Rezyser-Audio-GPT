@@ -21,6 +21,9 @@ etykieta: "Lluvia de ideas (planificación, SIN escritura a archivo)"
 kategoria: tryb
 kolejnosc: 10
 
+# Formato de salida → dispatch del motor (gui_rezyser). NO cambiar — vincula el modo al parser JSON de Python.
+format_wyjscia: burza_json
+
 # --- Parámetros de OpenAI ---
 model: gpt-4o
 temperatura: 0.85

@@ -20,6 +20,9 @@ etykieta: "Brainstorming (planification, SANS écriture vers fichier)"
 kategoria: tryb
 kolejnosc: 10
 
+# Format de sortie → dispatch du moteur (gui_rezyser). NE PAS modifier — lie le mode au parseur JSON Python.
+format_wyjscia: burza_json
+
 # --- Paramètres OpenAI ---
 model: gpt-4o
 temperatura: 0.85

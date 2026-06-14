@@ -229,7 +229,7 @@ rezyser:
     To change the project, you must first clear the current memory.
   prompt_architekta_content: |-
     You are an outstanding world architect (Worldbuilder) and literary consultant. I have a loose idea for a plot: [INSERT YOUR IDEA HERE]. Your task is to expand this into a professional "World Book".
-    Adjust the tone and rules to my idea. Avoid cheap, fairy-tale shortcuts and AI clichés.
+    Adjust the tone and rules to my idea. Avoid cheap plot devices and AI clichés.
 
     FORMATTING RULES (CRITICAL):
     You must return the response in two separate parts:
@@ -424,7 +424,7 @@ rezyser:
   el_build_blad_tresc: "Failed to create the ElevenLabs Studio project:\n{tresc_bledu}"
   el_raport_tytul: "ElevenLabs Studio project created"
   el_raport_tresc: |-
-    ✅ The project "{nazwa}" has been created in ElevenLabs Studio (0 credits — creating a project uses no characters).
+    ✅ The project "{nazwa}" has been created in ElevenLabs Studio (0 credits — creating a project consumes no text characters).
 
     Project ID: {project_id}
 
@@ -540,6 +540,9 @@ rezyser:
 
     Switch to 'Brainstorm' mode and try again.
   err_rate_limit: "No OpenAI credits! Top up your account and try again."
+  err_surowy_json: |-
+    This mode returned data in JSON format, but it is not configured as a JSON mode, so the text was NOT saved (avoiding pasting raw JSON into a file).
+    Most common cause: the mode was created from a duplicate Script. Set `format_wyjscia: skrypt_json` in its YAML file (for narrator+character dialogue) — or, if it's a new scheme, contact the developer.
   err_odrzucenie: |-
     AI rejected the prompt (tag [AI_REJECTION] detected).
     The text will NOT be saved to the story file.
@@ -648,7 +651,7 @@ poliglota:
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
   description_name: "Polyglot module description"
   tool_description: |-
-    The Polyglot module is used for applying hard phonetic accents for local speech synthesizers (NVDA/Vocalizer/eSpeak), for text play in Cipher Mode, and for translating texts using AI (OpenAI gpt-4o).
+    The Polyglot module is used for applying hard phonetic accents for local speech synthesizers (NVDA/Vocalizer/eSpeak), for wordplay in Cipher Mode, and for translating texts using AI (OpenAI gpt-4o).
 
     Supports files: .txt, .html, .htm, .docx.
     The result is saved in the same directory as the source file.
@@ -700,8 +703,8 @@ poliglota:
   rb_ai_name: "AI Translator Mode"
   rb_rezyser: "Director Mode (free phonetic rules from YAML)"
   rb_rezyser_name: "Director Mode free"
-  rb_szyfrant: "Cipher Mode (text play, random stuttering)"
-  rb_szyfrant_name: "Cipher Mode and text play"
+  rb_szyfrant: "Cipher Mode (wordplay, random stuttering)"
+  rb_szyfrant_name: "Cipher Mode and wordplay"
   # Panel AI
   lbl_jezyk_docelowy: "Target translation language (e.g., Finnish, Icelandic, English, Arabic):"
   txt_jezyk_name: "Target language field"
@@ -912,6 +915,13 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplicate from: {nazwa_pliku}
     # NOTE: change `label` and `description` fields, then save the file.
+  dup_opowiesci_ostrzezenie_tytul: "Story Mode requires a developer"
+  dup_opowiesci_ostrzezenie_tresc: |-
+    You are duplicating a Story Mode file. A YAML copy ALONE is NOT enough for the new mode to appear in the game — the engine recognizes modes by numerical constants and maps in Python code, so an unwired file is dead code.
+
+    If you want to add a NEW Story Mode, use "New rules file…" → "New Story Mode", which will generate a complete guide for the developer.
+
+    Continue duplication anyway?
   dup_ok_tytul: "Duplicate created"
   dup_ok_tresc: |-
     Duplicate created: {nazwa_pliku}
@@ -1015,6 +1025,8 @@ manager:
       Template for a "pure substitutions" cipher at `dictionaries/{jezyk_bazowy}/szyfry/{id_pliku}.yaml`. Format = `kategoria: szyfr` + a `zamiany:` list (like an accent, but without the phonetic pipeline). Take the STRUCTURE model from the accents — all shipped ciphers are algorithmic (a different format, with no `zamiany:` list).
     tryb_rezysera: |-
       Template based on the Audiobook mode (`{jezyk_bazowy}/` package). The agent will design `prompt_systemowy`, `przypomnienie_uzytkownika`, and `slowa_wyzwalajace` in the package's native language.
+    tryb_opowiesci: |-
+      Story Mode REQUIRES source code editing — the Manager does NOT create a file, it only provides a prompt for the agent. Game modes are recognized by numerical constants and maps in `opowiesci_ai.py`/`gui_opowiesci.py`, so the new mode needs to be wired (int constant added at the end, entries in maps, RadioBox label, model per mode). From an installed application (without a repository), this is unfeasible — a source version is needed.
     postprodukcja: |-
       The post-production template iterates over chapters (`{jezyk_bazowy}/` package). The agent will design `prompt_systemowy`, `prompt_uzytkownika_szablon` (placeholders {{naglowek}}, {{probka}}), and `regex_podzial_rozdzialow` matched to the native chapter names (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1052,6 +1064,10 @@ manager:
       etykieta: "New Director mode (creative mode)"
       opis: |-
         A file at <jezyk>/rezyser/tryb_*.yaml. A template based on the Audiobook mode + a prompt for an AI that translates prompt_systemowy, przypomnienie_uzytkownika, and slowa_wyzwalajace into the base package's native language.
+    tryb_opowiesci:
+      etykieta: "New Story Mode (REQUIRES DEVELOPER)"
+      opis: |-
+        Interactive game mode (Stories). Unlike Director modes, it is NOT data-driven: the YAML file alone is dead code — the engine recognizes modes by numerical constants and maps in Python. The Manager does NOT create a file; it only provides a prompt for AI/developer with a complete list of code entry points (int constant, two maps, RadioBox, model per mode).
     postprodukcja:
       etykieta: "New post-production (chapter-by-chapter iteration)"
       opis: |-
@@ -1105,7 +1121,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: "What's new in version {nowa_wersja}:"
-  co_nowego_tresc: 'The New Rule Wizard (Rule Manager) is now fully in your language — names and descriptions of rule types and "next steps" hints were previously partially in Polish, and now they are displayed natively in all supported languages. Instructions for the AI agent generating rules have been standardized (in English, regardless of the tool and system shell used). The Caesar cipher for French has also been fixed: the alphabet now counts 26 letters, and the shift range is ±25 (accented letters remain unchanged, as do digits). No changes in the operation of the story generator, other ciphers, and the translator.'
+  co_nowego_tresc: 'Easier to create and safer to duplicate modes. The dialog mode (Script) can now be duplicated in the Rules Manager without developer assistance — the response format is determined by a field in the mode file, so the copy works correctly right away. Additionally, if a regular text mode mistakenly returns technical data (JSON), the application will no longer silently paste it into your file but will warn you. The new rules wizard has gained a separate "New Story Mode" option, which generates a complete guide for the developer (these modes require code changes), and an attempt to simply copy a Story Mode file clearly warns about this. No changes to the story generator, other modes, and translator.'
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
 opowiesci:
@@ -1195,7 +1211,7 @@ opowiesci:
   brak_gry_tytul: "No Active Game"
   brak_gry_tresc: 'Start a new game with the "New Game" button or load a previously saved one with the "Load" button before trying to send an action.'
   gra_istnieje_tytul: "A game with this name already exists"
-  gra_istnieje_tresc: 'The game "{nazwa}" already has a saved state on disk. Do you want to overwrite it with a zero game? All current narrative, characters, and inventory will be lost (files .txt, .md, and .game.json will be reset).'
+  gra_istnieje_tresc: 'The game "{nazwa}" already has a saved state on disk. Do you want to overwrite it with a blank game? All current narrative, characters, and inventory will be lost (files .txt, .md, and .game.json will be reset).'
   gra_nowa_tytul: "New Game Created"
   gra_nowa_tresc: 'The game "{nazwa}" has been created. Enter the first action in the field below the narrative and click "Send" to start the story.'
   gra_wczytana_tytul: "Game Loaded"

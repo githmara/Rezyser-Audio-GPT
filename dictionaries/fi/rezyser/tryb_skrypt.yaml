@@ -18,6 +18,9 @@ etykieta: "Käsikirjoitus (Lukuteatteri: kertoja + dialogi, TALLENTAA TIEDOSTOON
 kategoria: tryb
 kolejnosc: 20
 
+# Tulostusmuoto → moottorin reititys (gui_rezyser). ÄLÄ muuta — sitoo tilan Pythonin JSON-jäsentimeen.
+format_wyjscia: skrypt_json
+
 # --- OpenAI-parametrit ---
 model: gpt-4o
 temperatura: 0.85
