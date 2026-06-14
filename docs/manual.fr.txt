@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 17.8.0 – Version de Publication)
+Manuel du Réalisateur Audio AI - Guide complet (Version 17.8.0 – Version de Lancement)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
