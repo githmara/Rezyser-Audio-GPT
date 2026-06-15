@@ -768,8 +768,12 @@ def generuj_skrypt(
         tury = [TuraSkryptu(mowca=o["mowca"], tekst=o["tekst"]) for o in dane["tury"]]
         tekst = renderuj_skrypt(tury)
 
-        if przepis.stosuj_akcenty_fonetyczne:
-            tekst = cr.zastosuj_akcenty_uniwersalne(tekst, snapshot.world_lore)
+        # v17.9 (Obszar 3a): akcenty w języku treści przepisu (`kod_jezyka`),
+        # bez pl-fallbacku — brak kodu → tekst nietknięty (patrz generuj_fragment).
+        if przepis.stosuj_akcenty_fonetyczne and przepis.kod_jezyka:
+            tekst = cr.zastosuj_akcenty_uniwersalne(
+                tekst, snapshot.world_lore, jezyk_projektu=przepis.kod_jezyka,
+            )
 
         if on_postep:
             on_postep("Gotowe.", 100)
@@ -862,12 +866,14 @@ def generuj_fragment(
         tekst, nowe_streszczenie = wyciagnij_streszczenie(tekst)
 
     # 3) Akcenty fonetyczne — tylko gdy przepis tego wymaga (Skrypt).
-    # 13.3: ``zastosuj_akcenty_uniwersalne`` przyjmuje teraz ``jezyk_projektu``
-    # (default "pl"). Tu zostawiamy default — gdy pojawi się odrębne pole
-    # „język projektu" w stanie reżysera (kandydat na 13.x), przekazujemy
-    # ``jezyk_projektu=snapshot.jezyk`` lub równoważne.
-    if przepis.stosuj_akcenty_fonetyczne:
-        tekst = cr.zastosuj_akcenty_uniwersalne(tekst, snapshot.world_lore)
+    # v17.9 (Obszar 3a): aplikujemy w JĘZYKU TREŚCI przepisu (`kod_jezyka`),
+    # nie w domyślnym „pl". Brak `kod_jezyka` → NIE aplikujemy akcentów (żaden
+    # fallback — lepiej zostawić tekst nietknięty niż psuć obcą ortografię
+    # polskimi/angielskimi regułami; dług z dawnego komentarza tu domknięty).
+    if przepis.stosuj_akcenty_fonetyczne and przepis.kod_jezyka:
+        tekst = cr.zastosuj_akcenty_uniwersalne(
+            tekst, snapshot.world_lore, jezyk_projektu=przepis.kod_jezyka,
+        )
 
     if on_postep:
         on_postep("Gotowe.", 100)
@@ -989,3 +995,58 @@ def nadaj_tytuly_rozdzialom(
             )
 
     return WynikTytulowania(tytuly=tytuly, przerwano_bledem=False, blad="")
+
+
+# =============================================================================
+# Wnioskowanie kodu ISO języka treści (v17.9, Obszar 3b)
+# =============================================================================
+
+def wywnioskuj_kod_jezyka(
+    klient:           Any,
+    jezyk_odpowiedzi: str,
+    dozwolone:        "set[str] | list[str]",
+    timeout:          float = 30.0,
+) -> str | None:
+    """Wnioskuje kod ISO 639-1 języka treści z prozaicznego ``jezyk_odpowiedzi``.
+
+    Używane, gdy lingwista zostawił ``kod_jezyka`` puste w przepisie (paczki
+    shippowane mają je wypełnione, więc to ścieżka awaryjna). Mikrorequest LLM
+    w stylu :mod:`tlumacz_ai`: krótki prompt, ``temperature=0``, zwraca GOŁY
+    dwuliterowy kod.
+
+    Walidacja (decyzja 2a): wynik MUSI należeć do ``dozwolone`` — zwykle
+    zainstalowane pakiety UI (``i18n.dostepne_jezyki_ui()``), bo tylko dla nich
+    nagłówki struktury wyrenderują się natywnie. Cokolwiek innego (halucynacja,
+    kod nieobsługiwanego języka, pusta odpowiedź) → ``None``; wołający (GUI)
+    pokazuje wtedy błąd reżyserowi i NIE wstawia nagłówka.
+
+    Nigdy nie rzuca — błąd sieci/SDK także daje ``None`` (degradacja do błędu
+    dla reżysera, nie crash wątku tła).
+    """
+    dozwolone_set = {str(k).strip().lower() for k in dozwolone}
+    system = (
+        "You map a natural-language description of a language (often given in a "
+        "locative or otherwise inflected form, in any language) to its ISO 639-1 "
+        "two-letter code. Respond with ONLY the two-letter lowercase code and "
+        "nothing else. Examples: 'polsku' -> pl, 'angielsku' -> en, "
+        "'fińsku' -> fi, 'suomeksi' -> fi, 'auf Deutsch' -> de, "
+        "'по-русски' -> ru."
+    )
+    try:
+        resp = klient.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user",   "content": jezyk_odpowiedzi},
+            ],
+            temperature=0,
+            max_tokens=5,
+            timeout=timeout,
+        )
+    except Exception:  # noqa: BLE001 — każdy błąd API/SDK = brak kodu, nie crash
+        return None
+
+    raw = (resp.choices[0].message.content or "").strip().lower()
+    m = re.search(r"[a-z]{2}", raw)
+    kod = m.group(0) if m else ""
+    return kod if kod in dozwolone_set else None

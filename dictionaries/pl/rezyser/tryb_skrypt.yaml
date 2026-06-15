@@ -113,3 +113,6 @@ slowa_wyzwalajace:
 # (nakłada akcenty z Księgi Świata; audio-tagi v3 są pomijane przy detekcji
 # mówcy — patrz core_rezyser.AUDIO_TAGS).
 stosuj_akcenty_fonetyczne: false   # v16.1: OFF — tekst do v3 musi mieć czystą ortografię; akcenty przeniesione do post-produkcji „wersja dla czytników ekranu"
+
+# v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
+kod_jezyka: "pl"

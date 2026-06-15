@@ -46,3 +46,6 @@ slowa_wyzwalajace:
     - sommario
 
 stosuj_akcenty_fonetyczne: false
+
+# v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
+kod_jezyka: "it"

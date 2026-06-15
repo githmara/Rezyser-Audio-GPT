@@ -99,3 +99,6 @@ slowa_wyzwalajace:
 # AVANT la validation JSON (un refus renvoie le tag seul, pas du JSON).
 
 stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production
+
+# v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
+kod_jezyka: "fr"

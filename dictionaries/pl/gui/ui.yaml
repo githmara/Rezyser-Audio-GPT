@@ -491,6 +491,8 @@ rezyser:
   sr_sukces_tresc: "Zapisano plik dla czytników ekranu: skrypty/{nazwa_pliku}_screen_reader.html"
   sr_blad_tytul: "Błąd generowania wersji dla czytników ekranu"
   sr_blad_tresc: "Nie udało się wygenerować wersji dla czytników ekranu:\n{tresc_bledu}"
+  kod_jezyka_blad_tytul: "Nieznany język przepisu"
+  kod_jezyka_blad_tresc: "Nie udało się ustalić kodu języka (ISO) dla odpowiedzi „{jezyk_odpowiedzi}”. Otwórz przepis w Menedżerze Reguł i ustaw pole kod_jezyka (np. „fi”), aby nagłówki struktury i akcenty trafiły w język treści."
   postprod_info: |-
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"

@@ -66,3 +66,6 @@ slowa_wyzwalajace:
 # --- Post-processing ---
 # Audiobook does NOT use the phonetic engine (no character tags).
 stosuj_akcenty_fonetyczne: false
+
+# v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
+kod_jezyka: "en"

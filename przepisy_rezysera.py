@@ -181,6 +181,15 @@ class PrzepisRezysera:
     model: str = "gpt-4o"
     temperatura: float = 0.85
     jezyk_odpowiedzi: str = "polsku"
+    # v17.9 (Obszar 3b): kod ISO języka TREŚCI generowanej przez ten przepis
+    # (np. "fi"), odrębny od prozaicznego `jezyk_odpowiedzi` ("fińsku"). Steruje
+    # JEDNOCZEŚNIE: (a) doborem `dictionaries/<kod>/akcenty/` przy post-processingu
+    # fonetycznym, (b) językiem nagłówków struktury (Prolog/Akt/Scena) przez
+    # `t(..., jezyk_override=kod)`. Puste = lingwista nie wypełnił → GUI
+    # wnioskuje kod mikrorequestem LLM z `jezyk_odpowiedzi` (rezyser_ai.
+    # wywnioskuj_kod_jezyka) i wpisuje tu z powrotem; halucynacja → błąd dla
+    # reżysera. Paczki shippowane mają to pole wypełnione (= kod pakietu).
+    kod_jezyka: str = ""
     prompt_systemowy: str = ""
 
     # --- Tryb ---
@@ -268,6 +277,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
         model=str(data.get("model", "gpt-4o")),
         temperatura=float(data.get("temperatura", 0.85)),
         jezyk_odpowiedzi=str(data.get("jezyk_odpowiedzi", "polsku")),
+        kod_jezyka=str(data.get("kod_jezyka", "")).strip().lower(),
         prompt_systemowy=str(data.get("prompt_systemowy", "")),
         format_wyjscia=format_wyjscia,
         zapis_do_pliku=bool(data.get("zapis_do_pliku", False)),

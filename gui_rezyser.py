@@ -54,7 +54,7 @@ import przepisy_rezysera as pr
 import sciezki
 import rezyser_ai as rai
 from bledy_ai import BladGeneracjiAI
-from i18n import aktualny_jezyk, t
+from i18n import aktualny_jezyk, dostepne_jezyki_ui, t
 
 
 
@@ -154,6 +154,9 @@ class RezyserPanel(wx.Panel):
         self._client = None
         self._api_dostepne: bool = False
         self._worker_thread: threading.Thread | None = None
+        # v17.9 (Obszar 3b): id przepisów, dla których trwa wnioskowanie
+        # `kod_jezyka` w tle — guard przed równoległymi mikrorequestami LLM.
+        self._kod_jezyka_w_toku: set[str] = set()
         self._init_api()
 
         # ── Most ElevenLabs (opcjonalny, v16.0) ────────────────────────────
@@ -197,6 +200,66 @@ class RezyserPanel(wx.Panel):
             if przepis.id == "burza":
                 return przepis
         return None
+
+    # ------------------------------------------------------------------
+    # Język TREŚCI przepisu (v17.9, Obszar 3a/3b) — nagłówki + akcenty
+    # ------------------------------------------------------------------
+    def _kod_jezyka_aktywny(self) -> str:
+        """Kod ISO języka TREŚCI aktywnego przepisu — do nagłówków struktury
+        (`t(jezyk_override=...)`) oraz wersji dla czytników ekranu.
+
+        Fallback na język GUI (`aktualny_jezyk()`) gdy przepis nie ma jeszcze
+        `kod_jezyka` (np. przepis bez struktury, albo lingwista nie wypełnił a
+        wnioskowanie w tle jeszcze nie wróciło). Paczki shippowane mają pole
+        wypełnione, więc fallback to ścieżka brzegowa.
+        """
+        przepis = self._aktualny_przepis()
+        return (przepis.kod_jezyka if przepis else "") or aktualny_jezyk()
+
+    def _zapewnij_kod_jezyka_w_tle(self) -> None:
+        """1b: gdy aktywny przepis ZAPISU (Skrypt/Audiobook) nie ma `kod_jezyka`,
+        wnioskuje go mikrorequestem LLM z `jezyk_odpowiedzi` w wątku tła i wpisuje
+        z powrotem na obiekt przepisu (cache na sesję). Wołane gdy przepis staje
+        się aktywny (zmiana trybu, wczytanie projektu), żeby do kliknięcia
+        nagłówka kod był gotowy bez blokowania GUI (A11y).
+
+        No-op gdy: brak API, kod już jest, przepis nie jest trybem zapisu, albo
+        wnioskowanie dla tego id już trwa.
+        """
+        przepis = self._aktualny_przepis()
+        if przepis is None or not przepis.zapis_do_pliku or przepis.kod_jezyka:
+            return
+        if not self._api_dostepne or self._client is None:
+            return
+        if przepis.id in self._kod_jezyka_w_toku:
+            return
+        self._kod_jezyka_w_toku.add(przepis.id)
+        klient    = self._client
+        jezyk_odp = przepis.jezyk_odpowiedzi
+        dozwolone = set(dostepne_jezyki_ui())
+
+        def _worker() -> None:
+            kod = rai.wywnioskuj_kod_jezyka(klient, jezyk_odp, dozwolone)
+            wx.CallAfter(self._kod_jezyka_done, przepis, kod)
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _kod_jezyka_done(
+        self, przepis: pr.PrzepisRezysera, kod: str | None,
+    ) -> None:
+        """Callback wnioskowania `kod_jezyka` (wątek GUI). Sukces → wpis na
+        przepis (cache); halucynacja/None → błąd dla reżysera (decyzja 2a)."""
+        self._kod_jezyka_w_toku.discard(przepis.id)
+        if kod:
+            przepis.kod_jezyka = kod
+            return
+        wx.MessageBox(
+            t("rezyser.kod_jezyka_blad_tresc",
+              jezyk_odpowiedzi=przepis.jezyk_odpowiedzi),
+            t("rezyser.kod_jezyka_blad_tytul"),
+            wx.OK | wx.ICON_ERROR,
+            self,
+        )
 
     # ==================================================================
     # SHIMY WŁAŚCIWOŚCI delegujące do self._projekt
@@ -1194,6 +1257,8 @@ class RezyserPanel(wx.Panel):
 
     def _on_mode_change(self, _event: wx.Event) -> None:
         self._refresh_ui_state()
+        # 1b: przepis stał się aktywny — zapewnij `kod_jezyka` (w tle, jeśli pusty).
+        self._zapewnij_kod_jezyka_w_tle()
 
     # ------------------------------------------------------------------
     # Helper: zbiera dostępne projekty do wczytania (A11y dialog wyboru)
@@ -1340,6 +1405,10 @@ class RezyserPanel(wx.Panel):
             # Decyzja trybu zostanie utrwalona przy pierwszej strukturze
             # albo pierwszej udanej wysyłce produkcyjnej.
             self._zapisany_tryb = None
+
+        # 1b: po wczytaniu przepis trybu zapisu jest aktywny — zapewnij `kod_jezyka`
+        # (w tle), żeby nagłówki struktury trafiły w język treści, nie GUI.
+        self._zapewnij_kod_jezyka_w_tle()
 
         # v15.2: rebuild panelu opcji Burzy z `.brainstorm.json` jeśli istnieje.
         # Po wczytaniu projektu gracz wciąż widzi 3 opcje wygenerowane przy
@@ -2169,8 +2238,10 @@ class RezyserPanel(wx.Panel):
     def _on_wstaw_prolog(self, _event: wx.Event) -> None:
         if self._wymagaj_nazwy_lub_alert() is None:
             return
+        kod = self._kod_jezyka_aktywny()
         try:
-            self._projekt.wstaw_prolog(naglowek=t("rezyser.naglowek_prolog"))
+            self._projekt.wstaw_prolog(
+                naglowek=t("rezyser.naglowek_prolog", jezyk_override=kod))
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_wstawiania_prolog", tresc_bledu=str(exc)),
@@ -2190,8 +2261,10 @@ class RezyserPanel(wx.Panel):
     def _on_wstaw_epilog(self, _event: wx.Event) -> None:
         if self._wymagaj_nazwy_lub_alert() is None:
             return
+        kod = self._kod_jezyka_aktywny()
         try:
-            self._projekt.wstaw_epilog(naglowek=t("rezyser.naglowek_epilog"))
+            self._projekt.wstaw_epilog(
+                naglowek=t("rezyser.naglowek_epilog", jezyk_override=kod))
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("rezyser.blad_wstawiania_epilog", tresc_bledu=str(exc)),
@@ -2211,9 +2284,10 @@ class RezyserPanel(wx.Panel):
     def _on_wstaw_rozdzial(self, _event: wx.Event) -> None:
         if self._wymagaj_nazwy_lub_alert() is None:
             return
+        kod = self._kod_jezyka_aktywny()
         try:
             naglowek = self._projekt.wstaw_rozdzial(
-                naglowek_bazowy=t("rezyser.naglowek_rozdzial"),
+                naglowek_bazowy=t("rezyser.naglowek_rozdzial", jezyk_override=kod),
             )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
@@ -2234,10 +2308,11 @@ class RezyserPanel(wx.Panel):
     def _on_wstaw_akt(self, _event: wx.Event) -> None:
         if self._wymagaj_nazwy_lub_alert() is None:
             return
+        kod = self._kod_jezyka_aktywny()
         try:
             akt_nag, scena_nag = self._projekt.wstaw_akt(
-                naglowek_akt=t("rezyser.naglowek_akt"),
-                naglowek_scena=t("rezyser.naglowek_scena"),
+                naglowek_akt=t("rezyser.naglowek_akt", jezyk_override=kod),
+                naglowek_scena=t("rezyser.naglowek_scena", jezyk_override=kod),
             )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
@@ -2258,9 +2333,10 @@ class RezyserPanel(wx.Panel):
     def _on_wstaw_scena(self, _event: wx.Event) -> None:
         if self._wymagaj_nazwy_lub_alert() is None:
             return
+        kod = self._kod_jezyka_aktywny()
         try:
             scena_nag = self._projekt.wstaw_scena(
-                naglowek_bazowy=t("rezyser.naglowek_scena"),
+                naglowek_bazowy=t("rezyser.naglowek_scena", jezyk_override=kod),
             )
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
@@ -2530,8 +2606,10 @@ class RezyserPanel(wx.Panel):
                 lore = ""
 
         try:
+            # v17.9 (Obszar 3a): wersja dla czytników w JĘZYKU TREŚCI przepisu
+            # (akcenty + atrybut lang HTML), nie w języku GUI.
             html = csr.generuj_html(
-                tekst, lore, jezyk_projektu=aktualny_jezyk(), tytul=nazwa,
+                tekst, lore, jezyk_projektu=self._kod_jezyka_aktywny(), tytul=nazwa,
             )
             sciezka_out = os.path.join(
                 app_dir, self.SKRYPTY_DIR, f"{nazwa}_screen_reader.html"

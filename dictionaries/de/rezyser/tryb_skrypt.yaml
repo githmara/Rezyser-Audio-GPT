@@ -98,3 +98,6 @@ slowa_wyzwalajace:
 # ihn VOR der JSON-Validierung (eine Ablehnung gibt den bloßen Tag zurück).
 
 stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production
+
+# v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
+kod_jezyka: "de"

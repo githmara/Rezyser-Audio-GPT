@@ -110,3 +110,6 @@ slowa_wyzwalajace:
 # World Bible accents; v3 audio tags are skipped during speaker detection —
 # see core_rezyser.AUDIO_TAGS).
 stosuj_akcenty_fonetyczne: false   # v16.1: OFF — v3 text must keep clean orthography; accents moved to the screen-reader post-production
+
+# v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
+kod_jezyka: "en"

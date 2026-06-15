@@ -628,6 +628,8 @@ rezyser:
   sr_sukces_tresc: 'Screen reader file saved: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Error Generating Screen Reader Version
   sr_blad_tresc: "Failed to generate screen reader version:\n{tresc_bledu}"
+  kod_jezyka_blad_tytul: Unknown recipe language
+  kod_jezyka_blad_tresc: "Could not determine the language code (ISO) for the response language \"{jezyk_odpowiedzi}\". Open the recipe in the Rules Manager and set the kod_jezyka field (e.g. \"fi\") so structure headers and accents match the content language."
   err_struktura: The model generated an incorrect response structure despite several correction attempts. Try again or rephrase the command.
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
   btn_przeladuj_label: '&Reload project from disk'
