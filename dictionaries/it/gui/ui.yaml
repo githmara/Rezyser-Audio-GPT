@@ -649,6 +649,10 @@ rezyser:
   punkt_odniesienia_snap_tresc: La memoria di lavoro AI inizia dall'intestazione "{naglowek}" ({liczba_znakow} caratteri). Gli eventi precedenti sono rappresentati dal Sommario a Lungo Termine (rimasto intatto).
   punkt_odniesienia_fallback_tresc: "Nessun punto di riferimento indicato — l'ultimo frammento di narrazione ({liczba_znakow} caratteri) è stato inserito nella memoria di lavoro. Il sommario è rimasto intatto. Suggerimento: inserisci intestazioni Capitolo/Atto/Scena per poter scegliere con precisione l'inizio della memoria."
   punkt_odniesienia_za_dluga_tresc: "Il frammento selezionato \"{naglowek}\" è così ampio che non si adatta da solo nella finestra della memoria di lavoro — è stato applicato un taglio di emergenza agli ultimi {liczba_znakow} caratteri. Regista, è un po' folle: considera di dividere Atti/Capitoli in Scene più piccole — sezioni più brevi permetteranno all'AI di mantenere un contesto coerente."
+  kod_jezyka_blad_tytul: Lingua della ricetta sconosciuta
+  kod_jezyka_blad_tresc: Impossibile determinare il codice lingua (ISO) per la risposta "{jezyk_odpowiedzi}". Apri la ricetta nel Gestore Regole e imposta il campo codice_lingua (ad esempio, "fi") affinché le intestazioni della struttura e gli accenti corrispondano alla lingua del contenuto.
+  jezyk_naglowkow_ostrzezenie_tytul: Lingua delle intestazioni e lingua della ricetta
+  jezyk_naglowkow_ostrzezenie_tresc: Il progetto caricato ha intestazioni di struttura che sembrano essere nella lingua "{wykryty}", mentre la ricetta attiva genera contenuti nella lingua "{kod}". Le nuove intestazioni verranno inserite dopo "{kod}" — se non è intenzionale, adatta il campo codice_lingua nella ricetta o scegli un'altra modalità.
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"

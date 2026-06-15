@@ -648,6 +648,10 @@ rezyser:
   punkt_odniesienia_snap_tresc: La memoria de trabajo de la IA comienza desde el encabezado "{naglowek}" ({liczba_znakow} caracteres). Los eventos anteriores se representan como Resumen a Largo Plazo (permanece intacto).
   punkt_odniesienia_fallback_tresc: 'No se indicó un punto de referencia — el último fragmento de la narración ({liczba_znakow} caracteres) se transfirió a la memoria de trabajo. El resumen permanece intacto. Consejo: inserta encabezados de Capítulo/Acto/Escena para poder elegir con precisión el inicio de la memoria.'
   punkt_odniesienia_za_dluga_tresc: 'El fragmento seleccionado "{naglowek}" es tan extenso que no cabe por sí solo en la ventana de memoria de trabajo — se aplicó un corte de emergencia a los últimos {liczba_znakow} caracteres. Director, esto es un poco de locura: considera dividir Actos/Capítulos en Escenas más pequeñas — secciones más cortas permitirán a la IA mantener un contexto coherente.'
+  kod_jezyka_blad_tytul: Idioma de receta desconocido
+  kod_jezyka_blad_tresc: No se pudo determinar el código de idioma (ISO) para la respuesta "{jezyk_odpowiedzi}". Abre la receta en el Administrador de Reglas y establece el campo codigo_idioma (por ejemplo, "fi") para que los encabezados de estructura y los acentos coincidan con el idioma del contenido.
+  jezyk_naglowkow_ostrzezenie_tytul: Idioma de los encabezados y el idioma de la receta
+  jezyk_naglowkow_ostrzezenie_tresc: El proyecto cargado tiene encabezados de estructura que parecen estar en el idioma "{wykryty}", y la receta activa genera contenido en el idioma "{kod}". Los nuevos encabezados se insertarán después de "{kod}" — si esto no es intencionado, ajusta el campo codigo_idioma en la receta o elige otro modo.
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"

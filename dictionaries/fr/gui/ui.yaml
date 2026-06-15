@@ -647,6 +647,10 @@ rezyser:
   punkt_odniesienia_snap_tresc: La mémoire de travail de l'IA commence à partir de l'en-tête «{naglowek}» ({liczba_znakow} caractères). Les événements antérieurs sont représentés par le Résumé à Long Terme (resté intact).
   punkt_odniesienia_fallback_tresc: 'Aucun point de référence indiqué — le dernier fragment de narration ({liczba_znakow} caractères) a été ajouté à la mémoire de travail. Le résumé est resté intact. Conseil : insérez des en-têtes Chapitre/Acte/Scène pour pouvoir choisir précisément le début de la mémoire.'
   punkt_odniesienia_za_dluga_tresc: "Le fragment sélectionné «{naglowek}» est si vaste qu'il ne tient pas seul dans la fenêtre de mémoire de travail — une coupe d'urgence a été appliquée aux derniers {liczba_znakow} caractères. Réalisateur, c'est un peu fou : envisagez de diviser les Actes/Chapitres en Scènes plus petites — des sections plus courtes permettront à l'IA de maintenir un contexte cohérent."
+  kod_jezyka_blad_tytul: Langue de recette inconnue
+  kod_jezyka_blad_tresc: Impossible de déterminer le code langue (ISO) pour la réponse « {jezyk_odpowiedzi} ». Ouvrez la recette dans le Gestionnaire de Règles et définissez le champ code_langue (par exemple, « fi ») pour que les en-têtes de structure et les accents correspondent à la langue du contenu.
+  jezyk_naglowkow_ostrzezenie_tytul: Langue des en-têtes et langue de la recette
+  jezyk_naglowkow_ostrzezenie_tresc: Le projet chargé a des en-têtes de structure qui semblent être en langue « {wykryty} », et la recette active génère du contenu en langue « {kod} ». Les nouveaux en-têtes seront insérés après « {kod} » — si ce n'est pas intentionnel, ajustez le champ code_langue dans la recette ou choisissez un autre mode.
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"

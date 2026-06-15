@@ -649,6 +649,10 @@ rezyser:
   punkt_odniesienia_snap_tresc: Vinnuminni AI byrjar frá fyrirsögn „{naglowek}" ({liczba_znakow} stafir). Fyrri atburðir eru táknaðir með Langtíma Samantekt (óbreytt).
   punkt_odniesienia_fallback_tresc: 'Enginn viðmiðunarpunktur gefinn — síðasti hluti frásagnarinnar ({liczba_znakow} stafir) fór í vinnuminni. Samantektin er óbreytt. Ábending: settu inn fyrirsagnir Kafla/Þáttar/Senu til að geta valið upphaf vinnuminnis nákvæmlega.'
   punkt_odniesienia_za_dluga_tresc: 'Valinn hluti „{naglowek}" er svo umfangsmikill að hann passar ekki einn í vinnuminnisglugganum — neyðarskurður var gerður á síðustu {liczba_znakow} stafi. Leikstjóri, þetta er smá brjálæði: íhugaðu að skipta Þáttum/Köflum í minni Senur — styttri hlutar gera AI kleift að halda samræmdu samhengi.'
+  kod_jezyka_blad_tytul: Óþekkt tungumál uppskriftar
+  kod_jezyka_blad_tresc: Ekki tókst að ákvarða tungumálakóða (ISO) fyrir svarið „{jezyk_odpowiedzi}”. Opnaðu uppskriftina í Reglustjóra og stilltu reitinn kod_jezyka (t.d. „fi”), til að fyrirsagnir og áherslur passi við tungumál efnisins.
+  jezyk_naglowkow_ostrzezenie_tytul: Tungumál fyrirsagna og tungumál uppskriftar
+  jezyk_naglowkow_ostrzezenie_tresc: Hlaðinn verkefni hefur fyrirsagnir sem líta út fyrir að vera á tungumálinu „{wykryty}”, en virka uppskriftin býr til efni á tungumálinu „{kod}”. Nýjar fyrirsagnir verða settar inn eftir „{kod}” — ef þetta er ekki ætlunin, stilltu reitinn kod_jezyka í uppskriftinni eða veldu annan ham.
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"

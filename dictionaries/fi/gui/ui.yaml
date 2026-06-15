@@ -647,6 +647,10 @@ rezyser:
   punkt_odniesienia_snap_tresc: AI:n työmuisti alkaa otsikosta „{naglowek}" ({liczba_znakow} merkkiä). Aiemmat tapahtumat edustaa Pitkäaikainen Yhteenveto (jäänyt koskemattomaksi).
   punkt_odniesienia_fallback_tresc: 'Viitekohtaa ei ole määritetty — työmuistiin siirtyi viimeinen kertomuksen katkelma ({liczba_znakow} merkkiä). Yhteenveto jäi koskemattomaksi. Vihje: lisää Luku/Näytös/Kohtaus otsikoita, jotta voit tarkasti valita muistin aloituskohdan.'
   punkt_odniesienia_za_dluga_tresc: 'Valittu katkelma „{naglowek}" on niin laaja, ettei se mahdu yksinään työmuisti-ikkunaan — hätäleikkaus viimeisiin {liczba_znakow} merkkiin on tehty. Ohjaaja, tämä on hieman hullua: harkitse Näytösten/Lukujen jakamista pienempiin Kohtauksiin — lyhyemmät osiot auttavat AI:ta pitämään yhtenäisen kontekstin.'
+  kod_jezyka_blad_tytul: Tuntematon reseptikieli
+  kod_jezyka_blad_tresc: Kielen koodia (ISO) ei voitu määrittää vastaukselle „{jezyk_odpowiedzi}”. Avaa resepti Sääntöjen Hallinnassa ja aseta kenttä kielikoodi (esim. „fi”), jotta rakenteen otsikot ja aksentit osuvat sisällön kieleen.
+  jezyk_naglowkow_ostrzezenie_tytul: Otsikoiden kieli ja reseptin kieli
+  jezyk_naglowkow_ostrzezenie_tresc: Ladatussa projektissa on rakenteen otsikoita, jotka näyttävät olevan kielellä „{wykryty}”, ja aktiivinen resepti tuottaa sisältöä kielellä „{kod}”. Uudet otsikot lisätään „{kod}” jälkeen — jos tämä ei ole tarkoituksellista, säädä reseptin kielikoodi-kenttää tai valitse toinen tila.
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
