@@ -9,8 +9,14 @@ Wersja 13.1 (pierwszy krok wielojęzyczności). Ten moduł:
   * Obsługuje zagnieżdżone klucze przez kropkę (``"app.title"``).
   * Gdy klucz nie istnieje, zwraca ``[klucz]`` (łatwe do zlokalizowania
     w UI - nic nie pęka, ale wiadomo, co dopisać do YAML-a).
-  * Fallback: jeśli zażądany język nie istnieje lub brakuje w nim klucza,
-    bierzemy wartość z języka polskiego (język bazowy całego projektu).
+  * Fallback (zasada międzynarodowości): jeśli zażądany język nie istnieje
+    lub brakuje w nim klucza, bierzemy wartość z **angielskiego**
+    (:data:`JEZYK_FALLBACK`), a nie polskiego — user niemówiący po polsku
+    powinien zobaczyć angielski (lub czytelny ``[klucz]``), nigdy polski
+    „przeciek". PL pozostaje jedynie domyślnym AKTYWNYM językiem
+    (:data:`JEZYK_DOMYSLNY`) dla startu aplikacji, nie targetem fallbacku.
+    EN jest bazą referencyjną 1:1 z PL (crosscheck ``_jezyk_kompletny``),
+    więc fallback nigdy nie trafia na stub.
 
 Użycie w kodzie wxPython:
 
@@ -44,7 +50,9 @@ import sciezki
 # ---------------------------------------------------------------------------
 # Stałe / ścieżki
 # ---------------------------------------------------------------------------
-JEZYK_DOMYSLNY = "pl"
+JEZYK_DOMYSLNY = "pl"   # domyślny AKTYWNY język przy starcie (nie target fallbacku)
+JEZYK_FALLBACK = "en"   # target fallbacku gdy w aktywnym języku brak klucza
+                        # (zasada międzynarodowości — patrz docstring modułu)
 
 _ROOT_DIR = sciezki.KATALOG_BAZOWY
 _DICTIONARIES_DIR = _ROOT_DIR / "dictionaries"
@@ -97,7 +105,7 @@ def zaladuj(jezyk: str) -> dict[str, Any]:
     """Ładuje ``dictionaries/<jezyk>/gui/ui.yaml`` (z cache) i zwraca słownik.
 
     Jeśli plik nie istnieje lub jest pusty, zwraca ``{}`` – wtedy
-    :func:`t` zacznie korzystać z fallbacku na polski.
+    :func:`t` zacznie korzystać z fallbacku na angielski (:data:`JEZYK_FALLBACK`).
     """
     if jezyk in _CACHE:
         return _CACHE[jezyk]
@@ -109,17 +117,18 @@ def zaladuj(jezyk: str) -> dict[str, Any]:
 def ustaw_jezyk(jezyk: str) -> None:
     """Ustawia aktywny język UI i wymusza wczytanie jego pliku YAML.
 
-    Domyślny fallback na polski dzieje się automatycznie w :func:`t` –
-    tu tylko zapamiętujemy wybór i preloadujemy cache, żeby pierwsze
-    wywołanie ``t()`` nie płaciło narzutu I/O w wątku GUI.
+    Fallback na angielski (:data:`JEZYK_FALLBACK`) dzieje się automatycznie
+    w :func:`t` – tu tylko zapamiętujemy wybór i preloadujemy cache, żeby
+    pierwsze wywołanie ``t()`` nie płaciło narzutu I/O w wątku GUI.
     """
     global _AKTUALNY_JEZYK
     _AKTUALNY_JEZYK = jezyk or JEZYK_DOMYSLNY
     zaladuj(_AKTUALNY_JEZYK)
-    # Preloaduj polski jako fallback – gwarantuje to, że nawet brak pliku
-    # dla aktywnego języka nie zatrzyma aplikacji.
-    if _AKTUALNY_JEZYK != JEZYK_DOMYSLNY:
-        zaladuj(JEZYK_DOMYSLNY)
+    # Preloaduj angielski jako fallback – gwarantuje to, że nawet brak pliku
+    # (lub klucza) dla aktywnego języka nie zatrzyma aplikacji i nie przecieknie
+    # polskim tekstem do nie-polskiego usera.
+    if _AKTUALNY_JEZYK != JEZYK_FALLBACK:
+        zaladuj(JEZYK_FALLBACK)
 
 
 def aktualny_jezyk() -> str:
@@ -148,12 +157,15 @@ def _pobierz(dane: dict[str, Any], klucz: str) -> Any:
 # ---------------------------------------------------------------------------
 # Główne API: t(klucz, **kwargs)
 # ---------------------------------------------------------------------------
-def t(klucz: str, **kwargs: Any) -> str:
+def t(klucz: str, *, jezyk_override: str | None = None, **kwargs: Any) -> str:
     """Zwraca przetłumaczony napis dla podanego klucza.
 
-    Kolejność wyszukiwania:
-      1. Słownik aktualnego języka (:data:`_AKTUALNY_JEZYK`).
-      2. Słownik polski (fallback) – jeśli aktywny ≠ ``pl``.
+    Kolejność wyszukiwania (zasada międzynarodowości):
+      1. Słownik języka bazowego: ``jezyk_override`` jeśli podany, inaczej
+         aktualny (:data:`_AKTUALNY_JEZYK`).
+      2. Słownik **angielski** (:data:`JEZYK_FALLBACK`) – jeśli baza ≠ ``en``.
+         (Świadomie NIE polski — nie-polski user nie powinien zobaczyć
+         polskiego przecieku; patrz docstring modułu.)
       3. Literalny placeholder ``[klucz]`` (widać go w GUI, łatwo znaleźć).
 
     Jeśli podano ``**kwargs``, wartość (string) przechodzi przez
@@ -161,23 +173,29 @@ def t(klucz: str, **kwargs: Any) -> str:
     zwracamy surowy tekst, żeby nie wywalić GUI w locie.
 
     Args:
-        klucz:   Klucz typu ``"main.app_title"`` lub ``"rezyser.btn_wstaw_akt"``.
-        **kwargs: Parametry dynamiczne do ``str.format``.
+        klucz:          Klucz typu ``"main.app_title"`` lub ``"rezyser.btn_wstaw_akt"``.
+        jezyk_override: Opcjonalny kod języka wymuszający tłumaczenie w nim
+                        zamiast w aktywnym (np. nagłówki struktury Reżysera
+                        w języku treści przepisu, nie GUI). Keyword-only,
+                        żeby nie kolidować z format-kwargiem ``jezyk``
+                        (``t("...", jezyk=...)`` używany w GUI).
+        **kwargs:       Parametry dynamiczne do ``str.format``.
 
     Returns:
         Przetłumaczony tekst (z podstawionymi parametrami) lub
-        ``[klucz]``, gdy klucz nie istnieje w żadnym języku.
+        ``[klucz]``, gdy klucz nie istnieje ani w bazie, ani w EN.
     """
-    # 1. Aktualny język
-    dane = _CACHE.get(_AKTUALNY_JEZYK)
+    # 1. Język bazowy (override albo aktywny)
+    jezyk_bazowy = jezyk_override or _AKTUALNY_JEZYK
+    dane = _CACHE.get(jezyk_bazowy)
     if dane is None:
-        dane = zaladuj(_AKTUALNY_JEZYK)
+        dane = zaladuj(jezyk_bazowy)
     wartosc = _pobierz(dane, klucz)
 
-    # 2. Fallback na polski
-    if wartosc is None and _AKTUALNY_JEZYK != JEZYK_DOMYSLNY:
-        dane_pl = _CACHE.get(JEZYK_DOMYSLNY) or zaladuj(JEZYK_DOMYSLNY)
-        wartosc = _pobierz(dane_pl, klucz)
+    # 2. Fallback na angielski (NIE polski — międzynarodowość)
+    if wartosc is None and jezyk_bazowy != JEZYK_FALLBACK:
+        dane_fb = _CACHE.get(JEZYK_FALLBACK) or zaladuj(JEZYK_FALLBACK)
+        wartosc = _pobierz(dane_fb, klucz)
 
     # 3. Brak klucza – zwróć placeholder widoczny w GUI
     if wartosc is None:
