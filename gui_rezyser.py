@@ -2009,7 +2009,17 @@ class RezyserPanel(wx.Panel):
         status = self._projekt.status_pamieci_modelu()
         r, g, b = self._KOLORY_POZIOMOW.get(status.poziom, (0, 0, 0))
         self._gauge_kontekst.SetValue(status.procent)
-        self._lbl_kontekst_status.SetValue(status.komunikat)
+        # v17.9: komunikat składamy z i18n po `poziom` (silnik zwraca już tylko
+        # dane) — koniec hard-kodowanego polskiego przeciekającego do GUI.
+        klucz = {
+            cr.POZIOM_CZYSTA:      "rezyser.pamiec_status_czysta",
+            cr.POZIOM_OK:          "rezyser.pamiec_status_ok",
+            cr.POZIOM_OSTRZEZENIE: "rezyser.pamiec_status_ostrzezenie",
+            cr.POZIOM_ALARM:       "rezyser.pamiec_status_alarm",
+        }.get(status.poziom, "rezyser.pamiec_status_ok")
+        self._lbl_kontekst_status.SetValue(
+            t(klucz, tokeny=status.tokeny, maks=cr.OKNO_KONTEKSTU_MAX)
+        )
         self._lbl_kontekst_status.SetForegroundColour(wx.Colour(r, g, b))
 
 

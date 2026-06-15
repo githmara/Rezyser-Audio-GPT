@@ -39,7 +39,7 @@ Publiczne API:
 
     # Status pamięci modelu (wskaźnik „czy pora na streszczenie")
     status = proj.status_pamieci_modelu()     # StatusPamieciModelu
-    print(status.procent, status.poziom, status.komunikat)
+    print(status.procent, status.poziom, status.tokeny)
 
     # Mutacje
     proj.twardy_reset()          # wyzeruj wszystko (dysk nietknięty)
@@ -635,16 +635,20 @@ class WynikRekoncyliacji:
 
 @dataclass
 class StatusPamieciModelu:
-    """Stan wskaźnika pamięci modelu – gotowe dane dla GUI.
+    """Stan wskaźnika pamięci modelu – dane dla GUI (komunikat składa GUI z i18n).
 
     Attributes:
-        procent:   0–100, do ustawienia w ``wx.Gauge``.
-        komunikat: Pełny tekst (z emoji) – do wyświetlenia w polu statusu.
-        poziom:    Jeden z ``POZIOM_*`` – GUI dobiera po nim kolor tekstu.
+        procent: 0–100, do ustawienia w ``wx.Gauge``.
+        tokeny:  surowa liczba tokenów payloadu (GUI wstawia w lokalizowany
+                 komunikat przez ``t("rezyser.pamiec_status_*", tokeny=…)``).
+        poziom:  Jeden z ``POZIOM_*`` – GUI dobiera po nim kolor tekstu i klucz
+                 treści. v17.9: pole ``komunikat`` USUNIĘTE (było hard-kodowanym
+                 polskim wyświetlanym wprost przez `gui_rezyser` — przeciekał do
+                 nie-polskiego usera).
     """
 
     procent: int
-    komunikat: str
+    tokeny: int
     poziom: str
 
 
@@ -1475,43 +1479,21 @@ class ProjektRezysera:
         Kolor (zielony/pomarańczowy/czerwony) GUI wybiera na podstawie
         pola ``poziom``.
         """
+        # v17.9: tylko dane (procent/tokeny/poziom) — lokalizowany komunikat
+        # składa GUI (`gui_rezyser._aktualizuj_pamiec_modelu`) z i18n. Koniec
+        # hard-kodowanego polskiego przeciekającego do nie-polskiego usera.
         if not self.full_story and not self.summary_text and not self.world_lore:
-            return StatusPamieciModelu(
-                procent=0,
-                komunikat="🟢 Pamięć czysta. Maszyna gotowa na nową historię.",
-                poziom=POZIOM_CZYSTA,
-            )
+            return StatusPamieciModelu(procent=0, tokeny=0, poziom=POZIOM_CZYSTA)
 
         tokeny  = self.policz_tokeny_payloadu()
         udzial  = tokeny / OKNO_KONTEKSTU_MAX
         procent = min(int(udzial * 100), 100)
 
         if udzial >= PROG_ALARM:
-            return StatusPamieciModelu(
-                procent=procent,
-                komunikat=(
-                    f"🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów.\n"
-                    "JAK KONTYNUOWAĆ: W Burzy Mózgów wpisz 'streszczenie', kliknij "
-                    "'Zapisz Streszczenie', potem 'Wyczyść bieżącą (zostaw Streszczenie)'."
-                ),
-                poziom=POZIOM_ALARM,
-            )
-
+            return StatusPamieciModelu(procent=procent, tokeny=tokeny, poziom=POZIOM_ALARM)
         if udzial >= PROG_OSTRZEZENIE:
-            return StatusPamieciModelu(
-                procent=procent,
-                komunikat=(
-                    f"⚠️ STAN OSTRZEGAWCZY: Zużyto {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów. "
-                    "Pamięć się zapełnia – wkrótce konieczne będzie wygenerowanie streszczenia."
-                ),
-                poziom=POZIOM_OSTRZEZENIE,
-            )
-
-        return StatusPamieciModelu(
-            procent=procent,
-            komunikat=f"🟢 Zużycie pamięci: {tokeny} / {OKNO_KONTEKSTU_MAX} tokenów. Bezpieczny bufor.",
-            poziom=POZIOM_OK,
-        )
+            return StatusPamieciModelu(procent=procent, tokeny=tokeny, poziom=POZIOM_OSTRZEZENIE)
+        return StatusPamieciModelu(procent=procent, tokeny=tokeny, poziom=POZIOM_OK)
 
     # ------------------------------------------------------------------
     # Snapshot dla wątku tła

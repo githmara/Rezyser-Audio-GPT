@@ -234,8 +234,11 @@ class StatusPamieci:
     """
     procent:        int          # 0–100, do `wx.Gauge.SetValue()`
     tokeny:         int          # surowa liczba tokenów wejściowych
-    komunikat:      str          # pełny tekst (z emoji) do `_lbl_pamiec_status`
     poziom:         str          # POZIOM_CZYSTA/OK/OSTRZEZENIE/ALARM
+    # v17.9: pole `komunikat` USUNIĘTE — GUI (`gui_opowiesci._aktualizuj_pamiec_modelu`)
+    # i tak budowało etykietę z i18n (`opowiesci.pamiec_status_format` + `pamiec_etap_*`
+    # po `poziom`), a hard-kodowany polski `komunikat` w `oblicz_status_pamieci` był
+    # martwy (niewyświetlany) — usunięty, by „oczyszczenie hard-kodów" było prawdziwe.
 
 
 # =============================================================================
@@ -740,47 +743,21 @@ def oblicz_status_pamieci(
     ale liczy tokeny zamiast znaków (gpt-4o ma 128k token window — wartość
     znakowa byłaby gruba i nieprecyzyjna).
     """
+    # v17.9: zwracamy WYŁĄCZNIE dane (procent/tokeny/poziom) — treść komunikatu
+    # składa GUI z i18n (`gui_opowiesci._aktualizuj_pamiec_modelu`). Koniec
+    # hard-kodowanego polskiego `komunikat` w silniku.
     if snapshot.numer_tury == 0 and not snapshot.ostatnie_tury:
-        return StatusPamieci(
-            procent=0,
-            tokeny=0,
-            komunikat="🟢 Pamięć czysta. Maszyna gotowa na nową historię.",
-            poziom=POZIOM_CZYSTA,
-        )
+        return StatusPamieci(procent=0, tokeny=0, poziom=POZIOM_CZYSTA)
 
     tokeny = policz_tokeny(snapshot, tryb, model)
     procent = min(int(tokeny / OKNO_KONTEKSTU_MAX * 100), 100)
     udzial  = tokeny / OKNO_KONTEKSTU_MAX
 
     if udzial >= PROG_ALARM:
-        return StatusPamieci(
-            procent=procent,
-            tokeny=tokeny,
-            komunikat=(
-                f"🚨 KRYTYCZNE PRZEŁADOWANIE: {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów. "
-                "Auto-streszczenie nie zwolniło bufora — wpisz /streszczenie ręcznie albo "
-                "zakończ grę i wczytaj nową."
-            ),
-            poziom=POZIOM_ALARM,
-        )
-
+        return StatusPamieci(procent=procent, tokeny=tokeny, poziom=POZIOM_ALARM)
     if udzial >= PROG_OSTRZEZENIE:
-        return StatusPamieci(
-            procent=procent,
-            tokeny=tokeny,
-            komunikat=(
-                f"⚠️ STAN OSTRZEGAWCZY: {tokeny} z {OKNO_KONTEKSTU_MAX} tokenów. "
-                "Auto-streszczenie zostanie odpalone przed kolejną turą."
-            ),
-            poziom=POZIOM_OSTRZEZENIE,
-        )
-
-    return StatusPamieci(
-        procent=procent,
-        tokeny=tokeny,
-        komunikat=f"🟢 Zużycie pamięci: {tokeny} / {OKNO_KONTEKSTU_MAX} tokenów. Bezpieczny bufor.",
-        poziom=POZIOM_OK,
-    )
+        return StatusPamieci(procent=procent, tokeny=tokeny, poziom=POZIOM_OSTRZEZENIE)
+    return StatusPamieci(procent=procent, tokeny=tokeny, poziom=POZIOM_OK)
 
 
 # =============================================================================
