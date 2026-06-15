@@ -82,24 +82,30 @@ from core_poliglota import (
     zastosuj_reguly_fonetyczne,
 )
 
-# Wzorce nagłówków dla wszystkich 6 obsługiwanych języków aplikacji.
-# Używane przez parsing liczników, detekcję ostatniej linii oraz konwerter.
+# Wzorce nagłówków dla wszystkich 9 obsługiwanych języków aplikacji
+# (pl en de es fr it fi is ru). Używane przez parsing liczników, detekcję
+# ostatniej linii oraz konwerter. v17.9: domknięty dług 6→9 — do regexów
+# dopisane de (Kapitel/Szene), es (Capítulo/Acto/Escena/Prólogo/Epílogo) i fr
+# (Chapitre/Acte/Scène/Épilogue), których wcześniej brakowało (źródło prawdy:
+# `rezyser.naglowek_*` w `dictionaries/<kod>/gui/ui.yaml`). `(?i)` + Unicode
+# obejmują warianty z diakrytykami (ó/é/ä/þ) i cyrylicę; `\s+(\d+)` po członie
+# rozróżnia np. „Acto 1" (es) od „Act 1" (en) przez backtracking alternatywy.
 _WZORZEC_ROZDZIAL = (
-    r"(?i)\b(?:rozdzia[łl]|chapter|luku|kafli|capitolo|глава)\s+(\d+)"
+    r"(?i)\b(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\s+(\d+)"
 )
 _WZORZEC_AKT = (
-    r"(?i)\b(?:akt|act|акт|näytös|þáttur)\s+(\d+)"
+    r"(?i)\b(?:akt|acte|acto|atto|act|näytös|þáttur|акт)\s+(\d+)"
 )
 _WZORZEC_SCENA = (
-    r"(?i)\b(?:scena|scene|kohtaus|atriði|сцена)\s+(\d+)"
+    r"(?i)\b(?:scena|scène|scene|szene|escena|kohtaus|atriði|сцена)\s+(\d+)"
 )
 _WZORZEC_NAGLOWEK_LINIA = (
     r"(?i)^(?:"
-    r"(?:rozdzia[łl]|chapter|luku|kafli|capitolo|глава)\s+\d+"
-    r"|(?:akt|act|акт|näytös|þáttur)\s+\d+"
-    r"|(?:scena|scene|kohtaus|atriði|сцена)\s+\d+"
-    r"|prolog(?:ue|i|o)?|formáli|пролог"
-    r"|epilog(?:ue|i|o)?|eftirorð|эпилог"
+    r"(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\s+\d+"
+    r"|(?:akt|acte|acto|atto|act|näytös|þáttur|акт)\s+\d+"
+    r"|(?:scena|scène|scene|szene|escena|kohtaus|atriði|сцена)\s+\d+"
+    r"|prolog(?:ue|i|o)?|prólogo|formáli|пролог"
+    r"|epilog(?:ue|i|o)?|epílogo|épilogue|eftirorð|эпилог"
     r")\s*$"
 )
 
@@ -304,9 +310,11 @@ def _rozbij_naglowek(naglowek: str) -> tuple[str, int | None]:
         if m:
             return typ, int(m.group(1))
     low = naglowek.lower()
-    if any(s in low for s in ("prolog", "formáli", "пролог")):
+    # v17.9: warianty z diakrytykami (es „prólogo"/„epílogo", fr „épilogue")
+    # nie zawieraja czystego „prolog"/„epilog" jako podlancucha — dopisane jawnie.
+    if any(s in low for s in ("prolog", "prólogo", "formáli", "пролог")):
         return "prolog", None
-    if any(s in low for s in ("epilog", "eftirorð", "эпилог")):
+    if any(s in low for s in ("epilog", "epílogo", "épilogue", "eftirorð", "эпилог")):
         return "epilog", None
     return "inny", None
 
