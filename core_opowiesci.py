@@ -364,6 +364,40 @@ class ProjektOpowiesci:
         _dev_log_runtime(sciezka)
         return sciezka
 
+    def ostatnia_tura_surowa(self, nazwa: str) -> str | None:
+        """Zwraca `response_json` z OSTATNIEJ niepustej linii `.story.jsonl`.
+
+        v17.9 (Obszar 2): ożywia dotąd write-only log. Po wczytaniu gry z dysku
+        GUI używa tego do wskrzeszenia `SnapshotOpowiesci.ostatni_surowy_json` —
+        surowy JSON ostatniej tury trafia do kolejnej tury jako wiadomość
+        `role=assistant` (ciągłość + wzorzec struktury). W trakcie gry źródłem
+        jest świeży `WynikTury.surowy_json`; ten odczyt potrzebny TYLKO po
+        reloadzie (gdy pamięć RAM nie zna jeszcze ostatniej tury).
+
+        Tolerancyjne — brak pliku / uszkodzona ostatnia linia / brak klucza →
+        ``None`` (degradacja: kolejna tura po prostu nie dostanie assistant-turna,
+        co jest bezpieczne, tylko mniej kontekstu ciągłości).
+        """
+        sciezka = self._sciezka_story_jsonl(nazwa)
+        if not os.path.exists(sciezka):
+            return None
+        ostatnia: str | None = None
+        try:
+            with open(sciezka, "r", encoding="utf-8") as fh:
+                for linia in fh:
+                    if linia.strip():
+                        ostatnia = linia
+        except OSError:
+            return None
+        if not ostatnia:
+            return None
+        try:
+            wpis = json.loads(ostatnia)
+        except ValueError:
+            return None
+        rj = wpis.get("response_json") if isinstance(wpis, dict) else None
+        return rj if isinstance(rj, str) and rj.strip() else None
+
     def zapisz_tryb(self, tryb_int: int) -> None:
         """Zapisuje aktualny tryb do `runtime/opowiesci/<nazwa>.mode` (cichy fail).
 

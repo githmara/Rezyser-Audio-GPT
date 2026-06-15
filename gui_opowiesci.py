@@ -831,6 +831,9 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._projekt.zasady_swiata,
+            # carry-forward: surowy JSON ostatniej tury dożywa do tej wysyłki
+            # (generuj_ture wstrzyknie go jako role=assistant).
+            ostatni_surowy_json=self._snapshot.ostatni_surowy_json,
         )
 
         # v15.2: mechanika fiolki — wyliczana TYLKO w trybie Mniejsze zło.
@@ -958,6 +961,9 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._snapshot.zasady_swiata,
+            # v17.9: surowy JSON WŁAŚNIE ukończonej tury — wejdzie jako
+            # role=assistant do następnej tury (ciągłość + wzorzec struktury).
+            ostatni_surowy_json=wynik.surowy_json,
         )
 
         # 3. Faza 3: synchronizacja stanu z dyskiem — 4 pliki per tura.
@@ -1491,6 +1497,10 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=projekt.seed_swiata,
             jezyk_projektu=projekt.jezyk_projektu,
             zasady_swiata=projekt.zasady_swiata,
+            # v17.9: po reloadzie wskrzeszamy surowy JSON ostatniej tury z
+            # `.story.jsonl` (RAM go nie zna) — następna tura dostanie go jako
+            # role=assistant. Brak/uszkodzony log → "" (bezpieczna degradacja).
+            ostatni_surowy_json=projekt.ostatnia_tura_surowa(projekt.nazwa_pliku) or "",
         )
 
         self._txt_nazwa_gry.SetValue(projekt.nazwa_pliku)
@@ -1693,6 +1703,7 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._snapshot.zasady_swiata,
+            ostatni_surowy_json=self._snapshot.ostatni_surowy_json,  # carry-forward
         )
 
         # Pole „Ostatnia tura" — świeża końcówka (NVDA usłyszy po fokusie).
@@ -1853,6 +1864,7 @@ class OpowiesciPanel(wx.Panel):
                 seed_swiata=self._snapshot.seed_swiata,
                 jezyk_projektu=self._snapshot.jezyk_projektu,
                 zasady_swiata=nowe_zasady,
+                ostatni_surowy_json=self._snapshot.ostatni_surowy_json,  # carry-forward
             )
             try:
                 self._projekt.zapisz_game_json()
@@ -2217,6 +2229,9 @@ class OpowiesciPanel(wx.Panel):
             seed_swiata=self._snapshot.seed_swiata,
             jezyk_projektu=self._snapshot.jezyk_projektu,
             zasady_swiata=self._snapshot.zasady_swiata,
+            # carry-forward: po streszczeniu ostatnia REALNA tura wciąż jest
+            # najlepszym wzorcem ciągłości — zostaje jako role=assistant.
+            ostatni_surowy_json=self._snapshot.ostatni_surowy_json,
         )
         if self._projekt is not None:
             self._projekt.ostatnie_tury = list(self._snapshot.ostatnie_tury)
@@ -2298,6 +2313,7 @@ class OpowiesciPanel(wx.Panel):
                 seed_swiata=self._snapshot.seed_swiata,
                 jezyk_projektu=self._snapshot.jezyk_projektu,
                 zasady_swiata=self._snapshot.zasady_swiata,
+                ostatni_surowy_json=self._snapshot.ostatni_surowy_json,  # carry-forward
             )
 
         self._meta_w_toku = False

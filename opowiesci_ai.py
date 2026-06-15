@@ -204,6 +204,13 @@ class SnapshotOpowiesci:
     seed_swiata:      str                   = ""
     jezyk_projektu:   str                   = "pl"
     zasady_swiata:    str                   = ""
+    # v17.9 (Obszar 2): surowy JSON OSTATNIEJ tury — wstrzykiwany przez
+    # `generuj_ture` jako wiadomość `role=assistant` PRZED user-payloadem.
+    # Daje modelowi ciągłość (kontynuuję własną wypowiedź) i żywy wzorzec
+    # poprawnej struktury wyjścia. Źródło: poprzedni `WynikTury.surowy_json`
+    # (gra w toku) albo ostatnia linia `.story.jsonl` (po reloadzie z dysku).
+    # Pusty string = brak (tura 1 / świeży start bufora po streszczeniu).
+    ostatni_surowy_json: str               = ""
 
 
 @dataclass
@@ -587,10 +594,14 @@ def generuj_ture(
         # Przy retry dodajemy do payloadu informację o błędzie z poprzedniej
         # próby — model może skorygować strukturę. To wzorzec z OpenAI
         # cookbook „self-correction via error feedback".
-        messages = [
-            {"role": "system", "content": prompt_systemowy},
-            {"role": "user",   "content": user_payload},
-        ]
+        messages = [{"role": "system", "content": prompt_systemowy}]
+        # v17.9 (Obszar 2): ostatnia tura jako role=assistant = jej surowy JSON.
+        # (a) ciągłość — model „kontynuuje własną wypowiedź"; (b) żywy wzorzec
+        # poprawnej struktury (spójny z response_format=json_object) — potrafi
+        # ściąć retry. Puste = tura 1 / świeży bufor po streszczeniu → pomijamy.
+        if snapshot.ostatni_surowy_json and snapshot.ostatni_surowy_json.strip():
+            messages.append({"role": "assistant", "content": snapshot.ostatni_surowy_json})
+        messages.append({"role": "user", "content": user_payload})
         if ostatni_blad is not None:
             messages.append({
                 "role": "system",
