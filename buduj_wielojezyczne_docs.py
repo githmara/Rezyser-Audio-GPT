@@ -1008,6 +1008,35 @@ def tlumacz_szablon(
     return True
 
 
+def _zbierz_leaki_draftow(
+    wytworzone: list[tuple[str, str]],
+) -> dict[tuple[str, str], dict]:
+    """Post-processor draftów: skan `audyt_leakow` per wytworzony plik.
+
+    Zwraca ``{(kod, plik): {sekcja: [Leak]}}`` (tylko pliki z leakami) do
+    doklejenia jako appendix checklisty przeglądu (`przeglad_tlumaczen`).
+    Detektor budujemy raz na język (ładowanie modeli lingua jest drogie) i
+    reużywamy między plikami. Fail-open — błąd skanu (np. brak `lingua`) NIE
+    wywraca buildu draftów; appendix to wygoda dla recenzenta, nie część krytyczna.
+    """
+    import audyt_leakow
+    wynik: dict[tuple[str, str], dict] = {}
+    detektory: dict[str, object] = {}
+    for kod, nazwa_pliku in wytworzone:
+        try:
+            detektor = detektory.get(kod)
+            if detektor is None:
+                detektor = audyt_leakow._zbuduj_detektor(kod)
+                detektory[kod] = detektor
+            per_sekcja = audyt_leakow.leaki_per_sekcja(kod, nazwa_pliku, detektor)
+        except Exception as exc:   # lingua brak / błąd modelu — nie wywracaj buildu
+            print(f"⚠️  audyt_leakow pominięty dla {kod}/{nazwa_pliku}: {exc}")
+            continue
+        if per_sekcja:
+            wynik[(kod, nazwa_pliku)] = per_sekcja
+    return wynik
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -1325,13 +1354,22 @@ def main() -> int:
             pass
 
     if args.draft and not args.dry_run:
+        # Post-processor: detektor PL-leaków na świeżych draftach — funnel dla
+        # recenzenta (zwł. nie-polskojęzycznego), doklejany do checklisty.
+        print("\n🔎 DRAFT: skan audyt_leakow na wytworzonych draftach…")
+        leaki_per_plik = _zbierz_leaki_draftow(wytworzone_drafty)
         sciezka_prompt = przeglad_tlumaczen.zapisz_prompt_przegladu(
             "buduj_wielojezyczne_docs.py", wytworzone_drafty, ROOT,
+            leaki_per_plik=leaki_per_plik,
         )
         if sciezka_prompt is not None:
-            print(f"\n📋 DRAFT: checklista przeglądu zapisana → "
+            ile_leakow = sum(
+                len(v) for per in leaki_per_plik.values() for v in per.values()
+            )
+            print(f"📋 DRAFT: checklista przeglądu zapisana → "
                   f"{sciezka_prompt.relative_to(ROOT)} "
-                  f"({len(wytworzone_drafty)} plik(ów) do recenzji).")
+                  f"({len(wytworzone_drafty)} plik(ów) do recenzji, "
+                  f"{ile_leakow} kandydat(ów) na leak).")
 
     print("\n========== PODSUMOWANIE ==========")
     print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
