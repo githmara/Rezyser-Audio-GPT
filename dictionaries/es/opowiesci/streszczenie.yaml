@@ -23,3 +23,6 @@ timeout_s: 60.0
 # --- Prompt de sistema ---
 prompt_systemowy: |
   Eres un asistente narrativo. Recibirás una lista de los turnos recientes de una historia interactiva (acción del jugador + narración condensada por turno). Genera un condensado de 200-400 palabras que cubra: acontecimientos clave de la trama, decisiones del jugador y sus consecuencias, personajes importantes que aparecen en la narración, lugares visitados, hilos sin resolver. Escribe en tercera persona, de forma neutra, como un resumen de novela — NO es un turno de juego, el jugador no lo lee como narración, sino que el motor narrativo lo utiliza como memoria a largo plazo.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "La lista de turnos a resumir está abajo."

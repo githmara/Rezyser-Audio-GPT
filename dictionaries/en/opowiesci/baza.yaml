@@ -49,3 +49,18 @@ prompt_systemowy: |
   FIELD `stan.ekwipunek_zmiany` — what the player just gained or lost this turn ("+lantern", "-key"); empty array if nothing changed.
 
   FIELD `stan.watki_otwarte` — unresolved threads the player should remember.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py) -----------------
+# Procedural instruction appended BEFORE the JSON payload. Lifted from a
+# hard-coded literal so a turn does not mix languages (the wrapper used to be
+# Polish even for non-Polish projects). Read by
+# `opowiesci_ai._zbuduj_user_payload` via the `_tekst_przepisu` helper
+# (key-level fallback: lang → en → EN literal).
+instrukcja_payload: "The game state and player action are below. Generate the next turn according to the JSON schema defined in the system prompt."
+
+# "World rules (defined by the player)" block — heading + binding instruction,
+# injected between the base and the mode addon when the player supplied custom
+# rules (`_zbuduj_prompt_systemowy`). The code inserts {zasady} between the
+# heading and the instruction, so we keep only the textual frame here.
+zasady_swiata_naglowek: "## World rules (defined by the player)"
+zasady_swiata_instrukcja: "These rules are ABSOLUTELY binding for the entire game. Respect them in the narration, dialogue, character descriptions, choices and visualizations."

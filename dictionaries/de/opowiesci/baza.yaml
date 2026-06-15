@@ -47,3 +47,8 @@ prompt_systemowy: |
   FELD `stan.ekwipunek_zmiany` — was der Spieler diese Runde gewonnen oder verloren hat („+Laterne", „-Schlüssel"); leeres Array, wenn sich nichts geändert hat.
 
   FELD `stan.watki_otwarte` — ungelöste Fäden, an die sich der Spieler erinnern sollte.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "Der Spielzustand und die Spieleraktion stehen unten. Generiere den nächsten Zug gemäß dem im Systemprompt definierten JSON-Schema."
+zasady_swiata_naglowek: "## Weltregeln (vom Spieler festgelegt)"
+zasady_swiata_instrukcja: "Diese Regeln sind für das gesamte Spiel UNBEDINGT verbindlich. Beachte sie in der Erzählung, den Dialogen, den Charakterbeschreibungen, den Auswahlmöglichkeiten und den Visualisierungen."

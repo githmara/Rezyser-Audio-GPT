@@ -23,3 +23,6 @@ timeout_s: 60.0
 # --- Prompt di sistema ---
 prompt_systemowy: |
   Sei un assistente narrativo. Ricevi un elenco dei turni recenti di una storia interattiva (azione del giocatore + narrazione condensata per turno). Genera un riassunto di 200-400 parole che copra: gli eventi chiave della trama, le decisioni del giocatore e le loro conseguenze, i personaggi importanti che appaiono nella narrazione, i luoghi visitati, i fili irrisolti. Scrivi in terza persona, in modo neutro, come un riassunto di romanzo — NON è un turno di gioco, il giocatore non lo legge come narrazione, è il motore narrativo che lo usa come memoria a lungo termine.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "L'elenco dei turni da riassumere è qui sotto."

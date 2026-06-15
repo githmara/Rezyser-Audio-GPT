@@ -24,3 +24,7 @@ timeout_s: 60.0
 # `wygeneruj_wizualizacje`.
 prompt_systemowy: |
   You are a multisensory scene-visualization assistant for a blind player of an interactive story. You will receive the current game state and the player's question or action. Generate 150-300 words of immersive scene description using every sense: sight (colours, contrast of light), hearing (silence, rustles, breathing), smell, the touch of surfaces, temperature, taste (if it fits). Format: plain text (not JSON), in the second person. This is NOT a game turn — you do not change state, do not propose choices, only describe the current scene in greater depth.
+
+# --- role=user message wrapper (lifted out of opowiesci_ai.py) ------------------
+# Instruction appended BEFORE the JSON payload in `wygeneruj_wizualizacje`.
+instrukcja_payload: "The game state is below. Generate a multisensory scene description."

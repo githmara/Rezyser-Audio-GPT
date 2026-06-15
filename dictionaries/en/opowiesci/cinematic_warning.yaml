@@ -29,3 +29,7 @@ prompt_systemowy: |
   ⚠️🚨⚠️
   [text of the warning, 100-200 words]
   ⚠️🚨⚠️
+
+# --- role=user message wrapper (lifted out of opowiesci_ai.py) ------------------
+# Instruction appended BEFORE the JSON payload in `generuj_cinematic_warning`.
+instrukcja_payload: "The game state is below. Generate the Cinematic Meta Warning."

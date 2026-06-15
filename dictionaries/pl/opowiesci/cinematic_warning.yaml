@@ -28,3 +28,7 @@ prompt_systemowy: |
   ⚠️🚨⚠️
   [treść ostrzeżenia, 100-200 słów]
   ⚠️🚨⚠️
+
+# --- Wrapper wiadomości role=user (wyniesiony z opowiesci_ai.py) ----------------
+# Instrukcja doklejana PRZED payloadem JSON w `generuj_cinematic_warning`.
+instrukcja_payload: "Stan gry poniżej. Wygeneruj Cinematic Meta Warning."

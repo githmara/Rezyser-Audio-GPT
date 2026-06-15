@@ -47,3 +47,8 @@ prompt_systemowy: |
   CHAMP `stan.ekwipunek_zmiany` — ce que le joueur vient de gagner ou de perdre ce tour-ci (« +lanterne », « -clé ») ; tableau vide si rien n'a changé.
 
   CHAMP `stan.watki_otwarte` — fils non résolus dont le joueur doit se souvenir.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "L'état du jeu et l'action du joueur sont ci-dessous. Génère le tour suivant conformément au schéma JSON défini dans le prompt système."
+zasady_swiata_naglowek: "## Règles du monde (définies par le joueur)"
+zasady_swiata_instrukcja: "Ces règles sont ABSOLUMENT contraignantes pour toute la partie. Respecte-les dans la narration, les dialogues, les descriptions de personnages, les choix et les visualisations."

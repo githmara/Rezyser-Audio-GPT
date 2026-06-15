@@ -21,3 +21,7 @@ timeout_s: 60.0
 # --- Prompt systemowy ---
 prompt_systemowy: |
   Jesteś asystentem narracyjnym. Otrzymasz listę ostatnich tur interaktywnej opowieści (akcja gracza + skrót narracji per tura). Wygeneruj kondensat 200-400 słów obejmujący: kluczowe wydarzenia fabularne, decyzje gracza i ich konsekwencje, ważne postacie pojawiające się w narracji, miejsca odwiedzone, niedokończone wątki. Pisz w trzeciej osobie, neutralnie, jak streszczenie powieści — to NIE jest tura gry, gracz nie czyta tego jako narracji, ale silnik narracyjny używa go jako pamięci długotrwałej.
+
+# --- Wrapper wiadomości role=user (wyniesiony z opowiesci_ai.py) ----------------
+# Instrukcja doklejana PRZED payloadem JSON w `streszczaj_kontekst`.
+instrukcja_payload: "Lista tur do streszczenia poniżej."

@@ -48,3 +48,8 @@ prompt_systemowy: |
   CAMPO `stan.ekwipunek_zmiany` — lo que el jugador acaba de ganar o perder este turno («+linterna», «-llave»); array vacío si nada cambió.
 
   CAMPO `stan.watki_otwarte` — hilos sin resolver que el jugador debe recordar.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "El estado del juego y la acción del jugador están abajo. Genera el siguiente turno conforme al esquema JSON definido en el prompt de sistema."
+zasady_swiata_naglowek: "## Reglas del mundo (definidas por el jugador)"
+zasady_swiata_instrukcja: "Estas reglas son ABSOLUTAMENTE vinculantes durante toda la partida. Respétalas en la narración, los diálogos, las descripciones de personajes, las opciones y las visualizaciones."

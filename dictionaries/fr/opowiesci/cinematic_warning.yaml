@@ -30,3 +30,6 @@ prompt_systemowy: |
   ⚠️🚨⚠️
   [texte de l'alerte, 100-200 mots]
   ⚠️🚨⚠️
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "L'état du jeu est ci-dessous. Génère le Cinematic Meta Warning."

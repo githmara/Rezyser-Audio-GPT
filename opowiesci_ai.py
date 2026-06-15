@@ -336,11 +336,22 @@ def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl", zasady_swiata: str = 
 
     zasady_blok = ""
     if zasady_swiata and zasady_swiata.strip():
+        # Rama bloku (nagłówek + instrukcja wiążąca) z `baza.yaml` w języku
+        # projektu — wyniesiona z hard-kodu PL, żeby blok nie był polski w
+        # obcojęzycznej grze. {zasady} (treść gracza) wstawiamy między nie.
+        zasady_naglowek = _tekst_przepisu(
+            jezyk, "baza", "zasady_swiata_naglowek",
+            "## World rules (defined by the player)",
+        )
+        zasady_instrukcja = _tekst_przepisu(
+            jezyk, "baza", "zasady_swiata_instrukcja",
+            "These rules are ABSOLUTELY binding for the entire game. Respect them "
+            "in the narration, dialogue, character descriptions, choices and visualizations.",
+        )
         zasady_blok = (
-            "\n\n## Zasady świata (zdefiniowane przez gracza)\n\n"
+            f"\n\n{zasady_naglowek}\n\n"
             f"{zasady_swiata.strip()}\n\n"
-            "Te zasady są BEZWZGLĘDNIE wiążące przez całą grę. Respektuj je "
-            "w narracji, dialogach, opisach postaci, wyborach i wizualizacjach."
+            f"{zasady_instrukcja}"
         )
 
     if tryb == TRYB_BURZA:
@@ -360,6 +371,26 @@ def _parametr_z_yaml(jezyk: str, nazwa: str, klucz: str, default: Any) -> Any:
     """
     przepis = _zaladuj_przepis(jezyk, nazwa)
     return przepis.get(klucz, default)
+
+
+def _tekst_przepisu(jezyk: str, nazwa: str, klucz: str, default_en: str) -> str:
+    """Czyta tekstowy klucz z przepisu z fallbackiem NA POZIOMIE KLUCZA: lang→en→literał.
+
+    `_zaladuj_przepis` daje już fallback na poziomie PLIKU (brak
+    `<jezyk>/opowiesci/<nazwa>.yaml` → `en/...`). Tu dokładamy fallback na
+    poziomie KLUCZA: gdy plik języka istnieje, ale nie ma jeszcze danego klucza
+    (np. paczka w trakcie tłumaczenia promptów), bierzemy klucz z `en`, a w
+    ostateczności literał `default_en`. Zasada międzynarodowości spójna z
+    `i18n.t` (lang → en → marker) — NIGDY polski przeciek do obcojęzycznej tury.
+
+    Używane do wrapperów wiadomości role=user (`instrukcja_payload`) i ramy
+    bloku „Zasady świata" (`zasady_swiata_*`), wyniesionych z hard-kodu Pythona,
+    żeby pojedyncza tura nie mieszała języków.
+    """
+    val = _zaladuj_przepis(jezyk, nazwa).get(klucz)
+    if val is None and jezyk != "en":
+        val = _zaladuj_przepis("en", nazwa).get(klucz)
+    return val if isinstance(val, str) else default_en
 
 
 def _zbuduj_user_payload(
@@ -401,11 +432,15 @@ def _zbuduj_user_payload(
     if fiolka_seed is not None:
         payload["fiolka_efekt_seed"] = fiolka_seed
 
-    return (
-        "Stan gry i akcja gracza poniżej. Wygeneruj kolejną turę zgodnie "
-        "ze schemą JSON podaną w prompt-systemowy.\n\n"
-        + json.dumps(payload, ensure_ascii=False, indent=2)
+    # Wrapper proceduralny w języku projektu (z `baza.yaml`, fallback en),
+    # nie hard-kodowany polski — żeby tura nie mieszała języków.
+    jezyk = snapshot.jezyk_projektu or "pl"
+    instrukcja = _tekst_przepisu(
+        jezyk, "baza", "instrukcja_payload",
+        "The game state and player action are below. Generate the next turn "
+        "according to the JSON schema defined in the system prompt.",
     )
+    return instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 # =============================================================================
@@ -642,10 +677,11 @@ def wygeneruj_wizualizacje(
         "ostatnia_tura":    snapshot.ostatnie_tury[-1] if snapshot.ostatnie_tury else None,
         "akcja_gracza":     user_input,
     }
-    user_msg = (
-        "Stan gry poniżej. Wygeneruj multisensoryczny opis sceny.\n\n"
-        + json.dumps(payload, ensure_ascii=False, indent=2)
+    instrukcja = _tekst_przepisu(
+        jezyk, "tryb_burza", "instrukcja_payload",
+        "The game state is below. Generate a multisensory scene description.",
     )
+    user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
     resp = klient.chat.completions.create(
         model=efektywny_model,
         messages=[
@@ -764,10 +800,11 @@ def streszczaj_kontekst(
         "stan":             snapshot.stan_poprzedni,
         "tura_numer":       snapshot.numer_tury,
     }
-    user_msg = (
-        "Lista tur do streszczenia poniżej.\n\n"
-        + json.dumps(payload, ensure_ascii=False, indent=2)
+    instrukcja = _tekst_przepisu(
+        jezyk, "streszczenie", "instrukcja_payload",
+        "The list of turns to summarize is below.",
     )
+    user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
     resp = klient.chat.completions.create(
         model=efektywny_model,
         messages=[
@@ -809,10 +846,11 @@ def generuj_cinematic_warning(
         "stan":             snapshot.stan_poprzedni,
         "ostatnie_tury":    snapshot.ostatnie_tury[-3:],   # tylko 3 ostatnie dla kontekstu
     }
-    user_msg = (
-        "Stan gry poniżej. Wygeneruj Cinematic Meta Warning.\n\n"
-        + json.dumps(payload, ensure_ascii=False, indent=2)
+    instrukcja = _tekst_przepisu(
+        jezyk, "cinematic_warning", "instrukcja_payload",
+        "The game state is below. Generate the Cinematic Meta Warning.",
     )
+    user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
     resp = klient.chat.completions.create(
         model=efektywny_model,
         messages=[

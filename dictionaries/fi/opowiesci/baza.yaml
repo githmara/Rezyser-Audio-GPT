@@ -46,3 +46,8 @@ prompt_systemowy: |
   KENTTÄ `stan.ekwipunek_zmiany` — mitä pelaaja juuri sai tai menetti tällä vuorolla («+lyhty», «-avain»); tyhjä taulukko, jos mikään ei muuttunut.
 
   KENTTÄ `stan.watki_otwarte` — ratkaisemattomat juonilangat, jotka pelaajan on syytä muistaa.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "Pelin tila ja pelaajan teko alla. Tuota seuraava vuoro järjestelmäkehotteessa määritellyn JSON-skeeman mukaisesti."
+zasady_swiata_naglowek: "## Maailman säännöt (pelaajan määrittelemät)"
+zasady_swiata_instrukcja: "Nämä säännöt ovat EHDOTTOMASTI sitovia koko pelin ajan. Noudata niitä kerronnassa, dialogeissa, hahmokuvauksissa, valinnoissa ja visualisoinneissa."

@@ -22,3 +22,6 @@ timeout_s: 60.0
 # --- Kerfishvati ---
 prompt_systemowy: |
   Þú ert frásagnaraðstoðarmaður. Þú færð lista yfir nýlegar umferðir gagnvirkrar sögu (aðgerð leikmanns + samþjöppuð frásögn á umferð). Myndaðu 200 til 400 orða samantekt sem nær yfir: lykilatburði söguþráðarins, val leikmannsins og afleiðingar þeirra, mikilvægar persónur sem birtast í frásögninni, staði sem heimsóttir hafa verið, óleysta þræði. Skrifaðu í þriðju persónu, á hlutlausan hátt, eins og skáldsögusamantekt — ÞETTA ER EKKI leikumferð, leikmaðurinn les þetta ekki sem frásögn, frásagnarvélin notar þetta sem langtímaminni.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "Listi yfir umferðir til samantektar er hér að neðan."

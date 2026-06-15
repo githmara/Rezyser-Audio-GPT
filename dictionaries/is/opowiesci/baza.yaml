@@ -46,3 +46,8 @@ prompt_systemowy: |
   REITUR `stan.ekwipunek_zmiany` — það sem leikmaðurinn vann eða tapaði í þessari umferð („+lukt", „-lykill"); tóm röð ef ekkert breyttist.
 
   REITUR `stan.watki_otwarte` — óleystir þræðir sem leikmaðurinn þarf að muna.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "Leikstaðan og aðgerð leikmannsins eru hér að neðan. Myndaðu næstu umferð samkvæmt JSON-skemanu sem skilgreint er í kerfishvatanum."
+zasady_swiata_naglowek: "## Reglur heimsins (skilgreindar af leikmanninum)"
+zasady_swiata_instrukcja: "Þessar reglur eru ALGERLEGA bindandi út allan leikinn. Virtu þær í frásögninni, samtölum, persónulýsingum, vali og sjónrænum lýsingum."

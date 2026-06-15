@@ -44,3 +44,17 @@ prompt_systemowy: |
   POLE `stan.ekwipunek_zmiany` — co gracz właśnie zdobył lub stracił w tej turze ("+latarnia", "-klucz"); pusta tablica jeśli bez zmian.
 
   POLE `stan.watki_otwarte` — niedokończone wątki które gracz powinien pamiętać.
+
+# --- Wrappery wiadomości role=user (wyniesione z opowiesci_ai.py) ---------------
+# Instrukcja proceduralna doklejana PRZED payloadem JSON. Wyniesiona z hard-kodu,
+# żeby tura nie mieszała języków (polski wrapper + obcy system-prompt). Czytane
+# przez `opowiesci_ai._zbuduj_user_payload` helperem `_tekst_przepisu`
+# (fallback na poziomie klucza: lang → en → literał EN).
+instrukcja_payload: "Stan gry i akcja gracza poniżej. Wygeneruj kolejną turę zgodnie ze schemą JSON podaną w prompt-systemowy."
+
+# Blok „Zasady świata (zdefiniowane przez gracza)" — nagłówek + instrukcja
+# wiążąca, wstrzykiwane między bazę a addon trybu, gdy gracz podał własne zasady
+# (`_zbuduj_prompt_systemowy`). Placeholder {zasady} wstawia kod między nagłówek
+# a instrukcję, więc tu trzymamy tylko ramę tekstową.
+zasady_swiata_naglowek: "## Zasady świata (zdefiniowane przez gracza)"
+zasady_swiata_instrukcja: "Te zasady są BEZWZGLĘDNIE wiążące przez całą grę. Respektuj je w narracji, dialogach, opisach postaci, wyborach i wizualizacjach."

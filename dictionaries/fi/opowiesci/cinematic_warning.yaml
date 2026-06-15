@@ -29,3 +29,6 @@ prompt_systemowy: |
   ⚠️🚨⚠️
   [varoituksen teksti, 100-200 sanaa]
   ⚠️🚨⚠️
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "Pelin tila alla. Tuota Cinematic Meta Warning."

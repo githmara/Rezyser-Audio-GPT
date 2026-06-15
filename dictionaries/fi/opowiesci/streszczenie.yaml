@@ -22,3 +22,6 @@ timeout_s: 60.0
 # --- Järjestelmäkehote ---
 prompt_systemowy: |
   Olet kerronnan avustaja. Saat luettelon interaktiivisen tarinan viimeisistä vuoroista (pelaajan teko + vuoroa kohti tiivistetty kerronta). Tuota 200-400 sanan tiivistys, joka kattaa: juonen avaintapahtumat, pelaajan päätökset ja niiden seuraukset, kerronnassa esiintyvät tärkeät hahmot, käydyt paikat, ratkaisemattomat juonilangat. Kirjoita kolmannessa persoonassa, neutraalisti, kuin romaanin tiivistelmä — EI ole pelin vuoro, pelaaja ei lue tätä kerrontana, vaan kerrontamoottori käyttää sitä pitkäkestoisena muistina.
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "Tiivistettävien vuorojen luettelo alla."

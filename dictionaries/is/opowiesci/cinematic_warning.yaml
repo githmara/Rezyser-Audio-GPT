@@ -29,3 +29,6 @@ prompt_systemowy: |
   ⚠️🚨⚠️
   [texti aðvörunarinnar, 100-200 orð]
   ⚠️🚨⚠️
+
+# --- role=user message wrappers (lifted out of opowiesci_ai.py, v17.9) ---
+instrukcja_payload: "Leikstaðan er hér að neðan. Myndaðu Cinematic Meta Warning."
