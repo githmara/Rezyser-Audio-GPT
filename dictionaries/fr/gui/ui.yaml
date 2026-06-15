@@ -651,6 +651,10 @@ rezyser:
   kod_jezyka_blad_tresc: Impossible de déterminer le code langue (ISO) pour la réponse « {jezyk_odpowiedzi} ». Ouvrez la recette dans le Gestionnaire de Règles et définissez le champ code_langue (par exemple, « fi ») pour que les en-têtes de structure et les accents correspondent à la langue du contenu.
   jezyk_naglowkow_ostrzezenie_tytul: Langue des en-têtes et langue de la recette
   jezyk_naglowkow_ostrzezenie_tresc: Le projet chargé a des en-têtes de structure qui semblent être en langue « {wykryty} », et la recette active génère du contenu en langue « {kod} ». Les nouveaux en-têtes seront insérés après « {kod} » — si ce n'est pas intentionnel, ajustez le champ code_langue dans la recette ou choisissez un autre mode.
+  pamiec_status_czysta: 🟢 Mémoire claire. Machine prête pour une nouvelle histoire.
+  pamiec_status_ok: '🟢 Utilisation de la mémoire : {tokeny} / {maks} jetons. Tampon sécurisé.'
+  pamiec_status_ostrzezenie: "⚠️ ÉTAT D'ALERTE : {tokeny} sur {maks} jetons utilisés. La mémoire se remplit – un résumé sera bientôt nécessaire."
+  pamiec_status_alarm: "🚨 SURCHARGE CRITIQUE : {tokeny} sur {maks} jetons utilisés. En mode Brainstorming, générez un résumé, enregistrez-le comme Mémoire à Long Terme, puis effacez l'historique actuel (en conservant le résumé)."
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -1118,7 +1122,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Quoi de neuf dans la version {nowa_wersja} :'
-  co_nowego_tresc: "Il est plus facile de créer et plus sûr de dupliquer des modes. Le mode dialogué (Script) peut maintenant être dupliqué dans le Manager de Règles sans l'aide d'un développeur — le format de réponse est déterminé par un champ dans le fichier de mode, donc la copie fonctionne immédiatement correctement. De plus, si un mode texte ordinaire renvoie par erreur des données techniques (JSON), l'application ne les collera plus discrètement dans votre fichier, mais vous avertira. L'assistant pour de nouvelles règles a gagné une entrée séparée « Nouveau mode Récit », qui génère un guide complet pour le développeur (ces modes nécessitent des modifications dans le code), et une tentative de simple copie d'un fichier de mode Récit vous en avertit clairement. Pas de changement dans le fonctionnement du générateur d'histoires, des autres modes et du traducteur."
+  co_nowego_tresc: "Cette version organise le multilinguisme sous le capot. Dans les Histoires Interactives, les commandes envoyées à l'IA ne mélangent plus les langues — dans un projet autre que polonais ou anglais, tout se fait dans la langue de votre histoire, et le récit maintient mieux la continuité entre les tours. En mode Réalisateur, les accents phonétiques et les en-têtes de structure (Prologue, Acte, Scène) sont maintenant dans la langue du contenu de la recette, et non dans la langue de l'interface ; après le chargement du projet, l'application avertira si elle détecte un décalage entre eux. Lorsqu'une inscription manque dans l'interface dans une langue autre que le polonais, l'anglais est affiché à la place du polonais. Aucun changement dans la façon d'écrire des histoires et des scénarios."
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
 opowiesci:

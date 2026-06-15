@@ -653,6 +653,10 @@ rezyser:
   kod_jezyka_blad_tresc: Impossibile determinare il codice lingua (ISO) per la risposta "{jezyk_odpowiedzi}". Apri la ricetta nel Gestore Regole e imposta il campo codice_lingua (ad esempio, "fi") affinché le intestazioni della struttura e gli accenti corrispondano alla lingua del contenuto.
   jezyk_naglowkow_ostrzezenie_tytul: Lingua delle intestazioni e lingua della ricetta
   jezyk_naglowkow_ostrzezenie_tresc: Il progetto caricato ha intestazioni di struttura che sembrano essere nella lingua "{wykryty}", mentre la ricetta attiva genera contenuti nella lingua "{kod}". Le nuove intestazioni verranno inserite dopo "{kod}" — se non è intenzionale, adatta il campo codice_lingua nella ricetta o scegli un'altra modalità.
+  pamiec_status_czysta: 🟢 Memoria pulita. Macchina pronta per una nuova storia.
+  pamiec_status_ok: '🟢 Utilizzo della memoria: {tokeny} / {maks} token. Buffer sicuro.'
+  pamiec_status_ostrzezenie: '⚠️ STATO DI AVVERTIMENTO: Utilizzati {tokeny} di {maks} token. La memoria si sta riempiendo – presto sarà necessario generare un riassunto.'
+  pamiec_status_alarm: '🚨 SOVRACCARICO CRITICO: Utilizzati {tokeny} di {maks} token. In modalità Brainstorming, genera un riassunto, salvalo come Memoria a Lungo Termine, quindi cancella la storia corrente (mantenendo il riassunto).'
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"
@@ -1125,7 +1129,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novità nella versione {nowa_wersja}:'
-  co_nowego_tresc: "È più facile creare e più sicuro duplicare le modalità. La modalità dialogo (Script) può ora essere duplicata nel Manager delle Regole senza l'aiuto di uno sviluppatore — il formato della risposta è determinato dal campo nel file della modalità, quindi la copia funziona immediatamente correttamente. Inoltre, se una modalità di testo normale restituisce per errore dati tecnici (JSON), l'applicazione non li incollerà più silenziosamente nel tuo file, ma ti avviserà. La procedura guidata per nuove regole ha guadagnato una voce separata \"Nuova modalità Storia\", che genera una guida completa per lo sviluppatore (queste modalità richiedono modifiche al codice), e il tentativo di copiare semplicemente il file della modalità Storia lo avverte chiaramente. Nessuna modifica nel funzionamento del generatore di storie, delle altre modalità e del traduttore."
+  co_nowego_tresc: "Questa edizione organizza il multilinguismo sotto il cofano. Nelle Storie Interattive, i comandi inviati all'AI non mescolano più le lingue — in un progetto diverso dal polacco o dall'inglese, tutto avviene nella lingua della tua storia, e la narrazione mantiene meglio la continuità tra i turni. In modalità Regista, gli accenti fonetici e le intestazioni strutturali (Prologo, Atto, Scena) ora si adattano alla lingua del contenuto della ricetta, e non alla lingua dell'interfaccia; dopo aver caricato il progetto, l'applicazione avviserà se rileva una discrepanza tra di essi. Quando nell'interfaccia in una lingua diversa dal polacco manca una scritta, viene mostrato l'inglese invece del polacco. Nessun cambiamento nel modo di scrivere storie e sceneggiature."
   co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
   btn_szczegoly_online: '&Dettagli online'
 opowiesci:

@@ -495,6 +495,11 @@ rezyser:
   kod_jezyka_blad_tresc: "Nie udało się ustalić kodu języka (ISO) dla odpowiedzi „{jezyk_odpowiedzi}”. Otwórz przepis w Menedżerze Reguł i ustaw pole kod_jezyka (np. „fi”), aby nagłówki struktury i akcenty trafiły w język treści."
   jezyk_naglowkow_ostrzezenie_tytul: "Język nagłówków a język przepisu"
   jezyk_naglowkow_ostrzezenie_tresc: "Wczytany projekt ma nagłówki struktury wyglądające na język „{wykryty}”, a aktywny przepis generuje treść w języku „{kod}”. Nowe nagłówki będą wstawiane po „{kod}” — jeśli to niezamierzone, dopasuj pole kod_jezyka w przepisie albo wybierz inny tryb."
+  # Wskaźnik pamięci modelu (gui_rezyser._aktualizuj_pamiec_modelu składa treść z i18n po `poziom`)
+  pamiec_status_czysta:       "🟢 Pamięć czysta. Maszyna gotowa na nową historię."
+  pamiec_status_ok:           "🟢 Zużycie pamięci: {tokeny} / {maks} tokenów. Bezpieczny bufor."
+  pamiec_status_ostrzezenie:  "⚠️ STAN OSTRZEGAWCZY: Zużyto {tokeny} z {maks} tokenów. Pamięć się zapełnia – wkrótce konieczne będzie wygenerowanie streszczenia."
+  pamiec_status_alarm:        "🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {tokeny} z {maks} tokenów. W trybie Burzy Mózgów wygeneruj streszczenie, zapisz je jako Pamięć Długotrwałą, a potem wyczyść bieżącą historię (zachowując streszczenie)."
   postprod_info: |-
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"
@@ -1131,7 +1136,7 @@ updater:
   # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
   co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
   co_nowego_tresc: |-
-    Łatwiej tworzyć i bezpieczniej duplikować tryby. Tryb dialogowy (Skrypt) można teraz powielić w Managerze Reguł bez pomocy programisty — o formacie odpowiedzi decyduje pole w pliku trybu, więc kopia od razu działa poprawnie. Dodatkowo, jeśli zwykły tryb tekstowy przez pomyłkę zwróci dane techniczne (JSON), aplikacja nie wklei ich już po cichu do Twojego pliku, tylko Cię ostrzeże. Kreator nowych reguł zyskał osobną pozycję „Nowy tryb Opowieści", która generuje kompletny przewodnik dla programisty (te tryby wymagają zmian w kodzie), a próba zwykłego skopiowania pliku trybu Opowieści jasno o tym uprzedza. Bez zmian w działaniu generatora opowieści, pozostałych trybów i tłumacza.
+    To wydanie porządkuje wielojęzyczność pod maską. W Interaktywnych Opowieściach polecenia wysyłane do AI nie mieszają już języków — w projekcie innym niż polski czy angielski całość idzie w języku Twojej historii, a opowieść lepiej trzyma ciągłość między turami. W trybie Reżysera akcenty fonetyczne i nagłówki struktury (Prolog, Akt, Scena) trafiają teraz w język treści przepisu, a nie w język interfejsu; po wczytaniu projektu aplikacja ostrzeże, jeśli wykryje rozjazd między nimi. Gdy w interfejsie w języku innym niż polski brakuje jakiegoś napisu, pokazywany jest angielski zamiast polskiego. Bez zmian w sposobie pisania historii i scenariuszy.
   co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
   btn_szczegoly_online:     "&Szczegóły online"
   # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)

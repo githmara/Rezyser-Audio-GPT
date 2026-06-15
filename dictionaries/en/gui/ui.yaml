@@ -632,6 +632,11 @@ rezyser:
   kod_jezyka_blad_tresc: "Could not determine the language code (ISO) for the response language \"{jezyk_odpowiedzi}\". Open the recipe in the Rules Manager and set the kod_jezyka field (e.g. \"fi\") so structure headers and accents match the content language."
   jezyk_naglowkow_ostrzezenie_tytul: Header language vs recipe language
   jezyk_naglowkow_ostrzezenie_tresc: "The loaded project has structure headers that look like \"{wykryty}\", but the active recipe generates content in \"{kod}\". New headers will be inserted in \"{kod}\" — if that is unintended, adjust the recipe's kod_jezyka field or pick another mode."
+  # Model-memory indicator (gui_rezyser._aktualizuj_pamiec_modelu builds the text from i18n by `poziom`)
+  pamiec_status_czysta:       "🟢 Memory clear. The engine is ready for a new story."
+  pamiec_status_ok:           "🟢 Memory usage: {tokeny} / {maks} tokens. Safe buffer."
+  pamiec_status_ostrzezenie:  "⚠️ WARNING STATE: {tokeny} of {maks} tokens used. Memory is filling up — a summary will soon be required."
+  pamiec_status_alarm:        "🚨 CRITICAL OVERLOAD: {tokeny} of {maks} tokens used. In Brainstorm mode generate a summary, save it as Long-Term Memory, then clear the current story (keeping the summary)."
   err_struktura: The model generated an incorrect response structure despite several correction attempts. Try again or rephrase the command.
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
   btn_przeladuj_label: '&Reload project from disk'
@@ -1125,7 +1130,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: "What's new in version {nowa_wersja}:"
-  co_nowego_tresc: 'Easier to create and safer to duplicate modes. The dialog mode (Script) can now be duplicated in the Rules Manager without developer assistance — the response format is determined by a field in the mode file, so the copy works correctly right away. Additionally, if a regular text mode mistakenly returns technical data (JSON), the application will no longer silently paste it into your file but will warn you. The new rules wizard has gained a separate "New Story Mode" option, which generates a complete guide for the developer (these modes require code changes), and an attempt to simply copy a Story Mode file clearly warns about this. No changes to the story generator, other modes, and translator.'
+  co_nowego_tresc: 'This release organizes multilingualism under the hood. In Interactive Stories, commands sent to AI no longer mix languages — in a project other than Polish or English, everything goes in the language of your story, and the narrative maintains better continuity between turns. In Director mode, phonetic accents and structure headers (Prologue, Act, Scene) now match the language of the recipe content, not the interface language; upon loading a project, the application will warn if it detects a mismatch between them. When an interface in a language other than Polish lacks a label, English is shown instead of Polish. No changes in the way stories and scripts are written.'
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
 opowiesci:

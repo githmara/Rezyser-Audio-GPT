@@ -652,6 +652,10 @@ rezyser:
   kod_jezyka_blad_tresc: No se pudo determinar el código de idioma (ISO) para la respuesta "{jezyk_odpowiedzi}". Abre la receta en el Administrador de Reglas y establece el campo codigo_idioma (por ejemplo, "fi") para que los encabezados de estructura y los acentos coincidan con el idioma del contenido.
   jezyk_naglowkow_ostrzezenie_tytul: Idioma de los encabezados y el idioma de la receta
   jezyk_naglowkow_ostrzezenie_tresc: El proyecto cargado tiene encabezados de estructura que parecen estar en el idioma "{wykryty}", y la receta activa genera contenido en el idioma "{kod}". Los nuevos encabezados se insertarán después de "{kod}" — si esto no es intencionado, ajusta el campo codigo_idioma en la receta o elige otro modo.
+  pamiec_status_czysta: 🟢 Memoria limpia. Máquina lista para una nueva historia.
+  pamiec_status_ok: '🟢 Uso de memoria: {tokeny} / {maks} tokens. Búfer seguro.'
+  pamiec_status_ostrzezenie: '⚠️ ESTADO DE ADVERTENCIA: Se han utilizado {tokeny} de {maks} tokens. La memoria se está llenando – pronto será necesario generar un resumen.'
+  pamiec_status_alarm: '🚨 SOBRECARGA CRÍTICA: Se han utilizado {tokeny} de {maks} tokens. En modo Tormenta de Ideas, genera un resumen, guárdalo como Memoria a Largo Plazo y luego limpia la historia actual (conservando el resumen).'
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -1124,7 +1128,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novedades en la versión {nowa_wersja}:'
-  co_nowego_tresc: 'Es más fácil crear y más seguro duplicar modos. El modo de diálogo (Script) ahora se puede duplicar en el Manager de Reglas sin la ayuda de un desarrollador — el formato de respuesta lo decide un campo en el archivo del modo, por lo que la copia funciona correctamente de inmediato. Además, si un modo de texto simple por error devuelve datos técnicos (JSON), la aplicación ya no los pegará silenciosamente en tu archivo, sino que te advertirá. El asistente para nuevas reglas ha ganado una posición separada "Nuevo modo de Narración", que genera una guía completa para el desarrollador (estos modos requieren cambios en el código), y el intento de copiar simplemente un archivo de modo de Narración lo advierte claramente. Sin cambios en el funcionamiento del generador de historias, otros modos y el traductor.'
+  co_nowego_tresc: 'Esta edición organiza el multilingüismo bajo el capó. En Historias Interactivas, los comandos enviados a la IA ya no mezclan idiomas: en un proyecto que no sea polaco o inglés, todo se realiza en el idioma de tu historia, y la narrativa mantiene mejor la continuidad entre turnos. En el modo Director, los acentos fonéticos y los encabezados de estructura (Prólogo, Acto, Escena) ahora se traducen al idioma del contenido de la receta, y no al idioma de la interfaz; al cargar el proyecto, la aplicación advertirá si detecta una discrepancia entre ellos. Cuando falta algún texto en la interfaz en un idioma que no sea polaco, se muestra en inglés en lugar de polaco. Sin cambios en la forma de escribir historias y guiones.'
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
 opowiesci:

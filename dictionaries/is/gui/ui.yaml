@@ -653,6 +653,10 @@ rezyser:
   kod_jezyka_blad_tresc: Ekki tókst að ákvarða tungumálakóða (ISO) fyrir svarið „{jezyk_odpowiedzi}”. Opnaðu uppskriftina í Reglustjóra og stilltu reitinn kod_jezyka (t.d. „fi”), til að fyrirsagnir og áherslur passi við tungumál efnisins.
   jezyk_naglowkow_ostrzezenie_tytul: Tungumál fyrirsagna og tungumál uppskriftar
   jezyk_naglowkow_ostrzezenie_tresc: Hlaðinn verkefni hefur fyrirsagnir sem líta út fyrir að vera á tungumálinu „{wykryty}”, en virka uppskriftin býr til efni á tungumálinu „{kod}”. Nýjar fyrirsagnir verða settar inn eftir „{kod}” — ef þetta er ekki ætlunin, stilltu reitinn kod_jezyka í uppskriftinni eða veldu annan ham.
+  pamiec_status_czysta: 🟢 Minni hreint. Vél tilbúin fyrir nýja sögu.
+  pamiec_status_ok: '🟢 Minni notkun: {tokeny} / {maks} tákn. Öruggur biðminni.'
+  pamiec_status_ostrzezenie: '⚠️ VIÐVÖRUNARÁSTAND: Notað {tokeny} af {maks} táknum. Minni er að fyllast – brátt verður nauðsynlegt að búa til samantekt.'
+  pamiec_status_alarm: '🚨 GAGNRÝN OFHLEÐSLA: Notað {tokeny} af {maks} táknum. Í Hugstormunarham, búðu til samantekt, vistaðu hana sem Langtímaminni og hreinsaðu síðan núverandi sögu (með því að halda samantektinni).'
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -1125,7 +1129,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Hvað er nýtt í útgáfu {nowa_wersja}:'
-  co_nowego_tresc: 'Auðveldara að búa til og öruggara að afrita hami. Samtalsham (Handrit) er nú hægt að afrita í Reglustjóra án aðstoðar forritara — sniðið á svörunum er ákvarðað af reitnum í skrá hamsins, þannig að afritið virkar strax rétt. Að auki, ef venjulegur texthamur skilar tæknilegum gögnum (JSON) fyrir mistök, mun forritið ekki líma þau hljóðlega í skrána þína, heldur vara þig við. Nýr reglugerðarsmiður hefur fengið sérstakan valkost „Nýr Söguhamur", sem býr til fullkomna leiðbeiningu fyrir forritara (þessir hamir krefjast breytinga á kóða), og tilraun til að afrita venjulega skrá fyrir Söguham varar skýrt við því. Engar breytingar á virkni sögugjafa, annarra hama og þýðanda.'
+  co_nowego_tresc: 'Þessi útgáfa skipuleggur fjöltyngi undir húddinu. Í gagnvirkum sögum blandast skipanir sendar til AI ekki lengur saman við tungumál — í verkefni sem er ekki pólsk eða enska fer allt á tungumáli sögunnar þinnar, og sagan heldur betur samfellu milli umferða. Í leikstjórastillingu fara hljóðfræðileg áherslur og uppbyggingarhausar (Prolog, Þáttur, Sena) nú á tungumál innihalds uppskriftarinnar, en ekki á tungumál viðmótsins; eftir að verkefni er hlaðið mun forritið vara við ef það greinir misræmi á milli þeirra. Þegar í viðmóti á öðru tungumáli en pólsku vantar einhvern texta, er sýndur enski í stað pólsku. Engar breytingar á því hvernig sögur og handrit eru skrifuð.'
   co_nowego_online_pl: Heill útgáfusíða (á netinu) er fáanleg á pólsku.
   btn_szczegoly_online: '&Upplýsingar á netinu'
 opowiesci:

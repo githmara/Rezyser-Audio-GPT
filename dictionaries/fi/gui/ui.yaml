@@ -651,6 +651,10 @@ rezyser:
   kod_jezyka_blad_tresc: Kielen koodia (ISO) ei voitu määrittää vastaukselle „{jezyk_odpowiedzi}”. Avaa resepti Sääntöjen Hallinnassa ja aseta kenttä kielikoodi (esim. „fi”), jotta rakenteen otsikot ja aksentit osuvat sisällön kieleen.
   jezyk_naglowkow_ostrzezenie_tytul: Otsikoiden kieli ja reseptin kieli
   jezyk_naglowkow_ostrzezenie_tresc: Ladatussa projektissa on rakenteen otsikoita, jotka näyttävät olevan kielellä „{wykryty}”, ja aktiivinen resepti tuottaa sisältöä kielellä „{kod}”. Uudet otsikot lisätään „{kod}” jälkeen — jos tämä ei ole tarkoituksellista, säädä reseptin kielikoodi-kenttää tai valitse toinen tila.
+  pamiec_status_czysta: 🟢 Muisti on tyhjä. Kone on valmis uuteen tarinaan.
+  pamiec_status_ok: '🟢 Muistin käyttö: {tokeny} / {maks} tokenia. Turvallinen puskuri.'
+  pamiec_status_ostrzezenie: '⚠️ VAROITUSTILA: Käytetty {tokeny} / {maks} tokenia. Muisti täyttyy – tiivistelmän luominen on pian tarpeen.'
+  pamiec_status_alarm: '🚨 KRIITTINEN YLITÄYTTÖ: Käytetty {tokeny} / {maks} tokenia. Aivoriihitilassa luo tiivistelmä, tallenna se pitkäaikaismuistiin ja tyhjennä sitten nykyinen historia (säilytä tiivistelmä).'
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -1123,7 +1127,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Mitä uutta versiossa {nowa_wersja}:'
-  co_nowego_tresc: 'Helpompi luoda ja turvallisempi kopioida tiloja. Dialogitilan (Skripti) voi nyt monistaa Sääntöjen Hallinnassa ilman kehittäjän apua — vastausmuodosta päättää tilan tiedoston kenttä, joten kopio toimii heti oikein. Lisäksi, jos tavallinen tekstimuotoinen tila palauttaa vahingossa teknisiä tietoja (JSON), sovellus ei enää liitä niitä hiljaa tiedostoosi, vaan varoittaa sinua. Uusien sääntöjen luontityökaluun on lisätty erillinen kohta "Uusi Tarinatila", joka luo täydellisen oppaan kehittäjälle (nämä tilat vaativat muutoksia koodiin), ja yritys kopioida Tarinatilan tiedosto selvästi varoittaa siitä. Ei muutoksia tarinageneraattorin, muiden tilojen ja kääntäjän toimintaan.'
+  co_nowego_tresc: 'Tämä julkaisu järjestää monikielisyyden kulissien takana. Interaktiivisissa tarinoissa tekoälylle lähetetyt komennot eivät enää sekoita kieliä — projektissa, joka ei ole puolaksi tai englanniksi, kaikki tapahtuu tarinasi kielellä, ja tarina säilyttää paremmin jatkuvuuden kierrosten välillä. Ohjaajan tilassa foneettiset aksentit ja rakenteen otsikot (Prologi, Näytös, Kohtaus) ovat nyt reseptin sisällön kielellä, eivätkä käyttöliittymän kielellä; kun projekti ladataan, sovellus varoittaa, jos niiden välillä havaitaan eroja. Kun käyttöliittymässä muulla kuin puolaksi kielellä puuttuu jokin teksti, näytetään englanti puolankielisen sijaan. Ei muutoksia tarinoiden ja käsikirjoitusten kirjoittamistapaan.'
   co_nowego_online_pl: Julkaisun koko sivu (verkossa) on saatavilla puolaksi.
   btn_szczegoly_online: '&Yksityiskohdat verkossa'
 opowiesci:

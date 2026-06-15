@@ -653,6 +653,10 @@ rezyser:
   kod_jezyka_blad_tresc: Der Sprachcode (ISO) für die Antwort „{jezyk_odpowiedzi}” konnte nicht ermittelt werden. Öffnen Sie das Rezept im Regelmanager und setzen Sie das Feld kod_jezyka (z.B. „fi”), damit die Strukturüberschriften und Akzente zur Inhaltssprache passen.
   jezyk_naglowkow_ostrzezenie_tytul: Sprache der Überschriften und Sprache des Rezepts
   jezyk_naglowkow_ostrzezenie_tresc: Das geladene Projekt hat Strukturüberschriften, die wie die Sprache „{wykryty}” aussehen, und das aktive Rezept generiert Inhalte in der Sprache „{kod}”. Neue Überschriften werden nach „{kod}” eingefügt — wenn dies nicht beabsichtigt ist, passen Sie das Feld kod_jezyka im Rezept an oder wählen Sie einen anderen Modus.
+  pamiec_status_czysta: 🟢 Speicher ist leer. Maschine bereit für eine neue Geschichte.
+  pamiec_status_ok: '🟢 Speichernutzung: {tokeny} / {maks} Tokens. Sicherer Puffer.'
+  pamiec_status_ostrzezenie: '⚠️ WARNZUSTAND: {tokeny} von {maks} Tokens verwendet. Speicher füllt sich – bald wird eine Zusammenfassung erforderlich sein.'
+  pamiec_status_alarm: '🚨 KRITISCHE ÜBERLASTUNG: {tokeny} von {maks} Tokens verwendet. Im Brainstorming-Modus eine Zusammenfassung erstellen, als Langzeitspeicher speichern und dann die aktuelle Geschichte löschen (Zusammenfassung beibehalten).'
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -1125,7 +1129,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Was ist neu in Version {nowa_wersja}:'
-  co_nowego_tresc: 'Es ist einfacher, Modi zu erstellen und sicherer zu duplizieren. Der Dialogmodus (Skript) kann jetzt im Regelmanager ohne Hilfe eines Entwicklers vervielfältigt werden — das Antwortformat wird durch ein Feld in der Modusdatei bestimmt, sodass die Kopie sofort korrekt funktioniert. Außerdem, wenn ein einfacher Textmodus versehentlich technische Daten (JSON) zurückgibt, wird die Anwendung diese nicht mehr stillschweigend in Ihre Datei einfügen, sondern Sie warnen. Der neue Regelassistent hat einen eigenen Eintrag „Neuer Erzählmodus" erhalten, der einen vollständigen Leitfaden für den Entwickler generiert (diese Modi erfordern Änderungen im Code), und der Versuch, eine Erzählmodusdatei einfach zu kopieren, warnt deutlich davor. Keine Änderungen am Betrieb des Erzählgenerators, der anderen Modi und des Übersetzers.'
+  co_nowego_tresc: 'Diese Ausgabe ordnet die Mehrsprachigkeit unter der Haube. In Interaktiven Geschichten werden die an die KI gesendeten Befehle nicht mehr vermischt — in einem Projekt, das weder polnisch noch englisch ist, wird alles in der Sprache deiner Geschichte ausgeführt, und die Erzählung hält besser die Kontinuität zwischen den Runden. Im Regiemodus werden phonetische Akzente und Strukturüberschriften (Prolog, Akt, Szene) jetzt in die Sprache des Rezeptinhalts und nicht in die Sprache der Benutzeroberfläche übersetzt; nach dem Laden des Projekts warnt die Anwendung, wenn sie eine Diskrepanz zwischen ihnen feststellt. Wenn in der Benutzeroberfläche in einer anderen Sprache als Polnisch ein Text fehlt, wird Englisch anstelle von Polnisch angezeigt. Keine Änderungen in der Art und Weise, wie Geschichten und Drehbücher geschrieben werden.'
   co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
   btn_szczegoly_online: '&Details online'
 opowiesci:
