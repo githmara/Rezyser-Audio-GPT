@@ -630,6 +630,8 @@ rezyser:
   sr_blad_tresc: "Failed to generate screen reader version:\n{tresc_bledu}"
   kod_jezyka_blad_tytul: Unknown recipe language
   kod_jezyka_blad_tresc: "Could not determine the language code (ISO) for the response language \"{jezyk_odpowiedzi}\". Open the recipe in the Rules Manager and set the kod_jezyka field (e.g. \"fi\") so structure headers and accents match the content language."
+  jezyk_naglowkow_ostrzezenie_tytul: Header language vs recipe language
+  jezyk_naglowkow_ostrzezenie_tresc: "The loaded project has structure headers that look like \"{wykryty}\", but the active recipe generates content in \"{kod}\". New headers will be inserted in \"{kod}\" — if that is unintended, adjust the recipe's kod_jezyka field or pick another mode."
   err_struktura: The model generated an incorrect response structure despite several correction attempts. Try again or rephrase the command.
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
   btn_przeladuj_label: '&Reload project from disk'

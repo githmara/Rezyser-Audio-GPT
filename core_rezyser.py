@@ -311,6 +311,44 @@ def _rozbij_naglowek(naglowek: str) -> tuple[str, int | None]:
     return "inny", None
 
 
+def policz_naglowki_per_jezyk(
+    content: str, mapa_slow: dict[str, set[str]],
+) -> dict[str, int]:
+    """Zlicza linie-nagłówki ``content`` per język wg ``mapa_slow``.
+
+    v17.9 (Obszar 3b, ostrzeżenie wczytania): heurystyczna detekcja języka
+    istniejącej treści projektu. ``mapa_slow`` = ``{kod_jezyka: {słowa-nagłówki
+    małymi literami}}`` budowane przez GUI z ``t("rezyser.naglowek_*",
+    jezyk_override=<kod>)`` — pokrywa WSZYSTKIE zainstalowane języki (w
+    odróżnieniu od 6-językowego ``_WZORZEC_NAGLOWEK_LINIA``, który nie zna
+    np. niemieckiego „Kapitel").
+
+    Liczy tylko linie wyglądające na czysty nagłówek: pojedyncze słowo +
+    opcjonalny numer (np. „Akt 1", „Prolog") — nie prozę zaczynającą się od
+    słowa-nagłówka. Słowo dzielone między językami (np. „Akt" pl i de) zlicza
+    się dla OBU — wołający interpretuje (brak trafień w języku przepisu przy
+    trafieniach w innym = sygnał rozjazdu).
+
+    Zwraca ``{kod_jezyka: liczba_trafień}`` dla każdego klucza ``mapa_slow``.
+    """
+    counts: dict[str, int] = {lang: 0 for lang in mapa_slow}
+    for linia in content.splitlines():
+        rdzen = linia.strip().lower()
+        if not rdzen:
+            continue
+        m = re.match(r"(\w+)", rdzen, re.UNICODE)
+        if not m:
+            continue
+        first = m.group(1)
+        # tylko czysty nagłówek: słowo + opcjonalny numer, nic więcej.
+        if not re.fullmatch(rf"{re.escape(first)}(\s+\d+)?", rdzen):
+            continue
+        for lang, slowa in mapa_slow.items():
+            if first in slowa:
+                counts[lang] += 1
+    return counts
+
+
 # =============================================================================
 # Wybór punktu odniesienia pamięci roboczej (v17.6)
 # =============================================================================

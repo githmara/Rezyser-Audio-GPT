@@ -493,6 +493,8 @@ rezyser:
   sr_blad_tresc: "Nie udało się wygenerować wersji dla czytników ekranu:\n{tresc_bledu}"
   kod_jezyka_blad_tytul: "Nieznany język przepisu"
   kod_jezyka_blad_tresc: "Nie udało się ustalić kodu języka (ISO) dla odpowiedzi „{jezyk_odpowiedzi}”. Otwórz przepis w Menedżerze Reguł i ustaw pole kod_jezyka (np. „fi”), aby nagłówki struktury i akcenty trafiły w język treści."
+  jezyk_naglowkow_ostrzezenie_tytul: "Język nagłówków a język przepisu"
+  jezyk_naglowkow_ostrzezenie_tresc: "Wczytany projekt ma nagłówki struktury wyglądające na język „{wykryty}”, a aktywny przepis generuje treść w języku „{kod}”. Nowe nagłówki będą wstawiane po „{kod}” — jeśli to niezamierzone, dopasuj pole kod_jezyka w przepisie albo wybierz inny tryb."
   postprod_info: |-
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"

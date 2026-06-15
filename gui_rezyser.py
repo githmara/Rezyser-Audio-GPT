@@ -261,6 +261,53 @@ class RezyserPanel(wx.Panel):
             self,
         )
 
+    def _mapa_slow_naglowkow(self) -> dict[str, set[str]]:
+        """Mapa ``kod_jezyka → {słowa-nagłówki małymi literami}`` dla
+        zainstalowanych języków — paliwo dla
+        :func:`core_rezyser.policz_naglowki_per_jezyk`. Słowa bierzemy z
+        ``t("rezyser.naglowek_*", jezyk_override=<kod>)`` (pierwszy token)."""
+        klucze = (
+            "naglowek_prolog", "naglowek_epilog", "naglowek_rozdzial",
+            "naglowek_akt", "naglowek_scena",
+        )
+        mapa: dict[str, set[str]] = {}
+        for lang in dostepne_jezyki_ui():
+            slowa: set[str] = set()
+            for k in klucze:
+                w = t(f"rezyser.{k}", jezyk_override=lang).strip().lower()
+                if w:
+                    slowa.add(w.split()[0])
+            mapa[lang] = slowa
+        return mapa
+
+    def _moze_ostrzec_o_jezyku_naglowkow(self, content: str) -> None:
+        """3a: po wczytaniu — INFORMACYJNE ostrzeżenie, gdy nagłówki istniejącej
+        treści NIE są w języku aktywnego przepisu, a wyglądają na inny. Wczytanie
+        i tak kontynuuje (reżyser może świadomie migrować język projektu).
+
+        Reguła niskiego false-positive: ostrzegamy TYLKO gdy język przepisu ma
+        ZERO trafień w nagłówkach, a inny język ma ≥1 (słowa wspólne, np. „Akt"
+        pl/de, liczą się dla obu, więc spójna treść nie wywoła alarmu)."""
+        if not content or not content.strip():
+            return
+        kod = self._kod_jezyka_aktywny()
+        counts = cr.policz_naglowki_per_jezyk(content, self._mapa_slow_naglowkow())
+        if counts.get(kod, 0) > 0:
+            return
+        inne = sorted(
+            ((l, c) for l, c in counts.items() if c > 0 and l != kod),
+            key=lambda x: -x[1],
+        )
+        if not inne:
+            return
+        wx.MessageBox(
+            t("rezyser.jezyk_naglowkow_ostrzezenie_tresc",
+              wykryty=inne[0][0], kod=kod),
+            t("rezyser.jezyk_naglowkow_ostrzezenie_tytul"),
+            wx.OK | wx.ICON_WARNING,
+            self,
+        )
+
     # ==================================================================
     # SHIMY WŁAŚCIWOŚCI delegujące do self._projekt
     # ==================================================================
@@ -1409,6 +1456,9 @@ class RezyserPanel(wx.Panel):
         # 1b: po wczytaniu przepis trybu zapisu jest aktywny — zapewnij `kod_jezyka`
         # (w tle), żeby nagłówki struktury trafiły w język treści, nie GUI.
         self._zapewnij_kod_jezyka_w_tle()
+        # 3a: ostrzeż, jeśli nagłówki wczytanej treści rozjeżdżają się z językiem
+        # przepisu (np. reżyser zmienił kod_jezyka po zapisaniu projektu).
+        self._moze_ostrzec_o_jezyku_naglowkow(self.full_story)
 
         # v15.2: rebuild panelu opcji Burzy z `.brainstorm.json` jeśli istnieje.
         # Po wczytaniu projektu gracz wciąż widzi 3 opcje wygenerowane przy
