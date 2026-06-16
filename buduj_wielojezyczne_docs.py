@@ -805,8 +805,10 @@ def _tlumacz_pojedyncza_sekcje(
         except OSError:
             pass
 
-    def _on_postep(msg: str, pct: int) -> None:
-        sys.stderr.write(f"   [{kod}/{rdzen}{sufiks} {pct:3d}%] {msg}\n")
+    def _on_postep(info: Any) -> None:
+        # `info` to InfoPostepu — str() zwraca czytelny `detal` (mostek i18n
+        # nieistotny dla CLI dev-toola; liczy się log z procentem).
+        sys.stderr.write(f"   [{kod}/{rdzen}{sufiks} {info.procent:3d}%] {info}\n")
 
     def _on_blad_krytyczny(info: Any, partial: str) -> None:
         # `info` to InfoBleduTlumaczenia — str() zwraca techniczny detal EN

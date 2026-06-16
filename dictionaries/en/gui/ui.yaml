@@ -800,6 +800,11 @@ poliglota:
 # -----------------------------------------------------------------------------
 # KONWERTER – panel modułu Konwerter (gui_konwerter.py)
 # -----------------------------------------------------------------------------
+  ai_postep_odzysk: Save file detected – restoring paid progress…
+  ai_postep_blok_odzyskany: Block {numer}/{ile} recovered from save file.
+  ai_postep_blok: Translating block {numer} of {ile}… ({znaki} characters)
+  ai_postep_iso: Generating language tag for screen readers…
+  ai_postep_zapis: Saving output file…
 konwerter:
   panel_name: "Audiobook Architect Panel"
   heading: "📄  Audiobook Architect"

@@ -802,6 +802,11 @@ poliglota:
 # -----------------------------------------------------------------------------
 # KONWERTER – panel modułu Konwerter (gui_konwerter.py)
 # -----------------------------------------------------------------------------
+  ai_postep_odzysk: Rilevato file di salvataggio – ripristino del progresso pagato…
+  ai_postep_blok_odzyskany: Blocco {numer}/{ile} recuperato dal file di salvataggio.
+  ai_postep_blok: Traduzione del blocco {numer} da {ile}… ({znaki} caratteri)
+  ai_postep_iso: Generazione del tag linguistico per i lettori di schermo…
+  ai_postep_zapis: Salvataggio del file di output…
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   heading: "📄  Architetto Audiolibri"

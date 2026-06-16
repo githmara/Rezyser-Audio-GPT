@@ -87,6 +87,29 @@ class InfoBleduTlumaczenia:
         return self.detal or self.klucz_i18n
 
 
+@dataclass
+class InfoPostepu:
+    """Strukturalny sygnał postępu z silnika tłumacza (mostek i18n ↔ GUI).
+
+    Bliźniak :class:`InfoBleduTlumaczenia` dla pasków postępu. `tlumacz_ai`
+    pozostaje wolny od wxPython i i18n, więc zamiast budować polską prozę
+    paska, przekazuje GOŁY `klucz_i18n` (namespace `poliglota.` dokłada GUI),
+    kwargs do `t(...)` i `procent`. GUI renderuje natywny komunikat w języku
+    interfejsu; nie-GUI konsument (CLI `buduj_wielojezyczne_docs.py`) bierze
+    `str(self)` → `detal` (czytelny opis PL/EN do logu, jak przy błędach).
+    Do v17.11 paski leciały surowym polskim stringiem przez `PostepCallback`,
+    omijając ten mostek — user widział polszczyznę nawet przy obcym UI.
+    """
+
+    klucz_i18n: str                                  # goła nazwa klucza w `poliglota.`
+    procent: int = 0                                 # 0–100 (pasek postępu)
+    kwargs: dict[str, Any] = field(default_factory=dict)   # parametry do t(klucz, **kwargs)
+    detal: str = ""                                  # czytelny opis dla nie-GUI (CLI/log)
+
+    def __str__(self) -> str:                        # CLI dev-tool traktuje postęp jak string
+        return self.detal or self.klucz_i18n
+
+
 class BladUcietegoTlumaczenia(RuntimeError):
     """Model uciął tłumaczenie bloku (limit wyjścia) i bisekcja go nie domknęła.
 
@@ -105,7 +128,7 @@ class BladUcietegoTlumaczenia(RuntimeError):
 # Wszystkie callbacki są opcjonalne – gdy nie zostaną podane, moduł po prostu
 # ich nie wywoła. GUI z wxPython zwykle zawija każdy callback w ``wx.CallAfter``.
 
-PostepCallback    = Callable[[str, int], None]                   # (komunikat, procent 0–100)
+PostepCallback    = Callable[[InfoPostepu], None]               # (info i18n — pasek postępu)
 BladKrytyczny     = Callable[[InfoBleduTlumaczenia, str], None]  # (info i18n, częściowe tłumaczenie)
 BladMiekki        = Callable[[InfoBleduTlumaczenia], None]       # (info i18n — miękki, nie przerywa)
 
@@ -215,22 +238,37 @@ def _podziel_blok_na_pol(blok: str) -> tuple[str, str]:
 # =============================================================================
 # Pomocnicze – nazwa pliku tymczasowego (cache wznawiania)
 # =============================================================================
-def _slugify_ascii(tekst: str) -> str:
-    """Prosty slugifier ASCII (usuwa polskie znaki, spacje → puste)."""
-    mapa = {
-        "ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
-        "ó": "o", "ś": "s", "ź": "z", "ż": "z",
-        "Ą": "A", "Ć": "C", "Ę": "E", "Ł": "L", "Ń": "N",
-        "Ó": "O", "Ś": "S", "Ź": "Z", "Ż": "Z",
-    }
-    for k, v in mapa.items():
-        tekst = tekst.replace(k, v)
-    return re.sub(r"[^a-zA-Z0-9]", "", tekst)
+# Znaki zakazane w nazwach plików — UNIA cross-platform: zestaw Windows
+# (`<>:"/\|?*`) + znaki sterujące. Linux/macOS zakazują tylko `/` i NUL, więc
+# odsianie unii jest bezpieczne wszędzie (projekt ma dev na Linux/macOS przez
+# `setup_dev.sh`/`run.sh`; zamrożony release jest Windows).
+_RE_ZNAKI_ZAKAZANE = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+def _bezpieczna_nazwa_pliku(tekst: str) -> str:
+    """Sanityzuje fragment do bezpiecznej, cross-platform nazwy pliku (Unicode-safe).
+
+    Zachowuje litery Unicode (cyrylica, CJK, diakrytyka — NTFS/ext4/APFS je
+    akceptują); usuwa tylko znaki zakazane w nazwach plików i zwija białe znaki
+    do ``_``.
+
+    Do v17.11 funkcja (``_slugify_ascii``) mapowała WYŁĄCZNIE polskie znaki na
+    ASCII i kasowała całą resztę (``[^a-zA-Z0-9]``). Dla nazw języków
+    nie-łacińskich (np. „Русский", „中文", „العربية") slug kolapsował do pustego
+    łańcucha → fallback ``"tlumaczenie"``. Skutek: tłumaczenia tego samego pliku
+    źródłowego na dwa różne języki nie-łacińskie dzieliły JEDEN plik cache
+    ``runtime/temp_*.jsonl`` (ta sama metryka wersja+bloki) → cache jednego
+    języka był po cichu odtwarzany dla drugiego. Unicode-safe sanitizer
+    eliminuje i ograniczenie „tylko PL", i tę kolizję.
+    """
+    oczyszczony = _RE_ZNAKI_ZAKAZANE.sub("", tekst)
+    oczyszczony = re.sub(r"\s+", "_", oczyszczony.strip())
+    return oczyszczony.strip("._")
 
 
 def zbuduj_nazwe_bazowa(oryginalna_nazwa: str, jezyk_docelowy: str) -> str:
     """Zwraca nazwę pliku wynikowego (bez rozszerzenia) dla trybu Tłumacza AI."""
-    slug = _slugify_ascii(jezyk_docelowy.split()[0]).lower() or "tlumaczenie"
+    slug = _bezpieczna_nazwa_pliku(jezyk_docelowy.split()[0]).lower() or "tlumaczenie"
     return f"{oryginalna_nazwa}_tlumaczenie_{slug}"
 
 
@@ -280,12 +318,14 @@ def _pobierz_iso(klient: Any, jezyk_docelowy: str, model: str) -> tuple[str, str
     regionalnych/pisma kod z podtagiem (``pt-BR``, ``zh-CN``, ``zh-Hans``)
     — HTML ``lang=`` i DOCX ``w:lang`` przyjmują oba formaty.
     """
+    # Prompt po angielsku — spójnie z `_PROMPT_SYSTEMOWY_TEMPLATE` (narzędzie
+    # bootstrap'owe, EN neutralny dla każdej pary językowej; patrz nagłówek sekcji).
     prompt = (
-        f"Podaj WYŁĄCZNIE kod języka w formacie BCP-47 "
-        f"dla języka: {jezyk_docelowy}. "
-        f"Dla zwykłych języków zwróć sam dwuliterowy kod ISO 639-1, np.: fi, it, en. "
-        f"Dla odmiany regionalnej lub odmiany pisma dodaj podtag, np.: pt-BR, zh-CN, zh-Hans. "
-        f"Odpowiedź ma zawierać wyłącznie sam kod — bez kropki i bez komentarza."
+        f"Return ONLY the language code in BCP-47 format "
+        f"for the language: {jezyk_docelowy}. "
+        f"For ordinary languages return just the two-letter ISO 639-1 code, e.g.: fi, it, en. "
+        f"For a regional or script variant add a subtag, e.g.: pt-BR, zh-CN, zh-Hans. "
+        f"The response must contain only the code itself — no period and no comment."
     )
     resp = klient.chat.completions.create(
         model=model,
@@ -324,10 +364,13 @@ def _tlumacz_blok(
     payload: list[dict[str, str]] = [{"role": "system", "content": sys_prompt}]
     if kontekst:
         payload.append({"role": "assistant", "content": kontekst})
+        # Sklejka po angielsku — payload LLM jest jednojęzyczny (EN), spójnie
+        # z `_PROMPT_SYSTEMOWY_TEMPLATE`; do v17.11 ten prefiks był polskim
+        # hard-kodem lecącym do modelu niezależnie od pary językowej.
         user_content = (
-            "[KRYTYCZNE: Kontynuuj tłumaczenie poniższego tekstu. "
-            "Zachowaj absolutną spójność terminologii, tonu i stylu "
-            "z Twoją poprzednią odpowiedzią.]\n\n" + blok
+            "[CRITICAL: Continue translating the text below. "
+            "Keep absolute consistency of terminology, tone and style "
+            "with your previous response.]\n\n" + blok
         )
     else:
         user_content = blok
@@ -390,7 +433,10 @@ def tlumacz_dlugi_tekst(
                           do nazwy cache'u i nazwy pliku wynikowego.
 
     Keyword Args:
-        on_postep:         Callback ``(msg, procent)`` wołany po każdym bloku.
+        on_postep:         Callback ``(info)`` wołany po każdym bloku, gdzie
+                           ``info`` to :class:`InfoPostepu` (mostek i18n — GUI
+                           mapuje ``klucz_i18n`` na natywny pasek; CLI bierze
+                           ``str(info)``=detal).
         on_blad_krytyczny: Callback ``(info, partial_text)`` przy przerwaniu,
                            gdzie ``info`` to :class:`InfoBleduTlumaczenia`
                            (mostek i18n — GUI mapuje ``klucz_i18n`` na natywny
@@ -457,7 +503,10 @@ def tlumacz_dlugi_tekst(
             and metryka.get("bloki") == len(bloki)
         ):
             if on_postep:
-                on_postep("Wykryto plik zapisu – odtwarzanie opłaconego postępu…", 0)
+                on_postep(InfoPostepu(
+                    "ai_postep_odzysk", 0,
+                    detal="Wykryto plik zapisu – odtwarzanie opłaconego postępu…",
+                ))
             wczytane = {dane["id"]: dane["text"] for dane in wiersze[1:]}
         else:
             try:
@@ -477,15 +526,19 @@ def tlumacz_dlugi_tekst(
     for i, blok in enumerate(bloki):
         if i in wczytane:
             if on_postep:
-                on_postep(f"Blok {i + 1}/{n} odzyskany z pliku zapisu.",
-                          int((i + 1) / n * 100))
+                on_postep(InfoPostepu(
+                    "ai_postep_blok_odzyskany", int((i + 1) / n * 100),
+                    kwargs={"numer": i + 1, "ile": n},
+                    detal=f"Blok {i + 1}/{n} odzyskany z pliku zapisu.",
+                ))
             continue
 
         if on_postep:
-            on_postep(
-                f"Tłumaczenie bloku {i + 1} z {n}… ({len(blok)} znaków)",
-                int(i / n * 100),
-            )
+            on_postep(InfoPostepu(
+                "ai_postep_blok", int(i / n * 100),
+                kwargs={"numer": i + 1, "ile": n, "znaki": len(blok)},
+                detal=f"Tłumaczenie bloku {i + 1} z {n}… ({len(blok)} znaków)",
+            ))
 
         kontekst = wczytane.get(i - 1, "") if i > 0 else ""
 
@@ -530,7 +583,10 @@ def tlumacz_dlugi_tekst(
 
     # -------- Pobranie kodu ISO -----------------------------------------
     if on_postep:
-        on_postep("Generowanie tagu językowego dla czytników ekranu…", 95)
+        on_postep(InfoPostepu(
+            "ai_postep_iso", 95,
+            detal="Generowanie tagu językowego dla czytników ekranu…",
+        ))
 
     ostrzezenia: list[str] = []
     iso_code = "pl"
@@ -571,7 +627,10 @@ def tlumacz_dlugi_tekst(
             pass
 
     if on_postep:
-        on_postep("Zapis pliku wynikowego…", 99)
+        on_postep(InfoPostepu(
+            "ai_postep_zapis", 99,
+            detal="Zapis pliku wynikowego…",
+        ))
 
     tekst_wynikowy = "\n\n".join(wczytane[k] for k in sorted(wczytane)).strip()
 

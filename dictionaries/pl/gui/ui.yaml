@@ -795,6 +795,12 @@ poliglota:
   sukces_zapis:          "Plik zapisany jako:\n{sciezka_pliku}"
   # Tłumacz AI
   ai_init:               "Inicjowanie tłumaczenia…"
+  # Paski postępu silnika tłumacza (tlumacz_ai.py — mostek i18n InfoPostepu)
+  ai_postep_odzysk:          "Wykryto plik zapisu – odtwarzanie opłaconego postępu…"
+  ai_postep_blok_odzyskany:  "Blok {numer}/{ile} odzyskany z pliku zapisu."
+  ai_postep_blok:            "Tłumaczenie bloku {numer} z {ile}… ({znaki} znaków)"
+  ai_postep_iso:             "Generowanie tagu językowego dla czytników ekranu…"
+  ai_postep_zapis:           "Zapis pliku wynikowego…"
   ai_zakonczone_tytul:   "Sukces"
   ai_zakonczone_tresc:   "Tłumaczenie ukończone!\n\nPlik zapisany jako:\n{sciezka_pliku}"
   ai_blad_zapisu:        "Błąd zapisu pliku wynikowego:\n{tresc_bledu}"

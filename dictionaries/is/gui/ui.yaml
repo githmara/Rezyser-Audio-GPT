@@ -802,6 +802,11 @@ poliglota:
 # -----------------------------------------------------------------------------
 # KONWERTER – panel modułu Konwerter (gui_konwerter.py)
 # -----------------------------------------------------------------------------
+  ai_postep_odzysk: Vistunarskrá fannst – endurheimt greiddrar framvindu…
+  ai_postep_blok_odzyskany: Blokk {numer}/{ile} endurheimt úr vistunarskrá.
+  ai_postep_blok: Þýðing á blokk {numer} frá {ile}… ({znaki} stafir)
+  ai_postep_iso: Búa til tungumálamerki fyrir skjálesara…
+  ai_postep_zapis: Vista niðurstöðuskrá…
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   heading: "📄  Hljóðbókaarkitekt"

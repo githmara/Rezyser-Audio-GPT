@@ -802,6 +802,11 @@ poliglota:
 # -----------------------------------------------------------------------------
 # KONWERTER – panel modułu Konwerter (gui_konwerter.py)
 # -----------------------------------------------------------------------------
+  ai_postep_odzysk: Speicherdatei erkannt – Wiederherstellung des bezahlten Fortschritts…
+  ai_postep_blok_odzyskany: Block {numer}/{ile} aus der Speicherdatei wiederhergestellt.
+  ai_postep_blok: Übersetzung des Blocks {numer} von {ile}… ({znaki} Zeichen)
+  ai_postep_iso: Generierung des Sprach-Tags für Bildschirmleser…
+  ai_postep_zapis: Ergebnisdatei wird gespeichert…
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   heading: "📄  Hörbucharchitekt"

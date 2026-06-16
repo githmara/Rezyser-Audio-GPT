@@ -835,8 +835,11 @@ class PoliglotaPanel(wx.Panel):
                    target_lang: str, runtime_dir: str) -> None:
         """Wątek tła – żaden bezpośredni wx.* (tylko przez wx.CallAfter!)."""
 
-        def _cb_postep(msg: str, pct: int) -> None:
-            wx.CallAfter(self._update_progress_label, msg, pct)
+        def _cb_postep(info: tlumacz_ai.InfoPostepu) -> None:
+            # InfoPostepu → natywny pasek z `poliglota.<klucz>` (mostek i18n,
+            # jak przy błędach); `kwargs` podstawia {numer}/{ile}/{znaki}.
+            wx.CallAfter(self._update_progress_label,
+                         t(f"poliglota.{info.klucz_i18n}", **info.kwargs), info.procent)
 
         def _cb_blad_kryt(info: tlumacz_ai.InfoBleduTlumaczenia, partial: str) -> None:
             # Typowany błąd → natywny komunikat z `poliglota.<klucz>`; pusty klucz

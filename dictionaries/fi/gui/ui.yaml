@@ -800,6 +800,11 @@ poliglota:
 # -----------------------------------------------------------------------------
 # KONWERTER – panel modułu Konwerter (gui_konwerter.py)
 # -----------------------------------------------------------------------------
+  ai_postep_odzysk: Tallennustiedosto havaittu – maksetun edistyksen palauttaminen…
+  ai_postep_blok_odzyskany: Lohko {numer}/{ile} palautettu tallennustiedostosta.
+  ai_postep_blok: Käännetään lohkoa {numer}/{ile}… ({znaki} merkkiä)
+  ai_postep_iso: Kielitunnisteen luominen ruudunlukijoille…
+  ai_postep_zapis: Tulostiedoston tallentaminen…
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   heading: "📄  Äänikirja-arkkitehti"
