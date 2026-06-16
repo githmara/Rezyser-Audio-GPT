@@ -53,6 +53,10 @@ dist/
 # User-data: powstaje obok exe u końcowego użytkownika, nie w repo.
 error_log.txt
 
+# Changelog NOWEJ wersji zapisywany przy aktualizacji (DialogAktualizacji →
+# docs/changelog.md, z `body` Release). User-data: powstaje obok exe, nie w repo.
+docs/changelog.md
+
 
 # --- USTAWIENIA EDYTORA ---
 .vscode/

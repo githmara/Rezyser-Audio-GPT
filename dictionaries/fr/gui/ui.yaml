@@ -1128,10 +1128,12 @@ updater:
 
     {url_release}
 
-  co_nowego_naglowek: 'Quoi de neuf dans la version {nowa_wersja} :'
-  co_nowego_tresc: "Cette version est une continuation du nettoyage sous le capot — suite du nettoyage de la version précédente, cette fois dans la couche AI du mode Réalisateur. Le changement le plus notable : l'outil « Attribuer des Titres aux Chapitres » affiche désormais une barre de progression et des messages d'erreur dans la langue de l'interface (auparavant, ils étaient codés en polonais). Les autres changements sont invisibles dans l'utilisation quotidienne — réorganisation du contexte envoyé à l'AI, afin que dans les projets dans d'autres langues, le polonais ne fuite pas. Pas de changements dans la manière d'écrire des histoires et des scénarios."
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
+  changelog_uwaga: Le journal des modifications de la nouvelle version s'ouvrira sous forme de fichier docs/changelog.md. Il est en anglais et en polonais — si vous préférez une autre langue, chargez ce fichier dans le module Polyglotte (Traducteur AI) ou tout autre traducteur ou chatbot.
+  changelog_naglowek: '# Quoi de neuf dans la version {nowa_wersja}'
+  changelog_blad: "Impossible d'enregistrer ou d'ouvrir le fichier du journal des modifications :\n{sciezka}\n\n{tresc_bledu}"
+  btn_changelog: 📄 &Journal des modifications de la version {nowa_wersja}
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Panneau d'Histoires"

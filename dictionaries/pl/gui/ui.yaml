@@ -1137,17 +1137,20 @@ updater:
     UWAGA: jeśli edytowałeś własne reguły fonetyczne lub szyfry w katalogu „dictionaries/" przez Menedżera Reguł, instalator nadpisze je domyślnymi wersjami z pakietu. Zrób kopię zapasową katalogu „dictionaries/" PRZED potwierdzeniem aktualizacji — kliknij przycisk „Otwórz folder dictionaries", żeby przejść tam w Eksploratorze, skopiuj cały folder w bezpieczne miejsce, a po aktualizacji odzyskaj swoje pliki z kopii.
 
     Czy chcesz pobrać i zainstalować aktualizację teraz?
-  # v17.6: „Co nowego" w DialogAktualizacji — krótka, NIETECHNICZNA treść o bieżącym
-  # wydaniu, nadpisywana co wydanie, tłumaczona autotłumaczem ui. Domyka lukę
-  # „user aktualizuje na ślepo". Pełna strona wydania (GitHub) jest po polsku —
-  # mówimy o tym wprost (co_nowego_online_pl), bo GitHub i tak wymusza ISO=en
-  # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
-  co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
-  co_nowego_tresc: |-
-    To wydanie to dalsze porządki pod maską — kontynuacja czyszczenia z poprzedniej wersji, tym razem w warstwie AI trybu Reżysera. Najbardziej zauważalna zmiana: narzędzie „Nadaj Tytuły Rozdziałom" pokazuje teraz pasek postępu i komunikaty błędów w języku interfejsu (wcześniej były zaszyte po polsku). Pozostałe zmiany są niewidoczne w codziennym użyciu — uporządkowanie kontekstu wysyłanego do AI, tak by w projektach w innych językach nie przeciekał polski. Bez zmian w sposobie pisania historii i scenariuszy.
+  # v17.11: changelog NOWEJ wersji w DialogAktualizacji. Surowy `body` Release
+  # (= sekcja RELEASE_NOTES tej wersji, pobrana z GitHub API) zapisywany do
+  # docs/changelog.md i otwierany przyciskiem domyślnym edytorem. Do v17.11 był
+  # tu baked-in `co_nowego_tresc` opisujący wersję JUŻ ZAINSTALOWANĄ — nagłówek
+  # mówił o nowej, treść była stara (krytyczny bug, usunięty). Body jest EN+PL —
+  # changelog_uwaga kieruje nie-PL/EN usera do Poligloty/dowolnego tłumacza.
+  # Literał „docs/changelog.md" zostaw 1:1 we wszystkich językach (ścieżka pliku).
+  changelog_uwaga:          "Changelog nowej wersji otworzy się jako plik docs/changelog.md. Jest po angielsku i polsku — jeśli wolisz inny język, wczytaj ten plik do modułu Poliglota (Tłumacz AI) albo dowolnego tłumacza lub chatbota."
+  changelog_naglowek:       "# Co nowego w wersji {nowa_wersja}"
+  changelog_blad:           "Nie udało się zapisać lub otworzyć pliku changelogu:\n{sciezka}\n\n{tresc_bledu}"
   co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
   btn_szczegoly_online:     "&Szczegóły online"
-  # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)
+  # Przyciski w DialogAktualizacji (akceleratory: &P, &C, &O, &A, &S — bez kolizji wewnątrz dialogu)
+  btn_changelog:            "📄 &Changelog wersji {nowa_wersja}"
   btn_pobierz:              "&Pobierz i zainstaluj"
   btn_otworz_dictionaries:  "&Otwórz folder dictionaries"
   btn_anuluj:               "&Anuluj"

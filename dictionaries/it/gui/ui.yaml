@@ -1135,10 +1135,12 @@ updater:
 
     {url_release}
 
-  co_nowego_naglowek: 'Novità nella versione {nowa_wersja}:'
-  co_nowego_tresc: "Questa edizione è un ulteriore lavoro di pulizia sotto il cofano — continuazione della pulizia dalla versione precedente, questa volta nello strato AI della modalità Regista. Il cambiamento più evidente: lo strumento \"Assegna Titoli ai Capitoli\" ora mostra la barra di avanzamento e i messaggi di errore nella lingua dell'interfaccia (prima erano codificati in polacco). Gli altri cambiamenti sono invisibili nell'uso quotidiano — organizzazione del contesto inviato all'AI, in modo che nei progetti in altre lingue non trapeli il polacco. Nessun cambiamento nel modo di scrivere storie e sceneggiature."
   co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
   btn_szczegoly_online: '&Dettagli online'
+  changelog_uwaga: Il changelog della nuova versione si aprirà come file docs/changelog.md. È in inglese e polacco — se preferisci un'altra lingua, carica questo file nel modulo Poliglotta (Traduttore AI) o in qualsiasi traduttore o chatbot.
+  changelog_naglowek: "# Cosa c'è di nuovo nella versione {nowa_wersja}"
+  changelog_blad: "Impossibile salvare o aprire il file del changelog:\n{sciezka}\n\n{tresc_bledu}"
+  btn_changelog: 📄 &Changelog della versione {nowa_wersja}
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Pannello delle Storie"

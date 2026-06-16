@@ -1136,10 +1136,12 @@ updater:
 
     {url_release}
 
-  co_nowego_naglowek: "What's new in version {nowa_wersja}:"
-  co_nowego_tresc: 'This release focuses on further under-the-hood improvements — a continuation of the cleanup from the previous version, this time in the AI layer of Director Mode. The most noticeable change: the "Assign Chapter Titles" tool now displays a progress bar and error messages in the interface language (previously they were hardcoded in Polish). Other changes are invisible in daily use — organizing the context sent to the AI to prevent Polish from leaking into projects in other languages. No changes in the way stories and scripts are written.'
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
+  changelog_uwaga: The changelog of the new version will open as the file docs/changelog.md. It is in English and Polish — if you prefer another language, load this file into the Polyglot module (AI Translator) or any translator or chatbot.
+  changelog_naglowek: "# What's new in version {nowa_wersja}"
+  changelog_blad: "Failed to save or open the changelog file:\n{sciezka}\n\n{tresc_bledu}"
+  btn_changelog: 📄 Version &Changelog {nowa_wersja}
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Story Panel"

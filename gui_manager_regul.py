@@ -27,9 +27,7 @@ tekst widoczny dla użytkownika przechodzi przez :mod:`i18n` (klucze
 from __future__ import annotations
 
 import os
-import platform
 import re
-import subprocess
 
 import wx
 
@@ -83,18 +81,12 @@ def _etykieta_kategorii(kat: str) -> str:
 def _otworz_w_edytorze_tekstu(parent: wx.Window, sciezka: str) -> None:
     """Otwiera plik w domyślnym edytorze tekstu systemu.
 
-    Identyczna logika jak :meth:`main.HomePanel._on_action_btn` dla
-    ``golden_key.env`` – ``os.startfile`` na Windows, ``open`` na macOS,
-    ``xdg-open`` na Linuksie. Przy błędzie pokazuje ``wx.MessageBox`` ze
-    ścieżką, żeby użytkownik mógł otworzyć plik ręcznie.
+    Deleguje do wspólnego :func:`sciezki.otworz_w_systemie` (cross-platform).
+    Przy błędzie pokazuje ``wx.MessageBox`` ze ścieżką, żeby użytkownik mógł
+    otworzyć plik ręcznie.
     """
     try:
-        if platform.system() == "Windows":
-            os.startfile(sciezka)                              # noqa: S606
-        elif platform.system() == "Darwin":
-            subprocess.Popen(["open", sciezka])                # noqa: S603,S607
-        else:
-            subprocess.Popen(["xdg-open", sciezka])            # noqa: S603,S607
+        sciezki.otworz_w_systemie(sciezka)
     except Exception as exc:                                    # noqa: BLE001
         wx.MessageBox(
             t(

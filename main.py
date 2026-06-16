@@ -136,19 +136,23 @@ def _pokaz_dialog_crash(sciezka_logu: str | None) -> None:
 
     # Preferujemy wx (spójny wygląd, dostępny dla NVDA), ale gdy crash nastąpił
     # PRZED utworzeniem wx.App, wx.MessageBox by sam rzucił — wtedy natywny
-    # MessageBox WinAPI przez ctypes. Aplikacja jest Windows-only (build_release
-    # + installer.iss), więc ctypes.windll jest zawsze dostępne.
+    # MessageBox WinAPI przez ctypes. Zamrożony release jest Windows-only
+    # (build_release + installer.iss), więc tam `ctypes.windll` jest zawsze
+    # dostępne; przy uruchomieniu ZE ŹRÓDŁA na Linux/macOS (`setup_dev.sh`)
+    # `windll` nie istnieje — wtedy pomijamy fallback (log + traceback na stderr
+    # z poprzedniego hooka i tak poszły), zamiast polegać na łapaniu wyjątku.
     try:
         if wx.GetApp() is not None:
             wx.MessageBox(tresc, tytul, wx.OK | wx.ICON_ERROR)
             return
     except Exception:  # noqa: BLE001 — spadamy do natywnego fallbacku
         pass
-    try:
-        import ctypes  # noqa: PLC0415
-        ctypes.windll.user32.MessageBoxW(0, tresc, tytul, 0x10)  # MB_ICONERROR
-    except Exception:  # noqa: BLE001 — nie mamy już jak pokazać dialogu
-        pass
+    if sys.platform == "win32":
+        try:
+            import ctypes  # noqa: PLC0415
+            ctypes.windll.user32.MessageBoxW(0, tresc, tytul, 0x10)  # MB_ICONERROR
+        except Exception:  # noqa: BLE001 — nie mamy już jak pokazać dialogu
+            pass
 
 
 def _zainstaluj_obsluge_bledow() -> None:
@@ -608,14 +612,9 @@ class HomePanel(wx.Panel):
             self._action_btn.Hide()
             self.Layout()
 
-        # Otwórz plik w domyślnym edytorze tekstu (cross-platform)
+        # Otwórz plik w domyślnym edytorze tekstu (cross-platform helper)
         try:
-            if platform.system() == "Windows":
-                os.startfile(env_path)          # otworzy Notatnik lub inny domyślny edytor
-            elif platform.system() == "Darwin":
-                subprocess.Popen(["open", env_path])
-            else:
-                subprocess.Popen(["xdg-open", env_path])   # Linux + Orca itp.
+            sciezki.otworz_w_systemie(env_path)
         except Exception:  # noqa: BLE001
             wx.MessageBox(
                 t("home.blad_otwarcia_pliku_tresc", sciezka_pliku=env_path),
@@ -670,17 +669,19 @@ class DialogAktualizacji(wx.Dialog):
         tresc_ctrl.Wrap(560)
         sizer.Add(tresc_ctrl, proportion=1, flag=wx.ALL | wx.EXPAND, border=12)
 
-        # v17.6: „Co nowego" — krótka, nietechniczna treść o bieżącym wydaniu w
-        # języku użytkownika (domyka „aktualizacja na ślepo"). Pełna strona online
-        # jest po polsku — mówimy o tym wprost (GitHub wymusza ISO=en i nie
-        # zaproponuje nie-polskiemu userowi tłumaczenia strony Release).
-        co_nowego = (
-            t("updater.co_nowego_naglowek", nowa_wersja=info_aktualizacji.wersja)
-            + "\n" + t("updater.co_nowego_tresc")
-        )
-        co_ctrl = wx.StaticText(self, label=co_nowego)
-        co_ctrl.Wrap(560)
-        sizer.Add(co_ctrl, proportion=1, flag=wx.ALL | wx.EXPAND, border=12)
+        # v17.11: realny changelog NOWEJ wersji (`body` Release z API). Do v17.11
+        # dialog pokazywał baked-in `co_nowego_tresc` opisujący wersję JUŻ
+        # zainstalowaną (nagłówek nowej, treść starej — krytyczny bug). Teraz
+        # surowy changelog zapisujemy do `docs/changelog.md` i otwieramy z
+        # przycisku domyślnym edytorem (cross-platform). Body jest EN+PL — nota
+        # podpowiada nie-PL/EN userowi, by przetłumaczył plik w module Poliglota
+        # (Tłumacz AI) lub dowolnym tłumaczu/chatbocie. Świadoma decyzja o update.
+        self._changelog = (getattr(info_aktualizacji, "changelog", "") or "").strip()
+        self._nowa_wersja = info_aktualizacji.wersja
+        if self._changelog:
+            changelog_uwaga = wx.StaticText(self, label=t("updater.changelog_uwaga"))
+            changelog_uwaga.Wrap(560)
+            sizer.Add(changelog_uwaga, flag=wx.LEFT | wx.RIGHT | wx.TOP, border=12)
 
         if self._url_release:
             uwaga_ctrl = wx.StaticText(self, label=t("updater.co_nowego_online_pl"))
@@ -702,6 +703,14 @@ class DialogAktualizacji(wx.Dialog):
         self._btn_anuluj = wx.Button(self, wx.ID_NO, t("updater.btn_anuluj"))
 
         btn_sizer.Add(self._btn_pobierz, flag=wx.ALL, border=6)
+        # „Pokaż changelog" — zapis docs/changelog.md + otwarcie (tylko gdy mamy body).
+        if self._changelog:
+            self._btn_changelog = wx.Button(
+                self, wx.ID_ANY,
+                t("updater.btn_changelog", nowa_wersja=info_aktualizacji.wersja),
+            )
+            self._btn_changelog.Bind(wx.EVT_BUTTON, self._on_pokaz_changelog)
+            btn_sizer.Add(self._btn_changelog, flag=wx.ALL, border=6)
         btn_sizer.Add(self._btn_otworz, flag=wx.ALL, border=6)
         # „Szczegóły online" tylko gdy znamy URL strony Release.
         if self._url_release:
@@ -718,6 +727,29 @@ class DialogAktualizacji(wx.Dialog):
         self.SetMinSize((600, -1))
         self._btn_pobierz.SetFocus()
 
+    def _on_pokaz_changelog(self, _event):
+        """Zapisuje surowy changelog NOWEJ wersji do docs/changelog.md i otwiera go.
+
+        Plik `.md` (rozszerzenie celowo — czytelne, edytor je otworzy) user może
+        wczytać do modułu Poliglota (Tłumacz AI) albo dowolnego tłumacza/chatbota,
+        jeśli nie zna PL/EN. Dialog pozostaje otwarty; po side-effekcie otwarcia
+        przywracamy fokus na „Pobierz" (ten sam wzorzec co `_on_otworz_folder`)."""
+        plik = sciezki.KATALOG_BAZOWY / "docs" / "changelog.md"
+        try:
+            plik.parent.mkdir(parents=True, exist_ok=True)
+            naglowek = t("updater.changelog_naglowek", nowa_wersja=self._nowa_wersja)
+            plik.write_text(naglowek + "\n\n" + self._changelog + "\n",
+                            encoding="utf-8")
+            sciezki.otworz_w_systemie(plik)
+        except Exception as exc:  # noqa: BLE001
+            wx.MessageBox(
+                t("updater.changelog_blad", sciezka=str(plik), tresc_bledu=str(exc)),
+                t("updater.blad_pobierania_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+        wx.CallAfter(self._btn_pobierz.SetFocus)
+
     def _on_otworz_folder(self, _event):
         """Cross-platform open dictionaries/ folder; dialog pozostaje otwarty.
 
@@ -733,12 +765,7 @@ class DialogAktualizacji(wx.Dialog):
         NVDA-wxPython community jako „fokus-anker-muster nach side-effect".
         """
         try:
-            if platform.system() == "Windows":
-                os.startfile(self._dictionaries_path)  # noqa: S606
-            elif platform.system() == "Darwin":
-                subprocess.Popen(["open", self._dictionaries_path])
-            else:
-                subprocess.Popen(["xdg-open", self._dictionaries_path])
+            sciezki.otworz_w_systemie(self._dictionaries_path)
         except Exception as exc:  # noqa: BLE001
             wx.MessageBox(
                 t("updater.blad_otworz_folder",
@@ -1180,11 +1207,18 @@ class MainFrame(wx.Frame):
                 self,
             )
             return
-        # os.startfile = Windows shell association (.txt → Notatnik / VS Code
-        # / co użytkownik ma skojarzone). Aplikacja jest Windows-only
-        # (build_release.py + installer.iss), więc bez multiplatformowych
-        # rozgałęzień subprocess.run / xdg-open.
-        os.startfile(str(sciezka))
+        # Otwórz docs/<rdzen>.<iso>.txt domyślną aplikacją (cross-platform helper).
+        # Wcześniej był tu goły `os.startfile` z komentarzem „Windows-only" —
+        # niespójne ze źródłem chodzącym też na Linux/macOS (`setup_dev.sh`).
+        try:
+            sciezki.otworz_w_systemie(sciezka)
+        except Exception:  # noqa: BLE001
+            wx.MessageBox(
+                t("main.pomoc.brak_pliku", sciezka=str(sciezka)),
+                t("main.pomoc.blad_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
 
     # ------------------------------------------------------------------
     # Auto-aktualizacja

@@ -56,6 +56,13 @@ class UpdateInfo:
     rozmiar_bajtow: int      # 0 jeśli GitHub nie podał Content-Length
     url_release: str = ""    # (v17.6) strona Release na GitHubie (html_url) —
                              # „Szczegóły online" w DialogAktualizacji. Treść po PL.
+    changelog: str = ""      # (v17.11) treść Release (`body` z API) = sekcja
+                             # `RELEASE_NOTES ## <wersja>` NOWEJ wersji. Realny
+                             # changelog do świadomej decyzji o aktualizacji —
+                             # zapisywany do `docs/changelog.md` i otwierany z
+                             # dialogu. Do v17.11 dialog pokazywał baked-in opis
+                             # wersji JUŻ zainstalowanej (bug: nagłówek nowej,
+                             # treść starej). EN-lead + PL (format RELEASE_NOTES).
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +173,7 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
             nazwa_pliku=asset["name"],
             rozmiar_bajtow=asset.get("size", 0),
             url_release=dane.get("html_url", ""),
+            changelog=(dane.get("body") or "").strip(),
         )
 
     except (HTTPError, URLError, OSError, KeyError, ValueError):

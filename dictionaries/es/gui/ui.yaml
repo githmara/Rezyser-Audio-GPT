@@ -1134,10 +1134,12 @@ updater:
 
     {url_release}
 
-  co_nowego_naglowek: 'Novedades en la versión {nowa_wersja}:'
-  co_nowego_tresc: 'Esta edición es una continuación de la limpieza bajo el capó — continuación de la limpieza de la versión anterior, esta vez en la capa de IA del modo Director. El cambio más notable: la herramienta "Asignar Títulos a los Capítulos" ahora muestra una barra de progreso y mensajes de error en el idioma de la interfaz (anteriormente estaban incrustados en polaco). Los demás cambios son invisibles en el uso diario — organización del contexto enviado a la IA, para que en proyectos en otros idiomas no se filtre el polaco. Sin cambios en la forma de escribir historias y guiones.'
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
+  changelog_uwaga: El registro de cambios de la nueva versión se abrirá como el archivo docs/changelog.md. Está en inglés y polaco; si prefieres otro idioma, carga este archivo en el módulo Políglota (Traductor AI) o cualquier traductor o chatbot.
+  changelog_naglowek: '# Novedades en la versión {nowa_wersja}'
+  changelog_blad: "No se pudo guardar o abrir el archivo del registro de cambios:\n{sciezka}\n\n{tresc_bledu}"
+  btn_changelog: 📄 &Registro de cambios de la versión {nowa_wersja}
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Panel de Historias"

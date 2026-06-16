@@ -1133,10 +1133,12 @@ updater:
 
     {url_release}
 
-  co_nowego_naglowek: 'Mitä uutta versiossa {nowa_wersja}:'
-  co_nowego_tresc: 'Tämä julkaisu on jatkoa kulissien takaiselle siivoukselle — edellisen version siivouksen jatko, tällä kertaa Ohjaajan tilan AI-kerroksessa. Huomattavin muutos: työkalu "Anna Luvuille Otsikot" näyttää nyt edistymispalkin ja virheilmoitukset käyttöliittymän kielellä (aikaisemmin ne olivat kovakoodattu puolaksi). Muut muutokset ovat näkymättömiä päivittäisessä käytössä — AI:lle lähetetyn kontekstin järjestäminen siten, että muilla kielillä olevissa projekteissa ei vuoda puolaa. Ei muutoksia tarinoiden ja käsikirjoitusten kirjoittamistapaan.'
   co_nowego_online_pl: Julkaisun koko sivu (verkossa) on saatavilla puolaksi.
   btn_szczegoly_online: '&Yksityiskohdat verkossa'
+  changelog_uwaga: Changelog uuden version avautuu tiedostona docs/changelog.md. Se on englanniksi ja puolaksi — jos haluat toisen kielen, lataa tämä tiedosto Polyglot-paneeliin (AI-kääntäjä) tai mihin tahansa kääntäjään tai chatbotiin.
+  changelog_naglowek: '# Mitä uutta versiossa {nowa_wersja}'
+  changelog_blad: "Tiedoston changelog tallentaminen tai avaaminen epäonnistui:\n{sciezka}\n\n{tresc_bledu}"
+  btn_changelog: 📄 &Version changelog {nowa_wersja}
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Tarina-paneeli"

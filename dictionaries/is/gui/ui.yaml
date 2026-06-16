@@ -1135,10 +1135,12 @@ updater:
 
     {url_release}
 
-  co_nowego_naglowek: 'Hvað er nýtt í útgáfu {nowa_wersja}:'
-  co_nowego_tresc: 'Þessi útgáfa er frekari hreinsun undir húddinu — framhald af hreinsuninni frá fyrri útgáfu, að þessu sinni í AI laginu í Leikstjórastillingu. Mest áberandi breytingin: tólið „Gefðu köflum titla" sýnir nú framvindustiku og villuskilaboð á viðmótstungumálinu (áður voru þau föst á pólsku). Aðrar breytingar eru ósýnilegar í daglegri notkun — skipulagning á samhengi sem sent er til AI, þannig að pólskan leki ekki í verkefnum á öðrum tungumálum. Engar breytingar á því hvernig sögur og handrit eru skrifuð.'
   co_nowego_online_pl: Heill útgáfusíða (á netinu) er fáanleg á pólsku.
   btn_szczegoly_online: '&Upplýsingar á netinu'
+  changelog_uwaga: Changelog nýrrar útgáfu opnast sem skrá docs/changelog.md. Það er á ensku og pólsku — ef þú vilt annað tungumál, hlaðið þessari skrá inn í AI Fjöltyngispanel (AI þýðandi) eða hvaða þýðanda eða spjallmenni sem er.
+  changelog_naglowek: '# Hvað er nýtt í útgáfu {nowa_wersja}'
+  changelog_blad: "Ekki tókst að vista eða opna changelog skrána:\n{sciezka}\n\n{tresc_bledu}"
+  btn_changelog: 📄 &Changelog útgáfu {nowa_wersja}
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Sögupanel"

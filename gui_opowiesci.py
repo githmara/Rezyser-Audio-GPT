@@ -35,8 +35,6 @@ from __future__ import annotations
 
 import json
 import os
-import platform
-import subprocess
 import threading
 from typing import Any
 
@@ -1616,12 +1614,7 @@ class OpowiesciPanel(wx.Panel):
         if odp != wx.YES:
             return
         try:
-            if platform.system() == "Windows":
-                os.startfile(sciezka)                              # noqa: S606
-            elif platform.system() == "Darwin":
-                subprocess.Popen(["open", sciezka])                # noqa: S603,S607
-            else:
-                subprocess.Popen(["xdg-open", sciezka])            # noqa: S603,S607
+            sciezki.otworz_w_systemie(sciezka)
         except Exception as exc:                                    # noqa: BLE001
             wx.MessageBox(
                 t(

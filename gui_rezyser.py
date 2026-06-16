@@ -36,8 +36,6 @@ from __future__ import annotations
 
 import json
 import os
-import platform
-import subprocess
 import threading
 
 import openai
@@ -2957,19 +2955,12 @@ class RezyserPanel(wx.Panel):
     def _otworz_w_edytorze(self, sciezka: str) -> None:
         """Otwiera plik w domyślnym edytorze tekstu systemu.
 
-        Wzorzec identyczny do `gui_manager_regul._otworz_w_edytorze_tekstu`
-        i `main.HomePanel._on_action_btn` dla `golden_key.env`:
-        Windows → `os.startfile`, macOS → `open`, Linux → `xdg-open`.
-        Przy błędzie pokazujemy MessageBox ze ścieżką, żeby gracz mógł
-        otworzyć plik manualnie z Eksploratora.
+        Deleguje do wspólnego :func:`sciezki.otworz_w_systemie` (cross-platform).
+        Przy błędzie pokazujemy MessageBox ze ścieżką, żeby gracz mógł otworzyć
+        plik manualnie z Eksploratora.
         """
         try:
-            if platform.system() == "Windows":
-                os.startfile(sciezka)                              # noqa: S606
-            elif platform.system() == "Darwin":
-                subprocess.Popen(["open", sciezka])                # noqa: S603,S607
-            else:
-                subprocess.Popen(["xdg-open", sciezka])            # noqa: S603,S607
+            sciezki.otworz_w_systemie(sciezka)
         except Exception as exc:                                    # noqa: BLE001
             wx.MessageBox(
                 t(
