@@ -38,6 +38,8 @@ import re
 import smtplib
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from email.message import EmailMessage
 
 from lingua import Language, LanguageDetectorBuilder
@@ -316,6 +318,121 @@ def _przepuszczalne(labels_csv: str) -> tuple[bool, list[str]]:
     return True, labels
 
 
+# --- Pobieranie treści ZAŁĄCZONYCH plików (od v17.11.2) --------------------
+# GitHub NIE wkleja treści załącznika do `body` issue — wstawia tylko link
+# markdown `[error_log.txt](https://github.com/user-attachments/files/…)`. Bez
+# pobrania tej treści LLM (gpt-4o-mini) dostaje sam URL, którego NIE odwiedzi,
+# więc crash zgłoszony przez ZAŁĄCZENIE pliku (a dialog crashu w aplikacji
+# wprost do tego zachęca: „ZAŁĄCZ ten plik") dawałby pusty prompt do Centrum
+# („Zgłoszenie wymaga doprecyzowania") + wesoły komentarz Sami = rozczarowany
+# user. Dlatego runner Actions (pełny internet + GITHUB_TOKEN) pobiera tekstowe
+# załączniki i inline'uje je do promptu LLM ORAZ do maila. Repo PUBLICZNE →
+# zwykły GET wystarcza; token dokładamy jako nagłówek-fallback (nieszkodliwy
+# przy publicznym, ratuje gdyby asset kiedyś wymagał auth). Patrz [[reguly_github_bot]].
+
+# Rozszerzenia, których treść umiemy sensownie inline'ować (tekstowe).
+_ZALACZNIK_TEKST_EXT = (
+    ".txt", ".log", ".md", ".json", ".yaml", ".yml", ".csv", ".ini",
+    ".cfg", ".py", ".traceback", ".out", ".err",
+)
+# Wzorzec URL-a załącznika GitHub (odróżnia od zwykłego linku w prozie usera).
+_ZALACZNIK_URL = re.compile(
+    r"https?://("
+    r"github\.com/user-attachments/[^\s)]+"          # nowy format (files/ i assets/)
+    r"|github\.com/[^\s)]+/files/[^\s)]+"             # legacy [owner]/[repo]/files/id/nazwa
+    r"|[a-z0-9.-]*githubusercontent\.com/[^\s)]+"     # CDN (user-images, objects)
+    r")",
+    re.IGNORECASE,
+)
+_ZALACZNIK_MAX_BAJTY = 60_000        # cap na pojedynczy plik (ochrona maila + LLM)
+_ZALACZNIK_LIMIT_PLIKOW = 5          # max liczba pobieranych załączników
+
+
+def _wykryj_linki_zalacznikow(issue_body: str) -> list[tuple[str, str]]:
+    """Zwraca [(nazwa, url)] dla linków wskazujących na załączniki GitHub.
+
+    Skanuje linki markdown `[label](url)` / `![label](url)` ORAZ gołe URL-e.
+    `nazwa` = etykieta markdown albo ostatni segment ścieżki URL. Dedup po URL.
+    """
+    if not issue_body:
+        return []
+    znalezione: list[tuple[str, str]] = []
+    widziane: set[str] = set()
+
+    def _dodaj(nazwa: str, url: str) -> None:
+        url = url.rstrip(").,;")
+        if url in widziane or not _ZALACZNIK_URL.match(url):
+            return
+        widziane.add(url)
+        nazwa = (nazwa or url.rsplit("/", 1)[-1]).strip()
+        znalezione.append((nazwa, url))
+
+    for m in re.finditer(r"!?\[([^\]]*)\]\((https?://[^)\s]+)\)", issue_body):
+        _dodaj(m.group(1), m.group(2))
+    for m in _ZALACZNIK_URL.finditer(issue_body):
+        _dodaj("", m.group(0))
+    return znalezione
+
+
+def _czy_tekstowy(nazwa: str, url: str) -> bool:
+    """Czy załącznik ma rozszerzenie tekstowe (po nazwie markdown albo URL-u)?"""
+    cel = (nazwa or url).lower().rsplit("/", 1)[-1].split("?")[0]
+    return cel.endswith(_ZALACZNIK_TEKST_EXT)
+
+
+def _pobierz_zalacznik(url: str) -> tuple[str | None, str | None]:
+    """GET treści załącznika. Zwraca (tekst, błąd) — dokładnie jedno jest None.
+
+    Cap na `_ZALACZNIK_MAX_BAJTY` (czytamy +1 bajt, żeby wykryć obcięcie).
+    Token GH dokładamy jako nagłówek-fallback (repo publiczne → i tak zbędny).
+    """
+    naglowki = {"User-Agent": "RezyserAudio-Sami-intake"}
+    token = os.environ.get("GH_TOKEN", "").strip()
+    if token:
+        naglowki["Authorization"] = f"Bearer {token}"
+    req = urllib.request.Request(url, headers=naglowki)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            surowe = resp.read(_ZALACZNIK_MAX_BAJTY + 1)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return None, f"pobranie nie powiodło się ({exc})"
+    obciete = len(surowe) > _ZALACZNIK_MAX_BAJTY
+    tekst = surowe[:_ZALACZNIK_MAX_BAJTY].decode("utf-8", errors="replace").strip()
+    if obciete:
+        tekst += "\n…[treść obcięta przez Sami do limitu]"
+    return (tekst or "(plik pusty)"), None
+
+
+def _zbierz_tresc_zalacznikow(issue_body: str) -> str:
+    """Blok z treścią pobranych załączników (lub notatkami). '' gdy brak linków.
+
+    Tekstowe pobiera i inline'uje; nietekstowe (obrazy/zip) tylko WYMIENIA, żeby
+    Centrum wiedziało, że trzeba je obejrzeć ręcznie. Nigdy nie rzuca — błąd
+    pobrania ląduje jako notatka przy linku (graceful degradation).
+    """
+    linki = _wykryj_linki_zalacznikow(issue_body)
+    if not linki:
+        return ""
+    sekcje: list[str] = []
+    pobrane = 0
+    for nazwa, url in linki:
+        if not _czy_tekstowy(nazwa, url):
+            sekcje.append(f"### {nazwa} (nietekstowy — nie pobrano, obejrzyj ręcznie)\n{url}")
+            continue
+        if pobrane >= _ZALACZNIK_LIMIT_PLIKOW:
+            sekcje.append(
+                f"### {nazwa} (pominięto — limit {_ZALACZNIK_LIMIT_PLIKOW} plików)\n{url}"
+            )
+            continue
+        pobrane += 1
+        tekst, blad = _pobierz_zalacznik(url)
+        if blad:
+            sekcje.append(f"### {nazwa} ({blad})\n{url}")
+        else:
+            sekcje.append(f"### {nazwa}\n{url}\n---\n{tekst}")
+    return "\n\n".join(sekcje)
+
+
 def _przeredaguj_z_openai(
     title: str, body: str, labels: list[str]
 ) -> tuple[str, bool]:
@@ -523,11 +640,31 @@ def main() -> int:
         return 1
     recipient = os.environ.get("MAINTAINER_EMAIL", "").strip() or smtp_user
 
-    prompt_tresc, czy_llm = _przeredaguj_z_openai(title, body, labels)
+    # Pobierz treść załączonych plików (GitHub trzyma w body tylko link) —
+    # inline'ujemy do promptu LLM, żeby gpt-4o-mini miał na czym pracować, oraz
+    # do maila, żeby Centrum widziało log bez ręcznego klikania w URL.
+    zalaczniki_tresc = _zbierz_tresc_zalacznikow(body)
+    if zalaczniki_tresc:
+        print(f"Sami pobrała załączniki issue #{number} ({len(zalaczniki_tresc)} znaków).")
+        body_dla_llm = (
+            f"{body}\n\n"
+            "# Treść załączonych plików (pobrana przez Sami — NIE była w body issue)\n"
+            f"{zalaczniki_tresc}"
+        )
+    else:
+        body_dla_llm = body
+
+    prompt_tresc, czy_llm = _przeredaguj_z_openai(title, body_dla_llm, labels)
     marker = "Sami (LLM)" if czy_llm else "Sami (fallback)"
     temat = f"[Reżyser Audio AI][{marker}] Issue #{number}: {title[:80]}"
 
     otwarte = _lista_otwartych_issues()
+
+    blok_zalacznikow = (
+        "\n--- Treść załączników pobrana przez Sami "
+        "(NIE jest częścią body issue) ---\n"
+        f"{zalaczniki_tresc}\n"
+    ) if zalaczniki_tresc else ""
 
     pelna_tresc = (
         f"Ciao Centrum!\n\n"
@@ -543,7 +680,8 @@ def main() -> int:
         "ORYGINALNY TEKST ZGŁOSZENIA (do weryfikacji)\n"
         "=========================================================\n\n"
         f"Tytuł: {title}\n\n"
-        f"{body}\n\n"
+        f"{body}\n"
+        f"{blok_zalacznikow}\n"
         "=========================================================\n"
         "OTWARTE ISSUES W REPO (snapshot z momentu intake)\n"
         "=========================================================\n\n"
