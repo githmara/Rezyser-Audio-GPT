@@ -70,15 +70,27 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
 import jsonschema
 
+import core_poliglota as cp
 import core_rezyser as cr
 import i18n
 import przepisy_rezysera as pr
 from bledy_ai import BladDlugosciOdpowiedzi, BladStrukturyJSON
+
+
+def _dev_log(msg: str) -> None:
+    """Strażowany print diagnostyczny (jak `core_rezyser._dev_log_runtime`) —
+    w paczce release `sys.stdout` bywa None, goły print mógłby ubić apkę."""
+    try:
+        if sys.stdout is not None:
+            print(f"[rezyser_ai] {msg}")
+    except Exception:  # noqa: BLE001 — log dev nigdy nie ubija apki
+        pass
 
 # ``openai`` potrzebne tylko do łapania ``RateLimitError``. Import leniwy
 # wewnątrz funkcji – by testy jednostkowe mogły działać bez SDK, a samo
@@ -463,8 +475,11 @@ def generuj_burze(
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
+    # v17.11.1: osobne budżety prób struktury i języka (patrz generuj_skrypt).
+    proby_struktury = 0
+    jezyk_skorygowano = False
 
-    for proba in range(max_retry + 1):
+    while True:
         # Self-correction: przy retry dodajemy info o poprzednim błędzie
         # walidacji jako system message — model próbuje skorygować strukturę.
         if ostatni_blad is not None:
@@ -486,6 +501,7 @@ def generuj_burze(
             timeout=timeout,
             response_format={"type": "json_object"},
         )
+        ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
         finish = getattr(response.choices[0], "finish_reason", None)
         if finish == "length":
@@ -510,16 +526,21 @@ def generuj_burze(
         try:
             dane = json.loads(surowy_text)
             jsonschema.validate(instance=dane, schema=SCHEMA_BURZA)
-        except json.JSONDecodeError as exc:
-            ostatni_blad = f"JSONDecodeError: {exc.msg}"
-            continue
-        except jsonschema.ValidationError as exc:
+        except (json.JSONDecodeError, jsonschema.ValidationError) as exc:
+            proby_struktury += 1
+            if proby_struktury > max_retry:
+                raise BladStrukturyJSON(
+                    f"The AI returned a malformed JSON structure {max_retry + 1} "
+                    f"times in a row for Brainstorm mode. Last error: {exc}"
+                ) from exc
             ostatni_blad = (
-                f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+                f"JSONDecodeError: {exc.msg}"
+                if isinstance(exc, json.JSONDecodeError)
+                else f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
             )
             continue
 
-        # Sukces — żaden błąd schemy. Mapujemy do dataclassy.
+        # Struktura OK — mapujemy do dataclassy.
         opcje = [
             OpcjaBurzy(
                 tytul=o["tytul"],
@@ -530,6 +551,25 @@ def generuj_burze(
         ]
         streszczenie = (dane.get("streszczenie") or "").strip()
 
+        # v17.11.1 BRAMKA JĘZYKOWA — sklejka WSZYSTKICH wartości narracyjnych
+        # (tytuł + opis + cel sceny + streszczenie) daje Lingui dość tekstu mimo
+        # że pojedyncza opcja bywa krótka. Pewny rozjazd → jeden dodatkowy strzał.
+        wartosci = " ".join(
+            [o.tytul + " " + o.opis + " " + o.cel_sceny for o in opcje] + [streszczenie]
+        )
+        wykryty = _wykryty_inny_jezyk(wartosci, przepis.kod_jezyka)
+        if wykryty and not jezyk_skorygowano:
+            jezyk_skorygowano = True
+            messages.append(
+                _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
+            )
+            continue
+        if wykryty and jezyk_skorygowano:
+            _dev_log(
+                f"Burza: render nadal w '{wykryty}' (oczekiwano "
+                f"'{przepis.kod_jezyka}') po korekcie językowej — przepuszczam."
+            )
+
         return WynikBurzy(
             opcje=opcje,
             streszczenie=streszczenie,
@@ -537,11 +577,6 @@ def generuj_burze(
             uzyty_sufiks=sufiks_nazwa,
             surowy_json=surowy_text,
         )
-
-    raise BladStrukturyJSON(
-        f"The AI returned a malformed JSON structure {max_retry + 1} times in a row "
-        f"for Brainstorm mode. Last error: {ostatni_blad}"
-    )
 
 
 # =============================================================================
@@ -696,8 +731,14 @@ def generuj_skrypt(
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
+    # v17.11.1: dwa NIEZALEŻNE budżety prób — struktury (JSON) i języka (Lingua).
+    # Bramka językowa „resetuje licznik retry" (życzenie usera): rozjazd języka
+    # daje JEDEN dodatkowy strzał, nie zżerając budżetu retry struktury.
+    proby_struktury = 0
+    jezyk_skorygowano = False
+    wywolan = 0
 
-    for proba in range(max_retry + 1):
+    while True:
         if ostatni_blad is not None:
             messages.append({
                 "role": "system",
@@ -717,6 +758,8 @@ def generuj_skrypt(
             timeout=timeout,
             response_format={"type": "json_object"},
         )
+        wywolan += 1
+        ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
         finish = getattr(response.choices[0], "finish_reason", None)
         if finish == "length":
@@ -736,23 +779,48 @@ def generuj_skrypt(
                 odrzucone=True,
                 uzyty_sufiks=sufiks_nazwa,
                 surowy_json=surowy_text,
-                liczba_prob=proba + 1,
+                liczba_prob=wywolan,
             )
 
         try:
             dane = json.loads(surowy_text)
             jsonschema.validate(instance=dane, schema=SCHEMA_SKRYPT)
-        except json.JSONDecodeError as exc:
-            ostatni_blad = f"JSONDecodeError: {exc.msg}"
-            continue
-        except jsonschema.ValidationError as exc:
+        except (json.JSONDecodeError, jsonschema.ValidationError) as exc:
+            proby_struktury += 1
+            if proby_struktury > max_retry:
+                raise BladStrukturyJSON(
+                    f"The AI returned a malformed JSON structure {max_retry + 1} "
+                    f"times in a row for Script mode. Last error: {exc}"
+                ) from exc
             ostatni_blad = (
-                f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+                f"JSONDecodeError: {exc.msg}"
+                if isinstance(exc, json.JSONDecodeError)
+                else f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
             )
             continue
 
-        # Sukces — mapujemy do dataclass, renderujemy, nakładamy akcenty.
+        # Struktura OK — mapujemy do dataclass.
         tury = [TuraSkryptu(mowca=o["mowca"], tekst=o["tekst"]) for o in dane["tury"]]
+
+        # v17.11.1 BRAMKA JĘZYKOWA — na surowych kwestiach, PRZED akcentami
+        # (akcenty psują ortografię → myliłyby Linguę). Pewny rozjazd → jeden
+        # dodatkowy strzał z jawną instrukcją tłumaczenia wartości; po nim
+        # przepuszczamy z dev-logiem (NIE blokujemy reżysera w kółko — D2).
+        wykryty = _wykryty_inny_jezyk(
+            " ".join(t.tekst for t in tury), przepis.kod_jezyka,
+        )
+        if wykryty and not jezyk_skorygowano:
+            jezyk_skorygowano = True
+            messages.append(
+                _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
+            )
+            continue
+        if wykryty and jezyk_skorygowano:
+            _dev_log(
+                f"Skrypt: render nadal w '{wykryty}' (oczekiwano "
+                f"'{przepis.kod_jezyka}') po korekcie językowej — przepuszczam."
+            )
+
         tekst = renderuj_skrypt(tury)
 
         # v17.9 (Obszar 3a): akcenty w języku treści przepisu (`kod_jezyka`),
@@ -768,13 +836,8 @@ def generuj_skrypt(
             odrzucone=False,
             uzyty_sufiks=sufiks_nazwa,
             surowy_json=surowy_text,
-            liczba_prob=proba + 1,
+            liczba_prob=wywolan,
         )
-
-    raise BladStrukturyJSON(
-        f"The AI returned a malformed JSON structure {max_retry + 1} times in a row "
-        f"for Script mode. Last error: {ostatni_blad}"
-    )
 
 
 # =============================================================================
@@ -810,48 +873,70 @@ def generuj_fragment(
     """
     messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
 
-    response = klient.chat.completions.create(
-        model=przepis.model,
-        messages=messages,
-        temperature=przepis.temperatura,
-        timeout=timeout,
-    )
-    tekst: str = response.choices[0].message.content or ""
+    # v17.11.1: pojedyncze wywołanie owinięte w pętlę, żeby bramka językowa
+    # mogła dać JEDEN dodatkowy strzał z instrukcją tłumaczenia (D2). Struktury
+    # tu nie walidujemy (proza), więc jedyny powód powtórki to rozjazd języka.
+    jezyk_skorygowano = False
+    while True:
+        response = klient.chat.completions.create(
+            model=przepis.model,
+            messages=messages,
+            temperature=przepis.temperatura,
+            timeout=timeout,
+        )
+        tekst: str = response.choices[0].message.content or ""
 
-    # 1) Detekcja odrzucenia — przed wszystkim innym. Tag infrastruktury
-    # jest wymuszany przez KLAUZULA_ODRZUCENIA_DOMYSLNA niezależnie od
-    # jezyk_odpowiedzi, więc działa tak samo dla fińskiego i japońskiego.
-    if pr.wykryto_odrzucenie(tekst):
+        # 1) Detekcja odrzucenia — przed wszystkim innym. Tag infrastruktury
+        # jest wymuszany przez KLAUZULA_ODRZUCENIA_DOMYSLNA niezależnie od
+        # jezyk_odpowiedzi, więc działa tak samo dla fińskiego i japońskiego.
+        if pr.wykryto_odrzucenie(tekst):
+            return WynikGeneracji(
+                tekst_odpowiedzi=tekst,
+                odrzucone=True,
+                uzyty_sufiks=sufiks_nazwa,
+            )
+
+        # 2) Ekstrakcja <STRESZCZENIE> — tylko w trybach planowania (Burza).
+        # Tryby zapisu nie powinny nigdy zwracać tego tagu, bo klauzula
+        # w prompt_systemowy tego nie wymusza; ale jeśli model je doda, to
+        # zostają w tekście. To mniej istotne niż brak streszczenia w Burzy.
+        nowe_streszczenie = ""
+        if not przepis.zapis_do_pliku:
+            tekst, nowe_streszczenie = wyciagnij_streszczenie(tekst)
+
+        # 2b) BRAMKA JĘZYKOWA — na narracji PO ekstrakcji streszczenia, PRZED
+        # akcentami (akcenty psują ortografię → myliłyby Linguę). Pewny rozjazd
+        # → jeden dodatkowy strzał z instrukcją tłumaczenia; po nim przepuszczamy
+        # z dev-logiem (nie blokujemy reżysera w kółko — D2).
+        wykryty = _wykryty_inny_jezyk(tekst, przepis.kod_jezyka)
+        if wykryty and not jezyk_skorygowano:
+            jezyk_skorygowano = True
+            messages.append(
+                _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
+            )
+            continue
+        if wykryty and jezyk_skorygowano:
+            _dev_log(
+                f"Fragment: render nadal w '{wykryty}' (oczekiwano "
+                f"'{przepis.kod_jezyka}') po korekcie językowej — przepuszczam."
+            )
+
+        # 3) Akcenty fonetyczne — tylko gdy przepis tego wymaga (Skrypt).
+        # v17.9 (Obszar 3a): aplikujemy w JĘZYKU TREŚCI przepisu (`kod_jezyka`),
+        # nie w domyślnym „pl". Brak `kod_jezyka` → NIE aplikujemy akcentów (żaden
+        # fallback — lepiej zostawić tekst nietknięty niż psuć obcą ortografię
+        # polskimi/angielskimi regułami; dług z dawnego komentarza tu domknięty).
+        if przepis.stosuj_akcenty_fonetyczne and przepis.kod_jezyka:
+            tekst = cr.zastosuj_akcenty_uniwersalne(
+                tekst, snapshot.world_lore, jezyk_projektu=przepis.kod_jezyka,
+            )
+
         return WynikGeneracji(
             tekst_odpowiedzi=tekst,
-            odrzucone=True,
+            odrzucone=False,
+            nowe_streszczenie=nowe_streszczenie,
             uzyty_sufiks=sufiks_nazwa,
         )
-
-    # 2) Ekstrakcja <STRESZCZENIE> — tylko w trybach planowania (Burza).
-    # Tryby zapisu nie powinny nigdy zwracać tego tagu, bo klauzula
-    # w prompt_systemowy tego nie wymusza; ale jeśli model je doda, to
-    # zostają w tekście. To mniej istotne niż brak streszczenia w Burzy.
-    nowe_streszczenie = ""
-    if not przepis.zapis_do_pliku:
-        tekst, nowe_streszczenie = wyciagnij_streszczenie(tekst)
-
-    # 3) Akcenty fonetyczne — tylko gdy przepis tego wymaga (Skrypt).
-    # v17.9 (Obszar 3a): aplikujemy w JĘZYKU TREŚCI przepisu (`kod_jezyka`),
-    # nie w domyślnym „pl". Brak `kod_jezyka` → NIE aplikujemy akcentów (żaden
-    # fallback — lepiej zostawić tekst nietknięty niż psuć obcą ortografię
-    # polskimi/angielskimi regułami; dług z dawnego komentarza tu domknięty).
-    if przepis.stosuj_akcenty_fonetyczne and przepis.kod_jezyka:
-        tekst = cr.zastosuj_akcenty_uniwersalne(
-            tekst, snapshot.world_lore, jezyk_projektu=przepis.kod_jezyka,
-        )
-
-    return WynikGeneracji(
-        tekst_odpowiedzi=tekst,
-        odrzucone=False,
-        nowe_streszczenie=nowe_streszczenie,
-        uzyty_sufiks=sufiks_nazwa,
-    )
 
 
 # =============================================================================
@@ -1023,3 +1108,115 @@ def wywnioskuj_kod_jezyka(
     m = re.search(r"[a-z]{2}", raw)
     kod = m.group(0) if m else ""
     return kod if kod in dozwolone_set else None
+
+
+# =============================================================================
+# v17.11.1: samowystarczalny resolver ISO (cache + retry) + bramka językowa
+# =============================================================================
+# Problem: lingwista/reżyser wpisywał `jezyk_odpowiedzi: fińsku`, ale `kod_jezyka`
+# zostawiał „pl" (lub puste) — silnik brał wpisany kod PO CICHU, dając rozjazd
+# „treść fińska / nagłówki polskie". Decyzja D1 (Wariant A): kod ISO ustalamy
+# ZAWSZE z `jezyk_odpowiedzi` (przez cache, więc bez spamu API), a wpisany
+# `kod_jezyka` traktujemy tylko jako fallback offline; rozjazd → jawne
+# ostrzeżenie dla reżysera (uciszamy każdego, kto sądził, że sam
+# `jezyk_odpowiedzi` wystarcza).
+
+
+@dataclass
+class RozwiazanieKodu:
+    """Wynik :func:`rozwiaz_kod_jezyka` — kod ISO + skąd pochodzi + flaga rozjazdu.
+
+    Attributes:
+        kod:            Rozwiązany 2-literowy ISO 639-1, albo ``None`` gdy nie
+                        udało się ustalić (brak API + brak sensownego fallbacku).
+        zrodlo:         ``"cache"`` | ``"llm"`` | ``"fallback_yaml"`` | ``"brak"``
+                        — diagnostyka / decyzja GUI (warn vs dialog edukacyjny).
+        rozjazd_z_yaml: ``True`` gdy PEWNY kod (cache/llm) ≠ niepuste, inne
+                        `kod_jezyka` wpisane w YAML → GUI pokazuje ostrzeżenie.
+        yaml_kod:       Oryginalny wpisany `kod_jezyka` (do treści komunikatu).
+    """
+
+    kod: str | None
+    zrodlo: str
+    rozjazd_z_yaml: bool
+    yaml_kod: str
+
+
+def rozwiaz_kod_jezyka(
+    klient:           Any,
+    jezyk_odpowiedzi: str,
+    kod_jezyka_yaml:  str,
+    dozwolone:        "set[str] | list[str]",
+    *,
+    retry:            int = 2,
+    timeout:          float = 30.0,
+) -> RozwiazanieKodu:
+    """Ustala kod ISO treści z `jezyk_odpowiedzi` — cache → LLM (2 retry) → fallback.
+
+    Kolejność (samowystarczalność, D1 Wariant A):
+      1. **Cache** ``runtime/jezyki_iso.json`` (klucz = znormalizowany
+         `jezyk_odpowiedzi`) — trafienie zwraca kod bez API.
+      2. **Mikrorequest LLM** (`wywnioskuj_kod_jezyka`) z maks. ``retry``
+         powtórkami (domyślnie 2 → łącznie 3 próby; chroni przed transient
+         network error). Sukces → zapis do cache.
+      3. **Fallback offline** do wpisanego `kod_jezyka_yaml`, jeśli jest w
+         ``dozwolone`` (brak API / wyczerpane próby). Inaczej ``kod=None``
+         (GUI pokaże dialog edukacyjny).
+
+    `rozjazd_z_yaml` ustawiamy tylko dla PEWNEGO kodu (cache/llm) — fallback do
+    YAML z definicji się z nim zgadza, więc nie ostrzega o sobie samym.
+    """
+    dozwolone_set = {str(k).strip().lower() for k in dozwolone}
+    yaml_kod = (kod_jezyka_yaml or "").strip().lower()
+    klucz = (jezyk_odpowiedzi or "").strip().lower()
+
+    cache = cr.wczytaj_cache_iso()
+    z_cache = cache.get(klucz)
+    if z_cache and z_cache in dozwolone_set:
+        return RozwiazanieKodu(
+            z_cache, "cache", bool(yaml_kod) and z_cache != yaml_kod, yaml_kod,
+        )
+
+    if klient is not None and klucz:
+        for _ in range(max(0, retry) + 1):
+            kod = wywnioskuj_kod_jezyka(klient, jezyk_odpowiedzi, dozwolone, timeout)
+            if kod:
+                cache[klucz] = kod
+                cr.zapisz_cache_iso(cache)
+                return RozwiazanieKodu(
+                    kod, "llm", bool(yaml_kod) and kod != yaml_kod, yaml_kod,
+                )
+
+    if yaml_kod in dozwolone_set:
+        return RozwiazanieKodu(yaml_kod, "fallback_yaml", False, yaml_kod)
+    return RozwiazanieKodu(None, "brak", False, yaml_kod)
+
+
+def _wykryty_inny_jezyk(tekst: str, oczekiwany_kod: str) -> str | None:
+    """Bramka językowa (#1B): zwraca PEWNIE wykryty inny kod ISO albo ``None``.
+
+    Korzysta z `core_poliglota.wykryj_jezyk_zrodlowy`, które przy niepewności
+    (tekst za krótki, brak sygnału, brak Lingua) zwraca ``fallback``. Podajemy
+    `fallback=oczekiwany_kod`, więc niepewna detekcja daje ``wykryty ==
+    oczekiwany`` → ``None`` (D2: przy niepewności UFAMY renderowi, nie korygujemy).
+    Tylko PEWNY, inny wynik → zwracamy go (sygnał do jednej korekty)."""
+    if not oczekiwany_kod or not tekst or not tekst.strip():
+        return None
+    wykryty = cp.wykryj_jezyk_zrodlowy(tekst, fallback=oczekiwany_kod)
+    return wykryty if wykryty != oczekiwany_kod else None
+
+
+def _komunikat_korekty_jezyka(jezyk_odpowiedzi: str, wykryty: str) -> dict[str, str]:
+    """System-message wymuszający przetłumaczenie WARTOŚCI na język treści
+    (po angielsku, spójnie z resztą self-correction w tym module — D2/„po en")."""
+    return {
+        "role": "system",
+        "content": (
+            f"YOUR PREVIOUS OUTPUT WAS WRITTEN IN THE WRONG LANGUAGE "
+            f"(detected ISO: '{wykryty}'). The target content language is "
+            f"'{jezyk_odpowiedzi}'. Regenerate the SAME content, but translate "
+            f"ALL human-readable VALUES into '{jezyk_odpowiedzi}'. Keep the JSON "
+            f"structure, field names, audio tags and speaker names UNCHANGED — "
+            f"translate only the narrative/prose values."
+        ),
+    }

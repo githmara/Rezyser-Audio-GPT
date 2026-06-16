@@ -657,6 +657,13 @@ rezyser:
   pamiec_status_alarm: "🚨 SURCHARGE CRITIQUE : {tokeny} sur {maks} jetons utilisés. En mode Brainstorming, générez un résumé, enregistrez-le comme Mémoire à Long Terme, puis effacez l'historique actuel (en conservant le résumé)."
   tytuly_postep: 'Titres : {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Aucun tag de structure trouvé (Prologue / Chapitre N / Épilogue) dans le fichier. Insérez des coupures de chapitres avant de donner des titres.
+  kod_jezyka_rozjazd_tytul: Le code de langue ne correspond pas au contenu
+  kod_jezyka_rozjazd_tresc: "Le code de langue « {kod_wpisany} » a été saisi dans la recette, mais la langue de réponse est « {jezyk_odpowiedzi} » — ce qui correspond au code « {kod_wykryty} ». Le seul « jezyk_odpowiedzi » NE suffit pas : c'est le code ISO qui contrôle les en-têtes de structure (Prologue/Acte/Scène), le choix des accents et le pont ElevenLabs. Le code « {kod_wykryty} » a été utilisé. Si c'est une erreur, corrigez le champ kod_jezyka dans le Gestionnaire de Règles."
+  kod_jezyka_edu_tytul: Impossible de déterminer le code de langue
+  kod_jezyka_edu_naglowek: 'Code ISO de la langue du contenu — action requise :'
+  kod_jezyka_edu_tresc: "Impossible de déterminer automatiquement le code ISO 639-1 pour la langue de réponse « {jezyk_odpowiedzi} » (pas de connexion à l'API ou réponse ambiguë). Ce code à deux lettres est nécessaire : il contrôle les en-têtes de structure (Prologue/Acte/Scène), le choix des accents et la langue du projet dans ElevenLabs. La seule description « jezyk_odpowiedzi » ne suffit pas. Ouvrez la recette dans le Gestionnaire de Règles et entrez le code correct dans le champ kod_jezyka (par exemple, « fi » pour le finnois, « de » pour l'allemand)."
+  kod_jezyka_edu_prompt: "Si vous ne connaissez pas le code, copiez la question ci-dessous et collez-la dans n'importe quel chatbot (par exemple, ChatGPT) :\n\n« Donnez le code à deux lettres ISO 639-1 pour la langue décrite comme : {jezyk_odpowiedzi}. Répondez uniquement avec le code. »"
+  kod_jezyka_edu_name: Explication du code de langue et invite pour le chatbot
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -1322,3 +1329,5 @@ opowiesci:
   edytuj_stan_zapisano_tytul: État du jeu enregistré
   edytuj_stan_zapisano_tresc: L'état du jeu «{nazwa}» a été enregistré et rechargé depuis le disque. Les personnages, la localisation, l'équipement, les intrigues et les compteurs reflètent maintenant votre édition.
   err_dlugosc: La réponse du modèle a été coupée avant qu'il ne puisse la terminer (limite de longueur dépassée). Raccourcissez le contexte et réessayez.
+  odrzucenie_tytul: Action impossible à mener
+  odrzucenie_tresc: Le moteur narratif ne peut pas mener cette action — elle pourrait être hors sujet, impossible dans ce monde ou non conforme aux règles de contenu. Le tour n'a pas été enregistré. Reformulez l'action et réessayez.

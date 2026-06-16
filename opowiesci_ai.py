@@ -39,6 +39,20 @@ import core_tokeny as ct
 import sciezki
 from bledy_ai import BladDlugosciOdpowiedzi, BladStrukturyJSON
 
+# v17.11.1: klauzula odrzucenia współdzielona z Reżyserem (single source —
+# stała jest CELOWO po angielsku i trzymana w Pythonie, nie w YAML, żeby LLM
+# jej nie tłumaczył/lokalizował; ten sam marker `[ODRZUCENIE_AI]` działa dla
+# wszystkich języków). Opowieści dotąd nie miały żadnej klauzuli — `user_input`
+# (free-text gracza) leciał prosto do payloadu, a odmowa LLM wracała jako
+# nie-JSON i mylnie wyglądała jak `BladStrukturyJSON` po wyczerpaniu retry.
+# `wykryto_odrzucenie` re-eksportowane, by GUI (`gui_opowiesci`) mogło wykryć
+# tag w surowym tekście `/visualize` bez importu `przepisy_rezysera`.
+from przepisy_rezysera import (  # noqa: F401  (re-eksport dla gui_opowiesci)
+    KLAUZULA_ODRZUCENIA_DOMYSLNA,
+    TAG_ODRZUCENIA_AI,
+    wykryto_odrzucenie,
+)
+
 # =============================================================================
 # Stałe konfiguracyjne
 # =============================================================================
@@ -222,6 +236,12 @@ class WynikTury:
     stan:             dict[str, Any]
     meta:             dict[str, Any]
     surowy_json:      str   # do zapisu w `.story.jsonl` (Faza 3)
+    # v17.11.1: True → LLM odmówił obsłużenia akcji gracza (zwrócił marker
+    # `[ODRZUCENIE_AI]` zamiast JSON-a). GUI pokazuje wtedy przyjazny komunikat,
+    # NIE awansuje tury i NIE zapisuje plików (tura „się nie wydarzyła").
+    # Pozostałe pola są pustymi placeholderami — nie wolno ich konsumować, gdy
+    # `odrzucone=True`. Domyślne False → stare ścieżki sukcesu bez zmian.
+    odrzucone:        bool = False
 
 
 @dataclass
@@ -366,11 +386,16 @@ def _zbuduj_prompt_systemowy(tryb: int, jezyk: str = "pl", zasady_swiata: str = 
 
     if tryb == TRYB_BURZA:
         # Visualize stoi na własnych nogach — bez bazy narracyjnej.
-        return _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"] + zasady_blok
+        baza_prompt = _zaladuj_przepis(jezyk, "tryb_burza")["prompt_systemowy"]
+        return baza_prompt + zasady_blok + KLAUZULA_ODRZUCENIA_DOMYSLNA
 
     baza   = _zaladuj_przepis(jezyk, "baza")["prompt_systemowy"]
     addon  = _zaladuj_przepis(jezyk, nazwa)["prompt_systemowy"]
-    return baza + zasady_blok + "\n\n" + addon
+    # v17.11.1: klauzula odrzucenia ZAWSZE na samym końcu (po addonie trybu i
+    # po blokach zasad świata) — gracz wpisuje free-text, więc LLM musi mieć
+    # jednoznaczną furtkę odmowy z markerem `[ODRZUCENIE_AI]` (wykrywanym przed
+    # walidacją JSON w `generuj_ture`), zamiast generować nie-JSON / łamać się.
+    return baza + zasady_blok + "\n\n" + addon + KLAUZULA_ODRZUCENIA_DOMYSLNA
 
 
 def _parametr_z_yaml(jezyk: str, nazwa: str, klucz: str, default: Any) -> Any:
@@ -635,6 +660,18 @@ def generuj_ture(
             )
 
         surowa = resp.choices[0].message.content or ""
+
+        # v17.11.1: odmowa LLM ma pierwszeństwo PRZED parsowaniem JSON (wzorzec
+        # 1:1 z `rezyser_ai.generuj_burze/skrypt`). Przy `response_format=
+        # json_object` model nie zwróci gołego `[ODRZUCENIE_AI]`, ale owinie go
+        # w JSON — substringowy `wykryto_odrzucenie` łapie tag tak czy inaczej.
+        # Tag = legalny wynik, NIE błąd retry; zwracamy pustą turę z flagą.
+        if wykryto_odrzucenie(surowa):
+            return WynikTury(
+                narracja="", wybory=[], postacie_aktywne=[],
+                stan={}, meta={}, surowy_json=surowa, odrzucone=True,
+            )
+
         try:
             dane = json.loads(surowa)
             jsonschema.validate(instance=dane, schema=SCHEMA_TURA)

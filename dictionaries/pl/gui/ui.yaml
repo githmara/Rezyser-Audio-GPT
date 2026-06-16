@@ -493,6 +493,13 @@ rezyser:
   sr_blad_tresc: "Nie udało się wygenerować wersji dla czytników ekranu:\n{tresc_bledu}"
   kod_jezyka_blad_tytul: "Nieznany język przepisu"
   kod_jezyka_blad_tresc: "Nie udało się ustalić kodu języka (ISO) dla odpowiedzi „{jezyk_odpowiedzi}”. Otwórz przepis w Menedżerze Reguł i ustaw pole kod_jezyka (np. „fi”), aby nagłówki struktury i akcenty trafiły w język treści."
+  kod_jezyka_rozjazd_tytul: "Kod języka nie zgadza się z treścią"
+  kod_jezyka_rozjazd_tresc: "W przepisie wpisano kod języka „{kod_wpisany}”, ale język odpowiedzi to „{jezyk_odpowiedzi}” — co odpowiada kodowi „{kod_wykryty}”. Sam „jezyk_odpowiedzi” NIE wystarcza: to kod ISO steruje nagłówkami struktury (Prolog/Akt/Scena), doborem akcentów i mostem ElevenLabs. Użyto kodu „{kod_wykryty}”. Jeśli to pomyłka, popraw pole kod_jezyka w Menedżerze Reguł."
+  kod_jezyka_edu_tytul: "Nie udało się ustalić kodu języka"
+  kod_jezyka_edu_naglowek: "Kod ISO języka treści — wymagane działanie:"
+  kod_jezyka_edu_tresc: "Nie udało się automatycznie ustalić kodu ISO 639-1 dla języka odpowiedzi „{jezyk_odpowiedzi}” (brak połączenia z API albo niejednoznaczna odpowiedź). Ten dwuliterowy kod jest konieczny: steruje nagłówkami struktury (Prolog/Akt/Scena), doborem akcentów oraz językiem projektu w ElevenLabs. Sam opis „jezyk_odpowiedzi” to za mało. Otwórz przepis w Menedżerze Reguł i wpisz właściwy kod w polu kod_jezyka (np. „fi” dla fińskiego, „de” dla niemieckiego)."
+  kod_jezyka_edu_prompt: "Jeśli nie znasz kodu, skopiuj poniższe pytanie i wklej je do dowolnego chatbota (np. ChatGPT):\n\n„Podaj dwuliterowy kod ISO 639-1 dla języka opisanego jako: {jezyk_odpowiedzi}. Odpowiedz wyłącznie samym kodem.”"
+  kod_jezyka_edu_name: "Wyjaśnienie kodu języka i prompt dla chatbota"
   jezyk_naglowkow_ostrzezenie_tytul: "Język nagłówków a język przepisu"
   jezyk_naglowkow_ostrzezenie_tresc: "Wczytany projekt ma nagłówki struktury wyglądające na język „{wykryty}”, a aktywny przepis generuje treść w języku „{kod}”. Nowe nagłówki będą wstawiane po „{kod}” — jeśli to niezamierzone, dopasuj pole kod_jezyka w przepisie albo wybierz inny tryb."
   # Wskaźnik pamięci modelu (gui_rezyser._aktualizuj_pamiec_modelu składa treść z i18n po `poziom`)
@@ -1316,6 +1323,8 @@ opowiesci:
   err_timeout:               "Czas oczekiwania na odpowiedź modelu został przekroczony (powyżej 120 sekund). Spróbuj ponownie."
   err_struktura:             "Model wygenerował niewłaściwą strukturę odpowiedzi mimo dwóch prób korekty. Spróbuj ponownie albo sformułuj akcję inaczej."
   err_dlugosc:               "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst i spróbuj ponownie."
+  odrzucenie_tytul:          "Akcja nie do poprowadzenia"
+  odrzucenie_tresc:          "Silnik narracyjny nie może poprowadzić tej akcji — mogła być nie na temat, niemożliwa w tym świecie albo niezgodna z zasadami treści. Tura nie została zapisana. Sformułuj akcję inaczej i spróbuj ponownie."
 
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul:            "Brak aktywnej gry"

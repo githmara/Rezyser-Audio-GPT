@@ -910,7 +910,52 @@ class OpowiesciPanel(wx.Panel):
             wx.CallAfter(self._obsluz_blad, exc)
             return
 
+        # v17.11.1: LLM odmówił obsłużenia akcji gracza (free-text mógł być nie
+        # na temat / niemożliwy do poprowadzenia). Odrzucenie idzie OSOBNĄ
+        # ścieżką — NIE jest błędem (nie `_obsluz_blad`) ani sukcesem
+        # (nie `_obsluz_ture`): tura „się nie wydarzyła".
+        if wynik.odrzucone:
+            wx.CallAfter(self._obsluz_odrzucenie, user_input)
+            return
+
         wx.CallAfter(self._obsluz_ture, wynik, user_input, tryb)
+
+    # ------------------------------------------------------------------
+    # _obsluz_odrzucenie: callback w wątku UI — odmowa LLM (v17.11.1)
+    # ------------------------------------------------------------------
+    def _obsluz_odrzucenie(self, user_input: str) -> None:
+        """Akcja gracza odrzucona przez LLM — tura nie liczy się i nic nie zapisuje.
+
+        D5 (decyzja projektowa): odrzucona tura „się nie wydarzyła" — cofamy
+        inkrementację `numer_tury` z `_on_wyslij` (linia ~825), żeby licznik
+        tur i próg Cinematic Warning nie rosły od nieudanych prób. NIE dotykamy
+        `.game.json` / `.story.jsonl` (synchronizacja dysku jest tylko w
+        `_obsluz_ture`, którego tu świadomie nie wołamy). Przywracamy tekst do
+        pola akcji, żeby gracz mógł go poprawić zamiast pisać od zera.
+        """
+        # Cofnięcie numeru tury (snapshot jest niezmienny — odtwarzamy z -1).
+        self._snapshot = oai.SnapshotOpowiesci(
+            nazwa_gry=self._snapshot.nazwa_gry,
+            numer_tury=max(0, self._snapshot.numer_tury - 1),
+            ostatnie_tury=self._snapshot.ostatnie_tury,
+            postacie_aktywne=self._snapshot.postacie_aktywne,
+            stan_poprzedni=self._snapshot.stan_poprzedni,
+            seed_swiata=self._snapshot.seed_swiata,
+            jezyk_projektu=self._snapshot.jezyk_projektu,
+            zasady_swiata=self._snapshot.zasady_swiata,
+            ostatni_surowy_json=self._snapshot.ostatni_surowy_json,
+        )
+
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_gotowe"))
+        self._btn_wyslij.Enable()
+        self._txt_akcja.SetValue(user_input)   # gracz poprawia, nie pisze od zera
+        wx.MessageBox(
+            t("opowiesci.odrzucenie_tresc"),
+            t("opowiesci.odrzucenie_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+        self._txt_akcja.SetFocus()
 
     # ------------------------------------------------------------------
     # _obsluz_ture: callback w wątku UI — append narracji + wybory
@@ -2120,7 +2165,25 @@ class OpowiesciPanel(wx.Panel):
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._obsluz_blad, exc)
             return
+        # v17.11.1: LLM mógł odmówić również wizualizacji (free-text argument
+        # `/visualize` bywa nie na temat). Pokazujemy przyjazny komunikat
+        # zamiast renderować surowy `[ODRZUCENIE_AI]` w dialogu.
+        if oai.wykryto_odrzucenie(tekst):
+            wx.CallAfter(self._obsluz_odrzucenie_visualize)
+            return
         wx.CallAfter(self._pokaz_visualize_dialog, tekst)
+
+    def _obsluz_odrzucenie_visualize(self) -> None:
+        """`/visualize` odrzucony przez LLM — wizualizacja to side-quest bez
+        zapisu i bez licznika tur, więc żaden stan się nie zmienia; pokazujemy
+        tylko ten sam przyjazny komunikat odmowy co dla zwykłej tury."""
+        self._lbl_pamiec_status.SetValue(t("opowiesci.status_gotowe"))
+        wx.MessageBox(
+            t("opowiesci.odrzucenie_tresc"),
+            t("opowiesci.odrzucenie_tytul"),
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
 
     def _pokaz_visualize_dialog(self, tekst: str) -> None:
         """Dialog z multisensorycznym opisem — readonly, NVDA-friendly, nie zapisuje plików."""

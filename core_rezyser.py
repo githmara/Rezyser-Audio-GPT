@@ -135,6 +135,55 @@ def _dev_log_runtime(sciezka: str) -> None:
     except Exception:  # noqa: BLE001 — log dev nie może nigdy ubić apki
         pass
 
+
+# =============================================================================
+# Globalny cache ISO języka treści (v17.11.1)
+# =============================================================================
+# Mapowanie prozaicznego `jezyk_odpowiedzi` ("fińsku") → kod ISO ("fi"),
+# wyliczonego mikrorequestem LLM (`rezyser_ai.rozwiaz_kod_jezyka`). Cache jest
+# GLOBALNY (nie per-projekt): „fińsku → fi" nie zależy od konkretnego projektu,
+# więc trzymamy go raz dla całej aplikacji w runtime/ (root, obok metadanych
+# projektów), by nie wołać API przy każdym wyborze przepisu. Plik gitignorowany
+# (cały runtime/), niewidoczny dla end-usera jak reszta metadanych.
+_PLIK_CACHE_ISO = "jezyki_iso.json"
+
+
+def _sciezka_cache_iso() -> str:
+    return os.path.join(sciezki.KATALOG_BAZOWY_STR, RUNTIME_DIR, _PLIK_CACHE_ISO)
+
+
+def wczytaj_cache_iso() -> dict[str, str]:
+    """Czyta cache `jezyk_odpowiedzi → ISO`. Brak pliku / uszkodzony → ``{}``.
+
+    Nigdy nie rzuca — cache to optymalizacja, a nie źródło prawdy (źródłem jest
+    mikrorequest LLM). Klucze trzymamy znormalizowane (lower) po stronie zapisu.
+    """
+    try:
+        with open(_sciezka_cache_iso(), encoding="utf-8") as fh:
+            dane = json.load(fh)
+    except (FileNotFoundError, json.JSONDecodeError, OSError, ValueError):
+        return {}
+    if not isinstance(dane, dict):
+        return {}
+    return {str(k): str(v) for k, v in dane.items()}
+
+
+def zapisz_cache_iso(mapa: dict[str, str]) -> None:
+    """Zapis atomowy (tmp + ``os.replace``) cache'u ISO; tworzy runtime/ w razie
+    potrzeby. Błąd I/O połykamy — brak zapisu cache'u nie może ubić generacji
+    (następnym razem po prostu zapytamy LLM jeszcze raz)."""
+    sciezka = _sciezka_cache_iso()
+    try:
+        os.makedirs(os.path.dirname(sciezka), exist_ok=True)
+        tmp = sciezka + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(mapa, fh, ensure_ascii=False, indent=2, sort_keys=True)
+        os.replace(tmp, sciezka)
+        _dev_log_runtime(sciezka)
+    except OSError:  # noqa: BLE001 — cache best-effort
+        pass
+
+
 # Pamięć modelu — od v15.1 wspólne ze ścieżką Opowieści przez `core_tokeny`.
 # Liczymy faktyczne tokeny payloadu (tiktoken), nie znaki — gpt-4o ma 128k
 # okno, a heurystyka „~4 znaki/token" była gruba (zwłaszcza dla diakrytyków

@@ -155,6 +155,10 @@ class RezyserPanel(wx.Panel):
         # v17.9 (Obszar 3b): id przepisów, dla których trwa wnioskowanie
         # `kod_jezyka` w tle — guard przed równoległymi mikrorequestami LLM.
         self._kod_jezyka_w_toku: set[str] = set()
+        # v17.11.1: id przepisów już rozwiązanych w TEJ sesji (sukces LUB pokazany
+        # dialog edukacyjny) — żeby nie ponawiać resolvera ani nie powtarzać
+        # ostrzeżenia/dialogu przy każdym ponownym wyborze tego samego przepisu.
+        self._kod_jezyka_rozwiazany: set[str] = set()
         self._init_api()
 
         # ── Most ElevenLabs (opcjonalny, v16.0) ────────────────────────────
@@ -215,49 +219,99 @@ class RezyserPanel(wx.Panel):
         return (przepis.kod_jezyka if przepis else "") or aktualny_jezyk()
 
     def _zapewnij_kod_jezyka_w_tle(self) -> None:
-        """1b: gdy aktywny przepis ZAPISU (Skrypt/Audiobook) nie ma `kod_jezyka`,
-        wnioskuje go mikrorequestem LLM z `jezyk_odpowiedzi` w wątku tła i wpisuje
-        z powrotem na obiekt przepisu (cache na sesję). Wołane gdy przepis staje
-        się aktywny (zmiana trybu, wczytanie projektu), żeby do kliknięcia
-        nagłówka kod był gotowy bez blokowania GUI (A11y).
+        """1b: dla aktywnego przepisu ZAPISU (Skrypt/Audiobook) ustala `kod_jezyka`
+        z `jezyk_odpowiedzi` w wątku tła (cache → LLM → fallback) i wpisuje wynik
+        na obiekt przepisu. Wołane gdy przepis staje się aktywny (zmiana trybu,
+        wczytanie projektu), żeby do kliknięcia nagłówka kod był gotowy bez
+        blokowania GUI (A11y).
 
-        No-op gdy: brak API, kod już jest, przepis nie jest trybem zapisu, albo
-        wnioskowanie dla tego id już trwa.
+        v17.11.1 (D1 Wariant A): NIE ufamy już wpisanemu `kod_jezyka` na ślepo —
+        resolver liczy kod z `jezyk_odpowiedzi` ZAWSZE (przez cache, więc bez
+        spamu API). Wpisany kod jest tylko fallbackiem offline; pewny rozjazd
+        (wpisane „pl" przy `jezyk_odpowiedzi: fińsku`) → jawne ostrzeżenie.
+
+        No-op gdy: brak API (zostaje wpisany kod jako fallback), przepis nie jest
+        trybem zapisu, wnioskowanie już trwa, albo przepis rozwiązano w tej sesji.
         """
         przepis = self._aktualny_przepis()
-        if przepis is None or not przepis.zapis_do_pliku or przepis.kod_jezyka:
+        if przepis is None or not przepis.zapis_do_pliku:
             return
         if not self._api_dostepne or self._client is None:
-            return
+            return  # offline: wpisany `kod_jezyka` zostaje fallbackiem
         if przepis.id in self._kod_jezyka_w_toku:
+            return
+        if przepis.id in self._kod_jezyka_rozwiazany:
             return
         self._kod_jezyka_w_toku.add(przepis.id)
         klient    = self._client
         jezyk_odp = przepis.jezyk_odpowiedzi
+        kod_yaml  = przepis.kod_jezyka
         dozwolone = set(dostepne_jezyki_ui())
 
         def _worker() -> None:
-            kod = rai.wywnioskuj_kod_jezyka(klient, jezyk_odp, dozwolone)
-            wx.CallAfter(self._kod_jezyka_done, przepis, kod)
+            wynik = rai.rozwiaz_kod_jezyka(klient, jezyk_odp, kod_yaml, dozwolone)
+            wx.CallAfter(self._kod_jezyka_done, przepis, wynik)
 
         threading.Thread(target=_worker, daemon=True).start()
 
     def _kod_jezyka_done(
-        self, przepis: pr.PrzepisRezysera, kod: str | None,
+        self, przepis: pr.PrzepisRezysera, wynik: "rai.RozwiazanieKodu",
     ) -> None:
-        """Callback wnioskowania `kod_jezyka` (wątek GUI). Sukces → wpis na
-        przepis (cache); halucynacja/None → błąd dla reżysera (decyzja 2a)."""
+        """Callback resolvera `kod_jezyka` (wątek GUI). Sukces → wpis na przepis;
+        rozjazd z wpisanym kodem → jawne ostrzeżenie; brak rozwiązania → dłuższy
+        dialog edukacyjny z promptem dla chatbota (D1)."""
         self._kod_jezyka_w_toku.discard(przepis.id)
-        if kod:
-            przepis.kod_jezyka = kod
+        self._kod_jezyka_rozwiazany.add(przepis.id)
+        if wynik.kod:
+            przepis.kod_jezyka = wynik.kod
+            if wynik.rozjazd_z_yaml:
+                # D1: kod wyliczony z `jezyk_odpowiedzi` WYGRYWA z wpisanym;
+                # uciszamy reżysera, który sądził, że sam `jezyk_odpowiedzi`
+                # wystarcza, i tłumaczymy, że to wyliczony kod steruje strukturą.
+                wx.MessageBox(
+                    t("rezyser.kod_jezyka_rozjazd_tresc",
+                      jezyk_odpowiedzi=przepis.jezyk_odpowiedzi,
+                      kod_wpisany=wynik.yaml_kod,
+                      kod_wykryty=wynik.kod),
+                    t("rezyser.kod_jezyka_rozjazd_tytul"),
+                    wx.OK | wx.ICON_WARNING,
+                    self,
+                )
             return
-        wx.MessageBox(
-            t("rezyser.kod_jezyka_blad_tresc",
-              jezyk_odpowiedzi=przepis.jezyk_odpowiedzi),
-            t("rezyser.kod_jezyka_blad_tytul"),
-            wx.OK | wx.ICON_ERROR,
-            self,
+        self._pokaz_dialog_iso_edu(przepis.jezyk_odpowiedzi)
+
+    def _pokaz_dialog_iso_edu(self, jezyk_odpowiedzi: str) -> None:
+        """Dłuższy, dostępny dialog (readonly `TextCtrl` + „Zamknij") gdy kodu
+        ISO NIE udało się ustalić (brak API / halucynacja / brak fallbacku).
+
+        Tłumaczy nieświadomemu reżyserowi, że sam `jezyk_odpowiedzi` nie
+        wystarcza, i wkleja gotowy prompt do zwykłego chatbota, którym sam
+        ustali właściwy kod ISO 639-1. Treść z `ui.yaml` (język UI). Wzorzec
+        zgodny z CLAUDE.md: długie treści techniczne → `wx.Dialog`+`TE_READONLY`.
+        """
+        tresc = (
+            t("rezyser.kod_jezyka_edu_tresc", jezyk_odpowiedzi=jezyk_odpowiedzi)
+            + "\n\n"
+            + t("rezyser.kod_jezyka_edu_prompt", jezyk_odpowiedzi=jezyk_odpowiedzi)
         )
+        dlg = wx.Dialog(
+            self, title=t("rezyser.kod_jezyka_edu_tytul"), size=(640, 440),
+        )
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        lbl = wx.StaticText(dlg, label=t("rezyser.kod_jezyka_edu_naglowek"))
+        txt = wx.TextCtrl(
+            dlg, value=tresc,
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_BESTWRAP,
+            name=t("rezyser.kod_jezyka_edu_name"),
+        )
+        btn = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
+        sizer.Add(lbl, flag=wx.ALL, border=8)
+        sizer.Add(txt, proportion=1, flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8)
+        sizer.Add(btn, flag=wx.ALL | wx.ALIGN_RIGHT, border=8)
+        dlg.SetSizer(sizer)
+        txt.SetFocus()
+        dlg.ShowModal()
+        dlg.Destroy()
 
     def _mapa_slow_naglowkow(self) -> dict[str, set[str]]:
         """Mapa ``kod_jezyka → {słowa-nagłówki małymi literami}`` dla

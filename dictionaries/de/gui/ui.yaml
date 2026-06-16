@@ -659,6 +659,13 @@ rezyser:
   pamiec_status_alarm: '🚨 KRITISCHE ÜBERLASTUNG: {tokeny} von {maks} Tokens verwendet. Im Brainstorming-Modus eine Zusammenfassung erstellen, als Langzeitspeicher speichern und dann die aktuelle Geschichte löschen (Zusammenfassung beibehalten).'
   tytuly_postep: 'Betitelung: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Keine Struktur-Tags (Prolog / Kapitel N / Epilog) in der Datei gefunden. Fügen Sie Kapiteltrennungen ein, bevor Sie Titel vergeben.
+  kod_jezyka_rozjazd_tytul: Der Sprachcode stimmt nicht mit dem Inhalt überein
+  kod_jezyka_rozjazd_tresc: 'Im Rezept wurde der Sprachcode „{kod_wpisany}” eingegeben, aber die Antwortsprache ist „{jezyk_odpowiedzi}” — was dem Code „{kod_wykryty}” entspricht. Allein „jezyk_odpowiedzi” reicht NICHT aus: Der ISO-Code steuert die Strukturüberschriften (Prolog/Akt/Szene), die Akzentwahl und die ElevenLabs-Brücke. Der Code „{kod_wykryty}” wurde verwendet. Wenn dies ein Fehler ist, korrigieren Sie das Feld kod_jezyka im Regelmanager.'
+  kod_jezyka_edu_tytul: Der Sprachcode konnte nicht ermittelt werden
+  kod_jezyka_edu_naglowek: 'ISO-Sprachcode des Inhalts — erforderliche Aktion:'
+  kod_jezyka_edu_tresc: 'Der ISO 639-1-Code für die Antwortsprache „{jezyk_odpowiedzi}” konnte nicht automatisch ermittelt werden (keine Verbindung zur API oder mehrdeutige Antwort). Dieser zweibuchstabige Code ist notwendig: Er steuert die Strukturüberschriften (Prolog/Akt/Szene), die Akzentwahl und die Projektsprache in ElevenLabs. Die Beschreibung „jezyk_odpowiedzi” allein reicht nicht aus. Öffnen Sie das Rezept im Regelmanager und geben Sie den richtigen Code im Feld kod_jezyka ein (z.B. „fi” für Finnisch, „de” für Deutsch).'
+  kod_jezyka_edu_prompt: "Wenn Sie den Code nicht kennen, kopieren Sie die folgende Frage und fügen Sie sie in einen beliebigen Chatbot ein (z.B. ChatGPT):\n\n„Geben Sie den zweibuchstabigen ISO 639-1-Code für die Sprache an, die als: {jezyk_odpowiedzi} beschrieben wird. Antworten Sie nur mit dem Code.”"
+  kod_jezyka_edu_name: Erklärung des Sprachcodes und Eingabeaufforderung für den Chatbot
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -1330,3 +1337,5 @@ opowiesci:
   edytuj_stan_zapisano_tytul: Spielstand gespeichert
   edytuj_stan_zapisano_tresc: Der Spielstand „{nazwa}" wurde gespeichert und von der Festplatte neu geladen. Charaktere, Standort, Ausrüstung, Handlungsstränge und Zähler spiegeln jetzt Ihre Bearbeitung wider.
   err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext und versuchen Sie es erneut.
+  odrzucenie_tytul: Aktion nicht ausführbar
+  odrzucenie_tresc: Der Erzählmotor kann diese Aktion nicht ausführen — sie könnte themenfremd, in dieser Welt unmöglich oder nicht mit den Inhaltsrichtlinien vereinbar sein. Die Runde wurde nicht gespeichert. Formuliere die Aktion anders und versuche es erneut.

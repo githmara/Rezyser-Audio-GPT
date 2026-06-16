@@ -657,6 +657,13 @@ rezyser:
   punkt_odniesienia_za_dluga_tresc: "The selected fragment “{naglowek}\" is so extensive that it doesn't fit into the working memory window by itself — emergency cutting to the last {liczba_znakow} characters was applied. Director, this is a bit of madness: consider dividing Acts/Chapters into smaller Scenes — shorter sections will allow the AI to maintain consistent context."
   tytuly_postep: 'Titling: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: No structure tags found (Prologue / Chapter N / Epilogue) in the file. Insert chapter breaks before titling.
+  kod_jezyka_rozjazd_tytul: The language code does not match the content
+  kod_jezyka_rozjazd_tresc: 'The recipe specifies the language code "{kod_wpisany}", but the response language is "{jezyk_odpowiedzi}" — which corresponds to the code "{kod_wykryty}". The "jezyk_odpowiedzi" alone is NOT sufficient: the ISO code controls the structure headers (Prologue/Act/Scene), accent selection, and the ElevenLabs bridge. The code "{kod_wykryty}" was used. If this is a mistake, correct the kod_jezyka field in the Rule Manager.'
+  kod_jezyka_edu_tytul: Failed to determine the language code
+  kod_jezyka_edu_naglowek: 'ISO language code of the content — required action:'
+  kod_jezyka_edu_tresc: 'Failed to automatically determine the ISO 639-1 code for the response language "{jezyk_odpowiedzi}" (no connection to the API or ambiguous response). This two-letter code is necessary: it controls the structure headers (Prologue/Act/Scene), accent selection, and the project language in ElevenLabs. The "jezyk_odpowiedzi" description alone is not enough. Open the recipe in the Rule Manager and enter the correct code in the kod_jezyka field (e.g., "fi" for Finnish, "de" for German).'
+  kod_jezyka_edu_prompt: "If you don't know the code, copy the following question and paste it into any chatbot (e.g., ChatGPT):\n\n\"Provide the two-letter ISO 639-1 code for the language described as: {jezyk_odpowiedzi}. Respond with the code only.\""
+  kod_jezyka_edu_name: Explanation of the language code and prompt for the chatbot
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -1335,3 +1342,5 @@ opowiesci:
   edytuj_stan_zapisano_tytul: Game state saved
   edytuj_stan_zapisano_tresc: Game state “{nazwa}" has been saved and reloaded from disk. Characters, location, inventory, plots, and counters now reflect your edits.
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context and try again.
+  odrzucenie_tytul: Action cannot be conducted
+  odrzucenie_tresc: The narrative engine cannot conduct this action — it might have been off-topic, impossible in this world, or against content rules. The turn was not saved. Rephrase the action and try again.

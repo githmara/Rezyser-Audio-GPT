@@ -657,6 +657,13 @@ rezyser:
   pamiec_status_alarm: '🚨 KRIITTINEN YLITÄYTTÖ: Käytetty {tokeny} / {maks} tokenia. Aivoriihitilassa luo tiivistelmä, tallenna se pitkäaikaismuistiin ja tyhjennä sitten nykyinen historia (säilytä tiivistelmä).'
   tytuly_postep: 'Otsikointi: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Rakennetunnisteita (Johdanto / Luku N / Epilogi) ei löytynyt tiedostosta. Lisää lukujen leikkaukset ennen otsikointia.
+  kod_jezyka_rozjazd_tytul: Kielikoodi ei vastaa sisältöä
+  kod_jezyka_rozjazd_tresc: 'Reseptissä on kielikoodi "{kod_wpisany}", mutta vastauskieli on "{jezyk_odpowiedzi}" — mikä vastaa koodia "{kod_wykryty}". Pelkkä "jezyk_odpowiedzi" EI riitä: ISO-koodi ohjaa rakenteen otsikoita (Prologi/Näytös/Kohtaus), aksenttien valintaa ja ElevenLabs-siltaa. Käytetty koodi on "{kod_wykryty}". Jos tämä on virhe, korjaa kod_jezyka-kenttä Sääntöjen Hallinnassa.'
+  kod_jezyka_edu_tytul: Kielikoodia ei voitu määrittää
+  kod_jezyka_edu_naglowek: 'Sisällön ISO-kielikoodi — vaadittu toimenpide:'
+  kod_jezyka_edu_tresc: 'ISO 639-1 -koodia vastauskielelle "{jezyk_odpowiedzi}" ei voitu automaattisesti määrittää (ei yhteyttä API:iin tai epäselvä vastaus). Tämä kaksikirjaiminen koodi on välttämätön: se ohjaa rakenteen otsikoita (Prologi/Näytös/Kohtaus), aksenttien valintaa ja projektin kieltä ElevenLabsissa. Pelkkä "jezyk_odpowiedzi" ei riitä. Avaa resepti Sääntöjen Hallinnassa ja kirjoita oikea koodi kod_jezyka-kenttään (esim. "fi" suomelle, "de" saksalle).'
+  kod_jezyka_edu_prompt: "Jos et tiedä koodia, kopioi alla oleva kysymys ja liitä se mihin tahansa chatbotin (esim. ChatGPT) keskusteluun:\n\n\"Anna kaksikirjaiminen ISO 639-1 -koodi kielelle, joka on kuvattu seuraavasti: {jezyk_odpowiedzi}. Vastaa pelkällä koodilla.\""
+  kod_jezyka_edu_name: Kielikoodin selitys ja kehotus chatbotille
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -1327,3 +1334,5 @@ opowiesci:
   edytuj_stan_zapisano_tytul: Pelitila tallennettu
   edytuj_stan_zapisano_tresc: Pelitila "{nazwa}" on tallennettu ja ladattu uudelleen levyltä. Hahmot, sijainti, varusteet, juonet ja laskurit heijastavat nyt muokkauksiasi.
   err_dlugosc: Mallin vastaus katkaistiin ennen kuin se ehti lopettaa sen (pituusraja ylitetty). Lyhennä kontekstia ja yritä uudelleen.
+  odrzucenie_tytul: Toimintoa ei voida suorittaa
+  odrzucenie_tresc: Kerrontamoottori ei voi suorittaa tätä toimintoa — se saattoi olla aiheen ulkopuolella, mahdoton tässä maailmassa tai ristiriidassa sisältösääntöjen kanssa. Vuoroa ei ole tallennettu. Muotoile toiminto uudelleen ja yritä uudelleen.
