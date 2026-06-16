@@ -34,6 +34,7 @@ przeredagowaniu.
 from __future__ import annotations
 
 import os
+import re
 import smtplib
 import subprocess
 import sys
@@ -53,23 +54,53 @@ LANGUAGES = [
 _detector = LanguageDetectorBuilder.from_languages(*LANGUAGES).build()
 
 
-# Markery zgłoszenia-crash (od v17.0). Globalny handler wyjątków aplikacji
-# (`main._zapisz_log_bledu`) zapisuje traceback do `error_log.txt` z nagłówkiem
-# `CRASH_MARKER`; zwykły user wkleja/załącza ten plik do Issue. Takie ciało to
-# surowy traceback (angielskie nazwy wyjątków, ścieżki Windows, fragmenty kodu)
-# — Lingua (detektor n-gramowy) myliłaby się na nim, a i tak chcemy uniwersalnej
-# odpowiedzi po angielsku. Wykrywamy crash po DOWOLNYM z markerów. Sygnatura
-# `Traceback (most recent call last)` jest gwarantowana w każdym tracebacku
-# Pythona (nawet gdy user wklei sam ślad bez nagłówka pliku).
-_CRASH_MARKERY = (
-    "=== REŻYSER AUDIO GPT — CRASH REPORT ===",
-    "Traceback (most recent call last)",
-)
+# Nagłówek crash-loga generowanego przez globalny handler wyjątków aplikacji
+# (`main._zapisz_log_bledu` → stała `main.CRASH_MARKER`). Trzymamy własną kopię
+# literału, bo ten skrypt to samodzielny entrypoint workflowa GH Actions i nie
+# importuje `main`. Użyte przez `_oczysc_tekst_dla_lingua` (przez `re.escape`,
+# żeby em-dash „—" nie wymagał ręcznego przepisania w regexie).
+_CRASH_HEADER = "=== REŻYSER AUDIO GPT — CRASH REPORT ==="
 
 
-def _czy_crash_report(issue_body: str) -> bool:
-    """Czy ciało zgłoszenia wygląda na raport o crashu (error_log.txt)?"""
-    return any(marker in issue_body for marker in _CRASH_MARKERY)
+def _oczysc_tekst_dla_lingua(issue_body: str) -> str:
+    """Wycina techniczne bloki (crash-log, traceback, bloki kodu) oraz linki,
+    zostawiając naturalny tekst użytkownika do detekcji języka przez Lingua.
+
+    Powód: detektor n-gramowy myli się na surowym tracebacku (angielskie nazwy
+    wyjątków, ścieżki Windows, fragmenty kodu) oraz na markdownowych linkach.
+
+    KRYTYCZNE dla scenariusza ZAŁĄCZONEGO pliku: GitHub NIE wkleja treści
+    załącznika do `body` — wstawia tylko link
+    `[error_log.txt](https://.../files/.../error_log.txt)`. Dlatego crash
+    zgłoszony przez załączenie pliku nie ma w `body` markerów tracebacku, a samo
+    body to (link + opcjonalny opis usera). Po wycięciu linków:
+      * gołe załączenie bez opisu → pusty string → caller spada na angielski;
+      * załączenie + natywny opis usera → zostaje opis → Lingua wykryje jego
+        prawdziwy język (komentarz Sami będzie w języku usera, nie sztywno EN).
+    """
+    if not issue_body:
+        return ""
+    tekst = issue_body
+    # 1. Markdownowe bloki kodu ``` ... ``` (typowa wklejka logu/tracebacku).
+    tekst = re.sub(r"```.*?```", " ", tekst, flags=re.DOTALL)
+    # 2. Pełny blok CRASH REPORT: od nagłówka do stopki „====" (60×'=' z
+    #    `_zapisz_log_bledu`) LUB do końca tekstu, gdy user wkleił sam fragment
+    #    bez stopki (`\Z` ratuje przed regresją „nic nie wycięte").
+    tekst = re.sub(
+        re.escape(_CRASH_HEADER) + r".*?(?:={10,}|\Z)",
+        " ", tekst, flags=re.DOTALL,
+    )
+    # 3. Surowy traceback Pythona (nawet wklejony bez nagłówka pliku): od
+    #    sygnatury do pustej linii albo końca tekstu.
+    tekst = re.sub(
+        r"Traceback \(most recent call last\):.*?(?=\n\s*\n|\Z)",
+        " ", tekst, flags=re.DOTALL,
+    )
+    # 4. Linki markdown (w tym do załączonych plików-logów) i gołe URL-e —
+    #    w całości, żeby host „github.com" ani nazwa pliku nie zaśmiecały Lingui.
+    tekst = re.sub(r"!?\[[^\]]*\]\([^)]*\)", " ", tekst)
+    tekst = re.sub(r"https?://\S+", " ", tekst)
+    return tekst.strip()
 
 
 # Komentarz Sami zostawiany na issue PO pomyślnej wysyłce maila do Centrum.
@@ -371,13 +402,15 @@ def _zostaw_komentarz_sami(
 ) -> None:
     """Zostawia komentarz Sami na issue po pomyślnej wysyłce maila do Centrum.
 
-    Język komentarza wykrywany lingua-language-detector'em na ciele issue
-    (te same 9 jzk co reszta obiegu). Brak komentarza dla LABELS_IGNORE
-    (skrypt nie dochodzi tu w tym scenariuszu — wcześniejszy return 0).
+    Język komentarza wykrywany Lingua-language-detector'em na ciele issue PO
+    wycięciu bloków technicznych i linków (`_oczysc_tekst_dla_lingua`) — te same
+    9 jzk co reszta obiegu. Crash-report bez opisu / gołe załączenie pliku-loga
+    zwijają się po czyszczeniu do pustego stringa → uniwersalny angielski; crash
+    z natywnym opisem usera zachowuje język opisu. Brak komentarza dla
+    LABELS_IGNORE (skrypt nie dochodzi tu — wcześniejszy return 0).
 
-    `czy_llm` decyduje czy doklejamy sufiks „(tym razem przekazałam
-    oryginalną treść — Centrum przejrzy ręcznie)". User powinien wiedzieć,
-    że Sami nie pomogła z przeredagowaniem, żeby nie czekał na cudowny
+    `czy_llm` decyduje czy doklejamy sufiks o fallbacku LLM. User powinien
+    wiedzieć, że Sami nie pomogła z przeredagowaniem, żeby nie czekał na cudowny
     fix gdy zgłoszenie jest niezrozumiałe.
     """
     repo = os.environ.get("GITHUB_REPOSITORY", "")
@@ -387,16 +420,14 @@ def _zostaw_komentarz_sami(
         )
         return
 
-    if _czy_crash_report(issue_body):
-        # Crash-report → POMIJAMY Lingua (traceback myli detektor) i odpowiadamy
-        # po angielsku, uniwersalnie. Patrz `_CRASH_MARKERY`.
+    czysty = _oczysc_tekst_dla_lingua(issue_body)
+    # Po wycięciu logów/linków zostało za mało, by detektor miał na czym pracować
+    # (czysty traceback wklejony bez opisu, samo „fix", gołe załączenie pliku)
+    # → uniwersalny angielski. Inaczej wykrywamy język realnego opisu usera.
+    if len(czysty) < 5:
         wykryty = Language.ENGLISH
     else:
-        wykryty = (
-            _detector.detect_language_of(issue_body)
-            if issue_body.strip()
-            else None
-        )
+        wykryty = _detector.detect_language_of(czysty)
         if wykryty not in COMMENTS:
             wykryty = Language.ENGLISH
 
