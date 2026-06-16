@@ -172,52 +172,94 @@ MAPA_JEZYKOW: dict[str, str] = _wczytaj_mape_jezykow()
 
 
 # ---------------------------------------------------------------------------
-# Prompt systemowy dla LLM
+# Natywna nazwa języka docelowego (do promptu — zamiast polskiego „fiński")
 # ---------------------------------------------------------------------------
-# Słowo "JSON" musi wystąpić w prompcie, by `response_format=json_object`
-# było zaakceptowane przez OpenAI API (twardy wymóg API z błędem inaczej).
-def _PROMPT_SYSTEMOWY(jezyk_docelowy: str) -> str:
+# Separator natywnej nazwy w `etykieta` (np. „Suomi – foneettiset perusteet”).
+# Tolerujemy en-dash / em-dash / zwykły myślnik z otaczającymi spacjami.
+_RE_SEP_ETYKIETY = re.compile(r"\s+[–—-]\s+")
+
+
+def _natywna_nazwa(kod: str) -> str:
+    """Natywna nazwa języka z `dictionaries/<kod>/podstawy.yaml::etykieta`.
+
+    Bierze prefiks przed separatorem ` – ` (jak `core_poliglota.natywna_nazwa`
+    i `refresh_languages.natywna_nazwa`, ale samowystarczalnie). Fallback na sam
+    kod ISO. Powód użycia: prompt podaje cel NATYWNIE („Suomi"/„中文") zamiast
+    po polsku („fiński") — jedna z kotwic PL zidentyfikowanych w audycie.
+    """
+    p = DICT_DIR / kod / "podstawy.yaml"
+    try:
+        with open(p, "r", encoding="utf-8") as fh:
+            dane = YAML(typ="safe").load(fh)
+    except Exception:  # noqa: BLE001 — fail-soft: brak/zły podstawy.yaml → kod ISO
+        return kod
+    etyk = (dane or {}).get("etykieta", "") if isinstance(dane, dict) else ""
+    if isinstance(etyk, str) and etyk.strip():
+        nazwa = _RE_SEP_ETYKIETY.split(etyk.strip(), maxsplit=1)[0].strip()
+        if nazwa:
+            return nazwa
+    return kod
+
+
+# ---------------------------------------------------------------------------
+# Prompt systemowy dla LLM — ANGIELSKI (audyt 2026-06-16)
+# ---------------------------------------------------------------------------
+# Prompt jest po ANGIELSKU, spójnie z docs/`tlumacz_ai._PROMPT_SYSTEMOWY_TEMPLATE`
+# (udokumentowana decyzja: „EN neutralny dla wszystkich par językowych, nie
+# wprowadza biasu modelu w stronę języka źródłowego"). Audyt UI-tłumacza wykazał,
+# że poprzedni PL-prompt + 150 polskich liści + polska nazwa celu = ~100% polski
+# payload → surowy model zakotwiczał się w PL i produkował kalki (RELEASE_NOTES:
+# „German/Russian/Spanish/Italian IT-jargon calques"). Stąd EN framing + blok
+# reguł naturalności (których PL-prompt w ogóle nie miał) + cel podany natywnie.
+# Słowo "JSON" MUSI wystąpić w prompcie (wymóg `response_format=json_object`).
+def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
     return (
-        "# Rola\n"
-        "Jesteś tłumaczem profesjonalnego interfejsu desktopowej aplikacji "
-        f"wxPython. Tłumaczysz WYŁĄCZNIE wartości — klucze i struktura JSON "
-        "są niezmienne.\n\n"
-        "## Zadanie\n"
-        f"Otrzymasz JSON z polem `liscie` — listą obiektów `{{\"id\": int, \"src\": str}}`.\n"
-        f"Przetłumacz każde pole `src` na język: **{jezyk_docelowy}**.\n"
-        "Zwróć JSON o strukturze:\n"
-        "  `{\"tlumaczenia\": [{\"id\": int, \"tgt\": str}, ...]}`\n"
-        "Każdy obiekt MUSI zawierać dokładnie to samo `id` co wejście. "
-        "Pomijanie id, dodawanie nowych ani zmiana ich kolejności nie są "
-        "dopuszczalne.\n\n"
-        "## Zasady techniczne (KRYTYCZNE — naruszenie blokuje zapis pliku)\n"
-        "1. **Markery ⟦P{n}⟧ i ⟦S{n}⟧** to zamrożone fragmenty programowe "
-        "(placeholdery i skróty klawiszowe). Skopiuj je do `tgt` DOSŁOWNIE — "
-        "litera w literę, cyfra w cyfrę. Liczba wystąpień każdego markera "
-        "w `tgt` musi być identyczna jak w `src` (skrypt nadrzędny "
-        "weryfikuje parzystość).\n"
-        "2. **Znak `&`** to akcelerator menu wxPython (Alt+litera). Zachowaj "
-        "DOKŁADNIE TAKĄ SAMĄ LICZBĘ ampersandów jak w `src` (zwykle 0 lub 1). "
-        "Przesuń `&` przed literę dającą sensowny skrót w języku docelowym "
-        "— preferuj pierwszą literę głównego słowa. Kolizje akceleratorów "
-        "w obrębie menu nie są Twoim problemem (review je rozwiąże).\n"
+        "# Role\n"
+        "You are a professional UI localizer for a desktop wxPython application. "
+        "You translate ONLY the values — JSON keys and structure are immutable.\n\n"
+        "## Task\n"
+        "You receive a JSON object with an `items` field — a list of "
+        "`{\"id\": int, \"source\": str}` objects. The `source` strings are in Polish.\n"
+        f"Translate each `source` into the target language: **{nazwa_celu}** "
+        f"(ISO 639 code: {kod}).\n"
+        "Return JSON of the shape:\n"
+        "  `{\"translations\": [{\"id\": int, \"target\": str}, ...]}`\n"
+        "Each object MUST carry exactly the same `id` as the input. Skipping ids, "
+        "adding new ones, or changing their order is not allowed.\n\n"
+        "## Localization quality (CRITICAL — these labels are read by real users)\n"
+        "- Translate NATURALLY and IDIOMATICALLY, the way a native-speaking software "
+        "product would phrase it — NOT word-for-word.\n"
+        "- Do NOT calque Polish word order, grammar or phrasing. Reformulate so the "
+        "result reads as if it had been written originally in the target language.\n"
+        "- Use the target language's ESTABLISHED software/UI and IT terminology and "
+        "conventions (button verbs, menu wording, error-message register, the "
+        "screen-reader / accessibility vocabulary native speakers actually use).\n"
+        "- Render the FUNCTION of each label, not a literal gloss of the Polish words.\n\n"
+        "## Technical rules (CRITICAL — a violation blocks the file from being saved)\n"
+        "1. **Markers ⟦P{n}⟧ and ⟦S{n}⟧** are frozen program fragments "
+        "(placeholders and keyboard shortcuts). Copy them into `target` VERBATIM — "
+        "letter for letter, digit for digit. The count of each marker in `target` "
+        "must be identical to `source` (a parent script verifies parity).\n"
+        "2. **The `&` character** is a wxPython menu accelerator (Alt+letter). Keep "
+        "EXACTLY THE SAME NUMBER of ampersands as in `source` (usually 0 or 1). Move "
+        "`&` before a letter that gives a sensible mnemonic in the target language — "
+        "prefer the first letter of the main word. Accelerator collisions within a "
+        "menu are not your concern (review resolves them).\n"
         "3. **Emoji** (🎬 📄 📚 🌍 ✅ ⚠️ 🚨 ℹ️ ✂️ 🎭 🔄 📝 📋 🧠 🎙️ 🔐 🎛️ 🏁 📜 📖) "
-        "— kopiuj 1:1 i zachowaj ich pozycję względem reszty tekstu.\n"
-        "4. **Literały techniczne** — NIE tłumacz: nazw plików "
-        "(`golden_key.env`, `.docx`, `.exe`), ścieżek (`dictionaries/`, "
-        "`runtime/`), nazw modeli AI (`gpt-4o`, `OpenAI`), produktów "
-        "(`NVDA`, `Vocalizer`, `Microsoft Word`), prefiksów kluczy (`sk-`), "
-        "skrótów Ctrl/Alt/Shift w skrótach klawiszowych.\n"
-        "5. **Białe znaki** — zachowaj wszystkie `\\n`, podwójne spacje, "
-        "wcięcia. Łamanie linii w komunikatach jest celowo dobrane "
-        "do szerokości okna dialogowego.\n"
-        "6. **Wersja aplikacji** — w polu `wersja` (np. `\"13.1 – Wersja "
-        "Wydawnicza\"`) zachowaj numer (cyfry + kropka) i myślnik, "
-        "ale przetłumacz frazę „Wersja Wydawnicza” na odpowiednik "
-        "w docelowym języku (np. „Release Edition” / „Julkaisuversio”).\n\n"
-        "## Format odpowiedzi\n"
-        "ZWRÓĆ WYŁĄCZNIE poprawny JSON `{\"tlumaczenia\": [...]}`. Bez "
-        "code-fences, bez wstępu, bez podsumowania."
+        "— copy 1:1 and keep their position relative to the rest of the text.\n"
+        "4. **Technical literals** — do NOT translate: file names (`golden_key.env`, "
+        "`.docx`, `.exe`), paths (`dictionaries/`, `runtime/`), AI model names "
+        "(`gpt-4o`, `OpenAI`), product names (`NVDA`, `Vocalizer`, `Microsoft Word`), "
+        "key prefixes (`sk-`), and Ctrl/Alt/Shift inside keyboard shortcuts.\n"
+        "5. **Whitespace** — preserve every `\\n`, double space and indentation. Line "
+        "breaks in messages are deliberately tuned to the dialog width.\n"
+        "6. **Application version** — in a value like `\"13.1 – Wersja Wydawnicza\"` "
+        "keep the number (digits + dot) and the dash, but translate the Polish phrase "
+        "'Wersja Wydawnicza' into the target-language equivalent "
+        "(e.g. 'Release Edition' / 'Julkaisuversio').\n\n"
+        "## Response format\n"
+        "Return ONLY valid JSON `{\"translations\": [...]}`. No code fences, no "
+        "preamble, no summary."
     )
 
 
@@ -376,7 +418,8 @@ def _zainicjuj_klienta_openai() -> Any:
 def wywolaj_llm(
     klient: Any,
     model: str,
-    jezyk_docelowy: str,
+    nazwa_celu: str,
+    kod: str,
     liscie_tok: list[tuple[int, str]],
 ) -> dict[int, str]:
     """Wysyła JEDEN request, zwraca mapę id → tgt.
@@ -390,9 +433,12 @@ def wywolaj_llm(
     to złapane jako miękki błąd dla danego języka, reszta języków
     leci dalej.
     """
+    # Klucze payloadu po ANGIELSKU (audyt 2026-06-16) — kolejna kotwica PL
+    # usunięta. Surowy model widzi teraz EN prompt + EN klucze; jedynym polskim
+    # elementem są same stringi `source` (czyli to, co MA tłumaczyć).
     payload = {
-        "jezyk_docelowy": jezyk_docelowy,
-        "liscie": [{"id": i, "src": s} for i, s in liscie_tok],
+        "target_language": nazwa_celu,
+        "items": [{"id": i, "source": s} for i, s in liscie_tok],
     }
 
     resp = klient.chat.completions.create(
@@ -401,12 +447,12 @@ def wywolaj_llm(
         max_tokens=MAX_TOKENS_OUT,
         response_format={"type": "json_object"},
         messages=[
-            {"role": "system", "content": _PROMPT_SYSTEMOWY(jezyk_docelowy)},
+            {"role": "system", "content": _PROMPT_SYSTEMOWY(nazwa_celu, kod)},
             {
                 "role": "user",
                 "content": (
-                    "Oto JSON z liśćmi do tłumaczenia. Zwróć JSON z polem "
-                    "`tlumaczenia`.\n\n"
+                    "Here is the JSON with items to translate. Return JSON with a "
+                    "`translations` field.\n\n"
                     + json.dumps(payload, ensure_ascii=False, indent=2)
                 ),
             },
@@ -434,13 +480,14 @@ def wywolaj_llm(
             f"Pierwsze 200 znaków: {surowa[:200]!r}"
         ) from exc
 
-    # Tolerancja drobnych wariacji nazwy korzenia: `tlumaczenia`,
-    # `translations`, lub bezpośrednio lista/słownik na top-levelu.
+    # Tolerancja drobnych wariacji nazwy korzenia: `translations` (nowy, EN),
+    # `tlumaczenia` (wstecz, sprzed audytu 2026-06-16), lub bezpośrednio
+    # lista/słownik na top-levelu.
     arr: Any
     if isinstance(dane, dict):
         arr = (
-            dane.get("tlumaczenia")
-            or dane.get("translations")
+            dane.get("translations")
+            or dane.get("tlumaczenia")
             or dane.get("results")
             or dane
         )
@@ -452,10 +499,14 @@ def wywolaj_llm(
         for item in arr:
             if not isinstance(item, dict):
                 continue
-            if "id" not in item or "tgt" not in item:
+            if "id" not in item:
+                continue
+            # `target` (nowy, EN) z tolerancją `tgt` (wstecz).
+            wartosc = item.get("target", item.get("tgt"))
+            if wartosc is None:
                 continue
             try:
-                mapa_tgt[int(item["id"])] = str(item["tgt"])
+                mapa_tgt[int(item["id"])] = str(wartosc)
             except (TypeError, ValueError):
                 continue
     elif isinstance(arr, dict):
@@ -615,12 +666,15 @@ def tlumacz_jezyk(
     total = len(liscie_tok)
     n_chunkow = (total + BATCH_SIZE - 1) // BATCH_SIZE
     mapa_tgt: dict[int, str] = {}
-    print(f"🌍 {kod}: {model} ({nazwa_pl}), {n_chunkow} chunków po max {BATCH_SIZE} liści...")
+    # Cel podawany modelowi NATYWNIE (audyt 2026-06-16) — „Suomi"/„中文" zamiast
+    # polskiego „fiński"; `nazwa_pl` zostaje tylko do logu konsoli dewelopera.
+    nazwa_cel = _natywna_nazwa(kod)
+    print(f"🌍 {kod}: {model} (cel: {nazwa_cel}), {n_chunkow} chunków po max {BATCH_SIZE} liści...")
     for nr, start in enumerate(range(0, total, BATCH_SIZE), start=1):
         chunk = liscie_tok[start:start + BATCH_SIZE]
         print(f"   {kod}: chunk {nr}/{n_chunkow} (id {chunk[0][0]}..{chunk[-1][0]}, {len(chunk)} liści)...")
         try:
-            mapa_tgt.update(wywolaj_llm(klient, model, nazwa_pl, chunk))
+            mapa_tgt.update(wywolaj_llm(klient, model, nazwa_cel, kod, chunk))
         except RuntimeError as exc:
             print(f"❌ {kod}: błąd LLM w chunk {nr}/{n_chunkow} — {exc}")
             return False
@@ -655,7 +709,7 @@ def tlumacz_jezyk(
         print(f"⚠️  {kod}: {len(porazki)} liści wymaga retry...")
         do_retry = [(idx, src_po_idx[idx]) for idx, _ in porazki]
         try:
-            retry_tgt = wywolaj_llm(klient, model, nazwa_pl, do_retry)
+            retry_tgt = wywolaj_llm(klient, model, nazwa_cel, kod, do_retry)
         except RuntimeError as exc:
             print(f"❌ {kod}: retry się wywalił — {exc}")
             return False
