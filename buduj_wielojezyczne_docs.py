@@ -542,25 +542,31 @@ def _zbuduj_prompt_dodatkowy(
 ) -> str:
     """Buduje custom system-prompt dla pary (kod_docelowy, nazwa_natywna).
 
-    Zwraca pusty string, gdy nie mamy tabeli skrótowców dla danego języka —
-    wtedy autotłumacz korzysta z bazowego promptu z `tlumacz_ai.py` bez modyfikacji.
-
     Teza 3 (2026-06-16): bloki AKCENTY/ODWRACACZ/TYPOGLIKEMIA wstrzykiwane
     WARUNKOWO — tylko gdy `tresc_sekcji` faktycznie zawiera dany artefakt
     (lista akcentów / ".nim" / Typoglikemia). CORE (kontekst + literały) zawsze.
     `tresc_sekcji=""` (wywołanie bez treści, np. ad-hoc) = zachowawczy fallback:
     wstrzykuje WSZYSTKIE bloki (stare zachowanie monolitu sprzed tezy 3).
+
+    Fix bramki (2026-06-16): brak tabeli `ABBREV_BY_LANG[kod]` blokuje WYŁĄCZNIE
+    blok ODWRACACZ (jedyny, który potrzebuje `{abbreviation_list}`) — NIE cały
+    prompt. Do tej pory `if not abbrev: return ""` zerowało też CORE-kontekst,
+    akcenty, Typoglikemię i ochronę literałów, choć te od tabeli nie zależą.
+    Empiria (stub `zh` bez tabeli, 2026-06-16): goły prompt psuł sekcje szyfrów
+    (polskie skrótowce, `.nim`, niezescramblowana Typoglikemia). Język bez tabeli
+    dostaje teraz całą resztę wytycznych; degraduje TYLKO lokalizacja skrótowców
+    Odwracacza (do rozważenia: mini-prompt generujący skrótowce zamiast tabeli).
     """
     abbrev = ABBREV_BY_LANG.get(kod)
-    if not abbrev:
-        return ""
 
     nieznana = not tresc_sekcji  # brak treści ⟹ nie wiemy, więc wstrzyknij wszystko
     czesci = [_PROMPT_CORE_KONTEKST.format(kod=kod, nazwa_natywna=nazwa_natywna)]
 
     if nieznana or _sekcja_ma_liste_akcentow(tresc_sekcji):
         czesci.append(_PROMPT_AKCENTY.format(nazwa_natywna=nazwa_natywna))
-    if nieznana or _sekcja_ma_odwracacz(tresc_sekcji):
+    # ODWRACACZ wymaga tabeli skrótowców — bez `abbrev` blok pomijamy (nie da się
+    # zbudować {abbreviation_list}); reszta wytycznych leci niezależnie.
+    if abbrev and (nieznana or _sekcja_ma_odwracacz(tresc_sekcji)):
         bullety = "\n".join(f'     - "{skr}" → "{exp}"' for skr, exp in abbrev)
         czesci.append(_PROMPT_ODWRACACZ.format(
             nazwa_natywna=nazwa_natywna, abbreviation_list=bullety,
