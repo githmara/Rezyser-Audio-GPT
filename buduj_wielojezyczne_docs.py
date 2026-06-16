@@ -231,6 +231,94 @@ ABBREV_BY_LANG: dict[str, list[tuple[str, str]]] = {
 
 
 # ---------------------------------------------------------------------------
+# Mini-prompt: skrótowce dla języka BEZ ręcznej tabeli (od 2026-06-16)
+# ---------------------------------------------------------------------------
+# Kontrybutor dodający język nie zna polskiego rdzenia i nie dopisze tabeli
+# `ABBREV_BY_LANG`. Zamiast zostawiać blok ODWRACACZ bez skrótowców (polskie
+# m.in./np. leakują do tłumaczenia), generujemy 5 typowych skrótowców języka
+# docelowego JEDNYM tanim wywołaniem LLM — wynik wpada w ten sam slot
+# `{abbreviation_list}` co tabela, więc reszta bloku (w tym recompute „.nim")
+# działa bez zmian. Cache per kod: jedno wywołanie na język na cały przebieg.
+_CACHE_SKROTOWCE_LLM: dict[str, list[tuple[str, str]]] = {}
+
+# Usuwa wiodący numer/punktor listy ("1. ", "2) ", "- ", "* ") BEZ ruszania kropek
+# wewnątrz samego skrótowca (np. „e.g." zaczyna się od litery → nie pasuje;
+# numeracja wymaga `.`/`)`, punktor wymaga spacji po znaku — więc „- " łapiemy,
+# a myślnik wewnątrz „c.-à-d." już nie, bo nie jest na początku linii).
+_RE_PUNKTOR_LISTY = re.compile(r"^\s*(?:\d+[.)]\s*|[-*•]\s+)")
+
+
+def _wygeneruj_skrotowce_llm(
+    klient: Any, kod: str, nazwa_natywna: str, model: str,
+) -> list[tuple[str, str]]:
+    """Generuje ≤5 typowych skrótowców języka docelowego (gdy brak `ABBREV_BY_LANG`).
+
+    Zwraca listę (skrót, rozwinięcie) — format identyczny z wpisem tabeli. Pusta
+    lista przy błędzie sieci / niezdatnym formacie → wołający pominie blok
+    ODWRACACZ (degradacja jak sprzed mini-promptu, nie crash). Prompt po angielsku
+    (spójnie z resztą promptów narzędzia); `temperature=0` dla determinizmu.
+    """
+    prompt = (
+        f"List exactly 5 of the most common WRITTEN abbreviations in {nazwa_natywna} "
+        f"(ISO language code: {kod}) that are normally written WITH periods — "
+        f"analogous to English 'e.g.', 'i.e.', 'etc.'. Context: a text-reversal cipher "
+        f"expands such dotted abbreviations before reversing a sentence, so they must be "
+        f"real, period-bearing abbreviations of {nazwa_natywna}.\n"
+        f"Output EXACTLY 5 lines, each STRICTLY in the format:\n"
+        f"abbreviation | full expansion\n"
+        f"No numbering, no commentary, no blank lines. If {nazwa_natywna} rarely uses "
+        f"dotted abbreviations, give the closest common written shortenings anyway."
+    )
+    try:
+        resp = klient.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+        )
+        surowa = (resp.choices[0].message.content or "").strip()
+    except Exception as exc:  # noqa: BLE001 — fail-soft: brak skrótowców → blok pominięty
+        print(f"⚠️  {kod}: generacja skrótowców LLM nie powiodła się ({exc}); "
+              f"blok Odwracacza zostanie pominięty.")
+        return []
+
+    pary: list[tuple[str, str]] = []
+    widziane: set[str] = set()
+    for linia in surowa.splitlines():
+        if "|" not in linia:
+            continue
+        lewa, prawa = linia.split("|", 1)
+        skr = _RE_PUNKTOR_LISTY.sub("", lewa).strip().strip('"').strip()
+        exp = prawa.strip().strip('"').strip()
+        # Odrzuć degeneraty: model dla języka BEZ kropkowanych skrótowców (np.
+        # chiński logograficzny) zwraca „暂无此类缩写 | 暂无此类缩写" (brak/echo) —
+        # wstrzyknięcie tego zaśmieciłoby manual. skrót==rozwinięcie lub duplikat
+        # skrótu = bezużyteczne. 0 czystych par ⟹ wołający pominie blok ODWRACACZ.
+        if not skr or not exp or skr == exp or skr in widziane:
+            continue
+        widziane.add(skr)
+        pary.append((skr, exp))
+    return pary[:5]
+
+
+def _skrotowce_dla_jezyka(
+    klient: Any, kod: str, nazwa_natywna: str, model: str,
+) -> list[tuple[str, str]]:
+    """Skrótowce dla języka: ręczna tabela `ABBREV_BY_LANG`, a gdy brak — generacja LLM (cache)."""
+    tabela = ABBREV_BY_LANG.get(kod)
+    if tabela is not None:
+        return tabela
+    if kod in _CACHE_SKROTOWCE_LLM:
+        return _CACHE_SKROTOWCE_LLM[kod]
+    wynik = _wygeneruj_skrotowce_llm(klient, kod, nazwa_natywna, model)
+    if wynik:
+        podglad = ", ".join(f'{s}→{e}' for s, e in wynik)
+        print(f"🔤 {kod}: brak tabeli ABBREV_BY_LANG — wygenerowano {len(wynik)} "
+              f"skrótowców przez LLM: {podglad}")
+    _CACHE_SKROTOWCE_LLM[kod] = wynik
+    return wynik
+
+
+# ---------------------------------------------------------------------------
 # 13.4 / teza-3 (2026-06-16): MODULARNY system-prompt per (kod, nazwa, sekcja)
 # ---------------------------------------------------------------------------
 # Dokleja się do `_PROMPT_SYSTEMOWY_TEMPLATE` z `tlumacz_ai.py` przez parametr
@@ -538,7 +626,8 @@ def parsuj_input_log(sciezka: Path) -> dict[str, str]:
 
 
 def _zbuduj_prompt_dodatkowy(
-    kod: str, nazwa_natywna: str, tresc_sekcji: str = ""
+    kod: str, nazwa_natywna: str, tresc_sekcji: str = "",
+    abbrev: list[tuple[str, str]] | None = None,
 ) -> str:
     """Buduje custom system-prompt dla pary (kod_docelowy, nazwa_natywna).
 
@@ -548,16 +637,19 @@ def _zbuduj_prompt_dodatkowy(
     `tresc_sekcji=""` (wywołanie bez treści, np. ad-hoc) = zachowawczy fallback:
     wstrzykuje WSZYSTKIE bloki (stare zachowanie monolitu sprzed tezy 3).
 
-    Fix bramki (2026-06-16): brak tabeli `ABBREV_BY_LANG[kod]` blokuje WYŁĄCZNIE
-    blok ODWRACACZ (jedyny, który potrzebuje `{abbreviation_list}`) — NIE cały
-    prompt. Do tej pory `if not abbrev: return ""` zerowało też CORE-kontekst,
-    akcenty, Typoglikemię i ochronę literałów, choć te od tabeli nie zależą.
-    Empiria (stub `zh` bez tabeli, 2026-06-16): goły prompt psuł sekcje szyfrów
-    (polskie skrótowce, `.nim`, niezescramblowana Typoglikemia). Język bez tabeli
-    dostaje teraz całą resztę wytycznych; degraduje TYLKO lokalizacja skrótowców
-    Odwracacza (do rozważenia: mini-prompt generujący skrótowce zamiast tabeli).
+    Fix bramki (2026-06-16): brak skrótowców blokuje WYŁĄCZNIE blok ODWRACACZ
+    (jedyny, który potrzebuje `{abbreviation_list}`) — NIE cały prompt. Do tej
+    pory `if not abbrev: return ""` zerowało też CORE-kontekst, akcenty,
+    Typoglikemię i ochronę literałów, choć te od skrótowców nie zależą.
+
+    `abbrev`: skrótowce do bloku ODWRACACZ. ``None`` (wywołanie ad-hoc) → fallback
+    na ręczną tabelę `ABBREV_BY_LANG[kod]`. Wołający z pętli tłumaczenia podaje
+    listę rozwiązaną przez `_skrotowce_dla_jezyka` — tabela LUB skrótowce
+    wygenerowane mini-promptem LLM (język kontrybutora bez wpisu w tabeli).
+    Pusta lista/``None`` bez tabeli → blok ODWRACACZ pominięty.
     """
-    abbrev = ABBREV_BY_LANG.get(kod)
+    if abbrev is None:
+        abbrev = ABBREV_BY_LANG.get(kod)
 
     nieznana = not tresc_sekcji  # brak treści ⟹ nie wiemy, więc wstrzyknij wszystko
     czesci = [_PROMPT_CORE_KONTEKST.format(kod=kod, nazwa_natywna=nazwa_natywna)]
@@ -1019,6 +1111,19 @@ def tlumacz_szablon(
 
     rdzen = nazwa_pliku.rsplit(".", 1)[0]
 
+    # Skrótowce Odwracacza: ręczna tabela ABBREV_BY_LANG, a gdy jej brak (język
+    # kontrybutora bez polskiego rdzenia) — generacja LLM (mini-prompt, raz na
+    # język, cache). Leniwie: tylko gdy któraś tłumaczona sekcja faktycznie zawiera
+    # Odwracacz (artefakt ".nim") i nie ma tabeli. dry_run: zero API → fallback do
+    # tabeli (None ⟹ brak bloku), bez generacji.
+    abbrev = ABBREV_BY_LANG.get(kod)
+    if (
+        abbrev is None
+        and not dry_run
+        and any(_sekcja_ma_odwracacz(t) for t in sekcje_do_tlumaczenia.values())
+    ):
+        abbrev = _skrotowce_dla_jezyka(klient, kod, nazwa_natywna, model)
+
     # RETRY: detektor budujemy raz na plik (ładowanie modeli lingua jest drogie),
     # reużywamy między sekcjami. sekcje_istniejace jest gwarantowane (retry ⟹
     # surgical ⟹ wczytano docelowy plik wyżej).
@@ -1033,8 +1138,9 @@ def tlumacz_szablon(
     for klucz, tresc_pl in sekcje_do_tlumaczenia.items():
         # Teza 3: prompt budujemy PER SEKCJĘ z jej treści — bloki szyfrów/akcentów
         # wstrzykiwane tylko gdy sekcja faktycznie ich dotyczy (vs dawny monolit
-        # doklejany do wszystkich 68 sekcji).
-        prompt_dodatkowy = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna, tresc_pl)
+        # doklejany do wszystkich 68 sekcji). `abbrev` rozwiązane wyżej (tabela
+        # albo skrótowce z mini-promptu LLM) — steruje blokiem ODWRACACZ.
+        prompt_dodatkowy = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna, tresc_pl, abbrev=abbrev)
         prompt_sekcji = prompt_dodatkowy
         if retry:
             import audyt_leakow
