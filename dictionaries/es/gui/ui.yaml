@@ -1126,20 +1126,13 @@ updater:
   blad_pobierania_tresc: "No se pudo descargar la actualización:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Error al iniciar el instalador"
   blad_uruchomienia_tresc: "No se pudo iniciar el instalador:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    Hay una nueva versión disponible: {nowa_wersja}.
-
-    Esta instalación no utiliza el paquete runtime — la descarga del instalador no está disponible.
-    Visita la página de lanzamientos en GitHub y descarga el archivo "Source code" o clona el repositorio:
-
-    {url_release}
-
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
   changelog_uwaga: El registro de cambios de la nueva versión se abrirá como el archivo docs/changelog.md. Está en inglés y polaco; si prefieres otro idioma, carga este archivo en el módulo Políglota (Traductor AI) o cualquier traductor o chatbot.
   changelog_naglowek: '# Novedades en la versión {nowa_wersja}'
   changelog_blad: "No se pudo guardar o abrir el archivo del registro de cambios:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Registro de cambios de la versión {nowa_wersja}
+  btn_pobierz_zrodlo: '&Descargar código fuente (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Panel de Historias"

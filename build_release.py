@@ -776,7 +776,13 @@ def skompletuj_dist(dist_dir: Path) -> None:
 
     src_docs = root / "docs"
     if src_docs.is_dir():
-        shutil.copytree(src_docs, dist_dir / "docs")
+        # `.gitkeep` (znacznik utrzymania pustego folderu w gicie) i runtime'owy
+        # `changelog.md` (zapisywany przy aktualizacji obok exe) to pliki dev /
+        # user-data — nie pakujemy ich do paczki end-usera.
+        shutil.copytree(
+            src_docs, dist_dir / "docs",
+            ignore=shutil.ignore_patterns(".gitkeep", "changelog.md"),
+        )
 
     def _pomin_dokumentacje(katalog: str, nazwy: list[str]) -> list[str]:
         # Surowe szablony dev (dictionaries/<kod>/gui/dokumentacja/*.yaml) nie

@@ -690,9 +690,15 @@ class DialogAktualizacji(wx.Dialog):
 
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self._btn_pobierz = wx.Button(
-            self, wx.ID_YES, t("updater.btn_pobierz")
+        # Etykieta zależna od trybu: frozen → instalator .exe; źródło (dev /
+        # non-Windows) → kod źródłowy ZIP (bez dodatkowej instalacji). Sam dialog
+        # jest identyczny niezależnie od sposobu uruchomienia (decyzja v17.11) —
+        # różni się TYLKO cel pobierania (obsłużony w `_start_pobieranie`).
+        label_pobierz = (
+            t("updater.btn_pobierz") if getattr(sys, "frozen", False)
+            else t("updater.btn_pobierz_zrodlo")
         )
+        self._btn_pobierz = wx.Button(self, wx.ID_YES, label_pobierz)
         self._btn_pobierz.SetDefault()
 
         self._btn_otworz = wx.Button(
@@ -1249,30 +1255,27 @@ class MainFrame(wx.Frame):
         obecność nie świadczy o tym, czy chodzimy z paczki. Jedynym wiarygodnym
         sygnałem „to skompilowana paczka" jest ``sys.frozen``.
         """
-        if getattr(sys, "frozen", False):
-            dlg = DialogAktualizacji(self, info)
-            odpowiedz = dlg.ShowModal()
-            dlg.Destroy()
-            if odpowiedz == wx.ID_YES:
-                self._start_pobieranie(info)
-        else:
-            url_release = (
-                f"https://github.com/{core_updater.GITHUB_USER}"
-                f"/{core_updater.GITHUB_REPO}/releases/tag/{info.tag}"
-            )
-            wx.MessageBox(
-                t(
-                    "updater.dev_info_tresc",
-                    nowa_wersja=info.wersja,
-                    url_release=url_release,
-                ),
-                t("updater.nowa_wersja_tytul"),
-                wx.OK | wx.ICON_INFORMATION,
-                self,
-            )
+        # Ten sam dialog niezależnie od sposobu uruchomienia (v17.11) — wygląd nie
+        # zależy już od frozen/źródło. Rozgałęzienie celu pobierania jest dopiero
+        # w `_start_pobieranie` (instalator .exe vs kod źródłowy ZIP).
+        dlg = DialogAktualizacji(self, info)
+        odpowiedz = dlg.ShowModal()
+        dlg.Destroy()
+        if odpowiedz == wx.ID_YES:
+            self._start_pobieranie(info)
 
     def _start_pobieranie(self, info: core_updater.UpdateInfo) -> None:
-        """Główny wątek: otwiera ProgressDialog i startuje wątek pobierania."""
+        """Główny wątek: rozgałęzia pobieranie wg trybu uruchomienia.
+
+        frozen (paczka PyInstaller) → pobranie instalatora .exe z paskiem postępu
+        i automatyczne uruchomienie. Źródło (dev / non-Windows) → otwarcie w
+        przeglądarce linku do kodu źródłowego (ZIP) danej wersji — bez instalatora
+        i bez dodatkowej instalacji (user rozpakowuje nad swoim klonem)."""
+        if not getattr(sys, "frozen", False):
+            url = info.url_zrodla or info.url_release
+            if url:
+                wx.LaunchDefaultBrowser(url)
+            return
         self._progress_dlg = wx.ProgressDialog(
             t("updater.pobieranie_tytul", nowa_wersja=info.wersja),
             t("updater.pobieranie_tresc", nazwa_pliku=info.nazwa_pliku),

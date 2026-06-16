@@ -24,6 +24,8 @@ from pathlib import Path
 from typing import Callable, Optional
 from urllib.error import URLError, HTTPError
 
+import sciezki
+
 
 # ---------------------------------------------------------------------------
 # Konfiguracja
@@ -33,7 +35,14 @@ GITHUB_USER = "githmara"
 GITHUB_REPO = "Rezyser-Audio-GPT"
 
 _API_URL = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
-_SCIEZKA_VERSION = Path(__file__).with_name("VERSION")
+# VERSION liczony przez `sciezki.KATALOG_BAZOWY` (= dir(exe) gdy frozen), TAK SAMO
+# jak `i18n._PLIK_WERSJI`. Do v17.11 było tu `Path(__file__).with_name("VERSION")`
+# — w paczce PyInstaller `__file__` wskazuje WEWNĄTRZ bundla (`runtime/`), więc
+# VERSION (kopiowany OBOK exe przez `skompletuj_dist`) nie był znajdowany →
+# `_odczytaj_wersje_lokalna` rzucał FileNotFoundError → `sprawdz_aktualizacje`
+# łapał go i zwracał None → DIALOG AKTUALIZACJI NIGDY SIĘ NIE POKAZYWAŁ w
+# żadnym frozen buildzie (cichy regres od migracji na PyInstaller, v17.0).
+_SCIEZKA_VERSION = sciezki.KATALOG_BAZOWY / "VERSION"
 
 # Wzorzec nazwy pliku instalatora w assets (GitHub Release)
 _WZORZEC_INSTALATORA = re.compile(r"rezyser_audio.*installer.*\.exe", re.IGNORECASE)
@@ -56,6 +65,10 @@ class UpdateInfo:
     rozmiar_bajtow: int      # 0 jeśli GitHub nie podał Content-Length
     url_release: str = ""    # (v17.6) strona Release na GitHubie (html_url) —
                              # „Szczegóły online" w DialogAktualizacji. Treść po PL.
+    url_zrodla: str = ""     # (v17.11) `zipball_url` — kod źródłowy (ZIP) tej
+                             # wersji. Cel przycisku „Pobierz" w trybie NIE-frozen
+                             # (dev / non-Windows): brak instalatora .exe, więc
+                             # oferujemy źródło bez dodatkowej instalacji.
     changelog: str = ""      # (v17.11) treść Release (`body` z API) = sekcja
                              # `RELEASE_NOTES ## <wersja>` NOWEJ wersji. Realny
                              # changelog do świadomej decyzji o aktualizacji —
@@ -173,6 +186,7 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
             nazwa_pliku=asset["name"],
             rozmiar_bajtow=asset.get("size", 0),
             url_release=dane.get("html_url", ""),
+            url_zrodla=dane.get("zipball_url", ""),
             changelog=(dane.get("body") or "").strip(),
         )
 

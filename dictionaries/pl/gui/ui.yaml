@@ -1152,6 +1152,8 @@ updater:
   # Przyciski w DialogAktualizacji (akceleratory: &P, &C, &O, &A, &S — bez kolizji wewnątrz dialogu)
   btn_changelog:            "📄 &Changelog wersji {nowa_wersja}"
   btn_pobierz:              "&Pobierz i zainstaluj"
+  # Tryb źródłowy (dev / non-Windows): brak instalatora .exe → kod źródłowy ZIP.
+  btn_pobierz_zrodlo:       "&Pobierz kod źródłowy (ZIP)"
   btn_otworz_dictionaries:  "&Otwórz folder dictionaries"
   btn_anuluj:               "&Anuluj"
   blad_otworz_folder:       "Nie udało się otworzyć folderu:\n{sciezka}\n\n{tresc_bledu}"
@@ -1168,13 +1170,6 @@ updater:
   blad_pobierania_tresc:    "Nie udało się pobrać aktualizacji:\n{tresc_bledu}"
   blad_uruchomienia_tytul:  "Błąd uruchamiania instalatora"
   blad_uruchomienia_tresc:  "Nie udało się uruchomić instalatora:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    Dostępna jest nowa wersja: {nowa_wersja}.
-
-    Ta instalacja nie korzysta z pakietu runtime — pobranie instalatora jest niedostępne.
-    Odwiedź stronę wydania na GitHubie i pobierz archiwum „Source code" lub sklonuj repozytorium:
-
-    {url_release}
 
 # -----------------------------------------------------------------------------
 # OPOWIEŚCI – panel modułu „Interaktywne Opowieści" (gui_opowiesci.py)

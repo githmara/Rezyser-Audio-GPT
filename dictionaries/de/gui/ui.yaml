@@ -1127,20 +1127,13 @@ updater:
   blad_pobierania_tresc: "Update konnte nicht heruntergeladen werden:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Fehler beim Starten des Installers"
   blad_uruchomienia_tresc: "Installer konnte nicht gestartet werden:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    Eine neue Version ist verfügbar: {nowa_wersja}.
-
-    Diese Installation verwendet kein Runtime-Paket — das Herunterladen des Installers ist nicht verfügbar.
-    Besuchen Sie die Release-Seite auf GitHub und laden Sie das Archiv „Source code" herunter oder klonen Sie das Repository:
-
-    {url_release}
-
   co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
   btn_szczegoly_online: '&Details online'
   changelog_uwaga: Das Änderungsprotokoll der neuen Version wird als Datei docs/changelog.md geöffnet. Es ist auf Englisch und Polnisch — wenn Sie eine andere Sprache bevorzugen, laden Sie diese Datei in das Polyglot-Modul (AI-Übersetzer) oder einen beliebigen Übersetzer oder Chatbot.
   changelog_naglowek: '# Was ist neu in Version {nowa_wersja}'
   changelog_blad: "Die Datei des Änderungsprotokolls konnte nicht gespeichert oder geöffnet werden:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Änderungsprotokoll der Version {nowa_wersja}
+  btn_pobierz_zrodlo: '&Quellcode herunterladen (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Geschichten-Panel"

@@ -1120,20 +1120,13 @@ updater:
   blad_pobierania_tresc: "Impossible de télécharger la mise à jour :\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Erreur de démarrage de l'installateur"
   blad_uruchomienia_tresc: "Impossible de démarrer l'installateur :\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    Une nouvelle version est disponible : {nowa_wersja}.
-
-    Cette installation n'utilise pas le pack runtime — le téléchargement de l'installateur n'est pas disponible.
-    Visitez la page de version sur GitHub et téléchargez l'archive « Source code » ou clonez le dépôt :
-
-    {url_release}
-
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
   changelog_uwaga: Le journal des modifications de la nouvelle version s'ouvrira sous forme de fichier docs/changelog.md. Il est en anglais et en polonais — si vous préférez une autre langue, chargez ce fichier dans le module Polyglotte (Traducteur AI) ou tout autre traducteur ou chatbot.
   changelog_naglowek: '# Quoi de neuf dans la version {nowa_wersja}'
   changelog_blad: "Impossible d'enregistrer ou d'ouvrir le fichier du journal des modifications :\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Journal des modifications de la version {nowa_wersja}
+  btn_pobierz_zrodlo: '&Télécharger le code source (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Panneau d'Histoires"

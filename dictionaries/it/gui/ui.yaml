@@ -1127,20 +1127,13 @@ updater:
   blad_pobierania_tresc: "Impossibile scaricare l'aggiornamento:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Errore di avvio dell'installatore"
   blad_uruchomienia_tresc: "Impossibile avviare l'installatore:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    È disponibile una nuova versione: {nowa_wersja}.
-
-    Questa installazione non utilizza il pacchetto runtime — il download dell'installatore non è disponibile.
-    Visita la pagina di rilascio su GitHub e scarica l'archivio "Source code" o clona il repository:
-
-    {url_release}
-
   co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
   btn_szczegoly_online: '&Dettagli online'
   changelog_uwaga: Il changelog della nuova versione si aprirà come file docs/changelog.md. È in inglese e polacco — se preferisci un'altra lingua, carica questo file nel modulo Poliglotta (Traduttore AI) o in qualsiasi traduttore o chatbot.
   changelog_naglowek: "# Cosa c'è di nuovo nella versione {nowa_wersja}"
   changelog_blad: "Impossibile salvare o aprire il file del changelog:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Changelog della versione {nowa_wersja}
+  btn_pobierz_zrodlo: '&Scarica il codice sorgente (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Pannello delle Storie"

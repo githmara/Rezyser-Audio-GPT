@@ -1128,20 +1128,13 @@ updater:
   blad_pobierania_tresc: "Failed to download update:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Installer launch error"
   blad_uruchomienia_tresc: "Failed to launch installer:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    A new version is available: {nowa_wersja}.
-
-    This installation does not use the runtime package — downloading the installer is unavailable.
-    Visit the release page on GitHub and download the "Source code" archive or clone the repository:
-
-    {url_release}
-
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
   changelog_uwaga: The changelog of the new version will open as the file docs/changelog.md. It is in English and Polish — if you prefer another language, load this file into the Polyglot module (AI Translator) or any translator or chatbot.
   changelog_naglowek: "# What's new in version {nowa_wersja}"
   changelog_blad: "Failed to save or open the changelog file:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 Version &Changelog {nowa_wersja}
+  btn_pobierz_zrodlo: '&Download source code (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Story Panel"

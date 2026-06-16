@@ -1127,20 +1127,13 @@ updater:
   blad_pobierania_tresc: "Ekki tókst að sækja uppfærslu:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Villa við ræsingu uppsetningarforrits"
   blad_uruchomienia_tresc: "Ekki tókst að ræsa uppsetningarforrit:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    Ný útgáfa er í boði: {nowa_wersja}.
-
-    Þessi uppsetning notar ekki runtime pakka — niðurhal uppsetningarforrits er ekki í boði.
-    Farðu á útgáfusíðuna á GitHub og sæktu „Source code" skjalasafnið eða klónaðu geymsluna:
-
-    {url_release}
-
   co_nowego_online_pl: Heill útgáfusíða (á netinu) er fáanleg á pólsku.
   btn_szczegoly_online: '&Upplýsingar á netinu'
   changelog_uwaga: Changelog nýrrar útgáfu opnast sem skrá docs/changelog.md. Það er á ensku og pólsku — ef þú vilt annað tungumál, hlaðið þessari skrá inn í AI Fjöltyngispanel (AI þýðandi) eða hvaða þýðanda eða spjallmenni sem er.
   changelog_naglowek: '# Hvað er nýtt í útgáfu {nowa_wersja}'
   changelog_blad: "Ekki tókst að vista eða opna changelog skrána:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Changelog útgáfu {nowa_wersja}
+  btn_pobierz_zrodlo: '&Sækja frumkóða (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Sögupanel"

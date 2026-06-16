@@ -1125,20 +1125,13 @@ updater:
   blad_pobierania_tresc: "Päivitystä ei voitu ladata:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Asentajan käynnistysvirhe"
   blad_uruchomienia_tresc: "Asentajaa ei voitu käynnistää:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    Uusi versio on saatavilla: {nowa_wersja}.
-
-    Tämä asennus ei käytä runtime-pakettia — asentajan lataaminen ei ole käytettävissä.
-    Käy GitHub-julkaisusivulla ja lataa "Source code" -arkisto tai kloonaa arkisto:
-
-    {url_release}
-
   co_nowego_online_pl: Julkaisun koko sivu (verkossa) on saatavilla puolaksi.
   btn_szczegoly_online: '&Yksityiskohdat verkossa'
   changelog_uwaga: Changelog uuden version avautuu tiedostona docs/changelog.md. Se on englanniksi ja puolaksi — jos haluat toisen kielen, lataa tämä tiedosto Polyglot-paneeliin (AI-kääntäjä) tai mihin tahansa kääntäjään tai chatbotiin.
   changelog_naglowek: '# Mitä uutta versiossa {nowa_wersja}'
   changelog_blad: "Tiedoston changelog tallentaminen tai avaaminen epäonnistui:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Version changelog {nowa_wersja}
+  btn_pobierz_zrodlo: '&Lataa lähdekoodi (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Tarina-paneeli"

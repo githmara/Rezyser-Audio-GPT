@@ -1127,20 +1127,13 @@ updater:
   blad_pobierania_tresc: "Не удалось загрузить обновление:\n{tresc_bledu}"
   blad_uruchomienia_tytul: "Ошибка запуска установщика"
   blad_uruchomienia_tresc: "Не удалось запустить установщик:\n{sciezka_pliku}\n\n{tresc_bledu}"
-  dev_info_tresc: |-
-    Доступна новая версия: {nowa_wersja}.
-
-    Эта установка не использует пакет runtime — загрузка установщика недоступна.
-    Посетите страницу релиза на GitHub и скачайте архив «Source code» или клонируйте репозиторий:
-
-    {url_release}
-
   co_nowego_online_pl: Полная страница выпуска (онлайн) доступна на польском.
   btn_szczegoly_online: '&Подробности онлайн'
   changelog_uwaga: Журнал изменений новой версии откроется как файл docs/changelog.md. Он на английском и польском языках — если вы предпочитаете другой язык, загрузите этот файл в модуль Полиглота (Переводчик AI) или любой другой переводчик или чат-бот.
   changelog_naglowek: '# Что нового в версии {nowa_wersja}'
   changelog_blad: "Не удалось сохранить или открыть файл журнала изменений:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Журнал изменений версии {nowa_wersja}
+  btn_pobierz_zrodlo: '&Загрузить исходный код (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Панель Историй"
