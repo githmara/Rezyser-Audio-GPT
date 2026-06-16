@@ -130,18 +130,45 @@ TOKEN_PARITY_REGEX = re.compile(r"⟦([PS]\d+)⟧")
 
 
 # ---------------------------------------------------------------------------
-# Mapa języków docelowych (spójna z buduj_wielojezyczne_docs.py)
+# Mapa języków docelowych — ładowana z `jezyki_docelowe.yaml` (od 2026-06-16)
 # ---------------------------------------------------------------------------
-MAPA_JEZYKOW: dict[str, str] = {
-    "en": "angielski",
-    "fi": "fiński",
-    "ru": "rosyjski",
-    "is": "islandzki",
-    "it": "włoski",
-    "de": "niemiecki",
-    "fr": "francuski",
-    "es": "hiszpański",
+# WSPÓLNY rejestr z `buduj_wielojezyczne_docs.py` (single source): oba siostrzane
+# narzędzia czytają TEN SAM plik `jezyki_docelowe.yaml` (root repo), utrzymywany
+# przez dev tool `refresh_languages.py`. Kontrybutor dodaje język raz (wrzuć
+# `dictionaries/<kod>/` + refresh) i działa zarówno dla UI, jak i dla docs — bez
+# edycji Pythona. `_FALLBACK_JEZYKOW` = safety net, gdy pliku brak (świeży checkout
+# przed pierwszym refresh). Czyta przez ruamel (ten sam YAML co reszta narzędzia).
+_REJESTR_JEZYKOW = ROOT / "jezyki_docelowe.yaml"
+_FALLBACK_JEZYKOW: dict[str, str] = {
+    "en": "angielski", "fi": "fiński", "ru": "rosyjski", "is": "islandzki",
+    "it": "włoski", "de": "niemiecki", "fr": "francuski", "es": "hiszpański",
 }
+
+
+def _wczytaj_mape_jezykow() -> dict[str, str]:
+    """Wczytuje rejestr ISO→nazwa z `jezyki_docelowe.yaml` (fallback: wbudowane 8).
+
+    Single source spójny z `buduj_wielojezyczne_docs.py`. Filtruje wpisy
+    nie-stringowe i język źródłowy `pl` (źródło, nie cel tłumaczenia).
+    """
+    if not _REJESTR_JEZYKOW.is_file():
+        return dict(_FALLBACK_JEZYKOW)
+    try:
+        with open(_REJESTR_JEZYKOW, "r", encoding="utf-8") as fh:
+            dane = YAML(typ="safe").load(fh)
+    except Exception:  # noqa: BLE001 — fail-soft: zły/niedostępny rejestr → fallback
+        return dict(_FALLBACK_JEZYKOW)
+    if not isinstance(dane, dict):
+        return dict(_FALLBACK_JEZYKOW)
+    mapa = {
+        str(k): str(v)
+        for k, v in dane.items()
+        if isinstance(k, str) and isinstance(v, str) and k != KOD_ZRODLOWY
+    }
+    return mapa or dict(_FALLBACK_JEZYKOW)
+
+
+MAPA_JEZYKOW: dict[str, str] = _wczytaj_mape_jezykow()
 
 
 # ---------------------------------------------------------------------------
