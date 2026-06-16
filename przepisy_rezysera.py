@@ -311,6 +311,45 @@ def _wczytaj_yaml(sciezka: str) -> dict:
     return data if isinstance(data, dict) else {}
 
 
+# =============================================================================
+# Plik wspólny ``rezyser/baza.yaml`` — wrappery kontekstu LLM (od v17.10)
+# =============================================================================
+# Trzyma teksty WSPÓŁDZIELONE między trybami (analogicznie do
+# ``opowiesci/baza.yaml``). Dziś: wrappery kontekstu role=assistant
+# (``[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:`` / ``[OBECNA FABUŁA]:``) wyniesione
+# z hard-kodu ``rezyser_ai.buduj_payload``. NIE jest przepisem (brak ``id``),
+# więc ``_yaml_to_przepis`` go pomija — nie zaśmieca listy trybów.
+NAZWA_BAZY = "baza"
+_CACHE_BAZA: dict[str, dict] = {}
+
+
+def _zaladuj_baze(jezyk: str) -> dict:
+    """Wczytuje ``dictionaries/<jezyk>/rezyser/baza.yaml`` (cache, ``{}`` gdy brak)."""
+    if jezyk in _CACHE_BAZA:
+        return _CACHE_BAZA[jezyk]
+    sciezka = os.path.join(DICTIONARIES_DIR, jezyk, FOLDER_REZYSER, f"{NAZWA_BAZY}.yaml")
+    dane = _wczytaj_yaml(sciezka)
+    _CACHE_BAZA[jezyk] = dane
+    return dane
+
+
+def tekst_bazy(jezyk: str, klucz: str, default: str) -> str:
+    """Zwraca tekstowy klucz z ``rezyser/baza.yaml`` z fallbackiem lang→en→literał.
+
+    Używane przez :func:`rezyser_ai.buduj_payload` do wrapperów kontekstu LLM
+    wyniesionych z hard-kodu. Wrappery ``[OBECNA FABUŁA]:`` /
+    ``[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:`` to strukturalne TAGI-KOTWICE
+    (``tryb_burza.yaml`` referuje ``[OBECNA FABUŁA]`` dosłownie), więc w paczkach
+    trzymane są 1:1 we wszystkich językach — fallback do en/literału jest tu
+    siatką bezpieczeństwa, nie mechanizmem lokalizacji. Pusty/niełańcuchowy klucz
+    (``jezyk`` bez baza.yaml) → en → ``default``.
+    """
+    val = _zaladuj_baze(jezyk).get(klucz)
+    if val is None and jezyk != "en":
+        val = _zaladuj_baze("en").get(klucz)
+    return val if isinstance(val, str) else default
+
+
 def _zaladuj_wszystkie(jezyk: str) -> list[PrzepisRezysera]:
     """Skanuje ``dictionaries/<jezyk>/rezyser/*.yaml`` i cache'uje wynik."""
     if jezyk in _CACHE_PRZEPISOW:
@@ -388,6 +427,7 @@ def wyczysc_cache() -> None:
     odczyty wzięły świeżą treść z dysku zamiast przeterminowanego cache.
     """
     _CACHE_PRZEPISOW.clear()
+    _CACHE_BAZA.clear()
 
 
 # =============================================================================

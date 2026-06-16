@@ -338,16 +338,26 @@ def buduj_payload(
 
     messages: list[dict] = [{"role": "system", "content": system_prompt}]
 
+    # Wrappery kontekstu (tagi-kotwice) wyniesione z hard-kodu do `rezyser/baza.yaml`
+    # (v17.10). 1:1 we wszystkich językach — `tryb_burza.yaml` referuje [OBECNA FABUŁA]
+    # dosłownie, więc lokalizacja by je rozjechała; baza daje pojedyncze źródło + fallback.
     if snapshot.summary_text.strip():
+        prefiks_streszczenia = pr.tekst_bazy(
+            przepis.kod_jezyka, "wrapper_streszczenie",
+            "[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
+        )
         messages.append({
             "role": "assistant",
-            "content": f"[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:\n{snapshot.summary_text}",
+            "content": f"{prefiks_streszczenia}\n{snapshot.summary_text}",
         })
 
     if snapshot.full_story.strip():
+        prefiks_fabuly = pr.tekst_bazy(
+            przepis.kod_jezyka, "wrapper_fabula", "[OBECNA FABUŁA]:",
+        )
         messages.append({
             "role": "assistant",
-            "content": f"[OBECNA FABUŁA]:\n{snapshot.full_story}",
+            "content": f"{prefiks_fabuly}\n{snapshot.full_story}",
         })
 
     przypom = pr.buduj_przypomnienie(przepis)

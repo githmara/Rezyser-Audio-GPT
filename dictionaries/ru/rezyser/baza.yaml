@@ -1,0 +1,11 @@
+# =============================================================================
+# rezyser/baza.yaml — shared keys across Director modes (mirror of opowiesci/baza.yaml)
+#
+# STRUCTURAL ANCHOR TAGS — DO NOT TRANSLATE / KEEP IDENTICAL IN EVERY LANGUAGE.
+# These wrap the LLM context (role=assistant) in rezyser_ai.buduj_payload and are
+# referenced VERBATIM by tryb_burza.yaml prompts (e.g. "the end of [OBECNA FABUŁA]").
+# Localizing them would desync the Burza prompt references. Read via
+# przepisy_rezysera.tekst_bazy (fallback lang -> en -> literal).
+# =============================================================================
+wrapper_streszczenie: "[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:"
+wrapper_fabula: "[OBECNA FABUŁA]:"
