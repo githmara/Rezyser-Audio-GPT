@@ -204,20 +204,27 @@ ABBREV_BY_LANG: dict[str, list[tuple[str, str]]] = {
 
 
 # ---------------------------------------------------------------------------
-# 13.4: builder customowego system-promptu per (kod_docelowy, nazwa_natywna)
+# 13.4 / teza-3 (2026-06-16): MODULARNY system-prompt per (kod, nazwa, sekcja)
 # ---------------------------------------------------------------------------
-# Dokleja się do `_PROMPT_SYSTEMOWY_TEMPLATE` z `tlumacz_ai.py` przez nowy
-# parametr `prompt_dodatkowy`. Wymusza na modelu trzy nieoczywiste rzeczy
-# zidentyfikowane podczas review wyników pierwszego batchu (13.4):
+# Dokleja się do `_PROMPT_SYSTEMOWY_TEMPLATE` z `tlumacz_ai.py` przez parametr
+# `prompt_dodatkowy`. Do 2026-06-16 był to JEDEN monolit (~1 286 tok) doklejany
+# do KAŻDEJ z 68 sekcji — także ~59, które nie mają nic wspólnego z akcentami
+# ani szyframi. Pomiar (skrypty/ai_odpowiedz.md): instrukcja zżerała 68% budżetu
+# treści, rozpraszając atencję modelu na reguły nieistotne dla danej sekcji.
 #
-#   1. NIE pisać że wsparcie kodu_docelowego jest „w przyszłości" —
-#      paczka `dictionaries/<kod>/` jest już kompletna w 13.4.
-#   2. W liście akcentów PODMIENIĆ pozycję dla języka docelowego
-#      (no-op dla użytkownika natywnego) na akcent polski (Ewa/Paulina).
-#   3. W sekcjach szyfrów (Odwracacz, Typoglikemia) — nie kopiować
-#      polskich przykładów dosłownie, tylko zlokalizować je pod
-#      docelową fonetykę.
-PROMPT_TEMPLATE_DOKUMENTACJA = """\
+# Teza 3 — składamy prompt z bloków, wstrzykiwanych WARUNKOWO wg treści sekcji:
+#   * CORE_KONTEKST + CORE_LITERALY — ZAWSZE (kontekst projektu + ochrona nazw
+#     plików/folderów/placeholderów/głosów + markery ⟦i⟧).
+#   * AKCENTY      — tylko gdy sekcja zawiera wyliczoną listę akcentów
+#                    (≥ _PROG_GLOSOW nazw głosów): podmiana pozycji języka
+#                    docelowego (no-op dla natywnego) na akcent polski Ewa/Paulina.
+#   * ODWRACACZ    — tylko gdy sekcja opisuje szyfr Odwracacz (artefakt ".nim").
+#   * TYPOGLIKEMIA — tylko gdy sekcja opisuje szyfr Typoglikemia.
+# Bias detekcji: false-positive (zbędny blok) = stracone tokeny (nieszkodliwe);
+# false-negative (brak bloku w sekcji szyfru/akcentu) = leak polskiego przykładu
+# → detektory są raczej zachłanne. CORE_LITERALY ląduje NA KOŃCU (recency:
+# najbliżej tłumaczonego tekstu są najważniejsze zakazy ochrony literałów).
+_PROMPT_CORE_KONTEKST = """\
 ## Project context (CRITICAL — read carefully)
 This documentation describes "Reżyser Audio GPT", a Polish desktop tool for writers
 and voice-over creators. The translation is for a {nazwa_natywna} user who already
@@ -229,8 +236,10 @@ The application supports MULTIPLE source languages (today: Polish and English; m
 in 13.4+). Each "dictionaries/<source>/" folder is a self-contained rule pack that
 operates on input text written in that source language. The application uses
 langdetect to pick the right pack automatically — you must NOT claim that the rules
-apply to Polish source only.
+apply to Polish source only.\
+"""
 
+_PROMPT_AKCENTY = """\
 ### Accent list — REPLACE the native accent
 The docs include a list of available accents like:
   - English (Samantha/Mark in Vocalizer, Zira/Hazel in OneCore)
@@ -245,8 +254,10 @@ voice names:
     Polish (Ewa in Vocalizer, Paulina in OneCore)
 
 Keep ALL OTHER entries (translate language NAMES to {nazwa_natywna}, but preserve
-voice names like Samantha, Markus, Heidi, Gudrun, Milena 1:1 — product names).
+voice names like Samantha, Markus, Heidi, Gudrun, Milena 1:1 — product names).\
+"""
 
+_PROMPT_ODWRACACZ = """\
 ### Cipher: Text Reverser — replace abbreviations with target-language equivalents
 The Reverser cipher section lists Polish abbreviations (m.in., np., tzw., tzn., dr.)
 that the script expands BEFORE reversing the sentence — without expansion, dotted
@@ -257,8 +268,10 @@ You MUST localize this:
 {abbreviation_list}
   2. RE-COMPUTE the nonsense example (".nim" in Polish): take the FIRST abbreviation
      from your replacement list, reverse it character-by-character, and present that
-     as the new nonsense example for the target language.
+     as the new nonsense example for the target language.\
+"""
 
+_PROMPT_TYPOGLIKEMIA = """\
 ### Cipher: Typoglycemia — DECODE, TRANSLATE, RE-SCRAMBLE
 The Typoglycemia section contains an example sentence that is ITSELF an output of
 the cipher (Polish, scrambled middles):
@@ -280,8 +293,10 @@ For English, a well-known canonical version exists you can use as a reference:
     oredr the ltteers in a wrod are, the olny iprmoatnt tihng is taht the frist
     and lsat ltteer be at the rghit pclae."
 
-For other languages, generate an equivalent in the same spirit.
+For other languages, generate an equivalent in the same spirit.\
+"""
 
+_PROMPT_CORE_LITERALY = """\
 ### Filenames, folders, placeholders and voice names — KEEP 1:1
 Polish filenames (angielski.yaml, cezar.yaml, podstawy.yaml, finski.yaml, islandzki.yaml,
 naprawiacz_tagow.yaml, oczyszczenie.yaml, oczyszczenie_bez_liczb.yaml, rosyjski.yaml,
@@ -305,6 +320,32 @@ Alice, Luca, Elsa, Zira, Hazel, Ewa, Paulina) are product names — keep 1:1.
 Every ⟦N⟧ marker is a frozen placeholder. Copy character-for-character; do not
 translate, do not renumber, do not insert new ones.\
 """
+
+
+# Nazwy głosów TTS z listy akcentów — sygnał detekcji sekcji „wyliczona lista
+# akcentów". ≥ _PROG_GLOSOW różnych nazw w sekcji ⟹ to lista do podmiany, a nie
+# mimochodem wspomniany pojedynczy głos (np. „VoiceOver z Vocalizerem").
+_GLOSY_AKCENTOW = frozenset({
+    "Samantha", "Mark", "Zira", "Hazel", "Milena", "Irina", "Pavel", "Yuri",
+    "Thomas", "Amelie", "Julie", "Markus", "Stefan", "Hedda", "Katja", "Jorge",
+    "Monica", "Helena", "Gudrun", "Alice", "Luca", "Elsa", "Satu", "Mikko", "Heidi",
+})
+_PROG_GLOSOW = 3
+
+
+def _sekcja_ma_liste_akcentow(tresc: str) -> bool:
+    """True, gdy sekcja zawiera wyliczoną listę akcentów (≥ _PROG_GLOSOW głosów)."""
+    return sum(1 for g in _GLOSY_AKCENTOW if g in tresc) >= _PROG_GLOSOW
+
+
+def _sekcja_ma_odwracacz(tresc: str) -> bool:
+    """True, gdy sekcja opisuje szyfr Odwracacz (artefakt ".nim" = odwrócony skrótowiec)."""
+    return ".nim" in tresc
+
+
+def _sekcja_ma_typoglikemie(tresc: str) -> bool:
+    """True, gdy sekcja opisuje szyfr Typoglikemia (manual i dictionaries mają różne przykłady)."""
+    return "typoglik" in tresc.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -469,21 +510,39 @@ def parsuj_input_log(sciezka: Path) -> dict[str, str]:
     return wpisy
 
 
-def _zbuduj_prompt_dodatkowy(kod: str, nazwa_natywna: str) -> str:
+def _zbuduj_prompt_dodatkowy(
+    kod: str, nazwa_natywna: str, tresc_sekcji: str = ""
+) -> str:
     """Buduje custom system-prompt dla pary (kod_docelowy, nazwa_natywna).
 
     Zwraca pusty string, gdy nie mamy tabeli skrótowców dla danego języka —
     wtedy autotłumacz korzysta z bazowego promptu z `tlumacz_ai.py` bez modyfikacji.
+
+    Teza 3 (2026-06-16): bloki AKCENTY/ODWRACACZ/TYPOGLIKEMIA wstrzykiwane
+    WARUNKOWO — tylko gdy `tresc_sekcji` faktycznie zawiera dany artefakt
+    (lista akcentów / ".nim" / Typoglikemia). CORE (kontekst + literały) zawsze.
+    `tresc_sekcji=""` (wywołanie bez treści, np. ad-hoc) = zachowawczy fallback:
+    wstrzykuje WSZYSTKIE bloki (stare zachowanie monolitu sprzed tezy 3).
     """
     abbrev = ABBREV_BY_LANG.get(kod)
     if not abbrev:
         return ""
-    bullety = "\n".join(f'     - "{skr}" → "{exp}"' for skr, exp in abbrev)
-    return PROMPT_TEMPLATE_DOKUMENTACJA.format(
-        kod=kod,
-        nazwa_natywna=nazwa_natywna,
-        abbreviation_list=bullety,
-    )
+
+    nieznana = not tresc_sekcji  # brak treści ⟹ nie wiemy, więc wstrzyknij wszystko
+    czesci = [_PROMPT_CORE_KONTEKST.format(kod=kod, nazwa_natywna=nazwa_natywna)]
+
+    if nieznana or _sekcja_ma_liste_akcentow(tresc_sekcji):
+        czesci.append(_PROMPT_AKCENTY.format(nazwa_natywna=nazwa_natywna))
+    if nieznana or _sekcja_ma_odwracacz(tresc_sekcji):
+        bullety = "\n".join(f'     - "{skr}" → "{exp}"' for skr, exp in abbrev)
+        czesci.append(_PROMPT_ODWRACACZ.format(
+            nazwa_natywna=nazwa_natywna, abbreviation_list=bullety,
+        ))
+    if nieznana or _sekcja_ma_typoglikemie(tresc_sekcji):
+        czesci.append(_PROMPT_TYPOGLIKEMIA.format(nazwa_natywna=nazwa_natywna))
+
+    czesci.append(_PROMPT_CORE_LITERALY.format(nazwa_natywna=nazwa_natywna))
+    return "\n\n".join(czesci)
 
 
 # ---------------------------------------------------------------------------
@@ -926,7 +985,6 @@ def tlumacz_szablon(
             return False
 
     rdzen = nazwa_pliku.rsplit(".", 1)[0]
-    prompt_dodatkowy = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna)
 
     # RETRY: detektor budujemy raz na plik (ładowanie modeli lingua jest drogie),
     # reużywamy między sekcjami. sekcje_istniejace jest gwarantowane (retry ⟹
@@ -940,6 +998,10 @@ def tlumacz_szablon(
     swiezy_cache = retry or (input_krytyki is not None)  # oba wymuszają świeże tłumaczenie
     sekcje_przetlumaczone: dict[str, str] = {}
     for klucz, tresc_pl in sekcje_do_tlumaczenia.items():
+        # Teza 3: prompt budujemy PER SEKCJĘ z jej treści — bloki szyfrów/akcentów
+        # wstrzykiwane tylko gdy sekcja faktycznie ich dotyczy (vs dawny monolit
+        # doklejany do wszystkich 68 sekcji).
+        prompt_dodatkowy = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna, tresc_pl)
         prompt_sekcji = prompt_dodatkowy
         if retry:
             import audyt_leakow
