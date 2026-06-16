@@ -1131,7 +1131,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Hvað er nýtt í útgáfu {nowa_wersja}:'
-  co_nowego_tresc: 'Þessi útgáfa skipuleggur fjöltyngi undir húddinu. Í gagnvirkum sögum blandast skipanir sendar til AI ekki lengur saman við tungumál — í verkefni sem er ekki pólsk eða enska fer allt á tungumáli sögunnar þinnar, og sagan heldur betur samfellu milli umferða. Í leikstjórastillingu fara hljóðfræðileg áherslur og uppbyggingarhausar (Prolog, Þáttur, Sena) nú á tungumál innihalds uppskriftarinnar, en ekki á tungumál viðmótsins; eftir að verkefni er hlaðið mun forritið vara við ef það greinir misræmi á milli þeirra. Þegar í viðmóti á öðru tungumáli en pólsku vantar einhvern texta, er sýndur enski í stað pólsku. Engar breytingar á því hvernig sögur og handrit eru skrifuð.'
+  co_nowego_tresc: 'Þessi útgáfa er frekari hreinsun undir húddinu — framhald af hreinsuninni frá fyrri útgáfu, að þessu sinni í AI laginu í Leikstjórastillingu. Mest áberandi breytingin: tólið „Gefðu köflum titla" sýnir nú framvindustiku og villuskilaboð á viðmótstungumálinu (áður voru þau föst á pólsku). Aðrar breytingar eru ósýnilegar í daglegri notkun — skipulagning á samhengi sem sent er til AI, þannig að pólskan leki ekki í verkefnum á öðrum tungumálum. Engar breytingar á því hvernig sögur og handrit eru skrifuð.'
   co_nowego_online_pl: Heill útgáfusíða (á netinu) er fáanleg á pólsku.
   btn_szczegoly_online: '&Upplýsingar á netinu'
 opowiesci:

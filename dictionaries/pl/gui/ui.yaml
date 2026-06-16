@@ -1138,7 +1138,7 @@ updater:
   # i nie zaproponuje nie-polskiemu userowi tłumaczenia strony.
   co_nowego_naglowek:       "Co nowego w wersji {nowa_wersja}:"
   co_nowego_tresc: |-
-    To wydanie porządkuje wielojęzyczność pod maską. W Interaktywnych Opowieściach polecenia wysyłane do AI nie mieszają już języków — w projekcie innym niż polski czy angielski całość idzie w języku Twojej historii, a opowieść lepiej trzyma ciągłość między turami. W trybie Reżysera akcenty fonetyczne i nagłówki struktury (Prolog, Akt, Scena) trafiają teraz w język treści przepisu, a nie w język interfejsu; po wczytaniu projektu aplikacja ostrzeże, jeśli wykryje rozjazd między nimi. Gdy w interfejsie w języku innym niż polski brakuje jakiegoś napisu, pokazywany jest angielski zamiast polskiego. Bez zmian w sposobie pisania historii i scenariuszy.
+    To wydanie to dalsze porządki pod maską — kontynuacja czyszczenia z poprzedniej wersji, tym razem w warstwie AI trybu Reżysera. Najbardziej zauważalna zmiana: narzędzie „Nadaj Tytuły Rozdziałom" pokazuje teraz pasek postępu i komunikaty błędów w języku interfejsu (wcześniej były zaszyte po polsku). Pozostałe zmiany są niewidoczne w codziennym użyciu — uporządkowanie kontekstu wysyłanego do AI, tak by w projektach w innych językach nie przeciekał polski. Bez zmian w sposobie pisania historii i scenariuszy.
   co_nowego_online_pl:      "Pełna strona wydania (online) jest dostępna po polsku."
   btn_szczegoly_online:     "&Szczegóły online"
   # Przyciski w DialogAktualizacji (akceleratory: &P, &O, &A, &S — bez kolizji wewnątrz dialogu)

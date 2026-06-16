@@ -392,8 +392,13 @@ def _zbuduj_placeholdery_globalne() -> dict[str, str]:
             len([p for p in pl_akcenty_dir.glob("*.yaml")]) if pl_akcenty_dir.is_dir() else 0
         ),
         "liczba_szyfrow":          str(len(szyfry_lista)),
+        # Wyklucz `baza.yaml` (od v17.10 — wspólne wrappery kontekstu LLM, NIE tryb
+        # pracy): dokumentacja WYLICZA konkretne pliki trybów (burza/skrypt/audiobook/
+        # postprod_tytuly), więc licznik musi pasować do tej listy = 4, nie do liczby
+        # wszystkich plików w folderze.
         "liczba_trybow_rezysera":  str(
-            len([p for p in pl_rezyser_dir.glob("*.yaml")]) if pl_rezyser_dir.is_dir() else 0
+            len([p for p in pl_rezyser_dir.glob("*.yaml") if p.stem != "baza"])
+            if pl_rezyser_dir.is_dir() else 0
         ),
         "liczba_trybow_opowiesci": str(
             len([p for p in pl_opowiesci_dir.glob("*.yaml")]) if pl_opowiesci_dir.is_dir() else 0

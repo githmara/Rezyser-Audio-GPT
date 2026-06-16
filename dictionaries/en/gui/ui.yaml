@@ -1132,7 +1132,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: "What's new in version {nowa_wersja}:"
-  co_nowego_tresc: 'This release organizes multilingualism under the hood. In Interactive Stories, commands sent to AI no longer mix languages — in a project other than Polish or English, everything goes in the language of your story, and the narrative maintains better continuity between turns. In Director mode, phonetic accents and structure headers (Prologue, Act, Scene) now match the language of the recipe content, not the interface language; upon loading a project, the application will warn if it detects a mismatch between them. When an interface in a language other than Polish lacks a label, English is shown instead of Polish. No changes in the way stories and scripts are written.'
+  co_nowego_tresc: 'This release focuses on further under-the-hood improvements — a continuation of the cleanup from the previous version, this time in the AI layer of Director Mode. The most noticeable change: the "Assign Chapter Titles" tool now displays a progress bar and error messages in the interface language (previously they were hardcoded in Polish). Other changes are invisible in daily use — organizing the context sent to the AI to prevent Polish from leaking into projects in other languages. No changes in the way stories and scripts are written.'
   co_nowego_online_pl: The full release page (online) is available in Polish.
   btn_szczegoly_online: '&Details online'
 opowiesci:

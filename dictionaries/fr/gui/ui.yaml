@@ -1124,7 +1124,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Quoi de neuf dans la version {nowa_wersja} :'
-  co_nowego_tresc: "Cette version organise le multilinguisme sous le capot. Dans les Histoires Interactives, les commandes envoyées à l'IA ne mélangent plus les langues — dans un projet autre que polonais ou anglais, tout se fait dans la langue de votre histoire, et le récit maintient mieux la continuité entre les tours. En mode Réalisateur, les accents phonétiques et les en-têtes de structure (Prologue, Acte, Scène) sont maintenant dans la langue du contenu de la recette, et non dans la langue de l'interface ; après le chargement du projet, l'application avertira si elle détecte un décalage entre eux. Lorsqu'une inscription manque dans l'interface dans une langue autre que le polonais, l'anglais est affiché à la place du polonais. Aucun changement dans la façon d'écrire des histoires et des scénarios."
+  co_nowego_tresc: "Cette version est une continuation du nettoyage sous le capot — suite du nettoyage de la version précédente, cette fois dans la couche AI du mode Réalisateur. Le changement le plus notable : l'outil « Attribuer des Titres aux Chapitres » affiche désormais une barre de progression et des messages d'erreur dans la langue de l'interface (auparavant, ils étaient codés en polonais). Les autres changements sont invisibles dans l'utilisation quotidienne — réorganisation du contexte envoyé à l'AI, afin que dans les projets dans d'autres langues, le polonais ne fuite pas. Pas de changements dans la manière d'écrire des histoires et des scénarios."
   co_nowego_online_pl: La page complète de la version (en ligne) est disponible en polonais.
   btn_szczegoly_online: '&Détails en ligne'
 opowiesci:

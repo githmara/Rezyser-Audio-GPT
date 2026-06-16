@@ -1130,7 +1130,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novedades en la versión {nowa_wersja}:'
-  co_nowego_tresc: 'Esta edición organiza el multilingüismo bajo el capó. En Historias Interactivas, los comandos enviados a la IA ya no mezclan idiomas: en un proyecto que no sea polaco o inglés, todo se realiza en el idioma de tu historia, y la narrativa mantiene mejor la continuidad entre turnos. En el modo Director, los acentos fonéticos y los encabezados de estructura (Prólogo, Acto, Escena) ahora se traducen al idioma del contenido de la receta, y no al idioma de la interfaz; al cargar el proyecto, la aplicación advertirá si detecta una discrepancia entre ellos. Cuando falta algún texto en la interfaz en un idioma que no sea polaco, se muestra en inglés en lugar de polaco. Sin cambios en la forma de escribir historias y guiones.'
+  co_nowego_tresc: 'Esta edición es una continuación de la limpieza bajo el capó — continuación de la limpieza de la versión anterior, esta vez en la capa de IA del modo Director. El cambio más notable: la herramienta "Asignar Títulos a los Capítulos" ahora muestra una barra de progreso y mensajes de error en el idioma de la interfaz (anteriormente estaban incrustados en polaco). Los demás cambios son invisibles en el uso diario — organización del contexto enviado a la IA, para que en proyectos en otros idiomas no se filtre el polaco. Sin cambios en la forma de escribir historias y guiones.'
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
 opowiesci:

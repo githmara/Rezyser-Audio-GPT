@@ -1131,7 +1131,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Was ist neu in Version {nowa_wersja}:'
-  co_nowego_tresc: 'Diese Ausgabe ordnet die Mehrsprachigkeit unter der Haube. In Interaktiven Geschichten werden die an die KI gesendeten Befehle nicht mehr vermischt — in einem Projekt, das weder polnisch noch englisch ist, wird alles in der Sprache deiner Geschichte ausgeführt, und die Erzählung hält besser die Kontinuität zwischen den Runden. Im Regiemodus werden phonetische Akzente und Strukturüberschriften (Prolog, Akt, Szene) jetzt in die Sprache des Rezeptinhalts und nicht in die Sprache der Benutzeroberfläche übersetzt; nach dem Laden des Projekts warnt die Anwendung, wenn sie eine Diskrepanz zwischen ihnen feststellt. Wenn in der Benutzeroberfläche in einer anderen Sprache als Polnisch ein Text fehlt, wird Englisch anstelle von Polnisch angezeigt. Keine Änderungen in der Art und Weise, wie Geschichten und Drehbücher geschrieben werden.'
+  co_nowego_tresc: 'Diese Ausgabe ist eine weitere Bereinigung unter der Haube — eine Fortsetzung der Säuberung aus der vorherigen Version, diesmal in der AI-Schicht des Regiemodus. Die auffälligste Änderung: Das Werkzeug „Kapitelüberschriften vergeben" zeigt jetzt einen Fortschrittsbalken und Fehlermeldungen in der Sprache der Benutzeroberfläche an (zuvor waren sie auf Polnisch festgelegt). Die übrigen Änderungen sind im täglichen Gebrauch unsichtbar — die Bereinigung des an die KI gesendeten Kontexts, damit in Projekten in anderen Sprachen kein Polnisch durchsickert. Keine Änderungen in der Art und Weise, wie Geschichten und Drehbücher geschrieben werden.'
   co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
   btn_szczegoly_online: '&Details online'
 opowiesci:

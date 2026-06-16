@@ -1131,7 +1131,7 @@ updater:
     {url_release}
 
   co_nowego_naglowek: 'Novità nella versione {nowa_wersja}:'
-  co_nowego_tresc: "Questa edizione organizza il multilinguismo sotto il cofano. Nelle Storie Interattive, i comandi inviati all'AI non mescolano più le lingue — in un progetto diverso dal polacco o dall'inglese, tutto avviene nella lingua della tua storia, e la narrazione mantiene meglio la continuità tra i turni. In modalità Regista, gli accenti fonetici e le intestazioni strutturali (Prologo, Atto, Scena) ora si adattano alla lingua del contenuto della ricetta, e non alla lingua dell'interfaccia; dopo aver caricato il progetto, l'applicazione avviserà se rileva una discrepanza tra di essi. Quando nell'interfaccia in una lingua diversa dal polacco manca una scritta, viene mostrato l'inglese invece del polacco. Nessun cambiamento nel modo di scrivere storie e sceneggiature."
+  co_nowego_tresc: "Questa edizione è un ulteriore lavoro di pulizia sotto il cofano — continuazione della pulizia dalla versione precedente, questa volta nello strato AI della modalità Regista. Il cambiamento più evidente: lo strumento \"Assegna Titoli ai Capitoli\" ora mostra la barra di avanzamento e i messaggi di errore nella lingua dell'interfaccia (prima erano codificati in polacco). Gli altri cambiamenti sono invisibili nell'uso quotidiano — organizzazione del contesto inviato all'AI, in modo che nei progetti in altre lingue non trapeli il polacco. Nessun cambiamento nel modo di scrivere storie e sceneggiature."
   co_nowego_online_pl: La pagina completa della versione (online) è disponibile in polacco.
   btn_szczegoly_online: '&Dettagli online'
 opowiesci:
