@@ -43,3 +43,7 @@ max_dlugosc_probki: 6000
 # Messages shown in the results window:
 etykieta_fragment_zbyt_krotki: "(Fragment too short)"
 etykieta_bled_brak_kredytow: "(Error – no API credits)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(AI refusal)"
+etykieta_blad_fragment: "(Error – {blad})"

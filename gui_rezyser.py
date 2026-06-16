@@ -2067,7 +2067,6 @@ class RezyserPanel(wx.Panel):
                     przepis=przepis,
                     snapshot=snapshot,
                     user_text=user_text,
-                    on_postep=None,
                 )
             except openai.RateLimitError:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
@@ -2099,7 +2098,6 @@ class RezyserPanel(wx.Panel):
                     przepis=przepis,
                     snapshot=snapshot,
                     user_text=user_text,
-                    on_postep=None,
                 )
             except openai.RateLimitError:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
@@ -2122,7 +2120,6 @@ class RezyserPanel(wx.Panel):
                 przepis=przepis,
                 snapshot=snapshot,
                 user_text=user_text,
-                on_postep=None,
             )
         except openai.RateLimitError:
             wx.CallAfter(

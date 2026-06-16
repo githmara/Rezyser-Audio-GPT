@@ -45,3 +45,7 @@ max_dlugosc_probki: 6000
 # Сообщения, отображаемые в окне результата:
 etykieta_fragment_zbyt_krotki: "(Фрагмент слишком короткий)"
 etykieta_bled_brak_kredytow: "(Ошибка — нет API-кредитов)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(Отказ ИИ)"
+etykieta_blad_fragment: "(Ошибка – {blad})"

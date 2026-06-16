@@ -33,3 +33,7 @@ max_dlugosc_probki: 6000
 # Meldungen im Ergebnisfenster:
 etykieta_fragment_zbyt_krotki: "(Abschnitt zu kurz)"
 etykieta_bled_brak_kredytow: "(Fehler — API-Guthaben erschöpft)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(KI-Ablehnung)"
+etykieta_blad_fragment: "(Fehler – {blad})"

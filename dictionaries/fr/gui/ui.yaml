@@ -655,6 +655,8 @@ rezyser:
   pamiec_status_ok: '🟢 Utilisation de la mémoire : {tokeny} / {maks} jetons. Tampon sécurisé.'
   pamiec_status_ostrzezenie: "⚠️ ÉTAT D'ALERTE : {tokeny} sur {maks} jetons utilisés. La mémoire se remplit – un résumé sera bientôt nécessaire."
   pamiec_status_alarm: "🚨 SURCHARGE CRITIQUE : {tokeny} sur {maks} jetons utilisés. En mode Brainstorming, générez un résumé, enregistrez-le comme Mémoire à Long Terme, puis effacez l'historique actuel (en conservant le résumé)."
+  tytuly_postep: 'Titres : {naglowek} ({step}/{total})…'
+  tytuly_blad_brak_struktury: Aucun tag de structure trouvé (Prologue / Chapitre N / Épilogue) dans le fichier. Insérez des coupures de chapitres avant de donner des titres.
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"

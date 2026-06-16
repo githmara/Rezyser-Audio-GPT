@@ -171,6 +171,12 @@ class PrzepisRezysera:
                           rozdział jest za krótki by generować tytuł.
         etykieta_bled_brak_kredytow:
                           (tylko postprodukcja) Napis przy ``RateLimitError``.
+        etykieta_odrzucenie:
+                          (tylko postprodukcja) Napis gdy model odrzucił tytuł
+                          (tag odrzucenia). W języku treści przepisu.
+        etykieta_blad_fragment:
+                          (tylko postprodukcja) Szablon napisu przy nieoczekiwanym
+                          błędzie fragmentu; placeholder ``{blad}`` = treść wyjątku.
     """
 
     # --- Wspólne ---
@@ -223,6 +229,8 @@ class PrzepisRezysera:
     max_dlugosc_probki: int = 0
     etykieta_fragment_zbyt_krotki: str = ""
     etykieta_bled_brak_kredytow: str = ""
+    etykieta_odrzucenie: str = ""
+    etykieta_blad_fragment: str = ""
 
 
 # =============================================================================
@@ -298,6 +306,8 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             data.get("etykieta_fragment_zbyt_krotki", "")),
         etykieta_bled_brak_kredytow=str(
             data.get("etykieta_bled_brak_kredytow", "")),
+        etykieta_odrzucenie=str(data.get("etykieta_odrzucenie", "")),
+        etykieta_blad_fragment=str(data.get("etykieta_blad_fragment", "")),
     )
 
 

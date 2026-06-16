@@ -657,6 +657,8 @@ rezyser:
   pamiec_status_ok: '🟢 Minni notkun: {tokeny} / {maks} tákn. Öruggur biðminni.'
   pamiec_status_ostrzezenie: '⚠️ VIÐVÖRUNARÁSTAND: Notað {tokeny} af {maks} táknum. Minni er að fyllast – brátt verður nauðsynlegt að búa til samantekt.'
   pamiec_status_alarm: '🚨 GAGNRÝN OFHLEÐSLA: Notað {tokeny} af {maks} táknum. Í Hugstormunarham, búðu til samantekt, vistaðu hana sem Langtímaminni og hreinsaðu síðan núverandi sögu (með því að halda samantektinni).'
+  tytuly_postep: 'Titill: {naglowek} ({step}/{total})…'
+  tytuly_blad_brak_struktury: Engir uppbyggingarmerki fundust (Formáli / Kafli N / Eftirorð) í skránni. Settu inn kaflaskil áður en titlar eru gefnir.
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"

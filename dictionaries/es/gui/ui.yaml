@@ -656,6 +656,8 @@ rezyser:
   pamiec_status_ok: '🟢 Uso de memoria: {tokeny} / {maks} tokens. Búfer seguro.'
   pamiec_status_ostrzezenie: '⚠️ ESTADO DE ADVERTENCIA: Se han utilizado {tokeny} de {maks} tokens. La memoria se está llenando – pronto será necesario generar un resumen.'
   pamiec_status_alarm: '🚨 SOBRECARGA CRÍTICA: Se han utilizado {tokeny} de {maks} tokens. En modo Tormenta de Ideas, genera un resumen, guárdalo como Memoria a Largo Plazo y luego limpia la historia actual (conservando el resumen).'
+  tytuly_postep: 'Titulación: {naglowek} ({step}/{total})…'
+  tytuly_blad_brak_struktury: No se encontraron etiquetas de estructura (Prólogo / Capítulo N / Epílogo) en el archivo. Inserte cortes de capítulos antes de asignar títulos.
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"

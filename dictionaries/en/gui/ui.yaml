@@ -633,10 +633,10 @@ rezyser:
   jezyk_naglowkow_ostrzezenie_tytul: Header language vs recipe language
   jezyk_naglowkow_ostrzezenie_tresc: "The loaded project has structure headers that look like \"{wykryty}\", but the active recipe generates content in \"{kod}\". New headers will be inserted in \"{kod}\" — if that is unintended, adjust the recipe's kod_jezyka field or pick another mode."
   # Model-memory indicator (gui_rezyser._aktualizuj_pamiec_modelu builds the text from i18n by `poziom`)
-  pamiec_status_czysta:       "🟢 Memory clear. The engine is ready for a new story."
-  pamiec_status_ok:           "🟢 Memory usage: {tokeny} / {maks} tokens. Safe buffer."
-  pamiec_status_ostrzezenie:  "⚠️ WARNING STATE: {tokeny} of {maks} tokens used. Memory is filling up — a summary will soon be required."
-  pamiec_status_alarm:        "🚨 CRITICAL OVERLOAD: {tokeny} of {maks} tokens used. In Brainstorm mode generate a summary, save it as Long-Term Memory, then clear the current story (keeping the summary)."
+  pamiec_status_czysta: "🟢 Memory clear. The engine is ready for a new story."
+  pamiec_status_ok: "🟢 Memory usage: {tokeny} / {maks} tokens. Safe buffer."
+  pamiec_status_ostrzezenie: "⚠️ WARNING STATE: {tokeny} of {maks} tokens used. Memory is filling up — a summary will soon be required."
+  pamiec_status_alarm: "🚨 CRITICAL OVERLOAD: {tokeny} of {maks} tokens used. In Brainstorm mode generate a summary, save it as Long-Term Memory, then clear the current story (keeping the summary)."
   err_struktura: The model generated an incorrect response structure despite several correction attempts. Try again or rephrase the command.
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
   btn_przeladuj_label: '&Reload project from disk'
@@ -655,6 +655,8 @@ rezyser:
   punkt_odniesienia_snap_tresc: AI working memory starts from the header “{naglowek}" ({liczba_znakow} characters). Earlier events are represented by the Long-term Summary (remained untouched).
   punkt_odniesienia_fallback_tresc: 'No reference point indicated — the last fragment of the narration ({liczba_znakow} characters) entered the working memory. The summary remained untouched. Tip: insert Chapter/Act/Scene headers to precisely choose the start of memory.'
   punkt_odniesienia_za_dluga_tresc: "The selected fragment “{naglowek}\" is so extensive that it doesn't fit into the working memory window by itself — emergency cutting to the last {liczba_znakow} characters was applied. Director, this is a bit of madness: consider dividing Acts/Chapters into smaller Scenes — shorter sections will allow the AI to maintain consistent context."
+  tytuly_postep: 'Titling: {naglowek} ({step}/{total})…'
+  tytuly_blad_brak_struktury: No structure tags found (Prologue / Chapter N / Epilogue) in the file. Insert chapter breaks before titling.
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"

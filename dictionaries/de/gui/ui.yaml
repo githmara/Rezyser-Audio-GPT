@@ -657,6 +657,8 @@ rezyser:
   pamiec_status_ok: '🟢 Speichernutzung: {tokeny} / {maks} Tokens. Sicherer Puffer.'
   pamiec_status_ostrzezenie: '⚠️ WARNZUSTAND: {tokeny} von {maks} Tokens verwendet. Speicher füllt sich – bald wird eine Zusammenfassung erforderlich sein.'
   pamiec_status_alarm: '🚨 KRITISCHE ÜBERLASTUNG: {tokeny} von {maks} Tokens verwendet. Im Brainstorming-Modus eine Zusammenfassung erstellen, als Langzeitspeicher speichern und dann die aktuelle Geschichte löschen (Zusammenfassung beibehalten).'
+  tytuly_postep: 'Betitelung: {naglowek} ({step}/{total})…'
+  tytuly_blad_brak_struktury: Keine Struktur-Tags (Prolog / Kapitel N / Epilog) in der Datei gefunden. Fügen Sie Kapiteltrennungen ein, bevor Sie Titel vergeben.
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"

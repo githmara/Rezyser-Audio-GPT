@@ -43,3 +43,7 @@ max_dlugosc_probki: 6000
 # Messaggi mostrati nella finestra dei risultati:
 etykieta_fragment_zbyt_krotki: "(Frammento troppo corto)"
 etykieta_bled_brak_kredytow: "(Errore — crediti API esauriti)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(Rifiuto dell'IA)"
+etykieta_blad_fragment: "(Errore – {blad})"

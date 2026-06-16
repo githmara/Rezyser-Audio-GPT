@@ -33,3 +33,7 @@ max_dlugosc_probki: 6000
 # Messages dans la fenêtre de résultats :
 etykieta_fragment_zbyt_krotki: "(Section trop courte)"
 etykieta_bled_brak_kredytow: "(Erreur — crédit API épuisé)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(Refus de l'IA)"
+etykieta_blad_fragment: "(Erreur – {blad})"

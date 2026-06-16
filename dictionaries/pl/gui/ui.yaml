@@ -670,6 +670,8 @@ rezyser:
     Bez niego postprodukcja tytułów rozdziałów jest niedostępna.
   tytuly_blad_naglowek:  "Wystąpił błąd podczas generowania tytułów rozdziałów."
   tytuly_blad_nieznany:  "Nieznany błąd podczas tytułowania."
+  tytuly_postep:         "Tytułowanie: {naglowek} ({step}/{total})…"
+  tytuly_blad_brak_struktury: "Nie znaleziono tagów struktury (Prolog / Rozdział N / Epilog) w pliku. Wstaw cięcia rozdziałów przed nadaniem tytułów."
   tytuly_czesciowe_naglowek: "⚠️ Częściowe wyniki (generowanie przerwano błędem):\n\n{wyniki}"
   tytuly_dlg_tytul:      "Proponowane Tytuły Rozdziałów (AI)"
   tytuly_dlg_lbl:        "Skopiuj tytuły (Ctrl+A, Ctrl+C) lub zanotuj je w Księdze Świata:"

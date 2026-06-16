@@ -43,3 +43,7 @@ max_dlugosc_probki: 6000
 # Komunikaty pokazywane w oknie wyników:
 etykieta_fragment_zbyt_krotki: "(Fragment zbyt krótki)"
 etykieta_bled_brak_kredytow: "(Błąd – brak kredytów API)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(Odrzucenie AI)"
+etykieta_blad_fragment: "(Błąd – {blad})"

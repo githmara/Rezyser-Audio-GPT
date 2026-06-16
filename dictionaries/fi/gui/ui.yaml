@@ -655,6 +655,8 @@ rezyser:
   pamiec_status_ok: '🟢 Muistin käyttö: {tokeny} / {maks} tokenia. Turvallinen puskuri.'
   pamiec_status_ostrzezenie: '⚠️ VAROITUSTILA: Käytetty {tokeny} / {maks} tokenia. Muisti täyttyy – tiivistelmän luominen on pian tarpeen.'
   pamiec_status_alarm: '🚨 KRIITTINEN YLITÄYTTÖ: Käytetty {tokeny} / {maks} tokenia. Aivoriihitilassa luo tiivistelmä, tallenna se pitkäaikaismuistiin ja tyhjennä sitten nykyinen historia (säilytä tiivistelmä).'
+  tytuly_postep: 'Otsikointi: {naglowek} ({step}/{total})…'
+  tytuly_blad_brak_struktury: Rakennetunnisteita (Johdanto / Luku N / Epilogi) ei löytynyt tiedostosta. Lisää lukujen leikkaukset ennen otsikointia.
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"

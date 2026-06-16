@@ -34,3 +34,7 @@ max_dlugosc_probki: 6000
 # Mensajes en la ventana de resultados:
 etykieta_fragment_zbyt_krotki: "(Sección demasiado corta)"
 etykieta_bled_brak_kredytow: "(Error — crédito API agotado)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(Rechazo de la IA)"
+etykieta_blad_fragment: "(Error – {blad})"

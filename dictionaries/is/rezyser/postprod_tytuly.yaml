@@ -43,3 +43,7 @@ max_dlugosc_probki: 6000
 # Skilaboð í niðurstöðuglugganum:
 etykieta_fragment_zbyt_krotki: "(Brot of stutt)"
 etykieta_bled_brak_kredytow: "(Villa – engin API-inneign)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(Höfnun gervigreindar)"
+etykieta_blad_fragment: "(Villa – {blad})"

@@ -44,3 +44,7 @@ max_dlugosc_probki: 6000
 # Tulosikkunassa näytettävät viestit:
 etykieta_fragment_zbyt_krotki: "(Fragmentti liian lyhyt)"
 etykieta_bled_brak_kredytow: "(Virhe – ei API-krediittejä)"
+
+# Per-rozdziałowe napisy (v17.10, w języku treści przepisu):
+etykieta_odrzucenie: "(Tekoälyn kieltäytyminen)"
+etykieta_blad_fragment: "(Virhe – {blad})"

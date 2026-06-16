@@ -36,7 +36,6 @@ Publiczne API:
         przepis=przepis_rezysera,       # PrzepisRezysera
         snapshot=proj.snapshot(),        # SnapshotProjektu
         user_text="Napisz scenę w tawernie.",
-        on_postep=lambda msg, pct: print(msg, pct),
         timeout=120.0,
     )
     if wynik.odrzucone:
@@ -77,6 +76,7 @@ from typing import Any, Callable
 import jsonschema
 
 import core_rezyser as cr
+import i18n
 import przepisy_rezysera as pr
 from bledy_ai import BladDlugosciOdpowiedzi, BladStrukturyJSON
 
@@ -433,7 +433,6 @@ def generuj_burze(
     przepis:   pr.PrzepisRezysera,
     snapshot:  cr.SnapshotProjektu,
     user_text: str,
-    on_postep: PostepCallback | None = None,
     timeout:   float = 120.0,
     max_retry: int = 2,
 ) -> WynikBurzy:
@@ -449,7 +448,6 @@ def generuj_burze(
         przepis:   ``PrzepisRezysera`` z ``id="burza"``.
         snapshot:  Niezmienny snapshot stanu projektu.
         user_text: Instrukcja użytkownika.
-        on_postep: Callback postępu.
         timeout:   Limit czasu pojedynczego wywołania (sekundy).
         max_retry: Maks. liczba RETRY (default 2; łącznie max 3 wywołania).
 
@@ -461,13 +459,7 @@ def generuj_burze(
                       zwrócił finish_reason="length" (max_tokens hit).
         Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) — propagowane.
     """
-    if on_postep:
-        on_postep("Budowanie payloadu Burzy…", 10)
-
     messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
-
-    if on_postep:
-        on_postep(f"Wysyłanie do {przepis.model} (JSON mode)…", 30)
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
@@ -509,8 +501,6 @@ def generuj_burze(
         # wymusza ZWROT samego tagu, NIE JSON-a. JSONDecodeError w tej linii
         # to legalny case „LLM odmówił, zwrócił tag, nie JSON".
         if pr.wykryto_odrzucenie(surowy_text):
-            if on_postep:
-                on_postep("AI odrzuciło prompt (tag wykryty).", 100)
             return WynikBurzy(
                 odrzucone=True,
                 uzyty_sufiks=sufiks_nazwa,
@@ -539,9 +529,6 @@ def generuj_burze(
             for o in dane["opcje"]
         ]
         streszczenie = (dane.get("streszczenie") or "").strip()
-
-        if on_postep:
-            on_postep("Gotowe.", 100)
 
         return WynikBurzy(
             opcje=opcje,
@@ -673,7 +660,6 @@ def generuj_skrypt(
     przepis:   pr.PrzepisRezysera,
     snapshot:  cr.SnapshotProjektu,
     user_text: str,
-    on_postep: PostepCallback | None = None,
     timeout:   float = 120.0,
     max_retry: int = 2,
 ) -> WynikSkryptu:
@@ -694,7 +680,6 @@ def generuj_skrypt(
         przepis:   ``PrzepisRezysera`` z ``id="skrypt"`` (``zapis_do_pliku=True``).
         snapshot:  Niezmienny snapshot stanu projektu.
         user_text: Instrukcja użytkownika.
-        on_postep: Callback postępu.
         timeout:   Limit czasu pojedynczego wywołania (sekundy).
         max_retry: Maks. liczba RETRY (default 2; łącznie max 3 wywołania).
 
@@ -707,13 +692,7 @@ def generuj_skrypt(
                       finish_reason="length" (ucięty JSON).
         Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) — propagowane.
     """
-    if on_postep:
-        on_postep("Budowanie payloadu Skryptu…", 10)
-
     messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
-
-    if on_postep:
-        on_postep(f"Wysyłanie do {przepis.model} (JSON mode)…", 30)
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
@@ -753,8 +732,6 @@ def generuj_skrypt(
         # ZWROT samego tagu, NIE JSON-a (JSONDecodeError byłby tu legalnym
         # skutkiem „LLM odmówił, zwrócił tag").
         if pr.wykryto_odrzucenie(surowy_text):
-            if on_postep:
-                on_postep("AI odrzuciło prompt (tag wykryty).", 100)
             return WynikSkryptu(
                 odrzucone=True,
                 uzyty_sufiks=sufiks_nazwa,
@@ -785,9 +762,6 @@ def generuj_skrypt(
                 tekst, snapshot.world_lore, jezyk_projektu=przepis.kod_jezyka,
             )
 
-        if on_postep:
-            on_postep("Gotowe.", 100)
-
         return WynikSkryptu(
             tekst_odpowiedzi=tekst,
             tury=tury,
@@ -812,7 +786,6 @@ def generuj_fragment(
     przepis: pr.PrzepisRezysera,
     snapshot: cr.SnapshotProjektu,
     user_text: str,
-    on_postep: PostepCallback | None = None,
     timeout: float = 120.0,
 ) -> WynikGeneracji:
     """Wysyła zapytanie do OpenAI i zwraca przetworzoną odpowiedź.
@@ -822,7 +795,6 @@ def generuj_fragment(
         przepis:    Tryb pracy (Burza / Skrypt / Audiobook).
         snapshot:   Niezmienny snapshot stanu projektu.
         user_text:  Instrukcja użytkownika z pola „Instrukcje".
-        on_postep:  Opcjonalny callback postępu (msg, procent).
         timeout:    Limit czasu na wywołanie OpenAI w sekundach.
                     Uwaga: obejmuje **cały** czas od wysłania do
                     otrzymania pełnej odpowiedzi. Dla długich generacji
@@ -836,13 +808,7 @@ def generuj_fragment(
         Wyjątki OpenAI (``RateLimitError``, ``APITimeoutError``,
         ``APIError``) są propagowane – GUI pokazuje je w dialogu błędu.
     """
-    if on_postep:
-        on_postep("Budowanie payloadu do AI…", 10)
-
     messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
-
-    if on_postep:
-        on_postep(f"Wysyłanie do {przepis.model}…", 30)
 
     response = klient.chat.completions.create(
         model=przepis.model,
@@ -852,15 +818,10 @@ def generuj_fragment(
     )
     tekst: str = response.choices[0].message.content or ""
 
-    if on_postep:
-        on_postep("Przetwarzanie odpowiedzi…", 80)
-
     # 1) Detekcja odrzucenia — przed wszystkim innym. Tag infrastruktury
     # jest wymuszany przez KLAUZULA_ODRZUCENIA_DOMYSLNA niezależnie od
     # jezyk_odpowiedzi, więc działa tak samo dla fińskiego i japońskiego.
     if pr.wykryto_odrzucenie(tekst):
-        if on_postep:
-            on_postep("AI odrzuciło prompt (tag wykryty).", 100)
         return WynikGeneracji(
             tekst_odpowiedzi=tekst,
             odrzucone=True,
@@ -884,9 +845,6 @@ def generuj_fragment(
         tekst = cr.zastosuj_akcenty_uniwersalne(
             tekst, snapshot.world_lore, jezyk_projektu=przepis.kod_jezyka,
         )
-
-    if on_postep:
-        on_postep("Gotowe.", 100)
 
     return WynikGeneracji(
         tekst_odpowiedzi=tekst,
@@ -936,10 +894,7 @@ def nadaj_tytuly_rozdzialom(
         return WynikTytulowania(
             tytuly=[],
             przerwano_bledem=True,
-            blad=(
-                "Nie znaleziono tagów struktury (Prolog / Rozdział N / Epilog) "
-                "w pliku. Wstaw cięcia rozdziałów przed nadaniem tytułów."
-            ),
+            blad=i18n.t("rezyser.tytuly_blad_brak_struktury"),
         )
 
     tytuly: list[str] = []
@@ -954,7 +909,11 @@ def nadaj_tytuly_rozdzialom(
         percent = int(step / total * 100)
 
         if on_postep:
-            on_postep(f"Tytułowanie: {naglowek} ({step}/{total})…", percent)
+            on_postep(
+                i18n.t("rezyser.tytuly_postep",
+                       naglowek=naglowek, step=step, total=total),
+                percent,
+            )
 
         # Fragmenty krótsze niż próg – pomijamy, nie marnujemy kredytów
         if len(tresc) < przepis_tytuly.min_dlugosc_fragmentu:
@@ -983,7 +942,10 @@ def nadaj_tytuly_rozdzialom(
             # Nawet model tytułujący może odrzucić prompt (szczególnie przy
             # brutalnych treściach w treści rozdziału). Honorujemy tag.
             if pr.wykryto_odrzucenie(tytul_raw):
-                tytuly.append(f"{naglowek}: (Odrzucenie AI)")
+                tytuly.append(
+                    f"{naglowek}: "
+                    f"{przepis_tytuly.etykieta_odrzucenie or '(Odrzucenie AI)'}"
+                )
             else:
                 tytuly.append(f"{naglowek}: {tytul_raw}")
 
@@ -994,10 +956,11 @@ def nadaj_tytuly_rozdzialom(
             return WynikTytulowania(
                 tytuly=tytuly,
                 przerwano_bledem=True,
-                blad="Brak kredytów OpenAI! Doładuj konto i spróbuj ponownie.",
+                blad=i18n.t("rezyser.err_rate_limit"),
             )
         except Exception as exc:  # noqa: BLE001
-            tytuly.append(f"{naglowek}: (Błąd – {exc})")
+            etykieta_bledu = przepis_tytuly.etykieta_blad_fragment or "(Błąd – {blad})"
+            tytuly.append(f"{naglowek}: {etykieta_bledu.replace('{blad}', str(exc))}")
             return WynikTytulowania(
                 tytuly=tytuly,
                 przerwano_bledem=True,

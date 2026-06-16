@@ -657,6 +657,8 @@ rezyser:
   pamiec_status_ok: '🟢 Utilizzo della memoria: {tokeny} / {maks} token. Buffer sicuro.'
   pamiec_status_ostrzezenie: '⚠️ STATO DI AVVERTIMENTO: Utilizzati {tokeny} di {maks} token. La memoria si sta riempiendo – presto sarà necessario generare un riassunto.'
   pamiec_status_alarm: '🚨 SOVRACCARICO CRITICO: Utilizzati {tokeny} di {maks} token. In modalità Brainstorming, genera un riassunto, salvalo come Memoria a Lungo Termine, quindi cancella la storia corrente (mantenendo il riassunto).'
+  tytuly_postep: 'Titoli: {naglowek} ({step}/{total})…'
+  tytuly_blad_brak_struktury: Tag di struttura non trovati (Prologo / Capitolo N / Epilogo) nel file. Inserisci i tag di divisione dei capitoli prima di assegnare i titoli.
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"
