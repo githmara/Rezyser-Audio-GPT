@@ -37,6 +37,7 @@ Nie zależy od wxPython ani OpenAI — czysty CLI/CI.
 from __future__ import annotations
 
 import argparse
+import ast
 import re
 import sys
 from dataclasses import dataclass
@@ -278,6 +279,253 @@ def leaki_per_sekcja(
     return wynik
 
 
+# ===========================================================================
+# SKANER ŹRÓDEŁ .py — user-facing / LLM-facing PL hard-kod (od v17.11.0)
+# ===========================================================================
+# Odłożony z v17.10.0 („Co nie weszło"): narzędzie wykrywające polski hard-kod
+# w źródłach Pythona, które trafia do USERA (etykiety/komunikaty GUI) lub do
+# MODELU (payload LLM) z pominięciem i18n (`t()`) / przepisów YAML. Filozofia
+# jak docs-detektor wyżej: LEJEK over-reportujący + ręczny triaż, NIE zero-FP.
+#
+# Świadomie NIE łapane (żeby lejek był użyteczny, nie zalany szumem):
+#   * komentarze `#` i docstringi — dev-facing PL jest OK (pomijane przez AST),
+#   * literały `detal=...` — techniczny opis błędu (wzorzec mostka i18n: GUI
+#     bierze `klucz_i18n`, `detal` to log EN/PL — patrz tlumacz_ai/bledy_ai),
+#   * argumenty `_dev_log_runtime(...)` — konsola dewelopera (runtime niewidoczny),
+#   * argumenty `t(...)`/`_(...)` — to KLUCZE i18n, nie treść,
+#   * całe dev-toole (PL `print` jest tam OK) — lista DEV_TOOLE.
+#
+# Triaż dwustopniowy (jak LIKELY/POSSIBLE w docs `--draft`):
+#   LIKELY   — string-arg trafia do sinka user-facing (wx Set*/MessageBox/…),
+#              do callbacku postępu, albo do payloadu LLM (kwarg content /
+#              dict z kluczem role|content). Niemal pewny leak.
+#   POSSIBLE — dowolny inny PL-string-literał poza komentarzem/docstringiem.
+#              Bywa FP (np. regex dopasowujący polską treść wejściową) → triaż.
+
+# Dev-toole odpalane WYŁĄCZNIE ze źródła przez maintainera — polski tekst (w tym
+# `print`) jest tam świadomy i poprawny (logi po PL dla polskiego dev-toola).
+DEV_TOOLE = {
+    "build_release.py", "generuj_dokumentacje.py",
+    "buduj_wielojezyczne_docs.py", "buduj_wielojezyczne_ui.py",
+    "audyt_leakow.py", "przeglad_tlumaczen.py", "odpowiedz_lokalnie.py",
+    "test_core_updater.py",
+}
+
+# Metody wx (i pochodne), których string-argument widzi user wprost.
+SINKI_USER_FACING = {
+    "SetValue", "SetLabel", "SetLabelText", "SetName", "SetTitle", "SetHint",
+    "SetToolTip", "SetStatusText", "SetHelpText", "SetPageText", "SetItemLabel",
+    "MessageBox", "AppendText", "ShowMessage", "SetMessage",
+}
+# Lokalne callbacki postępu/statusu — string-arg jest user-facing (pasek/etykieta).
+SINKI_POSTEP = {"on_postep", "on_status", "_update_progress_label"}
+# Kontekst payloadu LLM: kwarg `content=`/`system=` albo dict z kluczem role|content.
+KWARG_LLM = {"content", "system"}
+KLUCZE_DICT_LLM = {"role", "content"}
+# Funkcje, których string-arg NIE jest user-facing PL (i18n-klucz / dev-log).
+FUNC_POMIJANE = {"t", "_", "_dev_log_runtime"}
+# Kwargi przenoszące KLUCZ i18n / techniczny detal — nie treść user-facing.
+KWARG_POMIJANE = {"detal", "klucz_i18n", "klucz_tytul", "klucz"}
+
+# Diacritic-free polskie słowa-sygnały (czasowniki/komunikaty) — uzupełniają
+# detekcję znakową dla linii bez ą/ę/ł…, ale BEZ generycznych rzeczowników
+# („plik", „kod"), które jako identyfikatory/klucze dawały false-positives.
+PL_SLOWA = [
+    "Podaj", "Wykryto", "Kontynuuj", "Wysyłanie", "Przetwarzanie", "Budowanie",
+    "Gotowe", "Pomijam", "Zapisano", "Wczytaj", "Zapisz", "Anuluj", "Tłumaczenie",
+    "Generowanie", "Inicjowanie", "Zachowaj", "Odpowiedź", "Błąd", "Postęp",
+    "Wystąpił",
+]
+RE_PL_SLOWA = re.compile(
+    r"(?<![\wąęółńśćźżĄĘÓŁŃŚĆŹŻ])(?:"
+    + "|".join(re.escape(s) for s in PL_SLOWA)
+    + r")(?![\wąęółńśćźżĄĘÓŁŃŚĆŹŻ])",
+    re.IGNORECASE,
+)
+
+
+@dataclass
+class LeakPy:
+    """Pojedynczy podejrzany PL-string-literał w źródle `.py`."""
+    plik: str
+    linia: int
+    poziom: str            # „LIKELY" | „POSSIBLE"
+    powod: str             # „znak-PL:ł" | „slowo-PL:Podaj"
+    kontekst: str          # nazwa wywołania/kwargu („SetValue", „content=", „—")
+    tekst: str             # treść literału (przycięta)
+
+
+def _detektor_pl_en():
+    """Buduje lingua-detektor PL↔EN (lazy) dla diacritic-free polskich literałów.
+
+    Skan `.py` nie ma „języka docelowego" jak docs — interesuje nas tylko, czy
+    literał jest polski. Restrykcja do {POLISH, ENGLISH} tnie szum (większość
+    literałów aplikacji to PL albo EN: prompty, detale błędów).
+    """
+    from lingua import Language, LanguageDetectorBuilder
+    return LanguageDetectorBuilder.from_languages(
+        Language.POLISH, Language.ENGLISH,
+    ).build()
+
+
+def _sygnal_pl(tekst: str, detektor=None, *, prog_lingua: float = 0.70) -> str:
+    """Zwraca krótki powód, gdy tekst wygląda na polski; inaczej ''.
+
+    Trzy warstwy (jak docs-detektor): znaki diakrytyczne → kuratorskie słowa →
+    `lingua` dla dłuższych literałów (łapie diacritic-free PL typu „Blok 1/2
+    odzyskany z pliku zapisu", którego dwie pierwsze warstwy przepuszczają).
+    """
+    znaki = RE_PL_ZNAKI.findall(tekst)
+    if znaki:
+        return f"znak-PL:{''.join(sorted(set(znaki)))}"
+    m = RE_PL_SLOWA.search(tekst)
+    if m:
+        return f"slowo-PL:{m.group(0)}"
+    if detektor is not None:
+        # f-string placeholdery {…} mylą lingua — liczymy litery po ich usunięciu.
+        czysty = tekst.replace("{…}", " ")
+        # Tylko PROZA (≥1 spacja) — odsiewa snake_case klucze i18n / identyfikatory,
+        # które lingua myli z polskim (np. „ai_ostrzezenie_iso").
+        if " " not in czysty.strip():
+            return ""
+        if sum(ch.isalpha() for ch in czysty) >= _MIN_LITER_LINGUA:
+            cv = detektor.compute_language_confidence_values(czysty)
+            if cv and cv[0].language.name == "POLISH" and cv[0].value >= prog_lingua:
+                return f"lingua:PL {cv[0].value:.2f}"
+    return ""
+
+
+def _tekst_literalu(node: ast.AST) -> str:
+    """Rozwija ``ast.Constant``(str) i ``ast.JoinedStr`` (f-string) do tekstu.
+
+    Dla f-stringa części `{...}` zastępowane są markerem `{…}` — wystarcza do
+    detekcji sygnału PL w częściach literalnych i do czytelnego raportu.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.JoinedStr):
+        czesci: list[str] = []
+        for v in node.values:
+            if isinstance(v, ast.Constant) and isinstance(v.value, str):
+                czesci.append(v.value)
+            else:
+                czesci.append("{…}")
+        return "".join(czesci)
+    return ""
+
+
+def _nazwa_funkcji(func: ast.AST) -> str:
+    """Ostatni człon wywoływanej funkcji: ``obj.SetValue`` → „SetValue", ``t`` → „t"."""
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    if isinstance(func, ast.Name):
+        return func.id
+    return ""
+
+
+def _kontekst_wezla(node: ast.AST) -> tuple[str | None, set[str], str]:
+    """Wspina się po rodzicach: (nazwa_kwargu, klucze_dict, nazwa_wywołania).
+
+    Zatrzymuje się na pierwszym ``ast.Call`` (sink). Po drodze zapamiętuje
+    nazwę kwargu (``content=``) i klucze najbliższego dict-a (payload LLM).
+    """
+    kwarg: str | None = None
+    klucze: set[str] = set()
+    func = ""
+    cur = getattr(node, "_parent", None)
+    gleb = 0
+    while cur is not None and gleb < 8:
+        if isinstance(cur, ast.keyword) and cur.arg and kwarg is None:
+            kwarg = cur.arg
+        elif isinstance(cur, ast.Dict) and not klucze:
+            klucze = {
+                k.value for k in cur.keys
+                if isinstance(k, ast.Constant) and isinstance(k.value, str)
+            }
+        elif isinstance(cur, ast.Call):
+            func = _nazwa_funkcji(cur.func)
+            break
+        cur = getattr(cur, "_parent", None)
+        gleb += 1
+    return kwarg, klucze, func
+
+
+def _analizuj_plik(sciezka: Path, detektor=None) -> list[LeakPy]:
+    """Skanuje jeden plik `.py` pod kątem PL-string-literałów (poza docstring/komentarz)."""
+    try:
+        zrodlo = sciezka.read_text(encoding="utf-8")
+        drzewo = ast.parse(zrodlo, filename=str(sciezka))
+    except (OSError, SyntaxError):
+        return []
+
+    # Wskaźniki na rodzica (AST ich nie trzyma) — potrzebne do klasyfikacji.
+    for rodzic in ast.walk(drzewo):
+        for dziecko in ast.iter_child_nodes(rodzic):
+            dziecko._parent = rodzic  # type: ignore[attr-defined]
+
+    # Docstringi (pierwszy statement modułu/klasy/funkcji) — pomijane.
+    docstringi: set[int] = set()
+    for w in ast.walk(drzewo):
+        if isinstance(w, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            ciało = getattr(w, "body", [])
+            if (ciało and isinstance(ciało[0], ast.Expr)
+                    and isinstance(ciało[0].value, ast.Constant)
+                    and isinstance(ciało[0].value.value, str)):
+                docstringi.add(id(ciało[0].value))
+
+    leaki: list[LeakPy] = []
+    for w in ast.walk(drzewo):
+        if isinstance(w, ast.JoinedStr):
+            wezel: ast.AST = w
+        elif isinstance(w, ast.Constant) and isinstance(w.value, str):
+            if id(w) in docstringi:
+                continue
+            # Constanty wewnątrz f-stringa obsługujemy przez JoinedStr (jako całość).
+            if isinstance(getattr(w, "_parent", None), (ast.JoinedStr, ast.FormattedValue)):
+                continue
+            wezel = w
+        else:
+            continue
+
+        tekst = _tekst_literalu(wezel)
+        powod = _sygnal_pl(tekst, detektor)
+        if not powod:
+            continue
+
+        kwarg, klucze, func = _kontekst_wezla(wezel)
+        if kwarg in KWARG_POMIJANE or func in FUNC_POMIJANE:
+            continue
+
+        if func in SINKI_USER_FACING or func in SINKI_POSTEP:
+            poziom, opis = "LIKELY", (func or "—")
+        elif kwarg in KWARG_LLM or (klucze & KLUCZE_DICT_LLM):
+            poziom, opis = "LIKELY", (f"{kwarg}=" if kwarg else "LLM-dict")
+        else:
+            opis = func or (f"{kwarg}=" if kwarg else "—")
+            poziom = "POSSIBLE"
+
+        leaki.append(LeakPy(
+            plik=sciezka.name,
+            linia=getattr(wezel, "lineno", 0),
+            poziom=poziom,
+            powod=powod,
+            kontekst=opis,
+            tekst=" ".join(tekst.split())[:120],
+        ))
+    return leaki
+
+
+def skanuj_zrodla_py(root: Path = ROOT) -> list[LeakPy]:
+    """Skanuje wszystkie moduły aplikacji (`*.py` w roocie, bez DEV_TOOLE)."""
+    detektor = _detektor_pl_en()
+    leaki: list[LeakPy] = []
+    for sciezka in sorted(root.glob("*.py")):
+        if sciezka.name in DEV_TOOLE:
+            continue
+        leaki.extend(_analizuj_plik(sciezka, detektor))
+    return leaki
+
+
 # ---------------------------------------------------------------------------
 # CLI — mapa audytu (bez API)
 # ---------------------------------------------------------------------------
@@ -286,6 +534,35 @@ def _szablony_docelowe(kod: str) -> list[str]:
     if not folder.is_dir():
         return []
     return sorted(p.name for p in folder.glob("*.yaml"))
+
+
+def _main_py() -> int:
+    """Tryb `--py`: skan źródeł aplikacji, raport pogrupowany per plik (LIKELY first)."""
+    leaki = skanuj_zrodla_py()
+    if not leaki:
+        print("✅ Skan źródeł `.py`: brak podejrzanych PL hard-kodów (poza dev-toolami).")
+        return 0
+
+    per_plik: dict[str, list[LeakPy]] = {}
+    for l in leaki:
+        per_plik.setdefault(l.plik, []).append(l)
+
+    likely = sum(1 for l in leaki if l.poziom == "LIKELY")
+    possible = len(leaki) - likely
+    print(f"🔎 Skan źródeł `.py`: {likely} LIKELY + {possible} POSSIBLE "
+          f"w {len(per_plik)} plik(ach). LIKELY = niemal pewny leak; POSSIBLE = do triażu.\n")
+
+    for plik in sorted(per_plik):
+        pozycje = sorted(per_plik[plik], key=lambda l: (l.poziom != "LIKELY", l.linia))
+        ile_l = sum(1 for l in pozycje if l.poziom == "LIKELY")
+        print(f"📄 {plik}: {len(pozycje)} ({ile_l} LIKELY)")
+        for l in pozycje:
+            flaga = "❗" if l.poziom == "LIKELY" else "·"
+            print(f"   {flaga} L{l.linia} [{l.kontekst}] ({l.powod}): {l.tekst}")
+        print()
+
+    print(f"========== RAZEM: {likely} LIKELY + {possible} POSSIBLE ==========")
+    return 1
 
 
 def main() -> int:
@@ -297,12 +574,18 @@ def main() -> int:
     grupa.add_argument("--jezyki", type=str, default="",
                        help=f"CSV kodów ISO (np. is,fi). Dozwolone: {', '.join(KODY_DOCELOWE)}.")
     grupa.add_argument("--wszystkie", action="store_true",
-                       help="Skanuj wszystkie języki docelowe.")
+                       help="Skanuj wszystkie języki docelowe (docs YAML).")
+    grupa.add_argument("--py", action="store_true",
+                       help="Skanuj źródła aplikacji `*.py` pod kątem PL hard-kodu "
+                            "(user-facing / LLM-facing), z pominięciem dev-tooli.")
     parser.add_argument("--szczegoly", action="store_true",
                         help="Wypisz każdą linię-leak (domyślnie: licznik per sekcja).")
     parser.add_argument("--prog", type=float, default=0.70,
                         help="Próg pewności lingua dla klasy A (domyślnie 0.70).")
     args = parser.parse_args()
+
+    if args.py:
+        return _main_py()
 
     if args.wszystkie:
         kody = list(KODY_DOCELOWE)
