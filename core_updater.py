@@ -144,6 +144,17 @@ def _znajdz_asset_instalatora(assets: list[dict]) -> Optional[dict]:
     return None
 
 
+def _oczysc_changelog(body: str) -> str:
+    """Przycina treść Release do czystego changelogu (bez końcowego `---`).
+
+    `body` Release pochodzi z sekcji `RELEASE_NOTES.md`; draft-workflow do v17.11
+    dołączał końcowy separator `---` (należy MIĘDZY sekcje). Tniemy go również tu,
+    defensywnie, by już OPUBLIKOWANE Release (z dawnym `---`) też wyświetlały się
+    czysto w `docs/changelog.md`. Strip dotyczy wyłącznie KOŃCA tekstu.
+    """
+    return re.sub(r"\n+-{3,}[ \t]*$", "", (body or "").strip()).strip()
+
+
 # ---------------------------------------------------------------------------
 # Publiczne API
 # ---------------------------------------------------------------------------
@@ -187,7 +198,7 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
             rozmiar_bajtow=asset.get("size", 0),
             url_release=dane.get("html_url", ""),
             url_zrodla=dane.get("zipball_url", ""),
-            changelog=(dane.get("body") or "").strip(),
+            changelog=_oczysc_changelog(dane.get("body", "")),
         )
 
     except (HTTPError, URLError, OSError, KeyError, ValueError):

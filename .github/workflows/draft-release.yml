@@ -110,7 +110,11 @@ jobs:
                   f"patch release ...) przed odpaleniem workflow.\n"
               )
               sys.exit(2)
-          tresc = m.group(1).rstrip() + "\n"
+          tresc = m.group(1).rstrip()
+          # Usun koncowy separator sekcji `---` (nalezy MIEDZY sekcje, nie do
+          # tresci) — inaczej body Release (a wiec i changelog w DialogAktualizacji)
+          # konczy sie nieeleganckimi myslnikami.
+          tresc = re.sub(r"\n+-{3,}[ \t]*$", "", tresc).rstrip() + "\n"
           out = pathlib.Path("/tmp/release_notes.md")
           out.write_text(tresc, encoding="utf-8")
           print(f"OK: {len(tresc)} znakow z sekcji ## {wersja} zapisanych w {out}")

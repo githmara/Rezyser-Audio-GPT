@@ -636,10 +636,11 @@ class DialogAktualizacji(wx.Dialog):
     v15.2.4 manual w momencie decyzji o update. Krytyczne info o utracie danych
     MUSI być w samym dialogu, nie tylko w manualu.
 
-    Trzy przyciski (A11y kolejność lewy→prawy + akceleratory z kluczy ui.yaml):
-      - Pobierz (default + ID_YES) — Enter wciska, NVDA wymawia "domyślny"
-      - Otwórz folder dictionaries — uruchamia Eksplorator, NIE zamyka dialogu
-      - Anuluj (ID_NO)
+    Przyciski (A11y kolejność lewy→prawy + akceleratory z kluczy ui.yaml):
+      - Pobierz (default, ID_YES + jawny EndModal) — Enter/klik zamyka z ID_YES
+      - Pokaż changelog / Otwórz folder dictionaries / Szczegóły online —
+        akcje poboczne, NIE zamykają dialogu
+      - Anuluj (ID_CANCEL) — wxDialog auto-domyka + mapuje na Escape (A11y)
     """
 
     def __init__(self, parent, info_aktualizacji):
@@ -700,13 +701,21 @@ class DialogAktualizacji(wx.Dialog):
         )
         self._btn_pobierz = wx.Button(self, wx.ID_YES, label_pobierz)
         self._btn_pobierz.SetDefault()
+        # JAWNY EndModal — wxDialog auto-domyka tylko ID_OK/ID_CANCEL; dla ID_YES
+        # poleganie na auto-handlingu jest zawodne (klik myszką potrafił nie
+        # zamknąć dialogu). Bind gwarantuje zamknięcie z ID_YES niezależnie od tego.
+        self._btn_pobierz.Bind(wx.EVT_BUTTON, lambda _e: self.EndModal(wx.ID_YES))
 
         self._btn_otworz = wx.Button(
             self, wx.ID_ANY, t("updater.btn_otworz_dictionaries")
         )
         self._btn_otworz.Bind(wx.EVT_BUTTON, self._on_otworz_folder)
 
-        self._btn_anuluj = wx.Button(self, wx.ID_NO, t("updater.btn_anuluj"))
+        # ID_CANCEL (NIE ID_NO): wxDialog domyka go automatycznie i mapuje na
+        # Escape (A11y). Do v17.11 był ID_NO — wxDialog NIE auto-domyka ID_NO,
+        # więc „Anuluj" nie robił nic (zamykało tylko Alt+F4). Reszta dialogów
+        # aplikacji od dawna używa ID_CANCEL — to był jedyny odstający dialog.
+        self._btn_anuluj = wx.Button(self, wx.ID_CANCEL, t("updater.btn_anuluj"))
 
         btn_sizer.Add(self._btn_pobierz, flag=wx.ALL, border=6)
         # „Pokaż changelog" — zapis docs/changelog.md + otwarcie (tylko gdy mamy body).
