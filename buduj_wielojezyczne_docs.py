@@ -123,21 +123,48 @@ TOKEN_REGEX = re.compile(r"⟦(\d+)⟧")
 
 
 # ---------------------------------------------------------------------------
-# Mapa języków docelowych (13.x)
+# Mapa języków docelowych — ładowana z `jezyki_docelowe.yaml` (od 2026-06-16)
 # ---------------------------------------------------------------------------
-# Polskie nazwy — `_prompt_systemowy` w tlumacz_ai.py składa prompt po polsku
-# („Przetłumacz cały dostarczony tekst na język: **{jezyk_docelowy}**"),
-# więc przekazujemy nazwę w tym samym języku co reszta promptu.
-MAPA_JEZYKOW: dict[str, str] = {
-    "en": "angielski",
-    "fi": "fiński",
-    "ru": "rosyjski",
-    "is": "islandzki",
-    "it": "włoski",
-    "de": "niemiecki",
-    "fr": "francuski",
-    "es": "hiszpański",
+# Rejestr ISO→nazwa NIE jest już hard-kodem Pythona. Mieszka w `jezyki_docelowe.yaml`
+# (root repo), utrzymywanym przez dev tool `refresh_languages.py`. Dzięki temu
+# kontrybutor dodaje nowy język BEZ dotykania Pythona (zasada „dodanie języka
+# nie wymaga Pythona") — wrzuca `dictionaries/<kod>/`, odpala refresh, gotowe.
+#
+# Nazwa = `jezyk_docelowy` podawany modelowi ("Translate ... into **{jezyk_docelowy}**").
+# Bazowy prompt jest po angielsku, więc nazwa polska („fiński") i natywna („Suomi")
+# działają identycznie. `_FALLBACK_JEZYKOW` = ostatnia deska ratunku, gdy pliku
+# rejestru brak (np. świeży checkout przed pierwszym refresh) — 8 języków z v17.x.
+_REJESTR_JEZYKOW = ROOT / "jezyki_docelowe.yaml"
+_FALLBACK_JEZYKOW: dict[str, str] = {
+    "en": "angielski", "fi": "fiński", "ru": "rosyjski", "is": "islandzki",
+    "it": "włoski", "de": "niemiecki", "fr": "francuski", "es": "hiszpański",
 }
+
+
+def _wczytaj_mape_jezykow() -> dict[str, str]:
+    """Wczytuje rejestr ISO→nazwa z `jezyki_docelowe.yaml` (fallback: wbudowane 8).
+
+    Filtruje wpisy nie-stringowe i język źródłowy `pl` (gdyby ktoś go dopisał) —
+    `pl` jest źródłem, nie celem tłumaczenia.
+    """
+    if not _REJESTR_JEZYKOW.is_file():
+        return dict(_FALLBACK_JEZYKOW)
+    try:
+        with open(_REJESTR_JEZYKOW, "r", encoding="utf-8") as fh:
+            dane = yaml.safe_load(fh)
+    except (OSError, yaml.YAMLError):
+        return dict(_FALLBACK_JEZYKOW)
+    if not isinstance(dane, dict):
+        return dict(_FALLBACK_JEZYKOW)
+    mapa = {
+        str(k): str(v)
+        for k, v in dane.items()
+        if isinstance(k, str) and isinstance(v, str) and k != KOD_ZRODLOWY
+    }
+    return mapa or dict(_FALLBACK_JEZYKOW)
+
+
+MAPA_JEZYKOW: dict[str, str] = _wczytaj_mape_jezykow()
 
 
 # ---------------------------------------------------------------------------

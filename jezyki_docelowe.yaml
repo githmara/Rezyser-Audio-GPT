@@ -1,0 +1,28 @@
+# =============================================================================
+# jezyki_docelowe.yaml — rejestr języków docelowych doc-autotłumacza
+# =============================================================================
+# Mapa: kod ISO → nazwa języka podawana modelowi jako cel tłumaczenia
+# (`jezyk_docelowy` w `tlumacz_ai._PROMPT_SYSTEMOWY_TEMPLATE`).
+#
+# Ten plik jest UTRZYMYWANY przez `refresh_languages.py` (dev tool) — kontrybutor
+# dodający nowy język NIE edytuje Pythona: wrzuca `dictionaries/<kod>/` (z
+# `podstawy.yaml`), uruchamia `python refresh_languages.py`, a narzędzie:
+#   * DODAJE nowe paczki (nazwa = natywna `etykieta` z podstawy.yaml),
+#   * USUWA wpisy, których folder/podstawy.yaml już nie ma,
+#   * ZACHOWUJE istniejące wpisy (w tym ręcznie dopieszczone nazwy — możesz
+#     zmienić „Chinese" na „简体中文" itp., refresh tego nie nadpisze).
+#
+# `buduj_wielojezyczne_docs.py` czyta ten plik jako `MAPA_JEZYKOW`. Gdy pliku
+# brak — używa wbudowanego fallbacku. `pl` to język ŹRÓDŁOWY (nie cel) i celowo
+# NIE występuje tutaj. NIE edytuj kluczy ręcznie — od tego jest refresh; nazwy
+# (wartości) możesz zmieniać dowolnie.
+# =============================================================================
+
+de: niemiecki
+en: angielski
+es: hiszpański
+fi: fiński
+fr: francuski
+is: islandzki
+it: włoski
+ru: rosyjski
