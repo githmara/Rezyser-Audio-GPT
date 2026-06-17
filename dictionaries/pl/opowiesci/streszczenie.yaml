@@ -13,7 +13,7 @@ kolejnosc: 60
 
 # --- Parametry OpenAI ---
 # Niska temperatura — chcemy wierne, faktograficzne streszczenie (nie kreatywne).
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.3
 max_tokens: 800
 timeout_s: 60.0

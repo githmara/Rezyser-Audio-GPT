@@ -10,7 +10,7 @@ kategoria: tryb
 kolejnosc: 40
 
 # --- Parametry OpenAI ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Addon do prompt_systemowy z baza.yaml ---

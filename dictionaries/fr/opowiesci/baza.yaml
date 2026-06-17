@@ -20,7 +20,7 @@ kategoria: baza
 kolejnosc: 0
 
 # --- Paramètres OpenAI (hérités par les modes narratifs) ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Prompt système ---

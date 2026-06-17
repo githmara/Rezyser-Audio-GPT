@@ -179,21 +179,30 @@ speichern, und die Anwendung lädt Ihre Version beim nächsten Start. Kein
 Programmieren erforderlich.
 
 
-Was ist der "Geschichtenmodus"?
--------------------------------
+Was ist der "Story-Modus"?
+---------------------------
 
-Der Ordner "opowiesci/" enthält 8 Dateien, die den zweiten Hauptmodus der Anwendung beschreiben — interaktive Textspiele, die von einer KI als Erzählmotor geleitet werden. Im Gegensatz zum Regisseurmodus (wo du ein FERTIGES Hörbuch zur Wiedergabe im TTS generierst), ist der Geschichtenmodus ein rundenbasiertes Gespräch mit dem Modell, das mit dir eine dynamische Handlungssitzung durchführt:
+Der Ordner "opowiesci/" enthält 8 Dateien, die den zweiten Hauptmodus der Anwendung beschreiben — interaktive Textspiele, die von einer KI als erzählerische Engine geleitet werden. Im Gegensatz zum Regisseur-Modus (wo du ein FERTIGES Hörbuch zur Wiedergabe im TTS generierst), ist der Story-Modus ein rundenbasiertes Gespräch mit dem Modell, das mit dir eine dynamische Handlungssitzung führt:
 
-- tryb_wyborow.yaml      — Entscheidungen (3-5 nummerierte Optionen A-E am Ende jeder Runde, der intuitivste Modus für blinde Spieler)
-- tryb_mniejsze_zlo.yaml — Das kleinere Übel (wie Entscheidungen, aber jede Option ist nachteilig; ab v15.2 wiederverwendbare Phiole als NULL-nummerierte Option der verzweifelten Rettung)
-- tryb_swobodny.yaml     — Frei (beliebige Aktion im freien Text, der Motor schlägt 1-3 Vorschläge vor, erzwingt aber keine Wahl)
-- tryb_burza.yaml        — Brainstorming (interner Dispatcher, der Vorschläge zur Szenenentwicklung für den Erzählmotor generiert)
-- baza.yaml              — gemeinsame Basisregeln (Rundenlänge, Verbote von Zusammenfassungen, Anti-Schließungs-Direktive)
-- zaczatki.yaml          — Abenteuerstarter (3 anfängliche Welteinrichtungen zur Auswahl bei einem neuen Spiel)
-- streszczenie.yaml      — Langspiel-Zusammenfassungsgenerator (Komprimierung der Geschichte für das Kontextfenster des Modells)
-- cinematic_warning.yaml — Warnungen vor brutalen/dramatischen Szenen (Übereinstimmung mit den Vorlieben des Spielers)
+- tryb_wyborow.yaml      — Entscheidungen (3-5 nummerierte Optionen A-E am Ende
+                           jeder Runde, der intuitivste Modus für blinde Spieler)
+- tryb_mniejsze_zlo.yaml — Das kleinere Übel (wie Entscheidungen, aber jede Option ist
+                           nachteilig; ab v15.2 wiederverwendbare Phiole als
+                           NULL-nummerierte Option der verzweifelten Rettung)
+- tryb_swobodny.yaml     — Frei (beliebige Aktion im freien Text, die Engine
+                           schlägt 1-3 Vorschläge vor, zwingt aber keine Wahl auf)
+- tryb_burza.yaml        — Brainstorming (interner Dispatch, der
+                           Szenenentwicklungsvorschläge für die erzählerische Engine generiert)
+- baza.yaml              — gemeinsame Basisregeln (Rundenlänge, Verbote
+                           von Zusammenfassungen, Anti-Schluss-Direktive)
+- zaczatki.yaml          — Abenteuer-Starter (3 anfängliche Welteinrichtungen
+                           zur Auswahl bei einem neuen Spiel)
+- streszczenie.yaml      — Langspiel-Zusammenfassungs-Generator (Komprimierung
+                           der Geschichte für das Kontextfenster des Modells)
+- cinematic_warning.yaml — Warnungen vor brutalen/dramatischen
+                           Szenen (Einhaltung der Spielerpräferenzen)
 
-Wie im Regisseurmodus enthält jede Datei ein "System-Prompt" zur Bearbeitung. Du kannst den Stil des Erzählers anpassen (z.B. weniger blumig), die Rundenlänge ändern, eigene Handlungsdirektiven hinzufügen. Ab v15.2 wird das KI-Modell automatisch pro Modus ausgewählt: Entscheidungen und Das kleinere Übel verwenden gpt-4o (besseres moralisches Verständnis, wichtig für den Modus mit Konsequenzen), Frei verwendet gpt-4o-mini (günstigere Ökonomie der Improvisation im freien Text).
+Wie im Regisseur-Modus enthält jede Datei einen "System-Prompt" zur Bearbeitung. Du kannst den Stil des Erzählers anpassen (z.B. weniger blumig), die Rundenlänge ändern, eigene erzählerische Direktiven hinzufügen. Ab v18.1 nutzen alle Story-Modi ein einziges Modell, Anthropic Claude Sonnet 4.6 — ein stärkeres Modell, das sich strikt an die Regeln der Welt hält (entscheidend im Modus Das kleinere Übel, wo jede Option real nachteilig sein muss).
 
 
 Wie man anfängt — drei Schwierigkeitsstufen

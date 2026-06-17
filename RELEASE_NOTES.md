@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 18.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 18.1 „Wersja Wydawnicza"
+
+*Release v18.1: konsolidacja silnika Interaktywnych Opowieści z OpenAI na Anthropic Claude Sonnet 4.6 — kontynuacja łuku z v18.0 (wtedy narracja Reżysera). Bezpośredni powód: w trybie „Mniejsze zło" GPT-4o proponował wybory po prostu złe albo neutralne, zamiast konsekwentnie NIEKORZYSTNYCH, jak wymaga reguła tego trybu. Zamiast dalej dokręcać prompt (anty-wzorzec udowodniony w v18.0) zmieniono providera: cały moduł `opowiesci_ai` (tury trybów 3/4/5, `/visualize`, automatyczne streszczenia i przerywnik Cinematic) woła teraz Messages API jednego modelu Claude — dawny dobór modelu per tryb (gpt-4o dla wyborów / gpt-4o-mini dla reszty) zniesiony. Wzorzec 1:1 z v18.0: `system` osobno + pierwsza wiadomość `user` (ciągłość poprzedniej tury zwinięta do `user`, bo Anthropic nie pozwala zacząć od `assistant`), świadomie BEZ `output_config` (wymuszony schemat zablokowałby goły tag `[ODRZUCENIE_AI]` wykrywany przed `json.loads`), `stop_reason=="max_tokens"` zamiast `finish_reason=="length"`, self-correction dokleja błędy walidacji jako kolejne wiadomości `user`; `core_tokeny` nietknięty (pasek pamięci dalej liczy tiktokenem, okno 128k jako logiczny budżet). Weryfikacja empiryczna na realnej grze `joanna_joana_conflict` (Mniejsze zło, 3 tury z losowym wyborem podawanym zwrotnie): wszystkie wybory realnie niekorzystne, „Zmysłowa Fizjologia" Księgi Świata utrzymana, mechanika imienia Joanna→Joana respektowana, fiolka wprowadzona diegetycznie. Postprodukcja tytułów Reżysera (`gpt-4o-mini`) i Poliglota zostają na OpenAI — osobny łuk. Plus: dev-tool tłumaczeń dokumentacji chroni teraz literał `TUTAJ_WKLEJ_SWOJ_KLUCZ` przed tłumaczeniem.*
 
 *Release v18.0: migracja silnika narracji Reżysera (audiobook / teatr czytany / burza) z OpenAI GPT-4o na Anthropic Claude Sonnet 4.6 — odpowiedź na empirycznie udowodnioną niezdatność GPT-4o do prozy w tym świecie. Audyt wykazał trzy uporczywe wady: klisze mimo czarnej listy (model użył wprost listowanego „miecza Damoklesa"), melodramat zamiast „Zmysłowej Fizjologii" Księgi Świata, oraz oszukany anti-closure (wygaszenie sceny + sztucznie doklejony dźwięk). Trzy dokręcenia promptu (temperatura 0.85→0.65, czarna lista klisz, anti-closure „PRAWO ABSOLUTNE") nie pomogły — przeładowanie modeli z rodziny GPT zakazami skutkuje ich ignorowaniem. Zamiast dalej dokręcać prompt, zmieniono providera: warstwa `rezyser_ai` woła teraz Anthropic Messages API (`messages.create`, `system` osobno od `messages`, kontekst złożony w jedną wiadomość `user` — Anthropic wymaga pierwszej wiadomości `user`, `thinking=disabled` dla czystej prozy, `temperature` z przepisu zachowana, `stop_reason=="max_tokens"` zamiast `finish_reason=="length"`); prompty YAML NIETKNIĘTE (to migracja providera, nie redesign roli — przeładowanie zakazami było książkowym anty-wzorcem). Świadomie BEZ `output_config` json_schema — wymuszony schemat zablokowałby zwrot gołego tagu `[ODRZUCENIE_AI]`, na którym opiera się detekcja odmowy w burzy/skrypcie; zostaje istniejąca pętla self-correction + `jsonschema.validate`. Weryfikacja empiryczna na realnym projekcie (`finnish_length`): 3 iteracje audiobooka + 3 przebiegi burzy — wszystkie trzy wady GPT-4o odwrócone (rejestr fizjologiczny utrzymany: tchawica, kość gnykowa, chrząstka tarczowa, naczynia podśluzówkowe; klisze znikły; anti-closure realnie w połowie akcji/zdania; pojawiły się naturalne granice scen na nagłówki strukturalne). Eksponat: nowszy model samodzielnie zaudytował wycięty draft GPT-4o i doszedł do tego samego werdyktu co audyt ludzki („nie nadaje się bez przepisania niemal od zera"). Postprodukcja tytułów i mikro-call kodu języka zostają na `gpt-4o-mini` (tanie, niekreatywne), więc runtime jest **dual-provider** i wymaga teraz `ANTHROPIC_API_KEY` (`sk-ant-`) obok klucza OpenAI. Sufiks „optymalizacja" Burzy zniesiony (instruował AI o czymś, czego i tak domyślnie nie robi). Konsolidacja runtime na jednego providera (Opowieści/Poliglota/postprod → single-key end-user + lżejszy `.exe`) zaplanowana jako następny łuk; dev-tooling tłumaczeń docs/UI zostaje na OpenAI (proven, nie obciąża end-usera, nie jest w bundlu).*
 
@@ -79,6 +81,53 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 18.1 — minor release (Story engine consolidated from OpenAI onto Anthropic Claude Sonnet 4.6; per-mode model selection retired; verified live on a Lesser-Evil game)
+
+### 🆕 What's new (English)
+
+The Interactive Stories engine (`opowiesci_ai`) now runs entirely on Anthropic Claude Sonnet 4.6 — the same provider migration applied to the Director narrative in v18.0. Every Story call (turns in Choices / Lesser Evil / Free modes, `/visualize`, context summaries, the Cinematic interlude) goes through the Messages API on one model; the old per-mode split between GPT-4o and GPT-4o-mini is gone. The trigger: in Lesser Evil mode GPT-4o produced choices that were merely "bad" or neutral rather than the consistently disadvantageous options the mode requires — a stronger model fixes this with the prompt untouched. The documentation translator now also protects the literal `TUTAJ_WKLEJ_SWOJ_KLUCZ` API-key placeholder from being translated.
+
+### 🔭 Planned / deferred (English)
+
+- Director title post-production (`gpt-4o-mini`) and the Polyglot translator stay on OpenAI; migrating them to Anthropic is the next arc — expected to also lift the long-standing ban on auto-translating existing documentation, as translation quality should rise.
+- OpenAI will only be dropped from the packaged `.exe` once no bundled module imports it.
+- The remainder of these notes is in Polish.
+
+### TL;DR
+
+To wydanie domyka drugi łuk konsolidacji runtime na Anthropic: po Reżyserze (v18.0) na Claude Sonnet 4.6 przechodzi silnik Interaktywnych Opowieści. Bezpośrednim powodem był tryb „Mniejsze zło" — GPT-4o proponował wybory po prostu złe albo neutralne, zamiast konsekwentnie niekorzystnych, jak wymaga reguła tego trybu. Zamiast dalej dokręcać prompt (anty-wzorzec udowodniony w v18.0), zmieniono providera.
+
+Cały `opowiesci_ai` — tury trybów 3/4/5, `/visualize`, automatyczne streszczenia i przerywnik Cinematic — woła teraz Messages API jednego modelu Claude. Dawny dobór modelu per tryb (gpt-4o dla wyborów, gpt-4o-mini dla reszty) został zniesiony. Migracja jest lustrem v18.0 co do joty: prompt systemowy osobno od wiadomości, pierwsza wiadomość zawsze `user` (ciągłość poprzedniej tury zwinięta do tej wiadomości, bo Anthropic nie pozwala zacząć od `assistant`), świadomie BEZ `output_config`/json_schema (wymuszony schemat zablokowałby goły tag `[ODRZUCENIE_AI]`, na którym opiera się wykrywanie odmowy), `stop_reason=="max_tokens"` zamiast `finish_reason=="length"`, a pętla self-correction dokleja błędy walidacji jako kolejne wiadomości `user`. Liczenie tokenów na pasku pamięci zostaje bez zmian (tiktoken, okno 128k jako logiczny budżet kosztu i spójności).
+
+Weryfikacja empiryczna: realna gra `joanna_joana_conflict` (tryb Mniejsze zło, tura 15+), 3 tury z losowym wyborem podawanym zwrotnie. Wszystkie generowane wybory były realnie niekorzystne (każda opcja z jawnym kosztem), „Zmysłowa Fizjologia" Księgi Świata utrzymana (zimno, drżenie, utrata czucia), mechanika imienia Joanna→Joana jako fizyczny atak respektowana, fiolka wprowadzona diegetycznie i trwała jako wybór 0.
+
+### Co nowego
+
+- Wszystkie tryby Opowieści (Wybory, Mniejsze zło, Swobodny), `/visualize`, streszczenia i Cinematic Warning działają na Anthropic Claude Sonnet 4.6.
+- Koniec doboru modelu per tryb — jeden model dla całego modułu Opowieści.
+- Dev-tool tłumaczeń dokumentacji chroni literał `TUTAJ_WKLEJ_SWOJ_KLUCZ` (placeholder klucza generowany przez aplikację identycznie w każdym języku) przed tłumaczeniem.
+- Dokumentacja (manual Opowieści, README, przewodnik słowników) zaktualizowana: opis modelu Opowieści + skorygowany dług z v18.0 (sekcja „Architektura AI" wciąż przypisywała gpt-4o narracji Reżysera).
+
+### Pod maską
+
+- Nowy helper `opowiesci_ai._wywolaj_claude` (klon z `rezyser_ai`, jawne model/temperatura/max_tokens — Opowieści nie mają dataclassy `PrzepisRezysera`); `thinking=disabled`; tekst sklejany z bloków `type="text"`.
+- `inicjalizuj_klienta` czyta `ANTHROPIC_API_KEY` (`sk-ant-`); `gui_opowiesci` łapie wyjątki `anthropic` zamiast `openai`.
+- `MODEL_NARRACJA="claude-sonnet-4-6"` dla wszystkich wywołań LLM; `MODEL_DOMYSLNY` (gpt-4o-mini) został wyłącznie do liczenia tokenów; `core_tokeny` nietknięty.
+- YAML `model:` w 63 plikach `dictionaries/<9>/opowiesci/*.yaml` → `claude-sonnet-4-6`.
+
+### Co nie weszło
+
+- Postprodukcja tytułów Reżysera (`gpt-4o-mini`) i Poliglota/tłumacz zostają na OpenAI — migracja w kolejnym wydaniu. OpenAI zniknie z `.exe` dopiero, gdy żaden bundlowany moduł go nie importuje.
+- Obcojęzyczne sekcje dokumentacji o modelu zaktualizowano autotłumaczem (`--klucz`) — zniesiono dotychczasowy zakaz autotłumacza na istniejących plikach (jakość wzrośnie po migracji Poligloty).
+
+### Walidacja
+
+- 7/7 testów izolowanych (mock klienta Anthropic): payload (system osobno, pierwsza wiadomość `user`, ciągłość zwinięta), detekcja `[ODRZUCENIE_AI]` przed `json.loads`, `stop_reason=="max_tokens"` → `BladDlugosciOdpowiedzi`, self-correction jako `user`, wyczerpane retry → `BladStrukturyJSON`.
+- Live-test `joanna_joana_conflict` (3 tury, Mniejsze zło) — opis w TL;DR.
+- Review halucynacji autotłumacza ×8: model „Claude Sonnet 4.6" 1:1, zero wycieku PL, gpt-4o usunięty z sekcji Opowieści (został w „Architektura AI" dla tłumaczeń/mikro), `docs/*.txt` zregenerowane i zwalidowane.
 
 ---
 

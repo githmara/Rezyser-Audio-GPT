@@ -147,21 +147,31 @@ tresc:
     les sauvegarder, et l'application chargera votre version au prochain démarrage.
     Zéro programmation.
   co_to_tryb_opowiesci: |
-    Qu'est-ce que le "mode Histoire" ?
-    ----------------------------------
+    Qu'est-ce que le "mode Récits" ?
+    ----------------------------
 
-    Le dossier "opowiesci/" contient {liczba_trybow_opowiesci} fichiers décrivant le deuxième mode principal de l'application — des jeux textuels interactifs menés par l'IA en tant que moteur narratif. Contrairement au mode Réalisateur (où vous générez un livre audio PRÊT à être lu en TTS), le mode Histoire est une conversation tour par tour avec le modèle, qui vous guide à travers une session de scénario dynamique :
+    Le dossier "opowiesci/" contient {liczba_trybow_opowiesci} fichiers décrivant le deuxième mode principal de l'application — des jeux textuels interactifs dirigés par l'IA en tant que moteur narratif. Contrairement au mode Réalisateur (où vous générez un livre audio PRÊT à être lu en TTS), le mode Récits est une conversation tour par tour avec le modèle, qui vous guide dans une session de narration dynamique :
 
-    - tryb_wyborow.yaml      — Choix (3-5 options numérotées A-E à la fin de chaque tour, le mode le plus intuitif pour les joueurs aveugles)
-    - tryb_mniejsze_zlo.yaml — Moindre mal (comme Choix, mais chaque option est défavorable ; à partir de la v15.2, une fiole réutilisable comme option de secours désespéré numérotée ZERO)
-    - tryb_swobodny.yaml     — Libre (action libre en texte, le moteur propose 1-3 suggestions mais n'impose pas de choix)
-    - tryb_burza.yaml        — Brainstorming (dispatch interne générant des propositions de développement de scène pour le moteur narratif)
-    - baza.yaml              — règles de base communes (durée du tour, interdictions de résumés, directive anti-clôture)
-    - zaczatki.yaml          — amorces d'aventure (3 configurations initiales du monde à choisir pour un nouveau jeu)
-    - streszczenie.yaml      — générateur de résumés de jeux longs (compression de l'histoire pour la fenêtre de contexte du modèle)
-    - cinematic_warning.yaml — avertissements sur les scènes brutales/dramatiques (conformité avec les préférences du joueur)
+    - tryb_wyborow.yaml      — Choix (3-5 options numérotées A-E à la fin
+                               de chaque tour, le mode le plus intuitif pour
+                               les joueurs aveugles)
+    - tryb_mniejsze_zlo.yaml — Moindre mal (comme Choix, mais chaque option est
+                               défavorable ; à partir de v15.2, une fiole réutilisable
+                               comme option de secours désespéré numérotée ZERO)
+    - tryb_swobodny.yaml     — Libre (action libre en texte, le moteur
+                               propose 1-3 suggestions mais n'impose pas de choix)
+    - tryb_burza.yaml        — Brainstorming (dispatche interne générant
+                               des propositions de développement de scène pour le moteur narratif)
+    - baza.yaml              — règles de base communes (durée du tour, interdictions
+                               de résumés, directive anti-clôture)
+    - zaczatki.yaml          — amorces d'aventure (3 configurations initiales du monde
+                               à choisir pour un nouveau jeu)
+    - streszczenie.yaml      — générateur de résumés de jeux longs (compression
+                               de l'histoire pour la fenêtre de contexte du modèle)
+    - cinematic_warning.yaml — avertissements sur les scènes brutales/dramatiques
+                               (conformité avec les préférences du joueur)
 
-    Comme dans le mode Réalisateur, chaque fichier contient un "prompt système" à éditer. Vous pouvez ajuster le style du narrateur (par exemple, moins fleuri), changer la durée du tour, ajouter vos propres directives scénaristiques. À partir de la v15.2, le modèle AI est sélectionné automatiquement par mode : Choix et Moindre mal utilisent gpt-4o (meilleur raisonnement moral, important pour le mode avec conséquences), Libre utilise gpt-4o-mini (économie moins coûteuse pour l'improvisation en texte libre).
+    Comme dans le mode Réalisateur, chaque fichier contient un "prompt système" à éditer. Vous pouvez ajuster le style du narrateur (par exemple, moins fleuri), changer la durée du tour, ajouter vos propres directives narratives. Depuis la v18.1, tous les modes Récits utilisent un seul modèle Anthropic Claude Sonnet 4.6 — un modèle plus puissant qui respecte rigoureusement les règles du monde (essentiel dans le mode Moindre mal, où chaque option doit être réellement défavorable).
   jak_zaczac: |
     Comment commencer à s'amuser — trois niveaux de difficulté
     ----------------------------------------------------------

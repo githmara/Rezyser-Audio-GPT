@@ -19,7 +19,7 @@ kategoria: tryb
 kolejnosc: 50
 
 # --- Параметры OpenAI ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Механика склянки (v15.2) ---

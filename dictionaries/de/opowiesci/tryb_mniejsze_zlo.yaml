@@ -17,7 +17,7 @@ kategoria: tryb
 kolejnosc: 50
 
 # --- OpenAI-Parameter ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Phiolen-Mechanik (v15.2) ---

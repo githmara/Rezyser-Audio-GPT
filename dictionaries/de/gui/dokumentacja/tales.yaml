@@ -80,21 +80,21 @@ tresc:
 
     Hinweis: Weltregeln erfordern ein aktives Spiel. Wenn du auf "{opowiesci.btn_zasady_swiata_label}" klickst, ohne ein Spiel geladen/erstellt zu haben, erhältst du die Meldung „{opowiesci.zasady_bez_gry_tytul}" — klicke zuerst auf "{opowiesci.btn_nowa_gra_label}" oder lade ein gespeichertes Spiel.
   krok_5_slash_komendy: |
-    SCHRITT 5: Slash-Befehle — schnelle Aktionen ohne API
+    KROK 5: Slash-Befehle — schnelle Aktionen ohne API
 
-    Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Die Befehle sind lokal (kosten keine OpenAI-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl polnische als auch englische Varianten werden akzeptiert:
+    Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Befehle sind lokal (sie verursachen keine API-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl polnische als auch englische Varianten werden akzeptiert:
 
     /zapisz, /save — erzwingt das manuelle Speichern des Spielstands. Das automatische Speichern erfolgt nach jeder Runde, daher ist dieser Befehl hauptsächlich zur Sicherheit vor dem Schließen der Anwendung gedacht.
 
-    /wczytaj, /load — öffnet einen Dialog zur Auswahl eines Spiels aus einer Liste verfügbarer Namen (ab v15.2.3 anstelle des systemeigenen Dateidialogs — direkte Liste der gespeicherten Spiele aus dem Ordner runtime/opowiesci/, die anhand der Anwesenheit der Datei .game.json erkannt werden). NVDA liest die Liste natürlich vor, der blinde Spieler muss nicht im systemeigenen Dateidialog navigieren. Nach der Auswahl werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst von der Runde aus weitermachen, bei der du aufgehört hast. Identisches Verhalten hat die Schaltfläche "{opowiesci.btn_wczytaj_label}".
+    /wczytaj, /load — öffnet einen Dialog zur Auswahl eines Spiels aus einer Liste verfügbarer Namen (ab v15.2.3 anstelle des systemeigenen Dateidialogs — direkte Liste der gespeicherten Spiele aus dem Ordner runtime/opowiesci/, die anhand der Anwesenheit der Datei .game.json erkannt werden). NVDA liest die Liste natürlich vor, der blinde Spieler muss nicht im systemeigenen Dateidialog navigieren. Nach der Auswahl werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst ab der Runde weitermachen, bei der du aufgehört hast. Identisches Verhalten hat die Schaltfläche "{opowiesci.btn_wczytaj_label}".
 
-    Der Erzählmotor wählt das AI-Modell automatisch je nach Modus: Für den Modus Entscheidungen und Das kleinere Übel wird das teurere gpt-4o verwendet (hält sich streng an die Weltregeln), für den Freien Modus — das schnellere und günstigere gpt-4o-mini (der Spieler steuert die Handlung, daher ist keine dramatische Regie erforderlich).
+    Der Erzählmotor aller Erzählmodi verwendet ein einziges Modell, Anthropic Claude Sonnet 4.6 (ab v18.1; zuvor wurde das OpenAI-Modell pro Modus ausgewählt). Ein stärkeres Modell hält sich streng an die Regeln der Welt — das ist besonders wichtig im Modus Das kleinere Übel, wo jede Option real nachteilig bleiben muss.
 
-    /wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht, schlägt keine Entscheidungen vor — der Erzählmotor verwendet alle fünf Sinne (Sehen, Hören, Geruch, Tasten, Geschmack), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT in die Erzählung aufgenommen oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj wie der Wächter aussieht" oder „/wizualizuj der Geruch des Cafés".
+    /wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert nicht den Spielzustand, schlägt keine Entscheidungen vor — der Erzählmotor verwendet alle fünf Sinne (Sehen, Hören, Riechen, Tasten, Schmecken), um die Szene mit größerer Tiefe zu zeigen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT zur Erzählung hinzugefügt oder in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj jak wygląda strażnik" oder „/wizualizuj zapach kawiarni".
 
-    /odswiez, /refresh — aktualisiert den internen Speicher aus der Erzählungsdatei nach deren manueller Bearbeitung (seit v15.5). Wenn du opowiesci/<nazwa>.txt im Editor öffnest und z.B. einen Tippfehler korrigierst oder einen überflüssigen Absatz kürzt, synchronisiert dieser Befehl das frische Ende mit dem Kontext der Engine — ohne harten Reset und erneutes Laden des Spiels. Falls bereits eine Zusammenfassung früherer Runden existiert, bleibt sie unberührt, sodass die nächste Runde und die nächste Zusammenfassung nicht auf veralteten Daten entstehen. ACHTUNG: Der Spielstand (Figuren, Ort, Inventar, Handlungsfäden) aus der Datei .game.json wird NICHT aktualisiert — wenn die Bearbeitung Weltfakten verändert hat, kann die nächste Runde mit ihnen auseinanderlaufen. (Die entsprechende Schaltfläche „{opowiesci.btn_odswiez_z_dysku_label}" ist eine technische Option, standardmäßig ausgeblendet — der Befehl funktioniert immer.)
+    /odswiez, /refresh — aktualisiert den internen Speicher aus der Erzählungsdatei nach deren manueller Bearbeitung (ab v15.5). Wenn du opowiesci/<nazwa>.txt im Editor öffnest und z.B. einen Tippfehler korrigierst oder einen überflüssigen Absatz kürzt, synchronisiert dieser Befehl das frische Ende mit dem Kontext des Motors — ohne harten Reset und erneutes Laden des Spiels. (Die gleichwertige Schaltfläche „{opowiesci.btn_odswiez_z_dysku_label}" ist eine technische Option, standardmäßig verborgen — der Befehl funktioniert immer.) Wenn es bereits eine Zusammenfassung früherer Runden gibt, bleibt sie unberührt, sodass die nächste Runde und die nächste Zusammenfassung nicht auf veralteten Daten basieren. ACHTUNG: Der Spielzustand (Charaktere, Standort, Inventar, Handlungsstränge) aus der Datei .game.json wird NICHT aktualisiert — wenn die Bearbeitung die Fakten der Welt verändert hat, kann sich die nächste Runde mit ihnen überschneiden.
 
-    /pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Bildschirmleser liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
+    /pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, und der Bildschirmleser liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
 
     /koniec, /quit — schließt die Anwendung (nach dem automatischen Speichern der laufenden Runde).
   krok_6_pliki_gry: |
@@ -110,16 +110,16 @@ tresc:
 
     runtime/opowiesci/<nazwa>.mode — Metadaten der Modusnummer (3=Frei, 4=Wahl, 5=Kleineres Übel). Seit v17.4 in einem eigenen Geschichten-Ordner. Zuvor lag die Datei in runtime/skrypty/ gemeinsam mit dem Regisseur — bei einem Spiel und einem Regisseur-Projekt mit demselben Namen konnte das Speichern des einen Moduls den Modus des anderen stillschweigend überschreiben; nun sind die Namensräume getrennt, und alte Dateien werden beim Laden des Spiels einmalig migriert.
   krok_7_pamiec_modelu: |
-    SCHRITT 7: Modell-Speicheranzeige — Warum Runden in alten Spielen keine manuelle Arbeit von Ihnen erfordern
+    SCHRITT 7: Modell-Speicheranzeige — warum Runden in alten Spielen keine manuelle Arbeit von Ihnen erfordern
 
-    Unter dem RadioBox-Modus finden Sie die Modell-Speicheranzeige — eine Fortschrittsleiste (wx.Gauge) mit einer Statusbeschreibung daneben. Die Anzeige zeigt den Prozentsatz der Auslastung des Kontextfensters der Erzählmaschine an (gpt-4o-mini hat einen Puffer von 128.000 Token).
+    Unter dem RadioBox-Modus finden Sie die Modell-Speicheranzeige — eine Fortschrittsleiste (wx.Gauge) mit einer Statusbeschreibung daneben. Die Anzeige zeigt den Prozentsatz der Auslastung des Kontextfensters der Erzählmaschine (Puffer bis zu 128.000 Token).
 
     Vier Auslastungsstufen:
 
-    🟢 sauber (0%) — das Spiel hat gerade erst begonnen, keine gespeicherten Runden.
+    🟢 sauber (0%) — das Spiel hat gerade erst begonnen, es sind keine Runden gespeichert.
     🟢 OK (1-69%) — alles in Ordnung, Sie können ohne Einschränkungen fortfahren.
-    ⚠️ Warnung (70-89%) — die Maschine generiert automatisch eine Zusammenfassung der vorherigen Runden im Hintergrund. Eine Meldung „Auto-Zusammenfassung des Kontexts in Bearbeitung..." erscheint — senden Sie keine weitere Runde, bis die Zusammenfassung abgeschlossen ist. Nach Erfolg werden die vorherigen Runden zu einem Kondensat zusammengefasst, der Puffer wird freigegeben und Sie erhalten die Bestätigung „Modell-Speicher wiederhergestellt" mit der Anzahl der zusammengefassten Runden.
-    🚨 ALARM (90%+) — die Auto-Zusammenfassung hat den Puffer nicht freigegeben (seltener Fall nach einem API-Fehler). Das Senden einer weiteren Runde ist blockiert. Erzwingen Sie das Ende des Spiels mit /koniec, dann laden Sie es erneut — die Maschine lädt den Zustand aus game.json ohne die Geschichte der letzten Runden, der Puffer wird frisch sein.
+    ⚠️ Warnung (70-89%) — die Maschine generiert automatisch eine Zusammenfassung der vorherigen Runden im Hintergrund. Es erscheint die Meldung „Auto-Zusammenfassung des Kontexts in Arbeit…" — senden Sie keine weitere Runde, bis die Zusammenfassung abgeschlossen ist. Nach erfolgreichem Abschluss werden die vorherigen Runden zu einem Kondensat zusammengefasst, der Puffer wird freigegeben, und Sie erhalten die Bestätigung „Modell-Speicher wiederhergestellt" mit der Anzahl der zusammengefassten Runden.
+    🚨 ALARM (90%+) — die Auto-Zusammenfassung hat den Puffer nicht freigegeben (seltener Fall nach einem API-Fehler). Das Senden einer weiteren Runde ist blockiert. Erzwingen Sie das Spielende mit /koniec, laden Sie es dann erneut — die Maschine lädt den Zustand aus game.json ohne die Geschichte der letzten Runden, der Puffer wird frisch sein.
 
     In der Praxis ist der Autoreduktionsmechanismus unsichtbar — der Spieler merkt nicht, dass etwas passiert, da der Hintergrund-Thread das Problem löst, bevor es bemerkt wird. Wichtig ist nur, dass Sie keine weitere Runde während der Auto-Zusammenfassung senden (der Button "{opowiesci.btn_wyslij_label}" ist dann ausgegraut).
   krok_8_cinematic_warning: |
@@ -151,17 +151,17 @@ tresc:
   najczestsze_problemy: |
     Häufigste Probleme
 
-    Problem: Nach dem Klicken auf "{opowiesci.btn_nowa_gra_label}" erscheint die Meldung „Kein API-Schlüssel".
-    Ursache und Lösung: Die Datei golden_key.env im Hauptordner der Anwendung enthält keinen gültigen OpenAI-Schlüssel. Gehen Sie zum Startbildschirm zurück (Home-Taste), klicken Sie auf "{home.btn_generate}" und folgen Sie den Anweisungen (SCHRITT 2 des Haupthandbuchs).
+    Problem: Nach dem Klicken auf "{opowiesci.btn_nowa_gra_label}" erscheint die Meldung „Kein API-Schlüssel vorhanden".
+    Ursache und Lösung: Die Datei golden_key.env im Hauptverzeichnis der Anwendung enthält keinen gültigen Anthropic-Schlüssel (dieser treibt den Erzählmodus an). Gehe zurück zum Startbildschirm (Home-Taste), klicke auf "{home.btn_generate}" und folge den Anweisungen (SCHRITT 2 des Haupthandbuchs).
 
-    Problem: Ich versuche, eine weitere Runde zu senden, aber die Schaltfläche "{opowiesci.btn_wyslij_label}" ist ausgegraut.
-    Ursache und Lösung: Eine automatische Kontextzusammenfassung oder die Generierung einer Cinematic Warning läuft im Hintergrund. Der Speicherstatus zeigt „Automatische Kontextzusammenfassung läuft…". Warten Sie einige Sekunden — die Schaltfläche wird nach erfolgreichem Abschluss automatisch freigegeben.
+    Problem: Ich versuche, die nächste Runde zu senden, aber der Button "{opowiesci.btn_wyslij_label}" ist ausgegraut.
+    Ursache und Lösung: Es läuft eine automatische Kontextzusammenfassung oder die Generierung einer Cinematic Warning im Hintergrund-Thread. Der Speicherstatus zeigt „Automatische Kontextzusammenfassung läuft…". Warte einige Sekunden — der Button wird sich automatisch nach erfolgreichem Abschluss freischalten.
 
-    Problem: Die Meldung „Modellspeicher überlastet" blockiert das Spiel.
-    Ursache und Lösung: Die automatische Zusammenfassung hat den Puffer nicht freigegeben (z.B. Rate-Limit von OpenAI). Beenden Sie das Spiel mit dem Befehl /ende oder schließen Sie die Anwendung und laden Sie sie erneut — der Motor lädt nur den Zustand aus game.json ohne die Geschichte der letzten Runden.
+    Problem: Die Meldung „Modellspeicher überladen" blockiert das Spiel.
+    Ursache und Lösung: Die automatische Zusammenfassung hat den Puffer nicht freigegeben (z.B. aufgrund einer API-Anthropic-Ratenbegrenzung). Beende das Spiel mit dem Befehl /koniec oder schließe die Anwendung und lade sie erneut — der Motor lädt nur den Zustand aus game.json ohne die Geschichte der letzten Runden.
 
-    Problem: Im Auswahlmodus hat der Motor keine Schaltflächen generiert, obwohl ich sie erwartet habe.
-    Ursache und Lösung: Modellhalluzination — trotz Modus 4 hat LLM ein leeres Auswahlfeld zurückgegeben. Die Anwendung verbirgt dann bewusst den Auswahlbereich (anstatt einen leeren Platzhalter anzuzeigen) und erlaubt die Fortsetzung mit Freitext. Die nächste Runde wird wahrscheinlich die Auswahl korrekt generieren.
+    Problem: Im Wahlmodus hat der Motor keine Buttons generiert, obwohl ich sie erwartet habe.
+    Ursache und Lösung: Modellhalluzination — trotz des Modus 4 hat das LLM ein leeres Auswahlfeld zurückgegeben. Die Anwendung verbirgt dann bewusst den Auswahlbereich (anstatt einen leeren Platzhalter zu zeigen) und ermöglicht die Fortsetzung mit freiem Text. Die nächste Runde wird wahrscheinlich die Auswahl korrekt generieren.
 
     Problem: Die Dateien .game.json und .story.jsonl sind auf dem Desktop nicht sichtbar.
-    Ursache und Lösung: Dies ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Die Erzählungsdatei (.txt) gelangt in opowiesci/ — dort finden Sie sie.
+    Ursache und Lösung: Das ist beabsichtigt — runtime/ ist ein Systemordner für normale Benutzer, der im Datei-Explorer nicht sichtbar ist. Die Erzählungsdatei (.txt) wird in opowiesci/ abgelegt — dort findest du sie.

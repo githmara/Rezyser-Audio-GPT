@@ -80,23 +80,23 @@ tresc:
 
     Athugið: reglur heimsins krefjast virks leiks. Ef þú smellir á "{opowiesci.btn_zasady_swiata_label}" án þess að hafa hlaðið/sett upp leik, færðu skilaboðin „{opowiesci.zasady_bez_gry_tytul}" — smelltu fyrst á "{opowiesci.btn_nowa_gra_label}" eða hlaðið vistaðan leik.
   krok_5_slash_komendy: |
-    SKREF 5: Slash-tilskipanir — hraðar aðgerðir án API
+    KROK 5: Slash-komendy — szybkie akcje bez API
 
-    Í aðgerðarreitnum geturðu á hverjum tíma slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta ekki köll til OpenAI) og virka óháð leikham. Bæði íslensk og ensk afbrigði eru samþykkt:
+    Í aðgerðarsvæðinu geturðu alltaf slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (þær kosta engin API-köll) og virka óháð leikstillingu. Bæði pólskar og enskar útgáfur eru samþykktar:
 
-    /vista, /save — þvingar handvirka vistun á stöðu leiksins. Sjálfvirk vistun virkar eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritið er lokað.
+    /zapisz, /save — neyðir fram handvirka vistun á stöðu leiksins. Sjálfvirk vistun fer fram eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritið er lokað.
 
-    /hlaða, /load — opnar valglugga fyrir leik úr lista yfir tiltæk nöfn (frá v15.2.3 í stað kerfisskráargluggans — beinn listi yfir vistaða leiki úr möppunni runtime/opowiesci/ sem greindir eru eftir tilvist .game.json skrár). NVDA les listann náttúrulega, blindur leikmaður þarf ekki að sigla um kerfisskráargluggann. Eftir að hafa valið nafn leiksins, ham og fulla frásögn er endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á. Sama hegðun hefur hnappurinn "{opowiesci.btn_wczytaj_label}".
+    /wczytaj, /load — opnar valglugga fyrir leik með lista yfir tiltæk nöfn (frá v15.2.3 í stað kerfisskrárvalglugga — beinn listi yfir vistaða leiki úr möppunni runtime/opowiesci/ sem greindir eru eftir tilvist .game.json skráar). NVDA les listann náttúrulega, blindur leikmaður þarf ekki að sigla um kerfisskrárvalgluggann. Eftir að hafa valið nafn leiksins, stillingu og fulla frásögn er endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á. Sama hegðun hefur hnappurinn "{opowiesci.btn_wczytaj_label}".
 
-    Frásagnavélin velur AI líkan sjálfkrafa eftir ham: fyrir valham og Minna illt notar hún dýrara gpt-4o (fylgir ströngum reglum heimsins), fyrir Frjálsan ham — hraðara og ódýrara gpt-4o-mini (leikmaður stjórnar söguþræðinum, svo það krefst ekki dramatískrar leikstjórnar).
+    Frásagnarkerfi allra Opowieści stillinga notar eitt Anthropic Claude Sonnet 4.6 líkan (frá v18.1; áður var OpenAI líkan valið fyrir hverja stillingu). Sterkara líkan heldur stranglega við reglur heimsins — þetta er sérstaklega mikilvægt í stillingunni Mniejsze zło, þar sem hver valkostur verður að vera raunverulega óhagstæður.
 
-    /sjónrænt <lýsing>, /visualize <lýsing> — margskynja lýsing á núverandi senu. Breytir ekki stöðu leiksins, leggur ekki til valkosti — frásagnavélin notar öll fimm skilningarvitin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senu með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/sjónrænt hvernig lítur vörðurinn út" eða „/sjónrænt lyktin í kaffihúsinu".
+    /wizualizuj <opis>, /visualize <opis> — margskynjunar lýsing á núverandi sviði. Breytir ekki stöðu leiksins, býður ekki upp á valkosti — frásagnarkerfið notar öll fimm skilningarvitin (sjón, heyrn, lykt, snerting, bragð) til að sýna sviðið með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lyktin af kaffihúsinu".
 
-    /endurhlaða, /refresh — endurhleður innra minnið úr frásagnarskránni eftir handvirka breytingu á henni (frá v15.5). Þegar þú opnar opowiesci/<nazwa>.txt í textaritli og t.d. lagar innsláttarvillu eða styttir óþarfa málsgrein, samstillir þessi skipun ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. (Samsvarandi hnappurinn „{opowiesci.btn_odswiez_z_dysku_label}" er tæknilegur valkostur, sjálfgefið falinn — skipunin virkar alltaf.) Ef samantekt fyrri umferða er þegar til, helst hún ósnortin, þannig að næsta umferð og næsta samantekt verða ekki til á úreltum gögnum. ATHUGIÐ: leikstaðan (persónur, staðsetning, búnaður, þræðir) úr .game.json skránni er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins getur næsta umferð rekist á þær.
+    /odswiez, /refresh — endurnýjar innra minni úr frásagnarskrá eftir handvirka breytingu (frá v15.5). Þegar þú opnar opowiesci/<nazwa>.txt í ritli og t.d. lagar stafsetningarvillu eða klippir út óþarfa málsgrein, samstillir þessi skipun ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. (Jafngildi hnappurinn „{opowiesci.btn_odswiez_z_dysku_label}" er tæknileg valkostur, sjálfgefið falinn — skipunin virkar alltaf.) Ef samantekt fyrri umferða er þegar til, er hún ósnert, svo næsta umferð og næsta samantekt verða ekki byggð á úreltum gögnum. ATHUGIÐ: leikstaða (persónur, staðsetning, búnaður, þræðir) úr .game.json skrá er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins, gæti næsta umferð ekki passað við þær.
 
-    /hjálp, /help — birtir glugga með lista yfir allar tiltækar skipanir. Glugginn er aðeins til lesturs og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
+    /pomoc, /help — birtir valglugga með lista yfir allar tiltækar skipanir. Valglugginn er readonly og NVDA-vænn — textasvæðið fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
 
-    /loka, /quit — lokar forritinu (eftir sjálfvirka vistun á umferð í gangi).
+    /koniec, /quit — lokar forritinu (eftir sjálfvirka vistun á umferð í gangi).
   krok_6_pliki_gry: |
     SKREF 6: Leikjaskrár — hvar þú finnur gögnin þín
 
@@ -110,18 +110,18 @@ tresc:
 
     runtime/opowiesci/<nazwa>.mode — lýsigögn um númer ham (3=Frjáls, 4=Val, 5=Minna illt). Frá v17.4 í eigin Sögu-möppu. Áður lá skráin í runtime/skrypty/ sameiginlega með Leikstjóranum — þegar leikur og verkefni Leikstjórans báru sama nafn gat vistun annars einingarinnar þaggað niður og yfirskrifað ham hins; nú eru nafnrýmin aðskilin og gamlar skrár fluttar í eitt skipti við hleðslu leiksins.
   krok_7_pamiec_modelu: |
-    SKREF 7: Vísir minnis líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handavinnu frá þér
+    KROK 7: Minnisvísir líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
 
-    Undir RadioBox-stillingunni finnurðu vísir minnis líkans — framvindustiku (wx.Gauge) með stöðu lýsingu við hliðina. Vísirinn sýnir prósentu fyllingar samhengisglugga frásagnavélarinnar (gpt-4o-mini hefur 128.000 táknabúffer).
+    Undir RadioBox-stillingunni finnurðu minnisvísir líkans — framvindustiku (wx.Gauge) með stöðu lýsingu við hliðina. Vísirinn sýnir prósentu fyllingar samhengisglugga frásagnavélarinnar (biðminni reiknað upp í 128.000 tákn).
 
-    Fjórir fyllingarstig:
+    Fjórar fyllingarstig:
 
-    🟢 hreint (0%) — leikurinn er nýbyrjaður, engar skráðar umferðir.
-    🟢 OK (1-69%) — allt í lagi, þú getur haldið áfram án takmarkana.
-    ⚠️ viðvörun (70-89%) — vélin býr sjálfkrafa til útdrátt úr fyrri umferðum í bakgrunnsþræði. Skilaboðin „Sjálfvirk útdráttur samhengis í gangi..." birtast — sendu ekki næstu umferð fyrr en útdrátturinn er lokið. Eftir árangur verða fyrri umferðir dregnar saman í einn þétting, búfferinn losnar og þú færð staðfestingu „Minnis líkan endurheimt" með fjölda samandreginna umferða.
-    🚨 VIÐVÖRUN (90%+) — sjálfvirk útdráttur losaði ekki búfferinn (sjaldgæft tilfelli eftir API bilun). Að senda næstu umferð er lokað. Þú þarft að ljúka leiknum með /koniec, síðan hlaða honum aftur — vélin mun hlaða stöðu úr game.json án sögu síðustu umferða, búfferinn verður nýr.
+    🟢 hreint (0%) — leikurinn er nýbyrjaður, engar vistaðar umferðir.
+    🟢 OK (1-69%) — allt er í lagi, þú getur haldið áfram án takmarkana.
+    ⚠️ viðvörun (70-89%) — vélin býr sjálfkrafa til útdrátt úr fyrri umferðum í bakgrunnsþræði. Skilaboðin „Sjálfvirkur útdráttur samhengis í gangi..." birtast — ekki senda næstu umferð fyrr en útdrátturinn er lokið. Eftir árangur verða fyrri umferðir sameinaðar í einn þéttan pakka, biðminni losnar og þú færð staðfestingu „Minnisvísir líkans endurheimtur" með fjölda sameinaðra umferða.
+    🚨 VIÐVÖRUN (90%+) — sjálfvirkur útdráttur losaði ekki biðminni (sjaldgæft tilfelli eftir API bilun). Að senda næstu umferð er lokað. Þú þarft að ljúka leiknum með /koniec, síðan hlaða honum aftur — vélin mun hlaða ástand úr game.json án sögu síðustu umferða, biðminni verður ferskt.
 
-    Í framkvæmd er sjálfvirka minnkunarkerfið ósýnilegt — leikmaðurinn finnur ekki fyrir því að eitthvað sé að gerast, því bakgrunnsþráðurinn leysir vandamálið áður en það verður áberandi. Það er aðeins mikilvægt að þú sendir ekki næstu umferð á meðan sjálfvirk útdráttur er í gangi (hnappurinn "{opowiesci.btn_wyslij_label}" er þá gráður).
+    Í reynd er sjálfvirka minnkunarkerfið ósýnilegt — leikmaðurinn finnur ekki fyrir því að eitthvað sé að gerast, því bakgrunnsþráðurinn leysir vandamálið áður en það verður áberandi. Það er aðeins mikilvægt að þú sendir ekki næstu umferð meðan á sjálfvirkum útdrætti stendur (hnappurinn "{opowiesci.btn_wyslij_label}" er þá grár).
   krok_8_cinematic_warning: |
     SKREF 8: Cinematic Meta Warning — dramatískur millikafli eftir 150. umferð
 
@@ -149,19 +149,19 @@ tresc:
 
     LYKLARFLÝTILEIÐIR — allir takkar hafa `&` tákn fyrir einni af stöfum merkimiðans, sem virkjar flýtileið Alt+stafur. Virkar eins og í öðrum hlutum forritsins.
   najczestsze_problemy: |
-    Algengustu vandamálin
+    Najczęstsze problemy
 
-    Vandamál: Eftir að smellt er á "{opowiesci.btn_nowa_gra_label}" birtist skilaboðin „Enginn API-lykill".
-    Ástæða og lausn: Skráin golden_key.env í aðalmöppu forritsins hefur ekki réttan OpenAI-lykil. Farðu aftur á upphafsskjáinn (Heimhnappur), smelltu á "{home.btn_generate}" og fylgdu leiðbeiningunum (SKREF 2 í aðalhandbókinni).
+    Problem: Po kliknięciu "{opowiesci.btn_nowa_gra_label}" pojawia się komunikat „Brak klucza API".
+    Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza Anthropic (to on zasila tryb Opowieści). Wróć do ekranu startowego (przycisk Home), kliknij "{home.btn_generate}" i postępuj zgodnie z instrukcjami (KROK 2 głównego manuala).
 
-    Vandamál: Ég reyni að senda næstu umferð, en hnappurinn "{opowiesci.btn_wyslij_label}" er gráður.
-    Ástæða og lausn: Sjálfvirk samantekt á samhengi eða Cinematic Warning er í gangi í bakgrunnsþræði. Staða minnis sýnir „Sjálfvirk samantekt á samhengi í gangi…". Bíddu í nokkrar sekúndur — hnappurinn verður sjálfkrafa virkur eftir árangur.
+    Problem: Próbuję wysłać kolejną turę, ale przycisk "{opowiesci.btn_wyslij_label}" jest wyszarzony.
+    Przyczyna i rozwiązanie: Trwa auto-streszczenie kontekstu albo generacja Cinematic Warning w wątku tła. Status pamięci pokaże „Auto-streszczenie kontekstu w toku…". Poczekaj kilkanaście sekund — przycisk odblokuje się automatycznie po sukcesie.
 
-    Vandamál: Skilaboðin „Minni módelsins ofhlaðið" stöðva leikinn.
-    Ástæða og lausn: Sjálfvirk samantekt losaði ekki biðminni (t.d. takmörkun á hraða OpenAI). Lokaðu leiknum með skipuninni /loka eða lokaðu forritinu, síðan opnaðu það aftur — vélin mun aðeins hlaða stöðu úr game.json án sögu síðustu umferða.
+    Problem: Komunikat „Pamięć modelu przeładowana" blokuje grę.
+    Przyczyna i rozwiązanie: Auto-streszczenie nie zwolniło bufora (np. rate limit API Anthropic). Zakończ grę komendą /koniec albo zamknij aplikację, potem wczytaj ją ponownie — silnik załaduje tylko stan z game.json bez historii ostatnich tur.
 
-    Vandamál: Í valham bjó vélin ekki til hnappa, þó ég hafi búist við þeim.
-    Ástæða og lausn: Ofskynjun módelsins — þrátt fyrir ham 4 skilaði LLM tómu valmöguleikatöflu. Forritið felur þá meðvitað valmöguleikasvæðið (í stað þess að sýna tóman placeholder) og leyfir að halda áfram með frjálsum texta. Næsta umferð mun líklega búa til valmöguleika rétt. 
+    Problem: W trybie Wyborów silnik nie wygenerował przycisków, mimo że spodziewałem się ich.
+    Przyczyna i rozwiązanie: Halucynacja modelu — mimo trybu 4 LLM zwrócił pustą tablicę wyborów. Aplikacja świadomie ukrywa wtedy obszar wyborów (zamiast pokazać pusty placeholder) i pozwala kontynuować free-textem. Następna tura prawdopodobnie wygeneruje wybory poprawnie.
 
-    Vandamál: Skrárnar .game.json og .story.jsonl eru ekki sýnilegar á skjáborðinu.
-    Ástæða og lausn: Þetta er með vilja — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg frá skráarkönnuði. Frásagnarskráin (.txt) fer í opowiesci/ — þar finnur þú hana.
+    Problem: Pliki .game.json i .story.jsonl nie są widoczne na pulpicie.
+    Przyczyna i rozwiązanie: To celowe — runtime/ jest folderem systemowym dla zwykłych użytkowników, niewidocznym z poziomu eksploratora plików. Plik narracji (.txt) trafia do opowiesci/ — tam go znajdziesz.

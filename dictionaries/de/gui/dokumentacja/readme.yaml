@@ -36,14 +36,14 @@ tresc:
     * **Handlungsakku:** Der Algorithmus des „unendlichen Gedächtnisses". Wenn der Speicherzeiger in den roten Alarmzustand wechselt, generiert das System automatisch eine Handlungszusammenfassung und speichert sie im Langzeitspeicherfeld.
     * **{liczba_trybow_rezysera} kreative Modi:** Jede der Dateien in `dictionaries/<jzk>/rezyser/` beschreibt eine separate „Persönlichkeit" des KI-Regisseurs (Brainstorming, Skript, Hörbuch, Titel-Nachbearbeitung). Du kannst ihren Klang ohne Programmierung anpassen — siehe Regelmanager unten.
   modul_opowiesci: |
-    ### 2. Erzählungen (Strg+2, zweiter Hauptmodus ab v15.0)
+    ### 2. Opowieści (Ctrl+2, der zweite Hauptmodus ab v15.0)
 
-    Interaktive Textspiele, die von KI als Erzählmotor geführt werden. Im Gegensatz zur Regie (wo du ein fertiges Hörbuch generierst), sind Erzählungen eine rundenbasierte dynamische Handlung:
+    Interaktive Textspiele, die von einer KI als Erzählmotor geleitet werden. Im Gegensatz zur Regie (wo du ein fertiges Hörbuch generierst), sind Opowieści eine rundenbasierte dynamische Handlung:
 
     * **Wahlmodus:** Jede Runde endet mit 3-5 nummerierten Optionen A-E. Der intuitivste Modus für blinde Spieler — NVDA liest die Optionen vor, du klickst Tab und Enter.
-    * **Modus Kleineres Übel:** Wie Wahlmodus, aber jede Option ist moralisch, physisch oder strategisch nachteilig. Ab v15.2 gibt es eine zusätzliche „Phiole" — eine wiederverwendbare, NULL-nummerierte Option der verzweifelten Rettung, deren Effekte pseudolos sind (60% schädlich / 30% Wahrnehmungsstörung / 10% selten-vorteilhaft, Verteilung erzwungen durch Python, LLM kann keinen rettenden Effekt erfinden).
-    * **Freier Modus:** Beliebige Aktion im freien Text („Ich versuche, die Tür zu öffnen"), der Motor schlägt 1-3 Vorschläge vor, erzwingt aber keine Wahl.
-    * **KI-Modell pro Modus:** Wahlmodus und Kleineres Übel verwenden gpt-4o (besseres moralisches Verständnis), Freier Modus verwendet gpt-4o-mini (kostengünstigere Improvisationsökonomie).
+    * **Modus Kleineres Übel:** Ähnlich wie der Wahlmodus, aber jede Option ist moralisch, physisch oder strategisch nachteilig. Ab v15.2 gibt es eine zusätzliche „Phiole" — eine wiederverwendbare, mit NULL nummerierte Option für verzweifelte Rettungsversuche, deren Effekte pseudolos sind (60% schädlich / 30% Wahrnehmung störend / 10% selten vorteilhaft, Verteilung erzwungen durch Python, LLM kann keinen rettenden Effekt erfinden).
+    * **Freier Modus:** Beliebige Aktion in freiem Text („Ich versuche, die Tür zu öffnen"), der Motor schlägt 1-3 Vorschläge vor, zwingt aber keine Auswahl.
+    * **Ein KI-Modell für alle Modi:** Ab v18.1 verwenden alle Opowieści-Modi Anthropic Claude Sonnet 4.6 — ein stärkeres Modell, das sich streng an die Regeln der Welt hält (besonders wichtig im Modus Kleineres Übel, wo jede Option real nachteilig sein muss).
   modul_poliglota: |
     ### 3. Polyglott (Ctrl+3, AI-Übersetzer + TTS-Akzente)
 
@@ -73,10 +73,11 @@ tresc:
   architektura_ai: |
     ## Architektur der KI und verwendete Modelle
 
-    Die Anwendung verteilt Aufgaben intelligent, um die Kosten und die Geschwindigkeit der OpenAI-API zu optimieren:
+    Die Anwendung verteilt Aufgaben intelligent zwischen zwei API-Anbietern, um die Qualität der Prosa, Kosten und Geschwindigkeit zu optimieren:
 
-    * **gpt-4o:** Der Hauptmotor der Anwendung. Verantwortlich für anspruchsvolle generative Aufgaben: Regie von Skripten, Schreiben traditioneller Prosa (Hörbuch), Modi der Entscheidungen und des kleineren Übels in Geschichten, Generierung von Zusammenfassungen sowie fortgeschrittene Übersetzungen unter Beibehaltung des mehrblockigen Kontexts.
-    * **gpt-4o-mini:** Schnelles, leichtes Hilfsmodell. Wird im Hintergrund für Mikroaufgaben verwendet, die hohe Geschwindigkeit erfordern: iteratives Vergeben literarischer Titel an generierte Kapitel, Extraktion von ISO-Codes, Freier Modus in Geschichten (günstigere Ökonomie der Improvisation von freiem Text).
+    * **Anthropic Claude Sonnet 4.6:** Der Motor der gesamten kreativen Erzählung. Verantwortlich für die Regie von Skripten, das Schreiben traditioneller Prosa (Hörbuch), Brainstorming und ALLE Modi der Erzählungen (Wahlen, Das kleinere Übel, Freier Modus) sowie die Erstellung von Zusammenfassungen und filmischen Zwischensequenzen. Die Migration der Erzählung zu Claude (Regisseur in v18.0, Erzählungen in v18.1) erfolgte aufgrund der empirisch bestätigten Überlegenheit in der Einhaltung der Weltregeln und der Vermeidung von Klischees.
+    * **gpt-4o (OpenAI):** Fortgeschrittene Übersetzungen unter Beibehaltung des mehrblockigen Kontexts (Polyglott). Die Migration zu Anthropic ist in der nächsten Ausgabe geplant.
+    * **gpt-4o-mini (OpenAI):** Schnelles, leichtes Hilfsmodell für Mikroaufgaben: iterative Vergabe literarischer Titel an generierte Kapitel und Extraktion von ISO-Sprachcodes.
   ograniczenia_modeli: |
     ### Bekannte Einschränkungen von Modellen (Anti-Closure)
 

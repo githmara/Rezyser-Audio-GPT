@@ -36,14 +36,14 @@ tresc:
     * **Sögugeymir:** „Óendanlegt minni“ reiknirit. Þegar minnivísirinn fer í rauða viðvörunarástandið, býr kerfið sjálfkrafa til sögusamantekt og skráir hana í Langtímaminni.
     * **{liczba_trybow_rezysera} skapandi hamir:** Hver skrá í `dictionaries/<jzk>/rezyser/` lýsir sérstakri „persónuleika“ AI leikstjórans (Hugstormun, Handrit, Hljóðbók, Eftirvinnsla titla). Þú getur stillt hljóm þeirra án forritunar — sjá Reglustjóri hér að neðan.
   modul_opowiesci: |
-    ### 2. Sögur (Ctrl+2, annar aðalhamur frá v15.0)
+    ### 2. Opowieści (Ctrl+2, annar aðalstilling frá v15.0)
 
-    Gagnvirkir textaleikir stjórnaðir af AI sem frásagnavél. Ólíkt Leikstjórn (þar sem þú býrð til fullunninn hljóðbók), eru Sögur skref-fyrir-skref kvik frásögn:
+    Gagnvirkir textaleikir stjórnaðir af gervigreind sem gegnir hlutverki frásagnarmótors. Ólíkt Reżyserii (þar sem þú býrð til tilbúinn hljóðbók), eru Opowieści skref-fyrir-skref kvik frásögn:
 
-    * **Valhamur:** hvert skref endar með 3-5 tölusettum valkostum A-E. Mest innsæi hamur fyrir blinda leikmenn — NVDA les valkostina, þú smellir á Tab og Enter.
-    * **Minna Illa Hamur:** eins og Val, en hver valkostur er siðferðilega, líkamlega eða strategískt óhagstæður. Frá v15.2 er viðbótar „flaska" — endurnýtanlegur NÚLL-númeraður valkostur örvæntingarfullrar björgunar, þar sem áhrifin eru gervilöguð (60% skaðleg / 30% truflandi skynjun / 10% sjaldan-hagstæð, dreifing þvinguð af Python, LLM getur ekki fundið upp bjargandi áhrif).
-    * **Frjáls Hamur:** hvaða aðgerð sem er með frjálsum texta („ég reyni að opna dyrnar"), vélin leggur til 1-3 tillögur en þvingar ekki val.
-    * **AI-líkan per hamur:** Val og Minna Illa nota gpt-4o (betri siðferðileg röksemdafærsla), Frjáls notar gpt-4o-mini (ódýrari hagfræði spuna).
+    * **Valmöguleikastilling:** hvert skref endar með 3-5 tölusettum valkostum A-E. Mest innsæi stilling fyrir blinda leikmenn — NVDA les valkostina, þú smellir á Tab og Enter.
+    * **Minna Illa Stilling:** eins og Valmöguleikar, en hver valkostur er siðferðilega, líkamlega eða strategískt óhagstæður. Frá v15.2 er viðbótar „flaska" — endurnýtanlegur NÚLL-númeraður valkostur örvæntingarfullrar björgunar, þar sem áhrifin eru gervilöng (60% skaðleg / 30% truflandi skynjun / 10% sjaldan-hagstæð, dreifing þvinguð af Python, LLM getur ekki fundið upp á bjargandi niðurstöðu).
+    * **Frjáls Stilling:** hvaða aðgerð sem er með frjálsum texta („ég mun reyna að opna dyrnar"), mótorinn leggur til 1-3 tillögur en þvingar ekki val.
+    * **Einn AI líkan fyrir allar stillingar:** frá v18.1 nota allar stillingar Opowieści Anthropic Claude Sonnet 4.6 — öflugra líkan sem fylgir ströngum reglum heimsins (sérstaklega mikilvægt í Minna Illa Stilling, þar sem hver valkostur verður að vera raunverulega óhagstæður).
   modul_poliglota: |
     ### 3. Fjöltyngdur (Ctrl+3, AI Þýðandi + TTS Hreimur)
 
@@ -73,10 +73,11 @@ tresc:
   architektura_ai: |
     ## Arkitektúr AI og notuð líkön
 
-    Forritið skiptir verkefnum á snjallan hátt til að hámarka kostnað og hraða OpenAI API:
+    Forritið skiptir verkefnum á milli tveggja API-veitenda á snjallan hátt, til að hámarka gæði prósa, kostnað og hraða:
 
-    * **gpt-4o:** Aðalvél forritsins. Sér um þung verkefni sem krefjast sköpunargáfu: leikstjórn handrita, skrif á hefðbundinni prósa (Hljóðbók), valmöguleikar og Minna Illa í Sögum, samantektargerð og háþróuð þýðing með varðveislu margra samhengisblokka.
-    * **gpt-4o-mini:** Hratt, létt hjálparlíkan. Notað í bakgrunni fyrir örverkefni sem krefjast mikils hraða: endurtekin úthlutun bókmenntatitla til búinna kafla, útdráttur ISO kóða, Frjáls hamur í Sögum (hagkvæmari efnahagsleg frjáls texta spuni).
+    * **Anthropic Claude Sonnet 4.6:** Vél fyrir alla skapandi frásögn. Ber ábyrgð á leikstjórn handrita, skrifum hefðbundinnar prósa (Hljóðbók), Hugstormun og ALLA söguhami (Val, Minna Illa, Frjáls) ásamt því að búa til samantektir og kvikmyndalegar innskot. Flutningur frásagnar til Claude (Leikstjóri í v18.0, Sögur í v18.1) var afleiðing af reynslusönnuðum yfirburðum í að halda sig við reglur heimsins og forðast klisjur.
+    * **gpt-4o (OpenAI):** Háþróuð þýðing með varðveislu margra blokka samhengis (Tungumálasérfræðingur). Flutningur til Anthropic er áætlaður í næstu útgáfu.
+    * **gpt-4o-mini (OpenAI):** Hratt, létt hjálparlíkön fyrir smáverkefni: endurtekin veiting bókmenntatitla fyrir framleiddar kafla og útdráttur ISO tungumálakóða.
   ograniczenia_modeli: |
     ### Þekkt takmörk módela (Anti-Closure)
 

@@ -18,7 +18,7 @@ kategoria: tryb
 kolejnosc: 50
 
 # --- Paramètres OpenAI ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Mécanique de la fiole (v15.2) ---

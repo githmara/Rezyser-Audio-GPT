@@ -36,14 +36,14 @@ tresc:
     * **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
     * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
   modul_opowiesci: |
-    ### 2. Historias (Ctrl+2, segundo modo principal desde v15.0)
+    ### 2. Opowieści (Ctrl+2, segundo modo principal desde v15.0)
 
-    Juegos de texto interactivos dirigidos por IA como motor narrativo. A diferencia de la Dirección (donde generas un audiolibro completo), Historias es una narrativa dinámica turno por turno:
+    Juegos de texto interactivos dirigidos por IA en el papel de motor narrativo. A diferencia de la Dirección (donde generas un audiolibro terminado), las Opowieści son una narrativa dinámica turno a turno:
 
-    * **Modo Elecciones:** cada turno termina con 3-5 opciones numeradas A-E. El modo más intuitivo para jugadores ciegos: NVDA lee las opciones, haces clic en Tab y Enter.
-    * **Modo Menor Mal:** como Elecciones, pero cada opción es moralmente, físicamente o estratégicamente desfavorable. Desde v15.2 un "frasco" adicional: opción de rescate desesperado numerada CERO reutilizable, cuyos efectos son pseudoaleatorios (60% perjudicial / 30% alteración de la percepción / 10% raramente beneficioso, distribución forzada por Python, LLM no puede inventar un resultado salvador).
-    * **Modo Libre:** cualquier acción con texto libre ("intentaré abrir la puerta"), el motor propone 1-3 sugerencias pero no impone una elección.
-    * **Modelo AI por modo:** Elecciones y Menor Mal usan gpt-4o (mejor razonamiento moral), Libre usa gpt-4o-mini (economía de improvisación más barata).
+    * **Modo Elecciones:** cada turno termina con 3-5 opciones numeradas A-E. El modo más intuitivo para jugadores ciegos — NVDA lee las opciones, haces clic en Tab y Enter.
+    * **Modo Menor Mal:** como Elecciones, pero cada opción es desfavorable moral, física o estratégicamente. Desde v15.2 una "ampolla" adicional — opción de rescate desesperado reutilizable numerada CERO, cuyos efectos son pseudorandom (60% perjudiciales / 30% alteran la percepción / 10% raramente beneficiosos, distribución forzada por Python, LLM no puede inventar un resultado salvador).
+    * **Modo Libre:** cualquier acción en texto libre ("intentaré abrir la puerta"), el motor propone 1-3 sugerencias pero no impone una elección.
+    * **Un modelo de IA para todos los modos:** desde v18.1 todos los modos de Opowieści utilizan Anthropic Claude Sonnet 4.6 — un modelo más potente que sigue estrictamente las reglas del mundo (crucial especialmente en el modo Menor Mal, donde cada opción debe ser realmente desfavorable).
   modul_poliglota: |
     ### 3. Políglota (Ctrl+3, Traductor AI + Acentos TTS)
 
@@ -73,10 +73,11 @@ tresc:
   architektura_ai: |
     ## Arquitectura de IA y modelos utilizados
 
-    La aplicación distribuye inteligentemente las tareas, optimizando los costos y la velocidad de funcionamiento del API de OpenAI:
+    La aplicación distribuye inteligentemente las tareas entre dos proveedores de API, optimizando la calidad de la prosa, los costos y la velocidad:
 
-    * **gpt-4o:** El motor principal que impulsa la aplicación. Se encarga de tareas generativas pesadas: dirección de guiones, escritura de prosa tradicional (Audiolibro), modos de Elecciones y Menor de Dos Males en Historias, generación de resúmenes y traducciones avanzadas manteniendo el contexto multibloque.
-    * **gpt-4o-mini:** Un modelo auxiliar rápido y ligero. Se utiliza en segundo plano para microtareas que requieren alta velocidad: asignación iterativa de títulos literarios a los capítulos generados, extracción de códigos ISO, modo Libre en Historias (economía más barata de improvisación de texto libre).
+    * **Anthropic Claude Sonnet 4.6:** Motor de toda la narrativa creativa. Se encarga de dirigir los guiones, escribir prosa tradicional (Audiolibro), Lluvia de Ideas y TODOS los modos de Historias (Elecciones, Menor Mal, Libre) junto con la generación de resúmenes e interludios Cinematic. La migración de la narrativa a Claude (Director en v18.0, Historias en v18.1) se debió a una ventaja empíricamente confirmada en adherirse a las reglas del mundo y evitar clichés.
+    * **gpt-4o (OpenAI):** Traducciones avanzadas manteniendo el contexto de múltiples bloques (Políglota). La migración a Anthropic está planificada para la próxima versión.
+    * **gpt-4o-mini (OpenAI):** Modelo auxiliar rápido y ligero para microtareas: asignación iterativa de títulos literarios a los capítulos generados y extracción de códigos ISO de idioma.
   ograniczenia_modeli: |
     ### Limitaciones conocidas de los modelos (Anti-Closure)
 

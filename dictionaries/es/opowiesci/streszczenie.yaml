@@ -15,7 +15,7 @@ kolejnosc: 60
 
 # --- Parámetros de OpenAI ---
 # Temperatura baja — queremos un resumen fiel y factual (no creativo).
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.3
 max_tokens: 800
 timeout_s: 60.0

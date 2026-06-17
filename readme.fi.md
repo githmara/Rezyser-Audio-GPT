@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **18.0** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **18.1** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -24,14 +24,14 @@ Päästudio kuunnelmien ja äänikirjojen kirjoittamiseen. Valitset tilan — Ai
 * **4 luovat tilat:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja, Otsikoiden Jälkituotanto). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
 
 
-### 2. Tarinoita (Ctrl+2, toinen päätila v15.0 alkaen)
+### 2. Opowieści (Ctrl+2, toinen päätila v15.0 alkaen)
 
-Interaktiivisia tekstipelejä, joissa AI toimii kertomuksen moottorina. Toisin kuin Ohjauksessa (jossa luot valmiin äänikirjan), Tarinoita on vuoropohjainen dynaaminen juoni:
+Interaktiiviset tekstipelit, joissa AI toimii kerrontamoottorina. Toisin kuin Reżyseria (jossa tuotat valmiin äänikirjan), Opowieści tarjoaa vuoropohjaista dynaamista juonta:
 
-* **Valintatila:** jokainen vuoro päättyy 3-5 numeroituun vaihtoehtoon A-E. Intuitiivisin tila näkövammaisille pelaajille — NVDA lukee vaihtoehdot, napsautat Tab ja Enter.
-* **Pienempi paha -tila:** kuten Valinnat, mutta jokainen vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäedullinen. V15.2 alkaen lisätty "pullo" — uudelleenkäytettävä NOLLA-numeroitu epätoivoinen pelastusvaihtoehto, jonka vaikutukset ovat pseudolosiaalisia (60% haitallisia / 30% havainnointia häiritseviä / 10% harvoin hyödyllisiä, Python pakottaa jakauman, LLM ei voi keksiä pelastavaa vaikutusta).
-* **Vapaa tila:** mikä tahansa toiminta vapaalla tekstillä ("yritän avata oven"), moottori ehdottaa 1-3 ehdotusta mutta ei pakota valintaa.
-* **AI-malli per tila:** Valinnat ja Pienempi paha käyttävät gpt-4o (parempi moraalinen päättely), Vapaa käyttää gpt-4o-mini (edullisempi improvisaatioekonomia).
+* **Valintatila:** jokainen vuoro päättyy 3-5 numeroituun vaihtoehtoon A-E. Intuitiivisin tila näkövammaisille pelaajille — NVDA lukee vaihtoehdot, painat Tab ja Enter.
+* **Pienempi paha -tila:** kuten Valinnat, mutta jokainen vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäsuotuisa. V15.2 alkaen lisätty "fiolka" — uudelleenkäytettävä NOLLA-numeroitu epätoivoinen pelastusvaihtoehto, jonka vaikutukset ovat pseudolosiaalisia (60% haitallisia / 30% havainnointia häiritseviä / 10% harvoin hyödyllisiä, Python pakottaa jakauman, LLM ei voi keksiä pelastavaa vaikutusta).
+* **Vapaa tila:** mikä tahansa toiminta vapaalla tekstillä ("yritän avata oven"), moottori ehdottaa 1-3 ehdotusta, mutta ei pakota valintaa.
+* **Yksi AI-malli kaikille tiloille:** v18.1 alkaen kaikki Opowieści-tilat käyttävät Anthropic Claude Sonnet 4.6:ta — voimakkaampi malli, joka noudattaa tiukasti maailman sääntöjä (erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on oltava todellisesti epäsuotuisa).
 
 
 ### 3. Polyglot (Ctrl+3, AI-kääntäjä + TTS-aksentit)
@@ -66,10 +66,11 @@ Koko käyttöliittymä, dokumentaatio (`docs/manual.<iso>.txt`) ja suurin osa j�
 
 ## AI-arkkitehtuuri ja käytetyt mallit
 
-Sovellus jakaa tehtävät älykkäästi, optimoiden OpenAI:n API:n kustannukset ja nopeuden:
+Sovellus jakaa tehtävät älykkäästi kahden API-toimittajan välillä, optimoiden proosan laadun, kustannukset ja nopeuden:
 
-* **gpt-4o:** Sovelluksen päämoottori. Vastaa raskaista generatiivisista tehtävistä: käsikirjoitusten ohjaaminen, perinteisen proosan kirjoittaminen (äänikirja), Valintojen ja Pienemmän Pahan tilat Kertomuksissa, tiivistelmien luominen sekä edistyneet käännökset monilohkokontekstin säilyttämisellä.
-* **gpt-4o-mini:** Nopea, kevyt apumalli. Käytetään taustalla mikrotehtäviin, jotka vaativat suurta nopeutta: luotujen lukujen kirjallisten otsikoiden iteratiivinen antaminen, ISO-koodien poiminta, Vapaa tila Kertomuksissa (halvempi improvisoidun vapaan tekstin talous).
+* **Anthropic Claude Sonnet 4.6:** Koko luovan kerronnan moottori. Vastaa käsikirjoitusten ohjaamisesta, perinteisen proosan kirjoittamisesta (äänikirja), aivoriihistä sekä KAIKISTA tarinatiloista (Valinnat, Pienempi paha, Vapaa) yhdessä elokuvamaisten tiivistelmien ja katkojen luomisen kanssa. Narratiivin siirtyminen Claudeen (Reżyser v18.0, Opowieści v18.1) johtui empiirisesti todistetusta paremmuudesta maailman sääntöjen noudattamisessa ja kliseiden välttämisessä.
+* **gpt-4o (OpenAI):** Kehittyneet käännökset monilohkokontekstin säilyttämisellä (Poliglota). Siirtyminen Anthropicille suunniteltu seuraavassa julkaisussa.
+* **gpt-4o-mini (OpenAI):** Nopea, kevyt apumalli mikrotehtäviin: luotujen lukujen kirjallisten otsikoiden iteratiivinen antaminen ja kielen ISO-koodien poiminta.
 
 
 ### Tunnetut mallien rajoitukset (Anti-Closure)

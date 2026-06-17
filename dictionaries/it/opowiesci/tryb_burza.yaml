@@ -13,7 +13,7 @@ kolejnosc: 20
 # --- Parametri OpenAI ---
 # Temperatura più alta dei modi narrativi — vogliamo una descrizione
 # ricca e creativa. max_tokens è basso perché non è un turno di gioco.
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.95
 max_tokens: 1000
 timeout_s: 60.0

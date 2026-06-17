@@ -85,13 +85,13 @@ tresc:
   krok_5_slash_komendy: |
     KROK 5: Slash-komendy — szybkie akcje bez API
 
-    W polu akcji możesz w każdej chwili wpisać komendę zaczynającą się od ukośnika `/`. Komendy są lokalne (nie kosztują wywołań do OpenAI) i działają niezależnie od trybu gry. Akceptowane są zarówno polskie, jak i angielskie warianty:
+    W polu akcji możesz w każdej chwili wpisać komendę zaczynającą się od ukośnika `/`. Komendy są lokalne (nie kosztują żadnych wywołań do API) i działają niezależnie od trybu gry. Akceptowane są zarówno polskie, jak i angielskie warianty:
 
     /zapisz, /save — wymuszenie ręcznego zapisu stanu gry. Autozapis działa po każdej turze, więc ta komenda jest głównie dla pewności przed zamknięciem aplikacji.
 
     /wczytaj, /load — otwiera dialog wyboru gry z listą dostępnych nazw (od v15.2.3 zamiast systemowego dialogu plików — bezpośrednia lista zapisanych gier z folderu runtime/opowiesci/ wykrywanych po obecności pliku .game.json). NVDA czyta listę naturalnie, niewidomy gracz nie musi nawigować po systemowym dialogu plików. Po wybraniu nazwa gry, tryb i pełna narracja zostają przywrócone — możesz kontynuować od tury, na której skończyłeś. Identyczne zachowanie ma przycisk "{opowiesci.btn_wczytaj_label}".
 
-    Silnik narracyjny dobiera model AI automatycznie w zależności od trybu: dla trybu Wyborów i Mniejszego zła używa droższego gpt-4o (rygorystycznie trzyma się zasad świata), dla trybu Swobodnego — szybszego i tańszego gpt-4o-mini (gracz steruje fabułą, więc nie wymaga to dramatycznej reżyserii).
+    Silnik narracyjny wszystkich trybów Opowieści korzysta z jednego modelu Anthropic Claude Sonnet 4.6 (od v18.1; wcześniej dobierano model OpenAI per tryb). Mocniejszy model rygorystycznie trzyma się zasad świata — to istotne zwłaszcza w trybie Mniejsze zło, gdzie każda opcja musi pozostać realnie niekorzystna.
 
     /wizualizuj <opis>, /visualize <opis> — multisensoryczny opis aktualnej sceny. Nie zmienia stanu gry, nie proponuje wyborów — silnik narracyjny używa wszystkich pięciu zmysłów (wzrok, słuch, zapach, dotyk, smak), by pokazać scenę z większą głębią. Wynik pojawia się w osobnym dialogu, NIE jest dopisywany do narracji ani zapisany w pliku audiobooka. Przykład: „/wizualizuj jak wygląda strażnik" lub „/wizualizuj zapach kawiarni".
 
@@ -115,7 +115,7 @@ tresc:
   krok_7_pamiec_modelu: |
     KROK 7: Wskaźnik pamięci modelu — dlaczego tury w starych grach nie wymagają od Ciebie ręcznej pracy
 
-    Pod RadioBox-em trybu znajdziesz wskaźnik pamięci modelu — pasek postępu (wx.Gauge) z opisem statusu obok. Wskaźnik pokazuje procent zapełnienia okna kontekstowego silnika narracyjnego (gpt-4o-mini ma 128 000 tokenów buforu).
+    Pod RadioBox-em trybu znajdziesz wskaźnik pamięci modelu — pasek postępu (wx.Gauge) z opisem statusu obok. Wskaźnik pokazuje procent zapełnienia okna kontekstowego silnika narracyjnego (bufor liczony do 128 000 tokenów).
 
     Cztery poziomy zapełnienia:
 
@@ -155,13 +155,13 @@ tresc:
     Najczęstsze problemy
 
     Problem: Po kliknięciu "{opowiesci.btn_nowa_gra_label}" pojawia się komunikat „Brak klucza API".
-    Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza OpenAI. Wróć do ekranu startowego (przycisk Home), kliknij "{home.btn_generate}" i postępuj zgodnie z instrukcjami (KROK 2 głównego manuala).
+    Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza Anthropic (to on zasila tryb Opowieści). Wróć do ekranu startowego (przycisk Home), kliknij "{home.btn_generate}" i postępuj zgodnie z instrukcjami (KROK 2 głównego manuala).
 
     Problem: Próbuję wysłać kolejną turę, ale przycisk "{opowiesci.btn_wyslij_label}" jest wyszarzony.
     Przyczyna i rozwiązanie: Trwa auto-streszczenie kontekstu albo generacja Cinematic Warning w wątku tła. Status pamięci pokaże „Auto-streszczenie kontekstu w toku…". Poczekaj kilkanaście sekund — przycisk odblokuje się automatycznie po sukcesie.
 
     Problem: Komunikat „Pamięć modelu przeładowana" blokuje grę.
-    Przyczyna i rozwiązanie: Auto-streszczenie nie zwolniło bufora (np. rate limit OpenAI). Zakończ grę komendą /koniec albo zamknij aplikację, potem wczytaj ją ponownie — silnik załaduje tylko stan z game.json bez historii ostatnich tur.
+    Przyczyna i rozwiązanie: Auto-streszczenie nie zwolniło bufora (np. rate limit API Anthropic). Zakończ grę komendą /koniec albo zamknij aplikację, potem wczytaj ją ponownie — silnik załaduje tylko stan z game.json bez historii ostatnich tur.
 
     Problem: W trybie Wyborów silnik nie wygenerował przycisków, mimo że spodziewałem się ich.
     Przyczyna i rozwiązanie: Halucynacja modelu — mimo trybu 4 LLM zwrócił pustą tablicę wyborów. Aplikacja świadomie ukrywa wtedy obszar wyborów (zamiast pokazać pusty placeholder) i pozwala kontynuować free-textem. Następna tura prawdopodobnie wygeneruje wybory poprawnie.

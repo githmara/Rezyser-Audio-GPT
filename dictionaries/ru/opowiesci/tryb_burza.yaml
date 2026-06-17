@@ -14,7 +14,7 @@ kolejnosc: 20
 # --- Параметры OpenAI ---
 # Температура выше, чем у нарративных режимов — нам нужно богатое,
 # творческое описание. max_tokens низкий, потому что это не ход игры.
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.95
 max_tokens: 1000
 timeout_s: 60.0

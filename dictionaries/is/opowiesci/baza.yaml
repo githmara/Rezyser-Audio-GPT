@@ -19,7 +19,7 @@ kategoria: baza
 kolejnosc: 0
 
 # --- OpenAI-stillingar (erfast yfir í frásagnarhami) ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Kerfishvati ---

@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **18.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **18.1** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -24,14 +24,14 @@ Le principal studio pour écrire des pièces radiophoniques et des livres audio.
 * **4 modes créatifs :** Chacun des fichiers dans `dictionaries/<jzk>/rezyser/` décrit une « personnalité » distincte du réalisateur AI (Brainstorming, Script, Livre audio, Postproduction des Titres). Vous pouvez ajuster leur tonalité sans programmation — voir le Gestionnaire de Règles ci-dessous.
 
 
-### 2. Récits (Ctrl+2, deuxième mode principal à partir de v15.0)
+### 2. Opowieści (Ctrl+2, drugi główny tryb od v15.0)
 
-Jeux textuels interactifs dirigés par l'IA en tant que moteur narratif. Contrairement à la Mise en Scène (où vous générez un livre audio prêt à l'emploi), les Récits sont une intrigue dynamique tour par tour :
+Jeux textuels interactifs dirigés par l'IA en tant que moteur narratif. Contrairement à la Réalisation (où vous générez un livre audio complet), les Opowieści sont une intrigue dynamique tour par tour :
 
 * **Mode Choix :** chaque tour se termine par 3 à 5 options numérotées A-E. Le mode le plus intuitif pour les joueurs aveugles — NVDA lit les options, vous cliquez sur Tab et Entrée.
-* **Mode Moindre Mal :** comme le Mode Choix, mais chaque option est moralement, physiquement ou stratégiquement défavorable. À partir de v15.2, une « fiole » supplémentaire — une option de secours numérotée ZÉRO réutilisable, dont les effets sont pseudo-aléatoires (60% nuisibles / 30% perturbant la perception / 10% rarement bénéfiques, distribution forcée par Python, LLM ne peut pas inventer un effet salvateur).
+* **Mode Moindre Mal :** comme les Choix, mais chaque option est défavorable moralement, physiquement ou stratégiquement. À partir de la v15.2, une « fiole » supplémentaire — une option de secours numérotée ZERO réutilisable, dont les effets sont pseudo-aléatoires (60% nuisibles / 30% perturbant la perception / 10% rarement bénéfiques, distribution imposée par Python, LLM ne peut pas inventer de résultat salvateur).
 * **Mode Libre :** toute action en texte libre (« j'essaie d'ouvrir la porte »), le moteur propose 1 à 3 suggestions mais n'impose pas de choix.
-* **Modèle AI par mode :** Choix et Moindre Mal utilisent gpt-4o (meilleur raisonnement moral), Libre utilise gpt-4o-mini (économie d'improvisation moins coûteuse).
+* **Un modèle AI pour tous les modes :** à partir de la v18.1, tous les modes Opowieści utilisent Anthropic Claude Sonnet 4.6 — un modèle plus puissant qui respecte rigoureusement les règles du monde (essentiel surtout en mode Moindre Mal, où chaque option doit être réellement défavorable).
 
 
 ### 3. Polyglotte (Ctrl+3, Traducteur IA + Accents TTS)
@@ -66,10 +66,11 @@ Toute l'interface GUI, la documentation (`docs/manual.<iso>.txt`) et la plupart 
 
 ## Architecture de l'IA et modèles utilisés
 
-L'application répartit intelligemment les tâches, optimisant les coûts et la rapidité d'exécution de l'API OpenAI :
+L'application répartit intelligemment les tâches entre deux fournisseurs d'API, optimisant la qualité de la prose, les coûts et la rapidité :
 
-* **gpt-4o :** Le moteur principal de l'application. Il est responsable des tâches génératives lourdes : réalisation de scripts, écriture de prose traditionnelle (Livre audio), modes Choix et Moindre Mal dans les Histoires, génération de résumés et traductions avancées avec maintien du contexte multi-blocs.
-* **gpt-4o-mini :** Modèle auxiliaire rapide et léger. Utilisé en arrière-plan pour les micro-tâches nécessitant une grande rapidité : attribution itérative de titres littéraires aux chapitres générés, extraction de codes ISO, mode Libre dans les Histoires (économie d'improvisation de texte libre moins coûteuse).
+* **Anthropic Claude Sonnet 4.6 :** Moteur de toute la narration créative. Responsable de la mise en scène des scripts, de l'écriture de la prose traditionnelle (Audiobook), du Brainstorming ainsi que de TOUS les modes d'Histoires (Choix, Moindre Mal, Libre) avec la génération de résumés et d'intermèdes cinématographiques. La migration de la narration vers Claude (Réalisateur en v18.0, Histoires en v18.1) résulte d'une supériorité empiriquement confirmée dans le respect des règles du monde et l'évitement des clichés.
+* **gpt-4o (OpenAI) :** Traductions avancées avec maintien du contexte multi-bloc (Polyglotte). Migration vers Anthropic prévue dans la prochaine version.
+* **gpt-4o-mini (OpenAI) :** Modèle auxiliaire rapide et léger pour les micro-tâches : attribution itérative de titres littéraires aux chapitres générés et extraction des codes ISO de langue.
 
 
 ### Limitations connues des modèles (Anti-Closure)

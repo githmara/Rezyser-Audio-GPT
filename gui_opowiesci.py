@@ -712,14 +712,14 @@ class OpowiesciPanel(wx.Panel):
     # FAZA 2 — Silnik LLM
     # ==================================================================
     def _init_api(self) -> None:
-        """Inicjuje klienta OpenAI z ``golden_key.env``.
+        """Inicjuje klienta Anthropic (Claude) z ``golden_key.env``.
 
-        Wzorzec :meth:`gui_rezyser.RezyserPanel._init_api` — błąd ładowania
-        nigdy nie blokuje otwarcia panelu. Brak klucza → ``_api_dostepne``
-        zostaje ``False``, a :meth:`_on_wyslij` pokaże MessageBox z
-        `opowiesci.brak_api_tresc`. Sama detekcja przeniesiona do
-        :func:`opowiesci_ai.inicjalizuj_klienta` — moduł silnika i tak
-        potrzebuje tej funkcji do testów izolowanych.
+        v18.x (konsolidacja): cały moduł Opowieści woła Claude, więc
+        :func:`opowiesci_ai.inicjalizuj_klienta` zwraca klienta Anthropic
+        (``ANTHROPIC_API_KEY``/``sk-ant-``). Błąd ładowania nigdy nie blokuje
+        otwarcia panelu — brak klucza → ``_api_dostepne`` zostaje ``False``,
+        a :meth:`_on_wyslij` pokaże MessageBox z `opowiesci.brak_api_tresc`.
+        Detekcja w silniku (testy izolowane korzystają z tej samej funkcji).
         """
         app_dir = sciezki.KATALOG_BAZOWY_STR
         klient = oai.inicjalizuj_klienta(app_dir)
@@ -733,21 +733,17 @@ class OpowiesciPanel(wx.Panel):
 
     @staticmethod
     def _model_dla_trybu(tryb: int) -> str:
-        """Mapuje numer trybu na model LLM.
+        """Zwraca model LLM tury — jeden Claude dla WSZYSTKICH trybów.
 
-        v15.1: tryby z wyborami (4 = Wyborów, 5 = Mniejsze zło) używają
-        droższego gpt-4o, bo gpt-4o-mini regularnie łamał zasady świata
-        (proponował np. opcje neutralne w trybie „wszystkie wybory
-        niekorzystne", ignorował fonetyczne reguły imion z księgi).
-        Tryb 3 (Swobodny) zostaje na gpt-4o-mini — gracz steruje fabułą,
-        więc model nie musi przygotowywać dramatycznych dylematów sam.
-        Tryb 0 (Burza / `/visualize`) — mini, bo to opisówka.
-        Wywołania meta (streszczenie, cinematic) zawsze idą na mini —
-        nie używają tego helpera, hardkodują `oai.MODEL_DOMYSLNY`.
+        v18.x (konsolidacja na Anthropic, Opcja A): koniec model-per-tryb.
+        GPT-4o-mini regularnie łamał zasady świata w trybach z wyborami (4/5)
+        — proponował opcje neutralne mimo „wszystkie wybory niekorzystne".
+        Analogicznie do migracji narracji Reżysera (v18.0) całość przechodzi
+        na jeden, mocniejszy model (`claude-sonnet-4-6`), który ten problem
+        usuwa. Argument ``tryb`` zachowany dla zgodności sygnatury wywołań.
         """
-        if tryb in (oai.TRYB_WYBOROW, oai.TRYB_MNIEJSZE_ZLO):
-            return oai.MODEL_QUALITY
-        return oai.MODEL_DOMYSLNY
+        _ = tryb  # zachowany dla zgodności sygnatury (jeden model dla wszystkich)
+        return oai.MODEL_NARRACJA
 
     # ------------------------------------------------------------------
     # _on_wyslij: walidacja → spawn daemon thread → _wyslij_worker
@@ -1184,9 +1180,9 @@ class OpowiesciPanel(wx.Panel):
     # ------------------------------------------------------------------
     def _obsluz_blad(self, exc: Exception) -> None:
         """Mapuje wyjątek na komunikat lokalizowany i pokazuje dialog."""
-        # Lazy import — `openai` może nie być dostępne (brak klucza, brak
-        # paczki w środowisku testowym), a wtedy `import openai` na górze
-        # pliku rzuciłby ImportError i zablokowałby otwarcie panelu.
+        # Lazy import — `anthropic` może nie być dostępne (brak paczki w
+        # środowisku testowym), a wtedy `import anthropic` na górze pliku
+        # rzuciłby ImportError i zablokował otwarcie panelu.
         # Typowane błędy generacji AI (struktura/długość) niosą `klucz_i18n` —
         # mapujemy TYP na komunikat lokalizowany w namespace `opowiesci`, żeby
         # użytkownik nigdy nie zobaczył surowej, angielskiej treści technicznej
@@ -1195,10 +1191,10 @@ class OpowiesciPanel(wx.Panel):
             msg = t(f"opowiesci.{exc.klucz_i18n}")
         else:
             try:
-                import openai  # noqa: PLC0415
-                if isinstance(exc, openai.RateLimitError):
+                import anthropic  # noqa: PLC0415
+                if isinstance(exc, anthropic.RateLimitError):
                     msg = t("opowiesci.err_rate_limit")
-                elif isinstance(exc, openai.APITimeoutError):
+                elif isinstance(exc, anthropic.APITimeoutError):
                     msg = t("opowiesci.err_timeout")
                 else:
                     msg = str(exc)
@@ -2160,7 +2156,7 @@ class OpowiesciPanel(wx.Panel):
                 klient=self._client,
                 snapshot=snapshot,
                 user_input=arg,
-                model=oai.MODEL_DOMYSLNY,
+                model=oai.MODEL_NARRACJA,
             )
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._obsluz_blad, exc)
@@ -2261,7 +2257,7 @@ class OpowiesciPanel(wx.Panel):
         """LLM streszcza ostatnie tury — blokujący wątek tła."""
         try:
             streszczenie = oai.streszczaj_kontekst(
-                klient=self._client, snapshot=snapshot, model=oai.MODEL_DOMYSLNY,
+                klient=self._client, snapshot=snapshot, model=oai.MODEL_NARRACJA,
             )
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._streszczenie_blad, exc)
@@ -2330,7 +2326,7 @@ class OpowiesciPanel(wx.Panel):
     def _cinematic_worker(self, snapshot: oai.SnapshotOpowiesci) -> None:
         try:
             tekst = oai.generuj_cinematic_warning(
-                klient=self._client, snapshot=snapshot, model=oai.MODEL_DOMYSLNY,
+                klient=self._client, snapshot=snapshot, model=oai.MODEL_NARRACJA,
             )
         except Exception as exc:  # noqa: BLE001
             wx.CallAfter(self._cinematic_blad, exc)

@@ -36,14 +36,14 @@ tresc:
     * **Accumulatore di Trama:** Algoritmo di "memoria infinita". Quando l'indicatore di memoria entra in stato di allarme rosso, il sistema genera automaticamente un riassunto della trama e lo salva nel campo Memoria a Lungo Termine.
     * **{liczba_trybow_rezysera} modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore delle Regole di seguito.
   modul_opowiesci: |
-    ### 2. Racconti (Ctrl+2, secondo principale modalità da v15.0)
+    ### 2. Opowieści (Ctrl+2, secondo modalità principale dalla versione 15.0)
 
-    Giochi di testo interattivi condotti dall'IA come motore narrativo. A differenza della Regia (dove generi un audiolibro finito), i Racconti sono una trama dinamica turno per turno:
+    Giochi di testo interattivi condotti dall'AI nel ruolo di motore narrativo. A differenza della Regia (dove generi un audiolibro finito), le Opowieści sono una trama dinamica turno per turno:
 
     * **Modalità Scelte:** ogni turno termina con 3-5 opzioni numerate A-E. La modalità più intuitiva per i giocatori non vedenti — NVDA legge le opzioni, clicchi Tab e Invio.
-    * **Modalità Minore Male:** come le Scelte, ma ogni opzione è sfavorevole moralmente, fisicamente o strategicamente. Da v15.2 un'ulteriore "fiala" — opzione di salvataggio disperato riutilizzabile numerata ZERO, i cui effetti sono pseudocasuali (60% dannosi / 30% alterano la percezione / 10% raramente vantaggiosi, distribuzione forzata da Python, LLM non può inventare un effetto salvifico).
+    * **Modalità Minore Male:** come le Scelte, ma ogni opzione è sfavorevole moralmente, fisicamente o strategicamente. Dalla versione 15.2, un'ulteriore "fiala" — opzione di salvataggio disperato numerata ZERO riutilizzabile, i cui effetti sono pseudo-casuali (60% dannosi / 30% che alterano la percezione / 10% raramente vantaggiosi, distribuzione forzata da Python, LLM non può inventare un effetto salvifico).
     * **Modalità Libera:** azione libera con testo libero ("proverò ad aprire la porta"), il motore propone 1-3 suggerimenti ma non impone una scelta.
-    * **Modello AI per modalità:** Scelte e Minore Male usano gpt-4o (migliore ragionamento morale), Libera usa gpt-4o-mini (economia dell'improvvisazione più economica).
+    * **Un modello AI per tutte le modalità:** dalla versione 18.1 tutte le modalità Opowieści utilizzano Anthropic Claude Sonnet 4.6 — un modello più potente che aderisce rigorosamente alle regole del mondo (cruciale soprattutto nella modalità Minore Male, dove ogni opzione deve essere realmente sfavorevole).
   modul_poliglota: |
     ### 3. Poliglotta (Ctrl+3, Traduttore AI + Accenti TTS)
 
@@ -73,10 +73,11 @@ tresc:
   architektura_ai: |
     ## Architettura AI e modelli utilizzati
 
-    L'applicazione distribuisce intelligentemente i compiti, ottimizzando i costi e la velocità di funzionamento dell'API OpenAI:
+    L'applicazione distribuisce intelligentemente i compiti tra due fornitori di API, ottimizzando la qualità della prosa, i costi e la velocità:
 
-    * **gpt-4o:** Il motore principale che alimenta l'applicazione. Si occupa dei compiti generativi più complessi: regia di script, scrittura di prosa tradizionale (Audiolibro), modalità Scelte e Minore Male nelle Storie, generazione di riassunti e traduzioni avanzate mantenendo il contesto multi-blocco.
-    * **gpt-4o-mini:** Modello ausiliario veloce e leggero. Utilizzato in background per micro-compiti che richiedono alta velocità: assegnazione iterativa di titoli letterari ai capitoli generati, estrazione di codici ISO, modalità Libera nelle Storie (economia più economica dell'improvvisazione del testo libero).
+    * **Anthropic Claude Sonnet 4.6:** Motore di tutta la narrazione creativa. Responsabile della regia degli script, della scrittura di prosa tradizionale (Audiolibro), del Brainstorming e di TUTTE le modalità di Racconto (Scelte, Minor Male, Libero) insieme alla generazione di riassunti e intermezzi Cinematic. La migrazione della narrazione su Claude (Regista in v18.0, Racconti in v18.1) è risultata dalla comprovata superiorità empirica nel mantenere le regole del mondo e nell'evitare cliché.
+    * **gpt-4o (OpenAI):** Traduzioni avanzate con mantenimento del contesto multi-blocco (Poliglotta). Migrazione su Anthropic pianificata nella prossima versione.
+    * **gpt-4o-mini (OpenAI):** Modello ausiliario veloce e leggero per micro-compiti: assegnazione iterativa di titoli letterari ai capitoli generati ed estrazione di codici ISO della lingua.
   ograniczenia_modeli: |
     ### Limitazioni conosciute dei modelli (Anti-Closure)
 

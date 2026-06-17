@@ -102,24 +102,24 @@ tresc:
 
     Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt del sistema": una larga instrucción para la inteligencia artificial sobre cómo debe comportarse en ese modo. Si sientes que, por ejemplo, el modo Audiolibro escribe "demasiado florido" o la Tormenta de Ideas propone soluciones mágicas con demasiada frecuencia, puedes ajustar estos textos a tu gusto, guardarlos y la aplicación cargará tu versión la próxima vez que se inicie. Cero programación.
   co_to_tryb_opowiesci: |
-    ¿Qué es el "modo Historia"?
+    ¿Qué es el "modo Historias"?
     ----------------------------
 
     La carpeta "opowiesci/" contiene {liczba_trybow_opowiesci} archivos que describen el segundo
     modo principal de la aplicación: juegos de texto interactivos dirigidos por IA en el papel
     de motor narrativo. A diferencia del modo Director (donde generas un audiolibro COMPLETO
-    para reproducir en TTS), el modo Historia es una conversación por turnos
-    con el modelo, que lleva a cabo una sesión de narrativa dinámica contigo:
+    para reproducir en TTS), el modo Historias es una conversación turno a turno
+    con el modelo, que lleva a cabo una sesión de trama dinámica contigo:
 
     - tryb_wyborow.yaml      — Elecciones (3-5 opciones numeradas A-E al final
                                de cada turno, el modo más intuitivo para
                                jugadores ciegos)
     - tryb_mniejsze_zlo.yaml — Menor mal (como Elecciones, pero cada opción es
-                               desfavorable; desde v15.2 frasco reutilizable como
+                               desfavorable; desde v15.2 un vial reutilizable como
                                opción de rescate desesperado numerada como CERO)
     - tryb_swobodny.yaml     — Libre (cualquier acción en texto libre, el motor
                                propone 1-3 sugerencias pero no obliga a elegir)
-    - tryb_burza.yaml        — Tormenta de ideas (despacho interno que genera
+    - tryb_burza.yaml        — Tormenta de ideas (despacho interno generando
                                propuestas de desarrollo de escena para el motor narrativo)
     - baza.yaml              — reglas básicas comunes (duración del turno, prohibiciones
                                de resúmenes, directiva anti-cierre)
@@ -132,10 +132,10 @@ tresc:
 
     Al igual que en el modo Director, cada archivo contiene un "prompt del sistema" para editar.
     Puedes ajustar el estilo del narrador (por ejemplo, menos florido), cambiar la duración
-    del turno, añadir tus propias directivas narrativas. Desde la v15.2, el modelo de IA se selecciona
-    automáticamente por modo: Elecciones y Menor mal utilizan gpt-4o (mejor razonamiento moral,
-    importante para el modo con consecuencias), Libre utiliza gpt-4o-mini (economía más barata para
-    la improvisación de texto libre).
+    del turno, añadir tus propias directivas de trama. Desde v18.1 todos los modos de Historias
+    utilizan un único modelo Anthropic Claude Sonnet 4.6 — un modelo más potente
+    que sigue rigurosamente las reglas del mundo (crucial en el modo Menor mal,
+    donde cada opción debe ser realmente desfavorable).
   jak_zaczac: |
     Cómo empezar a divertirse — tres niveles de dificultad
     ------------------------------------------------------

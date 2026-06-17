@@ -1,4 +1,4 @@
-Director de Audio GPT — Módulo de Historias Interactivas (18.0 – Versión de Lanzamiento)
+Director de Audio GPT — Módulo de Historias Interactivas (18.1 – Versión de Lanzamiento)
 
 El segundo modo principal de la aplicación junto al Director — esta vez te conviertes en el jugador de una historia generada dinámicamente en lugar de su autor. La inteligencia artificial narra en segunda persona del singular ("Caminas por un bosque brumoso, sientes el olor de las hojas mojadas..."), y tú decides el siguiente movimiento — escribiendo cualquier acción en texto libre o eligiendo una de las opciones numeradas.
 
@@ -71,19 +71,19 @@ Nota: las reglas del mundo requieren un juego activo. Si haces clic en "Editar r
 
 PASO 5: Comandos Slash — acciones rápidas sin API
 
-En el campo de acción, puedes escribir un comando que comience con una barra `/` en cualquier momento. Los comandos son locales (no consumen llamadas a OpenAI) y funcionan independientemente del modo de juego. Se aceptan tanto las variantes en polaco como en inglés:
+En el campo de acción, puedes ingresar en cualquier momento un comando que comience con una barra inclinada `/`. Los comandos son locales (no requieren llamadas a la API) y funcionan independientemente del modo de juego. Se aceptan tanto las variantes en polaco como en inglés:
 
-/zapisz, /save — forzar un guardado manual del estado del juego. El autoguardado se realiza después de cada turno, por lo que este comando es principalmente para asegurarse antes de cerrar la aplicación.
+/zapisz, /save — forzar el guardado manual del estado del juego. El autoguardado se realiza después de cada turno, por lo que este comando es principalmente para asegurar antes de cerrar la aplicación.
 
-/wczytaj, /load — abre un diálogo de selección de juego con una lista de nombres disponibles (desde la versión v15.2.3 en lugar del diálogo de archivos del sistema — lista directa de juegos guardados desde la carpeta runtime/opowiesci/ detectados por la presencia del archivo .game.json). NVDA lee la lista de manera natural, el jugador ciego no necesita navegar por el diálogo de archivos del sistema. Al seleccionar el nombre del juego, el modo y la narración completa se restauran — puedes continuar desde el turno en el que te quedaste. El comportamiento es idéntico al botón "Cargar".
+/wczytaj, /load — abre un diálogo de selección de juego con una lista de nombres disponibles (desde v15.2.3 en lugar del diálogo de archivos del sistema — lista directa de juegos guardados desde la carpeta runtime/opowiesci/ detectados por la presencia del archivo .game.json). NVDA lee la lista de manera natural, el jugador ciego no necesita navegar por el diálogo de archivos del sistema. Después de seleccionar el nombre del juego, el modo y la narración completa se restauran — puedes continuar desde el turno en el que terminaste. El botón "Cargar" tiene un comportamiento idéntico.
 
-El motor narrativo selecciona el modelo de IA automáticamente dependiendo del modo: para el modo de Elecciones y el Menor de los males utiliza el más caro gpt-4o (se adhiere rigurosamente a las reglas del mundo), para el modo Libre — el más rápido y económico gpt-4o-mini (el jugador controla la trama, por lo que no requiere una dirección dramática).
+El motor narrativo de todos los modos de Historias utiliza un único modelo Anthropic Claude Sonnet 4.6 (desde v18.1; anteriormente se seleccionaba un modelo OpenAI por modo). Un modelo más potente se adhiere rigurosamente a las reglas del mundo — esto es especialmente importante en el modo Menor Mal, donde cada opción debe seguir siendo realmente desfavorable.
 
-/wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo usa los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo separado, NO se añade a la narración ni se guarda en el archivo de audiolibro. Ejemplo: "/wizualizuj cómo luce el guardia" o "/wizualizuj el olor de la cafetería".
+/wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo utiliza los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo separado, NO se añade a la narración ni se guarda en el archivo de audiolibro. Ejemplo: “/wizualizuj jak wygląda strażnik" o “/wizualizuj zapach kawiarni".
 
-/odswiez, /refresh — actualiza la memoria interna a partir del archivo de narración tras editarlo manualmente (desde la v15.5). Cuando abres opowiesci/<nazwa>.txt en el editor y, por ejemplo, corriges una errata o recortas un párrafo sobrante, este comando sincroniza la cola fresca con el contexto del motor — sin un reinicio completo ni recargar el juego. Si ya existe un resumen de los turnos anteriores, queda intacto, de modo que el siguiente turno y el siguiente resumen no se generan sobre datos desactualizados. ATENCIÓN: el estado del juego (personajes, ubicación, inventario, hilos) del archivo .game.json NO se actualiza — si la edición cambió hechos del mundo, el siguiente turno puede desviarse de ellos. (El botón equivalente „Actualizar desde el disco" es una opción técnica, oculta por defecto — el comando siempre funciona.)
+/odswiez, /refresh — actualiza la memoria interna desde el archivo de narración después de su edición manual (desde v15.5). Cuando abres opowiesci/<nazwa>.txt en un editor y, por ejemplo, corriges un error tipográfico o eliminas un párrafo redundante, este comando sincroniza el final fresco con el contexto del motor — sin un reinicio completo y recarga del juego. (El botón equivalente “Actualizar desde el disco" es una opción técnica, oculta por defecto — el comando siempre funciona.) Si ya existe un resumen de los turnos anteriores, permanece intacto, por lo que el siguiente turno y resumen no se basarán en datos desactualizados. ATENCIÓN: el estado del juego (personajes, ubicación, inventario, tramas) del archivo .game.json NO se actualiza — si la edición cambió los hechos del mundo, el siguiente turno puede no coincidir con ellos.
 
-/pomoc, /help — muestra una ventana de diálogo con una lista de todos los comandos disponibles. El diálogo es de solo lectura y amigable con NVDA — el campo de texto recibe el foco automáticamente, el lector de pantalla lee toda la lista de inmediato sin necesidad de navegación.
+/pomoc, /help — muestra un cuadro de diálogo con una lista de todos los comandos disponibles. El diálogo es de solo lectura y compatible con NVDA — el campo de texto recibe el foco automáticamente, el lector de pantalla lee toda la lista de inmediato sin necesidad de navegación.
 
 /koniec, /quit — cierra la aplicación (después del autoguardado del turno en curso).
 
@@ -103,16 +103,16 @@ runtime/opowiesci/<nazwa>.mode — metadatos del número de modo (3=Libre, 4=Ele
 
 PASO 7: Indicador de memoria del modelo — por qué los turnos en los juegos antiguos no requieren tu intervención manual
 
-Debajo del RadioBox del modo encontrarás el indicador de memoria del modelo: una barra de progreso (wx.Gauge) con una descripción del estado al lado. El indicador muestra el porcentaje de llenado de la ventana de contexto del motor narrativo (gpt-4o-mini tiene un búfer de 128,000 tokens).
+Debajo del RadioBox del modo encontrarás el indicador de memoria del modelo: una barra de progreso (wx.Gauge) con una descripción del estado al lado. El indicador muestra el porcentaje de llenado de la ventana de contexto del motor narrativo (un búfer calculado hasta 128,000 tokens).
 
 Cuatro niveles de llenado:
 
 🟢 limpio (0%) — el juego acaba de comenzar, no hay turnos guardados.
 🟢 OK (1-69%) — todo está en orden, puedes continuar sin restricciones.
-⚠️ advertencia (70-89%) — el motor genera automáticamente un resumen de los turnos anteriores en el hilo de fondo. Aparecerá el mensaje "Auto-resumen de contexto en progreso..." — no envíes otro turno hasta que el resumen haya terminado. Tras el éxito, los turnos anteriores se condensarán en un solo resumen, el búfer se liberará y recibirás la confirmación "Memoria del modelo recuperada" con el número de turnos condensados.
-🚨 ALARMA (90%+) — el auto-resumen no liberó el búfer (caso raro tras un fallo del API). El envío de otro turno está bloqueado. Fuerza el final del juego con /fin, luego recárgalo — el motor cargará el estado desde game.json sin el historial de los últimos turnos, el búfer estará fresco.
+⚠️ advertencia (70-89%) — el motor genera automáticamente un resumen de los turnos anteriores en el hilo de fondo. Aparecerá el mensaje "Auto-resumen de contexto en progreso..." — no envíes el siguiente turno hasta que el resumen haya terminado. Tras el éxito, los turnos anteriores se condensarán en un solo resumen, el búfer se liberará y recibirás la confirmación "Memoria del modelo recuperada" con el número de turnos condensados.
+🚨 ALARMA (90%+) — el auto-resumen no liberó el búfer (un caso raro tras un fallo del API). El envío del siguiente turno está bloqueado. Fuerza el final del juego con /koniec, luego cárgalo de nuevo — el motor cargará el estado desde game.json sin el historial de los últimos turnos, el búfer estará fresco.
 
-En la práctica, el mecanismo de autorreducción es invisible: el jugador no siente que algo está sucediendo, ya que el hilo de fondo resuelve el problema antes de que se note. Solo es importante que no envíes otro turno durante el auto-resumen (el botón "Enviar" está entonces atenuado).
+En la práctica, el mecanismo de autorreducción es invisible — el jugador no siente que algo está sucediendo, ya que el hilo de fondo resuelve el problema antes de que se note. Solo es importante que no envíes el siguiente turno durante el auto-resumen (el botón "Enviar" estará entonces desactivado).
 
 
 PASO 8: Cinematic Meta Warning — interludio dramático después del turno 150
@@ -145,17 +145,17 @@ ACELERADORES DE TECLADO — todos los botones tienen el signo `&` antes de una d
 
 Problemas más comunes
 
-Problema: Al hacer clic en "Nuevo juego" aparece el mensaje "Falta la clave API".
-Causa y solución: El archivo golden_key.env en la carpeta principal de la aplicación no tiene la clave OpenAI correcta. Regresa a la pantalla de inicio (botón Home), haz clic en "Generar archivo golden_key.env y abrir editor de texto" y sigue las instrucciones (PASO 2 del manual principal).
+Problema: Al hacer clic en "Nuevo juego" aparece el mensaje "Falta clave API".
+Causa y solución: El archivo golden_key.env en la carpeta principal de la aplicación no tiene una clave Anthropic válida (es la que alimenta el modo Historias). Regresa a la pantalla de inicio (botón Home), haz clic en "Generar archivo golden_key.env y abrir editor de texto" y sigue las instrucciones (PASO 2 del manual principal).
 
-Problema: Intento enviar otro turno, pero el botón "Enviar" está atenuado.
-Causa y solución: Se está realizando un auto-resumen del contexto o la generación de Cinematic Warning en el hilo de fondo. El estado de la memoria mostrará "Auto-resumen del contexto en progreso…". Espera unos segundos — el botón se desbloqueará automáticamente después del éxito.
+Problema: Intento enviar otro turno, pero el botón "Enviar" está deshabilitado.
+Causa y solución: Se está realizando un auto-resumen del contexto o la generación de Cinematic Warning en el hilo de fondo. El estado de la memoria mostrará "Auto-resumen del contexto en curso...". Espera unos segundos — el botón se desbloqueará automáticamente después del éxito.
 
 Problema: El mensaje "Memoria del modelo sobrecargada" bloquea el juego.
-Causa y solución: El auto-resumen no liberó el búfer (por ejemplo, límite de tasa de OpenAI). Termina el juego con el comando /fin o cierra la aplicación, luego vuelve a cargarla — el motor cargará solo el estado desde game.json sin el historial de los últimos turnos.
+Causa y solución: El auto-resumen no liberó el búfer (por ejemplo, límite de tasa del API Anthropic). Termina el juego con el comando /koniec o cierra la aplicación, luego vuelve a cargarla — el motor cargará solo el estado desde game.json sin el historial de los últimos turnos.
 
 Problema: En el modo de Elecciones, el motor no generó botones, aunque los esperaba.
-Causa y solución: Alucinación del modelo — a pesar del modo 4 LLM devolvió una tabla de elecciones vacía. La aplicación oculta conscientemente el área de elecciones (en lugar de mostrar un marcador de posición vacío) y permite continuar con texto libre. Es probable que el siguiente turno genere elecciones correctamente.
+Causa y solución: Alucinación del modelo — a pesar del modo 4 LLM devolvió un arreglo vacío de elecciones. La aplicación oculta conscientemente el área de elecciones en ese caso (en lugar de mostrar un marcador de posición vacío) y permite continuar con texto libre. Probablemente el siguiente turno generará las elecciones correctamente.
 
 Problema: Los archivos .game.json y .story.jsonl no son visibles en el escritorio.
-Causa y solución: Es intencionado — runtime/ es una carpeta del sistema para usuarios normales, invisible desde el explorador de archivos. El archivo de narración (.txt) va a opowiesci/ — ahí lo encontrarás.
+Causa y solución: Esto es intencional — runtime/ es una carpeta del sistema para usuarios comunes, invisible desde el explorador de archivos. El archivo de narración (.txt) va a opowiesci/ — allí lo encontrarás.

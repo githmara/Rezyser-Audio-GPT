@@ -15,7 +15,7 @@ kolejnosc: 20
 # Température plus élevée que les modes narratifs — nous voulons une
 # description riche et créative. max_tokens est bas car ce n'est pas un
 # tour de jeu.
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.95
 max_tokens: 1000
 timeout_s: 60.0

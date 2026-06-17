@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **18.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.1** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -26,12 +26,12 @@ The main studio for writing radio plays and audiobooks. You choose a mode — Br
 
 ### 2. Stories (Ctrl+2, second main mode from v15.0)
 
-Interactive text games led by AI as the narrative engine. Unlike Directing (where you generate a finished audiobook), Stories is a turn-by-turn dynamic storyline:
+Interactive text games led by AI as the narrative engine. Unlike Directing (where you generate a finished audiobook), Stories offer a turn-by-turn dynamic plot:
 
-* **Choice Mode:** each turn ends with 3-5 numbered options A-E. The most intuitive mode for blind players — NVDA reads the options, you click Tab and Enter.
-* **Lesser Evil Mode:** like Choices, but each option is morally, physically, or strategically disadvantageous. From v15.2 an additional "vial" — a reusable ZERO-numbered desperate rescue option, whose effects are pseudo-random (60% harmful / 30% perception-altering / 10% rarely-beneficial, distribution enforced by Python, LLM cannot invent a miraculous outcome).
-* **Free Mode:** any action in free text ("I'll try to open the door"), the engine suggests 1-3 options but does not enforce a choice.
-* **AI Model per Mode:** Choices and Lesser Evil use gpt-4o (better moral reasoning), Free uses gpt-4o-mini (more economical improvisation).
+* **Choices Mode:** each turn ends with 3-5 numbered options A-E. The most intuitive mode for blind players — NVDA reads the options, you click Tab and Enter.
+* **Lesser Evil Mode:** similar to Choices, but each option is morally, physically, or strategically disadvantageous. From v15.2, an additional "vial" — a reusable ZERO-numbered desperate rescue option, with pseudorandom effects (60% harmful / 30% perception-altering / 10% rarely-beneficial, distribution enforced by Python, LLM cannot invent a salvaging outcome).
+* **Free Mode:** any action in free text ("I'll try to open the door"), the engine suggests 1-3 actions but does not enforce a choice.
+* **One AI model for all modes:** from v18.1, all Stories modes use Anthropic Claude Sonnet 4.6 — a stronger model that rigorously adheres to world rules (crucial especially in Lesser Evil Mode, where each option must be genuinely disadvantageous).
 
 
 ### 3. Polyglot (Ctrl+3, AI Translator + TTS Accents)
@@ -66,10 +66,11 @@ The entire GUI interface, documentation (`docs/manual.<iso>.txt`), and most syst
 
 ## AI Architecture and Used Models
 
-The application intelligently distributes tasks, optimizing the costs and speed of the OpenAI API:
+The application intelligently distributes tasks between two API providers, optimizing prose quality, costs, and speed:
 
-* **gpt-4o:** The main engine powering the application. Responsible for heavy generative tasks: directing scripts, writing traditional prose (Audiobook), Choices and Lesser Evil modes in Stories, generating summaries, and advanced translations while maintaining multi-block context.
-* **gpt-4o-mini:** A fast, lightweight auxiliary model. Used in the background for micro-tasks requiring high speed: iterative assignment of literary titles to generated chapters, extraction of ISO codes, Free mode in Stories (more economical improvisation of free text).
+* **Anthropic Claude Sonnet 4.6:** The engine for all creative narrative. It is responsible for directing scripts, writing traditional prose (Audiobook), Brainstorming, and ALL Story modes (Choices, Lesser Evil, Free) along with generating summaries and Cinematic interludes. The migration of narrative to Claude (Director in v18.0, Stories in v18.1) resulted from empirically confirmed superiority in adhering to world rules and avoiding clichés.
+* **gpt-4o (OpenAI):** Advanced translations with multi-block context retention (Polyglot). Migration to Anthropic is planned for the next release.
+* **gpt-4o-mini (OpenAI):** A fast, lightweight auxiliary model for micro-tasks: iterative assignment of literary titles to generated chapters and extraction of language ISO codes.
 
 
 ### Known Model Limitations (Anti-Closure)

@@ -10,7 +10,7 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- OpenAI-parametrit (perityvät baza.yaml-tiedostosta, ellei tässä määritellä) ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Lisäys baza.yaml-tiedoston prompt_systemowy-kenttään ---

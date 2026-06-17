@@ -3,8 +3,9 @@ opowiesci_ai.py — Silnik LLM dla trybu „Interaktywne Opowieści" (v15.0 Faza
 
 Funkcja główna :func:`generuj_ture` wysyła snapshot stanu opowieści + akcję
 gracza i otrzymuje strukturyzowany JSON (narracja + wybory + postacie +
-stan + meta). Strukturę wymusza ``response_format={"type": "json_object"}``
-po stronie OpenAI oraz walidacja przez :mod:`jsonschema` po stronie naszej.
+stan + meta). Strukturę egzekwuje walidacja przez :mod:`jsonschema` po naszej
+stronie (Anthropic nie ma ``response_format=json_object`` — o czysty JSON
+prosimy w prompcie, a niezgodność naprawia self-correction).
 Halucynacja struktury → retry max 2× z błędem jako wskazówką dla modelu;
 trzeci błąd → ``RuntimeError`` (GUI łapie i pokazuje w dialogu).
 
@@ -13,8 +14,8 @@ Pomocnicza :func:`wygeneruj_wizualizacje` służy slash-komendzie
 schemy, bez zapisu do plików (lifecycle dochodzi w Fazie 3).
 
 Wzorzec architektoniczny: funkcyjny (jak :mod:`buduj_wielojezyczne_ui`),
-nie obj-obj (jak :mod:`rezyser_ai`). Klient OpenAI przekazywany jawnie
-przez parametr ``klient``; brak globalnego state.
+nie obj-obj (jak :mod:`rezyser_ai`). Klient Anthropic (Claude) przekazywany
+jawnie przez parametr ``klient``; brak globalnego state.
 
 Faza 2 świadomie nie zapisuje plików — stan trzymany w pamięci panelu
 (``OpowiesciPanel._snapshot``). Lifecycle plików (.txt/.md/.game.json/
@@ -58,8 +59,16 @@ from przepisy_rezysera import (  # noqa: F401  (re-eksport dla gui_opowiesci)
 # =============================================================================
 
 ENV_FILENAME       = "golden_key.env"
+# v18.x (konsolidacja na Anthropic, Opcja A): WSZYSTKIE wywołania LLM Opowieści
+# (tury 3/4/5, /visualize, streszczenie, cinematic) idą na jeden model Claude —
+# koniec model-per-tryb (dawne MODEL_QUALITY/gpt-4o usunięte). Dispatch routuje
+# na klienta Anthropic niezależnie od języka UI.
+MODEL_NARRACJA     = "claude-sonnet-4-6"
+# gpt-4o-mini ZOSTAJE wyłącznie do liczenia tokenów (tiktoken o200k_base) na
+# pasku pamięci — NIE jest już modelem LLM. `OKNO_KONTEKSTU_MAX=128k` (core_tokeny)
+# pozostaje LOGICZNYM budżetem kosztu/spójności (+ auto-streszczenie po 70%), nie
+# realnym oknem 1M Sonneta 4.6.
 MODEL_DOMYSLNY     = ct.MODEL_DOMYSLNY_OPOWIESCI
-MODEL_QUALITY      = ct.MODEL_DOMYSLNY_REZYSER
 TIMEOUT_S          = 120.0
 MAX_TOKENS_OUT     = 2000
 MAX_RETRIES        = 2          # +1 oryginalna próba = 3 wywołania w pesymistycznym scenariuszu
@@ -95,11 +104,13 @@ AKCJA_SYNC         = "(narracja zsynchronizowana z dysku)"
 # =============================================================================
 # JSON-schema dla strukturyzowanej tury
 # =============================================================================
-# Egzekwowane DWUKROTNIE — raz przez OpenAI (response_format=json_object daje
-# nam gwarancję że odpowiedź parsuje się jako JSON, NIE że trzyma się tej
-# konkretnej schemy), drugi raz przez `jsonschema.validate` po naszej
-# stronie. Dwa kroki, bo OpenAI gwarantuje tylko składnię JSON, a my chcemy
-# też walidację typów + obecności kluczy + długości tablic.
+# Egzekwowane przez `jsonschema.validate` po naszej stronie (typy + obecność
+# kluczy + długości tablic). Anthropic nie ma `response_format=json_object`, więc
+# NIE mamy gwarancji nawet samej składni JSON — o czysty JSON prosimy w prompcie,
+# a niezgodność (parse error / złamana schema) wraca jako wskazówka self-correction
+# i model regeneruje. ŚWIADOMIE bez `output_config`/json_schema: wymuszony schemat
+# zablokowałby goły tag `[ODRZUCENIE_AI]` (klauzula odmowy), wykrywany substringiem
+# PRZED `json.loads` (wzorzec 1:1 z `rezyser_ai`).
 # -----------------------------------------------------------------------------
 
 SCHEMA_TURA: dict[str, Any] = {
@@ -262,29 +273,69 @@ class StatusPamieci:
 
 
 # =============================================================================
-# Inicjalizacja klienta OpenAI
+# Inicjalizacja klienta Anthropic (Claude)
 # =============================================================================
 
 def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
-    """Ładuje ``golden_key.env`` z roota repo i zwraca skonfigurowanego klienta.
+    """Ładuje ``golden_key.env`` z roota repo i zwraca klienta Anthropic (Claude).
 
-    Zwraca ``None`` jeśli klucz nieobecny lub niewłaściwy (panel pokaże
-    wtedy ``brak_api_tresc`` w MessageBox przy próbie wysyłki). Nigdy nie
-    rzuca — błąd inicjalizacji nie powinien blokować otwarcia panelu.
+    v18.x (konsolidacja): czyta ``ANTHROPIC_API_KEY`` (``sk-ant-``). Zwraca
+    ``None`` jeśli klucz nieobecny lub niewłaściwy (panel pokaże wtedy
+    ``brak_api_tresc`` w MessageBox przy próbie wysyłki). Nigdy nie rzuca —
+    błąd inicjalizacji nie powinien blokować otwarcia panelu.
     """
     base = app_dir or sciezki.KATALOG_BAZOWY_STR
     env_path = os.path.join(base, ENV_FILENAME)
     if not os.path.exists(env_path):
         return None
     load_dotenv(env_path)
-    klucz = os.getenv("OPENAI_API_KEY", "")
-    if not klucz or not klucz.startswith("sk-"):
+    klucz = os.getenv("ANTHROPIC_API_KEY", "")
+    if not klucz or not klucz.startswith("sk-ant-"):
         return None
     try:
-        from openai import OpenAI  # noqa: PLC0415  (lazy import — brak openai nie blokuje GUI)
-        return OpenAI(api_key=klucz)
+        import anthropic  # noqa: PLC0415  (lazy import — brak SDK nie blokuje GUI/testów)
+        return anthropic.Anthropic(api_key=klucz)
     except Exception:
         return None
+
+
+# =============================================================================
+# Wywołanie Claude Messages API (wspólny helper dla wszystkich trybów)
+# =============================================================================
+
+def _wywolaj_claude(
+    klient:      Any,
+    model:       str,
+    system:      str,
+    messages:    list[dict],
+    *,
+    max_tokens:  int,
+    temperature: float,
+    timeout:     float,
+) -> tuple[str, str | None]:
+    """Wywołuje Claude Messages API (proza/JSON, BEZ reasoningu) → (tekst, stop_reason).
+
+    Klon ``rezyser_ai._wywolaj_claude`` dostrojony do Opowieści: model/temperatura/
+    max_tokens podajemy jawnie, bo Opowieści nie mają dataclassy ``PrzepisRezysera``
+    — parametry żyją w dictach YAML. ``thinking=disabled`` (narracja/JSON, reasoning
+    tylko dodawałby latencję i koszt). ``temperature`` honoruje Sonnet 4.6 (jedyny
+    parametr próbkowania — bez ``top_p``). Timeout per-wywołanie przez
+    ``with_options`` (Messages API nie przyjmuje ``timeout=`` na ``create``). Tekst
+    sklejamy z bloków ``type="text"`` (Claude zwraca listę bloków treści).
+    """
+    response = klient.with_options(timeout=timeout).messages.create(
+        model=model,
+        system=system,
+        messages=messages,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        thinking={"type": "disabled"},
+    )
+    tekst = "".join(
+        blok.text for blok in response.content
+        if getattr(blok, "type", None) == "text"
+    )
+    return tekst, getattr(response, "stop_reason", None)
 
 
 # =============================================================================
@@ -577,7 +628,7 @@ def generuj_ture(
     """Wysyła turę do LLM i zwraca strukturyzowany wynik.
 
     Args:
-        klient           : skonfigurowany klient OpenAI (z :func:`inicjalizuj_klienta`)
+        klient           : skonfigurowany klient Anthropic (z :func:`inicjalizuj_klienta`)
         snapshot         : niezmienny stan gry; ``snapshot.jezyk_projektu`` decyduje
                            z którego `dictionaries/<kod>/opowiesci/*.yaml` ładować prompt
         user_input       : akcja gracza (dowolny tekst lub mapowany wybór z przycisku)
@@ -597,10 +648,10 @@ def generuj_ture(
         :class:`WynikTury` z zwalidowaną zawartością.
 
     Raises:
-        RuntimeError: po wyczerpaniu prób retry (halucynacja struktury)
-                      ALBO przy ucięciu odpowiedzi (max_tokens hit).
-        Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) są
-        propagowane — GUI łapie i pokazuje w :func:`_wyswietl_blad_ai`.
+        BladStrukturyJSON: po wyczerpaniu prób retry (halucynacja struktury).
+        BladDlugosciOdpowiedzi: przy ucięciu odpowiedzi (stop_reason="max_tokens").
+        Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) są
+        propagowane — GUI łapie i pokazuje w :func:`_obsluz_blad`.
     """
     jezyk            = snapshot.jezyk_projektu or "pl"
     prompt_systemowy = _zbuduj_prompt_systemowy(tryb, jezyk, snapshot.zasady_swiata)
@@ -611,61 +662,64 @@ def generuj_ture(
         fiolka_seed=fiolka_seed,
     )
 
-    # Parametry: priorytet to argument funkcji (GUI może override przez
-    # `/ustawienia`), potem YAML trybu, na końcu hardkodowana stała.
+    # Parametry: priorytet to argument funkcji (GUI override), potem YAML trybu,
+    # na końcu stała MODEL_NARRACJA (Claude). YAML produkcyjnie zawiera już model
+    # Claude — fallback chroni tylko testy izolowane / niekompletne paczki.
     nazwa_pliku = _NAZWA_PLIKU_PER_TRYB[tryb]
-    efektywny_model = model or _parametr_z_yaml(jezyk, nazwa_pliku, "model", MODEL_DOMYSLNY)
+    efektywny_model = model or _parametr_z_yaml(jezyk, nazwa_pliku, "model", MODEL_NARRACJA)
     temperatura     = _parametr_z_yaml(jezyk, nazwa_pliku, "temperatura", TEMPERATURE_TURA)
 
+    # Anthropic: `system` osobno (parametr), PIERWSZA wiadomość musi być `user`.
+    # Ciągłość poprzedniej tury (dawniej role=assistant w OpenAI, v17.9 Obszar 2)
+    # zwijamy do wiadomości `user` jako oznaczony blok — nie wolno zacząć od
+    # `assistant`. Schema i tak siedzi w prompt-systemowym; tracimy tylko mikro-
+    # optymalizację „model kontynuuje własną wypowiedź", spójnie z `buduj_payload`
+    # Reżysera (cały kontekst w jednej wiadomości user).
+    czesci: list[str] = []
+    if snapshot.ostatni_surowy_json and snapshot.ostatni_surowy_json.strip():
+        czesci.append(
+            "[PREVIOUS TURN — your last JSON output; keep continuity and the same "
+            "structure]:\n" + snapshot.ostatni_surowy_json
+        )
+    czesci.append(user_payload)
+    messages: list[dict] = [{"role": "user", "content": "\n\n".join(czesci)}]
+
     ostatni_blad: str | None = None
-    for proba in range(MAX_RETRIES + 1):
-        # Przy retry dodajemy do payloadu informację o błędzie z poprzedniej
-        # próby — model może skorygować strukturę. To wzorzec z OpenAI
-        # cookbook „self-correction via error feedback".
-        messages = [{"role": "system", "content": prompt_systemowy}]
-        # v17.9 (Obszar 2): ostatnia tura jako role=assistant = jej surowy JSON.
-        # (a) ciągłość — model „kontynuuje własną wypowiedź"; (b) żywy wzorzec
-        # poprawnej struktury (spójny z response_format=json_object) — potrafi
-        # ściąć retry. Puste = tura 1 / świeży bufor po streszczeniu → pomijamy.
-        if snapshot.ostatni_surowy_json and snapshot.ostatni_surowy_json.strip():
-            messages.append({"role": "assistant", "content": snapshot.ostatni_surowy_json})
-        messages.append({"role": "user", "content": user_payload})
+    proby_struktury = 0
+    while True:
+        # Self-correction: błąd poprzedniej walidacji dopinamy jako wiadomość
+        # `user` (Anthropic nie przyjmuje dowolnych `system` w `messages`; kolejne
+        # `user` API skleja w jedną turę). Wzorzec 1:1 z `rezyser_ai.generuj_burze`.
         if ostatni_blad is not None:
             messages.append({
-                "role": "system",
+                "role": "user",
                 "content": (
                     f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
-                    f"Regenerate the response STRICTLY conforming to the JSON schema "
-                    f"defined in the system prompt. Every required field MUST be present "
-                    f"and MUST have the correct type. Return ONLY a single valid JSON "
-                    f"object — no prose, no markdown code fences, no commentary."
+                    "Regenerate the response STRICTLY conforming to the JSON schema "
+                    "defined in the system prompt. Every required field MUST be present "
+                    "and MUST have the correct type. Return ONLY a single valid JSON "
+                    "object — no prose, no markdown code fences, no commentary."
                 ),
             })
 
-        resp = klient.chat.completions.create(
-            model=efektywny_model,
-            messages=messages,
-            temperature=temperatura,
-            max_tokens=MAX_TOKENS_OUT,
-            timeout=TIMEOUT_S,
-            response_format={"type": "json_object"},
+        surowa, stop_reason = _wywolaj_claude(
+            klient, efektywny_model, prompt_systemowy, messages,
+            max_tokens=MAX_TOKENS_OUT, temperature=temperatura, timeout=TIMEOUT_S,
         )
+        ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
-        finish = getattr(resp.choices[0], "finish_reason", None)
-        if finish == "length":
+        if stop_reason == "max_tokens":
             raise BladDlugosciOdpowiedzi(
                 f"The model hit its max_tokens={MAX_TOKENS_OUT} limit — the response "
                 f"was cut off before the JSON could be closed. Shorten the context "
                 f"or raise MAX_TOKENS_OUT."
             )
 
-        surowa = resp.choices[0].message.content or ""
-
         # v17.11.1: odmowa LLM ma pierwszeństwo PRZED parsowaniem JSON (wzorzec
-        # 1:1 z `rezyser_ai.generuj_burze/skrypt`). Przy `response_format=
-        # json_object` model nie zwróci gołego `[ODRZUCENIE_AI]`, ale owinie go
-        # w JSON — substringowy `wykryto_odrzucenie` łapie tag tak czy inaczej.
-        # Tag = legalny wynik, NIE błąd retry; zwracamy pustą turę z flagą.
+        # 1:1 z `rezyser_ai.generuj_burze/skrypt`). BEZ `output_config` model może
+        # zwrócić goły `[ODRZUCENIE_AI]` — substringowy `wykryto_odrzucenie` łapie
+        # tag tak czy inaczej. Tag = legalny wynik, NIE błąd retry; zwracamy pustą
+        # turę z flagą.
         if wykryto_odrzucenie(surowa):
             return WynikTury(
                 narracja="", wybory=[], postacie_aktywne=[],
@@ -675,11 +729,18 @@ def generuj_ture(
         try:
             dane = json.loads(surowa)
             jsonschema.validate(instance=dane, schema=SCHEMA_TURA)
-        except json.JSONDecodeError as exc:
-            ostatni_blad = f"JSONDecodeError: {exc.msg}"
-            continue
-        except jsonschema.ValidationError as exc:
-            ostatni_blad = f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+        except (json.JSONDecodeError, jsonschema.ValidationError) as exc:
+            proby_struktury += 1
+            if proby_struktury > MAX_RETRIES:
+                raise BladStrukturyJSON(
+                    f"The AI returned a malformed JSON structure {MAX_RETRIES + 1} "
+                    f"times in a row. Last error: {exc}"
+                ) from exc
+            ostatni_blad = (
+                f"JSONDecodeError: {exc.msg}"
+                if isinstance(exc, json.JSONDecodeError)
+                else f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+            )
             continue
 
         # Sukces — żaden błąd schemy.
@@ -691,11 +752,6 @@ def generuj_ture(
             meta=dane["meta"],
             surowy_json=surowa,
         )
-
-    raise BladStrukturyJSON(
-        f"The AI returned a malformed JSON structure {MAX_RETRIES + 1} times in a "
-        f"row. Last error: {ostatni_blad}"
-    )
 
 
 # =============================================================================
@@ -716,7 +772,7 @@ def wygeneruj_wizualizacje(
     """
     jezyk = snapshot.jezyk_projektu or "pl"
     przepis = _zaladuj_przepis(jezyk, "tryb_burza")
-    efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+    efektywny_model = model or przepis.get("model", MODEL_NARRACJA)
     # v15.1+: zasady świata gracza trafiają też do prompt-systemowy
     # wizualizacji (fonetyczna tożsamość musi być respektowana także w
     # multisensorycznych opisach).
@@ -733,17 +789,14 @@ def wygeneruj_wizualizacje(
         "The game state is below. Generate a multisensory scene description.",
     )
     user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
-    resp = klient.chat.completions.create(
-        model=efektywny_model,
-        messages=[
-            {"role": "system", "content": prompt_systemowy},
-            {"role": "user",   "content": user_msg},
-        ],
-        temperature=przepis.get("temperatura", TEMPERATURE_VIS),
+    tekst, _stop = _wywolaj_claude(
+        klient, efektywny_model, prompt_systemowy,
+        [{"role": "user", "content": user_msg}],
         max_tokens=przepis.get("max_tokens", 1000),
+        temperature=przepis.get("temperatura", TEMPERATURE_VIS),
         timeout=przepis.get("timeout_s", 60.0),
     )
-    return resp.choices[0].message.content or ""
+    return tekst
 
 
 # =============================================================================
@@ -817,7 +870,7 @@ def streszczaj_kontekst(
     """
     jezyk = snapshot.jezyk_projektu or "pl"
     przepis = _zaladuj_przepis(jezyk, "streszczenie")
-    efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+    efektywny_model = model or przepis.get("model", MODEL_NARRACJA)
 
     payload = {
         "ostatnie_tury":    snapshot.ostatnie_tury,
@@ -830,17 +883,14 @@ def streszczaj_kontekst(
         "The list of turns to summarize is below.",
     )
     user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
-    resp = klient.chat.completions.create(
-        model=efektywny_model,
-        messages=[
-            {"role": "system", "content": przepis["prompt_systemowy"]},
-            {"role": "user",   "content": user_msg},
-        ],
-        temperature=przepis.get("temperatura", 0.3),
+    tekst, _stop = _wywolaj_claude(
+        klient, efektywny_model, przepis["prompt_systemowy"],
+        [{"role": "user", "content": user_msg}],
         max_tokens=przepis.get("max_tokens", 800),
+        temperature=przepis.get("temperatura", 0.3),
         timeout=przepis.get("timeout_s", 60.0),
     )
-    return (resp.choices[0].message.content or "").strip()
+    return tekst.strip()
 
 
 # =============================================================================
@@ -863,7 +913,7 @@ def generuj_cinematic_warning(
     """
     jezyk = snapshot.jezyk_projektu or "pl"
     przepis = _zaladuj_przepis(jezyk, "cinematic_warning")
-    efektywny_model = model or przepis.get("model", MODEL_DOMYSLNY)
+    efektywny_model = model or przepis.get("model", MODEL_NARRACJA)
 
     payload = {
         "tura_numer":       snapshot.numer_tury,
@@ -876,14 +926,11 @@ def generuj_cinematic_warning(
         "The game state is below. Generate the Cinematic Meta Warning.",
     )
     user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
-    resp = klient.chat.completions.create(
-        model=efektywny_model,
-        messages=[
-            {"role": "system", "content": przepis["prompt_systemowy"]},
-            {"role": "user",   "content": user_msg},
-        ],
-        temperature=przepis.get("temperatura", 0.85),
+    tekst, _stop = _wywolaj_claude(
+        klient, efektywny_model, przepis["prompt_systemowy"],
+        [{"role": "user", "content": user_msg}],
         max_tokens=przepis.get("max_tokens", 600),
+        temperature=przepis.get("temperatura", 0.85),
         timeout=przepis.get("timeout_s", 60.0),
     )
-    return (resp.choices[0].message.content or "").strip()
+    return tekst.strip()

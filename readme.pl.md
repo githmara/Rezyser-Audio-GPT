@@ -7,7 +7,7 @@
 
 Zestaw samowystarczalnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
 
-Wersja: **18.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **18.1** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Główne moduły
@@ -31,7 +31,7 @@ Interaktywne gry tekstowe prowadzone przez AI w roli silnika narracyjnego. W odr
 * **Tryb Wyborów:** każda tura kończy się 3-5 ponumerowanymi opcjami A-E. Najbardziej intuicyjny tryb dla niewidomych graczy — NVDA czyta opcje, klikasz Tab i Enter.
 * **Tryb Mniejsze Zło:** jak Wybory, ale każda opcja jest niekorzystna moralnie, fizycznie lub strategicznie. Od v15.2 dodatkowa „fiolka" — reusable ZERO-numerowana opcja desperackiego ratunku, której efekty są pseudolosowe (60% szkodliwe / 30% zaburzające percepcję / 10% rzadko-korzystne, rozkład wymuszany Pythonem, LLM nie ma jak wymyślić zbawiennego skutku).
 * **Tryb Swobodny:** dowolna akcja wolnym tekstem („spróbuję otworzyć drzwi"), silnik proponuje 1-3 sugestie ale nie wymusza wyboru.
-* **Model AI per tryb:** Wybory i Mniejsze Zło używają gpt-4o (lepsze rozumowanie moralne), Swobodny używa gpt-4o-mini (tańsza ekonomia improwizacji).
+* **Jeden model AI dla wszystkich trybów:** od v18.1 wszystkie tryby Opowieści korzystają z Anthropic Claude Sonnet 4.6 — mocniejszy model rygorystycznie trzyma się zasad świata (kluczowe zwłaszcza w trybie Mniejsze Zło, gdzie każda opcja musi być realnie niekorzystna).
 
 
 ### 3. Poliglota (Ctrl+3, Tłumacz AI + Akcenty TTS)
@@ -66,10 +66,11 @@ Cały interfejs GUI, dokumentacja (`docs/manual.<iso>.txt`) oraz większość ko
 
 ## Architektura AI i użyte modele
 
-Aplikacja inteligentnie rozdziela zadania, optymalizując koszty i szybkość działania API OpenAI:
+Aplikacja inteligentnie rozdziela zadania między dwóch dostawców API, optymalizując jakość prozy, koszty i szybkość:
 
-* **gpt-4o:** Główny silnik napędzający aplikację. Odpowiada za ciężkie zadania generatywne: reżyserowanie skryptów, pisanie tradycyjnej prozy (Audiobook), tryby Wyborów i Mniejszego Zła w Opowieściach, generowanie streszczeń oraz zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego.
-* **gpt-4o-mini:** Szybki, lekki model pomocniczy. Używany w tle do mikrozadań wymagających dużej szybkości: iteracyjne nadawanie literackich tytułów wygenerowanym rozdziałom, ekstrakcja kodów ISO, tryb Swobodny w Opowieściach (tańsza ekonomia improwizacji wolnego tekstu).
+* **Anthropic Claude Sonnet 4.6:** Silnik całej narracji twórczej. Odpowiada za reżyserowanie skryptów, pisanie tradycyjnej prozy (Audiobook), Burzę Mózgów oraz WSZYSTKIE tryby Opowieści (Wybory, Mniejsze Zło, Swobodny) wraz z generowaniem streszczeń i przerywników Cinematic. Migracja narracji na Claude (Reżyser w v18.0, Opowieści w v18.1) wynikła z empirycznie potwierdzonej przewagi w trzymaniu się zasad świata i unikaniu klisz.
+* **gpt-4o (OpenAI):** Zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego (Poliglota). Migracja na Anthropic planowana w kolejnym wydaniu.
+* **gpt-4o-mini (OpenAI):** Szybki, lekki model pomocniczy do mikrozadań: iteracyjne nadawanie literackich tytułów wygenerowanym rozdziałom oraz ekstrakcja kodów ISO języka.
 
 
 ### Znane ograniczenia modeli (Anti-Closure)

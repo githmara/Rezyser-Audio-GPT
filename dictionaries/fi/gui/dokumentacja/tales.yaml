@@ -80,23 +80,23 @@ tresc:
 
     Huomio: maailman säännöt vaativat aktiivisen pelin. Jos klikkaat "{opowiesci.btn_zasady_swiata_label}" ilman ladattua/aloitettua peliä, saat viestin "{opowiesci.zasady_bez_gry_tytul}" — klikkaa ensin "{opowiesci.btn_nowa_gra_label}" tai lataa tallennettu peli.
   krok_5_slash_komendy: |
-    VAIHE 5: Slash-komennot — nopeat toiminnot ilman API:a
+    KROK 5: Slash-komennot — nopeat toiminnot ilman API:a
 
-    Toimintokentässä voit milloin tahansa kirjoittaa komennon, joka alkaa vinoviivalla `/`. Komennot ovat paikallisia (eivät vaadi OpenAI-kutsuja) ja toimivat pelitilasta riippumatta. Hyväksytään sekä suomen- että englanninkieliset versiot:
+    Toimintokentässä voit milloin tahansa kirjoittaa komennon, joka alkaa vinoviivalla `/`. Komennot ovat paikallisia (eivät vaadi API-kutsuja) ja toimivat pelitilasta riippumatta. Hyväksytään sekä suomen- että englanninkieliset versiot:
 
-    /tallenna, /save — pakottaa manuaalisen pelitilan tallennuksen. Automaattinen tallennus tapahtuu jokaisen vuoron jälkeen, joten tämä komento on lähinnä varmistusta varten ennen sovelluksen sulkemista.
+    /zapisz, /save — pakotettu manuaalinen pelitilan tallennus. Automaattinen tallennus tapahtuu jokaisen vuoron jälkeen, joten tämä komento on lähinnä varmistusta varten ennen sovelluksen sulkemista.
 
-    /lataa, /load — avaa pelin valintadialogin saatavilla olevien nimien listasta (v15.2.3:sta alkaen järjestelmätiedostodialogin sijaan — suora lista tallennetuista peleistä runtime/opowiesci/ -kansiosta, jotka tunnistetaan .game.json-tiedoston olemassaolon perusteella). NVDA lukee listan luonnollisesti, joten sokea pelaaja ei tarvitse navigoida järjestelmätiedostodialogissa. Kun peli on valittu, pelitila ja koko kerronta palautetaan — voit jatkaa siitä vuorosta, johon jäit. Identtinen toiminta on painikkeella "{opowiesci.btn_wczytaj_label}".
+    /wczytaj, /load — avaa pelin valintadialogin saatavilla olevien nimien listalla (v15.2.3:sta alkaen järjestelmän tiedostodialogin sijaan — suora lista tallennetuista peleistä kansiossa runtime/opowiesci/ tunnistettuna .game.json-tiedoston olemassaolon perusteella). NVDA lukee listan luonnollisesti, sokea pelaaja ei tarvitse navigoida järjestelmän tiedostodialogissa. Kun valitset pelin nimen, tila ja koko kerronta palautetaan — voit jatkaa siitä vuorosta, johon jäit. Sama toiminto on painikkeella "{opowiesci.btn_wczytaj_label}".
 
-    Kerrontamoottori valitsee AI-mallin automaattisesti tilasta riippuen: Valintojen ja Pienemmän pahan tilassa käytetään kalliimpaa gpt-4o:ta (noudattaa tiukasti maailman sääntöjä), Vapaassa tilassa käytetään nopeampaa ja edullisempaa gpt-4o-miniä (pelaaja ohjaa juonta, joten dramaattista ohjausta ei tarvita).
+    Kaikkien Tarinat-tilojen kerrontamoottori käyttää yhtä Anthropic Claude Sonnet 4.6 -mallia (v18.1:stä alkaen; aiemmin valittiin OpenAI-malli per tila). Vahvempi malli noudattaa tiukasti maailman sääntöjä — tämä on erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on pysyttävä todellisesti epäsuotuisana.
 
-    /visualisoi <kuvaus>, /visualize <kuvaus> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvällisemmin. Tulokset ilmestyvät erilliseen dialogiin, niitä EI lisätä kerrontaan eikä tallenneta äänikirjatiedostoon. Esimerkki: „/visualisoi miltä vartija näyttää" tai „/visualisoi kahvilan tuoksu".
+    /wizualizuj <opis>, /visualize <opis> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvemmin. Tulos ilmestyy erilliseen dialogiin, eikä sitä lisätä kerrontaan tai tallenneta äänikirjatiedostoon. Esimerkki: „/wizualizuj miten vartija näyttää" tai „/wizualizuj kahvilan tuoksu".
 
-    /paivita, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen jälkeen, kun olet muokannut sitä käsin (versiosta 15.5 alkaen). Kun avaat opowiesci/<nazwa>.txt editorissa ja esim. korjaat kirjoitusvirheen tai poistat ylimääräisen kappaleen, tämä komento synkronoi tuoreen lopun moottorin kontekstin kanssa — ilman kovaa nollausta ja pelin uudelleenlatausta. Jos aiempien vuorojen tiivistelmä on jo olemassa, se jää koskemattomaksi, joten seuraava vuoro ja seuraava tiivistelmä eivät synny vanhentuneista tiedoista. HUOMIO: pelitilaa (hahmot, sijainti, varusteet, juonisäikeet) tiedostosta .game.json EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro voi olla ristiriidassa niiden kanssa. (Vastaava painike „{opowiesci.btn_odswiez_z_dysku_label}" on tekninen vaihtoehto, oletuksena piilotettu — komento toimii aina.)
+    /odswiez, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen manuaalisen muokkauksen jälkeen (v15.5:stä alkaen). Kun avaat opowiesci/<nazwa>.txt editorissa ja esimerkiksi korjaat kirjoitusvirheen tai poistat ylimääräisen kappaleen, tämä komento synkronoi tuoreen lopun moottorin kontekstiin — ilman kovaa resetointia ja pelin uudelleenlatausta. (Vastaava painike „{opowiesci.btn_odswiez_z_dysku_label}" on tekninen vaihtoehto, oletuksena piilotettu — komento toimii aina.) Jos aiempien vuorojen yhteenveto on jo olemassa, se pysyy koskemattomana, joten seuraava vuoro ja yhteenveto eivät perustu vanhentuneisiin tietoihin. HUOMIO: pelitila (hahmot, sijainti, varusteet, juonet) .game.json-tiedostosta EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro saattaa erota niistä.
 
-    /apu, /help — näyttää valintaikkunan, jossa on luettelo kaikista saatavilla olevista komennoista. Dialogi on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee koko listan heti ilman navigointia.
+    /pomoc, /help — näyttää dialogi-ikkunan, jossa on luettelo kaikista saatavilla olevista komennoista. Dialogi on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee koko luettelon heti ilman navigointia.
 
-    /lopeta, /quit — sulkee sovelluksen (vuoron automaattisen tallennuksen jälkeen).
+    /koniec, /quit — sulkee sovelluksen (tallennettuaan vuoron automaattisesti).
   krok_6_pliki_gry: |
     VAIHE 6: Pelitiedostot — missä löydät tietosi
 
@@ -110,18 +110,18 @@ tresc:
 
     runtime/opowiesci/<nazwa>.mode — tilanumeron metadata (3=Vapaa, 4=Valinnat, 5=Pienempi paha). Versiosta 17.4 alkaen omassa Tarinat-kansiossaan. Aiemmin tiedosto sijaitsi kansiossa runtime/skrypty/ yhdessä Ohjaajan kanssa — kun pelillä ja Ohjaajan projektilla oli sama nimi, toisen moduulin tallennus saattoi hiljaa ylikirjoittaa toisen tilan; nyt nimiavaruudet on eriytetty, ja vanhat tiedostot siirretään kertaluonteisesti pelin latauksen yhteydessä.
   krok_7_pamiec_modelu: |
-    VAIHE 7: Mallimallin muistin osoitin — miksi vanhojen pelien vuorot eivät vaadi sinulta manuaalista työtä
+    KROK 7: Mallimuistin ilmaisin — miksi vanhojen pelien vuorot eivät vaadi manuaalista työtäsi
 
-    Tilavalinnan RadioBoxin alapuolella on mallimallin muistin osoitin — edistymispalkki (wx.Gauge) tilan kuvauksella vieressä. Osoitin näyttää kertomusmoottorin kontekstin ikkunan täyttöprosentin (gpt-4o-mini:llä on 128 000 tokenin puskuri).
+    Tilatilan RadioBoxin alapuolella löydät mallimuistin ilmaisimen — edistymispalkin (wx.Gauge) ja tilan kuvauksen vieressä. Ilmaisin näyttää narratiivimoottorin kontekstin ikkunan täyttöprosentin (puskuri laskettuna 128 000 tokeniin asti).
 
     Neljä täyttötasoa:
 
     🟢 puhdas (0%) — peli on vasta alkanut, ei tallennettuja vuoroja.
     🟢 OK (1-69%) — kaikki on kunnossa, voit jatkaa ilman rajoituksia.
-    ⚠️ varoitus (70-89%) — moottori luo automaattisesti yhteenvedon aiemmista vuoroista taustaketjussa. Näkyviin tulee viesti "Kontekstin automaattinen tiivistäminen käynnissä…" — älä lähetä seuraavaa vuoroa ennen kuin tiivistäminen on valmis. Onnistumisen jälkeen aiemmat vuorot tiivistetään yhdeksi kondensaatiksi, puskuri vapautuu, ja saat vahvistuksen "Mallimallin muisti palautettu" tiivistettyjen vuorojen määrällä.
+    ⚠️ varoitus (70-89%) — moottori luo automaattisesti yhteenvedon edellisistä vuoroista taustaketjussa. Näkyviin tulee viesti "Automaattinen kontekstin tiivistäminen käynnissä…" — älä lähetä seuraavaa vuoroa ennen kuin tiivistäminen on valmis. Onnistumisen jälkeen edelliset vuorot tiivistetään yhdeksi kondensaatiksi, puskuri vapautuu ja saat vahvistuksen "Mallimuisti palautettu" tiivistettyjen vuorojen määrällä.
     🚨 HÄLYTYS (90%+) — automaattinen tiivistäminen ei vapauttanut puskuria (harvinainen tapaus API-virheen jälkeen). Seuraavan vuoron lähettäminen on estetty. Pakota pelin lopetus komennolla /koniec, lataa se sitten uudelleen — moottori lataa tilan game.json-tiedostosta ilman viimeisten vuorojen historiaa, puskuri on tuore.
 
-    Käytännössä automaattinen vähennysmekanismi on näkymätön — pelaaja ei huomaa, että mitään tapahtuu, koska taustaketju ratkaisee ongelman ennen kuin se huomataan. On tärkeää vain, ettet lähetä seuraavaa vuoroa automaattisen tiivistämisen aikana (painike "{opowiesci.btn_wyslij_label}" on silloin harmaana).
+    Käytännössä automaattinen vähennysmekanismi on näkymätön — pelaaja ei huomaa mitään tapahtuvan, koska taustaketju ratkaisee ongelman ennen sen havaitsemista. On vain tärkeää, ettet lähetä seuraavaa vuoroa automaattisen tiivistämisen aikana (painike "{opowiesci.btn_wyslij_label}" on silloin harmaana).
   krok_8_cinematic_warning: |
     VAIHE 8: Cinematic Meta Warning — dramaattinen keskeytys 150. kierroksen jälkeen
 
@@ -151,17 +151,17 @@ tresc:
   najczestsze_problemy: |
     Yleiset ongelmat
 
-    Ongelma: Kun napsautan "{opowiesci.btn_nowa_gra_label}", näkyviin tulee viesti "API-avainta ei löydy".
-    Syy ja ratkaisu: Sovelluksen pääkansiossa oleva golden_key.env-tiedosto ei sisällä oikeaa OpenAI-avainta. Palaa aloitusnäyttöön (Home-painike), napsauta "{home.btn_generate}" ja seuraa ohjeita (VAIHE 2 pääoppaassa).
+    Ongelma: Kun napsautan "{opowiesci.btn_nowa_gra_label}", näkyviin tulee viesti "API-avainta ei ole".
+    Syy ja ratkaisu: Sovelluksen pääkansiossa oleva golden_key.env-tiedosto ei sisällä oikeaa Anthropic-avainta (se tukee Tarina-tilaa). Palaa aloitusnäyttöön (Home-painike), napsauta "{home.btn_generate}" ja noudata ohjeita (päämanuaalin VAIHE 2).
 
-    Ongelma: Yritän lähettää uuden kierroksen, mutta "{opowiesci.btn_wyslij_label}"-painike on harmaana.
-    Syy ja ratkaisu: Kontekstin automaattinen tiivistäminen tai Cinematic Warning -varoituksen luominen on käynnissä taustalla. Muistin tila näyttää "Kontekstin automaattinen tiivistäminen käynnissä…". Odota muutama sekunti — painike vapautuu automaattisesti onnistumisen jälkeen.
+    Ongelma: Yritän lähettää seuraavan vuoron, mutta "{opowiesci.btn_wyslij_label}" -painike on harmaana.
+    Syy ja ratkaisu: Kontekstin automaattinen tiivistäminen tai Cinematic Warning -varoituksen luominen taustaketjussa on käynnissä. Muistin tila näyttää "Kontekstin automaattinen tiivistäminen käynnissä…". Odota muutama sekunti — painike avautuu automaattisesti onnistumisen jälkeen.
 
-    Ongelma: Viesti "Mallin muisti ylikuormitettu" estää pelin.
-    Syy ja ratkaisu: Automaattinen tiivistäminen ei vapauttanut puskuria (esim. OpenAI:n nopeusrajoitus). Lopeta peli komennolla /loppu tai sulje sovellus, sitten lataa se uudelleen — moottori lataa vain tilan game.json-tiedostosta ilman viime kierrosten historiaa.
+    Ongelma: Viesti "Mallin muisti on ylikuormitettu" estää pelin.
+    Syy ja ratkaisu: Automaattinen tiivistäminen ei vapauttanut puskuria (esim. Anthropic API:n nopeusrajoitus). Lopeta peli komennolla /koniec tai sulje sovellus, sitten lataa se uudelleen — moottori lataa vain tilan game.json-tiedostosta ilman viimeisten vuorojen historiaa.
 
     Ongelma: Valintatilassa moottori ei luonut painikkeita, vaikka odotin niitä.
-    Syy ja ratkaisu: Mallin hallusinaatio — huolimatta 4 LLM-tilasta, se palautti tyhjän valintataulukon. Sovellus piilottaa silloin tietoisesti valinta-alueen (sen sijaan, että näyttäisi tyhjän paikan) ja sallii jatkamisen vapaalla tekstillä. Seuraava kierros luultavasti luo valinnat oikein.
+    Syy ja ratkaisu: Mallin hallusinaatio — vaikka tila on 4 LLM palautti tyhjän valintataulukon. Sovellus piilottaa tietoisesti valinta-alueen (sen sijaan, että näyttäisi tyhjän paikkamerkin) ja sallii jatkamisen vapaalla tekstillä. Seuraava vuoro todennäköisesti luo valinnat oikein.
 
-    Ongelma: .game.json ja .story.jsonl tiedostoja ei näy työpöydällä.
-    Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on järjestelmäkansio tavallisille käyttäjille, eikä se ole näkyvissä tiedostoselaimessa. Kertomustiedosto (.txt) tallennetaan opowiesci/-kansioon — löydät sen sieltä.
+    Ongelma: .game.json- ja .story.jsonl-tiedostot eivät näy työpöydällä.
+    Syy ja ratkaisu: Tämä on tarkoituksellista — runtime/ on tavallisille käyttäjille järjestelmäkansio, joka ei ole näkyvissä tiedostonhallinnassa. Kertomustiedosto (.txt) menee opowiesci/ -kansioon — löydät sen sieltä.

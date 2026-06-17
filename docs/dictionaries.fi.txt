@@ -171,30 +171,32 @@ tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla
 käynnistyksellä sinun version. Ei ohjelmointia.
 
 
-Mikä on "Tarina-tila"?
------------------------
+Mikä on "Tarinoiden tila"?
+----------------------------
 
-Kansio "opowiesci/" sisältää 8 tiedostoja, jotka kuvaavat sovelluksen toisen päätilan — interaktiiviset tekstipelit, joissa AI toimii kertojana. Toisin kuin Ohjaaja-tilassa (jossa luot VALMIIN äänikirjan TTS-toistoa varten), Tarina-tila on vuoropohjainen keskustelu mallin kanssa, joka ohjaa sinua dynaamisen juonen läpi:
+Kansio "opowiesci/" sisältää 8 tiedostoja, jotka kuvaavat sovelluksen toista päätilaa — interaktiivisia tekstipelejä, joissa AI toimii kertojamoottorina. Toisin kuin Ohjaajan tilassa (jossa luot VALMIIN äänikirjan TTS-toistoa varten), Tarinoiden tila on vuoropohjainen keskustelu mallin kanssa, joka ohjaa sinua dynaamisen juonen läpi:
 
 - tryb_wyborow.yaml      — Valinnat (3-5 numeroitua vaihtoehtoa A-E jokaisen
-                           vuoron lopussa, intuitiivisin tila näkövammaisille pelaajille)
-- tryb_mniejsze_zlo.yaml — Pienempi paha (kuten Valinnat, mutta jokainen vaihtoehto
-                           on epäsuotuisa; v15.2 alkaen uudelleenkäytettävä pullo
-                           nolla-numerointina epätoivoisena pelastuksena)
-- tryb_swobodny.yaml     — Vapaa (mikä tahansa toiminta vapaalla tekstillä, moottori
-                           ehdottaa 1-3 vaihtoehtoa mutta ei pakota valintaa)
-- tryb_burza.yaml        — Ideamyrsky (sisäinen lähettäjä, joka generoi
+                           vuoron lopussa, intuitiivisin tila näkövammaisille
+                           pelaajille)
+- tryb_mniejsze_zlo.yaml — Pienempi paha (kuten Valinnat, mutta jokainen
+                           vaihtoehto on epäsuotuisa; v15.2 alkaen uudelleenkäytettävä
+                           pullo nolla-numerona epätoivoisena pelastuksena)
+- tryb_swobodny.yaml     — Vapaa (mikä tahansa toiminta vapaalla tekstillä,
+                           moottori ehdottaa 1-3 vaihtoehtoa, mutta ei pakota
+                           valintaa)
+- tryb_burza.yaml        — Ideamyrsky (sisäinen jakelu, joka generoi
                            kohtauksen kehitysehdotuksia kertojamoottorille)
-- baza.yaml              — yhteiset perussäännöt (vuoron pituus, tiivistysten
-                           kiellot, anti-closure-direktiivi)
-- zaczatki.yaml          — seikkailun aloitukset (3 maailman aloitusasetusta
-                           valittavissa uudessa pelissä)
-- streszczenie.yaml      — pitkien pelien tiivistelijä (tarinan tiivistäminen
-                           mallin konteksti-ikkunaa varten)
+- baza.yaml              — yhteiset perussäännöt (vuoron pituus, yhteenvetojen
+                           kiellot, anti-closure direktiivi)
+- zaczatki.yaml          — seikkailun aloitukset (3 alkuasetelmaa maailman
+                           valintaan uuden pelin alussa)
+- streszczenie.yaml      — pitkien pelien tiivistelmägeneraattori (tarinan
+                           tiivistys mallin konteksti-ikkunaa varten)
 - cinematic_warning.yaml — varoitukset väkivaltaisista/dramaattisista
                            kohtauksista (yhteensopivuus pelaajan mieltymysten kanssa)
 
-Kuten Ohjaaja-tilassa, jokainen tiedosto sisältää "järjestelmäkehotteen" muokattavaksi. Voit hienosäätää kertojan tyyliä (esim. vähemmän kukkainen), muuttaa vuoron pituutta, lisätä omia juoniohjeita. V15.2 alkaen AI-malli valitaan automaattisesti per tila: Valinnat ja Pienempi paha käyttävät gpt-4o:ta (parempi moraalinen päättely, tärkeä seuraamuksellisessa tilassa), Vapaa käyttää gpt-4o-miniä (edullisempi vapaatekstimprovisaatio).
+Kuten Ohjaajan tilassa, jokainen tiedosto sisältää "järjestelmäkehotteen" muokattavaksi. Voit hienosäätää kertojan tyyliä (esim. vähemmän kukkainen), muuttaa vuoron pituutta tai lisätä omia juoniohjeita. V18.1 alkaen kaikki Tarinoiden tilat käyttävät yhtä Anthropic Claude Sonnet 4.6 -mallia — vahvempi malli noudattaa tiukasti maailman sääntöjä (kriittistä Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on oltava oikeasti epäsuotuisa).
 
 
 Kuinka aloittaa leikki — kolme vaikeustasoa

@@ -11,7 +11,7 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- OpenAI-stillingar (erfast frá baza.yaml ef ekki skilgreint hér) ---
-model: gpt-4o-mini
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # --- Viðauki við prompt_systemowy úr baza.yaml ---

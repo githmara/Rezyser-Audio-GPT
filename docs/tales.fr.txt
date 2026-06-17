@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (18.0 – Version de Lancement)
+Reżyser Audio GPT — Module Histoires Interactives (18.1 – Version de Lancement)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
@@ -71,19 +71,19 @@ Remarque : les règles du monde nécessitent un jeu actif. Si vous cliquez sur "
 
 ÉTAPE 5 : Commandes Slash — actions rapides sans API
 
-Dans le champ d'action, vous pouvez à tout moment entrer une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne consomment pas d'appels à OpenAI) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont acceptées :
+Dans le champ d'action, vous pouvez à tout moment entrer une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne nécessitent aucun appel à l'API) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont acceptées :
 
-/zapisz, /save — forcer l'enregistrement manuel de l'état du jeu. L'enregistrement automatique se fait après chaque tour, donc cette commande est principalement pour s'assurer avant de fermer l'application.
+/zapisz, /save — force l'enregistrement manuel de l'état du jeu. L'enregistrement automatique se fait après chaque tour, donc cette commande est principalement pour s'assurer avant de fermer l'application.
 
-/wczytaj, /load — ouvre une boîte de dialogue pour choisir un jeu dans la liste des noms disponibles (à partir de la v15.2.3, au lieu de la boîte de dialogue de fichiers système — une liste directe des jeux enregistrés dans le dossier runtime/opowiesci/ détectés par la présence du fichier .game.json). NVDA lit la liste naturellement, le joueur aveugle n'a pas besoin de naviguer dans la boîte de dialogue de fichiers système. Après avoir choisi, le nom du jeu, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous êtes arrêté. Le comportement est identique au bouton "Charger".
+/wczytaj, /load — ouvre une boîte de dialogue de sélection de jeu avec une liste de noms disponibles (à partir de la v15.2.3, au lieu de la boîte de dialogue de fichiers système — une liste directe des jeux enregistrés dans le dossier runtime/opowiesci/ détectés par la présence du fichier .game.json). NVDA lit la liste naturellement, le joueur non-voyant n'a pas besoin de naviguer dans la boîte de dialogue de fichiers système. Après avoir choisi le nom du jeu, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous êtes arrêté. Le bouton "Charger" a le même comportement.
 
-Le moteur narratif choisit automatiquement le modèle AI en fonction du mode : pour le mode Choix et Moindre Mal, il utilise le gpt-4o plus coûteux (il suit strictement les règles du monde), pour le mode Libre — le gpt-4o-mini plus rapide et moins cher (le joueur contrôle l'intrigue, donc cela ne nécessite pas de mise en scène dramatique).
+Le moteur narratif de tous les modes Opowieści utilise un seul modèle Anthropic Claude Sonnet 4.6 (à partir de la v18.1 ; auparavant, un modèle OpenAI était sélectionné par mode). Un modèle plus puissant respecte rigoureusement les règles du monde — c'est particulièrement important dans le mode Moindre Mal, où chaque option doit rester réellement défavorable.
 
-/wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne change pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj à quoi ressemble le garde » ou « /wizualizuj l'odeur du café ».
+/wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne modifie pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj jak wygląda strażnik » ou « /wizualizuj zapach kawiarni ».
 
-/odswiez, /refresh — actualise la mémoire interne à partir du fichier de narration après son édition manuelle (depuis la v15.5). Lorsque vous ouvrez opowiesci/<nazwa>.txt dans l'éditeur et que, par exemple, vous corrigez une faute de frappe ou supprimez un paragraphe superflu, cette commande synchronise la fin fraîche avec le contexte du moteur — sans réinitialisation complète ni rechargement du jeu. S'il existe déjà un résumé des tours précédents, celui-ci reste intact, de sorte que le tour suivant et le résumé suivant ne se construiront pas sur des données obsolètes. ATTENTION : l'état du jeu (personnages, localisation, équipement, intrigues) du fichier .game.json N'EST PAS mis à jour — si votre édition a changé des faits du monde, le tour suivant peut entrer en décalage avec eux. (Le bouton équivalent « Actualiser depuis le disque » est une option technique, masquée par défaut — la commande fonctionne toujours.)
+/odswiez, /refresh — rafraîchit la mémoire interne à partir du fichier de narration après son édition manuelle (à partir de la v15.5). Lorsque vous ouvrez opowiesci/<nazwa>.txt dans un éditeur et que vous corrigez par exemple une faute de frappe ou que vous coupez un paragraphe superflu, cette commande synchronise la nouvelle fin avec le contexte du moteur — sans réinitialisation complète et rechargement du jeu. (Le bouton équivalent « Actualiser depuis le disque » est une option technique, cachée par défaut — la commande fonctionne toujours.) Si un résumé des tours précédents existe déjà, il reste intact, donc le tour suivant et le résumé suivant ne seront pas basés sur des données obsolètes. ATTENTION : l'état du jeu (personnages, emplacement, inventaire, intrigues) du fichier .game.json N'est PAS mis à jour — si l'édition a modifié les faits du monde, le tour suivant peut ne pas correspondre.
 
-/pomoc, /help — affiche une boîte de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
+/pomoc, /help — affiche une fenêtre de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
 
 /koniec, /quit — ferme l'application (après l'enregistrement automatique du tour en cours).
 
@@ -103,16 +103,16 @@ runtime/opowiesci/<nazwa>.mode — métadonnées du numéro de mode (3=Libre, 4=
 
 ÉTAPE 7 : Indicateur de mémoire du modèle — pourquoi les tours dans les anciens jeux ne nécessitent pas votre intervention manuelle
 
-Sous le RadioBox du mode, vous trouverez l'indicateur de mémoire du modèle — une barre de progression (wx.Gauge) avec une description du statut à côté. L'indicateur montre le pourcentage de remplissage de la fenêtre contextuelle du moteur narratif (gpt-4o-mini a un tampon de 128 000 tokens).
+Sous la RadioBox du mode, vous trouverez l'indicateur de mémoire du modèle — une barre de progression (wx.Gauge) avec une description du statut à côté. L'indicateur montre le pourcentage de remplissage de la fenêtre contextuelle du moteur narratif (tampon compté jusqu'à 128 000 tokens).
 
 Quatre niveaux de remplissage :
 
-🟢 propre (0 %) — le jeu vient de commencer, aucun tour enregistré.
-🟢 OK (1-69 %) — tout est normal, vous pouvez continuer sans restrictions.
-⚠️ avertissement (70-89 %) — le moteur génère automatiquement un résumé des tours précédents dans le fil de fond. Un message « Auto-résumé du contexte en cours... » apparaîtra — n'envoyez pas le tour suivant tant que le résumé n'est pas terminé. Après le succès, les tours précédents seront condensés en un seul, le tampon sera libéré, et vous recevrez une confirmation « Mémoire du modèle récupérée » avec le nombre de tours condensés.
-🚨 ALARME (90 %+ ) — l'auto-résumé n'a pas libéré le tampon (cas rare après une panne de l'API). L'envoi du tour suivant est bloqué. Forcez la fin du jeu avec /fin, puis rechargez-le — le moteur chargera l'état à partir de game.json sans l'historique des derniers tours, le tampon sera frais.
+🟢 vide (0%) — le jeu vient de commencer, aucun tour enregistré.
+🟢 OK (1-69%) — tout est normal, vous pouvez continuer sans restrictions.
+⚠️ avertissement (70-89%) — le moteur génère automatiquement un résumé des tours précédents dans le fil de fond. Un message « Résumé automatique du contexte en cours... » apparaîtra — n'envoyez pas de tour supplémentaire tant que le résumé n'est pas terminé. Après succès, les tours précédents seront condensés en un seul résumé, le tampon sera libéré, et vous recevrez une confirmation « Mémoire du modèle récupérée » avec le nombre de tours condensés.
+🚨 ALERTE (90%+) — le résumé automatique n'a pas libéré le tampon (cas rare après une panne de l'API). L'envoi d'un tour supplémentaire est bloqué. Forcez la fin du jeu avec /koniec, puis rechargez-le — le moteur chargera l'état à partir de game.json sans l'historique des derniers tours, le tampon sera frais.
 
-En pratique, le mécanisme d'autoréduction est invisible — le joueur ne ressent pas qu'il se passe quelque chose, car le fil de fond résout le problème avant qu'il ne soit remarqué. Il est seulement important de ne pas envoyer le tour suivant pendant l'auto-résumé (le bouton "Envoyer" est alors grisé).
+En pratique, le mécanisme d'autoréduction est invisible — le joueur ne sent pas que quelque chose se passe, car le fil de fond résout le problème avant qu'il ne soit remarqué. Il est seulement important de ne pas envoyer de tour supplémentaire pendant le résumé automatique (le bouton "Envoyer" est alors grisé).
 
 
 ÉTAPE 8 : Avertissement Cinématographique Méta — interlude dramatique après le 150e tour
@@ -145,17 +145,17 @@ ACCÉLÉRATEURS CLAVIER — tous les boutons ont un caractère `&` devant une de
 
 Problèmes fréquents
 
-Problème : Après avoir cliqué sur "Nouveau jeu", un message "Clé API manquante" apparaît.
-Cause et solution : Le fichier golden_key.env dans le dossier principal de l'application ne contient pas la clé OpenAI correcte. Revenez à l'écran d'accueil (bouton Accueil), cliquez sur "Générer le fichier golden_key.env et ouvrir l'éditeur de texte" et suivez les instructions (ÉTAPE 2 du manuel principal).
+Problème : Après avoir cliqué sur "Nouveau jeu", un message indiquant « Clé API manquante » apparaît.
+Cause et solution : Le fichier golden_key.env dans le dossier principal de l'application ne contient pas une clé Anthropic valide (qui alimente le mode Récits). Revenez à l'écran d'accueil (bouton Accueil), cliquez sur "Générer le fichier golden_key.env et ouvrir l'éditeur de texte" et suivez les instructions (ÉTAPE 2 du manuel principal).
 
 Problème : J'essaie d'envoyer un autre tour, mais le bouton "Envoyer" est grisé.
-Cause et solution : Un résumé automatique du contexte ou une génération d'avertissement cinématique est en cours dans le fil d'arrière-plan. Le statut de la mémoire affichera "Résumé automatique du contexte en cours...". Attendez quelques secondes — le bouton se déverrouillera automatiquement après le succès.
+Cause et solution : Un auto-résumé du contexte ou une génération d'Avertissement Cinématique est en cours dans le fil d'arrière-plan. Le statut de la mémoire indiquera « Auto-résumé du contexte en cours… ». Attendez quelques secondes — le bouton se déverrouillera automatiquement après le succès.
 
-Problème : Le message "Mémoire du modèle surchargée" bloque le jeu.
-Cause et solution : Le résumé automatique n'a pas libéré le tampon (par exemple, limite de taux OpenAI). Terminez le jeu avec la commande /fin ou fermez l'application, puis rechargez-la — le moteur chargera uniquement l'état à partir de game.json sans l'historique des derniers tours.
+Problème : Le message « Mémoire du modèle surchargée » bloque le jeu.
+Cause et solution : L'auto-résumé n'a pas libéré le tampon (par exemple, limite de taux de l'API Anthropic). Terminez le jeu avec la commande /fin ou fermez l'application, puis rechargez-la — le moteur chargera uniquement l'état à partir de game.json sans l'historique des derniers tours.
 
 Problème : En mode Choix, le moteur n'a pas généré de boutons, bien que je m'y attendais.
-Cause et solution : Hallucination du modèle — malgré le mode 4 LLM a renvoyé un tableau de choix vide. L'application masque alors consciemment la zone de choix (au lieu de montrer un espace réservé vide) et permet de continuer avec du texte libre. Le tour suivant générera probablement les choix correctement.
+Cause et solution : Hallucination du modèle — malgré le mode 4, le LLM a renvoyé un tableau de choix vide. L'application masque alors délibérément la zone de choix (au lieu de montrer un espace réservé vide) et permet de continuer avec du texte libre. Le tour suivant générera probablement les choix correctement.
 
 Problème : Les fichiers .game.json et .story.jsonl ne sont pas visibles sur le bureau.
-Cause et solution : C'est intentionnel — runtime/ est un dossier système pour les utilisateurs ordinaires, invisible depuis l'explorateur de fichiers. Le fichier de narration (.txt) va dans opowiesci/ — vous l'y trouverez.
+Cause et solution : C'est intentionnel — runtime/ est un dossier système pour les utilisateurs ordinaires, invisible depuis l'explorateur de fichiers. Le fichier de narration (.txt) est placé dans opowiesci/ — vous le trouverez là-bas.

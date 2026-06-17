@@ -431,6 +431,12 @@ Voice product names (Samantha, Mark, Markus, Hedda, Heidi, Gudrun, Milena, Irina
 Pavel, Yuri, Satu, Mikko, Thomas, Amelie, Julie, Stefan, Katja, Jorge, Monica, Helena,
 Alice, Luca, Elsa, Zira, Hazel, Ewa, Paulina) are product names — keep 1:1.
 
+The env-key placeholder TUTAJ_WKLEJ_SWOJ_KLUCZ is a literal token the app writes
+verbatim into golden_key.env (ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ /
+OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ), identical in every UI language. KEEP it 1:1 —
+do NOT translate it into a {nazwa_natywna} phrase for "paste your key here"; the reader
+must see the exact string that exists in the file.
+
 ### Frozen markers ⟦i⟧
 Every ⟦N⟧ marker is a frozen placeholder. Copy character-for-character; do not
 translate, do not renumber, do not insert new ones.\
@@ -489,6 +495,8 @@ application:
     (e.g. do NOT render "opowiesci/" with a {nazwa_natywna} word for "stories");
   - angle-bracket placeholders such as <nazwa>, <kod>, <name>: copy the brackets
     and the inner text character-for-character, do NOT translate <nazwa>;
+  - the env-key placeholder TUTAJ_WKLEJ_SWOJ_KLUCZ — copy it verbatim (the app writes
+    it literally into golden_key.env, identical in every language);
   - voice product names (Samantha, Heidi, Markus, ...);
   - the deliberately-Polish DIDACTIC cipher examples (Vowelizer/Reverser/
     Typoglycemia) — those you LOCALIZE per the rules above, you do NOT leave them
