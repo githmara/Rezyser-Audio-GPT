@@ -272,8 +272,9 @@ def wybierz_sufiks(
               ``<STRESZCZENIE>...</STRESZCZENIE>``);
             - pamięć ``>= PROG_OSTRZEZENIE`` → doklejamy ``"alarm"``
               (sam z siebie wymusza streszczenie, zanim zabraknie tokenów);
-            - w przeciwnym razie (pamięć jest pojemna) → ``"optymalizacja"``
-              (informuje AI, że NIE musi generować streszczenia).
+            - w przeciwnym razie (pamięć jest pojemna) → ``None``
+              (brak sufiksu; dawny „optymalizacja" zniesiony — był szumem,
+              instruował AI o czymś, czego i tak domyślnie nie robi).
 
         * **Tryby zapisu** (``zapis_do_pliku: true``, np. Skrypt):
             - gdy przepis ma zdefiniowane OBA sufiksy ``startowy``
@@ -285,7 +286,7 @@ def wybierz_sufiks(
     Sufiks jest brany tylko gdy RZECZYWIŚCIE istnieje w ``przepis.sufiksy``
     – lingwista może w YAML-u usunąć dany sufiks, co skutecznie wyłączy
     odpowiednie zachowanie silnika (np. wyłączyć alarm dla Burzy = zawsze
-    optymalizacja).
+    bez sufiksu).
     """
     slowa_s = przepis.slowa_wyzwalajace.get("streszczenie", [])
     user_lower = (user_text or "").lower()
@@ -301,8 +302,6 @@ def wybierz_sufiks(
         if udzial >= cr.PROG_OSTRZEZENIE:
             if "alarm" in przepis.sufiksy:
                 return "alarm"
-        elif "optymalizacja" in przepis.sufiksy:
-            return "optymalizacja"
         return None
 
     # --- Tryby zapisu (Skrypt / Audiobook) ---
@@ -318,26 +317,60 @@ def wybierz_sufiks(
 
 
 # =============================================================================
-# Budowa payloadu OpenAI
+# Budowa payloadu Anthropic (Claude) + wywołanie Messages API
 # =============================================================================
+
+# Maks. tokenów wyjścia trybów narracyjnych Claude (audiobook/skrypt/burza).
+# Ceiling, nie target — pod progiem non-streaming SDK (brak ryzyka HTTP-timeoutu).
+MAX_TOKENS_NARRACJA = 16000
+
+
+def _wywolaj_claude(
+    klient:   Any,
+    przepis:  pr.PrzepisRezysera,
+    system:   str,
+    messages: list[dict],
+    timeout:  float,
+) -> tuple[str, str | None]:
+    """Wywołuje Claude Messages API (proza, BEZ reasoningu) → (tekst, stop_reason).
+
+    ``thinking=disabled`` — tryby narracyjne to czysta proza/JSON, reasoning tylko
+    dodawałby latencję i koszt. ``temperature`` z przepisu (Sonnet 4.6 ją honoruje
+    jako jedyny parametr próbkowania — bez ``top_p``). Timeout per-wywołanie przez
+    ``with_options`` (SDK Anthropic nie przyjmuje ``timeout=`` na ``messages.create``).
+    Tekst sklejamy z bloków ``type="text"`` (Claude zwraca listę bloków treści).
+    """
+    response = klient.with_options(timeout=timeout).messages.create(
+        model=przepis.model,
+        system=system,
+        messages=messages,
+        max_tokens=MAX_TOKENS_NARRACJA,
+        temperature=przepis.temperatura,
+        thinking={"type": "disabled"},
+    )
+    tekst = "".join(
+        blok.text for blok in response.content
+        if getattr(blok, "type", None) == "text"
+    )
+    return tekst, getattr(response, "stop_reason", None)
+
 
 def buduj_payload(
     przepis: pr.PrzepisRezysera,
     snapshot: cr.SnapshotProjektu,
     user_text: str,
-) -> tuple[list[dict], str | None]:
-    """Buduje listę wiadomości ``chat.completions`` + zwraca użyty sufiks.
+) -> tuple[str, list[dict], str | None]:
+    """Buduje ``(system_prompt, messages, sufiks)`` dla Anthropic Messages API.
 
-    Kolejność wiadomości (istotna dla modelu):
-
-        1. ``role=system``  – pełny prompt systemowy
-           (baza + sufiks + klauzula odrzucenia).
-        2. ``role=assistant`` – streszczenie (gdy niepuste).
-        3. ``role=assistant`` – obecna fabuła (gdy niepusta).
-        4. ``role=user``    – instrukcja użytkownika + przypomnienie z YAML-a.
+    Anthropic rozdziela prompt systemowy (parametr ``system=``) od ``messages``
+    i wymaga, by PIERWSZA wiadomość miała ``role=user``. Kontekst poprzednich
+    wydarzeń (streszczenie + dotychczasowa fabuła) — w payloadzie OpenAI osobne
+    wiadomości ``role=assistant`` — składamy w JEDNĄ wiadomość ``user`` razem z
+    instrukcją. Kotwice (``[STRESZCZENIE...]``, ``[OBECNA FABUŁA]:``) zostają w
+    treści dosłownie, więc referencje z ``tryb_burza.yaml`` działają bez zmian.
 
     Returns:
-        Krotka ``(messages, nazwa_sufiksu)``. Druga wartość jest
+        Krotka ``(system_prompt, messages, nazwa_sufiksu)``. Trzecia wartość jest
         diagnostyczna i trafia do :class:`WynikGeneracji.uzyty_sufiks`.
     """
     sufiks_nazwa = wybierz_sufiks(przepis, snapshot, user_text)
@@ -348,34 +381,30 @@ def buduj_payload(
         sufiks_nazwa=sufiks_nazwa,
     )
 
-    messages: list[dict] = [{"role": "system", "content": system_prompt}]
-
-    # Wrappery kontekstu (tagi-kotwice) wyniesione z hard-kodu do `rezyser/baza.yaml`
-    # (v17.10). 1:1 we wszystkich językach — `tryb_burza.yaml` referuje [OBECNA FABUŁA]
-    # dosłownie, więc lokalizacja by je rozjechała; baza daje pojedyncze źródło + fallback.
+    # Wrappery kontekstu (tagi-kotwice) z `rezyser/baza.yaml` (v17.10). 1:1 we
+    # wszystkich językach — `tryb_burza.yaml` referuje [OBECNA FABUŁA] dosłownie,
+    # więc kotwice muszą zostać w treści. Składamy je w wiadomość `user` (Anthropic:
+    # pierwsza wiadomość MUSI być `user`, więc kontekstu nie podajemy jako `assistant`).
+    czesci: list[str] = []
     if snapshot.summary_text.strip():
         prefiks_streszczenia = pr.tekst_bazy(
             przepis.kod_jezyka, "wrapper_streszczenie",
             "[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
         )
-        messages.append({
-            "role": "assistant",
-            "content": f"{prefiks_streszczenia}\n{snapshot.summary_text}",
-        })
+        czesci.append(f"{prefiks_streszczenia}\n{snapshot.summary_text}")
 
     if snapshot.full_story.strip():
         prefiks_fabuly = pr.tekst_bazy(
             przepis.kod_jezyka, "wrapper_fabula", "[OBECNA FABUŁA]:",
         )
-        messages.append({
-            "role": "assistant",
-            "content": f"{prefiks_fabuly}\n{snapshot.full_story}",
-        })
+        czesci.append(f"{prefiks_fabuly}\n{snapshot.full_story}")
 
     przypom = pr.buduj_przypomnienie(przepis)
-    messages.append({"role": "user", "content": user_text + przypom})
+    czesci.append(user_text + przypom)
 
-    return messages, sufiks_nazwa
+    messages: list[dict] = [{"role": "user", "content": "\n\n".join(czesci)}]
+
+    return system_prompt, messages, sufiks_nazwa
 
 
 # =============================================================================
@@ -456,7 +485,7 @@ def generuj_burze(
     (default 2 → łącznie 3 wywołania).
 
     Args:
-        klient:    Klient OpenAI.
+        klient:    Klient Anthropic (Claude).
         przepis:   ``PrzepisRezysera`` z ``id="burza"``.
         snapshot:  Niezmienny snapshot stanu projektu.
         user_text: Instrukcja użytkownika.
@@ -469,9 +498,9 @@ def generuj_burze(
     Raises:
         RuntimeError: wyczerpane retry (halucynacja struktury) ALBO model
                       zwrócił finish_reason="length" (max_tokens hit).
-        Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) — propagowane.
+        Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) — propagowane.
     """
-    messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+    system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
@@ -484,7 +513,7 @@ def generuj_burze(
         # walidacji jako system message — model próbuje skorygować strukturę.
         if ostatni_blad is not None:
             messages.append({
-                "role": "system",
+                "role": "user",
                 "content": (
                     f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
                     "Regenerate the response STRICTLY conforming to the JSON schema "
@@ -494,24 +523,17 @@ def generuj_burze(
                 ),
             })
 
-        response = klient.chat.completions.create(
-            model=przepis.model,
-            messages=messages,
-            temperature=przepis.temperatura,
-            timeout=timeout,
-            response_format={"type": "json_object"},
+        surowy_text, stop_reason = _wywolaj_claude(
+            klient, przepis, system, messages, timeout,
         )
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
-        finish = getattr(response.choices[0], "finish_reason", None)
-        if finish == "length":
+        if stop_reason == "max_tokens":
             raise BladDlugosciOdpowiedzi(
                 "The model hit its max_tokens limit — the Brainstorm response was "
                 "cut off before the JSON could be closed. Shorten the context or "
                 "raise max_tokens."
             )
-
-        surowy_text = response.choices[0].message.content or ""
 
         # Detekcja odrzucenia PRZED walidacją JSON — bo klauzula odrzucenia
         # wymusza ZWROT samego tagu, NIE JSON-a. JSONDecodeError w tej linii
@@ -711,7 +733,7 @@ def generuj_skrypt(
     YAML (Etap E3), nie tego modułu.
 
     Args:
-        klient:    Klient OpenAI.
+        klient:    Klient Anthropic (Claude).
         przepis:   ``PrzepisRezysera`` z ``id="skrypt"`` (``zapis_do_pliku=True``).
         snapshot:  Niezmienny snapshot stanu projektu.
         user_text: Instrukcja użytkownika.
@@ -725,9 +747,9 @@ def generuj_skrypt(
     Raises:
         RuntimeError: wyczerpane retry (halucynacja struktury) ALBO
                       finish_reason="length" (ucięty JSON).
-        Wyjątki OpenAI (RateLimitError, APITimeoutError, ...) — propagowane.
+        Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) — propagowane.
     """
-    messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+    system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
@@ -741,7 +763,7 @@ def generuj_skrypt(
     while True:
         if ostatni_blad is not None:
             messages.append({
-                "role": "system",
+                "role": "user",
                 "content": (
                     f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
                     "Regenerate the response STRICTLY conforming to the JSON schema "
@@ -751,25 +773,18 @@ def generuj_skrypt(
                 ),
             })
 
-        response = klient.chat.completions.create(
-            model=przepis.model,
-            messages=messages,
-            temperature=przepis.temperatura,
-            timeout=timeout,
-            response_format={"type": "json_object"},
+        surowy_text, stop_reason = _wywolaj_claude(
+            klient, przepis, system, messages, timeout,
         )
         wywolan += 1
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
-        finish = getattr(response.choices[0], "finish_reason", None)
-        if finish == "length":
+        if stop_reason == "max_tokens":
             raise BladDlugosciOdpowiedzi(
                 "The model hit its max_tokens limit — the Script response was cut "
                 "off before the JSON could be closed. Shorten the context or raise "
                 "max_tokens."
             )
-
-        surowy_text = response.choices[0].message.content or ""
 
         # Detekcja odrzucenia PRZED walidacją JSON — klauzula odrzucenia wymusza
         # ZWROT samego tagu, NIE JSON-a (JSONDecodeError byłby tu legalnym
@@ -854,7 +869,7 @@ def generuj_fragment(
     """Wysyła zapytanie do OpenAI i zwraca przetworzoną odpowiedź.
 
     Args:
-        klient:     Klient OpenAI (``OpenAI(api_key=...)``).
+        klient:     Klient Anthropic (``anthropic.Anthropic(api_key=...)``).
         przepis:    Tryb pracy (Burza / Skrypt / Audiobook).
         snapshot:   Niezmienny snapshot stanu projektu.
         user_text:  Instrukcja użytkownika z pola „Instrukcje".
@@ -868,23 +883,19 @@ def generuj_fragment(
         ``.nowe_streszczenie`` decydując, co zrobić z odpowiedzią.
 
     Raises:
-        Wyjątki OpenAI (``RateLimitError``, ``APITimeoutError``,
+        Wyjątki Anthropic (``RateLimitError``, ``APITimeoutError``,
         ``APIError``) są propagowane – GUI pokazuje je w dialogu błędu.
     """
-    messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+    system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
 
     # v17.11.1: pojedyncze wywołanie owinięte w pętlę, żeby bramka językowa
     # mogła dać JEDEN dodatkowy strzał z instrukcją tłumaczenia (D2). Struktury
     # tu nie walidujemy (proza), więc jedyny powód powtórki to rozjazd języka.
     jezyk_skorygowano = False
     while True:
-        response = klient.chat.completions.create(
-            model=przepis.model,
-            messages=messages,
-            temperature=przepis.temperatura,
-            timeout=timeout,
+        tekst, _stop_reason = _wywolaj_claude(
+            klient, przepis, system, messages, timeout,
         )
-        tekst: str = response.choices[0].message.content or ""
 
         # 1) Detekcja odrzucenia — przed wszystkim innym. Tag infrastruktury
         # jest wymuszany przez KLAUZULA_ODRZUCENIA_DOMYSLNA niezależnie od
@@ -1207,10 +1218,13 @@ def _wykryty_inny_jezyk(tekst: str, oczekiwany_kod: str) -> str | None:
 
 
 def _komunikat_korekty_jezyka(jezyk_odpowiedzi: str, wykryty: str) -> dict[str, str]:
-    """System-message wymuszający przetłumaczenie WARTOŚCI na język treści
-    (po angielsku, spójnie z resztą self-correction w tym module — D2/„po en")."""
+    """User-message wymuszający przetłumaczenie WARTOŚCI na język treści
+    (po angielsku, spójnie z resztą self-correction w tym module — D2/„po en").
+
+    Rola ``user`` (nie ``system``): Anthropic nie przyjmuje dowolnych wiadomości
+    ``system`` w ``messages`` — kolejne ``user`` API skleja w jedną turę."""
     return {
-        "role": "system",
+        "role": "user",
         "content": (
             f"YOUR PREVIOUS OUTPUT WAS WRITTEN IN THE WRONG LANGUAGE "
             f"(detected ISO: '{wykryty}'). The target content language is "

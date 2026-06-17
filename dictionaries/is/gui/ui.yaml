@@ -214,6 +214,11 @@ home:
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
 # -----------------------------------------------------------------------------
+  heading_anthropic: Frásagnavél (Anthropic / Claude) — nauðsynleg
+  ant_err_struktura: "🚨 Villa í skráaruppbyggingu!\nVantar nauðsynlega breytu ANTHROPIC_API_KEY=.\nFrá útgáfu 18.0 keyrir frásagnavélin (hljóðbók, leiklestur, stormur) á Claude líkaninu og krefst sérstaks lykils.\nFjarlægðu skrána, búðu hana til aftur og límdu lykilinn varlega."
+  ant_err_format: "🚨 Grunsamlegt lykilsnið Anthropic!\nRéttur Anthropic lykill (Claude) byrjar alltaf á sk-ant- (t.d. sk-ant-api03-…).\nGakktu úr skugga um að þú hafir afritað lykilinn frá console.anthropic.com, ekki OpenAI lykil."
+  ant_err_zbyt_krotki: "⚠️ Anthropic lykillinn virðist vera of stuttur ({liczba_znakow} stafir fundnir, búist var við að minnsta kosti {minimum_znakow}).\nLíklega hefurðu aðeins afritað hluta lykilsins. Farðu aftur á console.anthropic.com og afritaðu hann í heild sinni."
+  ant_ok: "✅ Anthropic lykill (Claude) fannst og er rétt sniðinn.\nFrásagnavélin er tilbúin til notkunar."
 rezyser:
   panel_name: "Hljóðstjóri GPT spjald"
   heading: "🎬  Hljóðstjóri GPT – Blönduð Skapandi Stúdíó"

@@ -23,7 +23,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- OpenAI-Parameter ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # Wird in Prompts über den Platzhalter {jezyk_odpowiedzi} eingefügt.
@@ -94,11 +94,6 @@ sufiksy:
     [ERZWUNGENER ZUSAMMENFASSUNGSMODUS]: Die Nutzerin hat manuell um die Speicherung des Handlungsstands gebeten! Füge in der JSON-Antwort DEN SCHLÜSSEL `"streszczenie"` (auf gleicher Ebene wie `opcje`) mit einem Textwert hinzu, der ZWEI Pflichtelemente enthält:
     1. Eine prägnante Zusammenfassung der bisherigen Ereignisse.
     2. Einen Abschnitt [STIL UND TON]: eine einsätzige Notiz zur erzählerischen Atmosphäre.
-
-  optymalizacja: |
-
-
-    [OPTIMIERUNGSMODUS]: Das Gedächtnis ist geräumig. Erzeuge KEINEN `"streszczenie"`-Schlüssel im JSON. Gib nur ein Objekt mit dem Schlüssel `"opcje"` zurück.
 
   alarm: |
 

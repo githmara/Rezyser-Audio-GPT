@@ -22,7 +22,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- Parametry OpenAI ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # Wstawiany w promptach przez placeholder {jezyk_odpowiedzi}. Zmiana na
@@ -99,13 +99,6 @@ sufiksy:
     [TRYB WYMUSZONEGO STRESZCZENIA]: Użytkownik ręcznie zażądał zapisania stanu fabuły! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą DWA obowiązkowe elementy:
     1. Zwięzłe podsumowanie dotychczasowych wydarzeń.
     2. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
-
-  # Gdy pamięć modelu jest w bezpiecznym buforze (< prog_ostrzegawczy).
-  # AI ma NIE generować streszczenia, by nie marnować tokenów.
-  optymalizacja: |
-
-
-    [TRYB OPTYMALIZACJI]: Pamięć jest pojemna. NIE GENERUJ klucza `"streszczenie"` w JSON-ie. Zwróć wyłącznie obiekt z kluczem `"opcje"`.
 
   # Gdy pamięć osiągnęła próg ostrzegawczy (>= prog_ostrzegawczy). AI samo
   # wymusza streszczenie, nawet jeśli użytkownik o to nie prosił.

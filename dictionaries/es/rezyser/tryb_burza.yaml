@@ -25,7 +25,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- Parámetros de OpenAI ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # Se inserta en los prompts mediante el marcador {jezyk_odpowiedzi}.
@@ -96,11 +96,6 @@ sufiksy:
     [MODO RESUMEN FORZADO]: ¡El usuario ha pedido manualmente guardar el estado de la trama! En la respuesta JSON AÑADE LA CLAVE `"streszczenie"` (al mismo nivel que `opcje`) con un valor de texto que contenga DOS elementos obligatorios:
     1. Un resumen conciso de los acontecimientos hasta ahora.
     2. Una sección [ESTILO Y TONO]: una nota de una frase sobre el clima narrativo.
-
-  optymalizacja: |
-
-
-    [MODO OPTIMIZACIÓN]: La memoria es amplia. NO generes la clave `"streszczenie"` en el JSON. Devuelve solo un objeto con la clave `"opcje"`.
 
   alarm: |
 

@@ -292,6 +292,7 @@ class HomePanel(wx.Panel):
         self.SetName(t("home.panel_name"))
         self._build_ui()
         self._run_system_check()
+        self._run_anthropic_check()
         self._run_elevenlabs_check()
 
     # ------------------------------------------------------------------
@@ -348,6 +349,28 @@ class HomePanel(wx.Panel):
         self._action_btn.Hide()
         self.Bind(wx.EVT_BUTTON, self._on_action_btn, self._action_btn)
         main_sizer.Add(self._action_btn, flag=wx.LEFT | wx.BOTTOM, border=16)
+
+        # --- Sekcja: Silnik narracji (Anthropic / Claude) — WYMAGANY (v18.0) ---
+        # Klucz ANTHROPIC_API_KEY jest wymagany (narracja Reżysera na Claude);
+        # brak = błąd. Status liczony niezależnie od System Check OpenAI.
+        main_sizer.Add(
+            wx.StaticLine(self), flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=8
+        )
+
+        heading_ant = wx.StaticText(self, label=t("home.heading_anthropic"))
+        font_ant = heading_ant.GetFont()
+        font_ant.SetPointSize(13)
+        font_ant.MakeBold()
+        heading_ant.SetFont(font_ant)
+        main_sizer.Add(heading_ant, flag=wx.TOP | wx.LEFT | wx.RIGHT, border=16)
+
+        self._ant_status_lbl = wx.TextCtrl(
+            self,
+            value=t("home.checking"),
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.NO_BORDER,
+        )
+        self._ant_status_lbl.SetBackgroundColour(self.GetBackgroundColour())
+        main_sizer.Add(self._ant_status_lbl, flag=wx.ALL | wx.EXPAND, border=16)
 
         # --- Sekcja: Postprodukcja audio (ElevenLabs) — opcjonalna (v16.0) ---
         # Klucz ELEVENLABS_API_KEY jest opcjonalny; brak = stan informacyjny,
@@ -449,55 +472,88 @@ class HomePanel(wx.Panel):
             )
             return
 
-        # 1. Brak parametru OPENAI_API_KEY=
-        if "OPENAI_API_KEY=" not in zawartosc:
-            self._set_status(t("home.err_struktura"), kind="error")
-            self._show_action_btn("open", t("home.btn_open"))
+        # Walidacja klucza OpenAI (wymagany — postprodukcja tytułów, mikro-call
+        # kodu języka, Opowieści, Poliglota). Anthropic ma własną linię (v18.0).
+        wynik = self._diagnoza_klucza(
+            zawartosc, "OPENAI_API_KEY", "sk-",
+            "home.err_struktura", "home.err_format", "home.err_zbyt_krotki",
+        )
+        if wynik is None:
+            self._set_status(t("home.ok_klucz_wykryty"), kind="ok")
             return
+        klucz_i18n, kwargs, kind = wynik
+        self._set_status(t(klucz_i18n, **kwargs), kind=kind)
+        self._show_action_btn("open", t("home.btn_open"))
 
-        # 2. Tekst zastępczy nadal w pliku
-        if "TUTAJ_WKLEJ_SWOJ_KLUCZ" in zawartosc:
-            self._set_status(t("home.err_tekst_zastepczy"), kind="warning")
-            self._show_action_btn("open", t("home.btn_open"))
-            return
+    def _diagnoza_klucza(
+        self,
+        zawartosc:    str,
+        nazwa_zmiennej: str,
+        prefix:        str,
+        k_struktura:   str,
+        k_format:      str,
+        k_zbyt_krotki: str,
+    ) -> tuple[str, dict, str] | None:
+        """Waliduje pojedynczy WYMAGANY klucz w treści golden_key.env.
 
-        klucz_raw = zawartosc.split("OPENAI_API_KEY=")[-1].split("\n")[0]
+        Zwraca ``None`` gdy klucz OK, inaczej krotkę ``(klucz_i18n, kwargs, kind)``
+        do wyświetlenia. Komunikaty współdzielone (placeholder/cudzysłowy/spacje)
+        są wspólne dla obu providerów; specyficzne (struktura/format/zbyt krótki —
+        nazywają providera) podaje wywołujący przez ``k_*``.
+        """
+        if f"{nazwa_zmiennej}=" not in zawartosc:
+            return (k_struktura, {}, "error")
+        klucz_raw = zawartosc.split(f"{nazwa_zmiennej}=")[-1].split("\n")[0]
         klucz = klucz_raw.strip()
-
-        # 3. Zbędne cudzysłowy
+        if "TUTAJ_WKLEJ_SWOJ_KLUCZ" in klucz:
+            return ("home.err_tekst_zastepczy", {}, "warning")
         if (klucz.startswith('"') and klucz.endswith('"')) or \
            (klucz.startswith("'") and klucz.endswith("'")):
-            self._set_status(t("home.err_cudzyslowy"), kind="error")
-            self._show_action_btn("open", t("home.btn_open"))
-            return
-
-        # 4. Spacje lub znaki niedrukowalne przy kluczu
+            return ("home.err_cudzyslowy", {}, "error")
         if klucz_raw != klucz:
-            self._set_status(t("home.err_niedozwolone_znaki"), kind="error")
-            self._show_action_btn("open", t("home.btn_open"))
-            return
-
-        # 5. Niepoprawny format klucza OpenAI
-        if not klucz.startswith("sk-"):
-            self._set_status(t("home.err_format"), kind="error")
-            self._show_action_btn("open", t("home.btn_open"))
-            return
-
-        # 6. Klucz zbyt krótki
+            return ("home.err_niedozwolone_znaki", {}, "error")
+        if not klucz.startswith(prefix):
+            return (k_format, {}, "error")
         if len(klucz) < self.MINIMUM_ZNAKOW_KLUCZA:
-            self._set_status(
-                t(
-                    "home.err_zbyt_krotki",
-                    liczba_znakow=len(klucz),
-                    minimum_znakow=self.MINIMUM_ZNAKOW_KLUCZA,
-                ),
-                kind="warning",
+            return (
+                k_zbyt_krotki,
+                {"liczba_znakow": len(klucz),
+                 "minimum_znakow": self.MINIMUM_ZNAKOW_KLUCZA},
+                "warning",
             )
-            self._show_action_btn("open", t("home.btn_open"))
-            return
+        return None
 
-        # Wszystkie testy przeszły – sukces
-        self._set_status(t("home.ok_klucz_wykryty"), kind="ok")
+    # ------------------------------------------------------------------
+    # Logika walidacji klucza Anthropic (WYMAGANY — silnik narracji, v18.0)
+    # ------------------------------------------------------------------
+    def _run_anthropic_check(self) -> None:
+        """Diagnozuje WYMAGANY klucz Anthropic (Claude) i aktualizuje osobną linię.
+
+        Od v18.0 narracja Reżysera (audiobook/skrypt/burza) idzie przez Claude,
+        więc `ANTHROPIC_API_KEY` jest wymagany — brak = błąd (nie stan
+        informacyjny jak opcjonalny ElevenLabs). Format: `sk-ant-`.
+        """
+        env_path = self._env_path
+        plik_istnieje = os.path.exists(env_path)
+        try:
+            with open(env_path, "r", encoding="utf-8-sig") as fh:
+                zawartosc = fh.read().strip()
+        except OSError:
+            zawartosc = ""  # brak pliku — System Check OpenAI pokaże „generuj"
+
+        wynik = self._diagnoza_klucza(
+            zawartosc, "ANTHROPIC_API_KEY", "sk-ant-",
+            "home.ant_err_struktura", "home.ant_err_format", "home.ant_err_zbyt_krotki",
+        )
+        if wynik is None:
+            self._apply_status(self._ant_status_lbl, t("home.ant_ok"), "ok")
+            return
+        klucz_i18n, kwargs, kind = wynik
+        self._apply_status(self._ant_status_lbl, t(klucz_i18n, **kwargs), kind)
+        # Nie nadpisujemy przycisku „generuj" ustawionego przez System Check
+        # OpenAI, gdy pliku w ogóle nie ma — „otwórz" tylko gdy plik istnieje.
+        if plik_istnieje:
+            self._show_action_btn("open", t("home.btn_open"))
 
     # ------------------------------------------------------------------
     # Logika walidacji klucza ElevenLabs (opcjonalny — v16.0)
@@ -589,6 +645,11 @@ class HomePanel(wx.Panel):
                 with open(env_path, "w", encoding="utf-8") as fh:
                     fh.write(
                         "OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ\n"
+                        "ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ\n"
+                        "\n"
+                        "# Wymagane oba klucze (v18.0): OpenAI (sk-…) zasila tytuły,\n"
+                        "# wykrywanie języka, Opowieści i Poliglotę; Anthropic (sk-ant-…)\n"
+                        "# zasila silnik narracji Reżysera (audiobook / teatr / burza).\n"
                         "\n"
                         "# Opcjonalnie — postprodukcja audio w ElevenLabs Studio (v16.0).\n"
                         "# Odkomentuj poniższą linię i wklej klucz typu sk_ "

@@ -74,16 +74,26 @@ tresc:
 
     Ábending: valkosturinn „Opna skráarstaðsetningu" er innfæddur nafn fyrir íslenska útgáfu Windows. Í ensku kerfi heitir hann „Open file location", í öðrum tungumálaútgáfum — á sama hátt á staðbundnu tungumáli stýrikerfisins.
   krok_2_klucz_api: |
-    SKREF 2: Virkja API (OpenAI lykill)
+    SKREF 2: API Virkjun (tveir lyklar — Anthropic og OpenAI)
 
-    Til að gervigreindin geti starfað þarf hún aðgang að netþjónum OpenAI (höfundar ChatGPT).
+    Frá og með útgáfu 18.0 notar forritið tvo gervigreindarþjónustuaðila og krefst TVEIRRA API lykla í skrána golden_key.env:
 
+    •  Anthropic lykill (Claude) — knýr frásagnavél Reżyser (hljóðbók, lestrarleikhús, hugstormun). Hann byrjar á sk-ant-.
+    •  OpenAI lykill — knýr titla á köflum, greiningu á tungumáli efnis, sögustillingu og Poliglot (þýðanda). Hann byrjar á sk-.
+
+    Hvernig á að fá Anthropic lykil:
+    1. Búðu til reikning á console.anthropic.com og fylltu á reikninginn (Billing / Plans flipinn).
+    2. Búðu til lykil í API Keys hlutanum (byrjar á sk-ant-). Afritaðu hann strax — hann er oft aðeins sýndur einu sinni.
+
+    Hvernig á að fá OpenAI lykil:
     1. Búðu til reikning á platform.openai.com og fylltu á reikninginn í Billing flipanum.
-    2. Búðu til lykil í API Keys flipanum (byrjar á sk-proj-). Athugið: lykillinn er aðeins sýndur einu sinni — við sköpun. Ef þú lokar glugganum án þess að afrita, tapast hann og þú þarft að afturkalla hann (revoke secret key) og búa til nýjan. Afritaðu hann strax, áður en þú smellir á neitt.
-    3. Á upphafsskjá forritsins skaltu smella á hnappinn "{home.btn_generate}". Kerfið mun sjálfkrafa búa til hreina stillingaskrá á réttum stað og opna Notepad með sniðmáti tilbúið til breytinga.
-    4. Í opna skjalinu muntu sjá línuna OPENAI_API_KEY=HÉR_LÍMIR_ÞÚ_LYKILINN_ÞINN. Fjarlægðu staðgengiltextann og límdu afritaða lykilinn þinn beint eftir jafnaðarmerkið (án bils). Vistaðu skjalið og ræstu forritið aftur.
+    2. Búðu til lykil í API Keys flipanum (byrjar á sk-proj-). Athugið: lykillinn er aðeins sýndur einu sinni — þegar hann er búinn til. Ef þú lokar glugganum án þess að afrita, glatast hann og þú þarft að afturkalla hann (revoke secret key valkostur) og búa til nýjan. Afritaðu hann strax, áður en þú gerir neitt annað.
 
-    Ábending: Eftir að forritið hefur verið ræst aftur mun það athuga skrána og sýna græna skilaboð í hlutanum "{home.heading_system_check}" — þetta þýðir að allir AI einingar eru tilbúnir til notkunar. Annars mun það skýrt segja þér hvað er að og leyfa þér að opna textaritilinn til að laga villuna fljótt.
+    Hvernig á að setja lykla inn í forritið:
+    3. Á upphafsskjá forritsins, smelltu á hnappinn "{home.btn_generate}". Kerfið mun sjálfkrafa búa til hreina stillingaskrá á réttum stað og opna Notepad með sniðmáti tilbúið til breytinga.
+    4. Í opnuðu skjalinu sérðu tvær línur: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ og OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Fjarlægðu staðgengils textann í hvorri línu og límdu inn viðeigandi lykil beint eftir jafnaðarmerkið (án bils og án gæsalappa). Vistaðu skrána og endurræstu forritið.
+
+    Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "{home.heading_system_check}" sýna sérstakt ástand fyrir hvern lykil. Báðir verða að vera grænir til að allir AI einingar séu tilbúnar til notkunar. Ef einhver lykill vantar eða er rangur, mun forritið skýrt benda á hvaða lykill það er og leyfa að opna textaritil til að laga villuna fljótt.
   krok_3_glowne_studio: |
     KROK 3: Aðalstúdíó Leikstjórans
 

@@ -9,7 +9,7 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- Parametri OpenAI ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: italiano
 zapis_do_pliku: true

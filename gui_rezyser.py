@@ -38,6 +38,7 @@ import json
 import os
 import threading
 
+import anthropic
 import openai
 from dotenv import load_dotenv
 
@@ -148,8 +149,11 @@ class RezyserPanel(wx.Panel):
                 self,
             )
 
-        # ── Klient OpenAI ──────────────────────────────────────────────────
-        self._client = None
+        # ── Klienci LLM (dual-provider) ────────────────────────────────────
+        # OpenAI: postprodukcja tytułów (gpt-4o-mini) + mikro-call kodu języka.
+        # Anthropic (Claude): tryby narracyjne (audiobook / skrypt / burza).
+        self._client = None          # OpenAI
+        self._klient_claude = None   # Anthropic
         self._api_dostepne: bool = False
         self._worker_thread: threading.Thread | None = None
         # v17.9 (Obszar 3b): id przepisów, dla których trwa wnioskowanie
@@ -432,19 +436,37 @@ class RezyserPanel(wx.Panel):
     # Inicjowanie klienta OpenAI
     # ------------------------------------------------------------------
     def _init_api(self) -> None:
-        """Ładuje golden_key.env i inicjuje klienta OpenAI (jeśli klucz poprawny)."""
+        """Ładuje golden_key.env i inicjuje klientów LLM (OpenAI + Anthropic).
+
+        Dual-provider: tryby narracyjne (audiobook/skrypt/burza) idą przez klienta
+        Claude (`_klient_claude`); postprodukcja tytułów i mikro-call kodu języka —
+        przez OpenAI (`_client`). `_api_dostepne` = OBA klucze obecne; bramkuje
+        generowanie jednym flagiem (konsumenci OpenAI i tak null-checkują `_client`).
+        """
         app_dir = sciezki.KATALOG_BAZOWY_STR
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
-        if os.path.exists(env_path):
-            load_dotenv(env_path)
-            api_key = os.getenv("OPENAI_API_KEY", "")
-            if api_key and api_key.startswith("sk-"):
-                try:
-                    from openai import OpenAI  # noqa: PLC0415
-                    self._client = OpenAI(api_key=api_key)
-                    self._api_dostepne = True
-                except Exception:
-                    self._api_dostepne = False
+        if not os.path.exists(env_path):
+            return
+        load_dotenv(env_path)
+
+        openai_key = os.getenv("OPENAI_API_KEY", "")
+        if openai_key and openai_key.startswith("sk-"):
+            try:
+                from openai import OpenAI  # noqa: PLC0415
+                self._client = OpenAI(api_key=openai_key)
+            except Exception:
+                self._client = None
+
+        claude_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if claude_key and claude_key.startswith("sk-ant-"):
+            try:
+                self._klient_claude = anthropic.Anthropic(api_key=claude_key)
+            except Exception:
+                self._klient_claude = None
+
+        self._api_dostepne = (
+            self._client is not None and self._klient_claude is not None
+        )
 
     def _init_elevenlabs(self) -> None:
         """Wczytuje opcjonalny klucz ElevenLabs z golden_key.env (v16.0).
@@ -2115,12 +2137,12 @@ class RezyserPanel(wx.Panel):
         if przepis.format_wyjscia == "burza_json":
             try:
                 wynik_b = rai.generuj_burze(
-                    klient=self._client,
+                    klient=self._klient_claude,
                     przepis=przepis,
                     snapshot=snapshot,
                     user_text=user_text,
                 )
-            except openai.RateLimitError:
+            except anthropic.RateLimitError:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
             except Exception as exc:  # noqa: BLE001
@@ -2146,12 +2168,12 @@ class RezyserPanel(wx.Panel):
         if przepis.format_wyjscia == "skrypt_json":
             try:
                 wynik_s = rai.generuj_skrypt(
-                    klient=self._client,
+                    klient=self._klient_claude,
                     przepis=przepis,
                     snapshot=snapshot,
                     user_text=user_text,
                 )
-            except openai.RateLimitError:
+            except anthropic.RateLimitError:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
             except Exception as exc:  # noqa: BLE001
@@ -2168,12 +2190,12 @@ class RezyserPanel(wx.Panel):
         # --- Tryby produkcyjne (Audiobook / postprodukcja) ---
         try:
             wynik = rai.generuj_fragment(
-                klient=self._client,
+                klient=self._klient_claude,
                 przepis=przepis,
                 snapshot=snapshot,
                 user_text=user_text,
             )
-        except openai.RateLimitError:
+        except anthropic.RateLimitError:
             wx.CallAfter(
                 self._on_wyslij_error,
                 t("rezyser.err_rate_limit"),

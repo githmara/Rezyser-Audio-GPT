@@ -9,8 +9,8 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- Parametry OpenAI ---
-model: gpt-4o
-temperatura: 0.85
+model: claude-sonnet-4-6
+temperatura: 0.65
 jezyk_odpowiedzi: polsku
 
 # Odpowiedź dopisywana jest do pliku skrypty/<nazwa>.txt
@@ -29,43 +29,29 @@ prompt_systemowy: |
   {world_context}
 
   ### 📖 Zasady Trybu Audiobooka:
-  1. **GĘSTA, KLASYCZNA PROZA:** Skup się na głębokich opisach, sensoryce i psychologii postaci. Pisz długie akapity. Pokaż, zamiast tylko opisywać.
+  1. **GĘSTA, KLASYCZNA PROZA:** Skup się na głębokich opisach, sensoryce i psychologii postaci. Pisz długie akapity. Pokaż, zamiast tylko opisywać. Styl narracji MUSI rygorystycznie zgadzać się ze "Stylem Krytycznym" opisanym w Żelaznych Zasadach Świata.
   2. **CZYSTOŚĆ TEKSTU:** Gładki język literacki — bezwzględny zakaz wstawiania tagów z nawiasami kwadratowymi.
   3. **ABSOLUTNY ZAKAZ MARKDOWNU:** Żadnych nagłówków (typu "Rozdział 1", "Scena 2"), tytułów, ani list punktowanych.
-  4. **DOMYKANIE SCEN:** - DOMYŚLNIE (ANTI-CLOSURE): Urwij tekst bez domykania sceny, by utrzymać płynność.
-     - WYJĄTEK (FINAŁ/EPILOG): Jeśli to zakończenie, wygaś narrację w satysfakcjonujący, literacki sposób.
+  4. **DOMYKANIE SCEN (ANTI-CLOSURE - PRAWO ABSOLUTNE):** Bezwzględnie urywaj wygenerowany tekst. Kończ akapity w zawieszeniu (ang. cliffhanger), w połowie dialogu, przed ciosem lub w środku niepewności. ZAKAZ domykania scen logicznymi podsumowaniami, przemyśleniami bohaterów czy "moralizatorskim" zamykaniem wątków. Ostatnie zdanie ma zmuszać do czytania dalej.
+  5. **CZARNA LISTA KLISZ:** Żadnego "ognia w żyłach", "serca bijącego jak młot", "miecza Damoklesa". Przestrzegaj zakazu klisz z Księgi Świata.
 
 # --- Sufiksy kontekstowe ---
-# Tryb audiobooka w wersji bazowej nie używa sufiksów zależnych od stanu
-# pamięci – prompt systemowy jest wystarczający. Lingwista może je dodać,
-# a silnik wybierze właściwy, jeśli warunki się zgadzają.
 sufiksy: {}
 
 # --- Przypomnienie doklejane do instrukcji użytkownika (role=user) ---
-# Tu lingwista może poluzować Anti-Closure lub dopuścić krótkie rozdziały.
 przypomnienie_uzytkownika: |
 
 
-  (PRZYPOMNIENIE KRYTYCZNE: Tryb KSIĄŻKI. Zero tagów audio/głosowych. Długa, gęsta proza z dialogami po myślnikach. Zakaz Markdownu i nagłówków. BRUTALNY ANTI-CLOSURE: urwij tekst w środku napięcia lub w połowie akcji, chyba że to wyraźny finał historii.)
+  (PRZYPOMNIENIE KRYTYCZNE: Tryb KSIĄŻKI. Zero tagów audio/głosowych oraz baśniowych skrótów. Długa, gęsta proza z dialogami po myślnikach. Zakaz Markdownu i nagłówków. BRUTALNY ANTI-CLOSURE: urwij tekst w środku napięcia lub w połowie akcji, zmuś czytelnika by natychmiast chciał poznać ciąg dalszy. ZAKAZ wyciągania wniosków przez postaci na końcu tekstu.)
 
 # --- Walidacja po stronie aplikacji ---
 slowa_wyzwalajace:
-  # Blokujemy zapis streszczenia do pliku historii.
   streszczenie:
     - streszcz
     - streść
     - podsumuj
     - podsumowanie
 
-# Uwaga o detekcji odrzucenia przez AI:
-# Od wersji 13.0 detekcja odbywa się przez uniwersalny tag `[ODRZUCENIE_AI]`
-# wymuszany w prompt_systemowy przez KLAUZULA_ODRZUCENIA_DOMYSLNA
-# (przepisy_rezysera.py). Działa niezależnie od `jezyk_odpowiedzi` – lista
-# słów w lokalnym języku nie jest już potrzebna i mogła być dziurawa.
-
 # --- Post-processing ---
-# Audiobook NIE korzysta z silnika fonetycznego (nie ma tagów postaci).
 stosuj_akcenty_fonetyczne: false
-
-# v17.9 (Obszar 3b): kod ISO jezyka tresci -> akcenty + naglowki struktury.
 kod_jezyka: "pl"

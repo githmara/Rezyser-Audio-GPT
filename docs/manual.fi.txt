@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 17.11.1 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 18.0 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -60,16 +60,26 @@ Vinkki NVDA-käyttäjille: Sovellus-näppäimellä avattava kontekstivalikko "Av
 Vinkki: "Avaa tiedoston sijainti" on natiivi nimi Windowsin suomenkieliselle versiolle. Englanninkielisessä järjestelmässä se on "Open file location", muissa kieliversioissa — vastaavasti paikallisella kielellä.
 
 
-VAIHE 2: Zasilanie API (Klucz OpenAI)
+KROK 2: API-avainvirta (kaksi avainta — Anthropic ja OpenAI)
 
-Jotta tekoäly voi toimia, se tarvitsee pääsyn OpenAI:n palvelimille (ChatGPT:n luojat).
+Versiosta 18.0 alkaen sovellus käyttää kahta tekoälytoimittajaa ja vaatii KAKSI API-avainta tiedostossa golden_key.env:
 
-1. Luo tili osoitteessa platform.openai.com ja lataa tiliäsi Billing-välilehdellä.
-2. Luo avain API Keys -välilehdellä (alkaa sk-proj-). Huomio: avain näytetään vain kerran — luomishetkellä. Jos suljet ikkunan ilman kopiointia, se katoaa lopullisesti ja sinun on peruutettava se (vaihtoehto revoke secret key) ja luotava uusi. Kopioi se heti ennen kuin klikkaat mitään muuta.
-3. Ohjelman aloitusnäytössä klikkaa painiketta "Luo golden_key.env-tiedosto ja avaa tekstieditori". Järjestelmä luo automaattisesti uuden konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion valmiilla mallilla muokattavaksi.
-4. Avoimessa tiedostossa näet rivin OPENAI_API_KEY=TÄHÄN_LIITÄ_OMA_AVAIN. Poista paikkamerkkiteksti ja liitä kopioitu avain suoraan yhtäsuuruusmerkin jälkeen (ilman välilyöntejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
+•  Anthropic-avain (Claude) — ohjaa Reżyserin kerrontamoottoria (äänikirja, luettu teatteri, aivoriihi). Alkaa sk-ant-.
+•  OpenAI-avain — ohjaa lukujen otsikointia, sisällön kielen tunnistusta, Tarinatilaa sekä Polyglot (kääntäjä). Alkaa sk-.
 
-Vihje: Sovelluksen uudelleenkäynnistyksen jälkeen se tarkistaa tiedoston ja näyttää vihreän viestin osiossa "Järjestelmän tarkistus" — tämä tarkoittaa, että kaikki tekoälymoduulit ovat valmiita käyttöön. Muussa tapauksessa se kertoo selkeästi, mikä on vialla, ja antaa mahdollisuuden avata tekstieditori virheen nopeaa korjaamista varten.
+Miten hankkia Anthropic-avain:
+1. Luo tili osoitteessa console.anthropic.com ja lisää varoja (välilehti Billing / Plans).
+2. Luo avain API Keys -osiossa (alkaa sk-ant-). Kopioi se heti — se saatetaan näyttää vain kerran.
+
+Miten hankkia OpenAI-avain:
+1. Luo tili osoitteessa platform.openai.com ja lisää varoja välilehdellä Billing.
+2. Luo avain API Keys -välilehdellä (alkaa sk-proj-). Huomio: avain näytetään vain kerran — luomishetkellä. Jos suljet ikkunan ilman kopiointia, se menetetään pysyvästi ja sinun on peruutettava se (vaihtoehto revoke secret key) ja luotava uusi. Kopioi se heti ennen kuin klikkaat mitään muuta.
+
+Miten syöttää avaimet ohjelmaan:
+3. Ohjelman aloitusnäytössä klikkaa painiketta "Luo golden_key.env-tiedosto ja avaa tekstieditori". Järjestelmä luo automaattisesti uuden konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion valmiilla muokattavalla mallilla.
+4. Avoimessa tiedostossa näet kaksi riviä: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ ja OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Poista kummastakin korvaava teksti ja liitä oikea avain suoraan yhtäsuuruusmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
+
+Vinkki: Sovelluksen uudelleenkäynnistyksen jälkeen se tarkistaa tiedoston ja näyttää osiossa "Järjestelmän tarkistus" erillisen tilan jokaiselle avaimelle. Molempien on oltava vihreitä, jotta kaikki AI-moduulit ovat valmiita toimintaan. Jos jokin avain puuttuu tai on virheellinen, ohjelma osoittaa selvästi, mikä avain on kyseessä, ja antaa mahdollisuuden avata tekstieditori virheen nopeaa korjaamista varten.
 
 
 KROK 3: Pääohjaajan Studio

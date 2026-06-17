@@ -23,7 +23,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- OpenAI parameters ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # Inserted in prompts via the {jezyk_odpowiedzi} placeholder.
@@ -94,11 +94,6 @@ sufiksy:
     [FORCED SUMMARY MODE]: The user has manually requested saving the plot state! In the JSON response ADD THE KEY `"streszczenie"` (at the same level as `opcje`) with a text value containing TWO mandatory elements:
     1. A concise summary of events so far.
     2. A [STYLE AND TONE] section: a one-sentence note about the narrative mood.
-
-  optymalizacja: |
-
-
-    [OPTIMIZATION MODE]: Memory is roomy. Do NOT generate the `"streszczenie"` key in JSON. Return only an object with the `"opcje"` key.
 
   alarm: |
 

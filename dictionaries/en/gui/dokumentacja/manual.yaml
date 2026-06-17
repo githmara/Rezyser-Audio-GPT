@@ -74,16 +74,26 @@ tresc:
 
     Tip: the "Open file location" option is the native name for the Polish version of Windows. In the English system, it is "Open file location", in other language versions — similarly in the local operating system language.
   krok_2_klucz_api: |
-    STEP 2: Powering the API (OpenAI Key)
+    STEP 2: Powering the API (two keys — Anthropic and OpenAI)
 
-    For the artificial intelligence to function, it needs access to OpenAI's servers (creators of ChatGPT).
+    From version 18.0, the application uses two artificial intelligence providers and requires TWO API keys in the golden_key.env file:
 
-    1. Create an account on platform.openai.com and top up your account in the Billing section.
-    2. Generate a key in the API Keys section (it starts with sk-proj-). Note: the key is displayed only once — at the moment of creation. If you close the window without copying it, it will be lost forever, and you will need to revoke the secret key and generate a new one. Copy it immediately before clicking anything else.
-    3. On the program's start screen, click the button "{home.btn_generate}". The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
-    4. In the open file, you will see the line OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Remove the placeholder text and paste your copied key directly after the equal sign (without spaces). Save the file and restart the application.
+    •  Anthropic Key (Claude) — powers the Director's narration engine (audiobook, read theater, brainstorming). It starts with sk-ant-.
+    •  OpenAI Key — powers chapter title generation, content language detection, Story Mode, and Polyglot (translator). It starts with sk-.
 
-    Tip: Upon restarting, the application will check the file and display a green message in the "{home.heading_system_check}" section — this means all AI modules are ready to work. Otherwise, it will clearly tell you what is wrong and allow you to open the text editor to quickly fix the error.
+    How to obtain the Anthropic key:
+    1. Create an account at console.anthropic.com and add funds (Billing / Plans tab).
+    2. Generate a key in the API Keys section (starts with sk-ant-). Copy it immediately — it is sometimes displayed only once.
+
+    How to obtain the OpenAI key:
+    1. Create an account at platform.openai.com and add funds in the Billing tab.
+    2. Generate a key in the API Keys tab (starts with sk-proj-). Note: the key is displayed only once — at the moment of creation. If you close the window without copying it, it is lost forever and you will need to revoke it (revoke secret key option) and generate a new one. Copy it immediately before clicking anything else.
+
+    How to enter the keys into the program:
+    3. On the program's start screen, click the "{home.btn_generate}" button. The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
+    4. In the open file, you will see two lines: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ and OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. In each, remove the placeholder text and paste the appropriate key directly after the equals sign (without spaces and without quotation marks). Save the file and restart the application.
+
+    Tip: After restarting, the application will check the file and show a separate status for each key in section "{home.heading_system_check}". Both must be green for all AI modules to be ready for use. If any key is missing or incorrect, the program will clearly indicate which one and allow you to open the text editor to quickly fix the error.
   krok_3_glowne_studio: |
     STEP 3: Main Directing Studio
 

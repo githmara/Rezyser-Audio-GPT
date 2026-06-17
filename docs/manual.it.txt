@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida completa (Versione 17.11.1 – Versione di Rilascio)
+Manuale del Regista Audio AI - Guida completa (Versione 18.0 – Versione di Rilascio)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
@@ -63,16 +63,26 @@ Suggerimento per gli utenti NVDA: il menu contestuale "Apri percorso file" attiv
 Suggerimento: l'opzione "Apri percorso file" è il nome nativo per la versione italiana di Windows. Nel sistema inglese si chiama "Open file location", nelle altre versioni linguistiche — analogamente nella lingua locale del sistema operativo.
 
 
-PASSO 2: Alimentazione API (Chiave OpenAI)
+PASSO 2: Alimentazione API (due chiavi — Anthropic e OpenAI)
 
-Perché l'intelligenza artificiale possa funzionare, ha bisogno di accedere ai server di OpenAI (i creatori di ChatGPT).
+Dalla versione 18.0 l'applicazione utilizza due fornitori di intelligenza artificiale e richiede DUE chiavi API nel file golden_key.env:
 
-1. Crea un account su platform.openai.com e ricarica il credito nella scheda Billing.
-2. Genera una chiave nella scheda API Keys (inizia con sk-proj-). Attenzione: la chiave viene mostrata una sola volta — nel momento della creazione. Se chiudi la finestra senza copiarla, va persa irrimediabilmente e dovrai revocarla (opzione revoke secret key) e generarne una nuova. Copiala subito, prima di cliccare qualsiasi cosa.
-3. Nella schermata iniziale del programma clicca il pulsante "Genera il file golden_key.env e apri l'editor di testo". Il sistema creerà automaticamente un file di configurazione pulito nel posto giusto e aprirà il Blocco Note con un modello pronto per la modifica.
-4. Nel file aperto vedrai la riga OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina il testo segnaposto e incolla la chiave copiata subito dopo il segno di uguale (senza spazi). Salva il file e riavvia l'applicazione.
+•  Chiave Anthropic (Claude) — alimenta il motore narrativo del Regista (audiolibro, teatro letto, brainstorming). Inizia con sk-ant-.
+•  Chiave OpenAI — alimenta l'assegnazione dei titoli ai capitoli, il rilevamento della lingua del contenuto, la modalità Racconti e il Poliglotta (traduttore). Inizia con sk-.
 
-Suggerimento: Dopo il riavvio l'applicazione controllerà il file e mostrerà un messaggio verde nella sezione "Controllo del Sistema" — significa che tutti i moduli AI sono pronti all'uso. In caso contrario ti dirà chiaramente cosa non va e ti permetterà di aprire l'editor di testo per correggere rapidamente l'errore.
+Come ottenere la chiave Anthropic:
+1. Crea un account su console.anthropic.com e ricarica il saldo (scheda Billing / Plans).
+2. Genera la chiave nella sezione API Keys (inizia con sk-ant-). Copiala immediatamente — può essere visualizzata solo una volta.
+
+Come ottenere la chiave OpenAI:
+1. Crea un account su platform.openai.com e ricarica il saldo nella scheda Billing.
+2. Genera la chiave nella scheda API Keys (inizia con sk-proj-). Nota: la chiave viene visualizzata solo una volta — al momento della creazione. Se chiudi la finestra senza copiarla, andrà persa definitivamente e dovrai revocarla (opzione revoke secret key) e generarne una nuova. Copiala immediatamente, prima di cliccare qualsiasi cosa.
+
+Come inserire le chiavi nel programma:
+3. Nella schermata iniziale del programma, clicca sul pulsante "Genera il file golden_key.env e apri l'editor di testo". Il sistema creerà automaticamente un file di configurazione pulito nel posto giusto e aprirà il Blocco Note con un modello pronto per la modifica.
+4. Nel file aperto vedrai due righe: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ e OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. In ciascuna, rimuovi il testo segnaposto e incolla la chiave corrispondente direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
+
+Suggerimento: Dopo il riavvio, l'applicazione controllerà il file e nella sezione "Controllo del Sistema" mostrerà uno stato separato per ciascuna chiave. Entrambe devono essere verdi affinché tutti i moduli AI siano pronti per l'uso. Se manca una chiave o è errata, il programma indicherà chiaramente quale e permetterà di aprire l'editor di testo per correggere rapidamente l'errore.
 
 
 PASSO 3: Studio Principale del Regista

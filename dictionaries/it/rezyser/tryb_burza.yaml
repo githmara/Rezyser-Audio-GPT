@@ -22,7 +22,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- Parametri OpenAI ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # Inserito nei prompt tramite il segnaposto {jezyk_odpowiedzi}.
@@ -93,11 +93,6 @@ sufiksy:
     [MODALITÀ RIASSUNTO FORZATO]: L'utente ha richiesto manualmente di salvare lo stato della trama! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente DUE elementi obbligatori:
     1. Un riassunto conciso degli eventi finora.
     2. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
-
-  optymalizacja: |
-
-
-    [MODALITÀ OTTIMIZZAZIONE]: La memoria è ampia. NON generare la chiave `"streszczenie"` nel JSON. Restituisci solo un oggetto con la chiave `"opcje"`.
 
   alarm: |
 

@@ -23,7 +23,7 @@ kolejnosc: 20
 format_wyjscia: skrypt_json
 
 # --- Parametry OpenAI ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: polsku
 

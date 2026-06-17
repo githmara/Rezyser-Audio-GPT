@@ -1,4 +1,4 @@
-Audio AI Regisseur Handbuch - Komplettanleitung (Version 17.11.1 – Release-Version)
+Audio AI Regisseur Handbuch - Komplettanleitung (Version 18.0 – Release-Version)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -60,16 +60,26 @@ Tipp für NVDA-Benutzer: Das Kontextmenü „Dateispeicherort öffnen", das mit 
 Hinweis: Die Option „Dateispeicherort öffnen" ist der native Name für die deutsche Version von Windows. Im englischen System lautet sie „Open file location", in anderen Sprachversionen — analog in der lokalen Sprache des Betriebssystems.
 
 
-SCHRITT 2: API-Zugang (OpenAI-Schlüssel)
+SCHRITT 2: API-Versorgung (zwei Schlüssel — Anthropic und OpenAI)
 
-Damit die künstliche Intelligenz funktionieren kann, benötigt sie Zugriff auf die Server von OpenAI (den Entwicklern von ChatGPT).
+Ab Version 18.0 verwendet die Anwendung zwei Anbieter künstlicher Intelligenz und benötigt ZWEI API-Schlüssel in der Datei golden_key.env:
 
-1. Erstellen Sie ein Konto auf platform.openai.com und laden Sie Ihr Konto im Bereich "Billing" auf.
-2. Generieren Sie einen Schlüssel im Bereich "API Keys" (beginnt mit sk-proj-). Achtung: Der Schlüssel wird nur einmal angezeigt — im Moment der Erstellung. Wenn Sie das Fenster schließen, ohne ihn zu kopieren, geht er unwiderruflich verloren und Sie müssen ihn sperren (Option "revoke secret key") und einen neuen generieren. Kopieren Sie ihn sofort, bevor Sie irgendetwas anklicken.
+•  Anthropic-Schlüssel (Claude) — versorgt die Erzählmaschine des Regisseurs (Hörbuch, Lesetheater, Brainstorming). Beginnt mit sk-ant-.
+•  OpenAI-Schlüssel — versorgt die Kapitelbetitelung, die Spracherkennung des Inhalts, den Erzählmodus und den Polyglot (Übersetzer). Beginnt mit sk-.
+
+Wie man den Anthropic-Schlüssel erhält:
+1. Erstellen Sie ein Konto auf console.anthropic.com und laden Sie Guthaben auf (Registerkarte Billing / Plans).
+2. Generieren Sie einen Schlüssel im Abschnitt API Keys (beginnt mit sk-ant-). Kopieren Sie ihn sofort — er wird oft nur einmal angezeigt.
+
+Wie man den OpenAI-Schlüssel erhält:
+1. Erstellen Sie ein Konto auf platform.openai.com und laden Sie Ihr Konto im Bereich Billing auf.
+2. Generieren Sie einen Schlüssel im Bereich API Keys (beginnt mit sk-proj-). Achtung: Der Schlüssel wird nur einmal angezeigt — beim Erstellen. Wenn Sie das Fenster schließen, ohne ihn zu kopieren, geht er unwiderruflich verloren und Sie müssen ihn sperren (Option revoke secret key) und einen neuen generieren. Kopieren Sie ihn sofort, bevor Sie etwas anderes anklicken.
+
+Wie man die Schlüssel in das Programm eingibt:
 3. Klicken Sie auf dem Startbildschirm des Programms auf die Schaltfläche "Generiere die Datei golden_key.env und öffne den Texteditor". Das System erstellt automatisch eine leere Konfigurationsdatei an der richtigen Stelle und öffnet den Notizblock mit einer Vorlage, die zur Bearbeitung bereit ist.
-4. In der geöffneten Datei sehen Sie die Zeile OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Entfernen Sie den Platzhaltertext und fügen Sie Ihren kopierten Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
+4. In der geöffneten Datei sehen Sie zwei Zeilen: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ und OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Entfernen Sie in jeder Zeile den Platzhaltertext und fügen Sie den entsprechenden Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
 
-Tipp: Nach dem Neustart überprüft die Anwendung die Datei und zeigt eine grüne Meldung im Abschnitt "Systemprüfung" an — das bedeutet, dass alle KI-Module einsatzbereit sind. Andernfalls wird Ihnen klar mitgeteilt, was nicht stimmt, und Sie können den Texteditor öffnen, um den Fehler schnell zu beheben.
+Hinweis: Nach dem Neustart überprüft die Anwendung die Datei und zeigt im Abschnitt "Systemprüfung" einen separaten Status für jeden Schlüssel an. Beide müssen grün sein, damit alle KI-Module einsatzbereit sind. Wenn ein Schlüssel fehlt oder falsch ist, zeigt das Programm klar an, welcher es ist, und ermöglicht es, den Texteditor zu öffnen, um den Fehler schnell zu beheben.
 
 
 SCHRITT 3: Hauptregiestudio

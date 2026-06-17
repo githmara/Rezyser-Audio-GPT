@@ -1,4 +1,4 @@
-Manual del Director de Audio AI - Guía Completa (Versión 17.11.1 – Versión de Lanzamiento)
+Manual del Director de Audio AI - Guía Completa (Versión 18.0 – Versión de Lanzamiento)
 
 ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 
@@ -60,16 +60,26 @@ Consejo para usuarios de NVDA: el menú contextual "Abrir ubicación del archivo
 Consejo: la opción "Abrir ubicación del archivo" es el nombre nativo para la versión polaca de Windows. En el sistema en inglés es "Open file location", en otras versiones de idioma — de manera análoga en el idioma local del sistema operativo.
 
 
-PASO 2: Alimentación de la API (Clave de OpenAI)
+PASO 2: Alimentación de la API (dos claves — Anthropic y OpenAI)
 
-Para que la inteligencia artificial funcione, necesita acceso a los servidores de OpenAI (creadores de ChatGPT).
+A partir de la versión 18.0, la aplicación utiliza dos proveedores de inteligencia artificial y requiere DOS claves API en el archivo golden_key.env:
 
-1. Crea una cuenta en platform.openai.com y recarga tu cuenta en la pestaña de Facturación.
-2. Genera una clave en la pestaña de Claves API (comienza con sk-proj-). Atención: la clave se muestra solo una vez, en el momento de su creación. Si cierras la ventana sin copiarla, se perderá para siempre y tendrás que revocarla (opción revocar clave secreta) y generar una nueva. Cópiela inmediatamente antes de hacer cualquier clic.
+• Clave Anthropic (Claude) — alimenta el motor de narración del Director (audiolibro, teatro leído, lluvia de ideas). Comienza con sk-ant-.
+• Clave OpenAI — alimenta la asignación de títulos a los capítulos, la detección del idioma del contenido, el modo Historias y el Políglota (traductor). Comienza con sk-.
+
+Cómo obtener la clave Anthropic:
+1. Crea una cuenta en console.anthropic.com y recarga fondos (pestaña Billing / Plans).
+2. Genera una clave en la sección API Keys (comienza con sk-ant-). Cópiala de inmediato, ya que a veces se muestra solo una vez.
+
+Cómo obtener la clave OpenAI:
+1. Crea una cuenta en platform.openai.com y recarga fondos en la pestaña Billing.
+2. Genera una clave en la pestaña API Keys (comienza con sk-proj-). Nota: la clave se muestra solo una vez, en el momento de su creación. Si cierras la ventana sin copiarla, se pierde de forma irrevocable y tendrás que revocarla (opción revoke secret key) y generar una nueva. Cópiala de inmediato, antes de hacer clic en cualquier cosa.
+
+Cómo ingresar las claves en el programa:
 3. En la pantalla de inicio del programa, haz clic en el botón "Generar archivo golden_key.env y abrir editor de texto". El sistema creará automáticamente un archivo de configuración limpio en el lugar adecuado y abrirá el Bloc de notas con una plantilla lista para editar.
-4. En el archivo abierto, verás la línea OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina el texto de marcador de posición y pega tu clave copiada directamente después del signo igual (sin espacios). Guarda el archivo y reinicia la aplicación.
+4. En el archivo abierto verás dos líneas: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ y OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. En cada una, elimina el texto de marcador de posición y pega la clave correspondiente directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.
 
-Consejo: Después de reiniciar, la aplicación verificará el archivo y mostrará un mensaje verde en la sección "System Check", lo que significa que todos los módulos de IA están listos para funcionar. De lo contrario, te indicará claramente qué está mal y te permitirá abrir el editor de texto para corregir rápidamente el error.
+Consejo: Al reiniciar, la aplicación verificará el archivo y en la sección "System Check" mostrará un estado separado para cada clave. Ambas deben estar en verde para que todos los módulos de IA estén listos para funcionar. Si falta alguna clave o es incorrecta, el programa indicará claramente cuál es y permitirá abrir el editor de texto para corregir rápidamente el error.
 
 
 PASO 3: Estudio Principal de Dirección

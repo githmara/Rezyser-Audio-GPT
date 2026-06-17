@@ -214,6 +214,11 @@ home:
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
 # -----------------------------------------------------------------------------
+  heading_anthropic: Kerrontamoottori (Anthropic / Claude) — vaaditaan
+  ant_err_struktura: "🚨 Tiedostorakennevirhe!\nPuuttuu vaadittu muuttuja ANTHROPIC_API_KEY=.\nVersiosta 18.0 alkaen kerrontamoottori (äänikirja, lukuteatteri, myrsky) toimii Claude-mallilla ja vaatii erillisen avaimen.\nPoista tiedosto, luo se uudelleen ja liitä avain huolellisemmin."
+  ant_err_format: "🚨 Epäilyttävä Anthropic-avaimen muoto!\nOikea Anthropic-avain (Claude) alkaa aina merkeillä sk-ant- (esim. sk-ant-api03-…).\nVarmista, että kopioit avaimen osoitteesta console.anthropic.com, etkä OpenAI-avainta."
+  ant_err_zbyt_krotki: "⚠️ Anthropic-avain vaikuttaa liian lyhyeltä (havaittu {liczba_znakow} merkkiä, odotettiin vähintään {minimum_znakow}).\nOlet todennäköisesti kopioinut vain osan avaimesta. Palaa osoitteeseen console.anthropic.com ja kopioi se kokonaisuudessaan."
+  ant_ok: "✅ Anthropic-avain (Claude) havaittu ja oikein muotoiltu.\nKerrontamoottori on valmis käyttöön."
 rezyser:
   panel_name: "Ääniohjaaja GPT -paneeli"
   heading: "🎬  Ääniohjaaja GPT – Hybridi Luova Studio"

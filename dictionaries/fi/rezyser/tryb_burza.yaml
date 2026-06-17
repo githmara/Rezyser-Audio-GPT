@@ -23,7 +23,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- OpenAI-parametrit ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # Lisätään prompteihin paikkamerkin {jezyk_odpowiedzi} kautta.
@@ -94,11 +94,6 @@ sufiksy:
     [PAKOTETTU YHTEENVETOTILA]: Käyttäjä pyysi manuaalisesti tallentaa juonen tilan! Lisää JSON-vastaukseen AVAIN `"streszczenie"` (samalla tasolla kuin `opcje`) tekstiarvolla, joka sisältää KAKSI pakollista elementtiä:
     1. Tiivis yhteenveto tähänastisista tapahtumista.
     2. Osio [TYYLI JA SÄVY]: yhden lauseen huomautus kerronnan tunnelmasta.
-
-  optymalizacja: |
-
-
-    [OPTIMOINTITILA]: Muisti on tilava. ÄLÄ generoi `"streszczenie"`-avainta JSON:ssa. Palauta vain objekti, jossa on avain `"opcje"`.
 
   alarm: |
 

@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 17.11.1 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 18.0 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -63,16 +63,26 @@ Wskazówka dla użytkowników NVDA: menu kontekstowe „Otwórz lokalizację pli
 Wskazówka: opcja „Otwórz lokalizację pliku" to nazwa natywna dla polskiej wersji Windows. W angielskim systemie brzmi „Open file location", w pozostałych wersjach językowych — analogicznie w lokalnym języku systemu operacyjnego.
 
 
-KROK 2: Zasilanie API (Klucz OpenAI)
+KROK 2: Zasilanie API (dwa klucze — Anthropic i OpenAI)
 
-Aby sztuczna inteligencja mogła działać, potrzebuje dostępu do serwerów OpenAI (twórców ChatuGPT).
+Od wersji 18.0 aplikacja korzysta z dwóch dostawców sztucznej inteligencji i wymaga DWÓCH kluczy API w pliku golden_key.env:
 
+•  Klucz Anthropic (Claude) — zasila silnik narracji Reżysera (audiobook, teatr czytany, burza mózgów). Zaczyna się od sk-ant-.
+•  Klucz OpenAI — zasila nadawanie tytułów rozdziałom, wykrywanie języka treści, tryb Opowieści oraz Poliglotę (tłumacz). Zaczyna się od sk-.
+
+Jak zdobyć klucz Anthropic:
+1. Załóż konto na console.anthropic.com i doładuj środki (zakładka Billing / Plans).
+2. Wygeneruj klucz w sekcji API Keys (zaczyna się od sk-ant-). Skopiuj go od razu — bywa wyświetlany tylko raz.
+
+Jak zdobyć klucz OpenAI:
 1. Załóż konto na platform.openai.com i doładuj konto w zakładce Billing.
 2. Wygeneruj klucz w zakładce API Keys (zaczyna się od sk-proj-). Uwaga: klucz jest wyświetlany tylko raz — w momencie tworzenia. Jeśli zamkniesz okno bez skopiowania, przepada bezpowrotnie i trzeba będzie go zastrzec (opcja revoke secret key) i wygenerować nowy. Skopiuj go od razu, zanim cokolwiek klikniesz.
-3. Na ekranie startowym programu kliknij przycisk "Wygeneruj plik golden_key.env i otwórz edytor tekstu". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
-4. W otwartym pliku zobaczysz linię OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój skopiowany klucz bezpośrednio po znaku równości (bez spacji). Zapisz plik i uruchom aplikację ponownie.
 
-Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i wyświetli zielony komunikat w sekcji "System Check" — oznacza to, że wszystkie moduły AI są gotowe do pracy. W przeciwnym wypadku jasno ci powie, co jest nie tak i pozwoli otworzyć edytor tekstu, aby szybko dało się naprawić błąd.
+Jak wpisać klucze do programu:
+3. Na ekranie startowym programu kliknij przycisk "Wygeneruj plik golden_key.env i otwórz edytor tekstu". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
+4. W otwartym pliku zobaczysz dwie linie: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ oraz OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. W każdej usuń tekst zastępczy i wklej odpowiedni klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
+
+Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "System Check" pokaże osobny status dla każdego klucza. Oba muszą być zielone, aby wszystkie moduły AI były gotowe do pracy. Jeśli któregoś klucza brakuje lub jest błędny, program jasno wskaże który i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
 
 
 KROK 3: Główne Studio Reżyserskie

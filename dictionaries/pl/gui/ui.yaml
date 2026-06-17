@@ -167,6 +167,23 @@ home:
   ok_klucz_wykryty: |-
     ✅ Klucz API (golden_key.env) wykryty i poprawnie sformatowany.
     Wszystkie moduły są gotowe do pracy.
+  # --- System Check: silnik narracji Anthropic (Claude) — WYMAGANY (v18.0) ---
+  heading_anthropic:     "Silnik narracji (Anthropic / Claude) — wymagany"
+  ant_err_struktura: |-
+    🚨 Błąd struktury pliku!
+    Brakuje wymaganej zmiennej ANTHROPIC_API_KEY=.
+    Od wersji 18.0 silnik narracji (audiobook, teatr czytany, burza) działa na modelu Claude i wymaga osobnego klucza.
+    Usuń plik, wygeneruj go ponownie i wklej klucz ostrożniej.
+  ant_err_format: |-
+    🚨 Podejrzany format klucza Anthropic!
+    Poprawny klucz Anthropic (Claude) zawsze zaczyna się od znaków sk-ant- (np. sk-ant-api03-…).
+    Upewnij się, że skopiowałeś klucz z console.anthropic.com, a nie klucz OpenAI.
+  ant_err_zbyt_krotki: |-
+    ⚠️ Klucz Anthropic wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow}).
+    Prawdopodobnie skopiowałeś tylko fragment klucza. Wróć na console.anthropic.com i skopiuj go w całości.
+  ant_ok: |-
+    ✅ Klucz Anthropic (Claude) wykryty i poprawnie sformatowany.
+    Silnik narracji jest gotowy do pracy.
   # Przyciski akcji panelu startowego
   btn_generate:          "Wygeneruj plik golden_key.env i otwórz edytor tekstu"
   btn_open:              "📝 Otwórz plik golden_key.env w edytorze tekstu"

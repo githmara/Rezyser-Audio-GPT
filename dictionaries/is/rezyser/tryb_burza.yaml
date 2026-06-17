@@ -22,7 +22,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- OpenAI-stillingar ---
-model: gpt-4o
+model: claude-sonnet-4-6
 temperatura: 0.85
 
 # Sett í prompt í gegnum staðsetninguna {jezyk_odpowiedzi}.
@@ -93,11 +93,6 @@ sufiksy:
     [ÞVINGAÐUR SAMANTEKTARHAMUR]: Notandinn bað handvirkt um að vista söguástandið! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur TVÖ skyldubundnu þætti:
     1. Hnitmiðuð samantekt á atburðum hingað til.
     2. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
-
-  optymalizacja: |
-
-
-    [HAGRÆÐINGARHAMUR]: Minnið er rúmt. EKKI framleiða `"streszczenie"`-lykil í JSON. Skilaðu aðeins hlut með lyklinum `"opcje"`.
 
   alarm: |
 

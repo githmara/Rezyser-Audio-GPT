@@ -1,5 +1,6 @@
 wxpython
 openai
+anthropic
 elevenlabs
 python-dotenv
 python-docx

@@ -93,16 +93,26 @@ tresc:
 
     Selon une étude de l'Université de Cambridge, l'ordre des lettres dans un mot n'a pas d'importance, tant que la première et la dernière lettre sont à la bonne place. Vous puoevz lirre un txete mêm si les ltrtees sont mélgaéens, tnat que la pmrèire et la dèrneie lterte de cahuqe mto sont à la bnoe pclae.
   krok_2_klucz_api: |
-    ÉTAPE 2 : Alimentation de l'API (Clé OpenAI)
+    KROK 2 : Alimentation de l'API (deux clés — Anthropic et OpenAI)
 
-    Pour que l'intelligence artificielle fonctionne, elle a besoin d'accéder aux serveurs d'OpenAI (les créateurs de ChatGPT).
+    À partir de la version 18.0, l'application utilise deux fournisseurs d'intelligence artificielle et nécessite DEUX clés API dans le fichier golden_key.env :
 
+    •  Clé Anthropic (Claude) — alimente le moteur de narration du Réalisateur (livre audio, théâtre lu, brainstorming). Elle commence par sk-ant-.
+    •  Clé OpenAI — alimente la titration des chapitres, la détection de la langue du contenu, le mode Récit et le Polyglotte (traducteur). Elle commence par sk-.
+
+    Comment obtenir la clé Anthropic :
+    1. Créez un compte sur console.anthropic.com et approvisionnez votre compte (onglet Billing / Plans).
+    2. Générez une clé dans la section API Keys (elle commence par sk-ant-). Copiez-la immédiatement — elle peut n'être affichée qu'une seule fois.
+
+    Comment obtenir la clé OpenAI :
     1. Créez un compte sur platform.openai.com et approvisionnez votre compte dans l'onglet Billing.
-    2. Générez une clé dans l'onglet API Keys (elle commence par sk-proj-). Attention : la clé n'est affichée qu'une seule fois — au moment de sa création. Si vous fermez la fenêtre sans la copier, elle sera perdue à jamais et vous devrez la révoquer (option revoke secret key) et en générer une nouvelle. Copiez-la immédiatement, avant de cliquer sur quoi que ce soit.
-    3. Sur l'écran d'accueil du programme, cliquez sur le bouton "{home.btn_generate}". Le système créera automatiquement un fichier de configuration vierge à l'endroit approprié et ouvrira le Bloc-notes avec un modèle prêt à être édité.
-    4. Dans le fichier ouvert, vous verrez la ligne OPENAI_API_KEY=ICI_COLLER_VOTRE_CLÉ. Supprimez le texte de remplacement et collez votre clé copiée directement après le signe égal (sans espace). Enregistrez le fichier et relancez l'application.
+    2. Générez une clé dans l'onglet API Keys (elle commence par sk-proj-). Attention : la clé n'est affichée qu'une seule fois — au moment de la création. Si vous fermez la fenêtre sans la copier, elle est définitivement perdue et vous devrez la révoquer (option revoke secret key) et en générer une nouvelle. Copiez-la immédiatement, avant de cliquer sur quoi que ce soit.
 
-    Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera un message vert dans la section "{home.heading_system_check}" — cela signifie que tous les modules AI sont prêts à fonctionner. Sinon, elle vous indiquera clairement ce qui ne va pas et vous permettra d'ouvrir l'éditeur de texte pour corriger rapidement l'erreur.
+    Comment entrer les clés dans le programme :
+    3. Sur l'écran de démarrage du programme, cliquez sur le bouton "{home.btn_generate}". Le système créera automatiquement un fichier de configuration vierge à l'endroit approprié et ouvrira le Bloc-notes avec un modèle prêt à être édité.
+    4. Dans le fichier ouvert, vous verrez deux lignes : ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ et OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Dans chaque ligne, supprimez le texte de remplacement et collez la clé appropriée directement après le signe égal (sans espaces ni guillemets). Enregistrez le fichier et redémarrez l'application.
+
+    Astuce : Après le redémarrage, l'application vérifiera le fichier et affichera dans la section "{home.heading_system_check}" un statut distinct pour chaque clé. Les deux doivent être verts pour que tous les modules d'IA soient prêts à fonctionner. Si l'une des clés manque ou est incorrecte, le programme indiquera clairement laquelle et vous permettra d'ouvrir l'éditeur de texte pour corriger rapidement l'erreur.
   krok_3_glowne_studio: |
     KROK 3 : Studio Principal de Réalisation
 

@@ -213,6 +213,11 @@ home:
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
 # -----------------------------------------------------------------------------
+  heading_anthropic: Motor de narración (Anthropic / Claude) — requerido
+  ant_err_struktura: "🚨 ¡Error en la estructura del archivo!\nFalta la variable requerida ANTHROPIC_API_KEY=.\nDesde la versión 18.0, el motor de narración (audiolibro, teatro leído, brainstorming) funciona con el modelo Claude y requiere una clave separada.\nElimina el archivo, genéralo nuevamente y pega la clave con más cuidado."
+  ant_err_format: "🚨 ¡Formato de clave Anthropic sospechoso!\nLa clave correcta de Anthropic (Claude) siempre comienza con los caracteres sk-ant- (por ejemplo, sk-ant-api03-…).\nAsegúrate de haber copiado la clave de console.anthropic.com y no una clave de OpenAI."
+  ant_err_zbyt_krotki: "⚠️ La clave Anthropic parece demasiado corta (se detectaron {liczba_znakow} caracteres, se esperaban al menos {minimum_znakow}).\nProbablemente solo copiaste una parte de la clave. Regresa a console.anthropic.com y cópiala completa."
+  ant_ok: "✅ Clave Anthropic (Claude) detectada y correctamente formateada.\nEl motor de narración está listo para funcionar."
 rezyser:
   panel_name: "Panel de Director de Audio GPT"
   heading: "🎬  Director de Audio GPT – Estudio Creativo Híbrido"
