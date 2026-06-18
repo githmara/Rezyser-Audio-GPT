@@ -42,18 +42,7 @@ import urllib.error
 import urllib.request
 from email.message import EmailMessage
 
-from lingua import Language, LanguageDetectorBuilder
-
-
-# Lingua singleton zacisnięty do 9 wspieranych języków (te same co
-# `send_patch.py` i `issue_closure_north.py`). Cold-init detektora to ~3 sek;
-# trzymamy go na poziomie modułu, żeby nie inicjalizować przy każdym wywołaniu.
-LANGUAGES = [
-    Language.GERMAN, Language.ENGLISH, Language.SPANISH,
-    Language.FINNISH, Language.FRENCH, Language.ICELANDIC,
-    Language.ITALIAN, Language.POLISH, Language.RUSSIAN,
-]
-_detector = LanguageDetectorBuilder.from_languages(*LANGUAGES).build()
+import bot_i18n
 
 
 # Nagłówek crash-loga generowanego przez globalny handler wyjątków aplikacji
@@ -105,88 +94,8 @@ def _oczysc_tekst_dla_lingua(issue_body: str) -> str:
     return tekst.strip()
 
 
-# Komentarz Sami zostawiany na issue PO pomyślnej wysyłce maila do Centrum.
-# Jeden wariant per język (Sami to jedyna persona Południa — bez losowania).
-# Styl: włoski temperament, „Ciao!" + „A presto!", bezpośrednio adresuje
-# usera i informuje że jego zgłoszenie nie zostało zignorowane — kolejny
-# meldunek przyjdzie z Północy (Lumi/Vieno/Katla) po wydaniu fix-a.
-COMMENTS: dict[Language, str] = {
-    Language.POLISH: (
-        "Ciao! 🌞 Sami z Południa zauważyła Twoje zgłoszenie i już "
-        "pomknęła z technicznym promptem do Centrum. Za chwilkę "
-        "projektant aplikacji się tym zajmie — a kiedy poprawka wjedzie "
-        "do najnowszego wydania, odezwie się tutaj jedna z moich "
-        "koleżanek z Północy: Lumi, Vieno albo Katla. A presto!\n"
-        "— Sami"
-    ),
-    Language.ENGLISH: (
-        "Ciao! 🌞 Sami from the South has spotted your report and zoomed "
-        "off with a technical prompt to the Centre. The app's designer "
-        "will look into it shortly — and once the fix lands in the "
-        "latest release, one of my Northern colleagues will drop by "
-        "here: Lumi, Vieno or Katla. A presto!\n"
-        "— Sami"
-    ),
-    Language.GERMAN: (
-        "Ciao! 🌞 Sami aus dem Süden hat deine Meldung entdeckt und ist "
-        "mit dem technischen Prompt zum Zentrum geflitzt. Der "
-        "App-Entwickler kümmert sich gleich darum — und sobald die "
-        "Korrektur in der neuesten Veröffentlichung landet, meldet sich "
-        "hier eine meiner nordischen Kolleginnen: Lumi, Vieno oder "
-        "Katla. A presto!\n"
-        "— Sami"
-    ),
-    Language.SPANISH: (
-        "¡Ciao! 🌞 Sami del Sur ha visto tu reporte y ha salido "
-        "disparada con el prompt técnico hacia el Centro. El diseñador "
-        "de la aplicación se ocupará en breve — y cuando la corrección "
-        "llegue a la última versión, aparecerá por aquí una de mis "
-        "colegas del Norte: Lumi, Vieno o Katla. ¡A presto!\n"
-        "— Sami"
-    ),
-    Language.FINNISH: (
-        "Ciao! 🌞 Etelän Sami huomasi ilmoituksesi ja sujahti teknisen "
-        "kehotuksen kanssa Keskukseen. Sovelluksen suunnittelija "
-        "paneutuu siihen pian — ja kun korjaus saapuu uusimpaan "
-        "julkaisuun, täällä piipahtaa joku Pohjolan kollegoistani: "
-        "Lumi, Vieno tai Katla. A presto!\n"
-        "— Sami"
-    ),
-    Language.FRENCH: (
-        "Ciao ! 🌞 Sami du Sud a repéré ton signalement et est partie "
-        "en trombe avec le prompt technique vers le Centre. Le "
-        "concepteur de l'application s'en occupera sous peu — et "
-        "lorsque la correction arrivera dans la dernière version, "
-        "l'une de mes collègues du Nord passera par ici : Lumi, Vieno "
-        "ou Katla. À presto !\n"
-        "— Sami"
-    ),
-    Language.ICELANDIC: (
-        "Ciao! 🌞 Sami að sunnan kom auga á tilkynningu þína og þaut "
-        "af stað með tæknilegan leiðbeini til Miðstöðvarinnar. "
-        "Hönnuður forritsins tekur á henni innan stundar — og þegar "
-        "lagfæringin birtist í nýjustu útgáfu, mun ein af norrænu "
-        "kollegum mínum kíkja við hér: Lumi, Vieno eða Katla. "
-        "A presto!\n"
-        "— Sami"
-    ),
-    Language.ITALIAN: (
-        "Ciao! 🌞 Sami dal Sud ha avvistato la tua segnalazione ed è "
-        "sfrecciata con il prompt tecnico verso il Centro. Il "
-        "progettista dell'app se ne occuperà a breve — e quando la "
-        "correzione arriverà nell'ultima versione, qui passerà una "
-        "delle mie colleghe del Nord: Lumi, Vieno o Katla. A presto!\n"
-        "— Sami"
-    ),
-    Language.RUSSIAN: (
-        "Ciao! 🌞 Сами с Юга заметила твоё обращение и рванула с "
-        "техническим запросом в Центр. Разработчик приложения скоро "
-        "возьмётся за дело — а когда исправление попадёт в новейший "
-        "выпуск, сюда заглянет одна из моих коллег с Севера: Lumi, "
-        "Vieno или Katla. A presto!\n"
-        "— Sami"
-    ),
-}
+# Komentarz Sami: klucz bot.sami_comment w ui.yaml, renderowany przez
+# bot_i18n.t_bot — patrz docstring modułu.
 
 
 # Etykiety, które IGNORUJEMY (nie wysyłamy maila do Centrum).
@@ -538,17 +447,12 @@ def _zostaw_komentarz_sami(
         return
 
     czysty = _oczysc_tekst_dla_lingua(issue_body)
-    # Po wycięciu logów/linków zostało za mało, by detektor miał na czym pracować
-    # (czysty traceback wklejony bez opisu, samo „fix", gołe załączenie pliku)
-    # → uniwersalny angielski. Inaczej wykrywamy język realnego opisu usera.
-    if len(czysty) < 5:
-        wykryty = Language.ENGLISH
-    else:
-        wykryty = _detector.detect_language_of(czysty)
-        if wykryty not in COMMENTS:
-            wykryty = Language.ENGLISH
+    # Po wycięciu logów/linków za mało tekstu (czysty traceback bez opisu, samo
+    # „fix", gołe załączenie pliku) → None → t_bot na uniwersalny EN. Inaczej
+    # wykrywamy język realnego opisu usera (detektor dynamiczny z podstawy.yaml).
+    wykryty = bot_i18n.wykryj(czysty) if len(czysty) >= 5 else None
 
-    tresc = COMMENTS[wykryty]
+    tresc = bot_i18n.t_bot("bot.sami_comment", wykryty)
     if not czy_llm:
         # Sufiks per język byłby przerostem — pojedyncza krótka angielska
         # adnotacja w nawiasie wystarczy do sygnału „uważaj, fallback".
@@ -559,7 +463,7 @@ def _zostaw_komentarz_sami(
     if _gh(["gh", "issue", "comment", issue_number, "--repo", repo,
             "--body", tresc]):
         print(f"Komentarz Sami dodany do issue #{issue_number} "
-              f"(język: {wykryty.name}).")
+              f"(język: {bot_i18n.kod_iso(wykryty)}).")
 
 
 def _lista_otwartych_issues() -> str:

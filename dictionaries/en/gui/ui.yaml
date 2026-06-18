@@ -1329,3 +1329,27 @@ opowiesci:
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context and try again.
   odrzucenie_tytul: Action cannot be conducted
   odrzucenie_tresc: The narrative engine cannot conduct this action — it might have been off-topic, impossible in this world, or against content rules. The turn was not saved. Rephrase the action and try again.
+bot:
+  closure:
+    Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio AI Director release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"
+    Vieno: "Greetings.\n\nThe Northern winds carried word that your request has found its place in the new release. The vision has manifested.\n\nThe latest release awaits here: {link}\n\nClosing this circle — the matter has reached its end.\n— Vieno"
+    Katla: "Hey!\n\nForged in volcanic fire and still glowing! Your request has been resolved in the latest Audio AI Director release.\n\nCatch it here: {link}\n\nClosing the issue — volcanic greetings!\n— Katla"
+  answered:
+    Lumi: "Hi!\n\nWord from the Centre has reached the North with an answer for you. Passing it along exactly as it was given:\n\n{maintainer_answer}\n\nClosing the issue — the snow has settled on this matter. Stay frosty!\n— Lumi"
+    Vieno: "Greetings.\n\nThe Northern winds carried words of answer from the Centre. I relay them intact:\n\n{maintainer_answer}\n\nClosing this circle — the question has reached its end.\n— Vieno"
+    Katla: "Hey!\n\nA hot word from the Centre arrived at the North — passing it on to you directly:\n\n{maintainer_answer}\n\nClosing the issue — volcanic greetings!\n— Katla"
+  personal_note_intro: 'An additional message from the maintainer for you:'
+  patch:
+    Lumi:
+      subject: 'Tiflotecnia Voices patch — winter delivery #{issue_number}'
+      body: "Hi!\n\nI waded through the snowdrifts to deliver this! Your patch is ready, and I closed the issue to keep the cold out.\n{link}\n\nIf a blizzard hid this message, please check your Spam or Junk folder.\n\nStay frosty,\nLumi"
+    Vieno:
+      subject: 'Tiflotecnia Voices patch — a vision for request #{issue_number}'
+      body: "Greetings.\n\nThe Northern Spirits have brought word of your request. The ritual is complete, and the patch has manifested here:\n{link}\n\nIf the vision did not reach your inbox, search the mist in your Spam folder.\n\nListen to the wind,\nVieno"
+    Katla:
+      subject: 'Tiflotecnia Voices patch — hot off the forge #{issue_number}'
+      body: "Hey!\n\nForged in volcanic fire and still glowing! Sending you the patch and closing the issue.\n{link}\n\nIf smoke obscured your view of the inbox, be sure to check your Spam folder.\n\nWith volcanic greetings,\nKatla"
+    footer: 'You are receiving this because your email was provided in GitHub Issue #{issue_number}. If you didn''t request this, please ignore.'
+    brak_emaila: I couldn't find an email address in the issue — please add one.
+    pauza: A Tiflotecnia Voices patch update is currently in progress. I'm leaving this issue open and will return with an updated link once I'm done — no action needed on your end.
+  sami_comment: "Ciao! 🌞 Sami from the South has spotted your report and zoomed off with a technical prompt to the Centre. The app's designer will look into it shortly — and once the fix lands in the latest release, one of my Northern colleagues will drop by here: Lumi, Vieno or Katla. A presto!\n— Sami"

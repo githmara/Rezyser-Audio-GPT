@@ -1315,3 +1315,27 @@ opowiesci:
   err_dlugosc: La réponse du modèle a été coupée avant qu'il ne puisse la terminer (limite de longueur dépassée). Raccourcissez le contexte et réessayez.
   odrzucenie_tytul: Action impossible à mener
   odrzucenie_tresc: Le moteur narratif ne peut pas mener cette action — elle pourrait être hors sujet, impossible dans ce monde ou non conforme aux règles de contenu. Le tour n'a pas été enregistré. Reformulez l'action et réessayez.
+bot:
+  closure:
+    Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio AI.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"
+    Vieno: "Salutations.\n\nLes vents du Nord ont porté la nouvelle : votre demande a trouvé sa place dans la nouvelle version. La vision s'est manifestée.\n\nLa dernière version vous attend ici : {link}\n\nJe referme ce cercle — l'affaire a atteint sa fin.\n— Vieno"
+    Katla: "Hé !\n\nForgée dans le feu volcanique et encore brûlante ! Votre demande a été résolue dans la dernière version du Réalisateur Audio AI.\n\nAttrapez-la ici : {link}\n\nJe clôture le ticket — salutations volcaniques !\n— Katla"
+  answered:
+    Lumi: "Bonjour !\n\nUn message du Centre est parvenu au Nord — une réponse pour vous. Je vous la transmets exactement comme elle a été formulée :\n\n{maintainer_answer}\n\nJe clôture le ticket — la neige s'est posée sur cette affaire. Glaciales salutations !\n— Lumi"
+    Vieno: "Salutations.\n\nLes vents du Nord ont porté les mots de réponse du Centre. Je vous les relaye intacts :\n\n{maintainer_answer}\n\nJe referme ce cercle — la question a atteint sa fin.\n— Vieno"
+    Katla: "Hé !\n\nUn mot brûlant du Centre est arrivé au Nord — je vous le transmets directement :\n\n{maintainer_answer}\n\nJe clôture le ticket — salutations volcaniques !\n— Katla"
+  personal_note_intro: 'Un message supplémentaire du mainteneur pour vous :'
+  patch:
+    Lumi:
+      subject: 'Patch Tiflotecnia Voices — livraison hivernale #{issue_number}'
+      body: "Bonjour !\n\nJe me suis frayée un chemin à travers les congères pour vous livrer ceci ! Votre patch est prêt et j'ai clôturé le ticket pour que le froid ne s'engouffre pas.\n{link}\n\nSi une tempête de neige a caché le message dans votre boîte, vérifiez le dossier Spam ou Courrier indésirable.\n\nGlaciales salutations,\nLumi"
+    Vieno:
+      subject: 'Patch Tiflotecnia Voices — une vision pour la demande #{issue_number}'
+      body: "Salutations.\n\nLes Esprits du Nord ont apporté des nouvelles de votre demande. Le rituel s'est achevé et le patch s'est matérialisé ici :\n{link}\n\nSi la vision n'a pas atteint votre boîte, fouillez la brume dans le dossier Spam.\n\nÉcoute le vent,\nVieno"
+    Katla:
+      subject: 'Patch Tiflotecnia Voices — sorti tout chaud de la forge #{issue_number}'
+      body: "Hé !\n\nForgé dans le feu volcanique et encore brûlant ! Je vous envoie le patch et je clôture le ticket.\n{link}\n\nSi la fumée vous a masqué la vue de votre boîte, pensez à vérifier le dossier Spam.\n\nSalutations volcaniques,\nKatla"
+    footer: "Vous recevez ce message car votre adresse e-mail a été indiquée dans le GitHub Issue #{issue_number}. Si vous n'êtes pas à l'origine de cette demande, veuillez l'ignorer."
+    brak_emaila: Aucune adresse e-mail n'a été trouvée dans le contenu — merci de bien vouloir la compléter.
+    pauza: La mise à jour du patch Tiflotecnia Voices est en cours. Je laisse ce ticket ouvert et reviendrai avec un lien à jour dès que j'aurai terminé — vous n'avez rien à faire.
+  sami_comment: "Ciao ! 🌞 Sami du Sud a repéré ton signalement et est partie en trombe avec le prompt technique vers le Centre. Le concepteur de l'application s'en occupera sous peu — et lorsque la correction arrivera dans la dernière version, l'une de mes collègues du Nord passera par ici : Lumi, Vieno ou Katla. À presto !\n— Sami"

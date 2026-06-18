@@ -21,9 +21,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      # NOWY KROK: Instalacja Lingua
+      # Lingua (detekcja języka) + PyYAML (i18n czyta ui.yaml przez bot_i18n).
       - name: Instalacja zależności
-        run: pip install lingua-language-detector
+        run: pip install lingua-language-detector pyyaml
 
       - name: Wysłanie maila z patchem
         id: send_patch

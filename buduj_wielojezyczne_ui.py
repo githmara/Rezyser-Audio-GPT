@@ -240,7 +240,33 @@ def _natywna_nazwa(kod: str) -> str:
 # reguł naturalności (których PL-prompt w ogóle nie miał) + cel podany natywnie.
 # Słowo "JSON" w prompcie nieobowiązkowe na Claude (structured outputs egzekwuje
 # schemat `SCHEMA_TLUMACZENIA` na poziomie API), ale zostaje dla czytelności.
-def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
+def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str, *, persona_hint: bool = False) -> str:
+    # Warunkowy blok „głos person" wstrzykiwany TYLKO gdy bieżący chunk zawiera
+    # liście `bot.*` (komunikaty bohaterek obiegu zgłoszeń). Bez niego model
+    # kotwiczy się na „krótkich etykietach UI" i spłaszcza literacki głos person
+    # (audyt usera 2026-06-18: Lumi „Stay frosty!"→„Frosty greetings!", Vieno
+    # „ritual/manifest"→„materialized", Katla „glowing"→„hot", Sami „zooms off"→
+    # „passes on"). Reguła Sami `Ciao!`/`A presto!` (freeze marki) też tu siedzi.
+    persona_blok = (
+        "## Persona voice (applies ONLY to keys under `bot.*` — in-world messages)\n"
+        "Some items are NOT short UI labels but LONG in-world messages from named "
+        "characters of the issue-handling flow. Translate them as LITERARY PROSE, "
+        "preserving each character's tone, metaphors and flair — a literal or "
+        "watered-down rendering is WRONG here:\n"
+        "- **Lumi** — icy, snowy, blunt with dry humour. Keep frost/snow/cold imagery "
+        "and her crisp sign-offs (e.g. EN \"Stay frosty!\", not \"Frosty greetings!\").\n"
+        "- **Vieno** — shamanic, misty, ritual register. Keep the rite/ritual, visions "
+        "that \"manifest\" and closing \"circles\" — NOT a technical \"materialized\".\n"
+        "- **Katla** — volcanic, scorching. Keep \"glowing\"/\"white-hot\" intensity — "
+        "NOT a flat \"hot\".\n"
+        "- **Sami** — energetic, fast, smiling Italian dispatcher. She \"zooms/darts "
+        "off\" with the report — NOT merely \"passes it on\". Keep the Italian "
+        "catchphrases `Ciao!` and `A presto!` VERBATIM in Italian in EVERY language "
+        "(her brand — never \"Hi!\"/\"See you soon!\"/\"Stay tuned!\").\n"
+        "Render the imagery and energy IDIOMATICALLY in the target language — match the "
+        "force of the source, do not neutralize it.\n\n"
+    ) if persona_hint else ""
+
     return (
         "# Role\n"
         "You are a professional UI localizer for a desktop wxPython application. "
@@ -286,6 +312,7 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
         "keep the number (digits + dot) and the dash, but translate the Polish phrase "
         "'Wersja Wydawnicza' into the target-language equivalent "
         "(e.g. 'Release Edition' / 'Julkaisuversio').\n\n"
+        + persona_blok +
         "## Response format\n"
         "Return ONLY valid JSON `{\"translations\": [...]}`. No code fences, no "
         "preamble, no summary."
@@ -332,6 +359,14 @@ def ustaw_po_sciezce(node: Any, sciezka: str, nowa_wartosc: str) -> None:
         if seg.startswith("[") and seg.endswith("]"):
             node = node[int(seg[1:-1])]
         else:
+            # Auto-twórz brakującą gałąź mapowania w trybie UPDATE (--klucz):
+            # gdy do obcego pliku dochodzi CAŁKIEM NOWY klucz (np. sekcja
+            # `bot:` dodana w PL, której obce ui.yaml jeszcze nie mają),
+            # `node[seg]` rzuciłby KeyError. Tworzymy pusty dict, by iniekcja
+            # nowych liści zadziałała bez pełnego regenu całego pliku. Indeksy
+            # list NIE są auto-tworzone (brak sensownej semantyki rozmiaru).
+            if seg not in node:
+                node[seg] = {}
             node = node[seg]
     ostatni = segmenty[-1]
     if ostatni.startswith("[") and ostatni.endswith("]"):
@@ -450,6 +485,8 @@ def wywolaj_llm(
     nazwa_celu: str,
     kod: str,
     liscie_tok: list[tuple[int, str]],
+    *,
+    persona_hint: bool = False,
 ) -> dict[int, str]:
     """Wysyła JEDEN chunk, zwraca mapę id → tgt.
 
@@ -478,7 +515,7 @@ def wywolaj_llm(
         max_tokens=MAX_TOKENS_OUT,
         temperature=0.0,
         thinking={"type": "disabled"},
-        system=_PROMPT_SYSTEMOWY(nazwa_celu, kod),
+        system=_PROMPT_SYSTEMOWY(nazwa_celu, kod, persona_hint=persona_hint),
         messages=[{
             "role": "user",
             "content": (
@@ -705,9 +742,13 @@ def tlumacz_jezyk(
     print(f"🌍 {kod}: {model} (cel: {nazwa_cel}), {n_chunkow} chunków po max {BATCH_SIZE} liści...")
     for nr, start in enumerate(range(0, total, BATCH_SIZE), start=1):
         chunk = liscie_tok[start:start + BATCH_SIZE]
-        print(f"   {kod}: chunk {nr}/{n_chunkow} (id {chunk[0][0]}..{chunk[-1][0]}, {len(chunk)} liści)...")
+        # Warunkowa uwaga „głos person" — tylko gdy chunk zawiera liście `bot.*`.
+        persona_hint = any(liscie_pl[idx][0].startswith("bot.") for idx, _ in chunk)
+        print(f"   {kod}: chunk {nr}/{n_chunkow} (id {chunk[0][0]}..{chunk[-1][0]}, "
+              f"{len(chunk)} liści{', +persona' if persona_hint else ''})...")
         try:
-            mapa_tgt.update(wywolaj_llm(klient, model, nazwa_cel, kod, chunk))
+            mapa_tgt.update(wywolaj_llm(klient, model, nazwa_cel, kod, chunk,
+                                        persona_hint=persona_hint))
         except RuntimeError as exc:
             print(f"❌ {kod}: błąd LLM w chunk {nr}/{n_chunkow} — {exc}")
             return False
@@ -741,8 +782,10 @@ def tlumacz_jezyk(
     if porazki:
         print(f"⚠️  {kod}: {len(porazki)} liści wymaga retry...")
         do_retry = [(idx, src_po_idx[idx]) for idx, _ in porazki]
+        persona_hint_retry = any(liscie_pl[idx][0].startswith("bot.") for idx, _ in do_retry)
         try:
-            retry_tgt = wywolaj_llm(klient, model, nazwa_cel, kod, do_retry)
+            retry_tgt = wywolaj_llm(klient, model, nazwa_cel, kod, do_retry,
+                                    persona_hint=persona_hint_retry)
         except RuntimeError as exc:
             print(f"❌ {kod}: retry się wywalił — {exc}")
             return False

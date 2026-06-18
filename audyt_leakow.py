@@ -61,15 +61,36 @@ FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
 KOD_ZRODLOWY = "pl"
 
-# Kody docelowe (bez pl — to źródło). Mapowanie na enum lingua robione lazy
-# w `_zbuduj_detektor`, żeby import modułu nie ciągnął modeli językowych.
-KODY_DOCELOWE = ["en", "de", "es", "fi", "fr", "is", "it", "ru"]
+# Mapa {kod ISO: nazwa enum lingua} budowana DYNAMICZNIE ze
+# `dictionaries/<kod>/podstawy.yaml::lingua` (bez źródłowego pl) — nowy język =
+# nowy folder, zero edycji tutaj. Spójne z `core_poliglota._zbuduj_mapowanie_lingua`
+# i `bot_i18n.mapa_iso_na_lingua` (lekka kopia: ten dev-tool celowo trzyma deps
+# wąsko — sam `yaml` + lazy `lingua`, bez ciągnięcia silnika z docx/num2words).
+# Mapowanie na enum robione lazy w `_zbuduj_detektor` (string → getattr).
+def _skanuj_lingua_z_podstaw() -> dict[str, str]:
+    """{kod ISO: NAZWA_ENUMA} z podstawy.yaml::lingua (pomija pl, puste, błędne)."""
+    if not DICT_DIR.is_dir():
+        return {}
+    wynik: dict[str, str] = {}
+    for p in sorted(DICT_DIR.iterdir()):
+        if not p.is_dir() or p.name == KOD_ZRODLOWY:
+            continue
+        plik = p / "podstawy.yaml"
+        if not plik.is_file():
+            continue
+        try:
+            dane = yaml.safe_load(plik.read_text(encoding="utf-8"))
+        except (OSError, yaml.YAMLError):
+            continue
+        if isinstance(dane, dict):
+            wartosc = dane.get("lingua")
+            if isinstance(wartosc, str) and wartosc.strip():
+                wynik[p.name] = wartosc.strip().upper()
+    return wynik
 
-# Nazwa lingua.Language per kod (string — rozwijany lazy na enum).
-_NAZWA_LINGUA = {
-    "en": "ENGLISH", "de": "GERMAN", "es": "SPANISH", "fi": "FINNISH",
-    "fr": "FRENCH", "is": "ICELANDIC", "it": "ITALIAN", "ru": "RUSSIAN",
-}
+
+_NAZWA_LINGUA = _skanuj_lingua_z_podstaw()
+KODY_DOCELOWE = sorted(_NAZWA_LINGUA)
 
 # ---------------------------------------------------------------------------
 # Whitelista — maskowana PRZED detekcją lingua (inaczej false-positives)

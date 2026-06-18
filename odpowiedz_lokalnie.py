@@ -13,18 +13,20 @@ Skrypt opakowuje treść w styl jednej z bohaterek Północy (Lumi/Vieno/Katla),
 wykrywa język oryginalnego zgłoszenia (lingua) i robi przez ``gh``:
 ``issue comment`` → ``issue close`` → ``issue lock --reason resolved``.
 
-Templatki (TEMPLATES, TEMPLATES_ANSWERED, PERSONAL_NOTE_INTRO, PERSONAS,
-detektor lingua) importujemy z ``.github/scripts/issue_closure_north.py`` —
-single source, bez duplikowania ~250 linii szablonów personalnych.
+Teksty person renderuje ``bot_i18n.t_bot`` z ``dictionaries/<kod>/gui/ui.yaml``
+(sekcja ``bot:``) — to samo źródło prawdy, którego używa bot Actions. Wykrywanie
+języka robi ``bot_i18n.wykryj`` (detektor budowany dynamicznie ze
+``dictionaries/*/podstawy.yaml``). Listę person (PERSONAS) importujemy z bota
+Północy ``.github/scripts/issue_closure_north.py`` (single source).
 
 Dwa tryby:
   * ``answered`` (domyślny) — odpowiedź na pytanie/help wanted. Draft jest
-    OBOWIĄZKOWY (to treść odpowiedzi), opakowywany w TEMPLATES_ANSWERED bez
-    linku do Release.
+    OBOWIĄZKOWY (to treść odpowiedzi), opakowywany w klucz ``bot.answered.*``
+    bez linku do Release.
   * ``fixed-in-release`` — domknięcie buga z linkiem do najnowszego Release
-    (TEMPLATES). Draft jest OPCJONALNY: jeśli istnieje, dolepiamy go jako
+    (``bot.closure.*``). Draft jest OPCJONALNY: jeśli istnieje, dolepiamy go jako
     osobistą notkę pod separatorem ``---`` (dawny „release-with-answer").
-    Bez draftu publikujemy sam TEMPLATES z linkiem. Uwaga: zwykłe bugi i tak
+    Bez draftu publikujemy sam ``bot.closure.*`` z linkiem. Uwaga: zwykłe bugi i tak
     domyka bot przez web-label `fixed-in-release` — ten tryb jest dla sytuacji,
     gdy chcesz dorzucić osobistą wiadomość lub zamknąć ręcznie z lokala.
 
@@ -50,17 +52,14 @@ import random
 import subprocess
 import sys
 
-# Templatki + detektor języka żyją w bocie Północy (single source).
+# Detektor języka + lista person żyją w bocie Północy; teksty person renderuje
+# `bot_i18n.t_bot` z `dictionaries/<kod>/gui/ui.yaml` (sekcja `bot:`) — to samo
+# źródło prawdy, którego używa bot Actions (koniec hardkodowanych dictów).
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                 ".github", "scripts"))
-from issue_closure_north import (  # noqa: E402
-    Language,
-    PERSONAL_NOTE_INTRO,
-    PERSONAS,
-    TEMPLATES,
-    TEMPLATES_ANSWERED,
-    detector,
-)
+import bot_i18n  # noqa: E402
+from lingua import Language  # noqa: E402
+from issue_closure_north import PERSONAS  # noqa: E402
 
 DOMYSLNY_PLIK = os.path.join("skrypty", "pending_answer.md")
 
@@ -109,18 +108,22 @@ def _wczytaj_draft(sciezka: str) -> str:
 
 
 def _wykryj_jezyk(tekst: str) -> Language:
-    wykryty = detector.detect_language_of(tekst) if tekst.strip() else None
-    return wykryty if wykryty in TEMPLATES else Language.ENGLISH
+    # Detektor budowany dynamicznie ze `dictionaries/*/podstawy.yaml`
+    # (bot_i18n.wykryj) — wynik to jeden z obecnych języków albo None (pusty
+    # tekst / niepewność) → wtedy angielski. t_bot i tak ma własny fallback EN,
+    # ale Language jest potrzebny do logu (.name).
+    return bot_i18n.wykryj(tekst) or Language.ENGLISH
 
 
 def _buduj_tresc(tryb: str, jezyk: Language, persona: str, draft: str,
                  link: str | None) -> str:
     if tryb == "answered":
-        return TEMPLATES_ANSWERED[jezyk][persona].format(maintainer_answer=draft)
-    # fixed-in-release: TEMPLATES z linkiem + opcjonalny dolepek osobistej notki.
-    tresc = TEMPLATES[jezyk][persona].format(link=link)
+        return bot_i18n.t_bot(f"bot.answered.{persona}", jezyk,
+                              maintainer_answer=draft)
+    # fixed-in-release: closure z linkiem + opcjonalny dolepek osobistej notki.
+    tresc = bot_i18n.t_bot(f"bot.closure.{persona}", jezyk, link=link)
     if draft:
-        intro = PERSONAL_NOTE_INTRO.get(jezyk, PERSONAL_NOTE_INTRO[Language.ENGLISH])
+        intro = bot_i18n.t_bot("bot.personal_note_intro", jezyk)
         tresc = f"{tresc}\n\n---\n\n*{intro}*\n\n{draft}"
     return tresc
 

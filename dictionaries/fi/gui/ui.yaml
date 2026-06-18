@@ -1320,3 +1320,27 @@ opowiesci:
   err_dlugosc: Mallin vastaus katkaistiin ennen kuin se ehti lopettaa sen (pituusraja ylitetty). Lyhennä kontekstia ja yritä uudelleen.
   odrzucenie_tytul: Toimintoa ei voida suorittaa
   odrzucenie_tresc: Kerrontamoottori ei voi suorittaa tätä toimintoa — se saattoi olla aiheen ulkopuolella, mahdoton tässä maailmassa tai ristiriidassa sisältösääntöjen kanssa. Vuoroa ei ole tallennettu. Muotoile toiminto uudelleen ja yritä uudelleen.
+bot:
+  closure:
+    Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Audio AI -ohjaajan julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"
+    Vieno: "Tervehdys.\n\nPohjolan tuulet ovat tuoneet sanan, että pyyntösi on löytänyt paikkansa uudessa julkaisussa. Näky on toteutunut.\n\nUusin julkaisu odottaa täällä: {link}\n\nSuljen tämän piirin — asia on saapunut päätökseen.\n— Vieno"
+    Katla: "Hei!\n\nTaottu tulivuoren tulessa ja yhä hehkuva! Pyyntösi on ratkaistu uusimmassa Audio AI -ohjaajan julkaisussa.\n\nTartu siihen täällä: {link}\n\nSuljen ilmoituksen — tulivuoriterveisin!\n— Katla"
+  answered:
+    Lumi: "Hei!\n\nKeskuksesta on saapunut Pohjolaan sana — vastaus sinulle. Välitän sen täsmälleen siinä muodossa kuin se annettiin:\n\n{maintainer_answer}\n\nSuljen ilmoituksen — lumi on laskeutunut tämän asian päälle. Pysy kylmänä!\n— Lumi"
+    Vieno: "Tervehdys.\n\nPohjolan tuulet ovat tuoneet vastauksen sanat Keskuksesta. Välitän ne ehjinä:\n\n{maintainer_answer}\n\nSuljen tämän piirin — kysymys on saapunut päätökseen.\n— Vieno"
+    Katla: "Hei!\n\nKuuma sana Keskuksesta saapui Pohjolaan — annan sen sinulle suoraan:\n\n{maintainer_answer}\n\nSuljen ilmoituksen — tulivuoriterveisin!\n— Katla"
+  personal_note_intro: 'Lisäviesti ylläpitäjältä sinulle:'
+  patch:
+    Lumi:
+      subject: 'Tiflotecnia Voices -korjaustiedosto — talvitoimitus #{issue_number}'
+      body: "Hei!\n\nTallasin tieni nietosten läpi tuodakseni tämän! Korjaustiedostosi on valmis ja suljin ilmoituksen, jottei kylmä pääse sisään.\n{link}\n\nJos lumimyrsky kätki viestin postilaatikkoosi, tarkista roskaposti- tai mainoskansio.\n\nPysy kylmänä,\nLumi"
+    Vieno:
+      subject: 'Tiflotecnia Voices -korjaustiedosto — näky pyyntöön #{issue_number}'
+      body: "Tervehdys.\n\nPohjolan henget toivat sanan pyynnöstäsi. Riitti on päättynyt ja korjaustiedosto on ilmestynyt tänne:\n{link}\n\nJos näky ei saavuttanut postilaatikkoasi, etsi sumusta roskapostikansiosta.\n\nKuuntele tuulta,\nVieno"
+    Katla:
+      subject: 'Tiflotecnia Voices -korjaustiedosto — pajasta kuumana #{issue_number}'
+      body: "Hei!\n\nTaottu tulivuoren tulessa ja yhä hehkuva! Lähetän korjaustiedoston ja suljen ilmoituksen.\n{link}\n\nJos savu peitti näkymäsi postilaatikkoon, tarkista ehdottomasti roskapostikansio.\n\nTulivuorimaisin terveisin,\nKatla"
+    footer: 'Saat tämän viestin, koska sähköpostiosoitteesi annettiin GitHub Issuessa #{issue_number}. Jos et tehnyt tätä pyyntöä, voit jättää viestin huomiotta.'
+    brak_emaila: En löytänyt sähköpostiosoitetta viestistä — lisää se, kiitos.
+    pauza: Tiflotecnia Voices -patchia päivitetään parhaillaan. Jätän tämän tiketin auki ja palaan ajantasaisella linkillä heti kun olen valmis — sinun ei tarvitse tehdä mitään.
+  sami_comment: "Ciao! 🌞 Etelän Sami huomasi ilmoituksesi ja sujahti teknisen kehotuksen kanssa Keskukseen. Sovelluksen suunnittelija paneutuu siihen pian — ja kun korjaus saapuu uusimpaan julkaisuun, täällä piipahtaa joku Pohjolan kollegoistani: Lumi, Vieno tai Katla. A presto!\n— Sami"

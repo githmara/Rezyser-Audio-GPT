@@ -1322,3 +1322,27 @@ opowiesci:
   err_dlugosc: La risposta del modello è stata troncata prima che potesse completarla (superato il limite di lunghezza). Accorcia il contesto e riprova.
   odrzucenie_tytul: Azione non eseguibile
   odrzucenie_tresc: Il motore narrativo non può eseguire questa azione — potrebbe essere fuori tema, impossibile in questo mondo o non conforme alle regole del contenuto. Il turno non è stato salvato. Riformula l'azione e riprova.
+bot:
+  closure:
+    Lumi: "Ciao!\n\nLa neve si è posata e la correzione è arrivata! Tutto ciò che hai chiesto è appena atterrato nell'ultima versione del Regista Audio AI.\n\nPrendi l'aggiornamento qui: {link}\n\nChiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n— Lumi"
+    Vieno: "Salve.\n\nI venti del Nord hanno portato notizia che la tua richiesta ha trovato il suo posto nella nuova versione. La visione si è manifestata.\n\nL'ultima versione ti aspetta qui: {link}\n\nChiudo questo cerchio — la questione ha raggiunto la sua fine.\n— Vieno"
+    Katla: "Ehi!\n\nForgiata nel fuoco vulcanico e ancora rovente! La tua richiesta è stata risolta nell'ultima versione del Regista Audio AI.\n\nAcchiappala qui: {link}\n\nChiudo la segnalazione — saluti vulcanici!\n— Katla"
+  answered:
+    Lumi: "Ciao!\n\nUna notizia dal Centro è giunta al Nord — una risposta per te. Te la trasmetto esattamente come è stata formulata:\n\n{maintainer_answer}\n\nChiudo la segnalazione — la neve si è posata su questa faccenda. Saluti gelidi!\n— Lumi"
+    Vieno: "Salve.\n\nI venti del Nord hanno portato parole di risposta dal Centro. Te le riferisco intatte:\n\n{maintainer_answer}\n\nChiudo questo cerchio — la domanda ha raggiunto la sua fine.\n— Vieno"
+    Katla: "Ehi!\n\nUna parola rovente dal Centro è arrivata al Nord — te la passo direttamente:\n\n{maintainer_answer}\n\nChiudo la segnalazione — saluti vulcanici!\n— Katla"
+  personal_note_intro: 'Un messaggio aggiuntivo dal maintainer per te:'
+  patch:
+    Lumi:
+      subject: 'Patch Tiflotecnia Voices — consegna invernale #{issue_number}'
+      body: "Ciao!\n\nMi sono fatta strada tra i cumuli di neve per consegnartela! La tua patch è pronta e ho chiuso la segnalazione perché non entri il freddo.\n{link}\n\nSe una bufera ha nascosto il messaggio nella posta in arrivo, controlla la cartella Spam o Posta indesiderata.\n\nSaluti gelidi,\nLumi"
+    Vieno:
+      subject: 'Patch Tiflotecnia Voices — una visione per la richiesta #{issue_number}'
+      body: "Salve.\n\nGli Spiriti del Nord hanno portato notizia della tua richiesta. Il rito si è concluso e la patch si è manifestata qui:\n{link}\n\nSe la visione non è arrivata nella tua posta in arrivo, cerca nella nebbia della cartella Spam.\n\nAscolta il vento,\nVieno"
+    Katla:
+      subject: 'Patch Tiflotecnia Voices — appena uscita dalla fucina #{issue_number}'
+      body: "Ehi!\n\nForgiata nel fuoco vulcanico e ancora rovente! Ti mando la patch e chiudo la segnalazione.\n{link}\n\nSe il fumo ti ha coperto la vista della posta in arrivo, controlla assolutamente la cartella Spam.\n\nSaluti vulcanici,\nKatla"
+    footer: 'Ricevi questo messaggio perché il tuo indirizzo email è stato fornito nella GitHub Issue #{issue_number}. Se non sei stato tu a fare la richiesta, ignora pure il messaggio.'
+    brak_emaila: Non ho trovato alcun indirizzo email nel testo — ti chiedo di aggiungerlo.
+    pauza: È in corso l'aggiornamento del patch Tiflotecnia Voices. Lascio questa segnalazione aperta e tornerò con il link aggiornato non appena avrò finito — non devi fare nulla.
+  sami_comment: "Ciao! 🌞 Sami dal Sud ha avvistato la tua segnalazione ed è sfrecciata con il prompt tecnico verso il Centro. Il progettista dell'app se ne occuperà a breve — e quando la correzione arriverà nell'ultima versione, qui passerà una delle mie colleghe del Nord: Lumi, Vieno o Katla. A presto!\n— Sami"

@@ -36,8 +36,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalacja zaleznosci (lingua)
-        run: pip install lingua-language-detector
+      - name: Instalacja zaleznosci (lingua + pyyaml)
+        run: pip install lingua-language-detector pyyaml
 
       - name: Polnocna bohaterka komentuje i zamyka
         # UWAGA: argumentow NIE przekazujemy przez CLI, bo bash robi

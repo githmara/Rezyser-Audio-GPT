@@ -43,10 +43,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalacja zaleznosci (openai + lingua)
+      - name: Instalacja zaleznosci (openai + lingua + pyyaml)
         run: |
           pip install --upgrade "openai>=1.40,<2.0"
-          pip install lingua-language-detector
+          pip install lingua-language-detector pyyaml
 
       - name: Zbierz etykiety issue do CSV
         id: labels

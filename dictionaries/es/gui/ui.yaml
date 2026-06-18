@@ -1324,3 +1324,27 @@ opowiesci:
   err_dlugosc: La respuesta del modelo fue cortada antes de que pudiera completarla (se excedió el límite de longitud). Acorta el contexto e intenta de nuevo.
   odrzucenie_tytul: Acción no ejecutable
   odrzucenie_tresc: El motor narrativo no puede ejecutar esta acción — podría estar fuera de tema, ser imposible en este mundo o no cumplir con las reglas de contenido. El turno no fue guardado. Reformula la acción y vuelve a intentarlo.
+bot:
+  closure:
+    Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio AI.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"
+    Vieno: "Saludos.\n\nLos vientos del Norte han traído noticia de que tu solicitud ha encontrado su lugar en la nueva versión. La visión se ha manifestado.\n\nLa última versión te espera aquí: {link}\n\nCierro este círculo — el asunto ha llegado a su fin.\n— Vieno"
+    Katla: "¡Hey!\n\n¡Forjada en fuego volcánico y todavía al rojo vivo! Tu solicitud ha sido resuelta en la última versión del Director de Audio AI.\n\nRecógela aquí: {link}\n\nCierro la incidencia — ¡saludos volcánicos!\n— Katla"
+  answered:
+    Lumi: "¡Hola!\n\nUna noticia desde el Centro ha llegado al Norte — una respuesta para ti. La transmito exactamente tal como fue formulada:\n\n{maintainer_answer}\n\nCierro la incidencia — la nieve se ha asentado sobre este asunto. ¡Que la escarcha te acompañe!\n— Lumi"
+    Vieno: "Saludos.\n\nLos vientos del Norte han traído palabras de respuesta desde el Centro. Las relevo intactas:\n\n{maintainer_answer}\n\nCierro este círculo — la pregunta ha llegado a su fin.\n— Vieno"
+    Katla: "¡Hey!\n\nUna palabra ardiente del Centro llegó al Norte — te la paso directamente:\n\n{maintainer_answer}\n\nCierro la incidencia — ¡saludos volcánicos!\n— Katla"
+  personal_note_intro: 'Un mensaje adicional del maintainer para ti:'
+  patch:
+    Lumi:
+      subject: 'Parche Tiflotecnia Voices — entrega invernal #{issue_number}'
+      body: "¡Hola!\n\n¡He atravesado los ventisqueros para entregártelo! Tu parche está listo y he cerrado la incidencia para que no entre el frío.\n{link}\n\nSi una ventisca ha escondido el mensaje en tu bandeja, revisa la carpeta de Spam o Correo no deseado.\n\nQue la escarcha te acompañe,\nLumi"
+    Vieno:
+      subject: 'Parche Tiflotecnia Voices — una visión para la solicitud #{issue_number}'
+      body: "Saludos.\n\nLos Espíritus del Norte han traído noticias de tu solicitud. El ritual ha concluido y el parche se ha manifestado aquí:\n{link}\n\nSi la visión no llegó a tu bandeja, busca entre la niebla en la carpeta de Spam.\n\nEscucha al viento,\nVieno"
+    Katla:
+      subject: 'Parche Tiflotecnia Voices — recién salido de la fragua #{issue_number}'
+      body: "¡Hey!\n\n¡Forjado en fuego volcánico y todavía al rojo vivo! Te envío el parche y cierro la incidencia.\n{link}\n\nSi el humo te ha tapado la bandeja, asegúrate de revisar la carpeta de Spam.\n\nSaludos volcánicos,\nKatla"
+    footer: 'Recibes este mensaje porque tu dirección de correo se proporcionó en el GitHub Issue #{issue_number}. Si no fuiste tú quien lo solicitó, por favor ignóralo.'
+    brak_emaila: No encontré ninguna dirección de correo electrónico en el contenido — por favor, añádela.
+    pauza: Actualmente se está actualizando el patch de Tiflotecnia Voices. Dejo esta incidencia abierta y volveré con el enlace actualizado en cuanto termine — no necesitas hacer nada.
+  sami_comment: "¡Ciao! 🌞 Sami del Sur ha visto tu reporte y ha salido disparada con el prompt técnico hacia el Centro. El diseñador de la aplicación se ocupará en breve — y cuando la corrección llegue a la última versión, aparecerá por aquí una de mis colegas del Norte: Lumi, Vieno o Katla. ¡A presto!\n— Sami"

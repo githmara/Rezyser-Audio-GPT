@@ -1324,3 +1324,27 @@ opowiesci:
   err_dlugosc: Svar líkansins var skorið af áður en það náði að ljúka því (lengdarmörk voru brotin). Styttu samhengi og reyndu aftur.
   odrzucenie_tytul: Aðgerð ekki hægt að framkvæma
   odrzucenie_tresc: Frásagnavélin getur ekki framkvæmt þessa aðgerð — hún gæti hafa verið utan efnis, ómöguleg í þessum heimi eða ekki í samræmi við efnisreglur. Umferð var ekki vistuð. Endurformaðu aðgerðina og reyndu aftur.
+bot:
+  closure:
+    Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Audio AI leikstjórans.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"
+    Vieno: "Heilsa.\n\nVindar Norðursins hafa borið þau tíðindi að beiðni þín hafi fundið sinn stað í nýju útgáfunni. Sýnin hefur birst.\n\nNýjasta útgáfan bíður hér: {link}\n\nÉg loka þessum hring — málið hefur náð sínum enda.\n— Vieno"
+    Katla: "Hæ!\n\nSmíðað í eldfjallaeldi og enn glóandi! Beiðni þín hefur verið leyst í nýjustu útgáfu Audio AI leikstjórans.\n\nGríptu hana hér: {link}\n\nÉg loka málinu — eldfjallakveðjur!\n— Katla"
+  answered:
+    Lumi: "Halló!\n\nSkilaboð frá Miðstöðinni hafa borist Norðrinu — svar fyrir þig. Ég flyt þau nákvæmlega eins og þau voru sett fram:\n\n{maintainer_answer}\n\nÉg loka málinu — snjórinn hefur sest yfir þetta mál. Frostkveðjur!\n— Lumi"
+    Vieno: "Heilsa.\n\nVindar Norðursins hafa borið svarorð frá Miðstöðinni. Ég kem þeim óbreyttum til skila:\n\n{maintainer_answer}\n\nÉg loka þessum hring — spurningin hefur náð sínum enda.\n— Vieno"
+    Katla: "Hæ!\n\nHeit orð frá Miðstöðinni komu til Norðursins — ég sendi þér þau beint:\n\n{maintainer_answer}\n\nÉg loka málinu — eldfjallakveðjur!\n— Katla"
+  personal_note_intro: 'Viðbótarskilaboð frá viðhaldsaðila til þín:'
+  patch:
+    Lumi:
+      subject: 'Tiflotecnia Voices-bót — vetrarsending #{issue_number}'
+      body: "Halló!\n\nÉg braust í gegnum snjóskaflana til að færa þér þetta! Bóturinn þinn er tilbúinn og ég lokaði málinu svo kuldinn læddist ekki inn.\n{link}\n\nEf snjóstormur faldi skilaboðin í pósthólfinu þínu, skoðaðu þá ruslpóstsmöppuna.\n\nFrostkveðjur,\nLumi"
+    Vieno:
+      subject: 'Tiflotecnia Voices-bót — sýn vegna beiðni #{issue_number}'
+      body: "Heilsa.\n\nAndar Norðursins hafa fært tíðindi af beiðni þinni. Athöfninni er lokið og bóturinn hefur birst hér:\n{link}\n\nEf sýnin barst ekki í pósthólfið þitt, leitaðu í þokunni í ruslpóstsmöppunni.\n\nHlustaðu á vindinn,\nVieno"
+    Katla:
+      subject: 'Tiflotecnia Voices-bót — beint úr smiðjunni #{issue_number}'
+      body: "Hæ!\n\nSmíðaður í eldfjallaeldi og enn glóandi! Ég sendi þér bótinn og loka málinu.\n{link}\n\nEf reykur skyggði á yfirsýn þína yfir pósthólfið, mundu að gá í ruslpóstsmöppuna.\n\nEldfjallakveðjur,\nKatla"
+    footer: 'Þú færð þessi skilaboð vegna þess að netfangið þitt var gefið upp í GitHub Issue #{issue_number}. Ef þetta varst ekki þú, vinsamlegast hunsaðu skilaboðin.'
+    brak_emaila: Ég fann ekkert netfang í innihaldinu — vinsamlegast bættu því við.
+    pauza: Uppfærsla á Tiflotecnia Voices patch er í gangi. Ég læt þetta mál vera opið og kem aftur með uppfærðan hlekk þegar ég er búinn — þú þarft ekki að gera neitt.
+  sami_comment: "Ciao! 🌞 Sami að sunnan kom auga á tilkynningu þína og þaut af stað með tæknilegan leiðbeini til Miðstöðvarinnar. Hönnuður forritsins tekur á henni innan stundar — og þegar lagfæringin birtist í nýjustu útgáfu, mun ein af norrænu kollegum mínum kíkja við hér: Lumi, Vieno eða Katla. A presto!\n— Sami"

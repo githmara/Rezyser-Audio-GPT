@@ -1323,3 +1323,27 @@ opowiesci:
   err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext und versuchen Sie es erneut.
   odrzucenie_tytul: Aktion nicht ausführbar
   odrzucenie_tresc: Der Erzählmotor kann diese Aktion nicht ausführen — sie könnte themenfremd, in dieser Welt unmöglich oder nicht mit den Inhaltsrichtlinien vereinbar sein. Die Runde wurde nicht gespeichert. Formuliere die Aktion anders und versuche es erneut.
+bot:
+  closure:
+    Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-AI-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"
+    Vieno: "Sei gegrüßt.\n\nDie Winde des Nordens haben Kunde gebracht, dass dein Anliegen seinen Platz in der neuen Veröffentlichung gefunden hat. Die Vision ist manifest geworden.\n\nDie neueste Veröffentlichung erwartet dich hier: {link}\n\nIch schließe diesen Kreis — die Angelegenheit hat ihr Ende erreicht.\n— Vieno"
+    Katla: "Hey!\n\nIm vulkanischen Feuer geschmiedet und noch glühend! Dein Anliegen wurde in der neuesten Audio-AI-Regisseur-Veröffentlichung gelöst.\n\nGreif zu hier: {link}\n\nIch schließe das Anliegen — vulkanische Grüße!\n— Katla"
+  answered:
+    Lumi: "Hallo!\n\nVom Zentrum ist eine Nachricht in den Norden gelangt — eine Antwort für dich. Ich gebe sie genau so weiter, wie sie formuliert wurde:\n\n{maintainer_answer}\n\nIch schließe das Anliegen — der Schnee hat sich auf diese Sache gelegt. Bleib frostig!\n— Lumi"
+    Vieno: "Sei gegrüßt.\n\nDie Winde des Nordens haben Worte der Antwort vom Zentrum gebracht. Ich überbringe sie unverändert:\n\n{maintainer_answer}\n\nIch schließe diesen Kreis — die Frage hat ihr Ende erreicht.\n— Vieno"
+    Katla: "Hey!\n\nEin heißes Wort vom Zentrum ist im Norden eingetroffen — ich gebe es dir direkt weiter:\n\n{maintainer_answer}\n\nIch schließe das Anliegen — vulkanische Grüße!\n— Katla"
+  personal_note_intro: 'Eine zusätzliche Nachricht vom Maintainer für dich:'
+  patch:
+    Lumi:
+      subject: 'Tiflotecnia Voices Patch — Winter-Lieferung #{issue_number}'
+      body: "Hallo!\n\nIch habe mich durch die Schneewehen gekämpft, um das zu liefern! Dein Patch ist bereit und ich habe das Anliegen geschlossen, damit es nicht kalt hereinzieht.\n{link}\n\nFalls ein Schneesturm die Nachricht versteckt hat, prüfe bitte deinen Spam- oder Junk-Ordner.\n\nBleib frostig,\nLumi"
+    Vieno:
+      subject: 'Tiflotecnia Voices Patch — eine Vision für Anfrage #{issue_number}'
+      body: "Sei gegrüßt.\n\nDie Geister des Nordens haben Kunde von deinem Anliegen gebracht. Das Ritual ist vollendet und der Patch hat sich hier manifestiert:\n{link}\n\nWenn die Vision deinen Posteingang nicht erreicht hat, durchsuche den Nebel im Spam-Ordner.\n\nLausche dem Wind,\nVieno"
+    Katla:
+      subject: 'Tiflotecnia Voices Patch — heiß aus der Schmiede #{issue_number}'
+      body: "Hey!\n\nIm vulkanischen Feuer geschmiedet und noch glühend! Ich schicke dir den Patch und schließe das Anliegen.\n{link}\n\nFalls Rauch deinen Blick auf den Posteingang versperrt hat, prüfe unbedingt den Spam-Ordner.\n\nMit vulkanischen Grüßen,\nKatla"
+    footer: 'Du erhältst diese Nachricht, weil deine E-Mail-Adresse in GitHub Issue #{issue_number} angegeben wurde. Falls du diese Anfrage nicht gestellt hast, ignoriere sie bitte.'
+    brak_emaila: Im Inhalt wurde keine E-Mail-Adresse gefunden — bitte trage sie nach.
+    pauza: Der Tiflotecnia Voices-Patch wird gerade aktualisiert. Ich lasse dieses Ticket offen und melde mich mit einem aktuellen Link, sobald ich fertig bin — du musst nichts weiter tun.
+  sami_comment: "Ciao! 🌞 Sami aus dem Süden hat deine Meldung entdeckt und ist mit dem technischen Prompt zum Zentrum geflitzt. Der App-Entwickler kümmert sich gleich darum — und sobald die Korrektur in der neuesten Veröffentlichung landet, meldet sich hier eine meiner nordischen Kolleginnen: Lumi, Vieno oder Katla. A presto!\n— Sami"

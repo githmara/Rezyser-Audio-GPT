@@ -1414,3 +1414,134 @@ opowiesci:
   edytuj_stan_blad_typ_tresc: "Główny element stanu gry musi być obiektem JSON (parą klucz–wartość w nawiasach klamrowych), a nie listą ani wartością prostą. Przywróć strukturę obiektu i spróbuj ponownie."
   edytuj_stan_zapisano_tytul: "Stan gry zapisany"
   edytuj_stan_zapisano_tresc: 'Stan gry „{nazwa}" został zapisany i przeładowany z dysku. Postacie, lokacja, ekwipunek, wątki i liczniki odzwierciedlają teraz Twoją edycję.'
+
+# -----------------------------------------------------------------------------
+# BOT – wypowiedzi person obiegu zgłoszeń GitHub (Południe / Północ).
+#
+# Teksty user-facing botów `.github/scripts/*.py` (Lumi/Vieno/Katla/Sami),
+# wcześniej hardkodowane jako `dict[Language, ...]` w Pythonie. Renderowane
+# przez `bot_i18n.t_bot(klucz, jezyk, **kwargs)`. Persony: Lumi (mroźnie,
+# śnieżnie, z humorem), Vieno (szamańsko, mgliście), Katla (wulkanicznie,
+# gorąco). Placeholdery dynamiczne: `{link}` (link do Release / patcha),
+# `{maintainer_answer}` (treść odpowiedzi Centrum). Autotłumacz zamraża je
+# tokenami ⟦P{i}⟧ i weryfikuje parzystość — NIE usuwaj ani nie tłumacz nazw
+# w klamrach. Diakrytyki KRYTYCZNE (NVDA czyta fonetycznie).
+# -----------------------------------------------------------------------------
+bot:
+  # ---- Północ: komentarz zamknięcia bug-flow (etykieta fixed-in-release) ----
+  # `{link}` → najnowszy Release. Persona losowana per zgłoszenie.
+  closure:
+    Lumi: |-
+      Cześć!
+
+      Śnieg już osiadł, a poprawka dotarła! Wszystko, o co prosiłaś/eś, właśnie wylądowało w najnowszym wydaniu Reżysera Audio AI.
+
+      Pobierz aktualizację tutaj: {link}
+
+      Zamykam zgłoszenie, żeby nie wiało chłodem. Mroźnych pozdrowień!
+      — Lumi
+    Vieno: |-
+      Witaj.
+
+      Wiatry Północy przyniosły wieść, że Twoja prośba znalazła swoje miejsce w nowym wydaniu. Wizja się zmaterializowała.
+
+      Najnowsze wydanie czeka tutaj: {link}
+
+      Zamykam ten krąg — sprawa znalazła swój kres.
+      — Vieno
+    Katla: |-
+      Hej!
+
+      Wykute w wulkanicznym ogniu, jeszcze parzy! Twoja sprawa została rozwiązana w najnowszym wydaniu Reżysera Audio AI.
+
+      Łapiesz tutaj: {link}
+
+      Zamykam zgłoszenie — z wulkanicznym pozdrowieniem!
+      — Katla
+
+  # ---- Północ: komentarz answer-flow (odpowiedź Centrum na pytanie) ----
+  # `{maintainer_answer}` → treść odpowiedzi. Bez linku do Release (szum).
+  answered:
+    Lumi: |-
+      Cześć!
+
+      Z Centrum dotarła do Północy wieść z odpowiedzią dla Ciebie. Podaję ją dalej dokładnie tak, jak została wystosowana:
+
+      {maintainer_answer}
+
+      Zamykam zgłoszenie — śnieg już osiadł na tej sprawie. Mroźnych pozdrowień!
+      — Lumi
+    Vieno: |-
+      Witaj.
+
+      Wiatry Północy przyniosły z Centrum słowa odpowiedzi. Przekazuję je w nienaruszonej formie:
+
+      {maintainer_answer}
+
+      Zamykam ten krąg — pytanie znalazło swój kres.
+      — Vieno
+    Katla: |-
+      Hej!
+
+      Gorące słowo z Centrum przybyło na Północ — przekazuję Ci wprost:
+
+      {maintainer_answer}
+
+      Zamykam zgłoszenie — z wulkanicznym pozdrowieniem!
+      — Katla
+
+  # ---- Północ: intro dolepka osobistej notki maintainera (fixed-in-release) ----
+  personal_note_intro: "Dodatkowa wiadomość od maintainera dla Ciebie:"
+
+  # ---- Południe: mail z patchem Tiflotecnia Voices (etykieta tiflotecnia-patch) ----
+  # subject `{issue_number}`, body `{link}` (link do patcha). Persona losowana.
+  # Body: po akapicie z patchem JEDEN `\n` przed `{link}` (link w osobnej linii).
+  patch:
+    Lumi:
+      subject: "Tiflotecnia Voices patch — zimowa przesyłka #{issue_number}"
+      body: |-
+        Cześć!
+
+        Przedarłam się przez zaspy, żeby to dostarczyć! Twój patch jest gotowy, a zgłoszenie zamknęłam, żeby nie wiało chłodem.
+        {link}
+
+        Jeśli śnieżyca ukryła wiadomość w skrzynce, sprawdź folder Spam lub Wiadomości-śmieci.
+
+        Niech mróz będzie z Tobą,
+        Lumi
+    Vieno:
+      subject: "Tiflotecnia Voices patch — wizja dla zgłoszenia #{issue_number}"
+      body: |-
+        Witaj.
+
+        Duchy Północy przyniosły wieści o Twoim zgłoszeniu. Rytuał dobiegł końca, a patch zmaterializował się tutaj:
+        {link}
+
+        Jeśli wizja nie dotarła do Twojej skrzynki, przeszukaj mgłę w folderze Spam.
+
+        Słuchaj wiatru,
+        Vieno
+    Katla:
+      subject: "Tiflotecnia Voices patch — gorące zgłoszenie #{issue_number}"
+      body: |-
+        Hej!
+
+        Wykute w wulkanicznym ogniu i wciąż gorące! Przesyłam patcha i zamykam zgłoszenie.
+        {link}
+
+        Jeśli dym zasłonił Ci widok na skrzynkę, sprawdź koniecznie folder Spam.
+
+        Z wulkanicznym pozdrowieniem,
+        Katla
+    # Stopka maila (dolepiana pod body separatorem `---`), `{issue_number}`.
+    footer: "Otrzymujesz tę wiadomość, bo Twój adres email został podany w GitHub Issue #{issue_number}. Jeśli to nie Ty zgłaszałeś — zignoruj."
+    # Komentarz na issue: nie znaleziono adresu email w treści zgłoszenia.
+    brak_emaila: "Nie znalazłem adresu email w treści — uzupełnij proszę."
+    # Komentarz na issue: trwa aktualizacja linku patcha (pauza), issue zostaje otwarte.
+    pauza: "Trwa właśnie aktualizacja patcha Tiflotecnia Voices. Zostawiam to zgłoszenie otwarte i wrócę z aktualnym linkiem, gdy tylko skończę — nie musisz nic robić."
+
+  # ---- Południe: komentarz Sami (intake) zostawiany na issue po wysyłce maila ----
+  # Jedna persona (Sami) — bez losowania. Emoji 🌞 i podpis „— Sami" 1:1.
+  sami_comment: |-
+    Ciao! 🌞 Sami z Południa zauważyła Twoje zgłoszenie i już pomknęła z technicznym promptem do Centrum. Za chwilkę projektant aplikacji się tym zajmie — a kiedy poprawka wjedzie do najnowszego wydania, odezwie się tutaj jedna z moich koleżanek z Północy: Lumi, Vieno albo Katla. A presto!
+    — Sami
