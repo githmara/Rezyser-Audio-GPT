@@ -619,6 +619,8 @@ rezyser:
   err_surowy_json: |-
     Model w tym trybie zwrócił dane w formacie JSON, ale tryb nie jest skonfigurowany jako tryb JSON, więc tekst NIE został zapisany (uniknięto wklejenia surowego JSON-a do pliku).
     Najczęstsza przyczyna: tryb powstał z duplikatu Skryptu. Ustaw w jego pliku YAML `format_wyjscia: skrypt_json` (dla dialogu narrator+postać) — albo, jeśli to nowy schemat, skontaktuj się z programistą.
+  ostrzezenie_urwane_tytul: "Fragment mógł zostać ucięty"
+  ostrzezenie_urwane_tresc: "Odpowiedź modelu osiągnęła limit długości i urwała się w połowie zdania, a automatyczna próba domknięcia ostatniego zdania nie powiodła się. Fragment został zapisany w obecnej postaci — sprawdź jego końcówkę i w razie potrzeby dopisz zakończenie ręcznie albo wyślij krótką instrukcję kontynuacji."
   blad_ai_tytul:         "Błąd AI"
   blad_ai_szczegoly_tytul: "Błąd AI – Szczegóły techniczne"
   blad_ai_naglowek:      "Wystąpił nieoczekiwany błąd podczas przetwarzania."

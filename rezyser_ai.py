@@ -128,12 +128,19 @@ class WynikGeneracji:
         uzyty_sufiks:      Diagnostyczne – nazwa sufiksu, który został
                            doklejony do prompt_systemowy (``"alarm"``,
                            ``"startowy"`` itd.), lub ``None`` gdy żaden.
+        ostrzezenie:       Niepusty tekst miękkiego ostrzeżenia dla reżysera,
+                           gdy odpowiedź urwała się na ``max_tokens`` i NIE
+                           udało się jej domknąć mikro-callem (sprawa #1).
+                           GUI pokazuje go po zapisie — zapis i tak przechodzi
+                           (tekst jest zachowany w obecnej postaci). Pusty =
+                           wszystko OK (brak ucięcia albo domknięte czysto).
     """
 
     tekst_odpowiedzi: str
     odrzucone: bool = False
     nowe_streszczenie: str = ""
     uzyty_sufiks: str | None = None
+    ostrzezenie: str = ""
 
 
 @dataclass
@@ -329,6 +336,17 @@ MAX_TOKENS_NARRACJA = 16000
 # tytuł to jedna krótka linia, więc 256 z dużym zapasem. Anthropic wymaga jawnego
 # `max_tokens` (w OpenAI był domyślny). Mikro-call ISO ma własny, jeszcze mniejszy.
 MAX_TOKENS_TYTUL = 256
+
+# Maks. tokenów mikro-callu domykającego urwane zdanie (sprawa #1). Jedno zdanie
+# to kilkadziesiąt–kilkaset znaków; 300 z zapasem. Osobny, mały ceiling — domknięcie
+# nie ma prawa znów spuchnąć do rozmiarów narracji (inaczej samo by się ucięło).
+MAX_TOKENS_DOMKNIECIE = 300
+
+# Granica długości urwanego ogona zdania, powyżej której rezygnujemy z
+# automatycznego domknięcia (detekcja granicy zdania najpewniej zawiodła —
+# „zdanie" na 2000+ znaków to artefakt). Lepiej miękko ostrzec reżysera niż
+# przepisywać mikro-callem wielką partię tekstu (ryzyko parafrazy/utraty treści).
+MAX_ZNAKOW_URWANEGO_ZDANIA = 2000
 
 
 def _wywolaj_claude(
@@ -863,6 +881,104 @@ def generuj_skrypt(
 
 
 # =============================================================================
+# Guard urwanej prozy (sprawa #1): domknięcie zdania uciętego na max_tokens
+# =============================================================================
+# Tryby JSON (Skrypt/Burza) łapią `stop_reason=="max_tokens"` i rzucają
+# `BladDlugosciOdpowiedzi`. Tryb prozy (audiobook, `generuj_fragment`) dotąd
+# IGNOROWAŁ stop_reason — odpowiedź ucięta w pół zdania szła po cichu do pliku
+# z doklejonym `\n\n`. Przyczyna: anti-closure w promptach Reżysera (model nie
+# domyka scen) plus ceiling `MAX_TOKENS_NARRACJA`. Decyzja (2026-06-18): zapisu
+# NIE blokujemy — przy `max_tokens` domykamy ostatnie zdanie jednym mikro-callem
+# z minimalnym kontekstem (sam urwany ogon). Gdy się nie uda → miękkie
+# ostrzeżenie dla reżysera, a tekst zapisuje się w obecnej postaci.
+
+# Zakończenie zdania: jeden+ znak `.!?…` (+ ewentualny domykający cudzysłów /
+# nawias). Po nim musi nastąpić biały znak lub koniec tekstu — dzięki temu
+# „3.14" czy skrót „np." w środku zdania nie są brane za koniec (po kropce nie
+# ma spacji). Heurystyka, nie pełny tokenizer — w razie pomyłki na skrócie
+# domkniemy nieco dłuższy ogon, co jest nieszkodliwe.
+_RE_GRANICA_ZDANIA = re.compile(r"[.!?…]+[\"'»”’\)\]]*")
+
+
+def _ostatnia_granica_zdania(tekst: str) -> int:
+    """Indeks tuż PO ostatnim pełnym zakończeniu zdania w ``tekst`` (0 = brak)."""
+    best = 0
+    for m in _RE_GRANICA_ZDANIA.finditer(tekst):
+        koniec = m.end()
+        if koniec >= len(tekst) or tekst[koniec] in " \n\t\r":
+            best = koniec
+    return best
+
+
+def _domknij_urwane_zdanie(
+    klient:  Any,
+    przepis: pr.PrzepisRezysera,
+    tekst:   str,
+    timeout: float,
+) -> tuple[str, bool]:
+    """Domyka zdanie urwane przez ``max_tokens`` jednym mikro-callem LLM.
+
+    Bierze ogon od ostatniej granicy zdania i prosi model o przepisanie go jako
+    JEDNEGO domkniętego, naturalnego zdania w języku treści
+    (``przepis.jezyk_odpowiedzi``), zachowując dotychczasowe słowa. Zwrócone
+    zdanie podmienia urwany ogon (prefiks sprzed granicy + oryginalny separator
+    biały zostają nietknięte). Przepisanie CAŁEGO ogona (a nie doklejanie
+    „reszty") usuwa ryzyko sklejki w pół słowa — ucięcie na ``max_tokens`` pada
+    na granicy tokenu, często w środku wyrazu.
+
+    Returns:
+        Krotka ``(tekst, doszyto)``:
+          * ``doszyto=True``  — domknięte (albo nie było czego domykać, bo
+            ucięcie wypadło dokładnie na końcu zdania);
+          * ``doszyto=False`` — nie ruszamy tekstu (ogon zbyt długi, błąd API,
+            mikro-call też się uciął / odmówił / nic nie zwrócił). Wołający
+            ustawia wtedy miękkie ostrzeżenie, ale zapis przechodzi.
+    """
+    granica = _ostatnia_granica_zdania(tekst)
+    reszta = tekst[granica:]
+    ogon = reszta.strip()
+    if not ogon:
+        return tekst, True   # ucięcie dokładnie na końcu zdania — nic do roboty
+    if len(ogon) > MAX_ZNAKOW_URWANEGO_ZDANIA:
+        return tekst, False
+
+    sep = reszta[: len(reszta) - len(reszta.lstrip())]
+    system = (
+        "A passage of prose was cut off mid-sentence. You are given only the "
+        "final, incomplete sentence. Rewrite it as exactly ONE complete, natural "
+        f"sentence written in {przepis.jezyk_odpowiedzi}, keeping the existing "
+        "words and wording and merely continuing them to a natural end. Output "
+        "ONLY that single finished sentence — no quotes, no commentary, no extra "
+        "sentences, no leading or trailing whitespace."
+    )
+    try:
+        resp = klient.with_options(timeout=timeout).messages.create(
+            model=przepis.model,
+            system=system,
+            messages=[{"role": "user", "content": ogon}],
+            max_tokens=MAX_TOKENS_DOMKNIECIE,
+            temperature=przepis.temperatura,
+            thinking={"type": "disabled"},
+        )
+    except Exception:  # noqa: BLE001 — błąd domknięcia = ostrzeżenie, nie crash
+        return tekst, False
+
+    domkniete = "".join(
+        b.text for b in resp.content if getattr(b, "type", None) == "text"
+    ).strip()
+    # Mikro-call też się uciął / odmówił / milczy → nie ryzykujemy sklejki
+    # połówek; oddajemy oryginał i sygnalizujemy ostrzeżenie.
+    if (
+        not domkniete
+        or getattr(resp, "stop_reason", None) == "max_tokens"
+        or pr.wykryto_odrzucenie(domkniete)
+    ):
+        return tekst, False
+
+    return tekst[:granica] + sep + domkniete, True
+
+
+# =============================================================================
 # Główna funkcja: generowanie fragmentu historii
 # =============================================================================
 
@@ -900,7 +1016,7 @@ def generuj_fragment(
     # tu nie walidujemy (proza), więc jedyny powód powtórki to rozjazd języka.
     jezyk_skorygowano = False
     while True:
-        tekst, _stop_reason = _wywolaj_claude(
+        tekst, stop_reason = _wywolaj_claude(
             klient, przepis, system, messages, timeout,
         )
 
@@ -939,6 +1055,17 @@ def generuj_fragment(
                 f"'{przepis.kod_jezyka}') po korekcie językowej — przepuszczam."
             )
 
+        # 2c) GUARD URWANEJ PROZY (sprawa #1) — PO bramce językowej (żeby nie
+        # domykać zdania, które i tak zostałoby zregenerowane przy rozjeździe
+        # języka) i PRZED akcentami (akcenty psują ortografię → utrudniłyby
+        # mikro-callowi pracę). Tylko `max_tokens` = realne ucięcie; inne
+        # stop_reason (`end_turn` itp.) oznaczają, że model skończył sam.
+        ostrzezenie = ""
+        if stop_reason == "max_tokens":
+            tekst, doszyto = _domknij_urwane_zdanie(klient, przepis, tekst, timeout)
+            if not doszyto:
+                ostrzezenie = i18n.t("rezyser.ostrzezenie_urwane_tresc")
+
         # 3) Akcenty fonetyczne — tylko gdy przepis tego wymaga (Skrypt).
         # v17.9 (Obszar 3a): aplikujemy w JĘZYKU TREŚCI przepisu (`kod_jezyka`),
         # nie w domyślnym „pl". Brak `kod_jezyka` → NIE aplikujemy akcentów (żaden
@@ -954,6 +1081,7 @@ def generuj_fragment(
             odrzucone=False,
             nowe_streszczenie=nowe_streszczenie,
             uzyty_sufiks=sufiks_nazwa,
+            ostrzezenie=ostrzezenie,
         )
 
 

@@ -650,6 +650,8 @@ rezyser:
   kod_jezyka_edu_tresc: 'Ekki tókst að sjálfkrafa ákvarða ISO 639-1 kóða fyrir svarmál „{jezyk_odpowiedzi}” (engin tenging við API eða óljóst svar). Þessi tveggja stafa kóði er nauðsynlegur: hann stýrir fyrirsögnum uppbyggingar (Prolog/Akt/Scena), vali á áherslum og tungumáli verkefnis í ElevenLabs. Sjálf lýsingin „jezyk_odpowiedzi” er ekki nóg. Opnaðu uppskriftina í Reglustjóra og skráðu réttan kóða í kod_jezyka-reitinn (t.d. „fi” fyrir finnskt, „de” fyrir þýskt).'
   kod_jezyka_edu_prompt: "Ef þú þekkir ekki kóðann, afritaðu eftirfarandi spurningu og límdu hana í hvaða spjallmenni sem er (t.d. ChatGPT):\n\n„Gefðu upp tveggja stafa ISO 639-1 kóða fyrir tungumál sem lýst er sem: {jezyk_odpowiedzi}. Svaraðu eingöngu með kóðanum.”"
   kod_jezyka_edu_name: Útskýring á tungumálakóða og ábending fyrir spjallmenni
+  ostrzezenie_urwane_tytul: Brot gæti hafa verið klippt af
+  ostrzezenie_urwane_tresc: Svar líkansins náði lengdarmörkunum og brotnaði mitt í setningu, og sjálfvirk tilraun til að loka síðustu setningunni tókst ekki. Brotið var vistað eins og það er — athugaðu endann á því og bættu við niðurlagi handvirkt ef þörf krefur, eða sendu stutt framhaldsfyrirmæli.
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"

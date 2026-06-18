@@ -648,6 +648,8 @@ rezyser:
   kod_jezyka_edu_tresc: 'ISO 639-1 -koodia vastauskielelle "{jezyk_odpowiedzi}" ei voitu automaattisesti määrittää (ei yhteyttä API:iin tai epäselvä vastaus). Tämä kaksikirjaiminen koodi on välttämätön: se ohjaa rakenteen otsikoita (Prologi/Näytös/Kohtaus), aksenttien valintaa ja projektin kieltä ElevenLabsissa. Pelkkä "jezyk_odpowiedzi" ei riitä. Avaa resepti Sääntöjen Hallinnassa ja kirjoita oikea koodi kod_jezyka-kenttään (esim. "fi" suomelle, "de" saksalle).'
   kod_jezyka_edu_prompt: "Jos et tiedä koodia, kopioi alla oleva kysymys ja liitä se mihin tahansa chatbotin (esim. ChatGPT) keskusteluun:\n\n\"Anna kaksikirjaiminen ISO 639-1 -koodi kielelle, joka on kuvattu seuraavasti: {jezyk_odpowiedzi}. Vastaa pelkällä koodilla.\""
   kod_jezyka_edu_name: Kielikoodin selitys ja kehotus chatbotille
+  ostrzezenie_urwane_tytul: Katkelma saattaa olla leikattu kesken
+  ostrzezenie_urwane_tresc: Mallin vastaus saavutti pituusrajan ja katkesi kesken lauseen. Automaattinen yritys sulkea viimeinen lause epäonnistui. Katkelma on tallennettu nykyisessä muodossaan — tarkista sen loppu ja lisää tarvittaessa lopetus manuaalisesti tai lähetä lyhyt jatkamisohje.
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"

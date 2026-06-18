@@ -649,6 +649,8 @@ rezyser:
   kod_jezyka_edu_tresc: 'Failed to automatically determine the ISO 639-1 code for the response language "{jezyk_odpowiedzi}" (no connection to the API or ambiguous response). This two-letter code is necessary: it controls the structure headers (Prologue/Act/Scene), accent selection, and the project language in ElevenLabs. The "jezyk_odpowiedzi" description alone is not enough. Open the recipe in the Rule Manager and enter the correct code in the kod_jezyka field (e.g., "fi" for Finnish, "de" for German).'
   kod_jezyka_edu_prompt: "If you don't know the code, copy the following question and paste it into any chatbot (e.g., ChatGPT):\n\n\"Provide the two-letter ISO 639-1 code for the language described as: {jezyk_odpowiedzi}. Respond with the code only.\""
   kod_jezyka_edu_name: Explanation of the language code and prompt for the chatbot
+  ostrzezenie_urwane_tytul: Fragment may have been cut off
+  ostrzezenie_urwane_tresc: The model's response reached the length limit and was cut off mid-sentence, and the automatic attempt to complete the last sentence failed. The fragment has been saved as-is — check the ending and, if needed, add a conclusion manually or send a short continuation prompt.
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"

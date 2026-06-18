@@ -9,7 +9,7 @@ Po refaktorze 13.0 plik zawiera WYŁĄCZNIE:
     • Property-shimy (``full_story``, ``summary_text``, …) delegujące do
       ``self._projekt``.
 
-Logika biznesowa (stan projektu, przepisy, wywołania OpenAI) żyje w:
+Logika biznesowa (stan projektu, przepisy, wywołania Anthropic) żyje w:
     • :mod:`core_rezyser`     – ``ProjektRezysera`` + silnik fonetyczny.
     • :mod:`przepisy_rezysera` – loader YAML-i z ``dictionaries/pl/rezyser/``.
     • :mod:`rezyser_ai`       – ``generuj_fragment``, ``nadaj_tytuly_rozdzialom``.
@@ -39,7 +39,6 @@ import os
 import threading
 
 import anthropic
-import openai
 from dotenv import load_dotenv
 
 import wx
@@ -60,7 +59,7 @@ from i18n import aktualny_jezyk, dostepne_jezyki_ui, t
 class RezyserPanel(wx.Panel):
     """Panel modułu „Reżyser Audio GPT" — cienka warstwa widoku wxPython.
 
-    Trzy tryby pracy (AI OpenAI gpt-4o) wczytywane są dynamicznie z YAML-i
+    Trzy tryby pracy (AI Anthropic Claude Sonnet 4.6) wczytywane są dynamicznie z YAML-i
     (``dictionaries/pl/rezyser/``) przez :mod:`przepisy_rezysera`:
 
         * Burza Mózgów – planowanie fabuły, 3 opcje + prompty (BEZ zapisu).
@@ -74,7 +73,7 @@ class RezyserPanel(wx.Panel):
     w ``self._projekt`` (:class:`core_rezyser.ProjektRezysera`); atrybuty
     typu ``self.full_story`` są property-shimami delegującymi do modelu.
 
-    Wywołania OpenAI realizowane są w wątkach tła (``threading.Thread``)
+    Wywołania Anthropic realizowane są w wątkach tła (``threading.Thread``)
     z wynikami przekazywanymi do GUI przez ``wx.CallAfter``.
     """
 
@@ -149,10 +148,11 @@ class RezyserPanel(wx.Panel):
                 self,
             )
 
-        # ── Klienci LLM (dual-provider) ────────────────────────────────────
-        # OpenAI: postprodukcja tytułów (gpt-4o-mini) + mikro-call kodu języka.
-        # Anthropic (Claude): tryby narracyjne (audiobook / skrypt / burza).
-        self._client = None          # OpenAI
+        # ── Klient LLM (single-provider, Anthropic Claude od v18.2.1) ──────
+        # Claude Sonnet 4.6 obsługuje WSZYSTKO: tryby narracyjne (audiobook /
+        # skrypt / burza), postprodukcję tytułów ORAZ mikro-call kodu języka.
+        # (Do v18.2.1 GUI trzymało jeszcze martwego klienta OpenAI mimo migracji
+        # `rezyser_ai` na Messages API — co łamało obietnicę single-key.)
         self._klient_claude = None   # Anthropic
         self._api_dostepne: bool = False
         self._worker_thread: threading.Thread | None = None
@@ -240,14 +240,14 @@ class RezyserPanel(wx.Panel):
         przepis = self._aktualny_przepis()
         if przepis is None or not przepis.zapis_do_pliku:
             return
-        if not self._api_dostepne or self._client is None:
+        if not self._api_dostepne or self._klient_claude is None:
             return  # offline: wpisany `kod_jezyka` zostaje fallbackiem
         if przepis.id in self._kod_jezyka_w_toku:
             return
         if przepis.id in self._kod_jezyka_rozwiazany:
             return
         self._kod_jezyka_w_toku.add(przepis.id)
-        klient    = self._client
+        klient    = self._klient_claude
         jezyk_odp = przepis.jezyk_odpowiedzi
         kod_yaml  = przepis.kod_jezyka
         dozwolone = set(dostepne_jezyki_ui())
@@ -433,29 +433,21 @@ class RezyserPanel(wx.Panel):
         self._projekt.last_response = value
 
     # ------------------------------------------------------------------
-    # Inicjowanie klienta OpenAI
+    # Inicjowanie klienta Anthropic
     # ------------------------------------------------------------------
     def _init_api(self) -> None:
-        """Ładuje golden_key.env i inicjuje klientów LLM (OpenAI + Anthropic).
+        """Ładuje golden_key.env i inicjuje klienta LLM (Anthropic Claude).
 
-        Dual-provider: tryby narracyjne (audiobook/skrypt/burza) idą przez klienta
-        Claude (`_klient_claude`); postprodukcja tytułów i mikro-call kodu języka —
-        przez OpenAI (`_client`). `_api_dostepne` = OBA klucze obecne; bramkuje
-        generowanie jednym flagiem (konsumenci OpenAI i tak null-checkują `_client`).
+        Single-provider od v18.2.1: WSZYSTKIE wywołania Reżysera (tryby narracyjne
+        + postprodukcja tytułów + mikro-call kodu języka) idą przez `_klient_claude`.
+        `_api_dostepne` = obecny `ANTHROPIC_API_KEY` (`sk-ant-`) — to jedyny klucz,
+        którego wymaga end-user (zgodnie z konsolidacją 18.x na Anthropic).
         """
         app_dir = sciezki.KATALOG_BAZOWY_STR
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
         if not os.path.exists(env_path):
             return
         load_dotenv(env_path)
-
-        openai_key = os.getenv("OPENAI_API_KEY", "")
-        if openai_key and openai_key.startswith("sk-"):
-            try:
-                from openai import OpenAI  # noqa: PLC0415
-                self._client = OpenAI(api_key=openai_key)
-            except Exception:
-                self._client = None
 
         claude_key = os.getenv("ANTHROPIC_API_KEY", "")
         if claude_key and claude_key.startswith("sk-ant-"):
@@ -464,9 +456,7 @@ class RezyserPanel(wx.Panel):
             except Exception:
                 self._klient_claude = None
 
-        self._api_dostepne = (
-            self._client is not None and self._klient_claude is not None
-        )
+        self._api_dostepne = self._klient_claude is not None
 
     def _init_elevenlabs(self) -> None:
         """Wczytuje opcjonalny klucz ElevenLabs z golden_key.env (v16.0).
@@ -2226,7 +2216,10 @@ class RezyserPanel(wx.Panel):
             if self._wyglada_na_surowy_json(wynik.tekst_odpowiedzi):
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_surowy_json"))
                 return
-            wx.CallAfter(self._on_wyslij_done_zapis, wynik.tekst_odpowiedzi, nazwa)
+            wx.CallAfter(
+                self._on_wyslij_done_zapis,
+                wynik.tekst_odpowiedzi, nazwa, wynik.ostrzezenie,
+            )
         else:
             wx.CallAfter(self._on_wyslij_done_burza, wynik.tekst_odpowiedzi)
 
@@ -2243,7 +2236,9 @@ class RezyserPanel(wx.Panel):
         self.summary_text = streszczenie
         self._txt_pamiec.SetValue(streszczenie)
 
-    def _on_wyslij_done_zapis(self, response_text: str, nazwa: str) -> None:
+    def _on_wyslij_done_zapis(
+        self, response_text: str, nazwa: str, ostrzezenie: str = "",
+    ) -> None:
         if self.full_story:
             self.full_story += "\n\n" + response_text
         else:
@@ -2261,6 +2256,15 @@ class RezyserPanel(wx.Panel):
         self._refresh_ui_state()
         wx.Bell()
         self._txt_full_story.SetFocus()
+        # Miękkie ostrzeżenie (sprawa #1): odpowiedź urwała się na limicie
+        # długości i nie dała się domknąć mikro-callem. Fragment JEST już
+        # zapisany — informujemy tylko, by reżyser sprawdził końcówkę.
+        if ostrzezenie:
+            wx.MessageBox(
+                ostrzezenie,
+                t("rezyser.ostrzezenie_urwane_tytul"),
+                wx.OK | wx.ICON_WARNING,
+            )
 
     def _on_wyslij_done_burza(self, response_text: str) -> None:
         # v15.2: ścieżka legacy — fallback dla hipotetycznych przepisów
@@ -2952,7 +2956,7 @@ class RezyserPanel(wx.Panel):
             wx.CallAfter(self._update_tytuly_progress, msg, percent)
 
         wynik = rai.nadaj_tytuly_rozdzialom(
-            klient=self._client,
+            klient=self._klient_claude,
             przepis_tytuly=self._przepis_tytuly,
             pelny_tekst=pelny_tekst,
             on_postep=_cb,

@@ -650,6 +650,8 @@ rezyser:
   kod_jezyka_edu_tresc: 'No se pudo determinar automáticamente el código ISO 639-1 para el idioma de respuesta "{jezyk_odpowiedzi}" (sin conexión a la API o respuesta ambigua). Este código de dos letras es necesario: controla los encabezados de la estructura (Prólogo/Acto/Escena), la selección de acentos y el idioma del proyecto en ElevenLabs. Solo la descripción "jezyk_odpowiedzi" no es suficiente. Abre la receta en el Administrador de Reglas e ingresa el código correcto en el campo kod_jezyka (por ejemplo, "fi" para finlandés, "de" para alemán).'
   kod_jezyka_edu_prompt: "Si no conoces el código, copia la siguiente pregunta y pégala en cualquier chatbot (por ejemplo, ChatGPT):\n\n\"Proporcione el código ISO 639-1 de dos letras para el idioma descrito como: {jezyk_odpowiedzi}. Responda solo con el código.\""
   kod_jezyka_edu_name: Explicación del código de idioma y prompt para el chatbot
+  ostrzezenie_urwane_tytul: El fragmento puede haber sido cortado
+  ostrzezenie_urwane_tresc: La respuesta del modelo alcanzó el límite de longitud y se interrumpió a mitad de una frase; el intento automático de completar la última oración no tuvo éxito. El fragmento se ha guardado tal como está — revisa el final y, si es necesario, añade el cierre manualmente o envía una instrucción breve para continuar.
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"

@@ -11,3 +11,11 @@ ruamel.yaml
 jsonschema
 tiktoken
 pyinstaller
+# openai — NIE jest używany przez runtime aplikacji (cały silnik AI = Anthropic Claude
+# Sonnet 4.6, end-user potrzebuje tylko ANTHROPIC_API_KEY; PyInstaller nie wciąga openai
+# do .exe, bo żaden frozen-moduł go nie importuje). Pozostaje jednak ŻYWĄ zależnością
+# projektu: dyspozytorski workflow GitHub Actions „Sami" (intake zgłoszeń,
+# .github/scripts/issue_intake_sami.py) woła gpt-4o-mini. Workflow instaluje go też jawnie
+# w issue-intake.yml; ten wpis jest dla JAWNOŚCI (jedyny żywy konsument OpenAI w repo) oraz
+# dla lokalnego uruchomienia/debugowania bota intake. Patrz CLAUDE.md pkt 7.
+openai
