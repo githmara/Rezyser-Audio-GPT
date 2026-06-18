@@ -12,7 +12,7 @@ etykieta: "Cinematic Meta Warning (umferð 150)"
 kategoria: meta
 kolejnosc: 70
 
-# --- OpenAI-stillingar ---
+# --- Anthropic-stillingar ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 max_tokens: 600

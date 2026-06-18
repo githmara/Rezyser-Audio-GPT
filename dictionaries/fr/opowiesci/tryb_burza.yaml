@@ -11,7 +11,7 @@ etykieta: "Visualisation de scène (slash /visualize)"
 kategoria: tryb
 kolejnosc: 20
 
-# --- Paramètres OpenAI ---
+# --- Paramètres Anthropic ---
 # Température plus élevée que les modes narratifs — nous voulons une
 # description riche et créative. max_tokens est bas car ce n'est pas un
 # tour de jeu.

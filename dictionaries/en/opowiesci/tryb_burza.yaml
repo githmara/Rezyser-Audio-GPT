@@ -10,7 +10,7 @@ etykieta: "Scene visualization (slash /visualize)"
 kategoria: tryb
 kolejnosc: 20
 
-# --- OpenAI parameters ---
+# --- Anthropic parameters ---
 # Higher temperature than the narrative modes — we want a rich, creative
 # description. max_tokens is low because this is not a game turn.
 model: claude-sonnet-4-6

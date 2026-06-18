@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida completa (Versione 18.1 – Versione di Rilascio)
+Manuale del Regista Audio AI - Guida completa (Versione 18.2 – Versione di Rilascio)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
@@ -63,26 +63,23 @@ Suggerimento per gli utenti NVDA: il menu contestuale "Apri percorso file" attiv
 Suggerimento: l'opzione "Apri percorso file" è il nome nativo per la versione italiana di Windows. Nel sistema inglese si chiama "Open file location", nelle altre versioni linguistiche — analogamente nella lingua locale del sistema operativo.
 
 
-PASSO 2: Alimentazione API (due chiavi — Anthropic e OpenAI)
+PASSO 2: Configurazione API (chiave Anthropic / Claude)
 
-Dalla versione 18.0 l'applicazione utilizza due fornitori di intelligenza artificiale e richiede DUE chiavi API nel file golden_key.env:
+Dalla versione 18.2 l'applicazione utilizza un unico fornitore di intelligenza artificiale — Anthropic (Claude) — e richiede UNA SOLA chiave API nel file golden_key.env:
 
-•  Chiave Anthropic (Claude) — alimenta il motore narrativo del Regista (audiolibro, teatro letto, brainstorming). Inizia con sk-ant-.
-•  Chiave OpenAI — alimenta l'assegnazione dei titoli ai capitoli, il rilevamento della lingua del contenuto, la modalità Racconti e il Poliglotta (traduttore). Inizia con sk-.
+•  Chiave Anthropic (Claude) — alimenta L'INTERO motore AI: la narrazione del Reżyser (audiolibro, teatro letto, brainstorming), la modalità Opowieści, il Poliglota (traduttore) e l'assegnazione dei titoli ai capitoli e il rilevamento della lingua del contenuto. Inizia con sk-ant-.
+
+Se stai aggiornando da una versione precedente: la vecchia chiave OpenAI non è più necessaria — puoi lasciare o rimuovere la sua riga in golden_key.env, l'applicazione la ignora.
 
 Come ottenere la chiave Anthropic:
-1. Crea un account su console.anthropic.com e ricarica il saldo (scheda Billing / Plans).
-2. Genera la chiave nella sezione API Keys (inizia con sk-ant-). Copiala immediatamente — può essere visualizzata solo una volta.
+1. Crea un account su console.anthropic.com e ricarica il credito (scheda Billing / Plans).
+2. Genera la chiave nella sezione API Keys (inizia con sk-ant-). Copiala subito — a volte viene mostrata una sola volta.
 
-Come ottenere la chiave OpenAI:
-1. Crea un account su platform.openai.com e ricarica il saldo nella scheda Billing.
-2. Genera la chiave nella scheda API Keys (inizia con sk-proj-). Nota: la chiave viene visualizzata solo una volta — al momento della creazione. Se chiudi la finestra senza copiarla, andrà persa definitivamente e dovrai revocarla (opzione revoke secret key) e generarne una nuova. Copiala immediatamente, prima di cliccare qualsiasi cosa.
+Come inserire la chiave nel programma:
+3. Nella schermata iniziale del programma fai clic sul pulsante "Genera il file golden_key.env e apri l'editor di testo". Il sistema creerà automaticamente un file di configurazione pulito nella posizione corretta e aprirà il Blocco note con un modello pronto per la modifica.
+4. Nel file aperto vedrai la riga: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina il testo segnaposto e incolla la tua chiave direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
 
-Come inserire le chiavi nel programma:
-3. Nella schermata iniziale del programma, clicca sul pulsante "Genera il file golden_key.env e apri l'editor di testo". Il sistema creerà automaticamente un file di configurazione pulito nel posto giusto e aprirà il Blocco Note con un modello pronto per la modifica.
-4. Nel file aperto vedrai due righe: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ e OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. In ciascuna, rimuovi il testo segnaposto e incolla la chiave corrispondente direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
-
-Suggerimento: Dopo il riavvio, l'applicazione controllerà il file e nella sezione "Controllo del Sistema" mostrerà uno stato separato per ciascuna chiave. Entrambe devono essere verdi affinché tutti i moduli AI siano pronti per l'uso. Se manca una chiave o è errata, il programma indicherà chiaramente quale e permetterà di aprire l'editor di testo per correggere rapidamente l'errore.
+Suggerimento: Dopo il riavvio l'applicazione verificherà il file e nella sezione "Controllo del Sistema" mostrerà lo stato della chiave. Deve essere verde affinché tutti i moduli AI siano pronti all'uso. Se la chiave è assente o errata, il programma lo indicherà chiaramente e consentirà di aprire l'editor di testo per correggere rapidamente l'errore.
 
 
 PASSO 3: Studio Principale del Regista
@@ -205,47 +202,47 @@ Caricamento e ricaricamento intelligente dal disco (aggiornato in v17.6): Sia du
 
 PASSO 3b: Due uscite dello Script — audiolibro multivocale (ElevenLabs) e versione per lettori di schermo
 
-Un copione di teatro letto completato (modalità Script) ha due uscite indipendenti: un progetto multivocale di ElevenLabs Studio (audio) e una versione HTML per lettori di schermo. Sono due modi per "ascoltare" la stessa opera — puoi usare l'uno, l'altro o entrambi. Entrambi sono opzionali e non cambiano il flusso classico con il convertitore.
+Lo script pronto del teatro di lettura (modalità Script) ha due uscite indipendenti: un progetto multivocale ElevenLabs Studio (audio) e una versione HTML per lettori di schermo. Sono due modi di "ascoltare" lo stesso testo — puoi usarne uno, l'altro o entrambi. Entrambi sono opzionali e non modificano il flusso classico con il convertitore.
 
-─────────── Ponte a ElevenLabs Studio (audio, opzionale) ───────────
+─────────── Ponte verso ElevenLabs Studio (audio, opzionale) ───────────
 
-Il ponte trasforma il copione in un progetto Studio multivocale — il narratore e ogni personaggio ricevono una voce separata. Senza la chiave ElevenLabs nulla cambia: il ponte rimane semplicemente nascosto.
+Il ponte trasforma lo script in un progetto Studio multivocale — il narratore e ogni personaggio ricevono una voce separata. Senza la chiave ElevenLabs non cambia nulla: il ponte rimane semplicemente nascosto.
 
 Chiave ElevenLabs (opzionale)
 
-Incolla la tua chiave ElevenLabs nel file golden_key.env, su una linea separata: ELEVENLABS_API_KEY=sk_... Nota: la chiave ElevenLabs inizia con sk_ (con SOTTOLINEATURA), a differenza della chiave OpenAI (sk-). Una chiave con restrizioni necessita dei permessi (scope) projects_write e voices_read. Lo stato della chiave è visibile nella schermata principale (System Check) — la mancanza della chiave non è un errore, semplicemente il ponte rimane nascosto.
+Incolla la tua chiave ElevenLabs nel file golden_key.env, su una riga separata: ELEVENLABS_API_KEY=sk_... Attenzione: la chiave ElevenLabs inizia con sk_ (con UNDERSCORE), a differenza della chiave Anthropic (sk-ant-). Se utilizzi una chiave con restrizioni (restricted key), assegnale i permessi (scope) projects_write e voices_read. Lo stato della chiave è visibile nella schermata principale (System Check) — l'assenza della chiave non è un errore, il ponte rimane semplicemente nascosto.
 
-Il ponte appare nel pannello del Regista in modalità Script (quando la chiave è corretta). Funziona su un'opera pronta salvata sul disco — prima genera o carica il progetto.
+Il ponte appare nel pannello del Reżyser in modalità Script (quando la chiave è corretta). Funziona su uno script pronto salvato su disco — prima genera o carica il progetto, poi accedi al ponte.
 
 Passo 1 — Cast vocale
 
-Clicca su "Cast vocale…". L'applicazione carica i personaggi che hanno battute e aggiunge sempre uno slot per il Narratore (il narratore è la voce predefinita — titoli dei capitoli e tutta la narrazione). Per ogni oratore, incolla l'ID della voce. IMPORTANTE: ogni voce usata nell'opera deve prima trovarsi nelle tue "My Voices" — le voci che crei tu stesso (ad esempio in "Voice Design") finiscono lì automaticamente, mentre le voci della libreria pubblica si esplorano nella scheda "Explore" e si aggiungono con "Add to My Voices". Come ottenere un ID della voce in ElevenLabs (nel browser): trova la voce, ascolta un campione per essere sicuro che sia quella giusta e copia il suo identificatore con "Copy Voice ID"; quando una voce è già nelle "My Voices", quel pulsante è disponibile subito — senza aprire "More actions". Scelta delle voci: per limitare eventuali rigenerazioni, la cosa più facile è scegliere dalla collezione "Best for Eleven v3" (voci verificate per il modello v3 su cui viene creato il progetto); in alternativa progetta la tua voce in "Voice Design", e per i più audaci resta la clonazione IVC (Instant Voice Cloning) o persino PVC (Professional Voice Cloning). Puoi lasciare i campi vuoti e tornare più tardi — il salvataggio è una bozza.
+Clicca su "Obsada głosowa…". L'applicazione leggerà dallo script i personaggi che hanno battute e aggiungerà sempre uno slot per il Narratore (il narratore è la voce predefinita — legge i titoli dei capitoli e tutta la narrazione). Per ogni parlante incolla il voice ID. IMPORTANTE: ogni voce utilizzata nello script deve prima trovarsi nelle tue "My Voices" — le voci che crei tu stesso (ad es. in "Voice Design") vi finiscono automaticamente, mentre le voci della libreria pubblica le sfogli nella scheda "Explore" e le aggiungi con il pulsante "Add to My Voices". Come ottenere il voice ID in ElevenLabs (nel browser): trova la voce, riproduci un campione per assicurarti che sia quella giusta, e copia il suo identificatore con il pulsante "Copy Voice ID"; quando la voce è già nelle "My Voices", questo pulsante è disponibile immediatamente — senza espandere "More actions". Selezione delle voci: per limitare eventuali rigenerazioni, è più semplice scegliere dalla collezione "Best for Eleven v3" (voci testate per il modello v3 su cui viene creato il progetto); in alternativa progetta la tua voce in "Voice Design", e per i più audaci resta la clonazione IVC (Instant Voice Cloning) o PVC (Professional Voice Cloning). Puoi lasciare i campi vuoti e tornare in seguito — il salvataggio è una bozza.
 
 Passo 2 — Costruisci il progetto
 
-Clicca su "Crea progetto ElevenLabs Studio…". L'applicazione verifica che il copione abbia almeno un capitolo (Prologo/Atto/Capitolo) e che ogni voce sia assegnata, quindi crea sul tuo account un progetto Studio multivocale diviso in capitoli. La semplice creazione del progetto NON consuma crediti. L'applicazione imposta anche subito la lingua del progetto (pronuncia corretta delle righe di intestazione) e la normalizzazione del volume allo standard dell'audiolibro — lo fa tramite l'API così non devi aprire le impostazioni del progetto nel browser.
+Clicca su "Stwórz projekt ElevenLabs Studio…". L'applicazione verificherà che lo script abbia almeno un capitolo (Prolog/Akt/Rozdział) e che ogni parlante e il narratore abbiano una voce assegnata, quindi creerà nel tuo account un progetto Studio multivocale suddiviso in capitoli. La sola creazione del progetto NON consuma crediti. L'applicazione imposta immediatamente la lingua del progetto (pronuncia corretta delle righe di intestazione) e la normalizzazione del volume allo standard degli audiolibri — lo fa tramite API, così non devi entrare nelle impostazioni del progetto nel browser.
 
-Guardiano del formato (un'estensione della Regola del Montatore): il ponte richiede che nella sceneggiatura OGNI riga sia o una battuta con tag del parlante ([Narratore: …] o [Personaggio: …]) oppure un'intestazione di struttura (Prologo, Atto, Scena, Capitolo). La prosa comune senza tag scritta «alla rinfusa» — per esempio una nota dell'autore o un frammento di narrazione senza tag — non viene assegnata ad alcuna voce e viene saltata in silenzio durante la costruzione, quindi il progetto finito potrebbe divergere dal tuo file. Per questo, se l'applicazione rileva tali righe orfane, ne mostra l'elenco con i numeri di riga e chiede se costruire comunque: puoi allora annullare e correggere la sceneggiatura (aprila con il pulsante «Apri file di narrazione…», aggiungi i tag del parlante mancanti o elimina quelle righe) oppure costruire comunque consapevolmente, accettando che vengano saltate. È un'estensione naturale della Regola del Montatore: così come non devi rompere le intestazioni di struttura, in una sceneggiatura destinata al ponte ogni riga dovrebbe avere il suo parlante o essere un'intestazione.
+Guardiano del formato (estensione della Regola del Montatore): il ponte richiede che nello script OGNI riga sia o una battuta con indicazione del parlante ([Narrator: …] o [Nome: …]), oppure un'intestazione di struttura (Prolog, Akt, Scena, Rozdział). La prosa ordinaria non taggata inserita "liberamente" — ad esempio una nota d'autore o un frammento di narrazione senza tag — non viene assegnata ad alcuna voce e viene silenziosamente ignorata durante la costruzione, quindi il progetto finito potrebbe discostarsi dal tuo file. Pertanto, se l'applicazione rileva tali righe orfane, ne mostrerà l'elenco con i numeri e chiederà se procedere comunque: puoi annullare e correggere lo script (aprilo con il pulsante "Otwórz plik narracji…", aggiungi i tag mancanti del parlante o elimina quelle righe) oppure costruire consapevolmente lo stesso, accettando che vengano omesse. È un'estensione naturale della Regola del Montatore: così come non si devono rovinare le intestazioni di struttura, in uno script destinato al ponte ogni riga dovrebbe avere il suo parlante oppure essere un'intestazione.
 
-Passo 3 — Rendering nel browser
+Passo 3 — Render nel browser
 
-L'applicazione mostra l'identificatore del progetto e un pulsante per aprire ElevenLabs Studio. Nel browser, trova il progetto, esegui il rendering della voce (questo consuma crediti — indicativamente 1 credito per carattere), quindi esporta il file audio o pubblica il progetto su Eleven Reader. Il rendering e la pubblicazione avvengono dal tuo lato, consapevolmente — l'applicazione si limita a costruire il progetto.
+Dopo la creazione del progetto, l'applicazione mostrerà il suo identificatore e un pulsante che apre ElevenLabs Studio. Nel browser trova il progetto, esegui il render del parlato (è qui che vengono consumati i crediti — orientativamente 1 credito per carattere), poi esporta il file audio o pubblica il progetto su Eleven Reader. Il render e la pubblicazione avvengono dalla tua parte, consapevolmente — l'applicazione si limita a costruire il progetto.
 
 Espressione e accenti (modello Eleven v3)
 
-Il progetto è creato con il modello Eleven v3 (oltre 70 lingue). L'emozione NON si esprime con maiuscole, puntini di sospensione o trattini — il motore li ignora. Invece, il Regista intreccia nelle battute tag audio v3 in inglese, ad es. [whispers], [sighs], [angry], [laughs] — questi guidano l'espressione e funzionano indipendentemente dalla lingua parlata. L'ACCENTO di un personaggio proviene invece dal CAMPIONE DI VOCE: se vuoi che qualcuno parli, ad esempio, italiano con un accento straniero, scegli o progetta (in Voice Design) una voce il cui campione abbia quell'accento. In pratica, sperimenta con il prompt della voce finché non senti, ad esempio, un campione in italiano con accento finlandese — il modello v3 conserva quell'accento nella registrazione finale. Suggerimento: le frasi molto lunghe indeboliscono l'accento, per questo al Regista viene già chiesto nel prompt di usare frasi brevi.
+Il progetto viene creato con il modello Eleven v3 (oltre 70 lingue). Le emozioni NON si esprimono con lettere maiuscole, puntini di sospensione o trattini — il motore li ignora. Al loro posto il Reżyser inserisce nelle battute audio-tag v3 in inglese, ad esempio [whispers], [sighs], [angry], [laughs] — sono loro a controllare l'espressione e funzionano indipendentemente dalla lingua del parlato. L'ACCENTO del personaggio deriva invece dal CAMPIONE VOCALE: se vuoi che qualcuno parli ad esempio in polacco con un accento straniero, scegli o progetta in Voice Design una voce il cui campione abbia quell'accento. In pratica sperimenta con il prompt della voce finché non senti ad esempio un campione polacco con accento finlandese — il modello v3 manterrà quell'accento nella registrazione finale. Suggerimento: le frasi molto lunghe indeboliscono l'accento, per questo al Reżyser viene già chiesto nel prompt di usare frasi brevi.
 
-Consapevolezza del modello v3 (fase alfa)
+Consapevolezza del modello v3 (fase alpha)
 
-Eleven v3 è il più espressivo ma ancora in fase alfa. A volte una singola battuta viene resa come un gracchiare invece che come parlato — basta rigenerarla in Studio (ogni blocco ha alcune rigenerazioni gratuite). Le impostazioni del progetto in ElevenLabs possono anche mostrare raccomandazioni per cambiare modello (in Eleven Flash v2.5 o Multilingual v2) — questo NON è un errore, solo un suggerimento del motore. Se non vuoi vedere questi messaggi, semplicemente non aprire le impostazioni del progetto: l'applicazione ha già impostato tutto il necessario tramite l'API (modello, lingua, normalizzazione del volume).
+Eleven v3 è il più espressivo, ma è ancora in fase alpha. Può capitare che una singola replica venga renderizzata come rumore statico invece che come parlato — basta rigenerarla in Studio (ogni blocco ha alcune rigenerazioni gratuite). Nelle impostazioni del progetto ElevenLabs potrebbe anche mostrare raccomandazioni di cambio modello (su Eleven Flash v2.5 o Multilingual v2) — NON è un errore, solo un suggerimento del motore. Se non vuoi vedere questi messaggi, semplicemente non aprire le impostazioni del progetto: l'applicazione ha già impostato tutto il necessario tramite API (modello, lingua, normalizzazione del volume).
 
-Perché teatro letto e non effetti sonori? Nelle versioni precedenti, la modalità Script produceva effetti grezzi [SFX: ...] senza narratore. Tuttavia, il ponte verso una registrazione multivocale completa richiede che il contesto (luogo, tempo, azione) sia trasmesso dal narratore con le parole: gli effetti sonori in Studio non sono accessibili ai lettori di schermo, e il modello realizza comunque o il narratore o gli effetti — mai entrambi stabilmente. Per questo motivo, la modalità Script è ora teatro letto: narratore più dialogo, senza SFX.
+Perché teatro di lettura e non effetti sonori? Nelle versioni precedenti la modalità Script produceva effetti grezzi [SFX: ...] senza narratore. Il ponte verso una registrazione multivocale completa richiede però che il contesto (luogo, tempo, azione) sia portato dal narratore con le parole: gli effetti sonori in Studio non sono accessibili ai lettori di schermo, e il modello comunque realizza o il narratore o gli effetti — mai stabilmente entrambi insieme. Per questo la modalità Script è un teatro di lettura: narratore più dialogo, senza SFX.
 
 ─────────── Versione per lettori di schermo (HTML, senza ElevenLabs) ───────────
 
-In modalità Script, indipendentemente dalla chiave ElevenLabs, hai un pulsante "Genera versione per lettori di schermo". Crea il file skrypty/<nazwa>_screen_reader.html — un'uscita separata per le persone che usano lettori di schermo (ad es. NVDA). Funziona così: le battute dei personaggi che hanno un accento definito nel Libro del Mondo (ad es. una voce "[Joana] accento finlandese") ricevono una grafia fonetica (ortografia deliberatamente "rotta") e un tag di lingua (l'attributo lang), così il lettore di schermo le legge con il corretto accento straniero. I tag audio v3 (ad es. [whispers]) vengono rimossi in questa versione — il lettore non deve leggerli ad alta voce. Le intestazioni Prologo/Atto/Scena diventano intestazioni HTML, così il documento è facile da navigare.
+In modalità Script, indipendentemente dalla chiave ElevenLabs, hai il pulsante "Generuj wersję dla czytników ekranu". Crea il file skrypty/<nazwa>_screen_reader.html — un'uscita separata per le persone che utilizzano lettori di schermo (ad es. NVDA). Funziona così: le battute dei personaggi che nel Libro del Mondo hanno un accento definito (ad es. la voce "[Joana] akcent fiński"), ricevono una trascrizione fonetica (ortografia deliberatamente "alterata") e un indicatore di lingua (attributo lang), grazie al quale il lettore di schermo le legge con l'accento straniero corretto. Gli audio-tag v3 (ad es. [whispers]) vengono rimossi in questa versione — il lettore non deve leggerli ad alta voce. Le intestazioni Prolog/Akt/Scena diventano intestazioni HTML, quindi la navigazione nel documento è comoda.
 
-Questo completa deliberatamente il ponte audio: per il modello v3 l'accento proviene dal campione di voce, e per il lettore di schermo dall'ortografia più il tag di lingua. Per questo l'ortografia nella versione audio rimane pulita (v3 sceglie la lingua da sé), e "rompere" l'ortografia va solo nel file HTML separato, dove è desiderabile.
+È un complemento consapevole del ponte audio: l'accento per il modello v3 è portato dal campione vocale, mentre per il lettore di schermo — dall'ortografia più l'indicatore di lingua. Per questo l'ortografia nella versione audio rimane pulita (v3 sceglie da solo la lingua), mentre l'"alterazione" dell'ortografia va esclusivamente nel file HTML separato, dove è desiderata.
 
 
 PASSO 4: Postproduzione in Reżyser Audio GPT

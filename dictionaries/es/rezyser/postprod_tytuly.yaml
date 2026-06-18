@@ -2,15 +2,15 @@
 #  POSTPRODUCCIÓN: TÍTULOS DE CAPÍTULO POR IA
 #  Herramienta para el modo Audiolibro: itera sobre los capítulos del
 #  archivo de proyecto guardado y genera para cada uno un título literario
-#  breve. Por defecto utiliza un modelo de bajo coste (gpt-4o-mini).
+#  breve. Por defecto utiliza un modelo de bajo coste (claude-sonnet-4-6).
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Asignar títulos a los capítulos (IA)"
 kategoria: postprodukcja
 kolejnosc: 10
 
-# --- Parámetros OpenAI ---
-model: gpt-4o-mini
+# --- Parámetros Anthropic ---
+model: claude-sonnet-4-6
 temperatura: 0.7
 jezyk_odpowiedzi: español
 

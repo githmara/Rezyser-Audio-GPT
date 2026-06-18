@@ -11,7 +11,7 @@ etykieta: "Визуализация сцены (slash /visualize)"
 kategoria: tryb
 kolejnosc: 20
 
-# --- Параметры OpenAI ---
+# --- Параметры Anthropic ---
 # Температура выше, чем у нарративных режимов — нам нужно богатое,
 # творческое описание. max_tokens низкий, потому что это не ход игры.
 model: claude-sonnet-4-6

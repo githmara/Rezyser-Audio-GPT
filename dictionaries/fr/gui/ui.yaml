@@ -126,11 +126,6 @@ home:
     Premier démarrage du programme détecté. Les modules sont bloqués pour des raisons de sécurité.
     Pour débloquer tous les outils, cliquez sur le bouton ci-dessous — le programme générera automatiquement le fichier golden_key.env et l'ouvrira dans l'éditeur de texte par défaut.
   err_odczyt: "🚨 Impossible de lire le fichier golden_key.env :\n{tresc_bledu}"
-  err_struktura: |-
-    🚨 Erreur dans la structure du fichier !
-    Le paramètre obligatoire OPENAI_API_KEY= est manquant.
-    Vous avez probablement supprimé le signe égal ou le nom de la variable.
-    Supprimez le fichier, regénérez-le et collez la clé avec attention.
   err_tekst_zastepczy: |-
     ⚠️ Clé non saisie !
     Le fichier golden_key.env contient encore le texte de remplacement.
@@ -145,18 +140,6 @@ home:
     Un espace ou un autre caractère invisible a été détecté avant ou après la clé API.
     Ouvrez le fichier dans l'éditeur de texte et assurez-vous que la valeur commence
     immédiatement après le signe '=', sans espaces.
-  err_format: |-
-    🚨 Format de clé suspect !
-    Une clé OpenAI correcte commence toujours par les caractères sk- (par ex. sk-proj-…).
-    Assurez-vous d'avoir copié la chaîne correcte et qu'il n'y a pas d'espaces avant elle.
-  err_zbyt_krotki: |-
-    ⚠️ La clé semble trop courte ({liczba_znakow} caractères détectés, au moins {minimum_znakow} attendus).
-    Vous n'avez probablement copié qu'une partie de la clé.
-
-    Si vous avez déjà fermé la fenêtre avec la clé sur platform.openai.com,
-    vous devez retourner à votre compte, utiliser l'option « Revoke secret key » pour cette
-    clé tronquée et en générer une nouvelle. N'oubliez pas de copier la clé entière
-    avant de cliquer sur « Done » la prochaine fois.
   ok_klucz_wykryty: |-
     ✅ Clé API (golden_key.env) détectée et correctement formatée.
     Tous les modules sont prêts à l'emploi.
@@ -190,9 +173,9 @@ home:
     Un espace ou un autre caractère invisible a été détecté avant ou après la clé.
     Ouvre golden_key.env et assure-toi que la valeur commence immédiatement après le signe '='.
   el_format: |-
-    🚨 Format suspect de la clé ElevenLabs !
-    Une clé ElevenLabs commence toujours par sk_ (avec un TIRET BAS, pas sk- comme OpenAI).
-    Assure-toi d'avoir collé une clé d'ElevenLabs et non d'une autre plateforme.
+    🚨 Format de clé ElevenLabs suspect !
+    Une clé ElevenLabs commence toujours par sk_ (avec un UNDERSCORE, et non un tiret comme sk-ant-).
+    Assurez-vous d'avoir collé la clé depuis ElevenLabs et non depuis une autre plateforme.
   el_zbyt_krotki: |-
     ⚠️ La clé ElevenLabs semble trop courte ({liczba_znakow} caractères détectés, au moins {minimum_znakow} attendus).
     Tu n'as probablement copié qu'une partie de la clé. Génère une nouvelle clé dans le panneau ElevenLabs et colle-la en entier.
@@ -213,12 +196,9 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-# -----------------------------------------------------------------------------
-  heading_anthropic: Moteur de narration (Anthropic / Claude) — requis
-  ant_err_struktura: "🚨 Erreur de structure du fichier !\nLa variable requise ANTHROPIC_API_KEY= est manquante.\nDepuis la version 18.0, le moteur de narration (livre audio, théâtre lu, brainstorming) fonctionne avec le modèle Claude et nécessite une clé distincte.\nSupprimez le fichier, régénérez-le et collez la clé avec précaution."
-  ant_err_format: "🚨 Format de clé Anthropic suspect !\nUne clé Anthropic (Claude) valide commence toujours par les caractères sk-ant- (par ex. sk-ant-api03-…).\nAssurez-vous d'avoir copié la clé depuis console.anthropic.com, et non une clé OpenAI."
+  ant_err_struktura: "🚨 Erreur de structure du fichier !\nLa variable requise ANTHROPIC_API_KEY= est manquante.\nDepuis la version 18.2, tout le moteur IA (Réalisateur, Récits, Polyglotte, titres de chapitres) fonctionne sur le modèle Claude et nécessite une clé Anthropic.\nSupprimez le fichier, régénérez-le et collez la clé plus soigneusement."
+  ant_err_format: "🚨 Format de clé Anthropic suspect !\nUne clé Anthropic (Claude) valide commence toujours par sk-ant- (ex. : sk-ant-api03-…).\nAssurez-vous d'avoir copié la clé depuis console.anthropic.com et non la clé d'un autre fournisseur."
   ant_err_zbyt_krotki: "⚠️ La clé Anthropic semble trop courte ({liczba_znakow} caractères détectés, au moins {minimum_znakow} attendus).\nVous avez probablement copié seulement une partie de la clé. Retournez sur console.anthropic.com et copiez-la en entier."
-  ant_ok: "✅ Clé Anthropic (Claude) détectée et correctement formatée.\nLe moteur de narration est prêt à fonctionner."
 rezyser:
   panel_name: "Panneau Réalisateur Audio GPT"
   heading: "🎬  Réalisateur Audio GPT — Studio Créatif Hybride"
@@ -366,8 +346,8 @@ rezyser:
     (par ex. « Décris la rencontre de Geralt avec la sorcière dans la forêt. Tension élevée. »)
   btn_wyslij_label: "Envoyer à l'IA"
   btn_wyslij_tooltip: |-
-    Envoie les instructions au modèle gpt-4o et ajoute la réponse à l'histoire.
-    Nécessite une clé API active et une Bible du Monde remplie.
+    Envoie des instructions au modèle Claude et ajoute la réponse à l'historique.
+    Nécessite une clé API active et un Livre du Monde complété.
   # Postprodukcja
   postprod_heading: "🎛️ Post-production"
   # Pont vers ElevenLabs Studio (post-production audio, optionnel — v16.0)
@@ -448,8 +428,8 @@ rezyser:
   btn_tytuly_ai_label: "📜 Attribuer les Titres aux Chapitres (IA)"
   btn_tytuly_ai_name: "Bouton Attribuer les Titres aux Chapitres IA"
   btn_tytuly_ai_tooltip: |-
-    Itère sur les chapitres du fichier sauvegardé et leur attribue des titres (gpt-4o-mini).
-    Nécessite un fichier de projet sauvegardé et une clé API active.
+    Parcourt les chapitres du fichier enregistré et leur attribue des titres (Claude).
+    Nécessite un fichier de projet enregistré et une clé API active.
   # Pamięć modelu
   lbl_pamiec_modelu: "🧠 Mémoire du Modèle (État de la Fenêtre Contextuelle) :"
   lbl_pamiec_modelu_start: "🟢 Mémoire propre. Machine prête pour une nouvelle histoire."
@@ -524,8 +504,8 @@ rezyser:
   # Wysyłanie do AI
   brak_api_tytul: "Aucune API"
   brak_api_tresc: |-
-    Aucune connexion à OpenAI.
-    Vérifiez le fichier golden_key.env et redémarrez l'application.
+    Impossible de se connecter à Anthropic.
+    Vérifiez le fichier golden_key.env et relancez l'application.
   puste_pole_tytul: "Champ vide"
   puste_pole_tresc: "Saisissez les instructions pour l'IA avant l'envoi."
   brak_przepisow_tytul: "Aucune recette"
@@ -545,7 +525,7 @@ rezyser:
     Cela pourrait endommager votre histoire.
 
     Passez en mode « Brainstorming » et réessayez.
-  err_rate_limit: "Pas de crédit OpenAI ! Rechargez votre compte et réessayez."
+  err_rate_limit: "Crédits Anthropic insuffisants ! Rechargez votre compte et réessayez."
   err_surowy_json: |-
     Ce mode a renvoyé des données au format JSON, mais n'est pas configuré comme mode JSON, donc le texte n'a PAS été enregistré (évité de coller du JSON brut dans le fichier).
     Cause la plus fréquente : le mode a été créé à partir d'un duplicata de Script. Définissez dans son fichier YAML `format_wyjscia: skrypt_json` (pour le dialogue narrateur+personnage) — ou, si c'est un nouveau schéma, contactez le développeur.
@@ -634,7 +614,6 @@ rezyser:
   sr_sukces_tresc: "Fichier pour lecteurs d'écran enregistré : skrypty/{nazwa_pliku}_screen_reader.html"
   sr_blad_tytul: Erreur de génération de la version pour lecteurs d'écran
   sr_blad_tresc: "Échec de la génération de la version pour lecteurs d'écran :\n{tresc_bledu}"
-  err_struktura: Le modèle a généré une structure de réponse incorrecte malgré plusieurs tentatives de correction. Réessayez ou reformulez la commande différemment.
   err_dlugosc: La réponse du modèle a été coupée avant qu'il ne puisse la terminer (limite de longueur dépassée). Raccourcissez le contexte — par exemple, le Livre du Monde ou l'instruction — et réessayez.
   btn_przeladuj_label: '&Recharger le projet depuis le disque'
   btn_przeladuj_tooltip: "Recharge TOUT le projet depuis le disque après vos modifications manuelles dans le fichier de narration (skrypty/<nom>.txt) — recalcule les compteurs de Chapitres/Actes/Scènes, met à jour le Livre du Monde, le mode et les options de Brainstorming, et synchronise la mémoire de travail. Une courte histoire est chargée en entier ; pour une longue, il vous sera demandé à partir de quel en-tête la mémoire de travail de l'IA doit commencer (le reste est représenté par un Résumé). ATTENTION : cela écrase le contenu des champs avec la version du disque — enregistrez d'abord les modifications non sauvegardées."
@@ -674,10 +653,10 @@ poliglota:
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
   description_name: "Description du module Polyglotte"
   tool_description: |-
-    Le module Polyglotte sert à appliquer des accents phonétiques marqués aux synthétiseurs vocaux locaux (NVDA/Vocalizer/eSpeak), à des jeux de mots en Mode Chiffrant et à traduire des textes via l'IA (OpenAI gpt-4o).
+    Le module Polyglotte permet d'appliquer des accents phonétiques forts pour les synthétiseurs vocaux locaux (NVDA/Vocalizer/eSpeak), de jouer avec les textes en Mode Chiffreur et de traduire des textes à l'aide de l'IA (Anthropic Claude).
 
-    Prend en charge les fichiers : .txt, .html, .htm, .docx.
-    Le résultat est sauvegardé dans le même répertoire que le fichier source.
+    Fichiers pris en charge : .txt, .html, .htm, .docx.
+    Le résultat est enregistré dans le même répertoire que le fichier source.
   # Sekcja 1: wczytywanie pliku
   section1_heading: "1. Chargement du fichier source"
   lbl_plik: "Nom ou chemin complet du fichier (.txt, .html, .htm, .docx) :"
@@ -719,7 +698,7 @@ poliglota:
     NON — je laisse les règles pour « {jezyk_aktywny} ». L'effet sur un texte en langue étrangère pourrait être imprévisible.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Configuration du Travail"
-  rb_ai: "Traducteur IA (OpenAI gpt-4o — nécessite une clé API, consomme du crédit)"
+  rb_ai: "Traducteur IA (Anthropic Claude – nécessite une clé API, consomme des crédits)"
   rb_ai_disabled: "Traducteur IA (désactivé — fichier golden_key.env correct manquant)"
   rb_ai_name: "Mode Traducteur IA"
   rb_rezyser: "Mode Réalisateur (règles phonétiques gratuites depuis YAML)"
@@ -785,9 +764,9 @@ poliglota:
   ai_blad_zapisu: "Erreur de sauvegarde du fichier résultant :\n{tresc_bledu}"
   # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
   ai_blad_limit_api: |-
-    Pas de crédits ou limite API OpenAI dépassée ! Traduction interrompue au bloc {blok}.
+    Crédits insuffisants ou limite API Anthropic dépassée ! La traduction a été interrompue au bloc {blok}.
 
-    La progression a été automatiquement sauvegardée. Approvisionnez votre compte API et rechargez l'original pour continuer à partir de cet endroit.
+    La progression a été sauvegardée automatiquement. Rechargez votre compte API et rouvrez le fichier original pour reprendre à partir de cet endroit.
   ai_blad_cache: |-
     Impossible de lire le fichier temporaire (cache de reprise de traduction) :
     {plik}
@@ -1204,7 +1183,7 @@ opowiesci:
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format: "\n\n--- Tour {numer} ---\n\n"
   brak_api_tytul: "Pas de clé API"
-  brak_api_tresc: "Le fichier golden_key.env avec la clé OPENAI_API_KEY valide n'a pas été trouvé. Le module Histoires nécessite une clé active pour générer les tours de narration."
+  brak_api_tresc: "Le fichier golden_key.env contenant une clé ANTHROPIC_API_KEY valide est introuvable. Le module Récits nécessite une clé active pour générer les tours de narration."
   puste_pole_tytul: "Champ d'action vide"
   puste_pole_tresc: 'Entrez une action ou une commande dans le champ sous la narration avant de cliquer sur « Envoyer ».'
   puste_nazwa_tytul: "Pas de nom de jeu"
@@ -1218,10 +1197,8 @@ opowiesci:
   blad_ai_szczegoly_tytul: "Détails de l'erreur du moteur narratif"
   blad_ai_lbl_tresc: "Contenu de l'erreur (à copier) :"
   blad_ai_tresc_name: "Champ avec le contenu de l'erreur du moteur narratif"
-  err_rate_limit: "Le quota de requêtes à OpenAI est épuisé. Attendez un moment ou vérifiez l'état de votre compte."
+  err_rate_limit: "La limite de requêtes Anthropic a été atteinte. Patientez un moment ou vérifiez l'état de votre compte."
   err_timeout: "Le délai d'attente pour la réponse du modèle a été dépassé (plus de 120 secondes). Réessayez."
-  err_struktura: "Le modèle a généré une structure de réponse incorrecte malgré deux tentatives de correction. Réessayez ou formulez l'action différemment."
-
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul: "Aucun jeu actif"
   brak_gry_tresc: 'Créez un nouveau jeu avec le bouton « Nouveau jeu » ou chargez un jeu précédemment sauvegardé avec le bouton « Charger » avant d''essayer d''envoyer une action.'

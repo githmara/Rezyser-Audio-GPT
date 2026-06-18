@@ -2,15 +2,15 @@
 #  POSTPRODUCTION: ASSIGN CHAPTER TITLES (AI)
 #  Tool for the Audiobook mode: iterates over chapters in the saved project
 #  file and generates a short literary title for each.
-#  Uses a cheap model (gpt-4o-mini) by default — the task is simple.
+#  Uses a cheap model (claude-sonnet-4-6) by default — the task is simple.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Assign Chapter Titles (AI)"
 kategoria: postprodukcja
 kolejnosc: 10
 
-# --- OpenAI parameters ---
-model: gpt-4o-mini
+# --- Anthropic parameters ---
+model: claude-sonnet-4-6
 temperatura: 0.7
 jezyk_odpowiedzi: English
 

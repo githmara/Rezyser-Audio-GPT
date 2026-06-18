@@ -16,7 +16,7 @@ etykieta: "Minna illt — hver valkostur óhagstæður"
 kategoria: tryb
 kolejnosc: 50
 
-# --- OpenAI-stillingar ---
+# --- Anthropic-stillingar ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

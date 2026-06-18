@@ -8,7 +8,7 @@ etykieta: "Livre audio (prose, chapitres, ÉCRITURE FICHIER)"
 kategoria: tryb
 kolejnosc: 30
 
-# --- Paramètres OpenAI ---
+# --- Paramètres Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: français

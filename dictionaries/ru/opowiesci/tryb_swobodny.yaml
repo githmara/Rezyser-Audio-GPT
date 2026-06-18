@@ -10,7 +10,7 @@ etykieta: "Свободный режим — пиши любое действи�
 kategoria: tryb
 kolejnosc: 30
 
-# --- Параметры OpenAI (наследуются из baza.yaml, если не заданы здесь) ---
+# --- Параметры Anthropic (наследуются из baza.yaml, если не заданы здесь) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

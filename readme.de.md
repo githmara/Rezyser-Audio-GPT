@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **18.1** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.2** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -64,13 +64,11 @@ Ab Version 14.0 unterstützt die Anwendung nativ 9 Basissprachen: Polski, Deutsc
 Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.txt`) und die meisten Systemmeldungen sind nativ in jeder der unterstützten Sprachen verfügbar. Die AI-Systemaufforderungen im Regisseur- und Erzählmodus sind in den Zielsprache verfasst (manuell, nicht automatisch übersetzt — siehe `dictionaries/<kod>/rezyser/` und `dictionaries/<kod>/opowiesci/`).
 
 
-## Architektur der KI und verwendete Modelle
+## KI-Architektur und verwendete Modelle
 
-Die Anwendung verteilt Aufgaben intelligent zwischen zwei API-Anbietern, um die Qualität der Prosa, Kosten und Geschwindigkeit zu optimieren:
+Ab Version 18.2 nutzt die Anwendung einen einzigen API-Anbieter — Anthropic — und ein einziges Modell für alle Aufgaben der künstlichen Intelligenz:
 
-* **Anthropic Claude Sonnet 4.6:** Der Motor der gesamten kreativen Erzählung. Verantwortlich für die Regie von Skripten, das Schreiben traditioneller Prosa (Hörbuch), Brainstorming und ALLE Modi der Erzählungen (Wahlen, Das kleinere Übel, Freier Modus) sowie die Erstellung von Zusammenfassungen und filmischen Zwischensequenzen. Die Migration der Erzählung zu Claude (Regisseur in v18.0, Erzählungen in v18.1) erfolgte aufgrund der empirisch bestätigten Überlegenheit in der Einhaltung der Weltregeln und der Vermeidung von Klischees.
-* **gpt-4o (OpenAI):** Fortgeschrittene Übersetzungen unter Beibehaltung des mehrblockigen Kontexts (Polyglott). Die Migration zu Anthropic ist in der nächsten Ausgabe geplant.
-* **gpt-4o-mini (OpenAI):** Schnelles, leichtes Hilfsmodell für Mikroaufgaben: iterative Vergabe literarischer Titel an generierte Kapitel und Extraktion von ISO-Sprachcodes.
+* **Anthropic Claude Sonnet 4.6:** Die Engine der GESAMTEN Intelligenz der Anwendung. Verantwortlich für kreatives Erzählen (Regie von Skripten, Verfassen traditioneller Hörbuch-Prosa, Brainstorming sowie ALLE Opowieści-Modi — Wybory, Mniejsze Zło, Swobodny — einschließlich der Generierung von Zusammenfassungen und Cinematic-Zwischenspielen), fortgeschrittene Übersetzungen mit Beibehaltung des Mehrblock-Kontexts (Poliglota) sowie Mikroaufgaben: iteratives Vergeben literarischer Kapiteltitel und Erkennung des Sprachcodes von Inhalten. Die Konsolidierung auf Claude erfolgte schrittweise (Reżyser in v18.0, Opowieści in v18.1, Poliglota und Postproduktion in v18.2) — sie resultierte aus der empirisch bestätigten Überlegenheit beim Einhalten von Weltregeln, der Natürlichkeit der Prosa und der Vermeidung von Klischees.
 
 
 ### Bekannte Einschränkungen von Modellen (Anti-Closure)
@@ -80,13 +78,13 @@ Trotz der Implementierung strenger Systemrichtlinien, die das Abbrechen von Akti
 Dies ist eine grundlegende Einschränkung der aktuellen Generation künstlicher Intelligenz. Aus diesem Grund speichert die Anwendung Projekte in einfachen, leicht editierbaren Textdateien (`.txt`). Dies erfordert vom Benutzer die Rolle eines lebendigen Editors zu übernehmen — das gelegentliche, manuelle Entfernen der letzten, von der KI generierten „abschließenden" Sätze, bevor die Datei erneut geladen und die Arbeit fortgesetzt wird.
 
 
-## Installation und Start
+## Installation und Inbetriebnahme
 
 ### Für Endbenutzer (Windows)
 
-1. Laden Sie die neueste Version aus dem **Releases**-Tab herunter (Paket mit der Bezeichnung *Latest*) — die Datei `Rezyser_Audio_v<Nummer>_Installer.exe`. Starten Sie sie per Doppelklick. Der Installer landet standardmäßig im lokalen Verzeichnis Ihres Benutzerkontos (`%LocalAppData%\Programs\Reżyser Audio GPT`) und erfordert keine Administratorrechte; mit der Schaltfläche „Durchsuchen" können Sie einen eigenen Pfad wählen. Nach Abschluss werden Verknüpfungen im Startmenü und auf dem Desktop erstellt, und optional wird die Bedienungsanleitung im Standard-Editor für `.txt`-Dateien geöffnet.
-2. **OpenAI API-Konfiguration:** Beim ersten Start signalisiert die Anwendung das Fehlen eines Schlüssels im Abschnitt System Check. Klicken Sie auf die sichtbare Schaltfläche, um die Datei `golden_key.env` zu generieren, öffnen Sie sie in einem Texteditor und fügen Sie Ihren Schlüssel ein (beginnend mit `sk-proj-`).
-3. **Erste Schritte:** Öffnen Sie die Datei `docs/manual.pl.txt` (oder in einer anderen Sprache) im Installationsordner — dies ist eine vollständige Bedienungsanleitung, die in einer Sprache verfasst ist, die für jeden Benutzer zugänglich ist, nicht nur für Entwickler.
+1. Laden Sie die neueste Version aus dem Bereich **Releases** herunter (das als *Latest* gekennzeichnete Paket) — Datei `Rezyser_Audio_v<numer>_Installer.exe`. Starten Sie sie mit einem Doppelklick. Das Installationsprogramm landet standardmäßig im lokalen Verzeichnis Ihres Kontos (`%LocalAppData%\Programs\Reżyser Audio GPT`) und erfordert keine Administratorrechte; Sie können über die Schaltfläche „Durchsuchen" einen eigenen Pfad wählen. Nach Abschluss werden Verknüpfungen im Startmenü und auf dem Desktop erstellt, und optional wird die Bedienungsanleitung im Standard-Editor für `.txt`-Dateien geöffnet.
+2. **Anthropic-API-Konfiguration:** Beim ersten Start signalisiert die Anwendung das Fehlen des Schlüssels im Bereich „System Check". Klicken Sie auf die angezeigte Schaltfläche, um die Datei `golden_key.env` zu generieren, öffnen Sie sie in einem Texteditor und fügen Sie Ihren Anthropic-Schlüssel ein (der mit `sk-ant-` beginnt).
+3. **Erste Schritte:** Öffnen Sie die Datei `docs/manual.pl.txt` (oder in einer anderen Sprache) im Installationsordner — das ist die vollständige Bedienungsanleitung, verfasst in einer für jeden Benutzer verständlichen Sprache, nicht nur für Entwickler.
 
 
 ### Für Entwickler (Klonen + Einrichtung)

@@ -6,7 +6,7 @@
 # (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
 # w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
 #
-# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# Silnik: Anthropic Claude (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
 # zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
 # po weryfikacji parzystości multisetu markerów.
 # =============================================================================

@@ -10,7 +10,7 @@ etykieta: "Valinnat-moodi — 3-5 vaihtoehtoa A-E"
 kategoria: tryb
 kolejnosc: 40
 
-# --- OpenAI-parametrit ---
+# --- Anthropic-parametrit ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

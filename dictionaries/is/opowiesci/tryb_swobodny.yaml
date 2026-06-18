@@ -10,7 +10,7 @@ etykieta: "Frjáls hamur — skrifaðu hvaða aðgerð sem er"
 kategoria: tryb
 kolejnosc: 30
 
-# --- OpenAI-stillingar (erfast frá baza.yaml ef ekki skilgreint hér) ---
+# --- Anthropic-stillingar (erfast frá baza.yaml ef ekki skilgreint hér) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

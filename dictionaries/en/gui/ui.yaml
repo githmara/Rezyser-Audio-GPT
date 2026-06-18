@@ -126,11 +126,6 @@ home:
     First program launch detected. Modules are locked for security reasons.
     To unlock all tools, click the button below — the program will automatically generate the golden_key.env file and open it in the default text editor.
   err_odczyt: "🚨 Failed to read the golden_key.env file:\n{tresc_bledu}"
-  err_struktura: |-
-    🚨 File structure error!
-    The required parameter OPENAI_API_KEY= is missing.
-    You probably deleted the equals sign or the variable name.
-    Delete the file, regenerate it, and paste the key more carefully.
   err_tekst_zastepczy: |-
     ⚠️ Key not entered!
     The golden_key.env file still contains placeholder text.
@@ -145,17 +140,6 @@ home:
     A space or other invisible character was detected before or after the API key.
     Open the file in a text editor and ensure the value starts
     immediately after the '=', without any spaces.
-  err_format: |-
-    🚨 Suspicious key format!
-    A valid OpenAI key always starts with sk- (e.g., sk-proj-…).
-    Make sure you copied the correct string and there are no spaces before it.
-  err_zbyt_krotki: |-
-    ⚠️ The key seems too short ({liczba_znakow} characters detected, at least {minimum_znakow} expected).
-    You probably copied only a fragment of the key.
-
-    If you have already closed the key window on platform.openai.com,
-    you need to return to your account, use the 'Revoke secret key' option for this
-    truncated key, and generate a new one. Remember to copy the key in full next time before clicking 'Done'.
   ok_klucz_wykryty: |-
     ✅ API key (golden_key.env) detected and correctly formatted.
     All modules are ready to work.
@@ -190,8 +174,8 @@ home:
     Open golden_key.env and make sure the value starts immediately after the '=' sign.
   el_format: |-
     🚨 Suspicious ElevenLabs key format!
-    An ElevenLabs key always starts with sk_ (with an UNDERSCORE, not sk- like OpenAI).
-    Make sure you pasted a key from ElevenLabs and not from another platform.
+    An ElevenLabs key always starts with sk_ (with an UNDERSCORE, not a hyphen like sk-ant-).
+    Make sure you pasted the key from ElevenLabs and not from another platform.
   el_zbyt_krotki: |-
     ⚠️ The ElevenLabs key seems too short ({liczba_znakow} characters detected, at least {minimum_znakow} expected).
     You probably copied only part of the key. Generate a new key in the ElevenLabs panel and paste it in full.
@@ -212,12 +196,9 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-# -----------------------------------------------------------------------------
-  heading_anthropic: Narration engine (Anthropic / Claude) — required
-  ant_err_struktura: "🚨 File structure error!\nThe required variable ANTHROPIC_API_KEY= is missing.\nFrom version 18.0, the narration engine (audiobook, read theater, brainstorm) runs on the Claude model and requires a separate key.\nDelete the file, regenerate it, and paste the key more carefully."
-  ant_err_format: "🚨 Suspicious Anthropic key format!\nA valid Anthropic (Claude) key always starts with sk-ant- (e.g., sk-ant-api03-…).\nMake sure you copied the key from console.anthropic.com, not an OpenAI key."
+  ant_err_struktura: "🚨 File structure error!\nThe required variable ANTHROPIC_API_KEY= is missing.\nSince version 18.2, the entire AI engine (Director, Stories, Polyglot, chapter titles) runs on the Claude model and requires an Anthropic key.\nDelete the file, regenerate it, and paste the key more carefully."
+  ant_err_format: "🚨 Suspicious Anthropic key format!\nA valid Anthropic (Claude) key always starts with sk-ant- (e.g. sk-ant-api03-…).\nMake sure you copied the key from console.anthropic.com and not a key from another provider."
   ant_err_zbyt_krotki: "⚠️ The Anthropic key seems too short ({liczba_znakow} characters detected, at least {minimum_znakow} expected).\nYou probably copied only part of the key. Go back to console.anthropic.com and copy it in full."
-  ant_ok: "✅ Anthropic (Claude) key detected and correctly formatted.\nThe narration engine is ready to work."
 rezyser:
   panel_name: "Audio Director GPT Panel"
   heading: "🎬  Audio Director GPT – Hybrid Creative Studio"
@@ -365,7 +346,7 @@ rezyser:
     (e.g., 'Describe Geralt's meeting with the witch in the forest. High tension.')
   btn_wyslij_label: "Send to AI"
   btn_wyslij_tooltip: |-
-    Sends instructions to the gpt-4o model and appends the response to the story.
+    Sends instructions to the Claude model and appends the response to the history.
     Requires an active API key and a completed World Book.
   # Postprodukcja
   postprod_heading: "🎛️ Postproduction"
@@ -447,7 +428,7 @@ rezyser:
   btn_tytuly_ai_label: "📜 Assign Chapter Titles (AI)"
   btn_tytuly_ai_name: "Assign Chapter Titles AI Button"
   btn_tytuly_ai_tooltip: |-
-    Iterates over chapters from the saved file and assigns them titles (gpt-4o-mini).
+    Iterates through chapters in the saved file and assigns them titles (Claude).
     Requires a saved project file and an active API key.
   # Pamięć modelu
   lbl_pamiec_modelu: "🧠 Model Memory (Context Window State):"
@@ -523,7 +504,7 @@ rezyser:
   # Wysyłanie do AI
   brak_api_tytul: "No API"
   brak_api_tresc: |-
-    No connection to OpenAI.
+    No connection to Anthropic.
     Check the golden_key.env file and restart the application.
   puste_pole_tytul: "Empty field"
   puste_pole_tresc: "Enter instructions for AI before sending."
@@ -544,7 +525,7 @@ rezyser:
     This could damage your story.
 
     Switch to 'Brainstorm' mode and try again.
-  err_rate_limit: "No OpenAI credits! Top up your account and try again."
+  err_rate_limit: "No Anthropic credits! Top up your account and try again."
   err_surowy_json: |-
     This mode returned data in JSON format, but it is not configured as a JSON mode, so the text was NOT saved (avoiding pasting raw JSON into a file).
     Most common cause: the mode was created from a duplicate Script. Set `format_wyjscia: skrypt_json` in its YAML file (for narrator+character dialogue) — or, if it's a new scheme, contact the developer.
@@ -642,7 +623,6 @@ rezyser:
   pamiec_status_ok: "🟢 Memory usage: {tokeny} / {maks} tokens. Safe buffer."
   pamiec_status_ostrzezenie: "⚠️ WARNING STATE: {tokeny} of {maks} tokens used. Memory is filling up — a summary will soon be required."
   pamiec_status_alarm: "🚨 CRITICAL OVERLOAD: {tokeny} of {maks} tokens used. In Brainstorm mode generate a summary, save it as Long-Term Memory, then clear the current story (keeping the summary)."
-  err_struktura: The model generated an incorrect response structure despite several correction attempts. Try again or rephrase the command.
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
   btn_przeladuj_label: '&Reload project from disk'
   btn_przeladuj_tooltip: 'Reloads the ENTIRE project from disk after your manual changes in the narration file (skrypty/<name>.txt) — recalculates Chapter/Act/Scene counters, raises the World Book, mode and Brainstorm options, and synchronizes working memory. Loads a short story in full; for a long one, it will ask from which header the AI working memory should start (the rest is represented by the Summary). WARNING: overwrites field contents with the version from disk — save unsaved changes first.'
@@ -674,10 +654,10 @@ poliglota:
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
   description_name: "Polyglot module description"
   tool_description: |-
-    The Polyglot module is used for applying hard phonetic accents for local speech synthesizers (NVDA/Vocalizer/eSpeak), for wordplay in Cipher Mode, and for translating texts using AI (OpenAI gpt-4o).
+    The Polyglot module is used to apply hard phonetic accents for local speech synthesizers (NVDA/Vocalizer/eSpeak), for text games in Cipher Mode, and for translating texts using AI (Anthropic Claude).
 
-    Supports files: .txt, .html, .htm, .docx.
-    The result is saved in the same directory as the source file.
+    Supported files: .txt, .html, .htm, .docx.
+    The output is saved in the same directory as the source file.
   # Sekcja 1: wczytywanie pliku
   section1_heading: "1. Loading the source file"
   lbl_plik: "Name or full path of the file (.txt, .html, .htm, .docx):"
@@ -721,7 +701,7 @@ poliglota:
     NO – keep rules for "{jezyk_aktywny}". The effect on foreign language text may be unpredictable.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Work Configuration"
-  rb_ai: "AI Translator (OpenAI gpt-4o – requires API key, costs credits)"
+  rb_ai: "AI Translator (Anthropic Claude – requires API key, costs credits)"
   rb_ai_disabled: "AI Translator (disabled – no valid golden_key.env file)"
   rb_ai_name: "AI Translator Mode"
   rb_rezyser: "Director Mode (free phonetic rules from YAML)"
@@ -787,9 +767,9 @@ poliglota:
   ai_blad_zapisu: "Error saving the result file:\n{tresc_bledu}"
   # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
   ai_blad_limit_api: |-
-    Out of OpenAI credits or API rate limit exceeded! Translation was interrupted at block {blok}.
+    No credits or Anthropic API limit exceeded! Translation was interrupted at block {blok}.
 
-    Your progress has been saved automatically. Top up your API account and load the original again to continue from this point.
+    Progress has been automatically saved. Top up your API account and reload the original file to continue from this point.
   ai_blad_cache: |-
     Could not read the temporary file (translation resume cache):
     {plik}
@@ -1212,7 +1192,7 @@ opowiesci:
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format: "\n\n--- Turn {numer} ---\n\n"
   brak_api_tytul: "No API Key"
-  brak_api_tresc: "The golden_key.env file with a valid OPENAI_API_KEY was not found. The Story module requires an active key to generate narrative turns."
+  brak_api_tresc: "The golden_key.env file with a valid ANTHROPIC_API_KEY was not found. The Stories module requires an active key to generate narrative turns."
   puste_pole_tytul: "Empty Action Field"
   puste_pole_tresc: 'Enter an action or command in the field below the narrative before clicking "Send".'
   puste_nazwa_tytul: "No Game Name"
@@ -1226,10 +1206,8 @@ opowiesci:
   blad_ai_szczegoly_tytul: "Narrative Engine Error Details"
   blad_ai_lbl_tresc: "Error content (to copy):"
   blad_ai_tresc_name: "Narrative Engine Error Content Field"
-  err_rate_limit: "OpenAI query limit exhausted. Wait a moment or check your account status."
+  err_rate_limit: "The Anthropic request limit has been exhausted. Wait a moment or check your account status."
   err_timeout: "Model response timeout exceeded (over 120 seconds). Try again."
-  err_struktura: "The model generated an incorrect response structure despite two correction attempts. Try again or formulate the action differently."
-
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul: "No Active Game"
   brak_gry_tresc: 'Start a new game with the "New Game" button or load a previously saved one with the "Load" button before trying to send an action.'

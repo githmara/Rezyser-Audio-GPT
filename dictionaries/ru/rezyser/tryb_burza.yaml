@@ -21,7 +21,7 @@ kolejnosc: 10
 # Формат вывода → диспетчеризация движка (gui_rezyser). НЕ менять — связывает режим с JSON-парсером Python.
 format_wyjscia: burza_json
 
-# --- Параметры OpenAI ---
+# --- Параметры Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

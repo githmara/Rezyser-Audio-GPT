@@ -2,15 +2,15 @@
 #  POSTPRODUKCJA: NADAJ TYTUŁY ROZDZIAŁOM (AI)
 #  Narzędzie dla trybu Audiobook: iteruje po rozdziałach zapisanego pliku
 #  projektu i generuje dla każdego krótki, literacki tytuł.
-#  Domyślnie używa taniego modelu (gpt-4o-mini), bo zadanie jest proste.
+#  Używa modelu claude-sonnet-4-6 (konsolidacja v18.x na Anthropic) — zadanie proste.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Nadaj Tytuły Rozdziałom (AI)"
 kategoria: postprodukcja
 kolejnosc: 10
 
-# --- Parametry OpenAI ---
-model: gpt-4o-mini
+# --- Parametry Anthropic ---
+model: claude-sonnet-4-6
 temperatura: 0.7
 jezyk_odpowiedzi: polsku
 

@@ -10,7 +10,7 @@ etykieta: "Wizualizacja sceny (slash /wizualizuj)"
 kategoria: tryb
 kolejnosc: 20
 
-# --- Parametry OpenAI ---
+# --- Parametry Anthropic ---
 # Wyższa temperatura niż w trybach narracyjnych — chcemy bogatego, kreatywnego
 # opisu. max_tokens niski, bo to nie jest tura gry.
 model: claude-sonnet-4-6

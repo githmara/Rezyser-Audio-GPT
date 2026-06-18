@@ -1,5 +1,5 @@
 """
-tlumacz_ai.py – Silnik tłumaczenia OpenAI GPT-4o (moduł pomocniczy Poligloty).
+tlumacz_ai.py – Silnik tłumaczenia Anthropic Claude (moduł pomocniczy Poligloty).
 
 Wydzielony z ``gui_poliglota.py`` i ``core_poliglota.py``, by:
   * nie mieszać logiki „sieciowej” (OpenAI) z czystym przetwarzaniem tekstu,
@@ -18,11 +18,11 @@ Szczegółowy przebieg:
      Limit tokenowy (nie znakowy!) chroni języki token-gęste (CJK itp.)
      przed przekroczeniem limitu tokenów WYJŚCIA modelu.
   2. Jeśli ostatni blok jest krótki, sklejany jest z przedostatnim.
-  3. Dla każdego bloku wysyłane jest zapytanie ``chat.completions`` do modelu
-     ``model_tlumacz``. Ostatni tłumaczony blok podawany jest jako kontekst
-     do kolejnego wywołania – dzięki temu model trzyma spójną terminologię.
-     Odpowiedź ucięta limitem wyjścia (``finish_reason == "length"``) NIE
-     jest akceptowana — blok jest dzielony na pół i tłumaczony rekurencyjnie
+  3. Dla każdego bloku wysyłane jest zapytanie ``messages.create`` (Anthropic
+     Messages API) do modelu ``model_tlumacz``. Ostatni tłumaczony blok podawany
+     jest jako kontekst do kolejnego wywołania – dzięki temu model trzyma spójną
+     terminologię. Odpowiedź ucięta limitem wyjścia (``stop_reason == "max_tokens"``)
+     NIE jest akceptowana — blok jest dzielony na pół i tłumaczony rekurencyjnie
      (:func:`_tlumacz_blok`), zamiast bezgłośnie gubić końcówkę tekstu.
   4. Po każdym udanym bloku treść dopisywana jest do pliku tymczasowego
      ``runtime/temp_<nazwa_bazowa>.jsonl``. Jeśli użytkownik przerwie
@@ -30,9 +30,16 @@ Szczegółowy przebieg:
      gotowe bloki są odtwarzane z tego pliku (oszczędność kredytów API).
      Pierwsza linia pliku to metryka zgodności (wersja chunkowania +
      liczba bloków) — cache z innego podziału jest odrzucany w całości.
-  5. Na końcu wywoływana jest druga, tania konsultacja (``model_iso``)
+  5. Na końcu wywoływana jest druga, krótka konsultacja (``model_iso``)
      w celu ustalenia kodu języka BCP-47 (dwuliterowy ISO 639-1,
      dla odmian regionalnych/pisma z podtagiem, np. ``pt-BR``, ``zh-Hans``).
+
+Migracja na Anthropic (v18.x, Opcja A): silnik woła Claude Messages API
+(``klient.messages.create``) zamiast OpenAI ``chat.completions``. Klient
+przekazywany przez wołającego to instancja ``anthropic.Anthropic``. Tokenizer
+chunkingu pozostaje tiktoken ``o200k_base`` (stała :data:`_MODEL_TOKENIZER`,
+odpięta od modelu LLM) — to czysto logiczny budżet rozmiaru bloku, nie realny
+tokenizer Claude'a; granice bloków bez zmian, więc bez bumpa wersji chunkowania.
 """
 
 from __future__ import annotations
@@ -44,6 +51,35 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 import core_tokeny as ct
+
+
+# =============================================================================
+# Konfiguracja modelu i limitów (Anthropic Claude — migracja v18.x, Opcja A)
+# =============================================================================
+# Jeden model dla głównego tłumaczenia i mikro-callu ISO (konsolidacja: koniec
+# dual-providera). Sonnet 4.6 honoruje `temperature` (jedyny parametr próbkowania)
+# i `thinking={"type":"disabled"}` — tłumaczenie to proza, reasoning tylko dokłada
+# latencji/kosztu. Patrz `rezyser_ai._wywolaj_claude` (ten sam wzorzec).
+MODEL_TLUMACZ = "claude-sonnet-4-6"
+
+# Maks. tokenów WYJŚCIA pojedynczego bloku. Ceiling, nie target: blok wejściowy
+# ma ≤ `max_tokenow_na_blok` tokenów (2 500 GUI / 4 000 docs), tłumaczenie bywa
+# dłuższe dla języków rozwlekłych — 8 192 daje zapas, a pozostaje pod progiem
+# non-streaming SDK (~16k → bez ryzyka HTTP-timeoutu). Przekroczenie limitu łapie
+# `stop_reason == "max_tokens"` i domyka bisekcja (siatka bezpieczeństwa).
+MAX_TOKENS_BLOK = 8192
+
+# Timeout per-wywołanie (SDK Anthropic nie przyjmuje `timeout=` na `messages.create`
+# — przez `with_options`). Blok ≤ 4k tokenów wejścia: 120 s z dużym zapasem.
+TIMEOUT_S = 120.0
+
+# Tokenizer DO CHUNKINGU — celowo odpięty od modelu LLM. Claude nie używa tiktoken;
+# `o200k_base` (alias `gpt-4o`) to logiczny licznik rozmiaru bloku, identyczny jak
+# przed migracją (gpt-4o też był o200k_base) → granice bloków bez zmian → cache
+# `temp_*.jsonl` zgodny, BEZ bumpa `_WERSJA_CHUNKOWANIA`. NIE podstawiaj tu modelu
+# Claude — `kodowanie_dla_modelu` spadłby na ten sam o200k_base przez KeyError-fallback,
+# ale jawna stała czyni niezmiennik widocznym dla przyszłego reviewera.
+_MODEL_TOKENIZER = "gpt-4o"
 
 
 # =============================================================================
@@ -174,7 +210,7 @@ _WERSJA_CHUNKOWANIA = 2
 
 
 def _podziel_na_bloki(tekst: str, max_tokenow: int = 2_500,
-                      model: str = "gpt-4o") -> list[str]:
+                      model: str = _MODEL_TOKENIZER) -> list[str]:
     """Dzieli długi tekst na bloki ≤ ``max_tokenow`` tokenów, respektując linie.
 
     Do v17.2 limit liczony był w ZNAKACH (10k) — dla języków token-gęstych
@@ -327,12 +363,17 @@ def _pobierz_iso(klient: Any, jezyk_docelowy: str, model: str) -> tuple[str, str
         f"For a regional or script variant add a subtag, e.g.: pt-BR, zh-CN, zh-Hans. "
         f"The response must contain only the code itself — no period and no comment."
     )
-    resp = klient.chat.completions.create(
+    resp = klient.with_options(timeout=TIMEOUT_S).messages.create(
         model=model,
+        max_tokens=32,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.0,
+        thinking={"type": "disabled"},
     )
-    surowa = (resp.choices[0].message.content or "").strip()
+    surowa = "".join(
+        blok.text for blok in resp.content
+        if getattr(blok, "type", None) == "text"
+    ).strip()
     iso = normalizuj_kod_jezyka(surowa)
     if not iso:
         return "", surowa
@@ -352,49 +393,61 @@ def _tlumacz_blok(
 ) -> str:
     """Tłumaczy jeden blok; odpowiedź uciętą limitem wyjścia ponawia bisekcją.
 
-    ``finish_reason == "length"`` oznacza, że model wyczerpał limit tokenów
-    WYJŚCIA zanim dokończył tłumaczenie. Do v17.2 taka odpowiedź była
-    bezgłośnie sklejana z resztą — bug „uciętej końcówki" przy językach
-    token-gęstych (issue #16). Bisekcja: blok dzielimy możliwie po granicy
-    akapitu/zdania (:func:`_podziel_blok_na_pol`); lewa połowa dziedziczy
-    dotychczasowy kontekst, prawa dostaje jako kontekst świeżo
-    przetłumaczoną lewą (spójność terminologii). Wyjątki sieciowe
-    (RateLimitError itp.) przepuszczamy wyżej — obsługuje je pętla główna.
+    ``stop_reason == "max_tokens"`` oznacza, że model wyczerpał limit tokenów
+    WYJŚCIA (:data:`MAX_TOKENS_BLOK`) zanim dokończył tłumaczenie. Do v17.2 taka
+    odpowiedź była bezgłośnie sklejana z resztą — bug „uciętej końcówki" przy
+    językach token-gęstych (issue #16). Bisekcja: blok dzielimy możliwie po
+    granicy akapitu/zdania (:func:`_podziel_blok_na_pol`); lewa połowa dziedziczy
+    dotychczasowy kontekst, prawa dostaje jako kontekst świeżo przetłumaczoną
+    lewą (spójność terminologii).
+
+    Anthropic rozdziela prompt systemowy (parametr ``system=``) od ``messages`` i
+    NIE pozwala kończyć payloadu turą ``assistant`` (prefill = 400 na Sonnet 4.6).
+    Dlatego kontekst poprzedniego bloku — w wariancie OpenAI podawany jako tura
+    ``assistant`` — wkładamy do wiadomości ``user`` jako materiał referencyjny
+    (oznaczony „NIE powtarzać"). ``thinking=disabled`` — tłumaczenie to proza,
+    reasoning dokładałby tylko latencji/kosztu. Wyjątki sieciowe (RateLimitError
+    itp.) przepuszczamy wyżej — obsługuje je pętla główna.
     """
-    payload: list[dict[str, str]] = [{"role": "system", "content": sys_prompt}]
     if kontekst:
-        payload.append({"role": "assistant", "content": kontekst})
-        # Sklejka po angielsku — payload LLM jest jednojęzyczny (EN), spójnie
-        # z `_PROMPT_SYSTEMOWY_TEMPLATE`; do v17.11 ten prefiks był polskim
-        # hard-kodem lecącym do modelu niezależnie od pary językowej.
+        # Payload LLM jednojęzyczny (EN), spójnie z `_PROMPT_SYSTEMOWY_TEMPLATE`.
         user_content = (
-            "[CRITICAL: Continue translating the text below. "
-            "Keep absolute consistency of terminology, tone and style "
-            "with your previous response.]\n\n" + blok
+            "[CRITICAL: Continue translating the text below. Keep absolute "
+            "consistency of terminology, tone and style with the already-translated "
+            "preceding passage.]\n\n"
+            "## Already-translated preceding passage "
+            "(reference for consistency only — do NOT repeat or re-translate it):\n"
+            f"{kontekst}\n\n"
+            "## Text to translate now:\n"
+            f"{blok}"
         )
     else:
         user_content = blok
-    payload.append({"role": "user", "content": user_content})
 
-    response = klient.chat.completions.create(
+    response = klient.with_options(timeout=TIMEOUT_S).messages.create(
         model=model,
-        messages=payload,
+        system=sys_prompt,
+        messages=[{"role": "user", "content": user_content}],
+        max_tokens=MAX_TOKENS_BLOK,
         temperature=0.3,
+        thinking={"type": "disabled"},
     )
-    wybor = response.choices[0]
-    fragment = (wybor.message.content or "").strip()
-    if getattr(wybor, "finish_reason", "") != "length":
+    fragment = "".join(
+        blok_tresci.text for blok_tresci in response.content
+        if getattr(blok_tresci, "type", None) == "text"
+    ).strip()
+    if getattr(response, "stop_reason", None) != "max_tokens":
         return fragment
 
     if glebokosc <= 0:
         raise BladUcietegoTlumaczenia(
-            "Output truncated (finish_reason='length'); recursive bisection "
+            "Output truncated (stop_reason='max_tokens'); recursive bisection "
             "depth exhausted without completing the block."
         )
     lewa, prawa = _podziel_blok_na_pol(blok)
     if not lewa or not prawa:
         raise BladUcietegoTlumaczenia(
-            "Output truncated (finish_reason='length'); block can no longer "
+            "Output truncated (stop_reason='max_tokens'); block can no longer "
             "be split into smaller parts."
         )
     czesc_lewa = _tlumacz_blok(klient, model, sys_prompt, lewa, kontekst, glebokosc - 1)
@@ -415,18 +468,18 @@ def tlumacz_dlugi_tekst(
     on_postep: PostepCallback | None = None,
     on_blad_krytyczny: BladKrytyczny | None = None,
     on_blad_miekki: BladMiekki | None = None,
-    model_tlumacz: str = "gpt-4o",
-    model_iso: str = "gpt-4o-mini",
+    model_tlumacz: str = MODEL_TLUMACZ,
+    model_iso: str = MODEL_TLUMACZ,
     max_tokenow_na_blok: int = 2_500,
     prompt_dodatkowy: str = "",
 ) -> WynikTlumaczenia | None:
-    """Tłumaczy długi tekst przez OpenAI z wznawianiem po przerwaniu.
+    """Tłumaczy długi tekst przez Anthropic Claude z wznawianiem po przerwaniu.
 
     Args:
         tresc:            Pełny tekst źródłowy do przetłumaczenia.
         jezyk_docelowy:   Nazwa języka docelowego wpisana przez użytkownika
                           (np. ``"Fiński"``, ``"Angielski"``, ``"Arabski"``).
-        klient:           Zainicjowana instancja ``openai.OpenAI``.
+        klient:           Zainicjowana instancja ``anthropic.Anthropic``.
         runtime_dir:      Katalog na plik tymczasowy ``temp_*.jsonl``
                           (zalecany: ``<app>/runtime``).
         oryginalna_nazwa: Nazwa pliku źródłowego bez rozszerzenia – trafia
@@ -459,8 +512,8 @@ def tlumacz_dlugi_tekst(
         :class:`WynikTlumaczenia` po sukcesie, albo ``None`` po błędzie
         krytycznym (wtedy callback ``on_blad_krytyczny`` już został wywołany).
     """
-    # Import openai wewnątrz funkcji – odciąża moduł przy testach jednostkowych
-    import openai
+    # Import anthropic wewnątrz funkcji – odciąża moduł przy testach jednostkowych
+    import anthropic
 
     base_name = zbuduj_nazwe_bazowa(oryginalna_nazwa, jezyk_docelowy)
     plik_temp = _sciezka_pliku_tymczasowego(runtime_dir, base_name)
@@ -471,7 +524,7 @@ def tlumacz_dlugi_tekst(
         # jako jeden blok instrukcji, więc nie ma ryzyka „I'm just an AI" itp.
         sys_prompt = sys_prompt + "\n\n" + prompt_dodatkowy
     bloki = _podziel_na_bloki(
-        tresc, max_tokenow=max_tokenow_na_blok, model=model_tlumacz,
+        tresc, max_tokenow=max_tokenow_na_blok, model=_MODEL_TOKENIZER,
     )
 
     # -------- Odzyskanie wcześniej opłaconych bloków ----------------------
@@ -550,7 +603,7 @@ def tlumacz_dlugi_tekst(
             with open(plik_temp, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"id": i, "text": fragment}, ensure_ascii=False) + "\n")
 
-        except openai.RateLimitError:
+        except anthropic.RateLimitError:
             partial = "\n\n".join(wczytane[k] for k in sorted(wczytane))
             if on_blad_krytyczny:
                 on_blad_krytyczny(

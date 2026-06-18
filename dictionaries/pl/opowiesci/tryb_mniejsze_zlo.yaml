@@ -16,7 +16,7 @@ etykieta: "Mniejsze zło — wszystkie opcje niekorzystne"
 kategoria: tryb
 kolejnosc: 50
 
-# --- Parametry OpenAI ---
+# --- Parametry Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

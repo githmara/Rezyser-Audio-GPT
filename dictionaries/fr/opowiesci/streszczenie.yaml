@@ -12,7 +12,7 @@ etykieta: "Résumé automatique du contexte"
 kategoria: meta
 kolejnosc: 60
 
-# --- Paramètres OpenAI ---
+# --- Paramètres Anthropic ---
 # Température basse — nous voulons un résumé fidèle et factuel (non créatif).
 model: claude-sonnet-4-6
 temperatura: 0.3

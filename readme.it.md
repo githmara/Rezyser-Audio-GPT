@@ -7,7 +7,7 @@
 
 Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-Versione: **18.1** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versione: **18.2** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -66,11 +66,9 @@ L'interfaccia GUI, la documentazione (`docs/manual.<iso>.txt`) e la maggior part
 
 ## Architettura AI e modelli utilizzati
 
-L'applicazione distribuisce intelligentemente i compiti tra due fornitori di API, ottimizzando la qualità della prosa, i costi e la velocità:
+Dalla versione 18.2 l'applicazione utilizza un unico fornitore API — Anthropic — e un unico modello per tutti i compiti di intelligenza artificiale:
 
-* **Anthropic Claude Sonnet 4.6:** Motore di tutta la narrazione creativa. Responsabile della regia degli script, della scrittura di prosa tradizionale (Audiolibro), del Brainstorming e di TUTTE le modalità di Racconto (Scelte, Minor Male, Libero) insieme alla generazione di riassunti e intermezzi Cinematic. La migrazione della narrazione su Claude (Regista in v18.0, Racconti in v18.1) è risultata dalla comprovata superiorità empirica nel mantenere le regole del mondo e nell'evitare cliché.
-* **gpt-4o (OpenAI):** Traduzioni avanzate con mantenimento del contesto multi-blocco (Poliglotta). Migrazione su Anthropic pianificata nella prossima versione.
-* **gpt-4o-mini (OpenAI):** Modello ausiliario veloce e leggero per micro-compiti: assegnazione iterativa di titoli letterari ai capitoli generati ed estrazione di codici ISO della lingua.
+* **Anthropic Claude Sonnet 4.6:** Il motore dell'INTERA intelligenza dell'applicazione. È responsabile della narrazione creativa (regia degli script, scrittura della prosa tradizionale degli Audiolibri, Brainstorming e TUTTE le modalità delle Opowiesci — Scelte, Male Minore, Libero — insieme alla generazione di riassunti e intermezzi Cinematic), delle traduzioni avanzate con mantenimento del contesto multi-blocco (Poliglota), nonché dei micro-compiti: assegnazione iterativa di titoli letterari ai capitoli e rilevamento del codice lingua del contenuto. Il consolidamento su Claude è avvenuto per fasi (Reżyser nella v18.0, Opowiesci nella v18.1, Poliglota e post-produzione nella v18.2) — è scaturito da una superiorità empiricamente confermata nel rispetto delle regole del mondo narrativo, nella naturalezza della prosa e nell'evitare i cliché.
 
 
 ### Limitazioni conosciute dei modelli (Anti-Closure)
@@ -82,11 +80,11 @@ Questa è una limitazione fondamentale dell'attuale generazione di intelligenza 
 
 ## Installazione e avvio
 
-### Per utenti finali (Windows)
+### Per gli utenti finali (Windows)
 
-1. Scarica l'ultima versione dalla scheda **Releases** (pacchetto contrassegnato come *Latest*) — il file `Rezyser_Audio_v<numero>_Installer.exe`. Avvialo con un doppio clic. L'installatore atterra per impostazione predefinita nella directory locale del tuo account (`%LocalAppData%\Programs\Reżyser Audio GPT`) e non richiede diritti di amministratore; puoi scegliere il tuo percorso con il pulsante „Sfoglia". Al termine crea collegamenti nel Menu Start e sul desktop, e apre facoltativamente il manuale utente nell'editor predefinito di file `.txt`.
-2. **Configurazione API OpenAI:** Al primo avvio, l'applicazione segnalerà la mancanza della chiave nella sezione System Check. Clicca sul pulsante visibile per generare il file `golden_key.env`, aprilo in un editor di testo e incolla la tua chiave (che inizia con `sk-proj-`).
-3. **Primi passi:** Apri il file `docs/manual.pl.txt` (o in un'altra lingua) nella cartella di installazione — è un manuale utente completo scritto in un linguaggio accessibile a tutti gli utenti, non solo agli sviluppatori.
+1. Scarica l'ultima versione dalla scheda **Releases** (pacchetto contrassegnato come *Latest*) — file `Rezyser_Audio_v<numer>_Installer.exe`. Avvialo con un doppio clic. Il programma di installazione si posiziona per impostazione predefinita nella directory locale del tuo account (`%LocalAppData%\Programs\Reżyser Audio GPT`) e non richiede diritti di amministratore; puoi scegliere un percorso personalizzato tramite il pulsante "Sfoglia". Al termine crea collegamenti nel Menu Start e sul desktop, e facoltativamente apre il manuale d'uso nell'editor predefinito per i file `.txt`.
+2. **Configurazione API Anthropic:** Al primo avvio, l'applicazione segnalerà l'assenza della chiave nella sezione System Check. Fai clic sul pulsante visualizzato per generare il file `golden_key.env`, aprilo in un editor di testo e incolla la tua chiave Anthropic (che inizia con `sk-ant-`).
+3. **Primi passi:** Apri il file `docs/manual.pl.txt` (o in un'altra lingua) nella cartella di installazione — è il manuale d'uso completo, scritto in un linguaggio accessibile a ogni utente, non solo agli sviluppatori.
 
 
 ### Per sviluppatori (clone + setup)

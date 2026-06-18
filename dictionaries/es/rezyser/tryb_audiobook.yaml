@@ -9,7 +9,7 @@ etykieta: "Audiolibro (prosa, capítulos, ESCRITURA EN ARCHIVO)"
 kategoria: tryb
 kolejnosc: 30
 
-# --- Parámetros OpenAI ---
+# --- Parámetros Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: español

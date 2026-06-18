@@ -19,7 +19,7 @@ etykieta: "Erzählerischer Basisprompt"
 kategoria: baza
 kolejnosc: 0
 
-# --- OpenAI-Parameter (von den Erzählmodi geerbt) ---
+# --- Anthropic-Parameter (von den Erzählmodi geerbt) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

@@ -10,7 +10,7 @@ etykieta: "Senuskoðun (slash /visualize)"
 kategoria: tryb
 kolejnosc: 20
 
-# --- OpenAI-stillingar ---
+# --- Anthropic-stillingar ---
 # Hærra hitastig en frásagnarhamir — við viljum ríkulega, skapandi lýsingu.
 # max_tokens er lágt því þetta er ekki leikumferð.
 model: claude-sonnet-4-6

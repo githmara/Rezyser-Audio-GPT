@@ -127,26 +127,23 @@ tresc:
 
     Wskazówka: opcja „Otwórz lokalizację pliku" to nazwa natywna dla polskiej wersji Windows. W angielskim systemie brzmi „Open file location", w pozostałych wersjach językowych — analogicznie w lokalnym języku systemu operacyjnego.
   krok_2_klucz_api: |
-    KROK 2: Zasilanie API (dwa klucze — Anthropic i OpenAI)
+    KROK 2: Zasilanie API (klucz Anthropic / Claude)
 
-    Od wersji 18.0 aplikacja korzysta z dwóch dostawców sztucznej inteligencji i wymaga DWÓCH kluczy API w pliku golden_key.env:
+    Od wersji 18.2 aplikacja korzysta z jednego dostawcy sztucznej inteligencji — Anthropic (Claude) — i wymaga JEDNEGO klucza API w pliku golden_key.env:
 
-    •  Klucz Anthropic (Claude) — zasila silnik narracji Reżysera (audiobook, teatr czytany, burza mózgów). Zaczyna się od sk-ant-.
-    •  Klucz OpenAI — zasila nadawanie tytułów rozdziałom, wykrywanie języka treści, tryb Opowieści oraz Poliglotę (tłumacz). Zaczyna się od sk-.
+    •  Klucz Anthropic (Claude) — zasila CAŁY silnik AI: narrację Reżysera (audiobook, teatr czytany, burza mózgów), tryb Opowieści, Poliglotę (tłumacz) oraz nadawanie tytułów rozdziałom i wykrywanie języka treści. Zaczyna się od sk-ant-.
+
+    Jeśli aktualizujesz ze starszej wersji: dawny klucz OpenAI nie jest już potrzebny — możesz zostawić lub usunąć jego linię w golden_key.env, aplikacja ją ignoruje.
 
     Jak zdobyć klucz Anthropic:
     1. Załóż konto na console.anthropic.com i doładuj środki (zakładka Billing / Plans).
     2. Wygeneruj klucz w sekcji API Keys (zaczyna się od sk-ant-). Skopiuj go od razu — bywa wyświetlany tylko raz.
 
-    Jak zdobyć klucz OpenAI:
-    1. Załóż konto na platform.openai.com i doładuj konto w zakładce Billing.
-    2. Wygeneruj klucz w zakładce API Keys (zaczyna się od sk-proj-). Uwaga: klucz jest wyświetlany tylko raz — w momencie tworzenia. Jeśli zamkniesz okno bez skopiowania, przepada bezpowrotnie i trzeba będzie go zastrzec (opcja revoke secret key) i wygenerować nowy. Skopiuj go od razu, zanim cokolwiek klikniesz.
-
-    Jak wpisać klucze do programu:
+    Jak wpisać klucz do programu:
     3. Na ekranie startowym programu kliknij przycisk "{home.btn_generate}". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
-    4. W otwartym pliku zobaczysz dwie linie: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ oraz OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. W każdej usuń tekst zastępczy i wklej odpowiedni klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
+    4. W otwartym pliku zobaczysz linię: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
 
-    Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "{home.heading_system_check}" pokaże osobny status dla każdego klucza. Oba muszą być zielone, aby wszystkie moduły AI były gotowe do pracy. Jeśli któregoś klucza brakuje lub jest błędny, program jasno wskaże który i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
+    Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "{home.heading_system_check}" pokaże status klucza. Musi być zielony, aby wszystkie moduły AI były gotowe do pracy. Jeśli klucza brakuje lub jest błędny, program jasno to wskaże i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
   krok_3_glowne_studio: |
     KROK 3: Główne Studio Reżyserskie
 
@@ -275,7 +272,7 @@ tresc:
 
     Klucz ElevenLabs (opcjonalny)
 
-    Wklej swój klucz ElevenLabs do pliku golden_key.env, w osobnej linii: ELEVENLABS_API_KEY=sk_... Uwaga: klucz ElevenLabs zaczyna się od sk_ (z PODKREŚLNIKIEM), inaczej niż klucz OpenAI (sk-). Jeśli używasz klucza z ograniczeniami (restricted key), nadaj mu uprawnienia (scope'y) projects_write oraz voices_read. Status klucza widać na ekranie głównym (System Check) — brak klucza nie jest błędem, po prostu most pozostaje ukryty.
+    Wklej swój klucz ElevenLabs do pliku golden_key.env, w osobnej linii: ELEVENLABS_API_KEY=sk_... Uwaga: klucz ElevenLabs zaczyna się od sk_ (z PODKREŚLNIKIEM), inaczej niż klucz Anthropic (sk-ant-). Jeśli używasz klucza z ograniczeniami (restricted key), nadaj mu uprawnienia (scope'y) projects_write oraz voices_read. Status klucza widać na ekranie głównym (System Check) — brak klucza nie jest błędem, po prostu most pozostaje ukryty.
 
     Most pojawia się w panelu Reżysera w trybie Skrypt (gdy klucz jest poprawny). Działa na gotowej sztuce zapisanej na dysku — najpierw wygeneruj lub wczytaj projekt, potem przejdź do mostu.
 

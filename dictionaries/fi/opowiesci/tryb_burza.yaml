@@ -10,7 +10,7 @@ etykieta: "Kohtauksen visualisointi (slash /visualize)"
 kategoria: tryb
 kolejnosc: 20
 
-# --- OpenAI-parametrit ---
+# --- Anthropic-parametrit ---
 # Korkeampi lämpötila kuin kerrontamoodeissa — haluamme rikkaan ja
 # luovan kuvauksen. max_tokens on matala, koska tämä ei ole pelin vuoro.
 model: claude-sonnet-4-6

@@ -84,11 +84,9 @@ tresc:
   architektura_ai: |
     ## Architektura AI i użyte modele
 
-    Aplikacja inteligentnie rozdziela zadania między dwóch dostawców API, optymalizując jakość prozy, koszty i szybkość:
+    Od wersji 18.2 aplikacja korzysta z jednego dostawcy API — Anthropic — i jednego modelu do wszystkich zadań sztucznej inteligencji:
 
-    * **Anthropic Claude Sonnet 4.6:** Silnik całej narracji twórczej. Odpowiada za reżyserowanie skryptów, pisanie tradycyjnej prozy (Audiobook), Burzę Mózgów oraz WSZYSTKIE tryby Opowieści (Wybory, Mniejsze Zło, Swobodny) wraz z generowaniem streszczeń i przerywników Cinematic. Migracja narracji na Claude (Reżyser w v18.0, Opowieści w v18.1) wynikła z empirycznie potwierdzonej przewagi w trzymaniu się zasad świata i unikaniu klisz.
-    * **gpt-4o (OpenAI):** Zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego (Poliglota). Migracja na Anthropic planowana w kolejnym wydaniu.
-    * **gpt-4o-mini (OpenAI):** Szybki, lekki model pomocniczy do mikrozadań: iteracyjne nadawanie literackich tytułów wygenerowanym rozdziałom oraz ekstrakcja kodów ISO języka.
+    * **Anthropic Claude Sonnet 4.6:** Silnik CAŁEJ inteligencji aplikacji. Odpowiada za narrację twórczą (reżyserowanie skryptów, pisanie tradycyjnej prozy Audiobooka, Burzę Mózgów oraz WSZYSTKIE tryby Opowieści — Wybory, Mniejsze Zło, Swobodny — wraz z generowaniem streszczeń i przerywników Cinematic), zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego (Poliglota), a także mikrozadania: iteracyjne nadawanie literackich tytułów rozdziałom oraz wykrywanie kodu języka treści. Konsolidacja na Claude przebiegła etapami (Reżyser w v18.0, Opowieści w v18.1, Poliglota i postprodukcja w v18.2) — wynikła z empirycznie potwierdzonej przewagi w trzymaniu się zasad świata, naturalności prozy i unikaniu klisz.
   ograniczenia_modeli: |
     ### Znane ograniczenia modeli (Anti-Closure)
 
@@ -101,7 +99,7 @@ tresc:
     ### Dla użytkowników końcowych (Windows)
 
     1. Pobierz najnowsze wydanie z zakładki **Releases** (paczka oznaczona jako *Latest*) — plik `Rezyser_Audio_v<numer>_Installer.exe`. Uruchom go dwukrotnym kliknięciem. Instalator domyślnie ląduje w katalogu lokalnym Twojego konta (`%LocalAppData%\Programs\Reżyser Audio GPT`) i nie wymaga praw administratora; możesz wybrać własną ścieżkę przyciskiem „Przeglądaj". Po zakończeniu tworzy skróty w Menu Start i na pulpicie, a opcjonalnie otwiera instrukcję obsługi w domyślnym edytorze plików `.txt`.
-    2. **Konfiguracja API OpenAI:** Przy pierwszym uruchomieniu aplikacja zasygnalizuje brak klucza w sekcji System Check. Kliknij widoczny przycisk, by wygenerować plik `golden_key.env`, otwórz go w edytorze tekstu i wklej swój klucz (zaczynający się od `sk-proj-`).
+    2. **Konfiguracja API Anthropic:** Przy pierwszym uruchomieniu aplikacja zasygnalizuje brak klucza w sekcji System Check. Kliknij widoczny przycisk, by wygenerować plik `golden_key.env`, otwórz go w edytorze tekstu i wklej swój klucz Anthropic (zaczynający się od `sk-ant-`).
     3. **Pierwsze kroki:** Otwórz plik `docs/manual.pl.txt` (lub w innym języku) w folderze instalacji — to pełna instrukcja obsługi pisana językiem dostępnym dla każdego użytkownika, nie tylko deweloperów.
   instalacja_deweloperzy: |
     ### Dla deweloperów (clone + setup)

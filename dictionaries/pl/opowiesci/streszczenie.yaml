@@ -11,7 +11,7 @@ etykieta: "Auto-streszczenie kontekstu"
 kategoria: meta
 kolejnosc: 60
 
-# --- Parametry OpenAI ---
+# --- Parametry Anthropic ---
 # Niska temperatura — chcemy wierne, faktograficzne streszczenie (nie kreatywne).
 model: claude-sonnet-4-6
 temperatura: 0.3

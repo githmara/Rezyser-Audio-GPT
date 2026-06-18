@@ -12,7 +12,7 @@ etykieta: "Автоматическое резюме контекста"
 kategoria: meta
 kolejnosc: 60
 
-# --- Параметры OpenAI ---
+# --- Параметры Anthropic ---
 # Низкая температура — нам нужно верное, фактическое резюме (не творческое).
 model: claude-sonnet-4-6
 temperatura: 0.3

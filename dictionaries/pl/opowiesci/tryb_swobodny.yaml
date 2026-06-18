@@ -9,7 +9,7 @@ etykieta: "Tryb swobodny — pisz dowolną akcję"
 kategoria: tryb
 kolejnosc: 30
 
-# --- Parametry OpenAI (dziedziczone z baza.yaml jeśli nieobecne tutaj) ---
+# --- Parametry Anthropic (dziedziczone z baza.yaml jeśli nieobecne tutaj) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

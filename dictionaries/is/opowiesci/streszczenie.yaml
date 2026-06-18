@@ -12,7 +12,7 @@ etykieta: "Sjálfvirk samhengissamantekt"
 kategoria: meta
 kolejnosc: 60
 
-# --- OpenAI-stillingar ---
+# --- Anthropic-stillingar ---
 # Lágt hitastig — við viljum trúfasta, staðreyndakennda samantekt (ekki skapandi).
 model: claude-sonnet-4-6
 temperatura: 0.3

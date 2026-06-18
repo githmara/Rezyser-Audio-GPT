@@ -9,7 +9,7 @@ etykieta: "Vapaa moodi — kirjoita mikä tahansa teko"
 kategoria: tryb
 kolejnosc: 30
 
-# --- OpenAI-parametrit (perityvät baza.yaml-tiedostosta, ellei tässä määritellä) ---
+# --- Anthropic-parametrit (perityvät baza.yaml-tiedostosta, ellei tässä määritellä) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

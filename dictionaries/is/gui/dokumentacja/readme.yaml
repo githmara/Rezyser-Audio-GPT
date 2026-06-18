@@ -6,7 +6,7 @@
 # (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
 # w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
 #
-# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# Silnik: Anthropic Claude (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
 # zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
 # po weryfikacji parzystości multisetu markerów.
 # =============================================================================
@@ -71,13 +71,11 @@ tresc:
 
     Allt GUI viðmót, skjöl (`docs/manual.<iso>.txt`) og flest kerfisskilaboð eru fáanleg innfædd á hverju af studdu tungumálunum. Kerfisboð AI í Leikstjóra og Söguham eru skrifuð á markmálinu (handvirkt, ekki sjálfvirkt þýdd — sjá `dictionaries/<code>/rezyser/` og `dictionaries/<code>/opowiesci/`).
   architektura_ai: |
-    ## Arkitektúr AI og notuð líkön
+    ## Gerð gervigreindar og notuð líkön
 
-    Forritið skiptir verkefnum á milli tveggja API-veitenda á snjallan hátt, til að hámarka gæði prósa, kostnað og hraða:
+    Frá og með útgáfu 18.2 notar forritið einn API-þjónustuaðila — Anthropic — og eitt líkan fyrir öll verkefni gervigreindar:
 
-    * **Anthropic Claude Sonnet 4.6:** Vél fyrir alla skapandi frásögn. Ber ábyrgð á leikstjórn handrita, skrifum hefðbundinnar prósa (Hljóðbók), Hugstormun og ALLA söguhami (Val, Minna Illa, Frjáls) ásamt því að búa til samantektir og kvikmyndalegar innskot. Flutningur frásagnar til Claude (Leikstjóri í v18.0, Sögur í v18.1) var afleiðing af reynslusönnuðum yfirburðum í að halda sig við reglur heimsins og forðast klisjur.
-    * **gpt-4o (OpenAI):** Háþróuð þýðing með varðveislu margra blokka samhengis (Tungumálasérfræðingur). Flutningur til Anthropic er áætlaður í næstu útgáfu.
-    * **gpt-4o-mini (OpenAI):** Hratt, létt hjálparlíkön fyrir smáverkefni: endurtekin veiting bókmenntatitla fyrir framleiddar kafla og útdráttur ISO tungumálakóða.
+    * **Anthropic Claude Sonnet 4.6:** Vélin á bak við ALLA greind forritsins. Hún sér um skapandi frásögn (leikstjórn handrita, ritun hefðbundinnar hljóðbókarprósu, Hugflóð og ALLAR Söguhamur — Val, Minna Illt, Frjálst — ásamt myndun samantekta og Cinematic-millileikja), háþróaðar þýðingar með varðveislu samhengis yfir mörg blokkir (Poliglota), auk smáverkefna: endurtekið úthlutun bókmenntalegs titils á kafla og greining á tungumálakóða innihalds. Samþjöppunin á Claude fór fram í áföngum (Reżyser í v18.0, Opowiesci í v18.1, Poliglota og eftirvinnsla í v18.2) — hún leiddi af reynslulegri staðfestri yfirburðum í því að fylgja reglum heimsins, náttúruleika prósu og forðast klisé.
   ograniczenia_modeli: |
     ### Þekkt takmörk módela (Anti-Closure)
 
@@ -85,13 +83,13 @@ tresc:
 
     Þetta er grundvallartakmörkun núverandi kynslóðar gervigreindar. Af þessum sökum geymir forritið verkefni í venjulegum, auðveldum til að breyta textaskrám (`.txt`). Þetta krefst þess að notandinn taki á sig hlutverk lifandi klippara — að fjarlægja handvirkt síðustu, „loka" setningar sem AI hefur búið til, og samstilla síðan minnið við leiðréttu skrána með hnappnum „Endurhlaða af diski", og halda vinnunni áfram.
   instalacja_uzytkownicy: |
-    ## Uppsetning og keyrsla
+    ## Uppsetning og ræsing
 
-    ### Fyrir endanotendur (Windows)
+    ### Fyrir notendur (Windows)
 
-    1. Sæktu nýjustu útgáfuna úr **Útgáfur** flipanum (pakki merktur sem *Nýjasta*) — skrána `Rezyser_Audio_v<númer>_Installer.exe`. Keyrðu hana með tvísmelli. Uppsetningarforritið lendir sjálfgefið í staðbundinni möppu notandareiknings þíns (`%LocalAppData%\Programs\Reżyser Audio GPT`) og krefst ekki stjórnandaaðgangs; þú getur valið þína eigin slóð með „Vafra"-hnappinum. Eftir uppsetningu býr það til flýtileiðir í Start-valmyndinni og á skjáborðinu, og opnar valfrjálst notendahandbók í sjálfgefnum ritli fyrir `.txt`-skrár.
-    2. **Stilling OpenAI API:** Við fyrstu keyrslu mun forritið gefa til kynna skort á lykli í System Check hlutanum. Smelltu á sýnilegan hnapp til að búa til skrána `golden_key.env`, opnaðu hana í textaritli og límdu inn lykilinn þinn (sem byrjar á `sk-proj-`).
-    3. **Fyrstu skrefin:** Opnaðu skrána `docs/manual.pl.txt` (eða á öðru tungumáli) í uppsetningarmöppunni — þetta er full leiðarvísir skrifaður á tungumáli sem allir notendur geta skilið, ekki bara forritarar.
+    1. Sæktu nýjustu útgáfuna í flipanum **Releases** (pakkinn merktur *Latest*) — skráin `Rezyser_Audio_v<numer>_Installer.exe`. Keyrðu hana með tvöföldu smelli. Uppsetningarforritið setur sjálfgefið upp í staðbundna möppuna á reikningnum þínum (`%LocalAppData%\Programs\Reżyser Audio GPT`) og krefst ekki stjórnandaheimilda; þú getur valið þína eigin slóð með hnappinum „Przeglądaj". Að uppsetningunni lokinni eru búin til flýtitákn í Start-valmyndinni og á skjáborðinu, og valfrjálst opnar forritið notendahandbókina í sjálfgefnum `.txt`-ritli.
+    2. **Stilling Anthropic API:** Við fyrstu ræsingu mun forritið gefa til kynna að lykill vanti í hlutanum System Check. Smelltu á sýnilega hnappinn til að búa til skrána `golden_key.env`, opnaðu hana í textaritli og límdu inn Anthropic-lykilinn þinn (sem byrjar á `sk-ant-`).
+    3. **Fyrstu skref:** Opnaðu skrána `docs/manual.pl.txt` (eða á öðru tungumáli) í uppsetningarmöppunni — þetta er full notendahandbók skrifuð á tungumáli sem er aðgengilegt öllum notendum, ekki bara forritarar.
   instalacja_deweloperzy: |
     ### Fyrir forritara (afrita + uppsetning)
 

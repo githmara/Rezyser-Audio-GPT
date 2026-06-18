@@ -6,7 +6,7 @@
 # (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj
 # w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.
 #
-# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
+# Silnik: Anthropic Claude (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}
 # zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1
 # po weryfikacji parzystości multisetu markerów.
 # =============================================================================
@@ -74,26 +74,23 @@ tresc:
 
     Tip: the "Open file location" option is the native name for the Polish version of Windows. In the English system, it is "Open file location", in other language versions — similarly in the local operating system language.
   krok_2_klucz_api: |
-    STEP 2: Powering the API (two keys — Anthropic and OpenAI)
+    STEP 2: API Setup (Anthropic / Claude key)
 
-    From version 18.0, the application uses two artificial intelligence providers and requires TWO API keys in the golden_key.env file:
+    From version 18.2, the application uses a single artificial intelligence provider — Anthropic (Claude) — and requires ONE API key in the golden_key.env file:
 
-    •  Anthropic Key (Claude) — powers the Director's narration engine (audiobook, read theater, brainstorming). It starts with sk-ant-.
-    •  OpenAI Key — powers chapter title generation, content language detection, Story Mode, and Polyglot (translator). It starts with sk-.
+    •  Anthropic (Claude) key — powers the ENTIRE AI engine: Director narration (audiobook, radio drama, brainstorming), Stories mode, Polyglot (translator), as well as chapter title generation and content language detection. Starts with sk-ant-.
 
-    How to obtain the Anthropic key:
+    If you are upgrading from an older version: the former OpenAI key is no longer needed — you may leave or remove its line in golden_key.env; the application ignores it.
+
+    How to obtain an Anthropic key:
     1. Create an account at console.anthropic.com and add funds (Billing / Plans tab).
-    2. Generate a key in the API Keys section (starts with sk-ant-). Copy it immediately — it is sometimes displayed only once.
+    2. Generate a key in the API Keys section (starts with sk-ant-). Copy it immediately — it may only be displayed once.
 
-    How to obtain the OpenAI key:
-    1. Create an account at platform.openai.com and add funds in the Billing tab.
-    2. Generate a key in the API Keys tab (starts with sk-proj-). Note: the key is displayed only once — at the moment of creation. If you close the window without copying it, it is lost forever and you will need to revoke it (revoke secret key option) and generate a new one. Copy it immediately before clicking anything else.
+    How to enter the key into the application:
+    3. On the application's start screen, click the "{home.btn_generate}" button. The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
+    4. In the opened file you will see the line: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Delete the placeholder text and paste your key directly after the equals sign (no spaces, no quotation marks). Save the file and restart the application.
 
-    How to enter the keys into the program:
-    3. On the program's start screen, click the "{home.btn_generate}" button. The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
-    4. In the open file, you will see two lines: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ and OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. In each, remove the placeholder text and paste the appropriate key directly after the equals sign (without spaces and without quotation marks). Save the file and restart the application.
-
-    Tip: After restarting, the application will check the file and show a separate status for each key in section "{home.heading_system_check}". Both must be green for all AI modules to be ready for use. If any key is missing or incorrect, the program will clearly indicate which one and allow you to open the text editor to quickly fix the error.
+    Tip: After restarting, the application will check the file and display the key status in the "{home.heading_system_check}" section. It must be green for all AI modules to be ready for use. If the key is missing or incorrect, the application will clearly indicate this and allow you to open a text editor to quickly fix the error.
   krok_3_glowne_studio: |
     STEP 3: Main Directing Studio
 
@@ -211,49 +208,49 @@ tresc:
 
     Intelligent loading and reloading from disk (updated in v17.6): Both when loading a project and after clicking "{rezyser.btn_przeladuj_label}" (after manually editing the narrative file in the editor), the application reconciles memory with the disk in one go — recalculates structure counters and raises the World Book and mode. If the ENTIRE story fits in the context window — it loads it in full, and unnecessary old summary is deleted, so the engine works on the full text (this closes the old gap where the model received only the summary without the context of the last scenes). If the story is LONG and has a saved summary file — it keeps the summary untouched and asks you from which structure header (Chapter/Act/Scene) the AI working memory should start; the rest of the story is represented by the summary. This way, you don't waste tokens on reloading the entire story, and at the same time, the next summary is not created on outdated data.
   krok_3b_most_elevenlabs: |
-    STEP 3b: Two outputs of the Script — multi-voice audiobook (ElevenLabs) and a screen-reader version
+    STEP 3b: Two Outputs of the Script — Multi-Voice Audiobook (ElevenLabs) and Screen Reader Version
 
-    A completed reader's theatre script (Script mode) has two independent outputs: a multi-voice ElevenLabs Studio project (audio) and an HTML version for screen readers. These are two ways to "hear" the same play — you can use one, the other, or both. Both are optional and do not change the classic flow with the converter.
+    A finished read-aloud theatre script (Script mode) has two independent outputs: a multi-voice ElevenLabs Studio project (audio) and an HTML version for screen readers. These are two ways to "hear" the same play — you can use one, the other, or both. Both are optional and do not change the classic converter workflow.
 
     ─────────── Bridge to ElevenLabs Studio (audio, optional) ───────────
 
-    The bridge converts the script into a multi-voice Studio project — the narrator and each character receive a separate voice. Without an ElevenLabs key nothing changes: the bridge simply stays hidden.
+    The bridge turns the script into a multi-voice Studio project — the narrator and each character get their own voice. Without an ElevenLabs key nothing changes: the bridge simply remains hidden.
 
     ElevenLabs Key (optional)
 
-    Paste your ElevenLabs key into the golden_key.env file, on a separate line: ELEVENLABS_API_KEY=sk_... Note: the ElevenLabs key starts with sk_ (with an UNDERSCORE), unlike the OpenAI key (sk-). A restricted key needs the permissions (scopes) projects_write and voices_read. The key status is visible on the main screen (System Check) — the absence of a key is not an error, the bridge simply remains hidden.
+    Paste your ElevenLabs key into the golden_key.env file on a separate line: ELEVENLABS_API_KEY=sk_... Note: the ElevenLabs key starts with sk_ (with an UNDERSCORE), unlike the Anthropic key (sk-ant-). If you are using a restricted key, grant it the scopes projects_write and voices_read. The key status is visible on the main screen (System Check) — a missing key is not an error; the bridge simply remains hidden.
 
-    The bridge appears in the Director's panel in Script mode (when the key is valid). It operates on a completed play saved on disk — first generate or load a project.
+    The bridge appears in the Director panel in Script mode (when the key is valid). It works on a finished play saved to disk — first generate or load a project, then proceed to the bridge.
 
     Step 1 — Voice Cast
 
-    Click "Voice Cast…". The application loads the characters that have lines and always adds a Narrator slot (the narrator is the default voice — chapter titles and all narration). For each speaker, paste the voice ID. IMPORTANT: every voice used in the play must first be in your "My Voices" — voices you create yourself (e.g. in "Voice Design") land there automatically, while voices from the public library are browsed in the "Explore" tab and added with "Add to My Voices". How to get a voice ID in ElevenLabs (in the browser): find the voice, play a sample to be sure it is the right one, and copy its identifier with "Copy Voice ID"; once a voice is in "My Voices", that button is available right away — without expanding "More actions". Choosing voices: to limit possible regenerations, the easiest option is to pick from the "Best for Eleven v3" collection (voices vetted for the v3 model the project is built on); alternatively design your own voice in "Voice Design", and for the bold there is IVC (Instant Voice Cloning) or even PVC (Professional Voice Cloning). You can leave fields empty and return later — the save is a draft.
+    Click "Voice Cast…". The application will read the characters that have lines from your script and will always add a Narrator slot (the narrator is the default voice — it reads chapter titles and all narration). For each speaker, paste a voice ID. IMPORTANT: every voice used in the play must first be in your "My Voices" — voices you create yourself (e.g. in "Voice Design") go there automatically, while voices from the public library are browsed in the "Explore" tab and added with the "Add to My Voices" button. How to get a voice ID in ElevenLabs (in the browser): find the voice, play the sample to make sure it is the right one, and copy its identifier with the "Copy Voice ID" button; once the voice is in "My Voices", this button is available immediately — without expanding "More actions". Choosing voices: to minimise potential regenerations, the easiest approach is to pick from the "Best for Eleven v3" collection (voices verified for the v3 model on which the project is built); alternatively, design your own voice in "Voice Design", and for the adventurous there is IVC (Instant Voice Cloning) or PVC (Professional Voice Cloning). You can leave fields empty and come back later — the save is a draft.
 
     Step 2 — Build the Project
 
-    Click "Create ElevenLabs Studio Project…". The application checks that the script has at least one chapter (Prologue/Act/Chapter) and that every voice is assigned, then creates a multi-voice Studio project divided into chapters in your account. Creating the project itself does NOT consume credits. The application also sets the project language right away (correct pronunciation of heading lines) and volume normalization to the audiobook standard — it does this via the API so you don't have to open the project settings in the browser.
+    Click "Create ElevenLabs Studio Project…". The application will check that the script has at least one chapter (Prologue/Act/Chapter) and that every speaker and the narrator have a voice assigned, and will then create a multi-voice Studio project divided into chapters in your account. Creating the project itself does NOT consume credits. The application immediately sets the project language (correct pronunciation of header lines) and volume normalisation to the audiobook standard — it does this via the API so you do not have to go into the project settings in the browser.
 
-    Format guard (an extension of the Editor Rule): the bridge requires that in the script EVERY line be either an utterance with a speaker tag ([Narrator: …] or [Character: …]) or a structure heading (Prologue, Act, Scene, Chapter). Plain, untagged prose written “loose” — for example an author's note or a fragment of narration without a tag — is not assigned any voice and is silently skipped when building, so the finished project could diverge from your file. That is why, if the application detects such orphan lines, it shows their list with line numbers and asks whether to build anyway: you can then cancel and fix the script (open it with the “Open narration file…” button, add the missing speaker tags or delete those lines) or knowingly build anyway, accepting that they will be skipped. This is a natural extension of the Editor Rule: just as you must not break structure headings, every line in a script meant for the bridge should have its speaker or be a heading.
+    Format Guardian (extension of the Editor's Rule): the bridge requires that in the script EVERY line is either a line of dialogue with a speaker tag ([Narrator: …] or [Name: …]) or a structural header (Prologue, Act, Scene, Chapter). Plain, untagged prose written "loose" — for example an author's note or a narration fragment without a tag — is not assigned to any voice and is silently skipped during the build, so the finished project could diverge from your file. Therefore, if the application detects such orphan lines, it will show a list of them with line numbers and ask whether to build anyway: you can then cancel and fix the script (open it with the "Open narration file…" button, add the missing speaker tags or remove those lines) or knowingly build anyway, accepting that they will be omitted. This is a natural extension of the Editor's Rule: just as structural headers must not be broken, every line in a script intended for the bridge should have its own speaker or be a header.
 
     Step 3 — Render in the Browser
 
-    After creating the project, the application displays its identifier and a button to open ElevenLabs Studio. In the browser, find the project, render the speech (this is what consumes credits — roughly 1 credit per character), then export the audio file or publish the project to Eleven Reader. Rendering and publishing are done on your side, consciously — the application only builds the project.
+    After the project is created, the application will show its identifier and a button that opens ElevenLabs Studio. In the browser, find the project, render the speech (this is what actually consumes credits — roughly 1 credit per character), and then export the audio file or publish the project to Eleven Reader. Rendering and publishing happen on your side, deliberately — the application only builds the project.
 
-    Expression and accents (Eleven v3 model)
+    Expression and Accents (Eleven v3 model)
 
-    The project is built on the Eleven v3 model (over 70 languages). Emotion is NOT expressed with capital letters, ellipses, or dashes — the engine ignores that. Instead, the Director weaves English v3 audio tags into the lines, e.g. [whispers], [sighs], [angry], [laughs] — these drive the expression and work regardless of the spoken language. A character's ACCENT, however, comes from the VOICE SAMPLE: if you want someone to speak, say, English with a foreign accent, pick or design (in Voice Design) a voice whose sample carries that accent. In practice, experiment with the voice prompt until you hear, for example, an English sample with a Finnish accent — the v3 model preserves that accent in the finished recording. Tip: very long sentences weaken the accent, which is why the Director is already asked in the prompt to keep sentences short.
+    The project is built on the Eleven v3 model (over 70 languages). Emotions are NOT expressed with capital letters, ellipses, or dashes — the engine ignores these. Instead, the Director weaves English v3 audio tags into the lines, for example [whispers], [sighs], [angry], [laughs] — these control expression and work regardless of the spoken language. A character's ACCENT, on the other hand, comes from the VOICE SAMPLE: if you want someone to speak, for example, in Polish with a foreign accent, select or design a voice in Voice Design whose sample has that accent. In practice, experiment with the voice prompt until you hear, for example, a Polish sample with a Finnish accent — the v3 model will preserve that accent in the finished recording. Tip: very long sentences weaken the accent, which is why the Director is already prompted to use short sentences.
 
-    Awareness of the v3 model (alpha stage)
+    Awareness of the v3 Model (alpha phase)
 
-    Eleven v3 is the most expressive but still in alpha. Occasionally a single line renders as crackling instead of speech — just regenerate it in Studio (each block has a few free regenerations). The ElevenLabs project settings may also display recommendations to switch the model (to Eleven Flash v2.5 or Multilingual v2) — this is NOT an error, just an engine hint. If you don't want to see these messages, simply don't open the project settings: the application has already set everything needed via the API (model, language, volume normalization).
+    Eleven v3 is the most expressive, but is still in alpha. Occasionally a single line will render as crackling noise instead of speech — simply regenerate it in Studio (each block has several free regenerations). In the ElevenLabs project settings, the engine may also display recommendations to switch the model (to Eleven Flash v2.5 or Multilingual v2) — this is NOT an error, just a suggestion from the engine. If you do not want to see these messages, simply do not open the project settings: the application has already set everything needed via the API (model, language, volume normalisation).
 
-    Why reader's theatre and not sound effects? In earlier versions, Script mode produced raw effects [SFX: ...] without a narrator. A bridge to a finished, multi-voice recording, however, requires the context (place, time, action) to be conveyed by the narrator's words: sound effects in Studio are not accessible to screen readers, and the model realizes either the narrator or the effects — never both stably at once. Therefore, Script mode is now reader's theatre: narrator plus dialogue, without SFX.
+    Why read-aloud theatre and not sound effects? In earlier versions, Script mode produced raw [SFX: ...] effects without a narrator. The bridge to a finished, multi-voice recording requires, however, that context (place, time, action) be carried by the narrator in words: sound effects in Studio are not accessible to screen readers, and the model reliably handles either a narrator or effects — never both stably at the same time. That is why Script mode is read-aloud theatre: narrator plus dialogue, without SFX.
 
-    ─────────── Screen-reader version (HTML, without ElevenLabs) ───────────
+    ─────────── Screen Reader Version (HTML, without ElevenLabs) ───────────
 
-    In Script mode, regardless of the ElevenLabs key, you have a "Generate Screen Reader Version" button. It creates the file skrypty/<name>_screen_reader.html — a separate output for people who use screen readers (e.g. NVDA). It works like this: character lines that have an accent defined in the World Book (e.g. an entry "[Joana] Finnish accent") receive a phonetic spelling (deliberately "broken" orthography) and a language tag (the lang attribute), so the screen reader reads them with the correct foreign accent. v3 audio tags (e.g. [whispers]) are removed in this version — the reader is not supposed to read them aloud. Prologue/Act/Scene headers become HTML headings, so the document is easy to navigate.
+    In Script mode, regardless of the ElevenLabs key, you have a "Generate screen reader version" button. It creates a file skrypty/<nazwa>_screen_reader.html — a separate output for people using screen readers (e.g. NVDA). It works as follows: lines of characters who have an accent defined in the World Book (e.g. the entry "[Joana] Finnish accent") receive phonetic spelling (deliberately "broken" orthography) and a language marker (lang attribute), so that the screen reader reads them with the correct foreign accent. V3 audio tags (e.g. [whispers]) are removed in this version — the screen reader should not read them aloud. Prologue/Act/Scene headers become HTML headings, making the document easy to navigate.
 
-    This deliberately complements the audio bridge: for the v3 model the accent comes from the voice sample, and for the screen reader — from orthography plus the language tag. That is why the orthography in the audio version stays clean (v3 picks the language itself), and "breaking" the orthography goes only into the separate HTML file, where it is desirable.
+    This is a deliberate complement to the audio bridge: for the v3 model, the accent is carried by the voice sample, while for the screen reader it is carried by the orthography plus the language marker. That is why the orthography in the audio version remains clean (v3 selects the language itself), while the "broken" orthography goes exclusively into the separate HTML file, where it is desirable.
   krok_4_postprodukcja: |
     STEP 4: Postproduction in Directing
 

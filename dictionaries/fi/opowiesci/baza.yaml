@@ -18,7 +18,7 @@ etykieta: "Kerronnan peruskehote"
 kategoria: baza
 kolejnosc: 0
 
-# --- OpenAI-parametrit (perityvät kerrontamoodeihin) ---
+# --- Anthropic-parametrit (perityvät kerrontamoodeihin) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

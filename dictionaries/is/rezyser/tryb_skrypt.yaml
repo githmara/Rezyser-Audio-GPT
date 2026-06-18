@@ -20,7 +20,7 @@ kolejnosc: 20
 # Úttakssnið → sending vélar (gui_rezyser). EKKI breyta — tengir haminn við JSON-þáttara Python.
 format_wyjscia: skrypt_json
 
-# --- OpenAI-parametrar ---
+# --- Anthropic-parametrar ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: á íslensku

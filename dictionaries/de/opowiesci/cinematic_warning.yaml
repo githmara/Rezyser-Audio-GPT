@@ -12,7 +12,7 @@ etykieta: "Cinematic Meta Warning (Zug 150)"
 kategoria: meta
 kolejnosc: 70
 
-# --- OpenAI-Parameter ---
+# --- Anthropic-Parameter ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 max_tokens: 600

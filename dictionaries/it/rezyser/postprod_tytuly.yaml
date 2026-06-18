@@ -2,15 +2,15 @@
 #  POST-PRODUZIONE: ASSEGNAZIONE TITOLI AI CAPITOLI (IA)
 #  Strumento per la modalità Audiobook: itera sui capitoli nel file di progetto
 #  salvato e genera un breve titolo letterario per ognuno.
-#  Usa un modello economico (gpt-4o-mini) per default — il compito è semplice.
+#  Usa un modello economico (claude-sonnet-4-6) per default — il compito è semplice.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Assegna Titoli ai Capitoli (IA)"
 kategoria: postprodukcja
 kolejnosc: 10
 
-# --- Parametri OpenAI ---
-model: gpt-4o-mini
+# --- Parametri Anthropic ---
+model: claude-sonnet-4-6
 temperatura: 0.7
 jezyk_odpowiedzi: italiano
 

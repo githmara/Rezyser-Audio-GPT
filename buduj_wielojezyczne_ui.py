@@ -28,11 +28,13 @@ Architektura (decyzja 13.1 — Etap 2):
      (zob. `_PROMPT_SYSTEMOWY`). Tokenizacja `&` byłaby błędem —
      model nie miałby jak przesunąć ampersanda na sensowną literę.
 
-  4. Wszystkie liście trafiają do JEDNEGO requesta `chat.completions`
-     z `response_format={"type": "json_object"}`. Plik ui.yaml ma
-     ~450 liści / ~26 kB tekstu — bezpiecznie mieści się w jednym
-     kontekście. Eliminuje to ryzyko, że chunker rozetnie strukturę
-     w połowie linii.
+  4. Liście trafiają do Anthropic Messages API (`messages.create`) w
+     porcjach po `BATCH_SIZE`, ze STRUKTURALNYM wyjściem
+     `output_config={"format": {"type": "json_schema", "schema": SCHEMA_TLUMACZENIA}}`
+     — gwarancja mocniejsza niż OpenAI `json_object` (wymusza schemat
+     `{"translations": [{"id", "target"}]}`, nie tylko poprawny JSON).
+     Ucięcie odpowiedzi (`stop_reason == "max_tokens"`) przerywa CAŁY
+     batch (sygnał: zmniejsz `BATCH_SIZE`).
 
   5. WALIDACJE per-liść (przed iniekcją):
        * Multiset tokenów `⟦P\\d+⟧` i `⟦S\\d+⟧` w `tgt` musi być
@@ -54,7 +56,7 @@ Użycie:
   python buduj_wielojezyczne_ui.py --jezyki en,fi --skip-existing
   python buduj_wielojezyczne_ui.py --jezyki en --dry-run       # tokenizacja, zero API
 
-Wymaga: `OPENAI_API_KEY` w środowisku (to samo konto co GUI Poliglota /
+Wymaga: `ANTHROPIC_API_KEY` w środowisku (to samo konto co GUI Poliglota /
 `buduj_wielojezyczne_docs.py`). Moduł NIE zależy od wxPython —
 uruchamialny w CLI / CI bez inicjalizacji GUI.
 """
@@ -96,15 +98,40 @@ FOLDER_GUI = "gui"
 NAZWA_UI = "ui.yaml"
 KOD_ZRODLOWY = "pl"
 
-# Chunking — gpt-4o ma twardy limit 16 384 tokenów na pojedynczą odpowiedź,
-# a sformatowany JSON `{"tlumaczenia": [...]}` dla 450 liści cyrylicy
-# przekracza ten próg (testowo: RU ~46k znaków ≈ ~25k tokenów outputu).
-# 150 liści/chunk ≈ ~12-15k znaków JSON ≈ ~6-10k tokenów outputu — bezpiecznie
-# w limicie nawet dla rosyjskiego. 3 requesty per język × 5 języków = 15
-# wywołań total; każde walidowane niezależnie, jeden bad-batch nie zwala
-# pozostałych chunków danego języka.
-BATCH_SIZE = 150
-MAX_TOKENS_OUT = 16_384
+# Chunking — Claude Sonnet 4.6 (konsolidacja v18.x). MAX_TOKENS_OUT poniżej progu
+# non-streaming SDK Anthropic (~16k → brak ryzyka HTTP-timeoutu). Sformatowany JSON
+# `{"translations": [...]}` dla całego ui.yaml (~450 liści) przekraczałby limit
+# wyjścia, więc tniemy na porcje po BATCH_SIZE liści. Zmniejszone ze 150 → 80
+# (migracja na Anthropic): structured outputs dokłada narzut schematu, a języki
+# rozwlekłe/cyrylica puchną — 80 krótkich liści UI ≈ kilka k tokenów outputu,
+# bezpiecznie. Ucięcie (`stop_reason="max_tokens"`) przerywa CAŁY batch (sygnał:
+# zejdź jeszcze niżej z BATCH_SIZE), a nie tylko bieżący chunk/język.
+BATCH_SIZE = 80
+MAX_TOKENS_OUT = 16_000
+
+# Schemat structured-outputs (Anthropic `output_config.format`). Gwarantuje kształt
+# odpowiedzi na poziomie API (mocniej niż OpenAI `json_object`). Ograniczenia JSON
+# Schema strukturalnych wyjść: brak min/maxLength, każdy obiekt z
+# `additionalProperties: false`. `id`+`target` 1:1 z payloadem `items`.
+SCHEMA_TLUMACZENIA = {
+    "type": "object",
+    "properties": {
+        "translations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "target": {"type": "string"},
+                },
+                "required": ["id", "target"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "required": ["translations"],
+    "additionalProperties": False,
+}
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +238,8 @@ def _natywna_nazwa(kod: str) -> str:
 # payload → surowy model zakotwiczał się w PL i produkował kalki (RELEASE_NOTES:
 # „German/Russian/Spanish/Italian IT-jargon calques"). Stąd EN framing + blok
 # reguł naturalności (których PL-prompt w ogóle nie miał) + cel podany natywnie.
-# Słowo "JSON" MUSI wystąpić w prompcie (wymóg `response_format=json_object`).
+# Słowo "JSON" w prompcie nieobowiązkowe na Claude (structured outputs egzekwuje
+# schemat `SCHEMA_TLUMACZENIA` na poziomie API), ale zostaje dla czytelności.
 def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
     return (
         "# Role\n"
@@ -249,7 +277,8 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
         "— copy 1:1 and keep their position relative to the rest of the text.\n"
         "4. **Technical literals** — do NOT translate: file names (`golden_key.env`, "
         "`.docx`, `.exe`), paths (`dictionaries/`, `runtime/`), AI model names "
-        "(`gpt-4o`, `OpenAI`), product names (`NVDA`, `Vocalizer`, `Microsoft Word`), "
+        "(`claude-sonnet-4-6`, `Anthropic`, `gpt-4o`, `OpenAI`), product names "
+        "(`NVDA`, `Vocalizer`, `Microsoft Word`), "
         "key prefixes (`sk-`), and Ctrl/Alt/Shift inside keyboard shortcuts.\n"
         "5. **Whitespace** — preserve every `\\n`, double space and indentation. Line "
         "breaks in messages are deliberately tuned to the dialog width.\n"
@@ -383,15 +412,15 @@ def waliduj_liscia(src_tok: str, tgt: str) -> tuple[bool, list[str]]:
 
 
 # ---------------------------------------------------------------------------
-# Inicjalizacja klienta OpenAI (kopia 1:1 z buduj_wielojezyczne_docs.py)
+# Inicjalizacja klienta Anthropic (kopia 1:1 z buduj_wielojezyczne_docs.py)
 # ---------------------------------------------------------------------------
-def _zainicjuj_klienta_openai() -> Any:
+def _zainicjuj_klienta_anthropic() -> Any:
     try:
-        from openai import OpenAI
+        import anthropic
     except ImportError as exc:
         raise SystemExit(
-            "❌ Brak modułu `openai`. Instalacja (venv projektu):\n"
-            "   .venv/Scripts/pip install openai"
+            "❌ Brak modułu `anthropic`. Instalacja (venv projektu):\n"
+            "   .venv/Scripts/pip install anthropic"
         ) from exc
 
     try:
@@ -402,18 +431,18 @@ def _zainicjuj_klienta_openai() -> Any:
     except ImportError:
         pass
 
-    klucz = os.environ.get("OPENAI_API_KEY")
-    if not klucz or klucz == "TUTAJ_WKLEJ_SWOJ_KLUCZ":
+    klucz = os.environ.get("ANTHROPIC_API_KEY")
+    if not klucz or not klucz.startswith("sk-ant-"):
         raise SystemExit(
-            "❌ Brak prawidłowego OPENAI_API_KEY.\n"
+            "❌ Brak prawidłowego ANTHROPIC_API_KEY.\n"
             "   Sprawdź `golden_key.env` w katalogu projektu (ten sam plik,\n"
             "   którego używa GUI — System Check w trybie Reżysera)."
         )
-    return OpenAI(api_key=klucz)
+    return anthropic.Anthropic(api_key=klucz)
 
 
 # ---------------------------------------------------------------------------
-# Wywołanie LLM (jednorazowe, response_format=json_object)
+# Wywołanie LLM (chunk, Anthropic structured outputs — output_config json_schema)
 # ---------------------------------------------------------------------------
 def wywolaj_llm(
     klient: Any,
@@ -422,16 +451,19 @@ def wywolaj_llm(
     kod: str,
     liscie_tok: list[tuple[int, str]],
 ) -> dict[int, str]:
-    """Wysyła JEDEN request, zwraca mapę id → tgt.
+    """Wysyła JEDEN chunk, zwraca mapę id → tgt.
 
-    `response_format={"type": "json_object"}` gwarantuje, że odpowiedź
-    parsuje się jako JSON. Walidacje strukturalne (klucze, typy) robimy
-    po naszej stronie — model bywa kreatywny w nazwach pól.
+    Structured outputs (`output_config.format` ze :data:`SCHEMA_TLUMACZENIA`)
+    gwarantują kształt `{"translations": [{"id", "target"}]}` na poziomie API —
+    mocniej niż OpenAI `json_object`. Walidacje semantyczne (parity markerów, `&`)
+    robimy dalej, po naszej stronie.
 
-    Rzuca `RuntimeError` przy nieparowalnej odpowiedzi lub strukturze,
-    której nie umiemy zinterpretować — wyżej (w `tlumacz_jezyk`) jest
-    to złapane jako miękki błąd dla danego języka, reszta języków
-    leci dalej.
+    Rzuca `RuntimeError` przy nieparowalnej odpowiedzi lub strukturze, której nie
+    umiemy zinterpretować — wyżej (w `tlumacz_jezyk`) złapane jako MIĘKKI błąd
+    danego języka, reszta języków leci dalej. NATOMIAST ucięcie limitem wyjścia
+    (`stop_reason == "max_tokens"`) rzuca `SystemExit` — przerywa CAŁY batch (nie
+    łapie go `except RuntimeError`/`except Exception`), bo to sygnał konfiguracyjny
+    „zmniejsz BATCH_SIZE", nie wpadka pojedynczego języka.
     """
     # Klucze payloadu po ANGIELSKU (audyt 2026-06-16) — kolejna kotwica PL
     # usunięta. Surowy model widzi teraz EN prompt + EN klucze; jedynym polskim
@@ -441,37 +473,38 @@ def wywolaj_llm(
         "items": [{"id": i, "source": s} for i, s in liscie_tok],
     }
 
-    resp = klient.chat.completions.create(
+    resp = klient.messages.create(
         model=model,
-        temperature=0.0,
         max_tokens=MAX_TOKENS_OUT,
-        response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": _PROMPT_SYSTEMOWY(nazwa_celu, kod)},
-            {
-                "role": "user",
-                "content": (
-                    "Here is the JSON with items to translate. Return JSON with a "
-                    "`translations` field.\n\n"
-                    + json.dumps(payload, ensure_ascii=False, indent=2)
-                ),
-            },
-        ],
+        temperature=0.0,
+        thinking={"type": "disabled"},
+        system=_PROMPT_SYSTEMOWY(nazwa_celu, kod),
+        messages=[{
+            "role": "user",
+            "content": (
+                "Here is the JSON with items to translate. Return JSON with a "
+                "`translations` field.\n\n"
+                + json.dumps(payload, ensure_ascii=False, indent=2)
+            ),
+        }],
+        output_config={
+            "format": {"type": "json_schema", "schema": SCHEMA_TLUMACZENIA},
+        },
     )
 
-    # Sanity check: model trafił w max_tokens i ucięło odpowiedź?
-    # `finish_reason='length'` to sygnał, że JSON jest niekompletny —
-    # zgłaszamy explicit, żeby trening „output cut off" nie wyglądał jak
-    # zwykły błąd parsera.
-    finish = getattr(resp.choices[0], "finish_reason", None)
-    if finish == "length":
-        raise RuntimeError(
-            f"Model osiągnął limit max_tokens={MAX_TOKENS_OUT} — odpowiedź "
-            f"została ucięta. Zmniejsz BATCH_SIZE (obecnie {BATCH_SIZE}) "
-            f"lub przejdź na model z większym oknem wyjściowym."
+    # Ucięcie limitem wyjścia → JSON niekompletny. PRZERYWAMY CAŁY batch przez
+    # SystemExit (NIE RuntimeError): `except RuntimeError` w pętli per-chunk/jezyk
+    # by to schował, a to jest sygnał dla całego przebiegu (zmniejsz BATCH_SIZE).
+    if getattr(resp, "stop_reason", None) == "max_tokens":
+        raise SystemExit(
+            f"❌ {kod}: model osiągnął limit max_tokens={MAX_TOKENS_OUT} — odpowiedź "
+            f"ucięta, JSON niekompletny. Zmniejsz BATCH_SIZE (obecnie {BATCH_SIZE}) "
+            f"i uruchom ponownie. Przerwano CAŁY batch."
         )
 
-    surowa = resp.choices[0].message.content or ""
+    surowa = "".join(
+        b.text for b in resp.content if getattr(b, "type", None) == "text"
+    )
     try:
         dane = json.loads(surowa)
     except json.JSONDecodeError as exc:
@@ -661,7 +694,7 @@ def tlumacz_jezyk(
 
     # --- Krok 2: wywołania LLM (chunked po BATCH_SIZE liści) ------------------
     # Chunking gwarantuje, że żadna pojedyncza odpowiedź nie przekroczy
-    # MAX_TOKENS_OUT (16 384 dla gpt-4o). Wyniki łączymy w jedną mapę id→tgt
+    # MAX_TOKENS_OUT (16 000, pod progiem non-streaming Anthropic). Wyniki łączymy w jedną mapę id→tgt
     # — id-y są unikalne globalnie, bo pochodzą z `enumerate(liscie_pl)`.
     total = len(liscie_tok)
     n_chunkow = (total + BATCH_SIZE - 1) // BATCH_SIZE
@@ -809,8 +842,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="gpt-4o",
-        help="Model OpenAI do tłumaczenia (domyślnie: gpt-4o).",
+        default="claude-sonnet-4-6",
+        help="Model Anthropic Claude do tłumaczenia (domyślnie: claude-sonnet-4-6).",
     )
     parser.add_argument(
         "--draft",
@@ -901,7 +934,7 @@ def main() -> int:
             f"Istniejące pliki ui.yaml zostaną zaktualizowane w miejscu."
         )
 
-    klient: Any = None if args.dry_run else _zainicjuj_klienta_openai()
+    klient: Any = None if args.dry_run else _zainicjuj_klienta_anthropic()
 
     sukcesy: list[str] = []
     porazki: list[str] = []

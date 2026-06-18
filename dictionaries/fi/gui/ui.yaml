@@ -126,11 +126,6 @@ home:
     Ohjelman ensimmäinen käynnistys havaittu. Moduulit on lukittu turvallisuussyistä.
     Voit avata kaikki työkalut napsauttamalla alla olevaa painiketta — ohjelma luo automaattisesti golden_key.env-tiedoston ja avaa sen oletustekstieditorissa.
   err_odczyt: "🚨 Tiedostoa golden_key.env ei voitu lukea:\n{tresc_bledu}"
-  err_struktura: |-
-    🚨 Tiedoston rakennevirhe!
-    Pakollinen parametri OPENAI_API_KEY= puuttuu.
-    Olet todennäköisesti poistanut yhtäsuuruusmerkin tai muuttujan nimen.
-    Poista tiedosto, luo se uudelleen ja liitä avain huolellisemmin.
   err_tekst_zastepczy: |-
     ⚠️ Avain ei ole syötetty!
     Tiedostossa golden_key.env on edelleen paikkamerkkiteksti.
@@ -145,18 +140,6 @@ home:
     API-avaimen edessä tai takana on havaittu välilyönti tai muu näkymätön merkki.
     Avaa tiedosto tekstieditorissa ja varmista, että arvo alkaa
     heti yhtäsuuruusmerkin jälkeen ilman välilyöntejä.
-  err_format: |-
-    🚨 Epäilyttävä avaimen muoto!
-    Oikea OpenAI-avain alkaa aina merkeillä sk- (esim. sk-proj-…).
-    Varmista, että kopioit oikean merkkijonon eikä sen edessä ole välilyöntejä.
-  err_zbyt_krotki: |-
-    ⚠️ Avain vaikuttaa liian lyhyeltä (havaittu {liczba_znakow} merkkiä, odotettiin vähintään {minimum_znakow}).
-    Olet todennäköisesti kopioinut vain osan avaimesta.
-
-    Jos olet jo sulkenut avainikkunan platform.openai.com-sivustolla,
-    sinun on palattava tilillesi, käytettävä 'Revoke secret key' -vaihtoehtoa
-    tälle katkaistulle avaimelle ja luotava uusi. Muista kopioida avain
-    kokonaisuudessaan ennen kuin napsautat 'Done'.
   ok_klucz_wykryty: |-
     ✅ API-avain (golden_key.env) havaittu ja oikein muotoiltu.
     Kaikki moduulit ovat valmiita käyttöön.
@@ -191,8 +174,8 @@ home:
     Avaa golden_key.env ja varmista, että arvo alkaa heti '='-merkin jälkeen.
   el_format: |-
     🚨 Epäilyttävä ElevenLabs-avaimen muoto!
-    ElevenLabs-avain alkaa aina sk_ (ALAVIIVALLA, ei sk- kuten OpenAI).
-    Varmista, että liitit avaimen ElevenLabsista etkä toiselta alustalta.
+    ElevenLabs-avain alkaa aina merkeillä sk_ (ALAVIIVALLA, ei viivalla kuten sk-ant-).
+    Varmista, että olet liittänyt avaimen ElevenLabsista eikä muulta alustalta.
   el_zbyt_krotki: |-
     ⚠️ ElevenLabs-avain vaikuttaa liian lyhyeltä (havaittu {liczba_znakow} merkkiä, odotettiin vähintään {minimum_znakow}).
     Kopioit todennäköisesti vain osan avaimesta. Luo uusi avain ElevenLabs-paneelissa ja liitä se kokonaisuudessaan.
@@ -213,12 +196,9 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-# -----------------------------------------------------------------------------
-  heading_anthropic: Kerrontamoottori (Anthropic / Claude) — vaaditaan
-  ant_err_struktura: "🚨 Tiedostorakennevirhe!\nPuuttuu vaadittu muuttuja ANTHROPIC_API_KEY=.\nVersiosta 18.0 alkaen kerrontamoottori (äänikirja, lukuteatteri, myrsky) toimii Claude-mallilla ja vaatii erillisen avaimen.\nPoista tiedosto, luo se uudelleen ja liitä avain huolellisemmin."
-  ant_err_format: "🚨 Epäilyttävä Anthropic-avaimen muoto!\nOikea Anthropic-avain (Claude) alkaa aina merkeillä sk-ant- (esim. sk-ant-api03-…).\nVarmista, että kopioit avaimen osoitteesta console.anthropic.com, etkä OpenAI-avainta."
+  ant_err_struktura: "🚨 Tiedoston rakennevirhe!\nPakollinen muuttuja ANTHROPIC_API_KEY= puuttuu.\nVersiosta 18.2 alkaen koko tekoälymoottori (Ohjaaja, Tarinat, Polyglotti, luvun otsikot) toimii Claude-mallilla ja vaatii Anthropic-avaimen.\nPoista tiedosto, luo se uudelleen ja liitä avain huolellisesti."
+  ant_err_format: "🚨 Epäilyttävä Anthropic-avaimen muoto!\nOikea Anthropic (Claude) -avain alkaa aina merkeillä sk-ant- (esim. sk-ant-api03-…).\nVarmista, että olet kopioinut avaimen osoitteesta console.anthropic.com eikä jonkin muun palveluntarjoajan avain."
   ant_err_zbyt_krotki: "⚠️ Anthropic-avain vaikuttaa liian lyhyeltä (havaittu {liczba_znakow} merkkiä, odotettiin vähintään {minimum_znakow}).\nOlet todennäköisesti kopioinut vain osan avaimesta. Palaa osoitteeseen console.anthropic.com ja kopioi se kokonaisuudessaan."
-  ant_ok: "✅ Anthropic-avain (Claude) havaittu ja oikein muotoiltu.\nKerrontamoottori on valmis käyttöön."
 rezyser:
   panel_name: "Ääniohjaaja GPT -paneeli"
   heading: "🎬  Ääniohjaaja GPT – Hybridi Luova Studio"
@@ -366,7 +346,7 @@ rezyser:
     (esim. 'Kuvaile Geraltin kohtaaminen noidan kanssa metsässä. Suuri jännitys.')
   btn_wyslij_label: "Lähetä AI:lle"
   btn_wyslij_tooltip: |-
-    Lähettää ohjeet gpt-4o-mallille ja lisää vastauksen tarinaan.
+    Lähettää ohjeet Claude-mallille ja lisää vastauksen historiaan.
     Vaatii aktiivisen API-avaimen ja täytetyn Maailmankirjan.
   # Postprodukcja
   postprod_heading: "🎛️ Jälkituotanto"
@@ -448,7 +428,7 @@ rezyser:
   btn_tytuly_ai_label: "📜 Anna Luvuille Otsikot (AI)"
   btn_tytuly_ai_name: "Anna Luvuille Otsikot AI -painike"
   btn_tytuly_ai_tooltip: |-
-    Käy läpi tallennetun tiedoston luvut ja antaa niille otsikot (gpt-4o-mini).
+    Käy läpi tallennetun tiedoston luvut ja antaa niille otsikot (Claude).
     Vaatii tallennetun projektitiedoston ja aktiivisen API-avaimen.
   # Pamięć modelu
   lbl_pamiec_modelu: "🧠 Mallin Muisti (Konteksti-ikkunan Tila):"
@@ -524,7 +504,7 @@ rezyser:
   # Wysyłanie do AI
   brak_api_tytul: "API puuttuu"
   brak_api_tresc: |-
-    Ei yhteyttä OpenAI:hin.
+    Yhteys Anthropiciin epäonnistui.
     Tarkista tiedosto golden_key.env ja käynnistä sovellus uudelleen.
   puste_pole_tytul: "Tyhjä kenttä"
   puste_pole_tresc: "Kirjoita ohjeet AI:lle ennen lähettämistä."
@@ -545,7 +525,7 @@ rezyser:
     Tämä voisi vahingoittaa tarinaasi.
 
     Vaihda 'Aivoriihi'-tilaan ja yritä uudelleen.
-  err_rate_limit: "OpenAI-krediitit puuttuvat! Lataa tilisi ja yritä uudelleen."
+  err_rate_limit: "Anthropic-krediitit loppu! Lataa tiliä ja yritä uudelleen."
   err_surowy_json: |-
     Tämä tila palautti tiedot JSON-muodossa, mutta sitä ei ole määritetty JSON-tilaksi, joten tekstiä EI tallennettu (vältettiin raaka-JSONin liittämistä tiedostoon).
     Yleisin syy: tila on luotu Skriptin kaksoiskappaleesta. Aseta sen YAML-tiedostoon `format_wyjscia: skrypt_json` (kertoja+hahmo-dialogille) — tai, jos kyseessä on uusi kaavio, ota yhteyttä kehittäjään.
@@ -634,7 +614,6 @@ rezyser:
   sr_sukces_tresc: 'Näytönlukijan tiedosto tallennettu: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Virhe näytönlukijan version luomisessa
   sr_blad_tresc: "Näytönlukijan version luominen epäonnistui:\n{tresc_bledu}"
-  err_struktura: Malli tuotti väärän vastausrakenteen useista korjausyrityksistä huolimatta. Yritä uudelleen tai muotoile komento toisin.
   err_dlugosc: Mallin vastaus katkaistiin ennen kuin se ehti lopettaa sen (pituusraja ylitetty). Lyhennä kontekstia — esim. Maailmankirjaa tai ohjetta — ja yritä uudelleen.
   btn_przeladuj_label: '&Lataa projekti uudelleen levyltä'
   btn_przeladuj_tooltip: 'Lataa KOKO projekti uudelleen levyltä manuaalisten muutostesi jälkeen kertomustiedostossa (skrypty/<nimi>.txt) — laskee luvut Luvuista/Näytöksistä/Kohtauksista, nostaa Maailmankirjan, tilan ja Aivoriihen asetukset sekä synkronoi työmuistin. Lyhyt tarina ladataan kokonaisuudessaan; pitkässä kysytään, mistä otsikosta AI:n työmuisti alkaa (loput edustaa Yhteenveto). HUOMIO: korvaa kenttien sisällön levyn versiolla — tallenna ensin tallentamattomat muutokset.'
@@ -674,10 +653,10 @@ poliglota:
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
   description_name: "Polyglot-moduulin kuvaus"
   tool_description: |-
-    Polyglot-moduuli on tarkoitettu kovien foneettisten aksenttien asettamiseen paikallisille puhesyntetisaattoreille (NVDA/Vocalizer/eSpeak), tekstileikkeihin Koodinmurtajan tilassa sekä tekstien kääntämiseen AI:n avulla (OpenAI gpt-4o).
+    Polyglotti-moduuli on tarkoitettu kovien foneettisten aksenttien lisäämiseen paikallisia puhesyntetisaattoreita varten (NVDA/Vocalizer/eSpeak), tekstileikkeihin Salausmoduulissa sekä tekstien kääntämiseen tekoälyn avulla (Anthropic Claude).
 
-    Tukee tiedostoja: .txt, .html, .htm, .docx.
-    Tulos tallennetaan samaan hakemistoon kuin lähdetiedosto.
+    Tuetut tiedostomuodot: .txt, .html, .htm, .docx.
+    Tulos tallennetaan samaan kansioon kuin lähdetiedosto.
   # Sekcja 1: wczytywanie pliku
   section1_heading: "1. Lähdetiedoston lataaminen"
   lbl_plik: "Tiedoston nimi tai koko polku (.txt, .html, .htm, .docx):"
@@ -721,7 +700,7 @@ poliglota:
     EI – jätän säännöt "{jezyk_aktywny}". Vaikutus vieraskieliseen tekstiin voi olla arvaamaton.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Työn Konfigurointi"
-  rb_ai: "AI-kääntäjä (OpenAI gpt-4o – vaatii API-avaimen, maksaa krediittejä)"
+  rb_ai: "Tekoälykääntäjä (Anthropic Claude – vaatii API-avaimen, kuluttaa krediittejä)"
   rb_ai_disabled: "AI-kääntäjä (pois käytöstä – golden_key.env-tiedosto puuttuu tai on virheellinen)"
   rb_ai_name: "AI-kääntäjän tila"
   rb_rezyser: "Ohjaajan tila (ilmaiset foneettiset säännöt YAML:stä)"
@@ -787,9 +766,9 @@ poliglota:
   ai_blad_zapisu: "Virhe tulostiedoston tallennuksessa:\n{tresc_bledu}"
   # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
   ai_blad_limit_api: |-
-    Ei luottoja tai OpenAI API -raja ylittynyt! Käännös keskeytettiin lohkossa {blok}.
+    Anthropic-krediitit loppu tai API-raja ylitetty! Käännös keskeytyi lohkossa {blok}.
 
-    Edistyminen on tallennettu automaattisesti. Lisää API-tilille ja lataa alkuperäinen uudelleen jatkaaksesi tästä kohdasta.
+    Edistyminen on tallennettu automaattisesti. Lataa API-tiliä ja avaa alkuperäinen tiedosto uudelleen jatkaaksesi tästä kohdasta.
   ai_blad_cache: |-
     Väliaikaistiedostoa (käännöksen jatkamisen välimuisti) ei voitu lukea:
     {plik}
@@ -1209,7 +1188,7 @@ opowiesci:
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format: "\n\n--- Vuoro {numer} ---\n\n"
   brak_api_tytul: "API-avain puuttuu"
-  brak_api_tresc: "Tiedostoa golden_key.env, jossa on oikea OPENAI_API_KEY-avain, ei löytynyt. Tarinamoduuli vaatii aktiivisen avaimen luodakseen kerrontavuoroja."
+  brak_api_tresc: "Tiedostoa golden_key.env, jossa on kelvollinen ANTHROPIC_API_KEY, ei löydy. Tarinat-moduuli vaatii aktiivisen avaimen kerrontavuorojen luomiseen."
   puste_pole_tytul: "Tyhjä toimintokenttä"
   puste_pole_tresc: 'Kirjoita toiminto tai komento kerronnan alapuolella olevaan kenttään ennen kuin napsautat "Lähetä".'
   puste_nazwa_tytul: "Pelin nimi puuttuu"
@@ -1223,10 +1202,8 @@ opowiesci:
   blad_ai_szczegoly_tytul: "Kerrontamoottorin virheen yksityiskohdat"
   blad_ai_lbl_tresc: "Virhesisältö (kopioitavaksi):"
   blad_ai_tresc_name: "Kerrontamoottorin virhesisällön kenttä"
-  err_rate_limit: "OpenAI-kyselyraja on saavutettu. Odota hetki tai tarkista tilisi tila."
+  err_rate_limit: "Anthropic-kyselyraja on täynnä. Odota hetki tai tarkista tilisi tila."
   err_timeout: "Mallin vastausaika on ylitetty (yli 120 sekuntia). Yritä uudelleen."
-  err_struktura: "Malli tuotti väärän vastausrakenteen kahdesta korjausyrityksestä huolimatta. Yritä uudelleen tai muotoile toiminto toisin."
-
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul: "Ei aktiivista peliä"
   brak_gry_tresc: 'Aloita uusi peli "Uusi peli" -painikkeella tai lataa aiemmin tallennettu "Lataa"-painikkeella ennen kuin yrität lähettää toimintoa.'

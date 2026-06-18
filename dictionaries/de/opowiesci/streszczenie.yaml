@@ -14,7 +14,7 @@ etykieta: "Automatische Kontextzusammenfassung"
 kategoria: meta
 kolejnosc: 60
 
-# --- OpenAI-Parameter ---
+# --- Anthropic-Parameter ---
 # Niedrige Temperatur — wir wollen eine treue, sachliche Zusammenfassung
 # (nicht kreativ).
 model: claude-sonnet-4-6

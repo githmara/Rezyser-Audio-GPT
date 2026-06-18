@@ -21,7 +21,7 @@ kolejnosc: 10
 # Formato di output → dispatch del motore (gui_rezyser). NON modificare — lega la modalità al parser JSON Python.
 format_wyjscia: burza_json
 
-# --- Parametri OpenAI ---
+# --- Parametri Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

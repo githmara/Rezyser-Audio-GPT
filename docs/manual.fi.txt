@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 18.1 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 18.2 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -60,26 +60,23 @@ Vinkki NVDA-käyttäjille: Sovellus-näppäimellä avattava kontekstivalikko "Av
 Vinkki: "Avaa tiedoston sijainti" on natiivi nimi Windowsin suomenkieliselle versiolle. Englanninkielisessä järjestelmässä se on "Open file location", muissa kieliversioissa — vastaavasti paikallisella kielellä.
 
 
-KROK 2: API-avainvirta (kaksi avainta — Anthropic ja OpenAI)
+VAIHE 2: API:n käyttöönotto (Anthropic / Claude -avain)
 
-Versiosta 18.0 alkaen sovellus käyttää kahta tekoälytoimittajaa ja vaatii KAKSI API-avainta tiedostossa golden_key.env:
+Versiosta 18.2 alkaen sovellus käyttää yhtä tekoälyntarjoajaa — Anthropic (Claude) — ja vaatii YHDEN API-avaimen tiedostossa golden_key.env:
 
-•  Anthropic-avain (Claude) — ohjaa Reżyserin kerrontamoottoria (äänikirja, luettu teatteri, aivoriihi). Alkaa sk-ant-.
-•  OpenAI-avain — ohjaa lukujen otsikointia, sisällön kielen tunnistusta, Tarinatilaa sekä Polyglot (kääntäjä). Alkaa sk-.
+•  Anthropic-avain (Claude) — käyttää KOKO tekoälymoottoria: Ohjaajan kerrontaa (äänikirja, luettu teatteri, aivoriihi), Tarinatilaa, Polyglottia (kääntäjä) sekä lukujen otsikoiden luomista ja sisällön kielen tunnistamista. Alkaa merkeillä sk-ant-.
 
-Miten hankkia Anthropic-avain:
-1. Luo tili osoitteessa console.anthropic.com ja lisää varoja (välilehti Billing / Plans).
-2. Luo avain API Keys -osiossa (alkaa sk-ant-). Kopioi se heti — se saatetaan näyttää vain kerran.
+Jos päivität vanhemmasta versiosta: vanhaa OpenAI-avainta ei enää tarvita — voit jättää tai poistaa sen rivin tiedostosta golden_key.env, sovellus ohittaa sen.
 
-Miten hankkia OpenAI-avain:
-1. Luo tili osoitteessa platform.openai.com ja lisää varoja välilehdellä Billing.
-2. Luo avain API Keys -välilehdellä (alkaa sk-proj-). Huomio: avain näytetään vain kerran — luomishetkellä. Jos suljet ikkunan ilman kopiointia, se menetetään pysyvästi ja sinun on peruutettava se (vaihtoehto revoke secret key) ja luotava uusi. Kopioi se heti ennen kuin klikkaat mitään muuta.
+Anthropic-avaimen hankkiminen:
+1. Luo tili osoitteessa console.anthropic.com ja lataa saldoa (välilehti Billing / Plans).
+2. Luo avain osiossa API Keys (alkaa merkeillä sk-ant-). Kopioi se heti — se saatetaan näyttää vain kerran.
 
-Miten syöttää avaimet ohjelmaan:
-3. Ohjelman aloitusnäytössä klikkaa painiketta "Luo golden_key.env-tiedosto ja avaa tekstieditori". Järjestelmä luo automaattisesti uuden konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion valmiilla muokattavalla mallilla.
-4. Avoimessa tiedostossa näet kaksi riviä: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ ja OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Poista kummastakin korvaava teksti ja liitä oikea avain suoraan yhtäsuuruusmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
+Avaimen syöttäminen ohjelmaan:
+3. Napsauta ohjelman aloitusnäytöllä painiketta "Luo golden_key.env-tiedosto ja avaa tekstieditori". Järjestelmä luo automaattisesti tyhjän konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion muokkausta varten valmiin mallin kanssa.
+4. Avautuneessa tiedostossa näet rivin: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Poista paikkamerkkiteksti ja liitä avaimesi suoraan yhtäläisyysmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
 
-Vinkki: Sovelluksen uudelleenkäynnistyksen jälkeen se tarkistaa tiedoston ja näyttää osiossa "Järjestelmän tarkistus" erillisen tilan jokaiselle avaimelle. Molempien on oltava vihreitä, jotta kaikki AI-moduulit ovat valmiita toimintaan. Jos jokin avain puuttuu tai on virheellinen, ohjelma osoittaa selvästi, mikä avain on kyseessä, ja antaa mahdollisuuden avata tekstieditori virheen nopeaa korjaamista varten.
+Vinkki: Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää avaimen tilan osiossa "Järjestelmän tarkistus". Sen täytyy olla vihreä, jotta kaikki tekoälymoduulit ovat valmiina käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
 
 
 KROK 3: Pääohjaajan Studio
@@ -197,49 +194,49 @@ Automaattinen tiivistäminen: Kun muisti saavuttaa hälytystilan, Aivoriihi siir
 Älykäs lataaminen ja uudelleenlataus levyltä (päivitetty v17.6): Sekä projektin lataamisen yhteydessä että napsauttamalla "Lataa projekti uudelleen levyltä" (käsin muokatun narratiivin tiedoston jälkeen editorissa), sovellus yhdistää muistin ja levyn yhdellä kertaa — laskee rakenteen laskurit ja nostaa Maailmankirjan ja tilan. Jos KOKO tarina mahtuu konteksti-ikkunaan — se lataa sen kokonaan, ja tarpeeton vanha tiivistelmä poistetaan, jotta moottori toimii täydellä tekstillä (tämä sulkee aiemman aukon, jossa malli sai vain tiivistelmän ilman viimeisten kohtausten kontekstia). Jos tarina on PITKÄ ja sillä on tallennettu tiivistelmätiedosto — se säilyttää tiivistelmän koskemattomana ja kysyy, mistä rakenteen otsikosta (Luku/Näytös/Kohtaus) AI:n työmuisti alkaa; loput juonesta edustaa tiivistelmä. Näin et tuhlaa tokeneita koko tarinan uudelleenlataamiseen, ja samalla seuraava tiivistelmä ei perustu vanhentuneisiin tietoihin.
 
 
-VAIHE 3b: Käsikirjoituksen kaksi ulostuloa — monikielinen äänikirja (ElevenLabs) ja näytönlukijaversio
+VAIHE 3b: Skriptin kaksi ulostuloa — monihäninen äänikirja (ElevenLabs) ja ruudunlukijaversio
 
-Valmiilla luettavan teatterin käsikirjoituksella (käsikirjoitustila) on kaksi itsenäistä ulostuloa: monikielinen ElevenLabs Studio -projekti (ääni) ja HTML-versio näytönlukijoille. Ne ovat kaksi tapaa „kuulla" sama näytelmä — voit käyttää toista, toista tai molempia. Molemmat ovat vapaaehtoisia eivätkä muuta klassista työnkulkua muuntimella.
+Valmis luetun teatterin skripti (Skripti-tila) tuottaa kaksi itsenäistä ulostuloa: monihänisen ElevenLabs Studio -projektin (ääni) sekä HTML-version ruudunlukijoita varten. Nämä ovat kaksi tapaa "kuulla" sama näytelmä — voit käyttää toista, molempia tai jättää ne kokonaan käyttämättä. Molemmat ovat valinnaisia eivätkä muuta klassista konvertterityönkulkua.
 
-─────────── Silta ElevenLabs Studioon (ääni, vapaaehtoinen) ───────────
+─────────── Silta ElevenLabs Studioon (ääni, valinnainen) ───────────
 
-Silta muuttaa käsikirjoituksen monikieliseksi Studio-projektiksi — kertoja ja jokainen hahmo saavat oman äänensä. Ilman ElevenLabs-avainta mikään ei muutu: silta pysyy vain piilossa.
+Silta muuntaa skriptin monihäniseksi Studio-projektiksi — kertojalle ja jokaiselle hahmolle annetaan oma ääni. Ilman ElevenLabs-avainta mikään ei muutu: silta yksinkertaisesti pysyy piilossa.
 
-ElevenLabs-avain (vapaaehtoinen)
+ElevenLabs-avain (valinnainen)
 
-Liitä ElevenLabs-avaimesi tiedostoon golden_key.env erilliselle riville: ELEVENLABS_API_KEY=sk_... Huomio: ElevenLabs-avain alkaa sk_ (ALAVIIVALLA), toisin kuin OpenAI-avain (sk-). Rajoitettu avain tarvitsee oikeudet (scope) projects_write ja voices_read. Avaimen tila näkyy pääruudulla (System Check) — avaimen puuttuminen ei ole virhe, silta pysyy vain piilossa.
+Liitä ElevenLabs-avaimesi golden_key.env-tiedostoon omalle rivilleen: ELEVENLABS_API_KEY=sk_... Huomio: ElevenLabs-avain alkaa merkinnällä sk_ (ALAVIIVALLA), toisin kuin Anthropic-avain (sk-ant-). Jos käytät rajoitettua avainta (restricted key), myönnä sille oikeudet (scopes) projects_write ja voices_read. Avaimen tila näkyy päänäytöllä (System Check) — puuttuva avain ei ole virhe, silta vain pysyy piilossa.
 
-Silta ilmestyy Ohjaajan paneeliin käsikirjoitustilassa (kun avain on oikein). Se toimii valmiilla näytelmällä, joka on tallennettu levylle — ensin luo tai lataa projekti.
+Silta ilmestyy Reżyserin paneeliin Skripti-tilassa (kun avain on oikein). Se toimii levylle tallennetulla valmiilla näytelmällä — luo tai lataa projekti ensin, siirry sitten siltaan.
 
-Vaihe 1 — Ääninäyttelijät
+Vaihe 1 — Ääniroolitus
 
-Klikkaa "Ääninäyttelijät…". Sovellus lataa hahmot, joilla on repliikkejä, ja lisää aina Kertojan paikan (kertoja on oletusääni — lukujen otsikot ja koko kertomus). Liitä jokaiselle puhujalle voice ID. TÄRKEÄÄ: jokaisen näytelmässä käytetyn äänen on ensin oltava omissa "My Voices" -äänissäsi — äänet, jotka luot itse (esim. "Voice Design" -työkalussa), päätyvät sinne automaattisesti, kun taas julkisen kirjaston äänet selataan "Explore"-välilehdellä ja lisätään painikkeella "Add to My Voices". Näin saat voice ID:n ElevenLabsissa (selaimessa): etsi ääni, toista näyte varmistaaksesi, että se on oikea, ja kopioi sen tunniste painikkeella "Copy Voice ID"; kun ääni on jo "My Voices" -äänissä, tämä painike on heti käytettävissä — ilman "More actions" -valikon avaamista. Äänten valinta: mahdollisten uudelleengenerointien rajoittamiseksi helpointa on valita "Best for Eleven v3" -kokoelmasta (äänet, jotka on tarkistettu v3-mallia varten, jolle projekti rakennetaan); vaihtoehtoisesti suunnittele oma ääni "Voice Design" -työkalussa, ja rohkeille jää kloonaus IVC (Instant Voice Cloning) tai jopa PVC (Professional Voice Cloning). Kentät voi jättää tyhjiksi ja palata myöhemmin — tallennus on luonnos.
+Napsauta "Obsada głosowa…". Sovellus lukee skriptistäsi hahmot, joilla on vuorosanoja, ja lisää aina Kertojan paikan (kertoja on oletusääni — se lukee lukujen otsikot ja kaiken kerronnan). Liitä jokaisen puhujan kohdalle voice ID. TÄRKEÄÄ: jokaisen näytelmässä käytetyn äänen on ensin löydyttävä "My Voices" -kokoelmastasi — itse luomasi äänet (esim. "Voice Design" -toiminnolla) päätyvät sinne automaattisesti, ja julkisen kirjaston äänet löydät "Explore"-välilehdeltä, josta lisäät ne "Add to My Voices" -painikkeella. Voice ID:n hankkiminen ElevenLabsissa (selaimessa): etsi ääni, toista näyte varmistaaksesi, että se on oikea, ja kopioi tunniste "Copy Voice ID" -painikkeella; kun ääni on jo "My Voices" -kokoelmassa, tämä painike on heti käytettävissä — ilman "More actions" -valikon avaamista. Äänien valinta: mahdollisten uudelleengenerointien minimoimiseksi helpoin tapa on valita "Best for Eleven v3" -kokoelmasta (äänet, jotka on testattu v3-mallilla, jolla projekti luodaan); vaihtoehtoisesti voit suunnitella oman äänen "Voice Design" -toiminnolla, ja rohkeimmille on tarjolla IVC (Instant Voice Cloning) tai PVC (Professional Voice Cloning) -kloonaus. Voit jättää kentät tyhjiksi ja palata myöhemmin — tallennus on luonnos.
 
 Vaihe 2 — Rakenna projekti
 
-Klikkaa "Luo projekti ElevenLabs Studiossa…". Sovellus tarkistaa, että käsikirjoituksessa on vähintään yksi luku (Prologi/Näytös/Luku) ja että jokaiselle äänelle on annettu ääni, ja luo sitten tilillesi lukuihin jaetun monikielisen Studio-projektin. Pelkkä projektin luominen EI kuluta krediittejä. Sovellus asettaa myös heti projektin kielen (otsikkorivien oikea ääntäminen) sekä äänenvoimakkuuden normalisoinnin äänikirjastandardiin — se tekee tämän API:n kautta, jotta sinun ei tarvitse avata projektin asetuksia selaimessa.
+Napsauta "Stwórz projekt ElevenLabs Studio…". Sovellus tarkistaa, että skriptissä on vähintään yksi luku (Prolog/Akt/Rozdział) ja että jokaiselle puhujalle sekä kertojalle on määritetty ääni, minkä jälkeen se luo tilillesi monihänisen Studio-projektin jaettuna lukuihin. Pelkkä projektin luominen EI kuluta krediittejä. Sovellus asettaa heti projektin kielen (otsikkorivien oikea ääntäminen) sekä äänenvoimakkuuden normalisoinnin äänikirjastandardin mukaisesti — se tekee tämän API:n kautta, joten sinun ei tarvitse avata projektin asetuksia selaimessa.
 
-Muotovartija (Leikkaajan säännön laajennus): silta vaatii, että käsikirjoituksessa JOKAINEN rivi on joko vuorosana puhujamerkinnällä ([Kertoja: …] tai [Hahmo: …]) tai rakenneotsikko (Prologi, Näytös, Kohtaus, Luku). Tavallinen, merkitsemätön ”irrallinen” proosa — esimerkiksi tekijän muistiinpano tai kertomuskatkelma ilman tagia — ei saa ääntä ja ohitetaan hiljaisesti rakennettaessa, joten valmis projekti voisi poiketa tiedostostasi. Siksi, jos sovellus havaitsee tällaisia orporivejä, se näyttää niiden luettelon rivinumeroineen ja kysyy, rakennetaanko silti: voit silloin peruuttaa ja korjata käsikirjoituksen (avaa se painikkeella ”Avaa kertomustiedosto…”, lisää puuttuvat puhujamerkinnät tai poista nämä rivit) tai rakentaa silti tietoisesti, hyväksyen niiden ohittamisen. Tämä on Leikkaajan säännön luonteva laajennus: aivan kuten rakenneotsikoita ei saa rikkoa, sillalle tarkoitetussa käsikirjoituksessa jokaisella rivillä tulisi olla puhujansa tai olla otsikko.
+Muotovartiointija (Montażysty-säännön laajennus): silta edellyttää, että skriptissä JOKAINEN rivi on joko puhujan merkinnällä varustettu vuorosana ([Narrator: …] tai [Nimi: …]) tai rakenteen otsikko (Prolog, Akt, Scena, Rozdział). Tavallinen, merkitsemätön proosa kirjoitettuna "vapaasti" — esimerkiksi tekijän huomautus tai kerrontakatkelma ilman tagia — ei päädy minkään äänen luettavaksi ja ohitetaan hiljaa rakennusvaiheessa, joten valmis projekti saattaa poiketa tiedostostasi. Siksi jos sovellus havaitsee tällaisia "orpo-rivejä", se näyttää niiden listan rivinumeroineen ja kysyy, rakennetaanko silti: voit tällöin peruuttaa ja korjata skriptin (avaa se "Otwórz plik narracji…" -painikkeella, lisää puuttuvat puhujamerkinnät tai poista kyseiset rivit) tai rakentaa tietoisesti siitä huolimatta hyväksyen niiden poisjäämisen. Tämä on luonnollinen laajennus Montażysty-säännölle: aivan kuten rakenteen otsikoita ei saa rikkoa, siltaan tarkoitetussa skriptissä jokaisella rivillä tulee olla puhujansa tai sen tulee olla otsikko.
 
 Vaihe 3 — Renderöinti selaimessa
 
-Projektin luomisen jälkeen sovellus näyttää sen tunnisteen ja painikkeen, joka avaa ElevenLabs Studion. Etsi projekti selaimessa, renderöi puhe (tämä vasta kuluttaa krediittejä — noin 1 krediitti merkkiä kohden), ja vie sitten äänitiedosto tai julkaise projekti Eleven Readeriin. Renderöinti ja julkaisu tapahtuvat sinun puolellasi, tietoisesti — sovellus vain rakentaa projektin.
+Projektin luomisen jälkeen sovellus näyttää sen tunnisteen sekä painikkeen, joka avaa ElevenLabs Studion. Etsi projekti selaimessa, renderöi puhe (tämä vasta kuluttaa krediittejä — suuntaa-antavasti 1 krediitti merkkiä kohti), minkä jälkeen vie äänitiedosto tai julkaise projekti Eleven Readeriin. Renderöinti ja julkaisu tapahtuvat sinun puolellasi, tietoisesti — sovellus ainoastaan rakentaa projektin.
 
-Ilmaisu ja aksentit (malli Eleven v3)
+Ilmaisu ja aksentit (Eleven v3 -malli)
 
-Projekti luodaan Eleven v3 -mallilla (yli 70 kieltä). Tunteita EI ilmaista isoilla kirjaimilla, kolmella pisteellä äläkä ajatusviivoilla — moottori jättää sen huomiotta. Sen sijaan Ohjaaja kutoo repliikkeihin englanninkielisiä v3-äänitageja, esim. [whispers], [sighs], [angry], [laughs] — ne ohjaavat ilmaisua ja toimivat puhutusta kielestä riippumatta. Hahmon AKSENTTI sen sijaan tulee ÄÄNINÄYTTEESTÄ: jos haluat jonkun puhuvan esim. suomea vieraalla aksentilla, valitse tai suunnittele (Voice Design) ääni, jonka näytteessä on tuo aksentti. Kokeile käytännössä äänen promptia, kunnes kuulet esim. suomenkielisen näytteen ranskalaisella aksentilla — malli v3 säilyttää tämän aksentin valmiissa nauhoituksessa. Vinkki: hyvin pitkät virkkeet heikentävät aksenttia, minkä vuoksi Ohjaajaa pyydetään promptissa jo käyttämään lyhyitä virkkeitä.
+Projekti luodaan Eleven v3 -mallilla (yli 70 kieltä). Tunteita EI ilmaista isoilla kirjaimilla, ellipseillä tai ajatusviivoin — moottori jättää ne huomiotta. Sen sijaan Reżyser lisää vuorosanoihin englanninkielisiä v3-äänitägejä, kuten [whispers], [sighs], [angry], [laughs] — ne ohjaavat ilmaisua ja toimivat puhujan kielestä riippumatta. Hahmon AKSENTTI puolestaan tulee ÄÄNESTÄ: jos haluat jonkun puhuvan esimerkiksi puolaksi vieraalla aksentilla, valitse tai suunnittele Voice Designissa ääni, jonka näytteessä on kyseinen aksentti. Käytännössä kokeile äänipromptia, kunnes kuulet esimerkiksi puolankielisen näytteen suomalaisella aksentilla — v3-malli säilyttää sen aksenttia valmiissa nauhoituksessa. Vinkki: hyvin pitkät lauseet heikentävät aksenttia, minkä vuoksi Reżyseria pyydetään jo promptissa käyttämään lyhyitä lauseita.
 
-Tietoisuus mallista v3 (alfa-vaihe)
+Tietoisuus v3-mallista (alpha-vaihe)
 
-Eleven v3 on ilmaisuvoimaisin mutta yhä alfa-vaiheessa. Toisinaan yksittäinen repliikki renderöityy rätinänä puheen sijaan — riittää, että regeneroit sen Studiossa (jokaisella lohkolla on muutama ilmainen regenerointi). ElevenLabsin projektiasetukset voivat myös näyttää suosituksia mallin vaihtamisesta (Eleven Flash v2.5 tai Multilingual v2) — tämä EI ole virhe, vain moottorin vihje. Jos et halua nähdä näitä viestejä, älä yksinkertaisesti avaa projektin asetuksia: sovellus on jo asettanut API:n kautta kaiken tarvittavan (malli, kieli, äänenvoimakkuuden normalisointi).
+Eleven v3 on ilmaisuvoimaisin, mutta se on edelleen alpha-vaiheessa. Joskus yksittäinen repliikki saattaa renderöityä rätinänä puheen sijaan — riittää, että generoit sen uudelleen Studiossa (jokaisella lohkolla on muutama ilmainen uudelleengenerointi). ElevenLabsin projektin asetuksissa saattaa myös näkyä suosituksia mallin vaihtamisesta (Eleven Flash v2.5:een tai Multilingual v2:een) — tämä EI ole virhe, vaan moottorin ehdotus. Jos et halua nähdä näitä viestejä, älä yksinkertaisesti avaa projektin asetuksia: sovellus on jo asettanut API:n kautta kaiken tarvittavan (malli, kieli, äänenvoimakkuuden normalisointi).
 
-Miksi luettava teatteri eikä äänitehosteet? Aikaisemmissa versioissa käsikirjoitustila tuotti raakoja tehosteita [SFX: ...] ilman kertojaa. Silta valmiiseen, monikieliseen nauhoitukseen vaatii kuitenkin, että konteksti (paikka, aika, toiminta) välittyy kertojan sanoin: äänitehosteet Studiossa eivät ole saatavilla ruudunlukijoille, ja malli toteuttaa joko kertojan tai tehosteet — ei koskaan vakaasti molempia samanaikaisesti. Siksi käsikirjoitustila on nyt luettava teatteri: kertoja ja dialogi, ilman SFX.
+Miksi luettu teatteri eikä äänitehosteita? Aiemmissa versioissa Skripti-tila tuotti raakoja [SFX: ...] -tehosteita ilman kertojaa. Silta valmiiseen, monihäniseen nauhoitukseen edellyttää kuitenkin, että konteksti (paikka, aika, toiminta) välittyy kertojan sanojen kautta: äänitehosteet Studiossa eivät ole ruudunlukijoiden käytettävissä, ja malli toteuttaa joka tapauksessa joko kertojan tai tehosteet — ei koskaan vakaasti molempia yhtä aikaa. Siksi Skripti-tila on luettua teatteria: kertoja ja dialogi, ilman SFX:ää.
 
-─────────── Näytönlukijaversio (HTML, ilman ElevenLabsia) ───────────
+─────────── Ruudunlukijaversio (HTML, ilman ElevenLabsia) ───────────
 
-Käsikirjoitustilassa sinulla on ElevenLabs-avaimesta riippumatta painike „Luo näytönlukijan versio". Se luo tiedoston skrypty/<nazwa>_screen_reader.html — erillisen ulostulon näytönlukijoiden (esim. NVDA) käyttäjille. Se toimii näin: hahmojen repliikit, joilla on Maailman Kirjassa määritelty aksentti (esim. merkintä „[Joana] suomalainen aksentti"), saavat foneettisen kirjoitusasun (tarkoituksella „rikottu" oikeinkirjoitus) ja kielitunnisteen (lang-attribuutti), jolloin näytönlukija lukee ne oikealla vieraalla aksentilla. v3-äänitagit (esim. [whispers]) poistetaan tästä versiosta — lukijan ei pidä lukea niitä ääneen. Prologi/Näytös/Kohtaus-otsikoista tulee HTML-otsikoita, joten dokumentissa on helppo navigoida.
+Skripti-tilassa, ElevenLabs-avaimesta riippumatta, käytettävissäsi on "Generuj wersję dla czytników ekranu" -painike. Se luo tiedoston skrypty/<nazwa>_screen_reader.html — erillinen ulostulo ruudunlukijoita (esim. NVDA) käyttäville henkilöille. Se toimii näin: hahmojen vuorosanoille, joille on Maailmankirjassa määritetty aksentti (esim. merkintä "[Joana] akcent fiński"), lisätään foneettinen kirjoitusasu (tarkoituksellisesti "rikottu" oikeinkirjoitus) sekä kielimerkintä (lang-attribuutti), jolloin ruudunlukija lukee ne oikealla, vieraalla aksentilla. V3-äänitägit (esim. [whispers]) poistetaan tästä versiosta — ruudunlukijan ei tule lukea niitä ääneen. Prolog/Akt/Scena-otsikot muuttuvat HTML-otsikoiksi, joten dokumentissa on helppo navigoida.
 
-Tämä täydentää tietoisesti äänisiltaa: mallille v3 aksentti tulee ääninäytteestä, ja näytönlukijalle — oikeinkirjoituksesta plus kielitunnisteesta. Siksi oikeinkirjoitus ääniversiossa pysyy puhtaana (v3 valitsee kielen itse), ja oikeinkirjoituksen „rikkominen" menee vain erilliseen HTML-tiedostoon, jossa se on toivottavaa.
+Tämä on tietoinen täydennys äänisillan rinnalle: aksentti v3-mallille välittyy äänestä, ja ruudunlukijalle — oikeinkirjoituksesta sekä kielimerkinnästä. Siksi oikeinkirjoitus pysyy puhtaana ääniversiossa (v3 valitsee kielen itse), ja oikeinkirjoituksen "rikkominen" päätyy ainoastaan erilliseen HTML-tiedostoon, jossa se on toivottua.
 
 
 VAIHE 4: Jälkituotanto Reżyser Audio GPT:ssä

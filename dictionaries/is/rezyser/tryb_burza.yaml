@@ -21,7 +21,7 @@ kolejnosc: 10
 # Úttakssnið → sending vélar (gui_rezyser). EKKI breyta — tengir haminn við JSON-þáttara Python.
 format_wyjscia: burza_json
 
-# --- OpenAI-stillingar ---
+# --- Anthropic-stillingar ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

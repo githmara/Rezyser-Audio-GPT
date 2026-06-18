@@ -9,7 +9,7 @@ etykieta: "Valhamur — 3 til 5 valkostir A-E"
 kategoria: tryb
 kolejnosc: 40
 
-# --- OpenAI-stillingar ---
+# --- Anthropic-stillingar ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

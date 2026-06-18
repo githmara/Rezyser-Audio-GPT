@@ -10,7 +10,7 @@ etykieta: "Freier Modus — eigene Handlung schreiben"
 kategoria: tryb
 kolejnosc: 30
 
-# --- OpenAI-Parameter (geerbt von baza.yaml, wenn hier nicht gesetzt) ---
+# --- Anthropic-Parameter (geerbt von baza.yaml, wenn hier nicht gesetzt) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

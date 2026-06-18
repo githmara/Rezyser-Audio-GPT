@@ -17,7 +17,7 @@
 #   * Emoji (🎬 📄 📚 🌍 ✅ ⚠️ 🚨 ℹ️ ✂️ 🎭 🔄 📝 📋 🧠 🎙️ 🔐 🎛️ 🏁 📜 📖)
 #     zachowane 1:1.
 #   * Literały techniczne (`golden_key.env`, `.docx`, `sk-`, `dictionaries/`,
-#     `NVDA`, `OpenAI gpt-4o` itp.) – nie tłumaczymy.
+#     `NVDA`, `Anthropic claude-sonnet-4-6` itp.) – nie tłumaczymy.
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -133,11 +133,6 @@ home:
     Wykryto pierwsze uruchomienie programu. Moduły są zablokowane ze względów bezpieczeństwa.
     Aby odblokować wszystkie narzędzia, kliknij przycisk poniżej — program automatycznie wygeneruje plik golden_key.env i otworzy go w domyślnym edytorze tekstu.
   err_odczyt:            "🚨 Nie udało się odczytać pliku golden_key.env:\n{tresc_bledu}"
-  err_struktura: |-
-    🚨 Błąd struktury pliku!
-    Brakuje wymaganej zmiennej OPENAI_API_KEY=.
-    Prawdopodobnie usunąłeś znak równości lub nazwę zmiennej.
-    Usuń plik, wygeneruj go ponownie i wklej klucz ostrożniej.
   err_tekst_zastepczy: |-
     ⚠️ Klucz nie został wprowadzony!
     W pliku golden_key.env nadal znajduje się tekst zastępczy.
@@ -152,38 +147,21 @@ home:
     Przed lub za kluczem API wykryto spację bądź inny niewidoczny znak.
     Otwórz plik w edytorze tekstu i upewnij się, że wartość zaczyna się
     natychmiast po znaku '=', bez żadnych spacji.
-  err_format: |-
-    🚨 Podejrzany format klucza!
-    Poprawny klucz OpenAI zawsze zaczyna się od znaków sk- (np. sk-proj-…).
-    Upewnij się, że skopiowałeś właściwy ciąg znaków i nie ma przed nim żadnych spacji.
-  err_zbyt_krotki: |-
-    ⚠️ Klucz wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow}).
-    Prawdopodobnie skopiowałeś tylko fragment klucza.
-
-    Jeśli zamknąłeś już okienko z kluczem na platform.openai.com,
-    musisz wrócić na konto, użyć opcji 'Revoke secret key' dla tego
-    uciętego klucza i wygenerować nowy. Pamiętaj, by następnym razem
-    skopiować klucz w całości przed kliknięciem 'Done'.
   ok_klucz_wykryty: |-
     ✅ Klucz API (golden_key.env) wykryty i poprawnie sformatowany.
     Wszystkie moduły są gotowe do pracy.
-  # --- System Check: silnik narracji Anthropic (Claude) — WYMAGANY (v18.0) ---
-  heading_anthropic:     "Silnik narracji (Anthropic / Claude) — wymagany"
   ant_err_struktura: |-
     🚨 Błąd struktury pliku!
     Brakuje wymaganej zmiennej ANTHROPIC_API_KEY=.
-    Od wersji 18.0 silnik narracji (audiobook, teatr czytany, burza) działa na modelu Claude i wymaga osobnego klucza.
+    Od wersji 18.2 cały silnik AI (Reżyser, Opowieści, Poliglota, tytuły rozdziałów) działa na modelu Claude i wymaga klucza Anthropic.
     Usuń plik, wygeneruj go ponownie i wklej klucz ostrożniej.
   ant_err_format: |-
     🚨 Podejrzany format klucza Anthropic!
     Poprawny klucz Anthropic (Claude) zawsze zaczyna się od znaków sk-ant- (np. sk-ant-api03-…).
-    Upewnij się, że skopiowałeś klucz z console.anthropic.com, a nie klucz OpenAI.
+    Upewnij się, że skopiowałeś klucz z console.anthropic.com, a nie klucz innego dostawcy.
   ant_err_zbyt_krotki: |-
     ⚠️ Klucz Anthropic wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow}).
     Prawdopodobnie skopiowałeś tylko fragment klucza. Wróć na console.anthropic.com i skopiuj go w całości.
-  ant_ok: |-
-    ✅ Klucz Anthropic (Claude) wykryty i poprawnie sformatowany.
-    Silnik narracji jest gotowy do pracy.
   # Przyciski akcji panelu startowego
   btn_generate:          "Wygeneruj plik golden_key.env i otwórz edytor tekstu"
   btn_open:              "📝 Otwórz plik golden_key.env w edytorze tekstu"
@@ -215,7 +193,7 @@ home:
     Otwórz golden_key.env i upewnij się, że wartość zaczyna się natychmiast po znaku '='.
   el_format: |-
     🚨 Podejrzany format klucza ElevenLabs!
-    Klucz ElevenLabs zawsze zaczyna się od znaków sk_ (z PODKREŚLNIKIEM, nie sk- jak OpenAI).
+    Klucz ElevenLabs zawsze zaczyna się od znaków sk_ (z PODKREŚLNIKIEM, nie z myślnikiem jak sk-ant-).
     Upewnij się, że wkleiłeś klucz z ElevenLabs, a nie z innej platformy.
   el_zbyt_krotki: |-
     ⚠️ Klucz ElevenLabs wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow}).
@@ -417,7 +395,7 @@ rezyser:
     (np. 'Opisz spotkanie Geralta z wiedźmą w lesie. Duże napięcie.')
   btn_wyslij_label:      "Wyślij do AI"
   btn_wyslij_tooltip: |-
-    Wysyła instrukcje do modelu gpt-4o i dopisuje odpowiedź do historii.
+    Wysyła instrukcje do modelu Claude i dopisuje odpowiedź do historii.
     Wymaga aktywnego klucza API i uzupełnionej Księgi Świata.
   # Postprodukcja
   postprod_heading:      "🎛️ Postprodukcja"
@@ -529,7 +507,7 @@ rezyser:
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"
   btn_tytuly_ai_name:    "Przycisk Nadaj Tytuły Rozdziałom AI"
   btn_tytuly_ai_tooltip: |-
-    Iteruje po rozdziałach z zapisanego pliku i nadaje im tytuły (gpt-4o-mini).
+    Iteruje po rozdziałach z zapisanego pliku i nadaje im tytuły (Claude).
     Wymaga zapisanego pliku projektu i aktywnego klucza API.
   # Pamięć modelu
   lbl_pamiec_modelu:     "🧠 Pamięć Modelu (Stan Okna Kontekstowego):"
@@ -611,7 +589,7 @@ rezyser:
   # Wysyłanie do AI
   brak_api_tytul:        "Brak API"
   brak_api_tresc: |-
-    Brak połączenia z OpenAI.
+    Brak połączenia z Anthropic.
     Sprawdź plik golden_key.env i uruchom aplikację ponownie.
   puste_pole_tytul:      "Puste pole"
   puste_pole_tresc:      "Wpisz instrukcje dla AI przed wysłaniem."
@@ -632,12 +610,11 @@ rezyser:
     To mogłoby uszkodzić Twoją historię.
 
     Przełącz się na tryb 'Burza Mózgów' i spróbuj ponownie.
-  err_rate_limit:        "Brak kredytów OpenAI! Doładuj konto i spróbuj ponownie."
+  err_rate_limit:        "Brak kredytów Anthropic! Doładuj konto i spróbuj ponownie."
   err_odrzucenie: |-
     AI odrzuciło prompt (wykryto tag [ODRZUCENIE_AI]).
     Tekst NIE zostanie zapisany do pliku historii.
     Możesz zmodyfikować instrukcję i spróbować ponownie.
-  err_struktura:         "Model wygenerował niewłaściwą strukturę odpowiedzi mimo kilku prób korekty. Spróbuj ponownie albo sformułuj polecenie inaczej."
   err_dlugosc:           "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst — np. Księgę Świata lub instrukcję — i spróbuj ponownie."
   err_surowy_json: |-
     Model w tym trybie zwrócił dane w formacie JSON, ale tryb nie jest skonfigurowany jako tryb JSON, więc tekst NIE został zapisany (uniknięto wklejenia surowego JSON-a do pliku).
@@ -711,7 +688,7 @@ poliglota:
   heading:               "🌍  Poliglota AI – Hybrydowe Studio Tłumaczeń"
   description_name:      "Opis modułu Poliglota"
   tool_description: |-
-    Moduł Poliglota służy do nakładania twardych akcentów fonetycznych pod lokalne syntezatory mowy (NVDA/Vocalizer/eSpeak), do zabaw tekstowych w Trybie Szyfranta oraz do tłumaczenia tekstów za pomocą AI (OpenAI gpt-4o).
+    Moduł Poliglota służy do nakładania twardych akcentów fonetycznych pod lokalne syntezatory mowy (NVDA/Vocalizer/eSpeak), do zabaw tekstowych w Trybie Szyfranta oraz do tłumaczenia tekstów za pomocą AI (Anthropic Claude).
 
     Obsługuje pliki: .txt, .html, .htm, .docx.
     Wynik zapisywany jest w tym samym katalogu co plik źródłowy.
@@ -758,7 +735,7 @@ poliglota:
     NIE – zostawiam reguły dla „{jezyk_aktywny}". Efekt na obcojęzycznym tekście może być nieprzewidywalny.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading:      "2. Konfiguracja Pracy"
-  rb_ai:                 "Tłumacz AI (OpenAI gpt-4o – wymaga klucza API, kosztuje kredyty)"
+  rb_ai:                 "Tłumacz AI (Anthropic Claude – wymaga klucza API, kosztuje kredyty)"
   rb_ai_disabled:        "Tłumacz AI (wyłączony – brak poprawnego pliku golden_key.env)"
   rb_ai_name:            "Tryb Tłumacza AI"
   rb_rezyser:            "Tryb Reżysera (darmowe reguły fonetyczne z YAML)"
@@ -830,7 +807,7 @@ poliglota:
   ai_blad_zapisu:        "Błąd zapisu pliku wynikowego:\n{tresc_bledu}"
   # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
   ai_blad_limit_api: |-
-    Brak kredytów lub przekroczony limit API OpenAI! Tłumaczenie przerwano na bloku {blok}.
+    Brak kredytów lub przekroczony limit API Anthropic! Tłumaczenie przerwano na bloku {blok}.
 
     Postęp został automatycznie zabezpieczony. Zasil konto API i wczytaj oryginał ponownie, by kontynuować od tego miejsca.
   ai_blad_cache: |-
@@ -1322,7 +1299,7 @@ opowiesci:
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format:      "\n\n--- Tura {numer} ---\n\n"
   brak_api_tytul:            "Brak klucza API"
-  brak_api_tresc:            "Plik golden_key.env z prawidłowym kluczem OPENAI_API_KEY nie został znaleziony. Moduł Opowieści wymaga aktywnego klucza, by generować tury narracji."
+  brak_api_tresc:            "Plik golden_key.env z prawidłowym kluczem ANTHROPIC_API_KEY nie został znaleziony. Moduł Opowieści wymaga aktywnego klucza, by generować tury narracji."
   puste_pole_tytul:          "Puste pole akcji"
   puste_pole_tresc:          'Wpisz akcję lub komendę w polu poniżej narracji, zanim klikniesz „Wyślij".'
   puste_nazwa_tytul:         "Brak nazwy gry"
@@ -1336,9 +1313,8 @@ opowiesci:
   blad_ai_szczegoly_tytul:   "Szczegóły błędu silnika narracyjnego"
   blad_ai_lbl_tresc:         "Treść błędu (do skopiowania):"
   blad_ai_tresc_name:        "Pole z treścią błędu silnika narracyjnego"
-  err_rate_limit:            "Limit zapytań do OpenAI został wyczerpany. Odczekaj chwilę albo sprawdź stan konta."
+  err_rate_limit:            "Limit zapytań do Anthropic został wyczerpany. Odczekaj chwilę albo sprawdź stan konta."
   err_timeout:               "Czas oczekiwania na odpowiedź modelu został przekroczony (powyżej 120 sekund). Spróbuj ponownie."
-  err_struktura:             "Model wygenerował niewłaściwą strukturę odpowiedzi mimo dwóch prób korekty. Spróbuj ponownie albo sformułuj akcję inaczej."
   err_dlugosc:               "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst i spróbuj ponownie."
   odrzucenie_tytul:          "Akcja nie do poprowadzenia"
   odrzucenie_tresc:          "Silnik narracyjny nie może poprowadzić tej akcji — mogła być nie na temat, niemożliwa w tym świecie albo niezgodna z zasadami treści. Tura nie została zapisana. Sformułuj akcję inaczej i spróbuj ponownie."

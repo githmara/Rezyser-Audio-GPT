@@ -11,7 +11,7 @@ etykieta: "Cinematic Meta Warning (150. tura)"
 kategoria: meta
 kolejnosc: 70
 
-# --- Parametry OpenAI ---
+# --- Parametry Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 max_tokens: 600

@@ -55,7 +55,7 @@ Użycie:
                                                                 #  chcesz spalać API-billa
                                                                 #  na rerun)
 
-Wymaga: `OPENAI_API_KEY` w środowisku (to samo konto co GUI Poliglota).
+Wymaga: `ANTHROPIC_API_KEY` w środowisku (to samo konto co GUI Poliglota).
 Moduł NIE zależy od wxPython — uruchamialny w CLI / CI bez inicjalizacji GUI.
 """
 from __future__ import annotations
@@ -270,12 +270,16 @@ def _wygeneruj_skrotowce_llm(
         f"dotted abbreviations, give the closest common written shortenings anyway."
     )
     try:
-        resp = klient.chat.completions.create(
+        resp = klient.messages.create(
             model=model,
+            max_tokens=256,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,
+            thinking={"type": "disabled"},
         )
-        surowa = (resp.choices[0].message.content or "").strip()
+        surowa = "".join(
+            b.text for b in resp.content if getattr(b, "type", None) == "text"
+        ).strip()
     except Exception as exc:  # noqa: BLE001 — fail-soft: brak skrótowców → blok pominięty
         print(f"⚠️  {kod}: generacja skrótowców LLM nie powiodła się ({exc}); "
               f"blok Odwracacza zostanie pominięty.")
@@ -813,7 +817,7 @@ def zbuduj_yaml_wynikowy(
             "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj\n"
             "# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.\n"
             "#\n"
-            "# Silnik: OpenAI (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}\n"
+            "# Silnik: Anthropic Claude (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}\n"
             "# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1\n"
             "# po weryfikacji parzystości multisetu markerów.\n"
             "# =============================================================================\n"
@@ -1301,8 +1305,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="gpt-4o",
-        help="Model OpenAI do głównego tłumaczenia (domyślnie: gpt-4o).",
+        default="claude-sonnet-4-6",
+        help="Model Anthropic Claude do głównego tłumaczenia (domyślnie: claude-sonnet-4-6).",
     )
     parser.add_argument(
         "--klucz",
@@ -1415,13 +1419,13 @@ def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
     return kody
 
 
-def _zainicjuj_klienta_openai() -> Any:
+def _zainicjuj_klienta_anthropic() -> Any:
     try:
-        from openai import OpenAI
+        import anthropic
     except ImportError as exc:
         raise SystemExit(
-            "❌ Brak modułu `openai`. Instalacja (venv projektu):\n"
-            "   .venv/Scripts/pip install openai"
+            "❌ Brak modułu `anthropic`. Instalacja (venv projektu):\n"
+            "   .venv/Scripts/pip install anthropic"
         ) from exc
 
     # Ładujemy `golden_key.env` z roota projektu — ten sam plik, którego
@@ -1436,14 +1440,14 @@ def _zainicjuj_klienta_openai() -> Any:
     except ImportError:
         pass   # python-dotenv jest w requirements; fallback i tak ma sens
 
-    klucz = os.environ.get("OPENAI_API_KEY")
-    if not klucz or klucz == "TUTAJ_WKLEJ_SWOJ_KLUCZ":
+    klucz = os.environ.get("ANTHROPIC_API_KEY")
+    if not klucz or not klucz.startswith("sk-ant-"):
         raise SystemExit(
-            "❌ Brak prawidłowego OPENAI_API_KEY.\n"
+            "❌ Brak prawidłowego ANTHROPIC_API_KEY.\n"
             "   Sprawdź `golden_key.env` w katalogu projektu (ten sam plik,\n"
             "   którego używa GUI — System Check w trybie Reżysera)."
         )
-    return OpenAI(api_key=klucz)
+    return anthropic.Anthropic(api_key=klucz)
 
 
 def main() -> int:
@@ -1471,7 +1475,7 @@ def main() -> int:
             f"({len(szablony)}/{len(wszystkie_szablony)} dostępnych: {pelna_lista})."
         )
 
-    klient: Any = None if args.dry_run else _zainicjuj_klienta_openai()
+    klient: Any = None if args.dry_run else _zainicjuj_klienta_anthropic()
 
     # 13.4: import lazy — `core_poliglota` dorzuca docx/num2words. Skrypt
     # uruchamiany w czystym kontekście CLI nie powinien płacić za to przy

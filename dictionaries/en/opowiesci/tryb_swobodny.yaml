@@ -9,7 +9,7 @@ etykieta: "Free mode — write any action"
 kategoria: tryb
 kolejnosc: 30
 
-# --- OpenAI parameters (inherited from baza.yaml when absent here) ---
+# --- Anthropic parameters (inherited from baza.yaml when absent here) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

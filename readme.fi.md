@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **18.1** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **18.2** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -64,13 +64,11 @@ Versiosta v14.0 lähtien sovellus tukee luonnollisesti 9 peruskieltä: Polski, D
 Koko käyttöliittymä, dokumentaatio (`docs/manual.<iso>.txt`) ja suurin osa järjestelmäviesteistä ovat luonnollisesti saatavilla kaikilla tuetuilla kielillä. AI-järjestelmäkehotteet Ohjaajan ja Tarinan tiloissa on kirjoitettu kohdekielillä (käsin, ei automaattisesti käännettynä — katso `dictionaries/<kod>/rezyser/` ja `dictionaries/<kod>/opowiesci/`).
 
 
-## AI-arkkitehtuuri ja käytetyt mallit
+## Tekoälyarkkitehtuuri ja käytetyt mallit
 
-Sovellus jakaa tehtävät älykkäästi kahden API-toimittajan välillä, optimoiden proosan laadun, kustannukset ja nopeuden:
+Versiosta 18.2 lähtien sovellus käyttää yhtä API-palveluntarjoajaa — Anthropicia — ja yhtä mallia kaikkiin tekoälytehtäviin:
 
-* **Anthropic Claude Sonnet 4.6:** Koko luovan kerronnan moottori. Vastaa käsikirjoitusten ohjaamisesta, perinteisen proosan kirjoittamisesta (äänikirja), aivoriihistä sekä KAIKISTA tarinatiloista (Valinnat, Pienempi paha, Vapaa) yhdessä elokuvamaisten tiivistelmien ja katkojen luomisen kanssa. Narratiivin siirtyminen Claudeen (Reżyser v18.0, Opowieści v18.1) johtui empiirisesti todistetusta paremmuudesta maailman sääntöjen noudattamisessa ja kliseiden välttämisessä.
-* **gpt-4o (OpenAI):** Kehittyneet käännökset monilohkokontekstin säilyttämisellä (Poliglota). Siirtyminen Anthropicille suunniteltu seuraavassa julkaisussa.
-* **gpt-4o-mini (OpenAI):** Nopea, kevyt apumalli mikrotehtäviin: luotujen lukujen kirjallisten otsikoiden iteratiivinen antaminen ja kielen ISO-koodien poiminta.
+* **Anthropic Claude Sonnet 4.6:** Sovelluksen KAIKEN älykkyyden moottori. Se vastaa luovasta kerronnasta (skriptien ohjaamisesta, perinteisen äänikirjaproosan kirjoittamisesta, Aivoriihistä sekä KAIKISTA Tarinoiden tiloista — Valinnat, Pienempi Paha, Vapaa — mukaan lukien yhteenvetojen ja Cinematic-välikohtausten generointi), edistyneistä käännöksistä monilohkoisen kontekstin säilyttämisellä (Poliglota), sekä mikrotöistä: lukujen kirjallisten otsikoiden iteratiivisesta luomisesta ja sisällön kielikoodin tunnistamisesta. Konsolidointi Claudeen tapahtui vaiheittain (Reżyser versiossa v18.0, Opowiesci versiossa v18.1, Poliglota ja jälkituotanto versiossa v18.2) — se johtui empiirisesti vahvistetusta ylivoimaisuudesta maailman sääntöjen noudattamisessa, proosan luontevuudessa ja kliseiden välttämisessä.
 
 
 ### Tunnetut mallien rajoitukset (Anti-Closure)
@@ -84,9 +82,9 @@ Tämä on nykyisen sukupolven tekoälyn perustavanlaatuinen rajoitus. Tästä sy
 
 ### Loppukäyttäjille (Windows)
 
-1. Lataa uusin julkaisu **Releases**-välilehdeltä (paketti merkitty *Latest*) — tiedosto `Rezyser_Audio_v<numero>_Installer.exe`. Käynnistä se kaksoisklikkaamalla. Asennusohjelma asentaa oletuksena käyttäjätilisi paikalliseen hakemistoon (`%LocalAppData%\Programs\Reżyser Audio GPT`) eikä se vaadi järjestelmänvalvojan oikeuksia; voit valita oman polun „Selaa"-painikkeella. Asennuksen päätyttyä se luo pikakuvakkeet Käynnistä-valikkoon ja työpöydälle, ja avaa valinnaisesti käyttöohjeen `.txt`-tiedostojen oletuseditorissa.
-2. **OpenAI API:n konfigurointi:** Ensimmäisellä käynnistyskerralla sovellus ilmoittaa avaimen puuttumisesta System Check -osiossa. Napsauta näkyvää painiketta luodaksesi `golden_key.env`-tiedoston, avaa se tekstieditorissa ja liitä avain (alkaen `sk-proj-`).
-3. **Ensimmäiset askeleet:** Avaa tiedosto `docs/manual.pl.txt` (tai muulla kielellä) asennuskansiosta — se on täydellinen käyttöohje, joka on kirjoitettu kielellä, joka on kaikkien käyttäjien, ei vain kehittäjien, ymmärrettävissä.
+1. Lataa uusin julkaisu **Releases**-välilehdeltä (paketti merkitty *Latest*) — tiedosto `Rezyser_Audio_v<numer>_Installer.exe`. Käynnistä se kaksoisnapsauttamalla. Asennusohjelma sijoittuu oletuksena käyttäjätilisi paikalliseen hakemistoon (`%LocalAppData%\Programs\Reżyser Audio GPT`) eikä vaadi järjestelmänvalvojan oikeuksia; voit valita oman polun "Przeglądaj"-painikkeella. Asennuksen jälkeen ohjelma luo pikakuvakkeet Käynnistä-valikkoon ja työpöydälle, ja vaihtoehtoisesti avaa käyttöohjeen oletuksena määritetyssä `.txt`-tiedostojen editorissa.
+2. **Anthropic API -määritys:** Ensimmäisellä käynnistyskerralla sovellus ilmoittaa puuttuvasta avaimesta System Check -osiossa. Napsauta näkyvää painiketta luodaksesi `golden_key.env`-tiedoston, avaa se tekstieditorissa ja liitä Anthropic-avaimesi (joka alkaa merkkijonolla `sk-ant-`).
+3. **Ensiaskeleet:** Avaa tiedosto `docs/manual.pl.txt` (tai muunkielinen versio) asennuskansiosta — se on täydellinen käyttöohje, joka on kirjoitettu kaikkien käyttäjien ymmärtämällä kielellä, ei pelkästään kehittäjille.
 
 
 ### Kehittäjille (clone + setup)

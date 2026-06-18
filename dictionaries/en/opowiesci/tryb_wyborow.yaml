@@ -9,7 +9,7 @@ etykieta: "Choices mode — 3-5 options A-E"
 kategoria: tryb
 kolejnosc: 40
 
-# --- OpenAI parameters ---
+# --- Anthropic parameters ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

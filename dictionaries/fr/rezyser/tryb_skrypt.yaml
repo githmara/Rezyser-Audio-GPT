@@ -22,7 +22,7 @@ kolejnosc: 20
 # Format de sortie → dispatch du moteur (gui_rezyser). NE PAS modifier — lie le mode au parseur JSON Python.
 format_wyjscia: skrypt_json
 
-# --- Paramètres OpenAI ---
+# --- Paramètres Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: français

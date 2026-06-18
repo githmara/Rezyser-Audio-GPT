@@ -17,7 +17,7 @@ etykieta: "Male Minore — ogni opzione sfavorevole"
 kategoria: tryb
 kolejnosc: 50
 
-# --- Parametri OpenAI ---
+# --- Parametri Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

@@ -19,7 +19,7 @@ etykieta: "Prompt narratif de base"
 kategoria: baza
 kolejnosc: 0
 
-# --- Paramètres OpenAI (hérités par les modes narratifs) ---
+# --- Paramètres Anthropic (hérités par les modes narratifs) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

@@ -10,7 +10,7 @@ etykieta: "Mode libre — écris n'importe quelle action"
 kategoria: tryb
 kolejnosc: 30
 
-# --- Paramètres OpenAI (hérités de baza.yaml si non définis ici) ---
+# --- Paramètres Anthropic (hérités de baza.yaml si non définis ici) ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

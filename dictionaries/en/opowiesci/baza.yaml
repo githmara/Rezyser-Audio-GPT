@@ -17,7 +17,7 @@ etykieta: "Base narrative prompt"
 kategoria: baza
 kolejnosc: 0
 
-# --- OpenAI parameters (inherited by narrative modes) ---
+# --- Anthropic parameters (inherited by narrative modes) ---
 # A mode may override model/temperature; otherwise `_zbuduj_prompt_systemowy`
 # uses these defaults.
 model: claude-sonnet-4-6

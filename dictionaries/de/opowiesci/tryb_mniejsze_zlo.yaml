@@ -16,7 +16,7 @@ etykieta: "Kleineres Übel — jede Option ungünstig"
 kategoria: tryb
 kolejnosc: 50
 
-# --- OpenAI-Parameter ---
+# --- Anthropic-Parameter ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

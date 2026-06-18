@@ -126,11 +126,6 @@ home:
     Erster Programmstart erkannt. Module sind aus Sicherheitsgründen gesperrt.
     Um alle Werkzeuge freizuschalten, klicken Sie auf die Schaltfläche unten — das Programm generiert automatisch die Datei golden_key.env und öffnet sie im Standard-Texteditor.
   err_odczyt: "🚨 Die Datei golden_key.env konnte nicht gelesen werden:\n{tresc_bledu}"
-  err_struktura: |-
-    🚨 Dateistrukturfehler!
-    Der erforderliche Parameter OPENAI_API_KEY= fehlt.
-    Wahrscheinlich haben Sie das Gleichheitszeichen oder den Variablennamen gelöscht.
-    Löschen Sie die Datei, generieren Sie sie erneut und fügen Sie den Schlüssel vorsichtiger ein.
   err_tekst_zastepczy: |-
     ⚠️ Schlüssel wurde nicht eingegeben!
     In der Datei golden_key.env befindet sich noch ein Platzhaltertext.
@@ -145,18 +140,6 @@ home:
     Vor oder nach dem API-Schlüssel wurde ein Leerzeichen oder ein anderes unsichtbares Zeichen erkannt.
     Öffnen Sie die Datei im Texteditor und stellen Sie sicher, dass der Wert
     sofort nach dem '='-Zeichen beginnt, ohne Leerzeichen.
-  err_format: |-
-    🚨 Verdächtiges Schlüssel-Format!
-    Ein gültiger OpenAI-Schlüssel beginnt immer mit den Zeichen sk- (z.B. sk-proj-…).
-    Stellen Sie sicher, dass Sie die richtige Zeichenfolge kopiert haben und dass keine Leerzeichen davor stehen.
-  err_zbyt_krotki: |-
-    ⚠️ Der Schlüssel scheint zu kurz zu sein ({liczba_znakow} Zeichen erkannt, mindestens {minimum_znakow} erwartet).
-    Wahrscheinlich haben Sie nur einen Teil des Schlüssels kopiert.
-
-    Wenn Sie das Fenster mit dem Schlüssel auf platform.openai.com bereits geschlossen haben,
-    müssen Sie zu Ihrem Konto zurückkehren, die Option 'Geheimen Schlüssel widerrufen' für diesen
-    abgeschnittenen Schlüssel verwenden und einen neuen generieren. Denken Sie daran, den Schlüssel beim nächsten Mal
-    vollständig zu kopieren, bevor Sie auf 'Fertig' klicken.
   ok_klucz_wykryty: |-
     ✅ API-Schlüssel (golden_key.env) erkannt und korrekt formatiert.
     Alle Module sind einsatzbereit.
@@ -191,8 +174,8 @@ home:
     Öffne golden_key.env und stelle sicher, dass der Wert direkt nach dem '='-Zeichen beginnt.
   el_format: |-
     🚨 Verdächtiges Format des ElevenLabs-Schlüssels!
-    Ein ElevenLabs-Schlüssel beginnt immer mit sk_ (mit UNTERSTRICH, nicht sk- wie bei OpenAI).
-    Stelle sicher, dass du einen Schlüssel von ElevenLabs eingefügt hast und nicht von einer anderen Plattform.
+    Ein ElevenLabs-Schlüssel beginnt immer mit sk_ (mit UNTERSTRICH, nicht mit Bindestrich wie sk-ant-).
+    Stellen Sie sicher, dass Sie den Schlüssel von ElevenLabs eingefügt haben und nicht von einer anderen Plattform.
   el_zbyt_krotki: |-
     ⚠️ Der ElevenLabs-Schlüssel scheint zu kurz zu sein ({liczba_znakow} Zeichen erkannt, mindestens {minimum_znakow} erwartet).
     Wahrscheinlich hast du nur einen Teil des Schlüssels kopiert. Erzeuge einen neuen Schlüssel im ElevenLabs-Panel und füge ihn vollständig ein.
@@ -213,12 +196,9 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-# -----------------------------------------------------------------------------
-  heading_anthropic: Erzählmotor (Anthropic / Claude) — erforderlich
-  ant_err_struktura: "🚨 Fehler in der Dateistruktur!\nDie erforderliche Variable ANTHROPIC_API_KEY= fehlt.\nAb Version 18.0 läuft der Erzählmotor (Hörbuch, Lesetheater, Brainstorming) auf dem Claude-Modell und benötigt einen separaten Schlüssel.\nLöschen Sie die Datei, generieren Sie sie erneut und fügen Sie den Schlüssel sorgfältiger ein."
-  ant_err_format: "🚨 Verdächtiges Format des Anthropic-Schlüssels!\nEin gültiger Anthropic-Schlüssel (Claude) beginnt immer mit den Zeichen sk-ant- (z.B. sk-ant-api03-…).\nStellen Sie sicher, dass Sie den Schlüssel von console.anthropic.com kopiert haben und nicht einen OpenAI-Schlüssel."
+  ant_err_struktura: "🚨 Fehler in der Dateistruktur!\nDie erforderliche Variable ANTHROPIC_API_KEY= fehlt.\nAb Version 18.2 läuft die gesamte KI-Engine (Regisseur, Geschichten, Polyglott, Kapiteltitel) auf dem Claude-Modell und benötigt einen Anthropic-Schlüssel.\nLöschen Sie die Datei, generieren Sie sie neu und fügen Sie den Schlüssel sorgfältig ein."
+  ant_err_format: "🚨 Verdächtiges Format des Anthropic-Schlüssels!\nEin gültiger Anthropic-Schlüssel (Claude) beginnt immer mit sk-ant- (z. B. sk-ant-api03-…).\nStellen Sie sicher, dass Sie den Schlüssel von console.anthropic.com kopiert haben und nicht den Schlüssel eines anderen Anbieters."
   ant_err_zbyt_krotki: "⚠️ Der Anthropic-Schlüssel scheint zu kurz zu sein ({liczba_znakow} Zeichen erkannt, mindestens {minimum_znakow} erwartet).\nWahrscheinlich haben Sie nur einen Teil des Schlüssels kopiert. Gehen Sie zurück zu console.anthropic.com und kopieren Sie ihn vollständig."
-  ant_ok: "✅ Anthropic-Schlüssel (Claude) erkannt und korrekt formatiert.\nDer Erzählmotor ist einsatzbereit."
 rezyser:
   panel_name: "Audio GPT Regisseur-Panel"
   heading: "🎬  Audio GPT Regisseur – Hybrides Kreativstudio"
@@ -366,7 +346,7 @@ rezyser:
     (z.B. 'Beschreiben Sie das Treffen von Geralt mit der Hexe im Wald. Große Spannung.')
   btn_wyslij_label: "An die KI senden"
   btn_wyslij_tooltip: |-
-    Sendet Anweisungen an das Modell gpt-4o und fügt die Antwort der Geschichte hinzu.
+    Sendet Anweisungen an das Claude-Modell und fügt die Antwort dem Verlauf hinzu.
     Erfordert einen aktiven API-Schlüssel und ein ausgefülltes Weltbuch.
   # Postprodukcja
   postprod_heading: "🎛️ Postproduktion"
@@ -448,7 +428,7 @@ rezyser:
   btn_tytuly_ai_label: "📜 Kapitel betiteln (KI)"
   btn_tytuly_ai_name: "Schaltfläche Kapitel betiteln KI"
   btn_tytuly_ai_tooltip: |-
-    Iteriert über die Kapitel der gespeicherten Datei und gibt ihnen Titel (gpt-4o-mini).
+    Durchläuft die Kapitel der gespeicherten Datei und vergibt ihnen Titel (Claude).
     Erfordert eine gespeicherte Projektdatei und einen aktiven API-Schlüssel.
   # Pamięć modelu
   lbl_pamiec_modelu: "🧠 Modellspeicher (Zustand des Kontextfensters):"
@@ -524,7 +504,7 @@ rezyser:
   # Wysyłanie do AI
   brak_api_tytul: "Kein API"
   brak_api_tresc: |-
-    Keine Verbindung zu OpenAI.
+    Keine Verbindung zu Anthropic.
     Überprüfen Sie die Datei golden_key.env und starten Sie die Anwendung neu.
   puste_pole_tytul: "Leeres Feld"
   puste_pole_tresc: "Geben Sie Anweisungen für die KI ein, bevor Sie senden."
@@ -545,7 +525,7 @@ rezyser:
     Dies könnte Ihre Geschichte beschädigen.
 
     Wechseln Sie in den Modus 'Brainstorming' und versuchen Sie es erneut.
-  err_rate_limit: "Keine OpenAI-Kredite! Laden Sie Ihr Konto auf und versuchen Sie es erneut."
+  err_rate_limit: "Keine Anthropic-Credits! Laden Sie Ihr Konto auf und versuchen Sie es erneut."
   err_surowy_json: |-
     Dieser Modus hat Daten im JSON-Format zurückgegeben, ist jedoch nicht als JSON-Modus konfiguriert, sodass der Text NICHT gespeichert wurde (Vermeidung des Einfügens von rohem JSON in die Datei).
     Häufigste Ursache: Der Modus wurde aus einem Duplikat des Skripts erstellt. Stellen Sie in seiner YAML-Datei `format_wyjscia: skrypt_json` ein (für Dialog Erzähler+Charakter) — oder, wenn es sich um ein neues Schema handelt, wenden Sie sich an den Entwickler.
@@ -636,7 +616,6 @@ rezyser:
   sr_sukces_tresc: 'Datei für Screenreader gespeichert: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Fehler beim Generieren der Version für Screenreader
   sr_blad_tresc: "Version für Screenreader konnte nicht generiert werden:\n{tresc_bledu}"
-  err_struktura: Das Modell hat trotz mehrerer Korrekturversuche eine falsche Antwortstruktur generiert. Versuchen Sie es erneut oder formulieren Sie die Anweisung anders.
   err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext — z.B. das Buch der Welt oder die Anleitung — und versuchen Sie es erneut.
   btn_przeladuj_label: '&Projekt von der Festplatte neu laden'
   btn_przeladuj_tooltip: 'Lädt das gesamte Projekt erneut von der Festplatte, nachdem Sie manuelle Änderungen an der Erzählungsdatei (skrypty/<name>.txt) vorgenommen haben — berechnet die Zähler für Kapitel/Akte/Szenen neu, hebt das Weltbuch, den Modus und die Brainstorming-Optionen an und synchronisiert den Arbeitsspeicher. Eine kurze Geschichte wird vollständig geladen; bei einer langen wird gefragt, ab welcher Überschrift der Arbeitsspeicher der KI starten soll (der Rest wird durch die Zusammenfassung dargestellt). ACHTUNG: überschreibt den Inhalt der Felder mit der Version von der Festplatte — speichern Sie zuerst ungespeicherte Änderungen.'
@@ -676,9 +655,9 @@ poliglota:
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
   description_name: "Beschreibung des Polyglot-Moduls"
   tool_description: |-
-    Das Polyglot-Modul dient zum Aufbringen starker phonetischer Akzente für lokale Sprachsynthesizer (NVDA/Vocalizer/eSpeak), für Textspielereien im Kryptographenmodus und zum Übersetzen von Texten mit KI (OpenAI gpt-4o).
+    Das Polyglott-Modul dient zum Setzen harter phonetischer Akzente für lokale Sprachsynthesizer (NVDA/Vocalizer/eSpeak), für Textspiele im Verschlüsselungsmodus sowie zur KI-gestützten Textübersetzung (Anthropic Claude).
 
-    Unterstützte Dateien: .txt, .html, .htm, .docx.
+    Unterstützte Dateiformate: .txt, .html, .htm, .docx.
     Das Ergebnis wird im selben Verzeichnis wie die Quelldatei gespeichert.
   # Sekcja 1: wczytywanie pliku
   section1_heading: "1. Laden der Quelldatei"
@@ -723,7 +702,7 @@ poliglota:
     NEIN – Ich lasse die Regeln für „{jezyk_aktywny}". Der Effekt auf fremdsprachigen Text kann unvorhersehbar sein.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Arbeitskonfiguration"
-  rb_ai: "KI-Übersetzer (OpenAI gpt-4o – erfordert API-Schlüssel, kostet Credits)"
+  rb_ai: "KI-Übersetzer (Anthropic Claude – erfordert API-Schlüssel, verbraucht Credits)"
   rb_ai_disabled: "KI-Übersetzer (deaktiviert – keine korrekte golden_key.env-Datei)"
   rb_ai_name: "Modus KI-Übersetzer"
   rb_rezyser: "Regisseurmodus (kostenlose phonetische Regeln aus YAML)"
@@ -789,9 +768,9 @@ poliglota:
   ai_blad_zapisu: "Fehler beim Speichern der Ergebnisdatei:\n{tresc_bledu}"
   # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
   ai_blad_limit_api: |-
-    Keine Credits oder OpenAI-API-Limit überschritten! Übersetzung bei Block {blok} abgebrochen.
+    Keine Credits oder API-Limit von Anthropic überschritten! Die Übersetzung wurde bei Block {blok} unterbrochen.
 
-    Der Fortschritt wurde automatisch gesichert. Laden Sie Ihr API-Konto auf und laden Sie das Original erneut, um von dieser Stelle aus fortzufahren.
+    Der Fortschritt wurde automatisch gesichert. Laden Sie Ihr API-Konto auf und laden Sie das Original erneut, um von dieser Stelle fortzufahren.
   ai_blad_cache: |-
     Die temporäre Datei (Cache für die Wiederaufnahme der Übersetzung) konnte nicht gelesen werden:
     {plik}
@@ -1211,7 +1190,7 @@ opowiesci:
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format: "\n\n--- Runde {numer} ---\n\n"
   brak_api_tytul: "Kein API-Schlüssel"
-  brak_api_tresc: "Die Datei golden_key.env mit dem gültigen Schlüssel OPENAI_API_KEY wurde nicht gefunden. Das Geschichtenmodul erfordert einen aktiven Schlüssel, um Erzählrunden zu generieren."
+  brak_api_tresc: "Die Datei golden_key.env mit einem gültigen ANTHROPIC_API_KEY wurde nicht gefunden. Das Geschichten-Modul benötigt einen aktiven Schlüssel, um Erzählrunden zu generieren."
   puste_pole_tytul: "Leeres Aktionsfeld"
   puste_pole_tresc: 'Gib eine Aktion oder einen Befehl im Feld unter der Erzählung ein, bevor du auf „Senden" klickst.'
   puste_nazwa_tytul: "Kein Spielname"
@@ -1225,10 +1204,8 @@ opowiesci:
   blad_ai_szczegoly_tytul: "Fehlerdetails der Erzählmaschine"
   blad_ai_lbl_tresc: "Fehlerinhalt (zum Kopieren):"
   blad_ai_tresc_name: "Feld mit Fehlerinhalt der Erzählmaschine"
-  err_rate_limit: "Das Anfrage-Limit zu OpenAI wurde erreicht. Warte einen Moment oder überprüfe den Kontostand."
+  err_rate_limit: "Das Anfragelimit für Anthropic wurde ausgeschöpft. Warten Sie einen Moment oder überprüfen Sie den Kontostand."
   err_timeout: "Die Antwortzeit des Modells wurde überschritten (über 120 Sekunden). Versuche es erneut."
-  err_struktura: "Das Modell hat trotz zweier Korrekturversuche eine falsche Antwortstruktur generiert. Versuche es erneut oder formuliere die Aktion anders."
-
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul: "Kein aktives Spiel"
   brak_gry_tresc: 'Starte ein neues Spiel mit der Schaltfläche „Neues Spiel" oder lade ein zuvor gespeichertes mit der Schaltfläche „Laden", bevor du versuchst, eine Aktion zu senden.'

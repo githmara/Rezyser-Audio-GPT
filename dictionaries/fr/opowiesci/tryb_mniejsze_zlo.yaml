@@ -17,7 +17,7 @@ etykieta: "Moindre Mal — toute option défavorable"
 kategoria: tryb
 kolejnosc: 50
 
-# --- Paramètres OpenAI ---
+# --- Paramètres Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

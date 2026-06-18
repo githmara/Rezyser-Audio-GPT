@@ -11,7 +11,7 @@ etykieta: "Szenenvisualisierung (Slash /visualize)"
 kategoria: tryb
 kolejnosc: 20
 
-# --- OpenAI-Parameter ---
+# --- Anthropic-Parameter ---
 # Höhere Temperatur als die Erzählmodi — wir wollen eine reiche, kreative
 # Beschreibung. max_tokens ist niedrig, weil dies kein Spielzug ist.
 model: claude-sonnet-4-6

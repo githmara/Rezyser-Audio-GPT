@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 18.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 18.2 „Wersja Wydawnicza"
+
+*Release v18.2: domknięcie łuku konsolidacji — ostatni dostawca OpenAI usunięty z CAŁEGO projektu. Na Anthropic Claude Sonnet 4.6 przechodzą trzy ostatnie konsumenty: Poliglota (`tlumacz_ai` — używany przez wbudowany Tłumacz AI ORAZ batchowy tłumacz dokumentacji), tłumacz stringów UI (`buduj_wielojezyczne_ui`) i postprodukcja tytułów rozdziałów Reżysera. Runtime i dev-tooling są teraz single-provider; **end-user potrzebuje WYŁĄCZNIE `ANTHROPIC_API_KEY` (`sk-ant-`)**, a `openai` wypadło z `requirements.txt`. Migracja `tlumacz_ai` to wzorzec free-text 1:1 z v18.0/v18.1 (prompt systemowy osobno, kontekst zwinięty do `user`, `stop_reason=="max_tokens"` z zachowaną bisekcją, tokenizer chunkingu świadomie odpięty od modelu LLM → granice bloków bez zmian, bez bumpa wersji cache). Tłumacz UI dostał najmocniejszą zmianę: zamiast OpenAI `json_object` używa **structured outputs** Anthropic (`output_config` z `json_schema`) — gwarancja zgodności ze SCHEMATEM na poziomie API, nie tylko poprawnego JSON; ucięcie odpowiedzi (`stop_reason=="max_tokens"`) przerywa CAŁY batch jako sygnał zmniejszenia porcji (BATCH_SIZE 150→80). System Check zredukowany do jednego klucza (usunięta osobna sekcja Anthropic z v18.0), szablon „Generuj" tworzy plik z jedną linią. Weryfikacja LIVE obu silników: sekcje szyfranckie fi/is (Tipoglikemia realnie zaszyfrowana, Caesar adaptowany per alfabet — halucynacje GPT-4o zniknęły) oraz structured outputs UI (Anthropic akceptuje `json_schema`, markery/akceleratory zachowane). Pełny audyt: zero wzmianek OpenAI w `dictionaries/` poza celowymi notami „dla aktualizujących" i historycznymi.*
 
 *Release v18.1: konsolidacja silnika Interaktywnych Opowieści z OpenAI na Anthropic Claude Sonnet 4.6 — kontynuacja łuku z v18.0 (wtedy narracja Reżysera). Bezpośredni powód: w trybie „Mniejsze zło" GPT-4o proponował wybory po prostu złe albo neutralne, zamiast konsekwentnie NIEKORZYSTNYCH, jak wymaga reguła tego trybu. Zamiast dalej dokręcać prompt (anty-wzorzec udowodniony w v18.0) zmieniono providera: cały moduł `opowiesci_ai` (tury trybów 3/4/5, `/visualize`, automatyczne streszczenia i przerywnik Cinematic) woła teraz Messages API jednego modelu Claude — dawny dobór modelu per tryb (gpt-4o dla wyborów / gpt-4o-mini dla reszty) zniesiony. Wzorzec 1:1 z v18.0: `system` osobno + pierwsza wiadomość `user` (ciągłość poprzedniej tury zwinięta do `user`, bo Anthropic nie pozwala zacząć od `assistant`), świadomie BEZ `output_config` (wymuszony schemat zablokowałby goły tag `[ODRZUCENIE_AI]` wykrywany przed `json.loads`), `stop_reason=="max_tokens"` zamiast `finish_reason=="length"`, self-correction dokleja błędy walidacji jako kolejne wiadomości `user`; `core_tokeny` nietknięty (pasek pamięci dalej liczy tiktokenem, okno 128k jako logiczny budżet). Weryfikacja empiryczna na realnej grze `joanna_joana_conflict` (Mniejsze zło, 3 tury z losowym wyborem podawanym zwrotnie): wszystkie wybory realnie niekorzystne, „Zmysłowa Fizjologia" Księgi Świata utrzymana, mechanika imienia Joanna→Joana respektowana, fiolka wprowadzona diegetycznie. Postprodukcja tytułów Reżysera (`gpt-4o-mini`) i Poliglota zostają na OpenAI — osobny łuk. Plus: dev-tool tłumaczeń dokumentacji chroni teraz literał `TUTAJ_WKLEJ_SWOJ_KLUCZ` przed tłumaczeniem.*
 
@@ -81,6 +83,55 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 18.2 — minor release (full consolidation onto Anthropic — Polyglot, documentation/UI translators and title post-production migrated; OpenAI removed project-wide; end-user is now single-key)
+
+### 🆕 What's new (English)
+
+This release completes the OpenAI→Anthropic consolidation begun in v18.0 (Director narrative) and v18.1 (Stories). The last OpenAI consumers — the Polyglot translator (`tlumacz_ai`, used by the in-app AI Translator and the documentation translator), the UI-string translator (`buduj_wielojezyczne_ui`), and Director chapter-title post-production — now run on Anthropic Claude Sonnet 4.6. Both runtime and dev-tooling are single-provider; `openai` was dropped from `requirements.txt`. **The end-user now needs only `ANTHROPIC_API_KEY` (`sk-ant-`)** — System Check validates one key and the "Generate" button writes a single-line `golden_key.env`. The UI translator uses Anthropic structured outputs (`output_config` with a `json_schema`) — a stronger guarantee than OpenAI's `json_object` (it enforces the schema, not merely valid JSON); an output-length truncation (`stop_reason=="max_tokens"`) now aborts the whole batch as a signal to lower the chunk size (BATCH_SIZE 150→80).
+
+### 🔭 Planned / deferred (English)
+
+- OpenAI is now absent from the entire project — there is no remaining provider arc to migrate.
+- Existing users may leave their old `OPENAI_API_KEY` line in `golden_key.env`; it is silently ignored.
+- The remainder of these notes is in Polish.
+
+### TL;DR
+
+To wydanie domyka łuk konsolidacji rozpoczęty w v18.0 (narracja Reżysera) i v18.1 (Opowieści): ostatni dostawca OpenAI znika z CAŁEGO projektu. Na Anthropic Claude Sonnet 4.6 przechodzą trzy ostatnie konsumenty: Poliglota (`tlumacz_ai` — używany przez wbudowany Tłumacz AI ORAZ batchowy tłumacz dokumentacji), tłumacz stringów UI (`buduj_wielojezyczne_ui`) i postprodukcja tytułów rozdziałów Reżysera. Skutek dla użytkownika końcowego: **wystarczy jeden klucz — `ANTHROPIC_API_KEY` (`sk-ant-`)**, a `openai` wypadło z `requirements.txt`.
+
+Migracja `tlumacz_ai` to wzorzec free-text 1:1 z v18.0/v18.1: prompt systemowy osobno od wiadomości, kontekst poprzedniego bloku zwinięty do wiadomości `user` (Anthropic nie pozwala zacząć od `assistant`), `stop_reason=="max_tokens"` zamiast `finish_reason=="length"` z zachowaną bisekcją uciętych bloków; tokenizer chunkingu świadomie odpięty od modelu LLM (tiktoken `o200k_base` jako logiczny licznik rozmiaru — granice bloków bez zmian, więc bez bumpa wersji cache `temp_*.jsonl`). Tłumacz UI dostał najmocniejszą zmianę: zamiast OpenAI `json_object` używa **structured outputs** Anthropic (`output_config` z `SCHEMA_TLUMACZENIA`) — gwarancja zgodności ze schematem `{"translations":[{"id","target"}]}` na poziomie API. Ucięcie odpowiedzi przerywa CAŁY batch przez `SystemExit` (świadomie NIE łapany przez `except RuntimeError`) jako sygnał „zmniejsz BATCH_SIZE" — porcję zmniejszono 150→80 liści.
+
+### Co nowego
+
+- Poliglota (Tłumacz AI w aplikacji) i postprodukcja tytułów Reżysera działają na Claude Sonnet 4.6.
+- Dev-tooling tłumaczeń (dokumentacja + UI) w całości na Anthropic — kontrybutor potrzebuje już tylko klucza Anthropic.
+- **Single-key dla end-usera**: System Check waliduje wyłącznie `ANTHROPIC_API_KEY`; przycisk „Generuj" tworzy plik z jedną linią; osobna sekcja Anthropic z v18.0 usunięta (przepięta na główny System Check).
+- Tłumacz UI: structured outputs (`json_schema`), batch-abort na ucięciu, porcja 150→80 liści.
+- `openai` usunięte z `requirements.txt`.
+- Dokumentacja (manual KROK 2, README „Architektura AI" i instalacja) przepisana na single-provider w 9 językach; pełny purge wzmianek OpenAI z `dictionaries/` (poza celowymi notami dla aktualizujących i historycznymi).
+
+### Pod maską
+
+- `tlumacz_ai`: `klient.messages.create` (`system=` + jedna wiadomość `user`, `thinking=disabled`, `max_tokens=8192`), `MODEL_TLUMACZ="claude-sonnet-4-6"` dla tłumaczenia i mikro-callu ISO; `anthropic.RateLimitError` zamiast `openai.RateLimitError`.
+- `buduj_wielojezyczne_ui`: `output_config={"format":{"type":"json_schema","schema":SCHEMA_TLUMACZENIA}}`, `MAX_TOKENS_OUT=16000` (pod progiem non-streaming SDK Anthropic), batch-abort `SystemExit`.
+- `rezyser_ai`: postprodukcja tytułów + mikro-call ISO → Messages API; docstringi modułu odświeżone z „Warstwa OpenAI" na „Warstwa Anthropic Claude".
+- `main.py`: System Check przepięty na Anthropic, usunięta metoda `_run_anthropic_check` i sekcja `_ant_status_lbl`; szablon `golden_key.env` = jedna linia.
+- `model: gpt-4o-mini → claude-sonnet-4-6` w 9 plikach `postprod_tytuly.yaml`; komentarze `# Parametry OpenAI` → Anthropic w 90 plikach promptów `opowiesci/`+`rezyser/`; 5 martwych kluczy `home.*` (z treścią OpenAI) usuniętych z 9 `ui.yaml`; nagłówek generatora docs „Silnik: OpenAI" → „Anthropic Claude" w 32 plikach.
+
+### Co nie weszło
+
+- Brak — to wydanie domyka konsolidację; nie ma już dostawcy do migracji.
+- Drobny dług kosmetyczny: przymiotnik „tani model" w komentarzach 8 obcych `postprod_tytuly.yaml` (Claude nie jest „tani") — nieistotny, dev-facing.
+
+### Walidacja
+
+- Testy izolowane (mock klienta Anthropic): `tlumacz_ai` 6/6 (payload bez prefilla, `stop_reason:max_tokens`→bisekcja, ISO, pełny przebieg, niezmiennik chunkingu), postprodukcja `rezyser_ai` 3/3, tłumacz UI 4/4 (`output_config`, schemat, `SystemExit` poza `except RuntimeError/Exception`, BATCH_SIZE=80), `HomePanel` build (A11y, bez MainLoop, single-key).
+- **Live**: (1) `tlumacz_ai` na sekcjach szyfranckich fi/is — Tipoglikemia realnie zaszyfrowana w obu (stary błąd GPT-4o, który tłumaczył ją gramatycznie, zniknął), Caesar adaptowany per alfabet (is „32 stafir"), Odwracacz z poprawnie odwróconym lokalnym skrótowcem (fi `.mise`, is `.d.t`), literały 1:1; (2) tłumacz UI structured outputs — Anthropic akceptuje `json_schema`, 5/5 id, marker `⟦P0⟧` i akcelerator `&` zachowane.
+- Dogfood propagacji migrowanymi silnikami: 12 kluczy `ui.yaml` ×8 języków (8/8) + 4 sekcje docs ×8 (8/8); review halucynacji — literały (`ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ`, placeholdery `{home.*}`, `claude-sonnet-4-6`) zachowane, zero wycieku PL.
+- `generuj_dokumentacje.py --waliduj` — wszystkie placeholdery OK; `docs/*.txt` + `readme.*.md` zregenerowane (bump 18.2).
 
 ---
 

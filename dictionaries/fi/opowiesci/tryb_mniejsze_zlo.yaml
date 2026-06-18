@@ -17,7 +17,7 @@ etykieta: "Pienempi Paha — jokainen vaihtoehto epäedullinen"
 kategoria: tryb
 kolejnosc: 50
 
-# --- OpenAI-parametrit ---
+# --- Anthropic-parametrit ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

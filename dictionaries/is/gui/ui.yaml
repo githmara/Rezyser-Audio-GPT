@@ -126,11 +126,6 @@ home:
     Fyrsta gangsetning forrits greind. Einingar eru læstar af öryggisástæðum.
     Til að opna öll verkfæri, smelltu á hnappinn hér að neðan — forritið mun sjálfkrafa búa til skrána golden_key.env og opna hana í sjálfgefnum textaritli.
   err_odczyt: "🚨 Ekki tókst að lesa skrána golden_key.env:\n{tresc_bledu}"
-  err_struktura: |-
-    🚨 Skjalauppbyggingarvilla!
-    Vantar nauðsynlega breytu OPENAI_API_KEY=.
-    Þú hefur líklega eytt jafnaðarmerki eða breytunafni.
-    Fjarlægðu skrána, búa til hana aftur og límdu lykilinn varlega.
   err_tekst_zastepczy: |-
     ⚠️ Lykill hefur ekki verið sleginn inn!
     Í skrá golden_key.env er enn staðgengilstexti.
@@ -145,18 +140,6 @@ home:
     Bil eða annað ósýnilegt tákn fannst fyrir eða eftir API lykilinn.
     Opnaðu skrána í textaritli og vertu viss um að gildið byrji
     strax eftir '=', án nokkurra bila.
-  err_format: |-
-    🚨 Grunsamlegt lykilsnið!
-    Réttur OpenAI lykill byrjar alltaf með sk- (t.d. sk-proj-…).
-    Vertu viss um að þú hafir afritað réttan streng og að engin bil séu fyrir framan hann.
-  err_zbyt_krotki: |-
-    ⚠️ Lykillinn virðist vera of stuttur ({liczba_znakow} tákn fundust, búist var við að minnsta kosti {minimum_znakow}).
-    Þú hefur líklega aðeins afritað hluta lykilsins.
-
-    Ef þú hefur þegar lokað glugganum með lykilnum á platform.openai.com,
-    þarftu að fara aftur á reikninginn, nota valkostinn 'Revoke secret key' fyrir þennan
-    skerta lykil og búa til nýjan. Mundu að næst
-    afrita lykilinn í heild sinni áður en þú smellir á 'Done'.
   ok_klucz_wykryty: |-
     ✅ API lykill (golden_key.env) fannst og er rétt sniðinn.
     Allar einingar eru tilbúnar til notkunar.
@@ -190,9 +173,9 @@ home:
     Bil eða annað ósýnilegt tákn fannst fyrir framan eða aftan lykilinn.
     Opnaðu golden_key.env og gakktu úr skugga um að gildið byrji strax á eftir '='-tákninu.
   el_format: |-
-    🚨 Grunsamlegt snið ElevenLabs-lykilsins!
-    ElevenLabs-lykill byrjar alltaf á sk_ (með UNDIRSTRIKI, ekki sk- eins og OpenAI).
-    Gakktu úr skugga um að þú hafir límt lykil frá ElevenLabs en ekki frá öðrum vettvangi.
+    🚨 Grunsamlegt snið á ElevenLabs-lykli!
+    ElevenLabs-lykill byrjar alltaf á sk_ (með UNDIRSTRIK, ekki bandstrik eins og sk-ant-).
+    Gakktu úr skugga um að þú hafir límt inn lykil frá ElevenLabs en ekki frá annarri þjónustu.
   el_zbyt_krotki: |-
     ⚠️ ElevenLabs-lykillinn virðist of stuttur ({liczba_znakow} tákn fundust, búist var við að minnsta kosti {minimum_znakow}).
     Þú afritaðir líklega aðeins hluta lykilsins. Búðu til nýjan lykil í ElevenLabs-spjaldinu og límdu hann í heild.
@@ -213,12 +196,9 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-# -----------------------------------------------------------------------------
-  heading_anthropic: Frásagnavél (Anthropic / Claude) — nauðsynleg
-  ant_err_struktura: "🚨 Villa í skráaruppbyggingu!\nVantar nauðsynlega breytu ANTHROPIC_API_KEY=.\nFrá útgáfu 18.0 keyrir frásagnavélin (hljóðbók, leiklestur, stormur) á Claude líkaninu og krefst sérstaks lykils.\nFjarlægðu skrána, búðu hana til aftur og límdu lykilinn varlega."
-  ant_err_format: "🚨 Grunsamlegt lykilsnið Anthropic!\nRéttur Anthropic lykill (Claude) byrjar alltaf á sk-ant- (t.d. sk-ant-api03-…).\nGakktu úr skugga um að þú hafir afritað lykilinn frá console.anthropic.com, ekki OpenAI lykil."
+  ant_err_struktura: "🚨 Villa í skráarbyggingu!\nBreytan ANTHROPIC_API_KEY= vantar.\nFrá útgáfu 18.2 keyrir allt AI-vélin (Leikstjóri, Sögur, Poliglota, kaflaheiti) á Claude-líkaninu og krefst Anthropic-lykils.\nEyddu skránni, búðu hana til aftur og límdu lykillinn vandlegar inn."
+  ant_err_format: "🚨 Grunsamlegt snið á Anthropic-lykli!\nRétt Anthropic-lykill (Claude) byrjar alltaf á sk-ant- (t.d. sk-ant-api03-…).\nGakktu úr skugga um að þú hafir afritað lykillinn frá console.anthropic.com en ekki lykil frá öðrum þjónustuaðila."
   ant_err_zbyt_krotki: "⚠️ Anthropic lykillinn virðist vera of stuttur ({liczba_znakow} stafir fundnir, búist var við að minnsta kosti {minimum_znakow}).\nLíklega hefurðu aðeins afritað hluta lykilsins. Farðu aftur á console.anthropic.com og afritaðu hann í heild sinni."
-  ant_ok: "✅ Anthropic lykill (Claude) fannst og er rétt sniðinn.\nFrásagnavélin er tilbúin til notkunar."
 rezyser:
   panel_name: "Hljóðstjóri GPT spjald"
   heading: "🎬  Hljóðstjóri GPT – Blönduð Skapandi Stúdíó"
@@ -366,8 +346,8 @@ rezyser:
     (t.d. 'Lýstu fundi Geralts við nornina í skóginum. Mikil spenna.')
   btn_wyslij_label: "Senda til AI"
   btn_wyslij_tooltip: |-
-    Sendir leiðbeiningar til gpt-4o líkansins og bætir svari við söguna.
-    Krefst virks API lykils og útfylltrar Heimsbókar.
+    Sendir leiðbeiningar til Claude-líkansins og bætir svarinu við sögu.
+    Krefst virks API-lykils og útfyllts Heimsbókar.
   # Postprodukcja
   postprod_heading: "🎛️ Eftirvinnsla"
   # Brú að ElevenLabs Studio (hljóðeftirvinnsla, valfrjáls — v16.0)
@@ -448,8 +428,8 @@ rezyser:
   btn_tytuly_ai_label: "📜 Gefa Kaflatitla (AI)"
   btn_tytuly_ai_name: "Hnappur Gefa Kaflatitla AI"
   btn_tytuly_ai_tooltip: |-
-    Fer yfir kafla úr vistaðri skrá og gefur þeim titla (gpt-4o-mini).
-    Krefst vistaðrar verkefnaskrár og virks API lykils.
+    Fer í gegnum kafla úr vistaðri skrá og gefur þeim heiti (Claude).
+    Krefst vistaðrar verkefnisskrár og virks API-lykils.
   # Pamięć modelu
   lbl_pamiec_modelu: "🧠 Minni Líkans (Staða Samhengisglugga):"
   lbl_pamiec_modelu_start: "🟢 Minni hreint. Vél tilbúin fyrir nýja sögu."
@@ -524,8 +504,8 @@ rezyser:
   # Wysyłanie do AI
   brak_api_tytul: "Engin API"
   brak_api_tresc: |-
-    Engin tenging við OpenAI.
-    Athugaðu skrána golden_key.env og endurræstu forritið.
+    Engin tenging við Anthropic.
+    Athugaðu skrána golden_key.env og ræstu forritið aftur.
   puste_pole_tytul: "Tómt reit"
   puste_pole_tresc: "Sláðu inn leiðbeiningar fyrir AI áður en þú sendir."
   brak_przepisow_tytul: "Engar uppskriftir"
@@ -545,7 +525,7 @@ rezyser:
     Þetta gæti skemmt söguna þína.
 
     Skiptu yfir í 'Hugstorm' ham og reyndu aftur.
-  err_rate_limit: "Engin OpenAI inneign! Hladdu reikninginn og reyndu aftur."
+  err_rate_limit: "Engin Anthropic-inneign! Hladdu upp reikninginn og reyndu aftur."
   err_surowy_json: |-
     Þessi hamur skilaði gögnum á JSON sniði, en er ekki stilltur sem JSON-hamur, þannig að textinn var EKKI vistaður (forðast að líma hrátt JSON í skrá).
     Algengasta orsökin: hamurinn var búinn til úr afriti af Handriti. Stilltu í YAML skrá þess `format_wyjscia: skrypt_json` (fyrir samtalsviðmót sögumanns+persónu) — eða, ef þetta er nýtt kerfi, hafðu samband við forritara.
@@ -636,7 +616,6 @@ rezyser:
   sr_sukces_tresc: 'Skrá fyrir skjálesara vistuð: skrypty/{nazwa_pliku}_screen_reader.html'
   sr_blad_tytul: Villa við að búa til útgáfu fyrir skjálesara
   sr_blad_tresc: "Ekki tókst að búa til útgáfu fyrir skjálesara:\n{tresc_bledu}"
-  err_struktura: Líkanið bjó til ranga uppbyggingu svars þrátt fyrir nokkrar tilraunir til leiðréttingar. Reyndu aftur eða mótaðu skipunina á annan hátt.
   err_dlugosc: Svar líkansins var skorið af áður en það náði að ljúka því (lengdarmörk voru brotin). Styttu samhengi — t.d. Heimsbókina eða leiðbeiningarnar — og reyndu aftur.
   btn_przeladuj_label: '&Endurhlaða verkefni af diski'
   btn_przeladuj_tooltip: 'Hleður ÖLLU verkefninu aftur af diski eftir handvirkar breytingar þínar á frásagnarskránni (skrypty/<nafn>.txt) — endurreiknar teljara Kafla/Þátta/Sena, lyftir Heimsbók, hami og Hugstorm-valkostum og samstillir vinnuminni. Stutta sögu hleður hún í heild sinni; fyrir langa spyr hún frá hvaða fyrirsögn vinnuminni AI á að byrja (afgangurinn er táknaður með Samantekt). VARÚÐ: skrifar yfir innihald reita með útgáfu af diski — vistaðu óvistaðar breytingar fyrst.'
@@ -676,10 +655,10 @@ poliglota:
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
   description_name: "Lýsing á Fjöltyngur einingu"
   tool_description: |-
-    Fjöltyngur einingin er notuð til að leggja áherslu á hljóðfræðilega áherslu fyrir staðbundna talgervla (NVDA/Vocalizer/eSpeak), til textaleikja í Dulkóðunarham og til að þýða texta með AI (OpenAI gpt-4o).
+    Poliglota-einingin er notuð til að leggja á harðar hljóðfræðilegar áherslur fyrir staðbundnar talgreinir (NVDA/Vocalizer/eSpeak), til textaleikja í Dulmálsstillingu og til að þýða texta með AI (Anthropic Claude).
 
-    Styður skrár: .txt, .html, .htm, .docx.
-    Niðurstaðan er vistuð í sama skráasafni og upprunaskráin.
+    Studdar skrár: .txt, .html, .htm, .docx.
+    Niðurstaðan er vistuð í sama möppu og upprunaskráin.
   # Sekcja 1: wczytywanie pliku
   section1_heading: "1. Hleðsla upprunaskrár"
   lbl_plik: "Nafn eða full slóð skráar (.txt, .html, .htm, .docx):"
@@ -723,7 +702,7 @@ poliglota:
     NEI – ég læt reglur fyrir „{jezyk_aktywny}". Áhrif á texta á erlendu tungumáli gætu verið ófyrirsjáanleg.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Vinnuhamur"
-  rb_ai: "AI Þýðandi (OpenAI gpt-4o – krefst API lykils, kostar inneign)"
+  rb_ai: "AI-þýðandi (Anthropic Claude – krefst API-lykils, kostar inneign)"
   rb_ai_disabled: "AI Þýðandi (óvirkur – engin rétt skrá golden_key.env)"
   rb_ai_name: "AI Þýðandi Hamur"
   rb_rezyser: "Leikstjórnarhamur (ókeypis hljóðfræðireglur úr YAML)"
@@ -789,9 +768,9 @@ poliglota:
   ai_blad_zapisu: "Villa við vistun niðurstöðuskrár:\n{tresc_bledu}"
   # Błędy krytyczne silnika tłumacza (tlumacz_ai.py — mostek i18n InfoBleduTlumaczenia)
   ai_blad_limit_api: |-
-    Engin inneign eða API OpenAI kvóti uppurinn! Þýðingu hætt við á kubb {blok}.
+    Engin inneign eða API-takmörk Anthropic náð! Þýðingu var hætt á blokk {blok}.
 
-    Framvinda hefur verið sjálfkrafa vistuð. Fjármagnaðu API reikninginn og hlaðið upprunalegu skjali aftur til að halda áfram frá þessum stað.
+    Framvinda hefur verið sjálfkrafa vistuð. Hladdu upp API-reikninginn og hladdu frumtextann aftur til að halda áfram frá þessum stað.
   ai_blad_cache: |-
     Ekki tókst að lesa tímabundna skrá (endurræsingu skyndiminni þýðingar):
     {plik}
@@ -1211,7 +1190,7 @@ opowiesci:
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format: "\n\n--- Umferð {numer} ---\n\n"
   brak_api_tytul: "Enginn API lykill"
-  brak_api_tresc: "Skráin golden_key.env með réttum OPENAI_API_KEY lykli fannst ekki. Sögueiningin krefst virks lykils til að búa til umferðir frásagnar."
+  brak_api_tresc: "Skráin golden_key.env með gildri ANTHROPIC_API_KEY fannst ekki. Sögur-einingin krefst virks lykils til að búa til frásagnarlotu."
   puste_pole_tytul: "Tómt aðgerðarreit"
   puste_pole_tresc: 'Sláðu inn aðgerð eða skipun í reitinn hér að neðan frásögninni áður en þú smellir á „Senda".'
   puste_nazwa_tytul: "Enginn leikur nafn"
@@ -1225,10 +1204,8 @@ opowiesci:
   blad_ai_szczegoly_tytul: "Upplýsingar um villu í frásagnavél"
   blad_ai_lbl_tresc: "Villutexti (til að afrita):"
   blad_ai_tresc_name: "Reitur með villutexta frásagnavélar"
-  err_rate_limit: "Fjöldi fyrirspurna til OpenAI hefur verið tæmdur. Bíddu smá stund eða athugaðu stöðu reiknings."
+  err_rate_limit: "Fyrirspurnatakmörk Anthropic eru uppurin. Bíddu aðeins eða athugaðu stöðu reikningsins."
   err_timeout: "Svarstími líkans hefur verið yfirstiginn (yfir 120 sekúndur). Reyndu aftur."
-  err_struktura: "Líkanið bjó til ranga uppbyggingu svars þrátt fyrir tvær tilraunir til leiðréttingar. Reyndu aftur eða mótaðu aðgerðina á annan hátt."
-
   # ---- Faza 3: lifecycle plików (Nowa gra / Wczytaj / Zapisz) --------------
   brak_gry_tytul: "Enginn virkur leikur"
   brak_gry_tresc: 'Byrjaðu nýjan leik með því að smella á „Nýr leikur" eða hlaða áður vistaðan með því að smella á „Hlaða", áður en þú reynir að senda aðgerð.'

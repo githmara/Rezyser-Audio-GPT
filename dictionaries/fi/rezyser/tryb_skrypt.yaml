@@ -21,7 +21,7 @@ kolejnosc: 20
 # Tulostusmuoto → moottorin reititys (gui_rezyser). ÄLÄ muuta — sitoo tilan Pythonin JSON-jäsentimeen.
 format_wyjscia: skrypt_json
 
-# --- OpenAI-parametrit ---
+# --- Anthropic-parametrit ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: suomeksi

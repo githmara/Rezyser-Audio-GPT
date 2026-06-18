@@ -1,15 +1,15 @@
 # POST-PRODUCTION : TITRES DE CHAPITRE PAR IA
 # Outil pour le mode Livre audio : itère sur les chapitres dans le fichier
 # de projet enregistré et génère pour chacun un court titre littéraire.
-# Utilise par défaut un modèle peu coûteux (gpt-4o-mini).
+# Utilise par défaut un modèle peu coûteux (claude-sonnet-4-6).
 
 id: tytuly
 etykieta: "Attribuer les titres de chapitre (IA)"
 kategoria: postprodukcja
 kolejnosc: 10
 
-# --- Paramètres OpenAI ---
-model: gpt-4o-mini
+# --- Paramètres Anthropic ---
+model: claude-sonnet-4-6
 temperatura: 0.7
 jezyk_odpowiedzi: français
 

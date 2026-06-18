@@ -21,7 +21,7 @@ kolejnosc: 10
 # Format wyjścia → dispatch w silniku (gui_rezyser). NIE zmieniaj — wiąże tryb z parserem JSON w Pythonie.
 format_wyjscia: burza_json
 
-# --- Parametry OpenAI ---
+# --- Parametry Anthropic ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 

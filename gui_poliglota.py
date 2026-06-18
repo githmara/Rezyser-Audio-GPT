@@ -5,7 +5,7 @@ Po refaktorze do wersji 13.0 ten plik pełni WYŁĄCZNIE rolę warstwy widoku
 (zgodnie z nazwą ``gui_*``). Cała logika przetwarzania tekstu żyje w:
 
   * ``core_poliglota.py`` – silnik reguł fonetycznych i szyfrów (YAML),
-  * ``tlumacz_ai.py``     – tłumacz OpenAI GPT-4o w wątku tła.
+  * ``tlumacz_ai.py``     – tłumacz Anthropic Claude w wątku tła.
 
 GUI:
   1. Wczytuje plik (.txt / .html / .htm / .docx) do pamięci.
@@ -74,7 +74,7 @@ class PoliglotaPanel(wx.Panel):
     """Panel modułu „Poliglota AI" – cienka warstwa prezentacji.
 
     Obsługuje trzy tryby pracy, ale sam nie zawiera logiki przetwarzania:
-        - Tłumacz AI (OpenAI gpt-4o) – woła ``tlumacz_ai.tlumacz_dlugi_tekst``.
+        - Tłumacz AI (Anthropic Claude) – woła ``tlumacz_ai.tlumacz_dlugi_tekst``.
         - Tryb Reżysera (YAML: dictionaries/pl/akcenty/*) – woła
           ``core_poliglota.przetworz(tryb="Rezyser", ...)``.
         - Tryb Szyfranta (YAML: dictionaries/pl/szyfry/*) – woła
@@ -101,7 +101,7 @@ class PoliglotaPanel(wx.Panel):
         self._plik_katalog: str = "."
         self._sciezka_oryginalu: str | None = None
 
-        # Klient OpenAI (None → brak klucza, AI wyłączone)
+        # Klient Anthropic (None → brak klucza, AI wyłączone)
         self._client = None
         self._api_dostepne: bool = False
         self._init_api()
@@ -130,18 +130,18 @@ class PoliglotaPanel(wx.Panel):
         wx.CallAfter(self._description.SetFocus)
 
     # ------------------------------------------------------------------
-    # Inicjowanie klienta OpenAI
+    # Inicjowanie klienta Anthropic (Claude) — konsolidacja v18.x, Opcja A
     # ------------------------------------------------------------------
     def _init_api(self) -> None:
         app_dir = sciezki.KATALOG_BAZOWY_STR
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
         if os.path.exists(env_path):
             load_dotenv(env_path)
-            api_key = os.getenv("OPENAI_API_KEY", "")
-            if api_key and api_key.startswith("sk-"):
+            api_key = os.getenv("ANTHROPIC_API_KEY", "")
+            if api_key and api_key.startswith("sk-ant-"):
                 try:
-                    from openai import OpenAI  # noqa: PLC0415
-                    self._client = OpenAI(api_key=api_key)
+                    import anthropic  # noqa: PLC0415
+                    self._client = anthropic.Anthropic(api_key=api_key)
                     self._api_dostepne = True
                 except Exception:
                     self._api_dostepne = False

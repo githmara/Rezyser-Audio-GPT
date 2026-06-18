@@ -7,7 +7,7 @@ etykieta: "Hörbuch (Prosa, Kapitel, DATEI SCHREIBEN)"
 kategoria: tryb
 kolejnosc: 30
 
-# --- OpenAI-Parameter ---
+# --- Anthropic-Parameter ---
 model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: Deutsch

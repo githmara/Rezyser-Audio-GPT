@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 18.1 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 18.2 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -60,26 +60,23 @@ Ef þú vilt flytja verkefnin þín, API lykil og staðbundnar stillingar á ann
 Ábending: valkosturinn „Opna skráarstaðsetningu" er innfæddur nafn fyrir íslenska útgáfu Windows. Í ensku kerfi heitir hann „Open file location", í öðrum tungumálaútgáfum — á sama hátt á staðbundnu tungumáli stýrikerfisins.
 
 
-SKREF 2: API Virkjun (tveir lyklar — Anthropic og OpenAI)
+SKREF 2: Að veita API (Anthropic / Claude lykill)
 
-Frá og með útgáfu 18.0 notar forritið tvo gervigreindarþjónustuaðila og krefst TVEIRRA API lykla í skrána golden_key.env:
+Frá og með útgáfu 18.2 notar forritið einn gervigreindarveitu — Anthropic (Claude) — og krefst EINS API-lykils í skránni golden_key.env:
 
-•  Anthropic lykill (Claude) — knýr frásagnavél Reżyser (hljóðbók, lestrarleikhús, hugstormun). Hann byrjar á sk-ant-.
-•  OpenAI lykill — knýr titla á köflum, greiningu á tungumáli efnis, sögustillingu og Poliglot (þýðanda). Hann byrjar á sk-.
+•  Anthropic-lykill (Claude) — veitir orku í ALLT gervigreindarkerfi: frásögn Leikstjórans (hljóðbók, lesleikrit, hugflug), Söguham, Fjöltyngvan (þýðanda) og titlagjöf kafla og tungumálsgreiningu efnis. Byrjar á sk-ant-.
 
-Hvernig á að fá Anthropic lykil:
-1. Búðu til reikning á console.anthropic.com og fylltu á reikninginn (Billing / Plans flipinn).
-2. Búðu til lykil í API Keys hlutanum (byrjar á sk-ant-). Afritaðu hann strax — hann er oft aðeins sýndur einu sinni.
+Ef þú ert að uppfæra frá eldri útgáfu: gamli OpenAI-lykillinn er ekki lengur nauðsynlegur — þú getur látið eða eytt línu hans í golden_key.env, forritið hunsar hana.
 
-Hvernig á að fá OpenAI lykil:
-1. Búðu til reikning á platform.openai.com og fylltu á reikninginn í Billing flipanum.
-2. Búðu til lykil í API Keys flipanum (byrjar á sk-proj-). Athugið: lykillinn er aðeins sýndur einu sinni — þegar hann er búinn til. Ef þú lokar glugganum án þess að afrita, glatast hann og þú þarft að afturkalla hann (revoke secret key valkostur) og búa til nýjan. Afritaðu hann strax, áður en þú gerir neitt annað.
+Hvernig á að fá Anthropic-lykil:
+1. Stofnaðu reikning á console.anthropic.com og settu inn fjármuni (flipinn Billing / Plans).
+2. Búðu til lykil í hlutanum API Keys (byrjar á sk-ant-). Afritaðu hann strax — hann getur birst aðeins einu sinni.
 
-Hvernig á að setja lykla inn í forritið:
-3. Á upphafsskjá forritsins, smelltu á hnappinn "Búðu til skrána golden_key.env og opnaðu textaritil". Kerfið mun sjálfkrafa búa til hreina stillingaskrá á réttum stað og opna Notepad með sniðmáti tilbúið til breytinga.
-4. Í opnuðu skjalinu sérðu tvær línur: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ og OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Fjarlægðu staðgengils textann í hvorri línu og límdu inn viðeigandi lykil beint eftir jafnaðarmerkið (án bils og án gæsalappa). Vistaðu skrána og endurræstu forritið.
+Hvernig á að slá lykilinn inn í forritið:
+3. Á upphafsskjá forritsins smelltu á hnappinn "Búðu til skrána golden_key.env og opnaðu textaritil". Kerfið mun sjálfkrafa búa til hreina stillingarskrá á réttum stað og opna Notepad með sniðmáti tilbúið til breytinga.
+4. Í skránni sem opnast muntu sjá línuna: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Eyddu staðgengistextanum og límdu lykilinn þinn beint á eftir jafnaðarmerkinu (án bila og án gæsalappa). Vistaðu skrána og endurræstu forritið.
 
-Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "Kerfisathugun" sýna sérstakt ástand fyrir hvern lykil. Báðir verða að vera grænir til að allir AI einingar séu tilbúnar til notkunar. Ef einhver lykill vantar eða er rangur, mun forritið skýrt benda á hvaða lykill það er og leyfa að opna textaritil til að laga villuna fljótt.
+Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "Kerfisathugun" sýna stöðu lykillsins. Hann verður að vera grænn til að öll gervigreindareiningar séu tilbúnar til notkunar. Ef lykillinn vantar eða er rangur mun forritið gefa skýrt til kynna og leyfa þér að opna textaritil til að laga villuna fljótt.
 
 
 KROK 3: Aðalstúdíó Leikstjórans
@@ -200,49 +197,49 @@ Sjálfvirk samantekt: Þegar minnið fer í viðvörunarástand, skiptir Hugstor
 Snjöll skráarhleðsla og endurhleðsla frá disknum (uppfært í v17.6): Bæði við hleðslu verkefnis og eftir að smella á „Endurhlaða verkefni af diski" (eftir handvirka breytingu á frásagnarskrá í ritli), samræmir forritið minnið við diskinn á einum stað — endurreiknar teljara uppbyggingar og lyftir Heimabókinni og ham. Ef ALLA sagan kemst fyrir í samhengisglugganum — hleður hún henni í heild sinni, og óþarfa gömlu samantektinni er eytt, svo vélin vinnur á fullum texta (þetta lokar gömlu glufunni þar sem líkanið fékk aðeins samantekt án samhengis síðustu atriða). Ef sagan er LÖNG og hefur vistað samantektarskrá — heldur hún samantektinni óbreyttri og spyr þig, frá hvaða uppbyggingarmerkjum (Kafli/Þáttur/Atriði) á að byrja vinnsluminni AI; restin af sögunni er táknuð með samantekt. Þannig eyðirðu ekki tokenum í að hlaða alla söguna aftur, en samt verður næsta samantekt ekki byggð á úreltum gögnum.
 
 
-SKREF 3b: Tvær úttakar Skjals — margra radda hljóðbók (ElevenLabs) og útgáfa fyrir skjálesara
+SKREF 3b: Tvær útgangar Handritsins — fjölraddað hljóðbók (ElevenLabs) og útgáfa fyrir skjálesara
 
-Tilbúið leikhússkrif (Skjalahamur) hefur tvær sjálfstæðar úttakar: margra radda ElevenLabs Studio verkefni (hljóð) og HTML útgáfu fyrir skjálesara. Þetta eru tvær leiðir til að „heyra" sama leikritið — þú getur notað aðra, hina eða báðar. Báðar eru valfrjálsar og breyta ekki hefðbundnu flæði með breytara.
+Tilbúið handrit lesleikjans (Handritsstilling) hefur tvær sjálfstæðar útgangar: fjölraddað ElevenLabs Studio verkefni (hljóð) og HTML-útgáfu fyrir skjálesara. Þetta eru tvær leiðir til að „heyra" sömu leikritið — þú getur notað aðra, hina eða báðar. Báðar eru valkvæðar og breyta ekki hefðbundnu flæðinu með umbreytaranum.
 
-─────────── Brú til ElevenLabs Studio (hljóð, valfrjáls) ───────────
+─────────── Brú að ElevenLabs Studio (hljóð, valkvæð) ───────────
 
-Brúin breytir skjalinu í margra radda Studio verkefni — sögumaður og hver persóna fá sér rödd. Án ElevenLabs lykils breytist ekkert: brúin er einfaldlega falin.
+Brúin breytir handritinu í fjölraddað Studio-verkefni — frásagnarinn og hvert persóna fær sinn eigin rödd. Án ElevenLabs-lykils breytist ekkert: brúin er einfaldlega falin.
 
-ElevenLabs lykill (valfrjáls)
+ElevenLabs-lykill (valkvæður)
 
-Límdu ElevenLabs lykilinn þinn í skrána golden_key.env, á sér línu: ELEVENLABS_API_KEY=sk_... Athugið: ElevenLabs lykill byrjar á sk_ (með UNDIRSTRIKI), ólíkt OpenAI lykli (sk-). Lykill með takmörkunum þarf heimildir (scope) projects_write og voices_read. Staða lykilsins sést á aðalskjánum (System Check) — skortur á lykli er ekki villa, brúin er einfaldlega falin.
+Límdu ElevenLabs-lykilinn þinn í skrána golden_key.env, í sérstakri línu: ELEVENLABS_API_KEY=sk_... Athugið: ElevenLabs-lykillinn byrjar á sk_ (með UNDIRSTRIK), ólíkt Anthropic-lyklinum (sk-ant-). Ef þú notar lykil með takmörkunum (restricted key), gefðu honum heimildir (scope'y) projects_write og voices_read. Staða lykils sést á aðalskjánum (System Check) — skortur á lykli er ekki villa, brúin er einfaldlega falin.
 
-Brúin birtist í Stjórnborði í Skjalaham (þegar lykillinn er réttur). Hún virkar á tilbúnu leikriti sem er vistað á disknum — fyrst skaltu búa til eða hlaða inn verkefni.
+Brúin birtist í Leikstjórasvæðinu í Handritsstillingu (þegar lykillinn er réttur). Hún virkar á tilbúna leikrit sem er vistað á disk — búðu fyrst til eða hladdu inn verkefni, farðu síðan að brúnni.
 
-Skref 1 — Raddsetning
+Skref 1 — Raddlegar
 
-Smelltu á „Raddsetning…". Forritið les inn persónur sem hafa línur og bætir alltaf við rauf fyrir Sögumann (sögumaður er sjálfgefin rödd — titla kafla og alla frásögn). Fyrir hvern ræðumann skaltu líma inn voice ID. MIKILVÆGT: hver rödd sem notuð er í verkinu verður fyrst að vera í „My Voices" hjá þér — raddir sem þú býrð til sjálf(ur) (t.d. í „Voice Design") lenda þar sjálfkrafa, en raddir úr almenna safninu skoðarðu í flipanum „Explore" og bætir við með „Add to My Voices". Svona nærðu í voice ID í ElevenLabs (í vafra): finndu röddina, spilaðu sýnishorn til að vera viss um að það sé rétta röddin, og afritaðu auðkennið með „Copy Voice ID"; þegar rödd er komin í „My Voices" er þessi hnappur aðgengilegur strax — án þess að opna „More actions". Val á röddum: til að takmarka mögulegar endurgerðir er einfaldast að velja úr safninu „Best for Eleven v3" (raddir prófaðar fyrir v3-líkanið sem verkefnið byggir á); að öðrum kosti hannaðu þína eigin rödd í „Voice Design", og fyrir hugrakka stendur eftir klónun með IVC (Instant Voice Cloning) eða jafnvel PVC (Professional Voice Cloning). Þú getur skilið reitina eftir tóma og komið aftur seinna — skráningin er drög.
+Smelltu á „Raddlegar…". Forritið les persónurnar sem hafa línur úr handritinu þínu og bætir alltaf við Frásagnaraspás (frásagnarinn er sjálfgefin rödd — les kaflaheiti og alla frásögn). Fyrir hvern ræðumann límirðu voice ID. MIKILVÆGT: sérhver rödd sem notuð er í leikritinu verður fyrst að vera í „My Voices" þínum — raddir sem þú skapar sjálfur (t.d. í „Voice Design") fara þangað sjálfkrafa, en raddir úr opinberu safninu skoðar þú í flipanum „Explore" og bætir við með hnappinum „Add to My Voices". Hvernig á að fá voice ID í ElevenLabs (í vafra): finndu röddina, spiladu sýnishorn til að vera viss um að það sé rétt, og afritaðu auðkennið með hnappinum „Copy Voice ID"; þegar rödd er þegar í „My Voices" er þessi hnappur tiltækur strax — án þess að opna „More actions". Val á röddum: til að draga úr mögulegum endurgerðum er auðveldast að velja úr safninu „Best for Eleven v3" (raddir prófaðar með v3-líkaninu sem verkefnið er byggt á); að öðrum kosti hannaðu þína eigin rödd í „Voice Design", og fyrir hinn djarfa er klónun IVC (Instant Voice Cloning) eða PVC (Professional Voice Cloning) til staðar. Þú getur skilið reiti eftir tóma og komið aftur síðar — vistunin er drög.
 
-Skref 2 — Byggja verkefni
+Skref 2 — Byggðu verkefnið
 
-Smelltu á „Búa til verkefni ElevenLabs Studio…". Forritið athugar hvort skjalið hafi að minnsta kosti einn kafla (Prolog/Akt/Kafli) og hvort hver rödd sé úthlutuð, og býr síðan til margra radda Studio verkefni á reikningnum þínum skipt í kafla. Sjálf verkefnissköpunin EYÐIR EKKI inneignum. Forritið stillir einnig strax tungumál verkefnisins (réttan framburð fyrirsagnalína) og hljóðstyrksjöfnun að hljóðbókastaðli — það gerir þetta í gegnum API svo þú þurfir ekki að opna stillingar verkefnisins í vafranum.
+Smelltu á „Búðu til ElevenLabs Studio verkefni…". Forritið athugar hvort handritið hafi að minnsta kosti einn kafla (Prolog/Þáttur/Kafli) og hvort sérhver ræðumaður og frásagnarinn hafi úthlutaða rödd, og stofnar síðan í reikningnum þínum fjölraddað Studio-verkefni skipt í kafla. Stofnun verkefnisins eitt og sér EYÐIR EKKI kreditum. Forritið stillir strax tungumál verkefnisins (rétt framburður haustalína) og hljóðstyrkjajöfnun að staðli hljóðbókar — þetta gerist í gegnum API svo þú þurfir ekki að fara inn í verkefnisstillingar í vafranum.
 
-Sniðvörður (útvíkkun á Reglu Klipparans): brúin krefst þess að í handritinu sé HVER lína annaðhvort replík með talmerki ([Sögumaður: …] eða [Persóna: …]) eða byggingarfyrirsögn (Formáli, Þáttur, Atriði, Kafli). Venjulegur, ómerktur „laus” texti — til dæmis athugasemd höfundar eða frásagnarbrot án taggs — fær enga rödd og er sleppt þegjandi við byggingu, svo fullbúna verkefnið gæti vikið frá skránni þinni. Þess vegna, ef forritið greinir slíkar munaðarlausar línur, sýnir það lista yfir þær með línunúmerum og spyr hvort byggja eigi samt: þú getur þá hætt við og lagað handritið (opnaðu það með hnappnum „Opna frásagnarskrá…”, bættu við talmerkjunum sem vantar eða eyddu þessum línum) eða byggt samt af ásetningi og sætt þig við að þeim sé sleppt. Þetta er eðlileg útvíkkun á Reglu Klipparans: rétt eins og þú mátt ekki skemma byggingarfyrirsagnir ætti hver lína í handriti sem ætlað er fyrir brúna að hafa sinn talanda eða vera fyrirsögn.
+Sniðvörður (viðbót við Klipparegluna): brúin krefst þess að í handritinu sé SÉRHVER lína annaðhvort framburður með ræðumannsmerki ([Narrator: …] eða [Nafn: …]), eða skipulagshaus (Prolog, Þáttur, Atriði, Kafli). Venjuleg, ómerkt prósa skrifuð „laust" — til dæmis höfundarskilaboð eða frásagnarbrot án taga — fer ekki til neinar raddar og er þögult sleppt við byggingu, svo tilbúna verkefnið gæti vikið frá skránni þinni. Þess vegna, ef forritið greinir slíkar einyrðislínur, sýnir það lista þeirra með númerum og spyr hvort byggja eigi þrátt fyrir það: þú getur þá hætt við og leiðrétt handritið (opnaðu það með hnappinum „Otwórz plik narracji…", bættu við vantar ræðumannsmerki eða fjarlægðu þær línur) eða byggt meðvitað þrátt fyrir það, samþykkt að þær verði sleppt. Þetta er náttúrulegt framhald Klippareglunnar: rétt eins og ekki má skemma skipulagshausa, ætti sérhver lína í handriti ætluðu undir brúna að hafa sinn ræðumann eða vera haus.
 
-Skref 3 — Útgáfa í vafra
+Skref 3 — Render í vafra
 
-Forritið sýnir auðkenni verkefnisins og hnapp sem opnar ElevenLabs Studio. Í vafranum finndu verkefnið, búðu til tal (það eyðir inneignum — um það bil 1 inneign á tákn), og flyttu síðan út hljóðskrána eða birtu verkefnið í Eleven Reader. Útgáfa og birting fer fram þér megin, meðvitað — forritið byggir aðeins verkefnið.
+Eftir stofnun verkefnisins sýnir forritið auðkennið og hnapp sem opnar ElevenLabs Studio. Í vafranum finnurðu verkefnið, renderarðu tal (þetta eyðir fyrst kreditum — u.þ.b. 1 kreditt á staf), og flytur síðan út hljóðskrá eða birtir verkefnið í Eleven Reader. Render og birting fara fram af þinni hálfu, meðvitað — forritið byggir aðeins verkefnið.
 
-Tjáning og hreimar (líkan Eleven v3)
+Tjáning og hreim (líkan Eleven v3)
 
-Verkefnið er búið til með líkaninu Eleven v3 (yfir 70 tungumál). Tilfinningar eru EKKI tjáðar með hástöfum, úrfellingum eða bandstrikum — vélin hunsar það. Þess í stað vefur Leikstjórinn enskum v3 hljóðtöggum inn í línurnar, t.d. [whispers], [sighs], [angry], [laughs] — þeir stýra tjáningunni og virka óháð töluðu tungumáli. HREIMUR persónu kemur hins vegar úr RADDSÝNINU: ef þú vilt að einhver tali t.d. íslensku með erlendum hreim, veldu eða hannaðu (í Voice Design) rödd þar sem sýnið ber þennan hreim. Í reynd skaltu gera tilraunir með raddpromptinn þar til þú heyrir t.d. íslenskt sýni með finnskum hreim — líkanið v3 varðveitir þennan hreim í tilbúnu upptökunni. Ábending: mjög langar setningar veikja hreiminn, þess vegna er Leikstjórinn nú þegar beðinn í promptinu um stuttar setningar.
+Verkefnið er byggt á líkaninu Eleven v3 (yfir 70 tungumál). Tilfinningar eru EKKI tjáðar með hástöfum, þrípunktum eða bandstrikum — vélin hunsar þetta. Í staðinn vefur Leikstjórinn inn í línur enska hljóð-taga v3, til dæmis [whispers], [sighs], [angry], [laughs] — þeir stjórna tjáningu og virka óháð tungumáli tals. HREIM persónu kemur hins vegar úr RADDARSÝNISHORNINU: ef þú vilt að einhver tali t.d. á pólsku með erlendum hreimi, veldu eða hannaðu í Voice Design rödd þar sem sýnishornið hefur þann hreim. Í reynd skaltu gera tilraunir með raddprómptinn þar til þú heyrir t.d. pólskt sýnishorn með finnskum hreimi — líkan v3 mun varðveita þann hreim í tilbúna hljóðritinu. Ábending: mjög langar setningar veikja hreim, þess vegna er Leikstjórinn þegar beðinn í prómptinum um stuttar setningar.
 
-Vitund um líkanið v3 (alfa-stig)
+Meðvitund um v3-líkan (alpha-stig)
 
-Eleven v3 er tjáningarríkast en enn á alfa-stigi. Stundum er ein lína gerð sem snark í stað tals — það nægir að endurgera hana í Studio (hver blokk hefur nokkrar ókeypis endurgerðir). Stillingar verkefnisins í ElevenLabs geta einnig sýnt ráðleggingar um að skipta um líkan (yfir í Eleven Flash v2.5 eða Multilingual v2) — þetta er EKKI villa, aðeins ábending frá vélinni. Ef þú vilt ekki sjá þessi skilaboð, opnaðu einfaldlega ekki stillingar verkefnisins: forritið hefur þegar stillt allt sem þarf í gegnum API (líkan, tungumál, hljóðstyrksjöfnun).
+Eleven v3 er tjáningarmesta líkanið, en er enn á alpha-stigi. Það getur gerst að ein einstök replika renderi sem kraðak í stað tals — nóg er að endurgera hana í Studio (sérhver blokk hefur nokkrar ókeypis endurgerðir). Í verkefnisstillingum ElevenLabs gætu einnig birst tillögur um að skipta um líkan (yfir í Eleven Flash v2.5 eða Multilingual v2) — þetta er EKKI villa, aðeins ábending vélarinnar. Ef þú vilt ekki sjá þessi skilaboð, opnaðu einfaldlega ekki verkefnisstillingarnar: forritið hefur þegar stillt í gegnum API allt sem þarf (líkan, tungumál, hljóðstyrkjajöfnun).
 
-Af hverju leikhúslestrar, en ekki hljóðáhrif? Í fyrri útgáfum framleiddi Skjalahamur hrá hljóðáhrif [SFX: ...] án sögumanns. Brúin til tilbúins, margra radda upptöku krefst þess hins vegar að samhengi (staðsetning, tími, aðgerð) sé flutt af sögumanni með orðum: hljóðáhrif í Studio eru ekki aðgengileg fyrir skjálesara, og líkanið framkvæmir hvort sem er sögumann eða áhrif — aldrei stöðugt bæði í einu. Þess vegna er Skjalahamur núna leikhúslestrar: sögumaður plús samtal, án SFX.
+Af hverju lesleikur, en ekki hljóðbrellur? Í eldri útgáfum framleiddi Handritsstillingin hrá hljóðbrellur [SFX: ...] án frásagnarans. Brúin að tilbúnu, fjölrödduðu hljóðriti krefst hins vegar þess að samhengi (staður, tími, aðgerð) beri frásagnarinn með orðum: hljóðbrellur í Studio eru ekki aðgengilegar fyrir skjálesara, og líkanið framkvæmir hvort sem er annaðhvort frásagnara eða hljóðbrellur — aldrei stöðugt báðar í senn. Þess vegna er Handritsstillingin lesleikur: frásagnarinn plús samræður, án SFX.
 
 ─────────── Útgáfa fyrir skjálesara (HTML, án ElevenLabs) ───────────
 
-Í Skjalaham hefurðu, óháð ElevenLabs lyklinum, hnapp „Búa til útgáfu fyrir skjálesara". Hann býr til skrána skrypty/<nazwa>_screen_reader.html — sér úttak fyrir fólk sem notar skjálesara (t.d. NVDA). Svona virkar það: persónulínur sem hafa skilgreindan hreim í Heimsbókinni (t.d. færslan „[Joana] finnskur hreimur") fá hljóðfræðilega stafsetningu (viljandi „brotin" stafsetning) og tungumálatagg (lang-eigindina), þannig að skjálesarinn les þær með réttum erlendum hreim. v3 hljóðtögg (t.d. [whispers]) eru fjarlægð í þessari útgáfu — lesarinn á ekki að lesa þau upphátt. Prolog/Akt/Atriði fyrirsagnir verða að HTML fyrirsögnum, svo auðvelt er að fletta um skjalið.
+Í Handritsstillingu, óháð ElevenLabs-lykli, hefurðu hnappinn „Búðu til útgáfu fyrir skjálesara". Hann skapar skrána skrypty/<nazwa>_screen_reader.html — sérstakt úttak fyrir einstaklinga sem nota skjálesara (t.d. NVDA). Þetta virkar svona: línur persóna sem hafa skilgreindan hreim í Heimsbókinni (t.d. færslan „[Joana] akcent fiński") fá hljóðfræðilega ritun (vísvitandi „skemmd" stafsetning) og tungumálamark (lang-eigind), þannig að skjálesarinn les þær með réttum, erlendum hreimi. Hljóð-taggarnir v3 (t.d. [whispers]) eru fjarlægðir í þessari útgáfu — skjálesarinn á ekki að lesa þá upphátt. Hausar Prolog/Þáttur/Atriði verða HTML-hausar, svo auðvelt er að flakka um skjalið.
 
-Þetta er meðvituð viðbót við hljóðbrúna: fyrir líkanið v3 kemur hreimurinn úr raddsýninu, og fyrir skjálesarann — úr stafsetningunni plús tungumálatagginu. Þess vegna helst stafsetningin í hljóðútgáfunni hrein (v3 velur tungumálið sjálft), og „að brjóta" stafsetninguna fer aðeins í sér HTML skrána, þar sem það er æskilegt.
+Þetta er meðvitað viðbót við hljóðbrúna: hreim fyrir v3-líkanið ber raddarsýnishornið, en fyrir skjálesara — stafsetning plús tungumálamark. Þess vegna er stafsetning í hljóðútgáfunni hrein (v3 velur tungumál sjálfur), og „skemmda" stafsetningin fer eingöngu í sérstaka HTML-skrá, þar sem hún er æskileg.
 
 
 SKREF 4: Eftirvinnsla í Reżyser Audio GPT

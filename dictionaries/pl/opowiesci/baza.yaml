@@ -12,7 +12,7 @@ etykieta: "Baza promptów narracyjnych"
 kategoria: baza
 kolejnosc: 0
 
-# --- Parametry OpenAI (dziedziczone przez tryby narracyjne) ---
+# --- Parametry Anthropic (dziedziczone przez tryby narracyjne) ---
 # Tryb może nadpisać model/temperaturę u siebie; jeśli nie nadpisuje,
 # `_zbuduj_prompt_systemowy` używa tych defaultów.
 model: claude-sonnet-4-6

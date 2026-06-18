@@ -1,24 +1,25 @@
 """
-rezyser_ai.py – Warstwa OpenAI dla modułu Reżyser Audio GPT.
+rezyser_ai.py – Warstwa Anthropic Claude dla modułu Reżyser Audio GPT.
 
 Wydzielone z ``gui_rezyser.py`` w refaktorze wersji 13.0 — analogicznie
 do ``tlumacz_ai.py`` dla Poligloty. Moduł NIE zależy od wxPython; GUI woła
 go z wątku tła (``threading.Thread``) i dostaje wyniki przez callbacki
 lub zwracane ``@dataclass``-y. Dzięki temu:
 
-* Można testować logikę bez mockowania wx (użyj mock-klienta OpenAI).
+* Można testować logikę bez mockowania wx (użyj mock-klienta Anthropic).
 * Można podmienić warstwę GUI na cokolwiek innego (web, CLI, REST API)
   bez dotykania promptów i logiki przetwarzania.
 
 Zakres odpowiedzialności:
 
-    * Budowa payloadu ``chat.completions`` (system prompt + sufiks kontekstowy
-      + klauzula odrzucenia + wiadomości assistant z pamięci + user).
+    * Budowa payloadu Messages API (prompt systemowy w parametrze ``system=``
+      + sufiks kontekstowy + klauzula odrzucenia + kontekst pamięci złożony
+      w wiadomość ``user`` — Anthropic wymaga pierwszej wiadomości ``user``).
     * Wybór sufiksu kontekstowego (``startowy``/``kontynuacja``/
       ``optymalizacja``/``alarm``/``streszczenie``) na podstawie stanu
       pamięci i słów kluczowych w instrukcji użytkownika.
-    * Wywołanie OpenAI z timeoutem (domyślnie 120 s dla generowania,
-      60 s dla tytułów).
+    * Wywołanie Claude (Messages API) z timeoutem (domyślnie 120 s dla
+      generowania, 60 s dla tytułów) — przez ``klient.with_options(timeout=...)``.
     * Detekcja odrzucenia modelu przez uniwersalny tag
       :data:`przepisy_rezysera.TAG_ODRZUCENIA_AI`.
     * Ekstrakcja ``<STRESZCZENIE>...</STRESZCZENIE>`` w trybie Burzy.
@@ -32,7 +33,7 @@ Publiczne API:
 
     # Generowanie kolejnego fragmentu historii:
     wynik = rai.generuj_fragment(
-        klient=openai_client,
+        klient=anthropic_client,
         przepis=przepis_rezysera,       # PrzepisRezysera
         snapshot=proj.snapshot(),        # SnapshotProjektu
         user_text="Napisz scenę w tawernie.",
@@ -47,7 +48,7 @@ Publiczne API:
 
     # Nadawanie tytułów rozdziałom:
     wynik_tyt = rai.nadaj_tytuly_rozdzialom(
-        klient=openai_client,
+        klient=anthropic_client,
         przepis_tytuly=przepis_postprod_tytuly,
         pelny_tekst=open("skrypty/projekt.txt").read(),
         on_postep=cb_postep,
@@ -61,7 +62,7 @@ Komunikacja z GUI z wątku tła: GUI przekazuje callbacki zawinięte w
     def _cb_postep(msg, pct):
         wx.CallAfter(self._update_postep, msg, pct)
 
-Moduł ``openai`` importujemy leniwie – to samo podejście co w
+Moduł ``anthropic`` importujemy leniwie – to samo podejście co w
 ``tlumacz_ai.py``: pozwala uruchamiać testy jednostkowe bez instalowania
 SDK, gdy test używa mock-klienta.
 """
@@ -92,7 +93,7 @@ def _dev_log(msg: str) -> None:
     except Exception:  # noqa: BLE001 — log dev nigdy nie ubija apki
         pass
 
-# ``openai`` potrzebne tylko do łapania ``RateLimitError``. Import leniwy
+# ``anthropic`` potrzebne tylko do łapania ``RateLimitError``. Import leniwy
 # wewnątrz funkcji – by testy jednostkowe mogły działać bez SDK, a samo
 # wykrycie "brak SDK" zwrócić jako zwykły wyjątek do GUI.
 
@@ -324,6 +325,11 @@ def wybierz_sufiks(
 # Ceiling, nie target — pod progiem non-streaming SDK (brak ryzyka HTTP-timeoutu).
 MAX_TOKENS_NARRACJA = 16000
 
+# Maks. tokenów wyjścia postprodukcji tytułów (konsolidacja v18.x na Anthropic):
+# tytuł to jedna krótka linia, więc 256 z dużym zapasem. Anthropic wymaga jawnego
+# `max_tokens` (w OpenAI był domyślny). Mikro-call ISO ma własny, jeszcze mniejszy.
+MAX_TOKENS_TYTUL = 256
+
 
 def _wywolaj_claude(
     klient:   Any,
@@ -497,7 +503,7 @@ def generuj_burze(
 
     Raises:
         RuntimeError: wyczerpane retry (halucynacja struktury) ALBO model
-                      zwrócił finish_reason="length" (max_tokens hit).
+                      zwrócił stop_reason="max_tokens" (ucięty JSON).
         Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) — propagowane.
     """
     system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
@@ -728,9 +734,10 @@ def generuj_skrypt(
     ``max_retry`` powtórzeń (default 2 → łącznie 3 wywołania).
 
     WYMÓG: ``przepis.prompt_systemowy`` MUSI instruować model, by zwracał JSON
-    zgodny ze :data:`SCHEMA_SKRYPT`, i zawierać słowo „json" (warunek konieczny
-    ``response_format={"type": "json_object"}`` w OpenAI). To zadanie przepisu
-    YAML (Etap E3), nie tego modułu.
+    zgodny ze :data:`SCHEMA_SKRYPT`. Na Claude egzekwujemy to przez prompt +
+    walidację ``jsonschema`` + retry (nie ma odpowiednika OpenAI
+    ``response_format={"type": "json_object"}``). To zadanie przepisu YAML
+    (Etap E3), nie tego modułu.
 
     Args:
         klient:    Klient Anthropic (Claude).
@@ -746,7 +753,7 @@ def generuj_skrypt(
 
     Raises:
         RuntimeError: wyczerpane retry (halucynacja struktury) ALBO
-                      finish_reason="length" (ucięty JSON).
+                      stop_reason="max_tokens" (ucięty JSON).
         Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) — propagowane.
     """
     system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
@@ -866,14 +873,14 @@ def generuj_fragment(
     user_text: str,
     timeout: float = 120.0,
 ) -> WynikGeneracji:
-    """Wysyła zapytanie do OpenAI i zwraca przetworzoną odpowiedź.
+    """Wysyła zapytanie do Claude (Anthropic) i zwraca przetworzoną odpowiedź.
 
     Args:
         klient:     Klient Anthropic (``anthropic.Anthropic(api_key=...)``).
         przepis:    Tryb pracy (Burza / Skrypt / Audiobook).
         snapshot:   Niezmienny snapshot stanu projektu.
         user_text:  Instrukcja użytkownika z pola „Instrukcje".
-        timeout:    Limit czasu na wywołanie OpenAI w sekundach.
+        timeout:    Limit czasu na wywołanie Claude w sekundach.
                     Uwaga: obejmuje **cały** czas od wysłania do
                     otrzymania pełnej odpowiedzi. Dla długich generacji
                     audiobookowych można podnieść.
@@ -980,8 +987,8 @@ def nadaj_tytuly_rozdzialom(
     na plik historii). Wynik prezentowany w dialogu, by użytkownik mógł
     skopiować tytuły do Księgi Świata / spisu treści.
     """
-    # Import leniwy – tylko tu potrzebujemy wyjątków OpenAI
-    import openai  # noqa: PLC0415
+    # Import leniwy – tylko tu potrzebujemy wyjątków Anthropic
+    import anthropic  # noqa: PLC0415
 
     wzorzec = przepis_tytuly.regex_podzial_rozdzialow
     fragmenty = re.split(wzorzec, pelny_tekst)
@@ -1024,16 +1031,18 @@ def nadaj_tytuly_rozdzialom(
         )
 
         try:
-            resp = klient.chat.completions.create(
+            resp = klient.with_options(timeout=timeout).messages.create(
                 model=przepis_tytuly.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}],
+                max_tokens=MAX_TOKENS_TYTUL,
                 temperature=przepis_tytuly.temperatura,
-                timeout=timeout,
+                thinking={"type": "disabled"},
             )
-            tytul_raw = (resp.choices[0].message.content or "").strip()
+            tytul_raw = "".join(
+                b.text for b in resp.content
+                if getattr(b, "type", None) == "text"
+            ).strip()
 
             # Nawet model tytułujący może odrzucić prompt (szczególnie przy
             # brutalnych treściach w treści rozdziału). Honorujemy tag.
@@ -1045,7 +1054,7 @@ def nadaj_tytuly_rozdzialom(
             else:
                 tytuly.append(f"{naglowek}: {tytul_raw}")
 
-        except openai.RateLimitError:
+        except anthropic.RateLimitError:
             tytuly.append(
                 f"{naglowek}: {przepis_tytuly.etykieta_bled_brak_kredytow}"
             )
@@ -1102,20 +1111,20 @@ def wywnioskuj_kod_jezyka(
         "'по-русски' -> ru."
     )
     try:
-        resp = klient.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user",   "content": jezyk_odpowiedzi},
-            ],
+        resp = klient.with_options(timeout=timeout).messages.create(
+            model="claude-sonnet-4-6",
+            system=system,
+            messages=[{"role": "user", "content": jezyk_odpowiedzi}],
             temperature=0,
-            max_tokens=5,
-            timeout=timeout,
+            max_tokens=16,
+            thinking={"type": "disabled"},
         )
     except Exception:  # noqa: BLE001 — każdy błąd API/SDK = brak kodu, nie crash
         return None
 
-    raw = (resp.choices[0].message.content or "").strip().lower()
+    raw = "".join(
+        b.text for b in resp.content if getattr(b, "type", None) == "text"
+    ).strip().lower()
     m = re.search(r"[a-z]{2}", raw)
     kod = m.group(0) if m else ""
     return kod if kod in dozwolone_set else None
