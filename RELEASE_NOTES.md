@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 18.2 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 18.2.1 „Wersja Wydawnicza"
+
+*Patch v18.2.1: domknięcie cichej wady trybu prozy Reżysera ujawnionej po migracji na Anthropic (v18.0). Tryby JSON (Skrypt/Burza) wykrywały `stop_reason=="max_tokens"`, ale ścieżka prozy (audiobook) ignorowała ten sygnał — odpowiedź ucięta na limicie długości (skutek instrukcji anti-closure, która każe modelowi NIE domykać scen) szła po cichu do pliku w połowie zdania z doklejonym `\n\n`. Teraz przy `max_tokens` jeden mikro-call domyka ostatnie zdanie w języku treści (prefiks + separator nietknięte → brak sklejki w pół słowa); niepowodzenie (ogon >2000 zn., błąd API, mikro-call też ucięty, odmowa) → fragment i tak zapisany + miękkie ostrzeżenie dla reżysera w 9 językach, a zapis NIGDY nie jest blokowany. Drugi wątek (wykryty przy okazji): dokończenie konsolidacji v18.2 w GUI Reżysera — `gui_rezyser` trzymał jeszcze zaszłego klienta OpenAI i bramkował panel flagiem „OBA klucze", przez co end-user z samym `ANTHROPIC_API_KEY` miał Reżysera WYŁĄCZONEGO, a `import openai` wciągał bibliotekę do `.exe`; po usunięciu klienta single-key działa realnie i runtime nie importuje już `openai`. Trzeci wątek: `openai` wraca do `requirements.txt` — jedyny żywy konsument OpenAI w repo to dyspozytorski bot intake na GitHub Actions (`gpt-4o-mini`), więc ukrywanie tej zależności było mylące; po fixie GUI runtime jest naprawdę single-provider, a wpis w requirements to czysto dev/CI (`.exe` i single-key end-usera bez zmian). Plus odchudzenie konstytucji agenta (CLAUDE.md poniżej miękkiego limitu 25k — pure-infra, poza paczką).*
 
 *Release v18.2: domknięcie łuku konsolidacji — ostatni dostawca OpenAI usunięty z CAŁEGO projektu. Na Anthropic Claude Sonnet 4.6 przechodzą trzy ostatnie konsumenty: Poliglota (`tlumacz_ai` — używany przez wbudowany Tłumacz AI ORAZ batchowy tłumacz dokumentacji), tłumacz stringów UI (`buduj_wielojezyczne_ui`) i postprodukcja tytułów rozdziałów Reżysera. Runtime i dev-tooling są teraz single-provider; **end-user potrzebuje WYŁĄCZNIE `ANTHROPIC_API_KEY` (`sk-ant-`)**, a `openai` wypadło z `requirements.txt`. Migracja `tlumacz_ai` to wzorzec free-text 1:1 z v18.0/v18.1 (prompt systemowy osobno, kontekst zwinięty do `user`, `stop_reason=="max_tokens"` z zachowaną bisekcją, tokenizer chunkingu świadomie odpięty od modelu LLM → granice bloków bez zmian, bez bumpa wersji cache). Tłumacz UI dostał najmocniejszą zmianę: zamiast OpenAI `json_object` używa **structured outputs** Anthropic (`output_config` z `json_schema`) — gwarancja zgodności ze SCHEMATEM na poziomie API, nie tylko poprawnego JSON; ucięcie odpowiedzi (`stop_reason=="max_tokens"`) przerywa CAŁY batch jako sygnał zmniejszenia porcji (BATCH_SIZE 150→80). System Check zredukowany do jednego klucza (usunięta osobna sekcja Anthropic z v18.0), szablon „Generuj" tworzy plik z jedną linią. Weryfikacja LIVE obu silników: sekcje szyfranckie fi/is (Tipoglikemia realnie zaszyfrowana, Caesar adaptowany per alfabet — halucynacje GPT-4o zniknęły) oraz structured outputs UI (Anthropic akceptuje `json_schema`, markery/akceleratory zachowane). Pełny audyt: zero wzmianek OpenAI w `dictionaries/` poza celowymi notami „dla aktualizujących" i historycznymi.*
 
@@ -83,6 +85,60 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 18.2.1 — patch (consolidation correctness: Director prose no longer silently saved truncated mid-sentence; the Director GUI now genuinely needs only the Anthropic key; `openai` restored to requirements for the one workflow that still uses it)
+
+### 🆕 What's new (English)
+
+In the Director's audiobook/prose mode, when Claude hits its output-length ceiling and stops mid-sentence (a side effect of the anti-closure instruction that deliberately keeps scenes open), the truncated fragment used to be saved silently — with a paragraph break glued onto a half-finished sentence. The JSON modes (Script/Brainstorm) already caught this `max_tokens` stop and raised an error; the prose path ignored it. Now, on a `max_tokens` stop, a small micro-call rewrites and completes the dangling sentence in the content language before the fragment is saved; if that micro-call also fails, the fragment is still saved and the Director gets a soft warning to check the ending. The save is never blocked.
+
+This patch also finishes the v18.2 single-provider consolidation in the Director's GUI layer. v18.2 migrated chapter-title post-production and the language-code micro-call onto Claude, but `gui_rezyser` was never rewired: it still built an OpenAI client, still passed it to those (now Anthropic) functions, and gated the whole panel on *both* keys being present — so a user with only `ANTHROPIC_API_KEY` (exactly what v18.2 promised) had the Director disabled, and `import openai` still pulled the library into the `.exe`. The OpenAI client is gone; the Director now needs only the Anthropic key and the runtime no longer imports `openai`.
+
+Finally, `openai` is back in `requirements.txt` — the project's single remaining OpenAI consumer is the GitHub-Actions issue-intake bot (`gpt-4o-mini`), and hiding that dependency was misleading. With the GUI fix above the application runtime is now genuinely Anthropic-only; the requirements entry is dev/CI-only and does not change the installer/`.exe`.
+
+### 🔭 Planned / deferred (English)
+
+- Onboarding a new language still requires editing Python persona templates inside the GitHub bots (issue intake + closure); moving them to translatable UI keys is deferred to a later release.
+- The end-user runtime stays single-key (`ANTHROPIC_API_KEY`); `openai` in requirements is dev/CI-only and is not bundled into the `.exe`.
+- The remainder of these notes is in Polish.
+
+### TL;DR
+
+Patch naprawia cichą wadę trybu prozy Reżysera (audiobook) ujawnioną po migracji na Anthropic (v18.0). Tryby JSON (Skrypt/Burza) od dawna wykrywają `stop_reason=="max_tokens"` i sygnalizują ucięcie, ale ścieżka prozy ignorowała ten sygnał — odpowiedź ucięta na limicie długości (skutek instrukcji anti-closure, która każe modelowi NIE domykać scen) trafiała po cichu do pliku z doklejonym `\n\n` w połowie zdania (np. „…rozpoznaje rytm fonetyczny szybciej niż"). Teraz przy `max_tokens` jeden mikro-call domyka ostatnie zdanie w języku treści, a gdy się nie uda — fragment i tak się zapisuje, ale reżyser dostaje miękkie ostrzeżenie. Zapis NIGDY nie jest blokowany.
+
+Drugi wątek to **dokończenie konsolidacji v18.2 w warstwie GUI Reżysera** — wykryte przy okazji. v18.2 zmigrowała postprodukcję tytułów i mikro-call kodu języka na Claude (`rezyser_ai` woła `messages.create`, YAML `model: claude-sonnet-4-6`), ale `gui_rezyser` nie został przepięty: nadal budował klienta OpenAI, podawał go do tych (już Anthropic) funkcji i bramkował CAŁY panel flagiem `_api_dostepne = (klient OpenAI AND klient Claude)`. Skutek: end-user z samym `ANTHROPIC_API_KEY` (czyli obietnica v18.2!) miał **Reżysera wyłączonego**, a `import openai` realnie wciągał bibliotekę do `.exe`. Patch usuwa klienta OpenAI z GUI, przepina oba wywołania na `_klient_claude` i ustawia `_api_dostepne = (_klient_claude is not None)` — single-key zaczyna realnie działać, a runtime przestaje importować `openai`.
+
+Trzeci wątek to jawność zależności: `openai` wraca do `requirements.txt`. Jedyny żywy konsument OpenAI w projekcie to dyspozytorski bot intake na GitHub Actions (`gpt-4o-mini`), więc ukrywanie tej zależności (usuniętej w v18.2) było mylące. Po fixie GUI runtime aplikacji jest już naprawdę single-provider (Anthropic), więc wpis w requirements jest czysto dev/CI i NIE zmienia `.exe` ani klucza end-usera.
+
+### Co nowego
+
+- **Guard urwanych zdań w trybie prozy Reżysera**: przy ucięciu na limicie długości mikro-call domyka ostatnie zdanie; przy niepowodzeniu — miękkie ostrzeżenie po zapisie (nowy komunikat w 9 językach). Zapis nigdy nie jest blokowany.
+- **Realny single-key w Reżyserze**: usunięty zaszły klient OpenAI z `gui_rezyser` (relikt po v18.2) — panel wymaga teraz tylko `ANTHROPIC_API_KEY`, a tytuły/ISO realnie jadą na Claude (wcześniej dostawały klienta OpenAI mimo migracji `rezyser_ai`).
+- `openai` z powrotem w `requirements.txt` z komentarzem wyjaśniającym (jedyny żywy konsument = bot intake Sami na GitHub Actions, `gpt-4o-mini`); runtime już naprawdę go nie importuje, end-user single-key bez zmian.
+
+### Pod maską
+
+- `rezyser_ai.generuj_fragment`: przechwytuje `stop_reason` (był jawnie ignorowany jako `_stop_reason`); przy `max_tokens` — PO bramce językowej, PRZED akcentami — woła `_domknij_urwane_zdanie`. Helper bierze ogon od ostatniej granicy zdania (`_ostatnia_granica_zdania`; regex `[.!?…]+` + domykające cudzysłowy, wymóg białego znaku/końca po interpunkcji), prosi model o przepisanie go jako JEDNEGO domkniętego zdania w języku treści (osobny `system`, `MAX_TOKENS_DOMKNIECIE=300`) i podmienia tylko urwany ogon — prefiks sprzed granicy i oryginalny separator zostają nietknięte (eliminuje sklejkę w pół słowa, bo ucięcie na `max_tokens` pada na granicy tokenu).
+- Degradacja bez blokowania zapisu: ogon >`MAX_ZNAKOW_URWANEGO_ZDANIA=2000` / błąd API / mikro-call też ucięty (`max_tokens`) / odmowa (`[ODRZUCENIE_AI]`) → `WynikGeneracji.ostrzezenie` niesie tekst, GUI pokazuje `wx.MessageBox` (ICON_WARNING) po zapisie i dzwonku.
+- `gui_rezyser._on_wyslij_done_zapis` przyjmuje opcjonalny `ostrzezenie`; ścieżka `skrypt_json` używa domyślnego pustego (bez zmian zachowania).
+- Nowe klucze `rezyser.ostrzezenie_urwane_tytul/_tresc` w `pl` + autotłumacz na 8 języków (po review halucynacji jedna poprawka gramatyczna: de „Der Fragment" → „Das Fragment").
+- `gui_rezyser`: usunięty `import openai` (moduł) i atrybut `self._client`; `_init_api` buduje tylko `_klient_claude` i ustawia `_api_dostepne = _klient_claude is not None`; `nadaj_tytuly_rozdzialom` i `rozwiaz_kod_jezyka` dostają teraz `_klient_claude` (były `_client`); docstringi/komentarze OpenAI→Anthropic. Po fixie ŻADEN bundlowany moduł nie importuje `openai`.
+- `requirements.txt`: `openai` dodany z komentarzem (po co, że runtime go nie importuje → PyInstaller nie wciąga do `.exe`, że workflow `issue-intake.yml` instaluje go i tak jawnie).
+
+### Co nie weszło
+
+- Dług i18n szablonów person botów GitHub (Sami/intake na `gpt-4o-mini` + persony Północy Lumi/Vieno/Katla) — przeniesienie hard-kodowanych wypowiedzi do tłumaczalnych kluczy UI odłożone na osobne wydanie (most do `i18n.t()` w skryptach workflow do zaprojektowania).
+- Odchudzenie CLAUDE.md (26,9k→24,6k znaków) jechało tym samym cyklem, ale jako pure-infra poza paczką nie dotyka artefaktu.
+
+### Walidacja
+
+- Testy izolowane (mock klienta Anthropic, bez MainLoop): helpery domknięcia 7/7 (granica zdania, domknięcie udane z nietkniętym prefiksem, pusty ogon = no-op bez API, mikro-call ucięty / odmowa / błąd API / ogon za długi → `doszyto=False`, tekst bez zmian); integracja `generuj_fragment` 3/3 (`max_tokens`+udane domknięcie → bez ostrzeżenia, zdanie domknięte; `max_tokens`+ucięty mikro-call → ostrzeżenie + tekst bez zmian; `end_turn` → guard nieaktywny).
+- `i18n.t` rozwiązuje oba nowe klucze w 9 językach (zero wycieku `[klucz]`); manualny review halucynacji tłumaczeń (literałów brak — klucze ich nie mają).
+- Single-key Reżysera (wzorzec `wx.App(False)`+konstruktor+`Destroy`, bez MainLoop): z samym `ANTHROPIC_API_KEY` panel ma `_api_dostepne=True`, `_klient_claude` ustawiony, atrybut `_client` nie istnieje. Audyt: zero `import openai` w modułach runtime (poza intencjonalnym komentarzem).
+- `py_compile rezyser_ai.py gui_rezyser.py` OK.
+- `generuj_dokumentacje.py --waliduj` — placeholdery OK; `docs/*.txt` + `readme.*.md` zregenerowane (bump 18.2.1).
 
 ---
 
