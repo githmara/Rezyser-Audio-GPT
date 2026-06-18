@@ -13,7 +13,7 @@
 4. KRYTYCZNE ZABEZPIECZENIE (od v17.0): ZAKAZ uruchamiania zamrożonego `.exe` (z `dist/` ani `build/`) do testowania logiki — to ciągłe GUI (łamie pkt 2, A11y). Dodatkowo `build/` to katalog ROBOCZY PyInstallera (nie dystrybucja): jego exe i tak nie wystartuje (DLL-e montowane dopiero w `dist/` → „nie można odnaleźć python311.dll"). Runnable jest tylko `dist/` (z `dictionaries/`+`docs/` obok) lub zainstalowana lokalizacja. Logikę testuj izolowanymi fragmentami ze ŹRÓDŁA przez `.venv/Scripts/python`. Metadane projektów w `runtime/` (root, dev) też zostaw w spokoju.
 5. FLAGA `--no-pager` W GIT (KRYTYCZNE A11y): Komendy git, które mogą uruchomić stronicowanie (np. `git diff`, `git log`, `git show`), ZAWSZE wykonuj z flagą `--no-pager`. Brak tej flagi uruchamia tryb interaktywny, blokujący terminal i generujący artefakty niedostępne dla NVDA.
 6. GIT STATUS PRZED COMMITEM: Przed każdym commitowaniem i dodawaniem plików ZAWSZE uruchom `git status`, aby zobaczyć pełny stan repozytorium.
-7. KLUCZE API (SINGLE-PROVIDER od 18.2): `golden_key.env` w roocie repo jest gitignorowany, ale fizycznie obecny u dewelopera, i trzyma JEDEN klucz **`ANTHROPIC_API_KEY`** (`sk-ant-`). Po pełnej konsolidacji (18.0 narracja Reżysera → 18.1 Opowieści → 18.2 Poliglota + tłumacze docs/UI + postprodukcja tytułów) Claude Sonnet 4.6 zasila CAŁY silnik AI — runtime ORAZ dev-tooling tłumaczeń (`buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py`); `openai` usunięte z `requirements.txt`, end-user potrzebuje tylko jednego klucza (pełny kontekst + decyzje w [[reguly_architektury]]). Agent **może i powinien** odpalać skrypty tłumaczeń bezpośrednio (ładują klucz przez `python-dotenv`) — nie przekazuj tego kroku userowi „bo nie masz API". Stop tylko gdy skrypt zwróci „❌ Brak prawidłowego ANTHROPIC_API_KEY" lub HTTP 401/429 — wtedy poproś usera o uzupełnienie. Po auto-tłumaczeniach ZAWSZE manualny review halucynacji — generyczne sanity checki + szczegółowe hotspoty per szyfr/sekcja w [[reguly_tlumaczen]]. **WYJĄTEK (osobna infra CI):** bot intake GitHub `issue_intake_sami.py` dalej używa `gpt-4o-mini` z `OPENAI_API_KEY` jako sekretu GitHub Actions (instaluje `openai` jawnie w `issue-intake.yml`, NIE z `requirements.txt`) — konsolidacja runtime go nie dotyczy.
+7. KLUCZE API (SINGLE-PROVIDER RUNTIME od 18.2): `golden_key.env` w roocie (gitignorowany, fizycznie u dewelopera) trzyma JEDEN klucz **`ANTHROPIC_API_KEY`** (`sk-ant-`) — end-user potrzebuje tylko jego. Po konsolidacji 18.0→18.2 Claude Sonnet 4.6 zasila CAŁY silnik AI — runtime ORAZ dev-tooling tłumaczeń (`buduj_wielojezyczne_ui.py`, `buduj_wielojezyczne_docs.py`, `tlumacz_ai.py`) (pełny kontekst + decyzje → [[reguly_architektury]]). Agent **może i powinien** odpalać skrypty tłumaczeń bezpośrednio (ładują klucz przez `python-dotenv`) — nie przekazuj tego kroku userowi „bo nie masz API". Stop tylko gdy skrypt zwróci „❌ Brak prawidłowego ANTHROPIC_API_KEY" lub HTTP 401/429 — wtedy poproś usera. Po auto-tłumaczeniach ZAWSZE manualny review halucynacji ([[reguly_tlumaczen]]). **WYJĄTEK — jedyny żywy konsument OpenAI:** dyspozytorski workflow GitHub Actions „Sami" (`issue_intake_sami.py`, intake zgłoszeń) używa `gpt-4o-mini` z `OPENAI_API_KEY` (sekret Actions). `openai` jest więc z powrotem w `requirements.txt` (od 18.2.1) — dla JAWNOŚCI i lokalnego debugowania bota; runtime go NIE importuje, więc `.exe` i single-key end-usera są bez zmian.
 8. KOMUNIKACJA Z UŻYTKOWNIKIEM (od 2026-06-02 — czysty PowerShell, A11y). Pełne reguły → [[reguly_architektury]]. Skrót:
    - **Pytania są MILE WIDZIANE** — dziel proces na kroki z punktami decyzyjnymi, pytaj otwartym tekstem. AskUserQuestion dozwolone (stary „całkowity zakaz" z czasów zepsutego accessibility buffer VS Code został ZNIESIONY 2026-06-02; domyślnie i tak preferuj pytania otwartym tekstem, chyba że user wprost poprosi o menu).
    - **Terminal = tylko krótkie treści** (próg ≈2500 znaków): podsumowania + pytania o zgodę na kolejny krok. Długie raporty / plany / duże bloki kodu → `skrypty/ai_odpowiedz.md` (Write/Edit), w terminalu zostaw notę „zaktualizowałem plik" (user otworzy w edytorze VS Code z natywnym A11y). Rozszerzenie `.md` (nie `.txt`) celowo: osierocony plik markdown/log NIE jest łapany przez Reżysera jako potencjalny projekt, w odróżnieniu od `.txt`.
@@ -73,49 +73,28 @@ Solo-dev + A11y first: commit prosto na main, tag tworzony atomowo przez web Rel
 6. Web GitHub → Actions → workflow „Draft Release (auto-tag + RELEASE_NOTES.md sekcja → draft)" → Run workflow → input `potwierdz=tak` → Run. Bot odczytuje VERSION, sprawdza brak duplikatu tagu, tworzy tag na HEAD origin/main, wyciąga sekcję `## <wersja>` z `RELEASE_NOTES.md` i tworzy draft Release z tytułem „Reżyser Audio GPT — version <wersja>" (tytuł EN od v17.6.0, A11y). Workflow zatrzymuje się na draftcie — Publish dopiero po upload EXE w kroku 7. Szyba bezpieczeństwa: input `potwierdz` musi być dokładnie „tak". Alternatywnie agent: `gh workflow run draft-release.yml -f potwierdz=tak` [[reguly_git_workflow]].
 7. Web GitHub → Releases → wybierz draft → upload `Rezyser_Audio_v<wersja>_Installer.exe` → Publish. Agent: `gh release upload v<wersja> <plik.exe>` + `gh release edit v<wersja> --draft=false`.
 
-## Force push w tym repo — co dozwolone
-Force push do MAIN/MASTER przez maintainera = zakazany. Jedyny wąski wyjątek: **tag-only post-publish** — rzadki, czysto infrastrukturalny (np. tag wskazuje na zły commit po pomyłce przy publikacji Release) → [[reguly_git_workflow]]. (Do v17.0 istniał drugi wyjątek — branch-only force-push przez `github-actions[bot]` przy atomic-reset `pending_answer.md` w answer-flow; ZNIESIONY w v17.1, bo answer-flow przeniesiony do lokalnego `odpowiedz_lokalnie.py` bez commitów. Historia → `claude_archive.md`.)
-
-## Czego nie robić
-- NIE twórz feature branchy dla zwykłych patchy. Wszystko bezpośrednio na main. Rzadkie wyjątki (duży refaktor wielo-patchowy, eksperymentalna gałąź, PR od kontrybutora zewnętrznego) → `claude_archive.md`.
-- NIE używaj `gh pr create/merge` / `git tag` lokalnie do TWORZENIA tagów. Nowe tagi powstają WYŁĄCZNIE przez web Release UI atomowo z Release (wyjątek: force-push tag-only fallback z [[reguly_git_workflow]]).
-- NIE polegaj na `PULL_REQUEST_COMMENTS.md` (usunięty v15.2.5). Komentarze recenzentskie trafiają wprost do `RELEASE_NOTES.md::<wersja>::Co nie weszło` lub do konwersacji z agentem.
+## Force push + czego nie robić (pełne reguły → [[reguly_git_workflow]])
+Force push do MAIN przez maintainera = **zakazany**; jedyny wyjątek **tag-only post-publish** (pure-infra, np. tag na złym SHA po pomyłce publikacji). NIE: feature branche dla zwykłych patchy (wszystko direct-to-main), `gh pr create/merge`, lokalne `git tag`/`gh release create` do TWORZENIA tagów (powstają WYŁĄCZNIE przez `draft-release.yml` atomowo z Release). `PULL_REQUEST_COMMENTS.md` usunięty (v15.2.5) — uwagi recenzentskie idą do `RELEASE_NOTES.md::<wersja>::Co nie weszło`. Rzadkie wyjątki (duży refaktor wielo-patchowy, eksperyment, PR kontrybutora) → `claude_archive.md`.
 
 ## Klauzula awaryjna: bug-issue ma pierwszeństwo nad planowaną treścią
 Nowy bug-issue od prawdziwego usera = **priorytet** nad planowaną treścią. Procedura: odłóż feature na następny cykl (przepisz `RELEASE_NOTES.md::Co nie weszło`), bumpuj X.Y.(Z+1) [[reguly_git_workflow]], patch rozwiązuje TYLKO bug (lub grupę powiązanych z jednego obszaru), po Release nadaj etykietę `fixed-in-release` przez web UI (bot zamyka). Wyjątek: bug niewykonalny w jednym patchu (wymaga refaktoru) → przeetykietuj `bug` → `enhancement` z komentarzem wyjaśniającym workaround + plan strukturalny.
 
 # OBIEG ZGŁOSZEŃ Z POŁUDNIA NA PÓŁNOC — INTERPRETACJA PROMPTU SAMI (od v15.2.8 trójsekcyjny)
-Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera każde nowe GitHub Issue (eventy `opened` lub `labeled` z akceptowalną etykietą — patrz `LABELS_ACCEPT` / `LABELS_IGNORE` w skrypcie) i wysyła do Centrum mail w plain text o standardowej **trójsekcyjnej** strukturze:
+Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera nowe GitHub Issue (eventy `opened`/`labeled` wg `LABELS_ACCEPT`/`LABELS_IGNORE`) i wysyła do Centrum mail plain-text o **trójsekcyjnej** strukturze:
 
-1. **PROMPT DLA AGENTA AI** — wygenerowany przez `gpt-4o-mini` wg `SAMI_SYSTEM_PROMPT`. Format zależy od etykiet:
-   * **TRYB A — question / help wanted** (etykiety zawierają TYLKO `question` i/lub `help wanted`, BEZ `bug`/`enhancement`/`documentation`):
-     dokładnie 2 sekcje: `## Cel pytania` + `## Co agent powinien zrobić`. Agent odpowiada LOKALNIE skryptem `odpowiedz_lokalnie.py` (patrz `# ODPOWIEDZI NA ISSUE`).
-   * **TRYB B — zmiana w kodzie** (etykiety zawierają `bug`, `enhancement`, `documentation` lub `invalid`, nawet w kombinacji z question/help wanted):
-     dokładnie 4 sekcje: `## Cel` + `## Kontekst techniczny` + `## Kryteria akceptacji` + `## Pułapki do uniknięcia`. Agent implementuje fix.
+1. **PROMPT DLA AGENTA AI** — wygenerowany przez `gpt-4o-mini` (`SAMI_SYSTEM_PROMPT`); format zależy od etykiet:
+   * **TRYB A — question/help wanted** (etykiety TYLKO `question`/`help wanted`, BEZ `bug`/`enhancement`/`documentation`): 2 sekcje `## Cel pytania` + `## Co agent powinien zrobić`. Odpowiadasz LOKALNIE `odpowiedz_lokalnie.py` (patrz `# ODPOWIEDZI NA ISSUE`).
+   * **TRYB B — zmiana w kodzie** (etykiety mają `bug`/`enhancement`/`documentation`/`invalid`, też w kombinacji): 4 sekcje `## Cel` + `## Kontekst techniczny` + `## Kryteria akceptacji` + `## Pułapki do uniknięcia`. Implementujesz fix.
+2. **ORYGINALNY TEKST ZGŁOSZENIA** — surowy `title + body`. ZAWSZE porównuj z promptem przed implementacją — oryginał = źródło prawdy, prompt = sugestia LLM.
+3. **OTWARTE ISSUES W REPO** — `gh issue list --state open --limit 50` (od v15.2.8): detekcja duplikatów, scalanie powiązanych bugów, priorytet vs planowany feature.
 
-2. **ORYGINALNY TEKST ZGŁOSZENIA (do weryfikacji)** — surowy `title + body` z GitHub. ZAWSZE porównuj prompt z oryginałem przed implementacją — oryginał = źródło prawdy, prompt = sugestia LLM.
-
-3. **OTWARTE ISSUES W REPO (snapshot z momentu intake)** — output `gh issue list --state open --limit 50` (od v15.2.8). Użycie: detekcja duplikatów, scalanie powiązanych bugów w jeden patch (klauzula awaryjna `# WORKFLOW RELEASE`), priorytet vs planowany feature.
-
-## Sygnał rozpoznawczy
-Input maintainera otwierający się od `## Cel pytania` / `## Cel` z 2 lub 4 sekcjami, potem separator `==========…` i `ORYGINALNY TEKST ZGŁOSZENIA`, potem separator i `OTWARTE ISSUES W REPO` — to obieg „Z Południa na Północ". Twoja rola = **Centrum**. Decyzja TRYB A vs TRYB B z liczby sekcji + etykiet (linia „Etykiety:" w nagłówku maila).
-
-## Pułapki interpretacji
-Trzy non-obvious'y (halucynacja LLM w sekcji „Pułapki do uniknięcia", tryb FALLBACK bez TRYB A/B, pusta sekcja OTWARTE ISSUES) → [[reguly_github_bot]].
+## Sygnał rozpoznawczy + pułapki
+Mail od `## Cel pytania`/`## Cel` (2 lub 4 sekcje) + separatory `====` + `ORYGINALNY TEKST ZGŁOSZENIA` + `OTWARTE ISSUES W REPO` = ten obieg; Twoja rola = **Centrum**, decyzja TRYB A/B z liczby sekcji + linii „Etykiety:". Trzy non-obvious'y (halucynacja LLM w „Pułapki do uniknięcia", tryb FALLBACK bez TRYB A/B, pusta sekcja OTWARTE ISSUES) → [[reguly_github_bot]].
 
 # ODPOWIEDZI NA ISSUE — lokalny skrypt (od v17.1)
-Flow odpowiedzi na pytanie/help wanted domykasz LOKALNIE skryptem `odpowiedz_lokalnie.py` (root repo) przez lokalny `gh` CLI. Koniec dawnej maszynerii `pending_answer.md` + commit + bot + atomic-reset/force-push (ZNIESIONA w v17.1; powody i historia ewolucji v15.2.6→v15.2.8 → `claude_archive.md`). Draft odpowiedzi leży w pliku GITIGNOROWANYM i nigdy nie dotyka repo.
-
-## Procedura — flow czystego question (issue NIE wymaga release)
-1. Zapisz odpowiedź (Write/Edit) w `skrypty/pending_answer.md` — czysta treść merytoryczna w języku oryginalnego zgłoszenia (markdown OK), BEZ podpisu (wrapper Lumi/Vieno/Katla dopisze swój). Plik gitignorowany.
-2. `.venv/Scripts/python odpowiedz_lokalnie.py <N>` — pobiera treść issue przez `gh` (detekcja języka), losuje personę, opakowuje w TEMPLATES_ANSWERED i robi `gh issue comment/close/lock`. Podgląd przed wysyłką: `--dry-run`. Wymuszenie persony: `--persona Lumi|Vieno|Katla`. Inny plik draftu: `--plik`.
-3. Gotowe — żadnych commitów, pushy ani etykiet (etykieta `answered` skasowana z repo w v17.1).
-
-## Bug + osobista notka (dawny release-with-answer)
-PO opublikowaniu Release: zapisz notkę w `skrypty/pending_answer.md` i `.venv/Scripts/python odpowiedz_lokalnie.py <N> --tryb fixed-in-release` — dolepi notkę pod linkiem do najnowszego Release (separator `---`). Bez notki zwykły bug i tak domyka **slim bot** przez web-label `fixed-in-release`.
-
-## Slim bot (fixed-in-release)
-`issue_closure_north.py` obsługuje już TYLKO `fixed-in-release` (web label → komentarz z linkiem do Release + close + lock, bez żadnych operacji git). Templatki personalne (TEMPLATES/TEMPLATES_ANSWERED/PERSONAL_NOTE_INTRO + detektor lingua) zostają w nim jako single source — importuje je `odpowiedz_lokalnie.py`. Detale botów → [[reguly_github_bot]].
+Flow odpowiedzi na pytanie/help wanted domykasz LOKALNIE przez `odpowiedz_lokalnie.py` (root repo) + lokalny `gh` CLI — zero commitów/pushy/etykiet. Dawna maszyneria `pending_answer.md`+commit+bot+atomic-reset ZNIESIONA w v17.1 (historia → `claude_archive.md`). Detale botów/person → [[reguly_github_bot]].
+- **Czysty question:** zapisz odpowiedź (Write) w gitignorowanym `skrypty/pending_answer.md` — treść merytoryczna w języku zgłoszenia, BEZ podpisu (persona Lumi/Vieno/Katla dopisze swój) → `.venv/Scripts/python odpowiedz_lokalnie.py <N>` (pobiera issue przez `gh`, detekcja języka, losuje personę, `gh issue comment/close/lock`). Flagi: `--dry-run` (podgląd), `--persona`, `--plik`.
+- **Bug + osobista notka** (dawny release-with-answer): PO publikacji Release zapisz notkę w `pending_answer.md` → `odpowiedz_lokalnie.py <N> --tryb fixed-in-release` (dolepia pod linkiem do Release, separator `---`). Bez notki zwykły bug domyka **slim bot** `issue_closure_north.py` przez web-label `fixed-in-release` (komentarz+close+lock, zero git). Templatki person to single source bota, importowane przez skrypt lokalny.
 
 # SPRZĄTANIE (HIGIENA REPOZYTORIUM)
 - Zawsze po skończonej weryfikacji usuwaj wszystkie pliki tymczasowe (np. pliki z logami lub testami jednostkowymi).
@@ -125,10 +104,10 @@ PO opublikowaniu Release: zapisz notkę w `skrypty/pending_answer.md` i `.venv/S
 
 # DROGOWSKAZY DO POZOSTAŁYCH WARSTW PAMIĘCI
 
-**`claude_archive.md` (Muzeum, w repo)** — grube post-mortemy, pełne stare obejścia i zarchiwizowane roadmapy zamkniętych wydań (13.7 → v16.0). Główne sekcje: incydent halucynacji fi/manual.yaml (2026-05-15), incydent #13 GitHub auto-close keywords (2026-05-16), pełna heurystyka „cleanup commit boota = force-push tag" (v15.2.7 fallback), ewolucja question-flow v15.2.6 → v15.2.8, sub-procedury release-then-answer i release-with-answer, edge case'y `pending_answer.md`, wyjątki feature-branch workflowu, przykład empiryczny ES `ñ → nj`, CMENTARZYSKO ROADMAP. **KATEGORYCZNY ZAKAZ czytania/ładowania na start — sięgaj tam WYŁĄCZNIE na bezpośredni rozkaz użytkownika „przeszukaj archiwum".**
+**`claude_archive.md` (Muzeum, w repo)** — grube post-mortemy, pełne stare obejścia, zarchiwizowane roadmapy zamkniętych wydań (13.7 → v16.0) i ewolucje zniesionych mechanizmów (answer-flow atomic-reset, force-push-tag v15.2.7, question-flow v15.2.6→v15.2.8, incydenty fi/manual.yaml i #13 auto-close, przykład ES `ñ → nj`). **KATEGORYCZNY ZAKAZ czytania/ładowania na start — sięgaj tam WYŁĄCZNIE na bezpośredni rozkaz użytkownika „przeszukaj archiwum".**
 
-**`MEMORY.md` + `memory/*.md` (Podświadomość, poza repo, auto-load)** — techniczne niuanse, lessons learned, ścieżki awaryjne w 4 filarach. Indeks w `MEMORY.md`, filary czytane po referencji `[[name]]`:
-- [[reguly_tlumaczen]] — autotłumacz, review halucynacji (Caesar/Tipoglicemia/fiolka/PL-leak), generyczne sanity-checki, literały kod-vs-`ui.yaml`, idiomatyczna lokalizacja nazw, pl/en bazy referencyjne, review marki w templatkach.
-- [[reguly_github_bot]] — slim bot `fixed-in-release` + lokalny `odpowiedz_lokalnie.py` (od v17.1; dawny atomic-reset/FILE/COMMENT → archiwum), ZAKAZ auto-close keywords (fix/closes/resolves przed #N), env-zamiast-argv w workflowach, interpretacja promptu Sami.
-- [[reguly_git_workflow]] — direct-to-main, hotfix = patch tag, iteracyjny patch przez force-push rewrite, force-push tag-only post-publish, gh CLI release-flow.
-- [[reguly_architektury]] — prompty LLM w YAML (ręcznie), sekwencyjność `str.replace` w akcentach, `runtime/` niewidoczny, model per tryb Opowieści, staging + maskowanie, komunikacja (pytania mile widziane).
+**`MEMORY.md` + `memory/*.md` (Podświadomość, poza repo, auto-load)** — techniczne niuanse, lessons learned, ścieżki awaryjne w 4 filarach. Pełne hooki w `MEMORY.md` (ładowanym automatycznie); filary czytane po referencji `[[name]]`:
+- [[reguly_tlumaczen]] — autotłumacz, review halucynacji, literały kod-vs-`ui.yaml`, lokalizacja nazw, bazy pl/en.
+- [[reguly_github_bot]] — slim bot `fixed-in-release` + `odpowiedz_lokalnie.py`, ZAKAZ auto-close keywords, env-zamiast-argv, prompt Sami.
+- [[reguly_git_workflow]] — direct-to-main, hotfix=patch tag, iteracyjny patch/force-push tag-only, gh CLI release-flow.
+- [[reguly_architektury]] — prompty LLM w YAML, kolejność akcentów, `runtime/` niewidoczny, model per tryb, staging, komunikacja.
