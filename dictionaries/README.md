@@ -166,7 +166,7 @@ Głównego Studia Reżyserskiego:
 Każdy plik trybu zawiera m.in.:
 
 - `id`, `etykieta`, `opis` – metadane widoczne w GUI (RadioBox wyboru trybu).
-- `prompt_systemowy` – pełny tekst instrukcji dla modelu GPT-4o.
+- `prompt_systemowy` – pełny tekst instrukcji dla modelu AI (Anthropic Claude Sonnet 4.6).
 - `zapis_do_pliku` – flaga `true`/`false` decydująca, czy odpowiedź AI
   zostanie dopisana do pliku projektu (Skrypt/Audiobook = `true`;
   Burza = `false`, bo generuje tylko opcje fabularne).

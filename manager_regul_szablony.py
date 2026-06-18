@@ -280,7 +280,7 @@ def prompt_akcent(id_pliku: str, etykieta: str, iso: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project (wxPython + OpenAI). You have tools: Read, Write, Edit, Glob, Grep,
+project (wxPython + Anthropic). You have tools: Read, Write, Edit, Glob, Grep,
 Bash. Your job: create a phonetic rule inside the project tree.
 
 # PROJECT CONTEXT
@@ -723,8 +723,8 @@ etykieta: "{etykieta}"
 kategoria: tryb
 kolejnosc: 40
 
-# --- OpenAI parameters ---
-model: gpt-4o
+# --- AI model parameters ---
+model: claude-sonnet-4-6
 temperatura: 0.85
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
@@ -829,11 +829,11 @@ a creative AI mode named **{etykieta}**.
 # STRUCTURE REQUIREMENTS (engine)
 1. Identifying fields: `id`, `etykieta`, `kategoria: tryb`, `kolejnosc`
    (int 10-90; 30 = audiobook, 40 = brainstorm, 50 = script).
-2. OpenAI parameters: `model: gpt-4o` (or `gpt-4o-mini` for fast modes),
+2. AI model parameters: `model: claude-sonnet-4-6`,
    `temperatura` (0.7-0.9 for literary, 0.5 for scripting),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}` (already matched to the pack),
    `zapis_do_pliku: true`.
-3. **`prompt_systemowy:`** appended to every OpenAI call. It MUST contain
+3. **`prompt_systemowy:`** appended to every AI call. It MUST contain
    the placeholders `{{world_context}}` and `{{jezyk_odpowiedzi}}` (the
    engine substitutes them). The first line ALWAYS contains the phrase
    „ONLY in {{jezyk_odpowiedzi}}" in the appropriate idiom form
@@ -885,7 +885,7 @@ def prompt_tryb_opowiesci(id_pliku: str, etykieta: str,
     inne_paczki = _paczki_referencyjne(jezyk_bazowy)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project (wxPython + OpenAI). You have tools: Read, Write, Edit, Glob, Grep,
+project (wxPython + Anthropic). You have tools: Read, Write, Edit, Glob, Grep,
 Bash. Task: add a new INTERACTIVE STORY mode (Opowieści). Unlike Director
 modes, a Story mode is NOT data-driven — it requires BOTH a YAML file AND
 several wiring changes in Python. Dropping in a YAML file alone is dead code.
@@ -941,10 +941,11 @@ wiring it into the Python engine + GUI.
    `dictionaries/<code>/gui/ui.yaml` for EVERY deployed pack (use
    `buduj_wielojezyczne_ui.py` for the non-pl languages, or add by hand and
    proofread).
-5. **`_model_dla_trybu`** in `gui_opowiesci.py`: decide the model. Choice
-   modes that must respect world rules use `MODEL_QUALITY` (gpt-4o); light
-   free modes use `MODEL_DOMYSLNY` (gpt-4o-mini). If the new mode needs 4o,
-   extend the `if tryb in (TRYB_WYBOROW, TRYB_MNIEJSZE_ZLO)` condition.
+5. **`_model_dla_trybu`** in `gui_opowiesci.py`: since v18.1 every mode runs
+   on one model — the method returns `oai.MODEL_NARRACJA` (`claude-sonnet-4-6`)
+   unconditionally (the per-mode OpenAI tiers `MODEL_QUALITY`/`MODEL_DOMYSLNY`
+   were retired). A new mode needs NO change here; leave it as is unless you
+   deliberately want a different model for this mode.
 6. **Choice buttons** (`gui_opowiesci.py`, the `_aktywuj_obszar_wyborow` /
    visibility condition `tryb in (TRYB_WYBOROW, TRYB_MNIEJSZE_ZLO)`): if the
    new mode shows A–E option buttons, add the constant to that condition.
@@ -998,8 +999,8 @@ etykieta: "{etykieta}"
 kategoria: postprodukcja
 kolejnosc: 20
 
-# --- OpenAI parameters ---
-model: gpt-4o-mini
+# --- AI model parameters ---
+model: claude-sonnet-4-6
 temperatura: 0.7
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
@@ -1077,8 +1078,8 @@ a postproduction named **{etykieta}**.
 # STRUCTURE REQUIREMENTS (engine)
 1. Fields: `id`, `etykieta`, `kategoria: postprodukcja`, `kolejnosc`
    (int 10-90, e.g. 20 for a title generator).
-2. OpenAI parameters: `model: gpt-4o-mini` (or `gpt-4o` if the task
-   requires reasoning), `temperatura` 0.5-0.8 (we want stability),
+2. AI model parameters: `model: claude-sonnet-4-6`,
+   `temperatura` 0.5-0.8 (we want stability),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}`.
 3. **`prompt_systemowy:`** the AI role, 1-2 sentences on the expected
    output format. PL model: „Jesteś redaktorem audiobooków. Twoja odpowiedź
@@ -1095,7 +1096,7 @@ a postproduction named **{etykieta}**.
      - RU: `(?i)\\n*(Пролог|Глава \\d+|Эпилог)\\n*`
 6. `min_dlugosc_fragmentu` (typically 50 chars; shorter chunks are skipped
    with the `etykieta_fragment_zbyt_krotki` message).
-7. `max_dlugosc_probki` (typically 4000-8000 chars for gpt-4o-mini — the
+7. `max_dlugosc_probki` (typically 4000-8000 chars — the
    context budget sent to the API).
 
 # NATIVE-LANGUAGE REQUIREMENTS
@@ -1209,7 +1210,7 @@ def prompt_jezyk_bazowy(kod_jezyka: str, etykieta_jezyka: str) -> str:
     inne_paczki = _paczki_referencyjne(kod_jezyka)
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
-project (wxPython + OpenAI). You have tools: Read, Write, Edit, Glob, Grep,
+project (wxPython + Anthropic). You have tools: Read, Write, Edit, Glob, Grep,
 Bash. Your job: create the base file for a new language and prepare the
 pack for engine verification.
 

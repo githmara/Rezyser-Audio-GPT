@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 18.2.1 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 18.2.2 „Wersja Wydawnicza"
+
+*Patch v18.2.2: korekta aktualności po konsolidacji na Anthropic (v18.0–v18.2) — usunięcie martwych odwołań do GPT-4o, w tym jednego realnie groźnego. `przepisy_rezysera.py` ustawiał domyślny `model: "gpt-4o"` dla przepisów Reżysera bez jawnego pola `model:` w YAML, a `rezyser_ai` przekazuje `przepis.model` WPROST do `messages.create` Anthropic — więc lingwista tworzący lub edytujący własny tryb i pomijający `model:` dostałby 404 model-not-found i wywalone wywołanie API. Domyślny model to teraz `claude-sonnet-4-6` (nowa stała `MODEL_DOMYSLNY`); paczki shippowane mają pole wypełnione, więc to zabezpieczenie ręcznie tworzonych YAML-i — zero zmian zachowania dla istniejących paczek. Reszta to czyszczenie martwych wzmianek o GPT-4o: szablony Managera Reguł (generator nowych trybów/postprodukcji) podsuwały `model: gpt-4o`/`gpt-4o-mini` i nagłówki „OpenAI parameters" → teraz `claude-sonnet-4-6` i „AI model parameters"; checklist „nowy tryb Opowieści" odzwierciedla zniesienie doboru modelu per tryb (v18.1: `_model_dla_trybu` zwraca bezwarunkowo `MODEL_NARRACJA`); opis repo na GitHub i `dictionaries/README.md` przestały twierdzić, że silnikiem jest GPT-4o. Czysto korekcyjny patch (kod + docs).*
 
 *Patch v18.2.1: domknięcie cichej wady trybu prozy Reżysera ujawnionej po migracji na Anthropic (v18.0). Tryby JSON (Skrypt/Burza) wykrywały `stop_reason=="max_tokens"`, ale ścieżka prozy (audiobook) ignorowała ten sygnał — odpowiedź ucięta na limicie długości (skutek instrukcji anti-closure, która każe modelowi NIE domykać scen) szła po cichu do pliku w połowie zdania z doklejonym `\n\n`. Teraz przy `max_tokens` jeden mikro-call domyka ostatnie zdanie w języku treści (prefiks + separator nietknięte → brak sklejki w pół słowa); niepowodzenie (ogon >2000 zn., błąd API, mikro-call też ucięty, odmowa) → fragment i tak zapisany + miękkie ostrzeżenie dla reżysera w 9 językach, a zapis NIGDY nie jest blokowany. Drugi wątek (wykryty przy okazji): dokończenie konsolidacji v18.2 w GUI Reżysera — `gui_rezyser` trzymał jeszcze zaszłego klienta OpenAI i bramkował panel flagiem „OBA klucze", przez co end-user z samym `ANTHROPIC_API_KEY` miał Reżysera WYŁĄCZONEGO, a `import openai` wciągał bibliotekę do `.exe`; po usunięciu klienta single-key działa realnie i runtime nie importuje już `openai`. Trzeci wątek: `openai` wraca do `requirements.txt` — jedyny żywy konsument OpenAI w repo to dyspozytorski bot intake na GitHub Actions (`gpt-4o-mini`), więc ukrywanie tej zależności było mylące; po fixie GUI runtime jest naprawdę single-provider, a wpis w requirements to czysto dev/CI (`.exe` i single-key end-usera bez zmian). Plus odchudzenie konstytucji agenta (CLAUDE.md poniżej miękkiego limitu 25k — pure-infra, poza paczką). Domknięto też ostatni dług konsolidacji — i18n szablonów person botów GitHub: wypowiedzi Lumi/Vieno/Katla/Sami przeniesione z hard-kodu Pythona do tłumaczalnych kluczy `bot.*` w `ui.yaml`, a boty wykrywają języki dynamicznie ze słowników (nowy język = nowy folder, zero edycji Pythona). Czysto infra botów/CI — bez zmian dla `.exe` ani klucza end-usera.*
 
@@ -85,6 +87,53 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 18.2.2 — patch (correctness cleanup: stale GPT-4o references removed after the Anthropic consolidation — including a Director-recipe fallback that would 404 on Anthropic if a YAML omits the model field)
+
+### 🆕 What's new (English)
+
+A correctness patch that removes leftover GPT-4o references from the v18.0–v18.2 Anthropic consolidation. The important one: Director "recipes" (`przepisy_rezysera.py`) defaulted a missing `model:` field to `"gpt-4o"`, and `rezyser_ai` passes that value straight into the Anthropic Messages API — so a translator who created or edited a custom Director mode and forgot the `model:` line would hit a 404 "model not found" and a broken call. The default is now `claude-sonnet-4-6` (a new `MODEL_DOMYSLNY` constant). Shipped packs already set the field, so this only hardens hand-edited YAMLs — no behavior change for existing packs.
+
+The rest is dead-reference cleanup. The Rule Manager's new-recipe templates (which generate starter YAML for new Director modes / post-production tools) suggested `model: gpt-4o`/`gpt-4o-mini` and "OpenAI parameters" headers — now `claude-sonnet-4-6` and "AI model parameters". The "new Story mode" wiring checklist now reflects that per-mode model selection was retired in v18.1 (`_model_dla_trybu` returns `MODEL_NARRACJA` unconditionally). The GitHub repo description and `dictionaries/README.md` no longer claim the engine is GPT-4o.
+
+### 🔭 Planned / deferred (English)
+
+- No behavior change for packs that already set `model:` explicitly — every shipped pack does. The fix only protects hand-authored recipes.
+- `core_tokeny.py` intentionally keeps `gpt-4o-mini`/`gpt-4o`: those are tiktoken encoder ids (`o200k_base`) used only for the memory-bar token count, never as an LLM call.
+- The remainder of these notes is in Polish.
+
+### TL;DR
+
+Patch korekcyjny domykający aktualność po konsolidacji na Anthropic (v18.0–v18.2). Najważniejszy element to realny bug: `przepisy_rezysera.py` ustawiał domyślny `model: "gpt-4o"` dla przepisów Reżysera bez jawnego pola `model:`, a `rezyser_ai` przekazuje `przepis.model` wprost do `messages.create` Anthropic — więc lingwista tworzący lub edytujący własny tryb i pomijający `model:` dostałby 404 model-not-found i wywalone wywołanie. Domyślny model to teraz `claude-sonnet-4-6` (stała `MODEL_DOMYSLNY`). Paczki shippowane mają pole wypełnione, więc poprawka chroni wyłącznie ręcznie tworzone YAML-e — zero zmian zachowania dla istniejących paczek. Reszta to czyszczenie martwych wzmianek o GPT-4o: szablony Managera Reguł, checklist „nowy tryb Opowieści", opis repo GitHub, `dictionaries/README.md`.
+
+### Co nowego
+
+- **Bezpieczny fallback modelu w przepisach Reżysera**: brak pola `model:` w YAML trybu/postprodukcji → `claude-sonnet-4-6` zamiast nieistniejącego po stronie Anthropic `gpt-4o` (eliminuje 404 dla ręcznie tworzonych przepisów; paczki shippowane bez zmian, bo mają pole wypełnione).
+- **Szablony Managera Reguł zaktualizowane**: generator nowych trybów/postprodukcji podsuwa `model: claude-sonnet-4-6` (było `gpt-4o`/`gpt-4o-mini`), nagłówki „OpenAI parameters" → „AI model parameters", preambuły agenta „(wxPython + OpenAI)" → „(wxPython + Anthropic)".
+- **Checklist „nowy tryb Opowieści" zgodny z v18.1**: krok o modelu odzwierciedla, że `_model_dla_trybu` zwraca bezwarunkowo `MODEL_NARRACJA` (`claude-sonnet-4-6`) — dobór modelu per tryb (`MODEL_QUALITY`/`MODEL_DOMYSLNY`) zniesiony.
+- **Opis repo na GitHub i `dictionaries/README.md`** już nie twierdzą, że silnikiem jest GPT-4o.
+
+### Pod maską
+
+- `przepisy_rezysera.py`: nowa stała `MODEL_DOMYSLNY = "claude-sonnet-4-6"`; pole dataclass `model` oraz `_yaml_to_przepis(data.get("model", …))` używają jej zamiast literału `"gpt-4o"`. Docstringi/komentarze („model OpenAI", „NIE zależy od OpenAI", „GPT-4/4o priorytet") zgeneralizowane na neutralne wobec dostawcy.
+- `manager_regul_szablony.py`: SZABLON 3 (tryb Reżysera) i SZABLON 4 (postprodukcja) generują `model: claude-sonnet-4-6`; sekcje STRUCTURE REQUIREMENTS, preambuły agenta i checklist Opowieści zaktualizowane; usunięte mylące „(or gpt-4o-mini for fast modes)" / „(or gpt-4o if reasoning)" (jeden model dla wszystkich wywołań).
+- `dictionaries/README.md`: „instrukcji dla modelu GPT-4o" → „modelu AI (Anthropic Claude Sonnet 4.6)".
+- Opis repo (metadane GitHub, poza paczką): „Integrated director (GPT-4o)" → „(Anthropic Claude)".
+
+### Co nie weszło
+
+- `core_tokeny.py` celowo zostaje z `gpt-4o-mini`/`gpt-4o` — to wyłącznie identyfikatory tokenizera tiktoken (`o200k_base`) do liczenia paska pamięci, nie wywołania LLM.
+- Historyczne wzmianki o GPT-4o w `RELEASE_NOTES.md` / `claude_archive.md` (zapis migracji) zostają jako prawdziwy ślad.
+
+### Walidacja
+
+- `py_compile przepisy_rezysera.py manager_regul_szablony.py` — OK.
+- Test izolowany (bez MainLoop): `MODEL_DOMYSLNY`, domyślna wartość pola dataclass ORAZ `_yaml_to_przepis` dla YAML bez `model:` → wszystkie `claude-sonnet-4-6`.
+- Szablony Managera: `szablon_tryb_rezysera` / `szablon_postprodukcja` nie zawierają już „gpt" i zawierają `claude-sonnet-4-6`.
+- `generuj_dokumentacje.py --waliduj` — placeholdery OK; `docs/*.txt` zregenerowane (diff = wyłącznie bump 18.2.1→18.2.2 w tytułach manual/tales ×9).
+- Opis repo GitHub potwierdzony przez `gh repo view`.
 
 ---
 

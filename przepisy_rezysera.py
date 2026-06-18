@@ -15,7 +15,7 @@ Dlaczego osobny plik?
 
       * zmienić język odpowiedzi (``jezyk_odpowiedzi: angielsku``),
       * osłabić lub wzmocnić Anti-Closure w trybie Audiobook,
-      * podmienić model (``gpt-4o`` → ``gpt-4o-mini``) punktowo,
+      * podmienić model punktowo (pole ``model:``; domyślnie ``claude-sonnet-4-6``),
       * dodać zupełnie nowy tryb (np. ``tryb_poezja.yaml``) bez dotykania
         kodu Pythona – wystarczy nowy YAML i restart aplikacji.
 
@@ -40,7 +40,8 @@ Publiczne API (używane przez ``rezyser_ai.py`` i ``gui_rezyser.py``):
     # Zbudowanie przypomnienia doklejanego do treści użytkownika:
     przypom = pr.buduj_przypomnienie(przepis)
 
-Moduł NIE zależy od wxPython ani od OpenAI – to czysty loader danych.
+Moduł NIE zależy od wxPython ani od żadnego SDK modelu (OpenAI/Anthropic)
+– to czysty loader danych.
 """
 
 from __future__ import annotations
@@ -68,6 +69,15 @@ FOLDER_REZYSER = "rezyser"
 KATEGORIA_TRYB = "tryb"
 KATEGORIA_POSTPROD = "postprodukcja"
 
+# Domyślny model AI dla przepisów BEZ jawnego pola ``model:`` w YAML-u.
+# Od v18.2 cały silnik Reżysera jedzie na Anthropic Claude (``rezyser_ai``
+# woła ``messages.create`` z ``model=przepis.model``), więc fallback MUSI być
+# identyfikatorem Anthropic. Gdyby został dawny ``"gpt-4o"``, przepis lingwisty
+# bez pola ``model:`` przekazałby do API model nieznany Anthropic i wywaliłby
+# całe wywołanie (404 model-not-found). Paczki shippowane mają ``model:``
+# wypełnione — ta stała chroni ręcznie tworzone / edytowane YAML-e.
+MODEL_DOMYSLNY = "claude-sonnet-4-6"
+
 
 # -----------------------------------------------------------------------------
 # Detekcja odrzucenia przez AI – niezależna od języka odpowiedzi
@@ -80,7 +90,7 @@ KATEGORIA_POSTPROD = "postprodukcja"
 # Rozwiązanie (od wersji 13.0): wymuszamy na modelu zwrócenie jednego,
 # niezmiennego tagu (``[ODRZUCENIE_AI]``) — nawet gdy cała reszta
 # odpowiedzi byłaby w obcym języku. Klauzula systemowa poniżej jest
-# celowo po angielsku: GPT-4/4o traktuje angielskie "SYSTEM RULE"
+# celowo po angielsku: model (Claude/GPT) traktuje angielskie "SYSTEM RULE"
 # nadal z wyższym priorytetem niż treści w języku użytkownika.
 TAG_ODRZUCENIA_AI = "[ODRZUCENIE_AI]"
 
@@ -115,7 +125,8 @@ class PrzepisRezysera:
         etykieta:         Tekst wyświetlany w RadioBox / menu GUI.
         kategoria:        ``"tryb"`` lub ``"postprodukcja"``.
         kolejnosc:        Sortowanie wyświetlania (rosnąco).
-        model:            Nazwa modelu OpenAI (np. ``"gpt-4o"``).
+        model:            Nazwa modelu AI (np. ``"claude-sonnet-4-6"``);
+                          pominięte w YAML → :data:`MODEL_DOMYSLNY` (Anthropic).
         temperatura:      Parametr ``temperature`` wywołania API.
         jezyk_odpowiedzi: Rzeczownik w miejscowniku (``"polsku"``,
                           ``"angielsku"``) wstawiany jako placeholder
@@ -184,7 +195,7 @@ class PrzepisRezysera:
     etykieta: str
     kategoria: str
     kolejnosc: int = 0
-    model: str = "gpt-4o"
+    model: str = MODEL_DOMYSLNY
     temperatura: float = 0.85
     jezyk_odpowiedzi: str = "polsku"
     # v17.9 (Obszar 3b): kod ISO języka TREŚCI generowanej przez ten przepis
@@ -282,7 +293,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
         etykieta=str(etykieta),
         kategoria=str(kategoria),
         kolejnosc=int(data.get("kolejnosc", 0)),
-        model=str(data.get("model", "gpt-4o")),
+        model=str(data.get("model", MODEL_DOMYSLNY)),
         temperatura=float(data.get("temperatura", 0.85)),
         jezyk_odpowiedzi=str(data.get("jezyk_odpowiedzi", "polsku")),
         kod_jezyka=str(data.get("kod_jezyka", "")).strip().lower(),
