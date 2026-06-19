@@ -778,6 +778,32 @@ def _wcetnij_blok_scalar(tresc: str, wciecie: int = 2) -> list[str]:
     return [prefix + l if l.strip() else "" for l in linie]
 
 
+def _kanoniczny_naglowek(kod_jezyka: str, nazwa_pliku: str) -> str:
+    """Kanoniczny nagłówek „NIE edytuj ręcznie" dla wynikowego docs-YAML.
+
+    Wydzielony z :func:`zbuduj_yaml_wynikowy`, żeby tryb ``--finalizuj`` mógł
+    podmienić nagłówek draftu na ten BEZ ponownego tłumaczenia (jedno źródło
+    prawdy dla brzmienia nagłówka).
+    """
+    sciezka_rel = f"dictionaries/{kod_jezyka}/gui/dokumentacja/{nazwa_pliku}"
+    zrodlo_rel = f"dictionaries/{KOD_ZRODLOWY}/gui/dokumentacja/{nazwa_pliku}"
+    return (
+        "# =============================================================================\n"
+        f"# {sciezka_rel}\n"
+        "#\n"
+        "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py\n"
+        f"# ze źródła {zrodlo_rel}\n"
+        "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj\n"
+        "# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.\n"
+        "#\n"
+        "# Silnik: Anthropic Claude (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}\n"
+        "# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1\n"
+        "# po weryfikacji parzystości multisetu markerów.\n"
+        "# =============================================================================\n"
+        "\n"
+    )
+
+
 def zbuduj_yaml_wynikowy(
     kod_jezyka: str,
     id_szablonu: str,
@@ -808,21 +834,7 @@ def zbuduj_yaml_wynikowy(
             sciezka_rel, zrodlo_rel, "buduj_wielojezyczne_docs.py",
         )
     else:
-        naglowek = (
-            "# =============================================================================\n"
-            f"# {sciezka_rel}\n"
-            "#\n"
-            "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py\n"
-            f"# ze źródła {zrodlo_rel}\n"
-            "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj\n"
-            "# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.\n"
-            "#\n"
-            "# Silnik: Anthropic Claude (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}\n"
-            "# zostały zamrożone tokenami ⟦i⟧ na czas tłumaczenia i odtworzone 1:1\n"
-            "# po weryfikacji parzystości multisetu markerów.\n"
-            "# =============================================================================\n"
-            "\n"
-        )
+        naglowek = _kanoniczny_naglowek(kod_jezyka, nazwa_pliku)
 
     if isinstance(tresc, str):
         # Stary schemat: jeden block-scalar `|`
@@ -1253,6 +1265,48 @@ def _zbierz_leaki_draftow(
 
 
 # ---------------------------------------------------------------------------
+# --finalizuj: lokalna podmiana nagłówka DRAFT → kanoniczny (zero API)
+# ---------------------------------------------------------------------------
+def _rozdziel_naglowek(yaml_str: str) -> tuple[list[str], str]:
+    """Dzieli zawartość YAML na (linie_nagłówka_komentarza, reszta_bez_separatora).
+
+    Nagłówek = ciągły blok wiodących linii `#` + (opcjonalnie) jedna pusta linia
+    separatora. Body docs (`id:` / `tresc: |`) nie zawiera komentarzy inline,
+    więc cięcie jest bezpieczne. Reużywa tej samej logiki co `podmien_top_comment`
+    w builderze UI.
+    """
+    linie = yaml_str.split("\n")
+    i = 0
+    while i < len(linie) and linie[i].lstrip().startswith("#"):
+        i += 1
+    naglowek = linie[:i]
+    if i < len(linie) and linie[i].strip() == "":
+        i += 1
+    return naglowek, "\n".join(linie[i:])
+
+
+def finalizuj_naglowek_docs(cel: Path, kod: str, nazwa_pliku: str) -> str:
+    """Podmienia nagłówek DRAFT na kanoniczny BEZ retłumaczenia. Zwraca status.
+
+    Status: ``"ok"`` (podmieniono), ``"brak"`` (plik nie istnieje),
+    ``"nie-draft"`` (brak markera draftu — plik już kanoniczny / ręcznie
+    sfinalizowany; idempotentny no-op). Treść (z poprawkami recenzenta) NIE jest
+    tknięta — przepisujemy tylko blok nagłówkowy.
+    """
+    if not cel.is_file():
+        return "brak"
+    with open(cel, "r", encoding="utf-8") as fh:
+        tresc = fh.read()
+    naglowek_linie, body = _rozdziel_naglowek(tresc)
+    if przeglad_tlumaczen.MARKER_DRAFTU not in "\n".join(naglowek_linie):
+        return "nie-draft"
+    nowy = _kanoniczny_naglowek(kod, nazwa_pliku) + body
+    with open(cel, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(nowy)
+    return "ok"
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def _parsuj_argumenty() -> argparse.Namespace:
@@ -1340,7 +1394,19 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "`skrypty/przeglad_docs.md`. Użycie: paczka kontrybucji nowego języka "
              "wysyłana osobie trzeciej / agentowi do recenzji (recenzent bez naszej "
              "konstytucji nie dostaje sprzecznego rozkazu). Pliki lądują w normalnej "
-             "ścieżce — po akceptacji regeneruj bez --draft (kanoniczny nagłówek).",
+             "ścieżce — po akceptacji i ręcznych poprawkach uruchom `--finalizuj` "
+             "(podmienia nagłówek na kanoniczny BEZ retłumaczenia). NIE regeneruj "
+             "bez --draft — pełne tłumaczenie nadpisałoby plik i cofnęło poprawki.",
+    )
+    parser.add_argument(
+        "--finalizuj",
+        action="store_true",
+        help="FINALIZACJA draftu (zero API, zero retłumaczenia). Dla wybranych "
+             "języków/szablonów podmienia roboczy nagłówek „WORKING DRAFT” na "
+             "kanoniczny „NIE edytuj ręcznie”, ZACHOWUJĄC całą treść (w tym ręczne "
+             "poprawki halucynacji recenzenta). Pliki bez markera draftu są pomijane "
+             "(idempotentne). To właściwy krok po akceptacji przeglądu — w miejsce "
+             "destrukcyjnego „regeneruj bez --draft”.",
     )
     parser.add_argument(
         "--input",
@@ -1366,6 +1432,12 @@ def _parsuj_argumenty() -> argparse.Namespace:
     if args.input and not args.szablony:
         parser.error("--input wymaga --szablony <plik> (np. `--szablony tales`), żeby "
                      "wiedzieć z którego pliku brać sekcje wskazane w input.log.")
+    if args.finalizuj and (args.draft or args.klucz or args.retry or args.input
+                           or args.skip_existing or args.dry_run):
+        parser.error("--finalizuj to czysto lokalna podmiana nagłówka (zero API) — "
+                     "nie łącz z --draft/--klucz/--retry/--input/--skip-existing/"
+                     "--dry-run. Wybierz języki przez --jezyki/--wszystkie "
+                     "(opcjonalnie zawęź --szablony).")
     return args
 
 
@@ -1474,6 +1546,30 @@ def main() -> int:
             f"ℹ️  Szablony PL: filtr `--szablony` wybrał {wybrana_lista} "
             f"({len(szablony)}/{len(wszystkie_szablony)} dostępnych: {pelna_lista})."
         )
+
+    # --finalizuj: czysto lokalna podmiana nagłówka DRAFT → kanoniczny. Zero API,
+    # zero retłumaczenia — załatwiamy od razu i wychodzimy (przed inicjalizacją
+    # klienta Anthropic, bo nie jest potrzebny).
+    if args.finalizuj:
+        zmienione = 0
+        nie_drafty = 0
+        braki = 0
+        for kod in kody:
+            for nazwa_pliku, _id, _sekcje in szablony:
+                cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
+                status = finalizuj_naglowek_docs(cel, kod, nazwa_pliku)
+                if status == "ok":
+                    zmienione += 1
+                    print(f"✅ {kod}/{nazwa_pliku}: nagłówek DRAFT → kanoniczny (treść nietknięta).")
+                elif status == "nie-draft":
+                    nie_drafty += 1
+                    print(f"⏭️  {kod}/{nazwa_pliku}: brak markera draftu — pomijam (już kanoniczny).")
+                else:
+                    braki += 1
+                    print(f"⚠️  {kod}/{nazwa_pliku}: plik nie istnieje — pomijam.")
+        print("\n========== PODSUMOWANIE (--finalizuj) ==========")
+        print(f"✅ Sfinalizowano: {zmienione} | ⏭️ już kanoniczne: {nie_drafty} | ⚠️ brak pliku: {braki}")
+        return 0
 
     klient: Any = None if args.dry_run else _zainicjuj_klienta_anthropic()
 

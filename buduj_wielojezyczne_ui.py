@@ -659,6 +659,35 @@ def podmien_top_comment(yaml_str: str, kod_jezyka: str, *, tryb_draft: bool = Fa
     return _auto_naglowek(kod_jezyka, tryb_draft=tryb_draft) + reszta
 
 
+def finalizuj_naglowek_ui(cel: Path, kod: str) -> str:
+    """Podmienia nagłówek DRAFT ui.yaml na kanoniczny BEZ retłumaczenia.
+
+    Zwraca status: ``"ok"`` (podmieniono), ``"brak"`` (plik nie istnieje),
+    ``"nie-draft"`` (brak markera draftu — plik już kanoniczny; idempotentny
+    no-op). Treść (z ręcznymi poprawkami recenzenta) NIE jest tknięta — reużywa
+    `podmien_top_comment` (strip wiodących `#` + 1 pusta → kanoniczny nagłówek),
+    który zachowuje sekcyjny komentarz `# APP – ...` i resztę pliku 1:1.
+    """
+    if not cel.is_file():
+        return "brak"
+    with open(cel, "r", encoding="utf-8") as fh:
+        tresc = fh.read()
+    # Marker sprawdzamy WYŁĄCZNIE w wiodącym bloku komentarza (nie w całym pliku),
+    # żeby przypadkowe wystąpienie frazy w treści nie udawało draftu.
+    naglowek_linie: list[str] = []
+    for linia in tresc.split("\n"):
+        if linia.lstrip().startswith("#"):
+            naglowek_linie.append(linia)
+        else:
+            break
+    if przeglad_tlumaczen.MARKER_DRAFTU not in "\n".join(naglowek_linie):
+        return "nie-draft"
+    nowy = podmien_top_comment(tresc, kod, tryb_draft=False)
+    with open(cel, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(nowy)
+    return "ok"
+
+
 # ---------------------------------------------------------------------------
 # Pipeline dla jednego języka
 # ---------------------------------------------------------------------------
@@ -896,7 +925,19 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "przebiegu emituje checklistę przeglądu do `skrypty/przeglad_ui.md`. "
              "Użycie: paczka kontrybucji nowego języka wysyłana osobie trzeciej / "
              "agentowi do recenzji. Pliki lądują w normalnej ścieżce — po akceptacji "
-             "regeneruj bez --draft (kanoniczny nagłówek).",
+             "i ręcznych poprawkach uruchom `--finalizuj` (podmienia nagłówek na "
+             "kanoniczny BEZ retłumaczenia). NIE regeneruj bez --draft — pełne "
+             "tłumaczenie nadpisałoby plik i cofnęło poprawki.",
+    )
+    parser.add_argument(
+        "--finalizuj",
+        action="store_true",
+        help="FINALIZACJA draftu (zero API, zero retłumaczenia). Dla wybranych "
+             "języków podmienia roboczy nagłówek „WORKING DRAFT” w "
+             "`<kod>/gui/ui.yaml` na kanoniczny „NIE edytuj ręcznie”, ZACHOWUJĄC "
+             "całą treść (w tym ręczne poprawki recenzenta). Pliki bez markera "
+             "draftu są pomijane (idempotentne). To właściwy krok po akceptacji "
+             "przeglądu — w miejsce destrukcyjnego „regeneruj bez --draft”.",
     )
     parser.add_argument(
         "--klucz",
@@ -914,6 +955,10 @@ def _parsuj_argumenty() -> argparse.Namespace:
     if args.klucz and args.skip_existing:
         parser.error("--klucz i --skip-existing wzajemnie się wykluczają "
                      "(--klucz celowo nadpisuje wybrane liście w istniejącym pliku).")
+    if args.finalizuj and (args.draft or args.klucz or args.skip_existing or args.dry_run):
+        parser.error("--finalizuj to czysto lokalna podmiana nagłówka (zero API) — "
+                     "nie łącz z --draft/--klucz/--skip-existing/--dry-run. "
+                     "Wybierz języki przez --jezyki/--wszystkie.")
     return args
 
 
@@ -933,6 +978,28 @@ def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
 def main() -> int:
     args = _parsuj_argumenty()
     kody = _wybierz_jezyki(args)
+
+    # --finalizuj: czysto lokalna podmiana nagłówka DRAFT → kanoniczny. Zero API,
+    # zero retłumaczenia, zero potrzeby wczytywania źródła PL — załatwiamy i wracamy.
+    if args.finalizuj:
+        zmienione = 0
+        nie_drafty = 0
+        braki = 0
+        for kod in kody:
+            cel = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
+            status = finalizuj_naglowek_ui(cel, kod)
+            if status == "ok":
+                zmienione += 1
+                print(f"✅ {kod}/{NAZWA_UI}: nagłówek DRAFT → kanoniczny (treść nietknięta).")
+            elif status == "nie-draft":
+                nie_drafty += 1
+                print(f"⏭️  {kod}/{NAZWA_UI}: brak markera draftu — pomijam (już kanoniczny).")
+            else:
+                braki += 1
+                print(f"⚠️  {kod}/{NAZWA_UI}: plik nie istnieje — pomijam.")
+        print("\n========== PODSUMOWANIE (--finalizuj) ==========")
+        print(f"✅ Sfinalizowano: {zmienione} | ⏭️ już kanoniczne: {nie_drafty} | ⚠️ brak pliku: {braki}")
+        return 0
 
     # Wczytanie źródła PL przez ruamel round-trip (komentarze zachowane).
     # `width=10**9` zapobiega zawijaniu długich linii (welcome_text itp.).
