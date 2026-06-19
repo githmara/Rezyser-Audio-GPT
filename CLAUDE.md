@@ -103,11 +103,6 @@ Flow odpowiedzi na pytanie/help wanted domykasz LOKALNIE przez `odpowiedz_lokaln
 - ZAWSZE zrób review (`git --no-pager diff`) zanim zapiszesz stan na stałe w repozytorium.
 
 # DROGOWSKAZY DO POZOSTAŁYCH WARSTW PAMIĘCI
-
-**`claude_archive.md` (Muzeum, w repo)** — grube post-mortemy, pełne stare obejścia, zarchiwizowane roadmapy zamkniętych wydań (13.7 → v16.0) i ewolucje zniesionych mechanizmów (answer-flow atomic-reset, force-push-tag v15.2.7, question-flow v15.2.6→v15.2.8, incydenty fi/manual.yaml i #13 auto-close, przykład ES `ñ → nj`). **KATEGORYCZNY ZAKAZ czytania/ładowania na start — sięgaj tam WYŁĄCZNIE na bezpośredni rozkaz użytkownika „przeszukaj archiwum".**
-
-**`MEMORY.md` + `memory/*.md` (Podświadomość, poza repo, auto-load)** — techniczne niuanse, lessons learned, ścieżki awaryjne w 4 filarach. Pełne hooki w `MEMORY.md` (ładowanym automatycznie); filary czytane po referencji `[[name]]`:
-- [[reguly_tlumaczen]] — autotłumacz, review halucynacji, literały kod-vs-`ui.yaml`, lokalizacja nazw, bazy pl/en.
-- [[reguly_github_bot]] — slim bot `fixed-in-release` + `odpowiedz_lokalnie.py`, ZAKAZ auto-close keywords, env-zamiast-argv, prompt Sami.
-- [[reguly_git_workflow]] — direct-to-main, hotfix=patch tag, iteracyjny patch/force-push tag-only, gh CLI release-flow.
-- [[reguly_architektury]] — prompty LLM w YAML, kolejność akcentów, `runtime/` niewidoczny, model per tryb, staging, komunikacja.
+Pełne opisy → sekcja „TRÓJWARSTWOWY MODEL PAMIĘCI AGENTA" wyżej. Skrót:
+- **`claude_archive.md`** (Muzeum, w repo) — post-mortemy, pełne stare obejścia, zamknięte roadmapy. **KATEGORYCZNY ZAKAZ czytania/ładowania na start — WYŁĄCZNIE na rozkaz „przeszukaj archiwum".**
+- **`MEMORY.md` + `memory/*.md`** (Podświadomość, prywatne poza publicznym repo, auto-load) — 4 filary: [[reguly_tlumaczen]], [[reguly_github_bot]], [[reguly_git_workflow]], [[reguly_architektury]]. Pełne hooki w auto-ładowanym `MEMORY.md`; filary czytane po referencji `[[name]]`.
