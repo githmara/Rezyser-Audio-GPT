@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Modulo Storie Interattive (18.2.2 – Versione di Rilascio)
+Reżyser Audio GPT — Modulo Storie Interattive (18.3.0 – Versione di Rilascio)
 
 Il secondo principale modo dell'applicazione accanto a Regista — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
 
@@ -80,8 +80,6 @@ Nel campo azione, puoi inserire in qualsiasi momento un comando che inizia con u
 Il motore narrativo di tutte le modalità Storie utilizza un unico modello Anthropic Claude Sonnet 4.6 (dalla versione 18.1; in precedenza veniva selezionato un modello OpenAI per modalità). Un modello più potente aderisce rigorosamente alle regole del mondo — questo è particolarmente importante nella modalità Minore Male, dove ogni opzione deve rimanere realmente svantaggiosa.
 
 /wizualizuj <opis>, /visualize <opis> — descrizione multisensoriale della scena attuale. Non cambia lo stato del gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata, NON viene aggiunto alla narrazione né salvato nel file audiolibro. Esempio: "/wizualizuj come appare la guardia" o "/wizualizuj l'odore del caffè".
-
-/odswiez, /refresh — aggiorna la memoria interna dal file di narrazione dopo la sua modifica manuale (dalla versione 15.5). Quando apri opowiesci/<nazwa>.txt in un editor e ad esempio correggi un errore di battitura o tagli un paragrafo in eccesso, questo comando sincronizza il finale fresco con il contesto del motore — senza un reset rigido e senza ricaricare il gioco. (Il pulsante equivalente "Aggiorna dal disco" è un'opzione tecnica, nascosta di default — il comando funziona sempre.) Se esiste già un riassunto dei turni precedenti, rimane intatto, quindi il turno successivo e il riassunto successivo non verranno creati su dati non aggiornati. ATTENZIONE: lo stato del gioco (personaggi, posizione, equipaggiamento, trame) dal file .game.json NON viene aggiornato — se la modifica ha cambiato i fatti del mondo, il turno successivo potrebbe non corrispondere.
 
 /pomoc, /help — visualizza una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura e compatibile con NVDA — il campo di testo riceve automaticamente il focus, il lettore di schermo legge immediatamente l'intero elenco senza necessità di navigazione.
 

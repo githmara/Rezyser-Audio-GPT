@@ -1315,6 +1315,13 @@ opowiesci:
   err_dlugosc: La réponse du modèle a été coupée avant qu'il ne puisse la terminer (limite de longueur dépassée). Raccourcissez le contexte et réessayez.
   odrzucenie_tytul: Action impossible à mener
   odrzucenie_tresc: Le moteur narratif ne peut pas mener cette action — elle pourrait être hors sujet, impossible dans ce monde ou non conforme aux règles de contenu. Le tour n'a pas été enregistré. Reformulez l'action et réessayez.
+  btn_zamknij_gre_label: '&Fermer la partie'
+  btn_zamknij_gre_tooltip: Ferme la partie en cours et revient à l'écran de création d'une nouvelle partie (déverrouille le choix du mode et le Quick Start). La partie est sauvegardée sur le disque — vous pourrez la recharger ultérieurement. Une confirmation vous sera demandée.
+  zamknij_gre_pytanie_tytul: Fermer la partie en cours ?
+  zamknij_gre_pytanie: "Fermer la partie en cours et revenir à l'écran de création d'une nouvelle partie ?\n\nL'état de la partie est sauvegardé sur le disque après chaque tour, vous ne perdez donc rien — vous pourrez la recharger plus tard via le bouton « Charger »."
+  komenda_odswiez_zablokowana_tytul: Commande verrouillée
+  komenda_odswiez_zablokowana_tresc: La commande « {komenda} » est verrouillée par défaut, car le rechargement de la narration depuis le disque ne recalcule pas l'état du jeu (personnages, lieu, équipement) et peut provoquer une dérive sémantique. Pour la déverrouiller, définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 et générez votre propre package.
+  komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — verrouillées ; définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 pour déverrouiller)
 bot:
   closure:
     Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio AI.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"

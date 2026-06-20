@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (18.2.2 – Julkaisuversio)
+Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (18.3.0 – Julkaisuversio)
 
 Toinen sovelluksen päätila Ohjaajan rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly ohjaa kerrontaa yksikön toisessa persoonassa ("Kävelet sumuisen metsän läpi, tunnet märän lehden tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla vapaamuotoisen toiminnon tai valitsemalla yhden numeroiduista vaihtoehdoista.
 
@@ -80,8 +80,6 @@ Toimintokentässä voit milloin tahansa kirjoittaa komennon, joka alkaa vinoviiv
 Kaikkien Tarinat-tilojen kerrontamoottori käyttää yhtä Anthropic Claude Sonnet 4.6 -mallia (v18.1:stä alkaen; aiemmin valittiin OpenAI-malli per tila). Vahvempi malli noudattaa tiukasti maailman sääntöjä — tämä on erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on pysyttävä todellisesti epäsuotuisana.
 
 /wizualizuj <opis>, /visualize <opis> — moniaistinen kuvaus nykyisestä kohtauksesta. Ei muuta pelitilaa, ei ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, kosketus, maku) näyttääkseen kohtauksen syvemmin. Tulos ilmestyy erilliseen dialogiin, eikä sitä lisätä kerrontaan tai tallenneta äänikirjatiedostoon. Esimerkki: „/wizualizuj miten vartija näyttää" tai „/wizualizuj kahvilan tuoksu".
-
-/odswiez, /refresh — päivittää sisäisen muistin kerrontatiedostosta sen manuaalisen muokkauksen jälkeen (v15.5:stä alkaen). Kun avaat opowiesci/<nazwa>.txt editorissa ja esimerkiksi korjaat kirjoitusvirheen tai poistat ylimääräisen kappaleen, tämä komento synkronoi tuoreen lopun moottorin kontekstiin — ilman kovaa resetointia ja pelin uudelleenlatausta. (Vastaava painike „Päivitä levyltä" on tekninen vaihtoehto, oletuksena piilotettu — komento toimii aina.) Jos aiempien vuorojen yhteenveto on jo olemassa, se pysyy koskemattomana, joten seuraava vuoro ja yhteenveto eivät perustu vanhentuneisiin tietoihin. HUOMIO: pelitila (hahmot, sijainti, varusteet, juonet) .game.json-tiedostosta EI päivitetä — jos muokkaus muutti maailman faktoja, seuraava vuoro saattaa erota niistä.
 
 /pomoc, /help — näyttää dialogi-ikkunan, jossa on luettelo kaikista saatavilla olevista komennoista. Dialogi on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee koko luettelon heti ilman navigointia.
 

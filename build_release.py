@@ -860,6 +860,57 @@ def _parsuj_argumenty() -> argparse.Namespace:
     return parser.parse_args()
 
 
+# =============================================================================
+# STRAŻNIK FLAG DEBUG (od 18.3 — siatka bezpieczeństwa przed wyciekiem do paczki)
+# =============================================================================
+# Niektóre funkcje techniczne są ukryte za stałą boolean zaszytą w źródle
+# (NIE env-var, NIE user-facing), domyślnie False. Deweloper przełącza ją na
+# True, by poeksperymentować lokalnie (np. ręczna edycja `.game.json`), i łatwo
+# zapomnieć cofnąć przed buildem — wtedy ryzykowna funkcja trafiłaby do paczki
+# end-usera. Ten strażnik twardo odmawia buildu, gdy którakolwiek flaga = True.
+# Druga warstwa (hook pre-commit w `hooks/pre-commit`) pilnuje commitów; tutaj
+# pilnujemy samego buildu — niezależnie, czy hook był aktywny.
+#
+# Lista rozszerzalna: (plik, regex wykrywający stan "niebezpieczny", etykieta).
+_FLAGI_DEBUG: list[tuple[str, str, str]] = [
+    (
+        "gui_opowiesci.py",
+        r"^EDYCJA_STANU_GRY_WIDOCZNA\s*=\s*True",
+        "EDYCJA_STANU_GRY_WIDOCZNA",
+    ),
+]
+
+
+def _weryfikuj_flagi_debug() -> None:
+    """Aborts the build if any debug flag is left enabled in the source.
+
+    Mirrors the doc-validation gate above: a standalone concern in dev, but a
+    FATAL at build time so the installer never ships a debug feature exposed.
+    """
+    print("🔍 Verifying debug flags are disabled...")
+    znalezione: list[str] = []
+    for nazwa_pliku, wzorzec, etykieta in _FLAGI_DEBUG:
+        sciezka = Path(__file__).resolve().parent / nazwa_pliku
+        try:
+            tekst = sciezka.read_text(encoding="utf-8")
+        except OSError as exc:
+            print(f"❌ FATAL: cannot read {nazwa_pliku} to verify debug flags: {exc}")
+            sys.exit(1)
+        if re.search(wzorzec, tekst, flags=re.MULTILINE):
+            znalezione.append(f"   • {etykieta} = True  ({nazwa_pliku})")
+
+    if znalezione:
+        print("❌ FATAL: a debug flag is still enabled — refusing to build.")
+        print("These flags expose technical/experimental features to the end user")
+        print("and must be False in a release build. Set them back, then rebuild")
+        print("(the pre-commit hook in hooks/ auto-resets them on commit).")
+        for linia in znalezione:
+            print(linia)
+        sys.exit(1)
+
+    print("✅ Debug flags verified (all disabled).\n")
+
+
 def main(args: argparse.Namespace | None = None) -> None:
     # Allow main() to be called from CLI (with parser) or programmatically
     # (with `args=argparse.Namespace(yes=False, no_cleanup=False,
@@ -979,6 +1030,9 @@ def main(args: argparse.Namespace | None = None) -> None:
         sys.exit(1)
 
     print(f"✅ Documentation regenerated ({len(wyniki_docs)} files, clean).\n")
+
+    # 6b. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
+    _weryfikuj_flagi_debug()
 
     # 7. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,
     # następnie skompletuj paczkę (dictionaries/ + docs/ OBOK exe), żeby dist/

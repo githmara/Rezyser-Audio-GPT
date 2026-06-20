@@ -1320,6 +1320,13 @@ opowiesci:
   err_dlugosc: Mallin vastaus katkaistiin ennen kuin se ehti lopettaa sen (pituusraja ylitetty). Lyhennä kontekstia ja yritä uudelleen.
   odrzucenie_tytul: Toimintoa ei voida suorittaa
   odrzucenie_tresc: Kerrontamoottori ei voi suorittaa tätä toimintoa — se saattoi olla aiheen ulkopuolella, mahdoton tässä maailmassa tai ristiriidassa sisältösääntöjen kanssa. Vuoroa ei ole tallennettu. Muotoile toiminto uudelleen ja yritä uudelleen.
+  btn_zamknij_gre_label: '&Sulje peli'
+  btn_zamknij_gre_tooltip: Sulkee nykyisen pelin ja palaa uuden pelin aloitusnäyttöön (vapauttaa pelitilan valinnan ja Quick Startin). Peli on tallennettu levylle — voit ladata sen myöhemmin uudelleen. Vahvistus pyydetään.
+  zamknij_gre_pytanie_tytul: Suljetaanko nykyinen peli?
+  zamknij_gre_pytanie: "Suljetaanko nykyinen peli ja palataan uuden pelin aloitusnäyttöön?\n\nPelin tila tallennetaan levylle jokaisen vuoron jälkeen, joten et menetä mitään — pelin voi ladata myöhemmin uudelleen \"Lataa\"-painikkeella."
+  komenda_odswiez_zablokowana_tytul: Komento estetty
+  komenda_odswiez_zablokowana_tresc: Komento „{komenda}" on oletuksena estetty, koska tarinan päivittäminen levyltä ei laske pelin tilaa uudelleen (hahmot, sijainti, varusteet) ja voi aiheuttaa semanttista ajautumista. Ottaaksesi sen käyttöön, aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ja rakenna oma paketti.
+  komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — estetty; aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ottaaksesi käyttöön)
 bot:
   closure:
     Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Audio AI -ohjaajan julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"

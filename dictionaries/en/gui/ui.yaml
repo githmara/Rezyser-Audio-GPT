@@ -1329,6 +1329,13 @@ opowiesci:
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context and try again.
   odrzucenie_tytul: Action cannot be conducted
   odrzucenie_tresc: The narrative engine cannot conduct this action — it might have been off-topic, impossible in this world, or against content rules. The turn was not saved. Rephrase the action and try again.
+  btn_zamknij_gre_label: '&Close Game'
+  btn_zamknij_gre_tooltip: Closes the current game and returns to the new game setup screen (unlocks mode selection and Quick Start). The game is saved to disk — you can load it later. A confirmation prompt will appear.
+  zamknij_gre_pytanie_tytul: Close current game?
+  zamknij_gre_pytanie: "Close the current game and return to the new game setup screen?\n\nThe game state is saved to disk after each turn, so nothing is lost — you can reload the game later using the \"Load\" button."
+  komenda_odswiez_zablokowana_tytul: Command locked
+  komenda_odswiez_zablokowana_tresc: The "{komenda}" command is locked by default, because refreshing the narrative from disk does not recalculate the game state (characters, location, inventory) and may cause semantic drift. To unlock it, set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 and build your own package.
+  komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — locked; set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 to unlock)
 bot:
   closure:
     Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio AI Director release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"

@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (18.2.2 – Version de Lancement)
+Reżyser Audio GPT — Module Histoires Interactives (18.3.0 – Version de Lancement)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
@@ -80,8 +80,6 @@ Dans le champ d'action, vous pouvez à tout moment entrer une commande commença
 Le moteur narratif de tous les modes Opowieści utilise un seul modèle Anthropic Claude Sonnet 4.6 (à partir de la v18.1 ; auparavant, un modèle OpenAI était sélectionné par mode). Un modèle plus puissant respecte rigoureusement les règles du monde — c'est particulièrement important dans le mode Moindre Mal, où chaque option doit rester réellement défavorable.
 
 /wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne modifie pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée, il n'est PAS ajouté à la narration ni enregistré dans le fichier audiobook. Exemple : « /wizualizuj jak wygląda strażnik » ou « /wizualizuj zapach kawiarni ».
-
-/odswiez, /refresh — rafraîchit la mémoire interne à partir du fichier de narration après son édition manuelle (à partir de la v15.5). Lorsque vous ouvrez opowiesci/<nazwa>.txt dans un éditeur et que vous corrigez par exemple une faute de frappe ou que vous coupez un paragraphe superflu, cette commande synchronise la nouvelle fin avec le contexte du moteur — sans réinitialisation complète et rechargement du jeu. (Le bouton équivalent « Actualiser depuis le disque » est une option technique, cachée par défaut — la commande fonctionne toujours.) Si un résumé des tours précédents existe déjà, il reste intact, donc le tour suivant et le résumé suivant ne seront pas basés sur des données obsolètes. ATTENTION : l'état du jeu (personnages, emplacement, inventaire, intrigues) du fichier .game.json N'est PAS mis à jour — si l'édition a modifié les faits du monde, le tour suivant peut ne pas correspondre.
 
 /pomoc, /help — affiche une fenêtre de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
 

@@ -60,6 +60,12 @@ KATALOG_BAZOWY: Path = _wyznacz_baze()
 # Wariant string dla kodu operującego na `os.path.join(...)` zamiast `pathlib`.
 KATALOG_BAZOWY_STR: str = str(KATALOG_BAZOWY)
 
+# Czy aplikacja działa jako zamrożona paczka (PyInstaller), czy ze źródła.
+# Wyznaczane raz przy imporcie (jak wyżej — `sys.frozen` jest niezmienne).
+# Używane m.in. do różnicowania komunikatów dev vs end-user (np. bramka
+# komend technicznych w trybie Opowieści — patrz gui_opowiesci).
+JEST_FROZEN: bool = getattr(sys, "frozen", False)
+
 
 # ---------------------------------------------------------------------------
 # Otwieranie plików/folderów domyślną aplikacją systemową (cross-platform)

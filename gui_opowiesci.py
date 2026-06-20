@@ -349,6 +349,17 @@ class OpowiesciPanel(wx.Panel):
         self._btn_wczytaj = wx.Button(self, label=t("opowiesci.btn_wczytaj_label"))
         self._btn_wczytaj.SetToolTip(t("opowiesci.btn_wczytaj_tooltip"))
 
+        # 18.3: świadoma akcja zamknięcia gry — zastępuje kruchy guard
+        # `_on_nazwa_gry_change`, który reagował na każdą zmianę pola nazwy
+        # (ryzyko rozjazdu UI ze stanem przy edycji w trakcie wysyłki tury).
+        # Filozofia hard-resetu Reżysera. Przycisk jest zawsze widoczny;
+        # `_aktualizuj_uistate` aktywuje go (Enable) tylko gdy gra trwa, a pole
+        # nazwy + Nowa gra + Wczytaj wyłącza. Enable/Disable zamiast Show/Hide —
+        # nowsze NVDA pomija wyłączone kontrolki przy tabowaniu (spójnie z
+        # Reżyserem, bez skakania layoutu).
+        self._btn_zamknij_gre = wx.Button(self, label=t("opowiesci.btn_zamknij_gre_label"))
+        self._btn_zamknij_gre.SetToolTip(t("opowiesci.btn_zamknij_gre_tooltip"))
+
         self._btn_zapisz = wx.Button(self, label=t("opowiesci.btn_zapisz_label"))
         self._btn_zapisz.SetToolTip(t("opowiesci.btn_zapisz_tooltip"))
 
@@ -397,6 +408,8 @@ class OpowiesciPanel(wx.Panel):
         row.Add(self._btn_nowa_gra,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         row.Add(self._btn_wczytaj,
+                flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
+        row.Add(self._btn_zamknij_gre,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
         row.Add(self._btn_zapisz,
                 flag=wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, border=4)
@@ -681,6 +694,8 @@ class OpowiesciPanel(wx.Panel):
         self._btn_nowa_gra.Bind(wx.EVT_BUTTON, self._on_nowa_gra)
         self._btn_wczytaj.Bind(wx.EVT_BUTTON, self._on_wczytaj)
         self._btn_zapisz.Bind(wx.EVT_BUTTON, self._on_zapisz)
+        # 18.3: zamknięcie aktywnej gry → powrót do stanu zakładania nowej.
+        self._btn_zamknij_gre.Bind(wx.EVT_BUTTON, self._on_zamknij_gre)
         self._btn_otworz_narracje.Bind(wx.EVT_BUTTON, self._on_otworz_narracje)
         self._btn_odswiez_z_dysku.Bind(wx.EVT_BUTTON, self._on_odswiez_z_dysku)
         # v15.6: opt-in techniczna edycja `.game.json` (bind aktywny zawsze;
@@ -691,12 +706,12 @@ class OpowiesciPanel(wx.Panel):
         self._btn_zasady_swiata.Bind(wx.EVT_BUTTON, self._on_zasady_swiata)
         # Furtka awaryjna: ręczna zmiana trybu w trakcie aktywnej gry.
         self._btn_edytuj_tryb.Bind(wx.EVT_BUTTON, self._on_edytuj_tryb)
-        # Pole nazwy gry: wpisanie innej nazwy niż aktywny projekt sygnalizuje
-        # zamiar założenia nowej gry — RadioBox odblokowuje się, żeby gracz
-        # mógł wybrać inny tryb. Powrót do nazwy bieżącej gry przywraca
-        # zamrożenie. Bez tego bindu nie da się zmienić trybu między dwoma
-        # grami w tej samej sesji aplikacji (`/koniec` zamyka apkę).
-        self._txt_nazwa_gry.Bind(wx.EVT_TEXT, self._on_nazwa_gry_change)
+        # 18.3: ścieżka ekspercka (parytet z gui_rezyser._on_load) — Enter w polu
+        # nazwy wczytuje grę o tej nazwie wprost, bez dialogu wyboru. Dawny guard
+        # `_on_nazwa_gry_change` (reagujący na każdą zmianę pola) usunięty: w
+        # trakcie gry pasek jest zwinięty do „Zamknij grę", więc pole nie jest
+        # edytowalne podczas tury — znika ryzyko rozjazdu UI ze stanem.
+        self._txt_nazwa_gry.Bind(wx.EVT_TEXT_ENTER, self._on_wczytaj)
         # `_rb_tryb` bez callbacku — wybór trybu odczytujemy w `_on_wyslij`.
 
     def _on_placeholder(self, _event: wx.Event) -> None:
@@ -1307,6 +1322,18 @@ class OpowiesciPanel(wx.Panel):
         # aktywnej gry — presety dotyczą wyłącznie zakładania nowej gry.
         self._lbl_quick_start.Show(not ma_projekt)
         self._choice_zaczatek.Show(not ma_projekt)
+
+        # 18.3: pasek zakładania gry (nazwa + Nowa gra + Wczytaj) jest aktywny
+        # tylko w stanie SETUP; w trakcie gry wyłączamy go i aktywujemy „Zamknij
+        # grę". Enable/Disable zamiast Show/Hide — nowsze NVDA pomija wyłączone
+        # kontrolki przy tabowaniu (niewidomy gracz ich nie napotka), a layout
+        # nie skacze. Spójne z Reżyserem (`_txt_file_name.Enable(...)`,
+        # `_btn_load.Enable(...)`). Quick Start (label + Choice) ZOSTAJE na
+        # Show/Hide wyżej — to elementy bez sensu w trakcie rozgrywki.
+        self._txt_nazwa_gry.Enable(not ma_projekt)
+        self._btn_nowa_gra.Enable(not ma_projekt)
+        self._btn_wczytaj.Enable(not ma_projekt)
+        self._btn_zamknij_gre.Enable(ma_projekt)
         self.Layout()
 
     def _ustaw_rb_z_trybu(self, tryb_int: int) -> None:
@@ -1434,16 +1461,21 @@ class OpowiesciPanel(wx.Panel):
     # _on_wczytaj: SingleChoiceDialog → ProjektOpowiesci.wczytaj() → sync UI
     # ------------------------------------------------------------------
     def _on_wczytaj(self, _event: wx.Event) -> None:
-        """Otwiera dialog z listą dostępnych gier i wczytuje wybraną.
+        """Wczytuje grę. Dwie ścieżki UX (parytet z gui_rezyser._on_load):
 
-        v15.2.3: zastąpiliśmy wx.FileDialog (otwierał system file picker
-        z filtrem `.game.json`) prostszym wx.SingleChoiceDialog z listą
-        nazw gier. Powód: A11y — NVDA czyta listę choice items naturalnie,
-        a niewidomy gracz nie musi nawigować po systemowym dialogu plików
-        z trzema panelami i rozszerzeniami. Konsystentne z dialogiem
-        wyboru projektu w Reżyserze.
+        • pole nazwy PUSTE → dialog z listą gier (A11y — niewidomy gracz nie
+          musi pamiętać i przepisywać nazwy pliku);
+        • pole nazwy WYPEŁNIONE → bezpośrednie wczytanie tej nazwy (ścieżka
+          eksperta — Enter w polu nazwy lub klik po wpisaniu z pamięci).
+
+        v15.2.3: dialog to wx.SingleChoiceDialog (nie systemowy file picker) —
+        NVDA czyta listę choice items naturalnie. Konsystentne z Reżyserem.
         """
-        app_dir = sciezki.KATALOG_BAZOWY_STR
+        nazwa = self._txt_nazwa_gry.GetValue().strip()
+        if nazwa:
+            self._wczytaj_gre_po_nazwie(nazwa)   # ścieżka eksperta
+            return
+
         gry = self._zbierz_dostepne_gry()
         if not gry:
             wx.MessageBox(
@@ -1472,6 +1504,16 @@ class OpowiesciPanel(wx.Panel):
                 return
             nazwa = dlg.GetStringSelection()
 
+        self._wczytaj_gre_po_nazwie(nazwa)
+
+    def _wczytaj_gre_po_nazwie(self, nazwa: str) -> None:
+        """Wczytuje grę o podanej nazwie i wstawia ją do UI.
+
+        Wspólny tor dla ścieżki eksperckiej (pole nazwy) i dialogu wyboru.
+        Nieistniejąca/uszkodzona gra → `blad_wczytania_tresc` (np. literówka
+        w nazwie wpisanej ręcznie).
+        """
+        app_dir = sciezki.KATALOG_BAZOWY_STR
         projekt = ProjektOpowiesci(app_dir)
         try:
             wynik = projekt.wczytaj(nazwa)
@@ -2019,31 +2061,68 @@ class OpowiesciPanel(wx.Panel):
             self,
         )
 
-    def _on_nazwa_gry_change(self, _event: wx.Event) -> None:
-        """Odblokowuje / zamraża RadioBox w zależności od stanu pola nazwy.
+    def _on_zamknij_gre(self, _event: wx.Event) -> None:
+        """Zamyka aktywną grę i wraca do stanu zakładania nowej (setup).
 
-        Gdy gracz wpisuje nazwę różną od aktualnego `_projekt.nazwa_pliku`,
-        traktujemy to jako sygnał „przygotowuję założenie nowej gry" —
-        RadioBox staje się wolny, żeby gracz mógł wybrać dowolny tryb.
-        Powrót do nazwy bieżącej gry przywraca zamrożenie. Bez aktywnego
-        projektu metoda jest no-op — RadioBox jest wtedy wolny z definicji.
+        Zastępuje dawny guard na polu nazwy (18.3). Gra jest zapisywana na
+        dysku po KAŻDEJ turze (`.game.json`), więc zamknięcie jest
+        NIEDESTRUKCYJNE — można ją wczytać ponownie przyciskiem „Wczytaj".
+        Mimo to prosimy o potwierdzenie (A11y: świadoma zmiana kontekstu),
+        spójnie z filozofią hard-resetu Reżysera. Po potwierdzeniu czyścimy
+        projekt, mirror trybu (`_zapisany_tryb`) i snapshot, a
+        `_aktualizuj_uistate` rozwija pasek zakładania gry z powrotem
+        (odblokowując wybór trybu i Quick Start).
         """
         if self._projekt is None:
             return
-        nazwa = self._txt_nazwa_gry.GetValue().strip()
-        if nazwa and nazwa != self._projekt.nazwa_pliku:
-            if self._zapisany_tryb is not None:
-                self._zapisany_tryb = None
-                self._aktualizuj_uistate()
-        else:
-            # Powrót do nazwy bieżącego projektu — zamrażamy z powrotem.
-            if self._zapisany_tryb != self._projekt.tryb:
-                self._zapisany_tryb = self._projekt.tryb
-                self._aktualizuj_uistate()
+        odp = wx.MessageBox(
+            t("opowiesci.zamknij_gre_pytanie"),
+            t("opowiesci.zamknij_gre_pytanie_tytul"),
+            wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+            self,
+        )
+        if odp != wx.YES:
+            return
+
+        self._projekt = None
+        self._zapisany_tryb = None
+        self._snapshot = oai.SnapshotOpowiesci(nazwa_gry="", numer_tury=0)
+        self._txt_nazwa_gry.SetValue("")
+        self._txt_narracja.SetValue("")
+        self._txt_ostatnia_tura.SetValue(t("opowiesci.txt_ostatnia_tura_init"))
+        self._txt_akcja.SetValue("")
+        self._choice_zaczatek.SetSelection(0)
+        self._aktywuj_obszar_wyborow(False)
+        self._aktualizuj_uistate()
+        self._txt_nazwa_gry.SetFocus()
 
     # ==================================================================
     # FAZA 4 — Slash-komendy (parser lokalny, bez API)
     # ==================================================================
+    def _lista_komend_widoczna(self) -> str:
+        """Lista komend do dialogu pomocy / komunikatu „nieznana komenda".
+
+        Komenda `/odswiez` (`/refresh`) jest opt-in pod flagą
+        `EDYCJA_STANU_GRY_WIDOCZNA` (tak jak przyciski „Odśwież z dysku" /
+        „Edytuj stan gry"), bo rekoncyliacja narracji z dysku NIE re-derywuje
+        stanu strukturalnego — grozi cichym dryfem semantycznym. Gdy flaga jest
+        wyłączona:
+          • we frozen exe wiersz `/odswiez` znika całkowicie (end-user nigdy go
+            nie zobaczy — komenda zachowuje się jak nieznana);
+          • ze źródła (dev) wiersz znika z bazowej listy, ale doklejamy dopisek
+            mówiący, którą flagę włączyć, by ją odblokować.
+        Token `/refresh` nie jest tłumaczony, więc filtr wiersza działa
+        identycznie we wszystkich językach (zero zależności od listy w ui.yaml).
+        """
+        lista = t("opowiesci.komendy_dostepne_lista")
+        if EDYCJA_STANU_GRY_WIDOCZNA:
+            return lista
+        widoczne = [w for w in lista.splitlines() if "/refresh" not in w]
+        baza = "\n".join(widoczne)
+        if not sciezki.JEST_FROZEN:
+            baza = baza + "\n" + t("opowiesci.komenda_odswiez_zablokowana_hint")
+        return baza
+
     def _obsluz_komende(self, user_text: str) -> None:
         """Dispatcher slash-komend. Wzorzec PL+EN fallback.
 
@@ -2057,12 +2136,28 @@ class OpowiesciPanel(wx.Panel):
         arg = czesci[1] if len(czesci) > 1 else ""
 
         nazwa_handlera = self._DISPATCH_KOMEND.get(komenda)
+        # 18.3: bramka dryfu — `/odswiez`|`/refresh` działa tylko gdy włączona
+        # flaga EDYCJA_STANU_GRY_WIDOCZNA (jak przyciski technicznej edycji
+        # stanu). Bez flagi: we frozen exe traktujemy jak nieznaną komendę
+        # (niewidoczna dla end-usera), ze źródła pokazujemy, jak ją odblokować.
+        if nazwa_handlera == "_komenda_odswiez" and not EDYCJA_STANU_GRY_WIDOCZNA:
+            if sciezki.JEST_FROZEN:
+                nazwa_handlera = None
+            else:
+                wx.MessageBox(
+                    t("opowiesci.komenda_odswiez_zablokowana_tresc", komenda=komenda),
+                    t("opowiesci.komenda_odswiez_zablokowana_tytul"),
+                    wx.OK | wx.ICON_INFORMATION,
+                    self,
+                )
+                return
+
         if nazwa_handlera is None:
             wx.MessageBox(
                 t(
                     "opowiesci.komenda_nieznana_tresc",
                     komenda=komenda,
-                    lista=t("opowiesci.komendy_dostepne_lista"),
+                    lista=self._lista_komend_widoczna(),
                 ),
                 t("opowiesci.komenda_nieznana_tytul"),
                 wx.OK | wx.ICON_WARNING,
@@ -2084,7 +2179,14 @@ class OpowiesciPanel(wx.Panel):
         self._on_wczytaj(None)
 
     def _komenda_odswiez(self, _arg: str) -> None:
-        """`/odswiez` / `/refresh` — proxy do :meth:`_on_odswiez_z_dysku`."""
+        """`/odswiez` / `/refresh` — proxy do :meth:`_on_odswiez_z_dysku`.
+
+        Opt-in pod `EDYCJA_STANU_GRY_WIDOCZNA` (główna bramka w
+        :meth:`_obsluz_komende`); ten warunek to druga linia obrony na wypadek
+        wywołania handlera z innego miejsca.
+        """
+        if not EDYCJA_STANU_GRY_WIDOCZNA:
+            return
         self._on_odswiez_z_dysku(None)
 
     def _komenda_koniec(self, _arg: str) -> None:
@@ -2102,7 +2204,7 @@ class OpowiesciPanel(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
         lbl = wx.StaticText(dlg, label=t("opowiesci.dlg_pomoc_lbl"))
         txt = wx.TextCtrl(
-            dlg, value=t("opowiesci.komendy_dostepne_lista"),
+            dlg, value=self._lista_komend_widoczna(),
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_BESTWRAP,
             name=t("opowiesci.dlg_pomoc_name"),
         )

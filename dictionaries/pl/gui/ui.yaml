@@ -1200,6 +1200,13 @@ opowiesci:
   btn_nowa_gra_tooltip:      "Rozpocznij nową grę pod podaną nazwą — wymaga nazwy gry i wybranego trybu"
   btn_wczytaj_label:         "&Wczytaj"
   btn_wczytaj_tooltip:       "Wczytaj wcześniej zapisaną grę z runtime/opowiesci/<nazwa>.game.json"
+  # 18.3: w trakcie gry pasek zakładania (nazwa + Nowa gra + Wczytaj + Quick
+  # Start) zwija się do tego przycisku — odpowiednik filozofii hard-resetu
+  # Reżysera. Zamknięcie jest niedestrukcyjne (gra zapisana na dysku).
+  btn_zamknij_gre_label:     "Zam&knij grę"
+  btn_zamknij_gre_tooltip:   "Zamyka bieżącą grę i wraca do ekranu zakładania nowej (odblokowuje wybór trybu i Quick Start). Gra jest zapisana na dysku — możesz ją później wczytać. Pojawi się prośba o potwierdzenie."
+  zamknij_gre_pytanie_tytul: "Zamknąć bieżącą grę?"
+  zamknij_gre_pytanie:       "Zamknąć bieżącą grę i wrócić do ekranu zakładania nowej?\n\nStan gry jest zapisywany na dysku po każdej turze, więc nic nie tracisz — grę można później wczytać ponownie przyciskiem „Wczytaj\"."
   btn_zapisz_label:          "&Zapisz"
   btn_zapisz_tooltip:        "Wymuś ręczny zapis stanu gry (autozapis działa też po każdej turze)"
   # v15.2.3: awaryjne otwarcie pliku narracji w systemowym edytorze.
@@ -1356,6 +1363,14 @@ opowiesci:
     /odswiez, /refresh                — odśwież narrację z dysku po ręcznej edycji
     /pomoc, /help                     — pokaż tę listę komend
     /koniec, /quit                    — zamknij aplikację
+  # 18.3: bramka dryfu — `/odswiez` (`/refresh`) jest opt-in pod flagą
+  # EDYCJA_STANU_GRY_WIDOCZNA (gui_opowiesci.py). Komunikat i dopisek poniżej
+  # pokazujemy TYLKO ze źródła (dev); we frozen exe komenda jest niewidoczna.
+  # Literały EDYCJA_STANU_GRY_WIDOCZNA oraz gui_opowiesci.py:72 to nazwy
+  # techniczne — NIE tłumaczyć ich w pozostałych językach.
+  komenda_odswiez_zablokowana_tytul: "Komenda zablokowana"
+  komenda_odswiez_zablokowana_tresc: 'Komenda „{komenda}" jest domyślnie zablokowana, bo odświeżenie narracji z dysku nie przelicza stanu gry (postacie, lokacja, ekwipunek) i może wywołać dryf semantyczny. Aby ją odblokować, ustaw EDYCJA_STANU_GRY_WIDOCZNA = True w gui_opowiesci.py:72 i zbuduj własną paczkę.'
+  komenda_odswiez_zablokowana_hint:  "(/odswiez, /refresh — zablokowane; ustaw EDYCJA_STANU_GRY_WIDOCZNA = True w gui_opowiesci.py:72, aby odblokować)"
   dlg_visualize_tytul:       "🌅 Wizualizacja sceny"
   dlg_visualize_lbl:         "Multisensoryczny opis aktualnej sceny (nie zmienia stanu gry):"
   dlg_visualize_name:        "Pole z opisem wizualizacji sceny"

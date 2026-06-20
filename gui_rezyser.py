@@ -117,6 +117,14 @@ class RezyserPanel(wx.Panel):
         # produkcyjnej. Reset tylko przez twardy reset projektu.
         self._zapisany_tryb: int | None = None
 
+        # D2 (od 18.3): „czysty" snapshot pól Księga Świata / Pamięć z chwili
+        # ostatniego wczytania albo zapisu. Detektor niezapisanych zmian w
+        # `_on_przeladuj_z_dysku` porównuje z nim aktualną treść — bez tego
+        # ostrzeżenie wyskakiwało zawsze, gdy pola były NIEPUSTE (nawet bez
+        # żadnej edycji), co irytowało przy zwykłym przeładowaniu projektu.
+        self._ksiega_swiata_zapisana: str = ""
+        self._pamiec_zapisana: str = ""
+
         # ── Przepisy twórcze załadowane z YAML-i (dictionaries/<jezyk>/rezyser/) ─
         # 13.2: ładujemy tryby w języku UI z miękkim fallbackiem do EN. Twardego
         # polskiego fallbacku NIE robimy — etykiety i prompty mają być spójne
@@ -1508,6 +1516,10 @@ class RezyserPanel(wx.Panel):
         self._txt_full_story.SetValue(self.full_story)
         self._txt_full_story.SetInsertionPointEnd()
 
+        # D2: świeżo wczytany stan = „czysty" punkt odniesienia detektora zmian.
+        self._ksiega_swiata_zapisana = self._txt_ksiega_swiata.GetValue()
+        self._pamiec_zapisana = self._txt_pamiec.GetValue()
+
         if wynik.saved_mode in (1, 2):
             self._rb_mode.SetSelection(wynik.saved_mode)
             self._zapisany_tryb = wynik.saved_mode
@@ -1729,6 +1741,8 @@ class RezyserPanel(wx.Panel):
             self._projekt.nazwa_pliku = nazwa
         try:
             self._projekt.zapisz_ksiege_swiata(tresc)
+            # D2: zapis = nowy „czysty" punkt odniesienia detektora zmian.
+            self._ksiega_swiata_zapisana = self._txt_ksiega_swiata.GetValue()
             wx.MessageBox(
                 t("rezyser.ksiega_zapisana_tresc", nazwa_projektu=nazwa),
                 t("rezyser.ksiega_zapisana_tytul"),
@@ -1856,6 +1870,8 @@ class RezyserPanel(wx.Panel):
             self._projekt.nazwa_pliku = nazwa
         try:
             self._projekt.zapisz_streszczenie(tresc)
+            # D2: zapis = nowy „czysty" punkt odniesienia detektora zmian.
+            self._pamiec_zapisana = self._txt_pamiec.GetValue()
             wx.MessageBox(
                 t("rezyser.streszczenie_zapisane_tresc", nazwa_projektu=nazwa),
                 t("rezyser.streszczenie_zapisane_tytul"),
@@ -3118,10 +3134,12 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        # D2: pełny reload nadpisze pola wersją z dysku — ostrzeż, gdy w polach
-        # Księga/Pamięć jest treść (ryzyko porzucenia niezapisanych zmian).
-        if (self._txt_ksiega_swiata.GetValue().strip()
-                or self._txt_pamiec.GetValue().strip()):
+        # D2: pełny reload nadpisze pola wersją z dysku — ostrzeż TYLKO gdy w
+        # polach Księga/Pamięć są NIEZAPISANE zmiany (treść różni się od „czystego"
+        # snapshotu z ostatniego wczytania/zapisu). Do 18.3 warunek sprawdzał samo
+        # „pole niepuste", więc ostrzeżenie wyskakiwało nawet bez żadnej edycji.
+        if (self._txt_ksiega_swiata.GetValue() != self._ksiega_swiata_zapisana
+                or self._txt_pamiec.GetValue() != self._pamiec_zapisana):
             odp = wx.MessageBox(
                 t("rezyser.przeladuj_ostrzezenie_tresc"),
                 t("rezyser.przeladuj_ostrzezenie_tytul"),

@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Moduł Interaktywne Opowieści (18.2.2 – Wersja Wydawnicza)
+Reżyser Audio GPT — Moduł Interaktywne Opowieści (18.3.0 – Wersja Wydawnicza)
 
 Drugi główny tryb aplikacji obok Reżysera — tym razem stajesz się graczem dynamicznie generowanej historii zamiast jej autorem. Sztuczna inteligencja prowadzi narrację w drugiej osobie liczby pojedynczej („Idziesz przez mglisty las, czujesz zapach mokrych liści…"), a Ty decydujesz o kolejnym ruchu — pisząc dowolną akcję wolnym tekstem albo wybierając jedną z ponumerowanych opcji.
 
@@ -80,8 +80,6 @@ W polu akcji możesz w każdej chwili wpisać komendę zaczynającą się od uko
 Silnik narracyjny wszystkich trybów Opowieści korzysta z jednego modelu Anthropic Claude Sonnet 4.6 (od v18.1; wcześniej dobierano model OpenAI per tryb). Mocniejszy model rygorystycznie trzyma się zasad świata — to istotne zwłaszcza w trybie Mniejsze zło, gdzie każda opcja musi pozostać realnie niekorzystna.
 
 /wizualizuj <opis>, /visualize <opis> — multisensoryczny opis aktualnej sceny. Nie zmienia stanu gry, nie proponuje wyborów — silnik narracyjny używa wszystkich pięciu zmysłów (wzrok, słuch, zapach, dotyk, smak), by pokazać scenę z większą głębią. Wynik pojawia się w osobnym dialogu, NIE jest dopisywany do narracji ani zapisany w pliku audiobooka. Przykład: „/wizualizuj jak wygląda strażnik" lub „/wizualizuj zapach kawiarni".
-
-/odswiez, /refresh — odświeża pamięć wewnętrzną z pliku narracji po jego ręcznej edycji (od v15.5). Gdy otworzysz opowiesci/<nazwa>.txt w edytorze i np. poprawisz literówkę albo utniesz nadmiarowy akapit, ta komenda synchronizuje świeżą końcówkę z kontekstem silnika — bez twardego resetu i ponownego wczytywania gry. (Równoważny przycisk „Odśwież z dysku" jest opcją techniczną, domyślnie ukrytą — komenda działa zawsze.) Jeśli istnieje już streszczenie wcześniejszych tur, pozostaje ono nietknięte, więc kolejna tura i kolejne streszczenie nie powstaną na nieaktualnych danych. UWAGA: stan gry (postacie, lokacja, ekwipunek, wątki) z pliku .game.json NIE jest aktualizowany — jeśli edycja zmieniła fakty świata, kolejna tura może się z nimi rozjechać.
 
 /pomoc, /help — wyświetla okno dialogowe z listą wszystkich dostępnych komend. Dialog jest readonly i NVDA-friendly — pole tekstowe dostaje fokus automatycznie, czytnik ekranu od razu odczytuje całą listę bez konieczności nawigacji.
 

@@ -1324,6 +1324,13 @@ opowiesci:
   err_dlugosc: Svar líkansins var skorið af áður en það náði að ljúka því (lengdarmörk voru brotin). Styttu samhengi og reyndu aftur.
   odrzucenie_tytul: Aðgerð ekki hægt að framkvæma
   odrzucenie_tresc: Frásagnavélin getur ekki framkvæmt þessa aðgerð — hún gæti hafa verið utan efnis, ómöguleg í þessum heimi eða ekki í samræmi við efnisreglur. Umferð var ekki vistuð. Endurformaðu aðgerðina og reyndu aftur.
+  btn_zamknij_gre_label: Lo&ka leikinn
+  btn_zamknij_gre_tooltip: Lokar núverandi leik og fer aftur á uppsetningarskjá nýs leiks (opnar val á ham og Quick Start). Leikurinn er vistaður á disk — þú getur hlaðið honum inn síðar. Staðfestingarbeiðni birtist.
+  zamknij_gre_pytanie_tytul: Loka núverandi leik?
+  zamknij_gre_pytanie: "Loka núverandi leik og fara aftur á uppsetningarskjá nýs leiks?\n\nLeikstaðan er vistuð á disk eftir hverja umferð, svo þú tapar engu — hægt er að hlaða leiknum inn aftur síðar með „Hlaða inn\"-hnappinum."
+  komenda_odswiez_zablokowana_tytul: Skipun læst
+  komenda_odswiez_zablokowana_tresc: Skipunin „{komenda}" er læst sjálfgefið, því að endurnýjun frásagnar af disk endurreiknar ekki leikstöðu (persónur, staðsetning, búnaður) og getur valdið merkingarlegum fráviki. Til að opna hana, stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 og smídaðu eigin pakka.
+  komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — læst; stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 til að opna)
 bot:
   closure:
     Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Audio AI leikstjórans.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"

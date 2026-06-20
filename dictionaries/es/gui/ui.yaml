@@ -1324,6 +1324,13 @@ opowiesci:
   err_dlugosc: La respuesta del modelo fue cortada antes de que pudiera completarla (se excedió el límite de longitud). Acorta el contexto e intenta de nuevo.
   odrzucenie_tytul: Acción no ejecutable
   odrzucenie_tresc: El motor narrativo no puede ejecutar esta acción — podría estar fuera de tema, ser imposible en este mundo o no cumplir con las reglas de contenido. El turno no fue guardado. Reformula la acción y vuelve a intentarlo.
+  btn_zamknij_gre_label: '&Cerrar juego'
+  btn_zamknij_gre_tooltip: Cierra el juego actual y vuelve a la pantalla de creación de uno nuevo (desbloquea la selección de modo y Quick Start). El juego está guardado en disco — puedes cargarlo más adelante. Se pedirá confirmación.
+  zamknij_gre_pytanie_tytul: ¿Cerrar el juego actual?
+  zamknij_gre_pytanie: "¿Cerrar el juego actual y volver a la pantalla de creación de uno nuevo?\n\nEl estado del juego se guarda en disco tras cada turno, así que no perderás nada — puedes cargarlo de nuevo más adelante con el botón «Cargar»."
+  komenda_odswiez_zablokowana_tytul: Comando bloqueado
+  komenda_odswiez_zablokowana_tresc: El comando «{komenda}» está bloqueado por defecto, ya que actualizar la narración desde el disco no recalcula el estado del juego (personajes, ubicación, inventario) y puede provocar deriva semántica. Para desbloquearlo, establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 y compila tu propio paquete.
+  komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloqueados; establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 para desbloquear)
 bot:
   closure:
     Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio AI.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"

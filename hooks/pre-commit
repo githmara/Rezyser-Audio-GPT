@@ -1,0 +1,41 @@
+#!/bin/sh
+# =============================================================================
+# pre-commit — auto-reset flag debugowych do False (od 18.3)
+# =============================================================================
+# Niektóre funkcje techniczne są ukryte za stałą boolean zaszytą w źródle
+# (np. EDYCJA_STANU_GRY_WIDOCZNA w gui_opowiesci.py), domyślnie False. Deweloper
+# przełącza ją na True, by poeksperymentować lokalnie, i łatwo zapomnieć cofnąć.
+# Ten hook "robi to za Ciebie": jeśli commitowana (zaindeksowana) wersja pliku
+# ma flagę = True, przepisuje ją na False, re-stage'uje plik i PRZEPUSZCZA commit.
+#
+# Druga, niezależna warstwa to strażnik w build_release.py::_weryfikuj_flagi_debug
+# (twardo odmawia buildu, gdy flaga = True) — gdyby ten hook nie był aktywny.
+#
+# Aktywacja (jednorazowo, w roocie repo):  git config core.hooksPath hooks
+# Git for Windows uruchamia hooki przez bundlowany bash, więc ten skrypt sh działa.
+
+# Lista par "plik:FLAGA" — rozszerzalna o przyszłe flagi debug.
+FLAGI="gui_opowiesci.py:EDYCJA_STANU_GRY_WIDOCZNA"
+
+zmieniono=0
+for wpis in $FLAGI; do
+    plik=${wpis%%:*}
+    flaga=${wpis#*:}
+
+    # Sprawdzamy ZAINDEKSOWANĄ wersję (to ona trafi do commita). Brak w indeksie
+    # (plik nie stage'owany) → git show zwróci błąd, pomijamy.
+    staged=$(git show ":$plik" 2>/dev/null) || continue
+    if printf '%s\n' "$staged" | grep -Eq "^${flaga}[[:space:]]*=[[:space:]]*True"; then
+        # Przepisz drzewo robocze i ponownie zindeksuj plik — commit dostanie False.
+        sed -i -E "s/^(${flaga}[[:space:]]*=[[:space:]]*)True\b/\1False/" "$plik"
+        git add "$plik"
+        echo "pre-commit: auto-reset ${flaga} -> False w ${plik} (eksperyment nie trafi do commita)."
+        zmieniono=1
+    fi
+done
+
+if [ "$zmieniono" -eq 1 ]; then
+    echo "pre-commit: flagi debug zabezpieczone; kontynuuję commit."
+fi
+
+exit 0

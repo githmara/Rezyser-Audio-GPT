@@ -1322,6 +1322,13 @@ opowiesci:
   err_dlugosc: La risposta del modello è stata troncata prima che potesse completarla (superato il limite di lunghezza). Accorcia il contesto e riprova.
   odrzucenie_tytul: Azione non eseguibile
   odrzucenie_tresc: Il motore narrativo non può eseguire questa azione — potrebbe essere fuori tema, impossibile in questo mondo o non conforme alle regole del contenuto. Il turno non è stato salvato. Riformula l'azione e riprova.
+  btn_zamknij_gre_label: '&Chiudi partita'
+  btn_zamknij_gre_tooltip: Chiude la partita corrente e torna alla schermata di creazione di una nuova (sblocca la selezione della modalità e Quick Start). La partita è salvata su disco — puoi caricarla in seguito. Verrà richiesta una conferma.
+  zamknij_gre_pytanie_tytul: Chiudere la partita corrente?
+  zamknij_gre_pytanie: "Chiudere la partita corrente e tornare alla schermata di creazione di una nuova?\n\nLo stato della partita viene salvato su disco dopo ogni turno, quindi non perdi nulla — puoi ricaricarla in seguito tramite il pulsante \"Carica\"."
+  komenda_odswiez_zablokowana_tytul: Comando bloccato
+  komenda_odswiez_zablokowana_tresc: Il comando „{komenda}" è bloccato per impostazione predefinita, poiché il ricaricamento della narrazione dal disco non ricalcola lo stato della partita (personaggi, posizione, equipaggiamento) e può causare deriva semantica. Per sbloccarlo, imposta EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 e crea il tuo pacchetto personalizzato.
+  komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloccati; imposta EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 per sbloccarli)
 bot:
   closure:
     Lumi: "Ciao!\n\nLa neve si è posata e la correzione è arrivata! Tutto ciò che hai chiesto è appena atterrato nell'ultima versione del Regista Audio AI.\n\nPrendi l'aggiornamento qui: {link}\n\nChiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n— Lumi"

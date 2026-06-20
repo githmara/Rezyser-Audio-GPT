@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Samtalslegar Sögur (18.2.2 – Útgáfuútgáfa)
+Reżyser Audio GPT — Samtalslegar Sögur (18.3.0 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hliðina á Leikstjóra — í þetta sinn verður þú leikmaður í sögunni sem er dynamískt búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lyktina af blautum laufum…"), og þú ákveður næstu aðgerð — skrifar hvaða aðgerð sem er með frjálsum texta eða velur eina af tölusettum valkostum.
 
@@ -80,8 +80,6 @@ KROK 5: Slash-komendy — szybkie akcje bez API
 Frásagnarkerfi allra Opowieści stillinga notar eitt Anthropic Claude Sonnet 4.6 líkan (frá v18.1; áður var OpenAI líkan valið fyrir hverja stillingu). Sterkara líkan heldur stranglega við reglur heimsins — þetta er sérstaklega mikilvægt í stillingunni Mniejsze zło, þar sem hver valkostur verður að vera raunverulega óhagstæður.
 
 /wizualizuj <opis>, /visualize <opis> — margskynjunar lýsing á núverandi sviði. Breytir ekki stöðu leiksins, býður ekki upp á valkosti — frásagnarkerfið notar öll fimm skilningarvitin (sjón, heyrn, lykt, snerting, bragð) til að sýna sviðið með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lyktin af kaffihúsinu".
-
-/odswiez, /refresh — endurnýjar innra minni úr frásagnarskrá eftir handvirka breytingu (frá v15.5). Þegar þú opnar opowiesci/<nazwa>.txt í ritli og t.d. lagar stafsetningarvillu eða klippir út óþarfa málsgrein, samstillir þessi skipun ferska endann við samhengi vélarinnar — án harðrar endurstillingar og endurhleðslu leiksins. (Jafngildi hnappurinn „Endurhlaða af diski" er tæknileg valkostur, sjálfgefið falinn — skipunin virkar alltaf.) Ef samantekt fyrri umferða er þegar til, er hún ósnert, svo næsta umferð og næsta samantekt verða ekki byggð á úreltum gögnum. ATHUGIÐ: leikstaða (persónur, staðsetning, búnaður, þræðir) úr .game.json skrá er EKKI uppfærð — ef breytingin breytti staðreyndum heimsins, gæti næsta umferð ekki passað við þær.
 
 /pomoc, /help — birtir valglugga með lista yfir allar tiltækar skipanir. Valglugginn er readonly og NVDA-vænn — textasvæðið fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
 

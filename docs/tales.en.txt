@@ -1,4 +1,4 @@
-Audio Director GPT — Interactive Stories Module (18.2.2 – Release Edition)
+Audio Director GPT — Interactive Stories Module (18.3.0 – Release Edition)
 
 The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
@@ -80,8 +80,6 @@ In the action field, you can enter a command starting with a slash `/` at any ti
 The narrative engine for all Story modes uses a single Anthropic Claude Sonnet 4.6 model (from v18.1; previously an OpenAI model was selected per mode). The stronger model rigorously adheres to the rules of the world — this is especially important in the Lesser Evil mode, where each option must remain realistically disadvantageous.
 
 /wizualizuj <opis>, /visualize <opis> — a multisensory description of the current scene. It does not change the game state or propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog, it is NOT added to the narration or saved in the audiobook file. Example: "/wizualizuj how the guard looks" or "/wizualizuj the smell of the café".
-
-/odswiez, /refresh — refreshes the internal memory from the narration file after manual editing (from v15.5). When you open opowiesci/<nazwa>.txt in an editor and, for example, correct a typo or cut an excess paragraph, this command synchronizes the fresh ending with the engine's context — without a hard reset and reloading the game. (The equivalent "Refresh from disk" button is a technical option, hidden by default — the command always works.) If a summary of previous turns already exists, it remains untouched, so the next turn and subsequent summary will not be based on outdated data. NOTE: the game state (characters, location, inventory, threads) from the .game.json file is NOT updated — if the edit changed the world's facts, the next turn might diverge from them.
 
 /pomoc, /help — displays a dialog window with a list of all available commands. The dialog is readonly and NVDA-friendly — the text field automatically gets focus, and the screen reader immediately reads the entire list without the need for navigation.
 

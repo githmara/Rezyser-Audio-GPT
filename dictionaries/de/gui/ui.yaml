@@ -1323,6 +1323,13 @@ opowiesci:
   err_dlugosc: Die Antwort des Modells wurde abgeschnitten, bevor es sie abschließen konnte (Längenlimit überschritten). Kürzen Sie den Kontext und versuchen Sie es erneut.
   odrzucenie_tytul: Aktion nicht ausführbar
   odrzucenie_tresc: Der Erzählmotor kann diese Aktion nicht ausführen — sie könnte themenfremd, in dieser Welt unmöglich oder nicht mit den Inhaltsrichtlinien vereinbar sein. Die Runde wurde nicht gespeichert. Formuliere die Aktion anders und versuche es erneut.
+  btn_zamknij_gre_label: Spiel &schließen
+  btn_zamknij_gre_tooltip: Schließt das aktuelle Spiel und kehrt zum Bildschirm für ein neues Spiel zurück (entsperrt die Modusauswahl und Quick Start). Das Spiel ist auf der Festplatte gespeichert – Sie können es später laden. Eine Bestätigung wird angefordert.
+  zamknij_gre_pytanie_tytul: Aktuelles Spiel schließen?
+  zamknij_gre_pytanie: "Aktuelles Spiel schließen und zum Bildschirm für ein neues Spiel zurückkehren?\n\nDer Spielstand wird nach jeder Runde auf der Festplatte gespeichert, sodass nichts verloren geht – das Spiel kann später über die Schaltfläche „Laden\" erneut geladen werden."
+  komenda_odswiez_zablokowana_tytul: Befehl gesperrt
+  komenda_odswiez_zablokowana_tresc: Der Befehl „{komenda}" ist standardmäßig gesperrt, da das Aktualisieren der Erzählung von der Festplatte den Spielzustand (Charaktere, Ort, Ausrüstung) nicht neu berechnet und semantische Abweichungen verursachen kann. Um ihn zu entsperren, setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 und erstellen Sie Ihr eigenes Paket.
+  komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — gesperrt; setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72, um zu entsperren)
 bot:
   closure:
     Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-AI-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"

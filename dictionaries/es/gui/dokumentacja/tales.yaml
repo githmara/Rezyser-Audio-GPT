@@ -92,8 +92,6 @@ tresc:
 
     /wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo utiliza los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo separado, NO se añade a la narración ni se guarda en el archivo de audiolibro. Ejemplo: “/wizualizuj jak wygląda strażnik" o “/wizualizuj zapach kawiarni".
 
-    /odswiez, /refresh — actualiza la memoria interna desde el archivo de narración después de su edición manual (desde v15.5). Cuando abres opowiesci/<nazwa>.txt en un editor y, por ejemplo, corriges un error tipográfico o eliminas un párrafo redundante, este comando sincroniza el final fresco con el contexto del motor — sin un reinicio completo y recarga del juego. (El botón equivalente “{opowiesci.btn_odswiez_z_dysku_label}" es una opción técnica, oculta por defecto — el comando siempre funciona.) Si ya existe un resumen de los turnos anteriores, permanece intacto, por lo que el siguiente turno y resumen no se basarán en datos desactualizados. ATENCIÓN: el estado del juego (personajes, ubicación, inventario, tramas) del archivo .game.json NO se actualiza — si la edición cambió los hechos del mundo, el siguiente turno puede no coincidir con ellos.
-
     /pomoc, /help — muestra un cuadro de diálogo con una lista de todos los comandos disponibles. El diálogo es de solo lectura y compatible con NVDA — el campo de texto recibe el foco automáticamente, el lector de pantalla lee toda la lista de inmediato sin necesidad de navegación.
 
     /koniec, /quit — cierra la aplicación (después del autoguardado del turno en curso).
