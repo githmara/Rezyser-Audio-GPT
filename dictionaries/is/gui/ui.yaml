@@ -199,6 +199,9 @@ home:
   ant_err_struktura: "🚨 Villa í skráarbyggingu!\nBreytan ANTHROPIC_API_KEY= vantar.\nFrá útgáfu 18.2 keyrir allt AI-vélin (Leikstjóri, Sögur, Poliglota, kaflaheiti) á Claude-líkaninu og krefst Anthropic-lykils.\nEyddu skránni, búðu hana til aftur og límdu lykillinn vandlegar inn."
   ant_err_format: "🚨 Grunsamlegt snið á Anthropic-lykli!\nRétt Anthropic-lykill (Claude) byrjar alltaf á sk-ant- (t.d. sk-ant-api03-…).\nGakktu úr skugga um að þú hafir afritað lykillinn frá console.anthropic.com en ekki lykil frá öðrum þjónustuaðila."
   ant_err_zbyt_krotki: "⚠️ Anthropic lykillinn virðist vera of stuttur ({liczba_znakow} stafir fundnir, búist var við að minnsta kosti {minimum_znakow}).\nLíklega hefurðu aðeins afritað hluta lykilsins. Farðu aftur á console.anthropic.com og afritaðu hann í heild sinni."
+  compat_ok: "✅ OpenAI-compatible uppsetning greind (líkan: {model}).\nAllar einingar eru tilbúnar til notkunar."
+  compat_err_niekompletny: "⚠️ OpenAI-compatible stilling er ófullnægjandi.\nFylltu inn öll þrjú reiti í golden_key.env: LLM_BASE_URL, OPENAI_API_KEY og LLM_MODEL."
+  compat_jakosc_info: ℹ️ Kvaðningar eru fínstilltar fyrir Claude líkanið (Anthropic). Önnur líkön geta gefið lægri gæði — þetta er meðvituð ákvörðun leikstjórans (kostnaður á móti gæðum).
 rezyser:
   panel_name: "Hljóðstjóri GPT spjald"
   heading: "🎬  Hljóðstjóri GPT – Blönduð Skapandi Stúdíó"

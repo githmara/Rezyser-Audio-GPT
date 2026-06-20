@@ -162,6 +162,15 @@ home:
   ant_err_zbyt_krotki: |-
     ⚠️ Klucz Anthropic wydaje się zbyt krótki (wykryto {liczba_znakow} znaków, oczekiwano co najmniej {minimum_znakow}).
     Prawdopodobnie skopiowałeś tylko fragment klucza. Wróć na console.anthropic.com i skopiuj go w całości.
+  # Provider OpenAI-compatible (v18.4) — gdy LLM_PROVIDER=openai_compat w golden_key.env
+  compat_ok: |-
+    ✅ Konfiguracja OpenAI-compatible wykryta (model: {model}).
+    Wszystkie moduły są gotowe do pracy.
+  compat_err_niekompletny: |-
+    ⚠️ Tryb OpenAI-compatible jest niekompletny.
+    Uzupełnij w golden_key.env wszystkie trzy pola: LLM_BASE_URL, OPENAI_API_KEY oraz LLM_MODEL.
+  compat_jakosc_info: |-
+    ℹ️ Prompty są dostrojone pod model Claude (Anthropic). Inne modele mogą dać niższą jakość — to świadomy wybór reżysera (koszt kontra jakość).
   # Przyciski akcji panelu startowego
   btn_generate:          "Wygeneruj plik golden_key.env i otwórz edytor tekstu"
   btn_open:              "📝 Otwórz plik golden_key.env w edytorze tekstu"

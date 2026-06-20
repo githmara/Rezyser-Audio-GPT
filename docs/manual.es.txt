@@ -1,4 +1,4 @@
-Manual del Director de Audio AI - Guía Completa (Versión 18.3.0 – Versión de Lanzamiento)
+Manual del Director de Audio AI - Guía Completa (Versión 18.4.0 – Versión de Lanzamiento)
 
 ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 
@@ -74,7 +74,7 @@ Cómo obtener la clave Anthropic:
 
 Cómo introducir la clave en el programa:
 3. En la pantalla de inicio del programa, haz clic en el botón "Generar archivo golden_key.env y abrir editor de texto". El sistema creará automáticamente un archivo de configuración limpio en la ubicación correcta y abrirá el Bloc de notas con una plantilla lista para editar.
-4. En el archivo abierto verás la línea: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina el texto de marcador de posición y pega tu clave directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.
+4. En el archivo abierto verás la línea: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina el texto de marcador de posición y pega tu clave directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.
 
 Consejo: Tras reiniciar, la aplicación verificará el archivo y en la sección "System Check" mostrará el estado de la clave. Debe aparecer en verde para que todos los módulos de IA estén listos para funcionar. Si la clave falta o es incorrecta, el programa lo indicará claramente y permitirá abrir el editor de texto para corregir el error rápidamente.
 

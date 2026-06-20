@@ -91,7 +91,7 @@ tresc:
 
     Come inserire la chiave nel programma:
     3. Nella schermata iniziale del programma fai clic sul pulsante "{home.btn_generate}". Il sistema creerà automaticamente un file di configurazione pulito nella posizione corretta e aprirà il Blocco note con un modello pronto per la modifica.
-    4. Nel file aperto vedrai la riga: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina il testo segnaposto e incolla la tua chiave direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
+    4. Nel file aperto vedrai la riga: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina il testo segnaposto e incolla la tua chiave direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
 
     Suggerimento: Dopo il riavvio l'applicazione verificherà il file e nella sezione "{home.heading_system_check}" mostrerà lo stato della chiave. Deve essere verde affinché tutti i moduli AI siano pronti all'uso. Se la chiave è assente o errata, il programma lo indicherà chiaramente e consentirà di aprire l'editor di testo per correggere rapidamente l'errore.
   krok_3_glowne_studio: |

@@ -141,7 +141,7 @@ tresc:
 
     Jak wpisać klucz do programu:
     3. Na ekranie startowym programu kliknij przycisk "{home.btn_generate}". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
-    4. W otwartym pliku zobaczysz linię: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
+    4. W otwartym pliku zobaczysz linię: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Usuń tekst zastępczy i wklej swój klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
 
     Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "{home.heading_system_check}" pokaże status klucza. Musi być zielony, aby wszystkie moduły AI były gotowe do pracy. Jeśli klucza brakuje lub jest błędny, program jasno to wskaże i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
   krok_3_glowne_studio: |

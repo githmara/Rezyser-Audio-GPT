@@ -73,9 +73,18 @@ JEST_FROZEN: bool = getattr(sys, "frozen", False)
 def otworz_w_systemie(sciezka) -> None:
     """Otwiera plik lub folder domyślną aplikacją systemową (cross-platform).
 
-    Windows → ``os.startfile`` (powiązanie powłoki: ``.txt`` → Notatnik/edytor,
-    ``.md`` → edytor, folder → Eksplorator); macOS → ``open``; pozostałe
+    Windows → folder otwiera ``os.startfile`` (Eksplorator), a PLIK trafia
+    bezwarunkowo do Notatnika (``notepad.exe``); macOS → ``open``; pozostałe
     (Linux/BSD + Orca itd.) → ``xdg-open``.
+
+    **Dlaczego Notatnik, a nie ``os.startfile`` na pliku (od v18.4):** pliki, które
+    ta aplikacja otwiera najczęściej (``golden_key.env``, ``*.yaml`` Managera Reguł),
+    poza środowiskiem programistycznym NIE mają skojarzenia rozszerzenia — wtedy
+    ``os.startfile`` pokazuje systemowy picker „Jak chcesz otworzyć ten plik?"
+    zamiast edytora (zgłoszone na ``.env``). Notatnik jest zawsze obecny, dostępny
+    dla NVDA i radzi sobie z każdym plikiem tekstowym (env/yaml/md/txt) — a innych
+    niż tekst i foldery przez ten helper nie otwieramy. Folder MUSI iść przez
+    ``os.startfile`` (Notatnik nie otworzy katalogu — np. ``dictionaries/``).
 
     POJEDYNCZE źródło prawdy dla „otwórz w systemie" — wcześniej ten 3-gałęziowy
     wzorzec `platform.system()` był skopiowany w `main.py` (×3), `gui_opowiesci`,
@@ -91,7 +100,10 @@ def otworz_w_systemie(sciezka) -> None:
     cel = str(sciezka)
     system = platform.system()
     if system == "Windows":
-        os.startfile(cel)                       # noqa: S606 — powiązanie powłoki Windows
+        if os.path.isdir(cel):
+            os.startfile(cel)                   # noqa: S606 — Eksplorator dla folderu
+        else:
+            subprocess.Popen(["notepad.exe", cel])  # noqa: S603,S607 — pewny edytor tekstu
     elif system == "Darwin":
         subprocess.Popen(["open", cel])         # noqa: S603,S607
     else:

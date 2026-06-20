@@ -88,7 +88,7 @@ tresc:
 
     Hvernig á að slá lykilinn inn í forritið:
     3. Á upphafsskjá forritsins smelltu á hnappinn "{home.btn_generate}". Kerfið mun sjálfkrafa búa til hreina stillingarskrá á réttum stað og opna Notepad með sniðmáti tilbúið til breytinga.
-    4. Í skránni sem opnast muntu sjá línuna: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Eyddu staðgengistextanum og límdu lykilinn þinn beint á eftir jafnaðarmerkinu (án bila og án gæsalappa). Vistaðu skrána og endurræstu forritið.
+    4. Í skránni sem opnast muntu sjá línuna: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Eyddu staðgengistextanum og límdu lykilinn þinn beint á eftir jafnaðarmerkinu (án bila og án gæsalappa). Vistaðu skrána og endurræstu forritið.
 
     Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "{home.heading_system_check}" sýna stöðu lykillsins. Hann verður að vera grænn til að öll gervigreindareiningar séu tilbúnar til notkunar. Ef lykillinn vantar eða er rangur mun forritið gefa skýrt til kynna og leyfa þér að opna textaritil til að laga villuna fljótt.
   krok_3_glowne_studio: |

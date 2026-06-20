@@ -199,6 +199,9 @@ home:
   ant_err_struktura: "🚨 File structure error!\nThe required variable ANTHROPIC_API_KEY= is missing.\nSince version 18.2, the entire AI engine (Director, Stories, Polyglot, chapter titles) runs on the Claude model and requires an Anthropic key.\nDelete the file, regenerate it, and paste the key more carefully."
   ant_err_format: "🚨 Suspicious Anthropic key format!\nA valid Anthropic (Claude) key always starts with sk-ant- (e.g. sk-ant-api03-…).\nMake sure you copied the key from console.anthropic.com and not a key from another provider."
   ant_err_zbyt_krotki: "⚠️ The Anthropic key seems too short ({liczba_znakow} characters detected, at least {minimum_znakow} expected).\nYou probably copied only part of the key. Go back to console.anthropic.com and copy it in full."
+  compat_ok: "✅ OpenAI-compatible configuration detected (model: {model}).\nAll modules are ready to use."
+  compat_err_niekompletny: "⚠️ OpenAI-compatible mode is incomplete.\nPlease fill in all three fields in golden_key.env: LLM_BASE_URL, OPENAI_API_KEY, and LLM_MODEL."
+  compat_jakosc_info: ℹ️ Prompts are fine-tuned for the Claude (Anthropic) model. Other models may produce lower quality results — this is a deliberate director's choice (cost vs. quality).
 rezyser:
   panel_name: "Audio Director GPT Panel"
   heading: "🎬  Audio Director GPT – Hybrid Creative Studio"

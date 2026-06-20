@@ -36,6 +36,7 @@ from dotenv import load_dotenv
 
 import wx
 
+import core_llm as cl
 import core_poliglota
 import i18n
 import sciezki
@@ -137,14 +138,10 @@ class PoliglotaPanel(wx.Panel):
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
         if os.path.exists(env_path):
             load_dotenv(env_path)
-            api_key = os.getenv("ANTHROPIC_API_KEY", "")
-            if api_key and api_key.startswith("sk-ant-"):
-                try:
-                    import anthropic  # noqa: PLC0415
-                    self._client = anthropic.Anthropic(api_key=api_key)
-                    self._api_dostepne = True
-                except Exception:
-                    self._api_dostepne = False
+            # v18.4 provider-agnostic (przez core_llm): domyślnie Anthropic Claude,
+            # a przy LLM_PROVIDER=openai_compat dowolny endpoint zgodny z OpenAI.
+            self._client = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
+            self._api_dostepne = self._client is not None
 
     # ==================================================================
     # BUDOWANIE INTERFEJSU

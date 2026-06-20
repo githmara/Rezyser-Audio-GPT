@@ -88,7 +88,7 @@ tresc:
 
     How to enter the key into the application:
     3. On the application's start screen, click the "{home.btn_generate}" button. The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
-    4. In the opened file you will see the line: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Delete the placeholder text and paste your key directly after the equals sign (no spaces, no quotation marks). Save the file and restart the application.
+    4. In the opened file you will see the line: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Delete the placeholder text and paste your key directly after the equals sign (no spaces, no quotation marks). Save the file and restart the application.
 
     Tip: After restarting, the application will check the file and display the key status in the "{home.heading_system_check}" section. It must be green for all AI modules to be ready for use. If the key is missing or incorrect, the application will clearly indicate this and allow you to open a text editor to quickly fix the error.
   krok_3_glowne_studio: |

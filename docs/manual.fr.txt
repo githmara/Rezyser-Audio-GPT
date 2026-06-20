@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 18.3.0 – Version de Lancement)
+Manuel du Réalisateur Audio AI - Guide complet (Version 18.4.0 – Version de Lancement)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -93,7 +93,7 @@ Comment obtenir une clé Anthropic :
 
 Comment saisir la clé dans le programme :
 3. Sur l'écran de démarrage du programme, cliquez sur le bouton "Générer le fichier golden_key.env et ouvrir l'éditeur de texte". Le système créera automatiquement un fichier de configuration vierge au bon emplacement et ouvrira le Bloc-notes avec un modèle prêt à être édité.
-4. Dans le fichier ouvert, vous verrez la ligne : ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Supprimez le texte de remplacement et collez votre clé directement après le signe égal (sans espace ni guillemets). Enregistrez le fichier et redémarrez l'application.
+4. Dans le fichier ouvert, vous verrez la ligne : ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Supprimez le texte de remplacement et collez votre clé directement après le signe égal (sans espace ni guillemets). Enregistrez le fichier et redémarrez l'application.
 
 Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera le statut de la clé dans la section "Vérification du Système". Il doit être vert pour que tous les modules IA soient prêts à fonctionner. Si la clé est absente ou incorrecte, le programme l'indiquera clairement et permettra d'ouvrir un éditeur de texte pour corriger rapidement l'erreur.
 

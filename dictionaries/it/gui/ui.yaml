@@ -199,6 +199,9 @@ home:
   ant_err_struktura: "🚨 Errore nella struttura del file!\nManca la variabile obbligatoria ANTHROPIC_API_KEY=.\nDalla versione 18.2 l'intero motore AI (Regista, Storie, Poliglotta, titoli dei capitoli) funziona sul modello Claude e richiede una chiave Anthropic.\nElimina il file, rigeneralo e incolla la chiave con più attenzione."
   ant_err_format: "🚨 Formato della chiave Anthropic sospetto!\nUna chiave Anthropic (Claude) valida inizia sempre con i caratteri sk-ant- (es. sk-ant-api03-…).\nAssicurati di aver copiato la chiave da console.anthropic.com e non la chiave di un altro provider."
   ant_err_zbyt_krotki: "⚠️ La chiave Anthropic sembra troppo corta (rilevati {liczba_znakow} caratteri, attesi almeno {minimum_znakow}).\nProbabilmente hai copiato solo una parte della chiave. Torna su console.anthropic.com e copiala per intero."
+  compat_ok: "✅ Configurazione OpenAI-compatible rilevata (modello: {model}).\nTutti i moduli sono pronti all'uso."
+  compat_err_niekompletny: "⚠️ La modalità OpenAI-compatible è incompleta.\nCompila tutti e tre i campi in golden_key.env: LLM_BASE_URL, OPENAI_API_KEY e LLM_MODEL."
+  compat_jakosc_info: ℹ️ I prompt sono ottimizzati per il modello Claude (Anthropic). Altri modelli potrebbero produrre una qualità inferiore — si tratta di una scelta consapevole del regista (costo vs qualità).
 rezyser:
   panel_name: "Pannello Regista Audio GPT"
   heading: "🎬  Regista Audio GPT – Studio Creativo Ibrido"

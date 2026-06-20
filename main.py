@@ -343,9 +343,10 @@ class HomePanel(wx.Panel):
         self._status_lbl.SetBackgroundColour(self.GetBackgroundColour())
         main_sizer.Add(self._status_lbl, flag=wx.ALL | wx.EXPAND, border=16)
 
-        # --- Przycisk akcji (domyślnie ukryty) ---
+        # --- Przycisk akcji (v18.4: env = jedyna powierzchnia configu, więc
+        #     przycisk jest ZAWSZE widoczny; `_run_system_check` ustawia etykietę
+        #     „Wygeneruj"/„Otwórz" wg istnienia pliku). ---
         self._action_btn = wx.Button(self, label="")
-        self._action_btn.Hide()
         self.Bind(wx.EVT_BUTTON, self._on_action_btn, self._action_btn)
         main_sizer.Add(self._action_btn, flag=wx.LEFT | wx.BOTTOM, border=16)
 
@@ -426,17 +427,23 @@ class HomePanel(wx.Panel):
     # Logika walidacji golden_key.env
     # ------------------------------------------------------------------
     def _run_system_check(self) -> None:
-        """Waliduje plik golden_key.env i aktualizuje etykietę statusu."""
+        """Waliduje plik golden_key.env i aktualizuje etykietę statusu.
+
+        Od v18.4 provider-aware: domyślnie waliduje klucz Anthropic, a gdy
+        ``LLM_PROVIDER=openai_compat`` — trójkę OpenAI-compatible. Przycisk akcji
+        jest ZAWSZE widoczny (env = jedyna powierzchnia configu); etykieta zależy
+        WYŁĄCZNIE od istnienia pliku (mikropunkt 2026-06-20).
+        """
         env_path = self._env_path
 
-        # Plik nie istnieje – pierwsze uruchomienie
+        # Plik nie istnieje – pierwsze uruchomienie. Przycisk = „Wygeneruj".
         if not os.path.exists(env_path):
+            self._show_action_btn("generate", t("home.btn_generate"))
             self._set_status(t("home.err_brak_pliku"), kind="error")
-            self._show_action_btn(
-                action="generate",
-                label=t("home.btn_generate"),
-            )
             return
+
+        # Plik istnieje → przycisk = „Otwórz" (niezależnie od poprawności konfiguracji).
+        self._show_action_btn("open", t("home.btn_open"))
 
         # Odczyt pliku
         try:
@@ -449,9 +456,12 @@ class HomePanel(wx.Panel):
             )
             return
 
-        # Walidacja klucza Anthropic — JEDYNY wymagany po konsolidacji v18.x
-        # (narracja Reżysera, Opowieści, Poliglota, postprodukcja tytułów: wszystko
-        # na Claude). Format `sk-ant-`. OpenAI usunięty z całego projektu.
+        # Tryb OpenAI-compatible (v18.4) — walidujemy trójkę zamiast klucza Anthropic.
+        if self._czy_tryb_compat(zawartosc):
+            self._sprawdz_compat(zawartosc)
+            return
+
+        # Domyślnie: walidacja klucza Anthropic (`sk-ant-`) — zasila CAŁY silnik AI.
         wynik = self._diagnoza_klucza(
             zawartosc, "ANTHROPIC_API_KEY", "sk-ant-",
             "home.ant_err_struktura", "home.ant_err_format", "home.ant_err_zbyt_krotki",
@@ -461,7 +471,42 @@ class HomePanel(wx.Panel):
             return
         klucz_i18n, kwargs, kind = wynik
         self._set_status(t(klucz_i18n, **kwargs), kind=kind)
-        self._show_action_btn("open", t("home.btn_open"))
+
+    @staticmethod
+    def _wartosc_zmiennej(zawartosc: str, nazwa: str) -> str:
+        """Wyłuskuje wartość ``NAZWA=...`` z treści env (pierwsza linia po ``=``).
+
+        Pomija linie zakomentowane (``# NAZWA=...``): szuka wzorca z początkiem
+        linii. Zwraca pusty string, gdy zmiennej brak lub jest zakomentowana.
+        """
+        for linia in zawartosc.splitlines():
+            naga = linia.strip()
+            if naga.startswith(f"{nazwa}="):
+                return naga.split("=", 1)[1].strip()
+        return ""
+
+    def _czy_tryb_compat(self, zawartosc: str) -> bool:
+        """True, gdy aktywny ``LLM_PROVIDER=openai_compat`` (endpoint OpenAI-compatible)."""
+        return self._wartosc_zmiennej(zawartosc, "LLM_PROVIDER").lower() == "openai_compat"
+
+    def _sprawdz_compat(self, zawartosc: str) -> None:
+        """System Check trybu OpenAI-compatible: ``LLM_BASE_URL`` + ``OPENAI_API_KEY`` + ``LLM_MODEL``."""
+        base_url = self._wartosc_zmiennej(zawartosc, "LLM_BASE_URL")
+        klucz    = self._wartosc_zmiennej(zawartosc, "OPENAI_API_KEY")
+        model    = self._wartosc_zmiennej(zawartosc, "LLM_MODEL")
+        placeholdery = ("PASTE_YOUR_KEY_HERE", "TUTAJ_WKLEJ_SWOJ_KLUCZ")
+        kompletny = bool(
+            base_url and model and klucz
+            and not any(ph in klucz for ph in placeholdery)
+        )
+        if not kompletny:
+            self._set_status(t("home.compat_err_niekompletny"), kind="warning")
+            return
+        # Compat OK — pokaż model + świadome ostrzeżenie jakości (prompty pod Claude).
+        self._set_status(
+            t("home.compat_ok", model=model) + "\n\n" + t("home.compat_jakosc_info"),
+            kind="ok",
+        )
 
     def _diagnoza_klucza(
         self,
@@ -484,7 +529,9 @@ class HomePanel(wx.Panel):
             return (k_struktura, {}, "error")
         klucz_raw = zawartosc.split(f"{nazwa_zmiennej}=")[-1].split("\n")[0]
         klucz = klucz_raw.strip()
-        if "TUTAJ_WKLEJ_SWOJ_KLUCZ" in klucz:
+        # Anglicyzacja szablonu v18.4: nowy placeholder `PASTE_YOUR_KEY_HERE`;
+        # stary `TUTAJ_WKLEJ_SWOJ_KLUCZ` wciąż wykrywamy (env wygenerowany ≤v18.3).
+        if "PASTE_YOUR_KEY_HERE" in klucz or "TUTAJ_WKLEJ_SWOJ_KLUCZ" in klucz:
             return ("home.err_tekst_zastepczy", {}, "warning")
         if (klucz.startswith('"') and klucz.endswith('"')) or \
            (klucz.startswith("'") and klucz.endswith("'")):
@@ -591,16 +638,27 @@ class HomePanel(wx.Panel):
             try:
                 with open(env_path, "w", encoding="utf-8") as fh:
                     fh.write(
-                        "ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ\n"
+                        "ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE\n"
                         "\n"
-                        "# Wymagany klucz Anthropic (sk-ant-…): zasila CAŁY silnik AI —\n"
-                        "# narrację Reżysera (audiobook / teatr / burza), Opowieści,\n"
-                        "# Poliglotę (tłumacz) i postprodukcję tytułów (konsolidacja v18.x).\n"
+                        "# Required Anthropic key (sk-ant-…): powers the ENTIRE AI engine —\n"
+                        "# Director narration (audiobook / radio play / brainstorm), Stories,\n"
+                        "# Polyglot (translator) and chapter-title post-production.\n"
                         "\n"
-                        "# Opcjonalnie — postprodukcja audio w ElevenLabs Studio (v16.0).\n"
-                        "# Odkomentuj poniższą linię i wklej klucz typu sk_ "
-                        "(z podkreślnikiem, nie sk-):\n"
+                        "# Optional — audio post-production in ElevenLabs Studio (v16.0).\n"
+                        "# Uncomment the line below and paste a key of type sk_ "
+                        "(with an underscore, not sk-):\n"
                         "# ELEVENLABS_API_KEY=\n"
+                        "\n"
+                        "# --- Advanced (v18.4): use an OpenAI-compatible provider "
+                        "instead of Anthropic ---\n"
+                        "# Uncomment and fill ALL FOUR lines to route the ENTIRE engine to any\n"
+                        "# OpenAI-compatible endpoint (OpenRouter, Groq, Fireworks, local Ollama, …).\n"
+                        "# Claude (Anthropic) above stays the recommended quality baseline —\n"
+                        "# other models may produce lower quality (a deliberate cost/quality choice).\n"
+                        "# LLM_PROVIDER=openai_compat\n"
+                        "# LLM_BASE_URL=https://openrouter.ai/api/v1\n"
+                        "# OPENAI_API_KEY=PASTE_YOUR_KEY_HERE\n"
+                        "# LLM_MODEL=anthropic/claude-sonnet-4-6\n"
                     )
             except Exception as exc:
                 wx.MessageBox(
@@ -609,14 +667,15 @@ class HomePanel(wx.Panel):
                     wx.OK | wx.ICON_ERROR,
                 )
                 return
-            # Plik wygenerowany – zaktualizuj UI
+            # Plik wygenerowany – zaktualizuj UI. Przycisk ZOSTAJE widoczny i
+            # przełącza się na „Otwórz" (env = jedyna powierzchnia configu, v18.4).
             self._set_status(
                 t("home.ok_plik_wygenerowany", nazwa_pliku=self.ENV_FILENAME),
                 kind="ok",
             )
-            # Przenieś fokus przed ukryciem przycisku – NVDA nie wpadnie w próżnię (A11y)
+            self._show_action_btn("open", t("home.btn_open"))
+            # Fokus na status (A11y: NVDA odczyta „plik wygenerowany").
             self._status_lbl.SetFocus()
-            self._action_btn.Hide()
             self.Layout()
 
         # Otwórz plik w domyślnym edytorze tekstu (cross-platform helper)

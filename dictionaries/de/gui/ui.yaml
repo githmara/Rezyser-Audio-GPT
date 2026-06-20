@@ -199,6 +199,9 @@ home:
   ant_err_struktura: "🚨 Fehler in der Dateistruktur!\nDie erforderliche Variable ANTHROPIC_API_KEY= fehlt.\nAb Version 18.2 läuft die gesamte KI-Engine (Regisseur, Geschichten, Polyglott, Kapiteltitel) auf dem Claude-Modell und benötigt einen Anthropic-Schlüssel.\nLöschen Sie die Datei, generieren Sie sie neu und fügen Sie den Schlüssel sorgfältig ein."
   ant_err_format: "🚨 Verdächtiges Format des Anthropic-Schlüssels!\nEin gültiger Anthropic-Schlüssel (Claude) beginnt immer mit sk-ant- (z. B. sk-ant-api03-…).\nStellen Sie sicher, dass Sie den Schlüssel von console.anthropic.com kopiert haben und nicht den Schlüssel eines anderen Anbieters."
   ant_err_zbyt_krotki: "⚠️ Der Anthropic-Schlüssel scheint zu kurz zu sein ({liczba_znakow} Zeichen erkannt, mindestens {minimum_znakow} erwartet).\nWahrscheinlich haben Sie nur einen Teil des Schlüssels kopiert. Gehen Sie zurück zu console.anthropic.com und kopieren Sie ihn vollständig."
+  compat_ok: "✅ OpenAI-compatible-Konfiguration erkannt (Modell: {model}).\nAlle Module sind einsatzbereit."
+  compat_err_niekompletny: "⚠️ Der OpenAI-compatible-Modus ist unvollständig.\nBitte trage in golden_key.env alle drei Felder ein: LLM_BASE_URL, OPENAI_API_KEY und LLM_MODEL."
+  compat_jakosc_info: ℹ️ Die Prompts sind auf das Claude-Modell (Anthropic) abgestimmt. Andere Modelle können geringere Qualität liefern – das ist eine bewusste Entscheidung des Regisseurs (Kosten vs. Qualität).
 rezyser:
   panel_name: "Audio GPT Regisseur-Panel"
   heading: "🎬  Audio GPT Regisseur – Hybrides Kreativstudio"

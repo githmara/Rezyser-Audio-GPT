@@ -180,7 +180,7 @@ def _wczytaj_yaml(sciezka: Path) -> dict[str, Any]:
         with open(sciezka, "r", encoding="utf-8") as fh:
             dane = yaml.safe_load(fh)
     except (OSError, yaml.YAMLError) as exc:
-        print(f"⚠️  Nie udało się wczytać {sciezka}: {exc}")
+        print(f"⚠️  Failed to load {sciezka}: {exc}")
         return {}
     return dane if isinstance(dane, dict) else {}
 
@@ -217,7 +217,7 @@ def _scal_tresc_sekcjami(tresc: Any) -> str | None:
         sekcje: list[str] = []
         for klucz, wartosc in tresc.items():
             if not isinstance(wartosc, str):
-                print(f"⚠️  Sekcja '{klucz}' nie jest stringiem — pomijam.")
+                print(f"⚠️  Section '{klucz}' is not a string — skipping.")
                 continue
             sekcje.append(wartosc.rstrip("\n"))
         if not sekcje:
@@ -248,7 +248,7 @@ def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
             continue
         id_szablonu = dane.get("id") or plik.stem
         if not isinstance(id_szablonu, str):
-            print(f"⚠️  Pomijam {plik}: pole 'id' musi być stringiem.")
+            print(f"⚠️  Skipping {plik}: the 'id' field must be a string.")
             continue
         tresc_raw = dane.get("tresc", "")
         # Skip-w-PL: usuń sekcje trzymane wyłącznie pod autotłumacz, których
@@ -262,7 +262,7 @@ def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
                 }
         tresc_scalona = _scal_tresc_sekcjami(tresc_raw)
         if tresc_scalona is None:
-            print(f"⚠️  Pomijam {plik}: 'tresc' musi być stringiem albo słownikiem sekcji.")
+            print(f"⚠️  Skipping {plik}: 'tresc' must be a string or a dict of sections.")
             continue
         szablony.append((id_szablonu, tresc_scalona))
     return szablony
@@ -512,7 +512,7 @@ def generuj(
                 tresc_szablonu, ui, placeholdery_globalne)
             if brakujace and not cicho:
                 unikalne = sorted(set(brakujace))
-                print(f"⚠️  {jezyk}/{id_szablonu}: brakujące placeholdery w ui.yaml: {unikalne}")
+                print(f"⚠️  {jezyk}/{id_szablonu}: missing placeholders in ui.yaml: {unikalne}")
             if zbieraj_brakujace is not None and brakujace:
                 zbieraj_brakujace[f"{jezyk}/{id_szablonu}"] = sorted(set(brakujace))
 
@@ -552,23 +552,23 @@ def waliduj() -> int:
     brakujace_wedlug_pliku: dict[str, list[str]] = {}
     generuj(zbieraj_brakujace=brakujace_wedlug_pliku)
 
-    print("\n========== WALIDACJA PLACEHOLDERÓW ==========")
+    print("\n========== PLACEHOLDER VALIDATION ==========")
     if not brakujace_wedlug_pliku:
-        print("✅ Wszystkie {placeholdery} w szablonach mają wartości w ui.yaml.")
+        print("✅ All {placeholdery} in the templates have values in ui.yaml.")
         print("=============================================")
         return 0
 
-    print(f"❌ Znaleziono brakujące placeholdery w {len(brakujace_wedlug_pliku)} "
-          f"szablonie/ach:")
+    print(f"❌ Found missing placeholders in {len(brakujace_wedlug_pliku)} "
+          f"template(s):")
     for nazwa, brakujace in sorted(brakujace_wedlug_pliku.items()):
         print(f"  • {nazwa}")
         for klucz in brakujace:
             print(f"      - {{{klucz}}}")
     print("=============================================")
     print(
-        "Napraw: dodaj brakujące klucze do ui.yaml danego języka ALBO usuń "
-        "nieużywane placeholdery z szablonu. Surowe `{coś}` w docs/*.txt "
-        "wygląda jak błąd, więc build nie przejdzie."
+        "Fix: add the missing keys to that language's ui.yaml OR remove the "
+        "unused placeholders from the template. A raw `{coś}` in docs/*.txt "
+        "looks like a bug, so the build will not pass."
     )
     return 1
 
@@ -578,14 +578,14 @@ def waliduj() -> int:
 # ---------------------------------------------------------------------------
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Generator dokumentacji użytkownika (i18n).",
+        description="User documentation generator (i18n).",
     )
     parser.add_argument(
         "--waliduj",
         action="store_true",
-        help="Po wygenerowaniu sprawdź, czy wszystkie {placeholdery} zostały "
-             "rozwinięte przez ui.yaml. Exit 1, gdy cokolwiek zostało jako "
-             "surowe `{klucz}` w wynikowym docs/*.txt.",
+        help="After generating, check that all {placeholdery} were expanded "
+             "via ui.yaml. Exit 1 if anything was left as a raw `{klucz}` in "
+             "the resulting docs/*.txt.",
     )
     args = parser.parse_args()
 

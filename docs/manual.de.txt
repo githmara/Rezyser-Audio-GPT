@@ -1,4 +1,4 @@
-Audio AI Regisseur Handbuch - Komplettanleitung (Version 18.3.0 – Release-Version)
+Audio AI Regisseur Handbuch - Komplettanleitung (Version 18.4.0 – Release-Version)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -74,7 +74,7 @@ So erhalten Sie einen Anthropic-Schlüssel:
 
 So tragen Sie den Schlüssel in das Programm ein:
 3. Klicken Sie auf dem Startbildschirm des Programms auf die Schaltfläche „Generiere die Datei golden_key.env und öffne den Texteditor". Das System erstellt automatisch eine saubere Konfigurationsdatei am richtigen Speicherort und öffnet den Editor mit einer bearbeitungsbereiten Vorlage.
-4. In der geöffneten Datei sehen Sie die Zeile: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Entfernen Sie den Platzhaltertext und fügen Sie Ihren Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
+4. In der geöffneten Datei sehen Sie die Zeile: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Entfernen Sie den Platzhaltertext und fügen Sie Ihren Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
 
 Hinweis: Nach dem Neustart prüft die Anwendung die Datei und zeigt im Abschnitt „Systemprüfung" den Status des Schlüssels an. Er muss grün sein, damit alle KI-Module einsatzbereit sind. Fehlt der Schlüssel oder ist er fehlerhaft, weist das Programm klar darauf hin und ermöglicht es, den Texteditor zu öffnen, um den Fehler schnell zu beheben.
 

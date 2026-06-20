@@ -135,12 +135,12 @@ def zapisz_rejestr(mapa: dict[str, str]) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Synchronizuje jezyki_docelowe.yaml z folderem dictionaries/.",
+        description="Synchronize jezyki_docelowe.yaml with the dictionaries/ folder.",
     )
     ap.add_argument("--dry-run", action="store_true",
-                    help="Tylko pokaż diff, nie zapisuj pliku.")
+                    help="Only show the diff, do not write the file.")
     ap.add_argument("--strict", action="store_true",
-                    help="Zwróć exit 1, gdy rejestr wymaga zmiany (CI / pre-commit guard).")
+                    help="Return exit 1 when the registry needs updating (CI / pre-commit guard).")
     args = ap.parse_args()
 
     obecne = set(skanuj_jezyki())
@@ -161,17 +161,17 @@ def main() -> int:
     if do_usuniecia:
         print("➖ USUWAM (brak folderu/podstawy): " + ", ".join(do_usuniecia))
     if not do_dodania and not do_usuniecia:
-        print("✅ Rejestr jest już zsynchronizowany — bez zmian.")
+        print("✅ Registry is already in sync — no changes.")
 
     zmiana = bool(do_dodania or do_usuniecia)
     if args.strict and zmiana:
-        print("❌ --strict: rejestr wymaga aktualizacji (uruchom bez --strict).")
+        print("❌ --strict: registry needs updating (run without --strict).")
         return 1
     if zmiana and not args.dry_run:
         zapisz_rejestr(nowy)
-        print(f"💾 Zapisano {REJESTR.name} ({len(nowy)} języków docelowych).")
+        print(f"💾 Saved {REJESTR.name} ({len(nowy)} target languages).")
     elif zmiana and args.dry_run:
-        print("ℹ️  --dry-run: nic nie zapisano.")
+        print("ℹ️  --dry-run: nothing was written.")
     return 0
 
 

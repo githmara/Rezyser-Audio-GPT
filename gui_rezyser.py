@@ -38,7 +38,6 @@ import json
 import os
 import threading
 
-import anthropic
 from dotenv import load_dotenv
 
 import wx
@@ -46,6 +45,7 @@ import wx
 # Refaktor wersji 13.0: logika modelu, przepisy i silnik AI są wydzielone
 # z tego pliku. Panel zostaje cienką warstwą widoku wxPython.
 import core_elevenlabs as ce
+import core_llm as cl
 import core_rezyser as cr
 import core_screen_reader as csr
 import przepisy_rezysera as pr
@@ -161,7 +161,7 @@ class RezyserPanel(wx.Panel):
         # skrypt / burza), postprodukcję tytułów ORAZ mikro-call kodu języka.
         # (Do v18.2.1 GUI trzymało jeszcze martwego klienta OpenAI mimo migracji
         # `rezyser_ai` na Messages API — co łamało obietnicę single-key.)
-        self._klient_claude = None   # Anthropic
+        self._klient_llm = None   # Anthropic
         self._api_dostepne: bool = False
         self._worker_thread: threading.Thread | None = None
         # v17.9 (Obszar 3b): id przepisów, dla których trwa wnioskowanie
@@ -248,14 +248,14 @@ class RezyserPanel(wx.Panel):
         przepis = self._aktualny_przepis()
         if przepis is None or not przepis.zapis_do_pliku:
             return
-        if not self._api_dostepne or self._klient_claude is None:
+        if not self._api_dostepne or self._klient_llm is None:
             return  # offline: wpisany `kod_jezyka` zostaje fallbackiem
         if przepis.id in self._kod_jezyka_w_toku:
             return
         if przepis.id in self._kod_jezyka_rozwiazany:
             return
         self._kod_jezyka_w_toku.add(przepis.id)
-        klient    = self._klient_claude
+        klient    = self._klient_llm
         jezyk_odp = przepis.jezyk_odpowiedzi
         kod_yaml  = przepis.kod_jezyka
         dozwolone = set(dostepne_jezyki_ui())
@@ -444,12 +444,14 @@ class RezyserPanel(wx.Panel):
     # Inicjowanie klienta Anthropic
     # ------------------------------------------------------------------
     def _init_api(self) -> None:
-        """Ładuje golden_key.env i inicjuje klienta LLM (Anthropic Claude).
+        """Ładuje golden_key.env i inicjuje klienta LLM przez `core_llm`.
 
-        Single-provider od v18.2.1: WSZYSTKIE wywołania Reżysera (tryby narracyjne
-        + postprodukcja tytułów + mikro-call kodu języka) idą przez `_klient_claude`.
-        `_api_dostepne` = obecny `ANTHROPIC_API_KEY` (`sk-ant-`) — to jedyny klucz,
-        którego wymaga end-user (zgodnie z konsolidacją 18.x na Anthropic).
+        Od v18.4 provider-agnostic: domyślnie Anthropic Claude (`ANTHROPIC_API_KEY`,
+        `sk-ant-`), a gdy `LLM_PROVIDER=openai_compat` — dowolny endpoint zgodny z
+        OpenAI (`LLM_BASE_URL` + `OPENAI_API_KEY` + `LLM_MODEL`). WSZYSTKIE wywołania
+        Reżysera (tryby narracyjne + postprodukcja tytułów + mikro-call kodu języka)
+        idą przez `_klient_llm`. `_api_dostepne` = klient zbudowany (konfiguracja
+        kompletna). Claude pozostaje rekomendowanym filarem jakości.
         """
         app_dir = sciezki.KATALOG_BAZOWY_STR
         env_path = os.path.join(app_dir, self.ENV_FILENAME)
@@ -457,14 +459,8 @@ class RezyserPanel(wx.Panel):
             return
         load_dotenv(env_path)
 
-        claude_key = os.getenv("ANTHROPIC_API_KEY", "")
-        if claude_key and claude_key.startswith("sk-ant-"):
-            try:
-                self._klient_claude = anthropic.Anthropic(api_key=claude_key)
-            except Exception:
-                self._klient_claude = None
-
-        self._api_dostepne = self._klient_claude is not None
+        self._klient_llm = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
+        self._api_dostepne = self._klient_llm is not None
 
     def _init_elevenlabs(self) -> None:
         """Wczytuje opcjonalny klucz ElevenLabs z golden_key.env (v16.0).
@@ -2143,12 +2139,12 @@ class RezyserPanel(wx.Panel):
         if przepis.format_wyjscia == "burza_json":
             try:
                 wynik_b = rai.generuj_burze(
-                    klient=self._klient_claude,
+                    klient=self._klient_llm,
                     przepis=przepis,
                     snapshot=snapshot,
                     user_text=user_text,
                 )
-            except anthropic.RateLimitError:
+            except cl.BladLimituLLM:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
             except Exception as exc:  # noqa: BLE001
@@ -2174,12 +2170,12 @@ class RezyserPanel(wx.Panel):
         if przepis.format_wyjscia == "skrypt_json":
             try:
                 wynik_s = rai.generuj_skrypt(
-                    klient=self._klient_claude,
+                    klient=self._klient_llm,
                     przepis=przepis,
                     snapshot=snapshot,
                     user_text=user_text,
                 )
-            except anthropic.RateLimitError:
+            except cl.BladLimituLLM:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
             except Exception as exc:  # noqa: BLE001
@@ -2196,12 +2192,12 @@ class RezyserPanel(wx.Panel):
         # --- Tryby produkcyjne (Audiobook / postprodukcja) ---
         try:
             wynik = rai.generuj_fragment(
-                klient=self._klient_claude,
+                klient=self._klient_llm,
                 przepis=przepis,
                 snapshot=snapshot,
                 user_text=user_text,
             )
-        except anthropic.RateLimitError:
+        except cl.BladLimituLLM:
             wx.CallAfter(
                 self._on_wyslij_error,
                 t("rezyser.err_rate_limit"),
@@ -2683,24 +2679,33 @@ class RezyserPanel(wx.Panel):
         self._pnl_el.Layout()
         self.Layout()
 
+        # Język projektu (kod ISO treści, NIE język UI) — rozwiązujemy na wątku
+        # głównym i przekazujemy do workera (czystość wątkowa: nie czytamy stanu
+        # przepisu z tła). Reżyser z polskim UI tworzący np. fiński audiobook musi
+        # dostać `fi`, nie `pl` — patrz `_kod_jezyka_aktywny` (przepis.kod_jezyka).
+        kod_jezyka = self._kod_jezyka_aktywny()
+
         th = threading.Thread(
             target=self._el_build_worker,
-            args=(nazwa, tekst, obsada),
+            args=(nazwa, tekst, obsada, kod_jezyka),
             daemon=True,
         )
         self._worker_thread = th
         th.start()
 
-    def _el_build_worker(self, nazwa: str, tekst: str, obsada: dict) -> None:
+    def _el_build_worker(
+        self, nazwa: str, tekst: str, obsada: dict, kod_jezyka: str,
+    ) -> None:
         """Wątek tła: buduje from_content_json i tworzy projekt Studio."""
         try:
             chapters = ce.buduj_chapters(tekst, obsada)
-            # v16.1: język projektu = aktualny kod paczki (pl/en/de/…), który jest
-            # zarazem kodem ISO 639-1 dla Studio. Naprawia nagłówki (v3 bez języka
-            # bywa na nich niespójny). Kod paczek == ISO 639-1 dla wszystkich 9.
+            # v16.1: język projektu = kod ISO 639-1 TREŚCI dla Studio. Naprawia
+            # nagłówki (v3 bez języka bywa na nich niespójny). Od v18.4: kod treści
+            # przepisu (`_kod_jezyka_aktywny`), NIE język UI — projekt może być w
+            # innym języku niż interfejs (polski UI + fiński audiobook).
             project_id = ce.create_project(
                 self._el_klucz, nazwa, obsada[ce.NARRATOR_KEY], chapters,
-                language=aktualny_jezyk(),
+                language=kod_jezyka,
             )
         except ce.BrakUprawnien as exc:
             wx.CallAfter(self._on_el_build_error, "uprawnienia", str(exc))
@@ -2972,7 +2977,7 @@ class RezyserPanel(wx.Panel):
             wx.CallAfter(self._update_tytuly_progress, msg, percent)
 
         wynik = rai.nadaj_tytuly_rozdzialom(
-            klient=self._klient_claude,
+            klient=self._klient_llm,
             przepis_tytuly=self._przepis_tytuly,
             pelny_tekst=pelny_tekst,
             on_postep=_cb,

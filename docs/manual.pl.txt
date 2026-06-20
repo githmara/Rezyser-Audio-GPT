@@ -1,4 +1,4 @@
-Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 18.3.0 – Wersja Wydawnicza)
+Podręcznik Reżysera Audio AI - Kompletny Przewodnik (Wersja 18.4.0 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 
@@ -77,7 +77,7 @@ Jak zdobyć klucz Anthropic:
 
 Jak wpisać klucz do programu:
 3. Na ekranie startowym programu kliknij przycisk "Wygeneruj plik golden_key.env i otwórz edytor tekstu". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
-4. W otwartym pliku zobaczysz linię: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Usuń tekst zastępczy i wklej swój klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
+4. W otwartym pliku zobaczysz linię: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Usuń tekst zastępczy i wklej swój klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
 
 Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "System Check" pokaże status klucza. Musi być zielony, aby wszystkie moduły AI były gotowe do pracy. Jeśli klucza brakuje lub jest błędny, program jasno to wskaże i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
 

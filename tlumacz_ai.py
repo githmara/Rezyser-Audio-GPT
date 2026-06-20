@@ -50,6 +50,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
+import core_llm as cl
 import core_tokeny as ct
 
 
@@ -363,17 +364,16 @@ def _pobierz_iso(klient: Any, jezyk_docelowy: str, model: str) -> tuple[str, str
         f"For a regional or script variant add a subtag, e.g.: pt-BR, zh-CN, zh-Hans. "
         f"The response must contain only the code itself — no period and no comment."
     )
-    resp = klient.with_options(timeout=TIMEOUT_S).messages.create(
+    surowa_raw, _stop = cl.wywolaj_llm(
+        klient,
         model=model,
-        max_tokens=32,
+        system="",
         messages=[{"role": "user", "content": prompt}],
+        max_tokens=32,
         temperature=0.0,
-        thinking={"type": "disabled"},
+        timeout=TIMEOUT_S,
     )
-    surowa = "".join(
-        blok.text for blok in resp.content
-        if getattr(blok, "type", None) == "text"
-    ).strip()
+    surowa = surowa_raw.strip()
     iso = normalizuj_kod_jezyka(surowa)
     if not iso:
         return "", surowa
@@ -424,19 +424,17 @@ def _tlumacz_blok(
     else:
         user_content = blok
 
-    response = klient.with_options(timeout=TIMEOUT_S).messages.create(
+    fragment_raw, stop_reason = cl.wywolaj_llm(
+        klient,
         model=model,
         system=sys_prompt,
         messages=[{"role": "user", "content": user_content}],
         max_tokens=MAX_TOKENS_BLOK,
         temperature=0.3,
-        thinking={"type": "disabled"},
+        timeout=TIMEOUT_S,
     )
-    fragment = "".join(
-        blok_tresci.text for blok_tresci in response.content
-        if getattr(blok_tresci, "type", None) == "text"
-    ).strip()
-    if getattr(response, "stop_reason", None) != "max_tokens":
+    fragment = fragment_raw.strip()
+    if stop_reason != "max_tokens":
         return fragment
 
     if glebokosc <= 0:
@@ -512,9 +510,6 @@ def tlumacz_dlugi_tekst(
         :class:`WynikTlumaczenia` po sukcesie, albo ``None`` po błędzie
         krytycznym (wtedy callback ``on_blad_krytyczny`` już został wywołany).
     """
-    # Import anthropic wewnątrz funkcji – odciąża moduł przy testach jednostkowych
-    import anthropic
-
     base_name = zbuduj_nazwe_bazowa(oryginalna_nazwa, jezyk_docelowy)
     plik_temp = _sciezka_pliku_tymczasowego(runtime_dir, base_name)
 
@@ -603,7 +598,7 @@ def tlumacz_dlugi_tekst(
             with open(plik_temp, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps({"id": i, "text": fragment}, ensure_ascii=False) + "\n")
 
-        except anthropic.RateLimitError:
+        except cl.BladLimituLLM:
             partial = "\n\n".join(wczytane[k] for k in sorted(wczytane))
             if on_blad_krytyczny:
                 on_blad_krytyczny(

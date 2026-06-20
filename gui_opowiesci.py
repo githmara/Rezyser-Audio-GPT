@@ -40,6 +40,7 @@ from typing import Any
 
 import wx
 
+import core_llm as cl
 import opowiesci_ai as oai
 import sciezki
 from bledy_ai import BladGeneracjiAI
@@ -1195,26 +1196,20 @@ class OpowiesciPanel(wx.Panel):
     # ------------------------------------------------------------------
     def _obsluz_blad(self, exc: Exception) -> None:
         """Mapuje wyjątek na komunikat lokalizowany i pokazuje dialog."""
-        # Lazy import — `anthropic` może nie być dostępne (brak paczki w
-        # środowisku testowym), a wtedy `import anthropic` na górze pliku
-        # rzuciłby ImportError i zablokował otwarcie panelu.
+        # Błędy LLM są provider-agnostyczne (`core_llm`): limit→BladLimituLLM,
+        # timeout→BladTimeoutLLM (działa tak samo dla Anthropic i OpenAI-compat).
         # Typowane błędy generacji AI (struktura/długość) niosą `klucz_i18n` —
         # mapujemy TYP na komunikat lokalizowany w namespace `opowiesci`, żeby
         # użytkownik nigdy nie zobaczył surowej, angielskiej treści technicznej
         # (ta zostaje w wyjątku dla error_log.txt / maintainera).
         if isinstance(exc, BladGeneracjiAI):
             msg = t(f"opowiesci.{exc.klucz_i18n}")
+        elif isinstance(exc, cl.BladLimituLLM):
+            msg = t("opowiesci.err_rate_limit")
+        elif isinstance(exc, cl.BladTimeoutLLM):
+            msg = t("opowiesci.err_timeout")
         else:
-            try:
-                import anthropic  # noqa: PLC0415
-                if isinstance(exc, anthropic.RateLimitError):
-                    msg = t("opowiesci.err_rate_limit")
-                elif isinstance(exc, anthropic.APITimeoutError):
-                    msg = t("opowiesci.err_timeout")
-                else:
-                    msg = str(exc)
-            except ImportError:
-                msg = str(exc)
+            msg = str(exc)
 
         self._lbl_pamiec_status.SetValue(t("opowiesci.status_blad"))
         self._btn_wyslij.Enable()

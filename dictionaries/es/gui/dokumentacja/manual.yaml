@@ -88,7 +88,7 @@ tresc:
 
     Cómo introducir la clave en el programa:
     3. En la pantalla de inicio del programa, haz clic en el botón "{home.btn_generate}". El sistema creará automáticamente un archivo de configuración limpio en la ubicación correcta y abrirá el Bloc de notas con una plantilla lista para editar.
-    4. En el archivo abierto verás la línea: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina el texto de marcador de posición y pega tu clave directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.
+    4. En el archivo abierto verás la línea: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina el texto de marcador de posición y pega tu clave directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.
 
     Consejo: Tras reiniciar, la aplicación verificará el archivo y en la sección "{home.heading_system_check}" mostrará el estado de la clave. Debe aparecer en verde para que todos los módulos de IA estén listos para funcionar. Si la clave falta o es incorrecta, el programa lo indicará claramente y permitirá abrir el editor de texto para corregir el error rápidamente.
   krok_3_glowne_studio: |

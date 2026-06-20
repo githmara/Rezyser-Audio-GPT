@@ -107,7 +107,7 @@ tresc:
 
     Comment saisir la clé dans le programme :
     3. Sur l'écran de démarrage du programme, cliquez sur le bouton "{home.btn_generate}". Le système créera automatiquement un fichier de configuration vierge au bon emplacement et ouvrira le Bloc-notes avec un modèle prêt à être édité.
-    4. Dans le fichier ouvert, vous verrez la ligne : ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Supprimez le texte de remplacement et collez votre clé directement après le signe égal (sans espace ni guillemets). Enregistrez le fichier et redémarrez l'application.
+    4. Dans le fichier ouvert, vous verrez la ligne : ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Supprimez le texte de remplacement et collez votre clé directement après le signe égal (sans espace ni guillemets). Enregistrez le fichier et redémarrez l'application.
 
     Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera le statut de la clé dans la section "{home.heading_system_check}". Il doit être vert pour que tous les modules IA soient prêts à fonctionner. Si la clé est absente ou incorrecte, le programme l'indiquera clairement et permettra d'ouvrir un éditeur de texte pour corriger rapidement l'erreur.
   krok_3_glowne_studio: |

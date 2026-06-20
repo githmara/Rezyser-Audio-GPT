@@ -70,6 +70,7 @@ from typing import Any
 
 import yaml
 
+import core_llm as cl
 import przeglad_tlumaczen
 from tlumacz_ai import tlumacz_dlugi_tekst
 
@@ -270,19 +271,19 @@ def _wygeneruj_skrotowce_llm(
         f"dotted abbreviations, give the closest common written shortenings anyway."
     )
     try:
-        resp = klient.messages.create(
+        surowa_raw, _stop = cl.wywolaj_llm(
+            klient,
             model=model,
-            max_tokens=256,
+            system="",
             messages=[{"role": "user", "content": prompt}],
+            max_tokens=256,
             temperature=0.0,
-            thinking={"type": "disabled"},
+            timeout=60.0,
         )
-        surowa = "".join(
-            b.text for b in resp.content if getattr(b, "type", None) == "text"
-        ).strip()
+        surowa = surowa_raw.strip()
     except Exception as exc:  # noqa: BLE001 — fail-soft: brak skrótowców → blok pominięty
-        print(f"⚠️  {kod}: generacja skrótowców LLM nie powiodła się ({exc}); "
-              f"blok Odwracacza zostanie pominięty.")
+        print(f"⚠️  {kod}: LLM abbreviation generation failed ({exc}); "
+              f"the Odwracacz block will be skipped.")
         return []
 
     pary: list[tuple[str, str]] = []
@@ -435,9 +436,9 @@ Voice product names (Samantha, Mark, Markus, Hedda, Heidi, Gudrun, Milena, Irina
 Pavel, Yuri, Satu, Mikko, Thomas, Amelie, Julie, Stefan, Katja, Jorge, Monica, Helena,
 Alice, Luca, Elsa, Zira, Hazel, Ewa, Paulina) are product names — keep 1:1.
 
-The env-key placeholder TUTAJ_WKLEJ_SWOJ_KLUCZ is a literal token the app writes
-verbatim into golden_key.env (ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ /
-OPENAI_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ), identical in every UI language. KEEP it 1:1 —
+The env-key placeholder PASTE_YOUR_KEY_HERE is a literal token the app writes
+verbatim into golden_key.env (ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE /
+OPENAI_API_KEY=PASTE_YOUR_KEY_HERE), identical in every UI language. KEEP it 1:1 —
 do NOT translate it into a {nazwa_natywna} phrase for "paste your key here"; the reader
 must see the exact string that exists in the file.
 
@@ -499,7 +500,7 @@ application:
     (e.g. do NOT render "opowiesci/" with a {nazwa_natywna} word for "stories");
   - angle-bracket placeholders such as <nazwa>, <kod>, <name>: copy the brackets
     and the inner text character-for-character, do NOT translate <nazwa>;
-  - the env-key placeholder TUTAJ_WKLEJ_SWOJ_KLUCZ — copy it verbatim (the app writes
+  - the env-key placeholder PASTE_YOUR_KEY_HERE — copy it verbatim (the app writes
     it literally into golden_key.env, identical in every language);
   - voice product names (Samantha, Heidi, Markus, ...);
   - the deliberately-Polish DIDACTIC cipher examples (Vowelizer/Reverser/
@@ -885,18 +886,18 @@ def wczytaj_szablony_pl() -> list[tuple[str, str, dict[str, str]]]:
     """
     folder = DICT_DIR / KOD_ZRODLOWY / FOLDER_GUI / FOLDER_DOKUMENTACJA
     if not folder.is_dir():
-        raise FileNotFoundError(f"Brak folderu źródłowego PL: {folder}")
+        raise FileNotFoundError(f"Missing PL source folder: {folder}")
 
     szablony: list[tuple[str, str, dict[str, str]]] = []
     for plik in sorted(folder.glob("*.yaml")):
         with open(plik, "r", encoding="utf-8") as fh:
             dane = yaml.safe_load(fh)
         if not isinstance(dane, dict):
-            print(f"⚠️  Pomijam {plik.name}: nie parsuje się do słownika YAML.")
+            print(f"⚠️  Skipping {plik.name}: does not parse into a YAML dictionary.")
             continue
         id_szablonu = dane.get("id")
         if not isinstance(id_szablonu, str):
-            print(f"⚠️  Pomijam {plik.name}: brak stringowego pola `id`.")
+            print(f"⚠️  Skipping {plik.name}: missing string field `id`.")
             continue
         tresc = dane.get("tresc")
         if isinstance(tresc, str):
@@ -908,18 +909,18 @@ def wczytaj_szablony_pl() -> list[tuple[str, str, dict[str, str]]]:
                 if isinstance(v, str):
                     sekcje[k] = v
                 else:
-                    print(f"⚠️  {plik.name}: sekcja '{k}' nie jest stringiem — pomijam.")
+                    print(f"⚠️  {plik.name}: section '{k}' is not a string — skipping.")
             if not sekcje:
-                print(f"⚠️  Pomijam {plik.name}: dict `tresc` nie ma żadnych stringowych sekcji.")
+                print(f"⚠️  Skipping {plik.name}: dict `tresc` has no string sections.")
                 continue
         else:
-            print(f"⚠️  Pomijam {plik.name}: `tresc` musi być stringiem albo dictem.")
+            print(f"⚠️  Skipping {plik.name}: `tresc` must be a string or a dict.")
             continue
         szablony.append((plik.name, id_szablonu, sekcje))
 
     if not szablony:
         raise ValueError(
-            f"Folder {folder} nie zawiera żadnego poprawnego szablonu *.yaml."
+            f"Folder {folder} contains no valid *.yaml template."
         )
     return szablony
 
@@ -1049,8 +1050,8 @@ def _tlumacz_pojedyncza_sekcje(
         max_tokenow_na_blok=4_000,
     )
     if wynik is None:
-        komunikat = blad_kryt["msg"] or "nieznany błąd silnika tlumacz_ai.py"
-        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: przerwano tłumaczenie.\n    {komunikat.splitlines()[0]}")
+        komunikat = blad_kryt["msg"] or "unknown error from the tlumacz_ai.py engine"
+        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: translation aborted.\n    {komunikat.splitlines()[0]}")
         return False, None
 
     tekst_po_prefiksie = utnij_prefix_z_wyniku(wynik.tekst)
@@ -1060,11 +1061,11 @@ def _tlumacz_pojedyncza_sekcje(
         print(f"   📝 {kod}/{nazwa_pliku}{sufiks}: meta → output.log ({len(meta)} zn.)")
     ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
     if not ok:
-        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: NARUSZONA parzystość markerów ⟦i⟧.")
+        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN parity of ⟦i⟧ markers.")
         for diag in problemy[:10]:
             print(f"     {diag}")
         if len(problemy) > 10:
-            print(f"     ... (+{len(problemy) - 10} kolejnych)")
+            print(f"     ... (+{len(problemy) - 10} more)")
         return False, None
 
     tekst_final = detokenizuj(tekst_wy, mapa)
@@ -1118,18 +1119,18 @@ def tlumacz_szablon(
     if klucze_filtru is not None:
         nieznane = [k for k in klucze_filtru if k not in sekcje_pl]
         if nieznane:
-            print(f"❌ {kod}/{nazwa_pliku}: nieznane klucze w PL: {nieznane}")
-            print(f"   Dostępne klucze PL: {sorted(sekcje_pl.keys())}")
+            print(f"❌ {kod}/{nazwa_pliku}: unknown keys in PL: {nieznane}")
+            print(f"   Available PL keys: {sorted(sekcje_pl.keys())}")
             return False
         sekcje_do_tlumaczenia = {k: sekcje_pl[k] for k in klucze_filtru}
         sekcje_istniejace = wczytaj_istniejacy_docelowy(cel)
         if sekcje_istniejace is None:
-            print(f"❌ {kod}/{nazwa_pliku}: brak istniejącego pliku docelowego — uruchom najpierw bez --klucz.")
+            print(f"❌ {kod}/{nazwa_pliku}: no existing target file — run first without --klucz.")
             return False
         if KLUCZ_LEGACY in sekcje_istniejace:
             print(
-                f"❌ {kod}/{nazwa_pliku}: docelowy plik w starym schemacie (string tresc).\n"
-                f"   Surgical update niemożliwy — uruchom najpierw bez --klucz, żeby przemigrować na dict-schemat."
+                f"❌ {kod}/{nazwa_pliku}: target file in the old schema (string tresc).\n"
+                f"   Surgical update is impossible — run first without --klucz to migrate to the dict schema."
             )
             return False
 
@@ -1193,7 +1194,7 @@ def tlumacz_szablon(
             retry=swiezy_cache,
         )
         if not ok:
-            print(f"❌  {kod}/{nazwa_pliku}: sekcja '{klucz}' nie udała się — NIE zapisuję pliku.")
+            print(f"❌  {kod}/{nazwa_pliku}: section '{klucz}' failed — NOT writing the file.")
             return False
         if not dry_run:
             sekcje_przetlumaczone[klucz] = tekst or ""
@@ -1257,7 +1258,7 @@ def _zbierz_leaki_draftow(
                 detektory[kod] = detektor
             per_sekcja = audyt_leakow.leaki_per_sekcja(kod, nazwa_pliku, detektor)
         except Exception as exc:   # lingua brak / błąd modelu — nie wywracaj buildu
-            print(f"⚠️  audyt_leakow pominięty dla {kod}/{nazwa_pliku}: {exc}")
+            print(f"⚠️  audyt_leakow skipped for {kod}/{nazwa_pliku}: {exc}")
             continue
         if per_sekcja:
             wynik[(kod, nazwa_pliku)] = per_sekcja
@@ -1312,9 +1313,9 @@ def finalizuj_naglowek_docs(cel: Path, kod: str, nazwa_pliku: str) -> str:
 def _parsuj_argumenty() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Batchowy autotłumacz dokumentacji manual.yaml na języki docelowe "
-            f"({', '.join(MAPA_JEZYKOW)}). Używa tlumacz_ai.py z zamrożeniem "
-            "placeholderów przez unikalne tokeny Unicode ⟦i⟧."
+            "Batch auto-translator of the manual.yaml documentation into target "
+            f"languages ({', '.join(MAPA_JEZYKOW)}). Uses tlumacz_ai.py, freezing "
+            "placeholders with unique Unicode tokens ⟦i⟧."
         ),
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
@@ -1322,122 +1323,122 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "--jezyki",
         type=str,
         default="",
-        help=f"Lista kodów ISO oddzielona przecinkami (np. `en,fi`). "
-             f"Dozwolone: {', '.join(MAPA_JEZYKOW)}.",
+        help=f"Comma-separated list of ISO codes (e.g. `en,fi`). "
+             f"Allowed: {', '.join(MAPA_JEZYKOW)}.",
     )
     grupa.add_argument(
         "--wszystkie",
         action="store_true",
-        help=f"Tłumacz na wszystkie języki ({', '.join(MAPA_JEZYKOW)}).",
+        help=f"Translate into all languages ({', '.join(MAPA_JEZYKOW)}).",
     )
     parser.add_argument(
         "--szablony",
         type=str,
         default="",
-        help="CSV nazw szablonów do przetłumaczenia (np. `dictionaries.yaml` "
-             "lub bare-name `dictionaries`; rozszerzenie `.yaml` jest "
-             "dosztukowywane automatycznie). Pusta wartość = wszystkie szablony "
-             "z `dictionaries/pl/gui/dokumentacja/`. Sensowne, gdy część "
-             "szablonów ma już aktualne tłumaczenia na dysku i nie chcesz "
-             "ponownie spalać API-billa (np. `--szablony dictionaries`, gdy "
-             "`manual.yaml` jest już przetłumaczony we wszystkich językach).",
+        help="CSV of template names to translate (e.g. `dictionaries.yaml` "
+             "or bare-name `dictionaries`; the `.yaml` extension is "
+             "appended automatically). Empty value = all templates "
+             "from `dictionaries/pl/gui/dokumentacja/`. Useful when some "
+             "templates already have up-to-date translations on disk and you "
+             "don't want to burn the API bill again (e.g. `--szablony dictionaries` when "
+             "`manual.yaml` is already translated in all languages).",
     )
     parser.add_argument(
         "--skip-existing",
         action="store_true",
-        help="Pomiń SZABLONY, dla których "
-             "`dictionaries/<kod>/gui/dokumentacja/<plik>.yaml` już istnieje "
-             "(idempotentny rerun na poziomie pojedynczego pliku — gdy dorzucisz "
-             "nowy szablon do PL, wystarczy `--wszystkie --skip-existing`, żeby "
-             "dotłumaczyć tylko brakujące pozycje bez ponownego API-billingu na "
+        help="Skip TEMPLATES for which "
+             "`dictionaries/<kod>/gui/dokumentacja/<plik>.yaml` already exists "
+             "(idempotent rerun at the single-file level — when you add a "
+             "new template to PL, just run `--wszystkie --skip-existing` to "
+             "translate only the missing entries without re-billing the API on "
              "manual.yaml).",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Tylko tokenizacja + podgląd mapy placeholderów. Zero wywołań API.",
+        help="Tokenization + placeholder-map preview only. Zero API calls.",
     )
     parser.add_argument(
         "--model",
         default="claude-sonnet-4-6",
-        help="Model Anthropic Claude do głównego tłumaczenia (domyślnie: claude-sonnet-4-6).",
+        help="Anthropic Claude model for the main translation (default: claude-sonnet-4-6).",
     )
     parser.add_argument(
         "--klucz",
         type=str,
         default=None,
         metavar="KLUCZ[,KLUCZ...]",
-        help="Tłumacz TYLKO wskazane klucze sekcji (np. `krok_5_vocalizer,krok_5_alarm_nvda_2026`), "
-             "reszta pliku zostaje z istniejącego tłumaczenia. "
-             "Wymaga, by docelowy `<kod>/gui/dokumentacja/<plik>.yaml` już istniał W NOWYM SCHEMACIE "
-             "(dict `tresc:` z sekcjami) — najpierw zrób FULL tłumaczenie bez --klucz, "
-             "żeby plik nabrał nowego schematu. Surgical update jest tańszy API-wise: "
-             "tłumaczysz np. tylko sekcję Vocalizer (~2 kB) zamiast całego manuala (~68 kB).",
+        help="Translate ONLY the listed section keys (e.g. `krok_5_vocalizer,krok_5_alarm_nvda_2026`), "
+             "the rest of the file stays from the existing translation. "
+             "Requires the target `<kod>/gui/dokumentacja/<plik>.yaml` to already exist IN THE NEW SCHEMA "
+             "(dict `tresc:` with sections) — first run a FULL translation without --klucz, "
+             "so the file adopts the new schema. A surgical update is cheaper API-wise: "
+             "you translate e.g. only the Vocalizer section (~2 kB) instead of the whole manual (~68 kB).",
     )
     parser.add_argument(
         "-r", "--retry",
         action="store_true",
-        help="Tryb KOREKCJI LEAKÓW. Dla każdej sekcji z --klucz wczytuje ISTNIEJĄCE "
-             "tłumaczenie docelowe, wykrywa w nim polskie fragmenty (audyt_leakow: "
-             "lingua + kuratorskie terminy) i wstrzykuje je do prompta jako „te "
-             "fragmenty zostały po polsku — przetłumacz/odmień je w całości”, po czym "
-             "retłumaczy sekcję z PL źródła. Omija cache temp_*.jsonl (świeże "
-             "tłumaczenie). Zwykły --klucz NIE naprawia leaków (blind spot LLM) — "
-             "ta flaga to analog self-correction z rezyser_ai. WYMAGA --klucz.",
+        help="LEAK-CORRECTION mode. For each section from --klucz it loads the EXISTING "
+             "target translation, detects Polish fragments in it (audyt_leakow: "
+             "lingua + curatorial terms) and injects them into the prompt as \"these "
+             "fragments were left in Polish — translate/inflect them fully\", then "
+             "re-translates the section from the PL source. Bypasses the temp_*.jsonl cache (fresh "
+             "translation). A plain --klucz does NOT fix leaks (LLM blind spot) — "
+             "this flag is the analogue of self-correction from rezyser_ai. REQUIRES --klucz.",
     )
     parser.add_argument(
         "--draft",
         action="store_true",
-        help="Tryb ROBOCZY DO PRZEGLĄDU. Zamiast kanonicznego nagłówka „NIE edytuj "
-             "ręcznie” wstrzykuje neutralny nagłówek zachęcający do edycji i po "
-             "przebiegu emituje checklistę przeglądu halucynacji do "
-             "`skrypty/przeglad_docs.md`. Użycie: paczka kontrybucji nowego języka "
-             "wysyłana osobie trzeciej / agentowi do recenzji (recenzent bez naszej "
-             "konstytucji nie dostaje sprzecznego rozkazu). Pliki lądują w normalnej "
-             "ścieżce — po akceptacji i ręcznych poprawkach uruchom `--finalizuj` "
-             "(podmienia nagłówek na kanoniczny BEZ retłumaczenia). NIE regeneruj "
-             "bez --draft — pełne tłumaczenie nadpisałoby plik i cofnęło poprawki.",
+        help="WORKING DRAFT FOR REVIEW mode. Instead of the canonical \"do NOT edit "
+             "by hand\" header it injects a neutral header inviting edits, and after "
+             "the run emits a hallucination-review checklist to "
+             "`skrypty/przeglad_docs.md`. Use: a new-language contribution package "
+             "sent to a third party / agent for review (a reviewer without our "
+             "constitution does not get a conflicting order). Files land in the normal "
+             "path — after acceptance and manual fixes run `--finalizuj` "
+             "(swaps the header to canonical WITHOUT re-translating). Do NOT regenerate "
+             "without --draft — a full translation would overwrite the file and revert the fixes.",
     )
     parser.add_argument(
         "--finalizuj",
         action="store_true",
-        help="FINALIZACJA draftu (zero API, zero retłumaczenia). Dla wybranych "
-             "języków/szablonów podmienia roboczy nagłówek „WORKING DRAFT” na "
-             "kanoniczny „NIE edytuj ręcznie”, ZACHOWUJĄC całą treść (w tym ręczne "
-             "poprawki halucynacji recenzenta). Pliki bez markera draftu są pomijane "
-             "(idempotentne). To właściwy krok po akceptacji przeglądu — w miejsce "
-             "destrukcyjnego „regeneruj bez --draft”.",
+        help="DRAFT FINALIZATION (zero API, zero re-translation). For the selected "
+             "languages/templates it swaps the working \"WORKING DRAFT\" header to the "
+             "canonical \"do NOT edit by hand\", PRESERVING all content (including the reviewer's "
+             "manual hallucination fixes). Files without a draft marker are skipped "
+             "(idempotent). This is the proper step after review acceptance — instead of "
+             "the destructive \"regenerate without --draft\".",
     )
     parser.add_argument(
         "--input",
         action="store_true",
-        help="Tryb FEEDBACKU RECENZENTA (osobny workflow od --retry). Parsuje "
-             "`skrypty/input.log` (format „### kod/plik/klucz\\n<krytyka>”, ten sam co "
-             "output.log), ustala których kluczy dotyczy, sprawdza czy AI generowało dla "
-             "nich output w ostatniej turze, i retłumaczy TYLKO te klucze z PL źródła z "
-             "wstrzykniętą krytyką recenzenta — BEZ auto-detekcji leaków. Selektor kluczy "
-             "bierze z input.log (nie z --klucz). Po przebiegu input.log jest kasowany "
-             "(pętla ograniczona). Wyklucza się z --klucz/--retry.",
+        help="REVIEWER FEEDBACK mode (a separate workflow from --retry). Parses "
+             "`skrypty/input.log` (format \"### kod/plik/klucz\\n<critique>\", the same as "
+             "output.log), determines which keys it concerns, checks whether the AI generated "
+             "output for them in the last turn, and re-translates ONLY those keys from the PL source with "
+             "the reviewer's critique injected — WITHOUT leak auto-detection. The key selector "
+             "comes from input.log (not from --klucz). After the run input.log is deleted "
+             "(bounded loop). Mutually exclusive with --klucz/--retry.",
     )
     args = parser.parse_args()
     if args.klucz and args.skip_existing:
-        parser.error("--klucz i --skip-existing wzajemnie się wykluczają "
-                     "(--klucz celowo nadpisuje wybrane sekcje w istniejącym pliku).")
+        parser.error("--klucz and --skip-existing are mutually exclusive "
+                     "(--klucz deliberately overwrites the selected sections in an existing file).")
     if args.retry and not args.klucz:
-        parser.error("--retry wymaga --klucz (CSV sekcji do korekcji) — bez wskazania "
-                     "sekcji nie ma czego retłumaczyć z naciskiem na leaki.")
+        parser.error("--retry requires --klucz (CSV of sections to correct) — without specifying "
+                     "sections there is nothing to re-translate with emphasis on leaks.")
     if args.input and (args.klucz or args.retry or args.skip_existing):
-        parser.error("--input to OSOBNY workflow (krytyka z input.log) — nie łącz z "
-                     "--klucz/--retry/--skip-existing. Selektor kluczy bierze z input.log.")
+        parser.error("--input is a SEPARATE workflow (critique from input.log) — do not combine with "
+                     "--klucz/--retry/--skip-existing. The key selector comes from input.log.")
     if args.input and not args.szablony:
-        parser.error("--input wymaga --szablony <plik> (np. `--szablony tales`), żeby "
-                     "wiedzieć z którego pliku brać sekcje wskazane w input.log.")
+        parser.error("--input requires --szablony <plik> (e.g. `--szablony tales`), so it "
+                     "knows which file to take the sections listed in input.log from.")
     if args.finalizuj and (args.draft or args.klucz or args.retry or args.input
                            or args.skip_existing or args.dry_run):
-        parser.error("--finalizuj to czysto lokalna podmiana nagłówka (zero API) — "
-                     "nie łącz z --draft/--klucz/--retry/--input/--skip-existing/"
-                     "--dry-run. Wybierz języki przez --jezyki/--wszystkie "
-                     "(opcjonalnie zawęź --szablony).")
+        parser.error("--finalizuj is a purely local header swap (zero API) — "
+                     "do not combine with --draft/--klucz/--retry/--input/--skip-existing/"
+                     "--dry-run. Select languages via --jezyki/--wszystkie "
+                     "(optionally narrow with --szablony).")
     return args
 
 
@@ -1470,8 +1471,8 @@ def _filtruj_szablony(
     nieznane = sorted(wybrane - dostepne)
     if nieznane:
         raise SystemExit(
-            f"❌ Nieznane szablony: {nieznane}.\n"
-            f"   Dostępne w dictionaries/{KOD_ZRODLOWY}/{FOLDER_GUI}/{FOLDER_DOKUMENTACJA}/: "
+            f"❌ Unknown templates: {nieznane}.\n"
+            f"   Available in dictionaries/{KOD_ZRODLOWY}/{FOLDER_GUI}/{FOLDER_DOKUMENTACJA}/: "
             f"{sorted(dostepne)}"
         )
 
@@ -1485,21 +1486,19 @@ def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
     nieznane = [k for k in kody if k not in MAPA_JEZYKOW]
     if nieznane:
         raise SystemExit(
-            f"❌ Nieznane kody języków: {', '.join(nieznane)}.\n"
-            f"   Dozwolone: {', '.join(MAPA_JEZYKOW)}."
+            f"❌ Unknown language codes: {', '.join(nieznane)}.\n"
+            f"   Allowed: {', '.join(MAPA_JEZYKOW)}."
         )
     return kody
 
 
-def _zainicjuj_klienta_anthropic() -> Any:
-    try:
-        import anthropic
-    except ImportError as exc:
-        raise SystemExit(
-            "❌ Brak modułu `anthropic`. Instalacja (venv projektu):\n"
-            "   .venv/Scripts/pip install anthropic"
-        ) from exc
+def _zainicjuj_klienta() -> Any:
+    """Buduje klienta LLM (`core_llm`) z `golden_key.env`.
 
+    Od v18.4 provider-agnostic: domyślnie Anthropic Claude (`ANTHROPIC_API_KEY`,
+    `sk-ant-`), a przy `LLM_PROVIDER=openai_compat` dowolny endpoint zgodny z OpenAI.
+    Ten sam silnik co Poliglota runtime (`tlumacz_ai` wymaga `core_llm.KlientLLM`).
+    """
     # Ładujemy `golden_key.env` z roota projektu — ten sam plik, którego
     # używa GUI (`gui_poliglota.py`, `gui_rezyser.py`, `main.py`).
     # Dzięki temu skrypt CLI nie wymaga ręcznego eksportowania zmiennych
@@ -1512,14 +1511,16 @@ def _zainicjuj_klienta_anthropic() -> Any:
     except ImportError:
         pass   # python-dotenv jest w requirements; fallback i tak ma sens
 
-    klucz = os.environ.get("ANTHROPIC_API_KEY")
-    if not klucz or not klucz.startswith("sk-ant-"):
+    klient = cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
+    if klient is None:
         raise SystemExit(
-            "❌ Brak prawidłowego ANTHROPIC_API_KEY.\n"
-            "   Sprawdź `golden_key.env` w katalogu projektu (ten sam plik,\n"
-            "   którego używa GUI — System Check w trybie Reżysera)."
+            "❌ Brak prawidłowej konfiguracji LLM w `golden_key.env`.\n"
+            "   Anthropic (domyślnie): ustaw ANTHROPIC_API_KEY (sk-ant-…).\n"
+            "   OpenAI-compat: LLM_PROVIDER=openai_compat + LLM_BASE_URL\n"
+            "   + OPENAI_API_KEY + LLM_MODEL.\n"
+            "   Ten sam plik, którego używa GUI (System Check w trybie Reżysera)."
         )
-    return anthropic.Anthropic(api_key=klucz)
+    return klient
 
 
 def main() -> int:
@@ -1534,7 +1535,7 @@ def main() -> int:
 
     szablony = _filtruj_szablony(wszystkie_szablony, args.szablony)
     if not szablony:
-        print("❌ Filtr `--szablony` zostawił pustą listę — nic do roboty.")
+        print("❌ The `--szablony` filter left an empty list — nothing to do.")
         return 2
 
     pelna_lista = ", ".join(s[0] for s in wszystkie_szablony)
@@ -1566,12 +1567,12 @@ def main() -> int:
                     print(f"⏭️  {kod}/{nazwa_pliku}: brak markera draftu — pomijam (już kanoniczny).")
                 else:
                     braki += 1
-                    print(f"⚠️  {kod}/{nazwa_pliku}: plik nie istnieje — pomijam.")
-        print("\n========== PODSUMOWANIE (--finalizuj) ==========")
-        print(f"✅ Sfinalizowano: {zmienione} | ⏭️ już kanoniczne: {nie_drafty} | ⚠️ brak pliku: {braki}")
+                    print(f"⚠️  {kod}/{nazwa_pliku}: file does not exist — skipping.")
+        print("\n========== SUMMARY (--finalizuj) ==========")
+        print(f"✅ Finalized: {zmienione} | ⏭️ already canonical: {nie_drafty} | ⚠️ missing file: {braki}")
         return 0
 
-    klient: Any = None if args.dry_run else _zainicjuj_klienta_anthropic()
+    klient: Any = None if args.dry_run else _zainicjuj_klienta()
 
     # 13.4: import lazy — `core_poliglota` dorzuca docx/num2words. Skrypt
     # uruchamiany w czystym kontekście CLI nie powinien płacić za to przy
@@ -1586,7 +1587,7 @@ def main() -> int:
     if args.input:
         wpisy_input = parsuj_input_log(INPUT_LOG)
         if not wpisy_input:
-            print(f"❌ --input: {INPUT_LOG} pusty lub nie istnieje — nic do roboty.")
+            print(f"❌ --input: {INPUT_LOG} is empty or does not exist — nothing to do.")
             return 2
         prior_output_keys = set(parsuj_input_log(OUTPUT_LOG).keys())  # ten sam format
         print(f"📨 Tryb --input: {len(wpisy_input)} wpis(ów) krytyki z {INPUT_LOG.name}; "
@@ -1605,7 +1606,7 @@ def main() -> int:
     if args.klucz:
         klucze_filtru = [k.strip() for k in args.klucz.split(",") if k.strip()]
         if not klucze_filtru:
-            print("❌ Flag --klucz podany, ale CSV jest pusty.")
+            print("❌ Flag --klucz given, but the CSV is empty.")
             return 2
         print(f"🔎 Filtr --klucz ({len(klucze_filtru)} klucz/y): {klucze_filtru}")
         print(f"   Surgical update — pozostałe sekcje zostaną z istniejących tłumaczeń.")
@@ -1630,8 +1631,8 @@ def main() -> int:
                 kl_filtru = list(input_krytyki.keys())
                 for k in kl_filtru:
                     if f"{prefix}{k}" not in prior_output_keys:
-                        print(f"⚠️  {kod}/{nazwa_pliku} '{k}': brak w poprzednim output.log "
-                              f"(AI nie generowało dla niego ostatnio) — krytyka mimo to zastosowana.")
+                        print(f"⚠️  {kod}/{nazwa_pliku} '{k}': not in the previous output.log "
+                              f"(the AI did not generate for it last time) — critique applied anyway.")
             ok = tlumacz_szablon(
                 kod,
                 nazwa_pl,
@@ -1682,10 +1683,10 @@ def main() -> int:
                   f"({len(wytworzone_drafty)} plik(ów) do recenzji, "
                   f"{ile_leakow} kandydat(ów) na leak).")
 
-    print("\n========== PODSUMOWANIE ==========")
-    print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
+    print("\n========== SUMMARY ==========")
+    print(f"✅ Success: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
     if porazki:
-        print(f"❌ Porażki (≥1 szablon nie powiódł się): {', '.join(porazki)}")
+        print(f"❌ Failures (≥1 template failed): {', '.join(porazki)}")
         return 1
     return 0
 

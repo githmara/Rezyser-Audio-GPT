@@ -36,6 +36,7 @@ import jsonschema
 import yaml as _pyyaml
 from dotenv import load_dotenv
 
+import core_llm as cl
 import core_tokeny as ct
 import sciezki
 from bledy_ai import BladDlugosciOdpowiedzi, BladStrukturyJSON
@@ -277,26 +278,20 @@ class StatusPamieci:
 # =============================================================================
 
 def inicjalizuj_klienta(app_dir: str | None = None) -> Any | None:
-    """Ładuje ``golden_key.env`` z roota repo i zwraca klienta Anthropic (Claude).
+    """Ładuje ``golden_key.env`` z roota repo i zwraca :class:`core_llm.KlientLLM`.
 
-    v18.x (konsolidacja): czyta ``ANTHROPIC_API_KEY`` (``sk-ant-``). Zwraca
-    ``None`` jeśli klucz nieobecny lub niewłaściwy (panel pokaże wtedy
-    ``brak_api_tresc`` w MessageBox przy próbie wysyłki). Nigdy nie rzuca —
-    błąd inicjalizacji nie powinien blokować otwarcia panelu.
+    Od v18.4 provider-agnostic (przez ``core_llm``): domyślnie Anthropic Claude
+    (``ANTHROPIC_API_KEY``/``sk-ant-``), a przy ``LLM_PROVIDER=openai_compat`` —
+    dowolny endpoint zgodny z OpenAI. Zwraca ``None`` gdy konfiguracja niekompletna
+    (panel pokaże ``brak_api_tresc`` przy próbie wysyłki). Nigdy nie rzuca — błąd
+    inicjalizacji nie powinien blokować otwarcia panelu.
     """
     base = app_dir or sciezki.KATALOG_BAZOWY_STR
     env_path = os.path.join(base, ENV_FILENAME)
     if not os.path.exists(env_path):
         return None
     load_dotenv(env_path)
-    klucz = os.getenv("ANTHROPIC_API_KEY", "")
-    if not klucz or not klucz.startswith("sk-ant-"):
-        return None
-    try:
-        import anthropic  # noqa: PLC0415  (lazy import — brak SDK nie blokuje GUI/testów)
-        return anthropic.Anthropic(api_key=klucz)
-    except Exception:
-        return None
+    return cl.zbuduj_klienta(cl.wczytaj_konfiguracje())
 
 
 # =============================================================================
@@ -323,19 +318,15 @@ def _wywolaj_claude(
     ``with_options`` (Messages API nie przyjmuje ``timeout=`` na ``create``). Tekst
     sklejamy z bloków ``type="text"`` (Claude zwraca listę bloków treści).
     """
-    response = klient.with_options(timeout=timeout).messages.create(
+    return cl.wywolaj_llm(
+        klient,
         model=model,
         system=system,
         messages=messages,
         max_tokens=max_tokens,
         temperature=temperature,
-        thinking={"type": "disabled"},
+        timeout=timeout,
     )
-    tekst = "".join(
-        blok.text for blok in response.content
-        if getattr(blok, "type", None) == "text"
-    )
-    return tekst, getattr(response, "stop_reason", None)
 
 
 # =============================================================================

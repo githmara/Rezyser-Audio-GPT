@@ -1,4 +1,4 @@
-Manuale del Regista Audio AI - Guida completa (Versione 18.3.0 – Versione di Rilascio)
+Manuale del Regista Audio AI - Guida completa (Versione 18.4.0 – Versione di Rilascio)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
@@ -77,7 +77,7 @@ Come ottenere la chiave Anthropic:
 
 Come inserire la chiave nel programma:
 3. Nella schermata iniziale del programma fai clic sul pulsante "Genera il file golden_key.env e apri l'editor di testo". Il sistema creerà automaticamente un file di configurazione pulito nella posizione corretta e aprirà il Blocco note con un modello pronto per la modifica.
-4. Nel file aperto vedrai la riga: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Elimina il testo segnaposto e incolla la tua chiave direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
+4. Nel file aperto vedrai la riga: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina il testo segnaposto e incolla la tua chiave direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
 
 Suggerimento: Dopo il riavvio l'applicazione verificherà il file e nella sezione "Controllo del Sistema" mostrerà lo stato della chiave. Deve essere verde affinché tutti i moduli AI siano pronti all'uso. Se la chiave è assente o errata, il programma lo indicherà chiaramente e consentirà di aprire l'editor di testo per correggere rapidamente l'errore.
 

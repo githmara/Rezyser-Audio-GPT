@@ -454,7 +454,7 @@ def _zainicjuj_klienta_anthropic() -> Any:
         import anthropic
     except ImportError as exc:
         raise SystemExit(
-            "❌ Brak modułu `anthropic`. Instalacja (venv projektu):\n"
+            "❌ Missing `anthropic` module. Install (project venv):\n"
             "   .venv/Scripts/pip install anthropic"
         ) from exc
 
@@ -469,9 +469,9 @@ def _zainicjuj_klienta_anthropic() -> Any:
     klucz = os.environ.get("ANTHROPIC_API_KEY")
     if not klucz or not klucz.startswith("sk-ant-"):
         raise SystemExit(
-            "❌ Brak prawidłowego ANTHROPIC_API_KEY.\n"
-            "   Sprawdź `golden_key.env` w katalogu projektu (ten sam plik,\n"
-            "   którego używa GUI — System Check w trybie Reżysera)."
+            "❌ Missing or invalid ANTHROPIC_API_KEY.\n"
+            "   Check `golden_key.env` in the project directory (the same file\n"
+            "   used by the GUI — System Check in Director mode)."
         )
     return anthropic.Anthropic(api_key=klucz)
 
@@ -534,9 +534,9 @@ def wywolaj_llm(
     # by to schował, a to jest sygnał dla całego przebiegu (zmniejsz BATCH_SIZE).
     if getattr(resp, "stop_reason", None) == "max_tokens":
         raise SystemExit(
-            f"❌ {kod}: model osiągnął limit max_tokens={MAX_TOKENS_OUT} — odpowiedź "
-            f"ucięta, JSON niekompletny. Zmniejsz BATCH_SIZE (obecnie {BATCH_SIZE}) "
-            f"i uruchom ponownie. Przerwano CAŁY batch."
+            f"❌ {kod}: model hit the max_tokens={MAX_TOKENS_OUT} limit — response "
+            f"truncated, JSON incomplete. Reduce BATCH_SIZE (currently {BATCH_SIZE}) "
+            f"and run again. Aborted the ENTIRE batch."
         )
 
     surowa = "".join(
@@ -721,7 +721,7 @@ def tlumacz_jezyk(
         print(f"⏭️  {kod}: {cel.relative_to(ROOT)} już istnieje — pomijam (--skip-existing).")
         return True
     if klucze is not None and not cel.exists():
-        print(f"❌ {kod}: brak {cel.relative_to(ROOT)} — uruchom najpierw bez --klucz.")
+        print(f"❌ {kod}: missing {cel.relative_to(ROOT)} — run first without --klucz.")
         return False
 
     # --- Krok 1: tokenizacja per-liść -----------------------------------------
@@ -779,7 +779,7 @@ def tlumacz_jezyk(
             mapa_tgt.update(wywolaj_llm(klient, model, nazwa_cel, kod, chunk,
                                         persona_hint=persona_hint))
         except RuntimeError as exc:
-            print(f"❌ {kod}: błąd LLM w chunk {nr}/{n_chunkow} — {exc}")
+            print(f"❌ {kod}: LLM error in chunk {nr}/{n_chunkow} — {exc}")
             return False
 
     # --- Krok 3: walidacja kompletności + parity per-liść ---------------------
@@ -788,11 +788,11 @@ def tlumacz_jezyk(
     brakujace = oczekiwane - otrzymane
     nadmiarowe = otrzymane - oczekiwane
     if brakujace or nadmiarowe:
-        print(f"❌ {kod}: niezgodny zbiór id w odpowiedzi.")
+        print(f"❌ {kod}: mismatched set of ids in the response.")
         if brakujace:
-            print(f"     brakuje: {sorted(brakujace)[:20]} (łącznie {len(brakujace)})")
+            print(f"     missing: {sorted(brakujace)[:20]} (total {len(brakujace)})")
         if nadmiarowe:
-            print(f"     nadmiarowe: {sorted(nadmiarowe)[:20]} (łącznie {len(nadmiarowe)})")
+            print(f"     extra: {sorted(nadmiarowe)[:20]} (total {len(nadmiarowe)})")
         return False
 
     porazki: list[tuple[int, list[str]]] = []
@@ -809,14 +809,14 @@ def tlumacz_jezyk(
     # liście, mniejszy batch) zwykle to naprawia. Bez tego sieć by traciła
     # pełen plik z powodu jednej wpadki na 450 stringach.
     if porazki:
-        print(f"⚠️  {kod}: {len(porazki)} liści wymaga retry...")
+        print(f"⚠️  {kod}: {len(porazki)} leaves need a retry...")
         do_retry = [(idx, src_po_idx[idx]) for idx, _ in porazki]
         persona_hint_retry = any(liscie_pl[idx][0].startswith("bot.") for idx, _ in do_retry)
         try:
             retry_tgt = wywolaj_llm(klient, model, nazwa_cel, kod, do_retry,
                                     persona_hint=persona_hint_retry)
         except RuntimeError as exc:
-            print(f"❌ {kod}: retry się wywalił — {exc}")
+            print(f"❌ {kod}: retry failed — {exc}")
             return False
         mapa_tgt.update(retry_tgt)
 
@@ -828,16 +828,16 @@ def tlumacz_jezyk(
                 porazki_v2.append((idx, problemy))
 
         if porazki_v2:
-            print(f"❌ {kod}: po retry nadal {len(porazki_v2)} liści jest niepoprawnych. NIE zapisuję.")
+            print(f"❌ {kod}: after retry {len(porazki_v2)} leaves are still invalid. NOT saving.")
             for idx, problemy in porazki_v2[:10]:
                 path, _ = liscie_pl[idx]
                 print(f"     [{idx}] {path}")
                 for diag in problemy:
                     print(f"       • {diag}")
             if len(porazki_v2) > 10:
-                print(f"     ... (+{len(porazki_v2) - 10} kolejnych)")
+                print(f"     ... (+{len(porazki_v2) - 10} more)")
             return False
-        print(f"✅ {kod}: retry naprawił wszystkie {len(porazki)} problematycznych liści.")
+        print(f"✅ {kod}: retry fixed all {len(porazki)} problematic leaves.")
 
     # --- Krok 4: detokenizacja + iniekcja w drzewo ruamel ---------------------
     # Tryb FULL: klonujemy drzewo PL przez round-trip dump+load — bazą
@@ -882,10 +882,10 @@ def tlumacz_jezyk(
 def _parsuj_argumenty() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Batchowy autotłumacz interfejsu ui.yaml na języki docelowe "
-            f"({', '.join(MAPA_JEZYKOW)}). Zachowuje komentarze sekcyjne "
-            "(ruamel.yaml round-trip), tokenizuje placeholdery i skróty "
-            "klawiszowe, weryfikuje parzystość markerów + akceleratora `&`."
+            "Batch auto-translator of the ui.yaml interface into target languages "
+            f"({', '.join(MAPA_JEZYKOW)}). Preserves section comments "
+            "(ruamel.yaml round-trip), tokenizes placeholders and keyboard "
+            "shortcuts, and verifies marker parity + the `&` accelerator."
         ),
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
@@ -893,72 +893,72 @@ def _parsuj_argumenty() -> argparse.Namespace:
         "--jezyki",
         type=str,
         default="",
-        help=f"Lista kodów ISO oddzielona przecinkami (np. `en,fi`). "
-             f"Dozwolone: {', '.join(MAPA_JEZYKOW)}.",
+        help=f"Comma-separated list of ISO codes (e.g. `en,fi`). "
+             f"Allowed: {', '.join(MAPA_JEZYKOW)}.",
     )
     grupa.add_argument(
         "--wszystkie",
         action="store_true",
-        help=f"Tłumacz na wszystkie języki ({', '.join(MAPA_JEZYKOW)}).",
+        help=f"Translate into all languages ({', '.join(MAPA_JEZYKOW)}).",
     )
     parser.add_argument(
         "--skip-existing",
         action="store_true",
-        help="Pomiń języki, dla których `dictionaries/<kod>/gui/ui.yaml` "
-             "już istnieje (idempotentny rerun).",
+        help="Skip languages for which `dictionaries/<kod>/gui/ui.yaml` "
+             "already exists (idempotent rerun).",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Tylko walk + tokenizacja + podgląd. Zero wywołań API.",
+        help="Walk + tokenization + preview only. Zero API calls.",
     )
     parser.add_argument(
         "--model",
         default="claude-sonnet-4-6",
-        help="Model Anthropic Claude do tłumaczenia (domyślnie: claude-sonnet-4-6).",
+        help="Anthropic Claude model used for translation (default: claude-sonnet-4-6).",
     )
     parser.add_argument(
         "--draft",
         action="store_true",
-        help="Tryb ROBOCZY DO PRZEGLĄDU. Zamiast kanonicznego nagłówka „NIE edytuj "
-             "ręcznie” wstrzykuje neutralny nagłówek zachęcający do edycji i po "
-             "przebiegu emituje checklistę przeglądu do `skrypty/przeglad_ui.md`. "
-             "Użycie: paczka kontrybucji nowego języka wysyłana osobie trzeciej / "
-             "agentowi do recenzji. Pliki lądują w normalnej ścieżce — po akceptacji "
-             "i ręcznych poprawkach uruchom `--finalizuj` (podmienia nagłówek na "
-             "kanoniczny BEZ retłumaczenia). NIE regeneruj bez --draft — pełne "
-             "tłumaczenie nadpisałoby plik i cofnęło poprawki.",
+        help="WORKING DRAFT FOR REVIEW mode. Instead of the canonical \"do not edit "
+             "manually\" header, injects a neutral header encouraging edits and, after "
+             "the run, emits a review checklist to `skrypty/przeglad_ui.md`. "
+             "Use case: a new-language contribution package sent to a third party / "
+             "agent for review. Files land in the normal path — after approval "
+             "and manual corrections, run `--finalizuj` (swaps the header to the "
+             "canonical one WITHOUT retranslating). Do NOT regenerate without --draft — a full "
+             "translation would overwrite the file and revert the corrections.",
     )
     parser.add_argument(
         "--finalizuj",
         action="store_true",
-        help="FINALIZACJA draftu (zero API, zero retłumaczenia). Dla wybranych "
-             "języków podmienia roboczy nagłówek „WORKING DRAFT” w "
-             "`<kod>/gui/ui.yaml` na kanoniczny „NIE edytuj ręcznie”, ZACHOWUJĄC "
-             "całą treść (w tym ręczne poprawki recenzenta). Pliki bez markera "
-             "draftu są pomijane (idempotentne). To właściwy krok po akceptacji "
-             "przeglądu — w miejsce destrukcyjnego „regeneruj bez --draft”.",
+        help="FINALIZE a draft (zero API, zero retranslation). For the selected "
+             "languages, swaps the working \"WORKING DRAFT\" header in "
+             "`<kod>/gui/ui.yaml` for the canonical \"do not edit manually\" one, PRESERVING "
+             "all content (including the reviewer's manual corrections). Files without a "
+             "draft marker are skipped (idempotent). This is the proper step after a "
+             "review is approved — instead of the destructive \"regenerate without --draft\".",
     )
     parser.add_argument(
         "--klucz",
         type=str,
         default=None,
         metavar="KLUCZ[,KLUCZ...]",
-        help="Tłumacz TYLKO wskazane klucze (dotted-path), reszta pliku bez zmian. "
-             "Można podać wiele kluczy oddzielonych przecinkiem: "
+        help="Translate ONLY the given keys (dotted-path), leaving the rest of the file unchanged. "
+             "You can pass multiple comma-separated keys: "
              "`manager.kreator_jezyk_bazowy_etykieta_hint,manager.kreator_blad_nazwa_jezyka`. "
-             "Klucz pasuje do liścia dokładnie LUB do całego poddrzewa (prefix + '.children'). "
-             "Wymaga, by `<kod>/gui/ui.yaml` już istniał — najpierw pełne tłumaczenie, "
-             "potem surgical update wybranych kluczy.",
+             "A key matches a leaf exactly OR an entire subtree (prefix + '.children'). "
+             "Requires that `<kod>/gui/ui.yaml` already exists — full translation first, "
+             "then a surgical update of the selected keys.",
     )
     args = parser.parse_args()
     if args.klucz and args.skip_existing:
-        parser.error("--klucz i --skip-existing wzajemnie się wykluczają "
-                     "(--klucz celowo nadpisuje wybrane liście w istniejącym pliku).")
+        parser.error("--klucz and --skip-existing are mutually exclusive "
+                     "(--klucz deliberately overwrites selected leaves in an existing file).")
     if args.finalizuj and (args.draft or args.klucz or args.skip_existing or args.dry_run):
-        parser.error("--finalizuj to czysto lokalna podmiana nagłówka (zero API) — "
-                     "nie łącz z --draft/--klucz/--skip-existing/--dry-run. "
-                     "Wybierz języki przez --jezyki/--wszystkie.")
+        parser.error("--finalizuj is a purely local header swap (zero API) — "
+                     "do not combine it with --draft/--klucz/--skip-existing/--dry-run. "
+                     "Select languages via --jezyki/--wszystkie.")
     return args
 
 
@@ -969,8 +969,8 @@ def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
     nieznane = [k for k in kody if k not in MAPA_JEZYKOW]
     if nieznane:
         raise SystemExit(
-            f"❌ Nieznane kody języków: {', '.join(nieznane)}.\n"
-            f"   Dozwolone: {', '.join(MAPA_JEZYKOW)}."
+            f"❌ Unknown language codes: {', '.join(nieznane)}.\n"
+            f"   Allowed: {', '.join(MAPA_JEZYKOW)}."
         )
     return kody
 
@@ -997,8 +997,8 @@ def main() -> int:
             else:
                 braki += 1
                 print(f"⚠️  {kod}/{NAZWA_UI}: plik nie istnieje — pomijam.")
-        print("\n========== PODSUMOWANIE (--finalizuj) ==========")
-        print(f"✅ Sfinalizowano: {zmienione} | ⏭️ już kanoniczne: {nie_drafty} | ⚠️ brak pliku: {braki}")
+        print("\n========== SUMMARY (--finalizuj) ==========")
+        print(f"✅ Finalized: {zmienione} | ⏭️ already canonical: {nie_drafty} | ⚠️ file missing: {braki}")
         return 0
 
     # Wczytanie źródła PL przez ruamel round-trip (komentarze zachowane).
@@ -1010,14 +1010,14 @@ def main() -> int:
 
     sciezka_pl = DICT_DIR / KOD_ZRODLOWY / FOLDER_GUI / NAZWA_UI
     if not sciezka_pl.is_file():
-        print(f"❌ Brak pliku źródłowego PL: {sciezka_pl}")
+        print(f"❌ Missing PL source file: {sciezka_pl}")
         return 2
     with open(sciezka_pl, "r", encoding="utf-8") as fh:
         drzewo_pl = yaml_io.load(fh)
 
     liscie_pl = zbierz_liscie(drzewo_pl)
     if not liscie_pl:
-        print(f"❌ Plik {sciezka_pl} nie zawiera żadnych liści stringowych.")
+        print(f"❌ File {sciezka_pl} contains no string leaves.")
         return 2
     print(f"📄 Wczytano {sciezka_pl.relative_to(ROOT)}: {len(liscie_pl)} liści.")
 
@@ -1034,8 +1034,8 @@ def main() -> int:
         ]
         if not liscie_pl:
             print(
-                f"❌ Brak liści dla kluczy {klucze_filtru} w {sciezka_pl.relative_to(ROOT)}.\n"
-                f"   Sprawdź dotted-path (np. `manager.kreator_jezyk_bazowy_etykieta_hint`)."
+                f"❌ No leaves for keys {klucze_filtru} in {sciezka_pl.relative_to(ROOT)}.\n"
+                f"   Check the dotted-path (e.g. `manager.kreator_jezyk_bazowy_etykieta_hint`)."
             )
             return 2
         print(
@@ -1078,10 +1078,10 @@ def main() -> int:
                   f"{sciezka_prompt.relative_to(ROOT)} "
                   f"({len(wytworzone_drafty)} plik(ów) do recenzji).")
 
-    print("\n========== PODSUMOWANIE ==========")
-    print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
+    print("\n========== SUMMARY ==========")
+    print(f"✅ Succeeded: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
     if porazki:
-        print(f"❌ Porażki: {', '.join(porazki)}")
+        print(f"❌ Failed: {', '.join(porazki)}")
         return 1
     return 0
 

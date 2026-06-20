@@ -88,7 +88,7 @@ tresc:
 
     Avaimen syöttäminen ohjelmaan:
     3. Napsauta ohjelman aloitusnäytöllä painiketta "{home.btn_generate}". Järjestelmä luo automaattisesti tyhjän konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion muokkausta varten valmiin mallin kanssa.
-    4. Avautuneessa tiedostossa näet rivin: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Poista paikkamerkkiteksti ja liitä avaimesi suoraan yhtäläisyysmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
+    4. Avautuneessa tiedostossa näet rivin: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Poista paikkamerkkiteksti ja liitä avaimesi suoraan yhtäläisyysmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
 
     Vinkki: Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää avaimen tilan osiossa "{home.heading_system_check}". Sen täytyy olla vihreä, jotta kaikki tekoälymoduulit ovat valmiina käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
   krok_3_glowne_studio: |

@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 18.3.0 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 18.4.0 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -74,7 +74,7 @@ How to obtain an Anthropic key:
 
 How to enter the key into the application:
 3. On the application's start screen, click the "Generate the golden_key.env file and open the text editor" button. The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
-4. In the opened file you will see the line: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Delete the placeholder text and paste your key directly after the equals sign (no spaces, no quotation marks). Save the file and restart the application.
+4. In the opened file you will see the line: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Delete the placeholder text and paste your key directly after the equals sign (no spaces, no quotation marks). Save the file and restart the application.
 
 Tip: After restarting, the application will check the file and display the key status in the "System Check" section. It must be green for all AI modules to be ready for use. If the key is missing or incorrect, the application will clearly indicate this and allow you to open a text editor to quickly fix the error.
 

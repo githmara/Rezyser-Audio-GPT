@@ -199,6 +199,9 @@ home:
   ant_err_struktura: "🚨 Tiedoston rakennevirhe!\nPakollinen muuttuja ANTHROPIC_API_KEY= puuttuu.\nVersiosta 18.2 alkaen koko tekoälymoottori (Ohjaaja, Tarinat, Polyglotti, luvun otsikot) toimii Claude-mallilla ja vaatii Anthropic-avaimen.\nPoista tiedosto, luo se uudelleen ja liitä avain huolellisesti."
   ant_err_format: "🚨 Epäilyttävä Anthropic-avaimen muoto!\nOikea Anthropic (Claude) -avain alkaa aina merkeillä sk-ant- (esim. sk-ant-api03-…).\nVarmista, että olet kopioinut avaimen osoitteesta console.anthropic.com eikä jonkin muun palveluntarjoajan avain."
   ant_err_zbyt_krotki: "⚠️ Anthropic-avain vaikuttaa liian lyhyeltä (havaittu {liczba_znakow} merkkiä, odotettiin vähintään {minimum_znakow}).\nOlet todennäköisesti kopioinut vain osan avaimesta. Palaa osoitteeseen console.anthropic.com ja kopioi se kokonaisuudessaan."
+  compat_ok: "✅ OpenAI-compatible-kokoonpano havaittu (malli: {model}).\nKaikki moduulit ovat valmiina käyttöön."
+  compat_err_niekompletny: "⚠️ OpenAI-compatible-tila on puutteellinen.\nTäytä golden_key.env-tiedostoon kaikki kolme kenttää: LLM_BASE_URL, OPENAI_API_KEY ja LLM_MODEL."
+  compat_jakosc_info: ℹ️ Kehotteet on viritetty Claude (Anthropic) -mallille. Muut mallit voivat tuottaa heikomman laadun — tämä on ohjaajan tietoinen valinta (kustannus vs. laatu).
 rezyser:
   panel_name: "Ääniohjaaja GPT -paneeli"
   heading: "🎬  Ääniohjaaja GPT – Hybridi Luova Studio"

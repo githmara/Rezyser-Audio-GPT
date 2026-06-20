@@ -77,6 +77,7 @@ from typing import Any, Callable
 
 import jsonschema
 
+import core_llm as cl
 import core_poliglota as cp
 import core_rezyser as cr
 import i18n
@@ -93,9 +94,10 @@ def _dev_log(msg: str) -> None:
     except Exception:  # noqa: BLE001 — log dev nigdy nie ubija apki
         pass
 
-# ``anthropic`` potrzebne tylko do łapania ``RateLimitError``. Import leniwy
-# wewnątrz funkcji – by testy jednostkowe mogły działać bez SDK, a samo
-# wykrycie "brak SDK" zwrócić jako zwykły wyjątek do GUI.
+# Warstwę API LLM (budowa klienta + wywołanie + normalizacja błędów) trzyma
+# `core_llm` — moduł SDK-agnostyczny (Anthropic albo OpenAI-compat). Tutaj
+# wołamy wyłącznie `cl.wywolaj_llm(...)` i łapiemy `cl.BladLimituLLM`; SDK
+# konkretnego providera nie jest tu importowane.
 
 
 # =============================================================================
@@ -364,19 +366,15 @@ def _wywolaj_claude(
     ``with_options`` (SDK Anthropic nie przyjmuje ``timeout=`` na ``messages.create``).
     Tekst sklejamy z bloków ``type="text"`` (Claude zwraca listę bloków treści).
     """
-    response = klient.with_options(timeout=timeout).messages.create(
+    return cl.wywolaj_llm(
+        klient,
         model=przepis.model,
         system=system,
         messages=messages,
         max_tokens=MAX_TOKENS_NARRACJA,
         temperature=przepis.temperatura,
-        thinking={"type": "disabled"},
+        timeout=timeout,
     )
-    tekst = "".join(
-        blok.text for blok in response.content
-        if getattr(blok, "type", None) == "text"
-    )
-    return tekst, getattr(response, "stop_reason", None)
 
 
 def buduj_payload(
@@ -952,25 +950,24 @@ def _domknij_urwane_zdanie(
         "sentences, no leading or trailing whitespace."
     )
     try:
-        resp = klient.with_options(timeout=timeout).messages.create(
+        domkniete_raw, stop_reason = cl.wywolaj_llm(
+            klient,
             model=przepis.model,
             system=system,
             messages=[{"role": "user", "content": ogon}],
             max_tokens=MAX_TOKENS_DOMKNIECIE,
             temperature=przepis.temperatura,
-            thinking={"type": "disabled"},
+            timeout=timeout,
         )
     except Exception:  # noqa: BLE001 — błąd domknięcia = ostrzeżenie, nie crash
         return tekst, False
 
-    domkniete = "".join(
-        b.text for b in resp.content if getattr(b, "type", None) == "text"
-    ).strip()
+    domkniete = domkniete_raw.strip()
     # Mikro-call też się uciął / odmówił / milczy → nie ryzykujemy sklejki
     # połówek; oddajemy oryginał i sygnalizujemy ostrzeżenie.
     if (
         not domkniete
-        or getattr(resp, "stop_reason", None) == "max_tokens"
+        or stop_reason == "max_tokens"
         or pr.wykryto_odrzucenie(domkniete)
     ):
         return tekst, False
@@ -1115,9 +1112,6 @@ def nadaj_tytuly_rozdzialom(
     na plik historii). Wynik prezentowany w dialogu, by użytkownik mógł
     skopiować tytuły do Księgi Świata / spisu treści.
     """
-    # Import leniwy – tylko tu potrzebujemy wyjątków Anthropic
-    import anthropic  # noqa: PLC0415
-
     wzorzec = przepis_tytuly.regex_podzial_rozdzialow
     fragmenty = re.split(wzorzec, pelny_tekst)
 
@@ -1159,18 +1153,16 @@ def nadaj_tytuly_rozdzialom(
         )
 
         try:
-            resp = klient.with_options(timeout=timeout).messages.create(
+            tytul_raw, _stop = cl.wywolaj_llm(
+                klient,
                 model=przepis_tytuly.model,
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}],
                 max_tokens=MAX_TOKENS_TYTUL,
                 temperature=przepis_tytuly.temperatura,
-                thinking={"type": "disabled"},
+                timeout=timeout,
             )
-            tytul_raw = "".join(
-                b.text for b in resp.content
-                if getattr(b, "type", None) == "text"
-            ).strip()
+            tytul_raw = tytul_raw.strip()
 
             # Nawet model tytułujący może odrzucić prompt (szczególnie przy
             # brutalnych treściach w treści rozdziału). Honorujemy tag.
@@ -1182,7 +1174,7 @@ def nadaj_tytuly_rozdzialom(
             else:
                 tytuly.append(f"{naglowek}: {tytul_raw}")
 
-        except anthropic.RateLimitError:
+        except cl.BladLimituLLM:
             tytuly.append(
                 f"{naglowek}: {przepis_tytuly.etykieta_bled_brak_kredytow}"
             )
@@ -1239,20 +1231,19 @@ def wywnioskuj_kod_jezyka(
         "'по-русски' -> ru."
     )
     try:
-        resp = klient.with_options(timeout=timeout).messages.create(
+        raw_txt, _stop = cl.wywolaj_llm(
+            klient,
             model="claude-sonnet-4-6",
             system=system,
             messages=[{"role": "user", "content": jezyk_odpowiedzi}],
             temperature=0,
             max_tokens=16,
-            thinking={"type": "disabled"},
+            timeout=timeout,
         )
     except Exception:  # noqa: BLE001 — każdy błąd API/SDK = brak kodu, nie crash
         return None
 
-    raw = "".join(
-        b.text for b in resp.content if getattr(b, "type", None) == "text"
-    ).strip().lower()
+    raw = raw_txt.strip().lower()
     m = re.search(r"[a-z]{2}", raw)
     kod = m.group(0) if m else ""
     return kod if kod in dozwolone_set else None

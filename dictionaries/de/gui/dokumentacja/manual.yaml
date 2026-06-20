@@ -88,7 +88,7 @@ tresc:
 
     So tragen Sie den Schlüssel in das Programm ein:
     3. Klicken Sie auf dem Startbildschirm des Programms auf die Schaltfläche „{home.btn_generate}". Das System erstellt automatisch eine saubere Konfigurationsdatei am richtigen Speicherort und öffnet den Editor mit einer bearbeitungsbereiten Vorlage.
-    4. In der geöffneten Datei sehen Sie die Zeile: ANTHROPIC_API_KEY=TUTAJ_WKLEJ_SWOJ_KLUCZ. Entfernen Sie den Platzhaltertext und fügen Sie Ihren Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
+    4. In der geöffneten Datei sehen Sie die Zeile: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Entfernen Sie den Platzhaltertext und fügen Sie Ihren Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
 
     Hinweis: Nach dem Neustart prüft die Anwendung die Datei und zeigt im Abschnitt „{home.heading_system_check}" den Status des Schlüssels an. Er muss grün sein, damit alle KI-Module einsatzbereit sind. Fehlt der Schlüssel oder ist er fehlerhaft, weist das Programm klar darauf hin und ermöglicht es, den Texteditor zu öffnen, um den Fehler schnell zu beheben.
   krok_3_glowne_studio: |
