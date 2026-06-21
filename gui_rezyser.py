@@ -108,14 +108,14 @@ class RezyserPanel(wx.Panel):
         self._projekt: cr.ProjektRezysera = cr.ProjektRezysera()
 
         # Mirror pliku `.mode` w RAM. Trzyma trwałą decyzję trybu zapisu
-        # projektu (1=Skrypt, 2=Audiobook) niezależnie od bieżącego stanu
-        # `_rb_mode`, który gracz może swobodnie przełączać na Burzę (idx=0)
-        # — Burza pełni rolę awaryjną (streszczenie przy przepełnieniu
+        # projektu jako stabilne `id` przepisu (np. "audiobook") niezależnie od
+        # bieżącego stanu `_rb_mode`, który gracz może swobodnie przełączać na
+        # Burzę — Burza pełni rolę awaryjną (streszczenie przy przepełnieniu
         # okna kontekstowego, opcje fabularne) i musi pozostać dostępna na
         # każdym etapie. Materializuje się przy wczytaniu projektu z `.mode`,
         # pierwszym wstawieniu struktury i pierwszej udanej wysyłce
         # produkcyjnej. Reset tylko przez twardy reset projektu.
-        self._zapisany_tryb: int | None = None
+        self._zapisany_tryb: str | None = None
 
         # D2 (od 18.3): „czysty" snapshot pól Księga Świata / Pamięć z chwili
         # ostatniego wczytania albo zapisu. Detektor niezapisanych zmian w
@@ -1201,8 +1201,9 @@ class RezyserPanel(wx.Panel):
         nazwa_podana  = bool(self._txt_file_name.GetValue().strip())
         streszczenie_wpisane = bool(self._txt_pamiec.GetValue().strip())
         user_text_present    = bool(self._txt_user_input.GetValue().strip())
-        tryb_idx    = self._rb_mode.GetSelection()
-        tryb_zapisu = tryb_idx in (1, 2)
+        przepis     = self._aktualny_przepis()
+        tryb_zapisu = bool(przepis and przepis.zapis_do_pliku)
+        struktura   = przepis.struktura if przepis else "brak"
 
         self._txt_file_name.Enable(not pamiec_zajeta)
         # v15.2.3: przycisk Wczytaj jest aktywny też przy pustym polu nazwy —
@@ -1249,24 +1250,26 @@ class RezyserPanel(wx.Panel):
         _blokada = self._projekt.ostatnia_linia_to_naglowek or _epilog_juz_jest
 
 
-        # Panel struktury widoczny tylko gdy bieżący tryb w RadioBox-ie jest
-        # trybem zapisu (1/2) ORAZ zgadza się z utrwaloną decyzją projektu
-        # (`_zapisany_tryb`). Świeży projekt (`_zapisany_tryb is None`) ma
-        # wolny wybór — pierwsza wstawiona struktura lub udana wysyłka
-        # produkcyjna materializuje decyzję. Po materializacji przełączenie
-        # `_rb_mode` na Burzę chowa panel (Burza nie używa Akt/Scena/Rozdział),
+        # Panel struktury widoczny tylko gdy bieżący tryb to tryb zapisu z
+        # niepustą `struktura` ORAZ zgadza się z utrwaloną decyzją projektu
+        # (`_zapisany_tryb`, stabilne `id`). Świeży projekt (`_zapisany_tryb
+        # is None`) ma wolny wybór — pierwsza wstawiona struktura lub udana
+        # wysyłka produkcyjna materializuje decyzję. Po materializacji
+        # przełączenie `_rb_mode` na Burzę chowa panel (Burza ma struktura:brak),
         # a powrót do drugiego trybu zapisu jest zablokowany przez EnableItem
         # niżej — więc gracz nigdy nie zobaczy „Akt 1" w projekcie Audiobook.
         tryb_zapisu_aktywny = (
-            tryb_idx in (1, 2)
-            and (self._zapisany_tryb is None or self._zapisany_tryb == tryb_idx)
+            tryb_zapisu
+            and struktura != "brak"
+            and (self._zapisany_tryb is None
+                 or (przepis is not None and self._zapisany_tryb == przepis.id))
         )
 
         if not tryb_zapisu_aktywny:
             self._pnl_struktura.Hide()
         else:
-            jest_skrypt   = (tryb_idx == 1)
-            jest_audiobok = (tryb_idx == 2)
+            jest_skrypt   = (struktura == "akty_sceny")
+            jest_audiobok = (struktura == "rozdzialy")
 
             self._btn_rozdzial.Show(jest_audiobok)
             self._btn_akt.Show(jest_skrypt)
@@ -1313,22 +1316,21 @@ class RezyserPanel(wx.Panel):
             else:
                 self._pnl_struktura.Hide()
 
-        # Ochrona przed przypadkową zmianą trybu twórczego.
-        # Burza (idx=0) ZAWSZE aktywna — to mechanizm awaryjny (streszczenie
-        # przy przepełnieniu okna kontekstowego, opcje fabularne), nie tryb
-        # zapisu sensu stricto. Skrypt/Audiobook zamrażamy na utrwalonej
-        # decyzji `_zapisany_tryb`, nie na bieżącym `tryb_idx` — dzięki temu
-        # skok na Burzę nie zwalnia blokady drugiego trybu zapisu.
-        self._rb_mode.EnableItem(0, True)
-        if self._zapisany_tryb in (1, 2):
-            self._rb_mode.EnableItem(1, self._zapisany_tryb == 1)
-            self._rb_mode.EnableItem(2, self._zapisany_tryb == 2)
-        else:
-            self._rb_mode.EnableItem(1, True)
-            self._rb_mode.EnableItem(2, True)
+        # Ochrona przed przypadkową zmianą trybu twórczego (po stabilnym `id`,
+        # nie po pozycji w RadioBox). Tryby BEZ zapisu (np. Burza) ZAWSZE
+        # aktywne — to mechanizmy awaryjne/planowania, nie tryby zapisu sensu
+        # stricto. Tryby zapisu zamrażamy na utrwalonej decyzji `_zapisany_tryb`
+        # — gdy projekt zmaterializował jeden tryb produkcyjny, pozostałe tryby
+        # zapisu są zablokowane (gracz nie zmiesza Skryptu z Audiobookiem).
+        for i, p in enumerate(self._przepisy):
+            if self._zapisany_tryb and p.zapis_do_pliku:
+                self._rb_mode.EnableItem(i, p.id == self._zapisany_tryb)
+            else:
+                self._rb_mode.EnableItem(i, True)
 
-        # Postprodukcja Audiobooka (tytuły AI rozdziałów) — tylko tryb Audiobook.
-        if tryb_idx == 2:
+        # Postprodukcja Audiobooka (tytuły AI rozdziałów) — bespoke funkcja trybu
+        # Audiobook, bramkowana stabilnym `id` (nie pozycją).
+        if przepis is not None and przepis.id == "audiobook":
             self._pnl_postprodukcja.Show()
             self._btn_tytuly_ai.Enable(
                 self._api_dostepne and nazwa_podana and _historia_niepusta
@@ -1336,19 +1338,19 @@ class RezyserPanel(wx.Panel):
         else:
             self._pnl_postprodukcja.Hide()
 
-        # Most ElevenLabs (v16.0) — należy do trybu SKRYPT (teatr czytany),
-        # nie do Audiobooka. Cały panel tylko gdy klucz EL ważny; obsadę można
+        # Most ElevenLabs (v16.0) — bespoke funkcja trybu SKRYPT (teatr czytany),
+        # nie Audiobooka. Cały panel tylko gdy klucz EL ważny; obsadę można
         # edytować, gdy podano nazwę projektu (źródło skryptu z dysku).
-        if tryb_idx == 1 and self._el_dostepne:
+        if przepis is not None and przepis.id == "skrypt" and self._el_dostepne:
             self._pnl_el.Show()
             self._btn_el_obsada.Enable(nazwa_podana)
             self._btn_el_build.Enable(nazwa_podana)
         else:
             self._pnl_el.Hide()
 
-        # Wersja dla czytników ekranu (v16.1) — tryb Skrypt, NIEZALEŻNIE od
-        # klucza EL (akcent przez ortografię + lang, nie przez API).
-        if tryb_idx == 1:
+        # Wersja dla czytników ekranu (v16.1) — bespoke funkcja trybu Skrypt,
+        # NIEZALEŻNIE od klucza EL (akcent przez ortografię + lang, nie przez API).
+        if przepis is not None and przepis.id == "skrypt":
             self._pnl_sr.Show()
             self._btn_sr.Enable(nazwa_podana)
         else:
@@ -1516,12 +1518,20 @@ class RezyserPanel(wx.Panel):
         self._ksiega_swiata_zapisana = self._txt_ksiega_swiata.GetValue()
         self._pamiec_zapisana = self._txt_pamiec.GetValue()
 
-        if wynik.saved_mode in (1, 2):
-            self._rb_mode.SetSelection(wynik.saved_mode)
+        # `.mode` trzyma stabilne `id` trybu (od v18.5) — mapujemy na pozycję
+        # w RadioBox po `id`, nie po wartości int (reorder `kolejnosc` bezpieczny).
+        idx = None
+        if wynik.saved_mode:
+            idx = next(
+                (i for i, p in enumerate(self._przepisy) if p.id == wynik.saved_mode),
+                None,
+            )
+        if idx is not None:
+            self._rb_mode.SetSelection(idx)
             self._zapisany_tryb = wynik.saved_mode
         else:
-            # Stary projekt bez `.mode` lub projekt utworzony tylko w Burzy.
-            # Decyzja trybu zostanie utrwalona przy pierwszej strukturze
+            # Stary projekt bez `.mode`, projekt tylko w Burzy, lub tryb usunięty
+            # z paczki. Decyzja trybu zostanie utrwalona przy pierwszej strukturze
             # albo pierwszej udanej wysyłce produkcyjnej.
             self._zapisany_tryb = None
 
@@ -1569,16 +1579,17 @@ class RezyserPanel(wx.Panel):
             btn_cancel.SetLabel(t("common.btn_anuluj"))
 
     def _dialog_wyboru_markera(
-        self, markery: "list[cr.MarkerStruktury]", tryb: int,
+        self, markery: "list[cr.MarkerStruktury]", struktura: str,
     ) -> int | None:
         """Callback przekazywany do `core_rezyser.wczytaj` — pozwala graczowi
         wskazać punkt odniesienia pamięci roboczej, gdy historia jest za długa.
 
-        Audiobook (tryb 2) → płaska lista Rozdziałów. Skrypt (tryb 1) →
-        dwustopniowo: Akty, potem Sceny wybranego aktu (z opcją „cały Akt").
-        Anuluj na dowolnym etapie → ``None`` (silnik użyje fallbacku znakowego).
+        ``struktura == "akty_sceny"`` (Skrypt) → dwustopniowo: Akty, potem Sceny
+        wybranego aktu (z opcją „cały Akt"). Pozostałe (``"rozdzialy"``/``"brak"``)
+        → płaska lista nagłówków. Anuluj na dowolnym etapie → ``None`` (silnik
+        użyje fallbacku znakowego).
         """
-        if tryb == 1 and any(m.typ == "akt" for m in markery):
+        if struktura == "akty_sceny" and any(m.typ == "akt" for m in markery):
             return self._wybierz_marker_skrypt(markery)
         return self._wybierz_marker_plaski(markery)
 
@@ -1924,8 +1935,13 @@ class RezyserPanel(wx.Panel):
         # niezależny od języka UI ([DYREKTYWA] z doklejki jest lokalizowana,
         # więc nie nadaje się na sygnaturę).
         if przepis.id == "burza" and "[cel sceny]" in user_text.lower():
-            if self._zapisany_tryb in (1, 2):
-                self._rb_mode.SetSelection(self._zapisany_tryb)
+            idx_zapisany = next(
+                (i for i, p in enumerate(self._przepisy)
+                 if p.id == self._zapisany_tryb),
+                None,
+            ) if self._zapisany_tryb else None
+            if idx_zapisany is not None:
+                self._rb_mode.SetSelection(idx_zapisany)
                 self._refresh_ui_state()
                 przepis = self._aktualny_przepis()
                 if przepis is None:
@@ -3183,18 +3199,18 @@ class RezyserPanel(wx.Panel):
         self._txt_full_story.SetFocus()
 
     def _zapisz_tryb_projektu(self) -> None:
-        nazwa    = self._txt_file_name.GetValue().strip()
-        tryb_idx = self._rb_mode.GetSelection()
-        if not nazwa:
+        nazwa   = self._txt_file_name.GetValue().strip()
+        przepis = self._aktualny_przepis()
+        if not nazwa or przepis is None:
             return
         if self._projekt.nazwa_pliku != nazwa:
             self._projekt.nazwa_pliku = nazwa
-        self._projekt.zapisz_tryb_tworczy(tryb_idx)
-        # Synchronizacja mirror'a w RAM. `zapisz_tryb_tworczy` ignoruje
-        # Burzę (idx=0), więc `_zapisany_tryb` nie zostanie nadpisany na 0
-        # — Burza nigdy nie utrwala decyzji trybu zapisu.
-        if tryb_idx in (1, 2):
-            self._zapisany_tryb = tryb_idx
+        # `.mode` trzyma stabilne `id`; utrwalamy TYLKO tryby zapisu (Burza i
+        # inne tryby bez `zapis_do_pliku` są ulotne — silnik je pomija).
+        self._projekt.zapisz_tryb_tworczy(przepis.id, przepis.zapis_do_pliku)
+        # Synchronizacja mirror'a w RAM — tylko gdy to tryb zapisu.
+        if przepis.zapis_do_pliku:
+            self._zapisany_tryb = przepis.id
 
 
 class DialogObsady(wx.Dialog):

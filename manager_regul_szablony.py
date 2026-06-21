@@ -29,9 +29,13 @@ zsynchronizować szablony tutaj.
 
 from __future__ import annotations
 
+import re
 import sys
 
+import yaml
+
 import i18n
+import sciezki
 
 
 # =============================================================================
@@ -99,110 +103,127 @@ LISTA_TYPOW: list[str] = [
 
 
 # =============================================================================
-# Helpery natywności (od 13.9): w ramach audytu promptów po wdrożeniu siedmiu
-# kompletnych paczek (pl/en/fi/is/it/ru/de) szablony i prompty zaczynają
-# zwracać domyślne wartości w języku bazowym, jeśli ten jest już w projekcie.
-# Dla nieobecnych paczek (np. fr/es) szablon dostaje marker
-# „<FILL NATIVELY: …>", żeby AI lub user świadomie domknęli temat.
+# Natywne dane językowe — ODCZYT DYNAMICZNY z dictionaries/ (od v18.5)
 # =============================================================================
-_NATYWNE_JEZYK_ODPOWIEDZI: dict[str, str] = {
-    # forma zależna od idiomu prompta — tak jak istnieje w paczce po wdrożeniu
-    "pl": "polsku",
-    "en": "English",
-    "fi": "suomeksi",
-    "is": "á íslensku",
-    "it": "italiano",
-    "ru": "по-русски",
-    "de": "Deutsch",
-    "fr": "français",
-    "es": "español",
-}
+# Do v18.4 te wartości żyły jako zhardkodowane słowniki (`_NATYWNE_*`,
+# `_PACZKI_WDROZONE`), które trzeba było SYNCHRONIZOWAĆ RĘCZNIE w Pythonie przy
+# każdym nowym języku. Okazało się, że WSZYSTKIE są wyłącznie cache danych
+# leżących już w paczce na dysku:
+#   * endonim (np. „Deutsch")     → <kod>/podstawy.yaml::etykieta (prefiks),
+#   * forma odmieniona („polsku")  → <kod>/rezyser/*.yaml::jezyk_odpowiedzi,
+#   * słowa „streszczenie"         → <kod>/rezyser/tryb_audiobook.yaml::
+#                                     slowa_wyzwalajace.streszczenie,
+#   * lista paczek referencyjnych  → skan dictionaries/.
+# Czytamy je więc w locie (spójnie z dynamicznym dispatchem akcentów od v17.5).
+# Dodanie języka NIE wymaga już edycji tego pliku.
+#
+# Gdy danej nie ma jeszcze na dysku (świeża paczka) — zwracamy marker
+# „<FILL NATIVELY…>", dokładnie jak wcześniej dla niewdrożonych kodów; wykonawca
+# (AI/lingwista) go uzupełnia, a każdy KOLEJNY szablon czyta już realną wartość
+# zapisaną w YAML-u (samo-naprawa chicken-and-egg).
+#
+# Moduł jest importowany przez GUI także w zamrożonej apce — odczyt idzie przez
+# `sciezki.KATALOG_BAZOWY` (= katalog exe), więc działa offline i bez API.
+# =============================================================================
+_DICT_DIR = sciezki.KATALOG_BAZOWY / "dictionaries"
 
-_NATYWNE_STRESZCZENIE: dict[str, list[str]] = {
-    # 4 słowa wyzwalające „streszczenie" — synchronizowane z
-    # dictionaries/<kod>/rezyser/tryb_audiobook.yaml::slowa_wyzwalajace
-    "pl": ["streszcz", "streść", "podsumuj", "podsumowanie"],
-    "en": ["summarize", "summarise", "summary", "recap"],
-    "fi": ["tiivistä", "tee yhteenveto", "yhteenveto", "kertaa"],
-    "is": ["samantekt", "dragðu saman", "gerðu samantekt", "endurtaktu"],
-    "it": ["riassumi", "riassunto", "sintetizza", "sommario"],
-    "ru": ["обобщи", "сделай резюме", "резюме", "подытожь"],
-    "de": ["fasse zusammen", "Zusammenfassung", "zusammenfassen", "Überblick"],
-    "fr": ["résume", "résumé", "résumer", "vue d'ensemble"],
-    "es": ["resume", "resumen", "resumir", "sinopsis"],
-}
+# Separator endonimu w `etykieta` (np. „Suomi – foneettiset perusteet”) —
+# en-dash / em-dash / zwykły myślnik z otaczającymi spacjami (jak w
+# `core_poliglota.natywna_nazwa` i `refresh_languages`).
+_RE_SEPARATOR_ETYKIETY = re.compile(r"\s+[–—-]\s+")
 
-_NATYWNA_NAZWA_JEZYKA: dict[str, str] = {
-    # Endonim — tak jak człowiek z danego kraju nazwie własny język.
-    # Używane w prompcie, żeby pokazać AI „jaki ma być sufiks etykiety".
-    "pl": "Polski",
-    "en": "English",
-    "fi": "Suomi",
-    "is": "Íslenska",
-    "it": "Italiano",
-    "ru": "Русский",
-    "de": "Deutsch",
-    "fr": "Français",
-    "es": "Español",
-}
+
+def _wczytaj_yaml(sciezka) -> dict:
+    """Bezpiecznie wczytuje plik YAML jako dict (pusty dict, gdy brak/zły)."""
+    try:
+        dane = yaml.safe_load(sciezka.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return {}
+    return dane if isinstance(dane, dict) else {}
+
+
+def _pliki_rezyser(kod: str) -> list:
+    """Pliki trybów Reżysera danej paczki — `tryb_audiobook.yaml` na początku.
+
+    Audiobook jest kanonicznym źródłem `jezyk_odpowiedzi` i listy słów
+    streszczenia, ale każdy tryb paczki niesie tę samą natywną formę — więc
+    pozostałe pliki służą jako fallback, gdy audiobooka jeszcze nie ma.
+    """
+    rez = _DICT_DIR / kod / "rezyser"
+    if not rez.is_dir():
+        return []
+    audiobook = rez / "tryb_audiobook.yaml"
+    reszta = sorted(p for p in rez.glob("*.yaml") if p.name != "tryb_audiobook.yaml")
+    return ([audiobook] if audiobook.is_file() else []) + reszta
 
 
 def _natywne_jezyk_odpowiedzi(kod: str) -> str:
-    """Zwraca natywną wartość pola ``jezyk_odpowiedzi`` lub marker do uzupełnienia.
+    """Natywna wartość pola ``jezyk_odpowiedzi`` (np. ``"polsku"``, ``"Deutsch"``).
 
-    Args:
-        kod: kod ISO języka bazowego paczki (folder w ``dictionaries/``).
+    Czyta pierwszy dostępny ``<kod>/rezyser/*.yaml::jezyk_odpowiedzi``
+    (audiobook w pierwszej kolejności). Gdy żaden tryb jeszcze nie istnieje
+    (świeża paczka) — zwraca marker do uzupełnienia.
 
     Returns:
         ``"polsku"``, ``"Deutsch"``, ``"по-русски"`` itp. dla wdrożonych paczek
-        lub ``"<FILL NATIVELY: forma typu 'polsku'/'Deutsch'>"`` dla nowych
-        kodów (fr/es itp.) — komunikuje, że AI musi wybrać właściwą formę
-        gramatyczną sama.
+        lub ``"'<FILL NATIVELY: …>'"`` dla świeżych. Marker jest owinięty w
+        apostrofy YAML, żeby ``<...>`` nie zostało wzięte za tag YAML i żeby
+        parsowanie szablonu nie wybuchało (real-world: user i tak go zastąpi).
     """
-    # Fallback owinięty w apostrofy YAML, żeby `<...>` nie zostało
-    # zinterpretowane jako tag YAML i żeby parsowanie szablonu nie wybuchało
-    # w testach (real-world: i tak user MUSI zastąpić marker natywną wartością).
-    return _NATYWNE_JEZYK_ODPOWIEDZI.get(
-        kod,
-        "'<FILL NATIVELY: the form appropriate for the prompt, e.g. polsku / Deutsch / italiano>'",
-    )
+    for p in _pliki_rezyser(kod):
+        v = _wczytaj_yaml(p).get("jezyk_odpowiedzi")
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return "'<FILL NATIVELY: the form appropriate for the prompt, e.g. polsku / Deutsch / italiano>'"
 
 
 def _natywne_streszczenie_yaml(kod: str) -> str:
     """Zwraca blok YAML z natywnymi słowami wyzwalającymi streszczenie.
 
-    Format dopasowany do bezpośredniego wstrzyknięcia w ``szablon_tryb_rezysera``
-    pod kluczem ``slowa_wyzwalajace.streszczenie``. Dla nieobecnych paczek
-    zwraca pojedynczy marker do uzupełnienia.
+    Czyta ``slowa_wyzwalajace.streszczenie`` z pierwszego trybu Reżysera, który
+    je ma (audiobook w pierwszej kolejności). Format dopasowany do
+    bezpośredniego wstrzyknięcia w ``szablon_tryb_rezysera``. Dla świeżej paczki
+    (brak trybów na dysku) zwraca pojedynczy marker do uzupełnienia.
     """
-    slowa = _NATYWNE_STRESZCZENIE.get(kod)
-    if slowa is None:
-        return "    - <FILL NATIVELY: 4 words like 'streszcz'/'summarize'/'fasse zusammen'>"
-    return "\n".join(f"    - {slowo}" for slowo in slowa)
+    for p in _pliki_rezyser(kod):
+        sw = _wczytaj_yaml(p).get("slowa_wyzwalajace")
+        if isinstance(sw, dict):
+            streszcz = sw.get("streszczenie")
+            if isinstance(streszcz, list) and streszcz:
+                return "\n".join(f"    - {slowo}" for slowo in streszcz)
+    return "    - <FILL NATIVELY: 4 words like 'streszcz'/'summarize'/'fasse zusammen'>"
 
 
 def _natywna_nazwa_jezyka(kod: str) -> str:
-    """Endonim języka — np. ``"Deutsch"`` dla ``"de"``."""
-    return _NATYWNA_NAZWA_JEZYKA.get(kod, kod)
+    """Endonim języka — np. ``"Deutsch"`` dla ``"de"``.
 
-
-# =============================================================================
-# Pomocnicze: lista paczek wdrożonych (stan na 14.0 — synchronizować ręcznie
-# przy każdym pełnym wdrożeniu nowego języka). Używane w promptach agentowych
-# jako podpowiedź „skąd brać wzorzec stylu".
-# =============================================================================
-_PACZKI_WDROZONE: tuple[str, ...] = ("pl", "en", "de", "es", "fi", "fr", "is", "it", "ru")
+    Czyta prefiks ``<kod>/podstawy.yaml::etykieta`` (jak
+    ``core_poliglota.natywna_nazwa``, ale samowystarczalnie — bez importu
+    ciężkiego silnika). Fallback na sam kod ISO, gdy paczka nie ma jeszcze
+    ``podstawy.yaml`` (świeży język) — identycznie jak dawny słownik zwracał
+    kod dla nieznanego wpisu.
+    """
+    etyk = _wczytaj_yaml(_DICT_DIR / kod / "podstawy.yaml").get("etykieta", "")
+    if isinstance(etyk, str) and etyk.strip():
+        nazwa = _RE_SEPARATOR_ETYKIETY.split(etyk.strip(), maxsplit=1)[0].strip()
+        if nazwa:
+            return nazwa
+    return kod
 
 
 def _paczki_referencyjne(jezyk_bazowy: str) -> str:
-    """Zwraca CSV listę kodów paczek wdrożonych BEZ paczki bazowej.
+    """Zwraca CSV kodów paczek obecnych na dysku (z ``podstawy.yaml``) BEZ bazowej.
 
-    Używane w prompcie agentowym, gdzie podpowiadamy agentowi „otwórz
-    `dictionaries/<jedna z tych>/<typ>/<plik>.yaml`, żeby zobaczyć
-    konwencję stylu". Wykluczamy paczkę bazową, bo gdyby agent miał ją
-    czytać, znalazłby pusty folder (paczka dopiero powstaje).
+    Podpowiedź dla agenta „otwórz `dictionaries/<jedna z tych>/<typ>/<plik>.yaml`,
+    żeby zobaczyć konwencję stylu". Wykluczamy paczkę bazową, bo gdyby agent miał
+    ją czytać, mógłby trafić na pustą/powstającą strukturę. Skan zastąpił dawną
+    ręcznie synchronizowaną krotkę `_PACZKI_WDROZONE`.
     """
-    inne = [k for k in _PACZKI_WDROZONE if k != jezyk_bazowy]
+    inne = []
+    if _DICT_DIR.is_dir():
+        for p in sorted(_DICT_DIR.iterdir()):
+            if p.is_dir() and p.name != jezyk_bazowy and (p / "podstawy.yaml").is_file():
+                inne.append(p.name)
     return ", ".join(inne) if inne else "(brak — projekt ma tylko tę paczkę)"
 
 
@@ -723,6 +744,22 @@ etykieta: "{etykieta}"
 kategoria: tryb
 kolejnosc: 40
 
+# --- Mode behavior (data-driven; REUSING an existing value needs NO Python) ---
+# struktura: how the project .txt is segmented into memory anchor points AND
+#   which structure buttons appear in the GUI:
+#     rozdzialy  – flat chapter list (prose; like Audiobook)  ← default here
+#     akty_sceny – Acts with nested Scenes (read-theatre; like Skrypt)
+#     brak       – no file structure (planning / ephemeral modes)
+#   A NEW header type (beyond Prolog/Akt/Scena/Rozdział/Epilog) needs CODE.
+# format_wyjscia: how the engine parses the AI reply:
+#     tekst       – plain prose, no JSON                       ← default here
+#     skrypt_json – {{"tury":[{{mowca,tekst}}]}} (reuses the Script parser)
+#     burza_json  – 3 plot options (reuses the Brainstorm parser, no file save)
+#   A NEW JSON schema (other than the two above) needs CODE (a parser in
+#   rezyser_ai.py) — and therefore source access, like a Story (Opowieści) mode.
+struktura: rozdzialy
+format_wyjscia: tekst
+
 # --- AI model parameters ---
 model: claude-sonnet-4-6
 temperatura: 0.85
@@ -809,9 +846,29 @@ a new Director mode (system prompt + trigger-word validation).
 - Pack for this task: `dictionaries/{jezyk_bazowy}/`
   (language {natywna_baza}).
 
+# DATA-DRIVEN VS CODE — read before you start
+A Director mode has THREE axes. Two are now data-driven via YAML fields, so a
+new mode that REUSES existing values is a pure YAML drop (works in the frozen
+app, no source needed). Picking a value the engine does NOT already implement
+needs CODE + source access — exactly like a Story (Opowieści) mode.
+- `struktura` (file segmentation + structure buttons): REUSE `rozdzialy`
+  (flat chapters, prose) or `akty_sceny` (acts+scenes) or `brak` (none). A NEW
+  header type beyond Prolog/Akt/Scena/Rozdział/Epilog → CODE (regex in
+  `core_rezyser._znajdz_naglowki`).
+- `format_wyjscia` (reply parsing): REUSE `tekst` (plain prose), `skrypt_json`
+  ({{"tury":…}}) or `burza_json` (plot options). A NEW JSON schema → CODE (a
+  parser in `rezyser_ai.py`). A `tekst` mode that emits raw JSON is REFUSED at
+  send time (the engine will not write JSON garbage to the file).
+- `id` IDENTITY: the `id` MUST be unique in the pack. **NEVER reuse `skrypt`,
+  `audiobook` or `burza`** — those ids carry bespoke panels (ElevenLabs bridge,
+  screen-reader export, AI chapter titles, option buttons) and the project's
+  `.mode` persistence keys off the id. A duplicate id is skipped by the loader.
+  If you think „Script is the right base", do NOT clone its id — create a new id
+  and set `format_wyjscia: skrypt_json` to reuse its parser.
+
 # TASK
 Create the file `dictionaries/{jezyk_bazowy}/rezyser/tryb_{id_pliku}.yaml` —
-a creative AI mode named **{etykieta}**.
+a creative AI mode named **{etykieta}** (id stem `{id_pliku}` — must be NEW).
 
 # REFERENCE FILES (open before writing)
 1. `dictionaries/{jezyk_bazowy}/rezyser/tryb_audiobook.yaml` — if it
@@ -827,8 +884,12 @@ a creative AI mode named **{etykieta}**.
    prose.
 
 # STRUCTURE REQUIREMENTS (engine)
-1. Identifying fields: `id`, `etykieta`, `kategoria: tryb`, `kolejnosc`
-   (int 10-90; 30 = audiobook, 40 = brainstorm, 50 = script).
+1. Identifying fields: `id` (NEW, unique — see DATA-DRIVEN VS CODE),
+   `etykieta`, `kategoria: tryb`, `kolejnosc` (int 10-90; 30 = audiobook,
+   40 = brainstorm, 50 = script). Behavior fields: `struktura`
+   (`rozdzialy`/`akty_sceny`/`brak`) and `format_wyjscia`
+   (`tekst`/`skrypt_json`/`burza_json`) — REUSE existing values unless you are
+   also adding the matching code (then you need source access).
 2. AI model parameters: `model: claude-sonnet-4-6`,
    `temperatura` (0.7-0.9 for literary, 0.5 for scripting),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}` (already matched to the pack),

@@ -47,6 +47,7 @@ Moduł NIE zależy od wxPython ani od żadnego SDK modelu (OpenAI/Anthropic)
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -219,6 +220,19 @@ class PrzepisRezysera:
     #   "burza_json"  – 3 opcje fabuły (generuj_burze, BEZ zapisu do pliku).
     # Nowy SCHEMAT JSON (inny niż dwa powyższe) nadal wymaga programisty.
     format_wyjscia: str = "tekst"
+    # Sposób segmentacji pliku projektu (.txt) na punkty odniesienia pamięci
+    # roboczej — steruje `core_rezyser.wyliczy_markery` ORAZ panelem struktury
+    # w GUI (które przyciski Prolog/Akt/Scena/Rozdział pokazać). Zastępuje dawny
+    # pozycyjny `tryb_idx == 1/2`, dzięki czemu tryb identyfikuje się stabilnym
+    # `id`, a nie pozycją w RadioBox (reorder `kolejnosc` nie przestawia już
+    # znaczeń). Parser nagłówków (`_znajdz_naglowki`) jest GENERYCZNY, więc
+    # reużycie istniejącej wartości to sam YAML:
+    #   "akty_sceny" – Akty z zagnieżdżonymi Scenami (Skrypt: teatr czytany),
+    #   "rozdzialy"  – płaska lista Rozdziałów (Audiobook: proza),
+    #   "brak"       – tryb bez struktury pliku (np. planowanie / Burza).
+    # Nowy TYP nagłówka (inny niż Prolog/Akt/Scena/Rozdział/Epilog) wymaga
+    # programisty (rozszerzenie regexa) — ta sama granica co przy `format_wyjscia`.
+    struktura: str = "brak"
     zapis_do_pliku: bool = False
     stosuj_akcenty_fonetyczne: bool = False
     przypomnienie_uzytkownika: str = ""
@@ -251,6 +265,15 @@ class PrzepisRezysera:
 # yaml.safe_load zwraca świeży dict przy każdym wywołaniu, więc cache jest
 # bezpieczny dla wielu wątków (nie modyfikujemy zawartości po wczytaniu).
 _CACHE_PRZEPISOW: dict[str, list[PrzepisRezysera]] = {}
+
+
+# Mapa wstecznej zgodności id → struktura dla paczek sprzed pola `struktura`
+# (dwa tryby strukturalne shippowane od początku). Patrz pole `struktura`
+# w :class:`PrzepisRezysera`.
+_STRUKTURA_LEGACY: dict[str, str] = {
+    "skrypt": "akty_sceny",
+    "audiobook": "rozdzialy",
+}
 
 
 # =============================================================================
@@ -288,6 +311,14 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             "skrypt": "skrypt_json",
         }.get(str(id_), "tekst")
 
+    # Struktura: analogiczny shim wstecznej zgodności jak `format_wyjscia` —
+    # paczki sprzed wprowadzenia pola wnioskują wartość z `id` dla dwóch trybów
+    # strukturalnych shippowanych od początku; kanonicznym źródłem jest odtąd
+    # samo pole w YAML.
+    struktura = str(data.get("struktura", "")).strip().lower()
+    if not struktura:
+        struktura = _STRUKTURA_LEGACY.get(str(id_), "brak")
+
     return PrzepisRezysera(
         id=str(id_),
         etykieta=str(etykieta),
@@ -299,6 +330,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
         kod_jezyka=str(data.get("kod_jezyka", "")).strip().lower(),
         prompt_systemowy=str(data.get("prompt_systemowy", "")),
         format_wyjscia=format_wyjscia,
+        struktura=struktura,
         zapis_do_pliku=bool(data.get("zapis_do_pliku", False)),
         stosuj_akcenty_fonetyczne=bool(data.get("stosuj_akcenty_fonetyczne", False)),
         przypomnienie_uzytkownika=str(data.get("przypomnienie_uzytkownika", "")),
@@ -380,14 +412,28 @@ def _zaladuj_wszystkie(jezyk: str) -> list[PrzepisRezysera]:
     przepisy: list[PrzepisRezysera] = []
 
     if os.path.isdir(folder):
+        widziane_id: set[str] = set()
         for nazwa_pliku in sorted(os.listdir(folder)):
             if not nazwa_pliku.lower().endswith((".yaml", ".yml")):
                 continue
             sciezka = os.path.join(folder, nazwa_pliku)
             data = _wczytaj_yaml(sciezka)
             przepis = _yaml_to_przepis(data, sciezka)
-            if przepis is not None:
-                przepisy.append(przepis)
+            if przepis is None:
+                continue
+            # Guard kolizji id: tryb identyfikuje się stabilnym `id` (tożsamość
+            # `.mode`, dispatch struktury/paneli). Dwa pliki o tym samym `id` (np.
+            # kontrybutor zduplikował `audiobook`) rozbiłyby identyfikację —
+            # pomijamy późniejszy i sygnalizujemy na stderr (dev/headless).
+            if przepis.id in widziane_id:
+                print(
+                    f"⚠️  przepisy_rezysera: duplikat id={przepis.id!r} w {sciezka} "
+                    f"— plik pominięty (id musi być unikalne w paczce).",
+                    file=sys.stderr,
+                )
+                continue
+            widziane_id.add(przepis.id)
+            przepisy.append(przepis)
 
     przepisy.sort(key=lambda p: (p.kategoria, p.kolejnosc, p.id))
     _CACHE_PRZEPISOW[jezyk] = przepisy
@@ -405,6 +451,25 @@ def lista_trybow(jezyk: str = "pl") -> list[PrzepisRezysera]:
     (GUI może wtedy pokazać ostrzeżenie „brak zainstalowanych trybów").
     """
     return [p for p in _zaladuj_wszystkie(jezyk) if p.kategoria == KATEGORIA_TRYB]
+
+
+def struktura_dla_id(id_trybu: str, jezyk: str = "pl") -> str:
+    """Zwraca `struktura` trybu o danym `id` (do segmentacji `.txt` przy wczytaniu).
+
+    Używane przez :meth:`core_rezyser.ProjektRezysera.wczytaj`, która z pliku
+    `.mode` zna tylko stabilne `id` trybu, a potrzebuje sposobu segmentacji
+    (akty/sceny vs rozdziały) do enumeracji punktów odniesienia pamięci. Czyta
+    pole `struktura` z przepisu (parytet gwarantuje tę samą wartość we
+    wszystkich językach, więc `pl` jako referencja wystarcza). Gdy tryb nie
+    istnieje w paczce — fallback na mapę legacy, a w ostateczności ``"brak"``
+    (płaska lista — bezpieczny default).
+    """
+    if not id_trybu:
+        return "brak"
+    for p in _zaladuj_wszystkie(jezyk):
+        if p.id == id_trybu:
+            return p.struktura
+    return _STRUKTURA_LEGACY.get(id_trybu, "brak")
 
 
 def lista_postprodukcji(jezyk: str = "pl") -> list[PrzepisRezysera]:

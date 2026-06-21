@@ -30,7 +30,7 @@ Publiczne API:
     proj.zapisz_ksiege_swiata("[Geralt: akcent islandzki] ...")
     proj.zapisz_streszczenie("W poprzednich odcinkach...")
     proj.dopisz_do_pliku_historii("Tekst sceny.", mode="a")
-    proj.zapisz_tryb_tworczy(2)               # 1=Skrypt, 2=Audiobook
+    proj.zapisz_tryb_tworczy("audiobook", zapis_do_pliku=True)  # stabilne id trybu
 
     # Struktura – mutuje pamięć i plik na dysku
     proj.wstaw_prolog()
@@ -63,6 +63,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable
 
 import core_tokeny as ct
+import przepisy_rezysera as pr
 import sciezki
 
 # Silnik fonetyczny trybu Reżysera. Od v17.5 akcenty są dyspatchowane
@@ -442,19 +443,21 @@ class MarkerStruktury:
     sceny: list["MarkerStruktury"] = field(default_factory=list)
 
 
-def wyliczy_markery(content: str, tryb: int) -> list[MarkerStruktury]:
+def wyliczy_markery(content: str, struktura: str) -> list[MarkerStruktury]:
     """Buduje listę wybieralnych punktów odniesienia z treści `.txt`.
 
     Args:
-        content: pełna treść narracji (`skrypty/<nazwa>.txt`).
-        tryb:    1 = Skrypt (akty z zagnieżdżonymi scenami), 2 = Audiobook
-                 (płaska lista rozdziałów). Inne wartości → płaska lista.
+        content:   pełna treść narracji (`skrypty/<nazwa>.txt`).
+        struktura: sposób segmentacji z `PrzepisRezysera.struktura`:
+                   ``"akty_sceny"`` = Akty z zagnieżdżonymi Scenami (Skrypt),
+                   pozostałe (``"rozdzialy"``/``"brak"``) = płaska lista
+                   wszystkich nagłówków (Audiobook i tryby bez struktury).
 
     Returns:
-        Lista top-levelowych :class:`MarkerStruktury`. Dla Skryptu akty niosą
-        swoje sceny w ``sceny``; prolog/epilog oraz sceny przed pierwszym aktem
-        trafiają jako top-level (gracz wciąż może od nich wystartować pamięć).
-        Płaska lista (Audiobook) zawiera wszystkie nagłówki w kolejności.
+        Lista top-levelowych :class:`MarkerStruktury`. Dla ``"akty_sceny"`` akty
+        niosą swoje sceny w ``sceny``; prolog/epilog oraz sceny przed pierwszym
+        aktem trafiają jako top-level (gracz wciąż może od nich wystartować
+        pamięć). Płaska lista zawiera wszystkie nagłówki w kolejności.
     """
     surowe = [
         (off, txt, *_rozbij_naglowek(txt))
@@ -467,8 +470,8 @@ def wyliczy_markery(content: str, tryb: int) -> list[MarkerStruktury]:
             ma_istotna_tresc=_ma_istotna_tresc(content, off),
         )
 
-    # Skrypt: zagnieżdżamy sceny pod ostatnim napotkanym aktem.
-    if tryb == 1:
+    # Skrypt (akty_sceny): zagnieżdżamy sceny pod ostatnim napotkanym aktem.
+    if struktura == "akty_sceny":
         wynik: list[MarkerStruktury] = []
         biezacy_akt: MarkerStruktury | None = None
         for off, txt, typ, numer in surowe:
@@ -482,7 +485,7 @@ def wyliczy_markery(content: str, tryb: int) -> list[MarkerStruktury]:
                 wynik.append(_mk(off, txt, typ, numer))
         return wynik
 
-    # Audiobook / nieznany tryb: płaska lista wszystkich nagłówków.
+    # Audiobook (rozdzialy) / tryb bez struktury: płaska lista nagłówków.
     return [_mk(off, txt, typ, numer) for off, txt, typ, numer in surowe]
 
 
@@ -647,7 +650,7 @@ class WynikWczytania:
     czy_streszczenie: bool = False
     czy_ksiega_swiata: bool = False
     liczba_znakow: int = 0
-    saved_mode: int | None = None   # 1=Skrypt, 2=Audiobook, None=brak metadanej
+    saved_mode: str | None = None   # stabilne `id` trybu z `.mode` (np. "audiobook"); None=brak
     rekoncyliacja: "WynikRekoncyliacji | None" = None
 
 
@@ -826,7 +829,7 @@ class ProjektRezysera:
         self,
         nazwa: str,
         model: str = ct.MODEL_DOMYSLNY_REZYSER,
-        wybor_markera: "Callable[[list[MarkerStruktury], int], int | None] | None" = None,
+        wybor_markera: "Callable[[list[MarkerStruktury], str], int | None] | None" = None,
     ) -> WynikWczytania:
         """Wczytuje projekt: historię / streszczenie / Księgę Świata / tryb .mode.
 
@@ -849,7 +852,7 @@ class ProjektRezysera:
         Args:
             wybor_markera: (v17.6) opcjonalny callback wyboru punktu odniesienia
                 pamięci roboczej, wołany TYLKO gdy historia za długa (wariant
-                snap). Dostaje ``(markery, tryb)`` z :func:`wyliczy_markery`
+                snap). Dostaje ``(markery, struktura)`` z :func:`wyliczy_markery`
                 i zwraca wybrany ``offset`` lub ``None`` (anuluj → fallback
                 znakowy). Brak callbacku = automatyczny wybór anchora z meta
                 (zachowanie sprzed v17.6, używane przez testy/headless).
@@ -892,15 +895,17 @@ class ProjektRezysera:
 
         # --- Tryb twórczy (.mode) ---
         # Czytany PRZED rekoncyliacją (v17.6): enumeracja markerów punktu
-        # odniesienia musi znać tryb (Skrypt=akty+sceny / Audiobook=rozdziały).
+        # odniesienia musi znać strukturę (akty+sceny / rozdziały). Od v18.5
+        # `.mode` trzyma stabilne `id` trybu — strukturę rozwiązujemy z przepisu.
         self.nazwa_pliku = nazwa
         wynik.saved_mode = self.wczytaj_tryb_tworczy(nazwa)
+        struktura = pr.struktura_dla_id(wynik.saved_mode) if wynik.saved_mode else None
 
         # --- Inteligentna rekoncyliacja (v15.5) ---
         # nazwa_pliku MUSI być ustawiona przed rekoncyliacją — używa jej przez
         # `_wymagaj_nazwy` i ścieżkowe helpery.
         rek = self._zastosuj_rekoncyliacje(
-            content, model, wybor_markera, wynik.saved_mode,
+            content, model, wybor_markera, struktura,
         )
         wynik.rekoncyliacja    = rek
         wynik.czy_historia     = bool(self.full_story.strip())
@@ -915,8 +920,8 @@ class ProjektRezysera:
         self,
         content: str,
         model: str = ct.MODEL_DOMYSLNY_REZYSER,
-        wybor_markera: "Callable[[list[MarkerStruktury], int], int | None] | None" = None,
-        tryb_struktury: int | None = None,
+        wybor_markera: "Callable[[list[MarkerStruktury], str], int | None] | None" = None,
+        struktura: str | None = None,
     ) -> WynikRekoncyliacji:
         """Czysta logika rekoncyliacji (oddzielona od I/O dla testowalności).
 
@@ -1000,8 +1005,8 @@ class ProjektRezysera:
         # automat by chybił, więc pytamy gracza, od którego nagłówka startować.
         # Gdy anchor wciąż ważny, używamy go CICHO (zachowanie v15.5), bez dialogu.
         if wybor_markera is not None and anchor_offset is None:
-            markery = wyliczy_markery(content, tryb_struktury or 2)
-            offset = wybor_markera(markery, tryb_struktury or 2) if markery else None
+            markery = wyliczy_markery(content, struktura or "rozdzialy")
+            offset = wybor_markera(markery, struktura or "rozdzialy") if markery else None
             if offset is None:
                 # Anuluj / brak markerów → fallback znakowy (świadoma rezygnacja;
                 # BEZ flagi `sekcja_przekroczyla_limit`).
@@ -1133,38 +1138,47 @@ class ProjektRezysera:
         with open(sciezka, mode, encoding="utf-8") as fh:
             fh.write(content)
 
-    def zapisz_tryb_tworczy(self, tryb_idx: int, nazwa: str | None = None) -> None:
-        """Zapisuje aktualny tryb twórczy do pliku ``.mode`` (cichy fail).
+    def zapisz_tryb_tworczy(
+        self, id_trybu: str, zapis_do_pliku: bool = True, nazwa: str | None = None,
+    ) -> None:
+        """Zapisuje stabilne ``id`` trybu twórczego do pliku ``.mode`` (cichy fail).
+
+        Od v18.5 ``.mode`` trzyma ``id`` przepisu (np. ``"audiobook"``), nie
+        pozycyjny int — dzięki czemu reorder ``kolejnosc`` w RadioBox nie
+        przestawia znaczeń, a stary projekt zawsze wraca do właściwego trybu.
 
         Args:
-            tryb_idx: 1=Skrypt, 2=Audiobook. Inne wartości (w tym 0=Burza
-                      Mózgów) są ignorowane – nie ma sensu zapisywać
-                      tymczasowego trybu planowania.
-            nazwa:    Opcjonalne nadpisanie nazwy projektu (domyślnie
-                      ``self.nazwa_pliku``).
+            id_trybu:       stabilne ``id`` przepisu (``PrzepisRezysera.id``).
+            zapis_do_pliku: ``True`` tylko dla trybów produkcyjnych (zapisujących
+                            ``.txt``). Tryby bez zapisu (np. Burza, planowanie)
+                            są ulotne — NIE utrwalamy ich w metadanych.
+            nazwa:          Opcjonalne nadpisanie nazwy projektu.
         """
         nazwa = nazwa or self.nazwa_pliku
-        if not nazwa or tryb_idx not in (1, 2):
+        if not nazwa or not id_trybu or not zapis_do_pliku:
             return
         meta_dir = os.path.join(self.app_dir, RUNTIME_DIR, SKRYPTY_DIR)
         os.makedirs(meta_dir, exist_ok=True)
         sciezka = self._sciezka_mode(nazwa)
         try:
             with open(sciezka, "w", encoding="utf-8") as fh:
-                fh.write(str(tryb_idx))
+                fh.write(str(id_trybu))
             _dev_log_runtime(sciezka)
         except Exception:
             # Metadata trybu to quality-of-life, a nie coś, bez czego
             # aplikacja nie działa – milczymy w razie awarii.
             pass
 
-    def wczytaj_tryb_tworczy(self, nazwa: str | None = None) -> int | None:
-        """Odczytuje zapisany tryb twórczy z pliku ``.mode``.
+    def wczytaj_tryb_tworczy(self, nazwa: str | None = None) -> str | None:
+        """Odczytuje stabilne ``id`` trybu twórczego z pliku ``.mode``.
+
+        Back-compat: pliki sprzed v18.5 trzymały pozycyjny int — mapujemy
+        ``"1"`` → ``"skrypt"``, ``"2"`` → ``"audiobook"`` (stare zapisane
+        projekty wracają do właściwego trybu).
 
         Returns:
-            ``1`` lub ``2`` – gdy plik istnieje i zawiera poprawną wartość,
-            ``None`` – w każdym innym przypadku (brak pliku, błąd odczytu,
-            nie zainstalowana aplikacja w pełnej lokalizacji, itd.).
+            ``id`` trybu (np. ``"audiobook"``) gdy plik istnieje i jest niepusty,
+            ``None`` w każdym innym przypadku (brak pliku, błąd odczytu, itd.).
         """
         nazwa = nazwa or self.nazwa_pliku
         if not nazwa:
@@ -1174,10 +1188,12 @@ class ProjektRezysera:
             return None
         try:
             with open(sciezka, "r", encoding="utf-8") as fh:
-                val = int(fh.read().strip())
-            return val if val in (1, 2) else None
+                val = fh.read().strip()
         except Exception:
             return None
+        if not val:
+            return None
+        return {"1": "skrypt", "2": "audiobook"}.get(val, val)
 
     # ------------------------------------------------------------------
     # Persystencja wyników Burzy (v15.2)
