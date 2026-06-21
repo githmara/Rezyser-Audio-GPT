@@ -794,7 +794,7 @@ def _kanoniczny_naglowek(kod_jezyka: str, nazwa_pliku: str) -> str:
         "#\n"
         "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_docs.py\n"
         f"# ze źródła {zrodlo_rel}\n"
-        "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany wprowadzaj\n"
+        f"# (język bazowy PL, wersja 13.x). {przeglad_tlumaczen.MARKER_KANONICZNY} — zmiany wprowadzaj\n"
         "# w pliku źródłowym PL i uruchom ponownie skrypt tłumacza.\n"
         "#\n"
         "# Silnik: Anthropic Claude (tlumacz_ai.py). Placeholdery {klucz.zagniezdzony}\n"
@@ -1087,7 +1087,7 @@ def tlumacz_szablon(
     klucze_filtru: list[str] | None = None,
     retry: bool = False,
     input_krytyki: dict[str, str] | None = None,
-    tryb_draft: bool = False,
+    pelne_tlumaczenie: bool = True,
 ) -> bool:
     """Pełny przebieg tłumaczenia jednego pliku-szablonu na jeden język.
 
@@ -1112,6 +1112,13 @@ def tlumacz_szablon(
     if klucze_filtru is None and cel.exists() and skip_existing:
         print(f"⏭️  {kod}/{nazwa_pliku}: już istnieje — pomijam (--skip-existing).")
         return True
+
+    # Status finalizacji (od v18.6): pełne tłumaczenie ZAWSZE ląduje jako draft
+    # (świeży maszynowy przekład do recenzji halucynacji — kanon zdobywa się
+    # WYŁĄCZNIE przez --finalizuj). Chirurgiczny update (--klucz/--input/--retry)
+    # NIE zmienia statusu pliku: zachowuje jego dotychczasowy nagłówek, żeby nie
+    # kanonizować przedwcześnie draftu będącego w trakcie recenzji.
+    tryb_draft = True if pelne_tlumaczenie else przeglad_tlumaczen.czy_plik_jest_draftem(cel)
 
     # SURGICAL: filtruj sekcje + wczytaj istniejący plik docelowy do scalenia
     sekcje_do_tlumaczenia: dict[str, str] = sekcje_pl
@@ -1386,19 +1393,10 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "translation). A plain --klucz does NOT fix leaks (LLM blind spot) — "
              "this flag is the analogue of self-correction from rezyser_ai. REQUIRES --klucz.",
     )
-    parser.add_argument(
-        "--draft",
-        action="store_true",
-        help="WORKING DRAFT FOR REVIEW mode. Instead of the canonical \"do NOT edit "
-             "by hand\" header it injects a neutral header inviting edits, and after "
-             "the run emits a hallucination-review checklist to "
-             "`skrypty/przeglad_docs.md`. Use: a new-language contribution package "
-             "sent to a third party / agent for review (a reviewer without our "
-             "constitution does not get a conflicting order). Files land in the normal "
-             "path — after acceptance and manual fixes run `--finalizuj` "
-             "(swaps the header to canonical WITHOUT re-translating). Do NOT regenerate "
-             "without --draft — a full translation would overwrite the file and revert the fixes.",
-    )
+    # NB (od v18.6): flaga `--draft` została USUNIĘTA. Pełne tłumaczenie (bez
+    # --klucz/--input) ZAWSZE ląduje jako draft do recenzji + emituje checklistę
+    # `skrypty/przeglad_docs.md` — nie ma już czego pamiętać. Kanoniczny nagłówek
+    # „do NOT edit by hand" zdobywa się WYŁĄCZNIE przez --finalizuj po recenzji.
     parser.add_argument(
         "--finalizuj",
         action="store_true",
@@ -1433,10 +1431,10 @@ def _parsuj_argumenty() -> argparse.Namespace:
     if args.input and not args.szablony:
         parser.error("--input requires --szablony <plik> (e.g. `--szablony tales`), so it "
                      "knows which file to take the sections listed in input.log from.")
-    if args.finalizuj and (args.draft or args.klucz or args.retry or args.input
+    if args.finalizuj and (args.klucz or args.retry or args.input
                            or args.skip_existing or args.dry_run):
         parser.error("--finalizuj is a purely local header swap (zero API) — "
-                     "do not combine with --draft/--klucz/--retry/--input/--skip-existing/"
+                     "do not combine with --klucz/--retry/--input/--skip-existing/"
                      "--dry-run. Select languages via --jezyki/--wszystkie "
                      "(optionally narrow with --szablony).")
     return args
@@ -1602,6 +1600,11 @@ def main() -> int:
     porazki: list[str] = []
     wytworzone_drafty: list[tuple[str, str]] = []
 
+    # Pełne tłumaczenie (bez --klucz/--input) ⇒ ścieżka draft + checklista
+    # przeglądu. Chirurgiczny update (--klucz/--input/--retry) zachowuje status
+    # finalizacji pliku docelowego (patrz `tlumacz_szablon`/`_plik_jest_draftem`).
+    pelne_tlumaczenie = not (args.klucz or args.input)
+
     klucze_filtru: list[str] | None = None
     if args.klucz:
         klucze_filtru = [k.strip() for k in args.klucz.split(",") if k.strip()]
@@ -1647,11 +1650,11 @@ def main() -> int:
                 klucze_filtru=kl_filtru,
                 retry=args.retry,
                 input_krytyki=input_krytyki,
-                tryb_draft=args.draft,
+                pelne_tlumaczenie=pelne_tlumaczenie,
             )
             if not ok:
                 wszystko_ok = False
-            elif args.draft and not args.dry_run:
+            elif pelne_tlumaczenie and not args.dry_run:
                 wytworzone_drafty.append((kod, nazwa_pliku))
         (sukcesy if wszystko_ok else porazki).append(kod)
 
@@ -1665,7 +1668,7 @@ def main() -> int:
         except OSError:
             pass
 
-    if args.draft and not args.dry_run:
+    if pelne_tlumaczenie and not args.dry_run:
         # Post-processor: detektor PL-leaków na świeżych draftach — funnel dla
         # recenzenta (zwł. nie-polskojęzycznego), doklejany do checklisty.
         print("\n🔎 DRAFT: skan audyt_leakow na wytworzonych draftach…")

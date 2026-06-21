@@ -619,7 +619,7 @@ def _auto_naglowek(kod_jezyka: str, *, tryb_draft: bool = False) -> str:
         "#\n"
         "# Plik wygenerowany automatycznie przez buduj_wielojezyczne_ui.py\n"
         f"# ze źródła {zrodlo_rel}\n"
-        "# (język bazowy PL, wersja 13.x). NIE edytuj ręcznie — zmiany\n"
+        f"# (język bazowy PL, wersja 13.x). {przeglad_tlumaczen.MARKER_KANONICZNY} — zmiany\n"
         "# wprowadzaj w pliku źródłowym PL i uruchom ponownie skrypt.\n"
         "#\n"
         "# Tłumaczone są WYŁĄCZNIE wartości; klucze, struktura, komentarze\n"
@@ -703,7 +703,7 @@ def tlumacz_jezyk(
     dry_run: bool,
     model: str,
     klucze: list[str] | None = None,
-    tryb_draft: bool = False,
+    pelne_tlumaczenie: bool = True,
 ) -> bool:
     """Pełen pipeline dla jednego języka. Zwraca True przy sukcesie.
 
@@ -723,6 +723,11 @@ def tlumacz_jezyk(
     if klucze is not None and not cel.exists():
         print(f"❌ {kod}: missing {cel.relative_to(ROOT)} — run first without --klucz.")
         return False
+
+    # Status finalizacji (od v18.6): pełne tłumaczenie ZAWSZE ląduje jako draft
+    # do recenzji (kanon zdobywa się WYŁĄCZNIE przez --finalizuj). Chirurgiczny
+    # update (--klucz) NIE zmienia statusu — zachowuje dotychczasowy nagłówek.
+    tryb_draft = True if pelne_tlumaczenie else przeglad_tlumaczen.czy_plik_jest_draftem(cel)
 
     # --- Krok 1: tokenizacja per-liść -----------------------------------------
     liscie_tok: list[tuple[int, str]] = []
@@ -917,18 +922,10 @@ def _parsuj_argumenty() -> argparse.Namespace:
         default="claude-sonnet-4-6",
         help="Anthropic Claude model used for translation (default: claude-sonnet-4-6).",
     )
-    parser.add_argument(
-        "--draft",
-        action="store_true",
-        help="WORKING DRAFT FOR REVIEW mode. Instead of the canonical \"do not edit "
-             "manually\" header, injects a neutral header encouraging edits and, after "
-             "the run, emits a review checklist to `skrypty/przeglad_ui.md`. "
-             "Use case: a new-language contribution package sent to a third party / "
-             "agent for review. Files land in the normal path — after approval "
-             "and manual corrections, run `--finalizuj` (swaps the header to the "
-             "canonical one WITHOUT retranslating). Do NOT regenerate without --draft — a full "
-             "translation would overwrite the file and revert the corrections.",
-    )
+    # NB (od v18.6): flaga `--draft` została USUNIĘTA. Pełne tłumaczenie (bez
+    # --klucz) ZAWSZE ląduje jako draft do recenzji + emituje checklistę
+    # `skrypty/przeglad_ui.md`. Kanoniczny nagłówek „do not edit manually"
+    # zdobywa się WYŁĄCZNIE przez --finalizuj po recenzji.
     parser.add_argument(
         "--finalizuj",
         action="store_true",
@@ -955,9 +952,9 @@ def _parsuj_argumenty() -> argparse.Namespace:
     if args.klucz and args.skip_existing:
         parser.error("--klucz and --skip-existing are mutually exclusive "
                      "(--klucz deliberately overwrites selected leaves in an existing file).")
-    if args.finalizuj and (args.draft or args.klucz or args.skip_existing or args.dry_run):
+    if args.finalizuj and (args.klucz or args.skip_existing or args.dry_run):
         parser.error("--finalizuj is a purely local header swap (zero API) — "
-                     "do not combine it with --draft/--klucz/--skip-existing/--dry-run. "
+                     "do not combine it with --klucz/--skip-existing/--dry-run. "
                      "Select languages via --jezyki/--wszystkie.")
     return args
 
@@ -1046,6 +1043,11 @@ def main() -> int:
 
     klient: Any = None if args.dry_run else _zainicjuj_klienta_anthropic()
 
+    # Pełne tłumaczenie (bez --klucz) ⇒ ścieżka draft + checklista przeglądu.
+    # Chirurgiczny update (--klucz) zachowuje status finalizacji pliku docelowego
+    # (patrz `tlumacz_jezyk`/`przeglad_tlumaczen.czy_plik_jest_draftem`).
+    pelne_tlumaczenie = not args.klucz
+
     sukcesy: list[str] = []
     porazki: list[str] = []
     wytworzone_drafty: list[tuple[str, str]] = []
@@ -1063,13 +1065,13 @@ def main() -> int:
             dry_run=args.dry_run,
             model=args.model,
             klucze=klucze_filtru,
-            tryb_draft=args.draft,
+            pelne_tlumaczenie=pelne_tlumaczenie,
         )
         (sukcesy if ok else porazki).append(kod)
-        if ok and args.draft and not args.dry_run:
+        if ok and pelne_tlumaczenie and not args.dry_run:
             wytworzone_drafty.append((kod, NAZWA_UI))
 
-    if args.draft and not args.dry_run:
+    if pelne_tlumaczenie and not args.dry_run:
         sciezka_prompt = przeglad_tlumaczen.zapisz_prompt_przegladu(
             "buduj_wielojezyczne_ui.py", wytworzone_drafty, ROOT,
         )

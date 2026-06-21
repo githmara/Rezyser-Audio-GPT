@@ -1003,14 +1003,20 @@ def main(args: argparse.Namespace | None = None) -> None:
     # the normal flow.
     print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
     brakujace_docs: dict[str, list[str]] = {}
+    drafty_docs: dict[str, str] = {}
     bufor_generatora = io.StringIO()
     with contextlib.redirect_stdout(bufor_generatora):
         wyniki_docs = generuj_dokumentacje.generuj(
-            cicho=True, zbieraj_brakujace=brakujace_docs,
+            cicho=True, zbieraj_brakujace=brakujace_docs, zbieraj_drafty=drafty_docs,
         )
     szum_generatora = bufor_generatora.getvalue().strip()
 
-    if brakujace_docs or szum_generatora or not wyniki_docs:
+    # Draftowe / niekanoniczne nagłówki = bezwarunkowy FATAL (guard od v18.6).
+    # generuj() w cicho=True pomija takie pliki MILCZĄCO (sygnał wyłącznie
+    # strukturalny przez `drafty_docs`), więc nie liczymy na `szum_generatora` —
+    # warunek bije wprost po zebranym słowniku. Chroni przed wpuszczeniem do
+    # paczki maszynowego draftu, którego maintainer zapomniał sfinalizować.
+    if brakujace_docs or drafty_docs or szum_generatora or not wyniki_docs:
         print("❌ FATAL: documentation regeneration is not clean — refusing to build.")
         print("In a standalone run these are warnings; in a release build they are")
         print("fatal, so the installer never ships docs/*.txt that didn't validate.")
@@ -1018,6 +1024,11 @@ def main(args: argparse.Namespace | None = None) -> None:
         if not wyniki_docs:
             print("   • No documentation files were generated at all "
                   "(missing dictionaries/<kod>/gui/dokumentacja/?).")
+        if drafty_docs:
+            print("   Draft / non-canonical headers (run the matching builder "
+                  "with --finalizuj after reviewing):")
+            for nazwa, powod in sorted(drafty_docs.items()):
+                print(f"      • {nazwa}: {powod}")
         if brakujace_docs:
             print("   Unresolved placeholders:")
             for nazwa, klucze in sorted(brakujace_docs.items()):

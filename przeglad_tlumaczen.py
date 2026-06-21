@@ -34,6 +34,39 @@ from pathlib import Path
 # zapewnia idempotencję i chroni przed „finalizacją" pliku już kanonicznego).
 MARKER_DRAFTU = "⚠ WORKING DRAFT FOR REVIEW"
 
+# Sygnatura nagłówka KANONICZNEGO („finalizacja"). Wstrzykiwana w blok nagłówkowy
+# wyłącznie przez `--finalizuj` (po recenzji halucynacji) — świeże maszynowe
+# tłumaczenie całego pliku NIGDY jej nie dostaje (zawsze idzie ścieżką draft).
+# `_kanoniczny_naglowek`/`_auto_naglowek` w obu builderach interpolują tę stałą,
+# a `generuj_dokumentacje._status_naglowka` egzekwuje jej obecność przed
+# wygenerowaniem docs/*.txt (guard przeciw wpuszczeniu draftu do buildu).
+# Frazą po polsku celowo — kanon dotyczy WYŁĄCZNIE plików maintainera; draft
+# (recenzent zewnętrzny / agent bez konstytucji) dostaje neutralny baner EN.
+MARKER_KANONICZNY = "NIE edytuj ręcznie"
+
+
+def czy_plik_jest_draftem(sciezka: Path) -> bool:
+    """True, gdy plik nosi w bloku nagłówkowym ``MARKER_DRAFTU``.
+
+    Wspólny helper obu builderów (od v18.6): chirurgiczny update (--klucz/
+    --input/--retry) NIE zmienia statusu finalizacji — zachowuje istniejący
+    nagłówek. Skanujemy WYŁĄCZNIE wiodące komentarze `#`. Brak/nieczytelny plik
+    → traktujemy jak draft (bezpieczniejsza strona: guard buildu i tak odmówi,
+    maintainer zauważy, zamiast wpuścić niesprawdzony nagłówek kanoniczny).
+    """
+    try:
+        with open(sciezka, "r", encoding="utf-8") as fh:
+            for surowa in fh:
+                striped = surowa.strip()
+                if striped == "" or striped.startswith("#"):
+                    if MARKER_DRAFTU in surowa:
+                        return True
+                    continue
+                break
+    except OSError:
+        return True
+    return False
+
 
 def naglowek_roboczy(sciezka_rel: str, zrodlo_rel: str, narzedzie: str) -> str:
     """Neutralny nagłówek YAML dla pliku-draftu (zachęca do edycji).

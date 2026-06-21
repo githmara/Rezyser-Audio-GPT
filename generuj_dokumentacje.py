@@ -92,6 +92,103 @@ FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
 NAZWA_UI = "ui.yaml"
 
+# ---------------------------------------------------------------------------
+# GUARD NAGŁÓWKA FINALIZACJI (od v18.6) — draft NIE wchodzi do buildu
+# ---------------------------------------------------------------------------
+# Problem: świeże maszynowe tłumaczenie `ui.yaml`/szablonu docs to DRAFT do
+# recenzji halucynacji. Gdyby maintainer zapomniał go sfinalizować (a tym
+# bardziej gdyby native zostawił w bloku nagłówkowym własną notatkę „tu wrócę"),
+# build wypuściłby paczkę z draftowymi treściami i nikt by nie zauważył — zwłaszcza
+# przy dorzucaniu 10. języka. Guard egzekwuje kontrakt `--draft`/`--finalizuj`
+# (patrz `przeglad_tlumaczen`) na wejściu do generacji docs.
+#
+# Reguła (whitelist, NIE blacklist): generujemy docs dla danego pliku TYLKO gdy
+# jego blok nagłówkowy (wiodące komentarze `#` przed treścią) niesie kanoniczny
+# marker finalizacji. Każdy inny stan = draft → odmowa.
+#   * `pl` (źródło referencyjne) jest ZWOLNIONY — ma ręcznie pisany, bespoke
+#     nagłówek bez markera (single source of truth, nie produkt autotłumacza).
+#   * pozostałe języki: wymagany `MARKER_KANONICZNY`, zakazany `MARKER_DRAFTU`.
+#   * dodatkowa (druga) linia obrony — blacklist markerów roboczych skanowana
+#     WYŁĄCZNIE w bloku nagłówkowym (nie w tytule/treści → zerowe ryzyko
+#     fałszywych trafień w naturalnym tekście).
+#
+# Import `przeglad_tlumaczen` jest LAZY z fallbackiem na literały — ten sam wzorzec
+# samowystarczalności co `core_poliglota` niżej (generator musi działać też w
+# kontekście zdegradowanym / u nie-maintainera bez całego toolingu).
+_MARKERY_ROBOCZE = ("TODO", "FIXME", "XXX", "WIP", "DRAFT", "???")
+
+
+def _markery_finalizacji() -> tuple[str, str]:
+    """Zwraca `(MARKER_KANONICZNY, MARKER_DRAFTU)` z `przeglad_tlumaczen`.
+
+    Lazy import z fallbackiem na literały — gdy moduł dev-toolingu jest nieobecny
+    (np. po `git clone` bez prywatnej pamięci maintainera), guard działa dalej na
+    wbudowanych stałych, zamiast się wywalić.
+    """
+    try:
+        import przeglad_tlumaczen as pt
+        return pt.MARKER_KANONICZNY, pt.MARKER_DRAFTU
+    except ImportError:
+        return "NIE edytuj ręcznie", "⚠ WORKING DRAFT FOR REVIEW"
+
+
+def _blok_naglowka(sciezka: Path) -> str:
+    """Zwraca surowy blok wiodących komentarzy `#` pliku (przed pierwszą treścią).
+
+    `yaml.safe_load` gubi komentarze, więc baner finalizacji/draftu czytamy
+    wprost z tekstu. Zbieramy linie od początku pliku, dopóki są puste albo
+    zaczynają się od `#`; pierwsza linia treści (np. `id:`) kończy blok.
+    Zwraca "" przy braku pliku (wywołujący potraktuje jako brak kanonu).
+    """
+    if not sciezka.is_file():
+        return ""
+    linie: list[str] = []
+    try:
+        with open(sciezka, "r", encoding="utf-8") as fh:
+            for surowa in fh:
+                striped = surowa.strip()
+                if striped == "" or striped.startswith("#"):
+                    linie.append(surowa)
+                    continue
+                break
+    except OSError:
+        return ""
+    return "".join(linie)
+
+
+def _status_naglowka(sciezka: Path, jezyk: str) -> tuple[bool, str]:
+    """Sprawdza, czy plik jest sfinalizowany (kanoniczny), czy to draft.
+
+    Returns:
+        `(True, "")` — nagłówek kanoniczny (albo `pl`, zwolniony jako źródło);
+        `(False, powod)` — draft / nagłówek niekanoniczny; `powod` to krótki
+        opis po angielsku (ląduje w logu buildu, EN-only z założenia).
+    """
+    # Źródło referencyjne (pl): ręcznie pisany, ZAUFANY nagłówek — pełne
+    # zwolnienie PRZED blacklistą. Guard celuje w maszynowe tłumaczenia i notatki
+    # natywów w paczkach obcych, nie w bespoke komentarze maintainera (które
+    # legalnie zawierają prozę typu „literały do osobnego TODO refaktoru").
+    if jezyk == _FOLDER_REFERENCYJNY:
+        return True, ""
+
+    naglowek = _blok_naglowka(sciezka)
+    marker_kanon, marker_draft = _markery_finalizacji()
+
+    # 1) Świeży draft (jeszcze nie przepuszczony przez --finalizuj).
+    if marker_draft in naglowek:
+        return False, "still a WORKING DRAFT (not finalized via --finalizuj)"
+    # 2) Brak kanonicznego markera finalizacji = zakładamy draft.
+    if marker_kanon not in naglowek:
+        return False, "no canonical finalization header (assumed draft)"
+    # 3) Druga linia obrony: notatka robocza dopisana OBOK kanonicznego nagłówka
+    #    (np. native zostawił sobie „TODO sprawdzić akcenty"). Skanujemy WYŁĄCZNIE
+    #    blok komentarzy — zerowe ryzyko trafienia w naturalny tekst tytułu/treści.
+    naglowek_upper = naglowek.upper()
+    for token in _MARKERY_ROBOCZE:
+        if token in naglowek_upper:
+            return False, f"working-note marker '{token}' found in the header block"
+    return True, ""
+
 # 13.4: globalne placeholdery dynamiczne (liczone z dysku przy każdym wywołaniu
 # `generuj()` — tanie, deterministyczne). Pozwalają w szablonach docs używać
 # wartości typu `{liczba_szyfrow}` zamiast hardkodowanego "6", dzięki czemu
@@ -226,8 +323,8 @@ def _scal_tresc_sekcjami(tresc: Any) -> str | None:
     return None
 
 
-def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
-    """Zwraca listę (id, tresc) dla każdego szablonu w danym języku.
+def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str, Path]]:
+    """Zwraca listę (id, tresc, sciezka) dla każdego szablonu w danym języku.
 
     Szablon = plik YAML w ``dictionaries/<jezyk>/gui/dokumentacja/``
     z polami ``id`` (rdzeń nazwy pliku wynikowego) oraz ``tresc``.
@@ -241,7 +338,7 @@ def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
     if not folder.is_dir():
         return []
 
-    szablony: list[tuple[str, str]] = []
+    szablony: list[tuple[str, str, Path]] = []
     for plik in sorted(folder.glob("*.yaml")):
         dane = _wczytaj_yaml(plik)
         if not dane:
@@ -264,7 +361,7 @@ def _wczytaj_szablony(jezyk: str) -> list[tuple[str, str]]:
         if tresc_scalona is None:
             print(f"⚠️  Skipping {plik}: 'tresc' must be a string or a dict of sections.")
             continue
-        szablony.append((id_szablonu, tresc_scalona))
+        szablony.append((id_szablonu, tresc_scalona, plik))
     return szablony
 
 
@@ -472,6 +569,7 @@ def generuj(
     *,
     cicho: bool = False,
     zbieraj_brakujace: dict[str, list[str]] | None = None,
+    zbieraj_drafty: dict[str, str] | None = None,
 ) -> list[Path]:
     """Generuje wszystkie pliki ``docs/<id>.<kod>.txt`` z szablonów YAML.
 
@@ -483,6 +581,13 @@ def generuj(
                             posortowana lista unikalnych brakujących placeholderów.
                             Używane przez tryb ``--waliduj`` do zwrócenia
                             twardego exit code po zakończeniu generacji.
+        zbieraj_drafty:     Jeśli podasz pusty dict, funkcja wypełni go
+                            mapowaniem ``"<jezyk>/ui.yaml"`` lub
+                            ``"<jezyk>/<id_szablonu>"`` → powód (EN) odrzucenia
+                            niesfinalizowanego (draftowego) nagłówka. Plik z
+                            takim nagłówkiem NIE jest generowany (guard od v18.6).
+                            Używane przez ``--waliduj`` (głośne ostrzeżenie + exit 1)
+                            i ``build_release`` (bezwarunkowy FATAL).
 
     Returns:
         Lista ścieżek wygenerowanych plików.
@@ -501,13 +606,37 @@ def generuj(
     placeholdery_globalne = _zbuduj_placeholdery_globalne()
 
     for jezyk in jezyki:
+        # GUARD (poziom UI): niesfinalizowany `ui.yaml` ⇒ pomiń CAŁY język.
+        # ui.yaml dostarcza wartości WSZYSTKim szablonom docs tego języka, więc
+        # draftowy UI dyskwalifikuje całą paczkę językową (hierarchia: UI → doc).
+        ui_path = DICT_DIR / jezyk / FOLDER_GUI / NAZWA_UI
+        ok_ui, powod_ui = _status_naglowka(ui_path, jezyk)
+        if not ok_ui:
+            if not cicho:
+                print(f"⚠️  {jezyk}: ui.yaml header is not finalized "
+                      f"({powod_ui}) — skipping ALL docs for this language.")
+            if zbieraj_drafty is not None:
+                zbieraj_drafty[f"{jezyk}/{NAZWA_UI}"] = powod_ui
+            continue
+
         ui = _wczytaj_ui(jezyk)
         szablony = _wczytaj_szablony(jezyk)
         if not szablony and not cicho:
             print(f"ℹ️  {jezyk}: brak szablonów w gui/dokumentacja/.")
             continue
 
-        for id_szablonu, tresc_szablonu in szablony:
+        for id_szablonu, tresc_szablonu, sciezka_szablonu in szablony:
+            # GUARD (poziom doc): niesfinalizowany szablon ⇒ nie zapisuj tego .txt
+            # (UI tego języka jest już kanoniczny — odrzucamy tylko ten plik).
+            ok_doc, powod_doc = _status_naglowka(sciezka_szablonu, jezyk)
+            if not ok_doc:
+                if not cicho:
+                    print(f"⚠️  {jezyk}/{id_szablonu}: template header is not "
+                          f"finalized ({powod_doc}) — not writing docs file.")
+                if zbieraj_drafty is not None:
+                    zbieraj_drafty[f"{jezyk}/{id_szablonu}"] = powod_doc
+                continue
+
             wynik_tresc, brakujace = _rozwin_placeholdery(
                 tresc_szablonu, ui, placeholdery_globalne)
             if brakujace and not cicho:
@@ -545,32 +674,55 @@ def waliduj() -> int:
     (tłumaczenia robi człowiek albo LLM), dba tylko o to, żeby żadna
     nazwa klucza nie zostawała w wynikowym .txt jako surowy `{coś}`.
 
+    Od v18.6 sprawdza dodatkowo nagłówki finalizacji: plik z draftowym /
+    niekanonicznym nagłówkiem nie został wygenerowany (guard) — tu raportujemy
+    go głośno i również zwracamy exit 1.
+
     Returns:
-        0 — wszystkie placeholdery rozwinięte, paczka gotowa do buildu.
-        1 — znaleziono brakujące placeholdery; exit code dla CI / buduj_wydanie.
+        0 — wszystkie placeholdery rozwinięte i wszystkie nagłówki kanoniczne;
+            paczka gotowa do buildu.
+        1 — znaleziono brakujące placeholdery LUB draftowe nagłówki;
+            exit code dla CI / build_release.
     """
     brakujace_wedlug_pliku: dict[str, list[str]] = {}
-    generuj(zbieraj_brakujace=brakujace_wedlug_pliku)
+    drafty_wedlug_pliku: dict[str, str] = {}
+    generuj(
+        zbieraj_brakujace=brakujace_wedlug_pliku,
+        zbieraj_drafty=drafty_wedlug_pliku,
+    )
+
+    print("\n========== FINALIZATION-HEADER GUARD ==========")
+    if not drafty_wedlug_pliku:
+        print("✅ Every generated file carries the canonical finalization header.")
+    else:
+        print(f"❌ Refused to generate {len(drafty_wedlug_pliku)} file(s) with a "
+              f"draft / non-canonical header:")
+        for nazwa, powod in sorted(drafty_wedlug_pliku.items()):
+            print(f"  • {nazwa}: {powod}")
+        print("Fix: review the machine translation, then run the matching builder "
+              "with `--finalizuj` to swap the draft header for the canonical one "
+              "(zero re-translation). A `<lang>/ui.yaml` entry skips the WHOLE "
+              "language until its UI header is finalized.")
+    print("===============================================")
 
     print("\n========== PLACEHOLDER VALIDATION ==========")
     if not brakujace_wedlug_pliku:
         print("✅ All {placeholdery} in the templates have values in ui.yaml.")
-        print("=============================================")
-        return 0
-
-    print(f"❌ Found missing placeholders in {len(brakujace_wedlug_pliku)} "
-          f"template(s):")
-    for nazwa, brakujace in sorted(brakujace_wedlug_pliku.items()):
-        print(f"  • {nazwa}")
-        for klucz in brakujace:
-            print(f"      - {{{klucz}}}")
+    else:
+        print(f"❌ Found missing placeholders in {len(brakujace_wedlug_pliku)} "
+              f"template(s):")
+        for nazwa, brakujace in sorted(brakujace_wedlug_pliku.items()):
+            print(f"  • {nazwa}")
+            for klucz in brakujace:
+                print(f"      - {{{klucz}}}")
+        print(
+            "Fix: add the missing keys to that language's ui.yaml OR remove the "
+            "unused placeholders from the template. A raw `{coś}` in docs/*.txt "
+            "looks like a bug, so the build will not pass."
+        )
     print("=============================================")
-    print(
-        "Fix: add the missing keys to that language's ui.yaml OR remove the "
-        "unused placeholders from the template. A raw `{coś}` in docs/*.txt "
-        "looks like a bug, so the build will not pass."
-    )
-    return 1
+
+    return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku) else 0
 
 
 # ---------------------------------------------------------------------------
