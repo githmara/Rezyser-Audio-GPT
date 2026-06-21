@@ -80,16 +80,7 @@ Force push do MAIN przez maintainera = **zakazany**; wyjątek **tag-only post-pu
 Nowy bug-issue od prawdziwego usera = **priorytet** nad planowaną treścią. Procedura: odłóż feature na następny cykl (przepisz `RELEASE_NOTES.md::Co nie weszło`), bumpuj X.Y.(Z+1) [[reguly_git_workflow]], patch rozwiązuje TYLKO bug (lub grupę powiązanych z jednego obszaru), po Release nadaj etykietę `fixed-in-release` przez web UI (bot zamyka). Wyjątek: bug niewykonalny w jednym patchu (wymaga refaktoru) → przeetykietuj `bug` → `enhancement` z komentarzem wyjaśniającym workaround + plan strukturalny.
 
 # OBIEG ZGŁOSZEŃ Z POŁUDNIA NA PÓŁNOC — INTERPRETACJA PROMPTU SAMI (od v15.2.8 trójsekcyjny)
-Sami (`.github/scripts/issue_intake_sami.py`, etap Południe) odbiera nowe GitHub Issue (eventy `opened`/`labeled` wg `LABELS_ACCEPT`/`LABELS_IGNORE`) i wysyła do Centrum mail plain-text o **trójsekcyjnej** strukturze:
-
-1. **PROMPT DLA AGENTA AI** — wygenerowany przez `gpt-4o-mini` (`SAMI_SYSTEM_PROMPT`); format zależy od etykiet:
-   * **TRYB A — question/help wanted** (etykiety TYLKO `question`/`help wanted`, BEZ `bug`/`enhancement`/`documentation`): 2 sekcje `## Cel pytania` + `## Co agent powinien zrobić`. Odpowiadasz LOKALNIE `odpowiedz_lokalnie.py` (patrz `# ODPOWIEDZI NA ISSUE`).
-   * **TRYB B — zmiana w kodzie** (etykiety mają `bug`/`enhancement`/`documentation`/`invalid`, też w kombinacji): 4 sekcje `## Cel` + `## Kontekst techniczny` + `## Kryteria akceptacji` + `## Pułapki do uniknięcia`. Implementujesz fix.
-2. **ORYGINALNY TEKST ZGŁOSZENIA** — surowy `title + body`. ZAWSZE porównuj z promptem przed implementacją — oryginał = źródło prawdy, prompt = sugestia LLM.
-3. **OTWARTE ISSUES W REPO** — `gh issue list --state open --limit 50` (od v15.2.8): detekcja duplikatów, scalanie powiązanych bugów, priorytet vs planowany feature.
-
-## Sygnał rozpoznawczy + pułapki
-Mail od `## Cel pytania`/`## Cel` (2 lub 4 sekcje) + separatory `====` + `ORYGINALNY TEKST ZGŁOSZENIA` + `OTWARTE ISSUES W REPO` = ten obieg; Twoja rola = **Centrum**, decyzja TRYB A/B z liczby sekcji + linii „Etykiety:". Trzy non-obvious'y (halucynacja LLM w „Pułapki do uniknięcia", tryb FALLBACK bez TRYB A/B, pusta sekcja OTWARTE ISSUES) → [[reguly_github_bot]].
+Sami (`.github/scripts/issue_intake_sami.py`, Południe) wysyła do Centrum trójsekcyjny mail: **(1) PROMPT DLA AGENTA AI** (gpt-4o-mini; TRYB A question/help wanted = 2 sekcje → odpowiadasz lokalnie, patrz `# ODPOWIEDZI NA ISSUE`; TRYB B bug/enhancement/documentation/invalid = 4 sekcje → implementujesz fix), **(2) ORYGINALNY TEKST ZGŁOSZENIA** (źródło prawdy — ZAWSZE porównuj z promptem), **(3) OTWARTE ISSUES** (`gh issue list` — dedup/priorytet). Pełna struktura sekcji + sygnał rozpoznawczy (separatory `====`, linia „Etykiety:") + pułapki interpretacyjne (halucynacja w „Pułapki do uniknięcia", tryb FALLBACK bez TRYB A/B, pusta sekcja 3, zmyślone nazwy modułów) → [[reguly_github_bot]].
 
 # ODPOWIEDZI NA ISSUE — lokalny skrypt (od v17.1)
 Flow odpowiedzi na pytanie/help wanted domykasz LOKALNIE przez `odpowiedz_lokalnie.py` (root repo) + lokalny `gh` CLI — zero commitów/pushy/etykiet. Dawna maszyneria `pending_answer.md`+commit+bot+atomic-reset ZNIESIONA w v17.1 (historia → `claude_archive.md`). Detale botów/person → [[reguly_github_bot]].
