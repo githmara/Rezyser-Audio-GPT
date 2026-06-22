@@ -108,7 +108,7 @@ tresc:
 
     runtime/opowiesci/<nazwa>.mode — lýsigögn um númer ham (3=Frjáls, 4=Val, 5=Minna illt). Frá v17.4 í eigin Sögu-möppu. Áður lá skráin í runtime/skrypty/ sameiginlega með Leikstjóranum — þegar leikur og verkefni Leikstjórans báru sama nafn gat vistun annars einingarinnar þaggað niður og yfirskrifað ham hins; nú eru nafnrýmin aðskilin og gamlar skrár fluttar í eitt skipti við hleðslu leiksins.
   krok_7_pamiec_modelu: |
-    KROK 7: Minnisvísir líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
+    SKREF 7: Minnisvísir líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
 
     Undir RadioBox-stillingunni finnurðu minnisvísir líkans — framvindustiku (wx.Gauge) með stöðu lýsingu við hliðina. Vísirinn sýnir prósentu fyllingar samhengisglugga frásagnavélarinnar (biðminni reiknað upp í 128.000 tákn).
 

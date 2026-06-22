@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 18.5.3 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 18.5.4 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -79,7 +79,7 @@ Hvernig á að slá lykilinn inn í forritið:
 Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "Kerfisathugun" sýna stöðu lykillsins. Hún verður að vera græn til að allir AI-einingar séu tilbúnar til notkunar. Ef lykillinn vantar eða er rangur, mun forritið gefa skýrt til kynna og leyfa þér að opna textaritil til að laga villuna fljótt.
 
 
-KROK 3: Aðalstúdíó Leikstjórans
+SKREF 3: Aðalstúdíó Leikstjórans
 
 Þetta er stjórnstöðin þín til að skapa sögur og skrifa handrit. Fara í það með því að smella á "🎬  Leikstjóri" hnappinn á hnappastikunni eða velja Verkfæri → Leikstjóri úr valmyndinni (flýtilykill: Ctrl+1).
 

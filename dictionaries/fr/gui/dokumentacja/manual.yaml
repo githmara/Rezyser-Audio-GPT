@@ -111,7 +111,7 @@ tresc:
 
     Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera le statut de la clé dans la section "{home.heading_system_check}". Il doit être vert pour que tous les modules IA soient prêts à fonctionner. Si la clé est absente ou incorrecte, le programme l'indiquera clairement et vous permettra d'ouvrir l'éditeur de texte pour corriger rapidement l'erreur.
   krok_3_glowne_studio: |
-    KROK 3 : Studio Principal de Réalisation
+    ÉTAPE 3 : Studio Principal de Réalisation
 
     C'est votre centre de commande pour imaginer des histoires et écrire des scénarios. Accédez-y en cliquant sur le bouton "{main.btn.rezyser}" dans la barre d'outils ou en sélectionnant Outils → {main.menu.rezyser} dans le menu (raccourci : Ctrl+1).
 

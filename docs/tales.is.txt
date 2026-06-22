@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Samtalslegar Sögur (18.5.3 – Útgáfuútgáfa)
+Reżyser Audio GPT — Samtalslegar Sögur (18.5.4 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hliðina á Leikstjóra — í þetta sinn verður þú leikmaður í sögunni sem er dynamískt búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lyktina af blautum laufum…"), og þú ákveður næstu aðgerð — skrifar hvaða aðgerð sem er með frjálsum texta eða velur eina af tölusettum valkostum.
 
@@ -99,7 +99,7 @@ runtime/opowiesci/<nazwa>.story.jsonl — hrátt skrá yfir hverja umferð (bei�
 runtime/opowiesci/<nazwa>.mode — lýsigögn um númer ham (3=Frjáls, 4=Val, 5=Minna illt). Frá v17.4 í eigin Sögu-möppu. Áður lá skráin í runtime/skrypty/ sameiginlega með Leikstjóranum — þegar leikur og verkefni Leikstjórans báru sama nafn gat vistun annars einingarinnar þaggað niður og yfirskrifað ham hins; nú eru nafnrýmin aðskilin og gamlar skrár fluttar í eitt skipti við hleðslu leiksins.
 
 
-KROK 7: Minnisvísir líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
+SKREF 7: Minnisvísir líkans — hvers vegna umferðir í gömlum leikjum krefjast ekki handvirkrar vinnu frá þér
 
 Undir RadioBox-stillingunni finnurðu minnisvísir líkans — framvindustiku (wx.Gauge) með stöðu lýsingu við hliðina. Vísirinn sýnir prósentu fyllingar samhengisglugga frásagnavélarinnar (biðminni reiknað upp í 128.000 tákn).
 

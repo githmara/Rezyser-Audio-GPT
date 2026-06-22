@@ -1075,6 +1075,31 @@ def main(args: argparse.Namespace | None = None) -> None:
         else:
             print(f"✅ No leaks beyond the baseline ({audyt_leakow.BASELINE_PATH.name}).\n")
 
+        # 6a''. Source `.py` hard-code gate (od v18.5.4): scan application modules for
+        # user/LLM-facing Polish string literals that bypass i18n/recipe YAML, against
+        # a separate accepted baseline (audyt_leakow_py_baseline.json). Same baseline
+        # pattern as the docs gate: a new hard-code beyond the baseline (especially any
+        # LIKELY — a string reaching a wx Set*/MessageBox sink or an LLM payload) is a
+        # FATAL. `audyt_leakow` already imported above; reuse it (still lazy/graceful).
+        print("🔍 Source gate: scanning *.py for user/LLM-facing Polish hard-codes...")
+        wynik_py = audyt_leakow.bramka_py()
+        if wynik_py.pominieto:
+            print(f"⚠️  Source gate skipped: {wynik_py.powod_pominiecia}. "
+                  "Install `lingua` for the full release gate.\n")
+        elif not wynik_py.czysto:
+            ile = sum(len(v) for v in wynik_py.nowe.values())
+            print(f"❌ FATAL: {ile} Polish hard-code(s) ABOVE the baseline in "
+                  f"{len(wynik_py.nowe)} file(s) — refusing to build.")
+            print("Move the string into i18n (`t()`) / a recipe YAML, or — if it is a "
+                  "deliberate, by-design hard-code — regenerate the baseline with "
+                  "`python audyt_leakow.py --zapisz-baseline-py` and commit the diff.")
+            for nazwa, powody in sorted(wynik_py.nowe.items()):
+                for p in powody:
+                    print(f"      • {nazwa}: {p}")
+            sys.exit(1)
+        else:
+            print(f"✅ No hard-codes beyond the baseline ({audyt_leakow.BASELINE_PY_PATH.name}).\n")
+
     # 6b. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
 

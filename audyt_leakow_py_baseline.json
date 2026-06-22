@@ -1,0 +1,122 @@
+{
+  "core_elevenlabs.py": [
+    "POSSIBLE|lingua:PL|Nieoczekiwana struktura odpowiedzi przy tworzeniu projektu: {…}",
+    "POSSIBLE|znak-PL:ął|Błąd ElevenLabs (HTTP {…}): {…}",
+    "POSSIBLE|znak-PL:ł|^[=\\-\\s]*(Czołówka|Rozdzia[łl]|Chapter|Kapitel|Luku|Kafli|Capitolo|Chapitre|Cap[íi]tulo|Глава|Prolog(?:ue|i|o)?|Formáli|",
+    "POSSIBLE|znak-PL:ń|Klucz ElevenLabs nie ma wymaganych uprawnień (scope'ów). Dodaj projects_write oraz voices_read w panelu ElevenLabs.",
+    "POSSIBLE|znak-PL:ź|HTTP 401 — nieautoryzowany (sprawdź klucz ElevenLabs)."
+  ],
+  "core_opowiesci.py": [
+    "POSSIBLE|znak-PL:ł|ProjektOpowiesci nie ma ustawionej nazwy gry — przed I/O wywołaj `_on_nowa_gra` lub `wczytaj(nazwa)`."
+  ],
+  "core_poliglota.py": [
+    "POSSIBLE|lingua:PL|Nieznany tryb: „{…}”. Oczekiwano „Rezyser” lub „Szyfrant”.",
+    "POSSIBLE|lingua:PL|Parametr `wariant` jest wymagany.",
+    "POSSIBLE|lingua:PL|[core_poliglota] Brak pliku podstaw dla jezyka {…}: {…}",
+    "POSSIBLE|lingua:PL|[core_poliglota] WARN {…}: {…} potencjalnych petli sekwencyjnego str.replace -> {…}{…}. Jesli celowe (rozpad dwuznaku w ",
+    "POSSIBLE|znak-PL:ĄąĘę|aeiouyąęóAEIOUYĄĘÓ",
+    "POSSIBLE|znak-PL:ĄĆĘŁŃŚŹŻ|AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ",
+    "POSSIBLE|znak-PL:ĄĘ|AEIYUĄĘÓ",
+    "POSSIBLE|znak-PL:ąę|[core_poliglota] Pole lingua: '{…}' w dictionaries/{…}/podstawy.yaml nie jest znaną nazwą `lingua.Language` — język pomi",
+    "POSSIBLE|znak-PL:ąę|aeiyuąęó",
+    "POSSIBLE|znak-PL:ął|[core_poliglota] Błąd wczytywania {…}: {…}",
+    "POSSIBLE|znak-PL:ę|Nie znaleziono wariantu „{…}” dla trybu „{…}” i języka „{…}”.",
+    "POSSIBLE|znak-PL:ę|Nieznany algorytm szyfru: „{…}” (plik dictionaries/{…}/szyfry/{…}.yaml). Dostępne: {…}",
+    "POSSIBLE|znak-PL:ę|Nieznany algorytm szyfru: „{…}”. Dostępne: {…}",
+    "POSSIBLE|znak-PL:ęłńś|Wykryto fragment w języku {…} (kod '{…}'), ale brakuje reguły '{…}' w folderze {…}. Utwórz plik {…}/{…}.yaml przed konty"
+  ],
+  "core_rezyser.py": [
+    "POSSIBLE|lingua:PL|WynikRekoncyliacji | None",
+    "POSSIBLE|znak-PL:ą|ą",
+    "POSSIBLE|znak-PL:ć|ć",
+    "POSSIBLE|znak-PL:ćę|Brak nazwy projektu — nie mogę zapisać obsady.",
+    "POSSIBLE|znak-PL:ę|ę",
+    "POSSIBLE|znak-PL:ł|(?i)\\b(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\\s+(\\d+)",
+    "POSSIBLE|znak-PL:ł|(?i)^(?:(?:rozdzia[łl]|chapter|chapitre|kapitel|capitolo|capítulo|luku|kafli|глава)\\s+\\d+|(?:akt|acte|acto|atto|act|näyt",
+    "POSSIBLE|znak-PL:ł|ProjektRezysera: operacja wymaga ustawionej nazwa_pliku (ustaw self.nazwa_pliku lub najpierw wywołaj wczytaj()).",
+    "POSSIBLE|znak-PL:ł|Rozdział",
+    "POSSIBLE|znak-PL:ł|ł",
+    "POSSIBLE|znak-PL:ń|ń",
+    "POSSIBLE|znak-PL:ś|ś",
+    "POSSIBLE|znak-PL:ź|ź",
+    "POSSIBLE|znak-PL:ż|ż"
+  ],
+  "core_screen_reader.py": [
+    "POSSIBLE|lingua:PL|<!DOCTYPE html> <html lang=\"{…}\"> <head> <meta charset=\"utf-8\"> <title>{…} — wersja dla czytników ekranu</title> </head>"
+  ],
+  "core_updater.py": [
+    "POSSIBLE|lingua:PL|Plik VERSION jest pusty.",
+    "POSSIBLE|lingua:PL|RezyserAudio/{…} (+github.com/{…}/{…})",
+    "POSSIBLE|znak-PL:ł|Nieprawidłowy format wersji: {…}",
+    "POSSIBLE|znak-PL:łź|Nie znaleziono pliku VERSION w {…}. Sprawdź, czy plik istnieje w katalogu głównym projektu."
+  ],
+  "gui_konwerter.py": [
+    "POSSIBLE|lingua:PL|architektura_{…}.docx"
+  ],
+  "gui_manager_regul.py": [
+    "POSSIBLE|znak-PL:ę|węgierski",
+    "POSSIBLE|znak-PL:ł|słowacki",
+    "POSSIBLE|znak-PL:ł|włoski",
+    "POSSIBLE|znak-PL:ń|chiński",
+    "POSSIBLE|znak-PL:ń|duński",
+    "POSSIBLE|znak-PL:ń|fiński",
+    "POSSIBLE|znak-PL:ń|hiszpański",
+    "POSSIBLE|znak-PL:ń|japoński",
+    "POSSIBLE|znak-PL:ń|ukraiński"
+  ],
+  "gui_opowiesci.py": [
+    "POSSIBLE|slowo-PL:wczytaj|/wczytaj",
+    "POSSIBLE|slowo-PL:zapisz|/zapisz",
+    "POSSIBLE|znak-PL:ł|wywoływane tylko gdy _projekt nie None"
+  ],
+  "gui_rezyser.py": [
+    "POSSIBLE|lingua:PL|cr.WynikRekoncyliacji | None"
+  ],
+  "main.py": [
+    "POSSIBLE|znak-PL:ĄąćŁłśż|Aplikacja napotkała nieoczekiwany błąd i może działać niestabilnie. Szczegóły zapisaliśmy w pliku: {…} Pomóż go naprawić",
+    "POSSIBLE|znak-PL:ąłż|Reżyser Audio GPT — błąd / error",
+    "POSSIBLE|znak-PL:Ż|=== REŻYSER AUDIO GPT — CRASH REPORT ==="
+  ],
+  "manager_regul_szablony.py": [
+    "POSSIBLE|lingua:PL|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
+    "POSSIBLE|znak-PL:ĄŁłśźż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
+    "POSSIBLE|znak-PL:ąćęłńśźż|# ============================================================================= # <FILL NATIVELY: file header in {…}, e.",
+    "POSSIBLE|znak-PL:ąłż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
+    "POSSIBLE|znak-PL:ąŻż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
+    "POSSIBLE|znak-PL:ąż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
+    "POSSIBLE|znak-PL:ę|(brak — projekt ma tylko tę paczkę)",
+    "POSSIBLE|znak-PL:ęż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
+    "POSSIBLE|znak-PL:ł|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: AKZENT {…} / AC",
+    "POSSIBLE|znak-PL:ł|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
+    "POSSIBLE|znak-PL:ł|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
+    "POSSIBLE|znak-PL:ł|Nieznany typ reguły: {…}",
+    "POSSIBLE|znak-PL:łś|# ----------------------------------------------------------------------------- # <FILL NATIVELY in {…}: file header, e.",
+    "POSSIBLE|znak-PL:łśż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
+    "POSSIBLE|znak-PL:łśż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi",
+    "POSSIBLE|znak-PL:łż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project (wxPython + Anthropic). You have ",
+    "POSSIBLE|znak-PL:śż|# ROLE You are an AI agent with access to the files of the „Reżyser Audio GPT\" project. You have tools: Read, Write, Edi"
+  ],
+  "opowiesci_ai.py": [
+    "POSSIBLE|lingua:PL|(narracja zsynchronizowana z dysku)",
+    "POSSIBLE|lingua:PL|(streszczenie poprzednich tur)",
+    "POSSIBLE|lingua:PL|[opowiesci_ai] WARN: brak `{…}/opowiesci/{…}.yaml` — fallback do `en/opowiesci/{…}.yaml`. Czy paczka `{…}` jest kompletn",
+    "POSSIBLE|znak-PL:ę|Odkorkuj fiolkę",
+    "POSSIBLE|znak-PL:ś|Brak przepisu opowieści `{…}.yaml` ani w `{…}/opowiesci/` ani w `en/opowiesci/` (fallback). Czy folder dictionaries jest"
+  ],
+  "przepisy_rezysera.py": [
+    "POSSIBLE|znak-PL:ćę|⚠️ przepisy_rezysera: duplikat id={…} w {…} — plik pominięty (id musi być unikalne w paczce)."
+  ],
+  "refresh_languages.py": [
+    "POSSIBLE|lingua:PL|➖ USUWAM (brak folderu/podstawy):",
+    "POSSIBLE|lingua:PL|📁 Na dysku (dictionaries/, poza pl): {…}",
+    "POSSIBLE|znak-PL:ą|📒 W rejestrze przed synchronizacją: {…}",
+    "POSSIBLE|znak-PL:ąćęŁłśŹż|# ============================================================================= # jezyki_docelowe.yaml — rejestr języków",
+    "POSSIBLE|znak-PL:Ę|➕ DODAJĘ:"
+  ],
+  "rezyser_ai.py": [
+    "POSSIBLE|znak-PL:ął|(Błąd – {blad})",
+    "POSSIBLE|znak-PL:Ł|[OBECNA FABUŁA]:",
+    "POSSIBLE|znak-PL:Ń|[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
+    "POSSIBLE|znak-PL:ń|You map a natural-language description of a language (often given in a locative or otherwise inflected form, in any lang"
+  ]
+}

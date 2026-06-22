@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 18.5.3 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 18.5.4 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -79,7 +79,7 @@ Kuinka syöttää avain ohjelmaan:
 Vinkki: Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "Järjestelmän tarkistus" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
 
 
-KROK 3: Pääohjaajan Studio
+VAIHE 3: Pääohjaajan Studio
 
 Tämä on komentokeskuksesi tarinoiden keksimiseen ja käsikirjoitusten kirjoittamiseen. Siirry siihen napsauttamalla "🎬  Ohjaaja" -painiketta painikerivillä tai valitsemalla Työkalut → Ohjaaja valikosta (pikanäppäin: Ctrl+1).
 

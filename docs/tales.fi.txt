@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (18.5.3 – Julkaisuversio)
+Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (18.5.4 – Julkaisuversio)
 
 Toinen sovelluksen päätila Ohjaajan rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly ohjaa kerrontaa yksikön toisessa persoonassa ("Kävelet sumuisen metsän läpi, tunnet märän lehden tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla vapaamuotoisen toiminnon tai valitsemalla yhden numeroiduista vaihtoehdoista.
 
@@ -99,7 +99,7 @@ runtime/opowiesci/<nazwa>.story.jsonl — jokaisen kierroksen raakalogit (pelaaj
 runtime/opowiesci/<nazwa>.mode — tilanumeron metadata (3=Vapaa, 4=Valinnat, 5=Pienempi paha). Versiosta 17.4 alkaen omassa Tarinat-kansiossaan. Aiemmin tiedosto sijaitsi kansiossa runtime/skrypty/ yhdessä Ohjaajan kanssa — kun pelillä ja Ohjaajan projektilla oli sama nimi, toisen moduulin tallennus saattoi hiljaa ylikirjoittaa toisen tilan; nyt nimiavaruudet on eriytetty, ja vanhat tiedostot siirretään kertaluonteisesti pelin latauksen yhteydessä.
 
 
-KROK 7: Mallimuistin ilmaisin — miksi vanhojen pelien vuorot eivät vaadi manuaalista työtäsi
+VAIHE 7: Mallimuistin ilmaisin — miksi vanhojen pelien vuorot eivät vaadi manuaalista työtäsi
 
 Tilatilan RadioBoxin alapuolella löydät mallimuistin ilmaisimen — edistymispalkin (wx.Gauge) ja tilan kuvauksen vieressä. Ilmaisin näyttää narratiivimoottorin kontekstin ikkunan täyttöprosentin (puskuri laskettuna 128 000 tokeniin asti).
 

@@ -372,6 +372,87 @@ def leaki_ui_per_klucz(
 
 
 # ===========================================================================
+# CANON-CHECK — niespójność nazwy modułu w obrębie języka (od v18.5.4)
+# ===========================================================================
+# Domknięcie „Co nie weszło" v18.5.3: detektor PL-leak jest z natury ślepy na
+# niespójność KANONU w obrębie języka docelowego — włoskie „Storie" zamiast
+# kanonicznego „Racconti" (oba włoskie), angielska literówka „Poliglot" zamiast
+# „Polyglot". To nie polski tekst ani kanon innego języka, więc żadna OGÓLNA
+# reguła tego nie wykryje. Jedyne tractable podejście = KURATORSKA mapa znanych
+# form-dryfu → kanon (z `main.nazwy_narzedzi`), skanowana po ui.yaml + docs.
+#
+# Filozofia identyczna jak PL-leak: LEJEK over-reportujący + BASELINE. „Storie"/
+# „Storia" to też zwykłe włoskie słowo (proza „Storia corrente in memoria",
+# „Storia caricata") → te trafienia są FP wchłanianym przez baseline; NOWE
+# „Storie"-jako-moduł (np. w dodanej sekcji) pada na bramce. Mapa jest jawnie
+# wąska (tylko UDOKUMENTOWANE klasy dryfu), bo szeroka „każdy obcy kanon w złym
+# pliku" generowałaby lawinę FP. Nowy język/wariant = dopisanie wpisu tutaj.
+#
+# Canon-check jest WPIĘTY w `zbierz_wszystkie_leaki` (ten sam baseline + bramka co
+# PL-leak), więc `bramka_docs()` — a przez nią `generuj_dokumentacje --waliduj`
+# i `build_release` — pilnują go automatycznie. Powód ma stabilny kształt
+# „canon:<wariant>→<kanon>" (bez floata), więc jest jednoznaczny w baseline.
+DRIFT_VARIANTS: dict[str, dict[str, str]] = {
+    # it: moduł Opowieści — kanon „Racconti" (nazwy_narzedzi.opowiesci). Autotłumacz
+    # historycznie zostawiał „Storie"/„Storia" (= zwykłe włoskie słowo). Proza
+    # („Storia corrente", „Storia '…' caricata") = FP → baseline; NOWE „Storie"-moduł = blok.
+    "it": {"Storie": "Racconti", "Storia": "Racconti"},
+    # en: literówka kanonu „Polyglot" (nazwy_narzedzi.poliglota). „Poliglot" (bez „y")
+    # nie jest ani polski, ani innym kanonem — detektor PL-leak go z natury nie złapie.
+    "en": {"Poliglot": "Polyglot"},
+}
+
+
+def _re_canon(warianty: dict[str, str]) -> re.Pattern[str]:
+    """Buduje case-sensitive regex form-dryfu z granicą liter łacińskich (z diakrytyką).
+
+    Granica `(?<![A-Za-zÀ-ÿ])…(?![A-Za-zÀ-ÿ])` chroni przed trafieniem w wyrazy
+    pochodne: „Storie" NIE złapie się w „Storielle", „Storia" w „Storica".
+    """
+    return re.compile(
+        r"(?<![A-Za-zÀ-ÿ])(?:"
+        + "|".join(re.escape(w) for w in sorted(warianty, key=len, reverse=True))
+        + r")(?![A-Za-zÀ-ÿ])"
+    )
+
+
+def _canon_powody(rx: re.Pattern[str], warianty: dict[str, str], tekst: str) -> list[str]:
+    """Posortowany multiset powodów „canon:<wariant>→<kanon>" dla wszystkich trafień."""
+    return sorted(f"canon:{m.group(0)}→{warianty[m.group(0)]}" for m in rx.finditer(tekst))
+
+
+def leaki_canon_dla_jezyka(kod: str) -> dict[str, list[str]]:
+    """`{"<kod>/<plik>/<klucz>": [powod_canon]}` dla docs+ui — niespójność kanonu nazwy.
+
+    Zwraca {} dla języka spoza `DRIFT_VARIANTS` (brak znanych klas dryfu). Klucze
+    identyczne jak w `zbierz_wszystkie_leaki` (docs: `<plik>/<sekcja>`; ui: `ui.yaml/
+    <kropkowany>`), żeby powody dało się scalić z PL-leakami w jednym kluczu baseline.
+    """
+    warianty = DRIFT_VARIANTS.get(kod)
+    if not warianty:
+        return {}
+    rx = _re_canon(warianty)
+    wynik: dict[str, list[str]] = {}
+    for nazwa_pliku in _szablony_docelowe(kod):
+        for klucz, tresc in _wczytaj_sekcje_docelowe(kod, nazwa_pliku).items():
+            powody = _canon_powody(rx, warianty, tresc)
+            if powody:
+                wynik[f"{kod}/{nazwa_pliku}/{klucz}"] = powody
+    sciezka = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
+    if sciezka.is_file():
+        try:
+            dane = yaml.safe_load(sciezka.read_text(encoding="utf-8"))
+        except (OSError, yaml.YAMLError):
+            dane = None
+        if dane is not None:
+            for klucz, wartosc in _splaszcz_ui(dane).items():
+                powody = _canon_powody(rx, warianty, wartosc)
+                if powody:
+                    wynik[f"{kod}/{NAZWA_UI}/{klucz}"] = powody
+    return wynik
+
+
+# ===========================================================================
 # BRAMKA CI/BUILD — baseline zaakceptowanych leaków (od v18.5.3)
 # ===========================================================================
 # Odłożony z v18.5.2 („Co nie weszło"): wpięcie detektora leaków jako BRAMKA do
@@ -392,6 +473,8 @@ def leaki_ui_per_klucz(
 # baseline (nowy/przesunięty leak). Naprawa starych leaków (ElevenLabs, KROK,
 # ui.yaml) kurczy baseline; regeneracja po LEGALNej zmianie treści: `--zapisz-baseline`.
 BASELINE_PATH = ROOT / "audyt_leakow_baseline.json"
+# Skan źródeł `.py` to INNA powierzchnia (kod, nie tłumaczenia) → własny baseline.
+BASELINE_PY_PATH = ROOT / "audyt_leakow_py_baseline.json"
 
 # Powód lingua niesie ZMIENNY float pewności („lingua:PL 0.98") — normalizujemy
 # go do „lingua:PL", inaczej drobne wahanie modelu rozjeżdżałoby baseline. Inne
@@ -439,20 +522,26 @@ def zbierz_wszystkie_leaki(
         for klucz_ui, leaki in leaki_ui_per_klucz(kod, detektor, prog_lingua=prog_lingua).items():
             klucz = f"{kod}/{NAZWA_UI}/{klucz_ui}"
             wynik[klucz] = sorted(_normalizuj_powod(l.powod) for l in leaki)
+        # (3) Canon-check (od v18.5.4): niespójność kanonu nazwy modułu (it/en).
+        # Scala powody w TEN SAM klucz co PL-leak (jedna wartość mogła mieć oba) —
+        # multiset-różnica w bramce działa wtedy poprawnie na połączonej liście.
+        for klucz, powody in leaki_canon_dla_jezyka(kod).items():
+            wynik[klucz] = sorted(wynik.get(klucz, []) + powody)
     return wynik
 
 
-def wczytaj_baseline() -> dict[str, list[str]]:
-    """Wczytuje `audyt_leakow_baseline.json` (lub {} przy braku/uszkodzeniu).
+def wczytaj_baseline(path: Path = BASELINE_PATH) -> dict[str, list[str]]:
+    """Wczytuje baseline JSON (`path`, domyślnie docs/ui) lub {} przy braku/uszkodzeniu.
 
     Brak pliku traktujemy jako pusty baseline — wtedy KAŻDE trafienie jest „nowe"
     (bramka maksymalnie restrykcyjna). Świadomie: lepiej zablokować build przy
-    zgubionym baseline niż przepuścić leaki po cichu.
+    zgubionym baseline niż przepuścić leaki po cichu. `path` parametryzuje plik,
+    bo skan źródeł `.py` ma WŁASNY baseline (inna powierzchnia, inny plik).
     """
-    if not BASELINE_PATH.is_file():
+    if not path.is_file():
         return {}
     try:
-        dane = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+        dane = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {}
     if not isinstance(dane, dict):
@@ -461,14 +550,14 @@ def wczytaj_baseline() -> dict[str, list[str]]:
     return {k: list(v) for k, v in dane.items() if isinstance(v, list)}
 
 
-def zapisz_baseline(dane: dict[str, list[str]]) -> None:
-    """Zapisuje baseline do `audyt_leakow_baseline.json` (UTF-8, posortowany, LF).
+def zapisz_baseline(dane: dict[str, list[str]], path: Path = BASELINE_PATH) -> None:
+    """Zapisuje baseline do `path` (UTF-8, posortowany, LF).
 
     `sort_keys` + `indent=2` → deterministyczny, czytelny w diffie plik. `ensure_ascii
     =False` → polskie znaki w powodach (znak-PL:ćś) zostają czytelne, nie `\\uXXXX`.
     """
     tresc = json.dumps(dane, ensure_ascii=False, indent=2, sort_keys=True)
-    BASELINE_PATH.write_text(tresc + "\n", encoding="utf-8")
+    path.write_text(tresc + "\n", encoding="utf-8")
 
 
 def roznica_wzgledem_baseline(
@@ -560,7 +649,10 @@ SINKI_POSTEP = {"on_postep", "on_status", "_update_progress_label"}
 KWARG_LLM = {"content", "system"}
 KLUCZE_DICT_LLM = {"role", "content"}
 # Funkcje, których string-arg NIE jest user-facing PL (i18n-klucz / dev-log).
-FUNC_POMIJANE = {"t", "_", "_dev_log_runtime"}
+# `_dev_log` (core_llm/rezyser_ai) i `_dev_log_runtime` (core_rezyser) to strażowane
+# dev-printy na stdout dewelopera (w paczce release stdout=None → milczą) — PL tekst
+# tam jest świadomy i poprawny, jak w dev-toolach.
+FUNC_POMIJANE = {"t", "_", "_dev_log_runtime", "_dev_log"}
 # Kwargi przenoszące KLUCZ i18n / techniczny detal — nie treść user-facing.
 KWARG_POMIJANE = {"detal", "klucz_i18n", "klucz_tytul", "klucz"}
 
@@ -764,6 +856,48 @@ def skanuj_zrodla_py(root: Path = ROOT) -> list[LeakPy]:
 
 
 # ---------------------------------------------------------------------------
+# BRAMKA `.py` — baseline zaakceptowanych hard-kodów (od v18.5.4)
+# ---------------------------------------------------------------------------
+# Skan `.py` to LEJEK over-reportujący (jak docs/ui): na czystym drzewie ~92
+# trafienia POSSIBLE, w 100% triaged jako by-design (wyjątki-inwarianty, regexy
+# wielojęzyczne, stałe alfabetu, dev-printy, prompty-szablony Managera, fallbacki
+# recipe YAML, sentinele, tagi-kotwice payloadu). Surowy lejek jako twarda bramka
+# blokowałby każdy build, więc — ten sam wzorzec BASELINE co PL-leak: snapshot
+# zaakceptowanych trafień w `audyt_leakow_py_baseline.json`, bramka pada TYLKO na
+# nadwyżkę (nowy hard-kod, zwł. KAŻDE LIKELY = string do sinka user/LLM-facing).
+def zbierz_leaki_py(root: Path = ROOT) -> dict[str, list[str]]:
+    """Zbiera skan `.py` jako `{"<plik>": ["<poziom>|<powod_norm>|<tekst>", ...]}`.
+
+    Klucz = nazwa pliku (STABILNA — bez numeru linii, odporna na przesunięcia).
+    Wartość = posortowany multiset wpisów kodujących poziom + znormalizowany powód
+    + treść literału; treść w powodzie rozróżnia różne hard-kody w jednym pliku.
+    Float pewności lingua znormalizowany (`_normalizuj_powod`), inaczej drobne
+    wahanie modelu rozjeżdżałoby baseline. Rzuca `ImportError` bez `lingua`
+    (wołający `bramka_py` łapie i degraduje łagodnie).
+    """
+    wynik: dict[str, list[str]] = {}
+    for l in skanuj_zrodla_py(root):
+        wpis = f"{l.poziom}|{_normalizuj_powod(l.powod)}|{l.tekst}"
+        wynik.setdefault(l.plik, []).append(wpis)
+    return {k: sorted(v) for k, v in wynik.items()}
+
+
+def bramka_py() -> WynikBramki:
+    """Bramka skanu źródeł `.py` względem `audyt_leakow_py_baseline.json`.
+
+    Łagodna degradacja bez `lingua` (jak `bramka_docs`): zwraca `pominieto=True,
+    czysto=True` — nie blokuje kontrybutora bez pełnego dev-env. `nowe` to wpisy
+    PONAD baseline (nowy hard-kod / przesunięty poziom-powód-tekst).
+    """
+    try:
+        aktualne = zbierz_leaki_py()
+    except ImportError as exc:
+        return WynikBramki(True, {}, True, f"lingua not available ({exc})")
+    nowe = roznica_wzgledem_baseline(aktualne, wczytaj_baseline(BASELINE_PY_PATH))
+    return WynikBramki(not nowe, nowe, False, "")
+
+
+# ---------------------------------------------------------------------------
 # CLI — mapa audytu (bez API)
 # ---------------------------------------------------------------------------
 def _szablony_docelowe(kod: str) -> list[str]:
@@ -824,6 +958,13 @@ def main() -> int:
                        help="Regeneruj baseline z bieżących trafień (po LEGALnej "
                             "zmianie treści docs). Nadpisuje "
                             f"{BASELINE_PATH.name} — zrób review diffa przed commitem.")
+    grupa.add_argument("--bramka-py", dest="bramka_py", action="store_true",
+                       help="BRAMKA CI/build dla źródeł `.py` vs baseline "
+                            f"({BASELINE_PY_PATH.name}). Exit 1 przy hard-kodzie "
+                            "ponad baseline (nowy / zwł. LIKELY).")
+    grupa.add_argument("--zapisz-baseline-py", dest="zapisz_baseline_py", action="store_true",
+                       help="Regeneruj baseline `.py` z bieżącego skanu źródeł. "
+                            f"Nadpisuje {BASELINE_PY_PATH.name} — review diffa przed commitem.")
     parser.add_argument("--szczegoly", action="store_true",
                         help="Wypisz każdą linię-leak (domyślnie: licznik per sekcja).")
     parser.add_argument("--prog", type=float, default=0.70,
@@ -832,6 +973,40 @@ def main() -> int:
 
     if args.py:
         return _main_py()
+
+    if args.zapisz_baseline_py:
+        try:
+            aktualne = zbierz_leaki_py()
+        except ImportError as exc:
+            print(f"❌ Nie można zbudować baseline `.py` — brak `lingua` ({exc}).")
+            return 2
+        zapisz_baseline(aktualne, BASELINE_PY_PATH)
+        ile = sum(len(v) for v in aktualne.values())
+        print(f"✅ Zapisano baseline `.py`: {ile} trafień w {len(aktualne)} plik(ach) → "
+              f"{BASELINE_PY_PATH.name}. Zrób review diffa przed commitem.")
+        return 0
+
+    if args.bramka_py:
+        wynik = bramka_py()
+        print("========== BRAMKA HARD-KODU `.py` (vs baseline) ==========")
+        if wynik.pominieto:
+            print(f"⚠️  Bramka pominięta: {wynik.powod_pominiecia}. "
+                  "Instaluj `lingua`, by ją uruchomić (maintainer/CI).")
+            return 0
+        if wynik.czysto:
+            print(f"✅ Brak hard-kodów ponad baseline ({BASELINE_PY_PATH.name}).")
+            return 0
+        ile = sum(len(v) for v in wynik.nowe.values())
+        print(f"❌ {ile} hard-kod(ów) PONAD baseline w {len(wynik.nowe)} plik(ach) "
+              "(nowy lub przesunięty):")
+        for klucz, powody in sorted(wynik.nowe.items()):
+            for p in powody:
+                print(f"  • {klucz}: {p}")
+        print("Fix: przenieś string do i18n (`t()`) / przepisu YAML. Jeśli to ŚWIADOMY, "
+              f"by-design hard-kod — zregeneruj baseline: `python {Path(__file__).name} "
+              "--zapisz-baseline-py` i zcommituj diff.")
+        print("==========================================================")
+        return 1
 
     if args.zapisz_baseline:
         try:

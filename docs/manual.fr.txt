@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 18.5.3 – Version de Lancement)
+Manuel du Réalisateur Audio AI - Guide complet (Version 18.5.4 – Version de Lancement)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -98,7 +98,7 @@ Comment saisir la clé dans le programme :
 Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera le statut de la clé dans la section "Vérification du Système". Il doit être vert pour que tous les modules IA soient prêts à fonctionner. Si la clé est absente ou incorrecte, le programme l'indiquera clairement et vous permettra d'ouvrir l'éditeur de texte pour corriger rapidement l'erreur.
 
 
-KROK 3 : Studio Principal de Réalisation
+ÉTAPE 3 : Studio Principal de Réalisation
 
 C'est votre centre de commande pour imaginer des histoires et écrire des scénarios. Accédez-y en cliquant sur le bouton "🎬  Réalisateur" dans la barre d'outils ou en sélectionnant Outils → Réalisateur dans le menu (raccourci : Ctrl+1).
 

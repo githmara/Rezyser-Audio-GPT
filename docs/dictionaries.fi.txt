@@ -202,7 +202,7 @@ mallin kanssa, joka johtaa kanssasi dynaamisen tarinan sessiota:
 - cinematic_warning.yaml — varoitukset väkivaltaisista/dramaattisista
                            kohtauksista (pelaajan mieltymysten mukainen)
 
-Kuten Ohjaajan tilassa, jokainen tiedosto sisältää muokattavan "järjestelmäkehotteet".
+Kuten Ohjaajan tilassa, jokainen tiedosto sisältää muokattavan "järjestelmäkehotteen".
 Voit hienosäätää kertojan tyyliä (esim. vähemmän koristeellinen), muuttaa vuoron
 pituutta tai lisätä omia tarinallisia direktiivejä. V18.1:stä lähtien kaikki
 Tarina-tilat käyttävät yhtä yhteistä mallia (oletuksena ja suositeltuna

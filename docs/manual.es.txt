@@ -1,4 +1,4 @@
-Manual del Director de Audio AI - Guía Completa (Versión 18.5.3 – Versión de Lanzamiento)
+Manual del Director de Audio AI - Guía Completa (Versión 18.5.4 – Versión de Lanzamiento)
 
 ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 

@@ -92,7 +92,7 @@ tresc:
 
     Vinkki: Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "{home.heading_system_check}" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
   krok_3_glowne_studio: |
-    KROK 3: Pääohjaajan Studio
+    VAIHE 3: Pääohjaajan Studio
 
     Tämä on komentokeskuksesi tarinoiden keksimiseen ja käsikirjoitusten kirjoittamiseen. Siirry siihen napsauttamalla "{main.btn.rezyser}" -painiketta painikerivillä tai valitsemalla Työkalut → {main.menu.rezyser} valikosta (pikanäppäin: Ctrl+1).
 

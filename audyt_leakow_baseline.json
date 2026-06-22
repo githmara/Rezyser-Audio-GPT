@@ -103,9 +103,6 @@
     "znak-PL:ćś",
     "znak-PL:źż"
   ],
-  "fi/manual.yaml/krok_3_glowne_studio": [
-    "termin:KROK"
-  ],
   "fi/manual.yaml/krok_3b_most_elevenlabs": [
     "znak-PL:ęń",
     "znak-PL:ł",
@@ -120,9 +117,6 @@
   ],
   "fi/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
-  ],
-  "fi/tales.yaml/krok_7_pamiec_modelu": [
-    "termin:KROK"
   ],
   "fi/ui.yaml/manager.typ.postprodukcja.opis": [
     "lingua:PL"
@@ -139,9 +133,6 @@
   "fr/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
-  ],
-  "fr/manual.yaml/krok_3_glowne_studio": [
-    "termin:KROK"
   ],
   "fr/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę"
@@ -168,9 +159,6 @@
     "znak-PL:ćś",
     "znak-PL:źż"
   ],
-  "is/manual.yaml/krok_3_glowne_studio": [
-    "termin:KROK"
-  ],
   "is/manual.yaml/krok_3b_most_elevenlabs": [
     "znak-PL:ń"
   ],
@@ -183,9 +171,6 @@
   ],
   "is/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
-  ],
-  "is/tales.yaml/krok_7_pamiec_modelu": [
-    "termin:KROK"
   ],
   "is/ui.yaml/manager.uwagi.postprodukcja": [
     "znak-PL:ł"
@@ -237,6 +222,15 @@
   "it/ui.yaml/opowiesci.komenda_odswiez_zablokowana_hint": [
     "lingua:PL"
   ],
+  "it/ui.yaml/opowiesci.txt_narracja_tooltip": [
+    "canon:Storia→Racconti"
+  ],
+  "it/ui.yaml/rezyser.lbl_podglad_historii": [
+    "canon:Storia→Racconti"
+  ],
+  "it/ui.yaml/rezyser.status_wczytano_historia": [
+    "canon:Storia→Racconti"
+  ],
   "ru/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
   ],
@@ -255,7 +249,6 @@
     "znak-PL:ł"
   ],
   "ru/readme.yaml/architektura_ai": [
-    "termin:KROK",
     "znak-PL:łś",
     "znak-PL:ś"
   ],
