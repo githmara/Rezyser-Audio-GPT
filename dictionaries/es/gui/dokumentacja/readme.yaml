@@ -36,14 +36,14 @@ tresc:
     * **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
     * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
   modul_opowiesci: |
-    ### 2. Opowieści (Ctrl+2, segundo modo principal desde v15.0)
+    ### 2. Historias (Ctrl+2, segundo modo principal desde v15.0)
 
-    Juegos de texto interactivos dirigidos por IA en el rol de motor narrativo. A diferencia de la Reżyseria (donde generas un audiolibro terminado), Opowieści es una trama dinámica por turnos:
+    Juegos de texto interactivos dirigidos por IA en el rol de motor narrativo. A diferencia del Director (donde generas un audiolibro terminado), Historias es una trama dinámica por turnos:
 
     * **Modo Elecciones:** cada turno termina con 3-5 opciones numeradas A-E. El modo más intuitivo para jugadores ciegos — NVDA lee las opciones, pulsas Tab e Intro.
     * **Modo Mal Menor:** como Elecciones, pero cada opción es desfavorable moral, física o estratégicamente. Desde v15.2 se añade una «fiolka» adicional — una opción CERO reutilizable de rescate desesperado, cuyos efectos son pseudoaleatorios (60% perjudiciales / 30% que alteran la percepción / 10% raramente beneficiosos, distribución forzada por Python, el LLM no tiene forma de inventar un efecto salvador).
     * **Modo Libre:** cualquier acción en texto libre («intentaré abrir la puerta»), el motor propone 1-3 sugerencias pero no impone ninguna elección.
-    * **Un único modelo de IA para todos los modos:** desde v18.1 todos los modos de Opowieści utilizan el mismo modelo compartido (por defecto y recomendado: Anthropic Claude Sonnet 4.6) — un modelo más potente se ciñe rigurosamente a las reglas del mundo (especialmente importante en el modo Mal Menor, donde cada opción debe ser genuinamente desfavorable).
+    * **Un único modelo de IA para todos los modos:** desde v18.1 todos los modos de Historias utilizan el mismo modelo compartido (por defecto y recomendado: Anthropic Claude Sonnet 4.6) — un modelo más potente se ciñe rigurosamente a las reglas del mundo (especialmente importante en el modo Mal Menor, donde cada opción debe ser genuinamente desfavorable).
   modul_poliglota: |
     ### 3. Políglota (Ctrl+3, Traductor AI + Acentos TTS)
 
@@ -73,9 +73,9 @@ tresc:
   architektura_ai: |
     ## Arquitectura de IA y modelos utilizados
 
-    El proveedor de IA recomendado y predeterminado es Anthropic (Claude) — todos los prompts del sistema están ajustados para él, por lo que ofrece la mayor calidad narrativa, el mejor respeto a las reglas del mundo y la prosa más natural. La consolidación en Claude se realizó por etapas (Reżyser en v18.0, Opowieści en v18.1, Poliglota y posproducción en v18.2) — resultado de una ventaja empíricamente confirmada en el respeto a las reglas del mundo, la naturalidad de la prosa y la evitación de clichés.
+    El proveedor de IA recomendado y predeterminado es Anthropic (Claude) — todos los prompts del sistema están ajustados para él, por lo que ofrece la mayor calidad narrativa, el mejor respeto a las reglas del mundo y la prosa más natural. La consolidación en Claude se realizó por etapas (Director en v18.0, Historias en v18.1, Políglota y posproducción en v18.2) — resultado de una ventaja empíricamente confirmada en el respeto a las reglas del mundo, la naturalidad de la prosa y la evitación de clichés.
 
-    * **Anthropic Claude Sonnet 4.6 (pilar de calidad predeterminado):** Motor de TODA la inteligencia de la aplicación. Responsable de la narrativa creativa (dirección de guiones, escritura de prosa tradicional de Audiolibro, Lluvia de Ideas y TODOS los modos de Opowieści — Elecciones, Mal Menor, Libre — junto con la generación de resúmenes e interludios Cinematic), traducciones avanzadas con preservación del contexto multibloques (Poliglota), así como microtareas: asignación iterativa de títulos literarios a capítulos y detección del código de idioma del contenido.
+    * **Anthropic Claude Sonnet 4.6 (pilar de calidad predeterminado):** Motor de TODA la inteligencia de la aplicación. Responsable de la narrativa creativa (dirección de guiones, escritura de prosa tradicional de Audiolibro, Lluvia de Ideas y TODOS los modos de Historias — Elecciones, Mal Menor, Libre — junto con la generación de resúmenes e interludios Cinematic), traducciones avanzadas con preservación del contexto multibloques (Políglota), así como microtareas: asignación iterativa de títulos literarios a capítulos y detección del código de idioma del contenido.
 
     * **Endpoint propio compatible con OpenAI (opción avanzada, desde v18.4):** En lugar de Anthropic, se puede indicar cualquier endpoint compatible con la API de OpenAI (OpenRouter, Groq, Fireworks, DeepSeek, Ollama local, Gemini compatible con OpenAI y otros) — mediante una única ruta de código compartida, sin integración separada por proveedor. Configuración en el archivo `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); instrucciones completas en el manual principal (PASO 2B). Otros modelos pueden ofrecer menor calidad que Claude, para el cual están ajustados los prompts — es una elección consciente de coste↔calidad por parte del usuario.
   ograniczenia_modeli: |

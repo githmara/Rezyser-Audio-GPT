@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **18.5.1** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.5.2** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -66,9 +66,9 @@ Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.txt`) und die meisten Sys
 
 ## KI-Architektur und verwendete Modelle
 
-Der empfohlene und standardmäßige KI-Anbieter ist Anthropic (Claude) — alle Systemprompts sind auf ihn abgestimmt, weshalb er die höchste Narrationsqualität, die beste Einhaltung der Weltregeln und die natürlichste Prosa liefert. Die Konsolidierung auf Claude erfolgte schrittweise (Reżyser in v18.0, Opowieści in v18.1, Poliglota und Postproduktion in v18.2) — sie resultierte aus empirisch bestätigter Überlegenheit bei der Einhaltung von Weltregeln, der Natürlichkeit der Prosa und der Vermeidung von Klischees.
+Der empfohlene und standardmäßige KI-Anbieter ist Anthropic (Claude) — alle Systemprompts sind auf ihn abgestimmt, weshalb er die höchste Narrationsqualität, die beste Einhaltung der Weltregeln und die natürlichste Prosa liefert. Die Konsolidierung auf Claude erfolgte schrittweise (Regisseur in v18.0, Geschichten in v18.1, Polyglott und Postproduktion in v18.2) — sie resultierte aus empirisch bestätigter Überlegenheit bei der Einhaltung von Weltregeln, der Natürlichkeit der Prosa und der Vermeidung von Klischees.
 
-* **Anthropic Claude Sonnet 4.6 (standardmäßiger Qualitätspfeiler):** Die Engine der GESAMTEN Intelligenz der Anwendung. Verantwortlich für kreative Narration (Regie von Skripten, Verfassen traditioneller Hörbuch-Prosa, Brainstorming sowie ALLE Opowieści-Modi — Wybory, Mniejsze Zło, Swobodny — einschließlich der Generierung von Zusammenfassungen und Cinematic-Zwischensequenzen), erweiterte Übersetzungen unter Beibehaltung des Mehrblock-Kontexts (Poliglota) sowie Mikroaufgaben: iteratives Vergeben literarischer Kapiteltitel und Erkennung des Sprachcodes des Inhalts.
+* **Anthropic Claude Sonnet 4.6 (standardmäßiger Qualitätspfeiler):** Die Engine der GESAMTEN Intelligenz der Anwendung. Verantwortlich für kreative Narration (Regie von Skripten, Verfassen traditioneller Hörbuch-Prosa, Brainstorming sowie ALLE Geschichten-Modi — Auswahl, Das kleinere Übel, Frei — einschließlich der Generierung von Zusammenfassungen und Cinematic-Zwischensequenzen), erweiterte Übersetzungen unter Beibehaltung des Mehrblock-Kontexts (Polyglott) sowie Mikroaufgaben: iteratives Vergeben literarischer Kapiteltitel und Erkennung des Sprachcodes des Inhalts.
 
 * **Eigener OpenAI-kompatibler Endpunkt (erweiterte Option, ab v18.4):** Anstelle von Anthropic kann ein beliebiger Endpunkt angegeben werden, der mit der OpenAI-API kompatibel ist (OpenRouter, Groq, Fireworks, DeepSeek, lokales Ollama, OpenAI-kompatibles Gemini und andere) — über einen einzigen, gemeinsamen Codepfad, ohne separate Integration pro Anbieter. Konfiguration in der Datei `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); vollständige Anleitung im Haupthandbuch (SCHRITT 2B). Andere Modelle können eine geringere Qualität als Claude liefern, auf den die Prompts abgestimmt sind — dies ist eine bewusste Kosten↔Qualitäts-Entscheidung auf Seiten des Benutzers.
 

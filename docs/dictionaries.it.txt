@@ -136,13 +136,13 @@ salvarli e l'applicazione al prossimo avvio caricherà la tua versione.
 Zero programmazione.
 
 
-Cos'è la "modalità Storie"?
+Cos'è la "modalità Racconti"?
 ----------------------------
 
 La cartella "opowiesci/" contiene 8 file che descrivono la seconda
 modalità principale dell'applicazione — giochi di testo interattivi condotti dall'AI nel ruolo
 di motore narrativo. A differenza della modalità Regista (dove generi un audiolibro PRONTO
-da riprodurre in TTS), la modalità Storie è una conversazione turno per turno
+da riprodurre in TTS), la modalità Racconti è una conversazione turno per turno
 con il modello, che conduce con te una sessione di trama dinamica:
 
 - tryb_wyborow.yaml      — Scelte (3-5 opzioni numerate A-E alla fine
@@ -166,7 +166,7 @@ con il modello, che conduce con te una sessione di trama dinamica:
 
 Come nella modalità Regista, ogni file contiene un "prompt di sistema" modificabile.
 Puoi regolare lo stile del narratore (ad es. meno fiorito), cambiare la lunghezza
-del turno, aggiungere le tue direttive narrative. Dalla v18.1 tutte le modalità Storie
+del turno, aggiungere le tue direttive narrative. Dalla v18.1 tutte le modalità Racconti
 utilizzano un unico modello condiviso (di default e consigliato Anthropic
 Claude Sonnet 4.6) — un modello più potente rispetta rigorosamente le regole del mondo
 (fondamentale nella modalità Il male minore, dove ogni opzione deve essere realmente svantaggiosa).

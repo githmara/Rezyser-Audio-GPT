@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **18.5.1** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **18.5.2** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -24,14 +24,14 @@ Päästudio kuunnelmien ja äänikirjojen kirjoittamiseen. Valitset tilan — Ai
 * **4 luovat tilat:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja, Otsikoiden Jälkituotanto). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
 
 
-### 2. Opowiesci (Ctrl+2, toinen päätila versiosta v15.0 alkaen)
+### 2. Tarinat (Ctrl+2, toinen päätila versiosta v15.0 alkaen)
 
-Interaktiiviset tekstipelit, joita tekoäly ohjaa narratiivisena moottorina. Toisin kuin Reżyserissä (jossa luot valmiin äänikirjan), Opowiesci on vuoro vuorolta etenevä dynaaminen tarina:
+Interaktiiviset tekstipelit, joita tekoäly ohjaa narratiivisena moottorina. Toisin kuin Ohjaajan tilassa (jossa luot valmiin äänikirjan), Tarina-tila on vuoro vuorolta etenevä dynaaminen tarina:
 
 * **Valintatila:** jokainen vuoro päättyy 3–5 numeroituun vaihtoehtoon A–E. Intuitiivisin tila näkövammaisille pelaajille — NVDA lukee vaihtoehdot, painat Tab ja Enter.
 * **Pienempi paha -tila:** kuten Valintatila, mutta jokainen vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäedullinen. Versiosta v15.2 alkaen lisänä "ampulli" — uudelleenkäytettävä NOLLA-numeroitu epätoivoisen pelastuksen vaihtoehto, jonka vaikutukset ovat pseudosatunnaisia (60% haitallisia / 30% havaintoa häiritseviä / 10% harvoin hyödyllisiä, jakauma pakotetaan Pythonilla, LLM ei voi keksiä pelastavia vaikutuksia).
 * **Vapaa tila:** mikä tahansa toiminto vapaana tekstinä ("yritän avata oven"), moottori ehdottaa 1–3 vaihtoehtoa mutta ei pakota valintaa.
-* **Yksi tekoälymalli kaikille tiloille:** versiosta v18.1 alkaen kaikki Opowiesci-tilat käyttävät samaa yhteistä mallia (oletuksena ja suositeltuna Anthropic Claude Sonnet 4.6) — tehokkaampi malli noudattaa tiukasti maailman sääntöjä (erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on oltava aidosti epäedullinen).
+* **Yksi tekoälymalli kaikille tiloille:** versiosta v18.1 alkaen kaikki Tarina-tilat käyttävät samaa yhteistä mallia (oletuksena ja suositeltuna Anthropic Claude Sonnet 4.6) — tehokkaampi malli noudattaa tiukasti maailman sääntöjä (erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on oltava aidosti epäedullinen).
 
 
 ### 3. Polyglot (Ctrl+3, AI-kääntäjä + TTS-aksentit)
@@ -47,7 +47,7 @@ Interaktiiviset tekstipelit, joita tekoäly ohjaa narratiivisena moottorina. Toi
 
 * Käsittelee raakoja `.txt` tai `.docx` tiedostoja NVDA:n ja sellaisten järjestelmien kuin ElevenLabs näppäimistönavigointia varten.
 * Muuntaa automaattisesti avainsanat (Näytös, Luku, Prologi) Word-dokumentin "Heading 1" -otsikoiksi ja puhdistaa tarpeettomat HTML-tagit ja Markdown-merkinnät.
-* Versiosta 15.1 alkaen ryhmittelee 5 kierrosta kohtauksiin H1-otsikoilla (Tarinoiden automaattinen tunnistus) — valmistelee Tarinatilan luoman tiedoston perinteistä äänikirjajulkaisua varten.
+* Versiosta 15.1 alkaen ryhmittelee 5 kierrosta kohtauksiin H1-otsikoilla (Tarinoiden automaattinen tunnistus) — valmistelee Tarina-tilan luoman tiedoston perinteistä äänikirjajulkaisua varten.
 
 
 ### 5. Sääntöjen Hallinta (Ctrl+5, uutta v13.0 alkaen)
@@ -66,9 +66,9 @@ Koko käyttöliittymä, dokumentaatio (`docs/manual.<iso>.txt`) ja suurin osa j�
 
 ## AI-arkkitehtuuri ja käytetyt mallit
 
-Suositeltava ja oletusarvoinen AI-toimittaja on Anthropic (Claude) — kaikki järjestelmäpromptit on viritetty sitä varten, joten se tuottaa parhaan narratiivin laadun, parhaan maailman sääntöjen noudattamisen ja luonnollisimman proosan. Konsolidointi Claudeen tapahtui vaiheittain (Reżyser versiossa v18.0, Opowieści versiossa v18.1, Poliglota ja jälkituotanto versiossa v18.2) — se perustui empiirisesti vahvistettuun ylivoimaisuuteen maailman sääntöjen noudattamisessa, proosan luonnollisuudessa ja kliseiden välttämisessä.
+Suositeltava ja oletusarvoinen AI-toimittaja on Anthropic (Claude) — kaikki järjestelmäpromptit on viritetty sitä varten, joten se tuottaa parhaan narratiivin laadun, parhaan maailman sääntöjen noudattamisen ja luonnollisimman proosan. Konsolidointi Claudeen tapahtui vaiheittain (Ohjaaja versiossa v18.0, Tarinat versiossa v18.1, Polyglootti ja jälkituotanto versiossa v18.2) — se perustui empiirisesti vahvistettuun ylivoimaisuuteen maailman sääntöjen noudattamisessa, proosan luonnollisuudessa ja kliseiden välttämisessä.
 
-* **Anthropic Claude Sonnet 4.6 (oletusarvoinen laadun peruspilari):** Sovelluksen KAIKEN älykkyyden moottori. Vastaa luovasta narratiivista (skriptien ohjaamisesta, perinteisen Äänikirjaproosan kirjoittamisesta, Aivoriihistä sekä KAIKISTA Opowieści-tiloista — Valinnoista, Pienemmästä Pahasta, Vapaasta — sekä yhteenvetojen ja Cinematic-välikohtausten luomisesta), edistyneistä käännöksistä monilohkoisen kontekstin säilyttämisellä (Poliglota) sekä mikrotehtävistä: lukujen kirjallisten otsikoiden iteratiivisesta luomisesta ja sisällön kielikoodin tunnistamisesta.
+* **Anthropic Claude Sonnet 4.6 (oletusarvoinen laadun peruspilari):** Sovelluksen KAIKEN älykkyyden moottori. Vastaa luovasta narratiivista (skriptien ohjaamisesta, perinteisen Äänikirjaproosan kirjoittamisesta, Aivoriihistä sekä KAIKISTA Tarina-tiloista — Valinnoista, Pienemmästä Pahasta, Vapaasta — sekä yhteenvetojen ja Cinematic-välikohtausten luomisesta), edistyneistä käännöksistä monilohkoisen kontekstin säilyttämisellä (Polyglootti) sekä mikrotehtävistä: lukujen kirjallisten otsikoiden iteratiivisesta luomisesta ja sisällön kielikoodin tunnistamisesta.
 
 * **Oma OpenAI-yhteensopiva endpoint (edistynyt vaihtoehto, versiosta v18.4):** Anthropicin sijaan voidaan osoittaa mikä tahansa OpenAI API -yhteensopiva endpoint (OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama, OpenAI-yhteensopiva Gemini ja muut) — yhdellä yhteisellä koodipolulla, ilman erillistä integraatiota toimittajakohtaisesti. Konfigurointi tiedostossa `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); täydelliset ohjeet pääkäsikirjassa (VAIHE 2B). Muut mallit voivat tuottaa heikompaa laatua kuin Claude, jolle promptit on viritetty — tämä on käyttäjän tietoinen kustannus↔laatu-valinta.
 

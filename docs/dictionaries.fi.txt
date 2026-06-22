@@ -171,13 +171,13 @@ tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla
 käynnistyksellä sinun version. Ei ohjelmointia.
 
 
-Co to jest "tryb Opowieści"?
-----------------------------
+Mikä on "Tarina-tila"?
+----------------------
 
 Kansio "opowiesci/" sisältää 8 tiedostoa, jotka kuvaavat sovelluksen toista
 päätilaa — tekoälyn ohjaamia interaktiivisia tekstipelejä, joissa tekoäly toimii
 narratiivisena moottorina. Toisin kuin Ohjaajan tilassa (jossa luot VALMIIN
-äänikirjan TTS-toistoa varten), Tarinan tila on vuoropohjainen keskustelu
+äänikirjan TTS-toistoa varten), Tarina-tila on vuoropohjainen keskustelu
 mallin kanssa, joka johtaa kanssasi dynaamisen tarinan sessiota:
 
 - tryb_wyborow.yaml      — Valinnat (3–5 numeroitua vaihtoehtoa A–E jokaisen
@@ -205,7 +205,7 @@ mallin kanssa, joka johtaa kanssasi dynaamisen tarinan sessiota:
 Kuten Ohjaajan tilassa, jokainen tiedosto sisältää muokattavan "järjestelmäkehotteet".
 Voit hienosäätää kertojan tyyliä (esim. vähemmän koristeellinen), muuttaa vuoron
 pituutta tai lisätä omia tarinallisia direktiivejä. V18.1:stä lähtien kaikki
-Tarinan tilat käyttävät yhtä yhteistä mallia (oletuksena ja suositeltuna
+Tarina-tilat käyttävät yhtä yhteistä mallia (oletuksena ja suositeltuna
 Anthropic Claude Sonnet 4.6) — tehokkaampi malli noudattaa tiukasti maailman
 sääntöjä (keskeistä Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on
 oltava aidosti epäedullinen).

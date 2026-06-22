@@ -1,4 +1,4 @@
-Audio AI Regisseur Handbuch - Komplettanleitung (Version 18.5.1 – Release-Version)
+Audio AI Regisseur Handbuch - Komplettanleitung (Version 18.5.2 – Release-Version)
 
 Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.
 
@@ -64,7 +64,7 @@ SCHRITT 2: API-Versorgung (empfohlener Anthropic / Claude-Schlüssel)
 
 Der empfohlene und standardmäßige KI-Anbieter ist Anthropic (Claude) — alle Prompts der Anwendung sind auf ihn abgestimmt, sodass er die höchste Erzählqualität und die beste Einhaltung der Weltregeln bietet. Bei dieser (empfohlenen) Variante genügt EIN API-Schlüssel in der Datei golden_key.env:
 
-•  Anthropic-Schlüssel (Claude) — versorgt die GESAMTE KI-Engine: die Narration des Reżysers (Hörbuch, Lesebühne, Brainstorming), den Opowieści-Modus, den Poliglota (Übersetzer) sowie die Vergabe von Kapiteltiteln und die Erkennung der Inhaltssprache. Beginnt mit sk-ant-.
+•  Anthropic-Schlüssel (Claude) — versorgt die GESAMTE KI-Engine: die Narration des Regisseurs (Hörbuch, Lesebühne, Brainstorming), den Geschichten-Modus, den Polyglott (Übersetzer) sowie die Vergabe von Kapiteltiteln und die Erkennung der Inhaltssprache. Beginnt mit sk-ant-.
 
 Falls Sie von einer älteren Version aktualisieren: Der frühere OpenAI-Schlüssel wird für die Standardvariante nicht mehr benötigt — Sie können seine Zeile in golden_key.env belassen oder löschen, die Anwendung ignoriert sie (es sei denn, Sie konfigurieren bewusst einen anderen Anbieter — siehe SCHRITT 2B weiter unten).
 
@@ -209,7 +209,7 @@ ElevenLabs-Schlüssel (optional)
 
 Füge deinen ElevenLabs-Schlüssel in die Datei golden_key.env ein, in einer eigenen Zeile: ELEVENLABS_API_KEY=sk_... Hinweis: Der ElevenLabs-Schlüssel beginnt mit sk_ (mit UNTERSTRICH), anders als der Anthropic-Schlüssel (sk-ant-). Wenn du einen eingeschränkten Schlüssel (Restricted Key) verwendest, weise ihm die Berechtigungen (Scopes) projects_write sowie voices_read zu. Der Status des Schlüssels ist auf dem Hauptbildschirm (System Check) sichtbar — ein fehlender Schlüssel ist kein Fehler, die Brücke bleibt einfach verborgen.
 
-Die Brücke erscheint im Reżyser-Panel im Skript-Modus (wenn der Schlüssel korrekt ist). Sie arbeitet mit einem fertigen, auf der Festplatte gespeicherten Stück — generiere oder lade zuerst das Projekt, dann wechsle zur Brücke.
+Die Brücke erscheint im Regisseur-Panel im Skript-Modus (wenn der Schlüssel korrekt ist). Sie arbeitet mit einem fertigen, auf der Festplatte gespeicherten Stück — generiere oder lade zuerst das Projekt, dann wechsle zur Brücke.
 
 Schritt 1 — Stimmbesetzung
 
@@ -227,7 +227,7 @@ Nach dem Erstellen des Projekts zeigt die Anwendung dessen Kennung sowie eine Sc
 
 Ausdruck und Akzente (Modell Eleven v3)
 
-Das Projekt wird auf dem Modell Eleven v3 erstellt (über 70 Sprachen). Emotionen werden NICHT durch Großbuchstaben, Auslassungspunkte oder Gedankenstriche ausgedrückt — die Engine ignoriert das. Stattdessen fügt der Reżyser in die Äußerungen englische Audio-Tags v3 ein, zum Beispiel [whispers], [sighs], [angry], [laughs] — diese steuern den Ausdruck und funktionieren unabhängig von der Sprache der Rede. Der AKZENT einer Figur ergibt sich hingegen aus der STIMMPROBE: Wenn jemand z. B. Polnisch mit einem fremden Akzent sprechen soll, wähle oder entwirf in Voice Design eine Stimme, deren Probe diesen Akzent hat. Experimentiere in der Praxis mit dem Stimm-Prompt, bis du z. B. eine polnische Probe mit finnischem Akzent hörst — das Modell v3 behält diesen Akzent in der fertigen Aufnahme bei. Hinweis: Sehr lange Sätze schwächen den Akzent ab, daher wird der Reżyser im Prompt bereits um kurze Sätze gebeten.
+Das Projekt wird auf dem Modell Eleven v3 erstellt (über 70 Sprachen). Emotionen werden NICHT durch Großbuchstaben, Auslassungspunkte oder Gedankenstriche ausgedrückt — die Engine ignoriert das. Stattdessen fügt der Regisseur in die Äußerungen englische Audio-Tags v3 ein, zum Beispiel [whispers], [sighs], [angry], [laughs] — diese steuern den Ausdruck und funktionieren unabhängig von der Sprache der Rede. Der AKZENT einer Figur ergibt sich hingegen aus der STIMMPROBE: Wenn jemand z. B. Polnisch mit einem fremden Akzent sprechen soll, wähle oder entwirf in Voice Design eine Stimme, deren Probe diesen Akzent hat. Experimentiere in der Praxis mit dem Stimm-Prompt, bis du z. B. eine polnische Probe mit finnischem Akzent hörst — das Modell v3 behält diesen Akzent in der fertigen Aufnahme bei. Hinweis: Sehr lange Sätze schwächen den Akzent ab, daher wird der Regisseur im Prompt bereits um kurze Sätze gebeten.
 
 Bewusstsein über Modell v3 (Alpha-Phase)
 
@@ -675,7 +675,7 @@ Funktionen unverändert aus Version 12.0
 - Volle AI-Funktionen: Brainstorming, Skript, Hörbuch, Plot-Akkumulator, Unendliches Gedächtnis, Titelvergabe.
 
 
-SCHRITT 7b (uzupełnienie): Die Reihenfolge der `zamiany:`-Regeln ist wichtig
+SCHRITT 7b (Ergänzung): Die Reihenfolge der `zamiany:`-Regeln ist wichtig
 
 Die Dateien in `dictionaries/<kod>/akcenty/*.yaml` enthalten eine Liste von `zamiany:`-Regeln — Paare von `wzor → zamiana`, die die Engine SEQUENZIELL anwendet. Jede nachfolgende Regel arbeitet auf der Ausgabe der vorherigen. Dies ermöglicht den Aufbau von Pipelines wie „zerlege den Digraphen `szcz` in `shch` und ersetze dann `ch` durch `h`", birgt jedoch auch die klassische Falle für den Autor eines Sprachpakets.
 
@@ -722,7 +722,7 @@ LLM_MODEL=modellname_beim_anbieter (z. B. openai/gpt-4o-mini)
 OPENAI_API_KEY=dein_schlüssel_bei_diesem_anbieter
 
 So funktioniert es:
-•  Wenn LLM_PROVIDER=openai_compat gesetzt ist, nutzt die GESAMTE KI-Engine (Reżyser, Opowieści, Poliglota, Titel, Spracherkennung) den angegebenen Endpunkt, und der Modellname aus den Konfigurationsdateien wird durch LLM_MODEL überschrieben.
+•  Wenn LLM_PROVIDER=openai_compat gesetzt ist, nutzt die GESAMTE KI-Engine (Regisseur, Geschichten, Polyglott, Titel, Spracherkennung) den angegebenen Endpunkt, und der Modellname aus den Konfigurationsdateien wird durch LLM_MODEL überschrieben.
 •  Wenn die Zeile LLM_PROVIDER fehlt (oder den Wert anthropic hat), verhält sich die Anwendung wie in SCHRITT 2 — ausschließlich mit dem Anthropic-Schlüssel. Du musst nichts ändern.
 
 Wichtig (Qualität): Die System-Prompts der Anwendung sind für Claude geschrieben und optimiert. Ein anderes Modell kann eine geringere Qualität liefern — es hält sich möglicherweise schlechter an die Weltregeln, verliert die JSON-Struktur in Modi mit Auswahlmöglichkeiten oder gibt Text in der falschen Sprache zurück. Dies ist ein bewusster Kosten↔Qualität-Kompromiss auf deiner Seite. Wenn dir das beste Ergebnis wichtig ist, bleib bei Anthropic.

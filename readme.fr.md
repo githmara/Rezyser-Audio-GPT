@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **18.5.1** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **18.5.2** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -24,14 +24,14 @@ Le principal studio pour écrire des pièces radiophoniques et des livres audio.
 * **4 modes créatifs :** Chacun des fichiers dans `dictionaries/<jzk>/rezyser/` décrit une « personnalité » distincte du réalisateur AI (Brainstorming, Script, Livre audio, Postproduction des Titres). Vous pouvez ajuster leur tonalité sans programmation — voir le Gestionnaire de Règles ci-dessous.
 
 
-### 2. Opowieści (Ctrl+2, deuxième mode principal depuis v15.0)
+### 2. Histoires (Ctrl+2, deuxième mode principal depuis v15.0)
 
-Jeux de texte interactifs menés par l'IA dans le rôle de moteur narratif. Contrairement à la Régie (où vous générez un livre audio prêt à l'écoute), les Opowieści constituent une intrigue dynamique tour par tour :
+Jeux de texte interactifs menés par l'IA dans le rôle de moteur narratif. Contrairement au Réalisateur (où vous générez un livre audio prêt à l'écoute), les Histoires constituent une intrigue dynamique tour par tour :
 
 * **Mode Choix :** chaque tour se termine par 3 à 5 options numérotées A-E. Le mode le plus intuitif pour les joueurs non-voyants — NVDA lit les options, vous appuyez sur Tab et Entrée.
 * **Mode Moindre Mal :** comme le mode Choix, mais chaque option est défavorable sur le plan moral, physique ou stratégique. Depuis v15.2, une « fiole » supplémentaire — une option ZÉRO réutilisable de secours désespéré, dont les effets sont pseudo-aléatoires (60 % néfastes / 30 % perturbant la perception / 10 % rarement bénéfiques, distribution imposée par Python, le LLM n'a aucun moyen d'inventer un effet salvateur).
 * **Mode Libre :** toute action en texte libre (« j'essaierai d'ouvrir la porte »), le moteur propose 1 à 3 suggestions mais n'impose pas de choix.
-* **Un seul modèle d'IA pour tous les modes :** depuis v18.1, tous les modes des Opowieści utilisent le même modèle commun (par défaut et recommandé : Anthropic Claude Sonnet 4.6) — un modèle plus puissant respecte rigoureusement les règles du monde (crucial notamment en mode Moindre Mal, où chaque option doit être réellement défavorable).
+* **Un seul modèle d'IA pour tous les modes :** depuis v18.1, tous les modes des Histoires utilisent le même modèle commun (par défaut et recommandé : Anthropic Claude Sonnet 4.6) — un modèle plus puissant respecte rigoureusement les règles du monde (crucial notamment en mode Moindre Mal, où chaque option doit être réellement défavorable).
 
 
 ### 3. Polyglotte (Ctrl+3, Traducteur IA + Accents TTS)
@@ -66,9 +66,9 @@ Toute l'interface GUI, la documentation (`docs/manual.<iso>.txt`) et la plupart 
 
 ## Architecture IA et modèles utilisés
 
-Le fournisseur IA recommandé et par défaut est Anthropic (Claude) — tous les prompts système sont optimisés pour lui, ce qui lui confère la meilleure qualité narrative, le respect le plus fidèle des règles de l'univers et la prose la plus naturelle. La consolidation sur Claude s'est effectuée par étapes (Réalisateur en v18.0, Opowieści en v18.1, Polyglotte et postproduction en v18.2) — elle résulte d'une supériorité empiriquement confirmée dans le respect des règles de l'univers, la naturalité de la prose et l'évitement des clichés.
+Le fournisseur IA recommandé et par défaut est Anthropic (Claude) — tous les prompts système sont optimisés pour lui, ce qui lui confère la meilleure qualité narrative, le respect le plus fidèle des règles de l'univers et la prose la plus naturelle. La consolidation sur Claude s'est effectuée par étapes (Réalisateur en v18.0, Histoires en v18.1, Polyglotte et postproduction en v18.2) — elle résulte d'une supériorité empiriquement confirmée dans le respect des règles de l'univers, la naturalité de la prose et l'évitement des clichés.
 
-* **Anthropic Claude Sonnet 4.6 (pilier de qualité par défaut) :** Moteur de TOUTE l'intelligence de l'application. Il est responsable de la narration créative (mise en scène des scripts, rédaction de la prose traditionnelle de l'Audiobook, Brainstorming et TOUS les modes d'Opowieści — Choix, Moindre Mal, Libre — ainsi que la génération de résumés et d'interludes Cinematic), des traductions avancées avec préservation du contexte multi-blocs (Polyglotte), ainsi que des microtâches : attribution itérative de titres littéraires aux chapitres et détection du code de langue du contenu.
+* **Anthropic Claude Sonnet 4.6 (pilier de qualité par défaut) :** Moteur de TOUTE l'intelligence de l'application. Il est responsable de la narration créative (mise en scène des scripts, rédaction de la prose traditionnelle de l'Audiobook, Brainstorming et TOUS les modes des Histoires — Choix, Moindre Mal, Libre — ainsi que la génération de résumés et d'interludes Cinematic), des traductions avancées avec préservation du contexte multi-blocs (Polyglotte), ainsi que des microtâches : attribution itérative de titres littéraires aux chapitres et détection du code de langue du contenu.
 
 * **Endpoint personnalisé compatible OpenAI (option avancée, depuis v18.4) :** Au lieu d'Anthropic, il est possible de désigner n'importe quel endpoint compatible avec l'API OpenAI (OpenRouter, Groq, Fireworks, DeepSeek, Ollama local, Gemini compatible OpenAI et autres) — via un chemin de code unique et commun, sans intégration séparée par fournisseur. Configuration dans le fichier `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`) ; instructions complètes dans le manuel principal (ÉTAPE 2B). D'autres modèles peuvent offrir une qualité inférieure à celle de Claude, pour lequel les prompts sont optimisés — il s'agit d'un choix délibéré coût↔qualité de la part de l'utilisateur.
 

@@ -1,8 +1,8 @@
-Manuale del Regista Audio AI - Guida completa (Versione 18.5.1 – Versione di Rilascio)
+Manuale del Regista Audio AI - Guida completa (Versione 18.5.2 – Versione di Rilascio)
 
 Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).
 
-Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per la costruzione della struttura del file (Architetto Audiolibri), dal Gestore delle Regole (dalla versione 13.0 — senza Python puoi aggiungere un nuovo accento, cifra o modalità creativa, vedi PASSO 7b sotto) e — dalla versione 15.0 — dal modulo Storie (finzione interattiva in seconda persona generata da AI, letta da TTS o lettore dello schermo, descritta nel manuale separato opowiesci.pl.txt). Tutti e cinque gli strumenti sono disponibili in un'unica finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+5.
+Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per la costruzione della struttura del file (Architetto Audiolibri), dal Gestore delle Regole (dalla versione 13.0 — senza Python puoi aggiungere un nuovo accento, cifra o modalità creativa, vedi PASSO 7b sotto) e — dalla versione 15.0 — dal modulo Racconti (finzione interattiva in seconda persona generata da AI, letta da TTS o lettore dello schermo, descritta nel manuale separato opowiesci.pl.txt). Tutti e cinque gli strumenti sono disponibili in un'unica finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+5.
 
 
 PASSO 1: Primo avvio (Cross-Platform)
@@ -67,7 +67,7 @@ PASSO 2: Configurazione API (chiave Anthropic / Claude consigliata)
 
 Il fornitore AI consigliato e predefinito è Anthropic (Claude) — tutti i prompt dell'applicazione sono ottimizzati per esso, quindi garantisce la massima qualità narrativa e il miglior rispetto delle regole del mondo. In questa variante (raccomandata) è sufficiente UNA SOLA chiave API nel file golden_key.env:
 
-•  Chiave Anthropic (Claude) — alimenta L'INTERO motore AI: la narrazione del Reżyser (audiolibro, teatro letto, brainstorming), la modalità Opowieści, il Poliglota (traduttore) e l'assegnazione dei titoli ai capitoli e il rilevamento della lingua del contenuto. Inizia con sk-ant-.
+•  Chiave Anthropic (Claude) — alimenta L'INTERO motore AI: la narrazione del Regista (audiolibro, teatro letto, brainstorming), la modalità Racconti, il Poliglotta (traduttore) e l'assegnazione dei titoli ai capitoli e il rilevamento della lingua del contenuto. Inizia con sk-ant-.
 
 Se stai aggiornando da una versione precedente: la vecchia chiave OpenAI non è più necessaria per la variante predefinita — puoi lasciare o rimuovere la sua riga in golden_key.env, l'applicazione la ignora (a meno che tu non stia configurando consapevolmente un altro fornitore — vedi PASSO 2B più avanti).
 
@@ -212,7 +212,7 @@ Chiave ElevenLabs (opzionale)
 
 Incolla la tua chiave ElevenLabs nel file golden_key.env, su una riga separata: ELEVENLABS_API_KEY=sk_... Attenzione: la chiave ElevenLabs inizia con sk_ (con UNDERSCORE), a differenza della chiave Anthropic (sk-ant-). Se utilizzi una chiave con restrizioni (restricted key), assegnale i permessi (scope) projects_write e voices_read. Lo stato della chiave è visibile nella schermata principale (System Check) — l'assenza della chiave non è un errore, il ponte rimane semplicemente nascosto.
 
-Il ponte appare nel pannello del Reżyser in modalità Script (quando la chiave è corretta). Funziona su uno script pronto salvato su disco — prima genera o carica il progetto, poi accedi al ponte.
+Il ponte appare nel pannello del Regista in modalità Script (quando la chiave è corretta). Funziona su uno script pronto salvato su disco — prima genera o carica il progetto, poi accedi al ponte.
 
 Passo 1 — Cast vocale
 
@@ -230,7 +230,7 @@ Dopo la creazione del progetto, l'applicazione mostrerà il suo identificatore e
 
 Espressione e accenti (modello Eleven v3)
 
-Il progetto viene creato con il modello Eleven v3 (oltre 70 lingue). Le emozioni NON si esprimono con lettere maiuscole, puntini di sospensione o trattini — il motore li ignora. Al loro posto il Reżyser inserisce nelle battute audio-tag v3 in inglese, ad esempio [whispers], [sighs], [angry], [laughs] — sono loro a controllare l'espressione e funzionano indipendentemente dalla lingua del parlato. L'ACCENTO del personaggio deriva invece dal CAMPIONE VOCALE: se vuoi che qualcuno parli ad esempio in polacco con un accento straniero, scegli o progetta in Voice Design una voce il cui campione abbia quell'accento. In pratica sperimenta con il prompt della voce finché non senti ad esempio un campione polacco con accento finlandese — il modello v3 manterrà quell'accento nella registrazione finale. Suggerimento: le frasi molto lunghe indeboliscono l'accento, per questo al Reżyser viene già chiesto nel prompt di usare frasi brevi.
+Il progetto viene creato con il modello Eleven v3 (oltre 70 lingue). Le emozioni NON si esprimono con lettere maiuscole, puntini di sospensione o trattini — il motore li ignora. Al loro posto il Regista inserisce nelle battute audio-tag v3 in inglese, ad esempio [whispers], [sighs], [angry], [laughs] — sono loro a controllare l'espressione e funzionano indipendentemente dalla lingua del parlato. L'ACCENTO del personaggio deriva invece dal CAMPIONE VOCALE: se vuoi che qualcuno parli ad esempio in polacco con un accento straniero, scegli o progetta in Voice Design una voce il cui campione abbia quell'accento. In pratica sperimenta con il prompt della voce finché non senti ad esempio un campione polacco con accento finlandese — il modello v3 manterrà quell'accento nella registrazione finale. Suggerimento: le frasi molto lunghe indeboliscono l'accento, per questo al Regista viene già chiesto nel prompt di usare frasi brevi.
 
 Consapevolezza del modello v3 (fase alpha)
 
@@ -432,9 +432,9 @@ Come funziona?
 
 Pulizia automatica: Lo script rimuove automaticamente i tag HTML (se il testo proviene da un browser o da un file .html locale, ad esempio generato da Poliglotta) e i marcatori di intestazione Markdown (ad es. ### o ####) prima dell'elaborazione. Non è necessario pulire manualmente il file.
 
-Modalità Storia: raggruppamento automatico dei turni in scene (da v15.1)
+Modalità Racconto: raggruppamento automatico dei turni in scene (da v15.1)
 
-Se carichi nell'Architetto un file opowiesci/<gra>.txt generato dal modulo Storie Interattive, il convertitore riconoscerà i marcatori di turno (ad es. „--- Turno 7 ---") in 9 lingue (Turno, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) e ogni cinque turni inserirà una nuova intestazione di primo livello in forma di „Scena N" (il numero parte da 1, locale per la lingua — in inglese „Scene N", in tedesco „Szene N" ecc.). Gli altri marcatori di turno vengono eliminati — non appaiono nella narrazione dell'audiolibro, poiché „Turno 7" pronunciato da TTS interrompe l'immersione dell'ascoltatore. Il risultato è un file Word con una suddivisione naturale in scene di pochi minuti audio ciascuna, pronto per l'importazione in ElevenLabs. Il meccanismo è auto-detectante — i file di audiolibri normali senza marcatori di turno (narrazione classica dal Regista) vengono elaborati esattamente come prima.
+Se carichi nell'Architetto un file opowiesci/<gra>.txt generato dal modulo Racconti Interattivi, il convertitore riconoscerà i marcatori di turno (ad es. „--- Turno 7 ---") in 9 lingue (Turno, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) e ogni cinque turni inserirà una nuova intestazione di primo livello in forma di „Scena N" (il numero parte da 1, locale per la lingua — in inglese „Scene N", in tedesco „Szene N" ecc.). Gli altri marcatori di turno vengono eliminati — non appaiono nella narrazione dell'audiolibro, poiché „Turno 7" pronunciato da TTS interrompe l'immersione dell'ascoltatore. Il risultato è un file Word con una suddivisione naturale in scene di pochi minuti audio ciascuna, pronto per l'importazione in ElevenLabs. Il meccanismo è auto-detectante — i file di audiolibri normali senza marcatori di turno (narrazione classica dal Regista) vengono elaborati esattamente come prima.
 
 Vantaggio potente per gli utenti NVDA e ElevenLabs
 
@@ -487,7 +487,7 @@ La versione 13.0 introduce il quarto strumento nella barra: il Gestore delle Reg
 Perché YAML? Fino alla versione 12.0 tutti gli accenti, le modalità creative e i filtri erano "incorporati" nel codice Python. Aggiungere un nuovo accento richiedeva un programmatore. Nella versione 13.0 tutto è stato spostato nei file .yaml nella cartella dictionaries/ — chiunque sappia aprire il Blocco Note può regolare un accento esistente ("sostituisci sz con sh con sch") o aggiungerne uno completamente nuovo (svedese, danese, dialetto russo).
 
 Cosa troverai nel Gestore delle Regole:
-- Albero dei file — elenco completo di tutti i file YAML in dictionaries/ suddivisi per lingue di base (attualmente completamente implementate: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский) e cinque categorie: akcenty/ (fonetica per TTS), szyfry/ (giochi di testo), rezyser/ (modalità creative e post-produzione), gui/ (traduzioni UI) e opowiesci/ (modalità del modulo Storie, aggiunte nella 15.2.4). Navigazione con le frecce come in Esplora file di Windows, pieno supporto NVDA.
+- Albero dei file — elenco completo di tutti i file YAML in dictionaries/ suddivisi per lingue di base (attualmente completamente implementate: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский) e cinque categorie: akcenty/ (fonetica per TTS), szyfry/ (giochi di testo), rezyser/ (modalità creative e post-produzione), gui/ (traduzioni UI) e opowiesci/ (modalità del modulo Racconti, aggiunte nella 15.2.4). Navigazione con le frecce come in Esplora file di Windows, pieno supporto NVDA.
 - Pulsante „📝  Apri nell'editor di testo" — apre il file selezionato nel Blocco Note predefinito del sistema. Modifichi, salvi, clicchi „🔄  Aggiorna albero" ed è fatto.
 - Pulsante „📋  Duplica file selezionato" — la via più veloce per un nuovo accento: prendi un file esistente (ad es. finski.yaml), dai un nuovo nome (ad es. svedese), il Gestore crea una copia con il commento "cambia i campi etichetta e descrizione" e lo apre nell'editor.
 - Pulsante „➕  Nuovo file regole…" — creatore con scelta del tipo (accento, cifrario, modalità Regista, nuova lingua di base, cifrario algoritmico). Per i casi comuni (accento, cifrario tipo "sostituzione lettere") il creatore genera un modello YAML pronto per la modifica. Per i casi che richiedono un programmatore (nuova lingua di base, algoritmo tipo "mescolamento del centro delle parole") il creatore genera un prompt per il chatbot AI — lo incolli in ChatGPT, ottieni un file YAML pronto, lo salvi in dictionaries/ ed è fatto.
@@ -688,11 +688,11 @@ Sottocartelle in dictionaries/<codice-lingua>/ (questo è ciò che vedi nel Gest
 - akcenty (accents) — regole fonetiche per i sintetizzatori vocali
 - szyfry (ciphers) — modalità di cifratura del testo
 - rezyser (director) — modalità creative del modulo Regista
-- opowiesci (stories) — modalità delle Storie interattive
+- opowiesci (stories) — modalità dei Racconti interattivi
 
 Cartelle con i tuoi salvataggi (accanto al programma):
 - skrypty (scripts) — progetti del Regista: narrazione .txt, Libro del Mondo .md
-- opowiesci (stories) — salvataggi delle Storie interattive
+- opowiesci (stories) — salvataggi dei Racconti interattivi
 
 
 PASSO 2B (avanzato, opzionale): Provider AI personalizzato compatibile con OpenAI
@@ -707,7 +707,7 @@ LLM_MODEL=nome_modello_presso_il_provider (es. openai/gpt-4o-mini)
 OPENAI_API_KEY=tua_chiave_presso_questo_provider
 
 Come funziona:
-•  Quando LLM_PROVIDER=openai_compat, L'INTERO motore AI (Reżyser, Opowieści, Poliglota, titoli, rilevamento lingua) utilizza l'endpoint indicato, e il nome del modello nei file di configurazione viene sovrascritto da LLM_MODEL.
+•  Quando LLM_PROVIDER=openai_compat, L'INTERO motore AI (Regista, Racconti, Poliglotta, titoli, rilevamento lingua) utilizza l'endpoint indicato, e il nome del modello nei file di configurazione viene sovrascritto da LLM_MODEL.
 •  Quando la riga LLM_PROVIDER è assente (o ha il valore anthropic), l'applicazione funziona come nel PASSO 2 — esclusivamente con la chiave Anthropic. Non devi cambiare nulla.
 
 Importante (qualità): i prompt di sistema dell'applicazione sono scritti e ottimizzati per Claude. Un modello diverso potrebbe offrire una qualità inferiore — rispettare meno le regole del mondo, perdere la struttura JSON nelle modalità con scelte oppure restituire il testo nella lingua sbagliata. Si tratta di un compromesso consapevole costo↔qualità da parte tua. Se tieni al miglior risultato possibile, resta con Anthropic.

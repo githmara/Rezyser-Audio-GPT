@@ -14,7 +14,7 @@
 id: tales
 tresc:
   naglowek: |
-    Reżyser Audio GPT — Modulo Storie Interattive ({app.wersja})
+    Reżyser Audio GPT — Modulo Racconti Interattivi ({app.wersja})
 
     Il secondo principale modo dell'applicazione accanto a Regista — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
 
@@ -88,7 +88,7 @@ tresc:
 
     /wczytaj, /load — apre la finestra di dialogo per la selezione del gioco con l'elenco dei nomi disponibili (dalla v15.2.3 al posto della finestra di sistema per la selezione dei file — elenco diretto dei giochi salvati dalla cartella runtime/opowiesci/ rilevati dalla presenza del file .game.json). NVDA legge l'elenco in modo naturale, il giocatore non vedente non deve navigare nella finestra di sistema per la selezione dei file. Dopo aver selezionato il nome del gioco, la modalità e la narrazione completa vengono ripristinate — puoi continuare dal turno in cui ti eri fermato. Il pulsante "{opowiesci.btn_wczytaj_label}" ha un comportamento identico.
 
-    Il motore narrativo di tutte le modalità Storie utilizza un unico modello condiviso (per impostazione predefinita e consigliato Anthropic Claude Sonnet 4.6; dalla v18.4 un utente avanzato può indicare un proprio endpoint compatibile con OpenAI — vedi il manuale principale, PASSO 2B). Un modello più potente rispetta rigorosamente le regole del mondo — questo è particolarmente importante nella modalità Male minore, dove ogni opzione deve rimanere concretamente svantaggiosa.
+    Il motore narrativo di tutte le modalità Racconti utilizza un unico modello condiviso (per impostazione predefinita e consigliato Anthropic Claude Sonnet 4.6; dalla v18.4 un utente avanzato può indicare un proprio endpoint compatibile con OpenAI — vedi il manuale principale, PASSO 2B). Un modello più potente rispetta rigorosamente le regole del mondo — questo è particolarmente importante nella modalità Male minore, dove ogni opzione deve rimanere concretamente svantaggiosa.
 
     /wizualizuj <opis>, /visualize <opis> — descrizione multisensoriale della scena attuale. Non modifica lo stato di gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata, NON viene aggiunto alla narrazione né salvato nel file audiolibro. Esempio: „/wizualizuj che aspetto ha la guardia" oppure „/wizualizuj l'odore della caffetteria".
 
@@ -106,7 +106,7 @@ tresc:
 
     runtime/opowiesci/<nazwa>.story.jsonl — log grezzo di ogni turno (richiesta del giocatore + risposta del modello in JSON). Il file non è necessario per il gioco — serve per il debug o l'analisi successiva (ad esempio, statistiche su quanto è durata l'avventura, quali trame ha introdotto LLM).
 
-    runtime/opowiesci/<nazwa>.mode — metadati del numero di modalità (3=Libero, 4=Scelte, 5=Il minore dei mali). Dalla v17.4 nella propria cartella Storie. In precedenza il file si trovava in runtime/skrypty/ insieme al Regista — con un gioco e un progetto del Regista dallo stesso nome, il salvataggio di un modulo poteva sovrascrivere silenziosamente la modalità dell'altro; ora gli spazi dei nomi sono separati e i vecchi file vengono migrati una sola volta al caricamento del gioco.
+    runtime/opowiesci/<nazwa>.mode — metadati del numero di modalità (3=Libero, 4=Scelte, 5=Il minore dei mali). Dalla v17.4 nella propria cartella Racconti. In precedenza il file si trovava in runtime/skrypty/ insieme al Regista — con un gioco e un progetto del Regista dallo stesso nome, il salvataggio di un modulo poteva sovrascrivere silenziosamente la modalità dell'altro; ora gli spazi dei nomi sono separati e i vecchi file vengono migrati una sola volta al caricamento del gioco.
   krok_7_pamiec_modelu: |
     PASSO 7: Indicatore di memoria del modello — perché i turni nei vecchi giochi non richiedono il tuo intervento manuale
 
@@ -129,7 +129,7 @@ tresc:
   krok_10_dostepnosc_nvda: |
     PASSO 9: Accessibilità (NVDA e lettori di schermo) — progettato fin dall'inizio
 
-    L'intero modulo Storie è stato ottimizzato per i giocatori non vedenti. Cosa abbiamo fatto nello specifico:
+    L'intero modulo Racconti è stato ottimizzato per i giocatori non vedenti. Cosa abbiamo fatto nello specifico:
 
     CAMPO ULTIMO TURNO — è un wx.TextCtrl readonly multiline separato (~140 px di altezza) SOPRA la narrazione completa. Dopo ogni turno, il campo viene sostituito con un nuovo frammento (intestazione "--- Turno N ---" + contenuto della narrazione). NVDA lo legge immediatamente dopo il focus (auto-focus dopo il successo del turno), senza navigare attraverso centinaia di righe della storia completa. Dopo il caricamento di un gioco salvato, il campo mostra un RIASSUNTO dell'ultimo turno salvato (dal buffer `ostatnie_tury`, tagliato al confine di frase fino a ~1200 caratteri, senza interrompere a metà parola) con un prefisso che informa che la narrazione completa è nel campo sottostante.
 
@@ -150,7 +150,7 @@ tresc:
     Problemi comuni
 
     Problema: Dopo aver cliccato "{opowiesci.btn_nowa_gra_label}" appare il messaggio "Manca la chiave API".
-    Causa e soluzione: Il file golden_key.env nella cartella principale dell'applicazione non contiene una chiave Anthropic valida (necessaria per la modalità Storie). Torna alla schermata iniziale (pulsante Home), clicca "{home.btn_generate}" e segui le istruzioni (PASSO 2 del manuale principale).
+    Causa e soluzione: Il file golden_key.env nella cartella principale dell'applicazione non contiene una chiave Anthropic valida (necessaria per la modalità Racconti). Torna alla schermata iniziale (pulsante Home), clicca "{home.btn_generate}" e segui le istruzioni (PASSO 2 del manuale principale).
 
     Problema: Sto cercando di inviare un altro turno, ma il pulsante "{opowiesci.btn_wyslij_label}" è disattivato.
     Causa e soluzione: È in corso l'auto-sintesi del contesto o la generazione di un Cinematic Warning nel thread in background. Lo stato della memoria mostrerà "Auto-sintesi del contesto in corso...". Attendi qualche secondo — il pulsante si sbloccherà automaticamente al termine dell'operazione.

@@ -1,4 +1,4 @@
-Manual del Director de Audio AI - Guía Completa (Versión 18.5.1 – Versión de Lanzamiento)
+Manual del Director de Audio AI - Guía Completa (Versión 18.5.2 – Versión de Lanzamiento)
 
 ¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).
 
@@ -64,7 +64,7 @@ PASO 2: Configuración de la API (clave Anthropic / Claude recomendada)
 
 El proveedor de IA recomendado y predeterminado es Anthropic (Claude) — todos los prompts de la aplicación están optimizados para él, por lo que ofrece la mayor calidad narrativa y el mejor respeto a las reglas del mundo. En esta variante (recomendada) basta con UNA SOLA clave API en el archivo golden_key.env:
 
-•  Clave Anthropic (Claude) — alimenta TODO el motor de IA: la narración del Reżyser (audiolibro, teatro leído, lluvia de ideas), el modo Opowieści, el Políglota (traductor) y la asignación de títulos a capítulos y la detección del idioma del contenido. Comienza por sk-ant-.
+•  Clave Anthropic (Claude) — alimenta TODO el motor de IA: la narración del Director (audiolibro, teatro leído, lluvia de ideas), el modo Historias, el Políglota (traductor) y la asignación de títulos a capítulos y la detección del idioma del contenido. Comienza por sk-ant-.
 
 Si estás actualizando desde una versión anterior: la antigua clave OpenAI ya no es necesaria para la variante predeterminada — puedes dejar o eliminar su línea en golden_key.env, la aplicación la ignorará (a menos que estés configurando conscientemente otro proveedor — véase el PASO 2B más abajo).
 
@@ -203,7 +203,7 @@ Clave de ElevenLabs (opcional)
 
 Pega tu clave de ElevenLabs en el archivo golden_key.env, en una línea aparte: ELEVENLABS_API_KEY=sk_... Atención: la clave de ElevenLabs comienza con sk_ (con GUION BAJO), a diferencia de la clave de Anthropic (sk-ant-). Si usas una clave con restricciones (restricted key), otórgale los permisos (scopes) projects_write y voices_read. El estado de la clave se muestra en la pantalla principal (System Check) — la ausencia de clave no es un error, simplemente el puente permanece oculto.
 
-El puente aparece en el panel del Reżyser en modo Guion (cuando la clave es correcta). Funciona con una obra terminada guardada en disco — primero genera o carga el proyecto, luego accede al puente.
+El puente aparece en el panel del Director en modo Guion (cuando la clave es correcta). Funciona con una obra terminada guardada en disco — primero genera o carga el proyecto, luego accede al puente.
 
 Paso 1 — Reparto de voces
 
@@ -221,7 +221,7 @@ Tras crear el proyecto, la aplicación mostrará su identificador y un botón qu
 
 Expresión y acentos (modelo Eleven v3)
 
-El proyecto se crea con el modelo Eleven v3 (más de 70 idiomas). Las emociones NO se expresan con mayúsculas, puntos suspensivos ni guiones — el motor los ignora. En su lugar, el Reżyser inserta en las réplicas etiquetas de audio en inglés propias de v3, como [whispers], [sighs], [angry], [laughs] — estas controlan la expresión y funcionan independientemente del idioma del texto. El ACENTO del personaje proviene en cambio de la MUESTRA DE VOZ: si quieres que alguien hable, por ejemplo, en polaco con acento extranjero, selecciona o diseña en Voice Design una voz cuya muestra tenga ese acento. En la práctica, experimenta con el prompt de la voz hasta escuchar, por ejemplo, una muestra en polaco con acento finlandés — el modelo v3 conservará ese acento en la grabación final. Consejo: las frases muy largas debilitan el acento, por eso el Reżyser ya recibe instrucciones en el prompt de usar frases cortas.
+El proyecto se crea con el modelo Eleven v3 (más de 70 idiomas). Las emociones NO se expresan con mayúsculas, puntos suspensivos ni guiones — el motor los ignora. En su lugar, el Director inserta en las réplicas etiquetas de audio en inglés propias de v3, como [whispers], [sighs], [angry], [laughs] — estas controlan la expresión y funcionan independientemente del idioma del texto. El ACENTO del personaje proviene en cambio de la MUESTRA DE VOZ: si quieres que alguien hable, por ejemplo, en polaco con acento extranjero, selecciona o diseña en Voice Design una voz cuya muestra tenga ese acento. En la práctica, experimenta con el prompt de la voz hasta escuchar, por ejemplo, una muestra en polaco con acento finlandés — el modelo v3 conservará ese acento en la grabación final. Consejo: las frases muy largas debilitan el acento, por eso el Director ya recibe instrucciones en el prompt de usar frases cortas.
 
 Conciencia del modelo v3 (fase alpha)
 
@@ -661,7 +661,7 @@ LLM_MODEL=nombre_del_modelo_en_el_proveedor (p. ej. openai/gpt-4o-mini)
 OPENAI_API_KEY=tu_clave_en_ese_proveedor
 
 Cómo funciona:
-•  Cuando LLM_PROVIDER=openai_compat, TODO el motor de IA (Reżyser, Opowieści, Poliglota, títulos, detección de idioma) utiliza el endpoint indicado, y LLM_MODEL sobrescribe el nombre del modelo de los archivos de configuración.
+•  Cuando LLM_PROVIDER=openai_compat, TODO el motor de IA (Director, Historias, Políglota, títulos, detección de idioma) utiliza el endpoint indicado, y LLM_MODEL sobrescribe el nombre del modelo de los archivos de configuración.
 •  Cuando la línea LLM_PROVIDER no existe (o tiene el valor anthropic), la aplicación funciona como en el PASO 2 — exclusivamente con la clave de Anthropic. No necesitas cambiar nada.
 
 Importante (calidad): los prompts del sistema de la aplicación están escritos y ajustados para Claude. Otro modelo puede ofrecer menor calidad — respetar peor las reglas del mundo, perder la estructura JSON en los modos con elecciones o devolver el texto en un idioma incorrecto. Es un compromiso consciente coste↔calidad de tu parte. Si lo que te importa es el mejor resultado, quédate con Anthropic.

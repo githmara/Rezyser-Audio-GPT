@@ -1,4 +1,4 @@
-Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 18.5.1 – Julkaisuversio)
+Audio AI -ohjaajan käsikirja - Täydellinen opas (Versio 18.5.2 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 
@@ -206,7 +206,7 @@ ElevenLabs-avain (valinnainen)
 
 Liitä ElevenLabs-avaimesi golden_key.env-tiedostoon omalle rivilleen: ELEVENLABS_API_KEY=sk_... Huomio: ElevenLabs-avain alkaa merkinnällä sk_ (ALAVIIVALLA), toisin kuin Anthropic-avain (sk-ant-). Jos käytät rajoitettua avainta (restricted key), myönnä sille oikeudet (scopes) projects_write ja voices_read. Avaimen tila näkyy päänäytöllä (System Check) — puuttuva avain ei ole virhe, silta vain pysyy piilossa.
 
-Silta ilmestyy Reżyserin paneeliin Skripti-tilassa (kun avain on oikein). Se toimii levylle tallennetulla valmiilla näytelmällä — luo tai lataa projekti ensin, siirry sitten siltaan.
+Silta ilmestyy Ohjaajan paneeliin Skripti-tilassa (kun avain on oikein). Se toimii levylle tallennetulla valmiilla näytelmällä — luo tai lataa projekti ensin, siirry sitten siltaan.
 
 Vaihe 1 — Ääniroolitus
 
@@ -224,7 +224,7 @@ Projektin luomisen jälkeen sovellus näyttää sen tunnisteen sekä painikkeen,
 
 Ilmaisu ja aksentit (Eleven v3 -malli)
 
-Projekti luodaan Eleven v3 -mallilla (yli 70 kieltä). Tunteita EI ilmaista isoilla kirjaimilla, ellipseillä tai ajatusviivoin — moottori jättää ne huomiotta. Sen sijaan Reżyser lisää vuorosanoihin englanninkielisiä v3-äänitägejä, kuten [whispers], [sighs], [angry], [laughs] — ne ohjaavat ilmaisua ja toimivat puhujan kielestä riippumatta. Hahmon AKSENTTI puolestaan tulee ÄÄNESTÄ: jos haluat jonkun puhuvan esimerkiksi puolaksi vieraalla aksentilla, valitse tai suunnittele Voice Designissa ääni, jonka näytteessä on kyseinen aksentti. Käytännössä kokeile äänipromptia, kunnes kuulet esimerkiksi puolankielisen näytteen suomalaisella aksentilla — v3-malli säilyttää sen aksenttia valmiissa nauhoituksessa. Vinkki: hyvin pitkät lauseet heikentävät aksenttia, minkä vuoksi Reżyseria pyydetään jo promptissa käyttämään lyhyitä lauseita.
+Projekti luodaan Eleven v3 -mallilla (yli 70 kieltä). Tunteita EI ilmaista isoilla kirjaimilla, ellipseillä tai ajatusviivoin — moottori jättää ne huomiotta. Sen sijaan Ohjaaja lisää vuorosanoihin englanninkielisiä v3-äänitägejä, kuten [whispers], [sighs], [angry], [laughs] — ne ohjaavat ilmaisua ja toimivat puhujan kielestä riippumatta. Hahmon AKSENTTI puolestaan tulee ÄÄNESTÄ: jos haluat jonkun puhuvan esimerkiksi puolaksi vieraalla aksentilla, valitse tai suunnittele Voice Designissa ääni, jonka näytteessä on kyseinen aksentti. Käytännössä kokeile äänipromptia, kunnes kuulet esimerkiksi puolankielisen näytteen suomalaisella aksentilla — v3-malli säilyttää sen aksenttia valmiissa nauhoituksessa. Vinkki: hyvin pitkät lauseet heikentävät aksenttia, minkä vuoksi Ohjaajaa pyydetään jo promptissa käyttämään lyhyitä lauseita.
 
 Tietoisuus v3-mallista (alpha-vaihe)
 
@@ -665,7 +665,7 @@ LLM_MODEL=mallin_nimi_palveluntarjoajalla (esim. openai/gpt-4o-mini)
 OPENAI_API_KEY=sinun_avaimesi_kyseiseltä_palveluntarjoajalta
 
 Miten se toimii:
-•  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Reżyser, Opowieści, Poliglota, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.
+•  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Ohjaaja, Tarinat, Polyglootti, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.
 •  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.
 
 Tärkeää (laatu): sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.

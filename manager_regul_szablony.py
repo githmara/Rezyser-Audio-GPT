@@ -757,6 +757,14 @@ kolejnosc: 40
 #     burza_json  – 3 plot options (reuses the Brainstorm parser, no file save)
 #   A NEW JSON schema (other than the two above) needs CODE (a parser in
 #   rezyser_ai.py) — and therefore source access, like a Story (Opowieści) mode.
+#   WHY A JSON format_wyjscia MATTERS (since v18.5.1): skrypt_json / burza_json
+#   make the engine REQUEST structured output (response_format=json_object) when
+#   the user points the app at an OpenAI-compatible endpoint
+#   (LLM_PROVIDER=openai_compat) — that is what keeps the reply parseable on
+#   non-Anthropic models. The default Anthropic path ignores the flag and
+#   enforces the schema through the prompt instead. So: if this mode emits JSON,
+#   pick skrypt_json/burza_json (NOT tekst), and DOUBLE the braces of any literal
+#   JSON example in prompt_systemowy — see the system-prompt note below.
 struktura: rozdzialy
 format_wyjscia: tekst
 
@@ -772,6 +780,10 @@ zapis_do_pliku: true
 # Placeholders: {{world_context}}, {{jezyk_odpowiedzi}}
 # NOTE: the entire system prompt MUST be in {natywna_baza}.
 # Use `dictionaries/{jezyk_bazowy}/rezyser/tryb_audiobook.yaml` as a model.
+# JSON TRAP: if this is a JSON mode (format_wyjscia above) and you paste a
+# literal JSON example here, write its braces DOUBLED ({{{{ }}}}). A single {{ }}
+# is read as a format field by str.format_map, which then silently returns the
+# RAW template — and {{world_context}}/{{jezyk_odpowiedzi}} never reach the model.
 prompt_systemowy: |
   # <FILL NATIVELY in {natywna_baza}: Rola/Rolle/Ruolo: THE AI ROLE NAME>
 

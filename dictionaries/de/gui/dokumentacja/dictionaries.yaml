@@ -190,14 +190,14 @@ tresc:
     speichern, und die Anwendung lädt Ihre Version beim nächsten Start. Kein
     Programmieren erforderlich.
   co_to_tryb_opowiesci: |
-    Was ist der „Opowieści-Modus"?
+    Was ist der „Geschichten-Modus"?
     ---------------------------------
 
     Der Ordner „opowiesci/" enthält {liczba_trybow_opowiesci} Dateien, die den zweiten
     Hauptmodus der Anwendung beschreiben — interaktive Textspiele, die von der KI
     in der Rolle einer Narrations-Engine geleitet werden. Im Unterschied zum
-    Reżyser-Modus (bei dem du ein FERTIGES Hörbuch zur TTS-Wiedergabe erzeugst),
-    ist der Opowieści-Modus eine Zug-für-Zug-Konversation mit dem Modell, das mit
+    Regisseur-Modus (bei dem du ein FERTIGES Hörbuch zur TTS-Wiedergabe erzeugst),
+    ist der Geschichten-Modus eine Zug-für-Zug-Konversation mit dem Modell, das mit
     dir eine Session mit dynamischer Handlung führt:
 
     - tryb_wyborow.yaml      — Auswahl (3–5 nummerierte Optionen A–E am Ende
@@ -221,10 +221,10 @@ tresc:
     - cinematic_warning.yaml — Warnungen vor brutalen/dramatischen Szenen
                                (Übereinstimmung mit den Spielerpräferenzen)
 
-    Wie im Reżyser-Modus enthält jede Datei einen „System-Prompt" zur Bearbeitung.
+    Wie im Regisseur-Modus enthält jede Datei einen „System-Prompt" zur Bearbeitung.
     Du kannst den Stil des Erzählers anpassen (z. B. weniger blumig), die Zuglänge
     ändern und eigene Handlungsdirektiven hinzufügen. Ab v18.1 nutzen alle
-    Opowieści-Modi ein einziges gemeinsames Modell (standardmäßig und empfohlen:
+    Geschichten-Modi ein einziges gemeinsames Modell (standardmäßig und empfohlen:
     Anthropic Claude Sonnet 4.6) — ein leistungsstärkeres Modell hält sich
     strikt an die Regeln der Spielwelt (entscheidend im Modus „Das kleinere Übel",
     wo jede Option realistisch nachteilig sein muss).

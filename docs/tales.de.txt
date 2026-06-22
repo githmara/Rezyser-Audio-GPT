@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktive Geschichten Modul (18.5.1 – Release-Version)
+Reżyser Audio GPT — Interaktive Geschichten Modul (18.5.2 – Release-Version)
 
 Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.
 
@@ -77,7 +77,7 @@ Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägs
 
 /wczytaj, /load — öffnet den Spielauswahldialog mit einer Liste verfügbarer Namen (ab v15.2.3 anstelle des systemischen Dateidialogs — eine direkte Liste gespeicherter Spiele aus dem Ordner runtime/opowiesci/, die anhand des Vorhandenseins einer .game.json-Datei erkannt werden). NVDA liest die Liste auf natürliche Weise vor, ein blinder Spieler muss nicht durch den systemischen Dateidialog navigieren. Nach der Auswahl werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst ab der Runde weitermachen, bei der du aufgehört hast. Die Schaltfläche „Laden" verhält sich identisch.
 
-Die Erzählmaschine aller Opowiesci-Modi verwendet ein einziges, gemeinsames Modell (standardmäßig und empfohlen: Anthropic Claude Sonnet 4.6; ab v18.4 kann ein fortgeschrittener Benutzer einen eigenen, mit OpenAI kompatiblen Endpunkt angeben — siehe Haupthandbuch, SCHRITT 2B). Ein leistungsstärkeres Modell hält sich strikt an die Regeln der Spielwelt — das ist besonders im Modus „Das kleinere Übel" wichtig, wo jede Option realistisch nachteilig bleiben muss.
+Die Erzählmaschine aller Geschichten-Modi verwendet ein einziges, gemeinsames Modell (standardmäßig und empfohlen: Anthropic Claude Sonnet 4.6; ab v18.4 kann ein fortgeschrittener Benutzer einen eigenen, mit OpenAI kompatiblen Endpunkt angeben — siehe Haupthandbuch, SCHRITT 2B). Ein leistungsstärkeres Modell hält sich strikt an die Regeln der Spielwelt — das ist besonders im Modus „Das kleinere Übel" wichtig, wo jede Option realistisch nachteilig bleiben muss.
 
 /wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht und schlägt keine Optionen vor — die Erzählmaschine nutzt alle fünf Sinne (Sehen, Hören, Riechen, Tasten, Schmecken), um die Szene mit größerer Tiefe darzustellen. Das Ergebnis erscheint in einem separaten Dialog, wird NICHT an die Erzählung angehängt und nicht in der Hörbuchdatei gespeichert. Beispiel: „/wizualizuj wie der Wächter aussieht" oder „/wizualizuj der Geruch des Cafés".
 
@@ -122,7 +122,7 @@ Das Cinematic Warning ist NICHT Teil der Audiobook-Narration — die .txt-Filter
 
 SCHRITT 9: Barrierefreiheit (NVDA und Screenreader) — von Anfang an entworfen
 
-Das gesamte Modul "Erzählungen" wurde für blinde Spieler optimiert. Was wir konkret getan haben:
+Das gesamte Modul "Geschichten" wurde für blinde Spieler optimiert. Was wir konkret getan haben:
 
 FELD LETZTE RUNDE — dies ist ein separates wx.TextCtrl, schreibgeschützt, mehrzeilig (~140 px Höhe) ÜBER der vollständigen Erzählung. Nach jeder Runde wird das Feld mit einem neuen Abschnitt ersetzt (Überschrift „--- Runde N ---" + Erzählungstext). NVDA liest es sofort nach dem Fokussieren (Auto-Fokus nach erfolgreicher Runde), ohne durch Hunderte von Zeilen der vollständigen Geschichte navigieren zu müssen. Nach dem Laden eines gespeicherten Spiels zeigt das Feld eine ZUSAMMENFASSUNG der letzten gespeicherten Runde (aus dem `ostatnie_tury`-Puffer, an der Satzgrenze auf ~1200 Zeichen gekürzt, sodass kein Wort mittendrin abbricht) mit einem Präfix, das darauf hinweist, dass die vollständige Erzählung im Feld darunter steht.
 

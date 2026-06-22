@@ -1,4 +1,4 @@
-Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 18.5.1 – Útgáfuútgáfa)
+Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa 18.5.2 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -64,7 +64,7 @@ SKREF 2: Að tengja API (ráðlagt Anthropic / Claude lykill)
 
 Ráðlagður og sjálfgefinn AI-veitandi er Anthropic (Claude) — allir kvaðningar forritsins eru fínstilltar fyrir hann, þannig að hann gefur hæstu gæði frásagnar og bestu fylgni við reglur heimsins. Í þessum (ráðlögðum) valkosti nægir EINN API-lykill í skránni golden_key.env:
 
-•  Anthropic-lykill (Claude) — knýr ALLAN AI-vélina: frásögn Reżysera (hljóðbók, lesið leikhús, hugsunarflug), Opowieści-ham, Poliglota (þýðanda) og titlagjöf á kafla og tungumálagreiningu efnis. Byrjar á sk-ant-.
+•  Anthropic-lykill (Claude) — knýr ALLAN AI-vélina: frásögn Leikstjórans (hljóðbók, lesið leikhús, hugsunarflug), Söguham, Tungumálamann (þýðanda) og titlagjöf á kafla og tungumálagreiningu efnis. Byrjar á sk-ant-.
 
 Ef þú uppfærir úr eldri útgáfu: gamli OpenAI-lykillinn er ekki lengur nauðsynlegur fyrir sjálfgefna valkostinn — þú getur skilið eftir eða eytt línu hans í golden_key.env, forritið hunsar hana (nema þú sért meðvitað að stilla annan veitanda — sjá SKREF 2B hér að neðan).
 
@@ -667,7 +667,7 @@ LLM_MODEL=nafn_líkans_hjá_þjónustuaðila (t.d. openai/gpt-4o-mini)
 OPENAI_API_KEY=þinn_lykill_hjá_þessum_þjónustuaðila
 
 Hvernig þetta virkar:
-•  Þegar LLM_PROVIDER=openai_compat, notar ALLUR AI-vélin (Reżyser, Opowieści, Poliglota, titlar, tungumálagreining) tilgreindan endpoint, og LLM_MODEL skrifar yfir líkansnafnið úr stillingarskrám.
+•  Þegar LLM_PROVIDER=openai_compat, notar ALLUR AI-vélin (Leikstjóri, Sögur, Tungumálamaður, titlar, tungumálagreining) tilgreindan endpoint, og LLM_MODEL skrifar yfir líkansnafnið úr stillingarskrám.
 •  Þegar línan LLM_PROVIDER vantar (eða hefur gildið anthropic), virkar forritið eins og í SKREF 2 — eingöngu með Anthropic-lykli. Þú þarft ekki að breyta neinu.
 
 Mikilvægt (gæði): kerfisfyrirmæli forritsins eru skrifuð og fínstillt fyrir Claude. Annað líkan getur gefið lægri gæði — fylgt reglum heimsins verr, týnt JSON-uppbyggingu í stillingum með valmöguleikum eða skilað texta á röngu tungumáli. Þetta er meðvitað málamiðlun kostnaður↔gæði af þinni hálfu. Ef þér þykir vænt um besta niðurstöðuna, haltu þér við Anthropic.

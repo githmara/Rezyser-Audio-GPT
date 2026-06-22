@@ -1,4 +1,4 @@
-Manuel du Réalisateur Audio AI - Guide complet (Version 18.5.1 – Version de Lancement)
+Manuel du Réalisateur Audio AI - Guide complet (Version 18.5.2 – Version de Lancement)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 
@@ -511,9 +511,9 @@ Selon une étude à l'Université de Cambridge, peu importe l'ordre des lettres 
 Trdaon une édtue à l'Ueivnrsité de Cgabrmide, peu ipomrtte l'odre des ltteers dans un mot, la sléeu chsoe ipmoratnte est que la piremère et la draineère ltteer soient à la bnoe palce.
 
 
-Ważne wskazówki dla użytkowników czytników ekranu (NVDA)
+Conseils importants pour les utilisateurs de lecteurs d'écran (NVDA)
 
-1. Komunikaty o sukcesie i błędach
+1. Messages de succès et d'erreur
 
 Lorsque l'application termine une action (par exemple, enregistre un fichier ou rencontre une erreur), une boîte de dialogue apparaît avec un titre tel que "Succès", "Avertissement" ou "Erreur". NVDA annoncera immédiatement cette fenêtre et lira son contenu. Vous n'avez rien à faire — les dialogues sont entièrement accessibles au clavier, et le focus se place automatiquement sur le bouton "OK". Il n'y a plus de ruses avec le préfixe "Alerte" — les boîtes de dialogue natives wxPython sont directement prises en charge par le lecteur d'écran.
 
@@ -719,7 +719,7 @@ LLM_MODEL=nom_du_modèle_chez_le_fournisseur (ex. openai/gpt-4o-mini)
 OPENAI_API_KEY=votre_clé_chez_ce_fournisseur
 
 Comment ça fonctionne :
-•  Lorsque LLM_PROVIDER=openai_compat, TOUT le moteur IA (Réalisateur, Opowieści, Polyglotte, titres, détection de langue) utilise l'endpoint indiqué, et le nom du modèle issu des fichiers de configuration est remplacé par LLM_MODEL.
+•  Lorsque LLM_PROVIDER=openai_compat, TOUT le moteur IA (Réalisateur, Histoires, Polyglotte, titres, détection de langue) utilise l'endpoint indiqué, et le nom du modèle issu des fichiers de configuration est remplacé par LLM_MODEL.
 •  Lorsque la ligne LLM_PROVIDER est absente (ou a la valeur anthropic), l'application fonctionne comme à l'ÉTAPE 2 — exclusivement avec la clé Anthropic. Vous n'avez rien à modifier.
 
 Important (qualité) : les prompts système de l'application sont écrits et ajustés pour Claude. Un autre modèle peut produire une qualité inférieure — respecter moins bien les règles du monde, perdre la structure JSON dans les modes avec choix ou renvoyer du texte dans une mauvaise langue. Il s'agit d'un compromis délibéré coût↔qualité de votre côté. Si vous tenez au meilleur résultat, restez avec Anthropic.

@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Samtalslegar Sögur (18.5.1 – Útgáfuútgáfa)
+Reżyser Audio GPT — Samtalslegar Sögur (18.5.2 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hliðina á Leikstjóra — í þetta sinn verður þú leikmaður í sögunni sem er dynamískt búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lyktina af blautum laufum…"), og þú ákveður næstu aðgerð — skrifar hvaða aðgerð sem er með frjálsum texta eða velur eina af tölusettum valkostum.
 
@@ -77,7 +77,7 @@ SKREF 5: Slash-skipanir — skjótar aðgerðir án API
 
 /wczytaj, /load — opnar glugga til að velja leik með lista yfir tiltæk nöfn (frá v15.2.3 í stað kerfisglugga fyrir skrár — beinn listi yfir vistaðar leiki úr möppunni runtime/opowiesci/ sem greinast eftir tilvist .game.json skráar). NVDA les listann á náttúrulegan hátt, blindur leikmaður þarf ekki að fletta í gegnum kerfisglugga skráa. Þegar leikur er valinn eru nafn leiksins, leikhaminn og öll frásögnin endurheimt — þú getur haldið áfram frá þeirri umferð sem þú stóðst við. Hnappurinn "Hlaða" hefur nákvæmlega sama hegðun.
 
-Frásagnarvélin allra Opowiesci-hamanna notar eitt sameiginlegt líkan (sjálfgefið og mælt með Anthropic Claude Sonnet 4.6; frá v18.4 getur reyndir notandi tilgreint eigin endapunkt sem er samhæfður OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkan fylgir reglum heimsins af meiri nákvæmni — þetta skiptir sérstaklega máli í Minna-illu-hamanum, þar sem sérhver valkostur verður að vera raunverulega óhagstæður.
+Frásagnarvélin allra Söguhamanna notar eitt sameiginlegt líkan (sjálfgefið og mælt með Anthropic Claude Sonnet 4.6; frá v18.4 getur reyndir notandi tilgreint eigin endapunkt sem er samhæfður OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkan fylgir reglum heimsins af meiri nákvæmni — þetta skiptir sérstaklega máli í Minna-illu-hamanum, þar sem sérhver valkostur verður að vera raunverulega óhagstæður.
 
 /wizualizuj <opis>, /visualize <opis> — fjölskynjaralýsing á núverandi senu. Breytir ekki leikstöðu, leggur ekki til val — frásagnarvélin notar öll fimm skilningarvit (sjón, heyrn, lykt, snertingu, bragð) til að sýna senuna með meiri dýpt. Niðurstaðan birtist í sérstökum glugga, er EKKI bætt við frásögnina né vistuð í hljóðbókarskránni. Dæmi: „/wizualizuj hvernig vörðurinn lítur út" eða „/wizualizuj lyktin af kaffihúsinu".
 
@@ -141,19 +141,19 @@ LITIR Á MINNISSTÖÐU — vísir á minnisstöðu líkaninu breytir lit leturs 
 LYKLARFLÝTILEIÐIR — allir takkar hafa `&` tákn fyrir einni af stöfum merkimiðans, sem virkjar flýtileið Alt+stafur. Virkar eins og í öðrum hlutum forritsins.
 
 
-Najczęstsze problemy
+Algengustu vandamál
 
-Problem: Po kliknięciu "Nýr leikur" pojawia się komunikat „Brak klucza API".
-Przyczyna i rozwiązanie: Plik golden_key.env w głównym folderze aplikacji nie ma poprawnego klucza Anthropic (to on zasila tryb Opowieści). Wróć do ekranu startowego (przycisk Home), kliknij "Búðu til skrána golden_key.env og opnaðu textaritil" i postępuj zgodnie z instrukcjami (KROK 2 głównego manuala).
+Vandamál: Eftir að smellt er á "Nýr leikur" birtist skilaboðin „Vantar API-lykil".
+Orsök og lausn: Skráin golden_key.env í aðalmöppu forritsins hefur ekki gildan Anthropic-lykil (það er hann sem knýr Söguham). Farðu aftur á upphafsskjáinn (Home-hnappurinn), smelltu á "Búðu til skrána golden_key.env og opnaðu textaritil" og fylgdu leiðbeiningunum (SKREF 2 í aðalhandbókinni).
 
-Problem: Próbuję wysłać kolejną turę, ale przycisk "Senda" jest wyszarzony.
-Przyczyna i rozwiązanie: Trwa auto-streszczenie kontekstu albo generacja Cinematic Warning w wątku tła. Status pamięci pokaże „Auto-streszczenie kontekstu w toku…". Poczekaj kilkanaście sekund — przycisk odblokuje się automatycznie po sukcesie.
+Vandamál: Ég reyni að senda næstu umferð, en hnappurinn "Senda" er grár.
+Orsök og lausn: Sjálfvirkur útdráttur samhengis stendur yfir, eða Cinematic Warning er búið til í bakgrunnsþræði. Minnisstaðan mun sýna „Sjálfvirkur útdráttur samhengis í gangi...". Bíddu í nokkrar sekúndur — hnappurinn losnar sjálfkrafa eftir að aðgerðin heppnast.
 
-Problem: Komunikat „Pamięć modelu przeładowana" blokuje grę.
-Przyczyna i rozwiązanie: Auto-streszczenie nie zwolniło bufora (np. rate limit API Anthropic). Zakończ grę komendą /koniec albo zamknij aplikację, potem wczytaj ją ponownie — silnik załaduje tylko stan z game.json bez historii ostatnich tur.
+Vandamál: Skilaboðin „Minni líkans ofhlaðið" loka á leikinn.
+Orsök og lausn: Sjálfvirki útdrátturinn losaði ekki biðminnið (t.d. vegna rate limit á Anthropic-API). Ljúktu leiknum með skipuninni /koniec eða lokaðu forritinu, hlaðdu honum síðan aftur — vélin hleður aðeins ástandinu úr game.json án sögu síðustu umferða.
 
-Problem: W trybie Wyborów silnik nie wygenerował przycisków, mimo że spodziewałem się ich.
-Przyczyna i rozwiązanie: Halucynacja modelu — mimo trybu 4 LLM zwrócił pustą tablicę wyborów. Aplikacja świadomie ukrywa wtedy obszar wyborów (zamiast pokazać pusty placeholder) i pozwala kontynuować free-textem. Następna tura prawdopodobnie wygeneruje wybory poprawnie.
+Vandamál: Í Valhamnum bjó vélin ekki til hnappa, þrátt fyrir að ég hafi búist við þeim.
+Orsök og lausn: Ofskynjun líkansins — þrátt fyrir ham 4 skilaði LLM-ið tómu valkostafylki. Forritið felur þá meðvitað valmöguleikasvæðið (í stað þess að sýna tóman placeholder) og leyfir þér að halda áfram með frjálsum texta. Næsta umferð býr líklega til valkostina rétt.
 
-Problem: Pliki .game.json i .story.jsonl nie są widoczne na pulpicie.
-Przyczyna i rozwiązanie: To celowe — runtime/ jest folderem systemowym dla zwykłych użytkowników, niewidocznym z poziomu eksploratora plików. Plik narracji (.txt) trafia do opowiesci/ — tam go znajdziesz.
+Vandamál: Skrárnar .game.json og .story.jsonl sjást ekki á skjáborðinu.
+Orsök og lausn: Þetta er viljandi — runtime/ er kerfismappa fyrir venjulega notendur, ósýnileg úr skráaskoðaranum. Frásagnarskráin (.txt) fer í opowiesci/ — þar finnurðu hana.
