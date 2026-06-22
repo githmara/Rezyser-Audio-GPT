@@ -357,14 +357,18 @@ def _wywolaj_claude(
     system:   str,
     messages: list[dict],
     timeout:  float,
+    segmenty: list[dict] | None = None,
+    wymusz_json: bool = False,
 ) -> tuple[str, str | None]:
-    """Wywołuje Claude Messages API (proza, BEZ reasoningu) → (tekst, stop_reason).
+    """Wywołuje warstwę LLM (proza, BEZ reasoningu) → (tekst, stop_reason).
 
     ``thinking=disabled`` — tryby narracyjne to czysta proza/JSON, reasoning tylko
     dodawałby latencję i koszt. ``temperature`` z przepisu (Sonnet 4.6 ją honoruje
     jako jedyny parametr próbkowania — bez ``top_p``). Timeout per-wywołanie przez
     ``with_options`` (SDK Anthropic nie przyjmuje ``timeout=`` na ``messages.create``).
-    Tekst sklejamy z bloków ``type="text"`` (Claude zwraca listę bloków treści).
+
+    ``segmenty`` (role pre-v18 dla ``openai_compat``) przekazujemy bez zmian — na
+    Anthropic są ignorowane, więc nazwa „Claude" w sygnaturze jest historyczna.
     """
     return cl.wywolaj_llm(
         klient,
@@ -374,6 +378,8 @@ def _wywolaj_claude(
         max_tokens=MAX_TOKENS_NARRACJA,
         temperature=przepis.temperatura,
         timeout=timeout,
+        segmenty=segmenty,
+        wymusz_json=wymusz_json,
     )
 
 
@@ -381,19 +387,24 @@ def buduj_payload(
     przepis: pr.PrzepisRezysera,
     snapshot: cr.SnapshotProjektu,
     user_text: str,
-) -> tuple[str, list[dict], str | None]:
-    """Buduje ``(system_prompt, messages, sufiks)`` dla Anthropic Messages API.
+) -> tuple[str, list[dict], list[dict], str | None]:
+    """Buduje ``(system_prompt, messages, segmenty, sufiks)`` dla warstwy LLM.
 
     Anthropic rozdziela prompt systemowy (parametr ``system=``) od ``messages``
     i wymaga, by PIERWSZA wiadomość miała ``role=user``. Kontekst poprzednich
-    wydarzeń (streszczenie + dotychczasowa fabuła) — w payloadzie OpenAI osobne
-    wiadomości ``role=assistant`` — składamy w JEDNĄ wiadomość ``user`` razem z
-    instrukcją. Kotwice (``[STRESZCZENIE...]``, ``[OBECNA FABUŁA]:``) zostają w
-    treści dosłownie, więc referencje z ``tryb_burza.yaml`` działają bez zmian.
+    wydarzeń (streszczenie + dotychczasowa fabuła) składamy w JEDNĄ wiadomość
+    ``user`` razem z instrukcją (``messages``) — to jest payload Anthropic, filar
+    jakości, bez zmian. Kotwice (``[STRESZCZENIE...]``, ``[OBECNA FABUŁA]:``)
+    zostają w treści dosłownie, więc referencje z ``tryb_burza.yaml`` działają.
+
+    RÓWNOLEGLE budujemy ``segmenty`` z PRAWDZIWYMI rolami (streszczenie + fabuła →
+    ``assistant``, instrukcja → ``user``) — czyta je wyłącznie gałąź ``openai_compat``
+    w :func:`core_llm.wywolaj_llm`, przywracając rozdział ról sprzed v18 (kontekst
+    jako wypowiedź modelu) na cudzych endpointach. Anthropic ``segmenty`` ignoruje.
 
     Returns:
-        Krotka ``(system_prompt, messages, nazwa_sufiksu)``. Trzecia wartość jest
-        diagnostyczna i trafia do :class:`WynikGeneracji.uzyty_sufiks`.
+        Krotka ``(system_prompt, messages, segmenty, nazwa_sufiksu)``. Czwarta
+        wartość jest diagnostyczna i trafia do :class:`WynikGeneracji.uzyty_sufiks`.
     """
     sufiks_nazwa = wybierz_sufiks(przepis, snapshot, user_text)
 
@@ -405,28 +416,36 @@ def buduj_payload(
 
     # Wrappery kontekstu (tagi-kotwice) z `rezyser/baza.yaml` (v17.10). 1:1 we
     # wszystkich językach — `tryb_burza.yaml` referuje [OBECNA FABUŁA] dosłownie,
-    # więc kotwice muszą zostać w treści. Składamy je w wiadomość `user` (Anthropic:
-    # pierwsza wiadomość MUSI być `user`, więc kontekstu nie podajemy jako `assistant`).
+    # więc kotwice muszą zostać w treści. `czesci` → zwinięty `user` (Anthropic),
+    # `segmenty` → te same bloki z rolą `assistant` (kontekst) / `user` (instrukcja)
+    # dla compat.
     czesci: list[str] = []
+    segmenty: list[dict] = []
     if snapshot.summary_text.strip():
         prefiks_streszczenia = pr.tekst_bazy(
             przepis.kod_jezyka, "wrapper_streszczenie",
             "[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
         )
-        czesci.append(f"{prefiks_streszczenia}\n{snapshot.summary_text}")
+        blok_streszczenia = f"{prefiks_streszczenia}\n{snapshot.summary_text}"
+        czesci.append(blok_streszczenia)
+        segmenty.append({"rola": "assistant", "content": blok_streszczenia})
 
     if snapshot.full_story.strip():
         prefiks_fabuly = pr.tekst_bazy(
             przepis.kod_jezyka, "wrapper_fabula", "[OBECNA FABUŁA]:",
         )
-        czesci.append(f"{prefiks_fabuly}\n{snapshot.full_story}")
+        blok_fabuly = f"{prefiks_fabuly}\n{snapshot.full_story}"
+        czesci.append(blok_fabuly)
+        segmenty.append({"rola": "assistant", "content": blok_fabuly})
 
     przypom = pr.buduj_przypomnienie(przepis)
-    czesci.append(user_text + przypom)
+    blok_instrukcji = user_text + przypom
+    czesci.append(blok_instrukcji)
+    segmenty.append({"rola": "user", "content": blok_instrukcji})
 
     messages: list[dict] = [{"role": "user", "content": "\n\n".join(czesci)}]
 
-    return system_prompt, messages, sufiks_nazwa
+    return system_prompt, messages, segmenty, sufiks_nazwa
 
 
 # =============================================================================
@@ -522,7 +541,7 @@ def generuj_burze(
                       zwrócił stop_reason="max_tokens" (ucięty JSON).
         Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) — propagowane.
     """
-    system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+    system, messages, segmenty, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
@@ -534,7 +553,7 @@ def generuj_burze(
         # Self-correction: przy retry dodajemy info o poprzednim błędzie
         # walidacji jako system message — model próbuje skorygować strukturę.
         if ostatni_blad is not None:
-            messages.append({
+            komunikat = {
                 "role": "user",
                 "content": (
                     f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
@@ -543,10 +562,12 @@ def generuj_burze(
                     "and MUST have the correct type. Return ONLY a single valid JSON "
                     "object — no prose, no markdown code fences, no commentary."
                 ),
-            })
+            }
+            messages.append(komunikat)
+            segmenty.append(_segment_systemowy(komunikat))
 
         surowy_text, stop_reason = _wywolaj_claude(
-            klient, przepis, system, messages, timeout,
+            klient, przepis, system, messages, timeout, segmenty, wymusz_json=True,
         )
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
@@ -604,9 +625,9 @@ def generuj_burze(
         wykryty = _wykryty_inny_jezyk(wartosci, przepis.kod_jezyka)
         if wykryty and not jezyk_skorygowano:
             jezyk_skorygowano = True
-            messages.append(
-                _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
-            )
+            komunikat = _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
+            messages.append(komunikat)
+            segmenty.append(_segment_systemowy(komunikat))
             continue
         if wykryty and jezyk_skorygowano:
             _dev_log(
@@ -772,7 +793,7 @@ def generuj_skrypt(
                       stop_reason="max_tokens" (ucięty JSON).
         Wyjątki Anthropic (RateLimitError, APITimeoutError, ...) — propagowane.
     """
-    system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+    system, messages, segmenty, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
 
     ostatni_blad: str | None = None
     surowy_text: str = ""
@@ -785,7 +806,7 @@ def generuj_skrypt(
 
     while True:
         if ostatni_blad is not None:
-            messages.append({
+            komunikat = {
                 "role": "user",
                 "content": (
                     f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
@@ -794,10 +815,12 @@ def generuj_skrypt(
                     "and MUST have the correct type. Return ONLY a single valid JSON "
                     "object — no prose, no markdown code fences, no commentary."
                 ),
-            })
+            }
+            messages.append(komunikat)
+            segmenty.append(_segment_systemowy(komunikat))
 
         surowy_text, stop_reason = _wywolaj_claude(
-            klient, przepis, system, messages, timeout,
+            klient, przepis, system, messages, timeout, segmenty, wymusz_json=True,
         )
         wywolan += 1
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
@@ -849,9 +872,9 @@ def generuj_skrypt(
         )
         if wykryty and not jezyk_skorygowano:
             jezyk_skorygowano = True
-            messages.append(
-                _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
-            )
+            komunikat = _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
+            messages.append(komunikat)
+            segmenty.append(_segment_systemowy(komunikat))
             continue
         if wykryty and jezyk_skorygowano:
             _dev_log(
@@ -1006,7 +1029,7 @@ def generuj_fragment(
         Wyjątki Anthropic (``RateLimitError``, ``APITimeoutError``,
         ``APIError``) są propagowane – GUI pokazuje je w dialogu błędu.
     """
-    system, messages, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
+    system, messages, segmenty, sufiks_nazwa = buduj_payload(przepis, snapshot, user_text)
 
     # v17.11.1: pojedyncze wywołanie owinięte w pętlę, żeby bramka językowa
     # mogła dać JEDEN dodatkowy strzał z instrukcją tłumaczenia (D2). Struktury
@@ -1014,7 +1037,7 @@ def generuj_fragment(
     jezyk_skorygowano = False
     while True:
         tekst, stop_reason = _wywolaj_claude(
-            klient, przepis, system, messages, timeout,
+            klient, przepis, system, messages, timeout, segmenty,
         )
 
         # 1) Detekcja odrzucenia — przed wszystkim innym. Tag infrastruktury
@@ -1042,9 +1065,9 @@ def generuj_fragment(
         wykryty = _wykryty_inny_jezyk(tekst, przepis.kod_jezyka)
         if wykryty and not jezyk_skorygowano:
             jezyk_skorygowano = True
-            messages.append(
-                _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
-            )
+            komunikat = _komunikat_korekty_jezyka(przepis.jezyk_odpowiedzi, wykryty)
+            messages.append(komunikat)
+            segmenty.append(_segment_systemowy(komunikat))
             continue
         if wykryty and jezyk_skorygowano:
             _dev_log(
@@ -1362,3 +1385,13 @@ def _komunikat_korekty_jezyka(jezyk_odpowiedzi: str, wykryty: str) -> dict[str, 
             f"translate only the narrative/prose values."
         ),
     }
+
+
+def _segment_systemowy(komunikat: dict) -> dict:
+    """Z meta-wiadomości ``messages`` (rola ``user`` — Anthropic) robi segment
+    ``system`` dla ``openai_compat``.
+
+    Retry-walidacja i korekta języka to instrukcje meta (nie wkład użytkownika) —
+    w payloadzie z rolami należą do ``system``. Anthropic dostaje je dalej jako
+    kolejny ``user`` (kolejne ``user`` API i tak skleja), więc filar bez zmian."""
+    return {"rola": "system", "content": komunikat["content"]}

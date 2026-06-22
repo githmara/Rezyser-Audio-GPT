@@ -411,6 +411,10 @@ def _tlumacz_blok(
     """
     if kontekst:
         # Payload LLM jednojęzyczny (EN), spójnie z `_PROMPT_SYSTEMOWY_TEMPLATE`.
+        # `messages` → zwinięty `user` (Anthropic, filar): poprzedni blok jako materiał
+        # referencyjny „NIE powtarzać". `segmenty` → ten sam kontekst z rolą `assistant`
+        # (wypowiedź modelu) + świeży tekst jako `user`, dla `openai_compat` — rozdział
+        # ról sprzed v18 (Anthropic `segmenty` ignoruje).
         user_content = (
             "[CRITICAL: Continue translating the text below. Keep absolute "
             "consistency of terminology, tone and style with the already-translated "
@@ -421,8 +425,19 @@ def _tlumacz_blok(
             "## Text to translate now:\n"
             f"{blok}"
         )
+        segmenty: list[dict] = [
+            {"rola": "assistant", "content": kontekst},
+            {"rola": "user", "content": (
+                "[CRITICAL: Continue translating the text below. Keep absolute "
+                "consistency of terminology, tone and style with your preceding "
+                "translation above.]\n\n"
+                "## Text to translate now:\n"
+                f"{blok}"
+            )},
+        ]
     else:
         user_content = blok
+        segmenty = [{"rola": "user", "content": blok}]
 
     fragment_raw, stop_reason = cl.wywolaj_llm(
         klient,
@@ -432,6 +447,7 @@ def _tlumacz_blok(
         max_tokens=MAX_TOKENS_BLOK,
         temperature=0.3,
         timeout=TIMEOUT_S,
+        segmenty=segmenty,
     )
     fragment = fragment_raw.strip()
     if stop_reason != "max_tokens":

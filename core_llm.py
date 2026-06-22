@@ -20,6 +20,7 @@ wciągany do `.exe` (lekki bundla single-provider — patrz CLAUDE.md pkt 7).
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import dataclass
 from typing import Any
 
@@ -160,6 +161,143 @@ def _czy_timeout(exc: Exception) -> bool:
     return type(exc).__name__ == "APITimeoutError"
 
 
+def _czy_zla_struktura(exc: Exception) -> bool:
+    """Czy błąd to odrzucenie STRUKTURY payloadu (zła rola/kolejność), nie limit/sieć.
+
+    Heurystyka bez importu SDK: nazwa klasy (``BadRequestError`` /
+    ``UnprocessableEntityError``) lub status 400/422. 429/timeout/5xx świadomie
+    NIE są tu łapane — to nie problem struktury, więc nie chcemy ich maskować
+    fallbackiem (lecą wyżej do :func:`wywolaj_llm` → ``BladLimituLLM`` itp.).
+    Używane wyłącznie w gałęzi ``openai_compat`` do decyzji o cichym fallbacku
+    z payloadu z rolami (system/assistant/user) na pojedynczy blok ``user``.
+    """
+    if type(exc).__name__ in ("BadRequestError", "UnprocessableEntityError"):
+        return True
+    status = getattr(exc, "status_code", None)
+    if status is None:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+    return status in (400, 422)
+
+
+def _dev_log(komunikat: str) -> None:
+    """Strażowany ``print`` na stdout dewelopera (packaged: stdout None → milczy).
+
+    ``core_llm`` jest wx-free i NIE importuje ``core_rezyser`` (uniknięcie cyklu),
+    więc ma własny guard analogiczny do ``core_rezyser._dev_log_runtime`` — w paczce
+    release apka chodzi bez konsoli, goły ``print`` mógłby ubić proces.
+    """
+    try:
+        if sys.stdout is not None:
+            print(f"[core_llm] {komunikat}", file=sys.stdout)
+    except Exception:  # noqa: BLE001 — log nigdy nie może ubić wywołania
+        pass
+
+
+# Role akceptowane w segmentach `openai_compat` (poza nimi → degradacja do "user").
+_ROLE_DOZWOLONE = ("system", "assistant", "user")
+
+
+def _openai_chat(
+    klient: "KlientLLM",
+    mdl: str,
+    msgs: list[dict],
+    max_tokens: int,
+    temperature: float,
+    timeout: float,
+    response_format: dict | None = None,
+) -> tuple[str, str | None]:
+    """Pojedyncze wywołanie ``chat.completions`` + normalizacja wyniku/stop_reason.
+
+    ``response_format`` (``{"type": "json_object"}`` dla trybów JSON) doklejamy
+    tylko, gdy podane — endpoint, który go nie obsłuży, rzuci 400/422, a drabina
+    w :func:`_wywolaj_openai_compat` zdegraduje wywołanie. ``finish_reason=="length"``
+    mapujemy na ``"max_tokens"`` (jak Anthropic), żeby wołający trzymali JEDEN warunek
+    ucięcia (guard urwanej prozy, tytuły).
+    """
+    kwargs: dict[str, Any] = dict(
+        model=mdl,
+        messages=msgs,
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
+    if response_format is not None:
+        kwargs["response_format"] = response_format
+    resp = klient.sdk.with_options(timeout=timeout).chat.completions.create(**kwargs)
+    choice = resp.choices[0]
+    tekst = choice.message.content or ""
+    finish = getattr(choice, "finish_reason", None)
+    return tekst, ("max_tokens" if finish == "length" else finish)
+
+
+def _wywolaj_openai_compat(
+    klient: "KlientLLM",
+    mdl: str,
+    system: str,
+    messages: list[dict],
+    segmenty: list[dict] | None,
+    wymusz_json: bool,
+    max_tokens: int,
+    temperature: float,
+    timeout: float,
+) -> tuple[str, str | None]:
+    """Gałąź OpenAI-compatible z payloadem ROL + ``response_format`` + drabiną degradacji.
+
+    Dwie „zaawansowane" cechy payloadu przywrócone z ery pre-v18 (obie z cichym
+    fallbackiem, bo egzotyczny gateway może ich nie obsłużyć):
+      * **role** (gdy ``segmenty`` podane): kontekst narracyjny jako ``assistant``,
+        retry/korekty języka jako ``system``, instrukcja jako ``user`` — odtwarza
+        jakość utraconą przez zwijanie do jednego ``user``.
+      * **response_format** (gdy ``wymusz_json``): ``{"type": "json_object"}`` dla
+        trybów, które WALIDUJĄ JSON (Burza/Skrypt/tura Opowieści). Sygnał jest
+        JAWNY (flaga wołającego), NIE heurystyką „json w prompcie" — ta dawałaby
+        false-positive np. na /visualize, którego prompt zawiera „Format: czysty
+        tekst (nie JSON)".
+
+    Drabina degradacji (najpełniejszy → dotychczasowe zachowanie v18.3): degradujemy
+    NAJPIERW ``response_format`` (najczęściej nieobsługiwany), potem role, aż do
+    płaskiego ``user`` bez formatu. Każdy szczebel niżej po błędzie STRUKTURY
+    (400/422 via :func:`_czy_zla_struktura`). Na OSTATNIM szczeblu błąd leci wyżej;
+    nie-struktura (429/timeout/sieć) leci wyżej NATYCHMIAST (→ :func:`wywolaj_llm`).
+    """
+    plaskie: list[dict] = list(messages)
+    if system:
+        plaskie = [{"role": "system", "content": system}, *plaskie]
+
+    bogate: list[dict] | None = None
+    if segmenty:
+        bogate = [{"role": "system", "content": system}] if system else []
+        for s in segmenty:
+            rola = s.get("rola") or "user"
+            if rola not in _ROLE_DOZWOLONE:
+                rola = "user"
+            bogate.append({"role": rola, "content": s.get("content", "")})
+
+    rf: dict | None = {"type": "json_object"} if wymusz_json else None
+    glowny = bogate if bogate is not None else plaskie
+
+    # Szczeble od najpełniejszego do „flat bez formatu" (= v18.3). Płaski user-only
+    # ZAWSZE jest ostatni — gwarantuje powrót do dotychczasowego zachowania.
+    proby: list[tuple[list[dict], dict | None, str]] = []
+    if rf is not None:
+        proby.append((glowny, rf, "json" + ("+role" if bogate is not None else "")))
+    if bogate is not None:
+        proby.append((bogate, None, "role"))
+    proby.append((plaskie, None, "flat"))
+
+    ostatni = len(proby) - 1
+    for i, (msgs, fmt, opis) in enumerate(proby):
+        try:
+            return _openai_chat(klient, mdl, msgs, max_tokens, temperature, timeout, fmt)
+        except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
+            if i == ostatni or not _czy_zla_struktura(exc):
+                raise  # wyczerpana drabina ALBO 429/timeout/sieć → wyżej
+            _dev_log(
+                f"openai_compat: endpoint odrzucił payload '{opis}' "
+                f"({type(exc).__name__}) — degraduję do prostszego."
+            )
+    raise RuntimeError("unreachable")  # pętla zawsze zwraca lub rzuca
+
+
 def wywolaj_llm(
     klient: KlientLLM,
     *,
@@ -169,6 +307,8 @@ def wywolaj_llm(
     max_tokens: int,
     temperature: float,
     timeout: float,
+    segmenty: list[dict] | None = None,
+    wymusz_json: bool = False,
 ) -> tuple[str, str | None]:
     """Wywołuje LLM i zwraca ``(tekst, stop_reason)`` — wspólnie dla obu providerów.
 
@@ -182,6 +322,21 @@ def wywolaj_llm(
       * **stop_reason** — OpenAI ``finish_reason=="length"`` mapujemy na
         ``"max_tokens"`` (jak Anthropic), żeby wołający trzymali JEDEN warunek
         ucięcia (guard urwanej prozy, tytuły).
+
+    ``segmenty`` (opcjonalne) — równoległa reprezentacja ``messages`` z PRAWDZIWYMI
+    rolami (``[{"rola": "system"|"assistant"|"user", "content": str}, ...]``).
+    Czyta je **wyłącznie** gałąź ``openai_compat`` (przywrócenie ról pre-v18 — patrz
+    :func:`_wywolaj_openai_compat`). Gałąź **Anthropic IGNORUJE** ``segmenty`` i
+    używa ``messages`` dokładnie jak dotąd (filar jakości pozostaje nietknięty;
+    Anthropic wymaga pierwszej wiadomości ``user`` i nie przyjmuje luźnych ``system``).
+    Brak ``segmenty`` → compat działa po staremu (płaski blok ``user``).
+
+    ``wymusz_json`` (opcjonalne) — JAWNY sygnał, że wołający WALIDUJE JSON (Burza/
+    Skrypt/tura Opowieści). W ``openai_compat`` przekłada się na
+    ``response_format={"type": "json_object"}`` (z degradacją gdy endpoint go nie
+    obsłuży). Anthropic IGNORUJE — wymusza JSON promptem, nie parametrem. NIE używamy
+    heurystyki „json w prompcie": /visualize ma prompt „czysty tekst (nie JSON)",
+    więc substring dałby false-positive i zepsuł prozę.
 
     W trybie ``openai_compat`` nazwę modelu nadpisuje ``klient.model_override``
     (``LLM_MODEL``) — argument ``model`` (z przepisu YAML) jest wtedy ignorowany.
@@ -197,21 +352,12 @@ def wywolaj_llm(
 
     try:
         if klient.provider == PROVIDER_OPENAI_COMPAT:
-            msgs: list[dict] = list(messages)
-            if system:
-                msgs = [{"role": "system", "content": system}, *msgs]
-            resp = klient.sdk.with_options(timeout=timeout).chat.completions.create(
-                model=mdl,
-                messages=msgs,
-                max_tokens=max_tokens,
-                temperature=temperature,
+            return _wywolaj_openai_compat(
+                klient, mdl, system, messages, segmenty, wymusz_json,
+                max_tokens, temperature, timeout,
             )
-            choice = resp.choices[0]
-            tekst = choice.message.content or ""
-            finish = getattr(choice, "finish_reason", None)
-            return tekst, ("max_tokens" if finish == "length" else finish)
 
-        # Anthropic (domyślny filar jakości)
+        # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo nieużywane
         resp = klient.sdk.with_options(timeout=timeout).messages.create(
             model=mdl,
             system=system,

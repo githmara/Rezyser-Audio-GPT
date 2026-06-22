@@ -307,16 +307,20 @@ def _wywolaj_claude(
     max_tokens:  int,
     temperature: float,
     timeout:     float,
+    segmenty:    list[dict] | None = None,
+    wymusz_json: bool = False,
 ) -> tuple[str, str | None]:
-    """Wywołuje Claude Messages API (proza/JSON, BEZ reasoningu) → (tekst, stop_reason).
+    """Wywołuje warstwę LLM (proza/JSON, BEZ reasoningu) → (tekst, stop_reason).
 
     Klon ``rezyser_ai._wywolaj_claude`` dostrojony do Opowieści: model/temperatura/
     max_tokens podajemy jawnie, bo Opowieści nie mają dataclassy ``PrzepisRezysera``
     — parametry żyją w dictach YAML. ``thinking=disabled`` (narracja/JSON, reasoning
     tylko dodawałby latencję i koszt). ``temperature`` honoruje Sonnet 4.6 (jedyny
     parametr próbkowania — bez ``top_p``). Timeout per-wywołanie przez
-    ``with_options`` (Messages API nie przyjmuje ``timeout=`` na ``create``). Tekst
-    sklejamy z bloków ``type="text"`` (Claude zwraca listę bloków treści).
+    ``with_options`` (Messages API nie przyjmuje ``timeout=`` na ``create``).
+
+    ``segmenty`` (role pre-v18 dla ``openai_compat``) przekazujemy bez zmian — na
+    Anthropic ignorowane (nazwa „Claude" w sygnaturze jest historyczna).
     """
     return cl.wywolaj_llm(
         klient,
@@ -326,6 +330,8 @@ def _wywolaj_claude(
         max_tokens=max_tokens,
         temperature=temperature,
         timeout=timeout,
+        segmenty=segmenty,
+        wymusz_json=wymusz_json,
     )
 
 
@@ -666,13 +672,20 @@ def generuj_ture(
     # `assistant`. Schema i tak siedzi w prompt-systemowym; tracimy tylko mikro-
     # optymalizację „model kontynuuje własną wypowiedź", spójnie z `buduj_payload`
     # Reżysera (cały kontekst w jednej wiadomości user).
+    # `czesci` → zwinięty `user` (Anthropic, filar). `segmenty` → te same bloki z
+    # rolą `assistant` (poprzedni JSON = wypowiedź modelu) / `user` (payload tury) dla
+    # `openai_compat` — przywraca rozdział ról sprzed v18 na cudzych endpointach.
     czesci: list[str] = []
+    segmenty: list[dict] = []
     if snapshot.ostatni_surowy_json and snapshot.ostatni_surowy_json.strip():
-        czesci.append(
+        blok_poprzedni = (
             "[PREVIOUS TURN — your last JSON output; keep continuity and the same "
             "structure]:\n" + snapshot.ostatni_surowy_json
         )
+        czesci.append(blok_poprzedni)
+        segmenty.append({"rola": "assistant", "content": blok_poprzedni})
     czesci.append(user_payload)
+    segmenty.append({"rola": "user", "content": user_payload})
     messages: list[dict] = [{"role": "user", "content": "\n\n".join(czesci)}]
 
     ostatni_blad: str | None = None
@@ -682,7 +695,7 @@ def generuj_ture(
         # `user` (Anthropic nie przyjmuje dowolnych `system` w `messages`; kolejne
         # `user` API skleja w jedną turę). Wzorzec 1:1 z `rezyser_ai.generuj_burze`.
         if ostatni_blad is not None:
-            messages.append({
+            komunikat = {
                 "role": "user",
                 "content": (
                     f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
@@ -691,11 +704,15 @@ def generuj_ture(
                     "and MUST have the correct type. Return ONLY a single valid JSON "
                     "object — no prose, no markdown code fences, no commentary."
                 ),
-            })
+            }
+            messages.append(komunikat)
+            # Retry-walidacja = instrukcja meta → `system` w payloadzie z rolami (compat).
+            segmenty.append({"rola": "system", "content": komunikat["content"]})
 
         surowa, stop_reason = _wywolaj_claude(
             klient, efektywny_model, prompt_systemowy, messages,
             max_tokens=MAX_TOKENS_OUT, temperature=temperatura, timeout=TIMEOUT_S,
+            segmenty=segmenty, wymusz_json=True,
         )
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
