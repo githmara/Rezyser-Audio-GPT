@@ -1,4 +1,4 @@
-Audio Director GPT — Interactive Stories Module (18.5.0 – Release Edition)
+Audio Director GPT — Interactive Stories Module (18.5.1 – Release Edition)
 
 The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
@@ -69,21 +69,21 @@ An empty rules field = no additional rules (default behavior, as in v15.0). You 
 Note: world rules require an active game. If you click "Edit world rules…" without a loaded/started game, you will receive the message "No active game" — first click "New Game" or load a saved game.
 
 
-STEP 5: Slash Commands — Quick Actions Without API
+STEP 5: Slash commands — quick actions without API
 
-In the action field, you can enter a command starting with a slash `/` at any time. Commands are local (they do not incur any API calls) and work independently of the game mode. Both Polish and English variants are accepted:
+In the action field you can type a command starting with a slash `/` at any time. Commands are local (they do not cost any API calls) and work independently of the game mode. Both Polish and English variants are accepted:
 
-/zapisz, /save — forces a manual save of the game state. Autosave occurs after each turn, so this command is mainly for assurance before closing the application.
+/zapisz, /save — forces a manual save of the game state. Auto-save runs after every turn, so this command is mainly for peace of mind before closing the application.
 
-/wczytaj, /load — opens a game selection dialog with a list of available names (from v15.2.3, instead of the system file dialog — a direct list of saved games from the runtime/opowiesci/ folder detected by the presence of a .game.json file). NVDA reads the list naturally, so a blind player does not need to navigate through the system file dialog. After selecting, the game name, mode, and full narration are restored — you can continue from the turn where you left off. The "Load" button behaves identically.
+/wczytaj, /load — opens a game selection dialog with a list of available names (from v15.2.3, instead of the system file dialog — a direct list of saved games from the runtime/opowiesci/ folder, detected by the presence of a .game.json file). NVDA reads the list naturally; a blind player does not need to navigate the system file dialog. After selecting, the game name, mode, and full narrative are restored — you can continue from the turn where you left off. The "Load" button behaves identically.
 
-The narrative engine for all Story modes uses a single Anthropic Claude Sonnet 4.6 model (from v18.1; previously an OpenAI model was selected per mode). The stronger model rigorously adheres to the rules of the world — this is especially important in the Lesser Evil mode, where each option must remain realistically disadvantageous.
+The narrative engine for all Stories modes uses a single, shared model (by default and recommended: Anthropic Claude Sonnet 4.6; from v18.4, an advanced user can specify a custom endpoint compatible with OpenAI — see the main manual, STEP 2B). A more powerful model strictly adheres to the rules of the world — this is especially important in Lesser Evil mode, where every option must remain genuinely unfavorable.
 
-/wizualizuj <opis>, /visualize <opis> — a multisensory description of the current scene. It does not change the game state or propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog, it is NOT added to the narration or saved in the audiobook file. Example: "/wizualizuj how the guard looks" or "/wizualizuj the smell of the café".
+/wizualizuj <opis>, /visualize <opis> — a multisensory description of the current scene. It does not change the game state or propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog; it is NOT appended to the narrative or saved in the audiobook file. Example: "/wizualizuj how the guard looks" or "/wizualizuj the smell of the café".
 
-/pomoc, /help — displays a dialog window with a list of all available commands. The dialog is readonly and NVDA-friendly — the text field automatically gets focus, and the screen reader immediately reads the entire list without the need for navigation.
+/pomoc, /help — displays a dialog window with a list of all available commands. The dialog is read-only and NVDA-friendly — the text field receives focus automatically, and the screen reader immediately reads the entire list without requiring navigation.
 
-/koniec, /quit — closes the application (after autosaving the turn in progress).
+/koniec, /quit — closes the application (after auto-saving the current turn).
 
 
 STEP 6: Game Files — where to find your data

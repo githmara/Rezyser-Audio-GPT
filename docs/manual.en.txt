@@ -1,4 +1,4 @@
-Audio AI Director Manual - Complete Guide (Version 18.5.0 – Release Edition)
+Audio AI Director Manual - Complete Guide (Version 18.5.1 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 
@@ -60,13 +60,13 @@ Tip for NVDA users: the "Open file location" context menu option invoked with th
 Tip: the "Open file location" option is the native name for the Polish version of Windows. In the English system, it is "Open file location", in other language versions — similarly in the local operating system language.
 
 
-STEP 2: API Setup (Anthropic / Claude key)
+STEP 2: API Power Supply (recommended Anthropic / Claude key)
 
-From version 18.2, the application uses a single artificial intelligence provider — Anthropic (Claude) — and requires ONE API key in the golden_key.env file:
+The recommended and default AI provider is Anthropic (Claude) — all application prompts are fine-tuned for it, delivering the highest narrative quality and the best adherence to world-building rules. In this (recommended) configuration, only ONE API key is needed in the golden_key.env file:
 
 •  Anthropic (Claude) key — powers the ENTIRE AI engine: Director narration (audiobook, radio drama, brainstorming), Stories mode, Polyglot (translator), as well as chapter title generation and content language detection. Starts with sk-ant-.
 
-If you are upgrading from an older version: the former OpenAI key is no longer needed — you may leave or remove its line in golden_key.env; the application ignores it.
+If you are upgrading from an older version: the former OpenAI key is no longer needed for the default configuration — you can leave or remove its line in golden_key.env; the application ignores it (unless you are deliberately configuring a different provider — see STEP 2B below).
 
 How to obtain an Anthropic key:
 1. Create an account at console.anthropic.com and add funds (Billing / Plans tab).
@@ -676,3 +676,21 @@ Subfolders in dictionaries/<language-code>/ (as seen in the Rule Manager):
 Folders with your saves (next to the program):
 - skrypty (scripts) — Director projects: narration .txt, World Book .md
 - opowiesci (stories) — saves of interactive Stories
+
+
+STEP 2B (advanced, optional): Custom AI provider compatible with OpenAI
+
+Most users should stick with the recommended Anthropic (STEP 2) — it delivers the highest quality. However, if you have your own reason (cost, access, privacy, your own local model), starting from version 18.4 you can point to ANY endpoint compatible with the OpenAI API — for example OpenRouter, Groq, Fireworks, DeepSeek, local Ollama, or an OpenAI-compatible Gemini endpoint. The entire AI engine then follows a single path to that endpoint, with no separate per-provider integration.
+
+This is an option for advanced users: you configure it manually in the golden_key.env file, adding alongside (or instead of) the Anthropic key three lines plus the key for your chosen provider:
+
+LLM_PROVIDER=openai_compat
+LLM_BASE_URL=endpoint_address (e.g. https://openrouter.ai/api/v1)
+LLM_MODEL=model_name_at_provider (e.g. openai/gpt-4o-mini)
+OPENAI_API_KEY=your_key_for_that_provider
+
+How it works:
+•  When LLM_PROVIDER=openai_compat, the ENTIRE AI engine (Director, Stories, Polyglot, titles, language detection) uses the specified endpoint, and LLM_MODEL overrides the model name from the configuration files.
+•  When the LLM_PROVIDER line is absent (or set to anthropic), the application behaves as in STEP 2 — using the Anthropic key exclusively. You don't need to change anything.
+
+Important (quality): the application's system prompts are written and tuned for Claude. A different model may deliver lower quality — it may follow world rules less strictly, lose JSON structure in choice-based modes, or return text in the wrong language. This is a conscious cost↔quality trade-off on your part. If the best result matters to you, stick with Anthropic.

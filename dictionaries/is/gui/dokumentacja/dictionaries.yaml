@@ -99,31 +99,40 @@ tresc:
 
     Inni í hverri af þessum skrám er "kerfisbundin upphafssetning" dýrmætasti hlutinn — löng leiðbeining fyrir gervigreindina um hvernig hún á að haga sér í viðkomandi ham. Ef þér finnst t.d. að Hljóðbókarhamurinn sé "of blómleg" eða að Hugmyndavindan bjóði of oft upp á töfralausnir, geturðu stillt þessi texta eftir þínum smekk, vistað og forritið mun hlaða þína útgáfu næst þegar það er ræst. Engin forritun.
   co_to_tryb_opowiesci: |
-    Hvað er "Sögu hamur"?
-    ----------------------
+    Hvað er „Söguhamur"?
+    ----------------------------
 
-    Mappan "opowiesci/" inniheldur {liczba_trybow_opowiesci} skrár sem lýsa öðrum aðalham forritsins — gagnvirkar textaleikir sem eru stjórnaðir af gervigreind sem frásagnarmótor. Ólíkt Leikstjóra hamnum (þar sem þú býrð til FULLUNNIN hljóðbók til að spila í TTS), er Sögu hamur samtal í lotum við líkan sem leiðir þig í gegnum kraftmikla sögu:
+    Mappan „opowiesci/" inniheldur {liczba_trybow_opowiesci} skrár sem lýsa öðrum
+    aðalham forritsins — gagnvirkar textaleikir stýrðar af gervigreind í hlutverki
+    frásagnarvélar. Ólíkt Leikstjóraham (þar sem þú býrð til TILBÚNA
+    hljóðbók til að spila í TTS), er Söguhamur umræður í hverri umferð
+    með líkani sem leiðir þig í gegnum kvika sögu:
 
-    - tryb_wyborow.yaml      — Val (3-5 tölusettir valkostir A-E í lok
-                               hverrar lotu, mest innsæi hamur fyrir
+    - tryb_wyborow.yaml      — Val (3-5 númeraðir valkostir A-E í lok
+                               hverrar umferðar, þægilegasti hamurinn fyrir
                                blinda leikmenn)
     - tryb_mniejsze_zlo.yaml — Minna illt (eins og Val, en hver valkostur er
-                               óhagstæður; frá v15.2 endurnýtanleg flaska sem
-                               ZERO-númeraður valkostur örvæntingarfullrar björgunar)
-    - tryb_swobodny.yaml     — Frjáls (hvaða aðgerð sem er með frjálsum texta, mótorinn
-                               leggur til 1-3 tillögur en krefst ekki vals)
-    - tryb_burza.yaml        — Hugmyndastormur (innri útsending sem býr til
-                               tillögur um þróun senu fyrir frásagnarmótorinn)
-    - baza.yaml              — sameiginlegar grunnreglur (lengd lotu, bann við
-                               samantektum, anti-closure fyrirmæli)
-    - zaczatki.yaml          — ævintýrabyrjanir (3 upphafs uppsetningar heims
-                               til að velja úr við nýjan leik)
-    - streszczenie.yaml      — samantektarframleiðandi fyrir langa leiki (þjöppun
-                               sögunnar fyrir samhengi glugga líkansins)
-    - cinematic_warning.yaml — viðvaranir um ofbeldisfullar/dramatískar
-                               senur (samræmi við óskir leikmanns)
+                               óhagstæður; frá v15.2 endurnýtanleg hettuglös sem
+                               NÚLL-númeraður valkostur örvæntingarfullrar björgunar)
+    - tryb_swobodny.yaml     — Frjáls (hvaða aðgerð sem er með frjálsum texta, vélin
+                               leggur til 1-3 tillögur en þvingar ekki val)
+    - tryb_burza.yaml        — Hugstormur (innri dreifing sem myndar
+                               tillögur að þróun senu fyrir frásagnarvélina)
+    - baza.yaml              — sameiginlegar grunnreglur (lengd umferðar, bann við
+                               samantektum, anti-closure tilskipun)
+    - zaczatki.yaml          — ævintýraupphafsstaðir (3 upphafsuppsetningar heimsins
+                               til að velja við nýjan leik)
+    - streszczenie.yaml      — samantektarforritari fyrir langa leiki (þjöppun
+                               sögu fyrir samhengisglugga líkansins)
+    - cinematic_warning.yaml — viðvaranir um grimmar/dramatískar
+                               senu (í samræmi við óskir leikmanna)
 
-    Eins og í Leikstjóra hamnum inniheldur hver skrá "kerfis hvatningu" til að breyta. Þú getur stillt stíl sögumannsins (t.d. minna blómlegur), breytt lengd lotu, bætt við þínum eigin frásagnar fyrirmælum. Frá v18.1 nota allir Sögu hamir einn Anthropic Claude Sonnet 4.6 módel — öflugra módel sem fylgir ströngum reglum heimsins (lykilatriði í Minna illt hamnum, þar sem hver valkostur verður að vera raunverulega óhagstæður).
+    Eins og í Leikstjóraham inniheldur hver skrá „kerfisfyrirmæli" til breytinga.
+    Þú getur fínstillt stíl sögumanna (t.d. minna blómrænt), breytt lengd
+    umferðar, bætt við eigin sögulegum tilskipunum. Frá v18.1 nota allir Söguhamar
+    eitt sameiginlegt líkan (sjálfgefið og mælt með Anthropic
+    Claude Sonnet 4.6) — sterkara líkan fylgir reglum heimsins af nákvæmni
+    (lykilatriði í Minna-illt-ham, þar sem hver valkostur verður að vera raunverulega óhagstæður).
   jak_zaczac: |
     Hvernig á að byrja að leika sér — þrjú erfiðleikastig
     -------------------------------------------

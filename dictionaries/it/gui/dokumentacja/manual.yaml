@@ -77,23 +77,23 @@ tresc:
 
     Suggerimento: l'opzione "Apri percorso file" è il nome nativo per la versione italiana di Windows. Nel sistema inglese si chiama "Open file location", nelle altre versioni linguistiche — analogamente nella lingua locale del sistema operativo.
   krok_2_klucz_api: |
-    PASSO 2: Configurazione API (chiave Anthropic / Claude)
+    PASSO 2: Configurazione API (chiave Anthropic / Claude consigliata)
 
-    Dalla versione 18.2 l'applicazione utilizza un unico fornitore di intelligenza artificiale — Anthropic (Claude) — e richiede UNA SOLA chiave API nel file golden_key.env:
+    Il fornitore AI consigliato e predefinito è Anthropic (Claude) — tutti i prompt dell'applicazione sono ottimizzati per esso, quindi garantisce la massima qualità narrativa e il miglior rispetto delle regole del mondo. In questa variante (raccomandata) è sufficiente UNA SOLA chiave API nel file golden_key.env:
 
     •  Chiave Anthropic (Claude) — alimenta L'INTERO motore AI: la narrazione del Reżyser (audiolibro, teatro letto, brainstorming), la modalità Opowieści, il Poliglota (traduttore) e l'assegnazione dei titoli ai capitoli e il rilevamento della lingua del contenuto. Inizia con sk-ant-.
 
-    Se stai aggiornando da una versione precedente: la vecchia chiave OpenAI non è più necessaria — puoi lasciare o rimuovere la sua riga in golden_key.env, l'applicazione la ignora.
+    Se stai aggiornando da una versione precedente: la vecchia chiave OpenAI non è più necessaria per la variante predefinita — puoi lasciare o rimuovere la sua riga in golden_key.env, l'applicazione la ignora (a meno che tu non stia configurando consapevolmente un altro fornitore — vedi PASSO 2B più avanti).
 
     Come ottenere la chiave Anthropic:
     1. Crea un account su console.anthropic.com e ricarica il credito (scheda Billing / Plans).
     2. Genera la chiave nella sezione API Keys (inizia con sk-ant-). Copiala subito — a volte viene mostrata una sola volta.
 
     Come inserire la chiave nel programma:
-    3. Nella schermata iniziale del programma fai clic sul pulsante "{home.btn_generate}". Il sistema creerà automaticamente un file di configurazione pulito nella posizione corretta e aprirà il Blocco note con un modello pronto per la modifica.
+    3. Nella schermata iniziale del programma, fai clic sul pulsante "{home.btn_generate}". Il sistema creerà automaticamente un file di configurazione pulito nella posizione corretta e aprirà il Blocco note con un modello pronto per la modifica.
     4. Nel file aperto vedrai la riga: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina il testo segnaposto e incolla la tua chiave direttamente dopo il segno di uguale (senza spazi e senza virgolette). Salva il file e riavvia l'applicazione.
 
-    Suggerimento: Dopo il riavvio l'applicazione verificherà il file e nella sezione "{home.heading_system_check}" mostrerà lo stato della chiave. Deve essere verde affinché tutti i moduli AI siano pronti all'uso. Se la chiave è assente o errata, il programma lo indicherà chiaramente e consentirà di aprire l'editor di testo per correggere rapidamente l'errore.
+    Suggerimento: Dopo il riavvio, l'applicazione verificherà il file e nella sezione "{home.heading_system_check}" mostrerà lo stato della chiave. Deve essere verde affinché tutti i moduli AI siano pronti all'uso. Se la chiave è assente o errata, il programma lo indicherà chiaramente e consentirà di aprire l'editor di testo per correggere rapidamente l'errore.
   krok_3_glowne_studio: |
     PASSO 3: Studio Principale del Regista
 
@@ -682,3 +682,20 @@ tresc:
     Cartelle con i tuoi salvataggi (accanto al programma):
     - skrypty (scripts) — progetti del Regista: narrazione .txt, Libro del Mondo .md
     - opowiesci (stories) — salvataggi delle Storie interattive
+  krok_2b_dostawca_zaawansowany: |
+    PASSO 2B (avanzato, opzionale): Provider AI personalizzato compatibile con OpenAI
+
+    La maggior parte degli utenti dovrebbe restare con il consigliato Anthropic (PASSO 2) — è quello che garantisce la qualità più elevata. Se però hai una ragione specifica (costo, accesso, privacy, modello locale personalizzato), dalla versione 18.4 puoi indicare QUALSIASI endpoint compatibile con le API OpenAI — ad esempio OpenRouter, Groq, Fireworks, DeepSeek, Ollama locale o un endpoint Gemini compatibile con OpenAI. L'intero motore AI segue allora un unico percorso verso quell'endpoint, senza integrazione separata per provider.
+
+    Questa è un'opzione per utenti avanzati: la configuri manualmente nel file golden_key.env, aggiungendo accanto (o al posto) della chiave Anthropic tre righe e la chiave del provider scelto:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=indirizzo_endpoint (es. https://openrouter.ai/api/v1)
+    LLM_MODEL=nome_modello_presso_il_provider (es. openai/gpt-4o-mini)
+    OPENAI_API_KEY=tua_chiave_presso_questo_provider
+
+    Come funziona:
+    •  Quando LLM_PROVIDER=openai_compat, L'INTERO motore AI (Reżyser, Opowieści, Poliglota, titoli, rilevamento lingua) utilizza l'endpoint indicato, e il nome del modello nei file di configurazione viene sovrascritto da LLM_MODEL.
+    •  Quando la riga LLM_PROVIDER è assente (o ha il valore anthropic), l'applicazione funziona come nel PASSO 2 — esclusivamente con la chiave Anthropic. Non devi cambiare nulla.
+
+    Importante (qualità): i prompt di sistema dell'applicazione sono scritti e ottimizzati per Claude. Un modello diverso potrebbe offrire una qualità inferiore — rispettare meno le regole del mondo, perdere la struttura JSON nelle modalità con scelte oppure restituire il testo nella lingua sbagliata. Si tratta di un compromesso consapevole costo↔qualità da parte tua. Se tieni al miglior risultato possibile, resta con Anthropic.

@@ -80,21 +80,21 @@ tresc:
 
     Nota: las reglas del mundo requieren un juego activo. Si haces clic en "{opowiesci.btn_zasady_swiata_label}" sin un juego cargado/creado, recibirás el mensaje "{opowiesci.zasady_bez_gry_tytul}" — primero haz clic en "{opowiesci.btn_nowa_gra_label}" o carga un juego guardado.
   krok_5_slash_komendy: |
-    PASO 5: Comandos Slash — acciones rápidas sin API
+    PASO 5: Comandos slash — acciones rápidas sin API
 
-    En el campo de acción, puedes ingresar en cualquier momento un comando que comience con una barra inclinada `/`. Los comandos son locales (no requieren llamadas a la API) y funcionan independientemente del modo de juego. Se aceptan tanto las variantes en polaco como en inglés:
+    En el campo de acción puedes introducir en cualquier momento un comando que comience con la barra diagonal `/`. Los comandos son locales (no generan ninguna llamada a la API) y funcionan independientemente del modo de juego. Se aceptan tanto las variantes en polaco como en inglés:
 
-    /zapisz, /save — forzar el guardado manual del estado del juego. El autoguardado se realiza después de cada turno, por lo que este comando es principalmente para asegurar antes de cerrar la aplicación.
+    /zapisz, /save — fuerza el guardado manual del estado del juego. El guardado automático se ejecuta tras cada turno, por lo que este comando sirve principalmente como medida de seguridad antes de cerrar la aplicación.
 
-    /wczytaj, /load — abre un diálogo de selección de juego con una lista de nombres disponibles (desde v15.2.3 en lugar del diálogo de archivos del sistema — lista directa de juegos guardados desde la carpeta runtime/opowiesci/ detectados por la presencia del archivo .game.json). NVDA lee la lista de manera natural, el jugador ciego no necesita navegar por el diálogo de archivos del sistema. Después de seleccionar el nombre del juego, el modo y la narración completa se restauran — puedes continuar desde el turno en el que terminaste. El botón "{opowiesci.btn_wczytaj_label}" tiene un comportamiento idéntico.
+    /wczytaj, /load — abre el diálogo de selección de partida con una lista de nombres disponibles (desde la v15.2.3, en lugar del diálogo de archivos del sistema, se muestra una lista directa de partidas guardadas en la carpeta runtime/opowiesci/, detectadas por la presencia del archivo .game.json). NVDA lee la lista de forma natural, y el jugador con discapacidad visual no necesita navegar por el diálogo de archivos del sistema. Al seleccionar una partida, el nombre del juego, el modo y la narración completa se restauran — puedes continuar desde el turno en que lo dejaste. El botón "{opowiesci.btn_wczytaj_label}" tiene un comportamiento idéntico.
 
-    El motor narrativo de todos los modos de Historias utiliza un único modelo Anthropic Claude Sonnet 4.6 (desde v18.1; anteriormente se seleccionaba un modelo OpenAI por modo). Un modelo más potente se adhiere rigurosamente a las reglas del mundo — esto es especialmente importante en el modo Menor Mal, donde cada opción debe seguir siendo realmente desfavorable.
+    El motor narrativo de todos los modos de Historias utiliza un único modelo compartido (por defecto y recomendado: Anthropic Claude Sonnet 4.6; desde la v18.4, un usuario avanzado puede especificar su propio endpoint compatible con OpenAI — consulta el manual principal, PASO 2B). Un modelo más potente respeta rigurosamente las reglas del mundo narrativo — esto es especialmente importante en el modo Mal Menor, donde cada opción debe seguir siendo genuinamente desfavorable.
 
-    /wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo utiliza los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo separado, NO se añade a la narración ni se guarda en el archivo de audiolibro. Ejemplo: “/wizualizuj jak wygląda strażnik" o “/wizualizuj zapach kawiarni".
+    /wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No modifica el estado del juego ni propone opciones — el motor narrativo emplea los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo independiente, NO se añade a la narración ni se guarda en el archivo de audiolibro. Ejemplo: «/wizualizuj cómo es el guardia» o «/wizualizuj el olor de la cafetería».
 
-    /pomoc, /help — muestra un cuadro de diálogo con una lista de todos los comandos disponibles. El diálogo es de solo lectura y compatible con NVDA — el campo de texto recibe el foco automáticamente, el lector de pantalla lee toda la lista de inmediato sin necesidad de navegación.
+    /pomoc, /help — muestra una ventana de diálogo con la lista de todos los comandos disponibles. El diálogo es de solo lectura y compatible con NVDA — el campo de texto recibe el foco automáticamente, y el lector de pantalla lee toda la lista de inmediato sin necesidad de navegar.
 
-    /koniec, /quit — cierra la aplicación (después del autoguardado del turno en curso).
+    /koniec, /quit — cierra la aplicación (tras el guardado automático del turno en curso).
   krok_6_pliki_gry: |
     PASO 6: Archivos del juego — dónde encontrarás tus datos
 

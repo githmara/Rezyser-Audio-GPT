@@ -127,13 +127,13 @@ tresc:
 
     Wskazówka: opcja „Otwórz lokalizację pliku" to nazwa natywna dla polskiej wersji Windows. W angielskim systemie brzmi „Open file location", w pozostałych wersjach językowych — analogicznie w lokalnym języku systemu operacyjnego.
   krok_2_klucz_api: |
-    KROK 2: Zasilanie API (klucz Anthropic / Claude)
+    KROK 2: Zasilanie API (zalecany klucz Anthropic / Claude)
 
-    Od wersji 18.2 aplikacja korzysta z jednego dostawcy sztucznej inteligencji — Anthropic (Claude) — i wymaga JEDNEGO klucza API w pliku golden_key.env:
+    Zalecanym i domyślnym dostawcą AI jest Anthropic (Claude) — pod niego dostrojone są wszystkie prompty aplikacji, więc daje najwyższą jakość narracji i najlepsze trzymanie się zasad świata. W tym (rekomendowanym) wariancie wystarczy JEDEN klucz API w pliku golden_key.env:
 
     •  Klucz Anthropic (Claude) — zasila CAŁY silnik AI: narrację Reżysera (audiobook, teatr czytany, burza mózgów), tryb Opowieści, Poliglotę (tłumacz) oraz nadawanie tytułów rozdziałom i wykrywanie języka treści. Zaczyna się od sk-ant-.
 
-    Jeśli aktualizujesz ze starszej wersji: dawny klucz OpenAI nie jest już potrzebny — możesz zostawić lub usunąć jego linię w golden_key.env, aplikacja ją ignoruje.
+    Jeśli aktualizujesz ze starszej wersji: dawny klucz OpenAI nie jest już potrzebny do wariantu domyślnego — możesz zostawić lub usunąć jego linię w golden_key.env, aplikacja ją ignoruje (chyba że świadomie konfigurujesz innego dostawcę — patrz KROK 2B niżej).
 
     Jak zdobyć klucz Anthropic:
     1. Załóż konto na console.anthropic.com i doładuj środki (zakładka Billing / Plans).
@@ -144,6 +144,23 @@ tresc:
     4. W otwartym pliku zobaczysz linię: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Usuń tekst zastępczy i wklej swój klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
 
     Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "{home.heading_system_check}" pokaże status klucza. Musi być zielony, aby wszystkie moduły AI były gotowe do pracy. Jeśli klucza brakuje lub jest błędny, program jasno to wskaże i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
+  krok_2b_dostawca_zaawansowany: |
+    KROK 2B (zaawansowane, opcjonalne): Własny dostawca AI zgodny z OpenAI
+
+    Większość użytkowników powinna zostać przy zalecanym Anthropic (KROK 2) — to on daje najwyższą jakość. Jeśli jednak masz własny powód (koszt, dostęp, prywatność, własny lokalny model), od wersji 18.4 możesz wskazać DOWOLNY endpoint zgodny z API OpenAI — na przykład OpenRouter, Groq, Fireworks, DeepSeek, lokalne Ollama czy endpoint OpenAI-compatible Gemini. Cały silnik AI idzie wtedy jedną ścieżką do tego endpointu, bez osobnej integracji per dostawca.
+
+    To opcja dla zaawansowanych: konfigurujesz ją ręcznie w pliku golden_key.env, dopisując obok (lub zamiast) klucza Anthropic trzy linie oraz klucz wybranego dostawcy:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=adres_endpointu (np. https://openrouter.ai/api/v1)
+    LLM_MODEL=nazwa_modelu_u_dostawcy (np. openai/gpt-4o-mini)
+    OPENAI_API_KEY=twój_klucz_u_tego_dostawcy
+
+    Jak to działa:
+    •  Gdy LLM_PROVIDER=openai_compat, CAŁY silnik AI (Reżyser, Opowieści, Poliglota, tytuły, wykrywanie języka) korzysta ze wskazanego endpointu, a nazwę modelu z plików konfiguracyjnych nadpisuje LLM_MODEL.
+    •  Gdy linii LLM_PROVIDER brak (albo ma wartość anthropic), aplikacja działa jak w KROK 2 — wyłącznie na kluczu Anthropic. Nic nie musisz zmieniać.
+
+    Ważne (jakość): prompty systemowe aplikacji są pisane i strojone pod Claude. Inny model może dać niższą jakość — słabiej trzymać zasady świata, gubić strukturę JSON w trybach z wyborami albo zwracać tekst w niewłaściwym języku. To świadomy kompromis koszt↔jakość po Twojej stronie. Jeśli zależy Ci na najlepszym efekcie, zostań przy Anthropic.
   krok_3_glowne_studio: |
     KROK 3: Główne Studio Reżyserskie
 

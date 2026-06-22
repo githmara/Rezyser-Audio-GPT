@@ -7,7 +7,7 @@
 
 Zestaw samowystarczalnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
 
-Wersja: **18.5.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **18.5.1** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Główne moduły
@@ -31,7 +31,7 @@ Interaktywne gry tekstowe prowadzone przez AI w roli silnika narracyjnego. W odr
 * **Tryb Wyborów:** każda tura kończy się 3-5 ponumerowanymi opcjami A-E. Najbardziej intuicyjny tryb dla niewidomych graczy — NVDA czyta opcje, klikasz Tab i Enter.
 * **Tryb Mniejsze Zło:** jak Wybory, ale każda opcja jest niekorzystna moralnie, fizycznie lub strategicznie. Od v15.2 dodatkowa „fiolka" — reusable ZERO-numerowana opcja desperackiego ratunku, której efekty są pseudolosowe (60% szkodliwe / 30% zaburzające percepcję / 10% rzadko-korzystne, rozkład wymuszany Pythonem, LLM nie ma jak wymyślić zbawiennego skutku).
 * **Tryb Swobodny:** dowolna akcja wolnym tekstem („spróbuję otworzyć drzwi"), silnik proponuje 1-3 sugestie ale nie wymusza wyboru.
-* **Jeden model AI dla wszystkich trybów:** od v18.1 wszystkie tryby Opowieści korzystają z Anthropic Claude Sonnet 4.6 — mocniejszy model rygorystycznie trzyma się zasad świata (kluczowe zwłaszcza w trybie Mniejsze Zło, gdzie każda opcja musi być realnie niekorzystna).
+* **Jeden model AI dla wszystkich trybów:** od v18.1 wszystkie tryby Opowieści korzystają z tego samego, wspólnego modelu (domyślnie i zalecanie Anthropic Claude Sonnet 4.6) — mocniejszy model rygorystycznie trzyma się zasad świata (kluczowe zwłaszcza w trybie Mniejsze Zło, gdzie każda opcja musi być realnie niekorzystna).
 
 
 ### 3. Poliglota (Ctrl+3, Tłumacz AI + Akcenty TTS)
@@ -66,9 +66,11 @@ Cały interfejs GUI, dokumentacja (`docs/manual.<iso>.txt`) oraz większość ko
 
 ## Architektura AI i użyte modele
 
-Od wersji 18.2 aplikacja korzysta z jednego dostawcy API — Anthropic — i jednego modelu do wszystkich zadań sztucznej inteligencji:
+Zalecanym i domyślnym dostawcą AI jest Anthropic (Claude) — wszystkie prompty systemowe są pod niego dostrojone, więc to on daje najwyższą jakość narracji, najlepsze trzymanie się zasad świata i najbardziej naturalną prozę. Konsolidacja na Claude przebiegła etapami (Reżyser w v18.0, Opowieści w v18.1, Poliglota i postprodukcja w v18.2) — wynikła z empirycznie potwierdzonej przewagi w trzymaniu się zasad świata, naturalności prozy i unikaniu klisz.
 
-* **Anthropic Claude Sonnet 4.6:** Silnik CAŁEJ inteligencji aplikacji. Odpowiada za narrację twórczą (reżyserowanie skryptów, pisanie tradycyjnej prozy Audiobooka, Burzę Mózgów oraz WSZYSTKIE tryby Opowieści — Wybory, Mniejsze Zło, Swobodny — wraz z generowaniem streszczeń i przerywników Cinematic), zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego (Poliglota), a także mikrozadania: iteracyjne nadawanie literackich tytułów rozdziałom oraz wykrywanie kodu języka treści. Konsolidacja na Claude przebiegła etapami (Reżyser w v18.0, Opowieści w v18.1, Poliglota i postprodukcja w v18.2) — wynikła z empirycznie potwierdzonej przewagi w trzymaniu się zasad świata, naturalności prozy i unikaniu klisz.
+* **Anthropic Claude Sonnet 4.6 (domyślny filar jakości):** Silnik CAŁEJ inteligencji aplikacji. Odpowiada za narrację twórczą (reżyserowanie skryptów, pisanie tradycyjnej prozy Audiobooka, Burzę Mózgów oraz WSZYSTKIE tryby Opowieści — Wybory, Mniejsze Zło, Swobodny — wraz z generowaniem streszczeń i przerywników Cinematic), zaawansowane tłumaczenia z zachowaniem kontekstu wieloblokowego (Poliglota), a także mikrozadania: iteracyjne nadawanie literackich tytułów rozdziałom oraz wykrywanie kodu języka treści.
+
+* **Własny endpoint zgodny z OpenAI (opcja zaawansowana, od v18.4):** Zamiast Anthropic można wskazać dowolny endpoint zgodny z API OpenAI (OpenRouter, Groq, Fireworks, DeepSeek, lokalne Ollama, OpenAI-compatible Gemini i inne) — jedną, wspólną ścieżką kodu, bez osobnej integracji per dostawca. Konfiguracja w pliku `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); pełna instrukcja w głównym manualu (KROK 2B). Inne modele mogą dać niższą jakość niż Claude, pod którego stroione są prompty — to świadomy wybór koszt↔jakość po stronie użytkownika.
 
 
 ### Znane ograniczenia modeli (Anti-Closure)

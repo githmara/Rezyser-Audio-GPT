@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **18.5.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.5.1** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -24,14 +24,14 @@ The main studio for writing radio plays and audiobooks. You choose a mode — Br
 * **4 creative modes:** Each file in `dictionaries/<lang>/rezyser/` describes a separate AI director "personality" (Brainstorming, Script, Audiobook, Title Postproduction). You can tune their tone without programming — see the Rule Manager below.
 
 
-### 2. Stories (Ctrl+2, second main mode from v15.0)
+### 2. Stories (Ctrl+2, second main mode since v15.0)
 
-Interactive text games led by AI as the narrative engine. Unlike Directing (where you generate a finished audiobook), Stories offer a turn-by-turn dynamic plot:
+Interactive text games run by AI in the role of a narrative engine. Unlike the Director mode (where you generate a finished audiobook), Stories is a turn-by-turn dynamic plot:
 
-* **Choices Mode:** each turn ends with 3-5 numbered options A-E. The most intuitive mode for blind players — NVDA reads the options, you click Tab and Enter.
-* **Lesser Evil Mode:** similar to Choices, but each option is morally, physically, or strategically disadvantageous. From v15.2, an additional "vial" — a reusable ZERO-numbered desperate rescue option, with pseudorandom effects (60% harmful / 30% perception-altering / 10% rarely-beneficial, distribution enforced by Python, LLM cannot invent a salvaging outcome).
-* **Free Mode:** any action in free text ("I'll try to open the door"), the engine suggests 1-3 actions but does not enforce a choice.
-* **One AI model for all modes:** from v18.1, all Stories modes use Anthropic Claude Sonnet 4.6 — a stronger model that rigorously adheres to world rules (crucial especially in Lesser Evil Mode, where each option must be genuinely disadvantageous).
+* **Choices Mode:** each turn ends with 3-5 numbered options A-E. The most intuitive mode for blind players — NVDA reads the options, you press Tab and Enter.
+* **Lesser Evil Mode:** like Choices, but every option is unfavorable — morally, physically, or strategically. Since v15.2, an additional "vial" — a reusable ZERO-numbered option of last-resort rescue, whose effects are pseudo-random (60% harmful / 30% perception-distorting / 10% rarely beneficial, distribution enforced by Python, the LLM has no way to invent a saving outcome).
+* **Free Mode:** any action in free text ("I'll try to open the door"), the engine suggests 1-3 hints but does not force a choice.
+* **One AI model for all modes:** since v18.1 all Stories modes use the same shared model (default and recommended: Anthropic Claude Sonnet 4.6) — a more powerful model rigorously adheres to the rules of the world (especially critical in Lesser Evil Mode, where every option must be genuinely unfavorable).
 
 
 ### 3. Polyglot (Ctrl+3, AI Translator + TTS Accents)
@@ -66,9 +66,11 @@ The entire GUI interface, documentation (`docs/manual.<iso>.txt`), and most syst
 
 ## AI Architecture and Models Used
 
-Since version 18.2, the application uses a single API provider — Anthropic — and a single model for all artificial intelligence tasks:
+The recommended and default AI provider is Anthropic (Claude) — all system prompts are tuned for it, so it delivers the highest narrative quality, the best adherence to world-building rules, and the most natural prose. Consolidation on Claude happened in stages (Director in v18.0, Stories in v18.1, Polyglot and post-production in v18.2) — it resulted from empirically confirmed superiority in adhering to world rules, naturalness of prose, and avoiding clichés.
 
-* **Anthropic Claude Sonnet 4.6:** The engine behind ALL of the application's intelligence. It handles creative narration (directing scripts, writing traditional Audiobook prose, Brainstorming, and ALL Story modes — Choices, Lesser Evil, Freeform — along with generating summaries and Cinematic interludes), advanced translations with multi-block context preservation (Polyglot), as well as micro-tasks: iterative assignment of literary titles to chapters and detection of content language codes. The consolidation on Claude proceeded in stages (Director in v18.0, Stories in v18.1, Polyglot and post-production in v18.2) — it resulted from empirically confirmed superiority in adhering to world-building rules, naturalness of prose, and avoidance of clichés.
+* **Anthropic Claude Sonnet 4.6 (default quality pillar):** The engine of ALL the application's intelligence. Responsible for creative narration (directing scripts, writing traditional Audiobook prose, Brainstorming, and ALL Stories modes — Choices, Lesser Evil, Freeform — along with generating summaries and Cinematic interludes), advanced translations with multi-block context preservation (Polyglot), and micro-tasks: iterative assignment of literary chapter titles and detection of content language codes.
+
+* **Custom OpenAI-compatible endpoint (advanced option, from v18.4):** Instead of Anthropic, you can point to any endpoint compatible with the OpenAI API (OpenRouter, Groq, Fireworks, DeepSeek, local Ollama, OpenAI-compatible Gemini, and others) — through a single, shared code path, with no separate per-provider integration. Configuration in the `golden_key.env` file (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); full instructions in the main manual (STEP 2B). Other models may deliver lower quality than Claude, for which the prompts are tuned — this is a conscious cost↔quality trade-off on the user's part.
 
 
 ### Known Model Limitations (Anti-Closure)

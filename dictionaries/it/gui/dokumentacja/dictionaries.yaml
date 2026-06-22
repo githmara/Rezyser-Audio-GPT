@@ -151,28 +151,36 @@ tresc:
     ----------------------------
 
     La cartella "opowiesci/" contiene {liczba_trybow_opowiesci} file che descrivono la seconda
-    modalità principale dell'applicazione — giochi di testo interattivi condotti dall'AI come motore narrativo. A differenza della modalità Regista (dove generi un audiolibro PRONTO da riprodurre in TTS), la modalità Storie è una conversazione turno per turno con il modello, che conduce con te una sessione di trama dinamica:
+    modalità principale dell'applicazione — giochi di testo interattivi condotti dall'AI nel ruolo
+    di motore narrativo. A differenza della modalità Regista (dove generi un audiolibro PRONTO
+    da riprodurre in TTS), la modalità Storie è una conversazione turno per turno
+    con il modello, che conduce con te una sessione di trama dinamica:
 
     - tryb_wyborow.yaml      — Scelte (3-5 opzioni numerate A-E alla fine
-                               di ogni turno, modalità più intuitiva per
-                               giocatori non vedenti)
+                               di ogni turno, la modalità più intuitiva per
+                               i giocatori non vedenti)
     - tryb_mniejsze_zlo.yaml — Il male minore (come Scelte, ma ogni opzione è
-                               sfavorevole; dalla v15.2 fiala riutilizzabile come
-                               opzione di salvataggio disperato numerata ZERO)
-    - tryb_swobodny.yaml     — Libero (qualsiasi azione con testo libero, il motore
-                               propone 1-3 suggerimenti ma non impone una scelta)
+                               svantaggiosa; dalla v15.2 una fiala riutilizzabile come
+                               opzione ZERO-numerata di salvataggio disperato)
+    - tryb_swobodny.yaml     — Libero (qualsiasi azione in testo libero, il motore
+                               propone 1-3 suggerimenti ma non impone la scelta)
     - tryb_burza.yaml        — Brainstorming (dispatch interno che genera
                                proposte di sviluppo della scena per il motore narrativo)
-    - baza.yaml              — regole di base comuni (lunghezza del turno, divieti
+    - baza.yaml              — regole base comuni (lunghezza del turno, divieti
                                di riassunti, direttiva anti-closure)
-    - zaczatki.yaml          — inizi di avventura (3 setup iniziali del mondo
-                               da scegliere all'inizio di un nuovo gioco)
-    - streszczenie.yaml      — generatore di riassunti per giochi lunghi (compressione
+    - zaczatki.yaml          — starter dell'avventura (3 setup iniziali del mondo
+                               tra cui scegliere all'inizio di una nuova partita)
+    - streszczenie.yaml      — generatore di riassunti per partite lunghe (compressione
                                della storia per la finestra di contesto del modello)
-    - cinematic_warning.yaml — avvisi su scene brutali/drammatiche
+    - cinematic_warning.yaml — avvisi su scene violente/drammatiche
                                (conformità con le preferenze del giocatore)
 
-    Come nella modalità Regista, ogni file contiene un "prompt di sistema" da modificare. Puoi adattare lo stile del narratore (ad esempio, meno fiorito), cambiare la lunghezza del turno, aggiungere le tue direttive narrative. Dalla v18.1 tutte le modalità Storie utilizzano un unico modello Anthropic Claude Sonnet 4.6 — un modello più potente che aderisce rigorosamente alle regole del mondo (fondamentale nella modalità Il male minore, dove ogni opzione deve essere realmente sfavorevole).
+    Come nella modalità Regista, ogni file contiene un "prompt di sistema" modificabile.
+    Puoi regolare lo stile del narratore (ad es. meno fiorito), cambiare la lunghezza
+    del turno, aggiungere le tue direttive narrative. Dalla v18.1 tutte le modalità Storie
+    utilizzano un unico modello condiviso (di default e consigliato Anthropic
+    Claude Sonnet 4.6) — un modello più potente rispetta rigorosamente le regole del mondo
+    (fondamentale nella modalità Il male minore, dove ogni opzione deve essere realmente svantaggiosa).
   jak_zaczac: |
     Come iniziare a divertirsi — tre livelli di difficoltà
     ------------------------------------------------------

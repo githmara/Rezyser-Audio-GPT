@@ -80,21 +80,21 @@ tresc:
 
     Athugið: reglur heimsins krefjast virks leiks. Ef þú smellir á "{opowiesci.btn_zasady_swiata_label}" án þess að hafa hlaðið/sett upp leik, færðu skilaboðin „{opowiesci.zasady_bez_gry_tytul}" — smelltu fyrst á "{opowiesci.btn_nowa_gra_label}" eða hlaðið vistaðan leik.
   krok_5_slash_komendy: |
-    KROK 5: Slash-komendy — szybkie akcje bez API
+    SKREF 5: Slash-skipanir — skjótar aðgerðir án API
 
-    Í aðgerðarsvæðinu geturðu alltaf slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (þær kosta engin API-köll) og virka óháð leikstillingu. Bæði pólskar og enskar útgáfur eru samþykktar:
+    Í aðgerðareitnum getur þú hvenær sem er slegið inn skipun sem byrjar á skástrik `/`. Skipanirnar eru staðbundnar (kosta engar API-kallsendingar) og virka óháð leikhamanum. Bæði íslenskar og enskar útgáfur eru samþykktar:
 
-    /zapisz, /save — neyðir fram handvirka vistun á stöðu leiksins. Sjálfvirk vistun fer fram eftir hverja umferð, svo þessi skipun er aðallega til öryggis áður en forritið er lokað.
+    /zapisz, /save — þvingar handvirka vistun á leikstöðu. Sjálfvirk vistun á sér stað eftir hverja umferð, þannig að þessi skipun er aðallega til öryggis áður en forritið er lokað.
 
-    /wczytaj, /load — opnar valglugga fyrir leik með lista yfir tiltæk nöfn (frá v15.2.3 í stað kerfisskrárvalglugga — beinn listi yfir vistaða leiki úr möppunni runtime/opowiesci/ sem greindir eru eftir tilvist .game.json skráar). NVDA les listann náttúrulega, blindur leikmaður þarf ekki að sigla um kerfisskrárvalgluggann. Eftir að hafa valið nafn leiksins, stillingu og fulla frásögn er endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir á. Sama hegðun hefur hnappurinn "{opowiesci.btn_wczytaj_label}".
+    /wczytaj, /load — opnar glugga til að velja leik með lista yfir tiltæk nöfn (frá v15.2.3 í stað kerfisglugga fyrir skrár — beinn listi yfir vistaðar leiki úr möppunni runtime/opowiesci/ sem greinast eftir tilvist .game.json skráar). NVDA les listann á náttúrulegan hátt, blindur leikmaður þarf ekki að fletta í gegnum kerfisglugga skráa. Þegar leikur er valinn eru nafn leiksins, leikhaminn og öll frásögnin endurheimt — þú getur haldið áfram frá þeirri umferð sem þú stóðst við. Hnappurinn "{opowiesci.btn_wczytaj_label}" hefur nákvæmlega sama hegðun.
 
-    Frásagnarkerfi allra Opowieści stillinga notar eitt Anthropic Claude Sonnet 4.6 líkan (frá v18.1; áður var OpenAI líkan valið fyrir hverja stillingu). Sterkara líkan heldur stranglega við reglur heimsins — þetta er sérstaklega mikilvægt í stillingunni Mniejsze zło, þar sem hver valkostur verður að vera raunverulega óhagstæður.
+    Frásagnarvélin allra Opowiesci-hamanna notar eitt sameiginlegt líkan (sjálfgefið og mælt með Anthropic Claude Sonnet 4.6; frá v18.4 getur reyndir notandi tilgreint eigin endapunkt sem er samhæfður OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkan fylgir reglum heimsins af meiri nákvæmni — þetta skiptir sérstaklega máli í Minna-illu-hamanum, þar sem sérhver valkostur verður að vera raunverulega óhagstæður.
 
-    /wizualizuj <opis>, /visualize <opis> — margskynjunar lýsing á núverandi sviði. Breytir ekki stöðu leiksins, býður ekki upp á valkosti — frásagnarkerfið notar öll fimm skilningarvitin (sjón, heyrn, lykt, snerting, bragð) til að sýna sviðið með meiri dýpt. Niðurstaðan birtist í sérstöku glugga, ER EKKI bætt við frásögnina né vistuð í hljóðbókarskrá. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lyktin af kaffihúsinu".
+    /wizualizuj <opis>, /visualize <opis> — fjölskynjaralýsing á núverandi senu. Breytir ekki leikstöðu, leggur ekki til val — frásagnarvélin notar öll fimm skilningarvit (sjón, heyrn, lykt, snertingu, bragð) til að sýna senuna með meiri dýpt. Niðurstaðan birtist í sérstökum glugga, er EKKI bætt við frásögnina né vistuð í hljóðbókarskránni. Dæmi: „/wizualizuj hvernig vörðurinn lítur út" eða „/wizualizuj lyktin af kaffihúsinu".
 
-    /pomoc, /help — birtir valglugga með lista yfir allar tiltækar skipanir. Valglugginn er readonly og NVDA-vænn — textasvæðið fær sjálfkrafa fókus, skjálesarinn les strax allan listann án þess að þurfa að sigla.
+    /pomoc, /help — sýnir glugga með lista yfir allar tiltækar skipanir. Glugginn er readonly og NVDA-vinveittur — textareiturinn fær fókus sjálfkrafa, skjálesarinn les strax allan listann án þess að þurfa að fletta.
 
-    /koniec, /quit — lokar forritinu (eftir sjálfvirka vistun á umferð í gangi).
+    /koniec, /quit — lokar forritinu (eftir sjálfvirka vistun á yfirstandandi umferð).
   krok_6_pliki_gry: |
     SKREF 6: Leikjaskrár — hvar þú finnur gögnin þín
 

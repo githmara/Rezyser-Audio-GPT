@@ -187,30 +187,39 @@ tresc:
     version the next time it starts. Zero programming.
   co_to_tryb_opowiesci: |
     What is "Story Mode"?
-    ----------------------
+    ----------------------------
 
-    The "opowiesci/" folder contains {liczba_trybow_opowiesci} files describing the second main mode of the application — interactive text games led by AI as the narrative engine. Unlike the Director mode (where you generate a COMPLETE audiobook for playback in TTS), Story Mode is a turn-by-turn conversation with the model, which conducts a session of dynamic storytelling with you:
+    The "opowiesci/" folder contains {liczba_trybow_opowiesci} files describing the second
+    main mode of the application — interactive text games driven by AI acting as
+    a narrative engine. Unlike Director Mode (where you generate a FINISHED
+    audiobook for playback in TTS), Story Mode is a turn-by-turn conversation
+    with a model that leads you through a session of dynamic storytelling:
 
     - tryb_wyborow.yaml      — Choices (3-5 numbered options A-E at the end
                                of each turn, the most intuitive mode for
-                               visually impaired players)
-    - tryb_mniejsze_zlo.yaml — Lesser Evil (like Choices, but each option is
-                               disadvantageous; from v15.2 reusable vial as
-                               a ZERO-numbered desperate rescue option)
-    - tryb_swobodny.yaml     — Freeform (any action with free text, the engine
-                               suggests 1-3 options but does not enforce a choice)
+                               blind players)
+    - tryb_mniejsze_zlo.yaml — Lesser Evil (like Choices, but every option is
+                               unfavorable; from v15.2 a reusable vial as a
+                               ZERO-numbered desperate rescue option)
+    - tryb_swobodny.yaml     — Free (any action in free text, the engine
+                               suggests 1-3 hints but does not force a choice)
     - tryb_burza.yaml        — Brainstorm (internal dispatch generating
                                scene development proposals for the narrative engine)
-    - baza.yaml              — common base rules (turn length, summary bans,
-                               anti-closure directive)
+    - baza.yaml              — shared base rules (turn length, prohibition of
+                               summaries, anti-closure directive)
     - zaczatki.yaml          — adventure starters (3 initial world setups
                                to choose from when starting a new game)
-    - streszczenie.yaml      — long game summary generator (compressing
-                               the story for the model's context window)
-    - cinematic_warning.yaml — warnings about brutal/dramatic
+    - streszczenie.yaml      — summary generator for long games (history
+                               compression for the model's context window)
+    - cinematic_warning.yaml — warnings about violent/dramatic
                                scenes (compliance with player preferences)
 
-    As in Director mode, each file contains a "system prompt" for editing. You can adjust the narrator's style (e.g., less flowery), change the turn length, add your own storytelling directives. From v18.1, all Story Modes use a single Anthropic Claude Sonnet 4.6 model — a stronger model that rigorously adheres to world rules (crucial in Lesser Evil mode, where each option must be genuinely disadvantageous).
+    As in Director Mode, each file contains a "system prompt" for editing.
+    You can fine-tune the narrator's style (e.g. less flowery), change the turn
+    length, add your own story directives. From v18.1 all Story Mode variants
+    use a single shared model (by default and recommended: Anthropic
+    Claude Sonnet 4.6) — a more powerful model rigorously adheres to the rules of the world
+    (crucial in Lesser Evil mode, where every option must be genuinely unfavorable).
   jak_zaczac: |
     How to Start Playing — Three Levels of Difficulty
     -------------------------------------------------

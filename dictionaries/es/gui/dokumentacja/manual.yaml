@@ -74,23 +74,23 @@ tresc:
 
     Consejo: la opción "Abrir ubicación del archivo" es el nombre nativo para la versión polaca de Windows. En el sistema en inglés es "Open file location", en otras versiones de idioma — de manera análoga en el idioma local del sistema operativo.
   krok_2_klucz_api: |
-    PASO 2: Configuración de la API (clave Anthropic / Claude)
+    PASO 2: Configuración de la API (clave Anthropic / Claude recomendada)
 
-    A partir de la versión 18.2, la aplicación utiliza un único proveedor de inteligencia artificial — Anthropic (Claude) — y requiere UNA sola clave API en el archivo golden_key.env:
+    El proveedor de IA recomendado y predeterminado es Anthropic (Claude) — todos los prompts de la aplicación están optimizados para él, por lo que ofrece la mayor calidad narrativa y el mejor respeto a las reglas del mundo. En esta variante (recomendada) basta con UNA SOLA clave API en el archivo golden_key.env:
 
-    •  Clave Anthropic (Claude) — alimenta TODO el motor de IA: la narración del Director (audiolibro, teatro leído, lluvia de ideas), el modo Historias, el Políglota (traductor) y la asignación de títulos a capítulos y la detección del idioma del contenido. Comienza con sk-ant-.
+    •  Clave Anthropic (Claude) — alimenta TODO el motor de IA: la narración del Reżyser (audiolibro, teatro leído, lluvia de ideas), el modo Opowieści, el Políglota (traductor) y la asignación de títulos a capítulos y la detección del idioma del contenido. Comienza por sk-ant-.
 
-    Si estás actualizando desde una versión anterior: la antigua clave de OpenAI ya no es necesaria — puedes dejar o eliminar su línea en golden_key.env, la aplicación la ignorará.
+    Si estás actualizando desde una versión anterior: la antigua clave OpenAI ya no es necesaria para la variante predeterminada — puedes dejar o eliminar su línea en golden_key.env, la aplicación la ignorará (a menos que estés configurando conscientemente otro proveedor — véase el PASO 2B más abajo).
 
     Cómo obtener la clave Anthropic:
     1. Crea una cuenta en console.anthropic.com y añade fondos (pestaña Billing / Plans).
-    2. Genera la clave en la sección API Keys (comienza con sk-ant-). Cópiala de inmediato — en ocasiones se muestra una sola vez.
+    2. Genera la clave en la sección API Keys (comienza por sk-ant-). Cópiala de inmediato — en ocasiones solo se muestra una vez.
 
     Cómo introducir la clave en el programa:
-    3. En la pantalla de inicio del programa, haz clic en el botón "{home.btn_generate}". El sistema creará automáticamente un archivo de configuración limpio en la ubicación correcta y abrirá el Bloc de notas con una plantilla lista para editar.
+    3. En la pantalla de inicio del programa, haz clic en el botón "{home.btn_generate}". El sistema creará automáticamente un archivo de configuración limpio en el lugar correcto y abrirá el Bloc de notas con una plantilla lista para editar.
     4. En el archivo abierto verás la línea: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Elimina el texto de marcador de posición y pega tu clave directamente después del signo igual (sin espacios ni comillas). Guarda el archivo y reinicia la aplicación.
 
-    Consejo: Tras reiniciar, la aplicación verificará el archivo y en la sección "{home.heading_system_check}" mostrará el estado de la clave. Debe aparecer en verde para que todos los módulos de IA estén listos para funcionar. Si la clave falta o es incorrecta, el programa lo indicará claramente y permitirá abrir el editor de texto para corregir el error rápidamente.
+    Consejo: Tras reiniciar, la aplicación comprobará el archivo y en la sección "{home.heading_system_check}" mostrará el estado de la clave. Debe aparecer en verde para que todos los módulos de IA estén listos para funcionar. Si la clave falta o es incorrecta, el programa lo indicará claramente y permitirá abrir el editor de texto para corregir el error rápidamente.
   krok_3_glowne_studio: |
     PASO 3: Estudio Principal de Dirección
 
@@ -636,3 +636,20 @@ tresc:
     Carpetas con tus guardados (junto al programa):
     - skrypty (guiones) — proyectos del Director: narración .txt, Libro del Mundo .md
     - opowiesci (historias) — guardados de Historias interactivas
+  krok_2b_dostawca_zaawansowany: |
+    PASO 2B (avanzado, opcional): Proveedor de IA propio compatible con OpenAI
+
+    La mayoría de los usuarios debería quedarse con el Anthropic recomendado (PASO 2) — es el que ofrece la mayor calidad. Sin embargo, si tienes una razón propia (coste, acceso, privacidad, modelo local propio), a partir de la versión 18.4 puedes indicar CUALQUIER endpoint compatible con la API de OpenAI — por ejemplo OpenRouter, Groq, Fireworks, DeepSeek, Ollama local o un endpoint de Gemini compatible con OpenAI. Todo el motor de IA sigue entonces un único camino hacia ese endpoint, sin integración separada por proveedor.
+
+    Esta es una opción para usuarios avanzados: la configuras manualmente en el archivo golden_key.env, añadiendo junto a (o en lugar de) la clave de Anthropic tres líneas y la clave del proveedor elegido:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=dirección_del_endpoint (p. ej. https://openrouter.ai/api/v1)
+    LLM_MODEL=nombre_del_modelo_en_el_proveedor (p. ej. openai/gpt-4o-mini)
+    OPENAI_API_KEY=tu_clave_en_ese_proveedor
+
+    Cómo funciona:
+    •  Cuando LLM_PROVIDER=openai_compat, TODO el motor de IA (Reżyser, Opowieści, Poliglota, títulos, detección de idioma) utiliza el endpoint indicado, y LLM_MODEL sobrescribe el nombre del modelo de los archivos de configuración.
+    •  Cuando la línea LLM_PROVIDER no existe (o tiene el valor anthropic), la aplicación funciona como en el PASO 2 — exclusivamente con la clave de Anthropic. No necesitas cambiar nada.
+
+    Importante (calidad): los prompts del sistema de la aplicación están escritos y ajustados para Claude. Otro modelo puede ofrecer menor calidad — respetar peor las reglas del mundo, perder la estructura JSON en los modos con elecciones o devolver el texto en un idioma incorrecto. Es un compromiso consciente coste↔calidad de tu parte. Si lo que te importa es el mejor resultado, quédate con Anthropic.

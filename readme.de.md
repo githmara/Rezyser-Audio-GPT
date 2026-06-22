@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **18.5.0** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.5.1** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -24,14 +24,14 @@ Das Hauptstudio zum Schreiben von Hörspielen und Hörbüchern. Du wählst einen
 * **4 kreative Modi:** Jede der Dateien in `dictionaries/<jzk>/rezyser/` beschreibt eine separate „Persönlichkeit" des KI-Regisseurs (Brainstorming, Skript, Hörbuch, Titel-Nachbearbeitung). Du kannst ihren Klang ohne Programmierung anpassen — siehe Regelmanager unten.
 
 
-### 2. Opowieści (Ctrl+2, der zweite Hauptmodus ab v15.0)
+### 2. Geschichten (Ctrl+2, zweiter Hauptmodus ab v15.0)
 
-Interaktive Textspiele, die von einer KI als Erzählmotor geleitet werden. Im Gegensatz zur Regie (wo du ein fertiges Hörbuch generierst), sind Opowieści eine rundenbasierte dynamische Handlung:
+Interaktive Textspiele, die von einer KI als narrativer Motor geleitet werden. Im Unterschied zur Regie (wo du ein fertiges Hörbuch erzeugst) sind Geschichten eine rundenbasierte dynamische Handlung:
 
-* **Wahlmodus:** Jede Runde endet mit 3-5 nummerierten Optionen A-E. Der intuitivste Modus für blinde Spieler — NVDA liest die Optionen vor, du klickst Tab und Enter.
-* **Modus Kleineres Übel:** Ähnlich wie der Wahlmodus, aber jede Option ist moralisch, physisch oder strategisch nachteilig. Ab v15.2 gibt es eine zusätzliche „Phiole" — eine wiederverwendbare, mit NULL nummerierte Option für verzweifelte Rettungsversuche, deren Effekte pseudolos sind (60% schädlich / 30% Wahrnehmung störend / 10% selten vorteilhaft, Verteilung erzwungen durch Python, LLM kann keinen rettenden Effekt erfinden).
-* **Freier Modus:** Beliebige Aktion in freiem Text („Ich versuche, die Tür zu öffnen"), der Motor schlägt 1-3 Vorschläge vor, zwingt aber keine Auswahl.
-* **Ein KI-Modell für alle Modi:** Ab v18.1 verwenden alle Opowieści-Modi Anthropic Claude Sonnet 4.6 — ein stärkeres Modell, das sich streng an die Regeln der Welt hält (besonders wichtig im Modus Kleineres Übel, wo jede Option real nachteilig sein muss).
+* **Auswahlmodus:** Jede Runde endet mit 3–5 nummerierten Optionen A–E. Der intuitivste Modus für blinde Spieler — NVDA liest die Optionen vor, du navigierst mit Tab und Enter.
+* **Modus „Das kleinere Übel":** wie der Auswahlmodus, aber jede Option ist moralisch, physisch oder strategisch nachteilig. Ab v15.2 gibt es zusätzlich eine „Phiole" — eine wiederverwendbare, mit ZERO nummerierte Option eines verzweifelten Rettungsversuchs, deren Effekte pseudozufällig sind (60 % schädlich / 30 % wahrnehmungsverzerrend / 10 % selten vorteilhaft; die Verteilung wird durch Python erzwungen, das LLM hat keine Möglichkeit, einen heilsamen Effekt zu erfinden).
+* **Freier Modus:** beliebige Aktion als Freitext („Ich versuche, die Tür zu öffnen"), der Motor schlägt 1–3 Vorschläge vor, erzwingt jedoch keine Auswahl.
+* **Ein KI-Modell für alle Modi:** Ab v18.1 verwenden alle Geschichten-Modi dasselbe gemeinsame Modell (standardmäßig und empfohlen: Anthropic Claude Sonnet 4.6) — ein leistungsstärkeres Modell hält sich strikt an die Regeln der Spielwelt (besonders wichtig im Modus „Das kleinere Übel", wo jede Option tatsächlich nachteilig sein muss).
 
 
 ### 3. Polyglott (Ctrl+3, AI-Übersetzer + TTS-Akzente)
@@ -66,9 +66,11 @@ Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.txt`) und die meisten Sys
 
 ## KI-Architektur und verwendete Modelle
 
-Ab Version 18.2 nutzt die Anwendung einen einzigen API-Anbieter — Anthropic — und ein einziges Modell für alle Aufgaben der künstlichen Intelligenz:
+Der empfohlene und standardmäßige KI-Anbieter ist Anthropic (Claude) — alle Systemprompts sind auf ihn abgestimmt, weshalb er die höchste Narrationsqualität, die beste Einhaltung der Weltregeln und die natürlichste Prosa liefert. Die Konsolidierung auf Claude erfolgte schrittweise (Reżyser in v18.0, Opowieści in v18.1, Poliglota und Postproduktion in v18.2) — sie resultierte aus empirisch bestätigter Überlegenheit bei der Einhaltung von Weltregeln, der Natürlichkeit der Prosa und der Vermeidung von Klischees.
 
-* **Anthropic Claude Sonnet 4.6:** Die Engine der GESAMTEN Intelligenz der Anwendung. Verantwortlich für kreatives Erzählen (Regie von Skripten, Verfassen traditioneller Hörbuch-Prosa, Brainstorming sowie ALLE Opowieści-Modi — Wybory, Mniejsze Zło, Swobodny — einschließlich der Generierung von Zusammenfassungen und Cinematic-Zwischenspielen), fortgeschrittene Übersetzungen mit Beibehaltung des Mehrblock-Kontexts (Poliglota) sowie Mikroaufgaben: iteratives Vergeben literarischer Kapiteltitel und Erkennung des Sprachcodes von Inhalten. Die Konsolidierung auf Claude erfolgte schrittweise (Reżyser in v18.0, Opowieści in v18.1, Poliglota und Postproduktion in v18.2) — sie resultierte aus der empirisch bestätigten Überlegenheit beim Einhalten von Weltregeln, der Natürlichkeit der Prosa und der Vermeidung von Klischees.
+* **Anthropic Claude Sonnet 4.6 (standardmäßiger Qualitätspfeiler):** Die Engine der GESAMTEN Intelligenz der Anwendung. Verantwortlich für kreative Narration (Regie von Skripten, Verfassen traditioneller Hörbuch-Prosa, Brainstorming sowie ALLE Opowieści-Modi — Wybory, Mniejsze Zło, Swobodny — einschließlich der Generierung von Zusammenfassungen und Cinematic-Zwischensequenzen), erweiterte Übersetzungen unter Beibehaltung des Mehrblock-Kontexts (Poliglota) sowie Mikroaufgaben: iteratives Vergeben literarischer Kapiteltitel und Erkennung des Sprachcodes des Inhalts.
+
+* **Eigener OpenAI-kompatibler Endpunkt (erweiterte Option, ab v18.4):** Anstelle von Anthropic kann ein beliebiger Endpunkt angegeben werden, der mit der OpenAI-API kompatibel ist (OpenRouter, Groq, Fireworks, DeepSeek, lokales Ollama, OpenAI-kompatibles Gemini und andere) — über einen einzigen, gemeinsamen Codepfad, ohne separate Integration pro Anbieter. Konfiguration in der Datei `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); vollständige Anleitung im Haupthandbuch (SCHRITT 2B). Andere Modelle können eine geringere Qualität als Claude liefern, auf den die Prompts abgestimmt sind — dies ist eine bewusste Kosten↔Qualitäts-Entscheidung auf Seiten des Benutzers.
 
 
 ### Bekannte Einschränkungen von Modellen (Anti-Closure)

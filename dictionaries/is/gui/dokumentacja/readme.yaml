@@ -36,14 +36,14 @@ tresc:
     * **Sögugeymir:** „Óendanlegt minni“ reiknirit. Þegar minnivísirinn fer í rauða viðvörunarástandið, býr kerfið sjálfkrafa til sögusamantekt og skráir hana í Langtímaminni.
     * **{liczba_trybow_rezysera} skapandi hamir:** Hver skrá í `dictionaries/<jzk>/rezyser/` lýsir sérstakri „persónuleika“ AI leikstjórans (Hugstormun, Handrit, Hljóðbók, Eftirvinnsla titla). Þú getur stillt hljóm þeirra án forritunar — sjá Reglustjóri hér að neðan.
   modul_opowiesci: |
-    ### 2. Opowieści (Ctrl+2, annar aðalstilling frá v15.0)
+    ### 2. Opowiestar (Ctrl+2, annar aðalhamur frá v15.0)
 
-    Gagnvirkir textaleikir stjórnaðir af gervigreind sem gegnir hlutverki frásagnarmótors. Ólíkt Reżyserii (þar sem þú býrð til tilbúinn hljóðbók), eru Opowieści skref-fyrir-skref kvik frásögn:
+    Gagnvirkar textaleikir reknar af gervigreind í hlutverki frásagnarvélar. Ólíkt Leikstjórnarmóðunni (þar sem þú framleiðir tilbúna hljóðbók), eru Opowiestar umferð-fyrir-umferð kvikt söguþráður:
 
-    * **Valmöguleikastilling:** hvert skref endar með 3-5 tölusettum valkostum A-E. Mest innsæi stilling fyrir blinda leikmenn — NVDA les valkostina, þú smellir á Tab og Enter.
-    * **Minna Illa Stilling:** eins og Valmöguleikar, en hver valkostur er siðferðilega, líkamlega eða strategískt óhagstæður. Frá v15.2 er viðbótar „flaska" — endurnýtanlegur NÚLL-númeraður valkostur örvæntingarfullrar björgunar, þar sem áhrifin eru gervilöng (60% skaðleg / 30% truflandi skynjun / 10% sjaldan-hagstæð, dreifing þvinguð af Python, LLM getur ekki fundið upp á bjargandi niðurstöðu).
-    * **Frjáls Stilling:** hvaða aðgerð sem er með frjálsum texta („ég mun reyna að opna dyrnar"), mótorinn leggur til 1-3 tillögur en þvingar ekki val.
-    * **Einn AI líkan fyrir allar stillingar:** frá v18.1 nota allar stillingar Opowieści Anthropic Claude Sonnet 4.6 — öflugra líkan sem fylgir ströngum reglum heimsins (sérstaklega mikilvægt í Minna Illa Stilling, þar sem hver valkostur verður að vera raunverulega óhagstæður).
+    * **Valhamur:** hver umferð lýkur með 3-5 númeruðum valkostum A-E. Innsæjastur hamurinn fyrir blinda leikmenn — NVDA les valkostina, þú ýtir á Tab og Enter.
+    * **Minna Ilsins Hamur:** eins og Valhamur, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnumótandi. Frá v15.2 viðbótar „hettuglasið" — endurnýtanlegur NÚLL-númeraður valkostur örvæntingarfullrar björgunar, þar sem áhrifin eru gervitilviljunarkennd (60% skaðleg / 30% trufla skynjun / 10% sjaldgæft-gagnleg, dreifing þvinguð með Python, LLM getur ekki fundið upp frelsandi afleiðingu).
+    * **Frjálshamur:** hvaða aðgerð sem er með frjálsum texta („ég mun reyna að opna dyrnar"), vélin leggur til 1-3 tillögur en þvingar ekki val.
+    * **Eitt gervigreindalíkan fyrir alla hama:** frá v18.1 nota allir hamar Opowiestar sama, sameiginlega líkanið (sjálfgefið og mælt með Anthropic Claude Sonnet 4.6) — öflugra líkan fylgir reglum heimsins af nákvæmni (sérstaklega mikilvægt í Minna Ilsins Ham, þar sem hver valkostur verður að vera raunverulega óhagstæður).
   modul_poliglota: |
     ### 3. Fjöltyngdur (Ctrl+3, AI Þýðandi + TTS Hreimur)
 
@@ -71,11 +71,13 @@ tresc:
 
     Allt GUI viðmót, skjöl (`docs/manual.<iso>.txt`) og flest kerfisskilaboð eru fáanleg innfædd á hverju af studdu tungumálunum. Kerfisboð AI í Leikstjóra og Söguham eru skrifuð á markmálinu (handvirkt, ekki sjálfvirkt þýdd — sjá `dictionaries/<code>/rezyser/` og `dictionaries/<code>/opowiesci/`).
   architektura_ai: |
-    ## Gerð gervigreindar og notuð líkön
+    ## Uppbygging gervigreindar og notuð líkön
 
-    Frá og með útgáfu 18.2 notar forritið einn API-þjónustuaðila — Anthropic — og eitt líkan fyrir öll verkefni gervigreindar:
+    Ráðlagður og sjálfgefinn þjónustuaðili gervigreindar er Anthropic (Claude) — öll kerfisfyrirmæli eru fínstillt fyrir hann, þannig að hann gefur hæstu gæði frásagnar, bestu fylgni við reglur heimsins og náttúrulegustu prósu. Samþjöppun á Claude fór fram í áföngum (Reżyser í v18.0, Opowieści í v18.1, Poliglota og eftirvinnsla í v18.2) — hún hlaust af reynslubundinni staðfestri yfirburðum í fylgni við reglur heimsins, náttúrulegu prósu og forðast klisé.
 
-    * **Anthropic Claude Sonnet 4.6:** Vélin á bak við ALLA greind forritsins. Hún sér um skapandi frásögn (leikstjórn handrita, ritun hefðbundinnar hljóðbókarprósu, Hugflóð og ALLAR Söguhamur — Val, Minna Illt, Frjálst — ásamt myndun samantekta og Cinematic-millileikja), háþróaðar þýðingar með varðveislu samhengis yfir mörg blokkir (Poliglota), auk smáverkefna: endurtekið úthlutun bókmenntalegs titils á kafla og greining á tungumálakóða innihalds. Samþjöppunin á Claude fór fram í áföngum (Reżyser í v18.0, Opowiesci í v18.1, Poliglota og eftirvinnsla í v18.2) — hún leiddi af reynslulegri staðfestri yfirburðum í því að fylgja reglum heimsins, náttúruleika prósu og forðast klisé.
+    * **Anthropic Claude Sonnet 4.6 (sjálfgefinn gæðastoð):** Vélin á bak við ALLA greind forritsins. Hann sér um skapandi frásögn (leikstjórn handrita, ritun hefðbundinnar prósu hljóðbókar, Hugflóð og ALLAR stillingar Opowieści — Wybory, Mniejsze Zło, Swobodny — ásamt myndun samantekta og Cinematic hlébila), háþróaðar þýðingar með varðveislu samhengis margra blokka (Poliglota), sem og smáverkefni: ítrekaðar bókmentalegar fyrirsagnir kafla og greining málskóða efnis.
+
+    * **Eigin endapunktur samhæfður við OpenAI (ítarlegur valkostur, frá v18.4):** Í stað Anthropic er hægt að tilgreina hvaða sem er endapunkt samhæfðan við OpenAI API (OpenRouter, Groq, Fireworks, DeepSeek, staðbundið Ollama, OpenAI-compatible Gemini og fleiri) — með einum, sameiginlegum kóðaleiðum, án sérstakrar samþættingar per þjónustuaðila. Stillingar í skránni `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); fullnægjandi leiðbeiningar í aðalhandbókinni (SKREF 2B). Önnur líkön geta gefið lægri gæði en Claude, sem kerfisfyrirmælin eru fínstillt fyrir — þetta er meðvitað val kostnaðar↔gæða af hálfu notandans.
   ograniczenia_modeli: |
     ### Þekkt takmörk módela (Anti-Closure)
 

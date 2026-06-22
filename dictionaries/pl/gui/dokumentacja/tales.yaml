@@ -91,7 +91,7 @@ tresc:
 
     /wczytaj, /load — otwiera dialog wyboru gry z listą dostępnych nazw (od v15.2.3 zamiast systemowego dialogu plików — bezpośrednia lista zapisanych gier z folderu runtime/opowiesci/ wykrywanych po obecności pliku .game.json). NVDA czyta listę naturalnie, niewidomy gracz nie musi nawigować po systemowym dialogu plików. Po wybraniu nazwa gry, tryb i pełna narracja zostają przywrócone — możesz kontynuować od tury, na której skończyłeś. Identyczne zachowanie ma przycisk "{opowiesci.btn_wczytaj_label}".
 
-    Silnik narracyjny wszystkich trybów Opowieści korzysta z jednego modelu Anthropic Claude Sonnet 4.6 (od v18.1; wcześniej dobierano model OpenAI per tryb). Mocniejszy model rygorystycznie trzyma się zasad świata — to istotne zwłaszcza w trybie Mniejsze zło, gdzie każda opcja musi pozostać realnie niekorzystna.
+    Silnik narracyjny wszystkich trybów Opowieści korzysta z jednego, wspólnego modelu (domyślnie i zalecanie Anthropic Claude Sonnet 4.6; od v18.4 zaawansowany użytkownik może wskazać własny endpoint zgodny z OpenAI — patrz główny manual, KROK 2B). Mocniejszy model rygorystycznie trzyma się zasad świata — to istotne zwłaszcza w trybie Mniejsze zło, gdzie każda opcja musi pozostać realnie niekorzystna.
 
     /wizualizuj <opis>, /visualize <opis> — multisensoryczny opis aktualnej sceny. Nie zmienia stanu gry, nie proponuje wyborów — silnik narracyjny używa wszystkich pięciu zmysłów (wzrok, słuch, zapach, dotyk, smak), by pokazać scenę z większą głębią. Wynik pojawia się w osobnym dialogu, NIE jest dopisywany do narracji ani zapisany w pliku audiobooka. Przykład: „/wizualizuj jak wygląda strażnik" lub „/wizualizuj zapach kawiarni".
 

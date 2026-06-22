@@ -95,36 +95,35 @@ Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt del si
 ----------------------------
 
 La carpeta "opowiesci/" contiene 8 archivos que describen el segundo
-modo principal de la aplicación: juegos de texto interactivos dirigidos por IA en el papel
-de motor narrativo. A diferencia del modo Director (donde generas un audiolibro COMPLETO
-para reproducir en TTS), el modo Historias es una conversación turno a turno
-con el modelo, que lleva a cabo una sesión de trama dinámica contigo:
+modo principal de la aplicación: juegos de texto interactivos conducidos por la IA en el rol
+de motor narrativo. A diferencia del modo Director (donde generas un audiolibro LISTO para reproducir en TTS), el modo Historias es una conversación turno a turno
+con el modelo, que lleva contigo una sesión de trama dinámica:
 
 - tryb_wyborow.yaml      — Elecciones (3-5 opciones numeradas A-E al final
                            de cada turno, el modo más intuitivo para
                            jugadores ciegos)
-- tryb_mniejsze_zlo.yaml — Menor mal (como Elecciones, pero cada opción es
-                           desfavorable; desde v15.2 un vial reutilizable como
-                           opción de rescate desesperado numerada como CERO)
+- tryb_mniejsze_zlo.yaml — El mal menor (como Elecciones, pero cada opción es
+                           desfavorable; desde v15.2 una ampolla reutilizable como
+                           opción CERO numerada de rescate desesperado)
 - tryb_swobodny.yaml     — Libre (cualquier acción en texto libre, el motor
-                           propone 1-3 sugerencias pero no obliga a elegir)
-- tryb_burza.yaml        — Tormenta de ideas (despacho interno generando
+                           propone 1-3 sugerencias pero no impone la elección)
+- tryb_burza.yaml        — Lluvia de ideas (dispatch interno que genera
                            propuestas de desarrollo de escena para el motor narrativo)
-- baza.yaml              — reglas básicas comunes (duración del turno, prohibiciones
+- baza.yaml              — reglas base comunes (duración del turno, prohibición
                            de resúmenes, directiva anti-cierre)
-- zaczatki.yaml          — iniciadores de aventura (3 configuraciones iniciales del mundo
-                           para elegir al comenzar un nuevo juego)
-- streszczenie.yaml      — generador de resúmenes de juegos largos (compresión
-                           de la historia para la ventana de contexto del modelo)
+- zaczatki.yaml          — iniciadores de aventura (3 configuraciones iniciales de mundo
+                           a elegir al comenzar una nueva partida)
+- streszczenie.yaml      — generador de resúmenes para partidas largas (compresión
+                           del historial para la ventana de contexto del modelo)
 - cinematic_warning.yaml — advertencias sobre escenas violentas/dramáticas
                            (compatibilidad con las preferencias del jugador)
 
-Al igual que en el modo Director, cada archivo contiene un "prompt del sistema" para editar.
-Puedes ajustar el estilo del narrador (por ejemplo, menos florido), cambiar la duración
-del turno, añadir tus propias directivas de trama. Desde v18.1 todos los modos de Historias
-utilizan un único modelo Anthropic Claude Sonnet 4.6 — un modelo más potente
-que sigue rigurosamente las reglas del mundo (crucial en el modo Menor mal,
-donde cada opción debe ser realmente desfavorable).
+Al igual que en el modo Director, cada archivo contiene un "prompt del sistema" editable.
+Puedes ajustar el estilo del narrador (p. ej., menos florido), cambiar la duración
+del turno, añadir tus propias directivas narrativas. Desde v18.1, todos los modos de Historias
+utilizan un único modelo compartido (por defecto y recomendado: Anthropic
+Claude Sonnet 4.6): un modelo más potente respeta rigurosamente las reglas del mundo
+(clave en el modo Mal menor, donde cada opción debe ser genuinamente desfavorable).
 
 
 Cómo empezar a divertirse — tres niveles de dificultad

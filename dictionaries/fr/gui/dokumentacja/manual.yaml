@@ -93,13 +93,13 @@ tresc:
 
     Selon une étude de l'Université de Cambridge, l'ordre des lettres dans un mot n'a pas d'importance, tant que la première et la dernière lettre sont à la bonne place. Vous puoevz lirre un txete mêm si les ltrtees sont mélgaéens, tnat que la pmrèire et la dèrneie lterte de cahuqe mto sont à la bnoe pclae.
   krok_2_klucz_api: |
-    ÉTAPE 2 : Alimentation de l'API (clé Anthropic / Claude)
+    ÉTAPE 2 : Alimentation de l'API (clé Anthropic / Claude recommandée)
 
-    Depuis la version 18.2, l'application utilise un seul fournisseur d'intelligence artificielle — Anthropic (Claude) — et nécessite UNE SEULE clé API dans le fichier golden_key.env :
+    Le fournisseur d'IA recommandé et par défaut est Anthropic (Claude) — tous les prompts de l'application sont optimisés pour lui, ce qui garantit la meilleure qualité de narration et le respect le plus fidèle des règles de l'univers. Dans cette configuration (recommandée), une seule clé API dans le fichier golden_key.env suffit :
 
-    •  Clé Anthropic (Claude) — alimente L'INTÉGRALITÉ du moteur IA : la narration du Réalisateur (livre audio, théâtre lu, brainstorming), le mode Histoires, le Polyglotte (traducteur) ainsi que l'attribution de titres aux chapitres et la détection de la langue du contenu. Elle commence par sk-ant-.
+    •  Clé Anthropic (Claude) — alimente L'INTÉGRALITÉ du moteur IA : la narration du Réalisateur (livre audio, théâtre radiophonique, brainstorming), le mode Histoires, le Polyglotte (traducteur) ainsi que l'attribution de titres aux chapitres et la détection de la langue du contenu. Elle commence par sk-ant-.
 
-    Si vous effectuez une mise à jour depuis une version antérieure : l'ancienne clé OpenAI n'est plus nécessaire — vous pouvez laisser ou supprimer sa ligne dans golden_key.env, l'application l'ignore.
+    Si vous effectuez une mise à jour depuis une version antérieure : l'ancienne clé OpenAI n'est plus nécessaire pour la configuration par défaut — vous pouvez conserver ou supprimer sa ligne dans golden_key.env, l'application l'ignore (sauf si vous configurez délibérément un autre fournisseur — voir ÉTAPE 2B ci-dessous).
 
     Comment obtenir une clé Anthropic :
     1. Créez un compte sur console.anthropic.com et approvisionnez-le (onglet Billing / Plans).
@@ -107,9 +107,9 @@ tresc:
 
     Comment saisir la clé dans le programme :
     3. Sur l'écran de démarrage du programme, cliquez sur le bouton "{home.btn_generate}". Le système créera automatiquement un fichier de configuration vierge au bon emplacement et ouvrira le Bloc-notes avec un modèle prêt à être édité.
-    4. Dans le fichier ouvert, vous verrez la ligne : ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Supprimez le texte de remplacement et collez votre clé directement après le signe égal (sans espace ni guillemets). Enregistrez le fichier et redémarrez l'application.
+    4. Dans le fichier ouvert, vous verrez la ligne : ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Supprimez le texte de remplacement et collez votre clé directement après le signe égal (sans espace ni guillemets). Enregistrez le fichier et relancez l'application.
 
-    Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera le statut de la clé dans la section "{home.heading_system_check}". Il doit être vert pour que tous les modules IA soient prêts à fonctionner. Si la clé est absente ou incorrecte, le programme l'indiquera clairement et permettra d'ouvrir un éditeur de texte pour corriger rapidement l'erreur.
+    Conseil : Après le redémarrage, l'application vérifiera le fichier et affichera le statut de la clé dans la section "{home.heading_system_check}". Il doit être vert pour que tous les modules IA soient prêts à fonctionner. Si la clé est absente ou incorrecte, le programme l'indiquera clairement et vous permettra d'ouvrir l'éditeur de texte pour corriger rapidement l'erreur.
   krok_3_glowne_studio: |
     KROK 3 : Studio Principal de Réalisation
 
@@ -694,3 +694,20 @@ tresc:
     Dossiers contenant vos sauvegardes (à côté du programme) :
     - skrypty (scripts) — projets du Réalisateur : narration .txt, Livre du Monde .md
     - opowiesci (stories) — sauvegardes des Histoires interactives
+  krok_2b_dostawca_zaawansowany: |
+    ÉTAPE 2B (avancé, optionnel) : Fournisseur d'IA personnalisé compatible OpenAI
+
+    La plupart des utilisateurs devraient rester avec Anthropic recommandé (ÉTAPE 2) — c'est lui qui offre la meilleure qualité. Cependant, si vous avez une raison particulière (coût, accès, confidentialité, modèle local personnel), à partir de la version 18.4 vous pouvez indiquer N'IMPORTE QUEL endpoint compatible avec l'API OpenAI — par exemple OpenRouter, Groq, Fireworks, DeepSeek, Ollama local ou un endpoint Gemini compatible OpenAI. Tout le moteur IA emprunte alors un seul chemin vers cet endpoint, sans intégration séparée par fournisseur.
+
+    Il s'agit d'une option pour utilisateurs avancés : vous la configurez manuellement dans le fichier golden_key.env, en ajoutant à côté (ou à la place) de la clé Anthropic trois lignes ainsi que la clé du fournisseur choisi :
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=adresse_de_l'endpoint (ex. https://openrouter.ai/api/v1)
+    LLM_MODEL=nom_du_modèle_chez_le_fournisseur (ex. openai/gpt-4o-mini)
+    OPENAI_API_KEY=votre_clé_chez_ce_fournisseur
+
+    Comment ça fonctionne :
+    •  Lorsque LLM_PROVIDER=openai_compat, TOUT le moteur IA (Réalisateur, Opowieści, Polyglotte, titres, détection de langue) utilise l'endpoint indiqué, et le nom du modèle issu des fichiers de configuration est remplacé par LLM_MODEL.
+    •  Lorsque la ligne LLM_PROVIDER est absente (ou a la valeur anthropic), l'application fonctionne comme à l'ÉTAPE 2 — exclusivement avec la clé Anthropic. Vous n'avez rien à modifier.
+
+    Important (qualité) : les prompts système de l'application sont écrits et ajustés pour Claude. Un autre modèle peut produire une qualité inférieure — respecter moins bien les règles du monde, perdre la structure JSON dans les modes avec choix ou renvoyer du texte dans une mauvaise langue. Il s'agit d'un compromis délibéré coût↔qualité de votre côté. Si vous tenez au meilleur résultat, restez avec Anthropic.

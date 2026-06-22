@@ -74,23 +74,23 @@ tresc:
 
     Vinkki: "Avaa tiedoston sijainti" on natiivi nimi Windowsin suomenkieliselle versiolle. Englanninkielisessä järjestelmässä se on "Open file location", muissa kieliversioissa — vastaavasti paikallisella kielellä.
   krok_2_klucz_api: |
-    VAIHE 2: API:n käyttöönotto (Anthropic / Claude -avain)
+    VAIHE 2: API-avainten syöttäminen (suositeltava Anthropic / Claude -avain)
 
-    Versiosta 18.2 alkaen sovellus käyttää yhtä tekoälyntarjoajaa — Anthropic (Claude) — ja vaatii YHDEN API-avaimen tiedostossa golden_key.env:
+    Suositeltava ja oletustoimittaja tekoälylle on Anthropic (Claude) — kaikki sovelluksen promptit on viritetty sitä varten, joten se tuottaa parhaan kerronnan laadun ja noudattaa parhaiten maailman sääntöjä. Tässä (suositellussa) vaihtoehdossa riittää YKSI API-avain tiedostossa golden_key.env:
 
-    •  Anthropic-avain (Claude) — käyttää KOKO tekoälymoottoria: Ohjaajan kerrontaa (äänikirja, luettu teatteri, aivoriihi), Tarinatilaa, Polyglottia (kääntäjä) sekä lukujen otsikoiden luomista ja sisällön kielen tunnistamista. Alkaa merkeillä sk-ant-.
+    •  Anthropic (Claude) -avain — käyttää KOKO tekoälymoottoria: Ohjaajan kerrontaa (äänikirja, luettu teatteri, aivoriihi), Tarinat-tilaa, Polyglottia (kääntäjä) sekä lukujen otsikoiden antamista ja sisällön kielen tunnistamista. Alkaa merkeillä sk-ant-.
 
-    Jos päivität vanhemmasta versiosta: vanhaa OpenAI-avainta ei enää tarvita — voit jättää tai poistaa sen rivin tiedostosta golden_key.env, sovellus ohittaa sen.
+    Jos päivität vanhemmasta versiosta: vanhaa OpenAI-avainta ei enää tarvita oletusvaihtoehdon käyttöön — voit jättää tai poistaa sen rivin tiedostosta golden_key.env, sovellus ohittaa sen (ellei tietoisesti määritä toista toimittajaa — katso VAIHE 2B alla).
 
-    Anthropic-avaimen hankkiminen:
+    Kuinka hankkia Anthropic-avain:
     1. Luo tili osoitteessa console.anthropic.com ja lataa saldoa (välilehti Billing / Plans).
     2. Luo avain osiossa API Keys (alkaa merkeillä sk-ant-). Kopioi se heti — se saatetaan näyttää vain kerran.
 
-    Avaimen syöttäminen ohjelmaan:
-    3. Napsauta ohjelman aloitusnäytöllä painiketta "{home.btn_generate}". Järjestelmä luo automaattisesti tyhjän konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion muokkausta varten valmiin mallin kanssa.
+    Kuinka syöttää avain ohjelmaan:
+    3. Napsauta ohjelman aloitusnäytöllä painiketta "{home.btn_generate}". Järjestelmä luo automaattisesti puhtaan konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion muokkausta varten valmiin mallin kanssa.
     4. Avautuneessa tiedostossa näet rivin: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Poista paikkamerkkiteksti ja liitä avaimesi suoraan yhtäläisyysmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
 
-    Vinkki: Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää avaimen tilan osiossa "{home.heading_system_check}". Sen täytyy olla vihreä, jotta kaikki tekoälymoduulit ovat valmiina käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
+    Vinkki: Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "{home.heading_system_check}" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
   krok_3_glowne_studio: |
     KROK 3: Pääohjaajan Studio
 
@@ -640,3 +640,20 @@ tresc:
     Kansiot tallennuksillesi (ohjelman vieressä):
     - skrypty (käsikirjoitukset) — Ohjaajan projektit: kerronta .txt, Maailman Kirja .md
     - opowiesci (tarinat) — interaktiivisten Tarinoiden tallennukset
+  krok_2b_dostawca_zaawansowany: |
+    VAIHE 2B (edistynyt, valinnainen): Oma OpenAI-yhteensopiva AI-palveluntarjoaja
+
+    Useimpien käyttäjien kannattaa pysyä suositellussa Anthropicissa (VAIHE 2) — se tarjoaa parhaan laadun. Jos sinulla on kuitenkin oma syy (kustannukset, saatavuus, yksityisyys, oma paikallinen malli), voit versiosta 18.4 alkaen osoittaa MINKÄ TAHANSA OpenAI API -yhteensopivan endpointin — esimerkiksi OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama tai OpenAI-yhteensopiva Gemini-endpoint. Koko AI-moottori kulkee silloin yhtä polkua kyseiseen endpointiin, ilman erillistä integraatiota palveluntarjoajakohtaisesti.
+
+    Tämä on edistyneiden käyttäjien vaihtoehto: se konfiguroidaan manuaalisesti tiedostossa golden_key.env lisäämällä Anthropic-avaimen rinnalle (tai tilalle) kolme riviä sekä valitun palveluntarjoajan avain:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=endpointin_osoite (esim. https://openrouter.ai/api/v1)
+    LLM_MODEL=mallin_nimi_palveluntarjoajalla (esim. openai/gpt-4o-mini)
+    OPENAI_API_KEY=sinun_avaimesi_kyseiseltä_palveluntarjoajalta
+
+    Miten se toimii:
+    •  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Reżyser, Opowieści, Poliglota, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.
+    •  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.
+
+    Tärkeää (laatu): sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.

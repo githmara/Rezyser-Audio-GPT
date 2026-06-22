@@ -74,23 +74,23 @@ tresc:
 
     Hinweis: Die Option „Dateispeicherort öffnen" ist der native Name für die deutsche Version von Windows. Im englischen System lautet sie „Open file location", in anderen Sprachversionen — analog in der lokalen Sprache des Betriebssystems.
   krok_2_klucz_api: |
-    SCHRITT 2: API-Versorgung (Anthropic / Claude-Schlüssel)
+    SCHRITT 2: API-Versorgung (empfohlener Anthropic / Claude-Schlüssel)
 
-    Ab Version 18.2 nutzt die Anwendung einen einzigen KI-Anbieter — Anthropic (Claude) — und benötigt EINEN API-Schlüssel in der Datei golden_key.env:
+    Der empfohlene und standardmäßige KI-Anbieter ist Anthropic (Claude) — alle Prompts der Anwendung sind auf ihn abgestimmt, sodass er die höchste Erzählqualität und die beste Einhaltung der Weltregeln bietet. Bei dieser (empfohlenen) Variante genügt EIN API-Schlüssel in der Datei golden_key.env:
 
-    •  Anthropic-Schlüssel (Claude) — versorgt die GESAMTE KI-Engine: die Reżyser-Narration (Hörbuch, Lesebühne, Brainstorming), den Opowieści-Modus, den Poliglota (Übersetzer) sowie die Kapiteltitelvergabe und die Inhaltssprach­erkennung. Er beginnt mit sk-ant-.
+    •  Anthropic-Schlüssel (Claude) — versorgt die GESAMTE KI-Engine: die Narration des Reżysers (Hörbuch, Lesebühne, Brainstorming), den Opowieści-Modus, den Poliglota (Übersetzer) sowie die Vergabe von Kapiteltiteln und die Erkennung der Inhaltssprache. Beginnt mit sk-ant-.
 
-    Falls Sie von einer älteren Version aktualisieren: Der frühere OpenAI-Schlüssel wird nicht mehr benötigt — Sie können seine Zeile in golden_key.env belassen oder löschen, die Anwendung ignoriert sie.
+    Falls Sie von einer älteren Version aktualisieren: Der frühere OpenAI-Schlüssel wird für die Standardvariante nicht mehr benötigt — Sie können seine Zeile in golden_key.env belassen oder löschen, die Anwendung ignoriert sie (es sei denn, Sie konfigurieren bewusst einen anderen Anbieter — siehe SCHRITT 2B weiter unten).
 
     So erhalten Sie einen Anthropic-Schlüssel:
     1. Erstellen Sie ein Konto auf console.anthropic.com und laden Sie Guthaben auf (Reiter Billing / Plans).
-    2. Generieren Sie den Schlüssel im Bereich API Keys (beginnt mit sk-ant-). Kopieren Sie ihn sofort — er wird mitunter nur einmal angezeigt.
+    2. Generieren Sie einen Schlüssel im Bereich API Keys (beginnt mit sk-ant-). Kopieren Sie ihn sofort — er wird mitunter nur einmal angezeigt.
 
     So tragen Sie den Schlüssel in das Programm ein:
     3. Klicken Sie auf dem Startbildschirm des Programms auf die Schaltfläche „{home.btn_generate}". Das System erstellt automatisch eine saubere Konfigurationsdatei am richtigen Speicherort und öffnet den Editor mit einer bearbeitungsbereiten Vorlage.
-    4. In der geöffneten Datei sehen Sie die Zeile: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Entfernen Sie den Platzhaltertext und fügen Sie Ihren Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
+    4. In der geöffneten Datei sehen Sie die Zeile: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Löschen Sie den Platzhaltertext und fügen Sie Ihren Schlüssel direkt nach dem Gleichheitszeichen ein (ohne Leerzeichen und ohne Anführungszeichen). Speichern Sie die Datei und starten Sie die Anwendung neu.
 
-    Hinweis: Nach dem Neustart prüft die Anwendung die Datei und zeigt im Abschnitt „{home.heading_system_check}" den Status des Schlüssels an. Er muss grün sein, damit alle KI-Module einsatzbereit sind. Fehlt der Schlüssel oder ist er fehlerhaft, weist das Programm klar darauf hin und ermöglicht es, den Texteditor zu öffnen, um den Fehler schnell zu beheben.
+    Hinweis: Nach dem Neustart prüft die Anwendung die Datei und zeigt im Bereich „{home.heading_system_check}" den Status des Schlüssels an. Er muss grün sein, damit alle KI-Module einsatzbereit sind. Fehlt der Schlüssel oder ist er fehlerhaft, weist das Programm klar darauf hin und ermöglicht es, den Texteditor zu öffnen, um den Fehler schnell zu beheben.
   krok_3_glowne_studio: |
     SCHRITT 3: Hauptregiestudio
 
@@ -697,3 +697,20 @@ tresc:
     Ordner mit Ihren Aufzeichnungen (neben dem Programm):
     - skrypty (scripts) — Regisseurprojekte: Erzählung .txt, Weltbuch .md
     - opowiesci (stories) — Aufzeichnungen interaktiver Geschichten
+  krok_2b_dostawca_zaawansowany: |
+    SCHRITT 2B (erweitert, optional): Eigener KI-Anbieter kompatibel mit OpenAI
+
+    Die meisten Benutzer sollten beim empfohlenen Anthropic (SCHRITT 2) bleiben — er liefert die höchste Qualität. Wenn du jedoch einen eigenen Grund hast (Kosten, Zugang, Datenschutz, eigenes lokales Modell), kannst du ab Version 18.4 JEDEN Endpunkt angeben, der mit der OpenAI-API kompatibel ist — zum Beispiel OpenRouter, Groq, Fireworks, DeepSeek, lokales Ollama oder einen OpenAI-kompatiblen Gemini-Endpunkt. Die gesamte KI-Engine läuft dann über einen einzigen Pfad zu diesem Endpunkt, ohne separate Integration pro Anbieter.
+
+    Dies ist eine Option für Fortgeschrittene: Du konfigurierst sie manuell in der Datei golden_key.env, indem du neben (oder anstelle von) dem Anthropic-Schlüssel drei Zeilen sowie den Schlüssel des gewählten Anbieters hinzufügst:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=adresse_des_endpunkts (z. B. https://openrouter.ai/api/v1)
+    LLM_MODEL=modellname_beim_anbieter (z. B. openai/gpt-4o-mini)
+    OPENAI_API_KEY=dein_schlüssel_bei_diesem_anbieter
+
+    So funktioniert es:
+    •  Wenn LLM_PROVIDER=openai_compat gesetzt ist, nutzt die GESAMTE KI-Engine (Reżyser, Opowieści, Poliglota, Titel, Spracherkennung) den angegebenen Endpunkt, und der Modellname aus den Konfigurationsdateien wird durch LLM_MODEL überschrieben.
+    •  Wenn die Zeile LLM_PROVIDER fehlt (oder den Wert anthropic hat), verhält sich die Anwendung wie in SCHRITT 2 — ausschließlich mit dem Anthropic-Schlüssel. Du musst nichts ändern.
+
+    Wichtig (Qualität): Die System-Prompts der Anwendung sind für Claude geschrieben und optimiert. Ein anderes Modell kann eine geringere Qualität liefern — es hält sich möglicherweise schlechter an die Weltregeln, verliert die JSON-Struktur in Modi mit Auswahlmöglichkeiten oder gibt Text in der falschen Sprache zurück. Dies ist ein bewusster Kosten↔Qualität-Kompromiss auf deiner Seite. Wenn dir das beste Ergebnis wichtig ist, bleib bei Anthropic.

@@ -74,23 +74,23 @@ tresc:
 
     Ábending: valkosturinn „Opna skráarstaðsetningu" er innfæddur nafn fyrir íslenska útgáfu Windows. Í ensku kerfi heitir hann „Open file location", í öðrum tungumálaútgáfum — á sama hátt á staðbundnu tungumáli stýrikerfisins.
   krok_2_klucz_api: |
-    SKREF 2: Að veita API (Anthropic / Claude lykill)
+    SKREF 2: Að tengja API (ráðlagt Anthropic / Claude lykill)
 
-    Frá og með útgáfu 18.2 notar forritið einn gervigreindarveitu — Anthropic (Claude) — og krefst EINS API-lykils í skránni golden_key.env:
+    Ráðlagður og sjálfgefinn AI-veitandi er Anthropic (Claude) — allir kvaðningar forritsins eru fínstilltar fyrir hann, þannig að hann gefur hæstu gæði frásagnar og bestu fylgni við reglur heimsins. Í þessum (ráðlögðum) valkosti nægir EINN API-lykill í skránni golden_key.env:
 
-    •  Anthropic-lykill (Claude) — veitir orku í ALLT gervigreindarkerfi: frásögn Leikstjórans (hljóðbók, lesleikrit, hugflug), Söguham, Fjöltyngvan (þýðanda) og titlagjöf kafla og tungumálsgreiningu efnis. Byrjar á sk-ant-.
+    •  Anthropic-lykill (Claude) — knýr ALLAN AI-vélina: frásögn Reżysera (hljóðbók, lesið leikhús, hugsunarflug), Opowieści-ham, Poliglota (þýðanda) og titlagjöf á kafla og tungumálagreiningu efnis. Byrjar á sk-ant-.
 
-    Ef þú ert að uppfæra frá eldri útgáfu: gamli OpenAI-lykillinn er ekki lengur nauðsynlegur — þú getur látið eða eytt línu hans í golden_key.env, forritið hunsar hana.
+    Ef þú uppfærir úr eldri útgáfu: gamli OpenAI-lykillinn er ekki lengur nauðsynlegur fyrir sjálfgefna valkostinn — þú getur skilið eftir eða eytt línu hans í golden_key.env, forritið hunsar hana (nema þú sért meðvitað að stilla annan veitanda — sjá SKREF 2B hér að neðan).
 
     Hvernig á að fá Anthropic-lykil:
-    1. Stofnaðu reikning á console.anthropic.com og settu inn fjármuni (flipinn Billing / Plans).
-    2. Búðu til lykil í hlutanum API Keys (byrjar á sk-ant-). Afritaðu hann strax — hann getur birst aðeins einu sinni.
+    1. Stofnaðu reikning á console.anthropic.com og bættu við fjármagni (flipinn Billing / Plans).
+    2. Búðu til lykil í hlutanum API Keys (byrjar á sk-ant-). Afritaðu hann strax — hann er stundum aðeins sýndur einu sinni.
 
     Hvernig á að slá lykilinn inn í forritið:
-    3. Á upphafsskjá forritsins smelltu á hnappinn "{home.btn_generate}". Kerfið mun sjálfkrafa búa til hreina stillingarskrá á réttum stað og opna Notepad með sniðmáti tilbúið til breytinga.
-    4. Í skránni sem opnast muntu sjá línuna: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Eyddu staðgengistextanum og límdu lykilinn þinn beint á eftir jafnaðarmerkinu (án bila og án gæsalappa). Vistaðu skrána og endurræstu forritið.
+    3. Á upphafsskjá forritsins, smelltu á hnappinn "{home.btn_generate}". Kerfið mun sjálfkrafa búa til hreina stillingarskrá á réttan stað og opna Notepad með sniðmáti tilbúið til breytinga.
+    4. Í opnu skránni muntu sjá línuna: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Fjarlægðu staðgengistextann og límdu lykilinn þinn beint á eftir jafnaðarmerkinu (án bila og án gæsalappa). Vistaðu skrána og ræstu forritið aftur.
 
-    Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "{home.heading_system_check}" sýna stöðu lykillsins. Hann verður að vera grænn til að öll gervigreindareiningar séu tilbúnar til notkunar. Ef lykillinn vantar eða er rangur mun forritið gefa skýrt til kynna og leyfa þér að opna textaritil til að laga villuna fljótt.
+    Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "{home.heading_system_check}" sýna stöðu lykillsins. Hún verður að vera græn til að allir AI-einingar séu tilbúnar til notkunar. Ef lykillinn vantar eða er rangur, mun forritið gefa skýrt til kynna og leyfa þér að opna textaritil til að laga villuna fljótt.
   krok_3_glowne_studio: |
     KROK 3: Aðalstúdíó Leikstjórans
 
@@ -642,3 +642,20 @@ tresc:
     Möppur með vistunum þínum (við hlið forritsins):
     - skrypty (scripts) — verkefni Leikstjórans: frásögn .txt, Heimsbók .md
     - opowiesci (stories) — vistanir gagnvirkra Sagna
+  krok_2b_dostawca_zaawansowany: |
+    SKREF 2B (ítarlegt, valfrjálst): Eigin AI-þjónustuaðili samhæfur OpenAI
+
+    Flestir notendur ættu að halda sig við ráðlagðan Anthropic (SKREF 2) — hann gefur hæstu gæðin. Ef þú hefur þó eigin ástæðu (kostnaður, aðgangur, friðhelgi, eigið staðbundið líkan), getur þú frá útgáfu 18.4 bent á HVAÐA endpoint sem er samhæfan OpenAI API — til dæmis OpenRouter, Groq, Fireworks, DeepSeek, staðbundið Ollama eða OpenAI-compatible Gemini endpoint. Allur AI-vélin fer þá eina leið að þessum endpoint, án sérstakrar samþættingar per þjónustuaðila.
+
+    Þetta er valkostur fyrir lengra komna: þú stillir hann handvirkt í skránni golden_key.env, með því að bæta við (eða í stað) Anthropic-lykils þremur línum og lykli valins þjónustuaðila:
+
+    LLM_PROVIDER=openai_compat
+    LLM_BASE_URL=heimilisfang_endpoint (t.d. https://openrouter.ai/api/v1)
+    LLM_MODEL=nafn_líkans_hjá_þjónustuaðila (t.d. openai/gpt-4o-mini)
+    OPENAI_API_KEY=þinn_lykill_hjá_þessum_þjónustuaðila
+
+    Hvernig þetta virkar:
+    •  Þegar LLM_PROVIDER=openai_compat, notar ALLUR AI-vélin (Reżyser, Opowieści, Poliglota, titlar, tungumálagreining) tilgreindan endpoint, og LLM_MODEL skrifar yfir líkansnafnið úr stillingarskrám.
+    •  Þegar línan LLM_PROVIDER vantar (eða hefur gildið anthropic), virkar forritið eins og í SKREF 2 — eingöngu með Anthropic-lykli. Þú þarft ekki að breyta neinu.
+
+    Mikilvægt (gæði): kerfisfyrirmæli forritsins eru skrifuð og fínstillt fyrir Claude. Annað líkan getur gefið lægri gæði — fylgt reglum heimsins verr, týnt JSON-uppbyggingu í stillingum með valmöguleikum eða skilað texta á röngu tungumáli. Þetta er meðvitað málamiðlun kostnaður↔gæði af þinni hálfu. Ef þér þykir vænt um besta niðurstöðuna, haltu þér við Anthropic.

@@ -217,9 +217,9 @@ tresc:
     Jak w trybie Reżysera, każdy plik zawiera "prompt systemowy" do edycji.
     Możesz dostroić styl narratora (np. mniej kwiecisty), zmienić długość
     tury, dodać własne dyrektywy fabularne. Od v18.1 wszystkie tryby Opowieści
-    korzystają z jednego modelu Anthropic Claude Sonnet 4.6 — mocniejszy model
-    rygorystycznie trzyma się zasad świata (kluczowe w trybie Mniejsze zło,
-    gdzie każda opcja musi być realnie niekorzystna).
+    korzystają z jednego, wspólnego modelu (domyślnie i zalecanie Anthropic
+    Claude Sonnet 4.6) — mocniejszy model rygorystycznie trzyma się zasad świata
+    (kluczowe w trybie Mniejsze zło, gdzie każda opcja musi być realnie niekorzystna).
   jak_zaczac: |
     Jak zacząć zabawę — trzy poziomy trudności
     -------------------------------------------

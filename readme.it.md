@@ -7,7 +7,7 @@
 
 Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-Versione: **18.5.0** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versione: **18.5.1** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -24,14 +24,14 @@ Studio principale per scrivere radiodrammi e audiolibri. Scegli la modalità —
 * **4 modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore delle Regole di seguito.
 
 
-### 2. Opowieści (Ctrl+2, secondo modalità principale dalla versione 15.0)
+### 2. Opowieści (Ctrl+2, secondo modalità principale dalla v15.0)
 
-Giochi di testo interattivi condotti dall'AI nel ruolo di motore narrativo. A differenza della Regia (dove generi un audiolibro finito), le Opowieści sono una trama dinamica turno per turno:
+Giochi di testo interattivi condotti dall'AI nel ruolo di motore narrativo. A differenza della Reżyseria (dove generi un audiolibro già pronto), Opowieści è una trama dinamica turno per turno:
 
-* **Modalità Scelte:** ogni turno termina con 3-5 opzioni numerate A-E. La modalità più intuitiva per i giocatori non vedenti — NVDA legge le opzioni, clicchi Tab e Invio.
-* **Modalità Minore Male:** come le Scelte, ma ogni opzione è sfavorevole moralmente, fisicamente o strategicamente. Dalla versione 15.2, un'ulteriore "fiala" — opzione di salvataggio disperato numerata ZERO riutilizzabile, i cui effetti sono pseudo-casuali (60% dannosi / 30% che alterano la percezione / 10% raramente vantaggiosi, distribuzione forzata da Python, LLM non può inventare un effetto salvifico).
-* **Modalità Libera:** azione libera con testo libero ("proverò ad aprire la porta"), il motore propone 1-3 suggerimenti ma non impone una scelta.
-* **Un modello AI per tutte le modalità:** dalla versione 18.1 tutte le modalità Opowieści utilizzano Anthropic Claude Sonnet 4.6 — un modello più potente che aderisce rigorosamente alle regole del mondo (cruciale soprattutto nella modalità Minore Male, dove ogni opzione deve essere realmente sfavorevole).
+* **Modalità Scelte:** ogni turno si conclude con 3-5 opzioni numerate A-E. La modalità più intuitiva per i giocatori non vedenti — NVDA legge le opzioni, si preme Tab e Invio.
+* **Modalità Male Minore:** come Scelte, ma ogni opzione è svantaggiosa dal punto di vista morale, fisico o strategico. Dalla v15.2 è disponibile una "fiala" aggiuntiva — un'opzione ZERO riutilizzabile di salvataggio disperato, i cui effetti sono pseudocasuali (60% dannosi / 30% che alterano la percezione / 10% raramente vantaggiosi, distribuzione imposta da Python, l'LLM non ha modo di inventare un esito salvifico).
+* **Modalità Libera:** qualsiasi azione in testo libero ("proverò ad aprire la porta"), il motore propone 1-3 suggerimenti ma non impone una scelta.
+* **Un solo modello AI per tutte le modalità:** dalla v18.1 tutte le modalità di Opowieści utilizzano lo stesso modello condiviso (di default e consigliato Anthropic Claude Sonnet 4.6) — un modello più potente rispetta rigorosamente le regole del mondo (fondamentale soprattutto nella modalità Male Minore, dove ogni opzione deve essere realmente svantaggiosa).
 
 
 ### 3. Poliglotta (Ctrl+3, Traduttore AI + Accenti TTS)
@@ -66,9 +66,11 @@ L'interfaccia GUI, la documentazione (`docs/manual.<iso>.txt`) e la maggior part
 
 ## Architettura AI e modelli utilizzati
 
-Dalla versione 18.2 l'applicazione utilizza un unico fornitore API — Anthropic — e un unico modello per tutti i compiti di intelligenza artificiale:
+Il fornitore AI consigliato e predefinito è Anthropic (Claude) — tutti i prompt di sistema sono ottimizzati per esso, quindi offre la massima qualità narrativa, il miglior rispetto delle regole del mondo e la prosa più naturale. Il consolidamento su Claude è avvenuto per fasi (Reżyser nella v18.0, Opowieści nella v18.1, Poliglota e post-produzione nella v18.2) — è scaturito da una superiorità empiricamente confermata nel rispetto delle regole del mondo, nella naturalezza della prosa e nell'evitare i cliché.
 
-* **Anthropic Claude Sonnet 4.6:** Il motore dell'INTERA intelligenza dell'applicazione. È responsabile della narrazione creativa (regia degli script, scrittura della prosa tradizionale degli Audiolibri, Brainstorming e TUTTE le modalità delle Opowiesci — Scelte, Male Minore, Libero — insieme alla generazione di riassunti e intermezzi Cinematic), delle traduzioni avanzate con mantenimento del contesto multi-blocco (Poliglota), nonché dei micro-compiti: assegnazione iterativa di titoli letterari ai capitoli e rilevamento del codice lingua del contenuto. Il consolidamento su Claude è avvenuto per fasi (Reżyser nella v18.0, Opowiesci nella v18.1, Poliglota e post-produzione nella v18.2) — è scaturito da una superiorità empiricamente confermata nel rispetto delle regole del mondo narrativo, nella naturalezza della prosa e nell'evitare i cliché.
+* **Anthropic Claude Sonnet 4.6 (pilastro qualitativo predefinito):** Il motore dell'INTERA intelligenza dell'applicazione. È responsabile della narrativa creativa (regia degli script, scrittura della prosa tradizionale dell'Audiolibro, Brainstorming e TUTTE le modalità di Opowieści — Scelte, Male Minore, Libero — insieme alla generazione di riassunti e intermezzi Cinematic), delle traduzioni avanzate con mantenimento del contesto multi-blocco (Poliglota), nonché dei micro-compiti: assegnazione iterativa di titoli letterari ai capitoli e rilevamento del codice lingua del contenuto.
+
+* **Endpoint personalizzato compatibile con OpenAI (opzione avanzata, dalla v18.4):** Invece di Anthropic è possibile indicare qualsiasi endpoint compatibile con l'API OpenAI (OpenRouter, Groq, Fireworks, DeepSeek, Ollama locale, Gemini compatibile con OpenAI e altri) — tramite un unico percorso di codice condiviso, senza integrazione separata per fornitore. Configurazione nel file `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); istruzioni complete nel manuale principale (PASSO 2B). Altri modelli possono offrire una qualità inferiore rispetto a Claude, per il quale i prompt sono ottimizzati — si tratta di una scelta consapevole costo↔qualità da parte dell'utente.
 
 
 ### Limitazioni conosciute dei modelli (Anti-Closure)
