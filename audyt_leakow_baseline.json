@@ -13,6 +13,21 @@
   "de/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
   ],
+  "de/ui.yaml/manager.typ.tryb_rezysera.opis": [
+    "lingua:PL"
+  ],
+  "de/ui.yaml/manager.uwagi.postprodukcja": [
+    "znak-PL:ł"
+  ],
+  "de/ui.yaml/manager.uwagi.tryb_rezysera": [
+    "lingua:PL"
+  ],
+  "de/ui.yaml/opowiesci.dlg_zasady_swiata_hint": [
+    "znak-PL:ż"
+  ],
+  "de/ui.yaml/opowiesci.komenda_odswiez_zablokowana_hint": [
+    "lingua:PL"
+  ],
   "en/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
   ],
@@ -29,6 +44,24 @@
   "en/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę",
     "znak-PL:ęŚ"
+  ],
+  "en/ui.yaml/manager.typ.tryb_rezysera.opis": [
+    "lingua:PL"
+  ],
+  "en/ui.yaml/manager.uwagi.postprodukcja": [
+    "znak-PL:ł"
+  ],
+  "en/ui.yaml/manager.uwagi.tryb_rezysera": [
+    "lingua:PL"
+  ],
+  "en/ui.yaml/opowiesci.dlg_zasady_swiata_hint": [
+    "znak-PL:ż"
+  ],
+  "en/ui.yaml/opowiesci.komenda_odswiez_zablokowana_hint": [
+    "lingua:PL"
+  ],
+  "en/ui.yaml/opowiesci.komendy_dostepne_lista": [
+    "lingua:PL"
   ],
   "es/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
@@ -47,6 +80,21 @@
   ],
   "es/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
+  ],
+  "es/ui.yaml/manager.typ.tryb_rezysera.opis": [
+    "lingua:PL"
+  ],
+  "es/ui.yaml/manager.uwagi.postprodukcja": [
+    "znak-PL:ł"
+  ],
+  "es/ui.yaml/manager.uwagi.tryb_rezysera": [
+    "lingua:PL"
+  ],
+  "es/ui.yaml/opowiesci.dlg_zasady_swiata_hint": [
+    "znak-PL:ż"
+  ],
+  "es/ui.yaml/opowiesci.komenda_odswiez_zablokowana_hint": [
+    "lingua:PL"
   ],
   "fi/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
@@ -76,6 +124,15 @@
   "fi/tales.yaml/krok_7_pamiec_modelu": [
     "termin:KROK"
   ],
+  "fi/ui.yaml/manager.typ.postprodukcja.opis": [
+    "lingua:PL"
+  ],
+  "fi/ui.yaml/manager.uwagi.postprodukcja": [
+    "znak-PL:ł"
+  ],
+  "fi/ui.yaml/opowiesci.dlg_zasady_swiata_hint": [
+    "znak-PL:ż"
+  ],
   "fr/dictionaries.yaml/co_to_szyfr": [
     "lingua:PL"
   ],
@@ -90,6 +147,18 @@
     "znak-PL:ę"
   ],
   "fr/tales.yaml/krok_4_zasady_swiata": [
+    "znak-PL:ż"
+  ],
+  "fr/ui.yaml/manager.typ.tryb_rezysera.opis": [
+    "lingua:PL"
+  ],
+  "fr/ui.yaml/manager.uwagi.postprodukcja": [
+    "znak-PL:ł"
+  ],
+  "fr/ui.yaml/manager.uwagi.tryb_rezysera": [
+    "lingua:PL"
+  ],
+  "fr/ui.yaml/opowiesci.dlg_zasady_swiata_hint": [
     "znak-PL:ż"
   ],
   "is/dictionaries.yaml/co_to_akcent": [
@@ -118,6 +187,15 @@
   "is/tales.yaml/krok_7_pamiec_modelu": [
     "termin:KROK"
   ],
+  "is/ui.yaml/manager.uwagi.postprodukcja": [
+    "znak-PL:ł"
+  ],
+  "is/ui.yaml/opowiesci.komenda_odswiez_zablokowana_hint": [
+    "lingua:PL"
+  ],
+  "is/ui.yaml/rezyser.txt_nazwa_pliku_hint": [
+    "lingua:PL"
+  ],
   "it/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
   ],
@@ -140,6 +218,24 @@
   ],
   "it/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
+  ],
+  "it/ui.yaml/manager.typ.postprodukcja.opis": [
+    "lingua:PL"
+  ],
+  "it/ui.yaml/manager.typ.tryb_rezysera.opis": [
+    "lingua:PL"
+  ],
+  "it/ui.yaml/manager.uwagi.postprodukcja": [
+    "lingua:PL"
+  ],
+  "it/ui.yaml/manager.uwagi.tryb_rezysera": [
+    "lingua:PL"
+  ],
+  "it/ui.yaml/opowiesci.dlg_zasady_swiata_hint": [
+    "znak-PL:ż"
+  ],
+  "it/ui.yaml/opowiesci.komenda_odswiez_zablokowana_hint": [
+    "lingua:PL"
   ],
   "ru/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
@@ -173,5 +269,8 @@
   ],
   "ru/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
+  ],
+  "ru/ui.yaml/rezyser.txt_nazwa_pliku_hint": [
+    "lingua:PL"
   ]
 }

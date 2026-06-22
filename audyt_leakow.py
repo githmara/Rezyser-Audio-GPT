@@ -302,6 +302,75 @@ def leaki_per_sekcja(
     return wynik
 
 
+# ---------------------------------------------------------------------------
+# Skan ui.yaml (od v18.5.3) — rozszerzenie detektora PL-leak na stringi GUI
+# ---------------------------------------------------------------------------
+# Odłożony z v18.5.2 razem z bramką: te same klasy leaków (osadzona PL nazwa
+# modułu, dryf linii) trafiają też do `dictionaries/<kod>/gui/ui.yaml` —
+# komunikaty błędów, opisy, etykiety. `safe_load` GUBI komentarze, więc skanujemy
+# WYŁĄCZNIE wartości (polskie nagłówki sekcji `# REZYSER …` to dev-komentarze,
+# obecne identycznie we wszystkich paczkach — NIE leaki, i tak niewidoczne tu).
+#
+# OGRANICZENIE (świadome): detektor jest PL-leak. NIE łapie niespójności kanonu
+# w obrębie języka docelowego — np. włoskie „Storie" zamiast kanonicznego
+# „Racconti" (oba włoskie) ani angielskiej literówki „Poliglot" zamiast
+# „Polyglot". To nie polski tekst i nie kanon innego języka — żadna ogólna reguła
+# tego nie wykryje bez hardkodowanej listy wariantów (generującej FP). Ta klasa
+# pozostaje human-caught (skan `nazwy_narzedzi` + grep, jak w v18.5.2/18.5.3).
+NAZWA_UI = "ui.yaml"
+
+
+def _splaszcz_ui(dane, prefiks: str = "") -> dict[str, str]:
+    """Spłaszcza zagnieżdżony ui.yaml do `{klucz.kropkowany: wartosc_str}` (liście-stringi).
+
+    Listy adresowane `[i]`. Pomija nie-stringi (liczby, bool, None) — leak to zawsze
+    tekst user/LLM-facing. Klucz kropkowany = czytelny adres w raporcie i stabilny
+    identyfikator baseline (odporny na przesunięcie linii, w przeciwieństwie do nr).
+    """
+    wynik: dict[str, str] = {}
+    if isinstance(dane, dict):
+        iterator = dane.items()
+    elif isinstance(dane, list):
+        iterator = ((f"[{i}]", v) for i, v in enumerate(dane))
+    else:
+        return wynik
+    for k, v in iterator:
+        klucz = f"{prefiks}.{k}" if (prefiks and not str(k).startswith("[")) else f"{prefiks}{k}" if prefiks else str(k)
+        if isinstance(v, str):
+            wynik[klucz] = v
+        elif isinstance(v, (dict, list)):
+            wynik.update(_splaszcz_ui(v, klucz))
+    return wynik
+
+
+def leaki_ui_per_klucz(
+    kod: str,
+    detektor=None,
+    *,
+    prog_lingua: float = 0.70,
+) -> dict[str, list[Leak]]:
+    """Zwraca `{klucz.kropkowany: [Leak, ...]}` dla `dictionaries/<kod>/gui/ui.yaml`.
+
+    Analogon `leaki_per_sekcja` dla docs, ale jednostką jest pojedyncza wartość
+    ui.yaml (komunikat/etykieta), nie sekcja manuala. Skanuje tylko sekcje z leakami.
+    """
+    if detektor is None:
+        detektor = _zbuduj_detektor(kod)
+    sciezka = DICT_DIR / kod / FOLDER_GUI / NAZWA_UI
+    if not sciezka.is_file():
+        return {}
+    try:
+        dane = yaml.safe_load(sciezka.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return {}
+    wynik: dict[str, list[Leak]] = {}
+    for klucz, wartosc in _splaszcz_ui(dane).items():
+        leaki = wykryj_leaki_w_tekscie(wartosc, kod, detektor, prog_lingua=prog_lingua)
+        if leaki:
+            wynik[klucz] = leaki
+    return wynik
+
+
 # ===========================================================================
 # BRAMKA CI/BUILD — baseline zaakceptowanych leaków (od v18.5.3)
 # ===========================================================================
@@ -341,9 +410,11 @@ def zbierz_wszystkie_leaki(
     *,
     prog_lingua: float = 0.70,
 ) -> dict[str, list[str]]:
-    """Zbiera leaki ze WSZYSTKICH szablonów docs jako `{"<kod>/<plik>/<sekcja>": [powod_norm]}`.
+    """Zbiera leaki ze szablonów docs ORAZ ui.yaml jako `{"<kod>/<plik>/<sekcja>": [powod_norm]}`.
 
-    Klucz identyfikuje sekcję (nie linię — numery linii dryfują przy edycji);
+    Dwie powierzchnie (od v18.5.3): `dictionaries/<kod>/gui/dokumentacja/*.yaml`
+    (sekcja = klucz) i `dictionaries/<kod>/gui/ui.yaml` (sekcja = kropkowany klucz
+    wartości). Klucz identyfikuje sekcję (nie linię — numery linii dryfują przy edycji);
     wartość to posortowana LISTA znormalizowanych powodów (multiset — duplikaty
     znaczące, np. 2× znak-PL w jednej sekcji). To kanon zarówno baseline'u
     (`zapisz_baseline`), jak i bieżącego skanu bramki (`bramka_docs`).
@@ -358,11 +429,16 @@ def zbierz_wszystkie_leaki(
     wynik: dict[str, list[str]] = {}
     for kod in kody:
         detektor = _zbuduj_detektor(kod)
+        # (1) Szablony docs: dictionaries/<kod>/gui/dokumentacja/*.yaml
         for nazwa_pliku in _szablony_docelowe(kod):
             per_sekcja = leaki_per_sekcja(kod, nazwa_pliku, detektor, prog_lingua=prog_lingua)
             for klucz_sekcji, leaki in per_sekcja.items():
                 klucz = f"{kod}/{nazwa_pliku}/{klucz_sekcji}"
                 wynik[klucz] = sorted(_normalizuj_powod(l.powod) for l in leaki)
+        # (2) Stringi GUI: dictionaries/<kod>/gui/ui.yaml (od v18.5.3)
+        for klucz_ui, leaki in leaki_ui_per_klucz(kod, detektor, prog_lingua=prog_lingua).items():
+            klucz = f"{kod}/{NAZWA_UI}/{klucz_ui}"
+            wynik[klucz] = sorted(_normalizuj_powod(l.powod) for l in leaki)
     return wynik
 
 
@@ -812,6 +888,18 @@ def main() -> int:
             leakow_jez += ile
             print(f"  📄 {nazwa_pliku}: {ile} leak(ów) w {len(per_sekcja)} sekcji")
             for klucz, leaki in per_sekcja.items():
+                powody = ", ".join(sorted({l.powod.split(':')[0] for l in leaki}))
+                print(f"     • {klucz}: {len(leaki)}× [{powody}]")
+                if args.szczegoly:
+                    for l in leaki:
+                        print(f"        L{l.linia_nr} ({l.powod}): {l.tekst}")
+        # ui.yaml (od v18.5.3) — ta sama powierzchnia co bramka
+        per_ui = leaki_ui_per_klucz(kod, detektor, prog_lingua=args.prog)
+        if per_ui:
+            ile = sum(len(v) for v in per_ui.values())
+            leakow_jez += ile
+            print(f"  📄 {NAZWA_UI}: {ile} leak(ów) w {len(per_ui)} kluczu/ach")
+            for klucz, leaki in per_ui.items():
                 powody = ", ".join(sorted({l.powod.split(':')[0] for l in leaki}))
                 print(f"     • {klucz}: {len(leaki)}× [{powody}]")
                 if args.szczegoly:
