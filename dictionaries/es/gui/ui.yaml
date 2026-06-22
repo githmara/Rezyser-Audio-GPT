@@ -196,7 +196,7 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-  ant_err_struktura: "🚨 ¡Error en la estructura del archivo!\nFalta la variable requerida ANTHROPIC_API_KEY=.\nDesde la versión 18.2, todo el motor de IA (Reżyser, Opowieści, Poliglota, títulos de capítulos) funciona con el modelo Claude y requiere una clave de Anthropic.\nElimina el archivo, vuelve a generarlo e introduce la clave con más cuidado."
+  ant_err_struktura: "🚨 ¡Error en la estructura del archivo!\nFalta la variable requerida ANTHROPIC_API_KEY=.\nDesde la versión 18.2, todo el motor de IA (Director, Historias, Políglota, títulos de capítulos) funciona con el modelo Claude y requiere una clave de Anthropic.\nElimina el archivo, vuelve a generarlo e introduce la clave con más cuidado."
   ant_err_format: "🚨 ¡Formato de clave Anthropic sospechoso!\nUna clave válida de Anthropic (Claude) siempre comienza con los caracteres sk-ant- (p. ej., sk-ant-api03-…).\nAsegúrate de haber copiado la clave desde console.anthropic.com y no la clave de otro proveedor."
   ant_err_zbyt_krotki: "⚠️ La clave Anthropic parece demasiado corta (se detectaron {liczba_znakow} caracteres, se esperaban al menos {minimum_znakow}).\nProbablemente solo copiaste una parte de la clave. Regresa a console.anthropic.com y cópiala completa."
   compat_ok: "✅ Configuración OpenAI-compatible detectada (modelo: {model}).\nTodos los módulos están listos para funcionar."
@@ -660,7 +660,7 @@ poliglota:
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
   description_name: "Descripción del módulo Políglota"
   tool_description: |-
-    El módulo Poliglota sirve para aplicar acentos fonéticos forzados para sintetizadores de voz locales (NVDA/Vocalizer/eSpeak), para juegos de texto en el Modo Cifrador y para traducir textos mediante IA (Anthropic Claude).
+    El módulo Políglota sirve para aplicar acentos fonéticos forzados para sintetizadores de voz locales (NVDA/Vocalizer/eSpeak), para juegos de texto en el Modo Cifrador y para traducir textos mediante IA (Anthropic Claude).
 
     Admite archivos: .txt, .html, .htm, .docx.
     El resultado se guarda en el mismo directorio que el archivo de origen.
@@ -1021,7 +1021,7 @@ manager:
     El archivo podstawy.yaml se ha guardado, pero no se pudieron crear las subcarpetas akcenty/, szyfry/, rezyser/, opowiesci/ y gui/:
     {tresc_bledu}
 
-    Créelas manualmente en el Explorador de archivos antes de ejecutar Poliglota; de lo contrario, el motor generará un error al escanear el nuevo idioma.
+    Créelas manualmente en el Explorador de archivos antes de ejecutar Políglota; de lo contrario, el motor generará un error al escanear el nuevo idioma.
 
   uwagi:
     akcent: |-
@@ -1195,7 +1195,7 @@ opowiesci:
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format: "\n\n--- Turno {numer} ---\n\n"
   brak_api_tytul: "Falta la clave API"
-  brak_api_tresc: "No se encontró el archivo golden_key.env con una clave ANTHROPIC_API_KEY válida. El módulo Opowieści requiere una clave activa para generar turnos de narración."
+  brak_api_tresc: "No se encontró el archivo golden_key.env con una clave ANTHROPIC_API_KEY válida. El módulo Historias requiere una clave activa para generar turnos de narración."
   puste_pole_tytul: "Campo de acción vacío"
   puste_pole_tresc: 'Ingresa una acción o comando en el campo debajo de la narración antes de hacer clic en "Enviar".'
   puste_nazwa_tytul: "Falta el nombre del juego"

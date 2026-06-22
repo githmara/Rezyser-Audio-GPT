@@ -196,7 +196,7 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-  ant_err_struktura: "🚨 Villa í skráarbyggingu!\nBreytan ANTHROPIC_API_KEY= vantar.\nFrá útgáfu 18.2 keyrir allt AI-vélin (Leikstjóri, Sögur, Poliglota, kaflaheiti) á Claude-líkaninu og krefst Anthropic-lykils.\nEyddu skránni, búðu hana til aftur og límdu lykillinn vandlegar inn."
+  ant_err_struktura: "🚨 Villa í skráarbyggingu!\nBreytan ANTHROPIC_API_KEY= vantar.\nFrá útgáfu 18.2 keyrir allt AI-vélin (Leikstjóri, Sögur, Tungumálamaður, kaflaheiti) á Claude-líkaninu og krefst Anthropic-lykils.\nEyddu skránni, búðu hana til aftur og límdu lykillinn vandlegar inn."
   ant_err_format: "🚨 Grunsamlegt snið á Anthropic-lykli!\nRétt Anthropic-lykill (Claude) byrjar alltaf á sk-ant- (t.d. sk-ant-api03-…).\nGakktu úr skugga um að þú hafir afritað lykillinn frá console.anthropic.com en ekki lykil frá öðrum þjónustuaðila."
   ant_err_zbyt_krotki: "⚠️ Anthropic lykillinn virðist vera of stuttur ({liczba_znakow} stafir fundnir, búist var við að minnsta kosti {minimum_znakow}).\nLíklega hefurðu aðeins afritað hluta lykilsins. Farðu aftur á console.anthropic.com og afritaðu hann í heild sinni."
   compat_ok: "✅ OpenAI-compatible uppsetning greind (líkan: {model}).\nAllar einingar eru tilbúnar til notkunar."
@@ -660,7 +660,7 @@ poliglota:
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
   description_name: "Lýsing á Fjöltyngur einingu"
   tool_description: |-
-    Poliglota-einingin er notuð til að leggja á harðar hljóðfræðilegar áherslur fyrir staðbundnar talgreinir (NVDA/Vocalizer/eSpeak), til textaleikja í Dulmálsstillingu og til að þýða texta með AI (Anthropic Claude).
+    Tungumálamannseiningin er notuð til að leggja á harðar hljóðfræðilegar áherslur fyrir staðbundnar talgreinir (NVDA/Vocalizer/eSpeak), til textaleikja í Dulmálsstillingu og til að þýða texta með AI (Anthropic Claude).
 
     Studdar skrár: .txt, .html, .htm, .docx.
     Niðurstaðan er vistuð í sama möppu og upprunaskráin.

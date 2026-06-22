@@ -60,7 +60,7 @@ main:
     opowiesci: "&Racconti\tCtrl+5"
     pomoc: '&Aiuto'
     pomoc_manual: "&Manuale utente\tF1"
-    pomoc_tales: 'Modalità &Storia — guida'
+    pomoc_tales: 'Modalità &Racconti — guida'
     pomoc_dictionaries: '&Dizionari — accenti, cifrari, modalità AI'
   menu_status:
     strona_glowna: "Torna alla schermata iniziale con la descrizione degli strumenti e System Check"
@@ -73,7 +73,7 @@ main:
     opowiesci: "Apre il modulo Racconti – narrativa interattiva in seconda persona generata da AI, letta da TTS/lettore di schermo"
     pomoc: 'Apri la documentazione dell''applicazione nel gestore predefinito di file di testo'
     pomoc_manual: 'Apre il manuale principale (docs/manual nella lingua dell''interfaccia)'
-    pomoc_tales: 'Apre la guida alla modalità Storia (docs/tales nella lingua dell''interfaccia)'
+    pomoc_tales: 'Apre la guida alla modalità Racconti (docs/tales nella lingua dell''interfaccia)'
     pomoc_dictionaries: 'Apre la descrizione di accenti, cifrari e modalità AI (docs/dictionaries nella lingua dell''interfaccia) — destinato ai linguisti senza Python'
   btn:
     rezyser: "🎬  &Regista"
@@ -196,7 +196,7 @@ home:
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)
-  ant_err_struktura: "🚨 Errore nella struttura del file!\nManca la variabile obbligatoria ANTHROPIC_API_KEY=.\nDalla versione 18.2 l'intero motore AI (Regista, Storie, Poliglotta, titoli dei capitoli) funziona sul modello Claude e richiede una chiave Anthropic.\nElimina il file, rigeneralo e incolla la chiave con più attenzione."
+  ant_err_struktura: "🚨 Errore nella struttura del file!\nManca la variabile obbligatoria ANTHROPIC_API_KEY=.\nDalla versione 18.2 l'intero motore AI (Regista, Racconti, Poliglotta, titoli dei capitoli) funziona sul modello Claude e richiede una chiave Anthropic.\nElimina il file, rigeneralo e incolla la chiave con più attenzione."
   ant_err_format: "🚨 Formato della chiave Anthropic sospetto!\nUna chiave Anthropic (Claude) valida inizia sempre con i caratteri sk-ant- (es. sk-ant-api03-…).\nAssicurati di aver copiato la chiave da console.anthropic.com e non la chiave di un altro provider."
   ant_err_zbyt_krotki: "⚠️ La chiave Anthropic sembra troppo corta (rilevati {liczba_znakow} caratteri, attesi almeno {minimum_znakow}).\nProbabilmente hai copiato solo una parte della chiave. Torna su console.anthropic.com e copiala per intero."
   compat_ok: "✅ Configurazione OpenAI-compatible rilevata (modello: {model}).\nTutti i moduli sono pronti all'uso."
@@ -881,7 +881,7 @@ manager:
     szyfry: "Cifrari (giochi di testo)  🔐"
     rezyser: "Regista (modalità e post-produzione)  🎬"
     gui: "Traduzioni UI  🌐"
-    opowiesci: "Storie (modalità interattive)  📖"
+    opowiesci: "Racconti (modalità interattive)  📖"
   # Przyciski akcji
   btn_otworz_label: "📝  &Apri nell'editor di testo"
   btn_otworz_name: "Pulsante Apri file selezionato nell'editor di testo"
@@ -929,11 +929,11 @@ manager:
   dup_komentarz_naglowek: |-
     # Duplicato da: {nazwa_pliku}
     # ATTENZIONE: cambia i campi `etichetta` e `descrizione`, poi salva il file.
-  dup_opowiesci_ostrzezenie_tytul: "La modalità Storia richiede uno sviluppatore"
+  dup_opowiesci_ostrzezenie_tytul: "La modalità Racconti richiede uno sviluppatore"
   dup_opowiesci_ostrzezenie_tresc: |-
-    Stai duplicando il file della modalità Storia. La sola copia del file YAML NON è sufficiente per far apparire la nuova modalità nel gioco — il motore riconosce le modalità tramite costanti numeriche e mappe nel codice Python, quindi un file non integrato nel codice è codice morto.
+    Stai duplicando il file della modalità Racconti. La sola copia del file YAML NON è sufficiente per far apparire la nuova modalità nel gioco — il motore riconosce le modalità tramite costanti numeriche e mappe nel codice Python, quindi un file non integrato nel codice è codice morto.
 
-    Se vuoi aggiungere una NUOVA modalità Storia, usa "Nuovo file regole…" → "Nuova modalità Storia", che genererà una guida completa per lo sviluppatore.
+    Se vuoi aggiungere una NUOVA modalità Racconti, usa "Nuovo file regole…" → "Nuova modalità Racconti", che genererà una guida completa per lo sviluppatore.
 
     Continuare comunque con la duplicazione?
   dup_ok_tytul: "Duplicato creato"
@@ -1037,7 +1037,7 @@ manager:
     tryb_rezysera: |-
       Modello basato sulla modalità Audiobook (pacchetto `{jezyk_bazowy}/`). L'agente progetterà `prompt_systemowy`, `przypomnienie_uzytkownika` e `slowa_wyzwalajace` nella lingua nativa del pacchetto.
     tryb_opowiesci: |-
-      La modalità Storia RICHIEDE la modifica del codice sorgente — il Manager NON crea il file, fornisce solo un prompt per l'agente. Le modalità di gioco sono riconosciute tramite costanti numeriche e mappe in `opowiesci_ai.py`/`gui_opowiesci.py`, quindi la nuova modalità deve essere integrata (costante int aggiunta alla fine, voci nelle mappe, etichetta RadioBox, modello per modalità). Dall'applicazione installata (senza repository) è impossibile — è necessaria la versione sorgente.
+      La modalità Racconti RICHIEDE la modifica del codice sorgente — il Manager NON crea il file, fornisce solo un prompt per l'agente. Le modalità di gioco sono riconosciute tramite costanti numeriche e mappe in `opowiesci_ai.py`/`gui_opowiesci.py`, quindi la nuova modalità deve essere integrata (costante int aggiunta alla fine, voci nelle mappe, etichetta RadioBox, modello per modalità). Dall'applicazione installata (senza repository) è impossibile — è necessaria la versione sorgente.
     postprodukcja: |-
       Modello di post-produzione itera sui capitoli (pacchetto `{jezyk_bazowy}/`). L'agente progetterà `prompt_systemowy`, `prompt_uzytkownika_szablon` (segnaposto {{naglowek}}, {{probka}}) e `regex_podzial_rozdzialow` adattato ai nomi nativi dei capitoli (Rozdział/Kapitel/Capitolo/Глава…).
     jezyk_bazowy: |-
@@ -1076,9 +1076,9 @@ manager:
       opis: |-
         File in <jezyk>/rezyser/tryb_*.yaml. Modello basato sulla modalità Audiobook + prompt per l'AI che traduce prompt_systemowy, przypomnienie_uzytkownika e slowa_wyzwalajace nella lingua nativa del pacchetto base.
     tryb_opowiesci:
-      etykieta: "Nuova modalità Storia (RICHIEDE UNO SVILUPPATORE)"
+      etykieta: "Nuova modalità Racconti (RICHIEDE UNO SVILUPPATORE)"
       opis: |-
-        Modalità di gioco interattiva (Storia). A differenza delle modalità Regista, NON è guidata dai dati: il solo file YAML è codice morto — il motore riconosce le modalità tramite costanti numeriche e mappe in Python. Il Manager NON crea il file; fornisce solo un prompt per l'AI/sviluppatore con un elenco completo di punti di ancoraggio nel codice (costante int, due mappe, RadioBox, modello per modalità).
+        Modalità di gioco interattiva (Racconti). A differenza delle modalità Regista, NON è guidata dai dati: il solo file YAML è codice morto — il motore riconosce le modalità tramite costanti numeriche e mappe in Python. Il Manager NON crea il file; fornisce solo un prompt per l'AI/sviluppatore con un elenco completo di punti di ancoraggio nel codice (costante int, due mappe, RadioBox, modello per modalità).
     postprodukcja:
       etykieta: "Nuova post-produzione (iterazione per capitoli)"
       opis: |-
@@ -1132,9 +1132,9 @@ updater:
   btn_pobierz_zrodlo: '&Scarica il codice sorgente (ZIP)'
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
-  panel_name: "Pannello delle Storie"
-  description_name: "Descrizione del modulo Storie"
-  heading: "📖  Storie Interattive"
+  panel_name: "Pannello dei Racconti"
+  description_name: "Descrizione del modulo Racconti"
+  heading: "📖  Racconti Interattivi"
   tool_description: |-
     Interpreti il ruolo di un eroe in una storia generata dinamicamente. Inserisci il nome del nuovo gioco e scegli la modalità per iniziare — la narrazione è condotta in seconda persona e letta da uno screen reader o TTS.
 
@@ -1190,12 +1190,12 @@ opowiesci:
 
   # ---- Stub callbacka — Faza 1 (przyciski Nowa/Wczytaj/Zapisz, do podłączenia w Fazie 3)
   placeholder_msg_tytul: "Funzione ancora non disponibile"
-  placeholder_msg_tresc: "Questo pulsante sarà collegato nella prossima fase di implementazione del modulo Storie (v15.0). Attualmente il pannello esiste solo come scheletro UI per la verifica dell'accessibilità con NVDA."
+  placeholder_msg_tresc: "Questo pulsante sarà collegato nella prossima fase di implementazione del modulo Racconti (v15.0). Attualmente il pannello esiste solo come scheletro UI per la verifica dell'accessibilità con NVDA."
 
   # ---- Faza 2: silnik LLM, błędy AI, statusy wysyłki -----------------------
   tura_naglowek_format: "\n\n--- Turno {numer} ---\n\n"
   brak_api_tytul: "Nessuna chiave API"
-  brak_api_tresc: "Il file golden_key.env con una chiave ANTHROPIC_API_KEY valida non è stato trovato. Il modulo Storie richiede una chiave attiva per generare i turni narrativi."
+  brak_api_tresc: "Il file golden_key.env con una chiave ANTHROPIC_API_KEY valida non è stato trovato. Il modulo Racconti richiede una chiave attiva per generare i turni narrativi."
   puste_pole_tytul: "Campo azioni vuoto"
   puste_pole_tresc: 'Inserisci un''azione o un comando nel campo sotto la narrazione prima di cliccare "Invia".'
   puste_nazwa_tytul: "Nessun nome di gioco"
@@ -1224,8 +1224,8 @@ opowiesci:
   gra_zapisana_tresc: 'Lo stato del gioco "{nazwa}" è stato salvato sul disco.'
   nowa_gra_zaczatek: "📖 Gioco \"{nazwa}\" iniziato.\n\nInserisci la prima azione nel campo sottostante e clicca \"Invia\" — il motore narrativo descriverà il mondo in cui ti trovi e presenterà la prima scena."
   brak_narracji_info: "📖 Gioco \"{nazwa}\" caricato, ma il file di narrazione (script/{nazwa}.txt) non esiste. Lo stato del gioco proviene dal file game.json — puoi continuare."
-  dlg_wczytaj_tytul: "Carica gioco Storie"
-  dlg_wczytaj_filtr: "File di gioco Storie (*.game.json)|*.game.json|Tutti i file|*.*"
+  dlg_wczytaj_tytul: "Carica gioco Racconti"
+  dlg_wczytaj_filtr: "File di gioco Racconti (*.game.json)|*.game.json|Tutti i file|*.*"
   blad_zapisu_tresc: "Si è verificato un errore durante il salvataggio del file di gioco: {tresc_bledu}"
   blad_wczytania_tresc: 'Si è verificato un errore durante il caricamento del gioco "{nazwa}": {tresc_bledu}'
 

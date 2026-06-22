@@ -1020,7 +1020,7 @@ manager:
     File podstawy.yaml saved, but failed to create subfolders akcenty/, szyfry/, rezyser/, and gui/:
     {tresc_bledu}
 
-    Create them manually in File Explorer before running Poliglot — otherwise, the engine will throw an error when scanning the new language.
+    Create them manually in File Explorer before running Polyglot — otherwise, the engine will throw an error when scanning the new language.
   # "Next steps" notes in WynikKreatoraDialog. Composed in
   # manager_regul_szablony._uwagi(): rule-type note + jezyk_agenta + environment
   # paragraph (source vs installed package, per sys.frozen). Placeholders
