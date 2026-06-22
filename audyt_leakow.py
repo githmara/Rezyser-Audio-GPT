@@ -38,8 +38,10 @@ from __future__ import annotations
 
 import argparse
 import ast
+import json
 import re
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -298,6 +300,144 @@ def leaki_per_sekcja(
         if leaki:
             wynik[klucz] = leaki
     return wynik
+
+
+# ===========================================================================
+# BRAMKA CI/BUILD — baseline zaakceptowanych leaków (od v18.5.3)
+# ===========================================================================
+# Odłożony z v18.5.2 („Co nie weszło"): wpięcie detektora leaków jako BRAMKA do
+# `generuj_dokumentacje --waliduj`/`build_release` (dotąd strażniki sprawdzały
+# tylko nagłówek finalizacji + placeholdery, NIE leaki — stąd polski tekst mógł
+# dożyć „sfinalizowanego" wydania).
+#
+# Problem: detektor to LEJEK over-reportujący (filozofia jak skaner `.py` wyżej) —
+# na czystym drzewie raportuje ~75 trafień, w 100% triaged FP / treść intencjonalna:
+#   * `termin:KROK` — odroczona lokalizacja nagłówków „KROK" (osobny dług),
+#   * `znak-PL` dydaktyczne — `co_to_akcent` (uczy „ą/ę/ł"), `changelog_*`
+#     (fonem „[dż]", omówienie „ź/ż"), `krok_2_*` (polskie nazwy własne:
+#     Saska Kępa, Świętokrzyskie), `krok_4_*` (przykład [dż]),
+#   * `lingua` — linie alfabetu Cezara (`co_to_szyfr`), nazwy głosów TTS.
+# Surowy lejek jako twarda bramka blokowałby KAŻDY build już dziś. Stąd wzorzec
+# BASELINE (jak mypy/eslint baseline na legacy): commitujemy snapshot obecnych
+# trafień do `audyt_leakow_baseline.json`, a bramka pada TYLKO na trafienia SPOZA
+# baseline (nowy/przesunięty leak). Naprawa starych leaków (ElevenLabs, KROK,
+# ui.yaml) kurczy baseline; regeneracja po LEGALNej zmianie treści: `--zapisz-baseline`.
+BASELINE_PATH = ROOT / "audyt_leakow_baseline.json"
+
+# Powód lingua niesie ZMIENNY float pewności („lingua:PL 0.98") — normalizujemy
+# go do „lingua:PL", inaczej drobne wahanie modelu rozjeżdżałoby baseline. Inne
+# klasy (`znak-PL:ćś`, `termin:Manager Reguł`) są stabilne i zostają 1:1
+# (UWAGA: termin bywa wielowyrazowy, więc NIE wolno ciąć po pierwszej spacji).
+_RE_POWOD_LINGUA = re.compile(r" \d+\.\d+$")
+
+
+def _normalizuj_powod(powod: str) -> str:
+    """„lingua:PL 0.98" → „lingua:PL"; pozostałe powody bez zmian (stabilne klucze)."""
+    return _RE_POWOD_LINGUA.sub("", powod)
+
+
+def zbierz_wszystkie_leaki(
+    kody: list[str] | None = None,
+    *,
+    prog_lingua: float = 0.70,
+) -> dict[str, list[str]]:
+    """Zbiera leaki ze WSZYSTKICH szablonów docs jako `{"<kod>/<plik>/<sekcja>": [powod_norm]}`.
+
+    Klucz identyfikuje sekcję (nie linię — numery linii dryfują przy edycji);
+    wartość to posortowana LISTA znormalizowanych powodów (multiset — duplikaty
+    znaczące, np. 2× znak-PL w jednej sekcji). To kanon zarówno baseline'u
+    (`zapisz_baseline`), jak i bieżącego skanu bramki (`bramka_docs`).
+
+    Buduje detektor `lingua` raz na język (kosztowny — reużywany między plikami).
+    Rzuca `ImportError`, gdy `lingua` jest niedostępna — wołający (bramka) łapie
+    to i degraduje łagodnie (skip z ostrzeżeniem), spójnie z `core_poliglota`
+    lazy-importem w generatorze.
+    """
+    if kody is None:
+        kody = list(KODY_DOCELOWE)
+    wynik: dict[str, list[str]] = {}
+    for kod in kody:
+        detektor = _zbuduj_detektor(kod)
+        for nazwa_pliku in _szablony_docelowe(kod):
+            per_sekcja = leaki_per_sekcja(kod, nazwa_pliku, detektor, prog_lingua=prog_lingua)
+            for klucz_sekcji, leaki in per_sekcja.items():
+                klucz = f"{kod}/{nazwa_pliku}/{klucz_sekcji}"
+                wynik[klucz] = sorted(_normalizuj_powod(l.powod) for l in leaki)
+    return wynik
+
+
+def wczytaj_baseline() -> dict[str, list[str]]:
+    """Wczytuje `audyt_leakow_baseline.json` (lub {} przy braku/uszkodzeniu).
+
+    Brak pliku traktujemy jako pusty baseline — wtedy KAŻDE trafienie jest „nowe"
+    (bramka maksymalnie restrykcyjna). Świadomie: lepiej zablokować build przy
+    zgubionym baseline niż przepuścić leaki po cichu.
+    """
+    if not BASELINE_PATH.is_file():
+        return {}
+    try:
+        dane = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(dane, dict):
+        return {}
+    # Normalizacja typu wartości (lista stringów) — odporność na ręczną edycję.
+    return {k: list(v) for k, v in dane.items() if isinstance(v, list)}
+
+
+def zapisz_baseline(dane: dict[str, list[str]]) -> None:
+    """Zapisuje baseline do `audyt_leakow_baseline.json` (UTF-8, posortowany, LF).
+
+    `sort_keys` + `indent=2` → deterministyczny, czytelny w diffie plik. `ensure_ascii
+    =False` → polskie znaki w powodach (znak-PL:ćś) zostają czytelne, nie `\\uXXXX`.
+    """
+    tresc = json.dumps(dane, ensure_ascii=False, indent=2, sort_keys=True)
+    BASELINE_PATH.write_text(tresc + "\n", encoding="utf-8")
+
+
+def roznica_wzgledem_baseline(
+    aktualne: dict[str, list[str]],
+    baseline: dict[str, list[str]],
+) -> dict[str, list[str]]:
+    """Multiset-różnica: `{klucz: [powody]}` obecne PONAD baseline (= nowe leaki).
+
+    `Counter - Counter` zostawia tylko dodatnie nadwyżki, więc:
+      * nowa sekcja (brak w baseline) → wszystkie jej powody jako nowe,
+      * dodatkowy leak w znanej sekcji (count rośnie) → nadwyżka jako nowy,
+      * usunięty/naprawiony leak (count maleje) → NIE raportowany (baseline może
+        zostać „za szeroki" — to OK, kurczymy go osobno przez `--zapisz-baseline`).
+    """
+    nowe: dict[str, list[str]] = {}
+    for klucz, powody in aktualne.items():
+        nadwyzka = Counter(powody) - Counter(baseline.get(klucz, []))
+        if nadwyzka:
+            nowe[klucz] = sorted(nadwyzka.elements())
+    return nowe
+
+
+@dataclass
+class WynikBramki:
+    """Wynik bramki leaków dla docs (konsumowany przez waliduj() i build_release)."""
+    czysto: bool                 # True = brak leaków ponad baseline
+    nowe: dict[str, list[str]]   # {"<kod>/<plik>/<sekcja>": [powod_norm]} ponad baseline
+    pominieto: bool              # True = bramki nie udało się uruchomić (np. brak lingua)
+    powod_pominiecia: str        # krótki opis EN, gdy `pominieto`
+
+
+def bramka_docs(*, prog_lingua: float = 0.70) -> WynikBramki:
+    """Uruchamia bramkę leaków na szablonach docs względem baseline'u.
+
+    Łagodna degradacja: gdy `lingua` jest niedostępna (kontrybutor bez pełnego
+    dev-env), zwraca `pominieto=True, czysto=True` — bramka się NIE wykonała, ale
+    NIE blokuje (analogia lazy-importu `core_poliglota` w generatorze). Maintainer
+    robiący kanoniczny release MA `lingua`, więc dostaje pełną bramkę.
+    """
+    try:
+        aktualne = zbierz_wszystkie_leaki(prog_lingua=prog_lingua)
+    except ImportError as exc:
+        return WynikBramki(True, {}, True, f"lingua not available ({exc})")
+    nowe = roznica_wzgledem_baseline(aktualne, wczytaj_baseline())
+    return WynikBramki(not nowe, nowe, False, "")
 
 
 # ===========================================================================
@@ -599,6 +739,15 @@ def main() -> int:
     grupa.add_argument("--py", action="store_true",
                        help="Skanuj źródła aplikacji `*.py` pod kątem PL hard-kodu "
                             "(user-facing / LLM-facing), z pominięciem dev-tooli.")
+    grupa.add_argument("--bramka", action="store_true",
+                       help="BRAMKA CI/build: skan wszystkich docs vs baseline "
+                            f"({BASELINE_PATH.name}). Exit 1 TYLKO przy leakach "
+                            "ponad baseline (nowy/przesunięty). Czyste FP w baseline "
+                            "nie blokują.")
+    grupa.add_argument("--zapisz-baseline", dest="zapisz_baseline", action="store_true",
+                       help="Regeneruj baseline z bieżących trafień (po LEGALnej "
+                            "zmianie treści docs). Nadpisuje "
+                            f"{BASELINE_PATH.name} — zrób review diffa przed commitem.")
     parser.add_argument("--szczegoly", action="store_true",
                         help="Wypisz każdą linię-leak (domyślnie: licznik per sekcja).")
     parser.add_argument("--prog", type=float, default=0.70,
@@ -607,6 +756,39 @@ def main() -> int:
 
     if args.py:
         return _main_py()
+
+    if args.zapisz_baseline:
+        try:
+            aktualne = zbierz_wszystkie_leaki(prog_lingua=args.prog)
+        except ImportError as exc:
+            print(f"❌ Nie można zbudować baseline — brak `lingua` ({exc}).")
+            return 2
+        zapisz_baseline(aktualne)
+        ile = sum(len(v) for v in aktualne.values())
+        print(f"✅ Zapisano baseline: {ile} trafień w {len(aktualne)} sekcji → "
+              f"{BASELINE_PATH.name}. Zrób review diffa przed commitem.")
+        return 0
+
+    if args.bramka:
+        wynik = bramka_docs(prog_lingua=args.prog)
+        print("========== BRAMKA LEAKÓW DOCS (vs baseline) ==========")
+        if wynik.pominieto:
+            print(f"⚠️  Bramka pominięta: {wynik.powod_pominiecia}. "
+                  "Instaluj `lingua`, by ją uruchomić (maintainer/CI).")
+            return 0
+        if wynik.czysto:
+            print(f"✅ Brak leaków ponad baseline ({BASELINE_PATH.name}).")
+            return 0
+        ile = sum(len(v) for v in wynik.nowe.values())
+        print(f"❌ {ile} leak(ów) PONAD baseline w {len(wynik.nowe)} sekcji "
+              "(nowy lub przesunięty fragment):")
+        for klucz, powody in sorted(wynik.nowe.items()):
+            print(f"  • {klucz}: {', '.join(powody)}")
+        print("Fix: przetłumacz leak w szablonie. Jeśli to ŚWIADOMA, legalna "
+              f"zmiana treści — zregeneruj baseline: `python {Path(__file__).name} "
+              "--zapisz-baseline` i zcommituj diff.")
+        print("======================================================")
+        return 1
 
     if args.wszystkie:
         kody = list(KODY_DOCELOWE)

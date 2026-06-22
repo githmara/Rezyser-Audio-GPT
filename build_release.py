@@ -1042,6 +1042,39 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     print(f"✅ Documentation regenerated ({len(wyniki_docs)} files, clean).\n")
 
+    # 6a'. Leak gate (od v18.5.3): scan the docs templates for untranslated Polish
+    # text against the accepted baseline. The finalization-header guard above only
+    # proves a file was *finalized*, not that its content is leak-free — this closes
+    # that gap (a "finalized" pack could still ship Polish; see RELEASE_NOTES v18.5.2
+    # "Co nie weszło"). A new or shifted leak beyond audyt_leakow_baseline.json is a
+    # FATAL. Lazy import with graceful degradation: a contributor building without
+    # the `lingua` dev dependency gets a loud warning, not a blocked build (the
+    # maintainer's canonical release always has lingua, so they get the real gate).
+    print("🔍 Leak gate: scanning docs templates for Polish-text leaks...")
+    try:
+        import audyt_leakow
+    except ImportError:
+        print("⚠️  audyt_leakow/lingua not available — leak gate SKIPPED. "
+              "Install `lingua` for the full release gate.\n")
+    else:
+        wynik_leak = audyt_leakow.bramka_docs()
+        if wynik_leak.pominieto:
+            print(f"⚠️  Leak gate skipped: {wynik_leak.powod_pominiecia}. "
+                  "Install `lingua` for the full release gate.\n")
+        elif not wynik_leak.czysto:
+            ile = sum(len(v) for v in wynik_leak.nowe.values())
+            print(f"❌ FATAL: {ile} Polish-text leak(s) ABOVE the baseline in "
+                  f"{len(wynik_leak.nowe)} section(s) — refusing to build.")
+            print("A 'finalized' header does not prove leak-free content. Fix the "
+                  "leaked fragment(s) in the template, or — if this is a deliberate,")
+            print("legitimate content change — regenerate the baseline with "
+                  "`python audyt_leakow.py --zapisz-baseline` and commit the diff.")
+            for nazwa, powody in sorted(wynik_leak.nowe.items()):
+                print(f"      • {nazwa}: {', '.join(powody)}")
+            sys.exit(1)
+        else:
+            print(f"✅ No leaks beyond the baseline ({audyt_leakow.BASELINE_PATH.name}).\n")
+
     # 6b. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
 

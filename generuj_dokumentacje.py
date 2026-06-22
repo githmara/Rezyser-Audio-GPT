@@ -678,11 +678,17 @@ def waliduj() -> int:
     niekanonicznym nagłówkiem nie został wygenerowany (guard) — tu raportujemy
     go głośno i również zwracamy exit 1.
 
+    Od v18.5.3 dochodzi BRAMKA LEAKÓW (`audyt_leakow.bramka_docs`): skan szablonów
+    docs pod kątem nieprzetłumaczonego polskiego tekstu względem zaakceptowanego
+    baseline'u. Nowy/przesunięty leak (spoza baseline) → exit 1. Import jest LAZY
+    z łagodną degradacją: gdy `audyt_leakow`/`lingua` są niedostępne (kontrybutor
+    bez pełnego dev-env), bramka jest pomijana z notą, a nie blokuje walidacji.
+
     Returns:
-        0 — wszystkie placeholdery rozwinięte i wszystkie nagłówki kanoniczne;
-            paczka gotowa do buildu.
-        1 — znaleziono brakujące placeholdery LUB draftowe nagłówki;
-            exit code dla CI / build_release.
+        0 — wszystkie placeholdery rozwinięte, nagłówki kanoniczne i brak leaków
+            ponad baseline; paczka gotowa do buildu.
+        1 — znaleziono brakujące placeholdery, draftowe nagłówki LUB leaki ponad
+            baseline; exit code dla CI / build_release.
     """
     brakujace_wedlug_pliku: dict[str, list[str]] = {}
     drafty_wedlug_pliku: dict[str, str] = {}
@@ -722,7 +728,36 @@ def waliduj() -> int:
         )
     print("=============================================")
 
-    return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku) else 0
+    # Bramka leaków (od v18.5.3) — lazy import + łagodna degradacja, jak guard
+    # nagłówka. Skanuje szablony docs vs baseline; nowy/przesunięty PL-leak = exit 1.
+    leaki_blokujace = False
+    print("\n========== LEAK GATE (docs vs baseline) ==========")
+    try:
+        import audyt_leakow
+    except ImportError:
+        print("ℹ️  audyt_leakow/lingua not available — leak gate skipped "
+              "(degraded context, e.g. a fresh clone without the dev toolchain).")
+    else:
+        wynik = audyt_leakow.bramka_docs()
+        if wynik.pominieto:
+            print(f"ℹ️  Leak gate skipped: {wynik.powod_pominiecia}. "
+                  "Install `lingua` to run it (maintainer/CI).")
+        elif wynik.czysto:
+            print("✅ No Polish-text leaks beyond the accepted baseline "
+                  f"({audyt_leakow.BASELINE_PATH.name}).")
+        else:
+            leaki_blokujace = True
+            ile = sum(len(v) for v in wynik.nowe.values())
+            print(f"❌ Found {ile} leak(s) ABOVE the baseline in "
+                  f"{len(wynik.nowe)} section(s) (a new or shifted Polish fragment):")
+            for klucz, powody in sorted(wynik.nowe.items()):
+                print(f"  • {klucz}: {', '.join(powody)}")
+            print("Fix: translate the leaked fragment in the template. If this is a "
+                  "DELIBERATE, legitimate content change, regenerate the baseline "
+                  "with `python audyt_leakow.py --zapisz-baseline` and commit the diff.")
+    print("==================================================")
+
+    return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku or leaki_blokujace) else 0
 
 
 # ---------------------------------------------------------------------------
