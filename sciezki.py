@@ -67,6 +67,30 @@ KATALOG_BAZOWY_STR: str = str(KATALOG_BAZOWY)
 JEST_FROZEN: bool = getattr(sys, "frozen", False)
 
 
+def _wyznacz_zasoby() -> Path:
+    """Zwraca katalog z zasobami SPAKOWANYMI do bundla (nie edytowalnymi przez usera).
+
+    W odróżnieniu od `KATALOG_BAZOWY` (= dir(exe) gdy frozen — tam żyją EDYTOWALNE
+    seed-data `dictionaries/`/`docs/` i user-data obok exe), ten katalog wskazuje
+    WNĘTRZE bundla PyInstallera (`sys._MEIPASS`, u nas folder `runtime/` przez
+    `--contents-directory`). Tu trafiają pliki dołączone przez `datas` w
+    `rezyser_audio.spec` — np. `VERSION`, który jest pojedynczym źródłem prawdy
+    numeru wersji i NIE jest danymi użytkownika (nie powinien leżeć luzem obok exe,
+    gdzie kusi do edycji i — bez rozszerzenia — odpala systemowy file-picker).
+
+    frozen: `sys._MEIPASS` (= `<install>/runtime/`, gdzie COLLECT składa datas).
+    źródło: root repo (== `KATALOG_BAZOWY`) — `_MEIPASS` nie istnieje, VERSION
+            leży w roocie obok plików `.py`.
+    """
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
+    return Path(__file__).resolve().parent
+
+
+# Katalog zasobów spakowanych do bundla (VERSION itd.). Patrz docstring wyżej.
+KATALOG_ZASOBOW: Path = _wyznacz_zasoby()
+
+
 # ---------------------------------------------------------------------------
 # Otwieranie plików/folderów domyślną aplikacją systemową (cross-platform)
 # ---------------------------------------------------------------------------

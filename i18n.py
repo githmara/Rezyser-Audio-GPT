@@ -59,10 +59,13 @@ _DICTIONARIES_DIR = _ROOT_DIR / "dictionaries"
 _NAZWA_PLIKU_UI = "ui.yaml"
 _FOLDER_GUI = "gui"
 
-# Single source of truth dla numeru wersji. Plain text w roocie, jeden bump
-# = wszystkie języki. Wartość ładowana raz przy imporcie (read_text jest tani),
-# auto-wstrzykiwana do każdego format() w `t()` jako kwarg `numer_wersji`.
-_PLIK_WERSJI = _ROOT_DIR / "VERSION"
+# Single source of truth dla numeru wersji. Plain text, jeden bump = wszystkie
+# języki. Wartość ładowana raz przy imporcie (read_text jest tani), auto-
+# wstrzykiwana do każdego format() w `t()` jako kwarg `numer_wersji`.
+# VERSION to KOD/seed, nie user-data — siedzi w bundlu (`KATALOG_ZASOBOW` =
+# `sys._MEIPASS` gdy frozen), a nie luzem obok exe (`KATALOG_BAZOWY`). Do v18.x
+# był kopiowany obok exe i czytany z `KATALOG_BAZOWY` — patrz `sciezki._wyznacz_zasoby`.
+_PLIK_WERSJI = sciezki.KATALOG_ZASOBOW / "VERSION"
 try:
     NUMER_WERSJI = _PLIK_WERSJI.read_text(encoding="utf-8").strip()
 except OSError:

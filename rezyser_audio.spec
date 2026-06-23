@@ -33,6 +33,14 @@ datas = []
 binaries = []
 hiddenimports = []
 
+# VERSION — pojedyncze źródło prawdy numeru wersji. To KOD/seed, NIE user-data:
+# pakujemy go DO bundla (ląduje w `sys._MEIPASS` = folder `runtime/`), a nie
+# luzem obok exe. Runtime czyta go przez `sciezki.KATALOG_ZASOBOW`. Inaczej niż
+# `dictionaries/`+`docs/` (edytowalne przez Manager Reguł → shipowane obok exe),
+# VERSION nikt nie edytuje, a leżąc luzem bez rozszerzenia kusiłby do otwarcia
+# (systemowy file-picker). `(".")` = korzeń bundla.
+datas += [("VERSION", ".")]
+
 # collect_all = (datas, binaries, hiddenimports) — komplet dla pakietów, które
 # PyInstaller analizuje niepoprawnie z powodu importów dynamicznych / danych.
 for _pakiet in ("lingua", "num2words", "tiktoken"):

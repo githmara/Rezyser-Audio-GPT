@@ -561,7 +561,7 @@ def weryfikuj_runtime(sciezka_python: str) -> None:
 _RE_INSTALLER_NAME = re.compile(r"^Rezyser_Audio_v(.+)_Installer\.exe$")
 
 
-def sprzataj_opublikowane_instalatory() -> None:
+def sprzataj_opublikowane_instalatory(wersja_chroniona: str | None = None) -> None:
     """Usuwa lokalne `Rezyser_Audio_v*_Installer.exe`, których odpowiednik
     jest już opublikowany jako asset GitHub Release (non-draft).
 
@@ -571,9 +571,16 @@ def sprzataj_opublikowane_instalatory() -> None:
     assetami pod tagiem, więc lokalna kopia po publikacji jest redundantna.
 
     Sprzątamy PRZED buildem: jeśli build się wywali, nic nie tracimy — usunięte
-    zostały tylko pliki które i tak są w chmurze. Bieżąca wersja (jeszcze nie
-    zbudowana) z natury rzeczy nie istnieje na dysku, więc nie ma sensu jej
-    osobno chronić.
+    zostały tylko pliki które i tak są w chmurze.
+
+    `wersja_chroniona` (od mikropatcha bezpieczeństwa): instalator TEJ wersji NIE
+    jest kasowany, nawet jeśli jest już opublikowany. Pre-build cleanup dostaje tu
+    bieżącą wersję, żeby NIE wycinać pliku, którego pilnuje
+    `sprawdz_czy_installer_juz_istnieje`. Wcześniej cleanup kasował go także gdy był
+    opublikowany → guard refuse-overwrite przechodził → build BEZ bumpa cicho
+    przebudowywał JUŻ OPUBLIKOWANĄ wersję, dając niereprodukowalny binarny artefakt
+    rozjeżdżający się z assetem na GitHubie. `--cleanup-only` woła bez tego argumentu
+    (świadome zwolnienie miejsca po publikacji — wtedy bieżący też leci).
 
     Wymaga `gh` CLI w PATH + autoryzacji. Brak `gh`, brak autoryzacji, brak
     sieci, malformed JSON, timeout → WARN i kontynuuj (cleanup jest wygodą, nie
@@ -595,6 +602,10 @@ def sprzataj_opublikowane_instalatory() -> None:
     print("🧹 Cleaning up locally published installers...")
     for plik, wersja in sorted(kandydaci, key=lambda kv: kv[1]):
         tag = f"v{wersja}"
+        if wersja_chroniona is not None and wersja == wersja_chroniona:
+            print(f"   • {plik.name}: current build version — protected by "
+                  "overwrite guard, keeping.")
+            continue
         try:
             wynik = subprocess.run(
                 ["gh", "release", "view", tag, "--json", "isDraft,assets"],
@@ -797,15 +808,11 @@ def skompletuj_dist(dist_dir: Path) -> None:
             src_dict, dist_dir / "dictionaries", ignore=_pomin_dokumentacje,
         )
 
-    # VERSION — single source of truth numeru wersji. i18n czyta go z
-    # sciezki.KATALOG_BAZOWY/"VERSION" (= dir(exe) gdy frozen); bez niego
-    # NUMER_WERSJI fallbackuje na "?" i GUI pokazuje wersję jako „?".
-    # MUSI leżeć OBOK exe, nie w bundlu runtime/ (KATALOG_BAZOWY to dir exe).
-    src_version = root / "VERSION"
-    if src_version.is_file():
-        shutil.copy2(src_version, dist_dir / "VERSION")
-
-    print("   ✓ Completed dist payload: dictionaries/ + docs/ + VERSION copied next to the exe.\n")
+    # VERSION NIE jest tu kopiowany: od v18.x to KOD/seed pakowany przez `datas`
+    # w rezyser_audio.spec PROSTO DO bundla (`runtime/`), czytany z
+    # `sciezki.KATALOG_ZASOBOW` (= sys._MEIPASS gdy frozen). Do v17.11 lądował
+    # luzem obok exe (KATALOG_BAZOWY) — porzucone, bo nie jest danymi usera.
+    print("   ✓ Completed dist payload: dictionaries/ + docs/ next to the exe (VERSION lives inside the bundle).\n")
 
 
 def _parsuj_argumenty() -> argparse.Namespace:
@@ -948,15 +955,14 @@ def main(args: argparse.Namespace | None = None) -> None:
     # 4a. Pre-build cleanup of locally cached installers already on GitHub.
     # Każdy installer waży ~145 MB; bez tego eksplorator zarasta podobnymi
     # nazwami po kilku patchach. Cleanup leci PRZED `sprawdz_czy_installer_juz_istnieje`
-    # (krok 4b niżej) — jeśli bieżąca wersja siedzi w obu miejscach (dysk +
-    # opublikowany Release), to znaczy że user buduje to samo ponownie:
-    # cleanup ją usunie, guard pójdzie dalej, fresh build powstanie. Jeśli
-    # bieżąca wersja JEST na dysku ale NIE jest jeszcze na GH (typowy patch
-    # przed publikacją), cleanup ją zostawi, a guard zatrzyma build z
-    # komunikatem (zachowane zachowanie). Flaga `--no-cleanup` pomija ten krok
-    # dla buildów diagnostycznych.
+    # (krok 4b niżej), ale dostaje `wersja_chroniona=wersja` — instalator BIEŻĄCEJ
+    # wersji NIE jest kasowany, więc guard refuse-overwrite zawsze ma co bronić.
+    # (Wcześniej cleanup kasował go także gdy był opublikowany → guard przechodził
+    # → build bez bumpa cicho przebudowywał OPUBLIKOWANĄ wersję, dając binarny
+    # artefakt rozjeżdżający się z assetem na GitHubie.) Stare opublikowane wersje
+    # dalej lecą. Flaga `--no-cleanup` pomija ten krok dla buildów diagnostycznych.
     if not getattr(args, "no_cleanup", False):
-        sprzataj_opublikowane_instalatory()
+        sprzataj_opublikowane_instalatory(wersja_chroniona=wersja)
 
     # 4b. Refuse to overwrite a previous installer of the same version.
     # Od v15.2.5: ZIP Portable został wycięty z release flow (single deployment

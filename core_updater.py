@@ -35,14 +35,17 @@ GITHUB_USER = "githmara"
 GITHUB_REPO = "Rezyser-Audio-GPT"
 
 _API_URL = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
-# VERSION liczony przez `sciezki.KATALOG_BAZOWY` (= dir(exe) gdy frozen), TAK SAMO
-# jak `i18n._PLIK_WERSJI`. Do v17.11 było tu `Path(__file__).with_name("VERSION")`
-# — w paczce PyInstaller `__file__` wskazuje WEWNĄTRZ bundla (`runtime/`), więc
-# VERSION (kopiowany OBOK exe przez `skompletuj_dist`) nie był znajdowany →
+# VERSION liczony przez `sciezki.KATALOG_ZASOBOW`, TAK SAMO jak `i18n._PLIK_WERSJI`.
+# Historia: do v17.11 było tu `Path(__file__).with_name("VERSION")` — w paczce
+# PyInstaller `__file__` wskazuje WEWNĄTRZ bundla, więc plik nie był znajdowany →
 # `_odczytaj_wersje_lokalna` rzucał FileNotFoundError → `sprawdz_aktualizacje`
-# łapał go i zwracał None → DIALOG AKTUALIZACJI NIGDY SIĘ NIE POKAZYWAŁ w
-# żadnym frozen buildzie (cichy regres od migracji na PyInstaller, v17.0).
-_SCIEZKA_VERSION = sciezki.KATALOG_BAZOWY / "VERSION"
+# zwracał None → DIALOG AKTUALIZACJI NIGDY SIĘ NIE POKAZYWAŁ w żadnym frozen
+# buildzie (cichy regres od migracji na PyInstaller, v17.0). Quick-fix v17.11
+# przepiął odczyt na `KATALOG_BAZOWY` (obok exe) + kopiowanie pliku w buildzie.
+# Od v18.x VERSION (kod/seed, nie user-data) jest pakowany do bundla przez `datas`
+# i czytany z `KATALOG_ZASOBOW` (= `sys._MEIPASS` gdy frozen) — patrz
+# `sciezki._wyznacz_zasoby`; build już nie kopiuje go luzem obok exe.
+_SCIEZKA_VERSION = sciezki.KATALOG_ZASOBOW / "VERSION"
 
 # Wzorzec nazwy pliku instalatora w assets (GitHub Release)
 _WZORZEC_INSTALATORA = re.compile(r"rezyser_audio.*installer.*\.exe", re.IGNORECASE)
