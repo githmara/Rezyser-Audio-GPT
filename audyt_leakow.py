@@ -942,9 +942,9 @@ def main() -> int:
                     "(lingua per-linia + kuratorskie PL-terminy + znaki PL).",
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
-    grupa.add_argument("--jezyki", type=str, default="",
+    grupa.add_argument("-l", "--jezyki", type=str, default="",
                        help=f"CSV kodów ISO (np. is,fi). Dozwolone: {', '.join(KODY_DOCELOWE)}.")
-    grupa.add_argument("--wszystkie", action="store_true",
+    grupa.add_argument("-a", "--wszystkie", action="store_true",
                        help="Skanuj wszystkie języki docelowe (docs YAML).")
     grupa.add_argument("--py", action="store_true",
                        help="Skanuj źródła aplikacji `*.py` pod kątem PL hard-kodu "

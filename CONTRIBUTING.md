@@ -55,25 +55,27 @@ for full usage (help text is in English).
 
 | Tool | What it does |
 |------|--------------|
-| `generuj_dokumentacje.py [--waliduj]` | Regenerates `docs/*.txt` from `dictionaries/*/gui/dokumentacja/*.yaml`. `--waliduj` = generate **and** hard-check. Run before committing doc changes. |
-| `buduj_wielojezyczne_ui.py` | Batch-translates UI strings (`gui/ui.yaml`) from the Polish source into the other languages. Surgical mode: `--klucz <dotted.key>`. Review workflow: `--draft` → review → `--finalizuj`. |
-| `buduj_wielojezyczne_docs.py` | Batch-translates the manuals (`gui/dokumentacja/*.yaml`) pl → others. Same `--draft`/`--finalizuj` review workflow. |
+| `generuj_dokumentacje.py [-v | --waliduj]` | Regenerates `docs/*.txt` from `dictionaries/*/gui/dokumentacja/*.yaml`. `-v` = generate **and** hard-check. Run before committing doc changes. |
+| `buduj_wielojezyczne_ui.py` | Batch-translates UI strings (`gui/ui.yaml`) from the Polish source into the other languages. Surgical mode: `-k <dotted.key>`. Review workflow: a full run always lands as a draft → review → `-f`/`--finalizuj`. |
+| `buduj_wielojezyczne_docs.py` | Batch-translates the manuals (`gui/dokumentacja/*.yaml`) pl → others. Same draft → review → `-f` workflow. |
 | `refresh_languages.py` | Syncs the target-language registry (`jezyki_docelowe.yaml`) with the `dictionaries/<code>/` folders. Run after adding/removing a language. `--strict` for a CI guard. |
 | `build_release.py` | Builds the PyInstaller release and the Inno Setup installer. |
 
 > Machine translations are **always** reviewed for hallucinations before being
-> finalized. The `--draft` mode writes a review checklist to `skrypty/` for that.
+> finalized. A full (re)translation always lands as a draft and writes a review
+> checklist to `skrypty/` (`przeglad_ui.md` / `przeglad_docs.md`); finalize with
+> `-f` once reviewed.
 
 ## Adding a UI language
 
 1. Create `dictionaries/<code>/` with at least `podstawy.yaml` (incl. the native
    `etykieta`) and the four language sub-folders (`akcenty/`, `szyfry/`,
-   `rezyser/`, `opowiesci/`) plus `gui/ui.yaml`.
+   `rezyser/`, `opowiesci/`).
 2. `python refresh_languages.py` — registers the new code.
-3. `python buduj_wielojezyczne_ui.py --jezyki <code>` then
-   `python buduj_wielojezyczne_docs.py --jezyki <code>` — translate UI + manuals.
-4. Review the drafts, `--finalizuj`, then regenerate docs with
-   `python generuj_dokumentacje.py --waliduj`.
+3. `python buduj_wielojezyczne_ui.py -l <code>` then
+   `python buduj_wielojezyczne_docs.py -l <code>` — translate UI + manuals.
+4. Review the drafts, finalize with `-f`, then regenerate docs with
+   `python generuj_dokumentacje.py -v`.
 
 ## Pull requests
 

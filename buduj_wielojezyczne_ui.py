@@ -895,14 +895,14 @@ def _parsuj_argumenty() -> argparse.Namespace:
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
     grupa.add_argument(
-        "--jezyki",
+        "-l", "--jezyki",
         type=str,
         default="",
         help=f"Comma-separated list of ISO codes (e.g. `en,fi`). "
              f"Allowed: {', '.join(MAPA_JEZYKOW)}.",
     )
     grupa.add_argument(
-        "--wszystkie",
+        "-a", "--wszystkie",
         action="store_true",
         help=f"Translate into all languages ({', '.join(MAPA_JEZYKOW)}).",
     )
@@ -927,7 +927,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
     # `skrypty/przeglad_ui.md`. Kanoniczny nagłówek „do not edit manually"
     # zdobywa się WYŁĄCZNIE przez --finalizuj po recenzji.
     parser.add_argument(
-        "--finalizuj",
+        "-f", "--finalizuj",
         action="store_true",
         help="FINALIZE a draft (zero API, zero retranslation). For the selected "
              "languages, swaps the working \"WORKING DRAFT\" header in "
@@ -937,7 +937,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "review is approved — instead of the destructive \"regenerate without --draft\".",
     )
     parser.add_argument(
-        "--klucz",
+        "-k", "--klucz",
         type=str,
         default=None,
         metavar="KLUCZ[,KLUCZ...]",

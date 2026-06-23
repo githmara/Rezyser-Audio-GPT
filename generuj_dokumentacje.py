@@ -768,7 +768,7 @@ def main() -> int:
         description="User documentation generator (i18n).",
     )
     parser.add_argument(
-        "--waliduj",
+        "-v", "--waliduj",
         action="store_true",
         help="After generating, check that all {placeholdery} were expanded "
              "via ui.yaml. Exit 1 if anything was left as a raw `{klucz}` in "

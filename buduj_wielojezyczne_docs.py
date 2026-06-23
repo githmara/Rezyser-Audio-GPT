@@ -1327,19 +1327,19 @@ def _parsuj_argumenty() -> argparse.Namespace:
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
     grupa.add_argument(
-        "--jezyki",
+        "-l", "--jezyki",
         type=str,
         default="",
         help=f"Comma-separated list of ISO codes (e.g. `en,fi`). "
              f"Allowed: {', '.join(MAPA_JEZYKOW)}.",
     )
     grupa.add_argument(
-        "--wszystkie",
+        "-a", "--wszystkie",
         action="store_true",
         help=f"Translate into all languages ({', '.join(MAPA_JEZYKOW)}).",
     )
     parser.add_argument(
-        "--szablony",
+        "-t", "--szablony",
         type=str,
         default="",
         help="CSV of template names to translate (e.g. `dictionaries.yaml` "
@@ -1371,7 +1371,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
         help="Anthropic Claude model for the main translation (default: claude-sonnet-4-6).",
     )
     parser.add_argument(
-        "--klucz",
+        "-k", "--klucz",
         type=str,
         default=None,
         metavar="KLUCZ[,KLUCZ...]",
@@ -1398,7 +1398,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
     # `skrypty/przeglad_docs.md` — nie ma już czego pamiętać. Kanoniczny nagłówek
     # „do NOT edit by hand" zdobywa się WYŁĄCZNIE przez --finalizuj po recenzji.
     parser.add_argument(
-        "--finalizuj",
+        "-f", "--finalizuj",
         action="store_true",
         help="DRAFT FINALIZATION (zero API, zero re-translation). For the selected "
              "languages/templates it swaps the working \"WORKING DRAFT\" header to the "

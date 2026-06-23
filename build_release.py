@@ -724,6 +724,19 @@ def buduj_pyinstaller() -> Path:
     zamrożone, więc to ono musi mieć komplet zależności z requirements.txt).
     ``--clean`` czyści cache PyInstallera, ``--noconfirm`` nadpisuje ``dist/``
     bez interaktywnego pytania (build bywa odpalany przez agenta / CI).
+    ``--log-level=WARN`` wycisza domyślny zalew linii INFO z milisekundowymi
+    timestampami (każdy analizowany moduł = osobna linia) — w terminalu zostają
+    tylko realne WARNING/ERROR.
+
+    Świadomie NIE próbujemy automatycznie walidować z logu (ani z
+    ``build/<spec>/warn-<spec>.txt``), czy zamrożony exe wystartuje: ten plik to
+    setki fałszywych alarmów z bibliotek trzecich (samo ``numpy._core`` generuje
+    ~180 „missing module", wszystkie nieszkodliwe), a NASZE moduły (``main``,
+    ``gui_*``, ``core_*``) nie produkują tam ŻADNEGO wpisu — czyli sygnał tonie w
+    szumie. Jedyny wiarygodny test (uruchomienie exe) łamie A11y (ciągłe GUI),
+    więc sygnałem „apka w ogóle powstała" pozostaje obecność ``.exe`` (sprawdzana
+    niżej). ``warn-<spec>.txt`` i tak powstaje — do ręcznego wglądu, gdyby kiedyś
+    był potrzebny.
 
     Zwraca ścieżkę do ``dist/<NAZWA_DIST>/``. Przerywa build (exit 1), gdy spec
     nie istnieje, PyInstaller zwróci błąd albo brak oczekiwanego ``.exe``.
@@ -737,7 +750,8 @@ def buduj_pyinstaller() -> Path:
     print("🔨 Freezing the app with PyInstaller (onedir, windowed)...")
     try:
         subprocess.run(
-            [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", str(spec)],
+            [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean",
+             "--log-level=WARN", str(spec)],
             check=True,
         )
     except subprocess.CalledProcessError:
@@ -918,6 +932,73 @@ def _weryfikuj_flagi_debug() -> None:
     print("✅ Debug flags verified (all disabled).\n")
 
 
+def _regeneruj_dokumentacje_lub_przerwij() -> None:
+    """Regeneruje docs/<id>.<kod>.txt z szablonów YAML albo przerywa build.
+
+    We call the generator in-process (same Python process, no subprocess) —
+    the module has its own UTF-8 fix and does not need a fresh session.
+    This guarantees the installer ships fresh docs/ even when the developer
+    forgot to run the generator manually after editing a template.
+    The generator is a Polish-language developer tool (its warnings read
+    "⚠️  …brakujące placeholdery…"), whereas this build log is English by design
+    (since 13.1 — zero entry bar for foreign contributors). A bare call would
+    leak Polish lines into the English build output and, worse, would happily
+    build on top of broken docs if the developer skipped the standalone
+    `--waliduj` step.
+
+    So we (a) run with cicho=True to mute the routine ✅/ℹ️ chatter, (b) capture
+    whatever the generator still prints (the deep warnings about malformed
+    YAML / wrong-typed sections aren't gated by cicho), (c) collect unresolved
+    placeholders structurally via `zbieraj_brakujace`, and (d) ESCALATE any of
+    those signals — captured warning text, collected placeholders, or an empty
+    result set — to a FATAL that aborts the build. In a standalone run these
+    are warnings; in a release build they are fatal, so an installer never
+    ships docs/*.txt that didn't validate. The Polish detail only ever appears
+    indented under the English FATAL header (diagnostics for the dev), never in
+    the normal flow.
+    """
+    print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
+    brakujace_docs: dict[str, list[str]] = {}
+    drafty_docs: dict[str, str] = {}
+    bufor_generatora = io.StringIO()
+    with contextlib.redirect_stdout(bufor_generatora):
+        wyniki_docs = generuj_dokumentacje.generuj(
+            cicho=True, zbieraj_brakujace=brakujace_docs, zbieraj_drafty=drafty_docs,
+        )
+    szum_generatora = bufor_generatora.getvalue().strip()
+
+    # Draftowe / niekanoniczne nagłówki = bezwarunkowy FATAL (guard od v18.6).
+    # generuj() w cicho=True pomija takie pliki MILCZĄCO (sygnał wyłącznie
+    # strukturalny przez `drafty_docs`), więc nie liczymy na `szum_generatora` —
+    # warunek bije wprost po zebranym słowniku. Chroni przed wpuszczeniem do
+    # paczki maszynowego draftu, którego maintainer zapomniał sfinalizować.
+    if brakujace_docs or drafty_docs or szum_generatora or not wyniki_docs:
+        print("❌ FATAL: documentation regeneration is not clean — refusing to build.")
+        print("In a standalone run these are warnings; in a release build they are")
+        print("fatal, so the installer never ships docs/*.txt that didn't validate.")
+        print("Fix the source, then re-run `python generuj_dokumentacje.py --waliduj`.")
+        if not wyniki_docs:
+            print("   • No documentation files were generated at all "
+                  "(missing dictionaries/<kod>/gui/dokumentacja/?).")
+        if drafty_docs:
+            print("   Draft / non-canonical headers (run the matching builder "
+                  "with --finalizuj after reviewing):")
+            for nazwa, powod in sorted(drafty_docs.items()):
+                print(f"      • {nazwa}: {powod}")
+        if brakujace_docs:
+            print("   Unresolved placeholders:")
+            for nazwa, klucze in sorted(brakujace_docs.items()):
+                wypis = ", ".join("{" + k + "}" for k in klucze)
+                print(f"      • {nazwa}: {wypis}")
+        if szum_generatora:
+            print("   Generator warnings:")
+            for linia in szum_generatora.splitlines():
+                print(f"      {linia}")
+        sys.exit(1)
+
+    print(f"✅ Documentation regenerated ({len(wyniki_docs)} files, clean).\n")
+
+
 def main(args: argparse.Namespace | None = None) -> None:
     # Allow main() to be called from CLI (with parser) or programmatically
     # (with `args=argparse.Namespace(yes=False, no_cleanup=False,
@@ -984,73 +1065,10 @@ def main(args: argparse.Namespace | None = None) -> None:
             print("Build aborted.")
             sys.exit(0)
 
-    # 6. Regenerate end-user documentation (docs/<id>.<kod>.txt).
-    # We call the generator in-process (same Python process, no subprocess) —
-    # the module has its own UTF-8 fix and does not need a fresh session.
-    # This guarantees the installer ships fresh docs/ even when the developer
-    # forgot to run the generator manually after editing a template.
-    # We import generuj_dokumentacje and call it IN-PROCESS, which has a subtle
-    # consequence: the generator is a Polish-language developer tool (its
-    # warnings read "⚠️  …brakujące placeholdery…"), whereas this build log is
-    # English by design (since 13.1 — zero entry bar for foreign contributors).
-    # A bare call would leak Polish lines into the English build output and,
-    # worse, would happily build on top of broken docs if the developer skipped
-    # the standalone `--waliduj` step.
-    #
-    # So we (a) run with cicho=True to mute the routine ✅/ℹ️ chatter, (b) capture
-    # whatever the generator still prints (the deep warnings about malformed
-    # YAML / wrong-typed sections aren't gated by cicho), (c) collect unresolved
-    # placeholders structurally via `zbieraj_brakujace`, and (d) ESCALATE any of
-    # those signals — captured warning text, collected placeholders, or an empty
-    # result set — to a FATAL that aborts the build. In a standalone run these
-    # are warnings; in a release build they are fatal, so an installer never
-    # ships docs/*.txt that didn't validate. The Polish detail only ever appears
-    # indented under the English FATAL header (diagnostics for the dev), never in
-    # the normal flow.
-    print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
-    brakujace_docs: dict[str, list[str]] = {}
-    drafty_docs: dict[str, str] = {}
-    bufor_generatora = io.StringIO()
-    with contextlib.redirect_stdout(bufor_generatora):
-        wyniki_docs = generuj_dokumentacje.generuj(
-            cicho=True, zbieraj_brakujace=brakujace_docs, zbieraj_drafty=drafty_docs,
-        )
-    szum_generatora = bufor_generatora.getvalue().strip()
-
-    # Draftowe / niekanoniczne nagłówki = bezwarunkowy FATAL (guard od v18.6).
-    # generuj() w cicho=True pomija takie pliki MILCZĄCO (sygnał wyłącznie
-    # strukturalny przez `drafty_docs`), więc nie liczymy na `szum_generatora` —
-    # warunek bije wprost po zebranym słowniku. Chroni przed wpuszczeniem do
-    # paczki maszynowego draftu, którego maintainer zapomniał sfinalizować.
-    if brakujace_docs or drafty_docs or szum_generatora or not wyniki_docs:
-        print("❌ FATAL: documentation regeneration is not clean — refusing to build.")
-        print("In a standalone run these are warnings; in a release build they are")
-        print("fatal, so the installer never ships docs/*.txt that didn't validate.")
-        print("Fix the source, then re-run `python generuj_dokumentacje.py --waliduj`.")
-        if not wyniki_docs:
-            print("   • No documentation files were generated at all "
-                  "(missing dictionaries/<kod>/gui/dokumentacja/?).")
-        if drafty_docs:
-            print("   Draft / non-canonical headers (run the matching builder "
-                  "with --finalizuj after reviewing):")
-            for nazwa, powod in sorted(drafty_docs.items()):
-                print(f"      • {nazwa}: {powod}")
-        if brakujace_docs:
-            print("   Unresolved placeholders:")
-            for nazwa, klucze in sorted(brakujace_docs.items()):
-                wypis = ", ".join("{" + k + "}" for k in klucze)
-                print(f"      • {nazwa}: {wypis}")
-        if szum_generatora:
-            print("   Generator warnings:")
-            for linia in szum_generatora.splitlines():
-                print(f"      {linia}")
-        sys.exit(1)
-
-    print(f"✅ Documentation regenerated ({len(wyniki_docs)} files, clean).\n")
-
-    # 6a'. Leak gate (od v18.5.3): scan the docs templates for untranslated Polish
-    # text against the accepted baseline. The finalization-header guard above only
-    # proves a file was *finalized*, not that its content is leak-free — this closes
+    # 6a. Leak gate (od v18.5.3): scan the docs templates for untranslated Polish
+    # text against the accepted baseline. The finalization-header guard — now run
+    # LATER (step 6d, right before the freeze) — only proves a file was *finalized*,
+    # not that its content is leak-free, so this closes
     # that gap (a "finalized" pack could still ship Polish; see RELEASE_NOTES v18.5.2
     # "Co nie weszło"). A new or shifted leak beyond audyt_leakow_baseline.json is a
     # FATAL. Lazy import with graceful degradation: a contributor building without
@@ -1081,7 +1099,7 @@ def main(args: argparse.Namespace | None = None) -> None:
         else:
             print(f"✅ No leaks beyond the baseline ({audyt_leakow.BASELINE_PATH.name}).\n")
 
-        # 6a''. Source `.py` hard-code gate (od v18.5.4): scan application modules for
+        # 6b. Source `.py` hard-code gate (od v18.5.4): scan application modules for
         # user/LLM-facing Polish string literals that bypass i18n/recipe YAML, against
         # a separate accepted baseline (audyt_leakow_py_baseline.json). Same baseline
         # pattern as the docs gate: a new hard-code beyond the baseline (especially any
@@ -1106,8 +1124,17 @@ def main(args: argparse.Namespace | None = None) -> None:
         else:
             print(f"✅ No hard-codes beyond the baseline ({audyt_leakow.BASELINE_PY_PATH.name}).\n")
 
-    # 6b. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
+    # 6c. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
+
+    # 6d. Regenerate end-user documentation (docs/<id>.<kod>.txt) — DELIBERATELY the
+    # LAST gate before the freeze (reordered v18.x). Doc regeneration MUTATES
+    # docs/*.txt and bakes in the (possibly bumped) VERSION, so running it only AFTER
+    # the cheap, read-only gates above (leak/py/debug) means a failing gate aborts the
+    # build WITHOUT leaving a regenerated-but-unbuilt docs/ diff behind. All those gates
+    # scan YAML/`.py` source (independent of regenerated docs); the only consumer of
+    # fresh docs/manual.<iso>.txt is the Inno step (8 below), still after us.
+    _regeneruj_dokumentacje_lub_przerwij()
 
     # 7. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,
     # następnie skompletuj paczkę (dictionaries/ + docs/ OBOK exe), żeby dist/
@@ -1132,7 +1159,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     kody = zbierz_jezyki_bazowe()
     # Krzyżowa walidacja: język musi mieć NIE TYLKO `dictionaries/<kod>/
     # podstawy.yaml`, ale też `docs/manual.<iso>.txt` w paczce (regenerowany
-    # w kroku 6 wyżej). Bez manuala instalator nie ma czego otworzyć po
+    # w kroku 6d wyżej). Bez manuala instalator nie ma czego otworzyć po
     # kliknięciu Finish — pomiń ten język z mapy Inno.
     kody_z_manualem = zbierz_jezyki_z_manualem(kody)
     wpisy = buduj_wpisy_inno(kody_z_manualem, katalog_inno)
