@@ -1164,32 +1164,45 @@ class OpowiesciPanel(wx.Panel):
         tekst_wyboru: str,
         id_wyboru:    str = "",
     ) -> None:
-        """Klik na przycisku wyboru — wpisuje tekst do pola akcji i daje focus.
+        """Klik na przycisku wyboru — natychmiast wysyła ten wybór jako turę.
 
-        v15.1: NIE wysyłamy już automatycznie. Powód: gdy zasady świata
-        narzucają konkretną fonetykę imienia/słowa (np. „Joanna" twardo
-        [dż]), a LLM-owy tekst wyboru zawiera odmianę gramatyczną która
-        wymusiłaby zmiękczenie ([j]), gracz musi mieć szansę przeredagować
-        wybór przed wysyłką — inaczej model dostaje sprzeczne instrukcje
-        (system prompt: „twardo"; user input: „Joannę" w wołaczu). Po
-        kliknięciu gracz może swobodnie edytować pole akcji i sam wcisnąć
-        „Wyślij" (lub Enter).
+        v18.x (przywrócona auto-wysyłka): klik = commit. To domyka separację
+        ról aplikacji — w Reżyserze REŻYSERUJESZ (Burza Mózgów produkuje
+        opcje-drafty do dalszej obróbki), a w Opowieściach GRASZ: wybór to
+        ruch w grze, więc idzie do silnika od razu, bez kroku pośredniego.
+        Spójne z głównym manualem (zalecany workflow) i z migracją na Anthropic
+        — Claude rygorystycznie trzyma zasady świata, więc ręczna korekta
+        fonetyki wyboru przed wysyłką nie jest już regułą, lecz wyjątkiem.
+
+        Furtka edycji: gracz, który chce przeredagować ruch (np. zasady świata
+        narzucają twardą fonetykę imienia, którą odmiana gramatyczna w tekście
+        wyboru by zmiękczyła), NIE klika przycisku — wpisuje własną akcję
+        wolnym tekstem w polu akcji i wysyła ją „Wyślij"/Enter. Free-text był i
+        pozostaje zawsze dostępny; to on jest teraz ścieżką ręcznej korekty.
+        (Dawne v15.1: klik tylko wpisywał tekst do pola i czekał na ręczną
+        wysyłkę — zniesione, bo zacierało różnicę między rolą gracza a reżysera.)
 
         v15.2: parametr ``id_wyboru`` — gdy ``"0"`` (mechanika fiolki w
         trybie Mniejsze zło), ustawiamy ``_fiolka_klikneto_w_tej_turze=True``.
         Inny ID (A-E) zeruje flagę — gracz zmienił zdanie, fiolka nie idzie.
-        Flaga jest niezależna od finalnej treści `_txt_akcja` (gracz może
-        edytować „Odkorkuj fiolkę" → „Odkorkuję fiolkę z drżącą ręką",
-        wciąż liczy się jako użycie).
+        Flagę ustawiamy PRZED wysyłką, bo `_on_wyslij` czyta ją przy budowie
+        seeda fiolki w tej turze.
 
-        A11y: focus przechodzi do pola akcji, NVDA odczyta zawartość;
-        kursor stawiamy na końcu, żeby gracz dopisywał, a nie nadpisywał
-        na początku.
+        Guard zajętości: auto-wysyłka odpala TYLKO gdy „Wyślij" jest aktywny.
+        Gdy trwa tura albo auto-streszczenie w tle, przycisk jest wyłączony —
+        a klik wyboru wywołuje `_on_wyslij` wprost, więc bez tego guardu
+        obszedłby blokadę i odpalił drugiego workera (podwójna wysyłka, race
+        na snapshot). W stanie zajętości zachowujemy więc dawne zachowanie:
+        wpisujemy wybór do pola i dajemy fokus, a gracz wyśle go ręcznie, gdy
+        panel się odblokuje (nic nie ginie).
         """
         self._fiolka_klikneto_w_tej_turze = (id_wyboru == "0")
         self._txt_akcja.SetValue(tekst_wyboru)
-        self._txt_akcja.SetInsertionPointEnd()
-        self._txt_akcja.SetFocus()
+        if self._btn_wyslij.IsEnabled():
+            self._on_wyslij(_event)
+        else:
+            self._txt_akcja.SetInsertionPointEnd()
+            self._txt_akcja.SetFocus()
 
     # ------------------------------------------------------------------
     # _obsluz_blad: callback w wątku UI po wyjątku w workerze

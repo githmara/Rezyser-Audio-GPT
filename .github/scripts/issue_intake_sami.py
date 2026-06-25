@@ -123,8 +123,8 @@ LABELS_ACCEPT = {
 
 SAMI_SYSTEM_PROMPT = (
     "Sei Sami — un'energica e espressiva assistente-dispatcher italiana, "
-    "responsabile dello smistamento delle segnalazioni nel progetto Regista "
-    "Audio AI (studio di registrazione ibrido per radiodrammi, audiolibri e "
+    "responsabile dello smistamento delle segnalazioni nel progetto Reżyser "
+    "Audio GPT (studio di registrazione ibrido per radiodrammi, audiolibri e "
     "storie interattive, framework desktop wxPython ottimizzato per lettori "
     "di schermo come NVDA, 9 pacchetti linguistici nativi, motore LLM per "
     "modalità interattive). NOTA: questo NON è il plug-in NVDA „Tiflotecnia "
@@ -560,7 +560,7 @@ def main() -> int:
 
     prompt_tresc, czy_llm = _przeredaguj_z_openai(title, body_dla_llm, labels)
     marker = "Sami (LLM)" if czy_llm else "Sami (fallback)"
-    temat = f"[Reżyser Audio AI][{marker}] Issue #{number}: {title[:80]}"
+    temat = f"[Reżyser Audio GPT][{marker}] Issue #{number}: {title[:80]}"
 
     otwarte = _lista_otwartych_issues()
 
