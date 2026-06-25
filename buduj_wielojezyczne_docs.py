@@ -93,13 +93,6 @@ ROOT = Path(__file__).resolve().parent
 DICT_DIR = ROOT / "dictionaries"
 RUNTIME_DIR = ROOT / "runtime"
 
-# v17.0: META-komentarze + pętla feedbacku (--input). Logi w skrypty/ (user data).
-SKRYPTY_DIR = ROOT / "skrypty"
-OUTPUT_LOG = SKRYPTY_DIR / "output.log"
-INPUT_LOG = SKRYPTY_DIR / "input.log"
-# Separator META w odpowiedzi LLM (treść po nim = komentarz, nie tłumaczenie).
-META_MARKER = "===META==="
-
 FOLDER_GUI = "gui"
 FOLDER_DOKUMENTACJA = "dokumentacja"
 KOD_ZRODLOWY = "pl"
@@ -475,167 +468,12 @@ def _sekcja_ma_typoglikemie(tresc: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# v17.0: RETRY — blok korekcji leaków (doklejany per-sekcja w trybie --retry)
+# Model recenzji (od refaktoru 18.x): KAŻDE tłumaczenie ląduje jako DRAFT z
+# checklistą `przeglad_tlumaczen` — bez pętli feedbacku LLM. Dawne tryby
+# --input/--retry oraz maszyneria META (`===META===` + output.log) ZNIESIONE:
+# gryzły się z chunkowaniem (wiele markerów META po podziale sekcji na bloki)
+# i z modelami openai_compat. Recenzent poprawia draft ręcznie → `--finalizuj`.
 # ---------------------------------------------------------------------------
-# Zwykły surgical retranslate (--klucz) NIE naprawia leaków — empiryczny dowód
-# z v17.0 (sekcja Polish-naming: 3× re-tłumaczenie zostawiało polski, bo LLM ma
-# blind spot przy treściach które same wspominają „zostaw po polsku"). Ten blok
-# jest analogiem self-correction z rezyser_ai/opowiesci_ai („YOUR PREVIOUS OUTPUT
-# FAILED VALIDATION...") — wstrzykujemy KONKRETNE polskie fragmenty wykryte przez
-# audyt_leakow w istniejącym tłumaczeniu i każemy je zlikwidować. Angielski (jak
-# PROMPT_TEMPLATE_DOKUMENTACJA) — neutralny dla każdej pary językowej.
-RETRY_BLOK_TEMPLATE = """\
-## RETRY — LEAK CORRECTION (CRITICAL)
-A previous automatic translation of THIS section into {nazwa_natywna} LEFT POLISH
-TEXT UNTRANSLATED — a defect you must now fix. You are re-translating from the
-Polish source. Translate EVERY word into {nazwa_natywna}, WITH the following strict
-exceptions that you must COPY VERBATIM — translating any of them is itself a defect,
-because it hands the reader a path, token or term that does not exist in the running
-application:
-  - the frozen ⟦N⟧ markers;
-  - the brand name "Reżyser Audio GPT";
-  - physical file AND FOLDER names — these are literal identifiers on disk, NOT
-    words to translate: skrypty/, opowiesci/, runtime/, rezyser/, akcenty/, szyfry/,
-    dictionaries/, podstawy.yaml, golden_key.env, etc. KEEP the Polish spelling
-    (e.g. do NOT render "opowiesci/" with a {nazwa_natywna} word for "stories");
-  - angle-bracket placeholders such as <nazwa>, <kod>, <name>: copy the brackets
-    and the inner text character-for-character, do NOT translate <nazwa>;
-  - the env-key placeholder PASTE_YOUR_KEY_HERE — copy it verbatim (the app writes
-    it literally into golden_key.env, identical in every language);
-  - voice product names (Samantha, Heidi, Markus, ...);
-  - the deliberately-Polish DIDACTIC cipher examples (Vowelizer/Reverser/
-    Typoglycemia) — those you LOCALIZE per the rules above, you do NOT leave them
-    in Polish.
-
-CRITICAL — module/persona names: the Polish source uses "Reżyser" (Director),
-"Poliglota" (Polyglot), "Manager Reguł" (Rule Manager), "Księga Świata" (World
-Book). Render them with the established {nazwa_natywna} terms and INFLECT them
-grammatically as the sentence requires — Polish case forms like "Reżysera",
-"Reżyserowi", "Poligloty", "Księgę Świata" are NOT to be copied; use the correct
-{nazwa_natywna} declension of the {nazwa_natywna} term instead.
-
-The previous attempt specifically left these Polish fragments — NONE of them may
-appear in Polish in your output (localize/inflect, do not copy):
-{lista_leakow}\
-"""
-
-
-def _zbuduj_retry_blok(leaki: list[Any], nazwa_natywna: str) -> str:
-    """Buduje blok RETRY z unikalnych polskich fragmentów wykrytych w sekcji.
-
-    Zwraca pusty string, gdy brak leaków — wtedy retry degraduje do zwykłego
-    surgical retranslate (bez nacisku). Deduplikacja zachowuje kolejność
-    wystąpień; limit 40 pozycji (prompt nie ma puchnąć w nieskończoność).
-    """
-    widziane: list[str] = []
-    for leak in leaki:
-        frag = leak.fragment.strip()
-        if frag and frag not in widziane:
-            widziane.append(frag)
-    if not widziane:
-        return ""
-    lista = "\n".join(f"     - {frag}" for frag in widziane[:40])
-    return RETRY_BLOK_TEMPLATE.format(nazwa_natywna=nazwa_natywna, lista_leakow=lista)
-
-
-# ---------------------------------------------------------------------------
-# v17.0: META-komentarze (zawsze-on) — LLM dokleja `===META===` + komentarz
-# ---------------------------------------------------------------------------
-# Doklejane do system-promptu KAŻDEGO tłumaczenia sekcji (doc-autotłumacz).
-# GUI Poliglota NIE jest dotknięte (woła tlumacz_dlugi_tekst bez tego dodatku).
-# Treść po `===META===` jest wycinana przed walidacją tokenów i zapisem YAML,
-# a logowana do skrypty/output.log jako „### kod/plik/klucz\n<komentarz>".
-# Cel: widoczność rozumowania LLM (co/dlaczego, konflikty instrukcji) → user
-# czyta i może odpowiedzieć krytyką przez input.log (tryb --input).
-META_INSTRUKCJA = (
-    "## META COMMENTARY (required, appended AFTER the translation)\n"
-    "After the COMPLETE translated text, output a line containing EXACTLY "
-    f"`{META_MARKER}` and then 1–4 sentences (in English) describing: notable "
-    "translation/terminology choices for THIS section, and ESPECIALLY any conflict, "
-    "ambiguity or impossible requirement you noticed in the instructions. Everything "
-    f"after `{META_MARKER}` is stripped before saving — do NOT place any translated "
-    f"content there. Output `{META_MARKER}` exactly ONCE, at the very end."
-)
-
-
-def rozdziel_meta(tekst: str) -> tuple[str, str]:
-    """Dzieli odpowiedź LLM na (tłumaczenie, meta-komentarz) po `===META===`.
-
-    Split na PIERWSZYM markerze (sekcje doc są jednoblokowe — patrz jawny
-    `max_tokenow_na_blok=4_000` przy wywołaniu `tlumacz_dlugi_tekst`; meta
-    pojawia się raz, na końcu). Brak markera → ("", tekst, "")
-    tzn. całość to tłumaczenie, meta puste.
-    """
-    if META_MARKER in tekst:
-        tlum, meta = tekst.split(META_MARKER, 1)
-        return tlum.rstrip(), meta.strip()
-    return tekst, ""
-
-
-def _dopisz_meta_log(kod: str, nazwa_pliku: str, klucz: str, meta: str) -> None:
-    """Dopisuje meta-komentarz do skrypty/output.log („### kod/plik/klucz")."""
-    if not meta:
-        return
-    SKRYPTY_DIR.mkdir(parents=True, exist_ok=True)
-    with open(OUTPUT_LOG, "a", encoding="utf-8") as fh:
-        fh.write(f"### {kod}/{nazwa_pliku}/{klucz}\n{meta}\n\n")
-
-
-# ---------------------------------------------------------------------------
-# v17.0: tryb --input — krytyka usera per-klucz z skrypty/input.log
-# ---------------------------------------------------------------------------
-# Osobny workflow od --retry (auto-leaki). User czyta output.log, pisze krytykę
-# w TYM SAMYM formacie do input.log, odpala --input. Bot retłumaczy TYLKO klucze
-# wskazane w input.log, wstrzykując krytykę. Bez auto-detekcji leaków.
-INPUT_BLOK_TEMPLATE = """\
-## REVIEWER FEEDBACK — TARGETED CORRECTION (CRITICAL)
-A human reviewer examined your PREVIOUS translation of THIS section and left the
-correction note below. Re-translate from the Polish source and apply this note
-precisely; it overrides your earlier choices where they conflict. Keep all the
-KEEP-1:1 rules above (markers ⟦N⟧, brand, filenames/folders, placeholders, voices).
-
-Reviewer note:
-{krytyka}\
-"""
-
-
-def _zbuduj_input_blok(krytyka: str) -> str:
-    """Buduje blok korekty z notatki recenzenta (input.log) dla jednej sekcji."""
-    krytyka = (krytyka or "").strip()
-    if not krytyka:
-        return ""
-    return INPUT_BLOK_TEMPLATE.format(krytyka=krytyka)
-
-
-def parsuj_input_log(sciezka: Path) -> dict[str, str]:
-    """Parsuje input.log → {„kod/plik/klucz": krytyka}. Format „### nagłówek\\n<treść>".
-
-    Ten sam format co output.log (meta), żeby było jasne co punktujemy dla którego
-    klucza. Nagłówek = linia zaczynająca się od „### ". Treść = linie do następnego
-    „### " (puste linie brzegowe przycinane).
-    """
-    if not sciezka.is_file():
-        return {}
-    wpisy: dict[str, str] = {}
-    biezacy: str | None = None
-    bufor: list[str] = []
-
-    def _zamknij() -> None:
-        if biezacy is not None:
-            tresc = "\n".join(bufor).strip()
-            if tresc:
-                wpisy[biezacy] = tresc
-
-    with open(sciezka, "r", encoding="utf-8") as fh:
-        for linia in fh:
-            if linia.startswith("### "):
-                _zamknij()
-                biezacy = linia[4:].strip()
-                bufor = []
-            elif biezacy is not None:
-                bufor.append(linia.rstrip("\n"))
-    _zamknij()
-    return wpisy
 
 
 def _zbuduj_prompt_dodatkowy(
@@ -970,7 +808,6 @@ def _tlumacz_pojedyncza_sekcje(
     dry_run: bool,
     model: str,
     prompt_dodatkowy: str,
-    retry: bool = False,
 ) -> tuple[bool, str | None]:
     """Tłumaczy pojedynczą sekcję (tokenizacja + LLM + walidacja + detokenizacja).
 
@@ -1001,19 +838,6 @@ def _tlumacz_pojedyncza_sekcje(
         if klucz_sekcji != KLUCZ_LEGACY
         else f"{rdzen}_{KOD_ZRODLOWY}_to_{kod}"
     )
-    if retry:
-        # Świeża przestrzeń cache + wymuszone czyszczenie: retry MUSI ominąć
-        # stary, zaleakowany temp_*.jsonl (inaczej tlumacz_dlugi_tekst odtworzy
-        # zaleakowany blok z dysku zamiast tłumaczyć z naciskiem na leaki).
-        from tlumacz_ai import zbuduj_nazwe_bazowa
-        cache_key += "_retry"
-        base = zbuduj_nazwe_bazowa(cache_key, nazwa_pl)
-        temp = RUNTIME_DIR / f"temp_{base}.jsonl"
-        try:
-            temp.unlink()
-        except OSError:
-            pass
-
     def _on_postep(info: Any) -> None:
         # `info` to InfoPostepu — str() zwraca czytelny `detal` (mostek i18n
         # nieistotny dla CLI dev-toola; liczy się log z procentem).
@@ -1028,9 +852,6 @@ def _tlumacz_pojedyncza_sekcje(
     def _on_blad_miekki(info: Any) -> None:
         print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: {str(info).splitlines()[0]}")
 
-    # META zawsze-on (doc-autotłumacz): LLM dokleja `===META===` + komentarz.
-    prompt_z_meta = (prompt_dodatkowy + "\n\n" + META_INSTRUKCJA).strip()
-
     wynik = tlumacz_dlugi_tekst(
         tresc=payload,
         jezyk_docelowy=nazwa_pl,
@@ -1041,24 +862,18 @@ def _tlumacz_pojedyncza_sekcje(
         on_blad_krytyczny=_on_blad_krytyczny,
         on_blad_miekki=_on_blad_miekki,
         model_tlumacz=model,
-        prompt_dodatkowy=prompt_z_meta,
-        # Jawnie ponad domyślne 2 500: sekcje doc MUSZĄ być jednoblokowe
-        # (inaczej `===META===` wylądowałby w środku sklejki — patrz
-        # `rozdziel_meta`). 4 000 tokenów ≈ stary limit znakowy 14-16k;
-        # bezpieczne, bo docs tłumaczymy wyłącznie na języki łacińskie
-        # i cyrylicę (nie token-gęste CJK).
-        max_tokenow_na_blok=4_000,
+        prompt_dodatkowy=prompt_dodatkowy,
+        # Domyślne chunkowanie (~2 500 tok/blok): duża sekcja może rozpaść się
+        # na wiele bloków — bezpieczne, bo nie ma już META, której wielokrotny
+        # marker po podziale psułby sklejkę (dawny override 4 000 wymuszał
+        # „sekcja = jeden blok" wyłącznie pod META; zniesiony razem z META).
     )
     if wynik is None:
         komunikat = blad_kryt["msg"] or "unknown error from the tlumacz_ai.py engine"
         print(f"❌  {kod}/{nazwa_pliku}{sufiks}: translation aborted.\n    {komunikat.splitlines()[0]}")
         return False, None
 
-    tekst_po_prefiksie = utnij_prefix_z_wyniku(wynik.tekst)
-    tekst_wy, meta = rozdziel_meta(tekst_po_prefiksie)
-    if meta:
-        _dopisz_meta_log(kod, nazwa_pliku, klucz_sekcji, meta)
-        print(f"   📝 {kod}/{nazwa_pliku}{sufiks}: meta → output.log ({len(meta)} zn.)")
+    tekst_wy = utnij_prefix_z_wyniku(wynik.tekst)
     ok, problemy = sprawdz_parzystosc(tresc_tok, tekst_wy)
     if not ok:
         print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN parity of ⟦i⟧ markers.")
@@ -1085,9 +900,6 @@ def tlumacz_szablon(
     dry_run: bool,
     model: str,
     klucze_filtru: list[str] | None = None,
-    retry: bool = False,
-    input_krytyki: dict[str, str] | None = None,
-    pelne_tlumaczenie: bool = True,
 ) -> bool:
     """Pełny przebieg tłumaczenia jednego pliku-szablonu na jeden język.
 
@@ -1113,12 +925,11 @@ def tlumacz_szablon(
         print(f"⏭️  {kod}/{nazwa_pliku}: już istnieje — pomijam (--skip-existing).")
         return True
 
-    # Status finalizacji (od v18.6): pełne tłumaczenie ZAWSZE ląduje jako draft
-    # (świeży maszynowy przekład do recenzji halucynacji — kanon zdobywa się
-    # WYŁĄCZNIE przez --finalizuj). Chirurgiczny update (--klucz/--input/--retry)
-    # NIE zmienia statusu pliku: zachowuje jego dotychczasowy nagłówek, żeby nie
-    # kanonizować przedwcześnie draftu będącego w trakcie recenzji.
-    tryb_draft = True if pelne_tlumaczenie else przeglad_tlumaczen.czy_plik_jest_draftem(cel)
+    # Status finalizacji (od refaktoru 18.x): KAŻDE tłumaczenie — pełne ORAZ
+    # chirurgiczne (--klucz) — ZAWSZE ląduje jako draft. Świeży maszynowy przekład
+    # (choćby jednej sekcji) wymaga recenzji halucynacji; kanoniczny nagłówek
+    # zdobywa się WYŁĄCZNIE przez --finalizuj po przeglądzie wg checklisty.
+    tryb_draft = True
 
     # SURGICAL: filtruj sekcje + wczytaj istniejący plik docelowy do scalenia
     sekcje_do_tlumaczenia: dict[str, str] = sekcje_pl
@@ -1156,49 +967,17 @@ def tlumacz_szablon(
     ):
         abbrev = _skrotowce_dla_jezyka(klient, kod, nazwa_natywna, model)
 
-    # RETRY: detektor budujemy raz na plik (ładowanie modeli lingua jest drogie),
-    # reużywamy między sekcjami. sekcje_istniejace jest gwarantowane (retry ⟹
-    # surgical ⟹ wczytano docelowy plik wyżej).
-    detektor_leakow = None
-    if retry:
-        import audyt_leakow
-        detektor_leakow = audyt_leakow._zbuduj_detektor(kod)
-
     # Tłumaczenie sekcja-po-sekcji
-    swiezy_cache = retry or (input_krytyki is not None)  # oba wymuszają świeże tłumaczenie
     sekcje_przetlumaczone: dict[str, str] = {}
     for klucz, tresc_pl in sekcje_do_tlumaczenia.items():
         # Teza 3: prompt budujemy PER SEKCJĘ z jej treści — bloki szyfrów/akcentów
         # wstrzykiwane tylko gdy sekcja faktycznie ich dotyczy (vs dawny monolit
         # doklejany do wszystkich 68 sekcji). `abbrev` rozwiązane wyżej (tabela
         # albo skrótowce z mini-promptu LLM) — steruje blokiem ODWRACACZ.
-        prompt_dodatkowy = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna, tresc_pl, abbrev=abbrev)
-        prompt_sekcji = prompt_dodatkowy
-        if retry:
-            import audyt_leakow
-            istniejaca = (sekcje_istniejace or {}).get(klucz, "")
-            leaki = audyt_leakow.wykryj_leaki_w_tekscie(istniejaca, kod, detektor_leakow)
-            retry_blok = _zbuduj_retry_blok(leaki, nazwa_natywna)
-            if retry_blok:
-                prompt_sekcji = (prompt_dodatkowy + "\n\n" + retry_blok).strip()
-                fragmenty = sorted({l.fragment.strip() for l in leaki if l.fragment.strip()})
-                print(f"♻️  {kod}/{nazwa_pliku} '{klucz}': RETRY z naciskiem na "
-                      f"{len(fragmenty)} unikalny/ch leak(ów): {fragmenty[:8]}"
-                      f"{' …' if len(fragmenty) > 8 else ''}")
-            else:
-                print(f"♻️  {kod}/{nazwa_pliku} '{klucz}': RETRY — detektor nie wykrył "
-                      f"leaków w istniejącym tłumaczeniu; retłumaczę bez retry-bloku.")
-        elif input_krytyki is not None:
-            input_blok = _zbuduj_input_blok(input_krytyki.get(klucz, ""))
-            if input_blok:
-                prompt_sekcji = (prompt_dodatkowy + "\n\n" + input_blok).strip()
-                print(f"📨  {kod}/{nazwa_pliku} '{klucz}': INPUT — krytyka recenzenta wstrzyknięta.")
-            else:
-                print(f"📨  {kod}/{nazwa_pliku} '{klucz}': INPUT — pusta krytyka, retłumaczę bez bloku.")
+        prompt_sekcji = _zbuduj_prompt_dodatkowy(kod, nazwa_natywna, tresc_pl, abbrev=abbrev)
         ok, tekst = _tlumacz_pojedyncza_sekcje(
             kod, nazwa_pl, klient, nazwa_pliku, rdzen, klucz, tresc_pl,
             dry_run=dry_run, model=model, prompt_dodatkowy=prompt_sekcji,
-            retry=swiezy_cache,
         )
         if not ok:
             print(f"❌  {kod}/{nazwa_pliku}: section '{klucz}' failed — NOT writing the file.")
@@ -1382,20 +1161,10 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "so the file adopts the new schema. A surgical update is cheaper API-wise: "
              "you translate e.g. only the Vocalizer section (~2 kB) instead of the whole manual (~68 kB).",
     )
-    parser.add_argument(
-        "-r", "--retry",
-        action="store_true",
-        help="LEAK-CORRECTION mode. For each section from --klucz it loads the EXISTING "
-             "target translation, detects Polish fragments in it (audyt_leakow: "
-             "lingua + curatorial terms) and injects them into the prompt as \"these "
-             "fragments were left in Polish — translate/inflect them fully\", then "
-             "re-translates the section from the PL source. Bypasses the temp_*.jsonl cache (fresh "
-             "translation). A plain --klucz does NOT fix leaks (LLM blind spot) — "
-             "this flag is the analogue of self-correction from rezyser_ai. REQUIRES --klucz.",
-    )
-    # NB (od v18.6): flaga `--draft` została USUNIĘTA. Pełne tłumaczenie (bez
-    # --klucz/--input) ZAWSZE ląduje jako draft do recenzji + emituje checklistę
-    # `skrypty/przeglad_docs.md` — nie ma już czego pamiętać. Kanoniczny nagłówek
+    # NB (od refaktoru 18.x): flagi `--draft`, `--retry`, `--input` ZNIESIONE
+    # (krucha pętla feedbacku + META gryzły się z chunkowaniem i openai_compat).
+    # KAŻDE tłumaczenie — pełne i `--klucz` — ZAWSZE ląduje jako draft do recenzji
+    # + emituje checklistę `skrypty/przeglad_docs.md`. Kanoniczny nagłówek
     # „do NOT edit by hand" zdobywa się WYŁĄCZNIE przez --finalizuj po recenzji.
     parser.add_argument(
         "-f", "--finalizuj",
@@ -1407,35 +1176,14 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "(idempotent). This is the proper step after review acceptance — instead of "
              "the destructive \"regenerate without --draft\".",
     )
-    parser.add_argument(
-        "--input",
-        action="store_true",
-        help="REVIEWER FEEDBACK mode (a separate workflow from --retry). Parses "
-             "`skrypty/input.log` (format \"### kod/plik/klucz\\n<critique>\", the same as "
-             "output.log), determines which keys it concerns, checks whether the AI generated "
-             "output for them in the last turn, and re-translates ONLY those keys from the PL source with "
-             "the reviewer's critique injected — WITHOUT leak auto-detection. The key selector "
-             "comes from input.log (not from --klucz). After the run input.log is deleted "
-             "(bounded loop). Mutually exclusive with --klucz/--retry.",
-    )
     args = parser.parse_args()
     if args.klucz and args.skip_existing:
         parser.error("--klucz and --skip-existing are mutually exclusive "
                      "(--klucz deliberately overwrites the selected sections in an existing file).")
-    if args.retry and not args.klucz:
-        parser.error("--retry requires --klucz (CSV of sections to correct) — without specifying "
-                     "sections there is nothing to re-translate with emphasis on leaks.")
-    if args.input and (args.klucz or args.retry or args.skip_existing):
-        parser.error("--input is a SEPARATE workflow (critique from input.log) — do not combine with "
-                     "--klucz/--retry/--skip-existing. The key selector comes from input.log.")
-    if args.input and not args.szablony:
-        parser.error("--input requires --szablony <plik> (e.g. `--szablony tales`), so it "
-                     "knows which file to take the sections listed in input.log from.")
-    if args.finalizuj and (args.klucz or args.retry or args.input
-                           or args.skip_existing or args.dry_run):
+    if args.finalizuj and (args.klucz or args.skip_existing or args.dry_run):
         parser.error("--finalizuj is a purely local header swap (zero API) — "
-                     "do not combine with --klucz/--retry/--input/--skip-existing/"
-                     "--dry-run. Select languages via --jezyki/--wszystkie "
+                     "do not combine with --klucz/--skip-existing/--dry-run. "
+                     "Select languages via --jezyki/--wszystkie "
                      "(optionally narrow with --szablony).")
     return args
 
@@ -1577,33 +1325,9 @@ def main() -> int:
     # imporcie modułu, tylko gdy faktycznie idzie tłumaczyć.
     from core_poliglota import natywna_nazwa
 
-    # Log lifecycle: output.log świeży na każdy run (meta dopisywane per klucz).
-    # W trybie --input czytamy POPRZEDNI output.log (weryfikacja prior-output)
-    # PRZED skasowaniem; potem kasujemy, by zebrać nowe meta tego runu.
-    prior_output_keys: set[str] = set()
-    wpisy_input: dict[str, str] = {}
-    if args.input:
-        wpisy_input = parsuj_input_log(INPUT_LOG)
-        if not wpisy_input:
-            print(f"❌ --input: {INPUT_LOG} is empty or does not exist — nothing to do.")
-            return 2
-        prior_output_keys = set(parsuj_input_log(OUTPUT_LOG).keys())  # ten sam format
-        print(f"📨 Tryb --input: {len(wpisy_input)} wpis(ów) krytyki z {INPUT_LOG.name}; "
-              f"poprzedni output.log: {len(prior_output_keys)} kluczy.")
-    if not args.dry_run:
-        try:
-            OUTPUT_LOG.unlink()
-        except OSError:
-            pass
-
     sukcesy: list[str] = []
     porazki: list[str] = []
     wytworzone_drafty: list[tuple[str, str]] = []
-
-    # Pełne tłumaczenie (bez --klucz/--input) ⇒ ścieżka draft + checklista
-    # przeglądu. Chirurgiczny update (--klucz/--input/--retry) zachowuje status
-    # finalizacji pliku docelowego (patrz `tlumacz_szablon`/`_plik_jest_draftem`).
-    pelne_tlumaczenie = not (args.klucz or args.input)
 
     klucze_filtru: list[str] | None = None
     if args.klucz:
@@ -1613,9 +1337,6 @@ def main() -> int:
             return 2
         print(f"🔎 Filtr --klucz ({len(klucze_filtru)} klucz/y): {klucze_filtru}")
         print(f"   Surgical update — pozostałe sekcje zostaną z istniejących tłumaczeń.")
-        if args.retry:
-            print(f"♻️  Tryb --retry: korekcja leaków (audyt_leakow → retry-blok → "
-                  f"retłumaczenie z PL, świeży cache).")
 
     for kod in kody:
         nazwa_pl = MAPA_JEZYKOW[kod]
@@ -1623,19 +1344,6 @@ def main() -> int:
         print(f"\n========== {kod.upper()} ({nazwa_pl} / {nazwa_natywna}) ==========")
         wszystko_ok = True
         for nazwa_pliku, id_szablonu, sekcje_pl in szablony:
-            input_krytyki: dict[str, str] | None = None
-            kl_filtru = klucze_filtru
-            if args.input:
-                prefix = f"{kod}/{nazwa_pliku}/"
-                input_krytyki = {h[len(prefix):]: c for h, c in wpisy_input.items()
-                                 if h.startswith(prefix)}
-                if not input_krytyki:
-                    continue   # input.log nie ma wpisów dla tego (kod, plik)
-                kl_filtru = list(input_krytyki.keys())
-                for k in kl_filtru:
-                    if f"{prefix}{k}" not in prior_output_keys:
-                        print(f"⚠️  {kod}/{nazwa_pliku} '{k}': not in the previous output.log "
-                              f"(the AI did not generate for it last time) — critique applied anyway.")
             ok = tlumacz_szablon(
                 kod,
                 nazwa_pl,
@@ -1647,28 +1355,15 @@ def main() -> int:
                 skip_existing=args.skip_existing,
                 dry_run=args.dry_run,
                 model=args.model,
-                klucze_filtru=kl_filtru,
-                retry=args.retry,
-                input_krytyki=input_krytyki,
-                pelne_tlumaczenie=pelne_tlumaczenie,
+                klucze_filtru=klucze_filtru,
             )
             if not ok:
                 wszystko_ok = False
-            elif pelne_tlumaczenie and not args.dry_run:
+            elif not args.dry_run:
                 wytworzone_drafty.append((kod, nazwa_pliku))
         (sukcesy if wszystko_ok else porazki).append(kod)
 
-    # --input: skonsumowany input.log kasujemy (pętla ograniczona — bez kotka-myszki;
-    # output.log zawiera już NOWE meta tego runu do ewentualnej kolejnej rundy).
-    if args.input and not args.dry_run:
-        try:
-            INPUT_LOG.unlink()
-            print(f"\n🧹 input.log skonsumowany i usunięty. Nowe meta w output.log "
-                  f"(kolejna runda: przeczytaj, dopisz krytykę, --input ponownie).")
-        except OSError:
-            pass
-
-    if pelne_tlumaczenie and not args.dry_run:
+    if not args.dry_run:
         # Post-processor: detektor PL-leaków na świeżych draftach — funnel dla
         # recenzenta (zwł. nie-polskojęzycznego), doklejany do checklisty.
         print("\n🔎 DRAFT: skan audyt_leakow na wytworzonych draftach…")

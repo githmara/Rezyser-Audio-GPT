@@ -703,7 +703,6 @@ def tlumacz_jezyk(
     dry_run: bool,
     model: str,
     klucze: list[str] | None = None,
-    pelne_tlumaczenie: bool = True,
 ) -> bool:
     """Pełen pipeline dla jednego języka. Zwraca True przy sukcesie.
 
@@ -724,10 +723,10 @@ def tlumacz_jezyk(
         print(f"❌ {kod}: missing {cel.relative_to(ROOT)} — run first without --klucz.")
         return False
 
-    # Status finalizacji (od v18.6): pełne tłumaczenie ZAWSZE ląduje jako draft
-    # do recenzji (kanon zdobywa się WYŁĄCZNIE przez --finalizuj). Chirurgiczny
-    # update (--klucz) NIE zmienia statusu — zachowuje dotychczasowy nagłówek.
-    tryb_draft = True if pelne_tlumaczenie else przeglad_tlumaczen.czy_plik_jest_draftem(cel)
+    # Status finalizacji (od refaktoru 18.x): KAŻDE tłumaczenie — pełne ORAZ
+    # chirurgiczne (--klucz) — ZAWSZE ląduje jako draft do recenzji. Kanoniczny
+    # nagłówek zdobywa się WYŁĄCZNIE przez --finalizuj po przeglądzie wg checklisty.
+    tryb_draft = True
 
     # --- Krok 1: tokenizacja per-liść -----------------------------------------
     liscie_tok: list[tuple[int, str]] = []
@@ -922,8 +921,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
         default="claude-sonnet-4-6",
         help="Anthropic Claude model used for translation (default: claude-sonnet-4-6).",
     )
-    # NB (od v18.6): flaga `--draft` została USUNIĘTA. Pełne tłumaczenie (bez
-    # --klucz) ZAWSZE ląduje jako draft do recenzji + emituje checklistę
+    # NB (od refaktoru 18.x): KAŻDE tłumaczenie — pełne ORAZ chirurgiczne
+    # (--klucz) — ZAWSZE ląduje jako draft do recenzji + emituje checklistę
     # `skrypty/przeglad_ui.md`. Kanoniczny nagłówek „do not edit manually"
     # zdobywa się WYŁĄCZNIE przez --finalizuj po recenzji.
     parser.add_argument(
@@ -1043,11 +1042,6 @@ def main() -> int:
 
     klient: Any = None if args.dry_run else _zainicjuj_klienta_anthropic()
 
-    # Pełne tłumaczenie (bez --klucz) ⇒ ścieżka draft + checklista przeglądu.
-    # Chirurgiczny update (--klucz) zachowuje status finalizacji pliku docelowego
-    # (patrz `tlumacz_jezyk`/`przeglad_tlumaczen.czy_plik_jest_draftem`).
-    pelne_tlumaczenie = not args.klucz
-
     sukcesy: list[str] = []
     porazki: list[str] = []
     wytworzone_drafty: list[tuple[str, str]] = []
@@ -1065,13 +1059,12 @@ def main() -> int:
             dry_run=args.dry_run,
             model=args.model,
             klucze=klucze_filtru,
-            pelne_tlumaczenie=pelne_tlumaczenie,
         )
         (sukcesy if ok else porazki).append(kod)
-        if ok and pelne_tlumaczenie and not args.dry_run:
+        if ok and not args.dry_run:
             wytworzone_drafty.append((kod, NAZWA_UI))
 
-    if pelne_tlumaczenie and not args.dry_run:
+    if not args.dry_run:
         sciezka_prompt = przeglad_tlumaczen.zapisz_prompt_przegladu(
             "buduj_wielojezyczne_ui.py", wytworzone_drafty, ROOT,
         )
