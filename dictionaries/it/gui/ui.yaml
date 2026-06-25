@@ -1334,9 +1334,9 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloccati; imposta EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 per sbloccarli)
 bot:
   closure:
-    Lumi: "Ciao!\n\nLa neve si è posata e la correzione è arrivata! Tutto ciò che hai chiesto è appena atterrato nell'ultima versione del Regista Audio AI.\n\nPrendi l'aggiornamento qui: {link}\n\nChiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n— Lumi"
+    Lumi: "Ciao!\n\nLa neve si è posata e la correzione è arrivata! Tutto ciò che hai chiesto è appena atterrato nell'ultima versione del Regista Audio GPT.\n\nPrendi l'aggiornamento qui: {link}\n\nChiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n— Lumi"
     Vieno: "Salve.\n\nI venti del Nord hanno portato notizia che la tua richiesta ha trovato il suo posto nella nuova versione. La visione si è manifestata.\n\nL'ultima versione ti aspetta qui: {link}\n\nChiudo questo cerchio — la questione ha raggiunto la sua fine.\n— Vieno"
-    Katla: "Ehi!\n\nForgiata nel fuoco vulcanico e ancora rovente! La tua richiesta è stata risolta nell'ultima versione del Regista Audio AI.\n\nAcchiappala qui: {link}\n\nChiudo la segnalazione — saluti vulcanici!\n— Katla"
+    Katla: "Ehi!\n\nForgiata nel fuoco vulcanico e ancora rovente! La tua richiesta è stata risolta nell'ultima versione del Regista Audio GPT.\n\nAcchiappala qui: {link}\n\nChiudo la segnalazione — saluti vulcanici!\n— Katla"
   answered:
     Lumi: "Ciao!\n\nUna notizia dal Centro è giunta al Nord — una risposta per te. Te la trasmetto esattamente come è stata formulata:\n\n{maintainer_answer}\n\nChiudo la segnalazione — la neve si è posata su questa faccenda. Saluti gelidi!\n— Lumi"
     Vieno: "Salve.\n\nI venti del Nord hanno portato parole di risposta dal Centro. Te le riferisco intatte:\n\n{maintainer_answer}\n\nChiudo questo cerchio — la domanda ha raggiunto la sua fine.\n— Vieno"

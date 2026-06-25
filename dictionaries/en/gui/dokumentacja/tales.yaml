@@ -14,7 +14,7 @@
 id: tales
 tresc:
   naglowek: |
-    Audio Director GPT — Interactive Stories Module ({app.wersja})
+    Reżyser Audio GPT — Interactive Stories Module ({app.wersja})
 
     The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
@@ -22,51 +22,51 @@ tresc:
 
     You can open the panel with the "{main.btn.opowiesci}" button on the toolbar or the Ctrl+5 keyboard shortcut.
   krok_1_tryby_gry: |
-    STEP 1: Three Game Modes — Choose Your Play Style
+    STEP 1: Three game modes — choose your playstyle
 
-    Just below the game title bar, you'll find a mode selection box (RadioBox). The mode determines how the narrative engine engages in dialogue with you:
+    Just below the game name bar you will find the mode selector. The mode determines how the narrative engine conducts its dialogue with you:
 
-    FREE MODE — you enter any action in free text ("I'll try to open the door," "I ask the guard for directions," "I escape through the back stairs"). The narrative engine may suggest 1-3 options, but these are just hints — not mandatory paths. The most free-form mode, recommended for experienced players improvising their own story.
+    FREE MODE — you type any action as free text ("I'll try to open the door", "I ask the guard for directions", "I escape down the back stairs"). The narrative engine may suggest 1–3 prompts, but these are hints only — not a mandatory path. The most open-ended mode, recommended for experienced players improvising their own story.
 
-    CHOICE MODE — each turn ends with 3-5 numbered options A-E in the form of clickable buttons. Each choice is a specific action you can take. You can also enter your own action in free text — the engine will match it to the closest semantic choice. The most intuitive mode for visually impaired players: NVDA will read all options to you, you can tab between them, and press Enter to confirm.
+    CHOICE MODE — each turn ends with 3–5 numbered options A–E presented as clickable buttons. Each option is a specific action you can take. You can also type your own action as free text — the engine will match it to the closest option semantically. The most intuitive mode for blind players: NVDA will read all options aloud, you Tab between them, and Enter confirms your selection.
 
-    LESSER EVIL MODE — similar to Choice Mode, but each of the 3-5 options is morally, physically, or strategically disadvantageous. No "neutral" option, no happy ending in this turn. A mode for fans of dark fiction in the style of "Tales of Consequence" or moral dramas.
+    LESSER EVIL MODE — like Choice Mode, but each of the 3–5 options is unfavorable — morally, physically, or strategically. There is no "neutral" option, no happy ending in that turn. A mode for fans of dark fiction in the spirit of "Tales of Consequence" or moral dramas.
 
-    Vial in Lesser Evil Mode (from v15.2): after four turns of play, an additional, ZERO-numbered option "Uncork the vial" appears in the choice field — and remains there for the rest of the game as a reusable choice (it doesn't disappear after use, you can reach for it repeatedly). The vial is a "desperate rescue" option, but its effect is intentionally unpredictable and the more dramatically severe, the rarer the beneficial result: in about 60% of cases, the vial's contents are harmful (poisoning, injuring, blinding), in 30% it causes perception or spirit disturbance (hallucinations, altered speech, panic), and only in 10% it proves rarely beneficial (temporary enhancement, helpful spirit, key information). The distribution is enforced by Python (`random.choices` on the application side), the LLM receives a ready seed `{category, description}` and merely narrationalizes it — the model cannot "invent" a salvific outcome beyond the draw. Thanks to this, the vial NEVER becomes a deus ex machina: even reaching for it in a moment of extreme despair usually worsens the situation. The choice of its narrative form (whether the vial definitively shatters or is put back in the belt) belongs to the narrative engine — sometimes after the first of the 60%-harmful doses, you never return.
+    The vial in Lesser Evil mode (from v15.2): after four turns of play, an additional, ZERO-numbered option "Uncork the vial" appears in the choice field — and remains there until the end of the game as a reusable choice (it does not disappear after use; you may reach for it multiple times). The vial is a "desperate rescue" option, but its effect is deliberately unpredictable and all the more dramatically weighty the rarer the result it yields: in approximately 60% of cases the contents of the vial are harmful (poisoning, wounding, blinding), in 30% it induces a perceptual disturbance or a spirit (hallucinations, altered speech, panic), and only in 10% of cases does it prove rarely beneficial (a momentary boost, a helpful spirit, a crucial piece of information). The distribution is enforced by Python (`random.choices` on the application side); the LLM receives a ready-made seed `{kategoria, opis}` and merely narrates it — the model has no way to "invent" a saving effect outside of the draw. As a result, the vial NEVER becomes a deus ex machina: even reaching for it in a moment of extreme hopelessness usually makes the situation worse. The choice of its narrative form (whether the vial definitively shatters or is tucked back into a belt) belongs to the narrative engine — sometimes after the first of the 60%-harmful doses you will never return.
 
-    The mode can be changed during the game, but only through the emergency "Edit game mode…" button next to the RadioBox (from v15.2.3) — the RadioBox itself is frozen on the locked-in mode immediately after creating or loading a game, analogous to the Director's protection. The button opens a modal dialog with a warning; the typical use of this loophole is a situation in which the AI in Choices or Lesser Evil Mode stubbornly generates further dilemmas instead of ending the story — switching to Free Mode then allows the player to describe the final scene themselves. If you want to start a second game in a different tonality, simply type a new game name in the name field — the RadioBox will unlock by itself, because the application recognizes you are preparing a fresh project. Note: the vial is a feature exclusive to Lesser Evil Mode — when switching (through the loophole) in the same game to Choices or Free Mode, its existence and turn counter remain preserved in the game state, but until you return to Lesser Evil, the "Uncork the vial" option will not be displayed.
+    The mode can be changed during the game, but only via the emergency button "Edit game mode…" next to the mode selector (from v15.2.3) — the selector itself is frozen on the established mode immediately after a game is created or loaded, analogously to the lock in the Director. The button opens a modal dialog with a warning; the typical use of this escape hatch is a situation in which the AI in Choice Mode or Lesser Evil Mode stubbornly generates further dilemmas instead of ending the story — switching to Free Mode then allows the player to describe the final scene themselves. If you want to start a second game in a different tone, simply type a new game name in the name field — the mode selector will unlock on its own, because the application recognizes that you are preparing a fresh project. Note: the vial is a feature exclusive to Lesser Evil Mode — when switching (through the escape hatch) within the same game to Choice Mode or Free Mode, its existence and the turn counter are preserved in the game state, but as long as you do not return to Lesser Evil Mode, the "Uncork the vial" option will not be displayed.
   krok_2_quick_start: |
     STEP 2: Quick Start — ready-made opening scenarios
 
-    Below the game name field, you'll find a second row labeled "{opowiesci.lbl_quick_start}" with a dropdown selection (wx.Choice). The default position is "{opowiesci.quick_start_wlasna}" — the engine will invent the world based on your first action.
+    Below the game name field you will find a second row labeled "{opowiesci.lbl_quick_start}" with a dropdown list. The default position is "{opowiesci.quick_start_wlasna}" — the engine will invent the world on its own based on your first action.
 
-    However, you can choose one of five ready-made presets to immediately immerse yourself in a specific world:
+    You can, however, choose one of five ready-made presets to immediately immerse yourself in a specific world:
 
-    POST-APOCALYPTIC SF — a century after an ecological disaster. The remnants of humanity in shelters under the Świętokrzyskie Mountains. You are a young courier from the Mine Clan with your first serious assignment. Default mode: Choices.
+    POST-APOCALYPTIC SF — a century after an ecological catastrophe. The remnants of humanity in shelters beneath the Świętokrzyskie Mountains. You are a young courier of the Sztolnia Clan with your first serious assignment. Default mode: Choices.
 
-    DARK FANTASY — the border of the Kingdom of Three Streams, the ninth year of a religious war. You are a junior Inquisitor on the trail of a village where someone is protecting a possessed child. Default mode: Lesser Evil.
+    DARK FANTASY — the borderlands of the Kingdom of Three Streams, the ninth year of a religious war. You are a junior Inquisitor on the trail of a village where someone is sheltering a possessed child. Default mode: Lesser Evil.
 
-    URBAN FANTASY DETECTIVE — Warsaw 2008, an October evening. You are a private detective who sees ghosts. A client wants to find her husband who disappeared under the Royal Castle. Default mode: Choices.
+    URBAN FANTASY DETECTIVE — Warsaw, 2008, an October evening. You are a private detective who can see ghosts. A female client wants to find her husband who went missing near the Royal Castle. Default mode: Choices.
 
-    COSMIC HORROR — the year 2247, a research station orbiting a neutron star. You wake up from hibernation without the captain — and without any traces that the captain ever existed. Default mode: Free (Lovecraftian atmosphere favors improvisation).
+    COSMIC HORROR — the year 2247, a research station orbiting a neutron star. You wake from hibernation without a captain — and without any trace that the captain ever existed. Default mode: Free (a Lovecraftian atmosphere rewards improvisation).
 
-    ROMANTIC COMEDY OF MANNERS — Saska Kępa, April 2024, a small café faces closure. You are a barista-waitress whose owner tells you to "be nice" to a shy editor you've long wanted to approach yourself. Default mode: Free.
+    ROMANTIC COMEDY DRAMA — Saska Kępa, April 2024, a small café facing closure. You are a barista-waitress whose owner tells you to "be nice" to a shy editor you have long wanted to approach yourself. Default mode: Free.
 
-    After selecting a preset, click "{opowiesci.btn_nowa_gra_label}" — the engine will inject a short description of the world and the hero, set the default game mode (you can override it with the RadioBox before clicking "New Game"). The first LLM turn will play out the opening scene.
+    After selecting a preset, click "{opowiesci.btn_nowa_gra_label}" — the engine will inject a brief description of the world and the protagonist into itself, set the default game mode (you can override it with the mode selection field before clicking "New Game"). The first LLM turn will play out the opening scene.
   krok_3_pierwsza_gra: |
-    STEP 3: First game from scratch — without a preset
+    STEP 3: First game from scratch — no preset
 
-    If you prefer complete freedom, leave "{opowiesci.quick_start_wlasna}" in the Quick Start field and prepare to enter the first action manually.
+    If you prefer complete freedom, leave "{opowiesci.quick_start_wlasna}" in the Quick Start field and get ready to type the first action manually.
 
-    1. Enter the name of the game in the "{opowiesci.lbl_nazwa_gry}" bar (e.g., "my_adventure_1") — under this name, the narrative, state, and log files will be saved.
-    2. Choose the mode (Free/Choices/Lesser Evil).
-    3. Click "{opowiesci.btn_nowa_gra_label}". The application will create 2 files: game state (.game.json) and mode metadata (.mode). The narrative file (.txt) will be created after the first turn.
-    4. In the "{opowiesci.lbl_akcja}" field at the bottom of the panel, enter the first action, e.g., "I wake up in an unknown room." Click "{opowiesci.btn_wyslij_label}". The narrative engine will open the world based on your action — room description, sounds, characters, initial decisions.
-    5. Each turn will be automatically saved — you can close the application at any time and load the game later with the "{opowiesci.btn_wczytaj_label}" button.
+    1. Enter the game name in the "{opowiesci.lbl_nazwa_gry}" bar (e.g. "moja_przygoda_1") — the narration, state, and log files will be saved under this name.
+    2. Select the mode (Freeform/Choices/Lesser Evil).
+    3. Click "{opowiesci.btn_nowa_gra_label}". The application will create a new game and from this point on will automatically save its state. The file with the finished narration will be created after the first turn.
+    4. In the "{opowiesci.lbl_akcja}" field at the bottom of the panel, type the first action, e.g. "I wake up in an unknown room". Click "{opowiesci.btn_wyslij_label}". The narrative engine will open the world based on your action — a description of the room, sounds, characters, and the first decisions.
+    5. Each turn will be saved automatically — you can close the application at any time and reload the game later using the "{opowiesci.btn_wczytaj_label}" button.
   krok_4_zasady_swiata: |
     STEP 4: World Rules — custom rules that the engine respects throughout the game
 
-    From version 15.1, you will find a "{opowiesci.btn_zasady_swiata_label}" button above the narration field. It opens a separate editing window with a multiline field where you can enter any rules — phonetic, mechanical, or dramaturgical — that the narrative engine will respect in every subsequent turn of this particular game. The rules are saved together with the game state (.game.json), so loading the game preserves them unchanged.
+    From version 15.1, you will find a "{opowiesci.btn_zasady_swiata_label}" button above the narration field. It opens a separate editing window with a multiline field where you can enter any rules — phonetic, mechanical, or dramaturgical — that the narrative engine will respect in every subsequent turn of this particular game. The rules are saved together with the game state, so loading the game preserves them unchanged.
 
     Three typical applications of world rules:
 
@@ -82,84 +82,83 @@ tresc:
   krok_5_slash_komendy: |
     STEP 5: Slash commands — quick actions without API
 
-    In the action field you can type a command starting with a slash `/` at any time. Commands are local (they do not cost any API calls) and work independently of the game mode. Both Polish and English variants are accepted:
+    In the action field, you can type a command starting with a slash `/` at any time. Commands are local (they do not cost any API calls) and work independently of the game mode. Both Polish and English variants are accepted:
 
-    /zapisz, /save — forces a manual save of the game state. Auto-save runs after every turn, so this command is mainly for peace of mind before closing the application.
+    /zapisz, /save — forces a manual save of the game state. Autosave runs after every turn, so this command is mainly for peace of mind before closing the application.
 
-    /wczytaj, /load — opens a game selection dialog with a list of available names (from v15.2.3, instead of the system file dialog — a direct list of saved games from the runtime/opowiesci/ folder, detected by the presence of a .game.json file). NVDA reads the list naturally; a blind player does not need to navigate the system file dialog. After selecting, the game name, mode, and full narrative are restored — you can continue from the turn where you left off. The "{opowiesci.btn_wczytaj_label}" button behaves identically.
+    /wczytaj, /load — opens a game selection dialog with a list of available names (from v15.2.3, instead of the system file dialog — a direct list of all your saved games). NVDA reads the list naturally; a blind player does not need to navigate the system file dialog. After selecting, the game name, mode, and full narrative are restored — you can continue from the turn where you left off. The "{opowiesci.btn_wczytaj_label}" button behaves identically.
 
-    The narrative engine for all Stories modes uses a single, shared model (by default and recommended: Anthropic Claude Sonnet 4.6; from v18.4, an advanced user can specify a custom endpoint compatible with OpenAI — see the main manual, STEP 2B). A more powerful model strictly adheres to the rules of the world — this is especially important in Lesser Evil mode, where every option must remain genuinely unfavorable.
+    The narrative engine for all Stories modes uses a single, shared model (by default and recommended: Anthropic Claude Sonnet 4.6; from v18.4, an advanced user can specify a custom endpoint compatible with OpenAI — see the main manual, STEP 2B). A more powerful model strictly adheres to the rules of the world — this is especially important in the Lesser Evil mode, where every option must remain genuinely unfavorable.
 
-    /wizualizuj <opis>, /visualize <opis> — a multisensory description of the current scene. It does not change the game state or propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog; it is NOT appended to the narrative or saved in the audiobook file. Example: "/wizualizuj how the guard looks" or "/wizualizuj the smell of the café".
+    /wizualizuj <opis>, /visualize <opis> — a multisensory description of the current scene. It does not change the game state, does not propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to show the scene with greater depth. The result appears in a separate dialog and is NOT appended to the narrative. Example: "/wizualizuj jak wygląda strażnik" or "/wizualizuj zapach kawiarni".
 
-    /pomoc, /help — displays a dialog window with a list of all available commands. The dialog is read-only and NVDA-friendly — the text field receives focus automatically, and the screen reader immediately reads the entire list without requiring navigation.
+    /pomoc, /help — displays a dialog window with a list of all available commands. The dialog is read-only and NVDA-friendly — the text field receives focus automatically, and the screen reader immediately reads the entire list without any navigation required.
 
-    /koniec, /quit — closes the application (after auto-saving the current turn).
+    /koniec, /quit — closes the application (after autosaving the current turn in progress).
   krok_6_pliki_gry: |
-    STEP 6: Game Files — where to find your data
+    STEP 6: Your files — where to find the finished narration
 
-    Each game produces four files, each in a different folder, with various roles:
+    Only one file matters from your perspective — the finished narration:
 
-    opowiesci/<name>.txt — the full narrative ready for listening as an audiobook. It can be opened in Notepad or loaded into the Audiobook Architect (Converter) to generate a Word file with chapters or timing for ElevenLabs.
+    opowiesci/<nazwa>.txt — the complete narration ready to listen to as an audiobook, in the opowiesci/ folder next to the application. You can open it in Notepad, read it with a screen reader, or load it into the Audiobook Architect (Converter) and generate a Word document with chapters or a timeline for ElevenLabs.
 
-    runtime/opowiesci/<name>.game.json — the full game state: name, mode, active characters, location, inventory, open threads, the last 6 turns in a summarized form. This is the source of truth for loading the game — without this file, you cannot continue.
-
-    runtime/opowiesci/<name>.story.jsonl — the raw log of each turn (player request + model response in JSON). This file is not needed for the game — it is used for debugging or later analysis (e.g., statistics on how many turns the adventure lasted, what threads the LLM introduced).
-
-    runtime/opowiesci/<name>.mode — metadata of the mode number (3=Free, 4=Choices, 5=Lesser Evil). Since v17.4, it lives in its own Stories folder. Previously, the file resided in runtime/skrypty/ together with the Director — with a game and a Director project of the same name, saving one module could silently overwrite the other's mode; now the namespaces are separated, and old files are migrated once upon loading a game.
+    The entire game state — characters, location, equipment, open plot threads, and the history of all turns so far — is managed automatically by the application. It saves the state after every turn in a hidden system folder that you don't need to (and shouldn't) touch. To load a saved game, use the "{opowiesci.btn_wczytaj_label}" button or the /wczytaj command — they will show you a list of all your games by name. This means you can close the application at any time and return to your game later, without worrying about saving anything manually.
   krok_7_pamiec_modelu: |
-    STEP 7: Model Memory Indicator — Why Turns in Old Games Don't Require Manual Work from You
+    STEP 7: Model memory indicator — why turns in old games don't require manual work from you
 
-    Below the mode RadioBox, you will find the model memory indicator — a progress bar (wx.Gauge) with a status description next to it. The indicator shows the percentage of the narrative engine's context window that is filled (a buffer counted up to 128,000 tokens).
+    Below the mode selection field you will find the model memory indicator — a progress bar with a status description next to it. The indicator shows the percentage of the narrative engine's context window fill level (buffer counted up to 128,000 tokens).
 
-    Four levels of fullness:
+    Four fill levels:
 
-    🟢 clean (0%) — the game has just started, no turns saved.
+    🟢 clean (0%) — the game has just started, no saved turns.
     🟢 OK (1-69%) — everything is normal, you can continue without restrictions.
-    ⚠️ warning (70-89%) — the engine automatically generates a summary of previous turns in the background thread. A message "Auto-summarizing context in progress…" will appear — do not send the next turn until the summarization is complete. Upon success, previous turns will be condensed into one summary, the buffer will be freed, and you will receive confirmation "Model memory recovered" with the number of condensed turns.
-    🚨 ALARM (90%+) — auto-summarization did not free the buffer (a rare case after an API failure). Sending the next turn is blocked. Force the game to end with /end, then reload it — the engine will load the state from game.json without the history of recent turns, and the buffer will be fresh.
+    ⚠️ warning (70-89%) — the engine automatically generates a summary of previous turns in the background thread. A message will appear: "Auto-summarizing context in progress…" — do not send the next turn until the summary is complete. After success, the previous turns will be condensed into a single digest, the buffer will be freed, and you will receive a confirmation "Model memory recovered" with the number of condensed turns.
+    🚨 ALARM (90%+) — auto-summarization did not free the buffer (a rare case after an AI connection failure). Sending the next turn is blocked. Force the game to end via /koniec, then reload it — the engine will load the saved game state on its own without the history of the last turns, and the buffer will be fresh.
 
-    In practice, the auto-reduction mechanism is invisible — the player does not feel that anything is happening because the background thread solves the problem before it is noticed. It is only important that you do not send the next turn during auto-summarization (the "{opowiesci.btn_wyslij_label}" button is grayed out then).
+    In practice, the auto-reduction mechanism is invisible — the player does not feel that anything is happening, because the background thread resolves the issue before it is noticed. The only important thing is that you do not send the next turn while auto-summarization is in progress (the "{opowiesci.btn_wyslij_label}" button is grayed out at that time).
   krok_8_cinematic_warning: |
-    STEP 8: Cinematic Meta Warning — dramatic interlude after the 150th turn
+    STEP 8: Cinematic Meta Warning — a dramatic interlude after turn 150
 
-    After 150 turns in a single game, the narrative engine will ONCE insert a "Cinematic Meta Warning" — a meta-narrative dramatic interlude. It will appear in a separate dialogue with a bell sound, directly addressing you in the second person, summarizing achievements, and warning about the significance of the decisions being made.
+    After 150 turns of a single game, the narrative engine will insert a "Cinematic Meta Warning" ONCE — a meta-narrative dramatic interlude. It will appear in a separate dialog with a bell sound, addressing you directly in the second person, summarizing your achievements and warning you about the weight of the decisions you are making.
 
-    The Cinematic Warning is NOT part of the audiobook narration — the .txt filtering engine automatically removes its content (marked with ⚠️🚨⚠️) so that you don't hear meta-commentary about your own game during the audiobook playback. The content is only logged in the .story.jsonl file (for reflection or as a keepsake) and in the GUI dialogue, where you can read it once and continue.
+    The Cinematic Warning is NOT part of the audiobook narration — the application automatically cuts its content from the narration file (marked with ⚠️🚨⚠️ markers), so that during audiobook playback you will not hear a meta-commentary about your own game. You will see it only once, in a separate dialog window, where you can read it and calmly continue playing.
   krok_10_dostepnosc_nvda: |
-    STEP 9: Accessibility (NVDA and screen readers) — designed from the start
+    STEP 9: Accessibility (NVDA and screen readers) — designed from the ground up
 
-    The entire Stories module has been optimized for visually impaired users. Here's what we specifically did:
+    The entire Stories module has been optimized for blind players. Here is what we specifically did:
 
-    LAST TURN FIELD — this is a separate wx.TextCtrl readonly multiline (~140 px height) ABOVE the full narration. After each turn, the field is replaced with a fresh fragment (header "--- Turn N ---" + narration content). NVDA reads it immediately upon focus (auto-focus after a successful turn), without navigating through hundreds of lines of the full story. After loading a saved game, the field shows a SUMMARY of the last saved turn (from the `last_turns` buffer, cut at a sentence boundary to ~1200 characters, so it doesn't break off mid-word) with a prefix informing that the full narration is in the field below.
+    LAST TURN FIELD — this is a separate read-only text field (several lines tall) ABOVE the full narration. After each turn, the field is replaced with a fresh fragment (the header "--- Turn N ---" + narration content). NVDA reads it immediately after focus is acquired (automatically after a successful turn), without navigating through hundreds of lines of the full history. After loading a saved game, the field shows a SUMMARY of the last saved turn (trimmed at a sentence boundary to approximately 1200 characters, so it never cuts off mid-word) with a prefix informing the user that the full narration is in the field below.
 
-    FULL NARRATION FIELD — this is a wx.TextCtrl readonly multiline that grows with each turn. NVDA reads the entire narration linearly, you can navigate with arrows within the text, copy fragments with Ctrl+C. The field is never editable — you modify the story ONLY through a new turn, through the new "Open narration file…" button (since v15.2.3, described below), or by direct editing of the .txt file from the file explorer. This field is synchronized with the `opowiesci/<name>.txt` file, you can treat it as a preview of the audiobook.
+    FULL NARRATION FIELD — this is a scrollable read-only text field that grows after each turn. NVDA reads the entire narration linearly; you can navigate within the text using arrow keys and copy excerpts with Ctrl+C. The field is never editable — you modify the story ONLY by submitting a new turn, using the new "Open narration file…" button (from v15.2.3, described below), or by directly editing the .txt file from File Explorer. This field is synchronized with the file `opowiesci/<nazwa>.txt` and can be treated as an audiobook preview.
 
-    "{opowiesci.btn_otworz_narracje_label}" BUTTON (since v15.2.3) — next to the "New Game"/"Load"/"Save" buttons, a fourth one appears: "Open narration file…". It opens the `opowiesci/<name>.txt` file in the system text editor (Notepad on Windows, TextEdit on macOS, default GUI editor on Linux — analogous to how the Rule Manager opens YAML files or how the home panel opens `golden_key.env`). Typical use-case is an alternative to the "Edit game mode…" loophole → Free: instead of jumping to a different mode to write the finale, you can simply open the .txt file and manually add the closing scene. WARNING ABOUT DIVERGENCE RISK: before opening, the application shows a modal warning dialog, because .txt is ONLY the narration for TTS, while the source of truth of the game state (characters, location, inventory, threads) is a separate `.game.json` file. Editing the .txt does not update the state — the next LLM turn will receive the world from before your edit, so e.g. you may describe in the file that a character died, but in the game state they will still be alive and will appear in the next turn. Use deliberately, ideally only to add the closing scene after which you don't plan further turns anyway.
+    THE "{opowiesci.btn_otworz_narracje_label}" BUTTON (from v15.2.3) — alongside the "New Game" / "Load" / "Save" buttons, a fourth button appears: "Open narration file…". It opens the file `opowiesci/<nazwa>.txt` in the system text editor (Notepad on Windows, TextEdit on macOS, the default GUI editor on Linux — analogously to how the Rule Manager opens YAML files or how the home panel opens `golden_key.env`). A typical use case is as an alternative to the "Edit game mode…" → Free gateway: instead of switching to a different mode to write the ending, you can simply open the .txt file and append the closing scene manually. WARNING ABOUT DESYNC RISK: before opening, the application displays a modal warning dialog, because the .txt file contains ONLY the narration for TTS, while the source of truth for the game state (characters, location, inventory, storylines) is a separate, hidden save file managed by the application itself. Editing the .txt does not update the state — the next LLM turn will receive the world as it was before your edit, so for example you could describe a character dying in the file while they remain alive in the game state and will appear in the next turn. Use this feature deliberately, ideally only to append a final scene after which you do not plan any further turns.
 
-    DYNAMIC CHOICE BUTTONS — in Choices and Lesser Evil modes, each turn creates new wx.Buttons in the choice area. Each has a tooltip read by NVDA ("Choose: go further into the forest"). Tab between them works naturally. Enter on the selected button auto-sends that choice to the narrative engine.
+    DYNAMIC CHOICE BUTTONS — in Choices and Lesser Evil modes, each turn creates new buttons in the choices area. Each has a tooltip read by NVDA ("Choose: continue into the forest"). Tab navigation between them works naturally. Pressing Enter on a focused button automatically sends that choice to the narrative engine.
 
-    HIDING EMPTY AREAS — in Free mode, the choice area is COMPLETELY hidden (wx.Hide), not just grayed out — Tab skips it, NVDA won't include it in the list of elements. This prevents player confusion from falling into an empty placeholder. In modes 4 and 5, the area appears only after successful model response validation (non-empty choice array); model hallucination (empty choices) results in a fallback to free-text without cluttering the interface.
+    HIDING EMPTY AREAS — in Free mode, the choices area is COMPLETELY hidden, not merely grayed out — Tab skips it and NVDA will not include it in the list of elements. This prevents player disorientation from landing on an empty placeholder. In modes 4 and 5, the area appears only after successful validation of the model's response (a non-empty choices array); a model hallucination (empty choices) triggers a fallback to free-text without cluttering the interface.
 
-    AUDIO SIGNALS — each completed turn is signaled by wx.Bell (system bell), followed by automatic focus transfer to the "Last turn" field. NVDA will then read the fresh turn from the beginning, without the need to navigate through the entire previous history.
+    AUDIO SIGNALS — each completed turn is signaled by a system bell, followed by automatic focus transfer to the "Last Turn" field. NVDA will then read the fresh turn from the beginning, without requiring navigation through the entire history so far.
 
-    COLORED MEMORY STATUS — the model memory indicator changes font color (green/orange/red) according to the fill level. For sighted users, this is an additional visual cue; NVDA still reads the status text, so visually impaired users don't miss out on information.
+    COLOR-CODED MEMORY STATUSES — the model memory indicator changes font color (green / orange / red) according to the fill level. For sighted users this is an additional visual signal; NVDA reads the status text regardless, so blind users lose no information.
 
-    KEYBOARD ACCELERATORS — all buttons have a `&` sign before one of the label letters, which activates the Alt+letter accelerator. It works identically to other application modules.
+    KEYBOARD ACCELERATORS — all buttons have an `&` character before one of the letters in their label, which activates an Alt+letter accelerator. This works identically to other modules in the application.
   najczestsze_problemy: |
     Most Common Problems
 
-    Problem: After clicking "{opowiesci.btn_nowa_gra_label}", a message appears saying "No API key".
-    Cause and solution: The golden_key.env file in the main application folder does not have a valid Anthropic key (which powers the Story mode). Return to the start screen (Home button), click "{home.btn_generate}" and follow the instructions (STEP 2 of the main manual).
+    Problem: After clicking "{opowiesci.btn_nowa_gra_label}", the message "No API key" appears.
+    Cause and solution: The golden_key.env file in the application's main folder does not have a valid Anthropic key (this key powers the Stories mode). Go back to the start screen (Home button), click "{home.btn_generate}" and follow the instructions (STEP 2 of the main manual).
 
-    Problem: I am trying to send another turn, but the "{opowiesci.btn_wyslij_label}" button is grayed out.
-    Cause and solution: Auto-summarization of context or Cinematic Warning generation is in progress in the background thread. The memory status will show "Auto-summarization of context in progress…". Wait a few seconds — the button will automatically unlock upon success.
+    Problem: I'm trying to send the next turn, but the "{opowiesci.btn_wyslij_label}" button is grayed out.
+    Cause and solution: Context auto-summarization or Cinematic Warning generation is running in a background thread. The memory status will show "Context auto-summarization in progress…". Wait a few seconds — the button will unlock automatically upon success.
 
-    Problem: The message "Model memory overloaded" blocks the game.
-    Cause and solution: Auto-summarization did not release the buffer (e.g., Anthropic API rate limit). End the game with the /end command or close the application, then reload it — the engine will load only the state from game.json without the history of recent turns.
+    Problem: I clicked a choice, but instead of being sent, its content (without the letter A-E) ended up in the action field.
+    Cause and solution: This is the same situation as the problem above — the "{opowiesci.btn_wyslij_label}" button was momentarily grayed out at that moment (auto-summarization or Cinematic Warning was running in the background). Normally, clicking a choice is a ready move and it goes straight to the engine; however, when sending is temporarily blocked, the application doesn't lose your choice — it instead types its content into the action field and places the cursor there. You then have two options. First: wait a few seconds for the button to unlock and send the choice as-is — treating it as a ready draft (this is the default behavior from version 15.1 and later). Second: completely replace the content in the field with your own — this is a particularly good moment right after a Cinematic Meta Warning, when instead of clicking the next dilemma you prefer to type a clear command to wrap up the story and open threads, if you deem it appropriate. After editing, click "{opowiesci.btn_wyslij_label}" (or press Enter).
 
-    Problem: In Choice mode, the engine did not generate buttons, even though I expected them.
-    Cause and solution: Model hallucination — despite mode 4, the LLM returned an empty array of choices. The application deliberately hides the choice area (instead of showing an empty placeholder) and allows continuation with free-text. The next turn will likely generate choices correctly.
+    Problem: The message "Model memory overloaded" is blocking the game.
+    Cause and solution: Auto-summarization did not free up the buffer (e.g., a temporary request limit on the AI provider's side). End the game with the /koniec command or close the application, then reload it — the engine will load the saved game state on its own, without the history of the last turns.
 
-    Problem: The .game.json and .story.jsonl files are not visible on the desktop.
-    Cause and solution: This is intentional — runtime/ is a system folder for regular users, invisible from the file explorer. The narrative file (.txt) goes to opowiesci/ — you will find it there.
+    Problem: In Choices mode, the engine did not generate buttons, even though I expected them.
+    Cause and solution: Model hallucination — despite mode 4, the LLM returned an empty choices array. The application intentionally hides the choices area in this case (instead of showing an empty placeholder) and allows you to continue with free text. The next turn will most likely generate choices correctly.
+
+    Problem: I can't see any save files for my game.
+    Cause and solution: This is by design — the application keeps the game state in a hidden system folder and manages it itself, so you don't need to look for it or save anything manually. The only file you actually need is the finished narrative in the opowiesci/ folder next to the application — you'll find it there. You can load saved games using the "{opowiesci.btn_wczytaj_label}" button or the /wczytaj command.

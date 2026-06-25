@@ -14,7 +14,7 @@
 id: manual
 tresc:
   naglowek: |
-    Handbók Audio AI leikstjórans - Heildarleiðarvísir (Útgáfa {app.wersja})
+    Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa {app.wersja})
 
     Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
@@ -92,122 +92,125 @@ tresc:
 
     Ábending: Eftir endurræsingu mun forritið athuga skrána og í hlutanum "{home.heading_system_check}" sýna stöðu lykillsins. Hún verður að vera græn til að allir AI-einingar séu tilbúnar til notkunar. Ef lykillinn vantar eða er rangur, mun forritið gefa skýrt til kynna og leyfa þér að opna textaritil til að laga villuna fljótt.
   krok_3_glowne_studio: |
-    SKREF 3: Aðalstúdíó Leikstjórans
+    SKREF 3: Aðal Leikstjóraverkstæðið
 
-    Þetta er stjórnstöðin þín til að skapa sögur og skrifa handrit. Fara í það með því að smella á "{main.btn.rezyser}" hnappinn á hnappastikunni eða velja Verkfæri → {main.menu.rezyser} úr valmyndinni (flýtilykill: Ctrl+1).
-
-
-
-    MIKILVÆGT: Skráarsnið verkefna — aftur til .txt
-
-    Í útgáfu 7 voru verkefnaskrár vistaðar á Markdown (.md) sniði, t.d. skrypty/znieczulica.md. Þetta var meðvitað tilraun — .md sniðið átti að vera sálfræðileg hindrun fyrir ó tæknilega notendur, til að letja þá frá því að opna og breyta skránni handvirkt í ritli (og þar með til að koma í veg fyrir að skemma uppbyggingu fyrirsagna fyrir slysni).
-
-    Tilraunin mistókst. AI brýtur oft eitt af grundvallarreglunum (meira um það á eftir). Þess vegna var í útgáfu 8 farið aftur í einfaldar .txt skrár — sem eru meira innsæjar og læsilegar fyrir alla. Til dæmis verður verkefni með nafnið "znieczulica" nú vistað sem skrypty/znieczulica.txt, og samantekt þess sem skrypty/znieczulica_streszczenie.txt. Þetta gerir öllum auðveldara að gera leikstjórnarbreytingar eða klippingar á textanum í rauntíma.
+    Þetta er stjórnmiðstöð þín fyrir uppfinning sagna og skrifun handrita. Farðu þangað með því að smella á hnappinn „{main.btn.rezyser}" á hnappaslánni eða velja Verkfæri → {main.menu.rezyser} úr valmyndinni (flýtilykill: Ctrl+1).
 
 
-    ⚠️ KRÍTÍSK REGLA KLIPPINGARMANNSINS (LESTU ÁÐUR EN ÞÚ BYRJAR!) ⚠️
 
-    Öll handritin þín og bækurnar sem þú býrð til eru vistuð í venjulegum textaskrám (.txt), sem þú getur auðveldlega opnað í ritli.
+    MIKILVÆGT: Skráarsnið verkefna — aftur í .txt
 
-    Sem leikstjóri hefur þú FULLAN RÉTT (og jafnvel skyldu) til að breyta þessari skrá! Ef gervigreindin fer út af sporinu og t.d. leysir vandamál persóna í lokin á búnu broti, opnaðu skrána, fjarlægðu síðustu línurnar og skildu textann eftir á spennandi stað, og smelltu síðan á "{rezyser.btn_przeladuj_label}" til að samstilla minnið við breyttu skránni, og "{rezyser.btn_wyslij_label}" til að halda áfram.
+    Í útgáfu 7 vistust verkefnaskrár á Markdown-sniði (.md), t.d. skrypty/znieczulica.md. Þetta var meðvituð tilraun — .md-sniðið átti að vera sálfræðileg hindrun fyrir ótæknilægar manneskjur, til að letja þær frá því að opna og breyta skránni handvirkt í Notepad (og skemma þannig uppbyggingarhausar fyrir slysni).
 
-    🔴 HINS VEGAR - HVAÐ ÞÚ MÁTT EKKI SNERTA:
-
-    Aldrei breyta, fjarlægja eða breyta línum sem innihalda uppbyggingu (t.d. Þáttur 1, Atriði 2, Kafli 1, Formáli). Ef þú skemmir þessar fyrirsagnir:
-    1. Mun sagan þín brotna í skjálesurum (NVDA).
-    2. Hljóðbókararkitektinn, og þar með einnig Studio Eleven Labs, mun ekki geta skipt bókinni þinni rétt niður í lestrarbrot.
-    3. Innri Breytir forritsins mun ekki búa til rétt efnisyfirlit í Word skrá eða á tímalínu í ElevenLabs.
-
-    Breyttu samtölum, klipptu aðgerðir, en skildu uppbygginguna eftir!
+    Tilraunin tókst ekki. Gervigreind brýtur oft með dónalegum hætti eitt af grundvallarbönnunum (meira um það bráðum). Af þeim sökum var í útgáfu 8 snúið aftur í einfaldar .txt-skrár — þær eru innsæilegri og læsilegri fyrir alla. Til dæmis mun verkefni að nafni „znieczulica" nú vistast sem skrypty/znieczulica.txt og samantekt þess sem skrypty/znieczulica_streszczenie.txt. Þetta gerir öllum auðveldara að gera leikstjóralegar leiðréttingar eða skera í textann jafnóðum.
 
 
-    Hvernig á að nota Leikstjórn?
+    ⚠️ MIKILVÆG REGLA KLIPPISTJÓRANS (LESTU ÁÐUR EN ÞÚ BYRJAR!) ⚠️
 
-    - Heimabók (hliðarslá til vinstri): Hér slærðu inn reglur alheimsins. Hvert verkefni hefur nú sína eigin Heimabók tengda við skráarnafnið — ef sagan þín er t.d. emilia_heist_audiobook.txt, verður Heimabókin vistuð sem skrypty/emilia_heist_audiobook.md. Þess vegna skiptir röðin máli: fyrst slærðu inn nafn verkefnisskrárinnar í reitinn "Nafn verkefnisskrár", og þá geturðu vistað Heimabókina. Hnappurinn "{rezyser.btn_zapisz_ksiege_label}" er áfram gráður þar til þú gefur upp nafn. Að hlaða inn núverandi verkefni með hnappnum "{rezyser.btn_wczytaj_label}" mun sjálfkrafa hlaða inn samsvarandi .md skrá — þú þarft ekki að gera neitt handvirkt. Athugið: Án útfylltrar Heimabókar mun forritið loka fyrir að senda fyrirspurnir til AI — þetta er viljandi öryggisráðstöfun sem verndar þig frá því að búa til texta án nokkurra reglna.
-    - Langtímaminni (hliðarslá til vinstri): Annar reiturinn á hliðarslánni. Hér skráir AI sjálfkrafa samantekt sögunnar þegar minnið byrjar að fyllast. Þú getur einnig slegið inn þínar eigin athugasemdir handvirkt — líkanið mun líta á þær sem "hvað ég veit nú þegar" áður en það les núverandi atriði. SÖGULEG GLUFA (lagfærð í v15.5): áður, ef þú slóst inn mjög stutta athugasemd hér og smelltir á „Vista Samantekt" áður en eitthvað marktækt var í frásagnarskránni, þá hlaðaði forritið forgangsraðað inn samantektina og SLEPPTI allri sögunni — líkanið fékk þá aðeins Heimabókina og eina setningu, án samhengis um tón og síðustu atriði. Frá v15.5 er innhleðsla snjöll: ef öll sagan kemst fyrir í samhengisglugganum, er hún hlaðin í heild sinni (og óþarfa gömul samantekt eytt), svo líkanið missir ekki samhengi. Og eftir handvirka breytingu á frásagnarskránni í ritli skaltu nota nýja hnappinn „{rezyser.btn_przeladuj_label}" (frá v15.5), sem með einu smelli samstillir innra minni við diskinn; til að opna skrána í ritli er enn notað „{rezyser.btn_otworz_narracje_label}".
-    - Hugstormunarhamur: Sláðu inn lauslega hugmynd, og AI mun gefa þér 3 valkosti fyrir þróun sögunnar. Fyrir hvern valkost mun það strax búa til tilbúinn blokk "--- SKISSU PROMPT ---". Eftir að hafa valið einn þeirra, límdu þennan prompt í Handrits- eða Hljóðbókarham og bættu við athugasemdum eða upplýsingum fyrir líkanið. Söguminnið breytist ekki meðan á Hugstormun stendur — þú getur prófað án áhættu!
-    - Hrár Handritshamur (frá v16.0 — leikhúslestrar): Hér límir þú inn "Skissu Prompt" sem var búinn til í Hugstormun. AI mun skrifa langa frásögn með samtölum: frásögn (umhverfi, tími, aðgerð) í merkjum [Frásagnarmaður: ...] og setningar persóna í merkjum [Nafn: tilfinning]. Engin hljóðáhrif — samhengi kemur frá frásagnarmanninum í orðum. Textinn er sjálfkrafa bætt við skrána þína (t.d. nýtt_atriði.txt) í skráarsafninu skrypty/. Þú getur síðan breytt þessu tilbúna handriti í fjölradda hljóðbók (brú til ElevenLabs Studio — sérstakur kafli neðar).
-    - Hefðbundinn Hljóðbókarhamur: Hamur fyrir rithöfunda. AI býr til hreina bókmenntalega prósa — engin merki, engin hljóðfræði, klassísk samtöl fléttuð inn í frásögnina. Textinn er bætt við skrána á sama hátt og í Handritsham.
-    - Sjálfvirk persónusköpun: Handritið er forritað til að búa sjálfkrafa til ný merki [Speaker], ef sagan krefst nýrrar persónu. Ábending: Ef AI býr til áhugaverða persónu, afritaðu merkið hennar og límdu það í Heimabókina, svo líkanið muni hana til frambúðar!
+    Öll þín mynduð handrit og bækur vistast í venjulegum textaskrám (.txt) sem þú getur auðveldlega opnað í Notepad.
 
-    Verkefnastjórnun — þrír aðgerðahnappir:
-    - {rezyser.btn_wczytaj_label}: Hleður inn núverandi verkefni í minni. Aðgengilegt þegar núverandi minni er tómt. Frá útgáfu 15.2.3 styður tvær leiðir: ef verkefnaheiti er tómt, opnast valgluggi með lista yfir öll verkefni sem finnast í skráarsafninu skrypty/ (sleppir samantektarskrám) — NVDA les listann náttúrulega, notandinn þarf ekki að muna og slá inn nafnið með lyklaborðinu. Ef verkefnaheiti er útfyllt, reynir forritið strax að hlaða inn verkefni með því nafni (leið sérfræðings: Enter í verkefnaheiti eða smell eftir að hafa slegið inn úr minni).
-    - {rezyser.btn_hard_reset_label}: Hreinsar verkefni alveg. Eyðir sögu, samantekt, Heimabók og núllstillir alla teljara. Notaðu við breytingu á verkefni eða nýrri sögu.
-    - {rezyser.btn_otworz_narracje_label} (frá v15.2.3): Neyðarbreyting á frásagnarskrá í kerfisritli. Krefst útfyllts verkefnaheitis. Forritið opnar skrypty/<nazwa>.txt í Notepad (Windows), TextEdit (macOS) eða sjálfgefnum GUI ritli (Linux). Dæmigerð atburðarás: (a) AI lokar ekki atriði og þú vilt bæta við endi handvirkt; (b) þú hefur hlaðið inn verkefni með samantekt og vilt afrita síðustu atriði í Langtímaminni, svo líkanið hafi fullan tónsamhengi (arkitektónísk glufa lýst hér að ofan); (c) þú vilt gera klippingu á texta í miðjum kafla, sem forritsvélin styður ekki innfæddlega.
-    - {rezyser.btn_przeladuj_label} (frá v15.5, endurbyggt í v17.6): Endurhleður ALLT verkefnið af disknum eftir handvirka breytingu á frásagnarskrá — þetta er raunverulegt endurhleðsla, ekki bara uppfærslu á núverandi minni. Endurreiknar teljara Kafla/Þátta/Atriða, lyftir Heimabókinni, ham og valkostum Hugstormunar og samstillir vinnsluminni. Ef öll sagan kemst fyrir í samhengisglugganum, hleður hún henni í heild sinni (og eyðir óþarfa gömlu samantektinni, svo vélin vinnur á fullum texta). Ef sagan er löng og hefur vistað samantekt, heldur hún henni óbreyttri og spyr þig, frá hvaða fyrirsögn vinnsluminni AI á að byrja: í Hljóðbókarham velurðu Kafla, í Handritsham fyrst Þátt, og síðan Atriði þess þáttar (eða allan Þáttinn) — restin er táknuð með samantekt. Að hætta við val = neyðarklipping til síðasta textabrots (þess vegna er gott að halda fyrirsagnauppbyggingu). Áður en hún skrifar yfir reiti með útgáfu af disknum, varar hún við ef þú hefur óvistað efni í þeim. Dæmigerð atburðarás: AI lokar ranglega atriði (brýtur anti-closure), þú klippir ranga endann í ritli og smellir á Endurhlaða — engin þörf á að laga í tveimur stöðum.
+    Sem leikstjóri hefur þú FULLAN RÉTT (og jafnvel skyldu) til að breyta þessari skrá! Ef gervigreindin fer of langt og leysir til dæmis vandamál persónanna sjálf í lok myndaðs kafla, opnaðu skrána, eyddu síðustu línum og láttu textann hanga eftir á spennulegasta augnablikinu, smelltu síðan á „{rezyser.btn_przeladuj_label}" til að samstilla minni líkansins við leiðrétta skrána, og „{rezyser.btn_wyslij_label}" til að halda áfram.
 
-    Söguleg athugasemd — af hverju hamir eru nú verndaðir gegn óviljandi breytingum:
-    Í fyrri útgáfum forritsins var enginn sem fylgdist með samræmi sköpunarhamar innan eins verkefnis. Niðurstaðan var ákveðin lúmsk sköpunarmöguleiki, sem mætti lýsa svona: þú byrjar sögu í Handritsham, setur inn "Þáttur 1" og "Atriði 1" (forritið er hrifinn af samkvæmni þinni), býrð til nokkra skjái af spennu með merkjum [SFX: Hurðaskellur] og [Speaker 1: Marek - uppgefinn]... og síðan — því innblástur kemur — smellir á "Setja inn klippingu Kafli 1". Forritið skrifar fyrirsögnina "Kafli 1" í skrána, rétt eftir "Atriði 3". Þú hefur nú í skránni blöndu af útvarpsleikriti frá 50. áratugnum og skáldsögu. ElevenLabs lítur á þessa uppbyggingu, sér kaflafyrirsögn í miðjum þætti og ákveður að þetta sé líklega villa í kerfinu. Efnisyfirlitið lítur út eins og verk framúrstefnulistamanns. Hljóðbókararkitektinn á hinn bóginn gerir ráð fyrir að þú sért fullorðinn einstaklingur og vinnur úr því án orðs — en einnig án nokkurra trygginga um árangur. Frá útgáfu 12.0 reyndi viðmótið að hindra breytingu á skráningarham — að minnsta kosti í kenningunni. Raunveruleikinn reyndist skapandi: Hugstormun (alltaf virk sem skipulagsstilling) var bakdyr, þar sem hægt var að fara á milli Handrits og Hljóðbókar með örvunum upp og niður (Hljóðbók → Hugstormun → Handrit og á sama hátt í hina áttina). Fyrsta smella á „Setja inn Þátt 1" eða „Setja inn Kafli 1" í nýjum ham skrifaði auðveldlega yfir .mode skrána, blandaði þáttum við kafla í einni frásagnarskrá. Ekki fyrr en í útgáfu 15.2.3 höfum við raunverulega vernd: eftir að ákvörðun um ham er staðfest (fyrsta uppbygging eða fyrsta árangursríka framleiðslusending) er önnur skráningarstaða í RadioBox í raun óvirk. Hugstormun er alltaf virk sem neyðarvél — hún býr til samantekt þegar samhengisglugginn fyllist og valkosti fyrir söguþráð — en ekki er lengur hægt að fara í gegnum hana á hlið á annan skráningarham.
+    🔴 HINS VEGAR — HVAÐ MÁ ÞÚ EKKI SNERTA:
+
+    Breyttu aldrei, eyddu aldrei og breyttu aldrei línum sem innihalda uppbyggingu (t.d. Þáttur 1, Atriði 2, Kafli 1, Formáli). Ef þú skemmdir þessa hausa:
+    1. Saga þín mun brotna í skjálesara (NVDA).
+    2. Hljóðbókararkitektinn, og þar með einnig ElevenLabs Studio, mun ekki geta skipt bókinni þinni rétt í hluta til lestrar.
+    3. Innbyggður umbreytir forritsins mun ekki búa til rétta efnisyfirlit í Word-skrá né á tímalínu í ElevenLabs.
+
+    Breyttu samræðum, skertu aðgerðina, en láttu uppbygginguna vera í friði!
 
 
-    Showrunner Prompts — AI sem handritshöfundur þáttaraðar (frá útgáfu 7, varðveitt)
+    Hvernig á að nota Leikstjóraverkstæðið?
 
-    Þetta er stærsta breytingin sem var innleidd í útgáfu 7, varðveitt óbreytt. Hún er ekki sýnileg í viðmótinu, en breytir róttækt gæðum framleiddrar sögu.
+    - Heimsbók (hliðarslá til vinstri): Hér skrifar þú reglur alheimsins. Hvert verkefni hefur nú sína eigin Bók tengda við skráarheitið — ef sögusskráin þín er t.d. emilia_heist_audiobook.txt, mun Heimsbókin vistast sem skrypty/emilia_heist_audiobook.md. Þess vegna skiptir röðin máli: skrifaðu fyrst heiti verkefnisskrárinnar í reitinn „Heiti verkefnisskráar", og þá fyrst getur þú vistað Bókina. Hnappurinn „{rezyser.btn_zapisz_ksiege_label}" er gráður þar til þú gefur upp heiti. Að hlaða inn fyrirliggjandi verkefni með hnappinum „{rezyser.btn_wczytaj_label}" hleður sjálfkrafa samsvarandi .md-skrá — þú þarft ekki að gera neitt handvirkt. Athugaðu: Án útfylltrar Heimsbókar mun forritið loka á sendingu fyrirspurna til gervigreindar — þetta er meðvituð öryggisráðstöfun sem verndar þig gegn því að búa til texta án nokkurra reglna.
+    - Langtímaminni (hliðarslá til vinstri): Annað reiturinn í hliðarsláinni. Hér vistar gervigreindin sjálfkrafa samantekt sögunnar þegar minnið byrjar að fylla sig. Þú getur líka skrifað þínar eigin athugasemdir hér handvirkt — líkanið mun meðhöndla þær sem „það sem ég veit nú þegar" áður en það les núverandi senu. SÖGULEG GALLI (lagaður í v15.5): Áður, ef þú skrifaðir mjög stutta athugasemd hér og smellir á „Vista samantekt" áður en eitthvað marktækt var í frásagnaskránni, hlóð forritið við næstu opnun FORGANGSRÖÐUN samantektina og SLEPPTI fullri sögunni — líkanið fékk þá aðeins Heimsbókina og einnar setningar athugasemd, án samhengis tóns og nýjustu sena. Frá v15.5 er hleðslan gáleg: ef öll sagan passar í samhengisgluggan er hún hlaðin í heild (og óþarfa gömul samantekt eytt), þannig að líkanið missir ekki samhengi. Og eftir handvirka breytingu á frásagnaskránni í ritlinum skaltu nota nýja hnappinn „{rezyser.btn_przeladuj_label}" (frá v15.5), sem samstillir innra minni við disk með einum smelli; til að opna skrána sjálfa í ritlinum þjónar enn „{rezyser.btn_otworz_narracje_label}".
+    - Hugstormsstilling: Skrifaðu lauslegan hugmynd og gervigreindin gefur þér 3 valkosti um þróun sögunnar. Fyrir hvern valkost mun hún strax búa til tilbúinn blokk „--- SZKIC PROMPTU ---". Eftir að þú velur einn skaltu líma þessa hvetjingu í Handritsstillingu eða Hljóðbókarstillingu og bæta við athugasemdum eða upplýsingum fyrir líkanið. Söguleg minni breytist ekki meðan á Hugstormi stendur — þú getur gert tilraunir án áhættu!
+    - Hráhandritsstilling (frá v16.0 — lesleikrit): Hér límir þú „Szkic Promptu" sem myndaður var í Hugstormi. Gervigreindin mun skrifa langan frásagnar-samræðubút: frásögn (senumynd, tími, aðgerð) í merkjum [Narrator: ...] og orð persóna í merkjum [Nafn: tilfinning]. Engin hljóðáhrif — samhengið ber frásögnin með orðum. Textinn er sjálfkrafa bætt við skrána þína (t.d. nowa_scena.txt) í möppunni skrypty/. Slíkt tilbúið handrit getur þú síðan breytt í fjölraddaða hljóðbók (brú að ElevenLabs Studio — sérstakur kafli hér að neðan).
+    - Hefðbundin hljóðbókarstilling: Stilling fyrir rithöfunda. Gervigreindin myndar hreina bókmenntaprósu — engin merki, engin hljðfræði, klassískar samræður fléttaðar inn í frásögnina. Textinn bætist við skrána á sama hátt og í Handritsstillingu.
+    - Sjálfvirk persónusköpun: Handritið er forritað til að búa sjálfkrafa til ný [Speaker]-merki ef söguþráðurinn krefst nýrrar persónu. Ábending: Ef gervigreindin skapar flotta persónu, afritaðu merkið hennar og límdu það í Heimsbókina svo líkanið muni hana til frambúðar!
 
-    Showrunner er í sjónvarpsiðnaðinum einstaklingur sem er ábyrgur fyrir heildarþáttaraðgerð — sér til þess að sagan leiti aldrei að auðveldri lausn, heldur þéttist stöðugt, byggi upp átök og haldi áhorfendum í spennu í mörg tímabil. Í útgáfu 7 var þessi heimspeki beint innbyggð í kerfisleiðbeiningar AI.
+    Verkefnisstjórnun — þrír aðgerðahnappar:
+    - {rezyser.btn_wczytaj_label}: Hleður fyrirliggjandi verkefni inn í minni. Tiltækt þegar núverandi minni er tómt. Frá útgáfu 15.2.3 styður það tvær leiðir: ef verkefnaheitisreiturinn er tómur opnast valgluggi með lista yfir öll verkefni sem finnast í möppunni skrypty/ (sleppir samantektarskrám) — NVDA les listann náttúrulega, spilarinn þarf ekki að muna og skrifa nafnið af lyklaborðinu. Ef reiturinn er útfylltur reynir forritið strax að hlaða verkefni með því nafni (sérfræðingaleið: Enter í nafnareitnum eða smellur eftir að hafa skrifað úr minni).
+    - {rezyser.btn_hard_reset_label}: Hreinsar verkefnið að fullu. Eyðir sögu, samantekt, Heimsbók og núllstillir alla teljara. Notaðu við skipti á verkefni eða nýrri sögu.
+    - {rezyser.btn_otworz_narracje_label} (frá v15.2.3): Neyðarbreytingar á frásagnaskrá í kerfisritli. Krefst útfyllt verkefnaheitis. Forritið opnar skrypty/<nazwa>.txt í Notepad (Windows), TextEdit (macOS) eða sjálfgefnum GUI-ritli (Linux). Dæmigerðar aðstæður: (a) Gervigreindin lokar ekki senu og þú vilt bæta við enda handvirkt; (b) þú hlóðst verkefni með samantekt og vilt afrita nýjustu senur í Langtímaminni svo líkanið hafi fullt samhengi tóns (arkitekturgalli lýst hér að ofan); (c) þú vilt gera skurð í miðjum kafla sem vélin í forritinu styður ekki innbyggt.
 
-    Anti-Closure Fyrirmæli — staða í útgáfu 8
+    - {rezyser.btn_przeladuj_label} (frá v15.5, endurbyggður í v17.6): Endurhleður ALLT verkefnið af diski eftir handvirka breytingu á frásagnaskrá — þetta er raunveruleg endurhleðsla, ekki bara uppfærsla á núverandi minni. Endurreiknar teljara Kafla/Akt/Sena, hleður Heimsbókina, Hugstormsstillingu og valkosti, og samstillir vinnsluminni. Ef öll sagan passar í samhengisgluggan er hún hlaðin í heild (og óþarfa gömul samantekt eytt, til að vélin vinni á fullum texta). Ef sagan er löng og hefur vistað samantekt er hún geymd ósnert og forritið spyr þig hvaðan á að byrja vinnsluminni gervigreindarinnar: í Hljóðbókarstillingu velur þú Kafla, í Handritsstillingu fyrst Akt og síðan Senu þess akts (eða allan Aktinn) — restina táknar samantektin. Að hætta við valið = neyðarskurður að síðasta textabút (þess vegna er gott að halda uppbyggingu hausa). Áður en það yfirskrifar reiti með útgáfu af diski varar það þig við ef þú ert með óvistaðar breytingar í þeim. Dæmigerðar aðstæður: Gervigreindin lokaði senu á rangan hátt (braut anti-closure), þú skerð af þér ranga endinguna í ritlinum og smellir á Endurhlaða — engin þörf á að leiðrétta á tveimur stöðum.
 
-    Þrátt fyrir að prófa mismunandi nálganir, er Anti-Closure bannið oft brotið af líkaninu, sérstaklega í Hefðbundnum Hljóðbókarham. AI hefur sterka tilhneigingu til að "loka" sögum við hvert tækifæri — það fléttar inn samantektarsetningar, býr til falska hamingjusama enda eða lokar þræði í miðjum kafla, eins og hvert brot væri það síðasta. Áhrifin eru þau að næsta brot byrjar frá grunni, án náttúrulegrar samfellu.
-
-    Þess vegna er svo mikilvægt að fylgja reglu klippingarmannsins sem lýst er hér að ofan: ef AI brýtur bannið og lokar sjálft atriði, er það þitt verkefni sem Leikstjóri að opna .txt skrána, fjarlægja þessar síðustu setningar og skilja textann eftir á spennandi stað, og síðan smella á "{rezyser.btn_przeladuj_label}" til að samstilla minnið við breyttu skránni.
-
-    Hver hamur hefur innbyggð fyrirmæli Anti-Closure:
-
-    - Hugstormun: AI virkar sem handritshöfundur þáttaraðar með mörgum tímabilum. Hver af 3 fyrirhuguðum valkostum VERÐUR að byggja upp hindranir, kynna nýjar klípur, opna þræði og cliffhangera. Algjört bann við að bjóða upp á valkosti þar sem persónur sættast varanlega, sigrast á aðalhindruninni án mikilla afleiðinga eða sagan stefnir í hraðann endi. Bann við að búa til ódýra, töfrandi staði sem brjóta uppbyggingu heimsins.
-    - Hrár Handritshamur: Algjört bann við að ljúka texta með samantektum, siðferðislegum lærdómum eða klámrum. AI á að stöðva aðgerðina náttúrulega á spennandi augnabliki (cliffhanger), forðast niðurstöður, svo næsta brot geti tekið við frásögninni áreynslulaust.
-    - Hefðbundinn Hljóðbókarhamur: Algjört bann við að ljúka texta með hátíðlegum samantektum, lokun á þræði eða að gefa í skyn endalok sögunnar (t.d. "Hún var tilbúin fyrir nýjar áskoranir", "Hún skildi að það var kominn tími til að halda áfram"). Textinn á að stöðvast í miðri aðgerð, spennu eða opnu hugsun.
-
-    Undantekning frá reglunni: Ef þú biður beint um endalok, loka eða epilog, mun AI búa til fullnægjandi lokun sögunnar — bannið gildir ekki þegar þú biður sérstaklega um það.
-
-
-    Stjórnun á Þáttum og Atriðum (Handritshamur, frá útgáfu 7, varðveitt)
-
-    Hrár Handritshamur hefur sérstakan spjald "{rezyser.struktura_heading}" með hnöppum til að byggja uppbyggingu útvarpsleiks í rauntíma.
-
-    - Setja inn Þátt X: Setur inn fyrirsögn þáttar (t.d. "Þáttur 2") OG bætir sjálfkrafa við "Atriði 1" undir því — því hver nýr þáttur byrjar á fyrsta atriði. Teljari þátta hoppar á næsta númer, og teljari atriða endurstillist á 2 (tilbúinn fyrir næsta atriði í þessum þætti).
-    - Setja inn Atriði X: Setur aðeins inn fyrirsögn atriðis (t.d. "Atriði 3") innan núverandi þáttar. Teljari atriða eykst sjálfkrafa.
-
-    Snjöll skráarhleðsla: Þegar þú hleður inn núverandi handritsskrá, skannar forritið hana sjálfkrafa og stillir teljara þátta og atriða á rétt númer. Teljari atriða er alltaf reiknaður innan síðasta þáttar í skránni.
-
-    Formáli og Eftirskrift: Hnappar "{rezyser.btn_prolog_label}" og "{rezyser.btn_epilog_label}" eru sameiginlegir fyrir báða hamina og aðgengilegir á sama spjaldi.
-
-    Hljóðbókararkitektinn breytir sjálfkrafa Þáttum í aðal leiðsögupunkta (Heading 1) fyrir ElevenLabs og NVDA — Atriði verða feitletraður texti sýnilegur í skjalinu, en ósýnilegur í efnisyfirlitinu.
+    Söguleg athugasemd — af hverju stillingar eru nú verndaðar gegn óviljandi breytingum:
+    Í eldri útgáfum forritsins gætti enginn samræmis skapandi stillingar innan eins verkefnis. Afleiðingin var ákveðin fágæt skapandi möguleiki sem má lýsa svona: þú byrjar sögu í Handritsstillingu, setur inn „Akt 1" og „Scena 1" (forritið er ánægt með samkvæmni þína), myndar nokkrar skjáar af spennu með merkjum [SFX: Trzask drzwi] og [Speaker 1: Marek - zrezygnowany]... og síðan — vegna þess að innblástur kemur — smellir þú á „Setja inn skurð Kafli 1". Forritið bætir við haus „Rozdział 1" í skrána án þess að hika, rétt á eftir „Scena 3". Þú ert nú með blendning af útvarpsleikrit frá fimmtugsárunum og samtímasmásögu í sömu skrá. ElevenLabs lítur á þessa uppbyggingu, sér kaflahaus í miðjum akti og ákveður að þetta sé líklega villa í fylkinu. Efnisyfirlit lítur út eins og verk framúrstefnulistamanns. Hljóðbókararkitektinn gerir hins vegar ráð fyrir að þú sért fullorðið fólk og vinnur einfaldlega úr þessu án orðs — en einnig án nokkurra ábyrgðar á niðurstöðunni. Frá útgáfu 12.0 reyndi viðmótið að loka á breytingu á skráningarstillingu — að minnsta kosti í kenningunni. Í reyndinni reyndist þetta skapandi: Hugstormurinn (alltaf virkur sem skipulagsstilling) var bakdyrnar þar sem hægt var að fara á milli Handrits og Hljóðbókar með upp- og niðurörpum (Hljóðbók → Hugstormur → Handrit og öfugt). Fyrsta smellur á „Setja inn Akt 1" eða „Setja inn Kafli 1" í nývalda stillingu yfirskrifaði .mode-skrána þægilega og blandaði aktum og köflum í sömu frásagnaskrá. Fyrst frá útgáfu 15.2.3 höfum við raunverulega vernd: þegar stillingarákvörðun hefur verið staðfest (fyrsta uppbygging eða fyrsta vel heppnuð framleiðslusending) er önnur skráningarstaðan í stillingarvali í raun læst. Hugstormurinn er alltaf virkur sem neyðarmekanismi — myndar samantekt við yfirfyllingu samhengisglugga og söguþráðarvalkosti — en ekki er lengur hægt að nota hann til að hoppa yfir í aðra skráningarstillingu.
 
 
-    Snjöll Stjórnun á Kafla (Hljóðbókarhamur, frá útgáfu 5, varðveitt)
+    Showrunner-hvetjingar — Gervigreind sem handritshöfundur sjónvarpsþáttar (frá útgáfu 7, varðveitt)
 
-    LLM býr til að hámarki um 5000 stafi á einu fyrirspurn — það er of lítið fyrir fullan kafla. Þess vegna vinnur þú í skrefum: býrð til næstu brot með því að smella á "Senda til AI", þar til þú telur að tiltekinn kafli sé tilbúinn. Þá smellirðu á "Setja inn klippingu kafla" — forritið bætir fyrirsögn við skrána og minnið, og teljari kafla hoppar sjálfkrafa á næsta númer.
+    Þetta er stærsta breyting sem kynnt var í útgáfu 7 og hefur verið varðveitt óbreytt. Hún er ekki sýnileg í viðmótinu en breytir gæðum mynduðrar söguþráðar á róttækan hátt.
 
-    Hnappar á spjaldi:
+    Showrunner er í sjónvarpsiðnaðinum sá aðili sem ber ábyrgð á heildarmynd þáttaraðar — tryggir að söguþráðurinn stefni aldrei að auðveldum lausnum, heldur þéttist stöðugt, hrúgi upp átökum og haldi áhorfandanum í spennu í margar leiktíðir. Í útgáfu 7 var þessi heimspeki innbyggð beint í kerfislegar leiðbeiningar gervigreindarinnar.
 
-    - Setja inn klippingu (Kafli X): Setur inn fyrirsögn (t.d. "Kafli 3") í skrána og minnið. Teljari kafla uppfærir sig sjálfkrafa.
-    - Setja inn Formála: Virkar aðeins í byrjun, þegar minnið er tómt. Vörn gegn því að setja óvart inn Formála í miðri sögu.
-    - Setja inn Eftirskrift: Lokar sögunni. Eftir að Eftirskrift með efni hefur verið sett inn, mun forritið loka fyrir að búa til ný brot — það er viljandi, því eftir að sagan er lokið er ekkert meira að bæta við.
+    Anti-Closure-tilskipunin — og hvað Anthropic-vélin (Claude) breytti
 
-    Snjöll skráarhleðsla: Þegar þú hleður inn núverandi skrá, skannar forritið hana sjálfkrafa og stillir teljara kafla á rétt númer. Ef skráin hefur Formála og þrjá kafla, mun teljarinn sýna "Kafli 4" — án handvirkrar talningar.
+    Showrunner-heimspekin er framfylgt með Anti-Closure-tilskipun sem er innbyggð í hverja stillingu: bann við því að loka senum með samantektum, siðferðislegum lærdómi og fölskum hamingjusömum endingum. Í gömlu tímabilinu (GPT-líkan) var þetta nákvæmlega öfugt við það sem er í dag — vélin braut þetta bann stöðugt og „lokaði" sögunni við hverja tækifæri: fléttaði inn samantektarsetningar um söguþráðinn, bjó til falskar hamingjusælar endingar eða lokaði þráðum í miðjum kafla, eins og hvert brot væri það síðasta. Frá útgáfu 18 vinnur öll gervigreindarvélin sjálfgefið á Anthropic (Claude) — og frá útgáfu 18.4 getur þú valfrjálst tilgreint þinn eigin þjónustuaðila (SKREF 2B) — og Claude fylgir Anti-Closure mun strangari.
+
+    Þetta hefur leitt til annars, hreinlega tæknilegs aukaverkunar: þar sem líkanið lokar senu ekki stöðugt getur framlag þess náð lengdarmörk einstakrar svörunar og brotna af í miðri setningu (og stundum jafnvel í miðju orði). Forritið sér sjálft um þetta — þegar það greinir að brot brotnaði af við mörkin, lokar það síðustu setningunni með einni stuttri viðbótarfyrirspurn þannig að hún hljómar náttúrulegt á tungumáli sögunnar þinnar, og vistar textann fyrst þá. Ef þetta tekst ekki af einhverjum ástæðum muntu sjá varlega viðvörun, og textinn vistast engu að síður í núverandi mynd — við lokum aldrei á vistun, brotna endinguna getur þú alltaf fínpússað handvirkt.
+
+    Klippistjórareglan sem lýst er hér að ofan gildir óbreytt: ef líkanið lokar senu of þægilega þrátt fyrir allt, er það réttur þinn (og jafnvel skylda) sem Leikstjóra að opna .txt-skrána, eyða þessum síðustu setningum, láta textann hanga eftir á spennulegasta augnablikinu og smella á „{rezyser.btn_przeladuj_label}" til að samstilla minni við leiðrétta skrána.
+
+    Hvert stig hefur innbyggða Anti-Closure-tilskipun:
+
+    - Hugstormur: Gervigreindin virkar eins og handritshöfundur fjölþáttaraðar. Hvert af 3 lögðum valkostum VERÐUR að hrúga upp hindrunum, kynna ný dilemmur, opna þræði og cliffhangara. Algjört bann við því að leggja til valkosti þar sem persónur sættast til frambúðar, sigrast á aðalhindruninni án þungra afleiðinga eða sagan stefnir að flýtilokum. Bann við því að finna upp ódýrar, töfralegar staðsetningar sem brjóta uppbyggingu heimsins.
+    - Hráhandritsstilling: Algjört bann við því að ljúka texta með samantektum, siðferðislegum lærdómi eða rammagerð. Gervigreindin á að skera af aðgerðinni náttúrulega á spennulegasta augnablikinu (cliffhanger), forðast niðurstöður þannig að næsti brot geti tekið við frásögninni þægilega.
+    - Hefðbundin hljóðbókarstilling: Algjört bann við því að ljúka texta með hátíðlegum samantektum, loka þráðum eða gefa í skyn lok sögunnar (t.d. „Hún var tilbúin fyrir ný áskoranir", „Hún skildi að tíminn væri kominn til að halda áfram"). Textinn á að brotna af í miðjum yfirstandandi aðgerðum, spennu eða opnum hugsun.
+
+    Undantekning frá reglunni: Ef þú biður sérstaklega um endi, lokaþátt eða epilóg mun gervigreindin búa til fullnægjandi lok sögunnar — bannið gildir ekki þegar þú biður sjálfur um það.
 
 
-    Söguakumulator — hvernig minnið AI virkar
+    Stjórnun Akta og Sena (Handritsstilling, frá útgáfu 7, varðveitt)
 
-    Aðeins hreinn texti sögunnar fer í minnið — það sem AI hefur raunverulega skrifað. Leiðbeiningar, valkostir og áætlanir hverfa eftir notkun og menga ekki samhengið. Áhrifin? Líkanið heldur einbeitingu lengur, man betur eftir áherslum persóna og sleppir sjaldnar frá reglum Heimabókarinnar.
+    Hráhandritsstillingin hefur sérstakt spjald „{rezyser.struktura_heading}" með hnappar til að byggja upp uppbyggingu útvarpsleikritsins í rauntíma.
 
-    Vísir "Minni Líkans" á skjánum sýnir hversu mikið samhengisgluggi líkansins er fylltur. Frá útgáfu 15.1 er þetta EKKI lengur talning á sjálfum stöfum sögunnar — forritið telur raunveruleg TOKEN (með sömu aðferð og líkanið notar) og leggur saman ALLA hleðslu sem send er til AI: núverandi sögu, Langtímaminni (samantekt) OG Heimabókina. Þess vegna vex vísirinn einnig þegar þú byggir upp Heimabókina eða hefur langa samantekt — ekki aðeins frá sjálfri frásögninni. Gildi er sýnt sem prósenta af fyllingu gluggans:
-    - Grænt (allt að um 70%): Líkanið er fullkomlega einbeitt, þú hefur öruggt svigrúm.
-    - Gult (um 70–90%): Þú nálgast mörkin. AI getur byrjað að stytta svör og hunsa reglur; í áætlunarham (Hugstormun) byrjar vélin að neyða fram samantekt. Byrjaðu að loka þræði hægt.
-    - Rautt (yfir um 90%): Krítískt ofhleðsla!
+    - Setja inn Akt X: Setur inn akthaus (t.d. „Akt 2") OG bætir sjálfkrafa við „Scena 1" undir honum — vegna þess að sérhver nýr aktur byrjar á fyrstu senu. Aktataljari hoppar á næsta númer og senuteljari núllstillir sig á 2 (tilbúinn fyrir næstu senu í þessum akti).
+    - Setja inn Senu X: Setur aðeins inn senuhaus (t.d. „Scena 3") innan núverandi akts. Senuteljari hækkar sjálfkrafa.
 
-    Greining á samantektarþröskuldi (þegar AI ruglar fyrr en þröskuldurinn gerir ráð fyrir): þröskuldar (viðvörun ~70%, viðvörun ~90%) eru áætlaðir reynslulega. Ef þú tekur eftir endurtekinni tilhneigingu að líkanið "sleppir" frá reglum eða byrjar að rugla ÁÐUR en vísirinn fer í gult/rautt — þ.e. fyrr en þröskuldurinn gerir ráð fyrir — opnaðu mál í forritasafninu og lýstu, við hvaða um það bil fyllingu (prósentu) það raunverulega byrjar að brotna, helst með dæmi. Ef þessi tilhneiging staðfestist víðar (hjá öðrum notendum, á mismunandi verkefnum), verður þröskuldur sjálfvirkrar samantektar lækkaður í næsta plástri. Þetta er meðvitað iteratíft kerfi — betra að stilla það á raunverulegum gögnum en að giska fyrirfram.
+    Greint hleðsla skráar: Þegar þú hleður inn fyrirliggjandi handritsskrá skannar forritið hana sjálfkrafa og stillir akta- og senuteljara á réttar tölur. Senuteljari er alltaf reiknaður innan síðasta akts í skránni.
 
-    Óendanlegt Minni (frá útgáfu 6, varðveitt)
+    Prológur og Epilógur: Hnappar „{rezyser.btn_prolog_label}" og „{rezyser.btn_epilog_label}" eru sameiginlegir fyrir báðar stillingar og aðgengilegir á sama spjaldinu.
 
-    Þegar rauð viðvörun kviknar, þarftu ekki lengur að afrita samantekt handvirkt. Sláðu inn í Hugstormun skipun sem inniheldur orðið "samantekt" eða "yfirlit" — AI mun búa til stutta hylki af þekkingu um alla fyrri söguþráðinn. Smelltu síðan á "Vista Samantekt (varanlega)" — forritið býr sjálfkrafa til skrá _streszczenie.txt í skráarsafninu skrypty/ og verndar hana gegn óvart yfirskrift. Eftir að hafa vistað, hreinsaðu minnið og þú getur haldið áfram að búa til í núverandi skrá. Samantektina hleðurðu í Langtímaminni áður en næsta lota hefst — og þú getur haldið áfram sögunni endalaust, án nokkurra lengdarmarka.
+    Hljóðbókararkitektinn mun sjálfkrafa breyta Aktum í aðal leiðsögupunkta (Heading 1) fyrir ElevenLabs og NVDA — Senur verða feitletraður texti sem sést í skjalinu en ekki í efnisyfirlit.
 
-    Hvenær á að samantekta (uppfært í v15.5): Þú þarft ekki lengur að fylgjast með stífum þröskuldi stafa „fyrir lok vinnu". Best er að samantekta eftir náttúrulega lokun stærri uppbyggingarhluta — eftir að atriði, þáttur eða kafli lýkur. Ástæða: þegar þú breytir handvirkt lokin í frásagnarskránni og smellir á „{rezyser.btn_przeladuj_label}", mun forritið spyrja, frá hvaða fyrirsögn á að endurheimta ferskt brot — og samantekt fyrri hluta verður óbreytt (lokið við að breyta á tveimur stöðum). Þess vegna er enn mikilvægara að halda uppbyggingu: reglulega setja inn fyrirsagnir Kafli/Þáttur/Atriði úr uppbyggingarspjaldinu (forðast eru langar formir án neinna þátta/kafla, t.d. „nútímalegt drama" í einni lotu). UNDIRTEKNING: ef þú rekur mjög langa sögu ALGJÖRLEGA án fyrirsagna, er nauðsynlegt að búa til og vista Samantekt fyrir hlé — án merkja getur forritið aðeins endurheimt síðasta brot talið í stöfum, og vélin án samhengis gæti „panikkað".
 
-    Sjálfvirk samantekt: Þegar minnið fer í viðvörunarástand, skiptir Hugstormun sjálfkrafa í neyðarham — í stað þess að búa til valkosti strax, býr hún fyrst til ítarlega samantekt af allri fyrri söguþræði og geymir hana í merkjum <STRESZCZENIE>. Forritið greinir þessi merki og flytur sjálfkrafa samantektina í Langtímaminni. Engin handvirk vinna!
+    Greind stjórnun kafla (Hljóðbókarstilling, frá útgáfu 5, varðveitt)
 
-    Snjöll skráarhleðsla og endurhleðsla frá disknum (uppfært í v17.6): Bæði við hleðslu verkefnis og eftir að smella á „{rezyser.btn_przeladuj_label}" (eftir handvirka breytingu á frásagnarskrá í ritli), samræmir forritið minnið við diskinn á einum stað — endurreiknar teljara uppbyggingar og lyftir Heimabókinni og ham. Ef ALLA sagan kemst fyrir í samhengisglugganum — hleður hún henni í heild sinni, og óþarfa gömlu samantektinni er eytt, svo vélin vinnur á fullum texta (þetta lokar gömlu glufunni þar sem líkanið fékk aðeins samantekt án samhengis síðustu atriða). Ef sagan er LÖNG og hefur vistað samantektarskrá — heldur hún samantektinni óbreyttri og spyr þig, frá hvaða uppbyggingarmerkjum (Kafli/Þáttur/Atriði) á að byrja vinnsluminni AI; restin af sögunni er táknuð með samantekt. Þannig eyðirðu ekki tokenum í að hlaða alla söguna aftur, en samt verður næsta samantekt ekki byggð á úreltum gögnum.
+    LLM myndar að hámarki um 5000 stafi á hverja fyrirspurn — það er of lítið fyrir fullan kafla. Þess vegna vinnur þú í ítrekunum: myndar fleiri brot með hnappinum „Senda til gervigreindar" þar til þú telur viðkomandi kafla tilbúinn. Þá smellir þú á „Setja inn kaflasnið" — forritið bætir haus við skrána og minni, og kaflateljari hoppar sjálfkrafa á næsta númer.
+
+    Hnappar á spjaldinu:
+
+    - Setja inn snið (Kafli X): Setur inn haus (t.d. „Kafli 3") í skrána og minni. Kaflateljari uppfærist sjálfkrafa.
+    - Setja inn Prológ: Virkar aðeins í upphafi þegar minni er tómt. Vörn gegn því að setja Prológ inn í miðja sögu fyrir slysni.
+    - Setja inn Epilóg: Lokar sögunni. Þegar Epilóg hefur verið settur inn með efni mun forritið loka á myndun nýrra brota — þetta er vísvitandi, því eftir lok sögunnar er ekkert meira að bæta við.
+
+    Greind hleðsla skráar: Þegar þú hleður inn fyrirliggjandi skrá skannar forritið hana sjálfkrafa og stillir kaflateljara á rétt númer. Ef skráin hefur Prológ og þrjá kafla mun teljarinn sýna „Kafli 4" — án þess að þurfa að telja handvirkt.
+
+
+    Söguþráðarsöfnuður — hvernig minni gervigreindarinnar virkar
+
+    Í minni líkansins fer eingöngu hreinn texti sögunnar — það sem gervigreindin skrifaði í raun og veru. Leiðbeiningar, valkostir og áætlanir hverfa eftir notkun og mengna ekki samhengið. Áhrifin? Líkanið heldur einbeitingu lengur, man betur eftir persónueinkennum og „flýr" sjaldnar frá reglum Heimsbókarinnar.
+
+    Mælirinn „Minni líkansins" á skjánum sýnir hversu mikið samhengisgluggi líkansins er fylltur. Frá útgáfu 15.1 er þetta EKKI lengur bara talning stafa sögunnar — forritið telur raunveruleg TÓKEN (með sömu aðferð og líkanið notar) og leggur saman ALLA farminn sem sendur er til gervigreindarinnar: núverandi sögu, Langtímaminni (samantekt) OG Heimsbókina. Þess vegna hækkar mælirinn líka þegar þú þróar Heimsbókina eða ert með langa samantekt — ekki bara vegna frásagnarinnar sjálfrar. Gildið er sýnt sem hlutfall af fyllingu gluggans:
+    - Grænt (upp að um 70%): Líkanið er fullkomlega einbeitt, þú ert með öruggan biðminni.
+    - Gult (um 70–90%): Þú ert að nálgast mörkin. Gervigreindin gæti byrjað að stytta svör og hunsa reglur; í skipulagsham (Hugstormur) byrjar vélin að þvinga samantekt. Byrjaðu hægt að loka þræðinum.
+    - Rautt (yfir um 90%): Gagnrýnin yfirfylling!
+
+    Greining á samantektarþröskuldi (þegar gervigreindin hallucinerar fyrr en þröskuldurinn gerir ráð fyrir): þröskuldar (viðvörun ~70%, alarm ~90%) eru metnar með reynslu. Ef þú tekur eftir endurteknum tilhneigingum þess að líkanið „flýi" frá reglum eða byrji að hallucinera ÁÐUR en mælirinn fer í gult/rautt — þ.e. fyrr en þröskuldurinn gerir ráð fyrir — opnaðu issue í geymslu forritsins og lýstu við hvaða fyllingu (hlutfalli) það byrjar í raun að bila, helst með dæmi. Ef þessi tilhneiging staðfestist víðar (hjá öðrum notendum, á mismunandi verkefnum) verður þröskuldur sjálfvirkrar samantektar lækkaður í næsta plástri. Þetta er meðvitað ítrekuð aðferð — betra er að stilla hana á raunverulegum gögnum en að giska fyrirfram.
+
+    Óendanlegt minni (frá útgáfu 6, varðveitt)
+
+    Þegar rauður alarm kveikist þarftu ekki lengur að afrita samantekt handvirkt. Sláðu inn skipun í Hugstormi sem inniheldur orðið „streszczenie" eða „podsumowanie" — gervigreindin mun búa til hnitmiðaða þekkingarpillu um alla söguþráðinn hingað til. Smelltu síðan á hnappinn „Vista samantekt (varanlega)" — forritið skapar sjálfkrafa skrána _streszczenie.txt í möppunni skrypty/ og verndar hana gegn óviljandi yfirskrifun. Eftir vistun skaltu hreinsa minni og þú getur haldið áfram að skapa í núverandi skrá. Samantektina hleður þú inn í reit Langtímaminnis fyrir næstu lotu — og þú getur haldið sögunni áfram endalaust, án nokkurra lengdartakmarkana.
+
+    Hvenær á að taka saman (uppfært í v15.5): Þú þarft ekki lengur að fylgjast með föstum stafamörkum „áður en þú hættir að vinna". Best er að taka saman eftir náttúrulegu lokun stærri uppbyggingarhluta — eftir lok senu, akts eða kafla. Ástæðan: þegar þú leiðréttir síðar handvirkt endinguna í frásagnaskránni og smellir á „{rezyser.btn_przeladuj_label}" mun forritið spyrja þig frá hvaða haus á að endurreikna ferskt brot — og samantekt fyrri hlutans verður ósnert (engin þörf á að leiðrétta á tveimur stöðum). Þess vegna er enn mikilvægara að halda uppbyggingu: settu reglulega inn Kafli/Akt/Senu-hausa af uppbyggingarspjaldinu (langar myndir án nokkurra akta/kafla eru ekki mælt með, t.d. „módernískt leikrit" í einum streng). UNDANTEKNING: ef þú ert að skrifa mjög langa sögu ALGERLEGA án hausa er það enn nauðsynlegt að mynda og vista samantekt fyrir hlé — án merkja getur forritið aðeins endurreikna síðasta brot talið í stöfum, og vélin án samhengis gæti „brugðist".
+
+    Sjálfvirk samantekt: Þegar minni fer í alarmástand skiptir Hugstormurinn sjálfkrafa yfir í björgunarham — í stað þess að mynda valkosti strax skapar hann fyrst ítarlega samantekt á allri söguþráðinni hingað til og vistar hana í merkjunum <STRESZCZENIE>. Forritið greinir þessi merki og flytur samantektina sjálfkrafa í reit Langtímaminnis. Ekkert handvirkt starf!
+
+    Greind hleðsla og endurhleðsla af diski (uppfært í v17.6): Bæði við hleðslu verkefnis og eftir smell á „{rezyser.btn_przeladuj_label}" (eftir handvirka breytingu á frásagnaskrá í ritlinum) samræmir forritið minni við disk í einum farvegi — endurreiknar uppbyggingarteljara og hleður Heimsbókina og stillingu. Ef ÖLL sagan passar í samhengisgluggan — hleður hana í heild og eyðir óþarfa gömlu samantektinni svo vélin vinni á fullum texta (þetta lokar gömlu bili þar sem líkanið fékk bara samantekt án samhengis síðustu sena). Ef sagan er LÖNG og hefur vistaða samantektarskrá — geymir samantektina ósnerta og spyr þig frá hvaða uppbyggingarhaus (Kafli/Akt/Sena) vinnsluminni gervigreindarinnar á að byrja; restina af söguþráðinum táknar samantektin. Þannig eyðir þú ekki tóknum í að hlaða allri sögunni aftur, og um leið myndast næsta samantekt ekki á úreltum gögnum.
   krok_3b_most_elevenlabs: |
     SKREF 3b: Tvær útgangar Handritsins — fjölraddað hljóðbók (ElevenLabs) og útgáfa fyrir skjálesara
 
@@ -400,42 +403,43 @@ tresc:
 
     Hvað á að gera á meðan: ef þú vilt hafa rétta tungumálagreiningu (það er þess virði — þetta var eitt af „killer features" gamla Vocalizer, sjá „Killer Feature fyrir blinda" hér að ofan), opnaðu mál í forritasafni á GitHub með merkimiðanum `tiflotecnia-patch` og netfangið þitt í textanum. Það er þess virði að bæta við stuttri lýsingu á vandamálinu á eigin tungumáli (2–3 setningar duga) — bóturinn greinir tungumálið (stuðningur: pólska, enska, þýska, spænska, finnska, franska, íslenska, ítalska, rússneska) og svarar á sama tungumáli; án lýsingar eða á öðru tungumáli kemur svarið á ensku. Sjálfvirkur botn mun strax loka málinu með staðfestingu á innsendingu (án ummerkja í opinberu þræðinum), og þú færð plásturinn í tölvupósti yfirleitt innan nokkurra daga. Plásturinn er EKKI birtur í forritasafninu né sem Gist — Tiflotecnia Voices fyrir NVDA er viðskiptahugbúnaður, og leyfi viðbótarinnar leyfir ekki endurdreifingu á skrám þess, jafnvel ekki breyttum. Eftir að þú hefur fengið plásturinn þarftu að afrita innihald hans í `%appdata%\Roaming\nvda\addons\TiflotecniaVoices`, skipta út skrám. Varúð við afritun: ef Windows spurði ekki um skipti, þá hefurðu líklega afritað allan `TiflotecniaVoices_edits` möppuna með innihaldi hennar Í STAÐINN FYRIR einungis innihaldið — í slíku tilviki farðu inn í nýju undirmöppuna, klipptu allt, límdu það upp um eitt stig og skrifaðu yfir. Eftir að plásturinn hefur verið beittur með góðum árangri, endurræstu NVDA — njóttu betri gæða Cerrence 64-bita radda og réttrar tungumálagreiningar, sem er sambland sem enginn einstakur framleiðandi á markaðnum býður upp á. Við gerum ráð fyrir að þú hafir gilt leyfi fyrir Tiflotecnia Voices — við staðfestum það ekki, en þú getur ekki beitt plástrinum á möppu annarra án leyfis.
   krok_6_architekt: |
-    SKREF 6: Arkitekt Hljóðbóka
+    SKREF 6: Arkitekt hljóðbóka
 
-    Tól til að undirbúa faglega uppbyggingu skráar fyrir skjálesara og ElevenLabs. Farðu í það með því að smella á "{main.btn.konwerter}" hnappinn á hnappastikunni eða velja Verkfæri → {main.menu.konwerter} úr valmyndinni (flýtileið: Ctrl+3).
+    Tól til að undirbúa faglega skráarskipulag fyrir skjálesara og ElevenLabs. Farðu í það með því að smella á hnappinn „{main.btn.konwerter}" á hnappaslánni eða velja Verkfæri → {main.menu.konwerter} úr valmyndinni (flýtilykill: Ctrl+3).
 
-    Hvernig virkar það?
 
-    1. Sláðu inn slóðina að upprunaskránni í textareitinn eða smelltu á "Flettu..." hnappinn til að velja skrá í kerfisglugganum. Skiptin tekur við bæði .txt og .docx, sem og .html og .htm skrám.
-    2. Smelltu á "{konwerter.btn_buduj}".
-    3. Skiptin skannar hverja línu textans og breytir lykilorðum (Þáttur, Kafli, Formáli, Eftirskrift, Upphaf) í fyrirsagnir "Heading 1" í Word skjalinu.
-    4. Senur (línur sem byrja á orðinu "Sena") verða að feitletruðum texta — sýnilegar í skjalinu, en ósýnilegar í innihaldsyfirliti ElevenLabs.
-    5. Allur annar texti (samtöl, lýsingar) fer óbreyttur í gegn.
-    6. Þú færð skrána architektura_[nafn_upprunans].docx — faglegt Word skjal tilbúið til frekari vinnslu. Til dæmis, ef upprunaskráin þín hét dofi.txt, verður úttaksskráin nefnd architektura_dofi.docx og birtist í sama möppu og upprunaskráin.
+    Hvernig virkar þetta?
 
-    Hreinsun í leiðinni: Skiptin fjarlægir sjálfkrafa HTML merki (ef textinn kemur úr vafra eða staðbundinni .html skrá, t.d. búin til af Tungumálamanninum) og Markdown fyrirsagnamerki (t.d. ### eða ####) áður en hann er unnin. Þú þarft ekki að hreinsa skrána handvirkt.
+    1. Sláðu inn slóð að upprunaskránni í textareitinn eða smelltu á hnappinn „Skoða..." til að velja skrá í kerfisglugga. Skriftið tekur við bæði .txt og .docx, sem og .html og .htm skrám.
+    2. Smelltu á „{konwerter.btn_buduj}".
+    3. Skriftið mun skanna hverja línu texta og breyta lykilorðum (Þáttur, Kafli, Formáli, Eftirskrift, Upphaf) í „Heading 1" fyrirsagnir í Word-skjalinu.
+    4. Senur (línur sem byrja á orðinu „Scena") breytast í feitletraðan texta — sýnilegar í skjalinu en ósýnilegar í efnisyfirliti ElevenLabs.
+    5. Allur annar texti (samræður, lýsingar) fer óbreyttur í gegn.
+    6. Þú færð skrána architektura_[nazwa_oryginału].docx — faglegt Word-skjal tilbúið til frekari vinnslu. Til dæmis ef inntaksskráin þín hét znieczulica.txt, mun úttaksskráin heita architektura_znieczulica.docx og birtast í sama möppu og frumskráin.
 
-    Söguhamur: sjálfvirk hópun umferða í senur (frá v15.1)
+    Hreinsun samhliða: Skriftið fjarlægir sjálfkrafa HTML-merki (ef textinn kemur úr vafra eða úr staðbundinni .html skrá, t.d. þeirri sem Poliglótan bjó til) og Markdown-fyrirsagnarmerki (t.d. ### eða ####) áður en vinnsla hefst. Þú þarft ekki að hreinsa skrána handvirkt.
 
-    Ef þú hleður inn í Arkitekt skrá opowiesci/<leikur>.txt búin til af Interaktívu Sögumódúlnum, mun umbreytirinn þekkja umferðarmerki (t.d. „--- Umferð 7 ---") á 9 tungumálum (Umferð, Turn, Runde, Turno, Vuoro, Tour, Umferð, Turno, Ход) og á fimm umferðum mun hann setja nýja fyrirsögn á fyrsta stigi í formi „Sena N" (númer byrjar frá 1, staðbundið fyrir hvert tungumál — á ensku „Scene N", á þýsku „Szene N" o.s.frv.). Önnur umferðarmerki eru fjarlægð — þau birtast ekki í hljóðbókarfrásögninni, því „Umferð 7" lesið af TTS brýtur niðurdýfingu hlustandans. Útkoman er Word skjal með náttúrulegri skiptingu í senur með nokkrum mínútum af hljóði hver, tilbúið til innflutnings í ElevenLabs. Kerfið er sjálfvirkt — venjulegar hljóðbókarskrár án umferðarmerkja (hefðbundin frásögn úr Leikstjóra) eru unnar nákvæmlega eins og áður.
+    Söguhamur: sjálfvirk flokkun leiktíma í senur (frá v15.1)
+
+    Ef þú hleður inn í Arkitektinn skrána opowiesci/<gra>.txt sem Gagnvirka Söguhlutinn bjó til, mun umbreytirinn þekkja leiktímamerki (t.d. „--- Tura 7 ---" — einnig á öðrum studdum tungumálum ef þú lektst á öðru) og setja inn nýja fyrsta stigs fyrirsögn „Scena N" á fimm leiktíma fresti (númerið byrjar á 1, á tungumáli leiksins þíns). Önnur leiktímamerki eru fjarlægð — þau birtast ekki í frásögn hljóðbókarinnar, því „Tura 7" lesið upp af TTS brýtur innlifun hlustandans. Útkoman er Word-skjal með náttúrulegu senuskipulagi, nokkrar mínútur af hljóði í hverri senu, tilbúið til innflutnings í ElevenLabs. Virkni þessi er sjálfvirk — venjulegar hljóðbókarskrár án leiktímamerkja (klassísk frásögn úr Leikstjóri) eru unnar nákvæmlega eins og áður.
 
     Öflugur kostur fyrir NVDA og ElevenLabs notendur
 
-    "Heading 1" snið fyrir kafla er ekki bara fagurfræði. Í NVDA geturðu flett á milli fyrirsagna á augabragði með því að ýta á H (eða 1 fyrir fyrirsagnir á fyrsta stigi). Í stað þess að fletta í gegnum hundruð blaðsíðna, hopparðu frá kafla til kafla á sekúndubroti. Þetta breytir því hvernig þú vinnur með löng skjöl. Í ElevenLabs hefurðu tryggingu fyrir því að vélin setji sjálfkrafa inn klippingar og festist ekki við að leikstýra hljóðklippum.
+    „Heading 1" snið fyrir kafla er ekki bara fagurfræðilegt. Í NVDA geturðu flett yfir fyrirsagnir á ljóshraða með því að ýta á H-takkann (eða 1 fyrir fyrirsagnir á fyrsta stigi). Í stað þess að fletta í gegnum hundruð síður hoppar þú úr kafla í kafla á broti úr sekúndu. Þetta breytir vinnulaginu með löngum skjölum. Í ElevenLabs hefurðu vissu fyrir því að vélin setji sjálfkrafa inn skurði og hengist ekki upp við stjórnun hljóðklippa.
   krok_7_ksiega_swiata: |
-    SKREF 7: Hvernig á að skrifa Heimsbókina (Arkitekts Prompt og Mini-námskeið í Markdown)
+    SKREF 7: Hvernig á að skrifa Heimsbókina (Kvaðning Arkitektsins og Markdown-smánámskeið)
 
-    Gervigreindin sem knýr Aðalstúdíóið skilur best skipanir þegar þær eru sniðnar í Markdown merkingarmáli. Ef þú gefur AI í Leikstjóra bara lauslega hugmynd (t.d. "tvær systur í undirheimum"), mun vélin verða stressuð vegna skorts á smáatriðum og búa til klisjukennda, fyrirsjáanlega sögu, sem hunsar rökfræði.
+    Gervigreind sem knýr Aðalstúdíóið skilur skipanir best þegar þær eru sniðnar á Markdown-merkingarmálinu. Ef þú gefur gervigreind í Leikstjóranum aðeins lauslega hugmynd (t.d. „tvær systur í hinum heimi"), mun vélin fara í uppnám vegna skorts á upplýsingum og búa til banallega, fyrirsjáanlega sögu sem hunsar rökfræðina.
 
-    Til að koma í veg fyrir þetta, notaðu ytri spjallmenni (t.d. ókeypis ChatGPT eða Claude) sem þinn persónulega Arkitekt. Í útgáfu 13.0 þarftu ekki lengur að afrita prompt úr leiðbeiningunum — í Leikstjóra spjaldinu, rétt undir hnappnum „{rezyser.btn_zapisz_ksiege_label}", finnurðu hnappinn „{rezyser.btn_prompt_architekta_label}". Smelltu á hann og gluggi með tilbúnum texta prompt í „aðeins til lesturs" reit og hnappinn „Afrita í klippiborð" opnast. NVDA tilkynnir allt innihaldið strax eftir að glugginn opnast — það nægir að smella á „Afrita", líma (Ctrl+V) í ChatGPT/Claude og skipta út hlutanum „[SETTU HUGMYND ÞÍNA HÉR]" með þinni eigin söguþráðarhugmynd.
+    Til að koma í veg fyrir þetta skaltu nota ytri spjallbot (t.d. ókeypis ChatGPT eða Claude) sem persónulegan Arkitekt þinn. Í útgáfu 13.0 þarftu ekki lengur að afrita kvaðninguna úr leiðbeiningunum handvirkt — í stjórnborði Leikstjórans, rétt undir hnappinum „{rezyser.btn_zapisz_ksiege_label}", finnur þú hnappinn „{rezyser.btn_prompt_architekta_label}". Smelltu á hann og gluggi opnast með tilbúnum kvaðningstexta í „eingöngu lestur" reitnum ásamt hnappinum „Afrita á klippiborð". NVDA tilkynnir alla innihaldið strax þegar glugginn opnast — nóg er að smella á „Afrita", líma (Ctrl+V) í ChatGPT/Claude og skipta út hlutanum „[TUTAJ WPISZ SWÓJ POMYSŁ]" fyrir eigin frumkeim sögunnar.
 
-    Af hverju svona, en ekki með því að afrita úr leiðbeiningunum? Samræðan í GUI hefur mikilvægt aðgengisatriði: hún er innfædd og lesin án truflana af skjálesara, krefst ekki þess að skipta yfir í textaritil (þar sem íslenskir stafir og gæsalappir eru oft ranglega afritaðir) og virkar eins á öllum stýrikerfum. Sama mynstur — samræða með prompt til að afrita — er einnig notað í Reglustjóra (sjá SKREF 7b hér að neðan).
+    Af hverju svona en ekki með afritunar úr leiðbeiningunum? Glugginn í GUI hefur lykilforskot hvað aðgengi varðar: hann er innbyggður og lesinn án truflana af skjálesara, krefst ekki þess að skipta yfir í textaritil (þar sem pólskir „ogonki"-stafir og gæsalappir geta afritast rangt) og virkar eins á öllum stýrikerfum. Sama mynstur — gluggi með kvaðningu til afritunar — er einnig notað í Reglustjóranum (sjá SKREF 7b hér að neðan).
 
-    Hvernig AI svarar: Í svarinu færðu texta í tveimur hlutum. Fyrsti hlutinn er Heimsbókin lokuð í Markdown kóða blokk (merki ```markdown … ```). Afritaðu AÐEINS innihald kóðablokkarinnar (án sjálfra merkjanna ```) og límdu í reitinn „Heimsbók" í Leikstjóra, og smelltu síðan á „{rezyser.btn_zapisz_ksiege_label}". Annar hlutinn er tillaga um, hvaða skapandi hamur (Handrit eða Hljóðbók) passar best við hugmyndina þína — notaðu hana sem vísbendingu þegar þú velur ham í RadioBox.
+    Hvernig gervigreind svarar: Í svarinu færðu texta í tveimur hlutum. Fyrsti hlutinn er Heimsbókin lokuð í Markdown-kóðablokk (merki ```markdown … ```). Afritaðu EINGÖNGU innihald kóðablokkanna (án sjálfra merkjanna ```) og límdu í reitinn „Heimsbókin" í Leikstjóranum, og smelltu síðan á „{rezyser.btn_zapisz_ksiege_label}". Annar hlutinn er ráðlegging um hvaða skapandi ham (Skript eða Hljóðbók) hentar hugmynd þinni best — líttu á hana sem vísbendingu þegar þú velur ham í hamsvalsreitnum.
 
-    Mini-námskeið í Markdown í Heimsbókinni: einfalt pundmerki (#) er aðalhluti (t.d. „# Persónur"), tvöfalt pundmerki (##) er undirhluti, bandstrik (-) búa til lista, og tvöfaldar stjörnur (**texti**) feitletra algjörlega óhagganlegar reglur (t.d. „**Hetjan LJÚGAR ALDREI**"). Fyrir erlenda persónu, bættu við tagi með hreim, t.d. „[Speaker 1: Marek] - hefur franskan hreim". Lykilorðið „hreim" er NAUÐSYNLEGT — forritsvélin greinir það sjálfkrafa og setur rétt hljóðreglur á samtöl viðkomandi persónu.
+    Markdown-smánámskeið í Bókinni: einn myllumerki (#) er aðalhluti (t.d. „# Persónur"), tvöfaldur myllumerki (##) er undirhluti, bandstrik (-) búa til lista, og tvöföldar stjörnur (**texti**) feitletra algerar, óbrigðular reglur (t.d. „**Hetjan LYGAR ALDREI**"). Fyrir erlendmælandi persónu skaltu bæta við merki með hreim, t.d. „[Speaker 1: Marek] - hefur franska hreimi". Lykilorðið „akcent" er NAUÐSYNLEGT — vélin í forritinu greinir það sjálfkrafa og beitir réttum hljóðfræðireglum á samræður viðkomandi persónu.
 
-    Ábending: Mundu að uppfæra Heimsbókina þína reglulega (með því að bæta við nýjum stöðum eða mikilvægum persónum) þegar sagan þróast. Þú getur gert þetta handvirkt eða með hjálp ytri spjallmenna. Því ríkari grunnur, því betri árangur í Leikstjóra!
+    Ráðlegging: Mundu að uppfæra Heimsbókina þína reglulega (þegar söguþráðurinn þróast með nýjum stöðum eða mikilvægum persónum). Þetta er hægt að gera handvirkt eða með hjálp ytri spjallbots. Því ríkulegri sem grunnurinn er, þeim mun betri verða niðurstöðurnar í Leikstjóranum!
   krok_7b_manager_regul: |
     SKREF 7b: Reglustjóri (Ctrl+4) — orðabækur fyrir málfræðinga án Python
 
@@ -554,32 +558,32 @@ tresc:
     - Bilunarþolið þýðingarskráningarferli (skráning í .jsonl).
     - Merkjaviðgerð í Leikstjóraham (innsprautun ISO kóða).
   changelog_12: |
-    Nýir eiginleikar og breytingar í útgáfu 12.0 — Release Candidate
+    Nýjar aðgerðir og breytingar í útgáfu 12.0 — Release Candidate
 
-    - Algjör endurhönnun notendaviðmóts (ARKITEKTÓNÍSK BREYTING). Forritið er ekki lengur vefverkfæri sem keyrir í vafra. Allt viðmótið hefur verið endurskrifað frá grunni sem innfæddur skjáborðsforrit byggt á wxPython umgjörðinni. Enginn staðbundinn þjónn, enginn vafri, ekkert flugstöðvarglugga sem keyrir í bakgrunni — það er eitt, venjulegt forritsglugga. Innkomupunkturinn er main.py.
+    - Algjör endurbygging notendaviðmótsins (SKIPULAGSBREYTING). Forritið er ekki lengur vefverkfæri sem keyrir í vafra. Allt viðmótið var skrifað upp á nýtt sem innfætt skjáborðsforrit byggt á wxPython ramma. Það er enginn staðbundinn þjónn, enginn vafri, ekkert flugstöðvargluggi sem keyrir í bakgrunni — það er eitt, venjulegt forritagluggi. Inngangspunkturinn er main.py.
 
-    - Leiðsögustika með flýtilyklum (NÝTT). Verkfærin eru skipt um með þremur hnöppum á stikunni (Leikstjóri, Fjöltyngdur, Umbreytingar) eða í gegnum Verkfæri valmyndina. Aðgengilegir flýtilyklar: Ctrl+0 (Heimasíða með Kerfisskoðun), Ctrl+1 (Leikstjóri), Ctrl+2 (Fjöltyngdur), Ctrl+3 (Umbreytingar). Virka verkfærið er sjónrænt dregið fram með feitletruðum hnappi.
+    - Yfirlitsstika með flýtilyklahnöppum (NÝTT). Verkfærum er skipt yfir með þremur hnöppum á stikuna (Leikstjóri, Tungumálamaður, Breytingartæki) eða í gegnum Verkfærávalmyndina. Tiltækar flýtilyklar: Ctrl+0 (Heimasíða með System Check), Ctrl+1 (Leikstjóri), Ctrl+2 (Tungumálamaður), Ctrl+3 (Breytingartæki). Virkt verkfæri er sjónrænt auðkennt með feitletraðum hnappi.
 
-    - Full hagræðing fyrir skjálesara frá grunni (NVDA, VoiceOver). Hver víðari hefur fengið skýrt íslenskt aðgengisnafn. Fókus eftir að verkfæri er skipt lendir sjálfkrafa á lýsingu eininganna — NVDA byrjar strax að lesa nýja útsýnið. wx.MessageBox samræður eru innfæddar tilkynntar af skjálesara án nokkurra brella. Tab-röðin er rökrétt og samræmd í öllu viðmótinu. Sögulegar takmarkanir Streamlit og React umgjörðarinnar hverfa.
+    - Full fínstilling fyrir skjálesara frá grunni (NVDA, VoiceOver). Sérhver búnaður hefur fengið læsilegt aðgengisheiti. Fókus lendir sjálfkrafa á lýsingu eininganna eftir skipti á verkfæri — NVDA byrjar strax að lesa nýja sýnina. Gluggar wx.MessageBox eru tilkynntir af skjálesara á innfæðan hátt án nokkurra brella. Fliparöðin er rökrétt og samræmd í öllu viðmótinu. Sögulegar takmarkanir Streamlit og React ramma hverfa.
 
-    - Engin eldveggsstilling (BREYTING). Brottnám staðbundins vefþjóns þýðir að Windows Firewall sýnir ekki lengur glugga með spurningu um leyfi fyrir netaðgang við fyrstu ræsingu. Forritið einfaldlega ræsir sig.
+    - Engin stilling á eldvegg (BREYTING). Með því að fjarlægja staðbundinn vefþjón birtir Windows Firewall ekki lengur glugga þar sem spurt er um leyfi til netaðgangs við fyrstu ræsingu. Forritið ræsist einfaldlega.
 
-    - Innfæddar skráarvalsgluggar (NÝTT). Fjöltyngdur og Umbreytingar einingar hafa nú hnappinn "Skoða...", sem opnar kerfisbundinn skráarvalsglugga í stað þess að þurfa að slá inn slóðina handvirkt.
+    - Innfæddir skráarvalsgluggar (NÝTT). Einingarnar Tungumálamaður og Breytingartæki hafa nú hnapp „Vafra...", sem opnar kerfislægan skráarvalsglugg í stað þess að slá inn slóðina handvirkt.
 
-    - Verndun sköpunarhamar (NÝTT). Í Leikstjóra er ekki lengur hægt að skipta um vinnuham fyrir slysni (t.d. úr Hljóðbók í Handrit) þegar minni er upptekið — viðmótið lokar á að skipta yfir í annan skráningarham þar til saga eða útdráttur hefur verið hreinsaður. Hugstormunarhamur er alltaf aðgengilegur.
+    - Vernd skapandi ham (NÝTT). Í Leikstjóranum er ekki lengur hægt að skipta um vinnuham óvart (t.d. úr Audiobook í Skript) þegar minni er upptekið — viðmótið læsir skipti yfir í annan ritham þar til saga eða samantekt hefur verið hreinsuð. Hugsunarflughamur er alltaf tiltækur.
 
-    - Harðendurræsingarhnappur í Leikstjóra (NÝTT). Nýr hnappur "Loka Verkefni (Harðendurræsing)" gerir þér kleift að hreinsa allt verkefnið með einum smelli: sögu, útdrátt, Heimsbók og alla teljara — án þess að þurfa að núllstilla hvert svið handvirkt.
+    - Harður endurstillingarhnappurinn í Leikstjóranum (NÝTT). Nýr hnappur „Loka verkefni (Harður endurstilling)" gerir kleift að hreinsa allt verkefnið með einum smelli: sögu, samantekt, Heimsbok og alla teljara — án þess að þurfa að núllstilla hvert svæði handvirkt.
 
-    - Sjálfvirk innhleðsla sköpunarhamar (NÝTT). Við innhleðslu verkefnis endurheimtir forritið sjálfkrafa síðast notaða vinnuham (Handrit eða Hljóðbók) úr metaskrá sem forritið stjórnar. Þannig stillir RadioBox sig sjálfkrafa þegar verkefni er opnað aftur — þú þarft ekki að muna í hvaða ham þú varst að vinna.
+    - Sjálfvirk hleðsla á skapandi ham (NÝTT). Þegar verkefni er hlaðið inn endurheimtir forritið sjálfkrafa síðast notaða vinnuham (Skript eða Audiobook) úr lýsigagnaskrá sem forritið stjórnar. Þannig stillir valreiturinn fyrir ham sig sjálfur þegar verkefnið er opnað aftur — þú þarft ekki að muna í hvaða ham þú varst að vinna.
 
-    Eiginleikar haldnir óbreyttir frá útgáfu 11.0
+    Aðgerðir sem haldist hafa óbreyttar frá útgáfu 11.0
 
-    - Hljóðblæbrigði í Fjöltyngdum (Enska, Franska, Þýska, Spænska, Ítalska, Finnska, Pólska).
-    - Sjálfvirkur gulllykilskrá (.env) rafall innbyggður í upphafsskjá.
-    - Fjölbóka Heimsbók (hvert verkefni hefur sína eigin .md skrá).
-    - Bilanaþolið þýðingaraðlögunarkerfi (vistun í .jsonl).
-    - Merkjalagfæring í Leikstjóra (ISO kóða innspýting).
-    - Allir AI eiginleikar: Hugstormun, Handrit, Hljóðbók, Söguþráður, Óendanlegt Minni, Titlagjöf.
+    - Hljóðfræðilegir hreimar í Tungumálamanninum (Enska, Franska, Þýska, Spænska, Ítalska, Finnska, Íslenska).
+    - Sjálfvirkur búnaður til að búa til golden_key.env skrá innbyggður í upphafsskjáinn.
+    - Fjölbókakerfi Heimsbokar (hvert verkefni hefur sína eigin .md skrá).
+    - Bilunarþolið mekanískt til að halda áfram þýðingu (vistun í .jsonl).
+    - Tagaviðgerðarmaður í Leikstjóri ham (innspýting ISO kóða).
+    - Allar gervigreindarlegar aðgerðir: Hugsunarflug, Skript, Audiobook, Söguuppsöfnunarkerfi, Óendanlegt minni, Titlagjöf.
   changelog_13: |
     Nýir eiginleikar og breytingar í útgáfu 13.0 — Útgáfukandídat
 

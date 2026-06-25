@@ -1335,9 +1335,9 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — gesperrt; setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72, um zu entsperren)
 bot:
   closure:
-    Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-AI-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"
+    Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-GPT-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"
     Vieno: "Sei gegrüßt.\n\nDie Winde des Nordens haben Kunde gebracht, dass dein Anliegen seinen Platz in der neuen Veröffentlichung gefunden hat. Die Vision ist manifest geworden.\n\nDie neueste Veröffentlichung erwartet dich hier: {link}\n\nIch schließe diesen Kreis — die Angelegenheit hat ihr Ende erreicht.\n— Vieno"
-    Katla: "Hey!\n\nIm vulkanischen Feuer geschmiedet und noch glühend! Dein Anliegen wurde in der neuesten Audio-AI-Regisseur-Veröffentlichung gelöst.\n\nGreif zu hier: {link}\n\nIch schließe das Anliegen — vulkanische Grüße!\n— Katla"
+    Katla: "Hey!\n\nIm vulkanischen Feuer geschmiedet und noch glühend! Dein Anliegen wurde in der neuesten Audio-GPT-Regisseur-Veröffentlichung gelöst.\n\nGreif zu hier: {link}\n\nIch schließe das Anliegen — vulkanische Grüße!\n— Katla"
   answered:
     Lumi: "Hallo!\n\nVom Zentrum ist eine Nachricht in den Norden gelangt — eine Antwort für dich. Ich gebe sie genau so weiter, wie sie formuliert wurde:\n\n{maintainer_answer}\n\nIch schließe das Anliegen — der Schnee hat sich auf diese Sache gelegt. Bleib frostig!\n— Lumi"
     Vieno: "Sei gegrüßt.\n\nDie Winde des Nordens haben Worte der Antwort vom Zentrum gebracht. Ich überbringe sie unverändert:\n\n{maintainer_answer}\n\nIch schließe diesen Kreis — die Frage hat ihr Ende erreicht.\n— Vieno"

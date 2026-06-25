@@ -1332,9 +1332,9 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — estetty; aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ottaaksesi käyttöön)
 bot:
   closure:
-    Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Audio AI -ohjaajan julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"
+    Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Ääniohjaaja GPT -julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"
     Vieno: "Tervehdys.\n\nPohjolan tuulet ovat tuoneet sanan, että pyyntösi on löytänyt paikkansa uudessa julkaisussa. Näky on toteutunut.\n\nUusin julkaisu odottaa täällä: {link}\n\nSuljen tämän piirin — asia on saapunut päätökseen.\n— Vieno"
-    Katla: "Hei!\n\nTaottu tulivuoren tulessa ja yhä hehkuva! Pyyntösi on ratkaistu uusimmassa Audio AI -ohjaajan julkaisussa.\n\nTartu siihen täällä: {link}\n\nSuljen ilmoituksen — tulivuoriterveisin!\n— Katla"
+    Katla: "Hei!\n\nTaottu tulivuoren tulessa ja yhä hehkuva! Pyyntösi on ratkaistu uusimmassa Ääniohjaaja GPT -julkaisussa.\n\nTartu siihen täällä: {link}\n\nSuljen ilmoituksen — tulivuoriterveisin!\n— Katla"
   answered:
     Lumi: "Hei!\n\nKeskuksesta on saapunut Pohjolaan sana — vastaus sinulle. Välitän sen täsmälleen siinä muodossa kuin se annettiin:\n\n{maintainer_answer}\n\nSuljen ilmoituksen — lumi on laskeutunut tämän asian päälle. Pysy kylmänä!\n— Lumi"
     Vieno: "Tervehdys.\n\nPohjolan tuulet ovat tuoneet vastauksen sanat Keskuksesta. Välitän ne ehjinä:\n\n{maintainer_answer}\n\nSuljen tämän piirin — kysymys on saapunut päätökseen.\n— Vieno"

@@ -1336,9 +1336,9 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloqueados; establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 para desbloquear)
 bot:
   closure:
-    Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio AI.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"
+    Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio GPT.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"
     Vieno: "Saludos.\n\nLos vientos del Norte han traído noticia de que tu solicitud ha encontrado su lugar en la nueva versión. La visión se ha manifestado.\n\nLa última versión te espera aquí: {link}\n\nCierro este círculo — el asunto ha llegado a su fin.\n— Vieno"
-    Katla: "¡Hey!\n\n¡Forjada en fuego volcánico y todavía al rojo vivo! Tu solicitud ha sido resuelta en la última versión del Director de Audio AI.\n\nRecógela aquí: {link}\n\nCierro la incidencia — ¡saludos volcánicos!\n— Katla"
+    Katla: "¡Hey!\n\n¡Forjada en fuego volcánico y todavía al rojo vivo! Tu solicitud ha sido resuelta en la última versión del Director de Audio GPT.\n\nRecógela aquí: {link}\n\nCierro la incidencia — ¡saludos volcánicos!\n— Katla"
   answered:
     Lumi: "¡Hola!\n\nUna noticia desde el Centro ha llegado al Norte — una respuesta para ti. La transmito exactamente tal como fue formulada:\n\n{maintainer_answer}\n\nCierro la incidencia — la nieve se ha asentado sobre este asunto. ¡Que la escarcha te acompañe!\n— Lumi"
     Vieno: "Saludos.\n\nLos vientos del Norte han traído palabras de respuesta desde el Centro. Las relevo intactas:\n\n{maintainer_answer}\n\nCierro este círculo — la pregunta ha llegado a su fin.\n— Vieno"

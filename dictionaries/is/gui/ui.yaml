@@ -1336,9 +1336,9 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — læst; stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 til að opna)
 bot:
   closure:
-    Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Audio AI leikstjórans.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"
+    Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Hljóðstjóra GPT.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"
     Vieno: "Heilsa.\n\nVindar Norðursins hafa borið þau tíðindi að beiðni þín hafi fundið sinn stað í nýju útgáfunni. Sýnin hefur birst.\n\nNýjasta útgáfan bíður hér: {link}\n\nÉg loka þessum hring — málið hefur náð sínum enda.\n— Vieno"
-    Katla: "Hæ!\n\nSmíðað í eldfjallaeldi og enn glóandi! Beiðni þín hefur verið leyst í nýjustu útgáfu Audio AI leikstjórans.\n\nGríptu hana hér: {link}\n\nÉg loka málinu — eldfjallakveðjur!\n— Katla"
+    Katla: "Hæ!\n\nSmíðað í eldfjallaeldi og enn glóandi! Beiðni þín hefur verið leyst í nýjustu útgáfu Hljóðstjóra GPT.\n\nGríptu hana hér: {link}\n\nÉg loka málinu — eldfjallakveðjur!\n— Katla"
   answered:
     Lumi: "Halló!\n\nSkilaboð frá Miðstöðinni hafa borist Norðrinu — svar fyrir þig. Ég flyt þau nákvæmlega eins og þau voru sett fram:\n\n{maintainer_answer}\n\nÉg loka málinu — snjórinn hefur sest yfir þetta mál. Frostkveðjur!\n— Lumi"
     Vieno: "Heilsa.\n\nVindar Norðursins hafa borið svarorð frá Miðstöðinni. Ég kem þeim óbreyttum til skila:\n\n{maintainer_answer}\n\nÉg loka þessum hring — spurningin hefur náð sínum enda.\n— Vieno"

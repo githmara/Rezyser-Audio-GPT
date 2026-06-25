@@ -1341,9 +1341,9 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — locked; set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 to unlock)
 bot:
   closure:
-    Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio AI Director release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"
+    Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio Director GPT release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"
     Vieno: "Greetings.\n\nThe Northern winds carried word that your request has found its place in the new release. The vision has manifested.\n\nThe latest release awaits here: {link}\n\nClosing this circle — the matter has reached its end.\n— Vieno"
-    Katla: "Hey!\n\nForged in volcanic fire and still glowing! Your request has been resolved in the latest Audio AI Director release.\n\nCatch it here: {link}\n\nClosing the issue — volcanic greetings!\n— Katla"
+    Katla: "Hey!\n\nForged in volcanic fire and still glowing! Your request has been resolved in the latest Audio Director GPT release.\n\nCatch it here: {link}\n\nClosing the issue — volcanic greetings!\n— Katla"
   answered:
     Lumi: "Hi!\n\nWord from the Centre has reached the North with an answer for you. Passing it along exactly as it was given:\n\n{maintainer_answer}\n\nClosing the issue — the snow has settled on this matter. Stay frosty!\n— Lumi"
     Vieno: "Greetings.\n\nThe Northern winds carried words of answer from the Centre. I relay them intact:\n\n{maintainer_answer}\n\nClosing this circle — the question has reached its end.\n— Vieno"

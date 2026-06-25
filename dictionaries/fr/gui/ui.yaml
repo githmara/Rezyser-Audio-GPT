@@ -1327,9 +1327,9 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — verrouillées ; définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 pour déverrouiller)
 bot:
   closure:
-    Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio AI.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"
+    Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio GPT.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"
     Vieno: "Salutations.\n\nLes vents du Nord ont porté la nouvelle : votre demande a trouvé sa place dans la nouvelle version. La vision s'est manifestée.\n\nLa dernière version vous attend ici : {link}\n\nJe referme ce cercle — l'affaire a atteint sa fin.\n— Vieno"
-    Katla: "Hé !\n\nForgée dans le feu volcanique et encore brûlante ! Votre demande a été résolue dans la dernière version du Réalisateur Audio AI.\n\nAttrapez-la ici : {link}\n\nJe clôture le ticket — salutations volcaniques !\n— Katla"
+    Katla: "Hé !\n\nForgée dans le feu volcanique et encore brûlante ! Votre demande a été résolue dans la dernière version du Réalisateur Audio GPT.\n\nAttrapez-la ici : {link}\n\nJe clôture le ticket — salutations volcaniques !\n— Katla"
   answered:
     Lumi: "Bonjour !\n\nUn message du Centre est parvenu au Nord — une réponse pour vous. Je vous la transmets exactement comme elle a été formulée :\n\n{maintainer_answer}\n\nJe clôture le ticket — la neige s'est posée sur cette affaire. Glaciales salutations !\n— Lumi"
     Vieno: "Salutations.\n\nLes vents du Nord ont porté les mots de réponse du Centre. Je vous les relaye intacts :\n\n{maintainer_answer}\n\nJe referme ce cercle — la question a atteint sa fin.\n— Vieno"
