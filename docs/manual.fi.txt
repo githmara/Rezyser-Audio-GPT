@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Täydellinen opas (Versio 18.5.5 – Julkaisuversio)
+Reżyser Audio GPT — Täydellinen opas (Versio 18.6.0 – Julkaisuversio)
 
 Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.
 

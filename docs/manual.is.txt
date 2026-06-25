@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.5.5 – Útgáfuútgáfa)
+Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.6.0 – Útgáfuútgáfa)
 
 Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).
 
