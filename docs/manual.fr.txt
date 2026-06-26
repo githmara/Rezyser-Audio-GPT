@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Guide complet (Version 18.6.0 – Version de Lancement)
+Reżyser Audio GPT — Guide complet (Version 18.6.1 – Version de Lancement)
 
 Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).
 

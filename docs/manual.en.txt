@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Complete Guide (Version 18.6.0 – Release Edition)
+Reżyser Audio GPT — Complete Guide (Version 18.6.1 – Release Edition)
 
 Welcome to the Hybrid Recording Studio! This toolkit allows for the automatic writing, planning, formatting, and translation of radio play and audiobook scripts. It has been optimized to work with professional speech synthesizers and local screen reader engines (NVDA).
 

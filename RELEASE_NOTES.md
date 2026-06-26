@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 18.6.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 18.6.1 „Wersja Wydawnicza"
+
+*Patch v18.6.1: domknięcie WSZYSTKICH trzech pozycji z „Co nie weszło" v18.6.0 — czysto dokumentacyjny patch (treść paczki `dictionaries/`+`docs/`, zero zmian runtime/schematów/szyfrów/promptów LLM). **(1) Lokalizacja znacznika „SZKIC PROMPTU"** (opisowy nagłówek bloku Burzy Mózgów w manualu) w pięciu paczkach trzymających polski literał: de „--- PROMPT-ENTWURF ---", es „--- BORRADOR DE PROMPT ---", it „--- BOZZA DI PROMPT ---", ru „--- ЧЕРНОВИК ПРОМПТА ---", is „--- HVETJINGARDRÖG ---" (en/fr/fi miały już formę natywną). To nie literał silnika — brak w `.py`/recipe, czysta proza manuala. **(2) Islandzka deklinacja compound-trybu** w `is changelog_12`: „í Leikstjóri ham" (kalka z angielskiego „in Director mode" — mianownik „Leikstjóri" obok odmienionego „ham") → „í Leikstjóraham" (poprawne islandzkie złożenie w celowniku po przyimku „í"; wybrane dla 100% spójności z resztą dokumentacji is, gdzie forma już występuje). **(3) Leaki nazw modułu/trybów w `ru/readme.yaml`**: polskie „Opowieści"/„Wybory"/„Mniejsze Zło"/„Swobodny" → kanon rosyjski „Истории"/„Выборы"/„Меньшее зло"/„Свободный" (z `main.nazwy_narzedzi`/`ui.yaml`). Uściślenie: nota v18.6.0 wskazywała też `ru/dictionaries.yaml`, ale audyt potwierdził, że ten plik używał już kanonu — realny dług był wyłącznie w `readme.yaml`. Wszystkie formy natywne (is „HVETJINGARDRÖG", „Leikstjóraham") potwierdzone; bez autotłumacza — ręczna edycja źródeł.*
 
 *Release v18.6.0: sanity dokumentacji + ujednolicenie marki + refaktor toolingu tłumaczeń, plus jedna zmiana zachowania gry. **(1) Opowieści — klik wyboru wysyła od razu** (game feel; było: wpis do pola + ręczny „Wyślij"), domykając rozdział ról: w Reżyserze reżyserujesz (Burza = opcje-drafty), w Opowieściach grasz (wybór = ruch). Free-text pozostaje ścieżką ręcznej korekty; guard zajętości pomija auto-wysyłkę w trakcie tury/streszczenia w tle. **(2) Marka ujednolicona**: docs sztywny literał „Reżyser Audio GPT" (tytuły manuali/tales w 9 językach), GUI zlokalizowany per `app.nazwa` z GPT — usunięty przed-GPT wariant „Audio AI". **(3) Manual odświeżony**: sekcja anti-closure przepisana z ery GPT na Anthropic/Claude (provider-choice od 18.4) + opis guardu domykającego zdanie ucięte limitem długości; konwerter bez wielojęzycznego leaku enumeracji tury; manual Opowieści przepisany user-facing (zdjęte wewnętrzne ścieżki/pliki stanu i żargon wxPython). **(4) Pod maską — refaktor toolingu tłumaczeń**: zniesione `--input`/`--retry` + maszyneria META (gryzły się z chunkowaniem i modelami openai_compat — root cause gubienia zamrożonych markerów w dużych sekcjach), każde tłumaczenie = draft + checklista przeglądu, przywrócone domyślne chunkowanie. Plus re-lokalizacja nazw modułów w 9 paczkach (regresja re-translacji) z deklinacją is/fi/ru przez drugi niezależny przebieg. Zero zmian w schematach JSON, szyfrach i treści promptów LLM (poza opisaną zmianą zachowania kliknięcia w Opowieściach).*
 
@@ -105,6 +107,45 @@
 *Patch v15.2.1 (znaleziony podczas wizualnej weryfikacji v15.2 zaraz po release): tytuł `docs/manual.<iso>.txt` w 5 z 9 językach (de/fi/fr/is/it) zawierał polski leak — LLM podczas batch retranslate task #4 fazy B potraktował frazę „Podręcznik Reżysera Audio AI - Kompletny Przewodnik" jako brand name product i nie tłumaczył jej. Naprawa ręczna w 5 yamlach, zgodnie z [[feedback_hotfix_release]] (bump X.Y.(Z+1), nie nadpisuj artefaktów istniejącego v15.2 Release).*
 
 *Release v15.2 wielowątkowy domykający ostatnie luki user-facing po 15.0/15.1: (a) **fiolka w trybie Mniejsze Zło** — reusable ZERO-numerowana opcja desperackiego ratunku z pseudolosowym rozkładem 60/30/10 wymuszanym Pythonem (LLM nie ma jak wymyślić zbawiennego skutku, anti-deus-ex-machina); (b) **menu Pomoc** (4-te w menubar) z 3 podmenu otwierającymi `docs/<rdzen>.<iso>.txt` w domyślnym handlerze .txt — koniec z „gdzie jest instrukcja?"; (c) **README wielojęzyczne w 9 językach** (`readme.md` EN jako kanoniczny GitHub landing + 8 wariantów `readme.<iso>.md`) — fair dla nieanglojęzycznych użytkowników; (d) **Inno installer „Otwórz instrukcję obsługi" po instalacji** z automatycznym wyborem ISO z języka instalatora; (e) **rebrand Vocalizer → Tiflotecnia Voices for NVDA** (Cerrence successor) + alarm o krytycznym bugu detekcji języka + automatyczny bot tiflotecnia-patch w GitHub Actions; (f) **JSON prompts Reżysera** (Burza Mózgów zwraca strukturyzowany JSON z 3 opcjami rozwoju fabuły + persystencja w `.brainstorm.json`); (g) **refaktor docs YAML na sekcje + surgical batch translation** (tańsze przyszłe update'y treści — surgical `--klucz` zamiast FULL retranslate całego pliku). Plus dwa porządki: refaktor user-facing `opowiesci.yaml/.txt` → `tales.yaml/.txt` (konwencja braku polskiego w plikach end-userowych jak `manual` / `dictionaries`) i fix bugowego polskiego alfabetu w `pl/podstawy.yaml` (brakujące Ś, alfabet z deklarowanych 35 znaków → faktycznie 35).*
+
+---
+
+## 18.6.1 — documentation cleanup closing the three deferred items from 18.6.0 (Brainstorm "prompt draft" label localized, one Icelandic compound declension fixed, Russian module/mode-name leaks resolved)
+
+### 🆕 What's new (English)
+
+- **Brainstorm "prompt draft" block label localized** in the five manuals that still carried the Polish literal: de "--- PROMPT-ENTWURF ---", es "--- BORRADOR DE PROMPT ---", it "--- BOZZA DI PROMPT ---", ru "--- ЧЕРНОВИК ПРОМПТА ---", is "--- HVETJINGARDRÖG ---" (en/fr/fi were already localized). It is not an engine literal — pure manual prose, absent from `.py`/recipes.
+- **One Icelandic compound-mode declension fixed.** In `is changelog_12`, "í Leikstjóri ham" (an English calque — a nominative noun placed next to an already-declined one) becomes "í Leikstjóraham": the correct Icelandic compound in the dative that the preposition "í" requires, consistent with the rest of the Icelandic docs.
+- **Russian module/mode-name leaks resolved** in `ru/readme.yaml`: Polish "Opowieści"/"Wybory"/"Mniejsze Zło"/"Swobodny" → the Russian canon "Истории"/"Выборы"/"Меньшее зло"/"Свободный" (from `main.nazwy_narzedzi`/`ui.yaml`).
+
+### 🔭 Planned / deferred (English)
+
+- The 18.6.0 note also pointed at `ru/dictionaries.yaml`, but the audit confirmed that file already used the canon — the real debt was only in `readme.yaml`. Remaining `ru` hits (didactic ą/ę/ł, voice names caught by lingua) are accepted baseline false-positives, not regressions. The "deferred" list from 18.6.0 is now fully closed. The rest of this section is in Polish.
+
+### TL;DR
+
+Czysto dokumentacyjny patch domykający WSZYSTKIE trzy pozycje z „Co nie weszło" v18.6.0. Treść paczki (`dictionaries/` + `docs/`), zero zmian runtime/schematów JSON/szyfrów/promptów LLM. Wszystkie podmiany to ręczna edycja źródłowych szablonów (bez autotłumacza), formy natywne is potwierdzone.
+
+### Co nowego
+
+- **(1) Znacznik „SZKIC PROMPTU"** (opisowy nagłówek bloku Burzy Mózgów w manualu) zlokalizowany w pięciu paczkach trzymających polski literał: de `--- PROMPT-ENTWURF ---`, es `--- BORRADOR DE PROMPT ---`, it `--- BOZZA DI PROMPT ---`, ru `--- ЧЕРНОВИК ПРОМПТА ---`, is `--- HVETJINGARDRÖG ---` (hvetjing + drög; en/fr/fi miały już formę natywną). Nie literał silnika — brak w `.py`/recipe, czysta proza manuala.
+- **(2) Islandzka deklinacja** w `is changelog_12`: „í Leikstjóri ham" → „í Leikstjóraham". Stara forma to kalka z angielskiego („in Director mode") — mianownik „Leikstjóri" postawiony obok odmienionego „ham". Poprawne islandzkie to jedno złożenie odmienione w celowniku po przyimku „í"; wybrano „Leikstjóraham" dla 100% spójności z resztą dokumentacji is (forma występuje już m.in. w sekcji o Poligloci).
+- **(3) Leaki ru `readme.yaml`**: „Opowieści"/„Wybory"/„Mniejsze Zło"/„Swobodny" → kanon „Истории"/„Выборы"/„Меньшее зло"/„Свободный" (5 miejsc: nagłówek modułu, dwie wzmianki w `modul_opowiesci`, dwie w `architektura_ai`). Kanon z `main.nazwy_narzedzi.opowiesci` (= „Истории") i `ui.yaml::tryb_*` (Выбор/Меньшее зло/Свободный).
+
+### Pod maską
+
+- Wszystkie zmiany to ręczna edycja źródłowych `dictionaries/<kod>/gui/dokumentacja/*.yaml` (manual ×5: de/es/it/ru/is + readme ru) — autotłumacz (`buduj_wielojezyczne_docs.py`) NIEUŻYTY (drobne, ukierunkowane podmiany). Islandzkie „HVETJINGARDRÖG" i „Leikstjóraham" potwierdzone natywnie.
+- `docs/*.txt` zregenerowane przez `generuj_dokumentacje.py --waliduj`; diff = bump wersji w tytułach (18 plików) + sześć podmian treści (5× znacznik Burzy + 1× Leikstjóraham w is + 5× kanon ru w readme.ru.md).
+
+### Co nie weszło
+
+- **Pre-existing leaki w innych plikach `ru`** (dydaktyczne ą/ę/ł w `dictionaries.yaml`, nazwy głosów łapane przez lingua) to zaakceptowane baseline-FP, nie regresje — bez akcji. „Co nie weszło" v18.6.0 jest w całości domknięte tym patchem.
+
+### Walidacja
+
+- **Bramki**: leak gate (docs+ui vs baseline) = 0 ponad baseline ✅; placeholdery ✅; nagłówek finalizacji na każdym pliku ✅ (`generuj_dokumentacje.py --waliduj`).
+- **Propagacja do docs**: nowe znaczniki obecne w `docs/manual.{de,es,it,ru,is}.txt`, „Leikstjóraham" w `manual.is.txt`, kanon ru w `readme.ru.md`; stare „SZKIC PROMPTU" zostało WYŁĄCZNIE w `manual.pl.txt` (polskie źródło) ✅.
+- **YAML** parsują; `grep` potwierdza brak „Opowieści"/„Wybory"/„Mniejsze Zło"/„Swobodny" w `ru/readme.yaml` ✅.
 
 ---
 
