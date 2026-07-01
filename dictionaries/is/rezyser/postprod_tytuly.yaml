@@ -2,7 +2,7 @@
 #  EFTIRVINNSLA: GEFÐU KÖFLUM NÖFN (gervigreind)
 #  Verkfæri fyrir Hljóðbókarstillingu: fer yfir kafla í vistaðri verkefnisskrá
 #  og framleiðir stuttan, bókmenntanlegan titil fyrir hvern kafla.
-#  Notar sjálfgefið ódýrara líkan (claude-sonnet-4-6) þar sem verkefnið er einfalt.
+#  Notar sjálfgefið ódýrara líkan (claude-sonnet-5) þar sem verkefnið er einfalt.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Gefðu Köflum Nöfn (gervigreind)"
@@ -10,7 +10,7 @@ kategoria: postprodukcja
 kolejnosc: 10
 
 # --- Anthropic-parametrar ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: á íslensku
 

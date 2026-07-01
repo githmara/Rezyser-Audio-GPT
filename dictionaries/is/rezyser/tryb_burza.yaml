@@ -22,7 +22,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- Anthropic-stillingar ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # Sett í prompt í gegnum staðsetninguna {jezyk_odpowiedzi}.

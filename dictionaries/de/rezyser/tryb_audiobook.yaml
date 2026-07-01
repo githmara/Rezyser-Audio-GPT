@@ -8,7 +8,7 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- Anthropic-Parameter ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 jezyk_odpowiedzi: Deutsch
 zapis_do_pliku: true

@@ -171,44 +171,44 @@ tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla
 käynnistyksellä sinun version. Ei ohjelmointia.
 
 
-Mikä on "Tarina-tila"?
-----------------------
+Mikä on "Tarinatila"?
+----------------------------
 
-Kansio "opowiesci/" sisältää 8 tiedostoa, jotka kuvaavat sovelluksen toista
-päätilaa — tekoälyn ohjaamia interaktiivisia tekstipelejä, joissa tekoäly toimii
-narratiivisena moottorina. Toisin kuin Ohjaajan tilassa (jossa luot VALMIIN
-äänikirjan TTS-toistoa varten), Tarina-tila on vuoropohjainen keskustelu
-mallin kanssa, joka johtaa kanssasi dynaamisen tarinan sessiota:
+Kansio "opowiesci/" sisältää 8 tiedostoa, jotka kuvaavat sovelluksen
+toista päätilaa — interaktiivisia tekstipelejä, joita ohjaa tekoäly
+kertomusmoottorin roolissa. Toisin kuin Ohjaaja-tilassa (jossa luot
+VALMIIN äänikirjan toistettavaksi TTS:ssä), Tarinatila on vuoropohjainen
+keskustelu mallin kanssa, joka ohjaa kanssasi dynaamisen juonen istuntoa:
 
-- tryb_wyborow.yaml      — Valinnat (3–5 numeroitua vaihtoehtoa A–E jokaisen
-                           vuoron lopussa, intuitiivisin tila
+- tryb_wyborow.yaml      — Valinnat (3-5 numeroitua vaihtoehtoa A-E
+                           jokaisen vuoron lopussa, intuitiivisin tila
                            näkövammaisille pelaajille)
 - tryb_mniejsze_zlo.yaml — Pienempi paha (kuten Valinnat, mutta jokainen
-                           vaihtoehto on epäedullinen; v15.2:sta lähtien
-                           uudelleenkäytettävä ampulli NOLLA-numeroituna
+                           vaihtoehto on epäedullinen; versiosta 15.2
+                           lähtien uudelleenkäytettävä pullo ZERO-numeroituna
                            epätoivoisen pelastuksen vaihtoehtona)
 - tryb_swobodny.yaml     — Vapaa (mikä tahansa toiminto vapaana tekstinä,
-                           moottori ehdottaa 1–3 suositusta mutta ei pakota
-                           valintaa)
-- tryb_burza.yaml        — Ideointi (sisäinen dispatch, joka tuottaa
-                           kohtauksen kehitysehdotuksia narratiiviselle
-                           moottorille)
-- baza.yaml              — yhteiset perusmääritteet (vuoron pituus, tiivistelmien
-                           kiellot, anti-closure-direktiivi)
-- zaczatki.yaml          — seikkailun aloitukset (3 alustavaa maailman
-                           asetusta valittavaksi uutta peliä aloitettaessa)
-- streszczenie.yaml      — pitkien pelien tiivistelmägeneraattori (historian
-                           pakkaus mallin konteksti-ikkunaa varten)
-- cinematic_warning.yaml — varoitukset väkivaltaisista/dramaattisista
-                           kohtauksista (pelaajan mieltymysten mukainen)
+                           moottori ehdottaa 1-3 vaihtoehtoa mutta ei
+                           pakota valintaa)
+- tryb_burza.yaml        — Aivoriihi (sisäinen dispatch, joka tuottaa
+                           ehdotuksia kohtauksen kehittämiseksi
+                           kertomusmoottorille)
+- baza.yaml              — yhteiset perussäännöt (vuoron pituus, yhteenvetojen
+                           kiellot, anti-sulkeutumisdirektiivi)
+- zaczatki.yaml          — seikkailun aloittimet (3 alustavaa maailman
+                           asetelmaa valittavaksi uutta peliä aloitettaessa)
+- streszczenie.yaml      — pitkien pelien yhteenvetogeneraattori (historian
+                           pakkaus mallin kontekstiikkunaa varten)
+- cinematic_warning.yaml — varoitukset brutaaleista/dramaattisista
+                           kohtauksista (yhdenmukaisuus pelaajan mieltymysten kanssa)
 
-Kuten Ohjaajan tilassa, jokainen tiedosto sisältää muokattavan "järjestelmäkehotteen".
-Voit hienosäätää kertojan tyyliä (esim. vähemmän koristeellinen), muuttaa vuoron
-pituutta tai lisätä omia tarinallisia direktiivejä. V18.1:stä lähtien kaikki
-Tarina-tilat käyttävät yhtä yhteistä mallia (oletuksena ja suositeltuna
-Anthropic Claude Sonnet 4.6) — tehokkaampi malli noudattaa tiukasti maailman
-sääntöjä (keskeistä Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on
-oltava aidosti epäedullinen).
+Kuten Ohjaaja-tilassa, jokainen tiedosto sisältää muokattavan "järjestelmäkehotteen".
+Voit hienosäätää kertojan tyyliä (esim. vähemmän kukkeaa), muuttaa vuoron
+pituutta, lisätä omia juonidirektiivejä. Versiosta 18.1 lähtien kaikki
+Tarinatilan tilat käyttävät yhtä yhteistä mallia (oletuksena ja suositeltuna
+Anthropic Claude Sonnet 5) — vahvempi malli noudattaa tiukasti maailman
+sääntöjä (ratkaisevan tärkeää Pienempi paha -tilassa, jossa jokaisen
+vaihtoehdon on oltava todella epäedullinen).
 
 
 Kuinka aloittaa leikki — kolme vaikeustasoa

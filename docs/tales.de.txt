@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktive Geschichten Modul (18.6.1 – Release-Version)
+Reżyser Audio GPT — Interaktive Geschichten Modul (18.7.0 – Release-Version)
 
 Der zweite Hauptmodus der Anwendung neben dem Regisseur — diesmal wirst du zum Spieler einer dynamisch generierten Geschichte, anstatt ihr Autor zu sein. Die künstliche Intelligenz führt die Erzählung in der zweiten Person Singular („Du gehst durch den nebligen Wald, riechst die feuchten Blätter…"), und du entscheidest über die nächste Aktion — indem du eine beliebige Aktion im freien Text schreibst oder eine der nummerierten Optionen auswählst.
 
@@ -71,19 +71,19 @@ Hinweis: Weltregeln erfordern ein aktives Spiel. Wenn du auf "Weltregeln bearbei
 
 SCHRITT 5: Slash-Befehle — schnelle Aktionen ohne API
 
-Im Aktionsfeld kannst du jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Befehle sind lokal (verursachen keine API-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl polnische als auch englische Varianten werden akzeptiert:
+Im Aktionsfeld können Sie jederzeit einen Befehl eingeben, der mit einem Schrägstrich `/` beginnt. Die Befehle sind lokal (sie kosten keinerlei API-Aufrufe) und funktionieren unabhängig vom Spielmodus. Sowohl polnische als auch englische Varianten werden akzeptiert:
 
-/zapisz, /save — erzwingt das manuelle Speichern des Spielstands. Das automatische Speichern erfolgt nach jeder Runde, daher dient dieser Befehl hauptsächlich zur Sicherheit vor dem Schließen der Anwendung.
+/zapisz, /save — erzwingt ein manuelles Speichern des Spielstands. Die automatische Speicherung erfolgt nach jeder Runde, dieser Befehl dient also hauptsächlich der Sicherheit vor dem Schließen der Anwendung.
 
-/wczytaj, /load — öffnet einen Spielauswahldialog mit einer Liste der verfügbaren Namen (ab v15.2.3 anstelle des systemweiten Dateidialogs — eine direkte Liste aller deiner gespeicherten Spiele). NVDA liest die Liste auf natürliche Weise vor, ein blinder Spieler muss nicht durch den systemweiten Dateidialog navigieren. Nach der Auswahl werden der Spielname, der Modus und die vollständige Erzählung wiederhergestellt — du kannst ab der Runde weitermachen, bei der du aufgehört hast. Die Schaltfläche "Laden" verhält sich identisch.
+/wczytaj, /load — öffnet den Dialog zur Spielauswahl mit einer Liste der verfügbaren Namen (seit v15.2.3 anstelle des systemeigenen Dateidialogs — eine direkte Liste aller gespeicherten Spiele). NVDA liest die Liste natürlich vor, ein blinder Spieler muss nicht durch den Systemdateidialog navigieren. Nach Auswahl des Spielnamens werden Modus und vollständige Erzählung wiederhergestellt — Sie können ab der Runde fortfahren, bei der Sie aufgehört haben. Die Schaltfläche „Laden" verhält sich identisch.
 
-Die Erzählmaschine aller Geschichten-Modi verwendet ein einziges, gemeinsames Modell (standardmäßig und empfohlen: Anthropic Claude Sonnet 4.6; ab v18.4 kann ein fortgeschrittener Benutzer einen eigenen, mit OpenAI kompatiblen Endpunkt angeben — siehe Haupthandbuch, SCHRITT 2B). Ein leistungsstärkeres Modell hält sich strikt an die Regeln der Spielwelt — das ist besonders im Modus „Kleines Übel" wichtig, wo jede Option realistisch nachteilig bleiben muss.
+Die Erzähl-Engine aller Geschichten-Modi nutzt ein einziges, gemeinsames Modell (standardmäßig und empfohlen: Anthropic Claude Sonnet 5; ab v18.4 kann ein fortgeschrittener Benutzer einen eigenen OpenAI-kompatiblen Endpoint angeben — siehe Hauptmanual, SCHRITT 2B). Das leistungsfähigere Modell hält sich strikt an die Regeln der Spielwelt — das ist besonders wichtig im Modus Das kleinere Übel, wo jede Option real nachteilig bleiben muss.
 
-/wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert den Spielstand nicht und schlägt keine Optionen vor — die Erzählmaschine nutzt alle fünf Sinne (Sehen, Hören, Riechen, Tasten, Schmecken), um die Szene mit größerer Tiefe darzustellen. Das Ergebnis erscheint in einem separaten Dialog und wird NICHT an die Erzählung angehängt. Beispiel: „/wizualizuj jak wygląda strażnik" oder „/wizualizuj zapach kawiarni".
+/wizualizuj <opis>, /visualize <opis> — multisensorische Beschreibung der aktuellen Szene. Ändert nicht den Spielzustand, schlägt keine Entscheidungen vor — die Erzähl-Engine nutzt alle fünf Sinne (Sehen, Hören, Riechen, Tasten, Schmecken), um die Szene mit größerer Tiefe darzustellen. Das Ergebnis erscheint in einem separaten Dialog und wird NICHT der Erzählung hinzugefügt. Beispiel: „/wizualizuj wie der Wächter aussieht" oder „/wizualizuj Duft des Cafés".
 
-/pomoc, /help — zeigt ein Dialogfenster mit einer Liste aller verfügbaren Befehle an. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Screenreader liest die gesamte Liste sofort vor, ohne dass eine Navigation erforderlich ist.
+/pomoc, /help — zeigt ein Dialogfenster mit der Liste aller verfügbaren Befehle. Der Dialog ist schreibgeschützt und NVDA-freundlich — das Textfeld erhält automatisch den Fokus, der Screenreader liest die gesamte Liste sofort vor, ohne dass navigiert werden muss.
 
-/koniec, /quit — schließt die Anwendung (nach dem automatischen Speichern der laufenden Runde).
+/koniec, /quit — schließt die Anwendung (nach automatischem Speichern der laufenden Runde).
 
 
 SCHRITT 6: Deine Dateien — wo du die fertige Narration findest

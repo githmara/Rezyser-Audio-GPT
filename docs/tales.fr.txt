@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Module Histoires Interactives (18.6.1 – Version de Lancement)
+Reżyser Audio GPT — Module Histoires Interactives (18.7.0 – Version de Lancement)
 
 Le deuxième mode principal de l'application à côté du Réalisateur — cette fois, vous devenez le joueur d'une histoire générée dynamiquement au lieu de son auteur. L'intelligence artificielle mène la narration à la deuxième personne du singulier (« Vous marchez à travers une forêt brumeuse, vous sentez l'odeur des feuilles mouillées... »), et vous décidez du prochain mouvement — en écrivant n'importe quelle action en texte libre ou en choisissant l'une des options numérotées.
 
@@ -71,17 +71,17 @@ Remarque : les règles du monde nécessitent un jeu actif. Si vous cliquez sur "
 
 ÉTAPE 5 : Commandes slash — actions rapides sans API
 
-Dans le champ d'action, vous pouvez à tout moment saisir une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne génèrent aucun appel à l'API) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont toutes deux acceptées :
+Dans le champ d'action, vous pouvez à tout moment saisir une commande commençant par une barre oblique `/`. Les commandes sont locales (elles ne coûtent aucun appel API) et fonctionnent indépendamment du mode de jeu. Les variantes polonaises et anglaises sont toutes deux acceptées :
 
-/zapisz, /save — force la sauvegarde manuelle de l'état du jeu. La sauvegarde automatique s'effectue après chaque tour, cette commande sert donc principalement à s'assurer de la sauvegarde avant de fermer l'application.
+/zapisz, /save — force une sauvegarde manuelle de l'état du jeu. La sauvegarde automatique fonctionne après chaque tour, donc cette commande sert surtout à s'assurer avant de fermer l'application.
 
-/wczytaj, /load — ouvre une boîte de dialogue de sélection de partie affichant la liste des noms disponibles (depuis la v15.2.3, à la place de la boîte de dialogue système de fichiers — une liste directe de toutes vos parties sauvegardées). NVDA lit la liste naturellement, le joueur non-voyant n'a pas besoin de naviguer dans la boîte de dialogue système de fichiers. Une fois le nom de la partie sélectionné, le mode et la narration complète sont restaurés — vous pouvez reprendre au tour où vous vous étiez arrêté. Le bouton "Charger" a un comportement identique.
+/wczytaj, /load — ouvre une boîte de dialogue de sélection de partie avec la liste des noms disponibles (depuis la v15.2.3, à la place de la boîte de dialogue système de fichiers — liste directe de toutes vos parties sauvegardées). NVDA lit la liste naturellement, le joueur non-voyant n'a pas besoin de naviguer dans une boîte de dialogue système de fichiers. Une fois le nom de la partie choisi, le mode et la narration complète sont restaurés — vous pouvez continuer à partir du tour où vous vous étiez arrêté. Le bouton « Charger » a un comportement identique.
 
-Le moteur narratif de tous les modes Histoires utilise un seul modèle commun (par défaut et recommandé : Anthropic Claude Sonnet 4.6 ; depuis la v18.4, un utilisateur avancé peut indiquer son propre endpoint compatible OpenAI — voir le manuel principal, ÉTAPE 2B). Un modèle plus puissant respecte rigoureusement les règles de l'univers — c'est particulièrement important dans le mode Moindre mal, où chaque option doit rester réellement défavorable.
+Le moteur narratif de tous les modes Histoires utilise un modèle unique et commun (par défaut et recommandé : Anthropic Claude Sonnet 5 ; depuis la v18.4, un utilisateur avancé peut indiquer son propre point de terminaison compatible OpenAI — voir le manuel principal, ÉTAPE 2B). Un modèle plus puissant respecte rigoureusement les règles de l'univers — c'est particulièrement important dans le mode Moindre mal, où chaque option doit rester réellement défavorable.
 
-/wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne modifie pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour présenter la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée et N'EST PAS ajouté à la narration. Exemple : « /wizualizuj jak wygląda strażnik » ou « /wizualizuj zapach kawiarni ».
+/wizualizuj <opis>, /visualize <opis> — description multisensorielle de la scène actuelle. Ne modifie pas l'état du jeu, ne propose pas de choix — le moteur narratif utilise les cinq sens (vue, ouïe, odorat, toucher, goût) pour montrer la scène avec plus de profondeur. Le résultat apparaît dans une boîte de dialogue séparée et n'est PAS ajouté à la narration. Exemple : « /wizualizuj jak wygląda strażnik » (à quoi ressemble le garde) ou « /wizualizuj zapach kawiarni » (l'odeur du café).
 
-/pomoc, /help — affiche une boîte de dialogue contenant la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et compatible NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran lit immédiatement toute la liste sans nécessiter de navigation.
+/pomoc, /help — affiche une fenêtre de dialogue avec la liste de toutes les commandes disponibles. La boîte de dialogue est en lecture seule et adaptée à NVDA — le champ de texte reçoit automatiquement le focus, le lecteur d'écran énonce immédiatement toute la liste sans nécessiter de navigation.
 
 /koniec, /quit — ferme l'application (après la sauvegarde automatique du tour en cours).
 

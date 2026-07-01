@@ -14,7 +14,7 @@ kolejnosc: 20
 # --- Параметры Anthropic ---
 # Температура выше, чем у нарративных режимов — нам нужно богатое,
 # творческое описание. max_tokens низкий, потому что это не ход игры.
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.95
 max_tokens: 1000
 timeout_s: 60.0

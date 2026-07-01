@@ -9,7 +9,7 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- Parametry Anthropic ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.65
 jezyk_odpowiedzi: polsku
 

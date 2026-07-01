@@ -655,6 +655,7 @@ rezyser:
   kod_jezyka_edu_name: Explicación del código de idioma y prompt para el chatbot
   ostrzezenie_urwane_tytul: El fragmento puede haber sido cortado
   ostrzezenie_urwane_tresc: La respuesta del modelo alcanzó el límite de longitud y se interrumpió a mitad de una frase; el intento automático de completar la última oración no tuvo éxito. El fragmento se ha guardado tal como está — revisa el final y, si es necesario, añade el cierre manualmente o envía una instrucción breve para continuar.
+  err_struktura: El modelo de IA devolvió una estructura de datos incorrecta varias veces y no fue posible corregirla. Inténtalo de nuevo o simplifica la instrucción; si el error persiste, adjunta el archivo error_log.txt al informe.
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -1334,6 +1335,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tytul: Comando bloqueado
   komenda_odswiez_zablokowana_tresc: El comando «{komenda}» está bloqueado por defecto, ya que actualizar la narración desde el disco no recalcula el estado del juego (personajes, ubicación, inventario) y puede provocar deriva semántica. Para desbloquearlo, establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 y compila tu propio paquete.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloqueados; establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 para desbloquear)
+  err_struktura: El modelo de IA devolvió una estructura de datos incorrecta varias veces y no fue posible corregirla. Inténtalo de nuevo; si el error persiste, adjunta el archivo error_log.txt al informe.
 bot:
   closure:
     Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio GPT.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"

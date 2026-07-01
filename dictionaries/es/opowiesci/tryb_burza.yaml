@@ -13,7 +13,7 @@ kolejnosc: 20
 # --- Parámetros de Anthropic ---
 # Temperatura más alta que los modos narrativos — queremos una descripción
 # rica y creativa. max_tokens es bajo porque no es un turno de juego.
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.95
 max_tokens: 1000
 timeout_s: 60.0

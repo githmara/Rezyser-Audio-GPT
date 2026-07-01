@@ -2,7 +2,7 @@
 #  POST-PRODUZIONE: ASSEGNAZIONE TITOLI AI CAPITOLI (IA)
 #  Strumento per la modalità Audiobook: itera sui capitoli nel file di progetto
 #  salvato e genera un breve titolo letterario per ognuno.
-#  Usa un modello economico (claude-sonnet-4-6) per default — il compito è semplice.
+#  Usa un modello economico (claude-sonnet-5) per default — il compito è semplice.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Assegna Titoli ai Capitoli (IA)"
@@ -10,7 +10,7 @@ kategoria: postprodukcja
 kolejnosc: 10
 
 # --- Parametri Anthropic ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: italiano
 

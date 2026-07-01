@@ -17,7 +17,7 @@
 #   * Emoji (🎬 📄 📚 🌍 ✅ ⚠️ 🚨 ℹ️ ✂️ 🎭 🔄 📝 📋 🧠 🎙️ 🔐 🎛️ 🏁 📜 📖)
 #     zachowane 1:1.
 #   * Literały techniczne (`golden_key.env`, `.docx`, `sk-`, `dictionaries/`,
-#     `NVDA`, `Anthropic claude-sonnet-4-6` itp.) – nie tłumaczymy.
+#     `NVDA`, `Anthropic claude-sonnet-5` itp.) – nie tłumaczymy.
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -625,6 +625,7 @@ rezyser:
     Tekst NIE zostanie zapisany do pliku historii.
     Możesz zmodyfikować instrukcję i spróbować ponownie.
   err_dlugosc:           "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst — np. Księgę Świata lub instrukcję — i spróbuj ponownie."
+  err_struktura:         "Model AI kilkukrotnie zwrócił niepoprawną strukturę danych i nie udało się jej skorygować. Spróbuj ponownie albo uprość instrukcję — jeśli błąd się powtarza, dołącz plik error_log.txt do zgłoszenia."
   err_surowy_json: |-
     Model w tym trybie zwrócił dane w formacie JSON, ale tryb nie jest skonfigurowany jako tryb JSON, więc tekst NIE został zapisany (uniknięto wklejenia surowego JSON-a do pliku).
     Najczęstsza przyczyna: tryb powstał z duplikatu Skryptu. Ustaw w jego pliku YAML `format_wyjscia: skrypt_json` (dla dialogu narrator+postać) — albo, jeśli to nowy schemat, skontaktuj się z programistą.
@@ -1334,6 +1335,7 @@ opowiesci:
   err_rate_limit:            "Limit zapytań do Anthropic został wyczerpany. Odczekaj chwilę albo sprawdź stan konta."
   err_timeout:               "Czas oczekiwania na odpowiedź modelu został przekroczony (powyżej 120 sekund). Spróbuj ponownie."
   err_dlugosc:               "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst i spróbuj ponownie."
+  err_struktura:             "Model AI kilkukrotnie zwrócił niepoprawną strukturę danych i nie udało się jej skorygować. Spróbuj ponownie — jeśli błąd się powtarza, dołącz plik error_log.txt do zgłoszenia."
   odrzucenie_tytul:          "Akcja nie do poprowadzenia"
   odrzucenie_tresc:          "Silnik narracyjny nie może poprowadzić tej akcji — mogła być nie na temat, niemożliwa w tym świecie albo niezgodna z zasadami treści. Tura nie została zapisana. Sformułuj akcję inaczej i spróbuj ponownie."
 

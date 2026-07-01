@@ -654,6 +654,7 @@ rezyser:
   kod_jezyka_edu_name: Explanation of the language code and prompt for the chatbot
   ostrzezenie_urwane_tytul: Fragment may have been cut off
   ostrzezenie_urwane_tresc: The model's response reached the length limit and was cut off mid-sentence, and the automatic attempt to complete the last sentence failed. The fragment has been saved as-is — check the ending and, if needed, add a conclusion manually or send a short continuation prompt.
+  err_struktura: The AI model returned an invalid data structure several times and it could not be corrected. Please try again or simplify the instruction — if the error persists, attach the error_log.txt file to your report.
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -1339,6 +1340,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tytul: Command locked
   komenda_odswiez_zablokowana_tresc: The "{komenda}" command is locked by default, because refreshing the narrative from disk does not recalculate the game state (characters, location, inventory) and may cause semantic drift. To unlock it, set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 and build your own package.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — locked; set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 to unlock)
+  err_struktura: The AI model returned an invalid data structure several times and it could not be corrected. Please try again — if the error persists, attach the error_log.txt file to your report.
 bot:
   closure:
     Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio Director GPT release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"

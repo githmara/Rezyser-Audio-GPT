@@ -2,7 +2,7 @@
 #  POSTPRODUKCJA: NADAJ TYTUŁY ROZDZIAŁOM (AI)
 #  Narzędzie dla trybu Audiobook: iteruje po rozdziałach zapisanego pliku
 #  projektu i generuje dla każdego krótki, literacki tytuł.
-#  Używa modelu claude-sonnet-4-6 (konsolidacja v18.x na Anthropic) — zadanie proste.
+#  Używa modelu claude-sonnet-5 (konsolidacja v18.x na Anthropic) — zadanie proste.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Nadaj Tytuły Rozdziałom (AI)"
@@ -10,7 +10,7 @@ kategoria: postprodukcja
 kolejnosc: 10
 
 # --- Parametry Anthropic ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: polsku
 

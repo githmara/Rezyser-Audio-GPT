@@ -51,6 +51,7 @@ import core_screen_reader as csr
 import przepisy_rezysera as pr
 import sciezki
 import rezyser_ai as rai
+import bledy_ai
 from bledy_ai import BladGeneracjiAI
 from i18n import aktualny_jezyk, dostepne_jezyki_ui, t
 
@@ -2050,10 +2051,13 @@ class RezyserPanel(wx.Panel):
 
         Typowane błędy generacji AI (struktura/długość) niosą `klucz_i18n` —
         zwracamy komunikat lokalizowany w namespace `rezyser`, żeby user nigdy
-        nie zobaczył surowej, angielskiej treści technicznej (ta zostaje w
-        wyjątku dla error_log.txt / maintainera). Reszta wyjątków → `str(exc)`.
+        nie zobaczył surowej, angielskiej treści technicznej. Ta treść NIE
+        ginie — `zapisz_diagnostyke` dopisuje ją do error_log.txt PRZED
+        zwróceniem komunikatu, żeby dało się zdiagnozować powtarzające się
+        halucynacje struktury. Reszta wyjątków → `str(exc)`.
         """
         if isinstance(exc, BladGeneracjiAI):
+            bledy_ai.zapisz_diagnostyke(exc, "rezyser")
             return t(f"rezyser.{exc.klucz_i18n}")
         return str(exc)
 

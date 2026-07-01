@@ -175,39 +175,39 @@ these texts to your taste, save them, and the application will load your
 version the next time it starts. Zero programming.
 
 
-What is "Story Mode"?
+What is "Stories Mode"?
 ----------------------------
 
-The "opowiesci/" folder contains 8 files describing the second
-main mode of the application — interactive text games driven by AI acting as
-a narrative engine. Unlike Director Mode (where you generate a FINISHED
-audiobook for playback in TTS), Story Mode is a turn-by-turn conversation
-with a model that leads you through a session of dynamic storytelling:
+The "opowiesci/" folder contains 8 files describing the application's second
+main mode — interactive text-based games run by AI acting as a
+narrative engine. Unlike Director Mode (where you generate a FINISHED
+audiobook to be played back in TTS), Stories Mode is a turn-by-turn conversation
+with the model, which runs a dynamic story session with you:
 
-- tryb_wyborow.yaml      — Choices (3-5 numbered options A-E at the end
-                           of each turn, the most intuitive mode for
+- tryb_wyborow.yaml      — Choices (3-5 numbered options A-E at the end of
+                           each turn, the most intuitive mode for
                            blind players)
 - tryb_mniejsze_zlo.yaml — Lesser Evil (like Choices, but every option is
-                           unfavorable; from v15.2 a reusable vial as a
-                           ZERO-numbered desperate rescue option)
-- tryb_swobodny.yaml     — Free (any action in free text, the engine
+                           unfavorable; since v15.2 a reusable vial acts as
+                           the ZERO-numbered option for a desperate rescue)
+- tryb_swobodny.yaml     — Free Mode (any action in free text, the engine
                            suggests 1-3 hints but does not force a choice)
-- tryb_burza.yaml        — Brainstorm (internal dispatch generating
-                           scene development proposals for the narrative engine)
-- baza.yaml              — shared base rules (turn length, prohibition of
-                           summaries, anti-closure directive)
+- tryb_burza.yaml        — Brainstorm (an internal dispatch generating
+                           scene-development proposals for the narrative engine)
+- baza.yaml              — shared base rules (turn length, bans on
+                           summaries, the anti-closure directive)
 - zaczatki.yaml          — adventure starters (3 initial world setups
                            to choose from when starting a new game)
-- streszczenie.yaml      — summary generator for long games (history
-                           compression for the model's context window)
-- cinematic_warning.yaml — warnings about violent/dramatic
+- streszczenie.yaml      — summary generator for long games (compressing
+                           history for the model's context window)
+- cinematic_warning.yaml — warnings about brutal/dramatic
                            scenes (compliance with player preferences)
 
-As in Director Mode, each file contains a "system prompt" for editing.
-You can fine-tune the narrator's style (e.g. less flowery), change the turn
-length, add your own story directives. From v18.1 all Story Mode variants
-use a single shared model (by default and recommended: Anthropic
-Claude Sonnet 4.6) — a more powerful model rigorously adheres to the rules of the world
+As in Director Mode, each file contains an editable "system prompt".
+You can fine-tune the narrator's style (e.g. less flowery), change the
+turn length, add your own plot directives. Since v18.1 all Stories Mode
+modes use a single, shared model (Anthropic Claude Sonnet 5 by default and
+recommended) — a stronger model rigorously sticks to the world's rules
 (crucial in Lesser Evil mode, where every option must be genuinely unfavorable).
 
 

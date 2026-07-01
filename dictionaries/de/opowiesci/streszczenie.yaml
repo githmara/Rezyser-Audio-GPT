@@ -17,7 +17,7 @@ kolejnosc: 60
 # --- Anthropic-Parameter ---
 # Niedrige Temperatur — wir wollen eine treue, sachliche Zusammenfassung
 # (nicht kreativ).
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.3
 max_tokens: 800
 timeout_s: 60.0

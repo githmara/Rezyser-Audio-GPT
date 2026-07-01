@@ -658,7 +658,7 @@ class HomePanel(wx.Panel):
                         "# LLM_PROVIDER=openai_compat\n"
                         "# LLM_BASE_URL=https://openrouter.ai/api/v1\n"
                         "# OPENAI_API_KEY=PASTE_YOUR_KEY_HERE\n"
-                        "# LLM_MODEL=anthropic/claude-sonnet-4-6\n"
+                        "# LLM_MODEL=anthropic/claude-sonnet-5\n"
                     )
             except Exception as exc:
                 wx.MessageBox(

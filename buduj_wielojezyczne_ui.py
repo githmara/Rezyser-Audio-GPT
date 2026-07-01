@@ -303,7 +303,7 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str, *, persona_hint: bool = False) 
         "— copy 1:1 and keep their position relative to the rest of the text.\n"
         "4. **Technical literals** — do NOT translate: file names (`golden_key.env`, "
         "`.docx`, `.exe`), paths (`dictionaries/`, `runtime/`), AI model names "
-        "(`claude-sonnet-4-6`, `Anthropic`, `gpt-4o`, `OpenAI`), product names "
+        "(`claude-sonnet-5`, `Anthropic`, `gpt-4o`, `OpenAI`), product names "
         "(`NVDA`, `Vocalizer`, `Microsoft Word`), "
         "key prefixes (`sk-`), and Ctrl/Alt/Shift inside keyboard shortcuts.\n"
         "5. **Whitespace** — preserve every `\\n`, double space and indentation. Line "
@@ -510,7 +510,7 @@ def wywolaj_llm(
         "items": [{"id": i, "source": s} for i, s in liscie_tok],
     }
 
-    resp = klient.messages.create(
+    kwargs: dict[str, Any] = dict(
         model=model,
         max_tokens=MAX_TOKENS_OUT,
         temperature=0.0,
@@ -528,6 +528,21 @@ def wywolaj_llm(
             "format": {"type": "json_schema", "schema": SCHEMA_TLUMACZENIA},
         },
     )
+    try:
+        resp = klient.messages.create(**kwargs)
+    except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucenie `temperature`
+        # Od Claude Sonnet 5 (i Opus 4.7+/Fable 5) niedomyślna `temperature` zwraca
+        # 400 zamiast być zignorowana (patrz core_llm._wywolaj_anthropic — TEN
+        # skrypt ma WŁASNEGO klienta, poza core_llm, więc potrzebuje własnej
+        # degradacji). Złapane żywo 2026-07-01 przy migracji domyślnego modelu na
+        # claude-sonnet-5. Retry BEZ temperature; model wraca do samplingu domyślnego
+        # (dla deterministycznego tłumaczenia i tak liczy się głównie structured
+        # output + temperature=0 był tylko dodatkową gwarancją).
+        status = getattr(exc, "status_code", None)
+        if status != 400 or "temperature" not in str(exc):
+            raise
+        kwargs.pop("temperature")
+        resp = klient.messages.create(**kwargs)
 
     # Ucięcie limitem wyjścia → JSON niekompletny. PRZERYWAMY CAŁY batch przez
     # SystemExit (NIE RuntimeError): `except RuntimeError` w pętli per-chunk/jezyk
@@ -918,8 +933,8 @@ def _parsuj_argumenty() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default="claude-sonnet-4-6",
-        help="Anthropic Claude model used for translation (default: claude-sonnet-4-6).",
+        default="claude-sonnet-5",
+        help="Anthropic Claude model used for translation (default: claude-sonnet-5).",
     )
     # NB (od refaktoru 18.x): KAŻDE tłumaczenie — pełne ORAZ chirurgiczne
     # (--klucz) — ZAWSZE ląduje jako draft do recenzji + emituje checklistę

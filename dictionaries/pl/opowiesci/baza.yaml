@@ -15,7 +15,7 @@ kolejnosc: 0
 # --- Parametry Anthropic (dziedziczone przez tryby narracyjne) ---
 # Tryb może nadpisać model/temperaturę u siebie; jeśli nie nadpisuje,
 # `_zbuduj_prompt_systemowy` używa tych defaultów.
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- Prompt systemowy ---

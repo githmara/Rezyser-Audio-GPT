@@ -14,7 +14,7 @@ kategoria: meta
 kolejnosc: 70
 
 # --- Paramètres Anthropic ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 max_tokens: 600
 timeout_s: 60.0

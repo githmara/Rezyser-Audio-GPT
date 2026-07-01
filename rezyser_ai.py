@@ -1256,7 +1256,7 @@ def wywnioskuj_kod_jezyka(
     try:
         raw_txt, _stop = cl.wywolaj_llm(
             klient,
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             system=system,
             messages=[{"role": "user", "content": jezyk_odpowiedzi}],
             temperature=0,

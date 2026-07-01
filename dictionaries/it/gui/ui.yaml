@@ -655,6 +655,7 @@ rezyser:
   kod_jezyka_edu_name: Spiegazione del codice della lingua e prompt per il chatbot
   ostrzezenie_urwane_tytul: Il frammento potrebbe essere stato troncato
   ostrzezenie_urwane_tresc: La risposta del modello ha raggiunto il limite di lunghezza e si è interrotta a metà frase; il tentativo automatico di completare l'ultima frase non è riuscito. Il frammento è stato salvato così com'è — controlla la parte finale e, se necessario, aggiungi manualmente la conclusione oppure invia una breve istruzione di continuazione.
+  err_struktura: "Il modello AI ha restituito più volte una struttura dati non valida e non è stato possibile correggerla. Riprova o semplifica le istruzioni: se l'errore persiste, allega il file error_log.txt alla segnalazione."
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"
@@ -1332,6 +1333,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tytul: Comando bloccato
   komenda_odswiez_zablokowana_tresc: Il comando „{komenda}" è bloccato per impostazione predefinita, poiché il ricaricamento della narrazione dal disco non ricalcola lo stato della partita (personaggi, posizione, equipaggiamento) e può causare deriva semantica. Per sbloccarlo, imposta EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 e crea il tuo pacchetto personalizzato.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloccati; imposta EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 per sbloccarli)
+  err_struktura: "Il modello AI ha restituito più volte una struttura dati non valida e non è stato possibile correggerla. Riprova: se l'errore persiste, allega il file error_log.txt alla segnalazione."
 bot:
   closure:
     Lumi: "Ciao!\n\nLa neve si è posata e la correzione è arrivata! Tutto ciò che hai chiesto è appena atterrato nell'ultima versione del Regista Audio GPT.\n\nPrendi l'aggiornamento qui: {link}\n\nChiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n— Lumi"

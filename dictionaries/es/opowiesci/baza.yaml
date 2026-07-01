@@ -21,7 +21,7 @@ kategoria: baza
 kolejnosc: 0
 
 # --- Parámetros de Anthropic (heredados por los modos narrativos) ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- Prompt de sistema ---

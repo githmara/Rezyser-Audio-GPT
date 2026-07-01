@@ -20,7 +20,7 @@ kategoria: baza
 kolejnosc: 0
 
 # --- Параметры Anthropic (наследуются нарративными режимами) ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- Системный промпт ---

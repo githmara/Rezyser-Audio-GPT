@@ -10,7 +10,7 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- Anthropic parameters (inherited from baza.yaml when absent here) ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- Addon to prompt_systemowy from baza.yaml ---

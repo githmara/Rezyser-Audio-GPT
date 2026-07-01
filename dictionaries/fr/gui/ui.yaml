@@ -653,6 +653,7 @@ rezyser:
   kod_jezyka_edu_name: Explication du code de langue et invite pour le chatbot
   ostrzezenie_urwane_tytul: Le fragment a peut-être été tronqué
   ostrzezenie_urwane_tresc: La réponse du modèle a atteint la limite de longueur et s'est interrompue en milieu de phrase. La tentative automatique de compléter la dernière phrase a échoué. Le fragment a été enregistré tel quel — vérifiez sa fin et, si nécessaire, ajoutez manuellement une conclusion ou envoyez une courte instruction de continuation.
+  err_struktura: Le modèle IA a renvoyé plusieurs fois une structure de données incorrecte et il n'a pas été possible de la corriger. Réessayez ou simplifiez l'instruction — si l'erreur persiste, joignez le fichier error_log.txt à votre signalement.
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -1325,6 +1326,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tytul: Commande verrouillée
   komenda_odswiez_zablokowana_tresc: La commande « {komenda} » est verrouillée par défaut, car le rechargement de la narration depuis le disque ne recalcule pas l'état du jeu (personnages, lieu, équipement) et peut provoquer une dérive sémantique. Pour la déverrouiller, définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 et générez votre propre package.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — verrouillées ; définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 pour déverrouiller)
+  err_struktura: Le modèle IA a renvoyé plusieurs fois une structure de données incorrecte et il n'a pas été possible de la corriger. Réessayez — si l'erreur persiste, joignez le fichier error_log.txt à votre signalement.
 bot:
   closure:
     Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio GPT.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"

@@ -769,7 +769,7 @@ struktura: rozdzialy
 format_wyjscia: tekst
 
 # --- AI model parameters ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
@@ -902,7 +902,7 @@ a creative AI mode named **{etykieta}** (id stem `{id_pliku}` — must be NEW).
    (`rozdzialy`/`akty_sceny`/`brak`) and `format_wyjscia`
    (`tekst`/`skrypt_json`/`burza_json`) — REUSE existing values unless you are
    also adding the matching code (then you need source access).
-2. AI model parameters: `model: claude-sonnet-4-6`,
+2. AI model parameters: `model: claude-sonnet-5`,
    `temperatura` (0.7-0.9 for literary, 0.5 for scripting),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}` (already matched to the pack),
    `zapis_do_pliku: true`.
@@ -1015,7 +1015,7 @@ wiring it into the Python engine + GUI.
    `buduj_wielojezyczne_ui.py` for the non-pl languages, or add by hand and
    proofread).
 5. **`_model_dla_trybu`** in `gui_opowiesci.py`: since v18.1 every mode runs
-   on one model — the method returns `oai.MODEL_NARRACJA` (`claude-sonnet-4-6`)
+   on one model — the method returns `oai.MODEL_NARRACJA` (`claude-sonnet-5`)
    unconditionally (the per-mode OpenAI tiers `MODEL_QUALITY`/`MODEL_DOMYSLNY`
    were retired). A new mode needs NO change here; leave it as is unless you
    deliberately want a different model for this mode.
@@ -1073,7 +1073,7 @@ kategoria: postprodukcja
 kolejnosc: 20
 
 # --- AI model parameters ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: {natywny_jezyk_odp}
 
@@ -1151,7 +1151,7 @@ a postproduction named **{etykieta}**.
 # STRUCTURE REQUIREMENTS (engine)
 1. Fields: `id`, `etykieta`, `kategoria: postprodukcja`, `kolejnosc`
    (int 10-90, e.g. 20 for a title generator).
-2. AI model parameters: `model: claude-sonnet-4-6`,
+2. AI model parameters: `model: claude-sonnet-5`,
    `temperatura` 0.5-0.8 (we want stability),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}`.
 3. **`prompt_systemowy:`** the AI role, 1-2 sentences on the expected

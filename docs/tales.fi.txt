@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (18.6.1 – Julkaisuversio)
+Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli (18.7.0 – Julkaisuversio)
 
 Toinen sovelluksen päätila Ohjaajan rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly ohjaa kerrontaa yksikön toisessa persoonassa ("Kävelet sumuisen metsän läpi, tunnet märän lehden tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla vapaamuotoisen toiminnon tai valitsemalla yhden numeroiduista vaihtoehdoista.
 
@@ -69,21 +69,21 @@ Tyhjä sääntökenttä = ei lisäsääntöjä (oletuskäyttäytyminen, kuten v1
 Huomio: maailman säännöt vaativat aktiivisen pelin. Jos klikkaat "Muokkaa maailman sääntöjä…" ilman ladattua/aloitettua peliä, saat viestin "Ei aktiivista peliä" — klikkaa ensin "Uusi peli" tai lataa tallennettu peli.
 
 
-VAIHE 5: Slash-komennot — nopeat toiminnot ilman API-kutsuja
+VAIHE 5: Slash-komennot — nopeat toiminnot ilman API:a
 
-Toimintokentässä voit milloin tahansa kirjoittaa komennon, joka alkaa kauttaviivalla `/`. Komennot ovat paikallisia (eivät maksa yhtään API-kutsua) ja toimivat riippumatta pelitilasta. Sekä puolan- että englanninkieliset variantit hyväksytään:
+Toimintokenttään voit milloin tahansa kirjoittaa komennon, joka alkaa vinoviivalla `/`. Komennot ovat paikallisia (ne eivät kuluta yhtään API-kutsua) ja toimivat pelitilasta riippumatta. Hyväksyttyjä ovat sekä puolalaiset että englanninkieliset variantit:
 
-/zapisz, /save — pakottaa pelin tilan manuaalisen tallennuksen. Automaattitallennus toimii jokaisen vuoron jälkeen, joten tämä komento on pääasiassa varmuuden vuoksi ennen sovelluksen sulkemista.
+/zapisz, /save — pakottaa pelitilan manuaalisen tallennuksen. Automaattitallennus toimii jokaisen vuoron jälkeen, joten tämä komento on lähinnä varmuuden vuoksi ennen sovelluksen sulkemista.
 
-/wczytaj, /load — avaa pelinvalintavalintaikkunan, jossa on luettelo käytettävissä olevista nimistä (versiosta v15.2.3 alkaen järjestelmän tiedostovalintaikkunan sijaan — suora luettelo kaikista tallennetuista peleistäsi). NVDA lukee luettelon luonnollisesti, eikä näkövammaisen pelaajan tarvitse navigoida järjestelmän tiedostovalintaikkunassa. Nimen valitsemisen jälkeen pelin nimi, tila ja koko kerronta palautetaan — voit jatkaa vuorosta, johon jäit. Identtinen toiminta on painikkeella "Lataa".
+/wczytaj, /load — avaa pelin valintaikkunan, jossa on lista käytettävissä olevista nimistä (versiosta v15.2.3 lähtien järjestelmän tiedostovalintaikkunan sijaan — suora lista kaikista tallennetuista peleistäsi). NVDA lukee listan luontevasti, sokean pelaajan ei tarvitse navigoida järjestelmän tiedostovalintaikkunassa. Nimen valinnan jälkeen pelin tila, tila-asetus ja koko kertomus palautetaan — voit jatkaa siitä vuorosta, johon jäit. Sama toiminto löytyy painikkeesta "Lataa".
 
-Kaikkien Tarinat-tilojen kerrontamoottori käyttää yhtä yhteistä mallia (oletuksena ja suosituksena Anthropic Claude Sonnet 4.6; versiosta v18.4 alkaen edistynyt käyttäjä voi määrittää oman OpenAI-yhteensopivan endpointin — katso pääkäsikirja, VAIHE 2B). Tehokkaampi malli noudattaa tiukasti maailman sääntöjä — tämä on erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on pysyttävä aidosti epäedullisena.
+Kaikkien Tarinoita-tilojen kerrontamoottori käyttää yhtä, yhteistä mallia (oletuksena ja suositeltuna Anthropic Claude Sonnet 5; versiosta v18.4 lähtien edistynyt käyttäjä voi määrittää oman OpenAI-yhteensopivan päätepisteen — katso pääkäsikirja, VAIHE 2B). Vahvempi malli noudattaa tiukasti maailman sääntöjä — tämä on erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on pysyttävä aidosti epäedullisena.
 
-/wizualizuj <opis>, /visualize <opis> — nykyisen kohtauksen moniaistinen kuvaus. Ei muuta pelin tilaa, ei ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, tunto, maku) näyttääkseen kohtauksen syvemmin. Tulos näkyy erillisessä valintaikkunassa eikä sitä LISÄTÄ kerrontaan. Esimerkki: „/wizualizuj jak wygląda strażnik" tai „/wizualizuj zapach kawiarni".
+/wizualizuj <opis>, /visualize <opis> — nykyisen kohtauksen moniaistinen kuvaus. Ei muuta pelin tilaa eikä ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, tunto, maku) näyttääkseen kohtauksen syvällisemmin. Tulos ilmestyy erilliseen valintaikkunaan, eikä sitä lisätä kertomukseen. Esimerkki: "/wizualizuj jak wygląda strażnik" (miltä vartija näyttää) tai "/wizualizuj zapach kawiarni" (kahvilan tuoksu).
 
-/pomoc, /help — näyttää valintaikkunan, jossa on luettelo kaikista käytettävissä olevista komennoista. Valintaikkuna on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa kohdistuksen automaattisesti, ja ruudunlukija lukee koko luettelon heti ilman navigointia.
+/pomoc, /help — näyttää valintaikkunan, jossa on lista kaikista käytettävissä olevista komennoista. Ikkuna on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee heti koko listan ilman että sitä tarvitsee navigoida erikseen.
 
-/koniec, /quit — sulkee sovelluksen (käynnissä olevan vuoron automaattitallennuksen jälkeen).
+/koniec, /quit — sulkee sovelluksen (senhetkisen vuoron automaattitallennuksen jälkeen).
 
 
 VAIHE 6: Tiedostosi — mistä löydät valmiin kerronnan

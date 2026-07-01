@@ -13,7 +13,7 @@ kolejnosc: 20
 # --- Anthropic-parametrit ---
 # Korkeampi lämpötila kuin kerrontamoodeissa — haluamme rikkaan ja
 # luovan kuvauksen. max_tokens on matala, koska tämä ei ole pelin vuoro.
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.95
 max_tokens: 1000
 timeout_s: 60.0

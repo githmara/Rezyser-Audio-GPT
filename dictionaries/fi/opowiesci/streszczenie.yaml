@@ -14,7 +14,7 @@ kolejnosc: 60
 
 # --- Anthropic-parametrit ---
 # Matala lämpötila — haluamme uskollisen ja asiapohjaisen tiivistelmän (ei luovan).
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.3
 max_tokens: 800
 timeout_s: 60.0

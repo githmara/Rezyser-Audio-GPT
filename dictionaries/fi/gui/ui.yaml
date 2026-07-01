@@ -653,6 +653,7 @@ rezyser:
   kod_jezyka_edu_name: Kielikoodin selitys ja kehotus chatbotille
   ostrzezenie_urwane_tytul: Katkelma saattaa olla leikattu kesken
   ostrzezenie_urwane_tresc: Mallin vastaus saavutti pituusrajan ja katkesi kesken lauseen. Automaattinen yritys sulkea viimeinen lause epäonnistui. Katkelma on tallennettu nykyisessä muodossaan — tarkista sen loppu ja lisää tarvittaessa lopetus manuaalisesti tai lähetä lyhyt jatkamisohje.
+  err_struktura: Tekoälymalli palautti useita kertoja virheellisen tietorakenteen, jota ei saatu korjattua. Yritä uudelleen tai yksinkertaista ohjetta — jos virhe toistuu, liitä error_log.txt-tiedosto ilmoitukseen.
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -1330,6 +1331,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tytul: Komento estetty
   komenda_odswiez_zablokowana_tresc: Komento „{komenda}" on oletuksena estetty, koska tarinan päivittäminen levyltä ei laske pelin tilaa uudelleen (hahmot, sijainti, varusteet) ja voi aiheuttaa semanttista ajautumista. Ottaaksesi sen käyttöön, aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ja rakenna oma paketti.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — estetty; aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ottaaksesi käyttöön)
+  err_struktura: Tekoälymalli palautti useita kertoja virheellisen tietorakenteen, jota ei saatu korjattua. Yritä uudelleen — jos virhe toistuu, liitä error_log.txt-tiedosto ilmoitukseen.
 bot:
   closure:
     Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Ääniohjaaja GPT -julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"

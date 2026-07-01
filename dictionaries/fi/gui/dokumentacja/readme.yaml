@@ -36,14 +36,14 @@ tresc:
     * **Juonen Akut:** Algoritmi "loputtomalle muistille". Kun muistin osoitin saavuttaa punaisen hälytyksen tilan, järjestelmä luo automaattisesti juonitiivistelmän ja tallentaa sen Pitkäaikaisen Muistin kenttään.
     * **{liczba_trybow_rezysera} luovat tilat:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja, Otsikoiden Jälkituotanto). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
   modul_opowiesci: |
-    ### 2. Tarinat (Ctrl+2, toinen päätila versiosta v15.0 alkaen)
+    ### 2. Tarinat (Ctrl+2, toinen päätila versiosta 15.0 alkaen)
 
-    Interaktiiviset tekstipelit, joita tekoäly ohjaa narratiivisena moottorina. Toisin kuin Ohjaajan tilassa (jossa luot valmiin äänikirjan), Tarina-tila on vuoro vuorolta etenevä dynaaminen tarina:
+    Interaktiivisia tekstipelejä, joita AI ohjaa kerronnallisen moottorin roolissa. Toisin kuin Ohjaus-tilassa (jossa luodaan valmis äänikirja), Tarinat on vuoro vuorolta etenevä dynaaminen juoni:
 
-    * **Valintatila:** jokainen vuoro päättyy 3–5 numeroituun vaihtoehtoon A–E. Intuitiivisin tila näkövammaisille pelaajille — NVDA lukee vaihtoehdot, painat Tab ja Enter.
-    * **Pienempi paha -tila:** kuten Valintatila, mutta jokainen vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäedullinen. Versiosta v15.2 alkaen lisänä "ampulli" — uudelleenkäytettävä NOLLA-numeroitu epätoivoisen pelastuksen vaihtoehto, jonka vaikutukset ovat pseudosatunnaisia (60% haitallisia / 30% havaintoa häiritseviä / 10% harvoin hyödyllisiä, jakauma pakotetaan Pythonilla, LLM ei voi keksiä pelastavia vaikutuksia).
-    * **Vapaa tila:** mikä tahansa toiminto vapaana tekstinä ("yritän avata oven"), moottori ehdottaa 1–3 vaihtoehtoa mutta ei pakota valintaa.
-    * **Yksi tekoälymalli kaikille tiloille:** versiosta v18.1 alkaen kaikki Tarina-tilat käyttävät samaa yhteistä mallia (oletuksena ja suositeltuna Anthropic Claude Sonnet 4.6) — tehokkaampi malli noudattaa tiukasti maailman sääntöjä (erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on oltava aidosti epäedullinen).
+    * **Valintatila:** jokainen vuoro päättyy 3-5 numeroituun vaihtoehtoon A-E. Intuitiivisin tila näkövammaisille pelaajille — NVDA lukee vaihtoehdot, painat Tabia ja Enteriä.
+    * **Pienempi Paha -tila:** kuten Valinnat, mutta jokainen vaihtoehto on epäedullinen moraalisesti, fyysisesti tai strategisesti. Versiosta 15.2 alkaen lisätty "pullo" — uudelleenkäytettävä NOLLA-numeroitu vaihtoehto epätoivoiselle pelastautumiselle, jonka vaikutukset ovat pseudosatunnaisia (60% haitallisia / 30% havaintoa häiritseviä / 10% harvinaisen edullisia, jakauma pakotettu Pythonilla, LLM ei pysty keksimään pelastavaa lopputulosta).
+    * **Vapaa tila:** mikä tahansa toiminto vapaana tekstinä ("yritän avata oven"), moottori ehdottaa 1-3 vaihtoehtoa mutta ei pakota valintaan.
+    * **Yksi AI-malli kaikille tiloille:** versiosta 18.1 alkaen kaikki Tarinat-tilat käyttävät samaa, yhteistä mallia (oletuksena ja suositellen Anthropic Claude Sonnet 5) — vahvempi malli noudattaa tiukasti maailman sääntöjä (avainasemassa erityisesti Pienempi Paha -tilassa, jossa jokaisen vaihtoehdon on oltava aidosti epäedullinen).
   modul_poliglota: |
     ### 3. Polyglot (Ctrl+3, AI-kääntäjä + TTS-aksentit)
 
@@ -73,11 +73,11 @@ tresc:
   architektura_ai: |
     ## AI-arkkitehtuuri ja käytetyt mallit
 
-    Suositeltava ja oletusarvoinen AI-toimittaja on Anthropic (Claude) — kaikki järjestelmäpromptit on viritetty sitä varten, joten se tuottaa parhaan narratiivin laadun, parhaan maailman sääntöjen noudattamisen ja luonnollisimman proosan. Konsolidointi Claudeen tapahtui vaiheittain (Ohjaaja versiossa v18.0, Tarinat versiossa v18.1, Polyglootti ja jälkituotanto versiossa v18.2) — se perustui empiirisesti vahvistettuun ylivoimaisuuteen maailman sääntöjen noudattamisessa, proosan luonnollisuudessa ja kliseiden välttämisessä.
+    Suositeltu ja oletusarvoinen AI-palveluntarjoaja on Anthropic (Claude) — kaikki järjestelmäpromptit on hienosäädetty juuri sitä varten, joten se tuottaa korkealaatuisimman narratiivin, parhaan maailman sääntöjen noudattamisen ja luonnollisimman proosan. Siirtyminen Claudeen tapahtui vaiheittain (Ohjaaja versiossa 18.0, Tarinat versiossa 18.1, Polyglotti ja jälkituotanto versiossa 18.2) — muutos perustui empiirisesti vahvistettuun etuun maailman sääntöjen noudattamisessa, proosan luonnollisuudessa ja kliseiden välttämisessä.
 
-    * **Anthropic Claude Sonnet 4.6 (oletusarvoinen laadun peruspilari):** Sovelluksen KAIKEN älykkyyden moottori. Vastaa luovasta narratiivista (skriptien ohjaamisesta, perinteisen Äänikirjaproosan kirjoittamisesta, Aivoriihistä sekä KAIKISTA Tarina-tiloista — Valinnoista, Pienemmästä Pahasta, Vapaasta — sekä yhteenvetojen ja Cinematic-välikohtausten luomisesta), edistyneistä käännöksistä monilohkoisen kontekstin säilyttämisellä (Polyglootti) sekä mikrotehtävistä: lukujen kirjallisten otsikoiden iteratiivisesta luomisesta ja sisällön kielikoodin tunnistamisesta.
+    * **Anthropic Claude Sonnet 5 (oletusarvoinen laadun peruspilari):** Koko sovelluksen älyn moottori. Vastaa luovasta narraatiosta (skriptien ohjaamisesta, perinteisen Äänikirjaproosan kirjoittamisesta, Aivoriihestä sekä KAIKISTA Tarinat-tiloista — Valinnat, Pienempi Paha, Vapaa — mukaan lukien Cinematic-yhteenvetojen ja välikohtausten generointi), edistyneistä käännöksistä säilyttäen monilohkoisen kontekstin (Polyglotti), sekä pienemmistä osatehtävistä: lukujen iteratiivisesta kirjallisesta nimeämisestä ja sisällön kielikoodin tunnistamisesta.
 
-    * **Oma OpenAI-yhteensopiva endpoint (edistynyt vaihtoehto, versiosta v18.4):** Anthropicin sijaan voidaan osoittaa mikä tahansa OpenAI API -yhteensopiva endpoint (OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama, OpenAI-yhteensopiva Gemini ja muut) — yhdellä yhteisellä koodipolulla, ilman erillistä integraatiota toimittajakohtaisesti. Konfigurointi tiedostossa `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); täydelliset ohjeet pääkäsikirjassa (VAIHE 2B). Muut mallit voivat tuottaa heikompaa laatua kuin Claude, jolle promptit on viritetty — tämä on käyttäjän tietoinen kustannus↔laatu-valinta.
+    * **Oma OpenAI-yhteensopiva päätepiste (edistynyt vaihtoehto, versiosta 18.4 alkaen):** Anthropicin sijaan voi käyttää mitä tahansa OpenAI:n API:n kanssa yhteensopivaa päätepistettä (OpenRouter, Groq, Fireworks, DeepSeek, paikallinen Ollama, OpenAI-yhteensopiva Gemini ja muut) — yhdellä, yhteisellä koodipolulla, ilman erillistä integraatiota kutakin palveluntarjoajaa varten. Asetukset tehdään `golden_key.env`-tiedostossa (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); täydelliset ohjeet löytyvät pääkäyttöoppaasta (VAIHE 2B). Muut mallit saattavat tuottaa Claudea heikomman laadun, sillä promptit on hienosäädetty juuri sitä varten — tämä on käyttäjän tietoinen valinta kustannusten ja laadun välillä.
   ograniczenia_modeli: |
     ### Tunnetut mallien rajoitukset (Anti-Closure)
 

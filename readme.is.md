@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **18.6.1** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **18.7.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -24,14 +24,14 @@ Aðalstúdíó fyrir skrif á hljóðleikritum og hljóðbókum. Þú velur ham 
 * **4 skapandi hamir:** Hver skrá í `dictionaries/<jzk>/rezyser/` lýsir sérstakri „persónuleika“ AI leikstjórans (Hugstormun, Handrit, Hljóðbók, Eftirvinnsla titla). Þú getur stillt hljóm þeirra án forritunar — sjá Reglustjóri hér að neðan.
 
 
-### 2. Sögur (Ctrl+2, annar aðalhamur frá v15.0)
+### 2. Sögur (Ctrl+2, annar aðalhamurinn frá útgáfu 15.0)
 
-Gagnvirkar textaleikir reknar af gervigreind í hlutverki frásagnarvélar. Ólíkt Leikstjórnarmóðunni (þar sem þú framleiðir tilbúna hljóðbók), eru Sögur kvikur söguþráður umferð-fyrir-umferð:
+Gagnvirkir textaleikir sem gervigreind stýrir í hlutverki frásagnarvélar. Ólíkt Leikstjórn (þar sem þú býrð til fullbúna hljóðbók), eru Sögur runa-eftir-runu kvik atburðarás:
 
-* **Valhamur:** hver umferð lýkur með 3-5 númeruðum valkostum A-E. Innsæjastur hamurinn fyrir blinda leikmenn — NVDA les valkostina, þú ýtir á Tab og Enter.
-* **Minna Ilsins Hamur:** eins og Valhamur, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnumótandi. Frá v15.2 viðbótar „hettuglasið" — endurnýtanlegur NÚLL-númeraður valkostur örvæntingarfullrar björgunar, þar sem áhrifin eru gervitilviljunarkennd (60% skaðleg / 30% trufla skynjun / 10% sjaldgæft-gagnleg, dreifing þvinguð með Python, LLM getur ekki fundið upp frelsandi afleiðingu).
-* **Frjálshamur:** hvaða aðgerð sem er með frjálsum texta („ég mun reyna að opna dyrnar"), vélin leggur til 1-3 tillögur en þvingar ekki val.
-* **Eitt gervigreindalíkan fyrir alla hama:** frá v18.1 nota allir Söguhamir sama, sameiginlega líkanið (sjálfgefið og mælt með Anthropic Claude Sonnet 4.6) — öflugra líkan fylgir reglum heimsins af nákvæmni (sérstaklega mikilvægt í Minna Ilsins Ham, þar sem hver valkostur verður að vera raunverulega óhagstæður).
+* **Valhamur:** hver umferð endar með 3-5 tölusettum valkostum A-E. Innsæisríkasti hamurinn fyrir blinda leikendur — NVDA les valkostina, þú ýtir á Tab og Enter.
+* **Hamur Minna Illskunnar:** eins og Val, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnulega. Frá útgáfu 15.2 er til viðbótar „glasið" — endurnýtanlegur ZERO-tölusettur örvæntingarbjörgunarvalkostur, þar sem áhrifin eru gervi-tilviljunarkennd (60% skaðleg / 30% skynjunartruflandi / 10% sjaldan-hagstæð, dreifingin þvinguð fram af Python, LLM getur ekki fundið upp á hagstæðri niðurstöðu).
+* **Frjáls Hamur:** hvaða aðgerð sem er í lausum texta („ég reyni að opna dyrnar"), vélin stingur upp á 1-3 tillögum en þvingar ekki fram val.
+* **Eitt gervigreindarlíkan fyrir alla hami:** frá útgáfu 18.1 nota allir hamir Sagnanna sama, sameiginlega líkanið (sjálfgefið og mælt með Anthropic Claude Sonnet 5) — öflugra líkan heldur sig nákvæmlega við reglur heimsins (sérstaklega mikilvægt í ham Minna Illskunnar, þar sem hver valkostur verður að vera raunverulega óhagstæður).
 
 
 ### 3. Fjöltyngdur (Ctrl+3, AI Þýðandi + TTS Hreimur)
@@ -64,13 +64,13 @@ Frá og með v14.0 styður forritið 9 innfædd tungumál: Polski, Deutsch, Engl
 Allt GUI viðmót, skjöl (`docs/manual.<iso>.txt`) og flest kerfisskilaboð eru fáanleg innfædd á hverju af studdu tungumálunum. Kerfisboð AI í Leikstjóra og Söguham eru skrifuð á markmálinu (handvirkt, ekki sjálfvirkt þýdd — sjá `dictionaries/<code>/rezyser/` og `dictionaries/<code>/opowiesci/`).
 
 
-## Uppbygging gervigreindar og notuð líkön
+## Gervigreindararkitektúr og notuð líkön
 
-Ráðlagður og sjálfgefinn þjónustuaðili gervigreindar er Anthropic (Claude) — öll kerfisfyrirmæli eru fínstillt fyrir hann, þannig að hann gefur hæstu gæði frásagnar, bestu fylgni við reglur heimsins og náttúrulegustu prósu. Samþjöppun á Claude fór fram í áföngum (Leikstjóri í v18.0, Sögur í v18.1, Tungumálamaður og eftirvinnsla í v18.2) — hún hlaust af reynslubundinni staðfestri yfirburðum í fylgni við reglur heimsins, náttúrulegu prósu og forðast klisé.
+Ráðlagður og sjálfgefinn AI-þjónustuveitandi er Anthropic (Claude) — allar kerfisskipanir (system prompts) eru fínstilltar fyrir hann, svo hann skilar hæstu gæðum í frásögn, tryggustu fylgni við reglur heimsins og eðlilegustu prósa. Samþjöppun yfir í Claude fór fram í áföngum (Leikstjóri í útgáfu 18.0, Sögur í útgáfu 18.1, Fjöltyngi og eftirvinnsla í útgáfu 18.2) — sem byggðist á reynslulega staðfestu forskoti í fylgni við reglur heimsins, eðlilegum prósa og forðun klisja.
 
-* **Anthropic Claude Sonnet 4.6 (sjálfgefinn gæðastoð):** Vélin á bak við ALLA greind forritsins. Hann sér um skapandi frásögn (leikstjórn handrita, ritun hefðbundinnar prósu hljóðbókar, Hugflóð og ALLIR Söguhamir — Valhamur, Minna Ilsins Hamur, Frjálshamur — ásamt myndun samantekta og Cinematic hlébila), háþróaðar þýðingar með varðveislu samhengis margra blokka (Tungumálamaður), sem og smáverkefni: ítrekaðar bókmentalegar fyrirsagnir kafla og greining málskóða efnis.
+* **Anthropic Claude Sonnet 5 (sjálfgefin gæðastoð):** Vélin á bak við ALLA greind forritsins. Ber ábyrgð á skapandi frásögn (leikstjórn handrita, ritun hefðbundins hljóðbókarprósa, Hugflæði (Burza Mózgów) og ÖLLUM háttum Sagna — Valkostir, Minna illt og Frjáls háttur — ásamt gerð samantekta og millikafla í Cinematic-stíl), háþróuðum þýðingum með varðveislu samhengis milli margra blokka (Fjöltyngi), auk smærri verkefna: endurtekinnar úthlutunar á bókmenntalegum köflatitlum og greiningar á tungumálakóða efnis.
 
-* **Eigin endapunktur samhæfður við OpenAI (ítarlegur valkostur, frá v18.4):** Í stað Anthropic er hægt að tilgreina hvaða sem er endapunkt samhæfðan við OpenAI API (OpenRouter, Groq, Fireworks, DeepSeek, staðbundið Ollama, OpenAI-compatible Gemini og fleiri) — með einum, sameiginlegum kóðaleiðum, án sérstakrar samþættingar per þjónustuaðila. Stillingar í skránni `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); fullnægjandi leiðbeiningar í aðalhandbókinni (SKREF 2B). Önnur líkön geta gefið lægri gæði en Claude, sem kerfisfyrirmælin eru fínstillt fyrir — þetta er meðvitað val kostnaðar↔gæða af hálfu notandans.
+* **Eigin endapunktur samhæfður við OpenAI (valkostur fyrir lengra komna, frá útgáfu 18.4):** Í stað Anthropic er hægt að tilgreina hvaða endapunkt sem er samhæfðan við OpenAI-API (OpenRouter, Groq, Fireworks, DeepSeek, staðbundið Ollama, OpenAI-samhæft Gemini og fleiri) — með einni, sameiginlegri kóðaleið, án sérstakrar samþættingar fyrir hvern þjónustuveitanda. Stillingar eru í skránni `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); fullar leiðbeiningar er að finna í aðalhandbókinni (SKREF 2B). Önnur líkön geta gefið lakari gæði en Claude, sem skipanirnar eru fínstilltar fyrir — þetta er meðvitað val notandans milli kostnaðar og gæða.
 
 
 ### Þekkt takmörk módela (Anti-Closure)

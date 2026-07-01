@@ -91,39 +91,43 @@ La carpeta "rezyser/" contiene 4 archivos que describen los modos de operación 
 Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt del sistema": una larga instrucción para la inteligencia artificial sobre cómo debe comportarse en ese modo. Si sientes que, por ejemplo, el modo Audiolibro escribe "demasiado florido" o la Tormenta de Ideas propone soluciones mágicas con demasiada frecuencia, puedes ajustar estos textos a tu gusto, guardarlos y la aplicación cargará tu versión la próxima vez que se inicie. Cero programación.
 
 
-¿Qué es el "modo Historias"?
+Qué es el "modo Historias"
 ----------------------------
 
 La carpeta "opowiesci/" contiene 8 archivos que describen el segundo
-modo principal de la aplicación: juegos de texto interactivos conducidos por la IA en el rol
-de motor narrativo. A diferencia del modo Director (donde generas un audiolibro LISTO para reproducir en TTS), el modo Historias es una conversación turno a turno
-con el modelo, que lleva contigo una sesión de trama dinámica:
+modo principal de la aplicación: juegos de texto interactivos dirigidos por IA
+en el papel de motor narrativo. A diferencia del modo Director (donde generas
+un audiolibro TERMINADO para reproducir en TTS), el modo Historias es una
+conversación turno tras turno con el modelo, que lleva contigo una sesión
+de trama dinámica:
 
 - tryb_wyborow.yaml      — Elecciones (3-5 opciones numeradas A-E al final
                            de cada turno, el modo más intuitivo para
-                           jugadores ciegos)
-- tryb_mniejsze_zlo.yaml — El mal menor (como Elecciones, pero cada opción es
-                           desfavorable; desde v15.2 una ampolla reutilizable como
-                           opción CERO numerada de rescate desesperado)
+                           jugadores invidentes)
+- tryb_mniejsze_zlo.yaml — Mal menor (como Elecciones, pero cada opción es
+                           desfavorable; desde la v15.2, un vial reutilizable
+                           como opción numerada CERO de rescate desesperado)
 - tryb_swobodny.yaml     — Libre (cualquier acción en texto libre, el motor
-                           propone 1-3 sugerencias pero no impone la elección)
+                           propone 1-3 sugerencias pero no impone una elección)
 - tryb_burza.yaml        — Lluvia de ideas (dispatch interno que genera
-                           propuestas de desarrollo de escena para el motor narrativo)
+                           propuestas de desarrollo de escena para el motor
+                           narrativo)
 - baza.yaml              — reglas base comunes (duración del turno, prohibición
                            de resúmenes, directiva anti-cierre)
-- zaczatki.yaml          — iniciadores de aventura (3 configuraciones iniciales de mundo
-                           a elegir al comenzar una nueva partida)
-- streszczenie.yaml      — generador de resúmenes para partidas largas (compresión
-                           del historial para la ventana de contexto del modelo)
-- cinematic_warning.yaml — advertencias sobre escenas violentas/dramáticas
-                           (compatibilidad con las preferencias del jugador)
+- zaczatki.yaml          — arranques de aventura (3 configuraciones iniciales
+                           del mundo para elegir al empezar una nueva partida)
+- streszczenie.yaml      — generador de resúmenes de partidas largas (compresión
+                           de la historia para la ventana de contexto del modelo)
+- cinematic_warning.yaml — advertencias sobre escenas brutales/dramáticas
+                           (conformidad con las preferencias del jugador)
 
-Al igual que en el modo Director, cada archivo contiene un "prompt del sistema" editable.
-Puedes ajustar el estilo del narrador (p. ej., menos florido), cambiar la duración
-del turno, añadir tus propias directivas narrativas. Desde v18.1, todos los modos de Historias
-utilizan un único modelo compartido (por defecto y recomendado: Anthropic
-Claude Sonnet 4.6): un modelo más potente respeta rigurosamente las reglas del mundo
-(clave en el modo Mal menor, donde cada opción debe ser genuinamente desfavorable).
+Al igual que en el modo Director, cada archivo contiene un "prompt de sistema"
+editable. Puedes ajustar el estilo del narrador (por ejemplo, hacerlo menos
+florido), cambiar la duración del turno, añadir tus propias directivas de
+trama. Desde la v18.1, todos los modos de Historias utilizan un único modelo
+común (por defecto y recomendado, Anthropic Claude Sonnet 5); un modelo más
+potente se atiene rigurosamente a las reglas del mundo (algo clave en el modo
+Mal menor, donde cada opción debe ser realmente desfavorable).
 
 
 Cómo empezar a divertirse — tres niveles de dificultad

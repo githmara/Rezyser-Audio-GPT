@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Samtalslegar Sögur (18.6.1 – Útgáfuútgáfa)
+Reżyser Audio GPT — Samtalslegar Sögur (18.7.0 – Útgáfuútgáfa)
 
 Annar aðalhamur forritsins við hliðina á Leikstjóra — í þetta sinn verður þú leikmaður í sögunni sem er dynamískt búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lyktina af blautum laufum…"), og þú ákveður næstu aðgerð — skrifar hvaða aðgerð sem er með frjálsum texta eða velur eina af tölusettum valkostum.
 
@@ -69,21 +69,21 @@ Tómt reglureit = engar viðbótarreglur (sjálfgefin hegðun, eins og í v15.0)
 Athugið: reglur heimsins krefjast virks leiks. Ef þú smellir á "Breyta heimsreglum…" án þess að hafa hlaðið/sett upp leik, færðu skilaboðin „Enginn virkur leikur" — smelltu fyrst á "Nýr leikur" eða hlaðið vistaðan leik.
 
 
-SKREF 5: Slash-skipanir — skjótar aðgerðir án API
+SKREF 5: Skástrik-skipanir — hraðar aðgerðir án API
 
-Í aðgerðareitnum getur þú hvenær sem er slegið inn skipun sem byrjar á skástrik `/`. Skipanirnar eru staðbundnar (kosta engar API-kallsferðir) og virka óháð leikstíl. Bæði íslenskar og enskar útgáfur eru samþykktar:
+Í aðgerðarreitnum getur þú hvenær sem er slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta engin API-köll) og virka óháð leikstillingu. Bæði pólsk og ensk afbrigði eru samþykkt:
 
-/zapisz, /save — þvingar handvirka vistun á leikstöðu. Sjálfvirk vistun á sér stað eftir hverja umferð, þannig að þessi skipun er fyrst og fremst til öryggis áður en forritið er lokað.
+/zapisz, /save — knýr fram handvirka vistun leikstöðunnar. Sjálfvirk vistun á sér stað eftir hverja umferð, svo þessi skipun er fyrst og fremst til öryggis fyrir lokun forritsins.
 
-/wczytaj, /load — opnar leikvalsglugg með lista yfir tiltæk nöfn (frá v15.2.3 í stað kerfisglugga fyrir skrár — beinn listi yfir öll vistuð leikrit þín). NVDA les listann náttúrulega, blindur leikmaður þarf ekki að flakka um kerfisglugga skráa. Þegar leikur er valinn eru nafn leiksins, leikstíll og full frásögn endurreist — þú getur haldið áfram frá þeirri umferð sem þú stoppaðir á. Hnappurinn "Hlaða" hegðar sér á nákvæmlega sama hátt.
+/wczytaj, /load — opnar val-glugga fyrir leiki með lista yfir tiltæk nöfn (frá v15.2.3, í stað kerfisglugga fyrir skrár — beinn listi yfir öll þín vistuðu spil). NVDA les listann eðlilega, blindur leikmaður þarf ekki að rata um kerfisglugga fyrir skrár. Eftir að nafn leiksins hefur verið valið eru stillingin og öll frásögnin endurheimt — þú getur haldið áfram frá þeirri umferð sem þú hættir í. Hnappurinn "Hlaða" hegðar sér nákvæmlega eins.
 
-Frásagnarvélin allra Sögu-stíla notar eitt sameiginlegt líkan (sjálfgefið og mælt með Anthropic Claude Sonnet 4.6; frá v18.4 getur reynslumikill notandi tilgreint eigin endpoint sem er samhæfður OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkan fylgir reglum heimsins af meiri nákvæmni — þetta skiptir sérstaklega máli í Minna illt-stílnum, þar sem sérhver valkostur verður að vera raunverulega óhagstæður.
+Frásagnarvélin í öllum stillingum Sagna notar eina, sameiginlega líkan (sjálfgefið og mælt er með Anthropic Claude Sonnet 5; frá v18.4 getur lengra kominn notandi tilgreint eigin endapunkt sem er samhæfur við OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkanið heldur sig strangt við reglur heimsins — þetta skiptir sérstöku máli í stillingunni Minna illt, þar sem hver valkostur verður að haldast raunverulega óhagstæður.
 
-/wizualizuj <opis>, /visualize <opis> — fjölskynjaralýsing á núverandi senu. Breytir ekki leikstöðu, leggur ekki til val — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snertingu, bragð) til að sýna senuna með meiri dýpt. Niðurstaðan birtist í sérstökum glugga og er EKKI bætt við frásögnina. Dæmi: „/wizualizuj jak wygląda strażnik" eða „/wizualizuj zapach kawiarni".
+/wizualizuj <lýsing>, /visualize <lýsing> — fjölskynjanleg lýsing á núverandi atriði. Breytir ekki leikstöðunni, býður ekki upp á val — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snertingu, bragð) til að sýna atriðið með meiri dýpt. Niðurstaðan birtist í sérstökum glugga og bætist EKKI við frásögnina. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lykt kaffihússins".
 
-/pomoc, /help — sýnir glugga með lista yfir allar tiltækar skipanir. Glugginn er readonly og NVDA-vingjarnlegur — textareiturinn fær fókus sjálfkrafa og skjálesarinn les strax allan listann án þess að þurfa að flakka.
+/pomoc, /help — birtir samtalsglugga með lista yfir allar tiltækar skipanir. Glugginn er skrifvarinn og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax upp allan listann án þess að þörf sé á að rata um.
 
-/koniec, /quit — lokar forritinu (eftir sjálfvirka vistun á yfirstandandi umferð).
+/koniec, /quit — lokar forritinu (eftir sjálfvirka vistun umferðarinnar sem er í gangi).
 
 
 SKREF 6: Skrárnar þínar — hvar finnur þú tilbúna frásögnina

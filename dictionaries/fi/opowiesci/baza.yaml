@@ -19,7 +19,7 @@ kategoria: baza
 kolejnosc: 0
 
 # --- Anthropic-parametrit (perityvät kerrontamoodeihin) ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- Järjestelmäkehote ---

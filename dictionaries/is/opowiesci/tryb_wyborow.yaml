@@ -10,7 +10,7 @@ kategoria: tryb
 kolejnosc: 40
 
 # --- Anthropic-stillingar ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- Viðauki við prompt_systemowy úr baza.yaml ---

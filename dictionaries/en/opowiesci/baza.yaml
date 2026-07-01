@@ -20,7 +20,7 @@ kolejnosc: 0
 # --- Anthropic parameters (inherited by narrative modes) ---
 # A mode may override model/temperature; otherwise `_zbuduj_prompt_systemowy`
 # uses these defaults.
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- System prompt ---

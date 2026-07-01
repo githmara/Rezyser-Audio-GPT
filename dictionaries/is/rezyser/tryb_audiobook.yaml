@@ -9,7 +9,7 @@ kategoria: tryb
 kolejnosc: 30
 
 # --- Anthropic-parametrar ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 jezyk_odpowiedzi: á íslensku
 

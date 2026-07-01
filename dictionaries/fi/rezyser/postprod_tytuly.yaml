@@ -2,7 +2,7 @@
 #  JÄLKITUOTANTO: ANNA LUVUILLE NIMET (tekoäly)
 #  Työkalu Äänikirja-tilaan: iteroi tallennetun projektitiedoston luvut ja
 #  tuottaa jokaiselle lyhyen, kaunokirjallisen otsikon.
-#  Käyttää oletuksena halpaa mallia (claude-sonnet-4-6), koska tehtävä on yksinkertainen.
+#  Käyttää oletuksena halpaa mallia (claude-sonnet-5), koska tehtävä on yksinkertainen.
 # -----------------------------------------------------------------------------
 id: tytuly
 etykieta: "Anna Lukujen Nimet (tekoäly)"
@@ -10,7 +10,7 @@ kategoria: postprodukcja
 kolejnosc: 10
 
 # --- Anthropic-parametrit ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: suomeksi
 

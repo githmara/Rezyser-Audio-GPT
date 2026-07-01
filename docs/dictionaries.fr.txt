@@ -136,40 +136,40 @@ les sauvegarder, et l'application chargera votre version au prochain démarrage.
 Zéro programmation.
 
 
-Qu'est-ce que le « mode Histoires » ?
-----------------------------------------
+# Qu'est-ce que le « mode Histoires » ?
+----------------------------
 
 Le dossier « opowiesci/ » contient 8 fichiers décrivant le second
-mode principal de l'application — des jeux de texte interactifs conduits par l'IA dans le rôle
-de moteur narratif. Contrairement au mode Réalisateur (où vous générez un audiobook PRÊT À L'EMPLOI
-à lire via TTS), le mode Histoires est une conversation tour par tour
-avec le modèle, qui anime avec vous une session de récit dynamique :
+mode principal de l'application — des jeux textuels interactifs menés par l'IA dans le rôle
+d'un moteur narratif. Contrairement au mode Réalisateur (où vous générez un livre audio
+TOUT PRÊT à être lu par le TTS), le mode Histoires est une conversation
+tour par tour avec le modèle, qui mène avec vous une session d'intrigue dynamique :
 
 - tryb_wyborow.yaml      — Choix (3 à 5 options numérotées A-E à la fin
-                           de chaque tour, le mode le plus intuitif pour
+                           de chaque tour, mode le plus intuitif pour
                            les joueurs non-voyants)
-- tryb_mniejsze_zlo.yaml — Moindre mal (comme Choix, mais chaque option est
+- tryb_mniejsze_zlo.yaml — Le moindre mal (comme Choix, mais chaque option est
                            défavorable ; depuis la v15.2, une fiole réutilisable comme
-                           option ZÉRO numérotée de secours désespéré)
-- tryb_swobodny.yaml     — Libre (toute action en texte libre, le moteur
+                           option numérotée ZÉRO de sauvetage désespéré)
+- tryb_swobodny.yaml     — Libre (action en texte libre au choix, le moteur
                            propose 1 à 3 suggestions mais n'impose pas de choix)
-- tryb_burza.yaml        — Brainstorming (dispatch interne générant
+- tryb_burza.yaml        — Remue-méninges (dispatch interne générant
                            des propositions de développement de scène pour le moteur narratif)
-- baza.yaml              — règles de base communes (longueur du tour, interdictions
-                           de résumés, directive anti-clôture)
-- zaczatki.yaml          — amorces d'aventure (3 configurations initiales de monde
+- baza.yaml              — règles de base communes (durée du tour, interdiction
+                           des résumés, directive anti-clôture)
+- zaczatki.yaml          — amorces d'aventure (3 configurations initiales du monde
                            au choix lors d'une nouvelle partie)
 - streszczenie.yaml      — générateur de résumés pour les longues parties (compression
                            de l'historique pour la fenêtre de contexte du modèle)
-- cinematic_warning.yaml — avertissements concernant les scènes violentes/dramatiques
+- cinematic_warning.yaml — avertissements sur les scènes brutales/dramatiques
                            (conformité avec les préférences du joueur)
 
 Comme dans le mode Réalisateur, chaque fichier contient un « prompt système » modifiable.
-Vous pouvez affiner le style du narrateur (par exemple, moins fleuri), modifier la longueur
-du tour, ajouter vos propres directives narratives. Depuis la v18.1, tous les modes Histoires
-utilisent un seul modèle commun (par défaut et recommandé : Anthropic
-Claude Sonnet 4.6) — un modèle plus puissant respecte rigoureusement les règles du monde
-(essentiel dans le mode Moindre mal, où chaque option doit être réellement défavorable).
+Vous pouvez ajuster le style du narrateur (par exemple le rendre moins fleuri), modifier la durée
+d'un tour, ajouter vos propres directives narratives. Depuis la v18.1, tous les modes Histoires
+utilisent un seul modèle commun (par défaut et recommandé Anthropic
+Claude Sonnet 5) — un modèle plus puissant respecte rigoureusement les règles du monde
+(essentiel dans le mode Le moindre mal, où chaque option doit être réellement défavorable).
 
 
 Comment commencer à s'amuser — trois niveaux de difficulté

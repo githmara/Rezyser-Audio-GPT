@@ -23,7 +23,7 @@ kolejnosc: 10
 format_wyjscia: burza_json
 
 # --- Anthropic parameters ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # Inserted in prompts via the {jezyk_odpowiedzi} placeholder.

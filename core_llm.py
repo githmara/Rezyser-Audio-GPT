@@ -65,7 +65,7 @@ class KonfiguracjaLLM:
     """Migawka konfiguracji LLM z ``golden_key.env``.
 
     Pola ``base_url``/``model`` mają znaczenie wyłącznie dla ``openai_compat``.
-    W trybie ``anthropic`` model bierze się z YAML przepisu (``claude-sonnet-4-6``).
+    W trybie ``anthropic`` model bierze się z YAML przepisu (``claude-sonnet-5``).
     """
 
     provider: str = DOMYSLNY_PROVIDER
@@ -109,7 +109,7 @@ class KlientLLM:
     """Lekki wrapper nad klientem SDK + znacznik providera.
 
     ``model_override`` (z ``LLM_MODEL``) służy tylko trybowi ``openai_compat`` —
-    nadpisuje nazwę modelu z przepisu YAML (na cudzym endpoincie ``claude-sonnet-4-6``
+    nadpisuje nazwę modelu z przepisu YAML (na cudzym endpoincie ``claude-sonnet-5``
     nie istnieje). W trybie Anthropic pozostaje pusty i model bierze się z przepisu.
     """
 
@@ -168,8 +168,9 @@ def _czy_zla_struktura(exc: Exception) -> bool:
     ``UnprocessableEntityError``) lub status 400/422. 429/timeout/5xx świadomie
     NIE są tu łapane — to nie problem struktury, więc nie chcemy ich maskować
     fallbackiem (lecą wyżej do :func:`wywolaj_llm` → ``BladLimituLLM`` itp.).
-    Używane wyłącznie w gałęzi ``openai_compat`` do decyzji o cichym fallbacku
-    z payloadu z rolami (system/assistant/user) na pojedynczy blok ``user``.
+    Używane w gałęzi ``openai_compat`` (degradacja payloadu z rolami do pojedynczego
+    bloku ``user``) ORAZ w gałęzi ``anthropic`` (degradacja `temperature` — patrz
+    :func:`_wywolaj_anthropic`).
     """
     if type(exc).__name__ in ("BadRequestError", "UnprocessableEntityError"):
         return True
@@ -298,6 +299,52 @@ def _wywolaj_openai_compat(
     raise RuntimeError("unreachable")  # pętla zawsze zwraca lub rzuca
 
 
+def _wywolaj_anthropic(
+    klient: "KlientLLM",
+    mdl: str,
+    system: str,
+    messages: list[dict],
+    max_tokens: int,
+    temperature: float,
+    timeout: float,
+) -> tuple[str, str | None]:
+    """Gałąź Anthropic z degradacją ``temperature`` dla modeli, które ją odrzucają.
+
+    Od Claude Sonnet 5 (i Opus 4.7+/Fable 5) niedomyślna wartość ``temperature``
+    zwraca 400 zamiast być po prostu zignorowana. Reżyser może podmienić `model:`
+    w YAML na taki model punktowo (patrz :mod:`przepisy_rezysera`) — bez tej
+    degradacji dostałby gołego wyjątku zamiast wygenerowanego tekstu. Próbujemy
+    NAJPIERW z ``temperature`` z przepisu (kontrola kreatywności per tryb, patrz
+    ``temperatura:`` w YAML); dopiero przy błędzie STRUKTURY (400/422, via
+    :func:`_czy_zla_struktura`) ponawiamy BEZ tego parametru — model wraca do
+    własnego samplingu domyślnego. Modele, które ``temperature`` honorują
+    (np. Sonnet 4.6), nigdy nie trafiają w tę ścieżkę.
+    """
+    kwargs: dict[str, Any] = dict(
+        model=mdl,
+        system=system,
+        messages=list(messages),
+        max_tokens=max_tokens,
+        temperature=temperature,
+        thinking={"type": "disabled"},
+    )
+    try:
+        resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
+    except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
+        if not _czy_zla_struktura(exc):
+            raise
+        _dev_log(
+            f"anthropic: model '{mdl}' odrzucił 'temperature' ({type(exc).__name__}) "
+            "— ponawiam bez tego parametru."
+        )
+        kwargs.pop("temperature")
+        resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
+    tekst = "".join(
+        b.text for b in resp.content if getattr(b, "type", None) == "text"
+    )
+    return tekst, getattr(resp, "stop_reason", None)
+
+
 def wywolaj_llm(
     klient: KlientLLM,
     *,
@@ -341,6 +388,10 @@ def wywolaj_llm(
     W trybie ``openai_compat`` nazwę modelu nadpisuje ``klient.model_override``
     (``LLM_MODEL``) — argument ``model`` (z przepisu YAML) jest wtedy ignorowany.
 
+    ``temperature`` w gałęzi Anthropic ma degradację (patrz :func:`_wywolaj_anthropic`):
+    modele, które odrzucają niedomyślną wartość (Claude Sonnet 5 i nowsze), dostają
+    retry bez tego parametru zamiast wywalać wyjątek — patrz [[reguly_architektury]].
+
     Rate-limit (429) → :class:`BladLimituLLM`, timeout → :class:`BladTimeoutLLM`
     (oba dla dowolnego providera). Pozostałe wyjątki SDK propagują natywnie
     (łapie je szeroki ``except`` wołającego).
@@ -358,18 +409,9 @@ def wywolaj_llm(
             )
 
         # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo nieużywane
-        resp = klient.sdk.with_options(timeout=timeout).messages.create(
-            model=mdl,
-            system=system,
-            messages=list(messages),
-            max_tokens=max_tokens,
-            temperature=temperature,
-            thinking={"type": "disabled"},
+        return _wywolaj_anthropic(
+            klient, mdl, system, messages, max_tokens, temperature, timeout,
         )
-        tekst = "".join(
-            b.text for b in resp.content if getattr(b, "type", None) == "text"
-        )
-        return tekst, getattr(resp, "stop_reason", None)
 
     except Exception as exc:  # noqa: BLE001 — 429/timeout opakowujemy; reszta leci dalej
         if _czy_rate_limit(exc):

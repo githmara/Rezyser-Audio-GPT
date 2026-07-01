@@ -1,4 +1,4 @@
-Reżyser Audio GPT — Kompletny Przewodnik (Wersja 18.6.1 – Wersja Wydawnicza)
+Reżyser Audio GPT — Kompletny Przewodnik (Wersja 18.7.0 – Wersja Wydawnicza)
 
 Witaj w Hybrydowym Studiu Nagraniowym! Ten zestaw narzędzi pozwala na automatyczne pisanie, planowanie, formatowanie i tłumaczenie skryptów słuchowisk oraz audiobooków. Został zoptymalizowany do współpracy z profesjonalnymi syntezatorami mowy oraz lokalnymi silnikami czytników ekranu (NVDA).
 

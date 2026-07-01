@@ -43,6 +43,7 @@ import wx
 import core_llm as cl
 import opowiesci_ai as oai
 import sciezki
+import bledy_ai
 from bledy_ai import BladGeneracjiAI
 from core_opowiesci import ProjektOpowiesci
 from i18n import aktualny_jezyk, t
@@ -755,7 +756,7 @@ class OpowiesciPanel(wx.Panel):
         GPT-4o-mini regularnie łamał zasady świata w trybach z wyborami (4/5)
         — proponował opcje neutralne mimo „wszystkie wybory niekorzystne".
         Analogicznie do migracji narracji Reżysera (v18.0) całość przechodzi
-        na jeden, mocniejszy model (`claude-sonnet-4-6`), który ten problem
+        na jeden, mocniejszy model (`claude-sonnet-5`), który ten problem
         usuwa. Argument ``tryb`` zachowany dla zgodności sygnatury wywołań.
         """
         _ = tryb  # zachowany dla zgodności sygnatury (jeden model dla wszystkich)
@@ -1213,9 +1214,11 @@ class OpowiesciPanel(wx.Panel):
         # timeout→BladTimeoutLLM (działa tak samo dla Anthropic i OpenAI-compat).
         # Typowane błędy generacji AI (struktura/długość) niosą `klucz_i18n` —
         # mapujemy TYP na komunikat lokalizowany w namespace `opowiesci`, żeby
-        # użytkownik nigdy nie zobaczył surowej, angielskiej treści technicznej
-        # (ta zostaje w wyjątku dla error_log.txt / maintainera).
+        # użytkownik nigdy nie zobaczył surowej, angielskiej treści technicznej.
+        # `zapisz_diagnostyke` dopisuje tę treść do error_log.txt PRZED
+        # zbudowaniem komunikatu — inaczej ginie bezpowrotnie (bug 2026-07-01).
         if isinstance(exc, BladGeneracjiAI):
+            bledy_ai.zapisz_diagnostyke(exc, "opowiesci")
             msg = t(f"opowiesci.{exc.klucz_i18n}")
         elif isinstance(exc, cl.BladLimituLLM):
             msg = t("opowiesci.err_rate_limit")

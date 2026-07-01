@@ -25,6 +25,51 @@ czysto addytywne wzbogacenie typu, nie zmiana kontraktu wyjątków.
 
 from __future__ import annotations
 
+import datetime
+import os
+import platform
+
+import sciezki
+
+# Marker ODRĘBNY od `main.CRASH_MARKER` — to NIE jest crash aplikacji (wyjątek
+# jest obsłużony, user dostaje normalny dialog), więc intake bota
+# `issue_intake_sami.py` (patrz `_czy_crash_report`) nie powinien pomylić tego
+# wpisu z crash-reportem i pomijać detekcję języka.
+AI_DIAG_MARKER = "=== REŻYSER AUDIO GPT — AI DIAGNOSTIC LOG ==="
+_PLIK_LOGU_BLEDOW = "error_log.txt"
+
+
+def zapisz_diagnostyke(exc: "BladGeneracjiAI", panel: str) -> None:
+    """Dopisuje techniczną treść wyjątku (EN, pełny kontekst) do ``error_log.txt``.
+
+    Bug znaleziony 2026-07-01: `_komunikat_bledu_ai`/`_obsluz_blad` w GUI
+    zamieniały wyjątek na komunikat lokalizowany i PORZUCAŁY oryginalną treść
+    (`str(exc)`, finish_reason, licznik retry, ostatni błąd walidacji JSON) —
+    mimo że docstring modułu obiecywał „trafia do error_log.txt". W praktyce
+    nic tam nie trafiało, więc nie dało się zdiagnozować powtarzających się
+    halucynacji struktury. Wołaj to PRZED zbudowaniem komunikatu dla usera.
+
+    Nigdy nie rzuca — logowanie diagnostyki nie może wywrócić obsługi błędu,
+    którą user i tak zaraz zobaczy w dialogu.
+    """
+    try:
+        sciezka = os.path.join(sciezki.KATALOG_BAZOWY_STR, _PLIK_LOGU_BLEDOW)
+        stempel = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        wpis = (
+            f"{AI_DIAG_MARKER}\n"
+            f"Panel: {panel}\n"
+            f"Typ: {type(exc).__name__}\n"
+            f"Data / Time: {stempel}\n"
+            f"Platforma / Platform: {platform.platform()}\n"
+            f"{'-' * 60}\n"
+            f"{exc}\n"
+            f"{'=' * 60}\n\n"
+        )
+        with open(sciezka, "a", encoding="utf-8") as fh:
+            fh.write(wpis)
+    except Exception:  # noqa: BLE001 — logowanie nie może zamaskować oryginalnego błędu
+        pass
+
 
 class BladGeneracjiAI(RuntimeError):
     """Bazowy błąd generacji AI.

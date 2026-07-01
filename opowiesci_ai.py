@@ -64,7 +64,7 @@ ENV_FILENAME       = "golden_key.env"
 # (tury 3/4/5, /visualize, streszczenie, cinematic) idą na jeden model Claude —
 # koniec model-per-tryb (dawne MODEL_QUALITY/gpt-4o usunięte). Dispatch routuje
 # na klienta Anthropic niezależnie od języka UI.
-MODEL_NARRACJA     = "claude-sonnet-4-6"
+MODEL_NARRACJA     = "claude-sonnet-5"
 # gpt-4o-mini ZOSTAJE wyłącznie do liczenia tokenów (tiktoken o200k_base) na
 # pasku pamięci — NIE jest już modelem LLM. `OKNO_KONTEKSTU_MAX=128k` (core_tokeny)
 # pozostaje LOGICZNYM budżetem kosztu/spójności (+ auto-streszczenie po 70%), nie

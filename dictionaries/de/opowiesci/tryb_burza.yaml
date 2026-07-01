@@ -14,7 +14,7 @@ kolejnosc: 20
 # --- Anthropic-Parameter ---
 # Höhere Temperatur als die Erzählmodi — wir wollen eine reiche, kreative
 # Beschreibung. max_tokens ist niedrig, weil dies kein Spielzug ist.
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.95
 max_tokens: 1000
 timeout_s: 60.0

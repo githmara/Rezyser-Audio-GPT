@@ -22,7 +22,7 @@ kolejnosc: 20
 format_wyjscia: skrypt_json
 
 # --- Параметры Anthropic ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 jezyk_odpowiedzi: по-русски
 

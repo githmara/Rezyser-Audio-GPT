@@ -655,6 +655,7 @@ rezyser:
   kod_jezyka_edu_name: Erklärung des Sprachcodes und Eingabeaufforderung für den Chatbot
   ostrzezenie_urwane_tytul: Fragment wurde möglicherweise abgeschnitten
   ostrzezenie_urwane_tresc: Die Antwort des Modells hat das Längenlimit erreicht und mitten im Satz abgebrochen. Der automatische Versuch, den letzten Satz zu vervollständigen, ist fehlgeschlagen. Das Fragment wurde im aktuellen Zustand gespeichert – überprüfe das Ende und ergänze es bei Bedarf manuell oder sende eine kurze Fortsetzungsanweisung.
+  err_struktura: Das KI-Modell hat mehrfach eine ungültige Datenstruktur zurückgegeben, die nicht korrigiert werden konnte. Versuchen Sie es erneut oder vereinfachen Sie die Anweisung – wenn der Fehler weiterhin auftritt, fügen Sie der Meldung die Datei error_log.txt bei.
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -1333,6 +1334,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tytul: Befehl gesperrt
   komenda_odswiez_zablokowana_tresc: Der Befehl „{komenda}" ist standardmäßig gesperrt, da das Aktualisieren der Erzählung von der Festplatte den Spielzustand (Charaktere, Ort, Ausrüstung) nicht neu berechnet und semantische Abweichungen verursachen kann. Um ihn zu entsperren, setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 und erstellen Sie Ihr eigenes Paket.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — gesperrt; setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72, um zu entsperren)
+  err_struktura: Das KI-Modell hat mehrfach eine ungültige Datenstruktur zurückgegeben, die nicht korrigiert werden konnte. Versuchen Sie es erneut – wenn der Fehler weiterhin auftritt, fügen Sie der Meldung die Datei error_log.txt bei.
 bot:
   closure:
     Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-GPT-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"

@@ -11,7 +11,7 @@ kategoria: tryb
 kolejnosc: 40
 
 # --- Anthropic-Parameter ---
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 temperatura: 0.85
 
 # --- Anhang an prompt_systemowy aus baza.yaml ---

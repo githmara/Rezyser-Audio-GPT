@@ -61,7 +61,7 @@ import core_tokeny as ct
 # dual-providera). Sonnet 4.6 honoruje `temperature` (jedyny parametr próbkowania)
 # i `thinking={"type":"disabled"}` — tłumaczenie to proza, reasoning tylko dokłada
 # latencji/kosztu. Patrz `rezyser_ai._wywolaj_claude` (ten sam wzorzec).
-MODEL_TLUMACZ = "claude-sonnet-4-6"
+MODEL_TLUMACZ = "claude-sonnet-5"
 
 # Maks. tokenów WYJŚCIA pojedynczego bloku. Ceiling, nie target: blok wejściowy
 # ma ≤ `max_tokenow_na_blok` tokenów (2 500 GUI / 4 000 docs), tłumaczenie bywa

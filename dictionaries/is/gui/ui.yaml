@@ -655,6 +655,7 @@ rezyser:
   kod_jezyka_edu_name: Útskýring á tungumálakóða og ábending fyrir spjallmenni
   ostrzezenie_urwane_tytul: Brot gæti hafa verið klippt af
   ostrzezenie_urwane_tresc: Svar líkansins náði lengdarmörkunum og brotnaði mitt í setningu, og sjálfvirk tilraun til að loka síðustu setningunni tókst ekki. Brotið var vistað eins og það er — athugaðu endann á því og bættu við niðurlagi handvirkt ef þörf krefur, eða sendu stutt framhaldsfyrirmæli.
+  err_struktura: Gervigreindarlíkanið skilaði nokkrum sinnum ógildri gagnauppbyggingu og ekki tókst að leiðrétta hana. Reyndu aftur eða einfaldaðu leiðbeiningarnar — ef villan kemur ítrekað upp skaltu bæta skránni error_log.txt við tilkynninguna.
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -1334,6 +1335,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tytul: Skipun læst
   komenda_odswiez_zablokowana_tresc: Skipunin „{komenda}" er læst sjálfgefið, því að endurnýjun frásagnar af disk endurreiknar ekki leikstöðu (persónur, staðsetning, búnaður) og getur valdið merkingarlegum fráviki. Til að opna hana, stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 og smídaðu eigin pakka.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — læst; stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 til að opna)
+  err_struktura: Gervigreindarlíkanið skilaði nokkrum sinnum ógildri gagnauppbyggingu og ekki tókst að leiðrétta hana. Reyndu aftur — ef villan kemur ítrekað upp skaltu bæta skránni error_log.txt við tilkynninguna.
 bot:
   closure:
     Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Hljóðstjóra GPT.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"
