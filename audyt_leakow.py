@@ -138,6 +138,10 @@ PL_TERMINY = [
     "Managera Reguł", "Manager Reguł", "Managerze Reguł",
     "Księgę Świata", "Księgi Świata", "Księgą Świata", "Księdze Świata",
     "Księga Świata",
+    # moduł Opowieści + odmiany PL (domknięcie „Co nie weszło" v18.6.1 — brakował
+    # na liście obok Reżyser/Poliglota/Księga Świata/KROK)
+    "Opowieściami", "Opowieściach", "Opowieściom", "Opowieścią",
+    "Opowieści", "Opowieść",
     # nagłówki kroków (powinny być SCHRITT/ÉTAPE/PASSO/VAIHE/SKREF/STEP/ШАГ/PASO)
     "KROK",
     # zmyślony transliterat halucynacji (is manual:468 „Ważar" zamiast „Mikilvæg")
