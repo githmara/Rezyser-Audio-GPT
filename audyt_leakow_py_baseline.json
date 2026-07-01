@@ -1,4 +1,7 @@
 {
+  "bledy_ai.py": [
+    "POSSIBLE|znak-PL:Ż|=== REŻYSER AUDIO GPT — AI DIAGNOSTIC LOG ==="
+  ],
   "core_elevenlabs.py": [
     "POSSIBLE|lingua:PL|Nieoczekiwana struktura odpowiedzi przy tworzeniu projektu: {…}",
     "POSSIBLE|znak-PL:ął|Błąd ElevenLabs (HTTP {…}): {…}",
