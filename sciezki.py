@@ -97,9 +97,17 @@ KATALOG_ZASOBOW: Path = _wyznacz_zasoby()
 def otworz_w_systemie(sciezka) -> None:
     """Otwiera plik lub folder domyślną aplikacją systemową (cross-platform).
 
-    Windows → folder otwiera ``os.startfile`` (Eksplorator), a PLIK trafia
-    bezwarunkowo do Notatnika (``notepad.exe``); macOS → ``open``; pozostałe
-    (Linux/BSD + Orca itd.) → ``xdg-open``.
+    HTML (``.html``/``.htm``) → domyślna PRZEGLĄDARKA przez ``webbrowser``
+    (wszystkie systemy); Windows → folder otwiera ``os.startfile``
+    (Eksplorator), a pozostałe PLIKI trafiają bezwarunkowo do Notatnika
+    (``notepad.exe``); macOS → ``open``; pozostałe (Linux/BSD + Orca itd.)
+    → ``xdg-open``.
+
+    **Dlaczego HTML osobną gałęzią (od v18.8):** dokumentacja z menu Pomoc to
+    ``docs/<rdzen>.<iso>.html`` — reguła „plik = Notatnik" (niżej) rzucałaby
+    userowi w twarz kodem źródłowym zamiast wyrenderowanego dokumentu
+    (złapane na realnym UI przed wydaniem 18.8.0). ``webbrowser.open`` na
+    ``file://`` URI gwarantuje przeglądarkę niezależnie od skojarzeń systemowych.
 
     **Dlaczego Notatnik, a nie ``os.startfile`` na pliku (od v18.4):** pliki, które
     ta aplikacja otwiera najczęściej (``golden_key.env``, ``*.yaml`` Managera Reguł),
@@ -107,7 +115,7 @@ def otworz_w_systemie(sciezka) -> None:
     ``os.startfile`` pokazuje systemowy picker „Jak chcesz otworzyć ten plik?"
     zamiast edytora (zgłoszone na ``.env``). Notatnik jest zawsze obecny, dostępny
     dla NVDA i radzi sobie z każdym plikiem tekstowym (env/yaml/md/txt) — a innych
-    niż tekst i foldery przez ten helper nie otwieramy. Folder MUSI iść przez
+    niż tekst, HTML i foldery przez ten helper nie otwieramy. Folder MUSI iść przez
     ``os.startfile`` (Notatnik nie otworzy katalogu — np. ``dictionaries/``).
 
     POJEDYNCZE źródło prawdy dla „otwórz w systemie" — wcześniej ten 3-gałęziowy
@@ -122,6 +130,15 @@ def otworz_w_systemie(sciezka) -> None:
     ``subprocess.Popen`` wraca natychmiast, ``os.startfile`` jest również async.
     """
     cel = str(sciezka)
+
+    # HTML → zawsze domyślna przeglądarka (as_uri obsługuje spacje/diakrytykę
+    # w ścieżce; wymaga ścieżki absolutnej, stąd resolve()).
+    if os.path.isfile(cel) and cel.lower().endswith((".html", ".htm")):
+        import webbrowser
+        from pathlib import Path
+        webbrowser.open(Path(cel).resolve().as_uri())
+        return
+
     system = platform.system()
     if system == "Windows":
         if os.path.isdir(cel):

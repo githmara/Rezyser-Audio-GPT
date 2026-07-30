@@ -767,6 +767,12 @@ poliglota:
   blad_wyniku_tresc: "Der Ergebnistext konnte nicht generiert werden."
   blad_zapisu_wyjscia: "Fehler beim Speichern der Ergebnisdatei:\n{tresc_bledu}"
   sukces_zapis: "Datei gespeichert als:\n{sciezka_pliku}"
+  # 18.8: lokalisierte Namensbausteine der Ergebnisdateien (ein Wort, ohne Leerzeichen)
+  filename_naprawiony: "repariert"
+  filename_oczyszczony: "bereinigt"
+  filename_akcent: "akzent"
+  filename_szyfr: "chiffre"
+  filename_tlumaczenie: "übersetzung"
   # Tłumacz AI
   ai_init: "Übersetzung wird initialisiert…"
   ai_zakonczone_tytul: "Erfolg"
@@ -806,6 +812,8 @@ poliglota:
   ai_postep_zapis: Ergebnisdatei wird gespeichert…
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
+  # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)
+  filename_architektura: "architektur"
   heading: "📄  Hörbucharchitekt"
   tool_description: |-
     Dieses Modul dient zur Vorbereitung der Dateistruktur für Screenreader (Navigation mit den Tasten 1 und h über Überschriften) und ElevenLabs. Es ändert Schlüsselwörter (Vorspann, Akt, Kapitel, Prolog, Epilog) in Überschriften der ersten Ebene, während der Rest des Skripts unverändert bleibt.

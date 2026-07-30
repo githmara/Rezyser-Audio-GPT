@@ -14,14 +14,14 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Skrár Tungumálamanns og Leikstjóra — Leiðbeiningar fyrir alla
+    # Skrár Tungumálamanns og Leikstjóra — Leiðbeiningar fyrir alla
     =======================================================
 
     Halló! Ef þú ert að lesa þessa skrá, þá þýðir það að þú hefur kíkt í möppuna "dictionaries/" við hliðina á forritinu Reżyser Audio GPT og ert að velta fyrir þér hvað þessar skrár með skrítnu viðskeytunum ".yaml" eru. Ekki hafa áhyggjur — þú þarft ekki að kunna forritun eða Python til að skilja hvað er að gerast hér, og með smá hugrekki geturðu jafnvel bætt við eitthvað þitt eigið.
 
     Þessi skrá er skrifuð á einföldu máli fyrir rithöfunda, málvísindamenn, kennara, foreldra og almennt forvitna. Ef þú þekkir grunnatriði forritunar og ert að leita að ítarlegri skjölum um YAML skráarsniðið (með lista yfir reiti, reglulegum tjáningum, reglum fyrir vinnslupípu), skoðaðu skrána "README.md" í sömu möppu — en athugaðu, þessi skrá er aðeins aðgengileg ef þú hefur klónað geymsluna frá GitHub. Í útgáfupakkanum sem sóttur er frá flipanum Releases eru Markdown skrár síaðar út (til að koma í veg fyrir að til dæmis þínar heimsbækur með spoilerum lendi í pakkanum), svo aðeins þessi ".txt" skrá lendir hjá endanotendum.
   co_tu_jest: |
-    Hvað er hér yfirhöfuð?
+    ## Hvað er hér yfirhöfuð?
     -----------------------
 
     Möppan "dictionaries/" er safn reglna sem Polyglot (þýðingar- og framburðartól) og innri vél Leikstjórans nota. Fram að útgáfu 12.0 voru allar þessar reglur "innbyggðar" í Python kóðann — ef þú vildir bæta við nýjum framburði eða breyta reglum, þurftir þú að biðja forritara um hjálp. Frá útgáfu 13.0 er allt skráð í venjulegum textaskrám (viðbótin ".yaml" — þetta er einfaldlega venjulegur texti í sérstöku sniði). Þú opnar þær með hvaða ritli sem er (Notepad, VS Code, Notepad++) og breytir þeim eins og hverjum öðrum skjali.
@@ -36,9 +36,9 @@ tresc:
             └── rezyser/                   {liczba_trybow_rezysera} skrár með AI Leikstjóra hömum
 
     Nú þegar eru fullkomlega innleidd: {lista_kompletnych_jezykow_natywnie}
-    ({liczba_kompletnych_jezykow} grunnmál). Hvert hefur sitt eigið "dictionaries/<code>/" safn með diakritískum stöfum, stafrófi og hljóðreglum sem virka á texta í því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (fyrir hvern málsgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega. Fleiri tungumál eru í undirbúningi (fullkomið safn krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").
+    ({liczba_kompletnych_jezykow} grunnmál). Hvert hefur sitt eigið "`dictionaries/<code>/`" safn með diakritískum stöfum, stafrófi og hljóðreglum sem virka á texta í því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (fyrir hvern málsgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega. Fleiri tungumál eru í undirbúningi (fullkomið safn krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").
   co_to_akcent: |
-    Hvað er hreimur?
+    ## Hvað er hreimur?
     ------------------
 
     Hreimur er safn reglna sem "skemma" pólska texta þannig að skjálesari (eins og NVDA) lesi hann með rödd annars tungumáls. Til dæmis breytir finnski hreimurinn pólska "sz" í "s", "w" í "v", og diakritísk tákn (ą, ę, ł) í einfaldaðar útgáfur þeirra — þannig hljómar textinn eins og Finn frá Helsinki sé að læra pólsku. Þetta snýst ekki um ekta transliteringu, heldur skemmtilega og viljandi afskræmingu fyrir sögulegan tilgang.
@@ -56,7 +56,7 @@ tresc:
 
     Auk þess eru tvær hreinsunarvalkostir í hreimavalmyndinni: einn án tölunormalíseringar og annar með normalíseringu (breytir "15" í "fimmtán" fyrir vinnslu, því útlendingur myndi líklega ekki beygja þessa tölu rétt — sem bætir við áreiðanleika) og "Tag Fixer", sem einfaldlega setur ISO tungumálakóða í skrána án þess að skemma innihaldið (björgun þegar þýdd skrá þín hefur rangt tungumálakóða).
   co_to_szyfr: |
-    Hvað er dulritun?
+    ## Hvað er dulritun?
     -----------------
 
     Dulritanir eru textaleikir fyrir þrautir, málæfingar, gáfur. Ólíkt hreimum eru þau EKKI miðuð við ákveðna raddgervil — þau afskræma einfaldlega texta samkvæmt ákveðinni reglu. Aðgengilegar dulritanir ({liczba_szyfrow}):
@@ -83,7 +83,7 @@ tresc:
     6. Cæsar Dulritun (klassík)
        Elsta skjalfesta dulritun í sögunni (notuð í forn Róm). Hver stafur er færður um N stöður í íslenska stafrófinu (32 stafir, með diakritískum: AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ). Færslan er gefin upp í GUI í tölusviði; ef þú slærð inn 0, velur forritið handahófskennt gildi á bilinu 1-31 og sýnir það í skilaboðum, svo þú getir síðan afkóðað skilaboðin. Stafir utan stafrófsins (tölur, bil, greinarmerki) eru óbreyttir.
   co_to_tryb_rezysera: |
-    Hvað er "leikstjórahamur"?
+    ## Hvað er "leikstjórahamur"?
     ------------------------------
 
     Mappan "rezyser/" inniheldur {liczba_trybow_rezysera} skrár sem lýsa vinnuhömum Aðalstúdíós Leikstjórans í forritinu:
@@ -99,7 +99,7 @@ tresc:
 
     Inni í hverri af þessum skrám er "kerfisbundin upphafssetning" dýrmætasti hlutinn — löng leiðbeining fyrir gervigreindina um hvernig hún á að haga sér í viðkomandi ham. Ef þér finnst t.d. að Hljóðbókarhamurinn sé "of blómleg" eða að Hugmyndavindan bjóði of oft upp á töfralausnir, geturðu stillt þessi texta eftir þínum smekk, vistað og forritið mun hlaða þína útgáfu næst þegar það er ræst. Engin forritun.
   co_to_tryb_opowiesci: |
-    Hvað er "Sagnaham"?
+    ## Hvað er "Sagnaham"?
     ----------------------------
 
     Mappan "opowiesci/" inniheldur {liczba_trybow_opowiesci} skrár sem lýsa öðrum
@@ -134,10 +134,10 @@ tresc:
     Claude Sonnet 5) — sterkara líkan heldur ströngum reglum heimsins
     (lykilatriði í hamnum Minna böl, þar sem hver valkostur verður að vera raunverulega óhagstæður).
   jak_zaczac: |
-    Hvernig á að byrja að leika sér — þrjú erfiðleikastig
+    ## Hvernig á að byrja að leika sér — þrjú erfiðleikastig
     -------------------------------------------
   poziom_1_dostroj: |
-    STIG 1 — smávægileg stilling á núverandi hreim
+    ## STIG 1 — smávægileg stilling á núverandi hreim
 
     Ímyndaðu þér að franski hreimurinn í forritinu breyti "sz" í "sh", en þú telur að Frakki myndi frekar segja "sch" eða "ch". Engin vandamál.
 
@@ -148,7 +148,7 @@ tresc:
     5. Vistaðu skrána (Ctrl+S), lokaðu ritlinum.
     6. Farðu aftur í Reglustjóra og smelltu á "Endurnýja tré", lokaðu síðan og ræstu forritið aftur. Breytingin þín er nú virk.
   poziom_2_duplikacja: |
-    POFESSTIG 2 — bæta við nýjum hreim með því að afrita
+    ## POFESSTIG 2 — bæta við nýjum hreim með því að afrita
 
     Viltu bæta við sænskum eða dönskum hreim? Byrjaðu á því að velja þann sem er líkastur þeim sem er til staðar.
 
@@ -163,7 +163,7 @@ tresc:
        "ö → ö", fjarlægðu eða breyttu þeim sem eru sértæk fyrir finnsku).
     5. Vistaðu og endurræstu forritið. Nýja sænska mun birtast í hreimavalmynd Fjöltyngis (og ef þú bætir við í Heimsbók persónu merkimiðanum "[Marek] - hefur sænskan hreim", þá mun Leikstjórinn einnig þekkja það sjálfkrafa og nota það í samræðum hennar).
   poziom_3_cos_nowego: |
-    POFI 3 — að skapa eitthvað alveg nýtt
+    ## POFI 3 — að skapa eitthvað alveg nýtt
 
     Viltu skólaslangur? Tungumál fornra riddara? Grasiðmál? Kóða foreldra fyrir börnum?
 
@@ -171,7 +171,7 @@ tresc:
     2. Veldu tegund (hreimur, skipti dulmál, Leikstjórahamur, nýtt grunntungumál, reiknirit dulmál). Fyrir venjuleg tilfelli mun forritið strax búa til tilbúið YAML sniðmát — þú breytir því eins og á stigi 2.
     3. Fyrir erfiðari tilfelli (reiknirit eins og "blöndun endingar" eða alveg nýtt grunntungumál) mun Reglustjóri sýna þér tilbúið prompt til að líma í ChatGPT eða Claude. Gervigreindin mun búa til fullkomna YAML skrá, þú þarft bara að afrita hana í möppuna. Þú þarft ekki að kunna að forrita — það nægir að geta afritað.
   pomysly: |
-    Nokkrar hugmyndir að leikjum
+    ## Nokkrar hugmyndir að leikjum
     ------------------------
 
     - Skólabekkur í íslenskutíma: verkefni "lesa brot úr bókmenntum í Tungumálamanninum með rússneskum hreim — þekkirðu höfundinn?". Sérstaklega dýrmætt fyrir blind börn, þar sem þau fá áhugaverða hljómun án þess að þurfa að lesa plakat með augunum.
@@ -184,7 +184,7 @@ tresc:
 
     - Afmæliskort með þraut: færðu kveðjur með Cæsar Dulritun um 3 stöður, bættu við "lykill: færðu hvern staf um jafn margar stöður og þú ert gamall í dag". Afmælisbarnið þarf sjálft að finna afkóðunina. (Virkar best fyrir börn 7-12 ára; fullorðnir átta sig yfirleitt fljótt.)
   bezpieczenstwo: |
-    Getur eitthvað bilað hjá mér?
+    ## Getur eitthvað bilað hjá mér?
     ---------------------------
 
     Í raun ekki. Forritið hleður YAML skrárnar á hreyfanlegan hátt og ef einhver er ranglega skráð, sleppir það einfaldlega henni og birtir viðvörun við ræsingu. Restin af reglum virkar eins og ekkert hafi gerst.
@@ -197,4 +197,4 @@ tresc:
 
     Ekki eyða upprunalegu skránum úr pakkanum (angielski.yaml, cezar.yaml, podstawy.yaml o.s.frv.) — betra að "fela" þær með því að breyta viðbótinni úr ".yaml" í ".yaml.backup", ef þú vilt að þær hverfi úr valmyndinni. Ef þú skiptir um skoðun síðar, nægir að endurheimta viðbótina.
   zakonczenie: |
-    Góða skemmtun!
+    ## Góða skemmtun!

@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **18.7.0** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **18.8.0** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -61,7 +61,7 @@ Interaktiivisia tekstipelejä, joita AI ohjaa kerronnallisen moottorin roolissa.
 
 Versiosta v14.0 lähtien sovellus tukee luonnollisesti 9 peruskieltä: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Jokainen `dictionaries/<kod>/`-paketti sisältää diakriittiset merkit, aakkoset ja foneettiset säännöt, jotka toimivat kyseisen kielen tekstissä — sovellus tunnistaa lähdekielen automaattisesti lingua-language-detectorin avulla (kappaleittain) ja lataa sopivan paketin jokaiselle osalle erikseen.
 
-Koko käyttöliittymä, dokumentaatio (`docs/manual.<iso>.txt`) ja suurin osa järjestelmäviesteistä ovat luonnollisesti saatavilla kaikilla tuetuilla kielillä. AI-järjestelmäkehotteet Ohjaajan ja Tarinan tiloissa on kirjoitettu kohdekielillä (käsin, ei automaattisesti käännettynä — katso `dictionaries/<kod>/rezyser/` ja `dictionaries/<kod>/opowiesci/`).
+Koko käyttöliittymä, dokumentaatio (`docs/manual.<iso>.html`) ja suurin osa järjestelmäviesteistä ovat luonnollisesti saatavilla kaikilla tuetuilla kielillä. AI-järjestelmäkehotteet Ohjaajan ja Tarinan tiloissa on kirjoitettu kohdekielillä (käsin, ei automaattisesti käännettynä — katso `dictionaries/<kod>/rezyser/` ja `dictionaries/<kod>/opowiesci/`).
 
 
 ## AI-arkkitehtuuri ja käytetyt mallit
@@ -86,7 +86,7 @@ Tämä on nykyisen sukupolven tekoälyn perustavanlaatuinen rajoitus. Tästä sy
 
 1. Lataa uusin julkaisu **Releases**-välilehdeltä (paketti merkitty *Latest*) — tiedosto `Rezyser_Audio_v<numer>_Installer.exe`. Käynnistä se kaksoisnapsauttamalla. Asennusohjelma sijoittuu oletuksena käyttäjätilisi paikalliseen hakemistoon (`%LocalAppData%\Programs\Reżyser Audio GPT`) eikä vaadi järjestelmänvalvojan oikeuksia; voit valita oman polun "Przeglądaj"-painikkeella. Asennuksen jälkeen ohjelma luo pikakuvakkeet Käynnistä-valikkoon ja työpöydälle, ja vaihtoehtoisesti avaa käyttöohjeen oletuksena määritetyssä `.txt`-tiedostojen editorissa.
 2. **Anthropic API -määritys:** Ensimmäisellä käynnistyskerralla sovellus ilmoittaa puuttuvasta avaimesta System Check -osiossa. Napsauta näkyvää painiketta luodaksesi `golden_key.env`-tiedoston, avaa se tekstieditorissa ja liitä Anthropic-avaimesi (joka alkaa merkkijonolla `sk-ant-`).
-3. **Ensiaskeleet:** Avaa tiedosto `docs/manual.pl.txt` (tai muunkielinen versio) asennuskansiosta — se on täydellinen käyttöohje, joka on kirjoitettu kaikkien käyttäjien ymmärtämällä kielellä, ei pelkästään kehittäjille.
+3. **Ensiaskeleet:** Avaa tiedosto `docs/manual.pl.html` (tai muunkielinen versio) asennuskansiosta — se on täydellinen käyttöohje, joka on kirjoitettu kaikkien käyttäjien ymmärtämällä kielellä, ei pelkästään kehittäjille.
 
 
 ### Kehittäjille (clone + setup)
@@ -104,11 +104,11 @@ Tämä on nykyisen sukupolven tekoälyn perustavanlaatuinen rajoitus. Tästä sy
 
 Tämä README on vain projektin arkkitehtoninen luonnos. Jos haluat oppia kehittyneitä tekniikoita AI-harhojen estämiseksi, yhteensopivien puhesyntetisaattoreiden (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices) asennusohjeita, täydellisen kuvauksen Fiolitarinoiden tiloista sekä täydellisen käyttöoppaan, tutustu `docs/`-kansiossa oleviin tiedostoihin:
 
-* `docs/manual.<iso>.txt` — pääasiallinen käyttöohje (kirjoitettu loppukäyttäjälle).
-* `docs/tales.<iso>.txt` — Fiolitarinoiden tilan ohjekirja (interaktiiviset tekstipelit).
-* `docs/dictionaries.<iso>.txt` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
+* `docs/manual.<iso>.html` — pääasiallinen käyttöohje (kirjoitettu loppukäyttäjälle).
+* `docs/tales.<iso>.html` — Fiolitarinoiden tilan ohjekirja (interaktiiviset tekstipelit).
+* `docs/dictionaries.<iso>.html` — ohjeet lingvisteille ilman Pythonia, kuinka lisätä omia aksentteja/salauksia/AI-tiloja.
 
-Jokainen näistä tiedostoista on saatavilla 9 kielellä — suffiksi `.<iso>.txt` (esim. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+Jokainen näistä tiedostoista on saatavilla 9 kielellä — suffiksi `.<iso>.html` (esim. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ### Puolan kielinen nimistö — opas ei-puolankielisille käyttäjille

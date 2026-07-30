@@ -14,7 +14,7 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Wörterbücher des Polyglott und des Regisseurs — Anleitung für alle
+    # Wörterbücher des Polyglott und des Regisseurs — Anleitung für alle
     ===================================================================
 
     Hallo! Wenn Sie diese Datei lesen, haben Sie einen Blick in den Ordner
@@ -35,7 +35,7 @@ tresc:
     das Paket gelangen), sodass nur diese ".txt"-Datei an Endbenutzer weitergegeben
     wird.
   co_tu_jest: |
-    Was ist hier überhaupt?
+    ## Was ist hier überhaupt?
     -----------------------
 
     Der Ordner "dictionaries/" ist eine Regelbibliothek, die vom Polyglott
@@ -59,14 +59,14 @@ tresc:
 
     Derzeit vollständig implementiert sind: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} Basissprachen). Jede hat ein eigenes Paket
-    "dictionaries/<kod>/" mit Diakritika, Alphabet und phonetischen Regeln,
+    "`dictionaries/<kod>/`" mit Diakritika, Alphabet und phonetischen Regeln,
     die auf Texte in genau dieser Sprache wirken — die Anwendung erkennt die
     Quellsprache automatisch über den lingua-language-detector (per Absatz) und
     lädt das passende Paket für jeden Textabschnitt separat. Weitere Sprachen
     sind in Vorbereitung (ein vollständiges Paket erfordert "podstawy.yaml",
     "gui/ui.yaml" sowie mindestens eine Datei in "akcenty/" und "szyfry/").
   co_to_akcent: |
-    Was ist ein Akzent?
+    ## Was ist ein Akzent?
     -------------------
 
     Ein Akzent ist ein Regelwerk, das deutschen Text so "verdirbt", dass ein
@@ -100,7 +100,7 @@ tresc:
     die Datei einfügt, ohne den Inhalt zu verändern (Rettungsanker, wenn Ihre
     bereits übersetzte Datei mit einem falschen Sprachcode herausgekommen ist).
   co_to_szyfr: |
-    Was ist ein Chiffre?
+    ## Was ist ein Chiffre?
     --------------------
 
     Chiffren sind Textspielereien für Rätsel, Sprachübungen und Knobelaufgaben.
@@ -167,7 +167,7 @@ tresc:
        kannst. Zeichen außerhalb des Alphabets (Zahlen, Leerzeichen,
        Interpunktion) bleiben unverändert.
   co_to_tryb_rezysera: |
-    Was ist der "Regisseur-Modus"?
+    ## Was ist der "Regisseur-Modus"?
     ------------------------------
 
     Der Ordner "rezyser/" enthält {liczba_trybow_rezysera} Dateien, die die Arbeitsmodi
@@ -190,7 +190,7 @@ tresc:
     speichern, und die Anwendung lädt Ihre Version beim nächsten Start. Kein
     Programmieren erforderlich.
   co_to_tryb_opowiesci: |
-    Was ist der „Geschichten-Modus“?
+    ## Was ist der „Geschichten-Modus“?
     ----------------------------
 
     Der Ordner „opowiesci/" enthält {liczba_trybow_opowiesci} Dateien, die den zweiten
@@ -225,10 +225,10 @@ tresc:
     Claude Sonnet 5) — ein leistungsstärkeres Modell hält sich rigoros an die Weltregeln
     (entscheidend im Modus „Das kleinere Übel", wo jede Option realistisch nachteilig sein muss).
   jak_zaczac: |
-    Wie man anfängt — drei Schwierigkeitsstufen
+    ## Wie man anfängt — drei Schwierigkeitsstufen
     --------------------------------------------
   poziom_1_dostroj: |
-    STUFE 1 — Feinabstimmung eines bestehenden Akzents
+    ## STUFE 1 — Feinabstimmung eines bestehenden Akzents
 
     Stellen Sie sich vor, der französische Akzent der Anwendung ersetzt "sch"
     durch "sh", aber Sie meinen, ein Franzose würde eher "ch" sagen. Kein Problem.
@@ -246,7 +246,7 @@ tresc:
     6. Kehren Sie zum Regelmanager zurück und klicken Sie auf "Baum aktualisieren",
        dann schließen und starten Sie die Anwendung neu. Ihre Änderung wirkt.
   poziom_2_duplikacja: |
-    STUFE 2 — Einen neuen Akzent durch Duplizierung hinzufügen
+    ## STUFE 2 — Einen neuen Akzent durch Duplizierung hinzufügen
 
     Möchten Sie einen schwedischen oder dänischen Akzent hinzufügen? Beginnen
     Sie mit dem phonetisch ähnlichsten vorhandenen.
@@ -268,7 +268,7 @@ tresc:
        den Tag "[Marek] — hat schwedischen Akzent" hinzufügen, erkennt der
        Regisseur ihn automatisch und wendet ihn auf Dialoge dieser Figur an).
   poziom_3_cos_nowego: |
-    STUFE 3 — Etwas völlig Neues erschaffen
+    ## STUFE 3 — Etwas völlig Neues erschaffen
 
     Schulhofsprache? Sprache der antiken Ritter? Elterngeheimsprache vor den
     Kindern?
@@ -284,7 +284,7 @@ tresc:
        YAML-Datei, Sie kopieren sie nur in den Ordner. Kein Programmieren
        nötig — es reicht die Fähigkeit zum Kopieren und Einfügen.
   pomysly: |
-    Einige Spielideen
+    ## Einige Spielideen
     -----------------
 
     - Deutschunterricht in der Schule: Aufgabe "Lade einen Textabschnitt im
@@ -314,7 +314,7 @@ tresc:
       Der Jubilar muss selbst die Entschlüsselung finden. (Funktioniert am
       besten für Kinder von 7-12 Jahren; Erwachsene merken es meist schnell.)
   bezpieczenstwo: |
-    Kann mir etwas kaputtgehen?
+    ## Kann mir etwas kaputtgehen?
     ---------------------------
 
     Im Grunde nicht. Die Anwendung lädt YAML-Dateien dynamisch, und wenn eine
@@ -340,4 +340,4 @@ tresc:
     Wenn Sie später Ihre Meinung ändern, genügt es, die Endung
     wiederherzustellen.
   zakonczenie: |
-    Viel Spaß!
+    ## Viel Spaß!

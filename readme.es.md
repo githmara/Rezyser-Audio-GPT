@@ -7,7 +7,7 @@
 
 Conjunto de herramientas autocontenidas impulsadas por IA para la escritura automática, planificación, formato y traducción de guiones extensos, así como para la ejecución de juegos de texto interactivos. El proyecto es una aplicación de escritorio nativa (wxPython) diseñada desde cero con plena accesibilidad para lectores de pantalla (NVDA, VoiceOver) y compatibilidad con sintetizadores de voz profesionales (TTS). Funciona sin navegador y sin servidor local: se ejecuta como una ventana de programa normal.
 
-Versión: **18.7.0** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versión: **18.8.0** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Módulos principales
@@ -61,7 +61,7 @@ Juegos de texto interactivos dirigidos por la IA en el papel de motor narrativo.
 
 Desde la versión v14.0, la aplicación admite de forma nativa 9 idiomas base: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Cada paquete `dictionaries/<kod>/` contiene diacríticos, alfabeto y reglas fonéticas que operan en el texto en ese idioma específico: la aplicación detecta automáticamente el idioma de origen a través de lingua-language-detector (por párrafo) y carga el paquete adecuado para cada fragmento por separado.
 
-Toda la interfaz GUI, la documentación (`docs/manual.<iso>.txt`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<kod>/rezyser/` y `dictionaries/<kod>/opowiesci/`).
+Toda la interfaz GUI, la documentación (`docs/manual.<iso>.html`) y la mayoría de los mensajes del sistema están disponibles de forma nativa en cada uno de los idiomas compatibles. Los mensajes del sistema de IA en los modos Director y Narrativa están escritos en los idiomas de destino (manualmente, no autotraducidos — ver `dictionaries/<kod>/rezyser/` y `dictionaries/<kod>/opowiesci/`).
 
 
 ## Arquitectura de IA y modelos utilizados
@@ -86,7 +86,7 @@ Esta es una limitación fundamental de la generación actual de inteligencia art
 
 1. Descarga la versión más reciente desde la pestaña **Releases** (el paquete marcado como *Latest*) — archivo `Rezyser_Audio_v<numer>_Installer.exe`. Ejecútalo con doble clic. El instalador se ubica por defecto en el directorio local de tu cuenta (`%LocalAppData%\Programs\Reżyser Audio GPT`) y no requiere permisos de administrador; puedes elegir tu propia ruta con el botón «Examinar». Al finalizar, crea accesos directos en el Menú Inicio y en el escritorio, y opcionalmente abre el manual de usuario en el editor predeterminado de archivos `.txt`.
 2. **Configuración de la API de Anthropic:** En el primer arranque, la aplicación indicará la ausencia de clave en la sección System Check. Haz clic en el botón visible para generar el archivo `golden_key.env`, ábrelo en un editor de texto e introduce tu clave de Anthropic (que comienza por `sk-ant-`).
-3. **Primeros pasos:** Abre el archivo `docs/manual.pl.txt` (o en otro idioma) en la carpeta de instalación — es el manual de usuario completo, escrito en un lenguaje accesible para cualquier usuario, no solo para desarrolladores.
+3. **Primeros pasos:** Abre el archivo `docs/manual.pl.html` (o en otro idioma) en la carpeta de instalación — es el manual de usuario completo, escrito en un lenguaje accesible para cualquier usuario, no solo para desarrolladores.
 
 
 ### Para desarrolladores (clonar + configurar)
@@ -104,11 +104,11 @@ Los scripts `.sh` para macOS/Linux fueron eliminados en la versión v13.1 — el
 
 Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con frasco, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
 
-* `docs/manual.<iso>.txt` — manual principal de usuario (escrito para el usuario final).
-* `docs/tales.<iso>.txt` — manual del modo Historias (juegos de texto interactivos).
-* `docs/dictionaries.<iso>.txt` — instrucciones para lingüistas sin Python sobre cómo añadir sus propios acentos/códigos/modos de IA.
+* `docs/manual.<iso>.html` — manual principal de usuario (escrito para el usuario final).
+* `docs/tales.<iso>.html` — manual del modo Historias (juegos de texto interactivos).
+* `docs/dictionaries.<iso>.html` — instrucciones para lingüistas sin Python sobre cómo añadir sus propios acentos/códigos/modos de IA.
 
-Cada uno de estos archivos está disponible en 9 idiomas — sufijo `.<iso>.txt` (por ejemplo, `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+Cada uno de estos archivos está disponible en 9 idiomas — sufijo `.<iso>.html` (por ejemplo, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ### Guía de nombres polacos — para personas fuera del ámbito lingüístico polaco

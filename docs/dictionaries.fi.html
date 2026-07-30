@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polyglootin ja Ohjaajan sanakirjat — Ohje kaikille</title>
+<style>
+body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
+       font-family: system-ui, sans-serif; line-height: 1.5; }
+code { font-family: ui-monospace, Consolas, monospace; }
+@media (prefers-color-scheme: dark) {
+  body { background: #1b1b1b; color: #e6e6e6; }
+  a { color: #8ab4f8; }
+}
+</style>
+</head>
+<body>
+<h1>Polyglootin ja Ohjaajan sanakirjat — Ohje kaikille</h1>
+<p>=============================================</p>
+<p>Hei! Jos luet tätä tiedostoa, se tarkoittaa, että olet katsonut<br>
+"dictionaries/"-kansioon Reżyser Audio GPT -sovelluksen vieressä ja mietit,<br>
+mitä nämä omituiset ".yaml"-päätteiset tiedostot ovat. Ei hätää — sinun ei<br>
+tarvitse osata ohjelmointia tai Pythonia ymmärtääksesi, mitä täällä<br>
+tapahtuu, ja pienellä rohkeudella voit jopa lisätä jotain omaa.</p>
+<p>Tämä tiedosto on kirjoitettu yksinkertaisella kielellä kirjailijoille,<br>
+lingvisteille, opettajille, vanhemmille ja yleisesti uteliaille. Jos<br>
+tiedät ohjelmoinnin perusteet ja etsit yksityiskohtaista dokumentaatiota<br>
+YAML-tiedostojen muodosta (kenttälistat, säännölliset lausekkeet,<br>
+käsittelyputken säännöt), katso "README.md"-tiedostoa samassa kansiossa —<br>
+mutta huomaa, että tämä tiedosto on saatavilla vain, jos olet kloonannut<br>
+GitHub-repositorion. Julkaisupaketista, joka on ladattu Releases-välilehdeltä,<br>
+Markdown-tiedostot on suodatettu pois (jotta pakettiin ei päätyisi<br>
+vahingossa esimerkiksi spoilerillisia maailmankirjoja), joten vain tämä<br>
+".txt"-tiedosto päätyy loppukäyttäjille.</p>
+<h2>Mitä täällä oikein on?</h2>
+<hr>
+<p>Kansio "dictionaries/" on sääntökirjasto, jota Polyglootti (käännös- ja<br>
+aksenttityökalu) sekä Ohjaajan sisäinen moottori käyttävät. Versioon 12.0<br>
+asti kaikki nämä säännöt olivat "kovakoodattuja" Python-koodiin — jos<br>
+halusit lisätä uuden aksentin tai muuttaa sääntöjä, sinun piti pyytää<br>
+ohjelmoijaa. Versiosta 13.0 alkaen kaikki on tallennettu tavallisiin<br>
+tekstimuotoisiin tiedostoihin (".yaml"-päätteellä — se on vain erityisellä<br>
+tavalla muotoiltu tavallinen teksti). Voit avata ne millä tahansa<br>
+tekstieditorilla (Muistio, VS Code, Notepad++) ja muokata niitä kuten<br>
+mitä tahansa muuta asiakirjaa.</p>
+<p>Kansion rakenne näyttää tältä:</p>
+<pre><code>dictionaries/
+└── pl/              peruskielen (puolan) kansio
+    ├── podstawy.yaml              puolalaiset diakriitit + aakkoset
+    ├── akcenty/                  11 aksenttitiedostot
+    ├── szyfry/                   6 salaus- ja leikkitiedostot
+    └── rezyser/                  4 Ohjaaja AI -tilatiedostot
+</code></pre>
+<p>Tällä hetkellä täysin toteutettuja ovat: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
+(9 peruskieliä). Jokaisella on oma paketti<br>
+"<code>dictionaries/&lt;kod&gt;/</code>" diakriiteillä, aakkosilla ja äännesäännöillä, jotka<br>
+toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa<br>
+lähdekielen automaattisesti lingua-language-detector -työkalulla<br>
+(kappaletasolla) ja lataa oikean paketin kullekin katkelmalle erikseen.<br>
+Lisää kieliä on valmisteilla (täydellinen paketti vaatii "podstawy.yaml",<br>
+"gui/ui.yaml" sekä vähintään yhden tiedoston "akcenty/" ja "szyfry/").</p>
+<h2>Mikä on aksentti?</h2>
+<hr>
+<p>Aksentti on sääntöjoukko, joka "pilaa" tekstin niin, että ruudunlukija<br>
+(esim. NVDA) lukee sen vieraan kielen äänellä. Esimerkiksi puolalainen<br>
+teksti, jossa on suomenkielinen aksentti, muuttaa "sz" "s":ksi, "w" "v":ksi<br>
+ja diakriitit (ą, ę, ł) yksinkertaistetuiksi versioiksi — tuloksena teksti<br>
+kuulostaa siltä, kuin helsinkiläinen suomalainen vasta opettelisi puolaa.<br>
+Kyse ei ole aidosta translitteroinnista, vaan hauskasta ja tarkoituksellisesta<br>
+vääristymästä tarinan tarpeisiin.</p>
+<p>Saatavilla olevat aksentit (8 kieltä):</p>
+<ul>
+<li>englanti (Samantha/Mark Vocalizerissa, Zira/Hazel OneCoressa)</li>
+<li>ranska (Thomas/Amelie Vocalizerissa, Julie OneCoressa)</li>
+<li>saksa (Markus/Stefan Vocalizerissa, Katja/Hedda OneCoressa)</li>
+<li>espanja (Jorge/Monica Vocalizerissa, Helena OneCoressa)</li>
+<li>italia (Alice/Luca Vocalizerissa, Elsa OneCoressa)</li>
+<li>puolalainen (Ewa Vocalizerissa, Paulina OneCoressa)</li>
+<li>islanti (vain OneCore Gudrun ja ilmainen eSpeak — Vocalizerissa ei ole<br>
+  islantilaista ääntä!)</li>
+<li>venäjä (Milena Vocalizerissa, Irina/Pavel/Yuri OneCoressa — tämä on<br>
+  poikkeuksellinen, koska se ei "pilaa" latinalaisia kirjaimia vaan tekee<br>
+  täydellisen translitteroinnin kyrillisiin; ilman tätä venäläisellä äänellä<br>
+  ei olisi mitään lausuttavaa)</li>
+</ul>
+<p>Lisäksi aksenttivalikossa on kaksi "puhdistavaa ilman aksenttia" -vaihtoehtoa:<br>
+yksi ilman numeroiden normalisointia, toinen normalisoinnilla (muuttaa "15"<br>
+"viisitoista" ennen käsittelyä, koska ulkomaalainen ei todennäköisesti taivuttaisi<br>
+tätä lukua oikein — mikä lisää aitoutta) sekä "Tagikorjaaja", joka vain lisää<br>
+tiedostoon ISO-kielikoodin ilman sisällön pilaamista (pelastus, kun jo<br>
+käännetty tiedostosi on väärällä kielikoodilla).</p>
+<h2>Mikä on salaus?</h2>
+<hr>
+<p>Salaukset ovat tekstileikkejä arvoituksiin, kieliharjoituksiin ja pulmapeleihin.<br>
+Toisin kuin aksentit, ne eivät ole suunnattu tietylle synteettiselle äänelle —<br>
+ne vain vääristävät tekstiä tietyn säännön mukaan. Saatavilla olevat salaukset<br>
+(6):</p>
+<ol>
+<li>Tekstin Kääntäjä (lukeminen takaperin)<br>
+   Jokainen lause käännetään merkki merkiltä, säilyttäen iso alkukirjain<br>
+   alussa ja piste/huutomerkki/kysymysmerkki lopussa. Ennen kääntämistä<br>
+   skripti laajentaa suomenkieliset lyhenteet (esim., jne., ym., ns., tms.),<br>
+   koska ilman tätä kääntämisen jälkeen tulisi absurdeja, kuten ".mise".</li>
+</ol>
+<p>Inspiraatio: tehtävä puolalaisesta ohjelmasta "The Traitors. Zdrajcy".<br>
+   Juontaja soitti osallistujille suositun lastenlaulun takaperin. Reaktiot<br>
+   olivat tyyliin "mikä kieli tämä on? armenia? unkari? suomi?" — ja se oli<br>
+   lapsuudesta tuttu sävelmä sadusta. Myöhemmin kävi ilmi, että metsäjoukkue<br>
+   sai laulun tekstin takaperin ja heidän piti laulaa juuri tällaisessa<br>
+   versiossa — linnajoukkueen piti nauhoittaa se, kääntää nauhoitus ja<br>
+   teoriassa palauttaa laulu arvattavaksi.</p>
+<p>Täsmälleen sama hauska väärinkäsitys tapahtuu, kun ajat Tekstin Kääntäjän<br>
+   puhesyntetisaattorin kautta. Erinomainen teemallisiin arvoituksiin,<br>
+   pakohuoneisiin, juhlaohjelmiin.</p>
+<ol start="2">
+<li>
+<p>Typoglykemia (sekoitettu sanan keskiosa)<br>
+   Klassinen psykolingvistinen ilmiö: "Voit siis lkea tkstia missäkn<br>
+   jrjästyksessä, kunhan ensimäinen ja viimnien krjain ovat oiekilla<br>
+   paikolla." Skripti sekoittaa<br>
+   satunnaisesti jokaisen yli 4 kirjaimen pituisen sanan keskiosan, ensimmäinen<br>
+   ja viimeinen kirjain pysyvät paikoillaan. Erinomainen testi "mitä<br>
+   oikeasti näen ja mitä aivoni ehdottavat minulle".</p>
+</li>
+<li>
+<p>Rikkoutunut Puhelin / Käärmeiden Dialekti<br>
+   Jokainen "s", "z" tai "sz" venytetään satunnaisesti 4-8 merkin pituiseksi<br>
+   sihiseväksi ääneksi. Inspiraatio: Snecko pelistä "Slay the Spire". Tuloksena:<br>
+   teksti kuulostaa siltä, kuin sen lukisi käärme, jolla on puhevika. Erinomainen<br>
+   taustaksi sekaantuneelle käärmehahmolle tai rikkoutuneelle robotille, joka<br>
+   sihisee.</p>
+</li>
+<li>
+<p>Vokaalinvaihtaja (kaikki kumisee "o":na)<br>
+   Jokainen vokaali tekstissä muutetaan "o":ksi, säilyttäen suomenkieliset<br>
+   pehmennykset (ci, si, ni, zi, dzi käsitellään oikein): "Hyvää päivää,<br>
+   tervetuloa" → "Hyoää poovoo, torvotooloo". Mitä pidempi teksti, sitä<br>
+   hauskempi vaikutus — ja ruudunlukija lukee sen täydellä vakuuttavuudella,<br>
+   yrittämättä purkaa sitä.</p>
+</li>
+<li>
+<p>Vahva Änkytys / Rikkoutunut Robotti<br>
+   Lisää änkytystä sanojen alkuun: "tietokone" → "t-t-t-tietokone",<br>
+   "prinsessa" → "pr-pr-prinsessa". Alle 3 merkin pituiset sanat ohitetaan. Jos<br>
+   sanan toinen kirjain on konsonantti, toistetaan kaksi ensimmäistä (kuulostaa<br>
+   luonnollisemmalta); jos vokaali — vain ensimmäinen.</p>
+</li>
+<li>
+<p>Caesarin Salaus (klassikko)<br>
+   Vanhin dokumentoitu salaus historiassa (käytetty jo antiikin Roomassa).<br>
+   Jokainen kirjain siirretään N paikkaa suomen aakkosissa (29 kirjainta:<br>
+   ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ). Siirtymän syötät GUI:ssa numerokenttään; jos<br>
+   syötät 0, sovellus arpoo arvon välillä 1-28 ja näyttää sen viestissä, jotta<br>
+   voit myöhemmin purkaa viestin. Aakkosten ulkopuoliset merkit (numerot, välilyönnit,<br>
+   välimerkit) pysyvät ennallaan.</p>
+</li>
+</ol>
+<h2>Mikä on "Ohjaaja-tila"?</h2>
+<hr>
+<p>Kansio "rezyser/" sisältää 4 tiedostoa, jotka kuvaavat sovelluksen<br>
+Pääohjaamon tilat:</p>
+<ul>
+<li>burza_mozgow.yaml    — Aivoriihi (juonen suunnittelu, 3 vaihtoehtoa<br>
+                         tarinan kehitykselle, anti-closure-direktiivi)</li>
+<li>skrypt.yaml          — Raaka Käsikirjoitus (tagit [SFX], [Speaker: tunne],<br>
+                         hahmojen fonetiikka)</li>
+<li>audiobook.yaml       — Perinteinen Äänikirja (puhdas kirjallinen proosa,<br>
+                         yhteenvetojen ja sulkeumien kielto)</li>
+<li>postprod_tytuly.yaml — kirjallisten lukujen nimien antaminen koko tarinan<br>
+                         luomisen jälkeen</li>
+</ul>
+<p>Kunkin näiden tiedostojen sisällä arvokkain osa on "järjestelmäkehotus" —<br>
+pitkä ohjeistus tekoälylle, kuinka sen tulisi käyttäytyä kyseisessä tilassa.<br>
+Jos tunnet, että esimerkiksi Äänikirja-tila kirjoittaa "liian kukkaisesti"<br>
+tai Aivoriihi ehdottaa liian usein maagisia ratkaisuja, voit säätää näitä<br>
+tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla<br>
+käynnistyksellä sinun version. Ei ohjelmointia.</p>
+<h2>Mikä on "Tarinatila"?</h2>
+<hr>
+<p>Kansio "opowiesci/" sisältää 8 tiedostoa, jotka kuvaavat sovelluksen<br>
+toista päätilaa — interaktiivisia tekstipelejä, joita ohjaa tekoäly<br>
+kertomusmoottorin roolissa. Toisin kuin Ohjaaja-tilassa (jossa luot<br>
+VALMIIN äänikirjan toistettavaksi TTS:ssä), Tarinatila on vuoropohjainen<br>
+keskustelu mallin kanssa, joka ohjaa kanssasi dynaamisen juonen istuntoa:</p>
+<ul>
+<li>tryb_wyborow.yaml      — Valinnat (3-5 numeroitua vaihtoehtoa A-E<br>
+                           jokaisen vuoron lopussa, intuitiivisin tila<br>
+                           näkövammaisille pelaajille)</li>
+<li>tryb_mniejsze_zlo.yaml — Pienempi paha (kuten Valinnat, mutta jokainen<br>
+                           vaihtoehto on epäedullinen; versiosta 15.2<br>
+                           lähtien uudelleenkäytettävä pullo ZERO-numeroituna<br>
+                           epätoivoisen pelastuksen vaihtoehtona)</li>
+<li>tryb_swobodny.yaml     — Vapaa (mikä tahansa toiminto vapaana tekstinä,<br>
+                           moottori ehdottaa 1-3 vaihtoehtoa mutta ei<br>
+                           pakota valintaa)</li>
+<li>tryb_burza.yaml        — Aivoriihi (sisäinen dispatch, joka tuottaa<br>
+                           ehdotuksia kohtauksen kehittämiseksi<br>
+                           kertomusmoottorille)</li>
+<li>baza.yaml              — yhteiset perussäännöt (vuoron pituus, yhteenvetojen<br>
+                           kiellot, anti-sulkeutumisdirektiivi)</li>
+<li>zaczatki.yaml          — seikkailun aloittimet (3 alustavaa maailman<br>
+                           asetelmaa valittavaksi uutta peliä aloitettaessa)</li>
+<li>streszczenie.yaml      — pitkien pelien yhteenvetogeneraattori (historian<br>
+                           pakkaus mallin kontekstiikkunaa varten)</li>
+<li>cinematic_warning.yaml — varoitukset brutaaleista/dramaattisista<br>
+                           kohtauksista (yhdenmukaisuus pelaajan mieltymysten kanssa)</li>
+</ul>
+<p>Kuten Ohjaaja-tilassa, jokainen tiedosto sisältää muokattavan "järjestelmäkehotteen".<br>
+Voit hienosäätää kertojan tyyliä (esim. vähemmän kukkeaa), muuttaa vuoron<br>
+pituutta, lisätä omia juonidirektiivejä. Versiosta 18.1 lähtien kaikki<br>
+Tarinatilan tilat käyttävät yhtä yhteistä mallia (oletuksena ja suositeltuna<br>
+Anthropic Claude Sonnet 5) — vahvempi malli noudattaa tiukasti maailman<br>
+sääntöjä (ratkaisevan tärkeää Pienempi paha -tilassa, jossa jokaisen<br>
+vaihtoehdon on oltava todella epäedullinen).</p>
+<h2>Kuinka aloittaa leikki — kolme vaikeustasoa</h2>
+<hr>
+<h2>TASO 1 — olemassa olevan aksentin hienosäätö</h2>
+<p>Kuvittele, että sovelluksen ranskalainen aksentti muuttaa "sz" "sh":ksi,<br>
+mutta mielestäsi ranskalainen sanoisi mieluummin "sch" tai "ch". Ei ongelmaa.</p>
+<ol>
+<li>Käynnistä sovellus ja siirry Sääntöjen Hallintaan (Ctrl+4 tai neljäs<br>
+   painike palkissa).</li>
+<li>Laajenna tiedostopuu vasemmalla "pl" → "aksentit" ja klikkaa<br>
+   "francuski.yaml".</li>
+<li>Klikkaa "Avaa tekstieditorissa" -painiketta. Tiedosto avautuu Windowsin<br>
+   Muistiossa (tai oletustekstieditorissasi).</li>
+<li>Selaa alas kohtaan "korvaukset:". Etsi rivi, jossa on malli "sz" ja<br>
+   muuta "korvaus" -arvo haluamaksesi.</li>
+<li>Tallenna tiedosto (Ctrl+S), sulje editori.</li>
+<li>Palaa Sääntöjen Hallintaan ja klikkaa "Päivitä puu", sulje sitten<br>
+   sovellus ja käynnistä se uudelleen. Muutoksesi on jo toiminnassa.</li>
+</ol>
+<h2>TASO 2 — uuden aksentin lisääminen kopioimalla</h2>
+<p>Haluatko lisätä ruotsalaisen tai tanskalaisen aksentin? Aloita<br>
+lähimmästä olemassa olevasta.</p>
+<ol>
+<li>Sääntöjen Hallinnassa valitse esimerkiksi "finski.yaml" (suomi on<br>
+   lähellä ruotsia foneettisesti) ja klikkaa "Kopioi valittu tiedosto".</li>
+<li>Hallinta kysyy uutta nimeä — kirjoita esimerkiksi "ruotsalainen"<br>
+   (pienillä kirjaimilla, ilman välilyöntejä, ilman suomenkielisiä<br>
+   merkkejä).</li>
+<li>Uusi tiedosto avautuu editorissa. Muuta kentät:<ul>
+<li>"etiketti" — se, mitä näet sovelluksen valikossa, esim.<br>
+    "Ruotsalainen (Alva / Oskar — OneCore/Vocalizer)"</li>
+<li>"kuvaus" — lyhyt kuvaus itsellesi tulevaisuutta varten</li>
+<li>"iso" — kaksikirjaiminen kielikoodi, ruotsille "sv"</li>
+</ul>
+</li>
+<li>Säädä "korvaukset" -listaa ruotsalaiselle foneettisuudelle (esim.<br>
+   lisää "å → o", "ö → ö", poista tai muuta ne, jotka ovat erityisiä<br>
+   suomelle).</li>
+<li>Tallenna ja käynnistä sovellus uudelleen. Uusi ruotsalainen ilmestyy<br>
+   Polyglootin aksenttivalikkoon (ja jos lisäät Maailmankirjaan hahmon<br>
+   tagilla "[Marek] - puhuu ruotsalaisella aksentilla", Ohjaaja tunnistaa<br>
+   sen automaattisesti ja soveltaa sitä hänen dialogeihinsa).</li>
+</ol>
+<h2>TASO 3 — täysin uuden luominen</h2>
+<p>Haluatko kouluslangin? Muinaisten ritarien kielen? Ruohopuheen? Vanhempien<br>
+salakielen lapsilta?</p>
+<ol>
+<li>Sääntöjen Hallinnassa klikkaa "Uusi sääntötiedosto…".</li>
+<li>Valitse tyyppi (aksentti, korvaussalaus, Ohjaaja-tila, uusi<br>
+   peruskieli, algoritminen salaus). Tavallisissa tapauksissa sovellus<br>
+   luo heti valmiin YAML-mallin — muokkaat sitä kuten tasolla 2.</li>
+<li>Vaikeammissa tapauksissa (algoritmit, kuten "päätteiden sekoittaminen"<br>
+   tai kokonaan uusi peruskieli) Hallinta näyttää sinulle valmiin<br>
+   kehotuksen liitettäväksi ChatGPT:hen tai Claudeen. AI luo täydellisen<br>
+   YAML-tiedoston, sinun tarvitsee vain kopioida se kansioon. Sinun ei<br>
+   tarvitse osata ohjelmoida — riittää, että osaat kopioida ja liittää.</li>
+</ol>
+<h2>Muutamia ideoita leikkiin</h2>
+<hr>
+<ul>
+<li>
+<p>Koululuokka suomen kielen tunnilla: tehtävä "lue katkelma kirjasta<br>
+  Polyglootissa venäläisellä aksentilla — tunnistatko kirjailijan?".<br>
+  Erityisesti näkövammaisille lapsille arvokasta, koska he saavat<br>
+  mielenkiintoisen äänen ilman, että heidän tarvitsee lukea julistetta<br>
+  silmillään.</p>
+</li>
+<li>
+<p>Pakohuone kirjastossa: valmista runon katkelma Tekstin Kääntäjässä,<br>
+  tulosta (tai lähetä viestinä), osallistujien täytyy joko lukea ääneen<br>
+  ja nauhoittaa, sitten soittaa takaperin, tai yksinkertaisesti skannata<br>
+  silmillään takaperin. Avain kaappiin annetaan niille, jotka tunnistavat<br>
+  runon nimen.</p>
+</li>
+<li>
+<p>Kotikuunnelma vanhemmalle perheelle: tallenna satu "Ruma ankanpoikanen"<br>
+  eri aksenteilla (kertoja englanniksi, äiti ankka italiaksi, isä ankka<br>
+  saksaksi) ja yhdistä Audacityssä. Erityisen hauskaa isovanhemmille,<br>
+  koska he erottavat "kuka nyt puhuu" pelkän äänen perusteella.</p>
+</li>
+<li>
+<p>Näyttelijän harjoitus: aja repliikkisi Käärmeiden Dialektin läpi ja<br>
+  yritä toistaa se livenä. Harjoittaa sihinää, hengitystä, kielen hallintaa.</p>
+</li>
+<li>
+<p>Syntymäpäiväkortti arvoituksella: siirrä onnittelut Caesarin Salauksella<br>
+  3 paikkaa, lisää "avain: siirrä jokaista kirjainta niin monta paikkaa,<br>
+  kuin sinulla on tänään vuosia". Syntymäpäiväsankarin täytyy itse löytää<br>
+  purku. (Toimii parhaiten 7-12-vuotiaille lapsille; aikuiset yleensä<br>
+  huomaavat nopeasti.)</p>
+</li>
+</ul>
+<h2>Voiko jokin mennä pieleen?</h2>
+<hr>
+<p>Periaatteessa ei. Sovellus lataa YAML-tiedostot dynaamisesti ja jos jokin<br>
+on tallennettu väärin, se yksinkertaisesti ohittaa sen ja näyttää varoituksen<br>
+käynnistyksen yhteydessä. Loput säännöt toimivat kuin mitään ei olisi<br>
+tapahtunut.</p>
+<p>Pahin, mitä voi tapahtua, on että uusi tiedosto ei yksinkertaisesti näy<br>
+sovelluksen valikossa. Silloin:</p>
+<ul>
+<li>palaa Sääntöjen Hallintaan, tarkista, onko tiedosto näkyvissä puussa,</li>
+<li>avaa se uudelleen tekstieditorissa ja vertaa rakennetta viereisiin<br>
+  (sisennykset, kaksoispisteet, lainausmerkit),</li>
+<li>jos todella jäät jumiin — kopioi tiedostosi sisältö, avaa ChatGPT ja<br>
+  kirjoita "minulla on YAML-tiedosto, jota sovellus ei lataa, löydä<br>
+  virhe ja näytä korjattu versio". Liitä tiedosto. AI yleensä korjaa<br>
+  sen muutamassa sekunnissa.</li>
+</ul>
+<p>Älä poista alkuperäisiä paketin tiedostoja (angielski.yaml, cezar.yaml,<br>
+podstawy.yaml jne.) — piilota ne mieluummin muuttamalla tiedostopääte<br>
+".yaml" ".yaml.backup":iksi, jos haluat niiden katoavan valikosta. Jos<br>
+muutat myöhemmin mieltäsi, riittää, että palautat tiedostopäätteen.</p>
+<h2>Hauskoja hetkiä!</h2>
+</body>
+</html>

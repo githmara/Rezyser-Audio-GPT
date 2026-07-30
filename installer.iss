@@ -17,7 +17,7 @@
 ;   * sekcja Languages       — z `zbierz_jezyki_bazowe()` ∩
 ;                              `zbierz_jezyki_z_manualem()` ∩ `INNO_LANG_MAP`
 ;                              (kody z `dictionaries/<kod>/podstawy.yaml`
-;                              które mają `docs/manual.<iso>.txt` i oficjalny
+;                              które mają `docs/manual.<iso>.html` i oficjalny
 ;                              `.isl` w pakiecie Inno Setup); aktualnie 8 jzk
 ;                              (en/pl/de/es/fi/fr/it/ru), is pomijany z warningiem.
 ;   * sekcja Code            — `function GetManualISO()` z case'ami
@@ -75,13 +75,20 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; v15.2: checkbox „Otwórz instrukcję obsługi po instalacji" — domyślnie zaznaczony.
 ; ISO języka instrukcji wyliczany dynamicznie z ActiveLanguage() przez funkcję
 ; GetManualISO() w sekcji Code (patrz niżej). Fallback do EN dla języków
-; instalatora bez własnego docs/manual.<iso>.txt (np. instalator po angielsku
-; → manual.en.txt).
+; instalatora bez własnego docs/manual.<iso>.html (np. instalator po angielsku
+; → manual.en.html).
 Name: "openmanual"; Description: "{cm:OpenManualTaskDesc}"; GroupDescription: "{cm:AdditionalActionsGroup}"
 
+[InstallDelete]
+; v18.8: dokumentacja zmieniła format .txt → .html. Przy instalacji nadpisującej
+; starszą wersję usuwamy osierocone docs\*.txt, żeby użytkownik nie trafił na
+; nieaktualny plik obok świeżego .html (menu Pomoc i tak wskazuje już .html).
+Type: files; Name: "{app}\docs\*.txt"
+
 [Run]
-; Otwarcie instrukcji obsługi przez domyślny handler Windows (.txt → Notatnik
-; lub VS Code, zależnie od skojarzenia). Flagi:
+; Otwarcie instrukcji obsługi przez domyślny handler Windows (.html →
+; domyślna przeglądarka; od v18.8 manual jest HTML-em z tagiem lang i
+; nagłówkami do nawigacji czytnikiem ekranu). Flagi:
 ;   shellexec     — używa ShellExecute, czyli respektuje skojarzenia użytkownika
 ;   postinstall   — pokazuje na stronie „Finish" jako checkbox (już zaznaczony,
 ;                   bo task ma domyślnie selected)
@@ -89,14 +96,14 @@ Name: "openmanual"; Description: "{cm:OpenManualTaskDesc}"; GroupDescription: "{
 ; Plik wskazywany jest przez {code:GetManualISO} — funkcja zwraca kod ISO
 ; pasujący do języka instalatora. Folder docs\ leży w paczce (NIE jest
 ; w Excludes w [Files]).
-Filename: "{app}\docs\manual.{code:GetManualISO}.txt"; Description: "{cm:OpenManualRunDesc}"; Flags: shellexec postinstall skipifsilent; Tasks: openmanual
+Filename: "{app}\docs\manual.{code:GetManualISO}.html"; Description: "{cm:OpenManualRunDesc}"; Flags: shellexec postinstall skipifsilent; Tasks: openmanual
 
 ; UWAGA: Sekcje Code (GetManualISO) i CustomMessages poniżej są placeholderami
 ; nadpisywanymi przez `build_release.py` dynamicznie (nazwy sekcji w komentarzu
 ; BEZ nawiasów kwadratowych — split() szuka literalnie):
 ;   * sekcja Code body — generowany z `buduj_blok_kodu_iso(wpisy, kody_z_manualem)`,
 ;     mapuje `ActiveLanguage() → kod_iso` dla każdego jzk z Inno-supported listy,
-;     który MA `docs/manual.<iso>.txt`. Reszta → fallback en.
+;     który MA `docs/manual.<iso>.html`. Reszta → fallback en.
 ;   * sekcja CustomMessages — generowana z `buduj_blok_custom_messages(wpisy)`,
 ;     iteruje po `INNO_MANUAL_MESSAGES_MAP` (3 etykiety × N jzk).
 ;

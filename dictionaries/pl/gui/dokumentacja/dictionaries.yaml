@@ -2,8 +2,8 @@
 # dictionaries/pl/gui/dokumentacja/dictionaries.yaml
 #
 # Szablon instrukcji dla lingwistów bez Pythona (i18n, Etap 1 wersji 13.x).
-# Generator `generuj_dokumentacje.py` zapisuje wynik do `docs/dictionaries.pl.txt`
-# (a w kolejnych językach — `docs/dictionaries.<iso>.txt`).
+# Generator `generuj_dokumentacje.py` zapisuje wynik do `docs/dictionaries.pl.html`
+# (a w kolejnych językach — `docs/dictionaries.<iso>.html`).
 #
 # Konwencje:
 #   * Rdzeń nazwy pliku wynikowego ("dictionaries") — ten sam dla wszystkich
@@ -19,7 +19,7 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Słowniki Poligloty i Reżysera — Instrukcja dla każdego
+    # Słowniki Poligloty i Reżysera — Instrukcja dla każdego
     =======================================================
 
     Cześć! Jeśli czytasz ten plik, to znaczy, że zajrzałeś do folderu
@@ -39,7 +39,7 @@ tresc:
     spoilerami), więc tylko ten plik ".txt" trafia do użytkowników
     końcowych.
   co_tu_jest: |
-    Co w ogóle tu jest?
+    ## Co w ogóle tu jest?
     -------------------
 
     Folder "dictionaries/" to biblioteka reguł, którymi posługuje się
@@ -62,14 +62,14 @@ tresc:
 
     Obecnie kompletnie wdrożone są: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} języków bazowych). Każdy ma własną paczkę
-    "dictionaries/<kod>/" z diakrytykami, alfabetem i regułami fonetycznymi
+    "`dictionaries/<kod>/`" z diakrytykami, alfabetem i regułami fonetycznymi
     działającymi na tekst w tym właśnie języku — aplikacja sama wykrywa język
     źródłowy przez lingua-language-detector (per akapit) i ładuje odpowiednią
     paczkę dla każdego fragmentu osobno. Kolejne języki są
     w przygotowaniu (kompletny pakiet wymaga "podstawy.yaml", "gui/ui.yaml"
     oraz minimum jednego pliku w "akcenty/" i "szyfry/").
   co_to_akcent: |
-    Co to jest akcent?
+    ## Co to jest akcent?
     ------------------
 
     Akcent to zestaw reguł, które "psują" polski tekst tak, żeby czytnik
@@ -102,7 +102,7 @@ tresc:
     bez psucia treści (ratunek, gdy Twój już przetłumaczony plik wyszedł
     z błędnym kodem językowym).
   co_to_szyfr: |
-    Co to jest szyfr?
+    ## Co to jest szyfr?
     -----------------
 
     Szyfry to zabawy tekstowe do zagadek, ćwiczeń językowych, łamigłówek.
@@ -164,7 +164,7 @@ tresc:
        wiadomość. Znaki spoza alfabetu (cyfry, spacje, interpunkcja) zostają
        bez zmian.
   co_to_tryb_rezysera: |
-    Co to jest "tryb Reżysera"?
+    ## Co to jest "tryb Reżysera"?
     ---------------------------
 
     Folder "rezyser/" zawiera {liczba_trybow_rezysera} plików opisujących tryby pracy Głównego
@@ -186,7 +186,7 @@ tresc:
     rozwiązania, możesz te teksty dostroić pod swój gust, zapisać i aplikacja
     przy następnym uruchomieniu załaduje Twoją wersję. Zero programowania.
   co_to_tryb_opowiesci: |
-    Co to jest "tryb Opowieści"?
+    ## Co to jest "tryb Opowieści"?
     ----------------------------
 
     Folder "opowiesci/" zawiera {liczba_trybow_opowiesci} plików opisujących drugi
@@ -221,10 +221,10 @@ tresc:
     Claude Sonnet 5) — mocniejszy model rygorystycznie trzyma się zasad świata
     (kluczowe w trybie Mniejsze zło, gdzie każda opcja musi być realnie niekorzystna).
   jak_zaczac: |
-    Jak zacząć zabawę — trzy poziomy trudności
+    ## Jak zacząć zabawę — trzy poziomy trudności
     -------------------------------------------
   poziom_1_dostroj: |
-    POZIOM 1 — drobne dostrojenie istniejącego akcentu
+    ## POZIOM 1 — drobne dostrojenie istniejącego akcentu
 
     Wyobraź sobie, że francuski akcent aplikacji zamienia "sz" na "sh", ale
     Ty uważasz, że Francuz raczej powiedziałby "sch" lub "ch". Żaden problem.
@@ -241,7 +241,7 @@ tresc:
     6. Wróć do Managera Reguł i kliknij "Odśwież drzewo", a potem zamknij
        i uruchom aplikację ponownie. Twoja zmiana już działa.
   poziom_2_duplikacja: |
-    POZIOM 2 — dodanie nowego akcentu przez duplikację
+    ## POZIOM 2 — dodanie nowego akcentu przez duplikację
 
     Chcesz dodać akcent szwedzki albo duński? Zacznij od najbardziej
     podobnego istniejącego.
@@ -262,7 +262,7 @@ tresc:
        tag "[Marek] - ma akcent szwedzki", to Reżyser też go rozpozna
        automatycznie i zastosuje do jej dialogów).
   poziom_3_cos_nowego: |
-    POZIOM 3 — stworzenie czegoś zupełnie nowego
+    ## POZIOM 3 — stworzenie czegoś zupełnie nowego
 
     Chcesz gwarę szkolną? Język starożytnych rycerzy? Mowę trawę? Szyfr
     rodziców przed dziećmi?
@@ -277,7 +277,7 @@ tresc:
        Ty go tylko skopiujesz do folderu. Nie musisz umieć programować —
        wystarczy umieć przekleić.
   pomysly: |
-    Kilka pomysłów na zabawę
+    ## Kilka pomysłów na zabawę
     ------------------------
 
     - Klasa szkolna na lekcji polskiego: zadanie "wczytaj fragment lektury
@@ -304,7 +304,7 @@ tresc:
       dzisiaj". Jubilat musi sam znaleźć rozszyfrowanie. (Działa najlepiej
       dla dzieci 7-12 lat; dorośli zazwyczaj szybko się zorientują.)
   bezpieczenstwo: |
-    Czy coś mi się może popsuć?
+    ## Czy coś mi się może popsuć?
     ---------------------------
 
     W zasadzie nie. Aplikacja ładuje pliki YAML dynamicznie i jeśli któryś
@@ -327,4 +327,4 @@ tresc:
     na ".yaml.backup", jeśli chcesz, żeby zniknęły z menu. Gdybyś później
     zmienił zdanie, wystarczy przywrócić rozszerzenie.
   zakonczenie: |
-    Miłej zabawy!
+    ## Miłej zabawy!

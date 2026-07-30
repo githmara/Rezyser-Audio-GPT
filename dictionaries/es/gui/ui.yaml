@@ -767,6 +767,12 @@ poliglota:
   blad_wyniku_tresc: "No se pudo generar el texto resultante."
   blad_zapisu_wyjscia: "Error al guardar el archivo resultante:\n{tresc_bledu}"
   sukces_zapis: "Archivo guardado como:\n{sciezka_pliku}"
+  # 18.8: segmentos localizados de nombres de archivos de salida (una palabra, sin espacios)
+  filename_naprawiony: "reparado"
+  filename_oczyszczony: "limpiado"
+  filename_akcent: "acento"
+  filename_szyfr: "cifrado"
+  filename_tlumaczenie: "traducción"
   # Tłumacz AI
   ai_init: "Iniciando traducción…"
   ai_zakonczone_tytul: "Éxito"
@@ -806,6 +812,8 @@ poliglota:
   ai_postep_zapis: Guardando archivo de resultado…
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
+  # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)
+  filename_architektura: "arquitectura"
   heading: "📄  Arquitecto de Audiolibros"
   tool_description: |-
     Este módulo se utiliza para preparar la arquitectura del archivo para lectores de pantalla (navegación con teclas 1 y h por encabezados) y ElevenLabs. Cambia palabras clave (Introducción, Acto, Capítulo, Prólogo, Epílogo) a Encabezados de primer nivel, dejando el resto del guion sin cambios.

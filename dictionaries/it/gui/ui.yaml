@@ -767,6 +767,12 @@ poliglota:
   blad_wyniku_tresc: "Impossibile generare il testo risultante."
   blad_zapisu_wyjscia: "Errore durante il salvataggio del file risultante:\n{tresc_bledu}"
   sukces_zapis: "File salvato come:\n{sciezka_pliku}"
+  # 18.8: segmenti localizzati dei nomi dei file di output (una parola, senza spazi)
+  filename_naprawiony: "riparato"
+  filename_oczyszczony: "pulito"
+  filename_akcent: "accento"
+  filename_szyfr: "cifrario"
+  filename_tlumaczenie: "traduzione"
   # Tłumacz AI
   ai_init: "Inizializzazione della traduzione…"
   ai_zakonczone_tytul: "Successo"
@@ -806,6 +812,8 @@ poliglota:
   ai_postep_zapis: Salvataggio del file di output…
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
+  # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)
+  filename_architektura: "architettura"
   heading: "📄  Architetto Audiolibri"
   tool_description: |-
     Questo modulo serve a preparare l'architettura del file per i lettori di schermo (navigazione con i tasti 1 e h sui titoli) e ElevenLabs. Cambia le parole chiave (Frontespizio, Atto, Capitolo, Prologo, Epilogo) in Titoli di primo livello, lasciando il resto del copione invariato.

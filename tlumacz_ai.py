@@ -303,10 +303,18 @@ def _bezpieczna_nazwa_pliku(tekst: str) -> str:
     return oczyszczony.strip("._")
 
 
-def zbuduj_nazwe_bazowa(oryginalna_nazwa: str, jezyk_docelowy: str) -> str:
-    """Zwraca nazwę pliku wynikowego (bez rozszerzenia) dla trybu Tłumacza AI."""
+def zbuduj_nazwe_bazowa(oryginalna_nazwa: str, jezyk_docelowy: str,
+                        slowo_tlumaczenie: str = "tlumaczenie") -> str:
+    """Zwraca nazwę pliku wynikowego (bez rozszerzenia) dla trybu Tłumacza AI.
+
+    ``slowo_tlumaczenie`` to zlokalizowany człon nazwy (od v18.8 GUI podaje
+    ``poliglota.filename_tlumaczenie`` z ``ui.yaml`` w języku UI); default
+    zachowuje historyczne ``tlumaczenie`` — m.in. dla dev-toolingu
+    (``buduj_wielojezyczne_*``), gdzie nazwa jest tylko kluczem cache.
+    """
     slug = _bezpieczna_nazwa_pliku(jezyk_docelowy.split()[0]).lower() or "tlumaczenie"
-    return f"{oryginalna_nazwa}_tlumaczenie_{slug}"
+    slowo = _bezpieczna_nazwa_pliku(slowo_tlumaczenie).lower() or "tlumaczenie"
+    return f"{oryginalna_nazwa}_{slowo}_{slug}"
 
 
 def _sciezka_pliku_tymczasowego(runtime_dir: str, base_name: str) -> str:
@@ -486,6 +494,7 @@ def tlumacz_dlugi_tekst(
     model_iso: str = MODEL_TLUMACZ,
     max_tokenow_na_blok: int = 2_500,
     prompt_dodatkowy: str = "",
+    slowo_tlumaczenie: str = "tlumaczenie",
 ) -> WynikTlumaczenia | None:
     """Tłumaczy długi tekst przez Anthropic Claude z wznawianiem po przerwaniu.
 
@@ -521,12 +530,20 @@ def tlumacz_dlugi_tekst(
                            Używane przez batchowy autotłumacz dokumentacji
                            (`buduj_wielojezyczne_docs.py`); GUI Poligloty AI
                            dalej wywołuje funkcję bez tego argumentu.
+        slowo_tlumaczenie: 18.8. Zlokalizowany człon nazwy pliku wynikowego
+                           (GUI podaje ``poliglota.filename_tlumaczenie``
+                           w języku UI, już zsanityzowany). Default zachowuje
+                           historyczne ``tlumaczenie``. Uwaga: człon wchodzi
+                           też do nazwy cache ``temp_*.jsonl`` — zmiana języka
+                           UI między przerwanym a wznowionym tłumaczeniem
+                           unieważnia cache (świadomy, rzadki koszt).
 
     Returns:
         :class:`WynikTlumaczenia` po sukcesie, albo ``None`` po błędzie
         krytycznym (wtedy callback ``on_blad_krytyczny`` już został wywołany).
     """
-    base_name = zbuduj_nazwe_bazowa(oryginalna_nazwa, jezyk_docelowy)
+    base_name = zbuduj_nazwe_bazowa(oryginalna_nazwa, jezyk_docelowy,
+                                    slowo_tlumaczenie)
     plik_temp = _sciezka_pliku_tymczasowego(runtime_dir, base_name)
 
     sys_prompt = _prompt_systemowy(jezyk_docelowy)

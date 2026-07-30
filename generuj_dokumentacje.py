@@ -1,28 +1,31 @@
 """
 generuj_dokumentacje.py — Generator dokumentacji użytkownika (i18n).
 
-Czyta szablony z `dictionaries/<kod>/gui/dokumentacja/*.yaml`, podstawia
-placeholdery z `dictionaries/<kod>/gui/ui.yaml` i zapisuje wynik do
-`docs/<id>.<kod>.txt`.
+Czyta szablony z `dictionaries/<kod>/gui/dokumentacja/*.yaml` (treść w
+Markdownie od v18.8), podstawia placeholdery z `dictionaries/<kod>/gui/ui.yaml`
+i renderuje wynik do `docs/<id>.<kod>.html` (README: zapis surowego Markdownu,
+renderuje go GitHub).
 
 Model danych:
   * `id` (w szablonie YAML) → rdzeń nazwy pliku wynikowego
-    (np. "manual" → `docs/manual.pl.txt`).
-  * `tresc` (w szablonie YAML, block-scalar "|") → treść dokumentu
+    (np. "manual" → `docs/manual.pl.html`).
+  * `tresc` (w szablonie YAML, block-scalar "|") → treść dokumentu w Markdownie
     z placeholderami `{klucz.zagniezdzony}` odpowiadającymi strukturze
     `ui.yaml`. Kropka w kluczu = schodzenie po ścieżce zagnieżdżonej.
   * Wartości nieznalezione w `ui.yaml` zostają jako literał `{klucz}` +
     ostrzeżenie w konsoli (nie rzucamy wyjątku — łagodna degradacja,
     żeby brakujące tłumaczenie nie blokowało wygenerowania reszty).
 
-Konwencja nazewnicza plików wynikowych (decyzja 13.1):
+Konwencja nazewnicza plików wynikowych (decyzja 13.1, format od v18.8):
   * Rdzeń nazwy po angielsku (ASCII-only) — `manual`, `dictionaries` —
     żeby zagraniczny użytkownik nie musiał parsować polskich słów
     w Eksploratorze plików / Finderze.
   * Kod ISO języka jako środkowy człon (`.pl`, `.en`, `.ru`, …) —
     od razu widoczne, w jakim języku jest treść.
-  * Rozszerzenie `.txt` — plik zwykły tekstowy, otwieralny w dowolnym
-    edytorze bez dodatkowego oprogramowania.
+  * Rozszerzenie `.html` (do v18.7: `.txt`) — otwiera się w przeglądarce
+    (każdy system ją ma): `<html lang>` przełącza syntezator czytnika
+    ekranu na język dokumentu, nagłówki dają nawigację klawiszami 1-6/h,
+    a formatowanie (pogrubienia, listy) czyta się dobrze też wzrokiem.
 
 Użycie:
   python generuj_dokumentacje.py                # wygeneruj wszystkie języki
@@ -210,10 +213,17 @@ SEKCJE_POMIJANE_W_PL: dict[str, set[str]] = {
 }
 
 # 15.2: per-szablon override domyślnej lokalizacji + nazwy pliku wyjściowego.
-# Domyślnie generujemy `docs/<id>.<iso>.txt` (manual/opowiesci/dictionaries).
-# Wpis w `KONFIG_SZABLONOW` nadpisuje dla konkretnego id:
+# Od v18.8 szablony są pisane w Markdownie, a domyślnym wyjściem jest
+# `docs/<id>.<iso>.html` (render MD → HTML, patrz `_renderuj_html`): plik
+# otwiera się w przeglądarce z natywnym `<html lang="<iso>">` (czytnik ekranu
+# dobiera syntezator), nawigacją nagłówkami (klawisze 1/h w NVDA) i pełnym
+# Unicode — bez zależności od Notatnika/Worda. Wpis w `KONFIG_SZABLONOW`
+# nadpisuje dla konkretnego id:
 #   - katalog:        Path do katalogu docelowego (domyślnie DOCS_DIR)
-#   - rozszerzenie:   'txt' (domyślnie) | 'md' | dowolne inne
+#   - rozszerzenie:   'html' (domyślnie) | 'md' | dowolne inne
+#   - render:         'html' (domyślnie — Markdown → pełny dokument HTML) |
+#                     'surowy' (zapis 1:1 — README, którego Markdown renderuje
+#                               GitHub, nie my)
 #   - iso_w_nazwie:   'zawsze' (domyślnie, `<id>.<iso>.<ext>`) |
 #                     'smart_en' (en bez ISO: `<id>.<ext>`, reszta z ISO:
 #                                 `<id>.<iso>.<ext>`) — wzorzec README.md
@@ -227,6 +237,7 @@ KONFIG_SZABLONOW: dict[str, dict] = {
     "readme": {
         "katalog": ROOT,
         "rozszerzenie": "md",
+        "render": "surowy",
         "iso_w_nazwie": "smart_en",
     },
 }
@@ -239,11 +250,11 @@ def _sciezka_wyjscia(
 ) -> Path:
     """Zwraca docelową ścieżkę pliku wynikowego wg `KONFIG_SZABLONOW`.
 
-    Default (brak wpisu): `docelowy_katalog / "<id>.<jezyk>.txt"`.
+    Default (brak wpisu): `docelowy_katalog / "<id>.<jezyk>.html"`.
     """
     cfg = KONFIG_SZABLONOW.get(id_szablonu, {})
     katalog = cfg.get("katalog", docelowy_katalog)
-    rozszerzenie = cfg.get("rozszerzenie", "txt")
+    rozszerzenie = cfg.get("rozszerzenie", "html")
     tryb_iso = cfg.get("iso_w_nazwie", "zawsze")
 
     if tryb_iso == "smart_en" and jezyk == "en":
@@ -251,6 +262,101 @@ def _sciezka_wyjscia(
     else:
         nazwa = f"{id_szablonu}.{jezyk}.{rozszerzenie}"
     return katalog / nazwa
+
+
+# ---------------------------------------------------------------------------
+# Render Markdown → HTML (od v18.8)
+# ---------------------------------------------------------------------------
+# Szablony docs są pisane w Markdownie (nagłówki `#`/`##` per sekcja, backticki
+# wokół literałów technicznych typu `skrypty/<nazwa>.txt`). Render daje trzy
+# rzeczy, których .txt nie miał: (1) `<html lang="<iso>">` — czytnik ekranu
+# przełącza syntezator na język dokumentu, (2) nawigację nagłówkami (NVDA:
+# klawisze 1-6/h), (3) format czytelny też dla widzących (pogrubienia, listy).
+#
+# Rozszerzenia python-markdown:
+#   * nl2br      — pojedynczy `\n` = `<br>`; historyczna treść manuali używa
+#                  „linia = krok/wiersz" bez pustych linii między nimi, więc
+#                  bez nl2br Markdown skleiłby je w jeden akapit.
+#   * sane_lists — listy tylko z konsekwentnych markerów (mniej fałszywych
+#                  <ol> z liczb w naturalnym tekście).
+#
+# Minimalny CSS: czytelna szerokość kolumny + tryb ciemny przez
+# `prefers-color-scheme` (zero JS, zero zewnętrznych zasobów — plik działa
+# offline z dysku, jak dotychczasowy .txt).
+_HTML_STYL = """\
+body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
+       font-family: system-ui, sans-serif; line-height: 1.5; }
+code { font-family: ui-monospace, Consolas, monospace; }
+@media (prefers-color-scheme: dark) {
+  body { background: #1b1b1b; color: #e6e6e6; }
+  a { color: #8ab4f8; }
+}"""
+
+# Tagi, które legalnie może wyprodukować nasz render (markdown + nl2br +
+# sane_lists na treści szablonów). Wszystko spoza tej listy w wynikowym HTML
+# oznacza, że surowy `<fragment>` z szablonu przeszedł do dokumentu jako
+# nieznany tag (przeglądarka by go POŁKNĘŁA — treść znika dla usera).
+# Egzekwowane w `waliduj()` — patrz bramka „RAW-HTML".
+_TAGI_DOZWOLONE = frozenset({
+    "html", "head", "meta", "title", "style", "body",
+    "p", "br", "hr", "h1", "h2", "h3", "h4", "h5", "h6",
+    "ul", "ol", "li", "em", "strong", "code", "pre",
+    "blockquote", "a",
+})
+
+_TAG_REGEX = re.compile(r"</?([a-zA-Z][a-zA-Z0-9]*)")
+
+
+def _tytul_dokumentu(tresc_md: str) -> str:
+    """Wyciąga tytuł do ``<title>``: pierwszy nagłówek `# ` albo pierwsza linia."""
+    m = re.search(r"^#{1,2} +(.+)$", tresc_md, flags=re.MULTILINE)
+    tytul = m.group(1) if m else (tresc_md.strip().splitlines() or ["Dokument"])[0]
+    return tytul.strip().lstrip("#").strip()
+
+
+def _renderuj_html(tresc_md: str, jezyk: str) -> str:
+    """Renderuje treść Markdown do pełnego, samodzielnego dokumentu HTML5.
+
+    Raises:
+        RuntimeError: gdy biblioteka `markdown` nie jest zainstalowana —
+            celowo GŁOŚNO (build/`--waliduj` musi paść), bo cicha degradacja
+            zostawiłaby paczkę bez plików, na które wskazuje menu Pomoc.
+    """
+    try:
+        import markdown
+    except ImportError as exc:                              # pragma: no cover
+        raise RuntimeError(
+            "Missing the `markdown` package (docs render Markdown → HTML "
+            "since v18.8). Fix: .venv/Scripts/pip install markdown "
+            "(it is listed in requirements.txt)."
+        ) from exc
+
+    body = markdown.markdown(
+        tresc_md, extensions=["nl2br", "sane_lists"], output_format="html5",
+    )
+    tytul = _tytul_dokumentu(tresc_md)
+    tytul_safe = (tytul.replace("&", "&amp;").replace("<", "&lt;")
+                       .replace(">", "&gt;"))
+    return (
+        "<!DOCTYPE html>\n"
+        f'<html lang="{jezyk}">\n'
+        "<head>\n"
+        '<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+        f"<title>{tytul_safe}</title>\n"
+        f"<style>\n{_HTML_STYL}\n</style>\n"
+        "</head>\n"
+        "<body>\n"
+        f"{body}\n"
+        "</body>\n"
+        "</html>\n"
+    )
+
+
+def _obce_tagi_w_html(tekst_html: str) -> list[str]:
+    """Zwraca posortowaną listę tagów spoza `_TAGI_DOZWOLONE` (bramka RAW-HTML)."""
+    znalezione = {m.group(1).lower() for m in _TAG_REGEX.finditer(tekst_html)}
+    return sorted(znalezione - _TAGI_DOZWOLONE)
 
 # Regex placeholdera: {klucz} albo {klucz.zagniezdzony.z.kropkami}
 # - pierwszy znak: litera lub podkreślenie
@@ -571,10 +677,10 @@ def generuj(
     zbieraj_brakujace: dict[str, list[str]] | None = None,
     zbieraj_drafty: dict[str, str] | None = None,
 ) -> list[Path]:
-    """Generuje wszystkie pliki ``docs/<id>.<kod>.txt`` z szablonów YAML.
+    """Generuje wszystkie pliki ``docs/<id>.<kod>.html`` z szablonów YAML.
 
     Args:
-        docelowy_katalog:   Gdzie zapisać wynikowe pliki .txt (domyślnie ``docs/``).
+        docelowy_katalog:   Gdzie zapisać wynikowe pliki (domyślnie ``docs/``).
         cicho:              Czy pominąć przyjazne komunikaty print (dla testów).
         zbieraj_brakujace:  Jeśli podasz pusty dict, funkcja wypełni go
                             mapowaniem ``"<jezyk>/<id_szablonu>"`` →
@@ -645,6 +751,13 @@ def generuj(
             if zbieraj_brakujace is not None and brakujace:
                 zbieraj_brakujace[f"{jezyk}/{id_szablonu}"] = sorted(set(brakujace))
 
+            # Od v18.8: default = render Markdown → pełny dokument HTML z
+            # `lang="<iso>"`. README (render: 'surowy') zapisujemy 1:1 — jego
+            # Markdown renderuje GitHub.
+            tryb_renderu = KONFIG_SZABLONOW.get(id_szablonu, {}).get("render", "html")
+            if tryb_renderu == "html":
+                wynik_tresc = _renderuj_html(wynik_tresc, jezyk)
+
             sciezka_wyjscia = _sciezka_wyjscia(id_szablonu, jezyk, docelowy_katalog)
             # Piszemy z `newline="\n"` — celowo LF, nie platform-default.
             # Dzięki temu diff na Windowsie vs Linux zwraca ten sam wynik,
@@ -692,7 +805,7 @@ def waliduj() -> int:
     """
     brakujace_wedlug_pliku: dict[str, list[str]] = {}
     drafty_wedlug_pliku: dict[str, str] = {}
-    generuj(
+    wygenerowane = generuj(
         zbieraj_brakujace=brakujace_wedlug_pliku,
         zbieraj_drafty=drafty_wedlug_pliku,
     )
@@ -723,10 +836,33 @@ def waliduj() -> int:
                 print(f"      - {{{klucz}}}")
         print(
             "Fix: add the missing keys to that language's ui.yaml OR remove the "
-            "unused placeholders from the template. A raw `{coś}` in docs/*.txt "
+            "unused placeholders from the template. A raw `{coś}` in docs/*.html "
             "looks like a bug, so the build will not pass."
         )
     print("=============================================")
+
+    # Bramka RAW-HTML (od v18.8): tag spoza whitelisty renderera w wynikowym
+    # .html = surowy `<fragment>` z szablonu przepuszczony jako nieznany tag —
+    # przeglądarka POŁKNĘŁABY go razem z treścią. Fix: otoczyć fragment
+    # backtickami w szablonie (code span renderuje `<...>` literalnie).
+    obce_tagi_wedlug_pliku: dict[str, list[str]] = {}
+    for sciezka in wygenerowane:
+        if sciezka.suffix != ".html":
+            continue
+        obce = _obce_tagi_w_html(sciezka.read_text(encoding="utf-8"))
+        if obce:
+            obce_tagi_wedlug_pliku[str(sciezka.relative_to(ROOT))] = obce
+    print("\n========== RAW-HTML GATE (docs/*.html) ==========")
+    if not obce_tagi_wedlug_pliku:
+        print("✅ No raw HTML tags beyond the renderer's whitelist.")
+    else:
+        print(f"❌ Found unexpected tags in {len(obce_tagi_wedlug_pliku)} file(s) "
+              f"(a raw `<fragment>` from the template would be EATEN by the browser):")
+        for nazwa, tagi in sorted(obce_tagi_wedlug_pliku.items()):
+            print(f"  • {nazwa}: {tagi}")
+        print("Fix: wrap the `<fragment>` in backticks in the template "
+              "(a code span renders it literally).")
+    print("=================================================")
 
     # Bramka leaków (od v18.5.3) — lazy import + łagodna degradacja, jak guard
     # nagłówka. Skanuje szablony docs vs baseline; nowy/przesunięty PL-leak = exit 1.
@@ -757,7 +893,8 @@ def waliduj() -> int:
                   "with `python audyt_leakow.py --zapisz-baseline` and commit the diff.")
     print("==================================================")
 
-    return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku or leaki_blokujace) else 0
+    return 1 if (brakujace_wedlug_pliku or drafty_wedlug_pliku
+                 or leaki_blokujace or obce_tagi_wedlug_pliku) else 0
 
 
 # ---------------------------------------------------------------------------

@@ -69,7 +69,7 @@ tresc:
 
     Dalla versione v14.0 l'applicazione supporta nativamente {liczba_kompletnych_jezykow} lingue di base: {lista_kompletnych_jezykow_natywnie}. Ogni pacchetto `dictionaries/<kod>/` contiene diacritici, alfabeto e regole fonetiche che operano sul testo in quella specifica lingua — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente.
 
-    L'interfaccia GUI, la documentazione (`docs/manual.<iso>.txt`) e la maggior parte dei messaggi di sistema sono disponibili nativamente in ciascuna delle lingue supportate. I prompt di sistema AI nelle modalità Regista e Racconti sono scritti nelle lingue di destinazione (manualmente, non auto-tradotti — vedi `dictionaries/<kod>/rezyser/` e `dictionaries/<kod>/opowiesci/`).
+    L'interfaccia GUI, la documentazione (`docs/manual.<iso>.html`) e la maggior parte dei messaggi di sistema sono disponibili nativamente in ciascuna delle lingue supportate. I prompt di sistema AI nelle modalità Regista e Racconti sono scritti nelle lingue di destinazione (manualmente, non auto-tradotti — vedi `dictionaries/<kod>/rezyser/` e `dictionaries/<kod>/opowiesci/`).
   architektura_ai: |
     ## Architettura AI e modelli utilizzati
 
@@ -91,7 +91,7 @@ tresc:
 
     1. Scarica l'ultima versione dalla scheda **Releases** (pacchetto contrassegnato come *Latest*) — file `Rezyser_Audio_v<numer>_Installer.exe`. Avvialo con un doppio clic. Il programma di installazione si posiziona per impostazione predefinita nella directory locale del tuo account (`%LocalAppData%\Programs\Reżyser Audio GPT`) e non richiede diritti di amministratore; puoi scegliere un percorso personalizzato tramite il pulsante "Sfoglia". Al termine crea collegamenti nel Menu Start e sul desktop, e facoltativamente apre il manuale d'uso nell'editor predefinito per i file `.txt`.
     2. **Configurazione API Anthropic:** Al primo avvio, l'applicazione segnalerà l'assenza della chiave nella sezione System Check. Fai clic sul pulsante visualizzato per generare il file `golden_key.env`, aprilo in un editor di testo e incolla la tua chiave Anthropic (che inizia con `sk-ant-`).
-    3. **Primi passi:** Apri il file `docs/manual.pl.txt` (o in un'altra lingua) nella cartella di installazione — è il manuale d'uso completo, scritto in un linguaggio accessibile a ogni utente, non solo agli sviluppatori.
+    3. **Primi passi:** Apri il file `docs/manual.pl.html` (o in un'altra lingua) nella cartella di installazione — è il manuale d'uso completo, scritto in un linguaggio accessibile a ogni utente, non solo agli sviluppatori.
   instalacja_deweloperzy: |
     ### Per sviluppatori (clone + setup)
 
@@ -107,11 +107,11 @@ tresc:
 
     Questo README è solo un contorno architettonico del progetto. Per conoscere le tecniche avanzate per prevenire le allucinazioni dell'IA, le istruzioni per l'installazione di sintetizzatori vocali compatibili (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descrizione completa delle modalità Racconti con la fiala e il manuale completo dell'utente, consulta i file nella cartella `docs/`:
 
-    * `docs/manual.<iso>.txt` — manuale principale dell'utente (scritto per l'utente finale).
-    * `docs/tales.<iso>.txt` — manuale della modalità Racconti (giochi di testo interattivi).
-    * `docs/dictionaries.<iso>.txt` — istruzioni per linguisti senza Python su come aggiungere accenti/cifrari/modalità AI personalizzati.
+    * `docs/manual.<iso>.html` — manuale principale dell'utente (scritto per l'utente finale).
+    * `docs/tales.<iso>.html` — manuale della modalità Racconti (giochi di testo interattivi).
+    * `docs/dictionaries.<iso>.html` — istruzioni per linguisti senza Python su come aggiungere accenti/cifrari/modalità AI personalizzati.
 
-    Ognuno di questi file è disponibile in {liczba_kompletnych_jezykow} lingue — suffisso `.<iso>.txt` (ad es. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+    Ognuno di questi file è disponibile in {liczba_kompletnych_jezykow} lingue — suffisso `.<iso>.html` (ad es. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   polskie_nazewnictwo: |
     ### Guida alla nomenclatura polacca — per chi non parla polacco
 

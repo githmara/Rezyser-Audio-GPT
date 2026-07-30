@@ -14,7 +14,7 @@
 id: tales
 tresc:
   naglowek: |
-    Reżyser Audio GPT — Modulo Racconti Interattivi ({app.wersja})
+    # Reżyser Audio GPT — Modulo Racconti Interattivi ({app.wersja})
 
     Il secondo principale modo dell'applicazione accanto a Regista — questa volta diventi il giocatore di una storia generata dinamicamente invece che il suo autore. L'intelligenza artificiale narra in seconda persona singolare ("Cammini attraverso la foresta nebbiosa, senti l'odore delle foglie bagnate..."), e tu decidi la prossima mossa — scrivendo un'azione qualsiasi in testo libero oppure scegliendo una delle opzioni numerate.
 
@@ -22,7 +22,7 @@ tresc:
 
     Puoi aprire il pannello con il pulsante "{main.btn.opowiesci}" sulla barra degli strumenti o con la scorciatoia da tastiera Ctrl+5.
   krok_1_tryby_gry: |
-    PASSO 1: Tre modalità di gioco — scegli lo stile di gioco
+    ## PASSO 1: Tre modalità di gioco — scegli lo stile di gioco
 
     Appena sotto la barra del nome del gioco troverai il selettore della modalità. La modalità determina come il motore narrativo conduce il dialogo con te:
 
@@ -36,7 +36,7 @@ tresc:
 
     La modalità può essere cambiata durante la partita, ma esclusivamente tramite il pulsante di emergenza "Modifica modalità di gioco…" accanto al selettore della modalità (dalla v15.2.3) — il selettore stesso è bloccato sulla modalità consolidata subito dopo la creazione o il caricamento della partita, in modo analogo alla protezione presente nel Regista. Il pulsante apre un dialogo modale con un avviso; l'uso tipico di questa via d'uscita è la situazione in cui l'IA nella modalità Scelte o Male Minore continua ostinatamente a generare nuovi dilemmi invece di concludere la storia — passare alla modalità Libera permette allora al giocatore di descrivere autonomamente la scena finale. Se vuoi avviare una seconda partita con una tonalità diversa, è sufficiente inserire un nuovo nome nel campo del nome — il selettore si sbloccherà da solo, perché l'applicazione riconosce che stai preparando un nuovo progetto. Attenzione: la fialetta è una caratteristica esclusiva della modalità Male Minore — passando (tramite la via d'uscita) nella stessa partita alla modalità Scelte o Libera, la sua esistenza e il contatore dei turni rimangono conservati nello stato della partita, ma finché non torni al Male Minore, l'opzione "Stappa la fialetta" non verrà visualizzata.
   krok_2_quick_start: |
-    PASSO 2: Quick Start — scenari di apertura pronti
+    ## PASSO 2: Quick Start — scenari di apertura pronti
 
     Sotto il campo del nome del gioco troverai una seconda riga con l'etichetta „{opowiesci.lbl_quick_start}" e un menu a tendina. La posizione predefinita è "{opowiesci.quick_start_wlasna}" — il motore inventerà il mondo da solo in base alla tua prima azione.
 
@@ -54,7 +54,7 @@ tresc:
 
     Dopo aver scelto il preset clicca "{opowiesci.btn_nowa_gra_label}" — il motore inietterà al suo interno una breve descrizione del mondo e del protagonista, imposterà la modalità di gioco predefinita (puoi sovrascriverla con il selettore della modalità prima di cliccare su „Nuova partita"). Il primo turno dell'LLM metterà in scena la sequenza di apertura.
   krok_3_pierwsza_gra: |
-    PASSO 3: Prima partita da zero — senza preset
+    ## PASSO 3: Prima partita da zero — senza preset
 
     Se preferisci la massima libertà, lascia "{opowiesci.quick_start_wlasna}" nel campo Quick Start e preparati a inserire la prima azione manualmente.
 
@@ -64,7 +64,7 @@ tresc:
     4. Nel campo „{opowiesci.lbl_akcja}" in fondo al pannello inserisci la prima azione, ad es. „budzę się w nieznanym pokoju". Clicca "{opowiesci.btn_wyslij_label}". Il motore narrativo aprirà il mondo in base alla tua azione — la descrizione dell'ambiente, i suoni, i personaggi, le prime decisioni.
     5. Ogni turno verrà salvato automaticamente — puoi chiudere l'applicazione in qualsiasi momento e ricaricare la partita in seguito tramite il pulsante "{opowiesci.btn_wczytaj_label}".
   krok_4_zasady_swiata: |
-    PASSO 4: Regole del mondo — regole personalizzate che il motore rispetta durante tutto il gioco
+    ## PASSO 4: Regole del mondo — regole personalizzate che il motore rispetta durante tutto il gioco
 
     Dalla versione 15.1, sopra il campo di narrazione troverai il pulsante "{opowiesci.btn_zasady_swiata_label}". Questo apre una finestra di modifica separata con un campo multilinea, dove puoi inserire qualsiasi regola — fonetica, meccanica o drammaturgica — che il motore narrativo rispetterà in ogni turno successivo di quel particolare gioco. Le regole vengono salvate insieme allo stato del gioco, quindi il caricamento del gioco le mantiene inalterate.
 
@@ -80,7 +80,7 @@ tresc:
 
     Nota: le regole del mondo richiedono un gioco attivo. Se clicchi "{opowiesci.btn_zasady_swiata_label}" senza un gioco caricato/creato, riceverai il messaggio "{opowiesci.zasady_bez_gry_tytul}" — prima clicca "{opowiesci.btn_nowa_gra_label}" o carica un gioco salvato.
   krok_5_slash_komendy: |
-    PASSO 5: Comandi slash — azioni rapide senza API
+    ## PASSO 5: Comandi slash — azioni rapide senza API
 
     Nel campo azione puoi in qualsiasi momento digitare un comando che inizia con una barra `/`. I comandi sono locali (non comportano alcuna chiamata API) e funzionano indipendentemente dalla modalità di gioco. Sono accettate sia le varianti polacche che quelle inglesi:
 
@@ -90,21 +90,21 @@ tresc:
 
     Il motore narrativo di tutte le modalità di Racconti si basa su un unico modello condiviso (di default e consigliato Anthropic Claude Sonnet 5; dalla v18.4 un utente avanzato può indicare un proprio endpoint compatibile con OpenAI — vedi il manuale principale, PASSO 2B). Un modello più potente rispetta rigorosamente le regole del mondo — questo è particolarmente importante nella modalità Il male minore, dove ogni opzione deve rimanere realmente sfavorevole.
 
-    /wizualizuj <opis>, /visualize <opis> — descrizione multisensoriale della scena attuale. Non modifica lo stato di gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata e NON viene aggiunto alla narrazione. Esempio: "/wizualizuj come appare la guardia" oppure "/wizualizuj l'odore del bar".
+    /wizualizuj `<opis>`, /visualize `<opis>` — descrizione multisensoriale della scena attuale. Non modifica lo stato di gioco, non propone scelte — il motore narrativo utilizza tutti e cinque i sensi (vista, udito, olfatto, tatto, gusto) per mostrare la scena con maggiore profondità. Il risultato appare in una finestra di dialogo separata e NON viene aggiunto alla narrazione. Esempio: "/wizualizuj come appare la guardia" oppure "/wizualizuj l'odore del bar".
 
     /pomoc, /help — mostra una finestra di dialogo con l'elenco di tutti i comandi disponibili. La finestra di dialogo è di sola lettura ed è ottimizzata per NVDA — il campo di testo riceve automaticamente il focus, lo screen reader legge subito l'intero elenco senza bisogno di navigazione.
 
     /koniec, /quit — chiude l'applicazione (dopo il salvataggio automatico del turno in corso).
   krok_6_pliki_gry: |
-    PASSO 6: I tuoi file — dove trovare la narrazione pronta
+    ## PASSO 6: I tuoi file — dove trovare la narrazione pronta
 
     Da tuo punto di vista conta un solo file — la narrazione pronta:
 
-    opowiesci/<nazwa>.txt — narrazione completa pronta per l'ascolto come audiolibro, nella cartella opowiesci/ accanto all'applicazione. Puoi aprirla in Blocco note, leggerla con un lettore di schermo oppure caricarla nell'Architetto di Audiolibri (Convertitore) e generare un documento Word con i capitoli o una timeline per ElevenLabs.
+    `opowiesci/<nazwa>.txt` — narrazione completa pronta per l'ascolto come audiolibro, nella cartella opowiesci/ accanto all'applicazione. Puoi aprirla in Blocco note, leggerla con un lettore di schermo oppure caricarla nell'Architetto di Audiolibri (Convertitore) e generare un documento Word con i capitoli o una timeline per ElevenLabs.
 
     L'intero stato della partita — personaggi, location, equipaggiamento, trame aperte e cronologia dei turni precedenti — viene gestito automaticamente dall'applicazione. Lo salva dopo ogni turno in una cartella di sistema nascosta che non devi (né dovresti) toccare. Per caricare una partita salvata usa il pulsante "{opowiesci.btn_wczytaj_label}" oppure il comando /wczytaj — ti mostreranno l'elenco di tutte le tue partite per nome. In questo modo puoi chiudere l'applicazione in qualsiasi momento e riprendere la partita in seguito, senza preoccuparti di salvare nulla manualmente.
   krok_7_pamiec_modelu: |
-    PASSO 7: Indicatore di memoria del modello — perché i turni nelle partite vecchie non richiedono lavoro manuale da parte tua
+    ## PASSO 7: Indicatore di memoria del modello — perché i turni nelle partite vecchie non richiedono lavoro manuale da parte tua
 
     Sotto il campo di selezione della modalità troverai l'indicatore di memoria del modello — una barra di avanzamento con una descrizione dello stato accanto. L'indicatore mostra la percentuale di riempimento della finestra di contesto del motore narrativo (buffer calcolato fino a 128 000 token).
 
@@ -117,13 +117,13 @@ tresc:
 
     In pratica il meccanismo di riduzione automatica è invisibile — il giocatore non percepisce che stia accadendo qualcosa, perché il thread in background risolve il problema prima che venga notato. È importante solo che tu non invii il turno successivo durante il riepilogo automatico (il pulsante "{opowiesci.btn_wyslij_label}" è in quel momento disattivato).
   krok_8_cinematic_warning: |
-    PASSO 8: Cinematic Meta Warning — intermezzo drammatico dopo il 150° turno
+    ## PASSO 8: Cinematic Meta Warning — intermezzo drammatico dopo il 150° turno
 
     Dopo 150 turni di una singola partita, il motore narrativo inserirà UNA SOLA VOLTA un "Cinematic Meta Warning" — un intermezzo drammatico meta-narrativo. Apparirà in una finestra di dialogo separata con un suono di campanello, con un'allocuzione diretta a te in seconda persona, un riepilogo dei tuoi risultati e un avvertimento sul peso delle decisioni che stai prendendo.
 
     Il Cinematic Warning NON fa parte della narrazione dell'audiolibro — l'applicazione taglia automaticamente il suo contenuto dal file della narrazione (contrassegnato dai marcatori ⚠️🚨⚠️), in modo che durante l'ascolto dell'audiolibro tu non senta il meta-commento sulla tua partita. Lo vedrai una sola volta, in una finestra di dialogo separata, dove potrai leggerlo e continuare tranquillamente la partita.
   krok_10_dostepnosc_nvda: |
-    PASSO 9: Accessibilità (NVDA e lettori di schermo) — progettata fin dall'inizio
+    ## PASSO 9: Accessibilità (NVDA e lettori di schermo) — progettata fin dall'inizio
 
     L'intero modulo Racconti è stato ottimizzato per i giocatori non vedenti. Ecco cosa abbiamo fatto concretamente:
 
@@ -143,7 +143,7 @@ tresc:
 
     ACCELERATORI DA TASTIERA — tutti i pulsanti hanno il carattere `&` prima di una delle lettere dell'etichetta, il che attiva l'acceleratore Alt+lettera. Funziona in modo identico agli altri moduli dell'applicazione.
   najczestsze_problemy: |
-    Problemi più comuni
+    ## Problemi più comuni
 
     Problema: Dopo aver cliccato "{opowiesci.btn_nowa_gra_label}" appare il messaggio „Chiave API mancante".
     Causa e soluzione: Il file golden_key.env nella cartella principale dell'applicazione non contiene una chiave Anthropic valida (è quella che alimenta la modalità Racconti). Torna alla schermata iniziale (pulsante Home), clicca "{home.btn_generate}" e segui le istruzioni (PASSO 2 del manuale principale).

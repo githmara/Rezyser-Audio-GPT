@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **18.7.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **18.8.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -61,7 +61,7 @@ Jeux textuels interactifs pilotés par l'IA jouant le rôle de moteur narratif. 
 
 À partir de la version 14.0, l'application prend en charge nativement 9 langues de base : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Chaque paquet `dictionaries/<kod>/` contient des diacritiques, un alphabet et des règles phonétiques opérant sur le texte dans cette langue spécifique — l'application détecte automatiquement la langue source grâce au détecteur de langue lingua (par paragraphe) et charge le paquet approprié pour chaque fragment individuellement.
 
-Toute l'interface GUI, la documentation (`docs/manual.<iso>.txt`) et la plupart des messages système sont disponibles nativement dans chacune des langues prises en charge. Les invites système AI dans les modes Réalisateur et Histoire sont écrites dans les langues cibles (manuellement, non traduites automatiquement — voir `dictionaries/<kod>/rezyser/` et `dictionaries/<kod>/opowiesci/`).
+Toute l'interface GUI, la documentation (`docs/manual.<iso>.html`) et la plupart des messages système sont disponibles nativement dans chacune des langues prises en charge. Les invites système AI dans les modes Réalisateur et Histoire sont écrites dans les langues cibles (manuellement, non traduites automatiquement — voir `dictionaries/<kod>/rezyser/` et `dictionaries/<kod>/opowiesci/`).
 
 
 ## Architecture IA et modèles utilisés
@@ -86,7 +86,7 @@ C'est une limitation fondamentale de la génération actuelle d'intelligence art
 
 1. Téléchargez la dernière version depuis l'onglet **Releases** (le paquet marqué *Latest*) — le fichier `Rezyser_Audio_v<numer>_Installer.exe`. Lancez-le par un double-clic. L'installateur se place par défaut dans le répertoire local de votre compte (`%LocalAppData%\Programs\Reżyser Audio GPT`) et ne nécessite pas de droits administrateur ; vous pouvez choisir votre propre chemin via le bouton « Parcourir ». Une fois l'installation terminée, il crée des raccourcis dans le Menu Démarrer et sur le bureau, et ouvre optionnellement le manuel d'utilisation dans l'éditeur de fichiers `.txt` par défaut.
 2. **Configuration de l'API Anthropic :** Au premier lancement, l'application signalera l'absence de clé dans la section System Check. Cliquez sur le bouton visible pour générer le fichier `golden_key.env`, ouvrez-le dans un éditeur de texte et collez votre clé Anthropic (commençant par `sk-ant-`).
-3. **Premiers pas :** Ouvrez le fichier `docs/manual.pl.txt` (ou dans une autre langue) dans le dossier d'installation — il s'agit du manuel d'utilisation complet, rédigé dans un langage accessible à tout utilisateur, pas seulement aux développeurs.
+3. **Premiers pas :** Ouvrez le fichier `docs/manual.pl.html` (ou dans une autre langue) dans le dossier d'installation — il s'agit du manuel d'utilisation complet, rédigé dans un langage accessible à tout utilisateur, pas seulement aux développeurs.
 
 
 ### Pour les développeurs (clone + configuration)
@@ -104,11 +104,11 @@ Les scripts `.sh` pour macOS/Linux ont été supprimés dans la version 13.1 —
 
 Ce README est uniquement un aperçu architectural du projet. Pour découvrir les techniques avancées de prévention des hallucinations de l'IA, les instructions d'installation des synthétiseurs vocaux compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), une description complète des modes Histoires avec fiole, ainsi qu'un guide utilisateur complet, consultez les fichiers dans le dossier `docs/` :
 
-* `docs/manual.<iso>.txt` — le manuel principal (écrit pour l'utilisateur final).
-* `docs/tales.<iso>.txt` — le manuel du mode Histoires (jeux textuels interactifs).
-* `docs/dictionaries.<iso>.txt` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
+* `docs/manual.<iso>.html` — le manuel principal (écrit pour l'utilisateur final).
+* `docs/tales.<iso>.html` — le manuel du mode Histoires (jeux textuels interactifs).
+* `docs/dictionaries.<iso>.html` — guide pour les linguistes sans Python, sur comment ajouter des accents/chiffres/modes IA personnalisés.
 
-Chacun de ces fichiers est disponible en 9 langues — suffixe `.<iso>.txt` (par exemple, `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+Chacun de ces fichiers est disponible en 9 langues — suffixe `.<iso>.html` (par exemple, `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ### Nomenclature polonaise — guide pour les non-locuteurs du polonais

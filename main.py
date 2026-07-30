@@ -42,8 +42,8 @@ ID_TOOL_KONWERTER  = wx.NewIdRef()
 ID_TOOL_MANAGER    = wx.NewIdRef()   # Manager Reguł – nowość w 13.0
 ID_TOOL_OPOWIESCI  = wx.NewIdRef()   # Interaktywne Opowieści – nowość w 15.0
 ID_EXIT            = wx.NewIdRef()
-# Menu Pomoc (15.2): 3 podmenu otwierające docs/<rdzen>.<iso>.txt
-# w domyślnym handlerze .txt. ISO wybierane wg języka interfejsu (i18n).
+# Menu Pomoc (15.2, HTML od 18.8): 3 podmenu otwierające docs/<rdzen>.<iso>.html
+# w domyślnej przeglądarce. ISO wybierane wg języka interfejsu (i18n).
 ID_HELP_MANUAL       = wx.NewIdRef()
 ID_HELP_TALES        = wx.NewIdRef()
 ID_HELP_DICTIONARIES = wx.NewIdRef()
@@ -972,11 +972,10 @@ class MainFrame(wx.Frame):
                 self._jezyk_menu_ids[int(new_id)] = kod
             menubar.Append(menu_lang, t("main.menu.jezyk_interfejsu"))
 
-        # --- Menu: Pomoc (15.2) — otwiera docs/<rdzen>.<iso>.txt --------
+        # --- Menu: Pomoc (15.2) — otwiera docs/<rdzen>.<iso>.html -------
         # ISO wybierany z i18n.aktualny_jezyk(), rdzeń (manual/tales/
-        # dictionaries) określa _on_pomoc_* handler. Pliki otwierane przez
-        # `os.startfile` (Windows shell association — Notatnik / VS Code
-        # / co użytkownik ma skojarzone z .txt).
+        # dictionaries) określa _on_pomoc_* handler. Od v18.8 pliki to HTML
+        # otwierany w domyślnej przeglądarce (lang per ISO + nagłówki).
         menu_help = wx.Menu()
         menu_help.Append(
             ID_HELP_MANUAL,
@@ -1265,7 +1264,12 @@ class MainFrame(wx.Frame):
     # Menu Pomoc: otwieranie dokumentacji w domyślnym handlerze .txt
     # ------------------------------------------------------------------
     def _otworz_dokument(self, rdzen: str) -> None:
-        """Otwiera plik `docs/<rdzen>.<iso>.txt` przez Windows shell association.
+        """Otwiera plik `docs/<rdzen>.<iso>.html` w domyślnej przeglądarce.
+
+        Od v18.8 dokumentacja jest HTML-em renderowanym z Markdownu
+        (`generuj_dokumentacje.py`): `<html lang>` przełącza syntezator
+        czytnika ekranu na język treści, a nagłówki dają nawigację
+        klawiszami 1-6/h w NVDA — czego zwykły .txt w Notatniku nie umiał.
 
         Args:
             rdzen: ``"manual"`` | ``"tales"`` | ``"dictionaries"`` —
@@ -1279,7 +1283,7 @@ class MainFrame(wx.Frame):
         z lokalizowanym komunikatem.
         """
         iso = i18n.aktualny_jezyk()
-        sciezka = sciezki.KATALOG_BAZOWY / "docs" / f"{rdzen}.{iso}.txt"
+        sciezka = sciezki.KATALOG_BAZOWY / "docs" / f"{rdzen}.{iso}.html"
         if not sciezka.is_file():
             wx.MessageBox(
                 t("main.pomoc.brak_pliku", sciezka=str(sciezka)),
@@ -1288,7 +1292,7 @@ class MainFrame(wx.Frame):
                 self,
             )
             return
-        # Otwórz docs/<rdzen>.<iso>.txt domyślną aplikacją (cross-platform helper).
+        # Otwórz docs/<rdzen>.<iso>.html domyślną aplikacją (cross-platform helper).
         # Wcześniej był tu goły `os.startfile` z komentarzem „Windows-only" —
         # niespójne ze źródłem chodzącym też na Linux/macOS (`setup_dev.sh`).
         try:

@@ -14,7 +14,7 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Polyglot and Director Dictionaries — Instructions for Everyone
+    # Polyglot and Director Dictionaries — Instructions for Everyone
     ==============================================================
 
     Hello! If you're reading this file, it means you've looked into the
@@ -34,7 +34,7 @@ tresc:
     with spoilers don't accidentally end up in the package), so only this ".txt"
     file reaches end users.
   co_tu_jest: |
-    What's in here?
+    ## What's in here?
     ---------------
 
     The "dictionaries/" folder is a library of rules used by Polyglot (a tool
@@ -55,7 +55,7 @@ tresc:
             └── rezyser/                   {liczba_trybow_rezysera} AI Director mode files
 
     Currently fully implemented are: {lista_kompletnych_jezykow_natywnie}
-    ({liczba_kompletnych_jezykow} base languages). Each has its own "dictionaries/<code>/" package with
+    ({liczba_kompletnych_jezykow} base languages). Each has its own "`dictionaries/<code>/`" package with
     diacritics, alphabet, and phonetic rules operating on text in that language
     — the application automatically detects the source language via
     lingua-language-detector (per paragraph) and loads the appropriate package
@@ -63,7 +63,7 @@ tresc:
     complete package requires "podstawy.yaml", "gui/ui.yaml", and at least one
     file in "akcenty/" and "szyfry/").
   co_to_akcent: |
-    What is an accent?
+    ## What is an accent?
     ------------------
 
     An accent is a set of rules that "distort" Polish text so that a screen
@@ -97,7 +97,7 @@ tresc:
     distorting the content (a rescue when your already translated file came out
     with the wrong language code).
   co_to_szyfr: |
-    What is a cipher?
+    ## What is a cipher?
     -----------------
 
     Ciphers are text games for puzzles, language exercises, riddles. Unlike
@@ -164,7 +164,7 @@ tresc:
        later decrypt the message. Characters outside the alphabet (numbers,
        spaces, punctuation) remain unchanged.
   co_to_tryb_rezysera: |
-    What is "Director Mode"?
+    ## What is "Director Mode"?
     ------------------------
 
     The "rezyser/" folder contains {liczba_trybow_rezysera} files describing the operating modes
@@ -186,7 +186,7 @@ tresc:
     these texts to your taste, save them, and the application will load your
     version the next time it starts. Zero programming.
   co_to_tryb_opowiesci: |
-    What is "Stories Mode"?
+    ## What is "Stories Mode"?
     ----------------------------
 
     The "opowiesci/" folder contains {liczba_trybow_opowiesci} files describing the application's second
@@ -221,10 +221,10 @@ tresc:
     recommended) — a stronger model rigorously sticks to the world's rules
     (crucial in Lesser Evil mode, where every option must be genuinely unfavorable).
   jak_zaczac: |
-    How to Start Playing — Three Levels of Difficulty
+    ## How to Start Playing — Three Levels of Difficulty
     -------------------------------------------------
   poziom_1_dostroj: |
-    LEVEL 1 — minor tuning of an existing accent
+    ## LEVEL 1 — minor tuning of an existing accent
 
     Imagine the application's French accent changes "sz" to "sh", but you
     think a French person would rather say "sch" or "ch". No problem.
@@ -241,7 +241,7 @@ tresc:
     6. Return to the Rule Manager and click "Refresh tree", then close and
        restart the application. Your change is already working.
   poziom_2_duplikacja: |
-    LEVEL 2 — adding a new accent by duplication
+    ## LEVEL 2 — adding a new accent by duplication
 
     Want to add a Swedish or Danish accent? Start with the most similar
     existing one.
@@ -262,7 +262,7 @@ tresc:
        characters the tag "[Marek] - has a Swedish accent", the Director
        will also recognize it automatically and apply it to her dialogues).
   poziom_3_cos_nowego: |
-    LEVEL 3 — creating something completely new
+    ## LEVEL 3 — creating something completely new
 
     Want school slang? Ancient knights' language? Gibberish? Parent cipher
     before children?
@@ -278,7 +278,7 @@ tresc:
        just copy it to the folder. You don't need to know programming —
        just know how to paste.
   pomysly: |
-    Some Ideas for Fun
+    ## Some Ideas for Fun
     ------------------
 
     - School class in Polish lesson: task "read an excerpt from the reading
@@ -306,7 +306,7 @@ tresc:
       today". The birthday person must find the decryption themselves. (Works
       best for children 7-12 years old; adults usually catch on quickly.)
   bezpieczenstwo: |
-    Can Anything Go Wrong?
+    ## Can Anything Go Wrong?
     ----------------------
 
     Not really. The application loads YAML files dynamically, and if one is
@@ -329,4 +329,4 @@ tresc:
     the extension from ".yaml" to ".yaml.backup" if you want them to disappear
     from the menu. If you later change your mind, just restore the extension.
   zakonczenie: |
-    Have fun!
+    ## Have fun!

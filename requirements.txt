@@ -11,6 +11,9 @@ ruamel.yaml
 jsonschema
 tiktoken
 pyinstaller
+# markdown — render szablonów docs (Markdown → HTML) w generuj_dokumentacje.py
+# (dev/build-time; runtime .exe go nie importuje, więc nie trafia do bundla).
+markdown
 # openai — NIE jest używany przez runtime aplikacji (cały silnik AI = Anthropic Claude
 # Sonnet 4.6, end-user potrzebuje tylko ANTHROPIC_API_KEY; PyInstaller nie wciąga openai
 # do .exe, bo żaden frozen-moduł go nie importuje). Pozostaje jednak ŻYWĄ zależnością

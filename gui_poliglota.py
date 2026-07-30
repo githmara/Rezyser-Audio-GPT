@@ -19,7 +19,8 @@ GUI:
 Wzorzec przetwarzania na GUI sprowadza się w praktyce do:
 
     wynik = core_poliglota.przetworz(tekst, tryb="Szyfrant", jezyk="pl",
-                                     wariant="cezar", przesuniecie=7)
+                                     wariant="cezar",
+                                     opcje={"przesuniecie": 7})
 
 Wersja 13.1: cały tekst widoczny dla użytkownika pochodzi z
 ``dictionaries/pl/gui/ui.yaml`` (sekcja ``poliglota``) przez moduł
@@ -222,6 +223,9 @@ class PoliglotaPanel(wx.Panel):
         self._pnl_rezyser  = self._build_panel_rezyser()
         self._pnl_szyfrant = self._build_panel_szyfrant()
         self._pnl_szyfrant.Hide()
+        # Widoczność spina Cezara zależna od startowego wyboru szyfru
+        # (pierwszy na liście nie musi być Cezarem).
+        self._on_szyfr_change()
 
         # ── Sekcja 3: Przetwarzanie ──────────────────────────────────────
         lbl_section3 = self._naglowek(t("poliglota.section3_heading"))
@@ -353,7 +357,7 @@ class PoliglotaPanel(wx.Panel):
         min_pr = int(cezar_cfg.get("min_przesuniecie", -35))
         max_pr = int(cezar_cfg.get("max_przesuniecie",  35))
 
-        lbl_cezar = wx.StaticText(
+        self._lbl_cezar = wx.StaticText(
             panel,
             label=t(
                 "poliglota.lbl_cezar",
@@ -366,7 +370,7 @@ class PoliglotaPanel(wx.Panel):
 
         sizer.Add(lbl_szyfr,          flag=wx.BOTTOM, border=4)
         sizer.Add(self._combo_szyfr,  flag=wx.EXPAND | wx.BOTTOM, border=8)
-        sizer.Add(lbl_cezar,          flag=wx.BOTTOM, border=4)
+        sizer.Add(self._lbl_cezar,    flag=wx.BOTTOM, border=4)
         sizer.Add(self._spin_cezara,  flag=wx.EXPAND)
         panel.SetSizer(sizer)
         return panel
@@ -385,6 +389,7 @@ class PoliglotaPanel(wx.Panel):
         self._rb_rezyser.Bind(wx.EVT_RADIOBUTTON, self._on_mode_change)
         self._rb_szyfrant.Bind(wx.EVT_RADIOBUTTON, self._on_mode_change)
         self._combo_akcent.Bind(wx.EVT_COMBOBOX, self._on_akcent_change)
+        self._combo_szyfr.Bind(wx.EVT_COMBOBOX, self._on_szyfr_change)
 
     # ==================================================================
     # OBSŁUGA PLIKU ŹRÓDŁOWEGO
@@ -529,13 +534,23 @@ class PoliglotaPanel(wx.Panel):
         self._pnl_szyfrant.Show(szyf_mode)
         self.Layout()
 
-    def _on_akcent_change(self, _event: wx.Event) -> None:
+    def _on_akcent_change(self, _event: wx.Event | None = None) -> None:
         """Pokaż pole „Kod ISO" tylko dla wariantu Naprawiacz Tagów."""
         cfg = self._aktualny_wariant_akcentu()
         pokaz_iso = bool(cfg and cfg.get("kategoria") == "naprawiacz")
         self._lbl_iso.Show(pokaz_iso)
         self._txt_iso.Show(pokaz_iso)
         self._pnl_rezyser.Layout()
+        self.Layout()
+
+    def _on_szyfr_change(self, _event: wx.Event | None = None) -> None:
+        """Pokaż spin przesunięcia tylko dla szyfru Cezara (A11y: NVDA nie
+        powinna ogłaszać pola, które dla innych szyfrów nic nie robi)."""
+        cfg = self._aktualny_wariant_szyfru()
+        pokaz_cezar = bool(cfg and cfg.get("algorytm") == "cezar")
+        self._lbl_cezar.Show(pokaz_cezar)
+        self._spin_cezara.Show(pokaz_cezar)
+        self._pnl_szyfrant.Layout()
         self.Layout()
 
     # ------------------------------------------------------------------
@@ -577,6 +592,11 @@ class PoliglotaPanel(wx.Panel):
             self._combo_szyfr.SetToolTip(
                 t("poliglota.brak_szyfrow_dla_jezyka", jezyk=self._jezyk_aktywny)
             )
+
+        # Reset selekcji na indeks 0 unieważnia widoczność pól zależnych od
+        # wariantu (ISO naprawiacza, spin Cezara) — odśwież je jawnie.
+        self._on_akcent_change()
+        self._on_szyfr_change()
 
     def _aktualny_wariant_akcentu(self) -> dict | None:
         etykieta = self._combo_akcent.GetStringSelection()
@@ -661,7 +681,7 @@ class PoliglotaPanel(wx.Panel):
                 tryb=core_poliglota.TRYB_REZYSER,
                 jezyk=self._jezyk_aktywny,
                 wariant=cfg["id"],
-                **opcje,
+                opcje=opcje,   # przez referencję — silnik dopisze kanał zwrotny
             )
         except core_poliglota.BrakRegulyDlaJezykaError as exc:
             # 13.5: długi techniczny komunikat → wx.Dialog z TextCtrl TE_READONLY
@@ -703,7 +723,7 @@ class PoliglotaPanel(wx.Panel):
                 tryb=core_poliglota.TRYB_SZYFRANT,
                 jezyk=self._jezyk_aktywny,
                 wariant=cfg["id"],
-                **opcje,
+                opcje=opcje,   # przez referencję — silnik dopisze kanał zwrotny
             )
         except core_poliglota.BrakRegulyDlaJezykaError as exc:
             self._wyswietl_blad_ai(
@@ -745,8 +765,17 @@ class PoliglotaPanel(wx.Panel):
 
         wariant_id = cfg["id"]
         iso  = core_poliglota.kod_iso(tryb, self._jezyk_aktywny, wariant_id, opcje)
+        # 18.8: człony nazwy pliku w języku UI (klucze filename_* z ui.yaml) —
+        # sanityzacja + fallback na polskie defaulty w bezpieczny_czlon_nazwy.
+        slowa_nazw = {
+            "naprawiony":  t("poliglota.filename_naprawiony"),
+            "oczyszczony": t("poliglota.filename_oczyszczony"),
+            "akcent":      t("poliglota.filename_akcent"),
+            "szyfr":       t("poliglota.filename_szyfr"),
+        }
         base = core_poliglota.sufiks_nazwy_pliku(
-            tryb, self._jezyk_aktywny, wariant_id, self._oryginalna_nazwa, opcje)
+            tryb, self._jezyk_aktywny, wariant_id, self._oryginalna_nazwa, opcje,
+            slowa=slowa_nazw)
 
         # 13.5: side-channel z core_poliglota._przetworz_* — mapa
         # (iso, fragment, czy_tekst) per akapit. Pozwala zapisz_wynik
@@ -863,6 +892,8 @@ class PoliglotaPanel(wx.Panel):
             on_postep=_cb_postep,
             on_blad_krytyczny=_cb_blad_kryt,
             on_blad_miekki=_cb_blad_miekki,
+            slowo_tlumaczenie=core_poliglota.bezpieczny_czlon_nazwy(
+                t("poliglota.filename_tlumaczenie"), "tlumaczenie"),
         )
 
         if wynik is None:

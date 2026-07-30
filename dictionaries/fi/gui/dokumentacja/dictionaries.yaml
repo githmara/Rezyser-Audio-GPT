@@ -14,7 +14,7 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Polyglootin ja Ohjaajan sanakirjat — Ohje kaikille
+    # Polyglootin ja Ohjaajan sanakirjat — Ohje kaikille
     =============================================
 
     Hei! Jos luet tätä tiedostoa, se tarkoittaa, että olet katsonut
@@ -34,7 +34,7 @@ tresc:
     vahingossa esimerkiksi spoilerillisia maailmankirjoja), joten vain tämä
     ".txt"-tiedosto päätyy loppukäyttäjille.
   co_tu_jest: |
-    Mitä täällä oikein on?
+    ## Mitä täällä oikein on?
     ----------------------
 
     Kansio "dictionaries/" on sääntökirjasto, jota Polyglootti (käännös- ja
@@ -58,14 +58,14 @@ tresc:
 
     Tällä hetkellä täysin toteutettuja ovat: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} peruskieliä). Jokaisella on oma paketti
-    "dictionaries/<kod>/" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
+    "`dictionaries/<kod>/`" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
     toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa
     lähdekielen automaattisesti lingua-language-detector -työkalulla
     (kappaletasolla) ja lataa oikean paketin kullekin katkelmalle erikseen.
     Lisää kieliä on valmisteilla (täydellinen paketti vaatii "podstawy.yaml",
     "gui/ui.yaml" sekä vähintään yhden tiedoston "akcenty/" ja "szyfry/").
   co_to_akcent: |
-    Mikä on aksentti?
+    ## Mikä on aksentti?
     -----------------
 
     Aksentti on sääntöjoukko, joka "pilaa" tekstin niin, että ruudunlukija
@@ -98,7 +98,7 @@ tresc:
     tiedostoon ISO-kielikoodin ilman sisällön pilaamista (pelastus, kun jo
     käännetty tiedostosi on väärällä kielikoodilla).
   co_to_szyfr: |
-    Mikä on salaus?
+    ## Mikä on salaus?
     ---------------
 
     Salaukset ovat tekstileikkejä arvoituksiin, kieliharjoituksiin ja pulmapeleihin.
@@ -160,7 +160,7 @@ tresc:
        voit myöhemmin purkaa viestin. Aakkosten ulkopuoliset merkit (numerot, välilyönnit,
        välimerkit) pysyvät ennallaan.
   co_to_tryb_rezysera: |
-    Mikä on "Ohjaaja-tila"?
+    ## Mikä on "Ohjaaja-tila"?
     -----------------------
 
     Kansio "rezyser/" sisältää {liczba_trybow_rezysera} tiedostoa, jotka kuvaavat sovelluksen
@@ -182,7 +182,7 @@ tresc:
     tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla
     käynnistyksellä sinun version. Ei ohjelmointia.
   co_to_tryb_opowiesci: |
-    Mikä on "Tarinatila"?
+    ## Mikä on "Tarinatila"?
     ----------------------------
 
     Kansio "opowiesci/" sisältää {liczba_trybow_opowiesci} tiedostoa, jotka kuvaavat sovelluksen
@@ -221,10 +221,10 @@ tresc:
     sääntöjä (ratkaisevan tärkeää Pienempi paha -tilassa, jossa jokaisen
     vaihtoehdon on oltava todella epäedullinen).
   jak_zaczac: |
-    Kuinka aloittaa leikki — kolme vaikeustasoa
+    ## Kuinka aloittaa leikki — kolme vaikeustasoa
     -------------------------------------------
   poziom_1_dostroj: |
-    TASO 1 — olemassa olevan aksentin hienosäätö
+    ## TASO 1 — olemassa olevan aksentin hienosäätö
 
     Kuvittele, että sovelluksen ranskalainen aksentti muuttaa "sz" "sh":ksi,
     mutta mielestäsi ranskalainen sanoisi mieluummin "sch" tai "ch". Ei ongelmaa.
@@ -241,7 +241,7 @@ tresc:
     6. Palaa Sääntöjen Hallintaan ja klikkaa "Päivitä puu", sulje sitten
        sovellus ja käynnistä se uudelleen. Muutoksesi on jo toiminnassa.
   poziom_2_duplikacja: |
-    TASO 2 — uuden aksentin lisääminen kopioimalla
+    ## TASO 2 — uuden aksentin lisääminen kopioimalla
 
     Haluatko lisätä ruotsalaisen tai tanskalaisen aksentin? Aloita
     lähimmästä olemassa olevasta.
@@ -264,7 +264,7 @@ tresc:
        tagilla "[Marek] - puhuu ruotsalaisella aksentilla", Ohjaaja tunnistaa
        sen automaattisesti ja soveltaa sitä hänen dialogeihinsa).
   poziom_3_cos_nowego: |
-    TASO 3 — täysin uuden luominen
+    ## TASO 3 — täysin uuden luominen
 
     Haluatko kouluslangin? Muinaisten ritarien kielen? Ruohopuheen? Vanhempien
     salakielen lapsilta?
@@ -279,7 +279,7 @@ tresc:
        YAML-tiedoston, sinun tarvitsee vain kopioida se kansioon. Sinun ei
        tarvitse osata ohjelmoida — riittää, että osaat kopioida ja liittää.
   pomysly: |
-    Muutamia ideoita leikkiin
+    ## Muutamia ideoita leikkiin
     -------------------------
 
     - Koululuokka suomen kielen tunnilla: tehtävä "lue katkelma kirjasta
@@ -308,7 +308,7 @@ tresc:
       purku. (Toimii parhaiten 7-12-vuotiaille lapsille; aikuiset yleensä
       huomaavat nopeasti.)
   bezpieczenstwo: |
-    Voiko jokin mennä pieleen?
+    ## Voiko jokin mennä pieleen?
     --------------------------
 
     Periaatteessa ei. Sovellus lataa YAML-tiedostot dynaamisesti ja jos jokin
@@ -332,4 +332,4 @@ tresc:
     ".yaml" ".yaml.backup":iksi, jos haluat niiden katoavan valikosta. Jos
     muutat myöhemmin mieltäsi, riittää, että palautat tiedostopäätteen.
   zakonczenie: |
-    Hauskoja hetkiä!
+    ## Hauskoja hetkiä!

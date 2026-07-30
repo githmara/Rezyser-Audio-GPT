@@ -80,7 +80,7 @@ tresc:
 
     Od v14.0 aplikacja wspiera natywnie {liczba_kompletnych_jezykow} języków bazowych: {lista_kompletnych_jezykow_natywnie}. Każda paczka `dictionaries/<kod>/` zawiera diakrytyki, alfabet i reguły fonetyczne operujące na tekście w tym konkretnym języku — aplikacja wykrywa język źródła automatycznie przez lingua-language-detector (per akapit) i ładuje odpowiednią paczkę dla każdego fragmentu osobno.
 
-    Cały interfejs GUI, dokumentacja (`docs/manual.<iso>.txt`) oraz większość komunikatów systemowych dostępne są natywnie w każdym ze wspieranych języków. Prompty systemowe AI w trybach Reżysera i Opowieści są napisane w językach docelowych (ręcznie, nie autotłumaczone — patrz `dictionaries/<kod>/rezyser/` i `dictionaries/<kod>/opowiesci/`).
+    Cały interfejs GUI, dokumentacja (`docs/manual.<iso>.html`) oraz większość komunikatów systemowych dostępne są natywnie w każdym ze wspieranych języków. Prompty systemowe AI w trybach Reżysera i Opowieści są napisane w językach docelowych (ręcznie, nie autotłumaczone — patrz `dictionaries/<kod>/rezyser/` i `dictionaries/<kod>/opowiesci/`).
   architektura_ai: |
     ## Architektura AI i użyte modele
 
@@ -102,7 +102,7 @@ tresc:
 
     1. Pobierz najnowsze wydanie z zakładki **Releases** (paczka oznaczona jako *Latest*) — plik `Rezyser_Audio_v<numer>_Installer.exe`. Uruchom go dwukrotnym kliknięciem. Instalator domyślnie ląduje w katalogu lokalnym Twojego konta (`%LocalAppData%\Programs\Reżyser Audio GPT`) i nie wymaga praw administratora; możesz wybrać własną ścieżkę przyciskiem „Przeglądaj". Po zakończeniu tworzy skróty w Menu Start i na pulpicie, a opcjonalnie otwiera instrukcję obsługi w domyślnym edytorze plików `.txt`.
     2. **Konfiguracja API Anthropic:** Przy pierwszym uruchomieniu aplikacja zasygnalizuje brak klucza w sekcji System Check. Kliknij widoczny przycisk, by wygenerować plik `golden_key.env`, otwórz go w edytorze tekstu i wklej swój klucz Anthropic (zaczynający się od `sk-ant-`).
-    3. **Pierwsze kroki:** Otwórz plik `docs/manual.pl.txt` (lub w innym języku) w folderze instalacji — to pełna instrukcja obsługi pisana językiem dostępnym dla każdego użytkownika, nie tylko deweloperów.
+    3. **Pierwsze kroki:** Otwórz plik `docs/manual.pl.html` (lub w innym języku) w folderze instalacji — to pełna instrukcja obsługi pisana językiem dostępnym dla każdego użytkownika, nie tylko deweloperów.
   instalacja_deweloperzy: |
     ### Dla deweloperów (clone + setup)
 
@@ -137,11 +137,11 @@ tresc:
 
     Niniejszy README to jedynie zarys architektoniczny projektu. Aby poznać zaawansowane techniki powstrzymywania halucynacji AI, instrukcje instalacji kompatybilnych syntezatorów mowy (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), pełen opis trybów Opowieści z fiolką, oraz kompletny poradnik obsługi, zapoznaj się z plikami w folderze `docs/`:
 
-    * `docs/manual.<iso>.txt` — główna instrukcja obsługi (pisana dla użytkownika końcowego).
-    * `docs/tales.<iso>.txt` — manual trybu Opowieści (interaktywne gry tekstowe).
-    * `docs/dictionaries.<iso>.txt` — instrukcja dla lingwistów bez Pythona, jak dodawać własne akcenty/szyfry/tryby AI.
+    * `docs/manual.<iso>.html` — główna instrukcja obsługi (pisana dla użytkownika końcowego).
+    * `docs/tales.<iso>.html` — manual trybu Opowieści (interaktywne gry tekstowe).
+    * `docs/dictionaries.<iso>.html` — instrukcja dla lingwistów bez Pythona, jak dodawać własne akcenty/szyfry/tryby AI.
 
-    Każdy z tych plików dostępny jest w {liczba_kompletnych_jezykow} językach — sufiks `.<iso>.txt` (np. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+    Każdy z tych plików dostępny jest w {liczba_kompletnych_jezykow} językach — sufiks `.<iso>.html` (np. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   licencja: |
     ## Licencja
 

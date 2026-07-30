@@ -806,6 +806,13 @@ poliglota:
   blad_wyniku_tresc:     "Nie udało się wygenerować wynikowego tekstu."
   blad_zapisu_wyjscia:   "Błąd podczas zapisu pliku wynikowego:\n{tresc_bledu}"
   sukces_zapis:          "Plik zapisany jako:\n{sciezka_pliku}"
+  # 18.8: człony nazw plików wynikowych (jedno słowo, bez spacji — i tak
+  # sanityzowane przez core_poliglota.bezpieczny_czlon_nazwy)
+  filename_naprawiony:   "naprawiony"
+  filename_oczyszczony:  "oczyszczony"
+  filename_akcent:       "akcent"
+  filename_szyfr:        "szyfr"
+  filename_tlumaczenie:  "tłumaczenie"
   # Tłumacz AI
   ai_init:               "Inicjowanie tłumaczenia…"
   # Paski postępu silnika tłumacza (tlumacz_ai.py — mostek i18n InfoPostepu)
@@ -846,6 +853,8 @@ poliglota:
 # -----------------------------------------------------------------------------
 konwerter:
   panel_name:            "Panel Architekta Audiobooków"
+  # 18.8: człon nazwy pliku wynikowego (jedno słowo, bez spacji)
+  filename_architektura: "architektura"
   heading:               "📄  Architekt Audiobooków"
   tool_description: |-
     Ten moduł służy do przygotowania architektury pliku dla czytników ekranu (nawigacja klawiszami 1 i h po nagłówkach) oraz ElevenLabs. Zmienia słowa kluczowe (Czołówka, Akt, Rozdział, Prolog, Epilog) na Nagłówki pierwszego poziomu, pozostawiając całą resztę skryptu bez zmian.

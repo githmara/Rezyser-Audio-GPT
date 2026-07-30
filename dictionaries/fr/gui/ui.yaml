@@ -763,6 +763,12 @@ poliglota:
   blad_wyniku_tresc: "Impossible de générer le texte résultant."
   blad_zapisu_wyjscia: "Erreur lors de la sauvegarde du fichier résultant :\n{tresc_bledu}"
   sukces_zapis: "Fichier sauvegardé sous :\n{sciezka_pliku}"
+  # 18.8 : segments localisés des noms de fichiers de sortie (un mot, sans espaces)
+  filename_naprawiony: "réparé"
+  filename_oczyszczony: "nettoyé"
+  filename_akcent: "accent"
+  filename_szyfr: "chiffre"
+  filename_tlumaczenie: "traduction"
   # Tłumacz AI
   ai_init: "Initialisation de la traduction…"
   ai_zakonczone_tytul: "Succès"
@@ -802,6 +808,8 @@ poliglota:
   ai_postep_zapis: Enregistrement du fichier de sortie…
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
+  # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)
+  filename_architektura: "architecture"
   heading: "📄  Architecte de Livres Audio"
   tool_description: |-
     Ce module sert à préparer l'architecture du fichier pour les lecteurs d'écran (navigation avec les touches 1 et h sur les titres) et ElevenLabs. Il transforme les mots-clés (Page de titre, Acte, Chapitre, Prologue, Épilogue) en Titres de premier niveau, en laissant le reste du scénario intact.

@@ -17,6 +17,7 @@ import docx
 import wx
 import yaml
 
+import core_poliglota
 import sciezki
 from i18n import t
 
@@ -381,7 +382,11 @@ class KonwerterPanel(wx.Panel):
         # --- Zapis pliku wynikowego ---
         katalog = os.path.dirname(os.path.abspath(file_name))
         oryginalna_nazwa = os.path.splitext(os.path.basename(file_name))[0]
-        out_name = os.path.join(katalog, f"architektura_{oryginalna_nazwa}.docx")
+        # 18.8: człon nazwy w języku UI (konwerter.filename_architektura);
+        # sanityzacja + fallback na polski default w bezpieczny_czlon_nazwy.
+        czlon = core_poliglota.bezpieczny_czlon_nazwy(
+            t("konwerter.filename_architektura"), "architektura")
+        out_name = os.path.join(katalog, f"{czlon}_{oryginalna_nazwa}.docx")
 
         try:
             nowy_doc.save(out_name)

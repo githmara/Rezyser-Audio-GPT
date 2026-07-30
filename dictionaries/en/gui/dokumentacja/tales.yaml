@@ -14,7 +14,7 @@
 id: tales
 tresc:
   naglowek: |
-    Reżyser Audio GPT — Interactive Stories Module ({app.wersja})
+    # Reżyser Audio GPT — Interactive Stories Module ({app.wersja})
 
     The second main mode of the application alongside the Director — this time you become the player of a dynamically generated story instead of its author. Artificial intelligence narrates in the second person singular ("You walk through a misty forest, you smell the wet leaves..."), and you decide on the next move — by typing any action in free text or choosing one of the numbered options.
 
@@ -22,7 +22,7 @@ tresc:
 
     You can open the panel with the "{main.btn.opowiesci}" button on the toolbar or the Ctrl+5 keyboard shortcut.
   krok_1_tryby_gry: |
-    STEP 1: Three game modes — choose your playstyle
+    ## STEP 1: Three game modes — choose your playstyle
 
     Just below the game name bar you will find the mode selector. The mode determines how the narrative engine conducts its dialogue with you:
 
@@ -36,7 +36,7 @@ tresc:
 
     The mode can be changed during the game, but only via the emergency button "Edit game mode…" next to the mode selector (from v15.2.3) — the selector itself is frozen on the established mode immediately after a game is created or loaded, analogously to the lock in the Director. The button opens a modal dialog with a warning; the typical use of this escape hatch is a situation in which the AI in Choice Mode or Lesser Evil Mode stubbornly generates further dilemmas instead of ending the story — switching to Free Mode then allows the player to describe the final scene themselves. If you want to start a second game in a different tone, simply type a new game name in the name field — the mode selector will unlock on its own, because the application recognizes that you are preparing a fresh project. Note: the vial is a feature exclusive to Lesser Evil Mode — when switching (through the escape hatch) within the same game to Choice Mode or Free Mode, its existence and the turn counter are preserved in the game state, but as long as you do not return to Lesser Evil Mode, the "Uncork the vial" option will not be displayed.
   krok_2_quick_start: |
-    STEP 2: Quick Start — ready-made opening scenarios
+    ## STEP 2: Quick Start — ready-made opening scenarios
 
     Below the game name field you will find a second row labeled "{opowiesci.lbl_quick_start}" with a dropdown list. The default position is "{opowiesci.quick_start_wlasna}" — the engine will invent the world on its own based on your first action.
 
@@ -54,7 +54,7 @@ tresc:
 
     After selecting a preset, click "{opowiesci.btn_nowa_gra_label}" — the engine will inject a brief description of the world and the protagonist into itself, set the default game mode (you can override it with the mode selection field before clicking "New Game"). The first LLM turn will play out the opening scene.
   krok_3_pierwsza_gra: |
-    STEP 3: First game from scratch — no preset
+    ## STEP 3: First game from scratch — no preset
 
     If you prefer complete freedom, leave "{opowiesci.quick_start_wlasna}" in the Quick Start field and get ready to type the first action manually.
 
@@ -64,7 +64,7 @@ tresc:
     4. In the "{opowiesci.lbl_akcja}" field at the bottom of the panel, type the first action, e.g. "I wake up in an unknown room". Click "{opowiesci.btn_wyslij_label}". The narrative engine will open the world based on your action — a description of the room, sounds, characters, and the first decisions.
     5. Each turn will be saved automatically — you can close the application at any time and reload the game later using the "{opowiesci.btn_wczytaj_label}" button.
   krok_4_zasady_swiata: |
-    STEP 4: World Rules — custom rules that the engine respects throughout the game
+    ## STEP 4: World Rules — custom rules that the engine respects throughout the game
 
     From version 15.1, you will find a "{opowiesci.btn_zasady_swiata_label}" button above the narration field. It opens a separate editing window with a multiline field where you can enter any rules — phonetic, mechanical, or dramaturgical — that the narrative engine will respect in every subsequent turn of this particular game. The rules are saved together with the game state, so loading the game preserves them unchanged.
 
@@ -80,7 +80,7 @@ tresc:
 
     Note: world rules require an active game. If you click "{opowiesci.btn_zasady_swiata_label}" without a loaded/started game, you will receive the message "{opowiesci.zasady_bez_gry_tytul}" — first click "{opowiesci.btn_nowa_gra_label}" or load a saved game.
   krok_5_slash_komendy: |
-    STEP 5: Slash commands — quick actions without the API
+    ## STEP 5: Slash commands — quick actions without the API
 
     In the action field you can, at any time, type a command starting with a slash `/`. Commands are local (they cost no API calls at all) and work regardless of the game mode. Both Polish and English variants are accepted:
 
@@ -90,21 +90,21 @@ tresc:
 
     The narrative engine of all Story modes uses one shared model (by default and recommendation, Anthropic Claude Sonnet 5; as of v18.4 an advanced user can point to their own OpenAI-compatible endpoint — see the main manual, STEP 2B). The stronger model adheres rigorously to the rules of the world — this matters especially in Lesser Evil mode, where every option must remain genuinely unfavorable.
 
-    /wizualizuj <opis>, /visualize <opis> — a multisensory description of the current scene. It does not change the game state and does not propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to render the scene with greater depth. The result appears in a separate dialog and is NOT appended to the narration. Example: "/wizualizuj jak wygląda strażnik" ("visualize what the guard looks like") or "/wizualizuj zapach kawiarni" ("visualize the smell of the café").
+    /wizualizuj `<opis>`, /visualize `<opis>` — a multisensory description of the current scene. It does not change the game state and does not propose choices — the narrative engine uses all five senses (sight, hearing, smell, touch, taste) to render the scene with greater depth. The result appears in a separate dialog and is NOT appended to the narration. Example: "/wizualizuj jak wygląda strażnik" ("visualize what the guard looks like") or "/wizualizuj zapach kawiarni" ("visualize the smell of the café").
 
     /pomoc, /help — displays a dialog box with a list of all available commands. The dialog is read-only and NVDA-friendly — the text field receives focus automatically, and the screen reader immediately reads out the entire list without requiring navigation.
 
     /koniec, /quit — closes the application (after autosaving the turn in progress).
   krok_6_pliki_gry: |
-    STEP 6: Your files — where to find the finished narration
+    ## STEP 6: Your files — where to find the finished narration
 
     Only one file matters from your perspective — the finished narration:
 
-    opowiesci/<nazwa>.txt — the complete narration ready to listen to as an audiobook, in the opowiesci/ folder next to the application. You can open it in Notepad, read it with a screen reader, or load it into the Audiobook Architect (Converter) and generate a Word document with chapters or a timeline for ElevenLabs.
+    `opowiesci/<nazwa>.txt` — the complete narration ready to listen to as an audiobook, in the opowiesci/ folder next to the application. You can open it in Notepad, read it with a screen reader, or load it into the Audiobook Architect (Converter) and generate a Word document with chapters or a timeline for ElevenLabs.
 
     The entire game state — characters, location, equipment, open plot threads, and the history of all turns so far — is managed automatically by the application. It saves the state after every turn in a hidden system folder that you don't need to (and shouldn't) touch. To load a saved game, use the "{opowiesci.btn_wczytaj_label}" button or the /wczytaj command — they will show you a list of all your games by name. This means you can close the application at any time and return to your game later, without worrying about saving anything manually.
   krok_7_pamiec_modelu: |
-    STEP 7: Model memory indicator — why turns in old games don't require manual work from you
+    ## STEP 7: Model memory indicator — why turns in old games don't require manual work from you
 
     Below the mode selection field you will find the model memory indicator — a progress bar with a status description next to it. The indicator shows the percentage of the narrative engine's context window fill level (buffer counted up to 128,000 tokens).
 
@@ -117,13 +117,13 @@ tresc:
 
     In practice, the auto-reduction mechanism is invisible — the player does not feel that anything is happening, because the background thread resolves the issue before it is noticed. The only important thing is that you do not send the next turn while auto-summarization is in progress (the "{opowiesci.btn_wyslij_label}" button is grayed out at that time).
   krok_8_cinematic_warning: |
-    STEP 8: Cinematic Meta Warning — a dramatic interlude after turn 150
+    ## STEP 8: Cinematic Meta Warning — a dramatic interlude after turn 150
 
     After 150 turns of a single game, the narrative engine will insert a "Cinematic Meta Warning" ONCE — a meta-narrative dramatic interlude. It will appear in a separate dialog with a bell sound, addressing you directly in the second person, summarizing your achievements and warning you about the weight of the decisions you are making.
 
     The Cinematic Warning is NOT part of the audiobook narration — the application automatically cuts its content from the narration file (marked with ⚠️🚨⚠️ markers), so that during audiobook playback you will not hear a meta-commentary about your own game. You will see it only once, in a separate dialog window, where you can read it and calmly continue playing.
   krok_10_dostepnosc_nvda: |
-    STEP 9: Accessibility (NVDA and screen readers) — designed from the ground up
+    ## STEP 9: Accessibility (NVDA and screen readers) — designed from the ground up
 
     The entire Stories module has been optimized for blind players. Here is what we specifically did:
 
@@ -143,7 +143,7 @@ tresc:
 
     KEYBOARD ACCELERATORS — all buttons have an `&` character before one of the letters in their label, which activates an Alt+letter accelerator. This works identically to other modules in the application.
   najczestsze_problemy: |
-    Most Common Problems
+    ## Most Common Problems
 
     Problem: After clicking "{opowiesci.btn_nowa_gra_label}", the message "No API key" appears.
     Cause and solution: The golden_key.env file in the application's main folder does not have a valid Anthropic key (this key powers the Stories mode). Go back to the start screen (Home button), click "{home.btn_generate}" and follow the instructions (STEP 2 of the main manual).

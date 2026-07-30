@@ -69,7 +69,7 @@ tresc:
 
     Frá og með v14.0 styður forritið {liczba_kompletnych_jezykow} innfædd tungumál: {lista_kompletnych_jezykow_natywnie}. Hver pakki `dictionaries/<code>/` inniheldur kommur, stafróf og hljóðfræðireglur sem starfa á texta á því tiltekna tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (per málsgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega.
 
-    Allt GUI viðmót, skjöl (`docs/manual.<iso>.txt`) og flest kerfisskilaboð eru fáanleg innfædd á hverju af studdu tungumálunum. Kerfisboð AI í Leikstjóra og Söguham eru skrifuð á markmálinu (handvirkt, ekki sjálfvirkt þýdd — sjá `dictionaries/<code>/rezyser/` og `dictionaries/<code>/opowiesci/`).
+    Allt GUI viðmót, skjöl (`docs/manual.<iso>.html`) og flest kerfisskilaboð eru fáanleg innfædd á hverju af studdu tungumálunum. Kerfisboð AI í Leikstjóra og Söguham eru skrifuð á markmálinu (handvirkt, ekki sjálfvirkt þýdd — sjá `dictionaries/<code>/rezyser/` og `dictionaries/<code>/opowiesci/`).
   architektura_ai: |
     ## Gervigreindararkitektúr og notuð líkön
 
@@ -91,7 +91,7 @@ tresc:
 
     1. Sæktu nýjustu útgáfuna í flipanum **Releases** (pakkinn merktur *Latest*) — skráin `Rezyser_Audio_v<numer>_Installer.exe`. Keyrðu hana með tvöföldu smelli. Uppsetningarforritið setur sjálfgefið upp í staðbundna möppuna á reikningnum þínum (`%LocalAppData%\Programs\Reżyser Audio GPT`) og krefst ekki stjórnandaheimilda; þú getur valið þína eigin slóð með hnappinum „Przeglądaj". Að uppsetningunni lokinni eru búin til flýtitákn í Start-valmyndinni og á skjáborðinu, og valfrjálst opnar forritið notendahandbókina í sjálfgefnum `.txt`-ritli.
     2. **Stilling Anthropic API:** Við fyrstu ræsingu mun forritið gefa til kynna að lykill vanti í hlutanum System Check. Smelltu á sýnilega hnappinn til að búa til skrána `golden_key.env`, opnaðu hana í textaritli og límdu inn Anthropic-lykilinn þinn (sem byrjar á `sk-ant-`).
-    3. **Fyrstu skref:** Opnaðu skrána `docs/manual.pl.txt` (eða á öðru tungumáli) í uppsetningarmöppunni — þetta er full notendahandbók skrifuð á tungumáli sem er aðgengilegt öllum notendum, ekki bara forritarar.
+    3. **Fyrstu skref:** Opnaðu skrána `docs/manual.pl.html` (eða á öðru tungumáli) í uppsetningarmöppunni — þetta er full notendahandbók skrifuð á tungumáli sem er aðgengilegt öllum notendum, ekki bara forritarar.
   instalacja_deweloperzy: |
     ### Fyrir forritara (afrita + uppsetning)
 
@@ -107,11 +107,11 @@ tresc:
 
     Þetta README er aðeins uppbyggingarútdráttur verkefnisins. Til að læra um háþróaðar aðferðir til að koma í veg fyrir ofskynjanir AI, uppsetningarleiðbeiningar fyrir samhæfða talgervla (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), fulla lýsingu á sögumódum með flösku, og fullkomna notendahandbók, skoðaðu skrárnar í `docs/` möppunni:
 
-    * `docs/manual.<iso>.txt` — aðalnotendahandbókin (skrifuð fyrir endanotanda).
-    * `docs/tales.<iso>.txt` — handbók fyrir sögumóða (gagnvirkir textaleikir).
-    * `docs/dictionaries.<iso>.txt` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
+    * `docs/manual.<iso>.html` — aðalnotendahandbókin (skrifuð fyrir endanotanda).
+    * `docs/tales.<iso>.html` — handbók fyrir sögumóða (gagnvirkir textaleikir).
+    * `docs/dictionaries.<iso>.html` — leiðbeiningar fyrir málfræðinga án Python, um hvernig á að bæta við eigin hreim/sifrum/AI-móda.
 
-    Hver af þessum skrám er fáanleg á {liczba_kompletnych_jezykow} tungumálum — viðskeyti `.<iso>.txt` (t.d. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+    Hver af þessum skrám er fáanleg á {liczba_kompletnych_jezykow} tungumálum — viðskeyti `.<iso>.html` (t.d. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
   polskie_nazewnictwo: |
     ### Pólskt heiti — leiðarvísir fyrir þá sem eru utan pólska tungumálasvæðisins
 

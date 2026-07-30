@@ -14,7 +14,7 @@
 id: tales
 tresc:
   naglowek: |
-    Reżyser Audio GPT — Módulo de Historias Interactivas ({app.wersja})
+    # Reżyser Audio GPT — Módulo de Historias Interactivas ({app.wersja})
 
     El segundo modo principal de la aplicación junto al Director — esta vez te conviertes en el jugador de una historia generada dinámicamente en lugar de su autor. La inteligencia artificial narra en segunda persona del singular ("Caminas por un bosque brumoso, sientes el olor de las hojas mojadas..."), y tú decides el siguiente movimiento — escribiendo cualquier acción en texto libre o eligiendo una de las opciones numeradas.
 
@@ -22,7 +22,7 @@ tresc:
 
     Abres el panel con el botón "{main.btn.opowiesci}" en la barra de herramientas o con el atajo de teclado Ctrl+5.
   krok_1_tryby_gry: |
-    PASO 1: Tres modos de juego — elige tu estilo de partida
+    ## PASO 1: Tres modos de juego — elige tu estilo de partida
 
     Justo debajo de la barra con el nombre del juego encontrarás el selector de modo. El modo determina cómo el motor narrativo dialoga contigo:
 
@@ -36,7 +36,7 @@ tresc:
 
     El modo puede cambiarse durante la partida, pero únicamente mediante el botón de emergencia «Editar modo de juego…» junto al selector de modo (desde v15.2.3) — el propio selector queda congelado en el modo establecido justo después de crear o cargar la partida, de forma análoga a la protección del Director. El botón abre un diálogo modal con una advertencia; el uso típico de esta salida de emergencia es la situación en la que la IA en modo Elecciones o Mal Menor se empeña en generar nuevos dilemas en lugar de concluir la historia — saltar al modo Libre permite entonces al jugador describir por sí mismo la escena final. Si quieres iniciar una segunda partida con otra tonalidad, basta con escribir un nuevo nombre en el campo de nombre — el selector se desbloqueará solo, porque la aplicación reconoce que estás preparando un proyecto nuevo. Atención: la frasco es una característica exclusiva del modo Mal Menor — al pasar (por la salida de emergencia) dentro de la misma partida al modo Elecciones o Libre, su existencia y el contador de turnos se conservan en el estado de la partida, pero mientras no regreses al Mal Menor, la opción «Descorcha la frasco» no se mostrará.
   krok_2_quick_start: |
-    PASO 2: Quick Start — escenarios de apertura listos para usar
+    ## PASO 2: Quick Start — escenarios de apertura listos para usar
 
     Debajo del campo del nombre del juego encontrarás una segunda fila con la etiqueta "{opowiesci.lbl_quick_start}" y una lista desplegable. La posición predeterminada es "{opowiesci.quick_start_wlasna}" — el motor inventará el mundo por sí solo basándose en tu primera acción.
 
@@ -54,7 +54,7 @@ tresc:
 
     Tras elegir el preset, haz clic en "{opowiesci.btn_nowa_gra_label}" — el motor inyectará en sí mismo una breve descripción del mundo y del protagonista, establecerá el modo de juego predeterminado (puedes sobreescribirlo con el selector de modo antes de hacer clic en "Nueva partida"). El primer turno del LLM desarrollará la escena de apertura.
   krok_3_pierwsza_gra: |
-    PASO 3: Primera partida desde cero — sin preset
+    ## PASO 3: Primera partida desde cero — sin preset
 
     Si prefieres total libertad, deja "{opowiesci.quick_start_wlasna}" en el campo Quick Start y prepárate para escribir la primera acción manualmente.
 
@@ -64,7 +64,7 @@ tresc:
     4. En el campo "{opowiesci.lbl_akcja}" situado en la parte inferior del panel, escribe la primera acción, p. ej., "me despierto en una habitación desconocida". Haz clic en "{opowiesci.btn_wyslij_label}". El motor narrativo abrirá el mundo a partir de tu acción — descripción del lugar, sonidos, personajes, primeras decisiones.
     5. Cada turno se guardará automáticamente — puedes cerrar la aplicación en cualquier momento y cargar la partida más tarde con el botón "{opowiesci.btn_wczytaj_label}".
   krok_4_zasady_swiata: |
-    PASO 4: Reglas del mundo — reglas propias que el motor respeta durante todo el juego
+    ## PASO 4: Reglas del mundo — reglas propias que el motor respeta durante todo el juego
 
     Desde la versión 15.1, encontrarás un botón "{opowiesci.btn_zasady_swiata_label}" sobre el campo de narración. Este botón abre una ventana de edición separada con un campo multilínea donde puedes escribir cualquier regla — fonética, mecánica o dramática — que el motor narrativo respetará en cada turno siguiente de ese juego en particular. Las reglas se guardan junto con el estado del juego, por lo que al cargar el juego se mantienen sin cambios.
 
@@ -80,7 +80,7 @@ tresc:
 
     Nota: las reglas del mundo requieren un juego activo. Si haces clic en "{opowiesci.btn_zasady_swiata_label}" sin un juego cargado/creado, recibirás el mensaje "{opowiesci.zasady_bez_gry_tytul}" — primero haz clic en "{opowiesci.btn_nowa_gra_label}" o carga un juego guardado.
   krok_5_slash_komendy: |
-    PASO 5: Comandos de barra — acciones rápidas sin API
+    ## PASO 5: Comandos de barra — acciones rápidas sin API
 
     En el campo de acción puedes escribir en cualquier momento un comando que empiece por una barra `/`. Los comandos son locales (no consumen ninguna llamada a la API) y funcionan independientemente del modo de juego. Se aceptan tanto las variantes polacas como las inglesas:
 
@@ -90,21 +90,21 @@ tresc:
 
     El motor narrativo de todos los modos de Historias utiliza un único modelo compartido (por defecto y recomendado, Anthropic Claude Sonnet 5; desde v18.4 un usuario avanzado puede indicar su propio endpoint compatible con OpenAI — ver el manual principal, PASO 2B). Un modelo más potente se apega rigurosamente a las reglas del mundo — esto es especialmente importante en el modo Mal menor, donde cada opción debe seguir siendo realmente desfavorable.
 
-    /wizualizuj <opis>, /visualize <opis> — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo utiliza los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo aparte y NO se añade a la narración. Ejemplo: «/wizualizuj jak wygląda strażnik» («/visualiza cómo es el guardia») o «/wizualizuj zapach kawiarni» («/visualiza el olor de la cafetería»).
+    /wizualizuj `<opis>`, /visualize `<opis>` — descripción multisensorial de la escena actual. No cambia el estado del juego, no propone elecciones — el motor narrativo utiliza los cinco sentidos (vista, oído, olfato, tacto, gusto) para mostrar la escena con mayor profundidad. El resultado aparece en un diálogo aparte y NO se añade a la narración. Ejemplo: «/wizualizuj jak wygląda strażnik» («/visualiza cómo es el guardia») o «/wizualizuj zapach kawiarni» («/visualiza el olor de la cafetería»).
 
     /pomoc, /help — muestra una ventana de diálogo con la lista de todos los comandos disponibles. El diálogo es de solo lectura y compatible con NVDA — el campo de texto recibe el foco automáticamente, y el lector de pantalla lee de inmediato toda la lista sin necesidad de navegar.
 
     /koniec, /quit — cierra la aplicación (tras el autoguardado del turno en curso).
   krok_6_pliki_gry: |
-    PASO 6: Tus archivos — dónde encontrarás la narración terminada
+    ## PASO 6: Tus archivos — dónde encontrarás la narración terminada
 
     Lo único que te importa es un archivo — la narración terminada:
 
-    opowiesci/<nazwa>.txt — la narración completa lista para escuchar como audiolibro, en la carpeta opowiesci/ junto a la aplicación. Puedes abrirla en el Bloc de notas, leerla con un lector de pantalla o cargarla en el Arquitecto de Audiolibros (Conversor) y generar un documento Word con capítulos o una línea de tiempo para ElevenLabs.
+    `opowiesci/<nazwa>.txt` — la narración completa lista para escuchar como audiolibro, en la carpeta opowiesci/ junto a la aplicación. Puedes abrirla en el Bloc de notas, leerla con un lector de pantalla o cargarla en el Arquitecto de Audiolibros (Conversor) y generar un documento Word con capítulos o una línea de tiempo para ElevenLabs.
 
     Todo el estado de la partida — personajes, ubicación, equipamiento, tramas abiertas e historial de turnos anteriores — lo gestiona la aplicación automáticamente por ti. Lo guarda tras cada turno en una carpeta oculta del sistema que no necesitas (ni deberías) tocar. Para cargar una partida guardada usa el botón "{opowiesci.btn_wczytaj_label}" o el comando /wczytaj — te mostrarán la lista de todas tus partidas por nombre. Así podrás cerrar la aplicación en cualquier momento y retomar la partida más tarde, sin preocuparte por guardar nada manualmente.
   krok_7_pamiec_modelu: |
-    PASO 7: Indicador de memoria del modelo — por qué los turnos en partidas antiguas no requieren trabajo manual de tu parte
+    ## PASO 7: Indicador de memoria del modelo — por qué los turnos en partidas antiguas no requieren trabajo manual de tu parte
 
     Bajo el selector de modo encontrarás el indicador de memoria del modelo — una barra de progreso con una descripción de estado junto a ella. El indicador muestra el porcentaje de ocupación de la ventana de contexto del motor narrativo (búfer contado hasta 128 000 tokens).
 
@@ -117,13 +117,13 @@ tresc:
 
     En la práctica, el mecanismo de autorreducción es invisible — el jugador no percibe que ocurre nada, porque el hilo de fondo resuelve el problema antes de que llegue a notarlo. Lo único importante es que no envíes el siguiente turno mientras el resumen automático esté en curso (el botón "{opowiesci.btn_wyslij_label}" aparece atenuado en ese momento).
   krok_8_cinematic_warning: |
-    PASO 8: Cinematic Meta Warning — interrupción dramática después del turno 150
+    ## PASO 8: Cinematic Meta Warning — interrupción dramática después del turno 150
 
     Tras 150 turnos de una misma partida, el motor narrativo insertará UNA VEZ el «Cinematic Meta Warning» — una interrupción dramática meta-narrativa. Aparecerá en un diálogo separado con sonido de campana, con un apelativo directo a ti en segunda persona, un resumen de los logros alcanzados y una advertencia sobre el peso de las decisiones que se están tomando.
 
     El Cinematic Warning NO forma parte de la narración del audiolibro — la aplicación recorta automáticamente su contenido del archivo de narración (marcado con los marcadores ⚠️🚨⚠️), para que durante la escucha del audiolibro no escuches el meta-comentario sobre tu propia partida. Lo verás solo una vez, en una ventana de diálogo separada, donde podrás leerlo y continuar la partida con tranquilidad.
   krok_10_dostepnosc_nvda: |
-    PASO 9: Accesibilidad (NVDA y lectores de pantalla) — diseñada desde el principio
+    ## PASO 9: Accesibilidad (NVDA y lectores de pantalla) — diseñada desde el principio
 
     Todo el módulo Historias ha sido optimizado para jugadores invidentes. Esto es lo que hemos hecho concretamente:
 
@@ -143,7 +143,7 @@ tresc:
 
     ACELERADORES DE TECLADO — todos los botones tienen el carácter `&` antes de una de las letras de su etiqueta, lo que activa el acelerador Alt+letra. Funciona de forma idéntica a como lo hace en los demás módulos de la aplicación.
   najczestsze_problemy: |
-    Problemas más frecuentes
+    ## Problemas más frecuentes
 
     Problema: Al hacer clic en "{opowiesci.btn_nowa_gra_label}" aparece el mensaje «Falta la clave API».
     Causa y solución: El archivo golden_key.env en la carpeta principal de la aplicación no tiene una clave Anthropic válida (es la que alimenta el modo Historias). Vuelve a la pantalla de inicio (botón Home), haz clic en "{home.btn_generate}" y sigue las instrucciones (PASO 2 del manual principal).

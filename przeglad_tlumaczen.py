@@ -39,7 +39,7 @@ MARKER_DRAFTU = "⚠ WORKING DRAFT FOR REVIEW"
 # tłumaczenie całego pliku NIGDY jej nie dostaje (zawsze idzie ścieżką draft).
 # `_kanoniczny_naglowek`/`_auto_naglowek` w obu builderach interpolują tę stałą,
 # a `generuj_dokumentacje._status_naglowka` egzekwuje jej obecność przed
-# wygenerowaniem docs/*.txt (guard przeciw wpuszczeniu draftu do buildu).
+# wygenerowaniem docs/*.html (guard przeciw wpuszczeniu draftu do buildu).
 # Frazą po polsku celowo — kanon dotyczy WYŁĄCZNIE plików maintainera; draft
 # (recenzent zewnętrzny / agent bez konstytucji) dostaje neutralny baner EN.
 MARKER_KANONICZNY = "NIE edytuj ręcznie"

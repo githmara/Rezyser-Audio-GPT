@@ -128,16 +128,17 @@ def zbierz_jezyki_bazowe() -> list[str]:
 
 
 def zbierz_jezyki_z_manualem(kody: list[str]) -> list[str]:
-    """Filtr `kody` zostawiając tylko te, dla których istnieje docs/manual.<iso>.txt.
+    """Filtr `kody` zostawiając tylko te, dla których istnieje docs/manual.<iso>.html.
 
     Sens: język bazowy `dictionaries/<kod>/podstawy.yaml` to konieczność, ale
     sam fakt jego obecności nie wystarcza, żeby instalator otwarł manual po
-    instalacji — `docs/manual.<iso>.txt` musi faktycznie istnieć w paczce.
+    instalacji — `docs/manual.<iso>.html` (od v18.8 HTML zamiast .txt) musi
+    faktycznie istnieć w paczce.
     Dlaczego dwa odrębne kryteria: ktoś może dorzucić paczkę `podstawy.yaml`
     do `dictionaries/cs/` (np. czeski) zanim dotłumaczy `gui/dokumentacja/
     manual.yaml` przez `buduj_wielojezyczne_docs.py`. Wtedy `zbierz_jezyki_bazowe`
     zwróci `cs`, generator wyrzuci warning „pusty manual" ale i tak wytworzy
-    plik, a Inno installer próbujący otworzyć `manual.cs.txt` po instalacji
+    plik, a Inno installer próbujący otworzyć `manual.cs.html` po instalacji
     pokaże user-friendly tekst typu "brak danych w sekcji X" — średnio
     elegancko. Lepiej: jeśli plik manual nie istnieje fizycznie, pomiń ten
     język w mapie Inno (instalator wystartuje w fallbacku en).
@@ -149,7 +150,7 @@ def zbierz_jezyki_z_manualem(kody: list[str]) -> list[str]:
     docs_dir = Path(__file__).parent / "docs"
     z_manualem: list[str] = []
     for kod in kody:
-        manual_path = docs_dir / f"manual.{kod}.txt"
+        manual_path = docs_dir / f"manual.{kod}.html"
         if manual_path.is_file():
             z_manualem.append(kod)
         else:
@@ -353,7 +354,7 @@ def buduj_blok_kodu_iso(wpisy: list[tuple[str, str]], kody_z_manualem: list[str]
 
     Args:
         wpisy:           Lista par `(inno_nazwa, plik_isl)` z `buduj_wpisy_inno()`.
-        kody_z_manualem: Lista kodów ISO, dla których `docs/manual.<iso>.txt`
+        kody_z_manualem: Lista kodów ISO, dla których `docs/manual.<iso>.html`
                          faktycznie istnieje (z `zbierz_jezyki_z_manualem()`).
 
     Zwraca string typu:
@@ -846,7 +847,7 @@ def _parsuj_argumenty() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Build the release Installer EXE for Reżyser Audio GPT. "
-            "Reads VERSION (single source of truth), regenerates docs/*.txt, "
+            "Reads VERSION (single source of truth), regenerates docs/*.html, "
             "and runs ISCC to compile installer.iss. Output: "
             "`Rezyser_Audio_v<VERSION>_Installer.exe` in the repo root."
         ),
@@ -933,7 +934,7 @@ def _weryfikuj_flagi_debug() -> None:
 
 
 def _regeneruj_dokumentacje_lub_przerwij() -> None:
-    """Regeneruje docs/<id>.<kod>.txt z szablonów YAML albo przerywa build.
+    """Regeneruje docs/<id>.<kod>.html z szablonów YAML albo przerywa build.
 
     We call the generator in-process (same Python process, no subprocess) —
     the module has its own UTF-8 fix and does not need a fresh session.
@@ -953,11 +954,11 @@ def _regeneruj_dokumentacje_lub_przerwij() -> None:
     those signals — captured warning text, collected placeholders, or an empty
     result set — to a FATAL that aborts the build. In a standalone run these
     are warnings; in a release build they are fatal, so an installer never
-    ships docs/*.txt that didn't validate. The Polish detail only ever appears
+    ships docs/*.html that didn't validate. The Polish detail only ever appears
     indented under the English FATAL header (diagnostics for the dev), never in
     the normal flow.
     """
-    print("🔍 Regenerating documentation (YAML templates → docs/*.txt)...")
+    print("🔍 Regenerating documentation (YAML templates → docs/*.html)...")
     brakujace_docs: dict[str, list[str]] = {}
     drafty_docs: dict[str, str] = {}
     bufor_generatora = io.StringIO()
@@ -975,7 +976,7 @@ def _regeneruj_dokumentacje_lub_przerwij() -> None:
     if brakujace_docs or drafty_docs or szum_generatora or not wyniki_docs:
         print("❌ FATAL: documentation regeneration is not clean — refusing to build.")
         print("In a standalone run these are warnings; in a release build they are")
-        print("fatal, so the installer never ships docs/*.txt that didn't validate.")
+        print("fatal, so the installer never ships docs/*.html that didn't validate.")
         print("Fix the source, then re-run `python generuj_dokumentacje.py --waliduj`.")
         if not wyniki_docs:
             print("   • No documentation files were generated at all "
@@ -1127,13 +1128,13 @@ def main(args: argparse.Namespace | None = None) -> None:
     # 6c. Verify no debug flag leaked into the build (e.g. EDYCJA_STANU_GRY_WIDOCZNA).
     _weryfikuj_flagi_debug()
 
-    # 6d. Regenerate end-user documentation (docs/<id>.<kod>.txt) — DELIBERATELY the
+    # 6d. Regenerate end-user documentation (docs/<id>.<kod>.html) — DELIBERATELY the
     # LAST gate before the freeze (reordered v18.x). Doc regeneration MUTATES
-    # docs/*.txt and bakes in the (possibly bumped) VERSION, so running it only AFTER
+    # docs/*.html and bakes in the (possibly bumped) VERSION, so running it only AFTER
     # the cheap, read-only gates above (leak/py/debug) means a failing gate aborts the
     # build WITHOUT leaving a regenerated-but-unbuilt docs/ diff behind. All those gates
     # scan YAML/`.py` source (independent of regenerated docs); the only consumer of
-    # fresh docs/manual.<iso>.txt is the Inno step (8 below), still after us.
+    # fresh docs/manual.<iso>.html is the Inno step (8 below), still after us.
     _regeneruj_dokumentacje_lub_przerwij()
 
     # 7. Freeze the app with PyInstaller (onedir, windowed) → dist/<app>/,
@@ -1158,7 +1159,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     katalog_inno = Path(iscc_exe).parent
     kody = zbierz_jezyki_bazowe()
     # Krzyżowa walidacja: język musi mieć NIE TYLKO `dictionaries/<kod>/
-    # podstawy.yaml`, ale też `docs/manual.<iso>.txt` w paczce (regenerowany
+    # podstawy.yaml`, ale też `docs/manual.<iso>.html` w paczce (regenerowany
     # w kroku 6d wyżej). Bez manuala instalator nie ma czego otworzyć po
     # kliknięciu Finish — pomiń ten język z mapy Inno.
     kody_z_manualem = zbierz_jezyki_z_manualem(kody)
@@ -1167,7 +1168,7 @@ def main(args: argparse.Namespace | None = None) -> None:
     # Trzy dynamiczne sekcje wstrzykiwane do tmp installer.iss:
     #   [Languages]      — lista jzk Inno z .isl-em w lokalnej instalacji
     #   [Code]           — funkcja GetManualISO z case'ami ActiveLanguage()
-    #                      mapującymi inno_nazwa → kod_iso pliku manual.<iso>.txt
+    #                      mapującymi inno_nazwa → kod_iso pliku manual.<iso>.html
     #   [CustomMessages] — etykiety menu Pomoc (AdditionalActionsGroup +
     #                      OpenManualTaskDesc + OpenManualRunDesc) per jzk
     # Wszystkie 3 odbudowane z `wpisy` jako pojedynczego źródła prawdy — żeby

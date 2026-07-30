@@ -14,7 +14,7 @@
 id: tales
 tresc:
   naglowek: |
-    Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli ({app.wersja})
+    # Reżyser Audio GPT — Interaktiivisten Tarinoiden Moduuli ({app.wersja})
 
     Toinen sovelluksen päätila Ohjaajan rinnalla — tällä kertaa sinusta tulee dynaamisesti luodun tarinan pelaaja sen kirjoittajan sijaan. Tekoäly ohjaa kerrontaa yksikön toisessa persoonassa ("Kävelet sumuisen metsän läpi, tunnet märän lehden tuoksun..."), ja sinä päätät seuraavasta liikkeestä — kirjoittamalla vapaamuotoisen toiminnon tai valitsemalla yhden numeroiduista vaihtoehdoista.
 
@@ -22,7 +22,7 @@ tresc:
 
     Avaat paneelin painikkeella "{main.btn.opowiesci}" työkalupalkissa tai pikanäppäimellä Ctrl+5.
   krok_1_tryby_gry: |
-    ASKEL 1: Kolme pelitilaa — valitse pelityyli
+    ## ASKEL 1: Kolme pelitilaa — valitse pelityyli
 
     Heti pelin nimen alapuolella näet tilan valintakentän. Tila määrittää, miten kerronnallinen moottori käy kanssasi vuoropuhelua:
 
@@ -36,7 +36,7 @@ tresc:
 
     Tilaa voi vaihtaa pelin aikana, mutta ainoastaan hätäpainikkeen "Muokkaa pelitilaa…" kautta valintatilan kentän vieressä (versiosta v15.2.3 alkaen) — itse valintatilan kenttä on jäädytetty vahvistettuun tilaan heti pelin luomisen tai lataamisen jälkeen, samaan tapaan kuin Ohjaajassa oleva suojaus. Painike avaa modaalisen dialogin varoituksineen; tyypillinen käyttötilanne tälle porttikäytävälle on se, kun tekoäly Valintoja- tai Pienempi paha -tilassa tuottaa itsepintaisesti uusia dilemmoja tarinan päättämisen sijaan — siirtyminen Vapaaseen tilaan antaa pelaajalle mahdollisuuden kuvailla loppukohtaus itse. Jos haluat aloittaa toisen pelin eri sävyssä, riittää kun kirjoitat uuden pelin nimen nimikenttään — valintatilan kenttä avautuu itsestään, koska sovellus tunnistaa, että olet valmistelemassa uutta projektia. Huomio: pikkupullo on yksinomaan Pienempi paha -tilan ominaisuus — siirryttäessä (porttikäytävän kautta) saman pelin sisällä Valintoja- tai Vapaaseen tilaan, sen olemassaolo ja vuorolaskuri säilyvät pelin tilassa, mutta niin kauan kuin et palaa Pienempi paha -tilaan, "Avaa pikkupullo" -vaihtoehto ei näy.
   krok_2_quick_start: |
-    VAIHE 2: Quick Start — valmiit avausskenaariot
+    ## VAIHE 2: Quick Start — valmiit avausskenaariot
 
     Pelin nimen kentän alapuolella näet toisen rivin, jossa on etiketti "{opowiesci.lbl_quick_start}" ja pudotusvalikko. Oletusasetus on "{opowiesci.quick_start_wlasna}" — moottori keksii maailman itse ensimmäisen toimintosi perusteella.
 
@@ -54,7 +54,7 @@ tresc:
 
     Valittuasi presetin klikkaa "{opowiesci.btn_nowa_gra_label}" — moottori syöttää itselleen lyhyen kuvauksen maailmasta ja hahmosta sekä asettaa pelin oletustilan (voit ylikirjoittaa sen tilan valintakentällä ennen kuin klikkaat "Uusi peli"). LLM:n ensimmäinen vuoro pelaa avauskohtauksen.
   krok_3_pierwsza_gra: |
-    VAIHE 3: Ensimmäinen peli tyhjästä — ilman esiasetusta
+    ## VAIHE 3: Ensimmäinen peli tyhjästä — ilman esiasetusta
 
     Jos haluat täyden vapauden, jätä "{opowiesci.quick_start_wlasna}" Quick Start -kenttään ja valmistaudu kirjoittamaan ensimmäinen toiminto käsin.
 
@@ -64,7 +64,7 @@ tresc:
     4. Kirjoita alhaalla olevan paneelin "{opowiesci.lbl_akcja}"-kenttään ensimmäinen toiminto, esim. „budzę się w nieznanym pokoju". Napsauta "{opowiesci.btn_wyslij_label}". Kerrontamoottori avaa maailman toimintosi perusteella — kuvaus huoneesta, äänet, hahmot, ensimmäiset päätökset.
     5. Jokainen vuoro tallennetaan automaattisesti — voit sulkea sovelluksen milloin tahansa ja ladata pelin myöhemmin "{opowiesci.btn_wczytaj_label}"-painikkeella.
   krok_4_zasady_swiata: |
-    VAIHE 4: Maailman säännöt — omat säännöt, joita moottori noudattaa koko pelin ajan
+    ## VAIHE 4: Maailman säännöt — omat säännöt, joita moottori noudattaa koko pelin ajan
 
     Versiosta 15.1 alkaen kerrontakentän yläpuolella on painike "{opowiesci.btn_zasady_swiata_label}". Se avaa erillisen muokkausikkunan, jossa on monirivinen kenttä, johon voit kirjoittaa mitä tahansa sääntöjä — foneettisia, mekaanisia tai dramaturgisia — joita kerrontamoottori noudattaa jokaisella seuraavalla kierroksella tässä tietyssä pelissä. Säännöt tallennetaan yhdessä pelitilan kanssa, joten pelin lataaminen säilyttää ne muuttumattomina.
 
@@ -80,7 +80,7 @@ tresc:
 
     Huomio: maailman säännöt vaativat aktiivisen pelin. Jos klikkaat "{opowiesci.btn_zasady_swiata_label}" ilman ladattua/aloitettua peliä, saat viestin "{opowiesci.zasady_bez_gry_tytul}" — klikkaa ensin "{opowiesci.btn_nowa_gra_label}" tai lataa tallennettu peli.
   krok_5_slash_komendy: |
-    VAIHE 5: Slash-komennot — nopeat toiminnot ilman API:a
+    ## VAIHE 5: Slash-komennot — nopeat toiminnot ilman API:a
 
     Toimintokenttään voit milloin tahansa kirjoittaa komennon, joka alkaa vinoviivalla `/`. Komennot ovat paikallisia (ne eivät kuluta yhtään API-kutsua) ja toimivat pelitilasta riippumatta. Hyväksyttyjä ovat sekä puolalaiset että englanninkieliset variantit:
 
@@ -90,21 +90,21 @@ tresc:
 
     Kaikkien Tarinoita-tilojen kerrontamoottori käyttää yhtä, yhteistä mallia (oletuksena ja suositeltuna Anthropic Claude Sonnet 5; versiosta v18.4 lähtien edistynyt käyttäjä voi määrittää oman OpenAI-yhteensopivan päätepisteen — katso pääkäsikirja, VAIHE 2B). Vahvempi malli noudattaa tiukasti maailman sääntöjä — tämä on erityisen tärkeää Pienempi paha -tilassa, jossa jokaisen vaihtoehdon on pysyttävä aidosti epäedullisena.
 
-    /wizualizuj <opis>, /visualize <opis> — nykyisen kohtauksen moniaistinen kuvaus. Ei muuta pelin tilaa eikä ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, tunto, maku) näyttääkseen kohtauksen syvällisemmin. Tulos ilmestyy erilliseen valintaikkunaan, eikä sitä lisätä kertomukseen. Esimerkki: "/wizualizuj jak wygląda strażnik" (miltä vartija näyttää) tai "/wizualizuj zapach kawiarni" (kahvilan tuoksu).
+    /wizualizuj `<opis>`, /visualize `<opis>` — nykyisen kohtauksen moniaistinen kuvaus. Ei muuta pelin tilaa eikä ehdota valintoja — kerrontamoottori käyttää kaikkia viittä aistia (näkö, kuulo, haju, tunto, maku) näyttääkseen kohtauksen syvällisemmin. Tulos ilmestyy erilliseen valintaikkunaan, eikä sitä lisätä kertomukseen. Esimerkki: "/wizualizuj jak wygląda strażnik" (miltä vartija näyttää) tai "/wizualizuj zapach kawiarni" (kahvilan tuoksu).
 
     /pomoc, /help — näyttää valintaikkunan, jossa on lista kaikista käytettävissä olevista komennoista. Ikkuna on vain luku -tilassa ja NVDA-ystävällinen — tekstikenttä saa fokuksen automaattisesti, ja ruudunlukija lukee heti koko listan ilman että sitä tarvitsee navigoida erikseen.
 
     /koniec, /quit — sulkee sovelluksen (senhetkisen vuoron automaattitallennuksen jälkeen).
   krok_6_pliki_gry: |
-    VAIHE 6: Tiedostosi — mistä löydät valmiin kerronnan
+    ## VAIHE 6: Tiedostosi — mistä löydät valmiin kerronnan
 
     Sinun näkökulmastasi tärkeä on yksi tiedosto — valmis kerronta:
 
-    opowiesci/<nazwa>.txt — täydellinen kerronta valmiina kuunneltavaksi äänikirjana, opowiesci/-kansiossa sovelluksen vieressä. Voit avata sen Muistiossa, lukea ruudunlukijalla tai ladata sen Äänikirja-arkkitehtiin (Konvertteri) ja luoda Word-asiakirjan lukuineen tai aikajanan ElevenLabsia varten.
+    `opowiesci/<nazwa>.txt` — täydellinen kerronta valmiina kuunneltavaksi äänikirjana, opowiesci/-kansiossa sovelluksen vieressä. Voit avata sen Muistiossa, lukea ruudunlukijalla tai ladata sen Äänikirja-arkkitehtiin (Konvertteri) ja luoda Word-asiakirjan lukuineen tai aikajanan ElevenLabsia varten.
 
     Koko pelitilanteen — hahmot, sijainnin, varusteet, avoimet juonilangat ja aiempien vuorojen historian — sovellus hallinnoi puolestasi automaattisesti. Se tallentaa tilan jokaisen vuoron jälkeen piilotettuun järjestelmäkansioon, johon sinun ei tarvitse (eikä pidä) koskea. Tallennetun pelin lataamiseen käytetään painiketta "{opowiesci.btn_wczytaj_label}" tai komentoa /wczytaj — ne näyttävät sinulle listan kaikista peleistäsi nimeltä. Näin voit milloin tahansa sulkea sovelluksen ja palata peliin myöhemmin ilman huolta manuaalisesta tallentamisesta.
   krok_7_pamiec_modelu: |
-    VAIHE 7: Mallin muisti-indikaattori — miksi vanhojen pelien vuorot eivät vaadi sinulta manuaalista työtä
+    ## VAIHE 7: Mallin muisti-indikaattori — miksi vanhojen pelien vuorot eivät vaadi sinulta manuaalista työtä
 
     Tilavalintakentän alapuolella näet mallin muisti-indikaattorin — edistymispalkin, jonka vieressä on tilaselite. Indikaattori näyttää, kuinka suuri osa narratiivimoottorin konteksti-ikkunasta on käytössä (puskuri lasketaan 128 000 tokeniin asti).
 
@@ -117,13 +117,13 @@ tresc:
 
     Käytännössä automaattinen vähennysmekanismi on näkymätön — pelaaja ei huomaa, että mitään tapahtuu, koska taustaketju ratkaisee ongelman ennen kuin se ehtii näkyä. Tärkeintä on vain, että et lähetä seuraavaa vuoroa automaattisen tiivistyksen aikana (painike "{opowiesci.btn_wyslij_label}" on silloin harmaana).
   krok_8_cinematic_warning: |
-    VAIHE 8: Cinematic Meta Warning — dramaattinen välikohtaus 150. vuoron jälkeen
+    ## VAIHE 8: Cinematic Meta Warning — dramaattinen välikohtaus 150. vuoron jälkeen
 
     150 vuoron jälkeen yhdessä pelissä narratiivinen moottori lisää KERRAN "Cinematic Meta Warning" -elementin — metanarratiivisen dramaattisen välikohtauksen. Se ilmestyy erilliseen valintaikkunaan kellonäänen kera, sisältäen suoran puhuttelun sinulle toisessa persoonassa, yhteenvedon saavutuksistasi sekä varoituksen tekemiesi päätösten painoarvosta.
 
     Cinematic Warning EI ole osa äänikirjanarratiiveja — sovellus leikkaa automaattisesti sen sisällön pois narratiivitiedostosta (merkittynä markkereilla ⚠️🚨⚠️), jotta et äänikirjaa kuunnellessasi kuulisi metakommenttia omasta pelistäsi. Näet sen vain kerran, erillisessä valintaikkunassa, jossa voit lukea sen rauhassa ja jatkaa peliä.
   krok_10_dostepnosc_nvda: |
-    VAIHE 9: Saavutettavuus (NVDA ja ruudunlukijat) — suunniteltu alusta alkaen
+    ## VAIHE 9: Saavutettavuus (NVDA ja ruudunlukijat) — suunniteltu alusta alkaen
 
     Koko Tarinat-moduuli on optimoitu näkövammaisille pelaajille. Mitä konkreettisesti teimme:
 
@@ -143,7 +143,7 @@ tresc:
 
     NÄPPÄIMISTÖPIKANÄPPÄIMET — kaikilla painikkeilla on `&`-merkki yhden etikettinsä kirjaimen edessä, mikä aktivoi Alt+kirjain-pikanäppäimen. Toimii identtisesti kuten sovelluksen muissa moduuleissa.
   najczestsze_problemy: |
-    Yleisimmät ongelmat
+    ## Yleisimmät ongelmat
 
     Ongelma: Kun napsautat "{opowiesci.btn_nowa_gra_label}", näyttöön tulee viesti „API-avain puuttuu".
     Syy ja ratkaisu: Sovelluksen pääkansiossa oleva golden_key.env-tiedosto ei sisällä kelvollista Anthropic-avainta (se käyttää Tarinat-tilaa). Palaa aloitusnäyttöön (Home-painike), napsauta "{home.btn_generate}" ja seuraa ohjeita (päämanuaalin VAIHE 2).

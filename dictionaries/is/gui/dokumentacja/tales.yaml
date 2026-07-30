@@ -14,7 +14,7 @@
 id: tales
 tresc:
   naglowek: |
-    Reżyser Audio GPT — Samtalslegar Sögur ({app.wersja})
+    # Reżyser Audio GPT — Samtalslegar Sögur ({app.wersja})
 
     Annar aðalhamur forritsins við hliðina á Leikstjóra — í þetta sinn verður þú leikmaður í sögunni sem er dynamískt búin til í stað þess að vera höfundur hennar. Gervigreindin leiðir frásögnina í annarri persónu eintölu („Þú gengur í gegnum þokukenndan skóg, finnur lyktina af blautum laufum…"), og þú ákveður næstu aðgerð — skrifar hvaða aðgerð sem er með frjálsum texta eða velur eina af tölusettum valkostum.
 
@@ -22,7 +22,7 @@ tresc:
 
     Þú opnar spjaldið með því að smella á "{main.btn.opowiesci}" á verkfærastikunni eða með lyklaborðsskipuninni Ctrl+5.
   krok_1_tryby_gry: |
-    SKREF 1: Þrír leikhamur — veldu leikstíl
+    ## SKREF 1: Þrír leikhamur — veldu leikstíl
 
     Rétt undir nafnarein leiksins finnur þú valreit fyrir leikham. Leikhamurinn ákvarðar hvernig frásagnarvélin leiðir samtalið við þig:
 
@@ -36,7 +36,7 @@ tresc:
 
     Leikhaminn má breyta meðan á leik stendur, en eingöngu með neyðarhnappinn „Breyta leikham…" við hliðina á valreit leikhamans (frá v15.2.3) — valreiturinn sjálfur er frystur á þeim leikham sem var valinn strax eftir að leikurinn var stofnaður eða hlaðinn, á sama hátt og öryggisvörn í Leikstjóri. Hnappurinn opnar glugga með viðvörun; dæmigerð notkun þessarar hliðar er þegar AI í Valleikham eða Minna illt leikham þráast við að búa til fleiri siðferðilegar þrengingar í stað þess að ljúka sögunni — skipti yfir í Frjálsan leikham leyfir þá leikara að lýsa lokasenunni sjálfur. Ef þú vilt stofna annan leik í annarri tón, nægir að slá inn nýtt leikheiti í nafnareitinn — valreiturinn opnast sjálfkrafa, vegna þess að forritið þekkir að þú ert að undirbúa nýtt verkefni. Athugaðu: fíalan er einkenni eingöngu Minna illt leikhamans — við skipti (í gegnum hliðina) í sömu leikjum yfir í Valleikham eða Frjálsan leikham, er tilvera hennar og umferðateljari varðveitt í leikjastöðunni, en þar til þú snýrð aftur í Minna illt leikham birtist valkosturinn „Opnaðu fíaluna" ekki.
   krok_2_quick_start: |
-    SKREF 2: Quick Start — tilbúnar opnunarsenur
+    ## SKREF 2: Quick Start — tilbúnar opnunarsenur
 
     Undir reitnum fyrir heiti leiksins finnur þú aðra röð með merkimiðanum „{opowiesci.lbl_quick_start}" og fellivalmynd. Sjálfgefna staðan er "{opowiesci.quick_start_wlasna}" — vélin mun sjálf finna upp heiminn út frá fyrstu aðgerð þinni.
 
@@ -54,7 +54,7 @@ tresc:
 
     Eftir að hafa valið forstillingu skaltu smella á "{opowiesci.btn_nowa_gra_label}" — vélin mun sprauta inn stuttri lýsingu á heiminum og hetjunni, stilla sjálfgefinn leikhaminn (þú getur skrifað yfir hann með hátturvalreitnum áður en þú smellir á „Nýr leikur"). Fyrsta umferð LLM mun leika opnunarsenuna.
   krok_3_pierwsza_gra: |
-    SKREF 3: Fyrsta leikurinn frá grunni — án forstillingar
+    ## SKREF 3: Fyrsta leikurinn frá grunni — án forstillingar
 
     Ef þú kýst fulla frelsi, skildu „{opowiesci.quick_start_wlasna}" eftir í Quick Start reitnum og búðu þig undir að slá inn fyrstu aðgerðina handvirkt.
 
@@ -64,7 +64,7 @@ tresc:
     4. Í reitinn „{opowiesci.lbl_akcja}" neðst á spjaldinu skaltu slá inn fyrstu aðgerðina, t.d. „ég vakna í óþekktu herbergi". Smelltu á „{opowiesci.btn_wyslij_label}". Frásagnarvélin opnar heiminn á grundvelli aðgerðar þinnar — lýsing á rýminu, hljóð, persónur, fyrstu ákvarðanir.
     5. Sérhver leiktími verður vistaður sjálfkrafa — þú getur hvenær sem er lokað forritinu og hlaðið leiknum inn aftur með hnappinum „{opowiesci.btn_wczytaj_label}".
   krok_4_zasady_swiata: |
-    SKREF 4: Reglur heimsins — eigin reglur sem vélin virðir í gegnum allt leikinn
+    ## SKREF 4: Reglur heimsins — eigin reglur sem vélin virðir í gegnum allt leikinn
 
     Frá útgáfu 15.1 finnurðu hnappinn "{opowiesci.btn_zasady_swiata_label}" fyrir ofan frásagnarreitinn. Hann opnar sérstakan ritglugga með fjölina línureit, þar sem þú getur slegið inn hvaða reglur sem er — hljóðfræðilegar, vélrænar eða dramatískar — sem frásagnarvélin mun virða í hverri næstu umferð þessa tiltekna leiks. Reglurnar eru vistaðar ásamt stöðu leiksins, þannig að þegar leikur er hlaðinn aftur, eru þær varðveittar óbreyttar.
 
@@ -80,7 +80,7 @@ tresc:
 
     Athugið: reglur heimsins krefjast virks leiks. Ef þú smellir á "{opowiesci.btn_zasady_swiata_label}" án þess að hafa hlaðið/sett upp leik, færðu skilaboðin „{opowiesci.zasady_bez_gry_tytul}" — smelltu fyrst á "{opowiesci.btn_nowa_gra_label}" eða hlaðið vistaðan leik.
   krok_5_slash_komendy: |
-    SKREF 5: Skástrik-skipanir — hraðar aðgerðir án API
+    ## SKREF 5: Skástrik-skipanir — hraðar aðgerðir án API
 
     Í aðgerðarreitnum getur þú hvenær sem er slegið inn skipun sem byrjar á skástriki `/`. Skipanirnar eru staðbundnar (kosta engin API-köll) og virka óháð leikstillingu. Bæði pólsk og ensk afbrigði eru samþykkt:
 
@@ -90,21 +90,21 @@ tresc:
 
     Frásagnarvélin í öllum stillingum Sagna notar eina, sameiginlega líkan (sjálfgefið og mælt er með Anthropic Claude Sonnet 5; frá v18.4 getur lengra kominn notandi tilgreint eigin endapunkt sem er samhæfur við OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkanið heldur sig strangt við reglur heimsins — þetta skiptir sérstöku máli í stillingunni Minna illt, þar sem hver valkostur verður að haldast raunverulega óhagstæður.
 
-    /wizualizuj <lýsing>, /visualize <lýsing> — fjölskynjanleg lýsing á núverandi atriði. Breytir ekki leikstöðunni, býður ekki upp á val — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snertingu, bragð) til að sýna atriðið með meiri dýpt. Niðurstaðan birtist í sérstökum glugga og bætist EKKI við frásögnina. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lykt kaffihússins".
+    /wizualizuj `<lýsing>`, /visualize `<lýsing>` — fjölskynjanleg lýsing á núverandi atriði. Breytir ekki leikstöðunni, býður ekki upp á val — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snertingu, bragð) til að sýna atriðið með meiri dýpt. Niðurstaðan birtist í sérstökum glugga og bætist EKKI við frásögnina. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lykt kaffihússins".
 
     /pomoc, /help — birtir samtalsglugga með lista yfir allar tiltækar skipanir. Glugginn er skrifvarinn og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax upp allan listann án þess að þörf sé á að rata um.
 
     /koniec, /quit — lokar forritinu (eftir sjálfvirka vistun umferðarinnar sem er í gangi).
   krok_6_pliki_gry: |
-    SKREF 6: Skrárnar þínar — hvar finnur þú tilbúna frásögnina
+    ## SKREF 6: Skrárnar þínar — hvar finnur þú tilbúna frásögnina
 
     Frá þínu sjónarmiði skiptir máli ein skrá — tilbúin frásögn:
 
-    opowiesci/<nazwa>.txt — full frásögn tilbúin til hlustunar sem hljóðbók, í möppunni opowiesci/ við hliðina á forritinu. Þú getur opnað hana í Notepad, lesið hana með skjálesara eða hlaðið henni inn í Arkitekt Hljóðbóka (Konverter) og búið til Word-skjal með köflum eða tímalínu fyrir ElevenLabs.
+    `opowiesci/<nazwa>.txt` — full frásögn tilbúin til hlustunar sem hljóðbók, í möppunni opowiesci/ við hliðina á forritinu. Þú getur opnað hana í Notepad, lesið hana með skjálesara eða hlaðið henni inn í Arkitekt Hljóðbóka (Konverter) og búið til Word-skjal með köflum eða tímalínu fyrir ElevenLabs.
 
     Öllu leikástandi — persónum, staðsetningu, búnaði, opnum þráðum og sögu fyrri umferða — stjórnar forritið sjálfkrafa fyrir þig. Það vistar hann eftir hverja umferð í falinn kerfisskrámöppu sem þú þarft ekki (og ættir ekki) að snerta. Til að hlaða vistað leik er notaður hnappurinn "{opowiesci.btn_wczytaj_label}" eða skipunin /wczytaj — þær sýna þér lista yfir öll leikjanna þín eftir nafni. Þannig getur þú hvenær sem er lokað forritinu og snúið aftur að leiknum síðar, án þess að hafa áhyggjur af því að vista neitt handvirkt.
   krok_7_pamiec_modelu: |
-    SKREF 7: Minnismæling líkansins — af hverju þurfa þú ekki að vinna handvirkt í gömlum leikjum
+    ## SKREF 7: Minnismæling líkansins — af hverju þurfa þú ekki að vinna handvirkt í gömlum leikjum
 
     Undir reitnum fyrir val á ham finnurðu minnismælingu líkansins — framvindustiku með stöðulýsingu við hliðina. Mælingin sýnir hversu stór hluti samhengisglugga frásagnarvélarinnar er fylltur (biðminni reiknað upp í 128 000 tákn).
 
@@ -117,13 +117,13 @@ tresc:
 
     Í reynd er sjálfvirka minnkunarferlið ósýnilegt — leikmaðurinn finnur ekki til þess að eitthvað sé að gerast, því bakgrunnsþræðurinn leysir vandann áður en hann verður merkjanlegur. Það eina sem skiptir máli er að þú sendur ekki næsta legg á meðan sjálfvirk samantekt er í gangi (hnappurinn „{opowiesci.btn_wyslij_label}" er þá gráur).
   krok_8_cinematic_warning: |
-    SKREF 8: Cinematic Meta Warning — dramatískt hlé eftir 150. leikinn
+    ## SKREF 8: Cinematic Meta Warning — dramatískt hlé eftir 150. leikinn
 
     Eftir 150 leiki í einni lotu mun frásagnarvélin EINU SINNI setja inn „Cinematic Meta Warning" — meta-frásagnarlegt dramatískt hlé. Það birtist í sérstökum glugga með bjölluhljóði, með beinni ávarpi til þín í annarri persónu, samantekt á afrekum og viðvörun um þyngd þeirra ákvarðana sem teknar eru.
 
     Cinematic Warning er EKKI hluti af hljóðbókarfrásögninni — forritið klippir sjálfkrafa efni þess úr frásagnarskránni (merkt með ⚠️🚨⚠️ merkjum), svo þú heyrir ekki meta-athugasemd um eigin leik þegar þú hlustar á hljóðbókina. Þú sérð hana aðeins einu sinni, í sérstökum svarglugga, þar sem þú getur lesið hana og haldið leiknum áfram í ró og ro.
   krok_10_dostepnosc_nvda: |
-    SKREF 9: Aðgengi (NVDA og skjálesarar) — hannað frá grunni
+    ## SKREF 9: Aðgengi (NVDA og skjálesarar) — hannað frá grunni
 
     Allt Sögur eininguna hefur verið fínstillt fyrir blinda leikendur. Hér er nákvæmlega hvað við gerðum:
 
@@ -143,7 +143,7 @@ tresc:
 
     LYKLABORÐSFLÝTILYKLAR — allir hnappar hafa `&` tákn á undan einum af stöfum merkimiðans, sem virkjar flýtilykil Alt+stafur. Virkar nákvæmlega eins og í öðrum einingum forritsins.
   najczestsze_problemy: |
-    Algengustu vandamálin
+    ## Algengustu vandamálin
 
     Vandamál: Eftir að smella á „{opowiesci.btn_nowa_gra_label}" birtist skilaboðin „Engin API-lykill".
     Orsök og lausn: Skráin golden_key.env í aðalmöppu forritsins er ekki með gildan Anthropic-lykil (hann knýr Söguham). Farðu aftur á upphafsskjáinn (Home-hnappur), smelltu á „{home.btn_generate}" og fylgdu leiðbeiningunum (SKREF 2 í aðalhandbókinni).

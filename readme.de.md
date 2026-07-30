@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **18.7.0** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.8.0** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -61,7 +61,7 @@ Interaktive Textspiele, geleitet von der KI in der Rolle einer Erzähl-Engine. I
 
 Ab Version 14.0 unterstützt die Anwendung nativ 9 Basissprachen: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Jedes Paket `dictionaries/<kod>/` enthält Diakritika, Alphabet und phonetische Regeln, die auf Text in dieser spezifischen Sprache operieren — die Anwendung erkennt die Quellsprache automatisch durch den lingua-language-detector (pro Absatz) und lädt das entsprechende Paket für jeden Abschnitt separat.
 
-Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.txt`) und die meisten Systemmeldungen sind nativ in jeder der unterstützten Sprachen verfügbar. Die AI-Systemaufforderungen im Regisseur- und Erzählmodus sind in den Zielsprache verfasst (manuell, nicht automatisch übersetzt — siehe `dictionaries/<kod>/rezyser/` und `dictionaries/<kod>/opowiesci/`).
+Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.html`) und die meisten Systemmeldungen sind nativ in jeder der unterstützten Sprachen verfügbar. Die AI-Systemaufforderungen im Regisseur- und Erzählmodus sind in den Zielsprache verfasst (manuell, nicht automatisch übersetzt — siehe `dictionaries/<kod>/rezyser/` und `dictionaries/<kod>/opowiesci/`).
 
 
 ## KI-Architektur und eingesetzte Modelle
@@ -86,7 +86,7 @@ Dies ist eine grundlegende Einschränkung der aktuellen Generation künstlicher 
 
 1. Laden Sie die neueste Version aus dem Bereich **Releases** herunter (das als *Latest* gekennzeichnete Paket) — Datei `Rezyser_Audio_v<numer>_Installer.exe`. Starten Sie sie mit einem Doppelklick. Das Installationsprogramm landet standardmäßig im lokalen Verzeichnis Ihres Kontos (`%LocalAppData%\Programs\Reżyser Audio GPT`) und erfordert keine Administratorrechte; Sie können über die Schaltfläche „Durchsuchen" einen eigenen Pfad wählen. Nach Abschluss werden Verknüpfungen im Startmenü und auf dem Desktop erstellt, und optional wird die Bedienungsanleitung im Standard-Editor für `.txt`-Dateien geöffnet.
 2. **Anthropic-API-Konfiguration:** Beim ersten Start signalisiert die Anwendung das Fehlen des Schlüssels im Bereich „System Check". Klicken Sie auf die angezeigte Schaltfläche, um die Datei `golden_key.env` zu generieren, öffnen Sie sie in einem Texteditor und fügen Sie Ihren Anthropic-Schlüssel ein (der mit `sk-ant-` beginnt).
-3. **Erste Schritte:** Öffnen Sie die Datei `docs/manual.pl.txt` (oder in einer anderen Sprache) im Installationsordner — das ist die vollständige Bedienungsanleitung, verfasst in einer für jeden Benutzer verständlichen Sprache, nicht nur für Entwickler.
+3. **Erste Schritte:** Öffnen Sie die Datei `docs/manual.pl.html` (oder in einer anderen Sprache) im Installationsordner — das ist die vollständige Bedienungsanleitung, verfasst in einer für jeden Benutzer verständlichen Sprache, nicht nur für Entwickler.
 
 
 ### Für Entwickler (Klonen + Einrichtung)
@@ -104,11 +104,11 @@ Die `.sh`-Skripte für macOS/Linux wurden in v13.1 entfernt — die Entwicklungs
 
 Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Fläschchen" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
 
-* `docs/manual.<iso>.txt` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
-* `docs/tales.<iso>.txt` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
-* `docs/dictionaries.<iso>.txt` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
+* `docs/manual.<iso>.html` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
+* `docs/tales.<iso>.html` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).
+* `docs/dictionaries.<iso>.html` — Anleitung für Linguisten ohne Python, wie man eigene Akzente/Verschlüsselungen/AI-Modi hinzufügt.
 
-Jede dieser Dateien ist in 9 Sprachen verfügbar — Suffix `.<iso>.txt` (z.B. `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+Jede dieser Dateien ist in 9 Sprachen verfügbar — Suffix `.<iso>.html` (z.B. `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ### Polnische Benennungen — Leitfaden für Personen außerhalb des polnischen Sprachraums

@@ -437,7 +437,16 @@ must see the exact string that exists in the file.
 
 ### Frozen markers ⟦i⟧
 Every ⟦N⟧ marker is a frozen placeholder. Copy character-for-character; do not
-translate, do not renumber, do not insert new ones.\
+translate, do not renumber, do not insert new ones.
+
+### Markdown structure (since v18.8 the templates are Markdown rendered to HTML)
+Preserve the Markdown skeleton EXACTLY:
+  * a leading "# " / "## " heading marker stays at the start of the same line
+    (translate the heading TEXT, keep the marker and its level),
+  * backtick code spans (`like_this`) keep their backticks; their inner text is
+    a technical literal covered by the rules above — copy it 1:1,
+  * do not introduce new heading markers, bold/italic emphasis or code spans
+    that the source section does not have.\
 """
 
 

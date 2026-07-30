@@ -767,6 +767,12 @@ poliglota:
   blad_wyniku_tresc: "Ekki tókst að búa til niðurstöðutexta."
   blad_zapisu_wyjscia: "Villa við vistun niðurstöðuskrár:\n{tresc_bledu}"
   sukces_zapis: "Skrá vistuð sem:\n{sciezka_pliku}"
+  # 18.8: staðfærðir hlutar úttaksskráarnafna (eitt orð, engin bil)
+  filename_naprawiony: "lagfært"
+  filename_oczyszczony: "hreinsað"
+  filename_akcent: "áhersla"
+  filename_szyfr: "dulkóðun"
+  filename_tlumaczenie: "þýðing"
   # Tłumacz AI
   ai_init: "Þýðing er að hefjast…"
   ai_zakonczone_tytul: "Árangur"
@@ -806,6 +812,8 @@ poliglota:
   ai_postep_zapis: Vista niðurstöðuskrá…
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
+  # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)
+  filename_architektura: "arkitektúr"
   heading: "📄  Hljóðbókaarkitekt"
   tool_description: |-
     Þessi eining er notuð til að undirbúa skráararkitektúr fyrir skjálesara (siglingar með lyklum 1 og h eftir fyrirsögnum) og ElevenLabs. Breytir lykilorðum (Fram, Þáttur, Kafli, Formáli, Eftirmáli) í Fyrirsagnir fyrsta stigs, án þess að breyta restinni af handritinu.

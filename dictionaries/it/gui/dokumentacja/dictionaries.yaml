@@ -14,14 +14,14 @@
 id: dictionaries
 tresc:
   naglowek: |
-    Dizionari del Poliglotta e del Regista — Istruzioni per tutti
+    # Dizionari del Poliglotta e del Regista — Istruzioni per tutti
     ===========================================================
 
     Ciao! Se stai leggendo questo file, significa che hai dato un'occhiata alla cartella "dictionaries/" accanto all'applicazione Reżyser Audio GPT e ti stai chiedendo cosa siano questi file con strane estensioni ".yaml". Tranquillo — non è necessario conoscere la programmazione o Python per capire cosa sta succedendo qui, e con un po' di coraggio puoi persino aggiungere qualcosa di tuo.
 
     Questo file è scritto in un linguaggio semplice per scrittori, linguisti, insegnanti, genitori e in generale per i curiosi. Se conosci le basi della programmazione e stai cercando una documentazione dettagliata del formato dei file YAML (con elenchi di campi, regex, regole del pipeline di elaborazione), consulta il file "README.md" nella stessa cartella — ma attenzione, questo file è disponibile solo se hai clonato il repository da GitHub. Nella confezione di rilascio scaricata dalla scheda Releases, i file Markdown sono filtrati (per evitare che nella confezione finiscano per sbaglio, ad esempio, i tuoi libri del mondo con spoiler), quindi solo questo file ".txt" arriva agli utenti finali.
   co_tu_jest: |
-    Cosa c'è qui dentro?
+    ## Cosa c'è qui dentro?
     ---------------------
 
     La cartella "dictionaries/" è una libreria di regole utilizzate da Poliglotta (uno strumento per traduzioni e accenti) e dal motore interno di Regista. Fino alla versione 12.0 tutte queste regole erano "incorporate" nel codice Python — se volevi aggiungere un nuovo accento o cambiare le regole, dovevi chiedere a un programmatore. Dalla versione 13.0 tutto è salvato in semplici file di testo (estensione ".yaml" — è solo testo formattato in un modo speciale). Li apri con qualsiasi editor (Blocco note, VS Code, Notepad++) e li modifichi come qualsiasi altro documento.
@@ -37,10 +37,10 @@ tresc:
 
     Attualmente completamente implementati sono: {lista_kompletnych_jezykow_natywnie}
     ({liczba_kompletnych_jezykow} lingue di base). Ognuna ha il proprio pacchetto
-    "dictionaries/<kod>/" con diacritici, alfabeto e regole fonetiche
+    "`dictionaries/<kod>/`" con diacritici, alfabeto e regole fonetiche
     che operano sul testo in quella lingua specifica — l'applicazione rileva automaticamente la lingua di origine tramite lingua-language-detector (per paragrafo) e carica il pacchetto appropriato per ogni frammento separatamente. Altre lingue sono in preparazione (un pacchetto completo richiede "podstawy.yaml", "gui/ui.yaml" e almeno un file in "akcenty/" e "szyfry/").
   co_to_akcent: |
-    Cos'è un accento?
+    ## Cos'è un accento?
     -----------------
 
     Un accento è un insieme di regole che "alterano" il testo polacco in modo che il lettore di schermo (ad esempio NVDA) lo legga con una voce di lingua straniera. Ad esempio, l'accento finlandese sostituisce il polacco "sz" con "s", "w" con "v", e i diacritici (ą, ę, ł) con le loro versioni semplificate — il risultato è che il testo suona come se un finlandese di Helsinki stesse appena imparando il polacco. Non si tratta di una vera traslitterazione, ma di una distorsione divertente e intenzionale per scopi narrativi.
@@ -63,7 +63,7 @@ tresc:
     Inoltre, nel menu degli accenti ci sono due opzioni "di pulizia senza accento":
     una senza normalizzazione dei numeri, l'altra con normalizzazione (sostituisce "15" con "quindici" prima dell'elaborazione, perché uno straniero probabilmente non declinerebbe correttamente questo numero — il che aggiunge autenticità) e "Riparatore di Tag", che semplicemente inserisce nel file il codice lingua ISO senza alterare il contenuto (salvezza quando il tuo file già tradotto è uscito con un codice lingua errato).
   co_to_szyfr: |
-    Cos'è un cifrario?
+    ## Cos'è un cifrario?
     ------------------
 
     I cifrari sono giochi di testo per enigmi, esercizi linguistici, rompicapo. A differenza degli accenti, NON sono orientati verso una voce specifica del sintetizzatore — semplicemente distorcono il testo secondo una regola specifica. Cifrari disponibili ({liczba_szyfrow}):
@@ -125,7 +125,7 @@ tresc:
        che tu possa successivamente decifrare il messaggio. I caratteri al di fuori
        dell'alfabeto (numeri, spazi, punteggiatura) rimangono invariati.
   co_to_tryb_rezysera: |
-    Cos'è la "modalità Regista"?
+    ## Cos'è la "modalità Regista"?
     ----------------------------
 
     La cartella "rezyser/" contiene {liczba_trybow_rezysera} file che descrivono le modalità di lavoro dello Studio Principale del Regista dell'applicazione:
@@ -147,7 +147,7 @@ tresc:
     salvarli e l'applicazione al prossimo avvio caricherà la tua versione.
     Zero programmazione.
   co_to_tryb_opowiesci: |
-    Cosa si intende per "modalità Racconti"?
+    ## Cosa si intende per "modalità Racconti"?
     ----------------------------
 
     La cartella "opowiesci/" contiene {liczba_trybow_opowiesci} file che descrivono la seconda
@@ -182,10 +182,10 @@ tresc:
     Claude Sonnet 5) — un modello più potente si attiene rigorosamente alle regole del mondo
     (fondamentale nella modalità Il male minore, dove ogni opzione deve essere realmente svantaggiosa).
   jak_zaczac: |
-    Come iniziare a divertirsi — tre livelli di difficoltà
+    ## Come iniziare a divertirsi — tre livelli di difficoltà
     ------------------------------------------------------
   poziom_1_dostroj: |
-    LIVELLO 1 — piccole regolazioni di un accento esistente
+    ## LIVELLO 1 — piccole regolazioni di un accento esistente
 
     Immagina che l'accento francese dell'applicazione sostituisca "sz" con "sh", ma
     tu pensi che un francese direbbe piuttosto "sch" o "ch". Nessun problema.
@@ -202,7 +202,7 @@ tresc:
     6. Torna al Gestore delle Regole e fai clic su "Aggiorna albero", quindi
        chiudi e riavvia l'applicazione. La tua modifica è già attiva.
   poziom_2_duplikacja: |
-    LIVELLO 2 — aggiungere un nuovo accento tramite duplicazione
+    ## LIVELLO 2 — aggiungere un nuovo accento tramite duplicazione
 
     Vuoi aggiungere un accento svedese o danese? Inizia con quello più simile
     esistente.
@@ -225,7 +225,7 @@ tresc:
        "[Marek] - ha accento svedese", anche il Regista lo riconoscerà
        automaticamente e lo applicherà ai suoi dialoghi).
   poziom_3_cos_nowego: |
-    LIVELLO 3 — creare qualcosa di completamente nuovo
+    ## LIVELLO 3 — creare qualcosa di completamente nuovo
 
     Vuoi un gergo scolastico? La lingua degli antichi cavalieri? Un linguaggio
     criptico? Un cifrario per i genitori davanti ai bambini?
@@ -241,7 +241,7 @@ tresc:
        tu lo copierai semplicemente nella cartella. Non devi sapere programmare —
        basta saper copiare e incollare.
   pomysly: |
-    Alcune idee per divertirsi
+    ## Alcune idee per divertirsi
     --------------------------
 
     - Classe scolastica durante la lezione di italiano: compito "leggi un
@@ -270,7 +270,7 @@ tresc:
       meglio per bambini di 7-12 anni; gli adulti di solito se ne accorgono
       rapidamente.)
   bezpieczenstwo: |
-    C'è qualcosa che può rompersi?
+    ## C'è qualcosa che può rompersi?
     ------------------------------
 
     In realtà no. L'applicazione carica i file YAML dinamicamente e se uno di
@@ -293,4 +293,4 @@ tresc:
     ".yaml" a ".yaml.backup", se vuoi che scompaiano dal menu. Se in seguito
     cambi idea, basta ripristinare l'estensione.
   zakonczenie: |
-    Buon divertimento!
+    ## Buon divertimento!

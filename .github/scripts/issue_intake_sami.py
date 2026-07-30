@@ -152,7 +152,7 @@ SAMI_SYSTEM_PROMPT = (
     "  Wygeneruj DOKŁADNIE 2 sekcje po polsku:\n"
     "    1. „## Cel pytania\" — 1-2 zdania: o co dokładnie pyta user.\n"
     "    2. „## Co agent powinien zrobić\" — bullet list konkretnych "
-    "miejsc w kodzie/dokumentacji do przejrzenia (np. „docs/manual.<jzk>.txt "
+    "miejsc w kodzie/dokumentacji do przejrzenia (np. „docs/manual.<jzk>.html "
     "sekcja Automatyczne aktualizacje\", „installer.iss linia 64 Excludes\", "
     "„core_updater.py funkcja sprawdz_aktualizacje\") + jedna końcowa "
     "linijka „Odpowiedz w komentarzu na issue w języku oryginalnego "

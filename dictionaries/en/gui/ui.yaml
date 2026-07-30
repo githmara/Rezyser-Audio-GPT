@@ -766,6 +766,12 @@ poliglota:
   blad_wyniku_tresc: "Failed to generate the resulting text."
   blad_zapisu_wyjscia: "Error saving the result file:\n{tresc_bledu}"
   sukces_zapis: "File saved as:\n{sciezka_pliku}"
+  # 18.8: localized output-filename segments (single word, no spaces)
+  filename_naprawiony: "fixed"
+  filename_oczyszczony: "cleaned"
+  filename_akcent: "accent"
+  filename_szyfr: "cipher"
+  filename_tlumaczenie: "translation"
   # Tłumacz AI
   ai_init: "Initializing translation…"
   ai_zakonczone_tytul: "Success"
@@ -805,6 +811,8 @@ poliglota:
   ai_postep_zapis: Saving output file…
 konwerter:
   panel_name: "Audiobook Architect Panel"
+  # 18.8: localized output-filename segment (single word, no spaces)
+  filename_architektura: "architecture"
   heading: "📄  Audiobook Architect"
   tool_description: |-
     This module is used to prepare the file architecture for screen readers (navigate with keys 1 and h through headings) and ElevenLabs. It changes keywords (Intro, Act, Chapter, Prologue, Epilogue) to Level 1 Headings, leaving the rest of the script unchanged.

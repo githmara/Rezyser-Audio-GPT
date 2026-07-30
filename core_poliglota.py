@@ -12,13 +12,15 @@ Publiczne API (prosty, wysokopoziomowy interfejs używany przez GUI):
     core_poliglota.lista_wariantow(tryb="Rezyser",  jezyk="pl")
     core_poliglota.lista_wariantow(tryb="Szyfrant", jezyk="pl")
 
-    # przetwarzanie tekstu:
+    # przetwarzanie tekstu (opcje to MUTOWALNY dict — silnik dopisuje do
+    # niego kanał zwrotny: _segmenty_wynikowe, przesuniecie_faktyczne):
+    opcje = {"przesuniecie": 7}          # parametry zależne od algorytmu
     wynik = core_poliglota.przetworz(
         tekst,
         tryb="Szyfrant",       # lub "Rezyser"
         jezyk="pl",
         wariant="cezar",       # id z YAML (np. "islandzki", "odwracanie")
-        przesuniecie=7,        # parametr zależny od algorytmu
+        opcje=opcje,
     )
 
     # metadane pomocne przy zapisie pliku wynikowego:
@@ -1341,7 +1343,7 @@ def przetworz(
     tryb: str,
     jezyk: str = "pl",
     wariant: str | None = None,
-    **opcje: Any,
+    opcje: dict[str, Any] | None = None,
 ) -> str:
     """Uruchamia wybrane przetwarzanie i zwraca gotowy tekst.
 
@@ -1351,9 +1353,16 @@ def przetworz(
         jezyk:   Kod ISO 639-1 języka bazowego (domyślnie ``"pl"``).
         wariant: ``id`` z YAML-a (np. ``"islandzki"``, ``"odwracanie"``),
                  ewentualnie etykieta widoczna w GUI.
-        **opcje: Dodatkowe parametry zależne od algorytmu, np.:
-
-            ``przesuniecie`` – int, dla szyfru Cezara (0 = losuj).
+        opcje:   MUTOWALNY słownik parametrów zależnych od algorytmu, np.
+                 ``przesuniecie`` – int, dla szyfru Cezara (0 = losuj).
+                 To zarazem kanał ZWROTNY: silnik dopisuje do niego
+                 ``_segmenty_wynikowe`` (mapa języków per akapit dla
+                 :func:`zapisz_wynik`) oraz ``przesuniecie_faktyczne``
+                 (wylosowany shift Cezara). Do v18.7.x parametry szły przez
+                 ``**opcje`` — Python repakował je do nowego słownika i
+                 mutacje silnika NIGDY nie wracały do GUI (side-channel był
+                 martwy od 13.5; skutek: tag ``lang`` liczony ponownie na
+                 tekście już zniekształconym transformacją).
 
     Returns:
         Przetworzony tekst jako string.
@@ -1361,6 +1370,8 @@ def przetworz(
     Raises:
         ValueError: gdy tryb jest nieznany lub wariantu nie odnaleziono.
     """
+    if opcje is None:
+        opcje = {}
     if not wariant:
         raise ValueError("Parametr `wariant` jest wymagany.")
 
@@ -1403,43 +1414,85 @@ def kod_iso(tryb: str, jezyk: str, wariant: str, opcje: dict | None = None) -> s
     return str(iso).strip() or jezyk
 
 
+# Polskie defaulty członów nazw plików wynikowych — zachowane 1:1 z nazewnictwem
+# sprzed lokalizacji (fallback dla wywołań bez ``slowa``, np. headless/testy).
+SLOWA_NAZW_DOMYSLNE = {
+    "naprawiony":  "naprawiony",
+    "oczyszczony": "oczyszczony",
+    "akcent":      "akcent",
+    "szyfr":       "szyfr",
+}
+
+# Znaki zakazane w nazwach plików — unia cross-platform (Windows + sterujące);
+# ten sam zestaw co ``tlumacz_ai._RE_ZNAKI_ZAKAZANE``.
+_RE_ZNAKI_ZAKAZANE_NAZW = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+
+
+def bezpieczny_czlon_nazwy(slowo: Any, fallback: str) -> str:
+    """Sanityzuje przetłumaczony człon nazwy pliku (Unicode-safe).
+
+    Zachowuje litery Unicode (ä, þ, cyrylica — syntezatory czytają je
+    natywnie, systemy plików akceptują), usuwa znaki zakazane w nazwach
+    plików, zwija białe znaki do ``_`` i normalizuje do lowercase. Zwraca
+    ``fallback`` (polski default), gdy wejście nie jest użytecznym stringiem —
+    w tym dla nieprzetłumaczonego placeholdera i18n ``[sekcja.klucz]``.
+    """
+    if not isinstance(slowo, str):
+        return fallback
+    s = slowo.strip()
+    if not s or (s.startswith("[") and s.endswith("]")):
+        return fallback
+    s = _RE_ZNAKI_ZAKAZANE_NAZW.sub("", s)
+    s = re.sub(r"\s+", "_", s).strip("._")
+    return s.lower() or fallback
+
+
 def sufiks_nazwy_pliku(
     tryb: str,
     jezyk: str,
     wariant: str,
     oryginalna_nazwa: str,
     opcje: dict | None = None,
+    *,
+    slowa: dict[str, str] | None = None,
 ) -> str:
     """Buduje bazową nazwę pliku wynikowego (bez rozszerzenia).
 
-    Odtwarza nazewnictwo ze starego GUI:
-      * ``oczyszczony_<oryginał>``                  – oczyszczanie
-      * ``<oryginał>_akcent_<akcent>``              – akcent fonetyczny
-      * ``naprawiony_<oryginał>_<iso>``             – naprawiacz tagów
-      * ``<oryginał>_szyfr_<szyfr>[<±przesunięcie>]`` – szyfry
+    Schemat nazewnictwa (człony ``<...>`` lokalizowane od v18.8 przez GUI —
+    klucze ``poliglota.filename_*`` w ``ui.yaml``, przekazywane w ``slowa``;
+    bez ``slowa`` obowiązują polskie defaulty ``SLOWA_NAZW_DOMYSLNE``):
+      * ``<oczyszczony>_<oryginał>``                  – oczyszczanie
+      * ``<oryginał>_<akcent>_<id akcentu>``          – akcent fonetyczny
+      * ``<naprawiony>_<oryginał>_<iso>``             – naprawiacz tagów
+      * ``<oryginał>_<szyfr>_<id>[<±przesunięcie>]``  – szyfry
 
+    ``id`` wariantu pozostaje techniczne (wspólny klucz wszystkich paczek).
     Nie ma kropki w przyrostku – GUI doda ją razem z rozszerzeniem.
     """
     opcje = opcje or {}
+    slowa = slowa or {}
     cfg   = wariant_po_id(tryb, jezyk, wariant) or wariant_po_etykiecie(tryb, jezyk, wariant)
     if cfg is None:
         return oryginalna_nazwa
+
+    def slowo(klucz: str) -> str:
+        return bezpieczny_czlon_nazwy(slowa.get(klucz), SLOWA_NAZW_DOMYSLNE[klucz])
 
     kategoria = cfg.get("kategoria", "")
     wariant_id = cfg.get("id", wariant)
 
     if kategoria == "naprawiacz":
         iso = (opcje.get("iso_reczne") or jezyk).strip()
-        return f"naprawiony_{oryginalna_nazwa}_{iso}"
+        return f"{slowo('naprawiony')}_{oryginalna_nazwa}_{iso}"
 
     if kategoria == "oczyszczenie":
-        return f"oczyszczony_{oryginalna_nazwa}"
+        return f"{slowo('oczyszczony')}_{oryginalna_nazwa}"
 
     if kategoria == "akcent":
-        return f"{oryginalna_nazwa}_akcent_{wariant_id}"
+        return f"{oryginalna_nazwa}_{slowo('akcent')}_{wariant_id}"
 
     if kategoria == "szyfr":
-        base = f"{oryginalna_nazwa}_szyfr_{wariant_id}"
+        base = f"{oryginalna_nazwa}_{slowo('szyfr')}_{wariant_id}"
         # Cezar dopisuje informację o przesunięciu (np. +7, -12)
         if cfg.get("algorytm") == "cezar":
             przes = int(opcje.get("przesuniecie_faktyczne", opcje.get("przesuniecie", 0)))

@@ -765,6 +765,12 @@ poliglota:
   blad_wyniku_tresc: "Tulostekstin luominen epäonnistui."
   blad_zapisu_wyjscia: "Virhe tulostiedoston tallennuksessa:\n{tresc_bledu}"
   sukces_zapis: "Tiedosto tallennettu nimellä:\n{sciezka_pliku}"
+  # 18.8: tulostiedostojen nimien lokalisoidut osat (yksi sana, ei välilyöntejä)
+  filename_naprawiony: "korjattu"
+  filename_oczyszczony: "puhdistettu"
+  filename_akcent: "aksentti"
+  filename_szyfr: "salaus"
+  filename_tlumaczenie: "käännös"
   # Tłumacz AI
   ai_init: "Käännöksen alustus…"
   ai_zakonczone_tytul: "Onnistui"
@@ -804,6 +810,8 @@ poliglota:
   ai_postep_zapis: Tulostiedoston tallentaminen…
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
+  # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)
+  filename_architektura: "arkkitehtuuri"
   heading: "📄  Äänikirja-arkkitehti"
   tool_description: |-
     Tämä moduuli on tarkoitettu tiedoston rakenteen valmisteluun ruudunlukijoille (navigointi otsikoiden mukaan näppäimillä 1 ja h) sekä ElevenLabsille. Muuttaa avainsanat (Alku, Näytös, Luku, Prologi, Epilogi) ensimmäisen tason otsikoiksi, jättäen muun käsikirjoituksen ennalleen.

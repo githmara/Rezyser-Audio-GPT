@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **18.7.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.8.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -61,7 +61,7 @@ Interactive text-based games run by AI acting as a narrative engine. Unlike Dire
 
 From version 14.0, the application natively supports 9 base languages: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский. Each `dictionaries/<code>/` package contains diacritics, alphabet, and phonetic rules operating on text in that specific language — the application automatically detects the source language using the lingua-language-detector (per paragraph) and loads the appropriate package for each fragment separately.
 
-The entire GUI interface, documentation (`docs/manual.<iso>.txt`), and most system messages are natively available in each of the supported languages. AI system prompts in Director and Story modes are written in the target languages (manually, not auto-translated — see `dictionaries/<code>/rezyser/` and `dictionaries/<code>/opowiesci/`).
+The entire GUI interface, documentation (`docs/manual.<iso>.html`), and most system messages are natively available in each of the supported languages. AI system prompts in Director and Story modes are written in the target languages (manually, not auto-translated — see `dictionaries/<code>/rezyser/` and `dictionaries/<code>/opowiesci/`).
 
 
 ## AI Architecture and Models Used
@@ -86,7 +86,7 @@ This is a fundamental limitation of the current generation of artificial intelli
 
 1. Download the latest release from the **Releases** tab (the package marked as *Latest*) — the file `Rezyser_Audio_v<numer>_Installer.exe`. Launch it with a double-click. The installer lands by default in your account's local directory (`%LocalAppData%\Programs\Reżyser Audio GPT`) and does not require administrator rights; you can choose your own path using the "Browse" button. When finished, it creates shortcuts in the Start Menu and on the desktop, and optionally opens the user manual in the default `.txt` file editor.
 2. **Anthropic API Configuration:** On first launch, the application will signal a missing key in the System Check section. Click the visible button to generate the `golden_key.env` file, open it in a text editor, and paste your Anthropic key (starting with `sk-ant-`).
-3. **First Steps:** Open the file `docs/manual.pl.txt` (or in another language) in the installation folder — this is the complete user manual written in language accessible to every user, not just developers.
+3. **First Steps:** Open the file `docs/manual.pl.html` (or in another language) in the installation folder — this is the complete user manual written in language accessible to every user, not just developers.
 
 
 ### For Developers (clone + setup)
@@ -104,11 +104,11 @@ This is a fundamental limitation of the current generation of artificial intelli
 
 This README is only an architectural outline of the project. To learn advanced techniques for preventing AI hallucinations, installation instructions for compatible speech synthesizers (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), a full description of the Vial Story modes, and a complete user guide, refer to the files in the `docs/` folder:
 
-* `docs/manual.<iso>.txt` — main user manual (written for the end user).
-* `docs/tales.<iso>.txt` — Story mode manual (interactive text games).
-* `docs/dictionaries.<iso>.txt` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
+* `docs/manual.<iso>.html` — main user manual (written for the end user).
+* `docs/tales.<iso>.html` — Story mode manual (interactive text games).
+* `docs/dictionaries.<iso>.html` — guide for linguists without Python on how to add custom accents/ciphers/AI modes.
 
-Each of these files is available in 9 languages — suffix `.<iso>.txt` (e.g., `manual.pl.txt`, `manual.en.txt`, `manual.de.txt`).
+Each of these files is available in 9 languages — suffix `.<iso>.html` (e.g., `manual.pl.html`, `manual.en.html`, `manual.de.html`).
 
 
 ### Polish Naming — Guide for Non-Polish Speakers
