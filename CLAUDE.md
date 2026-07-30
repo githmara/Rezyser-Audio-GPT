@@ -93,6 +93,9 @@ Flow odpowiedzi na pytanie/help wanted domykasz LOKALNIE przez `odpowiedz_lokaln
 - Commity pośrednie: Możesz, a nawet powinieneś, wykonywać commity po zakończeniu poprawnie działającego małego podetapu dużej rewizji z tagiem "WIP".
 - ZAWSZE zrób review (`git --no-pager diff`) zanim zapiszesz stan na stałe w repozytorium.
 
+# AUDYT KODU PRZED DOMKNIĘCIEM (lekcja v18.9.0)
+Bramki (leak gate, hard-kod gate, `--waliduj`) pilnują TREŚCI i literałów — NIE współbieżności ani kompletności obsługi błędów. Zielone bramki ≠ kod gotowy: audyt v18.9 znalazł 18 usterek (7 wysokiej wagi) w kodzie uznanym za dopieszczony. Przed próbą domknięcia zleć audyt subagentowi z wymogiem dowodu wykonaniem dla KAŻDEGO znaleziska. Trzy klasy do sprawdzenia przy każdym nowym wątku/handlerze GUI: (1) `sys.excepthook` NIE pokrywa wątków — potrzebny `threading.excepthook` ORAZ własny try/except w workerze (bez tego w paczce `--windowed` wyjątek ginie bez logu i dialogu); (2) guard `is_alive()` w każdym handlerze mutującym stan projektu i na WEJŚCIU handlera, nie tylko w warunku `Enable`; (3) baseline blokuje wyłącznie NOWE trafienia — regeneruj i czytaj diff w obie strony. Pełna checklista → [[reguly_architektury]].
+
 # DROGOWSKAZY DO POZOSTAŁYCH WARSTW PAMIĘCI
 Pełne opisy → sekcja „TRÓJWARSTWOWY MODEL PAMIĘCI AGENTA" wyżej. Skrót:
 - **`claude_archive.md`** (Muzeum, w repo) — post-mortemy, pełne stare obejścia, zamknięte roadmapy. **KATEGORYCZNY ZAKAZ czytania/ładowania na start — WYŁĄCZNIE na rozkaz „przeszukaj archiwum".**
