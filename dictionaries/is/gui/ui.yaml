@@ -1233,8 +1233,6 @@ opowiesci:
   gra_zapisana_tresc: 'Staða leiks „{nazwa}" hefur verið vistuð á disk.'
   nowa_gra_zaczatek: "📖 Leikur \"{nazwa}\" hafinn.\n\nSláðu inn fyrstu aðgerðina í reitinn hér að neðan og smelltu á \"Senda\" — frásagnavélin mun lýsa heiminum sem þú ert í og kynna fyrstu senu."
   brak_narracji_info: "📖 Leikur \"{nazwa}\" hlaðinn, en frásagnarskráin (skrypty/{nazwa}.txt) er ekki til. Staða leiks kemur úr game.json skrá — þú getur haldið áfram."
-  dlg_wczytaj_tytul: "Hlaða söguleik"
-  dlg_wczytaj_filtr: "Skrár fyrir söguleik (*.game.json)|*.game.json|Allar skrár|*.*"
   blad_zapisu_tresc: "Villa kom upp við vistun á leikskrá: {tresc_bledu}"
   blad_wczytania_tresc: 'Villa kom upp við að hlaða leik „{nazwa}": {tresc_bledu}'
 
@@ -1249,6 +1247,9 @@ opowiesci:
     /sjá <lýsing>, /visualize    — fjölskynja lýsing á senu (án vistunar)
     /endurhlaða, /refresh           — endurhlaða frásögn af diski eftir handvirka breytingu
     /enda, /quit                    — loka forritinu
+  dlg_pomoc_tytul: "Tiltækar skipanir"
+  dlg_pomoc_lbl: "Listi yfir skástriksskipanir í Söguham:"
+  dlg_pomoc_name: "Reitur með skipanalista"
   dlg_visualize_tytul: "🌅 Senuvísualisering"
   dlg_visualize_lbl: "Fjölskynja lýsing á núverandi senu (breytir ekki stöðu leiks):"
   dlg_visualize_name: "Reitur með lýsingu á senuvísualiseringu"

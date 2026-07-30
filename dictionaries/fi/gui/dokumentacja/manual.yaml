@@ -26,15 +26,15 @@ tresc:
 
     Koko sovellus, mukaan lukien Python-moottori, projektit ja API-avain, sijaitsee yhdessä kansiossa asennuspolun alla — koko kansion voi siirtää muistitikulle, pilveen tai toiselle tietokoneelle (yksityiskohtaiset ohjeet kohdassa "Projektien ja API-avaimen siirtäminen" alempana).
 
-    Tärkeää: Asennuskansion sisäinen runtime/-kansio on PyInstaller-paketti (versiosta 17.0 alkaen) — se sisältää eristetyn Python-tulkitsimen ja kirjastot, valmiina käytettäväksi ilman erillistä järjestelmäasennusta; se toimii myös projektien piilotettujen metatietojen säilönä. Jos kloonaat arkiston (kehittäjän polku), tätä kansiota ei ole eikä sen pitäisi olla — käytät silloin virtuaalista venv-ympäristöä, joka on kuvattu kehittäjille tarkoitetussa osiossa alla.
+    **Tärkeää:** Asennuskansion sisäinen runtime/-kansio on PyInstaller-paketti (versiosta 17.0 alkaen) — se sisältää eristetyn Python-tulkitsimen ja kirjastot, valmiina käytettäväksi ilman erillistä järjestelmäasennusta; se toimii myös projektien piilotettujen metatietojen säilönä. Jos kloonaat arkiston (kehittäjän polku), tätä kansiota ei ole eikä sen pitäisi olla — käytät silloin virtuaalista venv-ympäristöä, joka on kuvattu kehittäjille tarkoitetussa osiossa alla.
 
-    --- Kehittäjille (Windows — Git-arkisto) ---
+    ### Kehittäjille (Windows — Git-arkisto)
 
     1. Kloonaa arkisto levyllesi.
     2. Suorita setup_dev.bat-tiedosto. Skripti luo automaattisesti virtuaalisen Python-ympäristön (venv) ja asentaa kaikki tarvittavat riippuvuudet tiedostosta requirements.txt.
     3. Käynnistä sovellus komennolla python main.py tai run_dev.bat-tiedostolla — skripti tunnistaa automaattisesti venv-kansion ja käynnistää ohjelman.
 
-    --- Kehittäjille ja tavallisille käyttäjille (macOS / Linux) ---
+    ### Kehittäjille ja tavallisille käyttäjille (macOS / Linux)
 
     1. Kloonaa arkisto levyllesi.
     2. Avaa terminaali projektikansiossa ja anna skripteille suoritusoikeudet: chmod +x *.sh
@@ -43,7 +43,7 @@ tresc:
 
     Mitä näet käynnistyksen jälkeen: Kun ohjelma käynnistyy, avautuu ikkuna aloitusnäytöllä. Siinä on lyhyt kuvaus käytettävissä olevista työkaluista sekä osio "{home.heading_system_check}". Jos API-avain ei ole vielä konfiguroitu, näet punaisen viestin, joka ilmoittaa, että tekoälypohjaiset moduulit (Ohjaus, Kääntäjä) eivät toimi — ilmaiset paikalliset toiminnot (aksentit, Arkkitehti) ovat kuitenkin heti aktiivisia. API-avaimen konfigurointi kuvataan seuraavassa vaiheessa.
 
-    Automaattiset päivitykset
+    ### Automaattiset päivitykset
 
     Sovellus tarkistaa käynnistyessään, onko GitHubissa saatavilla uudempi versio — tarkistus tapahtuu taustalla eikä estä käyttöliittymää.
 
@@ -55,7 +55,7 @@ tresc:
 
     Jos käytät Git-arkistoa (kehittäjät ja macOS/Linux-käyttäjät): latausehdotuksen sijaan näet tiedon uudesta versiosta suoran linkin kanssa GitHubin julkaisusivulle. Lataa sieltä "Source code" -arkisto tai päivitä arkisto komennolla git pull.
 
-    Projektien ja API-avaimen siirtäminen (migratio)
+    ### Projektien ja API-avaimen siirtäminen (migratio)
 
     Jos haluat siirtää projektisi, API-avaimesi ja paikalliset asetuksesi toiselle tietokoneelle (tai palauttaa kaiken Windowsin uudelleenasennuksen jälkeen), ei tarvitse kopioida yksittäisiä tiedostoja manuaalisesti — koko sovelluskansio on omavarainen.
 
@@ -70,9 +70,9 @@ tresc:
        - Eristetty Python-ympäristö (runtime/-kansio), joten sinun ei tarvitse asentaa mitään uuteen tietokoneeseen.
     5. Uudella tietokoneella: lataa uusin asennusohjelma GitHubin Releases-välilehdeltä ja asenna sovellus normaalisti. Käynnistä ohjelma kerran, jotta se luo tyhjän konfiguraatiotiedostorakenteen. Sulje sovellus. Kopioi sitten aiemmin tallennettu kansio asennuspaikkaan ylikirjoittaen tiedostot — tai valitse valikoivasti vain kiinnostavat kansiot (skrypty/, opowiesci/, golden_key.env) ja liitä ne uuden asennuksen oikeisiin paikkoihin.
 
-    Vinkki NVDA-käyttäjille: Sovellus-näppäimellä avattava kontekstivalikko "Avaa tiedoston sijainti" on täysin käytettävissä — NVDA lukee jokaisen kohdan suomeksi. Kun Resurssienhallinta avautuu kohdekansiossa, käytä Backspace-näppäintä siirtyäksesi taso ylemmäs (toimii aina, riippumatta siitä, onko kohdistus tiedostoluettelossa vai osoiterivillä), ja sitten Ctrl+A valitaksesi kaiken ja Ctrl+C kopioidaksesi.
+    **Vinkki NVDA-käyttäjille:** Sovellus-näppäimellä avattava kontekstivalikko "Avaa tiedoston sijainti" on täysin käytettävissä — NVDA lukee jokaisen kohdan suomeksi. Kun Resurssienhallinta avautuu kohdekansiossa, käytä Backspace-näppäintä siirtyäksesi taso ylemmäs (toimii aina, riippumatta siitä, onko kohdistus tiedostoluettelossa vai osoiterivillä), ja sitten Ctrl+A valitaksesi kaiken ja Ctrl+C kopioidaksesi.
 
-    Vinkki: "Avaa tiedoston sijainti" on natiivi nimi Windowsin suomenkieliselle versiolle. Englanninkielisessä järjestelmässä se on "Open file location", muissa kieliversioissa — vastaavasti paikallisella kielellä.
+    **Vinkki:** "Avaa tiedoston sijainti" on natiivi nimi Windowsin suomenkieliselle versiolle. Englanninkielisessä järjestelmässä se on "Open file location", muissa kieliversioissa — vastaavasti paikallisella kielellä.
   krok_2_klucz_api: |
     ## VAIHE 2: API-avainten syöttäminen (suositeltava Anthropic / Claude -avain)
 
@@ -90,7 +90,7 @@ tresc:
     3. Napsauta ohjelman aloitusnäytöllä painiketta "{home.btn_generate}". Järjestelmä luo automaattisesti puhtaan konfiguraatiotiedoston oikeaan paikkaan ja avaa Muistion muokkausta varten valmiin mallin kanssa.
     4. Avautuneessa tiedostossa näet rivin: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Poista paikkamerkkiteksti ja liitä avaimesi suoraan yhtäläisyysmerkin jälkeen (ilman välilyöntejä ja ilman lainausmerkkejä). Tallenna tiedosto ja käynnistä sovellus uudelleen.
 
-    Vinkki: Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "{home.heading_system_check}" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
+    **Vinkki:** Uudelleenkäynnistyksen jälkeen sovellus tarkistaa tiedoston ja näyttää osiossa "{home.heading_system_check}" avaimen tilan. Sen on oltava vihreä, jotta kaikki tekoälymoduulit ovat valmiita käyttöön. Jos avain puuttuu tai on virheellinen, ohjelma ilmoittaa siitä selkeästi ja antaa avata tekstieditorin virheen nopeaa korjaamista varten.
   krok_3_glowne_studio: |
     ## VAIHE 3: Pääohjaamo
 
@@ -98,20 +98,20 @@ tresc:
 
 
 
-    TÄRKEÄÄ: Projektitiedostojen muoto — paluu .txt-tiedostoihin
+    ### Tärkeää: Projektitiedostojen muoto — paluu .txt-tiedostoihin
 
     Versiossa 7 projektitiedostot tallennettiin Markdown-muodossa (.md), esim. skrypty/znieczulica.md. Tämä oli tarkoituksellinen kokeilu — .md-muodon oli tarkoitus toimia psykologisena esteenä ei-teknisille käyttäjille, estäen heitä avaamasta ja muokkaamasta tiedostoa manuaalisesti Muistiossa (ja siten vahingossa vahingoittamasta rakenteen otsikoita).
 
     Kokeilu ei toiminut. Tekoäly rikkoo usein toistuvasti yhden perustavanlaatuisista kielloista (lisää tästä hetken kuluttua). Tästä syystä versiossa 8 palattiin yksinkertaisiin .txt-tiedostoihin — intuitiivisempiin ja kaikkien luettavissa oleviin. Esimerkiksi projekti nimeltä "znieczulica" tallennetaan nyt muodossa skrypty/znieczulica.txt ja sen tiivistelmä muodossa skrypty/znieczulica_streszczenie.txt. Tämä antaa kaikille mahdollisuuden tehdä ohjauksellisia korjauksia tai tekstileikkauksia helpommin lennossa.
 
 
-    ⚠️ LEIKKAAJAN KRIITTINEN SÄÄNTÖ (LUE ENNEN KUIN ALOITAT!) ⚠️
+    ### ⚠️ Leikkaajan kriittinen sääntö (lue ennen kuin aloitat!)
 
     Kaikki luomasi käsikirjoitukset ja kirjat tallennetaan tavallisiin tekstitiedostoihin (.txt), jotka voit helposti avata Muistiossa.
 
     Ohjaajana sinulla on TÄYSI OIKEUS (ja jopa velvollisuus) muokata tätä tiedostoa! Jos tekoäly lähtee liian pitkälle ja esimerkiksi ratkaisee itse hahmojen ongelman luodun fragmentin lopussa, avaa tiedosto, poista viimeiset rivit ja jätä teksti katkeamaan jännittyneimpään hetkeen, ja napsauta sitten "{rezyser.btn_przeladuj_label}" synkronoidaksesi mallin muistin korjatun tiedoston kanssa, ja "{rezyser.btn_wyslij_label}" jatkaaksesi.
 
-    🔴 KUITENKIN — MITÄ ET SAA KOSKEA:
+    #### 🔴 Kuitenkin — mitä et saa koskea
 
     Älä koskaan muokkaa, poista tai muuta rakenteen sisältäviä rivejä (esim. Näytös 1, Kohtaus 2, Luku 1, Prologi). Jos rikot nämä otsikot:
     1. Tarinasi hajoaa ruudunlukuohjelmissa (NVDA).
@@ -121,7 +121,7 @@ tresc:
     Muokkaa dialogeja, leikkaa toimintaa, mutta jätä rakenne rauhaan!
 
 
-    Kuinka käyttää Ohjaustilaa?
+    ### Kuinka käyttää Ohjaustilaa?
 
     - Maailmankirja (vasen sivupalkki): Tänne kirjoitat universumisi säännöt. Jokaisella projektilla on nyt oma Kirja sidottuna tiedostonimeen — jos historiatiedostosi on esim. emilia_heist_audiobook.txt, Maailmankirja tallennetaan muodossa skrypty/emilia_heist_audiobook.md. Siksi järjestys on tärkeä: kirjoita ensin projektin tiedostonimi "Projektin tiedostonimi" -kenttään, ja vasta sen jälkeen voit tallentaa Kirjan. "{rezyser.btn_zapisz_ksiege_label}"-painike pysyy harmaana, kunnes annat nimen. Olemassa olevan projektin lataaminen "{rezyser.btn_wczytaj_label}"-painikkeella lataa automaattisesti myös vastaavan .md-tiedoston — sinun ei tarvitse tehdä mitään manuaalisesti. Huomio: Ilman täytettyä Maailmankirjaa sovellus estää kyselyjen lähettämisen tekoälylle — tämä on tarkoituksellinen suojaus, joka estää sinua luomasta tekstiä ilman mitään sääntöjä.
     - Pitkäkestoinen muisti (vasen sivupalkki): Toinen kenttä sivupalkissa. Tänne tekoäly tallentaa automaattisesti juonen tiivistelmän, kun muisti alkaa täyttyä. Voit myös kirjoittaa tänne omia muistiinpanojasi manuaalisesti — malli käsittelee ne "mitä jo tiedän" -tietona ennen nykyisen kohtauksen lukemista. HISTORIALLINEN PUUTE (korjattu v15.5:ssä): aiemmin, jos kirjoitit tänne hyvin lyhyen muistiinpanon ja napsautit "Tallenna tiivistelmä" ennen kuin kerrontatiedostossa oli mitään merkittävää, seuraavan latauksen yhteydessä sovellus latasi ENSISIJAISESTI tiivistelmän ja OHITTI koko historian — malli sai silloin vain Maailmankirjan ja yksirivisentenssin muistiinpanon ilman sävyn ja viimeisten kohtausten kontekstia. Versiosta v15.5 alkaen lataaminen on älykästä: jos koko historia mahtuu konteksti-ikkunaan, se ladataan kokonaisuudessaan (ja tarpeeton vanha tiivistelmä poistetaan), joten malli ei menetä kontekstia. Kerrontatiedoston manuaalisen muokkauksen jälkeen editorissa käytä uutta "{rezyser.btn_przeladuj_label}"-painiketta (versiosta v15.5), joka yhdellä napsautuksella synkronoi sisäisen muistin levyn kanssa; tiedoston avaamiseen editorissa käytetään edelleen "{rezyser.btn_otworz_narracje_label}"-painiketta.
@@ -141,13 +141,13 @@ tresc:
     Sovelluksen aiemmissa versioissa kukaan ei valvonut luovan tilan johdonmukaisuutta yhden projektin sisällä. Seurauksena oli eräänlainen hienovarainen luova mahdollisuus, jonka voisi kuvata näin: aloitat tarinan Käsikirjoitustilassa, lisäät "Näytös 1" ja "Kohtaus 1" (sovellus on mielissään johdonmukaisuudestasi), generoit muutaman näytöllisen jännitystä tageilla [SFX: Oven pamahdus] ja [Speaker 1: Marek - luovuttanut]... ja sitten — koska inspiraatio juuri iski — napsautat "Lisää leikkaus Luku 1". Sovellus lisää tiedostoon otsikon "Luku 1" silmää räpäyttämättä, heti "Kohtaus 3":n jälkeen. Tiedostossasi on nyt 1950-luvun radiokuunnelman ja yhteiskunnallisen romaanin hybridi. ElevenLabs katsoo tätä rakennetta, näkee luvun otsikon näytöksen keskellä ja päättää, että kyseessä on todennäköisesti virhe matriisissa. Sisällysluettelo näyttää avantgarde-taiteilijan teokselta. Äänikirja-arkkitehti puolestaan lähtee siitä, että olet aikuinen ihminen, ja yksinkertaisesti käsittelee sen sanomatta mitään — mutta myöskään ilman minkäänlaisia takuita lopputuloksesta. Versiosta 12.0 alkaen käyttöliittymä yritti estää tallennustilan vaihtamisen — ainakin teoriassa. Käytäntö osoittautui luovemmaksi: Aivoriihi (aina aktiivinen suunnittelutilana) oli takaovi, jonka kautta ylös- ja alaspäin-nuolinäppäimillä pystyi siirtymään Käsikirjoituksen ja Äänikirjan välillä (Äänikirja → Aivoriihi → Käsikirjoitus ja vastaavasti toiseen suuntaan). Ensimmäinen napsautus "Lisää Näytös 1" tai "Lisää Luku 1" uudessa valitussa tilassa ylikirjoitti .mode-tiedoston sujuvasti, sekoittaen näytökset ja luvut samaan kerrontatiedostoon. Vasta versiosta 15.2.3 alkaen meillä on todellinen suojaus: kun tilapäätös on vahvistettu (ensimmäinen rakenne tai ensimmäinen onnistunut tuotantolähetys), toinen tallennustilavalinta on todella estetty. Aivoriihi pysyy aina aktiivisena hätämekanismina — se luo tiivistelmän konteksti-ikkunan täyttyessä ja tarjoaa juonivaihtoehtoja — mutta sen kautta ei enää pysty hyppäämään sivulle toiseen tallennustilaan.
 
 
-    Showrunner-promptit — tekoäly sarjan käsikirjoittajana (versiosta 7, säilytetty)
+    ### Showrunner-promptit — tekoäly sarjan käsikirjoittajana (versiosta 7, säilytetty)
 
     Tämä on version 7 suurin muutos, säilytetty muuttumattomana. Se ei näy käyttöliittymässä, mutta muuttaa radikaalisti generoidun juonen laatua.
 
     Showrunner on televisioalalla henkilö, joka vastaa sarjan kokonaisuudesta — hän huolehtii siitä, että juoni ei koskaan etene helppoon ratkaisuun, vaan tiivistyy jatkuvasti, kasaa konflikteja ja pitää katsojan jännittyneenä useiden kausien ajan. Versiossa 7 tämä filosofia rakennettiin suoraan tekoälyn järjestelmäohjeisiin.
 
-    Anti-Closure-direktiivi — ja mitä Anthropicin moottori (Claude) muutti
+    ### Anti-Closure-direktiivi — ja mitä Anthropicin moottori (Claude) muutti
 
     Showrunnerin filosofiaa toimeenpanee jokaiseen tilaan sisäänrakennettu Anti-Closure-direktiivi: kielto sulkea kohtauksia yhteenvedoilla, moraaliopetuksilla ja teennäisillä onnellisilla lopuilla. Vanhalla aikakaudella (GPT-malli) tilanne oli usein täysin päinvastainen kuin nykyään — moottori rikkoi tätä kieltoa toistuvasti ja "sulki" tarinan joka tilaisuudessa: punoi juontoa yhteen kokoavia lauseita, loi teennäisiä onnellisia loppuja tai sulki juonilankoja luvun keskellä, ikään kuin jokainen fragmentti olisi viimeinen. Versiosta 18 alkaen koko tekoälymoottori toimii oletuksena Anthropicilla (Claude) — ja versiosta 18.4 alkaen voit halutessasi määrittää oman toimittajan (VAIHE 2B) — ja Claude noudattaa Anti-Closure-sääntöä huomattavasti tiukemmin.
 
@@ -164,7 +164,7 @@ tresc:
     Poikkeus säännöstä: Jos pyydät nimenomaisesti lopetusta, finaalia tai epilogia, tekoäly luo tyydyttävän tarinan sulkemisen — kielto ei päde, kun itse sitä pyydät.
 
 
-    Näytösten ja kohtausten hallinta (Käsikirjoitustila, versiosta 7, säilytetty)
+    ### Näytösten ja kohtausten hallinta (Käsikirjoitustila, versiosta 7, säilytetty)
 
     Raaka käsikirjoitustilassa on erillinen "{rezyser.struktura_heading}"-paneeli painikkeineen kuunnelman rakenteen rakentamiseen reaaliajassa.
 
@@ -178,7 +178,7 @@ tresc:
     Äänikirja-arkkitehti muuntaa Näytökset automaattisesti päänavigointipisteiksi (Heading 1) ElevenLabsia ja NVDA:ta varten — Kohtauksista tulee lihavoitu teksti, joka näkyy dokumentissa mutta ei sisällysluettelossa.
 
 
-    Älykäs lukujen hallinta (Äänikirjatila, versiosta 5, säilytetty)
+    ### Älykäs lukujen hallinta (Äänikirjatila, versiosta 5, säilytetty)
 
     LLM tuottaa enintään noin 5 000 merkkiä yhtä kyselyä kohden — se ei riitä kokonaiseen lukuun. Siksi työskentelet iteratiivisesti: generoit peräkkäisiä fragmentteja "Lähetä tekoälylle" -painikkeella, kunnes katsot kyseisen luvun olevan valmis. Tällöin napsautat "Lisää lukuleikkaus" — sovellus lisää otsikon tiedostoon ja muistiin, ja lukujen laskuri hyppää automaattisesti seuraavaan numeroon.
 
@@ -191,7 +191,7 @@ tresc:
     Älykäs tiedoston lataaminen: Kun lataat olemassa olevan tiedoston, sovellus skannaa sen automaattisesti ja asettaa lukujen laskurin oikeaan numeroon. Jos tiedostossa on Prologi ja kolme lukua, laskuri näyttää "Luku 4" — ilman manuaalista laskemista.
 
 
-    Juoniakku — miten tekoälyn muisti toimii
+    ### Juoniakku — miten tekoälyn muisti toimii
 
     Mallin muistiin tallennetaan ainoastaan puhdas kerrontateksti — se, mitä tekoäly on todella kirjoittanut. Ohjeet, vaihtoehdot ja suunnitelmat katoavat käytön jälkeen eivätkä tukkia kontekstia. Tulos? Malli säilyttää fokuksen pidempään, muistaa hahmojen aksentit paremmin ja "karkaa" Maailmankirjan säännöistä harvemmin.
 
@@ -202,7 +202,7 @@ tresc:
 
     Tiivistelmäkynnyksen diagnostiikka (kun tekoäly hallusinoi ennen kynnysarvoa): kynnykset (varoitus ~70 %, hälytys ~90 %) on arvioitu empiirisesti. Jos huomaat toistuvan taipumuksen, että malli "karkaa" säännöistä tai alkaa hallucinoida ENNEN kuin ilmaisin siirtyy keltaiselle/punaiselle — eli aiemmin kuin kynnysarvo olettaa — avaa issue sovelluksen repositoriossa ja kuvaile, missä täyttöprosentissa (suunnilleen) asiat alkavat hajota, mieluiten esimerkin kera. Jos tämä taipumus vahvistuu laajemmin (muilla käyttäjillä, eri projekteissa), automaattisen tiivistämisen kynnystä lasketaan seuraavassa patchissa. Kyseessä on tietoisesti iteratiivinen mekanismi — on parempi hienosäätää se todellisen datan perusteella kuin arvata etukäteen.
 
-    Ääretön muisti (versiosta 6, säilytetty)
+    ### Ääretön muisti (versiosta 6, säilytetty)
 
     Kun punainen hälytys syttyy, sinun ei enää tarvitse kopioida tiivistelmää käsin. Kirjoita Aivoriiheen komento, joka sisältää sanan "tiivistelmä" tai "yhteenveto" — tekoäly luo tiiviin tietopaketin koko tähänastisesta juonesta. Napsauta sitten "Tallenna tiivistelmä (pysyvästi)" -painiketta — sovellus luo automaattisesti _streszczenie.txt-tiedoston skrypty/-kansioon ja suojaa sen vahingolliselta ylikirjoittamiselta. Tallennuksen jälkeen tyhjennä muisti ja voit jatkaa luomista nykyisessä tiedostossa. Tiivistelmä ladataan Pitkäkestoisen muistin kenttään ennen seuraavaa istuntoa — ja voit jatkaa tarinaa loputtomiin ilman minkäänlaisia pituusrajoituksia.
 
@@ -216,41 +216,41 @@ tresc:
 
     Valmis luetun teatterin skripti (Skripti-tila) tuottaa kaksi itsenäistä ulostuloa: monihänisen ElevenLabs Studio -projektin (ääni) sekä HTML-version ruudunlukijoita varten. Nämä ovat kaksi tapaa "kuulla" sama näytelmä — voit käyttää toista, molempia tai jättää ne kokonaan käyttämättä. Molemmat ovat valinnaisia eivätkä muuta klassista konvertterityönkulkua.
 
-    ─────────── Silta ElevenLabs Studioon (ääni, valinnainen) ───────────
+    ### Silta ElevenLabs Studioon (ääni, valinnainen)
 
     Silta muuntaa skriptin monihäniseksi Studio-projektiksi — kertojalle ja jokaiselle hahmolle annetaan oma ääni. Ilman ElevenLabs-avainta mikään ei muutu: silta yksinkertaisesti pysyy piilossa.
 
-    ElevenLabs-avain (valinnainen)
+    #### ElevenLabs-avain (valinnainen)
 
     Liitä ElevenLabs-avaimesi golden_key.env-tiedostoon omalle rivilleen: ELEVENLABS_API_KEY=sk_... Huomio: ElevenLabs-avain alkaa merkinnällä sk_ (ALAVIIVALLA), toisin kuin Anthropic-avain (sk-ant-). Jos käytät rajoitettua avainta (restricted key), myönnä sille oikeudet (scopes) projects_write ja voices_read. Avaimen tila näkyy päänäytöllä (System Check) — puuttuva avain ei ole virhe, silta vain pysyy piilossa.
 
     Silta ilmestyy Ohjaajan paneeliin Skripti-tilassa (kun avain on oikein). Se toimii levylle tallennetulla valmiilla näytelmällä — luo tai lataa projekti ensin, siirry sitten siltaan.
 
-    Vaihe 1 — Ääniroolitus
+    #### Vaihe 1 — Ääniroolitus
 
     Napsauta "Obsada głosowa…". Sovellus lukee skriptistäsi hahmot, joilla on vuorosanoja, ja lisää aina Kertojan paikan (kertoja on oletusääni — se lukee lukujen otsikot ja kaiken kerronnan). Liitä jokaisen puhujan kohdalle voice ID. TÄRKEÄÄ: jokaisen näytelmässä käytetyn äänen on ensin löydyttävä "My Voices" -kokoelmastasi — itse luomasi äänet (esim. "Voice Design" -toiminnolla) päätyvät sinne automaattisesti, ja julkisen kirjaston äänet löydät "Explore"-välilehdeltä, josta lisäät ne "Add to My Voices" -painikkeella. Voice ID:n hankkiminen ElevenLabsissa (selaimessa): etsi ääni, toista näyte varmistaaksesi, että se on oikea, ja kopioi tunniste "Copy Voice ID" -painikkeella; kun ääni on jo "My Voices" -kokoelmassa, tämä painike on heti käytettävissä — ilman "More actions" -valikon avaamista. Äänien valinta: mahdollisten uudelleengenerointien minimoimiseksi helpoin tapa on valita "Best for Eleven v3" -kokoelmasta (äänet, jotka on testattu v3-mallilla, jolla projekti luodaan); vaihtoehtoisesti voit suunnitella oman äänen "Voice Design" -toiminnolla, ja rohkeimmille on tarjolla IVC (Instant Voice Cloning) tai PVC (Professional Voice Cloning) -kloonaus. Voit jättää kentät tyhjiksi ja palata myöhemmin — tallennus on luonnos.
 
-    Vaihe 2 — Rakenna projekti
+    #### Vaihe 2 — Rakenna projekti
 
     Napsauta "Stwórz projekt ElevenLabs Studio…". Sovellus tarkistaa, että skriptissä on vähintään yksi luku (Prolog/Akt/Rozdział) ja että jokaiselle puhujalle sekä kertojalle on määritetty ääni, minkä jälkeen se luo tilillesi monihänisen Studio-projektin jaettuna lukuihin. Pelkkä projektin luominen EI kuluta krediittejä. Sovellus asettaa heti projektin kielen (otsikkorivien oikea ääntäminen) sekä äänenvoimakkuuden normalisoinnin äänikirjastandardin mukaisesti — se tekee tämän API:n kautta, joten sinun ei tarvitse avata projektin asetuksia selaimessa.
 
     Muotovartiointija (Montażysty-säännön laajennus): silta edellyttää, että skriptissä JOKAINEN rivi on joko puhujan merkinnällä varustettu vuorosana ([Narrator: …] tai [Nimi: …]) tai rakenteen otsikko (Prolog, Akt, Scena, Rozdział). Tavallinen, merkitsemätön proosa kirjoitettuna "vapaasti" — esimerkiksi tekijän huomautus tai kerrontakatkelma ilman tagia — ei päädy minkään äänen luettavaksi ja ohitetaan hiljaa rakennusvaiheessa, joten valmis projekti saattaa poiketa tiedostostasi. Siksi jos sovellus havaitsee tällaisia "orpo-rivejä", se näyttää niiden listan rivinumeroineen ja kysyy, rakennetaanko silti: voit tällöin peruuttaa ja korjata skriptin (avaa se "Otwórz plik narracji…" -painikkeella, lisää puuttuvat puhujamerkinnät tai poista kyseiset rivit) tai rakentaa tietoisesti siitä huolimatta hyväksyen niiden poisjäämisen. Tämä on luonnollinen laajennus Montażysty-säännölle: aivan kuten rakenteen otsikoita ei saa rikkoa, siltaan tarkoitetussa skriptissä jokaisella rivillä tulee olla puhujansa tai sen tulee olla otsikko.
 
-    Vaihe 3 — Renderöinti selaimessa
+    #### Vaihe 3 — Renderöinti selaimessa
 
     Projektin luomisen jälkeen sovellus näyttää sen tunnisteen sekä painikkeen, joka avaa ElevenLabs Studion. Etsi projekti selaimessa, renderöi puhe (tämä vasta kuluttaa krediittejä — suuntaa-antavasti 1 krediitti merkkiä kohti), minkä jälkeen vie äänitiedosto tai julkaise projekti Eleven Readeriin. Renderöinti ja julkaisu tapahtuvat sinun puolellasi, tietoisesti — sovellus ainoastaan rakentaa projektin.
 
-    Ilmaisu ja aksentit (Eleven v3 -malli)
+    #### Ilmaisu ja aksentit (Eleven v3 -malli)
 
     Projekti luodaan Eleven v3 -mallilla (yli 70 kieltä). Tunteita EI ilmaista isoilla kirjaimilla, ellipseillä tai ajatusviivoin — moottori jättää ne huomiotta. Sen sijaan Ohjaaja lisää vuorosanoihin englanninkielisiä v3-äänitägejä, kuten [whispers], [sighs], [angry], [laughs] — ne ohjaavat ilmaisua ja toimivat puhujan kielestä riippumatta. Hahmon AKSENTTI puolestaan tulee ÄÄNESTÄ: jos haluat jonkun puhuvan esimerkiksi puolaksi vieraalla aksentilla, valitse tai suunnittele Voice Designissa ääni, jonka näytteessä on kyseinen aksentti. Käytännössä kokeile äänipromptia, kunnes kuulet esimerkiksi puolankielisen näytteen suomalaisella aksentilla — v3-malli säilyttää sen aksenttia valmiissa nauhoituksessa. Vinkki: hyvin pitkät lauseet heikentävät aksenttia, minkä vuoksi Ohjaajaa pyydetään jo promptissa käyttämään lyhyitä lauseita.
 
-    Tietoisuus v3-mallista (alpha-vaihe)
+    #### Tietoisuus v3-mallista (alpha-vaihe)
 
     Eleven v3 on ilmaisuvoimaisin, mutta se on edelleen alpha-vaiheessa. Joskus yksittäinen repliikki saattaa renderöityä rätinänä puheen sijaan — riittää, että generoit sen uudelleen Studiossa (jokaisella lohkolla on muutama ilmainen uudelleengenerointi). ElevenLabsin projektin asetuksissa saattaa myös näkyä suosituksia mallin vaihtamisesta (Eleven Flash v2.5:een tai Multilingual v2:een) — tämä EI ole virhe, vaan moottorin ehdotus. Jos et halua nähdä näitä viestejä, älä yksinkertaisesti avaa projektin asetuksia: sovellus on jo asettanut API:n kautta kaiken tarvittavan (malli, kieli, äänenvoimakkuuden normalisointi).
 
     Miksi luettu teatteri eikä äänitehosteita? Aiemmissa versioissa Skripti-tila tuotti raakoja [SFX: ...] -tehosteita ilman kertojaa. Silta valmiiseen, monihäniseen nauhoitukseen edellyttää kuitenkin, että konteksti (paikka, aika, toiminta) välittyy kertojan sanojen kautta: äänitehosteet Studiossa eivät ole ruudunlukijoiden käytettävissä, ja malli toteuttaa joka tapauksessa joko kertojan tai tehosteet — ei koskaan vakaasti molempia yhtä aikaa. Siksi Skripti-tila on luettua teatteria: kertoja ja dialogi, ilman SFX:ää.
 
-    ─────────── Ruudunlukijaversio (HTML, ilman ElevenLabsia) ───────────
+    ### Ruudunlukijaversio (HTML, ilman ElevenLabsia)
 
     Skripti-tilassa, ElevenLabs-avaimesta riippumatta, käytettävissäsi on "Generuj wersję dla czytników ekranu" -painike. Se luo tiedoston `skrypty/<nazwa>_screen_reader.html` — erillinen ulostulo ruudunlukijoita (esim. NVDA) käyttäville henkilöille. Se toimii näin: hahmojen vuorosanoille, joille on Maailmankirjassa määritetty aksentti (esim. merkintä "[Joana] akcent fiński"), lisätään foneettinen kirjoitusasu (tarkoituksellisesti "rikottu" oikeinkirjoitus) sekä kielimerkintä (lang-attribuutti), jolloin ruudunlukija lukee ne oikealla, vieraalla aksentilla. V3-äänitägit (esim. [whispers]) poistetaan tästä versiosta — ruudunlukijan ei tule lukea niitä ääneen. Prolog/Akt/Scena-otsikot muuttuvat HTML-otsikoiksi, joten dokumentissa on helppo navigoida.
 
@@ -260,17 +260,17 @@ tresc:
 
     Kun olet kirjoittanut tarinan, sinulla on käytettävissäsi jälkituotantotyökalu, joka on saatavilla Ohjaajan paneelin alareunassa (näkyy vain Äänikirjatilassa).
 
-    Lukujen Otsikointi (Äänikirjatila)
+    ### Lukujen Otsikointi (Äänikirjatila)
 
     AI analysoi koko tarinan ja ehdottaa kuvailevia, kirjallisia otsikoita jokaiselle luvulle (sekä mahdolliselle Prologille ja Epilogille). Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen otsikon, analysoiden vain kunkin luvun alkuja (enintään 6000 merkkiä). Se palauttaa vain numeroidun listan otsikoista — ilman kirjan sisällön uudelleenkirjoittamista.
 
-    Huomio: Moduuli vaatii, että tiedosto on jo tallennettu levylle (luotu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asiaankuuluvan viestin.
+    **Huomio:** Moduuli vaatii, että tiedosto on jo tallennettu levylle (luotu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asiaankuuluvan viestin.
   krok_5_poliglota_intro: |
     ## VAIHE 5: Polyglootti AI
 
     Sovellus käännöksiin ja kovien aksenttien pakottamiseen näytönlukijoiden synteettisissä äänissä. Siirry siihen napsauttamalla "{main.btn.poliglota}" -painiketta työkalupalkissa tai valitsemalla Työkalut → {main.menu.poliglota} valikosta (pikanäppäin: Ctrl+2).
 
-    Tila 1: Tavallinen Kääntäjä (Käyttää AI - Maksullinen)
+    ### Tila 1: Tavallinen Kääntäjä (Käyttää AI - Maksullinen)
 
     Ihanteellinen tarinoiden kuuntelemiseen kauniilla, oikealla vieraalla kielellä.
 
@@ -286,7 +286,7 @@ tresc:
 
     Miksi tämä on tärkeää? Versiossa 8 käännöksen jatkamisen lähestymistavassa oli kriittinen, hiljainen virhe: jos osittain käännettyä tiedostoa ei nimetty uudelleen ja käännetty osa leikattiin ohjeiden mukaisesti, ja sitten käännöstä jatkettiin heti — sovellus avasi tulostiedoston ylikirjoitustilassa. Maksettu edistys pyyhkiytyi peruuttamattomasti ja huomaamatta, ennen kuin ehdit huomata mitään. Versio 9 poistaa tämän ansan kokonaan: tallennus on pysyvä jokaisen lohkon jälkeen, riippumatta siitä, mitä teet sen jälkeen.
 
-    Tila 2: Ohjaajan Tila / Aksentit (Ilmainen - Toimii paikallisesti)
+    ### Tila 2: Ohjaajan Tila / Aksentit (Ilmainen - Toimii paikallisesti)
 
     Työkalu tekstin "rikkomiseen". Pakottaa synteettisiin ääniin murretun puolalaisen aksentin.
 
@@ -352,7 +352,7 @@ tresc:
 
     Eri TTS-moottorit käyttäytyvät eri tavoin. Alla on keskeisiä eroja, jotka vaikuttavat suoraan aksenttien toimintaan:
 
-    eSpeak (Open Source)
+    ### eSpeak (Open Source)
     Kevyt, ilmainen moottori, jolla on valtava kielivalikoima — tukee esimerkiksi islannin kieltä. Erittäin tarkka merkkikoodauksen suhteen, mikä tekee siitä ennakoitavan. Sillä on kuitenkin fonetiikkaan liittyviä puutteita: se jakaa usein foneemeja kielten kesken, minkä vuoksi esimerkiksi ukraina kuulostaa venäläiseltä.
   krok_5_tiflotecnia: |
     ## Tiflotecnia Voices for NVDA (äänet Cerrence — aiemmin Vocalizer by Nuance)
@@ -361,7 +361,7 @@ tresc:
 
     Asennusohjeet: NVDA → Työkalut → Add-on Store → etsi "Tiflotecnia Voices for NVDA" → Asenna. Asennuksen jälkeen NVDA-valikkoon ilmestyy oma alavalikko "Tiflotecnia Voices" sekä oma kategoria NVDA-asetuksissa. Lisäosan käyttöliittymä opastaa askel askeleelta lisenssin hankinnassa (tai 7 päivän kokeilujakson aktivoinnissa), ensimmäisten äänien valinnassa ja asennuksessa (esim. puolalainen Ewa sujuvaan järjestelmäkontrollien lukemiseen, suomalainen Satu aksentteihin Polyglotissa). Lisäosan sisäänrakennettu ohje on selkeä, joten emme toista menettelyä tässä — riittää, että seuraat lisäosan ohjeita.
 
-    Vinkki Vocalizerista ja Eloquencesta siirtyville: saatavilla on alennettu päivityshinta. Menettely: onnistuneen maksun jälkeen lähetä heti sähköpostia maksun onnistumisnäytöllä linkitettyyn osoitteeseen ja pyydä vanhan aktivointikoodin vahvistusta — Tiflotecnia vahvistaa oikeuden alennukseen ja säätää hinnan. Ilman tätä sähköpostia järjestelmä käsittelee sinut uutena asiakkaana.
+    **Vinkki Vocalizerista ja Eloquencesta siirtyville:** saatavilla on alennettu päivityshinta. Menettely: onnistuneen maksun jälkeen lähetä heti sähköpostia maksun onnistumisnäytöllä linkitettyyn osoitteeseen ja pyydä vanhan aktivointikoodin vahvistusta — Tiflotecnia vahvistaa oikeuden alennukseen ja säätää hinnan. Ilman tätä sähköpostia järjestelmä käsittelee sinut uutena asiakkaana.
 
     Äänien saatavuus: Tiflotecnia Voices tukee useimpia kieliä, joita Vocalizerilla oli (esim. puolalainen, englanti, saksa, ranska, espanja, suomi, italia, venäjä). Äänilista per kieli on nähtävissä lisäosan asetuskategoriassa ennen lisenssin ostamista.
   krok_5_onecore: |
@@ -408,7 +408,7 @@ tresc:
     Työkalu ammattimaisen tiedostorakenteen valmisteluun ruudunlukijoita ja ElevenLabsia varten. Siirry siihen napsauttamalla "{main.btn.konwerter}"-painiketta painikepalkissa tai valitsemalla Työkalut → {main.menu.konwerter} valikosta (pikakuvake: Ctrl+3).
 
 
-    Miten se toimii?
+    ### Miten se toimii?
 
     1. Kirjoita lähdetiedoston polku tekstikenttään tai napsauta "Selaa..."-painiketta valitaksesi tiedoston järjestelmän valintaikkunasta. Skripti hyväksyy sekä .txt- että .docx-tiedostot sekä .html- ja .htm-tiedostot.
     2. Napsauta "{konwerter.btn_buduj}".
@@ -419,11 +419,11 @@ tresc:
 
     Siivous samalla kertaa: Skripti poistaa automaattisesti HTML-tagit (jos teksti on peräisin selaimesta tai paikallisesta .html-tiedostosta, esim. Polyglootin tuottamasta) sekä Markdown-otsikkomerkinnät (esim. ### tai ####) ennen käsittelyä. Sinun ei tarvitse siivota tiedostoa käsin.
 
-    Tarina-tila: vuorojen automaattinen ryhmittely kohtauksiksi (versiosta v15.1 alkaen)
+    ### Tarina-tila: vuorojen automaattinen ryhmittely kohtauksiksi (versiosta v15.1 alkaen)
 
     Jos lataat Arkkitehtiin tiedoston `opowiesci/<gra>.txt`, jonka Interaktiivisten tarinoiden moduuli on tuottanut, muunnin tunnistaa vuoromerkinnät (esim. „--- Tura 7 ---" — myös muilla tuetuilla kielillä, jos olet pelannut jollakin muulla) ja lisää joka viidennen vuoron jälkeen uuden ensimmäisen tason otsikon „Scena N" (numero alkaa 1:stä, pelisi kielellä). Muut vuoromerkinnät poistetaan — ne eivät näy äänikirjan kerronnassa, koska „Tura 7" TTS:n lausumana rikkoo kuuntelijan immersiota. Tuloksena on Word-tiedosto, jossa on luonnollinen jako kohtauksiin, joissa kussakin on muutama minuutti audiota, valmiina tuotavaksi ElevenLabsiin. Mekanismi on automaattisesti tunnistava — tavalliset äänikirjatiedostot ilman vuoromerkintöjä (klassinen kerronta Ohjaajasta) käsitellään täsmälleen kuten ennenkin.
 
-    Tehokas etu NVDA- ja ElevenLabs-käyttäjille
+    ### Tehokas etu NVDA- ja ElevenLabs-käyttäjille
 
     "Heading 1" -muotoilu luvuille ei ole pelkkää estetiikkaa. NVDA:ssa voit navigoida otsikoiden välillä salamannopeasti painamalla H-näppäintä (tai 1 ensimmäisen tason otsikoille). Sen sijaan että selaisit satoja sivuja, hyppäät luvusta toiseen sekunnin murto-osassa. Tämä muuttaa tapaa työskennellä pitkien dokumenttien kanssa. ElevenLabsissa voit olla varma, että moottori lisää leikkaukset automaattisesti eikä jumiudu äänileikkeiden ohjauksessa.
   krok_7_ksiega_swiata: |
@@ -439,7 +439,7 @@ tresc:
 
     Markdown-pikakurssi Maailmankirjaan: yksittäinen risuaita (#) on pääosio (esim. „# Hahmot"), kaksinkertainen risuaita (##) on alaosio, viivat (-) muodostavat listoja, ja kaksinkertaiset tähdet (**teksti**) lihavoivat ehdottomat, loukkaamattomat säännöt (esim. „**Sankari EI KOSKAAN valehtele**"). Vieraskieliselle hahmolle lisää aksenttitagi, esim. „[Speaker 1: Marek] - ma akcent francuski". Sana „akcent" on VÄLTTÄMÄTÖN — sovelluksen moottori tunnistaa sen automaattisesti ja soveltaa oikeita foneettisia sääntöjä kyseisen hahmon dialogeihin.
 
-    Vinkki: Muista päivittää Maailmankirjaasi ajoittain (kun tarina laajenee uusilla paikoilla tai tärkeillä hahmoilla). Voit tehdä sen manuaalisesti tai ulkoisen chatbotin avulla. Mitä rikkaampi perusta, sitä paremmat tulokset Ohjauksessa!
+    **Vinkki:** Muista päivittää Maailmankirjaasi ajoittain (kun tarina laajenee uusilla paikoilla tai tärkeillä hahmoilla). Voit tehdä sen manuaalisesti tai ulkoisen chatbotin avulla. Mitä rikkaampi perusta, sitä paremmat tulokset Ohjauksessa!
   krok_7b_manager_regul: |
     ## VAIHE 7b: Sääntöjen Hallinta (Ctrl+4) — sanakirjat kielitieteilijöille ilman Pythonia
 
@@ -461,82 +461,82 @@ tresc:
   nvda_a11y: |
     ## Tärkeitä ohjeita näytönlukijoiden käyttäjille (NVDA)
 
-    1. Onnistumis- ja virheilmoitukset
+    ### 1. Onnistumis- ja virheilmoitukset
 
     Kun sovellus suorittaa toiminnon (esim. tallentaa tiedoston tai kohtaa virheen), ilmestyy valintaikkuna, jonka otsikko on esimerkiksi "Onnistuminen", "Varoitus" tai "Virhe". NVDA ilmoittaa tästä ikkunasta välittömästi ja lukee sen sisällön. Sinun ei tarvitse tehdä mitään — valintaikkunat ovat täysin käytettävissä näppäimistöllä, ja kohdistus siirtyy automaattisesti "OK"-painikkeeseen. Ei enää "Alert"-etuliitteitä — wxPythonin natiivivalintaikkunat ovat suoraan näytönlukijan tukemia.
 
-    2. Tärkeä varoitus: hiljainen taustaprosessointi
+    ### 2. Tärkeä varoitus: hiljainen taustaprosessointi
 
     Kun napsautat painikkeita, kuten "{rezyser.btn_wyslij_label}" tai "{poliglota.btn_process}", ohjelma aloittaa välittömästi taustaprosessoinnin. Näytölle ilmestyy edistymispalkki (Gauge), mutta NVDA EI lue sen arvoa reaaliajassa — näytönlukija on hiljaa työn aikana. Älä napsauta painiketta uudelleen. Odota, kunnes tulos- tai virheilmoitusikkuna ilmestyy — NVDA ilmoittaa siitä automaattisesti.
 
-    3. Työkalujen välillä navigointi
+    ### 3. Työkalujen välillä navigointi
 
     Liikkuminen työkalujen (Ohjaaja, Polyglotti, Muunnin, Sääntöjen hallinta) välillä tapahtuu yhdessä ohjelmaikkunassa neljän työkalupalkin painikkeen avulla tai Työkalut-valikon kautta (Alt, sitten N). Saatavilla olevat pikanäppäimet: Ctrl+0 (Kotisivu), Ctrl+1 (Ohjaaja), Ctrl+2 (Polyglotti), Ctrl+3 (Muunnin), Ctrl+4 (Sääntöjen hallinta — uutta versiossa 13.0). Työkalua vaihdettaessa kohdistus siirtyy automaattisesti uuden moduulin kuvaukseen — NVDA alkaa heti lukea uutta näkymää.
 
-    4. Välilehtijärjestys ja widgettien nimet
+    ### 4. Välilehtijärjestys ja widgettien nimet
 
     Jokaisella käyttöliittymän elementillä on selkeä suomenkielinen nimi — NVDA lukee sen, kun kohdistus siirtyy siihen. Välilehtijärjestys on looginen: työkalun kuvauksesta, konfigurointikenttien kautta, toimintopainikkeisiin. Ei yllätyksiä — näppäimistönavigointi toimii kuten missä tahansa muussa Windowsin alkuperäisessä ohjelmassa. Kaikki valikot ja painikkeet ovat suomeksi, ja NVDA lukee ne suomenkielisellä äänellä ilman lisäasetuksia.
   changelog_9: |
     ## Tärkeitä huomioita versioon 9.0 / Muutosloki
 
-    Uudet ominaisuudet ja muutokset versiossa 9
+    ### Uudet ominaisuudet ja muutokset versiossa 9
 
-    Kaatumisenkestävä käännöksen edistymisen tallennus (MUUTOS — kriittisen virheen korjaus)
+    **Kaatumisenkestävä käännöksen edistymisen tallennus (MUUTOS — kriittisen virheen korjaus)**
     Versiossa 8 keskeytetyn käännöksen jatkaminen sisälsi hiljaisen, tuhoavan ansan: jos käyttäjä noudatti ohjeita (leikkasi käsin pois jo käännetyn katkelman) ja jatkoi sitten heti lopun kääntämistä, sovellus avasi tulostiedoston ylikirjoitustilassa — pyyhkien peruuttamattomasti ja huomaamatta pois kaiken maksetun edistymisen. Versiossa 9 koko mekanismi on suunniteltu uudelleen. Jokainen käännetty lohko tallennetaan nyt välittömästi väliaikaistiedostoon (.jsonl) sille annetulla indeksillä. Jatkaminen on täysin automaattista — sovellus havaitsee tiedoston itse ja palauttaa edistymisen ilman käyttäjän väliintuloa. Onnistuneen valmistumisen jälkeen väliaikaistiedosto poistetaan automaattisesti.
 
-    Tagien korjaaja Ohjaajan tilassa (UUTUUS)
+    **Tagien korjaaja Ohjaajan tilassa (UUTUUS)**
     Ohjaajan tilan valikkoon on lisätty uusi vaihtoehto — Tagien korjaaja. Se injektoi tiedostoon ainoastaan käyttäjän antaman kaksikirjaimisen ISO-kielikoodin soveltamatta mitään foneettisia sääntöjä tai puhdistusta. Pelastustyökalu siltä varalta, että jo valmis tiedosto on tullut ulos väärällä tai puuttuvalla kielitägillä.
 
-    Automaattinen .txt-tiedostojen muunnos .html-muotoon Kääntäjän tilassa (MUUTOS)
+    **Automaattinen .txt-tiedostojen muunnos .html-muotoon Kääntäjän tilassa (MUUTOS)**
     AI-kääntäjän kääntämät tekstitiedostot (.txt ja .md) tallennetaan nyt automaattisesti .html-muotoon sisäänrakennetulla kielitägillä. Näin NVDA lukee tiedoston heti oikealla äänellä — ilman käyttäjän lisätoimia.
 
-    Älykäs tiedoston nimeäminen Arkkitehdissä (MUUTOS)
+    **Älykäs tiedoston nimeäminen Arkkitehdissä (MUUTOS)**
     Äänikirjojen arkkitehti ei tallenna enää tulostiedostoa aina samalla nimellä arkkitehtuuri_gotowa.docx. Nyt nimi johdetaan syöttötiedostosta — esim. tiedostolle znieczulica.txt tulostiedosto on arkkitehtuuri_znieczulica.docx. Tiedosto ilmestyy samaan kansioon kuin alkuperäinen.
 
-    Versiosta 8 muuttumattomina säilyneet ominaisuudet
+    ### Versiosta 8 muuttumattomina säilyneet ominaisuudet
 
-    Paluu .txt-muotoon projektitiedostoissa (MUUTOS)
+    **Paluu .txt-muotoon projektitiedostoissa (MUUTOS)**
     Projektitiedostot ja yhteenvedot tallennetaan nyt .txt-muotoon .md:n (Markdown) sijaan. Kokeilu .md-muodosta psykologisena esteenä muokkaamista vastaan osoittautui tehottomaksi — AI rikkoo usein ja toistuvasti anti-closure-sääntöä, ja usein on parempi muokata tiedostoa lennossa ja ladata sitten muisti uudelleen, jotta AI ei mahdollisuuksien mukaan saisi piilotettua lupaa rikkoa kieltoa. .txt-muoto on intuitiivisempi ja luettavampi kaikille.
 
-    Leikkaajan sääntö — uusi varoitus
+    **Leikkaajan sääntö — uusi varoitus**
     Ohjeisiin (ja käyttöliittymän tuleviin versioihin) on lisätty selkeä varoitus, joka selittää, mitä projektitiedostoissa saa ja mitä ei saa muokata. Käyttäjällä on täysi oikeus muokata dialogeja ja sisältöä, mutta hän ei missään tapauksessa saa muokata rakennerivejä (Näytös, Kohtaus, Luku, Prologi, Epilogi) — niiden vahingoittaminen pilaa NVDA:n navigoinnin, jaon ElevenLabsissa ja sisällysluettelon Wordissa.
 
-    Päivitetty Arkkitehdin prompti (MUUTOS)
+    **Päivitetty Arkkitehdin prompti (MUUTOS)**
     Ulkoisen chatbotin (ChatGPT/Claude) prompti on suunniteltu uudelleen. Sen sijaan, että se palauttaisi raakaa Markdown-koodia, AI palauttaa nyt vastauksen kahdessa selkeästi erotetussa osassa: Osa 1 on Maailmankirja suljettuna Markdown-koodilohkoon (helppo kopioida ilman merkintöjä), ja Osa 2 on Tilasuositus tavallisena tekstinä lohkon ulkopuolella — se neuvoo, kannattaako käyttää Raakakäsikirjoitustilaa vai Perinteistä Äänikirjatilaa. Myös hahmotägien kuvaus on muutettu: "äänellisten" sijaan puhutaan nyt aksentista ja äänensävystä tägissä, esim. [Speaker 1: Nimi] - sammaltaa ja ranskalainen aksentti.
 
-    Anti-Closure-direktiivin tilan selitys (DOKUMENTAATIO)
+    **Anti-Closure-direktiivin tilan selitys (DOKUMENTAATIO)**
     Ohjeet sisältävät nyt rehellisen selityksen siitä, että sisäänrakennetuista Anti-Closure-kielloista huolimatta malli rikkoo edelleen toistuvasti tätä sääntöä, erityisesti Äänikirjatilassa. Sen sijaan, että tämä ongelma piilotettaisiin, versio 8 sanoo asian suoraan ja palauttaa vastuun "manuaalisesta sulkemisesta" takaisin Ohjaajalle — tästä Leikkaajan sääntö virallisena työkaluna ja paluu tavalliseen tekstimuotoon.
 
-    Versiosta 7 muuttumattomina säilyneet ominaisuudet
+    ### Versiosta 7 muuttumattomina säilyneet ominaisuudet
 
-    Showrunner-promptit — Anti-Closure-direktiivi (Ohjaus — kaikki tilat)
+    **Showrunner-promptit — Anti-Closure-direktiivi (Ohjaus — kaikki tilat)**
     Kaikki kolme Ohjaustilaa säilyttävät sisäänrakennetut showrunner-direktiivit. Aivoriihi toimii kuin monikautisen sarjan käsikirjoittaja. Raakakäsikirjoitustilassa ja Äänikirjatilassa on kielletty tekstin lopettaminen yhteenvedoilla, opetuksilla ja kerronnallisilla sulkemisilla — paitsi silloin, kun käyttäjä nimenomaisesti pyytää loppuhuipennusta tai epilogia.
 
-    Näytösten ja Kohtausten reaaliaikainen hallinta (Ohjaus — Käsikirjoitustila)
+    **Näytösten ja Kohtausten reaaliaikainen hallinta (Ohjaus — Käsikirjoitustila)**
     Raakakäsikirjoitustilassa on paneeli, jossa on painikkeet "Lisää Näytös X" ja "Lisää Kohtaus X". Laskurit päivittyvät automaattisesti. Olemassa olevan tiedoston lataaminen asettaa molemmat laskurit oikeisiin numeroihin.
 
-    Sulkeissa olevien ohjauksellisten näyttämöohjeiden puhdistus (Polyglotti — Ohjaajan tila)
+    **Sulkeissa olevien ohjauksellisten näyttämöohjeiden puhdistus (Polyglotti — Ohjaajan tila)**
     Skripti poistaa kokonaiset kaarisulkeisiin sijoitetut tekstinpätkät (esim. "(kuiskaten)", "(hengähdysten kera)"). ElevenLabs lukee vain dialogit ja kerronnan.
 
-    Ääretön Muisti ja Automaattinen Yhteenveto (Ohjaus — Juonen Akku)
+    **Ääretön Muisti ja Automaattinen Yhteenveto (Ohjaus — Juonen Akku)**
     Kun muisti-ilmaisin siirtyy punaisen hälytyksen tilaan, Aivoriihi luo automaattisesti juonen yhteenvedon ja tallentaa sen Pitkäkestoisen Muistin kenttään. Painikkeen "Tallenna Yhteenveto (pysyvästi)" napsauttaminen luo tiedoston _streszczenie.txt. Muistin tyhjentämisen ja yhteenvedon lataamisen jälkeen tarinaa voi jatkaa ilman pituusrajoituksia.
 
-    Äänikirjojen arkkitehti
+    **Äänikirjojen arkkitehti**
     Työkalu tukee avainsanoja Näytös, Luku, Prologi, Epilogi ja Alkutekstit ensimmäisen tason otsikoina. Kohtaukset muuttuvat lihavoiduksi tekstiksi. Skripti puhdistaa automaattisesti HTML-tägit ja Markdown-merkinnät ennen käsittelyä.
 
-    Älykäs Lukujen Hallinta (Äänikirjatila)
+    **Älykäs Lukujen Hallinta (Äänikirjatila)**
     Oma paneeli, jossa on painikkeet Prologin, Epilogien ja lukuleikkausten lisäämiseen suoraan käyttöliittymästä. Lukulaskuri päivittyy automaattisesti. Olemassa olevan tiedoston lataaminen asettaa laskurin oikeaan numeroon ilman manuaalista laskemista.
 
-    Lukujen Otsikointi (Jälkituotanto — Äänikirjatila)
+    **Lukujen Otsikointi (Jälkituotanto — Äänikirjatila)**
     Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen, kirjallisen otsikon nopean AI-mallin avulla analysoiden vain kunkin luvun alkuja.
 
-    Poistetut ominaisuudet (muuttumattomia versiosta 7)
+    ### Poistetut ominaisuudet (muuttumattomia versiosta 7)
 
     Leikkauskartta (Käsikirjoitustila) — korvattu Näytösten ja Kohtausten reaaliaikaisella hallintapaneelilla.
     Käsikirjoituksen muuntaminen Äänikirjaksi (Käsikirjoitustila) — poistettu taloudellisista syistä. Työnkulku aiheutti kolme erillistä kustannusta: käsikirjoituksen luominen, mahdollinen yhteenveto muistin täyttyessä ja lopuksi koko tekstin uudelleenluominen äänikirjaproosana. Suosittelemme kirjoittamaan suoraan Perinteisessä Äänikirjatilassa alusta alkaen.
 
 
-    Version 10.0 ominaisuudet (säilytetty muuttumattomina versioissa 11.0 ja 12.0)
+    ### Version 10.0 ominaisuudet (säilytetty muuttumattomina versioissa 11.0 ja 12.0)
 
     - Automaattinen golden_key.env-konfiguraatiotiedoston generaattori, joka on rakennettu suoraan sovelluksen pääkäyttöliittymään. Käyttäjän ei tarvitse enää luoda tiedostoa käsin eikä huolehtia .txt-päätteen ansasta — riittää yksi napsautus aloitusnäytöllä olevasta painikkeesta, ja järjestelmä luo puhtaan, valmiin tiedoston oikeaan paikkaan.
     - Vanhentuneen napraw_api.bat-skriptin täydellinen poisto, sillä sitä ei enää tarvita. Ongelma, jonka tämä skripti ratkaisi (Muistion antama väärä tiedostopääte), on nyt täysin eliminoitu sisäänrakennetun generaattorin ansiosta.
@@ -552,7 +552,7 @@ tresc:
 
     - Polyglotin valikon synteesinimien päivitys (MUUTOS). Päivitetty äänten nimet valikon selectboxissa olemassa oleville kielille: Italialla on nyt myös Luca (Vocalizer), Puolalla on nyt myös Paulina (OneCore). Islanti säilytti nimen ilman diakriittisiä merkkejä (Gudrun sen sijaan, että Gudrun eth-merkillä) paremman yhteensopivuuden vuoksi.
 
-    Ominaisuudet, jotka säilyivät muuttumattomina versiosta 10
+    ### Ominaisuudet, jotka säilyivät muuttumattomina versiosta 10
 
     - Automaattinen golden_key.env-tiedoston generaattori sisäänrakennettuna käyttöliittymään.
     - Maailmankirjan monikirjaisuus (jokaisella projektilla on oma .md-tiedosto maailman säännöistä).
@@ -577,7 +577,7 @@ tresc:
 
     - Luovan tilan automaattinen lataaminen (UUTUUS). Projektin lataamisen yhteydessä sovellus palauttaa automaattisesti viimeksi käytetyn työtilan (Skripti tai Äänikirja) sovelluksen hallinnoimasta metatiedostosta. Tämän ansiosta projektin uudelleen avaamisen jälkeen tilavalintakenttä asettuu itsestään — sinun ei tarvitse muistaa, missä tilassa työskentelit.
 
-    Versiosta 11.0 muuttumattomina säilyneet ominaisuudet
+    ### Versiosta 11.0 muuttumattomina säilyneet ominaisuudet
 
     - Fonettiset aksentit Polyglootissa (englanti, ranska, saksa, espanja, italia, suomi, islanti).
     - Automaattinen golden_key.env-tiedoston generaattori sisäänrakennettuna aloitusnäyttöön.
@@ -604,7 +604,7 @@ tresc:
 
     - Laajennettu navigointipalkki ja Työkalut-valikko (MUUTOS). Palkissa on nyt neljäs painike — Sääntöjen hallinta — ja "Työkalut"-valikko tukee uutta pikanäppäintä Ctrl+4. Aiemmat pikanäppäimet (Ctrl+0 Kotisivu, Ctrl+1 Ohjaaja, Ctrl+2 Polyglootti, Ctrl+3 Muunnin) pysyvät ennallaan.
 
-    Ominaisuudet säilytetty ennallaan versiosta 12.0
+    ### Ominaisuudet säilytetty ennallaan versiosta 12.0
 
     - Natiivi työpöytäkäyttöliittymä wxPythonilla (ei selainta, ei paikallista palvelinta).
     - Navigointipalkki pikanäppäimillä (nyt Ctrl+0/1/2/3/4 — lisätty Ctrl+4 Sääntöjen hallintaan).
@@ -663,4 +663,4 @@ tresc:
     •  Kun LLM_PROVIDER=openai_compat, KOKO AI-moottori (Ohjaaja, Tarinat, Polyglootti, otsikot, kielen tunnistus) käyttää määritettyä endpointia, ja konfiguraatiotiedostojen mallinimi korvataan LLM_MODEL-arvolla.
     •  Kun LLM_PROVIDER-riviä ei ole (tai sen arvo on anthropic), sovellus toimii kuten VAIHEESSA 2 — yksinomaan Anthropic-avaimella. Sinun ei tarvitse muuttaa mitään.
 
-    Tärkeää (laatu): sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.
+    **Tärkeää (laatu):** sovelluksen järjestelmäpromptit on kirjoitettu ja viritetty Claudea varten. Muu malli saattaa tuottaa heikompaa laatua — se saattaa noudattaa maailman sääntöjä heikommin, menettää JSON-rakenteen valintoja sisältävissä tiloissa tai palauttaa tekstiä väärällä kielellä. Tämä on tietoinen kustannus↔laatu-kompromissi sinun puoleltasi. Jos haluat parhaan tuloksen, pysy Anthropicissa.

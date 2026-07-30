@@ -26,15 +26,15 @@ tresc:
 
     The entire application, including the Python engine, projects, and API key, resides in one folder under the installation path — the entire folder can be moved to a USB drive, the cloud, or another computer (detailed instructions in the "Transferring Projects and API Key" section below).
 
-    Important: The runtime/ folder inside the installation folder is a PyInstaller bundle (from version 17.0) — it contains an isolated Python interpreter and libraries, ready to use without a separate system installation; it also serves as a container for hidden project metadata. If you clone the repository (developer path), this folder is absent and should not be there — you then use the virtual environment venv described in the developer section below.
+    **Important:** The runtime/ folder inside the installation folder is a PyInstaller bundle (from version 17.0) — it contains an isolated Python interpreter and libraries, ready to use without a separate system installation; it also serves as a container for hidden project metadata. If you clone the repository (developer path), this folder is absent and should not be there — you then use the virtual environment venv described in the developer section below.
 
-    --- For Developers (Windows — Git Repository) ---
+    ### For Developers (Windows — Git Repository)
 
     1. Clone the repository to your disk.
     2. Run the setup_dev.bat file. The script will automatically create a Python virtual environment (venv) and install all required dependencies from the requirements.txt file.
     3. Run the application with the command python main.py or through the run_dev.bat file — the script will automatically detect the venv folder and launch the program.
 
-    --- For Developers and Regular Users (macOS / Linux) ---
+    ### For Developers and Regular Users (macOS / Linux)
 
     1. Clone the repository to your disk.
     2. Open a terminal in the project folder and grant execution permissions to the scripts: chmod +x *.sh
@@ -43,7 +43,7 @@ tresc:
 
     What you'll see upon launch: After launching the program, a window with the start screen opens. You will find a brief description of available tools and the "{home.heading_system_check}" section. If the API key is not yet configured, you will see a red message informing you that AI-based modules (Directing, Translator) will not work — free local features (accents, Architect) are active immediately. The configuration of the key is described in the next step.
 
-    Automatic Updates
+    ### Automatic Updates
 
     The application checks at startup if a newer version is available on GitHub — the check occurs in the background and does not block the interface.
 
@@ -55,7 +55,7 @@ tresc:
 
     If you are using the Git repository (developers and macOS/Linux users): instead of a download proposal, you will see information about the new version with a direct link to the release page on GitHub. Download the "Source code" archive from there or update the repository with the git pull command.
 
-    Transferring Projects and API Key (Migration)
+    ### Transferring Projects and API Key (Migration)
 
     If you want to transfer your projects, API key, and local settings to another computer (or restore everything after reinstalling Windows), there is no need to manually copy individual files — the entire application folder is self-sufficient.
 
@@ -70,9 +70,9 @@ tresc:
        - Isolated Python environment (runtime/ folder), so you don't need to install anything on the new computer.
     5. On the new computer: download the latest installer from the Releases tab on GitHub and install the application as usual. Run the program once to create an empty configuration file structure. Close the application. Then copy the previously saved folder to the installation location, overwriting the files — or selectively choose only the folders you are interested in (scripts/, stories/, golden_key.env) and paste them into the appropriate places of the new installation.
 
-    Tip for NVDA users: the "Open file location" context menu option invoked with the Applications key is fully accessible — NVDA reads each item in Polish. After opening Explorer in the target folder, use the Backspace key to go up one level (works always, regardless of whether the focus is on the file list or the address bar), then Ctrl+A to select everything and Ctrl+C to copy.
+    **Tip for NVDA users:** the "Open file location" context menu option invoked with the Applications key is fully accessible — NVDA reads each item in Polish. After opening Explorer in the target folder, use the Backspace key to go up one level (works always, regardless of whether the focus is on the file list or the address bar), then Ctrl+A to select everything and Ctrl+C to copy.
 
-    Tip: the "Open file location" option is the native name for the Polish version of Windows. In the English system, it is "Open file location", in other language versions — similarly in the local operating system language.
+    **Tip:** the "Open file location" option is the native name for the Polish version of Windows. In the English system, it is "Open file location", in other language versions — similarly in the local operating system language.
   krok_2_klucz_api: |
     ## STEP 2: API Power Supply (recommended Anthropic / Claude key)
 
@@ -90,7 +90,7 @@ tresc:
     3. On the application's start screen, click the "{home.btn_generate}" button. The system will automatically create a clean configuration file in the correct location and open Notepad with a template ready for editing.
     4. In the opened file you will see the line: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Delete the placeholder text and paste your key directly after the equals sign (no spaces, no quotation marks). Save the file and restart the application.
 
-    Tip: After restarting, the application will check the file and display the key status in the "{home.heading_system_check}" section. It must be green for all AI modules to be ready for use. If the key is missing or incorrect, the application will clearly indicate this and allow you to open a text editor to quickly fix the error.
+    **Tip:** After restarting, the application will check the file and display the key status in the "{home.heading_system_check}" section. It must be green for all AI modules to be ready for use. If the key is missing or incorrect, the application will clearly indicate this and allow you to open a text editor to quickly fix the error.
   krok_3_glowne_studio: |
     ## STEP 3: Main Directing Studio
 
@@ -98,20 +98,20 @@ tresc:
 
 
 
-    IMPORTANT: Project file format — back to .txt
+    ### Important: Project file format — back to .txt
 
     In version 7, project files were saved in Markdown format (.md), e.g. skrypty/znieczulica.md. This was a deliberate experiment — the .md format was meant to serve as a psychological barrier for non-technical users, discouraging them from opening and manually editing the file in Notepad (and thus accidentally corrupting the structure headers).
 
     The experiment did not work out. AI frequently and flagrantly breaks one of the fundamental prohibitions (more on that in a moment). For this reason, version 8 returned to simple .txt files — more intuitive and readable for everyone. For example, a project named "znieczulica" will now be saved as skrypty/znieczulica.txt, and its summary as skrypty/znieczulica_streszczenie.txt. This will allow everyone to more easily make ongoing directorial corrections or cuts to the text.
 
 
-    ⚠️ CRITICAL EDITOR'S RULE (READ BEFORE YOU START!) ⚠️
+    ### ⚠️ Critical Editor's Rule (read before you start!)
 
     All your generated scripts and books are saved in plain text files (.txt), which you can easily open in Notepad.
 
     As the Director, you have FULL RIGHT (and indeed an obligation) to edit this file! If the AI gets carried away and, for example, resolves the characters' problem on its own at the end of a generated passage, open the file, delete the last few lines and leave the text cut off at the most tense moment, then click "{rezyser.btn_przeladuj_label}" to synchronize the model's memory with the corrected file, and "{rezyser.btn_wyslij_label}" to continue.
 
-    🔴 HOWEVER — WHAT YOU MUST NOT TOUCH:
+    #### 🔴 However — what you must not touch
 
     Never modify, delete, or alter lines containing structure (e.g. Act 1, Scene 2, Chapter 1, Prologue). If you break these headers:
     1. Your story will fall apart in screen readers (NVDA).
@@ -121,7 +121,7 @@ tresc:
     Edit the dialogue, cut the action, but leave the structure alone!
 
 
-    How to use the Directing Studio?
+    ### How to use the Directing Studio?
 
     - World Book (left sidebar): This is where you enter the rules of your universe. Each project now has its own World Book linked to the filename — if your story file is e.g. emilia_heist_audiobook.txt, the World Book will be saved as skrypty/emilia_heist_audiobook.md. That is why the order matters: first enter the project filename in the "Project filename" field, and only then can you save the World Book. The "{rezyser.btn_zapisz_ksiege_label}" button remains grayed out until you provide a name. Loading an existing project with the "{rezyser.btn_wczytaj_label}" button will automatically load the corresponding .md file as well — you don't need to do anything manually. Note: Without a filled-in World Book, the application will block sending queries to the AI — this is a deliberate safeguard that protects you from generating text without any rules.
     - Long-Term Memory (left sidebar): The second field in the sidebar. This is where the AI automatically saves a plot summary when memory starts to fill up. You can also enter your own notes here manually — the model will treat them as "what I already know" before reading the current scene. HISTORICAL BUG (fixed in v15.5): previously, if you entered a very short note here and clicked "Save Summary" before there was anything significant in the narrative file, on the next load the application would PRIORITIZE loading the summary and SKIP the full story — the model would then receive only the World Book and a one-sentence note, with no context of tone or recent scenes. From v15.5 onward, loading is intelligent: if the entire story fits within the context window, it is loaded in full (and any redundant old summary is deleted), so the model does not lose context. And after manually editing the narrative file in the editor, use the new "{rezyser.btn_przeladuj_label}" button (from v15.5), which synchronizes internal memory with the disk in a single click; to simply open the file in the editor, use "{rezyser.btn_otworz_narracje_label}" as before.
@@ -141,13 +141,13 @@ tresc:
     In earlier versions of the application, nobody enforced consistency of the creative mode within a single project. The result was a certain subtle creative possibility that could be described like this: you start a story in Script Mode, insert "Act 1" and "Scene 1" (the application is delighted by your consistency), generate several screens of tension with [SFX: Door slam] and [Speaker 1: Marek - resigned] tags... and then — because inspiration has just struck — you click "Insert cut Chapter 1". The application, without batting an eye, appends the header "Chapter 1" to the file, right after "Scene 3". You now have in your file a hybrid of a 1950s radio play and a literary novel. ElevenLabs looks at this structure, sees a chapter header in the middle of an act, and decides it's probably a glitch in the matrix. The table of contents looks like the work of an avant-garde artist. The Audiobook Architect, for its part, assumes you're an adult and simply processes it without a word — but also without any guarantees of the result. From version 12.0 the interface tried to block changing the recording mode — at least in theory. Practice turned out to be more creative: Brainstorming (always active as a planning mode) was a back door through which you could navigate between Script and Audiobook using the up and down arrow keys (Audiobook → Brainstorm → Script and analogously in the other direction). The first click of "Insert Act 1" or "Insert Chapter 1" in the newly selected mode smoothly overwrote the .mode file, mixing acts with chapters in a single narrative file. Only from version 15.2.3 do we have true protection: once the mode decision has been committed (first structure or first successful production send), the second recording position in the mode selector is actually locked. Brainstorming remains always active as an emergency mechanism — it generates a summary when the context window overflows and provides plot options — but you can no longer use it to jump sideways into a different recording mode.
 
 
-    Showrunner Prompts — AI as a TV series writer (from version 7, retained)
+    ### Showrunner Prompts — AI as a TV series writer (from version 7, retained)
 
     This is the biggest change introduced in version 7, retained unchanged. It is not visible in the interface, but it radically changes the quality of the generated plot.
 
     A showrunner in the television industry is the person responsible for the overall vision of a series — they ensure that the plot never moves toward an easy resolution, but constantly thickens, piles up conflicts, and keeps the viewer in suspense across many seasons. In version 7, this philosophy was built directly into the AI's system instructions.
 
-    The Anti-Closure Directive — and what the Anthropic engine (Claude) changed
+    ### The Anti-Closure Directive — and what the Anthropic engine (Claude) changed
 
     The Showrunner philosophy is enforced by the Anti-Closure directive built into every mode: a prohibition on closing scenes with summaries, morals, and false happy endings. In the old era (GPT model), things were exactly the opposite of today — the engine notoriously broke this prohibition and "closed" the story at every opportunity: it wove in plot-summarizing sentences, created false happy endings, or wrapped up storylines in the middle of a chapter as if every passage were the last. From version 18, the entire AI engine runs on Anthropic (Claude) by default — and from version 18.4 you can optionally specify your own provider (STEP 2B) — and Claude adheres to Anti-Closure far more rigorously.
 
@@ -164,7 +164,7 @@ tresc:
     Exception to the rule: If you explicitly ask for an ending, finale, or epilogue, the AI will generate a satisfying conclusion to the story — the ban does not apply when you ask for it yourself.
 
 
-    Managing Acts and Scenes (Script Mode, from version 7, retained)
+    ### Managing Acts and Scenes (Script Mode, from version 7, retained)
 
     Raw Script Mode has a dedicated "{rezyser.struktura_heading}" panel with buttons for building the structure of a radio play in real time.
 
@@ -178,7 +178,7 @@ tresc:
     The Audiobook Architect will automatically convert Acts into main navigation points (Heading 1) for ElevenLabs and NVDA — Scenes will become bold text visible in the document, but not visible in the table of contents.
 
 
-    Intelligent Chapter Management (Audiobook Mode, from version 5, retained)
+    ### Intelligent Chapter Management (Audiobook Mode, from version 5, retained)
 
     The LLM generates a maximum of approximately 5,000 characters per single query — that is not enough for a full chapter. This is why you work iteratively: you generate successive passages using the "Send to AI" button until you decide that a given chapter is ready. You then click "Insert chapter cut" — the application appends the header to the file and memory, and the chapter counter automatically jumps to the next number.
 
@@ -191,7 +191,7 @@ tresc:
     Intelligent file loading: When you load an existing file, the application automatically scans it and sets the chapter counter to the correct number. If the file has a Prologue and three chapters, the counter will show "Chapter 4" — no manual counting required.
 
 
-    Story Accumulator — how AI memory works
+    ### Story Accumulator — how AI memory works
 
     Only the clean text of the story flows into the model's memory — what the AI actually wrote. Instructions, options, and plans disappear after use and do not clutter the context. The result? The model maintains focus for longer, remembers character accents better, and less frequently "drifts" away from the World Book rules.
 
@@ -202,7 +202,7 @@ tresc:
 
     Diagnosing the summary threshold (when the AI hallucinates earlier than the threshold assumes): the thresholds (warning ~70%, alarm ~90%) are empirically estimated. If you notice a recurring tendency for the model to "drift" from the rules or start hallucinating BEFORE the indicator enters the yellow/red zone — that is, earlier than the threshold assumes — please open an issue in the application's repository and describe at roughly what fill level (percentage) it actually starts to break down, ideally with an example. If this tendency is confirmed more broadly (by other users, across different projects), the automatic summary threshold will be lowered in the next patch. This is a deliberately iterative mechanism — it is better to tune it on real data than to guess in advance.
 
-    Infinite Memory (from version 6, retained)
+    ### Infinite Memory (from version 6, retained)
 
     When the red alarm lights up, you no longer need to copy the summary manually. Type a command containing the word "summary" or "recap" into Brainstorming — the AI will generate a concise knowledge capsule covering the entire plot so far. Then click the "Save Summary (permanently)" button — the application automatically creates a _streszczenie.txt file in the skrypty/ folder and protects it against accidental overwriting. After saving, clear the memory and you can continue creating in the current file. Load the summary into the Long-Term Memory field before your next session — and you can continue the story indefinitely, with no length restrictions whatsoever.
 
@@ -216,41 +216,41 @@ tresc:
 
     A finished read-aloud theatre script (Script mode) has two independent outputs: a multi-voice ElevenLabs Studio project (audio) and an HTML version for screen readers. These are two ways to "hear" the same play — you can use one, the other, or both. Both are optional and do not change the classic converter workflow.
 
-    ─────────── Bridge to ElevenLabs Studio (audio, optional) ───────────
+    ### Bridge to ElevenLabs Studio (audio, optional)
 
     The bridge turns the script into a multi-voice Studio project — the narrator and each character get their own voice. Without an ElevenLabs key nothing changes: the bridge simply remains hidden.
 
-    ElevenLabs Key (optional)
+    #### ElevenLabs Key (optional)
 
     Paste your ElevenLabs key into the golden_key.env file on a separate line: ELEVENLABS_API_KEY=sk_... Note: the ElevenLabs key starts with sk_ (with an UNDERSCORE), unlike the Anthropic key (sk-ant-). If you are using a restricted key, grant it the scopes projects_write and voices_read. The key status is visible on the main screen (System Check) — a missing key is not an error; the bridge simply remains hidden.
 
     The bridge appears in the Director panel in Script mode (when the key is valid). It works on a finished play saved to disk — first generate or load a project, then proceed to the bridge.
 
-    Step 1 — Voice Cast
+    #### Step 1 — Voice Cast
 
     Click "Voice Cast…". The application will read the characters that have lines from your script and will always add a Narrator slot (the narrator is the default voice — it reads chapter titles and all narration). For each speaker, paste a voice ID. IMPORTANT: every voice used in the play must first be in your "My Voices" — voices you create yourself (e.g. in "Voice Design") go there automatically, while voices from the public library are browsed in the "Explore" tab and added with the "Add to My Voices" button. How to get a voice ID in ElevenLabs (in the browser): find the voice, play the sample to make sure it is the right one, and copy its identifier with the "Copy Voice ID" button; once the voice is in "My Voices", this button is available immediately — without expanding "More actions". Choosing voices: to minimise potential regenerations, the easiest approach is to pick from the "Best for Eleven v3" collection (voices verified for the v3 model on which the project is built); alternatively, design your own voice in "Voice Design", and for the adventurous there is IVC (Instant Voice Cloning) or PVC (Professional Voice Cloning). You can leave fields empty and come back later — the save is a draft.
 
-    Step 2 — Build the Project
+    #### Step 2 — Build the Project
 
     Click "Create ElevenLabs Studio Project…". The application will check that the script has at least one chapter (Prologue/Act/Chapter) and that every speaker and the narrator have a voice assigned, and will then create a multi-voice Studio project divided into chapters in your account. Creating the project itself does NOT consume credits. The application immediately sets the project language (correct pronunciation of header lines) and volume normalisation to the audiobook standard — it does this via the API so you do not have to go into the project settings in the browser.
 
     Format Guardian (extension of the Editor's Rule): the bridge requires that in the script EVERY line is either a line of dialogue with a speaker tag ([Narrator: …] or [Name: …]) or a structural header (Prologue, Act, Scene, Chapter). Plain, untagged prose written "loose" — for example an author's note or a narration fragment without a tag — is not assigned to any voice and is silently skipped during the build, so the finished project could diverge from your file. Therefore, if the application detects such orphan lines, it will show a list of them with line numbers and ask whether to build anyway: you can then cancel and fix the script (open it with the "Open narration file…" button, add the missing speaker tags or remove those lines) or knowingly build anyway, accepting that they will be omitted. This is a natural extension of the Editor's Rule: just as structural headers must not be broken, every line in a script intended for the bridge should have its own speaker or be a header.
 
-    Step 3 — Render in the Browser
+    #### Step 3 — Render in the Browser
 
     After the project is created, the application will show its identifier and a button that opens ElevenLabs Studio. In the browser, find the project, render the speech (this is what actually consumes credits — roughly 1 credit per character), and then export the audio file or publish the project to Eleven Reader. Rendering and publishing happen on your side, deliberately — the application only builds the project.
 
-    Expression and Accents (Eleven v3 model)
+    #### Expression and Accents (Eleven v3 model)
 
     The project is built on the Eleven v3 model (over 70 languages). Emotions are NOT expressed with capital letters, ellipses, or dashes — the engine ignores these. Instead, the Director weaves English v3 audio tags into the lines, for example [whispers], [sighs], [angry], [laughs] — these control expression and work regardless of the spoken language. A character's ACCENT, on the other hand, comes from the VOICE SAMPLE: if you want someone to speak, for example, in Polish with a foreign accent, select or design a voice in Voice Design whose sample has that accent. In practice, experiment with the voice prompt until you hear, for example, a Polish sample with a Finnish accent — the v3 model will preserve that accent in the finished recording. Tip: very long sentences weaken the accent, which is why the Director is already prompted to use short sentences.
 
-    Awareness of the v3 Model (alpha phase)
+    #### Awareness of the v3 Model (alpha phase)
 
     Eleven v3 is the most expressive, but is still in alpha. Occasionally a single line will render as crackling noise instead of speech — simply regenerate it in Studio (each block has several free regenerations). In the ElevenLabs project settings, the engine may also display recommendations to switch the model (to Eleven Flash v2.5 or Multilingual v2) — this is NOT an error, just a suggestion from the engine. If you do not want to see these messages, simply do not open the project settings: the application has already set everything needed via the API (model, language, volume normalisation).
 
     Why read-aloud theatre and not sound effects? In earlier versions, Script mode produced raw [SFX: ...] effects without a narrator. The bridge to a finished, multi-voice recording requires, however, that context (place, time, action) be carried by the narrator in words: sound effects in Studio are not accessible to screen readers, and the model reliably handles either a narrator or effects — never both stably at the same time. That is why Script mode is read-aloud theatre: narrator plus dialogue, without SFX.
 
-    ─────────── Screen Reader Version (HTML, without ElevenLabs) ───────────
+    ### Screen Reader Version (HTML, without ElevenLabs)
 
     In Script mode, regardless of the ElevenLabs key, you have a "Generate screen reader version" button. It creates a file `skrypty/<nazwa>_screen_reader.html` — a separate output for people using screen readers (e.g. NVDA). It works as follows: lines of characters who have an accent defined in the World Book (e.g. the entry "[Joana] Finnish accent") receive phonetic spelling (deliberately "broken" orthography) and a language marker (lang attribute), so that the screen reader reads them with the correct foreign accent. V3 audio tags (e.g. [whispers]) are removed in this version — the screen reader should not read them aloud. Prologue/Act/Scene headers become HTML headings, making the document easy to navigate.
 
@@ -260,17 +260,17 @@ tresc:
 
     After writing the story, you have a postproduction tool available at the bottom of the Directing panel (it appears only in Audiobook Mode).
 
-    Assigning Chapter Titles (Audiobook Mode)
+    ### Assigning Chapter Titles (Audiobook Mode)
 
     The AI will analyze the entire story and suggest descriptive, literary titles for each chapter (as well as any Prologue and Epilogue). The module iterates through the chapters from the saved file and assigns them a short title by analyzing only the beginnings of each chapter (up to 6000 characters). It returns only a numbered list of titles — without rewriting the book's content.
 
-    Note: The module requires the file to already be saved on disk (generated or loaded). If the file does not exist, the application will display an appropriate message.
+    **Note:** The module requires the file to already be saved on disk (generated or loaded). If the file does not exist, the application will display an appropriate message.
   krok_5_poliglota_intro: |
     ## STEP 5: AI Polyglot
 
     An application for translations and enforcing strong accents on screen reader synthesizers. Access it by clicking the "{main.btn.poliglota}" button on the toolbar or selecting Tools → {main.menu.poliglota} from the menu (shortcut: Ctrl+2).
 
-    Mode 1: Regular Translator (Uses AI - Paid)
+    ### Mode 1: Regular Translator (Uses AI - Paid)
 
     Ideal for listening to stories in beautiful, correct foreign language.
 
@@ -286,7 +286,7 @@ tresc:
 
     Why is this important? In version 8, the approach to resuming translation had a critical, silent bug: if you didn't rename the file with the partial translation and cut out the translated fragment according to the instructions, and then immediately resumed translating the rest — the application would open the output file in overwrite mode. The paid progress would be irretrievably and unknowingly erased before you noticed anything. Version 9 completely eliminates this trap: the save is permanent after each block, regardless of what you do afterward.
 
-    Mode 2: Director Mode / Accents (Free - Works Locally)
+    ### Mode 2: Director Mode / Accents (Free - Works Locally)
 
     A tool for "spoiling" text. Forces broken Polish on synthesizers.
 
@@ -313,14 +313,6 @@ tresc:
 
     - Protective shield: The script protects all HTML tags. It only spoils dialogues and narration.
     - Works locally and costs nothing!
-
-    Cipher: Text Reverser
-
-    The Reverser cipher expands English abbreviations before reversing the sentence — without expansion, dotted abbreviations would reverse into phonetic nonsense (English example: ".g.e" becomes "e.g.").
-
-    Cipher: Typoglycemia
-
-    According to a rscheearch at Cmabrigde Uinervtisy, it deosn't mttaer in waht oredr the ltteers in a wrod are, the olny iprmoatnt tihng is taht the frist and lsat ltteer be at the rghit pclae.
   krok_5_tryb_szyfrant: |
     ## Mode 3: Cipher (NEW in 13.0 — text play, free, local)
 
@@ -340,7 +332,7 @@ tresc:
 
     - Strong Stuttering / Broken Robot — attaches stuttering at the beginning of words: "c-c-c-computer", "sh-sh-shower". For short words (less than 3 characters), the algorithm skips them. If the second letter of the word is a consonant, it repeats the first two letters (more natural effect); if a vowel — it repeats only the first.
 
-    - Caesar Cipher (EN alphabet shift) — a classic substitution cipher: each letter is shifted by N positions in the English alphabet (ABCD…XYZ, 26 characters). You enter the shift value in the numeric field "Caesar Cipher Shift (0 = random, range -25…25)". If you enter 0 — the application will randomly select a shift in the range 1-24 and display it in a message after completion (so you can decrypt it later). Characters outside the alphabet (numbers, punctuation, spaces) remain unchanged.
+    - Caesar Cipher (EN alphabet shift) — a classic substitution cipher: each letter is shifted by N positions in the English alphabet (ABCD…XYZ, 26 characters). You enter the shift value in the numeric field "Caesar Cipher Shift (0 = random, range -25…25)". If you enter 0 — the application will randomly select a shift in the range 1-25 and display it in a message after completion (so you can decrypt it later). Characters outside the alphabet (numbers, punctuation, spaces) remain unchanged.
 
     Practical application: ciphers save the result in the same format as Director Mode (.html with a lang tag or .docx with XML tags), so NVDA reads them with the appropriate language voice. Especially the Reverser and Vowelizer sound much more interesting in a synthesizer than when you read them with your eyes — because the brain automatically tries to "decode" the text when reading visually, while TTS reads it exactly as written.
 
@@ -360,7 +352,7 @@ tresc:
 
     Different TTS engines behave differently. Below are key differences that directly affect the functioning of accents:
 
-    eSpeak (Open Source)
+    ### eSpeak (Open Source)
     A lightweight, free engine with a vast database of languages — supports, for example, Icelandic. Very strict about character encoding, which makes it predictable. However, it has phonetic drawbacks: it often shares phonemes between languages, causing, for instance, Ukrainian to sound with a Russian accent.
   krok_5_tiflotecnia: |
     ## Tiflotecnia Voices for NVDA (Cerrence voices — formerly Vocalizer by Nuance)
@@ -369,7 +361,7 @@ tresc:
 
     How to install: NVDA → Tools → Add-on Store → search for "Tiflotecnia Voices for NVDA" → Install. After installation, a dedicated "Tiflotecnia Voices" submenu will appear in the NVDA menu, along with its own category in NVDA settings. The add-on's GUI guides you step-by-step through purchasing a license (or activating a 7-day trial period), selecting and installing the first voices (e.g., Polish Ewa for smooth reading of system controls, Finnish Satu for accents in Polyglot). The built-in help of the add-on is clear, so we won't duplicate the procedure here — just follow the add-on's guidance.
 
-    Tip for those migrating from Vocalizer and Eloquence: an upgrade is available at a lower price. Procedure: after successful payment, immediately send an email to the address linked on the payment success screen and request validation of the old activation code — Tiflotecnia will confirm the right to a discount and adjust the price. Without this email, the system treats you as a new customer.
+    **Tip for those migrating from Vocalizer and Eloquence:** an upgrade is available at a lower price. Procedure: after successful payment, immediately send an email to the address linked on the payment success screen and request validation of the old activation code — Tiflotecnia will confirm the right to a discount and adjust the price. Without this email, the system treats you as a new customer.
 
     Voice availability: Tiflotecnia Voices supports most of the languages that Vocalizer had (including Polish, English, German, French, Spanish, Finnish, Italian, Russian). The list of voices per language is visible in the add-on settings category before purchasing a license.
   krok_5_onecore: |
@@ -399,7 +391,7 @@ tresc:
 
     For NVDA to actually switch voices based on the lang tag, the setting "Automatically switch language when supported" must be enabled. You can find it in NVDA Preferences → Speech. By default, it is enabled upon the first launch of the reader — but it's worth checking if someone has turned it off.
 
-    Important limitation of OneCore voices: Microsoft OneCore voices do not natively support this mechanism with NVDA, only with the built-in Windows narrator. There is an unofficial NVDA add-on called "One Core Autolang" that attempts to fix this — but its development was quickly halted. The reason is simple: every year, with the first NVDA version of the year, there are changes that break API compatibility (so-called API Breaking Changes). Sometimes it's enough to update the "last tested version" field in the add-on's manifest, but sometimes real changes in the code are required — and the author can't keep up with updates. If you care about automatic language switching, safer choices are Tiflotecnia Voices (paid, section above) or eSpeak (free, lower quality), which support this mechanism natively — but note: currently in Tiflotecnia Voices, it works with a priority bug (see "Critical Catch" below). After applying the patch, automatic switching works flawlessly, as in the old Vocalizer.
+    **Important limitation of OneCore voices:** Microsoft OneCore voices do not natively support this mechanism with NVDA, only with the built-in Windows narrator. There is an unofficial NVDA add-on called "One Core Autolang" that attempts to fix this — but its development was quickly halted. The reason is simple: every year, with the first NVDA version of the year, there are changes that break API compatibility (so-called API Breaking Changes). Sometimes it's enough to update the "last tested version" field in the add-on's manifest, but sometimes real changes in the code are required — and the author can't keep up with updates. If you care about automatic language switching, safer choices are Tiflotecnia Voices (paid, section above) or eSpeak (free, lower quality), which support this mechanism natively — but note: currently in Tiflotecnia Voices, it works with a priority bug (see "Critical Catch" below). After applying the patch, automatic switching works flawlessly, as in the old Vocalizer.
   krok_5_alarm_detekcja_jezyka: |
     ## Critical Tiflotecnia Voices Catch: Broken Language Detection
 
@@ -416,7 +408,7 @@ tresc:
     A tool for preparing a professional file structure for screen readers and ElevenLabs. Access it by clicking the "{main.btn.konwerter}" button on the button bar or by selecting Tools → {main.menu.konwerter} from the menu (shortcut: Ctrl+3).
 
 
-    How does it work?
+    ### How does it work?
 
     1. Enter the path to the source file in the text field or click the "Browse..." button to select a file in the system dialog. The script accepts both .txt and .docx files, as well as .html and .htm files.
     2. Click "{konwerter.btn_buduj}".
@@ -427,11 +419,11 @@ tresc:
 
     Cleanup on the fly: The script automatically removes HTML tags (if the text comes from a browser or from a local .html file, e.g. generated by Polyglot) and Markdown heading markers (e.g. ### or ####) before processing. You do not need to clean the file manually.
 
-    Story Mode: automatic grouping of turns into scenes (since v15.1)
+    ### Story Mode: automatic grouping of turns into scenes (since v15.1)
 
     If you load an `opowiesci/<gra>.txt` file generated by the Interactive Stories module into the Architect, the converter will recognize turn markers (e.g. "--- Tura 7 ---" — also in the other supported languages, if you played in a different one) and every five turns will insert a new first-level heading "Scena N" (the number starts at 1, in your game's language). The remaining turn markers are stripped — they do not appear in the audiobook narration, because "Tura 7" spoken by TTS breaks the listener's immersion. The result is a Word file with a natural division into scenes of a few minutes of audio each, ready for import into ElevenLabs. The mechanism is auto-detecting — regular audiobook files without turn markers (classic narration from Director) are processed exactly as before.
 
-    A powerful advantage for NVDA and ElevenLabs users
+    ### A powerful advantage for NVDA and ElevenLabs users
 
     "Heading 1" formatting for chapters is not just about aesthetics. In NVDA you can navigate through headings instantly by pressing the H key (or 1 for first-level headings). Instead of scrolling through hundreds of pages, you jump from chapter to chapter in a fraction of a second. This changes the way you work with long documents. In ElevenLabs you can be confident that the engine will automatically insert cuts and will not freeze while directing audio clips.
   krok_7_ksiega_swiata: |
@@ -447,7 +439,7 @@ tresc:
 
     Mini Markdown course in the World Book: a single hashtag (#) is a main section (e.g. "# Characters"), a double hashtag (##) is a subsection, hyphens (-) create lists, and double asterisks (**text**) bold absolute, inviolable rules (e.g. "**The Hero NEVER lies**"). For a foreign-language character, add an accent tag, e.g. "[Speaker 1: Marek] - has a French accent". The keyword "accent" is REQUIRED — the application engine detects it automatically and applies the correct phonetic rules to that character's dialogue.
 
-    Tip: Remember to update your World Book from time to time (as the plot expands with new locations or important characters). You can do this manually or with the help of an external chatbot. The richer the foundation, the better the results in the Director!
+    **Tip:** Remember to update your World Book from time to time (as the plot expands with new locations or important characters). You can do this manually or with the help of an external chatbot. The richer the foundation, the better the results in the Director!
   krok_7b_manager_regul: |
     ## STEP 7b: Rule Manager (Ctrl+4) — dictionaries for linguists without Python
 
@@ -487,81 +479,81 @@ tresc:
   nvda_a11y: |
     ## Important tips for screen reader users (NVDA)
 
-    1. Success and error messages
+    ### 1. Success and error messages
 
     When the application completes an action (e.g., saves a file or encounters an error), a dialog box will appear with a title such as "Success," "Warning," or "Error." NVDA will immediately announce this window and read its content. You don't need to do anything — dialogs are fully accessible via the keyboard, and the focus automatically lands on the "OK" button. There are no more tricks with the "Alert" prefix — native wxPython dialog windows are directly supported by the reader.
 
-    2. Important warning: silent background processing
+    ### 2. Important warning: silent background processing
 
     After clicking buttons like "{rezyser.btn_wyslij_label}" or "{poliglota.btn_process}", the program immediately starts processing in the background. A progress bar (Gauge) appears on the screen, but NVDA does NOT read its value in real-time — the screen reader remains silent during the operation. Do not click the button again. Wait for a dialog box with the result or error message to appear — NVDA will announce it automatically.
 
-    3. Navigation between tools
+    ### 3. Navigation between tools
 
     Navigating between tools (Director, Polyglot, Converter, Rule Manager) is done in a single program window using four buttons on the toolbar or through the Tools menu (Alt, then N). Available keyboard shortcuts: Ctrl+0 (Home), Ctrl+1 (Director), Ctrl+2 (Polyglot), Ctrl+3 (Converter), Ctrl+4 (Rule Manager — new in 13.0). After switching tools, the focus automatically lands on the description of the new module — NVDA immediately starts reading the new view.
 
-    4. Tab order and widget names
+    ### 4. Tab order and widget names
 
     Every interface element has a clear Polish name — NVDA will read it when focused. The tab order is logical: from the tool description, through configuration fields, to action buttons. There are no surprises here — keyboard navigation works just like in any other native Windows program. All menus and buttons are in Polish, and NVDA will read them with a Polish voice without any additional settings.
   changelog_9: |
     ## Important Notes for Version 9.0 / Changelog
 
-    New Features and Changes in Version 9
+    ### New Features and Changes in Version 9
 
-    Crash-Resistant Translation Progress Saving (CHANGE — critical bug fix)
+    **Crash-Resistant Translation Progress Saving (CHANGE — critical bug fix)**
     In version 8, resuming interrupted translation had a silent, destructive trap: if the user followed the instructions (manually cutting out the translated fragment) and then immediately resumed translating the rest, the application opened the output file in overwrite mode — irreversibly and unknowingly erasing all paid progress. In version 9, the entire mechanism has been redesigned. Each translated block is now immediately saved to a temporary file (.jsonl) with an assigned index. Resuming is fully automatic — the application detects the file and restores progress without any user intervention. After successful completion, the temporary file is automatically deleted.
 
-    Tag Fixer in Director Mode (NEW)
+    **Tag Fixer in Director Mode (NEW)**
     A new option has been added to the Director Mode menu — the Tag Fixer. It injects only the user-specified two-letter ISO language code into the file, without applying any phonetic rules or cleaning. This is a rescue tool in case the finished file comes out with an incorrect or missing language tag.
 
-    Automatic .txt to .html Conversion in Translator Mode (CHANGE)
+    **Automatic .txt to .html Conversion in Translator Mode (CHANGE)**
     Text files (.txt and .md) translated by the AI Translator are now automatically saved in .html format with an embedded language tag. This allows NVDA to immediately read the file with the correct voice — without any additional steps from the user.
 
-    Intelligent File Naming in Architect (CHANGE)
+    **Intelligent File Naming in Architect (CHANGE)**
     The Audiobook Architect no longer saves the resulting file under the same name architecture_ready.docx. Now, the name is derived from the input file — for example, for znieczulica.txt, the resulting file is architecture_znieczulica.docx. The file appears in the same folder as the original.
 
-    Features Retained Without Changes from Version 8
+    ### Features Retained Without Changes from Version 8
 
-    Return to .txt Format for Project Files (CHANGE)
+    **Return to .txt Format for Project Files (CHANGE)**
     Project files and summaries are now saved in .txt format instead of .md (Markdown). The experiment with the .md format as a psychological barrier against editing proved ineffective — AI often notoriously breaks the anti-closure rule, and it is often better to edit the file on the fly and then reload memory so that AI, as much as possible, does not receive hidden permission to break the prohibition. The .txt format is more intuitive and readable for everyone.
 
-    Editor’s Rule — New Warning
+    **Editor’s Rule — New Warning**
     A clear warning has been added to the instructions (and in future versions of the interface) explaining what can and cannot be edited in project files. The user has full rights to edit dialogues and content but absolutely cannot modify the structure lines (Act, Scene, Chapter, Prologue, Epilogue) — damaging them spoils NVDA navigation, division in ElevenLabs, and the table of contents in Word.
 
-    Updated Architect Prompt (CHANGE)
+    **Updated Architect Prompt (CHANGE)**
     The prompt for the external chatbot (ChatGPT/Claude) has been redesigned. Instead of returning raw Markdown code, the AI now returns the response in two clearly separated parts: Part 1 is the World Book enclosed in a Markdown code block (easy to copy without markers), and Part 2 is the Mode Recommendation as plain text outside the block — advising whether to use Raw Script Mode or Traditional Audiobook Mode. The description of character tags has also been changed: instead of "sound," it now refers to accent and voice tone in the tag, e.g., [Speaker 1: Name] - lisps and French accent.
 
-    Explanation of the Anti-Closure Directive Status (DOCUMENTATION)
+    **Explanation of the Anti-Closure Directive Status (DOCUMENTATION)**
     The instructions now include a candid explanation that despite built-in Anti-Closure prohibitions, the model still notoriously breaks this rule, especially in Audiobook Mode. Instead of hiding this problem, version 8 makes it clear and returns the responsibility for "manual closure" back to the Director — hence the Editor’s Rule as an official working tool and the return to the regular text format.
 
-    Features Retained Without Changes from Version 7
+    ### Features Retained Without Changes from Version 7
 
-    Showrunner Prompts — Anti-Closure Directive (Directing — all modes)
+    **Showrunner Prompts — Anti-Closure Directive (Directing — all modes)**
     All three Directing modes retain built-in showrunner directives. Brainstorming acts as a multi-season series screenwriter. Raw Script Mode and Audiobook Mode are prohibited from ending the text with summaries, morals, and narrative closures — except when the user explicitly requests a finale or epilogue.
 
-    Real-Time Act and Scene Management (Directing — Script Mode)
+    **Real-Time Act and Scene Management (Directing — Script Mode)**
     Raw Script Mode has a panel with "Insert Act X" and "Insert Scene X" buttons. Counters update automatically. Loading an existing file sets both counters to the correct numbers.
 
-    Cleaning Parenthetical Directorial Stage Directions (Polyglot — Director Mode)
+    **Cleaning Parenthetical Directorial Stage Directions (Polyglot — Director Mode)**
     The script removes entire text fragments enclosed in parentheses (e.g., "(whispering)", "(with interspersed breaths)"). ElevenLabs reads only dialogues and narration.
 
-    Infinite Memory and Automatic Summarization (Directing — Story Accumulator)
+    **Infinite Memory and Automatic Summarization (Directing — Story Accumulator)**
     When the memory indicator enters a red alert state, Brainstorming automatically generates a plot summary and saves it to the Long-Term Memory field. Clicking "Save Summary (permanently)" creates a _streszczenie.txt file. After clearing memory and loading the summary, you can continue the story without any length restrictions.
 
-    Audiobook Architect
+    **Audiobook Architect**
     The tool supports keywords Act, Chapter, Prologue, Epilogue, and Opening as first-level headers. Scenes are converted into bold text. The script automatically cleans HTML tags and Markdown markers before processing.
 
-    Intelligent Chapter Management (Audiobook Mode)
+    **Intelligent Chapter Management (Audiobook Mode)**
     A dedicated panel with buttons for inserting Prologue, Epilogues, and chapter cuts directly from the interface. The chapter counter updates automatically. Loading an existing file sets the counter to the correct number without manual counting.
 
-    Titling Chapters (Postproduction — Audiobook Mode)
+    **Titling Chapters (Postproduction — Audiobook Mode)**
     The module iterates over chapters from the saved file and assigns them a short, literary title using a quick AI model, analyzing only the beginnings of each chapter.
 
-    Removed Features (unchanged since version 7)
+    ### Removed Features (unchanged since version 7)
 
     Cut Map (Script Mode) — replaced by the real-time Act and Scene management panel.
     Script to Audiobook Adaptation (Script Mode) — removed for financial reasons. The workflow generated three separate costs: script generation, potential summarization when memory overflowed, and finally, re-generating the whole as audiobook prose. We recommend writing directly in Traditional Audiobook Mode from the start.
 
-    Features from Version 10.0 (retained without changes in versions 11.0 and 12.0)
+    ### Features from Version 10.0 (retained without changes in versions 11.0 and 12.0)
 
     - Automatic golden_key.env configuration file generator built directly into the main application interface. The user no longer needs to manually create the file or worry about the .txt extension trap — just one click of the button available on the start screen, and the system creates a clean, ready file in the right place.
     - Complete removal of the outdated napraw_api.bat script, which is no longer needed. The problem this script solved (incorrect file extension assigned by Notepad) is now completely eliminated thanks to the built-in generator.
@@ -577,7 +569,7 @@ tresc:
 
     - Update of Synthesizer Names in Polyglot Menu (CHANGE). Updated voice names in the selectbox menu for existing languages: Italian now also has Luca (Vocalizer), Finnish now also has Mikko (Vocalizer). Icelandic retained the name without diacritical marks (Gudrun instead of Gudrun with the eth character) for better compatibility.
 
-    Features Retained Unchanged from Version 10
+    ### Features Retained Unchanged from Version 10
 
     - Automatic golden_key.env file generator built into the interface.
     - Multi-book World Book (each project has its own .md file with world rules).
@@ -602,7 +594,7 @@ tresc:
 
     - Automatic creative mode loading (NEW). When loading a project, the application automatically restores the most recently used working mode (Script or Audiobook) from a metadata file managed by the application. As a result, when reopening a project, the mode selector sets itself automatically — you don't need to remember which mode you were working in.
 
-    Features Retained Unchanged from Version 11.0
+    ### Features Retained Unchanged from Version 11.0
 
     - Phonetic accents in Polyglot (English, French, German, Spanish, Italian, Finnish, Icelandic).
     - Automatic golden_key.env file generator built into the start screen.
@@ -629,7 +621,7 @@ tresc:
 
     - Expanded navigation bar and Tools menu (CHANGE). The bar now has a fourth button — Rule Manager — and the "Tools" menu supports the new shortcut Ctrl+4. Existing shortcuts (Ctrl+0 Home, Ctrl+1 Director, Ctrl+2 Polyglot, Ctrl+3 Converter) remain unchanged.
 
-    Features retained unchanged from version 12.0
+    ### Features retained unchanged from version 12.0
 
     - Native desktop GUI based on wxPython (no browser, no local server).
     - Navigation bar with shortcut keys (now Ctrl+0/1/2/3/4 — added Ctrl+4 for Rule Manager).
@@ -639,22 +631,6 @@ tresc:
     - Automatic loading of creative mode from the project's metadata file.
     - All accents from previous versions (Polish, French, Spanish, Italian, Finnish, Icelandic) and Tag Fixer.
     - Full AI functions: Brainstorming, Script, Audiobook, Plot Accumulator, Infinite Memory, Title Assignment.
-
-    ### Available Accents
-    - Polish (Ewa in Vocalizer, Paulina in OneCore)
-    - Finnish (Satu/Mikko in Vocalizer, Heidi in OneCore)
-    - Italian (Alice/Luca in Vocalizer, Elsa in OneCore)
-    - Icelandic (Dóra in Vocalizer, Guðrún in OneCore)
-    - Spanish (Jorge/Monica in Vocalizer, Helena in OneCore)
-    - French (Thomas/Amelie in Vocalizer, Julie in OneCore)
-    - German (Stefan/Katja in Vocalizer, Hedda in OneCore)
-    - Russian (Milena/Irina/Yuri/Pavel)
-
-    ### Cipher: Text Reverser
-    The Reverser cipher section lists English abbreviations (e.g., i.e., etc., U.S., U.K.) that the script expands BEFORE reversing the sentence — without expansion, dotted abbreviations would reverse into phonetic nonsense (English example: ".g.e").
-
-    ### Cipher: Typoglycemia
-    According to a rscheearch at Cmabrigde Uinervtisy, it deosn't mttaer in waht oredr the ltteers in a wrod are, the olny iprmoatnt tihng is taht the frist and lsat ltteer be at the rghit pclae.
   krok_7b_polskie_nazewnictwo: |
     ## STEP 7b — Polish Folder and File Names (for Users Outside Poland)
 
@@ -686,4 +662,4 @@ tresc:
     •  When LLM_PROVIDER=openai_compat, the ENTIRE AI engine (Director, Stories, Polyglot, titles, language detection) uses the specified endpoint, and LLM_MODEL overrides the model name from the configuration files.
     •  When the LLM_PROVIDER line is absent (or set to anthropic), the application behaves as in STEP 2 — using the Anthropic key exclusively. You don't need to change anything.
 
-    Important (quality): the application's system prompts are written and tuned for Claude. A different model may deliver lower quality — it may follow world rules less strictly, lose JSON structure in choice-based modes, or return text in the wrong language. This is a conscious cost↔quality trade-off on your part. If the best result matters to you, stick with Anthropic.
+    **Important (quality):** the application's system prompts are written and tuned for Claude. A different model may deliver lower quality — it may follow world rules less strictly, lose JSON structure in choice-based modes, or return text in the wrong language. This is a conscious cost↔quality trade-off on your part. If the best result matters to you, stick with Anthropic.

@@ -99,9 +99,11 @@ jobs:
           t = pathlib.Path("RELEASE_NOTES.md").read_text(encoding="utf-8")
           # Wzorzec: "## <wersja> — patch release ..." (od v15.2.6+) LUB
           # "## <wersja> ..." (kompatybilne wstecznie z wczesniejszymi formatami).
-          # Konczy sie zaraz przed nastepnym "## " (nastepna sekcja wersji).
+          # Konczy sie zaraz przed nastepnym "## " (nastepna sekcja wersji)
+          # ALBO na koncu pliku (\Z) — bez tej alternatywy sekcja bedaca
+          # ostatnia w pliku nie zostalaby znaleziona wcale (v18.9).
           escaped = re.escape(wersja)
-          pattern = rf"(## {escaped}(?:\s+—|\s+\W).*?)(?=\n## )"
+          pattern = rf"(## {escaped}(?:\s+—|\s+\W).*?)(?=\n## |\Z)"
           m = re.search(pattern, t, re.DOTALL)
           if not m:
               sys.stderr.write(

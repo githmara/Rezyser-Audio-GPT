@@ -1233,8 +1233,6 @@ opowiesci:
   gra_zapisana_tresc: 'El estado del juego "{nazwa}" ha sido guardado en el disco.'
   nowa_gra_zaczatek: "📖 Juego \"{nazwa}\" iniciado.\n\nIngresa la primera acción en el campo a continuación y haz clic en \"Enviar\" — el motor narrativo describirá el mundo en el que te encuentras y presentará la primera escena."
   brak_narracji_info: "📖 Juego \"{nazwa}\" cargado, pero el archivo de narración (scripts/{nazwa}.txt) no existe. El estado del juego proviene del archivo game.json — puedes continuar."
-  dlg_wczytaj_tytul: "Cargar juego de Historias"
-  dlg_wczytaj_filtr: "Archivos de juego de Historias (*.game.json)|*.game.json|Todos los archivos|*.*"
   blad_zapisu_tresc: "Se produjo un error al guardar el archivo del juego: {tresc_bledu}"
   blad_wczytania_tresc: 'Se produjo un error al cargar el juego "{nazwa}": {tresc_bledu}'
 
@@ -1249,6 +1247,9 @@ opowiesci:
     /visualizar <descripción>, /visualize    — descripción multisensorial de la escena (sin guardar)
     /odswiez, /refresh                 — actualiza la narración desde el disco tras una edición manual
     /fin, /quit                    — cerrar la aplicación
+  dlg_pomoc_tytul: "Comandos disponibles"
+  dlg_pomoc_lbl: "Lista de comandos slash del modo Historias:"
+  dlg_pomoc_name: "Campo con la lista de comandos"
   dlg_visualize_tytul: "🌅 Visualización de la escena"
   dlg_visualize_lbl: "Descripción multisensorial de la escena actual (no cambia el estado del juego):"
   dlg_visualize_name: "Campo con la descripción de la visualización de la escena"

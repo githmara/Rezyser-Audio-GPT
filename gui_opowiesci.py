@@ -1208,8 +1208,21 @@ class OpowiesciPanel(wx.Panel):
     # ------------------------------------------------------------------
     # _obsluz_blad: callback w wątku UI po wyjątku w workerze
     # ------------------------------------------------------------------
-    def _obsluz_blad(self, exc: Exception) -> None:
-        """Mapuje wyjątek na komunikat lokalizowany i pokazuje dialog."""
+    def _obsluz_blad(self, exc: Exception, *, tura: bool = True) -> None:
+        """Mapuje wyjątek na komunikat lokalizowany i pokazuje dialog.
+
+        ``tura=True`` (domyślnie) = błąd PRZERWAŁ turę: cofamy inkrementację
+        `numer_tury` i odblokowujemy Wyślij. ``tura=False`` dla side-questów
+        (`/visualize`), które biegną RÓWNOLEGLE do tury — v18.9:
+          * bezwarunkowe `Enable()` odblokowywało Wyślij w trakcie trwającej
+            tury (podwójna, równoległa wysyłka — ta sama klasa co race
+            w Reżyserze);
+          * bezwarunkowy rollback licznika cofałby turę, która wciąż trwa.
+        Rollback licznika (dla `tura=True`) domyka asymetrię: ścieżka
+        odrzucenia LLM cofała numer tury (D5), a ścieżka błędu nie — więc
+        timeout/429 zostawiał dziurę w numeracji zapisywanej do `.txt`
+        i przyspieszał próg Cinematic Warning.
+        """
         # Błędy LLM są provider-agnostyczne (`core_llm`): limit→BladLimituLLM,
         # timeout→BladTimeoutLLM (działa tak samo dla Anthropic i OpenAI-compat).
         # Typowane błędy generacji AI (struktura/długość) niosą `klucz_i18n` —
@@ -1228,7 +1241,21 @@ class OpowiesciPanel(wx.Panel):
             msg = str(exc)
 
         self._lbl_pamiec_status.SetValue(t("opowiesci.status_blad"))
-        self._btn_wyslij.Enable()
+        if tura:
+            # Tura się nie wydarzyła — cofamy licznik (symetrycznie do
+            # `_obsluz_odrzucenie`) i oddajemy graczowi przycisk Wyślij.
+            self._snapshot = oai.SnapshotOpowiesci(
+                nazwa_gry=self._snapshot.nazwa_gry,
+                numer_tury=max(0, self._snapshot.numer_tury - 1),
+                ostatnie_tury=self._snapshot.ostatnie_tury,
+                postacie_aktywne=self._snapshot.postacie_aktywne,
+                stan_poprzedni=self._snapshot.stan_poprzedni,
+                seed_swiata=self._snapshot.seed_swiata,
+                jezyk_projektu=self._snapshot.jezyk_projektu,
+                zasady_swiata=self._snapshot.zasady_swiata,
+                ostatni_surowy_json=self._snapshot.ostatni_surowy_json,
+            )
+            self._btn_wyslij.Enable()
         self._wyswietl_blad_ai(msg)
 
     # ------------------------------------------------------------------
@@ -1989,6 +2016,18 @@ class OpowiesciPanel(wx.Panel):
             # `_aktualizuj_uistate`), ale strzeżemy się na wypadek
             # nieprzewidzianego wywołania (np. skrót klawiszowy).
             return
+        # v18.9: zmiana trybu W TRAKCIE tury robiła dwie szkody naraz —
+        # `_aktualizuj_uistate` na końcu tej metody odblokowywał Wyślij
+        # (równoległy worker), a wracająca tura nadpisywała `projekt.tryb`
+        # starą wartością, rozjeżdżając `.mode` z `.game.json`.
+        worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
+        if worker_w_toku or self._meta_w_toku:
+            wx.MessageBox(
+                t("opowiesci.odswiez_zajete_tresc"),
+                t("opowiesci.odswiez_zajete_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
 
         idx_obecny = self._MAPA_TRYB_RB_NA_INT.index(self._zapisany_tryb)
         choices = [
@@ -2085,6 +2124,18 @@ class OpowiesciPanel(wx.Panel):
         (odblokowując wybór trybu i Quick Start).
         """
         if self._projekt is None:
+            return
+        # v18.9: bez tego guardu zamknięcie gry W TRAKCIE generowania tury
+        # zerowało `_projekt`/`_snapshot`, a wracający worker dopisywał wynik
+        # do już nieistniejącego kontekstu — OPŁACONA tura znikała bez śladu
+        # (nie trafiała ani do `.txt`, ani do `.game.json`).
+        worker_w_toku = bool(self._worker_thread and self._worker_thread.is_alive())
+        if worker_w_toku or self._meta_w_toku:
+            wx.MessageBox(
+                t("opowiesci.odswiez_zajete_tresc"),
+                t("opowiesci.odswiez_zajete_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
             return
         odp = wx.MessageBox(
             t("opowiesci.zamknij_gre_pytanie"),
@@ -2272,7 +2323,9 @@ class OpowiesciPanel(wx.Panel):
                 model=oai.MODEL_NARRACJA,
             )
         except Exception as exc:  # noqa: BLE001
-            wx.CallAfter(self._obsluz_blad, exc)
+            # `tura=False`: /visualize biegnie równolegle do rozgrywki — nie
+            # wolno mu ani odblokować Wyślij, ani cofnąć licznika tur.
+            wx.CallAfter(lambda: self._obsluz_blad(exc, tura=False))
             return
         # v17.11.1: LLM mógł odmówić również wizualizacji (free-text argument
         # `/visualize` bywa nie na temat). Pokazujemy przyjazny komunikat

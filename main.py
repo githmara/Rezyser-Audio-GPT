@@ -117,20 +117,43 @@ def _pokaz_dialog_crash(sciezka_logu: str | None) -> None:
         f"https://github.com/{core_updater.GITHUB_USER}"
         f"/{core_updater.GITHUB_REPO}/issues/new"
     )
-    info_plik = sciezka_logu or _PLIK_LOGU_BLEDOW
+    # Gdy zapis logu padł (`sciezka_logu is None`), NIE obiecujemy pliku, którego
+    # nie ma — user szukałby go na próżno i nie miałby czego załączyć.
+    if sciezka_logu:
+        blok_pl = (
+            f"Szczegóły zapisaliśmy w pliku:\n{sciezka_logu}\n\n"
+            "Pomóż go naprawić: utwórz nowe zgłoszenie (Issue) na GitHubie i "
+            "ZAŁĄCZ ten plik (albo wklej jego treść):\n"
+            f"{url_issues}"
+        )
+        blok_en = (
+            f"Details were saved to the file:\n{sciezka_logu}\n\n"
+            "Please help fix it: open a new GitHub Issue and ATTACH that file "
+            "(or paste its contents):\n"
+            f"{url_issues}"
+        )
+    else:
+        blok_pl = (
+            "Nie udało się zapisać pliku z logiem błędu (brak uprawnień do "
+            "zapisu albo pełny dysk).\n\n"
+            "Pomóż go naprawić: utwórz nowe zgłoszenie (Issue) na GitHubie i "
+            "opisz, co robiłeś tuż przed błędem:\n"
+            f"{url_issues}"
+        )
+        blok_en = (
+            "The error log file could not be written (no write permission or "
+            "the disk is full).\n\n"
+            "Please help fix it: open a new GitHub Issue and describe what you "
+            "were doing right before the error:\n"
+            f"{url_issues}"
+        )
     tresc = (
         "Aplikacja napotkała nieoczekiwany błąd i może działać niestabilnie.\n\n"
-        f"Szczegóły zapisaliśmy w pliku:\n{info_plik}\n\n"
-        "Pomóż go naprawić: utwórz nowe zgłoszenie (Issue) na GitHubie i ZAŁĄCZ "
-        "ten plik (albo wklej jego treść):\n"
-        f"{url_issues}\n\n"
+        f"{blok_pl}\n\n"
         "----------------------------------------------------------------\n\n"
         "[EN] The application encountered an unexpected error and may be "
         "unstable.\n\n"
-        f"Details were saved to the file:\n{info_plik}\n\n"
-        "Please help fix it: open a new GitHub Issue and ATTACH that file "
-        "(or paste its contents):\n"
-        f"{url_issues}"
+        f"{blok_en}"
     )
     tytul = "Reżyser Audio GPT — błąd / error"
 
@@ -156,13 +179,21 @@ def _pokaz_dialog_crash(sciezka_logu: str | None) -> None:
 
 
 def _zainstaluj_obsluge_bledow() -> None:
-    """Instaluje globalny `sys.excepthook` (log do pliku + dialog dla usera).
+    """Instaluje globalne hooki wyjątków (log do pliku + dialog dla usera).
 
     wxPython (Phoenix) przepuszcza nieobsłużone wyjątki z handlerów zdarzeń do
     `sys.excepthook`, więc jeden hook pokrywa zarówno crash startowy (przed
     MainLoop), jak i wyjątek w obsłudze zdarzenia. `KeyboardInterrupt` i
     `SystemExit` przepuszczamy do domyślnego zachowania (czyste zamknięcie,
     nie „crash").
+
+    ODDZIELNIE instalujemy `threading.excepthook` (v18.9): wyjątek rzucony
+    w wątku tła NIE trafia do `sys.excepthook` — leciał więc na `stderr`,
+    które w paczce `--windowed` jest `None`. Efekt: wątek ginął po cichu, bez
+    wpisu w `error_log.txt` i bez dialogu, a GUI zostawało z wyłączonymi
+    przyciskami do restartu. Ta sama klasa buga co „martwa obietnica
+    error_log.txt" z v18.7 — obietnica z komentarza wyżej („jeden hook pokrywa
+    wszystko") nie obejmowała wątków.
     """
     poprzedni_hook = sys.excepthook
 
@@ -181,6 +212,32 @@ def _zainstaluj_obsluge_bledow() -> None:
         _pokaz_dialog_crash(sciezka_logu)
 
     sys.excepthook = _hook
+
+    poprzedni_hook_watku = threading.excepthook
+
+    def _hook_watku(args):
+        if issubclass(args.exc_type, (KeyboardInterrupt, SystemExit)):
+            poprzedni_hook_watku(args)
+            return
+        sciezka_logu = _zapisz_log_bledu(
+            args.exc_type, args.exc_value, args.exc_traceback
+        )
+        try:
+            poprzedni_hook_watku(args)
+        except Exception:  # noqa: BLE001
+            pass
+        # Dialog MUSI powstać w wątku GUI — wx nie jest thread-safe.
+        # Gdy app jeszcze/już nie istnieje, `_pokaz_dialog_crash` sam spada
+        # na natywny MessageBox WinAPI.
+        try:
+            if wx.GetApp() is not None:
+                wx.CallAfter(_pokaz_dialog_crash, sciezka_logu)
+                return
+        except Exception:  # noqa: BLE001
+            pass
+        _pokaz_dialog_crash(sciezka_logu)
+
+    threading.excepthook = _hook_watku
 
 
 # 13.4: lokalny `_natywna_nazwa` zastąpiony publicznym `core_poliglota.natywna_nazwa`
@@ -473,17 +530,29 @@ class HomePanel(wx.Panel):
         self._set_status(t(klucz_i18n, **kwargs), kind=kind)
 
     @staticmethod
-    def _wartosc_zmiennej(zawartosc: str, nazwa: str) -> str:
+    def _surowa_wartosc_zmiennej(zawartosc: str, nazwa: str) -> str | None:
+        """Zwraca NIEOBCIĘTĄ wartość ``NAZWA=...`` albo ``None``, gdy brak zmiennej.
+
+        Wersja surowa istnieje dla :meth:`_diagnoza_klucza`, która musi odróżnić
+        „zmiennej nie ma" (``None``) od „jest, ale pusta" ORAZ wykryć spacje
+        wokół wartości (wklejenie z formatowaniem). Pomija linie zakomentowane —
+        dotenv też je ignoruje.
+        """
+        for linia in zawartosc.splitlines():
+            naga = linia.strip()
+            if naga.startswith(f"{nazwa}="):
+                return naga.split("=", 1)[1]
+        return None
+
+    @classmethod
+    def _wartosc_zmiennej(cls, zawartosc: str, nazwa: str) -> str:
         """Wyłuskuje wartość ``NAZWA=...`` z treści env (pierwsza linia po ``=``).
 
         Pomija linie zakomentowane (``# NAZWA=...``): szuka wzorca z początkiem
         linii. Zwraca pusty string, gdy zmiennej brak lub jest zakomentowana.
         """
-        for linia in zawartosc.splitlines():
-            naga = linia.strip()
-            if naga.startswith(f"{nazwa}="):
-                return naga.split("=", 1)[1].strip()
-        return ""
+        surowa = cls._surowa_wartosc_zmiennej(zawartosc, nazwa)
+        return "" if surowa is None else surowa.strip()
 
     def _czy_tryb_compat(self, zawartosc: str) -> bool:
         """True, gdy aktywny ``LLM_PROVIDER=openai_compat`` (endpoint OpenAI-compatible)."""
@@ -525,9 +594,15 @@ class HomePanel(wx.Panel):
         (klucz Anthropic) — komunikaty generyczne (placeholder/cudzysłowy/spacje)
         wstrzykuje sama, specyficzne (struktura/format/zbyt krótki) podaje wołający.
         """
-        if f"{nazwa_zmiennej}=" not in zawartosc:
+        # v18.9: parsujemy PER LINIĘ, tak jak robi to dotenv. Poprzednia wersja
+        # szukała `NAZWA=` substringiem w całym pliku i brała OSTATNIE
+        # wystąpienie, więc zakomentowany `# ANTHROPIC_API_KEY=sk-ant-…` dawał
+        # zielony System Check, choć runtime tej linii nie widzi (silnik padał
+        # dopiero przy pierwszym wywołaniu AI) — i odwrotnie: komentarz PO
+        # poprawnym kluczu pokazywał fałszywy błąd.
+        klucz_raw = self._surowa_wartosc_zmiennej(zawartosc, nazwa_zmiennej)
+        if klucz_raw is None:
             return (k_struktura, {}, "error")
-        klucz_raw = zawartosc.split(f"{nazwa_zmiennej}=")[-1].split("\n")[0]
         klucz = klucz_raw.strip()
         # Anglicyzacja szablonu v18.4: nowy placeholder `PASTE_YOUR_KEY_HERE`;
         # stary `TUTAJ_WKLEJ_SWOJ_KLUCZ` wciąż wykrywamy (env wygenerowany ≤v18.3).

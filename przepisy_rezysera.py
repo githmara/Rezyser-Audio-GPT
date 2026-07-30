@@ -319,39 +319,57 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     if not struktura:
         struktura = _STRUKTURA_LEGACY.get(str(id_), "brak")
 
-    return PrzepisRezysera(
-        id=str(id_),
-        etykieta=str(etykieta),
-        kategoria=str(kategoria),
-        kolejnosc=int(data.get("kolejnosc", 0)),
-        model=str(data.get("model", MODEL_DOMYSLNY)),
-        temperatura=float(data.get("temperatura", 0.85)),
-        jezyk_odpowiedzi=str(data.get("jezyk_odpowiedzi", "polsku")),
-        kod_jezyka=str(data.get("kod_jezyka", "")).strip().lower(),
-        prompt_systemowy=str(data.get("prompt_systemowy", "")),
-        format_wyjscia=format_wyjscia,
-        struktura=struktura,
-        zapis_do_pliku=bool(data.get("zapis_do_pliku", False)),
-        stosuj_akcenty_fonetyczne=bool(data.get("stosuj_akcenty_fonetyczne", False)),
-        przypomnienie_uzytkownika=str(data.get("przypomnienie_uzytkownika", "")),
-        sufiksy={k: str(v) for k, v in (data.get("sufiksy") or {}).items()},
-        slowa_wyzwalajace={
-            k: [str(x) for x in (v or [])]
-            for k, v in (data.get("slowa_wyzwalajace") or {}).items()
-        },
-        klauzula_odrzucenia=str(data.get("klauzula_odrzucenia", "")),
-        doklejka_celu_sceny=str(data.get("doklejka_celu_sceny", "")),
-        prompt_uzytkownika_szablon=str(data.get("prompt_uzytkownika_szablon", "")),
-        regex_podzial_rozdzialow=str(data.get("regex_podzial_rozdzialow", "")),
-        min_dlugosc_fragmentu=int(data.get("min_dlugosc_fragmentu", 0)),
-        max_dlugosc_probki=int(data.get("max_dlugosc_probki", 0)),
-        etykieta_fragment_zbyt_krotki=str(
-            data.get("etykieta_fragment_zbyt_krotki", "")),
-        etykieta_bled_brak_kredytow=str(
-            data.get("etykieta_bled_brak_kredytow", "")),
-        etykieta_odrzucenie=str(data.get("etykieta_odrzucenie", "")),
-        etykieta_blad_fragment=str(data.get("etykieta_blad_fragment", "")),
-    )
+    # Konwersje pól są celowo objęte guardem (v18.9): `rezyser/*.yaml` to plik
+    # EDYTOWALNY przez usera w Managerze Reguł, więc `kolejnosc:` bez wartości
+    # (None → TypeError), `kolejnosc: abc` (ValueError) albo `sufiksy:` podane
+    # jako lista (AttributeError na `.items()`) to realne wejście, nie teoria.
+    # Bez tego wyjątek leciał z konstruktora `RezyserPanel` — po restarcie klik
+    # „Reżyser" wywalał aplikację, a narzędzie stawało się trwale niedostępne
+    # (poprzedni panel jest już zniszczony). Zachowujemy się jak przy duplikacie
+    # `id`: pomijamy plik z ostrzeżeniem na stderr.
+    try:
+        return PrzepisRezysera(
+            id=str(id_),
+            etykieta=str(etykieta),
+            kategoria=str(kategoria),
+            kolejnosc=int(data.get("kolejnosc", 0)),
+            model=str(data.get("model", MODEL_DOMYSLNY)),
+            temperatura=float(data.get("temperatura", 0.85)),
+            jezyk_odpowiedzi=str(data.get("jezyk_odpowiedzi", "polsku")),
+            kod_jezyka=str(data.get("kod_jezyka", "")).strip().lower(),
+            prompt_systemowy=str(data.get("prompt_systemowy", "")),
+            format_wyjscia=format_wyjscia,
+            struktura=struktura,
+            zapis_do_pliku=bool(data.get("zapis_do_pliku", False)),
+            stosuj_akcenty_fonetyczne=bool(
+                data.get("stosuj_akcenty_fonetyczne", False)),
+            przypomnienie_uzytkownika=str(data.get("przypomnienie_uzytkownika", "")),
+            sufiksy={k: str(v) for k, v in (data.get("sufiksy") or {}).items()},
+            slowa_wyzwalajace={
+                k: [str(x) for x in (v or [])]
+                for k, v in (data.get("slowa_wyzwalajace") or {}).items()
+            },
+            klauzula_odrzucenia=str(data.get("klauzula_odrzucenia", "")),
+            doklejka_celu_sceny=str(data.get("doklejka_celu_sceny", "")),
+            prompt_uzytkownika_szablon=str(
+                data.get("prompt_uzytkownika_szablon", "")),
+            regex_podzial_rozdzialow=str(data.get("regex_podzial_rozdzialow", "")),
+            min_dlugosc_fragmentu=int(data.get("min_dlugosc_fragmentu", 0)),
+            max_dlugosc_probki=int(data.get("max_dlugosc_probki", 0)),
+            etykieta_fragment_zbyt_krotki=str(
+                data.get("etykieta_fragment_zbyt_krotki", "")),
+            etykieta_bled_brak_kredytow=str(
+                data.get("etykieta_bled_brak_kredytow", "")),
+            etykieta_odrzucenie=str(data.get("etykieta_odrzucenie", "")),
+            etykieta_blad_fragment=str(data.get("etykieta_blad_fragment", "")),
+        )
+    except (TypeError, ValueError, AttributeError) as exc:
+        print(
+            f"⚠️  przepisy_rezysera: nieprawidłowe pole w {sciezka} ({exc}) "
+            f"— plik pominięty (sprawdź typy wartości w YAML-u).",
+            file=sys.stderr,
+        )
+        return None
 
 
 def _wczytaj_yaml(sciezka: str) -> dict:

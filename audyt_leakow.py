@@ -70,24 +70,39 @@ KOD_ZRODLOWY = "pl"
 # wąsko — sam `yaml` + lazy `lingua`, bez ciągnięcia silnika z docx/num2words).
 # Mapowanie na enum robione lazy w `_zbuduj_detektor` (string → getattr).
 def _skanuj_lingua_z_podstaw() -> dict[str, str]:
-    """{kod ISO: NAZWA_ENUMA} z podstawy.yaml::lingua (pomija pl, puste, błędne)."""
+    """{kod ISO: NAZWA_ENUMA} z podstawy.yaml::lingua (pomija źródłowe pl).
+
+    Paczka z `podstawy.yaml`, która NIE mapuje się na lingua (brak pola,
+    literówka `lingva:`, nieparsowalny YAML), jest błędem FATALNYM, a nie
+    powodem do cichego pominięcia (v18.9). Wcześniej taka paczka po prostu
+    wypadała z `KODY_DOCELOWE` — bramka leaków przestawała ją skanować i
+    raportowała „czysto", mimo że nikt jej nie sprawdził.
+    """
     if not DICT_DIR.is_dir():
         return {}
     wynik: dict[str, str] = {}
+    problemy: list[str] = []
     for p in sorted(DICT_DIR.iterdir()):
         if not p.is_dir() or p.name == KOD_ZRODLOWY:
             continue
         plik = p / "podstawy.yaml"
         if not plik.is_file():
-            continue
+            continue   # folder bez podstawy.yaml to nie paczka językowa
         try:
             dane = yaml.safe_load(plik.read_text(encoding="utf-8"))
-        except (OSError, yaml.YAMLError):
+        except (OSError, yaml.YAMLError) as exc:
+            problemy.append(f"{p.name}: podstawy.yaml nieczytelny ({exc})")
             continue
-        if isinstance(dane, dict):
-            wartosc = dane.get("lingua")
-            if isinstance(wartosc, str) and wartosc.strip():
-                wynik[p.name] = wartosc.strip().upper()
+        wartosc = dane.get("lingua") if isinstance(dane, dict) else None
+        if isinstance(wartosc, str) and wartosc.strip():
+            wynik[p.name] = wartosc.strip().upper()
+        else:
+            problemy.append(f"{p.name}: brak pola `lingua:` w podstawy.yaml")
+    if problemy:
+        raise SystemExit(
+            "❌ audyt_leakow: paczki językowe bez mapowania na lingua — "
+            "bramka leaków by je POMINĘŁA:\n  - " + "\n  - ".join(problemy)
+        )
     return wynik
 
 
@@ -265,15 +280,24 @@ def wykryj_leaki_w_tekscie(
 
 
 def _wczytaj_sekcje_docelowe(kod: str, nazwa_pliku: str) -> dict[str, str]:
-    """Wczytuje `tresc` z docelowego YAML jako dict sekcji (lub {} gdy brak)."""
+    """Wczytuje `tresc` z docelowego YAML jako dict sekcji (lub {} gdy brak).
+
+    Brak pliku = legalnie pusty wynik (nie każda paczka ma każdy szablon), ale
+    plik ISTNIEJĄCY i nieczytelny to błąd FATALNY (v18.9): zwrócenie ``{}``
+    dawało bramce „zero sekcji = zero leaków = czysto", czyli zielone światło
+    dla pliku, którego nikt nie zeskanował.
+    """
     plik = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
     if not plik.is_file():
         return {}
     try:
         with open(plik, "r", encoding="utf-8") as fh:
             dane = yaml.safe_load(fh)
-    except (OSError, yaml.YAMLError):
-        return {}
+    except (OSError, yaml.YAMLError) as exc:
+        raise SystemExit(
+            f"❌ audyt_leakow: nie mogę odczytać {plik} ({exc}) — "
+            f"skan tego pliku byłby fałszywie „czysty”."
+        ) from exc
     if not isinstance(dane, dict):
         return {}
     tresc = dane.get("tresc")

@@ -368,22 +368,37 @@ _RE_SCENE = re.compile(
 )
 
 
-def _czysty_naglowek(linia: str) -> str:
+#: Maks. długość linii, którą wolno uznać za nagłówek. Publiczna, bo tego
+#: samego strażnika używa Architekt Audiobooków (`gui_konwerter`) — oba
+#: parsery muszą tak samo odróżniać nagłówek od prozy narratora.
+MAX_DLUGOSC_NAGLOWKA = 60
+
+
+def czysty_naglowek(linia: str) -> str:
     """Obcina dekoracje ``= - spacja`` z obu stron linii nagłówka."""
     return re.sub(r"^[=\-\s]+|[=\-\s]+$", "", linia).strip()
 
 
-def _klasyfikuj_naglowek(linia: str):
-    """Zwraca ``("chapter"|"scene"|None, czysty_tekst)`` dla linii.
+def czy_moze_byc_naglowkiem(czysty: str) -> bool:
+    """Czy oczyszczona linia w ogóle kwalifikuje się na nagłówek?
 
     Strażnik przeciw fałszywym trafieniom w erze narratora: linia opisowa
     narratora może zaczynać się od słowa „Scena"/„Akt". Nagłówkiem jest tylko
-    linia KRÓTKA (≤ 60 znaków) i BEZ interpunkcji zdaniowej ``.!?`` — zdania
-    narratora („Scena była pusta.") przepadają przez filtr i trafiają do
-    bufora mówcy jako zwykły tekst.
+    linia KRÓTKA (≤ ``MAX_DLUGOSC_NAGLOWKA``) i BEZ interpunkcji zdaniowej
+    ``.!?`` — zdania narratora („Scena była pusta.") przepadają przez filtr.
     """
-    czysty = _czysty_naglowek(linia)
-    if not czysty or len(czysty) > 60 or re.search(r"[.!?]", czysty):
+    return bool(czysty) and len(czysty) <= MAX_DLUGOSC_NAGLOWKA \
+        and not re.search(r"[.!?]", czysty)
+
+
+# Aliasy wstecznej zgodności dla dotychczasowych, prywatnych nazw w tym module.
+_czysty_naglowek = czysty_naglowek
+
+
+def _klasyfikuj_naglowek(linia: str):
+    """Zwraca ``("chapter"|"scene"|None, czysty_tekst)`` dla linii."""
+    czysty = czysty_naglowek(linia)
+    if not czy_moze_byc_naglowkiem(czysty):
         return (None, czysty)
     if _RE_CHAPTER.match(linia):
         return ("chapter", czysty)

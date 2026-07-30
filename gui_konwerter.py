@@ -17,6 +17,7 @@ import docx
 import wx
 import yaml
 
+import core_elevenlabs
 import core_poliglota
 import sciezki
 from i18n import t
@@ -122,17 +123,29 @@ def _regex_tury() -> re.Pattern:
     )
 
 
+# Granica po słowie-kluczu (v18.9). Bez niej ``^…(?:Akt|Scena|…)`` łapało
+# KAŻDE słowo zaczynające się od klucza — „Aktor powiedział…", „Aktualnie…",
+# „Scenariusz był gotowy…" lądowały w .docx jako nagłówki H1, a ElevenLabs
+# tnie na nich rozdziały (cicha korupcja audiobooka). Po kluczu musi stać
+# separator (spacja, cyfra, dwukropek, myślnik, kropka) albo koniec linii.
+_GRANICA_SLOWA_KLUCZA = r"(?=[\s\d:=\-–—.,)\]]|$)"
+
+
 @lru_cache(maxsize=1)
 def _regex_naglowkow_rozdzialow() -> re.Pattern:
     """Regex nagłówków H1 (Rozdział/Prolog/Epilog/Akt/… ze wszystkich paczek).
 
     Dopasowanie prefiksowe po opcjonalnych ozdobnikach ``=-`` i białych znakach
-    (np. ``"=== Rozdział 1 ==="`` albo ``"Rozdział 1: Początek"``).
+    (np. ``"=== Rozdział 1 ==="`` albo ``"Rozdział 1: Początek"``), zakończone
+    granicą słowa — patrz :data:`_GRANICA_SLOWA_KLUCZA`.
     """
     slowa = _slowa_kluczowe_konwertera()["rozdzial"]
     if not slowa:
         return re.compile(r"$^")
-    return re.compile(r"^[=\-\s]*(?:" + _alternatywa(slowa) + r")", re.IGNORECASE)
+    return re.compile(
+        r"^[=\-\s]*(?:" + _alternatywa(slowa) + r")" + _GRANICA_SLOWA_KLUCZA,
+        re.IGNORECASE,
+    )
 
 
 @lru_cache(maxsize=1)
@@ -141,7 +154,10 @@ def _regex_scen() -> re.Pattern:
     slowa = _slowa_kluczowe_konwertera()["scena"]
     if not slowa:
         return re.compile(r"$^")
-    return re.compile(r"^[=\-\s]*(?:" + _alternatywa(slowa) + r")", re.IGNORECASE)
+    return re.compile(
+        r"^[=\-\s]*(?:" + _alternatywa(slowa) + r")" + _GRANICA_SLOWA_KLUCZA,
+        re.IGNORECASE,
+    )
 
 
 class KonwerterPanel(wx.Panel):
@@ -359,19 +375,24 @@ class KonwerterPanel(wx.Panel):
                 tury_od_h1 += 1
                 continue
 
+            # Strażnik nagłówka współdzielony z mostem ElevenLabs (v18.9):
+            # nagłówkiem może być tylko linia KRÓTKA i bez interpunkcji
+            # zdaniowej. Sam regex nie wystarcza — „Akt zawiązania spółki
+            # trafił na biurko" pasuje wzorcem, ale jest prozą.
+            czysty = core_elevenlabs.czysty_naglowek(linia)
+            moze_byc_naglowkiem = core_elevenlabs.czy_moze_byc_naglowkiem(czysty)
+
             # Detekcja nagłówków głównych (tnących plik na rozdziały w ElevenLabs).
             # Słowa-klucze (Rozdział/Prolog/Epilog/Akt/…) z `konwerter.
             # naglowki_rozdzialow` WSZYSTKICH paczek — pełna obsługa 9 języków,
             # zero-touch dla 10. (v17.2.2).
-            if regex_rozdzial.match(linia):
-                czysty = re.sub(r'^[=\-\s]+|[=\-\s]+$', '', linia)
+            if moze_byc_naglowkiem and regex_rozdzial.match(linia):
                 nowy_doc.add_heading(czysty, level=1)
 
             # Detekcja scen (pogrubiony tekst, bez wpisu w spisie treści).
             # Słowa-klucze (Scena/Scene/Szene/…) z `konwerter.naglowki_scen`
             # WSZYSTKICH paczek (v17.2.2).
-            elif regex_scena.match(linia):
-                czysty = re.sub(r'^[=\-\s]+|[=\-\s]+$', '', linia)
+            elif moze_byc_naglowkiem and regex_scena.match(linia):
                 p = nowy_doc.add_paragraph()
                 run = p.add_run(czysty)
                 run.bold = True

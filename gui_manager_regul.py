@@ -709,11 +709,24 @@ class ManagerRegulPanel(wx.Panel):
                 if odp != wx.YES:
                     return
 
+            # Zapis ATOMOWY (v18.9): przy nadpisywaniu istniejącego pliku
+            # `open(..., "w")` truncuje go natychmiast, więc przerwany zapis
+            # (pełny dysk, blokada antywirusa) zostawiał pusty/ucięty YAML —
+            # a ucięte `pl`/`en` wywala crosscheck kompletności CAŁEJ paczki
+            # (`core_poliglota._jezyk_kompletny`). Piszemy obok i podmieniamy
+            # przez `os.replace` (atomowe na NTFS) — ten sam wzorzec, co przy
+            # cache ISO w `core_opowiesci`.
+            tmp_abs = docelowy_abs + ".tmp"
             try:
                 os.makedirs(os.path.dirname(docelowy_abs), exist_ok=True)
-                with open(docelowy_abs, "w", encoding="utf-8") as fh:
+                with open(tmp_abs, "w", encoding="utf-8") as fh:
                     fh.write(pakiet["yaml"])
+                os.replace(tmp_abs, docelowy_abs)
             except Exception as exc:                            # noqa: BLE001
+                try:
+                    os.remove(tmp_abs)   # sprzątamy sierotę po nieudanym zapisie
+                except OSError:
+                    pass
                 wx.MessageBox(
                     t("manager.blad_tworzenia", tresc_bledu=str(exc)),
                     t("common.blad_tytul"),

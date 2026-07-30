@@ -1233,8 +1233,6 @@ opowiesci:
   gra_zapisana_tresc: 'Lo stato del gioco "{nazwa}" è stato salvato sul disco.'
   nowa_gra_zaczatek: "📖 Gioco \"{nazwa}\" iniziato.\n\nInserisci la prima azione nel campo sottostante e clicca \"Invia\" — il motore narrativo descriverà il mondo in cui ti trovi e presenterà la prima scena."
   brak_narracji_info: "📖 Gioco \"{nazwa}\" caricato, ma il file di narrazione (script/{nazwa}.txt) non esiste. Lo stato del gioco proviene dal file game.json — puoi continuare."
-  dlg_wczytaj_tytul: "Carica gioco Racconti"
-  dlg_wczytaj_filtr: "File di gioco Racconti (*.game.json)|*.game.json|Tutti i file|*.*"
   blad_zapisu_tresc: "Si è verificato un errore durante il salvataggio del file di gioco: {tresc_bledu}"
   blad_wczytania_tresc: 'Si è verificato un errore durante il caricamento del gioco "{nazwa}": {tresc_bledu}'
 
@@ -1249,6 +1247,9 @@ opowiesci:
     /visualizza <descrizione>, /visualize    — descrizione multisensoriale della scena (senza salvataggio)
     /aggiorna, /refresh              — aggiorna la narrazione dal disco dopo una modifica manuale
     /fine, /quit                     — chiudi l'applicazione
+  dlg_pomoc_tytul: "Comandi disponibili"
+  dlg_pomoc_lbl: "Elenco dei comandi slash della modalità Racconti:"
+  dlg_pomoc_name: "Campo con l'elenco dei comandi"
   dlg_visualize_tytul: "🌅 Visualizzazione della scena"
   dlg_visualize_lbl: "Descrizione multisensoriale della scena attuale (non cambia lo stato del gioco):"
   dlg_visualize_name: "Campo con la descrizione della visualizzazione della scena"

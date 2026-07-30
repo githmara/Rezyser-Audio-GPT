@@ -234,10 +234,11 @@ def _przepuszczalne(labels_csv: str) -> tuple[bool, list[str]]:
 # więc crash zgłoszony przez ZAŁĄCZENIE pliku (a dialog crashu w aplikacji
 # wprost do tego zachęca: „ZAŁĄCZ ten plik") dawałby pusty prompt do Centrum
 # („Zgłoszenie wymaga doprecyzowania") + wesoły komentarz Sami = rozczarowany
-# user. Dlatego runner Actions (pełny internet + GITHUB_TOKEN) pobiera tekstowe
-# załączniki i inline'uje je do promptu LLM ORAZ do maila. Repo PUBLICZNE →
-# zwykły GET wystarcza; token dokładamy jako nagłówek-fallback (nieszkodliwy
-# przy publicznym, ratuje gdyby asset kiedyś wymagał auth). Patrz [[reguly_github_bot]].
+# user. Dlatego runner Actions (pełny internet) pobiera tekstowe załączniki
+# i inline'uje je do promptu LLM ORAZ do maila. Repo PUBLICZNE → zwykły GET
+# wystarcza; ŚWIADOMIE bez nagłówka Authorization — treść issue kontroluje
+# obcy user, a token wysłany na URL z issue to gotowa eksfiltracja (urllib
+# kopiuje nagłówki także przy redirectach). Patrz [[reguly_github_bot]].
 
 # Rozszerzenia, których treść umiemy sensownie inline'ować (tekstowe).
 _ZALACZNIK_TEKST_EXT = (
@@ -249,7 +250,7 @@ _ZALACZNIK_URL = re.compile(
     r"https?://("
     r"github\.com/user-attachments/[^\s)]+"          # nowy format (files/ i assets/)
     r"|github\.com/[^\s)]+/files/[^\s)]+"             # legacy [owner]/[repo]/files/id/nazwa
-    r"|[a-z0-9.-]*githubusercontent\.com/[^\s)]+"     # CDN (user-images, objects)
+    r"|(?:[a-z0-9-]+\.)*githubusercontent\.com/[^\s)]+"  # CDN (user-images, objects); granica etykiety — bez evilgithubusercontent.com
     r")",
     re.IGNORECASE,
 )
@@ -293,12 +294,11 @@ def _pobierz_zalacznik(url: str) -> tuple[str | None, str | None]:
     """GET treści załącznika. Zwraca (tekst, błąd) — dokładnie jedno jest None.
 
     Cap na `_ZALACZNIK_MAX_BAJTY` (czytamy +1 bajt, żeby wykryć obcięcie).
-    Token GH dokładamy jako nagłówek-fallback (repo publiczne → i tak zbędny).
+    BEZ tokena GH: URL pochodzi z treści issue (kontrolowanej przez obcych),
+    więc jakikolwiek nagłówek auth = wektor eksfiltracji. Repo publiczne —
+    asset i tak nie wymaga uwierzytelnienia.
     """
     naglowki = {"User-Agent": "RezyserAudio-Sami-intake"}
-    token = os.environ.get("GH_TOKEN", "").strip()
-    if token:
-        naglowki["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(url, headers=naglowki)
     try:
         with urllib.request.urlopen(req, timeout=20) as resp:

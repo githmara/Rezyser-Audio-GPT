@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **18.8.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **18.9.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -129,30 +129,6 @@ La langue principale de ce projet est le polonais. Les noms des modules, des cla
 * `rezyser/` — *réalisateur*: modes créatifs du module Réalisateur.
 * `opowiesci/` — *histoires*: modes d'histoires interactives.
 * `gui/` — textes de l'interface (`ui.yaml`) et modèles de documentation.
-
-### Accents disponibles
-
-- Anglais (Samantha/Mark dans Vocalizer, Zira/Hazel dans OneCore)
-- Finnois (Satu/Mikko dans Vocalizer, Heidi dans OneCore)
-- Italien (Alice/Luca dans Vocalizer, Elsa dans OneCore)
-- Polonais (Ewa dans Vocalizer, Paulina dans OneCore)
-- Allemand (Stefan/Katja dans Vocalizer, Hedda dans OneCore)
-- Espagnol (Jorge/Monica dans Vocalizer, Helena dans OneCore)
-- Russe (Irina/Pavel dans Vocalizer, Yuri dans OneCore)
-
-### Chiffre : Inverseur de texte
-
-Ce chiffre inverse chaque phrase, mais d'abord il développe certaines abréviations pour éviter des inversions phonétiquement absurdes (par exemple : ".xel"). Les abréviations développées sont :
-
-- "p. ex." → "par exemple"
-- "c.-à-d." → "c'est-à-dire"
-- "etc." → "et cetera"
-- "M." → "Monsieur"
-- "Dr" → "Docteur"
-
-### Chiffre : Typoglycémie
-
-Selon une rechreche à l'Université de Cmabrigde, il n'importe pas dans quel odrre les lettres dans un mot sont, la seule chose ipmrotnate est que la première et la dernière lettre soient à la bonne place.
 
 
 ## Licence

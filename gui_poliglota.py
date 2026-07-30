@@ -37,6 +37,7 @@ from dotenv import load_dotenv
 
 import wx
 
+import bledy_ai
 import core_llm as cl
 import core_poliglota
 import i18n
@@ -883,18 +884,29 @@ class PoliglotaPanel(wx.Panel):
             wx.CallAfter(self._wyswietl_blad_ai,
                          t(f"poliglota.{info.klucz_i18n}", **info.kwargs), naglowek)
 
-        wynik = tlumacz_ai.tlumacz_dlugi_tekst(
-            tresc=content,
-            jezyk_docelowy=target_lang,
-            klient=self._client,
-            runtime_dir=runtime_dir,
-            oryginalna_nazwa=self._oryginalna_nazwa,
-            on_postep=_cb_postep,
-            on_blad_krytyczny=_cb_blad_kryt,
-            on_blad_miekki=_cb_blad_miekki,
-            slowo_tlumaczenie=core_poliglota.bezpieczny_czlon_nazwy(
-                t("poliglota.filename_tlumaczenie"), "tlumaczenie"),
-        )
+        # Siatka bezpieczeństwa wątku (v18.9): `tlumacz_dlugi_tekst` mapuje na
+        # callbacki tylko błędy Z PĘTLI per blok. Wyjątek RZUCONY WCZEŚNIEJ
+        # (np. `os.makedirs` na runtime_dir, inicjalizacja tiktoken, zapis
+        # metryki cache) leciał dotąd do `threading.excepthook`, czyli w paczce
+        # windowed donikąd — `_btn_process` zostawał wyłączony do restartu.
+        try:
+            wynik = tlumacz_ai.tlumacz_dlugi_tekst(
+                tresc=content,
+                jezyk_docelowy=target_lang,
+                klient=self._client,
+                runtime_dir=runtime_dir,
+                oryginalna_nazwa=self._oryginalna_nazwa,
+                on_postep=_cb_postep,
+                on_blad_krytyczny=_cb_blad_kryt,
+                on_blad_miekki=_cb_blad_miekki,
+                slowo_tlumaczenie=core_poliglota.bezpieczny_czlon_nazwy(
+                    t("poliglota.filename_tlumaczenie"), "tlumaczenie"),
+            )
+        except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
+            bledy_ai.zapisz_diagnostyke(exc, "poliglota._ai_worker")
+            wx.CallAfter(self._on_ai_error, str(exc), "",
+                         t("poliglota.blad_ai_naglowek"))
+            return
 
         if wynik is None:
             return   # _cb_blad_kryt już zajął się GUI

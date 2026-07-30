@@ -1234,6 +1234,10 @@ def main(args: argparse.Namespace | None = None) -> None:
         print(f"✅ Installer created: Rezyser_Audio_v{wersja}_Installer.exe")
     except subprocess.CalledProcessError:
         print("❌ Compilation error. Inno Setup returned a non-zero exit code.")
+        # v18.9: bez tego build kończył się kodem 0 mimo braku instalatora —
+        # w trybie automatycznym (`-y`) wyglądało to na sukces, a w `dist/`
+        # zostawał co najwyżej installer POPRZEDNIEJ wersji.
+        sys.exit(1)
     finally:
         if tmp_created and sciezka_tmp.exists():
             sciezka_tmp.unlink()

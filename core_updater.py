@@ -204,7 +204,13 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
             changelog=_oczysc_changelog(dane.get("body", "")),
         )
 
-    except (HTTPError, URLError, OSError, KeyError, ValueError):
+    # Świadomie szeroki łapacz — docstring obiecuje „nigdy nie rzuca", a wąska
+    # krotka tej obietnicy nie dotrzymywała: `http.client.HTTPException`
+    # (BadStatusLine / IncompleteRead przy zerwanym połączeniu) NIE dziedziczy
+    # po OSError, więc leciała z wątku tła. Sprawdzenie aktualizacji jest
+    # całkowicie opcjonalne — każdy jego błąd ma być cichym „brak aktualizacji",
+    # nigdy dialogiem crashu przy starcie aplikacji.
+    except Exception:  # noqa: BLE001 — patrz komentarz wyżej (kontrakt: zawsze None)
         return None
 
 

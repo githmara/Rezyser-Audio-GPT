@@ -121,7 +121,7 @@ tresc:
        Roma). Ogni lettera viene spostata di N posizioni nell'alfabeto italiano
        (21 lettere: ABCDEFGHILMNOPQRSTUVZ — senza J, K, W, X, Y). Lo spostamento viene inserito
        nell'interfaccia grafica nel campo numerico; se inserisci 0, l'applicazione
-       sceglierà un valore casuale tra 1-19 e lo mostrerà in un messaggio, in modo
+       sceglierà un valore casuale tra 1-20 e lo mostrerà in un messaggio, in modo
        che tu possa successivamente decifrare il messaggio. I caratteri al di fuori
        dell'alfabeto (numeri, spazi, punteggiatura) rimangono invariati.
   co_to_tryb_rezysera: |

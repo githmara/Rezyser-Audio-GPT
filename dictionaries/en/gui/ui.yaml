@@ -1235,8 +1235,6 @@ opowiesci:
   gra_zapisana_tresc: 'The state of the game "{nazwa}" has been saved to disk.'
   nowa_gra_zaczatek: "📖 Game \"{nazwa}\" started.\n\nEnter the first action in the field below and click \"Send\" — the narrative engine will describe the world you find yourself in and present the first scene."
   brak_narracji_info: "📖 Game \"{nazwa}\" loaded, but the narrative file (scripts/{nazwa}.txt) does not exist. The game state comes from the game.json file — you can continue."
-  dlg_wczytaj_tytul: "Load Story Game"
-  dlg_wczytaj_filtr: "Story Game Files (*.game.json)|*.game.json|All Files|*.*"
   blad_zapisu_tresc: "An error occurred while saving the game file: {tresc_bledu}"
   blad_wczytania_tresc: 'An error occurred while loading the game "{nazwa}": {tresc_bledu}'
 

@@ -160,7 +160,7 @@ tresc:
        letter is shifted by N positions in the English alphabet (26 letters:
        ABCDEFGHIJKLMNOPQRSTUVWXYZ). You enter the shift in the GUI in a
        numeric field; if you enter 0, the application will randomly select
-       a value in the range 1-24 and display it in a message so you can
+       a value in the range 1-25 and display it in a message so you can
        later decrypt the message. Characters outside the alphabet (numbers,
        spaces, punctuation) remain unchanged.
   co_to_tryb_rezysera: |

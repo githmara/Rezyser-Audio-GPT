@@ -837,7 +837,20 @@ def tlumacz_jezyk(
         except RuntimeError as exc:
             print(f"❌ {kod}: retry failed — {exc}")
             return False
-        mapa_tgt.update(retry_tgt)
+        # 18.9: bierzemy z retry WYŁĄCZNIE zamówione id. Gołe `update()`
+        # pozwalało nadmiarowemu liściowi (model potrafi dorzucić id, o które
+        # nikt nie prosił) nadpisać liść JUŻ ZWALIDOWANY w kroku 3 — i to
+        # z pominięciem walidacji parity/`&`, bo pętla niżej sprawdza tylko
+        # `porazki`. Zestaw id z pierwszej odpowiedzi jest weryfikowany wyżej;
+        # tu robimy to samo dla drugiej.
+        zamowione = {idx for idx, _ in do_retry}
+        nieproszone = set(retry_tgt) - zamowione
+        if nieproszone:
+            print(
+                f"⚠️  {kod}: retry returned {len(nieproszone)} unrequested id(s) "
+                f"— ignoring them: {sorted(nieproszone)[:10]}"
+            )
+        mapa_tgt.update({i: v for i, v in retry_tgt.items() if i in zamowione})
 
         porazki_v2: list[tuple[int, list[str]]] = []
         for idx, _ in porazki:

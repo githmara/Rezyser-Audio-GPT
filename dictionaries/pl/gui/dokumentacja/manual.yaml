@@ -77,15 +77,15 @@ tresc:
     Cała aplikacja, łącznie z silnikiem Pythona, projektami i kluczem API, żyje w jednym folderze pod ścieżką instalacji — cały folder można przenieść na pendrive, do chmury albo na inny komputer (szczegółowa instrukcja w sekcji „Przenoszenie projektów i klucza API" niżej).
 
 
-    Ważne: Folder runtime/ wewnątrz folderu instalacyjnego to bundla PyInstallera (od wersji 17.0) — zawiera izolowany interpreter Pythona i biblioteki, gotowe do użycia bez osobnej instalacji systemowej; pełni też rolę kontenera ukrytych metadanych projektów. Jeśli klonujesz repozytorium (ścieżka dewelopera), tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
+    **Ważne:** Folder runtime/ wewnątrz folderu instalacyjnego to bundla PyInstallera (od wersji 17.0) — zawiera izolowany interpreter Pythona i biblioteki, gotowe do użycia bez osobnej instalacji systemowej; pełni też rolę kontenera ukrytych metadanych projektów. Jeśli klonujesz repozytorium (ścieżka dewelopera), tego folderu nie ma i być nie powinno — używasz wtedy wirtualnego środowiska venv opisanego w sekcji dla programistów poniżej.
 
-    --- Dla Programistów (Windows — repozytorium Git) ---
+    ### Dla Programistów (Windows — repozytorium Git)
 
     1. Sklonuj repozytorium na swój dysk.
     2. Uruchom plik setup_dev.bat. Skrypt automatycznie utworzy wirtualne środowisko Pythona (venv) i zainstaluje wszystkie wymagane zależności z pliku requirements.txt.
     3. Uruchom aplikację komendą python main.py lub przez plik run_dev.bat — skrypt automatycznie wykryje folder venv i uruchomi program.
 
-    --- Dla Programistów i zwykłych użytkowników (macOS / Linux) ---
+    ### Dla Programistów i zwykłych użytkowników (macOS / Linux)
 
     1. Sklonuj repozytorium na swój dysk.
     2. Otwórz terminal w folderze projektu i nadaj skryptom uprawnienia do wykonania: chmod +x *.sh
@@ -96,7 +96,7 @@ tresc:
     Co zobaczysz po uruchomieniu: Po uruchomieniu programu otwiera się okno z ekranem startowym. Znajdziesz na nim krótki opis dostępnych narzędzi oraz sekcję "{home.heading_system_check}". Jeśli klucz API nie jest jeszcze skonfigurowany, zobaczysz czerwony komunikat informujący, że moduły oparte na AI (Reżyseria, Tłumacz) nie będą działać — darmowe funkcje lokalne (akcenty, Architekt) są jednak aktywne od razu. Konfigurację klucza opisuje kolejny krok.
 
 
-    Automatyczne aktualizacje
+    ### Automatyczne aktualizacje
 
     Aplikacja sprawdza przy starcie, czy na GitHubie dostępna jest nowsza wersja — sprawdzenie odbywa się w tle i nie blokuje interfejsu.
 
@@ -108,7 +108,7 @@ tresc:
 
     Jeśli korzystasz z repozytorium Git (programiści i użytkownicy macOS/Linux): zamiast propozycji pobrania zobaczysz informację o nowej wersji z bezpośrednim linkiem do strony wydania na GitHubie. Pobierz stamtąd archiwum „Source code" lub zaktualizuj repozytorium komendą git pull.
 
-    Przenoszenie projektów i klucza API (migracja)
+    ### Przenoszenie projektów i klucza API (migracja)
 
     Jeśli chcesz przenieść swoje projekty, klucz API i lokalne ustawienia na inny komputer (lub odtworzyć całość po przeinstalowaniu systemu Windows), nie ma potrzeby ręcznie kopiować pojedynczych plików — cały folder aplikacji jest samowystarczalny.
 
@@ -123,9 +123,9 @@ tresc:
        - Izolowane środowisko Pythona (folder runtime/), dzięki czemu nie musisz nic doinstalowywać na nowym komputerze.
     5. Na nowym komputerze: pobierz najnowszy instalator z zakładki Releases na GitHubie i zainstaluj aplikację standardowo. Uruchom program raz, żeby utworzył pustą strukturę plików konfiguracyjnych. Zamknij aplikację. Następnie skopiuj wcześniej zapisany folder w miejsce instalacji nadpisując pliki — albo wybierz selektywnie tylko interesujące cię foldery (skrypty/, opowiesci/, golden_key.env) i wklej je w odpowiednie miejsca nowej instalacji.
 
-    Wskazówka dla użytkowników NVDA: menu kontekstowe „Otwórz lokalizację pliku" wywoływane klawiszem Aplikacji jest w pełni dostępne — NVDA czyta każdą pozycję po polsku. Po otwarciu Eksploratora w docelowym folderze użyj klawisza Backspace żeby przejść poziom wyżej (działa zawsze, niezależnie od tego czy fokus jest na liście plików czy na pasku adresów), a następnie Ctrl+A żeby zaznaczyć wszystko i Ctrl+C żeby skopiować.
+    **Wskazówka dla użytkowników NVDA:** menu kontekstowe „Otwórz lokalizację pliku" wywoływane klawiszem Aplikacji jest w pełni dostępne — NVDA czyta każdą pozycję po polsku. Po otwarciu Eksploratora w docelowym folderze użyj klawisza Backspace żeby przejść poziom wyżej (działa zawsze, niezależnie od tego czy fokus jest na liście plików czy na pasku adresów), a następnie Ctrl+A żeby zaznaczyć wszystko i Ctrl+C żeby skopiować.
 
-    Wskazówka: opcja „Otwórz lokalizację pliku" to nazwa natywna dla polskiej wersji Windows. W angielskim systemie brzmi „Open file location", w pozostałych wersjach językowych — analogicznie w lokalnym języku systemu operacyjnego.
+    **Wskazówka:** opcja „Otwórz lokalizację pliku" to nazwa natywna dla polskiej wersji Windows. W angielskim systemie brzmi „Open file location", w pozostałych wersjach językowych — analogicznie w lokalnym języku systemu operacyjnego.
   krok_2_klucz_api: |
     ## KROK 2: Zasilanie API (zalecany klucz Anthropic / Claude)
 
@@ -143,7 +143,7 @@ tresc:
     3. Na ekranie startowym programu kliknij przycisk "{home.btn_generate}". System automatycznie stworzy czysty plik konfiguracyjny we właściwym miejscu i otworzy Notatnik z szablonem gotowym do edycji.
     4. W otwartym pliku zobaczysz linię: ANTHROPIC_API_KEY=PASTE_YOUR_KEY_HERE. Usuń tekst zastępczy i wklej swój klucz bezpośrednio po znaku równości (bez spacji i bez cudzysłowów). Zapisz plik i uruchom aplikację ponownie.
 
-    Wskazówka: Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "{home.heading_system_check}" pokaże status klucza. Musi być zielony, aby wszystkie moduły AI były gotowe do pracy. Jeśli klucza brakuje lub jest błędny, program jasno to wskaże i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
+    **Wskazówka:** Po ponownym uruchomieniu aplikacja sprawdzi plik i w sekcji "{home.heading_system_check}" pokaże status klucza. Musi być zielony, aby wszystkie moduły AI były gotowe do pracy. Jeśli klucza brakuje lub jest błędny, program jasno to wskaże i pozwoli otworzyć edytor tekstu, aby szybko naprawić błąd.
   krok_2b_dostawca_zaawansowany: |
     ## KROK 2B (zaawansowane, opcjonalne): Własny dostawca AI zgodny z OpenAI
 
@@ -160,7 +160,7 @@ tresc:
     •  Gdy LLM_PROVIDER=openai_compat, CAŁY silnik AI (Reżyser, Opowieści, Poliglota, tytuły, wykrywanie języka) korzysta ze wskazanego endpointu, a nazwę modelu z plików konfiguracyjnych nadpisuje LLM_MODEL.
     •  Gdy linii LLM_PROVIDER brak (albo ma wartość anthropic), aplikacja działa jak w KROK 2 — wyłącznie na kluczu Anthropic. Nic nie musisz zmieniać.
 
-    Ważne (jakość): prompty systemowe aplikacji są pisane i strojone pod Claude. Inny model może dać niższą jakość — słabiej trzymać zasady świata, gubić strukturę JSON w trybach z wyborami albo zwracać tekst w niewłaściwym języku. To świadomy kompromis koszt↔jakość po Twojej stronie. Jeśli zależy Ci na najlepszym efekcie, zostań przy Anthropic.
+    **Ważne (jakość):** prompty systemowe aplikacji są pisane i strojone pod Claude. Inny model może dać niższą jakość — słabiej trzymać zasady świata, gubić strukturę JSON w trybach z wyborami albo zwracać tekst w niewłaściwym języku. To świadomy kompromis koszt↔jakość po Twojej stronie. Jeśli zależy Ci na najlepszym efekcie, zostań przy Anthropic.
   krok_3_glowne_studio: |
     ## KROK 3: Główne Studio Reżyserskie
 
@@ -168,20 +168,20 @@ tresc:
 
 
 
-    WAŻNE: Format plików projektów — powrót do .txt
+    ### Ważne: Format plików projektów — powrót do .txt
 
     W wersji 7 pliki projektów zapisywały się w formacie Markdown (.md), np. skrypty/znieczulica.md. Był to celowy eksperyment — format .md miał stanowić psychologiczną barierę dla osób nietechnicznych, zniechęcając je do otwierania i ręcznej edycji pliku w Notatniku (a tym samym do przypadkowego uszkodzenia nagłówków struktury).
 
-    Eksperyment się nie sprawdził. AI często donorycznie łamie jeden z fundamentalnych zakazów (więcej o tym za chwilę). Z tego powodu w wersji 8 wrócono do prostych plików .txt — bardziej intuicyjnych i czytelnych dla każdego. Przykładowo projekt o nazwie "znieczulica" zapisze się teraz jako skrypty/znieczulica.txt, a jego streszczenie jako skrypty/znieczulica_streszczenie.txt. Pozwoli to każdemu łatwiej na bierząco wprowadzać reżyserskie korekty lub cięcia tekstu.
+    Eksperyment się nie sprawdził. AI często notorycznie łamie jeden z fundamentalnych zakazów (więcej o tym za chwilę). Z tego powodu w wersji 8 wrócono do prostych plików .txt — bardziej intuicyjnych i czytelnych dla każdego. Przykładowo projekt o nazwie "znieczulica" zapisze się teraz jako skrypty/znieczulica.txt, a jego streszczenie jako skrypty/znieczulica_streszczenie.txt. Pozwoli to każdemu łatwiej na bieżąco wprowadzać reżyserskie korekty lub cięcia tekstu.
 
 
-    ⚠️ KRYTYCZNA ZASADA MONTAŻYSTY (PRZECZYTAJ ZANIM ZACZNIESZ!) ⚠️
+    ### ⚠️ Krytyczna Zasada Montażysty (przeczytaj, zanim zaczniesz!)
 
     Wszystkie Twoje wygenerowane skrypty i książki zapisują się w zwykłych plikach tekstowych (.txt), które z łatwością otworzysz w Notatniku.
 
     Jako Reżyser masz PEŁNE PRAWO (a wręcz obowiązek) edytować ten plik! Jeśli sztuczna inteligencja zagalopuje się i np. sama rozwiąże problem bohaterów na końcu wygenerowanego fragmentu, otwórz plik, usuń ostatnie linijki i zostaw tekst urwany w najbardziej napiętym momencie, a następnie kliknij "{rezyser.btn_przeladuj_label}", aby zsynchronizować pamięć modelu z poprawionym plikiem, i "{rezyser.btn_wyslij_label}" w celu kontynuacji.
 
-    🔴 JEDNAKŻE - CZEGO NIE WOLNO CI DOTYKAĆ:
+    #### 🔴 Jednakże — czego nie wolno Ci dotykać
 
     Nigdy nie modyfikuj, nie usuwaj i nie zmieniaj linii zawierających strukturę (np. Akt 1, Scena 2, Rozdział 1, Prolog). Jeśli zepsujesz te nagłówki:
     1. Twoja historia rozsypie się w czytnikach ekranu (NVDA).
@@ -191,7 +191,7 @@ tresc:
     Edytuj dialogi, tnij akcję, ale zostaw strukturę w spokoju!
 
 
-    Jak używać Reżyserii?
+    ### Jak używać Reżyserii?
 
     - Księga Świata (pasek boczny po lewej): Tu wpisujesz zasady uniwersum. Każdy projekt ma teraz własną Księgę powiązaną z nazwą pliku — jeśli Twój plik historii to np. emilia_heist_audiobook.txt, Księga Świata zapisze się jako skrypty/emilia_heist_audiobook.md. Dlatego kolejność jest ważna: najpierw wpisz nazwę pliku projektu w polu "Nazwa pliku projektu", a dopiero potem możesz zapisać Księgę. Przycisk "{rezyser.btn_zapisz_ksiege_label}" pozostaje wyszarzony, dopóki nie podasz nazwy. Wczytanie istniejącego projektu przyciskiem "{rezyser.btn_wczytaj_label}" automatycznie załaduje też odpowiadający mu plik .md — nie musisz robić nic ręcznie. Uwaga: Bez wypełnionej Księgi Świata aplikacja zablokuje wysyłanie zapytań do AI — to celowe zabezpieczenie, które chroni Cię przed generowaniem tekstu bez żadnych zasad.
     - Pamięć Długotrwała (pasek boczny po lewej): Drugie pole w pasku bocznym. Tu AI automatycznie zapisuje streszczenie fabuły, gdy pamięć zaczyna się przepełniać. Możesz też wpisać tu własne notatki ręcznie — model potraktuje je jako "co już wiem" przed przeczytaniem bieżącej sceny. HISTORYCZNA LUKA (naprawiona w v15.5): dawniej, jeśli wpisałeś tu bardzo krótką notatkę i kliknąłeś „Zapisz Streszczenie" zanim w pliku narracji było coś znaczącego, po następnym wczytaniu aplikacja PRIORYTETOWO ładowała streszczenie i POMIJAŁA pełną historię — model dostawał wtedy tylko Księgę Świata i jednozdaniową notatkę, bez kontekstu tonu i ostatnich scen. Od v15.5 wczytywanie jest inteligentne: jeśli cała historia mieści się w oknie kontekstu, ładowana jest w całości (a zbędne stare streszczenie kasowane), więc model nie traci kontekstu. A po ręcznej edycji pliku narracji w edytorze użyj nowego przycisku „{rezyser.btn_przeladuj_label}" (od v15.5), który jednym kliknięciem synchronizuje pamięć wewnętrzną z dyskiem; do samego otwarcia pliku w edytorze nadal służy „{rezyser.btn_otworz_narracje_label}".
@@ -210,13 +210,13 @@ tresc:
     W wersjach wcześniejszych aplikacji nikt nie pilnował spójności trybu twórczego w obrębie jednego projektu. Efektem była pewna subtelna możliwość twórcza, którą można by opisać tak: zaczynasz historię w Trybie Skryptu, wstawiasz "Akt 1" i "Scena 1" (aplikacja jest zachwycona twoją konsekwencją), generujesz kilka ekranów napięcia z tagami [SFX: Trzask drzwi] i [Speaker 1: Marek - zrezygnowany]... a następnie — bo właśnie przyszło natchnienie — klikasz "Wstaw cięcie Rozdział 1". Aplikacja bez mrugnięcia okiem dopisuje nagłówek "Rozdział 1" do pliku, tuż po "Scena 3". Masz teraz w pliku hybrydę słuchowiska radiowego z lat 50. i powieści obyczajowej. ElevenLabs patrzy na tę strukturę, widzi nagłówek rozdziału w środku aktu i postanawia, że to pewnie błąd w matriksie. Spis treści wygląda jak dzieło awangardowego artysty. Architekt Audiobooków z kolei wychodzi z założenia, że jesteś dorosłym człowiekiem i po prostu przetwarza to bez słowa — ale też bez jakichkolwiek gwarancji efektu. Od wersji 12.0 interfejs próbował blokować zmianę trybu zapisu — przynajmniej w teorii. Praktyka okazała się bardziej kreatywna: Burza Mózgów (zawsze aktywna jako tryb planowania) była tylną furtką, przez którą strzałkami w górę i w dół dało się przejść między Skryptem a Audiobookiem (Audiobook → Burza → Skrypt i analogicznie w drugą stronę). Pierwsze kliknięcie „Wstaw Akt 1" lub „Wstaw Rozdział 1" w nowo wybranym trybie gładko nadpisywało plik .mode, mieszając akty z rozdziałami w jednym pliku narracji. Dopiero od wersji 15.2.3 mamy prawdziwą ochronę: po utrwaleniu decyzji trybu (pierwsza struktura lub pierwsza udana wysyłka produkcyjna) druga pozycja zapisu w polu wyboru trybu jest faktycznie zablokowana. Burza Mózgów pozostaje zawsze aktywna jako mechanizm awaryjny — generuje streszczenie przy przepełnieniu okna kontekstowego i opcje fabularne — ale nie da się już przez nią przeskoczyć w bok na inny tryb zapisu.
 
 
-    Prompty Showrunnerowe — AI jako scenarzysta serialu (z wersji 7, zachowane)
+    ### Prompty Showrunnerowe — AI jako scenarzysta serialu (z wersji 7, zachowane)
 
     To największa zmiana wprowadzona w wersji 7, zachowana bez zmian. Nie jest widoczna w interfejsie, ale radykalnie zmienia jakość generowanej fabuły.
 
     Showrunner to w branży telewizyjnej osoba odpowiedzialna za całokształt serialu — dba o to, by fabuła nigdy nie zmierzała do łatwego rozwiązania, lecz stale gęstniała, piętrzyła konflikty i trzymała widza w napięciu przez wiele sezonów. W wersji 7 ta filozofia została wbudowana bezpośrednio w instrukcje systemowe AI.
 
-    Dyrektywa Anti-Closure — i co zmienił silnik Anthropic (Claude)
+    ### Dyrektywa Anti-Closure — i co zmienił silnik Anthropic (Claude)
 
     Filozofia Showrunnera jest egzekwowana przez wbudowaną w każdy tryb dyrektywę Anti-Closure: zakaz domykania scen podsumowaniami, morałami i fałszywymi happy endami. W dawnej erze (model GPT) bywało dokładnie odwrotnie niż dziś — silnik notorycznie łamał ten zakaz i sam "zamykał" historię przy każdej okazji: wplatał zdania podsumowujące fabułę, tworzył fałszywe happy endy lub domykał wątki w środku rozdziału, jakby każdy fragment był ostatnim. Od wersji 18 cały silnik AI pracuje domyślnie na Anthropic (Claude) — a od wersji 18.4 możesz opcjonalnie wskazać własnego dostawcę (KROK 2B) — i Claude trzyma się Anti-Closure znacznie rygorystyczniej.
 
@@ -233,7 +233,7 @@ tresc:
     Wyjątek od reguły: Jeśli wprost poprosisz o zakończenie, finał lub epilog, AI wygeneruje satysfakcjonujące domknięcie historii — zakaz nie obowiązuje, gdy sam o to prosisz.
 
 
-    Zarządzanie Aktami i Scenami (Tryb Skryptu, z wersji 7, zachowane)
+    ### Zarządzanie Aktami i Scenami (Tryb Skryptu, z wersji 7, zachowane)
 
     Tryb Surowego Skryptu posiada dedykowany panel "{rezyser.struktura_heading}" z przyciskami do budowania struktury słuchowiska w czasie rzeczywistym.
 
@@ -247,7 +247,7 @@ tresc:
     Architekt Audiobooków automatycznie zamieni Akty na główne punkty nawigacyjne (Heading 1) dla ElevenLabs i NVDA — Sceny staną się pogrubionym tekstem widocznym w dokumencie, ale niewidocznym w spisie treści.
 
 
-    Inteligentne Zarządzanie Rozdziałami (Tryb Audiobooka, z wersji 5, zachowane)
+    ### Inteligentne Zarządzanie Rozdziałami (Tryb Audiobooka, z wersji 5, zachowane)
 
     LLM generuje maksymalnie około 5000 znaków na jedno zapytanie — to za mało na pełny rozdział. Dlatego pracujesz iteracyjnie: generujesz kolejne fragmenty przyciskiem "Wyślij do AI", aż uznasz, że dany rozdział jest gotowy. Wtedy klikasz "Wstaw cięcie rozdziału" — aplikacja dopisuje nagłówek do pliku i pamięci, a licznik rozdziałów automatycznie przeskakuje na następny numer.
 
@@ -260,7 +260,7 @@ tresc:
     Inteligentne wczytywanie pliku: Gdy wczytasz istniejący plik, aplikacja automatycznie przeskanuje go i ustawi licznik rozdziałów na właściwy numer. Jeśli plik ma Prolog i trzy rozdziały, licznik pokaże "Rozdział 4" — bez ręcznego liczenia.
 
 
-    Akumulator Fabuły — jak działa pamięć AI
+    ### Akumulator Fabuły — jak działa pamięć AI
 
     Do pamięci modelu trafia wyłącznie czysty tekst opowieści — to, co AI faktycznie napisało. Instrukcje, opcje i plany znikają po użyciu i nie zaśmiecają kontekstu. Efekt? Model dłużej utrzymuje skupienie, lepiej pamięta akcenty postaci i rzadziej "ucieka" od zasad Księgi Świata.
 
@@ -271,7 +271,7 @@ tresc:
 
     Diagnostyka progu streszczenia (gdy AI halucynuje wcześniej, niż zakłada próg): progi (ostrzeżenie ~70%, alarm ~90%) są oszacowane empirycznie. Jeśli zauważysz powtarzalną tendencję, że model „ucieka" od zasad albo zaczyna halucynować ZANIM wskaźnik wejdzie w żółty/czerwony — czyli wcześniej, niż zakłada próg — otwórz issue w repozytorium aplikacji i opisz, przy jakim mniej więcej zapełnieniu (procencie) faktycznie zaczyna się sypać, najlepiej z przykładem. Jeśli ta tendencja potwierdzi się szerzej (u innych użytkowników, na różnych projektach), próg automatycznego streszczenia zostanie obniżony w kolejnym patchu. To świadomie iteracyjny mechanizm — lepiej dostroić go na realnych danych niż zgadywać z góry.
 
-    Nieskończona Pamięć (z wersji 6, zachowana)
+    ### Nieskończona Pamięć (z wersji 6, zachowana)
 
     Gdy zapala się czerwony alarm, nie musisz już ręcznie kopiować streszczenia. Wpisz w Burzy Mózgów komendę zawierającą słowo "streszczenie" lub "podsumowanie" — AI wygeneruje zwięzłą pigułkę wiedzy o całej dotychczasowej fabule. Następnie kliknij przycisk "Zapisz Streszczenie (na stałe)" — aplikacja automatycznie tworzy plik _streszczenie.txt w folderze skrypty/ i zabezpiecza go przed przypadkowym nadpisaniem. Po zapisaniu wyczyść pamięć i możesz kontynuować tworzenie w obecnym pliku. Streszczenie wczytasz do pola Pamięci Długotrwałej przed kolejną sesją — i możesz kontynuować historię w nieskończoność, bez żadnych ograniczeń długości.
 
@@ -285,41 +285,41 @@ tresc:
 
     Gotowy skrypt teatru czytanego (tryb Skrypt) ma dwa niezależne wyjścia: wielogłosowy projekt ElevenLabs Studio (audio) oraz wersję HTML dla czytników ekranu. To dwa sposoby „usłyszenia" tej samej sztuki — możesz użyć jednego, drugiego albo obu. Oba są opcjonalne i nie zmieniają klasycznego przepływu z konwerterem.
 
-    ─────────── Most do ElevenLabs Studio (audio, opcjonalny) ───────────
+    ### Most do ElevenLabs Studio (audio, opcjonalny)
 
     Most zamienia skrypt w wielogłosowy projekt Studio — narrator i każda postać dostają osobny głos. Bez klucza ElevenLabs nic się nie zmienia: most po prostu pozostaje ukryty.
 
-    Klucz ElevenLabs (opcjonalny)
+    #### Klucz ElevenLabs (opcjonalny)
 
     Wklej swój klucz ElevenLabs do pliku golden_key.env, w osobnej linii: ELEVENLABS_API_KEY=sk_... Uwaga: klucz ElevenLabs zaczyna się od sk_ (z PODKREŚLNIKIEM), inaczej niż klucz Anthropic (sk-ant-). Jeśli używasz klucza z ograniczeniami (restricted key), nadaj mu uprawnienia (scope'y) projects_write oraz voices_read. Status klucza widać na ekranie głównym (System Check) — brak klucza nie jest błędem, po prostu most pozostaje ukryty.
 
     Most pojawia się w panelu Reżysera w trybie Skrypt (gdy klucz jest poprawny). Działa na gotowej sztuce zapisanej na dysku — najpierw wygeneruj lub wczytaj projekt, potem przejdź do mostu.
 
-    Krok 1 — Obsada głosowa
+    #### Krok 1 — Obsada głosowa
 
     Kliknij „Obsada głosowa…". Aplikacja wczyta z Twojego skryptu postacie, które mają kwestie, i zawsze doda slot Narratora (narrator to głos domyślny — czyta tytuły rozdziałów i całą narrację). Dla każdego mówcy wklej voice ID. WAŻNE: każdy głos użyty w sztuce musi najpierw znaleźć się w Twoich „My Voices" — głosy, które tworzysz sam (np. w „Voice Design"), trafiają tam automatycznie, a głosy z publicznej biblioteki przeglądasz w zakładce „Explore" i dodajesz przyciskiem „Add to My Voices". Jak zdobyć voice ID w ElevenLabs (w przeglądarce): odnajdź głos, odtwórz próbkę, żeby mieć pewność, że to właściwy, i skopiuj jego identyfikator przyciskiem „Copy Voice ID"; gdy głos jest już w „My Voices", przycisk ten jest dostępny od razu — bez rozwijania „More actions". Dobór głosów: aby ograniczyć ewentualne regeneracje, najłatwiej wybierać z kolekcji „Best for Eleven v3" (głosy sprawdzone pod kątem modelu v3, na którym powstaje projekt); alternatywnie zaprojektuj własny głos w „Voice Design", a dla odważnych zostaje klonowanie IVC (Instant Voice Cloning) lub PVC (Professional Voice Cloning). Pola możesz zostawić puste i wrócić później — zapis jest szkicem.
 
-    Krok 2 — Zbuduj projekt
+    #### Krok 2 — Zbuduj projekt
 
     Kliknij „Stwórz projekt ElevenLabs Studio…". Aplikacja sprawdzi, czy skrypt ma przynajmniej jeden rozdział (Prolog/Akt/Rozdział) i czy każdy mówca oraz narrator mają przypisany głos, a następnie utworzy w Twoim koncie wielogłosowy projekt Studio podzielony na rozdziały. Samo utworzenie projektu NIE zużywa kredytów. Aplikacja od razu ustawia język projektu (poprawna wymowa linii nagłówkowych) oraz normalizację głośności do standardu audiobooka — robi to przez API, żebyś nie musiał wchodzić w ustawienia projektu w przeglądarce.
 
     Strażnik formatu (rozszerzenie Zasady Montażysty): most wymaga, by w skrypcie KAŻDA linia była albo wypowiedzią ze znacznikiem mówcy ([Narrator: …] lub [Imię: …]), albo nagłówkiem struktury (Prolog, Akt, Scena, Rozdział). Zwykła, nieotagowana proza wpisana „luzem” — na przykład odautorska notatka albo fragment narracji bez tagu — nie trafia do żadnego głosu i jest przy budowie po cichu pomijana, więc gotowy projekt mógłby rozjechać się z Twoim plikiem. Dlatego jeśli aplikacja wykryje takie linie-sieroty, pokaże ich listę z numerami i zapyta, czy mimo to budować: możesz wtedy anulować i poprawić skrypt (otwórz go przyciskiem „Otwórz plik narracji…”, dodaj brakujące znaczniki mówcy albo usuń te linie) lub świadomie zbudować mimo to, godząc się na ich pominięcie. To naturalne rozszerzenie Zasady Montażysty: tak jak nie wolno psuć nagłówków struktury, tak w skrypcie przeznaczonym pod most każda linia powinna mieć swojego mówcę albo być nagłówkiem.
 
-    Krok 3 — Render w przeglądarce
+    #### Krok 3 — Render w przeglądarce
 
     Po utworzeniu projektu aplikacja pokaże jego identyfikator oraz przycisk otwierający ElevenLabs Studio. W przeglądarce odnajdź projekt, wyrenderuj mowę (to dopiero zużywa kredyty — orientacyjnie 1 kredyt za znak), a potem wyeksportuj plik audio lub opublikuj projekt do Eleven Reader. Render i publikacja odbywają się po Twojej stronie, świadomie — aplikacja jedynie buduje projekt.
 
-    Ekspresja i akcenty (model Eleven v3)
+    #### Ekspresja i akcenty (model Eleven v3)
 
     Projekt powstaje na modelu Eleven v3 (ponad 70 języków). Emocji NIE wyraża się wielkimi literami, wielokropkami ani myślnikami — silnik to ignoruje. Zamiast tego Reżyser wplata w kwestie angielskie audio-tagi v3, na przykład [whispers], [sighs], [angry], [laughs] — to one sterują ekspresją i działają niezależnie od języka mowy. AKCENT postaci bierze się natomiast z PRÓBKI GŁOSU: jeśli chcesz, by ktoś mówił np. po polsku z obcym akcentem, dobierz lub zaprojektuj w Voice Design głos, którego próbka ma ten akcent. W praktyce eksperymentuj z promptem głosu, aż usłyszysz np. polską próbkę z fińskim akcentem — model v3 ten akcent zachowa w gotowym nagraniu. Wskazówka: bardzo długie zdania osłabiają akcent, dlatego Reżyser jest już proszony w prompcie o krótkie zdania.
 
-    Świadomość modelu v3 (faza alpha)
+    #### Świadomość modelu v3 (faza alpha)
 
     Eleven v3 jest najbardziej ekspresyjny, ale wciąż w fazie alpha. Bywa, że pojedyncza replika wyrenderuje się jako trzeszczenie zamiast mowy — wystarczy ją zregenerować w Studio (każdy blok ma kilka darmowych regeneracji). W ustawieniach projektu ElevenLabs może też wyświetlać rekomendacje zmiany modelu (na Eleven Flash v2.5 lub Multilingual v2) — to NIE jest błąd, tylko podpowiedź silnika. Jeśli nie chcesz tych komunikatów widzieć, po prostu nie otwieraj ustawień projektu: aplikacja ustawiła już przez API wszystko, co potrzebne (model, język, normalizację głośności).
 
     Dlaczego teatr czytany, a nie efekty dźwiękowe? We wcześniejszych wersjach tryb Skrypt produkował surowe efekty [SFX: ...] bez narratora. Most do gotowego, wielogłosowego nagrania wymaga jednak, by kontekst (miejsce, czas, akcja) niósł narrator słowami: efekty dźwiękowe w Studio nie są dostępne dla czytników ekranu, a model i tak realizuje albo narratora, albo efekty — nigdy stabilnie obu naraz. Dlatego tryb Skrypt to teatr czytany: narrator plus dialog, bez SFX.
 
-    ─────────── Wersja dla czytników ekranu (HTML, bez ElevenLabs) ───────────
+    ### Wersja dla czytników ekranu (HTML, bez ElevenLabs)
 
     W trybie Skrypt, niezależnie od klucza ElevenLabs, masz przycisk „Generuj wersję dla czytników ekranu". Tworzy on plik `skrypty/<nazwa>_screen_reader.html` — osobne wyjście dla osób korzystających z czytników ekranu (np. NVDA). Działa tak: kwestie postaci, które w Księdze Świata mają zdefiniowany akcent (np. wpis „[Joana] akcent fiński"), dostają zapis fonetyczny (celowo „psuta" ortografia) oraz znacznik języka (atrybut lang), dzięki czemu czytnik ekranu czyta je z właściwym, obcym akcentem. Audio-tagi v3 (np. [whispers]) są w tej wersji usuwane — czytnik nie ma ich czytać na głos. Nagłówki Prolog/Akt/Scena stają się nagłówkami HTML, więc po dokumencie wygodnie się nawiguje.
 
@@ -329,18 +329,18 @@ tresc:
 
     Po napisaniu historii masz do dyspozycji narzędzie postprodukcyjne dostępne na dole panelu Reżyserii (pojawia się tylko w Trybie Audiobooka).
 
-    Nadawanie Tytułów Rozdziałom (Tryb Audiobooka)
+    ### Nadawanie Tytułów Rozdziałom (Tryb Audiobooka)
 
     AI przeanalizuje całą historię i zaproponuje opisowe, literackie tytuły dla każdego rozdziału (oraz ewentualnego Prologu i Epilogu). Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł, analizując tylko początki każdego rozdziału (do 6000 znaków). Zwraca wyłącznie ponumerowaną listę tytułów — bez przepisywania treści książki.
 
-    Uwaga: Moduł wymaga, by plik był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.
+    **Uwaga:** Moduł wymaga, by plik był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.
   krok_5_poliglota_intro: |
     ## KROK 5: Poliglota AI
 
     Aplikacja do tłumaczeń i wymuszania twardych akcentów na syntezatorach czytników ekranu. Przejdź do niej, klikając przycisk "{main.btn.poliglota}" na pasku przycisków lub wybierając Narzędzia → {main.menu.poliglota} z menu (skrót: Ctrl+2).
 
 
-    Tryb 1: Zwykły Tłumacz (Używa AI - Płatny)
+    ### Tryb 1: Zwykły Tłumacz (Używa AI - Płatny)
 
     Idealny do słuchania opowieści w pięknej, poprawnej obcej mowie.
 
@@ -356,7 +356,7 @@ tresc:
 
     Dlaczego to ważne? W wersji 8 podejście do wznawiania tłumaczenia miało krytyczny, cichy błąd: jeśli nie przemianowało się pliku z częściowym tłumaczeniem i wycięło się przetłumaczony fragment zgodnie z instrukcją, a potem od razu wznowiło tłumaczenie reszty — aplikacja otwierała plik wyjściowy w trybie nadpisywania. Opłacony postęp ulegał bezpowrotnemu i bezwiednemu wymazaniu, zanim zdążyłeś cokolwiek zauważyć. Wersja 9 eliminuje tę pułapkę całkowicie: zapis jest trwały po każdym bloku, niezależnie od tego, co zrobisz potem.
 
-    Tryb 2: Tryb Reżysera / Akcenty (Darmowy - Działa lokalnie)
+    ### Tryb 2: Tryb Reżysera / Akcenty (Darmowy - Działa lokalnie)
 
     Narzędzie do "psucia" tekstu. Wymusza na syntezatorach łamany polski.
 
@@ -415,7 +415,7 @@ tresc:
   krok_5_akcenty_nvda: |
     ## Akcenty zoptymalizowane pod lokalne syntezatory (NVDA)
 
-    Akcenty zostały w 100% zaprojektowane pod lokalne, darmowe i płatne syntezatoryczytników ekranu — Vocalizer i eSpeak w NVDA. To gwarantuje stabilność i przewidywalność efektu na każdym komputerze.
+    Akcenty zostały w 100% zaprojektowane pod lokalne, darmowe i płatne syntezatory czytników ekranu — Vocalizer i eSpeak w NVDA. To gwarantuje stabilność i przewidywalność efektu na każdym komputerze.
 
     Dlaczego nie ElevenLabs? Testy na dłuższych dokumentach wykazały, że fonetyczne zniekształcanie tekstu w silnikach takich jak ElevenLabs nie wymusza zamierzonego akcentu — silnik po prostu "zgaduje" język i z niego raczej robi akcent zachodnio/południowo-słowiański. Lokalne syntezatory NVDA są w tej kwestii znacznie bardziej posłuszne.
   krok_5_specyfika_tts: |
@@ -423,7 +423,7 @@ tresc:
 
     Różne silniki TTS zachowują się inaczej. Poniżej kluczowe różnice, które mają bezpośredni wpływ na działanie akcentów:
 
-    eSpeak (Open Source)
+    ### eSpeak (Open Source)
     Lekki, darmowy silnik z ogromną bazą języków — obsługuje m.in. islandzki. Bardzo rygorystyczny wobec kodowania znaków, co czyni go przewidywalnym. Ma jednak wady fonetyczne: często współdzieli fonemy między językami, przez co np. ukraiński brzmi z rosyjskim nalotem.
   krok_5_tiflotecnia: |
     ## Tiflotecnia Voices for NVDA (głosy Cerrence — dawniej Vocalizer od Nuance)
@@ -432,7 +432,7 @@ tresc:
 
     Jak zainstalować: NVDA → Narzędzia → Add-on Store → wyszukaj „Tiflotecnia Voices for NVDA" → Instaluj. Po instalacji w menu NVDA pojawi się dedykowane podmenu „Tiflotecnia Voices" oraz własna kategoria w ustawieniach NVDA. GUI dodatku prowadzi krok po kroku przez zakup licencji (lub aktywację 7-dniowego okresu próbnego), wybór i instalację pierwszych głosów (np. polska Ewa do płynnego czytania kontrolek systemowych, fińska Satu do akcentów w Poliglocie). Wbudowana pomoc dodatku jest klarowna, więc tu nie powielamy procedury — wystarczy się dać dodatkowi prowadzić.
 
-    Wskazówka dla migrujących z Vocalizera i Eloquence: dostępny jest upgrade w niższej cenie. Procedura: po pomyślnej płatności od razu napisz mail na adres podlinkowany na ekranie sukcesu płatności i poproś o walidację starego kodu aktywacyjnego — Tiflotecnia potwierdzi prawo do zniżki i ureguluje cenę. Bez tego maila system traktuje cię jako nowego klienta.
+    **Wskazówka dla migrujących z Vocalizera i Eloquence:** dostępny jest upgrade w niższej cenie. Procedura: po pomyślnej płatności od razu napisz mail na adres podlinkowany na ekranie sukcesu płatności i poproś o walidację starego kodu aktywacyjnego — Tiflotecnia potwierdzi prawo do zniżki i ureguluje cenę. Bez tego maila system traktuje cię jako nowego klienta.
 
     Dostępność głosów: Tiflotecnia Voices obsługuje większość języków, które miał Vocalizer (m.in. polski, angielski, niemiecki, francuski, hiszpański, fiński, włoski, rosyjski). Lista głosów per język widoczna jest w kategorii ustawień dodatku przed zakupem licencji.
   krok_5_onecore: |
@@ -462,7 +462,7 @@ tresc:
 
     Żeby NVDA faktycznie przełączało głos na podstawie tagu lang, musi być włączone ustawienie "Automatycznie zmieniaj język, gdy wspierane". Znajdziesz je w Preferencjach NVDA → Mowa. Domyślnie jest włączone po pierwszym uruchomieniu czytnika — ale warto sprawdzić, czy ktoś go nie wyłączył.
 
-    Ważne ograniczenie głosów OneCore: Głosy Microsoft OneCore natywnie nie obsługują tego mechanizmu z NVDA, a tylko z wbudowanym w system Windows narratorem. Istnieje nieoficjalny dodatek do NVDA o nazwie „One Core Autolang", który próbuje to naprawić — ale jego rozwój został szybko przerwany. Przyczyna jest prozaiczna: co roku, przy pierwszej wersji NVDA w danym roku, pojawiają się zmiany łamiące kompatybilność API (tzw. API Breaking Changes). Czasem wystarczy zaktualizować pole „last tested version" w manifeście dodatku, ale czasem wymagane są prawdziwe zmiany w kodzie — a autor nie nadąża z aktualizacjami. Jeśli zależy Ci na automatycznym przełączaniu języka, bezpieczniejszym wyborem są Tiflotecnia Voices (płatne, sekcja powyżej) lub eSpeak (darmowe, słabsza jakość), które obsługują ten mechanizm natywnie — ale uwaga: aktualnie w Tiflotecnia Voices działa to z błędem priorytetów (patrz „Krytyczny haczyk" niżej). Po skopiowaniu patcha automatyczne przełączanie chodzi wzorowo, jak w starym Vocalizerze.
+    **Ważne ograniczenie głosów OneCore:** Głosy Microsoft OneCore natywnie nie obsługują tego mechanizmu z NVDA, a tylko z wbudowanym w system Windows narratorem. Istnieje nieoficjalny dodatek do NVDA o nazwie „One Core Autolang", który próbuje to naprawić — ale jego rozwój został szybko przerwany. Przyczyna jest prozaiczna: co roku, przy pierwszej wersji NVDA w danym roku, pojawiają się zmiany łamiące kompatybilność API (tzw. API Breaking Changes). Czasem wystarczy zaktualizować pole „last tested version" w manifeście dodatku, ale czasem wymagane są prawdziwe zmiany w kodzie — a autor nie nadąża z aktualizacjami. Jeśli zależy Ci na automatycznym przełączaniu języka, bezpieczniejszym wyborem są Tiflotecnia Voices (płatne, sekcja powyżej) lub eSpeak (darmowe, słabsza jakość), które obsługują ten mechanizm natywnie — ale uwaga: aktualnie w Tiflotecnia Voices działa to z błędem priorytetów (patrz „Krytyczny haczyk" niżej). Po skopiowaniu patcha automatyczne przełączanie chodzi wzorowo, jak w starym Vocalizerze.
   krok_5_alarm_detekcja_jezyka: |
     ## Krytyczny haczyk Tiflotecnia Voices: zepsuta detekcja języka
 
@@ -479,7 +479,7 @@ tresc:
     Narzędzie do przygotowywania profesjonalnej struktury pliku pod czytniki ekranu i ElevenLabs. Przejdź do niego, klikając przycisk "{main.btn.konwerter}" na pasku przycisków lub wybierając Narzędzia → {main.menu.konwerter} z menu (skrót: Ctrl+3).
 
 
-    Jak to działa?
+    ### Jak to działa?
 
     1. Wpisz ścieżkę do pliku źródłowego w polu tekstowym lub kliknij przycisk "Przeglądaj...", by wybrać plik w systemowym oknie dialogowym. Skrypt przyjmuje zarówno .txt, jak i .docx, a także pliki .html i .htm.
     2. Kliknij "{konwerter.btn_buduj}".
@@ -490,11 +490,11 @@ tresc:
 
     Oczyszczanie przy okazji: Skrypt automatycznie usuwa tagi HTML (jeśli tekst pochodzi z przeglądarki lub z lokalnego pliku .html, np. wygenerowanego przez Poliglotę) oraz znaczniki nagłówków Markdown (np. ### lub ####) przed przetworzeniem. Nie musisz czyścić pliku ręcznie.
 
-    Tryb Opowieści: automatyczne grupowanie tur w sceny (od v15.1)
+    ### Tryb Opowieści: automatyczne grupowanie tur w sceny (od v15.1)
 
     Jeśli wczytasz do Architekta plik `opowiesci/<gra>.txt` wygenerowany przez moduł Interaktywnych Opowieści, konwerter rozpozna znaczniki tury (np. „--- Tura 7 ---" — także w pozostałych obsługiwanych językach, jeśli grałeś w innym) i co pięć tur wstawi nowy nagłówek pierwszego poziomu „Scena N" (numer biegnie od 1, w języku Twojej gry). Pozostałe znaczniki tury są strippowane — nie pojawiają się w narracji audiobooka, bo „Tura 7" wymówiona przez TTS łamie immersję słuchacza. Wynikiem jest plik Word z naturalnym podziałem na sceny po kilka minut audio każda, gotowy do importu do ElevenLabs. Mechanizm jest auto-detekcyjny — zwykłe pliki audiobooków bez znaczników tury (klasyczna narracja z Reżysera) przetwarzane są dokładnie tak, jak dotąd.
 
-    Potężna zaleta dla użytkowników NVDA i ElevenLabs
+    ### Potężna zaleta dla użytkowników NVDA i ElevenLabs
 
     Formatowanie "Heading 1" dla rozdziałów to nie tylko estetyka. W NVDA możesz nawigować po nagłówkach błyskawicznie, naciskając klawisz H (lub 1 dla nagłówków pierwszego poziomu). Zamiast przewijać setki stron, przeskakujesz od rozdziału do rozdziału w ułamku sekundy. To zmienia sposób pracy z długimi dokumentami. W ElevenLabs masz pewność, że silnik automatycznie wstawi cięcia i nie będzie się zawieszał podczas reżyserowania klipów audio.
   krok_7_ksiega_swiata: |
@@ -510,7 +510,7 @@ tresc:
 
     Mini-kurs Markdown w Księdze: pojedynczy hashtag (#) to główna sekcja (np. „# Postacie"), podwójny hashtag (##) to podsekcja, myślniki (-) tworzą listy, a podwójne gwiazdki (**tekst**) pogrubiają absolutne, nienaruszalne zasady (np. „**Bohater NIGDY nie kłamie**"). Dla postaci obcojęzycznej dodawaj tag z akcentem, np. „[Speaker 1: Marek] - ma akcent francuski". Słowo kluczowe „akcent" jest KONIECZNE — silnik aplikacji wykrywa je automatycznie i nakłada poprawne reguły fonetyczne na dialogi danej postaci.
 
-    Wskazówka: Pamiętaj, by co jakiś czas (wraz z rozbudową fabuły o nowe miejsca czy ważnych bohaterów) aktualizować swoją Księgę Świata. Możesz to robić ręcznie lub z pomocą zewnętrznego chatbota. Im bogatszy fundament, tym lepsze efekty w Reżyserii!
+    **Wskazówka:** Pamiętaj, by co jakiś czas (wraz z rozbudową fabuły o nowe miejsca czy ważnych bohaterów) aktualizować swoją Księgę Świata. Możesz to robić ręcznie lub z pomocą zewnętrznego chatbota. Im bogatszy fundament, tym lepsze efekty w Reżyserii!
   krok_7b_manager_regul: |
     ## KROK 7b: Manager Reguł (Ctrl+4) — słowniki dla lingwistów bez Pythona
 
@@ -565,83 +565,83 @@ tresc:
   nvda_a11y: |
     ## Ważne wskazówki dla użytkowników czytników ekranu (NVDA)
 
-    1. Komunikaty o sukcesie i błędach
+    ### 1. Komunikaty o sukcesie i błędach
 
     Gdy aplikacja zakończy działanie (np. zapisze plik lub napotka błąd), pojawi się okno dialogowe z tytułem takim jak "Sukces", "Ostrzeżenie" lub "Błąd". NVDA od razu ogłosi to okno i odczyta jego treść. Nie musisz nic robić — dialogi są w pełni dostępne z klawiatury, a fokus automatycznie ląduje na przycisku "OK". Nie ma już sztuczek z prefiksem "Alert" — natywne okna dialogowe wxPython są obsługiwane bezpośrednio przez czytnik.
 
-    2. Ważne ostrzeżenie: ciche przetwarzanie w tle
+    ### 2. Ważne ostrzeżenie: ciche przetwarzanie w tle
 
     Po kliknięciu przycisków takich jak "{rezyser.btn_wyslij_label}" lub "{poliglota.btn_process}", program natychmiast rozpoczyna przetwarzanie w tle. Na ekranie pojawia się pasek postępu (Gauge), ale NVDA NIE odczytuje jego wartości w czasie rzeczywistym — czytnik ekranu milczy podczas pracy. Nie klikaj przycisku ponownie. Poczekaj, aż pojawi się okno dialogowe z wynikiem lub komunikatem o błędzie — NVDA ogłosi je automatycznie.
 
-    3. Nawigacja między narzędziami
+    ### 3. Nawigacja między narzędziami
 
     Poruszanie się między narzędziami (Reżyser, Poliglota, Konwerter, Manager Reguł) odbywa się w jednym oknie programu za pomocą czterech przycisków na pasku narzędzi lub przez menu Narzędzia (Alt, a następnie N). Dostępne skróty klawiaturowe: Ctrl+0 (Strona główna), Ctrl+1 (Reżyser), Ctrl+2 (Poliglota), Ctrl+3 (Konwerter), Ctrl+4 (Manager Reguł — nowość w 13.0). Po przełączeniu narzędzia fokus automatycznie ląduje na opisie nowego modułu — NVDA od razu zaczyna czytać nowy widok.
 
 
-    4. Kolejność tabulatora i nazwy widżetów
+    ### 4. Kolejność tabulatora i nazwy widżetów
 
     Każdy element interfejsu ma nadaną czytelną polską nazwę — NVDA odczyta ją przy sfocusowaniu. Kolejność tabulatora jest logiczna: od opisu narzędzia, przez pola konfiguracyjne, aż po przyciski akcji. Nie ma tu zaskoczeń — nawigacja klawiaturą działa tak samo jak w każdym innym natywnym programie Windows. Wszystkie menu i przyciski są w języku polskim i NVDA odczyta je polskim głosem bez żadnych dodatkowych ustawień.
   changelog_9: |
     ## Ważne uwagi do wersji 9.0 / Changelog
 
-    Nowe funkcje i zmiany w wersji 9
+    ### Nowe funkcje i zmiany w wersji 9
 
-    Odporny na awarie zapis postępu tłumaczenia (ZMIANA — naprawa krytycznego buga)
+    **Odporny na awarie zapis postępu tłumaczenia (ZMIANA — naprawa krytycznego buga)**
     W wersji 8 wznawianie przerwanego tłumaczenia było obarczone cichą, destrukcyjną pułapką: jeśli użytkownik zastosował się do instrukcji (ręczne wycięcie przetłumaczonego fragmentu), a potem od razu wznowił tłumaczenie reszty, aplikacja otwierała plik wyjściowy w trybie nadpisywania — bezpowrotnie i bezwiednie kasując cały opłacony postęp. W wersji 9 cały mechanizm został przeprojektowany. Każdy przetłumaczony blok jest teraz natychmiast zapisywany do pliku tymczasowego (.jsonl) z przypisanym indeksem. Wznowienie jest w pełni automatyczne — aplikacja sama wykrywa plik i odtwarza postęp bez żadnej ingerencji użytkownika. Po udanym zakończeniu plik tymczasowy jest automatycznie usuwany.
 
-    Naprawiacz Tagów w Trybie Reżysera (NOWOŚĆ)
+    **Naprawiacz Tagów w Trybie Reżysera (NOWOŚĆ)**
     Do menu Trybu Reżysera dodano nową opcję — Naprawiacz Tagów. Wstrzykuje do pliku wyłącznie podany przez użytkownika dwuliterowy kod języka ISO, bez stosowania jakichkolwiek reguł fonetycznych ani czyszczenia. Narzędzie ratunkowe na wypadek, gdy gotowy już plik wyszedł z błędnym lub brakującym tagiem językowym.
 
-    Automatyczna konwersja .txt na .html w Trybie Tłumacza (ZMIANA)
+    **Automatyczna konwersja .txt na .html w Trybie Tłumacza (ZMIANA)**
     Pliki tekstowe (.txt oraz .md) tłumaczone przez Tłumacza AI są teraz automatycznie zapisywane w formacie .html z wbudowanym tagiem językowym. Dzięki temu NVDA od razu odczytuje plik właściwym głosem — bez żadnych dodatkowych kroków ze strony użytkownika.
 
-    Inteligentne nazewnictwo pliku w Architekcie (ZMIANA)
+    **Inteligentne nazewnictwo pliku w Architekcie (ZMIANA)**
     Architekt Audiobooków nie zapisuje już wynikowego pliku zawsze pod tą samą nazwą architektura_gotowa.docx. Teraz nazwa wynika z pliku wejściowego — np. dla znieczulica.txt wynikowy plik to architektura_znieczulica.docx. Plik pojawia się w tym samym folderze co oryginał.
 
-    Funkcje zachowane bez zmian z wersji 8
+    ### Funkcje zachowane bez zmian z wersji 8
 
-    Powrót do formatu .txt dla plików projektów (ZMIANA)
+    **Powrót do formatu .txt dla plików projektów (ZMIANA)**
     Pliki projektów i streszczenia zapisują się teraz w formacie .txt zamiast .md (Markdown). Eksperyment z formatem .md jako psychologiczną barierą przed edycją okazał się nieskuteczny — AI często notorycznie łamie zasadę anti-closure i często lepiej edytować plik na bieżąco i potem przeładowywać pamięć, by AI, w miarę możliwości, nie dostawało ukrytego przyzwolenia na łamanie zakazu. Format .txt jest bardziej intuicyjny i czytelny dla każdego.
 
-    Zasada Montażysty — nowe ostrzeżenie
+    **Zasada Montażysty — nowe ostrzeżenie**
     W instrukcji (i w przyszłych wersjach interfejsu) dodano wyraźne ostrzeżenie wyjaśniające, co wolno, a czego nie wolno edytować w plikach projektów. Użytkownik ma pełne prawo do edycji dialogów i treści, ale absolutnie nie może modyfikować linii struktury (Akt, Scena, Rozdział, Prolog, Epilog) — ich uszkodzenie psuje nawigację NVDA, podział w ElevenLabs i spis treści w Wordzie.
 
-    Zaktualizowany Prompt Architekta (ZMIANA)
+    **Zaktualizowany Prompt Architekta (ZMIANA)**
     Prompt do zewnętrznego chatbota (ChatGPT/Claude) został przeprojektowany. Zamiast zwracać surowy kod Markdown, AI teraz zwraca odpowiedź w dwóch wyraźnie oddzielonych częściach: Część 1 to Księga Świata zamknięta w bloku kodu Markdown (łatwa do skopiowania bez znaczników), a Część 2 to Rekomendacja Trybu jako zwykły tekst poza blokiem — doradza, czy lepiej użyć Trybu Surowego Skryptu, czy Trybu Tradycyjnego Audiobooka. Zmieniono też opis tagów postaci: zamiast "dźwiękowych" mowa teraz o akcencie i tonie głosu w tagu, np. [Speaker 1: Imię] - sepleni i akcent francuski.
 
-    Wyjaśnienie stanu dyrektywy Anti-Closure (DOKUMENTACJA)
+    **Wyjaśnienie stanu dyrektywy Anti-Closure (DOKUMENTACJA)**
     Instrukcja zawiera teraz szczere wyjaśnienie, że mimo wbudowanych zakazów Anti-Closure model nadal notorycznie łamie tę zasadę, szczególnie w Trybie Audiobooka. Zamiast ukrywać ten problem, wersja 8 stawia sprawę jasno i przekazuje odpowiedzialność za "ręczne domykanie" z powrotem do Reżysera — stąd Zasada Montażysty jako oficjalne narzędzie pracy i powrót do zwykłego formatu tekstowego.
 
-    Funkcje zachowane bez zmian z wersji 7
+    ### Funkcje zachowane bez zmian z wersji 7
 
-    Prompty Showrunnerowe — Dyrektywa Anti-Closure (Reżyseria — wszystkie tryby)
+    **Prompty Showrunnerowe — Dyrektywa Anti-Closure (Reżyseria — wszystkie tryby)**
     Wszystkie trzy tryby Reżyserii zachowują wbudowane dyrektywy showrunnerowe. Burza Mózgów działa jak scenarzysta serialu wielosezonowego. Tryb Surowego Skryptu i Tryb Audiobooka mają zakaz kończenia tekstu podsumowaniami, morałami i klamrami narracyjnymi — z wyjątkiem sytuacji, gdy użytkownik wprost prosi o finał lub epilog.
 
-    Zarządzanie Aktami i Scenami w czasie rzeczywistym (Reżyseria — Tryb Skryptu)
+    **Zarządzanie Aktami i Scenami w czasie rzeczywistym (Reżyseria — Tryb Skryptu)**
     Tryb Surowego Skryptu posiada panel z przyciskami "Wstaw Akt X" i "Wstaw Scenę X". Liczniki aktualizują się automatycznie. Wczytanie istniejącego pliku ustawia oba liczniki na właściwe numery.
 
-    Czyszczenie nawiasowych didaskaliów reżyserskich (Poliglota — Tryb Reżysera)
+    **Czyszczenie nawiasowych didaskaliów reżyserskich (Poliglota — Tryb Reżysera)**
     Skrypt usuwa całe fragmenty tekstu ujęte w nawiasy okrągłe (np. "(szeptem)", "(z wplecionymi wdechami)"). ElevenLabs czyta wyłącznie dialogi i narrację.
 
-    Nieskończona Pamięć i Automatyczne Streszczowanie (Reżyseria — Akumulator Fabuły)
+    **Nieskończona Pamięć i Automatyczne Streszczowanie (Reżyseria — Akumulator Fabuły)**
     Gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, Burza Mózgów automatycznie generuje streszczenie fabuły i zapisuje je do pola Pamięci Długotrwałej. Kliknięcie "Zapisz Streszczenie (na stałe)" tworzy plik _streszczenie.txt. Po wyczyszczeniu pamięci i wczytaniu streszczenia można kontynuować historię bez żadnych ograniczeń długości.
 
-    Architekt Audiobooków
+    **Architekt Audiobooków**
     Narzędzie obsługuje słowa kluczowe Akt, Rozdział, Prolog, Epilog i Czołówka jako nagłówki pierwszego poziomu. Sceny zamieniają się w pogrubiony tekst. Skrypt automatycznie czyści tagi HTML i znaczniki Markdown przed przetworzeniem.
 
-    Inteligentne Zarządzanie Rozdziałami (Tryb Audiobooka)
+    **Inteligentne Zarządzanie Rozdziałami (Tryb Audiobooka)**
     Dedykowany panel z przyciskami do wstawiania Prologu, Epilogów i cięć rozdziałów bezpośrednio z interfejsu. Licznik rozdziałów aktualizuje się automatycznie. Wczytanie istniejącego pliku ustawia licznik na właściwy numer bez ręcznego liczenia.
 
-    Nadawanie Tytułów Rozdziałom (Postprodukcja — Tryb Audiobooka)
+    **Nadawanie Tytułów Rozdziałom (Postprodukcja — Tryb Audiobooka)**
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki, literacki tytuł przy użyciu szybkiego modelu AI, analizując tylko początki każdego rozdziału.
 
-    Usunięte funkcje (niezmienione od wersji 7)
+    ### Usunięte funkcje (niezmienione od wersji 7)
 
     Mapa Cięć (Tryb Skryptu) — zastąpiona panelem zarządzania Aktami i Scenami w czasie rzeczywistym.
     Adaptacja Skryptu na Audiobooka (Tryb Skryptu) — usunięta z powodów finansowych. Przepływ pracy generował trzy osobne koszty: generowanie skryptu, potencjalne streszczowanie przy przepełnieniu pamięci, a na końcu ponowne generowanie całości jako prozy audiobookowej. Zalecamy pisanie bezpośrednio w Trybie Tradycyjnego Audiobooka od samego początku.
 
 
-    Funkcje z wersji 10.0 (zachowane bez zmian w wersjach 11.0 i 12.0)
+    ### Funkcje z wersji 10.0 (zachowane bez zmian w wersjach 11.0 i 12.0)
 
     - Automatyczny generator pliku konfiguracyjnego golden_key.env wbudowany prosto w główny interfejs aplikacji. Użytkownik nie musi już ręcznie tworzyć pliku ani martwić się pułapką rozszerzenia .txt — wystarczy jeden klik przycisku dostępnego na ekranie startowym, a system tworzy czysty, gotowy plik we właściwym miejscu.
     - Całkowite usunięcie przestarzałego skryptu napraw_api.bat, który nie jest już potrzebny. Problem, który ten skrypt rozwiązywał (błędne rozszerzenie pliku nadawane przez Notatnik), jest teraz całkowicie wyeliminowany dzięki wbudowanemu generatorowi.
@@ -658,7 +658,7 @@ tresc:
 
     - Aktualizacja imion syntezatorów w menu Poligloty (ZMIANA). Zaktualizowano nazwy głosów w menu selectbox dla istniejących języków: Włoski ma teraz również Luca (Vocalizer), Fiński ma teraz również Mikko (Vocalizer). Islandzki zachował nazwę bez znaków diakrytycznych (Gudrun zamiast Gudrun ze znakiem eth) dla lepszej kompatybilności.
 
-    Funkcje zachowane bez zmian z wersji 10
+    ### Funkcje zachowane bez zmian z wersji 10
 
     - Automatyczny generator pliku golden_key.env wbudowany w interfejs.
     - Wieloksiążkowość Księgi Świata (każdy projekt ma własny plik .md z zasadami świata).
@@ -683,7 +683,7 @@ tresc:
 
     - Automatyczne wczytywanie trybu twórczego (NOWOŚĆ). Przy wczytywaniu projektu aplikacja automatycznie przywraca ostatnio używany tryb pracy (Skrypt lub Audiobook) z pliku metadanych zarządzanego przez aplikację. Dzięki temu po ponownym otwarciu projektu pole wyboru trybu ustawia się samo — nie musisz pamiętać, w jakim trybie pracowałeś.
 
-    Funkcje zachowane bez zmian z wersji 11.0
+    ### Funkcje zachowane bez zmian z wersji 11.0
 
     - Akcenty fonetyczne w Poliglocie (Angielski, Francuski, Niemiecki, Hiszpański, Włoski, Fiński, Islandzki).
     - Automatyczny generator pliku golden_key.env wbudowany w ekran startowy.
@@ -711,7 +711,7 @@ tresc:
 
     - Rozszerzony pasek nawigacji i menu Narzędzia (ZMIANA). Pasek ma teraz czwarty przycisk — Manager Reguł — a menu „Narzędzia" obsługuje nowy skrót Ctrl+4. Dotychczasowe skróty (Ctrl+0 Strona główna, Ctrl+1 Reżyser, Ctrl+2 Poliglota, Ctrl+3 Konwerter) pozostają bez zmian.
 
-    Funkcje zachowane bez zmian z wersji 12.0
+    ### Funkcje zachowane bez zmian z wersji 12.0
 
     - Natywne GUI desktopowe oparte o wxPython (bez przeglądarki, bez serwera lokalnego).
     - Pasek nawigacji z klawiszami skrótów (teraz Ctrl+0/1/2/3/4 — dodano Ctrl+4 dla Managera Reguł).

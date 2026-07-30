@@ -323,6 +323,23 @@ def _sciezka_pliku_tymczasowego(runtime_dir: str, base_name: str) -> str:
     return os.path.join(runtime_dir, f"temp_{base_name}.jsonl")
 
 
+def sciezka_cache_tlumaczenia(
+    runtime_dir: str,
+    oryginalna_nazwa: str,
+    jezyk_docelowy: str,
+    slowo_tlumaczenie: str = "tlumaczenie",
+) -> str:
+    """Ścieżka cache'u wznawiania dla danego tłumaczenia (18.9).
+
+    Publiczna, bo wołający z ``zachowaj_cache=True`` musi wiedzieć, co
+    posprzątać po udanym zapisie pliku wynikowego. Buduje nazwę dokładnie tak
+    samo jak :func:`tlumacz_dlugi_tekst`, więc nie da się rozjechać obu miejsc.
+    """
+    base_name = zbuduj_nazwe_bazowa(
+        oryginalna_nazwa, jezyk_docelowy, slowo_tlumaczenie)
+    return _sciezka_pliku_tymczasowego(runtime_dir, base_name)
+
+
 # =============================================================================
 # Pobranie kodu języka docelowego (drugie, tańsze zapytanie)
 # =============================================================================
@@ -495,6 +512,7 @@ def tlumacz_dlugi_tekst(
     max_tokenow_na_blok: int = 2_500,
     prompt_dodatkowy: str = "",
     slowo_tlumaczenie: str = "tlumaczenie",
+    zachowaj_cache: bool = False,
 ) -> WynikTlumaczenia | None:
     """Tłumaczy długi tekst przez Anthropic Claude z wznawianiem po przerwaniu.
 
@@ -537,6 +555,15 @@ def tlumacz_dlugi_tekst(
                            też do nazwy cache ``temp_*.jsonl`` — zmiana języka
                            UI między przerwanym a wznowionym tłumaczeniem
                            unieważnia cache (świadomy, rzadki koszt).
+        zachowaj_cache:    18.9. Nie kasuj ``temp_*.jsonl`` po sukcesie —
+                           dla wołających, którzy tłumaczą WIELE jednostek
+                           i zapisują plik wynikowy dopiero na końcu
+                           (``buduj_wielojezyczne_docs``: 68 sekcji → jeden
+                           plik). Bez tego błąd sekcji 40/68 zostawiał
+                           sekcje 1-39 bez cache'u i bez pliku, więc rerun
+                           płacił za nie drugi raz. Wołający sprząta cache
+                           sam (:func:`sciezka_cache_tlumaczenia`) po
+                           faktycznym zapisie pliku.
 
     Returns:
         :class:`WynikTlumaczenia` po sukcesie, albo ``None`` po błędzie
@@ -701,7 +728,9 @@ def tlumacz_dlugi_tekst(
         )
 
     # -------- Posprzątanie cache'u i złożenie wyniku --------------------
-    if os.path.exists(plik_temp):
+    # `zachowaj_cache` = wołający zapisuje plik wynikowy dopiero po wielu
+    # jednostkach i sam skasuje cache po udanym zapisie (patrz docstring).
+    if not zachowaj_cache and os.path.exists(plik_temp):
         try:
             os.remove(plik_temp)
         except Exception:   # noqa: BLE001

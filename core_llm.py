@@ -206,6 +206,9 @@ def _openai_chat(
     temperature: float,
     timeout: float,
     response_format: dict | None = None,
+    *,
+    bez_temperatury: bool = False,
+    klucz_tokenow: str = "max_tokens",
 ) -> tuple[str, str | None]:
     """Pojedyncze wywołanie ``chat.completions`` + normalizacja wyniku/stop_reason.
 
@@ -214,13 +217,19 @@ def _openai_chat(
     w :func:`_wywolaj_openai_compat` zdegraduje wywołanie. ``finish_reason=="length"``
     mapujemy na ``"max_tokens"`` (jak Anthropic), żeby wołający trzymali JEDEN warunek
     ucięcia (guard urwanej prozy, tytuły).
+
+    ``bez_temperatury`` / ``klucz_tokenow`` obsługują rodziny modeli, które
+    przyjmują wyłącznie domyślny sampling albo nazywają limit tokenów
+    ``max_completion_tokens`` (o-*, gpt-5) — używa ich ostatni szczebel drabiny
+    degradacji w :func:`_wywolaj_openai_compat`.
     """
     kwargs: dict[str, Any] = dict(
         model=mdl,
         messages=msgs,
-        max_tokens=max_tokens,
-        temperature=temperature,
     )
+    kwargs[klucz_tokenow] = max_tokens
+    if not bez_temperatury:
+        kwargs["temperature"] = temperature
     if response_format is not None:
         kwargs["response_format"] = response_format
     resp = klient.sdk.with_options(timeout=timeout).chat.completions.create(**kwargs)
@@ -259,6 +268,14 @@ def _wywolaj_openai_compat(
     płaskiego ``user`` bez formatu. Każdy szczebel niżej po błędzie STRUKTURY
     (400/422 via :func:`_czy_zla_struktura`). Na OSTATNIM szczeblu błąd leci wyżej;
     nie-struktura (429/timeout/sieć) leci wyżej NATYCHMIAST (→ :func:`wywolaj_llm`).
+
+    Po szczeblach KSZTAŁTU idą jeszcze szczeble PARAMETRÓW (v18.9): bez
+    ``temperature`` i z ``max_completion_tokens`` zamiast ``max_tokens``.
+    Gałąź Anthropic miała degradację ``temperature`` od v18.7, compat nie —
+    wszystkie jej szczeble wysyłały te same parametry, więc modele wymagające
+    domyślnego samplingu (rodziny o-*, gpt-5) padały na KAŻDYM z nich surowym,
+    angielskim wyjątkiem, wbrew obietnicy „dowolny endpoint zgodny z OpenAI"
+    z v18.4.
     """
     plaskie: list[dict] = list(messages)
     if system:
@@ -276,19 +293,33 @@ def _wywolaj_openai_compat(
     rf: dict | None = {"type": "json_object"} if wymusz_json else None
     glowny = bogate if bogate is not None else plaskie
 
-    # Szczeble od najpełniejszego do „flat bez formatu" (= v18.3). Płaski user-only
-    # ZAWSZE jest ostatni — gwarantuje powrót do dotychczasowego zachowania.
-    proby: list[tuple[list[dict], dict | None, str]] = []
+    # Szczeble KSZTAŁTU: od najpełniejszego do „flat bez formatu" (= v18.3).
+    # Płaski user-only zamyka tę grupę — gwarantuje powrót do dotychczasowego
+    # zachowania. Krotka: (wiadomości, response_format, opis, bez_temperatury,
+    # klucz limitu tokenów).
+    proby: list[tuple[list[dict], dict | None, str, bool, str]] = []
     if rf is not None:
-        proby.append((glowny, rf, "json" + ("+role" if bogate is not None else "")))
+        proby.append(
+            (glowny, rf, "json" + ("+role" if bogate is not None else ""),
+             False, "max_tokens"))
     if bogate is not None:
-        proby.append((bogate, None, "role"))
-    proby.append((plaskie, None, "flat"))
+        proby.append((bogate, None, "role", False, "max_tokens"))
+    proby.append((plaskie, None, "flat", False, "max_tokens"))
+    # Szczeble PARAMETRÓW (v18.9) — kształt już najprostszy, więc winne jest
+    # coś w parametrach: najpierw zdejmujemy `temperature`, potem zmieniamy
+    # nazwę limitu tokenów na `max_completion_tokens`.
+    proby.append((plaskie, None, "flat bez temperature", True, "max_tokens"))
+    proby.append(
+        (plaskie, None, "flat bez temperature + max_completion_tokens",
+         True, "max_completion_tokens"))
 
     ostatni = len(proby) - 1
-    for i, (msgs, fmt, opis) in enumerate(proby):
+    for i, (msgs, fmt, opis, bez_temp, klucz_tok) in enumerate(proby):
         try:
-            return _openai_chat(klient, mdl, msgs, max_tokens, temperature, timeout, fmt)
+            return _openai_chat(
+                klient, mdl, msgs, max_tokens, temperature, timeout, fmt,
+                bez_temperatury=bez_temp, klucz_tokenow=klucz_tok,
+            )
         except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
             if i == ostatni or not _czy_zla_struktura(exc):
                 raise  # wyczerpana drabina ALBO 429/timeout/sieć → wyżej

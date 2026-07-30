@@ -53,9 +53,6 @@
     "POSSIBLE|znak-PL:ł|Nieprawidłowy format wersji: {…}",
     "POSSIBLE|znak-PL:łź|Nie znaleziono pliku VERSION w {…}. Sprawdź, czy plik istnieje w katalogu głównym projektu."
   ],
-  "gui_konwerter.py": [
-    "POSSIBLE|lingua:PL|architektura_{…}.docx"
-  ],
   "gui_manager_regul.py": [
     "POSSIBLE|znak-PL:ę|węgierski",
     "POSSIBLE|znak-PL:ł|słowacki",
@@ -76,8 +73,10 @@
     "POSSIBLE|lingua:PL|cr.WynikRekoncyliacji | None"
   ],
   "main.py": [
-    "POSSIBLE|znak-PL:ĄąćŁłśż|Aplikacja napotkała nieoczekiwany błąd i może działać niestabilnie. Szczegóły zapisaliśmy w pliku: {…} Pomóż go naprawić",
+    "POSSIBLE|znak-PL:ĄćŁłśż|Szczegóły zapisaliśmy w pliku: {…} Pomóż go naprawić: utwórz nowe zgłoszenie (Issue) na GitHubie i ZAŁĄCZ ten plik (albo",
+    "POSSIBLE|znak-PL:ąćłż|Aplikacja napotkała nieoczekiwany błąd i może działać niestabilnie. {…} ------------------------------------------------",
     "POSSIBLE|znak-PL:ąłż|Reżyser Audio GPT — błąd / error",
+    "POSSIBLE|znak-PL:ćęłńśż|Nie udało się zapisać pliku z logiem błędu (brak uprawnień do zapisu albo pełny dysk). Pomóż go naprawić: utwórz nowe zg",
     "POSSIBLE|znak-PL:Ż|=== REŻYSER AUDIO GPT — CRASH REPORT ==="
   ],
   "manager_regul_szablony.py": [
@@ -107,7 +106,8 @@
     "POSSIBLE|znak-PL:ś|Brak przepisu opowieści `{…}.yaml` ani w `{…}/opowiesci/` ani w `en/opowiesci/` (fallback). Czy folder dictionaries jest"
   ],
   "przepisy_rezysera.py": [
-    "POSSIBLE|znak-PL:ćę|⚠️ przepisy_rezysera: duplikat id={…} w {…} — plik pominięty (id musi być unikalne w paczce)."
+    "POSSIBLE|znak-PL:ćę|⚠️ przepisy_rezysera: duplikat id={…} w {…} — plik pominięty (id musi być unikalne w paczce).",
+    "POSSIBLE|znak-PL:ęłśź|⚠️ przepisy_rezysera: nieprawidłowe pole w {…} ({…}) — plik pominięty (sprawdź typy wartości w YAML-u)."
   ],
   "refresh_languages.py": [
     "POSSIBLE|lingua:PL|➖ USUWAM (brak folderu/podstawy):",

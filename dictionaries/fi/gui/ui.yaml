@@ -1231,8 +1231,6 @@ opowiesci:
   gra_zapisana_tresc: 'Pelin "{nazwa}" tila on tallennettu levylle.'
   nowa_gra_zaczatek: "📖 Peli \"{nazwa}\" aloitettu.\n\nKirjoita ensimmäinen toiminto alla olevaan kenttään ja napsauta \"Lähetä\" — kerrontamoottori kuvailee maailmaa, johon olet saapunut, ja esittelee ensimmäisen kohtauksen."
   brak_narracji_info: "📖 Peli \"{nazwa}\" ladattu, mutta kerrontatiedostoa (skrypty/{nazwa}.txt) ei ole olemassa. Pelin tila on peräisin game.json-tiedostosta — voit jatkaa."
-  dlg_wczytaj_tytul: "Lataa tarinapeli"
-  dlg_wczytaj_filtr: "Tarinapelitiedostot (*.game.json)|*.game.json|Kaikki tiedostot|*.*"
   blad_zapisu_tresc: "Pelitiedoston tallennusvirhe: {tresc_bledu}"
   blad_wczytania_tresc: 'Pelin "{nazwa}" latausvirhe: {tresc_bledu}'
 
@@ -1247,6 +1245,9 @@ opowiesci:
     /visualisoi <kuvaus>, /visualize    — moniaistinen kohtauksen kuvaus (ei tallennusta)
     /odswiez, /refresh                — päivitä kertomus levyltä käsin muokkauksen jälkeen
     /lopeta, /quit                    — sulje sovellus
+  dlg_pomoc_tytul: "Käytettävissä olevat komennot"
+  dlg_pomoc_lbl: "Tarinatilan slash-komentojen luettelo:"
+  dlg_pomoc_name: "Komentoluettelon kenttä"
   dlg_visualize_tytul: "🌅 Kohtauksen visualisointi"
   dlg_visualize_lbl: "Moniaistinen kuvaus nykyisestä kohtauksesta (ei muuta pelin tilaa):"
   dlg_visualize_name: "Kohtauksen visualisoinnin kuvauskenttä"

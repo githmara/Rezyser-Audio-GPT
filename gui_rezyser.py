@@ -1242,6 +1242,12 @@ class RezyserPanel(wx.Panel):
             self._btn_wyslij.Disable()
         elif not user_text_present:
             self._btn_wyslij.Disable()
+        elif worker_w_toku:
+            # v18.9: bez tego warunku wpisanie czegokolwiek w pole promptu
+            # PODCZAS generacji (EVT_TEXT → ta metoda) odblokowywało Wyślij —
+            # drugi klik startował równoległy worker na przestarzałym snapshocie
+            # i oba dopisywały do `skrypty/<nazwa>.txt` (przeplatana narracja).
+            self._btn_wyslij.Disable()
         else:
             self._btn_wyslij.Enable()
 
@@ -1460,7 +1466,11 @@ class RezyserPanel(wx.Panel):
                 self,
             )
             return
-        except OSError as exc:
+        # `ValueError` obejmuje `UnicodeDecodeError` (v18.9): plik narracji
+        # zapisany w Notatniku jako ANSI/cp1250 zamiast UTF-8 wywalał wczytanie
+        # crash-dialogiem zamiast czytelnego komunikatu. Bliźniaczy
+        # `_on_przeladuj_z_dysku` łapał ten przypadek od początku — wyrównujemy.
+        except (OSError, ValueError) as exc:
             wx.MessageBox(
                 t("rezyser.blad_odczytu_tresc", tresc_bledu=str(exc)),
                 t("common.blad_odczytu_tytul"),
@@ -1898,6 +1908,14 @@ class RezyserPanel(wx.Panel):
     # Wysyłanie do AI
     # ------------------------------------------------------------------
     def _on_wyslij(self, _event: wx.Event) -> None:
+        # Guard „druga wysyłka w trakcie pierwszej" (v18.9). Stan przycisku to
+        # za mało: klawiatura/NVDA potrafią dostarczyć zdarzenie zanim
+        # `_refresh_ui_state` przeliczy Enable, a każdy równoległy worker
+        # dopisywałby do tego samego pliku narracji. Cicho ignorujemy —
+        # generacja już trwa, pasek postępu jest widoczny.
+        if self._worker_thread and self._worker_thread.is_alive():
+            return
+
         if not self._api_dostepne:
             wx.MessageBox(
                 t("rezyser.brak_api_tresc"),
@@ -2996,12 +3014,23 @@ class RezyserPanel(wx.Panel):
         def _cb(msg: str, percent: int) -> None:
             wx.CallAfter(self._update_tytuly_progress, msg, percent)
 
-        wynik = rai.nadaj_tytuly_rozdzialom(
-            klient=self._klient_llm,
-            przepis_tytuly=self._przepis_tytuly,
-            pelny_tekst=pelny_tekst,
-            on_postep=_cb,
-        )
+        # Siatka bezpieczeństwa wątku (v18.9): `nadaj_tytuly_rozdzialom` zwraca
+        # błędy przez `wynik.przerwano_bledem`, ale potrafi RZUCIĆ zanim tam
+        # dojdzie — np. `re.split` na `regex_podzial_rozdzialow` z YAML-a
+        # (edytowalnego w Managerze Reguł): zepsuty wzorzec = `re.error`.
+        # Bez tego wątek ginął cicho, a przycisk postprodukcji zostawał
+        # wyłączony do restartu aplikacji.
+        try:
+            wynik = rai.nadaj_tytuly_rozdzialom(
+                klient=self._klient_llm,
+                przepis_tytuly=self._przepis_tytuly,
+                pelny_tekst=pelny_tekst,
+                on_postep=_cb,
+            )
+        except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
+            bledy_ai.zapisz_diagnostyke(exc, "rezyser._tytuly_worker")
+            wx.CallAfter(self._on_tytuly_error, str(exc))
+            return
 
         if wynik.przerwano_bledem:
             wx.CallAfter(

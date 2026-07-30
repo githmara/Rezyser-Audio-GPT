@@ -72,7 +72,7 @@ import yaml
 
 import core_llm as cl
 import przeglad_tlumaczen
-from tlumacz_ai import tlumacz_dlugi_tekst
+from tlumacz_ai import sciezka_cache_tlumaczenia, tlumacz_dlugi_tekst
 
 
 # ---------------------------------------------------------------------------
@@ -805,6 +805,17 @@ def wczytaj_istniejacy_docelowy(plik_docelowy: Path) -> dict[str, str] | None:
 # ---------------------------------------------------------------------------
 # Pipeline dla jednego języka docelowego
 # ---------------------------------------------------------------------------
+def _cache_key_sekcji(rdzen: str, klucz_sekcji: str, kod: str) -> str:
+    """Klucz cache'u wznawiania dla jednej sekcji (single source of truth).
+
+    Używany i przy tłumaczeniu, i przy sprzątaniu cache'ów po udanym zapisie
+    pliku (18.9) — dlatego wydzielony, żeby oba miejsca nie mogły się rozjechać.
+    """
+    if klucz_sekcji != KLUCZ_LEGACY:
+        return f"{rdzen}_{klucz_sekcji}_{KOD_ZRODLOWY}_to_{kod}"
+    return f"{rdzen}_{KOD_ZRODLOWY}_to_{kod}"
+
+
 def _tlumacz_pojedyncza_sekcje(
     kod: str,
     nazwa_pl: str,
@@ -842,11 +853,7 @@ def _tlumacz_pojedyncza_sekcje(
 
     payload = PREFIX_INSTRUKCJA + tresc_tok
     blad_kryt: dict[str, Any] = {"msg": None, "partial": None}
-    cache_key = (
-        f"{rdzen}_{klucz_sekcji}_{KOD_ZRODLOWY}_to_{kod}"
-        if klucz_sekcji != KLUCZ_LEGACY
-        else f"{rdzen}_{KOD_ZRODLOWY}_to_{kod}"
-    )
+    cache_key = _cache_key_sekcji(rdzen, klucz_sekcji, kod)
     def _on_postep(info: Any) -> None:
         # `info` to InfoPostepu — str() zwraca czytelny `detal` (mostek i18n
         # nieistotny dla CLI dev-toola; liczy się log z procentem).
@@ -872,6 +879,11 @@ def _tlumacz_pojedyncza_sekcje(
         on_blad_miekki=_on_blad_miekki,
         model_tlumacz=model,
         prompt_dodatkowy=prompt_dodatkowy,
+        # 18.9: cache sekcji NIE ginie po jej sukcesie — plik wynikowy powstaje
+        # dopiero po WSZYSTKICH sekcjach, więc błąd sekcji 40/68 kasował dotąd
+        # 39 opłaconych cache'ów i rerun płacił za nie ponownie. Sprzątamy je
+        # w `tlumacz_szablon` dopiero po faktycznym zapisie pliku.
+        zachowaj_cache=True,
         # Domyślne chunkowanie (~2 500 tok/blok): duża sekcja może rozpaść się
         # na wiele bloków — bezpieczne, bo nie ma już META, której wielokrotny
         # marker po podziale psułby sklejkę (dawny override 4 000 wymuszał
@@ -1019,6 +1031,18 @@ def tlumacz_szablon(
     cel.parent.mkdir(parents=True, exist_ok=True)
     with open(cel, "w", encoding="utf-8", newline="\n") as fh:
         fh.write(zawartosc_yaml)
+
+    # 18.9: DOPIERO teraz — po fizycznym zapisie pliku — kasujemy cache'e
+    # wznawiania wszystkich sekcji (tłumaczone były z `zachowaj_cache=True`).
+    # Przerwanie w połowie zostawia je na dysku, więc rerun wznawia za darmo.
+    for klucz_sekcji in sekcje_przetlumaczone:
+        sciezka_cache = sciezka_cache_tlumaczenia(
+            str(RUNTIME_DIR), _cache_key_sekcji(rdzen, klucz_sekcji, kod), nazwa_pl,
+        )
+        try:
+            os.remove(sciezka_cache)
+        except OSError:
+            pass   # brak pliku = nic do sprzątania (np. sekcja z cache'u wznowiona)
 
     tryb = "SURGICAL" if klucze_filtru else "FULL"
     if tryb_draft:

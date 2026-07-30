@@ -1233,8 +1233,6 @@ opowiesci:
   gra_zapisana_tresc: 'Der Spielstand „{nazwa}" wurde auf die Festplatte gespeichert.'
   nowa_gra_zaczatek: "📖 Spiel \"{nazwa}\" gestartet.\n\nGib die erste Aktion im Feld unten ein und klicke auf \"Senden\" — die Erzählmaschine beschreibt die Welt, in der du dich befindest, und stellt die erste Szene vor."
   brak_narracji_info: "📖 Spiel \"{nazwa}\" geladen, aber die Erzählungsdatei (skrypty/{nazwa}.txt) existiert nicht. Der Spielstand stammt aus der Datei game.json — du kannst fortfahren."
-  dlg_wczytaj_tytul: "Geschichtenspiel laden"
-  dlg_wczytaj_filtr: "Geschichtenspiel-Dateien (*.game.json)|*.game.json|Alle Dateien|*.*"
   blad_zapisu_tresc: "Ein Fehler beim Speichern der Spieldatei ist aufgetreten: {tresc_bledu}"
   blad_wczytania_tresc: 'Ein Fehler beim Laden des Spiels „{nazwa}" ist aufgetreten: {tresc_bledu}'
 
@@ -1248,6 +1246,9 @@ opowiesci:
     /laden, /load                   — öffne den Lade-Dialog
     /visualisieren <beschreibung>, /visualize    — multisensorische Beschreibung der Szene (ohne Speicherung)
     /ende, /quit                    — schließe die Anwendung
+  dlg_pomoc_tytul: "Verfügbare Befehle"
+  dlg_pomoc_lbl: "Liste der Slash-Befehle im Modus Geschichten:"
+  dlg_pomoc_name: "Feld mit der Befehlsliste"
   dlg_visualize_tytul: "🌅 Szenenvisualisierung"
   dlg_visualize_lbl: "Multisensorische Beschreibung der aktuellen Szene (ändert den Spielstand nicht):"
   dlg_visualize_name: "Feld mit der Beschreibung der Szenenvisualisierung"
