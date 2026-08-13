@@ -28,11 +28,10 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Trigramme zuerst ---
-  - { wzor: "tsch", zamiana: "ch"  }
-  - { wzor: "Tsch", zamiana: "Ch"  }
-  - { wzor: "TSch", zamiana: "CH"  }
-  # --- Digramme ---
+  # AUDYT 18.12 (W-4): „sch"→„sh" idzie PIERWSZE i łapie też „sch" wewnątrz
+  # „tsch" („Quatsch"→„Quatsh", czytelne /tʃ/). Dawna osobna reguła
+  # tsch→ch była kaskadą: jej wynik „ch" dojadało niższe „ch"→„kh"
+  # („Quatsch"→„Quakh").
   - { wzor: "sch",  zamiana: "sh"  }
   - { wzor: "Sch",  zamiana: "Sh"  }
   - { wzor: "SCH",  zamiana: "SH"  }
@@ -55,9 +54,11 @@ zamiany:
   - { wzor: "Ä",    zamiana: "Ae"  }
   - { wzor: "ß",    zamiana: "ss"  }
   # --- Einzelne Konsonanten ---
-  - { wzor: "w",    zamiana: "v"   }
-  - { wzor: "W",    zamiana: "V"   }
+  # „v"→„f" PRZED „w"→„v" (audyt 18.12): odwrotna kolejność czytała każde
+  # niemieckie W jako F („Wasser und Wein"→„Fasser und Fain").
   - { wzor: "v",    zamiana: "f"   }
   - { wzor: "V",    zamiana: "F"   }
+  - { wzor: "w",    zamiana: "v"   }
+  - { wzor: "W",    zamiana: "V"   }
   - { wzor: "z",    zamiana: "ts"  }
   - { wzor: "Z",    zamiana: "Ts"  }

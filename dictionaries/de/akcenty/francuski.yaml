@@ -8,9 +8,11 @@ opis: |
   Französisches TTS liest bestimmte Konsonantenverbindungen anders als Deutsch.
 
   Wichtigste Anpassungen:
-    - „sch" → „ch" (fr. /ʃ/ wird als ch geschrieben)
-    - „tsch" → „tch" (fr. /tʃ/ → tch)
-    - „ch" → „k" (dt. /x/ hat kein fr. Äquivalent, k ist am nächsten)
+    - „sch" → „ch" (fr. /ʃ/ wird als ch geschrieben; erfasst auch
+      „tsch" → „tch")
+    - „ch" bleibt („ich"/„auch" liest fr. TTS als /ʃ/ — gewollte
+      Karikatur; die frühere Regel „ch"→„k" zerstörte das frisch
+      erzeugte „ch": „Schön" → „Kon")
     - „w" → „v" (dt. /v/ → fr. v korrekt)
     - „ei" → „é" (dt. /aɪ/ → fr. Schreibweise)
     - „eu" → „eu" (bleibt — fr. hat „eu"!)
@@ -30,17 +32,14 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Trigramme zuerst ---
-  - { wzor: "tsch", zamiana: "tch"  }
-  - { wzor: "Tsch", zamiana: "Tch"  }
-  - { wzor: "TSch", zamiana: "TCH"  }
-  # --- Digramme ---
+  # AUDYT 18.12 (W-4): „sch"→„ch" PIERWSZE łapie też „sch" wewnątrz „tsch"
+  # („Quatsch"→„Quatch" = t+ch). Dawne reguły tsch→tch i ch→k były kaskadą:
+  # ch→k dojadało świeżo wprowadzone ch/tch („Schön"→„Kon",
+  # „Tschirner"→„Tkirner"). Niemieckie samotne „ch" ZOSTAJE — francuski
+  # głos czyta je jako /ʃ/ (zamierzona karykatura francuskiego akcentu).
   - { wzor: "sch",  zamiana: "ch"   }
   - { wzor: "Sch",  zamiana: "Ch"   }
   - { wzor: "SCH",  zamiana: "CH"   }
-  - { wzor: "ch",   zamiana: "k"    }
-  - { wzor: "Ch",   zamiana: "K"    }
-  - { wzor: "CH",   zamiana: "K"    }
   - { wzor: "ei",   zamiana: "é"    }
   - { wzor: "Ei",   zamiana: "É"    }
   - { wzor: "EI",   zamiana: "É"    }

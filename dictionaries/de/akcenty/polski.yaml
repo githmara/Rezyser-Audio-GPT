@@ -28,6 +28,11 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
+  # AUDYT 18.12 (W-4): „z"→„ts" MUSI iść PRZED sch→sz i tsch→cz — inaczej
+  # zjadało „z" ze świeżo wprowadzonych sz/cz („Schule"→„Stsule",
+  # „Tschüss"→„Ctsyss").
+  - { wzor: "z",    zamiana: "ts"  }
+  - { wzor: "Z",    zamiana: "Ts"  }
   # --- Trigramme zuerst ---
   - { wzor: "tsch", zamiana: "cz"  }
   - { wzor: "Tsch", zamiana: "Cz"  }
@@ -56,5 +61,3 @@ zamiany:
   - { wzor: "V",    zamiana: "F"   }
   - { wzor: "w",    zamiana: "v"   }
   - { wzor: "W",    zamiana: "V"   }
-  - { wzor: "z",    zamiana: "ts"  }
-  - { wzor: "Z",    zamiana: "Ts"  }
