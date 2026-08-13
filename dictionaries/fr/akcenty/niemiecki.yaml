@@ -31,25 +31,30 @@ usun_polskie_znaki: false
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires ---
+  # AUDYT 18.12 (W-4): usunięte „h"→„" (kasowało h ze świeżych sch);
+  # „j"→„sch" PRZED „gn"→„nj" (inaczej nj→nsch); pułapka samogłoskowa
+  # rozwiązana łańcuchem naprawczym: „qu"→„k" najpierw, potem „u"→„ü"
+  # (łapie też u wewnątrz ou/au/eu), potem naprawy „oü"→„u" (francuskie
+  # ou = niemieckie /u/), „aü"→„au", „eü"→„eu". Koniec „au"→„aü",
+  # „vieux"→„vieüx", „douze"→„düze".
   - { wzor: "ch", zamiana: "sch" }
   - { wzor: "Ch", zamiana: "Sch" }
   - { wzor: "CH", zamiana: "SCH" }
-  - { wzor: "ou", zamiana: "u"   }
-  - { wzor: "Ou", zamiana: "U"   }
-  - { wzor: "OU", zamiana: "U"   }
-  - { wzor: "gn", zamiana: "nj"  }
-  - { wzor: "Gn", zamiana: "Nj"  }
-  - { wzor: "GN", zamiana: "NJ"  }
   - { wzor: "qu", zamiana: "k"   }
   - { wzor: "Qu", zamiana: "K"   }
   - { wzor: "QU", zamiana: "K"   }
-  # --- Lettres simples (après digrammes pour éviter de casser « ou » → « u ») ---
   - { wzor: "j",  zamiana: "sch" }
   - { wzor: "J",  zamiana: "Sch" }
+  - { wzor: "gn", zamiana: "nj"  }
+  - { wzor: "Gn", zamiana: "Nj"  }
+  - { wzor: "GN", zamiana: "NJ"  }
   - { wzor: "u",  zamiana: "ü"   }
   - { wzor: "U",  zamiana: "Ü"   }
+  - { wzor: "oü", zamiana: "u"   }
+  - { wzor: "Oü", zamiana: "U"   }
+  - { wzor: "aü", zamiana: "au"  }
+  - { wzor: "Aü", zamiana: "Au"  }
+  - { wzor: "eü", zamiana: "eu"  }
+  - { wzor: "Eü", zamiana: "Eu"  }
   - { wzor: "ç",  zamiana: "ss"  }
   - { wzor: "Ç",  zamiana: "Ss"  }
-  - { wzor: "h",  zamiana: ""    }
-  - { wzor: "H",  zamiana: ""    }

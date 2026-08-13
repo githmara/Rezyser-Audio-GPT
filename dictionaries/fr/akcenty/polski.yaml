@@ -33,22 +33,26 @@ usun_polskie_znaki: false
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires ---
+  # AUDYT 18.12 (W-4): „ou"→„ó" (polskie ó = /u/, poza zasięgiem „u"→„i" —
+  # koniec „où?"→„i?"). „h"→„" zostaje — wyniki sz/ż/ń są bez h.
   - { wzor: "ch", zamiana: "sz" }
   - { wzor: "Ch", zamiana: "Sz" }
   - { wzor: "CH", zamiana: "SZ" }
   - { wzor: "gn", zamiana: "ń"  }
   - { wzor: "Gn", zamiana: "Ń"  }
   - { wzor: "GN", zamiana: "Ń"  }
-  - { wzor: "ou", zamiana: "u"  }
-  - { wzor: "Ou", zamiana: "U"  }
-  - { wzor: "OU", zamiana: "U"  }
+  - { wzor: "ou", zamiana: "ó"  }
+  - { wzor: "Ou", zamiana: "Ó"  }
+  - { wzor: "OU", zamiana: "Ó"  }
   - { wzor: "qu", zamiana: "k"  }
   - { wzor: "Qu", zamiana: "K"  }
   - { wzor: "QU", zamiana: "K"  }
-  # --- Lettres simples (après digrammes) ---
   - { wzor: "j",  zamiana: "ż"  }
   - { wzor: "J",  zamiana: "Ż"  }
+  - { wzor: "au", zamiana: "o"  }
+  - { wzor: "Au", zamiana: "O"  }
+  - { wzor: "eu", zamiana: "e"  }
+  - { wzor: "Eu", zamiana: "E"  }
   - { wzor: "u",  zamiana: "i"  }
   - { wzor: "U",  zamiana: "I"  }
   - { wzor: "ç",  zamiana: "s"  }

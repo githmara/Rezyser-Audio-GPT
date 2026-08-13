@@ -34,17 +34,17 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires ---
+  # AUDYT 18.12 (W-4): „ou"→„ú" (hiszpański zna ú = /u/, a znak nie wpada
+  # w żadną późniejszą regułę — wzorzec fr/islandzki). Usunięte „u"→„iu"
+  # (słaba karykatura, psuła qu: „qui"→„qiui"; hiszpański czyta qui/que
+  # natywnie).
   - { wzor: "gn", zamiana: "ñ" }
   - { wzor: "Gn", zamiana: "Ñ" }
   - { wzor: "GN", zamiana: "Ñ" }
-  - { wzor: "ou", zamiana: "u" }
-  - { wzor: "Ou", zamiana: "U" }
-  - { wzor: "OU", zamiana: "U" }
-  # --- Lettres simples ---
+  - { wzor: "ou", zamiana: "ú" }
+  - { wzor: "Ou", zamiana: "Ú" }
+  - { wzor: "OU", zamiana: "Ú" }
   - { wzor: "j",  zamiana: "ll" }
   - { wzor: "J",  zamiana: "Ll" }
-  - { wzor: "u",  zamiana: "iu" }
-  - { wzor: "U",  zamiana: "Iu" }
   - { wzor: "ç",  zamiana: "s"  }
   - { wzor: "Ç",  zamiana: "S"  }

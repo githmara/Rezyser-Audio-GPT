@@ -32,7 +32,9 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires ---
+  # AUDYT 18.12 (W-4): usunięte „u"→„iu" (słaba karykatura, jedyne źródło
+  # kaskad „juge"→„giiuge", „douze"→„diuze"; włoskie u = /u/ czyta się
+  # dobrze). „ou"→„u" jest odtąd formą finalną.
   - { wzor: "ch", zamiana: "sci" }
   - { wzor: "Ch", zamiana: "Sci" }
   - { wzor: "CH", zamiana: "SCI" }
@@ -42,10 +44,7 @@ zamiany:
   - { wzor: "qu", zamiana: "k"   }
   - { wzor: "Qu", zamiana: "K"   }
   - { wzor: "QU", zamiana: "K"   }
-  # --- Lettres simples (gn conservé : it gn = fr gn = /ɲ/) ---
   - { wzor: "j",  zamiana: "gi"  }
   - { wzor: "J",  zamiana: "Gi"  }
-  - { wzor: "u",  zamiana: "iu"  }
-  - { wzor: "U",  zamiana: "Iu"  }
   - { wzor: "ç",  zamiana: "ss"  }
   - { wzor: "Ç",  zamiana: "Ss"  }

@@ -33,25 +33,27 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires ---
+  # AUDYT 18.12 (W-4): usunięte „h"→„" (kasowało h ze świeżych sch/zh);
+  # „j"→„zh" PRZED „gn"→„nj"; pułapka samogłoskowa łańcuchem: „qu"→„k",
+  # „u"→„ju" (łapie też u w ou), naprawa „oju"→„u" (francuskie ou = /u/).
+  # UWAGA: plik czeka na W-3 (pełna transliteracja na cyrylicę).
   - { wzor: "ch", zamiana: "sch" }
   - { wzor: "Ch", zamiana: "Sch" }
   - { wzor: "CH", zamiana: "SCH" }
-  - { wzor: "ou", zamiana: "u"   }
-  - { wzor: "Ou", zamiana: "U"   }
-  - { wzor: "OU", zamiana: "U"   }
-  - { wzor: "gn", zamiana: "nj"  }
-  - { wzor: "Gn", zamiana: "Nj"  }
-  - { wzor: "GN", zamiana: "NJ"  }
   - { wzor: "qu", zamiana: "k"   }
   - { wzor: "Qu", zamiana: "K"   }
   - { wzor: "QU", zamiana: "K"   }
-  # --- Lettres simples ---
   - { wzor: "j",  zamiana: "zh"  }
   - { wzor: "J",  zamiana: "Zh"  }
+  - { wzor: "gn", zamiana: "nj"  }
+  - { wzor: "Gn", zamiana: "Nj"  }
   - { wzor: "u",  zamiana: "ju"  }
   - { wzor: "U",  zamiana: "Ju"  }
+  - { wzor: "oju", zamiana: "u"  }
+  - { wzor: "Oju", zamiana: "U"  }
+  - { wzor: "aju", zamiana: "au" }
+  - { wzor: "Aju", zamiana: "Au" }
+  - { wzor: "eju", zamiana: "eu" }
+  - { wzor: "Eju", zamiana: "Eu" }
   - { wzor: "ç",  zamiana: "s"   }
   - { wzor: "Ç",  zamiana: "S"   }
-  - { wzor: "h",  zamiana: ""    }
-  - { wzor: "H",  zamiana: ""    }

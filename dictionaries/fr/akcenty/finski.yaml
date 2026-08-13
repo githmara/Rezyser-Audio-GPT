@@ -36,24 +36,32 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires ---
+  # AUDYT 18.12 (W-4): „j"→„ž" PRZED „gn"→„nj" (inaczej „agneau"→„anžeau");
+  # pułapka samogłoskowa łańcuchem: „ou"→„uu", potem „u"→„y" zamienia
+  # uu→yy, naprawa „yy"→„uu" przywraca fińskie długie /u/ („douze" już
+  # nie kończy jako „dyyze"). „h"→„" zostaje — wyniki š/ž/nj są bez h.
   - { wzor: "ch", zamiana: "š"  }
   - { wzor: "Ch", zamiana: "Š"  }
   - { wzor: "CH", zamiana: "Š"  }
+  - { wzor: "qu", zamiana: "k"  }
+  - { wzor: "Qu", zamiana: "K"  }
+  - { wzor: "QU", zamiana: "K"  }
+  - { wzor: "j",  zamiana: "ž"  }
+  - { wzor: "J",  zamiana: "Ž"  }
   - { wzor: "gn", zamiana: "nj" }
   - { wzor: "Gn", zamiana: "Nj" }
   - { wzor: "GN", zamiana: "NJ" }
   - { wzor: "ou", zamiana: "uu" }
   - { wzor: "Ou", zamiana: "Uu" }
   - { wzor: "OU", zamiana: "UU" }
-  - { wzor: "qu", zamiana: "k"  }
-  - { wzor: "Qu", zamiana: "K"  }
-  - { wzor: "QU", zamiana: "K"  }
-  # --- Lettres simples (après digrammes) ---
-  - { wzor: "j",  zamiana: "ž"  }
-  - { wzor: "J",  zamiana: "Ž"  }
+  - { wzor: "au", zamiana: "o"  }
+  - { wzor: "Au", zamiana: "O"  }
+  - { wzor: "eu", zamiana: "ö"  }
+  - { wzor: "Eu", zamiana: "Ö"  }
   - { wzor: "u",  zamiana: "y"  }
   - { wzor: "U",  zamiana: "Y"  }
+  - { wzor: "yy", zamiana: "uu" }
+  - { wzor: "Yy", zamiana: "Uu" }
   - { wzor: "ç",  zamiana: "s"  }
   - { wzor: "Ç",  zamiana: "S"  }
   - { wzor: "h",  zamiana: ""   }

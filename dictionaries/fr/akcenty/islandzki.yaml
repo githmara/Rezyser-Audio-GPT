@@ -35,10 +35,13 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires ---
+  # AUDYT 18.12 (W-4): usunięte „h"→„" (kasowało h ze świeżych sh/zh);
+  # „j"→„zh" PRZED „gn"→„nj" (inaczej nj→nzh).
   - { wzor: "ch", zamiana: "sh" }
   - { wzor: "Ch", zamiana: "Sh" }
   - { wzor: "CH", zamiana: "SH" }
+  - { wzor: "j",  zamiana: "zh" }
+  - { wzor: "J",  zamiana: "Zh" }
   - { wzor: "gn", zamiana: "nj" }
   - { wzor: "Gn", zamiana: "Nj" }
   - { wzor: "GN", zamiana: "NJ" }
@@ -48,10 +51,5 @@ zamiany:
   - { wzor: "qu", zamiana: "kv" }
   - { wzor: "Qu", zamiana: "Kv" }
   - { wzor: "QU", zamiana: "KV" }
-  # --- Lettres simples ---
-  - { wzor: "j",  zamiana: "zh" }
-  - { wzor: "J",  zamiana: "Zh" }
   - { wzor: "ç",  zamiana: "s"  }
   - { wzor: "Ç",  zamiana: "S"  }
-  - { wzor: "h",  zamiana: ""   }
-  - { wzor: "H",  zamiana: ""   }

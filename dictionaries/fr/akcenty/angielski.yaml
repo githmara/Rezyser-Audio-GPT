@@ -30,7 +30,9 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Digrammes prioritaires (avant les lettres seules) ---
+  # AUDYT 18.12 (W-4): usunięte „h"→„" — kasowało h ze świeżych sh/zh
+  # („chez Charles"→„sez Sarles"). Angielski i tak nie czyta francuskiego
+  # h muet na tyle często, by warto było niszczyć każdy digraf.
   - { wzor: "ch", zamiana: "sh" }
   - { wzor: "Ch", zamiana: "Sh" }
   - { wzor: "CH", zamiana: "SH" }
@@ -43,10 +45,7 @@ zamiany:
   - { wzor: "qu", zamiana: "k"  }
   - { wzor: "Qu", zamiana: "K"  }
   - { wzor: "QU", zamiana: "K"  }
-  # --- Lettres simples ---
   - { wzor: "j",  zamiana: "zh" }
   - { wzor: "J",  zamiana: "Zh" }
   - { wzor: "ç",  zamiana: "s"  }
   - { wzor: "Ç",  zamiana: "S"  }
-  - { wzor: "h",  zamiana: ""   }
-  - { wzor: "H",  zamiana: ""   }
