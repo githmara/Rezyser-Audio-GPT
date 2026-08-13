@@ -116,8 +116,10 @@ class PoliglotaPanel(wx.Panel):
         # Aktywny język pipeline'u (akcenty/szyfry/cezar). Bez wczytanego
         # pliku domyślnie idzie z języka UI (gdy ma komplet reguł), żeby
         # użytkownik EN nie zobaczył polskich etykiet akcentów w combo.
-        # Po wczytaniu pliku podmieniany przez ``_odswiez_warianty()``
-        # na wynik ``wykryj_jezyk_zrodlowy()``.
+        # 18.11: sterowany przez combo „Język przetwarzania" — pozycja
+        # „Wykryj automatycznie" podmienia go po wczytaniu pliku wynikiem
+        # ``wykryj_jezyk_zrodlowy()``, wybór ręczny jest wiążący (detekcja
+        # przy wczytywaniu pomijana).
         self._jezyk_aktywny: str = _wybierz_domyslny_jezyk_pipeline()
 
         # Konfiguracje wariantów (z YAML) – pobierane raz przy starcie panelu,
@@ -201,6 +203,25 @@ class PoliglotaPanel(wx.Panel):
         self._lbl_file_status.SetBackgroundColour(self.GetBackgroundColour())
         self._lbl_file_status.SetName(t("poliglota.lbl_plik_status_name"))
 
+        # 18.11: jawny wybór języka pipeline'u (reguły akcentów/szyfrów).
+        # Pozycja 0 = „Wykryj automatycznie" (dotychczasowe zachowanie),
+        # pozycje 1+ = kompletne języki bazowe pod nazwami natywnymi.
+        lbl_jezyk_pipeline = wx.StaticText(
+            self, label=t("poliglota.lbl_jezyk_pipeline"))
+        self._jezyki_pipeline = core_poliglota.dostepne_jezyki_bazowe()
+        wybory_jezyka = [t("poliglota.jezyk_auto")] + [
+            core_poliglota.natywna_nazwa(kod) for kod in self._jezyki_pipeline]
+        self._combo_jezyk = wx.ComboBox(
+            self, choices=wybory_jezyka, style=wx.CB_READONLY,
+            name=t("poliglota.combo_jezyk_name"))
+        self._combo_jezyk.SetSelection(0)
+        self._combo_jezyk.SetToolTip(t("poliglota.combo_jezyk_tooltip"))
+
+        self._chk_wymus = wx.CheckBox(
+            self, label=t("poliglota.chk_wymus"),
+            name=t("poliglota.chk_wymus_name"))
+        self._chk_wymus.SetToolTip(t("poliglota.chk_wymus_tooltip"))
+
         # ── Sekcja 2: Konfiguracja trybu pracy ──────────────────────────
         lbl_section2 = self._naglowek(t("poliglota.section2_heading"))
 
@@ -266,6 +287,9 @@ class PoliglotaPanel(wx.Panel):
         main_sizer.Add(file_row,             flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=8)
         main_sizer.Add(load_row,             flag=wx.LEFT | wx.TOP, border=BORDER)
         main_sizer.Add(self._lbl_file_status, flag=wx.EXPAND | wx.ALL, border=BORDER)
+        main_sizer.Add(lbl_jezyk_pipeline,   flag=wx.LEFT | wx.RIGHT, border=BORDER)
+        main_sizer.Add(self._combo_jezyk,    flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=8)
+        main_sizer.Add(self._chk_wymus,      flag=wx.LEFT | wx.TOP | wx.RIGHT | wx.BOTTOM, border=BORDER)
         main_sizer.Add(wx.StaticLine(self),  flag=wx.EXPAND | wx.LEFT | wx.RIGHT, border=BORDER)
 
         main_sizer.Add(lbl_section2,         flag=wx.LEFT | wx.TOP | wx.RIGHT, border=BORDER)
@@ -392,6 +416,7 @@ class PoliglotaPanel(wx.Panel):
         self._rb_szyfrant.Bind(wx.EVT_RADIOBUTTON, self._on_mode_change)
         self._combo_akcent.Bind(wx.EVT_COMBOBOX, self._on_akcent_change)
         self._combo_szyfr.Bind(wx.EVT_COMBOBOX, self._on_szyfr_change)
+        self._combo_jezyk.Bind(wx.EVT_COMBOBOX, self._on_jezyk_pipeline_change)
 
     # ==================================================================
     # OBSŁUGA PLIKU ŹRÓDŁOWEGO
@@ -450,30 +475,28 @@ class PoliglotaPanel(wx.Panel):
         # 13.2: po wczytaniu pliku wykrywamy język treści (tylko jeśli ma
         # kompletny folder w ``dictionaries/``). Domyślny ``self._jezyk_aktywny``
         # jest zachowywany jako fallback.
-        # 13.4 (A11Y): poprzednio przełączenie odbywało się cicho, przez co
-        # NVDA nie zgłaszało zmiany etykiet w combo akcentów/szyfrów. Teraz
-        # przed przełączeniem prosimy o jawną zgodę użytkownika — dialog
-        # YES_NO jest sam w sobie powiadomieniem (czytnik ekranu odczyta
-        # tytuł i treść, więc użytkownik wie, że etykiety zaraz się zmienią).
-        # Cancel = zostaje aktywny język UI; ``_maybe_ostrzez_o_jezyku_zrodla``
-        # i tak rzuci miękkie ostrzeżenie przy uruchomieniu trybu Reżysera.
-        wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
-            self._file_content,
-            fallback=self._jezyk_aktywny,
-        )
-        if wykryty != self._jezyk_aktywny:
-            odp = wx.MessageBox(
-                t(
-                    "poliglota.zmiana_jezyka_pipeline_tresc",
-                    jezyk_aktywny=core_poliglota.natywna_nazwa(self._jezyk_aktywny),
-                    jezyk_wykryty=core_poliglota.natywna_nazwa(wykryty),
-                ),
-                t("poliglota.zmiana_jezyka_pipeline_tytul"),
-                wx.YES_NO | wx.ICON_QUESTION, self,
+        # 18.11: detekcja działa TYLKO przy combo w pozycji „Wykryj
+        # automatycznie" — wybór ręczny jest wiążący. Dawny dialog YES/NO
+        # (13.4) zredukowany do powiadomienia INFO: jawny wybór języka ma
+        # teraz własne combo, więc pytanie dublowałoby kontrolkę, a dialog
+        # INFO nadal jest jawnym sygnałem A11y, że etykiety akcentów/szyfrów
+        # właśnie się zmieniły.
+        if self._combo_jezyk.GetSelection() <= 0:
+            wykryty = core_poliglota.wykryj_jezyk_zrodlowy(
+                self._file_content,
+                fallback=self._jezyk_aktywny,
             )
-            if odp == wx.YES:
+            if wykryty != self._jezyk_aktywny:
                 self._jezyk_aktywny = wykryty
                 self._odswiez_warianty()
+                wx.MessageBox(
+                    t(
+                        "poliglota.wykryto_jezyk_tresc",
+                        jezyk_wykryty=core_poliglota.natywna_nazwa(wykryty),
+                    ),
+                    t("poliglota.wykryto_jezyk_tytul"),
+                    wx.OK | wx.ICON_INFORMATION, self,
+                )
 
         znaki = len(self._file_content)
         status_msg = t(
@@ -519,6 +542,16 @@ class PoliglotaPanel(wx.Panel):
         self._txt_result.SetValue("")
         self._gauge.SetValue(0);        self._gauge.Hide()
         self._lbl_progress.SetValue(""); self._lbl_progress.Hide()
+
+        # 18.11: w trybie auto po wyczyszczeniu wróć do języka domyślnego
+        # (UI), żeby język poprzedniego dokumentu nie „przyklejał się"
+        # do panelu. Wybór ręczny zostaje nietknięty.
+        if self._combo_jezyk.GetSelection() <= 0:
+            domyslny = _wybierz_domyslny_jezyk_pipeline()
+            if domyslny != self._jezyk_aktywny:
+                self._jezyk_aktywny = domyslny
+                self._odswiez_warianty()
+
         self.Layout()
 
     # ==================================================================
@@ -578,6 +611,28 @@ class PoliglotaPanel(wx.Panel):
             min_przesuniecie=min_pr,
             max_przesuniecie=max_pr,
         ))
+
+    def _on_jezyk_pipeline_change(self, _event: wx.Event | None = None) -> None:
+        """Reakcja na combo „Język przetwarzania" (18.11).
+
+        Pozycja 0 („Wykryj automatycznie") przywraca dotychczasowe
+        zachowanie: język z wczytanego pliku (jeśli jest), inaczej domyślny
+        z języka UI. Pozycje 1+ ustawiają język na sztywno.
+        """
+        idx = self._combo_jezyk.GetSelection()
+        if idx <= 0:
+            if self._file_content:
+                nowy = core_poliglota.wykryj_jezyk_zrodlowy(
+                    self._file_content,
+                    fallback=_wybierz_domyslny_jezyk_pipeline(),
+                )
+            else:
+                nowy = _wybierz_domyslny_jezyk_pipeline()
+        else:
+            nowy = self._jezyki_pipeline[idx - 1]
+        if nowy != self._jezyk_aktywny:
+            self._jezyk_aktywny = nowy
+            self._odswiez_warianty()
 
     # ------------------------------------------------------------------
     # 13.2: przeładowanie list wariantów po zmianie języka aktywnego
@@ -700,8 +755,15 @@ class PoliglotaPanel(wx.Panel):
                 return
             opcje["iso_reczne"] = kod_iso
 
-        # Ostrzeżenie o języku źródłowym (tylko dla akcentów)
-        if cfg.get("kategoria") == "akcent":
+        # 18.11: checkbox „wymuś język" pomija detekcję lingua per akapit —
+        # cały dokument przechodzi przez reguły języka pipeline'u.
+        if self._chk_wymus.GetValue():
+            opcje["wymus_jezyk"] = self._jezyk_aktywny
+
+        # Ostrzeżenie o języku źródłowym (tylko dla akcentów; przy jawnym
+        # wymuszeniu rozjazd detekcji z wyborem usera jest zamierzony —
+        # ostrzeżenie byłoby szumem).
+        if cfg.get("kategoria") == "akcent" and not self._chk_wymus.GetValue():
             self._maybe_ostrzez_o_jezyku_zrodla()
 
         # >>>> GŁÓWNE WYWOŁANIE SILNIKA <<<<
@@ -745,6 +807,12 @@ class PoliglotaPanel(wx.Panel):
         opcje: dict = {}
         if cfg.get("algorytm") == "cezar":
             opcje["przesuniecie"] = int(self._spin_cezara.GetValue())
+
+        # 18.11: wymuszenie języka = jeden zestaw reguł (i jeden alfabet
+        # Cezara) na cały dokument — warunek odwracalności szyfrowania
+        # wielowarstwowego przy tekstach mieszanych językowo.
+        if self._chk_wymus.GetValue():
+            opcje["wymus_jezyk"] = self._jezyk_aktywny
 
         # >>>> GŁÓWNE WYWOŁANIE SILNIKA <<<<
         try:

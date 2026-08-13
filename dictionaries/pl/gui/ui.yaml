@@ -738,12 +738,28 @@ poliglota:
   # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny zestaw reguł.
   # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
   # przeczytało, że etykiety akcentów/szyfrów się zmienią.
+  # 18.11: klucze zmiana_jezyka_pipeline_* NIEUŻYWANE (dialog YES/NO
+  # zastąpiony powiadomieniem wykryto_jezyk_* — jawny wybór języka ma
+  # własne combo). Do usunięcia ×9 przy domykaniu wydania.
   zmiana_jezyka_pipeline_tytul: "Wykryto inny język niż aktywny"
   zmiana_jezyka_pipeline_tresc: |-
     Treść wczytanego pliku jest w języku „{jezyk_wykryty}".
     Aktywny zestaw reguł (akcenty/szyfry) to obecnie „{jezyk_aktywny}".
 
     Czy przełączyć reguły na „{jezyk_wykryty}"?
+  # 18.11: jawny wybór języka pipeline'u + wymuszanie na cały dokument.
+  # Pozycja „auto" odtwarza dotychczasową detekcję z pliku.
+  lbl_jezyk_pipeline:    "Język przetwarzania (reguły akcentów i szyfrów):"
+  jezyk_auto:            "Wykryj automatycznie"
+  combo_jezyk_name:      "Wybór języka przetwarzania"
+  combo_jezyk_tooltip:   'Wybierz zestaw reguł dla trybów Reżysera i Szyfranta. „Wykryj automatycznie" ustala język na podstawie wczytanego pliku.'
+  chk_wymus:             "Wymuś ten język dla całego dokumentu (bez wykrywania języka akapitów)"
+  chk_wymus_name:        "Wymuszenie języka dla całego dokumentu"
+  chk_wymus_tooltip:     "Domyślnie każdy akapit jest przetwarzany według wykrytego dla niego języka. Zaznacz, aby cały dokument — także obcojęzyczne wstawki — przeszedł przez reguły jednego języka (np. odwracalne szyfrowanie Cezarem jednym alfabetem)."
+  wykryto_jezyk_tytul:   "Wykryto język dokumentu"
+  wykryto_jezyk_tresc: |-
+    Treść wczytanego pliku jest w języku „{jezyk_wykryty}".
+    Listy akcentów i szyfrów zostały przełączone na ten język.
 
     TAK – etykiety akcentów i szyfrów oraz reguły fonetyczne zmienią się na „{jezyk_wykryty}", zgodnie z treścią pliku.
     NIE – zostawiam reguły dla „{jezyk_aktywny}". Efekt na obcojęzycznym tekście może być nieprzewidywalny.

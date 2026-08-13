@@ -823,7 +823,11 @@ class BrakRegulyDlaJezykaError(RuntimeError):
 Segment = tuple[str, str, bool]
 
 
-def _segmentuj_z_ochrona_tagow(tekst: str, fallback_jezyk: str) -> list[Segment]:
+def _segmentuj_z_ochrona_tagow(
+    tekst: str,
+    fallback_jezyk: str,
+    wymus_jezyk: str | None = None,
+) -> list[Segment]:
     """Dzieli tekst na segmenty z wykrytym językiem; chroni tagi HTML i separatory.
 
     Algorytm dwuwarstwowy:
@@ -842,11 +846,20 @@ def _segmentuj_z_ochrona_tagow(tekst: str, fallback_jezyk: str) -> list[Segment]
     ``fallback_jezyk`` – zwykle parametr ``jezyk`` przekazany do
     :func:`przetworz`, czyli język aktywny w GUI.
 
+    ``wymus_jezyk`` (18.11): kod języka WYŁĄCZAJĄCY detekcję — każdy akapit
+    dostaje wskazany język bez pytania lingua. Zasilany przez
+    ``opcje["wymus_jezyk"]`` z checkboxa „wymuś język" w GUI Poligloty;
+    kluczowy dla odwracalnego szyfrowania wielowarstwowego (jeden alfabet
+    Cezara na cały dokument zamiast alfabetu per wykryty język akapitu).
+
     Zwraca listę gotową do iteracji w dyspozytorach – wszystko jest tam
     gotowe: kod języka per akapit, dosłowna treść, flaga „przetwarzaj".
     """
     if not isinstance(tekst, str) or not tekst:
         return []
+
+    if wymus_jezyk:
+        fallback_jezyk = wymus_jezyk
 
     czesci = re.split(r"(<[^>]+>)", tekst)
     wynik: list[Segment] = []
@@ -868,7 +881,8 @@ def _segmentuj_z_ochrona_tagow(tekst: str, fallback_jezyk: str) -> list[Segment]
                 continue
             if not akapit:
                 continue
-            jez = _wykryj_jezyk_fragmentu(akapit, fallback=poprzedni_jezyk)
+            jez = wymus_jezyk or _wykryj_jezyk_fragmentu(
+                akapit, fallback=poprzedni_jezyk)
             wynik.append((jez, akapit, True))
             poprzedni_jezyk = jez
 
@@ -1032,7 +1046,9 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
     # Oczyszczenie: pipeline TTS niezależny od reguł YAML konkretnego języka.
     # Detekcja per akapit potrzebna tylko dla locale ``num2words``.
     if kategoria == "oczyszczenie":
-        segmenty_in = _segmentuj_z_ochrona_tagow(tekst, fallback_jezyk=jezyk)
+        segmenty_in = _segmentuj_z_ochrona_tagow(
+            tekst, fallback_jezyk=jezyk,
+            wymus_jezyk=opcje.get("wymus_jezyk"))
         wyniki: list[str] = []
         zapisane: list[Segment] = []
         for jez_seg, fragment, czy_przetwarzac in segmenty_in:
@@ -1051,7 +1067,9 @@ def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
         return "".join(wyniki)
 
     # Zwykły akcent – per fragment szukamy YAML-a dla wykrytego języka.
-    segmenty_in = _segmentuj_z_ochrona_tagow(tekst, fallback_jezyk=jezyk)
+    segmenty_in = _segmentuj_z_ochrona_tagow(
+        tekst, fallback_jezyk=jezyk,
+        wymus_jezyk=opcje.get("wymus_jezyk"))
     wyniki = []
     zapisane = []
     for jez_seg, fragment, czy_przetwarzac in segmenty_in:
@@ -1290,7 +1308,9 @@ def _przetworz_szyfrant(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
             f"Dostępne: {sorted(_ALGORYTMY_SZYFROW)}"
         )
 
-    segmenty_in = _segmentuj_z_ochrona_tagow(tekst, fallback_jezyk=jezyk)
+    segmenty_in = _segmentuj_z_ochrona_tagow(
+        tekst, fallback_jezyk=jezyk,
+        wymus_jezyk=opcje.get("wymus_jezyk"))
     wyniki: list[str] = []
     zapisane: list[Segment] = []
 
@@ -1354,8 +1374,10 @@ def przetworz(
         wariant: ``id`` z YAML-a (np. ``"islandzki"``, ``"odwracanie"``),
                  ewentualnie etykieta widoczna w GUI.
         opcje:   MUTOWALNY słownik parametrów zależnych od algorytmu, np.
-                 ``przesuniecie`` – int, dla szyfru Cezara (0 = losuj).
-                 To zarazem kanał ZWROTNY: silnik dopisuje do niego
+                 ``przesuniecie`` – int, dla szyfru Cezara (0 = losuj);
+                 ``wymus_jezyk`` – str (18.11), pomija detekcję lingua per
+                 akapit i przetwarza cały dokument regułami wskazanego
+                 języka. To zarazem kanał ZWROTNY: silnik dopisuje do niego
                  ``_segmenty_wynikowe`` (mapa języków per akapit dla
                  :func:`zapisz_wynik`) oraz ``przesuniecie_faktyczne``
                  (wylosowany shift Cezara). Do v18.7.x parametry szły przez
