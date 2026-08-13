@@ -111,6 +111,17 @@ polskie_znaki:
   # -- → y (NOT ý — native) --
   - { wzor: "ÿ", zamiana: "y"  }
   - { wzor: "Ÿ", zamiana: "Y"  }
+  # -- Japanese romanization macrons (Tōkyō, rāmen) → base vowel --
+  - { wzor: "ā", zamiana: "a"  }
+  - { wzor: "ē", zamiana: "e"  }
+  - { wzor: "ī", zamiana: "i"  }
+  - { wzor: "ō", zamiana: "o"  }
+  - { wzor: "ū", zamiana: "u"  }
+  - { wzor: "Ā", zamiana: "A"  }
+  - { wzor: "Ē", zamiana: "E"  }
+  - { wzor: "Ī", zamiana: "I"  }
+  - { wzor: "Ō", zamiana: "O"  }
+  - { wzor: "Ū", zamiana: "U"  }
   # NOTE: æ/Æ, þ/Þ, ð/Ð are NATIVE Icelandic letters — NOT mapped here.
   # The Caesar cipher encrypts them through the native alphabet directly.
 

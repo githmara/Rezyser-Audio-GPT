@@ -125,6 +125,17 @@ polskie_znaki:
   - { wzor: "ÿ", zamiana: "y"  }
   - { wzor: "Ý", zamiana: "Y"  }
   - { wzor: "Ÿ", zamiana: "Y"  }
+  # -- Makrons der japanischen Romanisierung (Tōkyō, rāmen) → Grundvokal --
+  - { wzor: "ā", zamiana: "a"  }
+  - { wzor: "ē", zamiana: "e"  }
+  - { wzor: "ī", zamiana: "i"  }
+  - { wzor: "ō", zamiana: "o"  }
+  - { wzor: "ū", zamiana: "u"  }
+  - { wzor: "Ā", zamiana: "A"  }
+  - { wzor: "Ē", zamiana: "E"  }
+  - { wzor: "Ī", zamiana: "I"  }
+  - { wzor: "Ō", zamiana: "O"  }
+  - { wzor: "Ū", zamiana: "U"  }
 
 # -----------------------------------------------------------------------------
 # Deutsches Alphabet — 29 Großbuchstaben (A–Z + Ä, Ö, Ü am Ende).

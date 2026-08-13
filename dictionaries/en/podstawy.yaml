@@ -135,6 +135,17 @@ polskie_znaki:
   - { wzor: "ÿ", zamiana: "y"  }
   - { wzor: "Ý", zamiana: "Y"  }
   - { wzor: "Ÿ", zamiana: "Y"  }
+  # -- Japanese romanization macrons (Tōkyō, rāmen) → base vowel --
+  - { wzor: "ā", zamiana: "a"  }
+  - { wzor: "ē", zamiana: "e"  }
+  - { wzor: "ī", zamiana: "i"  }
+  - { wzor: "ō", zamiana: "o"  }
+  - { wzor: "ū", zamiana: "u"  }
+  - { wzor: "Ā", zamiana: "A"  }
+  - { wzor: "Ē", zamiana: "E"  }
+  - { wzor: "Ī", zamiana: "I"  }
+  - { wzor: "Ō", zamiana: "O"  }
+  - { wzor: "Ū", zamiana: "U"  }
 
 # -----------------------------------------------------------------------------
 # English alphabet – 26 uppercase letters, no whitespace.

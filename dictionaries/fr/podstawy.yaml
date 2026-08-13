@@ -125,6 +125,17 @@ polskie_znaki:
   - { wzor: "Ú", zamiana: "U"  }
   - { wzor: "ý", zamiana: "y"  }
   - { wzor: "Ý", zamiana: "Y"  }
+  # -- Macrons de la romanisation japonaise (Tōkyō, rāmen) → voyelle de base --
+  - { wzor: "ā", zamiana: "a"  }
+  - { wzor: "ē", zamiana: "e"  }
+  - { wzor: "ī", zamiana: "i"  }
+  - { wzor: "ō", zamiana: "o"  }
+  - { wzor: "ū", zamiana: "u"  }
+  - { wzor: "Ā", zamiana: "A"  }
+  - { wzor: "Ē", zamiana: "E"  }
+  - { wzor: "Ī", zamiana: "I"  }
+  - { wzor: "Ō", zamiana: "O"  }
+  - { wzor: "Ū", zamiana: "U"  }
 
 # -----------------------------------------------------------------------------
 # Alphabet français — 26 lettres latines, dans l'ordre natif.

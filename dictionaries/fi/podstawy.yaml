@@ -124,6 +124,18 @@ polskie_znaki:
   - { wzor: "ÿ", zamiana: "y"  }
   - { wzor: "Ý", zamiana: "Y"  }
   - { wzor: "Ÿ", zamiana: "Y"  }
+  # -- Japanin romanisaation pituusmerkit (Tōkyō, rāmen) → kahdennettu
+  #    vokaali (suomen konventio: pitkä vokaali = kaksoiskirjain) --
+  - { wzor: "ā", zamiana: "aa" }
+  - { wzor: "ē", zamiana: "ee" }
+  - { wzor: "ī", zamiana: "ii" }
+  - { wzor: "ō", zamiana: "oo" }
+  - { wzor: "ū", zamiana: "uu" }
+  - { wzor: "Ā", zamiana: "Aa" }
+  - { wzor: "Ē", zamiana: "Ee" }
+  - { wzor: "Ī", zamiana: "Ii" }
+  - { wzor: "Ō", zamiana: "Oo" }
+  - { wzor: "Ū", zamiana: "Uu" }
 
 # -----------------------------------------------------------------------------
 # Suomalainen aakkosto – 29 isoa kirjainta alkuperäisessä järjestyksessä

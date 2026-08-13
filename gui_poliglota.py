@@ -555,6 +555,30 @@ class PoliglotaPanel(wx.Panel):
         self._pnl_szyfrant.Layout()
         self.Layout()
 
+    def _odswiez_zakres_cezara(self) -> None:
+        """Dopasuj zakres i etykietę spinu Cezara do języka pipeline'u.
+
+        Zakres pochodzi z ``szyfry/cezar.yaml`` języka aktywnego i różni się
+        per język, bo alfabety mają różną długość (it ±20 … ru ±59). Do
+        v18.10 zakres był ustawiany tylko raz, w konstruktorze — po zmianie
+        języka pipeline'u spinner blokował część legalnych przesunięć
+        (it→ru) albo etykieta kłamała o zakresie (ru→it).
+        """
+        cezar_cfg = core_poliglota.wariant_po_id(
+            core_poliglota.TRYB_SZYFRANT, self._jezyk_aktywny, "cezar") or {}
+        min_pr = int(cezar_cfg.get("min_przesuniecie", -35))
+        max_pr = int(cezar_cfg.get("max_przesuniecie",  35))
+        self._spin_cezara.SetRange(min_pr, max_pr)
+        # Jawny clamp — nie polegamy na platformowym zachowaniu SetRange
+        # wobec wartości spoza nowego zakresu.
+        self._spin_cezara.SetValue(
+            max(min_pr, min(max_pr, self._spin_cezara.GetValue())))
+        self._lbl_cezar.SetLabel(t(
+            "poliglota.lbl_cezar",
+            min_przesuniecie=min_pr,
+            max_przesuniecie=max_pr,
+        ))
+
     # ------------------------------------------------------------------
     # 13.2: przeładowanie list wariantów po zmianie języka aktywnego
     # ------------------------------------------------------------------
@@ -594,6 +618,10 @@ class PoliglotaPanel(wx.Panel):
             self._combo_szyfr.SetToolTip(
                 t("poliglota.brak_szyfrow_dla_jezyka", jezyk=self._jezyk_aktywny)
             )
+
+        # Zakres spinu Cezara zależy od alfabetu języka — odśwież przed
+        # aktualizacją widoczności pól.
+        self._odswiez_zakres_cezara()
 
         # Reset selekcji na indeks 0 unieważnia widoczność pól zależnych od
         # wariantu (ISO naprawiacza, spin Cezara) — odśwież je jawnie.
