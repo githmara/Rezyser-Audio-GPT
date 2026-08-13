@@ -513,7 +513,7 @@ rezyser:
   pamiec_status_alarm:        "🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {tokeny} z {maks} tokenów. W trybie Burzy Mózgów wygeneruj streszczenie, zapisz je jako Pamięć Długotrwałą, a potem wyczyść bieżącą historię (zachowując streszczenie)."
   pamiec_status_offline:      "⚠️ Brak Internetu: dokładny licznik pamięci jest niedostępny, wartości są przybliżone (~{tokeny} / {maks} tokenów). Po odzyskaniu połączenia uruchom aplikację ponownie."
   postprod_info: |-
-    Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
+    Narzędzia AI przetwarzające zapisany plik projektu (per rozdział albo w całości). Zestaw zależy od trybu twórczego.
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"
   btn_tytuly_ai_name:    "Przycisk Nadaj Tytuły Rozdziałom AI"
   btn_tytuly_ai_tooltip: |-
@@ -692,6 +692,12 @@ rezyser:
   postprod_postep_gotowe: "Postprodukcja zakończona."
   postprod_pusta_tresc: "Model zwrócił pustą odpowiedź. Spróbuj ponownie."
   postprod_ucieta_tresc: "Wynik postprodukcji osiągnął limit długości i jego końcówka mogła zostać ucięta. Rezultat jest dostępny — sprawdź zakończenie, a jeśli jest urwane, uruchom narzędzie ponownie albo zwiększ wartość `max_tokens_wyjscia` w pliku YAML narzędzia."
+  postprod_ostrzezenie_tytul: "Wynik mógł zostać ucięty"
+  postprod_nadpisac_tytul: "Plik wyniku już istnieje"
+  postprod_nadpisac_tresc: "Plik {plik} już istnieje w folderze skrypty. Czy nadpisać go nowym wynikiem?"
+  postprod_dlg_lbl:      "Wynik narzędzia — skopiuj (Ctrl+A, Ctrl+C) lub zamknij:"
+  postprod_dlg_zapisano: "Wynik zapisano do pliku {plik} (folder skrypty). Podgląd poniżej:"
+  postprod_dlg_name:     "Pole wyniku postprodukcji"
   tytuly_dlg_tytul:      "Proponowane Tytuły Rozdziałów (AI)"
   tytuly_dlg_lbl:        "Skopiuj tytuły (Ctrl+A, Ctrl+C) lub zanotuj je w Księdze Świata:"
   tytuly_dlg_name:       "Lista proponowanych tytułów rozdziałów"

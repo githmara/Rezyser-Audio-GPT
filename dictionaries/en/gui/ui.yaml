@@ -427,7 +427,7 @@ rezyser:
   el_btn_otworz_studio: "Open ElevenLabs Studio"
   el_raport_btn_zamknij: "Close"
   postprod_info: |-
-    The module iterates over chapters from the saved file and assigns them a short literary title (AI analysis).
+    AI tools that process the saved project file (chapter by chapter or as a whole). The set depends on the creative mode.
   btn_tytuly_ai_label: "📜 Assign Chapter Titles (AI)"
   btn_tytuly_ai_name: "Assign Chapter Titles AI Button"
   btn_tytuly_ai_tooltip: |-
@@ -593,6 +593,12 @@ rezyser:
   postprod_postep_gotowe: "Post-production finished."
   postprod_pusta_tresc: "The model returned an empty response. Please try again."
   postprod_ucieta_tresc: "The post-production result reached the length limit and its ending may be cut off. The result is available — check how it ends, and if it is truncated, run the tool again or raise `max_tokens_wyjscia` in the tool's YAML file."
+  postprod_ostrzezenie_tytul: "The result may have been cut off"
+  postprod_nadpisac_tytul: "Result file already exists"
+  postprod_nadpisac_tresc: "The file {plik} already exists in the skrypty folder. Overwrite it with the new result?"
+  postprod_dlg_lbl:      "Tool result — copy it (Ctrl+A, Ctrl+C) or close:"
+  postprod_dlg_zapisano: "The result was saved to {plik} (skrypty folder). Preview below:"
+  postprod_dlg_name:     "Post-production result field"
   tytuly_dlg_tytul: "Proposed Chapter Titles (AI)"
   tytuly_dlg_lbl: "Copy titles (Ctrl+A, Ctrl+C) or note them in the World Book:"
   tytuly_dlg_name: "List of proposed chapter titles"

@@ -620,29 +620,44 @@ def lista_postprodukcji(jezyk: str = "pl") -> list[PrzepisRezysera]:
     return [p for p in _zaladuj_wszystkie(jezyk) if p.kategoria == KATEGORIA_POSTPROD]
 
 
-def postprodukcje_dla_trybu(
+def filtruj_postprodukcje(
+    postprodukcje: list[PrzepisRezysera],
     tryb: PrzepisRezysera | None,
-    jezyk: str = "pl",
 ) -> list[PrzepisRezysera]:
-    """Postprodukcje oferowane w GUI dla danego trybu twórczego (v18.12).
+    """Filtr postprodukcji pod dany tryb twórczy (semantyka ``dla_trybow``).
 
-    Filtruje :func:`lista_postprodukcji` po polu ``dla_trybow``: narzędzie
-    z niepustą listą pokazuje się wyłącznie w wymienionych trybach; narzędzie
-    z pustą listą — we wszystkich trybach z ``zapis_do_pliku`` (postprodukcja
-    operuje na pliku projektu ``skrypty/<nazwa>.txt``, więc tryb bez zapisu —
-    np. Burza Mózgów — nie ma na czym pracować). ``tryb=None`` (RadioBox bez
-    wyboru) → pusta lista.
+    Narzędzie z niepustą listą ``dla_trybow`` pokazuje się wyłącznie
+    w wymienionych trybach; narzędzie z pustą listą — we wszystkich trybach
+    z ``zapis_do_pliku`` (postprodukcja operuje na pliku projektu
+    ``skrypty/<nazwa>.txt``, więc tryb bez zapisu — np. Burza Mózgów — nie ma
+    na czym pracować). ``tryb=None`` (RadioBox bez wyboru) → pusta lista.
+
+    Wydzielone z :func:`postprodukcje_dla_trybu`, bo GUI trzyma listę
+    postprodukcji załadowaną raz z miękkim fallbackiem języka UI → EN
+    (jak tryby) i filtruje ją przy każdym odświeżeniu stanu.
     """
     if tryb is None:
         return []
     wynik: list[PrzepisRezysera] = []
-    for p in lista_postprodukcji(jezyk):
+    for p in postprodukcje:
         if p.dla_trybow:
             if tryb.id in p.dla_trybow:
                 wynik.append(p)
         elif tryb.zapis_do_pliku:
             wynik.append(p)
     return wynik
+
+
+def postprodukcje_dla_trybu(
+    tryb: PrzepisRezysera | None,
+    jezyk: str = "pl",
+) -> list[PrzepisRezysera]:
+    """Postprodukcje oferowane dla danego trybu twórczego (v18.12).
+
+    Wariant :func:`filtruj_postprodukcje` ładujący listę z paczki ``jezyk``
+    (bez fallbacku językowego — ten robi GUI na swojej liście).
+    """
+    return filtruj_postprodukcje(lista_postprodukcji(jezyk), tryb)
 
 
 def zaladuj_przepis(

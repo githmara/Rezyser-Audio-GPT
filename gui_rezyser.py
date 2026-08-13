@@ -22,7 +22,8 @@ Główne sekcje UI (zobacz metody ``_zbuduj_*``):
     • BLOK C – sidebar: Księga Świata + Pamięć Długotrwała (lewa kolumna).
     • BLOK D – obszar roboczy (prawa kolumna, kompozycja pod-bloków).
     • BLOK E – panel struktury (Prolog/Epilog/Akt/Scena/Rozdział).
-    • BLOK F – panel postprodukcji (tytułowanie rozdziałów AI).
+    • BLOK F – panel postprodukcji (od v18.12 dynamiczny: przycisk per
+      narzędzie z YAML `kategoria: postprodukcja`, filtr `dla_trybow`).
     • BLOK G – wskaźnik okna kontekstowego AI (Gauge + status).
 
 Wersja 13.1: cały tekst widoczny dla użytkownika pochodzi z
@@ -139,14 +140,15 @@ class RezyserPanel(wx.Panel):
             przepisy = pr.lista_trybow("en")
         self._przepisy: list[pr.PrzepisRezysera] = przepisy
 
-        przepis_tytuly = pr.zaladuj_przepis(
-            "tytuly", jezyk=jezyk_ui, kategoria="postprodukcja",
-        )
-        if przepis_tytuly is None and jezyk_ui != "en":
-            przepis_tytuly = pr.zaladuj_przepis(
-                "tytuly", jezyk="en", kategoria="postprodukcja",
-            )
-        self._przepis_tytuly: pr.PrzepisRezysera | None = przepis_tytuly
+        # Postprodukcje (v18.12, generalizacja): pełna lista z paczki języka
+        # UI z tym samym miękkim fallbackiem do EN co tryby (do v18.11 GUI
+        # ładowało na sztywno pojedynczy przepis `tytuly`). Które narzędzia
+        # są widoczne dla bieżącego trybu, decyduje `_refresh_ui_state`
+        # filtrem `pr.filtruj_postprodukcje` (pole `dla_trybow` z YAML).
+        postprodukcje = pr.lista_postprodukcji(jezyk_ui)
+        if not postprodukcje and jezyk_ui != "en":
+            postprodukcje = pr.lista_postprodukcji("en")
+        self._postprodukcje: list[pr.PrzepisRezysera] = postprodukcje
 
         # Skrajny przypadek: ani język UI, ani EN nie ma trybów — komunikat A11y.
         if not self._przepisy:
@@ -451,7 +453,7 @@ class RezyserPanel(wx.Panel):
         Od v18.4 provider-agnostic: domyślnie Anthropic Claude (`ANTHROPIC_API_KEY`,
         `sk-ant-`), a gdy `LLM_PROVIDER=openai_compat` — dowolny endpoint zgodny z
         OpenAI (`LLM_BASE_URL` + `OPENAI_API_KEY` + `LLM_MODEL`). WSZYSTKIE wywołania
-        Reżysera (tryby narracyjne + postprodukcja tytułów + mikro-call kodu języka)
+        Reżysera (tryby narracyjne + postprodukcje + mikro-call kodu języka)
         idą przez `_klient_llm`. `_api_dostepne` = klient zbudowany (konfiguracja
         kompletna). Claude pozostaje rekomendowanym filarem jakości.
         """
@@ -1001,6 +1003,15 @@ class RezyserPanel(wx.Panel):
     # BLOK F – Panel Postprodukcji
     # ------------------------------------------------------------------
     def _zbuduj_panel_postprodukcji(self, BORDER: int) -> wx.Panel:
+        """BLOK F (od v18.12 dynamiczny): przycisk per narzędzie postprodukcyjne.
+
+        Przyciski powstają dla WSZYSTKICH postprodukcji paczki — etykieta
+        wprost z YAML (jest już zlokalizowana per język paczki, jak etykiety
+        trybów w RadioBoxie). Które przyciski są widoczne dla bieżącego trybu,
+        decyduje `_refresh_ui_state` filtrem `dla_trybow`. Gauge i etykieta
+        statusu są WSPÓLNE dla wszystkich narzędzi — naraz działa najwyżej
+        jeden worker (guard `is_alive` na wejściu handlera).
+        """
         self._pnl_postprodukcja = wx.Panel(self)
 
         lbl_postprod = wx.StaticText(self._pnl_postprodukcja, label=t("rezyser.postprod_heading"))
@@ -1009,17 +1020,15 @@ class RezyserPanel(wx.Panel):
         pf.MakeBold()
         lbl_postprod.SetFont(pf)
 
-        lbl_tytuly_info = wx.StaticText(
+        lbl_postprod_info = wx.StaticText(
             self._pnl_postprodukcja,
             label=t("rezyser.postprod_info"),
         )
 
-        self._btn_tytuly_ai = wx.Button(
-            self._pnl_postprodukcja,
-            label=t("rezyser.btn_tytuly_ai_label"),
-            name=t("rezyser.btn_tytuly_ai_name"),
-        )
-        self._btn_tytuly_ai.SetToolTip(t("rezyser.btn_tytuly_ai_tooltip"))
+        self._btn_postprod: dict[str, wx.Button] = {}
+        for przepis_pp in self._postprodukcje:
+            btn = wx.Button(self._pnl_postprodukcja, label=przepis_pp.etykieta)
+            self._btn_postprod[przepis_pp.id] = btn
 
         self._gauge_postprod = wx.Gauge(self._pnl_postprodukcja, range=100)
         self._gauge_postprod.Hide()
@@ -1029,8 +1038,9 @@ class RezyserPanel(wx.Panel):
 
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(lbl_postprod,              flag=wx.ALL,                              border=BORDER)
-        sizer.Add(lbl_tytuly_info,           flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,      border=BORDER)
-        sizer.Add(self._btn_tytuly_ai,       flag=wx.LEFT | wx.BOTTOM,                 border=BORDER)
+        sizer.Add(lbl_postprod_info,         flag=wx.LEFT | wx.RIGHT | wx.BOTTOM,      border=BORDER)
+        for btn in self._btn_postprod.values():
+            sizer.Add(btn,                   flag=wx.LEFT | wx.BOTTOM,                 border=BORDER)
         sizer.Add(
             self._gauge_postprod,
             flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
@@ -1190,7 +1200,12 @@ class RezyserPanel(wx.Panel):
         self._btn_akt.Bind(wx.EVT_BUTTON,      self._on_wstaw_akt)
         self._btn_scena.Bind(wx.EVT_BUTTON,    self._on_wstaw_scena)
 
-        self._btn_tytuly_ai.Bind(wx.EVT_BUTTON, self._on_tytuly_ai)
+        # Postprodukcje (v18.12): jeden handler, id narzędzia domknięte
+        # w lambdzie (domyślny argument — klasyczny idiom przeciw późnemu
+        # wiązaniu zmiennej pętli).
+        for pp_id, btn in self._btn_postprod.items():
+            btn.Bind(wx.EVT_BUTTON,
+                     lambda _evt, i=pp_id: self._on_postprodukcja(i))
         self._btn_sr.Bind(wx.EVT_BUTTON, self._on_sr_generate)
 
     # ------------------------------------------------------------------
@@ -1336,13 +1351,26 @@ class RezyserPanel(wx.Panel):
             else:
                 self._rb_mode.EnableItem(i, True)
 
-        # Postprodukcja Audiobooka (tytuły AI rozdziałów) — bespoke funkcja trybu
-        # Audiobook, bramkowana stabilnym `id` (nie pozycją).
-        if przepis is not None and przepis.id == "audiobook":
-            self._pnl_postprodukcja.Show()
-            self._btn_tytuly_ai.Enable(
-                self._api_dostepne and nazwa_podana and _historia_niepusta
+        # Postprodukcje (v18.12): panel widoczny, gdy bieżący tryb ma
+        # JAKIEKOLWIEK narzędzia (filtr `dla_trybow` z YAML — do v18.11 panel
+        # był bramkowany na sztywno `id == "audiobook"`); przycisk per
+        # narzędzie. `worker_zajety` w Enable to tylko pierwsza linia obrony —
+        # właściwy guard jest na WEJŚCIU handlera (lekcja v18.9), bo każdy
+        # refresh (np. wpisywanie nazwy) przelicza Enable od zera.
+        postprod_dostepne = pr.filtruj_postprodukcje(self._postprodukcje, przepis)
+        if postprod_dostepne:
+            dostepne_id = {p.id for p in postprod_dostepne}
+            worker_zajety = bool(
+                self._worker_thread and self._worker_thread.is_alive()
             )
+            self._pnl_postprodukcja.Show()
+            for pp_id, btn in self._btn_postprod.items():
+                btn.Show(pp_id in dostepne_id)
+                btn.Enable(
+                    self._api_dostepne and nazwa_podana
+                    and _historia_niepusta and not worker_zajety
+                )
+            self._pnl_postprodukcja.Layout()
         else:
             self._pnl_postprodukcja.Hide()
 
@@ -2966,7 +2994,19 @@ class RezyserPanel(wx.Panel):
         finally:
             dlg.Destroy()
 
-    def _on_tytuly_ai(self, _event: wx.Event) -> None:
+    def _on_postprodukcja(self, id_postprod: str) -> None:
+        """Wspólny handler przycisków postprodukcji (v18.12, dispatch po `zakres`).
+
+        Wszystkie kosztowne pytania (brak nazwy/pliku, zgoda na nadpisanie
+        pliku wyniku) zadawane są PRZED startem workera — user nie płaci za
+        call, którego wynik miałby odrzucić przy zapisie.
+        """
+        przepis_pp = next(
+            (p for p in self._postprodukcje if p.id == id_postprod), None,
+        )
+        if przepis_pp is None:
+            return
+
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(
@@ -3009,7 +3049,40 @@ class RezyserPanel(wx.Panel):
             )
             return
 
-        self._btn_tytuly_ai.Disable()
+        # Plik wyniku (`sufiks_pliku_wyniku` z YAML): zgoda na nadpisanie
+        # PRZED wywołaniem API.
+        sciezka_wyj: str | None = None
+        if przepis_pp.sufiks_pliku_wyniku:
+            sciezka_wyj = os.path.join(
+                app_dir, self.SKRYPTY_DIR,
+                f"{nazwa}{przepis_pp.sufiks_pliku_wyniku}.txt",
+            )
+            if os.path.exists(sciezka_wyj):
+                odp = wx.MessageBox(
+                    t("rezyser.postprod_nadpisac_tresc",
+                      plik=os.path.basename(sciezka_wyj)),
+                    t("rezyser.postprod_nadpisac_tytul"),
+                    wx.YES_NO | wx.ICON_QUESTION,
+                    self,
+                )
+                if odp != wx.YES:
+                    return
+
+        # Księga Świata (`skrypty/<nazwa>.md`) — opcjonalny kontekst dla
+        # zakresu `calosc`; jej brak/nieczytelność nie blokuje narzędzia
+        # (silnik dokleja blok tylko gdy przepis ma `prompt_ksiegi_szablon`).
+        ksiega: str | None = None
+        if przepis_pp.zakres == pr.ZAKRES_CALOSC:
+            sciezka_md = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.md")
+            if os.path.exists(sciezka_md):
+                try:
+                    with open(sciezka_md, "r", encoding="utf-8") as fh:
+                        ksiega = fh.read()
+                except Exception:
+                    ksiega = None
+
+        for btn in self._btn_postprod.values():
+            btn.Disable()
         self._gauge_postprod.SetValue(0)
         self._gauge_postprod.Show()
         self._lbl_postprod_status.SetLabel(t("rezyser.tytuly_prep"))
@@ -3017,38 +3090,38 @@ class RezyserPanel(wx.Panel):
         self._pnl_postprodukcja.Layout()
         self.Layout()
 
-        t_thread = threading.Thread(
-            target=self._tytuly_worker,
-            args=(pelny_tekst,),
-            daemon=True,
-        )
+        if przepis_pp.zakres == pr.ZAKRES_PER_ROZDZIAL:
+            target, args = self._tytuly_worker, (przepis_pp, pelny_tekst, sciezka_wyj)
+        else:
+            target, args = self._postprod_calosc_worker, (
+                przepis_pp, pelny_tekst, ksiega, sciezka_wyj)
+
+        t_thread = threading.Thread(target=target, args=args, daemon=True)
         self._worker_thread = t_thread
         t_thread.start()
 
     # ------------------------------------------------------------------
-    # Wątek tła – generowanie tytułów
+    # Wątek tła – postprodukcja per rozdział (np. tytuły)
     # ------------------------------------------------------------------
-    def _tytuly_worker(self, pelny_tekst: str) -> None:
-        if self._przepis_tytuly is None:
-            wx.CallAfter(
-                self._on_tytuly_error,
-                t("rezyser.tytuly_brak_przepisu_tresc"),
-            )
-            return
-
+    def _tytuly_worker(
+        self,
+        przepis_pp: pr.PrzepisRezysera,
+        pelny_tekst: str,
+        sciezka_wyj: str | None = None,
+    ) -> None:
         def _cb(msg: str, percent: int) -> None:
-            wx.CallAfter(self._update_tytuly_progress, msg, percent)
+            wx.CallAfter(self._update_postprod_progress, msg, percent)
 
         # Siatka bezpieczeństwa wątku (v18.9): `nadaj_tytuly_rozdzialom` zwraca
         # błędy przez `wynik.przerwano_bledem`, ale potrafi RZUCIĆ zanim tam
         # dojdzie — np. `re.split` na `regex_podzial_rozdzialow` z YAML-a
         # (edytowalnego w Managerze Reguł): zepsuty wzorzec = `re.error`.
-        # Bez tego wątek ginął cicho, a przycisk postprodukcji zostawał
-        # wyłączony do restartu aplikacji.
+        # Bez tego wątek ginął cicho, a przyciski postprodukcji zostawały
+        # wyłączone do restartu aplikacji.
         try:
             wynik = rai.nadaj_tytuly_rozdzialom(
                 klient=self._klient_llm,
-                przepis_tytuly=self._przepis_tytuly,
+                przepis_tytuly=przepis_pp,
                 pelny_tekst=pelny_tekst,
                 on_postep=_cb,
             )
@@ -3056,29 +3129,103 @@ class RezyserPanel(wx.Panel):
             bledy_ai.zapisz_diagnostyke(exc, "rezyser._tytuly_worker")
             # v18.10 (audyt): przez centralny maper — timeout i typowane błędy
             # generacji dostają komunikat i18n zamiast surowego str(exc).
-            wx.CallAfter(self._on_tytuly_error, self._komunikat_bledu_ai(exc))
+            wx.CallAfter(self._on_postprod_error, self._komunikat_bledu_ai(exc))
             return
 
         if wynik.przerwano_bledem:
             wx.CallAfter(
-                self._on_tytuly_error,
+                self._on_postprod_error,
                 wynik.blad or t("rezyser.tytuly_blad_nieznany"),
                 list(wynik.tytuly),
+                przepis_pp,
             )
             return
 
-        wx.CallAfter(self._show_titles_dialog, "\n".join(wynik.tytuly))
-
+        tekst = "\n".join(wynik.tytuly)
+        if sciezka_wyj and not self._zapisz_wynik_postprod(sciezka_wyj, tekst):
+            return
+        wx.CallAfter(self._on_postprod_sukces, przepis_pp, tekst, sciezka_wyj, "")
 
     # ------------------------------------------------------------------
-    # Callbacki _tytuly_worker
+    # Wątek tła – postprodukcja całościowa (v18.12, `zakres: calosc`)
     # ------------------------------------------------------------------
-    def _update_tytuly_progress(self, msg: str, percent: int) -> None:
+    def _postprod_calosc_worker(
+        self,
+        przepis_pp: pr.PrzepisRezysera,
+        pelny_tekst: str,
+        ksiega: str | None,
+        sciezka_wyj: str | None,
+    ) -> None:
+        def _cb(msg: str, percent: int) -> None:
+            wx.CallAfter(self._update_postprod_progress, msg, percent)
+
+        # Siatka bezpieczeństwa wątku (v18.9): silnik zwraca rate-limit/timeout
+        # typowanym wynikiem, ale pozostałe wyjątki SDK celowo PROPAGUJE —
+        # bez try wątek ginąłby cicho w paczce --windowed.
+        try:
+            wynik = rai.wykonaj_postprodukcje_calosc(
+                klient=self._klient_llm,
+                przepis=przepis_pp,
+                pelny_tekst=pelny_tekst,
+                ksiega=ksiega,
+                on_postep=_cb,
+            )
+        except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
+            bledy_ai.zapisz_diagnostyke(exc, "rezyser._postprod_calosc_worker")
+            wx.CallAfter(self._on_postprod_error, self._komunikat_bledu_ai(exc))
+            return
+
+        if wynik.przerwano_bledem:
+            wx.CallAfter(
+                self._on_postprod_error,
+                wynik.blad or t("rezyser.tytuly_blad_nieznany"),
+            )
+            return
+
+        if wynik.odrzucone:
+            wx.CallAfter(self._on_postprod_error, t("rezyser.err_odrzucenie"))
+            return
+
+        if sciezka_wyj and not self._zapisz_wynik_postprod(sciezka_wyj, wynik.tekst):
+            return
+        wx.CallAfter(
+            self._on_postprod_sukces,
+            przepis_pp, wynik.tekst, sciezka_wyj, wynik.ostrzezenie,
+        )
+
+    def _zapisz_wynik_postprod(self, sciezka: str, tekst: str) -> bool:
+        """Zapis pliku wyniku (wątek tła). Błąd → callback błędu + ``False``.
+
+        Wynik modelu jest już opłacony, więc porażka zapisu NIE może zginąć
+        po cichu — user dostaje pełny komunikat i może ponowić narzędzie.
+        """
+        try:
+            with open(sciezka, "w", encoding="utf-8") as fh:
+                fh.write(tekst + "\n")
+            return True
+        except Exception as exc:  # noqa: BLE001 — dysk/uprawnienia to realne wejście
+            bledy_ai.zapisz_diagnostyke(exc, "rezyser._zapisz_wynik_postprod")
+            wx.CallAfter(
+                self._on_postprod_error,
+                t("rezyser.blad_zapisu_do_pliku", tresc_bledu=str(exc)),
+            )
+            return False
+
+    # ------------------------------------------------------------------
+    # Callbacki workerów postprodukcji
+    # ------------------------------------------------------------------
+    def _update_postprod_progress(self, msg: str, percent: int) -> None:
         self._lbl_postprod_status.SetLabel(msg)
         self._gauge_postprod.SetValue(max(0, min(100, percent)))
 
-    def _on_tytuly_error(self, msg: str, partial_tytuly: list | None = None) -> None:
-        self._btn_tytuly_ai.Enable()
+    def _on_postprod_error(
+        self,
+        msg: str,
+        partial_wyniki: list | None = None,
+        przepis_pp: pr.PrzepisRezysera | None = None,
+    ) -> None:
+        for btn in self._btn_postprod.values():
+            btn.Enable()
         self._gauge_postprod.SetValue(0)
         self._gauge_postprod.Hide()
         self._lbl_postprod_status.Hide()
@@ -3088,31 +3235,67 @@ class RezyserPanel(wx.Panel):
             msg,
             t("rezyser.tytuly_blad_naglowek"),
         )
-        if partial_tytuly:
-            self._show_titles_dialog(
+        if partial_wyniki:
+            self._show_postprod_dialog(
+                przepis_pp,
                 t(
                     "rezyser.tytuly_czesciowe_naglowek",
-                    wyniki="\n".join(partial_tytuly),
-                )
+                    wyniki="\n".join(partial_wyniki),
+                ),
+                sciezka_wyj=None,
             )
 
-    def _show_titles_dialog(self, tytuly_text: str) -> None:
-        self._btn_tytuly_ai.Enable()
+    def _on_postprod_sukces(
+        self,
+        przepis_pp: pr.PrzepisRezysera,
+        tekst: str,
+        sciezka_wyj: str | None,
+        ostrzezenie: str = "",
+    ) -> None:
+        for btn in self._btn_postprod.values():
+            btn.Enable()
         self._gauge_postprod.SetValue(100)
-        self._lbl_postprod_status.SetLabel(t("rezyser.tytuly_gotowe"))
+        self._lbl_postprod_status.SetLabel(t("rezyser.postprod_postep_gotowe"))
 
+        # Ostrzeżenie o ucięciu PRZED dialogiem wyniku — user wie, czego
+        # szukać na końcówce (konwencja miękka jak w `generuj_fragment`).
+        if ostrzezenie:
+            wx.MessageBox(
+                ostrzezenie,
+                t("rezyser.postprod_ostrzezenie_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+        self._show_postprod_dialog(przepis_pp, tekst, sciezka_wyj)
+
+    def _show_postprod_dialog(
+        self,
+        przepis_pp: pr.PrzepisRezysera | None,
+        tekst: str,
+        sciezka_wyj: str | None,
+    ) -> None:
+        """Dialog wyniku postprodukcji (TE_READONLY — długa treść, A11y).
+
+        Tytuł okna = etykieta narzędzia z YAML (już zlokalizowana). Gdy wynik
+        poszedł też do pliku, etykieta nad polem podaje jego nazwę.
+        """
+        tytul_dlg = przepis_pp.etykieta if przepis_pp else t("rezyser.postprod_heading")
+        lbl_tekst = (
+            t("rezyser.postprod_dlg_zapisano", plik=os.path.basename(sciezka_wyj))
+            if sciezka_wyj else t("rezyser.postprod_dlg_lbl")
+        )
         dlg = wx.Dialog(
             self,
-            title=t("rezyser.tytuly_dlg_tytul"),
+            title=tytul_dlg,
             size=(620, 420),
         )
         sizer = wx.BoxSizer(wx.VERTICAL)
-        lbl = wx.StaticText(dlg, label=t("rezyser.tytuly_dlg_lbl"))
+        lbl = wx.StaticText(dlg, label=lbl_tekst)
         txt = wx.TextCtrl(
             dlg,
-            value=tytuly_text,
+            value=tekst,
             style=wx.TE_MULTILINE | wx.TE_READONLY,
-            name=t("rezyser.tytuly_dlg_name"),
+            name=t("rezyser.postprod_dlg_name"),
         )
         btn_ok = wx.Button(dlg, wx.ID_OK, label=t("common.btn_zamknij"))
         sizer.Add(lbl,    flag=wx.ALL,                                   border=8)
