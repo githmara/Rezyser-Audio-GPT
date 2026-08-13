@@ -1,7 +1,7 @@
 # SPANISCHER AKZENT (Deutsch → spanischer TTS)
 # Für Synthesizer: Pablo / Helena / ähnliche spanische TTS-Stimmen.
 
-id: hiszp
+id: hiszpanski
 etykieta: "Spanisch (z.B. Pablo / Helena)"
 opis: |
   Passt deutschen Text für einen spanischen Sprachsynthesizer an.

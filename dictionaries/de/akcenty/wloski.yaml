@@ -1,7 +1,7 @@
 # ITALIENISCHER AKZENT (Deutsch → italienischer TTS)
 # Für Synthesizer: Elsa / Cosimo / ähnliche italienische TTS-Stimmen.
 
-id: wl
+id: wloski
 etykieta: "Italienisch (z.B. Elsa / Cosimo)"
 opis: |
   Passt deutschen Text für einen italienischen Sprachsynthesizer an.
