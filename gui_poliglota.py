@@ -532,6 +532,18 @@ class PoliglotaPanel(wx.Panel):
             wx.OK | wx.ICON_INFORMATION, self)
 
     def _on_clear(self, _event: wx.Event) -> None:
+        # 18.11 (audyt): guard is_alive — „Wyczyść" w trakcie tłumaczenia AI
+        # zerował _plik_katalog/_oryginalna_nazwa/_file_content, a callbacki
+        # końca wątku czytają je z instancji → ukończone (opłacone)
+        # tłumaczenie lądowało w bieżącym katalogu roboczym z pustym
+        # oryginałem; po wyczyszczeniu dało się też wczytać INNY plik
+        # w trakcie pracy wątku.
+        if self._worker_thread and self._worker_thread.is_alive():
+            wx.MessageBox(t("poliglota.zajety_tresc"),
+                          t("poliglota.zajety_tytul"),
+                          wx.OK | wx.ICON_INFORMATION, self)
+            return
+
         self._file_content      = ""
         self._file_ext          = ""
         self._oryginalna_nazwa  = "nieznany"
@@ -576,7 +588,24 @@ class PoliglotaPanel(wx.Panel):
         self._pnl_ai.Show(ai_mode)
         self._pnl_rezyser.Show(rez_mode)
         self._pnl_szyfrant.Show(szyf_mode)
+        self._odswiez_dostepnosc_wymuszania()
         self.Layout()
+
+    def _odswiez_dostepnosc_wymuszania(self) -> None:
+        """Wyszarza checkbox wymuszania języka tam, gdzie nie ma on efektu.
+
+        18.11 (audyt): wymuszanie działa wyłącznie na ścieżkach z segmentacją
+        (oczyszczenie/akcent/szyfry). Tłumacz AI go nie czyta, a Naprawiacz
+        Tagów wraca przed segmentacją (ISO per akapit wykrywa `zapisz_wynik`
+        na oryginale, docelowy tag podaje pole „Kod ISO"). Aktywny checkbox
+        bez efektu = etykieta kłamie — wyszarzamy zamiast udawać.
+        """
+        cfg = self._aktualny_wariant_akcentu()
+        naprawiacz = bool(cfg and cfg.get("kategoria") == "naprawiacz")
+        rez_mode = self._rb_rezyser.GetValue()
+        szyf_mode = self._rb_szyfrant.GetValue()
+        dziala = szyf_mode or (rez_mode and not naprawiacz)
+        self._chk_wymus.Enable(dziala)
 
     def _on_akcent_change(self, _event: wx.Event | None = None) -> None:
         """Pokaż pole „Kod ISO" tylko dla wariantu Naprawiacz Tagów."""
@@ -584,6 +613,7 @@ class PoliglotaPanel(wx.Panel):
         pokaz_iso = bool(cfg and cfg.get("kategoria") == "naprawiacz")
         self._lbl_iso.Show(pokaz_iso)
         self._txt_iso.Show(pokaz_iso)
+        self._odswiez_dostepnosc_wymuszania()
         self._pnl_rezyser.Layout()
         self.Layout()
 
