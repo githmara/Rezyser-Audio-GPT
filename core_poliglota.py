@@ -129,8 +129,19 @@ def normalizuj_liczby(tekst: str, jezyk: str = "pl") -> str:
 
 
 def sklej_pojedyncze_litery(tekst: str) -> str:
-    """Scala wiszące pojedyncze litery oddzielone spacją (np. „w y s” → „wys”)."""
-    return re.sub(r"(?i)\b([a-z])\s+", r"\1", tekst)
+    """Scala SERIE wiszących pojedynczych liter (np. „w y s” → „wys”).
+
+    Audyt 18.12 (W-2): dawny wzorzec ``\\b([a-z])\\s+`` sklejał KAŻDĄ
+    pojedynczą literę z następnym wyrazem — a jednoliterowe SŁOWA to
+    codzienność (pl „w/z/i/a/o/u”, es „y”, it „e”, transliteracje ru
+    „v/i/u/s/k”): „brzmi w trzcinie”→„bzhmi vtzhcinie”, „couldn't say”→
+    „couldn'tsay” (apostrof tworzy granicę słowa). Sklejamy więc tylko
+    ciąg CO NAJMNIEJ DWÓCH samotnych liter — faktyczne rozstrzelenie
+    („s z c z y t”→„szczyt”), nie słowo-literę przed normalnym wyrazem.
+    """
+    def _sklej(m: re.Match[str]) -> str:
+        return re.sub(r"\s+", "", m.group(0))
+    return re.sub(r"(?i)\b[a-z](?:\s+[a-z]\b)+(?!\w)", _sklej, tekst)
 
 
 def oczysc_tekst_tts(tekst: str, z_normalizacja: bool = True,
@@ -1017,10 +1028,21 @@ def zastosuj_reguly_fonetyczne(tekst: str, wariant: str,
     """
     cfg = wariant_po_id(TRYB_REZYSER, jezyk, wariant) or {}
     podstawy = _zaladuj_podstawy(jezyk)
-    tekst = normalizuj_liczby(tekst, jezyk)
-    tekst = _usun_polskie_znaki(tekst, podstawy)
+    # Audyt 18.12 (W-5): flagi YAML honorowane jak w `_aplikuj_akcent_z_yaml`
+    # (ścieżka Poligloty) — dawniej normalizacja/transliteracja/sklejanie
+    # szły tu BEZWARUNKOWO, więc ten sam akcent brzmiał inaczej w Reżyserze
+    # i Poliglocie (pl/rosyjski z `usun_polskie_znaki: false` gubił
+    # zmiękczenia: „jaźń”→„язн” zamiast „яжнь”, bo podstawy spłaszczały
+    # ś/ź przed transliteracją). Jedyna zamierzona różnica ścieżek to brak
+    # etapu `czysc_tekst_tts` (Reżyser zachowuje didaskalia).
+    if cfg.get("normalizuj_liczby"):
+        tekst = normalizuj_liczby(tekst, jezyk)
+    if cfg.get("usun_polskie_znaki"):
+        tekst = _usun_polskie_znaki(tekst, podstawy)
     tekst = _zastosuj_zamiany(tekst, cfg.get("zamiany", []))
-    return sklej_pojedyncze_litery(tekst)
+    if cfg.get("skleja_pojedyncze_litery"):
+        tekst = sklej_pojedyncze_litery(tekst)
+    return tekst
 
 
 def _przetworz_rezyser(tekst: str, jezyk: str, cfg: dict, opcje: dict) -> str:
