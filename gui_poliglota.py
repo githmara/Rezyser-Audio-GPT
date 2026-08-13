@@ -40,6 +40,7 @@ import wx
 import bledy_ai
 import core_llm as cl
 import core_poliglota
+import core_tokeny as ct
 import i18n
 import sciezki
 import tlumacz_ai
@@ -902,6 +903,13 @@ class PoliglotaPanel(wx.Panel):
                 slowo_tlumaczenie=core_poliglota.bezpieczny_czlon_nazwy(
                     t("poliglota.filename_tlumaczenie"), "tlumaczenie"),
             )
+        except ct.BladTokenizeraOffline as exc:
+            # v18.10: brak tabel BPE (chunking tiktoken) = brak Internetu —
+            # natywny komunikat zamiast surowego tracebacku EN.
+            bledy_ai.zapisz_diagnostyke(exc, "poliglota._ai_worker")
+            wx.CallAfter(self._on_ai_error,
+                         t("poliglota.err_tokenizer_offline"), "")
+            return
         except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
             bledy_ai.zapisz_diagnostyke(exc, "poliglota._ai_worker")
             wx.CallAfter(self._on_ai_error, str(exc), "",

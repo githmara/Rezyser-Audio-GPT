@@ -1207,12 +1207,17 @@ def nadaj_tytuly_rozdzialom(
                 blad=i18n.t("rezyser.err_rate_limit"),
             )
         except Exception as exc:  # noqa: BLE001
+            # v18.10 (audyt): timeout dostaje natywny komunikat i18n — bez tej
+            # gałęzi user widział surowe EN z SDK, choć rate-limit obok był
+            # zlokalizowany od dawna.
+            komunikat = (i18n.t("rezyser.err_timeout")
+                         if isinstance(exc, cl.BladTimeoutLLM) else str(exc))
             etykieta_bledu = przepis_tytuly.etykieta_blad_fragment or "(Błąd – {blad})"
-            tytuly.append(f"{naglowek}: {etykieta_bledu.replace('{blad}', str(exc))}")
+            tytuly.append(f"{naglowek}: {etykieta_bledu.replace('{blad}', komunikat)}")
             return WynikTytulowania(
                 tytuly=tytuly,
                 przerwano_bledem=True,
-                blad=str(exc),
+                blad=komunikat,
             )
 
     return WynikTytulowania(tytuly=tytuly, przerwano_bledem=False, blad="")

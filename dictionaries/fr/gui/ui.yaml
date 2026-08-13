@@ -654,6 +654,8 @@ rezyser:
   ostrzezenie_urwane_tytul: Le fragment a peut-être été tronqué
   ostrzezenie_urwane_tresc: La réponse du modèle a atteint la limite de longueur et s'est interrompue en milieu de phrase. La tentative automatique de compléter la dernière phrase a échoué. Le fragment a été enregistré tel quel — vérifiez sa fin et, si nécessaire, ajoutez manuellement une conclusion ou envoyez une courte instruction de continuation.
   err_struktura: Le modèle IA a renvoyé plusieurs fois une structure de données incorrecte et il n'a pas été possible de la corriger. Réessayez ou simplifiez l'instruction — si l'erreur persiste, joignez le fichier error_log.txt à votre signalement.
+  pamiec_status_offline: "⚠️ Pas de connexion Internet : le compteur de mémoire exact n'est pas disponible, les valeurs affichées sont approximatives (~{tokeny} / {maks} jetons). Redémarrez l'application une fois la connexion rétablie."
+  err_timeout: Le délai d'attente de la réponse du modèle a été dépassé. Vérifiez votre connexion Internet et réessayez.
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -806,6 +808,7 @@ poliglota:
   ai_postep_blok: Traduction du bloc {numer} de {ile}… ({znaki} caractères)
   ai_postep_iso: Génération de la balise linguistique pour les lecteurs d'écran…
   ai_postep_zapis: Enregistrement du fichier de sortie…
+  err_tokenizer_offline: 'Pas de connexion Internet : impossible de télécharger le dictionnaire du tokeniseur nécessaire pour découper le texte. Vérifiez votre connexion et réessayez.'
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)
@@ -1097,6 +1100,33 @@ manager:
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
+  sufiks_kopii: copie
+  nazwy_jezykow:
+    pl: polonais
+    en: anglais
+    de: allemand
+    fr: français
+    es: espagnol
+    it: italien
+    fi: finnois
+    is: islandais
+    sv: suédois
+    da: danois
+    "no": norvégien
+    ru: russe
+    cs: tchèque
+    sk: slovaque
+    hu: hongrois
+    nl: néerlandais
+    pt: portugais
+    uk: ukrainien
+    ja: japonais
+    zh: chinois
+  lustro_pytanie_tytul: Parité des bases pl/en
+  lustro_pytanie_tresc: "Vous créez le fichier « {nazwa_pliku} » dans la base « {jezyk_zrodlowy} », mais la base jumelle « {jezyk_lustra} » ne le possède pas.\n\nLes langues polonaise et anglaise sont les bases de référence du moteur : elles doivent avoir un ensemble de fichiers IDENTIQUE. Sans copie miroir, LES DEUX disparaîtront de la liste des langues après le redémarrage de l'application.\n\nCréer maintenant une copie 1:1 dans « {jezyk_lustra} » ? (Recommandé. Vous pourrez traduire le contenu nativement plus tard — la copie contiendra un commentaire pour vous le rappeler.)"
+  lustro_usun_pytanie_tresc: "Le fichier « {nazwa_pliku} » possède un équivalent miroir dans la base jumelle « {jezyk_lustra} ».\n\nLes langues polonaise et anglaise doivent avoir un ensemble de fichiers IDENTIQUE — le supprimer uniquement de « {jezyk_zrodlowy} » fera disparaître LES DEUX de la liste des langues après le redémarrage de l'application.\n\nSupprimer aussi l'équivalent dans « {jezyk_lustra} » ? (Oui = suppression cohérente dans les deux bases ; Non = vous supprimez seulement ce fichier et désynchronisez volontairement les bases.)"
+  lustro_komentarz_naglowek: "# Copie miroir de la base « {jezyk_zrodlowy} » (parité pl/en — exigence du moteur).\n# ATTENTION : traduisez nativement le contenu de ce fichier (étiquette, description, prompt)."
+  lustro_blad: "Impossible de créer la copie miroir :\n{tresc_bledu}"
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Mise à jour disponible"
@@ -1132,6 +1162,7 @@ updater:
   changelog_blad: "Impossible d'enregistrer ou d'ouvrir le fichier du journal des modifications :\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Journal des modifications de la version {nowa_wersja}
   btn_pobierz_zrodlo: '&Télécharger le code source (ZIP)'
+  blad_weryfikacji_tresc: "L'installateur téléchargé N'A PAS réussi la vérification d'intégrité (la somme de contrôle ou la taille ne correspond pas) et a été supprimé. L'installation a été interrompue par sécurité — réessayez ou téléchargez l'installateur manuellement depuis la page de publication.\n\nDétails techniques : {szczegoly}"
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Panneau d'Histoires"
@@ -1336,6 +1367,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tresc: La commande « {komenda} » est verrouillée par défaut, car le rechargement de la narration depuis le disque ne recalcule pas l'état du jeu (personnages, lieu, équipement) et peut provoquer une dérive sémantique. Pour la déverrouiller, définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 et générez votre propre package.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — verrouillées ; définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 pour déverrouiller)
   err_struktura: Le modèle IA a renvoyé plusieurs fois une structure de données incorrecte et il n'a pas été possible de la corriger. Réessayez — si l'erreur persiste, joignez le fichier error_log.txt à votre signalement.
+  pamiec_status_offline: "⚠️ Pas de connexion Internet : le compteur de mémoire exact n'est pas disponible, les valeurs affichées sont approximatives (~{procent} % — {tokeny} jetons). Redémarrez l'application une fois la connexion rétablie."
 bot:
   closure:
     Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio GPT.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"

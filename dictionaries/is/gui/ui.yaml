@@ -656,6 +656,8 @@ rezyser:
   ostrzezenie_urwane_tytul: Brot gæti hafa verið klippt af
   ostrzezenie_urwane_tresc: Svar líkansins náði lengdarmörkunum og brotnaði mitt í setningu, og sjálfvirk tilraun til að loka síðustu setningunni tókst ekki. Brotið var vistað eins og það er — athugaðu endann á því og bættu við niðurlagi handvirkt ef þörf krefur, eða sendu stutt framhaldsfyrirmæli.
   err_struktura: Gervigreindarlíkanið skilaði nokkrum sinnum ógildri gagnauppbyggingu og ekki tókst að leiðrétta hana. Reyndu aftur eða einfaldaðu leiðbeiningarnar — ef villan kemur ítrekað upp skaltu bæta skránni error_log.txt við tilkynninguna.
+  pamiec_status_offline: '⚠️ Engin nettenging: nákvæmur minnisteljari er ekki tiltækur, gildin eru áætluð (~{tokeny} / {maks} tákneiningar). Endurræstu forritið þegar tenging kemst á að nýju.'
+  err_timeout: Tími rann út meðan beðið var eftir svari líkansins. Athugaðu nettenginguna og reyndu aftur.
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -810,6 +812,7 @@ poliglota:
   ai_postep_blok: Þýðing á blokk {numer} frá {ile}… ({znaki} stafir)
   ai_postep_iso: Búa til tungumálamerki fyrir skjálesara…
   ai_postep_zapis: Vista niðurstöðuskrá…
+  err_tokenizer_offline: 'Engin nettenging: ekki tókst að sækja orðasafn tákngerandans sem þarf til að skipta textanum niður. Athugaðu tenginguna og reyndu aftur.'
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)
@@ -1104,6 +1107,33 @@ manager:
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
+  sufiks_kopii: afrit
+  nazwy_jezykow:
+    pl: pólska
+    en: enska
+    de: þýska
+    fr: franska
+    es: spænska
+    it: ítalska
+    fi: finnska
+    is: íslenska
+    sv: sænska
+    da: danska
+    "no": norska
+    ru: rússneska
+    cs: tékkneska
+    sk: slóvakíska
+    hu: ungverska
+    nl: hollenska
+    pt: portúgalska
+    uk: úkraínska
+    ja: japanska
+    zh: kínverska
+  lustro_pytanie_tytul: Jöfnuður pl/en gagnagrunna
+  lustro_pytanie_tresc: "Þú ert að búa til skrána „{nazwa_pliku}\" í gagnagrunninum „{jezyk_zrodlowy}\", en systurgagnagrunnurinn „{jezyk_lustra}\" hefur hana ekki.\n\nPólska og enska eru viðmiðunargagnagrunnar vélarinnar: þau verða að hafa NÁKVÆMLEGA SÖMU skráasafn. Án speglaðs afrits munu BÁÐIR málkostir hverfa af tungumálalistanum eftir að forritið er endurræst.\n\nBúa til 1:1 afrit í „{jezyk_lustra}\" núna? (Mælt með þessu. Þú getur þýtt innihaldið síðar á upprunalegan hátt — afritið fær athugasemd til áminningar.)"
+  lustro_usun_pytanie_tresc: "Skráin „{nazwa_pliku}\" á sér speglaða hliðstæðu í systurgagnagrunninum „{jezyk_lustra}\".\n\nPólska og enska verða að hafa NÁKVÆMLEGA SÖMU skráasafn — ef skránni er aðeins eytt úr „{jezyk_zrodlowy}\" munu BÁÐIR málkostir hverfa af tungumálalistanum eftir að forritið er endurræst.\n\nEyða einnig hliðstæðunni úr „{jezyk_lustra}\"? (Já = samræmd eyðing úr báðum gagnagrunnum; Nei = þú eyðir aðeins þessari skrá og skapar viljandi ósamræmi milli gagnagrunna.)"
+  lustro_komentarz_naglowek: "# Speglað afrit úr gagnagrunninum „{jezyk_zrodlowy}\" (jöfnuður pl/en — krafa vélarinnar).\n# ATHUGIÐ: þýddu innihald þessarar skrár á upprunalegan hátt (heiti, lýsingu, skipun)."
+  lustro_blad: "Ekki tókst að búa til speglað afrit:\n{tresc_bledu}"
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Uppfærsla í boði"
@@ -1139,6 +1169,7 @@ updater:
   changelog_blad: "Ekki tókst að vista eða opna changelog skrána:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Changelog útgáfu {nowa_wersja}
   btn_pobierz_zrodlo: '&Sækja frumkóða (ZIP)'
+  blad_weryfikacji_tresc: "Niðurhalaði uppsetningarforritið stóðst EKKI heilleikaprófun (gátsumma eða stærð stemmir ekki) og var eytt. Uppsetningu var hætt af öryggisástæðum — reyndu aftur eða sæktu uppsetningarforritið handvirkt af útgáfusíðunni.\n\nTæknilegar upplýsingar: {szczegoly}"
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Sögupanel"
@@ -1345,6 +1376,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tresc: Skipunin „{komenda}" er læst sjálfgefið, því að endurnýjun frásagnar af disk endurreiknar ekki leikstöðu (persónur, staðsetning, búnaður) og getur valdið merkingarlegum fráviki. Til að opna hana, stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 og smídaðu eigin pakka.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — læst; stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 til að opna)
   err_struktura: Gervigreindarlíkanið skilaði nokkrum sinnum ógildri gagnauppbyggingu og ekki tókst að leiðrétta hana. Reyndu aftur — ef villan kemur ítrekað upp skaltu bæta skránni error_log.txt við tilkynninguna.
+  pamiec_status_offline: '⚠️ Engin nettenging: nákvæmur minnisteljari er ekki tiltækur, gildin eru áætluð (~{procent}% — {tokeny} tákneiningar). Endurræstu forritið þegar tenging kemst á að nýju.'
 bot:
   closure:
     Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Hljóðstjóra GPT.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"

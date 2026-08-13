@@ -41,6 +41,7 @@ from typing import Any
 import wx
 
 import core_llm as cl
+import core_tokeny as ct
 import opowiesci_ai as oai
 import sciezki
 import bledy_ai
@@ -2387,6 +2388,15 @@ class OpowiesciPanel(wx.Panel):
             self._snapshot, self._aktualny_tryb_int(), oai.MODEL_DOMYSLNY,
         )
         self._gauge_pamiec.SetValue(status.procent)
+        # v18.10: brak tabel BPE (offline + pusty cache) → pomiar zdegradowany
+        # do heurystyki znakowej; komunikat o braku Internetu zamiast etapu.
+        if not ct.tokenizer_dostepny():
+            self._lbl_pamiec_status.SetValue(
+                t("opowiesci.pamiec_status_offline",
+                  procent=status.procent, tokeny=status.tokeny)
+            )
+            self._lbl_pamiec_status.SetForegroundColour(wx.Colour(180, 100, 0))
+            return
         etap_klucz = {
             oai.POZIOM_CZYSTA:      "opowiesci.pamiec_etap_czysta",
             oai.POZIOM_OK:          "opowiesci.pamiec_etap_ok",

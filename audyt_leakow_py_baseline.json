@@ -53,17 +53,6 @@
     "POSSIBLE|znak-PL:ł|Nieprawidłowy format wersji: {…}",
     "POSSIBLE|znak-PL:łź|Nie znaleziono pliku VERSION w {…}. Sprawdź, czy plik istnieje w katalogu głównym projektu."
   ],
-  "gui_manager_regul.py": [
-    "POSSIBLE|znak-PL:ę|węgierski",
-    "POSSIBLE|znak-PL:ł|słowacki",
-    "POSSIBLE|znak-PL:ł|włoski",
-    "POSSIBLE|znak-PL:ń|chiński",
-    "POSSIBLE|znak-PL:ń|duński",
-    "POSSIBLE|znak-PL:ń|fiński",
-    "POSSIBLE|znak-PL:ń|hiszpański",
-    "POSSIBLE|znak-PL:ń|japoński",
-    "POSSIBLE|znak-PL:ń|ukraiński"
-  ],
   "gui_opowiesci.py": [
     "POSSIBLE|slowo-PL:wczytaj|/wczytaj",
     "POSSIBLE|slowo-PL:zapisz|/zapisz",

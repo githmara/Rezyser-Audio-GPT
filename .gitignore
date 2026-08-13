@@ -36,6 +36,9 @@ pages/
 # Ignorujemy gotowe paczki ZIP i instalatory EXE, by nie zaśmiecać repozytorium
 *.zip
 *.exe
+# Suma kontrolna instalatora (od v18.10 build pisze <Installer>.exe.sha256
+# obok exe — to artefakt wydania na upload do Release, nie plik repo).
+*.exe.sha256
 # Launcher end-user jest generowany przez build_release.py — nie wersjonujemy go w repo.
 # (W wersjach 11.x–13.0 ten plik nazywał się `Uruchom_Rezysera.bat`; został
 # przemianowany w 13.1 razem z resztą skryptów infrastruktury na angielskie

@@ -31,6 +31,7 @@ import re
 
 import wx
 
+import core_poliglota
 import manager_regul_szablony as mrs
 import sciezki
 from i18n import aktualny_jezyk, t
@@ -578,8 +579,111 @@ class ManagerRegulPanel(wx.Panel):
             wx.OK | wx.ICON_INFORMATION,
             self,
         )
+        # v18.10: duplikat w pl/ lub en/ bez lustra rozjeżdża crosscheck baz.
+        self._zaproponuj_lustro_po_zapisie(nowa_sciezka)
         _otworz_w_edytorze_tekstu(self, nowa_sciezka)
         self._zaladuj_drzewo(zaznacz_sciezke=nowa_sciezka)
+
+    # ------------------------------------------------------------------
+    # Strażnik crosschecku pl↔en (v18.10)
+    # ------------------------------------------------------------------
+    # `core_poliglota._jezyk_kompletny` (15.3) wymaga IDENTYCZNEGO zestawu
+    # plików w bazach referencyjnych pl i en (poza akcentami obcojęzycznymi).
+    # Rozjazd → OBA języki znikają z `dostepne_jezyki_bazowe()`, czyli po
+    # restarcie aplikacja traci polski i angielski (potwierdzone testem
+    # bojowym 2026-08-13: kreator trybu w pl/ odfiltrował obie bazy).
+    # Manager, jako jedyne GUI mutujące dictionaries/, musi więc pilnować
+    # parytetu przy tworzeniu, duplikacji i usuwaniu plików w pl/ i en/.
+
+    def _sciezka_lustra_crosschecku(self, sciezka_abs: str):
+        """Zwraca ``(kod, kod_lustra, sciezka_lustra_abs)`` albo None.
+
+        None = plik nie podlega crosscheckowi zestawów pl↔en (inny język,
+        akcent obcojęzyczny). Reguły lustrzane wobec
+        ``core_poliglota._zestaw_referencyjny`` — stamtąd też stałe, żeby
+        semantyka nie rozjechała się z silnikiem. UWAGA (audyt v18.10):
+        ``podstawy.yaml`` i ``gui/ui.yaml`` też SĄ w zestawie referencyjnym
+        — bez nich strażnik milczał przy usuwaniu, choć usunięcie z jednej
+        bazy odfiltrowuje OBIE (przy tworzeniu i tak wycisza go
+        ``os.path.exists`` lustra, bo te pliki w pl/en zawsze istnieją).
+        """
+        try:
+            rel = os.path.relpath(sciezka_abs, DICTIONARIES_DIR)
+        except ValueError:
+            return None
+        czesci = rel.replace("\\", "/").split("/")
+        if len(czesci) == 2:
+            kod, nazwa = czesci
+            if nazwa != "podstawy.yaml":
+                return None
+            czesci_lustra = (nazwa,)
+        elif len(czesci) == 3:
+            kod, pod, nazwa = czesci
+            if pod == FOLDER_GUI:
+                if nazwa != "ui.yaml":
+                    return None
+            elif pod not in core_poliglota._PODFOLDERY_JEZYKOWE:
+                return None
+            elif pod == FOLDER_AKCENTY and \
+                    nazwa not in core_poliglota._NARZEDZIA_AKCENTOW:
+                return None
+            czesci_lustra = (pod, nazwa)
+        else:
+            return None
+        if kod not in core_poliglota._JEZYKI_REFERENCYJNE:
+            return None
+        kod_lustra = next(
+            j for j in core_poliglota._JEZYKI_REFERENCYJNE if j != kod)
+        return kod, kod_lustra, os.path.join(
+            DICTIONARIES_DIR, kod_lustra, *czesci_lustra)
+
+    def _zaproponuj_lustro_po_zapisie(self, sciezka_abs: str) -> None:
+        """Po utworzeniu pliku w pl/ lub en/ proponuje lustrzany stub.
+
+        Milczy, gdy plik nie podlega crosscheckowi albo lustro już istnieje
+        (np. przywracanie parytetu). Odmowa użytkownika = świadoma decyzja —
+        dialog wyjaśnia skutek (oba języki bazowe odfiltrowane po restarcie).
+        """
+        info = self._sciezka_lustra_crosschecku(sciezka_abs)
+        if not info:
+            return
+        kod, kod_lustra, lustro_abs = info
+        if os.path.exists(lustro_abs):
+            return
+        odp = wx.MessageBox(
+            t(
+                "manager.lustro_pytanie_tresc",
+                nazwa_pliku=os.path.basename(sciezka_abs),
+                jezyk_zrodlowy=kod,
+                jezyk_lustra=kod_lustra,
+            ),
+            t("manager.lustro_pytanie_tytul"),
+            wx.YES_NO | wx.YES_DEFAULT | wx.ICON_WARNING,
+            self,
+        )
+        if odp != wx.YES:
+            return
+        tmp_abs = lustro_abs + ".tmp"
+        try:
+            with open(sciezka_abs, "r", encoding="utf-8") as fh:
+                tresc = fh.read()
+            naglowek = t("manager.lustro_komentarz_naglowek",
+                         jezyk_zrodlowy=kod) + "\n"
+            os.makedirs(os.path.dirname(lustro_abs), exist_ok=True)
+            with open(tmp_abs, "w", encoding="utf-8") as fh:
+                fh.write(naglowek + tresc)
+            os.replace(tmp_abs, lustro_abs)
+        except Exception as exc:                                # noqa: BLE001
+            try:
+                os.remove(tmp_abs)
+            except OSError:
+                pass
+            wx.MessageBox(
+                t("manager.lustro_blad", tresc_bledu=str(exc)),
+                t("common.blad_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
 
     # ------------------------------------------------------------------
     # Usuwanie pliku
@@ -606,8 +710,32 @@ class ManagerRegulPanel(wx.Panel):
         if odp != wx.YES:
             return
 
+        # v18.10: plik z lustrzanym odpowiednikiem w drugiej bazie (pl↔en) —
+        # usunięcie tylko jednej strony rozjeżdża crosscheck i odfiltrowuje
+        # OBA języki bazowe. Pytamy PRZED usunięciem, żeby anulowanie (Esc na
+        # dialogu głównym już za nami) nie zostawiało stanu połowicznego.
+        lustro_do_usuniecia: str | None = None
+        info_lustra = self._sciezka_lustra_crosschecku(sciezka)
+        if info_lustra and os.path.exists(info_lustra[2]):
+            kod, kod_lustra, lustro_abs = info_lustra
+            odp_lustro = wx.MessageBox(
+                t(
+                    "manager.lustro_usun_pytanie_tresc",
+                    nazwa_pliku=os.path.basename(sciezka),
+                    jezyk_zrodlowy=kod,
+                    jezyk_lustra=kod_lustra,
+                ),
+                t("manager.lustro_pytanie_tytul"),
+                wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+                self,
+            )
+            if odp_lustro == wx.YES:
+                lustro_do_usuniecia = lustro_abs
+
         try:
             os.remove(sciezka)
+            if lustro_do_usuniecia:
+                os.remove(lustro_do_usuniecia)
         except Exception as exc:                                # noqa: BLE001
             wx.MessageBox(
                 t("manager.usun_blad", tresc_bledu=str(exc)),
@@ -735,6 +863,10 @@ class ManagerRegulPanel(wx.Panel):
                 )
                 return
 
+            # v18.10: nowy plik z kreatora w pl/ lub en/ bez lustrzanego
+            # odpowiednika odfiltrowałby OBA języki bazowe po restarcie.
+            self._zaproponuj_lustro_po_zapisie(docelowy_abs)
+
         # Dopiero po udanym zapisie podstawy.yaml dokładamy strukturę
         # podfolderów dla nowego języka (silnik ich oczekuje).
         # Wersja 13.1: tworzymy też podfolder gui/ – żeby tłumacz UI nowego
@@ -781,45 +913,40 @@ class ManagerRegulPanel(wx.Panel):
 # =============================================================================
 # Pomocnicze: etykiety, walidacje, zgadywanie kontekstu
 # =============================================================================
-# Uwaga: mapowanie ``kod_jezyka → nazwa_jezyka`` zostaje intencjonalnie
-# twardo w kodzie, bo to dane referencyjne (jak kody ISO) – nie etykiety UI.
-# Gdy ktoś zmieni język aplikacji na angielski, i tak dalej ma sens
-# pokazywać „ru (rosyjski)", bo to tylko pomaga rozróżnić folder
-# w drzewie. Pełne tłumaczenie tej tabeli może przyjść w 14.0, jeśli
-# będzie na nie konkretne zapotrzebowanie.
-_NAZWY_JEZYKOW = {
-    "pl": "polski",
-    "en": "angielski",
-    "de": "niemiecki",
-    "fr": "francuski",
-    "es": "hiszpański",
-    "it": "włoski",
-    "fi": "fiński",
-    "is": "islandzki",
-    "sv": "szwedzki",
-    "da": "duński",
-    "no": "norweski",
-    "ru": "rosyjski",
-    "cs": "czeski",
-    "sk": "słowacki",
-    "hu": "węgierski",
-    "nl": "niderlandzki",
-    "pt": "portugalski",
-    "uk": "ukraiński",
-    "ja": "japoński",
-    "zh": "chiński",
-}
-
 
 def _opis_jezyka(kod: str) -> str:
-    """Zwraca przyjazną nazwę języka dla kodu ISO (fallback: kod)."""
-    return _NAZWY_JEZYKOW.get(kod.lower(), kod)
+    """Zwraca przyjazną nazwę języka dla kodu ISO (fallback: kod).
+
+    Do v18.9 nazwy siedziały w hardkodowanej, POLSKIEJ mapie w tym module —
+    ruski UI pokazywał w drzewie „fi (fiński)" zamiast „fi (финский)"
+    (userowy PL-leak, potwierdzony testem bojowym 2026-08-13). Od v18.10
+    nazwy żyją w ``ui.yaml::manager.nazwy_jezykow.<kod>`` per język UI;
+    kod spoza tabeli (np. przyszły język) degraduje do samego kodu ISO.
+    """
+    klucz = f"manager.nazwy_jezykow.{kod.lower()}"
+    nazwa = t(klucz)
+    if nazwa == f"[{klucz}]":
+        return kod
+    return nazwa
 
 
 def _zaproponuj_nowa_nazwe(stara_nazwa: str) -> str:
-    """Proponuje nazwę duplikatu typu ``cezar_kopia``."""
+    """Proponuje nazwę duplikatu typu ``cezar_kopia`` (sufiks per język UI).
+
+    Sufiks z ``ui.yaml::manager.sufiks_kopii``, sanityzowany jak inne
+    lokalizowane człony nazw plików (wzorzec v18.8); fallback „kopia".
+    Dodatkowy strażnik (audyt v18.10): propozycja trafia do pola ID
+    walidowanego ASCII-only regexem ``_RE_ID_PLIKU`` — sufiks spoza
+    ``[a-z][a-z0-9_]*`` (np. ru „копия"; ``bezpieczny_czlon_nazwy`` celowo
+    zachowuje litery Unicode) dawałby DOMYŚLNĄ nazwę, którą Manager sam
+    zaraz odrzuci. Wtedy wracamy do uniwersalnego „kopia".
+    """
     baza = os.path.splitext(stara_nazwa)[0]
-    return f"{baza}_kopia"
+    sufiks = core_poliglota.bezpieczny_czlon_nazwy(
+        t("manager.sufiks_kopii"), "kopia")
+    if not re.fullmatch(r"[a-z][a-z0-9_]*", sufiks):
+        sufiks = "kopia"
+    return f"{baza}_{sufiks}"
 
 
 def _ta_sama_sciezka(a: str, b: str) -> bool:

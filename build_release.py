@@ -1,5 +1,6 @@
 import argparse
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -933,6 +934,15 @@ def _weryfikuj_flagi_debug() -> None:
     print("✅ Debug flags verified (all disabled).\n")
 
 
+def _policz_sha256(sciezka: Path) -> str:
+    """SHA256 pliku, czytany blokami (instalator ma dziesiątki MB)."""
+    skrot = hashlib.sha256()
+    with open(sciezka, "rb") as fh:
+        for blok in iter(lambda: fh.read(1024 * 1024), b""):
+            skrot.update(blok)
+    return skrot.hexdigest()
+
+
 def _regeneruj_dokumentacje_lub_przerwij() -> None:
     """Regeneruje docs/<id>.<kod>.html z szablonów YAML albo przerywa build.
 
@@ -968,12 +978,26 @@ def _regeneruj_dokumentacje_lub_przerwij() -> None:
         )
     szum_generatora = bufor_generatora.getvalue().strip()
 
+    # RAW-HTML gate (od v18.10): do v18.9 bramka żyła tylko w `--waliduj`,
+    # a build wołał gołe generuj() — instalator mógł wypuścić .html z tagiem
+    # spoza whitelisty renderera (surowy `<fragment>` z szablonu, który
+    # przeglądarka POŁYKA razem z treścią). Ten sam skan co w waliduj().
+    obce_tagi_docs: dict[str, list[str]] = {}
+    for sciezka_html in wyniki_docs:
+        if sciezka_html.suffix != ".html":
+            continue
+        obce = generuj_dokumentacje._obce_tagi_w_html(
+            sciezka_html.read_text(encoding="utf-8"))
+        if obce:
+            obce_tagi_docs[sciezka_html.name] = obce
+
     # Draftowe / niekanoniczne nagłówki = bezwarunkowy FATAL (guard od v18.6).
     # generuj() w cicho=True pomija takie pliki MILCZĄCO (sygnał wyłącznie
     # strukturalny przez `drafty_docs`), więc nie liczymy na `szum_generatora` —
     # warunek bije wprost po zebranym słowniku. Chroni przed wpuszczeniem do
     # paczki maszynowego draftu, którego maintainer zapomniał sfinalizować.
-    if brakujace_docs or drafty_docs or szum_generatora or not wyniki_docs:
+    if brakujace_docs or drafty_docs or szum_generatora or obce_tagi_docs \
+            or not wyniki_docs:
         print("❌ FATAL: documentation regeneration is not clean — refusing to build.")
         print("In a standalone run these are warnings; in a release build they are")
         print("fatal, so the installer never ships docs/*.html that didn't validate.")
@@ -991,6 +1015,11 @@ def _regeneruj_dokumentacje_lub_przerwij() -> None:
             for nazwa, klucze in sorted(brakujace_docs.items()):
                 wypis = ", ".join("{" + k + "}" for k in klucze)
                 print(f"      • {nazwa}: {wypis}")
+        if obce_tagi_docs:
+            print("   Raw HTML tags beyond the renderer's whitelist "
+                  "(wrap the `<fragment>` in backticks in the template):")
+            for nazwa, tagi in sorted(obce_tagi_docs.items()):
+                print(f"      • {nazwa}: {tagi}")
         if szum_generatora:
             print("   Generator warnings:")
             for linia in szum_generatora.splitlines():
@@ -1232,6 +1261,22 @@ def main(args: argparse.Namespace | None = None) -> None:
             check=True,
         )
         print(f"✅ Installer created: Rezyser_Audio_v{wersja}_Installer.exe")
+        # v18.10: suma kontrolna instalatora. Plik `.sha256` (format sha256sum:
+        # "<hash> *<nazwa>") idzie jako DRUGI asset Release — `core_updater`
+        # weryfikuje nim pobrany plik przed uruchomieniem (graceful skip dla
+        # starych wydań bez assetu).
+        sciezka_exe = Path(__file__).parent / f"Rezyser_Audio_v{wersja}_Installer.exe"
+        if sciezka_exe.exists():
+            suma = _policz_sha256(sciezka_exe)
+            sciezka_sha = sciezka_exe.with_name(sciezka_exe.name + ".sha256")
+            sciezka_sha.write_text(f"{suma} *{sciezka_exe.name}\n", encoding="ascii")
+            print(f"   SHA256: {suma}")
+            print(f"   Checksum file: {sciezka_sha.name} "
+                  "(upload it as the SECOND release asset, next to the .exe)")
+        else:
+            # ISCC zwrócił 0, ale pliku nie ma — nie maskujemy tego sukcesem.
+            print(f"❌ FATAL: ISCC exited 0 but {sciezka_exe.name} was not found.")
+            sys.exit(1)
     except subprocess.CalledProcessError:
         print("❌ Compilation error. Inno Setup returned a non-zero exit code.")
         # v18.9: bez tego build kończył się kodem 0 mimo braku instalatora —

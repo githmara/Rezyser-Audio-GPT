@@ -47,6 +47,7 @@ import wx
 import core_elevenlabs as ce
 import core_llm as cl
 import core_rezyser as cr
+import core_tokeny as ct
 import core_screen_reader as csr
 import przepisy_rezysera as pr
 import sciezki
@@ -2077,6 +2078,8 @@ class RezyserPanel(wx.Panel):
         if isinstance(exc, BladGeneracjiAI):
             bledy_ai.zapisz_diagnostyke(exc, "rezyser")
             return t(f"rezyser.{exc.klucz_i18n}")
+        if isinstance(exc, cl.BladTimeoutLLM):
+            return t("rezyser.err_timeout")
         return str(exc)
 
     def _wyswietl_blad_ai(self, tresc_bledu: str, custom_msg: str | None = None) -> None:
@@ -2123,6 +2126,16 @@ class RezyserPanel(wx.Panel):
         status = self._projekt.status_pamieci_modelu()
         r, g, b = self._KOLORY_POZIOMOW.get(status.poziom, (0, 0, 0))
         self._gauge_kontekst.SetValue(status.procent)
+        # v18.10: brak tabel BPE (offline + pusty cache) → pomiar zdegradowany
+        # do heurystyki znakowej w core_tokeny; user musi wiedzieć, że wartości
+        # są przybliżone i że przyczyną jest brak Internetu.
+        if not ct.tokenizer_dostepny():
+            self._lbl_kontekst_status.SetValue(
+                t("rezyser.pamiec_status_offline",
+                  tokeny=status.tokeny, maks=cr.OKNO_KONTEKSTU_MAX)
+            )
+            self._lbl_kontekst_status.SetForegroundColour(wx.Colour(180, 100, 0))
+            return
         # v17.9: komunikat składamy z i18n po `poziom` (silnik zwraca już tylko
         # dane) — koniec hard-kodowanego polskiego przeciekającego do GUI.
         klucz = {
@@ -2185,6 +2198,9 @@ class RezyserPanel(wx.Panel):
             except cl.BladLimituLLM:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
+            except cl.BladTimeoutLLM:
+                wx.CallAfter(self._on_wyslij_error, t("rezyser.err_timeout"))
+                return
             except Exception as exc:  # noqa: BLE001
                 wx.CallAfter(self._on_wyslij_error, self._komunikat_bledu_ai(exc))
                 return
@@ -2216,6 +2232,9 @@ class RezyserPanel(wx.Panel):
             except cl.BladLimituLLM:
                 wx.CallAfter(self._on_wyslij_error, t("rezyser.err_rate_limit"))
                 return
+            except cl.BladTimeoutLLM:
+                wx.CallAfter(self._on_wyslij_error, t("rezyser.err_timeout"))
+                return
             except Exception as exc:  # noqa: BLE001
                 wx.CallAfter(self._on_wyslij_error, self._komunikat_bledu_ai(exc))
                 return
@@ -2239,6 +2258,12 @@ class RezyserPanel(wx.Panel):
             wx.CallAfter(
                 self._on_wyslij_error,
                 t("rezyser.err_rate_limit"),
+            )
+            return
+        except cl.BladTimeoutLLM:
+            wx.CallAfter(
+                self._on_wyslij_error,
+                t("rezyser.err_timeout"),
             )
             return
         except Exception as exc:  # noqa: BLE001
@@ -3029,7 +3054,9 @@ class RezyserPanel(wx.Panel):
             )
         except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
             bledy_ai.zapisz_diagnostyke(exc, "rezyser._tytuly_worker")
-            wx.CallAfter(self._on_tytuly_error, str(exc))
+            # v18.10 (audyt): przez centralny maper — timeout i typowane błędy
+            # generacji dostają komunikat i18n zamiast surowego str(exc).
+            wx.CallAfter(self._on_tytuly_error, self._komunikat_bledu_ai(exc))
             return
 
         if wynik.przerwano_bledem:

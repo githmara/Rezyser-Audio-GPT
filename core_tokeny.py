@@ -55,10 +55,42 @@ POZIOM_OSTRZEZENIE = "ostrzezenie"
 POZIOM_ALARM       = "alarm"
 
 # =============================================================================
-# Encoder tiktoken — LRU-cached
+# Encoder tiktoken — LRU-cached + guard offline (od v18.10)
 # =============================================================================
 
+class BladTokenizeraOffline(RuntimeError):
+    """tiktoken BPE tables unavailable (no Internet and no local cache).
+
+    ``collect_all("tiktoken")`` nie pakuje tabel BPE do bundla — słownik
+    pobiera się z sieci przy PIERWSZYM liczeniu tokenów (cache w
+    ``%TEMP%\\data-gym-cache``). W zamkniętej sieci pobranie pada wyjątkiem
+    sieciowym (nie ``KeyError``!), który do v18.9 leciał nietknięty do wątku
+    GUI (crash konstruktora panelu Reżysera / EVT_TEXT). Świadoma decyzja
+    v18.10: NIE bundlujemy tabel (filar jakości — API — i tak wymaga sieci),
+    tylko degradujemy pomiar i komunikujemy brak Internetu w statusie.
+    """
+
+
+# Sticky-flaga: po pierwszej porażce pobrania NIE ponawiamy prób przy każdym
+# wywołaniu (licznik odpala się z EVT_TEXT — retry z timeoutem sieciowym
+# zamrażałby GUI na flaky łączu). Reset dopiero przy restarcie aplikacji.
+_TOKENIZER_OFFLINE = False
+
+
+def tokenizer_dostepny() -> bool:
+    """Czy tabele BPE są dostępne (False = pomiar zdegradowany do heurystyki)."""
+    return not _TOKENIZER_OFFLINE
+
+
 @functools.lru_cache(maxsize=8)
+def _zbuduj_encoder(model: str) -> tiktoken.Encoding:
+    """Surowa budowa encodera; ``KeyError`` (nieznany model) → ``o200k_base``."""
+    try:
+        return tiktoken.encoding_for_model(model)
+    except KeyError:
+        return tiktoken.get_encoding("o200k_base")
+
+
 def kodowanie_dla_modelu(model: str) -> tiktoken.Encoding:
     """Zwraca encoder tiktoken — fallback na ``o200k_base`` dla nowych modeli.
 
@@ -70,11 +102,24 @@ def kodowanie_dla_modelu(model: str) -> tiktoken.Encoding:
     LRU jest istotne: ``status_pamieci_modelu`` wywoływane jest po każdej
     regeneracji (gauge GUI), a ``tiktoken.encoding_for_model`` przy braku
     cache'u inicjalizuje encoder z dysku.
+
+    Raises:
+        BladTokenizeraOffline: brak tabel BPE (offline + pusty cache).
+            Konsumenci pomiaru pamięci NIE powinni jej propagować do GUI —
+            ``policz_tokeny_chat`` degraduje się sam; bezpośredni użytkownicy
+            encodera (chunking ``tlumacz_ai``) mapują ją na komunikat i18n.
     """
+    global _TOKENIZER_OFFLINE
+    if _TOKENIZER_OFFLINE:
+        raise BladTokenizeraOffline(
+            "tiktoken BPE tables unavailable (offline, no local cache)")
     try:
-        return tiktoken.encoding_for_model(model)
-    except KeyError:
-        return tiktoken.get_encoding("o200k_base")
+        return _zbuduj_encoder(model)
+    except Exception as exc:  # noqa: BLE001 — requests.ConnectionError/HTTPError/OSError
+        _TOKENIZER_OFFLINE = True
+        raise BladTokenizeraOffline(
+            "tiktoken BPE tables unavailable (offline, no local cache)"
+        ) from exc
 
 
 # =============================================================================
@@ -86,6 +131,13 @@ def kodowanie_dla_modelu(model: str) -> tiktoken.Encoding:
 # na sygnaturę odpowiedzi assistanta.
 NAGLOWEK_CHAT_PER_MSG = 4
 NAGLOWEK_RESPONSE     = 2
+
+# Heurystyka awaryjna sprzed v15.1: ~4 znaki na token. Używana WYŁĄCZNIE gdy
+# tabele BPE są niepobieralne (offline) — pomiar pamięci nie może wtedy ubić
+# przepływów, które od niego zależą (sufiks alarmu Burzy, rekoncyliacja przy
+# wczytaniu projektu, bramka ALARM Opowieści). GUI sygnalizuje degradację
+# przez `tokenizer_dostepny()`.
+_ZNAKI_NA_TOKEN = 4
 
 
 def policz_tokeny_chat(tresci: list[str], model: str) -> int:
@@ -100,9 +152,16 @@ def policz_tokeny_chat(tresci: list[str], model: str) -> int:
 
     Returns:
         Liczbę tokenów inputu (bez output / max_tokens — to liczy OpenAI
-        osobno).
+        osobno). Przy braku tabel BPE (offline) — przybliżenie znakowe
+        (``_ZNAKI_NA_TOKEN``), nigdy wyjątek.
     """
-    encoder = kodowanie_dla_modelu(model)
+    try:
+        encoder = kodowanie_dla_modelu(model)
+    except BladTokenizeraOffline:
+        suma = NAGLOWEK_RESPONSE
+        for tresc in tresci:
+            suma += NAGLOWEK_CHAT_PER_MSG + max(1, len(tresc) // _ZNAKI_NA_TOKEN)
+        return suma
     suma = NAGLOWEK_RESPONSE
     for tresc in tresci:
         suma += NAGLOWEK_CHAT_PER_MSG + len(encoder.encode(tresc))

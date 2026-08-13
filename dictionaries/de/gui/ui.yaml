@@ -656,6 +656,8 @@ rezyser:
   ostrzezenie_urwane_tytul: Fragment wurde möglicherweise abgeschnitten
   ostrzezenie_urwane_tresc: Die Antwort des Modells hat das Längenlimit erreicht und mitten im Satz abgebrochen. Der automatische Versuch, den letzten Satz zu vervollständigen, ist fehlgeschlagen. Das Fragment wurde im aktuellen Zustand gespeichert – überprüfe das Ende und ergänze es bei Bedarf manuell oder sende eine kurze Fortsetzungsanweisung.
   err_struktura: Das KI-Modell hat mehrfach eine ungültige Datenstruktur zurückgegeben, die nicht korrigiert werden konnte. Versuchen Sie es erneut oder vereinfachen Sie die Anweisung – wenn der Fehler weiterhin auftritt, fügen Sie der Meldung die Datei error_log.txt bei.
+  pamiec_status_offline: '⚠️ Keine Internetverbindung: Der genaue Speicherzähler ist nicht verfügbar, die Werte sind Näherungswerte (~{tokeny} / {maks} Token). Starten Sie die Anwendung nach Wiederherstellung der Verbindung neu.'
+  err_timeout: Die Wartezeit für die Antwort des Modells wurde überschritten. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
@@ -810,6 +812,7 @@ poliglota:
   ai_postep_blok: Übersetzung des Blocks {numer} von {ile}… ({znaki} Zeichen)
   ai_postep_iso: Generierung des Sprach-Tags für Bildschirmleser…
   ai_postep_zapis: Ergebnisdatei wird gespeichert…
+  err_tokenizer_offline: 'Keine Internetverbindung: Das für die Textaufteilung benötigte Tokenizer-Wörterbuch konnte nicht heruntergeladen werden. Überprüfen Sie die Verbindung und versuchen Sie es erneut.'
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)
@@ -1104,6 +1107,33 @@ manager:
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
+  sufiks_kopii: Kopie
+  nazwy_jezykow:
+    pl: Polnisch
+    en: Englisch
+    de: Deutsch
+    fr: Französisch
+    es: Spanisch
+    it: Italienisch
+    fi: Finnisch
+    is: Isländisch
+    sv: Schwedisch
+    da: Dänisch
+    "no": Norwegisch
+    ru: Russisch
+    cs: Tschechisch
+    sk: Slowakisch
+    hu: Ungarisch
+    nl: Niederländisch
+    pt: Portugiesisch
+    uk: Ukrainisch
+    ja: Japanisch
+    zh: Chinesisch
+  lustro_pytanie_tytul: Parität der pl/en-Datenbanken
+  lustro_pytanie_tresc: "Sie erstellen die Datei „{nazwa_pliku}\" in der Datenbank „{jezyk_zrodlowy}\", doch die entsprechende Zwillingsdatenbank „{jezyk_lustra}\" enthält sie nicht.\n\nPolnisch und Englisch sind die Referenzsprachen der Engine: Sie müssen über einen IDENTISCHEN Dateibestand verfügen. Ohne die Spiegelkopie verschwinden BEIDE nach einem Neustart der Anwendung aus der Sprachliste.\n\nJetzt eine 1:1-Kopie in „{jezyk_lustra}\" erstellen? (Empfohlen. Den Inhalt können Sie später nativ übersetzen — die Kopie erhält einen entsprechenden Hinweiskommentar.)"
+  lustro_usun_pytanie_tresc: "Die Datei „{nazwa_pliku}\" hat ein Gegenstück in der Zwillingsdatenbank „{jezyk_lustra}\".\n\nPolnisch und Englisch müssen über einen IDENTISCHEN Dateibestand verfügen — wird die Datei nur aus „{jezyk_zrodlowy}\" gelöscht, verschwinden BEIDE nach einem Neustart der Anwendung aus der Sprachliste.\n\nSoll das Gegenstück auch aus „{jezyk_lustra}\" gelöscht werden? (Ja = konsistentes Löschen aus beiden Datenbanken; Nein = Sie löschen nur diese Datei und lassen die Datenbanken bewusst auseinanderlaufen.)"
+  lustro_komentarz_naglowek: "# Spiegelkopie aus der Datenbank „{jezyk_zrodlowy}\" (pl/en-Parität — Anforderung der Engine).\n# HINWEIS: Übersetzen Sie den Inhalt dieser Datei nativ (Bezeichnung, Beschreibung, Prompt)."
+  lustro_blad: "Die Spiegelkopie konnte nicht erstellt werden:\n{tresc_bledu}"
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Update verfügbar"
@@ -1139,6 +1169,7 @@ updater:
   changelog_blad: "Die Datei des Änderungsprotokolls konnte nicht gespeichert oder geöffnet werden:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Änderungsprotokoll der Version {nowa_wersja}
   btn_pobierz_zrodlo: '&Quellcode herunterladen (ZIP)'
+  blad_weryfikacji_tresc: "Der heruntergeladene Installer hat die Integritätsprüfung NICHT bestanden (Prüfsumme oder Größe stimmen nicht überein) und wurde entfernt. Die Installation wurde sicherheitshalber abgebrochen — versuchen Sie es erneut oder laden Sie den Installer manuell von der Release-Seite herunter.\n\nTechnische Details: {szczegoly}"
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Geschichten-Panel"
@@ -1344,6 +1375,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tresc: Der Befehl „{komenda}" ist standardmäßig gesperrt, da das Aktualisieren der Erzählung von der Festplatte den Spielzustand (Charaktere, Ort, Ausrüstung) nicht neu berechnet und semantische Abweichungen verursachen kann. Um ihn zu entsperren, setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 und erstellen Sie Ihr eigenes Paket.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — gesperrt; setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72, um zu entsperren)
   err_struktura: Das KI-Modell hat mehrfach eine ungültige Datenstruktur zurückgegeben, die nicht korrigiert werden konnte. Versuchen Sie es erneut – wenn der Fehler weiterhin auftritt, fügen Sie der Meldung die Datei error_log.txt bei.
+  pamiec_status_offline: '⚠️ Keine Internetverbindung: Der genaue Speicherzähler ist nicht verfügbar, die Werte sind Näherungswerte (~{procent}% — {tokeny} Token). Starten Sie die Anwendung nach Wiederherstellung der Verbindung neu.'
 bot:
   closure:
     Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-GPT-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"

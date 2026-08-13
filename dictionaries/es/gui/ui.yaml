@@ -656,6 +656,8 @@ rezyser:
   ostrzezenie_urwane_tytul: El fragmento puede haber sido cortado
   ostrzezenie_urwane_tresc: La respuesta del modelo alcanzó el límite de longitud y se interrumpió a mitad de una frase; el intento automático de completar la última oración no tuvo éxito. El fragmento se ha guardado tal como está — revisa el final y, si es necesario, añade el cierre manualmente o envía una instrucción breve para continuar.
   err_struktura: El modelo de IA devolvió una estructura de datos incorrecta varias veces y no fue posible corregirla. Inténtalo de nuevo o simplifica la instrucción; si el error persiste, adjunta el archivo error_log.txt al informe.
+  pamiec_status_offline: '⚠️ Sin conexión a Internet: el contador exacto de memoria no está disponible, los valores son aproximados (~{tokeny} / {maks} tokens). Cuando recuperes la conexión, reinicia la aplicación.'
+  err_timeout: Se agotó el tiempo de espera de la respuesta del modelo. Comprueba tu conexión a Internet e inténtalo de nuevo.
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -810,6 +812,7 @@ poliglota:
   ai_postep_blok: Traduciendo bloque {numer} de {ile}… ({znaki} caracteres)
   ai_postep_iso: Generando etiqueta de idioma para lectores de pantalla…
   ai_postep_zapis: Guardando archivo de resultado…
+  err_tokenizer_offline: 'Sin conexión a Internet: no se pudo descargar el diccionario del tokenizador necesario para dividir el texto. Comprueba la conexión e inténtalo de nuevo.'
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)
@@ -1104,6 +1107,33 @@ manager:
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
+  sufiks_kopii: copia
+  nazwy_jezykow:
+    pl: polaco
+    en: inglés
+    de: alemán
+    fr: francés
+    es: español
+    it: italiano
+    fi: finlandés
+    is: islandés
+    sv: sueco
+    da: danés
+    "no": noruego
+    ru: ruso
+    cs: checo
+    sk: eslovaco
+    hu: húngaro
+    nl: neerlandés
+    pt: portugués
+    uk: ucraniano
+    ja: japonés
+    zh: chino
+  lustro_pytanie_tytul: Paridad de bases pl/en
+  lustro_pytanie_tresc: "Estás creando el archivo «{nazwa_pliku}» en la base «{jezyk_zrodlowy}», pero la base gemela «{jezyk_lustra}» no lo tiene.\n\nLos idiomas polaco e inglés son las bases de referencia del motor: deben tener un conjunto de archivos IDÉNTICO. Sin la copia especular, AMBOS desaparecerán de la lista de idiomas al reiniciar la aplicación.\n\n¿Crear ahora una copia 1:1 en «{jezyk_lustra}»? (Recomendado. Podrás traducir el contenido de forma nativa más adelante — la copia incluirá un comentario recordatorio.)"
+  lustro_usun_pytanie_tresc: "El archivo «{nazwa_pliku}» tiene un equivalente especular en la base gemela «{jezyk_lustra}».\n\nLos idiomas polaco e inglés deben tener un conjunto de archivos IDÉNTICO — eliminarlo solo de «{jezyk_zrodlowy}» hará que AMBOS desaparezcan de la lista de idiomas al reiniciar la aplicación.\n\n¿Eliminar también el equivalente de «{jezyk_lustra}»? (Sí = eliminación coherente en ambas bases; No = eliminas solo este archivo y desincronizas las bases de forma deliberada.)"
+  lustro_komentarz_naglowek: "# Copia especular de la base «{jezyk_zrodlowy}» (paridad pl/en — requisito del motor).\n# ATENCIÓN: traduce de forma nativa el contenido de este archivo (etiqueta, descripción, prompt)."
+  lustro_blad: "No se pudo crear la copia especular:\n{tresc_bledu}"
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Actualización disponible"
@@ -1139,6 +1169,7 @@ updater:
   changelog_blad: "No se pudo guardar o abrir el archivo del registro de cambios:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Registro de cambios de la versión {nowa_wersja}
   btn_pobierz_zrodlo: '&Descargar código fuente (ZIP)'
+  blad_weryfikacji_tresc: "El instalador descargado NO pasó la verificación de integridad (la suma de comprobación o el tamaño no coinciden) y fue eliminado. La instalación se ha interrumpido por seguridad — inténtalo de nuevo o descarga el instalador manualmente desde la página de la versión.\n\nDetalles técnicos: {szczegoly}"
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Panel de Historias"
@@ -1345,6 +1376,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tresc: El comando «{komenda}» está bloqueado por defecto, ya que actualizar la narración desde el disco no recalcula el estado del juego (personajes, ubicación, inventario) y puede provocar deriva semántica. Para desbloquearlo, establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 y compila tu propio paquete.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloqueados; establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 para desbloquear)
   err_struktura: El modelo de IA devolvió una estructura de datos incorrecta varias veces y no fue posible corregirla. Inténtalo de nuevo; si el error persiste, adjunta el archivo error_log.txt al informe.
+  pamiec_status_offline: '⚠️ Sin conexión a Internet: el contador exacto de memoria no está disponible, los valores son aproximados (~{procent}% — {tokeny} tokens). Cuando recuperes la conexión, reinicia la aplicación.'
 bot:
   closure:
     Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio GPT.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"

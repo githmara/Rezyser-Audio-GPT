@@ -655,6 +655,8 @@ rezyser:
   ostrzezenie_urwane_tytul: Fragment may have been cut off
   ostrzezenie_urwane_tresc: The model's response reached the length limit and was cut off mid-sentence, and the automatic attempt to complete the last sentence failed. The fragment has been saved as-is — check the ending and, if needed, add a conclusion manually or send a short continuation prompt.
   err_struktura: The AI model returned an invalid data structure several times and it could not be corrected. Please try again or simplify the instruction — if the error persists, attach the error_log.txt file to your report.
+  pamiec_status_offline: '⚠️ No internet connection: the exact memory counter is unavailable, values are approximate (~{tokeny} / {maks} tokens). Restart the application once your connection is restored.'
+  err_timeout: The model response timed out. Check your internet connection and try again.
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -809,6 +811,7 @@ poliglota:
   ai_postep_blok: Translating block {numer} of {ile}… ({znaki} characters)
   ai_postep_iso: Generating language tag for screen readers…
   ai_postep_zapis: Saving output file…
+  err_tokenizer_offline: 'No internet connection: unable to download the tokenizer dictionary needed to split the text. Check your connection and try again.'
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)
@@ -1106,6 +1109,33 @@ manager:
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
+  sufiks_kopii: copy
+  nazwy_jezykow:
+    pl: Polish
+    en: English
+    de: German
+    fr: French
+    es: Spanish
+    it: Italian
+    fi: Finnish
+    is: Icelandic
+    sv: Swedish
+    da: Danish
+    "no": Norwegian
+    ru: Russian
+    cs: Czech
+    sk: Slovak
+    hu: Hungarian
+    nl: Dutch
+    pt: Portuguese
+    uk: Ukrainian
+    ja: Japanese
+    zh: Chinese
+  lustro_pytanie_tytul: PL/EN database parity
+  lustro_pytanie_tresc: "You are creating the file \"{nazwa_pliku}\" in the \"{jezyk_zrodlowy}\" database, but the twin database \"{jezyk_lustra}\" doesn't have it.\n\nPolish and English are the engine's reference databases: they must have an IDENTICAL set of files. Without a mirror copy, BOTH will disappear from the language list after the application restarts.\n\nCreate a 1:1 copy in \"{jezyk_lustra}\" now? (Recommended. You can translate the content natively later — the copy will get a reminder comment.)"
+  lustro_usun_pytanie_tresc: "The file \"{nazwa_pliku}\" has a mirror counterpart in the twin database \"{jezyk_lustra}\".\n\nPolish and English must have an IDENTICAL set of files — deleting it only from \"{jezyk_zrodlowy}\" will cause BOTH to disappear from the language list after the application restarts.\n\nAlso delete the counterpart from \"{jezyk_lustra}\"? (Yes = consistent deletion from both databases; No = you delete only this file and knowingly desync the databases.)"
+  lustro_komentarz_naglowek: "# Mirror copy from the \"{jezyk_zrodlowy}\" database (pl/en parity — engine requirement).\n# NOTE: translate the content of this file natively (label, description, prompt)."
+  lustro_blad: "Failed to create the mirror copy:\n{tresc_bledu}"
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Update available"
@@ -1141,6 +1171,7 @@ updater:
   changelog_blad: "Failed to save or open the changelog file:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 Version &Changelog {nowa_wersja}
   btn_pobierz_zrodlo: '&Download source code (ZIP)'
+  blad_weryfikacji_tresc: "The downloaded installer did NOT pass integrity verification (checksum or size mismatch) and has been deleted. Installation aborted for safety — try again or download the installer manually from the release page.\n\nTechnical details: {szczegoly}"
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Story Panel"
@@ -1347,6 +1378,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tresc: The "{komenda}" command is locked by default, because refreshing the narrative from disk does not recalculate the game state (characters, location, inventory) and may cause semantic drift. To unlock it, set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 and build your own package.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — locked; set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 to unlock)
   err_struktura: The AI model returned an invalid data structure several times and it could not be corrected. Please try again — if the error persists, attach the error_log.txt file to your report.
+  pamiec_status_offline: '⚠️ No internet connection: the exact memory counter is unavailable, values are approximate (~{procent}% — {tokeny} tokens). Restart the application once your connection is restored.'
 bot:
   closure:
     Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio Director GPT release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"

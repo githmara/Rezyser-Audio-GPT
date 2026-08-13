@@ -654,6 +654,8 @@ rezyser:
   ostrzezenie_urwane_tytul: Katkelma saattaa olla leikattu kesken
   ostrzezenie_urwane_tresc: Mallin vastaus saavutti pituusrajan ja katkesi kesken lauseen. Automaattinen yritys sulkea viimeinen lause epäonnistui. Katkelma on tallennettu nykyisessä muodossaan — tarkista sen loppu ja lisää tarvittaessa lopetus manuaalisesti tai lähetä lyhyt jatkamisohje.
   err_struktura: Tekoälymalli palautti useita kertoja virheellisen tietorakenteen, jota ei saatu korjattua. Yritä uudelleen tai yksinkertaista ohjetta — jos virhe toistuu, liitä error_log.txt-tiedosto ilmoitukseen.
+  pamiec_status_offline: '⚠️ Ei internetyhteyttä: tarkka muistilaskuri ei ole käytettävissä, arvot ovat likimääräisiä (~{tokeny} / {maks} tokenia). Käynnistä sovellus uudelleen, kun yhteys on palautunut.'
+  err_timeout: Mallin vastausta odotettaessa aikakatkaisu ylittyi. Tarkista internetyhteys ja yritä uudelleen.
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -808,6 +810,7 @@ poliglota:
   ai_postep_blok: Käännetään lohkoa {numer}/{ile}… ({znaki} merkkiä)
   ai_postep_iso: Kielitunnisteen luominen ruudunlukijoille…
   ai_postep_zapis: Tulostiedoston tallentaminen…
+  err_tokenizer_offline: 'Ei internetyhteyttä: tekstin jakamiseen tarvittavan tokenisaattorin sanaston lataaminen epäonnistui. Tarkista yhteys ja yritä uudelleen.'
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)
@@ -1102,6 +1105,33 @@ manager:
 # -----------------------------------------------------------------------------
 # UPDATER – auto-aktualizacja (core_updater.py + wątek tła w main.py)
 # -----------------------------------------------------------------------------
+  sufiks_kopii: kopio
+  nazwy_jezykow:
+    pl: puola
+    en: englanti
+    de: saksa
+    fr: ranska
+    es: espanja
+    it: italia
+    fi: suomi
+    is: islanti
+    sv: ruotsi
+    da: tanska
+    "no": norja
+    ru: venäjä
+    cs: tšekki
+    sk: slovakki
+    hu: unkari
+    nl: hollanti
+    pt: portugali
+    uk: ukraina
+    ja: japani
+    zh: kiina
+  lustro_pytanie_tytul: pl/en-tietokantojen pariteetti
+  lustro_pytanie_tresc: "Olet luomassa tiedostoa \"{nazwa_pliku}\" tietokantaan \"{jezyk_zrodlowy}\", mutta vastaavasta kaksoistietokannasta \"{jezyk_lustra}\" se puuttuu.\n\nPuola ja englanti ovat moottorin vertailutietokantoja: niillä täytyy olla TÄSMÄLLEEN sama tiedostojoukko. Ilman peilikopiota MOLEMMAT kielet katoavat kielilistalta sovelluksen uudelleenkäynnistyksen jälkeen.\n\nLuodaanko nyt 1:1-kopio tietokantaan \"{jezyk_lustra}\"? (Suositeltavaa. Voit myöhemmin kääntää sisällön natiivisti — kopioon lisätään muistuttava kommentti.)"
+  lustro_usun_pytanie_tresc: "Tiedostolla \"{nazwa_pliku}\" on peilikopio kaksoistietokannassa \"{jezyk_lustra}\".\n\nPuolan ja englannin tietokannoilla täytyy olla TÄSMÄLLEEN sama tiedostojoukko — jos poistat tiedoston vain kannasta \"{jezyk_zrodlowy}\", MOLEMMAT kielet katoavat kielilistalta sovelluksen uudelleenkäynnistyksen jälkeen.\n\nPoistetaanko vastaava tiedosto myös kannasta \"{jezyk_lustra}\"? (Kyllä = johdonmukainen poisto molemmista kannoista; Ei = poistat vain tämän tiedoston ja hajautat tietokannat tietoisesti.)"
+  lustro_komentarz_naglowek: "# Peilikopio tietokannasta \"{jezyk_zrodlowy}\" (pl/en-pariteetti — moottorin vaatimus).\n# HUOM: käännä tämän tiedoston sisältö (nimike, kuvaus, prompti) natiivisti."
+  lustro_blad: "Peilikopion luominen epäonnistui:\n{tresc_bledu}"
 updater:
   # Powiadomienie o nowej wersji (DialogAktualizacji od v15.2.8 — wx.Dialog z 3 przyciskami)
   nowa_wersja_tytul: "Päivitys saatavilla"
@@ -1137,6 +1167,7 @@ updater:
   changelog_blad: "Tiedoston changelog tallentaminen tai avaaminen epäonnistui:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Version changelog {nowa_wersja}
   btn_pobierz_zrodlo: '&Lataa lähdekoodi (ZIP)'
+  blad_weryfikacji_tresc: "Ladattu asennusohjelma EI läpäissyt eheystarkistusta (tarkistussumma tai koko ei täsmää) ja se poistettiin. Asennus keskeytettiin turvallisuussyistä — yritä uudelleen tai lataa asennusohjelma manuaalisesti julkaisusivulta.\n\nTekniset tiedot: {szczegoly}"
 opowiesci:
   # ---- BLOK A — Nagłówek modułu ---------------------------------------------
   panel_name: "Tarina-paneeli"
@@ -1341,6 +1372,7 @@ opowiesci:
   komenda_odswiez_zablokowana_tresc: Komento „{komenda}" on oletuksena estetty, koska tarinan päivittäminen levyltä ei laske pelin tilaa uudelleen (hahmot, sijainti, varusteet) ja voi aiheuttaa semanttista ajautumista. Ottaaksesi sen käyttöön, aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ja rakenna oma paketti.
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — estetty; aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ottaaksesi käyttöön)
   err_struktura: Tekoälymalli palautti useita kertoja virheellisen tietorakenteen, jota ei saatu korjattua. Yritä uudelleen — jos virhe toistuu, liitä error_log.txt-tiedosto ilmoitukseen.
+  pamiec_status_offline: '⚠️ Ei internetyhteyttä: tarkka muistilaskuri ei ole käytettävissä, arvot ovat likimääräisiä (~{procent}% — {tokeny} tokenia). Käynnistä sovellus uudelleen, kun yhteys on palautunut.'
 bot:
   closure:
     Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Ääniohjaaja GPT -julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"

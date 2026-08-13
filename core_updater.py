@@ -15,6 +15,7 @@ Moduł jest w pełni niezależny od wxPython — testuj go bez GUI.
 
 from __future__ import annotations
 
+import hashlib
 import os
 import re
 import tempfile
@@ -79,6 +80,21 @@ class UpdateInfo:
                              # dialogu. Do v17.11 dialog pokazywał baked-in opis
                              # wersji JUŻ zainstalowanej (bug: nagłówek nowej,
                              # treść starej). EN-lead + PL (format RELEASE_NOTES).
+    url_sha256: str = ""     # (v18.10) link do assetu `<instalator>.sha256`
+                             # (drugi asset Release, generowany przez
+                             # build_release). Pusty dla starych wydań —
+                             # weryfikacja SHA256 jest wtedy pomijana.
+
+
+class BladWeryfikacjiPobrania(RuntimeError):
+    """Pobrany instalator nie przeszedł weryfikacji integralności.
+
+    Rzucany przez :func:`pobierz_instalator` gdy rozmiar pliku nie zgadza się
+    z rozmiarem assetu z API GitHuba ALBO SHA256 nie zgadza się z sumą z assetu
+    `.sha256`. Plik tymczasowy jest wtedy usuwany — GUI mapuje wyjątek na
+    komunikat i18n (`updater.blad_weryfikacji_tresc`), nigdy nie uruchamiamy
+    instalatora, którego integralności nie potwierdziliśmy.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -147,6 +163,54 @@ def _znajdz_asset_instalatora(assets: list[dict]) -> Optional[dict]:
     return None
 
 
+def _znajdz_asset_sha256(assets: list[dict], nazwa_instalatora: str) -> Optional[dict]:
+    """Zwraca asset `.sha256` sparowany z instalatorem (None = brak; v18.10).
+
+    Preferowana konwencja: `<nazwa instalatora>.sha256` (tak generuje
+    build_release). Fallback: jedyny asset `*.sha256` w Release — na wypadek
+    ręcznej zmiany nazwy przy uploadzie.
+    """
+    oczekiwana = f"{nazwa_instalatora}.sha256".lower()
+    kandydaci = sorted(
+        (a for a in assets if a.get("name", "").lower().endswith(".sha256")),
+        key=lambda a: a.get("name", ""),
+    )
+    for asset in kandydaci:
+        if asset.get("name", "").lower() == oczekiwana:
+            return asset
+    # Audyt v18.10: przy 2+ niedokładnych kandydatach NIE pomijamy cicho
+    # weryfikacji (fail-open) — bierzemy deterministycznie pierwszego;
+    # zły plik i tak wywali mismatch SHA256 (fail-closed przez porównanie).
+    return kandydaci[0] if kandydaci else None
+
+
+_REGEX_HEX_SHA256 = re.compile(r"\b[0-9a-fA-F]{64}\b")
+
+
+def _pobierz_oczekiwany_sha256(url: str) -> str:
+    """Pobiera asset `.sha256` i wyciąga 64-znakowy hash (format sha256sum).
+
+    Raises:
+        BladWeryfikacjiPobrania: asset istnieje, ale nie dało się go pobrać
+            lub sparsować — celowo FAIL-CLOSED (skoro wydawca zadeklarował
+            sumę, brak możliwości jej sprawdzenia = nie uruchamiamy exe).
+    """
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": f"RezyserAudio/{_odczytaj_wersje_lokalna()}"},
+        )
+        with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
+            tresc = resp.read(4096).decode("utf-8", errors="replace")
+    except Exception as exc:  # noqa: BLE001 — mapujemy na typowany wyjątek
+        raise BladWeryfikacjiPobrania(
+            f"failed to download the checksum asset: {exc}") from exc
+    dopasowanie = _REGEX_HEX_SHA256.search(tresc)
+    if not dopasowanie:
+        raise BladWeryfikacjiPobrania(
+            "checksum asset does not contain a valid SHA256 hash")
+    return dopasowanie.group(0).lower()
+
+
 def _oczysc_changelog(body: str) -> str:
     """Przycina treść Release do czystego changelogu (bez końcowego `---`).
 
@@ -193,6 +257,8 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
         if asset is None:
             return None
 
+        asset_sha = _znajdz_asset_sha256(dane.get("assets", []), asset["name"])
+
         return UpdateInfo(
             tag=tag,
             wersja=wersja_zdalna,
@@ -202,6 +268,7 @@ def sprawdz_aktualizacje(token: Optional[str] = None) -> Optional[UpdateInfo]:
             url_release=dane.get("html_url", ""),
             url_zrodla=dane.get("zipball_url", ""),
             changelog=_oczysc_changelog(dane.get("body", "")),
+            url_sha256=(asset_sha or {}).get("browser_download_url", ""),
         )
 
     # Świadomie szeroki łapacz — docstring obiecuje „nigdy nie rzuca", a wąska
@@ -230,6 +297,10 @@ def pobierz_instalator(
 
     Raises:
         OSError / HTTPError: przy błędzie pobierania.
+        BladWeryfikacjiPobrania: (v18.10) rozmiar pliku ≠ rozmiar assetu z API
+            ALBO SHA256 ≠ suma z assetu `.sha256`. Plik tymczasowy usuwany.
+            Weryfikacja SHA256 pomijana, gdy Release nie ma assetu `.sha256`
+            (stare wydania); weryfikacja rozmiaru pomijana przy `size == 0`.
     """
     sciezka_docelowa = Path(tempfile.gettempdir()) / info.nazwa_pliku
 
@@ -238,6 +309,7 @@ def pobierz_instalator(
         headers={"User-Agent": f"RezyserAudio/{_odczytaj_wersje_lokalna()}"},
     )
 
+    skrot = hashlib.sha256()
     with urllib.request.urlopen(req, timeout=60) as resp, \
             open(sciezka_docelowa, "wb") as fh:
 
@@ -250,8 +322,30 @@ def pobierz_instalator(
             if not chunk:
                 break
             fh.write(chunk)
+            skrot.update(chunk)
             pobrane += len(chunk)
             if callback:
                 callback(pobrane, total)
+
+    # --- Weryfikacja integralności (v18.10) ---
+    try:
+        if info.rozmiar_bajtow and pobrane != info.rozmiar_bajtow:
+            raise BladWeryfikacjiPobrania(
+                f"size mismatch: downloaded {pobrane} B, "
+                f"release asset declares {info.rozmiar_bajtow} B")
+        if info.url_sha256:
+            oczekiwany = _pobierz_oczekiwany_sha256(info.url_sha256)
+            if skrot.hexdigest().lower() != oczekiwany:
+                raise BladWeryfikacjiPobrania(
+                    f"SHA256 mismatch: got {skrot.hexdigest()}, "
+                    f"expected {oczekiwany}")
+    except BladWeryfikacjiPobrania:
+        # Nie zostawiamy w %TEMP% pliku, którego integralności nie
+        # potwierdziliśmy — mógłby zostać uruchomiony ręcznie.
+        try:
+            sciezka_docelowa.unlink()
+        except OSError:
+            pass
+        raise
 
     return sciezka_docelowa

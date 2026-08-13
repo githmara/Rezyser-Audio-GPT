@@ -1497,6 +1497,16 @@ class MainFrame(wx.Frame):
         if getattr(self, "_progress_dlg", None):
             self._progress_dlg.Destroy()
             self._progress_dlg = None
+        # v18.10: nieudana weryfikacja integralności (rozmiar/SHA256) dostaje
+        # własny, natywny komunikat — techniczny detal (EN) leci w {szczegoly}.
+        if isinstance(exc, core_updater.BladWeryfikacjiPobrania):
+            wx.MessageBox(
+                t("updater.blad_weryfikacji_tresc", szczegoly=str(exc)),
+                t("updater.blad_pobierania_tytul"),
+                wx.OK | wx.ICON_ERROR,
+                self,
+            )
+            return
         wx.MessageBox(
             t("updater.blad_pobierania_tresc", tresc_bledu=str(exc)),
             t("updater.blad_pobierania_tytul"),

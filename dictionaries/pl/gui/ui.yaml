@@ -511,6 +511,7 @@ rezyser:
   pamiec_status_ok:           "🟢 Zużycie pamięci: {tokeny} / {maks} tokenów. Bezpieczny bufor."
   pamiec_status_ostrzezenie:  "⚠️ STAN OSTRZEGAWCZY: Zużyto {tokeny} z {maks} tokenów. Pamięć się zapełnia – wkrótce konieczne będzie wygenerowanie streszczenia."
   pamiec_status_alarm:        "🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {tokeny} z {maks} tokenów. W trybie Burzy Mózgów wygeneruj streszczenie, zapisz je jako Pamięć Długotrwałą, a potem wyczyść bieżącą historię (zachowując streszczenie)."
+  pamiec_status_offline:      "⚠️ Brak Internetu: dokładny licznik pamięci jest niedostępny, wartości są przybliżone (~{tokeny} / {maks} tokenów). Po odzyskaniu połączenia uruchom aplikację ponownie."
   postprod_info: |-
     Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł literacki (analiza AI).
   btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"
@@ -620,6 +621,7 @@ rezyser:
 
     Przełącz się na tryb 'Burza Mózgów' i spróbuj ponownie.
   err_rate_limit:        "Brak kredytów Anthropic! Doładuj konto i spróbuj ponownie."
+  err_timeout:           "Czas oczekiwania na odpowiedź modelu został przekroczony. Sprawdź połączenie z Internetem i spróbuj ponownie."
   err_odrzucenie: |-
     AI odrzuciło prompt (wykryto tag [ODRZUCENIE_AI]).
     Tekst NIE zostanie zapisany do pliku historii.
@@ -847,6 +849,7 @@ poliglota:
   blad_ai_naglowek:      "Wystąpił nieoczekiwany błąd podczas przetwarzania."
   blad_ai_lbl_tresc:     "Treść błędu (zaznacz Ctrl+A, skopiuj Ctrl+C – do zgłoszenia):"
   blad_ai_tresc_name:    "Treść błędu do skopiowania"
+  err_tokenizer_offline: "Brak połączenia z Internetem: nie udało się pobrać słownika tokenizera potrzebnego do podziału tekstu. Sprawdź połączenie i spróbuj ponownie."
 
 # -----------------------------------------------------------------------------
 # KONWERTER – panel modułu Konwerter (gui_konwerter.py)
@@ -922,6 +925,33 @@ manager:
   dropdown_jezyk_tooltip: |-
     Filtruje drzewo do wybranego folderu w dictionaries/. Domyślnie ustawiony na język interfejsu, by lista była czytelna dla czytnika ekranu. Wybierz „Wszystkie języki", aby porównywać foldery obok siebie podczas tworzenia nowej paczki.
   opcja_wszystkie_jezyki: "🌍  Wszystkie języki"
+  # Sufiks proponowanej nazwy duplikatu pliku (np. "cezar_kopia") — człon
+  # nazwy pliku, lokalizowany jak inne nazwy plików (v18.8); bez spacji.
+  sufiks_kopii:          "kopia"
+  # Nazwy języków w drzewie (v18.10; dawniej hardkod PL w gui_manager_regul).
+  # Tłumaczone per język UI — np. w ru: fi → "финский". Kod spoza tabeli
+  # wyświetla się jako sam kod ISO.
+  nazwy_jezykow:
+    pl: "polski"
+    en: "angielski"
+    de: "niemiecki"
+    fr: "francuski"
+    es: "hiszpański"
+    it: "włoski"
+    fi: "fiński"
+    is: "islandzki"
+    sv: "szwedzki"
+    da: "duński"
+    "no": "norweski"
+    ru: "rosyjski"
+    cs: "czeski"
+    sk: "słowacki"
+    hu: "węgierski"
+    nl: "niderlandzki"
+    pt: "portugalski"
+    uk: "ukraiński"
+    ja: "japoński"
+    zh: "chiński"
   tree_jezyk:            "🌐  {kod_jezyka}  ({nazwa_jezyka})"
   tree_podstawy:         "📄  podstawy.yaml  (diakrytyki + alfabet)"
   tree_kategoria:        "{etykieta}  [{liczba_plikow}]"
@@ -992,6 +1022,25 @@ manager:
     Utworzono duplikat: {nazwa_pliku}
 
     Edytor tekstu otwiera się automatycznie. Zmień pola `etykieta` i `opis`, zapisz plik (Ctrl+S), a potem wróć do Managera i kliknij „Odśwież drzewo".
+  # Strażnik parytetu baz pl/en (v18.10) — crosscheck core_poliglota wymaga
+  # identycznego zestawu plików w pl i en; rozjazd wyłącza OBA języki.
+  lustro_pytanie_tytul:  "Parytet baz pl/en"
+  lustro_pytanie_tresc: |-
+    Tworzysz plik „{nazwa_pliku}" w bazie „{jezyk_zrodlowy}", a bliźniacza baza „{jezyk_lustra}" go nie ma.
+
+    Języki polski i angielski są bazami referencyjnymi silnika: muszą mieć IDENTYCZNY zestaw plików. Bez lustrzanej kopii OBA znikną z listy języków po restarcie aplikacji.
+
+    Utworzyć teraz kopię 1:1 w „{jezyk_lustra}"? (Zalecane. Treść możesz później przetłumaczyć natywnie — kopia dostanie komentarz przypominający.)
+  lustro_usun_pytanie_tresc: |-
+    Plik „{nazwa_pliku}" ma lustrzany odpowiednik w bliźniaczej bazie „{jezyk_lustra}".
+
+    Języki polski i angielski muszą mieć IDENTYCZNY zestaw plików — usunięcie tylko z „{jezyk_zrodlowy}" sprawi, że OBA znikną z listy języków po restarcie aplikacji.
+
+    Usunąć także odpowiednik z „{jezyk_lustra}"? (Tak = spójne usunięcie z obu baz; Nie = usuwasz tylko ten plik i świadomie rozjeżdżasz bazy.)
+  lustro_komentarz_naglowek: |-
+    # Kopia lustrzana z bazy „{jezyk_zrodlowy}" (parytet pl/en — wymóg silnika).
+    # UWAGA: przetłumacz natywnie treść tego pliku (etykieta, opis, prompt).
+  lustro_blad:           "Nie udało się utworzyć kopii lustrzanej:\n{tresc_bledu}"
   # Usuwanie
   usun_pytanie_tytul:    "Potwierdź usunięcie"
   usun_pytanie_tresc: |-
@@ -1190,6 +1239,7 @@ updater:
   # Błędy
   blad_pobierania_tytul:    "Błąd pobierania"
   blad_pobierania_tresc:    "Nie udało się pobrać aktualizacji:\n{tresc_bledu}"
+  blad_weryfikacji_tresc:   "Pobrany instalator NIE przeszedł weryfikacji integralności (suma kontrolna lub rozmiar się nie zgadza) i został usunięty. Instalacja przerwana dla bezpieczeństwa — spróbuj ponownie albo pobierz instalator ręcznie ze strony wydania.\n\nSzczegóły techniczne: {szczegoly}"
   blad_uruchomienia_tytul:  "Błąd uruchamiania instalatora"
   blad_uruchomienia_tresc:  "Nie udało się uruchomić instalatora:\n{sciezka_pliku}\n\n{tresc_bledu}"
 
@@ -1406,6 +1456,7 @@ opowiesci:
   pamiec_etap_ok:            "🟢 OK"
   pamiec_etap_ostrzezenie:   "⚠️ ostrzeżenie"
   pamiec_etap_alarm:         "🚨 ALARM"
+  pamiec_status_offline:     "⚠️ Brak Internetu: dokładny licznik pamięci jest niedostępny, wartości są przybliżone (~{procent}% — {tokeny} tokenów). Po odzyskaniu połączenia uruchom aplikację ponownie."
   status_streszczanie:       "Auto-streszczenie kontekstu w toku…"
   streszczenie_skonczone_tytul: "Pamięć modelu odzyskana"
   streszczenie_skonczone_tresc: "Auto-streszczenie poprzednich {liczba_tur} tur zakończone. Bufor zwolniony — możesz kontynuować rozgrywkę."
