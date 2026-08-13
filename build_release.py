@@ -561,16 +561,22 @@ def weryfikuj_runtime(sciezka_python: str) -> None:
 
 
 _RE_INSTALLER_NAME = re.compile(r"^Rezyser_Audio_v(.+)_Installer\.exe$")
+_RE_SHA256_NAME = re.compile(r"^Rezyser_Audio_v(.+)_Installer\.exe\.sha256$")
 
 
 def sprzataj_opublikowane_instalatory(wersja_chroniona: str | None = None) -> None:
-    """Usuwa lokalne `Rezyser_Audio_v*_Installer.exe`, których odpowiednik
-    jest już opublikowany jako asset GitHub Release (non-draft).
+    """Usuwa lokalne `Rezyser_Audio_v*_Installer.exe` (oraz ich sidecary
+    `.exe.sha256`, od v18.11), których odpowiednik jest już opublikowany jako
+    asset GitHub Release (non-draft).
 
     Tło: każdy installer waży ~145 MB. Bez automatycznego sprzątania eksplorator
     szybko zarasta starymi binariami z podobnymi nazwami — utrudniona nawigacja,
     ryzyko uploadu nie tej wersji. GitHub trzyma całą historię release'ów z
     assetami pod tagiem, więc lokalna kopia po publikacji jest redundantna.
+    Od v18.10 obok instalatora powstaje drugi asset — plik sumy kontrolnej
+    `.exe.sha256` — sprzątany według tej samej zasady: leci tylko wtedy, gdy
+    DOKŁADNIE ten plik jest już assetem opublikowanego Release (sidecar bez
+    uploadu zostaje na dysku, bo lokalna kopia byłaby jedyną).
 
     Sprzątamy PRZED buildem: jeśli build się wywali, nic nie tracimy — usunięte
     zostały tylko pliki które i tak są w chmurze.
@@ -592,20 +598,30 @@ def sprzataj_opublikowane_instalatory(wersja_chroniona: str | None = None) -> No
         print("⚠ gh CLI not in PATH — skipping cleanup of published installers.")
         return
 
-    kandydaci: list[tuple[Path, str]] = []
+    # Kandydaci grupowani per WERSJA, nie per plik: exe i sidecar `.sha256`
+    # tej samej wersji obsługuje JEDNO zapytanie gh, a osierocony sidecar
+    # (exe sprzątnięte przez starszy cleanup sprzed v18.11) też jest łapany,
+    # bo wersję wyprowadzamy niezależnie z obu wzorców nazw.
+    kandydaci: dict[str, list[Path]] = {}
     for plik in Path(".").glob("Rezyser_Audio_v*_Installer.exe"):
         match = _RE_INSTALLER_NAME.match(plik.name)
         if match:
-            kandydaci.append((plik, match.group(1)))
+            kandydaci.setdefault(match.group(1), []).append(plik)
+    for plik in Path(".").glob("Rezyser_Audio_v*_Installer.exe.sha256"):
+        match = _RE_SHA256_NAME.match(plik.name)
+        if match:
+            kandydaci.setdefault(match.group(1), []).append(plik)
 
     if not kandydaci:
         return
 
     print("🧹 Cleaning up locally published installers...")
-    for plik, wersja in sorted(kandydaci, key=lambda kv: kv[1]):
+    for wersja in sorted(kandydaci):
+        pliki = sorted(kandydaci[wersja], key=lambda p: p.name)
+        nazwy = ", ".join(p.name for p in pliki)
         tag = f"v{wersja}"
         if wersja_chroniona is not None and wersja == wersja_chroniona:
-            print(f"   • {plik.name}: current build version — protected by "
+            print(f"   • {nazwy}: current build version — protected by "
                   "overwrite guard, keeping.")
             continue
         try:
@@ -616,30 +632,33 @@ def sprzataj_opublikowane_instalatory(wersja_chroniona: str | None = None) -> No
                 timeout=15,
             )
         except (subprocess.TimeoutExpired, OSError) as exc:
-            print(f"   ⚠ Skipped {plik.name}: gh call failed ({exc}).")
+            print(f"   ⚠ Skipped {nazwy}: gh call failed ({exc}).")
             continue
         if wynik.returncode != 0:
-            print(f"   • {plik.name}: no Release {tag} on GitHub — keeping.")
+            print(f"   • {nazwy}: no Release {tag} on GitHub — keeping.")
             continue
         try:
             dane = json.loads(wynik.stdout)
         except json.JSONDecodeError:
-            print(f"   ⚠ Skipped {plik.name}: gh returned malformed JSON.")
+            print(f"   ⚠ Skipped {nazwy}: gh returned malformed JSON.")
             continue
         if dane.get("isDraft"):
-            print(f"   • {plik.name}: Release {tag} still in DRAFT — keeping.")
+            print(f"   • {nazwy}: Release {tag} still in DRAFT — keeping.")
             continue
         nazwy_assetow = {a.get("name") for a in (dane.get("assets") or [])}
-        if plik.name not in nazwy_assetow:
-            print(f"   • {plik.name}: Release {tag} published but EXE not uploaded — keeping.")
-            continue
-        rozmiar_mb = plik.stat().st_size / (1024 * 1024)
-        try:
-            plik.unlink()
-        except OSError as exc:
-            print(f"   ⚠ Failed to remove {plik.name}: {exc}.")
-            continue
-        print(f"   ✓ Removed {plik.name} ({rozmiar_mb:.0f} MB) — already on GitHub: {tag}.")
+        for plik in pliki:
+            if plik.name not in nazwy_assetow:
+                print(f"   • {plik.name}: Release {tag} published but this "
+                      "asset not uploaded — keeping.")
+                continue
+            rozmiar_mb = plik.stat().st_size / (1024 * 1024)
+            rozmiar_opis = f" ({rozmiar_mb:.0f} MB)" if rozmiar_mb >= 1 else ""
+            try:
+                plik.unlink()
+            except OSError as exc:
+                print(f"   ⚠ Failed to remove {plik.name}: {exc}.")
+                continue
+            print(f"   ✓ Removed {plik.name}{rozmiar_opis} — already on GitHub: {tag}.")
     print()
 
 
@@ -868,17 +887,19 @@ def _parsuj_argumenty() -> argparse.Namespace:
         action="store_true",
         help="Skip the pre-build cleanup of locally published installers. "
              "Default: cleanup runs before build, removing any "
-             "`Rezyser_Audio_v*_Installer.exe` already published as a "
-             "non-draft GitHub Release asset. Use this flag for diagnostic "
-             "builds where you want to keep older EXEs on disk.",
+             "`Rezyser_Audio_v*_Installer.exe` (and its `.exe.sha256` "
+             "checksum sidecar) already published as a non-draft GitHub "
+             "Release asset. Use this flag for diagnostic builds where you "
+             "want to keep older EXEs on disk.",
     )
     grupa_cleanup.add_argument(
         "--cleanup-only",
         action="store_true",
         help="Run ONLY the cleanup step (delete locally cached installers "
-             "already published on GitHub) and exit. Skips runtime/ check, "
-             "doc regeneration, ISCC compilation. Use case: free up disk "
-             "space after a release without rebuilding.",
+             "and their .sha256 checksum files already published on GitHub) "
+             "and exit. Skips runtime/ check, doc regeneration, ISCC "
+             "compilation. Use case: free up disk space after a release "
+             "without rebuilding.",
     )
     return parser.parse_args()
 
@@ -1063,7 +1084,9 @@ def main(args: argparse.Namespace | None = None) -> None:
 
     nazwa_installer = f"Rezyser_Audio_v{wersja}_Installer.exe"
 
-    # 4a. Pre-build cleanup of locally cached installers already on GitHub.
+    # 4a. Pre-build cleanup of locally cached installers already on GitHub
+    # (od v18.11 razem z sidecarami `.exe.sha256` — inaczej po każdym wydaniu
+    # zostawał osierocony plik sumy kontrolnej sprzątniętego exe).
     # Każdy installer waży ~145 MB; bez tego eksplorator zarasta podobnymi
     # nazwami po kilku patchach. Cleanup leci PRZED `sprawdz_czy_installer_juz_istnieje`
     # (krok 4b niżej), ale dostaje `wersja_chroniona=wersja` — instalator BIEŻĄCEJ
