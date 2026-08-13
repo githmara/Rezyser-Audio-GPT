@@ -58,9 +58,9 @@ import core_tokeny as ct
 # Konfiguracja modelu i limitów (Anthropic Claude — migracja v18.x, Opcja A)
 # =============================================================================
 # Jeden model dla głównego tłumaczenia i mikro-callu ISO (konsolidacja: koniec
-# dual-providera). Sonnet 4.6 honoruje `temperature` (jedyny parametr próbkowania)
-# i `thinking={"type":"disabled"}` — tłumaczenie to proza, reasoning tylko dokłada
-# latencji/kosztu. Patrz `rezyser_ai._wywolaj_claude` (ten sam wzorzec).
+# dual-providera). Domyślnie `thinking={"type":"disabled"}` — szybka proza bez
+# narzutu; od 18.11 tryb quality (checkbox w GUI Poligloty) włącza extended
+# thinking przez `thinking_budget` (patrz `THINKING_BUDGET_QUALITY` niżej).
 MODEL_TLUMACZ = "claude-sonnet-5"
 
 # Maks. tokenów WYJŚCIA pojedynczego bloku. Ceiling, nie target: blok wejściowy
@@ -73,6 +73,14 @@ MAX_TOKENS_BLOK = 8192
 # Timeout per-wywołanie (SDK Anthropic nie przyjmuje `timeout=` na `messages.create`
 # — przez `with_options`). Blok ≤ 4k tokenów wejścia: 120 s z dużym zapasem.
 TIMEOUT_S = 120.0
+
+# 18.11: budżet extended thinking dla trybu quality. Gałąź Anthropic dokłada
+# go PONAD `MAX_TOKENS_BLOK` (8192+4096 = 12k — wciąż pod progiem ~16k
+# non-streaming SDK), więc bisekcja po `stop_reason == "max_tokens"` zachowuje
+# dotychczasową semantykę (thinking nie podjada budżetu odpowiedzi). Na
+# endpointach `openai_compat` parametr jest ignorowany — tryb quality bez
+# efektu, zgodnie z etykietą checkboxa w GUI.
+THINKING_BUDGET_QUALITY = 4096
 
 # Tokenizer DO CHUNKINGU — celowo odpięty od modelu LLM. Claude nie używa tiktoken;
 # `o200k_base` (alias `gpt-4o`) to logiczny licznik rozmiaru bloku, identyczny jak
@@ -415,6 +423,7 @@ def _tlumacz_blok(
     blok: str,
     kontekst: str,
     glebokosc: int = 5,
+    thinking_budget: int = 0,
 ) -> str:
     """Tłumaczy jeden blok; odpowiedź uciętą limitem wyjścia ponawia bisekcją.
 
@@ -430,8 +439,9 @@ def _tlumacz_blok(
     NIE pozwala kończyć payloadu turą ``assistant`` (prefill = 400 na Sonnet 4.6).
     Dlatego kontekst poprzedniego bloku — w wariancie OpenAI podawany jako tura
     ``assistant`` — wkładamy do wiadomości ``user`` jako materiał referencyjny
-    (oznaczony „NIE powtarzać"). ``thinking=disabled`` — tłumaczenie to proza,
-    reasoning dokładałby tylko latencji/kosztu. Wyjątki sieciowe (RateLimitError
+    (oznaczony „NIE powtarzać"). ``thinking_budget`` (18.11): 0 = szybka proza
+    bez reasoning (default); > 0 = tryb quality, extended thinking w gałęzi
+    Anthropic (`openai_compat` ignoruje). Wyjątki sieciowe (RateLimitError
     itp.) przepuszczamy wyżej — obsługuje je pętla główna.
     """
     if kontekst:
@@ -473,6 +483,7 @@ def _tlumacz_blok(
         temperature=0.3,
         timeout=TIMEOUT_S,
         segmenty=segmenty,
+        thinking_budget=thinking_budget,
     )
     fragment = fragment_raw.strip()
     if stop_reason != "max_tokens":
@@ -489,8 +500,10 @@ def _tlumacz_blok(
             "Output truncated (stop_reason='max_tokens'); block can no longer "
             "be split into smaller parts."
         )
-    czesc_lewa = _tlumacz_blok(klient, model, sys_prompt, lewa, kontekst, glebokosc - 1)
-    czesc_prawa = _tlumacz_blok(klient, model, sys_prompt, prawa, czesc_lewa, glebokosc - 1)
+    czesc_lewa = _tlumacz_blok(klient, model, sys_prompt, lewa, kontekst,
+                               glebokosc - 1, thinking_budget)
+    czesc_prawa = _tlumacz_blok(klient, model, sys_prompt, prawa, czesc_lewa,
+                                glebokosc - 1, thinking_budget)
     return f"{czesc_lewa}\n\n{czesc_prawa}"
 
 
@@ -513,6 +526,7 @@ def tlumacz_dlugi_tekst(
     prompt_dodatkowy: str = "",
     slowo_tlumaczenie: str = "tlumaczenie",
     zachowaj_cache: bool = False,
+    tryb_quality: bool = False,
 ) -> WynikTlumaczenia | None:
     """Tłumaczy długi tekst przez Anthropic Claude z wznawianiem po przerwaniu.
 
@@ -555,6 +569,14 @@ def tlumacz_dlugi_tekst(
                            też do nazwy cache ``temp_*.jsonl`` — zmiana języka
                            UI między przerwanym a wznowionym tłumaczeniem
                            unieważnia cache (świadomy, rzadki koszt).
+        tryb_quality:      18.11. Extended thinking dla każdego bloku
+                           (``THINKING_BUDGET_QUALITY`` tokenów namysłu
+                           w gałęzi Anthropic; ``openai_compat`` ignoruje).
+                           Wolniej i drożej, staranniej przy trudnych
+                           fragmentach. Nie zmienia podziału na bloki, więc
+                           cache ``temp_*.jsonl`` pozostaje kompatybilny
+                           (wznowienie może zmieszać bloki z obu trybów —
+                           akceptowalne, to wciąż to samo tłumaczenie).
         zachowaj_cache:    18.9. Nie kasuj ``temp_*.jsonl`` po sukcesie —
                            dla wołających, którzy tłumaczą WIELE jednostek
                            i zapisują plik wynikowy dopiero na końcu
@@ -653,6 +675,7 @@ def tlumacz_dlugi_tekst(
         try:
             fragment = _tlumacz_blok(
                 klient, model_tlumacz, sys_prompt, blok, kontekst,
+                thinking_budget=THINKING_BUDGET_QUALITY if tryb_quality else 0,
             )
             wczytane[i] = fragment
             with open(plik_temp, "a", encoding="utf-8") as fh:

@@ -330,8 +330,17 @@ class PoliglotaPanel(wx.Panel):
                                      name=t("poliglota.txt_jezyk_name"))
         self._txt_lang.SetHint(t("poliglota.txt_jezyk_hint"))
 
+        # 18.11: tryb quality (extended thinking). Checkbox widoczny zawsze —
+        # etykieta mówi wprost, że na endpointach OpenAI-compatible nie ma
+        # efektu (core_llm cicho ignoruje parametr, wzorzec segmenty/wymusz_json).
+        self._chk_quality = wx.CheckBox(
+            panel, label=t("poliglota.chk_quality"),
+            name=t("poliglota.chk_quality_name"))
+        self._chk_quality.SetToolTip(t("poliglota.chk_quality_tooltip"))
+
         sizer.Add(lbl,           flag=wx.BOTTOM, border=4)
-        sizer.Add(self._txt_lang, flag=wx.EXPAND)
+        sizer.Add(self._txt_lang, flag=wx.EXPAND | wx.BOTTOM, border=8)
+        sizer.Add(self._chk_quality)
         panel.SetSizer(sizer)
         return panel
 
@@ -950,13 +959,16 @@ class PoliglotaPanel(wx.Panel):
 
         self._worker_thread = threading.Thread(
             target=self._ai_worker,
-            args=(self._file_content, self._file_ext, target_lang, runtime_dir),
+            # Stan checkboxa quality czytany TU (wątek GUI), nie w workerze.
+            args=(self._file_content, self._file_ext, target_lang, runtime_dir,
+                  self._chk_quality.GetValue()),
             daemon=True,
         )
         self._worker_thread.start()
 
     def _ai_worker(self, content: str, ext: str,
-                   target_lang: str, runtime_dir: str) -> None:
+                   target_lang: str, runtime_dir: str,
+                   tryb_quality: bool) -> None:
         """Wątek tła – żaden bezpośredni wx.* (tylko przez wx.CallAfter!)."""
 
         def _cb_postep(info: tlumacz_ai.InfoPostepu) -> None:
@@ -998,6 +1010,7 @@ class PoliglotaPanel(wx.Panel):
                 on_blad_miekki=_cb_blad_miekki,
                 slowo_tlumaczenie=core_poliglota.bezpieczny_czlon_nazwy(
                     t("poliglota.filename_tlumaczenie"), "tlumaczenie"),
+                tryb_quality=tryb_quality,
             )
         except ct.BladTokenizeraOffline as exc:
             # v18.10: brak tabel BPE (chunking tiktoken) = brak Internetu —

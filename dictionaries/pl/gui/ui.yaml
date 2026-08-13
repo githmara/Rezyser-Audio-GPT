@@ -760,9 +760,12 @@ poliglota:
   wykryto_jezyk_tresc: |-
     Treść wczytanego pliku jest w języku „{jezyk_wykryty}".
     Listy akcentów i szyfrów zostały przełączone na ten język.
-
-    TAK – etykiety akcentów i szyfrów oraz reguły fonetyczne zmienią się na „{jezyk_wykryty}", zgodnie z treścią pliku.
-    NIE – zostawiam reguły dla „{jezyk_aktywny}". Efekt na obcojęzycznym tekście może być nieprzewidywalny.
+  # 18.11: tryb quality tłumacza AI (extended thinking). Działa wyłącznie
+  # z providerem Anthropic; endpointy OpenAI-compatible ignorują parametr —
+  # stąd zastrzeżenie wprost w etykiecie.
+  chk_quality:           "Tryb jakość — głębszy namysł modelu (wolniej i drożej; bez efektu na endpointach OpenAI-compatible)"
+  chk_quality_name:      "Tryb jakość tłumaczenia"
+  chk_quality_tooltip:   "Model otrzymuje budżet na wewnętrzną analizę tekstu przed tłumaczeniem (extended thinking). Poprawia trudne fragmenty kosztem czasu i tokenów. Dotyczy wyłącznie Anthropic Claude — na endpointach OpenAI-compatible nie ma efektu."
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading:      "2. Konfiguracja Pracy"
   rb_ai:                 "Tłumacz AI (Anthropic Claude – wymaga klucza API, kosztuje kredyty)"

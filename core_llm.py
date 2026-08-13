@@ -338,6 +338,7 @@ def _wywolaj_anthropic(
     max_tokens: int,
     temperature: float,
     timeout: float,
+    thinking_budget: int = 0,
 ) -> tuple[str, str | None]:
     """Gałąź Anthropic z degradacją ``temperature`` dla modeli, które ją odrzucają.
 
@@ -350,6 +351,17 @@ def _wywolaj_anthropic(
     :func:`_czy_zla_struktura`) ponawiamy BEZ tego parametru — model wraca do
     własnego samplingu domyślnego. Modele, które ``temperature`` honorują
     (np. Sonnet 4.6), nigdy nie trafiają w tę ścieżkę.
+
+    ``thinking_budget`` > 0 (18.11, tryb quality tłumacza AI) włącza extended
+    thinking: model dostaje budżet tokenów na wewnętrzne rozumowanie PRZED
+    odpowiedzią. Wymogi API: ``temperature`` musi zostać domyślna (parametr
+    POMIJAMY) i ``max_tokens`` > ``budget_tokens`` — budżet dokładamy PONAD
+    limit odpowiedzi wołającego, żeby semantyka ``stop_reason=="max_tokens"``
+    (guard uciętej odpowiedzi / bisekcja tłumacza) nie drgnęła. Bloki
+    ``thinking`` w odpowiedzi odfiltrowuje istniejąca sklejka ``type=="text"``.
+    Odrzucenie konfiguracji thinking przez model/endpoint (400/422) → retry
+    bez thinking i bez ``temperature`` (najbezpieczniejszy wariant — default
+    sampling akceptują wszystkie modele Claude).
     """
     kwargs: dict[str, Any] = dict(
         model=mdl,
@@ -359,16 +371,28 @@ def _wywolaj_anthropic(
         temperature=temperature,
         thinking={"type": "disabled"},
     )
+    if thinking_budget > 0:
+        kwargs.pop("temperature")
+        kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
+        kwargs["max_tokens"] = max_tokens + thinking_budget
     try:
         resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
     except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
         if not _czy_zla_struktura(exc):
             raise
-        _dev_log(
-            f"anthropic: model '{mdl}' odrzucił 'temperature' ({type(exc).__name__}) "
-            "— ponawiam bez tego parametru."
-        )
-        kwargs.pop("temperature")
+        if kwargs["thinking"]["type"] == "enabled":
+            _dev_log(
+                f"anthropic: model '{mdl}' odrzucił 'thinking' ({type(exc).__name__}) "
+                "— ponawiam bez trybu quality (i bez 'temperature')."
+            )
+            kwargs["thinking"] = {"type": "disabled"}
+            kwargs["max_tokens"] = max_tokens
+        else:
+            _dev_log(
+                f"anthropic: model '{mdl}' odrzucił 'temperature' ({type(exc).__name__}) "
+                "— ponawiam bez tego parametru."
+            )
+            kwargs.pop("temperature")
         resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
     tekst = "".join(
         b.text for b in resp.content if getattr(b, "type", None) == "text"
@@ -387,14 +411,18 @@ def wywolaj_llm(
     timeout: float,
     segmenty: list[dict] | None = None,
     wymusz_json: bool = False,
+    thinking_budget: int = 0,
 ) -> tuple[str, str | None]:
     """Wywołuje LLM i zwraca ``(tekst, stop_reason)`` — wspólnie dla obu providerów.
 
     Różnice API ukryte tu:
       * **prompt systemowy** — Anthropic ma osobny ``system=``; OpenAI dokleja go
         jako pierwszą wiadomość ``role=system`` (gdy niepusty).
-      * **reasoning** — Anthropic ``thinking={"type":"disabled"}`` (proza, bez
-        narzutu); w OpenAI param pomijany.
+      * **reasoning** — Anthropic ``thinking``: domyślnie disabled (proza, bez
+        narzutu); ``thinking_budget`` > 0 włącza extended thinking (18.11,
+        tryb quality tłumacza AI — patrz :func:`_wywolaj_anthropic`).
+        W ``openai_compat`` parametr IGNOROWANY — cicha degradacja, ten sam
+        wzorzec co ``segmenty``/``wymusz_json`` niżej.
       * **odpowiedź** — Anthropic skleja bloki ``content[].text``; OpenAI bierze
         ``choices[0].message.content``.
       * **stop_reason** — OpenAI ``finish_reason=="length"`` mapujemy na
@@ -442,6 +470,7 @@ def wywolaj_llm(
         # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo nieużywane
         return _wywolaj_anthropic(
             klient, mdl, system, messages, max_tokens, temperature, timeout,
+            thinking_budget=thinking_budget,
         )
 
     except Exception as exc:  # noqa: BLE001 — 429/timeout opakowujemy; reszta leci dalej
