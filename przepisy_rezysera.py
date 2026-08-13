@@ -388,8 +388,10 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     # Pola generalizacji postprodukcji (v18.12). `zakres` wybiera ścieżkę
     # silnika (iteracja vs jeden call z całym plikiem), więc literówka
     # lingwisty nie może po cichu zmienić znaczenia — nieznana wartość pomija
-    # plik z ostrzeżeniem, jak błędny typ pola niżej.
-    zakres = str(data.get("zakres", "")).strip().lower()
+    # plik z ostrzeżeniem, jak błędny typ pola niżej. Idiom `or ""`/`or 0`
+    # (audyt 18.12, ŚREDNIA-3): klucz obecny z pustą wartością (YAML null)
+    # ma znaczyć „użyj defaultu", nie literalne str(None)="None".
+    zakres = str(data.get("zakres") or "").strip().lower()
     if not zakres:
         zakres = _ZAKRES_LEGACY.get(str(id_), ZAKRES_CALOSC)
     if kategoria == KATEGORIA_POSTPROD and zakres not in (
@@ -416,7 +418,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
 
     # Sufiks trafia wprost do nazwy pliku wyniku — separatory ścieżek i znaki
     # specjalne Windows dyskwalifikują plik (YAML edytowalny w Managerze).
-    sufiks_pliku_wyniku = str(data.get("sufiks_pliku_wyniku", "")).strip()
+    sufiks_pliku_wyniku = str(data.get("sufiks_pliku_wyniku") or "").strip()
     if any(z in sufiks_pliku_wyniku for z in _ZNAKI_ZAKAZANE_SUFIKSU):
         print(
             f"⚠️  przepisy_rezysera: niedozwolone znaki w sufiks_pliku_wyniku="
@@ -435,7 +437,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     # (poprzedni panel jest już zniszczony). Zachowujemy się jak przy duplikacie
     # `id`: pomijamy plik z ostrzeżeniem na stderr.
     try:
-        max_tokens_wyjscia = int(data.get("max_tokens_wyjscia", 0))
+        max_tokens_wyjscia = int(data.get("max_tokens_wyjscia") or 0)
         if max_tokens_wyjscia <= 0:
             max_tokens_wyjscia = (
                 MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
@@ -549,7 +551,7 @@ def _zaladuj_wszystkie(jezyk: str) -> list[PrzepisRezysera]:
     przepisy: list[PrzepisRezysera] = []
 
     if os.path.isdir(folder):
-        widziane_id: set[str] = set()
+        widziane_id: set[tuple[str, str]] = set()
         for nazwa_pliku in sorted(os.listdir(folder)):
             if not nazwa_pliku.lower().endswith((".yaml", ".yml")):
                 continue
@@ -559,17 +561,23 @@ def _zaladuj_wszystkie(jezyk: str) -> list[PrzepisRezysera]:
             if przepis is None:
                 continue
             # Guard kolizji id: tryb identyfikuje się stabilnym `id` (tożsamość
-            # `.mode`, dispatch struktury/paneli). Dwa pliki o tym samym `id` (np.
-            # kontrybutor zduplikował `audiobook`) rozbiłyby identyfikację —
-            # pomijamy późniejszy i sygnalizujemy na stderr (dev/headless).
-            if przepis.id in widziane_id:
+            # `.mode`, dispatch struktury/paneli). Dwa pliki o tym samym `id`
+            # rozbiłyby identyfikację — pomijamy późniejszy i sygnalizujemy na
+            # stderr (dev/headless). Unikalność liczona PER KATEGORIA (audyt
+            # 18.12, ŚREDNIA-5): globalny guard sprawiał, że postprodukcja
+            # o id trybu (`postprod_*` sortuje się przed `tryb_*`) po cichu
+            # USUWAŁA tryb z RadioBoxa. Wszystkie lookupy są per kategoria
+            # (`zaladuj_przepis(kategoria=...)`, `struktura_dla_id`, listy).
+            klucz_id = (przepis.kategoria, przepis.id)
+            if klucz_id in widziane_id:
                 print(
-                    f"⚠️  przepisy_rezysera: duplikat id={przepis.id!r} w {sciezka} "
-                    f"— plik pominięty (id musi być unikalne w paczce).",
+                    f"⚠️  przepisy_rezysera: duplikat id={przepis.id!r} "
+                    f"(kategoria {przepis.kategoria!r}) w {sciezka} — plik "
+                    f"pominięty (id musi być unikalne w kategorii).",
                     file=sys.stderr,
                 )
                 continue
-            widziane_id.add(przepis.id)
+            widziane_id.add(klucz_id)
             przepisy.append(przepis)
 
     przepisy.sort(key=lambda p: (p.kategoria, p.kolejnosc, p.id))
@@ -604,7 +612,10 @@ def struktura_dla_id(id_trybu: str, jezyk: str = "pl") -> str:
     if not id_trybu:
         return "brak"
     for p in _zaladuj_wszystkie(jezyk):
-        if p.id == id_trybu:
+        # Filtr kategorii (audyt 18.12): od czasu unikalności id per kategoria
+        # postprodukcja może legalnie nosić id trybu — segmentacja `.mode`
+        # nie może wtedy trafić w jej (pustą) `struktura`.
+        if p.id == id_trybu and p.kategoria == KATEGORIA_TRYB:
             return p.struktura
     return _STRUKTURA_LEGACY.get(id_trybu, "brak")
 

@@ -1027,7 +1027,15 @@ class RezyserPanel(wx.Panel):
 
         self._btn_postprod: dict[str, wx.Button] = {}
         for przepis_pp in self._postprodukcje:
-            btn = wx.Button(self._pnl_postprodukcja, label=przepis_pp.etykieta)
+            # `name=` (accessible name NVDA) + wspólny tooltip z wymaganiami —
+            # audyt 18.12, NISKA-1: stary przycisk tytułów je miał, dynamiczne
+            # nie mogą być gorsze.
+            btn = wx.Button(
+                self._pnl_postprodukcja,
+                label=przepis_pp.etykieta,
+                name=przepis_pp.etykieta,
+            )
+            btn.SetToolTip(t("rezyser.postprod_info"))
             self._btn_postprod[przepis_pp.id] = btn
 
         self._gauge_postprod = wx.Gauge(self._pnl_postprodukcja, range=100)
@@ -1420,8 +1428,10 @@ class RezyserPanel(wx.Panel):
         """Skanuje folder `skrypty/` i zwraca posortowaną listę nazw projektów.
 
         Kryterium: plik `.txt` w `skrypty/`, którego nazwa NIE kończy się
-        sufiksem `_streszczenie` (te są derived per-projekt, nie samodzielnymi
-        projektami). Pliki `.md` (Księga Świata) traktujemy jako
+        sufiksem `_streszczenie` ANI sufiksem pliku wyniku którejkolwiek
+        wczytanej postprodukcji (np. `_audyt` — audyt 18.12, ŚREDNIA-2:
+        raport narzędzia to derived-data, nie samodzielny projekt).
+        Pliki `.md` (Księga Świata) traktujemy jako
         opcjonalne — gracze, którzy nigdy nie zapisali księgi, też mają
         prawo zobaczyć swoje projekty na liście wyboru.
 
@@ -1433,12 +1443,18 @@ class RezyserPanel(wx.Panel):
         skrypty_dir = os.path.join(app_dir, cr.SKRYPTY_DIR)
         if not os.path.isdir(skrypty_dir):
             return []
+        sufiksy_wynikow = tuple(
+            p.sufiks_pliku_wyniku for p in self._postprodukcje
+            if p.sufiks_pliku_wyniku
+        )
         projekty: list[str] = []
         for nazwa_pliku in os.listdir(skrypty_dir):
             if not nazwa_pliku.endswith(".txt"):
                 continue
             rdzen = nazwa_pliku[:-len(".txt")]
             if rdzen.endswith("_streszczenie"):
+                continue
+            if sufiksy_wynikow and rdzen.endswith(sufiksy_wynikow):
                 continue
             projekty.append(rdzen)
         return sorted(projekty)
@@ -3099,6 +3115,12 @@ class RezyserPanel(wx.Panel):
         t_thread = threading.Thread(target=target, args=args, daemon=True)
         self._worker_thread = t_thread
         t_thread.start()
+        # Refresh PO starcie workera (audyt 18.12, NISKA-3): przelicza Enable
+        # kontrolek zależnych od `worker_w_toku` (np. „Przeładuj z dysku"),
+        # które inaczej zostałyby aktywne do najbliższego przypadkowego
+        # refreshu. Nadpisuje też ręczny Disable przycisków postprodukcji
+        # spójnym warunkiem (`worker_zajety` jest już True).
+        self._refresh_ui_state()
 
     # ------------------------------------------------------------------
     # Wątek tła – postprodukcja per rozdział (np. tytuły)
@@ -3143,6 +3165,10 @@ class RezyserPanel(wx.Panel):
 
         tekst = "\n".join(wynik.tytuly)
         if sciezka_wyj and not self._zapisz_wynik_postprod(sciezka_wyj, tekst):
+            # Opłacony wynik nie może zginąć z samą porażką zapisu (audyt
+            # 18.12, ŚREDNIA-1) — po dialogu błędu pokazujemy go w dialogu
+            # wyniku (wzorzec partial-wyników), user może skopiować ręcznie.
+            wx.CallAfter(self._show_postprod_dialog, przepis_pp, tekst, None)
             return
         wx.CallAfter(self._on_postprod_sukces, przepis_pp, tekst, sciezka_wyj, "")
 
@@ -3187,6 +3213,9 @@ class RezyserPanel(wx.Panel):
             return
 
         if sciezka_wyj and not self._zapisz_wynik_postprod(sciezka_wyj, wynik.tekst):
+            # Jak w `_tytuly_worker`: opłacony wynik trafia do dialogu mimo
+            # porażki zapisu (audyt 18.12, ŚREDNIA-1).
+            wx.CallAfter(self._show_postprod_dialog, przepis_pp, wynik.tekst, None)
             return
         wx.CallAfter(
             self._on_postprod_sukces,
@@ -3224,13 +3253,17 @@ class RezyserPanel(wx.Panel):
         partial_wyniki: list | None = None,
         przepis_pp: pr.PrzepisRezysera | None = None,
     ) -> None:
-        for btn in self._btn_postprod.values():
-            btn.Enable()
+        # Worker skończył (callback to jego ostatnia instrukcja) — zwalniamy
+        # referencję PRZED refreshem, żeby Enable nie zależał od wyścigu
+        # z dogasającym wątkiem.
+        self._worker_thread = None
         self._gauge_postprod.SetValue(0)
         self._gauge_postprod.Hide()
         self._lbl_postprod_status.Hide()
-        self._pnl_postprodukcja.Layout()
-        self.Layout()
+        # Pełny refresh zamiast bezwarunkowego Enable() (audyt 18.12,
+        # NISKA-2): stan przycisków wraca do prawdy (nazwa/historia/API),
+        # a refresh robi też Layout panelu i całości.
+        self._refresh_ui_state()
         self._wyswietl_blad_ai(
             msg,
             t("rezyser.tytuly_blad_naglowek"),
@@ -3252,10 +3285,12 @@ class RezyserPanel(wx.Panel):
         sciezka_wyj: str | None,
         ostrzezenie: str = "",
     ) -> None:
-        for btn in self._btn_postprod.values():
-            btn.Enable()
+        # Jak w `_on_postprod_error`: zwolnij referencję workera i przelicz
+        # stan przycisków pełnym refreshem (audyt 18.12, NISKA-2).
+        self._worker_thread = None
         self._gauge_postprod.SetValue(100)
         self._lbl_postprod_status.SetLabel(t("rezyser.postprod_postep_gotowe"))
+        self._refresh_ui_state()
 
         # Ostrzeżenie o ucięciu PRZED dialogiem wyniku — user wie, czego
         # szukać na końcówce (konwencja miękka jak w `generuj_fragment`).
@@ -3380,6 +3415,17 @@ class RezyserPanel(wx.Panel):
         (`_dialog_wyboru_markera`). Ostrzega przed nadpisaniem niezapisanych
         edycji w polach Księga/Pamięć (D2).
         """
+        # Guard `is_alive` NA WEJŚCIU (audyt 18.12, NISKA-3; checklist v18.9):
+        # pełny reload mutuje full_story/liczniki/streszczenie — warunek Enable
+        # (`worker_w_toku`) to za mało, bo refresh może nie nadążyć za startem
+        # workera, a handler musi bronić się sam.
+        if self._worker_thread and self._worker_thread.is_alive():
+            wx.MessageBox(
+                t("rezyser.tytuly_zajety_tresc"),
+                t("rezyser.tytuly_zajety_tytul"),
+                wx.OK | wx.ICON_INFORMATION, self,
+            )
+            return
         nazwa = self._txt_file_name.GetValue().strip()
         if not nazwa:
             wx.MessageBox(

@@ -1303,7 +1303,15 @@ def wykonaj_postprodukcje_calosc(
     if blok_ksiegi:
         czesci.append(blok_ksiegi)
     tresc = pr.buduj_prompt_uzytkownika(przepis, tresc=pelny_tekst)
-    czesci.append(tresc if tresc else pelny_tekst)
+    if not tresc:
+        tresc = pelny_tekst
+    elif pelny_tekst and pelny_tekst not in tresc:
+        # Siatka bezpieczeństwa (audyt 18.12, ŚREDNIA-4): zepsuty szablon
+        # (np. samotna `{` → `_format_bezpiecznie` oddaje SUROWY szablon
+        # z literalnym {tresc}) wysłałby opłacony call BEZ treści projektu.
+        # Doklejamy treść na końcu — prompt mniej elegancki, ale call ma sens.
+        tresc = tresc + "\n\n" + pelny_tekst
+    czesci.append(tresc)
     prompt_user = "\n\n".join(czesci)
 
     try:

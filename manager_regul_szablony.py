@@ -1201,7 +1201,10 @@ a postproduction named **{etykieta}**.
 
 # STRUCTURE REQUIREMENTS (engine)
 1. Fields: `id`, `etykieta`, `kategoria: postprodukcja`, `kolejnosc`
-   (int 10-90, e.g. 20 for a title generator).
+   (int 10-90, e.g. 20 for a title generator). The `id` must be unique
+   among postproductions and must NOT reuse a creative-mode id
+   (audiobook/skrypt/burza or any `tryb_*.yaml` id) — keep identifiers
+   unambiguous across the pack.
 2. **`dla_trybow:`** list of creative-mode ids the tool belongs to (e.g.
    `[audiobook]`); empty/omitted = every mode that writes to the file.
    **`zakres:`** `per_rozdzial` or `calosc` — pick per the task's nature
