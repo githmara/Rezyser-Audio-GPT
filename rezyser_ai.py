@@ -25,7 +25,8 @@ Zakres odpowiedzialności:
     * Ekstrakcja ``<STRESZCZENIE>...</STRESZCZENIE>`` w trybie Burzy.
     * Post-processing fonetyczny (:func:`core_rezyser.zastosuj_akcenty_uniwersalne`)
       dla trybów z ``stosuj_akcenty_fonetyczne: true``.
-    * Postprodukcja: iteracja po rozdziałach i nadawanie tytułów.
+    * Postprodukcja: iteracja po rozdziałach (``zakres: per_rozdzial``,
+      np. tytuły) lub jeden call z całym plikiem (``zakres: calosc``, v18.12).
 
 Publiczne API:
 
@@ -161,6 +162,33 @@ class WynikTytulowania:
     tytuly: list[str] = field(default_factory=list)
     przerwano_bledem: bool = False
     blad: str = ""
+
+
+@dataclass
+class WynikPostprodukcjiCalosc:
+    """Zbiorczy rezultat :func:`wykonaj_postprodukcje_calosc` (v18.12).
+
+    Attributes:
+        tekst:            Wynik modelu (np. raport). Pusty gdy ``odrzucone``
+                          lub ``przerwano_bledem``.
+        odrzucone:        True, gdy model odpowiedział tagiem
+                          :data:`przepisy_rezysera.TAG_ODRZUCENIA_AI` —
+                          wynik NIE nadaje się do zapisu/prezentacji.
+        przerwano_bledem: True przy typowanym błędzie warstwy LLM
+                          (rate-limit / timeout / pusta odpowiedź). Inne
+                          wyjątki propagują do siatki bezpieczeństwa GUI.
+        blad:             Ludzka (i18n) wersja błędu do pokazania userowi.
+        ostrzezenie:      Niepusty tekst miękkiego ostrzeżenia, gdy wynik
+                          urwał się na ``max_tokens`` — wynik i tak jest
+                          użyteczny (konwencja `generuj_fragment`: nie
+                          blokujemy, ostrzegamy).
+    """
+
+    tekst: str = ""
+    odrzucone: bool = False
+    przerwano_bledem: bool = False
+    blad: str = ""
+    ostrzezenie: str = ""
 
 
 # =============================================================================
@@ -334,10 +362,12 @@ def wybierz_sufiks(
 # Ceiling, nie target — pod progiem non-streaming SDK (brak ryzyka HTTP-timeoutu).
 MAX_TOKENS_NARRACJA = 16000
 
-# Maks. tokenów wyjścia postprodukcji tytułów (konsolidacja v18.x na Anthropic):
-# tytuł to jedna krótka linia, więc 256 z dużym zapasem. Anthropic wymaga jawnego
-# `max_tokens` (w OpenAI był domyślny). Mikro-call ISO ma własny, jeszcze mniejszy.
-MAX_TOKENS_TYTUL = 256
+# Maks. tokenów wyjścia postprodukcji: od v18.12 per przepis z YAML
+# (`max_tokens_wyjscia`, defaulty 256/8000 per `zakres` nadaje loader
+# `przepisy_rezysera`). Anthropic wymaga jawnego `max_tokens` (w OpenAI był
+# domyślny). Mikro-call ISO ma własny, mały ceiling (16). Dawna stała
+# MAX_TOKENS_TYTUL=256 zniesiona — wartość mieszka w loaderze jako
+# `MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE`.
 
 # Maks. tokenów mikro-callu domykającego urwane zdanie (sprawa #1). Jedno zdanie
 # to kilkadziesiąt–kilkaset znaków; 300 z zapasem. Osobny, mały ceiling — domknięcie
@@ -1181,7 +1211,7 @@ def nadaj_tytuly_rozdzialom(
                 model=przepis_tytuly.model,
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}],
-                max_tokens=MAX_TOKENS_TYTUL,
+                max_tokens=przepis_tytuly.max_tokens_wyjscia,
                 temperature=przepis_tytuly.temperatura,
                 timeout=timeout,
             )
@@ -1221,6 +1251,101 @@ def nadaj_tytuly_rozdzialom(
             )
 
     return WynikTytulowania(tytuly=tytuly, przerwano_bledem=False, blad="")
+
+
+# =============================================================================
+# Postprodukcja `zakres: calosc` (v18.12): jeden call z całym plikiem projektu
+# =============================================================================
+
+# Timeout postprodukcji całościowej — wejście to cały plik projektu, a wyjście
+# potrafi mieć kilka stron (default 8000 tokenów), więc 60 s tytułów to za
+# mało. 300 s sprawdzone bojowo w prywatnym pomoście `audyt_hsl.py`.
+TIMEOUT_POSTPROD_CALOSC = 300.0
+
+
+def wykonaj_postprodukcje_calosc(
+    klient: Any,
+    przepis: pr.PrzepisRezysera,
+    pelny_tekst: str,
+    ksiega: str | None = None,
+    on_postep: PostepCallback | None = None,
+    timeout: float = TIMEOUT_POSTPROD_CALOSC,
+) -> WynikPostprodukcjiCalosc:
+    """Postprodukcja ``zakres: calosc``: jeden call LLM z całym plikiem projektu.
+
+    Generalizacja wzorca prywatnego pomostu ``audyt_hsl.py`` (raport z audytu
+    całego kursu). Algorytm:
+
+        1. Prompt user składany z bloków rozdzielonych pustą linią:
+           - opcjonalny blok Księgi Świata (:func:`pr.buduj_prompt_ksiegi` —
+             tylko gdy ``ksiega`` niepusta ORAZ przepis ma
+             ``prompt_ksiegi_szablon``),
+           - treść z ``prompt_uzytkownika_szablon`` (placeholder ``{tresc}``);
+             przepis bez szablonu → sam ``pelny_tekst`` (instrukcję niesie
+             wtedy wyłącznie prompt systemowy).
+        2. Jeden call ``cl.wywolaj_llm`` z ``max_tokens=przepis.
+           max_tokens_wyjscia`` (default 8000 z loadera).
+        3. Tag odrzucenia → ``odrzucone=True`` (bez zapisu/prezentacji).
+        4. ``stop_reason=="max_tokens"`` → miękkie ostrzeżenie o ucięciu,
+           wynik pozostaje użyteczny (konwencja ``generuj_fragment``).
+
+    Rate-limit i timeout wracają jako typowany wynik (``przerwano_bledem``);
+    pozostałe wyjątki propagują — łapie je siatka bezpieczeństwa workera GUI
+    (``bledy_ai.zapisz_diagnostyke`` + centralny maper komunikatów).
+    """
+    if on_postep:
+        on_postep(i18n.t("rezyser.postprod_postep_generowanie"), 0)
+
+    system_prompt = pr.buduj_prompt_systemowy(przepis)
+
+    czesci: list[str] = []
+    blok_ksiegi = pr.buduj_prompt_ksiegi(przepis, ksiega or "")
+    if blok_ksiegi:
+        czesci.append(blok_ksiegi)
+    tresc = pr.buduj_prompt_uzytkownika(przepis, tresc=pelny_tekst)
+    czesci.append(tresc if tresc else pelny_tekst)
+    prompt_user = "\n\n".join(czesci)
+
+    try:
+        tekst, stop_reason = cl.wywolaj_llm(
+            klient,
+            model=przepis.model,
+            system=system_prompt,
+            messages=[{"role": "user", "content": prompt_user}],
+            max_tokens=przepis.max_tokens_wyjscia,
+            temperature=przepis.temperatura,
+            timeout=timeout,
+        )
+    except cl.BladLimituLLM:
+        return WynikPostprodukcjiCalosc(
+            przerwano_bledem=True,
+            blad=i18n.t("rezyser.err_rate_limit"),
+        )
+    except cl.BladTimeoutLLM:
+        return WynikPostprodukcjiCalosc(
+            przerwano_bledem=True,
+            blad=i18n.t("rezyser.err_timeout"),
+        )
+
+    tekst = (tekst or "").strip()
+
+    if pr.wykryto_odrzucenie(tekst):
+        return WynikPostprodukcjiCalosc(odrzucone=True)
+
+    if not tekst:
+        return WynikPostprodukcjiCalosc(
+            przerwano_bledem=True,
+            blad=i18n.t("rezyser.postprod_pusta_tresc"),
+        )
+
+    ostrzezenie = ""
+    if stop_reason == "max_tokens":
+        ostrzezenie = i18n.t("rezyser.postprod_ucieta_tresc")
+
+    if on_postep:
+        on_postep(i18n.t("rezyser.postprod_postep_gotowe"), 100)
+
+    return WynikPostprodukcjiCalosc(tekst=tekst, ostrzezenie=ostrzezenie)
 
 
 # =============================================================================

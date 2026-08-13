@@ -811,3 +811,20 @@ def buduj_prompt_uzytkownika(przepis: PrzepisRezysera, **kwargs: Any) -> str:
         jezyk_odpowiedzi=przepis.jezyk_odpowiedzi,
         **kwargs,
     )
+
+
+def buduj_prompt_ksiegi(przepis: PrzepisRezysera, ksiega: str) -> str:
+    """Blok Księgi Świata z ``prompt_ksiegi_szablon`` (placeholder ``{ksiega}``).
+
+    Używany przez postprodukcję ``calosc`` (v18.12): gdy projekt ma Księgę
+    Świata (``skrypty/<nazwa>.md``) a przepis szablon bloku — silnik dokleja
+    blok PRZED treścią pliku projektu. Pusty szablon LUB pusta księga →
+    pusty string (postprodukcja ignoruje księgę).
+    """
+    if not przepis.prompt_ksiegi_szablon or not (ksiega or "").strip():
+        return ""
+    return _format_bezpiecznie(
+        przepis.prompt_ksiegi_szablon,
+        ksiega=ksiega.strip(),
+        jezyk_odpowiedzi=przepis.jezyk_odpowiedzi,
+    )
