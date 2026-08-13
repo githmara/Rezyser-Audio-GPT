@@ -30,6 +30,9 @@ Publiczne API (używane przez ``rezyser_ai.py`` i ``gui_rezyser.py``):
     przepis = pr.zaladuj_przepis("audiobook")     # PrzepisRezysera | None
     postprod = pr.zaladuj_przepis("tytuly", kategoria="postprodukcja")
 
+    # Postprodukcje oferowane w GUI dla bieżącego trybu (filtr `dla_trybow`):
+    narzedzia = pr.postprodukcje_dla_trybu(przepis)
+
     # Zbudowanie końcowego prompt systemowego (podstawia {world_context}
     # i {jezyk_odpowiedzi} w szablonie z YAML-a):
     sys_prompt = pr.buduj_prompt_systemowy(przepis, world_context="...")
@@ -69,6 +72,24 @@ FOLDER_REZYSER = "rezyser"
 # ale silnik domyślnie rozumie tylko te dwie.
 KATEGORIA_TRYB = "tryb"
 KATEGORIA_POSTPROD = "postprodukcja"
+
+# Zakresy przetwarzania postprodukcji (pole ``zakres:`` w YAML, v18.12):
+#   per_rozdzial – iteracja po nagłówkach struktury pliku projektu
+#                  (wzorzec tytułów rozdziałów),
+#   calosc       – jeden call LLM z całym plikiem projektu (wzorzec raportu).
+ZAKRES_PER_ROZDZIAL = "per_rozdzial"
+ZAKRES_CALOSC = "calosc"
+
+# Domyślne limity tokenów wyjścia postprodukcji, gdy YAML nie podaje
+# ``max_tokens_wyjscia:`` — wartości historyczne obu wzorców (tytuł rozdziału
+# to jedna linia; raport całościowy to kilka stron).
+MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE = 256
+MAX_TOKENS_CALOSC_DOMYSLNE = 8_000
+
+# Znaki zakazane w ``sufiks_pliku_wyniku:`` — sufiks trafia wprost do nazwy
+# pliku ``skrypty/<nazwa><sufiks>.txt``, więc separatory ścieżek i znaki
+# specjalne Windows odpadają (YAML jest edytowalny przez usera w Managerze).
+_ZNAKI_ZAKAZANE_SUFIKSU = '\\/:*?"<>|'
 
 # Domyślny model AI dla przepisów BEZ jawnego pola ``model:`` w YAML-u.
 # Od v18.2 cały silnik Reżysera jedzie na Anthropic Claude (``rezyser_ai``
@@ -189,6 +210,33 @@ class PrzepisRezysera:
         etykieta_blad_fragment:
                           (tylko postprodukcja) Szablon napisu przy nieoczekiwanym
                           błędzie fragmentu; placeholder ``{blad}`` = treść wyjątku.
+        dla_trybow:       (tylko postprodukcja, v18.12) Lista ``id`` trybów,
+                          w których GUI oferuje to narzędzie. Pusta lista =
+                          narzędzie widoczne we wszystkich trybach
+                          z ``zapis_do_pliku`` (postprodukcja operuje na pliku
+                          projektu, więc tryb bez zapisu nie ma na czym
+                          pracować). YAML sprzed v18.12 bez pola → shim po
+                          ``id`` (:data:`_DLA_TRYBOW_LEGACY`).
+        zakres:           (tylko postprodukcja, v18.12) Sposób przetwarzania
+                          pliku projektu: :data:`ZAKRES_PER_ROZDZIAL` (iteracja
+                          po nagłówkach, jak tytuły) lub :data:`ZAKRES_CALOSC`
+                          (jeden call z całym plikiem). Nieznana wartość →
+                          plik pominięty (literówka nie może po cichu zmienić
+                          ścieżki silnika).
+        max_tokens_wyjscia:
+                          (tylko postprodukcja, v18.12) Limit tokenów wyjścia
+                          pojedynczego wywołania LLM. Pominięte/0 → domyślne
+                          per zakres (256 / 8000).
+        sufiks_pliku_wyniku:
+                          (tylko postprodukcja, v18.12) Niepusty → GUI zapisuje
+                          wynik do ``skrypty/<nazwa><sufiks>.txt`` (np.
+                          ``"_audyt"``). Pusty = wynik tylko w dialogu
+                          (zachowanie tytułów).
+        prompt_ksiegi_szablon:
+                          (tylko postprodukcja ``calosc``, v18.12) Szablon bloku
+                          Księgi Świata z placeholderem ``{ksiega}``, doklejany
+                          PRZED treścią gdy ``skrypty/<nazwa>.md`` istnieje
+                          i jest niepusty. Brak pola = księga ignorowana.
     """
 
     # --- Wspólne ---
@@ -257,6 +305,13 @@ class PrzepisRezysera:
     etykieta_odrzucenie: str = ""
     etykieta_blad_fragment: str = ""
 
+    # --- Postprodukcja: generalizacja (v18.12) ---
+    dla_trybow: list[str] = field(default_factory=list)
+    zakres: str = ZAKRES_CALOSC
+    max_tokens_wyjscia: int = MAX_TOKENS_CALOSC_DOMYSLNE
+    sufiks_pliku_wyniku: str = ""
+    prompt_ksiegi_szablon: str = ""
+
 
 # =============================================================================
 # Cache wczytanych przepisów
@@ -273,6 +328,17 @@ _CACHE_PRZEPISOW: dict[str, list[PrzepisRezysera]] = {}
 _STRUKTURA_LEGACY: dict[str, str] = {
     "skrypt": "akty_sceny",
     "audiobook": "rozdzialy",
+}
+
+# Shimy wstecznej zgodności postprodukcji sprzed v18.12 (pola `dla_trybow`
+# i `zakres` nie istniały; jedyną shippowaną postprodukcją były tytuły
+# rozdziałów Audiobooka). Kanonicznym źródłem są odtąd pola w YAML —
+# paczki shippowane mają je wypełnione, shim chroni YAML-e userów.
+_DLA_TRYBOW_LEGACY: dict[str, list[str]] = {
+    "tytuly": ["audiobook"],
+}
+_ZAKRES_LEGACY: dict[str, str] = {
+    "tytuly": ZAKRES_PER_ROZDZIAL,
 }
 
 
@@ -319,6 +385,47 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     if not struktura:
         struktura = _STRUKTURA_LEGACY.get(str(id_), "brak")
 
+    # Pola generalizacji postprodukcji (v18.12). `zakres` wybiera ścieżkę
+    # silnika (iteracja vs jeden call z całym plikiem), więc literówka
+    # lingwisty nie może po cichu zmienić znaczenia — nieznana wartość pomija
+    # plik z ostrzeżeniem, jak błędny typ pola niżej.
+    zakres = str(data.get("zakres", "")).strip().lower()
+    if not zakres:
+        zakres = _ZAKRES_LEGACY.get(str(id_), ZAKRES_CALOSC)
+    if kategoria == KATEGORIA_POSTPROD and zakres not in (
+            ZAKRES_PER_ROZDZIAL, ZAKRES_CALOSC):
+        print(
+            f"⚠️  przepisy_rezysera: nieznany zakres={zakres!r} w {sciezka} "
+            f"— plik pominięty (dozwolone: {ZAKRES_PER_ROZDZIAL!r} / "
+            f"{ZAKRES_CALOSC!r}).",
+            file=sys.stderr,
+        )
+        return None
+
+    # `dla_trybow`: rozróżniamy BRAK pola (shim legacy po `id`) od jawnie
+    # pustej listy (= wszystkie tryby zapisu, patrz `postprodukcje_dla_trybu`).
+    # Pojedynczy string (`dla_trybow: audiobook`) przyjmujemy łaskawie jako
+    # listę jednoelementową — to naturalny skrót w ręcznie pisanym YAML-u.
+    if "dla_trybow" in data:
+        surowe = data.get("dla_trybow")
+        if not isinstance(surowe, list):
+            surowe = [surowe] if surowe is not None else []
+        dla_trybow = [str(x).strip().lower() for x in surowe if str(x).strip()]
+    else:
+        dla_trybow = list(_DLA_TRYBOW_LEGACY.get(str(id_), []))
+
+    # Sufiks trafia wprost do nazwy pliku wyniku — separatory ścieżek i znaki
+    # specjalne Windows dyskwalifikują plik (YAML edytowalny w Managerze).
+    sufiks_pliku_wyniku = str(data.get("sufiks_pliku_wyniku", "")).strip()
+    if any(z in sufiks_pliku_wyniku for z in _ZNAKI_ZAKAZANE_SUFIKSU):
+        print(
+            f"⚠️  przepisy_rezysera: niedozwolone znaki w sufiks_pliku_wyniku="
+            f"{sufiks_pliku_wyniku!r} w {sciezka} — plik pominięty "
+            f"(zakazane: {_ZNAKI_ZAKAZANE_SUFIKSU}).",
+            file=sys.stderr,
+        )
+        return None
+
     # Konwersje pól są celowo objęte guardem (v18.9): `rezyser/*.yaml` to plik
     # EDYTOWALNY przez usera w Managerze Reguł, więc `kolejnosc:` bez wartości
     # (None → TypeError), `kolejnosc: abc` (ValueError) albo `sufiksy:` podane
@@ -328,6 +435,13 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     # (poprzedni panel jest już zniszczony). Zachowujemy się jak przy duplikacie
     # `id`: pomijamy plik z ostrzeżeniem na stderr.
     try:
+        max_tokens_wyjscia = int(data.get("max_tokens_wyjscia", 0))
+        if max_tokens_wyjscia <= 0:
+            max_tokens_wyjscia = (
+                MAX_TOKENS_PER_ROZDZIAL_DOMYSLNE
+                if zakres == ZAKRES_PER_ROZDZIAL
+                else MAX_TOKENS_CALOSC_DOMYSLNE
+            )
         return PrzepisRezysera(
             id=str(id_),
             etykieta=str(etykieta),
@@ -362,6 +476,11 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
                 data.get("etykieta_bled_brak_kredytow", "")),
             etykieta_odrzucenie=str(data.get("etykieta_odrzucenie", "")),
             etykieta_blad_fragment=str(data.get("etykieta_blad_fragment", "")),
+            dla_trybow=dla_trybow,
+            zakres=zakres,
+            max_tokens_wyjscia=max_tokens_wyjscia,
+            sufiks_pliku_wyniku=sufiks_pliku_wyniku,
+            prompt_ksiegi_szablon=str(data.get("prompt_ksiegi_szablon", "")),
         )
     except (TypeError, ValueError, AttributeError) as exc:
         print(
@@ -491,14 +610,39 @@ def struktura_dla_id(id_trybu: str, jezyk: str = "pl") -> str:
 
 
 def lista_postprodukcji(jezyk: str = "pl") -> list[PrzepisRezysera]:
-    """Zwraca listę przepisów kategorii ``postprodukcja``.
+    """Zwraca listę WSZYSTKICH przepisów kategorii ``postprodukcja``.
 
-    Na razie używana tylko do nadawania tytułów rozdziałom w trybie
-    Audiobook, ale kolejne narzędzia (np. „Automatyczna korekta", „Analiza
-    statystyczna stylu") mogą być dokładane tak samo: YAML + jedno wpisanie
-    ``kategoria: postprodukcja``.
+    Od v18.12 GUI nie ładuje już pojedynczego narzędzia po zahardkodowanym
+    ``id`` — nowe narzędzie postprodukcyjne to sam YAML z ``kategoria:
+    postprodukcja`` (+ pola ``dla_trybow``/``zakres``). Do filtrowania pod
+    bieżący tryb służy :func:`postprodukcje_dla_trybu`.
     """
     return [p for p in _zaladuj_wszystkie(jezyk) if p.kategoria == KATEGORIA_POSTPROD]
+
+
+def postprodukcje_dla_trybu(
+    tryb: PrzepisRezysera | None,
+    jezyk: str = "pl",
+) -> list[PrzepisRezysera]:
+    """Postprodukcje oferowane w GUI dla danego trybu twórczego (v18.12).
+
+    Filtruje :func:`lista_postprodukcji` po polu ``dla_trybow``: narzędzie
+    z niepustą listą pokazuje się wyłącznie w wymienionych trybach; narzędzie
+    z pustą listą — we wszystkich trybach z ``zapis_do_pliku`` (postprodukcja
+    operuje na pliku projektu ``skrypty/<nazwa>.txt``, więc tryb bez zapisu —
+    np. Burza Mózgów — nie ma na czym pracować). ``tryb=None`` (RadioBox bez
+    wyboru) → pusta lista.
+    """
+    if tryb is None:
+        return []
+    wynik: list[PrzepisRezysera] = []
+    for p in lista_postprodukcji(jezyk):
+        if p.dla_trybow:
+            if tryb.id in p.dla_trybow:
+                wynik.append(p)
+        elif tryb.zapis_do_pliku:
+            wynik.append(p)
+    return wynik
 
 
 def zaladuj_przepis(
