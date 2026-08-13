@@ -256,15 +256,22 @@ tresc:
 
     Es el complemento consciente del puente de audio: el acento para el modelo v3 lo aporta la muestra de voz, y para el lector de pantalla — la ortografía más el marcador de idioma. Por eso la ortografía en la versión de audio permanece limpia (v3 selecciona el idioma por sí mismo), y la «alteración» ortográfica va exclusivamente al archivo HTML separado, donde es deseable.
   krok_4_postprodukcja: |
-    ## PASO 4: Postproducción en Dirección
+    ## PASO 4: Posproducción en la Dirección
 
-    Después de escribir la historia, tienes a tu disposición una herramienta de postproducción disponible en la parte inferior del panel de Dirección (aparece solo en el Modo Audiolibro).
+    Después de escribir la historia, tienes a tu disposición un panel de herramientas de posproducción en la parte inferior del panel de Dirección. El panel es dinámico: cada herramienta es un archivo YAML independiente en la carpeta `rezyser/` (`kategoria: postprodukcja`), y su campo `dla_trybow` decide en qué modos creativos aparece la herramienta. El conjunto de botones cambia, por tanto, según el modo elegido, y cuando ninguna herramienta coincide con el modo actual, el panel permanece oculto. Puedes crear tu propia herramienta en el Gestor de Reglas (plantilla de tipo postprodukcja — ver PASO 7b).
+
+    La herramienta trabaja en uno de dos ámbitos (campo `zakres` en el YAML):
+
+    - `per_rozdzial` — itera por los capítulos del archivo guardado y procesa cada uno por separado (así funciona la Asignación de Títulos que se describe a continuación),
+    - `calosc` — envía a la IA el archivo completo del proyecto en una sola llamada (por ejemplo, un informe o una auditoría de toda la historia); si el proyecto tiene un Libro del Mundo, la herramienta puede incluirlo como contexto adicional.
+
+    El resultado siempre aparece en una ventana de diálogo (para copiarlo), y la herramienta con un sufijo de archivo de resultado configurado lo guarda además junto a la narración en la carpeta `skrypty/` (por ejemplo, `nazwa_audyt.txt`). Antes de sobrescribir un archivo de resultado ya existente, la aplicación pide confirmación, incluso antes de gastar un solo céntimo en una llamada a la IA.
 
     ### Asignación de Títulos a los Capítulos (Modo Audiolibro)
 
-    La IA analizará toda la historia y propondrá títulos descriptivos y literarios para cada capítulo (así como para un posible Prólogo y Epílogo). El módulo itera a través de los capítulos del archivo guardado y les asigna un título breve, analizando solo los inicios de cada capítulo (hasta 6000 caracteres). Devuelve únicamente una lista numerada de títulos, sin transcribir el contenido del libro.
+    La IA analizará toda la historia y propondrá títulos descriptivos y literarios para cada capítulo (así como para un posible Prólogo y Epílogo). El módulo itera por los capítulos del archivo guardado y les asigna un título breve, analizando solo el inicio de cada capítulo (hasta 6000 caracteres). Devuelve únicamente una lista numerada de títulos, sin reescribir el contenido del libro.
 
-    **Nota:** El módulo requiere que el archivo ya esté guardado en el disco (generado o cargado). Si el archivo no existe, la aplicación mostrará un mensaje adecuado.
+    **Nota:** Las herramientas de posproducción requieren que el archivo del proyecto ya esté guardado en el disco (generado o cargado). Si el archivo no existe, la aplicación mostrará el mensaje correspondiente.
   krok_5_poliglota_intro: |
     ## PASO 5: Políglota AI
 

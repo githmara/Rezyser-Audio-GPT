@@ -427,13 +427,7 @@ rezyser:
   el_btn_otworz_studio: "Ouvrir ElevenLabs Studio"
   el_raport_btn_zamknij: "Fermer"
   postprod_info: |-
-    Le module itère sur les chapitres du fichier sauvegardé et leur attribue un court titre littéraire (analyse IA).
-  btn_tytuly_ai_label: "📜 Attribuer les Titres aux Chapitres (IA)"
-  btn_tytuly_ai_name: "Bouton Attribuer les Titres aux Chapitres IA"
-  btn_tytuly_ai_tooltip: |-
-    Parcourt les chapitres du fichier enregistré et leur attribue des titres (Claude).
-    Nécessite un fichier de projet enregistré et une clé API active.
-  # Pamięć modelu
+    Outils IA traitant le fichier de projet enregistré (par chapitre ou dans son intégralité). L'ensemble disponible dépend du mode créatif.
   lbl_pamiec_modelu: "🧠 Mémoire du Modèle (État de la Fenêtre Contextuelle) :"
   lbl_pamiec_modelu_start: "🟢 Mémoire propre. Machine prête pour une nouvelle histoire."
   pamiec_modelu_status_name: "État de la mémoire du modèle IA"
@@ -583,16 +577,9 @@ rezyser:
 
     Générez et sauvegardez d'abord le contenu du projet.
   tytuly_prep: "Préparation…"
-  tytuly_brak_przepisu_tresc: |-
-    Recette « titres » introuvable dans YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
-    Sans elle, la post-production des titres de chapitres n'est pas disponible.
   tytuly_blad_naglowek: "Une erreur s'est produite pendant la génération des titres de chapitres."
   tytuly_blad_nieznany: "Erreur inconnue lors de l'attribution des titres."
   tytuly_czesciowe_naglowek: "⚠️ Résultats partiels (génération interrompue par une erreur) :\n\n{wyniki}"
-  tytuly_dlg_tytul: "Titres de Chapitres Proposés (IA)"
-  tytuly_dlg_lbl: "Copiez les titres (Ctrl+A, Ctrl+C) ou notez-les dans la Bible du Monde :"
-  tytuly_dlg_name: "Liste des titres de chapitres proposés"
-  tytuly_gotowe: "Terminé ! Titres générés."
   blad_zapisu_do_pliku: "Erreur de sauvegarde dans le fichier :\n{tresc_bledu}"
 
 # -----------------------------------------------------------------------------
@@ -656,6 +643,16 @@ rezyser:
   err_struktura: Le modèle IA a renvoyé plusieurs fois une structure de données incorrecte et il n'a pas été possible de la corriger. Réessayez ou simplifiez l'instruction — si l'erreur persiste, joignez le fichier error_log.txt à votre signalement.
   pamiec_status_offline: "⚠️ Pas de connexion Internet : le compteur de mémoire exact n'est pas disponible, les valeurs affichées sont approximatives (~{tokeny} / {maks} jetons). Redémarrez l'application une fois la connexion rétablie."
   err_timeout: Le délai d'attente de la réponse du modèle a été dépassé. Vérifiez votre connexion Internet et réessayez.
+  postprod_postep_generowanie: 'Post-production : génération du résultat…'
+  postprod_postep_gotowe: Post-production terminée.
+  postprod_pusta_tresc: Le modèle a renvoyé une réponse vide. Veuillez réessayer.
+  postprod_ucieta_tresc: Le résultat de la post-production a atteint la limite de longueur et sa fin a peut-être été tronquée. Le résultat est disponible — vérifiez la fin, et si elle est coupée, relancez l'outil ou augmentez la valeur `max_tokens_wyjscia` dans le fichier YAML de l'outil.
+  postprod_ostrzezenie_tytul: Le résultat a peut-être été tronqué
+  postprod_nadpisac_tytul: Le fichier de résultat existe déjà
+  postprod_nadpisac_tresc: Le fichier {plik} existe déjà dans le dossier skrypty. Voulez-vous l'écraser avec le nouveau résultat ?
+  postprod_dlg_lbl: "Résultat de l'outil — copiez (Ctrl+A, Ctrl+C) ou fermez :"
+  postprod_dlg_zapisano: 'Le résultat a été enregistré dans le fichier {plik} (dossier skrypty). Aperçu ci-dessous :'
+  postprod_dlg_name: Champ du résultat de post-production
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"

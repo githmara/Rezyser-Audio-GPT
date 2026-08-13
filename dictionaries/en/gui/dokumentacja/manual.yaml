@@ -256,15 +256,22 @@ tresc:
 
     This is a deliberate complement to the audio bridge: for the v3 model, the accent is carried by the voice sample, while for the screen reader it is carried by the orthography plus the language marker. That is why the orthography in the audio version remains clean (v3 selects the language itself), while the "broken" orthography goes exclusively into the separate HTML file, where it is desirable.
   krok_4_postprodukcja: |
-    ## STEP 4: Postproduction in Directing
+    ## STEP 4: Postproduction in the Director's panel
 
-    After writing the story, you have a postproduction tool available at the bottom of the Directing panel (it appears only in Audiobook Mode).
+    After writing the story, you have access to a panel of postproduction tools at the bottom of the Director's panel. The panel is dynamic: each tool is a separate YAML file in the `rezyser/` folder (`kategoria: postprodukcja`), and its `dla_trybow` field determines in which creative modes the tool appears. The set of buttons thus changes along with the selected mode — and when no tool matches the current mode, the panel remains hidden. You can create your own tool in the Rule Manager (template type postprodukcja — see STEP 7b).
 
-    ### Assigning Chapter Titles (Audiobook Mode)
+    A tool operates in one of two scopes (the `zakres` field in the YAML):
 
-    The AI will analyze the entire story and suggest descriptive, literary titles for each chapter (as well as any Prologue and Epilogue). The module iterates through the chapters from the saved file and assigns them a short title by analyzing only the beginnings of each chapter (up to 6000 characters). It returns only a numbered list of titles — without rewriting the book's content.
+    - `per_rozdzial` — iterates over the chapters of the saved file and processes each one separately (this is how Chapter Title Generation below works),
+    - `calosc` — sends the entire project file to the AI in a single call (e.g. a report or an audit of the whole story); if the project has a World Book, the tool may attach it as additional context.
 
-    **Note:** The module requires the file to already be saved on disk (generated or loaded). If the file does not exist, the application will display an appropriate message.
+    The result always appears in a dialog window (ready to be copied), and a tool with a set result file suffix additionally saves it next to the narration in the `skrypty/` folder (e.g. `nazwa_audyt.txt`). Before overwriting an existing result file, the application asks for confirmation — before it spends even a single penny on an AI call.
+
+    ### Chapter Title Generation (Audiobook Mode)
+
+    The AI will analyze the entire story and propose descriptive, literary titles for each chapter (as well as any Prologue and Epilogue). The module iterates over the chapters from the saved file and gives them a short title, analyzing only the beginnings of each chapter (up to 6000 characters). It returns only a numbered list of titles — without rewriting the content of the book.
+
+    **Note:** Postproduction tools require the project file to already be saved on disk (generated or loaded). If the file does not exist, the application will display an appropriate message.
   krok_5_poliglota_intro: |
     ## STEP 5: AI Polyglot
 

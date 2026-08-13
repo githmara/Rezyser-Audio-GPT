@@ -427,13 +427,7 @@ rezyser:
   el_btn_otworz_studio: "Apri ElevenLabs Studio"
   el_raport_btn_zamknij: "Chiudi"
   postprod_info: |-
-    Il modulo itera sui capitoli del file salvato e assegna loro un breve titolo letterario (analisi AI).
-  btn_tytuly_ai_label: "📜 Assegna Titoli ai Capitoli (AI)"
-  btn_tytuly_ai_name: "Pulsante Assegna Titoli ai Capitoli AI"
-  btn_tytuly_ai_tooltip: |-
-    Scorre i capitoli del file salvato e assegna loro un titolo (Claude).
-    Richiede un file di progetto salvato e una chiave API attiva.
-  # Pamięć modelu
+    Strumenti IA che elaborano il file di progetto salvato (per capitolo o nella sua interezza). Il set disponibile dipende dalla modalità creativa.
   lbl_pamiec_modelu: "🧠 Memoria del Modello (Stato della Finestra Contestuale):"
   lbl_pamiec_modelu_start: "🟢 Memoria pulita. Macchina pronta per una nuova storia."
   pamiec_modelu_status_name: "Stato della memoria del modello AI"
@@ -583,16 +577,9 @@ rezyser:
 
     Genera e salva prima il contenuto del progetto.
   tytuly_prep: "Preparazione…"
-  tytuly_brak_przepisu_tresc: |-
-    Ricetta 'titoli' non trovata in YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
-    Senza di essa la post-produzione dei titoli dei capitoli non è disponibile.
   tytuly_blad_naglowek: "Si è verificato un errore durante la generazione dei titoli dei capitoli."
   tytuly_blad_nieznany: "Errore sconosciuto durante la titolazione."
   tytuly_czesciowe_naglowek: "⚠️ Risultati parziali (generazione interrotta da un errore):\n\n{wyniki}"
-  tytuly_dlg_tytul: "Titoli dei Capitoli Proposti (AI)"
-  tytuly_dlg_lbl: "Copia i titoli (Ctrl+A, Ctrl+C) o annotali nel Libro del Mondo:"
-  tytuly_dlg_name: "Elenco dei titoli dei capitoli proposti"
-  tytuly_gotowe: "Fatto! Titoli generati."
   blad_zapisu_do_pliku: "Errore di salvataggio nel file:\n{tresc_bledu}"
 
 # -----------------------------------------------------------------------------
@@ -658,6 +645,16 @@ rezyser:
   err_struktura: "Il modello AI ha restituito più volte una struttura dati non valida e non è stato possibile correggerla. Riprova o semplifica le istruzioni: se l'errore persiste, allega il file error_log.txt alla segnalazione."
   pamiec_status_offline: "⚠️ Nessuna connessione a Internet: il conteggio esatto della memoria non è disponibile, i valori sono approssimativi (~{tokeny} / {maks} token). Al ripristino della connessione, riavvia l'applicazione."
   err_timeout: Tempo di attesa scaduto per la risposta del modello. Controlla la connessione a Internet e riprova.
+  postprod_postep_generowanie: 'Post-produzione: generazione del risultato…'
+  postprod_postep_gotowe: Post-produzione completata.
+  postprod_pusta_tresc: Il modello ha restituito una risposta vuota. Riprova.
+  postprod_ucieta_tresc: 'Il risultato della post-produzione ha raggiunto il limite di lunghezza e la parte finale potrebbe essere stata troncata. Il risultato è disponibile: controlla la conclusione e, se risulta interrotta, esegui di nuovo lo strumento oppure aumenta il valore di `max_tokens_wyjscia` nel file YAML dello strumento.'
+  postprod_ostrzezenie_tytul: Il risultato potrebbe essere stato troncato
+  postprod_nadpisac_tytul: Il file del risultato esiste già
+  postprod_nadpisac_tresc: Il file {plik} esiste già nella cartella skrypty. Sovrascriverlo con il nuovo risultato?
+  postprod_dlg_lbl: 'Risultato dello strumento — copia (Ctrl+A, Ctrl+C) o chiudi:'
+  postprod_dlg_zapisano: 'Il risultato è stato salvato nel file {plik} (cartella skrypty). Anteprima di seguito:'
+  postprod_dlg_name: Campo del risultato di post-produzione
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"

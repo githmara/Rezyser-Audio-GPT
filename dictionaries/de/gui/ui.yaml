@@ -427,13 +427,7 @@ rezyser:
   el_btn_otworz_studio: "ElevenLabs Studio öffnen"
   el_raport_btn_zamknij: "Schließen"
   postprod_info: |-
-    Das Modul iteriert über die Kapitel der gespeicherten Datei und gibt ihnen einen kurzen literarischen Titel (KI-Analyse).
-  btn_tytuly_ai_label: "📜 Kapitel betiteln (KI)"
-  btn_tytuly_ai_name: "Schaltfläche Kapitel betiteln KI"
-  btn_tytuly_ai_tooltip: |-
-    Durchläuft die Kapitel der gespeicherten Datei und vergibt ihnen Titel (Claude).
-    Erfordert eine gespeicherte Projektdatei und einen aktiven API-Schlüssel.
-  # Pamięć modelu
+    KI-Tools zur Verarbeitung der gespeicherten Projektdatei (pro Kapitel oder insgesamt). Der Umfang hängt vom kreativen Modus ab.
   lbl_pamiec_modelu: "🧠 Modellspeicher (Zustand des Kontextfensters):"
   lbl_pamiec_modelu_start: "🟢 Speicher sauber. Maschine bereit für eine neue Geschichte."
   pamiec_modelu_status_name: "Status des Modellspeichers"
@@ -583,16 +577,9 @@ rezyser:
 
     Generieren und speichern Sie zuerst den Projektinhalt.
   tytuly_prep: "Vorbereitung…"
-  tytuly_brak_przepisu_tresc: |-
-    Rezept 'titel' in YAML nicht gefunden (dictionaries/pl/rezyser/postprod_tytuly.yaml).
-    Ohne dieses ist die Postproduktion von Kapitelüberschriften nicht verfügbar.
   tytuly_blad_naglowek: "Fehler beim Generieren der Kapitelüberschriften."
   tytuly_blad_nieznany: "Unbekannter Fehler beim Betiteln."
   tytuly_czesciowe_naglowek: "⚠️ Teilweise Ergebnisse (Generierung durch Fehler unterbrochen):\n\n{wyniki}"
-  tytuly_dlg_tytul: "Vorgeschlagene Kapitelüberschriften (KI)"
-  tytuly_dlg_lbl: "Titel kopieren (Ctrl+A, Ctrl+C) oder im Weltbuch notieren:"
-  tytuly_dlg_name: "Liste der vorgeschlagenen Kapitelüberschriften"
-  tytuly_gotowe: "Fertig! Titel generiert."
   blad_zapisu_do_pliku: "Fehler beim Speichern in Datei:\n{tresc_bledu}"
 
 # -----------------------------------------------------------------------------
@@ -658,6 +645,16 @@ rezyser:
   err_struktura: Das KI-Modell hat mehrfach eine ungültige Datenstruktur zurückgegeben, die nicht korrigiert werden konnte. Versuchen Sie es erneut oder vereinfachen Sie die Anweisung – wenn der Fehler weiterhin auftritt, fügen Sie der Meldung die Datei error_log.txt bei.
   pamiec_status_offline: '⚠️ Keine Internetverbindung: Der genaue Speicherzähler ist nicht verfügbar, die Werte sind Näherungswerte (~{tokeny} / {maks} Token). Starten Sie die Anwendung nach Wiederherstellung der Verbindung neu.'
   err_timeout: Die Wartezeit für die Antwort des Modells wurde überschritten. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.
+  postprod_postep_generowanie: 'Postproduktion: Ergebnis wird generiert …'
+  postprod_postep_gotowe: Postproduktion abgeschlossen.
+  postprod_pusta_tresc: Das Modell hat eine leere Antwort zurückgegeben. Bitte versuchen Sie es erneut.
+  postprod_ucieta_tresc: Das Ergebnis der Postproduktion hat das Längenlimit erreicht und könnte am Ende abgeschnitten sein. Das Ergebnis ist verfügbar — prüfen Sie das Ende, und falls es abgeschnitten ist, führen Sie das Tool erneut aus oder erhöhen Sie den Wert `max_tokens_wyjscia` in der YAML-Datei des Tools.
+  postprod_ostrzezenie_tytul: Das Ergebnis wurde möglicherweise abgeschnitten
+  postprod_nadpisac_tytul: Die Ergebnisdatei existiert bereits
+  postprod_nadpisac_tresc: Die Datei {plik} existiert bereits im Ordner „skrypty“. Soll sie mit dem neuen Ergebnis überschrieben werden?
+  postprod_dlg_lbl: 'Ergebnis des Tools — kopieren (Ctrl+A, Ctrl+C) oder schließen:'
+  postprod_dlg_zapisano: 'Das Ergebnis wurde in der Datei {plik} (Ordner „skrypty“) gespeichert. Vorschau unten:'
+  postprod_dlg_name: Feld für das Postproduktionsergebnis
 poliglota:
   panel_name: "AI-Polyglot-Panel"
   heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"

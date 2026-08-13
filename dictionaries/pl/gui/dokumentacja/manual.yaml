@@ -327,13 +327,20 @@ tresc:
   krok_4_postprodukcja: |
     ## KROK 4: Postprodukcja w Reżyserii
 
-    Po napisaniu historii masz do dyspozycji narzędzie postprodukcyjne dostępne na dole panelu Reżyserii (pojawia się tylko w Trybie Audiobooka).
+    Po napisaniu historii masz do dyspozycji panel narzędzi postprodukcyjnych na dole panelu Reżyserii. Panel jest dynamiczny: każde narzędzie to osobny plik YAML w folderze `rezyser/` (`kategoria: postprodukcja`), a jego pole `dla_trybow` decyduje, w których trybach twórczych narzędzie się pojawia. Zestaw przycisków zmienia się więc wraz z wybranym trybem — a gdy żadne narzędzie nie pasuje do bieżącego trybu, panel pozostaje ukryty. Własne narzędzie stworzysz w Managerze Reguł (szablon typu postprodukcja — patrz KROK 7b).
+
+    Narzędzie pracuje w jednym z dwóch zakresów (pole `zakres` w YAML):
+
+    - `per_rozdzial` — iteruje po rozdziałach zapisanego pliku i przetwarza każdy z osobna (tak działa Nadawanie Tytułów poniżej),
+    - `calosc` — wysyła do AI cały plik projektu w jednym wywołaniu (np. raport albo audyt całej historii); jeśli projekt ma Księgę Świata, narzędzie może dołączyć ją jako dodatkowy kontekst.
+
+    Wynik zawsze pojawia się w oknie dialogowym (do skopiowania), a narzędzie z ustawionym sufiksem pliku wyniku zapisuje go dodatkowo obok narracji w folderze `skrypty/` (np. `nazwa_audyt.txt`). Przed nadpisaniem istniejącego pliku wyniku aplikacja pyta o zgodę — zanim wyda choćby grosz na wywołanie AI.
 
     ### Nadawanie Tytułów Rozdziałom (Tryb Audiobooka)
 
     AI przeanalizuje całą historię i zaproponuje opisowe, literackie tytuły dla każdego rozdziału (oraz ewentualnego Prologu i Epilogu). Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł, analizując tylko początki każdego rozdziału (do 6000 znaków). Zwraca wyłącznie ponumerowaną listę tytułów — bez przepisywania treści książki.
 
-    **Uwaga:** Moduł wymaga, by plik był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.
+    **Uwaga:** Narzędzia postprodukcyjne wymagają, by plik projektu był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.
   krok_5_poliglota_intro: |
     ## KROK 5: Poliglota AI
 

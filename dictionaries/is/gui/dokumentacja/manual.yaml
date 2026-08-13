@@ -256,15 +256,22 @@ tresc:
 
     Þetta er meðvitað viðbót við hljóðbrúna: hreim fyrir v3-líkanið ber raddarsýnishornið, en fyrir skjálesara — stafsetning plús tungumálamark. Þess vegna er stafsetning í hljóðútgáfunni hrein (v3 velur tungumál sjálfur), og „skemmda" stafsetningin fer eingöngu í sérstaka HTML-skrá, þar sem hún er æskileg.
   krok_4_postprodukcja: |
-    ## SKREF 4: Eftirvinnsla í Reżyser Audio GPT
+    ## SKREF 4: Eftirvinnsla í Leikstjórn
 
-    Eftir að hafa skrifað söguna hefurðu aðgang að eftirvinnslutóli sem er aðgengilegt neðst á Leikstjóra spjaldinu (kemur aðeins fram í Hljóðbókarham).
+    Eftir að hafa skrifað sögu hefur þú aðgang að stjórnborði eftirvinnslutækja neðst í Leikstjórnarglugganum. Stjórnborðið er kvikt: hvert tól er sérstök YAML-skrá í `rezyser/` möppunni (`kategoria: postprodukcja`), og reitur þess `dla_trybow` ákvarðar í hvaða sköpunarham tólið birtist. Sett af hnöppum breytist því með völdum ham — og þegar ekkert tól passar við núverandi ham, er stjórnborðið falið. Þitt eigið tól getur þú búið til í Reglustjóranum (sniðmát af tegundinni postprodukcja — sjá SKREF 7b).
 
-    ### Að gefa kaflaheiti (Hljóðbókarhamur)
+    Tólið vinnur á einu af tveimur sviðum (reitur `zakres` í YAML):
 
-    Gervigreindin mun greina alla söguna og leggja til lýsandi, bókmenntaleg heiti fyrir hvern kafla (og hugsanlega Prolog og Epilog). Einingin fer í gegnum kaflana úr skrá sem hefur verið vistuð og gefur þeim stutt heiti með því að greina aðeins upphaf hvers kafla (allt að 6000 tákn). Hún skilar eingöngu tölusettum lista af heitum — án þess að afrita innihald bókarinnar.
+    - `per_rozdzial` — fer yfir kaflana í vistaðri skrá og vinnur hvern þeirra sérstaklega (svona virkar Titlagjöf hér að neðan),
+    - `calosc` — sendir alla verkefnaskrána til gervigreindar í einu köllun (t.d. skýrslu eða úttekt á allri sögunni); ef verkefnið hefur Heimsbók, getur tólið bætt henni við sem viðbótarsamhengi.
 
-    **Athugið:** Einingin krefst þess að skráin sé þegar vistuð á disk (búin til eða hlaðið inn). Ef skráin er ekki til, mun forritið birta viðeigandi skilaboð.
+    Niðurstaðan birtist alltaf í samtalsglugga (til að afrita), og tól með stilltri viðskeytisstillingu fyrir niðurstöðuskrá vistar hana að auki við hlið frásagnarins í `skrypty/` möppunni (t.d. `nazwa_audyt.txt`). Áður en núverandi niðurstöðuskrá er skrifuð yfir, spyr forritið um samþykki — áður en það eyðir jafnvel einni krónu í gervigreindarköllun.
+
+    ### Titlagjöf til Kafla (Hljóðbókarhamur)
+
+    Gervigreindin greinir alla söguna og leggur til lýsandi, bókmenntalega titla fyrir hvern kafla (og hugsanlega Formála og Eftirmála). Einingin fer yfir kaflana í vistaðri skrá og gefur hverjum þeirra stuttan titil, með því að greina aðeins upphaf hvers kafla (upp að 6000 táknum). Hún skilar aðeins tölusettum lista titla — án þess að endurskrifa efni bókarinnar.
+
+    **Athugið:** Eftirvinnslutólin krefjast þess að verkefnaskráin sé þegar vistuð á diski (mynduð eða hlaðin inn). Ef skráin er ekki til, birtir forritið viðeigandi skilaboð.
   krok_5_poliglota_intro: |
     ## SKREF 5: Tungumálamaður AI
 

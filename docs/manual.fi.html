@@ -167,11 +167,17 @@ Sovelluksen aiemmissa versioissa kukaan ei valvonut luovan tilan johdonmukaisuut
 <h3>Ruudunlukijaversio (HTML, ilman ElevenLabsia)</h3>
 <p>Skripti-tilassa, ElevenLabs-avaimesta riippumatta, käytettävissäsi on "Generuj wersję dla czytników ekranu" -painike. Se luo tiedoston <code>skrypty/&lt;nazwa&gt;_screen_reader.html</code> — erillinen ulostulo ruudunlukijoita (esim. NVDA) käyttäville henkilöille. Se toimii näin: hahmojen vuorosanoille, joille on Maailmankirjassa määritetty aksentti (esim. merkintä "[Joana] akcent fiński"), lisätään foneettinen kirjoitusasu (tarkoituksellisesti "rikottu" oikeinkirjoitus) sekä kielimerkintä (lang-attribuutti), jolloin ruudunlukija lukee ne oikealla, vieraalla aksentilla. V3-äänitägit (esim. [whispers]) poistetaan tästä versiosta — ruudunlukijan ei tule lukea niitä ääneen. Prolog/Akt/Scena-otsikot muuttuvat HTML-otsikoiksi, joten dokumentissa on helppo navigoida.</p>
 <p>Tämä on tietoinen täydennys äänisillan rinnalle: aksentti v3-mallille välittyy äänestä, ja ruudunlukijalle — oikeinkirjoituksesta sekä kielimerkinnästä. Siksi oikeinkirjoitus pysyy puhtaana ääniversiossa (v3 valitsee kielen itse), ja oikeinkirjoituksen "rikkominen" päätyy ainoastaan erilliseen HTML-tiedostoon, jossa se on toivottua.</p>
-<h2>VAIHE 4: Jälkituotanto Reżyser Audio GPT:ssä</h2>
-<p>Kun olet kirjoittanut tarinan, sinulla on käytettävissäsi jälkituotantotyökalu, joka on saatavilla Ohjaajan paneelin alareunassa (näkyy vain Äänikirjatilassa).</p>
-<h3>Lukujen Otsikointi (Äänikirjatila)</h3>
-<p>AI analysoi koko tarinan ja ehdottaa kuvailevia, kirjallisia otsikoita jokaiselle luvulle (sekä mahdolliselle Prologille ja Epilogille). Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen otsikon, analysoiden vain kunkin luvun alkuja (enintään 6000 merkkiä). Se palauttaa vain numeroidun listan otsikoista — ilman kirjan sisällön uudelleenkirjoittamista.</p>
-<p><strong>Huomio:</strong> Moduuli vaatii, että tiedosto on jo tallennettu levylle (luotu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asiaankuuluvan viestin.</p>
+<h2>VAIHE 4: Jälkituotanto Ohjaajassa</h2>
+<p>Kirjoitettuasi tarinan käytössäsi on jälkituotantotyökalujen paneeli Ohjaaja-paneelin alaosassa. Paneeli on dynaaminen: jokainen työkalu on erillinen YAML-tiedosto <code>rezyser/</code>-kansiossa (<code>kategoria: postprodukcja</code>), ja sen <code>dla_trybow</code>-kenttä määrää, missä luovissa tiloissa työkalu näkyy. Painikkeiden joukko vaihtuu siis valitun tilan mukaan — ja kun mikään työkalu ei sovi nykyiseen tilaan, paneeli pysyy piilotettuna. Oman työkalusi voit luoda Sääntöjen Hallinnassa (postprodukcja-tyyppinen malli — katso VAIHE 7b).</p>
+<p>Työkalu toimii jommassakummassa kahdesta laajuudesta (<code>zakres</code>-kenttä YAML-tiedostossa):</p>
+<ul>
+<li><code>per_rozdzial</code> — käy läpi tallennetun tiedoston luvut ja käsittelee jokaisen erikseen (näin toimii alla kuvattu Otsikoiden Antaminen),</li>
+<li><code>calosc</code> — lähettää AI:lle koko projektitiedoston yhdellä kutsulla (esim. raportti tai koko tarinan tarkastus); jos projektissa on Maailmankirja, työkalu voi liittää sen mukaan lisäkontekstina.</li>
+</ul>
+<p>Tulos näkyy aina valintaikkunassa (kopioitavaksi), ja työkalu, jolle on asetettu tulostiedoston pääte, tallentaa sen lisäksi kertomuksen viereen <code>skrypty/</code>-kansioon (esim. <code>nazwa_audyt.txt</code>). Ennen olemassa olevan tulostiedoston ylikirjoittamista sovellus kysyy lupaa — ennen kuin se kuluttaa yhtään senttiäkään AI-kutsuun.</p>
+<h3>Otsikoiden Antaminen Luvuille (Äänikirjatila)</h3>
+<p>AI analysoi koko tarinan ja ehdottaa kuvailevia, kirjallisia otsikoita jokaiselle luvulle (sekä mahdolliselle Prologille ja Epilogille). Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen otsikon analysoimalla vain kunkin luvun alkuosan (enintään 6000 merkkiä). Se palauttaa pelkän numeroidun otsikkoluettelon — ilman kirjan sisällön uudelleenkirjoittamista.</p>
+<p><strong>Huomio:</strong> Jälkituotantotyökalut vaativat, että projektitiedosto on jo tallennettu levylle (generoitu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asianmukaisen ilmoituksen.</p>
 <h2>VAIHE 5: Polyglootti AI</h2>
 <p>Sovellus käännöksiin ja kovien aksenttien pakottamiseen näytönlukijoiden synteettisissä äänissä. Siirry siihen napsauttamalla "🌍  Polyglootti" -painiketta työkalupalkissa tai valitsemalla Työkalut → Polyglootti valikosta (pikanäppäin: Ctrl+2).</p>
 <h3>Tila 1: Tavallinen Kääntäjä (Käyttää AI - Maksullinen)</h3>

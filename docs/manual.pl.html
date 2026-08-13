@@ -177,10 +177,16 @@ W wersjach wcześniejszych aplikacji nikt nie pilnował spójności trybu twórc
 <p>W trybie Skrypt, niezależnie od klucza ElevenLabs, masz przycisk „Generuj wersję dla czytników ekranu". Tworzy on plik <code>skrypty/&lt;nazwa&gt;_screen_reader.html</code> — osobne wyjście dla osób korzystających z czytników ekranu (np. NVDA). Działa tak: kwestie postaci, które w Księdze Świata mają zdefiniowany akcent (np. wpis „[Joana] akcent fiński"), dostają zapis fonetyczny (celowo „psuta" ortografia) oraz znacznik języka (atrybut lang), dzięki czemu czytnik ekranu czyta je z właściwym, obcym akcentem. Audio-tagi v3 (np. [whispers]) są w tej wersji usuwane — czytnik nie ma ich czytać na głos. Nagłówki Prolog/Akt/Scena stają się nagłówkami HTML, więc po dokumencie wygodnie się nawiguje.</p>
 <p>To świadome dopełnienie mostu audio: akcent dla modelu v3 niesie próbka głosu, a dla czytnika ekranu — ortografia plus znacznik języka. Dlatego ortografia w wersji audio pozostaje czysta (v3 sam dobiera język), a „psucie" ortografii trafia wyłącznie do osobnego pliku HTML, gdzie jest pożądane.</p>
 <h2>KROK 4: Postprodukcja w Reżyserii</h2>
-<p>Po napisaniu historii masz do dyspozycji narzędzie postprodukcyjne dostępne na dole panelu Reżyserii (pojawia się tylko w Trybie Audiobooka).</p>
+<p>Po napisaniu historii masz do dyspozycji panel narzędzi postprodukcyjnych na dole panelu Reżyserii. Panel jest dynamiczny: każde narzędzie to osobny plik YAML w folderze <code>rezyser/</code> (<code>kategoria: postprodukcja</code>), a jego pole <code>dla_trybow</code> decyduje, w których trybach twórczych narzędzie się pojawia. Zestaw przycisków zmienia się więc wraz z wybranym trybem — a gdy żadne narzędzie nie pasuje do bieżącego trybu, panel pozostaje ukryty. Własne narzędzie stworzysz w Managerze Reguł (szablon typu postprodukcja — patrz KROK 7b).</p>
+<p>Narzędzie pracuje w jednym z dwóch zakresów (pole <code>zakres</code> w YAML):</p>
+<ul>
+<li><code>per_rozdzial</code> — iteruje po rozdziałach zapisanego pliku i przetwarza każdy z osobna (tak działa Nadawanie Tytułów poniżej),</li>
+<li><code>calosc</code> — wysyła do AI cały plik projektu w jednym wywołaniu (np. raport albo audyt całej historii); jeśli projekt ma Księgę Świata, narzędzie może dołączyć ją jako dodatkowy kontekst.</li>
+</ul>
+<p>Wynik zawsze pojawia się w oknie dialogowym (do skopiowania), a narzędzie z ustawionym sufiksem pliku wyniku zapisuje go dodatkowo obok narracji w folderze <code>skrypty/</code> (np. <code>nazwa_audyt.txt</code>). Przed nadpisaniem istniejącego pliku wyniku aplikacja pyta o zgodę — zanim wyda choćby grosz na wywołanie AI.</p>
 <h3>Nadawanie Tytułów Rozdziałom (Tryb Audiobooka)</h3>
 <p>AI przeanalizuje całą historię i zaproponuje opisowe, literackie tytuły dla każdego rozdziału (oraz ewentualnego Prologu i Epilogu). Moduł iteruje po rozdziałach z zapisanego pliku i nadaje im krótki tytuł, analizując tylko początki każdego rozdziału (do 6000 znaków). Zwraca wyłącznie ponumerowaną listę tytułów — bez przepisywania treści książki.</p>
-<p><strong>Uwaga:</strong> Moduł wymaga, by plik był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.</p>
+<p><strong>Uwaga:</strong> Narzędzia postprodukcyjne wymagają, by plik projektu był już zapisany na dysku (wygenerowany lub wczytany). Jeśli plik nie istnieje, aplikacja wyświetli stosowny komunikat.</p>
 <h2>KROK 5: Poliglota AI</h2>
 <p>Aplikacja do tłumaczeń i wymuszania twardych akcentów na syntezatorach czytników ekranu. Przejdź do niej, klikając przycisk "🌍  Poliglota" na pasku przycisków lub wybierając Narzędzia → Poliglota z menu (skrót: Ctrl+2).</p>
 <h3>Tryb 1: Zwykły Tłumacz (Używa AI - Płatny)</h3>

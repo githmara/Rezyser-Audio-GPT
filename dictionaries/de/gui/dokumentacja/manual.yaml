@@ -258,13 +258,20 @@ tresc:
   krok_4_postprodukcja: |
     ## SCHRITT 4: Postproduktion in der Regie
 
-    Nach dem Schreiben der Geschichte steht Ihnen ein Postproduktionswerkzeug zur Verfügung, das unten im Regie-Panel verfügbar ist (erscheint nur im Hörbuchmodus).
+    Nachdem du die Geschichte geschrieben hast, steht dir am unteren Rand des Regie-Panels eine Werkzeugleiste für die Postproduktion zur Verfügung. Das Panel ist dynamisch: Jedes Werkzeug ist eine separate YAML-Datei im Ordner `rezyser/` (`kategoria: postprodukcja`), und ihr Feld `dla_trybow` entscheidet, in welchen kreativen Modi das Werkzeug erscheint. Die Zusammenstellung der Schaltflächen ändert sich also je nach gewähltem Modus — und wenn kein Werkzeug zum aktuellen Modus passt, bleibt das Panel verborgen. Ein eigenes Werkzeug erstellst du im Regelmanager (Vorlagentyp Postproduktion — siehe SCHRITT 7b).
 
-    ### Kapitelüberschriften vergeben (Hörbuchmodus)
+    Ein Werkzeug arbeitet in einem von zwei Bereichen (Feld `zakres` in der YAML-Datei):
 
-    Die KI analysiert die gesamte Geschichte und schlägt beschreibende, literarische Titel für jedes Kapitel (sowie gegebenenfalls Prolog und Epilog) vor. Das Modul iteriert über die Kapitel der gespeicherten Datei und vergibt kurze Titel, indem es nur die Anfänge jedes Kapitels analysiert (bis zu 6000 Zeichen). Es gibt ausschließlich eine nummerierte Liste von Titeln zurück — ohne den Inhalt des Buches neu zu schreiben.
+    - `per_rozdzial` — iteriert über die Kapitel der gespeicherten Datei und verarbeitet jedes einzeln (so funktioniert die Titelvergabe weiter unten),
+    - `calosc` — sendet die gesamte Projektdatei in einem Aufruf an die KI (z. B. für einen Bericht oder ein Audit der gesamten Geschichte); wenn das Projekt ein Weltenbuch besitzt, kann das Werkzeug es als zusätzlichen Kontext hinzufügen.
 
-    **Hinweis:** Das Modul erfordert, dass die Datei bereits auf der Festplatte gespeichert ist (generiert oder geladen). Wenn die Datei nicht existiert, zeigt die Anwendung eine entsprechende Meldung an.
+    Das Ergebnis erscheint immer in einem Dialogfenster (zum Kopieren), und ein Werkzeug mit festgelegtem Dateisuffix für das Ergebnis speichert es zusätzlich neben der Erzählung im Ordner `skrypty/` (z. B. `nazwa_audyt.txt`). Bevor eine bestehende Ergebnisdatei überschrieben wird, fragt die Anwendung um Zustimmung — noch bevor auch nur ein Cent für einen KI-Aufruf ausgegeben wird.
+
+    ### Kapiteltitel vergeben (Hörbuch-Modus)
+
+    Die KI analysiert die gesamte Geschichte und schlägt beschreibende, literarische Titel für jedes Kapitel (sowie einen eventuellen Prolog und Epilog) vor. Das Modul iteriert über die Kapitel der gespeicherten Datei und vergibt ihnen einen kurzen Titel, wobei nur die Anfänge jedes Kapitels analysiert werden (bis zu 6000 Zeichen). Es liefert ausschließlich eine nummerierte Liste von Titeln zurück — ohne den Buchinhalt umzuschreiben.
+
+    **Hinweis:** Die Werkzeuge der Postproduktion setzen voraus, dass die Projektdatei bereits auf der Festplatte gespeichert ist (generiert oder geladen). Falls die Datei nicht existiert, zeigt die Anwendung eine entsprechende Meldung an.
   krok_5_poliglota_intro: |
     ## SCHRITT 5: Polyglott AI
 

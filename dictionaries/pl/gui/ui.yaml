@@ -514,11 +514,6 @@ rezyser:
   pamiec_status_offline:      "⚠️ Brak Internetu: dokładny licznik pamięci jest niedostępny, wartości są przybliżone (~{tokeny} / {maks} tokenów). Po odzyskaniu połączenia uruchom aplikację ponownie."
   postprod_info: |-
     Narzędzia AI przetwarzające zapisany plik projektu (per rozdział albo w całości). Zestaw zależy od trybu twórczego.
-  btn_tytuly_ai_label:   "📜 Nadaj Tytuły Rozdziałom (AI)"
-  btn_tytuly_ai_name:    "Przycisk Nadaj Tytuły Rozdziałom AI"
-  btn_tytuly_ai_tooltip: |-
-    Iteruje po rozdziałach z zapisanego pliku i nadaje im tytuły (Claude).
-    Wymaga zapisanego pliku projektu i aktywnego klucza API.
   # Pamięć modelu
   lbl_pamiec_modelu:     "🧠 Pamięć Modelu (Stan Okna Kontekstowego):"
   lbl_pamiec_modelu_start: "🟢 Pamięć czysta. Maszyna gotowa na nową historię."
@@ -680,9 +675,6 @@ rezyser:
 
     Wygeneruj i zapisz najpierw treść projektu.
   tytuly_prep:           "Przygotowywanie…"
-  tytuly_brak_przepisu_tresc: |-
-    Nie znaleziono przepisu 'tytuly' w YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
-    Bez niego postprodukcja tytułów rozdziałów jest niedostępna.
   tytuly_blad_naglowek:  "Wystąpił błąd podczas generowania tytułów rozdziałów."
   tytuly_blad_nieznany:  "Nieznany błąd podczas tytułowania."
   tytuly_postep:         "Tytułowanie: {naglowek} ({step}/{total})…"
@@ -698,10 +690,6 @@ rezyser:
   postprod_dlg_lbl:      "Wynik narzędzia — skopiuj (Ctrl+A, Ctrl+C) lub zamknij:"
   postprod_dlg_zapisano: "Wynik zapisano do pliku {plik} (folder skrypty). Podgląd poniżej:"
   postprod_dlg_name:     "Pole wyniku postprodukcji"
-  tytuly_dlg_tytul:      "Proponowane Tytuły Rozdziałów (AI)"
-  tytuly_dlg_lbl:        "Skopiuj tytuły (Ctrl+A, Ctrl+C) lub zanotuj je w Księdze Świata:"
-  tytuly_dlg_name:       "Lista proponowanych tytułów rozdziałów"
-  tytuly_gotowe:         "Gotowe! Tytuły wygenerowane."
   blad_zapisu_do_pliku:  "Błąd zapisu do pliku:\n{tresc_bledu}"
 
 # -----------------------------------------------------------------------------

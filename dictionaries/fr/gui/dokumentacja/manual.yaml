@@ -256,15 +256,22 @@ tresc:
 
     C'est un complément délibéré à la passerelle audio : l'accent pour le modèle v3 est porté par l'échantillon de voix, et pour le lecteur d'écran — par l'orthographe et le marqueur de langue. C'est pourquoi l'orthographe dans la version audio reste propre (v3 choisit lui-même la langue), tandis que l'« altération » de l'orthographe se retrouve exclusivement dans le fichier HTML séparé, où elle est souhaitée.
   krok_4_postprodukcja: |
-    ## ÉTAPE 4 : Postproduction dans Reżyser Audio GPT
+    ## ÉTAPE 4 : Postproduction dans la Réalisation
 
-    Après avoir écrit votre histoire, vous avez à votre disposition un outil de postproduction disponible en bas du panneau de Réalisateur (apparaît uniquement en Mode Audiobook).
+    Après avoir écrit l'histoire, vous disposez d'un panneau d'outils de postproduction en bas du panneau de Réalisation. Le panneau est dynamique : chaque outil est un fichier YAML distinct dans le dossier `rezyser/` (`kategoria: postprodukcja`), et son champ `dla_trybow` détermine dans quels modes créatifs l'outil apparaît. L'ensemble des boutons change donc selon le mode sélectionné — et lorsqu'aucun outil ne correspond au mode actuel, le panneau reste masqué. Vous pouvez créer votre propre outil dans le Gestionnaire de Règles (modèle de type postproduction — voir ÉTAPE 7b).
 
-    ### Attribution de Titres aux Chapitres (Mode Audiobook)
+    L'outil fonctionne selon l'une des deux portées (champ `zakres` dans le YAML) :
 
-    L'IA analysera toute l'histoire et proposera des titres descriptifs et littéraires pour chaque chapitre (ainsi que pour un éventuel Prologue et Épilogue). Le module itère à travers les chapitres du fichier enregistré et leur attribue un titre court, en analysant uniquement le début de chaque chapitre (jusqu'à 6000 caractères). Il retourne uniquement une liste numérotée de titres — sans retranscrire le contenu du livre.
+    - `per_rozdzial` — itère sur les chapitres du fichier enregistré et traite chacun séparément (c'est ainsi que fonctionne l'Attribution des Titres ci-dessous),
+    - `calosc` — envoie à l'IA le fichier de projet entier en un seul appel (par exemple un rapport ou un audit de toute l'histoire) ; si le projet possède un Livre du Monde, l'outil peut l'inclure comme contexte supplémentaire.
 
-    **Remarque:** Le module nécessite que le fichier soit déjà enregistré sur le disque (généré ou chargé). Si le fichier n'existe pas, l'application affichera un message approprié.
+    Le résultat apparaît toujours dans une fenêtre de dialogue (à copier), et l'outil dont le suffixe de fichier de résultat est défini l'enregistre en plus à côté de la narration dans le dossier `skrypty/` (par ex. `nazwa_audyt.txt`). Avant d'écraser un fichier de résultat existant, l'application demande confirmation — avant même de dépenser le moindre centime en appel à l'IA.
+
+    ### Attribution des Titres aux Chapitres (Mode Livre Audio)
+
+    L'IA analysera l'histoire entière et proposera des titres descriptifs et littéraires pour chaque chapitre (ainsi que pour l'éventuel Prologue et Épilogue). Le module itère sur les chapitres du fichier enregistré et leur attribue un titre court, en analysant uniquement le début de chaque chapitre (jusqu'à 6000 caractères). Il ne renvoie qu'une liste numérotée de titres — sans réécrire le contenu du livre.
+
+    **Attention :** Les outils de postproduction exigent que le fichier de projet soit déjà enregistré sur le disque (généré ou chargé). Si le fichier n'existe pas, l'application affichera un message approprié.
   krok_5_poliglota_intro: |
     ## ÉTAPE 5 : Polyglotte AI
 

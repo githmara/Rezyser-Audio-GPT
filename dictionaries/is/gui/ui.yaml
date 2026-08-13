@@ -427,13 +427,7 @@ rezyser:
   el_btn_otworz_studio: "Opna ElevenLabs Studio"
   el_raport_btn_zamknij: "Loka"
   postprod_info: |-
-    Einingin fer yfir kafla úr vistaðri skrá og gefur þeim stutt bókmenntatitil (AI greining).
-  btn_tytuly_ai_label: "📜 Gefa Kaflatitla (AI)"
-  btn_tytuly_ai_name: "Hnappur Gefa Kaflatitla AI"
-  btn_tytuly_ai_tooltip: |-
-    Fer í gegnum kafla úr vistaðri skrá og gefur þeim heiti (Claude).
-    Krefst vistaðrar verkefnisskrár og virks API-lykils.
-  # Pamięć modelu
+    AI-verkfæri sem vinna úr vistaðri verkefnaskrá (eftir kafla eða í heild). Hvaða verkfæri eru í boði er háð sköpunarhamnum.
   lbl_pamiec_modelu: "🧠 Minni Líkans (Staða Samhengisglugga):"
   lbl_pamiec_modelu_start: "🟢 Minni hreint. Vél tilbúin fyrir nýja sögu."
   pamiec_modelu_status_name: "Staða minnis AI líkans"
@@ -583,16 +577,9 @@ rezyser:
 
     Búðu til og vistaðu fyrst efni verkefnis.
   tytuly_prep: "Undirbúningur…"
-  tytuly_brak_przepisu_tresc: |-
-    Uppskrift 'titlar' fannst ekki í YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
-    Án hennar er eftirvinnsla kaflatitla ekki í boði.
   tytuly_blad_naglowek: "Villa kom upp við gerð kaflatitla."
   tytuly_blad_nieznany: "Óþekkt villa við titlun."
   tytuly_czesciowe_naglowek: "⚠️ Hluta niðurstöður (gerð stöðvuð vegna villu):\n\n{wyniki}"
-  tytuly_dlg_tytul: "Fyrirhugaðir Kaflatitlar (AI)"
-  tytuly_dlg_lbl: "Afritaðu titla (Ctrl+A, Ctrl+C) eða skráðu þá í Heimsbók:"
-  tytuly_dlg_name: "Listi yfir fyrirhugaða kaflatitla"
-  tytuly_gotowe: "Tilbúið! Titlar búnir til."
   blad_zapisu_do_pliku: "Villa við vistun í skrá:\n{tresc_bledu}"
 
 # -----------------------------------------------------------------------------
@@ -658,6 +645,16 @@ rezyser:
   err_struktura: Gervigreindarlíkanið skilaði nokkrum sinnum ógildri gagnauppbyggingu og ekki tókst að leiðrétta hana. Reyndu aftur eða einfaldaðu leiðbeiningarnar — ef villan kemur ítrekað upp skaltu bæta skránni error_log.txt við tilkynninguna.
   pamiec_status_offline: '⚠️ Engin nettenging: nákvæmur minnisteljari er ekki tiltækur, gildin eru áætluð (~{tokeny} / {maks} tákneiningar). Endurræstu forritið þegar tenging kemst á að nýju.'
   err_timeout: Tími rann út meðan beðið var eftir svari líkansins. Athugaðu nettenginguna og reyndu aftur.
+  postprod_postep_generowanie: 'Eftirvinnsla: úrvinnsla niðurstöðu…'
+  postprod_postep_gotowe: Eftirvinnslu lokið.
+  postprod_pusta_tresc: Líkanið sendi ekkert svar. Reyndu aftur.
+  postprod_ucieta_tresc: Niðurstaða eftirvinnslu náði lengdarmörkum og því getur endirinn hafa verið skertur. Niðurstaðan er tiltæk — athugaðu endann og ef hann er ófullkominn, keyrðu verkfærið aftur eða hækkaðu gildið `max_tokens_wyjscia` í YAML-skrá verkfærisins.
+  postprod_ostrzezenie_tytul: Niðurstaðan getur hafa verið skert
+  postprod_nadpisac_tytul: Niðurstöðuskrá er þegar til
+  postprod_nadpisac_tresc: Skráin {plik} er þegar til í möppunni skrypty. Viltu skrifa yfir hana með nýju niðurstöðunni?
+  postprod_dlg_lbl: 'Niðurstaða verkfæris — afritaðu (Ctrl+A, Ctrl+C) eða lokaðu:'
+  postprod_dlg_zapisano: 'Niðurstaðan var vistuð í skrána {plik} (mappa skrypty). Forskoðun hér að neðan:'
+  postprod_dlg_name: Reitur fyrir niðurstöðu eftirvinnslu
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"

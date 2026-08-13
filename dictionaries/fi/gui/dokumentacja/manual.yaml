@@ -256,15 +256,22 @@ tresc:
 
     Tämä on tietoinen täydennys äänisillan rinnalle: aksentti v3-mallille välittyy äänestä, ja ruudunlukijalle — oikeinkirjoituksesta sekä kielimerkinnästä. Siksi oikeinkirjoitus pysyy puhtaana ääniversiossa (v3 valitsee kielen itse), ja oikeinkirjoituksen "rikkominen" päätyy ainoastaan erilliseen HTML-tiedostoon, jossa se on toivottua.
   krok_4_postprodukcja: |
-    ## VAIHE 4: Jälkituotanto Reżyser Audio GPT:ssä
+    ## VAIHE 4: Jälkituotanto Ohjaajassa
 
-    Kun olet kirjoittanut tarinan, sinulla on käytettävissäsi jälkituotantotyökalu, joka on saatavilla Ohjaajan paneelin alareunassa (näkyy vain Äänikirjatilassa).
+    Kirjoitettuasi tarinan käytössäsi on jälkituotantotyökalujen paneeli Ohjaaja-paneelin alaosassa. Paneeli on dynaaminen: jokainen työkalu on erillinen YAML-tiedosto `rezyser/`-kansiossa (`kategoria: postprodukcja`), ja sen `dla_trybow`-kenttä määrää, missä luovissa tiloissa työkalu näkyy. Painikkeiden joukko vaihtuu siis valitun tilan mukaan — ja kun mikään työkalu ei sovi nykyiseen tilaan, paneeli pysyy piilotettuna. Oman työkalusi voit luoda Sääntöjen Hallinnassa (postprodukcja-tyyppinen malli — katso VAIHE 7b).
 
-    ### Lukujen Otsikointi (Äänikirjatila)
+    Työkalu toimii jommassakummassa kahdesta laajuudesta (`zakres`-kenttä YAML-tiedostossa):
 
-    AI analysoi koko tarinan ja ehdottaa kuvailevia, kirjallisia otsikoita jokaiselle luvulle (sekä mahdolliselle Prologille ja Epilogille). Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen otsikon, analysoiden vain kunkin luvun alkuja (enintään 6000 merkkiä). Se palauttaa vain numeroidun listan otsikoista — ilman kirjan sisällön uudelleenkirjoittamista.
+    - `per_rozdzial` — käy läpi tallennetun tiedoston luvut ja käsittelee jokaisen erikseen (näin toimii alla kuvattu Otsikoiden Antaminen),
+    - `calosc` — lähettää AI:lle koko projektitiedoston yhdellä kutsulla (esim. raportti tai koko tarinan tarkastus); jos projektissa on Maailmankirja, työkalu voi liittää sen mukaan lisäkontekstina.
 
-    **Huomio:** Moduuli vaatii, että tiedosto on jo tallennettu levylle (luotu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asiaankuuluvan viestin.
+    Tulos näkyy aina valintaikkunassa (kopioitavaksi), ja työkalu, jolle on asetettu tulostiedoston pääte, tallentaa sen lisäksi kertomuksen viereen `skrypty/`-kansioon (esim. `nazwa_audyt.txt`). Ennen olemassa olevan tulostiedoston ylikirjoittamista sovellus kysyy lupaa — ennen kuin se kuluttaa yhtään senttiäkään AI-kutsuun.
+
+    ### Otsikoiden Antaminen Luvuille (Äänikirjatila)
+
+    AI analysoi koko tarinan ja ehdottaa kuvailevia, kirjallisia otsikoita jokaiselle luvulle (sekä mahdolliselle Prologille ja Epilogille). Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen otsikon analysoimalla vain kunkin luvun alkuosan (enintään 6000 merkkiä). Se palauttaa pelkän numeroidun otsikkoluettelon — ilman kirjan sisällön uudelleenkirjoittamista.
+
+    **Huomio:** Jälkituotantotyökalut vaativat, että projektitiedosto on jo tallennettu levylle (generoitu tai ladattu). Jos tiedostoa ei ole olemassa, sovellus näyttää asianmukaisen ilmoituksen.
   krok_5_poliglota_intro: |
     ## VAIHE 5: Polyglootti AI
 

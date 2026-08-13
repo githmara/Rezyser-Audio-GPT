@@ -259,15 +259,22 @@ tresc:
 
     È un complemento consapevole del ponte audio: l'accento per il modello v3 è portato dal campione vocale, mentre per il lettore di schermo — dall'ortografia più l'indicatore di lingua. Per questo l'ortografia nella versione audio rimane pulita (v3 sceglie da solo la lingua), mentre l'"alterazione" dell'ortografia va esclusivamente nel file HTML separato, dove è desiderata.
   krok_4_postprodukcja: |
-    ## PASSO 4: Postproduzione in Reżyser Audio GPT
+    ## PASSO 4: Post-produzione nella Regia
 
-    Dopo aver scritto la storia, hai a disposizione uno strumento di postproduzione disponibile nella parte inferiore del pannello di Regista (compare solo in Modalità Audiobook).
+    Dopo aver scritto la storia, hai a disposizione un pannello di strumenti di post-produzione in fondo al pannello Regia. Il pannello è dinamico: ogni strumento è un file YAML separato nella cartella `rezyser/` (`kategoria: postprodukcja`), e il suo campo `dla_trybow` determina in quali modalità creative lo strumento apparirà. L'insieme dei pulsanti cambia quindi in base alla modalità selezionata — e quando nessuno strumento corrisponde alla modalità attuale, il pannello resta nascosto. Puoi creare uno strumento personalizzato nel Gestore Regole (modello di tipo postprodukcja — vedi PASSO 7b).
 
-    ### Assegnazione dei Titoli ai Capitoli (Modalità Audiobook)
+    Lo strumento opera in uno dei due ambiti (campo `zakres` nel file YAML):
 
-    L'IA analizzerà l'intera storia e proporrà titoli descrittivi e letterari per ogni capitolo (oltre a un eventuale Prologo ed Epilogo). Il modulo itera sui capitoli del file salvato e assegna loro un breve titolo, analizzando solo l'inizio di ogni capitolo (fino a 6000 caratteri). Restituisce esclusivamente un elenco numerato di titoli — senza riscrivere il contenuto del libro.
+    - `per_rozdzial` — itera sui capitoli del file salvato ed elabora ciascuno separatamente (è così che funziona l'Assegnazione dei Titoli descritta di seguito),
+    - `calosc` — invia all'IA l'intero file del progetto in un'unica chiamata (ad esempio per un report o un audit di tutta la storia); se il progetto dispone di un Libro del Mondo, lo strumento può includerlo come contesto aggiuntivo.
 
-    **Nota:** Il modulo richiede che il file sia già salvato sul disco (generato o caricato). Se il file non esiste, l'applicazione visualizzerà un messaggio appropriato.
+    Il risultato appare sempre in una finestra di dialogo (da cui puoi copiarlo), e lo strumento con un suffisso del file di risultato impostato lo salva inoltre insieme alla narrazione nella cartella `skrypty/` (ad esempio `nazwa_audyt.txt`). Prima di sovrascrivere un file di risultato esistente, l'applicazione chiede conferma — ancora prima di spendere un solo centesimo per la chiamata all'IA.
+
+    ### Assegnazione dei Titoli ai Capitoli (Modalità Audiolibro)
+
+    L'IA analizzerà l'intera storia e proporrà titoli descrittivi e letterari per ogni capitolo (nonché per l'eventuale Prologo ed Epilogo). Il modulo itera sui capitoli del file salvato e assegna loro un titolo breve, analizzando solo gli inizi di ciascun capitolo (fino a 6000 caratteri). Restituisce esclusivamente un elenco numerato di titoli — senza riscrivere il contenuto del libro.
+
+    **Attenzione:** gli strumenti di post-produzione richiedono che il file del progetto sia già salvato su disco (generato o caricato). Se il file non esiste, l'applicazione mostrerà un messaggio appropriato.
   krok_5_poliglota_intro: |
     ## PASSO 5: Poliglotta AI
 

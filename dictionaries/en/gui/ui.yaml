@@ -427,13 +427,7 @@ rezyser:
   el_btn_otworz_studio: "Open ElevenLabs Studio"
   el_raport_btn_zamknij: "Close"
   postprod_info: |-
-    AI tools that process the saved project file (chapter by chapter or as a whole). The set depends on the creative mode.
-  btn_tytuly_ai_label: "📜 Assign Chapter Titles (AI)"
-  btn_tytuly_ai_name: "Assign Chapter Titles AI Button"
-  btn_tytuly_ai_tooltip: |-
-    Iterates through chapters in the saved file and assigns them titles (Claude).
-    Requires a saved project file and an active API key.
-  # Pamięć modelu
+    AI tools that process the saved project file (per chapter or as a whole). The available set depends on the creative mode.
   lbl_pamiec_modelu: "🧠 Model Memory (Context Window State):"
   lbl_pamiec_modelu_start: "🟢 Memory clear. Machine ready for a new story."
   pamiec_modelu_status_name: "AI model memory status"
@@ -583,26 +577,19 @@ rezyser:
 
     Generate and save the project content first.
   tytuly_prep: "Preparing…"
-  tytuly_brak_przepisu_tresc: |-
-    Recipe 'titles' not found in YAML (dictionaries/pl/rezyser/postprod_tytuly.yaml).
-    Without it, chapter title postproduction is unavailable.
   tytuly_blad_naglowek: "An error occurred while generating chapter titles."
   tytuly_blad_nieznany: "Unknown error during titling."
   tytuly_czesciowe_naglowek: "⚠️ Partial results (generation interrupted by error):\n\n{wyniki}"
-  postprod_postep_generowanie: "Post-production: generating the result…"
-  postprod_postep_gotowe: "Post-production finished."
+  postprod_postep_generowanie: "Postproduction: generating output…"
+  postprod_postep_gotowe: "Postproduction completed."
   postprod_pusta_tresc: "The model returned an empty response. Please try again."
-  postprod_ucieta_tresc: "The post-production result reached the length limit and its ending may be cut off. The result is available — check how it ends, and if it is truncated, run the tool again or raise `max_tokens_wyjscia` in the tool's YAML file."
-  postprod_ostrzezenie_tytul: "The result may have been cut off"
-  postprod_nadpisac_tytul: "Result file already exists"
-  postprod_nadpisac_tresc: "The file {plik} already exists in the skrypty folder. Overwrite it with the new result?"
-  postprod_dlg_lbl:      "Tool result — copy it (Ctrl+A, Ctrl+C) or close:"
-  postprod_dlg_zapisano: "The result was saved to {plik} (skrypty folder). Preview below:"
-  postprod_dlg_name:     "Post-production result field"
-  tytuly_dlg_tytul: "Proposed Chapter Titles (AI)"
-  tytuly_dlg_lbl: "Copy titles (Ctrl+A, Ctrl+C) or note them in the World Book:"
-  tytuly_dlg_name: "List of proposed chapter titles"
-  tytuly_gotowe: "Done! Titles generated."
+  postprod_ucieta_tresc: "The postproduction output reached the length limit and its end may have been cut off. The result is available — check the ending, and if it's truncated, run the tool again or increase the `max_tokens_wyjscia` value in the tool's YAML file."
+  postprod_ostrzezenie_tytul: "The output may have been truncated"
+  postprod_nadpisac_tytul: "Output file already exists"
+  postprod_nadpisac_tresc: "The file {plik} already exists in the skrypty folder. Overwrite it with the new output?"
+  postprod_dlg_lbl: "Tool output — copy (Ctrl+A, Ctrl+C) or close:"
+  postprod_dlg_zapisano: "The output was saved to the file {plik} (skrypty folder). Preview below:"
+  postprod_dlg_name: "Postproduction output field"
   blad_zapisu_do_pliku: "File save error:\n{tresc_bledu}"
 
 # -----------------------------------------------------------------------------

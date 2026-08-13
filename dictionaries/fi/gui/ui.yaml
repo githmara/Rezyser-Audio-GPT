@@ -427,13 +427,7 @@ rezyser:
   el_btn_otworz_studio: "Avaa ElevenLabs Studio"
   el_raport_btn_zamknij: "Sulje"
   postprod_info: |-
-    Moduuli käy läpi tallennetun tiedoston luvut ja antaa niille lyhyen kirjallisen otsikon (AI-analyysi).
-  btn_tytuly_ai_label: "📜 Anna Luvuille Otsikot (AI)"
-  btn_tytuly_ai_name: "Anna Luvuille Otsikot AI -painike"
-  btn_tytuly_ai_tooltip: |-
-    Käy läpi tallennetun tiedoston luvut ja antaa niille otsikot (Claude).
-    Vaatii tallennetun projektitiedoston ja aktiivisen API-avaimen.
-  # Pamięć modelu
+    Tekoälytyökalut, jotka käsittelevät tallennettua projektitiedostoa (luvuittain tai kokonaisuudessaan). Työkalujoukko riippuu luovasta tilasta.
   lbl_pamiec_modelu: "🧠 Mallin Muisti (Konteksti-ikkunan Tila):"
   lbl_pamiec_modelu_start: "🟢 Muisti on puhdas. Kone on valmis uuteen tarinaan."
   pamiec_modelu_status_name: "AI-mallin muistin tila"
@@ -583,16 +577,9 @@ rezyser:
 
     Luo ja tallenna ensin projektin sisältö.
   tytuly_prep: "Valmistellaan…"
-  tytuly_brak_przepisu_tresc: |-
-    Reseptiä 'tytuly' ei löytynyt YAML:stä (dictionaries/pl/rezyser/postprod_tytuly.yaml).
-    Ilman sitä lukujen otsikointi ei ole käytettävissä.
   tytuly_blad_naglowek: "Virhe lukujen otsikoiden generoinnissa."
   tytuly_blad_nieznany: "Tuntematon virhe otsikoinnissa."
   tytuly_czesciowe_naglowek: "⚠️ Osittaiset tulokset (generointi keskeytettiin virheellä):\n\n{wyniki}"
-  tytuly_dlg_tytul: "Ehdotetut Lukuotsikot (AI)"
-  tytuly_dlg_lbl: "Kopioi otsikot (Ctrl+A, Ctrl+C) tai merkitse ne Maailmankirjaan:"
-  tytuly_dlg_name: "Ehdotettujen lukuotsikoiden lista"
-  tytuly_gotowe: "Valmis! Otsikot luotu."
   blad_zapisu_do_pliku: "Tiedostoon tallennusvirhe:\n{tresc_bledu}"
 
 # -----------------------------------------------------------------------------
@@ -656,6 +643,16 @@ rezyser:
   err_struktura: Tekoälymalli palautti useita kertoja virheellisen tietorakenteen, jota ei saatu korjattua. Yritä uudelleen tai yksinkertaista ohjetta — jos virhe toistuu, liitä error_log.txt-tiedosto ilmoitukseen.
   pamiec_status_offline: '⚠️ Ei internetyhteyttä: tarkka muistilaskuri ei ole käytettävissä, arvot ovat likimääräisiä (~{tokeny} / {maks} tokenia). Käynnistä sovellus uudelleen, kun yhteys on palautunut.'
   err_timeout: Mallin vastausta odotettaessa aikakatkaisu ylittyi. Tarkista internetyhteys ja yritä uudelleen.
+  postprod_postep_generowanie: 'Jälkituotanto: tuotetaan tulosta…'
+  postprod_postep_gotowe: Jälkituotanto valmis.
+  postprod_pusta_tresc: Malli palautti tyhjän vastauksen. Yritä uudelleen.
+  postprod_ucieta_tresc: Jälkituotannon tulos saavutti pituusrajan, ja sen loppuosa on saattanut leikkautua. Tulos on käytettävissä — tarkista lopetus, ja jos se on kesken, suorita työkalu uudelleen tai kasvata työkalun YAML-tiedoston arvoa `max_tokens_wyjscia`.
+  postprod_ostrzezenie_tytul: Tulos on saattanut leikkautua
+  postprod_nadpisac_tytul: Tulostiedosto on jo olemassa
+  postprod_nadpisac_tresc: Tiedosto {plik} on jo olemassa skrypty-kansiossa. Korvataanko se uudella tuloksella?
+  postprod_dlg_lbl: 'Työkalun tulos — kopioi (Ctrl+A, Ctrl+C) tai sulje:'
+  postprod_dlg_zapisano: 'Tulos tallennettiin tiedostoon {plik} (kansio skrypty). Esikatselu alla:'
+  postprod_dlg_name: Jälkituotannon tuloskenttä
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
