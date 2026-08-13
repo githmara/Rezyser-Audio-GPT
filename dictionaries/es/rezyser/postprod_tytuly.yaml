@@ -9,6 +9,14 @@ etykieta: "Asignar títulos a los capítulos (IA)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Visibilidad y alcance del procesamiento (v18.12) ---
+# Modos creativos que ofrecen esta herramienta (lista de id de modos).
+dla_trybow: [audiobook]
+# per_rozdzial = iteración capítulo a capítulo; calosc = una sola llamada con el archivo completo.
+zakres: per_rozdzial
+# Límite de tokens de salida por llamada a la IA (un título es una sola línea).
+max_tokens_wyjscia: 256
+
 # --- Parámetros Anthropic ---
 model: claude-sonnet-5
 temperatura: 0.7

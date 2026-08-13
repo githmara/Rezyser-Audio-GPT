@@ -9,6 +9,14 @@ etykieta: "Assegna Titoli ai Capitoli (IA)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Visibilità e ambito di elaborazione (v18.12) ---
+# Modalità creative che offrono questo strumento (elenco di id delle modalità).
+dla_trybow: [audiobook]
+# per_rozdzial = iterazione capitolo per capitolo; calosc = una sola chiamata con l'intero file.
+zakres: per_rozdzial
+# Limite di token di output per ogni chiamata all'IA (un titolo è una sola riga).
+max_tokens_wyjscia: 256
+
 # --- Parametri Anthropic ---
 model: claude-sonnet-5
 temperatura: 0.7

@@ -1072,6 +1072,24 @@ etykieta: "{etykieta}"
 kategoria: postprodukcja
 kolejnosc: 20
 
+# --- Visibility & processing (v18.12) ---
+# Creative modes offering this tool (list of mode ids from tryb_*.yaml).
+# Empty/omitted = every mode that writes to the project file.
+dla_trybow: [audiobook]
+
+# Processing scope:
+#   per_rozdzial – the engine iterates chapter by chapter (this template),
+#   calosc       – ONE call with the whole project file (report-style
+#                  tools; see the commented variant at the bottom).
+zakres: per_rozdzial
+
+# Max output tokens per AI call (defaults: 256 per_rozdzial / 8000 calosc).
+max_tokens_wyjscia: 256
+
+# Optional: save the result to skrypty/<project><suffix>.txt (the GUI asks
+# before overwriting). Empty/omitted = result shown only in a dialog.
+# sufiks_pliku_wyniku: "_raport"
+
 # --- AI model parameters ---
 model: claude-sonnet-5
 temperatura: 0.7
@@ -1105,6 +1123,31 @@ max_dlugosc_probki: 6000
 # Messages shown to the user in the results window (NATIVELY in {natywna_baza}):
 etykieta_fragment_zbyt_krotki: '<FILL NATIVELY: e.g. (Fragment too short)>'
 etykieta_bled_brak_kredytow: '<FILL NATIVELY: e.g. (Error – no API credits)>'
+
+# =============================================================================
+# VARIANT `zakres: calosc` (v18.12) — single call with the WHOLE project file
+# (report-style tools, e.g. an audit). Replace the fields above with:
+#
+# zakres: calosc
+# max_tokens_wyjscia: 8000
+# sufiks_pliku_wyniku: "_audyt"
+#
+# # User template uses the {{tresc}} placeholder (whole file) instead of
+# # {{naglowek}}/{{probka}}; omit the field to send the raw file content
+# # (the instruction then lives entirely in prompt_systemowy).
+# prompt_uzytkownika_szablon: |
+#   <FILL NATIVELY: header line, then the {{tresc}} placeholder,
+#    then the closing instruction>
+#
+# # Optional World Book block ({{ksiega}} = skrypty/<project>.md content),
+# # prepended BEFORE the content when that file exists:
+# prompt_ksiegi_szablon: |
+#   <FILL NATIVELY: header line for the World Book context block>
+#   {{ksiega}}
+#
+# # Iteration fields (regex_podzial_rozdzialow, min_dlugosc_fragmentu,
+# # max_dlugosc_probki, etykieta_*) are NOT used by `calosc`.
+# =============================================================================
 """
 
 
@@ -1119,17 +1162,25 @@ def prompt_postprodukcja(id_pliku: str, etykieta: str,
     return f"""# ROLE
 You are an AI agent with access to the files of the „Reżyser Audio GPT"
 project. You have tools: Read, Write, Edit, Glob, Grep, Bash. Task: create
-a postproduction (iterative chapter-by-chapter file processing).
+a postproduction (an AI tool processing the saved project file).
 
 # PROJECT CONTEXT
 - `core_rezyser.py` + `przepisy_rezysera.py` — the AI-mode engine; it loads
   postproductions from `dictionaries/<code>/rezyser/postprod_*.yaml`.
-- A postproduction iterates over the project file (.txt) — the engine
-  splits it by `regex_podzial_rozdzialow` and sends each chunk to the AI
-  with `prompt_systemowy` + `prompt_uzytkownika_szablon` (placeholders
-  `{{naglowek}}` and `{{probka}}`).
+- Since v18.12 a postproduction has TWO processing scopes (`zakres:`):
+  * `per_rozdzial` — the engine splits the project file (.txt) by
+    `regex_podzial_rozdzialow` and sends each chunk to the AI with
+    `prompt_systemowy` + `prompt_uzytkownika_szablon` (placeholders
+    `{{naglowek}}` and `{{probka}}`);
+  * `calosc` — ONE call with the whole file (`prompt_uzytkownika_szablon`
+    with the `{{tresc}}` placeholder; optional `prompt_ksiegi_szablon`
+    with `{{ksiega}}` prepends the World Book `skrypty/<project>.md`).
+- Visibility: `dla_trybow:` (list of mode ids) decides in which creative
+  modes the GUI offers the tool; empty/omitted = all modes that write to
+  the project file. Optional `sufiks_pliku_wyniku:` (e.g. "_audyt") saves
+  the result to `skrypty/<project><suffix>.txt` besides the dialog.
 - Deployed packs (as of 13.9): {inne_paczki} — each has 1 postproduction
-  (`postprod_tytuly.yaml`). A style model.
+  (`postprod_tytuly.yaml`, scope per_rozdzial). A style model.
 - Pack for this task: `dictionaries/{jezyk_bazowy}/`
   (language {natywna_baza}).
 
@@ -1151,32 +1202,45 @@ a postproduction named **{etykieta}**.
 # STRUCTURE REQUIREMENTS (engine)
 1. Fields: `id`, `etykieta`, `kategoria: postprodukcja`, `kolejnosc`
    (int 10-90, e.g. 20 for a title generator).
-2. AI model parameters: `model: claude-sonnet-5`,
+2. **`dla_trybow:`** list of creative-mode ids the tool belongs to (e.g.
+   `[audiobook]`); empty/omitted = every mode that writes to the file.
+   **`zakres:`** `per_rozdzial` or `calosc` — pick per the task's nature
+   (short per-chapter output vs one report over the whole file). ONLY these
+   two values are valid — a typo makes the engine SKIP the whole file.
+   **`max_tokens_wyjscia:`** output budget per call (defaults: 256 for
+   per_rozdzial, 8000 for calosc). Optional **`sufiks_pliku_wyniku:`**
+   (e.g. "_audyt") — no path separators or Windows-special characters.
+3. AI model parameters: `model: claude-sonnet-5`,
    `temperatura` 0.5-0.8 (we want stability),
    `jezyk_odpowiedzi: {natywny_jezyk_odp}`.
-3. **`prompt_systemowy:`** the AI role, 1-2 sentences on the expected
+4. **`prompt_systemowy:`** the AI role, 1-2 sentences on the expected
    output format. PL model: „Jesteś redaktorem audiobooków. Twoja odpowiedź
    zawiera WYŁĄCZNIE tytuł rozdziału — jedno zdanie, bez komentarzy."
-4. **`prompt_uzytkownika_szablon:`** MUST contain both placeholders:
-   `{{naglowek}}` (the engine inserts the title) and `{{probka}}` (the
-   chapter content).
-5. **`regex_podzial_rozdzialow:`** matched to how chapters are named in the
-   project .txt files in {natywna_baza}. Patterns per language:
+5. **`prompt_uzytkownika_szablon:`**
+   - per_rozdzial: MUST contain both placeholders `{{naglowek}}` (the
+     engine inserts the header) and `{{probka}}` (the chapter content);
+   - calosc: uses the `{{tresc}}` placeholder (whole file); omit the field
+     to send the raw file content (instruction lives in prompt_systemowy).
+     Optional `prompt_ksiegi_szablon:` with `{{ksiega}}` prepends the
+     World Book block when `skrypty/<project>.md` exists.
+6. **`regex_podzial_rozdzialow:`** (per_rozdzial only) matched to how
+   chapters are named in the project .txt files in {natywna_baza}.
+   Patterns per language:
      - PL: `(?i)\\n*(Prolog|Rozdział \\d+|Epilog)\\n*`
      - DE: `(?i)\\n*(Prolog|Kapitel \\d+|Epilog)\\n*`
      - IT: `(?i)\\n*(Prologo|Capitolo \\d+|Epilogo)\\n*`
      - EN: `(?i)\\n*(Prologue|Chapter \\d+|Epilogue)\\n*`
      - RU: `(?i)\\n*(Пролог|Глава \\d+|Эпилог)\\n*`
-6. `min_dlugosc_fragmentu` (typically 50 chars; shorter chunks are skipped
-   with the `etykieta_fragment_zbyt_krotki` message).
-7. `max_dlugosc_probki` (typically 4000-8000 chars — the
+7. `min_dlugosc_fragmentu` (per_rozdzial; typically 50 chars — shorter
+   chunks are skipped with the `etykieta_fragment_zbyt_krotki` message).
+8. `max_dlugosc_probki` (per_rozdzial; typically 4000-8000 chars — the
    context budget sent to the API).
 
 # NATIVE-LANGUAGE REQUIREMENTS
 All „human-facing" text in the file — label, header, YAML comments,
-`prompt_systemowy`, `prompt_uzytkownika_szablon`, both message fields
-(`etykieta_fragment_zbyt_krotki`, `etykieta_bled_brak_kredytow`) — in
-**{natywna_baza}**.
+`prompt_systemowy`, `prompt_uzytkownika_szablon`, `prompt_ksiegi_szablon`,
+the message fields (`etykieta_fragment_zbyt_krotki`,
+`etykieta_bled_brak_kredytow`) — in **{natywna_baza}**.
 
 # PROCEDURE
 1. Open the reference files (Read).
@@ -1189,9 +1253,10 @@ All „human-facing" text in the file — label, header, YAML comments,
    shell or that Python is on PATH).
 5. Postproductions are loaded dynamically — „Odśwież drzewo" in the Manager
    + restart the app.
-6. In your reply report: the model, the temperature, the
-   `regex_podzial_rozdzialow` you used, and whether
-   `prompt_uzytkownika_szablon` contains both placeholders.
+6. In your reply report: the chosen `zakres` and `dla_trybow`, the model,
+   the temperature, the `regex_podzial_rozdzialow` you used (per_rozdzial)
+   and whether `prompt_uzytkownika_szablon` contains the placeholders
+   required by that scope (`{{naglowek}}`+`{{probka}}` vs `{{tresc}}`).
 """
 
 

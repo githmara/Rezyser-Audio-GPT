@@ -8,6 +8,14 @@ etykieta: "Kapitelüberschriften zuweisen (KI)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Sichtbarkeit & Verarbeitungsumfang (v18.12) ---
+# Kreativmodi, die dieses Werkzeug anbieten (Liste der Modus-IDs).
+dla_trybow: [audiobook]
+# per_rozdzial = Iteration Kapitel für Kapitel; calosc = ein Aufruf mit der ganzen Datei.
+zakres: per_rozdzial
+# Ausgabe-Token-Limit pro KI-Aufruf (ein Titel ist eine einzelne Zeile).
+max_tokens_wyjscia: 256
+
 # --- Anthropic-Parameter ---
 model: claude-sonnet-5
 temperatura: 0.7

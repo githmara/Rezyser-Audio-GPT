@@ -9,6 +9,14 @@ etykieta: "Nadaj Tytuły Rozdziałom (AI)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Widoczność i zakres przetwarzania (v18.12) ---
+# Tryby twórcze oferujące to narzędzie (lista id trybów).
+dla_trybow: [audiobook]
+# per_rozdzial = iteracja po rozdziałach; calosc = jeden call z całym plikiem.
+zakres: per_rozdzial
+# Limit tokenów wyjścia pojedynczego wywołania AI (tytuł to jedna linia).
+max_tokens_wyjscia: 256
+
 # --- Parametry Anthropic ---
 model: claude-sonnet-5
 temperatura: 0.7

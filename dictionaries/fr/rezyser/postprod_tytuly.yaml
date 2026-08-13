@@ -8,6 +8,14 @@ etykieta: "Attribuer les titres de chapitre (IA)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Visibilité et portée du traitement (v18.12) ---
+# Modes créatifs proposant cet outil (liste des id de modes).
+dla_trybow: [audiobook]
+# per_rozdzial = itération chapitre par chapitre ; calosc = un seul appel avec le fichier entier.
+zakres: per_rozdzial
+# Limite de tokens de sortie par appel à l'IA (un titre tient sur une seule ligne).
+max_tokens_wyjscia: 256
+
 # --- Paramètres Anthropic ---
 model: claude-sonnet-5
 temperatura: 0.7

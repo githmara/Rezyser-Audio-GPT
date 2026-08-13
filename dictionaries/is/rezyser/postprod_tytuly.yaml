@@ -9,6 +9,14 @@ etykieta: "Gefðu Köflum Nöfn (gervigreind)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Sýnileiki og umfang vinnslu (v18.12) ---
+# Sköpunarhamir sem bjóða þetta verkfæri (listi yfir ham-id).
+dla_trybow: [audiobook]
+# per_rozdzial = kafli fyrir kafla; calosc = eitt kall með allri skránni.
+zakres: per_rozdzial
+# Hámarksfjöldi úttakstóka í hverju gervigreindarkalli (titill er ein lína).
+max_tokens_wyjscia: 256
+
 # --- Anthropic-parametrar ---
 model: claude-sonnet-5
 temperatura: 0.7

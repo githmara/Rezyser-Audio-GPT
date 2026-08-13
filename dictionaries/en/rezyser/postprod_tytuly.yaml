@@ -9,6 +9,14 @@ etykieta: "Assign Chapter Titles (AI)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Visibility & processing scope (v18.12) ---
+# Creative modes offering this tool (list of mode ids).
+dla_trybow: [audiobook]
+# per_rozdzial = chapter-by-chapter iteration; calosc = one call with the whole file.
+zakres: per_rozdzial
+# Output-token limit per AI call (a title is a single line).
+max_tokens_wyjscia: 256
+
 # --- Anthropic parameters ---
 model: claude-sonnet-5
 temperatura: 0.7

@@ -9,6 +9,14 @@ etykieta: "Anna Lukujen Nimet (tekoäly)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Näkyvyys ja käsittelyn laajuus (v18.12) ---
+# Luovat tilat, joissa työkalu on tarjolla (tilojen id-lista).
+dla_trybow: [audiobook]
+# per_rozdzial = luku kerrallaan; calosc = yksi kutsu koko tiedostolla.
+zakres: per_rozdzial
+# Tulosteen token-raja yhtä tekoälykutsua kohden (otsikko on yksi rivi).
+max_tokens_wyjscia: 256
+
 # --- Anthropic-parametrit ---
 model: claude-sonnet-5
 temperatura: 0.7

@@ -10,6 +10,14 @@ etykieta: "Дай Названия Главам (ИИ)"
 kategoria: postprodukcja
 kolejnosc: 10
 
+# --- Видимость и объём обработки (v18.12) ---
+# Творческие режимы, в которых доступен этот инструмент (список id режимов).
+dla_trybow: [audiobook]
+# per_rozdzial = итерация по главам; calosc = один вызов со всем файлом.
+zakres: per_rozdzial
+# Лимит токенов вывода на один вызов ИИ (заголовок — одна строка).
+max_tokens_wyjscia: 256
+
 # --- Параметры Anthropic ---
 model: claude-sonnet-5
 temperatura: 0.7
