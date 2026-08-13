@@ -337,6 +337,19 @@ tresc:
     Käytännön sovellus: salaukset tallentavat tuloksen samassa muodossa kuin Ohjaajan tila (.html lang-tägillä tai .docx XML-tägeillä), joten NVDA lukee ne oikean kielen äänellä. Erityisesti Kääntäjä ja Vokaalinvaihtaja kuulostavat synteesissä paljon mielenkiintoisemmilta kuin kun luet niitä silmilläsi — koska aivot yrittävät automaattisesti "purkaa" tekstiä, kun luet sitä visuaalisesti, mutta TTS lukee sen juuri sellaisena kuin se on kirjoitettu.
 
     Kaikki kuusi salausta on kuvattu myös laajemmin, helposti ymmärrettävällä kielellä tiedostossa docs/dictionaries.pl.html sovelluksen paketissa — yhdessä vinkkien kanssa, kuinka lisätä oma "kirjainten vaihtaminen" -tyyppinen salaus ilman ohjelmointitaitoja (esim. kouluslangi, puhekieli).
+  krok_5_jezyk_pipeline: |
+    ## Käsittelykieli, pakotus ja laatutila (UUTTA versiossa 18.11)
+
+    Tiedoston lataus -osiossa on nyt käsittelykielen pudotusvalikko. Sillä valitaan, minkä kielen säännöillä Ohjaajan ja Koodinmurtajan tilat toimivat: aksenttilistat ja salakirjoituslistat, sekä Caesarin salakirjoituksen aakkosto siirtoalueineen.
+
+    - Oletusasetus „{poliglota.jezyk_auto}" säilyttää nykyisen toiminnan: kieli määräytyy ladatun tiedoston perusteella, ja kun se poikkeaa sovelluksen kielestä, saat lyhyen ilmoituksen listojen vaihtumisesta.
+    - Tietyn kielen valitseminen listasta on sitova — sovellus ei muuta sitä itsenäisesti tiedostoa ladattaessa.
+
+    Listan alla on valintaruutu, joka pakottaa valitun kielen koko asiakirjalle. Oletuksena kukin kappale käsitellään sille tunnistetun kielen mukaan — se on tavallisesti paras valinta, koska vieraskieliset lisäykset saavat omat, oikeat sääntönsä. Merkitse pakotus, kun haluat koko asiakirjan yhtenäisen käsittelyn. Esimerkki, jossa tämä on välttämätöntä: peruutettava monikerroksinen salaus. Caesarin salakirjoituksen aakkosto on eri pituinen kussakin kielessä, joten ilman pakotusta kieliltään sekoitettu teksti salataan useilla eri aakkosilla — ja silloin salauksen purkaminen vaatii tietoa siitä, missä kielten rajat kulkivat. Pakotetulla kielellä koko asiakirja salataan ja puretaan yhdellä ja samalla aakkostolla.
+
+    AI-kääntäjä sai puolestaan laatutila-valintaruudun. Merkittäessä malli saa lisäbudjetin tekstin sisäiseen analysointiin ennen kääntämistä (niin sanottu extended thinking) — kääntäminen kestää pidempään ja kuluttaa enemmän tokeneita, mutta vaikeat kohdat käännetään huolellisemmin. Vaihtoehto toimii vain Anthropic Claude -malleilla; jos käytät vaihtoehtoista palveluntarjoajaa OpenAI-yhteensopivan rajapinnan kautta, valinnalla ei ole mitään vaikutusta.
+
+    Pieni yksityiskohta samasta aihepiiristä: japanilaisessa romanisaatiossa käytetyt makronilliset merkit (esim. Tōkyō, rāmen, jūdō) normalisoidaan tästä versiosta lähtien samoin kuin muut vieraat diakriittiset merkit — useimmissa kielissä paljaaksi kirjaimeksi (Tokyo), ja suomenkielisessä paketissa vokaalin kaksinkertaistamalla (Tookyoo), suomen kielen pitkien äänteiden merkitsemiskäytännön mukaisesti. Näin ne eivät enää putoa Caesarin salakirjoituksen aakkostosta salakirjoitustekstissä näkyvinä selväkielisinä merkkeinä.
   krok_5_detekcja_jezyka: |
     ## Kielentunnistus
 

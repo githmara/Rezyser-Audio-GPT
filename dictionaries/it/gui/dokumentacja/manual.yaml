@@ -340,6 +340,19 @@ tresc:
     Applicazione pratica: i cifrari salvano il risultato nello stesso formato della Modalità Regista (.html con tag lang o .docx con tag XML), quindi NVDA li leggerà con la voce della lingua appropriata. In particolare, l'Invertitore e il Vocalizzatore suonano nel sintetizzatore molto più interessanti di quando li leggi con gli occhi — perché il cervello durante la lettura visiva cerca automaticamente di "decodificare" il testo, mentre il TTS lo legge esattamente come è scritto.
 
     Tutti e sei i cifrari sono descritti anche in un linguaggio più ampio e accessibile nel file docs/dictionaries.pl.html nel pacchetto dell'applicazione — insieme a consigli su come aggiungere un proprio cifrario del tipo "sostituzione di lettere" senza conoscenze di programmazione (ad esempio, linguaggio gergale scolastico, linguaggio-trava).
+  krok_5_jezyk_pipeline: |
+    ## Lingua di elaborazione, forzatura e modalità qualità (NOVITÀ nella 18.11)
+
+    La sezione di caricamento file dispone ora di un menu a tendina della lingua di elaborazione. Con questo selettore stabilisci secondo le regole di quale lingua operano le modalità Regista e Cifrante: gli elenchi di accenti e cifrari, nonché l'alfabeto del Cifrario di Cesare insieme all'intervallo di spostamento.
+
+    - La posizione predefinita „{poliglota.jezyk_auto}" mantiene il comportamento finora in uso: la lingua viene determinata in base al file caricato, e quando differisce dalla lingua dell'applicazione, riceverai una breve notifica che gli elenchi sono stati cambiati.
+    - La scelta di una lingua specifica dall'elenco è vincolante — l'applicazione non la modificherà autonomamente durante il caricamento del file.
+
+    Sotto l'elenco si trova una casella di selezione che forza la lingua scelta per l'intero documento. Per impostazione predefinita ogni paragrafo viene elaborato secondo la lingua rilevata per quel paragrafo — questa è di norma la scelta migliore, poiché gli inserti in lingua straniera ricevono le proprie, corrette regole. Attiva la forzatura quando ti interessa un'elaborazione uniforme dell'intero testo. Un esempio in cui ciò è necessario: la cifratura multistrato reversibile. L'alfabeto del Cifrario di Cesare ha in ogni lingua una lunghezza diversa, quindi senza la forzatura un testo mistilingue verrà cifrato con diversi alfabeti — e allora la decifrazione richiede di sapere dove passavano i confini tra le lingue. Con la lingua forzata, l'intero documento viene cifrato e decifrato con un unico, medesimo alfabeto.
+
+    Il Traduttore AI ha invece guadagnato una casella di selezione per la modalità qualità. Una volta selezionata, il modello riceve un budget aggiuntivo per l'analisi interna del testo prima della traduzione (il cosiddetto extended thinking) — la traduzione richiede più tempo e costa più token, ma i passaggi difficili risultano più curati. L'opzione funziona esclusivamente con i modelli Anthropic Claude; se utilizzi un fornitore alternativo tramite un endpoint compatibile con OpenAI, la selezione non ha alcun effetto.
+
+    Un dettaglio correlato: i caratteri con macron usati nella romanizzazione giapponese (ad es. Tōkyō, rāmen, jūdō) vengono da questa versione normalizzati come gli altri segni diacritici stranieri — nella maggior parte delle lingue nella lettera semplice (Tokyo), mentre nel pacchetto finlandese tramite raddoppio della vocale (Tookyoo), secondo la convenzione finlandese di trascrizione dei suoni lunghi. Grazie a ciò non escono più dall'alfabeto del Cifrario di Cesare come caratteri in chiaro nel crittogramma.
   krok_5_detekcja_jezyka: |
     ## Detección della lingua
 

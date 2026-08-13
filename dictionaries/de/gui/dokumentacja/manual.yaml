@@ -337,6 +337,19 @@ tresc:
     Praktische Anwendung: Die Verschlüsselungen speichern das Ergebnis im gleichen Format wie der Regisseur-Modus (.html mit Sprach-Tag oder .docx mit XML-Tags), sodass NVDA sie mit der Stimme der entsprechenden Sprache liest. Besonders der Textumkehrer und der Vokalisierer klingen im Synthesizer viel interessanter, als wenn du sie mit den Augen liest — denn das Gehirn versucht beim visuellen Lesen automatisch, den Text zu „entschlüsseln", während TTS ihn genau so liest, wie er geschrieben ist.
 
     Alle sechs Verschlüsselungen sind auch in einer breiteren, zugänglichen Sprache in der Datei docs/dictionaries.pl.html im Anwendungspaket beschrieben — zusammen mit Tipps, wie man ohne Programmierkenntnisse eine eigene Verschlüsselung vom Typ „Buchstabentausch" hinzufügen kann (z.B. Schulsprache, Kauderwelsch).
+  krok_5_jezyk_pipeline: |
+    ## Verarbeitungssprache, Erzwingung und Qualitätsmodus (NEU in 18.11)
+
+    Der Bereich zum Laden der Datei verfügt jetzt über eine Dropdown-Liste für die Verarbeitungssprache. Mit ihr legst du fest, nach welchen Regeln welcher Sprache die Modi Regisseur und Kryptograph arbeiten: Listen der Akzente und Chiffren sowie das Alphabet der Caesar-Chiffre samt Verschiebungsbereich.
+
+    - Die Standardposition „{poliglota.jezyk_auto}" behält das bisherige Verhalten bei: Die Sprache wird anhand der geladenen Datei bestimmt, und wenn sie sich von der Sprache der Anwendung unterscheidet, erhältst du eine kurze Benachrichtigung, dass die Listen umgeschaltet wurden.
+    - Die Auswahl einer bestimmten Sprache aus der Liste ist bindend — die Anwendung ändert sie beim Laden einer Datei nicht eigenständig.
+
+    Unter der Liste befindet sich ein Kontrollkästchen, das die gewählte Sprache für das gesamte Dokument erzwingt. Standardmäßig wird jeder Absatz nach der für diesen Absatz erkannten Sprache verarbeitet — das ist normalerweise die beste Wahl, da fremdsprachige Einschübe ihre eigenen, korrekten Regeln erhalten. Aktiviere die Erzwingung, wenn dir eine einheitliche Verarbeitung des gesamten Textes wichtig ist. Ein Beispiel, bei dem dies notwendig ist: umkehrbare mehrschichtige Verschlüsselung. Das Alphabet der Caesar-Chiffre hat in jeder Sprache eine andere Länge, sodass ohne Erzwingung ein sprachlich gemischter Text mit mehreren unterschiedlichen Alphabeten verschlüsselt würde — und die Entschlüsselung würde dann Kenntnis darüber voraussetzen, wo die Sprachgrenzen verliefen. Bei erzwungener Sprache verschlüsselt und entschlüsselt das gesamte Dokument ein und dasselbe Alphabet.
+
+    Der KI-Übersetzer hat hingegen ein Kontrollkästchen für den Qualitätsmodus erhalten. Ist es aktiviert, erhält das Modell ein zusätzliches Budget für die interne Textanalyse vor der Übersetzung (sogenanntes extended thinking) — die Übersetzung dauert länger und kostet mehr Token, aber schwierige Textstellen fallen sorgfältiger aus. Die Option funktioniert ausschließlich mit Anthropic-Claude-Modellen; wenn du einen alternativen Anbieter über einen OpenAI-kompatiblen Endpunkt nutzt, hat das Aktivieren keine Wirkung.
+
+    Eine verwandte Kleinigkeit: Zeichen mit Makron, die in der japanischen Romanisierung verwendet werden (z. B. Tōkyō, rāmen, jūdō), werden ab dieser Version wie andere fremde diakritische Zeichen normalisiert — in den meisten Sprachen zum blanken Buchstaben (Tokyo), im finnischen Paket hingegen durch Verdopplung des Vokals (Tookyoo), gemäß der finnischen Schreibkonvention für lange Laute. Dadurch fallen sie nicht mehr als offene Zeichen im Chiffretext aus dem Alphabet der Caesar-Chiffre heraus.
   krok_5_detekcja_jezyka: |
     ## Spracherkennung
 

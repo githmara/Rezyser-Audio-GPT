@@ -337,6 +337,19 @@ tresc:
     Application pratique : les chiffres enregistrent le résultat dans le même format que le Mode Réalisateur (.html avec balise lang ou .docx avec balises XML), donc NVDA les lira avec la voix de la langue appropriée. En particulier, l'Inverseur et le Voyelliseur sonnent beaucoup plus intéressants dans le synthétiseur que lorsque vous les lisez avec vos yeux — car le cerveau lors de la lecture visuelle essaie automatiquement de « décoder » le texte, tandis que le TTS le lit exactement tel qu'il est écrit.
 
     Les six chiffres sont également décrits dans un langage plus large et accessible dans le fichier docs/dictionaries.pl.html du package de l'application — avec des conseils sur la façon d'ajouter votre propre chiffre de type « substitution de lettres » sans connaissance en programmation (par exemple, langage argot scolaire, langue de bois).
+  krok_5_jezyk_pipeline: |
+    ## Langue de traitement, forçage et mode qualité (NOUVEAU dans la 18.11)
+
+    La section de chargement de fichier dispose désormais d'une liste déroulante de langue de traitement. Elle permet de choisir selon les règles de quelle langue fonctionnent les modes Réalisateur et Chiffrant : les listes d'accents et de chiffres, ainsi que l'alphabet du Chiffre de César et sa plage de décalage.
+
+    - La position par défaut « {poliglota.jezyk_auto} » conserve le comportement antérieur : la langue est déterminée à partir du fichier chargé, et si elle diffère de la langue de l'application, vous recevrez une brève notification indiquant que les listes ont été commutées.
+    - Le choix d'une langue précise dans la liste est contraignant — l'application ne le modifiera pas d'elle-même lors du chargement d'un fichier.
+
+    Sous la liste se trouve une case à cocher forçant la langue choisie pour l'ensemble du document. Par défaut, chaque paragraphe est traité selon la langue détectée pour ce paragraphe — c'est généralement le meilleur choix, car les insertions en langue étrangère reçoivent leurs propres règles correctes. Cochez le forçage lorsque vous souhaitez un traitement uniforme de l'ensemble. Exemple où cela est indispensable : le chiffrement réversible multicouche. L'alphabet du Chiffre de César a une longueur différente selon chaque langue, donc sans forçage, un texte mêlant plusieurs langues sera chiffré avec plusieurs alphabets différents — et le déchiffrement nécessitera alors de savoir où passaient les frontières linguistiques. Avec la langue forcée, tout le document est chiffré et déchiffré avec un seul et même alphabet.
+
+    Le traducteur IA a quant à lui gagné une case à cocher pour le mode qualité. Une fois cochée, le modèle dispose d'un budget supplémentaire pour l'analyse interne du texte avant traduction (ce qu'on appelle l'extended thinking) — la traduction prend plus de temps et consomme davantage de jetons, mais les passages difficiles sont traités avec plus de soin. Cette option ne fonctionne qu'avec les modèles Anthropic Claude ; si vous utilisez un fournisseur alternatif via un point de terminaison compatible OpenAI, cocher la case n'a aucun effet.
+
+    Détail connexe : les caractères avec macron utilisés dans la romanisation japonaise (par ex. Tōkyō, rāmen, jūdō) sont depuis cette version normalisés comme les autres signes diacritiques étrangers — dans la plupart des langues, réduits à la lettre nue (Tokyo), et dans le pack finnois, par doublement de la voyelle (Tookyoo), conformément à la convention finnoise de notation des sons longs. Ainsi, ils ne disparaissent plus de l'alphabet du Chiffre de César en tant que caractères apparents dans le cryptogramme.
   krok_5_detekcja_jezyka: |
     ## Détection de la langue
 

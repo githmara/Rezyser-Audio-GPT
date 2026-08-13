@@ -407,6 +407,19 @@ tresc:
     Praktyczne zastosowanie: szyfry zapisują wynik w tym samym formacie co Tryb Reżysera (.html z tagiem lang lub .docx z tagami XML), czyli NVDA odczyta je głosem odpowiedniego języka. Szczególnie Odwracacz i Samogłoskowiec brzmią w syntezatorze znacznie ciekawiej niż gdy czytasz je oczami — bo mózg przy czytaniu wzrokiem automatycznie próbuje „zdekodować" tekst, a TTS czyta go dokładnie tak, jak zapisany.
 
     Wszystkie sześć szyfrów opisano też szerszym, przystępnym językiem w pliku docs/dictionaries.pl.html w paczce aplikacji — razem z poradami, jak dodać własny szyfr typu „zamiana liter" bez znajomości programowania (np. język gwary szkolnej, mowa-trawa).
+  krok_5_jezyk_pipeline: |
+    ## Język przetwarzania, wymuszanie i tryb jakość (NOWOŚĆ w 18.11)
+
+    Sekcja wczytywania pliku ma teraz rozwijaną listę języka przetwarzania. Wybierasz nią, według reguł którego języka pracują tryby Reżysera i Szyfranta: listy akcentów i szyfrów, a także alfabet Szyfru Cezara wraz z zakresem przesunięcia.
+
+    - Domyślna pozycja „{poliglota.jezyk_auto}" zachowuje dotychczasowe zachowanie: język ustala się na podstawie wczytanego pliku, a gdy różni się od języka aplikacji, dostaniesz krótkie powiadomienie, że listy zostały przełączone.
+    - Wybór konkretnego języka z listy jest wiążący — aplikacja nie zmieni go samodzielnie przy wczytywaniu pliku.
+
+    Pod listą znajduje się pole wyboru wymuszające wybrany język dla całego dokumentu. Domyślnie każdy akapit jest przetwarzany według języka wykrytego dla tego akapitu — to zwykle najlepszy wybór, bo obcojęzyczne wstawki dostają własne, poprawne reguły. Zaznacz wymuszanie, gdy zależy Ci na jednolitym przetworzeniu całości. Przykład, przy którym to konieczne: odwracalne szyfrowanie wielowarstwowe. Alfabet Szyfru Cezara ma w każdym języku inną długość, więc bez wymuszania tekst mieszany językowo zostanie zaszyfrowany kilkoma różnymi alfabetami — a wtedy odszyfrowanie wymaga wiedzy, gdzie przebiegały granice języków. Z wymuszonym językiem cały dokument szyfruje i deszyfruje jeden, ten sam alfabet.
+
+    Tłumacz AI zyskał natomiast pole wyboru trybu jakość. Po zaznaczeniu model dostaje dodatkowy budżet na wewnętrzną analizę tekstu przed tłumaczeniem (tzw. extended thinking) — tłumaczenie trwa dłużej i kosztuje więcej tokenów, ale trudne fragmenty wychodzą staranniej. Opcja działa wyłącznie z modelami Anthropic Claude; jeśli korzystasz z alternatywnego dostawcy przez endpoint zgodny z OpenAI, zaznaczenie nie ma żadnego efektu.
+
+    Drobiazg pokrewny: znaki z makronem używane w romanizacji japońskiej (np. Tōkyō, rāmen, jūdō) są od tej wersji normalizowane tak jak pozostałe obce znaki diakrytyczne — w większości języków do gołej litery (Tokyo), a w pakiecie fińskim przez podwojenie samogłoski (Tookyoo), zgodnie z fińską konwencją zapisu długich głosek. Dzięki temu nie wypadają już z alfabetu Szyfru Cezara jako znaki jawne w szyfrogramie.
   krok_5_detekcja_jezyka: |
     ## Detekcja języka
 

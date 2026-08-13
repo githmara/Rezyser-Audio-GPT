@@ -337,6 +337,19 @@ tresc:
     Practical application: ciphers save the result in the same format as Director Mode (.html with a lang tag or .docx with XML tags), so NVDA reads them with the appropriate language voice. Especially the Reverser and Vowelizer sound much more interesting in a synthesizer than when you read them with your eyes — because the brain automatically tries to "decode" the text when reading visually, while TTS reads it exactly as written.
 
     All six ciphers are also described in broader, accessible language in the file docs/dictionaries.pl.html in the application package — along with tips on how to add your own cipher type "letter substitution" without programming knowledge (e.g., school slang, gibberish).
+  krok_5_jezyk_pipeline: |
+    ## Processing language, forcing, and quality mode (NEW in 18.11)
+
+    The file-loading section now has a drop-down for processing language. It determines which language's rules govern the Director and Cipher modes: the accent and cipher lists, as well as the Caesar Cipher alphabet along with its shift range.
+
+    - The default position "{poliglota.jezyk_auto}" preserves the previous behavior: the language is set based on the loaded file, and if it differs from the application language, you'll get a brief notification that the lists have been switched.
+    - Choosing a specific language from the list is binding — the application will not change it on its own when loading a file.
+
+    Below the list is a checkbox that forces the selected language for the entire document. By default, each paragraph is processed according to the language detected for that paragraph — this is usually the best choice, since foreign-language insertions get their own, correct rules. Check the forcing option when you need the whole document processed uniformly. An example where this is necessary: reversible multi-layer encryption. The Caesar Cipher alphabet has a different length in each language, so without forcing, a text mixed across languages would be encrypted with several different alphabets — and decryption would then require knowing where the language boundaries fell. With a forced language, the entire document is encrypted and decrypted with one single alphabet.
+
+    The AI Translator, meanwhile, has gained a quality-mode checkbox. When checked, the model gets an extra budget for internal text analysis before translation (so-called extended thinking) — the translation takes longer and costs more tokens, but difficult passages come out more carefully rendered. The option works only with Anthropic Claude models; if you're using an alternative provider through an OpenAI-compatible endpoint, checking it has no effect at all.
+
+    A related detail: characters with a macron used in Japanese romanization (e.g. Tōkyō, rāmen, jūdō) are, as of this version, normalized the same way as other foreign diacritical characters — in most languages down to the bare letter (Tokyo), and in the Finnish pack through vowel doubling (Tookyoo), in line with the Finnish convention for writing long sounds. Thanks to this, they no longer fall outside the Caesar Cipher alphabet as literal characters in the ciphertext.
   krok_5_detekcja_jezyka: |
     ## Language Detection
 

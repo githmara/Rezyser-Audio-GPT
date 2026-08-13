@@ -337,6 +337,19 @@ tresc:
     Aplicación práctica: los cifrados guardan el resultado en el mismo formato que el Modo Director (.html con etiqueta lang o .docx con etiquetas XML), por lo que NVDA los leerá con la voz del idioma correspondiente. Especialmente el Inversor y el Vocalizador suenan en el sintetizador mucho más interesantes que cuando los lees con los ojos — porque el cerebro al leer visualmente automáticamente intenta "descodificar" el texto, y el TTS lo lee exactamente como está escrito.
 
     Los seis cifrados también se describen en un lenguaje más amplio y accesible en el archivo docs/dictionaries.pl.html en el paquete de la aplicación — junto con consejos sobre cómo agregar tu propio cifrado tipo "cambio de letras" sin conocimientos de programación (por ejemplo, jerga escolar, lenguaje de la selva).
+  krok_5_jezyk_pipeline: |
+    ## Idioma de procesamiento, forzado y modo calidad (NOVEDAD en 18.11)
+
+    La sección de carga de archivo tiene ahora una lista desplegable de idioma de procesamiento. Con ella eliges según las reglas de qué idioma funcionan los modos Director y Cifrador: las listas de acentos y cifrados, así como el alfabeto del Cifrado César junto con el rango de desplazamiento.
+
+    - La posición predeterminada „{poliglota.jezyk_auto}" conserva el comportamiento habitual: el idioma se establece según el archivo cargado, y cuando difiere del idioma de la aplicación, recibirás una breve notificación de que las listas se han cambiado.
+    - La selección de un idioma concreto de la lista es vinculante: la aplicación no lo cambiará por sí misma al cargar un archivo.
+
+    Debajo de la lista se encuentra una casilla de selección que fuerza el idioma elegido para todo el documento. Por defecto, cada párrafo se procesa según el idioma detectado para ese párrafo — esta suele ser la mejor opción, ya que las inserciones en otros idiomas reciben sus propias reglas correctas. Marca el forzado cuando necesites un procesamiento uniforme de todo el conjunto. Un ejemplo en el que esto es imprescindible: el cifrado reversible multicapa. El alfabeto del Cifrado César tiene una longitud distinta en cada idioma, así que sin forzado un texto lingüísticamente mixto se cifrará con varios alfabetos diferentes — y entonces el descifrado requiere saber dónde estaban los límites entre idiomas. Con el idioma forzado, todo el documento se cifra y descifra con un único alfabeto, el mismo.
+
+    El traductor de IA, por su parte, ha ganado una casilla de selección de modo calidad. Al marcarla, el modelo recibe un presupuesto adicional para el análisis interno del texto antes de traducir (el llamado extended thinking) — la traducción tarda más y consume más tokens, pero los fragmentos difíciles resultan más cuidados. La opción funciona exclusivamente con los modelos Anthropic Claude; si usas un proveedor alternativo a través de un endpoint compatible con OpenAI, marcarla no tiene ningún efecto.
+
+    Un detalle relacionado: los caracteres con macrón usados en la romanización japonesa (p. ej. Tōkyō, rāmen, jūdō) se normalizan desde esta versión igual que el resto de los signos diacríticos extranjeros — en la mayoría de los idiomas a la letra simple (Tokyo), y en el paquete finlandés mediante la duplicación de la vocal (Tookyoo), conforme a la convención finlandesa de notación de sonidos largos. Gracias a ello ya no se salen del alfabeto del Cifrado César como caracteres visibles en el criptograma.
   krok_5_detekcja_jezyka: |
     ## Detección de idioma
 
