@@ -6,8 +6,9 @@ id: niemiecki
 etykieta: "Niemiecki (np. Stefan / Markus / Katja / Hedda)"
 opis: |
   Upodabnia polski tekst do niemieckiej wymowy: „sz”→„sch”,
-  „cz”→„tsch”, „rz”→„rsch”, „w”→„v”, następnie „v”→„f”
-  (niemieckie bezdźwięczne „v”).
+  „cz”→„tsch”, „rz”→„rsch”, „v”→„w” (rzadkie polskie „v” z zapożyczeń —
+  niemieckie /w/ pisane „w”). Polskie „w” zostaje: niemiecki głos
+  i tak czyta „w” jako /w/ (v).
 iso: de
 kategoria: akcent
 kolejnosc: 60
@@ -24,7 +25,9 @@ zamiany:
   - { wzor: "Cz", zamiana: "Tsch" }
   - { wzor: "rz", zamiana: "rsch" }
   - { wzor: "Rz", zamiana: "Rsch" }
-  - { wzor: "w",  zamiana: "v"    }
-  - { wzor: "W",  zamiana: "V"    }
-  - { wzor: "v",  zamiana: "f"    }
-  - { wzor: "V",  zamiana: "F"    }
+  # AUDYT 18.12 (W-4): dawna kaskada „w”→„v” + „v”→„f” czytała KAŻDE
+  # polskie /w/ jako /f/ („woda i wino”→„foda ifino”). Niemiecka litera
+  # „w” to natywnie /w/ (v) — polskie „w” zostawiamy, a rzadkie polskie
+  # „v” (zapożyczenia) mapujemy na „w”, bo niemieckie „v” czyta się /f/.
+  - { wzor: "v",  zamiana: "w"    }
+  - { wzor: "V",  zamiana: "W"    }

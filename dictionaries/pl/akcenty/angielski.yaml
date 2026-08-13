@@ -17,6 +17,11 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
+  # KOLEJNOŚĆ (audyt 18.12, W-4): "ch"→"h" MUSI iść PRZED regułami,
+  # których WYNIK zawiera "ch" (szcz→shch, cz→ch) — inaczej sekwencyjny
+  # str.replace dojadał je do "shh"/"h" ("czapka"→"hapka", "mecz"→"meh").
+  - { wzor: "ch",   zamiana: "h"    }
+  - { wzor: "Ch",   zamiana: "H"    }
   - { wzor: "szcz", zamiana: "shch" }
   - { wzor: "Szcz", zamiana: "Shch" }
   - { wzor: "SZCZ", zamiana: "SHCH" }
@@ -26,7 +31,5 @@ zamiany:
   - { wzor: "Cz",   zamiana: "Ch"   }
   - { wzor: "rz",   zamiana: "zh"   }
   - { wzor: "Rz",   zamiana: "Zh"   }
-  - { wzor: "ch",   zamiana: "h"    }
-  - { wzor: "Ch",   zamiana: "H"    }
   - { wzor: "w",    zamiana: "v"    }
   - { wzor: "W",    zamiana: "V"    }

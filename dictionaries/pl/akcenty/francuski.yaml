@@ -5,9 +5,10 @@
 id: francuski
 etykieta: "Francuski (np. Thomas / Amelie / Julie)"
 opis: |
-  Upodabnia polski tekst do francuskiej wymowy: „ch”→„sh”, „sz”→„sh”,
-  „cz”→„tch”, „rz”→„j”, „h” niemalże znika, „r”→„gh” (francuskie
-  gardłowe R), „w”→„v”.
+  Upodabnia polski tekst do francuskiej wymowy: „sz”→„ch” (francuski
+  zapis głoski /sz/), „cz”→„tch”, „rz”→„j”, „r”→„gh” (francuskie
+  gardłowe R), „w”→„v”. Polskie „ch” zostaje — francuski głos i tak
+  czyta „ch” jako /sz/, a samotne „h” jest u niego nieme z natury.
 iso: fr
 kategoria: akcent
 kolejnosc: 50
@@ -18,16 +19,17 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  - { wzor: "ch", zamiana: "sh"  }
-  - { wzor: "Ch", zamiana: "Sh"  }
-  - { wzor: "sz", zamiana: "sh"  }
-  - { wzor: "Sz", zamiana: "Sh"  }
+  # AUDYT 18.12 (W-4): dawne „h”→„” kasowało h we WCZEŚNIEJ wprowadzonych
+  # „sh”/„tch” („szum, czar, chleb”→„sum, tcagh, sleb”). Reguła usunięta —
+  # francuski głos ma nieme h z natury — a /sz/ zapisujemy francuską
+  # ortografią „ch” (nie anglosaskim „sh”). Polskie „ch” zostaje literalnie
+  # (francuz przeczyta je jako /sz/ — akceptowalna karykatura).
+  - { wzor: "sz", zamiana: "ch"  }
+  - { wzor: "Sz", zamiana: "Ch"  }
   - { wzor: "cz", zamiana: "tch" }
   - { wzor: "Cz", zamiana: "Tch" }
   - { wzor: "rz", zamiana: "j"   }
   - { wzor: "Rz", zamiana: "J"   }
-  - { wzor: "h",  zamiana: ""    }
-  - { wzor: "H",  zamiana: ""    }
   - { wzor: "r",  zamiana: "gh"  }
   - { wzor: "R",  zamiana: "Gh"  }
   - { wzor: "w",  zamiana: "v"   }
