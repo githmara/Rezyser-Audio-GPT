@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guía Completa (Versión 18.10.0 – Versión de Lanzamiento)</title>
+<title>Reżyser Audio GPT — Guía Completa (Versión 18.11.0 – Versión de Lanzamiento)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guía Completa (Versión 18.10.0 – Versión de Lanzamiento)</h1>
+<h1>Reżyser Audio GPT — Guía Completa (Versión 18.11.0 – Versión de Lanzamiento)</h1>
 <p>¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).</p>
 <p>El conjunto consta del estudio principal (Dirección), la herramienta de traducción y acentos (Políglota), la herramienta para construir la estructura de archivos (Arquitecto de Audiolibros), el Gestor de Reglas (desde la versión 13.0 — sin Python puedes añadir un nuevo acento, cifrado o modo creativo, ver PASO 7b a continuación) y — desde la versión 15.0 — el módulo de Historias (ficción interactiva en segunda persona generada por IA, leída por TTS o lector de pantalla, descrita en un manual separado tales.es.html). Todas las cinco herramientas están disponibles en una sola ventana del programa, conmutables mediante botones en la barra o atajos de teclado Ctrl+1..Ctrl+5.</p>
 <h2>PASO 1: Primera ejecución (Cross-Platform)</h2>
@@ -235,6 +235,15 @@ Probablemente te preguntarás si el sintetizador podrá declinar esos números n
 </ul>
 <p>Aplicación práctica: los cifrados guardan el resultado en el mismo formato que el Modo Director (.html con etiqueta lang o .docx con etiquetas XML), por lo que NVDA los leerá con la voz del idioma correspondiente. Especialmente el Inversor y el Vocalizador suenan en el sintetizador mucho más interesantes que cuando los lees con los ojos — porque el cerebro al leer visualmente automáticamente intenta "descodificar" el texto, y el TTS lo lee exactamente como está escrito.</p>
 <p>Los seis cifrados también se describen en un lenguaje más amplio y accesible en el archivo docs/dictionaries.pl.html en el paquete de la aplicación — junto con consejos sobre cómo agregar tu propio cifrado tipo "cambio de letras" sin conocimientos de programación (por ejemplo, jerga escolar, lenguaje de la selva).</p>
+<h2>Idioma de procesamiento, forzado y modo calidad (NOVEDAD en 18.11)</h2>
+<p>La sección de carga de archivo tiene ahora una lista desplegable de idioma de procesamiento. Con ella eliges según las reglas de qué idioma funcionan los modos Director y Cifrador: las listas de acentos y cifrados, así como el alfabeto del Cifrado César junto con el rango de desplazamiento.</p>
+<ul>
+<li>La posición predeterminada „Detectar automáticamente" conserva el comportamiento habitual: el idioma se establece según el archivo cargado, y cuando difiere del idioma de la aplicación, recibirás una breve notificación de que las listas se han cambiado.</li>
+<li>La selección de un idioma concreto de la lista es vinculante: la aplicación no lo cambiará por sí misma al cargar un archivo.</li>
+</ul>
+<p>Debajo de la lista se encuentra una casilla de selección que fuerza el idioma elegido para todo el documento. Por defecto, cada párrafo se procesa según el idioma detectado para ese párrafo — esta suele ser la mejor opción, ya que las inserciones en otros idiomas reciben sus propias reglas correctas. Marca el forzado cuando necesites un procesamiento uniforme de todo el conjunto. Un ejemplo en el que esto es imprescindible: el cifrado reversible multicapa. El alfabeto del Cifrado César tiene una longitud distinta en cada idioma, así que sin forzado un texto lingüísticamente mixto se cifrará con varios alfabetos diferentes — y entonces el descifrado requiere saber dónde estaban los límites entre idiomas. Con el idioma forzado, todo el documento se cifra y descifra con un único alfabeto, el mismo. Advertencia: en los idiomas cuyo alfabeto César contiene letras diacríticas normalizadas al cargar (polaco, alemán), el descifrado no es totalmente fiel — las letras diacríticas del criptograma se convierten a sus formas base al volver a cargarlo, antes de llegar al descifrado. La reversibilidad completa la garantizan los alfabetos sin tales caracteres (p. ej. el inglés).</p>
+<p>El traductor de IA, por su parte, ha ganado una casilla de selección de modo calidad. Al marcarla, el modelo recibe un presupuesto adicional para el análisis interno del texto antes de traducir (el llamado extended thinking) — la traducción tarda más y consume más tokens, pero los fragmentos difíciles resultan más cuidados. La opción funciona exclusivamente con los modelos Anthropic Claude; si usas un proveedor alternativo a través de un endpoint compatible con OpenAI, marcarla no tiene ningún efecto.</p>
+<p>Un detalle relacionado: los caracteres con macrón usados en la romanización japonesa (p. ej. Tōkyō, rāmen, jūdō) se normalizan desde esta versión igual que el resto de los signos diacríticos extranjeros — en la mayoría de los idiomas a la letra simple (Tokyo), y en el paquete finlandés mediante la duplicación de la vocal (Tookyoo), conforme a la convención finlandesa de notación de sonidos largos. Gracias a ello ya no se salen del alfabeto del Cifrado César como caracteres visibles en el criptograma.</p>
 <h2>Detección de idioma</h2>
 <p>Antes de que el script "estropee" el texto, verifica en qué idioma está escrito. Si detecta que no es polaco, mostrará una advertencia. Las reglas fonéticas están diseñadas para el idioma polaco: aplicarlas a un texto en otro idioma daría resultados impredecibles.</p>
 <h2>Acentos optimizados para sintetizadores locales (NVDA)</h2>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Komplettanleitung (Version 18.10.0 – Release-Version)</title>
+<title>Reżyser Audio GPT — Komplettanleitung (Version 18.11.0 – Release-Version)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Komplettanleitung (Version 18.10.0 – Release-Version)</h1>
+<h1>Reżyser Audio GPT — Komplettanleitung (Version 18.11.0 – Release-Version)</h1>
 <p>Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.</p>
 <p>Das Set besteht aus dem Hauptstudio (Regie), einem Übersetzungs- und Akzentwerkzeug (Polyglott), einem Werkzeug zum Erstellen der Dateistruktur (Hörbucharchitekt), einem Regelmanager (ab Version 13.0 — ohne Python kannst du einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen, siehe SCHRITT 7b unten) und — ab Version 15.0 — einem Geschichtenmodul (interaktive, zweite Person AI-generierte Fiktion, gelesen von TTS oder Screenreader, beschrieben in einem separaten Handbuch tales.de.html). Alle fünf Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+5 umgeschaltet werden kann.</p>
 <h2>SCHRITT 1: Erste Ausführung (Cross-Platform)</h2>
@@ -235,6 +235,15 @@ Ihr fragt euch sicherlich, ob der Synthesizer in der Lage sein wird, solche norm
 </ul>
 <p>Praktische Anwendung: Die Verschlüsselungen speichern das Ergebnis im gleichen Format wie der Regisseur-Modus (.html mit Sprach-Tag oder .docx mit XML-Tags), sodass NVDA sie mit der Stimme der entsprechenden Sprache liest. Besonders der Textumkehrer und der Vokalisierer klingen im Synthesizer viel interessanter, als wenn du sie mit den Augen liest — denn das Gehirn versucht beim visuellen Lesen automatisch, den Text zu „entschlüsseln", während TTS ihn genau so liest, wie er geschrieben ist.</p>
 <p>Alle sechs Verschlüsselungen sind auch in einer breiteren, zugänglichen Sprache in der Datei docs/dictionaries.pl.html im Anwendungspaket beschrieben — zusammen mit Tipps, wie man ohne Programmierkenntnisse eine eigene Verschlüsselung vom Typ „Buchstabentausch" hinzufügen kann (z.B. Schulsprache, Kauderwelsch).</p>
+<h2>Verarbeitungssprache, Erzwingung und Qualitätsmodus (NEU in 18.11)</h2>
+<p>Der Bereich zum Laden der Datei verfügt jetzt über eine Dropdown-Liste für die Verarbeitungssprache. Mit ihr legst du fest, nach welchen Regeln welcher Sprache die Modi Regisseur und Kryptograph arbeiten: Listen der Akzente und Chiffren sowie das Alphabet der Caesar-Chiffre samt Verschiebungsbereich.</p>
+<ul>
+<li>Die Standardposition „Automatisch erkennen" behält das bisherige Verhalten bei: Die Sprache wird anhand der geladenen Datei bestimmt, und wenn sie sich von der Sprache der Anwendung unterscheidet, erhältst du eine kurze Benachrichtigung, dass die Listen umgeschaltet wurden.</li>
+<li>Die Auswahl einer bestimmten Sprache aus der Liste ist bindend — die Anwendung ändert sie beim Laden einer Datei nicht eigenständig.</li>
+</ul>
+<p>Unter der Liste befindet sich ein Kontrollkästchen, das die gewählte Sprache für das gesamte Dokument erzwingt. Standardmäßig wird jeder Absatz nach der für diesen Absatz erkannten Sprache verarbeitet — das ist normalerweise die beste Wahl, da fremdsprachige Einschübe ihre eigenen, korrekten Regeln erhalten. Aktiviere die Erzwingung, wenn dir eine einheitliche Verarbeitung des gesamten Textes wichtig ist. Ein Beispiel, bei dem dies notwendig ist: umkehrbare mehrschichtige Verschlüsselung. Das Alphabet der Caesar-Chiffre hat in jeder Sprache eine andere Länge, sodass ohne Erzwingung ein sprachlich gemischter Text mit mehreren unterschiedlichen Alphabeten verschlüsselt würde — und die Entschlüsselung würde dann Kenntnis darüber voraussetzen, wo die Sprachgrenzen verliefen. Bei erzwungener Sprache verschlüsselt und entschlüsselt das gesamte Dokument ein und dasselbe Alphabet. Einschränkung: In Sprachen, deren Caesar-Alphabet diakritische Buchstaben enthält, die beim Laden normalisiert werden (Polnisch, Deutsch), ist die Entschlüsselung nicht vollständig verlustfrei — diakritische Buchstaben des Chiffretexts werden beim erneuten Laden in ihre Grundformen umgewandelt, bevor sie die Entschlüsselung erreichen. Volle Umkehrbarkeit bieten Alphabete ohne solche Zeichen (z. B. Englisch).</p>
+<p>Der KI-Übersetzer hat hingegen ein Kontrollkästchen für den Qualitätsmodus erhalten. Ist es aktiviert, erhält das Modell ein zusätzliches Budget für die interne Textanalyse vor der Übersetzung (sogenanntes extended thinking) — die Übersetzung dauert länger und kostet mehr Token, aber schwierige Textstellen fallen sorgfältiger aus. Die Option funktioniert ausschließlich mit Anthropic-Claude-Modellen; wenn du einen alternativen Anbieter über einen OpenAI-kompatiblen Endpunkt nutzt, hat das Aktivieren keine Wirkung.</p>
+<p>Eine verwandte Kleinigkeit: Zeichen mit Makron, die in der japanischen Romanisierung verwendet werden (z. B. Tōkyō, rāmen, jūdō), werden ab dieser Version wie andere fremde diakritische Zeichen normalisiert — in den meisten Sprachen zum blanken Buchstaben (Tokyo), im finnischen Paket hingegen durch Verdopplung des Vokals (Tookyoo), gemäß der finnischen Schreibkonvention für lange Laute. Dadurch fallen sie nicht mehr als offene Zeichen im Chiffretext aus dem Alphabet der Caesar-Chiffre heraus.</p>
 <h2>Spracherkennung</h2>
 <p>Bevor das Skript den Text "verändert", überprüft es, in welcher Sprache er geschrieben ist. Wenn es erkennt, dass es sich nicht um Polnisch handelt, wird eine Warnung angezeigt. Die phonetischen Regeln sind auf die polnische Sprache zugeschnitten — die Anwendung auf fremdsprachige Texte würde unvorhersehbare Ergebnisse liefern.</p>
 <h2>Akzente optimiert für lokale Sprachsynthesizer (NVDA)</h2>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.10.0 – Útgáfuútgáfa)</title>
+<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.11.0 – Útgáfuútgáfa)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.10.0 – Útgáfuútgáfa)</h1>
+<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.11.0 – Útgáfuútgáfa)</h1>
 <p>Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).</p>
 <p>Verkfærakistan samanstendur af aðalstúdíóinu (Leikstjórn), þýðinga- og hreimaverkfærinu (Tungumálamaður), skráarbyggingarverkfærinu (Hljóðbókararkitekt), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleidd gagnvirk skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti tales.is.html). Öll fimm verkfærin eru aðgengileg í einu forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.</p>
 <h2>SKREF 1: Fyrsta gangsetning (Cross-Platform)</h2>
@@ -235,6 +235,15 @@ Valmöguleikinn með talnaviðmiðunar breytir sjálfkrafa tölum í orðform (t
 </ul>
 <p>Hagnýt notkun: dulritin vista niðurstöðuna á sama formi og Leikstjórahamur (.html með lang tagi eða .docx með XML merkjum), þannig að NVDA les þau með rödd viðeigandi tungumáls. Sérstaklega Afturköllun og Sérhljóðari hljóma í talgervli mun áhugaverðari en þegar þú lest þau með augunum — því heilinn reynir sjálfkrafa að „afkóða" textann við sjónlestur, en TTS les hann nákvæmlega eins og hann er skráður.</p>
 <p>Öll sex dulritin eru einnig lýst á breiðari, aðgengilegri hátt í skjalinu docs/dictionaries.pl.html í forritapakkanum — ásamt ráðum um hvernig á að bæta við eigin dulriti af gerðinni „skipta um stafi" án þess að kunna forritun (t.d. skólaslang, grasamál).</p>
+<h2>Vinnslutungumál, þvingun og gæðahamur (NÝTT í 18.11)</h2>
+<p>Skjalahlutinn hefur nú fellilista fyrir vinnslutungumál. Með honum velur þú samkvæmt reglum hvaða tungumáls Leikstjórnar- og Dulkóðunarhamur vinna: hreimlista og dulmálslista, ásamt stafrófi Sesarslykils og tilfærsluspönn þess.</p>
+<ul>
+<li>Sjálfgefna stillingin „Greina sjálfkrafa" heldur fyrra hegðunarmynstri: tungumálið ákvarðast út frá innlesnu skjali, og ef það er annað en tungumál forritsins færðu stutta tilkynningu um að listarnir hafi verið skiptir yfir.</li>
+<li>Val á tilteknu tungumáli úr listanum er bindandi — forritið breytir því ekki sjálfkrafa við innlestur skjals.</li>
+</ul>
+<p>Undir listanum er valreitur sem þvingar valið tungumál fyrir allt skjalið. Sjálfgefið er hver efnisgrein unnin samkvæmt tungumáli sem greinist fyrir þá efnisgrein — það er yfirleitt besti kosturinn, því innskot á öðrum tungumálum fá sínar eigin, réttu reglur. Merktu við þvingun þegar þú vilt samræmda vinnslu á öllu skjalinu. Dæmi þar sem þetta er nauðsynlegt: afturkræf fjöllaga dulritun. Stafróf Sesarslykils er mislangt eftir tungumálum, svo án þvingunar verður texti með blönduðum tungumálum dulritaður með nokkrum ólíkum stafrófum — og þá krefst afkóðun þess að vita hvar tungumálamörkin lágu. Með þvinguðu tungumáli dulritar og afkóðar allt skjalið eitt og sama stafróf. Fyrirvari: í tungumálum þar sem Caesar-stafrófið inniheldur broddstafi sem eru samræmdir við innlestur (pólska, þýska) er afkóðunin ekki fullkomlega trú — broddstafir dulritextans eru umbreyttir í grunnform sín við endurinnlestur, áður en þeir ná afkóðuninni. Full afturkræfni fæst með stafrófum án slíkra tákna (t.d. ensku).</p>
+<p>Gervigreindarþýðandinn hefur hins vegar fengið nýjan valreit fyrir gæðahaminn. Þegar merkt er við hann fær líkanið aukið svigrúm fyrir innri textagreiningu áður en þýtt er (svokölluð extended thinking) — þýðingin tekur lengri tíma og kostar fleiri tákneiningar (tokens), en erfiðir kaflar verða vandaðri. Valkosturinn virkar eingöngu með Anthropic Claude-líkönum; ef þú notar annan þjónustuveitanda gegnum OpenAI-samhæft endapunkt hefur merking við hann engin áhrif.</p>
+<p>Skyld smáatriði: Stafir með makron sem notaðir eru við umritun japönsku (t.d. Tōkyō, rāmen, jūdō) eru frá og með þessari útgáfu samræmdir eins og aðrir erlendir broddstafir — í flestum tungumálum í hreinan staf (Tokyo), en í finnska pakkanum með tvöföldun sérhljóðans (Tookyoo), í samræmi við finnsku venjuna við ritun langra hljóða. Þannig detta þeir ekki lengur út úr stafrófi Sesarslykils sem opinská tákn í dulritextanum.</p>
 <h2>Málgreining</h2>
 <p>Áður en skriftin "spillar" textanum, athugar hún hvaða tungumál textinn er skrifaður á. Ef hún greinir að það sé ekki pólskur texti, birtir hún viðvörun. Hljóðfræðilegu reglurnar eru sniðnar fyrir pólsku — að beita þeim á texta á öðru tungumáli myndi leiða til ófyrirsjáanlegra áhrifa.</p>
 <h2>Akcentar hannaðir fyrir staðbundna talgervla (NVDA)</h2>

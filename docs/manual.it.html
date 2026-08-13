@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guida completa (Versione 18.10.0 – Versione di Rilascio)</title>
+<title>Reżyser Audio GPT — Guida completa (Versione 18.11.0 – Versione di Rilascio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guida completa (Versione 18.10.0 – Versione di Rilascio)</h1>
+<h1>Reżyser Audio GPT — Guida completa (Versione 18.11.0 – Versione di Rilascio)</h1>
 <p>Benvenuto nello Studio di Registrazione Ibrido! Questo set di strumenti consente la scrittura automatica, la pianificazione, la formattazione e la traduzione di script per audiodrammi e audiolibri. È stato ottimizzato per lavorare con sintetizzatori vocali professionali e motori di lettura dello schermo locali (NVDA).</p>
 <p>Il set è composto dallo studio principale (Regia), dallo strumento per traduzioni e accenti (Poliglotta), dallo strumento per la costruzione della struttura del file (Architetto Audiolibri), dal Gestore delle Regole (dalla versione 13.0 — senza Python puoi aggiungere un nuovo accento, cifra o modalità creativa, vedi PASSO 7b sotto) e — dalla versione 15.0 — dal modulo Racconti (finzione interattiva in seconda persona generata da AI, letta da TTS o lettore dello schermo, descritta nel manuale separato tales.it.html). Tutti e cinque gli strumenti sono disponibili in un'unica finestra del programma, commutabile tramite pulsanti sulla barra o scorciatoie da tastiera Ctrl+1..Ctrl+5.</p>
 <h2>PASSO 1: Primo avvio (Cross-Platform)</h2>
@@ -235,6 +235,15 @@ Vi chiederete se il sintetizzatore sarà in grado di declinare tali numeri norma
 </ul>
 <p>Applicazione pratica: i cifrari salvano il risultato nello stesso formato della Modalità Regista (.html con tag lang o .docx con tag XML), quindi NVDA li leggerà con la voce della lingua appropriata. In particolare, l'Invertitore e il Vocalizzatore suonano nel sintetizzatore molto più interessanti di quando li leggi con gli occhi — perché il cervello durante la lettura visiva cerca automaticamente di "decodificare" il testo, mentre il TTS lo legge esattamente come è scritto.</p>
 <p>Tutti e sei i cifrari sono descritti anche in un linguaggio più ampio e accessibile nel file docs/dictionaries.pl.html nel pacchetto dell'applicazione — insieme a consigli su come aggiungere un proprio cifrario del tipo "sostituzione di lettere" senza conoscenze di programmazione (ad esempio, linguaggio gergale scolastico, linguaggio-trava).</p>
+<h2>Lingua di elaborazione, forzatura e modalità qualità (NOVITÀ nella 18.11)</h2>
+<p>La sezione di caricamento file dispone ora di un menu a tendina della lingua di elaborazione. Con questo selettore stabilisci secondo le regole di quale lingua operano le modalità Regista e Cifrante: gli elenchi di accenti e cifrari, nonché l'alfabeto del Cifrario di Cesare insieme all'intervallo di spostamento.</p>
+<ul>
+<li>La posizione predefinita „Rileva automaticamente" mantiene il comportamento finora in uso: la lingua viene determinata in base al file caricato, e quando differisce dalla lingua dell'applicazione, riceverai una breve notifica che gli elenchi sono stati cambiati.</li>
+<li>La scelta di una lingua specifica dall'elenco è vincolante — l'applicazione non la modificherà autonomamente durante il caricamento del file.</li>
+</ul>
+<p>Sotto l'elenco si trova una casella di selezione che forza la lingua scelta per l'intero documento. Per impostazione predefinita ogni paragrafo viene elaborato secondo la lingua rilevata per quel paragrafo — questa è di norma la scelta migliore, poiché gli inserti in lingua straniera ricevono le proprie, corrette regole. Attiva la forzatura quando ti interessa un'elaborazione uniforme dell'intero testo. Un esempio in cui ciò è necessario: la cifratura multistrato reversibile. L'alfabeto del Cifrario di Cesare ha in ogni lingua una lunghezza diversa, quindi senza la forzatura un testo mistilingue verrà cifrato con diversi alfabeti — e allora la decifrazione richiede di sapere dove passavano i confini tra le lingue. Con la lingua forzata, l'intero documento viene cifrato e decifrato con un unico, medesimo alfabeto. Avvertenza: nelle lingue il cui alfabeto di Cesare contiene lettere diacritiche normalizzate al caricamento (polacco, tedesco), la decifrazione non è del tutto fedele — le lettere diacritiche del crittogramma vengono convertite nelle loro forme base al nuovo caricamento, prima di raggiungere la decifrazione. La reversibilità completa è garantita dagli alfabeti privi di tali caratteri (ad es. l'inglese).</p>
+<p>Il Traduttore AI ha invece guadagnato una casella di selezione per la modalità qualità. Una volta selezionata, il modello riceve un budget aggiuntivo per l'analisi interna del testo prima della traduzione (il cosiddetto extended thinking) — la traduzione richiede più tempo e costa più token, ma i passaggi difficili risultano più curati. L'opzione funziona esclusivamente con i modelli Anthropic Claude; se utilizzi un fornitore alternativo tramite un endpoint compatibile con OpenAI, la selezione non ha alcun effetto.</p>
+<p>Un dettaglio correlato: i caratteri con macron usati nella romanizzazione giapponese (ad es. Tōkyō, rāmen, jūdō) vengono da questa versione normalizzati come gli altri segni diacritici stranieri — nella maggior parte delle lingue nella lettera semplice (Tokyo), mentre nel pacchetto finlandese tramite raddoppio della vocale (Tookyoo), secondo la convenzione finlandese di trascrizione dei suoni lunghi. Grazie a ciò non escono più dall'alfabeto del Cifrario di Cesare come caratteri in chiaro nel crittogramma.</p>
 <h2>Detección della lingua</h2>
 <p>Prima che lo script "rovini" il testo, verifica in quale lingua è scritto. Se rileva che non è polacco, visualizzerà un avviso. Le regole fonetiche sono progettate per il polacco — applicarle a un testo in lingua straniera darebbe risultati imprevedibili.</p>
 <h2>Akcenti ottimizzati per i sintetizzatori locali (NVDA)</h2>
