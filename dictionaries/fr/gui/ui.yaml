@@ -694,16 +694,6 @@ poliglota:
     ({liczba_znakow} caractères).
 
     Vous pouvez maintenant configurer le mode de travail et lancer le traitement.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
-  zmiana_jezyka_pipeline_tytul: "Langue détectée différente de la langue active"
-  zmiana_jezyka_pipeline_tresc: |-
-    Le contenu du fichier chargé est en langue « {jezyk_wykryty} ».
-    L'ensemble de règles actif (accents/chiffrements) est actuellement « {jezyk_aktywny} ».
-
-    Voulez-vous changer les règles vers « {jezyk_wykryty} » ?
-
-    OUI — les étiquettes des accents et des chiffrements ainsi que les règles phonétiques changeront vers « {jezyk_wykryty} », en fonction du contenu du fichier.
-    NON — je laisse les règles pour « {jezyk_aktywny} ». L'effet sur un texte en langue étrangère pourrait être imprévisible.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Configuration du Travail"
   rb_ai: "Traducteur IA (Anthropic Claude – nécessite une clé API, consomme des crédits)"
@@ -809,6 +799,18 @@ poliglota:
   ai_postep_iso: Génération de la balise linguistique pour les lecteurs d'écran…
   ai_postep_zapis: Enregistrement du fichier de sortie…
   err_tokenizer_offline: 'Pas de connexion Internet : impossible de télécharger le dictionnaire du tokeniseur nécessaire pour découper le texte. Vérifiez votre connexion et réessayez.'
+  lbl_jezyk_pipeline: "Langue de traitement (règles d'accents et de chiffrement) :"
+  jezyk_auto: Détecter automatiquement
+  combo_jezyk_name: Choix de la langue de traitement
+  combo_jezyk_tooltip: Choisissez le jeu de règles pour les modes Réalisateur et Chiffrant. « Détecter automatiquement » détermine la langue à partir du fichier chargé.
+  chk_wymus: Forcer cette langue pour tout le document (sans détection de la langue des paragraphes)
+  chk_wymus_name: Forçage de la langue pour tout le document
+  chk_wymus_tooltip: Par défaut, chaque paragraphe est traité selon la langue détectée pour lui. Cochez cette option pour que tout le document — y compris les passages en langue étrangère — soit traité selon les règles d'une seule langue (par ex. chiffrement de César réversible avec un seul alphabet).
+  wykryto_jezyk_tytul: Langue du document détectée
+  wykryto_jezyk_tresc: "Le contenu du fichier chargé est en langue « {jezyk_wykryty} ».\nLes listes d'accents et de chiffrements ont été basculées sur cette langue."
+  chk_quality: Mode qualité — réflexion plus approfondie du modèle (plus lent et plus coûteux ; sans effet sur les points de terminaison compatibles OpenAI)
+  chk_quality_name: Mode qualité de traduction
+  chk_quality_tooltip: Le modèle reçoit un budget pour une analyse interne du texte avant la traduction (extended thinking). Cela améliore les passages difficiles au prix du temps et des tokens. Concerne uniquement Anthropic Claude — sans effet sur les points de terminaison compatibles OpenAI.
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)

@@ -735,18 +735,6 @@ poliglota:
     ({liczba_znakow} znaków).
 
     Możesz teraz skonfigurować tryb pracy i uruchomić przetwarzanie.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny zestaw reguł.
-  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
-  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
-  # 18.11: klucze zmiana_jezyka_pipeline_* NIEUŻYWANE (dialog YES/NO
-  # zastąpiony powiadomieniem wykryto_jezyk_* — jawny wybór języka ma
-  # własne combo). Do usunięcia ×9 przy domykaniu wydania.
-  zmiana_jezyka_pipeline_tytul: "Wykryto inny język niż aktywny"
-  zmiana_jezyka_pipeline_tresc: |-
-    Treść wczytanego pliku jest w języku „{jezyk_wykryty}".
-    Aktywny zestaw reguł (akcenty/szyfry) to obecnie „{jezyk_aktywny}".
-
-    Czy przełączyć reguły na „{jezyk_wykryty}"?
   # 18.11: jawny wybór języka pipeline'u + wymuszanie na cały dokument.
   # Pozycja „auto" odtwarza dotychczasową detekcję z pliku.
   lbl_jezyk_pipeline:    "Język przetwarzania (reguły akcentów i szyfrów):"

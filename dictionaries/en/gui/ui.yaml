@@ -695,18 +695,6 @@ poliglota:
     ({liczba_znakow} characters).
 
     You can now configure the working mode and start processing.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
-  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
-  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
-  zmiana_jezyka_pipeline_tytul: "Detected language different from active"
-  zmiana_jezyka_pipeline_tresc: |-
-    The content of the loaded file is in the language "{jezyk_wykryty}".
-    The active set of rules (accents/ciphers) is currently "{jezyk_aktywny}".
-
-    Switch rules to "{jezyk_wykryty}"?
-
-    YES – accent and cipher labels and phonetic rules will change to "{jezyk_wykryty}", according to the file content.
-    NO – keep rules for "{jezyk_aktywny}". The effect on foreign language text may be unpredictable.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Work Configuration"
   rb_ai: "AI Translator (Anthropic Claude – requires API key, costs credits)"
@@ -812,6 +800,18 @@ poliglota:
   ai_postep_iso: Generating language tag for screen readers…
   ai_postep_zapis: Saving output file…
   err_tokenizer_offline: 'No internet connection: unable to download the tokenizer dictionary needed to split the text. Check your connection and try again.'
+  lbl_jezyk_pipeline: 'Processing language (accent and cipher rules):'
+  jezyk_auto: Detect automatically
+  combo_jezyk_name: Processing language selection
+  combo_jezyk_tooltip: Choose the rule set for Director and Cipher modes. "Detect automatically" sets the language based on the loaded file.
+  chk_wymus: Force this language for the entire document (disable per-paragraph language detection)
+  chk_wymus_name: Force language for the entire document
+  chk_wymus_tooltip: By default, each paragraph is processed according to its detected language. Check this to have the entire document — including foreign-language passages — processed using the rules of a single language (e.g. reversible Caesar cipher with one alphabet).
+  wykryto_jezyk_tytul: Document language detected
+  wykryto_jezyk_tresc: "The content of the loaded file is in \"{jezyk_wykryty}\".\nThe accent and cipher lists have been switched to this language."
+  chk_quality: Quality mode — deeper model reasoning (slower and more expensive; no effect on OpenAI-compatible endpoints)
+  chk_quality_name: Translation quality mode
+  chk_quality_tooltip: The model is given a budget for internal text analysis before translating (extended thinking). This improves difficult passages at the cost of time and tokens. Applies only to Anthropic Claude — has no effect on OpenAI-compatible endpoints.
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)

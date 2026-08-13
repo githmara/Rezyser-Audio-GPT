@@ -696,18 +696,6 @@ poliglota:
     ({liczba_znakow} caracteres).
 
     Ahora puedes configurar el modo de trabajo e iniciar el procesamiento.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
-  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
-  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
-  zmiana_jezyka_pipeline_tytul: "Se detectó un idioma diferente al activo"
-  zmiana_jezyka_pipeline_tresc: |-
-    El contenido del archivo cargado está en el idioma "{jezyk_wykryty}".
-    El conjunto de reglas activo (acentos/cifras) es actualmente "{jezyk_aktywny}".
-
-    ¿Cambiar las reglas a "{jezyk_wykryty}"?
-
-    SÍ – las etiquetas de acentos y cifras y las reglas fonéticas cambiarán a "{jezyk_wykryty}", de acuerdo con el contenido del archivo.
-    NO – dejo las reglas para "{jezyk_aktywny}". El efecto en el texto en otro idioma puede ser impredecible.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Configuración de Trabajo"
   rb_ai: "Traductor IA (Anthropic Claude – requiere clave API, consume créditos)"
@@ -813,6 +801,18 @@ poliglota:
   ai_postep_iso: Generando etiqueta de idioma para lectores de pantalla…
   ai_postep_zapis: Guardando archivo de resultado…
   err_tokenizer_offline: 'Sin conexión a Internet: no se pudo descargar el diccionario del tokenizador necesario para dividir el texto. Comprueba la conexión e inténtalo de nuevo.'
+  lbl_jezyk_pipeline: 'Idioma de procesamiento (reglas de acentos y cifrados):'
+  jezyk_auto: Detectar automáticamente
+  combo_jezyk_name: Selección del idioma de procesamiento
+  combo_jezyk_tooltip: Elige el conjunto de reglas para los modos Director y Cifrador. «Detectar automáticamente» determina el idioma según el archivo cargado.
+  chk_wymus: Forzar este idioma para todo el documento (sin detección de idioma por párrafo)
+  chk_wymus_name: Forzar idioma para todo el documento
+  chk_wymus_tooltip: De forma predeterminada, cada párrafo se procesa según el idioma detectado para él. Marca esta opción para que todo el documento —incluidos los fragmentos en otros idiomas— se procese con las reglas de un solo idioma (por ejemplo, para un cifrado César reversible con un solo alfabeto).
+  wykryto_jezyk_tytul: Idioma del documento detectado
+  wykryto_jezyk_tresc: "El contenido del archivo cargado está en «{jezyk_wykryty}».\nLas listas de acentos y cifrados se han cambiado a este idioma."
+  chk_quality: Modo calidad — el modelo reflexiona más a fondo (más lento y caro; sin efecto en endpoints compatibles con OpenAI)
+  chk_quality_name: Modo de calidad de traducción
+  chk_quality_tooltip: El modelo recibe un presupuesto para el análisis interno del texto antes de traducir (extended thinking). Mejora los fragmentos difíciles a costa de tiempo y tokens. Se aplica únicamente a Anthropic Claude; en los endpoints compatibles con OpenAI no tiene efecto.
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)

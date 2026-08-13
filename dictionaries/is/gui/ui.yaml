@@ -696,18 +696,6 @@ poliglota:
     ({liczba_znakow} stafir).
 
     Þú getur nú stillt vinnuham og keyrt vinnslu.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
-  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
-  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
-  zmiana_jezyka_pipeline_tytul: "Annar tungumál en virkur greindist"
-  zmiana_jezyka_pipeline_tresc: |-
-    Innihald hlaðinnar skráar er á tungumálinu „{jezyk_wykryty}".
-    Virkur reglusett (áherslur/dulkóðar) er nú „{jezyk_aktywny}".
-
-    Á að skipta um reglur í „{jezyk_wykryty}"?
-
-    JÁ – merkingar áherslna og dulkóða og hljóðfræðireglur breytast í „{jezyk_wykryty}", í samræmi við innihald skráar.
-    NEI – ég læt reglur fyrir „{jezyk_aktywny}". Áhrif á texta á erlendu tungumáli gætu verið ófyrirsjáanleg.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Vinnuhamur"
   rb_ai: "AI-þýðandi (Anthropic Claude – krefst API-lykils, kostar inneign)"
@@ -813,6 +801,18 @@ poliglota:
   ai_postep_iso: Búa til tungumálamerki fyrir skjálesara…
   ai_postep_zapis: Vista niðurstöðuskrá…
   err_tokenizer_offline: 'Engin nettenging: ekki tókst að sækja orðasafn tákngerandans sem þarf til að skipta textanum niður. Athugaðu tenginguna og reyndu aftur.'
+  lbl_jezyk_pipeline: 'Vinnslumál (reglur um áherslur og dulmál):'
+  jezyk_auto: Greina sjálfkrafa
+  combo_jezyk_name: Val á vinnslumáli
+  combo_jezyk_tooltip: Veldu reglusett fyrir Leikstjórnar- og Dulkóðunarham. „Greina sjálfkrafa" ákvarðar málið út frá skránni sem hlaðið er inn.
+  chk_wymus: Þvinga þetta mál fyrir allt skjalið (án greiningar á máli einstakra málsgreina)
+  chk_wymus_name: Þvinguð málstilling fyrir allt skjalið
+  chk_wymus_tooltip: Sjálfgefið er hver málsgrein unnin samkvæmt því máli sem greinist fyrir hana. Merktu þennan valkost til að allt skjalið — þar á meðal innskot á öðrum tungumálum — fari í gegnum reglur eins tiltekins máls (t.d. afturkræfa Caesar-dulritun með einu stafrófi).
+  wykryto_jezyk_tytul: Mál skjals greint
+  wykryto_jezyk_tresc: "Efni skráarinnar sem hlaðið var inn er á „{jezyk_wykryty}\".\nListar yfir áherslur og dulmál hafa verið skipt yfir í þetta mál."
+  chk_quality: Gæðastilling — dýpri yfirvegun líkans (hægara og dýrara; hefur engin áhrif á OpenAI-samhæfð endapunkta)
+  chk_quality_name: Gæðastilling þýðingar
+  chk_quality_tooltip: Líkanið fær fjárveitingu fyrir innri greiningu textans áður en þýðing hefst (extended thinking). Þetta bætir erfiða hluta á kostnað tíma og tóka. Gildir aðeins um Anthropic Claude — hefur engin áhrif á OpenAI-samhæfð endapunkta.
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)

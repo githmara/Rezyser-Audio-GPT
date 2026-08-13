@@ -694,18 +694,6 @@ poliglota:
     ({liczba_znakow} merkkiä).
 
     Voit nyt määrittää toimintatilan ja aloittaa käsittelyn.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
-  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
-  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
-  zmiana_jezyka_pipeline_tytul: "Havaittu muu kieli kuin aktiivinen"
-  zmiana_jezyka_pipeline_tresc: |-
-    Ladatun tiedoston sisältö on kielellä "{jezyk_wykryty}".
-    Aktiivinen sääntöjoukko (aksentit/salaukset) on tällä hetkellä "{jezyk_aktywny}".
-
-    Vaihdetaanko säännöt "{jezyk_wykryty}"?
-
-    KYLLÄ – aksenttien ja salausten etiketit sekä foneettiset säännöt muuttuvat "{jezyk_wykryty}", tiedoston sisällön mukaisesti.
-    EI – jätän säännöt "{jezyk_aktywny}". Vaikutus vieraskieliseen tekstiin voi olla arvaamaton.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Työn Konfigurointi"
   rb_ai: "Tekoälykääntäjä (Anthropic Claude – vaatii API-avaimen, kuluttaa krediittejä)"
@@ -811,6 +799,18 @@ poliglota:
   ai_postep_iso: Kielitunnisteen luominen ruudunlukijoille…
   ai_postep_zapis: Tulostiedoston tallentaminen…
   err_tokenizer_offline: 'Ei internetyhteyttä: tekstin jakamiseen tarvittavan tokenisaattorin sanaston lataaminen epäonnistui. Tarkista yhteys ja yritä uudelleen.'
+  lbl_jezyk_pipeline: 'Käsittelykieli (aksentti- ja salaussäännöt):'
+  jezyk_auto: Tunnista automaattisesti
+  combo_jezyk_name: Käsittelykielen valinta
+  combo_jezyk_tooltip: Valitse sääntökokoelma Ohjaajan ja Koodinmurtajan tiloille. ”Tunnista automaattisesti” määrittää kielen ladatun tiedoston perusteella.
+  chk_wymus: Pakota tämä kieli koko asiakirjalle (ei kappalekohtaista kielentunnistusta)
+  chk_wymus_name: Kielen pakottaminen koko asiakirjalle
+  chk_wymus_tooltip: Oletuksena kukin kappale käsitellään sille tunnistetun kielen mukaan. Valitse tämä, jotta koko asiakirja — myös vieraskieliset osuudet — käsitellään yhden kielen säännöillä (esim. palautuva Caesar-salaus yhdellä aakkostolla).
+  wykryto_jezyk_tytul: Asiakirjan kieli tunnistettu
+  wykryto_jezyk_tresc: "Ladatun tiedoston sisältö on kielellä ”{jezyk_wykryty}”.\nAksentti- ja salauslistat on vaihdettu tähän kieleen."
+  chk_quality: Laatutila — mallin syvempi harkinta (hitaampi ja kalliimpi; ei vaikutusta OpenAI-yhteensopivilla päätepisteillä)
+  chk_quality_name: Käännöksen laatutila
+  chk_quality_tooltip: Malli saa käyttöönsä budjetin tekstin sisäiseen analysointiin ennen kääntämistä (extended thinking). Parantaa vaikeiden kohtien käsittelyä ajan ja tokenien kustannuksella. Koskee vain Anthropic Claudea — OpenAI-yhteensopivilla päätepisteillä sillä ei ole vaikutusta.
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)

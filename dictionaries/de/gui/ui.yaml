@@ -696,18 +696,6 @@ poliglota:
     ({liczba_znakow} Zeichen).
 
     Sie können jetzt den Arbeitsmodus konfigurieren und die Verarbeitung starten.
-  # 13.4: dialog A11Y, gdy język wczytanej treści ≠ aktywny pipeline.
-  # Pokazywany PRZED cichą zmianą `_jezyk_aktywny`, żeby NVDA jawnie
-  # przeczytało, że etykiety akcentów/szyfrów się zmienią.
-  zmiana_jezyka_pipeline_tytul: "Andere Sprache als aktiv erkannt"
-  zmiana_jezyka_pipeline_tresc: |-
-    Der Inhalt der geladenen Datei ist in der Sprache „{jezyk_wykryty}".
-    Das aktive Regelset (Akzente/Verschlüsselungen) ist derzeit „{jezyk_aktywny}".
-
-    Möchten Sie die Regeln auf „{jezyk_wykryty}" umschalten?
-
-    JA – Die Etiketten für Akzente und Verschlüsselungen sowie die phonetischen Regeln ändern sich auf „{jezyk_wykryty}", entsprechend dem Inhalt der Datei.
-    NEIN – Ich lasse die Regeln für „{jezyk_aktywny}". Der Effekt auf fremdsprachigen Text kann unvorhersehbar sein.
   # Sekcja 2: konfiguracja trybu pracy
   section2_heading: "2. Arbeitskonfiguration"
   rb_ai: "KI-Übersetzer (Anthropic Claude – erfordert API-Schlüssel, verbraucht Credits)"
@@ -813,6 +801,18 @@ poliglota:
   ai_postep_iso: Generierung des Sprach-Tags für Bildschirmleser…
   ai_postep_zapis: Ergebnisdatei wird gespeichert…
   err_tokenizer_offline: 'Keine Internetverbindung: Das für die Textaufteilung benötigte Tokenizer-Wörterbuch konnte nicht heruntergeladen werden. Überprüfen Sie die Verbindung und versuchen Sie es erneut.'
+  lbl_jezyk_pipeline: 'Verarbeitungssprache (Regeln für Akzente und Chiffren):'
+  jezyk_auto: Automatisch erkennen
+  combo_jezyk_name: Auswahl der Verarbeitungssprache
+  combo_jezyk_tooltip: Wählen Sie den Regelsatz für den Regisseur- und den Kryptographen-Modus. „Automatisch erkennen" legt die Sprache anhand der geladenen Datei fest.
+  chk_wymus: Diese Sprache für das gesamte Dokument erzwingen (ohne Spracherkennung je Absatz)
+  chk_wymus_name: Sprachvorgabe für das gesamte Dokument
+  chk_wymus_tooltip: Standardmäßig wird jeder Absatz gemäß der für ihn erkannten Sprache verarbeitet. Aktivieren Sie diese Option, damit das gesamte Dokument – auch fremdsprachige Einschübe – den Regeln einer einzigen Sprache folgt (z. B. bei der umkehrbaren Caesar-Verschlüsselung mit einem einzigen Alphabet).
+  wykryto_jezyk_tytul: Dokumentsprache erkannt
+  wykryto_jezyk_tresc: "Der Inhalt der geladenen Datei ist in der Sprache „{jezyk_wykryty}\".\nDie Listen für Akzente und Chiffren wurden auf diese Sprache umgestellt."
+  chk_quality: Qualitätsmodus – tiefere Überlegung des Modells (langsamer und teurer; ohne Effekt bei OpenAI-kompatiblen Endpunkten)
+  chk_quality_name: Übersetzungsqualitätsmodus
+  chk_quality_tooltip: Das Modell erhält ein Budget für die interne Textanalyse vor der Übersetzung (Extended Thinking). Dies verbessert schwierige Textstellen auf Kosten von Zeit und Tokens. Betrifft ausschließlich Anthropic Claude – bei OpenAI-kompatiblen Endpunkten hat dies keine Wirkung.
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)
