@@ -54,7 +54,7 @@ tresc:
     - pólska (Ewa í Vocalizer, Paulina í OneCore)
     - rússneska (Milena í Vocalizer, Irina/Pavel/Yuri í OneCore — þessi er sérstakur, því í stað þess að "skemma" latneska stafi framkvæmir hann fulla transliteringu yfir í kyrillísku; án þess hefði rússneska röddin ekkert til að bera fram)
 
-    Auk þess eru tvær hreinsunarvalkostir í hreimavalmyndinni: einn án tölunormalíseringar og annar með normalíseringu (breytir "15" í "fimmtán" fyrir vinnslu, því útlendingur myndi líklega ekki beygja þessa tölu rétt — sem bætir við áreiðanleika) og "Tag Fixer", sem einfaldlega setur ISO tungumálakóða í skrána án þess að skemma innihaldið (björgun þegar þýdd skrá þín hefur rangt tungumálakóða).
+    Auk þess eru tveir hreinsunarvalkostir í hreimavalmyndinni: einn án tölunormalíseringar og annar með normalíseringu (breytir "15" í "fimmtán" fyrir vinnslu, því útlendingur myndi líklega ekki beygja þessa tölu rétt — sem bætir við áreiðanleika) og "Tag Fixer", sem einfaldlega setur ISO tungumálakóða í skrána án þess að skemma innihaldið (björgun þegar þýdd skrá þín hefur rangt tungumálakóða).
   co_to_szyfr: |
     ## Hvað er dulritun?
     -----------------

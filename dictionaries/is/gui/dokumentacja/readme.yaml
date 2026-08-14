@@ -41,7 +41,7 @@ tresc:
     Gagnvirkir textaleikir sem gervigreind stýrir í hlutverki frásagnarvélar. Ólíkt Leikstjórn (þar sem þú býrð til fullbúna hljóðbók), eru Sögur runa-eftir-runu kvik atburðarás:
 
     * **Valhamur:** hver umferð endar með 3-5 tölusettum valkostum A-E. Innsæisríkasti hamurinn fyrir blinda leikendur — NVDA les valkostina, þú ýtir á Tab og Enter.
-    * **Hamur Minna Illskunnar:** eins og Val, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnulega. Frá útgáfu 15.2 er til viðbótar „glasið" — endurnýtanlegur ZERO-tölusettur örvæntingarbjörgunarvalkostur, þar sem áhrifin eru gervi-tilviljunarkennd (60% skaðleg / 30% skynjunartruflandi / 10% sjaldan-hagstæð, dreifingin þvinguð fram af Python, LLM getur ekki fundið upp á hagstæðri niðurstöðu).
+    * **Hamur Minna Illskunnar:** eins og Val, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnulega. Frá útgáfu 15.2 er til viðbótar „flaskan" — endurnýtanlegur NÚLL-tölusettur örvæntingarbjörgunarvalkostur, þar sem áhrifin eru gervi-tilviljunarkennd (60% skaðleg / 30% skynjunartruflandi / 10% sjaldan-hagstæð, dreifingin þvinguð fram af Python, LLM getur ekki fundið upp á hagstæðri niðurstöðu).
     * **Frjáls Hamur:** hvaða aðgerð sem er í lausum texta („ég reyni að opna dyrnar"), vélin stingur upp á 1-3 tillögum en þvingar ekki fram val.
     * **Eitt gervigreindarlíkan fyrir alla hami:** frá útgáfu 18.1 nota allir hamir Sagnanna sama, sameiginlega líkanið (sjálfgefið og mælt með Anthropic Claude Sonnet 5) — öflugra líkan heldur sig nákvæmlega við reglur heimsins (sérstaklega mikilvægt í ham Minna Illskunnar, þar sem hver valkostur verður að vera raunverulega óhagstæður).
   modul_poliglota: |
