@@ -127,7 +127,7 @@ tresc:
     - Pitkäkestoinen muisti (vasen sivupalkki): Toinen kenttä sivupalkissa. Tänne tekoäly tallentaa automaattisesti juonen tiivistelmän, kun muisti alkaa täyttyä. Voit myös kirjoittaa tänne omia muistiinpanojasi manuaalisesti — malli käsittelee ne "mitä jo tiedän" -tietona ennen nykyisen kohtauksen lukemista. HISTORIALLINEN PUUTE (korjattu v15.5:ssä): aiemmin, jos kirjoitit tänne hyvin lyhyen muistiinpanon ja napsautit "Tallenna tiivistelmä" ennen kuin kerrontatiedostossa oli mitään merkittävää, seuraavan latauksen yhteydessä sovellus latasi ENSISIJAISESTI tiivistelmän ja OHITTI koko historian — malli sai silloin vain Maailmankirjan ja yksirivisen muistiinpanon ilman sävyn ja viimeisten kohtausten kontekstia. Versiosta v15.5 alkaen lataaminen on älykästä: jos koko historia mahtuu konteksti-ikkunaan, se ladataan kokonaisuudessaan (ja tarpeeton vanha tiivistelmä poistetaan), joten malli ei menetä kontekstia. Kerrontatiedoston manuaalisen muokkauksen jälkeen editorissa käytä uutta "{rezyser.btn_przeladuj_label}"-painiketta (versiosta v15.5), joka yhdellä napsautuksella synkronoi sisäisen muistin levyn kanssa; tiedoston avaamiseen editorissa käytetään edelleen "{rezyser.btn_otworz_narracje_label}"-painiketta.
     - Aivoriihitila: Kirjoita vapaa idea, ja tekoäly antaa sinulle 3 juonenkehitysvaihtoehtoa. Jokaiselle vaihtoehdolle se luo heti valmiin "--- PROMPTILUONNOS ---" -lohkon. Valittuasi yhden liitä tämä prompti Käsikirjoitus- tai Äänikirjatilaan ja lisää mahdolliset huomiot tai tiedot mallille. Juonimuisti ei muutu Aivoriihen aikana — voit kokeilla ilman riskiä!
     - Raaka käsikirjoitustila (versiosta v16.0 — lukuteatteriesitys): Liität tänne Aivoriihessä luodun "Promptiluonnoksen". Tekoäly kirjoittaa pitkän kerronta-dialogifragmentin: kerronnan (kulissit, aika, toiminta) [Narrator: ...] -tageissa sekä hahmojen repliikit [Nimi: tunne] -tageissa. Ei äänitehosteita — kontekstin kantaa kertoja sanoin. Teksti lisätään automaattisesti tiedostoosi (esim. uusi_kohtaus.txt) skrypty/-kansiossa. Tällaisen valmiin käsikirjoituksen voit sitten muuttaa moniääniseksi äänikirjaksi (silta ElevenLabs Studioon — erillinen luku alla).
-    - Perinteinen äänikirjatila: Kirjailijoille tarkoitettu tila. Tekoäly luo puhdasta kirjallista proosaa — ei tageja, ei fonetiikkaa, klassisia dialogeja kerrontaan upotettuna. Teksti lisätään tiedostoon samalla tavalla kuin Käsikirjoitustilassa.
+    - Perinteinen äänikirjatila: Kirjailijoille tarkoitettu tila. Tekoäly luo puhdasta kirjallista proosaa — ei tageja, ei fonetiikkaa, klassisia dialogeja kerrontaan upotettuina. Teksti lisätään tiedostoon samalla tavalla kuin Käsikirjoitustilassa.
     - Automaattinen hahmonluonti: Skripti on ohjelmoitu luomaan automaattisesti uusia [Speaker]-tageja, jos juoni vaatii uuden hahmon. Vinkki: Jos tekoäly luo hienon hahmon, kopioi sen tagi ja liitä se Maailmankirjaan, jotta malli muistaa sen pysyvästi!
 
     Projektinhallinta — kolme toimintopainiketta:
@@ -197,7 +197,7 @@ tresc:
 
     Näytöllä oleva "Mallin muisti" -ilmaisin näyttää, kuinka täynnä mallin konteksti-ikkuna on. Versiosta 15.1 alkaen kyse EI ole enää pelkästään kerrontamerkkien laskemisesta — sovellus laskee todelliset TOKENIT (samalla menetelmällä kuin malli itse) ja laskee yhteen KOKO tekoälylle lähetettävän kuorman: nykyisen historian, Pitkäkestoisen muistin (tiivistelmän) SEKÄ Maailmankirjan. Siksi ilmaisin kasvaa myös silloin, kun laajennat Maailmankirjaa tai sinulla on pitkä tiivistelmä — ei pelkästään kerronnan myötä. Arvo näytetään konteksti-ikkunan täyttöprosenttina:
     - Vihreä (noin 70 %:iin asti): Malli on täysin fokusoitunut, sinulla on turvallinen puskuri.
-    - Keltainen (noin 70–90 %): Lähestyt rajaa. Tekoäly saattaa alkaa lyhentää vastauksia ja sivuuttaa sääntöjä; suunnittelutilassa (Aivoriihi) moottori alkaa pakottaa tiivistelmän luomiseen. Ala hiljalleen sulkea juonilankaa.
+    - Keltainen (noin 70–90 %): Lähestyt rajaa. Tekoäly saattaa alkaa lyhentää vastauksia ja sivuuttaa sääntöjä; suunnittelutilassa (Aivoriihi) moottori alkaa pakottaa tekemään tiivistelmän. Ala hiljalleen sulkea juonilankaa.
     - Punainen (noin 90 % ylittyy): Kriittinen ylikuormitus!
 
     Tiivistelmäkynnyksen diagnostiikka (kun tekoäly hallusinoi ennen kynnysarvoa): kynnykset (varoitus ~70 %, hälytys ~90 %) on arvioitu empiirisesti. Jos huomaat toistuvan taipumuksen, että malli "karkaa" säännöistä tai alkaa hallusinoida ENNEN kuin ilmaisin siirtyy keltaiselle/punaiselle — eli aiemmin kuin kynnysarvo olettaa — avaa issue sovelluksen repositoriossa ja kuvaile, missä täyttöprosentissa (suunnilleen) asiat alkavat hajota, mieluiten esimerkin kera. Jos tämä taipumus vahvistuu laajemmin (muilla käyttäjillä, eri projekteissa), automaattisen tiivistämisen kynnystä lasketaan seuraavassa patchissa. Kyseessä on tietoisesti iteratiivinen mekanismi — on parempi hienosäätää se todellisen datan perusteella kuin arvata etukäteen.
@@ -335,7 +335,7 @@ tresc:
 
     - Rikkinäinen Puhelin / Käärmeiden kieli — jokainen "s", "z" tai digrafi "sz" venytetään satunnaisesti sihinäksi, jonka pituus on 4-8 merkkiä ("ssssss", "zzzzzz", "ssssssz"). Inspiraatio: Snecko pelistä "Slay the Spire". Vaikutus: teksti kuulostaa siltä kuin sen lukisi käärme, jolla on puhevika.
 
-    - Vokaalinvaihtaja (Kaikki kumisee "O":lla) — jokainen vokaali tekstissä korvataan "o":lla, säilyttäen suomen kielen pehmennykset. "Hyvää päivää" → "Hovoo povoo". Mitä pidempi teksti, sitä hauskempi vaikutus (ja ruudunlukija lukee sen täydellä vakuutuksella).
+    - Vokaalinvaihtaja (Kaikki kumisee "O":lla) — jokainen vokaali tekstissä korvataan "o":lla, säilyttäen suomen kielen pehmennykset. "Hyvää päivää" → "Hovoo poovoo". Mitä pidempi teksti, sitä hauskempi vaikutus (ja ruudunlukija lukee sen täydellä vakuutuksella).
 
     - Vahva Änkytys / Viallinen Robotti — lisää änkytyksiä sanojen alkuun: "t-t-t-tietokone", "pr-pr-prinsessa". Lyhyitä sanoja (alle 3 merkkiä) algoritmi jättää huomiotta. Jos sanan toinen kirjain on konsonantti, se toistaa kaksi ensimmäistä kirjainta (luonnollisempi vaikutus); jos vokaali, se toistaa vain ensimmäisen.
 
@@ -393,7 +393,7 @@ tresc:
     ## Apple (iPhone / iPad / Mac) — VoiceOver ja Vocalizer
     Apple-laitteissa Vocalizer-moottori on sisäänrakennettu käyttöjärjestelmään ja tukee kaikkia kieliä ilman lisäostoja. Oletuksena asennetut äänet ovat kuitenkin kompakteja versioita, jotka kuulostavat hieman mekaanisilta. Saadaksesi huomattavasti paremman ja luonnollisemman äänenlaadun, kannattaa ladata laajennetut tai premium-versiot:
     - iPhonessa/iPadissa: Asetukset → Käytettävyys → VoiceOver → Puhe → Ääni → valitse kieli (esim. Puola) → napauta äänen nimeä (esim. Ewa) → näet vaihtoehdot "Laajennettu" ja "Premium". Lataa valitsemasi versio — se vie enemmän tilaa levyllä, mutta ero laadussa on selvä.
-    - Macissa: Järjestelmäasetukset (tai Järjestelmäasetukset) → Käytettävyys → VoiceOver → Avaa VoiceOver-työkalu → Puhe → Ääni → napsauta "Mukauta" valitun äänen kohdalla ja lataa laajennettu tai premium-versio.
+    - Macissa: Järjestelmäasetukset → Käytettävyys → VoiceOver → Avaa VoiceOver-työkalu → Puhe → Ääni → napsauta "Mukauta" valitun äänen kohdalla ja lataa laajennettu tai premium-versio.
   krok_5_android: |
     ## Android — Vocalizer maksaa jokaisesta äänestä erikseen
     Androidilla Vocalizer on saatavilla sovelluksena Google Play Storessa (etsi "Vocalizer TTS"). Huomio: jokainen kieli ja ääni ostetaan erikseen — ei ole yhtä lisenssiä kaikille. Ennen ostoa voit testata ääntä muutaman minuutin ajan demotilassa. Oston jälkeen ääni liitetään Google-tiliisi ja sen voi asentaa mille tahansa laitteelle, jossa on sama tili.
@@ -538,7 +538,7 @@ tresc:
     **Sulkeissa olevien ohjauksellisten näyttämöohjeiden puhdistus (Polyglootti — Ohjaajan tila)**
     Skripti poistaa kokonaiset kaarisulkeisiin sijoitetut tekstinpätkät (esim. "(kuiskaten)", "(hengähdysten kera)"). ElevenLabs lukee vain dialogit ja kerronnan.
 
-    **Ääretön Muisti ja Automaattinen Yhteenveto (Ohjaus — Juonen Akku)**
+    **Ääretön Muisti ja Automaattinen Yhteenveto (Ohjaus — Juonen Akut)**
     Kun muisti-ilmaisin siirtyy punaisen hälytyksen tilaan, Aivoriihi luo automaattisesti juonen yhteenvedon ja tallentaa sen Pitkäkestoisen Muistin kenttään. Painikkeen "Tallenna Yhteenveto (pysyvästi)" napsauttaminen luo tiedoston _streszczenie.txt. Muistin tyhjentämisen ja yhteenvedon lataamisen jälkeen tarinaa voi jatkaa ilman pituusrajoituksia.
 
     **Äänikirjojen arkkitehti**
@@ -633,7 +633,7 @@ tresc:
     - Kovan projektin nollaus yhdellä napsautuksella Ohjaajassa.
     - Luovatilan automaattinen lataus projektin metatiedostosta.
     - Kaikki aiemmat aksentit (Englanti, Ranska, Saksa, Espanja, Italia, Puola, Islanti) sekä Tunnisteiden korjaaja.
-    - Täydet AI-toiminnot: Aivoriihi, Käsikirjoitus, Äänikirja, Juonen akkumulaattori, Loputon muisti, Otsikointi.
+    - Täydet AI-toiminnot: Aivoriihi, Käsikirjoitus, Äänikirja, Juonen Akut, Loputon muisti, Otsikointi.
   krok_7b_manager_regul_kolejnosc_zamian: |
     ## VAIHE 7b (täydennys): `zamiany:`-sääntöjen järjestyksellä on merkitystä
 

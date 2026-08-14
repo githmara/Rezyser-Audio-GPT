@@ -261,7 +261,7 @@ tresc:
             "Schwedisch (Alva / Oskar — OneCore/Vocalizer)"
           - "opis" — kurze Beschreibung für die Zukunft
           - "iso" — zweistelliger Sprachcode, für Schwedisch "sv"
-    4. Passen Sie die Liste der Ersetzungen an die schwedische Phonetik an
+    4. Passen Sie die "zamiany"-Liste an die schwedische Phonetik an
        (z.B. "å → o", löschen oder ändern Sie die finnischen Spezifika).
     5. Speichern und Anwendung neu starten. Das neue Schwedisch
        erscheint im Polyglott-Akzentmenü (und wenn Sie im Weltbuch des Projekts

@@ -141,7 +141,7 @@ tresc:
 
     VÄRILLISET MUISTITILAILMAISIMET — mallin muisti-indikaattori vaihtaa fontin väriä (vihreä/oranssi/punainen) täyttöasteen mukaan. Näkeville käyttäjille tämä on lisävisuaalinen signaali; NVDA lukee joka tapauksessa tilatekstin, joten näkövammaiset eivät menetä tietoa.
 
-    NÄPPÄIMISTÖPIKANÄPPÄIMET — kaikilla painikkeilla on `&`-merkki yhden etikettinsä kirjaimen edessä, mikä aktivoi Alt+kirjain-pikanäppäimen. Toimii identtisesti kuten sovelluksen muissa moduuleissa.
+    NÄPPÄIMISTÖPIKANÄPPÄIMET — kaikilla painikkeilla on `&`-merkki nimikkeen yhden kirjaimen edessä, mikä aktivoi Alt+kirjain-pikanäppäimen. Toimii identtisesti kuten sovelluksen muissa moduuleissa.
   najczestsze_problemy: |
     ## Yleisimmät ongelmat
 

@@ -142,7 +142,7 @@ tresc:
     4. Vokaalinvaihtaja (kaikki kumisee "o":na)
        Jokainen vokaali tekstissä muutetaan "o":ksi, säilyttäen suomenkieliset
        pehmennykset (ci, si, ni, zi, dzi käsitellään oikein): "Hyvää päivää,
-       tervetuloa" → "Hyoää poovoo, torvotooloo". Mitä pidempi teksti, sitä
+       tervetuloa" → "Hovoo poovoo, torvotoloo". Mitä pidempi teksti, sitä
        hauskempi vaikutus — ja ruudunlukija lukee sen täydellä vakuuttavuudella,
        yrittämättä purkaa sitä.
 
@@ -196,7 +196,7 @@ tresc:
                                näkövammaisille pelaajille)
     - tryb_mniejsze_zlo.yaml — Pienempi paha (kuten Valinnat, mutta jokainen
                                vaihtoehto on epäedullinen; versiosta 15.2
-                               lähtien uudelleenkäytettävä pullo NOLLA-numeroituna
+                               lähtien uudelleenkäytettävä pikkupullo NOLLA-numeroituna
                                epätoivoisen pelastuksen vaihtoehtona)
     - tryb_swobodny.yaml     — Vapaa (mikä tahansa toiminto vapaana tekstinä,
                                moottori ehdottaa 1-3 vaihtoehtoa mutta ei
@@ -256,7 +256,7 @@ tresc:
             "Ruotsalainen (Alva / Oskar — OneCore/Vocalizer)"
           - "kuvaus" — lyhyt kuvaus itsellesi tulevaisuutta varten
           - "iso" — kaksikirjaiminen kielikoodi, ruotsille "sv"
-    4. Säädä "korvaukset" -listaa ruotsalaiselle foneettisuudelle (esim.
+    4. Säädä "zamiany"-listaa ruotsalaiselle foneettisuudelle (esim.
        lisää "å → o", "ö → ö", poista tai muuta ne, jotka ovat erityisiä
        suomelle).
     5. Tallenna ja käynnistä sovellus uudelleen. Uusi ruotsalainen ilmestyy

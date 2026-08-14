@@ -6,7 +6,7 @@
 #
 #  v15.2 — pullomekaniikka (tiedostosta `notatki_dev/tales_mechanics.md §4`).
 #  Ilmestyy N kovan vuoron jälkeen (`fiolka.prog_aktywacji_tur`, oletus 4)
-#  kiinteänä paikkana `0) Avaa pullo`. Uudelleenkäytettävä: ei katoa käytön
+#  kiinteänä paikkana `0) Avaa pikkupullo`. Uudelleenkäytettävä: ei katoa käytön
 #  jälkeen. Ennustamaton: Python arpoo siemenen `opisy_skutkow`-poolista
 #  painoilla `wagi_skutkow` (oletus 60% harmful / 30% distortion /
 #  10% rare_beneficial — «never guaranteed salvation»). LLM vain
@@ -32,7 +32,7 @@ fiolka:
   # id=0-painikkeen otsikko (lokalisoitu per kieli). Sijainti on
   # MUUTTUMATON — aina ensimmäisenä `wybory[]`-listassa niin kauan kuin
   # pullo on läsnä ja rikkomaton.
-  etykieta_wyboru: "Avaa pullo"
+  etykieta_wyboru: "Avaa pikkupullo"
 
   # Vaikutuksen kategorian todennäköisyysjakauma avattaessa. Python arpoo
   # kategorian näillä painoilla → arpoo kuvauksen vastaavasta poolista →
@@ -89,14 +89,14 @@ prompt_systemowy: |
 
   KIELLETTY: ÄLÄ kerro pelaajalle, mitä pullo tekee. ÄLÄ lupaa pelastusta. ÄLÄ vihjaa, että se auttaisi. Pullo on arvoitus.
 
-  ### VAIHTOEHTO `0) Avaa pullo` (VAIHTOEHTOJEN LISTA)
+  ### VAIHTOEHTO `0) Avaa pikkupullo` (VAIHTOEHTOJEN LISTA)
 
   Kun `stan.fiolka.obecna == true` ja `stan.fiolka.zniszczona == false` (luet saapuvan `stan`:n käyttäjän payloadista), tulos-JSON:n `wybory[]`-kentässä laitat AINA ENSIMMÄISEKSI elementiksi:
   ```
-  {"id": "0", "tekst": "Avaa pullo"}
+  {"id": "0", "tekst": "Avaa pikkupullo"}
   ```
 
-  KIINTEÄ SIJAINTI: tämän elementin TÄYTYY olla ensimmäinen `wybory[]`-listassa, ennen vaihtoehtoja A-E. Otsikko on TÄSMÄLLEEN «Avaa pullo» (älä muokkaa — Python tunnistaa `id="0"`:lla). ÄLÄ numeroi muita uudelleen — A on edelleen A, B on edelleen B, jne. Lista näyttää siis: `[0, A, B, C, D]` (4 vaihtoehtoa) tai `[0, A, B, C, D, E]` (5 vaihtoehtoa).
+  KIINTEÄ SIJAINTI: tämän elementin TÄYTYY olla ensimmäinen `wybory[]`-listassa, ennen vaihtoehtoja A-E. Otsikko on TÄSMÄLLEEN «Avaa pikkupullo» (älä muokkaa — Python tunnistaa `id="0"`:lla). ÄLÄ numeroi muita uudelleen — A on edelleen A, B on edelleen B, jne. Lista näyttää siis: `[0, A, B, C, D]` (4 vaihtoehtoa) tai `[0, A, B, C, D, E]` (5 vaihtoehtoa).
 
   ### VAIKUTUKSEN KERRONTA AVAUKSEN JÄLKEEN
 
@@ -115,6 +115,6 @@ prompt_systemowy: |
 
   Vuoro ennen aktivointia (pullo poissa): `[{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
 
-  Aktivointivuoro (fiolka_aktywacja_w_tej_turze=true) ja jokainen seuraava vuoro pullon ollessa läsnä: `[{"id":"0","tekst":"Avaa pullo"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
+  Aktivointivuoro (fiolka_aktywacja_w_tej_turze=true) ja jokainen seuraava vuoro pullon ollessa läsnä: `[{"id":"0","tekst":"Avaa pikkupullo"},{"id":"A","tekst":"..."},{"id":"B","tekst":"..."},{"id":"C","tekst":"..."}]`
 
   Vuoro pullon tuhoutumisen jälkeen kerronnassa: paluu muotoon `[{"id":"A",...},{"id":"B",...},...]` ilman `0`:aa.
