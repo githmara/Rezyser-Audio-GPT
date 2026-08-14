@@ -5,9 +5,10 @@
 id: hiszpanski
 etykieta: "Hiszpański (np. Jorge / Monica / Helena)"
 opis: |
-  Upodabnia polski tekst do hiszpańskiej wymowy: „sz”→„s”, „cz”→„ch”,
-  „rz”→„r”, a zarówno „w” jak i „v” zamienia na „b” (tak jak
-  w iberyjskim hiszpańskim).
+  Upodabnia polski tekst do hiszpańskiej wymowy: „sz”→„s”, „ch”→„j”
+  (hiszpańskie „j” = /x/, dokładny odpowiednik polskiego „ch”;
+  hiszpańskie „ch” czyta się /cz/), „cz”→„ch”, „rz”→„r”, a zarówno
+  „w” jak i „v” zamienia na „b” (tak jak w iberyjskim hiszpańskim).
 iso: es
 kategoria: akcent
 kolejnosc: 70
@@ -17,13 +18,22 @@ normalizuj_liczby: true
 usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
+# KOLEJNOŚĆ KRYTYCZNA (sekwencyjny str.replace — patrz reguły architektury):
+# najpierw ch→j (konsumujemy polskie „ch”=/x/), DOPIERO POTEM cz→ch
+# (wprowadza NOWE „ch”=/cz/ po hiszpańsku, którego nic już nie zjada).
 zamiany:
   - { wzor: "sz", zamiana: "s"  }
   - { wzor: "Sz", zamiana: "S"  }
+  - { wzor: "SZ", zamiana: "S"  }
+  - { wzor: "ch", zamiana: "j"  }
+  - { wzor: "Ch", zamiana: "J"  }
+  - { wzor: "CH", zamiana: "J"  }
   - { wzor: "cz", zamiana: "ch" }
   - { wzor: "Cz", zamiana: "Ch" }
+  - { wzor: "CZ", zamiana: "CH" }
   - { wzor: "rz", zamiana: "r"  }
   - { wzor: "Rz", zamiana: "R"  }
+  - { wzor: "RZ", zamiana: "R"  }
   - { wzor: "w",  zamiana: "b"  }
   - { wzor: "W",  zamiana: "B"  }
   - { wzor: "v",  zamiana: "b"  }

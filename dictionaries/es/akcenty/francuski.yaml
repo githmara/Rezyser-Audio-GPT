@@ -22,8 +22,12 @@ opis: |
     - « j »  es = /x/, francés « j » = /ʒ/ → no hay /x/ en francés, así que
       el TTS lo leerá como una /ʁ/ uvular natural — acento francés natural,
       conservamos « j » (cambiarlo a « r » distorsionaría las palabras).
-    - « ll » es = /ʝ/, francés « ll » = /l/ geminada → se escribe « ill »
-      (fr ill = /j/, aproximación de /ʝ/).
+    - « ll » es = /ʝ/, francés « ll » = /l/ geminada → sustitución POSICIONAL
+      (regex): a inicio de palabra « ll » → « y » (fr « y » + vocal = /j/,
+      p. ej. « lleva » → « yeva »); tras « i » se conserva tal cual (« cardillo »
+      ya se lee /ij/ en francés — « ill » duplicaría la i: « cardiillo »);
+      en el resto de posiciones « ll » → « ill » (fr « ill » = /j/,
+      p. ej. « calle » → « caille »).
     - « z »  es = /θ/ o /s/, francés « z » = /z/ → acento francés natural,
       no se transforma.
 
@@ -50,7 +54,11 @@ zamiany:
   # --- ñ → gn (correspondencia exacta /ɲ/) ---
   - { wzor: "ñ", zamiana: "gn" }
   - { wzor: "Ñ", zamiana: "Gn" }
-  # --- ll → ill (francés ill = /j/, aproximación de /ʝ/) ---
-  - { wzor: "ll", zamiana: "ill" }
-  - { wzor: "Ll", zamiana: "Ill" }
-  - { wzor: "LL", zamiana: "ILL" }
+  # --- ll → sustitución posicional (regex; v18.12 fix „cardiillo"/„illeva") ---
+  # ORDEN CRÍTICO: primero inicio de palabra (\b), después el resto;
+  # el lookbehind (?<![iI]) evita duplicar la i en « -illo/-illa ».
+  - { wzor: '\bll', zamiana: 'y', regex: true }
+  - { wzor: '\bLl', zamiana: 'Y', regex: true }
+  - { wzor: '\bLL', zamiana: 'Y', regex: true }
+  - { wzor: '(?<![iI])ll', zamiana: 'ill', regex: true }
+  - { wzor: '(?<![iI])LL', zamiana: 'ILL', regex: true }

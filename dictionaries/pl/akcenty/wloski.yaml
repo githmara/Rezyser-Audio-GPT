@@ -5,8 +5,19 @@
 id: wloski
 etykieta: "Włoski (np. Alice / Luca / Elsa)"
 opis: |
-  Upodabnia polski tekst do włoskiej wymowy: zamienia „y” na „i”,
-  „w” na „v”. Zachowuje charakterystyczną melodię włoską.
+  Upodabnia polski tekst do włoskiej wymowy (zapis włoską ortografią,
+  czytelną dla włoskiego TTS):
+    - „y” → „i”  (włoski nie ma /y/),
+    - „sz” → „sci”  (włoskie „sci” = /sz/, jak w „sciare”),
+    - „cz” → „ci”   (włoskie „ci” = /cz/, jak w „ciao”),
+    - „rz” → „gi”   (włoskie „gi” = /dż/ — najbliższa włoska aproksymacja
+      polskiego /ż/; „morze”→„mogie”),
+    - „ch” → „c”    (włoski nie ma /ch/; Włosi czytają je jako /k/ —
+      „chleb”→„cleb”, klasyczna cecha włoskiego akcentu),
+    - „w” → „v”  (włoska pisownia głoski /w/).
+  Pozostawione celowo (naturalny akcent włoski): „ż/ź”→„z” po transliteracji
+  diakrytyków czyta się jako włoskie /dz/-/ts/, nieme „h” („herbata”→/erbata/),
+  melodyjne pełne samogłoski.
 iso: it
 kategoria: akcent
 kolejnosc: 80
@@ -16,8 +27,29 @@ normalizuj_liczby: true
 usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
+# KOLEJNOŚĆ (sekwencyjny str.replace — patrz reguły architektury):
+# najpierw y→i (proste podstawienie samogłoski), potem dwuznaki sz/cz/rz/ch
+# (wprowadzają „i”/„c”, których żadna późniejsza reguła już nie konsumuje),
+# na końcu w→v. Żadna reguła nie wprowadza wzorca zjadanego przez następną.
 zamiany:
   - { wzor: "y", zamiana: "i" }
   - { wzor: "Y", zamiana: "I" }
+  # --- sz → sci (włoskie „sci” = /sz/) ---
+  - { wzor: "sz", zamiana: "sci" }
+  - { wzor: "Sz", zamiana: "Sci" }
+  - { wzor: "SZ", zamiana: "SCI" }
+  # --- cz → ci (włoskie „ci” = /cz/) ---
+  - { wzor: "cz", zamiana: "ci" }
+  - { wzor: "Cz", zamiana: "Ci" }
+  - { wzor: "CZ", zamiana: "CI" }
+  # --- rz → gi (włoskie „gi” = /dż/, aproksymacja /ż/) ---
+  - { wzor: "rz", zamiana: "gi" }
+  - { wzor: "Rz", zamiana: "Gi" }
+  - { wzor: "RZ", zamiana: "GI" }
+  # --- ch → c (Włosi czytają polskie /ch/ jako /k/) ---
+  - { wzor: "ch", zamiana: "c" }
+  - { wzor: "Ch", zamiana: "C" }
+  - { wzor: "CH", zamiana: "C" }
+  # --- w → v (włoska pisownia /w/) ---
   - { wzor: "w", zamiana: "v" }
   - { wzor: "W", zamiana: "V" }
