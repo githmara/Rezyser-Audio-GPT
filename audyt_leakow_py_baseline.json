@@ -95,7 +95,9 @@
     "POSSIBLE|znak-PL:ś|Brak przepisu opowieści `{…}.yaml` ani w `{…}/opowiesci/` ani w `en/opowiesci/` (fallback). Czy folder dictionaries jest"
   ],
   "przepisy_rezysera.py": [
-    "POSSIBLE|znak-PL:ćę|⚠️ przepisy_rezysera: duplikat id={…} w {…} — plik pominięty (id musi być unikalne w paczce).",
+    "POSSIBLE|znak-PL:ćę|⚠️ przepisy_rezysera: duplikat id={…} (kategoria {…}) w {…} — plik pominięty (id musi być unikalne w kategorii).",
+    "POSSIBLE|znak-PL:ę|⚠️ przepisy_rezysera: niedozwolone znaki w sufiks_pliku_wyniku={…} w {…} — plik pominięty (zakazane: {…}).",
+    "POSSIBLE|znak-PL:ę|⚠️ przepisy_rezysera: nieznany zakres={…} w {…} — plik pominięty (dozwolone: {…} / {…}).",
     "POSSIBLE|znak-PL:ęłśź|⚠️ przepisy_rezysera: nieprawidłowe pole w {…} ({…}) — plik pominięty (sprawdź typy wartości w YAML-u)."
   ],
   "refresh_languages.py": [
