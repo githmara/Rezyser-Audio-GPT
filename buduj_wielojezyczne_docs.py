@@ -542,11 +542,16 @@ MARKER_KONCA_PREFIXU = "[KONIEC INSTRUKCJI — TŁUMACZENIE ZACZYNA SIĘ PONIŻE
 
 PREFIX_INSTRUKCJA = (
     "[INSTRUKCJA TECHNICZNA — USUŃ TEN BLOK Z ODPOWIEDZI, NIE TŁUMACZ GO]\n"
-    "Poniższy tekst zawiera markery w formacie ⟦liczba⟧ (np. ⟦0⟧, ⟦12⟧, ⟦47⟧).\n"
-    "To są zamrożone placeholdery programowe. Skopiuj je do odpowiedzi DOSŁOWNIE,\n"
-    "znak w znak — nie zmieniaj cyfr, nie zmieniaj nawiasów, nie tłumacz.\n"
-    "Każdy marker musi wystąpić w odpowiedzi dokładnie tyle samo razy,\n"
-    "co w oryginale (skrypt nadrzędny weryfikuje parzystość po zakończeniu).\n"
+    # UWAGA (18.12): opis formatu CELOWO bez literalnych przykładów tokenów —
+    # claude-sonnet-5 „zachowywał" przykładowe markery z instrukcji, wstawiając
+    # je do tłumaczenia (walidacja parzystości ubijała sekcję).
+    "Poniższy tekst zawiera markery: liczba ujęta w podwójne nawiasy\n"
+    "matematyczne (znaki U+27E6 i U+27E7). To są zamrożone placeholdery\n"
+    "programowe. Skopiuj je do odpowiedzi DOSŁOWNIE, znak w znak — nie\n"
+    "zmieniaj cyfr, nie zmieniaj nawiasów, nie tłumacz. Każdy marker musi\n"
+    "wystąpić w odpowiedzi dokładnie tyle samo razy, co w oryginale (skrypt\n"
+    "nadrzędny weryfikuje parzystość po zakończeniu). NIE dodawaj żadnych\n"
+    "markerów, których nie ma w oryginale.\n"
     f"{MARKER_KONCA_PREFIXU}\n\n"
 )
 
@@ -851,7 +856,11 @@ def _tlumacz_pojedyncza_sekcje(
         print(f"    {marker} Sanity check: {sum(oryginalne.values())} wystąpień ph, mapa {liczba_ph}.")
         return True, None
 
-    payload = PREFIX_INSTRUKCJA + tresc_tok
+    # Sekcja bez placeholderów → BEZ prefix-instrukcji o markerach. Empiryczne
+    # (18.12, claude-sonnet-5): przy zerze tokenów w źródle model potrafił
+    # „zachować" przykładowe ⟦0⟧/⟦12⟧/⟦47⟧ z samej instrukcji, wstawiając je
+    # do tłumaczenia — walidacja parzystości ubijała sekcję deterministycznie.
+    payload = (PREFIX_INSTRUKCJA + tresc_tok) if liczba_ph else tresc_tok
     blad_kryt: dict[str, Any] = {"msg": None, "partial": None}
     cache_key = _cache_key_sekcji(rdzen, klucz_sekcji, kod)
     def _on_postep(info: Any) -> None:
