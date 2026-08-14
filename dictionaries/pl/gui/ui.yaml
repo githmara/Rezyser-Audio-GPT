@@ -92,7 +92,7 @@ main:
     rezyser:             "Moduł Reżyserii (Ctrl+1): Pisz skrypty i prozę z pomocą AI"
     poliglota:           "Moduł Poligloty (Ctrl+2): Akcenty i tłumaczenie tekstów"
     konwerter:           "Moduł Konwertera (Ctrl+3): Twórz pliki Word z nagłówkami"
-    manager:             "Manager Reguł (Ctrl+4): Eksploruj pliki YAND w dictionaries/, twórz nowe akcenty, szyfry i tryby (szablon lub prompt dla AI)"
+    manager:             "Manager Reguł (Ctrl+4): Eksploruj pliki YAML w dictionaries/, twórz nowe akcenty, szyfry i tryby (szablon lub prompt dla AI)"
     opowiesci:           "Moduł Opowieści (Ctrl+5): Interaktywna fikcja II-osobowa — generowana przez AI, czytana przez TTS"
   nazwy_narzedzi:
     dom:                 "Dom"

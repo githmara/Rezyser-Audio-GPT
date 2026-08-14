@@ -85,7 +85,7 @@ main:
     rezyser: "Módulo de Dirección (Ctrl+1): Escribe guiones y prosa con ayuda de IA"
     poliglota: "Módulo Políglota (Ctrl+2): Acentos y traducción de textos"
     konwerter: "Módulo Convertidor (Ctrl+3): Crea archivos Word con encabezados"
-    manager: "Gestor de Reglas (Ctrl+4): Explora archivos YAND en dictionaries/, crea nuevos acentos, cifrados y modos (plantilla o prompt para IA)"
+    manager: "Gestor de Reglas (Ctrl+4): Explora archivos YAML en dictionaries/, crea nuevos acentos, cifrados y modos (plantilla o prompt para IA)"
     opowiesci: "Módulo Historias (Ctrl+5): Ficción interactiva en segunda persona — generada por IA, leída por TTS"
   nazwy_narzedzi:
     dom: "Inicio"

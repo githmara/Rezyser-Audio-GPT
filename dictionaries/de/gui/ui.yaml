@@ -34,7 +34,7 @@ common:
   btn_skopiuj_schowek: "📋  In die Zwischenablage kopieren"
   komunikat_skopiowano: "Kopiert"
   komunikat_schowek_nieudany_tytul: "Zwischenablage nicht verfügbar"
-  komunikat_schowek_nieudany_tresc: "Systemzwischenablage konnte nicht geöffnet werden.\nKopiere den Text manuell: Strg+A, Strg+C im obigen Feld."
+  komunikat_schowek_nieudany_tresc: "Systemzwischenablage konnte nicht geöffnet werden.\nKopiere den Text manuell: Ctrl+A, Ctrl+C im obigen Feld."
   blad_tytul: "Fehler"
   blad_odczytu_tytul: "Lesefehler"
   blad_zapisu_tytul: "Schreibfehler"
@@ -82,10 +82,10 @@ main:
     manager: "📚  &Regelmanager"
     opowiesci: "📖  &Geschichten"
   tooltip:
-    rezyser: "Regisseur-Modul (Strg+1): Schreibe Skripte und Prosa mit KI-Unterstützung"
-    poliglota: "Polyglott-Modul (Strg+2): Akzente und Textübersetzung"
-    konwerter: "Konverter-Modul (Strg+3): Erstelle Word-Dokumente mit Überschriften"
-    manager: "Regelmanager (Strg+4): Erkunde YAND-Dateien in dictionaries/, erstelle neue Akzente, Chiffren und Modi (Vorlage oder Prompt für KI)"
+    rezyser: "Regisseur-Modul (Ctrl+1): Schreibe Skripte und Prosa mit KI-Unterstützung"
+    poliglota: "Polyglott-Modul (Ctrl+2): Akzente und Textübersetzung"
+    konwerter: "Konverter-Modul (Ctrl+3): Erstelle Word-Dokumente mit Überschriften"
+    manager: "Regelmanager (Ctrl+4): Erkunde YAML-Dateien in dictionaries/, erstelle neue Akzente, Chiffren und Modi (Vorlage oder Prompt für KI)"
     opowiesci: "Geschichten-Modul (Ctrl+5): Interaktive, von KI generierte Zweitperson-Fiktion — gelesen von TTS"
   nazwy_narzedzi:
     dom: "Startseite"
@@ -151,7 +151,7 @@ home:
   ok_plik_wygenerowany: |-
     ✅ Datei {nazwa_pliku} wurde generiert!
     Der Texteditor öffnet sich automatisch.
-    Fügen Sie Ihren API-Schlüssel ein, speichern Sie die Datei (Strg+S) und starten Sie die Anwendung neu.
+    Fügen Sie Ihren API-Schlüssel ein, speichern Sie die Datei (Ctrl+S) und starten Sie die Anwendung neu.
   blad_otwarcia_pliku_tytul: "Information"
   blad_otwarcia_pliku_tresc: "Die Datei konnte nicht automatisch geöffnet werden.\nÖffnen Sie sie manuell:\n{sciezka_pliku}"
   # Audio-Postproduktion (ElevenLabs) — optional (v16.0)
@@ -187,12 +187,12 @@ home:
   narzedzia_slownikowe_name: "Beschreibung der Wörterbuchwerkzeuge"
   tools_info: |-
     Möchten Sie einen neuen Akzent, eine Chiffre oder einen Regisseur-Modus hinzufügen?
-    Öffnen Sie den Regelmanager (Strg+4) – dort finden Sie den Baum aller YAML-Dateien in dictionaries/ sowie einen Assistenten, der automatisch eine Vorlage erstellt oder einen Prompt für den Chatbot generiert.
+    Öffnen Sie den Regelmanager (Ctrl+4) – dort finden Sie den Baum aller YAML-Dateien in dictionaries/ sowie einen Assistenten, der automatisch eine Vorlage erstellt oder einen Prompt für den Chatbot generiert.
 
     Nach dem Hinzufügen einer neuen Datei starten Sie die Anwendung neu – der Regisseur-Modus und Polyglott erkennen alle YAML-Dateien in dictionaries/ automatisch.
   btn_open_manager_label: "📚 Öffne Regelmanager"
   btn_open_manager_name: "Schaltfläche Öffne Regelmanager"
-  btn_open_manager_tooltip: "Wechselt zum Regelmanager – YAML-Dateiexplorer und Assistent für neue Akzente / Modi / Chiffren (Strg+4)."
+  btn_open_manager_tooltip: "Wechselt zum Regelmanager – YAML-Dateiexplorer und Assistent für neue Akzente / Modi / Chiffren (Ctrl+4)."
 
 # -----------------------------------------------------------------------------
 # REZYSER – panel modułu Reżyser (gui_rezyser.py)

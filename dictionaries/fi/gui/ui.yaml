@@ -85,7 +85,7 @@ main:
     rezyser: "Ohjausmoduuli (Ctrl+1): Kirjoita käsikirjoituksia ja proosaa AI:n avulla"
     poliglota: "Polyglootti-moduuli (Ctrl+2): Aksentit ja tekstien kääntäminen"
     konwerter: "Muunnin-moduuli (Ctrl+3): Luo Word-tiedostoja otsikoilla"
-    manager: "Sääntöjen Hallinta (Ctrl+4): Tutki YAND-tiedostoja dictionaries/, luo uusia aksentteja, salauksia ja tiloja (malli tai kehotus AI:lle)"
+    manager: "Sääntöjen Hallinta (Ctrl+4): Tutki YAML-tiedostoja dictionaries/, luo uusia aksentteja, salauksia ja tiloja (malli tai kehotus AI:lle)"
     opowiesci: "Tarinat-moduuli (Ctrl+5): Interaktiivinen toisen persoonan fiktio — AI:n luoma, TTS:n lukema"
   nazwy_narzedzi:
     dom: "Koti"

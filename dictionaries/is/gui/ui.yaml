@@ -85,7 +85,7 @@ main:
     rezyser: "Leikstjórnarhamur (Ctrl+1): Skrifaðu handrit og prósa með hjálp AI"
     poliglota: "Tungumálamannshamur (Ctrl+2): Áherslur og þýðing texta"
     konwerter: "Breytingartækishamur (Ctrl+3): Búðu til Word skrár með fyrirsögnum"
-    manager: "Reglustjórahamur (Ctrl+4): Skoðaðu YAND skrár í dictionaries/, búðu til nýjar áherslur, dulritanir og stillingar (sniðmát eða ábending fyrir AI)"
+    manager: "Reglustjórahamur (Ctrl+4): Skoðaðu YAML skrár í dictionaries/, búðu til nýjar áherslur, dulritanir og stillingar (sniðmát eða ábending fyrir AI)"
     opowiesci: "Sögur eining (Ctrl+5): Gagnvirkar sögur í annarri persónu — búnar til af AI, lesnar af TTS"
   nazwy_narzedzi:
     dom: "Heim"
