@@ -90,7 +90,7 @@ tresc:
 
     Frásagnarvélin í öllum stillingum Sagna notar eina, sameiginlega líkan (sjálfgefið og mælt er með Anthropic Claude Sonnet 5; frá v18.4 getur lengra kominn notandi tilgreint eigin endapunkt sem er samhæfur við OpenAI — sjá aðalhandbókina, SKREF 2B). Öflugra líkanið heldur sig strangt við reglur heimsins — þetta skiptir sérstöku máli í stillingunni Minna illt, þar sem hver valkostur verður að haldast raunverulega óhagstæður.
 
-    /wizualizuj `<lýsing>`, /visualize `<lýsing>` — fjölskynjanleg lýsing á núverandi atriði. Breytir ekki leikstöðunni, býður ekki upp á val — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snertingu, bragð) til að sýna atriðið með meiri dýpt. Niðurstaðan birtist í sérstökum glugga og bætist EKKI við frásögnina. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lykt kaffihússins".
+    /wizualizuj `<opis>`, /visualize `<opis>` — fjölskynjanleg lýsing á núverandi atriði. Breytir ekki leikstöðunni, býður ekki upp á val — frásagnarvélin notar öll fimm skynfærin (sjón, heyrn, lykt, snertingu, bragð) til að sýna atriðið með meiri dýpt. Niðurstaðan birtist í sérstökum glugga og bætist EKKI við frásögnina. Dæmi: „/wizualizuj hvernig lítur vörðurinn út" eða „/wizualizuj lykt kaffihússins".
 
     /pomoc, /help — birtir samtalsglugga með lista yfir allar tiltækar skipanir. Glugginn er skrifvarinn og NVDA-vænn — textareiturinn fær sjálfkrafa fókus, skjálesarinn les strax upp allan listann án þess að þörf sé á að rata um.
 
