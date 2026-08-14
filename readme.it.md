@@ -21,10 +21,10 @@ Studio principale per scrivere radiodrammi e audiolibri. Scegli la modalità —
 
 * **Libro del Mondo Multiprogetto:** Il sistema carica automaticamente in background le regole dedicate dell'universo (`.md`) basate sul file sorgente attivo, garantendo un'isolamento completo (caricamento del contesto senza clic).
 * **Accumulatore di Trama:** Algoritmo di "memoria infinita". Quando l'indicatore di memoria entra in stato di allarme rosso, il sistema genera automaticamente un riassunto della trama e lo salva nel campo Memoria a Lungo Termine.
-* **4 modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore delle Regole di seguito.
+* **4 modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore Regole di seguito.
 
 
-### 2. Racconti (Ctrl+2, secondo modo principale dalla v15.0)
+### 2. Racconti (Ctrl+5, secondo modo principale dalla v15.0)
 
 Giochi testuali interattivi condotti dall'IA nel ruolo di motore narrativo. A differenza della Regia (dove generi un audiolibro pronto), i Racconti sono una trama dinamica turno-per-turno:
 
@@ -34,23 +34,23 @@ Giochi testuali interattivi condotti dall'IA nel ruolo di motore narrativo. A di
 * **Un unico modello IA per tutte le modalità:** dalla v18.1 tutte le modalità di Racconti utilizzano lo stesso modello condiviso (predefinito e consigliato Anthropic Claude Sonnet 5) — un modello più potente si attiene rigorosamente alle regole del mondo (particolarmente cruciale nella modalità Male Minore, dove ogni opzione deve essere realmente sfavorevole).
 
 
-### 3. Poliglotta (Ctrl+3, Traduttore AI + Accenti TTS)
+### 3. Poliglotta (Ctrl+2, Traduttore AI + Accenti TTS)
 
 * **Traduttore Sicuro:** I testi lunghi vengono automaticamente suddivisi in blocchi misurati in token del modello (sicuro anche per lingue a scrittura densa, ad es. il cinese) e tradotti sequenzialmente; una risposta troncata del modello viene rilevata e ritentata su frammenti più piccoli. Ogni blocco viene immediatamente salvato in un file nascosto `.jsonl`. Il ripristino dopo l'esaurimento dei limiti API è completamente automatico.
 * **Automazione NVDA:** Le traduzioni vengono salvate come file `.html` pronti con tag di lingua incorporato o file `.docx` con tag iniettati direttamente nella struttura XML.
 * **8 accenti locali:** Possibilità di forzare intenzionalmente un accento spezzato per i sintetizzatori locali (Tiflotecnia Voices, eSpeak, OneCore) grazie a regole regex avanzate. Accenti stranieri supportati: inglese, russo (con traslitterazione in cirillico), francese, tedesco, spagnolo, polacco, finlandese, islandese.
-* **Modalità Cifrario:** 6 algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 35 caratteri con diacritici).
+* **Modalità Cifrario:** 6 algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 21 caratteri).
 * **Riparatore di Tag:** Inietta in modo non invasivo il codice ISO della lingua fornito — anche regionale, ad es. pt-BR o zh-CN — nei file esistenti.
 
 
-### 4. Convertitore / Architetto Audiolibri (Ctrl+4)
+### 4. Convertitore / Architetto Audiolibri (Ctrl+3)
 
 * Elabora file `.txt` o `.docx` grezzi per la navigazione tramite tastiera per NVDA e sistemi come ElevenLabs.
 * Converte automaticamente le parole chiave (Atto, Capitolo, Prologo) in intestazioni "Heading 1" nel documento Word e pulisce i tag HTML superflui e i marcatori Markdown.
 * Dalla versione 15.1 raggruppa 5 turni in scene con intestazioni H1 (rilevamento automatico dei Racconti) — prepara il file generato dalla modalità Racconti per la pubblicazione tradizionale di audiolibri.
 
 
-### 5. Gestore delle Regole (Ctrl+5, novità dalla v13.0)
+### 5. Gestore Regole (Ctrl+4, novità dalla v13.0)
 
 * **Esploratore di dizionari senza Python:** Albero visivo di tutti i file YAML nella cartella `dictionaries/` — accenti fonetici, cifrari, modalità creative del Regista e Racconti. Un linguista o traduttore può visualizzare, duplicare, modificare e eliminare regole direttamente dall'interfaccia grafica.
 * **Creatore di nuove regole:** Modulo con selezione del tipo (accento, cifrario di sostituzioni pure, modalità del Regista, nuova lingua di base, cifrario algoritmico) che crea un modello YAML pronto all'uso e, per i casi più complessi, genera un prompt formattato da incollare in ChatGPT / Claude.
@@ -121,7 +121,7 @@ La lingua principale di questo progetto è il polacco. I nomi dei moduli, delle 
 * `opowiesci/` — *stories*: registrazioni di Racconti interattivi.
 * `runtime/` — doppio ruolo: cartella del bundle dell'applicazione congelata (interprete + librerie) E contenitore di metadati nascosti dei progetti (`runtime/skrypty/`, `runtime/opowiesci/`).
 
-**Sottocartelle dei dati sorgente in `dictionaries/<codice-lingua>/` (visibili nel Gestore delle Regole):**
+**Sottocartelle dei dati sorgente in `dictionaries/<codice-lingua>/` (visibili nel Gestore Regole):**
 
 * `podstawy.yaml` — *basics*: configurazione e metadati del pacchetto linguistico.
 * `akcenty/` — *accents*: regole fonetiche per i sintetizzatori vocali.

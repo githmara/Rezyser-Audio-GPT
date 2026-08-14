@@ -46,7 +46,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <li>pólska (Ewa í Vocalizer, Paulina í OneCore)</li>
 <li>rússneska (Milena í Vocalizer, Irina/Pavel/Yuri í OneCore — þessi er sérstakur, því í stað þess að "skemma" latneska stafi framkvæmir hann fulla transliteringu yfir í kyrillísku; án þess hefði rússneska röddin ekkert til að bera fram)</li>
 </ul>
-<p>Auk þess eru tvær hreinsunarvalkostir í hreimavalmyndinni: einn án tölunormalíseringar og annar með normalíseringu (breytir "15" í "fimmtán" fyrir vinnslu, því útlendingur myndi líklega ekki beygja þessa tölu rétt — sem bætir við áreiðanleika) og "Tag Fixer", sem einfaldlega setur ISO tungumálakóða í skrána án þess að skemma innihaldið (björgun þegar þýdd skrá þín hefur rangt tungumálakóða).</p>
+<p>Auk þess eru tveir hreinsunarvalkostir í hreimavalmyndinni: einn án tölunormalíseringar og annar með normalíseringu (breytir "15" í "fimmtán" fyrir vinnslu, því útlendingur myndi líklega ekki beygja þessa tölu rétt — sem bætir við áreiðanleika) og "Tag Fixer", sem einfaldlega setur ISO tungumálakóða í skrána án þess að skemma innihaldið (björgun þegar þýdd skrá þín hefur rangt tungumálakóða).</p>
 <h2>Hvað er dulritun?</h2>
 <hr>
 <p>Dulritanir eru textaleikir fyrir þrautir, málæfingar, gáfur. Ólíkt hreimum eru þau EKKI miðuð við ákveðna raddgervil — þau afskræma einfaldlega texta samkvæmt ákveðinni reglu. Aðgengilegar dulritanir (6):</p>
@@ -96,7 +96,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 <hr>
 <p>Mappan "opowiesci/" inniheldur 8 skrár sem lýsa öðrum<br>
 aðalham forritsins — gagnvirkum textaleikjum sem AI stýrir í hlutverki<br>
-frásagnarvélar. Ólíkt Leikstjórahamnum (þar sem þú býrð til TILBÚINN<br>
+frásagnarvélar. Ólíkt Leikstjórnarhamnum (þar sem þú býrð til TILBÚINN<br>
 hljóðbók til afspilunar í TTS), er Sagnaham samtal fyrir hverja umferð<br>
 við líkanið, sem heldur úti fundi með kviku söguþræði með þér:</p>
 <ul>
@@ -119,7 +119,7 @@ við líkanið, sem heldur úti fundi með kviku söguþræði með þér:</p>
 <li>cinematic_warning.yaml — viðvaranir um grimmilegar/dramatískar<br>
                            senur (samræmi við óskir leikmanns)</li>
 </ul>
-<p>Eins og í Leikstjórahamnum inniheldur hver skrá "kerfisskipun" (system prompt) til breytinga.<br>
+<p>Eins og í Leikstjórnarhamnum inniheldur hver skrá "kerfisskipun" (system prompt) til breytinga.<br>
 Þú getur stillt stíl sögumannsins (t.d. minna blómlegan), breytt lengd<br>
 umferðar, bætt við eigin söguþráðartilskipunum. Frá v18.1 nota allir Sagnahamir<br>
 eitt sameiginlegt líkan (sjálfgefið og mælt með Anthropic<br>
@@ -151,13 +151,13 @@ Claude Sonnet 5) — sterkara líkan heldur ströngum reglum heimsins<br>
 </li>
 <li>Aðlagaðu listann "skipti" að sænskri hljóðfræði (t.d. bættu við "å → o",<br>
    "ö → ö", fjarlægðu eða breyttu þeim sem eru sértæk fyrir finnsku).</li>
-<li>Vistaðu og endurræstu forritið. Nýja sænska mun birtast í hreimavalmynd Fjöltyngis (og ef þú bætir við í Heimsbók persónu merkimiðanum "[Marek] - hefur sænskan hreim", þá mun Leikstjórinn einnig þekkja það sjálfkrafa og nota það í samræðum hennar).</li>
+<li>Vistaðu og endurræstu forritið. Nýja sænska mun birtast í hreimavalmynd Tungumálamanns (og ef þú bætir við í Heimsbók persónu merkimiðanum "[Marek] - hefur sænskan hreim", þá mun Leikstjórinn einnig þekkja það sjálfkrafa og nota það í samræðum hennar).</li>
 </ol>
 <h2>POFI 3 — að skapa eitthvað alveg nýtt</h2>
 <p>Viltu skólaslangur? Tungumál fornra riddara? Grasiðmál? Kóða foreldra fyrir börnum?</p>
 <ol>
 <li>Í Reglustjóra, smelltu á "Ný skrá með reglum…".</li>
-<li>Veldu tegund (hreimur, skipti dulmál, Leikstjórahamur, nýtt grunntungumál, reiknirit dulmál). Fyrir venjuleg tilfelli mun forritið strax búa til tilbúið YAML sniðmát — þú breytir því eins og á stigi 2.</li>
+<li>Veldu tegund (hreimur, skipti dulmál, Leikstjórnarhamur, nýtt grunntungumál, reiknirit dulmál). Fyrir venjuleg tilfelli mun forritið strax búa til tilbúið YAML sniðmát — þú breytir því eins og á stigi 2.</li>
 <li>Fyrir erfiðari tilfelli (reiknirit eins og "blöndun endingar" eða alveg nýtt grunntungumál) mun Reglustjóri sýna þér tilbúið prompt til að líma í ChatGPT eða Claude. Gervigreindin mun búa til fullkomna YAML skrá, þú þarft bara að afrita hana í möppuna. Þú þarft ekki að kunna að forrita — það nægir að geta afritað.</li>
 </ol>
 <h2>Nokkrar hugmyndir að leikjum</h2>

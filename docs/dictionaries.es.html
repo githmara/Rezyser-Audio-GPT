@@ -66,7 +66,7 @@ y al menos un archivo en "akcenty/" y "szyfry/").</p>
 <ol start="2">
 <li>
 <p>Tipoglicemia (mezcla del medio de las palabras)<br>
-   Efecto psicolingüístico clásico: "No meossż peyrzcztać tkstueu w trkirej klojoinseęci letir, jśeli pszeriwa i otsnatia leritea są na wscłaoyicwh mscjaieh". El script mezcla aleatoriamente el medio de cada palabra de más de 4 letras, la primera y última letra permanecen en su lugar. Ideal para probar "cuánto realmente veo y cuánto me sugiere mi cerebro".</p>
+   Efecto psicolingüístico clásico: "No pdueess leer un toexto en cuiaqluer odren de ltreas, si la prmeira y úilmta lretra etsán en su lguar". El script mezcla aleatoriamente el medio de cada palabra de más de 4 letras, la primera y última letra permanecen en su lugar. Ideal para probar "cuánto realmente veo y cuánto me sugiere mi cerebro".</p>
 </li>
 <li>
 <p>Teléfono Descompuesto / Dialecto Serpiente<br>
@@ -136,18 +136,18 @@ Mal menor, donde cada opción debe ser realmente desfavorable).</p>
 <h2>NIVEL 1 — ajuste menor de un acento existente</h2>
 <p>Imagina que el acento francés de la aplicación cambia "sz" a "sh", pero tú crees que un francés probablemente diría "sch" o "ch". No hay problema.</p>
 <ol>
-<li>Inicia la aplicación y ve al Administrador de Reglas (tecla Ctrl+4 o el cuarto botón en la barra).</li>
+<li>Inicia la aplicación y ve al Gestor de Reglas (tecla Ctrl+4 o el cuarto botón en la barra).</li>
 <li>En el árbol de archivos a la izquierda, expande "pl" → "akcenty" y haz clic en "francuski.yaml".</li>
 <li>Haz clic en el botón "Abrir en editor de texto". El archivo se abrirá en el Bloc de notas de Windows (o en tu editor de texto predeterminado).</li>
 <li>Desplázate hacia abajo hasta la sección "zamiany:". Encuentra la línea con el patrón "sz" y cambia el valor "zamiana" a lo que te convenga.</li>
 <li>Guarda el archivo (Ctrl+S), cierra el editor.</li>
-<li>Vuelve al Administrador de Reglas y haz clic en "Actualizar árbol", luego cierra y reinicia la aplicación. Tu cambio ya está en efecto.</li>
+<li>Vuelve al Gestor de Reglas y haz clic en "Actualizar árbol", luego cierra y reinicia la aplicación. Tu cambio ya está en efecto.</li>
 </ol>
 <h2>NIVEL 2 — agregar un nuevo acento mediante duplicación</h2>
 <p>¿Quieres agregar un acento sueco o danés? Comienza con el más similar existente.</p>
 <ol>
 <li>
-<p>En el Administrador de Reglas, selecciona, por ejemplo, "finski.yaml" (el finlandés está cerca del sueco fonéticamente) y haz clic en "Duplicar archivo seleccionado".</p>
+<p>En el Gestor de Reglas, selecciona, por ejemplo, "finski.yaml" (el finlandés está cerca del sueco fonéticamente) y haz clic en "Duplicar archivo seleccionado".</p>
 </li>
 <li>
 <p>El Administrador te pedirá un nuevo nombre: ingresa, por ejemplo, "szwedzki" (en minúsculas, sin espacios, sin caracteres polacos).</p>
@@ -164,7 +164,7 @@ Mal menor, donde cada opción debe ser realmente desfavorable).</p>
 <h2>NIVEL 3 — crear algo completamente nuevo</h2>
 <p>¿Quieres jerga escolar? ¿El idioma de los caballeros antiguos? ¿Lenguaje enredado? ¿Cifrado de padres ante los niños?</p>
 <ol>
-<li>En el Administrador de Reglas, haz clic en "Nuevo archivo de reglas…".</li>
+<li>En el Gestor de Reglas, haz clic en "Nuevo archivo de reglas…".</li>
 <li>Elige el tipo (acento, cifrado de sustitución, modo Director, nuevo idioma base, cifrado algorítmico). Para casos simples, la aplicación creará inmediatamente una plantilla YAML lista: la editas como en el nivel 2.</li>
 <li>Para casos más difíciles (algoritmos como "mezcla de finales" o un nuevo idioma base completo), el Administrador te mostrará un prompt listo para pegar en ChatGPT o Claude. La IA generará un archivo YAML completo, solo tienes que copiarlo a la carpeta. No necesitas saber programar: solo saber copiar y pegar.</li>
 </ol>
@@ -192,7 +192,7 @@ Mal menor, donde cada opción debe ser realmente desfavorable).</p>
 <p>En principio, no. La aplicación carga los archivos YAML dinámicamente y si alguno está mal escrito, simplemente lo omite y muestra una advertencia al inicio. El resto de las reglas funcionan como si nada hubiera pasado.</p>
 <p>Lo peor que puede pasar es que el nuevo archivo simplemente no aparezca en el menú de la aplicación. En ese caso:</p>
 <ul>
-<li>vuelve al Administrador de Reglas, verifica si el archivo es visible en el árbol,</li>
+<li>vuelve al Gestor de Reglas, verifica si el archivo es visible en el árbol,</li>
 <li>ábrelo nuevamente en el editor de texto y compara la estructura con los vecinos (sangrías, dos puntos, comillas),</li>
 <li>si realmente estás atascado, copia el contenido de tu archivo, abre ChatGPT y escribe "tengo un archivo YAML que la aplicación no carga, encuentra el error y muestra la versión corregida". Pega el archivo. La IA generalmente lo corrige en unos segundos.</li>
 </ul>

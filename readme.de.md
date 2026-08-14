@@ -1,4 +1,4 @@
-# Audio GPT Regisseur
+# Reżyser Audio GPT
 
 **Hybrides Aufnahmestudio für Hörspiele, Hörbücher und interaktive Geschichten**
 
@@ -12,7 +12,7 @@ Version: **18.11.0** · Unterstützte Sprachen nativ (9): Polski, Deutsch, Engli
 
 ## Hauptmodule
 
-Die Anwendung vereint in einem Fenster fünf Werkzeuge, die über Tastenkombinationen (Strg+1 / Strg+2 / Strg+3 / Strg+4 / Strg+5) oder Schaltflächen in der Symbolleiste umgeschaltet werden können. Jedes Modul funktioniert unabhängig, aber alle teilen sich die Wörterbuchpakete aus dem Ordner `dictionaries/` (Akzente, Chiffren, kreative AI-Modi) und zentrale Einstellungen.
+Die Anwendung vereint in einem Fenster fünf Werkzeuge, die über Tastenkombinationen (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4 / Ctrl+5) oder Schaltflächen in der Symbolleiste umgeschaltet werden können. Jedes Modul funktioniert unabhängig, aber alle teilen sich die Wörterbuchpakete aus dem Ordner `dictionaries/` (Akzente, Chiffren, kreative AI-Modi) und zentrale Einstellungen.
 
 
 ### 1. Regie (Ctrl+1)
@@ -24,33 +24,33 @@ Das Hauptstudio zum Schreiben von Hörspielen und Hörbüchern. Du wählst einen
 * **4 kreative Modi:** Jede der Dateien in `dictionaries/<jzk>/rezyser/` beschreibt eine separate „Persönlichkeit" des KI-Regisseurs (Brainstorming, Skript, Hörbuch, Titel-Nachbearbeitung). Du kannst ihren Klang ohne Programmierung anpassen — siehe Regelmanager unten.
 
 
-### 2. Geschichten (Strg+2, zweiter Hauptmodus ab v15.0)
+### 2. Geschichten (Ctrl+5, zweiter Hauptmodus ab v15.0)
 
 Interaktive Textspiele, geleitet von der KI in der Rolle einer Erzähl-Engine. Im Unterschied zur Regie (wo man ein fertiges Hörbuch generiert) sind Geschichten eine dynamische, rundenbasierte Handlung:
 
 * **Auswahlmodus:** jede Runde endet mit 3-5 nummerierten Optionen A-E. Der intuitivste Modus für blinde Spieler — NVDA liest die Optionen vor, man klickt Tab und Enter.
-* **Modus Kleineres Übel:** wie Auswahl, aber jede Option ist moralisch, körperlich oder strategisch nachteilig. Ab v15.2 zusätzliche „Fläschchen" — eine wiederverwendbare, mit NULL nummerierte Option der verzweifelten Rettung, deren Effekte pseudozufällig sind (60 % schädlich / 30 % wahrnehmungsstörend / 10 % selten-günstig, die Verteilung wird von Python erzwungen, das LLM hat keine Möglichkeit, sich einen heilsamen Ausgang auszudenken).
+* **Modus Kleineres Übel:** wie Auswahl, aber jede Option ist moralisch, körperlich oder strategisch nachteilig. Ab v15.2 zusätzliche „Phiole" — eine wiederverwendbare, mit NULL nummerierte Option der verzweifelten Rettung, deren Effekte pseudozufällig sind (60 % schädlich / 30 % wahrnehmungsstörend / 10 % selten-günstig, die Verteilung wird von Python erzwungen, das LLM hat keine Möglichkeit, sich einen heilsamen Ausgang auszudenken).
 * **Freier Modus:** beliebige Aktion in freiem Text („ich versuche, die Tür zu öffnen"), die Engine schlägt 1-3 Vorschläge vor, erzwingt aber keine Auswahl.
 * **Ein KI-Modell für alle Modi:** ab v18.1 nutzen alle Modi der Geschichten dasselbe, gemeinsame Modell (standardmäßig und empfohlen Anthropic Claude Sonnet 5) — ein stärkeres Modell hält sich rigoros an die Regeln der Welt (besonders entscheidend im Modus Kleineres Übel, wo jede Option real nachteilig sein muss).
 
 
-### 3. Polyglott (Ctrl+3, AI-Übersetzer + TTS-Akzente)
+### 3. Polyglott (Ctrl+2, KI-Übersetzer + TTS-Akzente)
 
 * **Sicherer Übersetzer:** Lange Texte werden automatisch in Blöcke aufgeteilt, die in Modell-Tokens gemessen werden (sicher auch für dicht geschriebene Sprachen, z.B. Chinesisch), und sequenziell übersetzt; eine abgeschnittene Modellantwort wird erkannt und auf kleineren Fragmenten wiederholt. Jeder Block wird sofort in einer versteckten `.jsonl`-Datei gespeichert. Die Wiederaufnahme nach Erschöpfung der API-Limits erfolgt vollautomatisch.
 * **NVDA-Automatisierung:** Übersetzungen werden als fertige `.html`-Dateien mit eingebettetem Sprach-Tag oder `.docx`-Dateien mit direkt in die XML-Struktur injizierten Tags gespeichert.
 * **8 lokale Akzente:** Möglichkeit, absichtlich einen gebrochenen Akzent für lokale Synthesizer (Tiflotecnia Voices, eSpeak, OneCore) durch fortgeschrittene Regex-Regeln zu erzwingen. Unterstützte fremdsprachige Akzente: Englisch, Russisch (mit Transliteration in Kyrillisch), Französisch, Spanisch, Italienisch, Finnisch, Isländisch, Polnisch.
-* **Verschlüsselungsmodus:** 6 lokale Algorithmen zur Textverzerrung — von Rückwärtslesen über Typoglycämie bis hin zur klassischen Cäsar-Verschlüsselung. Jeder mit lokalem Alphabet des Sprachpakets (z.B. Cäsar-Verschlüsselung mit 35-Zeichen-Alphabet DE mit Diakritika).
+* **Verschlüsselungsmodus:** 6 lokale Algorithmen zur Textverzerrung — von Rückwärtslesen über Typoglycämie bis hin zur klassischen Cäsar-Verschlüsselung. Jeder mit lokalem Alphabet des Sprachpakets (z.B. Cäsar-Verschlüsselung mit 29-Zeichen-Alphabet DE mit Diakritika).
 * **Tag-Reparatur:** Injektiert nicht-invasiv den angegebenen ISO-Sprachcode — auch regionale Codes, z.B. pt-BR oder zh-CN — in bestehende Dateien.
 
 
-### 4. Konverter / Audiobook-Architekt (Ctrl+4)
+### 4. Konverter / Audiobook-Architekt (Ctrl+3)
 
 * Verarbeitet rohe `.txt`- oder `.docx`-Dateien für die Tastaturnavigation mit NVDA und Systemen wie ElevenLabs.
 * Konvertiert automatisch Schlüsselwörter (Akt, Kapitel, Prolog) in „Heading 1"-Überschriften im Word-Dokument und bereinigt unnötige HTML-Tags und Markdown-Markierungen.
 * Ab Version 15.1 Gruppierung von 5 Runden in Szenen mit H1-Überschriften (automatische Erkennung der Erzählung) — bereitet die im Erzählmodus generierte Datei für die traditionelle Audiobuchveröffentlichung vor.
 
 
-### 5. Regel-Manager (Ctrl+5, neu ab v13.0)
+### 5. Regel-Manager (Ctrl+4, neu ab v13.0)
 
 * **Wörterbuch-Explorer ohne Python:** Visueller Baum aller YAML-Dateien im Ordner `dictionaries/` — phonetische Akzente, Chiffren, kreative Modi des Regisseurs und der Erzählungen. Ein Linguist oder Übersetzer kann Regeln direkt aus der GUI durchsuchen, duplizieren, bearbeiten und löschen.
 * **Ersteller neuer Regeln:** Formular mit Typauswahl (Akzent, reine Austausch-Chiffre, Regisseur-Modus, neue Basissprache, algorithmische Chiffre), das eine fertige YAML-Vorlage erstellt, und für schwierigere Fälle einen formatierten Prompt zur Einfügung in ChatGPT / Claude generiert.
@@ -66,9 +66,9 @@ Die gesamte GUI, die Dokumentation (`docs/manual.<iso>.html`) und die meisten Sy
 
 ## KI-Architektur und eingesetzte Modelle
 
-Der empfohlene und standardmäßige KI-Anbieter ist Anthropic (Claude) — alle System-Prompts sind auf ihn abgestimmt, weshalb er die höchste Qualität der Narration, die beste Einhaltung der Weltregeln und die natürlichste Prosa liefert. Die Konsolidierung auf Claude erfolgte in Etappen (Regisseur in v18.0, Geschichten in v18.1, Polyglot und Postproduktion in v18.2) — resultierend aus einer empirisch bestätigten Überlegenheit bei der Einhaltung der Weltregeln, der Natürlichkeit der Prosa und der Vermeidung von Klischees.
+Der empfohlene und standardmäßige KI-Anbieter ist Anthropic (Claude) — alle System-Prompts sind auf ihn abgestimmt, weshalb er die höchste Qualität der Narration, die beste Einhaltung der Weltregeln und die natürlichste Prosa liefert. Die Konsolidierung auf Claude erfolgte in Etappen (Regisseur in v18.0, Geschichten in v18.1, Polyglott und Postproduktion in v18.2) — resultierend aus einer empirisch bestätigten Überlegenheit bei der Einhaltung der Weltregeln, der Natürlichkeit der Prosa und der Vermeidung von Klischees.
 
-* **Anthropic Claude Sonnet 5 (Standard-Qualitätssäule):** Motor der GESAMTEN Intelligenz der Anwendung. Verantwortlich für die kreative Narration (Regie von Skripten, Verfassen traditioneller Hörbuch-Prosa, Brainstorming sowie ALLE Modi der Geschichten — Entscheidungen, Das kleinere Übel, Frei — samt Erstellung von Zusammenfassungen und Cinematic-Zwischensequenzen), fortgeschrittene Übersetzungen unter Wahrung des mehrblockigen Kontexts (Polyglot), sowie Mikroaufgaben: iterative Vergabe literarischer Kapiteltitel und Erkennung des Sprachcodes des Inhalts.
+* **Anthropic Claude Sonnet 5 (Standard-Qualitätssäule):** Motor der GESAMTEN Intelligenz der Anwendung. Verantwortlich für die kreative Narration (Regie von Skripten, Verfassen traditioneller Hörbuch-Prosa, Brainstorming sowie ALLE Modi der Geschichten — Entscheidungen, Das kleinere Übel, Frei — samt Erstellung von Zusammenfassungen und Cinematic-Zwischensequenzen), fortgeschrittene Übersetzungen unter Wahrung des mehrblockigen Kontexts (Polyglott), sowie Mikroaufgaben: iterative Vergabe literarischer Kapiteltitel und Erkennung des Sprachcodes des Inhalts.
 
 * **Eigener OpenAI-kompatibler Endpoint (erweiterte Option, ab v18.4):** Anstelle von Anthropic kann ein beliebiger, mit der OpenAI-API kompatibler Endpoint angegeben werden (OpenRouter, Groq, Fireworks, DeepSeek, lokales Ollama, OpenAI-kompatibles Gemini und andere) — über einen einzigen, gemeinsamen Codepfad, ohne separate Integration pro Anbieter. Konfiguration in der Datei `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); die vollständige Anleitung befindet sich im Hauptmanual (SCHRITT 2B). Andere Modelle können eine niedrigere Qualität als Claude liefern, auf den die Prompts abgestimmt sind — dies ist eine bewusste Kosten-Qualitäts-Entscheidung seitens des Nutzers.
 
@@ -102,7 +102,7 @@ Die `.sh`-Skripte für macOS/Linux wurden in v13.1 entfernt — die Entwicklungs
 
 ## Vollständige Dokumentation
 
-Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Fläschchen" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
+Dieses README ist nur ein architektonischer Überblick über das Projekt. Um fortgeschrittene Techniken zur Vermeidung von KI-Halluzinationen, Installationsanweisungen für kompatible Sprachsynthesizer (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), eine vollständige Beschreibung der Modi "Geschichten mit Phiole" sowie ein vollständiges Benutzerhandbuch kennenzulernen, konsultieren Sie die Dateien im Ordner `docs/`:
 
 * `docs/manual.<iso>.html` — Hauptbenutzerhandbuch (für Endbenutzer geschrieben).
 * `docs/tales.<iso>.html` — Handbuch für den Modus "Geschichten" (interaktive Textspiele).

@@ -1,4 +1,4 @@
-# Director de Audio GPT
+# Reżyser Audio GPT
 
 **Estudio de Grabación Híbrido para Dramas de Audio, Audiolibros y Narraciones Interactivas**
 
@@ -21,36 +21,36 @@ El estudio principal para escribir radioteatros y audiolibros. Eliges el modo �
 
 * **Libro del Mundo Multiproyecto:** El sistema carga automáticamente en segundo plano las reglas dedicadas del universo (`.md`) basándose en el archivo fuente activo, asegurando un aislamiento completo (carga de contexto sin clics).
 * **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
-* **4 modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
+* **4 modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Gestor de Reglas más abajo.
 
 
-### 2. Historias (Ctrl+2, segundo modo principal desde v15.0)
+### 2. Historias (Ctrl+5, segundo modo principal desde v15.0)
 
 Juegos de texto interactivos dirigidos por la IA en el papel de motor narrativo. A diferencia de la Dirección (donde generas un audiolibro terminado), Historias es una trama dinámica turno por turno:
 
 * **Modo Elecciones:** cada turno termina con 3-5 opciones numeradas A-E. El modo más intuitivo para jugadores invidentes — NVDA lee las opciones, pulsas Tab e Intro.
-* **Modo Mal Menor:** como Elecciones, pero cada opción es desfavorable moral, física o estratégicamente. Desde v15.2 se añade un «frasco» adicional — una opción reutilizable numerada como CERO de rescate desesperado, cuyos efectos son pseudoaleatorios (60% perjudiciales / 30% que alteran la percepción / 10% raramente favorables, distribución forzada por Python, el LLM no tiene forma de inventar un resultado salvador).
+* **Modo Mal Menor:** como Elecciones, pero cada opción es desfavorable moral, física o estratégicamente. Desde v15.2 se añade una «ampolla» adicional — una opción reutilizable numerada como CERO de rescate desesperado, cuyos efectos son pseudoaleatorios (60% perjudiciales / 30% que alteran la percepción / 10% raramente favorables, distribución forzada por Python, el LLM no tiene forma de inventar un resultado salvador).
 * **Modo Libre:** cualquier acción en texto libre («intentaré abrir la puerta»), el motor propone 1-3 sugerencias pero no impone una elección.
 * **Un solo modelo de IA para todos los modos:** desde v18.1 todos los modos de Historias utilizan el mismo modelo compartido (por defecto y recomendado Anthropic Claude Sonnet 5) — un modelo más potente se atiene rigurosamente a las reglas del mundo (clave especialmente en el modo Mal Menor, donde cada opción debe ser realmente desfavorable).
 
 
-### 3. Políglota (Ctrl+3, Traductor AI + Acentos TTS)
+### 3. Políglota (Ctrl+2, Traductor IA + Acentos TTS)
 
 * **Traductor Seguro:** Los textos largos se dividen automáticamente en bloques medidos en tokens del modelo (seguro también para idiomas de escritura densa, p. ej. el chino) y se traducen secuencialmente; una respuesta cortada del modelo se detecta y se reintenta en fragmentos más pequeños. Cada bloque se guarda inmediatamente en un archivo `.jsonl` oculto. La reanudación después de alcanzar los límites de la API es completamente automática.
 * **Automatización NVDA:** Las traducciones se guardan como archivos `.html` listos con la etiqueta de idioma incorporada o archivos `.docx` con etiquetas inyectadas directamente en la estructura XML.
-* **8 acentos locales:** Posibilidad de forzar intencionadamente un acento roto para los sintetizadores locales (Tiflotecnia Voices, eSpeak, OneCore) mediante reglas avanzadas de regex. Acentos extranjeros soportados: inglés, ruso (con transliteración al cirílico), francés, alemán, español, italiano, finlandés, islandés.
+* **8 acentos locales:** Posibilidad de forzar intencionadamente un acento roto para los sintetizadores locales (Tiflotecnia Voices, eSpeak, OneCore) mediante reglas avanzadas de regex. Acentos extranjeros soportados: inglés, ruso (con transliteración al cirílico), francés, alemán, polaco, italiano, finlandés, islandés.
 * **Modo Cifrador:** 6 algoritmos locales que distorsionan el texto, desde la lectura al revés, pasando por tipoglicemia, hasta el clásico cifrado César. Cada uno con el alfabeto local del paquete de idioma (por ejemplo, cifrado César en un alfabeto PL de 35 caracteres con diacríticos).
 * **Reparador de Etiquetas:** Inyecta de manera no invasiva el código de idioma ISO proporcionado — también regional, p. ej. pt-BR o zh-CN — en archivos existentes.
 
 
-### 4. Convertidor / Arquitecto de Audiolibros (Ctrl+4)
+### 4. Convertidor / Arquitecto de Audiolibros (Ctrl+3)
 
 * Procesa archivos `.txt` o `.docx` en bruto para navegación por teclado para NVDA y sistemas como ElevenLabs.
 * Convierte automáticamente palabras clave (Acto, Capítulo, Prólogo) en encabezados "Heading 1" en un documento de Word, y también limpia etiquetas HTML innecesarias y marcadores Markdown.
 * Desde la versión v15.1, agrupa 5 turnos en escenas con encabezados H1 (detección automática de Historias) — prepara el archivo generado por el modo Historia para la publicación tradicional de audiolibros.
 
 
-### 5. Gestor de Reglas (Ctrl+5, novedad desde v13.0)
+### 5. Gestor de Reglas (Ctrl+4, novedad desde v13.0)
 
 * **Explorador de diccionarios sin Python:** Árbol visual de todos los archivos YAML en la carpeta `dictionaries/` — acentos fonéticos, cifrados, modos creativos del Director y Narrador. Un lingüista o traductor puede explorar, duplicar, editar y eliminar reglas directamente desde la interfaz gráfica.
 * **Creador de nuevas reglas:** Formulario con selección de tipo (acento, cifrado de sustitución simple, modo del Director, nuevo idioma base, cifrado algorítmico) que crea una plantilla YAML lista, y para casos más complejos, genera un prompt formateado para pegar en ChatGPT / Claude.
@@ -102,7 +102,7 @@ Los scripts `.sh` para macOS/Linux fueron eliminados en la versión v13.1 — el
 
 ## Documentación completa
 
-Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con frasco, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
+Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con ampolla, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
 
 * `docs/manual.<iso>.html` — manual principal de usuario (escrito para el usuario final).
 * `docs/tales.<iso>.html` — manual del modo Historias (juegos de texto interactivos).

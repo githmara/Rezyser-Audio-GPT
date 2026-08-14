@@ -24,36 +24,36 @@ Aðalstúdíó fyrir skrif á hljóðleikritum og hljóðbókum. Þú velur ham 
 * **4 skapandi hamir:** Hver skrá í `dictionaries/<jzk>/rezyser/` lýsir sérstakri „persónuleika“ AI leikstjórans (Hugstormun, Handrit, Hljóðbók, Eftirvinnsla titla). Þú getur stillt hljóm þeirra án forritunar — sjá Reglustjóri hér að neðan.
 
 
-### 2. Sögur (Ctrl+2, annar aðalhamurinn frá útgáfu 15.0)
+### 2. Sögur (Ctrl+5, annar aðalhamurinn frá útgáfu 15.0)
 
 Gagnvirkir textaleikir sem gervigreind stýrir í hlutverki frásagnarvélar. Ólíkt Leikstjórn (þar sem þú býrð til fullbúna hljóðbók), eru Sögur runa-eftir-runu kvik atburðarás:
 
 * **Valhamur:** hver umferð endar með 3-5 tölusettum valkostum A-E. Innsæisríkasti hamurinn fyrir blinda leikendur — NVDA les valkostina, þú ýtir á Tab og Enter.
-* **Hamur Minna Illskunnar:** eins og Val, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnulega. Frá útgáfu 15.2 er til viðbótar „glasið" — endurnýtanlegur ZERO-tölusettur örvæntingarbjörgunarvalkostur, þar sem áhrifin eru gervi-tilviljunarkennd (60% skaðleg / 30% skynjunartruflandi / 10% sjaldan-hagstæð, dreifingin þvinguð fram af Python, LLM getur ekki fundið upp á hagstæðri niðurstöðu).
+* **Hamur Minna Illskunnar:** eins og Val, en hver valkostur er óhagstæður siðferðilega, líkamlega eða stefnulega. Frá útgáfu 15.2 er til viðbótar „flaskan" — endurnýtanlegur NÚLL-tölusettur örvæntingarbjörgunarvalkostur, þar sem áhrifin eru gervi-tilviljunarkennd (60% skaðleg / 30% skynjunartruflandi / 10% sjaldan-hagstæð, dreifingin þvinguð fram af Python, LLM getur ekki fundið upp á hagstæðri niðurstöðu).
 * **Frjáls Hamur:** hvaða aðgerð sem er í lausum texta („ég reyni að opna dyrnar"), vélin stingur upp á 1-3 tillögum en þvingar ekki fram val.
 * **Eitt gervigreindarlíkan fyrir alla hami:** frá útgáfu 18.1 nota allir hamir Sagnanna sama, sameiginlega líkanið (sjálfgefið og mælt með Anthropic Claude Sonnet 5) — öflugra líkan heldur sig nákvæmlega við reglur heimsins (sérstaklega mikilvægt í ham Minna Illskunnar, þar sem hver valkostur verður að vera raunverulega óhagstæður).
 
 
-### 3. Fjöltyngdur (Ctrl+3, AI Þýðandi + TTS Hreimur)
+### 3. Tungumálamaður (Ctrl+2, AI-þýðandi + TTS-hreimar)
 
 * **Öruggur Þýðandi:** Langir textar eru sjálfkrafa skiptir í einingar sem mældar eru í tókum líkansins (öruggt einnig fyrir þétt rituð tungumál, t.d. kínversku) og þýddir í röð; afklippt svar líkansins er greint og reynt aftur á minni hlutum. Hver eining er samstundis vistuð í falinni `.jsonl` skrá. Endurræsing eftir að API takmörk eru náð er fullkomlega sjálfvirk.
 * **Sjálfvirkni NVDA:** Þýðingar eru vistaðar sem tilbúnar `.html` skrár með innbyggðum tungumálamerkjum eða `.docx` skrár með merkjum sem eru sprautað beint inn í XML uppbygginguna.
 * **8 staðbundnir hreimar:** Möguleiki á að þvinga fram brotinn hreim fyrir staðbundna hljóðgjafa (Tiflotecnia Voices, eSpeak, OneCore) með háþróuðum regex reglum. Studdir erlendir hreimar: enska, rússneska (með transliteringu á kyrillísku), franska, þýska, spænska, ítalska, finnska, pólsku.
-* **Dulkóðunarhamur:** 6 staðbundin reiknirit til að afmynda texta — frá því að lesa afturábak, í gegnum typoglycemíu, til klassískrar Cæsar dulkóðunar. Hvert með staðbundnu stafrófi tungumálapakkans (t.d. Cæsar dulkóðun með 35-stafa íslensku stafrófi með diakritískum merkjum).
+* **Dulkóðunarhamur:** 6 staðbundin reiknirit til að afmynda texta — frá því að lesa afturábak, í gegnum typoglycemíu, til klassískrar Cæsar dulkóðunar. Hvert með staðbundnu stafrófi tungumálapakkans (t.d. Cæsar dulkóðun með 32-stafa íslensku stafrófi með diakritískum merkjum).
 * **Merkingarviðgerð:** Sprautar á óskaðlegan hátt inn gefnum ISO tungumálakóða — einnig svæðisbundnum, t.d. pt-BR eða zh-CN — í núverandi skrár.
 
 
-### 4. Umbreytingartæki / Hljóðbókararkitekt (Ctrl+4)
+### 4. Umbreytingartæki / Hljóðbókararkitekt (Ctrl+3)
 
 * Vinnur úr hráum `.txt` eða `.docx` skrám fyrir lyklaborðsleiðsögn fyrir NVDA og kerfi eins og ElevenLabs.
 * Breytir sjálfkrafa lykilorðum (Þáttur, Kafli, Formáli) í „Heading 1" fyrirsagnir í Word skjali og hreinsar einnig óþarfa HTML og Markdown merki.
 * Frá og með v15.1 hópar 5 umferðir í senur með H1 fyrirsögnum (sjálfvirk greining á Sögu) — undirbýr skrá sem er búin til af Sögumáta fyrir hefðbundna útgáfu hljóðbóka.
 
 
-### 5. Reglustjóri (Ctrl+5, nýjung frá v13.0)
+### 5. Reglustjóri (Ctrl+4, nýjung frá v13.0)
 
 * **Orðabókarleitari án Pythons:** Sjónrænt tré allra YAML skráa í `dictionaries/` möppunni — hljóðblæir, dulmál, skapandi hamir Leikstjóra og Sagna. Málfræðingur eða þýðandi getur skoðað, afritað, breytt og eytt reglum beint úr GUI.
-* **Nýr reglusköpunarforritari:** Form með val á tegund (hljóðblær, hreint skiptidulmál, Leikstjórahamur, nýtt grunnmál, reikniritadulmál) sem býr til tilbúið YAML sniðmát, og fyrir erfiðari tilfelli býr til sniðinn prompt til að líma í ChatGPT / Claude.
+* **Nýr reglusköpunarforritari:** Form með val á tegund (hljóðblær, hreint skiptidulmál, Leikstjórnarhamur, nýtt grunnmál, reikniritadulmál) sem býr til tilbúið YAML sniðmát, og fyrir erfiðari tilfelli býr til sniðinn prompt til að líma í ChatGPT / Claude.
 * **Endurskipulagning v13.0 — reglur í YAML-skrám:** Allir hljóðblæir, dulmál og AI-stillingar, sem í útgáfu 12.0 voru „innbyggðar" fastar í Python kóða, hafa verið færðar yfir í lýsandi `.yaml` skrár sem eru lesnar inn á dynamískan hátt við ræsingu forritsins. Hver sem er sem getur notað Notepad getur stillt hljóðblæ (t.d. breytt `sz → sh` í `sz → sch`), bætt við nýju tungumáli, eða jafnvel breytt hljómi kerfisprompt fyrir AI — án þess að þurfa að umbreyta kóða.
 
 
@@ -66,9 +66,9 @@ Allt GUI viðmót, skjöl (`docs/manual.<iso>.html`) og flest kerfisskilaboð er
 
 ## Gervigreindararkitektúr og notuð líkön
 
-Ráðlagður og sjálfgefinn AI-þjónustuveitandi er Anthropic (Claude) — allar kerfisskipanir (system prompts) eru fínstilltar fyrir hann, svo hann skilar hæstu gæðum í frásögn, tryggustu fylgni við reglur heimsins og eðlilegustu prósa. Samþjöppun yfir í Claude fór fram í áföngum (Leikstjóri í útgáfu 18.0, Sögur í útgáfu 18.1, Fjöltyngi og eftirvinnsla í útgáfu 18.2) — sem byggðist á reynslulega staðfestu forskoti í fylgni við reglur heimsins, eðlilegum prósa og forðun klisja.
+Ráðlagður og sjálfgefinn AI-þjónustuveitandi er Anthropic (Claude) — allar kerfisskipanir (system prompts) eru fínstilltar fyrir hann, svo hann skilar hæstu gæðum í frásögn, tryggustu fylgni við reglur heimsins og eðlilegustu prósa. Samþjöppun yfir í Claude fór fram í áföngum (Leikstjóri í útgáfu 18.0, Sögur í útgáfu 18.1, Tungumálamaður og eftirvinnsla í útgáfu 18.2) — sem byggðist á reynslulega staðfestu forskoti í fylgni við reglur heimsins, eðlilegum prósa og forðun klisja.
 
-* **Anthropic Claude Sonnet 5 (sjálfgefin gæðastoð):** Vélin á bak við ALLA greind forritsins. Ber ábyrgð á skapandi frásögn (leikstjórn handrita, ritun hefðbundins hljóðbókarprósa, Hugflæði (Burza Mózgów) og ÖLLUM háttum Sagna — Valkostir, Minna illt og Frjáls háttur — ásamt gerð samantekta og millikafla í Cinematic-stíl), háþróuðum þýðingum með varðveislu samhengis milli margra blokka (Fjöltyngi), auk smærri verkefna: endurtekinnar úthlutunar á bókmenntalegum köflatitlum og greiningar á tungumálakóða efnis.
+* **Anthropic Claude Sonnet 5 (sjálfgefin gæðastoð):** Vélin á bak við ALLA greind forritsins. Ber ábyrgð á skapandi frásögn (leikstjórn handrita, ritun hefðbundins hljóðbókarprósa, Hugflæði (Burza Mózgów) og ÖLLUM háttum Sagna — Valkostir, Minna illt og Frjáls háttur — ásamt gerð samantekta og millikafla í Cinematic-stíl), háþróuðum þýðingum með varðveislu samhengis milli margra blokka (Tungumálamaður), auk smærri verkefna: endurtekinnar úthlutunar á bókmenntalegum köflatitlum og greiningar á tungumálakóða efnis.
 
 * **Eigin endapunktur samhæfður við OpenAI (valkostur fyrir lengra komna, frá útgáfu 18.4):** Í stað Anthropic er hægt að tilgreina hvaða endapunkt sem er samhæfðan við OpenAI-API (OpenRouter, Groq, Fireworks, DeepSeek, staðbundið Ollama, OpenAI-samhæft Gemini og fleiri) — með einni, sameiginlegri kóðaleið, án sérstakrar samþættingar fyrir hvern þjónustuveitanda. Stillingar eru í skránni `golden_key.env` (`LLM_PROVIDER`, `LLM_BASE_URL`, `LLM_MODEL`, `OPENAI_API_KEY`); fullar leiðbeiningar er að finna í aðalhandbókinni (SKREF 2B). Önnur líkön geta gefið lakari gæði en Claude, sem skipanirnar eru fínstilltar fyrir — þetta er meðvitað val notandans milli kostnaðar og gæða.
 

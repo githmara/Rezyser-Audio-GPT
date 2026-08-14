@@ -24,7 +24,7 @@ Główne studio do pisania słuchowisk i audiobooków. Wybierasz tryb — Burza 
 * **4 tryby twórcze:** Każdy z plików w `dictionaries/<jzk>/rezyser/` opisuje osobną „personalność" reżysera AI (Burza Mózgów, Skrypt, Audiobook, Postprodukcja Tytułów). Możesz dostroić ich brzmienie bez programowania — patrz Manager Reguł niżej.
 
 
-### 2. Opowieści (Ctrl+2, drugi główny tryb od v15.0)
+### 2. Opowieści (Ctrl+5, drugi główny tryb od v15.0)
 
 Interaktywne gry tekstowe prowadzone przez AI w roli silnika narracyjnego. W odróżnieniu od Reżyserii (gdzie generujesz gotowy audiobook), Opowieści to tura-po-turze dynamiczna fabuła:
 
@@ -34,7 +34,7 @@ Interaktywne gry tekstowe prowadzone przez AI w roli silnika narracyjnego. W odr
 * **Jeden model AI dla wszystkich trybów:** od v18.1 wszystkie tryby Opowieści korzystają z tego samego, wspólnego modelu (domyślnie i zalecanie Anthropic Claude Sonnet 5) — mocniejszy model rygorystycznie trzyma się zasad świata (kluczowe zwłaszcza w trybie Mniejsze Zło, gdzie każda opcja musi być realnie niekorzystna).
 
 
-### 3. Poliglota (Ctrl+3, Tłumacz AI + Akcenty TTS)
+### 3. Poliglota (Ctrl+2, Tłumacz AI + Akcenty TTS)
 
 * **Bezpieczny Tłumacz:** Długie teksty są automatycznie dzielone na bloki mierzone w tokenach modelu (bezpieczne także dla języków o gęstym zapisie, np. chińskiego) i tłumaczone sekwencyjnie; ucięta odpowiedź modelu jest wykrywana i ponawiana na mniejszych fragmentach. Każdy blok jest natychmiast zapisywany do ukrytego pliku `.jsonl`. Wznowienie po wyczerpaniu limitów API jest w pełni automatyczne.
 * **Automatyzacja NVDA:** Tłumaczenia zapisywane są jako gotowe pliki `.html` z wbudowanym tagiem językowym lub pliki `.docx` z tagami wstrzykniętymi bezpośrednio do struktury XML.
@@ -43,14 +43,14 @@ Interaktywne gry tekstowe prowadzone przez AI w roli silnika narracyjnego. W odr
 * **Naprawiacz Tagów:** Bezinwazyjnie wstrzykuje podany kod języka ISO — także regionalny, np. pt-BR czy zh-CN — do istniejących plików.
 
 
-### 4. Konwerter / Architekt Audiobooków (Ctrl+4)
+### 4. Konwerter / Architekt Audiobooków (Ctrl+3)
 
 * Przetwarza surowe pliki `.txt` lub `.docx` pod kątem nawigacji klawiszowej dla NVDA i systemów takich jak ElevenLabs.
 * Automatycznie konwertuje słowa kluczowe (Akt, Rozdział, Prolog) na nagłówki „Heading 1" w dokumencie Word, a także czyści zbędne tagi HTML i znaczniki Markdown.
 * Od v15.1 grupowanie 5 tur w sceny z nagłówkami H1 (auto-detekcja Opowieści) — przygotowuje plik wygenerowany przez tryb Opowieści do tradycyjnej publikacji audiobookowej.
 
 
-### 5. Manager Reguł (Ctrl+5, nowość od v13.0)
+### 5. Manager Reguł (Ctrl+4, nowość od v13.0)
 
 * **Eksplorator słowników bez Pythona:** Wizualne drzewo wszystkich plików YAML w folderze `dictionaries/` — akcenty fonetyczne, szyfry, tryby twórcze Reżysera i Opowieści. Lingwista lub tłumacz może przeglądać, duplikować, edytować i usuwać reguły wprost z GUI.
 * **Kreator nowych reguł:** Formularz z wyborem typu (akcent, szyfr czystych zamian, tryb Reżysera, nowy język bazowy, szyfr algorytmiczny) tworzący gotowy szablon YAML, a dla trudniejszych przypadków generujący sformatowany prompt do wklejenia w ChatGPT / Claude.

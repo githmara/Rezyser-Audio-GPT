@@ -47,14 +47,14 @@ mitä tahansa muuta asiakirjaa.</p>
 <pre><code>dictionaries/
 └── pl/              peruskielen (puolan) kansio
     ├── podstawy.yaml              puolalaiset diakriitit + aakkoset
-    ├── akcenty/                  11 aksenttitiedostot
-    ├── szyfry/                   6 salaus- ja leikkitiedostot
-    └── rezyser/                  4 Ohjaaja AI -tilatiedostot
+    ├── akcenty/                  11 aksenttitiedostoa
+    ├── szyfry/                   6 salaus- ja leikkitiedostoa
+    └── rezyser/                  4 Ohjaaja AI -tilatiedostoa
 </code></pre>
 <p>Tällä hetkellä täysin toteutettuja ovat: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
-(9 peruskieliä). Jokaisella on oma paketti<br>
+(9 peruskieltä). Jokaisella on oma paketti<br>
 "<code>dictionaries/&lt;kod&gt;/</code>" diakriiteillä, aakkosilla ja äännesäännöillä, jotka<br>
-toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa<br>
+kohdistuvat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa<br>
 lähdekielen automaattisesti lingua-language-detector -työkalulla<br>
 (kappaletasolla) ja lataa oikean paketin kullekin katkelmalle erikseen.<br>
 Lisää kieliä on valmisteilla (täydellinen paketti vaatii "podstawy.yaml",<br>
@@ -75,7 +75,7 @@ vääristymästä tarinan tarpeisiin.</p>
 <li>saksa (Markus/Stefan Vocalizerissa, Katja/Hedda OneCoressa)</li>
 <li>espanja (Jorge/Monica Vocalizerissa, Helena OneCoressa)</li>
 <li>italia (Alice/Luca Vocalizerissa, Elsa OneCoressa)</li>
-<li>puolalainen (Ewa Vocalizerissa, Paulina OneCoressa)</li>
+<li>puola (Ewa Vocalizerissa, Paulina OneCoressa)</li>
 <li>islanti (vain OneCore Gudrun ja ilmainen eSpeak — Vocalizerissa ei ole<br>
   islantilaista ääntä!)</li>
 <li>venäjä (Milena Vocalizerissa, Irina/Pavel/Yuri OneCoressa — tämä on<br>
@@ -86,7 +86,7 @@ vääristymästä tarinan tarpeisiin.</p>
 <p>Lisäksi aksenttivalikossa on kaksi "puhdistavaa ilman aksenttia" -vaihtoehtoa:<br>
 yksi ilman numeroiden normalisointia, toinen normalisoinnilla (muuttaa "15"<br>
 "viisitoista" ennen käsittelyä, koska ulkomaalainen ei todennäköisesti taivuttaisi<br>
-tätä lukua oikein — mikä lisää aitoutta) sekä "Tagikorjaaja", joka vain lisää<br>
+tätä lukua oikein — mikä lisää aitoutta) sekä "Tunnisteiden korjaaja", joka vain lisää<br>
 tiedostoon ISO-kielikoodin ilman sisällön pilaamista (pelastus, kun jo<br>
 käännetty tiedostosi on väärällä kielikoodilla).</p>
 <h2>Mikä on salaus?</h2>
@@ -174,7 +174,7 @@ pitkä ohjeistus tekoälylle, kuinka sen tulisi käyttäytyä kyseisessä tilass
 Jos tunnet, että esimerkiksi Äänikirja-tila kirjoittaa "liian kukkaisesti"<br>
 tai Aivoriihi ehdottaa liian usein maagisia ratkaisuja, voit säätää näitä<br>
 tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla<br>
-käynnistyksellä sinun version. Ei ohjelmointia.</p>
+käynnistyksellä sinun versiosi. Ei ohjelmointia.</p>
 <h2>Mikä on "Tarinatila"?</h2>
 <hr>
 <p>Kansio "opowiesci/" sisältää 8 tiedostoa, jotka kuvaavat sovelluksen<br>
@@ -188,7 +188,7 @@ keskustelu mallin kanssa, joka ohjaa kanssasi dynaamisen juonen istuntoa:</p>
                            näkövammaisille pelaajille)</li>
 <li>tryb_mniejsze_zlo.yaml — Pienempi paha (kuten Valinnat, mutta jokainen<br>
                            vaihtoehto on epäedullinen; versiosta 15.2<br>
-                           lähtien uudelleenkäytettävä pullo ZERO-numeroituna<br>
+                           lähtien uudelleenkäytettävä pullo NOLLA-numeroituna<br>
                            epätoivoisen pelastuksen vaihtoehtona)</li>
 <li>tryb_swobodny.yaml     — Vapaa (mikä tahansa toiminto vapaana tekstinä,<br>
                            moottori ehdottaa 1-3 vaihtoehtoa mutta ei<br>
@@ -201,7 +201,7 @@ keskustelu mallin kanssa, joka ohjaa kanssasi dynaamisen juonen istuntoa:</p>
 <li>zaczatki.yaml          — seikkailun aloittimet (3 alustavaa maailman<br>
                            asetelmaa valittavaksi uutta peliä aloitettaessa)</li>
 <li>streszczenie.yaml      — pitkien pelien yhteenvetogeneraattori (historian<br>
-                           pakkaus mallin kontekstiikkunaa varten)</li>
+                           pakkaus mallin konteksti-ikkunaa varten)</li>
 <li>cinematic_warning.yaml — varoitukset brutaaleista/dramaattisista<br>
                            kohtauksista (yhdenmukaisuus pelaajan mieltymysten kanssa)</li>
 </ul>
