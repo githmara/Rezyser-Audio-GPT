@@ -474,7 +474,7 @@ rezyser:
   # Prompt Architekta dialog
   prompt_arch_dlg_tytul: "Prompt des Architekten – in externen Chatbot einfügen"
   prompt_arch_instrukcja: |-
-    Fügen Sie diesen fertigen Prompt in einen externen Chatbot ein (z.B. kostenlosen ChatGPT oder Claude) und ersetzen Sie den Text „[HIER IHRE IDEE EINGEBEN]" durch Ihren eigenen Plotansatz.
+    Fügen Sie diesen fertigen Prompt in einen externen Chatbot ein (z.B. kostenlosen ChatGPT oder Claude) und ersetzen Sie den Text „[HIER IHRE IDEE EINFÜGEN]" durch Ihren eigenen Plotansatz.
 
     Die KI gibt Ihnen ein fertiges Weltbuch im Markdown-Codeblock zurück — kopieren Sie dessen Inhalt (ohne die umgebenden Markierungen ```) und fügen Sie es in das Feld „Weltbuch" oben ein, und klicken Sie dann auf „Buch dauerhaft speichern".
   prompt_arch_instrukcja_name: "Anleitung zur Nutzung des Architekten-Prompts"
@@ -485,7 +485,7 @@ rezyser:
   prompt_arch_skopiowano_tytul: "Kopiert"
   prompt_arch_skopiowano_tresc: |-
     Der Architekten-Prompt wurde in die Zwischenablage kopiert.
-    Fügen Sie ihn (Ctrl+V) in ChatGPT oder Claude ein und ersetzen Sie [HIER IHRE IDEE EINGEBEN] durch Ihre eigene Plotidee.
+    Fügen Sie ihn (Ctrl+V) in ChatGPT oder Claude ein und ersetzen Sie [HIER IHRE IDEE EINFÜGEN] durch Ihre eigene Plotidee.
   prompt_arch_schowek_nieudany: |-
     Systemzwischenablage konnte nicht geöffnet werden.
     Kopieren Sie den Prompt manuell: Klicken Sie in das obige Feld, wählen Sie alles aus (Ctrl+A) und kopieren Sie (Ctrl+C).
@@ -656,9 +656,9 @@ rezyser:
   postprod_dlg_zapisano: 'Das Ergebnis wurde in der Datei {plik} (Ordner „skrypty“) gespeichert. Vorschau unten:'
   postprod_dlg_name: Feld für das Postproduktionsergebnis
 poliglota:
-  panel_name: "AI-Polyglot-Panel"
-  heading: "🌍  AI-Polyglot – Hybrides Übersetzungsstudio"
-  description_name: "Beschreibung des Polyglot-Moduls"
+  panel_name: "AI-Polyglott-Panel"
+  heading: "🌍  AI-Polyglott – Hybrides Übersetzungsstudio"
+  description_name: "Beschreibung des Polyglott-Moduls"
   tool_description: |-
     Das Polyglott-Modul dient zum Setzen harter phonetischer Akzente für lokale Sprachsynthesizer (NVDA/Vocalizer/eSpeak), für Textspiele im Verschlüsselungsmodus sowie zur KI-gestützten Textübersetzung (Anthropic Claude).
 
@@ -1030,7 +1030,7 @@ manager:
     Datei podstawy.yaml gespeichert, aber Unterordner akcenty/, szyfry/, rezyser/, opowiesci/ und gui/ konnten nicht erstellt werden:
     {tresc_bledu}
 
-    Erstellen Sie diese manuell im Datei-Explorer, bevor Sie Polyglot starten – andernfalls wird die Engine beim Scannen der neuen Sprache einen Fehler ausgeben.
+    Erstellen Sie diese manuell im Datei-Explorer, bevor Sie Polyglott starten – andernfalls wird die Engine beim Scannen der neuen Sprache einen Fehler ausgeben.
 
   uwagi:
     akcent: |-
@@ -1161,7 +1161,7 @@ updater:
   blad_uruchomienia_tresc: "Installer konnte nicht gestartet werden:\n{sciezka_pliku}\n\n{tresc_bledu}"
   co_nowego_online_pl: Die vollständige Veröffentlichungsseite (online) ist auf Polnisch verfügbar.
   btn_szczegoly_online: '&Details online'
-  changelog_uwaga: Das Änderungsprotokoll der neuen Version wird als Datei docs/changelog.md geöffnet. Es ist auf Englisch und Polnisch — wenn Sie eine andere Sprache bevorzugen, laden Sie diese Datei in das Polyglot-Modul (AI-Übersetzer) oder einen beliebigen Übersetzer oder Chatbot.
+  changelog_uwaga: Das Änderungsprotokoll der neuen Version wird als Datei docs/changelog.md geöffnet. Es ist auf Englisch und Polnisch — wenn Sie eine andere Sprache bevorzugen, laden Sie diese Datei in das Polyglott-Modul (AI-Übersetzer) oder einen beliebigen Übersetzer oder Chatbot.
   changelog_naglowek: '# Was ist neu in Version {nowa_wersja}'
   changelog_blad: "Die Datei des Änderungsprotokolls konnte nicht gespeichert oder geöffnet werden:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Änderungsprotokoll der Version {nowa_wersja}
