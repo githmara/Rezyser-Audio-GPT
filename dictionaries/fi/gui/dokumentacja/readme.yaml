@@ -36,7 +36,7 @@ tresc:
     * **Juonen Akut:** Algoritmi "loputtomalle muistille". Kun muistin osoitin saavuttaa punaisen hälytyksen tilan, järjestelmä luo automaattisesti juonitiivistelmän ja tallentaa sen Pitkäaikaisen Muistin kenttään.
     * **{liczba_trybow_rezysera} luovat tilat:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja, Otsikoiden Jälkituotanto). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
   modul_opowiesci: |
-    ### 2. Tarinat (Ctrl+2, toinen päätila versiosta 15.0 alkaen)
+    ### 2. Tarinat (Ctrl+5, toinen päätila versiosta 15.0 alkaen)
 
     Interaktiivisia tekstipelejä, joita AI ohjaa kerronnallisen moottorin roolissa. Toisin kuin Ohjaus-tilassa (jossa luodaan valmis äänikirja), Tarinat on vuoro vuorolta etenevä dynaaminen juoni:
 
@@ -45,7 +45,7 @@ tresc:
     * **Vapaa tila:** mikä tahansa toiminto vapaana tekstinä ("yritän avata oven"), moottori ehdottaa 1-3 vaihtoehtoa mutta ei pakota valintaan.
     * **Yksi AI-malli kaikille tiloille:** versiosta 18.1 alkaen kaikki Tarinat-tilat käyttävät samaa, yhteistä mallia (oletuksena ja suositellen Anthropic Claude Sonnet 5) — vahvempi malli noudattaa tiukasti maailman sääntöjä (avainasemassa erityisesti Pienempi Paha -tilassa, jossa jokaisen vaihtoehdon on oltava aidosti epäedullinen).
   modul_poliglota: |
-    ### 3. Polyglot (Ctrl+3, AI-kääntäjä + TTS-aksentit)
+    ### 3. Polyglootti (Ctrl+2, Tekoälykääntäjä + TTS-aksentit)
 
     * **Turvallinen Kääntäjä:** Pitkät tekstit jaetaan automaattisesti lohkoihin, jotka mitataan mallin tokeneina (turvallista myös tiheästi kirjoitetuille kielille, esim. kiinalle), ja käännetään peräkkäin; katkennut mallin vastaus tunnistetaan ja yritetään uudelleen pienemmissä osissa. Jokainen lohko tallennetaan välittömästi piilotettuun `.jsonl`-tiedostoon. API-rajoitusten täyttyessä jatkaminen on täysin automaattista.
     * **NVDA Automaatio:** Käännökset tallennetaan valmiina `.html`-tiedostoina, joissa on sisäänrakennettu kielitagi, tai `.docx`-tiedostoina, joissa tagit on injektoitu suoraan XML-rakenteeseen.
@@ -53,13 +53,13 @@ tresc:
     * **Siffrin tila:** {liczba_szyfrow} paikallisia tekstin vääristämisalgoritmeja — tekstin kääntämisestä taaksepäin, typoglykemiaan ja klassiseen Caesarin salaukseen. Jokainen paikallisella kielipaketin aakkostolla (esim. Caesarin salaus 35-merkkisellä FI-aakkostolla diakriittisillä merkeillä).
     * **Tagien Korjaaja:** Injektoi häiritsemättä annetun ISO-kielikoodin — myös alueellisen, esim. pt-BR tai zh-CN — olemassa oleviin tiedostoihin.
   modul_konwerter: |
-    ### 4. Muuntaja / Äänikirjojen Arkkitehti (Ctrl+4)
+    ### 4. Muunnin / Äänikirjojen Arkkitehti (Ctrl+3)
 
     * Käsittelee raakoja `.txt` tai `.docx` tiedostoja NVDA:n ja sellaisten järjestelmien kuin ElevenLabs näppäimistönavigointia varten.
     * Muuntaa automaattisesti avainsanat (Näytös, Luku, Prologi) Word-dokumentin "Heading 1" -otsikoiksi ja puhdistaa tarpeettomat HTML-tagit ja Markdown-merkinnät.
     * Versiosta 15.1 alkaen ryhmittelee 5 kierrosta kohtauksiin H1-otsikoilla (Tarinoiden automaattinen tunnistus) — valmistelee Tarina-tilan luoman tiedoston perinteistä äänikirjajulkaisua varten.
   modul_manager_regul: |
-    ### 5. Sääntöjen Hallinta (Ctrl+5, uutta v13.0 alkaen)
+    ### 5. Sääntöjen Hallinta (Ctrl+4, uutta versiosta 13.0 alkaen)
 
     * **Sanakirjojen tutkija ilman Pythonia:** Visuaalinen puu kaikista YAML-tiedostoista `dictionaries/`-kansiossa — foneettiset aksentit, salakirjoitukset, Ohjaajan ja Tarinoiden luovat tilat. Kielitieteilijä tai kääntäjä voi tarkastella, kopioida, muokata ja poistaa sääntöjä suoraan käyttöliittymästä.
     * **Uusien sääntöjen luonti:** Lomake, jossa valitaan tyyppi (aksentti, yksinkertainen korvaussalakirjoitus, Ohjaajan tila, uusi peruskieli, algoritminen salakirjoitus), luo valmiin YAML-mallin, ja vaikeammissa tapauksissa generoi muotoillun kehotteen liitettäväksi ChatGPT:hen / Claudeen.

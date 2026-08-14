@@ -36,7 +36,7 @@ tresc:
     * **Accumulateur de l'Intrigue :** Algorithme de « mémoire infinie ». Lorsque l'indicateur de mémoire entre en état d'alerte rouge, le système génère automatiquement un résumé de l'intrigue et l'enregistre dans le champ Mémoire à Long Terme.
     * **{liczba_trybow_rezysera} modes créatifs :** Chacun des fichiers dans `dictionaries/<jzk>/rezyser/` décrit une « personnalité » distincte du réalisateur AI (Brainstorming, Script, Livre audio, Postproduction des Titres). Vous pouvez ajuster leur tonalité sans programmation — voir le Gestionnaire de Règles ci-dessous.
   modul_opowiesci: |
-    ### 2. Récits (Ctrl+2, deuxième mode principal depuis v15.0)
+    ### 2. Histoires (Ctrl+5, deuxième mode principal depuis v15.0)
 
     Jeux textuels interactifs pilotés par l'IA jouant le rôle de moteur narratif. Contrairement au Mode Réalisateur (où vous générez un audiobook prêt à l'emploi), les Récits fonctionnent tour par tour, dans une intrigue dynamique :
 
@@ -45,7 +45,7 @@ tresc:
     * **Mode Libre :** action au choix en texte libre (« j'essaie d'ouvrir la porte »), le moteur propose 1 à 3 suggestions mais n'impose pas de choix.
     * **Un seul modèle d'IA pour tous les modes :** depuis la v18.1, tous les modes de Récits utilisent le même modèle commun (par défaut et recommandé : Anthropic Claude Sonnet 5) — un modèle plus puissant respecte rigoureusement les règles de l'univers (essentiel en particulier dans le Mode Moindre Mal, où chaque option doit être réellement défavorable).
   modul_poliglota: |
-    ### 3. Polyglotte (Ctrl+3, Traducteur IA + Accents TTS)
+    ### 3. Polyglotte (Ctrl+2, Traducteur IA + Accents TTS)
 
     * **Traducteur Sécurisé :** Les longs textes sont automatiquement divisés en blocs mesurés en tokens du modèle (sûr aussi pour les langues à écriture dense, par ex. le chinois) et traduits séquentiellement ; une réponse tronquée du modèle est détectée et retentée sur des fragments plus petits. Chaque bloc est immédiatement enregistré dans un fichier caché `.jsonl`. La reprise après l'épuisement des limites de l'API est entièrement automatique.
     * **Automatisation NVDA :** Les traductions sont enregistrées sous forme de fichiers `.html` prêts à l'emploi avec une balise linguistique intégrée ou de fichiers `.docx` avec des balises injectées directement dans la structure XML.
@@ -53,13 +53,13 @@ tresc:
     * **Mode Chiffreur :** {liczba_szyfrow} algorithmes locaux de distorsion de texte — de la lecture à l'envers, à la typoglycémie, en passant par le chiffre de César classique. Chacun avec l'alphabet local du pack linguistique (par exemple, le chiffre de César sur un alphabet FR de 35 caractères avec diacritiques).
     * **Réparateur de Balises :** Injecte de manière non invasive le code de langue ISO fourni — y compris régional, par ex. pt-BR ou zh-CN — dans les fichiers existants.
   modul_konwerter: |
-    ### 4. Convertisseur / Architecte d'Audiobooks (Ctrl+4)
+    ### 4. Convertisseur / Architecte d'Audiobooks (Ctrl+3)
 
     * Traite les fichiers bruts `.txt` ou `.docx` pour la navigation par clavier avec NVDA et des systèmes tels que ElevenLabs.
     * Convertit automatiquement les mots-clés (Acte, Chapitre, Prologue) en en-têtes "Heading 1" dans le document Word, et nettoie également les balises HTML inutiles et les balises Markdown.
     * À partir de la version 15.1, regroupe 5 tours en scènes avec des en-têtes H1 (détection automatique des Histoires) — prépare le fichier généré par le mode Histoires pour une publication traditionnelle d'audiobook.
   modul_manager_regul: |
-    ### 5. Gestionnaire de Règles (Ctrl+5, nouveauté depuis v13.0)
+    ### 5. Gestionnaire de Règles (Ctrl+4, nouveauté depuis v13.0)
 
     * **Explorateur de dictionnaires sans Python :** Arborescence visuelle de tous les fichiers YAML dans le dossier `dictionaries/` — accents phonétiques, chiffres, modes créatifs du Réalisateur et du Narrateur. Un linguiste ou un traducteur peut parcourir, dupliquer, éditer et supprimer des règles directement depuis l'interface graphique.
     * **Créateur de nouvelles règles :** Formulaire avec choix de type (accent, chiffre de substitutions simples, mode Réalisateur, nouvelle langue de base, chiffre algorithmique) créant un modèle YAML prêt à l'emploi, et pour les cas plus complexes, générant une invite formatée à coller dans ChatGPT / Claude.

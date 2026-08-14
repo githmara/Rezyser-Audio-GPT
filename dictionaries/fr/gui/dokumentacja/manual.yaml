@@ -635,9 +635,9 @@ tresc:
     - Tous les accents des versions précédentes (Anglais, Polonais, Allemand, Espagnol, Italien, Finnois, Islandais) ainsi que le Correcteur de Tags.
     - Fonctions AI complètes : Brainstorming, Script, Livre audio, Accumulateur d'Intrigue, Mémoire Infinie, Attribution de Titres.
   krok_7b_manager_regul_kolejnosc_zamian: |
-    ## ÉTAPE 7b (complément) : L'ordre des règles `remplacement:` est important
+    ## ÉTAPE 7b (complément) : L'ordre des règles `zamiany:` est important
 
-    Les fichiers dans `dictionaries/<kod>/accents/*.yaml` contiennent une liste de règles `remplacement:` — des paires `modèle → remplacement` que le moteur applique SÉQUENTIELLEMENT. Chaque règle suivante opère sur la sortie de la précédente. Cela permet de construire des pipelines du type « décomposer le digramme `szcz` en `shch`, puis remplacer `ch` par `h` », mais cela ouvre également le piège classique pour l'auteur du pack linguistique.
+    Les fichiers dans `dictionaries/<kod>/akcenty/*.yaml` contiennent une liste de règles `zamiany:` — des paires `modèle → remplacement` que le moteur applique SÉQUENTIELLEMENT. Chaque règle suivante opère sur la sortie de la précédente. Cela permet de construire des pipelines du type « décomposer le digramme `szcz` en `shch`, puis remplacer `ch` par `h` », mais cela ouvre également le piège classique pour l'auteur du pack linguistique.
 
     Le piège de la « boucle séquentielle ». Supposons que pour un accent espagnol visant à faire ressembler le « ñ » polonais à la prononciation de Diego (Loquendo), l'auteur ajoute deux règles :
     1. `ñ → nj` (pour que le « ñ » polonais sonne comme un « nj » doux)
@@ -651,7 +651,7 @@ tresc:
 
     Validation dans le moteur (opt-in pour les auteurs de packs). L'application a une heuristique intégrée pour détecter les boucles potentielles, mais elle est désactivée par défaut — car de nombreux pipelines ressemblent à une boucle, bien qu'ils soient intentionnels (le classique « szcz → shch » + « ch → h »). Pour l'activer : réglez la variable d'environnement `REZYSER_VALIDATE_ZAMIANY=1` et lancez l'application depuis la console — depuis la source via `python main.py`, car l'exécutable `.exe` figé en mode fenêtre (à partir de la version 17.0) n'a pas de fenêtre de console. Le moteur affichera pour chaque fichier d'accents une ligne WARN agrégée avec les trois premières boucles potentielles et le nombre restant. Vérifiez la phonétique résultante sur une phrase test — si l'effet est intentionnel, ignorez le WARN.
 
-    Les boutons de déplacement des règles dans le GUI du Gestionnaire de Règles (glisser-déposer, « Vers le haut / Vers le bas ») sont une fonction distincte prévue pour un cycle de version ultérieur — cela nécessite une refonte du Gestionnaire (actuellement, il délègue l'édition de fichiers à un Bloc-notes système externe et n'a pas sa propre vue des règles). Jusqu'à sa mise en œuvre : éditez le fichier YAML manuellement, déplacez les lignes dans la section `remplacement:`, utilisez le validateur avec la variable ENV et testez sur des phrases de contrôle.
+    Les boutons de déplacement des règles dans le GUI du Gestionnaire de Règles (glisser-déposer, « Vers le haut / Vers le bas ») sont une fonction distincte prévue pour un cycle de version ultérieur — cela nécessite une refonte du Gestionnaire (actuellement, il délègue l'édition de fichiers à un Bloc-notes système externe et n'a pas sa propre vue des règles). Jusqu'à sa mise en œuvre : éditez le fichier YAML manuellement, déplacez les lignes dans la section `zamiany:`, utilisez le validateur avec la variable ENV et testez sur des phrases de contrôle.
   krok_7b_polskie_nazewnictwo: |
     ## ÉTAPE 7b — Noms polonais des dossiers et fichiers (pour les utilisateurs non polonophones)
 

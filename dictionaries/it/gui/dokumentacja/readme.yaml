@@ -36,7 +36,7 @@ tresc:
     * **Accumulatore di Trama:** Algoritmo di "memoria infinita". Quando l'indicatore di memoria entra in stato di allarme rosso, il sistema genera automaticamente un riassunto della trama e lo salva nel campo Memoria a Lungo Termine.
     * **{liczba_trybow_rezysera} modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore delle Regole di seguito.
   modul_opowiesci: |
-    ### 2. Racconti (Ctrl+2, secondo modo principale dalla v15.0)
+    ### 2. Racconti (Ctrl+5, secondo modo principale dalla v15.0)
 
     Giochi testuali interattivi condotti dall'IA nel ruolo di motore narrativo. A differenza della Regia (dove generi un audiolibro pronto), i Racconti sono una trama dinamica turno-per-turno:
 
@@ -45,7 +45,7 @@ tresc:
     * **Modalità Libera:** qualsiasi azione in testo libero ("provo ad aprire la porta"), il motore propone 1-3 suggerimenti ma non impone una scelta.
     * **Un unico modello IA per tutte le modalità:** dalla v18.1 tutte le modalità di Racconti utilizzano lo stesso modello condiviso (predefinito e consigliato Anthropic Claude Sonnet 5) — un modello più potente si attiene rigorosamente alle regole del mondo (particolarmente cruciale nella modalità Male Minore, dove ogni opzione deve essere realmente sfavorevole).
   modul_poliglota: |
-    ### 3. Poliglotta (Ctrl+3, Traduttore AI + Accenti TTS)
+    ### 3. Poliglotta (Ctrl+2, Traduttore AI + Accenti TTS)
 
     * **Traduttore Sicuro:** I testi lunghi vengono automaticamente suddivisi in blocchi misurati in token del modello (sicuro anche per lingue a scrittura densa, ad es. il cinese) e tradotti sequenzialmente; una risposta troncata del modello viene rilevata e ritentata su frammenti più piccoli. Ogni blocco viene immediatamente salvato in un file nascosto `.jsonl`. Il ripristino dopo l'esaurimento dei limiti API è completamente automatico.
     * **Automazione NVDA:** Le traduzioni vengono salvate come file `.html` pronti con tag di lingua incorporato o file `.docx` con tag iniettati direttamente nella struttura XML.
@@ -53,13 +53,13 @@ tresc:
     * **Modalità Cifrario:** {liczba_szyfrow} algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 35 caratteri con diacritici).
     * **Riparatore di Tag:** Inietta in modo non invasivo il codice ISO della lingua fornito — anche regionale, ad es. pt-BR o zh-CN — nei file esistenti.
   modul_konwerter: |
-    ### 4. Convertitore / Architetto Audiolibri (Ctrl+4)
+    ### 4. Convertitore / Architetto Audiolibri (Ctrl+3)
 
     * Elabora file `.txt` o `.docx` grezzi per la navigazione tramite tastiera per NVDA e sistemi come ElevenLabs.
     * Converte automaticamente le parole chiave (Atto, Capitolo, Prologo) in intestazioni "Heading 1" nel documento Word e pulisce i tag HTML superflui e i marcatori Markdown.
     * Dalla versione 15.1 raggruppa 5 turni in scene con intestazioni H1 (rilevamento automatico dei Racconti) — prepara il file generato dalla modalità Racconti per la pubblicazione tradizionale di audiolibri.
   modul_manager_regul: |
-    ### 5. Gestore delle Regole (Ctrl+5, novità dalla v13.0)
+    ### 5. Gestore Regole (Ctrl+4, novità dalla v13.0)
 
     * **Esploratore di dizionari senza Python:** Albero visivo di tutti i file YAML nella cartella `dictionaries/` — accenti fonetici, cifrari, modalità creative del Regista e Racconti. Un linguista o traduttore può visualizzare, duplicare, modificare e eliminare regole direttamente dall'interfaccia grafica.
     * **Creatore di nuove regole:** Modulo con selezione del tipo (accento, cifrario di sostituzioni pure, modalità del Regista, nuova lingua di base, cifrario algoritmico) che crea un modello YAML pronto all'uso e, per i casi più complessi, genera un prompt formattato da incollare in ChatGPT / Claude.

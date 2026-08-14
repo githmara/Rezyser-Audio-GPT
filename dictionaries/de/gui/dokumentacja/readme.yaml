@@ -26,7 +26,7 @@ tresc:
   glowne_moduly: |
     ## Hauptmodule
 
-    Die Anwendung vereint in einem Fenster fünf Werkzeuge, die über Tastenkombinationen (Strg+1 / Strg+2 / Strg+3 / Strg+4 / Strg+5) oder Schaltflächen in der Symbolleiste umgeschaltet werden können. Jedes Modul funktioniert unabhängig, aber alle teilen sich die Wörterbuchpakete aus dem Ordner `dictionaries/` (Akzente, Chiffren, kreative AI-Modi) und zentrale Einstellungen.
+    Die Anwendung vereint in einem Fenster fünf Werkzeuge, die über Tastenkombinationen (Ctrl+1 / Ctrl+2 / Ctrl+3 / Ctrl+4 / Ctrl+5) oder Schaltflächen in der Symbolleiste umgeschaltet werden können. Jedes Modul funktioniert unabhängig, aber alle teilen sich die Wörterbuchpakete aus dem Ordner `dictionaries/` (Akzente, Chiffren, kreative AI-Modi) und zentrale Einstellungen.
   modul_rezyseria: |
     ### 1. Regie (Ctrl+1)
 
@@ -36,7 +36,7 @@ tresc:
     * **Handlungsakku:** Der Algorithmus des „unendlichen Gedächtnisses". Wenn der Speicherzeiger in den roten Alarmzustand wechselt, generiert das System automatisch eine Handlungszusammenfassung und speichert sie im Langzeitspeicherfeld.
     * **{liczba_trybow_rezysera} kreative Modi:** Jede der Dateien in `dictionaries/<jzk>/rezyser/` beschreibt eine separate „Persönlichkeit" des KI-Regisseurs (Brainstorming, Skript, Hörbuch, Titel-Nachbearbeitung). Du kannst ihren Klang ohne Programmierung anpassen — siehe Regelmanager unten.
   modul_opowiesci: |
-    ### 2. Geschichten (Strg+2, zweiter Hauptmodus ab v15.0)
+    ### 2. Geschichten (Ctrl+5, zweiter Hauptmodus ab v15.0)
 
     Interaktive Textspiele, geleitet von der KI in der Rolle einer Erzähl-Engine. Im Unterschied zur Regie (wo man ein fertiges Hörbuch generiert) sind Geschichten eine dynamische, rundenbasierte Handlung:
 
@@ -45,7 +45,7 @@ tresc:
     * **Freier Modus:** beliebige Aktion in freiem Text („ich versuche, die Tür zu öffnen"), die Engine schlägt 1-3 Vorschläge vor, erzwingt aber keine Auswahl.
     * **Ein KI-Modell für alle Modi:** ab v18.1 nutzen alle Modi der Geschichten dasselbe, gemeinsame Modell (standardmäßig und empfohlen Anthropic Claude Sonnet 5) — ein stärkeres Modell hält sich rigoros an die Regeln der Welt (besonders entscheidend im Modus Kleineres Übel, wo jede Option real nachteilig sein muss).
   modul_poliglota: |
-    ### 3. Polyglott (Ctrl+3, AI-Übersetzer + TTS-Akzente)
+    ### 3. Polyglott (Ctrl+2, AI-Übersetzer + TTS-Akzente)
 
     * **Sicherer Übersetzer:** Lange Texte werden automatisch in Blöcke aufgeteilt, die in Modell-Tokens gemessen werden (sicher auch für dicht geschriebene Sprachen, z.B. Chinesisch), und sequenziell übersetzt; eine abgeschnittene Modellantwort wird erkannt und auf kleineren Fragmenten wiederholt. Jeder Block wird sofort in einer versteckten `.jsonl`-Datei gespeichert. Die Wiederaufnahme nach Erschöpfung der API-Limits erfolgt vollautomatisch.
     * **NVDA-Automatisierung:** Übersetzungen werden als fertige `.html`-Dateien mit eingebettetem Sprach-Tag oder `.docx`-Dateien mit direkt in die XML-Struktur injizierten Tags gespeichert.
@@ -53,13 +53,13 @@ tresc:
     * **Verschlüsselungsmodus:** {liczba_szyfrow} lokale Algorithmen zur Textverzerrung — von Rückwärtslesen über Typoglycämie bis hin zur klassischen Cäsar-Verschlüsselung. Jeder mit lokalem Alphabet des Sprachpakets (z.B. Cäsar-Verschlüsselung mit 35-Zeichen-Alphabet DE mit Diakritika).
     * **Tag-Reparatur:** Injektiert nicht-invasiv den angegebenen ISO-Sprachcode — auch regionale Codes, z.B. pt-BR oder zh-CN — in bestehende Dateien.
   modul_konwerter: |
-    ### 4. Konverter / Audiobook-Architekt (Ctrl+4)
+    ### 4. Konverter / Audiobook-Architekt (Ctrl+3)
 
     * Verarbeitet rohe `.txt`- oder `.docx`-Dateien für die Tastaturnavigation mit NVDA und Systemen wie ElevenLabs.
     * Konvertiert automatisch Schlüsselwörter (Akt, Kapitel, Prolog) in „Heading 1"-Überschriften im Word-Dokument und bereinigt unnötige HTML-Tags und Markdown-Markierungen.
     * Ab Version 15.1 Gruppierung von 5 Runden in Szenen mit H1-Überschriften (automatische Erkennung der Erzählung) — bereitet die im Erzählmodus generierte Datei für die traditionelle Audiobuchveröffentlichung vor.
   modul_manager_regul: |
-    ### 5. Regel-Manager (Ctrl+5, neu ab v13.0)
+    ### 5. Regel-Manager (Ctrl+4, neu ab v13.0)
 
     * **Wörterbuch-Explorer ohne Python:** Visueller Baum aller YAML-Dateien im Ordner `dictionaries/` — phonetische Akzente, Chiffren, kreative Modi des Regisseurs und der Erzählungen. Ein Linguist oder Übersetzer kann Regeln direkt aus der GUI durchsuchen, duplizieren, bearbeiten und löschen.
     * **Ersteller neuer Regeln:** Formular mit Typauswahl (Akzent, reine Austausch-Chiffre, Regisseur-Modus, neue Basissprache, algorithmische Chiffre), das eine fertige YAML-Vorlage erstellt, und für schwierigere Fälle einen formatierten Prompt zur Einfügung in ChatGPT / Claude generiert.

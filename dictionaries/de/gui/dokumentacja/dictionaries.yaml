@@ -233,7 +233,7 @@ tresc:
     Stellen Sie sich vor, der französische Akzent der Anwendung ersetzt "sch"
     durch "sh", aber Sie meinen, ein Franzose würde eher "ch" sagen. Kein Problem.
 
-    1. Starten Sie die Anwendung und gehen Sie zum Regelmanager (Taste Strg+4
+    1. Starten Sie die Anwendung und gehen Sie zum Regelmanager (Taste Ctrl+4
        oder die vierte Schaltfläche in der Leiste).
     2. Klappen Sie im Dateibaum links "de" → "akcenty" auf und klicken Sie
        auf "francuski.yaml".
@@ -242,7 +242,7 @@ tresc:
     4. Scrollen Sie nach unten zum Abschnitt "zamiany:". Suchen Sie die Zeile
        mit dem gesuchten Muster und ändern Sie den Wert "zamiana" auf das,
        was Ihnen passt.
-    5. Speichern Sie die Datei (Strg+S) und schließen Sie den Editor.
+    5. Speichern Sie die Datei (Ctrl+S) und schließen Sie den Editor.
     6. Kehren Sie zum Regelmanager zurück und klicken Sie auf "Baum aktualisieren",
        dann schließen und starten Sie die Anwendung neu. Ihre Änderung wirkt.
   poziom_2_duplikacja: |

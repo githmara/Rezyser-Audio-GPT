@@ -63,12 +63,12 @@ tresc:
     2. Find the shortcut {app.nazwa} on the desktop. Right-click on it (or use the Applications key or Shift+F10 when navigating with NVDA) and select "Open file location". NOTE on Windows 11: in the new, simplified context menu, this option may be hidden — first select "Show more options" (or press Shift+F10 twice to immediately open the full menu with the option).
     3. A Windows Explorer window will open in the program's installation folder. Press the Backspace key (the simplest way, always works) or click the "Up" arrow on the toolbar to go up one level — you will see the full application folder there. Note: the Alt+Up Arrow shortcut only works when the focus is on the file list — if Explorer opened with the focus on the address bar (typical), Alt+Up Arrow will do nothing, use Backspace instead.
     4. Copy this entire folder to a USB drive, cloud storage (OneDrive, Google Drive, Dropbox), or external drive. The folder contains everything needed to restore the work state:
-       - Your projects (scripts/ folder — narration .txt files, World Book .md files, _summary.txt; stories/ folder — interactive games).
+       - Your projects (skrypty/ folder — narration .txt files, World Book .md files, _streszczenie.txt; opowiesci/ folder — interactive games).
        - API key (golden_key.env file in the main application folder).
        - Your own phonetic rules, accents, ciphers if you edited something in the Rule Manager (`dictionaries/<language_code>/` folder, e.g., dictionaries/pl/akcenty/wloski.yaml).
-       - Application preferences and creative mode selection (runtime/scripts/ folder, .mode files).
+       - Application preferences and creative mode selection (runtime/skrypty/ folder, .mode files).
        - Isolated Python environment (runtime/ folder), so you don't need to install anything on the new computer.
-    5. On the new computer: download the latest installer from the Releases tab on GitHub and install the application as usual. Run the program once to create an empty configuration file structure. Close the application. Then copy the previously saved folder to the installation location, overwriting the files — or selectively choose only the folders you are interested in (scripts/, stories/, golden_key.env) and paste them into the appropriate places of the new installation.
+    5. On the new computer: download the latest installer from the Releases tab on GitHub and install the application as usual. Run the program once to create an empty configuration file structure. Close the application. Then copy the previously saved folder to the installation location, overwriting the files — or selectively choose only the folders you are interested in (skrypty/, opowiesci/, golden_key.env) and paste them into the appropriate places of the new installation.
 
     **Tip for NVDA users:** the "Open file location" context menu option invoked with the Applications key is fully accessible — NVDA reads each item in Polish. After opening Explorer in the target folder, use the Backspace key to go up one level (works always, regardless of whether the focus is on the file list or the address bar), then Ctrl+A to select everything and Ctrl+C to copy.
 
@@ -479,9 +479,9 @@ tresc:
     - File `docs/dictionaries.pl.html` (available in the end-user package from the Releases tab) — a short, simple language description of each subfolder, 6 ready ciphers, 8 ready accents, and ideas for what you can do yourself, without knowing Python.
     - File `dictionaries/README.md` (available only when cloning the repository from GitHub — release packages filter out .md files) — detailed technical documentation of the YAML format with examples, field lists, pipeline rules, regexes. This document is addressed to linguists with basic programming knowledge and developers.
   krok_7b_manager_regul_kolejnosc_zamian: |
-    ## STEP 7b (supplement): The order of `replacement:` rules matters
+    ## STEP 7b (supplement): The order of `zamiany:` rules matters
 
-    Files in `dictionaries/<code>/accents/*.yaml` contain a list of `replacement:` rules — `pattern → replacement` pairs that the engine applies SEQUENTIALLY. Each subsequent rule operates on the output of the previous one. This allows building pipelines like "break down the digraph `szcz` into `shch`, then replace `ch` with `h`", but it also opens up a classic trap for the language pack author.
+    Files in `dictionaries/<code>/akcenty/*.yaml` contain a list of `zamiany:` rules — `pattern → replacement` pairs that the engine applies SEQUENTIALLY. Each subsequent rule operates on the output of the previous one. This allows building pipelines like "break down the digraph `szcz` into `shch`, then replace `ch` with `h`", but it also opens up a classic trap for the language pack author.
 
     The "sequential loop" trap. Let's assume that for the Spanish accent trying to make the Polish "ñ" sound like Diego (Loquendo), the author adds two rules:
     1. `ñ → nj` (so that the Polish "ñ" sounds like a soft "nj")
@@ -495,7 +495,7 @@ tresc:
 
     Engine validation (opt-in for pack authors). The application has a built-in heuristic for detecting potential loops, but it is disabled by default — because many pipelines look like a loop, though they are intentional (classic "szcz → shch" + "ch → h"). To enable it: set the environment variable `REZYSER_VALIDATE_ZAMIANY=1` and run the application from the console — from source via `python main.py`, because the frozen `.exe` in windowed mode (from version 17.0) does not have a console window. The engine will print one aggregated WARN line for each accent file with the first three potential loops and the number of remaining ones. Check the resulting phonetics on the test sentence — if the effect is intended, ignore the WARN.
 
-    Rule movement buttons in the GUI Rule Manager (drag-and-drop, "Up / Down") are a separate feature planned for a later version cycle — it requires redesigning the Manager (currently delegates file editing to an external system Notepad and does not have its own rule view). Until its implementation: edit the YAML file manually, move lines in the `replacement:` section, use the validator ENV-var, and test on control sentences.
+    Rule movement buttons in the GUI Rule Manager (drag-and-drop, "Up / Down") are a separate feature planned for a later version cycle — it requires redesigning the Manager (currently delegates file editing to an external system Notepad and does not have its own rule view). Until its implementation: edit the YAML file manually, move lines in the `zamiany:` section, use the validator ENV-var, and test on control sentences.
   nvda_a11y: |
     ## Important tips for screen reader users (NVDA)
 

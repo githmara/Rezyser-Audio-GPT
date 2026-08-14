@@ -598,7 +598,7 @@ tresc:
 
     ### Funciones conservadas sin cambios desde la versión 11.0
 
-    - Acentos fonéticos en Políglota (Inglés, Francés, Alemán, Español, Italiano, Finlandés, Islandés).
+    - Acentos fonéticos en Políglota (Inglés, Francés, Alemán, Polaco, Italiano, Finlandés, Islandés).
     - Generador automático del archivo golden_key.env integrado en la pantalla de inicio.
     - Compatibilidad con múltiples libros en el Libro del Mundo (cada proyecto tiene su propio archivo .md).
     - Mecanismo de reanudación de traducción resistente a fallos (guardado en .jsonl).
@@ -631,7 +631,7 @@ tresc:
     - Protección del modo creativo contra cambios accidentales durante el trabajo.
     - Restablecimiento completo del proyecto con un clic en el Director.
     - Carga automática del modo creativo desde el archivo de metadatos del proyecto.
-    - Todos los acentos de versiones anteriores (Inglés, Francés, Alemán, Español, Italiano, Finés, Islandés) y el Reparador de Etiquetas.
+    - Todos los acentos de versiones anteriores (Inglés, Francés, Alemán, Polaco, Italiano, Finés, Islandés) y el Reparador de Etiquetas.
     - Funciones completas de IA: Tormenta de Ideas, Guion, Audiolibro, Acumulador de Trama, Memoria Infinita, Asignación de Títulos.
   krok_7b_manager_regul_kolejnosc_zamian: |
     ## PASO 7b (complemento): El orden de las reglas `zamiany:` importa
