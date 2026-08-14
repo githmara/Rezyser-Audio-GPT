@@ -5,34 +5,25 @@
 id: rosyjski
 etykieta: "Ruso (p. ej. Irina / Pavel)"
 opis: |
-  Adapta el texto español al sintetizador de voz ruso (Irina / Pavel). El
-  TTS ruso lee las letras latinas según sus propias reglas — usamos
-  transcripciones latinas legibles para una voz rusa.
+  Translitera el texto español COMPLETAMENTE al alfabeto cirílico para que
+  el sintetizador de voz ruso (Irina / Pavel) lo lea con acento ruso.
+  La transcripción es fonética, no académica (no sigue ISO 9 ni GOST):
+  el objetivo es un ruso hablando español.
 
-  Compatibilidad fonética natural español-ruso:
-    - ch  español = /tʃ/, ruso « ч » = /tʃ/ ✓ → se conserva « ch ».
-    - rr  vibrante español ≈ « р » rusa vibrante ✓
-    - vocales puras a/e/i/o/u — el TTS ruso las lee próximas al original.
+  Correspondencias principales:
+    - « ch » → « ч »,  « ll » → « й »,  « ñ » → « нь »
+    - « j » → « х »,   « ge/gi » → « хе/хи »
+    - « gue/gui » → « ге/ги »,  « que/qui » → « ке/ки » (u muda)
+    - « ce/ci » → « се/си » (seseo),  « z » → « с »
+    - « v » → « б » (betacismo),  « h » muda → se elimina
+    - « ya/ye/yo/yu » → « я/е/ё/ю »,  « y » restante → « и »
+    - vocales a/e/i/o/u → а/е/и/о/у, resto de letras 1:1 en cirílico
+    - « rr » → « рр » sale de forma natural de « r » → « р ».
 
-  Diferencias fonéticas críticas español → ruso:
-    - « ñ »  es = /ɲ/, ruso « нь » → se escribe « nj » (transcripción latina).
-    - « j »  es = /x/, ruso « х » = /x/ ✓ → se escribe « kh » (transcripción
-      estándar latina de « х »).
-    - « ll » es = /ʝ/ → se escribe « j » (transcripción latina rusa de « й »
-      = /j/, aproximación más cercana).
-    - « z »  es = /θ/ o /s/, ruso z = /z/ → se escribe « s ».
-    - « gu » + e/i es = /g/ (u muda) → se escribe « g ».
-    - « qu » + e/i es = /k/ (u muda) → se escribe « k ».
-
-  ORDEN CRÍTICO: « j → kh » se aplica ANTES que « ll → j ». De lo contrario
-  « calle » → « caje » → « cakhe » sería erróneo.
-
-  Acentos naturales del ruso sobre el español (dejados intencionalmente):
-    - « h » es muda, el TTS ruso la lee como /x/ aproximada → se conserva
-      (acento natural; no se elimina porque la « j → kh » de abajo
-      introduce un grafema con « h » que la regla « h → "" » dañaría).
-    - v  es = /b/, ruso « в » = /v/ → acento ruso natural.
-    - r  vibrante española vs. « р » rusa palatalizada en algunos contextos.
+  Simplificaciones conscientes (impuestas por el pipeline): la etapa
+  previa `usun_polskie_znaki` quita las tildes ANTES de estas reglas
+  (á→a, …, ü→u), por lo que « güe/güi » pierde la /w/ (pingüino →
+  пингино) y el acento tónico no se marca.
 iso: ru
 kategoria: akcent
 kolejnosc: 60
@@ -43,34 +34,115 @@ normalizuj_liczby: true
 usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
-# --- Sustituciones fonéticas ---
+# -----------------------------------------------------------------------------
+# ORDEN CRÍTICO (str.replace secuencial):
+#   1. Dígrafos y trígrafos (ch, ll, ñ, gue/gui, que/qui, ge/gi, ce/ci)
+#   2. j → х,  h muda → (eliminada; segura: ningún resultado contiene « h »)
+#   3. Yotación ya/ye/yo/yu, luego « y » restante
+#   4. Letras sueltas → cirílico
+# Todos los resultados son cirílicos — los patrones latinos posteriores
+# ya no pueden dañar los resultados anteriores.
+# -----------------------------------------------------------------------------
 zamiany:
-  # --- gu + e/i → g (u muda) ---
-  - { wzor: "gue", zamiana: "ge" }
-  - { wzor: "Gue", zamiana: "Ge" }
-  - { wzor: "GUE", zamiana: "GE" }
-  - { wzor: "gui", zamiana: "gi" }
-  - { wzor: "Gui", zamiana: "Gi" }
-  - { wzor: "GUI", zamiana: "GI" }
-  # --- qu + e/i → k (u muda) ---
-  - { wzor: "que", zamiana: "ke" }
-  - { wzor: "Que", zamiana: "Ke" }
-  - { wzor: "QUE", zamiana: "KE" }
-  - { wzor: "qui", zamiana: "ki" }
-  - { wzor: "Qui", zamiana: "Ki" }
-  - { wzor: "QUI", zamiana: "KI" }
-  # --- j → kh (ANTES de ñ→nj y ll→j: la nueva j NO debe convertirse a kh) ---
-  - { wzor: "j", zamiana: "kh" }
-  - { wzor: "J", zamiana: "Kh" }
-  # --- ñ → nj (DESPUÉS de j→kh: la « j » dentro de « nj » representa /j/
-  #     palatal, NO debe convertirse a /x/. Si fuera al revés
-  #     « señorita » → « senjorita » → « senkhorita ».) ---
-  - { wzor: "ñ", zamiana: "nj" }
-  - { wzor: "Ñ", zamiana: "Nj" }
-  # --- ll → j (DESPUÉS de j→kh) ---
-  - { wzor: "ll", zamiana: "j" }
-  - { wzor: "Ll", zamiana: "J" }
-  - { wzor: "LL", zamiana: "J" }
-  # --- z → s ---
-  - { wzor: "z", zamiana: "s" }
-  - { wzor: "Z", zamiana: "S" }
+  # --- 1. Dígrafos y trígrafos ---
+  - { wzor: "ch",  zamiana: "ч"  }
+  - { wzor: "Ch",  zamiana: "Ч"  }
+  - { wzor: "CH",  zamiana: "Ч"  }
+  - { wzor: "ll",  zamiana: "й"  }
+  - { wzor: "Ll",  zamiana: "Й"  }
+  - { wzor: "LL",  zamiana: "Й"  }
+  - { wzor: "ñ",   zamiana: "нь" }
+  - { wzor: "Ñ",   zamiana: "Нь" }
+  # --- gu/qu + e/i (u muda) — ANTES de ge/gi ---
+  - { wzor: "gue", zamiana: "ге" }
+  - { wzor: "Gue", zamiana: "Ге" }
+  - { wzor: "GUE", zamiana: "ГЕ" }
+  - { wzor: "gui", zamiana: "ги" }
+  - { wzor: "Gui", zamiana: "Ги" }
+  - { wzor: "GUI", zamiana: "ГИ" }
+  - { wzor: "que", zamiana: "ке" }
+  - { wzor: "Que", zamiana: "Ке" }
+  - { wzor: "QUE", zamiana: "КЕ" }
+  - { wzor: "qui", zamiana: "ки" }
+  - { wzor: "Qui", zamiana: "Ки" }
+  - { wzor: "QUI", zamiana: "КИ" }
+  # --- ge/gi → хе/хи ---
+  - { wzor: "ge",  zamiana: "хе" }
+  - { wzor: "Ge",  zamiana: "Хе" }
+  - { wzor: "GE",  zamiana: "ХЕ" }
+  - { wzor: "gi",  zamiana: "хи" }
+  - { wzor: "Gi",  zamiana: "Хи" }
+  - { wzor: "GI",  zamiana: "ХИ" }
+  # --- ce/ci → се/си (seseo) ---
+  - { wzor: "ce",  zamiana: "се" }
+  - { wzor: "Ce",  zamiana: "Се" }
+  - { wzor: "CE",  zamiana: "СЕ" }
+  - { wzor: "ci",  zamiana: "си" }
+  - { wzor: "Ci",  zamiana: "Си" }
+  - { wzor: "CI",  zamiana: "СИ" }
+
+  # --- 2. j → х, h muda eliminada ---
+  - { wzor: "j",   zamiana: "х"  }
+  - { wzor: "J",   zamiana: "Х"  }
+  - { wzor: "h",   zamiana: ""   }
+  - { wzor: "H",   zamiana: ""   }
+
+  # --- 3. Yotación ---
+  - { wzor: "ya",  zamiana: "я"  }
+  - { wzor: "Ya",  zamiana: "Я"  }
+  - { wzor: "ye",  zamiana: "е"  }
+  - { wzor: "Ye",  zamiana: "Е"  }
+  - { wzor: "yo",  zamiana: "ё"  }
+  - { wzor: "Yo",  zamiana: "Ё"  }
+  - { wzor: "yu",  zamiana: "ю"  }
+  - { wzor: "Yu",  zamiana: "Ю"  }
+  - { wzor: "y",   zamiana: "и"  }
+  - { wzor: "Y",   zamiana: "И"  }
+
+  # --- 4. Letras sueltas → cirílico ---
+  - { wzor: "a",   zamiana: "а"  }
+  - { wzor: "A",   zamiana: "А"  }
+  - { wzor: "b",   zamiana: "б"  }
+  - { wzor: "B",   zamiana: "Б"  }
+  - { wzor: "c",   zamiana: "к"  }
+  - { wzor: "C",   zamiana: "К"  }
+  - { wzor: "d",   zamiana: "д"  }
+  - { wzor: "D",   zamiana: "Д"  }
+  - { wzor: "e",   zamiana: "е"  }
+  - { wzor: "E",   zamiana: "Е"  }
+  - { wzor: "f",   zamiana: "ф"  }
+  - { wzor: "F",   zamiana: "Ф"  }
+  - { wzor: "g",   zamiana: "г"  }
+  - { wzor: "G",   zamiana: "Г"  }
+  - { wzor: "i",   zamiana: "и"  }
+  - { wzor: "I",   zamiana: "И"  }
+  - { wzor: "k",   zamiana: "к"  }
+  - { wzor: "K",   zamiana: "К"  }
+  - { wzor: "l",   zamiana: "л"  }
+  - { wzor: "L",   zamiana: "Л"  }
+  - { wzor: "m",   zamiana: "м"  }
+  - { wzor: "M",   zamiana: "М"  }
+  - { wzor: "n",   zamiana: "н"  }
+  - { wzor: "N",   zamiana: "Н"  }
+  - { wzor: "o",   zamiana: "о"  }
+  - { wzor: "O",   zamiana: "О"  }
+  - { wzor: "p",   zamiana: "п"  }
+  - { wzor: "P",   zamiana: "П"  }
+  - { wzor: "q",   zamiana: "к"  }
+  - { wzor: "Q",   zamiana: "К"  }
+  - { wzor: "r",   zamiana: "р"  }
+  - { wzor: "R",   zamiana: "Р"  }
+  - { wzor: "s",   zamiana: "с"  }
+  - { wzor: "S",   zamiana: "С"  }
+  - { wzor: "t",   zamiana: "т"  }
+  - { wzor: "T",   zamiana: "Т"  }
+  - { wzor: "u",   zamiana: "у"  }
+  - { wzor: "U",   zamiana: "У"  }
+  - { wzor: "v",   zamiana: "б"  }
+  - { wzor: "V",   zamiana: "Б"  }
+  - { wzor: "w",   zamiana: "в"  }
+  - { wzor: "W",   zamiana: "В"  }
+  - { wzor: "x",   zamiana: "кс" }
+  - { wzor: "X",   zamiana: "Кс" }
+  - { wzor: "z",   zamiana: "с"  }
+  - { wzor: "Z",   zamiana: "С"  }

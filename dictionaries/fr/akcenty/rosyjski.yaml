@@ -5,24 +5,27 @@
 id: rosyjski
 etykieta: "Russe (par ex. Irina / Pavel)"
 opis: |
-  Adapte le texte français au synthétiseur vocal russe (Irina / Pavel).
-  Le TTS russe lit les lettres latines selon ses propres règles, donc
-  on translittère les digrammes français pour qu'ils correspondent à
-  l'orthographe latine adaptée au russe.
+  Translittère le texte français ENTIÈREMENT en cyrillique pour que le
+  synthétiseur vocal russe (Irina / Pavel) le lise avec un accent russe.
+  La transcription est phonétique, non académique (ni ISO 9 ni GOST) :
+  l'objectif est un Russe qui parle français.
 
-  Différences phonétiques critiques français → russe :
-    - « ch » fr = /ʃ/, « sch » est l'écriture latine la plus lisible en russe.
-    - « j »  fr = /ʒ/ → on écrit « zh » (transcription standard).
-    - « ou » fr = /u/ → on écrit « u » (TTS russe lit u comme /u/ ✓).
-    - « u »  fr = /y/, absent en russe → on écrit « ju » (approximation).
-    - « ç »  fr = /s/ → on écrit « s ».
-    - « qu » fr = /k/ → on écrit « k ».
-    - « gn » fr = /ɲ/ → on écrit « nj » (analogie avec « н + ь »).
-    - « h »  fr muet → on supprime.
+  Correspondances principales :
+    - « ch » → « ш »,  « j » → « ж »,  « ge/gi » → « же/жи »
+    - « gn » → « нь »,  « gue/gui » → « ге/ги »,  « qu » → « к »
+    - « ou » → « у »,  « oi » → « уа »,  « u » → « ю »
+    - « au/eau » → « о »,  « eu/œu » → « ё »,  « ai/ei » → « е »
+    - « tion » → « сьон »,  « ph » → « ф »,  « ce/ci » → « се/си »
+    - « h » muet → supprimé (sans danger : aucun résultat ne contient
+      de « h » latin),  « c' » → « с' »,  autres lettres 1:1 en cyrillique.
 
-  Accents naturels laissés intentionnellement : « r » uvulaire fr vs.
-  « r » roulé russe, nasalisations non transformées (TTS russe les
-  rendra en voyelle + n).
+  Simplifications conscientes :
+    - les consonnes finales muettes NE sont PAS supprimées (irréalisable
+      de façon fiable avec des remplacements séquentiels) ;
+    - les nasales in/un/an/en restent voyelle + « н » (« эн » forcé
+      casserait « une », « inutile », « cuisine ») ;
+    - l'étape `usun_polskie_znaki` aplatit ç→c et é/è/ê→e AVANT ces
+      règles, donc « ça » se lit « ка » et les e accentués → « е ».
 iso: ru
 kategoria: akcent
 kolejnosc: 60
@@ -32,28 +35,142 @@ normalizuj_liczby: true
 usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
+# -----------------------------------------------------------------------------
+# ORDRE CRITIQUE (str.replace séquentiel) — AUDYT 18.12 (W-3) : les règles
+# latines de l'audit W-4 sont remplacées par la translittération cyrillique
+# complète. Tous les résultats sont cyrilliques — les motifs latins
+# ultérieurs ne peuvent plus abîmer les résultats précédents.
+#   1. c' élidé, suffixe -tion
+#   2. Groupes vocaliques (eau, oeu, au, ou, oi, eu, ai, ei)
+#   3. Digrammes consonantiques (ch, ph, gn, gue/gui, ge/gi, qu, j)
+#   4. h muet supprimé (APRÈS ch/ph), ce/ci, u → ю
+#   5. Lettres seules → cyrillique
+# -----------------------------------------------------------------------------
 zamiany:
-  # AUDYT 18.12 (W-4): usunięte „h"→„" (kasowało h ze świeżych sch/zh);
-  # „j"→„zh" PRZED „gn"→„nj"; pułapka samogłoskowa łańcuchem: „qu"→„k",
-  # „u"→„ju" (łapie też u w ou), naprawa „oju"→„u" (francuskie ou = /u/).
-  # UWAGA: plik czeka na W-3 (pełna transliteracja na cyrylicę).
-  - { wzor: "ch", zamiana: "sch" }
-  - { wzor: "Ch", zamiana: "Sch" }
-  - { wzor: "CH", zamiana: "SCH" }
-  - { wzor: "qu", zamiana: "k"   }
-  - { wzor: "Qu", zamiana: "K"   }
-  - { wzor: "QU", zamiana: "K"   }
-  - { wzor: "j",  zamiana: "zh"  }
-  - { wzor: "J",  zamiana: "Zh"  }
-  - { wzor: "gn", zamiana: "nj"  }
-  - { wzor: "Gn", zamiana: "Nj"  }
-  - { wzor: "u",  zamiana: "ju"  }
-  - { wzor: "U",  zamiana: "Ju"  }
-  - { wzor: "oju", zamiana: "u"  }
-  - { wzor: "Oju", zamiana: "U"  }
-  - { wzor: "aju", zamiana: "au" }
-  - { wzor: "Aju", zamiana: "Au" }
-  - { wzor: "eju", zamiana: "eu" }
-  - { wzor: "Eju", zamiana: "Eu" }
-  - { wzor: "ç",  zamiana: "s"   }
-  - { wzor: "Ç",  zamiana: "S"   }
+  # --- 1. c' élidé (c'est, c'était) — apostrophe droite et typographique ---
+  - { wzor: "c'", zamiana: "с'" }
+  - { wzor: "C'", zamiana: "С'" }
+  - { wzor: "c’", zamiana: "с’" }
+  - { wzor: "C’", zamiana: "С’" }
+  # --- suffixe -tion → сьон ---
+  - { wzor: "tion", zamiana: "сьон" }
+  - { wzor: "Tion", zamiana: "Сьон" }
+  - { wzor: "TION", zamiana: "СЬОН" }
+
+  # --- 2. Groupes vocaliques (les plus longs d'abord) ---
+  - { wzor: "eau", zamiana: "о"  }
+  - { wzor: "Eau", zamiana: "О"  }
+  - { wzor: "EAU", zamiana: "О"  }
+  - { wzor: "oeu", zamiana: "ё"  }
+  - { wzor: "Oeu", zamiana: "Ё"  }
+  - { wzor: "OEU", zamiana: "Ё"  }
+  - { wzor: "au",  zamiana: "о"  }
+  - { wzor: "Au",  zamiana: "О"  }
+  - { wzor: "AU",  zamiana: "О"  }
+  - { wzor: "ou",  zamiana: "у"  }
+  - { wzor: "Ou",  zamiana: "У"  }
+  - { wzor: "OU",  zamiana: "У"  }
+  - { wzor: "oi",  zamiana: "уа" }
+  - { wzor: "Oi",  zamiana: "Уа" }
+  - { wzor: "OI",  zamiana: "УА" }
+  - { wzor: "eu",  zamiana: "ё"  }
+  - { wzor: "Eu",  zamiana: "Ё"  }
+  - { wzor: "EU",  zamiana: "Ё"  }
+  - { wzor: "ai",  zamiana: "е"  }
+  - { wzor: "Ai",  zamiana: "Е"  }
+  - { wzor: "AI",  zamiana: "Е"  }
+  - { wzor: "ei",  zamiana: "е"  }
+  - { wzor: "Ei",  zamiana: "Е"  }
+  - { wzor: "EI",  zamiana: "Е"  }
+
+  # --- 3. Digrammes consonantiques ---
+  - { wzor: "ch",  zamiana: "ш"  }
+  - { wzor: "Ch",  zamiana: "Ш"  }
+  - { wzor: "CH",  zamiana: "Ш"  }
+  - { wzor: "ph",  zamiana: "ф"  }
+  - { wzor: "Ph",  zamiana: "Ф"  }
+  - { wzor: "PH",  zamiana: "Ф"  }
+  - { wzor: "gn",  zamiana: "нь" }
+  - { wzor: "Gn",  zamiana: "Нь" }
+  - { wzor: "GN",  zamiana: "НЬ" }
+  # --- gu + e/i (u muet) — AVANT ge/gi et u → ю ---
+  - { wzor: "gue", zamiana: "ге" }
+  - { wzor: "Gue", zamiana: "Ге" }
+  - { wzor: "GUE", zamiana: "ГЕ" }
+  - { wzor: "gui", zamiana: "ги" }
+  - { wzor: "Gui", zamiana: "Ги" }
+  - { wzor: "GUI", zamiana: "ГИ" }
+  # --- ge/gi → же/жи ---
+  - { wzor: "ge",  zamiana: "же" }
+  - { wzor: "Ge",  zamiana: "Же" }
+  - { wzor: "GE",  zamiana: "ЖЕ" }
+  - { wzor: "gi",  zamiana: "жи" }
+  - { wzor: "Gi",  zamiana: "Жи" }
+  - { wzor: "GI",  zamiana: "ЖИ" }
+  # --- qu → к (AVANT u → ю) ---
+  - { wzor: "qu",  zamiana: "к"  }
+  - { wzor: "Qu",  zamiana: "К"  }
+  - { wzor: "QU",  zamiana: "К"  }
+  # --- j → ж ---
+  - { wzor: "j",   zamiana: "ж"  }
+  - { wzor: "J",   zamiana: "Ж"  }
+
+  # --- 4. h muet supprimé (APRÈS ch/ph), ce/ci, u → ю ---
+  - { wzor: "h",   zamiana: ""   }
+  - { wzor: "H",   zamiana: ""   }
+  - { wzor: "ce",  zamiana: "се" }
+  - { wzor: "Ce",  zamiana: "Се" }
+  - { wzor: "CE",  zamiana: "СЕ" }
+  - { wzor: "ci",  zamiana: "си" }
+  - { wzor: "Ci",  zamiana: "Си" }
+  - { wzor: "CI",  zamiana: "СИ" }
+  - { wzor: "u",   zamiana: "ю"  }
+  - { wzor: "U",   zamiana: "Ю"  }
+
+  # --- 5. Lettres seules → cyrillique ---
+  - { wzor: "a",   zamiana: "а"  }
+  - { wzor: "A",   zamiana: "А"  }
+  - { wzor: "b",   zamiana: "б"  }
+  - { wzor: "B",   zamiana: "Б"  }
+  - { wzor: "c",   zamiana: "к"  }
+  - { wzor: "C",   zamiana: "К"  }
+  - { wzor: "d",   zamiana: "д"  }
+  - { wzor: "D",   zamiana: "Д"  }
+  - { wzor: "e",   zamiana: "е"  }
+  - { wzor: "E",   zamiana: "Е"  }
+  - { wzor: "f",   zamiana: "ф"  }
+  - { wzor: "F",   zamiana: "Ф"  }
+  - { wzor: "g",   zamiana: "г"  }
+  - { wzor: "G",   zamiana: "Г"  }
+  - { wzor: "i",   zamiana: "и"  }
+  - { wzor: "I",   zamiana: "И"  }
+  - { wzor: "k",   zamiana: "к"  }
+  - { wzor: "K",   zamiana: "К"  }
+  - { wzor: "l",   zamiana: "л"  }
+  - { wzor: "L",   zamiana: "Л"  }
+  - { wzor: "m",   zamiana: "м"  }
+  - { wzor: "M",   zamiana: "М"  }
+  - { wzor: "n",   zamiana: "н"  }
+  - { wzor: "N",   zamiana: "Н"  }
+  - { wzor: "o",   zamiana: "о"  }
+  - { wzor: "O",   zamiana: "О"  }
+  - { wzor: "p",   zamiana: "п"  }
+  - { wzor: "P",   zamiana: "П"  }
+  - { wzor: "q",   zamiana: "к"  }
+  - { wzor: "Q",   zamiana: "К"  }
+  - { wzor: "r",   zamiana: "р"  }
+  - { wzor: "R",   zamiana: "Р"  }
+  - { wzor: "s",   zamiana: "с"  }
+  - { wzor: "S",   zamiana: "С"  }
+  - { wzor: "t",   zamiana: "т"  }
+  - { wzor: "T",   zamiana: "Т"  }
+  - { wzor: "v",   zamiana: "в"  }
+  - { wzor: "V",   zamiana: "В"  }
+  - { wzor: "w",   zamiana: "в"  }
+  - { wzor: "W",   zamiana: "В"  }
+  - { wzor: "x",   zamiana: "кс" }
+  - { wzor: "X",   zamiana: "Кс" }
+  - { wzor: "y",   zamiana: "и"  }
+  - { wzor: "Y",   zamiana: "И"  }
+  - { wzor: "z",   zamiana: "з"  }
+  - { wzor: "Z",   zamiana: "З"  }

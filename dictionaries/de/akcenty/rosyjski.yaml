@@ -4,22 +4,27 @@
 id: rosyjski
 etykieta: "Russisch (z.B. Irina / Pavel)"
 opis: |
-  Passt deutschen Text für einen russischen Sprachsynthesizer an.
-  Russisches TTS liest lateinische Buchstaben nach eigenem Regelwerk.
+  Transliteriert deutschen Text VOLLSTÄNDIG in kyrillische Schrift, damit
+  der russische Sprachsynthesizer (Irina / Pavel) ihn mit russischem
+  Akzent vorliest. Die Umschrift ist lautlich, nicht akademisch (kein
+  ISO 9 / GOST): Ziel ist ein Russe, der Deutsch spricht.
 
-  Wichtigste Anpassungen:
-    - „sch" → „sch" (russisches TTS liest /ʃ/ ähnlich)
-    - „tsch" → „tsch" (bleibt)
-    - „ch" → „h" (russisch hat kein /x/ im Lateinlesen → h)
-    - „w" → „w" (russisches TTS liest w als /v/ — gut!)
-    - „ei" → „ej" (russische Vokalstruktur)
-    - „eu" → „oj" (russische Vokalstruktur)
-    - „ü" → „ju" (russische Annäherung)
-    - „ö" → „jo" (russische Annäherung)
-    - „ä" → „je" (russische Annäherung)
-    - „ß" → „ss" (kein ß im Russischen)
-    - „z" → „z" (russisches TTS liest z als /z/ — gut!)
-    - „v" → „w" (damit russisches TTS /v/ liest)
+  Wichtigste Zuordnungen:
+    - „tsch" → „ч",  „sch" → „ш",  „ch" → „х" (vereinfacht, ohne ich-Laut)
+    - „sp"/„st" am Wortanfang → „шп"/„шт" (Näherung: nur nach Leerzeichen
+      oder bei Großschreibung erkennbar — Wortmitte bleibt „сп"/„ст")
+    - „ei" → „ай",  „eu" → „ой",  „ie" → „и",  „aa/ee/oo" → „а/е/о"
+    - „s" vor Vokal → „з" (за/зе/зи/зо/зу), „ss" → „сс"
+    - „ja/je/jo/ju" → „я/е/ё/ю",  übriges „j" → „й"
+    - „w" → „в",  „v" → „ф",  „z"/„tz" → „ц",  „qu" → „кв",  „ck" → „к"
+    - „th" → „т",  „ph" → „ф",  restliche Buchstaben 1:1 kyrillisch.
+
+  Bewusste Vereinfachungen (Pipeline-bedingt): die Vorstufe
+  `usun_polskie_znaki` normalisiert Umlaute VOR diesen Regeln
+  (ä→a, ö→o, ü→u, ß→ss), daher „ü" → „у" statt „ю", „ö" → „о" statt
+  „ё", „ä" → „а"; „äu" ist von „au" nicht mehr unterscheidbar (beide
+  → „ау"). „ß" wird über ss → „сс" abgebildet. Dehnungs-h wird
+  vereinfacht als „х" gesprochen (starker Akzent-Effekt).
 iso: ru
 kategoria: akcent
 kolejnosc: 60
@@ -29,26 +34,147 @@ normalizuj_liczby: true
 usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
+# -----------------------------------------------------------------------------
+# KRITISCHE REIHENFOLGE (sequenzielles str.replace):
+#   1. tsch / sch (längste Muster zuerst)
+#   2. sp/st am Wortanfang (Näherung: Großbuchstabe oder Leerzeichen davor)
+#   3. Konsonanten-Digraphen (ch, ck, th, ph, qu, tz, ss)
+#   4. Vokal-Digraphen (ei, eu, ie, aa, ee, oo)
+#   5. s + Vokal → з + Vokal (Stimmhaftigkeit)
+#   6. Jotierung ja/je/jo/ju, dann restliches j
+#   7. Einzelbuchstaben → Kyrillisch
+# Alle Ersetzungen liefern Kyrillisch — spätere lateinische Muster können
+# frühere Ergebnisse nicht mehr beschädigen.
+# -----------------------------------------------------------------------------
 zamiany:
-  # --- Umlaute (vor Digrammen, damit ü/ö/ä nicht mit ie/ei kollidieren) ---
-  - { wzor: "ü",    zamiana: "ju"  }
-  - { wzor: "Ü",    zamiana: "Ju"  }
-  - { wzor: "ö",    zamiana: "jo"  }
-  - { wzor: "Ö",    zamiana: "Jo"  }
-  - { wzor: "ä",    zamiana: "je"  }
-  - { wzor: "Ä",    zamiana: "Je"  }
-  - { wzor: "ß",    zamiana: "ss"  }
-  # --- Digramme ---
-  - { wzor: "ei",   zamiana: "ej"  }
-  - { wzor: "Ei",   zamiana: "Ej"  }
-  - { wzor: "EI",   zamiana: "EJ"  }
-  - { wzor: "eu",   zamiana: "oj"  }
-  - { wzor: "Eu",   zamiana: "Oj"  }
-  - { wzor: "ie",   zamiana: "i"   }
-  - { wzor: "Ie",   zamiana: "I"   }
-  - { wzor: "ch",   zamiana: "h"   }
-  - { wzor: "Ch",   zamiana: "H"   }
-  - { wzor: "CH",   zamiana: "H"   }
-  # --- Einzelne Konsonanten ---
-  - { wzor: "v",    zamiana: "w"   }
-  - { wzor: "V",    zamiana: "W"   }
+  # --- 1. tsch / sch ---
+  - { wzor: "tsch", zamiana: "ч" }
+  - { wzor: "Tsch", zamiana: "Ч" }
+  - { wzor: "TSCH", zamiana: "Ч" }
+  - { wzor: "sch",  zamiana: "ш" }
+  - { wzor: "Sch",  zamiana: "Ш" }
+  - { wzor: "SCH",  zamiana: "Ш" }
+
+  # --- 2. sp / st am Wortanfang (Näherung) ---
+  - { wzor: "Sp",  zamiana: "Шп"  }
+  - { wzor: " sp", zamiana: " шп" }
+  - { wzor: "St",  zamiana: "Шт"  }
+  - { wzor: " st", zamiana: " шт" }
+
+  # --- 3. Konsonanten-Digraphen ---
+  - { wzor: "ch", zamiana: "х"  }
+  - { wzor: "Ch", zamiana: "Х"  }
+  - { wzor: "CH", zamiana: "Х"  }
+  - { wzor: "ck", zamiana: "к"  }
+  - { wzor: "CK", zamiana: "К"  }
+  - { wzor: "th", zamiana: "т"  }
+  - { wzor: "Th", zamiana: "Т"  }
+  - { wzor: "TH", zamiana: "Т"  }
+  - { wzor: "ph", zamiana: "ф"  }
+  - { wzor: "Ph", zamiana: "Ф"  }
+  - { wzor: "PH", zamiana: "Ф"  }
+  - { wzor: "qu", zamiana: "кв" }
+  - { wzor: "Qu", zamiana: "Кв" }
+  - { wzor: "QU", zamiana: "КВ" }
+  - { wzor: "tz", zamiana: "ц"  }
+  - { wzor: "Tz", zamiana: "Ц"  }
+  - { wzor: "TZ", zamiana: "Ц"  }
+  - { wzor: "ss", zamiana: "сс" }
+  - { wzor: "Ss", zamiana: "Сс" }
+  - { wzor: "SS", zamiana: "СС" }
+
+  # --- 4. Vokal-Digraphen ---
+  - { wzor: "ei", zamiana: "ай" }
+  - { wzor: "Ei", zamiana: "Ай" }
+  - { wzor: "EI", zamiana: "АЙ" }
+  - { wzor: "eu", zamiana: "ой" }
+  - { wzor: "Eu", zamiana: "Ой" }
+  - { wzor: "EU", zamiana: "ОЙ" }
+  - { wzor: "ie", zamiana: "и"  }
+  - { wzor: "Ie", zamiana: "И"  }
+  - { wzor: "IE", zamiana: "И"  }
+  - { wzor: "aa", zamiana: "а"  }
+  - { wzor: "Aa", zamiana: "А"  }
+  - { wzor: "AA", zamiana: "А"  }
+  - { wzor: "ee", zamiana: "е"  }
+  - { wzor: "Ee", zamiana: "Е"  }
+  - { wzor: "EE", zamiana: "Е"  }
+  - { wzor: "oo", zamiana: "о"  }
+  - { wzor: "Oo", zamiana: "О"  }
+  - { wzor: "OO", zamiana: "О"  }
+
+  # --- 5. s + Vokal → з + Vokal (nach den Vokal-Digraphen!) ---
+  - { wzor: "sa", zamiana: "за" }
+  - { wzor: "Sa", zamiana: "За" }
+  - { wzor: "se", zamiana: "зе" }
+  - { wzor: "Se", zamiana: "Зе" }
+  - { wzor: "si", zamiana: "зи" }
+  - { wzor: "Si", zamiana: "Зи" }
+  - { wzor: "so", zamiana: "зо" }
+  - { wzor: "So", zamiana: "Зо" }
+  - { wzor: "su", zamiana: "зу" }
+  - { wzor: "Su", zamiana: "Зу" }
+
+  # --- 6. Jotierung ---
+  - { wzor: "ja", zamiana: "я" }
+  - { wzor: "Ja", zamiana: "Я" }
+  - { wzor: "je", zamiana: "е" }
+  - { wzor: "Je", zamiana: "Е" }
+  - { wzor: "jo", zamiana: "ё" }
+  - { wzor: "Jo", zamiana: "Ё" }
+  - { wzor: "ju", zamiana: "ю" }
+  - { wzor: "Ju", zamiana: "Ю" }
+  - { wzor: "j",  zamiana: "й" }
+  - { wzor: "J",  zamiana: "Й" }
+
+  # --- 7. Einzelbuchstaben → Kyrillisch ---
+  - { wzor: "a", zamiana: "а"  }
+  - { wzor: "A", zamiana: "А"  }
+  - { wzor: "b", zamiana: "б"  }
+  - { wzor: "B", zamiana: "Б"  }
+  - { wzor: "c", zamiana: "к"  }
+  - { wzor: "C", zamiana: "К"  }
+  - { wzor: "d", zamiana: "д"  }
+  - { wzor: "D", zamiana: "Д"  }
+  - { wzor: "e", zamiana: "е"  }
+  - { wzor: "E", zamiana: "Е"  }
+  - { wzor: "f", zamiana: "ф"  }
+  - { wzor: "F", zamiana: "Ф"  }
+  - { wzor: "g", zamiana: "г"  }
+  - { wzor: "G", zamiana: "Г"  }
+  - { wzor: "h", zamiana: "х"  }
+  - { wzor: "H", zamiana: "Х"  }
+  - { wzor: "i", zamiana: "и"  }
+  - { wzor: "I", zamiana: "И"  }
+  - { wzor: "k", zamiana: "к"  }
+  - { wzor: "K", zamiana: "К"  }
+  - { wzor: "l", zamiana: "л"  }
+  - { wzor: "L", zamiana: "Л"  }
+  - { wzor: "m", zamiana: "м"  }
+  - { wzor: "M", zamiana: "М"  }
+  - { wzor: "n", zamiana: "н"  }
+  - { wzor: "N", zamiana: "Н"  }
+  - { wzor: "o", zamiana: "о"  }
+  - { wzor: "O", zamiana: "О"  }
+  - { wzor: "p", zamiana: "п"  }
+  - { wzor: "P", zamiana: "П"  }
+  - { wzor: "q", zamiana: "к"  }
+  - { wzor: "Q", zamiana: "К"  }
+  - { wzor: "r", zamiana: "р"  }
+  - { wzor: "R", zamiana: "Р"  }
+  - { wzor: "s", zamiana: "с"  }
+  - { wzor: "S", zamiana: "С"  }
+  - { wzor: "t", zamiana: "т"  }
+  - { wzor: "T", zamiana: "Т"  }
+  - { wzor: "u", zamiana: "у"  }
+  - { wzor: "U", zamiana: "У"  }
+  - { wzor: "v", zamiana: "ф"  }
+  - { wzor: "V", zamiana: "Ф"  }
+  - { wzor: "w", zamiana: "в"  }
+  - { wzor: "W", zamiana: "В"  }
+  - { wzor: "x", zamiana: "кс" }
+  - { wzor: "X", zamiana: "Кс" }
+  - { wzor: "y", zamiana: "и"  }
+  - { wzor: "Y", zamiana: "И"  }
+  - { wzor: "z", zamiana: "ц"  }
+  - { wzor: "Z", zamiana: "Ц"  }
