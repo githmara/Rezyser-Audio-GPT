@@ -10,22 +10,26 @@ opis: |
 
   Compatibilità naturale italiano-inglese:
     - v   = /v/ in entrambi ✓
-    - g + e/i = /dʒ/ in entrambi (es. "gente") ✓
+    - g + e/i = /dʒ/ in entrambi (es. "gente", ingl. "gem") ✓ → si conserva
     - h   — il TTS inglese legge /h/, italiano h è muta → accento inglese
-    - geminati — gestiti dal TTS ✓
+    - sch + e/i = /sk/ ("maschera") — la regola che→ke la copre ✓
 
-  Problema critico — il digramma ch:
-    - ch + e/i = /k/ in italiano ("chiesa" = /kjɛza/)
-      Il TTS inglese legge "ch" come /tʃ/ ("chiesa" → /tʃjɛza/): incomprensibile.
-      Correzione: che → ke, chi → ki.
-    - gh + e/i = /g/ in italiano → il TTS inglese legge "gh" in modo imprevedibile.
-      Correzione: ghe → ge, ghi → gi.
+  Correzioni critiche italiano → inglese:
+    - ch + e/i = /k/ it, inglese legge /tʃ/ → che→ke, chi→ki ("chiesa"→"kiesa").
+    - cch geminata → kk ("vecchio"→"vekkio", "gnocchi"→"nyokki").
+    - c + e/i = /tʃ/ it, inglese legge /s/ ("cena"→/siːnə/) → ce→che, ci→chi
+      (ingl. ch=/tʃ/; "cena"→"chena", "ciao"→"chiao").
+    - cc + e/i = /ttʃ/ → cce→tche, cci→tchi ("faccia"→"fatchia").
+    - gh + e/i = /g/ it, inglese ge=/dʒ/ → ghe→gue, ghi→gui
+      (ingl. "guest"/"guitar" = /g/; "spaghetti"→"spaguetti").
+    - gn = /ɲ/ it, inglese legge /gn/ → gn→ny ("signora"→"sinyora").
+    - gli = /ʎ/ it, inglese legge /gli/ → gli→li ("figlio"→"filio").
+    - sc + e/i = /ʃ/ it, inglese "sce"=/s/ → sce→she, sci→shi
+      ("scena"→"shena", "uscita"→"ushita").
 
   Accenti naturali dell'inglese sull'italiano (lasciati intenzionalmente):
-    - c + e/i = /tʃ/ in italiano, inglese legge come /s/ → accento inglese
     - z = /ts/ in italiano, inglese legge come /z/ → accento inglese
-    - gli = /ʎ/ in italiano, inglese legge come /gli/ → accento inglese
-    - gn = /ɲ/ in italiano, inglese legge come /gn/ → accento inglese
+    - vocali piene italiane ridotte a schwa → accento inglese
 iso: en
 kategoria: akcent
 kolejnosc: 40
@@ -37,19 +41,53 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # --- Sostituzioni fonetiche ---
+# ORDINE CRITICO (str.replace sequenziale — vedi regole di architettura):
+# 1. sce/sci PRIMA di ce/ci (il pattern "ce" è contenuto in "sce");
+# 2. cch PRIMA di che/chi (la geminata verrebbe spezzata in "cki");
+# 3. che/chi→ke/ki consuma il ch ITALIANO, e SOLO DOPO ce/ci→che/chi
+#    introduce il ch INGLESE (/tʃ/) — nessuna regola successiva lo tocca.
 zamiany:
-  # --- ch + e/i → k (CRITICO: inglese ch=/tʃ/, italiano ch=/k/) ---
+  # --- 1. sc + e/i → sh (inglese sh = /ʃ/) ---
+  - { wzor: "sce", zamiana: "she" }
+  - { wzor: "Sce", zamiana: "She" }
+  - { wzor: "SCE", zamiana: "SHE" }
+  - { wzor: "sci", zamiana: "shi" }
+  - { wzor: "Sci", zamiana: "Shi" }
+  - { wzor: "SCI", zamiana: "SHI" }
+  # --- 2. cch geminata → kk ("vecchio"→"vekkio") ---
+  - { wzor: "cch", zamiana: "kk" }
+  - { wzor: "CCH", zamiana: "KK" }
+  # --- 3. ch + e/i → k (CRITICO: inglese ch=/tʃ/, italiano ch=/k/) ---
   - { wzor: "Che", zamiana: "Ke"  }
   - { wzor: "che", zamiana: "ke"  }
   - { wzor: "CHE", zamiana: "KE"  }
   - { wzor: "Chi", zamiana: "Ki"  }
   - { wzor: "chi", zamiana: "ki"  }
   - { wzor: "CHI", zamiana: "KI"  }
-
-  # --- gh + e/i → g (italiano gh=/g/, inglese legge in modo imprevedibile) ---
-  - { wzor: "Ghe", zamiana: "Ge"  }
-  - { wzor: "ghe", zamiana: "ge"  }
-  - { wzor: "GHE", zamiana: "GE"  }
-  - { wzor: "Ghi", zamiana: "Gi"  }
-  - { wzor: "ghi", zamiana: "gi"  }
-  - { wzor: "GHI", zamiana: "GI"  }
+  # --- 4. cc + e/i geminata → tch ("faccia"→"fatchia") ---
+  - { wzor: "cce", zamiana: "tche" }
+  - { wzor: "CCE", zamiana: "TCHE" }
+  - { wzor: "cci", zamiana: "tchi" }
+  - { wzor: "CCI", zamiana: "TCHI" }
+  # --- 5. c + e/i → ch (inglese ch=/tʃ/ = c dolce italiana) ---
+  - { wzor: "ce", zamiana: "che" }
+  - { wzor: "Ce", zamiana: "Che" }
+  - { wzor: "CE", zamiana: "CHE" }
+  - { wzor: "ci", zamiana: "chi" }
+  - { wzor: "Ci", zamiana: "Chi" }
+  - { wzor: "CI", zamiana: "CHI" }
+  # --- 6. gh + e/i → gu (inglese "guest"/"guitar" = /g/) ---
+  - { wzor: "Ghe", zamiana: "Gue" }
+  - { wzor: "ghe", zamiana: "gue" }
+  - { wzor: "GHE", zamiana: "GUE" }
+  - { wzor: "Ghi", zamiana: "Gui" }
+  - { wzor: "ghi", zamiana: "gui" }
+  - { wzor: "GHI", zamiana: "GUI" }
+  # --- 7. gn → ny (inglese ny ≈ /ɲ/) ---
+  - { wzor: "gn", zamiana: "ny" }
+  - { wzor: "Gn", zamiana: "Ny" }
+  - { wzor: "GN", zamiana: "NY" }
+  # --- 8. gli → li (approssimazione di /ʎ/) ---
+  - { wzor: "gli", zamiana: "li" }
+  - { wzor: "Gli", zamiana: "Li" }
+  - { wzor: "GLI", zamiana: "LI" }

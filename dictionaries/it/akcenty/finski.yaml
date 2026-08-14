@@ -15,19 +15,21 @@ opis: |
     - geminati (ll, mm, nn, tt) — fondamentali in entrambe le lingue ✓
     - vocali a/e/i/o/u — corrispondenza diretta in entrambe ✓
 
-  Problema critico — il digramma ch:
-    - ch + e/i = /k/ in italiano ("chiesa" = /kjɛza/)
-      Il TTS finlandese non usa "ch" nativamente e può leggerlo in modo
-      imprevedibile. Correzione: che → ke, chi → ki.
-    - gh + e/i = /g/ in italiano → TTS finlandese può leggerlo stranamente.
-      Correzione: ghe → ge, ghi → gi.
+  Correzioni critiche italiano → finlandese:
+    - ch + e/i = /k/ it, TTS finlandese imprevedibile → che→ke, chi→ki.
+    - cch geminata → kk ("vecchio"→"vekkio", "gnocchi"→"njokki").
+    - c + e/i = /tʃ/ it, finlandese legge /k/ o /s/ → ce→tse, ci→tsi
+      (fin. ts come in "metsä"; "cena"→"tsena", "ciao"→"tsiao").
+    - cc + e/i geminata → cce→tse, cci→tsi ("faccia"→"fatsia").
+    - gh + e/i = /g/ it → ghe→ge, ghi→gi (finlandese legge /g/ ✓).
+    - gn = /ɲ/ it → gn→nj (fin. nj; "signora"→"sinjora").
+    - gli = /ʎ/ it → gli→li ("figlio"→"filio").
+    - sc + e/i = /ʃ/ it → sce→se, sci→si (il finlandese addolcisce
+      le sibilanti; "scena"→"sena", "uscita"→"usita").
 
   Accenti naturali del finlandese sull'italiano (lasciati intenzionalmente):
-    - c + e/i = /tʃ/ in italiano, finlandese legge come /k/ → accento finlandese
     - g + e/i = /dʒ/ in italiano, finlandese legge come /g/ → accento finlandese
     - h muta italiana → TTS finlandese legge come /h/ → accento finlandese
-    - gli = /ʎ/ → finlandese legge come /gli/ → accento finlandese
-    - gn = /ɲ/ → finlandese legge come /gn/ → accento finlandese
 iso: fi
 kategoria: akcent
 kolejnosc: 50
@@ -39,19 +41,52 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # --- Sostituzioni fonetiche ---
+# ORDINE CRITICO (str.replace sequenziale — vedi regole di architettura):
+# 1. sce/sci PRIMA di ce/ci ("ce" è contenuto in "sce");
+# 2. cch PRIMA di che/chi; 3. che/chi→ke/ki PRIMA di ce/ci→tse/tsi
+# (nessuna regola successiva consuma ke/ki/ts).
 zamiany:
-  # --- ch + e/i → k (CRITICO: italiano ch=/k/, TTS finlandese incerto) ---
+  # --- 1. sc + e/i → s (sibilante addolcita, convenzione finlandese) ---
+  - { wzor: "sce", zamiana: "se" }
+  - { wzor: "Sce", zamiana: "Se" }
+  - { wzor: "SCE", zamiana: "SE" }
+  - { wzor: "sci", zamiana: "si" }
+  - { wzor: "Sci", zamiana: "Si" }
+  - { wzor: "SCI", zamiana: "SI" }
+  # --- 2. cch geminata → kk ("vecchio"→"vekkio") ---
+  - { wzor: "cch", zamiana: "kk" }
+  - { wzor: "CCH", zamiana: "KK" }
+  # --- 3. ch + e/i → k (CRITICO: italiano ch=/k/, TTS finlandese incerto) ---
   - { wzor: "Che", zamiana: "Ke"  }
   - { wzor: "che", zamiana: "ke"  }
   - { wzor: "CHE", zamiana: "KE"  }
   - { wzor: "Chi", zamiana: "Ki"  }
   - { wzor: "chi", zamiana: "ki"  }
   - { wzor: "CHI", zamiana: "KI"  }
-
-  # --- gh + e/i → g (italiano gh=/g/, TTS finlandese imprevedibile) ---
+  # --- 4. cc + e/i geminata → ts ("faccia"→"fatsia") ---
+  - { wzor: "cce", zamiana: "tse" }
+  - { wzor: "CCE", zamiana: "TSE" }
+  - { wzor: "cci", zamiana: "tsi" }
+  - { wzor: "CCI", zamiana: "TSI" }
+  # --- 5. c + e/i → ts (fin. ts ≈ /tʃ/ italiana) ---
+  - { wzor: "ce", zamiana: "tse" }
+  - { wzor: "Ce", zamiana: "Tse" }
+  - { wzor: "CE", zamiana: "TSE" }
+  - { wzor: "ci", zamiana: "tsi" }
+  - { wzor: "Ci", zamiana: "Tsi" }
+  - { wzor: "CI", zamiana: "TSI" }
+  # --- 6. gh + e/i → g (finlandese legge /g/ correttamente) ---
   - { wzor: "Ghe", zamiana: "Ge"  }
   - { wzor: "ghe", zamiana: "ge"  }
   - { wzor: "GHE", zamiana: "GE"  }
   - { wzor: "Ghi", zamiana: "Gi"  }
   - { wzor: "ghi", zamiana: "gi"  }
   - { wzor: "GHI", zamiana: "GI"  }
+  # --- 7. gn → nj (fin. nj ≈ /ɲ/) ---
+  - { wzor: "gn", zamiana: "nj" }
+  - { wzor: "Gn", zamiana: "Nj" }
+  - { wzor: "GN", zamiana: "NJ" }
+  # --- 8. gli → li (approssimazione di /ʎ/) ---
+  - { wzor: "gli", zamiana: "li" }
+  - { wzor: "Gli", zamiana: "Li" }
+  - { wzor: "GLI", zamiana: "LI" }

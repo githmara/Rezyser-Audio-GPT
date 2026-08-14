@@ -12,22 +12,30 @@ opis: |
   Compatibilità naturale italiano-spagnolo:
     - h   — muta in entrambe le lingue ✓
     - r   — r vibrante spagnola ≈ r vibrante italiana ✓
-    - gn  — spagnolo non ha /ɲ/ da "gn" (usa "ñ") → accento spagnolo naturale
     - vocali a/e/i/o/u — corrispondenza diretta ✓
 
-  Problema critico — il digramma ch:
-    - ch + e/i = /k/ in italiano ("chiesa" = /kjɛza/)
-      Il TTS spagnolo legge "ch" come /tʃ/ ("chiesa" → /tʃjeza/): errato.
-      Correzione: che → ke, chi → ki.
-    - gh + e/i = /g/ in italiano → il TTS spagnolo legge in modo imprevedibile.
-      Correzione: ghe → ge, ghi → gi.
+  Correzioni critiche italiano → spagnolo:
+    - ch + e/i = /k/ it, spagnolo legge /tʃ/ ("chiesa"→/tʃjesa/) →
+      che→ke, chi→ki.
+    - cch geminata → kk ("vecchio"→"vekkio", "gnocchi"→"ñokki").
+    - c + e/i = /tʃ/ it, spagnolo legge /θ/ → ce→che, ci→chi
+      (spagn. ch=/tʃ/ — corrispondenza esatta; "cena"→"chena",
+      "ciao"→"chiao"; DOPO che/chi→ke/ki).
+    - cc + e/i geminata → cce→che, cci→chi ("faccia"→"fachia").
+    - g + e/i = /dʒ/ it, spagnolo legge /x/ (fortissimo) → ge→ye, gi→yi
+      (spagn. y=/ʝ/, l'approssimazione più vicina; "gente"→"yente").
+    - gg + e/i geminata → gge→ye, ggi→yi ("maggio"→"mayio").
+    - gh + e/i = /g/ it → ghe→gue, ghi→gui (spagn. "guerra"/"guitarra" =
+      /g/ — corrispondenza esatta; "spaghetti"→"spaguetti").
+    - gn = /ɲ/ it → gn→ñ (corrispondenza esatta; "signora"→"siñora",
+      "gnocchi"→"ñokki" — come lo spagnolo scrive "ñoquis"!).
+    - gli = /ʎ/ it → gli→lli (spagn. ll=/ʝ~ʎ/; "figlio"→"fillio").
+    - sc + e/i = /ʃ/ it → sce→se, sci→si (lo spagnolo non ha /ʃ/ —
+      la /s/ è il suo sostituto naturale; "scena"→"sena").
 
   Accenti naturali dello spagnolo sull'italiano (lasciati intenzionalmente):
-    - c + e/i = /tʃ/ in italiano, spagnolo (castigliano) legge come /θ/ → accento spagnolo
-    - g + e/i = /dʒ/ in italiano, spagnolo legge come /x/ → accento spagnolo forte
     - z = /ts/ in italiano, spagnolo legge come /θ/ o /s/ → accento spagnolo
-    - v = /v/ in italiano, spagnolo legge come /b/ → accento spagnolo (b/v identici in spagnolo)
-    - gli = /ʎ/ → spagnolo legge come /gli/ → accento spagnolo
+    - v = /v/ in italiano, spagnolo legge come /b/ → accento spagnolo
 iso: es
 kategoria: akcent
 kolejnosc: 65
@@ -39,19 +47,66 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # --- Sostituzioni fonetiche ---
+# ORDINE CRITICO (str.replace sequenziale — vedi regole di architettura):
+# 1. sce/sci PRIMA di ce/ci ("ce" è contenuto in "sce");
+# 2. cch PRIMA di che/chi; 3. che/chi→ke/ki consuma il ch ITALIANO,
+#    SOLO DOPO ce/ci→che/chi introduce il ch SPAGNOLO (/tʃ/);
+# 4. ge/gi→ye/yi consuma la g DOLCE, SOLO DOPO ghe/ghi→gue/gui
+#    introduce la g dura — l'ordine inverso darebbe "spayetti".
 zamiany:
-  # --- ch + e/i → k (CRITICO: spagnolo ch=/tʃ/, italiano ch=/k/) ---
+  # --- 1. sc + e/i → s (lo spagnolo non ha /ʃ/) ---
+  - { wzor: "sce", zamiana: "se" }
+  - { wzor: "Sce", zamiana: "Se" }
+  - { wzor: "SCE", zamiana: "SE" }
+  - { wzor: "sci", zamiana: "si" }
+  - { wzor: "Sci", zamiana: "Si" }
+  - { wzor: "SCI", zamiana: "SI" }
+  # --- 2. cch geminata → kk ("vecchio"→"vekkio") ---
+  - { wzor: "cch", zamiana: "kk" }
+  - { wzor: "CCH", zamiana: "KK" }
+  # --- 3. ch + e/i → k (CRITICO: spagnolo ch=/tʃ/, italiano ch=/k/) ---
   - { wzor: "Che", zamiana: "Ke"  }
   - { wzor: "che", zamiana: "ke"  }
   - { wzor: "CHE", zamiana: "KE"  }
   - { wzor: "Chi", zamiana: "Ki"  }
   - { wzor: "chi", zamiana: "ki"  }
   - { wzor: "CHI", zamiana: "KI"  }
-
-  # --- gh + e/i → g (italiano gh=/g/, spagnolo imprevedibile) ---
-  - { wzor: "Ghe", zamiana: "Ge"  }
-  - { wzor: "ghe", zamiana: "ge"  }
-  - { wzor: "GHE", zamiana: "GE"  }
-  - { wzor: "Ghi", zamiana: "Gi"  }
-  - { wzor: "ghi", zamiana: "gi"  }
-  - { wzor: "GHI", zamiana: "GI"  }
+  # --- 4. cc + e/i geminata → ch ("faccia"→"fachia") ---
+  - { wzor: "cce", zamiana: "che" }
+  - { wzor: "CCE", zamiana: "CHE" }
+  - { wzor: "cci", zamiana: "chi" }
+  - { wzor: "CCI", zamiana: "CHI" }
+  # --- 5. c + e/i → ch (spagn. ch=/tʃ/ = c dolce italiana) ---
+  - { wzor: "ce", zamiana: "che" }
+  - { wzor: "Ce", zamiana: "Che" }
+  - { wzor: "CE", zamiana: "CHE" }
+  - { wzor: "ci", zamiana: "chi" }
+  - { wzor: "Ci", zamiana: "Chi" }
+  - { wzor: "CI", zamiana: "CHI" }
+  # --- 6. gg + e/i geminata → y ("maggio"→"mayio") ---
+  - { wzor: "gge", zamiana: "ye" }
+  - { wzor: "GGE", zamiana: "YE" }
+  - { wzor: "ggi", zamiana: "yi" }
+  - { wzor: "GGI", zamiana: "YI" }
+  # --- 7. g dolce → y (spagn. y=/ʝ/ ≈ /dʒ/; evita la /x/ spagnola) ---
+  - { wzor: "ge", zamiana: "ye" }
+  - { wzor: "Ge", zamiana: "Ye" }
+  - { wzor: "GE", zamiana: "YE" }
+  - { wzor: "gi", zamiana: "yi" }
+  - { wzor: "Gi", zamiana: "Yi" }
+  - { wzor: "GI", zamiana: "YI" }
+  # --- 8. gh + e/i → gu (spagn. "guerra"/"guitarra" = /g/; DOPO il passo 7!) ---
+  - { wzor: "Ghe", zamiana: "Gue" }
+  - { wzor: "ghe", zamiana: "gue" }
+  - { wzor: "GHE", zamiana: "GUE" }
+  - { wzor: "Ghi", zamiana: "Gui" }
+  - { wzor: "ghi", zamiana: "gui" }
+  - { wzor: "GHI", zamiana: "GUI" }
+  # --- 9. gn → ñ (corrispondenza esatta /ɲ/) ---
+  - { wzor: "gn", zamiana: "ñ" }
+  - { wzor: "Gn", zamiana: "Ñ" }
+  - { wzor: "GN", zamiana: "Ñ" }
+  # --- 10. gli → lli (spagn. ll=/ʝ~ʎ/) ---
+  - { wzor: "gli", zamiana: "lli" }
+  - { wzor: "Gli", zamiana: "Lli" }
+  - { wzor: "GLI", zamiana: "LLI" }

@@ -9,19 +9,26 @@ opis: |
   L'italiano e il polacco condividono molti suoni latini di base:
     - v   = /v/ in entrambi — nessuna modifica necessaria ✓
     - r   — r vibrante polacca ≈ r vibrante italiana ✓
-    - geminati (ll, mm, nn, tt) — il TTS polacco li gestisce ✓
+    - ci + vocale = /tɕ/ polacco ≈ /tʃ/ italiano ("ciao" letto alla polacca
+      suona quasi identico) ✓ → si conserva
 
-  Problema critico — i digrammi italiani ch/gh:
-    - ch + e/i = /k/ in italiano (es. "chiesa" = /kjɛza/)
-      Il TTS polacco legge "ch" come /x/ — "chiesa" → /xjeza/: incomprensibile.
-      Correzione: che → ke, chi → ki.
-    - gh + e/i = /g/ in italiano (es. "ghetto" = /getto/)
-      Il TTS polacco può leggere "gh" come /gx/: incomprensibile.
-      Correzione: ghe → ge, ghi → gi.
+  Correzioni critiche italiano → polacco:
+    - ch + e/i = /k/ it, polacco legge /x/ ("chiesa"→/xjeza/) → che→ke, chi→ki.
+    - cch geminata → kk ("vecchio"→"vekkio", "gnocchi"→"niokki").
+    - c + e = /tʃe/ it, polacco legge /tse/ → ce→cie (pol. "cie"=/tɕe/;
+      "cena"→"ciena").
+    - g + e/i = /dʒ/ it, polacco legge /g/ → ge→dże, gi→dzi (pol. dż=/dʒ/,
+      dzi=/dʑi/; "gente"→"dżente", "giorno"→"dziorno", "mangia"→"mandzia").
+    - gg + e/i geminata → gge→dże, ggi→dzi ("oggi"→"odzi", "maggio"→"madzio").
+    - gh + e/i = /g/ it → ghe→gie, ghi→gi (pol. "gie"/"gi"=/gʲ/;
+      "spaghetti"→"spagietti") — DOPO ge/gi→dż, altrimenti la g dura
+      verrebbe divorata dalla regola della g dolce.
+    - gn = /ɲ/ it → gn→ni (pol. "ni"+vocale=/ɲ/; "signora"→"siniora").
+    - gli = /ʎ/ it → gli→li (pol. "li"=/lʲ/; "figlio"→"filio").
+    - sc + e/i = /ʃ/ it, polacco leggerebbe /stse/ → sce→sze, sci→szi
+      (pol. sz=/ʃ/; "scena"→"szena", "uscita"→"uszita").
 
   Accenti naturali del polacco sull'italiano (lasciati intenzionalmente):
-    - c + e/i = /tʃ/ in italiano, polacco legge come /ts/ → accento polacco
-    - g + e/i = /dʒ/ in italiano, polacco legge come /g/ → accento polacco
     - z = /ts/ in italiano, polacco legge come /z/ → accento polacco
     - h iniziale (es. "ha", "ho") — polacco legge come /x/ → accento polacco
 iso: pl
@@ -35,21 +42,57 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 # --- Sostituzioni fonetiche ---
-# ORDINE CRITICO: digrammi prima delle lettere singole,
-# e le varianti più lunghe prima di quelle più corte (Che prima di Ch, ecc.)
+# ORDINE CRITICO (str.replace sequenziale — vedi regole di architettura):
+# 1. sce/sci PRIMA di ce ("ce" è contenuto in "sce");
+# 2. cch PRIMA di che/chi;
+# 3. ge/gi→dże/dzi consuma la g DOLCE italiana, e SOLO DOPO ghe/ghi→gie/gi
+#    introduce la g dura polacca — l'ordine inverso darebbe "spadżetti".
 zamiany:
-  # --- ch + e/i → k (CRITICO: polacco legge ch=/x/, italiano ch=/k/) ---
+  # --- 1. sc + e/i → sz (polacco sz = /ʃ/) ---
+  - { wzor: "sce", zamiana: "sze" }
+  - { wzor: "Sce", zamiana: "Sze" }
+  - { wzor: "SCE", zamiana: "SZE" }
+  - { wzor: "sci", zamiana: "szi" }
+  - { wzor: "Sci", zamiana: "Szi" }
+  - { wzor: "SCI", zamiana: "SZI" }
+  # --- 2. cch geminata → kk ("vecchio"→"vekkio") ---
+  - { wzor: "cch", zamiana: "kk" }
+  - { wzor: "CCH", zamiana: "KK" }
+  # --- 3. ch + e/i → k (CRITICO: polacco ch=/x/, italiano ch=/k/) ---
   - { wzor: "Che", zamiana: "Ke"  }
   - { wzor: "che", zamiana: "ke"  }
   - { wzor: "CHE", zamiana: "KE"  }
   - { wzor: "Chi", zamiana: "Ki"  }
   - { wzor: "chi", zamiana: "ki"  }
   - { wzor: "CHI", zamiana: "KI"  }
-
-  # --- gh + e/i → g (gh italiano=/g/, polacco legge come /gx/) ---
-  - { wzor: "Ghe", zamiana: "Ge"  }
-  - { wzor: "ghe", zamiana: "ge"  }
-  - { wzor: "GHE", zamiana: "GE"  }
-  - { wzor: "Ghi", zamiana: "Gi"  }
-  - { wzor: "ghi", zamiana: "gi"  }
-  - { wzor: "GHI", zamiana: "GI"  }
+  # --- 4. ce → cie (polacco "cie" = /tɕe/ ≈ c dolce; "ci" resta com'è) ---
+  - { wzor: "ce", zamiana: "cie" }
+  - { wzor: "Ce", zamiana: "Cie" }
+  - { wzor: "CE", zamiana: "CIE" }
+  # --- 5. gg + e/i geminata → dż/dzi ("oggi"→"odzi", "maggio"→"madzio") ---
+  - { wzor: "gge", zamiana: "dże" }
+  - { wzor: "GGE", zamiana: "DŻE" }
+  - { wzor: "ggi", zamiana: "dzi" }
+  - { wzor: "GGI", zamiana: "DZI" }
+  # --- 6. g dolce → dż/dzi (polacco dż=/dʒ/, dzi=/dʑ/) ---
+  - { wzor: "ge", zamiana: "dże" }
+  - { wzor: "Ge", zamiana: "Dże" }
+  - { wzor: "GE", zamiana: "DŻE" }
+  - { wzor: "gi", zamiana: "dzi" }
+  - { wzor: "Gi", zamiana: "Dzi" }
+  - { wzor: "GI", zamiana: "DZI" }
+  # --- 7. gh + e/i → g dura polacca (DOPO il passo 6!) ---
+  - { wzor: "Ghe", zamiana: "Gie" }
+  - { wzor: "ghe", zamiana: "gie" }
+  - { wzor: "GHE", zamiana: "GIE" }
+  - { wzor: "Ghi", zamiana: "Gi" }
+  - { wzor: "ghi", zamiana: "gi" }
+  - { wzor: "GHI", zamiana: "GI" }
+  # --- 8. gn → ni (polacco "ni"+vocale = /ɲ/) ---
+  - { wzor: "gn", zamiana: "ni" }
+  - { wzor: "Gn", zamiana: "Ni" }
+  - { wzor: "GN", zamiana: "NI" }
+  # --- 9. gli → li (polacco "li" = /lʲ/, approssimazione di /ʎ/) ---
+  - { wzor: "gli", zamiana: "li" }
+  - { wzor: "Gli", zamiana: "Li" }
+  - { wzor: "GLI", zamiana: "LI" }
