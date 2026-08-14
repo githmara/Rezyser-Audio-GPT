@@ -52,14 +52,14 @@ tresc:
         dictionaries/
         └── pl/              peruskielen (puolan) kansio
             ├── podstawy.yaml              puolalaiset diakriitit + aakkoset
-            ├── akcenty/                  {liczba_plikow_w_akcentach} aksenttitiedostot
-            ├── szyfry/                   {liczba_szyfrow} salaus- ja leikkitiedostot
-            └── rezyser/                  {liczba_trybow_rezysera} Ohjaaja AI -tilatiedostot
+            ├── akcenty/                  {liczba_plikow_w_akcentach} aksenttitiedostoa
+            ├── szyfry/                   {liczba_szyfrow} salaus- ja leikkitiedostoa
+            └── rezyser/                  {liczba_trybow_rezysera} Ohjaaja AI -tilatiedostoa
 
     Tällä hetkellä täysin toteutettuja ovat: {lista_kompletnych_jezykow_natywnie}
-    ({liczba_kompletnych_jezykow} peruskieliä). Jokaisella on oma paketti
+    ({liczba_kompletnych_jezykow} peruskieltä). Jokaisella on oma paketti
     "`dictionaries/<kod>/`" diakriiteillä, aakkosilla ja äännesäännöillä, jotka
-    toimivat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa
+    kohdistuvat kyseisellä kielellä kirjoitettuun tekstiin — sovellus tunnistaa
     lähdekielen automaattisesti lingua-language-detector -työkalulla
     (kappaletasolla) ja lataa oikean paketin kullekin katkelmalle erikseen.
     Lisää kieliä on valmisteilla (täydellinen paketti vaatii "podstawy.yaml",
@@ -83,7 +83,7 @@ tresc:
     - saksa (Markus/Stefan Vocalizerissa, Katja/Hedda OneCoressa)
     - espanja (Jorge/Monica Vocalizerissa, Helena OneCoressa)
     - italia (Alice/Luca Vocalizerissa, Elsa OneCoressa)
-    - puolalainen (Ewa Vocalizerissa, Paulina OneCoressa)
+    - puola (Ewa Vocalizerissa, Paulina OneCoressa)
     - islanti (vain OneCore Gudrun ja ilmainen eSpeak — Vocalizerissa ei ole
       islantilaista ääntä!)
     - venäjä (Milena Vocalizerissa, Irina/Pavel/Yuri OneCoressa — tämä on
@@ -94,7 +94,7 @@ tresc:
     Lisäksi aksenttivalikossa on kaksi "puhdistavaa ilman aksenttia" -vaihtoehtoa:
     yksi ilman numeroiden normalisointia, toinen normalisoinnilla (muuttaa "15"
     "viisitoista" ennen käsittelyä, koska ulkomaalainen ei todennäköisesti taivuttaisi
-    tätä lukua oikein — mikä lisää aitoutta) sekä "Tagikorjaaja", joka vain lisää
+    tätä lukua oikein — mikä lisää aitoutta) sekä "Tunnisteiden korjaaja", joka vain lisää
     tiedostoon ISO-kielikoodin ilman sisällön pilaamista (pelastus, kun jo
     käännetty tiedostosi on väärällä kielikoodilla).
   co_to_szyfr: |
@@ -180,7 +180,7 @@ tresc:
     Jos tunnet, että esimerkiksi Äänikirja-tila kirjoittaa "liian kukkaisesti"
     tai Aivoriihi ehdottaa liian usein maagisia ratkaisuja, voit säätää näitä
     tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla
-    käynnistyksellä sinun version. Ei ohjelmointia.
+    käynnistyksellä sinun versiosi. Ei ohjelmointia.
   co_to_tryb_opowiesci: |
     ## Mikä on "Tarinatila"?
     ----------------------------
@@ -196,7 +196,7 @@ tresc:
                                näkövammaisille pelaajille)
     - tryb_mniejsze_zlo.yaml — Pienempi paha (kuten Valinnat, mutta jokainen
                                vaihtoehto on epäedullinen; versiosta 15.2
-                               lähtien uudelleenkäytettävä pullo ZERO-numeroituna
+                               lähtien uudelleenkäytettävä pullo NOLLA-numeroituna
                                epätoivoisen pelastuksen vaihtoehtona)
     - tryb_swobodny.yaml     — Vapaa (mikä tahansa toiminto vapaana tekstinä,
                                moottori ehdottaa 1-3 vaihtoehtoa mutta ei
@@ -209,7 +209,7 @@ tresc:
     - zaczatki.yaml          — seikkailun aloittimet (3 alustavaa maailman
                                asetelmaa valittavaksi uutta peliä aloitettaessa)
     - streszczenie.yaml      — pitkien pelien yhteenvetogeneraattori (historian
-                               pakkaus mallin kontekstiikkunaa varten)
+                               pakkaus mallin konteksti-ikkunaa varten)
     - cinematic_warning.yaml — varoitukset brutaaleista/dramaattisista
                                kohtauksista (yhdenmukaisuus pelaajan mieltymysten kanssa)
 
