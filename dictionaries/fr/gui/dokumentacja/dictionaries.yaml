@@ -147,7 +147,7 @@ tresc:
     les sauvegarder, et l'application chargera votre version au prochain démarrage.
     Zéro programmation.
   co_to_tryb_opowiesci: |
-    # Qu'est-ce que le « mode Histoires » ?
+    ## Qu'est-ce que le « mode Histoires » ?
     ----------------------------
 
     Le dossier « opowiesci/ » contient {liczba_trybow_opowiesci} fichiers décrivant le second

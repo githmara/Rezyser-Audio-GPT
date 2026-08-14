@@ -1161,7 +1161,7 @@ updater:
   blad_uruchomienia_tresc: "No se pudo iniciar el instalador:\n{sciezka_pliku}\n\n{tresc_bledu}"
   co_nowego_online_pl: La página completa de la edición (en línea) está disponible en polaco.
   btn_szczegoly_online: '&Detalles en línea'
-  changelog_uwaga: El registro de cambios de la nueva versión se abrirá como el archivo docs/changelog.md. Está en inglés y polaco; si prefieres otro idioma, carga este archivo en el módulo Políglota (Traductor AI) o cualquier traductor o chatbot.
+  changelog_uwaga: El registro de cambios de la nueva versión se abrirá como el archivo docs/changelog.md. Está en inglés y polaco; si prefieres otro idioma, carga este archivo en el módulo Políglota (Traductor IA) o cualquier traductor o chatbot.
   changelog_naglowek: '# Novedades en la versión {nowa_wersja}'
   changelog_blad: "No se pudo guardar o abrir el archivo del registro de cambios:\n{sciezka}\n\n{tresc_bledu}"
   btn_changelog: 📄 &Registro de cambios de la versión {nowa_wersja}

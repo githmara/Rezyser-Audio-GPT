@@ -190,7 +190,7 @@ tresc:
     Immagina che l'accento francese dell'applicazione sostituisca "sz" con "sh", ma
     tu pensi che un francese direbbe piuttosto "sch" o "ch". Nessun problema.
 
-    1. Avvia l'applicazione e vai al Gestore delle Regole (tasto Ctrl+4 o
+    1. Avvia l'applicazione e vai al Gestore Regole (tasto Ctrl+4 o
        quarto pulsante sulla barra).
     2. Nell'albero dei file a sinistra espandi "pl" → "akcenty" e fai clic su
        "francuski.yaml".
@@ -199,7 +199,7 @@ tresc:
     4. Scorri verso il basso fino alla sezione "zamiany:". Trova la riga con il
        modello "sz" e cambia il valore "zamiana" con quello che preferisci.
     5. Salva il file (Ctrl+S), chiudi l'editor.
-    6. Torna al Gestore delle Regole e fai clic su "Aggiorna albero", quindi
+    6. Torna al Gestore Regole e fai clic su "Aggiorna albero", quindi
        chiudi e riavvia l'applicazione. La tua modifica è già attiva.
   poziom_2_duplikacja: |
     ## LIVELLO 2 — aggiungere un nuovo accento tramite duplicazione
@@ -207,7 +207,7 @@ tresc:
     Vuoi aggiungere un accento svedese o danese? Inizia con quello più simile
     esistente.
 
-    1. Nel Gestore delle Regole seleziona ad esempio "finski.yaml" (il finlandese
+    1. Nel Gestore Regole seleziona ad esempio "finski.yaml" (il finlandese
        è foneticamente vicino allo svedese) e fai clic su "Duplica file selezionato".
     2. Il Gestore chiederà un nuovo nome — inserisci ad esempio "szwedzki" (in
        minuscolo, senza spazi, senza caratteri polacchi).
@@ -230,7 +230,7 @@ tresc:
     Vuoi un gergo scolastico? La lingua degli antichi cavalieri? Un linguaggio
     criptico? Un cifrario per i genitori davanti ai bambini?
 
-    1. Nel Gestore delle Regole fai clic su "Nuovo file di regole…".
+    1. Nel Gestore Regole fai clic su "Nuovo file di regole…".
     2. Scegli il tipo (accento, cifrario di sostituzione, modalità del Regista,
        nuova lingua di base, cifrario algoritmico). Per i casi comuni
        l'applicazione creerà immediatamente un modello YAML pronto — lo modifichi
@@ -280,7 +280,7 @@ tresc:
     La cosa peggiore che può succedere è che il nuovo file semplicemente non
     appaia nel menu dell'applicazione. In tal caso:
 
-    - torna al Gestore delle Regole, verifica se il file è visibile nell'albero,
+    - torna al Gestore Regole, verifica se il file è visibile nell'albero,
     - aprilo nuovamente nell'editor di testo e confronta la struttura con
       quelli vicini (rientri, due punti, virgolette),
     - se sei veramente bloccato — copia il contenuto del tuo file, apri

@@ -34,7 +34,7 @@ tresc:
 
     * **Libro del Mondo Multiprogetto:** Il sistema carica automaticamente in background le regole dedicate dell'universo (`.md`) basate sul file sorgente attivo, garantendo un'isolamento completo (caricamento del contesto senza clic).
     * **Accumulatore di Trama:** Algoritmo di "memoria infinita". Quando l'indicatore di memoria entra in stato di allarme rosso, il sistema genera automaticamente un riassunto della trama e lo salva nel campo Memoria a Lungo Termine.
-    * **{liczba_trybow_rezysera} modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore delle Regole di seguito.
+    * **{liczba_trybow_rezysera} modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore Regole di seguito.
   modul_opowiesci: |
     ### 2. Racconti (Ctrl+5, secondo modo principale dalla v15.0)
 
@@ -50,7 +50,7 @@ tresc:
     * **Traduttore Sicuro:** I testi lunghi vengono automaticamente suddivisi in blocchi misurati in token del modello (sicuro anche per lingue a scrittura densa, ad es. il cinese) e tradotti sequenzialmente; una risposta troncata del modello viene rilevata e ritentata su frammenti più piccoli. Ogni blocco viene immediatamente salvato in un file nascosto `.jsonl`. Il ripristino dopo l'esaurimento dei limiti API è completamente automatico.
     * **Automazione NVDA:** Le traduzioni vengono salvate come file `.html` pronti con tag di lingua incorporato o file `.docx` con tag iniettati direttamente nella struttura XML.
     * **{liczba_akcentow_jezykowych} accenti locali:** Possibilità di forzare intenzionalmente un accento spezzato per i sintetizzatori locali (Tiflotecnia Voices, eSpeak, OneCore) grazie a regole regex avanzate. Accenti stranieri supportati: inglese, russo (con traslitterazione in cirillico), francese, tedesco, spagnolo, polacco, finlandese, islandese.
-    * **Modalità Cifrario:** {liczba_szyfrow} algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 35 caratteri con diacritici).
+    * **Modalità Cifrario:** {liczba_szyfrow} algoritmi locali di distorsione del testo — dalla lettura al contrario, attraverso la tipoglicemia, fino al classico cifrario di Cesare. Ognuno con l'alfabeto locale del pacchetto linguistico (ad esempio, cifrario di Cesare su alfabeto IT di 21 caratteri).
     * **Riparatore di Tag:** Inietta in modo non invasivo il codice ISO della lingua fornito — anche regionale, ad es. pt-BR o zh-CN — nei file esistenti.
   modul_konwerter: |
     ### 4. Convertitore / Architetto Audiolibri (Ctrl+3)
@@ -123,7 +123,7 @@ tresc:
     * `opowiesci/` — *stories*: registrazioni di Racconti interattivi.
     * `runtime/` — doppio ruolo: cartella del bundle dell'applicazione congelata (interprete + librerie) E contenitore di metadati nascosti dei progetti (`runtime/skrypty/`, `runtime/opowiesci/`).
 
-    **Sottocartelle dei dati sorgente in `dictionaries/<codice-lingua>/` (visibili nel Gestore delle Regole):**
+    **Sottocartelle dei dati sorgente in `dictionaries/<codice-lingua>/` (visibili nel Gestore Regole):**
 
     * `podstawy.yaml` — *basics*: configurazione e metadati del pacchetto linguistico.
     * `akcenty/` — *accents*: regole fonetiche per i sintetizzatori vocali.

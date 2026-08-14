@@ -61,7 +61,7 @@ tresc:
     1. Kirjoita pelin nimi "{opowiesci.lbl_nazwa_gry}"-kenttään (esim. „moja_przygoda_1") — tällä nimellä tallennetaan kerronnan, tilan ja lokin tiedostot.
     2. Valitse tila (Vapaa/Valintojen/Pienempi paha).
     3. Napsauta "{opowiesci.btn_nowa_gra_label}". Sovellus luo uuden pelin ja alkaa tästä hetkestä lähtien tallentaa sen tilan automaattisesti. Valmis kerrontatiedosto syntyy ensimmäisen vuoron jälkeen.
-    4. Kirjoita alhaalla olevan paneelin "{opowiesci.lbl_akcja}"-kenttään ensimmäinen toiminto, esim. „budzę się w nieznanym pokoju". Napsauta "{opowiesci.btn_wyslij_label}". Kerrontamoottori avaa maailman toimintosi perusteella — kuvaus huoneesta, äänet, hahmot, ensimmäiset päätökset.
+    4. Kirjoita alhaalla olevan paneelin "{opowiesci.lbl_akcja}"-kenttään ensimmäinen toiminto, esim. „herään tuntemattomassa huoneessa". Napsauta "{opowiesci.btn_wyslij_label}". Kerrontamoottori avaa maailman toimintosi perusteella — kuvaus huoneesta, äänet, hahmot, ensimmäiset päätökset.
     5. Jokainen vuoro tallennetaan automaattisesti — voit sulkea sovelluksen milloin tahansa ja ladata pelin myöhemmin "{opowiesci.btn_wczytaj_label}"-painikkeella.
   krok_4_zasady_swiata: |
     ## VAIHE 4: Maailman säännöt — omat säännöt, joita moottori noudattaa koko pelin ajan
@@ -100,7 +100,7 @@ tresc:
 
     Sinun näkökulmastasi tärkeä on yksi tiedosto — valmis kerronta:
 
-    `opowiesci/<nazwa>.txt` — täydellinen kerronta valmiina kuunneltavaksi äänikirjana, opowiesci/-kansiossa sovelluksen vieressä. Voit avata sen Muistiossa, lukea ruudunlukijalla tai ladata sen Äänikirja-arkkitehtiin (Konvertteri) ja luoda Word-asiakirjan lukuineen tai aikajanan ElevenLabsia varten.
+    `opowiesci/<nazwa>.txt` — täydellinen kerronta valmiina kuunneltavaksi äänikirjana, opowiesci/-kansiossa sovelluksen vieressä. Voit avata sen Muistiossa, lukea ruudunlukijalla tai ladata sen Äänikirja-arkkitehtiin (Muunnin) ja luoda Word-asiakirjan lukuineen tai aikajanan ElevenLabsia varten.
 
     Koko pelitilanteen — hahmot, sijainnin, varusteet, avoimet juonilangat ja aiempien vuorojen historian — sovellus hallinnoi puolestasi automaattisesti. Se tallentaa tilan jokaisen vuoron jälkeen piilotettuun järjestelmäkansioon, johon sinun ei tarvitse (eikä pidä) koskea. Tallennetun pelin lataamiseen käytetään painiketta "{opowiesci.btn_wczytaj_label}" tai komentoa /wczytaj — ne näyttävät sinulle listan kaikista peleistäsi nimeltä. Näin voit milloin tahansa sulkea sovelluksen ja palata peliin myöhemmin ilman huolta manuaalisesta tallentamisesta.
   krok_7_pamiec_modelu: |

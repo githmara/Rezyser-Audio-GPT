@@ -634,10 +634,10 @@ rezyser:
   tytuly_postep: 'Titoli: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Tag di struttura non trovati (Prologo / Capitolo N / Epilogo) nel file. Inserisci i tag di divisione dei capitoli prima di assegnare i titoli.
   kod_jezyka_rozjazd_tytul: Il codice della lingua non corrisponde al contenuto
-  kod_jezyka_rozjazd_tresc: 'Nel ricettario è stato inserito il codice lingua "{kod_wpisany}", ma la lingua della risposta è "{jezyk_odpowiedzi}" — che corrisponde al codice "{kod_wykryty}". Solo "jezyk_odpowiedzi" NON è sufficiente: è il codice ISO che controlla le intestazioni della struttura (Prologo/Atto/Scena), la scelta degli accenti e il ponte ElevenLabs. È stato utilizzato il codice "{kod_wykryty}". Se è un errore, correggi il campo kod_jezyka nel Gestore delle Regole.'
+  kod_jezyka_rozjazd_tresc: 'Nel ricettario è stato inserito il codice lingua "{kod_wpisany}", ma la lingua della risposta è "{jezyk_odpowiedzi}" — che corrisponde al codice "{kod_wykryty}". Solo "jezyk_odpowiedzi" NON è sufficiente: è il codice ISO che controlla le intestazioni della struttura (Prologo/Atto/Scena), la scelta degli accenti e il ponte ElevenLabs. È stato utilizzato il codice "{kod_wykryty}". Se è un errore, correggi il campo kod_jezyka nel Gestore Regole.'
   kod_jezyka_edu_tytul: Impossibile determinare il codice della lingua
   kod_jezyka_edu_naglowek: 'Codice ISO della lingua del contenuto — azione richiesta:'
-  kod_jezyka_edu_tresc: "Impossibile determinare automaticamente il codice ISO 639-1 per la lingua della risposta \"{jezyk_odpowiedzi}\" (nessuna connessione all'API o risposta ambigua). Questo codice a due lettere è necessario: controlla le intestazioni della struttura (Prologo/Atto/Scena), la scelta degli accenti e la lingua del progetto in ElevenLabs. Solo la descrizione \"jezyk_odpowiedzi\" non è sufficiente. Apri il ricettario nel Gestore delle Regole e inserisci il codice corretto nel campo kod_jezyka (ad esempio, \"fi\" per il finlandese, \"de\" per il tedesco)."
+  kod_jezyka_edu_tresc: "Impossibile determinare automaticamente il codice ISO 639-1 per la lingua della risposta \"{jezyk_odpowiedzi}\" (nessuna connessione all'API o risposta ambigua). Questo codice a due lettere è necessario: controlla le intestazioni della struttura (Prologo/Atto/Scena), la scelta degli accenti e la lingua del progetto in ElevenLabs. Solo la descrizione \"jezyk_odpowiedzi\" non è sufficiente. Apri il ricettario nel Gestore Regole e inserisci il codice corretto nel campo kod_jezyka (ad esempio, \"fi\" per il finlandese, \"de\" per il tedesco)."
   kod_jezyka_edu_prompt: "Se non conosci il codice, copia la seguente domanda e incollala in qualsiasi chatbot (ad esempio, ChatGPT):\n\n\"Fornisci il codice a due lettere ISO 639-1 per la lingua descritta come: {jezyk_odpowiedzi}. Rispondi solo con il codice.\""
   kod_jezyka_edu_name: Spiegazione del codice della lingua e prompt per il chatbot
   ostrzezenie_urwane_tytul: Il frammento potrebbe essere stato troncato
@@ -1138,7 +1138,7 @@ updater:
     È disponibile una nuova versione: {nowa_wersja}.
     La tua versione: {aktualna_wersja}.
 
-    ATTENZIONE: se hai personalizzato le tue regole fonetiche o cifrari nella cartella „dictionaries/" tramite il Gestore delle Regole, il programma di installazione li sovrascriverà con le versioni predefinite del pacchetto. Esegui un backup della cartella „dictionaries/" PRIMA di confermare l'aggiornamento — clicca su „Apri cartella dictionaries" per accedervi in Esplora risorse, copia l'intera cartella in un luogo sicuro e, dopo l'aggiornamento, ripristina i tuoi file dal backup.
+    ATTENZIONE: se hai personalizzato le tue regole fonetiche o cifrari nella cartella „dictionaries/" tramite il Gestore Regole, il programma di installazione li sovrascriverà con le versioni predefinite del pacchetto. Esegui un backup della cartella „dictionaries/" PRIMA di confermare l'aggiornamento — clicca su „Apri cartella dictionaries" per accedervi in Esplora risorse, copia l'intera cartella in un luogo sicuro e, dopo l'aggiornamento, ripristina i tuoi file dal backup.
 
     Vuoi scaricare e installare l'aggiornamento ora?
   # Przyciski w DialogAktualizacji (akceleratory różne: &S/A&p/&A — Apri ma &p, nie &A, by nie kolidować z Annulla)

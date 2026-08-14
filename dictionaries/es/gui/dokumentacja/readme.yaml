@@ -14,7 +14,7 @@
 id: readme
 tresc:
   naglowek: |
-    # Director de Audio GPT
+    # Reżyser Audio GPT
 
     **Estudio de Grabación Híbrido para Dramas de Audio, Audiolibros y Narraciones Interactivas**
 
@@ -34,14 +34,14 @@ tresc:
 
     * **Libro del Mundo Multiproyecto:** El sistema carga automáticamente en segundo plano las reglas dedicadas del universo (`.md`) basándose en el archivo fuente activo, asegurando un aislamiento completo (carga de contexto sin clics).
     * **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
-    * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Administrador de Reglas más abajo.
+    * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Gestor de Reglas más abajo.
   modul_opowiesci: |
     ### 2. Historias (Ctrl+5, segundo modo principal desde v15.0)
 
     Juegos de texto interactivos dirigidos por la IA en el papel de motor narrativo. A diferencia de la Dirección (donde generas un audiolibro terminado), Historias es una trama dinámica turno por turno:
 
     * **Modo Elecciones:** cada turno termina con 3-5 opciones numeradas A-E. El modo más intuitivo para jugadores invidentes — NVDA lee las opciones, pulsas Tab e Intro.
-    * **Modo Mal Menor:** como Elecciones, pero cada opción es desfavorable moral, física o estratégicamente. Desde v15.2 se añade un «frasco» adicional — una opción reutilizable numerada como CERO de rescate desesperado, cuyos efectos son pseudoaleatorios (60% perjudiciales / 30% que alteran la percepción / 10% raramente favorables, distribución forzada por Python, el LLM no tiene forma de inventar un resultado salvador).
+    * **Modo Mal Menor:** como Elecciones, pero cada opción es desfavorable moral, física o estratégicamente. Desde v15.2 se añade una «ampolla» adicional — una opción reutilizable numerada como CERO de rescate desesperado, cuyos efectos son pseudoaleatorios (60% perjudiciales / 30% que alteran la percepción / 10% raramente favorables, distribución forzada por Python, el LLM no tiene forma de inventar un resultado salvador).
     * **Modo Libre:** cualquier acción en texto libre («intentaré abrir la puerta»), el motor propone 1-3 sugerencias pero no impone una elección.
     * **Un solo modelo de IA para todos los modos:** desde v18.1 todos los modos de Historias utilizan el mismo modelo compartido (por defecto y recomendado Anthropic Claude Sonnet 5) — un modelo más potente se atiene rigurosamente a las reglas del mundo (clave especialmente en el modo Mal Menor, donde cada opción debe ser realmente desfavorable).
   modul_poliglota: |
@@ -105,7 +105,7 @@ tresc:
   dokumentacja: |
     ## Documentación completa
 
-    Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con frasco, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
+    Este README es solo un esquema arquitectónico del proyecto. Para conocer las técnicas avanzadas de prevención de alucinaciones de IA, las instrucciones de instalación de sintetizadores de voz compatibles (Tiflotecnia Voices, OneCore, eSpeak, Apple Voices), la descripción completa de los modos de Historias con ampolla, y la guía completa del usuario, consulta los archivos en la carpeta `docs/`:
 
     * `docs/manual.<iso>.html` — manual principal de usuario (escrito para el usuario final).
     * `docs/tales.<iso>.html` — manual del modo Historias (juegos de texto interactivos).

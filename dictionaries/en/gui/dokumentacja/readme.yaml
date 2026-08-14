@@ -14,7 +14,7 @@
 id: readme
 tresc:
   naglowek: |
-    # Audio Director GPT
+    # Reżyser Audio GPT
 
     **Hybrid Recording Studio for Radio Plays, Audiobooks, and Interactive Stories**
 
@@ -73,7 +73,7 @@ tresc:
   architektura_ai: |
     ## AI Architecture and Models Used
 
-    The recommended and default AI provider is Anthropic (Claude) — all system prompts are tuned for it, which is why it delivers the highest quality narration, the strongest adherence to world-building rules, and the most natural prose. Consolidation onto Claude proceeded in stages (Director in v18.0, Stories in v18.1, Polyglot and post-production in v18.2) — resulting from an empirically confirmed advantage in adherence to world rules, naturalness of prose, and avoidance of clichés.
+    The recommended and default AI provider is Anthropic (Claude) — all system prompts are tuned for it, which is why it delivers the highest quality narration, the strongest adherence to world-building rules, and the most natural prose. Consolidation onto Claude proceeded in stages (Director in v18.0, Stories in v18.1, Polyglot and postproduction in v18.2) — resulting from an empirically confirmed advantage in adherence to world rules, naturalness of prose, and avoidance of clichés.
 
     * **Anthropic Claude Sonnet 5 (default pillar of quality):** The engine of ALL the application's intelligence. Responsible for creative narration (directing scripts, writing traditional Audiobook prose, Brainstorming, and ALL Story modes — Choices, Lesser Evil, Freeform — along with generating Cinematic summaries and interludes), advanced translations with multi-block context preservation (Polyglot), as well as microtasks: iterative literary title generation for chapters and content language code detection.
 
@@ -119,7 +119,7 @@ tresc:
 
     **User Data Directories (next to the executable file or in the project directory):**
 
-    * `skrypty/` — *scripts*: Director module projects (`.txt` with narration, `.md` with the Book of the World, `_streszczenie.txt`).
+    * `skrypty/` — *scripts*: Director module projects (`.txt` with narration, `.md` with the World Book, `_streszczenie.txt`).
     * `opowiesci/` — *stories*: records of interactive Stories.
     * `runtime/` — dual role: frozen application bundle directory (interpreter + libraries) AND container of hidden project metadata (`runtime/skrypty/`, `runtime/opowiesci/`).
 
