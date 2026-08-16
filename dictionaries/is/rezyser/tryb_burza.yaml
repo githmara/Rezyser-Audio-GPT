@@ -27,6 +27,7 @@ temperatura: 0.85
 
 # Sett í prompt í gegnum staðsetninguna {jezyk_odpowiedzi}.
 jezyk_odpowiedzi: íslensku
+kod_jezyka: is
 
 # Fer svar þessarar stillingar í verkefnaskrána (.txt)?
 # Hugstormun yfirskrifar ekki söguna að hönnun — það er minnisbók.

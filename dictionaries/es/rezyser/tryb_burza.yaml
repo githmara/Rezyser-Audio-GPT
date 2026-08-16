@@ -30,6 +30,7 @@ temperatura: 0.85
 
 # Se inserta en los prompts mediante el marcador {jezyk_odpowiedzi}.
 jezyk_odpowiedzi: español
+kod_jezyka: es
 
 # ¿La respuesta de este modo va al archivo del proyecto (.txt)?
 # La Lluvia de Ideas por diseño NO sobrescribe la historia — es un bloc de notas.

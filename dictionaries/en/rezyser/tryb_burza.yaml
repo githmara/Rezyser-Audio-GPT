@@ -28,6 +28,7 @@ temperatura: 0.85
 
 # Inserted in prompts via the {jezyk_odpowiedzi} placeholder.
 jezyk_odpowiedzi: English
+kod_jezyka: en
 
 # Does this mode's response go to the project file (.txt)?
 # Brainstorm by design does NOT overwrite history — it's a scratchpad.

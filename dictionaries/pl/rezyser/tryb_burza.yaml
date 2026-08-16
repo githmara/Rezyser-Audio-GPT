@@ -28,6 +28,7 @@ temperatura: 0.85
 # Wstawiany w promptach przez placeholder {jezyk_odpowiedzi}. Zmiana na
 # "angielsku" / "niemiecku" przełącza język generowanych opcji fabuły.
 jezyk_odpowiedzi: polsku
+kod_jezyka: pl
 
 # Czy odpowiedź tego trybu trafia do pliku projektu (.txt)?
 # Burza Mózgów z założenia NIE nadpisuje historii – to szkicownik.

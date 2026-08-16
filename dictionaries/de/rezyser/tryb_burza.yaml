@@ -28,6 +28,7 @@ temperatura: 0.85
 
 # Wird in Prompts über den Platzhalter {jezyk_odpowiedzi} eingefügt.
 jezyk_odpowiedzi: Deutsch
+kod_jezyka: de
 
 # Geht die Antwort dieses Modus in die Projektdatei (.txt)?
 # Brainstorming überschreibt die Geschichte bewusst NICHT — es ist ein Notizblock.

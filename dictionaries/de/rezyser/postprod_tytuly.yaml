@@ -20,6 +20,7 @@ max_tokens_wyjscia: 256
 model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: Deutsch
+kod_jezyka: de
 
 # --- Systemprompt ---
 prompt_systemowy: |

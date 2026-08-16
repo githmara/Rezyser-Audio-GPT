@@ -21,6 +21,7 @@ max_tokens_wyjscia: 256
 model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: suomeksi
+kod_jezyka: fi
 
 # --- Järjestelmäprompt ---
 prompt_systemowy: |
@@ -36,10 +37,10 @@ prompt_uzytkownika_szablon: |
 
 # --- Projektitiedoston iterointiparametrit ---
 # Regex, joka jakaa tiedoston rakenteellisiin otsikoihin + sisältöihin.
-# Kaappaavan ryhmän on poimittava PELKKÄ otsikko ("Johdanto" / "Luku 7" /
+# Kaappaavan ryhmän on poimittava PELKKÄ otsikko ("Prologi" / "Luku 7" /
 # "Epilogi"). Alussa ja lopussa olevat \n* sallivat useat tyhjät rivit
 # otsikoiden ympärillä.
-regex_podzial_rozdzialow: "(?i)\\n*(Johdanto|Luku \\d+|Epilogi)\\n*"
+regex_podzial_rozdzialow: "(?i)\\n*(Prologi|Luku \\d+|Epilogi)\\n*"
 
 # Tätä lyhyemmät fragmentit saavat tilan "(Fragmentti liian lyhyt)" tekoälykutsun
 # sijaan (säästää API-krediittejä ja välttää merkityksettömät otsikot).

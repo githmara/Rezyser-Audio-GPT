@@ -10,7 +10,7 @@ kolejnosc: 30
 
 # --- Parametri Anthropic ---
 model: claude-sonnet-5
-temperatura: 0.85
+temperatura: 0.65
 jezyk_odpowiedzi: italiano
 zapis_do_pliku: true
 

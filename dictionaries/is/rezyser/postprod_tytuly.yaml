@@ -21,6 +21,7 @@ max_tokens_wyjscia: 256
 model: claude-sonnet-5
 temperatura: 0.7
 jezyk_odpowiedzi: á íslensku
+kod_jezyka: is
 
 # --- Kerfisprompt ---
 prompt_systemowy: |
@@ -36,9 +37,9 @@ prompt_uzytkownika_szablon: |
 
 # --- Iterunarfæribreytur verkefnisskráar ---
 # Regex sem skiptir skránni í skipulegar fyrirsagnir + innihald.
-# Námunarflokkurinn verður að vinna EINGÖNGU fyrirsögnina ("Formáli" / "Kafli 7" /
-# "Eftirorð"). Upphaf og endir \n* leyfa margar tómar línur umhverfis fyrirsagnir.
-regex_podzial_rozdzialow: "(?i)\\n*(Formáli|Kafli \\d+|Eftirorð)\\n*"
+# Námunarflokkurinn verður að vinna EINGÖNGU fyrirsögnina ("Prolog" / "Kafli 7" /
+# "Epilog"). Upphaf og endir \n* leyfa margar tómar línur umhverfis fyrirsagnir.
+regex_podzial_rozdzialow: "(?i)\\n*(Prolog|Kafli \\d+|Epilog)\\n*"
 
 # Brot styttri en þetta fá stöðuna "(Brot of stutt)" í stað gervigreindarkalls
 # (sparar API-inneign og forðast merkingarlausar fyrirsagnir).

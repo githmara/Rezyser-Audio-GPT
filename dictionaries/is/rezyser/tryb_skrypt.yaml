@@ -46,7 +46,7 @@ prompt_systemowy: |
   - `mowca` — HREINT nafn mælanda: `Sögumaður` eða nafn persónu. ENGIN hornklofi, ENGIN tvípunktur, ENGIN tilfinningalýsing. Forritið vefur nafnið sjálft í hornklofa.
   - `tekst` — innihald línunnar á {jezyk_odpowiedzi}.
   - Röð tagga í fylkinu = töluð röð í atriðinu. Hver ræða er eigin taggi; sama persóna sem talar tvisvar í röð = tveir taggar.
-  - Þú býrð EKKI til fyrirsagnir (Formáli/Þáttur/Atriði/Eftirorð) — leikstjórinn setur þær inn handvirkt. Taggir þínir eru aðeins frásögn og samtal.
+  - Þú býrð EKKI til fyrirsagnir (Prolog/Þáttur/Atriði/Epilog) — leikstjórinn setur þær inn handvirkt. Taggir þínir eru aðeins frásögn og samtal.
   - Enginn texti utan JSON-hlutarins (engin athugasemd, ekkert ```).
 
   ### 🎙️ TJÁNING — ElevenLabs v3 HLJÓÐTAGGAR (í stað leturfræði):

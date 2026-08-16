@@ -29,6 +29,7 @@ temperatura: 0.85
 
 # Inséré dans les prompts via l'espace réservé {jezyk_odpowiedzi}.
 jezyk_odpowiedzi: français
+kod_jezyka: fr
 
 # La réponse de ce mode va-t-elle dans le fichier du projet (.txt) ?
 # Le Brainstorming, par conception, NE remplace PAS l'histoire — c'est un bloc-notes.

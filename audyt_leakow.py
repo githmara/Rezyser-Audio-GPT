@@ -661,6 +661,7 @@ def bramka_docs(*, prog_lingua: float = 0.70) -> WynikBramki:
 DEV_TOOLE = {
     "build_release.py", "generuj_dokumentacje.py",
     "buduj_wielojezyczne_docs.py", "buduj_wielojezyczne_ui.py",
+    "buduj_wielojezyczne_tryby.py",
     "audyt_leakow.py", "przeglad_tlumaczen.py", "odpowiedz_lokalnie.py",
     "test_core_updater.py",
 }

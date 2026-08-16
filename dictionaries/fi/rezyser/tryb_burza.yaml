@@ -28,6 +28,7 @@ temperatura: 0.85
 
 # Lisätään prompteihin paikkamerkin {jezyk_odpowiedzi} kautta.
 jezyk_odpowiedzi: suomeksi
+kod_jezyka: fi
 
 # Meneekö tämän tilan vastaus projektitiedostoon (.txt)?
 # Aivoriihi ei lähtökohtaisesti korvaa tarinaa — se on luonnoslehtiö.

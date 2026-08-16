@@ -1,4 +1,6 @@
-# Release Notes — Reżyser Audio GPT 18.14.0 „Wersja Wydawnicza"
+# Release Notes — Reżyser Audio GPT 18.15.0 „Wersja Wydawnicza"
+
+*Release v18.15.0: trzeci autotłumacz rodziny — dla PRZEPISÓW Reżysera — plus cztery rozjazdy paczek językowych, które wykrył jego tryb audytu. **(1) Autotłumacz przepisów przeszedł test.** Etap 3 roadmapy 18.13 był eksperymentem z jawnym kryterium odrzucenia: jeśli model WYKONA tłumaczony prompt systemowy zamiast go przetłumaczyć albo zgubi tagi-kotwice, narzędzie ginie bez commita. Test bojowy poszedł na najtrudniejszym materiale w repo — prompcie karty publikacyjnej ElevenReadera (długi, pełen kotwic, sam brzmiący jak instrukcja) — i przeszedł na wszystkich ośmiu językach. Powstał `buduj_wielojezyczne_tryby.py`: round-trip ruamel zachowujący komentarze i block-scalary, klasyfikacja pól z twardym błędem na nieznanym kluczu, pola pochodne liczone BEZ modelu, kotwice rozstrzygane jednomyślnością wszystkich paczek plus bezwarunkowo ze stałych `KOTWICA_*` w kodzie, odcisk struktury prompta jako detektor „meta instruction skip" i walidacja silnikiem z przywróceniem pliku przy porażce. **(2) Prolog nie był wykrywany w trzech językach.** Regex dzielący plik projektu na rozdziały był tłumaczony jak zwykły tekst, więc rozjechał się z nagłówkami, które aplikacja sama wpisuje: fi szukał `Johdanto` wobec `Prologi`, is `Formáli`/`Eftirorð` wobec `Prolog`/`Epilog`, ru `Введение` wobec `Пролог`. „Nadaj Tytuły Rozdziałom" pomijał w tych paczkach prolog (w islandzkiej też epilog). Pole nie jest już tłumaczone — powstaje podmianą nazw nagłówków z `ui.yaml` paczki docelowej. **(3) Temperatura Audiobooka rozjechana od v18.0.** Migracja na Claude obniżyła ją świadomie z 0.85 na 0.65, dotknęła wszystkich dziewięciu paczek, ale wartość zmieniła tylko w polskiej — przez piętnaście wydań obcojęzyczna proza generowała się innym parametrem. **(4) Dwa przepisy bez deklaracji języka.** Tytuły rozdziałów i Burza Mózgów nie miały `kod_jezyka` w żadnej paczce, więc silnik dopytywał model o kod ISO przy każdym użyciu; islandzki prompt Skryptu zakazywał modelowi nagłówków, których aplikacja nie wpisuje. **(5) Kanon karty publikacyjnej zostaje ręczny.** Maszynowy przekład wyszedł równorzędny, nie lepszy, a zmiana niemieckiego sufiksu `_veroffentlichung` na `_publikation` wypchnęłaby już zapisane karty z unii rozpoznawanych sufiksów. Świeże tłumaczenie nie wypiera zrecenzowanego tylko dlatego, że jest nowsze.*
 
 *Release v18.14.0: karta publikacyjna ElevenReadera plus sprostowanie decyzji z v18.13 — nazwa pliku Pamięci Długotrwałej JEST lokalizowana. **(1) Nowe narzędzie postprodukcji: karta publikacyjna.** ElevenReader wymaga przy publikacji zestawu metadanych, których nikt nie ma w głowie po skończeniu powieści: opisu w limicie 1000 znaków, gatunków z zamkniętej listy 22 kategorii, grupy odbiorców, oznaczenia treści dla dorosłych, wskazania fragmentów na darmową próbkę i grafiki okładki w pionie 1200×1800 px. Narzędzie ma dostęp do CAŁEGO tekstu projektu, więc typuje to wszystko na podstawie treści, a nie domysłów autora. Nazwy pól karty zostają angielskie (formularz platformy istnieje tylko po angielsku, reżyser przepisuje je 1:1 — i po tych samych napisach orientuje się walidator), treść jest w języku projektu. Kanon gatunków i limit opisu idą do prompta z pól YAML, a po powrocie odpowiedzi aplikacja sprawdza je po swojej stronie: gatunek poza kanonem, audiencja poza listą, opis ponad limit, brak wymaganego pola i cyfry w polu ISBN wracają jako miękkie uwagi. Wydawcy, ISBN ani nazwiska autora karta nie zmyśla — ISBN to numer rejestrowany, a profil autora jest na platformie obowiązkowy, bo publikacje anonimowe są niedozwolone. **(2) Sprostowanie: sufiks pliku pamięci jest tłumaczony.** v18.13 wpisała do manuali ×9 regułę „sufiks musi być IDENTYCZNY we wszystkich paczkach, bo to nazwa pliku, a nie tekst do lokalizacji". Argument był nietrafiony (nazwa pliku należy do reżysera), a skutkiem ubocznym była martwa obietnica w kodzie: shim „przenieś pamięć spod historycznej nazwy" nie mógł nic zrobić, bo historyczna i aktualna nazwa były tą samą wartością. Od teraz każda paczka ma własne słowo (`_overview`, `_zusammenfassung`, `_resumen`, `_yhteenveto`, `_resume`, `_samantekt`, `_riassunto`, `_пересказ`, pl `_streszczenie`), a aplikacja nie ZAKŁADA nazwy pliku pamięci — ROZSTRZYGA ją po liście kandydatów z paczki języka TREŚCI projektu, potem neutralnego `_overview` i historycznego `_streszczenie`. Jeden plik pod obcą nazwą → rename razem z meta-anchorem; kilka → pytanie do reżysera zamiast zgadywania, z datą i rozmiarem każdego pliku, a niewybrane zostają nietknięte; anulowanie → sesja bez pamięci i ręczny punkt odniesienia zamiast wciągania całego pliku. **(3) Trzy usterki widoczne dopiero po lokalizacji sufiksu.** Streszczenie poprzednio otwartego projektu przeciekało do nowego (długi projekt bez pamięci ładował cudzą pamięć do pola i do kontekstu modelu); filtr listy projektów znał sufiksy tylko jednej paczki, więc plik pamięci zapisany przy niemieckim interfejsie pokazywał się polskiemu userowi jako osobny PROJEKT (a po wczytaniu silnik dopisywał tury do streszczenia); komunikaty interfejsu w kilku paczkach cytowały nazwy plików, których nigdy nie było na dysku — przetłumaczone `scripts/`, `скрипты/` i sufiksy w rodzaju `_yfirlit` obok realnego `_samantekt`.*
 
@@ -17,6 +19,178 @@
 *Release v18.7.0: pełna migracja silnika AI na Claude Sonnet 5 (promocja wakacyjna Anthropic) + dwa krytyczne bugi złapane żywo w warstwie obsługi błędów AI. **(1) Migracja modelu.** Sonnet 5 odrzuca niedomyślną `temperature`/`top_p`/`top_k` błędem 400 zamiast ją po cichu ignorować — `core_llm._wywolaj_anthropic` dostał degradację (próba z `temperature` z przepisu YAML, przy 400 retry bez parametru), zwalidowaną żywym API na realnym projekcie (`finnish_length`: burza mózgów + audiobook, fabuła realnie się rozwinęła bez utraty jakości). Model zbumpowany wszędzie: YAML `model:` Rezysera (burza/audiobook/skrypt/postprodukcja tytułów ×9 języków) i Opowieści (7 plików ×9 języków), stałe Pythona (`przepisy_rezysera.MODEL_DOMYSLNY`, `opowiesci_ai.MODEL_NARRACJA`, `tlumacz_ai.MODEL_TLUMACZ`, mikro-call ISO w `rezyser_ai`), CLI-defaulty obu autotłumaczy. Złapany przy okazji DRUGI ślepy punkt: `buduj_wielojezyczne_ui.py` ma własnego klienta Anthropic poza `core_llm` (świadoma decyzja architektoniczna — dev-only tłumacz UI) — dostał analogiczną, niezależną degradację `temperature`. **(2) Bug: goły klucz i18n w dialogu błędu AI.** `BladStrukturyJSON.klucz_i18n = "err_struktura"`, ale ten klucz nigdy nie istniał w żadnym z 9 `ui.yaml` (tylko siostrzany `err_dlugosc` był kiedyś dodany) — user widział literalny placeholder `[rezyser.err_struktura]` zamiast komunikatu po wyczerpaniu prób korekty JSON. Klucz dodany do PL, przetłumaczony ×8, zweryfikowany bez halucynacji. **(3) Bug: martwa obietnica `error_log.txt`.** Docstring `bledy_ai.py` i komentarze w obu GUI twierdziły, że techniczna treść wyjątku (finish_reason, licznik retry, ostatni błąd walidacji JSON) trafia do `error_log.txt` dla diagnostyki — w rzeczywistości `_komunikat_bledu_ai`/`_obsluz_blad` po prostu ją porzucały. Nowa `bledy_ai.zapisz_diagnostyke()` (osobny marker `AI_DIAG_MARKER`, celowo odróżnialny od `main.CRASH_MARKER`, żeby intake bota Sami nie pomylił obsłużonego błędu z crashem) faktycznie loguje ją teraz PRZED zbudowaniem komunikatu dla usera. Przy okazji migracji dokumentacji na Sonnet 5 (4 sekcje × 8 języków w `dictionaries/<kod>/gui/dokumentacja/`) złapano i naprawiono ręcznie sporadyczną halucynację modelu (dopisywał przetłumaczony fragment własnej instrukcji systemowej jako treść sekcji) oraz kilka regresji nazw modułów (Opowieści/Poliglota/Reżyser, włoskie Storie→Racconti) reintrodukowanych przez pełne retłumaczenie sekcji zamiast punktowej edycji.*
 
 ---
+
+## 18.15.0 — minor release (a third autotranslator, this time for the Director's recipe prompts — and the four language-pack drifts its audit mode uncovered)
+
+### 🆕 What's new (English)
+
+- **Fixed: the chapter-titling tool skipped the prologue in Finnish, Icelandic and Russian.** The regex that splits a project file into chapters was hand-translated, so it drifted away from the headings the application itself writes: it looked for `Johdanto` while the engine writes `Prologi`, for `Formáli`/`Eftirorð` instead of `Prolog`/`Epilog`, for `Введение` instead of `Пролог`. The prologue (and, in Icelandic, the epilogue) simply never got a title. All three regexes are now derived from the pack's own heading words instead of being translated.
+- **Fixed: audiobook prose was generated at a different temperature in every language except Polish.** The Claude migration in v18.0 deliberately lowered the Audiobook mode's temperature from 0.85 to 0.65, but changed the value only in the Polish pack. Fifteen releases later, all eight other packs are aligned.
+- **Fixed: two recipes never declared their own language.** `Assign Chapter Titles` and `Brainstorm` shipped without the `kod_jezyka` field in all nine packs, so the application had to infer the ISO code with an extra model call every time — with a chance of guessing wrong. The field is now filled in.
+- **Fixed: the Icelandic Script-mode prompt listed heading names the engine does not use.** It told the model not to generate `Formáli`/`Eftirorð` while the application actually inserts `Prolog`/`Epilog` — the prohibition missed the real headings.
+
+### 🔭 Planned / deferred (English)
+
+- **The publication card's existing translations were kept, not replaced.** The new recipe autotranslator was proven on exactly that file, and its output turned out to be equivalent to the hand-reviewed canon rather than better — while changing the German result-file suffix would have orphaned cards already written to disk. Machine output does not replace a reviewed translation just because it is newer.
+- **Icelandic keeps `Prolog`/`Epilog` as structural headings.** `Formáli`/`Eftirorð` would read better in Icelandic, but the engine has been writing `Prolog`/`Epilog` into project files for many releases; changing the heading words would break chapter detection in files users already have. A migration would need to rewrite existing project files, and that is not a change to make silently.
+- **The recipe autotranslator does not cover the Tales module.** `opowiesci/*.yaml` uses a different schema; the tool deliberately refuses anything outside `rezyser/`.
+
+### TL;DR — co się zmieniło
+
+To wydanie zamyka trzeci etap roadmapy 18.13: eksperymentalny autotłumacz PRZEPISÓW. Powstał `buduj_wielojezyczne_tryby.py` — trzeci brat rodziny obok tłumacza interfejsu i dokumentacji — i przeszedł test bojowy na najtrudniejszym możliwym materiale, czyli na prompcie karty publikacyjnej ElevenReadera: długim, pełnym tagów-kotwic i sam brzmiącym jak instrukcja. Kryterium odrzucenia było jasne: jeśli model WYKONA prompt zamiast go przetłumaczyć albo zgubi kotwice, narzędzie ginie bez commita, a zakaz tłumaczenia promptów systemowych zostaje w mocy. Nie zginęło.
+
+Prawdziwym zyskiem tego wydania okazał się jednak nie sam tłumacz, a jego **tryb audytu**. Narzędzie musiało nauczyć się sprawdzać, czy przetłumaczony przepis nadal robi to samo co polski — a gdy tę samą kontrolę puściło się na kanon leżący w repo od dawna, wypadły z niej cztery realne rozjazdy paczek. Wszystkie cztery są w tym wydaniu naprawione i wszystkie były niewidoczne dla dotychczasowych bramek, bo żadna z nich nie porównywała paczek MIĘDZY sobą.
+
+Najpoważniejszy: „Nadaj Tytuły Rozdziałom" nie rozpoznawał prologu w trzech językach. Regex dzielący plik projektu na rozdziały był tłumaczony jak zwykły tekst, więc szukał `Johdanto`, gdy aplikacja wpisuje do pliku `Prologi` — i analogicznie w islandzkim (`Formáli`/`Eftirorð` wobec `Prolog`/`Epilog`) oraz rosyjskim (`Введение` wobec `Пролог`). Pięć pozostałych paczek zgadzało się z nagłówkami, co samo w sobie było dowodem, że to nie kwestia gustu tłumacza: nazwa nagłówka jest KONTRAKTEM z silnikiem. Nowe narzędzie nie tłumaczy już tego pola — wyprowadza je podmianą nazw nagłówków z `ui.yaml` paczki docelowej.
+
+Drugi rozjazd ma piętnaście wydań: v18.0 obniżyła świadomie temperaturę trybu Audiobook z 0.85 na 0.65 (migracja na Claude), dotknęła wszystkich dziewięciu paczek, ale wartość zmieniła tylko w polskiej. Obcojęzyczna proza generowała się od tamtej pory z innym parametrem niż polska. Trzeci: dwa przepisy — tytuły rozdziałów i Burza Mózgów — nie deklarowały w ogóle `kod_jezyka`, więc silnik przy każdym użyciu dopytywał model o kod ISO języka. Czwarty: islandzki prompt trybu Skrypt zakazywał modelowi generowania nagłówków `Formáli`/`Eftirorð`, których aplikacja i tak nie wpisuje.
+
+Karta publikacyjna, na której narzędzie było testowane, **zostaje w wersji dotychczasowej**. Maszynowy przekład wyszedł równorzędny, nie lepszy — a jedna z jego różnic byłaby regresją: zmiana niemieckiego sufiksu `_veroffentlichung` na `_publikation` wypchnęłaby już zapisane karty z unii rozpoznawanych sufiksów, więc plik `<projekt>_veroffentlichung.txt` zacząłby udawać projekt. Świeże tłumaczenie nie wypiera zrecenzowanego tylko dlatego, że jest nowsze.
+
+### Co nowego
+
+**`buduj_wielojezyczne_tryby.py` — autotłumacz przepisów Reżysera.** Bierze
+`dictionaries/pl/rezyser/*.yaml` i produkuje paczkę docelową jako DRAFT do
+recenzji, razem z checklistą `skrypty/przeglad_tryby.md`. Round-trip ruamel
+zachowuje komentarze, kolejność kluczy i style block-scalar; jedno wywołanie API
+na parę (plik, język), więc model widzi cały przepis i trzyma spójną
+terminologię między etykietą, promptem i komentarzami. `baza.yaml` jest
+pomijany świadomie — to tagi-kotwice, identyczne we wszystkich paczkach.
+
+**Klasyfikacja pól z twardym błędem.** Każdy klucz przepisu ma jawnie przypisaną
+klasę (techniczny / etykieta / prompt / mapa / sufiks pliku / pochodny). Klucz
+NIEZNANY zatrzymuje przebieg, zamiast zostać po cichu skopiowany — cicha kopia
+nowego pola z PL to polski leak w ośmiu paczkach, którego nie widzi żadna bramka.
+
+**Pola, których model nie dotyka.** `kod_jezyka` bierze kod paczki,
+`jezyk_odpowiedzi` — wartość z siostrzanego przepisu tej samej paczki (cała
+paczka mówi o sobie jednym napisem), a `regex_podzial_rozdzialow` powstaje
+podmianą nazw nagłówków z `ui.yaml`. To ostatnie jest właśnie naprawą rozjazdu
+fi/is/ru: pole, które wygląda jak tekst, jest kontraktem.
+
+**Kotwice i ich orakuł.** Placeholdery, escapowane bloki JSON, tagi silnika
+(`[ODRZUCENIE_AI]`, wrappery z `baza.yaml`), audio-tagi v3 (`[whispers]`) i
+angielskie nazwy pól formularza publikacyjnego są zamrażane tokenami i
+odtwarzane 1:1 po weryfikacji krotności. O tym, CO jest kotwicą, decyduje
+jednomyślność wszystkich paczek — literał obecny dosłownie w każdej z nich jest
+nietłumaczalny z definicji. Nazwy pól, po których `rezyser_ai` odnajduje
+wartości w odpowiedzi modelu, są dodatkowo zamrażane bezwarunkowo, wprost ze
+stałych `KOTWICA_*` w kodzie: zmiana nazwy pola w prompcie wyłącza walidator
+karty BEZ ŻADNEGO objawu — ostrzeżenia po prostu przestają się pojawiać.
+
+**Detektor „meta instruction skip".** Odcisk struktury prompta (liczba nagłówków
+`#`, punktów numerowanych, par `**`, linii niepustych, stosunek długości) jest
+porównywany przed i po tłumaczeniu. Model, który wykonał prompt zamiast go
+przetłumaczyć, zwraca gotowy artefakt — i odcisk się nie zgadza.
+
+**Tryb `--tylko-walidacja` (zero API).** Ładuje przepis SILNIKIEM i porównuje
+z polskim: pola techniczne, zbiory placeholderów, krotności kotwic, wartości
+zamknięte formularza, cytaty nazw nagłówków, kolizje sufiksów plików wyniku,
+kompletność paczki. To on wykrył cztery rozjazdy naprawione w tym wydaniu.
+Uruchamiany też po upgrade aplikacji, gdy pracuje się na prywatnych przepisach
+w katalogu instalacji (`--slowniki`).
+
+**Zapis dopiero po przejściu wszystkich bramek**, z przywróceniem poprzedniej
+treści pliku, jeśli walidacja silnikiem go odrzuci. Połowicznie przetłumaczony
+przepis mógłby wypchnąć paczkę z listy kompletnych — jego brak jest lepszy niż
+jego obecność.
+
+### Pod maską
+
+**Trzy pułapki złapane w trakcie, warte zapamiętania.**
+
+Pierwsza: nagłówki markdown `###` WEWNĄTRZ block-scalara są nieodróżnialne od
+komentarza YAML dla parsera tekstowego. Bez maski ciał block-scalarów nagłówek
+prompta trafiał do tłumaczenia jako „komentarz" i wracał do pliku jako
+`# ## Reguły bezwzględne`, kalecząc prompt. Wykryte testem tożsamościowym
+(podstawiony „tłumacz" zwracający źródło bez zmian) PRZED pierwszym opłaconym
+wywołaniem — wzorzec wart powtórzenia przy każdym generatorze plików.
+
+Druga: bramka pilnująca angielskich wartości zamkniętych (`Yes`/`No` w polu
+„Mature content") w dwóch pierwszych wersjach odrzucała POPRAWNE pliki. Liczenie
+wystąpień w całym polu bez rozróżniania wielkości liter dawało w hiszpańskim 16
+trafień słowa „no" wobec dwóch polskich; z rozróżnianiem — pięć, bo hiszpańskie
+zdania zaczynają się od „No creas…". Wartość zamknięta ma znaczenie WYŁĄCZNIE
+w linii z nazwą pola formularza, bo tylko tę linię czyta potem Python.
+
+Trzecia: orakuł kotwic oparty na jednej paczce odniesienia jest bezwartościowy
+dla literału, który w źródle JEST angielski. `[Speaker]`, `"Narrator"`,
+`"deus ex machina"` trywialnie „przeżyły" tłumaczenie PL→EN, choć niemiecka
+i rosyjska paczka słusznie je lokalizują (`[Sprecher]`, `Рассказчик`) — 35
+fałszywych alarmów na 74 w pierwszym audycie. Wymóg jednomyślności WSZYSTKICH
+paczek zdejmuje tę klasę do zera, nie tracąc kotwic prawdziwych.
+
+**Czego bramka nie złapie i nie mogła.** Prompt polski glosuje obce terminy dla
+polskiego czytelnika („suomenruotsalaiset (szwedzkojęzycznych Finów)",
+„HSL (Helsingin seudun liikenne — helsińska komunikacja miejska)"). W fińskim
+taki gloss jest tautologią — i model faktycznie ją wyprodukował
+(`suomenruotsalaiset-väestöryhmään (suomenruotsalaisiin)`). Zdanie jest poprawne
+gramatycznie, więc żadna kontrola mechaniczna go nie odrzuci; obroną jest
+wyłącznie recenzent, dlatego reguła trafiła do prompta tłumacza ORAZ do
+checklisty przeglądu. Ta sama uwaga dotyczy `--kotwica`: nie wolno wymuszać
+kotwicy na terminie, który w języku docelowym jest wyrazem rodzimym — zamrożony
+mianownik blokuje odmianę i utrwala tautologię.
+
+**Zmiany w plikach współdzielonych.** `przeglad_tlumaczen.py` dostał trzecią
+checklistę (hotspoty przepisów: meta instruction skip, kotwice, słowa
+wyzwalające, sufiksy plików, cytaty nagłówków, redundantne glosy),
+generalizację rdzenia nazwy narzędzia (dawne `if narzedzie.endswith("docs.py")`)
+oraz opcjonalną notę finalizacji — bo przepis, w odróżnieniu od docs i ui, NIE
+dostaje banera „nie edytuj ręcznie": `rezyser/*.yaml` jest plikiem edytowalnym
+przez lingwistę w Managerze Reguł, więc taki zakaz byłby w nim kłamstwem.
+`--finalizuj` po prostu zdejmuje baner draftu. `audyt_leakow.py` zna nowy moduł
+jako dev-tool (polskie logi CLI są tam świadome i poprawne).
+
+**Dowód wartości poza repo.** Narzędzie rozpropagowało prywatne przepisy
+maintainera (tryb dziennika maszynisty i postprodukcja audytu — ten sam materiał,
+z którego v18.12 wyprowadziła generalizację postprodukcji) na wszystkie paczki
+w katalogu zainstalowanej aplikacji, wraz z dostrojeniem paczki angielskiej, która
+rozjechała się z polską wcześniej. To user-data, więc do repo nie wchodzi, ale to
+właśnie ten scenariusz uzasadnia istnienie narzędzia: przy dziewięciu paczkach
+ręczna propagacja jednego nowego przepisu to dziewięć okazji do rozjazdu.
+
+### Co nie weszło
+
+- **Kanon karty publikacyjnej zostaje ręczny** (uzasadnienie w TL;DR — sufiks
+  `_veroffentlichung` i brak zysku jakościowego). Draft maszynowy został
+  wycofany w całości; test miał rozstrzygnąć, czy narzędzie działa, nie zająć
+  miejsce recenzenta.
+- **Islandzkie nagłówki `Formáli`/`Eftirorð`** brzmiałyby lepiej niż `Prolog`/
+  `Epilog`, ale silnik wpisuje te drugie do plików projektów od wielu wydań.
+  Zmiana wymaga migracji istniejących plików usera, a taka operacja nie robi się
+  po cichu razem z innym wydaniem.
+- **`opowiesci/*.yaml` poza zakresem narzędzia** — inny schemat (`core_opowiesci`),
+  własne reguły. Rozszerzenie to osobna decyzja, nie „jeszcze jeden glob".
+- **Łamanie przetłumaczonych komentarzy do ~79 kolumn** działa przez instrukcję
+  w prompcie, nie przez deterministyczne zawijanie po stronie skryptu. Wynik jest
+  bliski konwencji plików, ale nierówny; recenzent nadal to poprawia.
+- **`is/gui/ui.yaml::konwerter.naglowki_rozdzialow`** wymienia `Formáli`/
+  `Eftirorð`, a nie `Prolog`/`Epilog` z tej samej paczki. Zostawione świadomie:
+  konwerter składa UNIĘ list ze wszystkich dziewięciu paczek, więc oba słowa i tak
+  są w zbiorze — to niespójność kosmetyczna, nie błąd, a dopisywanie słów byłoby
+  churnem.
+- **Bramka repo nie zna jeszcze przepisów.** `audyt_leakow --bramka` skanuje
+  `gui/dokumentacja/*.yaml` i `gui/ui.yaml`; walidacja przepisów żyje w nowym
+  narzędziu (`--tylko-walidacja`) i trzeba ją uruchomić ręcznie. Wpięcie jej
+  w bramkę wymaga własnego baseline'u.
+
+### Walidacja
+
+- `buduj_wielojezyczne_tryby.py --wszystkie --tylko-walidacja` — 48 par
+  (plik × język) bez zastrzeżeń po naprawach; przed naprawami: 24 błędy
+  w czterech klasach.
+- `buduj_wielojezyczne_tryby.py --wszystkie --dry-run` — 8/8 języków, podział na
+  jednostki i kotwice bez wywołań API.
+- Test tożsamościowy ścieżki zapisu (podstawiony tłumacz zwracający źródło):
+  wynik identyczny z PL poza banerem draftu i dwoma polami pochodnymi.
+- `audyt_leakow.py --bramka` oraz `--bramka-py` — bez leaków i hard-kodów ponad
+  baseline.
+- `generuj_dokumentacje.py --waliduj` — dokumentacja ×9 zregenerowana pod nowy
+  numer wersji.
+- Regresja bratnich builderów (`_ui.py`, `_docs.py`): import i nagłówki draftu
+  bez zmian po generalizacji `przeglad_tlumaczen`.
+- Prywatna walidacja przepisów w instalacji (52 kontrole) — 0 błędów po
+  propagacji i po dostrojeniu paczki angielskiej.
 
 ## 18.14.0 — minor release (an ElevenReader publication card as a post-production tool; the memory file name becomes localized and the application stops guessing which summary belongs to a project)
 

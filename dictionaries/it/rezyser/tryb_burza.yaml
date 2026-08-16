@@ -27,6 +27,7 @@ temperatura: 0.85
 
 # Inserito nei prompt tramite il segnaposto {jezyk_odpowiedzi}.
 jezyk_odpowiedzi: italiano
+kod_jezyka: it
 
 # La risposta di questa modalità va nel file del progetto (.txt)?
 # Il Brainstorm per principio NON sovrascrive la storia — è un blocco appunti.
