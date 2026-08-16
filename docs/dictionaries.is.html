@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              pólskir diakritískir stafir + stafróf
     ├── akcenty/                   11 skrár með framburðum
     ├── szyfry/                    6 skrár með dulmálum og leikjum
-    └── rezyser/                   5 skrár með AI Leikstjóra hömum
+    └── rezyser/                   6 skrár með AI Leikstjóra hömum
 </code></pre>
 <p>Nú þegar eru fullkomlega innleidd: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 grunnmál). Hvert hefur sitt eigið "<code>dictionaries/&lt;code&gt;/</code>" safn með diakritískum stöfum, stafrófi og hljóðreglum sem virka á texta í því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (fyrir hvern málsgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega. Fleiri tungumál eru í undirbúningi (fullkomið safn krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").</p>
@@ -80,7 +80,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </ol>
 <h2>Hvað er "leikstjóra-hamur"?</h2>
 <hr>
-<p>Mappan "rezyser/" inniheldur 5 skrár sem lýsa vinnuhömum Aðal<br>
+<p>Mappan "rezyser/" inniheldur 6 skrár sem lýsa vinnuhömum Aðal<br>
 Leikstjórnarstofu forritsins:</p>
 <ul>
 <li>tryb_burza.yaml      — Hugarflug (skipulagning söguþráðar, 3 valkostir<br>
@@ -95,6 +95,10 @@ Leikstjórnarstofu forritsins:</p>
                          vistuð í skrá og í minnissvæði á stjórnborðinu<br>
                          (frá útgáfu 18.13; virkjast einnig sjálfkrafa<br>
                          þegar samhengisgluggi fyllist í neyðartilviki)</li>
+<li>postprod_publikacja.yaml — útgáfukort ElevenReader: lýsigögn fyrir<br>
+                         útgáfuform hljóðbókar (frá útgáfu 18.14; kanónlisti<br>
+                         22 flokka og hámarkslengd lýsingar eru afhent<br>
+                         líkaninu og forritið athugar þau á eftir)</li>
 <li>baza.yaml            — sameiginleg akkerismerki fyrir samhengi<br>
                          ([OBECNA FABUŁA] og samantekt fyrri atburða);<br>
                          eina skráin í þessari möppu þar sem innihaldið<br>

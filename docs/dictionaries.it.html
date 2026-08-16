@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              diacritici polacchi + alfabeto
     ├── akcenty/                   11 file con accenti
     ├── szyfry/                    6 file con cifrari e giochi
-    └── rezyser/                   5 file con modalità del Regista AI
+    └── rezyser/                   6 file con modalità del Regista AI
 </code></pre>
 <p>Attualmente completamente implementati sono: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 lingue di base). Ognuna ha il proprio pacchetto<br>
@@ -122,7 +122,7 @@ una senza normalizzazione dei numeri, l'altra con normalizzazione (sostituisce "
 </ol>
 <h2>Che cos'è la "modalità Regista"?</h2>
 <hr>
-<p>La cartella "rezyser/" contiene 5 file che descrivono le modalità di lavoro dello Studio del Regista Principale dell'applicazione:</p>
+<p>La cartella "rezyser/" contiene 6 file che descrivono le modalità di lavoro dello Studio del Regista Principale dell'applicazione:</p>
 <ul>
 <li>tryb_burza.yaml      — Brainstorming (pianificazione della trama, 3 opzioni<br>
                          di sviluppo della storia, direttiva anti-closure)</li>
@@ -136,6 +136,11 @@ una senza normalizzazione dei numeri, l'altra con normalizzazione (sostituisce "
                          salvato in un file e nel campo memoria del pannello<br>
                          (dalla v18.13; si attiva anche automaticamente in caso<br>
                          di riempimento allarmante della finestra di contesto)</li>
+<li>postprod_publikacja.yaml — scheda di pubblicazione ElevenReader: metadati<br>
+                         per il modulo di pubblicazione dell'audiolibro<br>
+                         (dalla v18.14; l'elenco canonico dei 22 generi e il<br>
+                         limite della descrizione vengono serviti al modello<br>
+                         e poi controllati dall'applicazione)</li>
 <li>baza.yaml            — tag-ancora di contesto condivisi ([OBECNA FABUŁA]<br>
                          e riassunto degli eventi precedenti); l'unico file<br>
                          in questa cartella il cui contenuto NON viene tradotto<br>

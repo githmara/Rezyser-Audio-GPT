@@ -101,6 +101,10 @@ tresc:
                              vistuð í skrá og í minnissvæði á stjórnborðinu
                              (frá útgáfu 18.13; virkjast einnig sjálfkrafa
                              þegar samhengisgluggi fyllist í neyðartilviki)
+    - postprod_publikacja.yaml — útgáfukort ElevenReader: lýsigögn fyrir
+                             útgáfuform hljóðbókar (frá útgáfu 18.14; kanónlisti
+                             22 flokka og hámarkslengd lýsingar eru afhent
+                             líkaninu og forritið athugar þau á eftir)
     - baza.yaml            — sameiginleg akkerismerki fyrir samhengi
                              ([OBECNA FABUŁA] og samantekt fyrri atburða);
                              eina skráin í þessari möppu þar sem innihaldið

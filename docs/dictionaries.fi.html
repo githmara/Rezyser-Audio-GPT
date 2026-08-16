@@ -49,7 +49,7 @@ mitä tahansa muuta asiakirjaa.</p>
     ├── podstawy.yaml              puolalaiset diakriitit + aakkoset
     ├── akcenty/                  11 aksenttitiedostoa
     ├── szyfry/                   6 salaus- ja leikkitiedostoa
-    └── rezyser/                  5 Ohjaaja AI -tilatiedostoa
+    └── rezyser/                  6 Ohjaaja AI -tilatiedostoa
 </code></pre>
 <p>Tällä hetkellä täysin toteutettuja ovat: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 peruskieltä). Jokaisella on oma paketti<br>
@@ -157,7 +157,7 @@ ne vain vääristävät tekstiä tietyn säännön mukaan. Saatavilla olevat sal
 </ol>
 <h2>Mikä on "Ohjaaja-tila"?</h2>
 <hr>
-<p>Kansio "rezyser/" sisältää 5 tiedostoa, jotka kuvaavat sovelluksen<br>
+<p>Kansio "rezyser/" sisältää 6 tiedostoa, jotka kuvaavat sovelluksen<br>
 Pääohjaajastudion toimintatiloja:</p>
 <ul>
 <li>tryb_burza.yaml      — Aivoriihi (juonen suunnittelu, 3 vaihtoehtoa<br>
@@ -173,6 +173,11 @@ Pääohjaajastudion toimintatiloja:</p>
                          (versiosta 18.13 lähtien; käynnistyy myös<br>
                          automaattisesti kontekstiikkunan hälyttävän<br>
                          täyttymisen yhteydessä)</li>
+<li>postprod_publikacja.yaml — ElevenReaderin julkaisukortti: metatiedot<br>
+                         äänikirjan julkaisulomakkeeseen (versiosta 18.14;<br>
+                         22 lajityypin kanoninen lista ja kuvauksen raja<br>
+                         annetaan mallille valmiina ja sovellus tarkistaa<br>
+                         ne jälkeenpäin)</li>
 <li>baza.yaml            — yhteiset kontekstin ankkuritagit ([OBECNA FABUŁA]<br>
                          ja yhteenveto aiemmista tapahtumista); ainoa<br>
                          tiedosto tässä kansiossa, jonka sisältöä EI käännetä<br>

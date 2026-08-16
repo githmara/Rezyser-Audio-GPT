@@ -179,6 +179,11 @@ tresc:
                              (versiosta 18.13 lähtien; käynnistyy myös
                              automaattisesti kontekstiikkunan hälyttävän
                              täyttymisen yhteydessä)
+    - postprod_publikacja.yaml — ElevenReaderin julkaisukortti: metatiedot
+                             äänikirjan julkaisulomakkeeseen (versiosta 18.14;
+                             22 lajityypin kanoninen lista ja kuvauksen raja
+                             annetaan mallille valmiina ja sovellus tarkistaa
+                             ne jälkeenpäin)
     - baza.yaml            — yhteiset kontekstin ankkuritagit ([OBECNA FABUŁA]
                              ja yhteenveto aiemmista tapahtumista); ainoa
                              tiedosto tässä kansiossa, jonka sisältöä EI käännetä

@@ -7,7 +7,7 @@
 
 Safn sjálfstæðra verkfæra knúin af gervigreind til sjálfvirkrar ritunar, skipulagningar, sniðmáts og þýðingar á umfangsmiklum handritum og til að stýra gagnvirkum textaleikjum. Verkefnið er innfæddur skjáborðsforrit (wxPython) hannað frá grunni með fullu aðgengi fyrir skjálesara (NVDA, VoiceOver) og samhæfni við faglega talgervla (TTS). Það virkar án vafra og án staðbundins netþjóns — keyrir sem venjulegur gluggi forrits.
 
-Útgáfa: **18.13.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Útgáfa: **18.14.0** · Stutt tungumál innfædd (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Helstu einingar
@@ -21,7 +21,7 @@ Aðalstúdíó fyrir skrif á hljóðleikritum og hljóðbókum. Þú velur ham 
 
 * **Heimsbók margra verkefna:** Kerfið hleður sjálfkrafa í bakgrunni sérstökum reglum alheimsins (`.md`) á grundvelli virks upprunaskrár, sem tryggir fullkomna einangrun (núll-smell samhengishleðsla).
 * **Sögugeymir:** „Óendanlegt minni“ reiknirit. Sögusamantektina býr til sérstakt eftirvinnsluverkfæri (frá v18.13), og þegar minnivísirinn fer í rauða viðvörunarástandið keyrir kerfið það sjálft og vistar niðurstöðuna bæði í skrá og í reit Langtímaminnis. Næstu samantektir eru stigvaxandi — líkanið fær fyrra minnið og aðeins nýja hluta frásagnarinnar.
-* **5 skapandi hamir:** Hver skrá í `dictionaries/<jzk>/rezyser/` lýsir sérstakri „persónuleika“ AI leikstjórans (Hugstormun, Handrit, Hljóðbók) eða eftirvinnsluverkfæri (Kaflaheiti, Langtímaminni). Þú getur stillt hljóm þeirra án forritunar — sjá Reglustjóri hér að neðan.
+* **6 skapandi hamir:** Hver skrá í `dictionaries/<jzk>/rezyser/` lýsir sérstakri „persónuleika“ AI leikstjórans (Hugstormun, Handrit, Hljóðbók) eða eftirvinnsluverkfæri (Kaflaheiti, Langtímaminni). Þú getur stillt hljóm þeirra án forritunar — sjá Reglustjóri hér að neðan.
 
 
 ### 2. Sögur (Ctrl+5, annar aðalhamurinn frá útgáfu 15.0)

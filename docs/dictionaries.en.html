@@ -47,7 +47,7 @@ Code, Notepad++) and edit them like any other document.</p>
     ├── podstawy.yaml              Polish diacritics + alphabet
     ├── akcenty/                   11 accent files
     ├── szyfry/                    6 cipher and game files
-    └── rezyser/                   5 AI Director mode files
+    └── rezyser/                   6 AI Director mode files
 </code></pre>
 <p>Currently fully implemented are: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 base languages). Each has its own "<code>dictionaries/&lt;code&gt;/</code>" package with<br>
@@ -161,7 +161,7 @@ they simply distort text according to a specific rule. Available ciphers<br>
 </ol>
 <h1>What is "Director mode"?</h1>
 <hr>
-<p>The "rezyser/" folder contains 5 files describing the operating modes<br>
+<p>The "rezyser/" folder contains 6 files describing the operating modes<br>
 of the application's Main Director's Studio:</p>
 <ul>
 <li>tryb_burza.yaml      — Brainstorm (plot planning, 3 story-development<br>
@@ -176,6 +176,11 @@ of the application's Main Director's Studio:</p>
                          saved to a file and to the memory field in the<br>
                          panel (since v18.13; also triggers automatically<br>
                          when the context window fills up to alarm level)</li>
+<li>postprod_publikacja.yaml — ElevenReader publication card: metadata for<br>
+                         the audiobook publication form (since v18.14; the<br>
+                         canonical list of 22 genres and the description<br>
+                         limit are handed to the model and then checked<br>
+                         by the application)</li>
 <li>baza.yaml            — shared context-anchor tags ([OBECNA FABUŁA]<br>
                          and a summary of previous events); the only file<br>
                          in this folder whose content is NOT translated<br>

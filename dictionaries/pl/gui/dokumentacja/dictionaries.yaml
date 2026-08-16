@@ -182,6 +182,10 @@ tresc:
                              zapisywane do pliku i do pola pamięci w panelu
                              (od v18.13; uruchamia się też samo przy alarmowym
                              zapełnieniu okna kontekstowego)
+    - postprod_publikacja.yaml — karta publikacyjna ElevenReadera: metadane
+                             do formularza publikacji audiobooka (od v18.14;
+                             kanoniczna lista 22 gatunków i limit opisu podane
+                             modelowi na tacy, a potem sprawdzane w aplikacji)
     - baza.yaml            — wspólne tagi-kotwice kontekstu ([OBECNA FABUŁA]
                              i streszczenie poprzednich wydarzeń); jedyny plik
                              w tym folderze, którego treści NIE tłumaczy się

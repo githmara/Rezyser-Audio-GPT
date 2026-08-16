@@ -7,7 +7,7 @@
 
 Itsenäinen tekoälyllä toimivien työkalujen kokoelma laajojen käsikirjoitusten automaattiseen kirjoittamiseen, suunnitteluun, muotoiluun ja kääntämiseen sekä interaktiivisten tekstipelien johtamiseen. Projekti on natiivi työpöytäsovellus (wxPython), joka on suunniteltu alusta alkaen täysin saavutettavaksi ruudunlukijoille (NVDA, VoiceOver) ja yhteensopivaksi ammattimaisten puhesynteesien (TTS) kanssa. Toimii ilman selainta ja ilman paikallista palvelinta — käynnistyy tavallisena ohjelmaikkunana.
 
-Versio: **18.13.0** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versio: **18.14.0** · Tuetut kielet alkuperäisesti (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Päämoduulit
@@ -21,7 +21,7 @@ Päästudio kuunnelmien ja äänikirjojen kirjoittamiseen. Valitset tilan — Ai
 
 * **Moniprojektinen Maailman Kirja:** Järjestelmä lataa automaattisesti taustalla omistetut universumin säännöt (`.md`) aktiivisen lähdetiedoston perusteella, tarjoten täydellisen eristyksen (kontekstin lataus ilman klikkauksia).
 * **Juonen Akut:** Algoritmi "loputtomalle muistille". Juonitiivistelmän luo erillinen jälkituotantotyökalu (versiosta 18.13), ja kun muistin osoitin saavuttaa punaisen hälytyksen tilan, järjestelmä käynnistää sen itse ja tallentaa tuloksen sekä tiedostoon että Pysyvän Muistin kenttään. Seuraavat tiivistelmät ovat inkrementaalisia — malli saa edellisen muistin ja vain kerronnan uuden osan.
-* **5 luovaa tilaa:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja) tai jälkituotantotyökalun (Lukujen otsikot, Pysyvä Muisti). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
+* **6 luovaa tilaa:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja) tai jälkituotantotyökalun (Lukujen otsikot, Pysyvä Muisti). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
 
 
 ### 2. Tarinat (Ctrl+5, toinen päätila versiosta 15.0 alkaen)

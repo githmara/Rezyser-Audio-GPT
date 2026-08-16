@@ -142,6 +142,11 @@ tresc:
                              salvato in un file e nel campo memoria del pannello
                              (dalla v18.13; si attiva anche automaticamente in caso
                              di riempimento allarmante della finestra di contesto)
+    - postprod_publikacja.yaml — scheda di pubblicazione ElevenReader: metadati
+                             per il modulo di pubblicazione dell'audiolibro
+                             (dalla v18.14; l'elenco canonico dei 22 generi e il
+                             limite della descrizione vengono serviti al modello
+                             e poi controllati dall'applicazione)
     - baza.yaml            — tag-ancora di contesto condivisi ([OBECNA FABUŁA]
                              e riassunto degli eventi precedenti); l'unico file
                              in questa cartella il cui contenuto NON viene tradotto

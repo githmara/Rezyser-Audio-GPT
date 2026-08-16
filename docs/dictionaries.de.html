@@ -50,7 +50,7 @@ Dokument.</p>
     ├── podstawy.yaml              deutsche Diakritika + Alphabet
     ├── akcenty/                   11 Akzentdateien
     ├── szyfry/                    6 Chiffre- und Spieledateien
-    └── rezyser/                   5 Regisseur-KI-Modusdateien
+    └── rezyser/                   6 Regisseur-KI-Modusdateien
 </code></pre>
 <p>Derzeit vollständig implementiert sind: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 Basissprachen). Jede hat ein eigenes Paket<br>
@@ -164,7 +164,7 @@ Verfügbare Chiffren (6):</p>
 </ol>
 <h1>Was ist der "Regisseur-Modus"?</h1>
 <hr>
-<p>Der Ordner "rezyser/" enthält 5 Dateien, die die Arbeitsmodi des<br>
+<p>Der Ordner "rezyser/" enthält 6 Dateien, die die Arbeitsmodi des<br>
 Hauptregiestudios der Anwendung beschreiben:</p>
 <ul>
 <li>tryb_burza.yaml      — Brainstorming (Handlungsplanung, 3 Optionen<br>
@@ -179,6 +179,11 @@ Hauptregiestudios der Anwendung beschreiben:</p>
                          die in einer Datei und im Gedächtnisfeld des Panels<br>
                          gespeichert wird (seit v18.13; startet auch automatisch<br>
                          bei alarmierender Füllung des Kontextfensters)</li>
+<li>postprod_publikacja.yaml — Veröffentlichungskarte für ElevenReader:<br>
+                         Metadaten für das Formular zur Hörbuch-Veröffentlichung<br>
+                         (seit v18.14; die kanonische Liste der 22 Genres und<br>
+                         das Beschreibungslimit bekommt das Modell serviert und<br>
+                         die Anwendung prüft sie anschließend)</li>
 <li>baza.yaml            — gemeinsame Kontext-Anker-Tags ([OBECNA FABUŁA]<br>
                          und Zusammenfassung vorheriger Ereignisse); die einzige<br>
                          Datei in diesem Ordner, deren Inhalt NICHT in<br>

@@ -185,6 +185,11 @@ tresc:
                              die in einer Datei und im Gedächtnisfeld des Panels
                              gespeichert wird (seit v18.13; startet auch automatisch
                              bei alarmierender Füllung des Kontextfensters)
+    - postprod_publikacja.yaml — Veröffentlichungskarte für ElevenReader:
+                             Metadaten für das Formular zur Hörbuch-Veröffentlichung
+                             (seit v18.14; die kanonische Liste der 22 Genres und
+                             das Beschreibungslimit bekommt das Modell serviert und
+                             die Anwendung prüft sie anschließend)
     - baza.yaml            — gemeinsame Kontext-Anker-Tags ([OBECNA FABUŁA]
                              und Zusammenfassung vorheriger Ereignisse); die einzige
                              Datei in diesem Ordner, deren Inhalt NICHT in

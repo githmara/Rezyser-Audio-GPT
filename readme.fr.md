@@ -7,7 +7,7 @@
 
 Ensemble d'outils autonomes alimentés par l'IA pour l'écriture automatique, la planification, le formatage et la traduction de scripts volumineux, ainsi que pour la conduite de jeux textuels interactifs. Le projet est une application de bureau native (wxPython) conçue dès le départ pour une accessibilité totale aux lecteurs d'écran (NVDA, VoiceOver) et pour fonctionner avec des synthétiseurs vocaux professionnels (TTS). Il fonctionne sans navigateur et sans serveur local — il se lance comme une fenêtre de programme ordinaire.
 
-Version : **18.13.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version : **18.14.0** · Langues prises en charge nativement (9) : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Modules principaux
@@ -21,7 +21,7 @@ Le principal studio pour écrire des pièces radiophoniques et des livres audio.
 
 * **Livre du Monde Multi-projet :** Le système charge automatiquement en arrière-plan les règles dédiées de l'univers (`.md`) en fonction du fichier source actif, assurant une isolation complète (chargement de contexte sans clic).
 * **Accumulateur de l'Intrigue :** Algorithme de « mémoire infinie ». Le résumé de l'intrigue est produit par un outil de postproduction distinct (depuis la v18.13) et, lorsque l'indicateur de mémoire entre en état d'alerte rouge, le système le lance de lui-même et enregistre le résultat à la fois dans le fichier et dans le champ Mémoire à Long Terme. Les résumés successifs sont incrémentaux : le modèle reçoit la mémoire précédente et uniquement la partie nouvelle du récit.
-* **5 modes créatifs :** Chacun des fichiers dans `dictionaries/<jzk>/rezyser/` décrit une « personnalité » distincte du réalisateur AI (Brainstorming, Script, Livre audio) ou un outil de postproduction (Titres de Chapitres, Mémoire à Long Terme). Vous pouvez ajuster leur tonalité sans programmation — voir le Gestionnaire de Règles ci-dessous.
+* **6 modes créatifs :** Chacun des fichiers dans `dictionaries/<jzk>/rezyser/` décrit une « personnalité » distincte du réalisateur AI (Brainstorming, Script, Livre audio) ou un outil de postproduction (Titres de Chapitres, Mémoire à Long Terme). Vous pouvez ajuster leur tonalité sans programmation — voir le Gestionnaire de Règles ci-dessous.
 
 
 ### 2. Histoires (Ctrl+5, deuxième mode principal depuis v15.0)

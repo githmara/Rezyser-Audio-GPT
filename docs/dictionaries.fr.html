@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              diacritiques polonais + alphabet
     ├── akcenty/                   11 fichiers d'accents
     ├── szyfry/                    6 fichiers de chiffrements et jeux
-    └── rezyser/                   5 fichiers de modes du Réalisateur IA
+    └── rezyser/                   6 fichiers de modes du Réalisateur IA
 </code></pre>
 <p>Sont actuellement entièrement implémentées : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 langues de base). Chacune dispose de son propre pack<br>
@@ -122,7 +122,7 @@ l'une sans normalisation des nombres, l'autre avec normalisation (remplace « 15
 </ol>
 <h2>Qu'est-ce que le « mode Réalisateur » ?</h2>
 <hr>
-<p>Le dossier "rezyser/" contient 5 fichiers décrivant les modes de<br>
+<p>Le dossier "rezyser/" contient 6 fichiers décrivant les modes de<br>
 fonctionnement du Studio de Réalisation Principal de l'application :</p>
 <ul>
 <li>tryb_burza.yaml      — Remue-méninges (planification de l'intrigue, 3 options<br>
@@ -137,6 +137,11 @@ fonctionnement du Studio de Réalisation Principal de l'application :</p>
                          enregistré dans un fichier et dans le champ mémoire du panneau<br>
                          (depuis la v18.13 ; se déclenche aussi automatiquement en cas<br>
                          de remplissage critique de la fenêtre contextuelle)</li>
+<li>postprod_publikacja.yaml — fiche de publication ElevenReader : métadonnées<br>
+                         pour le formulaire de publication du livre audio<br>
+                         (depuis la v18.14 ; la liste canonique des 22 genres<br>
+                         et la limite de la description sont servies au modèle,<br>
+                         puis vérifiées par l'application)</li>
 <li>baza.yaml            — balises-ancres de contexte communes ([OBECNA FABUŁA]<br>
                          et résumé des événements précédents) ; le seul fichier<br>
                          de ce dossier dont le contenu n'est PAS traduit<br>

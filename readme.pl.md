@@ -7,7 +7,7 @@
 
 Zestaw samowystarczalnych narzędzi napędzanych przez AI do automatycznego pisania, planowania, formatowania i tłumaczenia obszernych skryptów oraz prowadzenia interaktywnych gier tekstowych. Projekt jest natywną aplikacją desktopową (wxPython) zaprojektowaną od podstaw z myślą o pełnej dostępności dla czytników ekranu (NVDA, VoiceOver) i współpracy z profesjonalnymi syntezatorami mowy (TTS). Działa bez przeglądarki i bez lokalnego serwera — uruchamia się jako zwykłe okno programu.
 
-Wersja: **18.13.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Wersja: **18.14.0** · Wspierane języki natywnie (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Główne moduły
@@ -21,7 +21,7 @@ Główne studio do pisania słuchowisk i audiobooków. Wybierasz tryb — Burza 
 
 * **Wieloprojektowa Księga Świata:** System automatycznie ładuje w tle dedykowane zasady uniwersum (`.md`) na podstawie aktywnego pliku źródłowego, zapewniając pełną izolację (zero-click context loading).
 * **Akumulator Fabuły:** Algorytm „nieskończonej pamięci". Streszczenie fabuły generuje osobne narzędzie postprodukcji (od v18.13), a gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, system uruchamia je sam i zapisuje wynik do pliku oraz do pola Pamięci Długotrwałej. Kolejne streszczenia są przyrostowe — model dostaje poprzednią pamięć i tylko nową część narracji.
-* **Przepisy Reżysera (liczba plików: 5):** Każdy z plików w `dictionaries/<jzk>/rezyser/` opisuje osobną „personalność" reżysera AI (Burza Mózgów, Skrypt, Audiobook) albo narzędzie postprodukcji (Tytuły Rozdziałów, Pamięć Długotrwała). Możesz dostroić ich brzmienie bez programowania — patrz Manager Reguł niżej.
+* **Przepisy Reżysera (liczba plików: 6):** Każdy z plików w `dictionaries/<jzk>/rezyser/` opisuje osobną „personalność" reżysera AI (Burza Mózgów, Skrypt, Audiobook) albo narzędzie postprodukcji (Tytuły Rozdziałów, Pamięć Długotrwała). Możesz dostroić ich brzmienie bez programowania — patrz Manager Reguł niżej.
 
 
 ### 2. Opowieści (Ctrl+5, drugi główny tryb od v15.0)

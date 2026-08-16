@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              diacríticos polacos + alfabeto
     ├── akcenty/                   11 archivos con acentos
     ├── szyfry/                    6 archivos con cifrados y juegos
-    └── rezyser/                   5 archivos con modos del Director AI
+    └── rezyser/                   6 archivos con modos del Director AI
 </code></pre>
 <p>Actualmente están completamente implementados: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 idiomas base). Cada uno tiene su propio paquete<br>
@@ -89,7 +89,7 @@ y al menos un archivo en "akcenty/" y "szyfry/").</p>
 [FIN DE LA INSTRUCCIÓN — LA TRADUCCIÓN COMIENZA A CONTINUACIÓN]</p>
 <h2>¿Qué es el "modo Director"?</h2>
 <hr>
-<p>La carpeta "rezyser/" contiene 5 archivos que describen los modos de<br>
+<p>La carpeta "rezyser/" contiene 6 archivos que describen los modos de<br>
 trabajo del Estudio Principal de Dirección de la aplicación:</p>
 <ul>
 <li>tryb_burza.yaml      — Lluvia de Ideas (planificación de la trama, 3 opciones<br>
@@ -104,6 +104,11 @@ trabajo del Estudio Principal de Dirección de la aplicación:</p>
                          guardado en un archivo y en el campo de memoria del panel<br>
                          (desde v18.13; también se activa automáticamente cuando<br>
                          la ventana de contexto se llena de forma crítica)</li>
+<li>postprod_publikacja.yaml — ficha de publicación de ElevenReader: metadatos<br>
+                         para el formulario de publicación del audiolibro<br>
+                         (desde v18.14; la lista canónica de 22 géneros y el<br>
+                         límite de la descripción se le sirven al modelo y<br>
+                         después los comprueba la aplicación)</li>
 <li>baza.yaml            — etiquetas-ancla de contexto comunes ([OBECNA FABUŁA]<br>
                          y resumen de eventos anteriores); el único archivo<br>
                          de esta carpeta cuyo contenido NO se traduce<br>

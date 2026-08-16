@@ -182,6 +182,11 @@ tresc:
                              saved to a file and to the memory field in the
                              panel (since v18.13; also triggers automatically
                              when the context window fills up to alarm level)
+    - postprod_publikacja.yaml — ElevenReader publication card: metadata for
+                             the audiobook publication form (since v18.14; the
+                             canonical list of 22 genres and the description
+                             limit are handed to the model and then checked
+                             by the application)
     - baza.yaml            — shared context-anchor tags ([OBECNA FABUŁA]
                              and a summary of previous events); the only file
                              in this folder whose content is NOT translated

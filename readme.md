@@ -7,7 +7,7 @@
 
 A set of self-contained AI-powered tools for automatic writing, planning, formatting, and translating extensive scripts, as well as conducting interactive text games. The project is a native desktop application (wxPython) designed from the ground up with full accessibility for screen readers (NVDA, VoiceOver) and compatibility with professional text-to-speech synthesizers (TTS). It operates without a browser and without a local server — it launches as a regular program window.
 
-Version: **18.13.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.14.0** · Supported languages natively (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Main Modules
@@ -21,7 +21,7 @@ The main studio for writing radio plays and audiobooks. You choose a mode — Br
 
 * **Multi-Project World Book:** The system automatically loads dedicated universe rules (`.md`) in the background based on the active source file, ensuring full isolation (zero-click context loading).
 * **Plot Accumulator:** The "infinite memory" algorithm. The plot summary is produced by a separate post-production tool (since v18.13), and when the memory indicator enters a red alert state the system runs it by itself and writes the result both to the file and to the Long-Term Memory field. Successive summaries are incremental — the model receives the previous memory plus only the new part of the narrative.
-* **5 creative modes:** Each file in `dictionaries/<lang>/rezyser/` describes a separate AI director "personality" (Brainstorming, Script, Audiobook) or a post-production tool (Chapter Titles, Long-Term Memory). You can tune their tone without programming — see the Rule Manager below.
+* **6 creative modes:** Each file in `dictionaries/<lang>/rezyser/` describes a separate AI director "personality" (Brainstorming, Script, Audiobook) or a post-production tool (Chapter Titles, Long-Term Memory). You can tune their tone without programming — see the Rule Manager below.
 
 
 ### 2. Stories (Ctrl+5, second main mode since v15.0)

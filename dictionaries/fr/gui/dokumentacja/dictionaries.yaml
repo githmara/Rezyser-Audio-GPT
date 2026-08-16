@@ -143,6 +143,11 @@ tresc:
                              enregistré dans un fichier et dans le champ mémoire du panneau
                              (depuis la v18.13 ; se déclenche aussi automatiquement en cas
                              de remplissage critique de la fenêtre contextuelle)
+    - postprod_publikacja.yaml — fiche de publication ElevenReader : métadonnées
+                             pour le formulaire de publication du livre audio
+                             (depuis la v18.14 ; la liste canonique des 22 genres
+                             et la limite de la description sont servies au modèle,
+                             puis vérifiées par l'application)
     - baza.yaml            — balises-ancres de contexte communes ([OBECNA FABUŁA]
                              et résumé des événements précédents) ; le seul fichier
                              de ce dossier dont le contenu n'est PAS traduit
