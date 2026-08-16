@@ -74,11 +74,34 @@ KATEGORIA_TRYB = "tryb"
 KATEGORIA_POSTPROD = "postprodukcja"
 
 # Zakresy przetwarzania postprodukcji (pole ``zakres:`` w YAML, v18.12):
-#   per_rozdzial – iteracja po nagłówkach struktury pliku projektu
-#                  (wzorzec tytułów rozdziałów),
-#   calosc       – jeden call LLM z całym plikiem projektu (wzorzec raportu).
+#   per_rozdzial   – iteracja po nagłówkach struktury pliku projektu
+#                    (wzorzec tytułów rozdziałów),
+#   calosc         – jeden call LLM z całym plikiem projektu (wzorzec raportu),
+#   rekoncyliacja  – (v18.13) wejście składane z trzech członów zamiast całego
+#                    pliku: dotychczasowe streszczenie + narracja od anchora
+#                    z ``_streszczenie_meta.json`` + reszta. Wzorzec Pamięci
+#                    Długotrwałej: kolejne streszczenie jest PRZYROSTOWE, a
+#                    payload nie rośnie liniowo z długością projektu.
 ZAKRES_PER_ROZDZIAL = "per_rozdzial"
 ZAKRES_CALOSC = "calosc"
+ZAKRES_REKONCYLIACJA = "rekoncyliacja"
+
+# Role postprodukcji (pole ``rola:`` w YAML, v18.13). Pusta = zwykłe narzędzie
+# (wynik do dialogu i opcjonalnie do pliku ``<nazwa><sufiks>.txt``).
+#   pamiec_dlugotrwala – wynik JEST Pamięcią Długotrwałą projektu: GUI zapisuje
+#                        go przez ``ProjektRezysera.zapisz_streszczenie`` (plik +
+#                        meta-anchor + stan w RAM + pole „Pamięć" w GUI), a nie
+#                        zwykłym zapisem pliku wyniku. Bez tej roli plik powstałby
+#                        „obok", a meta-anchor rekoncyliacji rozjechałby się
+#                        z treścią — kolejne wczytanie projektu snapowałoby do
+#                        nieaktualnego nagłówka.
+ROLA_PAMIEC_DLUGOTRWALA = "pamiec_dlugotrwala"
+
+# Sufiks pliku Pamięci Długotrwałej używany, gdy paczka nie ma przepisu z rolą
+# :data:`ROLA_PAMIEC_DLUGOTRWALA` (np. user skasował YAML albo paczka jest sprzed
+# v18.13). Historyczna wartość — pliki `<nazwa>_streszczenie.txt` istnieją
+# u każdego, kto używał Reżysera przed tym wydaniem.
+SUFIKS_STRESZCZENIA_DOMYSLNY = "_streszczenie"
 
 # Domyślne limity tokenów wyjścia postprodukcji, gdy YAML nie podaje
 # ``max_tokens_wyjscia:`` — wartości historyczne obu wzorców (tytuł rozdziału
@@ -237,6 +260,12 @@ class PrzepisRezysera:
                           Księgi Świata z placeholderem ``{ksiega}``, doklejany
                           PRZED treścią gdy ``skrypty/<nazwa>.md`` istnieje
                           i jest niepusty. Brak pola = księga ignorowana.
+        rola:             (tylko postprodukcja, v18.13) Specjalne znaczenie wyniku
+                          dla silnika. Dziś jedna wartość:
+                          :data:`ROLA_PAMIEC_DLUGOTRWALA`. Pusta = zwykłe
+                          narzędzie. Nieznana wartość jest IGNOROWANA (degraduje
+                          się do zwykłego narzędzia) — w odróżnieniu od ``zakres``,
+                          gdzie literówka zmieniałaby ścieżkę przetwarzania.
     """
 
     # --- Wspólne ---
@@ -311,6 +340,9 @@ class PrzepisRezysera:
     max_tokens_wyjscia: int = MAX_TOKENS_CALOSC_DOMYSLNE
     sufiks_pliku_wyniku: str = ""
     prompt_ksiegi_szablon: str = ""
+
+    # --- Postprodukcja: rola wyniku (v18.13) ---
+    rola: str = ""
 
 
 # =============================================================================
@@ -395,11 +427,11 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     if not zakres:
         zakres = _ZAKRES_LEGACY.get(str(id_), ZAKRES_CALOSC)
     if kategoria == KATEGORIA_POSTPROD and zakres not in (
-            ZAKRES_PER_ROZDZIAL, ZAKRES_CALOSC):
+            ZAKRES_PER_ROZDZIAL, ZAKRES_CALOSC, ZAKRES_REKONCYLIACJA):
         print(
             f"⚠️  przepisy_rezysera: nieznany zakres={zakres!r} w {sciezka} "
             f"— plik pominięty (dozwolone: {ZAKRES_PER_ROZDZIAL!r} / "
-            f"{ZAKRES_CALOSC!r}).",
+            f"{ZAKRES_CALOSC!r} / {ZAKRES_REKONCYLIACJA!r}).",
             file=sys.stderr,
         )
         return None
@@ -416,9 +448,26 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
     else:
         dla_trybow = list(_DLA_TRYBOW_LEGACY.get(str(id_), []))
 
+    # Rola wyniku (v18.13). Nieznana wartość → traktujemy jak brak (zwykłe
+    # narzędzie): rola tylko DODAJE zachowanie po sukcesie, więc literówka nie
+    # może przekierować przetwarzania w złe miejsce — inaczej niż `zakres`.
+    rola = str(data.get("rola") or "").strip().lower()
+    if rola and rola != ROLA_PAMIEC_DLUGOTRWALA:
+        print(
+            f"⚠️  przepisy_rezysera: nieznana rola={rola!r} w {sciezka} — pole "
+            f"zignorowane (dozwolone: {ROLA_PAMIEC_DLUGOTRWALA!r}).",
+            file=sys.stderr,
+        )
+        rola = ""
+
     # Sufiks trafia wprost do nazwy pliku wyniku — separatory ścieżek i znaki
     # specjalne Windows dyskwalifikują plik (YAML edytowalny w Managerze).
     sufiks_pliku_wyniku = str(data.get("sufiks_pliku_wyniku") or "").strip()
+    if rola == ROLA_PAMIEC_DLUGOTRWALA and not sufiks_pliku_wyniku:
+        # Pamięć Długotrwała MUSI mieć gdzie wylądować — pusty sufiks oznaczałby
+        # nadpisanie samego pliku narracji `<nazwa>.txt`. Spadamy na historyczną
+        # wartość zamiast pomijać plik: user dostaje działające narzędzie.
+        sufiks_pliku_wyniku = SUFIKS_STRESZCZENIA_DOMYSLNY
     if any(z in sufiks_pliku_wyniku for z in _ZNAKI_ZAKAZANE_SUFIKSU):
         print(
             f"⚠️  przepisy_rezysera: niedozwolone znaki w sufiks_pliku_wyniku="
@@ -483,6 +532,7 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             max_tokens_wyjscia=max_tokens_wyjscia,
             sufiks_pliku_wyniku=sufiks_pliku_wyniku,
             prompt_ksiegi_szablon=str(data.get("prompt_ksiegi_szablon", "")),
+            rola=rola,
         )
     except (TypeError, ValueError, AttributeError) as exc:
         print(
@@ -669,6 +719,49 @@ def postprodukcje_dla_trybu(
     (bez fallbacku językowego — ten robi GUI na swojej liście).
     """
     return filtruj_postprodukcje(lista_postprodukcji(jezyk), tryb)
+
+
+def przepis_pamieci_dlugotrwalej(
+    postprodukcje: list[PrzepisRezysera],
+) -> PrzepisRezysera | None:
+    """Pierwszy przepis z rolą :data:`ROLA_PAMIEC_DLUGOTRWALA` (lub ``None``).
+
+    Bierze GOTOWĄ listę, a nie kod języka, celowo: GUI ładuje postprodukcje raz,
+    z miękkim fallbackiem język-UI → EN, i musi mieć pewność, że sufiks pliku
+    pochodzi DOKŁADNIE z tego przepisu, który wygeneruje treść. Wariant liczący
+    listę samodzielnie rozjechałby się z GUI przy niekompletnej paczce.
+
+    „Pierwszy" jest deterministyczny: :func:`_zaladuj_wszystkie` sortuje po
+    ``(kategoria, kolejnosc, id)``. Dwóch narzędzi z tą rolą w jednej paczce nie
+    przewidujemy — Pamięć Długotrwała jest jedna na projekt.
+    """
+    for p in postprodukcje:
+        if p.rola == ROLA_PAMIEC_DLUGOTRWALA:
+            return p
+    return None
+
+
+def sufiks_pamieci_dlugotrwalej(
+    postprodukcje: list[PrzepisRezysera] | None = None,
+) -> str:
+    """Sufiks pliku Pamięci Długotrwałej (``"_streszczenie"`` gdy brak przepisu).
+
+    Jedno źródło prawdy dla trzech miejsc, które MUSZĄ się zgadzać co do znaku:
+    ścieżki w :class:`core_rezyser.ProjektRezysera`, filtru listy projektów w GUI
+    i shimu migracyjnego. Rozjazd któregokolwiek z nich oznacza „projekt zniknął
+    z listy" albo „streszczenie zapisane obok, poza rekoncyliacją".
+
+    ``postprodukcje=None`` → lista z paczki ``pl`` (referencyjna): używane przez
+    kod bez dostępu do listy GUI (np. testy, wczytanie projektu przed zbudowaniem
+    panelu). Sufiks jest z założenia IDENTYCZNY we wszystkich paczkach — to
+    fragment nazwy pliku na dysku, nie tekst do lokalizacji (komentarz w YAML-u
+    mówi o tym wprost, tak jak przy tagach-kotwicach w ``baza.yaml``).
+    """
+    lista = postprodukcje if postprodukcje is not None else lista_postprodukcji("pl")
+    przepis = przepis_pamieci_dlugotrwalej(lista)
+    if przepis is not None and przepis.sufiks_pliku_wyniku:
+        return przepis.sufiks_pliku_wyniku
+    return SUFIKS_STRESZCZENIA_DOMYSLNY
 
 
 def zaladuj_przepis(

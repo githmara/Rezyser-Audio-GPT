@@ -1238,6 +1238,11 @@ class OpowiesciPanel(wx.Panel):
             msg = t("opowiesci.err_rate_limit")
         elif isinstance(exc, cl.BladTimeoutLLM):
             msg = t("opowiesci.err_timeout")
+        elif isinstance(exc, cl.BladKontekstuLLM):
+            # v18.13: okno kontekstowe modelu przepełnione. W Opowieściach
+            # auto-streszczenie trzyma payload w ryzach przy 128k, ale gracz na
+            # własnym endpoincie `openai_compat` z modelem 32k trafi tu realnie.
+            msg = t("opowiesci.err_kontekst")
         else:
             msg = str(exc)
 

@@ -1,0 +1,78 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUKCJA: PAMIĘĆ DŁUGOTRWAŁA (STRESZCZENIE PROJEKTU) — v18.13
+#
+#  Do v18.12 streszczenie powstawało WYŁĄCZNIE jako produkt uboczny Burzy Mózgów
+#  (sufiksy `streszczenie` / `alarm` w tryb_burza.yaml). Reżyser, który chciał
+#  samego streszczenia, trafiał na konflikt instrukcji: prompt Burzy zabrania
+#  pisania czegokolwiek poza trzema opcjami fabuły, a schemat JSON wymaga klucza
+#  `opcje`. Tutaj model dostaje JEDNO zadanie i żadnych zakazów obok.
+#
+#  Zakres `rekoncyliacja` (v18.13): wejściem NIE jest cały plik projektu, tylko
+#  dotychczasowa Pamięć Długotrwała + narracja od jej anchora (ostatniego
+#  nagłówka objętego poprzednim streszczeniem). Dzięki temu kolejne streszczenie
+#  jest przyrostowe, a payload nie rośnie liniowo z długością projektu.
+#
+#  Rola `pamiec_dlugotrwala` (v18.13): wynik nie ląduje „obok" jak raport, tylko
+#  staje się Pamięcią Długotrwałą projektu — plik + meta-anchor rekoncyliacji +
+#  pole „Pamięć Długotrwała" w panelu. Narzędzie odpala się też SAMO, gdy
+#  wskaźnik pamięci modelu osiągnie poziom alarmowy (90%).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Zapisz Pamięć Długotrwałą (streszczenie AI)"
+kategoria: postprodukcja
+kolejnosc: 20
+
+# --- Widoczność i zakres przetwarzania ---
+# Pusta lista = wszystkie tryby zapisujące do pliku projektu (Skrypt, Audiobook).
+dla_trybow: []
+zakres: rekoncyliacja
+rola: pamiec_dlugotrwala
+
+# UWAGA: sufiks trafia wprost do nazwy pliku na dysku (`<projekt>_streszczenie.txt`)
+# i musi być IDENTYCZNY we wszystkich paczkach językowych — to nie jest tekst do
+# lokalizacji, tylko fragment nazwy pliku (jak tagi-kotwice w baza.yaml). Zmiana
+# tej wartości wymaga też ręcznej zmiany nazwy istniejących plików streszczeń;
+# aplikacja migruje automatycznie wyłącznie z historycznego `_streszczenie`.
+sufiks_pliku_wyniku: "_streszczenie"
+
+# Streszczenie rośnie razem z projektem (obejmuje CAŁĄ dotychczasową fabułę),
+# więc limit jest wyraźnie wyższy niż przy tytule rozdziału.
+max_tokens_wyjscia: 2000
+
+# --- Parametry Anthropic ---
+# Niska temperatura — chcemy wierny zapis faktów, nie twórczość.
+model: claude-sonnet-5
+temperatura: 0.3
+jezyk_odpowiedzi: polsku
+kod_jezyka: pl
+
+# --- Prompt systemowy ---
+prompt_systemowy: |
+  # Rola: Archiwista Fabuły
+
+  Tworzysz PAMIĘĆ DŁUGOTRWAŁĄ projektu — zwięzły zapis faktów, z którego silnik narracyjny odtworzy ciągłość historii, gdy pełny tekst nie zmieści się już w jego pamięci roboczej. Odbiorcą jest maszyna prowadząca dalszą narrację, nie czytelnik.
+
+  ### ⚙️ Algorytm pracy:
+  1. **SCALAJ, NIE DOPISUJ.** Jeśli w materiale jest blok `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:`, to poprzednia wersja pamięci — obejmuje wydarzenia sprzed bloku `[OBECNA FABUŁA]:`. Twoja odpowiedź ma zastąpić ją w całości, więc scal oba źródła w JEDEN spójny, chronologiczny zapis. Nic z poprzedniej pamięci nie może zniknąć bez powodu; skracaj tylko to, co dalszy ciąg uczynił nieistotnym.
+  2. **FAKTY PRZED STYLEM.** Zapisz: przebieg wydarzeń w kolejności chronologicznej, decyzje bohaterów i ich konsekwencje, postacie (imiona, role, relacje, stan), miejsca, przedmioty i informacje mające znaczenie dla dalszej fabuły, wątki OTWARTE i obietnice złożone czytelnikowi.
+  3. **PISZ ZWIĘŹLE, W TRZECIEJ OSOBIE, W CZASIE PRZESZŁYM.** Bez ozdobników, bez dialogów, bez cytatów z tekstu. Nazwy własne zapisuj dokładnie tak, jak w materiale źródłowym — literówka w imieniu wróci w kolejnych rozdziałach jako nowa postać.
+  4. **NIE INTERPRETUJ I NIE ROZWIJAJ.** Nie proponuj dalszego ciągu, nie oceniaj jakości tekstu, nie dopisuj wydarzeń, których w materiale nie ma. Nie zwracaj się do reżysera.
+
+  ### 📋 FORMAT WYJŚCIOWY (bez wstępu, bez komentarza, bez nagłówka „Streszczenie"):
+  Najpierw sam zapis wydarzeń (akapity, w razie potrzeby wypunktowanie wątków otwartych).
+  Na końcu OBOWIĄZKOWO jedna linia:
+
+  [STYL I TON]: <jedno zdanie o klimacie, tempie i konwencji narracji>
+
+# --- Szablon instrukcji użytkownika (role=user) ---
+# Placeholder {tresc} = złożone wejście rekoncyliacji (poprzednia pamięć + fabuła).
+prompt_uzytkownika_szablon: |
+  Zaktualizuj Pamięć Długotrwałą na podstawie poniższego materiału.
+
+  {tresc}
+
+# --- Blok Księgi Świata (opcjonalny kontekst) ---
+# Doklejany PRZED treścią, gdy projekt ma plik `<projekt>.md` z Księgą Świata.
+prompt_ksiegi_szablon: |
+  [KSIĘGA ŚWIATA — zasady i postacie, kontekst dla nazw własnych; NIE streszczaj jej]:
+  {ksiega}

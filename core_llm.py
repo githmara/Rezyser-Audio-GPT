@@ -57,6 +57,23 @@ class BladTimeoutLLM(BladLLM):
     """
 
 
+class BladKontekstuLLM(BladLLM):
+    """Payload nie zmieścił się w oknie kontekstowym modelu (v18.13).
+
+    Provider zwraca to jako HTTP 400/413 z komunikatem typu „prompt is too long:
+    N tokens > M maximum" (Anthropic) albo ``context_length_exceeded`` (OpenAI-compat)
+    — czyli tym samym kodem, co błąd STRUKTURY payloadu. Bez rozróżnienia wpadało to
+    w :func:`_czy_zla_struktura` i uruchamiało bezcelowe retry: gałąź Anthropic
+    ponawiała ten sam za duży payload bez ``temperature``, a compat przechodziła całą
+    drabinę degradacji — kilka wywołań, kilka opóźnień, ten sam wynik. Na końcu user
+    dostawał surową, angielską treść wyjątku.
+
+    Filar jakości (Claude, okno 1M) trafia tu wyjątkowo; realnym adresatem jest
+    reżyser, który wskazał własny endpoint ``openai_compat`` z modelem o małym oknie
+    (32k/64k) i uruchomił postprodukcję ``zakres: calosc`` na dużym projekcie.
+    """
+
+
 # ---------------------------------------------------------------------------
 # Konfiguracja czytana z golden_key.env (po load_dotenv przez wołającego)
 # ---------------------------------------------------------------------------
@@ -161,6 +178,46 @@ def _czy_timeout(exc: Exception) -> bool:
     return type(exc).__name__ == "APITimeoutError"
 
 
+# Frazy rozpoznające przepełnienie okna kontekstowego w treści błędu — zebrane
+# z realnych komunikatów obu rodzin API (nie z domysłów):
+#   Anthropic: „prompt is too long: 1234 tokens > 200000 maximum",
+#              „input length and `max_tokens` exceed context limit: … decrease
+#               input length or max_tokens and try again"
+#   OpenAI:    code „context_length_exceeded" + „This model's maximum context
+#              length is 8192 tokens. However, your messages resulted in …
+#              Please reduce the length of the messages."
+# Porównanie na lowercase substring — treść bywa opakowana w JSON błędu SDK,
+# więc dopasowujemy fragment, nie cały komunikat.
+_FRAZY_PRZEPELNIENIA = (
+    "prompt is too long",
+    "context_length_exceeded",
+    "maximum context length",
+    "exceed context limit",
+    "context window",
+    "too many tokens",
+    "reduce the length of the messages",
+)
+
+
+def _czy_przepelniony_kontekst(exc: Exception) -> bool:
+    """Czy błąd to przekroczenie okna kontekstowego modelu (v18.13).
+
+    Rozpoznajemy po TREŚCI (:data:`_FRAZY_PRZEPELNIENIA`) albo po statusie 413
+    („Request Entity Too Large" — payload odrzucony przez gateway zanim model go
+    zobaczył). Sam status 400 NIE wystarcza: to ten sam kod, którym provider zgłasza
+    błąd struktury payloadu, a pomylenie tych dwóch przypadków kosztuje albo jałowe
+    retry (gdybyśmy uznali przepełnienie za strukturę), albo utratę działającej
+    degradacji (gdybyśmy uznali strukturę za przepełnienie).
+    """
+    status = getattr(exc, "status_code", None)
+    if status is None:
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+    if status == 413:
+        return True
+    tresc = str(exc).lower()
+    return any(fraza in tresc for fraza in _FRAZY_PRZEPELNIENIA)
+
+
 def _czy_zla_struktura(exc: Exception) -> bool:
     """Czy błąd to odrzucenie STRUKTURY payloadu (zła rola/kolejność), nie limit/sieć.
 
@@ -171,7 +228,15 @@ def _czy_zla_struktura(exc: Exception) -> bool:
     Używane w gałęzi ``openai_compat`` (degradacja payloadu z rolami do pojedynczego
     bloku ``user``) ORAZ w gałęzi ``anthropic`` (degradacja `temperature` — patrz
     :func:`_wywolaj_anthropic`).
+
+    v18.13: przepełnienie okna kontekstowego przychodzi tym SAMYM kodem 400, ale NIE
+    jest problemem struktury — żadna degradacja go nie naprawi, bo payload zostaje
+    tak samo długi. Wykluczamy je tu jawnie, żeby Anthropic nie ponawiał bez
+    ``temperature``, a compat nie przechodził całej drabiny; błąd leci prosto do
+    :func:`wywolaj_llm` → :class:`BladKontekstuLLM`.
     """
+    if _czy_przepelniony_kontekst(exc):
+        return False
     if type(exc).__name__ in ("BadRequestError", "UnprocessableEntityError"):
         return True
     status = getattr(exc, "status_code", None)
@@ -451,8 +516,9 @@ def wywolaj_llm(
     modele, które odrzucają niedomyślną wartość (Claude Sonnet 5 i nowsze), dostają
     retry bez tego parametru zamiast wywalać wyjątek — patrz [[reguly_architektury]].
 
-    Rate-limit (429) → :class:`BladLimituLLM`, timeout → :class:`BladTimeoutLLM`
-    (oba dla dowolnego providera). Pozostałe wyjątki SDK propagują natywnie
+    Rate-limit (429) → :class:`BladLimituLLM`, timeout → :class:`BladTimeoutLLM`,
+    przepełnione okno kontekstowe (400 z frazą / 413) → :class:`BladKontekstuLLM`
+    (wszystkie dla dowolnego providera). Pozostałe wyjątki SDK propagują natywnie
     (łapie je szeroki ``except`` wołającego).
     """
     if klient.provider == PROVIDER_OPENAI_COMPAT and klient.model_override:
@@ -473,9 +539,11 @@ def wywolaj_llm(
             thinking_budget=thinking_budget,
         )
 
-    except Exception as exc:  # noqa: BLE001 — 429/timeout opakowujemy; reszta leci dalej
+    except Exception as exc:  # noqa: BLE001 — 429/timeout/kontekst opakowujemy; reszta leci dalej
         if _czy_rate_limit(exc):
             raise BladLimituLLM(str(exc)) from exc
         if _czy_timeout(exc):
             raise BladTimeoutLLM(str(exc)) from exc
+        if _czy_przepelniony_kontekst(exc):
+            raise BladKontekstuLLM(str(exc)) from exc
         raise

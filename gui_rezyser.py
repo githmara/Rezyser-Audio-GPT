@@ -38,6 +38,7 @@ from __future__ import annotations
 import json
 import os
 import threading
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
@@ -57,6 +58,40 @@ import bledy_ai
 from bledy_ai import BladGeneracjiAI
 from i18n import aktualny_jezyk, dostepne_jezyki_ui, t
 
+
+@dataclass
+class ZadaniePostprodukcji:
+    """Komplet danych jednego uruchomienia postprodukcji (v18.13).
+
+    Do v18.12 workery dostawały luźne argumenty pozycyjne; po dołożeniu zakresu
+    ``rekoncyliacja`` i roli ``pamiec_dlugotrwala`` potrzebnych jest sześć wartości,
+    a dwie z nich to bliźniacze stringi (``tresc_modelu`` vs ``pelny_tekst``) —
+    czyli dokładnie ten rodzaj sygnatury, w którym zamiana argumentów miejscami
+    kompiluje się i cicho psuje wynik. Snapshot zamraża je w jednym obiekcie
+    przekazywanym do wątku tła (wzorzec ``SnapshotProjektu``).
+
+    Attributes:
+        przepis:      Przepis postprodukcji (YAML).
+        nazwa:        Nazwa projektu z pola GUI (może NIE być projektem otwartym).
+        tresc_modelu: To, co realnie leci do modelu — cały plik (``calosc``) albo
+                      złożone wejście rekoncyliacji (streszczenie + fabuła
+                      od anchora).
+        pelny_tekst:  Pełna treść ``skrypty/<nazwa>.txt``. Potrzebna osobno, bo
+                      anchor meta Pamięci Długotrwałej liczymy z CAŁEGO pliku,
+                      nie z przyciętego wejścia.
+        ksiega:       Treść Księgi Świata (``None`` gdy brak / nieczytelna).
+        sciezka_wyj:  Plik wyniku lub ``None`` (wynik tylko w dialogu).
+        auto:         True = uruchomienie automatyczne (próg pamięci), bez pytań
+                      i bez dialogu wyniku — patrz ``_spawn_auto_pamiec``.
+    """
+
+    przepis: pr.PrzepisRezysera
+    nazwa: str
+    tresc_modelu: str
+    pelny_tekst: str
+    ksiega: str | None = None
+    sciezka_wyj: str | None = None
+    auto: bool = False
 
 
 class RezyserPanel(wx.Panel):
@@ -149,6 +184,13 @@ class RezyserPanel(wx.Panel):
         if not postprodukcje and jezyk_ui != "en":
             postprodukcje = pr.lista_postprodukcji("en")
         self._postprodukcje: list[pr.PrzepisRezysera] = postprodukcje
+
+        # v18.13: nazwa pliku Pamięci Długotrwałej pochodzi z przepisu o roli
+        # `pamiec_dlugotrwala`. Model MUSI liczyć tę samą ścieżkę co panel,
+        # więc bierzemy sufiks z DOKŁADNIE tej listy, którą GUI wyświetla
+        # (a nie z paczki `pl`, na której `ProjektRezysera` opiera default).
+        self._projekt.sufiks_streszczenia = pr.sufiks_pamieci_dlugotrwalej(
+            self._postprodukcje)
 
         # Skrajny przypadek: ani język UI, ani EN nie ma trybów — komunikat A11y.
         if not self._przepisy:
@@ -1428,9 +1470,13 @@ class RezyserPanel(wx.Panel):
         """Skanuje folder `skrypty/` i zwraca posortowaną listę nazw projektów.
 
         Kryterium: plik `.txt` w `skrypty/`, którego nazwa NIE kończy się
-        sufiksem `_streszczenie` ANI sufiksem pliku wyniku którejkolwiek
-        wczytanej postprodukcji (np. `_audyt` — audyt 18.12, ŚREDNIA-2:
-        raport narzędzia to derived-data, nie samodzielny projekt).
+        sufiksem pliku wyniku którejkolwiek wczytanej postprodukcji (np.
+        `_audyt` — audyt 18.12, ŚREDNIA-2: raport narzędzia to derived-data,
+        nie samodzielny projekt). Od v18.13 obejmuje to również streszczenia:
+        Pamięć Długotrwała jest postprodukcją, więc jej sufiks przychodzi
+        z YAML-a zamiast z hard-kodu. Historyczny `_streszczenie` dokładamy
+        zawsze — pliki sprzed v18.13 leżą na dyskach userów niezależnie od
+        tego, czy paczka nadal zawiera przepis, który je wytworzył.
         Pliki `.md` (Księga Świata) traktujemy jako
         opcjonalne — gracze, którzy nigdy nie zapisali księgi, też mają
         prawo zobaczyć swoje projekty na liście wyboru.
@@ -1443,18 +1489,17 @@ class RezyserPanel(wx.Panel):
         skrypty_dir = os.path.join(app_dir, cr.SKRYPTY_DIR)
         if not os.path.isdir(skrypty_dir):
             return []
-        sufiksy_wynikow = tuple(
-            p.sufiks_pliku_wyniku for p in self._postprodukcje
-            if p.sufiks_pliku_wyniku
-        )
+        sufiksy_wynikow = tuple({
+            *(p.sufiks_pliku_wyniku for p in self._postprodukcje
+              if p.sufiks_pliku_wyniku),
+            pr.SUFIKS_STRESZCZENIA_DOMYSLNY,
+        })
         projekty: list[str] = []
         for nazwa_pliku in os.listdir(skrypty_dir):
             if not nazwa_pliku.endswith(".txt"):
                 continue
             rdzen = nazwa_pliku[:-len(".txt")]
-            if rdzen.endswith("_streszczenie"):
-                continue
-            if sufiksy_wynikow and rdzen.endswith(sufiksy_wynikow):
+            if rdzen.endswith(sufiksy_wynikow):
                 continue
             projekty.append(rdzen)
         return sorted(projekty)
@@ -2124,6 +2169,11 @@ class RezyserPanel(wx.Panel):
             return t(f"rezyser.{exc.klucz_i18n}")
         if isinstance(exc, cl.BladTimeoutLLM):
             return t("rezyser.err_timeout")
+        # v18.13: przepełnione okno kontekstowe modelu — komunikat mówi, CO
+        # zrobić (streszczenie / mniejszy zakres / model z większym oknem),
+        # zamiast pokazywać surową angielską treść z SDK.
+        if isinstance(exc, cl.BladKontekstuLLM):
+            return t("rezyser.err_kontekst")
         return str(exc)
 
     def _wyswietl_blad_ai(self, tresc_bledu: str, custom_msg: str | None = None) -> None:
@@ -2384,6 +2434,9 @@ class RezyserPanel(wx.Panel):
                 t("rezyser.ostrzezenie_urwane_tytul"),
                 wx.OK | wx.ICON_WARNING,
             )
+        # v18.13: pamięć modelu na poziomie ALARM → sam zapisz Pamięć Długotrwałą
+        # (cichy no-op, gdy warunki niespełnione — patrz `_spawn_auto_pamiec`).
+        self._spawn_auto_pamiec()
 
     def _on_wyslij_done_burza(self, response_text: str) -> None:
         # v15.2: ścieżka legacy — fallback dla hipotetycznych przepisów
@@ -3067,28 +3120,60 @@ class RezyserPanel(wx.Panel):
 
         # Plik wyniku (`sufiks_pliku_wyniku` z YAML): zgoda na nadpisanie
         # PRZED wywołaniem API.
-        sciezka_wyj: str | None = None
-        if przepis_pp.sufiks_pliku_wyniku:
-            sciezka_wyj = os.path.join(
-                app_dir, self.SKRYPTY_DIR,
-                f"{nazwa}{przepis_pp.sufiks_pliku_wyniku}.txt",
+        sciezka_wyj = self._sciezka_wyniku_postprod(przepis_pp, nazwa)
+        if sciezka_wyj and os.path.exists(sciezka_wyj):
+            odp = wx.MessageBox(
+                t("rezyser.postprod_nadpisac_tresc",
+                  plik=os.path.basename(sciezka_wyj)),
+                t("rezyser.postprod_nadpisac_tytul"),
+                wx.YES_NO | wx.ICON_QUESTION,
+                self,
             )
-            if os.path.exists(sciezka_wyj):
-                odp = wx.MessageBox(
-                    t("rezyser.postprod_nadpisac_tresc",
-                      plik=os.path.basename(sciezka_wyj)),
-                    t("rezyser.postprod_nadpisac_tytul"),
-                    wx.YES_NO | wx.ICON_QUESTION,
-                    self,
-                )
-                if odp != wx.YES:
-                    return
+            if odp != wx.YES:
+                return
 
-        # Księga Świata (`skrypty/<nazwa>.md`) — opcjonalny kontekst dla
-        # zakresu `calosc`; jej brak/nieczytelność nie blokuje narzędzia
-        # (silnik dokleja blok tylko gdy przepis ma `prompt_ksiegi_szablon`).
+        zadanie = self._zbuduj_zadanie_postprod(przepis_pp, nazwa, pelny_tekst)
+
+        # Pre-check okna kontekstowego (v18.13): narzędzia operujące na całym
+        # projekcie potrafią przerosnąć okno modelu. Liczymy tokeny lokalnie —
+        # tym samym pomiarem, co wskaźnik pamięci — i pytamy PRZED opłaceniem
+        # calla. To ostrzeżenie, nie blokada: filar jakości (Claude) ma okno
+        # znacznie większe niż nasz licznik, więc twarde „nie" byłoby fałszywe.
+        # Decyzję zostawiamy reżyserowi, bo tylko on wie, jakim modelem jedzie.
+        if not self._potwierdz_rozmiar_kontekstu(zadanie):
+            return
+
+        self._start_postprodukcje(zadanie)
+
+    # ------------------------------------------------------------------
+    # Przygotowanie zadania postprodukcji (wspólne dla ręcznego i auto)
+    # ------------------------------------------------------------------
+    def _sciezka_wyniku_postprod(
+        self, przepis_pp: pr.PrzepisRezysera, nazwa: str,
+    ) -> str | None:
+        """Ścieżka pliku wyniku wg ``sufiks_pliku_wyniku`` (``None`` = brak pliku)."""
+        if not przepis_pp.sufiks_pliku_wyniku:
+            return None
+        return os.path.join(
+            sciezki.KATALOG_BAZOWY_STR, self.SKRYPTY_DIR,
+            f"{nazwa}{przepis_pp.sufiks_pliku_wyniku}.txt",
+        )
+
+    def _zbuduj_zadanie_postprod(
+        self,
+        przepis_pp: pr.PrzepisRezysera,
+        nazwa: str,
+        pelny_tekst: str,
+        auto: bool = False,
+    ) -> ZadaniePostprodukcji:
+        """Składa :class:`ZadaniePostprodukcji` — w tym wejście dla `rekoncyliacja`."""
+        app_dir = sciezki.KATALOG_BAZOWY_STR
+
+        # Księga Świata (`skrypty/<nazwa>.md`) — opcjonalny kontekst dla zakresów
+        # całościowych; jej brak/nieczytelność nie blokuje narzędzia (silnik
+        # dokleja blok tylko gdy przepis ma `prompt_ksiegi_szablon`).
         ksiega: str | None = None
-        if przepis_pp.zakres == pr.ZAKRES_CALOSC:
+        if przepis_pp.zakres != pr.ZAKRES_PER_ROZDZIAL:
             sciezka_md = os.path.join(app_dir, self.SKRYPTY_DIR, f"{nazwa}.md")
             if os.path.exists(sciezka_md):
                 try:
@@ -3097,6 +3182,54 @@ class RezyserPanel(wx.Panel):
                 except Exception:
                     ksiega = None
 
+        # `rekoncyliacja` (v18.13): zamiast całego pliku wysyłamy dotychczasową
+        # Pamięć Długotrwałą + narrację od jej anchora. Kolejne streszczenie jest
+        # dzięki temu przyrostowe, a payload nie rośnie liniowo z projektem.
+        if przepis_pp.zakres == pr.ZAKRES_REKONCYLIACJA:
+            stare, fragment, _naglowek = self._projekt.wejscie_pamieci_dlugotrwalej(
+                pelny_tekst, nazwa,
+            )
+            tresc_modelu = rai.zloz_wejscie_rekoncyliacji(przepis_pp, stare, fragment)
+        else:
+            tresc_modelu = pelny_tekst
+
+        return ZadaniePostprodukcji(
+            przepis=przepis_pp,
+            nazwa=nazwa,
+            tresc_modelu=tresc_modelu,
+            pelny_tekst=pelny_tekst,
+            ksiega=ksiega,
+            sciezka_wyj=self._sciezka_wyniku_postprod(przepis_pp, nazwa),
+            auto=auto,
+        )
+
+    def _potwierdz_rozmiar_kontekstu(self, zadanie: ZadaniePostprodukcji) -> bool:
+        """Ostrzega, gdy payload przekracza okno licznika (128k). ``False`` = anuluj.
+
+        Pomijane dla ``per_rozdzial`` (tam do modelu idą krótkie próbki rozdziałów)
+        oraz dla uruchomień automatycznych (bez GUI-owego pytania — automat i tak
+        nie ma komu zadać pytania, a rekoncyliacja z definicji tnie kontekst).
+        """
+        if zadanie.auto or zadanie.przepis.zakres == pr.ZAKRES_PER_ROZDZIAL:
+            return True
+        tokeny = ct.policz_tokeny_chat(
+            [zadanie.tresc_modelu, zadanie.ksiega or "",
+             zadanie.przepis.prompt_systemowy],
+            ct.MODEL_DOMYSLNY_REZYSER,
+        )
+        if tokeny <= ct.OKNO_KONTEKSTU_MAX:
+            return True
+        odp = wx.MessageBox(
+            t("rezyser.postprod_kontekst_tresc",
+              tokeny=tokeny, limit=ct.OKNO_KONTEKSTU_MAX),
+            t("rezyser.postprod_kontekst_tytul"),
+            wx.YES_NO | wx.ICON_WARNING,
+            self,
+        )
+        return odp == wx.YES
+
+    def _start_postprodukcje(self, zadanie: ZadaniePostprodukcji) -> None:
+        """Blokuje panel, pokazuje postęp i startuje wątek właściwy dla zakresu."""
         for btn in self._btn_postprod.values():
             btn.Disable()
         self._gauge_postprod.SetValue(0)
@@ -3106,13 +3239,12 @@ class RezyserPanel(wx.Panel):
         self._pnl_postprodukcja.Layout()
         self.Layout()
 
-        if przepis_pp.zakres == pr.ZAKRES_PER_ROZDZIAL:
-            target, args = self._tytuly_worker, (przepis_pp, pelny_tekst, sciezka_wyj)
-        else:
-            target, args = self._postprod_calosc_worker, (
-                przepis_pp, pelny_tekst, ksiega, sciezka_wyj)
-
-        t_thread = threading.Thread(target=target, args=args, daemon=True)
+        target = (
+            self._tytuly_worker
+            if zadanie.przepis.zakres == pr.ZAKRES_PER_ROZDZIAL
+            else self._postprod_calosc_worker
+        )
+        t_thread = threading.Thread(target=target, args=(zadanie,), daemon=True)
         self._worker_thread = t_thread
         t_thread.start()
         # Refresh PO starcie workera (audyt 18.12, NISKA-3): przelicza Enable
@@ -3125,12 +3257,9 @@ class RezyserPanel(wx.Panel):
     # ------------------------------------------------------------------
     # Wątek tła – postprodukcja per rozdział (np. tytuły)
     # ------------------------------------------------------------------
-    def _tytuly_worker(
-        self,
-        przepis_pp: pr.PrzepisRezysera,
-        pelny_tekst: str,
-        sciezka_wyj: str | None = None,
-    ) -> None:
+    def _tytuly_worker(self, zadanie: ZadaniePostprodukcji) -> None:
+        przepis_pp = zadanie.przepis
+
         def _cb(msg: str, percent: int) -> None:
             wx.CallAfter(self._update_postprod_progress, msg, percent)
 
@@ -3144,7 +3273,7 @@ class RezyserPanel(wx.Panel):
             wynik = rai.nadaj_tytuly_rozdzialom(
                 klient=self._klient_llm,
                 przepis_tytuly=przepis_pp,
-                pelny_tekst=pelny_tekst,
+                pelny_tekst=zadanie.tresc_modelu,
                 on_postep=_cb,
             )
         except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
@@ -3164,24 +3293,14 @@ class RezyserPanel(wx.Panel):
             return
 
         tekst = "\n".join(wynik.tytuly)
-        if sciezka_wyj and not self._zapisz_wynik_postprod(sciezka_wyj, tekst):
-            # Opłacony wynik nie może zginąć z samą porażką zapisu (audyt
-            # 18.12, ŚREDNIA-1) — po dialogu błędu pokazujemy go w dialogu
-            # wyniku (wzorzec partial-wyników), user może skopiować ręcznie.
-            wx.CallAfter(self._show_postprod_dialog, przepis_pp, tekst, None)
-            return
-        wx.CallAfter(self._on_postprod_sukces, przepis_pp, tekst, sciezka_wyj, "")
+        self._domknij_postprodukcje(zadanie, tekst, "")
 
     # ------------------------------------------------------------------
     # Wątek tła – postprodukcja całościowa (v18.12, `zakres: calosc`)
     # ------------------------------------------------------------------
-    def _postprod_calosc_worker(
-        self,
-        przepis_pp: pr.PrzepisRezysera,
-        pelny_tekst: str,
-        ksiega: str | None,
-        sciezka_wyj: str | None,
-    ) -> None:
+    def _postprod_calosc_worker(self, zadanie: ZadaniePostprodukcji) -> None:
+        przepis_pp = zadanie.przepis
+
         def _cb(msg: str, percent: int) -> None:
             wx.CallAfter(self._update_postprod_progress, msg, percent)
 
@@ -3192,8 +3311,8 @@ class RezyserPanel(wx.Panel):
             wynik = rai.wykonaj_postprodukcje_calosc(
                 klient=self._klient_llm,
                 przepis=przepis_pp,
-                pelny_tekst=pelny_tekst,
-                ksiega=ksiega,
+                pelny_tekst=zadanie.tresc_modelu,
+                ksiega=zadanie.ksiega,
                 on_postep=_cb,
             )
         except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
@@ -3212,14 +3331,37 @@ class RezyserPanel(wx.Panel):
             wx.CallAfter(self._on_postprod_error, t("rezyser.err_odrzucenie"))
             return
 
-        if sciezka_wyj and not self._zapisz_wynik_postprod(sciezka_wyj, wynik.tekst):
-            # Jak w `_tytuly_worker`: opłacony wynik trafia do dialogu mimo
-            # porażki zapisu (audyt 18.12, ŚREDNIA-1).
-            wx.CallAfter(self._show_postprod_dialog, przepis_pp, wynik.tekst, None)
+        self._domknij_postprodukcje(zadanie, wynik.tekst, wynik.ostrzezenie)
+
+    # ------------------------------------------------------------------
+    # Domknięcie postprodukcji (wątek tła → GUI)
+    # ------------------------------------------------------------------
+    def _domknij_postprodukcje(
+        self, zadanie: ZadaniePostprodukcji, tekst: str, ostrzezenie: str,
+    ) -> None:
+        """Zapisuje wynik i oddaje sterowanie GUI. Wołane Z WĄTKU TŁA.
+
+        Trzy ścieżki:
+          * **rola ``pamiec_dlugotrwala``** (v18.13) — wynik JEST Pamięcią
+            Długotrwałą projektu, więc zapis idzie przez
+            ``ProjektRezysera.zapisz_streszczenie`` (plik + meta-anchor + stan
+            w RAM). Robi to wątek GUI, bo operacja mutuje model i pola panelu —
+            wątek tła nie ma prawa ich dotykać.
+          * **zwykły plik wyniku** — zapis tutaj (I/O poza wątkiem GUI); porażka
+            zapisu NIE gubi opłaconego wyniku, tylko pokazuje go w dialogu
+            (audyt 18.12, ŚREDNIA-1).
+          * **bez pliku** — sam dialog wyniku.
+        """
+        if zadanie.przepis.rola == pr.ROLA_PAMIEC_DLUGOTRWALA:
+            wx.CallAfter(self._on_postprod_pamiec, zadanie, tekst, ostrzezenie)
+            return
+        if zadanie.sciezka_wyj and not self._zapisz_wynik_postprod(
+                zadanie.sciezka_wyj, tekst):
+            wx.CallAfter(self._show_postprod_dialog, zadanie.przepis, tekst, None)
             return
         wx.CallAfter(
             self._on_postprod_sukces,
-            przepis_pp, wynik.tekst, sciezka_wyj, wynik.ostrzezenie,
+            zadanie.przepis, tekst, zadanie.sciezka_wyj, ostrzezenie,
         )
 
     def _zapisz_wynik_postprod(self, sciezka: str, tekst: str) -> bool:
@@ -3302,6 +3444,113 @@ class RezyserPanel(wx.Panel):
                 self,
             )
         self._show_postprod_dialog(przepis_pp, tekst, sciezka_wyj)
+
+    def _on_postprod_pamiec(
+        self,
+        zadanie: ZadaniePostprodukcji,
+        tekst: str,
+        ostrzezenie: str = "",
+    ) -> None:
+        """Zapis wyniku o roli ``pamiec_dlugotrwala`` (v18.13). Wątek GUI.
+
+        Idzie przez ``zapisz_streszczenie``, a nie przez zwykły zapis pliku, bo
+        Pamięć Długotrwała to TRÓJKA: plik ``<nazwa><sufiks>.txt``, meta-anchor
+        rekoncyliacji i stan w RAM. Zapisanie samego pliku zostawiłoby anchor
+        wskazujący poprzednie streszczenie — kolejna rekoncyliacja wciągnęłaby
+        ponownie materiał już skompresowany.
+        """
+        self._worker_thread = None
+        self._gauge_postprod.SetValue(100)
+        self._lbl_postprod_status.SetLabel(t("rezyser.postprod_postep_gotowe"))
+
+        try:
+            sciezka = self._projekt.zapisz_streszczenie(
+                tekst, nazwa=zadanie.nazwa, content=zadanie.pelny_tekst,
+            )
+        except (OSError, ValueError) as exc:
+            bledy_ai.zapisz_diagnostyke(exc, "rezyser._on_postprod_pamiec")
+            # Opłacony wynik nie ginie z porażką zapisu (wzorzec ŚREDNIA-1
+            # z audytu 18.12) — pokazujemy go do ręcznego skopiowania.
+            self._on_postprod_error(
+                t("rezyser.blad_zapisu_streszczenia", tresc_bledu=str(exc)))
+            self._show_postprod_dialog(zadanie.przepis, tekst, None)
+            return
+
+        # Panel synchronizujemy TYLKO gdy streszczenie dotyczy otwartego projektu
+        # (postprodukcja może działać na projekcie wskazanym samą nazwą).
+        if zadanie.nazwa == self._projekt.nazwa_pliku:
+            self._txt_pamiec.SetValue(tekst)
+            # D2: świeży zapis = nowy „czysty" punkt odniesienia detektora zmian.
+            self._pamiec_zapisana = tekst
+        self._refresh_ui_state()
+
+        if ostrzezenie:
+            wx.MessageBox(
+                ostrzezenie,
+                t("rezyser.postprod_ostrzezenie_tytul"),
+                wx.OK | wx.ICON_WARNING,
+                self,
+            )
+
+        if zadanie.auto:
+            # Automat (próg alarmowy pamięci): bez dialogu z treścią — reżyser
+            # nie prosił o ten wynik, więc nie zabieramy mu fokusu na długi
+            # tekst. Sam komunikat, żeby wiedział, co aplikacja zrobiła.
+            wx.MessageBox(
+                t("rezyser.pamiec_auto_zapisana_tresc",
+                  nazwa_projektu=zadanie.nazwa,
+                  plik=os.path.basename(sciezka)),
+                t("rezyser.pamiec_auto_zapisana_tytul"),
+                wx.OK | wx.ICON_INFORMATION,
+                self,
+            )
+            return
+        self._show_postprod_dialog(zadanie.przepis, tekst, sciezka)
+
+    # ------------------------------------------------------------------
+    # Auto-streszczenie po przekroczeniu progu alarmowego (v18.13)
+    # ------------------------------------------------------------------
+    def _spawn_auto_pamiec(self) -> None:
+        """Po udanej turze: przy poziomie ALARM sam zapisuje Pamięć Długotrwałą.
+
+        Parytet z Opowieściami, gdzie auto-streszczenie działa od Fazy 4 — z tą
+        różnicą, że tam progiem jest 70%, a tu 90%. Powód: w Reżyserze etykieta
+        ostrzeżenia (70%) już dziś zapowiada, że streszczenie „niedługo będzie
+        konieczne", więc automat przy 90% domyka obietnicę UI zamiast ją
+        wyprzedzać, a pojedynczy call Reżysera jest droższy niż tura Opowieści.
+
+        Cichy no-op, gdy: brak przepisu z rolą ``pamiec_dlugotrwala`` (user
+        skasował YAML), brak API, trwa inny worker albo projekt nie ma jeszcze
+        pliku na dysku. Auto-mechanizm nie ma prawa niczym rzucić ani niczego
+        blokować — reżyser zawsze może kliknąć narzędzie ręcznie.
+        """
+        if self._projekt.status_pamieci_modelu().poziom != cr.POZIOM_ALARM:
+            return
+        if not self._api_dostepne or self._klient_llm is None:
+            return
+        if self._worker_thread and self._worker_thread.is_alive():
+            return
+        przepis_pp = pr.przepis_pamieci_dlugotrwalej(self._postprodukcje)
+        if przepis_pp is None:
+            return
+
+        nazwa = self._projekt.nazwa_pliku or self._txt_file_name.GetValue().strip()
+        if not nazwa:
+            return
+        filepath = os.path.join(
+            sciezki.KATALOG_BAZOWY_STR, self.SKRYPTY_DIR, f"{nazwa}.txt")
+        try:
+            with open(filepath, "r", encoding="utf-8") as fh:
+                pelny_tekst = fh.read()
+        except (OSError, ValueError):
+            return
+
+        zadanie = self._zbuduj_zadanie_postprod(
+            przepis_pp, nazwa, pelny_tekst, auto=True)
+        self._start_postprodukcje(zadanie)
+        # Komunikat PO starcie (A11y): reżyser słyszy, dlaczego panel się
+        # zablokował, zanim zacznie szukać przyczyny.
+        self._lbl_postprod_status.SetLabel(t("rezyser.pamiec_auto_start"))
 
     def _show_postprod_dialog(
         self,

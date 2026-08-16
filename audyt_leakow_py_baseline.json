@@ -29,6 +29,7 @@
     "POSSIBLE|znak-PL:ęłńś|Wykryto fragment w języku {…} (kod '{…}'), ale brakuje reguły '{…}' w folderze {…}. Utwórz plik {…}/{…}.yaml przed konty"
   ],
   "core_rezyser.py": [
+    "POSSIBLE|lingua:PL|ProjektRezysera: zapis streszczenia wymaga nazwy projektu.",
     "POSSIBLE|lingua:PL|WynikRekoncyliacji | None",
     "POSSIBLE|znak-PL:ą|ą",
     "POSSIBLE|znak-PL:ć|ć",
@@ -95,9 +96,10 @@
     "POSSIBLE|znak-PL:ś|Brak przepisu opowieści `{…}.yaml` ani w `{…}/opowiesci/` ani w `en/opowiesci/` (fallback). Czy folder dictionaries jest"
   ],
   "przepisy_rezysera.py": [
+    "POSSIBLE|lingua:PL|⚠️ przepisy_rezysera: nieznana rola={…} w {…} — pole zignorowane (dozwolone: {…}).",
     "POSSIBLE|znak-PL:ćę|⚠️ przepisy_rezysera: duplikat id={…} (kategoria {…}) w {…} — plik pominięty (id musi być unikalne w kategorii).",
     "POSSIBLE|znak-PL:ę|⚠️ przepisy_rezysera: niedozwolone znaki w sufiks_pliku_wyniku={…} w {…} — plik pominięty (zakazane: {…}).",
-    "POSSIBLE|znak-PL:ę|⚠️ przepisy_rezysera: nieznany zakres={…} w {…} — plik pominięty (dozwolone: {…} / {…}).",
+    "POSSIBLE|znak-PL:ę|⚠️ przepisy_rezysera: nieznany zakres={…} w {…} — plik pominięty (dozwolone: {…} / {…} / {…}).",
     "POSSIBLE|znak-PL:ęłśź|⚠️ przepisy_rezysera: nieprawidłowe pole w {…} ({…}) — plik pominięty (sprawdź typy wartości w YAML-u)."
   ],
   "refresh_languages.py": [
@@ -110,6 +112,8 @@
   "rezyser_ai.py": [
     "POSSIBLE|znak-PL:ął|(Błąd – {blad})",
     "POSSIBLE|znak-PL:Ł|[OBECNA FABUŁA]:",
+    "POSSIBLE|znak-PL:Ł|[OBECNA FABUŁA]:",
+    "POSSIBLE|znak-PL:Ń|[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
     "POSSIBLE|znak-PL:Ń|[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
     "POSSIBLE|znak-PL:ń|You map a natural-language description of a language (often given in a locative or otherwise inflected form, in any lang"
   ]

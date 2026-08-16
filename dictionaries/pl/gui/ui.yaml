@@ -614,9 +614,10 @@ rezyser:
     Próbujesz wygenerować streszczenie w trybie zapisu do pliku!
     To mogłoby uszkodzić Twoją historię.
 
-    Przełącz się na tryb 'Burza Mózgów' i spróbuj ponownie.
+    Streszczenie zapisuje przycisk „Zapisz Pamięć Długotrwałą (streszczenie AI)" w sekcji postprodukcji poniżej — nie nadpisuje pliku projektu.
   err_rate_limit:        "Brak kredytów Anthropic! Doładuj konto i spróbuj ponownie."
   err_timeout:           "Czas oczekiwania na odpowiedź modelu został przekroczony. Sprawdź połączenie z Internetem i spróbuj ponownie."
+  err_kontekst:          "Materiał wysłany do modelu nie zmieścił się w jego oknie kontekstowym. Zapisz Pamięć Długotrwałą (streszczenie skraca kontekst kolejnych wywołań), podziel projekt na mniejsze pliki albo wybierz model o większym oknie — modele Claude mają tu największy zapas."
   err_odrzucenie: |-
     AI odrzuciło prompt (wykryto tag [ODRZUCENIE_AI]).
     Tekst NIE zostanie zapisany do pliku historii.
@@ -691,6 +692,21 @@ rezyser:
   postprod_dlg_zapisano: "Wynik zapisano do pliku {plik} (folder skrypty). Podgląd poniżej:"
   postprod_dlg_name:     "Pole wyniku postprodukcji"
   blad_zapisu_do_pliku:  "Błąd zapisu do pliku:\n{tresc_bledu}"
+  # Pre-check okna kontekstowego przed wywołaniem narzędzia (v18.13)
+  postprod_kontekst_tytul: "Duży projekt — sprawdź okno modelu"
+  postprod_kontekst_tresc: |-
+    Materiał dla narzędzia ma około {tokeny} tokenów i przekracza {limit} tokenów, czyli okno kontekstowe, według którego aplikacja mierzy zajętość pamięci.
+
+    Modele Claude mają okno znacznie większe niż ten licznik, więc wywołanie najprawdopodobniej się powiedzie. Jeśli jednak korzystasz z własnego dostawcy AI z mniejszym oknem, model odrzuci zapytanie — a i tak zapłacisz za próbę.
+
+    Czy uruchomić narzędzie mimo to?
+  # Auto-zapis Pamięci Długotrwałej po przekroczeniu progu alarmowego (v18.13)
+  pamiec_auto_start:     "Pamięć modelu prawie pełna — zapisuję Pamięć Długotrwałą…"
+  pamiec_auto_zapisana_tytul: "Pamięć Długotrwała zapisana automatycznie"
+  pamiec_auto_zapisana_tresc: |-
+    Pamięć modelu przekroczyła próg alarmowy, więc aplikacja sama przygotowała streszczenie projektu {nazwa_projektu} i zapisała je jako {plik}.
+
+    Streszczenie widnieje w polu „Pamięć Długotrwała" — możesz je swobodnie poprawić i zapisać ponownie.
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
@@ -1398,6 +1414,7 @@ opowiesci:
   blad_ai_tresc_name:        "Pole z treścią błędu silnika narracyjnego"
   err_rate_limit:            "Limit zapytań do Anthropic został wyczerpany. Odczekaj chwilę albo sprawdź stan konta."
   err_timeout:               "Czas oczekiwania na odpowiedź modelu został przekroczony (powyżej 120 sekund). Spróbuj ponownie."
+  err_kontekst:              "Historia gry nie zmieściła się w oknie kontekstowym modelu. Zakończ tę grę i zacznij nową albo wybierz model o większym oknie — modele Claude mają tu największy zapas."
   err_dlugosc:               "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst i spróbuj ponownie."
   err_struktura:             "Model AI kilkukrotnie zwrócił niepoprawną strukturę danych i nie udało się jej skorygować. Spróbuj ponownie — jeśli błąd się powtarza, dołącz plik error_log.txt do zgłoszenia."
   odrzucenie_tytul:          "Akcja nie do poprowadzenia"

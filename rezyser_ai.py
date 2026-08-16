@@ -478,6 +478,41 @@ def buduj_payload(
     return system_prompt, messages, segmenty, sufiks_nazwa
 
 
+def zloz_wejscie_rekoncyliacji(
+    przepis: pr.PrzepisRezysera,
+    stare_streszczenie: str,
+    fragment_narracji: str,
+) -> str:
+    """Składa wejście postprodukcji ``zakres: rekoncyliacja`` (v18.13).
+
+    Te same tagi-kotwice co :func:`buduj_payload` (``rezyser/baza.yaml``,
+    identyczne we wszystkich paczkach) — model widzi znajomą strukturę kontekstu:
+
+        [STRESZCZENIE POPRZEDNICH WYDARZEŃ]:
+        <dotychczasowa Pamięć Długotrwała>
+
+        [OBECNA FABUŁA]:
+        <narracja od anchora, czyli to, czego streszczenie jeszcze nie objęło>
+
+    Pusty człon jest pomijany (pierwsze streszczenie projektu nie ma jeszcze
+    poprzednika). Kolejność jest istotna: streszczenie PRZED fabułą, tak jak
+    w payloadzie trybów narracyjnych — prompt przepisu może się do niej odwoływać.
+    """
+    czesci: list[str] = []
+    if stare_streszczenie.strip():
+        prefiks = pr.tekst_bazy(
+            przepis.kod_jezyka, "wrapper_streszczenie",
+            "[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
+        )
+        czesci.append(f"{prefiks}\n{stare_streszczenie.strip()}")
+    if fragment_narracji.strip():
+        prefiks = pr.tekst_bazy(
+            przepis.kod_jezyka, "wrapper_fabula", "[OBECNA FABUŁA]:",
+        )
+        czesci.append(f"{prefiks}\n{fragment_narracji.strip()}")
+    return "\n\n".join(czesci)
+
+
 # =============================================================================
 # Ekstrakcja <STRESZCZENIE> (tylko Burza Mózgów)
 # =============================================================================
@@ -1239,9 +1274,14 @@ def nadaj_tytuly_rozdzialom(
         except Exception as exc:  # noqa: BLE001
             # v18.10 (audyt): timeout dostaje natywny komunikat i18n — bez tej
             # gałęzi user widział surowe EN z SDK, choć rate-limit obok był
-            # zlokalizowany od dawna.
-            komunikat = (i18n.t("rezyser.err_timeout")
-                         if isinstance(exc, cl.BladTimeoutLLM) else str(exc))
+            # zlokalizowany od dawna. v18.13: to samo dla przepełnionego okna
+            # kontekstowego (próbka rozdziału bywa duża przy małym modelu).
+            if isinstance(exc, cl.BladTimeoutLLM):
+                komunikat = i18n.t("rezyser.err_timeout")
+            elif isinstance(exc, cl.BladKontekstuLLM):
+                komunikat = i18n.t("rezyser.err_kontekst")
+            else:
+                komunikat = str(exc)
             etykieta_bledu = przepis_tytuly.etykieta_blad_fragment or "(Błąd – {blad})"
             tytuly.append(f"{naglowek}: {etykieta_bledu.replace('{blad}', komunikat)}")
             return WynikTytulowania(
@@ -1333,6 +1373,15 @@ def wykonaj_postprodukcje_calosc(
         return WynikPostprodukcjiCalosc(
             przerwano_bledem=True,
             blad=i18n.t("rezyser.err_timeout"),
+        )
+    except cl.BladKontekstuLLM:
+        # v18.13: payload przekroczył okno kontekstowe modelu. Najczęstszy
+        # adresat: własny endpoint `openai_compat` z modelem 32k/64k puszczony
+        # na duży projekt. Typowany wynik (nie goły wyjątek), żeby user dostał
+        # instrukcję co zrobić zamiast angielskiej treści z SDK.
+        return WynikPostprodukcjiCalosc(
+            przerwano_bledem=True,
+            blad=i18n.t("rezyser.err_kontekst"),
         )
 
     tekst = (tekst or "").strip()

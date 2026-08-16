@@ -87,27 +87,15 @@ prompt_systemowy: |
   - `opis` — 1-3 zdania logiki opcji. Gracz czyta to nad polem Instrukcji po kliknięciu opcji. Nie powtarzaj tytułu w pierwszym zdaniu opisu.
 
 # --- Sufiksy kontekstowe doklejane do prompt_systemowy ---
-# Silnik wybiera sufiks na podstawie stanu pamięci i słów kluczowych
-# w instrukcji użytkownika (patrz: slowa_wyzwalajace.streszczenie).
-sufiksy:
-  # Gdy użytkownik w instrukcji użył słów z `slowa_wyzwalajace.streszczenie`
-  # (np. "streszczenie", "podsumuj"). Wymusza wygenerowanie streszczenia
-  # jako klucza JSON `streszczenie` (v15.2 — wcześniej tag <STRESZCZENIE>).
-  streszczenie: |
-
-
-    [TRYB WYMUSZONEGO STRESZCZENIA]: Użytkownik ręcznie zażądał zapisania stanu fabuły! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą DWA obowiązkowe elementy:
-    1. Zwięzłe podsumowanie dotychczasowych wydarzeń.
-    2. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
-
-  # Gdy pamięć osiągnęła próg ostrzegawczy (>= prog_ostrzegawczy). AI samo
-  # wymusza streszczenie, nawet jeśli użytkownik o to nie prosił.
-  alarm: |
-
-
-    [TRYB ALARMOWY - ZBLIŻA SIĘ KONIEC PAMIĘCI]: Pamięć jest prawie pełna! W odpowiedzi JSON DODAJ KLUCZ `"streszczenie"` (na tym samym poziomie co `opcje`) z wartością tekstową zawierającą DWA obowiązkowe elementy:
-    1. Zwięzłe podsumowanie dotychczasowych wydarzeń.
-    2. Sekcję [STYL I TON]: jednozdaniowa notatka o klimacie narracji.
+# v18.13: sufiksy `streszczenie` i `alarm` USUNIĘTE, razem ze słowami
+# wyzwalającymi. Kazały modelowi dołożyć klucz JSON `streszczenie` do odpowiedzi,
+# której prompt powyżej zabrania pisać cokolwiek poza trzema opcjami fabuły —
+# reżyser proszący o samo streszczenie dostawał konflikt instrukcji i (przy
+# nieudanej improwizacji modelu) błąd walidacji zamiast wyniku. Streszczenie jest
+# odtąd osobnym narzędziem postprodukcji: `postprod_streszczenie.yaml`
+# (rola `pamiec_dlugotrwala`), które odpala się także samo przy progu alarmowym.
+# Silnik nadal UMIE odczytać klucz `streszczenie` z odpowiedzi Burzy — gdyby
+# lingwista chciał wrócić do dawnego zachowania, wystarczy tu dopisać sufiks.
 
 # --- Przypomnienie doklejane do instrukcji użytkownika (role=user) ---
 # Ostatnia szansa na przypilnowanie modelu tuż przed "wysłaniem".
@@ -118,10 +106,7 @@ przypomnienie_uzytkownika: |
   (PRZYPOMNIENIE KRYTYCZNE: Generujesz JSON z 3 opcjami. Opcje logiczne i uziemione. Każde `cel_sceny` kontynuuje od miejsca, w którym urwała się [OBECNA FABUŁA] — pomysł reżysera to scena DO NAPISANIA, nie tło, które już się wydarzyło; nie przeskakuj nad nim. Komplikuj fabułę, CHYBA ŻE użytkownik wyraźnie prosi o Epilog lub zakończenie – wtedy ładnie domknij historię. Opcje NIE MOGĄ kończyć się pełnym sukcesem bez konsekwencji! `cel_sceny` BEZ [Reżyserze: ...] ani [DYREKTYWA]: ... — te dokleja Python.)
 
 # --- Słowa wyzwalające zachowania silnika ---
-slowa_wyzwalajace:
-  # Wywołują sufiks `streszczenie` i zapisują wynik do Pamięci Długotrwałej.
-  streszczenie:
-    - streszcz
-    - streść
-    - podsumuj
-    - podsumowanie
+# v18.13: lista `streszczenie` usunięta razem z sufiksami (patrz komentarz
+# wyżej). Prośba „streść fabułę" wpisana w instrukcję Burzy nie zmienia już
+# niczego w prompcie — od streszczania jest przycisk „Zapisz Pamięć Długotrwałą"
+# w panelu postprodukcji.

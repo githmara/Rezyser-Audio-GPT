@@ -345,6 +345,29 @@ def _koncowka_po_znakach(tekst: str, max_zn: int = MAX_TAIL_ZN) -> str:
     return okno.lstrip()
 
 
+def wytnij_od_anchora(content: str, anchor: str | None) -> tuple[str, str | None]:
+    """Zwraca ``(fragment, uzyty_naglowek)`` — narrację od anchora streszczenia.
+
+    v18.13, wejście postprodukcji ``zakres: rekoncyliacja``. ``anchor`` to tekst
+    nagłówka zapisany w meta streszczenia (``marker_naglowek_tekst``) — punkt,
+    do którego sięgało POPRZEDNIE streszczenie. Wszystko przed nim jest już
+    skompresowane w Pamięci Długotrwałej, więc kolejne streszczenie dostaje
+    wyłącznie to, czego jeszcze nie widziało (streszczenie przyrostowe zamiast
+    liniowo rosnącego payloadu).
+
+    Wymagamy, by nagłówek miał istotną treść (:func:`_ma_istotna_tresc`) — inaczej
+    „od anchora" oznaczałoby pusty ogon. Anchor nieobecny w treści (reżyser uciął
+    albo przepisał nagłówki) → zwracamy CAŁY ``content`` i ``None``: lepiej
+    streścić za dużo niż zgubić kawałek fabuły.
+    """
+    if not anchor:
+        return content, None
+    for offset, txt in reversed(_znajdz_naglowki(content)):
+        if txt == anchor and _ma_istotna_tresc(content, offset):
+            return content[offset:], txt
+    return content, None
+
+
 def _rozbij_naglowek(naglowek: str) -> tuple[str, int | None]:
     """Rozbija tekst nagłówka na ``(typ, numer)``.
 
@@ -774,14 +797,28 @@ class ProjektRezysera:
         self.nazwa_pliku: str = ""       # bez rozszerzenia, np. "kroniki_arkonii"
         self.last_response: str = ""     # ostatnia odpowiedź AI (diagnostyka)
 
+        # --- Sufiks pliku Pamięci Długotrwałej (v18.13) ---
+        # Do v18.12 `_streszczenie` było hard-kodem w dwóch ścieżkach. Od v18.13
+        # streszczenie powstaje jako POSTPRODUKCJA (`rola: pamiec_dlugotrwala`),
+        # więc nazwę pliku deklaruje jej YAML — reżyser, który uzna, że w jego
+        # projekcie plik ma się nazywać inaczej, zmienia `sufiks_pliku_wyniku`
+        # i nic w kodzie. Default z paczki `pl` (referencyjnej); GUI nadpisuje
+        # to wartością z listy postprodukcji, którą realnie wyświetla —
+        # `_migruj_sufiks_streszczenia` domyka przejście dla istniejących plików.
+        self.sufiks_streszczenia: str = pr.sufiks_pamieci_dlugotrwalej()
+
     # ------------------------------------------------------------------
     # Ścieżki pomocnicze
     # ------------------------------------------------------------------
     def _sciezka_historii(self, nazwa: str) -> str:
         return os.path.join(self.app_dir, SKRYPTY_DIR, f"{nazwa}.txt")
 
-    def _sciezka_streszczenia(self, nazwa: str) -> str:
-        return os.path.join(self.app_dir, SKRYPTY_DIR, f"{nazwa}_streszczenie.txt")
+    def _sciezka_streszczenia(self, nazwa: str, sufiks: str | None = None) -> str:
+        # Sufiks z przepisu postprodukcji (v18.13) — patrz `sufiks_streszczenia`
+        # w `__init__`. Argument `sufiks` służy shimowi migracyjnemu, który musi
+        # zbudować ścieżkę STAREJ nazwy pliku.
+        suf = self.sufiks_streszczenia if sufiks is None else sufiks
+        return os.path.join(self.app_dir, SKRYPTY_DIR, f"{nazwa}{suf}.txt")
 
     def _sciezka_ksiegi(self, nazwa: str) -> str:
         return os.path.join(self.app_dir, SKRYPTY_DIR, f"{nazwa}.md")
@@ -804,13 +841,16 @@ class ProjektRezysera:
             self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}.brainstorm.json"
         )
 
-    def _sciezka_streszczenie_meta(self, nazwa: str) -> str:
+    def _sciezka_streszczenie_meta(self, nazwa: str, sufiks: str | None = None) -> str:
         # v15.5: metadane streszczenia — ostatni nagłówek struktury wykryty
         # w momencie zapisu streszczenia. Anchor do rekoncyliacji końcówki
         # `.txt` po ręcznej edycji. runtime/skrypty/ (ukryte, gitignored) —
         # ten sam katalog co `.mode` / `.brainstorm.json`.
+        # v18.13: nazwa podąża za sufiksem pliku streszczenia (para plik+meta
+        # musi trzymać się razem, inaczej anchor osieroca się przy zmianie nazwy).
+        suf = self.sufiks_streszczenia if sufiks is None else sufiks
         return os.path.join(
-            self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}_streszczenie_meta.json"
+            self.app_dir, RUNTIME_DIR, SKRYPTY_DIR, f"{nazwa}{suf}_meta.json"
         )
 
     def _sciezka_obsada(self, nazwa: str) -> str:
@@ -866,6 +906,11 @@ class ProjektRezysera:
 
         with open(sciezka, "r", encoding="utf-8") as fh:
             content = fh.read()
+
+        # v18.13: sufiks pliku Pamięci Długotrwałej pochodzi teraz z YAML-a —
+        # przenieś istniejący plik spod historycznej nazwy PRZED rekoncyliacją,
+        # która sprawdza jego obecność (patrz `_migruj_sufiks_streszczenia`).
+        self._migruj_sufiks_streszczenia(nazwa)
 
         # --- Liczniki: bierzemy maksimum znalezionych numerów i +1 ---
         chapter_nums = [int(m) for m in re.findall(_WZORZEC_ROZDZIAL, content)]
@@ -1029,6 +1074,80 @@ class ProjektRezysera:
         self.full_story = _koncowka_po_znakach(content, MAX_TAIL_ZN)
         return WynikRekoncyliacji(tryb="koncowka", liczba_znakow=len(self.full_story))
 
+    def wejscie_pamieci_dlugotrwalej(
+        self, content: str, nazwa: str | None = None,
+    ) -> tuple[str, str, str | None]:
+        """Składniki wejścia postprodukcji ``rekoncyliacja`` — czytane z DYSKU.
+
+        Zwraca ``(stare_streszczenie, fragment_narracji, uzyty_naglowek)``:
+
+        * **stare_streszczenie** — treść ``skrypty/<nazwa><sufiks>.txt``, czyli
+          dotychczasowa Pamięć Długotrwała (``""`` gdy pierwszy raz);
+        * **fragment_narracji** — ``content`` od anchora z meta (:func:`wytnij_od_anchora`),
+          czyli część fabuły powstała PO ostatnim streszczeniu; przy pierwszym
+          streszczeniu (brak meta) — całość;
+        * **uzyty_naglowek** — nagłówek, od którego cięliśmy (``None`` = całość).
+
+        Źródłem jest dysk, nie RAM, bo postprodukcja z założenia działa na pliku
+        projektu wskazanym w polu nazwy — tak samo jak tytuły rozdziałów czy
+        raport całościowy. Dzięki temu narzędzie działa również dla projektu,
+        którego reżyser nie wczytał do panelu.
+        """
+        nazwa = nazwa or self.nazwa_pliku
+        stare = ""
+        sciezka_strsz = self._sciezka_streszczenia(nazwa)
+        if os.path.exists(sciezka_strsz):
+            try:
+                with open(sciezka_strsz, "r", encoding="utf-8") as fh:
+                    stare = fh.read().strip()
+            except (OSError, ValueError):
+                # Nieczytelne streszczenie (uprawnienia / zły kodek) NIE blokuje
+                # narzędzia — degradujemy do streszczenia całości od zera.
+                stare = ""
+
+        meta = self._wczytaj_streszczenie_meta(nazwa)
+        anchor = meta.get("marker_naglowek_tekst") if meta else None
+        # Anchor ma sens tylko razem ze streszczeniem: bez niego wszystko przed
+        # nagłówkiem przepadłoby bez śladu (nie jest nigdzie skompresowane).
+        fragment, uzyty = wytnij_od_anchora(content, anchor if stare else None)
+        return stare, fragment, uzyty
+
+    def _migruj_sufiks_streszczenia(self, nazwa: str) -> bool:
+        """v18.13: przenosi plik Pamięci Długotrwałej spod historycznej nazwy.
+
+        Do v18.12 plik nazywał się zawsze ``<nazwa>_streszczenie.txt``. Od v18.13
+        nazwę deklaruje ``sufiks_pliku_wyniku`` przepisu z rolą
+        ``pamiec_dlugotrwala`` — jeśli reżyser go zmienił, istniejące streszczenia
+        zostałyby OSIEROCONE: rekoncyliacja przy wczytaniu nie znalazłaby pliku
+        i potraktowała projekt jak „długa historia bez streszczenia" (czyli
+        wczytała całość, zamiast snapować do końcówki). Tu robimy jednorazowy
+        rename pary plik + meta.
+
+        Migrujemy WYŁĄCZNIE z historycznego ``_streszczenie`` — to jedyny stan
+        poprzedni, który znamy na pewno. Kolejne zmiany sufiksu (``_memoria`` →
+        ``_pamiec``) wymagają ręcznej zmiany nazwy pliku; manual mówi o tym wprost.
+
+        Cichy fail przy błędzie I/O (read-only nośnik, plik otwarty w Notatniku) —
+        wzorzec migracji z v15.2.3 / v17.4. Zwraca True, gdy coś przeniesiono.
+        """
+        stary = pr.SUFIKS_STRESZCZENIA_DOMYSLNY
+        if not self.sufiks_streszczenia or self.sufiks_streszczenia == stary:
+            return False
+
+        przeniesiono = False
+        for buduj in (self._sciezka_streszczenia, self._sciezka_streszczenie_meta):
+            sciezka_stara = buduj(nazwa, stary)
+            sciezka_nowa = buduj(nazwa)
+            if not os.path.exists(sciezka_stara) or os.path.exists(sciezka_nowa):
+                continue
+            try:
+                os.makedirs(os.path.dirname(sciezka_nowa), exist_ok=True)
+                os.rename(sciezka_stara, sciezka_nowa)
+                przeniesiono = True
+            except OSError:
+                pass
+        return przeniesiono
+
     def _skasuj_streszczenie_i_meta(self) -> bool:
         """D1: usuwa `_streszczenie.txt` + `_streszczenie_meta.json` i zeruje
         `summary_text`. Zwraca True jeśli skasowano przynajmniej jeden plik."""
@@ -1046,9 +1165,16 @@ class ProjektRezysera:
         self.summary_text = ""
         return skasowano
 
-    def _wczytaj_streszczenie_meta(self) -> dict[str, Any] | None:
-        """Wczytuje `_streszczenie_meta.json` lub None (brak / błąd parsowania)."""
-        sciezka = self._sciezka_streszczenie_meta(self.nazwa_pliku)
+    def _wczytaj_streszczenie_meta(
+        self, nazwa: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Wczytuje meta streszczenia lub None (brak / błąd parsowania).
+
+        ``nazwa`` (v18.13) pozwala odczytać meta projektu, który nie jest
+        załadowany — postprodukcja Pamięci Długotrwałej operuje na pliku z dysku
+        wskazanym w polu nazwy, dokładnie jak pozostałe narzędzia postprodukcji.
+        """
+        sciezka = self._sciezka_streszczenie_meta(nazwa or self.nazwa_pliku)
         if not os.path.exists(sciezka):
             return None
         try:
@@ -1057,10 +1183,30 @@ class ProjektRezysera:
         except (OSError, ValueError):
             return None
 
-    def _zapisz_streszczenie_meta(self) -> None:
-        """Wykrywa ostatni nagłówek struktury w `full_story` i zapisuje meta JSON
-        (anchor rekoncyliacji). Wołane z :meth:`zapisz_streszczenie`."""
-        naglowki = _znajdz_naglowki(self.full_story)
+    def _zapisz_streszczenie_meta(
+        self, content: str | None = None, nazwa: str | None = None,
+    ) -> None:
+        """Wykrywa ostatni nagłówek struktury i zapisuje meta JSON (anchor).
+
+        Domyślnie patrzy na ``full_story`` (pamięć robocza). ``content`` (v18.13)
+        pozwala wskazać PEŁNĄ treść pliku projektu — postprodukcja Pamięci
+        Długotrwałej streszcza to, co na dysku, więc anchor musi wskazywać
+        ostatni nagłówek PLIKU. Gdyby liczyć go z ``full_story``, która po
+        wczytaniu bywa tylko końcówką (wariant „snap"), anchor cofnąłby się
+        w przeszłość i następna rekoncyliacja wciągnęłaby ponownie materiał
+        już skompresowany.
+
+        ``nazwa`` (v18.13) kieruje zapis do meta innego projektu niż otwarty —
+        wtedy ``full_story`` NIE jest sensownym źródłem, więc przy braku
+        ``content`` anchor wychodzi pusty (rekoncyliacja spadnie na fallback
+        znakowy, zachowanie bezpieczne).
+        """
+        cel = nazwa or self.nazwa_pliku
+        if content is not None:
+            zrodlo = content
+        else:
+            zrodlo = self.full_story if cel == self.nazwa_pliku else ""
+        naglowki = _znajdz_naglowki(zrodlo)
         if naglowki:
             _, tekst_naglowka = naglowki[-1]
             marker_typ, marker_numer = _rozbij_naglowek(tekst_naglowka)
@@ -1070,9 +1216,9 @@ class ProjektRezysera:
             "marker_typ": marker_typ,
             "marker_numer": marker_numer,
             "marker_naglowek_tekst": tekst_naglowka,
-            "dlugosc_full_story_przy_streszczeniu": len(self.full_story),
+            "dlugosc_full_story_przy_streszczeniu": len(zrodlo),
         }
-        sciezka = self._sciezka_streszczenie_meta(self.nazwa_pliku)
+        sciezka = self._sciezka_streszczenie_meta(cel)
         os.makedirs(os.path.dirname(sciezka), exist_ok=True)
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(meta, fh, ensure_ascii=False, indent=2)
@@ -1100,20 +1246,42 @@ class ProjektRezysera:
         self.world_lore = tresc
         return sciezka
 
-    def zapisz_streszczenie(self, tresc: str) -> str:
-        """Zapisuje Pamięć Długotrwałą do ``skrypty/<nazwa>_streszczenie.txt``."""
-        self._wymagaj_nazwy()
+    def zapisz_streszczenie(
+        self,
+        tresc: str,
+        nazwa: str | None = None,
+        content: str | None = None,
+    ) -> str:
+        """Zapisuje Pamięć Długotrwałą do ``skrypty/<nazwa><sufiks>.txt``.
+
+        Args:
+            tresc:   Treść streszczenia.
+            nazwa:   (v18.13) Nazwa projektu — postprodukcja Pamięci Długotrwałej
+                     bierze ją z pola GUI i może dotyczyć projektu, który nie jest
+                     wczytany do panelu (wzorzec :meth:`zapisz_obsada`). Wtedy NIE
+                     dotykamy ``summary_text``, bo w RAM siedzi inny projekt.
+            content: (v18.13) Pełna treść pliku projektu do wyliczenia anchora —
+                     patrz :meth:`_zapisz_streszczenie_meta`.
+        """
+        cel = nazwa or self.nazwa_pliku
+        if not cel:
+            raise ValueError(
+                "ProjektRezysera: zapis streszczenia wymaga nazwy projektu."
+            )
         skrypty = os.path.join(self.app_dir, SKRYPTY_DIR)
         os.makedirs(skrypty, exist_ok=True)
-        sciezka = self._sciezka_streszczenia(self.nazwa_pliku)
+        sciezka = self._sciezka_streszczenia(cel)
         with open(sciezka, "w", encoding="utf-8") as fh:
             fh.write(tresc)
-        self.summary_text = tresc
-        # v15.5: zapisz meta-marker (ostatni nagłówek struktury w full_story
-        # w momencie streszczania) — anchor do rekoncyliacji końcówki `.txt`.
-        # Niekrytyczne: brak meta → rekoncyliacja użyje fallbacku po znakach.
+        # Stan w RAM synchronizujemy TYLKO gdy zapis dotyczy otwartego projektu —
+        # inaczej pole „Pamięć" pokazywałoby streszczenie cudzej historii.
+        if cel == self.nazwa_pliku:
+            self.summary_text = tresc
+        # v15.5: zapisz meta-marker (ostatni nagłówek struktury) — anchor do
+        # rekoncyliacji końcówki `.txt`. Niekrytyczne: brak meta → rekoncyliacja
+        # użyje fallbacku po znakach.
         try:
-            self._zapisz_streszczenie_meta()
+            self._zapisz_streszczenie_meta(content, nazwa=cel)
         except OSError:
             pass
         return sciezka
