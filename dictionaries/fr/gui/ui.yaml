@@ -592,6 +592,16 @@ rezyser:
   tytuly_blad_nieznany: "Erreur inconnue lors de l'attribution des titres."
   tytuly_czesciowe_naglowek: "⚠️ Résultats partiels (génération interrompue par une erreur) :\n\n{wyniki}"
   blad_zapisu_do_pliku: "Erreur de sauvegarde dans le fichier :\n{tresc_bledu}"
+  # Fiche de publication (v18.14) – remarques souples du validateur. Les noms des
+  # champs ({pole}) restent en anglais : le formulaire de la plateforme est anglais.
+  publikacja_ostrz_naglowek: "La fiche est prête, mais elle demande une correction manuelle avant d'être collée dans le formulaire :"
+  publikacja_ostrz_opis: "La description compte {znaki} caractères alors que le formulaire en accepte au maximum {limit}. Raccourcissez-la avant de la coller."
+  publikacja_ostrz_gatunki: "Genres hors de la liste canonique de la plateforme : {wartosci}. Choisissez des remplaçants dans la liste `gatunki_dozwolone` du fichier rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    Le public « {wartosc} » n'est pas une valeur du formulaire. Autorisés : {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    La fiche ne contient pas le champ « {pole} » rempli – le formulaire l'exige.
+  publikacja_ostrz_isbn: "Des chiffres sont apparus dans le champ ISBN. L'ISBN est un numéro enregistré – saisissez le vôtre ou laissez le champ à remplir."
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
@@ -658,7 +668,9 @@ rezyser:
   postprod_postep_gotowe: Post-production terminée.
   postprod_pusta_tresc: Le modèle a renvoyé une réponse vide. Veuillez réessayer.
   postprod_ucieta_tresc: Le résultat de la post-production a atteint la limite de longueur et sa fin a peut-être été tronquée. Le résultat est disponible — vérifiez la fin, et si elle est coupée, relancez l'outil ou augmentez la valeur `max_tokens_wyjscia` dans le fichier YAML de l'outil.
-  postprod_ostrzezenie_tytul: Le résultat a peut-être été tronqué
+  # Titre commun aux avertissements de troncature ET aux remarques du validateur
+  # de la fiche (v18.14), donc neutre — le corps du message dit quoi vérifier.
+  postprod_ostrzezenie_tytul: "Le résultat demande une vérification"
   postprod_nadpisac_tytul: Le fichier de résultat existe déjà
   postprod_nadpisac_tresc: Le fichier {plik} existe déjà dans le dossier skrypty. Voulez-vous l'écraser avec le nouveau résultat ?
   postprod_dlg_lbl: "Résultat de l'outil — copiez (Ctrl+A, Ctrl+C) ou fermez :"

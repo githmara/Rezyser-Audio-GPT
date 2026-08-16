@@ -592,6 +592,16 @@ rezyser:
   tytuly_blad_nieznany: "Tuntematon virhe otsikoinnissa."
   tytuly_czesciowe_naglowek: "⚠️ Osittaiset tulokset (generointi keskeytettiin virheellä):\n\n{wyniki}"
   blad_zapisu_do_pliku: "Tiedostoon tallennusvirhe:\n{tresc_bledu}"
+  # Julkaisukortti (v18.14) – validaattorin pehmeät huomiot. Kenttien nimet
+  # ({pole}) pysyvät englanniksi: alustan lomake on englanninkielinen.
+  publikacja_ostrz_naglowek: "Kortti on valmis, mutta vaatii käsin tehtävän korjauksen ennen liittämistä lomakkeeseen:"
+  publikacja_ostrz_opis: "Kuvauksessa on {znaki} merkkiä, ja lomake hyväksyy enintään {limit}. Lyhennä sitä ennen liittämistä."
+  publikacja_ostrz_gatunki: "Lajityyppejä alustan kanonisen listan ulkopuolelta: {wartosci}. Valitse korvaajat listalta `gatunki_dozwolone` tiedostossa rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    Kohderyhmä ”{wartosc}” ei ole lomakkeen arvo. Sallitut: {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    Kortissa ei ole täytettyä kenttää ”{pole}” – lomake vaatii sen.
+  publikacja_ostrz_isbn: "ISBN-kenttään ilmestyi numeroita. ISBN on rekisteröity numero – kirjoita oma tai jätä kenttä täytettäväksi."
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
@@ -658,7 +668,9 @@ rezyser:
   postprod_postep_gotowe: Jälkituotanto valmis.
   postprod_pusta_tresc: Malli palautti tyhjän vastauksen. Yritä uudelleen.
   postprod_ucieta_tresc: Jälkituotannon tulos saavutti pituusrajan, ja sen loppuosa on saattanut leikkautua. Tulos on käytettävissä — tarkista lopetus, ja jos se on kesken, suorita työkalu uudelleen tai kasvata työkalun YAML-tiedoston arvoa `max_tokens_wyjscia`.
-  postprod_ostrzezenie_tytul: Tulos on saattanut leikkautua
+  # Yhteinen otsikko katkeamisvaroituksille JA julkaisukortin validaattorin
+  # huomioille (v18.14), siksi neutraali — viestin runko kertoo, mitä tarkistaa.
+  postprod_ostrzezenie_tytul: "Tulos vaatii tarkistuksen"
   postprod_nadpisac_tytul: Tulostiedosto on jo olemassa
   postprod_nadpisac_tresc: Tiedosto {plik} on jo olemassa skrypty-kansiossa. Korvataanko se uudella tuloksella?
   postprod_dlg_lbl: 'Työkalun tulos — kopioi (Ctrl+A, Ctrl+C) tai sulje:'

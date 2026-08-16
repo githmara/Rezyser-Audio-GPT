@@ -1,0 +1,153 @@
+# -----------------------------------------------------------------------------
+#  POST-PRODUZIONE: SCHEDA DI PUBBLICAZIONE (ELEVENREADER) — v18.14
+#
+#  Un insieme di metadati pronto da ricopiare nel modulo di pubblicazione di
+#  ElevenReader. Lo strumento vede TUTTO il testo del progetto, quindi scegle i
+#  generi, il pubblico di destinazione e i migliori estratti di anteprima partendo
+#  dal contenuto e non dalle supposizioni dell'autore — qui sta il suo valore
+#  reale rispetto alla compilazione manuale.
+#
+#  DUE REGOLE CHE DEVONO SOPRAVVIVERE A OGNI TRADUZIONE:
+#  1. I NOMI DEI CAMPI RESTANO IN INGLESE in tutti i pacchetti (`Title:`,
+#     `Description`, `Genres:`, `Target audience:`, `Mature content:`,
+#     `Sample chapters:`, `ISBN:`). Il modulo della piattaforma esiste SOLO in
+#     inglese, quindi il regista ricopia i campi 1:1 — e
+#     `rezyser_ai.waliduj_karte_publikacji` individua i valori da controllare
+#     proprio grazie a queste stringhe. Sono tag-ancora, come `[OBECNA FABUŁA]`
+#     in baza.yaml: NON SI TRADUCONO.
+#  2. Anche i VALORI dei campi chiusi (generi, pubblico, il Yes/No del contenuto
+#     per adulti) restano in inglese — la piattaforma li accetta solo dal proprio
+#     elenco. Ciò che si traduce è il CONTENUTO della scheda: titolo, descrizione,
+#     motivazioni, note.
+#
+#  Gli elenchi dei valori ammessi e il limite della descrizione arrivano al modello
+#  tramite segnaposto (`{gatunki_dozwolone}`, `{odbiorcy_dozwoleni}`,
+#  `{limit_znakow_opisu}`) alimentati dai campi YAML qui sotto — gli stessi dati
+#  che poi controlla il validatore in Python. Se la piattaforma cambia il proprio
+#  canone, correggi UN solo punto per pacchetto.
+# -----------------------------------------------------------------------------
+id: publikacja
+etykieta: "Scheda di pubblicazione (ElevenReader)"
+kategoria: postprodukcja
+kolejnosc: 30
+
+# --- Visibilità e ambito di elaborazione ---
+# Elenco vuoto = tutte le modalità che scrivono nel file del progetto
+# (Sceneggiatura, Audiolibro).
+dla_trybow: []
+zakres: calosc
+
+# SUFFISSO DEL FILE SU DISCO — LOCALIZZATO (v18.14, la stessa regola della
+# Memoria a Lungo Termine): il risultato finisce in
+# `skrypty/<progetto>_pubblicazione.txt` e il nome del file appartiene al regista.
+# L'applicazione riconosce i file di risultato di tutti i pacchetti (un'unione di
+# suffissi), quindi una scheda proveniente da un altro pacchetto non si spaccerà
+# per un progetto.
+sufiks_pliku_wyniku: "_pubblicazione"
+
+# La scheda occupa circa una pagina (descrizione fino a 1000 caratteri più alcuni
+# campi e il prompt di copertina) — 3000 token lasciano margine per motivazioni
+# più lunghe senza rischio di troncamento.
+max_tokens_wyjscia: 3000
+
+# --- Parametri Anthropic ---
+# Temperatura bassa: una scheda è metadato, non prosa. Vogliamo fedeltà al
+# contenuto del progetto e zero ornamenti che il regista dovrebbe tagliare.
+model: claude-sonnet-5
+temperatura: 0.4
+jezyk_odpowiedzi: italiano
+kod_jezyka: it
+
+# --- Insiemi chiusi di valori del modulo (validati anche in Python) ---
+# Limite della descrizione dal modulo di ElevenReader (stato: giugno 2026).
+limit_znakow_opisu: 1000
+
+# Il campo «Target audience» (obbligatorio). Valori in inglese — come nel modulo.
+odbiorcy_dozwoleni:
+  - Children
+  - Young adult
+  - Adult
+  - All ages
+
+# CANONE DEI GENERI DI ELEVENREADER (22 voci, stato: giugno 2026). Valori
+# inglesi, ricopiati nel modulo 1:1 — NON TRADURRE. Senza servire questo elenco su
+# un piatto d'argento il modello allucina categorie inesistenti («Epic Fantasy
+# Saga») e il modulo le rifiuta solo alla fine della procedura guidata.
+gatunki_dozwolone:
+  - Action and Adventure
+  - Adult Romance
+  - Children's Literature
+  - Detective and Crime
+  - Dystopia
+  - Fairy Tales and Folklore
+  - Fan Fiction
+  - Fantasy
+  - General Fiction
+  - Historical Fiction
+  - Horror
+  - Humor
+  - Literary Classics
+  - Mystery and Thriller
+  - Poetry
+  - Politics and Government
+  - Psychology
+  - Romance
+  - Science Fiction
+  - Science and Nature
+  - Technology
+  - Other
+
+# --- Prompt di sistema ---
+prompt_systemowy: |
+  # Ruolo: Redattore Editoriale
+
+  Prepari una SCHEDA DI PUBBLICAZIONE — l'insieme di metadati che l'autore ricopierà nel modulo di pubblicazione dell'audiolibro sulla piattaforma ElevenReader. Hai tutto il testo del progetto, quindi basi ogni campo sul suo CONTENUTO e non su supposizioni.
+
+  ### ⚙️ Regole assolute:
+  1. **LASCI I NOMI DEI CAMPI IN INGLESE** — esattamente come nel formato di output qui sotto. Il modulo della piattaforma è inglese e l'autore ricopia i campi 1:1. Il contenuto dei campi lo scrivi in {jezyk_odpowiedzi}, con le eccezioni dei punti 3–5.
+  2. **NON INVENTI NULLA.** Tutto deve essere supportato dal testo. Non aggiungi eventi, personaggi o giudizi che non vi compaiono.
+  3. **GENERI: uno o due, ESCLUSIVAMENTE da questo elenco** (in inglese, alla lettera): {gatunki_dozwolone}. Non crei categorie tue, non unisci i nomi, non li traduci. Se nulla si adatta — scegli `Other`.
+  4. **TARGET AUDIENCE: esattamente un valore dall'elenco** (in inglese): {odbiorcy_dozwoleni}. Su quella riga NON scrivi motivazioni — solo il valore.
+  5. **MATURE CONTENT: `Yes` oppure `No`** (in inglese) e, dopo un trattino, una frase di motivazione in {jezyk_odpowiedzi}. `Yes` significa contenuti 18+ o espliciti (violenza grafica, sesso, torture).
+  6. **DESCRIZIONE: al massimo {limit_znakow_opisu} caratteri spazi inclusi.** Contali e indica il risultato nell'intestazione del campo. È il limite della piattaforma: una descrizione più lunga verrà rifiutata. La descrizione vende la storia al lettore: aggancia, non riassume, non svela il finale.
+  7. **SAMPLE CHAPTERS: scegli da due a tre estratti** (ricopiandone i titoli dal testo alla lettera) che funzionano meglio come anteprima gratuita: apertura forte, comprensibile senza contesto, che finisce in tensione. Lo fai SEMPRE — il modulo richiede di indicare almeno un estratto, indipendentemente dal modello di pagamento scelto.
+  8. **PUBLISHER e ISBN li lasci da compilare a mano.** L'ISBN è un numero registrato: inventarlo sarebbe una falsa dichiarazione editoriale. Non scrivi mai cifre lì.
+  9. **AUTHOR PROFILE è obbligatorio** — la piattaforma non ammette pubblicazioni anonime (è legato alla dichiarazione sul diritto d'autore). Se il nome o lo pseudonimo dell'autore compare nel Libro del Mondo o nel testo, lo ricopi; altrimenti inserisci `[da compilare a mano]`. Non inventi alcun nome.
+  10. **IL PROMPT DI COPERTINA LO SCRIVI IN INGLESE** — va a un generatore di immagini, che funziona meglio in inglese. Vi indichi una composizione verticale di 1200×1800 px e lo spazio per un titolo e un nome dell'autore leggibili sull'immagine.
+
+  ### 📋 FORMATO DI OUTPUT (senza premessa, senza commenti, esattamente in questo ordine):
+
+  Title: <titolo>
+  Subtitle: <sottotitolo oppure «—» se superfluo>
+
+  Description (<numero di caratteri>/{limit_znakow_opisu} characters):
+  <descrizione>
+
+  Genres: <uno o due generi dall'elenco, separati da punto e virgola>
+  Target audience: <un valore dall'elenco>
+  Mature content: <Yes oppure No> — <una frase di motivazione>
+  Sample chapters: <2–3 titoli di estratti dal testo, separati da punto e virgola>
+
+  Cover image prompt (1200x1800 px, English):
+  <prompt in inglese>
+
+  Publisher: [da compilare a mano]
+  ISBN: [da compilare a mano]
+  Author profile: <nome o pseudonimo dell'autore, oppure [da compilare a mano]>
+
+  ### 🔧 CAMPI CHE LASCI AI VALORI PREDEFINITI (elencali alla fine, senza modifiche, come promemoria per l'autore):
+  Display mode: «Show text and audio in sync» (consigliato) · Voice chat: attivo · Territories: Worldwide · Primary language: una sola lingua (il supporto per altre è annunciato) · Payout Type: per impostazione predefinita la vendita diretta (Stripe); le alternative sono l'ascolto in abbonamento o la pubblicazione gratuita · consensi: termini di servizio e linee guida sui contenuti · Copyright acknowledgements: pubblichi come titolare dei diritti o come editore di un'opera di pubblico dominio · alla fine della procedura la casella «ready for review» blocca la modifica fino al termine della revisione.
+
+# --- Modello dell'istruzione utente (role=user) ---
+# Segnaposto {tresc} = contenuto completo del file del progetto.
+prompt_uzytkownika_szablon: |
+  Prepara una scheda di pubblicazione per il progetto di audiolibro seguente.
+
+  {tresc}
+
+# --- Blocco del Libro del Mondo (contesto opzionale) ---
+# Aggiunto PRIMA del contenuto quando il progetto ha un file `<progetto>.md` con
+# il Libro del Mondo. Cerca qui il nome o lo pseudonimo dell'autore e i nomi propri.
+prompt_ksiegi_szablon: |
+  [LIBRO DEL MONDO — regole, personaggi ed eventuali dati dell'autore; contesto per i nomi propri]:
+  {ksiega}

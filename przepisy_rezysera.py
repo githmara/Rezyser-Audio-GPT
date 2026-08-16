@@ -355,6 +355,18 @@ class PrzepisRezysera:
     # --- Postprodukcja: rola wyniku (v18.13) ---
     rola: str = ""
 
+    # --- Postprodukcja: walidacja karty publikacyjnej (v18.14) ---
+    # Listy DOZWOLONYCH wartości pól, które platforma publikacyjna przyjmuje
+    # tylko z zamkniętego zbioru (gatunki, grupa odbiorców) + limit długości
+    # opisu. Trafiają do prompta przez placeholdery (`{gatunki_dozwolone}`,
+    # `{odbiorcy_dozwoleni}`, `{limit_znakow_opisu}`) ORAZ do walidatora
+    # w Pythonie — model dostaje listę na tacy, a my sprawdzamy, czy jej
+    # nie zignorował. Bez tej pary halucynowana kategoria wraca do reżysera
+    # jako gotowa do wklejenia, a formularz odrzuca ją dopiero na platformie.
+    gatunki_dozwolone: list[str] = field(default_factory=list)
+    odbiorcy_dozwoleni: list[str] = field(default_factory=list)
+    limit_znakow_opisu: int = 0
+
 
 # =============================================================================
 # Cache wczytanych przepisów
@@ -549,6 +561,14 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             sufiks_pliku_wyniku=sufiks_pliku_wyniku,
             prompt_ksiegi_szablon=str(data.get("prompt_ksiegi_szablon", "")),
             rola=rola,
+            # v18.14: zamknięte zbiory wartości + limit opisu karty
+            # publikacyjnej. `_lista_str` przyjmuje też pojedynczy string
+            # (naturalny skrót w ręcznie pisanym YAML-u) i wycina puste wpisy,
+            # żeby literówka typu „- " nie weszła na listę dozwolonych gatunków
+            # jako pusty ciąg (walidator uznałby wtedy każdy gatunek za legalny).
+            gatunki_dozwolone=_lista_str(data.get("gatunki_dozwolone")),
+            odbiorcy_dozwoleni=_lista_str(data.get("odbiorcy_dozwoleni")),
+            limit_znakow_opisu=max(0, int(data.get("limit_znakow_opisu") or 0)),
         )
     except (TypeError, ValueError, AttributeError) as exc:
         print(
@@ -557,6 +577,21 @@ def _yaml_to_przepis(data: dict, sciezka: str) -> PrzepisRezysera | None:
             file=sys.stderr,
         )
         return None
+
+
+def _lista_str(surowe: Any) -> list[str]:
+    """Normalizuje pole YAML na listę niepustych stringów (v18.14).
+
+    Przyjmuje listę, pojedynczą wartość (skrót w ręcznie pisanym YAML-u) i brak
+    pola. Zachowuje ORYGINALNĄ pisownię wpisów — w karcie publikacyjnej gatunki
+    trafiają do formularza platformy dosłownie, więc `lower()` byłby szkodliwy
+    (walidator porównuje bez uwzględniania wielkości liter osobno).
+    """
+    if surowe is None:
+        return []
+    if not isinstance(surowe, list):
+        surowe = [surowe]
+    return [str(x).strip() for x in surowe if str(x).strip()]
 
 
 def _wczytaj_yaml(sciezka: str) -> dict:
@@ -963,6 +998,13 @@ def buduj_pelny_prompt_systemowy(
         przepis.prompt_systemowy,
         world_context=world_context,
         jezyk_odpowiedzi=przepis.jezyk_odpowiedzi,
+        # v18.14: zamknięte zbiory wartości karty publikacyjnej wstrzykiwane
+        # z pól YAML — jedno źródło prawdy dla prompta i walidatora. Gdyby
+        # lingwista wypisał gatunki wprost w treści prompta, każda korekta listy
+        # (platforma zmienia kategorie) musiałaby trafić w 9 paczek DWA razy.
+        gatunki_dozwolone="; ".join(przepis.gatunki_dozwolone),
+        odbiorcy_dozwoleni="; ".join(przepis.odbiorcy_dozwoleni),
+        limit_znakow_opisu=przepis.limit_znakow_opisu or "",
     )
     sufiks = ""
     if sufiks_nazwa:

@@ -592,6 +592,16 @@ rezyser:
   tytuly_blad_nieznany: "Errore sconosciuto durante la titolazione."
   tytuly_czesciowe_naglowek: "⚠️ Risultati parziali (generazione interrotta da un errore):\n\n{wyniki}"
   blad_zapisu_do_pliku: "Errore di salvataggio nel file:\n{tresc_bledu}"
+  # Scheda di pubblicazione (v18.14) – note morbide del validatore. I nomi dei
+  # campi ({pole}) restano in inglese: il modulo della piattaforma è inglese.
+  publikacja_ostrz_naglowek: "La scheda è pronta, ma richiede una correzione manuale prima di incollarla nel modulo:"
+  publikacja_ostrz_opis: "La descrizione ha {znaki} caratteri e il modulo ne accetta al massimo {limit}. Accorciala prima di incollarla."
+  publikacja_ostrz_gatunki: "Generi fuori dall'elenco canonico della piattaforma: {wartosci}. Scegli i sostituti dall'elenco `gatunki_dozwolone` in rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    Il pubblico «{wartosc}» non è un valore del modulo. Ammessi: {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    La scheda non contiene il campo «{pole}» compilato – il modulo lo richiede.
+  publikacja_ostrz_isbn: "Nel campo ISBN sono comparse delle cifre. L'ISBN è un numero registrato – inserisci il tuo oppure lascia il campo da compilare."
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
@@ -660,7 +670,9 @@ rezyser:
   postprod_postep_gotowe: Post-produzione completata.
   postprod_pusta_tresc: Il modello ha restituito una risposta vuota. Riprova.
   postprod_ucieta_tresc: 'Il risultato della post-produzione ha raggiunto il limite di lunghezza e la parte finale potrebbe essere stata troncata. Il risultato è disponibile: controlla la conclusione e, se risulta interrotta, esegui di nuovo lo strumento oppure aumenta il valore di `max_tokens_wyjscia` nel file YAML dello strumento.'
-  postprod_ostrzezenie_tytul: Il risultato potrebbe essere stato troncato
+  # Titolo comune agli avvisi di troncamento E alle note del validatore della
+  # scheda (v18.14), quindi neutro — il corpo del messaggio dice cosa controllare.
+  postprod_ostrzezenie_tytul: "Il risultato richiede un controllo"
   postprod_nadpisac_tytul: Il file del risultato esiste già
   postprod_nadpisac_tresc: Il file {plik} esiste già nella cartella skrypty. Sovrascriverlo con il nuovo risultato?
   postprod_dlg_lbl: 'Risultato dello strumento — copia (Ctrl+A, Ctrl+C) o chiudi:'

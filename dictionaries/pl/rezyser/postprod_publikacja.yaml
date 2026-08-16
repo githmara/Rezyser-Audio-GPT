@@ -1,0 +1,145 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUKCJA: KARTA PUBLIKACYJNA (ELEVENREADER) — v18.14
+#
+#  Gotowy do przepisania zestaw metadanych do formularza publikacji na
+#  ElevenReaderze. Narzędzie ma dostęp do CAŁEGO tekstu projektu, więc typuje
+#  gatunki, grupę odbiorców i najlepsze fragmenty na próbkę na podstawie treści,
+#  a nie domysłów autora — to jego realna wartość wobec ręcznego wypełniania.
+#
+#  DWIE ZASADY, KTÓRE MUSZĄ ZOSTAĆ NIENARUSZONE PRZY TŁUMACZENIU:
+#  1. NAZWY PÓL SĄ PO ANGIELSKU we wszystkich paczkach (`Title:`, `Description`,
+#     `Genres:`, `Target audience:`, `Mature content:`, `Sample chapters:`,
+#     `ISBN:`). Formularz platformy istnieje WYŁĄCZNIE po angielsku, więc reżyser
+#     przepisuje pola 1:1 — a `rezyser_ai.waliduj_karte_publikacji` po tych
+#     samych napisach odnajduje wartości do sprawdzenia. To tagi-kotwice, jak
+#     `[OBECNA FABUŁA]` w baza.yaml: NIE TŁUMACZYMY ICH.
+#  2. WARTOŚCI pól zamkniętych (gatunki, grupa odbiorców, TAK/NIE dojrzałości)
+#     też zostają po angielsku — platforma przyjmuje je tylko z własnej listy.
+#     Tłumaczona jest TREŚĆ karty: tytuł, opis, uzasadnienia, uwagi.
+#
+#  Listy dozwolonych wartości i limit opisu podajemy modelowi przez placeholdery
+#  (`{gatunki_dozwolone}`, `{odbiorcy_dozwoleni}`, `{limit_znakow_opisu}`)
+#  z pól YAML niżej — te same dane sprawdza potem walidator w Pythonie. Gdy
+#  platforma zmieni kanon kategorii, poprawiasz JEDNO miejsce w każdej paczce.
+# -----------------------------------------------------------------------------
+id: publikacja
+etykieta: "Karta publikacyjna (ElevenReader)"
+kategoria: postprodukcja
+kolejnosc: 30
+
+# --- Widoczność i zakres przetwarzania ---
+# Pusta lista = wszystkie tryby zapisujące do pliku projektu (Skrypt, Audiobook).
+dla_trybow: []
+zakres: calosc
+
+# SUFIKS PLIKU NA DYSKU — LOKALIZOWANY (v18.14, ta sama reguła co przy Pamięci
+# Długotrwałej): wynik trafia do `skrypty/<projekt>_publikacja.txt`, a nazwa
+# pliku należy do reżysera. Aplikacja rozpoznaje pliki wyników wszystkich paczek
+# (unia sufiksów), więc karta z innej paczki nie zacznie udawać projektu.
+sufiks_pliku_wyniku: "_publikacja"
+
+# Karta to ~1 strona (opis do 1000 znaków + kilka pól i prompt okładki) —
+# 3000 tokenów daje zapas na dłuższe uzasadnienia bez ryzyka ucięcia.
+max_tokens_wyjscia: 3000
+
+# --- Parametry Anthropic ---
+# Niska temperatura: karta to metadane, nie proza. Chcemy wierność treści
+# projektu i zero ozdobników, które reżyser musiałby wycinać przed wklejeniem.
+model: claude-sonnet-5
+temperatura: 0.4
+jezyk_odpowiedzi: polsku
+kod_jezyka: pl
+
+# --- Zamknięte zbiory wartości formularza (walidowane też w Pythonie) ---
+# Limit opisu z formularza ElevenReadera (stan: czerwiec 2026).
+limit_znakow_opisu: 1000
+
+# Pole „Target audience" (wymagane). Wartości po angielsku — jak w formularzu.
+odbiorcy_dozwoleni:
+  - Children
+  - Young adult
+  - Adult
+  - All ages
+
+# KANON GATUNKÓW ElevenReadera (22 pozycje, stan: czerwiec 2026). Wartości
+# angielskie, przepisywane do formularza 1:1 — NIE TŁUMACZYĆ. Bez podania tej
+# listy modelowi na tacy halucynuje nieistniejące kategorie („Epic Fantasy Saga"),
+# a formularz odrzuca je dopiero na końcu kreatora.
+gatunki_dozwolone:
+  - Action and Adventure
+  - Adult Romance
+  - Children's Literature
+  - Detective and Crime
+  - Dystopia
+  - Fairy Tales and Folklore
+  - Fan Fiction
+  - Fantasy
+  - General Fiction
+  - Historical Fiction
+  - Horror
+  - Humor
+  - Literary Classics
+  - Mystery and Thriller
+  - Poetry
+  - Politics and Government
+  - Psychology
+  - Romance
+  - Science Fiction
+  - Science and Nature
+  - Technology
+  - Other
+
+# --- Prompt systemowy ---
+prompt_systemowy: |
+  # Rola: Redaktor Wydawniczy
+
+  Przygotowujesz KARTĘ PUBLIKACYJNĄ — zestaw metadanych, który autor przepisze do formularza publikacji audiobooka na platformie ElevenReader. Masz cały tekst projektu, więc każde pole opierasz na TREŚCI, nie na domysłach.
+
+  ### ⚙️ Reguły bezwzględne:
+  1. **NAZWY PÓL ZOSTAWIASZ PO ANGIELSKU** — dokładnie tak, jak w formacie wyjściowym niżej. Formularz platformy jest angielski, autor przepisuje pola 1:1. Treść pól piszesz po {jezyk_odpowiedzi}, z wyjątkami wymienionymi w punktach 3–5.
+  2. **NIE ZMYŚLASZ FAKTÓW.** Wszystko musi mieć pokrycie w tekście. Nie dopisujesz wydarzeń, postaci ani ocen, których w nim nie ma.
+  3. **GATUNKI: od jednego do dwóch, WYŁĄCZNIE z tej listy** (po angielsku, dosłownie): {gatunki_dozwolone}. Nie tworzysz własnych kategorii, nie łączysz nazw, nie tłumaczysz ich. Jeśli nic nie pasuje — wybierasz `Other`.
+  4. **TARGET AUDIENCE: dokładnie jedna wartość z listy** (po angielsku): {odbiorcy_dozwoleni}. W tej linii NIE piszesz uzasadnienia — sama wartość.
+  5. **MATURE CONTENT: `Yes` albo `No`** (po angielsku), a po myślniku jedno zdanie uzasadnienia po {jezyk_odpowiedzi}. `Yes` oznacza treści 18+ albo drastyczne (przemoc graficzna, seks, tortury).
+  6. **OPIS: maksymalnie {limit_znakow_opisu} znaków ze spacjami.** Policz je i podaj wynik w nagłówku pola. To limit platformy — dłuższy opis zostanie odrzucony. Opis sprzedaje historię czytelnikowi: zaczepia, nie streszcza, nie ujawnia zakończenia.
+  7. **SAMPLE CHAPTERS: typujesz od dwóch do trzech fragmentów** (przepisując dokładnie ich nagłówki z tekstu) najlepiej nadających się na darmową próbkę: mocne wejście, zrozumiałe bez kontekstu, kończące się napięciem. Robisz to ZAWSZE — formularz wymaga wskazania co najmniej jednego fragmentu, niezależnie od wybranego modelu płatności.
+  8. **PUBLISHER i ISBN pozostawiasz do uzupełnienia ręcznego.** ISBN to numer rejestrowany — zmyślenie go byłoby fałszywym oświadczeniem wydawniczym. Nigdy nie wpisujesz tam cyfr.
+  9. **AUTHOR PROFILE jest obowiązkowy** — platforma nie dopuszcza publikacji anonimowych (wiąże się to z oświadczeniem o prawach autorskich). Jeśli imię lub pseudonim autora znajduje się w Księdze Świata albo w tekście, przepisujesz je; jeśli nie — wstawiasz `[do uzupełnienia ręcznie]`. Nie wymyślasz nazwiska.
+  10. **PROMPT OKŁADKI PISZESZ PO ANGIELSKU** — trafia do generatora obrazu, który działa najlepiej na angielszczyźnie. Podajesz w nim kompozycję pionową 1200×1800 px oraz miejsce na czytelny tytuł i nazwisko autora na grafice.
+
+  ### 📋 FORMAT WYJŚCIOWY (bez wstępu, bez komentarza, dokładnie w tej kolejności):
+
+  Title: <tytuł>
+  Subtitle: <podtytuł albo „—", jeśli zbędny>
+
+  Description (<liczba znaków>/{limit_znakow_opisu} characters):
+  <opis>
+
+  Genres: <jeden lub dwa gatunki z listy, oddzielone średnikiem>
+  Target audience: <jedna wartość z listy>
+  Mature content: <Yes albo No> — <jedno zdanie uzasadnienia>
+  Sample chapters: <2–3 nagłówki fragmentów z tekstu, oddzielone średnikiem>
+
+  Cover image prompt (1200x1800 px, English):
+  <prompt po angielsku>
+
+  Publisher: [do uzupełnienia ręcznie]
+  ISBN: [do uzupełnienia ręcznie]
+  Author profile: <imię lub pseudonim autora albo [do uzupełnienia ręcznie]>
+
+  ### 🔧 POLA, KTÓRE ZOSTAWIASZ DOMYŚLNE (wypisz je na końcu jako przypomnienie dla autora, bez zmian):
+  Display mode: „Show text and audio in sync" (zalecane) · Voice chat: włączony · Territories: Worldwide · Primary language: jeden język (obsługa kolejnych zapowiedziana) · Payout Type: domyślnie sprzedaż bezpośrednia (Stripe); alternatywy to udział w abonamencie albo publikacja darmowa · zgody: regulamin i wytyczne dotyczące treści · Copyright acknowledgements: publikujesz jako właściciel praw albo jako wydawca dzieła w domenie publicznej · na końcu kreatora checkbox „ready for review" blokuje edycję do czasu recenzji.
+
+# --- Szablon instrukcji użytkownika (role=user) ---
+# Placeholder {tresc} = pełna treść pliku projektu.
+prompt_uzytkownika_szablon: |
+  Przygotuj kartę publikacyjną dla poniższego projektu audiobooka.
+
+  {tresc}
+
+# --- Blok Księgi Świata (opcjonalny kontekst) ---
+# Doklejany PRZED treścią, gdy projekt ma plik `<projekt>.md` z Księgą Świata.
+# Tu szukaj nazwiska/pseudonimu autora i nazw własnych do opisu.
+prompt_ksiegi_szablon: |
+  [KSIĘGA ŚWIATA — zasady, postacie i ewentualne dane autora; kontekst dla nazw własnych]:
+  {ksiega}

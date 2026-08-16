@@ -1303,6 +1303,152 @@ def nadaj_tytuly_rozdzialom(
 TIMEOUT_POSTPROD_CALOSC = 300.0
 
 
+# --- Walidacja karty publikacyjnej (v18.14) ------------------------------------
+# KOTWICE PÓL SĄ ANGIELSKIE we wszystkich 9 paczkach — to nazwy pól formularza
+# platformy publikacyjnej (ElevenReader), który istnieje wyłącznie po angielsku.
+# Reżyser przepisuje je 1:1, więc karta MUSI nimi operować, choć jej treść jest
+# w języku projektu. Ta sama zasada co przy tagach-kotwicach `[OBECNA FABUŁA]`
+# w `rezyser/baza.yaml`: strukturalny znacznik, po którym orientuje się kod, nie
+# podlega lokalizacji. Zmiana którejkolwiek z tych wartości wymaga zmiany
+# w 9 promptach ORAZ tutaj.
+KOTWICA_OPIS = "Description"
+KOTWICA_GATUNKI = "Genres:"
+KOTWICA_ODBIORCA = "Target audience:"
+KOTWICA_DOJRZALOSC = "Mature content:"
+KOTWICA_PROBKI = "Sample chapters:"
+KOTWICA_ISBN = "ISBN:"
+
+# Wartości pola „Mature content" — radio TAK/NIE w formularzu.
+_WARTOSCI_DOJRZALOSCI = ("yes", "no")
+
+# Ciąg wyglądający jak numer ISBN (≥9 cyfr z opcjonalnymi separatorami). Model
+# NIE MA PRAWA go wymyślić — ISBN jest numerem rejestrowanym, a halucynacja
+# wklejona do formularza to fałszywe oświadczenie wydawnicze.
+_RE_ISBN_ZMYSLONY = re.compile(r"\d[\d\s\-]{8,}")
+
+# Separatory listy wartości w jednej linii karty („Fantasy; Horror", „A, B").
+_RE_SEPARATOR_WARTOSCI = re.compile(r"[;,]")
+
+
+def _fragment_po_kotwicy(tekst: str, kotwica: str) -> str | None:
+    """Reszta PIERWSZEJ linii zawierającej ``kotwica`` (``None`` = brak kotwicy).
+
+    Szukamy „zawiera", nie „zaczyna się od": model lubi ozdobić linię
+    numeracją albo pogrubieniem Markdown (``**Genres:** Fantasy``), a to nie
+    powód, żeby uznać pole za nieobecne.
+    """
+    for linia in tekst.splitlines():
+        poz = linia.find(kotwica)
+        if poz >= 0:
+            return linia[poz + len(kotwica):].strip(" *_:\t")
+    return None
+
+
+def _blok_opisu(tekst: str) -> str:
+    """Treść pola „Description" — od jego kotwicy do następnego pola karty.
+
+    Opis jest jedynym polem WIELOLINIJKOWYM, którego długość pilnuje platforma,
+    więc liczymy go inaczej niż pola jednolinijkowe: bierzemy wszystko do
+    najbliższej kolejnej kotwicy. Nagłówek linii (``Description (947/1000
+    characters):``) odcinamy — nawias z licznikiem to instrukcja formatu, nie
+    treść opisu, a jego doliczenie fałszowałoby wynik przy granicznych opisach.
+    """
+    linie = tekst.splitlines()
+    start = next(
+        (i for i, l in enumerate(linie) if KOTWICA_OPIS in l), None,
+    )
+    if start is None:
+        return ""
+    kolejne = (
+        KOTWICA_GATUNKI, KOTWICA_ODBIORCA, KOTWICA_DOJRZALOSC,
+        KOTWICA_PROBKI, KOTWICA_ISBN,
+    )
+    zebrane: list[str] = []
+    reszta_naglowka = linie[start].split(":", 1)
+    if len(reszta_naglowka) == 2 and reszta_naglowka[1].strip():
+        zebrane.append(reszta_naglowka[1].strip())
+    for linia in linie[start + 1:]:
+        if any(k in linia for k in kolejne):
+            break
+        zebrane.append(linia)
+    return "\n".join(zebrane).strip()
+
+
+def waliduj_karte_publikacji(
+    przepis: pr.PrzepisRezysera, tekst: str,
+) -> list[str]:
+    """Miękka walidacja karty publikacyjnej — lista zlokalizowanych ostrzeżeń.
+
+    Uruchamiana dla przepisów, które deklarują zamknięte zbiory wartości
+    (``gatunki_dozwolone`` / ``odbiorcy_dozwoleni``) albo limit opisu
+    (``limit_znakow_opisu``). Prompt podaje modelowi te same dane, ale prompt to
+    prośba, nie kontrakt: bez sprawdzenia halucynowana kategoria („Epic Fantasy
+    Saga") albo opis na 1400 znaków wracają do reżysera jako gotowe do wklejenia,
+    a formularz platformy odrzuca je dopiero po wypełnieniu całego kreatora.
+
+    MIĘKKA celowo: wynik jest opłaconym callem i pozostaje użyteczny w całości
+    (reżyser sam skróci opis albo wybierze inny gatunek). Nic nie blokujemy —
+    tylko mówimy wprost, co wymaga ręcznej korekty. Pusta lista = karta zgodna.
+    """
+    ostrzezenia: list[str] = []
+
+    if przepis.limit_znakow_opisu:
+        opis = _blok_opisu(tekst)
+        if len(opis) > przepis.limit_znakow_opisu:
+            ostrzezenia.append(i18n.t(
+                "rezyser.publikacja_ostrz_opis",
+                znaki=len(opis), limit=przepis.limit_znakow_opisu,
+            ))
+
+    if przepis.gatunki_dozwolone:
+        linia = _fragment_po_kotwicy(tekst, KOTWICA_GATUNKI)
+        if linia is None:
+            ostrzezenia.append(i18n.t(
+                "rezyser.publikacja_ostrz_brak_pola", pole=KOTWICA_GATUNKI))
+        else:
+            dozwolone = {g.casefold() for g in przepis.gatunki_dozwolone}
+            obce = [
+                w.strip() for w in _RE_SEPARATOR_WARTOSCI.split(linia)
+                if w.strip() and w.strip().casefold() not in dozwolone
+            ]
+            if obce:
+                ostrzezenia.append(i18n.t(
+                    "rezyser.publikacja_ostrz_gatunki",
+                    wartosci="; ".join(obce)))
+
+    if przepis.odbiorcy_dozwoleni:
+        linia = _fragment_po_kotwicy(tekst, KOTWICA_ODBIORCA)
+        if linia is None:
+            ostrzezenia.append(i18n.t(
+                "rezyser.publikacja_ostrz_brak_pola", pole=KOTWICA_ODBIORCA))
+        elif linia.casefold() not in {o.casefold() for o in przepis.odbiorcy_dozwoleni}:
+            ostrzezenia.append(i18n.t(
+                "rezyser.publikacja_ostrz_odbiorca",
+                wartosc=linia, dozwolone="; ".join(przepis.odbiorcy_dozwoleni)))
+
+    # Pola obowiązkowe formularza, których treści nie da się zwalidować (są
+    # decyzją autora), ale ich BRAK blokuje publikację — sprawdzamy obecność.
+    # Tylko dla karty, która i tak zna kanon gatunków (inne narzędzia
+    # `zakres: calosc` — np. raport z audytu — nie mają tych pól).
+    if przepis.gatunki_dozwolone:
+        for kotwica in (KOTWICA_DOJRZALOSC, KOTWICA_PROBKI):
+            linia = _fragment_po_kotwicy(tekst, kotwica)
+            if not linia:
+                ostrzezenia.append(i18n.t(
+                    "rezyser.publikacja_ostrz_brak_pola", pole=kotwica))
+            elif (kotwica == KOTWICA_DOJRZALOSC
+                    and not any(w in linia.casefold()
+                                for w in _WARTOSCI_DOJRZALOSCI)):
+                ostrzezenia.append(i18n.t(
+                    "rezyser.publikacja_ostrz_brak_pola", pole=kotwica))
+
+        isbn = _fragment_po_kotwicy(tekst, KOTWICA_ISBN)
+        if isbn and _RE_ISBN_ZMYSLONY.search(isbn):
+            ostrzezenia.append(i18n.t("rezyser.publikacja_ostrz_isbn"))
+
+    return ostrzezenia
+
+
 def wykonaj_postprodukcje_calosc(
     klient: Any,
     przepis: pr.PrzepisRezysera,
@@ -1398,6 +1544,17 @@ def wykonaj_postprodukcje_calosc(
     ostrzezenie = ""
     if stop_reason == "max_tokens":
         ostrzezenie = i18n.t("rezyser.postprod_ucieta_tresc")
+
+    # v18.14: miękka walidacja karty publikacyjnej. No-op dla narzędzi bez
+    # zamkniętych zbiorów wartości (raport, audyt) — patrz
+    # `waliduj_karte_publikacji`.
+    uwagi = waliduj_karte_publikacji(przepis, tekst)
+    if uwagi:
+        blok = (
+            i18n.t("rezyser.publikacja_ostrz_naglowek") + "\n\n"
+            + "\n".join(f"• {u}" for u in uwagi)
+        )
+        ostrzezenie = f"{ostrzezenie}\n\n{blok}" if ostrzezenie else blok
 
     if on_postep:
         on_postep(i18n.t("rezyser.postprod_postep_gotowe"), 100)

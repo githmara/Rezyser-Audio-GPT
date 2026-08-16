@@ -592,6 +592,16 @@ rezyser:
   tytuly_blad_nieznany: "Error desconocido durante la titulación."
   tytuly_czesciowe_naglowek: "⚠️ Resultados parciales (generación interrumpida por error):\n\n{wyniki}"
   blad_zapisu_do_pliku: "Error al guardar en el archivo:\n{tresc_bledu}"
+  # Ficha de publicación (v18.14) – avisos suaves del validador. Los nombres de
+  # los campos ({pole}) siguen en inglés: el formulario de la plataforma es inglés.
+  publikacja_ostrz_naglowek: "La ficha está lista, pero necesita una corrección manual antes de pegarla en el formulario:"
+  publikacja_ostrz_opis: "La descripción tiene {znaki} caracteres y el formulario acepta como máximo {limit}. Acórtala antes de pegarla."
+  publikacja_ostrz_gatunki: "Géneros fuera de la lista canónica de la plataforma: {wartosci}. Elige sustitutos de la lista `gatunki_dozwolone` en rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    El público «{wartosc}» no es un valor del formulario. Permitidos: {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    La ficha no contiene el campo «{pole}» rellenado – el formulario lo exige.
+  publikacja_ostrz_isbn: "Aparecieron cifras en el campo ISBN. El ISBN es un número registrado – escribe el tuyo o deja el campo por rellenar."
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
@@ -660,7 +670,9 @@ rezyser:
   postprod_postep_gotowe: Posproducción completada.
   postprod_pusta_tresc: El modelo devolvió una respuesta vacía. Inténtalo de nuevo.
   postprod_ucieta_tresc: El resultado de la posproducción alcanzó el límite de longitud y su final podría haberse cortado. El resultado está disponible; revisa el final y, si está incompleto, ejecuta la herramienta de nuevo o aumenta el valor de `max_tokens_wyjscia` en el archivo YAML de la herramienta.
-  postprod_ostrzezenie_tytul: El resultado podría haberse cortado
+  # Título común para los avisos de corte Y las notas del validador de la ficha
+  # (v18.14), por eso es neutral — el cuerpo del mensaje dice qué revisar.
+  postprod_ostrzezenie_tytul: "El resultado requiere una revisión"
   postprod_nadpisac_tytul: El archivo de resultado ya existe
   postprod_nadpisac_tresc: El archivo {plik} ya existe en la carpeta skrypty. ¿Deseas sobrescribirlo con el nuevo resultado?
   postprod_dlg_lbl: 'Resultado de la herramienta — copia (Ctrl+A, Ctrl+C) o cierra:'

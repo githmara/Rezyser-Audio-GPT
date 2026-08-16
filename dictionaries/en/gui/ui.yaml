@@ -595,13 +595,25 @@ rezyser:
   postprod_postep_gotowe: "Postproduction completed."
   postprod_pusta_tresc: "The model returned an empty response. Please try again."
   postprod_ucieta_tresc: "The postproduction output reached the length limit and its end may have been cut off. The result is available — check the ending, and if it's truncated, run the tool again or increase the `max_tokens_wyjscia` value in the tool's YAML file."
-  postprod_ostrzezenie_tytul: "The output may have been truncated"
+  # Shared title for truncation warnings AND publication-card validator notes
+  # (v18.14), hence neutral — the message body says what needs attention.
+  postprod_ostrzezenie_tytul: "The result needs a check"
   postprod_nadpisac_tytul: "Output file already exists"
   postprod_nadpisac_tresc: "The file {plik} already exists in the skrypty folder. Overwrite it with the new output?"
   postprod_dlg_lbl: "Tool output — copy (Ctrl+A, Ctrl+C) or close:"
   postprod_dlg_zapisano: "The output was saved to the file {plik} (skrypty folder). Preview below:"
   postprod_dlg_name: "Postproduction output field"
   blad_zapisu_do_pliku: "File save error:\n{tresc_bledu}"
+  # Publication card (v18.14) – soft validator warnings. Field names ({pole})
+  # stay in English: the platform's form is English.
+  publikacja_ostrz_naglowek: "The card is ready, but it needs a manual fix before you paste it into the form:"
+  publikacja_ostrz_opis: "The description has {znaki} characters and the form accepts at most {limit}. Shorten it before pasting."
+  publikacja_ostrz_gatunki: "Genres outside the platform's canonical list: {wartosci}. Pick replacements from the `gatunki_dozwolone` list in rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    The target audience "{wartosc}" is not a form value. Allowed: {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    The card has no filled-in "{pole}" field – the form requires it.
+  publikacja_ostrz_isbn: "Digits appeared in the ISBN field. An ISBN is a registered number – enter your own or leave the field to be filled in."
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)

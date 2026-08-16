@@ -696,13 +696,25 @@ rezyser:
   postprod_postep_gotowe: "Postprodukcja zakończona."
   postprod_pusta_tresc: "Model zwrócił pustą odpowiedź. Spróbuj ponownie."
   postprod_ucieta_tresc: "Wynik postprodukcji osiągnął limit długości i jego końcówka mogła zostać ucięta. Rezultat jest dostępny — sprawdź zakończenie, a jeśli jest urwane, uruchom narzędzie ponownie albo zwiększ wartość `max_tokens_wyjscia` w pliku YAML narzędzia."
-  postprod_ostrzezenie_tytul: "Wynik mógł zostać ucięty"
+  # Tytuł wspólny dla ostrzeżeń o ucięciu ORAZ uwag walidatora karty (v18.14),
+  # więc neutralny — treść komunikatu mówi, co dokładnie wymaga uwagi.
+  postprod_ostrzezenie_tytul: "Wynik wymaga sprawdzenia"
   postprod_nadpisac_tytul: "Plik wyniku już istnieje"
   postprod_nadpisac_tresc: "Plik {plik} już istnieje w folderze skrypty. Czy nadpisać go nowym wynikiem?"
   postprod_dlg_lbl:      "Wynik narzędzia — skopiuj (Ctrl+A, Ctrl+C) lub zamknij:"
   postprod_dlg_zapisano: "Wynik zapisano do pliku {plik} (folder skrypty). Podgląd poniżej:"
   postprod_dlg_name:     "Pole wyniku postprodukcji"
   blad_zapisu_do_pliku:  "Błąd zapisu do pliku:\n{tresc_bledu}"
+  # Karta publikacyjna (v18.14) – miękkie ostrzeżenia walidatora. Nazwy pól
+  # ({pole}) zostają po angielsku: formularz platformy jest angielski.
+  publikacja_ostrz_naglowek: "Karta jest gotowa, ale wymaga ręcznej korekty przed wklejeniem do formularza:"
+  publikacja_ostrz_opis: "Opis ma {znaki} znaków, a formularz przyjmuje maksymalnie {limit}. Skróć go przed wklejeniem."
+  publikacja_ostrz_gatunki: "Gatunki poza kanoniczną listą platformy: {wartosci}. Wybierz zamienniki z listy `gatunki_dozwolone` w pliku rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    Grupa odbiorców „{wartosc}" nie jest wartością formularza. Dozwolone: {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    Karta nie zawiera wypełnionego pola „{pole}" – formularz go wymaga.
+  publikacja_ostrz_isbn: "W polu ISBN pojawiły się cyfry. ISBN to numer rejestrowany – wpisz własny albo pozostaw pole do uzupełnienia."
   # Pre-check okna kontekstowego przed wywołaniem narzędzia (v18.13)
   postprod_kontekst_tytul: "Duży projekt — sprawdź okno modelu"
   postprod_kontekst_tresc: |-

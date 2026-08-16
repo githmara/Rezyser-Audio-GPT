@@ -592,6 +592,16 @@ rezyser:
   tytuly_blad_nieznany: "Óþekkt villa við titlun."
   tytuly_czesciowe_naglowek: "⚠️ Hluta niðurstöður (gerð stöðvuð vegna villu):\n\n{wyniki}"
   blad_zapisu_do_pliku: "Villa við vistun í skrá:\n{tresc_bledu}"
+  # Útgáfukort (v18.14) – mildar athugasemdir staðfestingar. Heiti reitanna
+  # ({pole}) eru áfram á ensku: form vettvangsins er á ensku.
+  publikacja_ostrz_naglowek: "Kortið er tilbúið en þarf handvirka leiðréttingu áður en þú límir það í formið:"
+  publikacja_ostrz_opis: "Lýsingin er {znaki} stafir en formið tekur að hámarki {limit}. Styttu hana áður en þú límir hana."
+  publikacja_ostrz_gatunki: "Flokkar utan kanónlista vettvangsins: {wartosci}. Veldu í staðinn úr listanum `gatunki_dozwolone` í rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    Markhópurinn „{wartosc}" er ekki gildi í forminu. Leyfilegt: {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    Kortið hefur engan útfylltan reit „{pole}" – formið krefst hans.
+  publikacja_ostrz_isbn: "Tölur komu fram í ISBN-reitnum. ISBN er skráð númer – skrifaðu þitt eigið eða skildu reitinn eftir til útfyllingar."
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
@@ -660,7 +670,9 @@ rezyser:
   postprod_postep_gotowe: Eftirvinnslu lokið.
   postprod_pusta_tresc: Líkanið sendi ekkert svar. Reyndu aftur.
   postprod_ucieta_tresc: Niðurstaða eftirvinnslu náði lengdarmörkum og því getur endirinn hafa verið skertur. Niðurstaðan er tiltæk — athugaðu endann og ef hann er ófullkominn, keyrðu verkfærið aftur eða hækkaðu gildið `max_tokens_wyjscia` í YAML-skrá verkfærisins.
-  postprod_ostrzezenie_tytul: Niðurstaðan getur hafa verið skert
+  # Sameiginlegur titill fyrir viðvaranir um skerðingu OG athugasemdir
+  # kortavalidatorsins (v18.14), því hlutlaus — meginmálið segir hvað þarf að skoða.
+  postprod_ostrzezenie_tytul: "Niðurstaðan þarf athugun"
   postprod_nadpisac_tytul: Niðurstöðuskrá er þegar til
   postprod_nadpisac_tresc: Skráin {plik} er þegar til í möppunni skrypty. Viltu skrifa yfir hana með nýju niðurstöðunni?
   postprod_dlg_lbl: 'Niðurstaða verkfæris — afritaðu (Ctrl+A, Ctrl+C) eða lokaðu:'

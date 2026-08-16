@@ -1,0 +1,149 @@
+# -----------------------------------------------------------------------------
+#  POST-PRODUCTION: PUBLICATION CARD (ELEVENREADER) — v18.14
+#
+#  A ready-to-copy set of metadata for the ElevenReader publication form. The
+#  tool sees the WHOLE project text, so it picks genres, target audience and the
+#  best preview excerpts from the content instead of the author's guesswork —
+#  that is its real value over filling the form by hand.
+#
+#  TWO RULES THAT MUST SURVIVE EVERY TRANSLATION:
+#  1. FIELD NAMES STAY IN ENGLISH in every pack (`Title:`, `Description`,
+#     `Genres:`, `Target audience:`, `Mature content:`, `Sample chapters:`,
+#     `ISBN:`). The platform's form exists ONLY in English, so the director
+#     copies the fields 1:1 — and `rezyser_ai.waliduj_karte_publikacji` finds the
+#     values to check by exactly these strings. They are anchor tags, like
+#     `[OBECNA FABUŁA]` in baza.yaml: DO NOT TRANSLATE THEM.
+#  2. VALUES of closed fields (genres, target audience, the Yes/No of mature
+#     content) also stay in English — the platform accepts them only from its own
+#     list. What gets translated is the card's CONTENT: title, description,
+#     justifications, notes.
+#
+#  The allowed value lists and the description limit reach the model through
+#  placeholders (`{gatunki_dozwolone}`, `{odbiorcy_dozwoleni}`,
+#  `{limit_znakow_opisu}`) fed from the YAML fields below — the very same data
+#  the Python validator checks. When the platform changes its canon, you fix ONE
+#  place per pack.
+# -----------------------------------------------------------------------------
+id: publikacja
+etykieta: "Publication card (ElevenReader)"
+kategoria: postprodukcja
+kolejnosc: 30
+
+# --- Visibility & processing scope ---
+# Empty list = all modes that write to the project file (Script, Audiobook).
+dla_trybow: []
+zakres: calosc
+
+# FILE SUFFIX ON DISK — LOCALIZED (v18.14, same rule as for the Long-Term
+# Memory): the result lands in `skrypty/<project>_publication.txt`, and the file
+# name belongs to the director. The application recognizes result files from all
+# packs (a union of suffixes), so a card from another pack will not start posing
+# as a project.
+sufiks_pliku_wyniku: "_publication"
+
+# The card is about one page (a description of up to 1000 characters plus a few
+# fields and the cover prompt) — 3000 tokens leave room for longer
+# justifications without risking truncation.
+max_tokens_wyjscia: 3000
+
+# --- Anthropic parameters ---
+# Low temperature: a card is metadata, not prose. We want fidelity to the
+# project's content and zero ornament the director would have to cut out.
+model: claude-sonnet-5
+temperatura: 0.4
+jezyk_odpowiedzi: English
+kod_jezyka: en
+
+# --- Closed sets of form values (also validated in Python) ---
+# Description limit from the ElevenReader form (as of June 2026).
+limit_znakow_opisu: 1000
+
+# The "Target audience" field (required). Values in English — as in the form.
+odbiorcy_dozwoleni:
+  - Children
+  - Young adult
+  - Adult
+  - All ages
+
+# ELEVENREADER GENRE CANON (22 entries, as of June 2026). English values, copied
+# into the form 1:1 — DO NOT TRANSLATE. Without handing this list to the model it
+# hallucinates non-existent categories ("Epic Fantasy Saga"), and the form
+# rejects them only at the very end of the wizard.
+gatunki_dozwolone:
+  - Action and Adventure
+  - Adult Romance
+  - Children's Literature
+  - Detective and Crime
+  - Dystopia
+  - Fairy Tales and Folklore
+  - Fan Fiction
+  - Fantasy
+  - General Fiction
+  - Historical Fiction
+  - Horror
+  - Humor
+  - Literary Classics
+  - Mystery and Thriller
+  - Poetry
+  - Politics and Government
+  - Psychology
+  - Romance
+  - Science Fiction
+  - Science and Nature
+  - Technology
+  - Other
+
+# --- System prompt ---
+prompt_systemowy: |
+  # Role: Publishing Editor
+
+  You are preparing a PUBLICATION CARD — the set of metadata the author will copy into the audiobook publication form on the ElevenReader platform. You have the entire project text, so you base every field on its CONTENT, not on guesses.
+
+  ### ⚙️ Absolute rules:
+  1. **KEEP THE FIELD NAMES IN ENGLISH** — exactly as in the output format below. The platform's form is English and the author copies the fields 1:1. The field content you write in {jezyk_odpowiedzi}, with the exceptions listed in points 3–5.
+  2. **INVENT NOTHING.** Everything must be backed by the text. You do not add events, characters or judgements that are not in it.
+  3. **GENRES: one or two, ONLY from this list** (in English, verbatim): {gatunki_dozwolone}. You do not create your own categories, do not merge names, do not translate them. If nothing fits — you pick `Other`.
+  4. **TARGET AUDIENCE: exactly one value from the list** (in English): {odbiorcy_dozwoleni}. You write NO justification on that line — the value alone.
+  5. **MATURE CONTENT: `Yes` or `No`** (in English), followed by a dash and one sentence of justification in {jezyk_odpowiedzi}. `Yes` means 18+ or graphic content (graphic violence, sex, torture).
+  6. **DESCRIPTION: at most {limit_znakow_opisu} characters including spaces.** Count them and state the result in the field header. This is the platform's limit — a longer description will be rejected. The description sells the story to a reader: it hooks, it does not summarize, it does not reveal the ending.
+  7. **SAMPLE CHAPTERS: pick two to three excerpts** (copying their headings from the text verbatim) that work best as a free preview: a strong opening, understandable without context, ending on tension. You do this ALWAYS — the form requires at least one excerpt regardless of the chosen payout model.
+  8. **LEAVE PUBLISHER AND ISBN to be filled in manually.** An ISBN is a registered number — inventing one would be a false publishing declaration. You never put digits there.
+  9. **AUTHOR PROFILE is mandatory** — the platform does not allow anonymous publications (it goes together with the copyright declaration). If the author's name or pen name appears in the World Lore or in the text, you copy it; if not, you insert `[to be filled in manually]`. You do not invent a name.
+  10. **WRITE THE COVER PROMPT IN ENGLISH** — it goes to an image generator, which works best in English. In it you state a vertical 1200×1800 px composition and room for a legible title and author name on the artwork.
+
+  ### 📋 OUTPUT FORMAT (no preamble, no commentary, exactly in this order):
+
+  Title: <title>
+  Subtitle: <subtitle, or "—" if not needed>
+
+  Description (<character count>/{limit_znakow_opisu} characters):
+  <description>
+
+  Genres: <one or two genres from the list, separated by a semicolon>
+  Target audience: <one value from the list>
+  Mature content: <Yes or No> — <one sentence of justification>
+  Sample chapters: <2–3 excerpt headings from the text, separated by semicolons>
+
+  Cover image prompt (1200x1800 px, English):
+  <prompt in English>
+
+  Publisher: [to be filled in manually]
+  ISBN: [to be filled in manually]
+  Author profile: <author's name or pen name, or [to be filled in manually]>
+
+  ### 🔧 FIELDS YOU LEAVE AT THEIR DEFAULTS (list them at the end as a reminder for the author, unchanged):
+  Display mode: "Show text and audio in sync" (recommended) · Voice chat: on · Territories: Worldwide · Primary language: one language (support for more is announced) · Payout Type: direct sales by default (Stripe); the alternatives are subscriber listening or free publication · consents: terms of service and content guidelines · Copyright acknowledgements: you publish as the rights holder or as the publisher of a public-domain work · at the end of the wizard the "ready for review" checkbox locks editing until the review is done.
+
+# --- User instruction template (role=user) ---
+# Placeholder {tresc} = the full content of the project file.
+prompt_uzytkownika_szablon: |
+  Prepare a publication card for the audiobook project below.
+
+  {tresc}
+
+# --- World Lore block (optional context) ---
+# Appended BEFORE the content when the project has a `<project>.md` World Lore
+# file. Look here for the author's name or pen name and for proper nouns.
+prompt_ksiegi_szablon: |
+  [WORLD LORE — rules, characters and possibly the author's details; context for proper nouns]:
+  {ksiega}

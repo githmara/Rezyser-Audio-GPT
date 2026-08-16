@@ -1,0 +1,153 @@
+# -----------------------------------------------------------------------------
+#  POSPRODUCCIÓN: FICHA DE PUBLICACIÓN (ELEVENREADER) — v18.14
+#
+#  Un conjunto de metadatos listo para copiar en el formulario de publicación de
+#  ElevenReader. La herramienta ve TODO el texto del proyecto, así que elige los
+#  géneros, el público objetivo y los mejores fragmentos de muestra a partir del
+#  contenido y no de las suposiciones del autor — ahí está su valor real frente a
+#  rellenar el formulario a mano.
+#
+#  DOS REGLAS QUE DEBEN SOBREVIVIR A CUALQUIER TRADUCCIÓN:
+#  1. LOS NOMBRES DE LOS CAMPOS SE QUEDAN EN INGLÉS en todos los paquetes
+#     (`Title:`, `Description`, `Genres:`, `Target audience:`,
+#     `Mature content:`, `Sample chapters:`, `ISBN:`). El formulario de la
+#     plataforma existe SOLO en inglés, así que el director copia los campos 1:1
+#     — y `rezyser_ai.waliduj_karte_publikacji` localiza por esas mismas cadenas
+#     los valores que hay que comprobar. Son etiquetas ancla, como
+#     `[OBECNA FABUŁA]` en baza.yaml: NO SE TRADUCEN.
+#  2. Los VALORES de los campos cerrados (géneros, público, el Yes/No del
+#     contenido para adultos) también se quedan en inglés — la plataforma solo los
+#     acepta de su propia lista. Lo que se traduce es el CONTENIDO de la ficha:
+#     título, descripción, justificaciones, notas.
+#
+#  Las listas de valores permitidos y el límite de la descripción llegan al modelo
+#  mediante marcadores (`{gatunki_dozwolone}`, `{odbiorcy_dozwoleni}`,
+#  `{limit_znakow_opisu}`) alimentados por los campos YAML de abajo — los mismos
+#  datos que comprueba después el validador en Python. Si la plataforma cambia su
+#  canon, corriges UN solo lugar por paquete.
+# -----------------------------------------------------------------------------
+id: publikacja
+etykieta: "Ficha de publicación (ElevenReader)"
+kategoria: postprodukcja
+kolejnosc: 30
+
+# --- Visibilidad y alcance del procesamiento ---
+# Lista vacía = todos los modos que escriben en el archivo del proyecto
+# (Guion, Audiolibro).
+dla_trybow: []
+zakres: calosc
+
+# SUFIJO DEL ARCHIVO EN DISCO — LOCALIZADO (v18.14, la misma regla que en la
+# Memoria a Largo Plazo): el resultado va a `skrypty/<proyecto>_publicacion.txt`
+# y el nombre del archivo pertenece al director. La aplicación reconoce los
+# archivos de resultados de todos los paquetes (una unión de sufijos), así que una
+# ficha de otro paquete no empezará a hacerse pasar por proyecto.
+sufiks_pliku_wyniku: "_publicacion"
+
+# La ficha ocupa alrededor de una página (descripción de hasta 1000 caracteres
+# más unos pocos campos y el prompt de portada) — 3000 tokens dejan margen para
+# justificaciones más largas sin riesgo de corte.
+max_tokens_wyjscia: 3000
+
+# --- Parámetros de Anthropic ---
+# Temperatura baja: una ficha son metadatos, no prosa. Queremos fidelidad al
+# contenido del proyecto y cero adornos que el director tendría que recortar.
+model: claude-sonnet-5
+temperatura: 0.4
+jezyk_odpowiedzi: español
+kod_jezyka: es
+
+# --- Conjuntos cerrados de valores del formulario (validados también en Python) -
+# Límite de la descripción del formulario de ElevenReader (a junio de 2026).
+limit_znakow_opisu: 1000
+
+# El campo "Target audience" (obligatorio). Valores en inglés — como en el formulario.
+odbiorcy_dozwoleni:
+  - Children
+  - Young adult
+  - Adult
+  - All ages
+
+# CANON DE GÉNEROS DE ELEVENREADER (22 entradas, a junio de 2026). Valores en
+# inglés, copiados al formulario 1:1 — NO TRADUCIR. Sin darle esta lista en bandeja
+# al modelo, alucina categorías inexistentes («Epic Fantasy Saga») y el formulario
+# las rechaza solo al final del asistente.
+gatunki_dozwolone:
+  - Action and Adventure
+  - Adult Romance
+  - Children's Literature
+  - Detective and Crime
+  - Dystopia
+  - Fairy Tales and Folklore
+  - Fan Fiction
+  - Fantasy
+  - General Fiction
+  - Historical Fiction
+  - Horror
+  - Humor
+  - Literary Classics
+  - Mystery and Thriller
+  - Poetry
+  - Politics and Government
+  - Psychology
+  - Romance
+  - Science Fiction
+  - Science and Nature
+  - Technology
+  - Other
+
+# --- Prompt del sistema ---
+prompt_systemowy: |
+  # Rol: Editor Editorial
+
+  Preparas una FICHA DE PUBLICACIÓN: el conjunto de metadatos que el autor copiará en el formulario de publicación del audiolibro en la plataforma ElevenReader. Tienes todo el texto del proyecto, así que basas cada campo en su CONTENIDO, no en suposiciones.
+
+  ### ⚙️ Reglas absolutas:
+  1. **DEJAS LOS NOMBRES DE LOS CAMPOS EN INGLÉS** — exactamente como en el formato de salida de abajo. El formulario de la plataforma es inglés y el autor copia los campos 1:1. El contenido de los campos lo escribes en {jezyk_odpowiedzi}, con las excepciones de los puntos 3–5.
+  2. **NO INVENTAS NADA.** Todo debe estar respaldado por el texto. No añades acontecimientos, personajes ni valoraciones que no aparezcan en él.
+  3. **GÉNEROS: uno o dos, EXCLUSIVAMENTE de esta lista** (en inglés, literalmente): {gatunki_dozwolone}. No creas categorías propias, no combinas nombres, no los traduces. Si nada encaja — eliges `Other`.
+  4. **TARGET AUDIENCE: exactamente un valor de la lista** (en inglés): {odbiorcy_dozwoleni}. En esa línea NO escribes justificación — solo el valor.
+  5. **MATURE CONTENT: `Yes` o `No`** (en inglés) y, tras un guion, una frase de justificación en {jezyk_odpowiedzi}. `Yes` significa contenido +18 o explícito (violencia gráfica, sexo, tortura).
+  6. **DESCRIPCIÓN: como máximo {limit_znakow_opisu} caracteres con espacios.** Cuéntalos e indica el resultado en el encabezado del campo. Es el límite de la plataforma: una descripción más larga será rechazada. La descripción vende la historia al lector: engancha, no resume, no revela el final.
+  7. **SAMPLE CHAPTERS: eliges de dos a tres fragmentos** (copiando sus encabezados del texto al pie de la letra) que funcionen mejor como muestra gratuita: entrada potente, comprensible sin contexto, que termine en tensión. Lo haces SIEMPRE — el formulario exige indicar al menos un fragmento, independientemente del modelo de pago elegido.
+  8. **PUBLISHER e ISBN los dejas para rellenar a mano.** El ISBN es un número registrado: inventarlo sería una declaración editorial falsa. Nunca escribes cifras ahí.
+  9. **AUTHOR PROFILE es obligatorio** — la plataforma no admite publicaciones anónimas (va unido a la declaración de derechos de autor). Si el nombre o el seudónimo del autor está en el Libro del Mundo o en el texto, lo copias; si no, pones `[por rellenar a mano]`. No inventas ningún nombre.
+  10. **EL PROMPT DE PORTADA LO ESCRIBES EN INGLÉS** — va a un generador de imágenes, que funciona mejor en inglés. En él indicas una composición vertical de 1200×1800 px y espacio para un título y un nombre de autor legibles en la imagen.
+
+  ### 📋 FORMATO DE SALIDA (sin introducción, sin comentarios, exactamente en este orden):
+
+  Title: <título>
+  Subtitle: <subtítulo o «—» si no hace falta>
+
+  Description (<número de caracteres>/{limit_znakow_opisu} characters):
+  <descripción>
+
+  Genres: <uno o dos géneros de la lista, separados por punto y coma>
+  Target audience: <un valor de la lista>
+  Mature content: <Yes o No> — <una frase de justificación>
+  Sample chapters: <2–3 encabezados de fragmentos del texto, separados por punto y coma>
+
+  Cover image prompt (1200x1800 px, English):
+  <prompt en inglés>
+
+  Publisher: [por rellenar a mano]
+  ISBN: [por rellenar a mano]
+  Author profile: <nombre o seudónimo del autor, o [por rellenar a mano]>
+
+  ### 🔧 CAMPOS QUE DEJAS POR DEFECTO (enuméralos al final, sin cambios, como recordatorio para el autor):
+  Display mode: «Show text and audio in sync» (recomendado) · Voice chat: activado · Territories: Worldwide · Primary language: un idioma (se anuncia la compatibilidad con más) · Payout Type: por defecto venta directa (Stripe); las alternativas son la escucha por suscripción o la publicación gratuita · consentimientos: términos del servicio y directrices de contenido · Copyright acknowledgements: publicas como titular de los derechos o como editor de una obra de dominio público · al final del asistente la casilla «ready for review» bloquea la edición hasta que termine la revisión.
+
+# --- Plantilla de la instrucción del usuario (role=user) ---
+# Marcador {tresc} = contenido completo del archivo del proyecto.
+prompt_uzytkownika_szablon: |
+  Prepara una ficha de publicación para el siguiente proyecto de audiolibro.
+
+  {tresc}
+
+# --- Bloque del Libro del Mundo (contexto opcional) ---
+# Se añade ANTES del contenido cuando el proyecto tiene un archivo
+# `<proyecto>.md` con el Libro del Mundo. Busca aquí el nombre o seudónimo del
+# autor y los nombres propios para la descripción.
+prompt_ksiegi_szablon: |
+  [LIBRO DEL MUNDO — reglas, personajes y posibles datos del autor; contexto para los nombres propios]:
+  {ksiega}

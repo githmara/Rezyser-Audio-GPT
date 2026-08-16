@@ -1,0 +1,152 @@
+# -----------------------------------------------------------------------------
+#  JÄLKITUOTANTO: JULKAISUKORTTI (ELEVENREADER) — v18.14
+#
+#  Valmis metatietopaketti, jonka kirjoittaja kopioi ElevenReaderin
+#  julkaisulomakkeeseen. Työkalu näkee KOKO projektin tekstin, joten se valitsee
+#  lajityypit, kohderyhmän ja parhaat esikatselukatkelmat sisällön perusteella
+#  eikä kirjoittajan arvailujen varassa — siinä on sen todellinen arvo verrattuna
+#  lomakkeen käsin täyttämiseen.
+#
+#  KAKSI SÄÄNTÖÄ, JOIDEN ON SÄILYTTÄVÄ JOKAISESSA KÄÄNNÖKSESSÄ:
+#  1. KENTTIEN NIMET PYSYVÄT ENGLANNIKSI kaikissa paketeissa (`Title:`,
+#     `Description`, `Genres:`, `Target audience:`, `Mature content:`,
+#     `Sample chapters:`, `ISBN:`). Alustan lomake on olemassa VAIN englanniksi,
+#     joten ohjaaja kopioi kentät 1:1 — ja
+#     `rezyser_ai.waliduj_karte_publikacji` löytää tarkistettavat arvot juuri
+#     näiden merkkijonojen avulla. Ne ovat ankkuritunnisteita, kuten
+#     `[OBECNA FABUŁA]` tiedostossa baza.yaml: NIITÄ EI KÄÄNNETÄ.
+#  2. Myös suljettujen kenttien ARVOT (lajityypit, kohderyhmä, aikuissisällön
+#     Yes/No) pysyvät englanniksi — alusta hyväksyy ne vain omalta listaltaan.
+#     Käännettävää on kortin SISÄLTÖ: nimi, kuvaus, perustelut, huomiot.
+#
+#  Sallittujen arvojen listat ja kuvauksen raja kulkevat mallille paikkamerkkien
+#  kautta (`{gatunki_dozwolone}`, `{odbiorcy_dozwoleni}`,
+#  `{limit_znakow_opisu}`), jotka syötetään alla olevista YAML-kentistä — samat
+#  tiedot tarkistaa jälkeenpäin Pythonin validaattori. Kun alusta muuttaa
+#  kanoniaan, korjaat YHDEN paikan pakettia kohti.
+# -----------------------------------------------------------------------------
+id: publikacja
+etykieta: "Julkaisukortti (ElevenReader)"
+kategoria: postprodukcja
+kolejnosc: 30
+
+# --- Näkyvyys ja käsittelyn laajuus ---
+# Tyhjä lista = kaikki tilat, jotka kirjoittavat projektitiedostoon
+# (Käsikirjoitus, Äänikirja).
+dla_trybow: []
+zakres: calosc
+
+# TIEDOSTON JÄLKILIITE LEVYLLÄ — LOKALISOITU (v18.14, sama sääntö kuin
+# Pitkäkestoisessa Muistissa): tulos tallentuu tiedostoon
+# `skrypty/<projekti>_julkaisu.txt`, ja tiedoston nimi kuuluu ohjaajalle. Sovellus
+# tunnistaa kaikkien pakettien tulostiedostot (jälkiliitteiden yhdiste), joten
+# toisen paketin kortti ei ala esittää projektia.
+sufiks_pliku_wyniku: "_julkaisu"
+
+# Kortti on noin sivun mittainen (kuvaus enintään 1000 merkkiä sekä muutama
+# kenttä ja kansikuvan ohje) — 3000 tokenia jättää tilaa pidemmille perusteluille
+# ilman katkeamisen vaaraa.
+max_tokens_wyjscia: 3000
+
+# --- Anthropic-parametrit ---
+# Matala lämpötila: kortti on metatietoa, ei proosaa. Haluamme uskollisuutta
+# projektin sisällölle eikä yhtään koristetta, jonka ohjaaja joutuisi leikkaamaan.
+model: claude-sonnet-5
+temperatura: 0.4
+jezyk_odpowiedzi: suomeksi
+kod_jezyka: fi
+
+# --- Lomakkeen suljetut arvojoukot (validoidaan myös Pythonissa) ---
+# Kuvauksen raja ElevenReaderin lomakkeesta (tilanne: kesäkuu 2026).
+limit_znakow_opisu: 1000
+
+# Kenttä ”Target audience” (pakollinen). Arvot englanniksi — kuten lomakkeessa.
+odbiorcy_dozwoleni:
+  - Children
+  - Young adult
+  - Adult
+  - All ages
+
+# ELEVENREADERIN LAJITYYPPIKANONI (22 kohtaa, tilanne: kesäkuu 2026).
+# Englanninkieliset arvot, jotka kopioidaan lomakkeeseen 1:1 — EI KÄÄNNETÄ. Ilman
+# tätä listaa tarjottimella malli hallusinoi olemattomia kategorioita (”Epic
+# Fantasy Saga”), ja lomake hylkää ne vasta ohjatun toiminnon lopussa.
+gatunki_dozwolone:
+  - Action and Adventure
+  - Adult Romance
+  - Children's Literature
+  - Detective and Crime
+  - Dystopia
+  - Fairy Tales and Folklore
+  - Fan Fiction
+  - Fantasy
+  - General Fiction
+  - Historical Fiction
+  - Horror
+  - Humor
+  - Literary Classics
+  - Mystery and Thriller
+  - Poetry
+  - Politics and Government
+  - Psychology
+  - Romance
+  - Science Fiction
+  - Science and Nature
+  - Technology
+  - Other
+
+# --- Järjestelmäkehote ---
+prompt_systemowy: |
+  # Rooli: Kustannustoimittaja
+
+  Laadit JULKAISUKORTIN — metatietopaketin, jonka kirjoittaja kopioi äänikirjan julkaisulomakkeeseen ElevenReader-alustalla. Sinulla on koko projektin teksti, joten perustat jokaisen kentän sen SISÄLTÖÖN, et arvailuun.
+
+  ### ⚙️ Ehdottomat säännöt:
+  1. **JÄTÄT KENTTIEN NIMET ENGLANNIKSI** — täsmälleen kuten alla olevassa tulostusmuodossa. Alustan lomake on englanninkielinen, ja kirjoittaja kopioi kentät 1:1. Kenttien sisällön kirjoitat {jezyk_odpowiedzi}, kohdissa 3–5 mainituin poikkeuksin.
+  2. **ET KEKSI MITÄÄN.** Kaiken on löydyttävä tekstistä. Et lisää tapahtumia, hahmoja tai arvioita, joita siinä ei ole.
+  3. **LAJITYYPIT: yksi tai kaksi, YKSINOMAAN tästä listasta** (englanniksi, kirjaimellisesti): {gatunki_dozwolone}. Et luo omia kategorioita, et yhdistele nimiä, et käännä niitä. Jos mikään ei sovi — valitset `Other`.
+  4. **TARGET AUDIENCE: täsmälleen yksi arvo listalta** (englanniksi): {odbiorcy_dozwoleni}. Tälle riville ET kirjoita perustelua — pelkän arvon.
+  5. **MATURE CONTENT: `Yes` tai `No`** (englanniksi) ja ajatusviivan jälkeen yksi perustelulause {jezyk_odpowiedzi}. `Yes` tarkoittaa K18- tai raakaa sisältöä (graafinen väkivalta, seksi, kidutus).
+  6. **KUVAUS: enintään {limit_znakow_opisu} merkkiä välilyönteineen.** Laske ne ja ilmoita tulos kentän otsikossa. Tämä on alustan raja — pidempi kuvaus hylätään. Kuvaus myy tarinan lukijalle: se koukuttaa, ei tiivistä eikä paljasta loppua.
+  7. **SAMPLE CHAPTERS: valitset kaksi tai kolme katkelmaa** (kopioiden niiden otsikot tekstistä kirjaimellisesti), jotka toimivat parhaiten ilmaisena esikatseluna: vahva aloitus, ilman kontekstia ymmärrettävä, jännitykseen päättyvä. Teet tämän AINA — lomake vaatii vähintään yhden katkelman valitusta maksumallista riippumatta.
+  8. **PUBLISHER JA ISBN jätät käsin täytettäviksi.** ISBN on rekisteröity numero — sen keksiminen olisi väärä kustannusilmoitus. Et koskaan kirjoita sinne numeroita.
+  9. **AUTHOR PROFILE on pakollinen** — alusta ei salli anonyymejä julkaisuja (se liittyy tekijänoikeusvakuutukseen). Jos kirjoittajan nimi tai taiteilijanimi on Maailmankirjassa tai tekstissä, kopioit sen; jos ei, kirjoitat `[täytetään käsin]`. Et keksi nimeä.
+  10. **KANSIKUVAN OHJEEN KIRJOITAT ENGLANNIKSI** — se menee kuvageneraattorille, joka toimii parhaiten englanniksi. Mainitset siinä pystysuoran 1200×1800 px:n sommittelun sekä tilan luettavalle nimelle ja kirjoittajan nimelle kuvassa.
+
+  ### 📋 TULOSTUSMUOTO (ilman johdantoa, ilman kommentteja, täsmälleen tässä järjestyksessä):
+
+  Title: <nimi>
+  Subtitle: <alaotsikko tai ”—”, jos tarpeeton>
+
+  Description (<merkkien määrä>/{limit_znakow_opisu} characters):
+  <kuvaus>
+
+  Genres: <yksi tai kaksi lajityyppiä listalta, puolipisteellä erotettuna>
+  Target audience: <yksi arvo listalta>
+  Mature content: <Yes tai No> — <yksi perustelulause>
+  Sample chapters: <2–3 katkelman otsikkoa tekstistä, puolipisteellä erotettuna>
+
+  Cover image prompt (1200x1800 px, English):
+  <ohje englanniksi>
+
+  Publisher: [täytetään käsin]
+  ISBN: [täytetään käsin]
+  Author profile: <kirjoittajan nimi tai taiteilijanimi tai [täytetään käsin]>
+
+  ### 🔧 KENTÄT, JOTKA JÄTÄT OLETUSARVOIHIN (luettele ne lopussa muistutuksena kirjoittajalle, muuttamatta):
+  Display mode: ”Show text and audio in sync” (suositus) · Voice chat: päällä · Territories: Worldwide · Primary language: yksi kieli (useamman tuki on ilmoitettu tulevaksi) · Payout Type: oletuksena suoramyynti (Stripe); vaihtoehtoina tilauskuuntelu tai ilmainen julkaisu · hyväksynnät: käyttöehdot ja sisältöohjeet · Copyright acknowledgements: julkaiset oikeudenhaltijana tai public domain -teoksen julkaisijana · ohjatun toiminnon lopussa valintaruutu ”ready for review” lukitsee muokkauksen arvioinnin ajaksi.
+
+# --- Käyttäjän ohjeen malli (role=user) ---
+# Paikkamerkki {tresc} = projektitiedoston koko sisältö.
+prompt_uzytkownika_szablon: |
+  Laadi julkaisukortti alla olevalle äänikirjaprojektille.
+
+  {tresc}
+
+# --- Maailmankirjan lohko (valinnainen konteksti) ---
+# Liitetään ENNEN sisältöä, kun projektissa on tiedosto `<projekti>.md`
+# Maailmankirjaa varten. Etsi täältä kirjoittajan nimi tai taiteilijanimi sekä
+# erisnimet kuvaukseen.
+prompt_ksiegi_szablon: |
+  [MAAILMANKIRJA — säännöt, hahmot ja mahdolliset kirjoittajan tiedot; konteksti erisnimille]:
+  {ksiega}

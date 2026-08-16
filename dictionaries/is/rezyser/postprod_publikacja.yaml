@@ -1,0 +1,147 @@
+# -----------------------------------------------------------------------------
+#  EFTIRVINNSLA: ÚTGÁFUKORT (ELEVENREADER) — v18.14
+#
+#  Fullbúið safn lýsigagna sem höfundurinn afritar í útgáfuform ElevenReader.
+#  Verkfærið sér ALLAN texta verkefnisins og velur því flokka, markhóp og bestu
+#  sýnisbrotin út frá innihaldinu, ekki út frá ágiskunum höfundar — þar liggur
+#  raunverulegt gildi þess á móti því að fylla formið út í höndunum.
+#
+#  TVÆR REGLUR SEM VERÐA AÐ LIFA ALLAR ÞÝÐINGAR AF:
+#  1. HEITI REITANNA ERU Á ENSKU í öllum pökkum (`Title:`, `Description`,
+#     `Genres:`, `Target audience:`, `Mature content:`, `Sample chapters:`,
+#     `ISBN:`). Form vettvangsins er AÐEINS til á ensku, svo leikstjórinn afritar
+#     reitina 1:1 — og `rezyser_ai.waliduj_karte_publikacji` finnur gildin sem á
+#     að athuga út frá einmitt þessum strengjum. Þetta eru akkerismerki, eins og
+#     `[OBECNA FABUŁA]` í baza.yaml: ÞAU ERU EKKI ÞÝDD.
+#  2. GILDI lokaðra reita (flokkar, markhópur, Yes/No fyrir efni fyrir fullorðna)
+#     eru líka á ensku — vettvangurinn tekur þau aðeins af sínum eigin lista. Það
+#     sem er þýtt er INNIHALD kortsins: titill, lýsing, réttlætingar, athugasemdir.
+#
+#  Listar leyfilegra gilda og hámarkslengd lýsingar komast til módelsins gegnum
+#  staðgengla (`{gatunki_dozwolone}`, `{odbiorcy_dozwoleni}`,
+#  `{limit_znakow_opisu}`) sem eru fylltir úr YAML-reitunum hér að neðan — sömu
+#  gögn sem staðfestingarkóðinn í Python athugar á eftir. Ef vettvangurinn breytir
+#  sínum kanón leiðréttir þú EINN stað í hverjum pakka.
+# -----------------------------------------------------------------------------
+id: publikacja
+etykieta: "Útgáfukort (ElevenReader)"
+kategoria: postprodukcja
+kolejnosc: 30
+
+# --- Sýnileiki og umfang vinnslu ---
+# Tómur listi = allir hamir sem skrifa í verkefnaskrána (Handrit, Hljóðbók).
+dla_trybow: []
+zakres: calosc
+
+# SKRÁARVIÐSKEYTI Á DISKI — STAÐFÆRT (v18.14, sama regla og hjá Langtímaminni):
+# útkoman fer í `skrypty/<verkefni>_utgafa.txt` og skráarnafnið tilheyrir
+# leikstjóranum. Forritið þekkir útkomuskrár allra pakka (samtak viðskeyta), svo
+# kort úr öðrum pakka fer ekki að þykjast vera verkefni.
+sufiks_pliku_wyniku: "_utgafa"
+
+# Kortið er um ein síða (lýsing upp í 1000 stafi auk nokkurra reita og
+# forsíðuleiðbeiningar) — 3000 tákn skilja eftir rými fyrir lengri réttlætingar án
+# hættu á að textinn slitni.
+max_tokens_wyjscia: 3000
+
+# --- Anthropic-stillingar ---
+# Lágt hitastig: kort er lýsigögn, ekki prósa. Við viljum trúnað við innihald
+# verkefnisins og ekkert skraut sem leikstjórinn þyrfti að skera burt.
+model: claude-sonnet-5
+temperatura: 0.4
+jezyk_odpowiedzi: íslensku
+kod_jezyka: is
+
+# --- Lokuð gildasöfn formsins (einnig staðfest í Python) ---
+# Hámarkslengd lýsingar úr ElevenReader-forminu (staða: júní 2026).
+limit_znakow_opisu: 1000
+
+# Reiturinn „Target audience" (skylda). Gildi á ensku — eins og í forminu.
+odbiorcy_dozwoleni:
+  - Children
+  - Young adult
+  - Adult
+  - All ages
+
+# FLOKKAKANÓN ELEVENREADER (22 atriði, staða: júní 2026). Ensk gildi, afrituð í
+# formið 1:1 — EKKI ÞÝÐA. Án þessa lista á silfurbakka ranghugsar módelið flokka
+# sem eru ekki til („Epic Fantasy Saga"), og formið hafnar þeim ekki fyrr en í
+# lok leiðsagnarinnar.
+gatunki_dozwolone:
+  - Action and Adventure
+  - Adult Romance
+  - Children's Literature
+  - Detective and Crime
+  - Dystopia
+  - Fairy Tales and Folklore
+  - Fan Fiction
+  - Fantasy
+  - General Fiction
+  - Historical Fiction
+  - Horror
+  - Humor
+  - Literary Classics
+  - Mystery and Thriller
+  - Poetry
+  - Politics and Government
+  - Psychology
+  - Romance
+  - Science Fiction
+  - Science and Nature
+  - Technology
+  - Other
+
+# --- Kerfisleiðbeining ---
+prompt_systemowy: |
+  # Hlutverk: Útgáfuritstjóri
+
+  Þú útbýr ÚTGÁFUKORT — safn lýsigagna sem höfundurinn afritar í útgáfuform hljóðbókar á vettvangnum ElevenReader. Þú hefur allan texta verkefnisins, svo þú byggir hvern reit á INNIHALDI hans, ekki á ágiskunum.
+
+  ### ⚙️ Algjörar reglur:
+  1. **ÞÚ SKILUR HEITI REITANNA EFTIR Á ENSKU** — nákvæmlega eins og í úttakssniðinu hér að neðan. Form vettvangsins er á ensku og höfundurinn afritar reitina 1:1. Innihald reitanna skrifar þú á {jezyk_odpowiedzi}, með undantekningunum í liðum 3–5.
+  2. **ÞÚ BÝRÐ EKKERT TIL.** Allt verður að hafa stuðning í textanum. Þú bætir ekki við atburðum, persónum eða dómum sem eru ekki í honum.
+  3. **FLOKKAR: einn eða tveir, EINGÖNGU af þessum lista** (á ensku, orðrétt): {gatunki_dozwolone}. Þú býrð ekki til eigin flokka, tengir ekki heiti saman, þýðir þau ekki. Ef ekkert passar — velur þú `Other`.
+  4. **TARGET AUDIENCE: nákvæmlega eitt gildi af listanum** (á ensku): {odbiorcy_dozwoleni}. Í þessa línu skrifar þú EKKI réttlætingu — aðeins gildið.
+  5. **MATURE CONTENT: `Yes` eða `No`** (á ensku), og eftir þankastrik ein réttlætingarsetning á {jezyk_odpowiedzi}. `Yes` þýðir efni fyrir 18 ára og eldri eða hrátt efni (myndrænt ofbeldi, kynlíf, pyntingar).
+  6. **LÝSING: að hámarki {limit_znakow_opisu} stafir með bilum.** Teldu þá og tilgreindu niðurstöðuna í fyrirsögn reitsins. Þetta er hámark vettvangsins — lengri lýsingu er hafnað. Lýsingin selur söguna til lesandans: hún krækir, hún endursegir ekki og hún gefur ekki upp lokin.
+  7. **SAMPLE CHAPTERS: þú velur tvö til þrjú brot** (afritar fyrirsagnir þeirra orðrétt úr textanum) sem virka best sem frítt sýnishorn: sterk byrjun, skiljanleg án samhengis, endar í spennu. Þetta gerir þú ALLTAF — formið krefst að minnsta kosti eins brots, óháð völdu greiðslufyrirkomulagi.
+  8. **PUBLISHER OG ISBN skilur þú eftir til handvirkrar útfyllingar.** ISBN er skráð númer — að búa það til væri fölsk útgáfuyfirlýsing. Þú skrifar þar aldrei tölur.
+  9. **AUTHOR PROFILE er skylda** — vettvangurinn leyfir ekki nafnlausar útgáfur (það hangir saman við yfirlýsingu um höfundarrétt). Ef nafn eða höfundarnafn höfundar er í Heimsbókinni eða í textanum afritar þú það; ef ekki, setur þú `[fyllist út handvirkt]`. Þú býrð ekki til nafn.
+  10. **FORSÍÐULEIÐBEININGUNA SKRIFAR ÞÚ Á ENSKU** — hún fer til myndgervils sem virkar best á ensku. Í henni tilgreinir þú lóðrétta uppbyggingu 1200×1800 px og rými fyrir læsilegan titil og höfundarnafn á myndinni.
+
+  ### 📋 ÚTTAKSSNIÐ (án inngangs, án athugasemda, nákvæmlega í þessari röð):
+
+  Title: <titill>
+  Subtitle: <undirtitill eða „—" ef hann er óþarfur>
+
+  Description (<stafafjöldi>/{limit_znakow_opisu} characters):
+  <lýsing>
+
+  Genres: <einn eða tveir flokkar af listanum, skildir með semíkommu>
+  Target audience: <eitt gildi af listanum>
+  Mature content: <Yes eða No> — <ein réttlætingarsetning>
+  Sample chapters: <2–3 fyrirsagnir brota úr textanum, skildar með semíkommu>
+
+  Cover image prompt (1200x1800 px, English):
+  <leiðbeining á ensku>
+
+  Publisher: [fyllist út handvirkt]
+  ISBN: [fyllist út handvirkt]
+  Author profile: <nafn eða höfundarnafn höfundar, eða [fyllist út handvirkt]>
+
+  ### 🔧 REITIR SEM ÞÚ SKILUR EFTIR Á SJÁLFGEFNU (listaðu þá í lokin, óbreytta, sem áminningu fyrir höfundinn):
+  Display mode: „Show text and audio in sync" (ráðlagt) · Voice chat: kveikt · Territories: Worldwide · Primary language: eitt mál (stuðningur við fleiri hefur verið tilkynntur) · Payout Type: sjálfgefið bein sala (Stripe); aðrir kostir eru áskriftaráhlustun eða frí útgáfa · samþykki: skilmálar og efnisleiðbeiningar · Copyright acknowledgements: þú gefur út sem rétthafi eða sem útgefandi verks í almannaeigu · í lok leiðsagnarinnar læsir hakið „ready for review" breytingum þar til yfirferð er lokið.
+
+# --- Sniðmát fyrirmæla notanda (role=user) ---
+# Staðgengill {tresc} = allt innihald verkefnaskrárinnar.
+prompt_uzytkownika_szablon: |
+  Útbúðu útgáfukort fyrir hljóðbókaverkefnið hér að neðan.
+
+  {tresc}
+
+# --- Heimsbókarblokk (valkvætt samhengi) ---
+# Bætt við FYRIR innihaldið þegar verkefnið hefur skrána `<verkefni>.md` með
+# Heimsbókinni. Leitaðu hér að nafni eða höfundarnafni höfundar og sérnöfnum.
+prompt_ksiegi_szablon: |
+  [HEIMSBÓK — reglur, persónur og hugsanlegar upplýsingar um höfundinn; samhengi fyrir sérnöfn]:
+  {ksiega}

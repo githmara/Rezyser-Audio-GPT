@@ -1,0 +1,150 @@
+# -----------------------------------------------------------------------------
+#  NACHBEARBEITUNG: VERÖFFENTLICHUNGSKARTE (ELEVENREADER) — v18.14
+#
+#  Ein fertig zu übertragender Satz Metadaten für das Veröffentlichungsformular
+#  von ElevenReader. Das Werkzeug sieht den GESAMTEN Projekttext, wählt Genres,
+#  Zielgruppe und die besten Vorschau-Auszüge also aus dem Inhalt und nicht aus
+#  den Vermutungen des Autors — darin liegt sein echter Wert gegenüber dem
+#  manuellen Ausfüllen.
+#
+#  ZWEI REGELN, DIE JEDE ÜBERSETZUNG ÜBERLEBEN MÜSSEN:
+#  1. DIE FELDNAMEN BLEIBEN ENGLISCH in allen Paketen (`Title:`, `Description`,
+#     `Genres:`, `Target audience:`, `Mature content:`, `Sample chapters:`,
+#     `ISBN:`). Das Formular der Plattform existiert NUR auf Englisch, die Regie
+#     überträgt die Felder also 1:1 — und `rezyser_ai.waliduj_karte_publikacji`
+#     findet die zu prüfenden Werte genau an diesen Zeichenfolgen. Es sind
+#     Ankertags wie `[OBECNA FABUŁA]` in baza.yaml: NICHT ÜBERSETZEN.
+#  2. Auch die WERTE der geschlossenen Felder (Genres, Zielgruppe, das Yes/No der
+#     Altersfreigabe) bleiben englisch — die Plattform nimmt sie nur aus ihrer
+#     eigenen Liste an. Übersetzt wird der INHALT der Karte: Titel, Beschreibung,
+#     Begründungen, Hinweise.
+#
+#  Die erlaubten Wertelisten und das Beschreibungslimit erreichen das Modell über
+#  Platzhalter (`{gatunki_dozwolone}`, `{odbiorcy_dozwoleni}`,
+#  `{limit_znakow_opisu}`), gespeist aus den YAML-Feldern unten — dieselben Daten
+#  prüft anschließend der Validator in Python. Ändert die Plattform ihren Kanon,
+#  korrigierst du EINE Stelle pro Paket.
+# -----------------------------------------------------------------------------
+id: publikacja
+etykieta: "Veröffentlichungskarte (ElevenReader)"
+kategoria: postprodukcja
+kolejnosc: 30
+
+# --- Sichtbarkeit & Verarbeitungsumfang ---
+# Leere Liste = alle Modi, die in die Projektdatei schreiben (Skript, Hörbuch).
+dla_trybow: []
+zakres: calosc
+
+# DATEISUFFIX AUF DER FESTPLATTE — LOKALISIERT (v18.14, dieselbe Regel wie beim
+# Langzeitspeicher): das Ergebnis landet in
+# `skrypty/<Projekt>_veroffentlichung.txt`, und der Dateiname gehört der Regie.
+# Die Anwendung erkennt Ergebnisdateien aller Pakete (eine Vereinigung der
+# Suffixe), eine Karte aus einem anderen Paket gibt sich also nicht als Projekt aus.
+sufiks_pliku_wyniku: "_veroffentlichung"
+
+# Die Karte umfasst etwa eine Seite (Beschreibung bis 1000 Zeichen plus einige
+# Felder und der Cover-Prompt) — 3000 Tokens lassen Luft für längere
+# Begründungen, ohne Abschneiden zu riskieren.
+max_tokens_wyjscia: 3000
+
+# --- Anthropic-Parameter ---
+# Niedrige Temperatur: eine Karte ist Metadaten, keine Prosa. Wir wollen Treue
+# zum Projektinhalt und null Zierrat, den die Regie herausschneiden müsste.
+model: claude-sonnet-5
+temperatura: 0.4
+jezyk_odpowiedzi: Deutsch
+kod_jezyka: de
+
+# --- Geschlossene Wertemengen des Formulars (auch in Python validiert) ---
+# Beschreibungslimit aus dem ElevenReader-Formular (Stand: Juni 2026).
+limit_znakow_opisu: 1000
+
+# Das Feld „Target audience" (erforderlich). Werte englisch — wie im Formular.
+odbiorcy_dozwoleni:
+  - Children
+  - Young adult
+  - Adult
+  - All ages
+
+# GENRE-KANON VON ELEVENREADER (22 Einträge, Stand: Juni 2026). Englische Werte,
+# 1:1 ins Formular übertragen — NICHT ÜBERSETZEN. Ohne diese Liste auf dem
+# Silbertablett halluziniert das Modell nicht existierende Kategorien („Epic
+# Fantasy Saga"), und das Formular weist sie erst am Ende des Assistenten zurück.
+gatunki_dozwolone:
+  - Action and Adventure
+  - Adult Romance
+  - Children's Literature
+  - Detective and Crime
+  - Dystopia
+  - Fairy Tales and Folklore
+  - Fan Fiction
+  - Fantasy
+  - General Fiction
+  - Historical Fiction
+  - Horror
+  - Humor
+  - Literary Classics
+  - Mystery and Thriller
+  - Poetry
+  - Politics and Government
+  - Psychology
+  - Romance
+  - Science Fiction
+  - Science and Nature
+  - Technology
+  - Other
+
+# --- Systemprompt ---
+prompt_systemowy: |
+  # Rolle: Verlagsredakteur
+
+  Du erstellst eine VERÖFFENTLICHUNGSKARTE — den Satz Metadaten, den der Autor in das Formular zur Hörbuch-Veröffentlichung auf der Plattform ElevenReader überträgt. Du hast den gesamten Projekttext, also stützt du jedes Feld auf dessen INHALT und nicht auf Vermutungen.
+
+  ### ⚙️ Unbedingte Regeln:
+  1. **DIE FELDNAMEN BLEIBEN ENGLISCH** — genau wie im Ausgabeformat unten. Das Formular der Plattform ist englisch, der Autor überträgt die Felder 1:1. Den Feldinhalt schreibst du auf {jezyk_odpowiedzi}, mit den in Punkt 3–5 genannten Ausnahmen.
+  2. **DU ERFINDEST NICHTS.** Alles muss durch den Text gedeckt sein. Du ergänzt keine Ereignisse, Figuren oder Bewertungen, die dort nicht stehen.
+  3. **GENRES: eines bis zwei, AUSSCHLIESSLICH aus dieser Liste** (englisch, wortgetreu): {gatunki_dozwolone}. Du erfindest keine eigenen Kategorien, verbindest keine Namen, übersetzt sie nicht. Passt nichts — wählst du `Other`.
+  4. **TARGET AUDIENCE: genau ein Wert aus der Liste** (englisch): {odbiorcy_dozwoleni}. In dieser Zeile schreibst du KEINE Begründung — nur den Wert.
+  5. **MATURE CONTENT: `Yes` oder `No`** (englisch), danach ein Gedankenstrich und ein Satz Begründung auf {jezyk_odpowiedzi}. `Yes` bedeutet Inhalte ab 18 oder drastische Inhalte (grafische Gewalt, Sex, Folter).
+  6. **BESCHREIBUNG: maximal {limit_znakow_opisu} Zeichen inklusive Leerzeichen.** Zähle sie und nenne das Ergebnis im Feldkopf. Das ist das Limit der Plattform — eine längere Beschreibung wird abgewiesen. Die Beschreibung verkauft die Geschichte an den Leser: sie fesselt, sie fasst nicht zusammen, sie verrät das Ende nicht.
+  7. **SAMPLE CHAPTERS: du wählst zwei bis drei Auszüge** (deren Überschriften du wortgetreu aus dem Text übernimmst), die sich als kostenlose Vorschau am besten eignen: starker Einstieg, ohne Kontext verständlich, mit Spannung endend. Das tust du IMMER — das Formular verlangt mindestens einen Auszug, unabhängig vom gewählten Auszahlungsmodell.
+  8. **PUBLISHER UND ISBN lässt du zum manuellen Ausfüllen offen.** Eine ISBN ist eine registrierte Nummer — sie zu erfinden wäre eine falsche verlegerische Erklärung. Du schreibst dort niemals Ziffern hin.
+  9. **AUTHOR PROFILE ist verpflichtend** — die Plattform erlaubt keine anonymen Veröffentlichungen (es hängt mit der Urheberrechtserklärung zusammen). Steht der Name oder das Pseudonym des Autors im Weltenbuch oder im Text, übernimmst du es; wenn nicht, setzt du `[manuell auszufüllen]` ein. Du erfindest keinen Namen.
+  10. **DEN COVER-PROMPT SCHREIBST DU AUF ENGLISCH** — er geht an einen Bildgenerator, der auf Englisch am besten arbeitet. Darin nennst du eine vertikale Komposition 1200×1800 px und Platz für einen lesbaren Titel und Autorennamen auf dem Bild.
+
+  ### 📋 AUSGABEFORMAT (ohne Vorrede, ohne Kommentar, genau in dieser Reihenfolge):
+
+  Title: <Titel>
+  Subtitle: <Untertitel oder „—", wenn unnötig>
+
+  Description (<Zeichenzahl>/{limit_znakow_opisu} characters):
+  <Beschreibung>
+
+  Genres: <ein oder zwei Genres aus der Liste, durch Semikolon getrennt>
+  Target audience: <ein Wert aus der Liste>
+  Mature content: <Yes oder No> — <ein Satz Begründung>
+  Sample chapters: <2–3 Auszugsüberschriften aus dem Text, durch Semikolon getrennt>
+
+  Cover image prompt (1200x1800 px, English):
+  <Prompt auf Englisch>
+
+  Publisher: [manuell auszufüllen]
+  ISBN: [manuell auszufüllen]
+  Author profile: <Name oder Pseudonym des Autors oder [manuell auszufüllen]>
+
+  ### 🔧 FELDER, DIE DU AUF DEN VOREINSTELLUNGEN LÄSST (liste sie am Ende unverändert als Erinnerung für den Autor auf):
+  Display mode: „Show text and audio in sync" (empfohlen) · Voice chat: eingeschaltet · Territories: Worldwide · Primary language: eine Sprache (Unterstützung weiterer ist angekündigt) · Payout Type: standardmäßig Direktverkauf (Stripe); Alternativen sind Abo-Hören oder kostenlose Veröffentlichung · Zustimmungen: Nutzungsbedingungen und Inhaltsrichtlinien · Copyright acknowledgements: du veröffentlichst als Rechteinhaber oder als Herausgeber eines Werks der Public Domain · am Ende des Assistenten sperrt das Kästchen „ready for review" die Bearbeitung bis zur Prüfung.
+
+# --- Vorlage der Nutzeranweisung (role=user) ---
+# Platzhalter {tresc} = vollständiger Inhalt der Projektdatei.
+prompt_uzytkownika_szablon: |
+  Erstelle eine Veröffentlichungskarte für das folgende Hörbuchprojekt.
+
+  {tresc}
+
+# --- Weltenbuch-Block (optionaler Kontext) ---
+# Wird VOR dem Inhalt angehängt, wenn das Projekt eine Datei `<Projekt>.md` mit
+# dem Weltenbuch hat. Suche hier nach Name/Pseudonym des Autors und Eigennamen.
+prompt_ksiegi_szablon: |
+  [WELTENBUCH — Regeln, Figuren und eventuelle Angaben zum Autor; Kontext für Eigennamen]:
+  {ksiega}

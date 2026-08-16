@@ -592,6 +592,16 @@ rezyser:
   tytuly_blad_nieznany: "Unbekannter Fehler beim Betiteln."
   tytuly_czesciowe_naglowek: "⚠️ Teilweise Ergebnisse (Generierung durch Fehler unterbrochen):\n\n{wyniki}"
   blad_zapisu_do_pliku: "Fehler beim Speichern in Datei:\n{tresc_bledu}"
+  # Veröffentlichungskarte (v18.14) – sanfte Hinweise des Validators. Feldnamen
+  # ({pole}) bleiben englisch: das Formular der Plattform ist englisch.
+  publikacja_ostrz_naglowek: "Die Karte ist fertig, benötigt aber eine manuelle Korrektur, bevor Sie sie in das Formular einfügen:"
+  publikacja_ostrz_opis: "Die Beschreibung hat {znaki} Zeichen, das Formular nimmt höchstens {limit} an. Kürzen Sie sie vor dem Einfügen."
+  publikacja_ostrz_gatunki: "Genres außerhalb der kanonischen Liste der Plattform: {wartosci}. Wählen Sie Ersatz aus der Liste `gatunki_dozwolone` in rezyser/postprod_publikacja.yaml."
+  publikacja_ostrz_odbiorca: |-
+    Die Zielgruppe „{wartosc}" ist kein Formularwert. Erlaubt: {dozwolone}.
+  publikacja_ostrz_brak_pola: |-
+    Die Karte enthält kein ausgefülltes Feld „{pole}" – das Formular verlangt es.
+  publikacja_ostrz_isbn: "Im ISBN-Feld sind Ziffern erschienen. Eine ISBN ist eine registrierte Nummer – tragen Sie Ihre eigene ein oder lassen Sie das Feld zum Ausfüllen offen."
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)
@@ -660,7 +670,9 @@ rezyser:
   postprod_postep_gotowe: Postproduktion abgeschlossen.
   postprod_pusta_tresc: Das Modell hat eine leere Antwort zurückgegeben. Bitte versuchen Sie es erneut.
   postprod_ucieta_tresc: Das Ergebnis der Postproduktion hat das Längenlimit erreicht und könnte am Ende abgeschnitten sein. Das Ergebnis ist verfügbar — prüfen Sie das Ende, und falls es abgeschnitten ist, führen Sie das Tool erneut aus oder erhöhen Sie den Wert `max_tokens_wyjscia` in der YAML-Datei des Tools.
-  postprod_ostrzezenie_tytul: Das Ergebnis wurde möglicherweise abgeschnitten
+  # Gemeinsamer Titel für Abschneide-Warnungen UND Hinweise des
+  # Karten-Validators (v18.14), daher neutral — der Text sagt, was zu prüfen ist.
+  postprod_ostrzezenie_tytul: "Das Ergebnis muss geprüft werden"
   postprod_nadpisac_tytul: Die Ergebnisdatei existiert bereits
   postprod_nadpisac_tresc: Die Datei {plik} existiert bereits im Ordner „skrypty“. Soll sie mit dem neuen Ergebnis überschrieben werden?
   postprod_dlg_lbl: 'Ergebnis des Tools — kopieren (Ctrl+A, Ctrl+C) oder schließen:'
