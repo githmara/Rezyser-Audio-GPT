@@ -89,20 +89,16 @@ prompt_systemowy: |
   - `opis` — 1-3 phrases sur la logique de l'option. Le joueur la lit au-dessus du champ Instructions après avoir cliqué sur l'option. Ne répète pas le titre dans la première phrase de la description.
 
 # --- Suffixes contextuels ajoutés à prompt_systemowy ---
-sufiksy:
-  streszczenie: |
-
-
-    [MODE RÉSUMÉ FORCÉ] : L'utilisateur a manuellement demandé de sauvegarder l'état de l'intrigue ! Dans la réponse JSON AJOUTE LA CLÉ `"streszczenie"` (au même niveau que `opcje`) avec une valeur texte contenant DEUX éléments obligatoires :
-    1. Un résumé concis des événements jusqu'à présent.
-    2. Une section [STYLE ET TON] : une note d'une phrase sur l'atmosphère narrative.
-
-  alarm: |
-
-
-    [MODE ALARME - LIMITE DE MÉMOIRE APPROCHE] : La mémoire est presque pleine ! Dans la réponse JSON AJOUTE LA CLÉ `"streszczenie"` (au même niveau que `opcje`) avec une valeur texte contenant DEUX éléments obligatoires :
-    1. Un résumé concis des événements jusqu'à présent.
-    2. Une section [STYLE ET TON] : une note d'une phrase sur l'atmosphère narrative.
+# v18.13 : les suffixes `streszczenie` et `alarm` ont été SUPPRIMÉS avec leurs
+# mots déclencheurs. Ils demandaient au modèle d'ajouter la clé JSON
+# `streszczenie` à une réponse dont le prompt ci-dessus interdit d'écrire autre
+# chose que trois options d'intrigue : le réalisateur qui voulait un simple résumé
+# recevait des instructions contradictoires et (si l'improvisation du modèle
+# échouait) une erreur de validation du schéma au lieu d'un résultat. Le résumé
+# est désormais un outil de postproduction distinct : `postprod_streszczenie.yaml`
+# (rôle `pamiec_dlugotrwala`), qui se déclenche aussi seul au seuil d'alarme.
+# Le moteur SAIT toujours lire une clé `streszczenie` — pour revenir à l'ancien
+# comportement, il suffit de remettre le suffixe ici.
 
 # --- Rappel ajouté aux instructions utilisateur (role=user) ---
 przypomnienie_uzytkownika: |
@@ -110,11 +106,9 @@ przypomnienie_uzytkownika: |
 
   (RAPPEL CRITIQUE : Tu génères un JSON avec 3 options. Options logiques et ancrées. Chaque `cel_sceny` reprend là où [OBECNA FABUŁA] s'est arrêté — l'idée du réalisateur est une scène À ÉCRIRE, non un arrière-plan déjà survenu ; ne la saute pas. Complique l'intrigue, SAUF SI l'utilisateur demande explicitement un Épilogue ou une fin — alors ferme l'histoire proprement. Les options NE PEUVENT PAS se terminer en succès inconditionnel sans conséquence ! `cel_sceny` SANS [Réalisateur : ...] ni [DIRECTIVE] : ... — ces lignes sont ajoutées par Python.)
 
-# --- Mots déclencheurs du comportement du moteur ---
+# --- Mots déclencheurs du moteur ---
+# v18.13 : la liste `streszczenie` a été supprimée avec les suffixes (voir le
+# commentaire ci-dessus). Écrire « résume l'intrigue » dans une instruction du
+# Remue-méninges ne change plus le prompt — le résumé passe par le bouton
+# « Enregistrer la Mémoire à long terme » dans la section postproduction.
 slowa_wyzwalajace:
-  streszczenie:
-    - résumé
-    - résume
-    - récapitul
-    - synthèse
-    - bilan

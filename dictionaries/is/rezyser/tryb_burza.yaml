@@ -85,21 +85,16 @@ prompt_systemowy: |
   - `tytul` — stutt merki fyrir GUI-hnappinn. Leikmaður sér „1. {tytul}". T.d. „Þakeftirfararás", „Yfirheyrsla við smyglarann", „Fundur í yfirgefnu kapellu".
   - `opis` — 1-3 setningar um rökfræði valkostsins. Leikmaður les það yfir Leiðbeiningar-reitnum eftir að smella á valkostinn. Endurtaktu ekki titilinn í fyrstu setningu lýsingarinnar.
 
-# --- Samhengisviðaukar sem bætt er við prompt_systemowy ---
-sufiksy:
-  streszczenie: |
-
-
-    [ÞVINGAÐUR SAMANTEKTARHAMUR]: Notandinn bað handvirkt um að vista söguástandið! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur TVÖ skyldubundnu þætti:
-    1. Hnitmiðuð samantekt á atburðum hingað til.
-    2. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
-
-  alarm: |
-
-
-    [VIÐVÖRUNARHAMUR - ENDIR MINNIS NÁLGAST]: Minnið er næstum fullt! Í JSON-svarinu BÆTTU VIÐ LYKLINUM `"streszczenie"` (á sama stigi og `opcje`) með textagildi sem inniheldur TVÖ skyldubundnu þætti:
-    1. Hnitmiðuð samantekt á atburðum hingað til.
-    2. Hluta [STÍLL OG TÓNN]: einsetninga athugasemd um andrúmsloft frásagnar.
+# --- Samhengisviðskeyti sem bætt er við prompt_systemowy ---
+# v18.13: viðskeytin `streszczenie` og `alarm` VORU FJARLÆGÐ ásamt kveikjuorðum
+# sínum. Þau skipuðu líkaninu að bæta JSON-lyklinum `streszczenie` við svar sem
+# hvatningin hér að ofan bannar að innihaldi nokkuð annað en þrjá
+# söguþráðarkosti — leikstjóri sem bað um hreina samantekt fékk andstæðar
+# fyrirmæli og (ef spuni líkansins mistókst) villu í staðfestingu skemans í stað
+# niðurstöðu. Samantektin er nú sjálfstætt eftirvinnsluverkfæri:
+# `postprod_streszczenie.yaml` (hlutverk `pamiec_dlugotrwala`), sem fer líka
+# sjálft í gang við viðvörunarmörkin. Vélin GETUR enn lesið lykilinn
+# `streszczenie` — til að fá fyrri hegðun nægir að setja viðskeytið hér aftur.
 
 # --- Áminning bætt við notendaleiðbeiningar (role=user) ---
 przypomnienie_uzytkownika: |
@@ -107,11 +102,9 @@ przypomnienie_uzytkownika: |
 
   (MIKILVÆG ÁMINNING: Þú framleiðir JSON með 3 valkostum. Valkostir rökfræðilegir og jarðtengdir. Hvert `cel_sceny` heldur áfram þar sem [OBECNA FABUŁA] sleppti — hugmynd leikstjórans er atriði SEM Á AÐ SKRIFA, ekki bakgrunnur sem þegar gerðist; ekki stökkva yfir það. Flæktu söguþráðinn NEMA notandi biðji beinlínis um Eftirmála eða endi — þá lokaðu sögunni snyrtilega. Valkostir MEGA EKKI enda í skilyrðislausum árangri án afleiðinga! `cel_sceny` ÁN [Leikstjóri: ...] eða [FYRIRMÆLI]: ... — Python bætir þeim við.)
 
-# --- Hvarforð fyrir hegðun vélar ---
+# --- Kveikjuorð vélarinnar ---
+# v18.13: listinn `streszczenie` var fjarlægður með viðskeytunum (sjá athugasemd
+# að ofan). Að biðja „taktu söguþráðinn saman“ í fyrirmælum Hugarflugsins breytir
+# hvatningunni ekki lengur — samantektin fer fram með hnappinum „Vista
+# Langtímaminni“ í eftirvinnsluhlutanum.
 slowa_wyzwalajace:
-  streszczenie:
-    - samantekt
-    - taktu saman
-    - dragðu saman
-    - yfirlit
-    - útdráttur

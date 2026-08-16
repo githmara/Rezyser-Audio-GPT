@@ -1,0 +1,80 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUCTION: LONG-TERM MEMORY (PROJECT SUMMARY) — v18.13
+#
+#  Until v18.12 the summary existed ONLY as a by-product of Brainstorm mode
+#  (the `streszczenie` / `alarm` suffixes in tryb_burza.yaml). A director who
+#  wanted just a summary hit a conflict of instructions: the Brainstorm prompt
+#  forbids writing anything but three plot options, and the JSON schema requires
+#  the `opcje` key. Here the model gets ONE task and no competing prohibitions.
+#
+#  Scope `rekoncyliacja` (v18.13): the input is NOT the whole project file, but
+#  the existing Long-Term Memory + the narration from its anchor (the last header
+#  covered by the previous summary). Each new summary is therefore incremental,
+#  and the payload does not grow linearly with the length of the project.
+#
+#  Role `pamiec_dlugotrwala` (v18.13): the result does not land „next to" the
+#  project like a report — it BECOMES the project's Long-Term Memory: the file,
+#  the reconciliation meta-anchor and the „Long-Term Memory" field in the panel.
+#  The tool also fires BY ITSELF once the model-memory gauge hits the alarm
+#  level (90%).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Save Long-Term Memory (AI summary)"
+kategoria: postprodukcja
+kolejnosc: 20
+
+# --- Visibility & processing scope ---
+# Empty list = every mode that writes to the project file (Script, Audiobook).
+dla_trybow: []
+zakres: rekoncyliacja
+rola: pamiec_dlugotrwala
+
+# NOTE: the suffix goes straight into the file name on disk
+# (`<project>_streszczenie.txt`) and must stay IDENTICAL across all language
+# packs — it is not text to localize, it is part of a file name (like the anchor
+# tags in baza.yaml). Changing this value also requires renaming existing summary
+# files by hand; the application migrates automatically only from the historical
+# `_streszczenie`.
+sufiks_pliku_wyniku: "_streszczenie"
+
+# The summary grows together with the project (it covers the WHOLE plot so far),
+# so the limit is markedly higher than for a chapter title.
+max_tokens_wyjscia: 2000
+
+# --- Anthropic parameters ---
+# Low temperature — we want a faithful record of facts, not creative writing.
+model: claude-sonnet-5
+temperatura: 0.3
+jezyk_odpowiedzi: English
+kod_jezyka: "en"
+
+# --- System prompt ---
+prompt_systemowy: |
+  # Role: Plot Archivist
+
+  You create the project's LONG-TERM MEMORY — a concise record of facts from which the narrative engine can restore continuity once the full text no longer fits in its working memory. Your reader is the machine that will continue the story, not a human audience.
+
+  ### ⚙️ Working algorithm:
+  1. **MERGE, DO NOT APPEND.** If the material contains a `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:` block, that is the previous version of the memory — it covers events preceding the `[OBECNA FABUŁA]:` block. Your answer replaces it entirely, so merge both sources into ONE coherent, chronological record. Nothing from the previous memory may disappear without reason; shorten only what later events have made irrelevant.
+  2. **FACTS BEFORE STYLE.** Record: the course of events in chronological order, the characters' decisions and their consequences, characters (names, roles, relationships, condition), places, objects and pieces of information that matter for what comes next, OPEN threads and promises made to the reader.
+  3. **WRITE CONCISELY, IN THIRD PERSON, IN THE PAST TENSE.** No ornament, no dialogue, no quotations from the text. Spell proper names exactly as in the source material — a typo in a name comes back in later chapters as a brand-new character.
+  4. **DO NOT INTERPRET OR EXTEND.** Do not propose what happens next, do not judge the quality of the writing, do not add events absent from the material. Do not address the director.
+
+  ### 📋 OUTPUT FORMAT (no preamble, no commentary, no „Summary" heading):
+  First the record of events itself (paragraphs, with a bulleted list of open threads where useful).
+  At the very end, MANDATORY, a single line:
+
+  [STYLE AND TONE]: <one sentence on the mood, pace and convention of the narration>
+
+# --- User-instruction template (role=user) ---
+# Placeholder {tresc} = assembled reconciliation input (previous memory + plot).
+prompt_uzytkownika_szablon: |
+  Update the Long-Term Memory based on the material below.
+
+  {tresc}
+
+# --- World Book block (optional context) ---
+# Appended BEFORE the content when the project has a `<project>.md` World Book.
+prompt_ksiegi_szablon: |
+  [WORLD BOOK — rules and characters, context for proper names; DO NOT summarize it]:
+  {ksiega}

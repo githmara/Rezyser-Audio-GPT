@@ -518,10 +518,10 @@ rezyser:
     Les règles du monde et les personnages sont requis par le modèle.
   blad_trybu_tytul: "Erreur de mode"
   blad_trybu_tresc: |-
-    Vous essayez de générer un résumé en mode sauvegarde fichier !
-    Cela pourrait endommager votre histoire.
+    Vous essayez de générer un résumé en mode enregistrement dans un fichier !
+    Cela pourrait endommager votre historique.
 
-    Passez en mode « Brainstorming » et réessayez.
+    Le résumé est enregistré par le bouton « Enregistrer la Mémoire à Long Terme (résumé IA) » dans la section post-production ci-dessous — il n'écrase pas le fichier de projet.
   err_rate_limit: "Crédits Anthropic insuffisants ! Rechargez votre compte et réessayez."
   err_surowy_json: |-
     Ce mode a renvoyé des données au format JSON, mais n'est pas configuré comme mode JSON, donc le texte n'a PAS été enregistré (évité de coller du JSON brut dans le fichier).
@@ -653,6 +653,12 @@ rezyser:
   postprod_dlg_lbl: "Résultat de l'outil — copiez (Ctrl+A, Ctrl+C) ou fermez :"
   postprod_dlg_zapisano: 'Le résultat a été enregistré dans le fichier {plik} (dossier skrypty). Aperçu ci-dessous :'
   postprod_dlg_name: Champ du résultat de post-production
+  err_kontekst: Le contenu envoyé au modèle ne tient pas dans sa fenêtre contextuelle. Enregistrez la Mémoire à Long Terme (le résumé réduit le contexte des appels suivants), divisez le projet en fichiers plus petits, ou choisissez un modèle avec une fenêtre plus grande — les modèles Claude offrent ici la plus grande marge.
+  postprod_kontekst_tytul: Projet volumineux — vérifiez la fenêtre du modèle
+  postprod_kontekst_tresc: "Le contenu destiné à l'outil compte environ {tokeny} jetons et dépasse {limit} jetons, soit la fenêtre contextuelle utilisée par l'application pour mesurer l'occupation de la mémoire.\n\nLes modèles Claude ont une fenêtre bien plus grande que ce seuil, donc l'appel devrait probablement réussir. Cependant, si vous utilisez votre propre fournisseur d'IA avec une fenêtre plus petite, le modèle rejettera la requête — et vous paierez quand même pour la tentative.\n\nVoulez-vous lancer l'outil malgré tout ?"
+  pamiec_auto_start: Mémoire du modèle presque pleine — enregistrement de la Mémoire à Long Terme…
+  pamiec_auto_zapisana_tytul: Mémoire à Long Terme enregistrée automatiquement
+  pamiec_auto_zapisana_tresc: "La mémoire du modèle a dépassé le seuil d'alerte, l'application a donc préparé elle-même un résumé du projet {nazwa_projektu} et l'a enregistré sous {plik}.\n\nLe résumé apparaît dans le champ « Mémoire à Long Terme » — vous pouvez le modifier librement et l'enregistrer à nouveau."
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
@@ -1367,6 +1373,7 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — verrouillées ; définissez EDYCJA_STANU_GRY_WIDOCZNA = True dans gui_opowiesci.py:72 pour déverrouiller)
   err_struktura: Le modèle IA a renvoyé plusieurs fois une structure de données incorrecte et il n'a pas été possible de la corriger. Réessayez — si l'erreur persiste, joignez le fichier error_log.txt à votre signalement.
   pamiec_status_offline: "⚠️ Pas de connexion Internet : le compteur de mémoire exact n'est pas disponible, les valeurs affichées sont approximatives (~{procent} % — {tokeny} jetons). Redémarrez l'application une fois la connexion rétablie."
+  err_kontekst: L'historique de la partie ne tient pas dans la fenêtre contextuelle du modèle. Terminez cette partie et commencez-en une nouvelle, ou choisissez un modèle avec une fenêtre plus grande — les modèles Claude offrent ici la plus grande marge.
 bot:
   closure:
     Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio GPT.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"

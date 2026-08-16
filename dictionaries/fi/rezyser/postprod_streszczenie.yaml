@@ -1,0 +1,82 @@
+# -----------------------------------------------------------------------------
+#  JÄLKITUOTANTO: PYSYVÄ MUISTI (PROJEKTIN YHTEENVETO) — v18.13
+#
+#  Versioon 18.12 asti yhteenveto syntyi VAIN Aivoriihi-tilan sivutuotteena
+#  (jälkiliitteet `streszczenie` / `alarm` tiedostossa tryb_burza.yaml). Ohjaaja,
+#  joka halusi pelkän yhteenvedon, törmäsi ristiriitaisiin ohjeisiin: Aivoriihen
+#  kehote kieltää kirjoittamasta mitään muuta kuin kolme juonivaihtoehtoa, ja
+#  JSON-skeema vaatii avaimen `opcje`. Täällä malli saa YHDEN tehtävän eikä
+#  yhtään kilpailevaa kieltoa.
+#
+#  Laajuus `rekoncyliacja` (v18.13): syötteenä EI ole koko projektitiedosto vaan
+#  nykyinen Pysyvä Muisti + kerronta sen ankkurista alkaen (viimeisestä
+#  otsikosta, jonka edellinen yhteenveto kattoi). Näin jokainen uusi yhteenveto
+#  on inkrementaalinen eikä hyötykuorma kasva lineaarisesti projektin pituuden
+#  mukana.
+#
+#  Rooli `pamiec_dlugotrwala` (v18.13): tulos ei jää raportin tavoin „viereen"
+#  vaan siitä TULEE projektin Pysyvä Muisti: tiedosto, täsmäytyksen
+#  meta-ankkuri ja paneelin kenttä „Pysyvä Muisti". Työkalu käynnistyy
+#  myös ITSESTÄÄN, kun mallin muistimittari saavuttaa hälytystason (90 %).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Tallenna Pysyvä Muisti (tekoälyn yhteenveto)"
+kategoria: postprodukcja
+kolejnosc: 20
+
+# --- Näkyvyys ja käsittelyn laajuus ---
+# Tyhjä lista = kaikki tilat, jotka kirjoittavat projektitiedostoon
+# (Käsikirjoitus, Äänikirja).
+dla_trybow: []
+zakres: rekoncyliacja
+rola: pamiec_dlugotrwala
+
+# HUOMIO: jälkiliite menee suoraan levyllä olevan tiedoston nimeen
+# (`<projekti>_streszczenie.txt`), ja sen on pysyttävä SAMANA kaikissa
+# kielipaketeissa — se ei ole lokalisoitavaa tekstiä vaan osa tiedostonimeä
+# (kuten ankkuritunnisteet tiedostossa baza.yaml). Arvon muuttaminen vaatii
+# lisäksi olemassa olevien yhteenvetotiedostojen nimeämisen käsin; sovellus
+# siirtää automaattisesti vain historiallisesta muodosta `_streszczenie`.
+sufiks_pliku_wyniku: "_streszczenie"
+
+# Yhteenveto kasvaa projektin mukana (se kattaa KOKO tähänastisen juonen), joten
+# raja on selvästi korkeampi kuin luvun otsikolla.
+max_tokens_wyjscia: 2000
+
+# --- Anthropic-parametrit ---
+# Matala lämpötila — haluamme uskollisen tallenteen tosiasioista, emme luomista.
+model: claude-sonnet-5
+temperatura: 0.3
+jezyk_odpowiedzi: suomeksi
+kod_jezyka: "fi"
+
+# --- Järjestelmäkehote ---
+prompt_systemowy: |
+  # Rooli: Juonen arkistonhoitaja
+
+  Laadit projektin PYSYVÄN MUISTIN — tiiviin tallenteen tosiasioista, joiden avulla kerrontamoottori palauttaa jatkuvuuden, kun koko teksti ei enää mahdu sen työmuistiin. Vastaanottaja on tarinaa jatkava kone, ei ihmislukija.
+
+  ### ⚙️ Työalgoritmi:
+  1. **YHDISTÄ, ÄLÄ LISÄÄ PERÄÄN.** Jos aineistossa on lohko `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:`, se on muistin edellinen versio — se kattaa lohkoa `[OBECNA FABUŁA]:` edeltävät tapahtumat. Vastauksesi korvaa sen kokonaan, joten yhdistä molemmat lähteet YHDEKSI johdonmukaiseksi, kronologiseksi tallenteeksi. Mikään edellisestä muistista ei saa kadota syyttä; lyhennä vain sitä, minkä jatko on tehnyt merkityksettömäksi.
+  2. **TOSIASIAT ENNEN TYYLIÄ.** Kirjaa: tapahtumien kulku aikajärjestyksessä, hahmojen päätökset ja niiden seuraukset, hahmot (nimet, roolit, suhteet, tila), paikat, esineet ja tiedot, joilla on merkitystä jatkon kannalta, AVOIMET juonilangat ja lukijalle annetut lupaukset.
+  3. **KIRJOITA TIIVIISTI, KOLMANNESSA PERSOONASSA JA MENNEESSÄ AIKAMUODOSSA.** Ei koristelua, ei dialogia, ei lainauksia tekstistä. Kirjoita erisnimet täsmälleen kuten lähdeaineistossa — kirjoitusvirhe nimessä palaa myöhemmissä luvuissa uutena hahmona.
+  4. **ÄLÄ TULKITSE ÄLÄKÄ LAAJENNA.** Älä ehdota jatkoa, älä arvioi tekstin laatua, älä lisää tapahtumia, joita aineistossa ei ole. Älä puhuttele ohjaajaa.
+
+  ### 📋 TULOSTUSMUOTO (ei johdantoa, ei kommentteja, ei otsikkoa „Yhteenveto"):
+  Ensin itse tapahtumatallenne (kappaleita, tarvittaessa luettelomerkeillä avoimet juonilangat).
+  Aivan lopuksi PAKOLLISENA yksi rivi:
+
+  [TYYLI JA SÄVY]: <yksi lause kerronnan tunnelmasta, temposta ja konventiosta>
+
+# --- Käyttäjän ohjeen malli (role=user) ---
+# Paikkamerkki {tresc} = koottu syöte (edellinen muisti + juoni).
+prompt_uzytkownika_szablon: |
+  Päivitä Pysyvä Muisti alla olevan aineiston perusteella.
+
+  {tresc}
+
+# --- Maailmankirjan lohko (valinnainen konteksti) ---
+# Liitetään ENNEN sisältöä, kun projektilla on tiedosto `<projekti>.md`.
+prompt_ksiegi_szablon: |
+  [MAAILMANKIRJA — säännöt ja hahmot, konteksti erisnimille; ÄLÄ tee siitä yhteenvetoa]:
+  {ksiega}

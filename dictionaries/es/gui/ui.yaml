@@ -521,7 +521,7 @@ rezyser:
     ¡Estás intentando generar un resumen en modo de guardado en archivo!
     Esto podría dañar tu historia.
 
-    Cambia al modo 'Lluvia de Ideas' e inténtalo de nuevo.
+    El resumen se guarda con el botón «Guardar Memoria a Largo Plazo (resumen IA)» en la sección de postproducción de abajo — no sobrescribe el archivo del proyecto.
   err_rate_limit: "¡Sin créditos de Anthropic! Recarga tu cuenta e inténtalo de nuevo."
   err_surowy_json: |-
     Este modo devolvió datos en formato JSON, pero no está configurado como modo JSON, por lo que el texto NO fue guardado (se evitó pegar JSON sin procesar en el archivo).
@@ -655,6 +655,12 @@ rezyser:
   postprod_dlg_lbl: 'Resultado de la herramienta — copia (Ctrl+A, Ctrl+C) o cierra:'
   postprod_dlg_zapisano: 'El resultado se guardó en el archivo {plik} (carpeta skrypty). Vista previa a continuación:'
   postprod_dlg_name: Campo de resultado de posproducción
+  err_kontekst: El material enviado al modelo no cupo en su ventana de contexto. Guarda la Memoria a Largo Plazo (el resumen reduce el contexto de las próximas llamadas), divide el proyecto en archivos más pequeños o elige un modelo con una ventana más grande — los modelos Claude tienen aquí el mayor margen.
+  postprod_kontekst_tytul: Proyecto grande — revisa la ventana del modelo
+  postprod_kontekst_tresc: "El material para la herramienta tiene aproximadamente {tokeny} tokens y supera {limit} tokens, que es la ventana de contexto con la que la aplicación mide la ocupación de memoria.\n\nLos modelos Claude tienen una ventana mucho más grande que este contador, así que lo más probable es que la llamada se realice con éxito. Sin embargo, si utilizas tu propio proveedor de IA con una ventana más pequeña, el modelo rechazará la solicitud — y aun así pagarás por el intento.\n\n¿Deseas ejecutar la herramienta de todos modos?"
+  pamiec_auto_start: La memoria del modelo está casi llena — guardando la Memoria a Largo Plazo…
+  pamiec_auto_zapisana_tytul: Memoria a Largo Plazo guardada automáticamente
+  pamiec_auto_zapisana_tresc: "La memoria del modelo superó el umbral de alarma, así que la aplicación preparó automáticamente un resumen del proyecto {nazwa_projektu} y lo guardó como {plik}.\n\nEl resumen aparece en el campo «Memoria a Largo Plazo» — puedes editarlo libremente y guardarlo de nuevo."
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"
@@ -1374,6 +1380,7 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloqueados; establece EDYCJA_STANU_GRY_WIDOCZNA = True en gui_opowiesci.py:72 para desbloquear)
   err_struktura: El modelo de IA devolvió una estructura de datos incorrecta varias veces y no fue posible corregirla. Inténtalo de nuevo; si el error persiste, adjunta el archivo error_log.txt al informe.
   pamiec_status_offline: '⚠️ Sin conexión a Internet: el contador exacto de memoria no está disponible, los valores son aproximados (~{procent}% — {tokeny} tokens). Cuando recuperes la conexión, reinicia la aplicación.'
+  err_kontekst: El historial del juego no cupo en la ventana de contexto del modelo. Termina esta partida y comienza una nueva, o elige un modelo con una ventana más grande — los modelos Claude tienen aquí el mayor margen.
 bot:
   closure:
     Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio GPT.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"

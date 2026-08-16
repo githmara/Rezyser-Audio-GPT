@@ -518,10 +518,10 @@ rezyser:
     Maailman säännöt ja hahmot ovat mallin vaatimia.
   blad_trybu_tytul: "Tilavirhe"
   blad_trybu_tresc: |-
-    Yrität luoda yhteenvetoa tiedostoon tallennustilassa!
-    Tämä voisi vahingoittaa tarinaasi.
+    Yrität luoda tiivistelmää tiedostoon tallentavassa tilassa!
+    Tämä voisi vahingoittaa historiaasi.
 
-    Vaihda 'Aivoriihi'-tilaan ja yritä uudelleen.
+    Tiivistelmän tallentaa alla olevan jälkituotanto-osion painike ”Tallenna Pysyvä Muisti (AI-tiivistelmä)” — se ei korvaa projektitiedostoa.
   err_rate_limit: "Anthropic-krediitit loppu! Lataa tiliä ja yritä uudelleen."
   err_surowy_json: |-
     Tämä tila palautti tiedot JSON-muodossa, mutta sitä ei ole määritetty JSON-tilaksi, joten tekstiä EI tallennettu (vältettiin raaka-JSONin liittämistä tiedostoon).
@@ -653,6 +653,12 @@ rezyser:
   postprod_dlg_lbl: 'Työkalun tulos — kopioi (Ctrl+A, Ctrl+C) tai sulje:'
   postprod_dlg_zapisano: 'Tulos tallennettiin tiedostoon {plik} (kansio skrypty). Esikatselu alla:'
   postprod_dlg_name: Jälkituotannon tuloskenttä
+  err_kontekst: Mallille lähetetty aineisto ei mahtunut sen konteksti-ikkunaan. Tallenna Pysyvä Muisti (tiivistelmä lyhentää seuraavien kutsujen kontekstia), jaa projekti pienempiin tiedostoihin tai valitse malli, jolla on suurempi konteksti-ikkuna — Claude-malleilla tila on tässä suurin.
+  postprod_kontekst_tytul: Suuri projekti — tarkista mallin konteksti-ikkuna
+  postprod_kontekst_tresc: "Työkalulle lähetetty aineisto sisältää noin {tokeny} tokenia, mikä ylittää {limit} tokenin rajan — tämän mukaan sovellus mittaa muistin käyttöä.\n\nClaude-malleilla konteksti-ikkuna on tätä laskuria huomattavasti suurempi, joten kutsu todennäköisesti onnistuu. Jos kuitenkin käytät omaa AI-palveluntarjoajaa, jonka konteksti-ikkuna on pienempi, malli hylkää pyynnön — ja siitä huolimatta maksat yrityksestä.\n\nHaluatko silti käynnistää työkalun?"
+  pamiec_auto_start: Mallin muisti lähes täynnä — tallennetaan Pysyvää Muistia…
+  pamiec_auto_zapisana_tytul: Pysyvä Muisti tallennettu automaattisesti
+  pamiec_auto_zapisana_tresc: "Mallin muisti ylitti hälytysrajan, joten sovellus laati automaattisesti projektin {nazwa_projektu} tiivistelmän ja tallensi sen nimellä {plik}.\n\nTiivistelmä näkyy kentässä ”Pysyvä Muisti” — voit muokata sitä vapaasti ja tallentaa uudelleen."
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"
@@ -1370,6 +1376,7 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — estetty; aseta EDYCJA_STANU_GRY_WIDOCZNA = True tiedostossa gui_opowiesci.py:72 ottaaksesi käyttöön)
   err_struktura: Tekoälymalli palautti useita kertoja virheellisen tietorakenteen, jota ei saatu korjattua. Yritä uudelleen — jos virhe toistuu, liitä error_log.txt-tiedosto ilmoitukseen.
   pamiec_status_offline: '⚠️ Ei internetyhteyttä: tarkka muistilaskuri ei ole käytettävissä, arvot ovat likimääräisiä (~{procent}% — {tokeny} tokenia). Käynnistä sovellus uudelleen, kun yhteys on palautunut.'
+  err_kontekst: Pelin historia ei mahtunut mallin konteksti-ikkunaan. Lopeta tämä peli ja aloita uusi tai valitse malli, jolla on suurempi konteksti-ikkuna — Claude-malleilla tila on tässä suurin.
 bot:
   closure:
     Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Ääniohjaaja GPT -julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"

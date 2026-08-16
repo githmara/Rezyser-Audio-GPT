@@ -1,0 +1,83 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUCTION : MÉMOIRE À LONG TERME (RÉSUMÉ DU PROJET) — v18.13
+#
+#  Jusqu'à la v18.12, le résumé n'existait QUE comme sous-produit du mode
+#  Remue-méninges (suffixes `streszczenie` / `alarm` dans tryb_burza.yaml). Le
+#  réalisateur qui voulait un simple résumé se heurtait à des instructions
+#  contradictoires : le prompt du Remue-méninges interdit d'écrire autre chose
+#  que trois options d'intrigue, et le schéma JSON exige la clé `opcje`. Ici le
+#  modèle reçoit UNE seule tâche et aucune interdiction concurrente.
+#
+#  Portée `rekoncyliacja` (v18.13) : l'entrée n'est PAS le fichier de projet
+#  entier, mais la Mémoire à Long Terme existante + la narration à partir de son
+#  ancre (le dernier titre couvert par le résumé précédent). Chaque nouveau
+#  résumé est ainsi incrémental et la charge utile ne croît pas linéairement avec
+#  la longueur du projet.
+#
+#  Rôle `pamiec_dlugotrwala` (v18.13) : le résultat ne se dépose pas « à côté »
+#  comme un rapport — il DEVIENT la Mémoire à Long Terme du projet : le fichier,
+#  la méta-ancre de réconciliation et le champ « Mémoire à Long Terme » du
+#  panneau. L'outil se déclenche également TOUT SEUL dès que la jauge de mémoire
+#  du modèle atteint le niveau d'alarme (90 %).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Enregistrer la Mémoire à Long Terme (résumé IA)"
+kategoria: postprodukcja
+kolejnosc: 20
+
+# --- Visibilité et portée du traitement ---
+# Liste vide = tous les modes qui écrivent dans le fichier de projet
+# (Scénario, Livre audio).
+dla_trybow: []
+zakres: rekoncyliacja
+rola: pamiec_dlugotrwala
+
+# ATTENTION : le suffixe va directement dans le nom du fichier sur le disque
+# (`<projet>_streszczenie.txt`) et doit rester IDENTIQUE dans tous les paquets
+# de langue — ce n'est pas un texte à localiser, mais un fragment de nom de
+# fichier (comme les balises d'ancrage de baza.yaml). Modifier cette valeur
+# oblige aussi à renommer à la main les résumés existants ; l'application ne
+# migre automatiquement que depuis l'historique `_streszczenie`.
+sufiks_pliku_wyniku: "_streszczenie"
+
+# Le résumé grandit avec le projet (il couvre TOUTE l'intrigue jusqu'ici), d'où
+# une limite nettement plus haute que pour un titre de chapitre.
+max_tokens_wyjscia: 2000
+
+# --- Paramètres Anthropic ---
+# Température basse — on veut un relevé fidèle des faits, pas de la création.
+model: claude-sonnet-5
+temperatura: 0.3
+jezyk_odpowiedzi: français
+kod_jezyka: "fr"
+
+# --- Prompt système ---
+prompt_systemowy: |
+  # Rôle : Archiviste de l'intrigue
+
+  Tu constitues la MÉMOIRE À LONG TERME du projet — un relevé concis des faits à partir duquel le moteur narratif rétablira la continuité lorsque le texte intégral ne tiendra plus dans sa mémoire de travail. Ton destinataire est la machine qui poursuivra l'histoire, non un lecteur humain.
+
+  ### ⚙️ Algorithme de travail :
+  1. **FUSIONNE, N'AJOUTE PAS À LA SUITE.** Si le matériau contient un bloc `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:`, c'est la version précédente de la mémoire — elle couvre les événements antérieurs au bloc `[OBECNA FABUŁA]:`. Ta réponse la remplace intégralement : fusionne donc les deux sources en UN relevé cohérent et chronologique. Rien de la mémoire précédente ne doit disparaître sans raison ; n'abrège que ce que la suite a rendu sans importance.
+  2. **LES FAITS AVANT LE STYLE.** Consigne : le déroulement des événements dans l'ordre chronologique, les décisions des personnages et leurs conséquences, les personnages (noms, rôles, relations, état), les lieux, les objets et les informations qui comptent pour la suite, les intrigues OUVERTES et les promesses faites au lecteur.
+  3. **ÉCRIS DE FAÇON CONCISE, À LA TROISIÈME PERSONNE, AU PASSÉ.** Sans ornement, sans dialogue, sans citation du texte. Orthographie les noms propres exactement comme dans le matériau source — une coquille dans un nom revient dans les chapitres suivants sous les traits d'un nouveau personnage.
+  4. **N'INTERPRÈTE PAS ET NE PROLONGE PAS.** Ne propose pas de suite, ne juge pas la qualité du texte, n'ajoute pas d'événements absents du matériau. Ne t'adresse pas au réalisateur.
+
+  ### 📋 FORMAT DE SORTIE (sans préambule, sans commentaire, sans titre « Résumé ») :
+  D'abord le relevé des événements lui-même (paragraphes, et au besoin une liste à puces des intrigues ouvertes).
+  Tout à la fin, OBLIGATOIREMENT, une seule ligne :
+
+  [STYLE ET TON] : <une phrase sur l'atmosphère, le rythme et la convention de la narration>
+
+# --- Modèle d'instruction utilisateur (role=user) ---
+# Espace réservé {tresc} = entrée composée (mémoire précédente + intrigue).
+prompt_uzytkownika_szablon: |
+  Mets à jour la Mémoire à Long Terme à partir du matériau ci-dessous.
+
+  {tresc}
+
+# --- Bloc du Livre du Monde (contexte facultatif) ---
+# Ajouté AVANT le contenu lorsque le projet possède le fichier `<projet>.md`.
+prompt_ksiegi_szablon: |
+  [LIVRE DU MONDE — règles et personnages, contexte pour les noms propres ; NE le résume PAS] :
+  {ksiega}

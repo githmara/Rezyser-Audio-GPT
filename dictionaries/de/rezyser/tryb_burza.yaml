@@ -86,21 +86,17 @@ prompt_systemowy: |
   - `tytul` — kurzes Label für den GUI-Button. Die Spielerin sieht „1. {tytul}". Z. B. „Dachverfolgung", „Konfrontation mit dem Schmuggler", „Treffen in der verlassenen Kapelle".
   - `opis` — 1-3 Sätze zur Logik der Option. Die Spielerin liest sie über dem Anweisungsfeld nach Klick auf die Option. Wiederhole nicht den Titel im ersten Satz der Beschreibung.
 
-# --- Kontext-Suffixe, die an prompt_systemowy angehängt werden ---
-sufiksy:
-  streszczenie: |
-
-
-    [ERZWUNGENER ZUSAMMENFASSUNGSMODUS]: Die Nutzerin hat manuell um die Speicherung des Handlungsstands gebeten! Füge in der JSON-Antwort DEN SCHLÜSSEL `"streszczenie"` (auf gleicher Ebene wie `opcje`) mit einem Textwert hinzu, der ZWEI Pflichtelemente enthält:
-    1. Eine prägnante Zusammenfassung der bisherigen Ereignisse.
-    2. Einen Abschnitt [STIL UND TON]: eine einsätzige Notiz zur erzählerischen Atmosphäre.
-
-  alarm: |
-
-
-    [ALARMMODUS - GEDÄCHTNIS BALD VOLL]: Das Gedächtnis ist fast voll! Füge in der JSON-Antwort DEN SCHLÜSSEL `"streszczenie"` (auf gleicher Ebene wie `opcje`) mit einem Textwert hinzu, der ZWEI Pflichtelemente enthält:
-    1. Eine prägnante Zusammenfassung der bisherigen Ereignisse.
-    2. Einen Abschnitt [STIL UND TON]: eine einsätzige Notiz zur erzählerischen Atmosphäre.
+# --- Kontextsuffixe, die an prompt_systemowy angehängt werden ---
+# v18.13: Die Suffixe `streszczenie` und `alarm` wurden samt Auslösewörtern
+# ENTFERNT. Sie verlangten vom Modell einen zusätzlichen JSON-Schlüssel
+# `streszczenie` in einer Antwort, deren Prompt oben alles außer drei
+# Handlungsoptionen verbietet — wer bloß eine Zusammenfassung wollte, bekam
+# widersprüchliche Anweisungen und (bei misslungener Improvisation des Modells)
+# einen Schema-Validierungsfehler statt eines Ergebnisses. Die Zusammenfassung ist
+# jetzt ein eigenes Nachbearbeitungswerkzeug: `postprod_streszczenie.yaml`
+# (Rolle `pamiec_dlugotrwala`), das auch von selbst bei der Alarmschwelle startet.
+# Die Engine KANN einen Schlüssel `streszczenie` weiterhin lesen — für das alte
+# Verhalten genügt es, das Suffix hier wieder einzutragen.
 
 # --- Erinnerung, die an die Nutzeranweisungen (role=user) angehängt wird ---
 przypomnienie_uzytkownika: |
@@ -108,11 +104,9 @@ przypomnienie_uzytkownika: |
 
   (KRITISCHE ERINNERUNG: Du erzeugst JSON mit 3 Optionen. Optionen logisch und geerdet. Jedes `cel_sceny` setzt dort an, wo [OBECNA FABUŁA] aufhört — die Idee der Regie ist eine ZU SCHREIBENDE Szene, kein bereits geschehener Hintergrund; überspringe sie nicht. Verkomplizere die Handlung, ES SEI DENN, die Nutzerin bittet ausdrücklich um Epilog oder Ende — dann schließe die Geschichte sauber. Optionen DÜRFEN nicht in bedingungslosem Erfolg ohne Konsequenz enden! `cel_sceny` OHNE [Regisseur: ...] oder [DIREKTIVE]: ... — diese hängt Python an.)
 
-# --- Auslöserwörter für Engine-Verhalten ---
+# --- Auslösewörter der Engine ---
+# v18.13: Die Liste `streszczenie` wurde zusammen mit den Suffixen entfernt (siehe
+# Kommentar oben). „Fasse die Handlung zusammen“ in einer Brainstorming-Anweisung
+# ändert den Prompt nicht mehr — dafür gibt es die Schaltfläche
+# „Langzeitgedächtnis speichern“ im Nachbearbeitungsbereich.
 slowa_wyzwalajace:
-  streszczenie:
-    - zusammenfass
-    - zusammenfassung
-    - zusammenfassen
-    - rekapituli
-    - resümee

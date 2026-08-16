@@ -1,0 +1,83 @@
+# -----------------------------------------------------------------------------
+#  POSTPRODUZIONE: MEMORIA A LUNGO TERMINE (RIASSUNTO DEL PROGETTO) — v18.13
+#
+#  Fino alla v18.12 il riassunto esisteva SOLO come sottoprodotto della modalità
+#  Brainstorming (suffissi `streszczenie` / `alarm` in tryb_burza.yaml). Il
+#  regista che voleva soltanto un riassunto incontrava istruzioni in conflitto:
+#  il prompt del Brainstorming vieta di scrivere qualsiasi cosa oltre alle tre
+#  opzioni di trama, e lo schema JSON richiede la chiave `opcje`. Qui il modello
+#  riceve UN solo compito e nessun divieto concorrente.
+#
+#  Ambito `rekoncyliacja` (v18.13): l'input NON è l'intero file di progetto, ma
+#  la Memoria a Lungo Termine esistente + la narrazione a partire dalla sua
+#  ancora (l'ultima intestazione coperta dal riassunto precedente). Ogni nuovo
+#  riassunto è così incrementale e il payload non cresce linearmente con la
+#  lunghezza del progetto.
+#
+#  Ruolo `pamiec_dlugotrwala` (v18.13): il risultato non finisce «accanto» come
+#  un rapporto — DIVENTA la Memoria a Lungo Termine del progetto: il file,
+#  la meta-ancora di riconciliazione e il campo «Memoria a Lungo Termine» del
+#  pannello. Lo strumento parte inoltre DA SOLO quando l'indicatore di memoria
+#  del modello raggiunge il livello d'allarme (90%).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Salva la Memoria a Lungo Termine (riassunto IA)"
+kategoria: postprodukcja
+kolejnosc: 20
+
+# --- Visibilità e ambito di elaborazione ---
+# Lista vuota = tutte le modalità che scrivono nel file di progetto
+# (Copione, Audiolibro).
+dla_trybow: []
+zakres: rekoncyliacja
+rola: pamiec_dlugotrwala
+
+# ATTENZIONE: il suffisso finisce direttamente nel nome del file su disco
+# (`<progetto>_streszczenie.txt`) e deve restare IDENTICO in tutti i pacchetti
+# linguistici — non è testo da localizzare, ma parte di un nome di file (come i
+# tag-ancora in baza.yaml). Cambiare questo valore richiede anche di rinominare
+# a mano i riassunti esistenti; l'applicazione migra automaticamente soltanto
+# dallo storico `_streszczenie`.
+sufiks_pliku_wyniku: "_streszczenie"
+
+# Il riassunto cresce insieme al progetto (copre TUTTA la trama finora), perciò
+# il limite è nettamente più alto che per un titolo di capitolo.
+max_tokens_wyjscia: 2000
+
+# --- Parametri Anthropic ---
+# Temperatura bassa — vogliamo un registro fedele dei fatti, non creatività.
+model: claude-sonnet-5
+temperatura: 0.3
+jezyk_odpowiedzi: italiano
+kod_jezyka: "it"
+
+# --- Prompt di sistema ---
+prompt_systemowy: |
+  # Ruolo: Archivista della trama
+
+  Crei la MEMORIA A LUNGO TERMINE del progetto: un registro conciso dei fatti dal quale il motore narrativo ricostruirà la continuità quando il testo completo non entrerà più nella sua memoria di lavoro. Il destinatario è la macchina che proseguirà la storia, non un lettore umano.
+
+  ### ⚙️ Algoritmo di lavoro:
+  1. **UNISCI, NON ACCODARE.** Se il materiale contiene un blocco `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:`, quella è la versione precedente della memoria: copre gli eventi anteriori al blocco `[OBECNA FABUŁA]:`. La tua risposta la sostituisce per intero, quindi fondi entrambe le fonti in UN unico registro coerente e cronologico. Nulla della memoria precedente può sparire senza motivo; accorcia solo ciò che il seguito ha reso irrilevante.
+  2. **I FATTI PRIMA DELLO STILE.** Registra: lo svolgimento degli eventi in ordine cronologico, le decisioni dei personaggi e le loro conseguenze, i personaggi (nomi, ruoli, relazioni, condizione), i luoghi, gli oggetti e le informazioni che contano per il seguito, le trame APERTE e le promesse fatte al lettore.
+  3. **SCRIVI IN MODO CONCISO, IN TERZA PERSONA, AL PASSATO.** Senza ornamenti, senza dialoghi, senza citazioni dal testo. Scrivi i nomi propri esattamente come nel materiale di partenza: un refuso in un nome torna nei capitoli successivi come un personaggio nuovo.
+  4. **NON INTERPRETARE E NON AMPLIARE.** Non proporre il seguito, non giudicare la qualità del testo, non aggiungere eventi assenti dal materiale. Non rivolgerti al regista.
+
+  ### 📋 FORMATO DI USCITA (senza preambolo, senza commenti, senza il titolo «Riassunto»):
+  Prima il registro degli eventi (paragrafi e, se utile, un elenco puntato delle trame aperte).
+  Alla fine, OBBLIGATORIAMENTE, una sola riga:
+
+  [STILE E TONO]: <una frase sull'atmosfera, il ritmo e la convenzione della narrazione>
+
+# --- Modello di istruzione utente (role=user) ---
+# Segnaposto {tresc} = input composto (memoria precedente + trama).
+prompt_uzytkownika_szablon: |
+  Aggiorna la Memoria a Lungo Termine sulla base del materiale seguente.
+
+  {tresc}
+
+# --- Blocco del Libro del Mondo (contesto facoltativo) ---
+# Aggiunto PRIMA del contenuto quando il progetto ha il file `<progetto>.md`.
+prompt_ksiegi_szablon: |
+  [LIBRO DEL MONDO — regole e personaggi, contesto per i nomi propri; NON riassumerlo]:
+  {ksiega}

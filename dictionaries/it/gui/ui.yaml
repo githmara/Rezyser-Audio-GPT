@@ -519,9 +519,9 @@ rezyser:
   blad_trybu_tytul: "Errore di modalità"
   blad_trybu_tresc: |-
     Stai cercando di generare un riassunto in modalità di salvataggio su file!
-    Questo potrebbe danneggiare la tua storia.
+    Questo potrebbe danneggiare la tua cronologia.
 
-    Passa alla modalità 'Brainstorming' e riprova.
+    Il riassunto viene salvato con il pulsante "Salva Memoria a Lungo Termine (riassunto AI)" nella sezione di post-produzione qui sotto — non sovrascrive il file di progetto.
   err_rate_limit: "Crediti Anthropic esauriti! Ricarica l'account e riprova."
   err_surowy_json: |-
     Questa modalità ha restituito dati in formato JSON, ma non è configurata come modalità JSON, quindi il testo NON è stato salvato (evitato di incollare JSON grezzo nel file).
@@ -655,6 +655,12 @@ rezyser:
   postprod_dlg_lbl: 'Risultato dello strumento — copia (Ctrl+A, Ctrl+C) o chiudi:'
   postprod_dlg_zapisano: 'Il risultato è stato salvato nel file {plik} (cartella skrypty). Anteprima di seguito:'
   postprod_dlg_name: Campo del risultato di post-produzione
+  err_kontekst: Il materiale inviato al modello non è entrato nella sua finestra di contesto. Salva la Memoria a Lungo Termine (il riassunto riduce il contesto delle chiamate successive), suddividi il progetto in file più piccoli oppure scegli un modello con una finestra più ampia — i modelli Claude offrono il margine maggiore in questo senso.
+  postprod_kontekst_tytul: Progetto di grandi dimensioni — controlla la finestra del modello
+  postprod_kontekst_tresc: "Il materiale per lo strumento è di circa {tokeny} token e supera i {limit} token, ovvero la finestra di contesto con cui l'applicazione misura l'occupazione della memoria.\n\nI modelli Claude hanno una finestra molto più ampia di questo limite, quindi la chiamata probabilmente andrà a buon fine. Tuttavia, se stai usando un tuo provider AI con una finestra più piccola, il modello rifiuterà la richiesta — e in ogni caso pagherai per il tentativo.\n\nVuoi comunque eseguire lo strumento?"
+  pamiec_auto_start: Memoria del modello quasi piena — salvataggio della Memoria a Lungo Termine in corso…
+  pamiec_auto_zapisana_tytul: Memoria a Lungo Termine salvata automaticamente
+  pamiec_auto_zapisana_tresc: "La memoria del modello ha superato la soglia di allarme, quindi l'applicazione ha preparato automaticamente un riassunto del progetto {nazwa_projektu} e lo ha salvato come {plik}.\n\nIl riassunto è visibile nel campo \"Memoria a Lungo Termine\" — puoi modificarlo liberamente e salvarlo di nuovo."
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"
@@ -1372,6 +1378,7 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — bloccati; imposta EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 per sbloccarli)
   err_struktura: "Il modello AI ha restituito più volte una struttura dati non valida e non è stato possibile correggerla. Riprova: se l'errore persiste, allega il file error_log.txt alla segnalazione."
   pamiec_status_offline: "⚠️ Nessuna connessione a Internet: il conteggio esatto della memoria non è disponibile, i valori sono approssimativi (~{procent}% — {tokeny} token). Al ripristino della connessione, riavvia l'applicazione."
+  err_kontekst: La cronologia della partita non è entrata nella finestra di contesto del modello. Termina questa partita e iniziane una nuova, oppure scegli un modello con una finestra più ampia — i modelli Claude offrono il margine maggiore in questo senso.
 bot:
   closure:
     Lumi: "Ciao!\n\nLa neve si è posata e la correzione è arrivata! Tutto ciò che hai chiesto è appena atterrato nell'ultima versione del Regista Audio GPT.\n\nPrendi l'aggiornamento qui: {link}\n\nChiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n— Lumi"

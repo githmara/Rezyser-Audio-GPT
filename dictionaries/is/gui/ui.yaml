@@ -518,10 +518,10 @@ rezyser:
     Reglur heimsins og persónur eru nauðsynlegar fyrir líkanið.
   blad_trybu_tytul: "Hamvilla"
   blad_trybu_tresc: |-
-    Þú ert að reyna að búa til yfirlit í vistunarham!
-    Þetta gæti skemmt söguna þína.
+    Þú ert að reyna að útbúa samantekt í vistunarham fyrir skrá!
+    Það gæti skemmt söguna þína.
 
-    Skiptu yfir í 'Hugstorm' ham og reyndu aftur.
+    Samantektin er vistuð með hnappinum „Vista langtímaminni (AI-samantekt)“ í eftirvinnslukaflanum hér fyrir neðan — hún skrifar ekki yfir verkefnaskrána.
   err_rate_limit: "Engin Anthropic-inneign! Hladdu upp reikninginn og reyndu aftur."
   err_surowy_json: |-
     Þessi hamur skilaði gögnum á JSON sniði, en er ekki stilltur sem JSON-hamur, þannig að textinn var EKKI vistaður (forðast að líma hrátt JSON í skrá).
@@ -655,6 +655,12 @@ rezyser:
   postprod_dlg_lbl: 'Niðurstaða verkfæris — afritaðu (Ctrl+A, Ctrl+C) eða lokaðu:'
   postprod_dlg_zapisano: 'Niðurstaðan var vistuð í skrána {plik} (mappa skrypty). Forskoðun hér að neðan:'
   postprod_dlg_name: Reitur fyrir niðurstöðu eftirvinnslu
+  err_kontekst: Efnið sem sent var til líkansins rúmaðist ekki í samhengisglugga þess. Vistaðu langtímaminni (samantekt styttir samhengi næstu kalla), skiptu verkefninu í minni skrár, eða veldu líkan með stærri samhengisglugga — Claude-líkön hafa mest svigrúm hér.
+  postprod_kontekst_tytul: Stórt verkefni — athugaðu samhengisglugga líkansins
+  postprod_kontekst_tresc: "Efnið fyrir tólið er um það bil {tokeny} tákneiningar (tokens) og fer yfir {limit} tákneiningar, sem er samhengisglugginn sem forritið notar til að meta minnisnotkun.\n\nClaude-líkön hafa mun stærri samhengisglugga en þessi teljari gefur til kynna, svo kallið mun líklega heppnast. Ef þú notar hins vegar eigin AI-þjónustuaðila með minni glugga mun líkanið hafna beiðninni — og þú greiðir samt fyrir tilraunina.\n\nViltu keyra tólið samt sem áður?"
+  pamiec_auto_start: Minni líkansins að fyllast — vista langtímaminni…
+  pamiec_auto_zapisana_tytul: Langtímaminni vistað sjálfkrafa
+  pamiec_auto_zapisana_tresc: "Minni líkansins fór yfir viðvörunarmörkin, svo forritið útbjó sjálfkrafa samantekt af verkefninu {nazwa_projektu} og vistaði hana sem {plik}.\n\nSamantektin birtist í reitnum „Langtímaminni“ — þú getur breytt henni frjálslega og vistað aftur."
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"
@@ -1374,6 +1380,7 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — læst; stilltu EDYCJA_STANU_GRY_WIDOCZNA = True í gui_opowiesci.py:72 til að opna)
   err_struktura: Gervigreindarlíkanið skilaði nokkrum sinnum ógildri gagnauppbyggingu og ekki tókst að leiðrétta hana. Reyndu aftur — ef villan kemur ítrekað upp skaltu bæta skránni error_log.txt við tilkynninguna.
   pamiec_status_offline: '⚠️ Engin nettenging: nákvæmur minnisteljari er ekki tiltækur, gildin eru áætluð (~{procent}% — {tokeny} tákneiningar). Endurræstu forritið þegar tenging kemst á að nýju.'
+  err_kontekst: Saga leiksins rúmaðist ekki í samhengisglugga líkansins. Ljúktu þessum leik og byrjaðu nýjan, eða veldu líkan með stærri samhengisglugga — Claude-líkön hafa mest svigrúm hér.
 bot:
   closure:
     Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Hljóðstjóra GPT.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"

@@ -518,10 +518,10 @@ rezyser:
     Weltregeln und Charaktere sind für das Modell erforderlich.
   blad_trybu_tytul: "Modusfehler"
   blad_trybu_tresc: |-
-    Sie versuchen, eine Zusammenfassung im Dateispeichermodus zu generieren!
-    Dies könnte Ihre Geschichte beschädigen.
+    Sie versuchen, eine Zusammenfassung im Dateispeicher-Modus zu erstellen!
+    Das könnte Ihre Historie beschädigen.
 
-    Wechseln Sie in den Modus 'Brainstorming' und versuchen Sie es erneut.
+    Die Zusammenfassung wird über die Schaltfläche „Langzeitspeicher speichern (KI-Zusammenfassung)“ im Postproduktionsbereich weiter unten gespeichert – die Projektdatei wird dabei nicht überschrieben.
   err_rate_limit: "Keine Anthropic-Credits! Laden Sie Ihr Konto auf und versuchen Sie es erneut."
   err_surowy_json: |-
     Dieser Modus hat Daten im JSON-Format zurückgegeben, ist jedoch nicht als JSON-Modus konfiguriert, sodass der Text NICHT gespeichert wurde (Vermeidung des Einfügens von rohem JSON in die Datei).
@@ -590,7 +590,7 @@ rezyser:
   brak_projektow_tytul: Keine Projekte
   brak_projektow_tresc: 'Im Ordner skrypty/ gibt es noch keine Projekte zum Laden. Beginnen Sie ein neues Projekt: Geben Sie einen Namen in das obige Feld ein und speichern Sie dann das Weltbuch oder senden Sie die erste Anfrage an die KI.'
   btn_otworz_narracje_label: '&Öffne Erzählungsdatei…'
-  btn_otworz_narracje_tooltip: Öffnet die Erzählungsdatei des Projekts (skrypty/<nazwa>.txt) im systemeigenen Texteditor (Notepad, VS Code). Nützlich, wenn die KI die Szene nicht abschließt — Sie können das Ende manuell hinzufügen/bearbeiten — oder wenn Sie nach dem Laden des Projekts mit einer Zusammenfassung die letzten Szenen in das Langzeitgedächtnisfeld kopieren möchten, damit die KI den vollständigen Kontext des Tons und der letzten Ereignisse hat.
+  btn_otworz_narracje_tooltip: Öffnet die Erzählungsdatei des Projekts (skrypty/<nazwa>.txt) im systemeigenen Texteditor (Notepad, VS Code). Nützlich, wenn die KI die Szene nicht abschließt — Sie können das Ende manuell hinzufügen/bearbeiten — oder wenn Sie nach dem Laden des Projekts mit einer Zusammenfassung die letzten Szenen in das Langzeitspeicherfeld kopieren möchten, damit die KI den vollständigen Kontext des Tons und der letzten Ereignisse hat.
   blad_otwarcia_tytul: Datei konnte nicht geöffnet werden
   blad_otwarcia_tresc: "Der Versuch, die Datei {sciezka_pliku} zu öffnen, ist fehlgeschlagen:\n{tresc_bledu}\n\nÖffnen Sie die Datei manuell über den Datei-Explorer."
   plik_narracji_brak_tytul: Keine Erzählungsdatei vorhanden
@@ -655,6 +655,12 @@ rezyser:
   postprod_dlg_lbl: 'Ergebnis des Tools — kopieren (Ctrl+A, Ctrl+C) oder schließen:'
   postprod_dlg_zapisano: 'Das Ergebnis wurde in der Datei {plik} (Ordner „skrypty“) gespeichert. Vorschau unten:'
   postprod_dlg_name: Feld für das Postproduktionsergebnis
+  err_kontekst: Das an das Modell gesendete Material hat nicht in dessen Kontextfenster gepasst. Speichern Sie den Langzeitspeicher (die Zusammenfassung verkürzt den Kontext nachfolgender Aufrufe), teilen Sie das Projekt in kleinere Dateien auf oder wählen Sie ein Modell mit größerem Kontextfenster – die Claude-Modelle bieten hier den größten Spielraum.
+  postprod_kontekst_tytul: Großes Projekt — Kontextfenster des Modells prüfen
+  postprod_kontekst_tresc: "Das für das Werkzeug bestimmte Material umfasst etwa {tokeny} Token und überschreitet {limit} Token, also das Kontextfenster, anhand dessen die Anwendung die Speicherauslastung misst.\n\nDie Claude-Modelle verfügen über ein deutlich größeres Kontextfenster als dieser Zähler, daher wird der Aufruf höchstwahrscheinlich erfolgreich sein. Wenn Sie jedoch einen eigenen KI-Anbieter mit kleinerem Kontextfenster verwenden, wird das Modell die Anfrage ablehnen — und Sie zahlen trotzdem für den Versuch.\n\nMöchten Sie das Werkzeug trotzdem ausführen?"
+  pamiec_auto_start: Modellgedächtnis fast voll — Langzeitspeicher wird gespeichert…
+  pamiec_auto_zapisana_tytul: Langzeitspeicher automatisch gespeichert
+  pamiec_auto_zapisana_tresc: "Das Modellgedächtnis hat den Warnschwellenwert überschritten, daher hat die Anwendung automatisch eine Zusammenfassung des Projekts {nazwa_projektu} erstellt und als {plik} gespeichert.\n\nDie Zusammenfassung befindet sich im Feld „Langzeitspeicher“ — Sie können sie beliebig bearbeiten und erneut speichern."
 poliglota:
   panel_name: "AI-Polyglott-Panel"
   heading: "🌍  AI-Polyglott – Hybrides Übersetzungsstudio"
@@ -1373,6 +1379,7 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — gesperrt; setzen Sie EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72, um zu entsperren)
   err_struktura: Das KI-Modell hat mehrfach eine ungültige Datenstruktur zurückgegeben, die nicht korrigiert werden konnte. Versuchen Sie es erneut – wenn der Fehler weiterhin auftritt, fügen Sie der Meldung die Datei error_log.txt bei.
   pamiec_status_offline: '⚠️ Keine Internetverbindung: Der genaue Speicherzähler ist nicht verfügbar, die Werte sind Näherungswerte (~{procent}% — {tokeny} Token). Starten Sie die Anwendung nach Wiederherstellung der Verbindung neu.'
+  err_kontekst: Der Spielverlauf hat nicht in das Kontextfenster des Modells gepasst. Beenden Sie dieses Spiel und beginnen Sie ein neues, oder wählen Sie ein Modell mit größerem Kontextfenster – die Claude-Modelle bieten hier den größten Spielraum.
 bot:
   closure:
     Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-GPT-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"

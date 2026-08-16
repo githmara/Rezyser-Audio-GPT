@@ -89,20 +89,16 @@ prompt_systemowy: |
   - `opis` — 1-3 frases sobre la lógica de la opción. El jugador lo lee sobre el campo de Instrucciones tras pulsar la opción. No repitas el título en la primera frase de la descripción.
 
 # --- Sufijos contextuales añadidos a prompt_systemowy ---
-sufiksy:
-  streszczenie: |
-
-
-    [MODO RESUMEN FORZADO]: ¡El usuario ha pedido manualmente guardar el estado de la trama! En la respuesta JSON AÑADE LA CLAVE `"streszczenie"` (al mismo nivel que `opcje`) con un valor de texto que contenga DOS elementos obligatorios:
-    1. Un resumen conciso de los acontecimientos hasta ahora.
-    2. Una sección [ESTILO Y TONO]: una nota de una frase sobre el clima narrativo.
-
-  alarm: |
-
-
-    [MODO ALARMA - SE ACERCA EL LÍMITE DE MEMORIA]: ¡La memoria está casi llena! En la respuesta JSON AÑADE LA CLAVE `"streszczenie"` (al mismo nivel que `opcje`) con un valor de texto que contenga DOS elementos obligatorios:
-    1. Un resumen conciso de los acontecimientos hasta ahora.
-    2. Una sección [ESTILO Y TONO]: una nota de una frase sobre el clima narrativo.
+# v18.13: los sufijos `streszczenie` y `alarm` fueron ELIMINADOS junto con sus
+# palabras desencadenantes. Ordenaban al modelo añadir la clave JSON
+# `streszczenie` a una respuesta cuyo prompt superior prohíbe escribir nada salvo
+# tres opciones de trama: quien pedía solo un resumen recibía instrucciones
+# contradictorias y (si la improvisación del modelo fallaba) un error de
+# validación del esquema en lugar de un resultado. El resumen es ahora una
+# herramienta de postproducción aparte: `postprod_streszczenie.yaml` (rol
+# `pamiec_dlugotrwala`), que además se dispara sola en el umbral de alarma.
+# El motor TODAVÍA sabe leer una clave `streszczenie` — para volver al
+# comportamiento anterior basta con reponer aquí el sufijo.
 
 # --- Recordatorio añadido a las instrucciones del usuario (role=user) ---
 przypomnienie_uzytkownika: |
@@ -110,11 +106,9 @@ przypomnienie_uzytkownika: |
 
   (RECORDATORIO CRÍTICO: Generas JSON con 3 opciones. Opciones lógicas y aterrizadas. Cada `cel_sceny` continúa desde donde se cortó [OBECNA FABUŁA] — la idea del director es una escena POR ESCRIBIR, no un trasfondo que ya ocurrió; no la saltes. Complica la trama A MENOS QUE el usuario pida explícitamente Epílogo o final — entonces cierra la historia con elegancia. ¡Las opciones NO PUEDEN acabar en éxito incondicional sin consecuencia! `cel_sceny` SIN [Director: ...] ni [DIRECTIVA]: ... — esas las añade Python.)
 
-# --- Palabras desencadenantes de comportamiento del motor ---
+# --- Palabras desencadenantes del motor ---
+# v18.13: la lista `streszczenie` se eliminó junto con los sufijos (véase el
+# comentario anterior). Pedir «resume la trama» dentro de una instrucción de
+# Lluvia de Ideas ya no cambia el prompt: para resumir está el botón «Guardar
+# Memoria a Largo Plazo» en la sección de postproducción.
 slowa_wyzwalajace:
-  streszczenie:
-    - resumen
-    - resumir
-    - recapitula
-    - sintetiza
-    - síntesis

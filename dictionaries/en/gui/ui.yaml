@@ -518,10 +518,10 @@ rezyser:
     World rules and characters are required by the model.
   blad_trybu_tytul: "Mode error"
   blad_trybu_tresc: |-
-    You're trying to generate a summary in file-saving mode!
+    You're trying to generate a summary in file-save mode!
     This could damage your story.
 
-    Switch to 'Brainstorm' mode and try again.
+    The summary is saved by the "Save Long-Term Memory (AI summary)" button in the post-production section below — it does not overwrite the project file.
   err_rate_limit: "No Anthropic credits! Top up your account and try again."
   err_surowy_json: |-
     This mode returned data in JSON format, but it is not configured as a JSON mode, so the text was NOT saved (avoiding pasting raw JSON into a file).
@@ -654,6 +654,12 @@ rezyser:
   err_struktura: The AI model returned an invalid data structure several times and it could not be corrected. Please try again or simplify the instruction — if the error persists, attach the error_log.txt file to your report.
   pamiec_status_offline: '⚠️ No internet connection: the exact memory counter is unavailable, values are approximate (~{tokeny} / {maks} tokens). Restart the application once your connection is restored.'
   err_timeout: The model response timed out. Check your internet connection and try again.
+  err_kontekst: The material sent to the model didn't fit in its context window. Save Long-Term Memory (the summary shortens the context for subsequent calls), split the project into smaller files, or choose a model with a larger window — Claude models have the most headroom here.
+  postprod_kontekst_tytul: Large project — check the model's window
+  postprod_kontekst_tresc: "The material for the tool is about {tokeny} tokens and exceeds {limit} tokens, the context window the application uses to measure memory usage.\n\nClaude models have a window much larger than this counter, so the call will most likely succeed. However, if you're using your own AI provider with a smaller window, the model will reject the request — and you'll still pay for the attempt.\n\nRun the tool anyway?"
+  pamiec_auto_start: Model memory almost full — saving Long-Term Memory…
+  pamiec_auto_zapisana_tytul: Long-Term Memory saved automatically
+  pamiec_auto_zapisana_tresc: "Model memory exceeded the alarm threshold, so the application automatically prepared a summary of the {nazwa_projektu} project and saved it as {plik}.\n\nThe summary appears in the \"Long-Term Memory\" field — feel free to edit it and save again."
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"
@@ -1376,6 +1382,7 @@ opowiesci:
   komenda_odswiez_zablokowana_hint: (/odswiez, /refresh — locked; set EDYCJA_STANU_GRY_WIDOCZNA = True in gui_opowiesci.py:72 to unlock)
   err_struktura: The AI model returned an invalid data structure several times and it could not be corrected. Please try again — if the error persists, attach the error_log.txt file to your report.
   pamiec_status_offline: '⚠️ No internet connection: the exact memory counter is unavailable, values are approximate (~{procent}% — {tokeny} tokens). Restart the application once your connection is restored.'
+  err_kontekst: The game history didn't fit in the model's context window. End this game and start a new one, or choose a model with a larger window — Claude models have the most headroom here.
 bot:
   closure:
     Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio Director GPT release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"

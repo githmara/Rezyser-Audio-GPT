@@ -86,21 +86,16 @@ prompt_systemowy: |
   - `tytul` — short label for the GUI button. The player sees "1. {tytul}". E.g. "Rooftop chase", "Confrontation with the smuggler", "Meeting in the abandoned chapel".
   - `opis` — 1-3 sentences of the option's logic. The player reads it above the Instructions field after clicking the option. Do not repeat the title in the first sentence of the description.
 
-# --- Context suffixes appended to prompt_systemowy ---
-sufiksy:
-  streszczenie: |
-
-
-    [FORCED SUMMARY MODE]: The user has manually requested saving the plot state! In the JSON response ADD THE KEY `"streszczenie"` (at the same level as `opcje`) with a text value containing TWO mandatory elements:
-    1. A concise summary of events so far.
-    2. A [STYLE AND TONE] section: a one-sentence note about the narrative mood.
-
-  alarm: |
-
-
-    [ALARM MODE - APPROACHING MEMORY LIMIT]: Memory is nearly full! In the JSON response ADD THE KEY `"streszczenie"` (at the same level as `opcje`) with a text value containing TWO mandatory elements:
-    1. A concise summary of events so far.
-    2. A [STYLE AND TONE] section: a one-sentence note about the narrative mood.
+# --- Contextual suffixes appended to prompt_systemowy ---
+# v18.13: the `streszczenie` and `alarm` suffixes were REMOVED together with
+# their trigger words. They told the model to add a `streszczenie` JSON key to a
+# response whose prompt above forbids writing anything but three plot options —
+# a director asking for a plain summary got a conflict of instructions and (when
+# the model's improvisation failed) a schema validation error instead of a result.
+# The summary is now a separate postproduction tool: `postprod_streszczenie.yaml`
+# (role `pamiec_dlugotrwala`), which also fires by itself at the alarm threshold.
+# The engine can STILL read a `streszczenie` key from a Brainstorm response — to
+# restore the old behaviour a linguist only needs to add the suffix back here.
 
 # --- Reminder appended to user instructions (role=user) ---
 przypomnienie_uzytkownika: |
@@ -108,11 +103,9 @@ przypomnienie_uzytkownika: |
 
   (CRITICAL REMINDER: You generate JSON with 3 options. Options logical and grounded. Each `cel_sceny` continues from where [OBECNA FABUŁA] left off — the director's idea is a scene TO BE WRITTEN, not a backdrop that already happened; do not skip over it. Complicate the plot UNLESS the user explicitly asks for an Epilogue or ending — then close the story neatly. Options MUST NOT end in unqualified success without consequence! `cel_sceny` WITHOUT [Director: ...] or [DIRECTIVE]: ... — those are appended by Python.)
 
-# --- Trigger words for engine behaviour ---
+# --- Engine trigger words ---
+# v18.13: the `streszczenie` list was removed along with the suffixes (see the
+# comment above). Asking “summarise the plot” inside a Brainstorm instruction no
+# longer changes the prompt — summarising belongs to the “Save Long-Term Memory”
+# button in the postproduction section.
 slowa_wyzwalajace:
-  streszczenie:
-    - summary
-    - summarise
-    - summarize
-    - recap
-    - sum up

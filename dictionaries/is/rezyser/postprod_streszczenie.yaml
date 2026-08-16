@@ -1,0 +1,80 @@
+# -----------------------------------------------------------------------------
+#  EFTIRVINNSLA: LANGTÍMAMINNI (SAMANTEKT VERKEFNIS) — v18.13
+#
+#  Fram að v18.12 varð samantektin AÐEINS til sem aukaafurð Hugarflugshamsins
+#  (viðskeytin `streszczenie` / `alarm` í tryb_burza.yaml). Leikstjóri sem vildi
+#  eingöngu samantekt rakst á andstæðar fyrirmæli: hvatning Hugarflugsins bannar
+#  að skrifa nokkuð annað en þrjá söguþráðarkosti, og JSON-skemað krefst
+#  lykilsins `opcje`. Hér fær líkanið EITT verkefni og engin bönn sem keppa
+#  við það.
+#
+#  Umfangið `rekoncyliacja` (v18.13): inntakið er EKKI öll verkefnisskráin,
+#  heldur núverandi Langtímaminni + frásögnin frá akkeri þess (síðustu
+#  fyrirsögninni sem fyrri samantekt náði yfir). Þannig er hver ný samantekt
+#  stigvaxandi og álagið vex ekki línulega með lengd verkefnisins.
+#
+#  Hlutverkið `pamiec_dlugotrwala` (v18.13): niðurstaðan lendir ekki „við hliðina"
+#  eins og skýrsla — hún VERÐUR Langtímaminni verkefnisins: skráin, meta-akkeri
+#  samstillingarinnar og reiturinn „Langtímaminni" í spjaldinu. Verkfærið fer
+#  einnig SJÁLFT í gang þegar minnismælir líkansins nær viðvörunarstigi (90%).
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Vista Langtímaminni (AI-samantekt)"
+kategoria: postprodukcja
+kolejnosc: 20
+
+# --- Sýnileiki og vinnsluumfang ---
+# Tómur listi = allir hamir sem skrifa í verkefnisskrána (Handrit, Hljóðbók).
+dla_trybow: []
+zakres: rekoncyliacja
+rola: pamiec_dlugotrwala
+
+# ATHUGIÐ: viðskeytið fer beint í skráarnafnið á disknum
+# (`<verkefni>_streszczenie.txt`) og verður að haldast EINS í öllum
+# tungumálapökkum — þetta er ekki texti til staðfærslu heldur hluti af
+# skráarnafni (eins og akkerismerkin í baza.yaml). Breyting á þessu gildi krefst
+# þess líka að endurnefna fyrirliggjandi samantektarskrár handvirkt; forritið
+# flytur sjálfkrafa aðeins frá hinu sögulega `_streszczenie`.
+sufiks_pliku_wyniku: "_streszczenie"
+
+# Samantektin stækkar með verkefninu (hún nær yfir ALLAN söguþráðinn hingað til),
+# svo mörkin eru mun hærri en fyrir kaflaheiti.
+max_tokens_wyjscia: 2000
+
+# --- Anthropic-stillingar ---
+# Lágt hitastig — við viljum trúverðuga skráningu staðreynda, ekki sköpun.
+model: claude-sonnet-5
+temperatura: 0.3
+jezyk_odpowiedzi: á íslensku
+kod_jezyka: "is"
+
+# --- Kerfishvatning ---
+prompt_systemowy: |
+  # Hlutverk: Skjalavörður söguþráðarins
+
+  Þú býrð til LANGTÍMAMINNI verkefnisins — hnitmiðaða skráningu staðreynda sem frásagnarvélin notar til að endurheimta samfellu þegar textinn allur kemst ekki lengur fyrir í vinnsluminni hennar. Viðtakandinn er vélin sem heldur sögunni áfram, ekki mennskur lesandi.
+
+  ### ⚙️ Vinnureglur:
+  1. **SAMEINAÐU, EKKI BÆTA AFTAN VIÐ.** Ef efnið inniheldur blokkina `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:` er það fyrri útgáfa minnisins — hún nær yfir atburði á undan blokkinni `[OBECNA FABUŁA]:`. Svar þitt kemur alfarið í hennar stað, svo sameinaðu báðar heimildir í EINA samfellda, tímaraðaða skráningu. Ekkert úr fyrra minni má hverfa að ástæðulausu; styttu aðeins það sem framhaldið hefur gert máli óskylt.
+  2. **STAÐREYNDIR Á UNDAN STÍL.** Skráðu: rás atburða í tímaröð, ákvarðanir persóna og afleiðingar þeirra, persónur (nöfn, hlutverk, tengsl, ástand), staði, hluti og upplýsingar sem skipta máli fyrir framhaldið, OPNA söguþræði og loforð sem lesanda hafa verið gefin.
+  3. **SKRIFAÐU HNITMIÐAÐ, Í ÞRIÐJU PERSÓNU OG Í ÞÁTÍÐ.** Engar skreytingar, engin samtöl, engar beinar tilvitnanir í textann. Ritaðu sérnöfn nákvæmlega eins og í frumefninu — innsláttarvilla í nafni snýr aftur í síðari köflum sem glæný persóna.
+  4. **TÚLKAÐU EKKI OG ÚTVÍKKAÐU EKKI.** Ekki stinga upp á framhaldi, ekki leggja mat á gæði textans, ekki bæta við atburðum sem eru ekki í efninu. Ekki ávarpa leikstjórann.
+
+  ### 📋 ÚTTAKSSNIÐ (án inngangs, án athugasemda, án fyrirsagnarinnar „Samantekt"):
+  Fyrst sjálf atburðaskráningin (málsgreinar og, ef við á, punktalisti yfir opna söguþræði).
+  Allra síðast SKYLDUBUNDIÐ ein lína:
+
+  [STÍLL OG TÓNN]: <ein setning um andrúmsloft, hraða og hefð frásagnarinnar>
+
+# --- Snið notandafyrirmæla (role=user) ---
+# Staðgengill {tresc} = samsett inntak (fyrra minni + söguþráður).
+prompt_uzytkownika_szablon: |
+  Uppfærðu Langtímaminnið út frá efninu hér að neðan.
+
+  {tresc}
+
+# --- Heimsbókarblokk (valfrjálst samhengi) ---
+# Bætt við Á UNDAN efninu þegar verkefnið er með skrána `<verkefni>.md`.
+prompt_ksiegi_szablon: |
+  [HEIMSBÓK — reglur og persónur, samhengi fyrir sérnöfn; EKKI taka hana saman]:
+  {ksiega}

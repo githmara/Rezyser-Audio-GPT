@@ -86,20 +86,16 @@ prompt_systemowy: |
   - `opis` — 1-3 frasi sulla logica dell'opzione. Il giocatore la legge sopra il campo Istruzioni dopo aver cliccato l'opzione. Non ripetere il titolo nella prima frase della descrizione.
 
 # --- Suffissi contestuali aggiunti a prompt_systemowy ---
-sufiksy:
-  streszczenie: |
-
-
-    [MODALITÀ RIASSUNTO FORZATO]: L'utente ha richiesto manualmente di salvare lo stato della trama! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente DUE elementi obbligatori:
-    1. Un riassunto conciso degli eventi finora.
-    2. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
-
-  alarm: |
-
-
-    [MODALITÀ ALLARME - LIMITE DI MEMORIA IN AVVICINAMENTO]: La memoria è quasi piena! Nella risposta JSON AGGIUNGI LA CHIAVE `"streszczenie"` (allo stesso livello di `opcje`) con un valore di testo contenente DUE elementi obbligatori:
-    1. Un riassunto conciso degli eventi finora.
-    2. Una sezione [STILE E TONO]: una nota di una frase sull'atmosfera narrativa.
+# v18.13: i suffissi `streszczenie` e `alarm` sono stati RIMOSSI insieme alle loro
+# parole scatenanti. Imponevano al modello di aggiungere la chiave JSON
+# `streszczenie` a una risposta il cui prompt qui sopra vieta di scrivere
+# qualsiasi cosa oltre alle tre opzioni di trama: chi voleva solo un riassunto
+# riceveva istruzioni in conflitto e (se l'improvvisazione del modello falliva) un
+# errore di validazione dello schema invece di un risultato. Il riassunto è ora
+# uno strumento di postproduzione a sé: `postprod_streszczenie.yaml` (ruolo
+# `pamiec_dlugotrwala`), che parte anche da solo alla soglia d'allarme.
+# Il motore SA ancora leggere una chiave `streszczenie` — per tornare al
+# comportamento precedente basta rimettere qui il suffisso.
 
 # --- Promemoria aggiunto alle istruzioni dell'utente (role=user) ---
 przypomnienie_uzytkownika: |
@@ -107,11 +103,9 @@ przypomnienie_uzytkownika: |
 
   (PROMEMORIA CRITICO: Generi JSON con 3 opzioni. Opzioni logiche e con i piedi per terra. Ogni `cel_sceny` prosegue da dove [OBECNA FABUŁA] si è interrotta — l'idea del regista è una scena DA SCRIVERE, non uno sfondo già accaduto; non saltarla. Complica la trama A MENO CHE l'utente non chieda esplicitamente un Epilogo o un finale — allora chiudi la storia in modo pulito. Le opzioni NON POSSONO concludersi con successo incondizionato senza conseguenza! `cel_sceny` SENZA [Regista: ...] né [DIRETTIVA]: ... — le aggiunge Python.)
 
-# --- Parole scatenanti per il comportamento del motore ---
+# --- Parole scatenanti del motore ---
+# v18.13: l'elenco `streszczenie` è stato rimosso insieme ai suffissi (vedi il
+# commento sopra). Chiedere «riassumi la trama» in un'istruzione del
+# Brainstorming non cambia più il prompt: per riassumere c'è il pulsante «Salva la
+# Memoria a lungo termine» nella sezione di postproduzione.
 slowa_wyzwalajace:
-  streszczenie:
-    - riassunto
-    - riassumi
-    - sintetizza
-    - sintesi
-    - ricapitola

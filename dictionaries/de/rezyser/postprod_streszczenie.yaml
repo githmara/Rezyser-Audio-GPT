@@ -1,0 +1,82 @@
+# -----------------------------------------------------------------------------
+#  NACHBEARBEITUNG: LANGZEITSPEICHER (PROJEKTZUSAMMENFASSUNG) — v18.13
+#
+#  Bis v18.12 entstand die Zusammenfassung AUSSCHLIESSLICH als Nebenprodukt des
+#  Brainstorming-Modus (Suffixe `streszczenie` / `alarm` in tryb_burza.yaml). Wer
+#  nur eine Zusammenfassung wollte, stieß auf widersprüchliche Anweisungen: der
+#  Brainstorming-Prompt verbietet alles außer drei Handlungsoptionen, und das
+#  JSON-Schema verlangt den Schlüssel `opcje`. Hier bekommt das Modell EINE
+#  Aufgabe und keine konkurrierenden Verbote.
+#
+#  Umfang `rekoncyliacja` (v18.13): Eingabe ist NICHT die ganze Projektdatei,
+#  sondern das bisherige Langzeitspeicher + die Erzählung ab dessen Anker (der
+#  letzten Überschrift, die die vorige Zusammenfassung abdeckte). Jede weitere
+#  Zusammenfassung ist damit inkrementell, und die Nutzlast wächst nicht linear
+#  mit der Länge des Projekts.
+#
+#  Rolle `pamiec_dlugotrwala` (v18.13): das Ergebnis landet nicht „daneben" wie
+#  ein Bericht — es WIRD zum Langzeitspeicher des Projekts: Datei,
+#  Meta-Anker der Abgleichung und Feld „Langzeitspeicher" im Panel. Das
+#  Werkzeug startet außerdem VON SELBST, sobald die Speicheranzeige des Modells
+#  die Alarmstufe (90 %) erreicht.
+# -----------------------------------------------------------------------------
+id: streszczenie
+etykieta: "Langzeitspeicher speichern (KI-Zusammenfassung)"
+kategoria: postprodukcja
+kolejnosc: 20
+
+# --- Sichtbarkeit & Verarbeitungsumfang ---
+# Leere Liste = alle Modi, die in die Projektdatei schreiben (Skript, Hörbuch).
+dla_trybow: []
+zakres: rekoncyliacja
+rola: pamiec_dlugotrwala
+
+# ACHTUNG: Das Suffix geht direkt in den Dateinamen auf der Festplatte
+# (`<Projekt>_streszczenie.txt`) und muss in ALLEN Sprachpaketen IDENTISCH
+# bleiben — es ist kein zu lokalisierender Text, sondern Teil eines Dateinamens
+# (wie die Ankertags in baza.yaml). Eine Änderung erfordert zusätzlich das
+# manuelle Umbenennen vorhandener Zusammenfassungsdateien; automatisch migriert
+# die Anwendung nur vom historischen `_streszczenie`.
+sufiks_pliku_wyniku: "_streszczenie"
+
+# Die Zusammenfassung wächst mit dem Projekt (sie deckt die GESAMTE bisherige
+# Handlung ab), daher liegt das Limit deutlich höher als bei einem Kapiteltitel.
+max_tokens_wyjscia: 2000
+
+# --- Anthropic-Parameter ---
+# Niedrige Temperatur — wir wollen eine treue Faktenaufzeichnung, keine Dichtung.
+model: claude-sonnet-5
+temperatura: 0.3
+jezyk_odpowiedzi: Deutsch
+kod_jezyka: "de"
+
+# --- Systemprompt ---
+prompt_systemowy: |
+  # Rolle: Handlungsarchivar
+
+  Du erstellst den LANGZEITSPEICHER des Projekts — eine knappe Faktenaufzeichnung, aus der die Erzähl-Engine die Kontinuität wiederherstellt, sobald der vollständige Text nicht mehr in ihren Arbeitsspeicher passt. Adressat ist die Maschine, die die Geschichte fortsetzt, nicht ein menschlicher Leser.
+
+  ### ⚙️ Arbeitsalgorithmus:
+  1. **ZUSAMMENFÜHREN, NICHT ANHÄNGEN.** Enthält das Material einen Block `[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:`, so ist das die vorherige Fassung des Gedächtnisses — sie umfasst die Ereignisse vor dem Block `[OBECNA FABUŁA]:`. Deine Antwort ersetzt sie vollständig, führe also beide Quellen zu EINER kohärenten, chronologischen Aufzeichnung zusammen. Nichts aus dem bisherigen Gedächtnis darf grundlos verschwinden; kürze nur, was der weitere Verlauf bedeutungslos gemacht hat.
+  2. **FAKTEN VOR STIL.** Halte fest: den Ablauf der Ereignisse in chronologischer Reihenfolge, die Entscheidungen der Figuren und deren Folgen, Figuren (Namen, Rollen, Beziehungen, Zustand), Orte, Gegenstände und Informationen, die für den weiteren Verlauf zählen, OFFENE Handlungsstränge und Versprechen an den Leser.
+  3. **SCHREIBE KNAPP, IN DER DRITTEN PERSON, IM PRÄTERITUM.** Keine Ausschmückungen, keine Dialoge, keine Zitate aus dem Text. Schreibe Eigennamen exakt wie im Ausgangsmaterial — ein Tippfehler im Namen kehrt in späteren Kapiteln als völlig neue Figur zurück.
+  4. **NICHT DEUTEN, NICHT WEITERSPINNEN.** Schlage keine Fortsetzung vor, bewerte die Qualität des Textes nicht, ergänze keine Ereignisse, die im Material fehlen. Wende dich nicht an den Regisseur.
+
+  ### 📋 AUSGABEFORMAT (ohne Einleitung, ohne Kommentar, ohne Überschrift „Zusammenfassung"):
+  Zuerst die Ereignisaufzeichnung selbst (Absätze, bei Bedarf eine Aufzählung offener Handlungsstränge).
+  Ganz am Ende OBLIGATORISCH eine einzelne Zeile:
+
+  [STIL UND TON]: <ein Satz über Stimmung, Tempo und Konvention der Erzählung>
+
+# --- Benutzerbefehlsvorlage (role=user) ---
+# Platzhalter {tresc} = zusammengesetzte Eingabe (bisheriges Gedächtnis + Handlung).
+prompt_uzytkownika_szablon: |
+  Aktualisiere den Langzeitspeicher anhand des folgenden Materials.
+
+  {tresc}
+
+# --- Weltenbuch-Block (optionaler Kontext) ---
+# Wird VOR dem Inhalt eingefügt, wenn das Projekt eine Datei `<Projekt>.md` hat.
+prompt_ksiegi_szablon: |
+  [WELTENBUCH — Regeln und Figuren, Kontext für Eigennamen; NICHT zusammenfassen]:
+  {ksiega}
