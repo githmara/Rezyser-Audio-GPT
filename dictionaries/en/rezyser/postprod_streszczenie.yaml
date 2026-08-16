@@ -29,13 +29,16 @@ dla_trybow: []
 zakres: rekoncyliacja
 rola: pamiec_dlugotrwala
 
-# NOTE: the suffix goes straight into the file name on disk
-# (`<project>_streszczenie.txt`) and must stay IDENTICAL across all language
-# packs — it is not text to localize, it is part of a file name (like the anchor
-# tags in baza.yaml). Changing this value also requires renaming existing summary
-# files by hand; the application migrates automatically only from the historical
-# `_streszczenie`.
-sufiks_pliku_wyniku: "_streszczenie"
+# FILE SUFFIX ON DISK — LOCALIZED (since v18.14; up to v18.13 it had to be
+# identical across all packs). The result lands in
+# `skrypty/<project>_overview.txt`, so the name belongs to the director, not to
+# the engine — every pack uses its own native word here. The application
+# recognizes the memory file by a LIST OF CANDIDATES: suffixes of the memory
+# tools from the pack of the project's CONTENT language + the neutral
+# `_overview` + the historical `_streszczenie`. When a project has several such
+# files on disk, the application asks which one becomes the Long-Term Memory;
+# a single file under a foreign suffix is renamed to this one on load.
+sufiks_pliku_wyniku: "_overview"
 
 # The summary grows together with the project (it covers the WHOLE plot so far),
 # so the limit is markedly higher than for a chapter title.

@@ -282,7 +282,7 @@ rezyser:
     Ermöglicht die Fortsetzung der Geschichte ohne Einschränkungen des Kontextfensters des Modells.
   btn_zapisz_pamiec_label: "💾 Zusammenfassung speichern"
   btn_zapisz_pamiec_tooltip: |-
-    Speichert die Zusammenfassung in einer Datei: skrypty/<name>_zusammenfassung.txt
+    Speichert die Zusammenfassung in der Speicherdatei des Projekts im Ordner skrypty/ (den Dateinamen gibt das Rezept des Langzeitspeicher-Werkzeugs vor).
     Nach dem Speichern können Sie den aktuellen Speicher sicher löschen.
   # Obszar roboczy
   main_heading: "🎬 Arbeitsbereich"
@@ -494,9 +494,20 @@ rezyser:
   pamiec_pusta_tresc: "Langzeitspeicher ist leer. Nichts zu speichern."
   streszczenie_zapisane_tytul: "Zusammenfassung gespeichert"
   streszczenie_zapisane_tresc: |-
-    Zusammenfassung gespeichert: skrypty/{nazwa_projektu}_zusammenfassung.txt
+    Zusammenfassung gespeichert: skrypty/{plik}
 
     Sie können jetzt den aktuellen Speicher sicher löschen.
+  # Wahl der Langzeitspeicher-Datei (v18.14) – wenn mehrere auf der Platte liegen
+  pamiec_wybor_tytul:    "Langzeitspeicher-Datei wählen"
+  pamiec_wybor_lbl: |-
+    Dieses Projekt hat mehr als eine Speicherdatei auf der Festplatte.
+    Wählen Sie die Datei, die zum Langzeitspeicher werden soll – die übrigen bleiben unangetastet:
+  pamiec_wybor_pozycja:  "{plik} – gespeichert {data}, {bajty} Bytes"
+  pamiec_wybor_anulowano_tytul: "Sitzung ohne Langzeitspeicher"
+  pamiec_wybor_anulowano_tresc: |-
+    Sie haben keine Speicherdatei gewählt, daher bleibt das Feld „Langzeitspeicher" leer.
+
+    Keine Datei auf der Festplatte wurde geändert oder gelöscht – laden Sie das Projekt einfach erneut, um diese Frage noch einmal zu erhalten.
   blad_zapisu_streszczenia: "Fehler beim Speichern der Zusammenfassung:\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul: "Kein API"

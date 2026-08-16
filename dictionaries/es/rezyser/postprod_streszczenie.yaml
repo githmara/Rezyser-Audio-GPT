@@ -31,13 +31,16 @@ dla_trybow: []
 zakres: rekoncyliacja
 rola: pamiec_dlugotrwala
 
-# ATENCIÓN: el sufijo va directamente al nombre del archivo en disco
-# (`<proyecto>_streszczenie.txt`) y debe permanecer IDÉNTICO en todos los
-# paquetes de idioma — no es texto localizable, sino parte de un nombre de
-# archivo (como las etiquetas ancla de baza.yaml). Cambiar este valor exige
-# además renombrar a mano los resúmenes existentes; la aplicación migra
-# automáticamente solo desde el histórico `_streszczenie`.
-sufiks_pliku_wyniku: "_streszczenie"
+# SUFIJO DEL ARCHIVO EN DISCO — LOCALIZADO (desde v18.14; hasta v18.13 tenía que
+# ser idéntico en todos los paquetes). El resultado va a
+# `skrypty/<proyecto>_resumen.txt`, así que el nombre pertenece al director y no
+# al motor — cada paquete usa aquí su propia palabra nativa. La aplicación
+# reconoce el archivo de memoria mediante una LISTA DE CANDIDATOS: sufijos de las
+# herramientas de memoria del paquete del idioma del CONTENIDO del proyecto + el
+# neutral `_overview` + el histórico `_streszczenie`. Si el proyecto tiene varios
+# de estos archivos en disco, la aplicación pregunta cuál pasa a ser la Memoria a
+# Largo Plazo; un único archivo con un sufijo ajeno se renombra a este al cargar.
+sufiks_pliku_wyniku: "_resumen"
 
 # El resumen crece con el proyecto (abarca TODA la trama hasta el momento), por
 # eso el límite es netamente mayor que para un título de capítulo.

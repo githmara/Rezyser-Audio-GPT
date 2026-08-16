@@ -282,7 +282,7 @@ rezyser:
     Leyfir að halda áfram með söguna án takmarkana á samhengi glugga líkansins.
   btn_zapisz_pamiec_label: "💾 Vista Samantekt"
   btn_zapisz_pamiec_tooltip: |-
-    Vista samantekt í skrá: skrypty/<nafn>_samantekt.txt
+    Vistar samantektina í minnisskrá verkefnisins í möppunni skrypty/ (skráarnafnið kemur úr uppskrift Langtímaminnis-verkfærisins).
     Eftir vistun geturðu örugglega hreinsað núverandi minni.
   # Obszar roboczy
   main_heading: "🎬 Vinnusvæði"
@@ -494,9 +494,20 @@ rezyser:
   pamiec_pusta_tresc: "Langtímaminni er tómt. Ekkert til að vista."
   streszczenie_zapisane_tytul: "Yfirlit vistað"
   streszczenie_zapisane_tresc: |-
-    Yfirlit vistað: skrypty/{nazwa_projektu}_yfirlit.txt
+    Yfirlit vistað: skrypty/{plik}
 
     Þú getur nú örugglega hreinsað núverandi minni.
+  # Val á Langtímaminnis-skrá (v18.14) – þegar verkefnið hefur fleiri á diski
+  pamiec_wybor_tytul:    "Veldu Langtímaminnis-skrá"
+  pamiec_wybor_lbl: |-
+    Þetta verkefni hefur fleiri en eina minnisskrá á disknum.
+    Veldu þá sem á að verða Langtímaminni – hinum verður ekki hreyft:
+  pamiec_wybor_pozycja:  "{plik} – vistað {data}, {bajty} bæti"
+  pamiec_wybor_anulowano_tytul: "Seta án Langtímaminnis"
+  pamiec_wybor_anulowano_tresc: |-
+    Þú valdir enga minnisskrá, svo reiturinn „Langtímaminni" er tómur.
+
+    Engri skrá á disknum var breytt né eytt – hlaðið verkefninu inn aftur til að fá þessa spurningu á nýjan leik.
   blad_zapisu_streszczenia: "Villa við vistun yfirlits:\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul: "Engin API"

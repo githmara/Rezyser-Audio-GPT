@@ -282,7 +282,7 @@ rezyser:
     Mahdollistaa tarinan jatkamisen ilman mallin kontekstin ikkunan rajoituksia.
   btn_zapisz_pamiec_label: "💾 Tallenna Yhteenveto"
   btn_zapisz_pamiec_tooltip: |-
-    Tallentaa yhteenvedon tiedostoon: skrypty/<nimi>_yhteenveto.txt
+    Tallentaa yhteenvedon projektin muistitiedostoon kansiossa skrypty/ (tiedoston nimen määrää Pitkäkestoisen Muistin työkalun ohje).
     Tallennuksen jälkeen voit turvallisesti tyhjentää nykyisen muistin.
   # Obszar roboczy
   main_heading: "🎬 Työtila"
@@ -494,9 +494,20 @@ rezyser:
   pamiec_pusta_tresc: "Pysyvä Muisti on tyhjä. Ei mitään tallennettavaa."
   streszczenie_zapisane_tytul: "Yhteenveto tallennettu"
   streszczenie_zapisane_tresc: |-
-    Yhteenveto tallennettu: skrypty/{nazwa_projektu}_yhteenveto.txt
+    Yhteenveto tallennettu: skrypty/{plik}
 
     Voit nyt turvallisesti tyhjentää nykyisen muistin.
+  # Muistitiedoston valinta (v18.14) – kun projektilla on levyllä useita
+  pamiec_wybor_tytul:    "Valitse Pitkäkestoisen Muistin tiedosto"
+  pamiec_wybor_lbl: |-
+    Tällä projektilla on levyllä useampi kuin yksi muistitiedosto.
+    Osoita se, josta tulee Pitkäkestoinen Muisti – muihin ei kosketa:
+  pamiec_wybor_pozycja:  "{plik} – tallennettu {data}, {bajty} tavua"
+  pamiec_wybor_anulowano_tytul: "Istunto ilman Pitkäkestoista Muistia"
+  pamiec_wybor_anulowano_tresc: |-
+    Et valinnut muistitiedostoa, joten kenttä ”Pitkäkestoinen Muisti” jää tyhjäksi.
+
+    Yhtäkään tiedostoa levyllä ei muutettu eikä poistettu – lataa projekti uudelleen, niin saat tämän kysymyksen uudestaan.
   blad_zapisu_streszczenia: "Yhteenvedon tallennusvirhe:\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul: "API puuttuu"

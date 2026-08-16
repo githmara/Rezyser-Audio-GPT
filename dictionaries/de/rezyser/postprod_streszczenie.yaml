@@ -31,13 +31,17 @@ dla_trybow: []
 zakres: rekoncyliacja
 rola: pamiec_dlugotrwala
 
-# ACHTUNG: Das Suffix geht direkt in den Dateinamen auf der Festplatte
-# (`<Projekt>_streszczenie.txt`) und muss in ALLEN Sprachpaketen IDENTISCH
-# bleiben — es ist kein zu lokalisierender Text, sondern Teil eines Dateinamens
-# (wie die Ankertags in baza.yaml). Eine Änderung erfordert zusätzlich das
-# manuelle Umbenennen vorhandener Zusammenfassungsdateien; automatisch migriert
-# die Anwendung nur vom historischen `_streszczenie`.
-sufiks_pliku_wyniku: "_streszczenie"
+# DATEISUFFIX AUF DER FESTPLATTE — LOKALISIERT (ab v18.14; bis v18.13 musste es
+# in allen Paketen identisch sein). Das Ergebnis landet in
+# `skrypty/<Projekt>_zusammenfassung.txt`, der Name gehört also der Regie und
+# nicht der Engine — jedes Paket verwendet hier sein eigenes, natives Wort. Die
+# Anwendung erkennt die Speicherdatei über eine KANDIDATENLISTE: Suffixe der
+# Speicher-Werkzeuge aus dem Paket der INHALTSSPRACHE des Projekts + das
+# neutrale `_overview` + das historische `_streszczenie`. Liegen mehrere solche
+# Dateien auf der Festplatte, fragt die Anwendung, welche zum Langzeitspeicher
+# wird; eine einzelne Datei unter einem fremden Suffix wird beim Laden auf dieses
+# hier umbenannt.
+sufiks_pliku_wyniku: "_zusammenfassung"
 
 # Die Zusammenfassung wächst mit dem Projekt (sie deckt die GESAMTE bisherige
 # Handlung ab), daher liegt das Limit deutlich höher als bei einem Kapiteltitel.

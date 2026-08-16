@@ -282,7 +282,7 @@ rezyser:
     Permette di continuare la storia senza limitazioni della finestra contestuale del modello.
   btn_zapisz_pamiec_label: "💾 Salva Sommario"
   btn_zapisz_pamiec_tooltip: |-
-    Salva il sommario nel file: skrypty/<nome>_sommario.txt
+    Salva il riassunto nel file di memoria del progetto, nella cartella skrypty/ (il nome del file è indicato dalla ricetta dello strumento Memoria a Lungo Termine).
     Dopo il salvataggio, puoi cancellare in sicurezza la memoria corrente.
   # Obszar roboczy
   main_heading: "🎬 Area di Lavoro"
@@ -494,9 +494,20 @@ rezyser:
   pamiec_pusta_tresc: "La Memoria a Lungo Termine è vuota. Niente da salvare."
   streszczenie_zapisane_tytul: "Riassunto salvato"
   streszczenie_zapisane_tresc: |-
-    Riassunto salvato: scripts/{nazwa_projektu}_riassunto.txt
+    Riassunto salvato: skrypty/{plik}
 
     Ora puoi cancellare in sicurezza la memoria corrente.
+  # Scelta del file di Memoria a Lungo Termine (v18.14) – se su disco ce ne sono più
+  pamiec_wybor_tytul:    "Scegli il file di Memoria a Lungo Termine"
+  pamiec_wybor_lbl: |-
+    Questo progetto ha più di un file di memoria su disco.
+    Indica quello che deve diventare la Memoria a Lungo Termine – gli altri resteranno intatti:
+  pamiec_wybor_pozycja:  "{plik} – salvato {data}, {bajty} byte"
+  pamiec_wybor_anulowano_tytul: "Sessione senza Memoria a Lungo Termine"
+  pamiec_wybor_anulowano_tresc: |-
+    Non hai scelto alcun file di memoria, quindi il campo «Memoria a Lungo Termine» resta vuoto.
+
+    Nessun file su disco è stato modificato o eliminato – basta ricaricare il progetto per ricevere di nuovo questa domanda.
   blad_zapisu_streszczenia: "Errore di salvataggio del riassunto:\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul: "Nessun API"

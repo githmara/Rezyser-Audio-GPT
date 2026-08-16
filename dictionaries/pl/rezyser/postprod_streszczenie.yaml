@@ -28,11 +28,15 @@ dla_trybow: []
 zakres: rekoncyliacja
 rola: pamiec_dlugotrwala
 
-# UWAGA: sufiks trafia wprost do nazwy pliku na dysku (`<projekt>_streszczenie.txt`)
-# i musi być IDENTYCZNY we wszystkich paczkach językowych — to nie jest tekst do
-# lokalizacji, tylko fragment nazwy pliku (jak tagi-kotwice w baza.yaml). Zmiana
-# tej wartości wymaga też ręcznej zmiany nazwy istniejących plików streszczeń;
-# aplikacja migruje automatycznie wyłącznie z historycznego `_streszczenie`.
+# SUFIKS PLIKU NA DYSKU — LOKALIZOWANY (od v18.14; do v18.13 musiał być
+# identyczny we wszystkich paczkach). Wynik trafia do
+# `skrypty/<projekt>_streszczenie.txt`, więc nazwa należy do reżysera, nie do
+# silnika — każda paczka ma tu własne, natywne słowo. Aplikacja rozpoznaje plik
+# pamięci po LIŚCIE KANDYDATÓW: sufiksy narzędzi pamięci z paczki języka TREŚCI
+# projektu + neutralny `_overview` + historyczny `_streszczenie`. Gdy projekt ma
+# na dysku kilka takich plików, aplikacja pyta, który ma trafić do Pamięci
+# Długotrwałej; pojedynczy plik pod obcym sufiksem jest przy wczytaniu
+# przemianowywany na ten.
 sufiks_pliku_wyniku: "_streszczenie"
 
 # Streszczenie rośnie razem z projektem (obejmuje CAŁĄ dotychczasową fabułę),

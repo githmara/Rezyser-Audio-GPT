@@ -116,7 +116,7 @@ _WZORZEC_NAGLOWEK_LINIA = (
 # =============================================================================
 
 # Foldery projektu (relatywne względem ``app_dir``)
-SKRYPTY_DIR = "skrypty"          # pliki .txt / .md / _streszczenie.txt
+SKRYPTY_DIR = "skrypty"          # pliki .txt / .md / pamięć <nazwa><sufiks>.txt
 RUNTIME_DIR = "runtime"          # ukryta metadata – tam leżą .mode
 
 
@@ -675,6 +675,13 @@ class WynikWczytania:
     liczba_znakow: int = 0
     saved_mode: str | None = None   # stabilne `id` trybu z `.mode` (np. "audiobook"); None=brak
     rekoncyliacja: "WynikRekoncyliacji | None" = None
+    # v18.14: sufiks pliku Pamięci Długotrwałej rozstrzygnięty dla TEGO projektu
+    # (GUI podaje w komunikacie rzeczywistą nazwę pliku — sufiksy są
+    # lokalizowane, więc twardy napis `_streszczenie.txt` byłby nieprawdą).
+    sufiks_pamieci: str = ""
+    # v18.14: user anulował wybór pamięci przy kilku kandydatach — sesja jedzie
+    # bez pamięci, a pliki na dysku zostały nietknięte.
+    pamiec_odrzucona: bool = False
 
 
 @dataclass
@@ -690,7 +697,7 @@ class WynikRekoncyliacji:
                                 "koncowka" – brak/anulowano marker LUB wybrana
                                               sekcja za długa → ostatnie
                                               MAX_TAIL_ZN znaków (fallback znakowy).
-        skasowano_streszczenie: czy usunięto `_streszczenie.txt` + meta (D1).
+        skasowano_streszczenie: czy usunięto plik pamięci + meta (D1).
         liczba_znakow:          długość przywróconego `full_story`.
         naglowek_uzyty:         tekst nagłówka, od którego snapowano (lub None).
         sekcja_przekroczyla_limit: (v17.6) True gdy WYBRANY marker istniał, ale
@@ -797,15 +804,49 @@ class ProjektRezysera:
         self.nazwa_pliku: str = ""       # bez rozszerzenia, np. "kroniki_arkonii"
         self.last_response: str = ""     # ostatnia odpowiedź AI (diagnostyka)
 
-        # --- Sufiks pliku Pamięci Długotrwałej (v18.13) ---
+        # --- Sufiks pliku Pamięci Długotrwałej (v18.13, kandydaci od v18.14) ---
         # Do v18.12 `_streszczenie` było hard-kodem w dwóch ścieżkach. Od v18.13
         # streszczenie powstaje jako POSTPRODUKCJA (`rola: pamiec_dlugotrwala`),
         # więc nazwę pliku deklaruje jej YAML — reżyser, który uzna, że w jego
         # projekcie plik ma się nazywać inaczej, zmienia `sufiks_pliku_wyniku`
-        # i nic w kodzie. Default z paczki `pl` (referencyjnej); GUI nadpisuje
-        # to wartością z listy postprodukcji, którą realnie wyświetla —
-        # `_migruj_sufiks_streszczenia` domyka przejście dla istniejących plików.
-        self.sufiks_streszczenia: str = pr.sufiks_pamieci_dlugotrwalej()
+        # i nic w kodzie.
+        #
+        # v18.14: sufiks JEST lokalizowany, więc jedna wartość już nie wystarcza.
+        # `sufiksy_pamieci` to lista KANDYDATÓW wg priorytetu (sufiksy przepisów
+        # z rolą pamięci + `_overview` + historyczny `_streszczenie`), po której
+        # `_rozstrzygnij_pamiec` szuka pliku na dysku; `sufiks_streszczenia` to
+        # wynik tego rozstrzygnięcia dla AKTUALNEGO projektu (i cel nowych
+        # zapisów). Default z paczki `pl` (referencyjnej); GUI nadpisuje jedno
+        # i drugie listą z paczki JĘZYKA PROJEKTU (`kod_jezyka` aktywnego
+        # przepisu), nie języka interfejsu — plik pamięci należy do treści, nie
+        # do tego, w jakim języku user ma dziś menu.
+        self.sufiksy_pamieci: list[str] = pr.sufiksy_pamieci_dlugotrwalej()
+        self.sufiks_streszczenia: str = self.sufiksy_pamieci[0]
+
+    def ustaw_kandydatow_pamieci(self, sufiksy: "list[str] | tuple[str, ...]") -> None:
+        """Podmienia listę kandydatów na plik Pamięci Długotrwałej (v18.14).
+
+        Wołane przez GUI, gdy zmieni się rozstrzygnięcie języka projektu
+        (``kod_jezyka`` przepisu — przy starcie z YAML-a, później po mikro-callu
+        resolvera). Sufiks JUŻ rozstrzygnięty dla OTWARTEGO projektu zostaje
+        nietknięty, dopóki jest wśród kandydatów: mid-sesyjna korekta języka nie
+        ma prawa osierocić pliku, na którym reżyser właśnie pracuje. Nowe zapisy
+        i tak celują w sufiks przepisu, który user kliknął, a kolejne wczytanie
+        projektu przeliczy wszystko od nowa (razem z ewentualnym renamem).
+
+        Gdy żaden projekt nie jest otwarty, nie ma czego chronić — wtedy sufiksem
+        docelowym zostaje pierwszy kandydat nowej listy (inaczej default z paczki
+        ``pl``, ustawiony w ``__init__``, przeżyłby przełączenie na inny język
+        i pierwszy zapis poszedłby pod polską nazwę).
+
+        Pusta lista jest ignorowana — bez kandydatów nie ma jak zbudować ścieżki.
+        """
+        kandydaci = [s for s in sufiksy if s]
+        if not kandydaci:
+            return
+        self.sufiksy_pamieci = kandydaci
+        if not self.nazwa_pliku or self.sufiks_streszczenia not in kandydaci:
+            self.sufiks_streszczenia = kandydaci[0]
 
     # ------------------------------------------------------------------
     # Ścieżki pomocnicze
@@ -870,6 +911,7 @@ class ProjektRezysera:
         nazwa: str,
         model: str = ct.MODEL_DOMYSLNY_REZYSER,
         wybor_markera: "Callable[[list[MarkerStruktury], str], int | None] | None" = None,
+        wybor_pamieci: "Callable[[list[tuple[str, str]]], int | None] | None" = None,
     ) -> WynikWczytania:
         """Wczytuje projekt: historię / streszczenie / Księgę Świata / tryb .mode.
 
@@ -896,6 +938,12 @@ class ProjektRezysera:
                 i zwraca wybrany ``offset`` lub ``None`` (anuluj → fallback
                 znakowy). Brak callbacku = automatyczny wybór anchora z meta
                 (zachowanie sprzed v17.6, używane przez testy/headless).
+            wybor_pamieci: (v18.14) opcjonalny callback wyboru pliku Pamięci
+                Długotrwałej, wołany TYLKO gdy projekt ma na dysku KILKU
+                kandydatów (sufiksy są lokalizowane — patrz
+                :meth:`_rozstrzygnij_pamiec`). Dostaje ``[(sufiks, ścieżka), …]``
+                w kolejności priorytetu i zwraca indeks lub ``None`` (anuluj →
+                sesja bez pamięci). Brak callbacku = najwyższy priorytet.
 
         Raises:
             FileNotFoundError: gdy nie istnieje plik ``skrypty/<nazwa>.txt``.
@@ -907,10 +955,12 @@ class ProjektRezysera:
         with open(sciezka, "r", encoding="utf-8") as fh:
             content = fh.read()
 
-        # v18.13: sufiks pliku Pamięci Długotrwałej pochodzi teraz z YAML-a —
-        # przenieś istniejący plik spod historycznej nazwy PRZED rekoncyliacją,
-        # która sprawdza jego obecność (patrz `_migruj_sufiks_streszczenia`).
-        self._migruj_sufiks_streszczenia(nazwa)
+        # v18.13/v18.14: nazwa pliku Pamięci Długotrwałej pochodzi z YAML-a i jest
+        # lokalizowana, więc PRZED rekoncyliacją (która sprawdza obecność pliku)
+        # trzeba rozstrzygnąć, który z kandydatów na dysku jest pamięcią tego
+        # projektu — z ewentualnym renamem pod sufiks główny albo pytaniem
+        # do usera przy kilku plikach (patrz `_rozstrzygnij_pamiec`).
+        pamiec_odrzucona = self._rozstrzygnij_pamiec(nazwa, wybor_pamieci)
 
         # --- Liczniki: bierzemy maksimum znalezionych numerów i +1 ---
         chapter_nums = [int(m) for m in re.findall(_WZORZEC_ROZDZIAL, content)]
@@ -950,12 +1000,14 @@ class ProjektRezysera:
         # nazwa_pliku MUSI być ustawiona przed rekoncyliacją — używa jej przez
         # `_wymagaj_nazwy` i ścieżkowe helpery.
         rek = self._zastosuj_rekoncyliacje(
-            content, model, wybor_markera, struktura,
+            content, model, wybor_markera, struktura, pamiec_odrzucona,
         )
         wynik.rekoncyliacja    = rek
         wynik.czy_historia     = bool(self.full_story.strip())
         wynik.czy_streszczenie = bool(self.summary_text.strip())
         wynik.liczba_znakow    = len(self.full_story)
+        wynik.sufiks_pamieci   = self.sufiks_streszczenia
+        wynik.pamiec_odrzucona = pamiec_odrzucona
         return wynik
 
     # ------------------------------------------------------------------
@@ -967,16 +1019,28 @@ class ProjektRezysera:
         model: str = ct.MODEL_DOMYSLNY_REZYSER,
         wybor_markera: "Callable[[list[MarkerStruktury], str], int | None] | None" = None,
         struktura: str | None = None,
+        pamiec_odrzucona: bool = False,
     ) -> WynikRekoncyliacji:
         """Czysta logika rekoncyliacji (oddzielona od I/O dla testowalności).
 
         Ustawia `self.full_story` (+ ewentualnie `self.summary_text`) na
         podstawie ``content`` (treść `.txt`) i obecności streszczenia. Zwraca
         :class:`WynikRekoncyliacji`. Wymaga ustawionej `nazwa_pliku`.
+
+        ``pamiec_odrzucona`` (v18.14): user anulował wybór spośród kilku plików
+        pamięci. Traktujemy to jak „nie ma pamięci" (nie czytamy pliku, nie
+        używamy anchora, NICZEGO nie kasujemy — nie wiemy który plik miałby
+        zniknąć), ale z jedną różnicą wobec projektu bez pamięci: gdy narracja
+        nie mieści się pod progiem, nie wciągamy jej całej, tylko idziemy torem
+        interaktywnym (ręczny punkt odniesienia → fallback znakowy). Reżyser
+        świadomie zrezygnował z pamięci, więc daje mu to pracowalną końcówkę
+        zamiast payloadu, który nie wejdzie w okno modelu.
         """
         self._wymagaj_nazwy()
         sciezka_strsz = self._sciezka_streszczenia(self.nazwa_pliku)
-        ma_streszczenie = os.path.exists(sciezka_strsz) or bool(self.summary_text.strip())
+        ma_streszczenie = (not pamiec_odrzucona) and (
+            os.path.exists(sciezka_strsz) or bool(self.summary_text.strip())
+        )
 
         # Próg: czy CAŁA narracja (+ Księga Świata) mieści się pod ostrzeżeniem?
         # summary_text="" w teście — sprawdzamy sam tekst narracji.
@@ -988,7 +1052,9 @@ class ProjektRezysera:
         miesci_sie = tokeny < int(OKNO_KONTEKSTU_MAX * PROG_OSTRZEZENIE)
 
         # --- Wariant „całość": krótka historia LUB brak streszczenia ---
-        if miesci_sie or not ma_streszczenie:
+        # Odrzucona pamięć (v18.14) NIE wpada tu przy długiej narracji — user wie,
+        # że pamięć istnieje, i sam ją odłożył, więc dostaje tor interaktywny.
+        if miesci_sie or not (ma_streszczenie or pamiec_odrzucona):
             self.full_story = content
             skasowano = False
             if not miesci_sie:
@@ -1008,7 +1074,9 @@ class ProjektRezysera:
 
         # --- Wariant „snap": długa historia + istnieje streszczenie ---
         # Doładuj streszczenie z dysku jeśli nie ma go jeszcze w RAM.
-        if not self.summary_text.strip() and os.path.exists(sciezka_strsz):
+        # Pamięć odrzucona → pomijamy odczyt (pole „Pamięć" zostaje puste).
+        if (not pamiec_odrzucona and not self.summary_text.strip()
+                and os.path.exists(sciezka_strsz)):
             try:
                 with open(sciezka_strsz, "r", encoding="utf-8") as fh:
                     self.summary_text = fh.read()
@@ -1035,8 +1103,10 @@ class ProjektRezysera:
             )
 
         # Anchor zapisany w meta streszczenia: czy jest WCIĄŻ ważny w bieżącej
-        # treści (preferowany nagłówek obecny + ma istotną treść)?
-        meta = self._wczytaj_streszczenie_meta()
+        # treści (preferowany nagłówek obecny + ma istotną treść)? Przy pamięci
+        # odrzuconej anchor nie ma prawa działać — należy do pliku, którego user
+        # nie wybrał, więc snapowałby do punktu bez pokrycia w treści pamięci.
+        meta = None if pamiec_odrzucona else self._wczytaj_streszczenie_meta()
         preferowany = meta.get("marker_naglowek_tekst") if meta else None
         anchor_offset = None
         if preferowany:
@@ -1075,7 +1145,7 @@ class ProjektRezysera:
         return WynikRekoncyliacji(tryb="koncowka", liczba_znakow=len(self.full_story))
 
     def wejscie_pamieci_dlugotrwalej(
-        self, content: str, nazwa: str | None = None,
+        self, content: str, nazwa: str | None = None, sufiks: str | None = None,
     ) -> tuple[str, str, str | None]:
         """Składniki wejścia postprodukcji ``rekoncyliacja`` — czytane z DYSKU.
 
@@ -1092,10 +1162,16 @@ class ProjektRezysera:
         projektu wskazanym w polu nazwy — tak samo jak tytuły rozdziałów czy
         raport całościowy. Dzięki temu narzędzie działa również dla projektu,
         którego reżyser nie wczytał do panelu.
+
+        ``sufiks`` (v18.14): plik pamięci do scalenia. Domyślnie rozstrzygamy go
+        po dysku dla PODANEJ nazwy (:meth:`rozstrzygnij_sufiks_pamieci`), a nie
+        po stanie otwartego projektu — inaczej narzędzie odpalone na projekcie
+        wskazanym samą nazwą scalałoby pamięć innego projektu.
         """
         nazwa = nazwa or self.nazwa_pliku
+        suf = sufiks or self.rozstrzygnij_sufiks_pamieci(nazwa)
         stare = ""
-        sciezka_strsz = self._sciezka_streszczenia(nazwa)
+        sciezka_strsz = self._sciezka_streszczenia(nazwa, suf)
         if os.path.exists(sciezka_strsz):
             try:
                 with open(sciezka_strsz, "r", encoding="utf-8") as fh:
@@ -1105,52 +1181,154 @@ class ProjektRezysera:
                 # narzędzia — degradujemy do streszczenia całości od zera.
                 stare = ""
 
-        meta = self._wczytaj_streszczenie_meta(nazwa)
+        meta = self._wczytaj_streszczenie_meta(nazwa, suf)
         anchor = meta.get("marker_naglowek_tekst") if meta else None
         # Anchor ma sens tylko razem ze streszczeniem: bez niego wszystko przed
         # nagłówkiem przepadłoby bez śladu (nie jest nigdzie skompresowane).
         fragment, uzyty = wytnij_od_anchora(content, anchor if stare else None)
         return stare, fragment, uzyty
 
-    def _migruj_sufiks_streszczenia(self, nazwa: str) -> bool:
-        """v18.13: przenosi plik Pamięci Długotrwałej spod historycznej nazwy.
+    def znajdz_pliki_pamieci(self, nazwa: str) -> list[tuple[str, str]]:
+        """Kandydaci Pamięci Długotrwałej OBECNI na dysku (v18.14).
 
-        Do v18.12 plik nazywał się zawsze ``<nazwa>_streszczenie.txt``. Od v18.13
-        nazwę deklaruje ``sufiks_pliku_wyniku`` przepisu z rolą
-        ``pamiec_dlugotrwala`` — jeśli reżyser go zmienił, istniejące streszczenia
-        zostałyby OSIEROCONE: rekoncyliacja przy wczytaniu nie znalazłaby pliku
-        i potraktowała projekt jak „długa historia bez streszczenia" (czyli
-        wczytała całość, zamiast snapować do końcówki). Tu robimy jednorazowy
-        rename pary plik + meta.
+        Zwraca ``[(sufiks, ścieżka), …]`` w kolejności priorytetu z
+        :attr:`sufiksy_pamieci` (sufiksy przepisów z rolą pamięci → ``_overview``
+        → historyczny ``_streszczenie``). Pusta lista = projekt nie ma pamięci.
 
-        Migrujemy WYŁĄCZNIE z historycznego ``_streszczenie`` — to jedyny stan
-        poprzedni, który znamy na pewno. Kolejne zmiany sufiksu (``_memoria`` →
-        ``_pamiec``) wymagają ręcznej zmiany nazwy pliku; manual mówi o tym wprost.
-
-        Cichy fail przy błędzie I/O (read-only nośnik, plik otwarty w Notatniku) —
-        wzorzec migracji z v15.2.3 / v17.4. Zwraca True, gdy coś przeniesiono.
+        Publiczna, bo z tej samej listy korzysta postprodukcja operująca na
+        projekcie nieotwartym w panelu (patrz :meth:`rozstrzygnij_sufiks_pamieci`).
         """
-        stary = pr.SUFIKS_STRESZCZENIA_DOMYSLNY
-        if not self.sufiks_streszczenia or self.sufiks_streszczenia == stary:
+        znalezione: list[tuple[str, str]] = []
+        for suf in self.sufiksy_pamieci:
+            sciezka = self._sciezka_streszczenia(nazwa, suf)
+            if os.path.exists(sciezka):
+                znalezione.append((suf, sciezka))
+        return znalezione
+
+    def rozstrzygnij_sufiks_pamieci(self, nazwa: str) -> str:
+        """Sufiks pamięci dla projektu ``nazwa`` — BEZ pytania usera (v18.14).
+
+        Pierwszy kandydat obecny na dysku, a gdy nie ma żadnego — sufiks główny.
+        Wariant dla kodu, który nie ma komu zadać pytania: wątek postprodukcji
+        i budowa wejścia rekoncyliacji dla projektu wskazanego samą nazwą
+        (dialog wyboru pojawia się WYŁĄCZNIE przy wczytywaniu projektu do panelu,
+        w wątku GUI). Deterministyczny: przy dwóch plikach bierze ten
+        o wyższym priorytecie, więc nie „skacze" między wywołaniami.
+        """
+        znalezione = self.znajdz_pliki_pamieci(nazwa)
+        return znalezione[0][0] if znalezione else self.sufiksy_pamieci[0]
+
+    def _rozstrzygnij_pamiec(
+        self,
+        nazwa: str,
+        wybor_pamieci: "Callable[[list[tuple[str, str]]], int | None] | None" = None,
+    ) -> bool:
+        """Ustala plik Pamięci Długotrwałej projektu. Zwraca ``True`` = ODRZUCONA.
+
+        Sufiksy są od v18.14 lokalizowane, więc jeden projekt może mieć na dysku
+        kilku kandydatów (reżyser przełączył język interfejsu; paczka ma dwa
+        narzędzia z rolą pamięci — „pod siebie" i „pod AI"; plik przyszedł
+        z innej maszyny). Reguły:
+
+        * **brak kandydatów** → sufiks główny jako cel przyszłych zapisów;
+        * **dokładnie jeden** → to jest pamięć projektu; jeśli leży pod sufiksem
+          innym niż główny, a pod głównym nic nie ma — przenosimy parę
+          plik + meta (v18.13 obiecywała to tylko dla historycznego
+          ``_streszczenie``; od v18.14 działa dla dowolnego obcego sufiksu, bo
+          każdy język ma własny). Nieudany rename → adopcja W MIEJSCU;
+        * **kilku** → NIE zgadujemy i NIE zmieniamy nazw: pytamy usera
+          (``wybor_pamieci``); brak callbacku (testy/headless) → najwyższy
+          priorytet.
+
+        Anulowanie wyboru = świadoma rezygnacja z pamięci na tę sesję: pliki
+        zostają na dysku nietknięte (nie wiemy, który miał zniknąć, więc D1 też
+        ma prawa do nich nie mieć), a rekoncyliacja jedzie torem „bez pamięci".
+
+        ``summary_text`` zerujemy zawsze — to stan POPRZEDNIEGO projektu, a od
+        v18.14 pamięć wchodzi do RAM wyłącznie z rozstrzygniętego pliku. Bez tego
+        wczytanie długiego projektu bez pamięci podkładało pod niego streszczenie
+        poprzednio otwartego (widoczne w polu „Pamięć Długotrwała").
+        """
+        self.summary_text = ""
+        glowny = self.sufiksy_pamieci[0]
+        znalezione = self.znajdz_pliki_pamieci(nazwa)
+
+        if not znalezione:
+            self.sufiks_streszczenia = glowny
             return False
 
-        przeniesiono = False
-        for buduj in (self._sciezka_streszczenia, self._sciezka_streszczenie_meta):
+        if len(znalezione) == 1:
+            suf = znalezione[0][0]
+            if suf != glowny and self._przenies_pamiec(nazwa, suf, glowny):
+                suf = glowny
+            self.sufiks_streszczenia = suf
+            return False
+
+        if wybor_pamieci is None:
+            self.sufiks_streszczenia = znalezione[0][0]
+            return False
+
+        idx = wybor_pamieci(znalezione)
+        if idx is None or not 0 <= idx < len(znalezione):
+            # Odrzucenie: ścieżki celują w sufiks główny (spójność przyszłego
+            # zapisu), ale rekoncyliacja dostanie sygnał „bez pamięci", a D1
+            # niczego nie skasuje.
+            self.sufiks_streszczenia = glowny
+            return True
+
+        self.sufiks_streszczenia = znalezione[idx][0]
+        return False
+
+    def _przenies_pamiec(self, nazwa: str, stary: str, nowy: str) -> bool:
+        """Rename pary plik + meta Pamięci Długotrwałej. ``True`` = przeniesiono.
+
+        Bez tego pamięć zapisana pod sufiksem innej paczki zostawałaby przy tej
+        nazwie na zawsze, a każde kolejne narzędzie pisałoby obok — projekt miałby
+        dwie „pamięci" i rekoncyliację opartą na losowej z nich.
+
+        Nie nadpisujemy: gdy pod ``nowy`` już coś leży, mamy dwóch kandydatów,
+        a o tym decyduje user (:meth:`_rozstrzygnij_pamiec` nie woła nas wtedy).
+        Meta jedzie razem z plikiem, bo anchor rekoncyliacji jest parą do treści;
+        gdy przeniesie się sam ``.txt`` (meta zablokowana), pamięć nadal działa —
+        anchor zdegraduje się do wyboru punktu odniesienia.
+
+        Cichy fail przy błędzie I/O (read-only nośnik, plik otwarty w Notatniku) —
+        wzorzec migracji z v15.2.3 / v17.4.
+        """
+        if not stary or not nowy or stary == nowy:
+            return False
+        if os.path.exists(self._sciezka_streszczenia(nazwa, nowy)):
+            return False
+
+        przeniesiono_tresc = False
+        # Flaga „to plik treści" jawnie w krotce — porównanie `buduj is
+        # self._sciezka_streszczenia` byłoby zawsze False (każdy dostęp do metody
+        # instancji tworzy nowy obiekt bound method).
+        for buduj, czy_tresc in (
+            (self._sciezka_streszczenia, True),
+            (self._sciezka_streszczenie_meta, False),
+        ):
             sciezka_stara = buduj(nazwa, stary)
-            sciezka_nowa = buduj(nazwa)
+            sciezka_nowa = buduj(nazwa, nowy)
             if not os.path.exists(sciezka_stara) or os.path.exists(sciezka_nowa):
                 continue
             try:
                 os.makedirs(os.path.dirname(sciezka_nowa), exist_ok=True)
                 os.rename(sciezka_stara, sciezka_nowa)
-                przeniesiono = True
+                if czy_tresc:
+                    przeniesiono_tresc = True
             except OSError:
                 pass
-        return przeniesiono
+        return przeniesiono_tresc
 
     def _skasuj_streszczenie_i_meta(self) -> bool:
-        """D1: usuwa `_streszczenie.txt` + `_streszczenie_meta.json` i zeruje
-        `summary_text`. Zwraca True jeśli skasowano przynajmniej jeden plik."""
+        """D1: usuwa ROZSTRZYGNIĘTY plik pamięci + jego meta i zeruje
+        `summary_text`. Zwraca True jeśli skasowano przynajmniej jeden plik.
+
+        Kasuje wyłącznie parę wskazaną przez `sufiks_streszczenia` — ewentualne
+        pliki pamięci pod innymi sufiksami (druga pamięć „pod siebie", pozostałość
+        po innym języku) zostają: nie my je stworzyliśmy i nie my decydujemy
+        o ich losie."""
         skasowano = False
         for sciezka in (
             self._sciezka_streszczenia(self.nazwa_pliku),
@@ -1166,15 +1344,17 @@ class ProjektRezysera:
         return skasowano
 
     def _wczytaj_streszczenie_meta(
-        self, nazwa: str | None = None,
+        self, nazwa: str | None = None, sufiks: str | None = None,
     ) -> dict[str, Any] | None:
         """Wczytuje meta streszczenia lub None (brak / błąd parsowania).
 
         ``nazwa`` (v18.13) pozwala odczytać meta projektu, który nie jest
         załadowany — postprodukcja Pamięci Długotrwałej operuje na pliku z dysku
         wskazanym w polu nazwy, dokładnie jak pozostałe narzędzia postprodukcji.
+        ``sufiks`` (v18.14) trzyma meta w parze z konkretnym plikiem pamięci
+        (kandydatów może być kilku).
         """
-        sciezka = self._sciezka_streszczenie_meta(nazwa or self.nazwa_pliku)
+        sciezka = self._sciezka_streszczenie_meta(nazwa or self.nazwa_pliku, sufiks)
         if not os.path.exists(sciezka):
             return None
         try:
@@ -1185,6 +1365,7 @@ class ProjektRezysera:
 
     def _zapisz_streszczenie_meta(
         self, content: str | None = None, nazwa: str | None = None,
+        sufiks: str | None = None,
     ) -> None:
         """Wykrywa ostatni nagłówek struktury i zapisuje meta JSON (anchor).
 
@@ -1218,7 +1399,7 @@ class ProjektRezysera:
             "marker_naglowek_tekst": tekst_naglowka,
             "dlugosc_full_story_przy_streszczeniu": len(zrodlo),
         }
-        sciezka = self._sciezka_streszczenie_meta(cel)
+        sciezka = self._sciezka_streszczenie_meta(cel, sufiks)
         os.makedirs(os.path.dirname(sciezka), exist_ok=True)
         with open(sciezka, "w", encoding="utf-8") as fh:
             json.dump(meta, fh, ensure_ascii=False, indent=2)
@@ -1251,6 +1432,7 @@ class ProjektRezysera:
         tresc: str,
         nazwa: str | None = None,
         content: str | None = None,
+        sufiks: str | None = None,
     ) -> str:
         """Zapisuje Pamięć Długotrwałą do ``skrypty/<nazwa><sufiks>.txt``.
 
@@ -1262,26 +1444,41 @@ class ProjektRezysera:
                      dotykamy ``summary_text``, bo w RAM siedzi inny projekt.
             content: (v18.13) Pełna treść pliku projektu do wyliczenia anchora —
                      patrz :meth:`_zapisz_streszczenie_meta`.
+            sufiks:  (v18.14) Sufiks pliku wyniku. GUI podaje sufiks przepisu,
+                     który user kliknął — to on rządzi nazwą pliku, bo paczka może
+                     mieć kilka narzędzi pamięci (każde ze swoim plikiem). Bez
+                     jawnej wartości: sufiks rozstrzygnięty dla otwartego projektu,
+                     a dla obcej nazwy — rozstrzygnięty po dysku dla NIEJ.
         """
         cel = nazwa or self.nazwa_pliku
         if not cel:
             raise ValueError(
                 "ProjektRezysera: zapis streszczenia wymaga nazwy projektu."
             )
+        if sufiks:
+            suf = sufiks
+        elif cel == self.nazwa_pliku:
+            suf = self.sufiks_streszczenia
+        else:
+            suf = self.rozstrzygnij_sufiks_pamieci(cel)
         skrypty = os.path.join(self.app_dir, SKRYPTY_DIR)
         os.makedirs(skrypty, exist_ok=True)
-        sciezka = self._sciezka_streszczenia(cel)
+        sciezka = self._sciezka_streszczenia(cel, suf)
         with open(sciezka, "w", encoding="utf-8") as fh:
             fh.write(tresc)
         # Stan w RAM synchronizujemy TYLKO gdy zapis dotyczy otwartego projektu —
         # inaczej pole „Pamięć" pokazywałoby streszczenie cudzej historii.
         if cel == self.nazwa_pliku:
             self.summary_text = tresc
+            # v18.14: świeżo zapisany plik JEST od teraz pamięcią projektu —
+            # rekoncyliacja i D1 muszą celować w niego, a nie w plik sprzed
+            # zapisu (inaczej narzędzie o innym sufiksie pisałoby „obok").
+            self.sufiks_streszczenia = suf
         # v15.5: zapisz meta-marker (ostatni nagłówek struktury) — anchor do
         # rekoncyliacji końcówki `.txt`. Niekrytyczne: brak meta → rekoncyliacja
         # użyje fallbacku po znakach.
         try:
-            self._zapisz_streszczenie_meta(content, nazwa=cel)
+            self._zapisz_streszczenie_meta(content, nazwa=cel, sufiks=suf)
         except OSError:
             pass
         return sciezka

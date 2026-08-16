@@ -282,7 +282,7 @@ rezyser:
     Allows continuing the story without model context window limitations.
   btn_zapisz_pamiec_label: "💾 Save Summary"
   btn_zapisz_pamiec_tooltip: |-
-    Saves the summary to a file: skrypty/<name>_streszczenie.txt
+    Saves the summary to the project's memory file in the skrypty/ folder (the file name comes from the Long-Term Memory tool recipe).
     After saving, you can safely clear the current memory.
   # Obszar roboczy
   main_heading: "🎬 Workspace"
@@ -494,9 +494,20 @@ rezyser:
   pamiec_pusta_tresc: "Long-Term Memory is empty. Nothing to save."
   streszczenie_zapisane_tytul: "Summary saved"
   streszczenie_zapisane_tresc: |-
-    Summary saved: skrypty/{nazwa_projektu}_streszczenie.txt
+    Summary saved: skrypty/{plik}
 
     You can now safely clear the current memory.
+  # Long-Term Memory file choice (v18.14) – when a project has several on disk
+  pamiec_wybor_tytul:    "Choose the Long-Term Memory file"
+  pamiec_wybor_lbl: |-
+    This project has more than one memory file on disk.
+    Point to the one that should become the Long-Term Memory – the others will be left untouched:
+  pamiec_wybor_pozycja:  "{plik} – saved {data}, {bajty} bytes"
+  pamiec_wybor_anulowano_tytul: "Session without Long-Term Memory"
+  pamiec_wybor_anulowano_tresc: |-
+    You did not choose a memory file, so the "Long-Term Memory" field stays empty.
+
+    No file on disk was changed or deleted – just load the project again to get this question once more.
   blad_zapisu_streszczenia: "Summary save error:\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul: "No API"

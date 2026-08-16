@@ -32,13 +32,18 @@ dla_trybow: []
 zakres: rekoncyliacja
 rola: pamiec_dlugotrwala
 
-# ATTENTION : le suffixe va directement dans le nom du fichier sur le disque
-# (`<projet>_streszczenie.txt`) et doit rester IDENTIQUE dans tous les paquets
-# de langue — ce n'est pas un texte à localiser, mais un fragment de nom de
-# fichier (comme les balises d'ancrage de baza.yaml). Modifier cette valeur
-# oblige aussi à renommer à la main les résumés existants ; l'application ne
-# migre automatiquement que depuis l'historique `_streszczenie`.
-sufiks_pliku_wyniku: "_streszczenie"
+# SUFFIXE DU FICHIER SUR LE DISQUE — LOCALISÉ (depuis la v18.14 ; jusqu'à la
+# v18.13 il devait être identique dans tous les paquets). Le résultat va dans
+# `skrypty/<projet>_resume.txt` : le nom appartient donc au réalisateur et non au
+# moteur — chaque paquet utilise ici son propre mot natif (sans accent, pour
+# rester sûr dans un nom de fichier). L'application reconnaît le fichier de
+# mémoire grâce à une LISTE DE CANDIDATS : suffixes des outils de mémoire du
+# paquet de la langue du CONTENU du projet + le neutre `_overview` +
+# l'historique `_streszczenie`. Si le projet possède plusieurs de ces fichiers
+# sur le disque, l'application demande lequel devient la Mémoire à Long Terme ;
+# un fichier unique portant un suffixe étranger est renommé en celui-ci au
+# chargement.
+sufiks_pliku_wyniku: "_resume"
 
 # Le résumé grandit avec le projet (il couvre TOUTE l'intrigue jusqu'ici), d'où
 # une limite nettement plus haute que pour un titre de chapitre.

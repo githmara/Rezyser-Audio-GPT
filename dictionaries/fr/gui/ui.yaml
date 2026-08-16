@@ -282,7 +282,7 @@ rezyser:
     Permet de continuer l'histoire sans les limitations de la fenêtre contextuelle du modèle.
   btn_zapisz_pamiec_label: "💾 Sauvegarder le Résumé"
   btn_zapisz_pamiec_tooltip: |-
-    Sauvegarde le résumé dans le fichier : skrypty/<nom>_resume.txt
+    Sauvegarde le résumé dans le fichier de mémoire du projet, dans le dossier skrypty/ (le nom du fichier est indiqué par la recette de l'outil Mémoire à Long Terme).
     Après la sauvegarde, vous pouvez effacer la mémoire courante en toute sécurité.
   # Obszar roboczy
   main_heading: "🎬 Espace de Travail"
@@ -494,9 +494,20 @@ rezyser:
   pamiec_pusta_tresc: "La Mémoire à Long Terme est vide. Rien à sauvegarder."
   streszczenie_zapisane_tytul: "Résumé sauvegardé"
   streszczenie_zapisane_tresc: |-
-    Résumé sauvegardé : skrypty/{nazwa_projektu}_resume.txt
+    Résumé sauvegardé : skrypty/{plik}
 
     Vous pouvez maintenant effacer la mémoire courante en toute sécurité.
+  # Choix du fichier de Mémoire à Long Terme (v18.14) – si plusieurs sur le disque
+  pamiec_wybor_tytul:    "Choisissez le fichier de Mémoire à Long Terme"
+  pamiec_wybor_lbl: |-
+    Ce projet possède plus d'un fichier de mémoire sur le disque.
+    Indiquez celui qui doit devenir la Mémoire à Long Terme – les autres resteront intacts :
+  pamiec_wybor_pozycja:  "{plik} – sauvegardé {data}, {bajty} octets"
+  pamiec_wybor_anulowano_tytul: "Session sans Mémoire à Long Terme"
+  pamiec_wybor_anulowano_tresc: |-
+    Vous n'avez choisi aucun fichier de mémoire, le champ « Mémoire à Long Terme » reste donc vide.
+
+    Aucun fichier du disque n'a été modifié ni supprimé – il suffit de recharger le projet pour obtenir cette question à nouveau.
   blad_zapisu_streszczenia: "Erreur de sauvegarde du résumé :\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul: "Aucune API"

@@ -282,7 +282,7 @@ rezyser:
     Permite continuar la historia sin las limitaciones de la ventana de contexto del modelo.
   btn_zapisz_pamiec_label: "💾 Guardar Resumen"
   btn_zapisz_pamiec_tooltip: |-
-    Guarda el resumen en un archivo: skrypty/<nombre>_resumen.txt
+    Guarda el resumen en el archivo de memoria del proyecto, en la carpeta skrypty/ (el nombre del archivo lo indica la receta de la herramienta de Memoria a Largo Plazo).
     Después de guardar, puedes limpiar la memoria actual de forma segura.
   # Obszar roboczy
   main_heading: "🎬 Área de Trabajo"
@@ -494,9 +494,20 @@ rezyser:
   pamiec_pusta_tresc: "La Memoria a Largo Plazo está vacía. Nada que guardar."
   streszczenie_zapisane_tytul: "Resumen guardado"
   streszczenie_zapisane_tresc: |-
-    Resumen guardado: scripts/{nazwa_projektu}_resumen.txt
+    Resumen guardado: skrypty/{plik}
 
     Ahora puedes borrar la memoria actual de forma segura.
+  # Elección del archivo de Memoria a Largo Plazo (v18.14) – si hay varios en disco
+  pamiec_wybor_tytul:    "Elige el archivo de Memoria a Largo Plazo"
+  pamiec_wybor_lbl: |-
+    Este proyecto tiene más de un archivo de memoria en el disco.
+    Señala el que debe convertirse en la Memoria a Largo Plazo – los demás quedarán intactos:
+  pamiec_wybor_pozycja:  "{plik} – guardado {data}, {bajty} bytes"
+  pamiec_wybor_anulowano_tytul: "Sesión sin Memoria a Largo Plazo"
+  pamiec_wybor_anulowano_tresc: |-
+    No has elegido ningún archivo de memoria, así que el campo «Memoria a Largo Plazo» queda vacío.
+
+    Ningún archivo del disco fue modificado ni eliminado – basta con cargar el proyecto de nuevo para recibir esta pregunta otra vez.
   blad_zapisu_streszczenia: "Error al guardar el resumen:\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul: "Falta API"

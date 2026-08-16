@@ -103,6 +103,17 @@ ROLA_PAMIEC_DLUGOTRWALA = "pamiec_dlugotrwala"
 # u każdego, kto używał Reżysera przed tym wydaniem.
 SUFIKS_STRESZCZENIA_DOMYSLNY = "_streszczenie"
 
+# Sufiks paczki `en` (v18.14). Pełni PODWÓJNĄ rolę: jest wartością
+# ``sufiks_pliku_wyniku`` w ``en/rezyser/postprod_streszczenie.yaml`` ORAZ stałą
+# REGUŁY MIĘDZYNARODOWEGO FALLBACKU. Od v18.14 sufiks JEST lokalizowany (v18.13
+# wymagała jeszcze identycznej wartości we wszystkich paczkach — patrz
+# :func:`sufiksy_pamieci_dlugotrwalej`), więc aplikacja musi rozpoznać plik
+# pamięci także wtedy, gdy paczka, która go wytworzyła, nie jest zainstalowana
+# (user ją skasował, przeniósł projekt na inną maszynę, wrócił do innego języka).
+# „Na sucho", bez żadnego YAML-a, rozpoznajemy więc dwa sufiksy: neutralny
+# angielski ``_overview`` i historyczny ``_streszczenie``.
+SUFIKS_PAMIECI_MIEDZYNARODOWY = "_overview"
+
 # Domyślne limity tokenów wyjścia postprodukcji, gdy YAML nie podaje
 # ``max_tokens_wyjscia:`` — wartości historyczne obu wzorców (tytuł rozdziału
 # to jedna linia; raport całościowy to kilka stron).
@@ -352,6 +363,11 @@ class PrzepisRezysera:
 # yaml.safe_load zwraca świeży dict przy każdym wywołaniu, więc cache jest
 # bezpieczny dla wielu wątków (nie modyfikujemy zawartości po wczytaniu).
 _CACHE_PRZEPISOW: dict[str, list[PrzepisRezysera]] = {}
+
+# Cache unii sufiksów plików wyniku ze wszystkich paczek (v18.14) — patrz
+# :func:`sufiksy_wynikow_wszystkich_paczek`. ``None`` = jeszcze nie liczone
+# (pusta krotka jest legalnym wynikiem, więc sentinelem nie może być falsy).
+_CACHE_SUFIKSY_GLOBALNE: tuple[str, ...] | None = None
 
 
 # Mapa wstecznej zgodności id → struktura dla paczek sprzed pola `struktura`
@@ -721,47 +737,124 @@ def postprodukcje_dla_trybu(
     return filtruj_postprodukcje(lista_postprodukcji(jezyk), tryb)
 
 
-def przepis_pamieci_dlugotrwalej(
+def przepisy_pamieci_dlugotrwalej(
     postprodukcje: list[PrzepisRezysera],
-) -> PrzepisRezysera | None:
-    """Pierwszy przepis z rolą :data:`ROLA_PAMIEC_DLUGOTRWALA` (lub ``None``).
+) -> list[PrzepisRezysera]:
+    """WSZYSTKIE przepisy z rolą :data:`ROLA_PAMIEC_DLUGOTRWALA` (v18.14).
 
     Bierze GOTOWĄ listę, a nie kod języka, celowo: GUI ładuje postprodukcje raz,
     z miękkim fallbackiem język-UI → EN, i musi mieć pewność, że sufiks pliku
     pochodzi DOKŁADNIE z tego przepisu, który wygeneruje treść. Wariant liczący
     listę samodzielnie rozjechałby się z GUI przy niekompletnej paczce.
 
-    „Pierwszy" jest deterministyczny: :func:`_zaladuj_wszystkie` sortuje po
-    ``(kategoria, kolejnosc, id)``. Dwóch narzędzi z tą rolą w jednej paczce nie
-    przewidujemy — Pamięć Długotrwała jest jedna na projekt.
+    Kolejność jest deterministyczna: :func:`_zaladuj_wszystkie` sortuje po
+    ``(kategoria, kolejnosc, id)``. Do v18.13 zakładaliśmy JEDNO narzędzie z tą
+    rolą w paczce; od v18.14 dopuszczamy więcej (reżyser może chcieć osobną
+    pamięć „pod siebie" i osobną „pod AI", każdą z własnym sufiksem). Wszystkie
+    ich sufiksy są potem KANDYDATAMI przy rozstrzyganiu, który plik na dysku jest
+    Pamięcią Długotrwałą projektu — przy więcej niż jednym pyta się usera.
+
+    Uwaga: dwa przepisy o tym samym ``id`` w jednej paczce są nadal niemożliwe
+    (guard unikalności ``(kategoria, id)`` w :func:`_zaladuj_wszystkie`) — żeby
+    mieć drugą pamięć, trzeba drugiego ``id``.
     """
-    for p in postprodukcje:
-        if p.rola == ROLA_PAMIEC_DLUGOTRWALA:
-            return p
-    return None
+    return [p for p in postprodukcje if p.rola == ROLA_PAMIEC_DLUGOTRWALA]
+
+
+def przepis_pamieci_dlugotrwalej(
+    postprodukcje: list[PrzepisRezysera],
+) -> PrzepisRezysera | None:
+    """Pierwszy przepis z rolą :data:`ROLA_PAMIEC_DLUGOTRWALA` (lub ``None``).
+
+    Wariant „głównego" narzędzia pamięci — używany tam, gdzie trzeba wskazać
+    JEDEN przepis do uruchomienia bez pytania usera (automat progu alarmowego).
+    Do rozpoznawania plików na dysku służy :func:`sufiksy_pamieci_dlugotrwalej`.
+    """
+    lista = przepisy_pamieci_dlugotrwalej(postprodukcje)
+    return lista[0] if lista else None
+
+
+def sufiksy_pamieci_dlugotrwalej(
+    postprodukcje: list[PrzepisRezysera] | None = None,
+) -> list[str]:
+    """Kandydaci na sufiks pliku Pamięci Długotrwałej — wg PRIORYTETU (v18.14).
+
+    Kolejność: sufiksy przepisów z rolą :data:`ROLA_PAMIEC_DLUGOTRWALA` (wg
+    ``kolejnosc``), potem :data:`SUFIKS_PAMIECI_MIEDZYNARODOWY`, na końcu
+    historyczny :data:`SUFIKS_STRESZCZENIA_DOMYSLNY`. Pierwszy element jest
+    sufiksem GŁÓWNYM (tam trafiają nowe zapisy i tam migruje shim), pozostałe
+    służą do ROZPOZNANIA pliku, który już leży na dysku.
+
+    Zmiana wobec v18.13: sufiks jest teraz LOKALIZOWANY (paczka ``de`` może mieć
+    ``_zusammenfassung``, ``fi`` — ``_yhteenveto``), bo nazwa pliku należy do
+    usera, a nie do silnika. Ceną jest rozpoznawanie po liście kandydatów zamiast
+    po jednej stałej — inaczej wystarczyłoby przełączyć język interfejsu, żeby
+    aplikacja „zgubiła" pamięć projektu i wczytała całą narrację jako nową.
+
+    ``postprodukcje=None`` → lista z paczki ``pl`` (referencyjna): dla kodu bez
+    dostępu do listy GUI (testy, headless). GUI podaje listę z paczki JĘZYKA
+    PROJEKTU (``kod_jezyka`` aktywnego przepisu), nie języka interfejsu.
+    """
+    lista = postprodukcje if postprodukcje is not None else lista_postprodukcji("pl")
+    kandydaci: list[str] = []
+    for p in przepisy_pamieci_dlugotrwalej(lista):
+        if p.sufiks_pliku_wyniku and p.sufiks_pliku_wyniku not in kandydaci:
+            kandydaci.append(p.sufiks_pliku_wyniku)
+    for zapasowy in (SUFIKS_PAMIECI_MIEDZYNARODOWY, SUFIKS_STRESZCZENIA_DOMYSLNY):
+        if zapasowy not in kandydaci:
+            kandydaci.append(zapasowy)
+    return kandydaci
 
 
 def sufiks_pamieci_dlugotrwalej(
     postprodukcje: list[PrzepisRezysera] | None = None,
 ) -> str:
-    """Sufiks pliku Pamięci Długotrwałej (``"_streszczenie"`` gdy brak przepisu).
+    """Sufiks GŁÓWNY Pamięci Długotrwałej — pierwszy kandydat z listy priorytetów.
 
-    Jedno źródło prawdy dla trzech miejsc, które MUSZĄ się zgadzać co do znaku:
-    ścieżki w :class:`core_rezyser.ProjektRezysera`, filtru listy projektów w GUI
-    i shimu migracyjnego. Rozjazd któregokolwiek z nich oznacza „projekt zniknął
-    z listy" albo „streszczenie zapisane obok, poza rekoncyliacją".
-
-    ``postprodukcje=None`` → lista z paczki ``pl`` (referencyjna): używane przez
-    kod bez dostępu do listy GUI (np. testy, wczytanie projektu przed zbudowaniem
-    panelu). Sufiks jest z założenia IDENTYCZNY we wszystkich paczkach — to
-    fragment nazwy pliku na dysku, nie tekst do lokalizacji (komentarz w YAML-u
-    mówi o tym wprost, tak jak przy tagach-kotwicach w ``baza.yaml``).
+    Jedno źródło prawdy dla miejsc, które MUSZĄ się zgadzać co do znaku: ścieżki
+    w :class:`core_rezyser.ProjektRezysera`, zapisu wyniku postprodukcji i shimu
+    migracyjnego. Rozjazd oznacza „streszczenie zapisane obok, poza
+    rekoncyliacją". Do FILTROWANIA listy projektów w GUI ta funkcja NIE
+    wystarcza — patrz :func:`sufiksy_wynikow_wszystkich_paczek`.
     """
-    lista = postprodukcje if postprodukcje is not None else lista_postprodukcji("pl")
-    przepis = przepis_pamieci_dlugotrwalej(lista)
-    if przepis is not None and przepis.sufiks_pliku_wyniku:
-        return przepis.sufiks_pliku_wyniku
-    return SUFIKS_STRESZCZENIA_DOMYSLNY
+    return sufiksy_pamieci_dlugotrwalej(postprodukcje)[0]
+
+
+def sufiksy_wynikow_wszystkich_paczek() -> tuple[str, ...]:
+    """Unia ``sufiks_pliku_wyniku`` postprodukcji ze WSZYSTKICH paczek (v18.14).
+
+    Odpowiada na pytanie „czy plik ``skrypty/<coś><sufiks>.txt`` jest wynikiem
+    narzędzia, a nie samodzielnym projektem" — i musi je rozstrzygać niezależnie
+    od tego, w jakim języku user ma dziś interfejs. Po lokalizacji sufiksów
+    (v18.14) filtr oparty na jednej paczce przepuściłby np.
+    ``kroniki_zusammenfassung.txt`` na listę projektów PL-owego usera, a po
+    wczytaniu takiego „projektu" silnik dopisywałby tury do streszczenia.
+
+    Skanujemy katalogi ``dictionaries/*/`` własnymi siłami (bez importu
+    ``core_poliglota`` — zero ryzyka cyklu) i BEZ filtra kompletności paczki:
+    plik wytworzony przez paczkę-stuba leży na dysku usera tak samo jak każdy
+    inny. Do unii dokładamy oba sufiksy fallbackowe.
+
+    Cache modułowy (czyszczony przez :func:`wyczysc_cache`) — funkcja jest wołana
+    przy każdym otwarciu dialogu wyboru projektu, a `_zaladuj_wszystkie` i tak
+    trzyma sparsowane paczki.
+    """
+    global _CACHE_SUFIKSY_GLOBALNE
+    if _CACHE_SUFIKSY_GLOBALNE is not None:
+        return _CACHE_SUFIKSY_GLOBALNE
+
+    sufiksy: set[str] = {
+        SUFIKS_PAMIECI_MIEDZYNARODOWY, SUFIKS_STRESZCZENIA_DOMYSLNY,
+    }
+    if os.path.isdir(DICTIONARIES_DIR):
+        for kod in sorted(os.listdir(DICTIONARIES_DIR)):
+            if not os.path.isdir(os.path.join(DICTIONARIES_DIR, kod)):
+                continue
+            for p in lista_postprodukcji(kod):
+                if p.sufiks_pliku_wyniku:
+                    sufiksy.add(p.sufiks_pliku_wyniku)
+    _CACHE_SUFIKSY_GLOBALNE = tuple(sorted(sufiksy))
+    return _CACHE_SUFIKSY_GLOBALNE
 
 
 def zaladuj_przepis(
@@ -793,8 +886,13 @@ def wyczysc_cache() -> None:
     Wołane po ręcznej edycji plików ``rezyser/`` / ``akcenty/``, by kolejne
     odczyty wzięły świeżą treść z dysku zamiast przeterminowanego cache.
     """
+    global _CACHE_SUFIKSY_GLOBALNE
     _CACHE_PRZEPISOW.clear()
     _CACHE_BAZA.clear()
+    # v18.14: unia sufiksów jest pochodną przepisów — po edycji
+    # `sufiks_pliku_wyniku` w Managerze Reguł musi być przeliczona, inaczej filtr
+    # listy projektów zostałby przy starej nazwie pliku wyniku.
+    _CACHE_SUFIKSY_GLOBALNE = None
 
 
 # =============================================================================

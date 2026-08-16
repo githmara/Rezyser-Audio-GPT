@@ -29,13 +29,16 @@ dla_trybow: []
 zakres: rekoncyliacja
 rola: pamiec_dlugotrwala
 
-# ATHUGIÐ: viðskeytið fer beint í skráarnafnið á disknum
-# (`<verkefni>_streszczenie.txt`) og verður að haldast EINS í öllum
-# tungumálapökkum — þetta er ekki texti til staðfærslu heldur hluti af
-# skráarnafni (eins og akkerismerkin í baza.yaml). Breyting á þessu gildi krefst
-# þess líka að endurnefna fyrirliggjandi samantektarskrár handvirkt; forritið
-# flytur sjálfkrafa aðeins frá hinu sögulega `_streszczenie`.
-sufiks_pliku_wyniku: "_streszczenie"
+# SKRÁARVIÐSKEYTI Á DISKI — STAÐFÆRT (frá v18.14; fram að v18.13 varð það að
+# vera eins í öllum pökkum). Útkoman fer í
+# `skrypty/<verkefni>_samantekt.txt`, svo nafnið tilheyrir leikstjóranum og ekki
+# vélinni — hver pakki notar hér sitt eigið orð. Forritið þekkir minnisskrána út
+# frá LISTA MÖGULEGRA VIÐSKEYTA: viðskeyti minnisverkfæra úr pakka INNIHALDSMÁLS
+# verkefnisins + hlutlausa `_overview` + hið sögulega `_streszczenie`. Ef
+# verkefnið hefur fleiri slíkar skrár á diski spyr forritið hver eigi að verða
+# Langtímaminni; ein skrá með óskyldu viðskeyti er endurnefnd í þetta við
+# innlestur.
+sufiks_pliku_wyniku: "_samantekt"
 
 # Samantektin stækkar með verkefninu (hún nær yfir ALLAN söguþráðinn hingað til),
 # svo mörkin eru mun hærri en fyrir kaflaheiti.

@@ -337,7 +337,7 @@ rezyser:
     Pozwala kontynuować historię bez ograniczeń okna kontekstowego modelu.
   btn_zapisz_pamiec_label:   "💾 Zapisz Streszczenie"
   btn_zapisz_pamiec_tooltip: |-
-    Zapisuje streszczenie do pliku: skrypty/<nazwa>_streszczenie.txt
+    Zapisuje streszczenie do pliku pamięci projektu w folderze skrypty/ (nazwę pliku podaje przepis narzędzia Pamięci Długotrwałej).
     Po zapisie możesz bezpiecznie wyczyścić pamięć bieżącą.
   # Obszar roboczy
   main_heading:          "🎬 Obszar Roboczy"
@@ -587,9 +587,20 @@ rezyser:
   pamiec_pusta_tresc:    "Pamięć Długotrwała jest pusta. Nic do zapisania."
   streszczenie_zapisane_tytul: "Streszczenie zapisane"
   streszczenie_zapisane_tresc: |-
-    Streszczenie zapisane: skrypty/{nazwa_projektu}_streszczenie.txt
+    Streszczenie zapisane: skrypty/{plik}
 
     Możesz teraz bezpiecznie wyczyścić pamięć bieżącą.
+  # Wybór pliku Pamięci Długotrwałej (v18.14) – gdy projekt ma ich na dysku kilka
+  pamiec_wybor_tytul:    "Wybierz plik Pamięci Długotrwałej"
+  pamiec_wybor_lbl: |-
+    Ten projekt ma na dysku więcej niż jeden plik pamięci.
+    Wskaż ten, który ma trafić do Pamięci Długotrwałej – pozostałe zostaną nietknięte:
+  pamiec_wybor_pozycja:  "{plik} – zapisany {data}, {bajty} bajtów"
+  pamiec_wybor_anulowano_tytul: "Sesja bez Pamięci Długotrwałej"
+  pamiec_wybor_anulowano_tresc: |-
+    Nie wybrałeś pliku pamięci, więc pole „Pamięć Długotrwała" pozostaje puste.
+
+    Żaden plik na dysku NIE został zmieniony ani usunięty – wystarczy wczytać projekt ponownie, żeby dostać to pytanie jeszcze raz.
   blad_zapisu_streszczenia: "Błąd zapisu streszczenia:\n{tresc_bledu}"
   # Wysyłanie do AI
   brak_api_tytul:        "Brak API"

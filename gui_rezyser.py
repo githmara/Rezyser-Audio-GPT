@@ -38,6 +38,7 @@ from __future__ import annotations
 import json
 import os
 import threading
+import time
 from dataclasses import dataclass
 
 from dotenv import load_dotenv
@@ -189,8 +190,12 @@ class RezyserPanel(wx.Panel):
         # `pamiec_dlugotrwala`. Model MUSI liczyć tę samą ścieżkę co panel,
         # więc bierzemy sufiks z DOKŁADNIE tej listy, którą GUI wyświetla
         # (a nie z paczki `pl`, na której `ProjektRezysera` opiera default).
-        self._projekt.sufiks_streszczenia = pr.sufiks_pamieci_dlugotrwalej(
-            self._postprodukcje)
+        # v18.14: sufiksy są lokalizowane, więc podajemy całą listę KANDYDATÓW,
+        # a docelowo (po zbudowaniu RadioBoxa) bierzemy ją z paczki JĘZYKA
+        # PROJEKTU — patrz `_odswiez_kandydatow_pamieci`. Tu jeszcze nie ma
+        # `_rb_mode`, więc startujemy od paczki interfejsu.
+        self._projekt.ustaw_kandydatow_pamieci(
+            pr.sufiksy_pamieci_dlugotrwalej(self._postprodukcje))
 
         # Skrajny przypadek: ani język UI, ani EN nie ma trybów — komunikat A11y.
         if not self._przepisy:
@@ -283,6 +288,28 @@ class RezyserPanel(wx.Panel):
         przepis = self._aktualny_przepis()
         return (przepis.kod_jezyka if przepis else "") or aktualny_jezyk()
 
+    def _odswiez_kandydatow_pamieci(self) -> None:
+        """Przelicza kandydatów na plik Pamięci Długotrwałej (v18.14).
+
+        Sufiks pliku pamięci jest od v18.14 LOKALIZOWANY, a jego źródłem jest
+        paczka JĘZYKA PROJEKTU (`kod_jezyka` aktywnego przepisu — ta sama
+        wartość, którą dostaje most do ElevenLabs), NIE język interfejsu.
+        Powód: plik należy do treści projektu, więc przełączenie menu na inny
+        język nie może przemianowywać pamięci cudzej historii, a projekt pisany
+        po fińsku ma mieć fińską nazwę pliku także u reżysera z polskim UI.
+
+        Gdy paczka języka treści nie ma narzędzia z rolą pamięci (paczka
+        niekompletna, user skasował YAML) — spadamy na listę, którą panel
+        realnie wyświetla (język UI z miękkim fallbackiem EN), żeby sufiks
+        pochodził DOKŁADNIE z przepisu, który wygeneruje treść.
+        """
+        kod = self._kod_jezyka_aktywny()
+        lista = pr.lista_postprodukcji(kod) if kod else []
+        if not pr.przepisy_pamieci_dlugotrwalej(lista):
+            lista = self._postprodukcje
+        self._projekt.ustaw_kandydatow_pamieci(
+            pr.sufiksy_pamieci_dlugotrwalej(lista))
+
     def _zapewnij_kod_jezyka_w_tle(self) -> None:
         """1b: dla aktywnego przepisu ZAPISU (Skrypt/Audiobook) ustala `kod_jezyka`
         z `jezyk_odpowiedzi` w wątku tła (cache → LLM → fallback) i wpisuje wynik
@@ -329,6 +356,11 @@ class RezyserPanel(wx.Panel):
         self._kod_jezyka_rozwiazany.add(przepis.id)
         if wynik.kod:
             przepis.kod_jezyka = wynik.kod
+            # v18.14: nazwa pliku Pamięci Długotrwałej podąża za językiem TREŚCI,
+            # nie interfejsu — świeżo rozstrzygnięty kod może wskazywać inną
+            # paczkę, więc przeliczamy kandydatów (plik już rozstrzygniętego
+            # projektu zostaje nietknięty — patrz `ustaw_kandydatow_pamieci`).
+            self._odswiez_kandydatow_pamieci()
             if wynik.rozjazd_z_yaml:
                 # D1: kod wyliczony z `jezyk_odpowiedzi` WYGRYWA z wpisanym;
                 # uciszamy reżysera, który sądził, że sam `jezyk_odpowiedzi`
@@ -1477,16 +1509,24 @@ class RezyserPanel(wx.Panel):
         """Skanuje folder `skrypty/` i zwraca posortowaną listę nazw projektów.
 
         Kryterium: plik `.txt` w `skrypty/`, którego nazwa NIE kończy się
-        sufiksem pliku wyniku którejkolwiek wczytanej postprodukcji (np.
-        `_audyt` — audyt 18.12, ŚREDNIA-2: raport narzędzia to derived-data,
-        nie samodzielny projekt). Od v18.13 obejmuje to również streszczenia:
-        Pamięć Długotrwała jest postprodukcją, więc jej sufiks przychodzi
-        z YAML-a zamiast z hard-kodu. Historyczny `_streszczenie` dokładamy
-        zawsze — pliki sprzed v18.13 leżą na dyskach userów niezależnie od
-        tego, czy paczka nadal zawiera przepis, który je wytworzył.
-        Pliki `.md` (Księga Świata) traktujemy jako
-        opcjonalne — gracze, którzy nigdy nie zapisali księgi, też mają
-        prawo zobaczyć swoje projekty na liście wyboru.
+        sufiksem pliku wyniku którejkolwiek postprodukcji (np. `_audyt` — audyt
+        18.12, ŚREDNIA-2: raport narzędzia to derived-data, nie samodzielny
+        projekt). Od v18.13 obejmuje to również streszczenia: Pamięć Długotrwała
+        jest postprodukcją, więc jej sufiks przychodzi z YAML-a zamiast
+        z hard-kodu.
+
+        v18.14 (KRYTYCZNE): filtrujemy po unii sufiksów ze WSZYSTKICH paczek
+        (`pr.sufiksy_wynikow_wszystkich_paczek`), a nie po liście z paczki języka
+        UI. Sufiksy są od tego wydania lokalizowane, więc plik pamięci wytworzony
+        przy niemieckim interfejsie (`_zusammenfassung`) trafiłby u polskiego
+        usera na listę PROJEKTÓW — a po wczytaniu silnik dopisywałby tury do
+        streszczenia. Unia zawiera też oba sufiksy fallbackowe (`_overview`,
+        historyczny `_streszczenie`), więc pliki sprzed v18.13 i pliki
+        z nieobecnych paczek są rozpoznawane bez żadnego YAML-a.
+
+        Pliki `.md` (Księga Świata) traktujemy jako opcjonalne — gracze, którzy
+        nigdy nie zapisali księgi, też mają prawo zobaczyć swoje projekty na
+        liście wyboru.
 
         Zwraca pustą listę gdy folder `skrypty/` nie istnieje lub jest
         pusty po filtracji — wywołujący `_on_load` decyduje wtedy o
@@ -1499,7 +1539,7 @@ class RezyserPanel(wx.Panel):
         sufiksy_wynikow = tuple({
             *(p.sufiks_pliku_wyniku for p in self._postprodukcje
               if p.sufiks_pliku_wyniku),
-            pr.SUFIKS_STRESZCZENIA_DOMYSLNY,
+            *pr.sufiksy_wynikow_wszystkich_paczek(),
         })
         projekty: list[str] = []
         for nazwa_pliku in os.listdir(skrypty_dir):
@@ -1551,9 +1591,14 @@ class RezyserPanel(wx.Panel):
                 nazwa = dlg.GetStringSelection()
             self._txt_file_name.SetValue(nazwa)
 
+        # v18.14: sufiksy pamięci z paczki języka TREŚCI — przed wczytaniem,
+        # bo rozstrzygnięcie pliku pamięci dzieje się wewnątrz `wczytaj`.
+        self._odswiez_kandydatow_pamieci()
         try:
             wynik = self._projekt.wczytaj(
-                nazwa, wybor_markera=self._dialog_wyboru_markera,
+                nazwa,
+                wybor_markera=self._dialog_wyboru_markera,
+                wybor_pamieci=self._dialog_wyboru_pamieci,
             )
         except FileNotFoundError as exc:
             wx.MessageBox(
@@ -1598,6 +1643,7 @@ class RezyserPanel(wx.Panel):
 
         wx.MessageBox(status_msg, t("rezyser.status_wczytano_tytul"),
                       wx.OK | wx.ICON_INFORMATION, self)
+        self._moze_ostrzec_o_odrzuconej_pamieci(wynik)
         # Punkt odniesienia pokazujemy przy WCZYTANIU tylko gdy faktycznie trzeba
         # było pytać o marker (anchor nieaktualny) lub zadziałał fallback sekcji
         # za długiej — przy normalnym wczytaniu (anchor z meta ważny) box byłby
@@ -1605,6 +1651,22 @@ class RezyserPanel(wx.Panel):
         rek = wynik.rekoncyliacja
         if rek is not None and (rek.interaktywny or rek.sekcja_przekroczyla_limit):
             self._pokaz_punkt_odniesienia(rek)
+
+    def _moze_ostrzec_o_odrzuconej_pamieci(self, wynik: "cr.WynikWczytania") -> None:
+        """v18.14: nota, gdy reżyser anulował wybór spośród kilku plików pamięci.
+
+        Bez niej puste pole „Pamięć Długotrwała" po wczytaniu wyglądałoby jak
+        utrata danych — a pliki leżą na dysku nietknięte i wystarczy wczytać
+        projekt ponownie, żeby dostać pytanie jeszcze raz. Wspólne dla „Wczytaj"
+        i „Przeładuj projekt z dysku" (oba tory wołają `wczytaj`).
+        """
+        if not wynik.pamiec_odrzucona:
+            return
+        wx.MessageBox(
+            t("rezyser.pamiec_wybor_anulowano_tresc"),
+            t("rezyser.pamiec_wybor_anulowano_tytul"),
+            wx.OK | wx.ICON_INFORMATION, self,
+        )
 
     # ------------------------------------------------------------------
     # Wspólne sianie GUI po wczytaniu/przeładowaniu projektu (v17.6)
@@ -1689,6 +1751,48 @@ class RezyserPanel(wx.Panel):
         btn_cancel = dlg.FindWindowById(wx.ID_CANCEL)
         if btn_cancel is not None:
             btn_cancel.SetLabel(t("common.btn_anuluj"))
+
+    def _dialog_wyboru_pamieci(
+        self, kandydaci: "list[tuple[str, str]]",
+    ) -> int | None:
+        """Callback `core_rezyser.wczytaj` — który plik jest Pamięcią Długotrwałą.
+
+        Wołany TYLKO gdy projekt ma na dysku kilka plików pamięci (sufiksy są
+        lokalizowane, a paczka może mieć dwa narzędzia pamięci — „pod siebie"
+        i „pod AI"). Nie zgadujemy za reżysera: zła pamięć w kontekście to
+        zafałszowana fabuła w kolejnych rozdziałach.
+
+        Etykiety: nazwa pliku + data modyfikacji i rozmiar w znakach — po tym
+        realnie da się poznać, który zapis jest świeższy (czytnik ekranu odczyta
+        całą linię). Data w formacie ISO, bez lokalizacji: neutralna dla
+        wszystkich 9 paczek i jednoznaczna dla NVDA.
+
+        Anuluj → ``None`` = sesja bez pamięci; pliki zostają na dysku, a silnik
+        traktuje projekt jak „bez pamięci" (przy długiej narracji pyta jeszcze
+        o punkt odniesienia pamięci roboczej).
+        """
+        etykiety: list[str] = []
+        for _suf, sciezka in kandydaci:
+            nazwa_pliku = os.path.basename(sciezka)
+            try:
+                st = os.stat(sciezka)
+                data = time.strftime("%Y-%m-%d %H:%M", time.localtime(st.st_mtime))
+                etykiety.append(t("rezyser.pamiec_wybor_pozycja",
+                                  plik=nazwa_pliku, data=data, bajty=st.st_size))
+            except OSError:
+                etykiety.append(nazwa_pliku)
+
+        with wx.SingleChoiceDialog(
+            self,
+            t("rezyser.pamiec_wybor_lbl"),
+            t("rezyser.pamiec_wybor_tytul"),
+            etykiety,
+        ) as dlg:
+            self._lokalizuj_anuluj(dlg)
+            dlg.SetSelection(0)
+            if dlg.ShowModal() != wx.ID_OK:
+                return None
+            return dlg.GetSelection()
 
     def _dialog_wyboru_markera(
         self, markery: "list[cr.MarkerStruktury]", struktura: str,
@@ -1986,14 +2090,25 @@ class RezyserPanel(wx.Panel):
             self._txt_pamiec.SetFocus()
             return
 
+        # v18.14: sufiksy pamięci pochodzą z paczki języka TREŚCI.
+        self._odswiez_kandydatow_pamieci()
+        # Projekt jeszcze nie wczytany do panelu (reżyser wpisał samą nazwę) →
+        # sufiks rozstrzygamy po dysku DLA TEJ nazwy, ZANIM przypiszemy
+        # `nazwa_pliku`. Inaczej `zapisz_streszczenie` uznałby projekt za otwarty
+        # i użył sufiksu rozstrzygniętego dla poprzedniej historii.
+        sufiks_celu: str | None = None
         if self._projekt.nazwa_pliku != nazwa:
+            sufiks_celu = self._projekt.rozstrzygnij_sufiks_pamieci(nazwa)
             self._projekt.nazwa_pliku = nazwa
         try:
-            self._projekt.zapisz_streszczenie(tresc)
+            sciezka = self._projekt.zapisz_streszczenie(tresc, sufiks=sufiks_celu)
             # D2: zapis = nowy „czysty" punkt odniesienia detektora zmian.
             self._pamiec_zapisana = self._txt_pamiec.GetValue()
             wx.MessageBox(
-                t("rezyser.streszczenie_zapisane_tresc", nazwa_projektu=nazwa),
+                # v18.14: nazwa pliku z DYSKU, nie z szablonu — sufiks jest
+                # lokalizowany i mógł zostać rozstrzygnięty na inny kandydat.
+                t("rezyser.streszczenie_zapisane_tresc",
+                  plik=os.path.basename(sciezka)),
                 t("rezyser.streszczenie_zapisane_tytul"),
                 wx.OK | wx.ICON_INFORMATION,
                 self,
@@ -3215,8 +3330,17 @@ class RezyserPanel(wx.Panel):
         # Pamięć Długotrwałą + narrację od jej anchora. Kolejne streszczenie jest
         # dzięki temu przyrostowe, a payload nie rośnie liniowo z projektem.
         if przepis_pp.zakres == pr.ZAKRES_REKONCYLIACJA:
+            # v18.14: dla projektu OTWARTEGO w panelu scalamy dokładnie ten plik
+            # pamięci, który rozstrzygnęło wczytanie (być może ręcznym wyborem
+            # reżysera spośród kilku). Dla projektu wskazanego samą nazwą sufiks
+            # rozstrzyga się po dysku — dla NIEJ, nie dla stanu panelu.
+            self._odswiez_kandydatow_pamieci()
+            sufiks_zrodla = (
+                self._projekt.sufiks_streszczenia
+                if nazwa == self._projekt.nazwa_pliku else None
+            )
             stare, fragment, _naglowek = self._projekt.wejscie_pamieci_dlugotrwalej(
-                pelny_tekst, nazwa,
+                pelny_tekst, nazwa, sufiks_zrodla,
             )
             tresc_modelu = rai.zloz_wejscie_rekoncyliacji(przepis_pp, stare, fragment)
         else:
@@ -3500,8 +3624,12 @@ class RezyserPanel(wx.Panel):
         self._lbl_postprod_status.SetLabel(t("rezyser.postprod_postep_gotowe"))
 
         try:
+            # v18.14: nazwą pliku rządzi sufiks PRZEPISU, który user kliknął —
+            # paczka może mieć kilka narzędzi pamięci (osobna „pod siebie",
+            # osobna „pod AI"), a każde ma prawo pisać do swojego pliku.
             sciezka = self._projekt.zapisz_streszczenie(
                 tekst, nazwa=zadanie.nazwa, content=zadanie.pelny_tekst,
+                sufiks=zadanie.przepis.sufiks_pliku_wyniku,
             )
         except (OSError, ValueError) as exc:
             bledy_ai.zapisz_diagnostyke(exc, "rezyser._on_postprod_pamiec")
@@ -3748,9 +3876,12 @@ class RezyserPanel(wx.Panel):
             if odp != wx.YES:
                 return
 
+        self._odswiez_kandydatow_pamieci()
         try:
             wynik = self._projekt.wczytaj(
-                nazwa, wybor_markera=self._dialog_wyboru_markera,
+                nazwa,
+                wybor_markera=self._dialog_wyboru_markera,
+                wybor_pamieci=self._dialog_wyboru_pamieci,
             )
         except (FileNotFoundError, OSError, ValueError) as exc:
             self._wyswietl_blad_ai(
@@ -3759,6 +3890,7 @@ class RezyserPanel(wx.Panel):
             return
 
         self._zasiej_gui_po_wczytaniu(wynik, nazwa)
+        self._moze_ostrzec_o_odrzuconej_pamieci(wynik)
 
         rek = wynik.rekoncyliacja
         if rek is not None and rek.tryb == "calosc":
