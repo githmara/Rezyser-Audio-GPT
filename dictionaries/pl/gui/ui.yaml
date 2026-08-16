@@ -397,7 +397,7 @@ rezyser:
   btn_opcja_burzy_format:      "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Instrukcje do kolejnego fragmentu (wpisz 'streszczenie', by wymusić zapis do Pamięci Długotrwałej):
+    Instrukcje do kolejnego fragmentu:
   txt_instrukcje_name:   "Pole instrukcji dla AI – dawny user_input"
   txt_instrukcje_hint: |-
     Podaj instrukcje do kolejnego fragmentu historii…
@@ -509,8 +509,8 @@ rezyser:
   # Wskaźnik pamięci modelu (gui_rezyser._aktualizuj_pamiec_modelu składa treść z i18n po `poziom`)
   pamiec_status_czysta:       "🟢 Pamięć czysta. Maszyna gotowa na nową historię."
   pamiec_status_ok:           "🟢 Zużycie pamięci: {tokeny} / {maks} tokenów. Bezpieczny bufor."
-  pamiec_status_ostrzezenie:  "⚠️ STAN OSTRZEGAWCZY: Zużyto {tokeny} z {maks} tokenów. Pamięć się zapełnia – wkrótce konieczne będzie wygenerowanie streszczenia."
-  pamiec_status_alarm:        "🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {tokeny} z {maks} tokenów. W trybie Burzy Mózgów wygeneruj streszczenie, zapisz je jako Pamięć Długotrwałą, a potem wyczyść bieżącą historię (zachowując streszczenie)."
+  pamiec_status_ostrzezenie:  "⚠️ STAN OSTRZEGAWCZY: Zużyto {tokeny} z {maks} tokenów. Pamięć się zapełnia – wkrótce konieczne będzie wygenerowanie streszczenia (przycisk Pamięci Długotrwałej w sekcji postprodukcji)."
+  pamiec_status_alarm:        "🚨 KRYTYCZNE PRZEŁADOWANIE: Zużyto {tokeny} z {maks} tokenów. Po najbliższej udanej wysyłce aplikacja sama zapisze Pamięć Długotrwałą; żeby zwolnić pamięć roboczą, przeładuj potem projekt z dysku."
   pamiec_status_offline:      "⚠️ Brak Internetu: dokładny licznik pamięci jest niedostępny, wartości są przybliżone (~{tokeny} / {maks} tokenów). Po odzyskaniu połączenia uruchom aplikację ponownie."
   postprod_info: |-
     Narzędzia AI przetwarzające zapisany plik projektu (per rozdział albo w całości). Zestaw zależy od trybu twórczego.
@@ -707,6 +707,8 @@ rezyser:
     Pamięć modelu przekroczyła próg alarmowy, więc aplikacja sama przygotowała streszczenie projektu {nazwa_projektu} i zapisała je jako {plik}.
 
     Streszczenie widnieje w polu „Pamięć Długotrwała" — możesz je swobodnie poprawić i zapisać ponownie.
+
+    Sam zapis nie zmniejsza jeszcze zajętości pamięci: wskaźnik opadnie dopiero po przeładowaniu projektu z dysku, bo wtedy aplikacja zastąpi całą historię streszczeniem plus końcówką narracji. Do tego czasu automat już się nie powtórzy — kolejne streszczenie zamówisz przyciskiem w sekcji postprodukcji.
 
 # -----------------------------------------------------------------------------
 # POLIGLOTA – panel modułu Poliglota (gui_poliglota.py)

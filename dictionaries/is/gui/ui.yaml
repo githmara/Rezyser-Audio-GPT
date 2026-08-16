@@ -342,7 +342,7 @@ rezyser:
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Leiðbeiningar fyrir næsta hluta (sláðu inn 'yfirlit' til að þvinga vistun í Langtímaminni):
+    Leiðbeiningar fyrir næsta hluta:
   txt_instrukcje_name: "Leiðbeiningareitur fyrir AI – fyrri user_input"
   txt_instrukcje_hint: |-
     Gefðu leiðbeiningar fyrir næsta hluta sögunnar…
@@ -629,8 +629,8 @@ rezyser:
   jezyk_naglowkow_ostrzezenie_tresc: Hlaðinn verkefni hefur fyrirsagnir sem líta út fyrir að vera á tungumálinu „{wykryty}”, en virka uppskriftin býr til efni á tungumálinu „{kod}”. Nýjar fyrirsagnir verða settar inn eftir „{kod}” — ef þetta er ekki ætlunin, stilltu reitinn kod_jezyka í uppskriftinni eða veldu annan ham.
   pamiec_status_czysta: 🟢 Minni hreint. Vél tilbúin fyrir nýja sögu.
   pamiec_status_ok: '🟢 Minni notkun: {tokeny} / {maks} tákn. Öruggur biðminni.'
-  pamiec_status_ostrzezenie: '⚠️ VIÐVÖRUNARÁSTAND: Notað {tokeny} af {maks} táknum. Minni er að fyllast – brátt verður nauðsynlegt að búa til samantekt.'
-  pamiec_status_alarm: '🚨 GAGNRÝN OFHLEÐSLA: Notað {tokeny} af {maks} táknum. Í Hugstormunarham, búðu til samantekt, vistaðu hana sem Langtímaminni og hreinsaðu síðan núverandi sögu (með því að halda samantektinni).'
+  pamiec_status_ostrzezenie: '⚠️ VIÐVÖRUNARSTAÐA: {tokeny} af {maks} táknum notuð. Minnið er að fyllast – bráðlega verður nauðsynlegt að útbúa samantekt (hnappurinn Langtímaminni í eftirvinnslukaflanum).'
+  pamiec_status_alarm: '🚨 ALVARLEG OFHLEÐSLA: {tokeny} af {maks} táknum notuð. Eftir næstu heppnuðu sendingu vistar forritið sjálfkrafa Langtímaminnið; til að losa vinnsluminnið skaltu síðan endurhlaða verkefninu af diski.'
   tytuly_postep: 'Titill: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Engir uppbyggingarmerki fundust (Formáli / Kafli N / Eftirorð) í skránni. Settu inn kaflaskil áður en titlar eru gefnir.
   kod_jezyka_rozjazd_tytul: Tungumálakóði passar ekki við innihald
@@ -660,7 +660,7 @@ rezyser:
   postprod_kontekst_tresc: "Efnið fyrir tólið er um það bil {tokeny} tákneiningar (tokens) og fer yfir {limit} tákneiningar, sem er samhengisglugginn sem forritið notar til að meta minnisnotkun.\n\nClaude-líkön hafa mun stærri samhengisglugga en þessi teljari gefur til kynna, svo kallið mun líklega heppnast. Ef þú notar hins vegar eigin AI-þjónustuaðila með minni glugga mun líkanið hafna beiðninni — og þú greiðir samt fyrir tilraunina.\n\nViltu keyra tólið samt sem áður?"
   pamiec_auto_start: Minni líkansins að fyllast — vista langtímaminni…
   pamiec_auto_zapisana_tytul: Langtímaminni vistað sjálfkrafa
-  pamiec_auto_zapisana_tresc: "Minni líkansins fór yfir viðvörunarmörkin, svo forritið útbjó sjálfkrafa samantekt af verkefninu {nazwa_projektu} og vistaði hana sem {plik}.\n\nSamantektin birtist í reitnum „Langtímaminni“ — þú getur breytt henni frjálslega og vistað aftur."
+  pamiec_auto_zapisana_tresc: "Minni líkansins fór yfir viðvörunarmörkin, svo að forritið útbjó sjálfkrafa samantekt á verkefninu {nazwa_projektu} og vistaði hana sem {plik}.\n\nSamantektin er sýnd í reitnum „Langtímaminni\" — þú getur breytt henni frjálslega og vistað aftur.\n\nSjálf vistunin dregur þó ekki strax úr minnisnotkuninni: mælirinn lækkar ekki fyrr en verkefnið er endurhlaðið af diskinum, því þá skiptir forritið út allri sögunni fyrir samantektina ásamt lokahluta frásagnarinnar. Fram að því endurtekur sjálfvirknin sig ekki — næstu samantekt getur þú pantað með hnappinum í eftirvinnslukaflanum."
 poliglota:
   panel_name: "AI Fjöltyngispanel"
   heading: "🌍  Fjöltyngur AI – Blönduð Þýðingarstofa"

@@ -210,6 +210,13 @@ class RezyserPanel(wx.Panel):
         self._klient_llm = None   # Anthropic
         self._api_dostepne: bool = False
         self._worker_thread: threading.Thread | None = None
+        # v18.13: czy auto-zapis Pamięci Długotrwałej (próg ALARM) już zadziałał
+        # dla BIEŻĄCEGO stanu projektu. Streszczenie nie zmniejsza `full_story`
+        # w pamięci roboczej — realnie skraca kontekst dopiero rekoncyliacja przy
+        # wczytaniu/przeładowaniu projektu. Bez tej flagi automat odpalałby się
+        # (i płacił) po KAŻDEJ kolejnej turze powyżej progu. Reset: wczytanie /
+        # przeładowanie projektu i twardy reset.
+        self._auto_pamiec_wykonane: bool = False
         # v17.9 (Obszar 3b): id przepisów, dla których trwa wnioskowanie
         # `kod_jezyka` w tle — guard przed równoległymi mikrorequestami LLM.
         self._kod_jezyka_w_toku: set[str] = set()
@@ -1618,6 +1625,10 @@ class RezyserPanel(wx.Panel):
         # D2: świeżo wczytany stan = „czysty" punkt odniesienia detektora zmian.
         self._ksiega_swiata_zapisana = self._txt_ksiega_swiata.GetValue()
         self._pamiec_zapisana = self._txt_pamiec.GetValue()
+        # v18.13: wczytanie przepuściło narrację przez rekoncyliację, więc pamięć
+        # robocza jest już przycięta — automat Pamięci Długotrwałej dostaje nową
+        # szansę zadziałania, jeśli mimo to znów dobijemy do progu alarmowego.
+        self._auto_pamiec_wykonane = False
 
         # `.mode` trzyma stabilne `id` trybu (od v18.5) — mapujemy na pozycję
         # w RadioBox po `id`, nie po wartości int (reorder `kolejnosc` bezpieczny).
@@ -1797,6 +1808,7 @@ class RezyserPanel(wx.Panel):
             return
 
         self._projekt.twardy_reset()
+        self._auto_pamiec_wykonane = False
         # Mirror `.mode` zwalniamy — nowy projekt zaczyna z pustą decyzją
         # trybu, wszystkie 3 pozycje RadioBoxa znów wolne do wyboru.
         # (Twardy Reset zapomina o projekcie; „Przeładuj z dysku" przeciwnie —
@@ -2397,9 +2409,23 @@ class RezyserPanel(wx.Panel):
     # Callbacki _wyslij_worker
     # ------------------------------------------------------------------
     def _on_wyslij_error(self, msg: str) -> None:
+        self._zwolnij_workera()
         self._btn_wyslij.Enable()
         self._refresh_ui_state()
         self._wyswietl_blad_ai(msg)
+
+    def _zwolnij_workera(self) -> None:
+        """Zwalnia referencję wątku tła — wołane na WEJŚCIU callbacku końcowego.
+
+        v18.13: callbacki generacji (w odróżnieniu od postprodukcyjnych) tego nie
+        robiły, więc przez chwilę po zakończeniu pracy `self._worker_thread` wciąż
+        wskazywał dogasający wątek. Guardy `is_alive()` widziały wtedy „zajęte":
+        `Enable` kontrolek zależał od wyścigu, a auto-zapis Pamięci Długotrwałej
+        (`_spawn_auto_pamiec`, wołany właśnie z takiego callbacku) bywał CICHO
+        pomijany — niedeterministycznie, bo `wx.CallAfter` tylko kolejkuje
+        wywołanie i wątek zwykle, ale nie zawsze, zdąży się zakończyć wcześniej.
+        """
+        self._worker_thread = None
 
     def _on_wyslij_zapisz_streszczenie(self, streszczenie: str) -> None:
         self.summary_text = streszczenie
@@ -2408,6 +2434,7 @@ class RezyserPanel(wx.Panel):
     def _on_wyslij_done_zapis(
         self, response_text: str, nazwa: str, ostrzezenie: str = "",
     ) -> None:
+        self._zwolnij_workera()
         if self.full_story:
             self.full_story += "\n\n" + response_text
         else:
@@ -2443,6 +2470,7 @@ class RezyserPanel(wx.Panel):
         # spoza id="burza" z `zapis_do_pliku=false`. Burza w v15.2+ idzie
         # przez :meth:`_on_wyslij_done_burza_json`. Zachowane na wypadek
         # gdyby lingwista dodał własny przepis planowy bez JSON-schemy.
+        self._zwolnij_workera()
         self.last_response = response_text
         self._btn_wyslij.Enable()
         self._refresh_ui_state()
@@ -2454,6 +2482,7 @@ class RezyserPanel(wx.Panel):
         Buduje przyciski opcji w panelu, persystuje wynik do
         `runtime/skrypty/<nazwa>.brainstorm.json` żeby przeżył reload.
         """
+        self._zwolnij_workera()
         # Dataclass → list[dict] dla persystencji + przekazania do GUI.
         # `dataclasses.asdict` nie jest tutaj idealne (nie wszystkie pola
         # opcji mają iść do persystencji), więc ręczne mapowanie 3 pól.
@@ -3352,17 +3381,24 @@ class RezyserPanel(wx.Panel):
             (audyt 18.12, ŚREDNIA-1).
           * **bez pliku** — sam dialog wyniku.
         """
-        if zadanie.przepis.rola == pr.ROLA_PAMIEC_DLUGOTRWALA:
-            wx.CallAfter(self._on_postprod_pamiec, zadanie, tekst, ostrzezenie)
-            return
-        if zadanie.sciezka_wyj and not self._zapisz_wynik_postprod(
-                zadanie.sciezka_wyj, tekst):
-            wx.CallAfter(self._show_postprod_dialog, zadanie.przepis, tekst, None)
-            return
-        wx.CallAfter(
-            self._on_postprod_sukces,
-            zadanie.przepis, tekst, zadanie.sciezka_wyj, ostrzezenie,
-        )
+        # Ostatnia instrukcja workera biegnie POZA jego try/except, więc dostaje
+        # własną siatkę (lekcja v18.9): wyjątek tutaj ubiłby wątek po cichu,
+        # zostawiając panel postprodukcji zablokowany aż do restartu aplikacji.
+        try:
+            if zadanie.przepis.rola == pr.ROLA_PAMIEC_DLUGOTRWALA:
+                wx.CallAfter(self._on_postprod_pamiec, zadanie, tekst, ostrzezenie)
+                return
+            if zadanie.sciezka_wyj and not self._zapisz_wynik_postprod(
+                    zadanie.sciezka_wyj, tekst):
+                wx.CallAfter(self._show_postprod_dialog, zadanie.przepis, tekst, None)
+                return
+            wx.CallAfter(
+                self._on_postprod_sukces,
+                zadanie.przepis, tekst, zadanie.sciezka_wyj, ostrzezenie,
+            )
+        except Exception as exc:  # noqa: BLE001 — wątek nie może umrzeć po cichu
+            bledy_ai.zapisz_diagnostyke(exc, "rezyser._domknij_postprodukcje")
+            wx.CallAfter(self._on_postprod_error, self._komunikat_bledu_ai(exc))
 
     def _zapisz_wynik_postprod(self, sciezka: str, tekst: str) -> bool:
         """Zapis pliku wyniku (wątek tła). Błąd → callback błędu + ``False``.
@@ -3530,6 +3566,8 @@ class RezyserPanel(wx.Panel):
             return
         if self._worker_thread and self._worker_thread.is_alive():
             return
+        if self._auto_pamiec_wykonane:
+            return
         przepis_pp = pr.przepis_pamieci_dlugotrwalej(self._postprodukcje)
         if przepis_pp is None:
             return
@@ -3547,6 +3585,9 @@ class RezyserPanel(wx.Panel):
 
         zadanie = self._zbuduj_zadanie_postprod(
             przepis_pp, nazwa, pelny_tekst, auto=True)
+        # Flagę stawiamy przy STARCIE, nie po sukcesie: nieudany call też nie
+        # powinien ponawiać się automatycznie przy każdej następnej turze.
+        self._auto_pamiec_wykonane = True
         self._start_postprodukcje(zadanie)
         # Komunikat PO starcie (A11y): reżyser słyszy, dlaczego panel się
         # zablokował, zanim zacznie szukać przyczyny.

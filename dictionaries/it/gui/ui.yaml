@@ -342,7 +342,7 @@ rezyser:
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Istruzioni per il prossimo frammento (digita 'riassunto' per forzare il salvataggio nella Memoria a Lungo Termine):
+    Istruzioni per il prossimo frammento:
   txt_instrukcje_name: "Campo istruzioni per l'AI – vecchio user_input"
   txt_instrukcje_hint: |-
     Fornisci istruzioni per il prossimo frammento di storia…
@@ -629,8 +629,8 @@ rezyser:
   jezyk_naglowkow_ostrzezenie_tresc: Il progetto caricato ha intestazioni di struttura che sembrano essere nella lingua "{wykryty}", mentre la ricetta attiva genera contenuti nella lingua "{kod}". Le nuove intestazioni verranno inserite dopo "{kod}" — se non è intenzionale, adatta il campo codice_lingua nella ricetta o scegli un'altra modalità.
   pamiec_status_czysta: 🟢 Memoria pulita. Macchina pronta per una nuova storia.
   pamiec_status_ok: '🟢 Utilizzo della memoria: {tokeny} / {maks} token. Buffer sicuro.'
-  pamiec_status_ostrzezenie: '⚠️ STATO DI AVVERTIMENTO: Utilizzati {tokeny} di {maks} token. La memoria si sta riempiendo – presto sarà necessario generare un riassunto.'
-  pamiec_status_alarm: '🚨 SOVRACCARICO CRITICO: Utilizzati {tokeny} di {maks} token. In modalità Brainstorming, genera un riassunto, salvalo come Memoria a Lungo Termine, quindi cancella la storia corrente (mantenendo il riassunto).'
+  pamiec_status_ostrzezenie: '⚠️ STATO DI AVVISO: utilizzati {tokeny} token su {maks}. La memoria si sta esaurendo – sarà presto necessario generare un riassunto (pulsante Memoria a Lungo Termine nella sezione post-produzione).'
+  pamiec_status_alarm: '🚨 SOVRACCARICO CRITICO: utilizzati {tokeny} token su {maks}. Dopo il prossimo invio riuscito, l''applicazione salverà automaticamente la Memoria a Lungo Termine; per liberare la memoria di lavoro, ricarica poi il progetto dal disco.'
   tytuly_postep: 'Titoli: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Tag di struttura non trovati (Prologo / Capitolo N / Epilogo) nel file. Inserisci i tag di divisione dei capitoli prima di assegnare i titoli.
   kod_jezyka_rozjazd_tytul: Il codice della lingua non corrisponde al contenuto
@@ -660,7 +660,7 @@ rezyser:
   postprod_kontekst_tresc: "Il materiale per lo strumento è di circa {tokeny} token e supera i {limit} token, ovvero la finestra di contesto con cui l'applicazione misura l'occupazione della memoria.\n\nI modelli Claude hanno una finestra molto più ampia di questo limite, quindi la chiamata probabilmente andrà a buon fine. Tuttavia, se stai usando un tuo provider AI con una finestra più piccola, il modello rifiuterà la richiesta — e in ogni caso pagherai per il tentativo.\n\nVuoi comunque eseguire lo strumento?"
   pamiec_auto_start: Memoria del modello quasi piena — salvataggio della Memoria a Lungo Termine in corso…
   pamiec_auto_zapisana_tytul: Memoria a Lungo Termine salvata automaticamente
-  pamiec_auto_zapisana_tresc: "La memoria del modello ha superato la soglia di allarme, quindi l'applicazione ha preparato automaticamente un riassunto del progetto {nazwa_projektu} e lo ha salvato come {plik}.\n\nIl riassunto è visibile nel campo \"Memoria a Lungo Termine\" — puoi modificarlo liberamente e salvarlo di nuovo."
+  pamiec_auto_zapisana_tresc: "La memoria del modello ha superato la soglia di allarme, quindi l'applicazione ha preparato automaticamente un riassunto del progetto {nazwa_projektu} e lo ha salvato come {plik}.\n\nIl riassunto compare nel campo \"Memoria a Lungo Termine\" — puoi modificarlo liberamente e salvarlo di nuovo.\n\nIl salvataggio da solo non riduce ancora l'occupazione della memoria: l'indicatore scenderà solo dopo aver ricaricato il progetto da disco, perché a quel punto l'applicazione sostituirà l'intera cronologia con il riassunto più la parte finale della narrazione. Fino ad allora la procedura automatica non si ripeterà più — un nuovo riassunto potrai richiederlo con il pulsante nella sezione di post-produzione."
 poliglota:
   panel_name: "Pannello Poliglotta AI"
   heading: "🌍  Poliglotta AI – Studio di Traduzione Ibrido"

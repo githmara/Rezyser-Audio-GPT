@@ -342,7 +342,7 @@ rezyser:
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Anweisungen für den nächsten Abschnitt (geben Sie 'Zusammenfassung' ein, um die Speicherung im Langzeitspeicher zu erzwingen):
+    Anweisungen für den nächsten Abschnitt:
   txt_instrukcje_name: "Anweisungsfeld für KI – ehemaliger user_input"
   txt_instrukcje_hint: |-
     Geben Sie Anweisungen für den nächsten Abschnitt der Geschichte ein…
@@ -629,8 +629,8 @@ rezyser:
   jezyk_naglowkow_ostrzezenie_tresc: Das geladene Projekt hat Strukturüberschriften, die wie die Sprache „{wykryty}” aussehen, und das aktive Rezept generiert Inhalte in der Sprache „{kod}”. Neue Überschriften werden nach „{kod}” eingefügt — wenn dies nicht beabsichtigt ist, passen Sie das Feld kod_jezyka im Rezept an oder wählen Sie einen anderen Modus.
   pamiec_status_czysta: 🟢 Speicher ist leer. Maschine bereit für eine neue Geschichte.
   pamiec_status_ok: '🟢 Speichernutzung: {tokeny} / {maks} Tokens. Sicherer Puffer.'
-  pamiec_status_ostrzezenie: '⚠️ WARNZUSTAND: {tokeny} von {maks} Tokens verwendet. Speicher füllt sich – bald wird eine Zusammenfassung erforderlich sein.'
-  pamiec_status_alarm: '🚨 KRITISCHE ÜBERLASTUNG: {tokeny} von {maks} Tokens verwendet. Im Brainstorming-Modus eine Zusammenfassung erstellen, als Langzeitspeicher speichern und dann die aktuelle Geschichte löschen (Zusammenfassung beibehalten).'
+  pamiec_status_ostrzezenie: '⚠️ WARNZUSTAND: {tokeny} von {maks} Tokens verbraucht. Der Speicher füllt sich – bald muss eine Zusammenfassung erstellt werden (Schaltfläche „Langzeitspeicher“ im Postproduktionsbereich).'
+  pamiec_status_alarm: '🚨 KRITISCHE ÜBERLASTUNG: {tokeny} von {maks} Tokens verbraucht. Nach der nächsten erfolgreichen Übertragung speichert die Anwendung automatisch das Langzeitspeicher; um den Arbeitsspeicher freizugeben, laden Sie das Projekt anschließend erneut von der Festplatte.'
   tytuly_postep: 'Betitelung: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Keine Struktur-Tags (Prolog / Kapitel N / Epilog) in der Datei gefunden. Fügen Sie Kapiteltrennungen ein, bevor Sie Titel vergeben.
   kod_jezyka_rozjazd_tytul: Der Sprachcode stimmt nicht mit dem Inhalt überein
@@ -660,7 +660,7 @@ rezyser:
   postprod_kontekst_tresc: "Das für das Werkzeug bestimmte Material umfasst etwa {tokeny} Token und überschreitet {limit} Token, also das Kontextfenster, anhand dessen die Anwendung die Speicherauslastung misst.\n\nDie Claude-Modelle verfügen über ein deutlich größeres Kontextfenster als dieser Zähler, daher wird der Aufruf höchstwahrscheinlich erfolgreich sein. Wenn Sie jedoch einen eigenen KI-Anbieter mit kleinerem Kontextfenster verwenden, wird das Modell die Anfrage ablehnen — und Sie zahlen trotzdem für den Versuch.\n\nMöchten Sie das Werkzeug trotzdem ausführen?"
   pamiec_auto_start: Modellgedächtnis fast voll — Langzeitspeicher wird gespeichert…
   pamiec_auto_zapisana_tytul: Langzeitspeicher automatisch gespeichert
-  pamiec_auto_zapisana_tresc: "Das Modellgedächtnis hat den Warnschwellenwert überschritten, daher hat die Anwendung automatisch eine Zusammenfassung des Projekts {nazwa_projektu} erstellt und als {plik} gespeichert.\n\nDie Zusammenfassung befindet sich im Feld „Langzeitspeicher“ — Sie können sie beliebig bearbeiten und erneut speichern."
+  pamiec_auto_zapisana_tresc: "Der Speicherverbrauch des Modells hat den Alarmschwellenwert überschritten. Die Anwendung hat daher automatisch eine Zusammenfassung des Projekts {nazwa_projektu} erstellt und sie als {plik} gespeichert.\n\nDie Zusammenfassung finden Sie im Feld „Langzeitspeicher\" — Sie können sie frei bearbeiten und erneut speichern.\n\nDas Speichern allein verringert die Speicherauslastung noch nicht: Die Anzeige sinkt erst, nachdem das Projekt von der Festplatte neu geladen wurde, da die Anwendung dann den gesamten Verlauf durch die Zusammenfassung plus das Ende der Erzählung ersetzt. Bis dahin wiederholt sich der Automatismus nicht mehr — eine weitere Zusammenfassung können Sie über die Schaltfläche im Postproduktionsbereich anfordern."
 poliglota:
   panel_name: "AI-Polyglott-Panel"
   heading: "🌍  AI-Polyglott – Hybrides Übersetzungsstudio"

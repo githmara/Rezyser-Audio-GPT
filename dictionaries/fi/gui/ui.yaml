@@ -342,7 +342,7 @@ rezyser:
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Ohjeet seuraavalle osalle (kirjoita 'yhteenveto' pakottaaksesi tallennuksen Pitkäaikaismuistiin):
+    Ohjeet seuraavaa osaa varten:
   txt_instrukcje_name: "AI:n ohjekenttä – entinen user_input"
   txt_instrukcje_hint: |-
     Anna ohjeet seuraavalle tarinan osalle…
@@ -456,7 +456,7 @@ rezyser:
 
     Seuraavat tyhjennetään:
       • nykyinen tarina
-      • yhteenveto (Pitkäaikaismuisti)
+      • yhteenveto (Pysyvä Muisti)
       • Maailmankirja
       • kaikki laskurit (luvut, näytökset, kohtaukset)
 
@@ -491,7 +491,7 @@ rezyser:
     Kopioi prompti manuaalisesti: napsauta yllä olevaa kenttää, valitse kaikki (Ctrl+A) ja kopioi (Ctrl+C).
   # Zapis Streszczenia
   pamiec_pusta_tytul: "Tyhjä yhteenveto"
-  pamiec_pusta_tresc: "Pitkäaikaismuisti on tyhjä. Ei mitään tallennettavaa."
+  pamiec_pusta_tresc: "Pysyvä Muisti on tyhjä. Ei mitään tallennettavaa."
   streszczenie_zapisane_tytul: "Yhteenveto tallennettu"
   streszczenie_zapisane_tresc: |-
     Yhteenveto tallennettu: skrypty/{nazwa_projektu}_yhteenveto.txt
@@ -590,7 +590,7 @@ rezyser:
   brak_projektow_tytul: Ei projekteja
   brak_projektow_tresc: 'Kansiossa skrypty/ ei ole vielä projekteja ladattavaksi. Aloita uusi projekti: kirjoita nimi yllä olevaan kenttään ja tallenna sitten Maailmankirja tai lähetä ensimmäinen kysely tekoälylle.'
   btn_otworz_narracje_label: '&Avaa kertomustiedosto…'
-  btn_otworz_narracje_tooltip: Avaa projektin kertomustiedoston (skrypty/<nazwa>.txt) järjestelmän tekstieditorissa (Notepad, VS Code). Hyödyllinen, kun AI ei sulje kohtausta — voit lisätä/muokata loppua käsin — tai kun haluat kopioida viimeiset kohtaukset Pitkäaikaiseen Muistiin projektin yhteenvedon lataamisen jälkeen, jotta AI:lla on täydellinen konteksti sävystä ja viimeisistä tapahtumista.
+  btn_otworz_narracje_tooltip: Avaa projektin kertomustiedoston (skrypty/<nazwa>.txt) järjestelmän tekstieditorissa (Notepad, VS Code). Hyödyllinen, kun AI ei sulje kohtausta — voit lisätä/muokata loppua käsin — tai kun haluat kopioida viimeiset kohtaukset Pysyvään Muistiin projektin yhteenvedon lataamisen jälkeen, jotta AI:lla on täydellinen konteksti sävystä ja viimeisistä tapahtumista.
   blad_otwarcia_tytul: Tiedoston avaaminen epäonnistui
   blad_otwarcia_tresc: "Yritys avata tiedosto {sciezka_pliku} epäonnistui:\n{tresc_bledu}\n\nAvaa tiedosto manuaalisesti Tiedostonhallinnasta."
   plik_narracji_brak_tytul: Kertomustiedosto puuttuu
@@ -608,7 +608,7 @@ rezyser:
   btn_przeladuj_label: '&Lataa projekti uudelleen levyltä'
   btn_przeladuj_tooltip: 'Lataa KOKO projekti uudelleen levyltä manuaalisten muutostesi jälkeen kertomustiedostossa (skrypty/<nimi>.txt) — laskee luvut Luvuista/Näytöksistä/Kohtauksista, nostaa Maailmankirjan, tilan ja Aivoriihen asetukset sekä synkronoi työmuistin. Lyhyt tarina ladataan kokonaisuudessaan; pitkässä kysytään, mistä otsikosta AI:n työmuisti alkaa (loput edustaa Yhteenveto). HUOMIO: korvaa kenttien sisällön levyn versiolla — tallenna ensin tallentamattomat muutokset.'
   przeladuj_ostrzezenie_tytul: Ladataanko projekti uudelleen levyltä?
-  przeladuj_ostrzezenie_tresc: "Uudelleenlataus korvaa nykyisen sisällön (Maailmankirja, Pitkäaikainen Muisti, kertomus, rakenteen laskurit) levylle tallennetulla versiolla. Tallentamattomat muutokset kentissä menetetään.\n\nJatketaanko?"
+  przeladuj_ostrzezenie_tresc: "Uudelleenlataus korvaa nykyisen sisällön (Maailmankirja, Pysyvä Muisti, kertomus, rakenteen laskurit) levylle tallennetulla versiolla. Tallentamattomat muutokset kentissä menetetään.\n\nJatketaanko?"
   przeladuj_tytul: Projekti ladattu uudelleen levyltä
   przeladuj_calosc_tresc: Koko projekti ladattu uudelleen levyltä ({liczba_znakow} merkkiä). Rakenteen laskurit, Maailmankirja, tila ja työmuisti on synkronoitu tiedoston kanssa.
   przeladuj_calosc_skasowano_tresc: Koko projekti ladattu uudelleen levyltä ({liczba_znakow} merkkiä) — koko teksti mahtui konteksti-ikkunaan, joten tarpeeton yhteenveto poistettiin (moottori toimii nyt täydellä historialla). Laskurit ja Maailmankirja synkronoitu tiedoston kanssa.
@@ -618,7 +618,7 @@ rezyser:
   marker_dlg_scena_lbl: Mistä tämän Näytöksen Kohtauksesta AI:n työmuisti alkaa?
   marker_dlg_caly_akt: ← koko Näytös (näytöksen otsikosta)
   punkt_odniesienia_tytul: Työmuistin viitekohta
-  punkt_odniesienia_snap_tresc: AI:n työmuisti alkaa otsikosta „{naglowek}" ({liczba_znakow} merkkiä). Aiemmat tapahtumat edustaa Pitkäaikainen Yhteenveto (jäänyt koskemattomaksi).
+  punkt_odniesienia_snap_tresc: AI:n työmuisti alkaa otsikosta „{naglowek}" ({liczba_znakow} merkkiä). Aiemmat tapahtumat edustaa Pysyvä Muisti (jäänyt koskemattomaksi).
   punkt_odniesienia_fallback_tresc: 'Viitekohtaa ei ole määritetty — työmuistiin siirtyi viimeinen kertomuksen katkelma ({liczba_znakow} merkkiä). Yhteenveto jäi koskemattomaksi. Vihje: lisää Luku/Näytös/Kohtaus otsikoita, jotta voit tarkasti valita muistin aloituskohdan.'
   punkt_odniesienia_za_dluga_tresc: 'Valittu katkelma „{naglowek}" on niin laaja, ettei se mahdu yksinään työmuisti-ikkunaan — hätäleikkaus viimeisiin {liczba_znakow} merkkiin on tehty. Ohjaaja, tämä on hieman hullua: harkitse Näytösten/Lukujen jakamista pienempiin Kohtauksiin — lyhyemmät osiot auttavat AI:ta pitämään yhtenäisen kontekstin.'
   kod_jezyka_blad_tytul: Tuntematon reseptikieli
@@ -627,8 +627,8 @@ rezyser:
   jezyk_naglowkow_ostrzezenie_tresc: Ladatussa projektissa on rakenteen otsikoita, jotka näyttävät olevan kielellä „{wykryty}”, ja aktiivinen resepti tuottaa sisältöä kielellä „{kod}”. Uudet otsikot lisätään „{kod}” jälkeen — jos tämä ei ole tarkoituksellista, säädä reseptin kielikoodi-kenttää tai valitse toinen tila.
   pamiec_status_czysta: 🟢 Muisti on tyhjä. Kone on valmis uuteen tarinaan.
   pamiec_status_ok: '🟢 Muistin käyttö: {tokeny} / {maks} tokenia. Turvallinen puskuri.'
-  pamiec_status_ostrzezenie: '⚠️ VAROITUSTILA: Käytetty {tokeny} / {maks} tokenia. Muisti täyttyy – tiivistelmän luominen on pian tarpeen.'
-  pamiec_status_alarm: '🚨 KRIITTINEN YLITÄYTTÖ: Käytetty {tokeny} / {maks} tokenia. Aivoriihitilassa luo tiivistelmä, tallenna se pitkäaikaismuistiin ja tyhjennä sitten nykyinen historia (säilytä tiivistelmä).'
+  pamiec_status_ostrzezenie: '⚠️ VAROITUSTILA: Käytetty {tokeny} / {maks} tokenia. Muisti alkaa täyttyä – pian on tarpeen luoda yhteenveto (Pysyvä Muisti-painike jälkituotanto-osiossa).'
+  pamiec_status_alarm: '🚨 KRIITTINEN YLIKUORMITUS: Käytetty {tokeny} / {maks} tokenia. Sovellus tallentaa Pysyvän Muistin automaattisesti seuraavan onnistuneen lähetyksen jälkeen; vapauttaaksesi työmuistia, lataa projekti sen jälkeen uudelleen levyltä.'
   tytuly_postep: 'Otsikointi: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Rakennetunnisteita (Johdanto / Luku N / Epilogi) ei löytynyt tiedostosta. Lisää lukujen leikkaukset ennen otsikointia.
   kod_jezyka_rozjazd_tytul: Kielikoodi ei vastaa sisältöä
@@ -658,7 +658,7 @@ rezyser:
   postprod_kontekst_tresc: "Työkalulle lähetetty aineisto sisältää noin {tokeny} tokenia, mikä ylittää {limit} tokenin rajan — tämän mukaan sovellus mittaa muistin käyttöä.\n\nClaude-malleilla konteksti-ikkuna on tätä laskuria huomattavasti suurempi, joten kutsu todennäköisesti onnistuu. Jos kuitenkin käytät omaa AI-palveluntarjoajaa, jonka konteksti-ikkuna on pienempi, malli hylkää pyynnön — ja siitä huolimatta maksat yrityksestä.\n\nHaluatko silti käynnistää työkalun?"
   pamiec_auto_start: Mallin muisti lähes täynnä — tallennetaan Pysyvää Muistia…
   pamiec_auto_zapisana_tytul: Pysyvä Muisti tallennettu automaattisesti
-  pamiec_auto_zapisana_tresc: "Mallin muisti ylitti hälytysrajan, joten sovellus laati automaattisesti projektin {nazwa_projektu} tiivistelmän ja tallensi sen nimellä {plik}.\n\nTiivistelmä näkyy kentässä ”Pysyvä Muisti” — voit muokata sitä vapaasti ja tallentaa uudelleen."
+  pamiec_auto_zapisana_tresc: "Mallin muisti ylitti hälytysrajan, joten sovellus laati automaattisesti projektin {nazwa_projektu} yhteenvedon ja tallensi sen nimellä {plik}.\n\nYhteenveto näkyy kentässä ”Pysyvä Muisti” — voit vapaasti muokata sitä ja tallentaa uudelleen.\n\nPelkkä tallennus ei vielä vähennä muistin käyttöä: mittari laskee vasta, kun projekti ladataan uudelleen levyltä, sillä tällöin sovellus korvaa koko historian yhteenvedolla ja kertomuksen loppuosalla. Siihen asti automatiikka ei toistu enää itsestään — seuraavan yhteenvedon voit tilata jälkituotanto-osion painikkeesta."
 poliglota:
   panel_name: "AI Polyglot -paneeli"
   heading: "🌍  Polyglot AI – Hybridikäännösstudio"

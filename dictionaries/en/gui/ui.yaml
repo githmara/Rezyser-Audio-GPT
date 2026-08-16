@@ -342,7 +342,7 @@ rezyser:
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Instructions for the next fragment (type 'summary' to force save to Long-Term Memory):
+    Instructions for the next fragment:
   txt_instrukcje_name: "Instruction field for AI – former user_input"
   txt_instrukcje_hint: |-
     Provide instructions for the next fragment of the story…
@@ -621,8 +621,8 @@ rezyser:
   # Model-memory indicator (gui_rezyser._aktualizuj_pamiec_modelu builds the text from i18n by `poziom`)
   pamiec_status_czysta: "🟢 Memory clear. The engine is ready for a new story."
   pamiec_status_ok: "🟢 Memory usage: {tokeny} / {maks} tokens. Safe buffer."
-  pamiec_status_ostrzezenie: "⚠️ WARNING STATE: {tokeny} of {maks} tokens used. Memory is filling up — a summary will soon be required."
-  pamiec_status_alarm: "🚨 CRITICAL OVERLOAD: {tokeny} of {maks} tokens used. In Brainstorm mode generate a summary, save it as Long-Term Memory, then clear the current story (keeping the summary)."
+  pamiec_status_ostrzezenie: "⚠️ WARNING STATE: {tokeny} of {maks} tokens used. Memory is filling up – you'll soon need to generate a summary (the Long-Term Memory button in the post-production section)."
+  pamiec_status_alarm: "🚨 CRITICAL OVERLOAD: {tokeny} of {maks} tokens used. After the next successful send, the application will automatically save the Long-Term Memory; to free up working memory, reload the project from disk afterward."
   err_dlugosc: The model's response was cut off before it could be completed (length limit exceeded). Shorten the context — e.g., the World Book or instruction — and try again.
   btn_przeladuj_label: '&Reload project from disk'
   btn_przeladuj_tooltip: 'Reloads the ENTIRE project from disk after your manual changes in the narration file (skrypty/<name>.txt) — recalculates Chapter/Act/Scene counters, raises the World Book, mode and Brainstorm options, and synchronizes working memory. Loads a short story in full; for a long one, it will ask from which header the AI working memory should start (the rest is represented by the Summary). WARNING: overwrites field contents with the version from disk — save unsaved changes first.'
@@ -659,7 +659,7 @@ rezyser:
   postprod_kontekst_tresc: "The material for the tool is about {tokeny} tokens and exceeds {limit} tokens, the context window the application uses to measure memory usage.\n\nClaude models have a window much larger than this counter, so the call will most likely succeed. However, if you're using your own AI provider with a smaller window, the model will reject the request — and you'll still pay for the attempt.\n\nRun the tool anyway?"
   pamiec_auto_start: Model memory almost full — saving Long-Term Memory…
   pamiec_auto_zapisana_tytul: Long-Term Memory saved automatically
-  pamiec_auto_zapisana_tresc: "Model memory exceeded the alarm threshold, so the application automatically prepared a summary of the {nazwa_projektu} project and saved it as {plik}.\n\nThe summary appears in the \"Long-Term Memory\" field — feel free to edit it and save again."
+  pamiec_auto_zapisana_tresc: "Model memory has exceeded the alarm threshold, so the application automatically prepared a summary of project {nazwa_projektu} and saved it as {plik}.\n\nThe summary now appears in the \"Long-Term Memory\" field — you can freely edit it and save it again.\n\nSaving alone does not yet reduce memory usage: the indicator will only drop once the project is reloaded from disk, since that is when the application replaces the entire history with the summary plus the tail end of the narrative. Until then, the automatic process won't repeat — you can request another summary using the button in the postproduction section."
 poliglota:
   panel_name: "AI Polyglot Panel"
   heading: "🌍  AI Polyglot – Hybrid Translation Studio"

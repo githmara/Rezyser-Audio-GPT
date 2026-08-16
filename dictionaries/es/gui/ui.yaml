@@ -342,7 +342,7 @@ rezyser:
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Instrucciones para el siguiente fragmento (escribe 'resumen' para forzar el guardado en la Memoria a Largo Plazo):
+    Instrucciones para el siguiente fragmento:
   txt_instrukcje_name: "Campo de instrucciones para la IA – antiguo user_input"
   txt_instrukcje_hint: |-
     Proporciona instrucciones para el siguiente fragmento de la historia…
@@ -629,8 +629,8 @@ rezyser:
   jezyk_naglowkow_ostrzezenie_tresc: El proyecto cargado tiene encabezados de estructura que parecen estar en el idioma "{wykryty}", y la receta activa genera contenido en el idioma "{kod}". Los nuevos encabezados se insertarán después de "{kod}" — si esto no es intencionado, ajusta el campo codigo_idioma en la receta o elige otro modo.
   pamiec_status_czysta: 🟢 Memoria limpia. Máquina lista para una nueva historia.
   pamiec_status_ok: '🟢 Uso de memoria: {tokeny} / {maks} tokens. Búfer seguro.'
-  pamiec_status_ostrzezenie: '⚠️ ESTADO DE ADVERTENCIA: Se han utilizado {tokeny} de {maks} tokens. La memoria se está llenando – pronto será necesario generar un resumen.'
-  pamiec_status_alarm: '🚨 SOBRECARGA CRÍTICA: Se han utilizado {tokeny} de {maks} tokens. En modo Tormenta de Ideas, genera un resumen, guárdalo como Memoria a Largo Plazo y luego limpia la historia actual (conservando el resumen).'
+  pamiec_status_ostrzezenie: '⚠️ ESTADO DE ADVERTENCIA: Se han utilizado {tokeny} de {maks} tokens. La memoria se está llenando; pronto será necesario generar un resumen (botón de Memoria a Largo Plazo en la sección de posproducción).'
+  pamiec_status_alarm: '🚨 SOBRECARGA CRÍTICA: Se han utilizado {tokeny} de {maks} tokens. Tras el próximo envío correcto, la aplicación guardará automáticamente la Memoria a Largo Plazo; para liberar memoria de trabajo, vuelva a cargar el proyecto desde el disco después.'
   tytuly_postep: 'Titulación: {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: No se encontraron etiquetas de estructura (Prólogo / Capítulo N / Epílogo) en el archivo. Inserte cortes de capítulos antes de asignar títulos.
   kod_jezyka_rozjazd_tytul: El código de idioma no coincide con el contenido
@@ -660,7 +660,7 @@ rezyser:
   postprod_kontekst_tresc: "El material para la herramienta tiene aproximadamente {tokeny} tokens y supera {limit} tokens, que es la ventana de contexto con la que la aplicación mide la ocupación de memoria.\n\nLos modelos Claude tienen una ventana mucho más grande que este contador, así que lo más probable es que la llamada se realice con éxito. Sin embargo, si utilizas tu propio proveedor de IA con una ventana más pequeña, el modelo rechazará la solicitud — y aun así pagarás por el intento.\n\n¿Deseas ejecutar la herramienta de todos modos?"
   pamiec_auto_start: La memoria del modelo está casi llena — guardando la Memoria a Largo Plazo…
   pamiec_auto_zapisana_tytul: Memoria a Largo Plazo guardada automáticamente
-  pamiec_auto_zapisana_tresc: "La memoria del modelo superó el umbral de alarma, así que la aplicación preparó automáticamente un resumen del proyecto {nazwa_projektu} y lo guardó como {plik}.\n\nEl resumen aparece en el campo «Memoria a Largo Plazo» — puedes editarlo libremente y guardarlo de nuevo."
+  pamiec_auto_zapisana_tresc: "La memoria del modelo superó el umbral de alarma, así que la aplicación preparó automáticamente un resumen del proyecto {nazwa_projektu} y lo guardó como {plik}.\n\nEl resumen aparece en el campo «Memoria a Largo Plazo»: puedes modificarlo libremente y guardarlo de nuevo.\n\nEl guardado en sí aún no reduce el uso de memoria: el indicador bajará solo al recargar el proyecto desde el disco, ya que entonces la aplicación sustituirá todo el historial por el resumen más el tramo final de la narración. Hasta entonces, el proceso automático no se repetirá; podrás solicitar otro resumen con el botón de la sección de posproducción."
 poliglota:
   panel_name: "Panel del Políglota IA"
   heading: "🌍  Políglota IA – Estudio de Traducción Híbrido"

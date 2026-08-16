@@ -342,7 +342,7 @@ rezyser:
   btn_opcja_burzy_format: "{numer}. {tytul}"
   # Pole instrukcji
   lbl_instrukcje: |-
-    Instructions pour le prochain fragment (tapez « résume » pour forcer la sauvegarde dans la Mémoire à Long Terme) :
+    Instructions pour le prochain fragment :
   txt_instrukcje_name: "Champ instructions pour l'IA — ancien user_input"
   txt_instrukcje_hint: |-
     Donnez les instructions pour le prochain fragment d'histoire…
@@ -627,8 +627,8 @@ rezyser:
   jezyk_naglowkow_ostrzezenie_tresc: Le projet chargé a des en-têtes de structure qui semblent être en langue « {wykryty} », et la recette active génère du contenu en langue « {kod} ». Les nouveaux en-têtes seront insérés après « {kod} » — si ce n'est pas intentionnel, ajustez le champ code_langue dans la recette ou choisissez un autre mode.
   pamiec_status_czysta: 🟢 Mémoire claire. Machine prête pour une nouvelle histoire.
   pamiec_status_ok: '🟢 Utilisation de la mémoire : {tokeny} / {maks} jetons. Tampon sécurisé.'
-  pamiec_status_ostrzezenie: "⚠️ ÉTAT D'ALERTE : {tokeny} sur {maks} jetons utilisés. La mémoire se remplit – un résumé sera bientôt nécessaire."
-  pamiec_status_alarm: "🚨 SURCHARGE CRITIQUE : {tokeny} sur {maks} jetons utilisés. En mode Brainstorming, générez un résumé, enregistrez-le comme Mémoire à Long Terme, puis effacez l'historique actuel (en conservant le résumé)."
+  pamiec_status_ostrzezenie: "⚠️ ÉTAT D'ALERTE : {tokeny} jetons utilisés sur {maks}. La mémoire commence à saturer – il faudra bientôt générer un résumé (bouton Mémoire à long terme dans la section postproduction)."
+  pamiec_status_alarm: "🚨 SURCHARGE CRITIQUE : {tokeny} jetons utilisés sur {maks}. Après le prochain envoi réussi, l'application enregistrera automatiquement la Mémoire à long terme ; pour libérer la mémoire de travail, rechargez ensuite le projet depuis le disque."
   tytuly_postep: 'Titres : {naglowek} ({step}/{total})…'
   tytuly_blad_brak_struktury: Aucun tag de structure trouvé (Prologue / Chapitre N / Épilogue) dans le fichier. Insérez des coupures de chapitres avant de donner des titres.
   kod_jezyka_rozjazd_tytul: Le code de langue ne correspond pas au contenu
@@ -658,7 +658,7 @@ rezyser:
   postprod_kontekst_tresc: "Le contenu destiné à l'outil compte environ {tokeny} jetons et dépasse {limit} jetons, soit la fenêtre contextuelle utilisée par l'application pour mesurer l'occupation de la mémoire.\n\nLes modèles Claude ont une fenêtre bien plus grande que ce seuil, donc l'appel devrait probablement réussir. Cependant, si vous utilisez votre propre fournisseur d'IA avec une fenêtre plus petite, le modèle rejettera la requête — et vous paierez quand même pour la tentative.\n\nVoulez-vous lancer l'outil malgré tout ?"
   pamiec_auto_start: Mémoire du modèle presque pleine — enregistrement de la Mémoire à Long Terme…
   pamiec_auto_zapisana_tytul: Mémoire à Long Terme enregistrée automatiquement
-  pamiec_auto_zapisana_tresc: "La mémoire du modèle a dépassé le seuil d'alerte, l'application a donc préparé elle-même un résumé du projet {nazwa_projektu} et l'a enregistré sous {plik}.\n\nLe résumé apparaît dans le champ « Mémoire à Long Terme » — vous pouvez le modifier librement et l'enregistrer à nouveau."
+  pamiec_auto_zapisana_tresc: "La mémoire du modèle a dépassé le seuil d'alerte, l'application a donc préparé elle-même un résumé du projet {nazwa_projektu} et l'a enregistré sous {plik}.\n\nLe résumé apparaît dans le champ « Mémoire à Long Terme » — vous pouvez librement le corriger et l'enregistrer à nouveau.\n\nL'enregistrement en lui-même ne réduit pas encore l'occupation de la mémoire : l'indicateur ne baissera qu'après le rechargement du projet depuis le disque, car l'application remplacera alors tout l'historique par le résumé plus la fin de la narration. D'ici là, l'automatisme ne se répétera plus — vous pourrez demander un nouveau résumé via le bouton de la section postproduction."
 poliglota:
   panel_name: "Panneau Polyglotte IA"
   heading: "🌍  Polyglotte IA — Studio de Traduction Hybride"
