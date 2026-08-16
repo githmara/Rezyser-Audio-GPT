@@ -164,27 +164,36 @@ tresc:
        later decrypt the message. Characters outside the alphabet (numbers,
        spaces, punctuation) remain unchanged.
   co_to_tryb_rezysera: |
-    ## What is "Director Mode"?
-    ------------------------
+    # What is "Director mode"?
+    ---------------------------
 
     The "rezyser/" folder contains {liczba_trybow_rezysera} files describing the operating modes
-    of the Main Director Studio of the application:
+    of the application's Main Director's Studio:
 
-    - tryb_burza.yaml      — Brainstorm Mode (story planning, 3 story
-                             development options, anti-closure directive)
+    - tryb_burza.yaml      — Brainstorm (plot planning, 3 story-development
+                             options, anti-closure directive)
     - tryb_skrypt.yaml     — Raw Script (tags [SFX], [Speaker: emotion],
                              character phonetics)
     - tryb_audiobook.yaml  — Traditional Audiobook (pure literary prose,
-                             ban on summaries and frames)
+                             no summaries or wrap-up clauses allowed)
     - postprod_tytuly.yaml — assigning literary titles to chapters after
-                             generating the entire story
+                             the entire story has been generated
+    - postprod_streszczenie.yaml — Long-Term Memory: a project summary
+                             saved to a file and to the memory field in the
+                             panel (since v18.13; also triggers automatically
+                             when the context window fills up to alarm level)
+    - baza.yaml            — shared context-anchor tags ([OBECNA FABUŁA]
+                             and a summary of previous events); the only file
+                             in this folder whose content is NOT translated
+                             into national languages
 
-    Inside each of these files, the most valuable part is the "system prompt"
-    — a long instruction for artificial intelligence on how to behave in that
-    mode. If you feel, for example, that Audiobook mode writes "too floridly"
-    or Brainstorm Mode too often proposes magical solutions, you can adjust
-    these texts to your taste, save them, and the application will load your
-    version the next time it starts. Zero programming.
+    Inside each of these files, the most valuable part is the "system
+    prompt" — a long instruction telling the AI how to behave in a given
+    mode. If you feel that, for example, the Audiobook mode writes
+    "too flowery," or that Brainstorm too often suggests magical
+    solutions, you can fine-tune these texts to your taste, save them, and
+    the application will load your version the next time it starts. Zero
+    programming required.
   co_to_tryb_opowiesci: |
     ## What is "Stories Mode"?
     ----------------------------

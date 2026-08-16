@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              diacritici polacchi + alfabeto
     ├── akcenty/                   11 file con accenti
     ├── szyfry/                    6 file con cifrari e giochi
-    └── rezyser/                   4 file con modalità del Regista AI
+    └── rezyser/                   5 file con modalità del Regista AI
 </code></pre>
 <p>Attualmente completamente implementati sono: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 lingue di base). Ognuna ha il proprio pacchetto<br>
@@ -120,26 +120,34 @@ una senza normalizzazione dei numeri, l'altra con normalizzazione (sostituisce "
    dell'alfabeto (numeri, spazi, punteggiatura) rimangono invariati.</p>
 </li>
 </ol>
-<h2>Cos'è la "modalità Regista"?</h2>
+<h2>Che cos'è la "modalità Regista"?</h2>
 <hr>
-<p>La cartella "rezyser/" contiene 4 file che descrivono le modalità di lavoro dello Studio Principale del Regista dell'applicazione:</p>
+<p>La cartella "rezyser/" contiene 5 file che descrivono le modalità di lavoro dello Studio del Regista Principale dell'applicazione:</p>
 <ul>
 <li>tryb_burza.yaml      — Brainstorming (pianificazione della trama, 3 opzioni<br>
                          di sviluppo della storia, direttiva anti-closure)</li>
-<li>tryb_skrypt.yaml     — Script Grezzo (tag [SFX], [Speaker: emozione],<br>
+<li>tryb_skrypt.yaml     — Sceneggiatura Grezza (tag [SFX], [Speaker: emozione],<br>
                          fonetica dei personaggi)</li>
 <li>tryb_audiobook.yaml  — Audiolibro Tradizionale (prosa letteraria pura,<br>
-                         divieto di riassunti e chiusure)</li>
+                         divieto di riassunti e parentesi)</li>
 <li>postprod_tytuly.yaml — assegnazione di titoli letterari ai capitoli dopo<br>
                          la generazione dell'intera storia</li>
+<li>postprod_streszczenie.yaml — Memoria a Lungo Termine: riassunto del progetto<br>
+                         salvato in un file e nel campo memoria del pannello<br>
+                         (dalla v18.13; si attiva anche automaticamente in caso<br>
+                         di riempimento allarmante della finestra di contesto)</li>
+<li>baza.yaml            — tag-ancora di contesto condivisi ([OBECNA FABUŁA]<br>
+                         e riassunto degli eventi precedenti); l'unico file<br>
+                         in questa cartella il cui contenuto NON viene tradotto<br>
+                         nelle lingue nazionali</li>
 </ul>
 <p>All'interno di ciascuno di questi file, la parte più preziosa è il "prompt<br>
 di sistema" — una lunga istruzione per l'intelligenza artificiale su come<br>
-comportarsi in quella modalità. Se senti che, ad esempio, la modalità<br>
-Audiolibro scrive "troppo fiorito" o che Brainstorming propone troppo<br>
-spesso soluzioni magiche, puoi regolare questi testi secondo il tuo gusto,<br>
-salvarli e l'applicazione al prossimo avvio caricherà la tua versione.<br>
-Zero programmazione.</p>
+comportarsi in una determinata modalità. Se hai la sensazione che, ad esempio,<br>
+la modalità Audiolibro scriva "in modo troppo fiorito" oppure che il<br>
+Brainstorming proponga troppo spesso soluzioni magiche, puoi personalizzare<br>
+questi testi secondo i tuoi gusti, salvarli, e l'applicazione al successivo<br>
+avvio caricherà la tua versione. Zero programmazione.</p>
 <h2>Cosa si intende per "modalità Racconti"?</h2>
 <hr>
 <p>La cartella "opowiesci/" contiene 8 file che descrivono la seconda<br>

@@ -125,27 +125,35 @@ tresc:
        che tu possa successivamente decifrare il messaggio. I caratteri al di fuori
        dell'alfabeto (numeri, spazi, punteggiatura) rimangono invariati.
   co_to_tryb_rezysera: |
-    ## Cos'è la "modalità Regista"?
-    ----------------------------
+    ## Che cos'è la "modalità Regista"?
+    ---------------------------
 
-    La cartella "rezyser/" contiene {liczba_trybow_rezysera} file che descrivono le modalità di lavoro dello Studio Principale del Regista dell'applicazione:
+    La cartella "rezyser/" contiene {liczba_trybow_rezysera} file che descrivono le modalità di lavoro dello Studio del Regista Principale dell'applicazione:
 
     - tryb_burza.yaml      — Brainstorming (pianificazione della trama, 3 opzioni
                              di sviluppo della storia, direttiva anti-closure)
-    - tryb_skrypt.yaml     — Script Grezzo (tag [SFX], [Speaker: emozione],
+    - tryb_skrypt.yaml     — Sceneggiatura Grezza (tag [SFX], [Speaker: emozione],
                              fonetica dei personaggi)
     - tryb_audiobook.yaml  — Audiolibro Tradizionale (prosa letteraria pura,
-                             divieto di riassunti e chiusure)
+                             divieto di riassunti e parentesi)
     - postprod_tytuly.yaml — assegnazione di titoli letterari ai capitoli dopo
                              la generazione dell'intera storia
+    - postprod_streszczenie.yaml — Memoria a Lungo Termine: riassunto del progetto
+                             salvato in un file e nel campo memoria del pannello
+                             (dalla v18.13; si attiva anche automaticamente in caso
+                             di riempimento allarmante della finestra di contesto)
+    - baza.yaml            — tag-ancora di contesto condivisi ([OBECNA FABUŁA]
+                             e riassunto degli eventi precedenti); l'unico file
+                             in questa cartella il cui contenuto NON viene tradotto
+                             nelle lingue nazionali
 
     All'interno di ciascuno di questi file, la parte più preziosa è il "prompt
     di sistema" — una lunga istruzione per l'intelligenza artificiale su come
-    comportarsi in quella modalità. Se senti che, ad esempio, la modalità
-    Audiolibro scrive "troppo fiorito" o che Brainstorming propone troppo
-    spesso soluzioni magiche, puoi regolare questi testi secondo il tuo gusto,
-    salvarli e l'applicazione al prossimo avvio caricherà la tua versione.
-    Zero programmazione.
+    comportarsi in una determinata modalità. Se hai la sensazione che, ad esempio,
+    la modalità Audiolibro scriva "in modo troppo fiorito" oppure che il
+    Brainstorming proponga troppo spesso soluzioni magiche, puoi personalizzare
+    questi testi secondo i tuoi gusti, salvarli, e l'applicazione al successivo
+    avvio caricherà la tua versione. Zero programmazione.
   co_to_tryb_opowiesci: |
     ## Cosa si intende per "modalità Racconti"?
     ----------------------------

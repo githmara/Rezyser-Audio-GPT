@@ -33,8 +33,8 @@ tresc:
     El estudio principal para escribir radioteatros y audiolibros. Eliges el modo — Lluvia de Ideas, Guion (con etiquetas `[SFX]`/`[Personaje: emoción]`), Audiolibro (prosa tradicional) — y diriges el diálogo con el modelo a través del campo de Instrucciones + Libro del Mundo + Memoria a Largo Plazo:
 
     * **Libro del Mundo Multiproyecto:** El sistema carga automáticamente en segundo plano las reglas dedicadas del universo (`.md`) basándose en el archivo fuente activo, asegurando un aislamiento completo (carga de contexto sin clics).
-    * **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
-    * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Gestor de Reglas más abajo.
+    * **Acumulador de Trama:** Algoritmo de "memoria infinita". El resumen de la trama lo genera una herramienta de postproducción aparte (desde v18.13) y, cuando el indicador de memoria entra en estado de alerta roja, el sistema la ejecuta por su cuenta y guarda el resultado tanto en el archivo como en el campo de Memoria a Largo Plazo. Los resúmenes sucesivos son incrementales: el modelo recibe la memoria anterior y solo la parte nueva de la narración.
+    * **{liczba_trybow_rezysera} modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro) o una herramienta de postproducción (Títulos de Capítulos, Memoria a Largo Plazo). Puedes ajustar su tono sin programación — ver Gestor de Reglas más abajo.
   modul_opowiesci: |
     ### 2. Historias (Ctrl+5, segundo modo principal desde v15.0)
 

@@ -90,17 +90,39 @@ tresc:
     6. Cifrado César (clásico)
        El cifrado documentado más antiguo de la historia (utilizado ya en la antigua Roma). Cada letra se desplaza N posiciones en el alfabeto español (27 letras: ABCDEFGHIJKLMNÑOPQRSTUVWXYZ). El desplazamiento lo introduces en la GUI en el campo numérico; si ingresas 0, la aplicación elegirá un valor al azar en el rango 1-26 y lo mostrará en un mensaje para que luego puedas descifrar el mensaje. Los caracteres fuera del alfabeto (números, espacios, puntuación) permanecen sin cambios.
   co_to_tryb_rezysera: |
+    [INSTRUCCIÓN TÉCNICA — ELIMINA ESTE BLOQUE DE LA RESPUESTA, NO LO TRADUZCAS]
+    [FIN DE LA INSTRUCCIÓN — LA TRADUCCIÓN COMIENZA A CONTINUACIÓN]
+
     ## ¿Qué es el "modo Director"?
     ---------------------------
 
-    La carpeta "rezyser/" contiene {liczba_trybow_rezysera} archivos que describen los modos de operación del Estudio Principal del Director de la aplicación:
+    La carpeta "rezyser/" contiene {liczba_trybow_rezysera} archivos que describen los modos de
+    trabajo del Estudio Principal de Dirección de la aplicación:
 
-    - tryb_burza.yaml      — Tormenta de Ideas (planificación de la trama, 3 opciones de desarrollo de la historia, directiva anti-cierre)
-    - tryb_skrypt.yaml     — Guion Crudo (etiquetas [SFX], [Speaker: emoción], fonética de personajes)
-    - tryb_audiobook.yaml  — Audiolibro Tradicional (prosa literaria pura, prohibición de resúmenes y cierres)
-    - postprod_tytuly.yaml — asignación de títulos literarios a los capítulos después de generar toda la historia
+    - tryb_burza.yaml      — Lluvia de Ideas (planificación de la trama, 3 opciones
+                             de desarrollo de la historia, directiva anti-cierre)
+    - tryb_skrypt.yaml     — Guion en Bruto (etiquetas [SFX], [Speaker: emoción],
+                             fonética de los personajes)
+    - tryb_audiobook.yaml  — Audiolibro Tradicional (prosa literaria pura,
+                             prohibición de resúmenes y frases de cierre)
+    - postprod_tytuly.yaml — asignación de títulos literarios a los capítulos tras
+                             generar toda la historia
+    - postprod_streszczenie.yaml — Memoria a Largo Plazo: resumen del proyecto
+                             guardado en un archivo y en el campo de memoria del panel
+                             (desde v18.13; también se activa automáticamente cuando
+                             la ventana de contexto se llena de forma crítica)
+    - baza.yaml            — etiquetas-ancla de contexto comunes ([OBECNA FABUŁA]
+                             y resumen de eventos anteriores); el único archivo
+                             de esta carpeta cuyo contenido NO se traduce
+                             a los idiomas nacionales
 
-    Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt del sistema": una larga instrucción para la inteligencia artificial sobre cómo debe comportarse en ese modo. Si sientes que, por ejemplo, el modo Audiolibro escribe "demasiado florido" o la Tormenta de Ideas propone soluciones mágicas con demasiada frecuencia, puedes ajustar estos textos a tu gusto, guardarlos y la aplicación cargará tu versión la próxima vez que se inicie. Cero programación.
+    Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt
+    del sistema" — una larga instrucción para la inteligencia artificial sobre cómo
+    debe comportarse en ese modo determinado. Si sientes que, por ejemplo, el modo
+    Audiolibro escribe "de forma demasiado florida" o que la Lluvia de Ideas propone
+    demasiado a menudo soluciones mágicas, puedes ajustar estos textos a tu gusto,
+    guardarlos, y la aplicación cargará tu versión en el siguiente arranque. Sin
+    necesidad de programar nada.
   co_to_tryb_opowiesci: |
     ## Qué es el "modo Historias"
     ----------------------------

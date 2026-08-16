@@ -33,8 +33,8 @@ tresc:
     Päästudio kuunnelmien ja äänikirjojen kirjoittamiseen. Valitset tilan — Aivoriihi, Käsikirjoitus (tageilla `[SFX]`/`[Hahmo: tunne]`), Äänikirja (perinteinen proosa) — ja ohjaat dialogia mallin kanssa ohjeiden kentän + Maailman Kirjojen + Pitkäaikaisen Muistin avulla:
 
     * **Moniprojektinen Maailman Kirja:** Järjestelmä lataa automaattisesti taustalla omistetut universumin säännöt (`.md`) aktiivisen lähdetiedoston perusteella, tarjoten täydellisen eristyksen (kontekstin lataus ilman klikkauksia).
-    * **Juonen Akut:** Algoritmi "loputtomalle muistille". Kun muistin osoitin saavuttaa punaisen hälytyksen tilan, järjestelmä luo automaattisesti juonitiivistelmän ja tallentaa sen Pitkäaikaisen Muistin kenttään.
-    * **{liczba_trybow_rezysera} luovaa tilaa:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja, Otsikoiden Jälkituotanto). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
+    * **Juonen Akut:** Algoritmi "loputtomalle muistille". Juonitiivistelmän luo erillinen jälkituotantotyökalu (versiosta 18.13), ja kun muistin osoitin saavuttaa punaisen hälytyksen tilan, järjestelmä käynnistää sen itse ja tallentaa tuloksen sekä tiedostoon että Pysyvän Muistin kenttään. Seuraavat tiivistelmät ovat inkrementaalisia — malli saa edellisen muistin ja vain kerronnan uuden osan.
+    * **{liczba_trybow_rezysera} luovaa tilaa:** Jokainen tiedosto `dictionaries/<jzk>/rezyser/` -hakemistossa kuvaa erillisen AI-ohjaajan "persoonallisuuden" (Aivoriihi, Käsikirjoitus, Äänikirja) tai jälkituotantotyökalun (Lukujen otsikot, Pysyvä Muisti). Voit hienosäätää niiden sävyä ilman ohjelmointia — katso Sääntöjen Hallinta alla.
   modul_opowiesci: |
     ### 2. Tarinat (Ctrl+5, toinen päätila versiosta 15.0 alkaen)
 

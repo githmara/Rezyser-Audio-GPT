@@ -126,26 +126,35 @@ tresc:
        de l'alphabet (chiffres, espaces, ponctuation, lettres accentuées) restent inchangés.
   co_to_tryb_rezysera: |
     ## Qu'est-ce que le « mode Réalisateur » ?
-    ---------------------------------------
+    ---------------------------
 
-    Le dossier « rezyser/ » contient {liczba_trybow_rezysera} fichiers décrivant les modes de travail du Studio Principal du Réalisateur de l'application :
+    Le dossier "rezyser/" contient {liczba_trybow_rezysera} fichiers décrivant les modes de
+    fonctionnement du Studio de Réalisation Principal de l'application :
 
-    - tryb_burza.yaml      — Brainstorming (planification de l'intrigue, 3 options
+    - tryb_burza.yaml      — Remue-méninges (planification de l'intrigue, 3 options
                              de développement de l'histoire, directive anti-clôture)
-    - tryb_skrypt.yaml     — Scénario Brut (balises [SFX], [Speaker : émotion],
+    - tryb_skrypt.yaml     — Script Brut (balises [SFX], [Speaker : émotion],
                              phonétique des personnages)
     - tryb_audiobook.yaml  — Livre Audio Traditionnel (prose littéraire pure,
-                             interdiction des résumés et conclusions)
+                             interdiction des résumés et des formules-cadres)
     - postprod_tytuly.yaml — attribution de titres littéraires aux chapitres après
-                             la génération de toute l'histoire
+                             la génération de l'histoire complète
+    - postprod_streszczenie.yaml — Mémoire à Long Terme : résumé du projet
+                             enregistré dans un fichier et dans le champ mémoire du panneau
+                             (depuis la v18.13 ; se déclenche aussi automatiquement en cas
+                             de remplissage critique de la fenêtre contextuelle)
+    - baza.yaml            — balises-ancres de contexte communes ([OBECNA FABUŁA]
+                             et résumé des événements précédents) ; le seul fichier
+                             de ce dossier dont le contenu n'est PAS traduit
+                             dans les langues nationales
 
-    À l'intérieur de chacun de ces fichiers, la partie la plus précieuse est le « prompt
-    système » — une longue instruction pour l'intelligence artificielle sur la façon
-    de se comporter dans ce mode. Si vous sentez que, par exemple, le mode
-    Livre Audio écrit « trop fleuri » ou que Brainstorming propose trop
-    souvent des solutions magiques, vous pouvez ajuster ces textes selon votre goût,
-    les sauvegarder, et l'application chargera votre version au prochain démarrage.
-    Zéro programmation.
+    À l'intérieur de chacun de ces fichiers, la partie la plus précieuse est le
+    « prompt système » — une longue instruction destinée à l'intelligence artificielle,
+    lui indiquant comment se comporter dans un mode donné. Si vous sentez que, par
+    exemple, le mode Livre Audio écrit « de manière trop fleurie » ou que le mode
+    Remue-méninges propose trop souvent des solutions magiques, vous pouvez ajuster
+    ces textes selon votre goût, les enregistrer, et l'application chargera votre
+    version au prochain démarrage. Aucune programmation requise.
   co_to_tryb_opowiesci: |
     ## Qu'est-ce que le « mode Histoires » ?
     ----------------------------

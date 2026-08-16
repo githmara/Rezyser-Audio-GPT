@@ -50,7 +50,7 @@ Dokument.</p>
     ├── podstawy.yaml              deutsche Diakritika + Alphabet
     ├── akcenty/                   11 Akzentdateien
     ├── szyfry/                    6 Chiffre- und Spieledateien
-    └── rezyser/                   4 Regisseur-KI-Modusdateien
+    └── rezyser/                   5 Regisseur-KI-Modusdateien
 </code></pre>
 <p>Derzeit vollständig implementiert sind: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 Basissprachen). Jede hat ein eigenes Paket<br>
@@ -162,27 +162,35 @@ Verfügbare Chiffren (6):</p>
    Interpunktion) bleiben unverändert.</p>
 </li>
 </ol>
-<h2>Was ist der "Regisseur-Modus"?</h2>
+<h1>Was ist der "Regisseur-Modus"?</h1>
 <hr>
-<p>Der Ordner "rezyser/" enthält 4 Dateien, die die Arbeitsmodi<br>
-des Haupt-Regiestudios der Anwendung beschreiben:</p>
+<p>Der Ordner "rezyser/" enthält 5 Dateien, die die Arbeitsmodi des<br>
+Hauptregiestudios der Anwendung beschreiben:</p>
 <ul>
-<li>tryb_burza.yaml      — Brainstorming (Handlungsplanung, 3 Entwicklungs-<br>
-                         optionen, Anti-Closure-Direktive)</li>
-<li>tryb_skrypt.yaml     — Rohskript (Tags [SFX], [Sprecher: Emotion],<br>
-                         Figurenphoneti)</li>
-<li>tryb_audiobook.yaml  — Traditionelles Hörbuch (reine Literaturprosa,<br>
-                         ohne Zusammenfassungen und Klammern)</li>
-<li>postprod_tytuly.yaml — Vergabe literarischer Kapitelüberschriften nach<br>
-                         der Generierung der gesamten Geschichte</li>
+<li>tryb_burza.yaml      — Brainstorming (Handlungsplanung, 3 Optionen<br>
+                         zur Entwicklung der Geschichte, Anti-Closure-Direktive)</li>
+<li>tryb_skrypt.yaml     — Rohes Skript (Tags [SFX], [Speaker: emocja],<br>
+                         Figurenphonetik)</li>
+<li>tryb_audiobook.yaml  — Traditionelles Hörbuch (reine literarische Prosa,<br>
+                         Verbot von Zusammenfassungen und Klammerbemerkungen)</li>
+<li>postprod_tytuly.yaml — Vergabe literarischer Kapiteltitel nach<br>
+                         Generierung der gesamten Geschichte</li>
+<li>postprod_streszczenie.yaml — Langzeitspeicher: Projektzusammenfassung,<br>
+                         die in einer Datei und im Gedächtnisfeld des Panels<br>
+                         gespeichert wird (seit v18.13; startet auch automatisch<br>
+                         bei alarmierender Füllung des Kontextfensters)</li>
+<li>baza.yaml            — gemeinsame Kontext-Anker-Tags ([OBECNA FABUŁA]<br>
+                         und Zusammenfassung vorheriger Ereignisse); die einzige<br>
+                         Datei in diesem Ordner, deren Inhalt NICHT in<br>
+                         Landessprachen übersetzt wird</li>
 </ul>
-<p>Im Inneren jeder dieser Dateien ist der wertvollste Teil der "System-Prompt"<br>
-— eine lange Anweisung für die künstliche Intelligenz, wie sie sich in<br>
-diesem Modus verhalten soll. Wenn Sie das Gefühl haben, dass z.B. der<br>
-Hörbuchmodus "zu blumig" schreibt oder das Brainstorming zu häufig magische<br>
-Lösungen vorschlägt, können Sie diese Texte nach Ihrem Geschmack anpassen,<br>
-speichern, und die Anwendung lädt Ihre Version beim nächsten Start. Kein<br>
-Programmieren erforderlich.</p>
+<p>Der wertvollste Teil jeder dieser Dateien ist der "System-Prompt" —<br>
+eine ausführliche Anweisung für die künstliche Intelligenz, wie sie sich<br>
+im jeweiligen Modus verhalten soll. Wenn Sie das Gefühl haben, dass z. B.<br>
+der Hörbuch-Modus "zu blumig" schreibt oder das Brainstorming zu oft<br>
+magische Lösungen vorschlägt, können Sie diese Texte nach Ihrem<br>
+Geschmack anpassen, speichern, und die Anwendung lädt beim nächsten<br>
+Start Ihre Version. Null Programmierkenntnisse erforderlich.</p>
 <h2>Was ist der „Geschichten-Modus“?</h2>
 <hr>
 <p>Der Ordner „opowiesci/" enthält 8 Dateien, die den zweiten<br>

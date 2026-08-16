@@ -33,8 +33,8 @@ tresc:
     Le principal studio pour écrire des pièces radiophoniques et des livres audio. Vous choisissez le mode — Brainstorming, Script (avec des balises `[SFX]`/`[Personnage: émotion]`), Livre audio (prose traditionnelle) — et dirigez le dialogue avec le modèle via le champ Instructions + Livre du Monde + Mémoire à Long Terme :
 
     * **Livre du Monde Multi-projet :** Le système charge automatiquement en arrière-plan les règles dédiées de l'univers (`.md`) en fonction du fichier source actif, assurant une isolation complète (chargement de contexte sans clic).
-    * **Accumulateur de l'Intrigue :** Algorithme de « mémoire infinie ». Lorsque l'indicateur de mémoire entre en état d'alerte rouge, le système génère automatiquement un résumé de l'intrigue et l'enregistre dans le champ Mémoire à Long Terme.
-    * **{liczba_trybow_rezysera} modes créatifs :** Chacun des fichiers dans `dictionaries/<jzk>/rezyser/` décrit une « personnalité » distincte du réalisateur AI (Brainstorming, Script, Livre audio, Postproduction des Titres). Vous pouvez ajuster leur tonalité sans programmation — voir le Gestionnaire de Règles ci-dessous.
+    * **Accumulateur de l'Intrigue :** Algorithme de « mémoire infinie ». Le résumé de l'intrigue est produit par un outil de postproduction distinct (depuis la v18.13) et, lorsque l'indicateur de mémoire entre en état d'alerte rouge, le système le lance de lui-même et enregistre le résultat à la fois dans le fichier et dans le champ Mémoire à Long Terme. Les résumés successifs sont incrémentaux : le modèle reçoit la mémoire précédente et uniquement la partie nouvelle du récit.
+    * **{liczba_trybow_rezysera} modes créatifs :** Chacun des fichiers dans `dictionaries/<jzk>/rezyser/` décrit une « personnalité » distincte du réalisateur AI (Brainstorming, Script, Livre audio) ou un outil de postproduction (Titres de Chapitres, Mémoire à Long Terme). Vous pouvez ajuster leur tonalité sans programmation — voir le Gestionnaire de Règles ci-dessous.
   modul_opowiesci: |
     ### 2. Histoires (Ctrl+5, deuxième mode principal depuis v15.0)
 

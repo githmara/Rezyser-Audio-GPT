@@ -49,7 +49,7 @@ mitä tahansa muuta asiakirjaa.</p>
     ├── podstawy.yaml              puolalaiset diakriitit + aakkoset
     ├── akcenty/                  11 aksenttitiedostoa
     ├── szyfry/                   6 salaus- ja leikkitiedostoa
-    └── rezyser/                  4 Ohjaaja AI -tilatiedostoa
+    └── rezyser/                  5 Ohjaaja AI -tilatiedostoa
 </code></pre>
 <p>Tällä hetkellä täysin toteutettuja ovat: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 peruskieltä). Jokaisella on oma paketti<br>
@@ -157,24 +157,33 @@ ne vain vääristävät tekstiä tietyn säännön mukaan. Saatavilla olevat sal
 </ol>
 <h2>Mikä on "Ohjaaja-tila"?</h2>
 <hr>
-<p>Kansio "rezyser/" sisältää 4 tiedostoa, jotka kuvaavat sovelluksen<br>
-Pääohjaamon tilat:</p>
+<p>Kansio "rezyser/" sisältää 5 tiedostoa, jotka kuvaavat sovelluksen<br>
+Pääohjaajastudion toimintatiloja:</p>
 <ul>
-<li>burza_mozgow.yaml    — Aivoriihi (juonen suunnittelu, 3 vaihtoehtoa<br>
-                         tarinan kehitykselle, anti-closure-direktiivi)</li>
-<li>skrypt.yaml          — Raaka Käsikirjoitus (tagit [SFX], [Speaker: tunne],<br>
+<li>tryb_burza.yaml      — Aivoriihi (juonen suunnittelu, 3 vaihtoehtoa<br>
+                         tarinan kehittämiseen, anti-closure-direktiivi)</li>
+<li>tryb_skrypt.yaml     — Raakaskripti (tagit [SFX], [Puhuja: tunne],<br>
                          hahmojen fonetiikka)</li>
-<li>audiobook.yaml       — Perinteinen Äänikirja (puhdas kirjallinen proosa,<br>
-                         yhteenvetojen ja sulkeumien kielto)</li>
-<li>postprod_tytuly.yaml — kirjallisten lukujen nimien antaminen koko tarinan<br>
-                         luomisen jälkeen</li>
+<li>tryb_audiobook.yaml  — Perinteinen äänikirja (puhdas kirjallinen<br>
+                         proosa, yhteenvetojen ja hakasulkeiden kielto)</li>
+<li>postprod_tytuly.yaml — kirjallisten otsikoiden antaminen luvuille sen<br>
+                         jälkeen, kun koko tarina on generoitu</li>
+<li>postprod_streszczenie.yaml — Pysyvä Muisti: projektin yhteenveto<br>
+                         tallennetaan tiedostoon ja paneelin muistikenttään<br>
+                         (versiosta 18.13 lähtien; käynnistyy myös<br>
+                         automaattisesti kontekstiikkunan hälyttävän<br>
+                         täyttymisen yhteydessä)</li>
+<li>baza.yaml            — yhteiset kontekstin ankkuritagit ([OBECNA FABUŁA]<br>
+                         ja yhteenveto aiemmista tapahtumista); ainoa<br>
+                         tiedosto tässä kansiossa, jonka sisältöä EI käännetä<br>
+                         kansallisille kielille</li>
 </ul>
-<p>Kunkin näiden tiedostojen sisällä arvokkain osa on "järjestelmäkehotus" —<br>
-pitkä ohjeistus tekoälylle, kuinka sen tulisi käyttäytyä kyseisessä tilassa.<br>
-Jos tunnet, että esimerkiksi Äänikirja-tila kirjoittaa "liian kukkaisesti"<br>
-tai Aivoriihi ehdottaa liian usein maagisia ratkaisuja, voit säätää näitä<br>
-tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla<br>
-käynnistyksellä sinun versiosi. Ei ohjelmointia.</p>
+<p>Jokaisen näiden tiedostojen sisällä arvokkain osa on "järjestelmäkehote"<br>
+— pitkä ohje tekoälylle siitä, miten sen tulee käyttäytyä kyseisessä<br>
+tilassa. Jos sinusta tuntuu, että esimerkiksi Äänikirja-tila kirjoittaa<br>
+"liian koristeellisesti" tai Aivoriihi ehdottaa liian usein maagisia<br>
+ratkaisuja, voit muokata näitä tekstejä oman makusi mukaan, tallentaa ne,<br>
+ja sovellus lataa version seuraavalla käynnistyskerralla. Ei ohjelmointia.</p>
 <h2>Mikä on "Tarinatila"?</h2>
 <hr>
 <p>Kansio "opowiesci/" sisältää 8 tiedostoa, jotka kuvaavat sovelluksen<br>

@@ -596,9 +596,12 @@ def _zbuduj_placeholdery_globalne() -> dict[str, str]:
         ),
         "liczba_szyfrow":          str(len(szyfry_lista)),
         # Wyklucz `baza.yaml` (od v17.10 — wspólne wrappery kontekstu LLM, NIE tryb
-        # pracy): dokumentacja WYLICZA konkretne pliki trybów (burza/skrypt/audiobook/
-        # postprod_tytuly), więc licznik musi pasować do tej listy = 4, nie do liczby
-        # wszystkich plików w folderze.
+        # pracy): dokumentacja WYLICZA konkretne pliki (burza/skrypt/audiobook +
+        # postprodukcje: postprod_tytuly, postprod_streszczenie od v18.13), więc
+        # licznik musi pasować do tej listy = 5, nie do liczby wszystkich plików
+        # w folderze. UWAGA dla lingwisty: zdanie z tym placeholderem w readme
+        # musi znieść KAŻDĄ wartość — w językach z fleksją liczebnika (pl, ru)
+        # trzymaj liczbę w nawiasie zamiast odmieniać rzeczownik po niej.
         "liczba_trybow_rezysera":  str(
             len([p for p in pl_rezyser_dir.glob("*.yaml") if p.stem != "baza"])
             if pl_rezyser_dir.is_dir() else 0

@@ -44,8 +44,8 @@ tresc:
     Główne studio do pisania słuchowisk i audiobooków. Wybierasz tryb — Burza Mózgów, Skrypt (z tagami `[SFX]`/`[Postać: emocja]`), Audiobook (tradycyjna proza) — i kierujesz dialog z modelem przez pole Instrukcji + Księgi Świata + Pamięci Długotrwałej:
 
     * **Wieloprojektowa Księga Świata:** System automatycznie ładuje w tle dedykowane zasady uniwersum (`.md`) na podstawie aktywnego pliku źródłowego, zapewniając pełną izolację (zero-click context loading).
-    * **Akumulator Fabuły:** Algorytm „nieskończonej pamięci". Gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, system automatycznie generuje streszczenie fabuły i zapisuje je do pola Pamięci Długotrwałej.
-    * **{liczba_trybow_rezysera} tryby twórcze:** Każdy z plików w `dictionaries/<jzk>/rezyser/` opisuje osobną „personalność" reżysera AI (Burza Mózgów, Skrypt, Audiobook, Postprodukcja Tytułów). Możesz dostroić ich brzmienie bez programowania — patrz Manager Reguł niżej.
+    * **Akumulator Fabuły:** Algorytm „nieskończonej pamięci". Streszczenie fabuły generuje osobne narzędzie postprodukcji (od v18.13), a gdy wskaźnik pamięci wejdzie w stan czerwonego alarmu, system uruchamia je sam i zapisuje wynik do pliku oraz do pola Pamięci Długotrwałej. Kolejne streszczenia są przyrostowe — model dostaje poprzednią pamięć i tylko nową część narracji.
+    * **Przepisy Reżysera (liczba plików: {liczba_trybow_rezysera}):** Każdy z plików w `dictionaries/<jzk>/rezyser/` opisuje osobną „personalność" reżysera AI (Burza Mózgów, Skrypt, Audiobook) albo narzędzie postprodukcji (Tytuły Rozdziałów, Pamięć Długotrwała). Możesz dostroić ich brzmienie bez programowania — patrz Manager Reguł niżej.
   modul_opowiesci: |
     ### 2. Opowieści (Ctrl+5, drugi główny tryb od v15.0)
 

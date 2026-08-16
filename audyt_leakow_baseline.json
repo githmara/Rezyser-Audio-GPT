@@ -1,17 +1,15 @@
 {
+  "de/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
+  ],
   "de/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
-  ],
-  "de/manual.yaml/krok_3b_most_elevenlabs": [
-    "znak-PL:ęń",
-    "znak-PL:ł"
   ],
   "de/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
   ],
   "de/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł",
     "znak-PL:ż"
   ],
   "de/tales.yaml/krok_2_quick_start": [
@@ -19,12 +17,6 @@
   ],
   "de/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
-  ],
-  "de/tales.yaml/krok_5_slash_komendy": [
-    "znak-PL:ąż"
-  ],
-  "de/tales.yaml/krok_7_pamiec_modelu": [
-    "znak-PL:ćę"
   ],
   "de/ui.yaml/manager.typ.tryb_rezysera.opis": [
     "lingua:PL"
@@ -47,6 +39,9 @@
   "en/dictionaries.yaml/co_to_szyfr": [
     "lingua:PL"
   ],
+  "en/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
+  ],
   "en/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
@@ -56,9 +51,6 @@
   ],
   "en/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
-  ],
-  "en/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł"
   ],
   "en/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę",
@@ -89,8 +81,10 @@
     "znak-PL:ąęł"
   ],
   "es/dictionaries.yaml/co_to_szyfr": [
-    "znak-PL:ąćęłśż",
     "znak-PL:ąńź"
+  ],
+  "es/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
   ],
   "es/manual.yaml/changelog_13": [
     "znak-PL:ćś",
@@ -100,7 +94,6 @@
     "znak-PL:ł"
   ],
   "es/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł",
     "znak-PL:ł",
     "znak-PL:ż"
   ],
@@ -132,21 +125,15 @@
   "fi/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
   ],
+  "fi/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
+  ],
   "fi/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
   ],
-  "fi/manual.yaml/krok_3b_most_elevenlabs": [
-    "znak-PL:ęń",
-    "znak-PL:ł",
-    "znak-PL:ł",
-    "znak-PL:łż"
-  ],
   "fi/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
-  ],
-  "fi/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł"
   ],
   "fi/readme.yaml/instalacja_uzytkownicy": [
     "znak-PL:ą"
@@ -154,9 +141,6 @@
   "fi/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę",
     "znak-PL:ęŚ"
-  ],
-  "fi/tales.yaml/krok_3_pierwsza_gra": [
-    "znak-PL:ę"
   ],
   "fi/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
@@ -176,15 +160,15 @@
   "fr/dictionaries.yaml/co_to_szyfr": [
     "lingua:PL"
   ],
+  "fr/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
+  ],
   "fr/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
   ],
   "fr/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
-  ],
-  "fr/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł"
   ],
   "fr/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę",
@@ -211,21 +195,18 @@
   "is/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
   ],
+  "is/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
+  ],
   "is/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
-  ],
-  "is/manual.yaml/krok_3_glowne_studio": [
-    "znak-PL:ł"
   ],
   "is/manual.yaml/krok_3b_most_elevenlabs": [
     "znak-PL:ń"
   ],
   "is/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
-  ],
-  "is/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł"
   ],
   "is/readme.yaml/instalacja_uzytkownicy": [
     "znak-PL:ą"
@@ -236,9 +217,6 @@
   ],
   "is/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
-  ],
-  "is/tales.yaml/krok_5_slash_komendy": [
-    "znak-PL:ąż"
   ],
   "is/ui.yaml/manager.uwagi.postprodukcja": [
     "znak-PL:ł"
@@ -255,34 +233,22 @@
   "it/dictionaries.yaml/co_to_szyfr": [
     "lingua:PL"
   ],
+  "it/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
+  ],
   "it/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
   ],
-  "it/manual.yaml/krok_3b_most_elevenlabs": [
-    "znak-PL:ęń",
-    "znak-PL:ł",
-    "znak-PL:ł",
-    "znak-PL:ł"
-  ],
   "it/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
-  ],
-  "it/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł"
   ],
   "it/tales.yaml/krok_2_quick_start": [
     "znak-PL:ę",
     "znak-PL:ęŚ"
   ],
-  "it/tales.yaml/krok_3_pierwsza_gra": [
-    "znak-PL:ę"
-  ],
   "it/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"
-  ],
-  "it/tales.yaml/krok_5_slash_komendy": [
-    "znak-PL:ąż"
   ],
   "it/ui.yaml/manager.typ.postprodukcja.opis": [
     "lingua:PL"
@@ -314,16 +280,15 @@
   "ru/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
   ],
+  "ru/dictionaries.yaml/co_to_tryb_rezysera": [
+    "znak-PL:Ł"
+  ],
   "ru/dictionaries.yaml/poziom_2_duplikacja": [
     "lingua:PL"
   ],
   "ru/manual.yaml/changelog_13": [
     "znak-PL:ćś",
     "znak-PL:źż"
-  ],
-  "ru/manual.yaml/krok_3_glowne_studio": [
-    "znak-PL:ł",
-    "znak-PL:ł"
   ],
   "ru/manual.yaml/krok_3b_most_elevenlabs": [
     "znak-PL:ęń",
@@ -332,26 +297,11 @@
   "ru/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
   ],
-  "ru/manual.yaml/krok_7_ksiega_swiata": [
-    "znak-PL:Ł"
-  ],
-  "ru/readme.yaml/architektura_ai": [
-    "znak-PL:łś",
-    "znak-PL:ś"
-  ],
   "ru/readme.yaml/instalacja_uzytkownicy": [
     "znak-PL:ą"
   ],
-  "ru/readme.yaml/modul_opowiesci": [
-    "znak-PL:ś",
-    "znak-PL:ś",
-    "znak-PL:ś"
-  ],
   "ru/tales.yaml/krok_10_dostepnosc_nvda": [
     "znak-PL:ź"
-  ],
-  "ru/tales.yaml/krok_3_pierwsza_gra": [
-    "znak-PL:ę"
   ],
   "ru/tales.yaml/krok_4_zasady_swiata": [
     "znak-PL:ż"

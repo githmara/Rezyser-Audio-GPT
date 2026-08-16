@@ -7,7 +7,7 @@
 
 Ein eigenständiges Toolkit, das von KI angetrieben wird, um umfangreiche Skripte automatisch zu schreiben, zu planen, zu formatieren und zu übersetzen sowie interaktive Textspiele zu führen. Das Projekt ist eine native Desktop-Anwendung (wxPython), die von Grund auf für vollständige Zugänglichkeit mit Bildschirmlesern (NVDA, VoiceOver) und die Zusammenarbeit mit professionellen Sprachsynthesizern (TTS) entwickelt wurde. Es funktioniert ohne Browser und ohne lokalen Server — es startet als normales Programmfenster.
 
-Version: **18.12.0** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Version: **18.13.0** · Unterstützte Sprachen nativ (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Hauptmodule
@@ -20,8 +20,8 @@ Die Anwendung vereint in einem Fenster fünf Werkzeuge, die über Tastenkombinat
 Das Hauptstudio zum Schreiben von Hörspielen und Hörbüchern. Du wählst einen Modus — Brainstorming, Skript (mit Tags `[SFX]`/`[Charakter: Emotion]`), Hörbuch (traditionelle Prosa) — und leitest den Dialog mit dem Modell durch das Instruktionsfeld + Weltbuch + Langzeitspeicher:
 
 * **Multiprojekt-Weltbuch:** Das System lädt automatisch im Hintergrund die dedizierten Universumsregeln (`.md`) basierend auf der aktiven Quelldatei, um vollständige Isolation zu gewährleisten (Zero-Click-Kontextladen).
-* **Handlungsakku:** Der Algorithmus des „unendlichen Gedächtnisses". Wenn der Speicherzeiger in den roten Alarmzustand wechselt, generiert das System automatisch eine Handlungszusammenfassung und speichert sie im Langzeitspeicherfeld.
-* **4 kreative Modi:** Jede der Dateien in `dictionaries/<jzk>/rezyser/` beschreibt eine separate „Persönlichkeit" des KI-Regisseurs (Brainstorming, Skript, Hörbuch, Titel-Nachbearbeitung). Du kannst ihren Klang ohne Programmierung anpassen — siehe Regelmanager unten.
+* **Handlungsakku:** Der Algorithmus des „unendlichen Gedächtnisses". Die Handlungszusammenfassung erzeugt ein eigenes Nachbearbeitungswerkzeug (seit v18.13); wechselt der Speicherzeiger in den roten Alarmzustand, startet das System es von selbst und schreibt das Ergebnis sowohl in die Datei als auch in das Langzeitspeicherfeld. Weitere Zusammenfassungen sind inkrementell — das Modell erhält das bisherige Gedächtnis und nur den neuen Teil der Erzählung.
+* **5 kreative Modi:** Jede der Dateien in `dictionaries/<jzk>/rezyser/` beschreibt eine separate „Persönlichkeit" des KI-Regisseurs (Brainstorming, Skript, Hörbuch) oder ein Nachbearbeitungswerkzeug (Kapitelüberschriften, Langzeitspeicher). Du kannst ihren Klang ohne Programmierung anpassen — siehe Regelmanager unten.
 
 
 ### 2. Geschichten (Ctrl+5, zweiter Hauptmodus ab v15.0)

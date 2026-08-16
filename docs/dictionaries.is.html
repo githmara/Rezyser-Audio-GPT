@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              pólskir diakritískir stafir + stafróf
     ├── akcenty/                   11 skrár með framburðum
     ├── szyfry/                    6 skrár með dulmálum og leikjum
-    └── rezyser/                   4 skrár með AI Leikstjóra hömum
+    └── rezyser/                   5 skrár með AI Leikstjóra hömum
 </code></pre>
 <p>Nú þegar eru fullkomlega innleidd: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 grunnmál). Hvert hefur sitt eigið "<code>dictionaries/&lt;code&gt;/</code>" safn með diakritískum stöfum, stafrófi og hljóðreglum sem virka á texta í því tungumáli — forritið greinir sjálfkrafa upprunamál með lingua-language-detector (fyrir hvern málsgrein) og hleður viðeigandi pakka fyrir hvern hluta sérstaklega. Fleiri tungumál eru í undirbúningi (fullkomið safn krefst "podstawy.yaml", "gui/ui.yaml" og að minnsta kosti einnar skráar í "akcenty/" og "szyfry/").</p>
@@ -78,20 +78,34 @@ code { font-family: ui-monospace, Consolas, monospace; }
    Elsta skjalfesta dulritun í sögunni (notuð í forn Róm). Hver stafur er færður um N stöður í íslenska stafrófinu (32 stafir, með diakritískum: AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ). Færslan er gefin upp í GUI í tölusviði; ef þú slærð inn 0, velur forritið handahófskennt gildi á bilinu 1-31 og sýnir það í skilaboðum, svo þú getir síðan afkóðað skilaboðin. Stafir utan stafrófsins (tölur, bil, greinarmerki) eru óbreyttir.</p>
 </li>
 </ol>
-<h2>Hvað er "leikstjórahamur"?</h2>
+<h2>Hvað er "leikstjóra-hamur"?</h2>
 <hr>
-<p>Mappan "rezyser/" inniheldur 4 skrár sem lýsa vinnuhömum Aðalstúdíós Leikstjórans í forritinu:</p>
+<p>Mappan "rezyser/" inniheldur 5 skrár sem lýsa vinnuhömum Aðal<br>
+Leikstjórnarstofu forritsins:</p>
 <ul>
-<li>tryb_burza.yaml      — Hugmyndavinda (söguþráðarplan, 3 valkostir<br>
-                         fyrir þróun sögunnar, and-lokunarstefna)</li>
-<li>tryb_skrypt.yaml     — Hrátt Handrit (merki [SFX], [Ræðumaður: tilfinning],<br>
+<li>tryb_burza.yaml      — Hugarflug (skipulagning söguþráðar, 3 valkostir<br>
+                         fyrir framvindu sögunnar, anti-closure tilskipun)</li>
+<li>tryb_skrypt.yaml     — Hráð Handrit (merki [SFX], [Speaker: tilfinning],<br>
                          hljóðfræði persóna)</li>
-<li>tryb_audiobook.yaml  — Hefðbundinn Hljóðbók (hrein bókmenntaprósa,<br>
-                         bann við samantektum og ramma)</li>
-<li>postprod_tytuly.yaml — að veita bókmenntatitla köflum eftir að<br>
-                         öll sagan hefur verið búin til</li>
+<li>tryb_audiobook.yaml  — Hefðbundin Hljóðbók (hrein bókmenntagerð,<br>
+                         bann við samantektum og innskotum)</li>
+<li>postprod_tytuly.yaml — gjöf bókmenntalegra titla fyrir kafla eftir<br>
+                         að öll sagan hefur verið mynduð</li>
+<li>postprod_streszczenie.yaml — Langtímaminni: samantekt verkefnisins<br>
+                         vistuð í skrá og í minnissvæði á stjórnborðinu<br>
+                         (frá útgáfu 18.13; virkjast einnig sjálfkrafa<br>
+                         þegar samhengisgluggi fyllist í neyðartilviki)</li>
+<li>baza.yaml            — sameiginleg akkerismerki fyrir samhengi<br>
+                         ([OBECNA FABUŁA] og samantekt fyrri atburða);<br>
+                         eina skráin í þessari möppu þar sem innihaldið<br>
+                         er EKKI þýtt á þjóðtungur</li>
 </ul>
-<p>Inni í hverri af þessum skrám er "kerfisbundin upphafssetning" dýrmætasti hlutinn — löng leiðbeining fyrir gervigreindina um hvernig hún á að haga sér í viðkomandi ham. Ef þér finnst t.d. að Hljóðbókarhamurinn sé "of blómleg" eða að Hugmyndavindan bjóði of oft upp á töfralausnir, geturðu stillt þessi texta eftir þínum smekk, vistað og forritið mun hlaða þína útgáfu næst þegar það er ræst. Engin forritun.</p>
+<p>Verðmætasti hluti hverrar þessara skráa er "kerfisleiðbeiningin"<br>
+(system prompt) — löng leiðbeining fyrir gervigreindina um hvernig hún<br>
+á að haga sér í viðkomandi ham. Ef þér finnst t.d. Hljóðbókarhamurinn<br>
+skrifa "of blómlega" eða Hugarflugið leggja of oft til töfralausnir,<br>
+geturðu stillt þessa texta að þínum smekk, vistað þá, og forritið mun<br>
+hlaða inn þinni útgáfu við næstu ræsingu. Engin forritun nauðsynleg.</p>
 <h2>Hvað er "Sagnaham"?</h2>
 <hr>
 <p>Mappan "opowiesci/" inniheldur 8 skrár sem lýsa öðrum<br>

@@ -7,7 +7,7 @@
 
 Conjunto de herramientas autocontenidas impulsadas por IA para la escritura automática, planificación, formato y traducción de guiones extensos, así como para la ejecución de juegos de texto interactivos. El proyecto es una aplicación de escritorio nativa (wxPython) diseñada desde cero con plena accesibilidad para lectores de pantalla (NVDA, VoiceOver) y compatibilidad con sintetizadores de voz profesionales (TTS). Funciona sin navegador y sin servidor local: se ejecuta como una ventana de programa normal.
 
-Versión: **18.12.0** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versión: **18.13.0** · Idiomas soportados de forma nativa (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Módulos principales
@@ -20,8 +20,8 @@ La aplicación combina en una sola ventana cinco herramientas que se pueden alte
 El estudio principal para escribir radioteatros y audiolibros. Eliges el modo — Lluvia de Ideas, Guion (con etiquetas `[SFX]`/`[Personaje: emoción]`), Audiolibro (prosa tradicional) — y diriges el diálogo con el modelo a través del campo de Instrucciones + Libro del Mundo + Memoria a Largo Plazo:
 
 * **Libro del Mundo Multiproyecto:** El sistema carga automáticamente en segundo plano las reglas dedicadas del universo (`.md`) basándose en el archivo fuente activo, asegurando un aislamiento completo (carga de contexto sin clics).
-* **Acumulador de Trama:** Algoritmo de "memoria infinita". Cuando el indicador de memoria entra en estado de alerta roja, el sistema genera automáticamente un resumen de la trama y lo guarda en el campo de Memoria a Largo Plazo.
-* **4 modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro, Postproducción de Títulos). Puedes ajustar su tono sin programación — ver Gestor de Reglas más abajo.
+* **Acumulador de Trama:** Algoritmo de "memoria infinita". El resumen de la trama lo genera una herramienta de postproducción aparte (desde v18.13) y, cuando el indicador de memoria entra en estado de alerta roja, el sistema la ejecuta por su cuenta y guarda el resultado tanto en el archivo como en el campo de Memoria a Largo Plazo. Los resúmenes sucesivos son incrementales: el modelo recibe la memoria anterior y solo la parte nueva de la narración.
+* **5 modos creativos:** Cada uno de los archivos en `dictionaries/<jzk>/rezyser/` describe una "personalidad" separada del director de IA (Lluvia de Ideas, Guion, Audiolibro) o una herramienta de postproducción (Títulos de Capítulos, Memoria a Largo Plazo). Puedes ajustar su tono sin programación — ver Gestor de Reglas más abajo.
 
 
 ### 2. Historias (Ctrl+5, segundo modo principal desde v15.0)

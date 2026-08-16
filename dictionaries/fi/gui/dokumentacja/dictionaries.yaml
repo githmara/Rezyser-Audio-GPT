@@ -161,26 +161,35 @@ tresc:
        välimerkit) pysyvät ennallaan.
   co_to_tryb_rezysera: |
     ## Mikä on "Ohjaaja-tila"?
-    -----------------------
+    ---------------------------
 
     Kansio "rezyser/" sisältää {liczba_trybow_rezysera} tiedostoa, jotka kuvaavat sovelluksen
-    Pääohjaamon tilat:
+    Pääohjaajastudion toimintatiloja:
 
-    - burza_mozgow.yaml    — Aivoriihi (juonen suunnittelu, 3 vaihtoehtoa
-                             tarinan kehitykselle, anti-closure-direktiivi)
-    - skrypt.yaml          — Raaka Käsikirjoitus (tagit [SFX], [Speaker: tunne],
+    - tryb_burza.yaml      — Aivoriihi (juonen suunnittelu, 3 vaihtoehtoa
+                             tarinan kehittämiseen, anti-closure-direktiivi)
+    - tryb_skrypt.yaml     — Raakaskripti (tagit [SFX], [Puhuja: tunne],
                              hahmojen fonetiikka)
-    - audiobook.yaml       — Perinteinen Äänikirja (puhdas kirjallinen proosa,
-                             yhteenvetojen ja sulkeumien kielto)
-    - postprod_tytuly.yaml — kirjallisten lukujen nimien antaminen koko tarinan
-                             luomisen jälkeen
+    - tryb_audiobook.yaml  — Perinteinen äänikirja (puhdas kirjallinen
+                             proosa, yhteenvetojen ja hakasulkeiden kielto)
+    - postprod_tytuly.yaml — kirjallisten otsikoiden antaminen luvuille sen
+                             jälkeen, kun koko tarina on generoitu
+    - postprod_streszczenie.yaml — Pysyvä Muisti: projektin yhteenveto
+                             tallennetaan tiedostoon ja paneelin muistikenttään
+                             (versiosta 18.13 lähtien; käynnistyy myös
+                             automaattisesti kontekstiikkunan hälyttävän
+                             täyttymisen yhteydessä)
+    - baza.yaml            — yhteiset kontekstin ankkuritagit ([OBECNA FABUŁA]
+                             ja yhteenveto aiemmista tapahtumista); ainoa
+                             tiedosto tässä kansiossa, jonka sisältöä EI käännetä
+                             kansallisille kielille
 
-    Kunkin näiden tiedostojen sisällä arvokkain osa on "järjestelmäkehotus" —
-    pitkä ohjeistus tekoälylle, kuinka sen tulisi käyttäytyä kyseisessä tilassa.
-    Jos tunnet, että esimerkiksi Äänikirja-tila kirjoittaa "liian kukkaisesti"
-    tai Aivoriihi ehdottaa liian usein maagisia ratkaisuja, voit säätää näitä
-    tekstejä oman makusi mukaan, tallentaa ja sovellus lataa seuraavalla
-    käynnistyksellä sinun versiosi. Ei ohjelmointia.
+    Jokaisen näiden tiedostojen sisällä arvokkain osa on "järjestelmäkehote"
+    — pitkä ohje tekoälylle siitä, miten sen tulee käyttäytyä kyseisessä
+    tilassa. Jos sinusta tuntuu, että esimerkiksi Äänikirja-tila kirjoittaa
+    "liian koristeellisesti" tai Aivoriihi ehdottaa liian usein maagisia
+    ratkaisuja, voit muokata näitä tekstejä oman makusi mukaan, tallentaa ne,
+    ja sovellus lataa version seuraavalla käynnistyskerralla. Ei ohjelmointia.
   co_to_tryb_opowiesci: |
     ## Mikä on "Tarinatila"?
     ----------------------------

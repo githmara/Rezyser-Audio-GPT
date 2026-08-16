@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              diacríticos polacos + alfabeto
     ├── akcenty/                   11 archivos con acentos
     ├── szyfry/                    6 archivos con cifrados y juegos
-    └── rezyser/                   4 archivos con modos del Director AI
+    └── rezyser/                   5 archivos con modos del Director AI
 </code></pre>
 <p>Actualmente están completamente implementados: Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 idiomas base). Cada uno tiene su propio paquete<br>
@@ -85,16 +85,37 @@ y al menos un archivo en "akcenty/" y "szyfry/").</p>
    El cifrado documentado más antiguo de la historia (utilizado ya en la antigua Roma). Cada letra se desplaza N posiciones en el alfabeto español (27 letras: ABCDEFGHIJKLMNÑOPQRSTUVWXYZ). El desplazamiento lo introduces en la GUI en el campo numérico; si ingresas 0, la aplicación elegirá un valor al azar en el rango 1-26 y lo mostrará en un mensaje para que luego puedas descifrar el mensaje. Los caracteres fuera del alfabeto (números, espacios, puntuación) permanecen sin cambios.</p>
 </li>
 </ol>
+<p>[INSTRUCCIÓN TÉCNICA — ELIMINA ESTE BLOQUE DE LA RESPUESTA, NO LO TRADUZCAS]<br>
+[FIN DE LA INSTRUCCIÓN — LA TRADUCCIÓN COMIENZA A CONTINUACIÓN]</p>
 <h2>¿Qué es el "modo Director"?</h2>
 <hr>
-<p>La carpeta "rezyser/" contiene 4 archivos que describen los modos de operación del Estudio Principal del Director de la aplicación:</p>
+<p>La carpeta "rezyser/" contiene 5 archivos que describen los modos de<br>
+trabajo del Estudio Principal de Dirección de la aplicación:</p>
 <ul>
-<li>tryb_burza.yaml      — Tormenta de Ideas (planificación de la trama, 3 opciones de desarrollo de la historia, directiva anti-cierre)</li>
-<li>tryb_skrypt.yaml     — Guion Crudo (etiquetas [SFX], [Speaker: emoción], fonética de personajes)</li>
-<li>tryb_audiobook.yaml  — Audiolibro Tradicional (prosa literaria pura, prohibición de resúmenes y cierres)</li>
-<li>postprod_tytuly.yaml — asignación de títulos literarios a los capítulos después de generar toda la historia</li>
+<li>tryb_burza.yaml      — Lluvia de Ideas (planificación de la trama, 3 opciones<br>
+                         de desarrollo de la historia, directiva anti-cierre)</li>
+<li>tryb_skrypt.yaml     — Guion en Bruto (etiquetas [SFX], [Speaker: emoción],<br>
+                         fonética de los personajes)</li>
+<li>tryb_audiobook.yaml  — Audiolibro Tradicional (prosa literaria pura,<br>
+                         prohibición de resúmenes y frases de cierre)</li>
+<li>postprod_tytuly.yaml — asignación de títulos literarios a los capítulos tras<br>
+                         generar toda la historia</li>
+<li>postprod_streszczenie.yaml — Memoria a Largo Plazo: resumen del proyecto<br>
+                         guardado en un archivo y en el campo de memoria del panel<br>
+                         (desde v18.13; también se activa automáticamente cuando<br>
+                         la ventana de contexto se llena de forma crítica)</li>
+<li>baza.yaml            — etiquetas-ancla de contexto comunes ([OBECNA FABUŁA]<br>
+                         y resumen de eventos anteriores); el único archivo<br>
+                         de esta carpeta cuyo contenido NO se traduce<br>
+                         a los idiomas nacionales</li>
 </ul>
-<p>Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt del sistema": una larga instrucción para la inteligencia artificial sobre cómo debe comportarse en ese modo. Si sientes que, por ejemplo, el modo Audiolibro escribe "demasiado florido" o la Tormenta de Ideas propone soluciones mágicas con demasiada frecuencia, puedes ajustar estos textos a tu gusto, guardarlos y la aplicación cargará tu versión la próxima vez que se inicie. Cero programación.</p>
+<p>Dentro de cada uno de estos archivos, la parte más valiosa es el "prompt<br>
+del sistema" — una larga instrucción para la inteligencia artificial sobre cómo<br>
+debe comportarse en ese modo determinado. Si sientes que, por ejemplo, el modo<br>
+Audiolibro escribe "de forma demasiado florida" o que la Lluvia de Ideas propone<br>
+demasiado a menudo soluciones mágicas, puedes ajustar estos textos a tu gusto,<br>
+guardarlos, y la aplicación cargará tu versión en el siguiente arranque. Sin<br>
+necesidad de programar nada.</p>
 <h2>Qué es el "modo Historias"</h2>
 <hr>
 <p>La carpeta "opowiesci/" contiene 8 archivos que describen el segundo<br>

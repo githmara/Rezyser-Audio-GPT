@@ -83,21 +83,35 @@ tresc:
     6. Cæsar Dulritun (klassík)
        Elsta skjalfesta dulritun í sögunni (notuð í forn Róm). Hver stafur er færður um N stöður í íslenska stafrófinu (32 stafir, með diakritískum: AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ). Færslan er gefin upp í GUI í tölusviði; ef þú slærð inn 0, velur forritið handahófskennt gildi á bilinu 1-31 og sýnir það í skilaboðum, svo þú getir síðan afkóðað skilaboðin. Stafir utan stafrófsins (tölur, bil, greinarmerki) eru óbreyttir.
   co_to_tryb_rezysera: |
-    ## Hvað er "leikstjórahamur"?
-    ------------------------------
+    ## Hvað er "leikstjóra-hamur"?
+    ---------------------------
 
-    Mappan "rezyser/" inniheldur {liczba_trybow_rezysera} skrár sem lýsa vinnuhömum Aðalstúdíós Leikstjórans í forritinu:
+    Mappan "rezyser/" inniheldur {liczba_trybow_rezysera} skrár sem lýsa vinnuhömum Aðal
+    Leikstjórnarstofu forritsins:
 
-    - tryb_burza.yaml      — Hugmyndavinda (söguþráðarplan, 3 valkostir
-                             fyrir þróun sögunnar, and-lokunarstefna)
-    - tryb_skrypt.yaml     — Hrátt Handrit (merki [SFX], [Ræðumaður: tilfinning],
+    - tryb_burza.yaml      — Hugarflug (skipulagning söguþráðar, 3 valkostir
+                             fyrir framvindu sögunnar, anti-closure tilskipun)
+    - tryb_skrypt.yaml     — Hráð Handrit (merki [SFX], [Speaker: tilfinning],
                              hljóðfræði persóna)
-    - tryb_audiobook.yaml  — Hefðbundinn Hljóðbók (hrein bókmenntaprósa,
-                             bann við samantektum og ramma)
-    - postprod_tytuly.yaml — að veita bókmenntatitla köflum eftir að
-                             öll sagan hefur verið búin til
+    - tryb_audiobook.yaml  — Hefðbundin Hljóðbók (hrein bókmenntagerð,
+                             bann við samantektum og innskotum)
+    - postprod_tytuly.yaml — gjöf bókmenntalegra titla fyrir kafla eftir
+                             að öll sagan hefur verið mynduð
+    - postprod_streszczenie.yaml — Langtímaminni: samantekt verkefnisins
+                             vistuð í skrá og í minnissvæði á stjórnborðinu
+                             (frá útgáfu 18.13; virkjast einnig sjálfkrafa
+                             þegar samhengisgluggi fyllist í neyðartilviki)
+    - baza.yaml            — sameiginleg akkerismerki fyrir samhengi
+                             ([OBECNA FABUŁA] og samantekt fyrri atburða);
+                             eina skráin í þessari möppu þar sem innihaldið
+                             er EKKI þýtt á þjóðtungur
 
-    Inni í hverri af þessum skrám er "kerfisbundin upphafssetning" dýrmætasti hlutinn — löng leiðbeining fyrir gervigreindina um hvernig hún á að haga sér í viðkomandi ham. Ef þér finnst t.d. að Hljóðbókarhamurinn sé "of blómleg" eða að Hugmyndavindan bjóði of oft upp á töfralausnir, geturðu stillt þessi texta eftir þínum smekk, vistað og forritið mun hlaða þína útgáfu næst þegar það er ræst. Engin forritun.
+    Verðmætasti hluti hverrar þessara skráa er "kerfisleiðbeiningin"
+    (system prompt) — löng leiðbeining fyrir gervigreindina um hvernig hún
+    á að haga sér í viðkomandi ham. Ef þér finnst t.d. Hljóðbókarhamurinn
+    skrifa "of blómlega" eða Hugarflugið leggja of oft til töfralausnir,
+    geturðu stillt þessa texta að þínum smekk, vistað þá, og forritið mun
+    hlaða inn þinni útgáfu við næstu ræsingu. Engin forritun nauðsynleg.
   co_to_tryb_opowiesci: |
     ## Hvað er "Sagnaham"?
     ----------------------------

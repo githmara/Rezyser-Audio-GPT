@@ -178,6 +178,14 @@ tresc:
                              zakaz podsumowań i klamr)
     - postprod_tytuly.yaml — nadawanie literackich tytułów rozdziałom po
                              wygenerowaniu całej historii
+    - postprod_streszczenie.yaml — Pamięć Długotrwała: streszczenie projektu
+                             zapisywane do pliku i do pola pamięci w panelu
+                             (od v18.13; uruchamia się też samo przy alarmowym
+                             zapełnieniu okna kontekstowego)
+    - baza.yaml            — wspólne tagi-kotwice kontekstu ([OBECNA FABUŁA]
+                             i streszczenie poprzednich wydarzeń); jedyny plik
+                             w tym folderze, którego treści NIE tłumaczy się
+                             na języki narodowe
 
     W środku każdego z tych plików najcenniejszą częścią jest "prompt
     systemowy" — długa instrukcja dla sztucznej inteligencji, jak ma się

@@ -167,28 +167,36 @@ tresc:
        kannst. Zeichen außerhalb des Alphabets (Zahlen, Leerzeichen,
        Interpunktion) bleiben unverändert.
   co_to_tryb_rezysera: |
-    ## Was ist der "Regisseur-Modus"?
-    ------------------------------
+    # Was ist der "Regisseur-Modus"?
+    ---------------------------
 
-    Der Ordner "rezyser/" enthält {liczba_trybow_rezysera} Dateien, die die Arbeitsmodi
-    des Haupt-Regiestudios der Anwendung beschreiben:
+    Der Ordner "rezyser/" enthält {liczba_trybow_rezysera} Dateien, die die Arbeitsmodi des
+    Hauptregiestudios der Anwendung beschreiben:
 
-    - tryb_burza.yaml      — Brainstorming (Handlungsplanung, 3 Entwicklungs-
-                             optionen, Anti-Closure-Direktive)
-    - tryb_skrypt.yaml     — Rohskript (Tags [SFX], [Sprecher: Emotion],
-                             Figurenphoneti)
-    - tryb_audiobook.yaml  — Traditionelles Hörbuch (reine Literaturprosa,
-                             ohne Zusammenfassungen und Klammern)
-    - postprod_tytuly.yaml — Vergabe literarischer Kapitelüberschriften nach
-                             der Generierung der gesamten Geschichte
+    - tryb_burza.yaml      — Brainstorming (Handlungsplanung, 3 Optionen
+                             zur Entwicklung der Geschichte, Anti-Closure-Direktive)
+    - tryb_skrypt.yaml     — Rohes Skript (Tags [SFX], [Speaker: emocja],
+                             Figurenphonetik)
+    - tryb_audiobook.yaml  — Traditionelles Hörbuch (reine literarische Prosa,
+                             Verbot von Zusammenfassungen und Klammerbemerkungen)
+    - postprod_tytuly.yaml — Vergabe literarischer Kapiteltitel nach
+                             Generierung der gesamten Geschichte
+    - postprod_streszczenie.yaml — Langzeitspeicher: Projektzusammenfassung,
+                             die in einer Datei und im Gedächtnisfeld des Panels
+                             gespeichert wird (seit v18.13; startet auch automatisch
+                             bei alarmierender Füllung des Kontextfensters)
+    - baza.yaml            — gemeinsame Kontext-Anker-Tags ([OBECNA FABUŁA]
+                             und Zusammenfassung vorheriger Ereignisse); die einzige
+                             Datei in diesem Ordner, deren Inhalt NICHT in
+                             Landessprachen übersetzt wird
 
-    Im Inneren jeder dieser Dateien ist der wertvollste Teil der "System-Prompt"
-    — eine lange Anweisung für die künstliche Intelligenz, wie sie sich in
-    diesem Modus verhalten soll. Wenn Sie das Gefühl haben, dass z.B. der
-    Hörbuchmodus "zu blumig" schreibt oder das Brainstorming zu häufig magische
-    Lösungen vorschlägt, können Sie diese Texte nach Ihrem Geschmack anpassen,
-    speichern, und die Anwendung lädt Ihre Version beim nächsten Start. Kein
-    Programmieren erforderlich.
+    Der wertvollste Teil jeder dieser Dateien ist der "System-Prompt" —
+    eine ausführliche Anweisung für die künstliche Intelligenz, wie sie sich
+    im jeweiligen Modus verhalten soll. Wenn Sie das Gefühl haben, dass z. B.
+    der Hörbuch-Modus "zu blumig" schreibt oder das Brainstorming zu oft
+    magische Lösungen vorschlägt, können Sie diese Texte nach Ihrem
+    Geschmack anpassen, speichern, und die Anwendung lädt beim nächsten
+    Start Ihre Version. Null Programmierkenntnisse erforderlich.
   co_to_tryb_opowiesci: |
     ## Was ist der „Geschichten-Modus“?
     ----------------------------

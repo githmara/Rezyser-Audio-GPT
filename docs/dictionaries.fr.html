@@ -28,7 +28,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
     ├── podstawy.yaml              diacritiques polonais + alphabet
     ├── akcenty/                   11 fichiers d'accents
     ├── szyfry/                    6 fichiers de chiffrements et jeux
-    └── rezyser/                   4 fichiers de modes du Réalisateur IA
+    └── rezyser/                   5 fichiers de modes du Réalisateur IA
 </code></pre>
 <p>Sont actuellement entièrement implémentées : Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский<br>
 (9 langues de base). Chacune dispose de son propre pack<br>
@@ -122,24 +122,33 @@ l'une sans normalisation des nombres, l'autre avec normalisation (remplace « 15
 </ol>
 <h2>Qu'est-ce que le « mode Réalisateur » ?</h2>
 <hr>
-<p>Le dossier « rezyser/ » contient 4 fichiers décrivant les modes de travail du Studio Principal du Réalisateur de l'application :</p>
+<p>Le dossier "rezyser/" contient 5 fichiers décrivant les modes de<br>
+fonctionnement du Studio de Réalisation Principal de l'application :</p>
 <ul>
-<li>tryb_burza.yaml      — Brainstorming (planification de l'intrigue, 3 options<br>
+<li>tryb_burza.yaml      — Remue-méninges (planification de l'intrigue, 3 options<br>
                          de développement de l'histoire, directive anti-clôture)</li>
-<li>tryb_skrypt.yaml     — Scénario Brut (balises [SFX], [Speaker : émotion],<br>
+<li>tryb_skrypt.yaml     — Script Brut (balises [SFX], [Speaker : émotion],<br>
                          phonétique des personnages)</li>
 <li>tryb_audiobook.yaml  — Livre Audio Traditionnel (prose littéraire pure,<br>
-                         interdiction des résumés et conclusions)</li>
+                         interdiction des résumés et des formules-cadres)</li>
 <li>postprod_tytuly.yaml — attribution de titres littéraires aux chapitres après<br>
-                         la génération de toute l'histoire</li>
+                         la génération de l'histoire complète</li>
+<li>postprod_streszczenie.yaml — Mémoire à Long Terme : résumé du projet<br>
+                         enregistré dans un fichier et dans le champ mémoire du panneau<br>
+                         (depuis la v18.13 ; se déclenche aussi automatiquement en cas<br>
+                         de remplissage critique de la fenêtre contextuelle)</li>
+<li>baza.yaml            — balises-ancres de contexte communes ([OBECNA FABUŁA]<br>
+                         et résumé des événements précédents) ; le seul fichier<br>
+                         de ce dossier dont le contenu n'est PAS traduit<br>
+                         dans les langues nationales</li>
 </ul>
-<p>À l'intérieur de chacun de ces fichiers, la partie la plus précieuse est le « prompt<br>
-système » — une longue instruction pour l'intelligence artificielle sur la façon<br>
-de se comporter dans ce mode. Si vous sentez que, par exemple, le mode<br>
-Livre Audio écrit « trop fleuri » ou que Brainstorming propose trop<br>
-souvent des solutions magiques, vous pouvez ajuster ces textes selon votre goût,<br>
-les sauvegarder, et l'application chargera votre version au prochain démarrage.<br>
-Zéro programmation.</p>
+<p>À l'intérieur de chacun de ces fichiers, la partie la plus précieuse est le<br>
+« prompt système » — une longue instruction destinée à l'intelligence artificielle,<br>
+lui indiquant comment se comporter dans un mode donné. Si vous sentez que, par<br>
+exemple, le mode Livre Audio écrit « de manière trop fleurie » ou que le mode<br>
+Remue-méninges propose trop souvent des solutions magiques, vous pouvez ajuster<br>
+ces textes selon votre goût, les enregistrer, et l'application chargera votre<br>
+version au prochain démarrage. Aucune programmation requise.</p>
 <h2>Qu'est-ce que le « mode Histoires » ?</h2>
 <hr>
 <p>Le dossier « opowiesci/ » contient 8 fichiers décrivant le second<br>

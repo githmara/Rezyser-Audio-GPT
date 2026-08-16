@@ -33,8 +33,8 @@ tresc:
     The main studio for writing radio plays and audiobooks. You choose a mode — Brainstorming, Script (with `[SFX]`/`[Character: emotion]` tags), Audiobook (traditional prose) — and direct dialogue with the model through the Instruction field + World Book + Long-Term Memory:
 
     * **Multi-Project World Book:** The system automatically loads dedicated universe rules (`.md`) in the background based on the active source file, ensuring full isolation (zero-click context loading).
-    * **Plot Accumulator:** The "infinite memory" algorithm. When the memory indicator enters a red alert state, the system automatically generates a plot summary and saves it to the Long-Term Memory field.
-    * **{liczba_trybow_rezysera} creative modes:** Each file in `dictionaries/<lang>/rezyser/` describes a separate AI director "personality" (Brainstorming, Script, Audiobook, Title Postproduction). You can tune their tone without programming — see the Rule Manager below.
+    * **Plot Accumulator:** The "infinite memory" algorithm. The plot summary is produced by a separate post-production tool (since v18.13), and when the memory indicator enters a red alert state the system runs it by itself and writes the result both to the file and to the Long-Term Memory field. Successive summaries are incremental — the model receives the previous memory plus only the new part of the narrative.
+    * **{liczba_trybow_rezysera} creative modes:** Each file in `dictionaries/<lang>/rezyser/` describes a separate AI director "personality" (Brainstorming, Script, Audiobook) or a post-production tool (Chapter Titles, Long-Term Memory). You can tune their tone without programming — see the Rule Manager below.
   modul_opowiesci: |
     ### 2. Stories (Ctrl+5, second main mode since v15.0)
 

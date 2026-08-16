@@ -7,7 +7,7 @@
 
 Strumenti autonomi alimentati da AI per la scrittura automatica, pianificazione, formattazione e traduzione di script estesi, oltre alla conduzione di giochi di testo interattivi. Il progetto è un'applicazione desktop nativa (wxPython) progettata da zero per garantire piena accessibilità ai lettori di schermo (NVDA, VoiceOver) e compatibilità con sintetizzatori vocali professionali (TTS). Funziona senza browser e senza server locale — si avvia come una normale finestra di programma.
 
-Versione: **18.12.0** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
+Versione: **18.13.0** · Lingue supportate nativamente (9): Polski, Deutsch, English, Español, Suomi, Français, Íslenska, Italiano, Русский.
 
 
 ## Moduli principali
@@ -20,8 +20,8 @@ L'applicazione combina in una finestra cinque strumenti commutabili tramite scor
 Studio principale per scrivere radiodrammi e audiolibri. Scegli la modalità — Brainstorming, Script (con tag `[SFX]`/`[Personaggio: emozione]`), Audiolibro (prosa tradizionale) — e dirigi il dialogo con il modello attraverso il campo Istruzioni + Libro del Mondo + Memoria a Lungo Termine:
 
 * **Libro del Mondo Multiprogetto:** Il sistema carica automaticamente in background le regole dedicate dell'universo (`.md`) basate sul file sorgente attivo, garantendo un'isolamento completo (caricamento del contesto senza clic).
-* **Accumulatore di Trama:** Algoritmo di "memoria infinita". Quando l'indicatore di memoria entra in stato di allarme rosso, il sistema genera automaticamente un riassunto della trama e lo salva nel campo Memoria a Lungo Termine.
-* **4 modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro, Post-produzione Titoli). Puoi regolare il loro tono senza programmazione — vedi Gestore Regole di seguito.
+* **Accumulatore di Trama:** Algoritmo di "memoria infinita". Il riassunto della trama lo genera uno strumento di postproduzione a sé (dalla v18.13) e, quando l'indicatore di memoria entra in stato di allarme rosso, il sistema lo avvia da solo e salva il risultato sia nel file sia nel campo Memoria a Lungo Termine. I riassunti successivi sono incrementali: il modello riceve la memoria precedente e solo la parte nuova della narrazione.
+* **5 modalità creative:** Ogni file in `dictionaries/<jzk>/rezyser/` descrive una diversa "personalità" del regista AI (Brainstorming, Script, Audiolibro) oppure uno strumento di postproduzione (Titoli dei Capitoli, Memoria a Lungo Termine). Puoi regolare il loro tono senza programmazione — vedi Gestore Regole di seguito.
 
 
 ### 2. Racconti (Ctrl+5, secondo modo principale dalla v15.0)
