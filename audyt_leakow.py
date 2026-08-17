@@ -660,16 +660,35 @@ def bramka_docs(*, prog_lingua: float = 0.70) -> WynikBramki:
 # `print`) jest tam świadomy i poprawny (logi po PL dla polskiego dev-toola).
 DEV_TOOLE = {
     "build_release.py", "generuj_dokumentacje.py",
-    "buduj_wielojezyczne_docs.py", "buduj_wielojezyczne_ui.py",
-    "buduj_wielojezyczne_tryby.py",
     "audyt_leakow.py", "przeglad_tlumaczen.py", "odpowiedz_lokalnie.py",
-    # v18.16: wspólne bramki rodziny `buduj_wielojezyczne_*`. Ta sama klasa co
-    # `przeglad_tlumaczen.py` — polskie diagnostyki dla polskiego maintainera,
-    # zero powierzchni user-facing. Whitelista jest tu czystsza niż baseline
-    # (wzorzec `_dev_log` z v18.5.4).
-    "tlumacz_bramki.py",
+    # Wspólne moduły rodziny `buduj_wielojezyczne_*` (v18.16 bramki, v18.17
+    # rdzeń). Ta sama klasa co `przeglad_tlumaczen.py` — polskie diagnostyki dla
+    # polskiego maintainera, zero powierzchni user-facing. Whitelista jest tu
+    # czystsza niż baseline (wzorzec `_dev_log` z v18.5.4).
+    #
+    # WYPISANE JAWNIE, a nie objęte prefiksem `tlumacz_`, i to jest ważne:
+    # `tlumacz_ai.py` NOSI ten sam prefiks, ale dev-toolem NIE JEST — chodzi
+    # w runtime za GUI Poligloty, więc polski hard-kod jest tam realnym leakiem
+    # i plik MUSI zostać skanowany.
+    "tlumacz_bramki.py", "tlumacz_rdzen.py",
     "test_core_updater.py",
 }
+
+# Prefiks rodziny autotłumaczy. Każdy `buduj_wielojezyczne_*.py` jest z definicji
+# dev-only: chodzi wyłącznie ze źródła, u maintainera, i NIE wchodzi do bundla
+# PyInstallera — jego polskie `print` są świadome.
+#
+# Reguła prefiksowa, nie kolejna nazwa na liście, bo ten sam błąd popełniliśmy
+# już dwa razy: `buduj_wielojezyczne_tryby.py` dopisano dopiero w patchu sanity
+# po v18.15, a `buduj_wielojezyczne_opowiesci.py` wywrócił bramkę hard-kodów
+# w buildzie v18.17. Roadmapa planuje jeszcze dwóch braci (Poliglota, akcenty)
+# — mają być wykluczeni w chwili powstania, bez pamiętania o tej liście.
+PREFIKS_AUTOTLUMACZY = "buduj_wielojezyczne_"
+
+
+def czy_dev_tool(nazwa_pliku: str) -> bool:
+    """Czy ten plik `.py` jest dev-toolem wyłączonym ze skanu hard-kodów?"""
+    return nazwa_pliku in DEV_TOOLE or nazwa_pliku.startswith(PREFIKS_AUTOTLUMACZY)
 
 # Metody wx (i pochodne), których string-argument widzi user wprost.
 SINKI_USER_FACING = {
@@ -879,11 +898,11 @@ def _analizuj_plik(sciezka: Path, detektor=None) -> list[LeakPy]:
 
 
 def skanuj_zrodla_py(root: Path = ROOT) -> list[LeakPy]:
-    """Skanuje wszystkie moduły aplikacji (`*.py` w roocie, bez DEV_TOOLE)."""
+    """Skanuje moduły aplikacji (`*.py` w roocie, bez dev-tooli — :func:`czy_dev_tool`)."""
     detektor = _detektor_pl_en()
     leaki: list[LeakPy] = []
     for sciezka in sorted(root.glob("*.py")):
-        if sciezka.name in DEV_TOOLE:
+        if czy_dev_tool(sciezka.name):
             continue
         leaki.extend(_analizuj_plik(sciezka, detektor))
     return leaki
