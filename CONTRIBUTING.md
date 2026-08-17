@@ -60,7 +60,8 @@ for full usage (help text is in English).
 | `buduj_wielojezyczne_docs.py` | Batch-translates the manuals (`gui/dokumentacja/*.yaml`) pl → others. Same draft → review → `-f` workflow. |
 | `buduj_wielojezyczne_tryby.py` | Batch-translates the Director's **recipes** (`<code>/rezyser/*.yaml` — prompt templates, GUI labels, developer comments) pl → others. Same draft → review → `-f` workflow, plus `--tylko-walidacja` (no API) to audit existing packs against each other. |
 | `buduj_wielojezyczne_opowiesci.py` | Batch-translates the **Tales** recipes (`<code>/opowiesci/*.yaml` — the narrative engine's system prompts, the vial mechanic, Quick Start presets) pl → others. Same draft → review → `-f` workflow and `--tylko-walidacja` (no API). Light `--fiolka` mode translates only the vial effect seeds a pack is MISSING and appends them, touching nothing else. `zaczatki.yaml` is excluded from `--wszystkie`: the presets are literature written per language, so name them explicitly if you really want a machine starting point. |
-| `tlumacz_rdzen.py`, `tlumacz_bramki.py` | Shared engine room of the four autotranslators above — API client and structured-output call, literal freezing, YAML comment surgery, round-trip dumping, draft banners (`_rdzen`), plus the anti-"meta instruction skip" prompt block and the structural fingerprint gate (`_bramki`). Dev-only, no engine imports; edit here rather than copying code into a fifth tool. |
+| `buduj_wielojezyczne_poliglota.py` | Batch-translates the **Polyglot** rules (`<code>/szyfry/*.yaml` plus the three cleanup tools in `<code>/akcenty/`) pl → others. Same draft → review → `-f` workflow and `--tylko-walidacja` (no API). Two things are special: worked examples in `opis` are COMPUTED by the real engine and injected into the prompt (the model never does the arithmetic), and LANGUAGE DATA (vowel sets, abbreviation tables, hissing pattern, Caesar shift range, ISO code) is never rewritten in an existing pack — for a new one the tool derives what is computable and asks the model once for the rest. |
+| `tlumacz_rdzen.py`, `tlumacz_bramki.py` | Shared engine room of the five autotranslators above — API client and structured-output call, literal freezing, YAML comment surgery, round-trip dumping, draft banners (`_rdzen`), plus the anti-"meta instruction skip" prompt block and the structural fingerprint gate (`_bramki`). Dev-only, no engine imports; edit here rather than copying code into a fifth tool. |
 | `audyt_leakow.py` | Leak detector and release **gate**: `--bramka` (docs + `ui.yaml`), `--bramka-py` (Polish hard-coded strings in `*.py`). Both compare against a committed baseline; regenerate with `--zapisz-baseline[-py]` only after reviewing the diff. Needs the optional `lingua` dependency — without it the gate is skipped with a warning, never blocked. |
 | `refresh_languages.py` | Syncs the target-language registry (`jezyki_docelowe.yaml`) with the `dictionaries/<code>/` folders. Run after adding/removing a language. `--strict` for a CI guard. |
 | `build_release.py` | Builds the PyInstaller release and the Inno Setup installer. |
@@ -68,7 +69,8 @@ for full usage (help text is in English).
 > Machine translations are **always** reviewed for hallucinations before being
 > finalized. A full (re)translation always lands as a draft and writes a review
 > checklist to `skrypty/` (`przeglad_ui.md` / `przeglad_docs.md` /
-> `przeglad_tryby.md` / `przeglad_opowiesci.md`); finalize with `-f` once reviewed.
+> `przeglad_tryby.md` / `przeglad_opowiesci.md` / `przeglad_poliglota.md`);
+> finalize with `-f` once reviewed.
 
 ## Adding a UI language
 
@@ -78,7 +80,12 @@ for full usage (help text is in English).
 2. `python refresh_languages.py` — registers the new code.
 3. `python buduj_wielojezyczne_ui.py -l <code>` then
    `python buduj_wielojezyczne_docs.py -l <code>` — translate UI + manuals.
-4. Review the drafts, finalize with `-f`, then regenerate docs with
+4. `python buduj_wielojezyczne_poliglota.py -l <code>` — the cipher and cleanup
+   rules. The tool derives the language data it can compute and asks the model
+   once for the rest (vowels, abbreviations, hissing letters); expect to write
+   `samogloskowiec.yaml` by hand if your language has no Polish-style softening
+   (see the Finnish pack) — the gate will tell you.
+5. Review the drafts, finalize with `-f`, then regenerate docs with
    `python generuj_dokumentacje.py -v`.
 
 ## Pull requests

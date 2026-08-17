@@ -350,6 +350,56 @@ presets. Everything below has been observed at least once in a real batch.
 """
 
 
+_CHECKLIST_POLIGLOTA = """\
+## Polyglot rule hotspots (szyfry/*.yaml + the three tools in akcenty/)
+
+These files define TEXT TRANSFORMATIONS: ciphers and screen-reader cleanup tools.
+Their teaching text is checked by a PYTHON ENGINE, not by taste — a "nicer"
+sentence that disagrees with the algorithm is a bug in the manual, not a style
+choice. Everything below has been observed at least once in a real run.
+
+- WORKED EXAMPLES ARE ARITHMETIC. Every `"word" → "result"` pair in `opis` must
+  be exactly what `core_poliglota._algo_*` produces for THIS language pack. The
+  tool computes them and injects them as `computed_examples`; a gate re-runs the
+  engine on your text. Concretely: the stutter repeats ONE leading letter when
+  the second letter is a vowel (`"Computer" → "C-c-c-computer"`) and TWO when it
+  is a consonant (`"Straße" → "St-st-straße"`); the rest of the word ALWAYS goes
+  lowercase (German nouns are the trap); a word is skipped only when it is
+  SHORTER than `min_dlugosc_slowa` — a three-letter word at threshold 3 IS
+  stuttered (this is how German „Ich" and French « moi » were wrong for years).
+- EXAMPLE WORDS MUST BE NATIVE. A Polish `komputer`/`prysznic`/`dzień` left in
+  your pack is a leak that NO character-based detector can see (no Polish
+  diacritics in them) and that the arithmetic gate happily accepts. If the tool
+  gave you a computed pair, use that word; if you replace it, the replacement
+  must still satisfy the rule's branch.
+- NUMBERS BELONG TO THIS PACK: the Caesar alphabet length and shift range come
+  from `<code>/podstawy.yaml`, never from the Polish text (Polish has 35 letters,
+  almost no other language does). Allowed shifts are ±(length−1): a shift equal
+  to the alphabet length is the identity, i.e. plain text instead of a cipher.
+- YAML FIELD NAMES STAY POLISH in every language: `min_dlugosc_slowa`,
+  `samogloski`, `rozwiniecia`, `wzor_syku`, `min_przesuniecie`, `zamiany`. The
+  user edits those very fields in the in-app Rules Manager, so a localized name
+  points at a field that does not exist. Same for algorithm ids (`cezar`,
+  `jakanie`, `odwracanie`, `samogloskowiec`, `typoglikemia`, `waz`) and category
+  values (`szyfr`, `oczyszczenie`, `naprawiacz`).
+- THE LABEL IS THE CANONICAL NAME of this cipher for the whole pack — `ui.yaml`
+  and the manual quote it. The tool refuses to change an existing one; if you
+  change it by hand, update those quotations in the same commit.
+- A STEP WHOSE DATA IS EMPTY HERE MUST NOT BE DOCUMENTED AS WORKING. Most
+  languages have empty `zmiekszenia_*` (they have no Polish `dzi→dź` softening),
+  so their vowel-cipher description should say the step does not apply — the way
+  the Finnish pack does — instead of translating the Polish example.
+- LANGUAGE DATA IS NOT TRANSLATION and the tool never rewrites it in an existing
+  pack: vowel sets, abbreviation tables, the hissing pattern and the ISO code
+  belong to your language. If you see Polish letters (ą, ę, ł, ń, ś, ź, ż, ć) in
+  any of them, something bypassed the tool.
+- ABBREVIATIONS (`rozwiniecia`) are read by a text-to-speech engine: give the
+  real written forms of YOUR language with their dots (`t.ex.`, `o.s.frv.`,
+  `ул.`) and spell the expansion out in full. The reversed-abbreviation example
+  in `opis` has to match your own table, not the Polish `m.in.` → `.nim`.
+"""
+
+
 # Rdzeń nazwy buildera → blok hotspotów. Trzeci brat (`_tryby.py`, v18.15) wymusił
 # generalizację dawnego `if narzedzie.endswith("docs.py")`: nowe narzędzie z tej
 # rodziny dopisuje tu jedną parę i nie tyka reszty modułu. Nieznany rdzeń spada na
@@ -361,6 +411,7 @@ _HOTSPOTY: dict[str, str] = {
     "ui": _CHECKLIST_UI,
     "tryby": _CHECKLIST_TRYBY,
     "opowiesci": _CHECKLIST_OPOWIESCI,
+    "poliglota": _CHECKLIST_POLIGLOTA,
 }
 
 

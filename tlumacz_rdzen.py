@@ -192,6 +192,7 @@ def wywolaj_llm(
     max_tokens: int,
     wskazowka_limitu: str = "",
     kontekst_paczki: dict[str, str] | None = None,
+    pola_payloadu: dict[str, Any] | None = None,
 ) -> dict[int, str]:
     """Wysyła jeden chunk `(id, kind, source)`. Zwraca mapę id → target.
 
@@ -207,6 +208,12 @@ def wywolaj_llm(
             głosami (test bojowy v18.17: `de` dostało „Fläschchen", choć jej
             dokumentacja od wydań mówi „Phiole"). Prompt systemowy narzędzia
             musi opisać, jak z tego pola korzystać.
+        pola_payloadu: dodatkowe pola wstawiane do payloadu PRZED `items`
+            (generyczny kanał na fakty policzone po stronie Pythona — u brata
+            od Poligloty jadą tak `computed_examples` i `alphabet_facts`,
+            czyli wyjścia faktycznych algorytmów silnika). Rdzeń nic o ich
+            znaczeniu nie wie i wie wiedzieć nie musi: nazwy i opis kontraktu
+            należą do prompta systemowego narzędzia.
 
     Kontrakt błędów jest częścią API rdzenia i wszyscy bracia go dziedziczą:
     ``RuntimeError`` = wpadka TEGO chunku (wołający może ją złapać i lecieć
@@ -216,6 +223,9 @@ def wywolaj_llm(
     payload: dict[str, Any] = {"target_language": nazwa_celu}
     if kontekst_paczki:
         payload["existing_terminology"] = kontekst_paczki
+    for nazwa_pola, wartosc in (pola_payloadu or {}).items():
+        if wartosc:
+            payload[nazwa_pola] = wartosc
     payload["items"] = [
         {"id": i, "kind": rodzaj, "source": src} for i, rodzaj, src in pozycje
     ]
