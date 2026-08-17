@@ -191,6 +191,7 @@ def wywolaj_llm(
     pozycje: list[tuple[int, str, str]],
     max_tokens: int,
     wskazowka_limitu: str = "",
+    kontekst_paczki: dict[str, str] | None = None,
 ) -> dict[int, str]:
     """Wysyła jeden chunk `(id, kind, source)`. Zwraca mapę id → target.
 
@@ -199,16 +200,25 @@ def wywolaj_llm(
             o materiale należy do narzędzia).
         wskazowka_limitu: tekst dopisywany do komunikatu przy uderzeniu w
             `max_tokens` (np. „zmniejsz BATCH_MAX_ZNAKOW (obecnie 12 000)").
+        kontekst_paczki: terminologia JUŻ UŻYWANA w paczce docelowej
+            (`{nazwa_pola: wartość}`), wstrzykiwana do payloadu jako
+            `existing_terminology`. Model nie widzi sąsiednich plików paczki,
+            więc bez tego wymyśla własny termin — a paczka mówi wtedy dwoma
+            głosami (test bojowy v18.17: `de` dostało „Fläschchen", choć jej
+            dokumentacja od wydań mówi „Phiole"). Prompt systemowy narzędzia
+            musi opisać, jak z tego pola korzystać.
 
     Kontrakt błędów jest częścią API rdzenia i wszyscy bracia go dziedziczą:
     ``RuntimeError`` = wpadka TEGO chunku (wołający może ją złapać i lecieć
     dalej z pozostałymi językami), ``SystemExit`` = sygnał konfiguracyjny,
     po którym dalsza praca nie ma sensu (ucięta odpowiedź = niekompletny JSON).
     """
-    payload = {
-        "target_language": nazwa_celu,
-        "items": [{"id": i, "kind": rodzaj, "source": src} for i, rodzaj, src in pozycje],
-    }
+    payload: dict[str, Any] = {"target_language": nazwa_celu}
+    if kontekst_paczki:
+        payload["existing_terminology"] = kontekst_paczki
+    payload["items"] = [
+        {"id": i, "kind": rodzaj, "source": src} for i, rodzaj, src in pozycje
+    ]
 
     kwargs: dict[str, Any] = dict(
         model=model,

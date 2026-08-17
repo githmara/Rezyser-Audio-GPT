@@ -513,6 +513,13 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str) -> str:
         "- Stay CONSISTENT inside the batch: the vial (its label, the prompt "
         "rules about it, the effect descriptions and the comments) must use ONE "
         "native word for the object, in every item.\n"
+        "- **`existing_terminology` IN THE INPUT WINS.** When the payload "
+        "carries that field, this language pack ALREADY ships those strings and "
+        "its manual, readme and tutorials have used them for releases. REUSE "
+        "them verbatim — same word for the vial, same mode name — instead of "
+        "coining a better-sounding synonym. You cannot see the pack's other "
+        "files; a fresh coinage would make the button say one thing and the "
+        "manual another.\n"
         "- THE VIAL CHOICE LABEL IS A CONTRACT. The short label of the "
         "`Uncork the vial` choice appears BOTH as its own item AND quoted "
         "verbatim several times inside the mode's system prompt (in a JSON "
@@ -577,9 +584,16 @@ def _PROMPT_FIOLKA(nazwa_celu: str, kod: str) -> str:
         "sentence, do not summarize, no commentary, no code fences.\n\n"
         "## Localization quality\n"
         + _ZASADY_TERMINOW +
-        "- The vial itself must be called by the SAME native word the rest of "
-        "this language pack already uses for it (check the sibling effects you "
-        "are given, if any).\n"
+        "- **TERMINOLOGY COMES FROM `existing_terminology` IN THE INPUT, not "
+        "from your judgement.** That field carries strings this language pack "
+        "already ships: the label of the \"uncork\" choice (e.g. German `Phiole "
+        "entkorken`) and one already-translated effect per category. Mine them "
+        "for the words this pack uses — for the VIAL, for a game TURN, for the "
+        "player's INVENTORY, for a SCENE — and reuse those exact words "
+        "(inflected as the sentence needs), even where you would have picked a "
+        "different synonym. The pack's manual and its other effects have used "
+        "them for releases, and you cannot see those files. Getting this wrong "
+        "is the single most likely way to spoil an otherwise good translation.\n"
         "- Full diacritics, correct case/gender/number; for inflected languages "
         "inflect the cultural terms naturally instead of leaving bare "
         "nominatives.\n\n"
@@ -1018,9 +1032,54 @@ def wczytaj_orakuly(
         kod_zrodlowy=KOD_ZRODLOWY, dopusc_drafty=dopusc_drafty)
 
 
+def kontekst_paczki(
+    kod: str, nazwa_pliku: str, *, z_ziarnami: bool = False,
+) -> dict[str, str]:
+    """Terminologia, którą paczka docelowa JUŻ ma (pusta, gdy pliku nie ma).
+
+    Model nie widzi sąsiednich plików paczki, więc nazwę fiolki wymyśla za
+    każdym razem od nowa. Test bojowy v18.17 pokazał, do czego to prowadzi:
+    świeży przekład `de` nazwał ją „Fläschchen", choć `readme`, `tales`
+    i `dictionaries` tej paczki od wydań mówią „Phiole" — paczka zaczęłaby
+    mówić dwoma głosami, a gracz zobaczyłby w przycisku inne słowo niż
+    w podręczniku. Dlatego istniejące napisy podajemy modelowi JAWNIE, z
+    instrukcją „użyj ponownie, nie wymyślaj".
+
+    ``z_ziarnami=True`` (tryb `--fiolka`) dokłada po jednym ISTNIEJĄCYM ziarnie
+    z każdej kategorii. Tam model dostaje wyłącznie nowe opisy, więc nie ma
+    skąd wziąć terminologii mechanicznej — a właśnie na niej poległ test bojowy
+    `is` (termin tury `umferð` zamieniony na `skipti`, ekwipunek `eigur` na
+    `farangur`). Ziarno-przykład jest najtańszym możliwym słownikiem: pokazuje
+    te słowa w naturalnym zdaniu i w odpowiednim przypadku.
+    """
+    plik = DICT_DIR / kod / FOLDER_OPOWIESCI / nazwa_pliku
+    if not plik.is_file():
+        return {}
+    try:
+        dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 — fail-soft: wskazówka to wygoda, nie bramka
+        return {}
+    if not isinstance(dane, dict):
+        return {}
+    wynik: dict[str, str] = {}
+    etykieta = dane.get("etykieta")
+    if isinstance(etykieta, str) and etykieta.strip():
+        wynik["mode_label"] = etykieta.strip()
+    fiolka = dane.get("fiolka") or {}
+    etykieta_fiolki = fiolka.get("etykieta_wyboru")
+    if isinstance(etykieta_fiolki, str) and etykieta_fiolki.strip():
+        wynik["vial_choice_label"] = etykieta_fiolki.strip()
+    if z_ziarnami:
+        for kategoria, pula in (fiolka.get("opisy_skutkow") or {}).items():
+            if isinstance(pula, list) and pula and isinstance(pula[0], str):
+                wynik[f"existing_effect_{kategoria}"] = pula[0].strip()
+    return wynik
+
+
 def _wywolaj(
     klient: Any, model: str, nazwa_celu: str, kod: str,
     pozycje: list[tuple[int, str, str]], *, tryb_fiolka: bool,
+    kontekst: dict[str, str] | None = None,
 ) -> dict[int, str]:
     """Jedno wywołanie LLM z promptem właściwym dla trybu."""
     system = (_PROMPT_FIOLKA if tryb_fiolka else _PROMPT_SYSTEMOWY)(nazwa_celu, kod)
@@ -1036,6 +1095,7 @@ def _wywolaj(
             f"Zmniejsz BATCH_MAX_ZNAKOW (obecnie {BATCH_MAX_ZNAKOW}) "
             f"i uruchom ponownie."
         ),
+        kontekst_paczki=kontekst,
     )
 
 
@@ -1197,6 +1257,10 @@ def tlumacz_plik(
 
     # --- Wywołania LLM -------------------------------------------------------
     nazwa_cel = _natywna_nazwa(kod)
+    kontekst = kontekst_paczki(kod, nazwa_pliku)
+    if kontekst:
+        print(f"🔤 {kod}/{nazwa_pliku}: terminologia paczki podana modelowi: "
+              f"{kontekst}")
     chunki = _chunkuj(jednostki)
     mapa_tgt: dict[int, str] = {}
     print(f"🌍 {kod}/{nazwa_pliku}: {model} (cel: {nazwa_cel}), {len(chunki)} chunk(ów)…")
@@ -1206,7 +1270,7 @@ def tlumacz_plik(
               f"(id {chunk[0].id}..{chunk[-1].id}, {len(chunk)} jednostek)…")
         try:
             mapa_tgt.update(_wywolaj(klient, model, nazwa_cel, kod, pozycje,
-                                     tryb_fiolka=False))
+                                     tryb_fiolka=False, kontekst=kontekst))
         except RuntimeError as exc:
             print(f"❌ {kod}/{nazwa_pliku}: błąd LLM w chunku {nr}/{len(chunki)} — {exc}")
             return False, []
@@ -1218,7 +1282,8 @@ def tlumacz_plik(
         return False, []
 
     if not _bramki_z_powtorka(jednostki, mapa_tgt, kod, nazwa_pliku, klient,
-                              model, nazwa_cel, tryb_fiolka=False):
+                              model, nazwa_cel, tryb_fiolka=False,
+                              kontekst=kontekst):
         return False, []
 
     # --- Detokenizacja + iniekcja do klona drzewa PL ------------------------
@@ -1311,11 +1376,16 @@ def _tlumacz_fiolke(
         return True, []
 
     nazwa_cel = _natywna_nazwa(kod)
-    print(f"🧪 {kod}/{nazwa_pliku}: {model} (cel: {nazwa_cel}), tryb --fiolka…")
+    kontekst = kontekst_paczki(kod, nazwa_pliku, z_ziarnami=True)
+    print(f"🧪 {kod}/{nazwa_pliku}: {model} (cel: {nazwa_cel}), tryb --fiolka "
+          f"(fiolka w tej paczce: {kontekst.get('vial_choice_label', '—')!r}, "
+          f"{sum(1 for k in kontekst if k.startswith('existing_effect_'))} ziaren "
+          f"jako wzorzec terminologii)…")
     try:
         mapa_tgt = _wywolaj(
             klient, model, nazwa_cel, kod,
-            [(j.id, j.rodzaj, j.zrodlo_tok) for j in jednostki], tryb_fiolka=True)
+            [(j.id, j.rodzaj, j.zrodlo_tok) for j in jednostki],
+            tryb_fiolka=True, kontekst=kontekst)
     except RuntimeError as exc:
         print(f"❌ {kod}/{nazwa_pliku}: błąd LLM — {exc}")
         return False, []
@@ -1327,7 +1397,8 @@ def _tlumacz_fiolke(
         return False, []
 
     if not _bramki_z_powtorka(jednostki, mapa_tgt, kod, nazwa_pliku, klient,
-                              model, nazwa_cel, tryb_fiolka=True):
+                              model, nazwa_cel, tryb_fiolka=True,
+                              kontekst=kontekst):
         return False, []
 
     for j in jednostki:
@@ -1367,6 +1438,7 @@ def _bramki_z_powtorka(
     nazwa_cel: str,
     *,
     tryb_fiolka: bool,
+    kontekst: dict[str, str] | None = None,
 ) -> bool:
     """Bramki per jednostka + jednorazowa powtórka z czystym kontekstem."""
     porazki: list[tuple[Jednostka, list[str]]] = []
@@ -1384,7 +1456,7 @@ def _bramki_z_powtorka(
     do_retry = [(j.id, j.rodzaj, j.zrodlo_tok) for j, _ in porazki]
     try:
         retry = _wywolaj(klient, model, nazwa_cel, kod, do_retry,
-                         tryb_fiolka=tryb_fiolka)
+                         tryb_fiolka=tryb_fiolka, kontekst=kontekst)
     except RuntimeError as exc:
         print(f"❌ {kod}/{nazwa_pliku}: powtórka nieudana — {exc}")
         return False
