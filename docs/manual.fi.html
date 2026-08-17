@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Täydellinen opas (Versio 18.17.0 – Julkaisuversio)</title>
+<title>Reżyser Audio GPT — Täydellinen opas (Versio 18.18.0 – Julkaisuversio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Täydellinen opas (Versio 18.17.0 – Julkaisuversio)</h1>
+<h1>Reżyser Audio GPT — Täydellinen opas (Versio 18.18.0 – Julkaisuversio)</h1>
 <p>Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.</p>
 <p>Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglootti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tales.fi.html). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.</p>
 <h2>VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)</h2>
@@ -253,7 +253,7 @@ Saatatte kysyä, osaako synteettinen ääni taivuttaa näin normalisoituja numer
 <p>Vahva Änkytys / Viallinen Robotti — lisää änkytyksiä sanojen alkuun: "t-t-t-tietokone", "pr-pr-prinsessa". Lyhyitä sanoja (alle 3 merkkiä) algoritmi jättää huomiotta. Jos sanan toinen kirjain on konsonantti, se toistaa kaksi ensimmäistä kirjainta (luonnollisempi vaikutus); jos vokaali, se toistaa vain ensimmäisen.</p>
 </li>
 <li>
-<p>Caesarin Salakirjoitus (FI-alfabetin siirto) — klassinen korvaussalaus: jokainen kirjain siirretään N paikkaa eteenpäin suomen aakkosissa (ABCD…ÅÄÖ, 29 merkkiä). Siirron arvo syötetään numerokenttään "Caesarin salauksen siirto (0 = satunnainen, alue -29…29)". Jos syötät 0 — sovellus arpoo siirron alueella 1-28 ja näyttää sen viestissä lopuksi (jotta voit myöhemmin purkaa salauksen). Aakkosten ulkopuoliset merkit (numerot, välimerkit, välilyönnit) pysyvät ennallaan.</p>
+<p>Caesarin Salakirjoitus (FI-alfabetin siirto) — klassinen korvaussalaus: jokainen kirjain siirretään N paikkaa eteenpäin suomen aakkosissa (ABCD…ÅÄÖ, 29 merkkiä). Siirron arvo syötetään numerokenttään "Caesarin salauksen siirto (0 = satunnainen, alue -28…28)". Jos syötät 0 — sovellus arpoo siirron alueella 1-28 ja näyttää sen viestissä lopuksi (jotta voit myöhemmin purkaa salauksen). Aakkosten ulkopuoliset merkit (numerot, välimerkit, välilyönnit) pysyvät ennallaan.</p>
 </li>
 </ul>
 <p>Käytännön sovellus: salaukset tallentavat tuloksen samassa muodossa kuin Ohjaajan tila (.html lang-tagilla tai .docx XML-tageilla), joten NVDA lukee ne oikean kielen äänellä. Erityisesti Kääntäjä ja Vokaalinvaihtaja kuulostavat synteesissä paljon mielenkiintoisemmilta kuin kun luet niitä silmilläsi — koska aivot yrittävät automaattisesti "purkaa" tekstiä, kun luet sitä visuaalisesti, mutta TTS lukee sen juuri sellaisena kuin se on kirjoitettu.</p>
