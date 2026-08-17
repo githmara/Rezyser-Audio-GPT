@@ -23,5 +23,7 @@ algorytm: cezar
 # alfabet: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 # Zakres dopuszczalnych przesunięć w GUI (SpinCtrl).
-min_przesuniecie: -35
-max_przesuniecie: 35
+# 35 liter → przesunięcie 35 ≡ 0 (identyczność, czyli jawny tekst zamiast
+# szyfru); unikalne są wyłącznie przesunięcia ±1..±34.
+min_przesuniecie: -34
+max_przesuniecie: 34

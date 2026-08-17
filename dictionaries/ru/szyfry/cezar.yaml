@@ -33,5 +33,5 @@ algorytm: cezar
 
 # Диапазон допустимых сдвигов в графическом интерфейсе (SpinCtrl).
 # 59 букв → сдвиг 59 ≡ 0 (тождество); сдвиги ±1..±58 уникальны.
-min_przesuniecie: -59
-max_przesuniecie: 59
+min_przesuniecie: -58
+max_przesuniecie: 58

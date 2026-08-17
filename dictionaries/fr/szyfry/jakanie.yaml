@@ -7,7 +7,7 @@ opis: |
   Pour chaque mot dont la longueur est >= `min_dlugosc_slowa`, un nombre
   aléatoire de répétitions de la première (ou des deux premières) lettre(s)
   est généré et préfixé avec des tirets : « ordinateur » → « or-or-or-ordinateur »,
-  « moi » → « moi ».
+  « tu » → « tu » (trop court).
 
   Si la deuxième lettre du mot est une consonne (absente de la chaîne
   `samogloski`), le bégaiement couvre DEUX lettres initiales — cela sonne

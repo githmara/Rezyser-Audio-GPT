@@ -6,11 +6,13 @@ etykieta: "Intensives Stottern / Defekter Roboter"
 opis: |
   Für jedes Wort mit Länge >= `min_dlugosc_slowa` wird eine zufällige Anzahl
   von Wiederholungen des ersten (oder der ersten zwei) Buchstaben erzeugt und
-  mit Bindestrichen vorangestellt: „Computer" → „C-c-c-Computer", „Ich" → „Ich".
+  mit Bindestrichen vorangestellt: „Computer" → „C-c-c-computer", „es" → „es"
+  (zu kurz). Nur das Stottern selbst behält die Großschreibung — der Wortanfang
+  dahinter wird kleingeschrieben, auch bei Substantiven.
 
   Wenn der zweite Buchstabe des Wortes ein Konsonant ist (nicht in der Zeichenkette
   `samogloski`), umfasst das Stottern ZWEI Anfangsbuchstaben — klingt natürlicher
-  (z.B. „Straße" → „St-st-Straße").
+  (z.B. „Straße" → „St-st-straße").
 iso: de
 kategoria: szyfr
 kolejnosc: 50

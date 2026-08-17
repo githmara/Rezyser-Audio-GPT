@@ -24,5 +24,5 @@ algorytm: cezar
 
 # Sallittu siirtoalue käyttöliittymässä (SpinCtrl).
 # 29 kirjainta → siirto 29 ≡ 0 (identiteetti); siirrot ±1..±28 ovat yksilöllisiä.
-min_przesuniecie: -29
-max_przesuniecie: 29
+min_przesuniecie: -28
+max_przesuniecie: 28

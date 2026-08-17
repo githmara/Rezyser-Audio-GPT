@@ -22,5 +22,5 @@ algorytm: cezar
 
 # Leyfilegt flutningsbil í notendaviðmótinu (SpinCtrl).
 # 32 stafir → flutningur 32 ≡ 0 (sjálfsmynd); flutningar ±1..±31 eru einstakar.
-min_przesuniecie: -32
-max_przesuniecie: 32
+min_przesuniecie: -31
+max_przesuniecie: 31
