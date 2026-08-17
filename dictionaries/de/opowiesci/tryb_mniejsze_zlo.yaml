@@ -38,9 +38,9 @@ fiolka:
   # Beschreibung aus dem entsprechenden Pool → injiziert sie in die User-Payload
   # als `fiolka_efekt_seed`. Summe muss nicht 1,0 ergeben (Python normalisiert).
   wagi_skutkow:
-    harmful:          0.6   # die Phiole verwundet / nimmt etwas / verschlimmert die Szene
-    distortion:       0.3   # Realität verzerrt sich, Wahrnehmung versagt
-    rare_beneficial:  0.1   # selten: eine kleine Gnade — niemals volle Rettung
+    harmful: 0.6            # die Phiole verwundet / nimmt etwas / verschlimmert die Szene
+    distortion: 0.3         # Realität verzerrt sich, Wahrnehmung versagt
+    rare_beneficial: 0.1    # selten: eine kleine Gnade — niemals volle Rettung
 
   # Pools von Effekt-Beschreibungen pro Kategorie. Das LLM wählt EINE
   # dieser Beschreibungen (Python würfelt vor der Anfrage) und erzählt
@@ -54,18 +54,25 @@ fiolka:
       - "Der Trank verlangsamt heimtückisch deine Bewegungen. Jede Entscheidung dauert nun doppelt so lange — die Charaktere um dich herum bemerken das Zögern."
       - "Dein Blut verdickt sich. Du verlierst kurz das Bewusstsein und erwachst woanders als zuvor. Etwas Wichtiges fehlt aus deinem Inventar — das LLM entscheidet, was."
       - "Sporen kriechen aus der Phiole und klammern sich an deine Haut; Zeugen der Szene sehen es und weichen angewidert zurück. Du verlierst die Gunst eines anwesenden Verbündeten."
+      - Aus der Phiole kriecht **routa** — Rauhreif, der in deiner Hand nicht schmilzt, sondern in das Gelenk eindringt. Finger und Knie versteifen bis zum Ende der nächsten Szene; jede Bewegung musst du zweimal ansetzen. Hinter dir bleibt eine Spur aus weißem Belag zurück, die jeder Spurleser mühelos liest.
+      - 'Die Flüssigkeit verwandelt sich in **móða**: einen gelblichen Nebel mit dem Geruch von Streichhölzern, der sich auf alles in Armreichweite legt. Der Hals brennt, du sprichst nur halb so laut wie du willst. Ein Gegenstand aus dem Inventar taugt nur noch zum Wegwerfen — welcher, entscheidet das LLM.'
+      - 'Aus der Phiole schießt — mit dem Knall einer Feder und dem Rascheln von Folie — ein Werbebanner der Firma Mause: „DIE BESTEN UND GÜNSTIGSTEN", darunter in kleiner Schrift „freundliche Hilfe verfügbar im Premium-Plan". Das Tuch lässt sich nicht zusammenfalten, es belegt eine Hand und ist vom anderen Ende der Szene aus zu sehen. Es taugt einzig als einmaliger, notdürftiger Sichtschutz — und das um den Preis eines Lärms, der bereits jemanden angelockt hat.'
     distortion:
       - "Die Welt rutscht. Du hörst einen Dialog aus der vorigen Runde erneut, aber die Stimmen sind falsch. Das Gedächtnis ist nicht mehr verlässlich."
       - "Die Zeit verlangsamt sich auf drei Herzschläge, dann beschleunigt sie aufs Doppelte. Du vollendest die Handlung, erinnerst dich aber nicht, wie — die Erzählung springt über den Vorgang und liefert nur die Folge."
       - "Die Charaktere um dich tauschen Rollen — der Feind spricht mit der Stimme eines Freundes, der Freund wird zum Fremden. Vertraue Namen, nicht Gesichtern."
       - "Der Ort formt sich um — du bist in derselben Szene, aber die Geometrie hat sich verändert. Der Ausgang ist verschwunden, ein neues Fenster, das vorher nicht da war, erscheint."
       - "Deine eigene Stimme klingt fremd. NSCs reagieren auf deine Worte, als spräche ein anderer — die Antworten verfehlen deine Absicht."
+      - 'Du gerätst in einen **metsänpeitto**: der Ort, den du kennst, hört auf, dich anzunehmen. Diejenigen, die dich suchen, gehen anderthalb Schritte an dir vorbei und blicken durch dich hindurch; du selbst findest den Ausgang nicht mehr, durch den du gekommen bist. Niemand kann dich berühren oder hören — und niemand kann dir helfen.'
+      - 'Deine **fylgja** löst sich ab und stellt sich einen Schritt vor dich: Sie tut, was du noch nicht getan hast, und sagt, was du nicht gesagt hast. Die Figuren in der Szene antworten ihr, nicht dir — deine eigenen Worte kommen um einen Wortwechsel zu spät.'
     rare_beneficial:
       - "Das Elixier lindert eine einzige Wunde / Furcht / Lücke im Inventar — eine kleine Sache. Der Rest der Bedrohung bleibt. Es zählt nicht als Lösung der Szene."
       - "Ein kurzer Blitz der Klarheit: ein Hinweis taucht auf zum aktuellen Gegner oder Strang. Nur einer — das LLM entscheidet, welcher."
       - "Eine Welle der Ruhe — die nächste Runde vergeht ohne neue Eskalation. Eine Pause, keine Erlösung; das Gewicht kehrt in der darauffolgenden Runde zurück."
 
 # --- Addon zum prompt_systemowy aus baza.yaml ---
+      - 'Hinter deinem Rücken räuspert sich jemand mit einer Stimme, alt wie der Winter: **Joulupukki**, der von Korvatunturi, den Sack auf dem Knie abgestützt. Er schaut hinein, murmelt, dass er an einem Ort wie diesem höchstens eine Kleinigkeit dalassen darf — und reicht dir eine Sache, die genau für diese eine Runde nützlich ist, danach unbrauchbar oder verloren. Was es ist, entscheidet das LLM; vom Gewicht der Szene nimmt es nichts.'
+      - 'Etwas an diesem Ort — der **landvættur**, der Hüter dieses Landes — beschließt, dich für einen Moment zu ertragen. Ein Weg hält: das Eis bricht nicht, das Regal rutscht nicht ein, das Brett splittert nicht. Genau einer und genau einmal; niemand führt dich weiter.'
 prompt_systemowy: |
   MODUS: KLEINERES ÜBEL. Das Feld `wybory` enthält 3-5 Elemente A-E, wobei JEDE Wahl moralisch, körperlich oder strategisch ungünstig ist — der Spieler wählt das kleinere Übel, nicht das größere Gut. Keine „neutrale" Option. Kein „Happy End" innerhalb dieser Runde.
 

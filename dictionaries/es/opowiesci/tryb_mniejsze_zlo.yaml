@@ -38,9 +38,9 @@ fiolka:
   # de la reserva correspondiente → la inyecta en la user payload como
   # `fiolka_efekt_seed`. La suma no tiene que ser 1,0 (Python normaliza).
   wagi_skutkow:
-    harmful:          0.6   # la ampolla hiere / quita algo / empeora la escena
-    distortion:       0.3   # la realidad se deforma, la percepción falla
-    rare_beneficial:  0.1   # raro: una pequeña gracia — nunca salvación completa
+    harmful: 0.6            # la ampolla hiere / quita algo / empeora la escena
+    distortion: 0.3         # la realidad se deforma, la percepción falla
+    rare_beneficial: 0.1    # raro: una pequeña gracia — nunca salvación completa
 
   # Reservas de descripciones de efecto por categoría. El LLM elige UNA
   # de estas descripciones (Python sortea antes del envío) y la narra
@@ -54,18 +54,25 @@ fiolka:
       - "El elixir ralentiza traidoramente tus movimientos. Cada decisión exige ahora el doble de tiempo — los personajes a tu alrededor notan la vacilación."
       - "Tu sangre se espesa. Pierdes el conocimiento un instante y despiertas en otro lugar. Algo importante falta de tu inventario — el LLM decide qué."
       - "De la ampolla se arrastran esporas que se aferran a tu piel; los testigos de la escena lo ven y retroceden con asco. Pierdes el favor de un aliado presente."
+      - De la ampolla repta **routa** — escarcha que no se derrite en la mano, sino que penetra en la articulación. Los dedos y las rodillas se te ponen rígidos hasta el final de la escena siguiente; cada movimiento hay que empezarlo dos veces. Detrás de ti queda un rastro de pátina blanca que cualquier rastreador leerá sin dificultad.
+      - 'El líquido se transforma en **móða**: una niebla amarillenta con olor a cerillas que se posa sobre todo lo que esté al alcance de los brazos. La garganta arde, hablas a la mitad del volumen que quisieras. Una cosa del inventario ya solo sirve para tirarla — el LLM decidirá cuál.'
+      - 'De la ampolla sale disparado —con un chasquido de resorte y un crujido de plástico— un banner publicitario de la empresa Mause: «LO MEJOR Y LO MÁS BARATO», y debajo, en letra pequeña, «ayuda cortés disponible en el plan Premium». La lona no quiere plegarse, te ocupa una mano y se ve desde el otro extremo de la escena. Solo sirve como cobertura provisional de un solo uso, y eso al precio del ruido que ya ha atraído a alguien.'
     distortion:
       - "El mundo se desliza. Oyes un diálogo del turno anterior reproducido de nuevo, pero las voces son incorrectas. La memoria deja de ser fiable."
       - "El tiempo se ralentiza a tres latidos, luego acelera al doble. Completas la acción pero no recuerdas cómo — la narración salta sobre el proceso y entrega solo la consecuencia."
       - "Los personajes a tu alrededor intercambian roles — el enemigo habla con voz de amigo, el amigo se vuelve extraño. Confía en los nombres, no en los rostros."
       - "El lugar se remodela — estás en la misma escena pero la geometría ha cambiado. La salida ha desaparecido, una nueva ventana que no existía aparece."
       - "Tu propia voz suena ajena. Los PNJs responden a tus palabras como si hablara otro — las respuestas se desvían de tu intención."
+      - 'Caes en el **metsänpeitto**: un lugar que conocías deja de aceptarte. Los que te buscan pasan a un paso y medio de ti y miran a través tuyo; tú no encuentras la salida por la que entraste. Nadie puede tocarte ni oírte — y nadie puede ayudarte.'
+      - 'Tu **fylgja** se despega y se planta un paso por delante de ti: hace lo que tú aún no has hecho y dice lo que tú no has dicho. Los personajes de la escena le responden a ella, no a ti; tus propias palabras llegan con un intercambio de retraso.'
     rare_beneficial:
       - "El elixir alivia una sola herida / miedo / hueco en el inventario — una cosa pequeña. El resto de la amenaza persiste. No cuenta como resolución de la escena."
       - "Un breve destello de claridad: surge una pista sobre el oponente o hilo actual. Solo una — el LLM decide cuál."
       - "Una ola de calma — el próximo turno pasa sin nueva escalada. Una pausa, no liberación; el peso regresa en el turno siguiente."
 
 # --- Addon al prompt_systemowy de baza.yaml ---
+      - 'Detrás de ti alguien carraspea con una voz vieja como el invierno: **Joulupukki**, el de Korvatunturi, con el saco apoyado en la rodilla. Mira dentro, murmura que en un lugar como este solo puede dejar una nimiedad, y te tiende una cosa, útil exactamente para este turno, luego inútil o perdida. Qué es lo decide el LLM; no le quita nada al peso de la escena.'
+      - 'Algo en este lugar —el **landvættur**, guardián de esta tierra— decide sobrellevarte por un instante. Un camino aguanta: el hielo no se rompe, la repisa no se desmorona, la tabla no cede. Exactamente uno y exactamente una vez; nadie te guía más allá.'
 prompt_systemowy: |
   MODO: MAL MENOR. El campo `wybory` contiene 3-5 elementos A-E, donde CADA opción es moral, física o estratégicamente desfavorable — el jugador escoge el mal menor, no el bien mayor. Sin opción «neutra». Sin «final feliz» dentro de este turno.
 

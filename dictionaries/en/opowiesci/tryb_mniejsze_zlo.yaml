@@ -38,9 +38,9 @@ fiolka:
   # description from the matching pool → injects it into the user payload
   # as `fiolka_efekt_seed`. Sum need not equal 1.0 (Python normalises).
   wagi_skutkow:
-    harmful:          0.6   # the vial wounds / takes something / worsens the scene
-    distortion:       0.3   # reality warps, perception fails
-    rare_beneficial:  0.1   # rarely: a small mercy — never a full rescue
+    harmful: 0.6            # the vial wounds / takes something / worsens the scene
+    distortion: 0.3         # reality warps, perception fails
+    rare_beneficial: 0.1    # rarely: a small mercy — never a full rescue
 
   # Effect-description pools per category. The LLM picks ONE of these
   # descriptions (Python pre-rolls before the request) and narrates it
@@ -54,18 +54,25 @@ fiolka:
       - "The elixir treacherously slows your movements. Every decision now takes twice as long — the characters around you notice the hesitation."
       - "Your blood thickens. You black out briefly and wake somewhere other than where you were. Something important is missing from your inventory — the LLM decides what."
       - "Spores crawl out of the vial and cling to your skin; witnesses in the scene see them and recoil in disgust. You lose the favour of one ally present in the scene."
+      - From the vial crawls **routa** — frost that doesn't melt in your hand, but sinks into the joint instead. Your fingers and knees stiffen until the end of the next scene; every movement has to be started twice. Behind you a trail of white bloom is left, which any tracker will read without difficulty.
+      - "The liquid turns into **móða**: a yellowish fog smelling of matches, settling on everything within arm's reach. Your throat burns, you speak at half the volume you intend. One item from your inventory is now fit only to be thrown away — it's the LLM that decides which one."
+      - "From the vial shoots out — with the snap of a spring and the rustle of foil — an advertising banner for the Mause company: \"THE BEST AND THE CHEAPEST,\" and beneath it, in fine print, \"courteous assistance available in the Premium plan.\" The sheet won't fold back up, it occupies one of your hands, and it's visible from the other end of the scene. It's fit only for a one-time, makeshift screen — and at the price of the noise it has already used to draw someone's attention."
     distortion:
       - "The world slips. You hear a line of dialogue from the previous turn replaying, but the voices are wrong. Memory stops being trustworthy."
       - "Time slows to three heartbeats, then races to double speed. You complete the action but cannot recall how — the narration skips over the process and goes straight to the consequence."
       - "Characters around you swap roles — the enemy speaks in a friend's voice, the friend becomes a stranger. Trust names, not faces."
       - "The location remoulds itself — you are in the same scene but the geometry has changed. The exit is gone; a new window has appeared that wasn't there before."
       - "Your own voice sounds foreign. NPCs respond to your words as if someone else were speaking — answers miss your intent."
+      - 'You fall into **metsänpeitto**: the place you know stops accepting you. Those searching for you pass a step and a half from you and look right through you; you cannot find the way out that you came in by. No one can touch you or hear you — and no one can help you.'
+      - "Your **fylgja** peels away and stands a step ahead of you: it does what you haven't done yet, and says what you haven't said. The characters in the scene answer it, not you — your own words arrive one exchange late."
     rare_beneficial:
       - "The elixir soothes a single wound / fear / equipment gap — one small thing. The rest of the threat persists. It does not count as a resolution of the scene."
       - "A brief flash of clarity: one hint surfaces about the current opponent or thread. Just one — the LLM decides what."
       - "A wave of calm — the next turn passes without fresh escalation. A pause, not deliverance; the weight returns in the turn after."
 
 # --- Addon to prompt_systemowy from baza.yaml ---
+      - 'Behind your back someone clears their throat with a voice as old as winter: **Joulupukki**, the one from Korvatunturi, sack resting against his knee. He peers inside, mutters that in a place like this he may leave at most a trifle — and hands you one thing, useful for exactly this one turn, then useless or lost. What it is, the LLM decides; it takes nothing off the weight of the scene.'
+      - "Something in this place — a **landvættur**, guardian of this land — decides to bear with you for a moment. One path holds: the ice doesn't crack, the ledge doesn't crumble, the plank doesn't break. Exactly one, and exactly once; no one leads you any further."
 prompt_systemowy: |
   MODE: LESSER EVIL. The `wybory` field contains 3-5 elements A-E, where EVERY choice is morally, physically or strategically unfavourable — the player picks the lesser evil, not the greater good. No "neutral" option. No "happy ending" inside this turn.
 

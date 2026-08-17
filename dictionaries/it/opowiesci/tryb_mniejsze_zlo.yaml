@@ -39,9 +39,9 @@ fiolka:
   # dalla riserva corrispondente → la inietta nella user payload come
   # `fiolka_efekt_seed`. La somma non deve valere 1,0 (Python normalizza).
   wagi_skutkow:
-    harmful:          0.6   # la fiala ferisce / toglie qualcosa / peggiora la scena
-    distortion:       0.3   # la realtà si distorce, la percezione cede
-    rare_beneficial:  0.1   # raro: una piccola grazia — mai una salvezza piena
+    harmful: 0.6            # la fiala ferisce / toglie qualcosa / peggiora la scena
+    distortion: 0.3         # la realtà si distorce, la percezione cede
+    rare_beneficial: 0.1    # raro: una piccola grazia — mai una salvezza piena
 
   # Riserve di descrizioni di effetto per categoria. L'LLM sceglie UNA di
   # queste descrizioni (Python estrae prima della richiesta) e la narra
@@ -55,18 +55,25 @@ fiolka:
       - "L'elisir rallenta proditoriamente i tuoi movimenti. Ogni decisione richiede ora il doppio del tempo — i personaggi attorno notano l'esitazione."
       - "Il tuo sangue si addensa. Perdi conoscenza un istante e ti risvegli altrove rispetto a dov'eri. Qualcosa di importante manca dal tuo inventario — l'LLM decide cosa."
       - "Dalla fiala strisciano spore che si aggrappano alla pelle; i testimoni della scena lo vedono e arretrano disgustati. Perdi il favore di un alleato presente nella scena."
+      - Dalla fiala striscia fuori la **routa** — brina che non si scioglie nel palmo, ma penetra nell'articolazione. Dita e ginocchia s'irrigidiscono fino alla fine della scena successiva; ogni movimento va iniziato due volte. Dietro di te resta una traccia di patina bianca, che qualunque tracciatore leggerà senza fatica.
+      - "Il liquido si trasforma in **móða**: nebbia giallastra dall'odore di fiammiferi, che si deposita su tutto ciò che è a portata di braccia. La gola brucia, parli a metà del volume che vorresti. Un oggetto dell'inventario è ormai buono solo da buttare — deciderà il LLM quale."
+      - "Dalla fiala spara fuori — con uno scatto di molla e un fruscio di pellicola — uno striscione pubblicitario della ditta Mause: \"IL MIGLIORE E IL PIÙ ECONOMICO\", e sotto, in caratteri minuscoli, \"assistenza cortese disponibile nel piano Premium\". Il telone non vuole ripiegarsi, ti occupa una mano ed è visibile dall'altro capo della scena. Serve solo come riparo improvvisato e monouso — e al prezzo di un rumore che ha già attirato qualcuno."
     distortion:
       - "Il mondo slitta. Senti un dialogo del turno precedente riprodotto, ma le voci sono sbagliate. La memoria smette di essere affidabile."
       - "Il tempo rallenta a tre battiti cardiaci, poi accelera al doppio. Completi l'azione ma non ricordi come — il racconto salta il processo e consegna solo la conseguenza."
       - "I personaggi attorno scambiano i ruoli — il nemico parla con la voce di un amico, l'amico diventa estraneo. Fidati dei nomi, non dei volti."
       - "Il luogo si rimodella — sei nella stessa scena ma la geometria è cambiata. L'uscita è sparita, una nuova finestra che prima non c'era appare."
       - "La tua stessa voce suona straniera. I PNG rispondono alle tue parole come se parlasse un altro — le risposte mancano la tua intenzione."
+      - "Cadi nel **metsänpeitto**: un luogo che conosci smette di accoglierti. Chi ti cerca passa a un passo e mezzo da te e ti guarda attraverso; tu non riesci a trovare l'uscita da cui sei entrato. Nessuno può toccarti né sentirti — e nessuno può aiutarti."
+      - 'La tua **fylgja** si stacca e si mette un passo davanti a te: fa ciò che tu non hai ancora fatto, e dice ciò che tu non hai detto. I personaggi nella scena rispondono a lei, non a te — le tue stesse parole arrivano con uno scambio di battute di ritardo.'
     rare_beneficial:
       - "L'elisir lenisce una sola ferita / paura / lacuna nell'inventario — una sola piccola cosa. Il resto della minaccia rimane. Non conta come risoluzione della scena."
       - "Un breve lampo di chiarezza: emerge un solo indizio sull'avversario o il filo attuale. Solo uno — l'LLM decide quale."
       - "Un'ondata di calma — il prossimo turno passa senza nuova escalation. Una pausa, non una liberazione; il peso ritorna nel turno seguente."
 
 # --- Addon al prompt_systemowy da baza.yaml ---
+      - "Alle tue spalle qualcuno si schiarisce la voce, vecchia come l'inverno: **Joulupukki**, quello di Korvatunturi, con il sacco appoggiato sul ginocchio. Sbircia dentro, borbotta che in un posto come questo può lasciare al massimo una piccolezza — e ti porge una cosa, utile esattamente per quel singolo turno, poi inutile o smarrita. Cosa sia, lo decide il LLM; non toglie nulla al peso della scena."
+      - "Qualcosa in questo luogo — il **landvættur**, il guardiano di questa terra — decide per un momento di sopportarti. Una via regge: il ghiaccio non si spacca, la mensola non frana, l'asse non si spezza. Esattamente una, ed esattamente una volta; nessuno ti guida oltre."
 prompt_systemowy: |
   MODO: MALE MINORE. Il campo `wybory` contiene 3-5 elementi A-E, dove OGNI scelta è sfavorevole moralmente, fisicamente o strategicamente — il giocatore sceglie il male minore, non il bene maggiore. Nessuna opzione «neutra». Nessun «lieto fine» all'interno di questo turno.
 

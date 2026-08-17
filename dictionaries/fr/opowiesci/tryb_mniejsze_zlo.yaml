@@ -39,9 +39,9 @@ fiolka:
   # le pool correspondant → l'injecte dans la user payload comme
   # `fiolka_efekt_seed`. La somme n'a pas à valoir 1,0 (Python normalise).
   wagi_skutkow:
-    harmful:          0.6   # la fiole blesse / retire quelque chose / aggrave la scène
-    distortion:       0.3   # la réalité se déforme, la perception échoue
-    rare_beneficial:  0.1   # rare : une petite grâce — jamais un sauvetage complet
+    harmful: 0.6            # la fiole blesse / retire quelque chose / aggrave la scène
+    distortion: 0.3         # la réalité se déforme, la perception échoue
+    rare_beneficial: 0.1    # rare : une petite grâce — jamais un sauvetage complet
 
   # Pools de descriptions d'effet par catégorie. Le LLM choisit UNE de
   # ces descriptions (Python tire avant l'envoi) et la narre de manière
@@ -55,18 +55,25 @@ fiolka:
       - "L'élixir ralentit traîtreusement tes mouvements. Chaque décision exige maintenant deux fois plus de temps — les personnages autour de toi remarquent l'hésitation."
       - "Ton sang s'épaissit. Tu perds connaissance un instant et te réveilles ailleurs qu'avant. Quelque chose d'important manque dans ton inventaire — le LLM décide quoi."
       - "Des spores rampent hors de la fiole et s'accrochent à ta peau ; les témoins de la scène le voient et reculent de dégoût. Tu perds la faveur d'un allié présent dans la scène."
+      - De la fiole rampe la **routa** — un givre qui ne fond pas dans la main, mais s'infiltre dans l'articulation. Doigts et genoux se raidissent jusqu'à la fin de la scène suivante ; chaque mouvement doit être amorcé deux fois. Derrière toi reste une trace de dépôt blanc que n'importe quel pisteur lira sans peine.
+      - "Le liquide se change en **móða** : une brume jaunâtre à l'odeur d'allumette qui se dépose sur tout ce qui est à portée de bras. La gorge brûle, tu parles deux fois plus bas que tu ne le voudrais. Un objet de l'inventaire n'est plus bon qu'à jeter — c'est au LLM de décider lequel."
+      - "De la fiole jaillit — dans un claquement de ressort et un froissement de plastique — une bannière publicitaire de la société Mause : « LE MEILLEUR ET LE MOINS CHER », et en dessous, en petits caractères, « aide courtoise disponible avec l'offre Premium ». La bâche refuse de se replier, elle t'occupe une main et se voit depuis l'autre bout de la scène. Elle ne sert qu'à faire un abri de fortune, à usage unique — et au prix du bruit qui a déjà attiré quelqu'un."
     distortion:
       - "Le monde glisse. Tu entends un dialogue du tour précédent rejoué, mais les voix sont fausses. La mémoire cesse d'être fiable."
       - "Le temps ralentit à trois battements de cœur, puis accélère au double. Tu achèves l'action mais ne te souviens pas comment — le récit saute le processus et livre seulement la conséquence."
       - "Les personnages autour de toi échangent les rôles — l'ennemi parle avec la voix d'un ami, l'ami devient étranger. Fais confiance aux noms, pas aux visages."
       - "Le lieu se remodèle — tu es dans la même scène, mais la géométrie a changé. La sortie a disparu, une nouvelle fenêtre, qui n'existait pas auparavant, apparaît."
       - "Ta propre voix sonne étrangère. Les PNJ répondent à tes paroles comme si un autre parlait — les réponses manquent ton intention."
+      - "Tu tombes dans le **metsänpeitto** : un lieu que tu connais cesse de t'accepter. Ceux qui te cherchent passent à un pas et demi de toi et regardent à travers toi ; toi, tu ne parviens plus à retrouver la sortie par laquelle tu es entré. Personne ne peut te toucher ni t'entendre — et personne ne peut t'aider."
+      - "Ta **fylgja** se détache et se tient un pas devant toi : elle fait ce que tu n'as pas encore fait, et dit ce que tu n'as pas dit. Les personnages de la scène lui répondent, à elle, pas à toi — tes propres paroles arrivent avec un échange de retard."
     rare_beneficial:
       - "L'élixir apaise une seule blessure / peur / faille de l'inventaire — une seule petite chose. Le reste de la menace persiste. Ne compte pas comme résolution de la scène."
       - "Un bref éclair de clarté : un indice surgit sur l'adversaire ou le fil en cours. Un seul — le LLM décide lequel."
       - "Une vague de calme — le prochain tour passe sans nouvelle escalade. Une pause, pas une délivrance ; le poids revient au tour suivant."
 
 # --- Addon au prompt_systemowy de baza.yaml ---
+      - "Dans ton dos, quelqu'un s'éclaircit la gorge d'une voix vieille comme l'hiver : **Joulupukki**, celui de Korvatunturi, son sac calé sur le genou. Il regarde à l'intérieur, marmonne que dans un endroit pareil il ne peut laisser qu'une bricole tout au plus — et il te tend une chose, utile exactement pour ce tour-ci, ensuite inutile ou perdue. Ce que c'est, c'est au LLM de le décider ; cela n'enlève rien au poids de la scène."
+      - "Quelque chose en ce lieu — un **landvættur**, gardien de cette contrée — décide de te supporter un instant. Un passage tient bon : la glace ne se fend pas, l'étagère ne s'effondre pas, la planche ne casse pas. Exactement un, et exactement une fois ; personne ne te guide plus loin."
 prompt_systemowy: |
   MODE : MOINDRE MAL. Le champ `wybory` contient 3-5 éléments A-E, où CHAQUE choix est défavorable moralement, physiquement ou stratégiquement — le joueur choisit le moindre mal, pas le bien supérieur. Aucune option « neutre ». Aucune « fin heureuse » à l'intérieur de ce tour.
 

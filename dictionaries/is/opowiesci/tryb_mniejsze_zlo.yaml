@@ -37,9 +37,9 @@ fiolka:
   # user payload sem `fiolka_efekt_seed`. Summa þarf ekki að vera 1,0
   # (Python staðlar).
   wagi_skutkow:
-    harmful:          0.6   # flaskan særir / tekur eitthvað / versnar atriðið
-    distortion:       0.3   # raunveruleikinn afmyndast, skynjun bilar
-    rare_beneficial:  0.1   # sjaldan: smá miskunn — aldrei full björgun
+    harmful: 0.6            # flaskan særir / tekur eitthvað / versnar atriðið
+    distortion: 0.3         # raunveruleikinn afmyndast, skynjun bilar
+    rare_beneficial: 0.1    # sjaldan: smá miskunn — aldrei full björgun
 
   # Söfn áhrifalýsinga eftir flokki. LLM velur EINA af þessum lýsingum
   # (Python kastar fyrir sendingu) og segir hana diegetískt frá í 2-4
@@ -52,18 +52,25 @@ fiolka:
       - "Elixírinn sviksamlega hægir á hreyfingum þínum. Hver ákvörðun tekur nú tvöfaldan tíma — persónurnar í kring taka eftir hikinu."
       - "Blóðið þitt þykknar. Þú missir meðvitund í augnablik og vaknar annars staðar en þú varst. Eitthvað mikilvægt vantar úr eigum þínum — LLM ákveður hvað."
       - "Gró skríða úr flöskunni og festast við húð þína; vitni atriðisins sjá það og hörfa með viðbjóði. Þú missir hylli eins bandamanns sem er á staðnum."
+      - Úr flöskunni skríður **routa** — héla sem bráðnar ekki í lófanum, heldur sest í liðina. Fingur og hné stirðna til loka næsta atriðis; hverja hreyfingu þarf að byrja tvisvar. Á eftir þér liggur slóð af hvítri slikju sem hver einasti sporrekjandi les án erfiðleika.
+      - 'Vökvinn breytist í **móðu**: gulleita þoku með lykt af eldspýtum, sem sest á allt innan seilingar. Hálsinn sviðnar, þú talar hálfu hljóðlátar en þú vilt. Einn hlutur úr eigum þínum er nú aðeins nýtilegur til að fleygja — það er LLM sem ákveður hver.'
+      - 'Úr flöskunni skýst — með smelli í fjöður og skrjáfi í filmu — auglýsingaborði frá fyrirtækinu Mause: „BEST OG ÓDÝRAST“, og undir því smáu letri „kurteisleg aðstoð í boði á Premium-áskrift“. Dúkurinn neitar að leggjast saman, tekur upp aðra höndina á þér og sést frá hinum enda atriðisins. Hann dugar aðeins sem einnota, bráðabirgða skjól — og það kostar hávaða sem þegar hefur laðað einhvern að.'
     distortion:
       - "Heimurinn rennur. Þú heyrir samtal úr fyrri umferð endurspilað, en raddirnar eru rangar. Minningin hættir að vera trúverðug."
       - "Tíminn hægist í þrjú hjartaslög, svo flýtist tvöfalt. Þú lýkur aðgerðinni en man ekki hvernig — frásögnin hoppar yfir ferlið og skilar aðeins afleiðingunni."
       - "Persónurnar í kring skipta um hlutverk — óvinurinn talar með rödd vinar, vinurinn verður ókunnugur. Treystu nöfnum, ekki andlitum."
       - "Staðurinn endurmótast — þú ert í sama atriði en rúmfræðin hefur breyst. Útgangurinn er horfinn, nýr gluggi sem var ekki áður birtist."
       - "Eigin rödd þín hljómar framandi. Persónurnar bregðast við orðum þínum eins og einhver annar talaði — svörin missa marks við ásetningi þínum."
+      - 'Þú lendir í **metsänpeitto**: stað sem þú þekkir hættir að taka við þér. Þeir sem leita að þér ganga einu og hálfu skrefi framhjá þér og horfa í gegnum þig; þú finnur ekki útganginn sem þú komst inn um. Enginn getur snert þig né heyrt í þér — og enginn getur hjálpað þér.'
+      - '**Fylgja** þín losnar frá og stígur skrefi fram fyrir þig: hún gerir það sem þú hefur ekki enn gert, og segir það sem þú hefur ekki sagt. Persónurnar í atriðinu svara henni, ekki þér — þín eigin orð berast einni orðaskiptalotu of seint.'
     rare_beneficial:
       - "Elixírinn linar eitt sár / ótta / skarð í eigum — eitt smá. Restin af ógninni helst. Telst ekki lausn atriðisins."
       - "Stutt blika af skýrleika: ein vísbending vaknar um núverandi andstæðing eða þráð. Aðeins ein — LLM ákveður hver."
       - "Ró bylgja — næsta umferð líður án nýrrar stigmögnunar. Hlé, ekki frelsun; þunginn snýr aftur í umferðinni eftir."
 
 # --- Viðbót við prompt_systemowy úr baza.yaml ---
+      - 'Fyrir aftan þig ryskir einhver sér með rödd jafn gamalli og veturinn: **Joulupukki**, sá frá Korvatunturi, með pokann hvílandi á hnénu. Hann gægist ofan í hann, muldrar að á stað eins og þessum megi hann skilja eftir í mesta lagi smáræði — og réttir þér einn hlut, nytsamlegan nákvæmlega þennan eina leik, síðan gagnslausan eða týndan. Hvað það er ákveður LLM; það léttir ekkert af byrði atriðisins.'
+      - 'Eitthvað á þessum stað — **landvættur** — ákveður að umbera þig um stund. Ein leið heldur: ísinn brestur ekki, hillan hrynur ekki, fjölin brotnar ekki. Nákvæmlega ein og nákvæmlega einu sinni; enginn leiðir þig lengra.'
 prompt_systemowy: |
   HAMUR: MINNA ILLA. Reiturinn `wybory` inniheldur 3-5 stök A-E, þar sem HVER valkostur er óhagstæður siðferðilega, líkamlega eða stefnumótandi — leikmaðurinn velur minna illa, ekki meira gott. Engin „hlutlaus" valkostur. Enginn „farsæll endir" innan þessarar umferðar.
 

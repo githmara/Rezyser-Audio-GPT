@@ -571,7 +571,8 @@ def wylosuj_seed_fiolki(jezyk: str = "pl") -> dict[str, str]:
     Czyta `dictionaries/<jezyk>/opowiesci/tryb_mniejsze_zlo.yaml::fiolka`:
     - ``wagi_skutkow`` — rozkład prawdopodobieństwa (default 0.6/0.3/0.1
       dla harmful/distortion/rare_beneficial; „never guaranteed salvation").
-    - ``opisy_skutkow.<kategoria>`` — lista 3-5 opisów per kategoria;
+    - ``opisy_skutkow.<kategoria>`` — pula opisów per kategoria (od v18.17:
+      8/7/5 dla harmful/distortion/rare_beneficial, wcześniej 5/5/3);
       `random.choice` losuje jeden, ten trafia do LLM jako seed.
 
     Returns:

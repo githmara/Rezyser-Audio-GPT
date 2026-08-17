@@ -39,9 +39,9 @@ fiolka:
   # injektoi sen käyttäjän payloadiin `fiolka_efekt_seed`-avaimena. Summan
   # ei tarvitse olla 1,0 (Python normalisoi).
   wagi_skutkow:
-    harmful:          0.6   # pullo haavoittaa / vie jotain / pahentaa kohtausta
-    distortion:       0.3   # todellisuus vääristyy, havainto pettää
-    rare_beneficial:  0.1   # harvoin: pieni armo — ei koskaan täydellistä pelastusta
+    harmful: 0.6            # pullo haavoittaa / vie jotain / pahentaa kohtausta
+    distortion: 0.3         # todellisuus vääristyy, havainto pettää
+    rare_beneficial: 0.1    # harvoin: pieni armo — ei koskaan täydellistä pelastusta
 
   # Vaikutuskuvauksen poolit per kategoria. LLM valitsee YHDEN näistä
   # kuvauksista (Python arpoo ennen pyyntöä) ja narratisoi sen diegeettisesti
@@ -54,18 +54,25 @@ fiolka:
       - "Eliksiiri hidastaa petollisesti liikkeitäsi. Jokainen päätös vie nyt kaksinkertaisen ajan — ympärilläsi olevat hahmot huomaavat empimisen."
       - "Veresi sakeutuu. Menetät hetkeksi tajuntasi ja heräät muualta kuin missä olit. Jokin tärkeä puuttuu tavaroistasi — LLM päättää mikä."
       - "Pullosta ryömii itiöitä, jotka tarttuvat ihoosi; kohtauksen todistajat näkevät sen ja perääntyvät inhoten. Menetät yhden läsnäolevan liittolaisen suosion."
+      - Pikkupullosta ryömii esiin **routa** — huurre, joka ei sula kämmenessä vaan tunkeutuu niveleen. Sormet ja polvet jäykistyvät seuraavan kohtauksen loppuun; jokainen liike täytyy aloittaa kahdesti. Jälkeesi jää valkoista kuuraa, jonka kuka tahansa jäljittäjä lukee vaivatta.
+      - 'Neste muuttuu **móðaksi**: kellertäväksi tulitikkujen hajuiseksi sumuksi, joka laskeutuu kaikkeen käsivarren mitalla. Kurkkua polttaa, puhut puolet hiljempaa kuin haluaisit. Yksi tavaroistasi kelpaa enää heitettäväksi pois — LLM päättää mikä.'
+      - 'Pikkupullosta laukeaa — jousen napsahduksella ja kalvon kahinalla — Mause-yhtiön mainosbanneri: "PARAS JA HALVIN", ja sen alla pienellä "ystävällinen apu saatavilla Premium-tilauksessa". Kangas ei taitu kokoon, se vie yhden kätesi, ja se näkyy kohtauksen toiseen päähän saakka. Se kelpaa vain kertakäyttöiseksi hätäsuojaksi — ja hinta on melu, joka on jo ehtinyt houkutella jonkun paikalle.'
     distortion:
       - "Maailma luiskahtaa. Kuulet edellisen vuoron dialogin toistuvan, mutta äänet ovat väärät. Muisti lakkaa olemasta luotettava."
       - "Aika hidastuu kolmen sydämenlyönnin mittaiseksi, sitten kiihtyy kaksinkertaiseksi. Suoritat toiminnon, mutta et muista miten — kerronta hyppää prosessin yli ja antaa vain seurauksen."
       - "Ympärilläsi olevat hahmot vaihtavat rooleja — vihollinen puhuu ystävän äänellä, ystävästä tulee vieras. Luota nimiin, älä kasvoihin."
       - "Paikka muotoutuu uudelleen — olet samassa kohtauksessa, mutta geometria on muuttunut. Uloskäynti on kadonnut, uusi ikkuna, jota ei ennen ollut, on ilmestynyt."
       - "Oma äänesi kuulostaa vieraalta. NPC:t reagoivat sanoihisi kuin puhuisi joku muu — vastaukset ohittavat tarkoituksesi."
+      - 'Joudut **metsänpeittoon**: paikka, jonka tunnet, lakkaa päästämästä sinua luokseen. Ne, jotka etsivät sinua, kulkevat puolentoista askeleen päästäsi ja katsovat lävitsesi; et itse löydä ovea, josta tulit sisään. Kukaan ei voi koskea sinuun eikä kuulla sinua — eikä kukaan voi auttaa sinua.'
+      - '**fylgjasi** irtoaa ja astuu askeleen eteesi: se tekee sen, mitä et vielä ole tehnyt, ja sanoo sen, mitä et ole sanonut. Kohtauksen henkilöt vastaavat sille, eivät sinulle — omat sanasi myöhästyvät yhden repliikinvaihdon verran.'
     rare_beneficial:
       - "Eliksiiri lievittää yhden haavan / pelon / aukon tavaroissasi — yhden pienen asian. Loput uhasta jää. Ei lasketa kohtauksen ratkaisuksi."
       - "Lyhyt selkeyden välähdys: nousee yksi vihje nykyisestä vastustajasta tai juonesta. Vain yksi — LLM päättää mikä."
       - "Rauhan aalto — seuraava vuoro kuluu ilman uutta eskalaatiota. Tauko, ei pelastus; paino palaa sitä seuraavalla vuorolla."
 
 # --- Lisäosa baza.yaml:n prompt_systemowy:hin ---
+      - 'Selkäsi takana joku rykäisee talven ikäisellä äänellä: **Joulupukki**, se Korvatunturilta, säkki polvea vasten nojaten. Hän kurkistaa säkkiin, mutistaa, että tällaisessa paikassa hän saa jättää korkeintaan pikkuisen — ja ojentaa sinulle yhden esineen, joka on hyödyllinen juuri tämän yhden vuoron ajan, sen jälkeen hyödytön tai kadonnut. Mikä se on, sen päättää LLM; se ei kevennä kohtauksen painoa yhtään.'
+      - 'Jokin tässä paikassa — **landvættur**, tämän maan haltija — päättää sietää sinua hetken. Yksi tie kestää: jää ei murru, hylly ei sorru, lauta ei katkea. Täsmälleen yksi ja täsmälleen kerran; kukaan ei johdata sinua pidemmälle.'
 prompt_systemowy: |
   MOODI: PIENEMPI PAHA. Kenttä `wybory` sisältää 3-5 elementtiä A-E, joissa JOKAINEN vaihtoehto on moraalisesti, fyysisesti tai strategisesti epäedullinen — pelaaja valitsee pienemmän pahan, ei suurempaa hyvää. Ei «neutraalia» vaihtoehtoa. Ei «onnellista loppua» tämän vuoron sisällä.
 

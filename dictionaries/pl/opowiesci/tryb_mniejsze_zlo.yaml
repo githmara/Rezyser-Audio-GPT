@@ -53,16 +53,23 @@ fiolka:
       - "Eliksir podstępnie spowalnia ruchy. Każda decyzja wymaga teraz dwukrotnie więcej czasu — postacie wokół zauważają twoje wahanie."
       - "Twoja krew się zagęszcza. Tracisz przytomność na chwilę, budzisz się w innym miejscu niż byłeś. Coś istotnego zniknęło z ekwipunku — to LLM zdecyduje co."
       - "Z fiolki wypełzają zarodki — przyczepiają się do skóry, świadkowie sceny dostrzegają i odwracają się ze wstrętem. Tracisz przychylność jednego sojusznika obecnego w scenie."
+      - "Z fiolki wypełza **routa** — szron, który nie topi się w dłoni, tylko wchodzi w staw. Palce i kolana sztywnieją do końca następnej sceny; każdy ruch trzeba zacząć dwa razy. Za tobą zostaje ślad białego nalotu, który każdy tropiciel przeczyta bez trudu."
+      - "Ciecz zamienia się w **móðę**: żółtawą mgłę o zapachu zapałek, która osiada na wszystkim w zasięgu ramion. Gardło piecze, mówisz o połowę ciszej niż chcesz. Jedna rzecz z ekwipunku nadaje się już tylko do wyrzucenia — to LLM zdecyduje która."
+      - "Z fiolki wystrzela — z trzaskiem sprężyny i szelestem folii — reklamowy baner firmy Mause: „NAJLEPSZE I NAJTAŃSZE\", a pod spodem drobnym drukiem „uprzejma pomoc dostępna w planie Premium\". Płachta nie chce się złożyć, zajmuje ci jedną rękę i widać ją z drugiego końca sceny. Nadaje się wyłącznie na jednorazową, prowizoryczną zasłonę — i to za cenę hałasu, który już zdążył kogoś przyciągnąć."
     distortion:
       - "Świat się ślizga. Słyszysz dialog z poprzedniej tury, jakby grał ponownie, ale głosy są niewłaściwe. Pamięć przestaje być wiarygodna."
       - "Czas zwalnia do trzech uderzeń serca, potem przyspiesza dwukrotnie. Wykonujesz akcję, ale nie pamiętasz jak — narracja przeskakuje konsekwencję bez pokazania procesu."
       - "Postacie wokół wymieniają się rolami — wróg mówi głosem przyjaciela, przyjaciel staje się obcy. Ufaj imionom, nie twarzom."
       - "Lokacja się odmienia — jesteś w tej samej scenie, ale geometria się zmieniła. Wyjście znikło, pojawiło się nowe okno, którego nie było."
       - "Twój własny głos brzmi obco. NPC reagują na twoje słowa, jakby mówił ktoś inny — odpowiedzi rozmijają się z intencją."
+      - "Wpadasz w **metsänpeitto**: miejsce, które znasz, przestaje cię przyjmować. Ci, którzy cię szukają, przechodzą półtora kroku od ciebie i patrzą przez ciebie; ty nie potrafisz znaleźć wyjścia, którym wszedłeś. Nikt nie może cię dotknąć ani usłyszeć — i nikt nie może ci pomóc."
+      - "Twoja **fylgja** odkleja się i staje o krok przed tobą: robi to, czego jeszcze nie zrobiłeś, i mówi to, czego nie powiedziałeś. Postacie w scenie odpowiadają jej, nie tobie — twoje własne słowa spóźniają się o jedną wymianę zdań."
     rare_beneficial:
       - "Eliksir koi jedną ranę / lęk / lukę w ekwipunku — coś jednego, drobnego. Reszta zagrożenia trwa. Nie liczy się jako rozwiązanie sceny."
       - "Krótki przebłysk jasności: pojawia się jedna podpowiedź dotycząca obecnego przeciwnika lub wątku. Tylko jedna — LLM wybiera co."
       - "Fala spokoju — kolejna tura mija bez nowej eskalacji. To pauza, nie wybawienie; ciężar wróci w turze następującej po."
+      - "Za twoimi plecami ktoś chrząka głosem starym jak zima: **Joulupukki**, ten z Korvatunturi, z workiem opartym o kolano. Zagląda do środka, mruczy, że w takim miejscu jak to wolno mu zostawić najwyżej drobiazg — i podaje ci jedną rzecz, przydatną dokładnie na tę jedną turę, potem bezużyteczną albo zgubioną. Co to jest, decyduje LLM; z ciężaru sceny nie zdejmuje to niczego."
+      - "Coś w tym miejscu — **landvættur**, opiekun tej krainy — postanawia cię przez chwilę znosić. Jedna droga trzyma: lód nie pęka, półka nie usypuje się, deska nie łamie. Dokładnie jedna i dokładnie raz; nikt cię nie prowadzi dalej."
 
 # --- Addon do prompt_systemowy z baza.yaml ---
 prompt_systemowy: |
