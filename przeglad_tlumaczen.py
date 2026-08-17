@@ -283,6 +283,73 @@ more than style here.
 """
 
 
+_CHECKLIST_OPOWIESCI = """\
+## Story recipe hotspots (opowiesci/*.yaml — interactive-fiction prompts)
+
+These files drive the narrative engine of a game played by BLIND players: system
+prompts for the storytelling model, the vial mechanic and the Quick Start
+presets. Everything below has been observed at least once in a real batch.
+
+- META-INSTRUCTION SKIP (the big one): every `prompt_systemowy` must still be an
+  INSTRUCTION, not its result. If a prompt that told the model to "write the next
+  turn as JSON" came back as an actual generated turn (a `{"narracja": …}`
+  block), the model executed it instead of translating it. Reject that file.
+- THE VIAL CHOICE LABEL IS A CONTRACT. `fiolka.etykieta_wyboru` is quoted
+  VERBATIM four times inside `prompt_systemowy` (a JSON example, the rule fixing
+  its position, two format examples). All five places must carry the SAME
+  wording, letter for letter: the player reads the label from the YAML field
+  while the engine matches the model's output against the prompt. A gate counts
+  the quotations, but only YOU can tell whether the wording is idiomatic.
+- CULTURAL TERMS AND PROPER NAMES (`routa`, `móða`, `metsänpeitto`, `fylgja`,
+  `landvættur`, `Joulupukki`, `Korvatunturi`, the `Mause` company) stay
+  THEMSELVES. Do NOT substitute your language's nearest equivalent
+  (`Santa Claus`, `Weihnachtsmann`, `Дед Мороз`, `guardian angel`) — that is a
+  different figure with different customs. You MAY inflect them; that is
+  expected in Finnish, Icelandic and Russian. Do NOT demote the term to a
+  parenthesis behind a native word (`Rauhreif (routa)` is wrong; `routa —
+  Rauhreif that …` is right), and never translate it outright (one batch turned
+  `routa` into French `rue`, "street").
+- REDUNDANT GLOSS: the Polish source explains foreign terms for its Polish
+  reader. Where the term is NATIVE in the target language the gloss becomes a
+  tautology — drop it (Icelandic must not read `landvættur, guardian of this
+  land`). Keep the gloss where it carries FICTIONAL information ("a yellowish
+  fog smelling of matches") rather than a dictionary definition.
+- PACK TERMINOLOGY WINS over your own taste. The words for the VIAL, a game
+  TURN, the player's INVENTORY and a SCENE must be the ones this pack already
+  uses — check the older effects in the same pool and the pack's manual. Observed
+  drift: Spanish `frasco` against the pack's own `ampolla` (24 hits), Icelandic
+  `skipti` for a turn where the pack says `umferð`.
+- MEASURES AND COUNTS IN PROSE ARE DATA: "a step and a half", "two turns", "one
+  item", "exactly once". Five packs mangled "a step and a half" in one batch
+  (into "a metre and a half" and into "half a step"). Re-read every number.
+- MECHANICAL CONSEQUENCE of a vial seed must survive: how long it lasts, how
+  many things are lost, who decides what, and that a `rare_beneficial` effect
+  NEVER resolves the scene. If the Polish gift is useful "for exactly this one
+  turn and takes nothing off the weight of the scene", so is yours.
+- FOURTH WALL: the base prompt forbids citing game mechanics. Where the source
+  motivates a limit in-world (the craft rule of the being who grants it), keep it
+  in-world — do not turn it into a meta comment about turns or probabilities.
+- ENGINE CONTRACTS, verbatim: the JSON keys of a turn (`"narracja"`, `"wybory"`,
+  `"id"`, `"tekst"`, `"postacie_aktywne"`, `"stan"`, `"meta"`, `"etap_luku"`…),
+  the payload fields (`fiolka_aktywacja_w_tej_turze`, `fiolka_efekt_seed`,
+  `stan.fiolka.*`), the category names (`harmful` / `distortion` /
+  `rare_beneficial`), `id="0"`, the refusal tag `[ODRZUCENIE_AI]` and the
+  Cinematic Meta Warning emoji marker ⚠️🚨⚠️ (the TTS filter cuts the block by
+  those emoji — lose them and a blind player HEARS the meta commentary).
+- THE NARRATIVE-ARC STAGE SET IS DERIVED, not translated: every pack ships
+  `exposition|rising_action|climax|resolution`. The tool substitutes it; if you
+  see localized stage names, something bypassed the tool.
+- SECOND PERSON, INFORMAL: the engine narrates "You walk", "You feel". Where the
+  target language distinguishes formal and informal address, use the one a novel
+  would use — consistently across prompts and seeds.
+- `zaczatki.yaml` (Quick Start presets) is LITERATURE written per language, not
+  i18n. A machine draft is a starting point only: names, places and cultural
+  references should be plausible for the target culture, while the genre, the
+  dramatic situation, the number of named characters and `tryb_domyslny` stay as
+  in the source. The preset KEYS are identifiers — never translate them.
+"""
+
+
 # Rdzeń nazwy buildera → blok hotspotów. Trzeci brat (`_tryby.py`, v18.15) wymusił
 # generalizację dawnego `if narzedzie.endswith("docs.py")`: nowe narzędzie z tej
 # rodziny dopisuje tu jedną parę i nie tyka reszty modułu. Nieznany rdzeń spada na
@@ -293,6 +360,7 @@ _HOTSPOTY: dict[str, str] = {
     "docs": _CHECKLIST_DOCS,
     "ui": _CHECKLIST_UI,
     "tryby": _CHECKLIST_TRYBY,
+    "opowiesci": _CHECKLIST_OPOWIESCI,
 }
 
 
