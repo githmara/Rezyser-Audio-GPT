@@ -75,6 +75,7 @@ from typing import Any
 from ruamel.yaml import YAML
 
 import przeglad_tlumaczen
+import tlumacz_bramki
 
 
 # ---------------------------------------------------------------------------
@@ -289,6 +290,16 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str, *, persona_hint: bool = False) 
         "conventions (button verbs, menu wording, error-message register, the "
         "screen-reader / accessibility vocabulary native speakers actually use).\n"
         "- Render the FUNCTION of each label, not a literal gloss of the Polish words.\n\n"
+        # v18.16: `ui.yaml` to w większości krótkie etykiety, ale mieszka w nim
+        # materiał promptowy — `rezyser.prompt_architekta_content` (1,7 kB prompta,
+        # który user wkleja do czatbota), długie komunikaty w trybie rozkazującym
+        # oraz opisy szablonów Managera cytujące pola silnika („Agent zaprojektuje
+        # `prompt_systemowy`…"). Na takim tekście model potrafi rozpoznać się jako
+        # adresat i wykonać instrukcję zamiast ją przetłumaczyć. Wariant
+        # „mniejszość" mówi o tym prawdę, nie przesuwając rejestru tłumaczenia
+        # krótkich napisów. (Pełne szablony agenta żyją w
+        # `manager_regul_szablony.py`, więc tego buildera nie dotyczą.)
+        + tlumacz_bramki.blok_anty_meta_skip(przewaga_promptow=False) + "\n"
         "## Technical rules (CRITICAL — a violation blocks the file from being saved)\n"
         "1. **Markers ⟦P{n}⟧ and ⟦S{n}⟧** are frozen program fragments "
         "(placeholders and keyboard shortcuts). Copy them into `target` VERBATIM — "
@@ -311,7 +322,10 @@ def _PROMPT_SYSTEMOWY(nazwa_celu: str, kod: str, *, persona_hint: bool = False) 
         "6. **Application version** — in a value like `\"13.1 – Wersja Wydawnicza\"` "
         "keep the number (digits + dot) and the dash, but translate the Polish phrase "
         "'Wersja Wydawnicza' into the target-language equivalent "
-        "(e.g. 'Release Edition' / 'Julkaisuversio').\n\n"
+        "(e.g. 'Release Edition' / 'Julkaisuversio'). Here 'wydawnicza' means a "
+        "SOFTWARE RELEASE — never the printing-house sense of a book edition "
+        "(never ru 'Издательская', it 'di Pubblicazione', de 'Verlags-'), and never "
+        "a tautology repeating the word for version/edition twice.\n\n"
         + persona_blok +
         "## Response format\n"
         "Return ONLY valid JSON `{\"translations\": [...]}`. No code fences, no "
@@ -419,9 +433,25 @@ def detokenizuj_liscia(tekst: str, mapa: dict[str, str]) -> str:
     return TOKEN_PARITY_REGEX.sub(_zamien, tekst)
 
 
-def waliduj_liscia(src_tok: str, tgt: str) -> tuple[bool, list[str]]:
-    """Sprawdza parity tokenów + count('&'). Zwraca (ok, lista_problemow)."""
+def waliduj_liscia(
+    src_tok: str, tgt: str, sciezka_klucza: str = "",
+) -> tuple[bool, list[str], list[str]]:
+    """Sprawdza parity tokenów + count('&') + odcisk struktury promptów.
+
+    Zwraca ``(ok, problemy, ostrzezenia)``. `problemy` blokują zapis (idą przez
+    retry), `ostrzezenia` są tylko raportowane.
+
+    Odcisk struktury (v18.16, `tlumacz_bramki`) dotyczy WYŁĄCZNIE liści
+    promptopodobnych — w `ui.yaml` jest ich 14 na ~900 (prompt Architekta, długie
+    komunikaty i ostrzeżenia ze szkieletem). Krótkiej etykiety przycisku odciskiem
+    nie mierzymy (byłby szum). Naruszenia TWARDE (liczba nagłówków `#`, punktów
+    numerowanych) blokują, MIĘKKIE (pogrubienia, liczba linii, stosunek długości)
+    zostają ostrzeżeniem: prozy UI nie chcemy odrzucać za to, że niemiecki jest
+    dłuższy. W przepisach (`_tryby.py`) ta sama para list blokuje w całości —
+    tam materiał jest sztywny.
+    """
     problemy: list[str] = []
+    ostrzezenia: list[str] = []
 
     we = Counter(TOKEN_PARITY_REGEX.findall(src_tok))
     wy = Counter(TOKEN_PARITY_REGEX.findall(tgt))
@@ -443,7 +473,12 @@ def waliduj_liscia(src_tok: str, tgt: str) -> tuple[bool, list[str]]:
             f"tgt: {tgt.count('&')}×"
         )
 
-    return (len(problemy) == 0), problemy
+    if tlumacz_bramki.wyglada_jak_prompt(src_tok, sciezka_klucza):
+        twarde, miekkie = tlumacz_bramki.waliduj_odcisk(src_tok, tgt)
+        problemy += twarde
+        ostrzezenia += miekkie
+
+    return (len(problemy) == 0), problemy, ostrzezenia
 
 
 # ---------------------------------------------------------------------------
@@ -815,12 +850,27 @@ def tlumacz_jezyk(
         return False
 
     porazki: list[tuple[int, list[str]]] = []
+    uwagi_odcisku: list[tuple[int, list[str]]] = []
     src_po_idx = {idx: src for idx, src in liscie_tok}
     for idx, src_tok in liscie_tok:
         tgt = mapa_tgt[idx]
-        ok, problemy = waliduj_liscia(src_tok, tgt)
+        ok, problemy, ostrzezenia = waliduj_liscia(src_tok, tgt, liscie_pl[idx][0])
         if not ok:
             porazki.append((idx, problemy))
+        if ostrzezenia:
+            uwagi_odcisku.append((idx, ostrzezenia))
+
+    # Miękki odcisk struktury nie blokuje — ale recenzent musi go zobaczyć,
+    # bo „prompt schudł o połowę" wygląda w YAML-u niewinnie.
+    if uwagi_odcisku:
+        print(f"⚠️  {kod}: {len(uwagi_odcisku)} prompt-like value(s) changed shape "
+              f"(review, not blocking):")
+        for idx, ostrzezenia in uwagi_odcisku[:5]:
+            print(f"     [{idx}] {liscie_pl[idx][0]}")
+            for diag in ostrzezenia:
+                print(f"       • {diag}")
+        if len(uwagi_odcisku) > 5:
+            print(f"     ... (+{len(uwagi_odcisku) - 5} more)")
 
     # --- Krok 3.5: jednorazowy RETRY dla problematycznych liści ---------------
     # LLM bywa kreatywny w pojedynczych przypadkach (np. zgubi `&`, zmieni
@@ -855,7 +905,7 @@ def tlumacz_jezyk(
         porazki_v2: list[tuple[int, list[str]]] = []
         for idx, _ in porazki:
             tgt = mapa_tgt.get(idx, "")
-            ok, problemy = waliduj_liscia(src_po_idx[idx], tgt)
+            ok, problemy, _ = waliduj_liscia(src_po_idx[idx], tgt, liscie_pl[idx][0])
             if not ok:
                 porazki_v2.append((idx, problemy))
 

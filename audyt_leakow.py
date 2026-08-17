@@ -663,6 +663,11 @@ DEV_TOOLE = {
     "buduj_wielojezyczne_docs.py", "buduj_wielojezyczne_ui.py",
     "buduj_wielojezyczne_tryby.py",
     "audyt_leakow.py", "przeglad_tlumaczen.py", "odpowiedz_lokalnie.py",
+    # v18.16: wspólne bramki rodziny `buduj_wielojezyczne_*`. Ta sama klasa co
+    # `przeglad_tlumaczen.py` — polskie diagnostyki dla polskiego maintainera,
+    # zero powierzchni user-facing. Whitelista jest tu czystsza niż baseline
+    # (wzorzec `_dev_log` z v18.5.4).
+    "tlumacz_bramki.py",
     "test_core_updater.py",
 }
 

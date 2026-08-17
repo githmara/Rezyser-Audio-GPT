@@ -58,6 +58,8 @@ for full usage (help text is in English).
 | `generuj_dokumentacje.py [-v | --waliduj]` | Regenerates `docs/*.txt` from `dictionaries/*/gui/dokumentacja/*.yaml`. `-v` = generate **and** hard-check. Run before committing doc changes. |
 | `buduj_wielojezyczne_ui.py` | Batch-translates UI strings (`gui/ui.yaml`) from the Polish source into the other languages. Surgical mode: `-k <dotted.key>`. Review workflow: a full run always lands as a draft → review → `-f`/`--finalizuj`. |
 | `buduj_wielojezyczne_docs.py` | Batch-translates the manuals (`gui/dokumentacja/*.yaml`) pl → others. Same draft → review → `-f` workflow. |
+| `buduj_wielojezyczne_tryby.py` | Batch-translates the Director's **recipes** (`<code>/rezyser/*.yaml` — prompt templates, GUI labels, developer comments) pl → others. Same draft → review → `-f` workflow, plus `--tylko-walidacja` (no API) to audit existing packs against each other. |
+| `audyt_leakow.py` | Leak detector and release **gate**: `--bramka` (docs + `ui.yaml`), `--bramka-py` (Polish hard-coded strings in `*.py`). Both compare against a committed baseline; regenerate with `--zapisz-baseline[-py]` only after reviewing the diff. Needs the optional `lingua` dependency — without it the gate is skipped with a warning, never blocked. |
 | `refresh_languages.py` | Syncs the target-language registry (`jezyki_docelowe.yaml`) with the `dictionaries/<code>/` folders. Run after adding/removing a language. `--strict` for a CI guard. |
 | `build_release.py` | Builds the PyInstaller release and the Inno Setup installer. |
 

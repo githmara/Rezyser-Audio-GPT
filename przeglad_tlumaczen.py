@@ -164,9 +164,17 @@ from PL/EN. Canon (de / es / fr / it / ru):
   cards / geographic maps). NEVER es `mapas` (use `diccionarios`).
 - "kreator" is a wizard → NEVER `создатель` / `creatore` / `Schöpfer` / `creator`
   (= a creator/God).
-- For the app-version suffix translate ONLY the suffix and keep
-  `{numer_wersji} – ` unchanged — NEVER ru `Издательская` / it `di Pubblicazione`
-  (= "for a book publisher").
+- APP-VERSION SUFFIX (`app.wersja`): translate ONLY the suffix and keep
+  `{numer_wersji} – ` unchanged. It denotes a SOFTWARE RELEASE — never a
+  book/print edition (NEVER ru `Издательская` / it `di Pubblicazione` /
+  de `Verlags-`), and never a tautology like is `Útgáfuútgáfa`
+  ("edition-edition"). This checklist is the canon; the value shipped in
+  `dictionaries/<code>/gui/ui.yaml::app.wersja` is the source of truth:
+  pl `Wersja Wydawnicza` · en `Release Edition` · de `Release-Version` ·
+  es `Versión de Lanzamiento` · fi `Julkaisuversio` · fr `Version de Lancement` ·
+  is `Fullbúin útgáfa` · it `Versione di Rilascio` · ru `Релизная версия`.
+  For a NEW language: pick the native phrase a released product would use,
+  then add it to this list.
 """
 
 _CHECKLIST_DOCS = """\

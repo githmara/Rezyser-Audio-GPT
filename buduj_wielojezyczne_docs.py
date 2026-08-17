@@ -72,6 +72,7 @@ import yaml
 
 import core_llm as cl
 import przeglad_tlumaczen
+import tlumacz_bramki
 from tlumacz_ai import sciezka_cache_tlumaczenia, tlumacz_dlugi_tekst
 
 
@@ -526,6 +527,15 @@ def _zbuduj_prompt_dodatkowy(
     if nieznana or _sekcja_ma_typoglikemie(tresc_sekcji):
         czesci.append(_PROMPT_TYPOGLIKEMIA.format(nazwa_natywna=nazwa_natywna))
 
+    # Anty-meta-skip (v18.16, wspólny `tlumacz_bramki`) — BEZWARUNKOWO, wbrew
+    # oszczędności teza-3. Powód: ryzyko nie ogranicza się do sekcji opisujących
+    # prompty. Manual jest pisany w trybie rozkazującym do CZŁOWIEKA („wpisz klucz
+    # i naciśnij…"), a model tłumaczący potrafi się w takim tekście rozpoznać jako
+    # adresat i zacząć go wykonywać/odpowiadać — dokładnie to zdarzyło się
+    # 2026-05-19 na `opowiesci/baza.yaml` (is/ru: pierwsza sekcja wracała po
+    # polsku). Blok waży ~180 tokenów, monolit sprzed teza-3 ważył 1 286.
+    czesci.append(tlumacz_bramki.blok_anty_meta_skip(przewaga_promptow=False))
+
     czesci.append(_PROMPT_CORE_LITERALY.format(nazwa_natywna=nazwa_natywna))
     return "\n\n".join(czesci)
 
@@ -609,13 +619,46 @@ def sprawdz_parzystosc(
     return False, problemy
 
 
+# Kształt linii markera w DOWOLNYM języku: cała linia jest jednym nawiasem
+# kwadratowym z tekstem wersalikowym. Nasz prefix to dokładnie dwie takie linie
+# (otwarcie + zamknięcie). Próg 15 znaków trzyma z daleka krótkie tagi-kotwice
+# (`[CEL SCENY]`, `[ODRZUCENIE_AI]`), gdyby kiedyś stanęły w osobnej linii.
+_RE_LINIA_MARKERA = re.compile(r"^\s*\[([^\]\n]{15,})\]\s*$")
+
+
+def _czy_linia_markera(linia: str) -> bool:
+    m = _RE_LINIA_MARKERA.match(linia)
+    return bool(m) and m.group(1) == m.group(1).upper()
+
+
 def utnij_prefix_z_wyniku(wynik: str) -> str:
-    """Usuwa prefix-instrukcję z odpowiedzi LLM (jeśli nie usunął sam)."""
+    """Usuwa prefix-instrukcję z odpowiedzi LLM (jeśli nie usunął sam).
+
+    Ścieżka podstawowa: szukamy polskiego :data:`MARKER_KONCA_PREFIXU`.
+
+    Ścieżka awaryjna (v18.16): marker jest polską PROZĄ, więc model potrafi go
+    PRZETŁUMACZYĆ — wtedy `find` zwraca -1, dawna wersja uznawała to za „model
+    posłuchał i usunął blok" i wpuszczała całą instrukcję do szablonu. Tak
+    powstał osad w `es/dictionaries::co_to_tryb_rezysera`: dwie linie
+    „[INSTRUCCIÓN TÉCNICA…]" / „[FIN DE LA INSTRUCCIÓN…]" pojechały do wydanej
+    dokumentacji i renderowały się w `docs/dictionaries.es.html`. Znalazła to
+    dopiero bramka odcisku struktury (`tlumacz_bramki`, reguła „tłumaczenie
+    zaczyna się artefaktem"). Bramka zostaje jako siatka bezpieczeństwa, ale
+    ubijanie opłaconej sekcji jest gorsze niż zdjęcie dwóch linii tutaj.
+    """
     idx = wynik.find(MARKER_KONCA_PREFIXU)
-    if idx == -1:
-        # Model posłuchał i usunął blok META — zostawiamy wynik w całości.
-        return wynik.lstrip()
-    return wynik[idx + len(MARKER_KONCA_PREFIXU):].lstrip()
+    if idx != -1:
+        return wynik[idx + len(MARKER_KONCA_PREFIXU):].lstrip()
+
+    linie = wynik.lstrip("\n").split("\n")
+    zdjete = 0
+    while linie and zdjete < 2 and _czy_linia_markera(linie[0]):
+        linie.pop(0)
+        zdjete += 1
+    if zdjete:
+        print(f"⚠️  Model PRZETŁUMACZYŁ blok instrukcji technicznej zamiast go "
+              f"usunąć — zdjęto {zdjete} wiodące linie markera.")
+    return "\n".join(linie).lstrip()
 
 
 # ---------------------------------------------------------------------------
@@ -912,6 +955,26 @@ def _tlumacz_pojedyncza_sekcje(
         if len(problemy) > 10:
             print(f"     ... (+{len(problemy) - 10} more)")
         return False, None
+
+    # Odcisk struktury (v18.16) — druga bramka tej samej klasy co parzystość, tylko
+    # na KSZTAŁCIE: szablony docs są Markdownem od v18.8, więc liczba nagłówków
+    # `#`/`##` i punktów numerowanych jest kontraktem (pilnuje jej też renderer).
+    # Model, który zamiast przetłumaczyć sekcję WYKONAŁ jej instrukcje albo ją
+    # streścił, gubi ten szkielet — a parzystość ⟦i⟧ tego nie widzi.
+    # TWARDE naruszenia ubijają sekcję; MIĘKKIE (pogrubienia, liczba linii,
+    # stosunek długości) tylko ostrzegają: w prozie manuala przełamanie akapitu
+    # i dłuższy niemiecki są legalne.
+    twarde, miekkie = tlumacz_bramki.waliduj_odcisk(tresc_tok, tekst_wy)
+    if twarde:
+        print(f"❌  {kod}/{nazwa_pliku}{sufiks}: BROKEN structural fingerprint "
+              f"(the model may have executed the text instead of translating it).")
+        for diag in twarde:
+            print(f"     {diag}")
+        return False, None
+    if miekkie:
+        print(f"⚠️  {kod}/{nazwa_pliku}{sufiks}: shape drift (review, not blocking):")
+        for diag in miekkie:
+            print(f"     {diag}")
 
     tekst_final = detokenizuj(tekst_wy, mapa)
     return True, tekst_final
