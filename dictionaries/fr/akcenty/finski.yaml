@@ -51,17 +51,23 @@ zamiany:
   - { wzor: "gn", zamiana: "nj" }
   - { wzor: "Gn", zamiana: "Nj" }
   - { wzor: "GN", zamiana: "NJ" }
+  # KASKADA ZAMIERZONA (opisana wyżej, oznaczona jawnie w v18.21): „ou" → „uu"
+  # świadomie wpada pod „u" → „y", a reguła „yy" → „uu" niżej przywraca fińskie
+  # długie /u/ — dlatego G3 ma tu milczeć, a nie raportować w każdym przebiegu.
   - { wzor: "ou", zamiana: "uu" }
   - { wzor: "Ou", zamiana: "Uu" }
   - { wzor: "OU", zamiana: "UU" }
   - { wzor: "au", zamiana: "o"  }
   - { wzor: "Au", zamiana: "O"  }
+  - { wzor: "AU", zamiana: "O"  }
   - { wzor: "eu", zamiana: "ö"  }
   - { wzor: "Eu", zamiana: "Ö"  }
+  - { wzor: "EU", zamiana: "Ö"  }
   - { wzor: "u",  zamiana: "y"  }
   - { wzor: "U",  zamiana: "Y"  }
   - { wzor: "yy", zamiana: "uu" }
   - { wzor: "Yy", zamiana: "Uu" }
+  - { wzor: "YY", zamiana: "UU" }
   # « ç » N'EST PAS ici (correction v18.19) : le champ `alfabet` du français
   # compte 26 lettres ASCII, donc `polskie_znaki` dans `podstawy.yaml`
   # normalise « ç » en « c » AVANT cette liste — une règle sur « ç » était

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Komplettanleitung (Version 18.20.0 – Release-Version)</title>
+<title>Reżyser Audio GPT — Komplettanleitung (Version 18.21.0 – Release-Version)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Komplettanleitung (Version 18.20.0 – Release-Version)</h1>
+<h1>Reżyser Audio GPT — Komplettanleitung (Version 18.21.0 – Release-Version)</h1>
 <p>Willkommen im Hybriden Aufnahmestudio! Dieses Toolset ermöglicht das automatische Schreiben, Planen, Formatieren und Übersetzen von Hörspiel- und Hörbuchskripten. Es wurde für die Zusammenarbeit mit professionellen Sprachsynthesizern und lokalen Screenreader-Engines (NVDA) optimiert.</p>
 <p>Das Set besteht aus dem Hauptstudio (Regie), einem Übersetzungs- und Akzentwerkzeug (Polyglott), einem Werkzeug zum Erstellen der Dateistruktur (Hörbucharchitekt), einem Regelmanager (ab Version 13.0 — ohne Python kannst du einen neuen Akzent, ein Chiffre oder einen kreativen Modus hinzufügen, siehe SCHRITT 7b unten) und — ab Version 15.0 — einem Geschichtenmodul (interaktive, zweite Person AI-generierte Fiktion, gelesen von TTS oder Screenreader, beschrieben in einem separaten Handbuch tales.de.html). Alle fünf Werkzeuge sind in einem Programmfenster verfügbar, das über Schaltflächen in der Leiste oder Tastenkombinationen Ctrl+1..Ctrl+5 umgeschaltet werden kann.</p>
 <h2>SCHRITT 1: Erste Ausführung (Cross-Platform)</h2>
@@ -462,7 +462,7 @@ Skriptadaption zum Audiobook (Skriptmodus) — aus finanziellen Gründen entfern
 <p>Architekten-Prompt direkt im Regisseur-Panel (A11y-ÄNDERUNG). Bisher lebte der Prompt für den externen Chatbot zur Erstellung des Weltbuchs nur in dieser Anleitung — der Benutzer musste ihn aus einer Textdatei kopieren (was bei Bildschirmlesegeräten problematisch sein kann, insbesondere bei polnischen Zeichen und Anführungszeichen). In Version 13.0 hat das Regisseur-Panel einen neuen Button „📖 Architekten-Prompt für AI…" (direkt unter „Buch dauerhaft speichern"), der ein natives Dialogfenster mit dem vollständigen Prompt-Text im READONLY-Feld sowie einem separaten Button „In Zwischenablage kopieren" öffnet. Das A11y-Muster ist identisch mit dem des Ergebnisdialogs des Assistenten im Regelmanager — NVDA liest sofort den gesamten Inhalt des Fensters ohne zusätzliche Konfiguration. Vollständige Beschreibung im aktualisierten SCHRITT 7.</p>
 </li>
 <li>
-<p>Russischer Akzent im Polyglott (NEU — achte europäische Sprache im Menü des Regisseur-Modus). Zur Dropdown-Liste „Regisseur-Modus / Akzente" wird die Option „Russisch (z.B. Milena / Irina / Yuri / Pavel)" hinzugefügt. Im Gegensatz zu den anderen Akzenten, die den deutschen Text nur auf lateinischer Ebene „verfälschen" (der englische Akzent etwa „w" → „v"), führt der russische Akzent eine vollständige Transliteration des deutschen Textes ins Kyrillische durch — so können russischsprachige TTS-Stimmen (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") die Wörter „aussprechen". Die Tabelle des deutschen Pakets deckt die deutschen Digraphen ab: „sch" → „ш", „tsch" → „ч", „ch" → „х", „qu" → „кв", „tz" → „ц" (z.B. „Schule" → „Шуле", „Tschüss" → „Чусс").</p>
+<p>Russischer Akzent im Polyglott (NEU — achte europäische Sprache im Menü des Regisseur-Modus). Zur Dropdown-Liste „Regisseur-Modus / Akzente" wird die Option „Russisch (z.B. Milena / Irina / Yuri / Pavel)" hinzugefügt. Im Gegensatz zu den anderen Akzenten, die den deutschen Text nur auf lateinischer Ebene „verfälschen" (der englische Akzent etwa „w" → „v"), führt der russische Akzent eine vollständige Transliteration des deutschen Textes ins Kyrillische durch — so können russischsprachige TTS-Stimmen (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") die Wörter „aussprechen". Die Tabelle des deutschen Pakets deckt die deutschen Digraphen ab: „sch" → „ш", „tsch" → „ч", „ch" → „х", „qu" → „кв", „tz" → „ц" (z.B. „Schule" → „Шуле", „Tschüss" → „Чюсс").</p>
 </li>
 </ul>
 <p>Phonetische Anmerkung: Der Akzent ist keine akademische russische Transliteration (ISO 9, GOST, BGN/PCGN). Ziel ist es, den polnischen Text klanglich dem Russischen anzunähern — für die Zwecke der Sprachsynthese, nicht für die ernsthafte Transliteration von Eigennamen. Für letztere Arbeit verwenden Sie bitte spezielle sprachwissenschaftliche Werkzeuge.</p>

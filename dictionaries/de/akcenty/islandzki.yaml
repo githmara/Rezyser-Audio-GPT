@@ -33,7 +33,7 @@ zamiany:
   # --- Trigramme zuerst ---
   - { wzor: "tsch", zamiana: "tsk"  }
   - { wzor: "Tsch", zamiana: "Tsk"  }
-  - { wzor: "TSch", zamiana: "TSK"  }
+  - { wzor: "TSCH", zamiana: "TSK"  }
   # --- Digramme ---
   - { wzor: "sch",  zamiana: "sk"   }
   - { wzor: "Sch",  zamiana: "Sk"   }
@@ -43,14 +43,15 @@ zamiany:
   - { wzor: "CH",   zamiana: "K"    }
   - { wzor: "eu",   zamiana: "öy"   }
   - { wzor: "Eu",   zamiana: "Öy"   }
+  - { wzor: "EU",   zamiana: "ÖY"   }
   - { wzor: "ie",   zamiana: "i"    }
   - { wzor: "Ie",   zamiana: "I"    }
+  - { wzor: "IE",   zamiana: "I"    }
   # --- Umlaute ---
   - { wzor: "ü",    zamiana: "y"    }
   - { wzor: "Ü",    zamiana: "Y"    }
   - { wzor: "ä",    zamiana: "æ"    }
   - { wzor: "Ä",    zamiana: "Æ"    }
-  - { wzor: "ß",    zamiana: "ss"   }
   # ö bleibt (is. hat ö!)
   # --- Einzelne Konsonanten ---
   - { wzor: "w",    zamiana: "v"    }

@@ -41,10 +41,13 @@ skleja_pojedyncze_litery: true
 zamiany:
   - { wzor: "ph", zamiana: "v" }
   - { wzor: "Ph", zamiana: "V" }
+  - { wzor: "PH", zamiana: "V" }
   - { wzor: "sh", zamiana: "s" }
   - { wzor: "Sh", zamiana: "S" }
+  - { wzor: "SH", zamiana: "S" }
   - { wzor: "th", zamiana: "t" }
   - { wzor: "Th", zamiana: "T" }
+  - { wzor: "TH", zamiana: "T" }
   - { wzor: "f",  zamiana: "v" }
   - { wzor: "F",  zamiana: "V" }
   - { wzor: "z",  zamiana: "s" }

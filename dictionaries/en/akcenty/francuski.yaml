@@ -46,10 +46,13 @@ skleja_pojedyncze_litery: true
 zamiany:
   - { wzor: "th", zamiana: "z"  }
   - { wzor: "Th", zamiana: "Z"  }
+  - { wzor: "TH", zamiana: "Z"  }
   - { wzor: "wh", zamiana: "v"  }
   - { wzor: "Wh", zamiana: "V"  }
+  - { wzor: "WH", zamiana: "V"  }
   - { wzor: "ch", zamiana: "sh" }
   - { wzor: "Ch", zamiana: "Sh" }
+  - { wzor: "CH", zamiana: "SH" }
 
   # --- Silent H at word start (regex: true) ---
   - { wzor: '\bh', zamiana: "", regex: true }

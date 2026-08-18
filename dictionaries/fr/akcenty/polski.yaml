@@ -51,8 +51,10 @@ zamiany:
   - { wzor: "J",  zamiana: "Ż"  }
   - { wzor: "au", zamiana: "o"  }
   - { wzor: "Au", zamiana: "O"  }
+  - { wzor: "AU", zamiana: "O"  }
   - { wzor: "eu", zamiana: "e"  }
   - { wzor: "Eu", zamiana: "E"  }
+  - { wzor: "EU", zamiana: "E"  }
   - { wzor: "u",  zamiana: "i"  }
   - { wzor: "U",  zamiana: "I"  }
   - { wzor: "ç",  zamiana: "s"  }

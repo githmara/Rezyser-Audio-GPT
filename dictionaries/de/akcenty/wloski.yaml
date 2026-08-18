@@ -34,7 +34,7 @@ zamiany:
   # --- Trigramme zuerst ---
   - { wzor: "tsch", zamiana: "ci"  }
   - { wzor: "Tsch", zamiana: "Ci"  }
-  - { wzor: "TSch", zamiana: "CI"  }
+  - { wzor: "TSCH", zamiana: "CI"  }
   # --- Digramme ---
   - { wzor: "sch",  zamiana: "sc"  }
   - { wzor: "Sch",  zamiana: "Sc"  }
@@ -44,6 +44,7 @@ zamiany:
   - { wzor: "CH",   zamiana: "C"   }
   - { wzor: "ie",   zamiana: "i"   }
   - { wzor: "Ie",   zamiana: "I"   }
+  - { wzor: "IE",   zamiana: "I"   }
   # --- Umlaute ---
   - { wzor: "ü",    zamiana: "u"   }
   - { wzor: "Ü",    zamiana: "U"   }
@@ -51,7 +52,11 @@ zamiany:
   - { wzor: "Ö",    zamiana: "O"   }
   - { wzor: "ä",    zamiana: "e"   }
   - { wzor: "Ä",    zamiana: "E"   }
-  - { wzor: "ß",    zamiana: "ss"  }
   # --- Einzelne Konsonanten ---
   - { wzor: "w",    zamiana: "v"   }
   - { wzor: "W",    zamiana: "V"   }
+  # AUDYT 18.21: reguły „z" nie było wcale, choć proza obiecuje ją od v13.0 —
+  # włoski głos czytał niemieckie „Zeit" przez /dz/. Żadna wcześniejsza reguła
+  # nie produkuje „z", żadna późniejsza nie tyka „ts", więc miejsce jest wolne.
+  - { wzor: "z",    zamiana: "ts"  }
+  - { wzor: "Z",    zamiana: "Ts"  }

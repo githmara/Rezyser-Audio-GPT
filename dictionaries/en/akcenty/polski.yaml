@@ -75,18 +75,24 @@ zamiany:
   # --- 1-4. Core digraph rewrites ---
   - { wzor: "sh", zamiana: "sz" }
   - { wzor: "Sh", zamiana: "Sz" }
+  - { wzor: "SH", zamiana: "SZ" }
   - { wzor: "ch", zamiana: "cz" }
   - { wzor: "Ch", zamiana: "Cz" }
+  - { wzor: "CH", zamiana: "CZ" }
   - { wzor: "th", zamiana: "d"  }
   - { wzor: "Th", zamiana: "D"  }
+  - { wzor: "TH", zamiana: "D"  }
   - { wzor: "wh", zamiana: "ł"  }
   - { wzor: "Wh", zamiana: "Ł"  }
+  - { wzor: "WH", zamiana: "Ł"  }
 
   # --- 5-6. Hardening of digraph-i clusters (after sh→sz, ch→cz) ---
   - { wzor: "szi", zamiana: "szy" }
   - { wzor: "Szi", zamiana: "Szy" }
+  - { wzor: "SZI", zamiana: "SZY" }
   - { wzor: "czi", zamiana: "czy" }
   - { wzor: "Czi", zamiana: "Czy" }
+  - { wzor: "CZI", zamiana: "CZY" }
 
   # --- 7-10. Hardening of single soft consonants + i ---
   # Native Polish ortografia "ci"/"si"/"zi"/"ni" forces soft phonemes
@@ -94,12 +100,16 @@ zamiany:
   # Ewa reads /tsɨ sɨ zɨ nɨ/ — hard, English-like.
   - { wzor: "si", zamiana: "sy" }
   - { wzor: "Si", zamiana: "Sy" }
+  - { wzor: "SI", zamiana: "SY" }
   - { wzor: "ci", zamiana: "cy" }
   - { wzor: "Ci", zamiana: "Cy" }
+  - { wzor: "CI", zamiana: "CY" }
   - { wzor: "zi", zamiana: "zy" }
   - { wzor: "Zi", zamiana: "Zy" }
+  - { wzor: "ZI", zamiana: "ZY" }
   - { wzor: "ni", zamiana: "ny" }
   - { wzor: "Ni", zamiana: "Ny" }
+  - { wzor: "NI", zamiana: "NY" }
 
   # --- 11. w → ł (after wh → ł) ---
   - { wzor: "w",  zamiana: "ł"  }

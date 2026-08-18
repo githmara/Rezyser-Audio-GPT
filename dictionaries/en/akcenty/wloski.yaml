@@ -51,10 +51,13 @@ skleja_pojedyncze_litery: true
 zamiany:
   - { wzor: "wh", zamiana: "v" }
   - { wzor: "Wh", zamiana: "V" }
+  - { wzor: "WH", zamiana: "V" }
   - { wzor: "sh", zamiana: "s" }
   - { wzor: "Sh", zamiana: "S" }
+  - { wzor: "SH", zamiana: "S" }
   - { wzor: "th", zamiana: "t" }
   - { wzor: "Th", zamiana: "T" }
+  - { wzor: "TH", zamiana: "T" }
 
   # --- Silent H at word start (regex: true) ---
   - { wzor: '\bh', zamiana: "", regex: true }
@@ -72,4 +75,4 @@ zamiany:
   # avoids over-caricaturising prepositions and articles. Capture group is
   # preserved verbatim, "a" appended.
   - { wzor: '(rk|st|nd|kt|pt|ft)\b', zamiana: '\1a', regex: true }
-  - { wzor: '(RK|ST|ND|KT|PT|FT)\b', zamiana: '\1a', regex: true }
+  - { wzor: '(RK|ST|ND|KT|PT|FT)\b', zamiana: '\1A', regex: true }

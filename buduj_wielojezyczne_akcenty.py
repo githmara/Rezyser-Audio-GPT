@@ -40,7 +40,10 @@ Bramki (błąd = blokada zapisu / niezerowy exit; uwaga = triaż recenzenta):
     przez pre-pass** (patrz niżej — to ta bramka znalazła 43 martwe reguły
     w paczce `de`).
   * **G3 cieniowanie sekwencyjne** — port `core_poliglota._ostrzez_o_lancuchu_zamian`
-    do raportu (uwaga: kaskady bywają celowe).
+    do raportu (uwaga: kaskady bywają celowe). Kaskadę ZAMIERZONĄ deklaruje
+    się w danych: komentarz z markerem `KASKADA ZAMIERZONA` nad regułą-źródłem
+    wycisza to trafienie (v18.21 — inaczej osiem świadomych łańcuchów
+    w `de/hiszpanski` i `fr/finski` szumiałoby w audycie na zawsze).
   * **G4 parytet wielkości liter** — reguła małoliterowa bez odpowiednika
     wielkoliterowego. Wyjątek: litery bez odpowiednika (`ß`.upper() == „SS").
   * **G5 pismo wyjścia** — dla akcentu TRANSLITERUJĄCEGO (wyjście w innym
@@ -53,6 +56,15 @@ Bramki (błąd = blokada zapisu / niezerowy exit; uwaga = triaż recenzenta):
     uwagi. Klasa v17.6.2, ta sama co jąkanie w v18.18.
   * **G7 kolejnosc** — duplikat w obrębie paczki (uwaga, nie błąd: silnik ma
     tie-breaker po etykiecie, więc lista pozostaje deterministyczna).
+  * **G8 wariant ALL-CAPS dwuznaku** (v18.21) — reguła o co najmniej dwóch
+    literach bez odpowiednika pisanego WERSALIKAMI: `Sz → Sh` nie łapie
+    nagłówka „SZKIC", bo `str.replace` jest wrażliwe na wielkość liter. G4
+    pilnuje tylko wariantu z wielkiej litery, więc luka przeżyła 72 pary
+    (109 brakujących wariantów dosypanych w v18.21). Porównanie idzie po
+    wzorcu OBCIĘTYM z białych znaków: wariant wersalikowy reguły, w której
+    wielka litera zastępuje granicę słowa (`Sp` → `Шп` w `de/rosyjski`), nosi
+    tę granicę jawnie jako spację (` SP`), bo w tekście pisanym wersalikami
+    proxy z wielkiej litery nie istnieje.
 
 **PRE-PASS ZJADA REGUŁY — klasa defektu odkryta tym audytem.** Silnik stosuje
 `usun_polskie_znaki` PRZED listą `zamiany` (`core_poliglota` linie 1038-1044),
@@ -544,7 +556,14 @@ def bramka_martwe_reguly(
                                  f"reguła no-op", blad=True))
         if len(wzor) > 1 and para in proste:
             poprzednie = proste[:proste.index(para)]
-            for wcz in poprzednie:
+            # Wzorzec bywa PRODUKOWANY przez wcześniejszą regułę — wtedy nie ma
+            # znaczenia, że któraś rozbija go w tekście WEJŚCIOWYM, bo reguła
+            # pracuje na wyniku (wzorzec-warta: `de/hiszpanski` prowadzi „tsch"
+            # przez „jj", żeby „ch" → „j" nie zjadło świeżego /tʃ/). Bez tego
+            # rozróżnienia bramka ubijała jedyny mechanizm, jakim sekwencyjne
+            # `str.replace` umie obsłużyć trzy nachodzące na siebie dźwięki.
+            odtwarzany = any(wzor in str(wcz.get("zamiana", "")) for wcz in poprzednie)
+            for wcz in ([] if odtwarzany else poprzednie):
                 krotszy = str(wcz.get("wzor", ""))
                 if krotszy and len(krotszy) < len(wzor) and krotszy in wzor:
                     zn.append(Znalezisko(
@@ -582,6 +601,45 @@ def bramka_martwe_reguly(
     return zn
 
 
+MARKER_KASKADY = "KASKADA ZAMIERZONA"
+
+
+def kaskady_zamierzone(paczka: str, akcent: str) -> set[str]:
+    """Wzorce reguł, nad którymi stoi komentarz z :data:`MARKER_KASKADY`.
+
+    Świadomy łańcuch zamian jest własnością DANYCH, nie pamięci recenzenta:
+    `de/hiszpanski` prowadzi „tsch" przez wartę „jj", żeby reguła „ch" → „j"
+    nie zjadła świeżego /tʃ/, a `fr/finski` naprawia „uu" → „yy" powstałe
+    z „ou" → „uu". Bez tej deklaracji G3 raportowałaby oba łańcuchy w każdym
+    przebiegu, a stała uwaga w audycie przestaje być sygnałem.
+
+    Marker obowiązuje od swojego bloku komentarza do NASTĘPNEGO bloku (tak
+    działają nagłówki sekcji w tych plikach), więc nagłówek grupy oznacza całą
+    grupę, a komentarz nad jedną regułą — tylko ją i jej warianty wielkości
+    liter stojące niżej.
+    """
+    plik = DICT_DIR / paczka / FOLDER / f"{akcent}.yaml"
+    try:
+        linie = plik.read_text(encoding="utf-8").split("\n")
+    except OSError:
+        return set()
+    oznaczone: set[str] = set()
+    blok = poprzednia_komentarz = False
+    for linia in linie:
+        naga = linia.strip()
+        if naga.startswith("#"):
+            if not poprzednia_komentarz:
+                blok = False
+            blok = blok or MARKER_KASKADY in naga
+            poprzednia_komentarz = True
+            continue
+        poprzednia_komentarz = False
+        trafienie = re.search(r"""wzor:\s*(["'])(.*?)\1""", linia)
+        if trafienie and blok:
+            oznaczone.add(trafienie.group(2))
+    return oznaczone
+
+
 def bramka_cieniowanie(paczka: str, akcent: str, cfg: dict) -> list[Znalezisko]:
     """G3: reguła wprowadza znak, który łapie późniejsza reguła (uwaga)."""
     nazwa = f"{paczka}/{akcent}"
@@ -590,9 +648,10 @@ def bramka_cieniowanie(paczka: str, akcent: str, cfg: dict) -> list[Znalezisko]:
         return []
     pary = [(str(p.get("wzor", "")), str(p.get("zamiana", "")), bool(p.get("regex")))
             for p in zamiany if isinstance(p, dict)]
+    zamierzone = kaskady_zamierzone(paczka, akcent)
     zn: list[Znalezisko] = []
     for i, (wzor_i, zam_i, regex_i) in enumerate(pary):
-        if not zam_i or regex_i:
+        if not zam_i or regex_i or wzor_i in zamierzone:
             continue
         for j in range(i + 1, len(pary)):
             wzor_j, _, regex_j = pary[j]
@@ -630,6 +689,47 @@ def bramka_parytet_liter(paczka: str, akcent: str, cfg: dict) -> list[Znalezisko
             nazwa, "G4",
             f"reguły bez wariantu wielkoliterowego: {braki[:8]} — słowo na "
             f"początku zdania nie dostanie akcentu", blad=False)]
+    return []
+
+
+def bramka_wersaliki(paczka: str, akcent: str, cfg: dict) -> list[Znalezisko]:
+    """G8: reguła o ≥2 literach bez wariantu pisanego WERSALIKAMI (uwaga).
+
+    `str.replace` jest wrażliwe na wielkość liter, więc `Sz → Sh` nie tyka
+    nagłówka „SZKIC PROMPTU" ani wykrzyknienia pisanego wersalikami. G4 pilnuje
+    wariantu z WIELKIEJ litery (początek zdania), ta bramka — wariantu ALL-CAPS.
+    Jednoliterowe reguły są poza zakresem: dla nich wariant wielkoliterowy
+    z G4 JEST wariantem wersalikowym.
+
+    Wzorce porównujemy OBCIĘTE z białych znaków, bo w jednej parze wielka
+    litera zastępuje granicę słowa (`Sp` → `Шп`, „sp" na początku wyrazu),
+    a jej odpowiednik wersalikowy musi tę granicę nosić jawnie (` SP`) —
+    w tekście pisanym wersalikami proxy z wielkiej litery nie istnieje.
+    """
+    nazwa = f"{paczka}/{akcent}"
+    zamiany = cfg.get("zamiany")
+    if not isinstance(zamiany, list):
+        return []
+    wzory = [str(p.get("wzor", "")) for p in zamiany
+             if isinstance(p, dict) and not p.get("regex")]
+    wersaliki = {w.strip().upper() for w in wzory
+                 if w.strip() and w.strip() == w.strip().upper()
+                 and w.strip() != w.strip().lower()}
+    braki: list[str] = []
+    for wzor in sorted(set(wzory)):
+        rdzen = wzor.strip()
+        if len([z for z in rdzen if z.isalpha()]) < 2:
+            continue
+        gorny = rdzen.upper()
+        # „ß".upper() == „SS" — zmiana długości znaczy, że to inny wzorzec.
+        if gorny == rdzen or len(gorny) != len(rdzen) or gorny in wersaliki:
+            continue
+        braki.append(wzor)
+    if braki:
+        return [Znalezisko(
+            nazwa, "G8",
+            f"reguły wielozankowe bez wariantu ALL-CAPS: {braki[:8]} — tekst "
+            f"pisany wersalikami przejdzie obok nich bez akcentu", blad=False)]
     return []
 
 
@@ -799,6 +899,7 @@ def audytuj(
         znaleziska += bramka_martwe_reguly(pkg, akc, cfg, cp)
         znaleziska += bramka_cieniowanie(pkg, akc, cfg)
         znaleziska += bramka_parytet_liter(pkg, akc, cfg)
+        znaleziska += bramka_wersaliki(pkg, akc, cfg)
         znaleziska += bramka_pismo_wyjscia(pkg, akc, cfg, cp)
         znaleziska += bramka_przyklady(pkg, akc, cfg, cp)
     if not kody_paczek and not akcenty:
@@ -1017,7 +1118,17 @@ def _PROMPT_GENERATORA(
         "4. Keep the source language's own letters where the target voice "
         "happens to read them correctly — every rule must earn its place.\n"
         "5. `existing_terminology`, when present, is how this pack already "
-        "names things. Reuse its wording for the label.\n\n"
+        "names things. Reuse its wording for the label.\n"
+        "6. **Every rule of two letters or more needs THREE case variants: "
+        "lowercase, Capitalised and ALL-CAPS** (`sz`, `Sz`, `SZ`). "
+        "`str.replace` is case-sensitive, so a table with only the first two "
+        "leaves headings and shouting written in capitals unaccented — that gap "
+        "existed in 25 of the 72 hand-written pairs until v18.21. Two "
+        "exceptions: a single-letter rule needs only the two obvious variants, "
+        "and a rule that uses the capital letter AS A PROXY for the start of a "
+        "word cannot have a plain ALL-CAPS twin (the proxy does not exist in "
+        "text written in capitals) — spell the boundary out as a leading space "
+        "instead, as `de/akcenty/rosyjski.yaml` does for ` SP`.\n\n"
         "## `previous_attempt_problems` MEANS YOUR PREVIOUS ANSWER WAS REJECTED\n"
         "When the payload carries that field (the diagnostics are in Polish, the "
         "language of the parent script), a gate already re-ran the ENGINE on your "

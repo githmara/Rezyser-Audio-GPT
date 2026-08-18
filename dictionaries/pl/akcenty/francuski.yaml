@@ -26,10 +26,13 @@ zamiany:
   # (francuz przeczyta je jako /sz/ — akceptowalna karykatura).
   - { wzor: "sz", zamiana: "ch"  }
   - { wzor: "Sz", zamiana: "Ch"  }
+  - { wzor: "SZ", zamiana: "CH"  }
   - { wzor: "cz", zamiana: "tch" }
   - { wzor: "Cz", zamiana: "Tch" }
+  - { wzor: "CZ", zamiana: "TCH" }
   - { wzor: "rz", zamiana: "j"   }
   - { wzor: "Rz", zamiana: "J"   }
+  - { wzor: "RZ", zamiana: "J"   }
   - { wzor: "r",  zamiana: "gh"  }
   - { wzor: "R",  zamiana: "Gh"  }
   - { wzor: "w",  zamiana: "v"   }

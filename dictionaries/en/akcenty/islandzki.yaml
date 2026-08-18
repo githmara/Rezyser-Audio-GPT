@@ -36,12 +36,16 @@ skleja_pojedyncze_litery: true
 zamiany:
   - { wzor: "wh", zamiana: "v" }
   - { wzor: "Wh", zamiana: "V" }
+  - { wzor: "WH", zamiana: "V" }
   - { wzor: "sh", zamiana: "s" }
   - { wzor: "Sh", zamiana: "S" }
+  - { wzor: "SH", zamiana: "S" }
   - { wzor: "ch", zamiana: "k" }
   - { wzor: "Ch", zamiana: "K" }
+  - { wzor: "CH", zamiana: "K" }
   - { wzor: "th", zamiana: "t" }
   - { wzor: "Th", zamiana: "T" }
+  - { wzor: "TH", zamiana: "T" }
   - { wzor: "w",  zamiana: "v" }
   - { wzor: "W",  zamiana: "V" }
   - { wzor: "j",  zamiana: "y" }

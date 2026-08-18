@@ -61,6 +61,7 @@ zamiany:
   - { wzor: "SZCZ", zamiana: "Щ"  }
   - { wzor: "ść",   zamiana: "щ"  }
   - { wzor: "Ść",   zamiana: "Щ"  }
+  - { wzor: "ŚĆ",   zamiana: "Щ"  }
   - { wzor: "sz",   zamiana: "ш"  }
   - { wzor: "Sz",   zamiana: "Ш"  }
   - { wzor: "SZ",   zamiana: "Ш"  }
@@ -75,59 +76,83 @@ zamiany:
   - { wzor: "CH",   zamiana: "Х"  }
   - { wzor: "dż",   zamiana: "дж" }
   - { wzor: "Dż",   zamiana: "Дж" }
+  - { wzor: "DŻ",   zamiana: "ДЖ" }
   - { wzor: "dź",   zamiana: "джь" }
   - { wzor: "Dź",   zamiana: "Джь" }
+  - { wzor: "DŹ",   zamiana: "ДЖЬ" }
   - { wzor: "dz",   zamiana: "дз" }
   - { wzor: "Dz",   zamiana: "Дз" }
+  - { wzor: "DZ",   zamiana: "ДЗ" }
 
   # --- 2. Zmiękczenia si/ci/ni/zi + samogłoska ---
   - { wzor: "sia",  zamiana: "ся" }
   - { wzor: "Sia",  zamiana: "Ся" }
+  - { wzor: "SIA",  zamiana: "СЯ" }
   - { wzor: "sie",  zamiana: "се" }
   - { wzor: "Sie",  zamiana: "Се" }
+  - { wzor: "SIE",  zamiana: "СЕ" }
   - { wzor: "sio",  zamiana: "сё" }
   - { wzor: "Sio",  zamiana: "Сё" }
+  - { wzor: "SIO",  zamiana: "СЁ" }
   - { wzor: "siu",  zamiana: "сю" }
   - { wzor: "Siu",  zamiana: "Сю" }
+  - { wzor: "SIU",  zamiana: "СЮ" }
 
   - { wzor: "cia",  zamiana: "ця" }
   - { wzor: "Cia",  zamiana: "Ця" }
+  - { wzor: "CIA",  zamiana: "ЦЯ" }
   - { wzor: "cie",  zamiana: "це" }
   - { wzor: "Cie",  zamiana: "Це" }
+  - { wzor: "CIE",  zamiana: "ЦЕ" }
   - { wzor: "cio",  zamiana: "цё" }
   - { wzor: "Cio",  zamiana: "Цё" }
+  - { wzor: "CIO",  zamiana: "ЦЁ" }
   - { wzor: "ciu",  zamiana: "цю" }
   - { wzor: "Ciu",  zamiana: "Цю" }
+  - { wzor: "CIU",  zamiana: "ЦЮ" }
 
   - { wzor: "nia",  zamiana: "ня" }
   - { wzor: "Nia",  zamiana: "Ня" }
+  - { wzor: "NIA",  zamiana: "НЯ" }
   - { wzor: "nie",  zamiana: "не" }
   - { wzor: "Nie",  zamiana: "Не" }
+  - { wzor: "NIE",  zamiana: "НЕ" }
   - { wzor: "nio",  zamiana: "нё" }
   - { wzor: "Nio",  zamiana: "Нё" }
+  - { wzor: "NIO",  zamiana: "НЁ" }
   - { wzor: "niu",  zamiana: "ню" }
   - { wzor: "Niu",  zamiana: "Ню" }
+  - { wzor: "NIU",  zamiana: "НЮ" }
 
   - { wzor: "zia",  zamiana: "зя" }
   - { wzor: "Zia",  zamiana: "Зя" }
+  - { wzor: "ZIA",  zamiana: "ЗЯ" }
   - { wzor: "zie",  zamiana: "зе" }
   - { wzor: "Zie",  zamiana: "Зе" }
+  - { wzor: "ZIE",  zamiana: "ЗЕ" }
   - { wzor: "zio",  zamiana: "зё" }
   - { wzor: "Zio",  zamiana: "Зё" }
+  - { wzor: "ZIO",  zamiana: "ЗЁ" }
   - { wzor: "ziu",  zamiana: "зю" }
   - { wzor: "Ziu",  zamiana: "Зю" }
+  - { wzor: "ZIU",  zamiana: "ЗЮ" }
 
   # --- 3. Jotowane „j" + samogłoska ---
   - { wzor: "ja",   zamiana: "я"  }
   - { wzor: "Ja",   zamiana: "Я"  }
+  - { wzor: "JA",   zamiana: "Я"  }
   - { wzor: "je",   zamiana: "е"  }
   - { wzor: "Je",   zamiana: "Е"  }
+  - { wzor: "JE",   zamiana: "Е"  }
   - { wzor: "jo",   zamiana: "ё"  }
   - { wzor: "Jo",   zamiana: "Ё"  }
+  - { wzor: "JO",   zamiana: "Ё"  }
   - { wzor: "ju",   zamiana: "ю"  }
   - { wzor: "Ju",   zamiana: "Ю"  }
+  - { wzor: "JU",   zamiana: "Ю"  }
   - { wzor: "ji",   zamiana: "и"  }
   - { wzor: "Ji",   zamiana: "И"  }
+  - { wzor: "JI",   zamiana: "И"  }
 
   # --- 4. Pozostałe „j" → „й" ---
   - { wzor: "j",    zamiana: "й"  }

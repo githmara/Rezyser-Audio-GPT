@@ -68,7 +68,7 @@ zamiany:
   # --- gn + vocale /ɲ/ → нь + vocale (n palatale) ---
   - { wzor: "Gna", zamiana: "Нья" }
   - { wzor: "gna", zamiana: "нья" }
-  - { wzor: "GNA", zamiana: "НЬА" }
+  - { wzor: "GNA", zamiana: "НЬЯ" }
   - { wzor: "Gne", zamiana: "Нье" }
   - { wzor: "gne", zamiana: "нье" }
   - { wzor: "GNE", zamiana: "НЬЕ" }

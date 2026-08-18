@@ -21,10 +21,13 @@ skleja_pojedyncze_litery: true
 zamiany:
   - { wzor: "sz", zamiana: "sch"  }
   - { wzor: "Sz", zamiana: "Sch"  }
+  - { wzor: "SZ", zamiana: "SCH"  }
   - { wzor: "cz", zamiana: "tsch" }
   - { wzor: "Cz", zamiana: "Tsch" }
+  - { wzor: "CZ", zamiana: "TSCH" }
   - { wzor: "rz", zamiana: "rsch" }
   - { wzor: "Rz", zamiana: "Rsch" }
+  - { wzor: "RZ", zamiana: "RSCH" }
   # AUDYT 18.12 (W-4): dawna kaskada „w”→„v” + „v”→„f” czytała KAŻDE
   # polskie /w/ jako /f/ („woda i wino”→„foda ifino”). Niemiecka litera
   # „w” to natywnie /w/ (v) — polskie „w” zostawiamy, a rzadkie polskie

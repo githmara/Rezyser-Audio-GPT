@@ -52,9 +52,12 @@ zamiany:
   - { wzor: "U",  zamiana: "Ü"   }
   - { wzor: "oü", zamiana: "u"   }
   - { wzor: "Oü", zamiana: "U"   }
+  - { wzor: "OÜ", zamiana: "U"   }
   - { wzor: "aü", zamiana: "au"  }
   - { wzor: "Aü", zamiana: "Au"  }
+  - { wzor: "AÜ", zamiana: "AU"  }
   - { wzor: "eü", zamiana: "eu"  }
   - { wzor: "Eü", zamiana: "Eu"  }
+  - { wzor: "EÜ", zamiana: "EU"  }
   - { wzor: "ç",  zamiana: "ss"  }
   - { wzor: "Ç",  zamiana: "Ss"  }

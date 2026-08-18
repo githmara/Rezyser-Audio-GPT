@@ -13,17 +13,22 @@ opis: |
     - „tsch" → „ч",  „sch" → „ш",  „ch" → „х" (vereinfacht, ohne ich-Laut)
     - „sp"/„st" am Wortanfang → „шп"/„шт" (Näherung: nur nach Leerzeichen
       oder bei Großschreibung erkennbar — Wortmitte bleibt „сп"/„ст")
-    - „ei" → „ай",  „eu" → „ой",  „ie" → „и",  „aa/ee/oo" → „а/е/о"
+    - „ei" → „ай",  „eu"/„äu" → „ой",  „ie" → „и",  „aa/ee/oo" → „а/е/о"
+    - Umlaute jotiert: „ü" → „ю", „ö" → „ё", „ä" → „э" („Müller" → „Мюллер",
+      „König" → „Кёниг" — die russische Schreibtradition für deutsche Namen)
     - „s" vor Vokal → „з" (за/зе/зи/зо/зу), „ss" → „сс"
     - „ja/je/jo/ju" → „я/е/ё/ю",  übriges „j" → „й"
     - „w" → „в",  „v" → „ф",  „z"/„tz" → „ц",  „qu" → „кв",  „ck" → „к"
     - „th" → „т",  „ph" → „ф",  restliche Buchstaben 1:1 kyrillisch.
 
-  Bewusste Vereinfachungen: die Umlaute werden flach abgebildet —
-  „ü" → „у" statt „ю", „ö" → „о" statt „ё", „ä" → „а"; „äu" ist damit
-  von „au" nicht unterscheidbar (beide → „ау"). „ß" wird über die
-  Vorstufe (ss) zu „сс" abgebildet. Dehnungs-h wird vereinfacht als
-  „х" gesprochen (starker Akzent-Effekt).
+  Seit v18.21 sind die Umlaute jotiert abgebildet (ю/ё/э) — bis v18.20 lagen
+  sie flach auf а/о/у, und „äu" war dabei von „au" nicht unterscheidbar.
+  Wer den alten, flachen Klang braucht, ändert die sechs Umlaut-Regeln am
+  Ende der Tabelle im Regel-Manager zurück.
+
+  Bewusste Vereinfachungen bleiben: „ß" wird über die Vorstufe (ss) zu „сс"
+  abgebildet, und das Dehnungs-h wird als „х" gesprochen (starker
+  Akzent-Effekt).
 iso: ru
 kategoria: akcent
 kolejnosc: 60
@@ -55,10 +60,17 @@ zamiany:
   - { wzor: "SCH",  zamiana: "Ш" }
 
   # --- 2. sp / st am Wortanfang (Näherung) ---
+  # AUDYT 18.21 (bramka G7): wariant ALL-CAPS tej pary NIE brzmi „SP"/„ST",
+  # bo wielka litera pełni tu rolę PROXY POCZĄTKU SŁOWA — w tekście pisanym
+  # wersalikami ten proxy nie istnieje, a goła reguła „SP" łapałaby też środek
+  # wyrazu („KNOSPE" → „КНОШПЕ", choć „Knospe" → „кноспе"). Wersalikowy
+  # odpowiednik nosi więc spację, dokładnie jak wariant małych liter.
   - { wzor: "Sp",  zamiana: "Шп"  }
   - { wzor: " sp", zamiana: " шп" }
+  - { wzor: " SP", zamiana: " ШП" }
   - { wzor: "St",  zamiana: "Шт"  }
   - { wzor: " st", zamiana: " шт" }
+  - { wzor: " ST", zamiana: " ШТ" }
 
   # --- 3. Konsonanten-Digraphen ---
   - { wzor: "ch", zamiana: "х"  }
@@ -83,6 +95,12 @@ zamiany:
   - { wzor: "SS", zamiana: "СС" }
 
   # --- 4. Vokal-Digraphen ---
+  # AUDYT 18.21: „äu" stoi PRZED tablicą umlautów (blok 7) i przed regułą „au",
+  # bo to ten sam dyftong /ɔʏ/ co „eu" — bez tej reguły „Häuser" wychodziłoby
+  # jako „хэузер" (э + у), czyli sekwencja obca rosyjskiemu głosowi.
+  - { wzor: "äu", zamiana: "ой" }
+  - { wzor: "Äu", zamiana: "Ой" }
+  - { wzor: "ÄU", zamiana: "ОЙ" }
   - { wzor: "ei", zamiana: "ай" }
   - { wzor: "Ei", zamiana: "Ай" }
   - { wzor: "EI", zamiana: "АЙ" }
@@ -105,40 +123,52 @@ zamiany:
   # --- 5. s + Vokal → з + Vokal (nach den Vokal-Digraphen!) ---
   - { wzor: "sa", zamiana: "за" }
   - { wzor: "Sa", zamiana: "За" }
+  - { wzor: "SA", zamiana: "ЗА" }
   - { wzor: "se", zamiana: "зе" }
   - { wzor: "Se", zamiana: "Зе" }
+  - { wzor: "SE", zamiana: "ЗЕ" }
   - { wzor: "si", zamiana: "зи" }
   - { wzor: "Si", zamiana: "Зи" }
+  - { wzor: "SI", zamiana: "ЗИ" }
   - { wzor: "so", zamiana: "зо" }
   - { wzor: "So", zamiana: "Зо" }
+  - { wzor: "SO", zamiana: "ЗО" }
   - { wzor: "su", zamiana: "зу" }
   - { wzor: "Su", zamiana: "Зу" }
+  - { wzor: "SU", zamiana: "ЗУ" }
 
   # --- 6. Jotierung ---
   - { wzor: "ja", zamiana: "я" }
   - { wzor: "Ja", zamiana: "Я" }
+  - { wzor: "JA", zamiana: "Я" }
   - { wzor: "je", zamiana: "е" }
   - { wzor: "Je", zamiana: "Е" }
+  - { wzor: "JE", zamiana: "Е" }
   - { wzor: "jo", zamiana: "ё" }
   - { wzor: "Jo", zamiana: "Ё" }
+  - { wzor: "JO", zamiana: "Ё" }
   - { wzor: "ju", zamiana: "ю" }
   - { wzor: "Ju", zamiana: "Ю" }
+  - { wzor: "JU", zamiana: "Ю" }
   - { wzor: "j",  zamiana: "й" }
   - { wzor: "J",  zamiana: "Й" }
 
-  # --- 7. Umlaute (v18.19: eigene Regeln statt Vorstufe) ---
+  # --- 7. Umlaute (v18.21: feinere Abbildung ю/ё/э statt flacher а/о/у) ---
   # Bis v18.18 erledigte das `usun_polskie_znaki` in `podstawy.yaml` (ä→a→а).
   # Seit Ä/Ö/Ü dort — dem deutschen `alfabet` entsprechend — NICHT mehr
-  # plattgemacht werden, muss diese Tabelle sie selbst abbilden, sonst bleiben
-  # lateinische Buchstaben im kyrillischen Ergebnis stehen. Abbildung wie
-  # bisher (а/о/у), damit sich der Klang gegenüber v18.18 nicht ändert; die im
-  # `opis` genannte feinere Variante (ю/ё/э) bleibt eine spätere Option.
-  - { wzor: "ä", zamiana: "а"  }
-  - { wzor: "Ä", zamiana: "А"  }
-  - { wzor: "ö", zamiana: "о"  }
-  - { wzor: "Ö", zamiana: "О"  }
-  - { wzor: "ü", zamiana: "у"  }
-  - { wzor: "Ü", zamiana: "У"  }
+  # plattgemacht werden, bildet diese Tabelle sie selbst ab. v18.19 hielt die
+  # flache Abbildung (а/о/у) bewusst bei, um den Klang nicht zu verändern;
+  # v18.21 nimmt die Variante, die der `opis` seit v13.0 als Ideal bezeichnet:
+  # ü ≈ /y/ → ю, ö ≈ /ø/ → ё, ä ≈ /ɛ/ → э. Die jotierten Buchstaben tragen im
+  # Russischen genau die Palatalisierung, die dt. ö/ü brauchen („Müller" →
+  # „Мюллер", „König" → „Кёниг" — die russische Schreibtradition für dt. Namen).
+  # ACHTUNG: das ändert den Klang bestehender Projekte (bis v18.20: „Муллер").
+  - { wzor: "ä", zamiana: "э"  }
+  - { wzor: "Ä", zamiana: "Э"  }
+  - { wzor: "ö", zamiana: "ё"  }
+  - { wzor: "Ö", zamiana: "Ё"  }
+  - { wzor: "ü", zamiana: "ю"  }
+  - { wzor: "Ü", zamiana: "Ю"  }
 
   # --- 8. Einzelbuchstaben → Kyrillisch ---
   - { wzor: "a", zamiana: "а"  }

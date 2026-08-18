@@ -10,7 +10,7 @@ opis: |
   Problematische deutsche Laute für englisches TTS:
     - „sch" → „sh" (dt. /ʃ/ — englisches TTS liest sch als /sk/)
     - „ch" → „kh" (dt. /x/ — englisches TTS liest ch als /tʃ/)
-    - „ei" → „eye" oder „ai" (dt. /aɪ/)
+    - „ei" → „ai" oder „eye" (dt. /aɪ/ — die Tabelle nimmt „ai")
     - „eu" → „oy" (dt. /ɔɪ/)
     - „ü" → „ue" (dt. /y/ — englisches TTS kennt kein y-Laut)
     - „ö" → „oe" (dt. /ø/)
@@ -43,8 +43,10 @@ zamiany:
   - { wzor: "EI",   zamiana: "AI"  }
   - { wzor: "eu",   zamiana: "oy"  }
   - { wzor: "Eu",   zamiana: "Oy"  }
+  - { wzor: "EU",   zamiana: "OY"  }
   - { wzor: "ie",   zamiana: "ee"  }
   - { wzor: "Ie",   zamiana: "Ee"  }
+  - { wzor: "IE",   zamiana: "EE"  }
   # --- Umlaute ---
   - { wzor: "ü",    zamiana: "ue"  }
   - { wzor: "Ü",    zamiana: "Ue"  }
@@ -52,7 +54,6 @@ zamiany:
   - { wzor: "Ö",    zamiana: "Oe"  }
   - { wzor: "ä",    zamiana: "ae"  }
   - { wzor: "Ä",    zamiana: "Ae"  }
-  - { wzor: "ß",    zamiana: "ss"  }
   # --- Einzelne Konsonanten ---
   # „v"→„f" PRZED „w"→„v" (audyt 18.12): odwrotna kolejność czytała każde
   # niemieckie W jako F („Wasser und Wein"→„Fasser und Fain").

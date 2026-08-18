@@ -90,12 +90,16 @@ zamiany:
   # --- 3. Yotación ---
   - { wzor: "ya",  zamiana: "я"  }
   - { wzor: "Ya",  zamiana: "Я"  }
+  - { wzor: "YA",  zamiana: "Я"  }
   - { wzor: "ye",  zamiana: "е"  }
   - { wzor: "Ye",  zamiana: "Е"  }
+  - { wzor: "YE",  zamiana: "Е"  }
   - { wzor: "yo",  zamiana: "ё"  }
   - { wzor: "Yo",  zamiana: "Ё"  }
+  - { wzor: "YO",  zamiana: "Ё"  }
   - { wzor: "yu",  zamiana: "ю"  }
   - { wzor: "Yu",  zamiana: "Ю"  }
+  - { wzor: "YU",  zamiana: "Ю"  }
   - { wzor: "y",   zamiana: "и"  }
   - { wzor: "Y",   zamiana: "И"  }
 

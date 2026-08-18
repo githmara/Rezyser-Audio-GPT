@@ -8,9 +8,12 @@ opis: |
   Spanisches TTS liest lateinische Buchstaben nach spanischen Regeln.
 
   Wichtigste Anpassungen:
+    - „j" → „y" (dt. /j/ — span. „j" wäre /x/, „Jahr" also [xar])
     - „sch" → „sh" (spanisches TTS liest sh als /ʃ/ — besser als sch → /sk/)
-    - „tsch" → „ch" (spanisches TTS liest ch als /tʃ/)
-    - „ch" → „k" (dt. /x/ — span. j wäre /x/ aber Schreibweise unklar → k)
+    - „tsch" → „ch" (spanisches TTS liest ch als /tʃ/; läuft über den
+      Zwischenschritt „jj" — siehe Kommentar in der Tabelle)
+    - „ch" → „j" (dt. /x/ = span. „j"; bis v18.20 stand hier „k", und die
+      Kaskade verschluckte dabei das /tʃ/: „Tschüss" wurde zu „Kuss")
     - „ei" → „ei" (bleibt — spanisch liest ei gut)
     - „eu" → „eu" (bleibt)
     - „ü" → „u" (span. hat kein /y/ → u)
@@ -31,19 +34,32 @@ usun_polskie_znaki: true
 skleja_pojedyncze_litery: true
 
 zamiany:
-  # --- Trigramme zuerst ---
-  - { wzor: "tsch", zamiana: "ch"  }
-  - { wzor: "Tsch", zamiana: "Ch"  }
-  - { wzor: "TSch", zamiana: "CH"  }
+  # AUDYT 18.21: kolejność jest tu nietrywialna i opiera się na dwóch krokach.
+  # (1) „j" → „y" MUSI iść PIERWSZE: niemieckie „j" to /j/, a hiszpańskie „j"
+  #     czyta się /x/ („Jahr" jako [xar]) — przy okazji ten krok OPRÓŻNIA
+  #     literę „j", która niżej pełni rolę warty.
+  # (2) Trzy dźwięki — /tʃ/ (tsch), /ʃ/ (sch) i /x/ (samotne ch) — nachodzą na
+  #     siebie w sekwencyjnym `str.replace`: świeże „ch" z reguły tsch zjadałaby
+  #     niższa reguła „ch" → „j". Dlatego tsch idzie na WARTĘ „jj", przywracaną
+  #     na „ch" na samym końcu listy. Naturalne „jj" nie może już wystąpić, bo
+  #     krok (1) usunął z tekstu wszystkie „j".
+  #     Do v18.20 kaskada spadała na /k/: „Tschüss" → „Kuss", „Deutsch" → „Deuk".
+  - { wzor: "j",    zamiana: "y"   }
+  - { wzor: "J",    zamiana: "Y"   }
+  # --- Trigramme zuerst (KASKADA ZAMIERZONA: warta „jj", patrz koniec listy) ---
+  - { wzor: "tsch", zamiana: "jj"  }
+  - { wzor: "Tsch", zamiana: "Jj"  }
+  - { wzor: "TSCH", zamiana: "JJ"  }
   # --- Digramme ---
   - { wzor: "sch",  zamiana: "sh"  }
   - { wzor: "Sch",  zamiana: "Sh"  }
   - { wzor: "SCH",  zamiana: "SH"  }
-  - { wzor: "ch",   zamiana: "k"   }
-  - { wzor: "Ch",   zamiana: "K"   }
-  - { wzor: "CH",   zamiana: "K"   }
+  - { wzor: "ch",   zamiana: "j"   }
+  - { wzor: "Ch",   zamiana: "J"   }
+  - { wzor: "CH",   zamiana: "J"   }
   - { wzor: "ie",   zamiana: "i"   }
   - { wzor: "Ie",   zamiana: "I"   }
+  - { wzor: "IE",   zamiana: "I"   }
   # --- Umlaute ---
   - { wzor: "ü",    zamiana: "u"   }
   - { wzor: "Ü",    zamiana: "U"   }
@@ -51,11 +67,15 @@ zamiany:
   - { wzor: "Ö",    zamiana: "O"   }
   - { wzor: "ä",    zamiana: "e"   }
   - { wzor: "Ä",    zamiana: "E"   }
-  - { wzor: "ß",    zamiana: "ss"  }
-  # --- Einzelne Konsonanten ---
+  # --- Einzelne Konsonanten (KASKADA ZAMIERZONA: „w" → „v" → „b" — reguła
+  #     „v" → „b" łapie świeże „v", a span. /v/ ≈ /b/ brzmi tak samo) ---
   - { wzor: "w",    zamiana: "v"   }
   - { wzor: "W",    zamiana: "V"   }
   - { wzor: "v",    zamiana: "b"   }
   - { wzor: "V",    zamiana: "B"   }
   - { wzor: "z",    zamiana: "s"   }
   - { wzor: "Z",    zamiana: "S"   }
+  # --- warta tsch przywrócona na /tʃ/ (PO wszystkich regułach na „ch") ---
+  - { wzor: "jj",   zamiana: "ch"  }
+  - { wzor: "Jj",   zamiana: "Ch"  }
+  - { wzor: "JJ",   zamiana: "CH"  }

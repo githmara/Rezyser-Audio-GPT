@@ -22,14 +22,18 @@ zamiany:
   # str.replace dojadał je do "shh"/"h" ("czapka"→"hapka", "mecz"→"meh").
   - { wzor: "ch",   zamiana: "h"    }
   - { wzor: "Ch",   zamiana: "H"    }
+  - { wzor: "CH",   zamiana: "H"    }
   - { wzor: "szcz", zamiana: "shch" }
   - { wzor: "Szcz", zamiana: "Shch" }
   - { wzor: "SZCZ", zamiana: "SHCH" }
   - { wzor: "sz",   zamiana: "sh"   }
   - { wzor: "Sz",   zamiana: "Sh"   }
+  - { wzor: "SZ",   zamiana: "SH"   }
   - { wzor: "cz",   zamiana: "ch"   }
   - { wzor: "Cz",   zamiana: "Ch"   }
+  - { wzor: "CZ",   zamiana: "CH"   }
   - { wzor: "rz",   zamiana: "zh"   }
   - { wzor: "Rz",   zamiana: "Zh"   }
+  - { wzor: "RZ",   zamiana: "ZH"   }
   - { wzor: "w",    zamiana: "v"    }
   - { wzor: "W",    zamiana: "V"    }
