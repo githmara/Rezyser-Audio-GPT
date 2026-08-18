@@ -134,11 +134,12 @@ they simply distort text according to a specific rule. Available ciphers<br>
 </li>
 <li>
 <p>Vowelizer (everything booms on "o")<br>
-   Each vowel in the text is replaced with "o", preserving Polish<br>
-   softening (ci, si, ni, zi, dzi are handled correctly): "Good morning,<br>
-   welcome madam" → "Goo mornong, woltom modom". The longer the text,<br>
-   the funnier the effect — and the screen reader reads it with full<br>
-   conviction, without trying to decode.</p>
+   Each vowel in the text is replaced with "o". The Polish softening step<br>
+   (dzi/ci/ni/si/zi) is intentionally empty in the English pack: English<br>
+   has no such spellings, so the rule reduces to the vowel swap. "Good<br>
+   morning, welcome madam" → "Good mornong, wolcomo modom". The longer<br>
+   the text, the funnier the effect — and the screen reader reads it with<br>
+   full conviction, without trying to decode.</p>
 </li>
 <li>
 <p>Strong Stuttering / Broken Robot<br>

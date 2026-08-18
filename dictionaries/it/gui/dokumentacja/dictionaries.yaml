@@ -104,9 +104,11 @@ tresc:
        doppiaggi di personaggi di serpenti confusi o robot difettosi con un sibilo.
 
     4. Vocalizzatore (tutto rimbomba su "o")
-       Ogni vocale nel testo viene sostituita con "o", mantenendo le
-       ammorbidimenti polacchi (ci, si, ni, zi, dzi sono gestiti correttamente):
-       "Buongiorno, signora" → "Boongiorno, soignoro". Più lungo è il testo,
+       Ogni vocale nel testo viene sostituita con "o", comprese quelle
+       accentate. Il passaggio delle morbidezze polacche (dzi/ci/ni/si/zi) è
+       volutamente vuoto nel pacchetto italiano: quelle grafie qui non
+       esistono, quindi la regola si riduce al cambio delle vocali:
+       "Buongiorno, signora" → "Boongoorno, sognoro". Più lungo è il testo,
        più divertente è l'effetto — e il lettore di schermo lo legge con piena
        convinzione, senza tentare di decodificarlo.
 

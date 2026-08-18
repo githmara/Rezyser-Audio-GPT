@@ -43,7 +43,18 @@ Architektura (decyzja 13.1 — Etap 5):
      (nie edytować ręcznie), plus `id: manual` + `tresc: |` z 2-spacyjnym
      wcięciem block-scalar. Encoding UTF-8 + LF (tak jak `generuj_dokumentacje.py`).
 
+AUDYT PRZYKŁADÓW (`--audyt`, od v18.20, zero API): docsowa odmiana bramki G6
+z brata akcentów — każda para „X → Y" w `gui/dokumentacja/*.yaml` liczona
+FAKTYCZNYM silnikiem (szyfry przez niezmienniki algorytmu, akcenty przez
+tablicę `zamiany`). Powstała, bo v18.19 znalazł RĘCZNIE, że akapit
+o Samogłoskowcu kłamie w ośmiu podręcznikach, a bramki plików REGUŁ tego nie
+widzą — to inny folder. Operację rozstrzygamy w paczce `pl` i przenosimy po
+POZYCJI punktu listy; szczegóły i kalibracja przy sekcji „AUDYT PRZYKŁADÓW".
+
 Użycie:
+  python buduj_wielojezyczne_docs.py --audyt                      # 9 paczek, zero API
+  python buduj_wielojezyczne_docs.py --audyt --jezyki pl,de
+  python buduj_wielojezyczne_docs.py --audyt --raport skrypty/audyt.md
   python buduj_wielojezyczne_docs.py --wszystkie                 # en, fi, ru, is, it
   python buduj_wielojezyczne_docs.py --jezyki en                 # tylko angielski
   python buduj_wielojezyczne_docs.py --jezyki en,fi --skip-existing
@@ -1199,6 +1210,408 @@ def finalizuj_naglowek_docs(cel: Path, kod: str, nazwa_pliku: str) -> str:
 
 
 # ---------------------------------------------------------------------------
+# AUDYT PRZYKŁADÓW W PODRĘCZNIKACH (`--audyt`, zero API) — v18.20
+# ---------------------------------------------------------------------------
+# Docsowa odmiana bramki G6 z brata akcentów (v18.19): każdą parę „X → Y"
+# z `gui/dokumentacja/*.yaml` przelicz FAKTYCZNYM silnikiem. Powód wprost
+# z v18.19: akapit o Samogłoskowcu kłamał w OŚMIU podręcznikach (obietnica
+# „zachowania polskich zmiękczeń" w paczkach bez tego kroku, pięć cytowało
+# przykład niezgodny z silnikiem), a bramki plików REGUŁ tego nie widzą, bo to
+# inny folder. Podręcznik czyta każdy użytkownik, pliki reguł prawie nikt.
+#
+# TRZY RÓŻNICE WOBEC G6 — wszystkie wymuszone materiałem, nie gustem:
+#
+#  1. **Kotwica nie może iść po etykiecie reguły.** Proza podręczników ma WŁASNĄ
+#     terminologię, rozjechaną z `szyfry/*.yaml::etykieta`: docs `de` mówią
+#     „Vokalisierer", etykieta „Vokaloid"; is „Sérhljóðari", ru „Гласновик",
+#     it „Vocalizzatore". Kotwiczymy więc w paczce `pl` (tam proza i etykiety
+#     się zgadzają, bo obie pisane ręcznie) i przenosimy rozstrzygnięcie do
+#     ośmiu pozostałych paczek PO POZYCJI PUNKTU LISTY w tej samej sekcji.
+#     Klucze sekcji są identyczne we wszystkich paczkach, a struktura listy
+#     zmierzona 9/9 zgodna — to ten sam kanon „pl jako baza referencyjna".
+#  2. **Zakres wynika z danych, nie z listy wyjątków.** Sekcja wchodzi do bramki
+#     tylko wtedy, gdy jej PL-owy punkt listy NAZYWA operację silnika. Dzięki
+#     temu dydaktyka HIPOTETYCZNA („dodajesz do akcentu dwie reguły: `ñ → nj`,
+#     `j → x`" w `krok_7b_manager_regul_kolejnosc_zamian`) i ścieżki nawigacji
+#     w cudzysłowach („pl" → „akcenty" = rozwijanie drzewa plików) wypadają
+#     SAME, bez utrzymywania czarnej listy w dziewięciu językach. Pary poza
+#     zakresem trafiają do podsumowania jako LICZBA — nowa sekcja z przykładami
+#     nie zniknie po cichu.
+#  3. **Czwarty werdykt: „to wynik INNEJ operacji tej paczki".** Proza cytuje
+#     przykłady przez KONTRAST („w przeciwieństwie do pozostałych akcentów,
+#     które tylko psują litery łacińskie — np. „sz" → „sh"") i wtedy para
+#     należy do innego narzędzia niż punkt listy. Zamiast listy markerów
+#     kontrastu w dziewięciu językach pytamy silnik: czy któraś INNA operacja
+#     tego samego rodzaju daje ten wynik? Jeśli tak — uwaga z nazwą tej
+#     operacji (recenzent widzi, czy to kontrast, czy pomylone narzędzie).
+KODY_AUDYTU: tuple[str, ...] = (KOD_ZRODLOWY, *MAPA_JEZYKOW)
+
+# Ile znaków CZOŁA punktu listy przeszukujemy pod nazwę operacji. Kalibracja na
+# paczce pl: nazwa narzędzia stoi w TYTULE punktu, czyli w pierwszych kilkunastu
+# znakach po punktorze („- Samogłoskowiec (Wszystko dudni na „O") — każda
+# samogłoska…", „- Akcent rosyjski w Poliglocie (NOWOŚĆ…)"). Okno 90 znaków
+# z pierwszej wersji łapało jeszcze nazwę PLIKU cytowaną w instrukcji
+# („rozwiń „pl" → „akcenty" i kliknij „francuski.yaml"") i przypisywało
+# ścieżkę nawigacji do akcentu francuskiego — 8 fałszywych oskarżeń.
+GLOWA_PUNKTU = 40
+
+# Szyfry, których NIE pytamy „czy to Twój wynik?" w werdykcie kontrastu — patrz
+# :func:`_inna_operacja_zgodna`.
+SZYFRY_POZA_KONTRASTEM = ("cezar",)
+
+
+def _rodzenstwo_audytu() -> tuple[Any, Any]:
+    """Leniwy import dwóch braci: tylko audyt potrzebuje silnika Poligloty.
+
+    Ścieżka tłumacząca nie płaci za `core_poliglota` (docx, num2words) ani za
+    `ruamel` — dokładnie tym samym argumentem, co lazy import `natywna_nazwa`
+    w :func:`main`.
+    """
+    import buduj_wielojezyczne_akcenty as bwa
+    import buduj_wielojezyczne_poliglota as bwp
+    return bwa, bwp
+
+
+def _bez_zawijania(tekst: str) -> str:
+    """Skleja zawinięte wiersze punktu w jedną linię (spacje do jednej).
+
+    Konieczne, bo `tresc` podręcznika to block scalar ZAWIJANY na ~72 znakach:
+    cytat „Good morning, welcome madam" potrafi mieć w środku znak nowej linii,
+    a ekstraktor par (dzielony z bratem akcentów) celowo nie wpuszcza `\\n`
+    do cytatu — tam `opis` jest krótki i zawijanie nie występuje. Bez tej
+    normalizacji bramka MILCZAŁABY o zawiniętych przykładach, co jest gorsze
+    od fałszywego alarmu: pierwszy przebieg przeoczył tak angielski przykład
+    Samogłoskowca („Goo mornong, woltom modom" — niezgodny z silnikiem).
+    """
+    return re.sub(r"\s+", " ", tekst).strip()
+
+
+def _punkty_listy(tekst: str) -> list[str]:
+    """Punkty listy sekcji, w kolejności występowania.
+
+    Jednostką bramki jest PUNKT LISTY, a nie akapit: pomiar na 9 paczkach dał
+    identyczną liczbę punktów w każdej audytowanej sekcji (6 szyfrów, 8 akcentów,
+    14 pozycji changelogu), przy czym liczba samych akapitów potrafi się różnić
+    (ru/`co_to_akcent` ma 13 wobec 12) — więc wyrównanie po akapitach byłoby
+    kruche tam, gdzie po punktach jest dokładne.
+    """
+    punkty: list[str] = []
+    for akapit in re.split(r"\n\s*\n", tekst or ""):
+        for kandydat in re.split(r"\n(?=\s*(?:[-*•]|\d+[.)])\s)", akapit):
+            if kandydat.strip() and _RE_PUNKTOR_LISTY.match(kandydat):
+                punkty.append(kandydat)
+    return punkty
+
+
+def nazwy_operacji_pl(bwa: Any) -> dict[str, tuple[str, str]]:
+    """Nazwa operacji z paczki `pl` → (`szyfry`|`akcenty`, id pliku).
+
+    Źródłem nazw jest `etykieta` reguły (człon przed nawiasem, rozbity po „/" —
+    „Zepsuty Telefon / Wężowy dialekt" to dwie nazwy jednego szyfru) plus sam
+    `id`. Trzy narzędzia z `akcenty/` pomijamy: nie są akcentami fonetycznymi
+    i nie mają czego obiecywać w prozie.
+    """
+    nazwy: dict[str, tuple[str, str]] = {}
+    for folder in ("szyfry", "akcenty"):
+        katalog = DICT_DIR / KOD_ZRODLOWY / folder
+        if not katalog.is_dir():
+            continue
+        for plik in sorted(katalog.glob("*.yaml")):
+            if plik.name in bwa.NARZEDZIA_AKCENTOW:
+                continue
+            try:
+                with open(plik, "r", encoding="utf-8") as fh:
+                    dane = yaml.safe_load(fh) or {}
+            except (OSError, yaml.YAMLError):
+                continue
+            glowa = str(dane.get("etykieta") or "").split("(")[0]
+            kandydaci = [czlon.strip() for czlon in glowa.split("/")]
+            kandydaci.append(plik.stem)
+            for nazwa in kandydaci:
+                if len(nazwa) > 3:
+                    nazwy[nazwa.lower()] = (folder, plik.stem)
+    return nazwy
+
+
+def _operacje_punktow_pl(
+    tekst_pl: str, nazwy: dict[str, tuple[str, str]],
+) -> dict[int, tuple[str, str]]:
+    """Indeks punktu listy → operacja, rozstrzygnięta w paczce `pl`.
+
+    Punkt, którego czoło nazywa DWIE różne operacje, zostaje nierozstrzygnięty:
+    lepiej stracić przykład niż przypisać go nie temu narzędziu (ta sama zasada,
+    co „bramka ma prawo powiedzieć «nie rozstrzygam»" z v18.19).
+    """
+    wynik: dict[int, tuple[str, str]] = {}
+    for indeks, punkt in enumerate(_punkty_listy(tekst_pl)):
+        czolo = _bez_zawijania(punkt)[:GLOWA_PUNKTU].lower()
+        # Nazwa PLIKU reguły (`francuski.yaml`) nie jest tytułem punktu, a
+        # cytatem z instrukcji — punkt „kliknij «francuski.yaml»" opisuje
+        # nawigację, nie akcent francuski.
+        trafione = {
+            operacja for nazwa, operacja in nazwy.items()
+            if re.search(r"(?<!\w)" + re.escape(nazwa) + r"(?!\.ya?ml)", czolo)
+        }
+        if len(trafione) == 1:
+            wynik[indeks] = trafione.pop()
+    return wynik
+
+
+def _wczytaj_regule(kod: str, folder: str, nazwa: str) -> dict:
+    """`dictionaries/<kod>/<folder>/<nazwa>.yaml` (pusty dict przy braku)."""
+    plik = DICT_DIR / kod / folder / f"{nazwa}.yaml"
+    try:
+        with open(plik, "r", encoding="utf-8") as fh:
+            dane = yaml.safe_load(fh)
+    except (OSError, yaml.YAMLError):
+        return {}
+    return dane if isinstance(dane, dict) else {}
+
+
+def _operacja_zgodna(
+    kod: str, folder: str, nazwa: str, src: str, oczekiwane: str,
+    cp: Any, bwa: Any, bwp: Any,
+) -> str | None:
+    """Czy operacja `<folder>/<nazwa>` paczki `kod` produkuje `oczekiwane`?
+
+    Zwraca ``None``, gdy tak (albo gdy nie ma czego policzyć), a opis rozjazdu,
+    gdy nie. Dla szyfrów pytamy o NIEZMIENNIKI (algorytmy jąkania, typoglikemii
+    i węża losują — patrz `sprawdz_pare_przykladu` u brata Poligloty), dla
+    akcentów o dokładny wynik tablicy `zamiany`.
+    """
+    if folder == "szyfry":
+        cfg = _wczytaj_regule(kod, folder, nazwa)
+        if not cfg:
+            return f"paczka nie ma pliku `szyfry/{nazwa}.yaml`"
+        algorytm = str(cfg.get("algorytm") or nazwa)
+        return bwp.sprawdz_pare_przykladu(
+            algorytm, src, oczekiwane, cfg, bwa.podstawy_paczki(kod))
+    if not (DICT_DIR / kod / folder / f"{nazwa}.yaml").is_file():
+        return f"paczka nie ma pliku `akcenty/{nazwa}.yaml`"
+    wynik = bwa.zastosuj(cp, src, kod, nazwa)
+    if wynik is None:
+        return "silnik nie policzył tego przykładu (zła reguła?)"
+    if wynik == oczekiwane:
+        return None
+    return f"{src!r} → obiecuje {oczekiwane!r}, a silnik daje {wynik!r}"
+
+
+def _inna_operacja_zgodna(
+    kod: str, folder: str, nazwa: str, src: str, oczekiwane: str,
+    cp: Any, bwa: Any, bwp: Any,
+) -> str | None:
+    """Nazwa INNEJ operacji tego samego rodzaju, która daje ten wynik (albo None).
+
+    Bramka pyta o to zamiast utrzymywać listę markerów kontrastu w dziewięciu
+    językach. Trafienie NIE jest rozgrzeszeniem — jest uwagą: albo proza
+    świadomie cytuje inne narzędzie („w przeciwieństwie do pozostałych
+    akcentów…"), albo pomyliła narzędzia, a to już defekt do ręki recenzenta.
+
+    Szyfr Cezara jest z tego pytania WYŁĄCZONY (kalibracja pierwszego przebiegu):
+    jego kontrola jest EGZYSTENCJALNA — „czy ISTNIEJE przesunięcie dające ten
+    wynik" — więc dla dowolnej pary równej długości odpowiada „tak" i tłumaczy
+    wszystko. Sześć realnych rozjazdów Samogłoskowca (pl, es, fr, it, ru)
+    zeszło z jego łaski z błędu na uwagę, zamiast się wyświetlić.
+    """
+    katalog = DICT_DIR / kod / folder
+    if not katalog.is_dir():
+        return None
+    for plik in sorted(katalog.glob("*.yaml")):
+        if (plik.stem == nazwa or plik.name in bwa.NARZEDZIA_AKCENTOW
+                or plik.stem in SZYFRY_POZA_KONTRASTEM):
+            continue
+        if _operacja_zgodna(kod, folder, plik.stem, src, oczekiwane,
+                            cp, bwa, bwp) is None:
+            return plik.stem
+    return None
+
+
+def audytuj_przyklady(
+    kody: list[str] | None = None,
+    nazwy_plikow: list[str] | None = None,
+) -> tuple[list[Any], dict[str, Any]]:
+    """Bramki D1 i D2 na `dictionaries/<kod>/gui/dokumentacja/*.yaml`.
+
+    * **D1 struktura** — liczba punktów listy w sekcji rozjechana z paczką `pl`
+      (uwaga, nie błąd: bramka przestaje wtedy wyrównywać przykłady tej sekcji,
+      ale sam rozjazd bywa redakcją, np. akapit dopisany w jednym języku).
+    * **D2 przykłady** — para „X → Y" niezgodna z faktycznym silnikiem.
+
+    Zwraca ``(znaleziska, statystyki)``; statystyki mają liczbę par w zakresie
+    i poza nim (per sekcja), żeby żadne obcięcie pokrycia nie było ciche.
+    """
+    bwa, bwp = _rodzenstwo_audytu()
+    cp = bwa.ustaw_silnik()
+    nazwy = nazwy_operacji_pl(bwa)
+    szablony_pl = wczytaj_szablony_pl()
+    if nazwy_plikow:
+        szablony_pl = [s for s in szablony_pl if s[0] in nazwy_plikow]
+    zakres_kodow = [k for k in KODY_AUDYTU if not kody or k in kody]
+
+    znaleziska: list[Any] = []
+    staty: dict[str, Any] = {
+        "par": 0, "w_zakresie": 0, "poza_zakresem": Counter(), "sekcji": 0,
+    }
+    for nazwa_pliku, _id, sekcje_pl in szablony_pl:
+        for klucz_sekcji, tekst_pl in sekcje_pl.items():
+            operacje = _operacje_punktow_pl(tekst_pl, nazwy)
+            punkty_pl = len(_punkty_listy(tekst_pl))
+            if operacje:
+                staty["sekcji"] += 1
+            for kod in zakres_kodow:
+                cel = DICT_DIR / kod / FOLDER_GUI / FOLDER_DOKUMENTACJA / nazwa_pliku
+                sekcje = (wczytaj_istniejacy_docelowy(cel) or {}
+                          if kod != KOD_ZRODLOWY else sekcje_pl)
+                tekst = sekcje.get(klucz_sekcji)
+                if not tekst:
+                    continue
+                punkty = _punkty_listy(tekst)
+                pary_sekcji = bwa.lancuchy_z_opisu(
+                    _bez_zawijania(tekst), dopusc_frazy=True)
+                staty["par"] += len(pary_sekcji)
+                etykieta = f"{kod}/{nazwa_pliku}::{klucz_sekcji}"
+                if operacje and len(punkty) != punkty_pl:
+                    znaleziska.append(bwa.Znalezisko(
+                        etykieta, "D1",
+                        f"punktów listy jest {len(punkty)}, a w paczce "
+                        f"`{KOD_ZRODLOWY}` {punkty_pl} — bramka NIE wyrównuje "
+                        f"przykładów tej sekcji (sprawdź ją ręcznie)",
+                        blad=False))
+                    staty["poza_zakresem"][f"{nazwa_pliku}::{klucz_sekcji}"] += \
+                        len(pary_sekcji)
+                    continue
+                # Pary liczymy per punkt listy, bo tylko punkt ma kotwicę.
+                w_punktach = 0
+                for indeks, punkt in enumerate(punkty):
+                    operacja = operacje.get(indeks)
+                    pary = bwa.lancuchy_z_opisu(
+                        _bez_zawijania(punkt), dopusc_frazy=True)
+                    w_punktach += len(pary)
+                    if operacja is None:
+                        staty["poza_zakresem"][
+                            f"{nazwa_pliku}::{klucz_sekcji}"] += len(pary)
+                        continue
+                    folder, nazwa_reguly = operacja
+                    for src, oczekiwane, kontekst in pary:
+                        staty["w_zakresie"] += 1
+                        znalezisko = _werdykt_przykladu(
+                            etykieta, folder, nazwa_reguly, kod, src,
+                            oczekiwane, kontekst, cp, bwa, bwp)
+                        if znalezisko is not None:
+                            znaleziska.append(znalezisko)
+                # Pary spoza punktów listy (proza wprowadzająca, akapit
+                # podsumowujący) — poza zakresem, ale policzone.
+                staty["poza_zakresem"][f"{nazwa_pliku}::{klucz_sekcji}"] += \
+                    max(0, len(pary_sekcji) - w_punktach)
+    return znaleziska, staty
+
+
+def _werdykt_przykladu(
+    etykieta: str, folder: str, nazwa_reguly: str, kod: str, src: str,
+    oczekiwane: str, kontekst: str, cp: Any, bwa: Any, bwp: Any,
+) -> Any | None:
+    """Jedna para „X → Y" wobec silnika. ``None`` = zgoda, inaczej znalezisko."""
+    rozjazd = _operacja_zgodna(kod, folder, nazwa_reguly, src, oczekiwane,
+                               cp, bwa, bwp)
+    if rozjazd is None:
+        return None
+    opis_reguly = f"{folder}/{nazwa_reguly}"
+
+    inna = _inna_operacja_zgodna(kod, folder, nazwa_reguly, src, oczekiwane,
+                                 cp, bwa, bwp)
+
+    # Werdykt „paczka nie ma tej reguły": w prozie changelogu bywa uczciwy
+    # (`ru` opisuje akcent rosyjski, którego rosyjska paczka z natury nie ma —
+    # to parytet natywności, nie defekt; sama przepisała wpis na akcent
+    # LUSTRZANY, czyli polski), więc uwaga, nie błąd. Nazwa realnej operacji
+    # oszczędza recenzentowi szukania, o czym ta paczka właściwie mówi.
+    if rozjazd.startswith("paczka nie ma pliku"):
+        trop = (f", a ten wynik daje `{folder}/{inna}` — najpewniej paczka "
+                f"opisuje tę regułę" if inna else " — bramka NIE ROZSTRZYGA")
+        return bwa.Znalezisko(
+            etykieta, "D2",
+            f"przykład {src!r} → {oczekiwane!r} przypisany (po pozycji punktu "
+            f"w paczce `{KOD_ZRODLOWY}`) do `{opis_reguly}`, ale {rozjazd}"
+            f"{trop}", blad=False)
+
+    if inna is not None:
+        return bwa.Znalezisko(
+            etykieta, "D2",
+            f"przykład {src!r} → {oczekiwane!r} stoi w punkcie o "
+            f"`{opis_reguly}`, a taki wynik daje `{folder}/{inna}` — sprawdź, "
+            f"czy proza cytuje inne narzędzie przez KONTRAST, czy je pomyliła",
+            blad=False)
+
+    pozycyjna = folder == "akcenty" and bwa.regex_uczestniczyl(
+        _wczytaj_regule(kod, folder, nazwa_reguly), src)
+    miekkie = pozycyjna or bwa.zastrzezone(kontekst)
+    powod = ""
+    if pozycyjna:
+        powod = (" — w wyniku uczestniczy reguła pozycyjna `regex: true`, więc "
+                 "bramka NIE ROZSTRZYGA: sprawdź ten przykład na całym słowie")
+    elif miekkie:
+        powod = " (proza zastrzeżona warunkiem albo cytuje anty-przykład)"
+    return bwa.Znalezisko(etykieta, "D2",
+                          f"[{opis_reguly}] {rozjazd}{powod}", blad=not miekkie)
+
+
+def raport_audytu_markdown(znaleziska: list[Any], staty: dict[str, Any],
+                           bwa: Any) -> str:
+    """Raport audytu do pliku (długa treść nie idzie do terminala)."""
+    bledy = [z for z in znaleziska if z.blad]
+    uwagi = [z for z in znaleziska if not z.blad]
+    linie = [
+        "# Audyt przykładów w podręcznikach",
+        "",
+        f"Par „X → Y” w dokumentacji: **{staty['par']}**, w zakresie bramki: "
+        f"**{staty['w_zakresie']}** (sekcji z kotwicą w `pl`: "
+        f"{staty['sekcji']}). Błędów: **{len(bledy)}**, uwag: **{len(uwagi)}**.",
+        "",
+        "Bramki: D1 struktura punktów listy wobec paczki `pl` · "
+        "D2 przykład przeliczony SILNIKIEM (szyfry — niezmienniki algorytmu, "
+        "akcenty — dokładny wynik tablicy `zamiany`).",
+        "",
+    ]
+    for tytul, zbior in (("Błędy (blokują)", bledy), ("Uwagi (triaż)", uwagi)):
+        linie += [f"## {tytul}", ""]
+        if not zbior:
+            linie += ["Brak.", ""]
+            continue
+        for bramka, lista in sorted(bwa.grupuj(zbior).items()):
+            linie += [f"### {bramka} ({len(lista)})", ""]
+            linie += [f"- `{z.para}` — {z.opis}" for z in lista]
+            linie.append("")
+    linie += ["## Pary poza zakresem bramki (per sekcja)", ""]
+    poza = staty["poza_zakresem"]
+    if not poza:
+        linie += ["Brak.", ""]
+    else:
+        linie += [
+            "Sekcje bez kotwicy w paczce `pl` (dydaktyka hipotetyczna, ścieżki "
+            "nawigacji, nazwy pól) albo pary spoza punktów listy. Lista jest tu "
+            "po to, żeby NOWA sekcja z przykładami nie zniknęła po cichu:", "",
+        ]
+        linie += [f"- `{sekcja}` — {ile}"
+                  for sekcja, ile in sorted(poza.items()) if ile]
+        linie.append("")
+    return "\n".join(linie)
+
+
+def wypisz_podsumowanie_audytu(znaleziska: list[Any], staty: dict[str, Any],
+                               bwa: Any) -> None:
+    bledy = [z for z in znaleziska if z.blad]
+    uwagi = [z for z in znaleziska if not z.blad]
+    poza = sum(staty["poza_zakresem"].values())
+    print(f"\n========== AUDYT PRZYKŁADÓW DOCS "
+          f"({staty['w_zakresie']} par w zakresie, {poza} poza) ==========")
+    for bramka, lista in sorted(bwa.grupuj(znaleziska).items()):
+        ile_b = sum(1 for z in lista if z.blad)
+        print(f"  {bramka}: {len(lista)} trafień ({ile_b} błędów)")
+    print(f"{'✅ Bez zastrzeżeń.' if not bledy else f'❌ Błędów: {len(bledy)}'}"
+          f"  (uwag: {len(uwagi)})")
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def _parsuj_argumenty() -> argparse.Namespace:
@@ -1209,7 +1622,11 @@ def _parsuj_argumenty() -> argparse.Namespace:
             "placeholders with unique Unicode tokens ⟦i⟧."
         ),
     )
-    grupa = parser.add_mutually_exclusive_group(required=True)
+    # Grupa jest OPCJONALNA od v18.20: `--audyt` domyślnie bierze wszystkie
+    # dziewięć paczek (razem z `pl`, która sama okazała się kłamać o
+    # Samogłoskowcu), więc wymuszanie wyboru języka byłoby tu tylko szumem.
+    # Ścieżka TŁUMACZĄCA nadal wymaga jawnego wyboru — sprawdzenie niżej.
+    grupa = parser.add_mutually_exclusive_group(required=False)
     grupa.add_argument(
         "-l", "--jezyki",
         type=str,
@@ -1281,7 +1698,31 @@ def _parsuj_argumenty() -> argparse.Namespace:
              "(idempotent). This is the proper step after review acceptance — instead of "
              "the destructive \"regenerate without --draft\".",
     )
+    parser.add_argument(
+        "--audyt",
+        action="store_true",
+        help="AUDIT of examples in the manuals (zero API). Recomputes every "
+             "„X → Y” pair from `dictionaries/<code>/gui/dokumentacja/*.yaml` "
+             "with the ACTUAL engine — ciphers via the algorithm's invariants, "
+             "accents via the `zamiany` table. Default scope: all nine packages "
+             "including `pl` (narrow it with --jezyki). Long report goes to "
+             "--raport, the terminal gets a summary.",
+    )
+    parser.add_argument(
+        "--raport",
+        type=str,
+        default="",
+        help="Path for the full markdown audit report (used with --audyt).",
+    )
     args = parser.parse_args()
+    if args.audyt and (args.klucz or args.skip_existing or args.dry_run
+                       or args.finalizuj):
+        parser.error("--audyt is a read-only local check (zero API) — "
+                     "do not combine with --klucz/--skip-existing/--dry-run/"
+                     "--finalizuj.")
+    if not args.audyt and not (args.jezyki or args.wszystkie):
+        parser.error("one of the arguments -l/--jezyki -a/--wszystkie "
+                     "is required (not needed only for --audyt).")
     if args.klucz and args.skip_existing:
         parser.error("--klucz and --skip-existing are mutually exclusive "
                      "(--klucz deliberately overwrites the selected sections in an existing file).")
@@ -1374,8 +1815,40 @@ def _zainicjuj_klienta() -> Any:
     return klient
 
 
+def _tryb_audytu(args: argparse.Namespace) -> int:
+    """`--audyt`: bramki D1/D2 na dokumentacji, zero API. Exit 1 przy błędzie."""
+    kody = [k.strip() for k in args.jezyki.split(",") if k.strip()]
+    nieznane = [k for k in kody if k not in KODY_AUDYTU]
+    if nieznane:
+        print(f"❌ Nieznane kody paczek: {', '.join(nieznane)}.\n"
+              f"   Dozwolone: {', '.join(KODY_AUDYTU)}.")
+        return 2
+    try:
+        wszystkie = wczytaj_szablony_pl()
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"❌ {exc}")
+        return 2
+    nazwy_plikow = [s[0] for s in _filtruj_szablony(wszystkie, args.szablony)]
+
+    bwa, _bwp = _rodzenstwo_audytu()
+    znaleziska, staty = audytuj_przyklady(kody or None, nazwy_plikow)
+    if args.raport:
+        sciezka = Path(args.raport)
+        sciezka.parent.mkdir(parents=True, exist_ok=True)
+        sciezka.write_text(raport_audytu_markdown(znaleziska, staty, bwa),
+                           encoding="utf-8", newline="\n")
+        print(f"📋 Raport audytu → {sciezka}")
+    else:
+        for z in znaleziska:
+            print(("❌ " if z.blad else "⚠️  ") + str(z))
+    wypisz_podsumowanie_audytu(znaleziska, staty, bwa)
+    return 1 if any(z.blad for z in znaleziska) else 0
+
+
 def main() -> int:
     args = _parsuj_argumenty()
+    if args.audyt:
+        return _tryb_audytu(args)
     kody = _wybierz_jezyki(args)
 
     try:

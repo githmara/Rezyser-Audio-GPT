@@ -291,6 +291,16 @@ _RE_CUDZYSLOW = re.compile(
 _RE_KSZTALT_FRAGMENTU = re.compile(
     r"^[^\W\d_]+(?:[.'’\-][^\W\d_]+)*\.?$", re.UNICODE)
 
+# Ten sam filtr dla materiału DOKUMENTACJI (`dopusc_frazy=True` — konsument:
+# bramka D2 w `buduj_wielojezyczne_docs.py`). Podręczniki cytują CAŁE FRAZY
+# („Dzień dobry" → „Dźoń dobro", „Schöne Grüße" → „Schono Großo"), których
+# filtr fragmentu odsiewał — a to właśnie w nich siedział akapit o Samogłoskowcu
+# kłamiący w ośmiu językach (v18.19). Dopuszczamy spacje, przecinki i dwukropki
+# W ŚRODKU, ale nadal wymagamy litery i zakazujemy znaków, po których poznaje się
+# ścieżkę menu albo kod (`/`, `\`, `{`, `` ` ``, `=`, `→` w środku cytatu).
+_RE_KSZTALT_FRAZY = re.compile(
+    r"^[^\W\d_][^/\\{}`=<>|→\n]*$", re.UNICODE)
+
 # Gloss WYMOWY, nie podmiana: „zana"-ääninen / „zaga"-hljóð / „vater"-Laut.
 # Proza mówi wtedy, jak CEL to CZYTA (natywnie), a nie co robi tabela — więc
 # nie ma czego porównywać z silnikiem.
@@ -328,8 +338,15 @@ _KONTEKST_HISTORYCZNY = (
 _OKNO_KONTEKSTU = 160
 
 
-def lancuchy_z_opisu(opis: str) -> list[tuple[str, str, str]]:
+def lancuchy_z_opisu(
+    opis: str, *, dopusc_frazy: bool = False,
+) -> list[tuple[str, str, str]]:
     """Pary „źródło → oczekiwane" z prozy, jako `(src, oczekiwane, kontekst)`.
+
+    `dopusc_frazy=True` przełącza filtr kształtu na :data:`_RE_KSZTALT_FRAZY`
+    (materiał podręczników — patrz komentarz przy tej stałej). Domyślnie
+    obowiązuje węższy filtr fragmentu ortograficznego, skalibrowany na 72
+    parach akcentowych.
 
     Dwie własności materiału, których naiwny regex nie widzi (obie zmierzone
     na 72 plikach — bez nich bramka produkuje ~10 fałszywych alarmów):
@@ -342,6 +359,7 @@ def lancuchy_z_opisu(opis: str) -> list[tuple[str, str, str]]:
     zastrzeżenie („je nach Kontext") i degraduje rozjazd do uwagi.
     """
     wynik: list[tuple[str, str, str]] = []
+    ksztalt = _RE_KSZTALT_FRAZY if dopusc_frazy else _RE_KSZTALT_FRAGMENTU
     tekst = opis or ""
     pozycja = 0
     while True:
@@ -384,16 +402,16 @@ def lancuchy_z_opisu(opis: str) -> list[tuple[str, str, str]]:
         else:
             kandydaci = [(src, oczekiwane)]
         for s, c in kandydaci:
-            # Oba końce muszą mieć KSZTAŁT fragmentu ortograficznego. Bez tego
-            # filtru guillemety wpuszczały do bramki tekst spomiędzy cytatów
-            # i produkowały „rozjazdy" na frazach, nie na przykładach.
-            if (_RE_KSZTALT_FRAGMENTU.match(s)
-                    and _RE_KSZTALT_FRAGMENTU.match(c)):
+            # Oba końce muszą mieć KSZTAŁT fragmentu ortograficznego (albo
+            # frazy, gdy `dopusc_frazy`). Bez tego filtru guillemety wpuszczały
+            # do bramki tekst spomiędzy cytatów i produkowały „rozjazdy"
+            # na frazach, nie na przykładach.
+            if ksztalt.match(s) and ksztalt.match(c):
                 wynik.append((s, c, kontekst))
     return wynik
 
 
-def _zastrzezone(kontekst: str) -> bool:
+def zastrzezone(kontekst: str) -> bool:
     """Czy rozjazd tej pary ma być UWAGĄ, a nie błędem?
 
     Dwa powody: proza obwarowuje obietnicę warunkiem, którego silnik nie ma
@@ -681,8 +699,8 @@ def bramka_przyklady(
         # w prawdziwym słowie („the" → „зэ") proza ma rację. Bramka NIE udaje
         # wtedy, że wie — mówi wprost, że nie rozstrzyga. Uczciwsze niż
         # milczenie (przeoczony defekt) i niż oskarżenie (fałszywy alarm).
-        pozycyjna = _regex_uczestniczyl(cfg, src)
-        miekkie = pozycyjna or _zastrzezone(kontekst)
+        pozycyjna = regex_uczestniczyl(cfg, src)
+        miekkie = pozycyjna or zastrzezone(kontekst)
         powod = ""
         if pozycyjna:
             powod = (" — w wyniku uczestniczy reguła pozycyjna `regex: true`, "
@@ -699,7 +717,7 @@ def bramka_przyklady(
     return zn
 
 
-def _regex_uczestniczyl(cfg: dict, src: str) -> bool:
+def regex_uczestniczyl(cfg: dict, src: str) -> bool:
     """Czy przy przetwarzaniu `src` zmieniła tekst któraś reguła `regex: true`?
 
     Powtarzamy pętlę silnika (sekwencyjnie, w kolejności listy) i patrzymy nie
@@ -788,7 +806,7 @@ def audytuj(
     return znaleziska, len(wybrane)
 
 
-def _grupuj(znaleziska: list[Znalezisko]) -> dict[str, list[Znalezisko]]:
+def grupuj(znaleziska: list[Znalezisko]) -> dict[str, list[Znalezisko]]:
     per_bramka: dict[str, list[Znalezisko]] = defaultdict(list)
     for z in znaleziska:
         per_bramka[z.bramka].append(z)
@@ -815,7 +833,7 @@ def raport_markdown(znaleziska: list[Znalezisko], ile_par: int) -> str:
         if not zbior:
             linie += ["Brak.", ""]
             continue
-        for bramka, lista in sorted(_grupuj(zbior).items()):
+        for bramka, lista in sorted(grupuj(zbior).items()):
             linie += [f"### {bramka} ({len(lista)})", ""]
             for z in lista:
                 linie.append(f"- `{z.para}` — {z.opis}")
@@ -827,7 +845,7 @@ def wypisz_podsumowanie(znaleziska: list[Znalezisko], ile_par: int) -> None:
     bledy = [z for z in znaleziska if z.blad]
     uwagi = [z for z in znaleziska if not z.blad]
     print(f"\n========== AUDYT AKCENTÓW ({ile_par} par) ==========")
-    for bramka, lista in sorted(_grupuj(znaleziska).items()):
+    for bramka, lista in sorted(grupuj(znaleziska).items()):
         ile_b = sum(1 for z in lista if z.blad)
         print(f"  {bramka}: {len(lista)} trafień ({ile_b} błędów)")
     print(f"{'✅ Bez zastrzeżeń.' if not bledy else f'❌ Błędów: {len(bledy)}'}"

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Täydellinen opas (Versio 18.19.0 – Julkaisuversio)</title>
+<title>Reżyser Audio GPT — Täydellinen opas (Versio 18.20.0 – Julkaisuversio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Täydellinen opas (Versio 18.19.0 – Julkaisuversio)</h1>
+<h1>Reżyser Audio GPT — Täydellinen opas (Versio 18.20.0 – Julkaisuversio)</h1>
 <p>Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.</p>
 <p>Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglootti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tales.fi.html). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.</p>
 <h2>VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)</h2>
@@ -462,7 +462,7 @@ Käsikirjoituksen muuntaminen Äänikirjaksi (Käsikirjoitustila) — poistettu 
 <p>Arkkitehdin kehotus suoraan ohjauspaneelissa (A11y MUUTOS). Aiemmin ulkoisen chatbotin kehotus Maailman Kirjan luomiseen oli vain tässä ohjeessa — käyttäjän piti kopioida se tekstistä (mikä voi olla ongelmallista näytönlukijoilla, kun käytetään erikoismerkkejä ja lainausmerkkejä). Versiossa 13.0 ohjauspaneelissa on uusi painike "📖 Arkkitehdin kehotus AI:lle…" (juuri "Tallenna Kirja pysyvästi" alla), joka avaa natiivin valintaikkunan täydellä kehotustekstillä READONLY-kentässä ja erillisellä "Kopioi leikepöydälle" -painikkeella. A11y-malli on identtinen Sääntöjen hallinnan luojan tulosdialogin kanssa — NVDA lukee heti koko ikkunan sisällön ilman lisäasetuksia. Täysi kuvaus päivitettynä VAIHEESSA 7.</p>
 </li>
 <li>
-<p>Venäjän aksentti Polyglootissa (UUTUUS — kahdeksas eurooppalainen kieli ohjaustilavalikossa). Pudotusvalikkoon "Ohjaustila / Aksentit" lisätään vaihtoehto "Venäjä (esim. Milena / Irina / Yuri / Pavel)". Toisin kuin muut aksentit, jotka vain "rikkovat" suomenkielistä tekstiä latinalaisten kirjainten tasolla (esim. "sz" → "sh", "w" → "v"), venäjän aksentti suorittaa täydellisen translitteroinnin suomenkielisestä tekstistä kyrillisiin — näin venäjänkieliset TTS-synteesin äänet (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak "ru") voivat "lausua" sanat. Kartoitusta on laajennettu jodisoituihin vokaaleihin ("ja" → "я", "je" → "е", "jo" → "ё", "ju" → "ю"), suomen pehmennyksiin si/ci/ni/zi + vokaali (esim. "ciocia" → "цёця"), sekä venäjän erikoiskaksoiskirjaimiin: "ść" / "szcz" → "щ", "sz" → "ш", "cz" → "ч", "rz" → "ж", "ch" → "х".</p>
+<p>Venäjän aksentti Polyglootissa (UUTUUS — kahdeksas eurooppalainen kieli ohjaustilavalikossa). Pudotusvalikkoon "Ohjaustila / Aksentit" lisätään vaihtoehto "Venäjä (esim. Milena / Irina / Yuri / Pavel)". Toisin kuin muut aksentit, jotka vain "rikkovat" suomenkielistä tekstiä latinalaisten kirjainten tasolla (englannin aksentti muuttaa esimerkiksi "j":n "y":ksi), venäjän aksentti suorittaa täydellisen translitteroinnin suomenkielisestä tekstistä kyrillisiin — näin venäjänkieliset TTS-synteesin äänet (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak "ru") voivat "lausua" sanat. Suomen paketin taulukko kattaa jodisoidut vokaalit ja suomen omat kirjoitusasut: "ja" → "я", "je" → "е", "jo" → "ё", "ju" → "ю", "y" → "ю" (esim. "yksi" → "юкси", "jokainen" → "ёкаинэн").</p>
 </li>
 </ul>
 <p>Foneettinen huomio: Aksentti ei ole venäjän akateeminen translitterointi (ISO 9, GOST, BGN/PCGN). Tavoitteena on yksinomaan suomenkielisen tekstin ääntäminen venäjäksi — puhesynteesin tarpeisiin, ei vakavaan erisnimien translitterointiin. Tähän toiseen työhön käytä omistettuja kielitieteellisiä työkaluja.</p>

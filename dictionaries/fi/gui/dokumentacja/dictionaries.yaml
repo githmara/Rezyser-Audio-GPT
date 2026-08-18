@@ -140,11 +140,13 @@ tresc:
        sihisee.
 
     4. Vokaalinvaihtaja (kaikki kumisee "o":na)
-       Jokainen vokaali tekstissä muutetaan "o":ksi, säilyttäen suomenkieliset
-       pehmennykset (ci, si, ni, zi, dzi käsitellään oikein): "Hyvää päivää,
-       tervetuloa" → "Hovoo poovoo, torvotoloo". Mitä pidempi teksti, sitä
-       hauskempi vaikutus — ja ruudunlukija lukee sen täydellä vakuuttavuudella,
-       yrittämättä purkaa sitä.
+       Jokainen vokaali tekstissä muutetaan "o":ksi, myös ä, ö, å ja y, joten
+       vokaaliharmonia katoaa kokonaan. Puolalainen pehmennysvaihe
+       (dzi/ci/ni/si/zi) on suomen paketissa tarkoituksella tyhjä: tällaisia
+       kirjoitusasuja ei ole, joten sääntö supistuu vokaalinvaihtoon.
+       "Hyvää päivää, tervetuloa" → "Hovoo poovoo, torvotoloo". Mitä pidempi
+       teksti, sitä hauskempi vaikutus — ja ruudunlukija lukee sen täydellä
+       vakuuttavuudella, yrittämättä purkaa sitä.
 
     5. Vahva Änkytys / Rikkoutunut Robotti
        Lisää änkytystä sanojen alkuun: "tietokone" → "t-t-t-tietokone",

@@ -106,7 +106,7 @@ tresc:
     4. Vocaloïde (tout résonne en « o »)
        Chaque voyelle du texte est remplacée par « o », en conservant les
        adoucissements (les digrammes français comme « ai », « ou », « eu » s'effondrent en « oo ») :
-       « Bonjour, madame » → « Bonoor, modomo ». Plus le texte est long,
+       « Bonjour, madame » → « Bonjoor, modomo ». Plus le texte est long,
        plus l'effet est drôle — et le lecteur d'écran le lit avec une totale
        conviction, sans tenter de le décoder.
 

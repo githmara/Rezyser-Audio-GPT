@@ -1015,8 +1015,8 @@ def waliduj_jednostke(
         if cfg_dla_przykladow is not None:
             algorytm = str(cfg_dla_przykladow.get("algorytm", ""))
             for src, oczek in pary_z_opisu(tgt):
-                blad = _sprawdz_pare(algorytm, src, oczek, cfg_dla_przykladow,
-                                     podstawy or {})
+                blad = sprawdz_pare_przykladu(algorytm, src, oczek,
+                                              cfg_dla_przykladow, podstawy or {})
                 if blad:
                     problemy.append(f"przykład sprzeczny z silnikiem: {blad}")
     else:
@@ -1205,10 +1205,14 @@ def _kolaps_powtorzen(tekst: str) -> str:
     return re.sub(r"(.)\1+", r"\1", tekst, flags=re.IGNORECASE)
 
 
-def _sprawdz_pare(
+def sprawdz_pare_przykladu(
     algorytm: str, src: str, oczek: str, cfg: dict, podstawy: dict,
 ) -> str | None:
     """Czy para „słowo → wynik" z `opis` zgadza się z FAKTYCZNYM algorytmem?
+
+    Funkcja jest PUBLICZNA, bo od v18.20 współdzieli ją bramka D2 podręczników
+    (`buduj_wielojezyczne_docs.py --audyt`): niezmienniki algorytmów losowych
+    są własnością silnika, nie tego narzędzia, więc druga kopia byłaby długiem.
 
     Trzy algorytmy są losowe, więc porównujemy NIEZMIENNIKI, nie jeden przebieg:
 
@@ -1331,7 +1335,7 @@ def _sprawdz_przyklady(
             f"{len(pary_pl)} — sprawdź, czy to redakcja tej paczki (gałąź "
             f"reguły, której ten język nie ma), a nie zgubiony przykład")
     for src, oczek in pary:
-        blad = _sprawdz_pare(algorytm, src, oczek, cfg, podstawy)
+        blad = sprawdz_pare_przykladu(algorytm, src, oczek, cfg, podstawy)
         if blad:
             bledy.append(f"`opis` — przykład sprzeczny z silnikiem: {blad}")
     return bledy, uwagi

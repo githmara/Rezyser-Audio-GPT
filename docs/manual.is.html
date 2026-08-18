@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.19.0 – Fullbúin útgáfa)</title>
+<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.20.0 – Fullbúin útgáfa)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.19.0 – Fullbúin útgáfa)</h1>
+<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.20.0 – Fullbúin útgáfa)</h1>
 <p>Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).</p>
 <p>Verkfærakistan samanstendur af aðalstúdíóinu (Leikstjórn), þýðinga- og hreimaverkfærinu (Tungumálamaður), skráarbyggingarverkfærinu (Hljóðbókararkitekt), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleiddur gagnvirkur skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti tales.is.html). Öll fimm verkfærin eru aðgengileg í einum forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.</p>
 <h2>SKREF 1: Fyrsta gangsetning (Cross-Platform)</h2>
@@ -462,14 +462,14 @@ Aðlögun Handrits í Hljóðbók (Handritshamur) — fjarlægt af fjárhagsást
 <p>Skipun Arkitektsins beint í Leikstjórans pallborði (A11y BREYTING). Hingað til var skipun fyrir ytri spjallmenni til að búa til Heimsbókina aðeins í þessari leiðbeiningu — notandi þurfti að afrita hana úr textaskrá (sem getur verið vandamál á skjálesurum með íslenskum stöfum og gæsalöppum). Í útgáfu 13.0 hefur Leikstjórans pallborð nýjan hnapp „📖 Skipun Arkitekts fyrir AI…" (rétt undir „Vista Heimsbók varanlega"), sem opnar innfædda glugga með fullum texta skipunar í READONLY reit og sérstökum hnappi „Afrita í klippiborð". A11y sniðið er eins og fyrir niðurstöðugluggann í Reglustjórans töframanni — NVDA les strax allt gluggainnihaldið án viðbótarstillinga. Full lýsing í uppfærðu SKREFI 7.</p>
 </li>
 <li>
-<p>Rússneskur hreimur í Tungumálamanninum (NÝTT — áttunda evrópska tungumálið í Leikstjórans stillingavalmynd). Í fellivalmyndinni „Leikstjórans stillingar / Hreimsetningar" bætist við valkosturinn „Rússneska (t.d. Milena / Irina / Yuri / Pavel)". Ólíkt öðrum hreimum, sem aðeins „spilla" íslenskum texta á latnesku stafi (t.d. „sj" → „sh", „v" → „v"), framkvæmir rússneski hreimurinn fulla umritun íslensks texta yfir á kyrillísku — þannig að rússneskumælandi TTS raddir (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") hafa eitthvað til að „bera fram" orðin. Kortlagningin hefur verið bætt með jótun sérhljóða („ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю"), íslenskum mýkingum si/ci/ni/zi + sérhljóða (t.d. „frænka" → „цёця"), sem og sérstökum rússneskum tvíhljóðum: „ść" / „szcz" → „щ", „sz" → „ш", „cz" → „ч", „rz" → „ж", „ch" → „х".</p>
+<p>Rússneskur hreimur í Tungumálamanninum (NÝTT — áttunda evrópska tungumálið í Leikstjórans stillingavalmynd). Í fellivalmyndinni „Leikstjórans stillingar / Hreimsetningar" bætist við valkosturinn „Rússneska (t.d. Milena / Irina / Yuri / Pavel)". Ólíkt öðrum hreimum, sem aðeins „spilla" íslenskum texta á latnesku stafi (enski hreimurinn breytir til dæmis „þ" í „th"), framkvæmir rússneski hreimurinn fulla umritun íslensks texta yfir á kyrillísku — þannig að rússneskumælandi TTS raddir (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak „ru") hafa eitthvað til að „bera fram" orðin. Tafla íslenska pakkans nær yfir jótun sérhljóða og íslenska stafsetningu: „ja" → „я", „je" → „е", „jo" → „ё", „ju" → „ю" (t.d. „jökull" → „йёкулл", „hjarta" → „хярта").</p>
 </li>
 </ul>
 <p>Hljóðskýrslun: Hreimurinn er ekki rússnesk fræðileg umritun (ISO 9, GOST, BGN/PCGN). Markmiðið er eingöngu að gera íslenskan texta hljóðlega líkan rússneskum — fyrir talgervil, ekki fyrir alvarlega umritun eiginnafna. Fyrir það verk notaðu sérstök málvísindatól.</p>
 <p>Tungumálakóði fyrir niðurstöðuskrá: „ru" (ISO 639-1). NVDA með valkostinn „Skipta sjálfkrafa um tungumál þegar stutt" virkt skiptir strax yfir í rússneska rödd.</p>
 <ul>
 <li>
-<p>Athugasemd um „ź": Í rússnesku er engin nákvæm samsvörun fyrir íslenska „ź", svo þessum staf er venjulega breytt í „ж" — líkt og „ż". Sumar norður-rússneskar og hvítrússneskar mállýskur bera „ź" nær „зь", en frá sjónarhóli talgervils er munurinn óverulegur. Ef málfræðingur telur að hann kjósi „зь", getur hann sjálfur skipt út þessari einu reglu í skránni <code>dictionaries/pl/akcenty/rosyjski.yaml</code> — vélin hleður YAML skrár sjálfvirkt, svo það krefst ekki endursamsetningar forritsins.</p>
+<p>Athugasemd um „ź": Í rússnesku er engin nákvæm samsvörun fyrir pólska „ź" (íslenska hefur þennan staf ekki, þetta á við pólska pakkann), svo þessum staf er venjulega breytt í „ж" — líkt og „ż". Sumar norður-rússneskar og hvítrússneskar mállýskur bera „ź" nær „зь", en frá sjónarhóli talgervils er munurinn óverulegur. Ef málfræðingur telur að hann kjósi „зь", getur hann sjálfur skipt út þessari einu reglu í skránni <code>dictionaries/pl/akcenty/rosyjski.yaml</code> — vélin hleður YAML skrár sjálfvirkt, svo það krefst ekki endursamsetningar forritsins.</p>
 </li>
 <li>
 <p>Útvíkkuð leiðarstika og Verkfæri valmynd (BREYTING). Stikan hefur nú fjórða hnappinn — Reglustjóri — og valmyndin „Verkfæri" styður nýja flýtileiðina Ctrl+4. Fyrri flýtileiðir (Ctrl+0 Heim, Ctrl+1 Leikstjóri, Ctrl+2 Tungumálamaður, Ctrl+3 Breytir) haldast óbreyttar.</p>

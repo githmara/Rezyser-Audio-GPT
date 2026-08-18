@@ -146,10 +146,13 @@ tresc:
        eines kaputten Roboters mit zischender Störung.
 
     4. Vokalisierer (alles dröhnt auf "o")
-       Jeder Vokal im Text wird in ein "o" umgewandelt: "Guten Morgen" →
-       "Goton Moroon". Je länger der Text, desto lustiger der Effekt — und
-       der Bildschirmleser liest es mit voller Überzeugung, ohne zu versuchen,
-       es zu dekodieren.
+       Jeder Vokal im Text wird in ein "o" umgewandelt, die Umlaute ä/ö/ü
+       eingeschlossen: "Guten Morgen" → "Goton Morgon". Die polnische
+       Erweichungsstufe (dzi/ci/ni/si/zi) ist im deutschen Paket absichtlich
+       leer — solche Schreibweisen gibt es hier nicht, die Regel besteht also
+       nur aus dem Vokaltausch. Je länger der Text, desto lustiger der
+       Effekt — und der Bildschirmleser liest es mit voller Überzeugung, ohne
+       zu versuchen, es zu dekodieren.
 
     5. Starkes Stottern / Kaputter Roboter
        Fügt Stottern am Anfang der Wörter hinzu: "Computer" → "C-c-c-computer",

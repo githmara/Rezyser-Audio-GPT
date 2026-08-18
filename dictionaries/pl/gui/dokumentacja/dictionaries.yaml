@@ -145,7 +145,7 @@ tresc:
     4. Samogłoskowiec (wszystko dudni na "o")
        Każda samogłoska w tekście zamieniana jest na "o", z zachowaniem
        polskich zmiękczeń (ci, si, ni, zi, dzi są obsługiwane poprawnie):
-       "Dzień dobry, witam panią" → "Dźoń doboro, wotom poną". Im dłuższy
+       "Dzień dobry, witam panią" → "Dźoń dobro, wotom pońo". Im dłuższy
        tekst, tym zabawniejszy efekt — a czytnik ekranu czyta to z pełnym
        przekonaniem, bez próby dekodowania.
 

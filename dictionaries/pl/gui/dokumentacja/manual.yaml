@@ -432,7 +432,7 @@ tresc:
 
     - Zepsuty Telefon / Wężowy dialekt — każde „s", „z" lub dwuznak „sz" jest losowo wydłużane w syk długości 4-8 znaków („ssssss", „zzzzzz", „ssssssz"). Inspiracja: Snecko z gry „Slay the Spire". Efekt: tekst brzmi, jakby przeczytał go wąż z wadą wymowy.
 
-    - Samogłoskowiec (Wszystko dudni na „O") — każda samogłoska w tekście zamieniana jest na „o", z zachowaniem polskich zmiękczeń. „Dzień dobry" → „Dźoń doboro". Im dłuższy tekst, tym zabawniejszy efekt (a czytnik ekranu czyta to z pełnym przekonaniem).
+    - Samogłoskowiec (Wszystko dudni na „O") — każda samogłoska w tekście zamieniana jest na „o", z zachowaniem polskich zmiękczeń. „Dzień dobry" → „Dźoń dobro". Im dłuższy tekst, tym zabawniejszy efekt (a czytnik ekranu czyta to z pełnym przekonaniem).
 
     - Silne Jąkanie / Uszkodzony Robot — dokleja zająknięcia na początku słów: „k-k-k-komputer", „pr-pr-prysznic". Dla krótkich słów (mniej niż 3 znaki) algorytm je pomija. Jeśli druga litera słowa jest spółgłoską, powtarza dwie pierwsze litery (bardziej naturalny efekt); jeśli samogłoską — powtarza tylko pierwszą.
 

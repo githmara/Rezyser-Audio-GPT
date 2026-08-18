@@ -75,7 +75,7 @@ tresc:
        Hvert "s", "z" eða "sz" er handahófskennt lengt í hvísl á lengd 4-8 stafa. Innblástur: Snecko úr leiknum "Slay the Spire". Áhrif: textinn hljómar eins og hann sé lesinn af slöngu með talgalla. Frábært fyrir undirlag fyrir persónu sem er ruglaður skriðdýr eða bilaður vélmenni með hvæsandi bilun.
 
     4. Sérhljóðabreyting (allt hljómar á "o")
-       Hvert sérhljóð í textanum er breytt í "o", með varðveislu íslenskra mýkinga (ci, si, ni, zi, dzi eru rétt meðhöndluð): "Góðan daginn, velkomin" → "Góðon doginn, volkomin". Því lengri texti, því fyndnari áhrif — og skjálesari les þetta með fullri sannfæringu, án þess að reyna að afkóða.
+       Hvert sérhljóð í textanum er breytt í "o", líka broddstöfunum (á, é, í, ó, ú, ý). Mýkingarþrepið úr pólsku (dzi/ci/ni/si/zi) er viljandi tómt í íslenska pakkanum: þessi skrif eru ekki til hér, svo reglan verður einfaldlega sérhljóðaskipti: "Góðan daginn, velkomin" → "Goðon dogonn, volkomon". Því lengri texti, því fyndnari áhrif — og skjálesari les þetta með fullri sannfæringu, án þess að reyna að afkóða.
 
     5. Sterk Stam / Skemmd Vélmenni
        Bætir stami við upphaf orða: "stelpa" → "st-st-stelpa", "þrjótur" → "þr-þr-þrjótur". Orð styttri en 3 stafir eru sleppt. Ef annar stafur orðsins er samhljóði, eru fyrstu tveir stafir endurteknir (hljómar náttúrulegra); ef sérhljóði — aðeins fyrsti.

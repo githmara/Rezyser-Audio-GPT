@@ -82,7 +82,7 @@ tresc:
        Cada "s", "z" o "sz" se alarga aleatoriamente en un siseo de 4-8 caracteres. Inspiración: Snecko del juego "Slay the Spire". Efecto: el texto suena como si lo leyera una serpiente con un defecto de pronunciación. Ideal para fondos de personajes de reptiles confundidos o robots rotos en una grieta siseante.
 
     4. Vocalizador (todo retumba en "o")
-       Cada vocal en el texto se cambia por "o", manteniendo las suavizaciones polacas (ci, si, ni, zi, dzi se manejan correctamente): "Dzień dobry, witam panią" → "Dźoń doboro, wotom poną". Cuanto más largo es el texto, más divertido es el efecto, y el lector de pantalla lo lee con total convicción, sin intentar decodificar.
+       Cada vocal en el texto se cambia por "o", incluidas las vocales acentuadas. El paso de suavizaciones polacas (dzi/ci/ni/si/zi) está vacío a propósito en el paquete español: esas grafías no existen aquí, así que la regla se reduce al cambio de vocales: "Buenos días, señora" → "Boonos doos, soñoro". Cuanto más largo es el texto, más divertido es el efecto, y el lector de pantalla lo lee con total convicción, sin intentar decodificar.
 
     5. Tartamudeo Fuerte / Robot Dañado
        Añade tartamudeos al principio de las palabras: "ordenador" → "or-or-or-ordenador", "cristal" → "cr-cr-cristal". Las palabras de menos de 3 letras se omiten. Si la segunda letra de la palabra es una consonante, se repiten las dos primeras (suena más natural); si es una vocal, solo la primera.

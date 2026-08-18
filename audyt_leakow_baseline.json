@@ -3,7 +3,6 @@
     "znak-PL:Ł"
   ],
   "de/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
     "znak-PL:źż"
   ],
   "de/manual.yaml/krok_6_architekt": [
@@ -43,11 +42,7 @@
     "znak-PL:Ł"
   ],
   "en/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
     "znak-PL:źż"
-  ],
-  "en/manual.yaml/krok_5_tryb_szyfrant": [
-    "znak-PL:ńź"
   ],
   "en/manual.yaml/krok_6_architekt": [
     "znak-PL:ł"
@@ -80,14 +75,10 @@
   "es/dictionaries.yaml/co_to_akcent": [
     "znak-PL:ąęł"
   ],
-  "es/dictionaries.yaml/co_to_szyfr": [
-    "znak-PL:ąńź"
-  ],
   "es/dictionaries.yaml/co_to_tryb_rezysera": [
     "znak-PL:Ł"
   ],
   "es/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
     "znak-PL:źż"
   ],
   "es/manual.yaml/krok_6_architekt": [
@@ -129,7 +120,6 @@
     "znak-PL:Ł"
   ],
   "fi/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
     "znak-PL:źż"
   ],
   "fi/manual.yaml/krok_6_architekt": [
@@ -164,7 +154,6 @@
     "znak-PL:Ł"
   ],
   "fr/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
     "znak-PL:źż"
   ],
   "fr/manual.yaml/krok_6_architekt": [
@@ -199,7 +188,6 @@
     "znak-PL:Ł"
   ],
   "is/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
     "znak-PL:źż"
   ],
   "is/manual.yaml/krok_3b_most_elevenlabs": [
@@ -237,7 +225,6 @@
     "znak-PL:Ł"
   ],
   "it/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
     "znak-PL:źż"
   ],
   "it/manual.yaml/krok_6_architekt": [
@@ -287,7 +274,7 @@
     "lingua:PL"
   ],
   "ru/manual.yaml/changelog_13": [
-    "znak-PL:ćś",
+    "znak-PL:ćŻż",
     "znak-PL:źż"
   ],
   "ru/manual.yaml/krok_3b_most_elevenlabs": [

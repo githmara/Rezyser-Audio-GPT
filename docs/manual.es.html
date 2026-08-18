@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guía Completa (Versión 18.19.0 – Versión de Lanzamiento)</title>
+<title>Reżyser Audio GPT — Guía Completa (Versión 18.20.0 – Versión de Lanzamiento)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guía Completa (Versión 18.19.0 – Versión de Lanzamiento)</h1>
+<h1>Reżyser Audio GPT — Guía Completa (Versión 18.20.0 – Versión de Lanzamiento)</h1>
 <p>¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).</p>
 <p>El conjunto consta del estudio principal (Dirección), la herramienta de traducción y acentos (Políglota), la herramienta para construir la estructura de archivos (Arquitecto de Audiolibros), el Gestor de Reglas (desde la versión 13.0 — sin Python puedes añadir un nuevo acento, cifrado o modo creativo, ver PASO 7b a continuación) y — desde la versión 15.0 — el módulo de Historias (ficción interactiva en segunda persona generada por IA, leída por TTS o lector de pantalla, descrita en un manual separado tales.es.html). Todas las cinco herramientas están disponibles en una sola ventana del programa, conmutables mediante botones en la barra o atajos de teclado Ctrl+1..Ctrl+5.</p>
 <h2>PASO 1: Primera ejecución (Cross-Platform)</h2>
@@ -462,7 +462,7 @@ Adaptación de Guion a Audiolibro (Modo Guion) — eliminada por razones financi
 <p>Prompt del Arquitecto directamente en el panel del Director (CAMBIO A11y). Hasta ahora, el prompt para el chatbot externo para generar el Libro del Mundo solo existía en esta instrucción — el usuario debía copiarlo de un archivo de texto (lo cual puede ser problemático en lectores de pantalla con caracteres polacos y comillas). En la versión 13.0, el panel del Director tiene un nuevo botón "📖 Prompt del Arquitecto para IA..." (justo debajo de "Guardar Libro permanentemente"), que abre una ventana de diálogo nativa con el texto completo del prompt en un campo de solo lectura y un botón separado "Copiar al portapapeles". El patrón A11y es idéntico al del diálogo de resultados del asistente en el Gestor de Reglas — NVDA lee inmediatamente todo el contenido de la ventana sin configuración adicional. Descripción completa en el PASO 7 actualizado.</p>
 </li>
 <li>
-<p>Acento ruso en Políglota (NUEVO — octavo idioma europeo en el menú del Modo del Director). A la lista desplegable "Modo del Director / Acentos" se añade la opción "Ruso (ej. Milena / Irina / Yuri / Pavel)". A diferencia de los otros acentos, que solo "deforman" el texto polaco a nivel de letras latinas (ej. "sz" → "sh", "w" → "v"), el acento ruso realiza una transliteración completa del texto polaco al cirílico — de este modo, las voces sintetizadoras TTS en ruso (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak "ru") pueden "pronunciar" las palabras. Se ha enriquecido el mapeo con vocales yotizadas ("ja" → "я", "je" → "е", "jo" → "ё", "ju" → "ю"), suavizaciones polacas si/ci/ni/zi + vocal (ej. "ciocia" → "цёця"), así como dígrafos especiales rusos: "ść" / "szcz" → "щ", "sz" → "ш", "cz" → "ч", "rz" → "ж", "ch" → "х".</p>
+<p>Acento ruso en Políglota (NUEVO — octavo idioma europeo en el menú del Modo del Director). A la lista desplegable "Modo del Director / Acentos" se añade la opción "Ruso (ej. Milena / Irina / Yuri / Pavel)". A diferencia de los otros acentos, que solo "deforman" el texto español a nivel de letras latinas (el acento inglés, por ejemplo, convierte "ll" en "y"), el acento ruso realiza una transliteración completa del texto español al cirílico — de este modo, las voces sintetizadoras TTS en ruso (Vocalizer Milena, OneCore Irina / Pavel / Yuri, eSpeak "ru") pueden "pronunciar" las palabras. La tabla del paquete español cubre los dígrafos y las grafías propias del español: "ch" → "ч", "ll" → "й", "ge" → "хе", "que" → "ке" (ej. "gente" → "хенте", "muchacho" → "мучачо").</p>
 </li>
 </ul>
 <p>Nota fonética: El acento no es una transliteración académica rusa (ISO 9, GOST, BGN/PCGN). El objetivo es únicamente hacer que el texto polaco suene más parecido al ruso — para las necesidades de síntesis de voz, no para una transliteración seria de nombres propios. Para este último trabajo, utiliza herramientas lingüísticas dedicadas.</p>
