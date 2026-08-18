@@ -89,11 +89,52 @@ Trzecie znalezisko jest user-facing: akapit o Samogłoskowcu w podręcznikach ob
 - **Systematyczny audyt przykładów w PODRĘCZNIKACH.** Akapit o Samogłoskowcu poprawiony ręcznie w ośmiu językach; docsowa wersja bramki „przelicz każdy przykład" to naturalny następny krok.
 - **Prawdziwa naprawa francuskiej cedylli** (wyłączenie pre-passu i pełna tablica diakrytyków w pięciu plikach).
 - **Subtelniejsze mapowanie umlautów w niemiecko-rosyjskim akcencie** (ю/ё/э zamiast а/о/у) — świadomie odłożone, żeby to wydanie nie zmieniało brzmienia istniejących projektów.
-- **Pomiar „model sam nakłada akcent"** na trasie z instalacji — po publikacji, zgodnie z ustaleniem.
+- ~~**Pomiar „model sam nakłada akcent"** na trasie z instalacji — po publikacji, zgodnie z ustaleniem.~~ **WYKONANY** — wynik w sekcji „Pomiar po publikacji" na końcu.
 
 ### Walidacja
 
 Test ścieżki zapisu przed pierwszym opłaconym wywołaniem (podstawiony „model" zwracający dane wzorca pl/finski): plik odtworzony bez różnic w danych i z identycznym wyjściem silnika na polskiej próbce. Trzy testy bojowe `--replay` z API (wzorzec przywracany za każdym razem, drafty w `skrypty/`). Smoke 72 par przez pełny `przetworz` w dziewięciu językach: zero wyjątków, zero pustych wyników, wszystkie paczki nadal kompletne dla silnika. Smoke GUI bez `MainLoop` na trzech trybach Reżysera: cztery panele pokazują się dokładnie wtedy, gdy mają aktywną akcję. Audyt akcentów: 0 błędów, 30 uwag redakcyjnych. Bramki wydania: `audyt_leakow --bramka`, `audyt_leakow --bramka-py`, `generuj_dokumentacje --waliduj`, `_weryfikuj_flagi_debug`, `zbierz_jezyki_z_manualem`.
+
+### Pomiar po publikacji: czy model nałoży akcent sam, bez tabeli reguł?
+
+Zanim akcenty stały się sekwencyjnymi regułami `str.replace` w YAML-u, nakładać
+je miał sam LLM — „według konwencji języka docelowego". Na GPT-4o to zadanie
+oblewało, ale nigdy nie zostało zmierzone, a od migracji na Claude (v18.0) nikt
+go nie powtórzył. Powtórzone teraz na `claude-sonnet-5`, na realnym projekcie
+użytkownika z zainstalowanej aplikacji (raport audytu trasy: 788-znakowy fragment
+polskiej prozy z markdownem, liczbami i nazwami własnymi z makronem), akcent
+fiński. Odniesienie: SILNIK, czyli `pl/akcenty/finski.yaml` — 18 reguł.
+
+| wariant | zostało polskich diakrytyków (z 27) | zostało wzorców do przerobienia (z 86) | długość |
+|---|---|---|---|
+| **silnik (18 reguł)** | **0** — 100 % zdjętych | 1 | 1,06× |
+| model BEZ podpowiedzi (zadanie jak z ery GPT-4o) | **24** — 11 % zdjętych | 66 — 23 % przerobionych | 1,02× |
+| model + sześć osi fonologicznych w prompcie | 11 — 59 % zdjętych | 6 — 93 % przerobionych | 1,01× |
+
+Bez podpowiedzi tekst wraca w około 89 % po polsku: zostają ń, ż, ł, ó i wszystkie
+dźwięczne zwarte, model zmienia garść słów („Głuvny", „Standarduv", „odtsinek")
+i uznaje zadanie za wykonane. To ta sama „bardzo minimalistyczna" odpowiedź, którą
+pamiętamy z prywatnych bet — tylko teraz policzona.
+
+Z podpowiedziami model zdejmuje 93 % wzorców, ale zostawia 11 diakrytyków
+(`PESPIETSEŃSTVA`, `Kłuvny`) i **wymyśla mapowania, których fiński nie chce**:
+`Inspehtor` (k → h, choć fiński ma k), `sastrsesone`, `osoposve`. Wyjścia nie da
+się zwalidować ani per dokument, ani per para językowa — a tabela 18 reguł jest
+walidowalna bramkami, powtarzalna i darmowa.
+
+Co się natomiast poprawiło od czasów GPT-4o: **zniknął dylemat „kilka zepsutych
+słów albo złamana zasada długości"**. Oba warianty zachowały długość (1,01-1,02×),
+podział na linie, markdown, liczby i nazwy własne w tych samych miejscach. Problem
+przestał być kompozycyjny i jest wyłącznie kwestią pokrycia oraz spójności.
+Różnica uboczna: silnik dodatkowo normalizuje liczby na słowa
+(`normalizuj_liczby: true`), czego model nie robi.
+
+**Wniosek, który utrzymuje architekturę:** właściwym miejscem dla modelu jest
+AUTORSTWO tabeli reguł — offline, raz, z recenzją natywną i odsłuchem, czyli
+ścieżka `--nowy-jezyk` z tego wydania — a nie stosowanie akcentu w czasie
+działania aplikacji. Trzy pomiary `--replay` z tego samego wydania mówią to samo
+z drugiej strony: model odtwarza 16 z 18 reguł, gdy dostanie tabele innych paczek
+dla tego samego celu, i gubi cechę definiującą akcent, gdy ich nie dostanie.
 
 ---
 
