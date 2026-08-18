@@ -45,12 +45,19 @@ polskie_znaki:
   - { wzor: "Æ", zamiana: "Ae" }
   # -- Diacritiques français → ASCII (pour les moteurs d'accent avec
   #    usun_polskie_znaki: true) --
+  #    Les accents des voyelles ne changent pas le PHONÈME de la lettre de
+  #    base : « é/è/ê » restent un /e/, « à/â » un /a/. La cédille, elle, le
+  #    change — « ç » se lit /s/, jamais /k/ — donc elle est aplatie en « s »
+  #    et NON en « c » (18.22 : avec « c », les six accents à pre-pass
+  #    lisaient « français » avec /k/, car leur règle « c » → /k/ prenait le
+  #    relais). Les accents qui ont besoin de la cédille telle quelle
+  #    (fr/niemiecki, fr/polski) gardent `usun_polskie_znaki: false`.
   - { wzor: "à", zamiana: "a"  }
   - { wzor: "À", zamiana: "A"  }
   - { wzor: "â", zamiana: "a"  }
   - { wzor: "Â", zamiana: "A"  }
-  - { wzor: "ç", zamiana: "c"  }
-  - { wzor: "Ç", zamiana: "C"  }
+  - { wzor: "ç", zamiana: "s"  }
+  - { wzor: "Ç", zamiana: "S"  }
   - { wzor: "é", zamiana: "e"  }
   - { wzor: "É", zamiana: "E"  }
   - { wzor: "è", zamiana: "e"  }

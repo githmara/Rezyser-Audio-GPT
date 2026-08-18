@@ -351,17 +351,26 @@ instead of „Akcent fonetyczny"). You cannot meaningfully write a
    `usun_polskie_znaki`, `skleja_pojedyncze_litery`. Default `true`
    for typical phonetic accents.
 3. The `zamiany:` list ordered: TRIGRAPHS → DIGRAPHS → SINGLE LETTERS
-   (otherwise `c → ts` breaks the `ch` / `cz` spellings). Each
-   digraph/trigraph in a `lowercase` + `Capitalized` variant; for
-   languages that use frequent ALL-CAPS forms (e.g. German SCH, CH) add a
-   third variant.
+   (otherwise `c → ts` breaks the `ch` / `cz` spellings). Every rule of
+   two letters or more needs THREE case variants — `sz`, `Sz`, `SZ` —
+   because the engine matches with case-sensitive `str.replace`, so a rule
+   written only as `Sz` walks straight past a heading typed in capitals.
+   This is a hard requirement, not a preference for shouty languages.
+   You do NOT need to do anything about the case of the RESULT: since 18.22
+   the engine lifts the replacement to capitals whenever the match sits in
+   an all-caps word, so a single-letter rule with a multi-letter result
+   (`Ж → Zh`) yields „ZHDAT" for „ЖДАТЬ" on its own.
 4. Regex: add `regex: true` on the replacement row.
 5. **The `usun_polskie_znaki: true` flag** (despite its historical name!)
    strips the diacritics of language {jezyk_bazowy} per the map in
    `dictionaries/{jezyk_bazowy}/podstawy.yaml::polskie_znaki`. Your
    patterns MUST work ON THE TEXT AFTER that transliteration — i.e.
    operate on the ASCII (or diacritic-free) equivalent of the
-   {natywna_baza} alphabet.
+   {natywna_baza} alphabet. If that map flattens a letter to a base letter
+   that SOUNDS DIFFERENT (French `ç` → `c`, which then reads /k/), the map
+   itself is the defect — flatten to the letter carrying the sound (`ç` →
+   `s`) instead of working around it in every accent, or turn the flag off
+   in the accent that needs the raw letter.
 
 # NATIVE-LANGUAGE REQUIREMENTS
 - `etykieta`, `opis`, the file header, the YAML comments — everything in

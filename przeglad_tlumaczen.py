@@ -175,6 +175,21 @@ from PL/EN. Canon (de / es / fr / it / ru):
   is `Fullbúin útgáfa` · it `Versione di Rilascio` · ru `Релизная версия`.
   For a NEW language: pick the native phrase a released product would use,
   then add it to this list.
+- SECOND REVIEWER (is/fi, the v17.8.0 rule) — DONE for both suffixes in 18.22,
+  verdict KEEP for each, so do not reopen either without a new argument. What
+  the review added, both for these packs and for any new language: the phrase
+  must not imply a PRODUCT TIER that does not exist (NEVER is `Almenn útgáfa` —
+  reads as the basic tier as opposed to a Pro edition this application has no
+  such thing as), must not imply END OF LIFE (NEVER is `Lokaútgáfa` = "the last
+  version ever released"), and must not raise the register to officialdom
+  (NEVER is `Opinber útgáfa`, which reads as government-sanctioned). Where the
+  native word for "version" is ambiguous between software and a printed
+  publication (is `útgáfa`, fi `julkaisu`), the mild redundancy of naming the
+  version twice (fi `julkaisu` + `versio`) is the LESSER EVIL — it anchors the
+  phrase to software. Note also that a suffix asserting completeness (is
+  `fullbúin` = feature-complete) says something slightly different from
+  "publicly released"; it stays acceptable only because the product ships no
+  visible beta channel to contrast with.
 """
 
 _CHECKLIST_DOCS = """\

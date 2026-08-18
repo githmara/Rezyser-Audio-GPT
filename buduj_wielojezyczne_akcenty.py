@@ -65,6 +65,13 @@ Bramki (błąd = blokada zapisu / niezerowy exit; uwaga = triaż recenzenta):
     wielka litera zastępuje granicę słowa (`Sp` → `Шп` w `de/rosyjski`), nosi
     tę granicę jawnie jako spację (` SP`), bo w tekście pisanym wersalikami
     proxy z wielkiej litery nie istnieje.
+  * **G9 tablica pre-passu vs. własne akcenty paczki** (v18.22) — wpis
+    `podstawy.yaml::polskie_znaki` obowiązuje w każdym akcencie z flagą
+    `usun_polskie_znaki: true`, więc jeśli akcenty z flagą `false` czytają ten
+    sam znak inaczej, paczka sobie przeczy. Porównanie po PIERWSZEJ literze
+    wyniku i tylko w obrębie jednego pisma; jednomyślny rozjazd = błąd. To ta
+    bramka nazywa francuską cedyllę: tablica dawała „c" (czyli /k/), a własne
+    akcenty — /s/.
 
 **PRE-PASS ZJADA REGUŁY — klasa defektu odkryta tym audytem.** Silnik stosuje
 `usun_polskie_znaki` PRZED listą `zamiany` (`core_poliglota` linie 1038-1044),
@@ -871,6 +878,73 @@ def bramka_kolejnosc(pary: dict[tuple[str, str], dict]) -> list[Znalezisko]:
     return zn
 
 
+def _pierwsza_litera(tekst: str) -> str:
+    """Pierwsza litera napisu (małą literą) albo pusty napis."""
+    return next((z.lower() for z in tekst if z.isalpha()), "")
+
+
+def _pismo(znak: str) -> str:
+    """Nazwa pisma znaku (`LATIN`, `CYRILLIC`, …) — do odsiania cudzych alfabetów."""
+    return unicodedata.name(znak, " ").split()[0] if znak else ""
+
+
+def bramka_tablica_prepassu(pary: dict[tuple[str, str], dict]) -> list[Znalezisko]:
+    """G9: tablica pre-passu paczki wbrew opinii jej WŁASNYCH akcentów (18.22).
+
+    `podstawy.yaml::polskie_znaki` spłaszcza diakrytyki PRZED regułami akcentu,
+    więc jej wpis obowiązuje w każdym akcencie z `usun_polskie_znaki: true` —
+    a akcenty z flagą `false` mają o tym samym znaku opinię WŁASNĄ, wyrażoną
+    regułą. Rozjazd między jednym a drugim to defekt: paczka `fr` spłaszczała
+    „ç" do „c", choć jej własne akcenty (`niemiecki`, `polski`) czytają cedyllę
+    jako /s/ — i sześć par z pre-passem czytało „français" przez /k/, bo regułę
+    przejmowało „c" (dług C roadmapy, spłacony w 18.22).
+
+    Kryterium jest OBLICZALNE, nie ocenne — porównujemy PIERWSZĄ literę wyniku
+    (niemieckie „ss" i polskie „s" zapisują ten sam dźwięk, więc zgadzają się),
+    a opinie w innym piśmie odsiewamy (`pl/rosyjski` mapuje „ł" na „л" — to
+    nie spór o dźwięk, to inny alfabet). Jednomyślny rozjazd = BŁĄD (tablica
+    jest po prostu zła); podzielone opinie = uwaga (bywają zapisem celu).
+    """
+    zn: list[Znalezisko] = []
+    for paczka in sorted({p for p, _ in pary}):
+        tabela = {str(r.get("wzor", "")): str(r.get("zamiana", ""))
+                  for r in podstawy_paczki(paczka).get("polskie_znaki", [])
+                  if isinstance(r, dict)}
+        z_prepassem = sorted(a for (p, a), cfg in pary.items()
+                             if p == paczka and cfg.get("usun_polskie_znaki"))
+        if not tabela or not z_prepassem:
+            continue  # tablica nie działa w żadnym akcencie — nie ma o co pytać
+        opinie: dict[str, dict[str, str]] = defaultdict(dict)
+        for (p, akcent), cfg in pary.items():
+            if p != paczka or cfg.get("usun_polskie_znaki"):
+                continue
+            for regula in cfg.get("zamiany") or []:
+                if regula.get("regex"):
+                    continue
+                wzor = str(regula.get("wzor", ""))
+                if wzor in tabela:
+                    opinie[wzor][akcent] = str(regula.get("zamiana", ""))
+        for znak, per_akcent in sorted(opinie.items()):
+            z_tabeli = _pierwsza_litera(tabela[znak])
+            wazne = {a: z for a, z in per_akcent.items()
+                     if _pismo(_pierwsza_litera(z)) == _pismo(z_tabeli)}
+            sporne = {a: z for a, z in wazne.items()
+                      if _pierwsza_litera(z) != z_tabeli}
+            if not sporne:
+                continue
+            jednomyslnie = len(sporne) == len(wazne)
+            glosy = ", ".join(f"{a} → {z!r}" for a, z in sorted(sporne.items()))
+            zn.append(Znalezisko(
+                f"{paczka}/podstawy", "G9",
+                f"pre-pass spłaszcza {znak!r} do {tabela[znak]!r}, a własne akcenty "
+                f"paczki czytają ten znak inaczej ({glosy})"
+                + (f" — zgodnie, więc tablica obowiązująca w {len(z_prepassem)} "
+                   f"akcentach z pre-passem jest błędna" if jednomyslnie else
+                   " — opinie podzielone, sprawdź czy to zapis celu"),
+                blad=jednomyslnie))
+    return zn
+
+
 # ---------------------------------------------------------------------------
 # AUDYT — przebieg
 # ---------------------------------------------------------------------------
@@ -904,6 +978,7 @@ def audytuj(
         znaleziska += bramka_przyklady(pkg, akc, cfg, cp)
     if not kody_paczek and not akcenty:
         znaleziska += bramka_kolejnosc(pary)
+        znaleziska += bramka_tablica_prepassu(pary)
     return znaleziska, len(wybrane)
 
 
@@ -926,7 +1001,8 @@ def raport_markdown(znaleziska: list[Znalezisko], ile_par: int) -> str:
         "",
         "Bramki: G1 kontrakt pliku · G2 martwe reguły · G3 cieniowanie "
         "sekwencyjne · G4 parytet wielkości liter · G5 pismo wyjścia · "
-        "G6 przykłady przeliczone silnikiem · G7 kolejność w liście.",
+        "G6 przykłady przeliczone silnikiem · G7 kolejność w liście · "
+        "G8 wariant ALL-CAPS dwuznaku · G9 tablica pre-passu vs. własne akcenty.",
         "",
     ]
     for tytul, zbior in (("Błędy (blokują)", bledy), ("Uwagi (triaż)", uwagi)):
@@ -1128,7 +1204,12 @@ def _PROMPT_GENERATORA(
         "and a rule that uses the capital letter AS A PROXY for the start of a "
         "word cannot have a plain ALL-CAPS twin (the proxy does not exist in "
         "text written in capitals) — spell the boundary out as a leading space "
-        "instead, as `de/akcenty/rosyjski.yaml` does for ` SP`.\n\n"
+        "instead, as `de/akcenty/rosyjski.yaml` does for ` SP`.\n"
+        "7. **Never write a rule to fix the CASE OF A RESULT.** Since 18.22 the "
+        "engine lifts a replacement to capitals whenever the match sits inside an "
+        "all-caps word, so a single-letter rule with a multi-letter replacement "
+        "(`Ж` → `Zh`) already yields `ZHDAT` for `ЖДАТЬ`. A positional rule for "
+        "that is dead weight.\n\n"
         "## `previous_attempt_problems` MEANS YOUR PREVIOUS ANSWER WAS REJECTED\n"
         "When the payload carries that field (the diagnostics are in Polish, the "
         "language of the parent script), a gate already re-ran the ENGINE on your "

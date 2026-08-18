@@ -16,7 +16,8 @@ opis: |
     - „ei" → „ай",  „eu"/„äu" → „ой",  „ie" → „и",  „aa/ee/oo" → „а/е/о"
     - Umlaute jotiert: „ü" → „ю", „ö" → „ё", „ä" → „э" („Müller" → „Мюллер",
       „König" → „Кёниг" — die russische Schreibtradition für deutsche Namen)
-    - „s" vor Vokal → „з" (за/зе/зи/зо/зу), „ss" → „сс"
+    - „s" vor Vokal → „з" (за/зе/зи/зо/зу, seit 18.22 auch зэ/зё/зю vor
+      Umlauten: „Söhne" → „Зёхне"), „ss" → „сс"
     - „ja/je/jo/ju" → „я/е/ё/ю",  übriges „j" → „й"
     - „w" → „в",  „v" → „ф",  „z"/„tz" → „ц",  „qu" → „кв",  „ck" → „к"
     - „th" → „т",  „ph" → „ф",  restliche Buchstaben 1:1 kyrillisch.
@@ -24,7 +25,9 @@ opis: |
   Seit v18.21 sind die Umlaute jotiert abgebildet (ю/ё/э) — bis v18.20 lagen
   sie flach auf а/о/у, und „äu" war dabei von „au" nicht unterscheidbar.
   Wer den alten, flachen Klang braucht, ändert die sechs Umlaut-Regeln am
-  Ende der Tabelle im Regel-Manager zurück.
+  Ende der Tabelle im Regel-Manager zurück. Seit 18.22 gilt die
+  Stimmhaftigkeit des „s" auch vor den Umlauten (Block 5) — solange die
+  Umlaute flach lagen, konnte sie dort niemand hören.
 
   Bewusste Vereinfachungen bleiben: „ß" wird über die Vorstufe (ss) zu „сс"
   abgebildet, und das Dehnungs-h wird als „х" gesprochen (starker
@@ -43,8 +46,8 @@ skleja_pojedyncze_litery: false
 #   1. tsch / sch (längste Muster zuerst)
 #   2. sp/st am Wortanfang (Näherung: Großbuchstabe oder Leerzeichen davor)
 #   3. Konsonanten-Digraphen (ch, ck, th, ph, qu, tz, ss)
-#   4. Vokal-Digraphen (ei, eu, ie, aa, ee, oo)
-#   5. s + Vokal → з + Vokal (Stimmhaftigkeit)
+#   4. Vokal-Digraphen (säu, äu, ei, eu, ie, aa, ee, oo)
+#   5. s + Vokal → з + Vokal (Stimmhaftigkeit, auch vor Umlauten)
 #   6. Jotierung ja/je/jo/ju, dann restliches j
 #   7. Einzelbuchstaben → Kyrillisch
 # Alle Ersetzungen liefern Kyrillisch — spätere lateinische Muster können
@@ -95,6 +98,12 @@ zamiany:
   - { wzor: "SS", zamiana: "СС" }
 
   # --- 4. Vokal-Digraphen ---
+  # AUDYT 18.22: „säu" musi stać PRZED „äu", inaczej dyftong zabiera „ä"
+  # i blok 5 nie ma już czego udźwięcznić („säubern" wychodziło „сойбэрн"
+  # zamiast „зойбэрн", choć niemieckie „s" przed samogłoską to /z/).
+  - { wzor: "säu", zamiana: "зой" }
+  - { wzor: "Säu", zamiana: "Зой" }
+  - { wzor: "SÄU", zamiana: "ЗОЙ" }
   # AUDYT 18.21: „äu" stoi PRZED tablicą umlautów (blok 7) i przed regułą „au",
   # bo to ten sam dyftong /ɔʏ/ co „eu" — bez tej reguły „Häuser" wychodziłoby
   # jako „хэузер" (э + у), czyli sekwencja obca rosyjskiemu głosowi.
@@ -136,6 +145,19 @@ zamiany:
   - { wzor: "su", zamiana: "зу" }
   - { wzor: "Su", zamiana: "Зу" }
   - { wzor: "SU", zamiana: "ЗУ" }
+  # AUDYT 18.22: umlauty to też samogłoski, więc „s" udźwięcznia się przed nimi
+  # tak samo („Söhne" = /ˈzøːnə/, nie /s/). Wyniki są jotowane, zgodnie z blokiem
+  # 7: ä → э, ö → ё, ü → ю. Do v18.21 tej pary reguł nie było, bo pre-pass
+  # spłaszczał umlauty jeszcze przed tablicą — dług równolatek pary.
+  - { wzor: "sä", zamiana: "зэ" }
+  - { wzor: "Sä", zamiana: "Зэ" }
+  - { wzor: "SÄ", zamiana: "ЗЭ" }
+  - { wzor: "sö", zamiana: "зё" }
+  - { wzor: "Sö", zamiana: "Зё" }
+  - { wzor: "SÖ", zamiana: "ЗЁ" }
+  - { wzor: "sü", zamiana: "зю" }
+  - { wzor: "Sü", zamiana: "Зю" }
+  - { wzor: "SÜ", zamiana: "ЗЮ" }
 
   # --- 6. Jotierung ---
   - { wzor: "ja", zamiana: "я" }

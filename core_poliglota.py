@@ -189,19 +189,102 @@ def procesuj_z_ochrona_tagow(tekst: str, funkcja: Callable[[str], str]) -> str:
     return "".join(parts)
 
 
+def _kontekst_wersalikami(tekst: str, poczatek: int, koniec: int) -> bool:
+    """Czy trafienie ``[poczatek, koniec)`` leży w słowie pisanym WERSALIKAMI.
+
+    Rozszerza trafienie do granic wyrazu (maksymalny ciąg liter dowolnego
+    pisma) i pyta o małą literę: jej brak przy co najmniej dwóch literach,
+    z których co najmniej jedna jest wielka, to tekst pisany wersalikami.
+    Wzorzec ze spacją (`` SP`` → ``ШП`` w ``de/rosyjski``) dotyka DWÓCH
+    wyrazów — wtedy wersalikami musi być całość, inaczej podniesienia nie ma.
+
+    Progu „dwie litery" pilnuje świadomie: samotne „Ж" to inicjał albo
+    początek zdania, nie krzyk, więc zostaje przy „Zh".
+    """
+    i = poczatek
+    while i > 0 and tekst[i - 1].isalpha():
+        i -= 1
+    j = koniec
+    while j < len(tekst) and tekst[j].isalpha():
+        j += 1
+    litery = [z for z in tekst[i:j] if z.isalpha()]
+    if len(litery) < 2 or any(z.islower() for z in litery):
+        return False
+    return any(z.isupper() for z in litery)
+
+
+def _moze_podniesc_wersaliki(wzor: str, zamiana: str, *, regex: bool) -> bool:
+    """Czy dla tej reguły podnoszenie wyniku ma szansę cokolwiek zmienić.
+
+    Dwa warunki wykluczające — oba dokładne, nie heurystyczne — trzymają
+    ścieżkę wolną (skanowanie trafień) przy garstce reguł z klasy „jedna
+    litera źródła, wiele znaków wyniku" (`Ж` → `Zh`), a całą resztę
+    zostawiają szybkiemu ``str.replace``/``re.sub``:
+
+      * wynik bez małej litery → podniesienie jest tożsamością;
+      * wzorzec z małą literą → trafi wyłącznie w tekst z małą literą,
+        więc kontekstem nigdy nie będą wersaliki. Dla ``regex: true`` tego
+        warunku NIE stosujemy: mała litera we wzorcu bywa częścią klasy
+        (``[a-z]``), a flaga ``(?i)`` pozwala jej dopasować wielką.
+    """
+    if not wzor or not any(z.islower() for z in zamiana):
+        return False
+    if regex:
+        return True
+    return not any(z.islower() for z in wzor)
+
+
+def _zamien_literalnie(tekst: str, wzor: str, zamiana: str) -> str:
+    """``str.replace`` z podniesieniem wyniku w wyrazach pisanym wersalikami."""
+    wynik: list[str] = []
+    poz = 0
+    while True:
+        trafienie = tekst.find(wzor, poz)
+        if trafienie < 0:
+            wynik.append(tekst[poz:])
+            return "".join(wynik)
+        koniec = trafienie + len(wzor)
+        wynik.append(tekst[poz:trafienie])
+        wynik.append(zamiana.upper()
+                     if _kontekst_wersalikami(tekst, trafienie, koniec)
+                     else zamiana)
+        poz = koniec
+
+
 def _zastosuj_zamiany(tekst: str, zamiany: list[dict]) -> str:
     """Stosuje listę par ``{wzor, zamiana, regex?}`` z pliku YAML.
 
     Wzory oznaczone ``regex: true`` używają ``re.sub``, pozostałe są
     traktowane jako zwykłe stringi i zamieniane przez ``str.replace``.
+
+    18.22: **wynik reguły trafionej w wyrazie pisanym WERSALIKAMI jest
+    podnoszony do wersalików.** Reguła jednoliterowa z wielo-znakowym
+    wynikiem (`Ж` → `Zh`, `Þ` → `Th`, `ß` → `ss`) jest poprawna dla
+    „Ждать", a dla „ЖДАТЬ" dawała „ZhDAT'". Wariantu w danych dosypać się
+    nie da (wzorzec ma tylko jedną literę, więc nie ma czego odmieniać
+    wielkością — patrz kanon ALL-CAPS z v18.21, który domknął wzorce
+    WIELOLITEROWE), a reguła pozycyjna na literę byłaby ~120 pozycjami
+    długu w danych. Krok jest bezwarunkowy: dotyczy zarówno pre-passu
+    ``usun_polskie_znaki``, jak i właściwych ``zamiany``, w Reżyserze
+    i w Poliglocie jednakowo.
     """
     for para in zamiany:
         wzor    = para.get("wzor", "")
         zamiana = para.get("zamiana", "")
-        if para.get("regex"):
-            tekst = re.sub(wzor, zamiana, tekst)
+        regex   = bool(para.get("regex"))
+        if not _moze_podniesc_wersaliki(wzor, zamiana, regex=regex):
+            tekst = re.sub(wzor, zamiana, tekst) if regex else tekst.replace(wzor, zamiana)
+            continue
+        if regex:
+            tekst = re.sub(
+                wzor,
+                lambda m: (m.expand(zamiana).upper()
+                           if _kontekst_wersalikami(m.string, m.start(), m.end())
+                           else m.expand(zamiana)),
+                tekst,
+            )
         else:
-            tekst = tekst.replace(wzor, zamiana)
+            tekst = _zamien_literalnie(tekst, wzor, zamiana)
     return tekst
 
 
