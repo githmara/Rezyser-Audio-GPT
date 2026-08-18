@@ -16,8 +16,9 @@ wykrywa język oryginalnego zgłoszenia (lingua) i robi przez ``gh``:
 Teksty person renderuje ``bot_i18n.t_bot`` z ``dictionaries/<kod>/gui/ui.yaml``
 (sekcja ``bot:``) — to samo źródło prawdy, którego używa bot Actions. Wykrywanie
 języka robi ``bot_i18n.wykryj`` (detektor budowany dynamicznie ze
-``dictionaries/*/podstawy.yaml``). Listę person (PERSONAS) importujemy z bota
-Północy ``.github/scripts/issue_closure_north.py`` (single source).
+``dictionaries/*/podstawy.yaml``) na TYTULE i BODY zgłoszenia oczyszczonych
+``_oczysc_tekst_dla_lingua`` z bota intake'u. Listę person (PERSONAS) importujemy
+z bota Północy ``.github/scripts/issue_closure_north.py`` (single source).
 
 Dwa tryby:
   * ``answered`` (domyślny) — odpowiedź na pytanie/help wanted. Draft jest
@@ -60,6 +61,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
 import bot_i18n  # noqa: E402
 from lingua import Language  # noqa: E402
 from issue_closure_north import PERSONAS  # noqa: E402
+from issue_intake_sami import _oczysc_tekst_dla_lingua  # noqa: E402
 
 DOMYSLNY_PLIK = os.path.join("skrypty", "pending_answer.md")
 
@@ -90,10 +92,22 @@ def _repo_namewithowner() -> str | None:
     return out.strip() if out else None
 
 
-def _tresc_issue(numer: str) -> str:
-    """Pobiera body issue przez gh (do detekcji języka). Pusty string przy błędzie."""
-    out = _gh_tekst(["gh", "issue", "view", numer, "--json", "body", "-q", ".body"])
-    return (out or "").strip()
+def _tekst_do_detekcji(numer: str) -> str | None:
+    """Zwraca TYTUŁ + BODY issue oczyszczone dla Lingui. None = błąd `gh`.
+
+    Tytuł jest tu równoprawnym źródłem, nie ozdobą: gdy user ZAŁĄCZA plik zamiast
+    wklejać treść, GitHub wstawia do `body` sam link markdown (lekcja v17.11.1),
+    więc po oczyszczeniu zostaje pustka — jedynym natywnym tekstem zgłoszenia
+    bywa wtedy tytuł. Czyszczenie (bloki kodu, crash-log, traceback, linki
+    markdown i gołe URL-e) robi `_oczysc_tekst_dla_lingua` z bota Sami — jedno
+    źródło prawdy dla obu końców obiegu, żeby lokalna odpowiedź nie wychodziła
+    w innym języku niż komentarz intake'u.
+    """
+    out = _gh_tekst(["gh", "issue", "view", numer, "--json", "title,body",
+                     "-q", '[.title, .body] | join("\\n\\n")'])
+    if out is None:
+        return None
+    return _oczysc_tekst_dla_lingua(out).strip()
 
 
 def _wczytaj_draft(sciezka: str) -> str:
@@ -154,14 +168,21 @@ def main() -> int:
         )
         return 1
 
-    body = _tresc_issue(numer)
-    if not body:
+    tekst = _tekst_do_detekcji(numer)
+    if tekst is None:
         sys.stderr.write(
             f"[!] Nie udało się pobrać treści issue #{numer} (gh). Sprawdź numer "
             "i czy `gh` jest zalogowany. Język spadnie na angielski.\n"
         )
+        tekst = ""
+    elif not tekst:
+        sys.stderr.write(
+            f"[!] Issue #{numer}: po oczyszczeniu (linki, logi) nie został żaden "
+            "naturalny tekst do detekcji języka — komentarz wyjdzie po angielsku. "
+            "Jeśli zgłoszenie było w innym języku, wymuś go ręcznie draftem.\n"
+        )
 
-    jezyk = _wykryj_jezyk(body)
+    jezyk = _wykryj_jezyk(tekst)
     persona = args.persona or random.choice(PERSONAS)
 
     link = None
