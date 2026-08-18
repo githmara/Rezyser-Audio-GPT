@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guide complet (Version 18.18.0 – Version de Lancement)</title>
+<title>Reżyser Audio GPT — Guide complet (Version 18.19.0 – Version de Lancement)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guide complet (Version 18.18.0 – Version de Lancement)</h1>
+<h1>Reżyser Audio GPT — Guide complet (Version 18.19.0 – Version de Lancement)</h1>
 <p>Bienvenue dans le Studio d'Enregistrement Hybride ! Cet ensemble d'outils permet l'écriture, la planification, le formatage et la traduction automatiques de scripts pour pièces radiophoniques et livres audio. Il est optimisé pour fonctionner avec des synthétiseurs vocaux professionnels ainsi que des moteurs de lecteurs d'écran locaux (NVDA).</p>
 <p>L'ensemble se compose du studio principal (Réalisation), de l'outil de traduction et d'accents (Polyglotte), de l'outil de construction de structure de fichier (Architecte de Livres Audio), du Gestionnaire de Règles (à partir de la version 13.0 — sans Python, vous pouvez ajouter un nouvel accent, un chiffre ou un mode créatif, voir ÉTAPE 7b ci-dessous) et — à partir de la version 15.0 — du module Histoires (fiction interactive à la deuxième personne générée par IA, lue par TTS ou lecteur d'écran, décrite dans le manuel séparé tales.fr.html). Les cinq outils sont disponibles dans une seule fenêtre de programme, commutable par des boutons sur la barre ou par des raccourcis clavier Ctrl+1..Ctrl+5.</p>
 <h2>ÉTAPE 1 : Première exécution (Cross-Platform)</h2>
@@ -247,7 +247,7 @@ Vous vous demandez probablement si le synthétiseur saura décliner ces nombres 
 <p>Téléphone Cassé / Dialecte Serpent — chaque « s », « z » ou digramme « sz » est allongé aléatoirement en un sifflement de 4 à 8 caractères (« sssssss », « zzzzzzz », « sssssssz »). Inspiration : Snecko du jeu « Slay the Spire ». Effet : le texte semble lu par un serpent avec un défaut de prononciation.</p>
 </li>
 <li>
-<p>Voyelliseur (Tout résonne en « O ») — chaque voyelle dans le texte est remplacée par « o », en conservant les adoucissements polonais. « Bonjour » → « Bonjoor ». Plus le texte est long, plus l'effet est amusant (et le lecteur d'écran le lit avec pleine conviction).</p>
+<p>Voyelliseur (Tout résonne en « O ») — chaque voyelle du texte est remplacée par « o », y compris les voyelles accentuées (é, è, ê, à, ù). « Bonjour » → « Bonjoor ». L'étape des adoucissements polonais (dzi/ci/ni/si/zi) est volontairement vide dans le pack français : ces graphies n'existent pas ici, la règle se réduit donc à l'échange des voyelles. Plus le texte est long, plus l'effet est amusant (et le lecteur d'écran le lit avec pleine conviction).</p>
 </li>
 <li>
 <p>Bégaiement Fort / Robot Endommagé — ajoute des bégaiements au début des mots : « or-or-or-ordinateur », « st-st-stratégie ». Pour les mots courts (moins de 3 lettres), l'algorithme les ignore. Si la deuxième lettre du mot est une consonne, il répète les deux premières lettres (effet plus naturel) ; si c'est une voyelle — il ne répète que la première.</p>

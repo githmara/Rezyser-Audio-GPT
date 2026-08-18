@@ -362,7 +362,7 @@ tresc:
 
     - Téléphone Cassé / Dialecte Serpent — chaque « s », « z » ou digramme « sz » est allongé aléatoirement en un sifflement de 4 à 8 caractères (« sssssss », « zzzzzzz », « sssssssz »). Inspiration : Snecko du jeu « Slay the Spire ». Effet : le texte semble lu par un serpent avec un défaut de prononciation.
 
-    - Voyelliseur (Tout résonne en « O ») — chaque voyelle dans le texte est remplacée par « o », en conservant les adoucissements polonais. « Bonjour » → « Bonjoor ». Plus le texte est long, plus l'effet est amusant (et le lecteur d'écran le lit avec pleine conviction).
+    - Voyelliseur (Tout résonne en « O ») — chaque voyelle du texte est remplacée par « o », y compris les voyelles accentuées (é, è, ê, à, ù). « Bonjour » → « Bonjoor ». L'étape des adoucissements polonais (dzi/ci/ni/si/zi) est volontairement vide dans le pack français : ces graphies n'existent pas ici, la règle se réduit donc à l'échange des voyelles. Plus le texte est long, plus l'effet est amusant (et le lecteur d'écran le lit avec pleine conviction).
 
     - Bégaiement Fort / Robot Endommagé — ajoute des bégaiements au début des mots : « or-or-or-ordinateur », « st-st-stratégie ». Pour les mots courts (moins de 3 lettres), l'algorithme les ignore. Si la deuxième lettre du mot est une consonne, il répète les deux premières lettres (effet plus naturel) ; si c'est une voyelle — il ne répète que la première.
 

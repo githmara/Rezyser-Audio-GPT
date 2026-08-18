@@ -10,14 +10,15 @@ opis: |
   Italian words almost never end in a hard consonant cluster — Italians
   carry these gaps into English. We steer the Italian TTS into the same
   gaps:
-    - silent H at word start  ("hello" → "ello", "Henry" → "Enry")
+    - silent H at word start  ("hello" → "ello", "Henry" → "enri" — the
+      capital goes with the dropped H, and the final Y becomes I)
     - th → t                  (no /θ/ /ð/; "think" → "tink", "this" → "tis")
     - sh → s                  (no /ʃ/ standardly)
     - w/wh → v                (no native W; "water" → "vater")
     - j → y                   (Italian J is /j/ — yot, like Scandinavian)
-    - y\b → i                 ("happy" → "happi", "city" → "citi")
+    - y\b → i                 ("happy" → "appi" — H drops too, "city" → "citi")
     - epenthetic vowel after hard final clusters (rk/st/nd/kt/pt/ft)
-        "work"  → "worka"
+        "work"  → "vorka"     (w → v fires first)
         "fast"  → "fasta"
         "stand" → "standa"
       Constrained to those clusters by design — broader epenthesis

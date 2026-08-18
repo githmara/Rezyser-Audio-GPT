@@ -400,6 +400,52 @@ choice. Everything below has been observed at least once in a real run.
 """
 
 
+_CHECKLIST_AKCENTY = """\
+## Accent-pair hotspots (akcenty/<accent>.yaml)
+
+An accent file is NOT a translation of anything. It is a PHONETIC RULE derived
+for one ordered pair — the language of the text and the language of the speech
+synthesizer that will read it. `de/akcenty/finski.yaml` and
+`pl/akcenty/finski.yaml` share a target and nothing else: their rule tables are
+disjoint, because one rewrites German spelling and the other Polish. Never
+"translate" a sibling pack's file into yours.
+
+- LISTEN TO IT. Every gate in this tool is mechanical; none of them can hear.
+  Read a paragraph of your own language through the target synthesizer before
+  approving the file — a table can satisfy every check and still sound like
+  nothing in particular.
+- WORKED EXAMPLES ARE RE-RUN BY THE ENGINE. Every `"x" → "y"` pair in `opis` is
+  recomputed; the file is rejected when the engine disagrees. Chains
+  (`"a" → "b" → "c"`) are checked end-to-end, and alternatives (`"au/eau" → "o"`)
+  per member. A promise the rules cannot keep is a bug in the description.
+- RULE ORDER IS A CONTRACT. The engine applies `zamiany` sequentially with
+  `str.replace`, so a multi-character pattern must stand BEFORE any shorter
+  pattern contained in it, and a rule that introduces a character a later rule
+  consumes creates a cascade. Cascades are sometimes intended — say so in a
+  comment when they are.
+- THE PRE-PASS RUNS FIRST AND EATS RULES. With `usun_polskie_znaki: true` the
+  engine flattens your language's own diacritics BEFORE `zamiany` (the field name
+  is historical; it removes ALL diacritics). A rule whose pattern contains one of
+  them is unreachable, and its promise in `opis` becomes a lie — this is how 43
+  German umlaut rules stayed dead across seven accents. Either set the flag to
+  `false` for that pair (as the Spanish and French packs do) or drop the rule and
+  the prose about it.
+- CASE: give every letter rule its capitalized counterpart, and remember that
+  ALL-CAPS text (headings) needs the fully upper-cased form of a digraph as a
+  third rule — `Sz` does not catch `SZ`.
+- NON-LATIN OUTPUT: a transliterating accent (e.g. to Cyrillic) must cover the
+  whole source alphabet — a leftover Latin letter is a hole in the table — and it
+  must set `skleja_pojedyncze_litery: false`, because the engine's merging regex
+  matches `[a-z]` only.
+- VOICE NAMES IN `etykieta` ARE REAL PRODUCTS (NVDA/Vocalizer/OneCore). Keep the
+  ones you were given or replace them with voices that actually exist for that
+  language; an invented name is untestable for the next reviewer.
+- `iso` IS THE CODE OF THE SYNTHESIZER's LANGUAGE, not of the text. It drives the
+  `lang` tag of the output file, so a wrong value makes a screen reader read the
+  result with the wrong voice.
+"""
+
+
 # Rdzeń nazwy buildera → blok hotspotów. Trzeci brat (`_tryby.py`, v18.15) wymusił
 # generalizację dawnego `if narzedzie.endswith("docs.py")`: nowe narzędzie z tej
 # rodziny dopisuje tu jedną parę i nie tyka reszty modułu. Nieznany rdzeń spada na
@@ -412,6 +458,7 @@ _HOTSPOTY: dict[str, str] = {
     "tryby": _CHECKLIST_TRYBY,
     "opowiesci": _CHECKLIST_OPOWIESCI,
     "poliglota": _CHECKLIST_POLIGLOTA,
+    "akcenty": _CHECKLIST_AKCENTY,
 }
 
 

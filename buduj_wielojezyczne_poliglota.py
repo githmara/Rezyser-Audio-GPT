@@ -346,6 +346,38 @@ def przyklady_wyliczone(
     return wynik
 
 
+def skrotowce_z_rozwiniec(cfg: dict) -> list[str]:
+    """Literały skrótowców wyłuskane z regexów `rozwiniecia` (v18.19).
+
+    Domknięcie ograniczenia z v18.18: przykład odwróconego skrótowca
+    (`m.in.` → `.nim`) NIE był liczony silnikiem, więc nowa paczka dostawała
+    polski skrótowiec w prozie. Wzorce w `rozwiniecia` są regexami budowanymi
+    MECHANICZNIE (`\\b` + `re.escape(skrót)` + `\\s`), więc da się je odwrócić
+    równie mechanicznie — i wtedy Odwracacz dostaje przykłady z WŁASNEJ tablicy
+    języka docelowego, dokładnie jak inne algorytmy dostają `computed_examples`.
+    """
+    wynik: list[str] = []
+    for para in cfg.get("rozwiniecia") or []:
+        if not isinstance(para, dict):
+            continue
+        wzor = str(para.get("wzor", ""))
+        if not wzor:
+            continue
+        literal = wzor
+        for kotwica in (r"\b", r"\s", r"\B", r"\S"):
+            literal = literal.replace(kotwica, "")
+        literal = re.sub(r"\\(.)", r"\1", literal).strip()
+        # Nie każdy wpis da się odwrócić na literał: rosyjska paczka trzyma
+        # `в.?\s*т.?\s*ч.?` (skrótowiec pisany z odstępami), z którego po
+        # zdjęciu kotwic zostają metaznaki. Taki wpis POMIJAMY — lepiej mniej
+        # przykładów niż przykład, którego silnik nigdy nie zobaczy w tekście.
+        if not literal or re.search(r"[\\*+?\[\]{}()|^$]", literal):
+            continue
+        if literal not in wynik:
+            wynik.append(literal)
+    return wynik
+
+
 def fakty_alfabetu(cfg: dict, podstawy: dict) -> dict[str, Any]:
     """Fakty o alfabecie i zasięgu Cezara — jedyne źródło liczb w `opis` szyfru.
 
@@ -757,6 +789,13 @@ _ZASADY_PRZYKLADOW = (
     "reasons. Fix those reasons and change nothing else about the task. In "
     "particular, if it says a Polish example word survived, replace it with the "
     "`computed_examples` pair — do not reintroduce the Polish one.\n"
+    "- **`empty_step_precedent` IS THE MODEL ANSWER, NOT AN ANECDOTE.** When the "
+    "payload carries it, that is the REAL, reviewed description of a pack whose "
+    "rule data for this very step is empty too. Read how it words the "
+    "\"this step does not apply here\" sentence and do the same thing in the "
+    "target language — do not translate its wording literally (it is a "
+    "different language), and do not fall back to the Polish example the "
+    "source shows.\n"
     "- **`empty_rule_data` MEANS THE STEP DOES NOT APPLY HERE.** That field "
     "lists rule fields that are EMPTY for this language (e.g. the Polish "
     "softening tables `dzi→dź`, `ci→ć`, which most languages simply do not "
@@ -1485,10 +1524,31 @@ def slowa_przykladowe(
     """
     algorytm = str(cfg_efektywne.get("algorytm") or "")
     pary_pl = pary_z_opisu(str(cfg_pl.get("opis", "")))
-    if not pary_pl:
-        return [], []
-
     uwagi: list[str] = []
+
+    # Kolejność JEST istotna: gałąź Odwracacza stoi PRZED progiem „brak par w
+    # prozie PL", bo polski `opis` tej reguły wymienia skrótowce BEZ cudzysłowu
+    # po lewej stronie strzałki (`m.in. → „między innymi"`), więc detektor par
+    # nie widzi tam ani jednej pary — a przykład do policzenia jak najbardziej
+    # istnieje. To była druga połowa długu z v18.18.
+    # ODWRACACZ (domknięcie długu v18.18): przykładem MUSI być skrótowiec z
+    # tablicy `rozwiniecia` języka docelowego, nie zwykłe słowo — cała
+    # dydaktyka tej reguły polega na tym, co dzieje się ze skrótowcem. Wcześniej
+    # ta jedna reguła nie miała czym karmić `computed_examples`, więc nowa
+    # paczka dostawała polskie „m.in." w prozie.
+    if algorytm == "odwracanie":
+        zrodlo = (cfg_efektywne.get("rozwiniecia")
+                  or (dane_llm or {}).get("rozwiniecia") or [])
+        skroty = skrotowce_z_rozwiniec({"rozwiniecia": zrodlo})
+        if skroty:
+            return skroty[:max(1, len(pary_pl))], uwagi
+        uwagi.append(
+            f"{kod}/{nazwa}: paczka nie ma tablicy `rozwiniecia`, z której "
+            f"wziąłbym skrótowiec-przykład — model zobaczy parę polską, "
+            f"a bramka przeliczy ją silnikiem")
+
+    if not pary_pl:
+        return [], uwagi
     plik = DICT_DIR / kod / folder / nazwa
     if plik.is_file():
         try:
@@ -1656,6 +1716,39 @@ def _bramki_z_powtorka(
         return False
     print(f"✅ {kod}/{nazwa}: powtórka naprawiła wszystkie {len(porazki)} jednostek.")
     return True
+
+
+def _precedens_pustego_kroku(
+    kod: str, folder: str, nazwa: str,
+) -> dict[str, str] | None:
+    """Realny `opis` paczki, która ten sam krok reguły ma PUSTY (v18.19).
+
+    Szukamy paczki, w której pola `POLA_ZEROWANE_DLA_NOWEJ` są puste, a `opis`
+    jest już zrecenzowany — czyli takiej, która musiała napisać wprost „ten krok
+    jest tu bezprzedmiotowy". Kolejność preferencji: fińska (kanoniczny wzorzec
+    z v18.18), potem dowolna inna poza paczką docelową i źródłową.
+    """
+    kandydaci = ["fi"] + sorted(
+        p.name for p in DICT_DIR.iterdir()
+        if p.is_dir() and p.name not in (kod, KOD_ZRODLOWY, "fi"))
+    for kandydat in kandydaci:
+        if kandydat == kod:
+            continue
+        plik = DICT_DIR / kandydat / folder / nazwa
+        if not plik.is_file():
+            continue
+        try:
+            dane = YAML(typ="safe").load(plik.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        if not isinstance(dane, dict):
+            continue
+        if any(not _pusta(dane.get(pole)) for pole in POLA_ZEROWANE_DLA_NOWEJ):
+            continue
+        opis = str(dane.get("opis", "")).strip()
+        if opis:
+            return {"language": kandydat, "description": opis}
+    return None
 
 
 def _wstaw_dane_jezyka(drzewo: Any, pole: str, wartosc: Any) -> None:
@@ -1927,6 +2020,16 @@ def tlumacz_plik(
         pola_payloadu["empty_rule_data"] = puste
         print(f"ℹ️  {kod}/{nazwa}: pola danych puste w tym języku: {puste} — "
               f"model dostaje instrukcję, żeby nie tłumaczyć ich przykładów.")
+        # Domknięcie długu v18.18: sama instrukcja („napisz, że krok jest pusty,
+        # tak jak paczka fińska") nie wystarczała — model uparcie przepisywał
+        # polskie `dzi→dź`. POKAZUJEMY więc precedens zamiast o nim opowiadać:
+        # realny `opis` paczki, która ten sam krok ma pusty. Wzorzec „przykład
+        # bije regułę" z tej samej rodziny (kotwice, computed_examples).
+        precedens = _precedens_pustego_kroku(kod, folder, nazwa)
+        if precedens:
+            pola_payloadu["empty_step_precedent"] = precedens
+            print(f"📎 {kod}/{nazwa}: precedens pustego kroku z paczki "
+                  f"`{precedens['language']}` dołączony do payloadu.")
 
     kontekst = kontekst_paczki(kod, folder, nazwa)
     etykieta_przed = kontekst.get("label") if not pozwol_zmiane_etykiety else None

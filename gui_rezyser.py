@@ -1452,14 +1452,34 @@ class RezyserPanel(wx.Panel):
             worker_zajety = bool(
                 self._worker_thread and self._worker_thread.is_alive()
             )
-            self._pnl_postprodukcja.Show()
+            postprod_on = (
+                self._api_dostepne and nazwa_podana
+                and _historia_niepusta and not worker_zajety
+            )
             for pp_id, btn in self._btn_postprod.items():
                 btn.Show(pp_id in dostepne_id)
-                btn.Enable(
-                    self._api_dostepne and nazwa_podana
-                    and _historia_niepusta and not worker_zajety
-                )
-            self._pnl_postprodukcja.Layout()
+                btn.Enable(postprod_on)
+            # v18.19: ten sam wzorzec, co panel struktury (P2, v17.4) — panel
+            # z samymi nieaktywnymi przyciskami wciąż łapał fokus NVDA jako
+            # „panel" bez żadnej akcji. Do v18.11 stan „widoczny i cały
+            # disabled" był rzadki (bramka `id == "audiobook"`), po
+            # generalizacji postprodukcji (v18.12) stał się ZWYKŁY: każdy
+            # świeży projekt bez nazwy albo bez narracji ma wszystkie
+            # narzędzia nieaktywne.
+            # WYJĄTEK: postęp w toku. Gauge i status mieszkają w tym panelu,
+            # a `_start_postprodukcje` robi refresh JUŻ po starcie workera
+            # (`worker_zajety` = True, wszystkie przyciski disabled) —
+            # bez tego warunku pasek postępu i komunikat „pamięć w tle"
+            # zniknęłyby dokładnie wtedy, kiedy są potrzebne (A11y).
+            postep_w_toku = (
+                self._gauge_postprod.IsShown()
+                or self._lbl_postprod_status.IsShown()
+            )
+            if postprod_on or postep_w_toku:
+                self._pnl_postprodukcja.Show()
+                self._pnl_postprodukcja.Layout()
+            else:
+                self._pnl_postprodukcja.Hide()
         else:
             self._pnl_postprodukcja.Hide()
 
@@ -1467,17 +1487,28 @@ class RezyserPanel(wx.Panel):
         # nie Audiobooka. Cały panel tylko gdy klucz EL ważny; obsadę można
         # edytować, gdy podano nazwę projektu (źródło skryptu z dysku).
         if przepis is not None and przepis.id == "skrypt" and self._el_dostepne:
-            self._pnl_el.Show()
             self._btn_el_obsada.Enable(nazwa_podana)
             self._btn_el_build.Enable(nazwa_podana)
+            # v18.19: ten sam wzorzec P2 co panel struktury i postprodukcji —
+            # bez nazwy projektu oba przyciski są disabled, a panel łapał
+            # fokus NVDA jako martwy „panel". Status budowy mieszka w tym
+            # panelu, więc trzyma go widocznym niezależnie od przycisków.
+            if nazwa_podana or self._lbl_el_status.IsShown():
+                self._pnl_el.Show()
+            else:
+                self._pnl_el.Hide()
         else:
             self._pnl_el.Hide()
 
         # Wersja dla czytników ekranu (v16.1) — bespoke funkcja trybu Skrypt,
         # NIEZALEŻNIE od klucza EL (akcent przez ortografię + lang, nie przez API).
         if przepis is not None and przepis.id == "skrypt":
-            self._pnl_sr.Show()
             self._btn_sr.Enable(nazwa_podana)
+            # v18.19: wzorzec P2 — jedyny przycisk panelu jest bezużyteczny
+            # bez nazwy projektu (generator czyta skrypt z dysku), więc panel
+            # bez nazwy jest martwy. Brak wyjątku „postęp w toku": generacja
+            # HTML jest synchroniczna, panel nie ma własnego paska.
+            self._pnl_sr.Show(nazwa_podana)
         else:
             self._pnl_sr.Hide()
 

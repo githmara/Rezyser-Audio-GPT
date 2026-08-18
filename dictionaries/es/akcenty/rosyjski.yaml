@@ -32,7 +32,7 @@ kolejnosc: 60
 czysc_tekst_tts: true
 normalizuj_liczby: true
 usun_polskie_znaki: true
-skleja_pojedyncze_litery: true
+skleja_pojedyncze_litery: false
 
 # -----------------------------------------------------------------------------
 # ORDEN CRÍTICO (str.replace secuencial):

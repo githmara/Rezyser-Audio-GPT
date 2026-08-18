@@ -22,7 +22,7 @@ opis: |
     - „z" → „s" (is. TTS liest z als /s/)
 iso: is
 kategoria: akcent
-kolejnosc: 100
+kolejnosc: 95
 
 czysc_tekst_tts: true
 normalizuj_liczby: true

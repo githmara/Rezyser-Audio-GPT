@@ -362,7 +362,7 @@ tresc:
 
     - Broken Telephone / Snake Dialect — each "s", "z", or digraph "sz" is randomly elongated into a hiss of 4-8 characters ("ssssss", "zzzzzz", "ssssssz"). Inspiration: Snecko from the game "Slay the Spire". Effect: the text sounds as if read by a snake with a speech impediment.
 
-    - Vowelizer (Everything booms on "O") — every vowel in the text is replaced with "o", preserving Polish softening. "Dzień dobry" → "Dźoń doboro". The longer the text, the funnier the effect (and a screen reader reads it with full conviction).
+    - Vowelizer (Everything booms on "O") — every vowel in the text is replaced with "o". "Good morning" → "Good mornong". The Polish softening step (dzi/ci/ni/si/zi) is intentionally empty in the English pack: English has no such spellings, so the rule reduces to the vowel swap. The longer the text, the funnier the effect (and a screen reader reads it with full conviction).
 
     - Strong Stuttering / Broken Robot — attaches stuttering at the beginning of words: "c-c-c-computer", "sh-sh-shower". For short words (less than 3 characters), the algorithm skips them. If the second letter of the word is a consonant, it repeats the first two letters (more natural effect); if a vowel — it repeats only the first.
 

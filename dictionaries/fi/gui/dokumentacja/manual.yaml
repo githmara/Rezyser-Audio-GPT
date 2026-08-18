@@ -362,7 +362,7 @@ tresc:
 
     - Rikkinäinen Puhelin / Käärmeiden kieli — jokainen "s", "z" tai digrafi "sz" venytetään satunnaisesti sihinäksi, jonka pituus on 4-8 merkkiä ("ssssss", "zzzzzz", "ssssssz"). Inspiraatio: Snecko pelistä "Slay the Spire". Vaikutus: teksti kuulostaa siltä kuin sen lukisi käärme, jolla on puhevika.
 
-    - Vokaalinvaihtaja (Kaikki kumisee "O":lla) — jokainen vokaali tekstissä korvataan "o":lla, säilyttäen suomen kielen pehmennykset. "Hyvää päivää" → "Hovoo poovoo". Mitä pidempi teksti, sitä hauskempi vaikutus (ja ruudunlukija lukee sen täydellä vakuutuksella).
+    - Vokaalinvaihtaja (Kaikki kumisee "O":lla) — jokainen vokaali tekstissä korvataan "o":lla, myös ä, ö, å ja y, joten vokaaliharmonia katoaa kokonaan. "Hyvää päivää" → "Hovoo poovoo". Puolalainen pehmennysvaihe (dzi/ci/ni/si/zi) on suomen paketissa tarkoituksella tyhjä: tällaisia kirjoitusasuja ei ole, joten sääntö supistuu vokaalinvaihtoon. Mitä pidempi teksti, sitä hauskempi vaikutus (ja ruudunlukija lukee sen täydellä vakuutuksella).
 
     - Vahva Änkytys / Viallinen Robotti — lisää änkytyksiä sanojen alkuun: "t-t-t-tietokone", "pr-pr-prinsessa". Lyhyitä sanoja (alle 3 merkkiä) algoritmi jättää huomiotta. Jos sanan toinen kirjain on konsonantti, se toistaa kaksi ensimmäistä kirjainta (luonnollisempi vaikutus); jos vokaali, se toistaa vain ensimmäisen.
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Täydellinen opas (Versio 18.18.0 – Julkaisuversio)</title>
+<title>Reżyser Audio GPT — Täydellinen opas (Versio 18.19.0 – Julkaisuversio)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Täydellinen opas (Versio 18.18.0 – Julkaisuversio)</h1>
+<h1>Reżyser Audio GPT — Täydellinen opas (Versio 18.19.0 – Julkaisuversio)</h1>
 <p>Tervetuloa Hybridiäänitysstudioon! Tämä työkalupaketti mahdollistaa kuunnelmien ja äänikirjojen käsikirjoitusten automaattisen kirjoittamisen, suunnittelun, muotoilun ja kääntämisen. Se on optimoitu toimimaan ammattimaisten puhesynteesien ja paikallisten ruudunlukuohjelmien (NVDA) moottorien kanssa.</p>
 <p>Paketti koostuu päästudiosta (Ohjaus), käännös- ja aksenttityökalusta (Polyglootti), tiedostorakenteen rakennustyökalusta (Äänikirja-arkkitehti), Sääntöjen Hallinnasta (versiosta 13.0 alkaen — ilman Pythonia voit lisätä uuden aksentin, salauksen tai luovan tilan, katso KOHTA 7b alla) sekä — versiosta 15.0 alkaen — Tarinamoduulista (interaktiivinen toisen persoonan fiktio, jonka AI tuottaa ja TTS tai ruudunlukija lukee, kuvattu erillisessä oppaassa tales.fi.html). Kaikki viisi työkalua ovat saatavilla yhdessä ohjelmaikkunassa, ja niitä voi vaihtaa painikkeilla tai pikanäppäimillä Ctrl+1..Ctrl+5.</p>
 <h2>VAIHE 1: Ensimmäinen käynnistys (Cross-Platform)</h2>
@@ -247,7 +247,7 @@ Saatatte kysyä, osaako synteettinen ääni taivuttaa näin normalisoituja numer
 <p>Rikkinäinen Puhelin / Käärmeiden kieli — jokainen "s", "z" tai digrafi "sz" venytetään satunnaisesti sihinäksi, jonka pituus on 4-8 merkkiä ("ssssss", "zzzzzz", "ssssssz"). Inspiraatio: Snecko pelistä "Slay the Spire". Vaikutus: teksti kuulostaa siltä kuin sen lukisi käärme, jolla on puhevika.</p>
 </li>
 <li>
-<p>Vokaalinvaihtaja (Kaikki kumisee "O":lla) — jokainen vokaali tekstissä korvataan "o":lla, säilyttäen suomen kielen pehmennykset. "Hyvää päivää" → "Hovoo poovoo". Mitä pidempi teksti, sitä hauskempi vaikutus (ja ruudunlukija lukee sen täydellä vakuutuksella).</p>
+<p>Vokaalinvaihtaja (Kaikki kumisee "O":lla) — jokainen vokaali tekstissä korvataan "o":lla, myös ä, ö, å ja y, joten vokaaliharmonia katoaa kokonaan. "Hyvää päivää" → "Hovoo poovoo". Puolalainen pehmennysvaihe (dzi/ci/ni/si/zi) on suomen paketissa tarkoituksella tyhjä: tällaisia kirjoitusasuja ei ole, joten sääntö supistuu vokaalinvaihtoon. Mitä pidempi teksti, sitä hauskempi vaikutus (ja ruudunlukija lukee sen täydellä vakuutuksella).</p>
 </li>
 <li>
 <p>Vahva Änkytys / Viallinen Robotti — lisää änkytyksiä sanojen alkuun: "t-t-t-tietokone", "pr-pr-prinsessa". Lyhyitä sanoja (alle 3 merkkiä) algoritmi jättää huomiotta. Jos sanan toinen kirjain on konsonantti, se toistaa kaksi ensimmäistä kirjainta (luonnollisempi vaikutus); jos vokaali, se toistaa vain ensimmäisen.</p>

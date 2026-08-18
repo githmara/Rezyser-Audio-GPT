@@ -40,15 +40,16 @@ polskie_znaki:
   # -- ß → ss (rosnące przy .upper(): ß→SS — ZAKAZ w alfabet) --
   - { wzor: "ß", zamiana: "ss" }
   - { wzor: "ẞ", zamiana: "SS" }
-  # -- ä → a (dla akcent-engines z usun_polskie_znaki: true) --
-  - { wzor: "ä", zamiana: "a"  }
-  - { wzor: "Ä", zamiana: "A"  }
-  # -- ö → o --
-  - { wzor: "ö", zamiana: "o"  }
-  - { wzor: "Ö", zamiana: "O"  }
-  # -- ü → u --
-  - { wzor: "ü", zamiana: "u"  }
-  - { wzor: "Ü", zamiana: "U"  }
+  # -- Ä/Ö/Ü: BEWUSST NICHT normalisiert (Korrektur v18.19) --
+  #    Diese drei stehen im deutschen `alfabet` (29 Buchstaben) — sie sind
+  #    also vollwertige Buchstaben dieser Sprache und keine Fremdzeichen.
+  #    Sie hier zu plattzumachen widersprach der eigenen Alphabet-Angabe und
+  #    hatte zwei Folgen: (1) die Caesar-Chiffre verschlüsselte „a" dort, wo
+  #    das Alphabet „ä" anbietet, (2) im Akzent-Pipeline läuft dieser Schritt
+  #    VOR der Liste `zamiany`, so dass ALLE Umlaut-Regeln der sieben
+  #    Akzentdateien unerreichbar waren (26 tote Regeln; der Text versprach
+  #    „ä → e", die Engine lieferte „a"). „ß" bleibt oben normalisiert — es
+  #    steht bewusst NICHT im `alfabet`.
   # -- Polnische Zeichen → ASCII --
   - { wzor: "ą", zamiana: "a"  }
   - { wzor: "ć", zamiana: "c"  }

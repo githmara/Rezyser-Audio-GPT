@@ -34,10 +34,10 @@ opis: |
         position to "y" so Ewa reads /ɨ/ not /i/.
     - **Final-E truncation** (silent E from English the Pole drops):
         (?<=\\w{3})e\\b → ""    — only in words with ≥4 chars
-        "have" → "haw" → "hał"
+        "have" → "hav"
         "love" → "lov"
-        "give" → "giw"
-        "twelve" → "tłelw"
+        "give" → "giv"
+        "twelve" → "tłelv"   (the w → ł rule fires first, the V stays a V)
         Words ≤3 chars protected by the lookbehind length:
         "the", "be", "we", "he", "she" stay intact.
 

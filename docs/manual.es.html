@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Guía Completa (Versión 18.18.0 – Versión de Lanzamiento)</title>
+<title>Reżyser Audio GPT — Guía Completa (Versión 18.19.0 – Versión de Lanzamiento)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Guía Completa (Versión 18.18.0 – Versión de Lanzamiento)</h1>
+<h1>Reżyser Audio GPT — Guía Completa (Versión 18.19.0 – Versión de Lanzamiento)</h1>
 <p>¡Bienvenido al Estudio de Grabación Híbrido! Este conjunto de herramientas permite la escritura, planificación, formateo y traducción automática de guiones para radionovelas y audiolibros. Ha sido optimizado para trabajar con sintetizadores de voz profesionales y motores locales de lectores de pantalla (NVDA).</p>
 <p>El conjunto consta del estudio principal (Dirección), la herramienta de traducción y acentos (Políglota), la herramienta para construir la estructura de archivos (Arquitecto de Audiolibros), el Gestor de Reglas (desde la versión 13.0 — sin Python puedes añadir un nuevo acento, cifrado o modo creativo, ver PASO 7b a continuación) y — desde la versión 15.0 — el módulo de Historias (ficción interactiva en segunda persona generada por IA, leída por TTS o lector de pantalla, descrita en un manual separado tales.es.html). Todas las cinco herramientas están disponibles en una sola ventana del programa, conmutables mediante botones en la barra o atajos de teclado Ctrl+1..Ctrl+5.</p>
 <h2>PASO 1: Primera ejecución (Cross-Platform)</h2>
@@ -247,7 +247,7 @@ Probablemente te preguntarás si el sintetizador podrá declinar esos números n
 <p>Teléfono Descompuesto / Dialecto Serpiente — cada "s", "z" o dígrafo "sz" se alarga aleatoriamente en un siseo de 4-8 caracteres ("ssssss", "zzzzzz", "ssssssz"). Inspiración: Snecko del juego "Slay the Spire". Efecto: el texto suena como si lo leyera una serpiente con un defecto de pronunciación.</p>
 </li>
 <li>
-<p>Vocalizador (Todo retumba en "O") — cada vocal en el texto se reemplaza por "o", manteniendo las suavizaciones polacas. "Buenos días" → "Boenos doas". Cuanto más largo el texto, más divertido el efecto (y el lector de pantalla lo lee con total convicción).</p>
+<p>Vocalizador (Todo retumba en "O") — cada vocal en el texto se reemplaza por "o", incluidas las vocales acentuadas. "Buenos días" → "Boonos doos". El paso de suavizaciones polacas (dzi/ci/ni/si/zi) está vacío a propósito en el paquete español: esas grafías no existen aquí, así que la regla se reduce al cambio de vocales. Cuanto más largo el texto, más divertido el efecto (y el lector de pantalla lo lee con total convicción).</p>
 </li>
 <li>
 <p>Tartamudeo Fuerte / Robot Dañado — agrega tartamudeos al comienzo de las palabras: "or-or-or-ordenador", "cr-cr-cristal". Para palabras cortas (menos de 3 letras) el algoritmo las omite. Si la segunda letra de la palabra es una consonante, repite las dos primeras letras (efecto más natural); si es vocal, repite solo la primera.</p>

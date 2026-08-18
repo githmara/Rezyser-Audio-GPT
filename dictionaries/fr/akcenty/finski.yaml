@@ -62,7 +62,11 @@ zamiany:
   - { wzor: "U",  zamiana: "Y"  }
   - { wzor: "yy", zamiana: "uu" }
   - { wzor: "Yy", zamiana: "Uu" }
-  - { wzor: "ç",  zamiana: "s"  }
-  - { wzor: "Ç",  zamiana: "S"  }
+  # « ç » N'EST PAS ici (correction v18.19) : le champ `alfabet` du français
+  # compte 26 lettres ASCII, donc `polskie_znaki` dans `podstawy.yaml`
+  # normalise « ç » en « c » AVANT cette liste — une règle sur « ç » était
+  # inatteignable. La cédille se lit donc comme /k/ dans « français » ;
+  # la corriger demanderait de désactiver la pré-passe pour cette paire et
+  # d'y réécrire la table complète des diacritiques françaises.
   - { wzor: "h",  zamiana: ""   }
   - { wzor: "H",  zamiana: ""   }

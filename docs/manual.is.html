@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.18.0 – Fullbúin útgáfa)</title>
+<title>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.19.0 – Fullbúin útgáfa)</title>
 <style>
 body { max-width: 75ch; margin: 2rem auto; padding: 0 1rem;
        font-family: system-ui, sans-serif; line-height: 1.5; }
@@ -15,7 +15,7 @@ code { font-family: ui-monospace, Consolas, monospace; }
 </style>
 </head>
 <body>
-<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.18.0 – Fullbúin útgáfa)</h1>
+<h1>Reżyser Audio GPT — Heildarleiðarvísir (Útgáfa 18.19.0 – Fullbúin útgáfa)</h1>
 <p>Velkomin í Hybrid Recording Studio! Þessi verkfærakista gerir þér kleift að skrifa, skipuleggja, stilla og þýða handrit fyrir hljóðleiki og hljóðbækur sjálfvirkt. Hún hefur verið fínstillt til að vinna með faglegum talgervlum og staðbundnum skjálestrum (NVDA).</p>
 <p>Verkfærakistan samanstendur af aðalstúdíóinu (Leikstjórn), þýðinga- og hreimaverkfærinu (Tungumálamaður), skráarbyggingarverkfærinu (Hljóðbókararkitekt), Reglustjóra (frá útgáfu 13.0 — án Python geturðu bætt við nýjum hreim, dulmáli eða sköpunarham, sjá SKREF 7b hér að neðan) og — frá útgáfu 15.0 — Sögueiningunni (gervigreindarframleiddur gagnvirkur skáldskapur í annarri persónu, lesin af TTS eða skjálesara, lýst í sérstöku handriti tales.is.html). Öll fimm verkfærin eru aðgengileg í einum forritsglugga, skipt á milli með hnöppum á stikunni eða með lyklaborðssamsetningum Ctrl+1..Ctrl+5.</p>
 <h2>SKREF 1: Fyrsta gangsetning (Cross-Platform)</h2>
@@ -247,7 +247,7 @@ Valmöguleikinn með talnaviðmiðun breytir sjálfkrafa tölum í orðform (t.d
 <p>Skemmdur Sími / Ormadíalekt — hvert „s", „z" eða tvíhljóð „sz" er tilviljanakennt lengt í hvæs af lengd 4-8 stafa („ssssss", „zzzzzz", „ssssssz"). Innblástur: Snecko úr leiknum „Slay the Spire". Áhrif: textinn hljómar eins og hann hafi verið lesinn af ormi með talgalla.</p>
 </li>
 <li>
-<p>Sérhljóðari (Allt hljómar á „O") — hverjum sérhljóða í textanum er breytt í „o", með varðveislu íslenskra mýkinga. „Góðan daginn" → „Góðon doginn". Því lengri texti, því skemmtilegri áhrif (og skjálesari les þetta með fullri sannfæringu).</p>
+<p>Sérhljóðari (Allt hljómar á „O") — hverjum sérhljóða í textanum er breytt í „o", líka broddstöfunum (á, é, í, ó, ú, ý). „Góðan daginn" → „Goðon dogonn". Mýkingarþrepið úr pólsku (dzi/ci/ni/si/zi) er viljandi tómt í íslenska pakkanum: þessi skrif eru ekki til hér, svo reglan verður einfaldlega sérhljóðaskipti. Því lengri texti, því skemmtilegri áhrif (og skjálesari les þetta með fullri sannfæringu).</p>
 </li>
 <li>
 <p>Sterkt Stam / Skemmdur Vélmenni — bætir við stami í upphafi orða: „st-st-stelpa", „þr-þr-þrjótur". Fyrir stutt orð (minna en 3 stafir) sleppir reikniritið þeim. Ef annar stafur orðsins er samhljóði, endurtekur það fyrstu tvo stafina (náttúrulegri áhrif); ef sérhljóði — endurtekur aðeins fyrsta.</p>

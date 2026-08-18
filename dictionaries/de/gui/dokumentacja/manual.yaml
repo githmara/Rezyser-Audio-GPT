@@ -362,7 +362,7 @@ tresc:
 
     - Kaputtes Telefon / Schlangendialekt — jedes „s", „z" oder der Doppelbuchstabe „sch" wird zufällig zu einem Zischen von 4-8 Zeichen verlängert („ssssss", „zzzzzz", „sssssssch"). Inspiration: Snecko aus dem Spiel „Slay the Spire". Effekt: Der Text klingt, als ob ihn eine Schlange mit Sprachfehler gelesen hätte.
 
-    - Vokalisierer (Alles dröhnt auf „O") — jeder Vokal im Text wird durch „o" ersetzt, wobei die deutschen Umlaute erhalten bleiben. „Guten Tag" → „Goton Tog". Je länger der Text, desto lustiger der Effekt (und der Screenreader liest es mit voller Überzeugung).
+    - Vokalisierer (Alles dröhnt auf „O") — jeder Vokal im Text wird durch „o" ersetzt, die Umlaute ä/ö/ü eingeschlossen: „Guten Tag" → „Goton Tog", „Schöne Grüße" → „Schono Grosso". Die polnische Erweichungsstufe (dzi/ci/ni/si/zi) ist im deutschen Paket absichtlich leer — solche Schreibweisen gibt es hier nicht, die Regel besteht also nur aus dem Vokaltausch. Je länger der Text, desto lustiger der Effekt (und der Screenreader liest es mit voller Überzeugung).
 
     - Starkes Stottern / Beschädigter Roboter — fügt Stottern am Anfang von Wörtern hinzu: „C-c-c-computer", „St-st-straße". Bei kurzen Wörtern (weniger als 3 Zeichen) ignoriert der Algorithmus sie. Wenn der zweite Buchstabe des Wortes ein Konsonant ist, werden die ersten beiden Buchstaben wiederholt (natürlicherer Effekt); wenn ein Vokal, wird nur der erste wiederholt.
 

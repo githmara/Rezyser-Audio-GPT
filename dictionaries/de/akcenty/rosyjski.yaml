@@ -19,12 +19,11 @@ opis: |
     - „w" → „в",  „v" → „ф",  „z"/„tz" → „ц",  „qu" → „кв",  „ck" → „к"
     - „th" → „т",  „ph" → „ф",  restliche Buchstaben 1:1 kyrillisch.
 
-  Bewusste Vereinfachungen (Pipeline-bedingt): die Vorstufe
-  `usun_polskie_znaki` normalisiert Umlaute VOR diesen Regeln
-  (ä→a, ö→o, ü→u, ß→ss), daher „ü" → „у" statt „ю", „ö" → „о" statt
-  „ё", „ä" → „а"; „äu" ist von „au" nicht mehr unterscheidbar (beide
-  → „ау"). „ß" wird über ss → „сс" abgebildet. Dehnungs-h wird
-  vereinfacht als „х" gesprochen (starker Akzent-Effekt).
+  Bewusste Vereinfachungen: die Umlaute werden flach abgebildet —
+  „ü" → „у" statt „ю", „ö" → „о" statt „ё", „ä" → „а"; „äu" ist damit
+  von „au" nicht unterscheidbar (beide → „ау"). „ß" wird über die
+  Vorstufe (ss) zu „сс" abgebildet. Dehnungs-h wird vereinfacht als
+  „х" gesprochen (starker Akzent-Effekt).
 iso: ru
 kategoria: akcent
 kolejnosc: 60
@@ -32,7 +31,7 @@ kolejnosc: 60
 czysc_tekst_tts: true
 normalizuj_liczby: true
 usun_polskie_znaki: true
-skleja_pojedyncze_litery: true
+skleja_pojedyncze_litery: false
 
 # -----------------------------------------------------------------------------
 # KRITISCHE REIHENFOLGE (sequenzielles str.replace):
@@ -127,7 +126,21 @@ zamiany:
   - { wzor: "j",  zamiana: "й" }
   - { wzor: "J",  zamiana: "Й" }
 
-  # --- 7. Einzelbuchstaben → Kyrillisch ---
+  # --- 7. Umlaute (v18.19: eigene Regeln statt Vorstufe) ---
+  # Bis v18.18 erledigte das `usun_polskie_znaki` in `podstawy.yaml` (ä→a→а).
+  # Seit Ä/Ö/Ü dort — dem deutschen `alfabet` entsprechend — NICHT mehr
+  # plattgemacht werden, muss diese Tabelle sie selbst abbilden, sonst bleiben
+  # lateinische Buchstaben im kyrillischen Ergebnis stehen. Abbildung wie
+  # bisher (а/о/у), damit sich der Klang gegenüber v18.18 nicht ändert; die im
+  # `opis` genannte feinere Variante (ю/ё/э) bleibt eine spätere Option.
+  - { wzor: "ä", zamiana: "а"  }
+  - { wzor: "Ä", zamiana: "А"  }
+  - { wzor: "ö", zamiana: "о"  }
+  - { wzor: "Ö", zamiana: "О"  }
+  - { wzor: "ü", zamiana: "у"  }
+  - { wzor: "Ü", zamiana: "У"  }
+
+  # --- 8. Einzelbuchstaben → Kyrillisch ---
   - { wzor: "a", zamiana: "а"  }
   - { wzor: "A", zamiana: "А"  }
   - { wzor: "b", zamiana: "б"  }

@@ -193,6 +193,7 @@ def wywolaj_llm(
     wskazowka_limitu: str = "",
     kontekst_paczki: dict[str, str] | None = None,
     pola_payloadu: dict[str, Any] | None = None,
+    myslenie: bool = False,
 ) -> dict[int, str]:
     """Wysyła jeden chunk `(id, kind, source)`. Zwraca mapę id → target.
 
@@ -214,6 +215,16 @@ def wywolaj_llm(
             czyli wyjścia faktycznych algorytmów silnika). Rdzeń nic o ich
             znaczeniu nie wie i wie wiedzieć nie musi: nazwy i opis kontraktu
             należą do prompta systemowego narzędzia.
+        myslenie: ``True`` włącza myślenie adaptacyjne (`thinking: adaptive`)
+            i ZDEJMUJE `temperature`. Domyślnie ``False`` — czyli zachowanie
+            czterech starszych braci (tłumaczenie to odwzorowanie, nie
+            wyprowadzanie, więc determinizm jest tam wart więcej niż namysł).
+            Włącza to brat od AKCENTÓW: para akcentowa nie jest przekładem, a
+            wyprowadzeniem reguły fonetycznej dla pary (pismo źródła →
+            fonologia celu). UWAGA: na Claude Sonnet 5 niedomyślna
+            `temperature` i tak kończy się 400 (degradacja niżej), a myślenie
+            adaptacyjne jest domyślne — jawny `thinking` trzymamy, żeby
+            intencja była widoczna w kodzie, nie w domyśle modelu.
 
     Kontrakt błędów jest częścią API rdzenia i wszyscy bracia go dziedziczą:
     ``RuntimeError`` = wpadka TEGO chunku (wołający może ją złapać i lecieć
@@ -233,8 +244,6 @@ def wywolaj_llm(
     kwargs: dict[str, Any] = dict(
         model=model,
         max_tokens=max_tokens,
-        temperature=0.0,
-        thinking={"type": "disabled"},
         system=system,
         messages=[{
             "role": "user",
@@ -250,6 +259,14 @@ def wywolaj_llm(
             "format": {"type": "json_schema", "schema": SCHEMA_TLUMACZENIA},
         },
     )
+    if myslenie:
+        # Myślenie adaptacyjne i sterowanie samplingiem wykluczają się — obok
+        # `thinking` NIE wysyłamy `temperature` (na Sonnet 5 niedomyślna wartość
+        # to 400, a przy myśleniu nie ma czego determinizować).
+        kwargs["thinking"] = {"type": "adaptive"}
+    else:
+        kwargs["thinking"] = {"type": "disabled"}
+        kwargs["temperature"] = 0.0
     try:
         resp = klient.messages.create(**kwargs)
     except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucenie `temperature`
@@ -258,7 +275,7 @@ def wywolaj_llm(
         status = getattr(exc, "status_code", None)
         if status != 400 or "temperature" not in str(exc):
             raise
-        kwargs.pop("temperature")
+        kwargs.pop("temperature", None)      # przy `myslenie=True` jej tu nie ma
         resp = klient.messages.create(**kwargs)
 
     if getattr(resp, "stop_reason", None) == "max_tokens":

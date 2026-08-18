@@ -362,7 +362,7 @@ tresc:
 
     - Teléfono Descompuesto / Dialecto Serpiente — cada "s", "z" o dígrafo "sz" se alarga aleatoriamente en un siseo de 4-8 caracteres ("ssssss", "zzzzzz", "ssssssz"). Inspiración: Snecko del juego "Slay the Spire". Efecto: el texto suena como si lo leyera una serpiente con un defecto de pronunciación.
 
-    - Vocalizador (Todo retumba en "O") — cada vocal en el texto se reemplaza por "o", manteniendo las suavizaciones polacas. "Buenos días" → "Boenos doas". Cuanto más largo el texto, más divertido el efecto (y el lector de pantalla lo lee con total convicción).
+    - Vocalizador (Todo retumba en "O") — cada vocal en el texto se reemplaza por "o", incluidas las vocales acentuadas. "Buenos días" → "Boonos doos". El paso de suavizaciones polacas (dzi/ci/ni/si/zi) está vacío a propósito en el paquete español: esas grafías no existen aquí, así que la regla se reduce al cambio de vocales. Cuanto más largo el texto, más divertido el efecto (y el lector de pantalla lo lee con total convicción).
 
     - Tartamudeo Fuerte / Robot Dañado — agrega tartamudeos al comienzo de las palabras: "or-or-or-ordenador", "cr-cr-cristal". Para palabras cortas (menos de 3 letras) el algoritmo las omite. Si la segunda letra de la palabra es una consonante, repite las dos primeras letras (efecto más natural); si es vocal, repite solo la primera.
 

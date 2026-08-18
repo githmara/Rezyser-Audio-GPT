@@ -362,7 +362,7 @@ tresc:
 
     - Skemmdur Sími / Ormadíalekt — hvert „s", „z" eða tvíhljóð „sz" er tilviljanakennt lengt í hvæs af lengd 4-8 stafa („ssssss", „zzzzzz", „ssssssz"). Innblástur: Snecko úr leiknum „Slay the Spire". Áhrif: textinn hljómar eins og hann hafi verið lesinn af ormi með talgalla.
 
-    - Sérhljóðari (Allt hljómar á „O") — hverjum sérhljóða í textanum er breytt í „o", með varðveislu íslenskra mýkinga. „Góðan daginn" → „Góðon doginn". Því lengri texti, því skemmtilegri áhrif (og skjálesari les þetta með fullri sannfæringu).
+    - Sérhljóðari (Allt hljómar á „O") — hverjum sérhljóða í textanum er breytt í „o", líka broddstöfunum (á, é, í, ó, ú, ý). „Góðan daginn" → „Goðon dogonn". Mýkingarþrepið úr pólsku (dzi/ci/ni/si/zi) er viljandi tómt í íslenska pakkanum: þessi skrif eru ekki til hér, svo reglan verður einfaldlega sérhljóðaskipti. Því lengri texti, því skemmtilegri áhrif (og skjálesari les þetta með fullri sannfæringu).
 
     - Sterkt Stam / Skemmdur Vélmenni — bætir við stami í upphafi orða: „st-st-stelpa", „þr-þr-þrjótur". Fyrir stutt orð (minna en 3 stafir) sleppir reikniritið þeim. Ef annar stafur orðsins er samhljóði, endurtekur það fyrstu tvo stafina (náttúrulegri áhrif); ef sérhljóði — endurtekur aðeins fyrsta.
 

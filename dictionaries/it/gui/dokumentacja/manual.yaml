@@ -365,7 +365,7 @@ tresc:
 
     - Telefono Rotto / Dialetto Serpente — ogni "s", "z" o digramma "sz" viene allungato casualmente in un sibilo di lunghezza 4-8 caratteri ("ssssss", "zzzzzz", "ssssssz"). Ispirazione: Snecko dal gioco "Slay the Spire". Effetto: il testo sembra letto da un serpente con un difetto di pronuncia.
 
-    - Vocalizzatore (Tutto rimbomba con "O") — ogni vocale nel testo viene sostituita con "o", mantenendo le morbidezze polacche. "Buongiorno" → "Boongiorno". Più lungo è il testo, più divertente è l'effetto (e il lettore di schermo lo legge con piena convinzione).
+    - Vocalizzatore (Tutto rimbomba con "O") — ogni vocale nel testo viene sostituita con "o", comprese quelle accentate. "Buongiorno" → "Boongoorno". Il passaggio delle morbidezze polacche (dzi/ci/ni/si/zi) è volutamente vuoto nel pacchetto italiano: quelle grafie qui non esistono, quindi la regola si riduce al cambio delle vocali. Più lungo è il testo, più divertente è l'effetto (e il lettore di schermo lo legge con piena convinzione).
 
     - Balbuzie Forte / Robot Danneggiato — aggiunge balbuzie all'inizio delle parole: "c-c-c-computer", "st-st-strada". Per le parole brevi (meno di 3 caratteri) l'algoritmo le ignora. Se la seconda lettera della parola è una consonante, ripete le prime due lettere (effetto più naturale); se è una vocale — ripete solo la prima.
 

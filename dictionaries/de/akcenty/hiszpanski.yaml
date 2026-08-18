@@ -17,7 +17,8 @@ opis: |
     - „ö" → „o" (span. hat kein /ø/ → o)
     - „ä" → "e" (span. hat kein /ɛ/ → e)
     - „ß" → „ss"
-    - „w" → „v" (span. /v/ ≈ /b/ — TTS liest beides ähnlich)
+    - „w" → „v" → am Ende „b" (Kaskade, gewollt: die Regel „v" → „b" greift
+      danach, und span. /v/ ≈ /b/ klingt ohnehin gleich)
     - „z" → „s" (span. TTS liest z als /s/ in Lateinamerika)
     - „v" → „b" (span. v und b klingen gleich: /b/)
 iso: es
