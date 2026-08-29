@@ -44,6 +44,7 @@ from typing import Any
 from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import LiteralScalarString
 
+import core_llm as cl
 import przeglad_tlumaczen
 
 
@@ -146,6 +147,11 @@ SCHEMA_TLUMACZENIA: dict[str, Any] = {
 }
 
 NAZWA_PLIKU_KLUCZA = "golden_key.env"
+
+# Tłumaczenie to odwzorowanie, nie wyprowadzanie — sampling zerujemy. Wartość
+# jest NIEDOMYŚLNA, więc modele pokroju `claude-sonnet-5` odrzucają ją kodem 400;
+# kogo pominąć bez próby, rozstrzyga `core_llm.honoruje_temperature`.
+TEMPERATURA_TLUMACZENIA = 0.0
 
 
 def zainicjuj_klienta_anthropic(root: Path) -> Any:
@@ -266,16 +272,22 @@ def wywolaj_llm(
         kwargs["thinking"] = {"type": "adaptive"}
     else:
         kwargs["thinking"] = {"type": "disabled"}
-        kwargs["temperature"] = 0.0
+        # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać — wiedzę
+        # (baseline modeli + trwały autocache) dzielimy z runtimem przez
+        # `core_llm`, zamiast trzymać trzecią kopię tej samej listy.
+        if cl.honoruje_temperature(model, TEMPERATURA_TLUMACZENIA):
+            kwargs["temperature"] = TEMPERATURA_TLUMACZENIA
     try:
         resp = klient.messages.create(**kwargs)
     except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucenie `temperature`
-        # Od Claude Sonnet 5 niedomyślna `temperature` zwraca 400 (patrz
-        # `core_llm._wywolaj_anthropic` i bliźniacza degradacja w builderze UI).
-        status = getattr(exc, "status_code", None)
-        if status != 400 or "temperature" not in str(exc):
+        # Reaktywna siatka bezpieczeństwa dla modelu spoza baseline'u (reżyser
+        # może podać własny `--model`). Rozpoznanie winowajcy bierzemy z
+        # `core_llm`, a wynik ZAPAMIĘTUJEMY — kolejne chunki tego przebiegu i
+        # kolejne przebiegi nie zapłacą już jałowym round-tripem.
+        if "temperature" not in kwargs or not cl.czy_odrzucono_temperature(exc):
             raise
-        kwargs.pop("temperature", None)      # przy `myslenie=True` jej tu nie ma
+        cl.zapamietaj_odrzucenie_temperatury(model)
+        kwargs.pop("temperature", None)
         resp = klient.messages.create(**kwargs)
 
     if getattr(resp, "stop_reason", None) == "max_tokens":

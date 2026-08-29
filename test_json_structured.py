@@ -17,6 +17,11 @@ Testy pilnuja czterech rzeczy, ktorych nie pilnuje zadna bramka danych:
   4. tresc `BladStrukturyJSON` nadaje sie do PUBLICZNEGO zgloszenia - niesie
      request_id kazdej proby i zero prozy uzytkownika.
 
+Piata rzecz doszla w 18.24 (sekcja 3b): kontrakt samplingu `core_llm` jest teraz
+DZIELONY z rodzina autotlumaczy, ktora ma wlasnych klientow Anthropic. Testy
+pilnuja, ze rodzina nie placi jalowym round-tripem 400 na modelu z baseline'u
+i ze nauke o nieznanym modelu zapamietuje RAZ, a nie co chunk.
+
 Mock SDK, zero wywolan API.
 
 Uruchom:  .venv/Scripts/python test_json_structured.py
@@ -226,17 +231,17 @@ def test_naprawa_nie_zmienia_poprawnego_json():
 # 3. Sampling: baseline, autocache, degradacja CELOWANA
 # ---------------------------------------------------------------------------
 def test_baseline_modeli_bez_temperatury():
-    assert not cl._honoruje_temperature("claude-sonnet-5", 0.85)
-    assert not cl._honoruje_temperature("claude-opus-5", 0.85)
-    assert cl._honoruje_temperature("claude-sonnet-4-6", 0.85)
-    assert cl._honoruje_temperature("claude-haiku-4-5", 0.85)
+    assert not cl.honoruje_temperature("claude-sonnet-5", 0.85)
+    assert not cl.honoruje_temperature("claude-opus-5", 0.85)
+    assert cl.honoruje_temperature("claude-sonnet-4-6", 0.85)
+    assert cl.honoruje_temperature("claude-haiku-4-5", 0.85)
     # Nieznany endpoint compat dostaje szanse (nauczy sie po pierwszym 400).
-    assert cl._honoruje_temperature("jakis-lokalny-model", 0.85)
+    assert cl.honoruje_temperature("jakis-lokalny-model", 0.85)
 
 
 def test_temperatura_domyslna_przechodzi_wszedzie():
     # 1.0 jest no-opem samplingu - API przyjmuje ja nawet od Sonneta 5.
-    assert cl._honoruje_temperature("claude-sonnet-5", cl._TEMPERATURA_DOMYSLNA)
+    assert cl.honoruje_temperature("claude-sonnet-5", cl._TEMPERATURA_DOMYSLNA)
 
 
 def test_rozpoznanie_winowajcy_400():
@@ -281,15 +286,15 @@ def test_nierozpoznany_400_konczy_sie_najprostszym_payloadem():
 def test_autocache_uczy_sie_nieznanego_modelu():
     """Reżyser z cudzym endpointem nie musi czekac na mikropatch baseline'u."""
     cl._NAUCZONE_BEZ_TEMPERATURY.discard("egzotyczny-model-7")
-    assert cl._honoruje_temperature("egzotyczny-model-7", 0.85)
-    cl._dopisz_do_cache_samplingu("egzotyczny-model-7")
-    assert not cl._honoruje_temperature("egzotyczny-model-7", 0.85)
+    assert cl.honoruje_temperature("egzotyczny-model-7", 0.85)
+    cl.zapamietaj_odrzucenie_temperatury("egzotyczny-model-7")
+    assert not cl.honoruje_temperature("egzotyczny-model-7", 0.85)
 
 
 def test_autocache_nie_dubluje_baseline():
     # Plik ma trzymac tylko to, czego baseline NIE wie.
     cl._NAUCZONE_BEZ_TEMPERATURY.discard("claude-sonnet-5")
-    cl._dopisz_do_cache_samplingu("claude-sonnet-5")
+    cl.zapamietaj_odrzucenie_temperatury("claude-sonnet-5")
     assert "claude-sonnet-5" not in cl._NAUCZONE_BEZ_TEMPERATURY
 
 
@@ -300,6 +305,89 @@ def test_powtarzajacy_sie_ten_sam_400_nie_petli():
     except _Blad400:
         return
     raise AssertionError("the error must propagate instead of looping the degradation ladder")
+
+
+# ---------------------------------------------------------------------------
+# 3b. Kontrakt samplingu dzielony z RODZINA AUTOTLUMACZY (v18.24)
+# ---------------------------------------------------------------------------
+# `tlumacz_rdzen` (czterej bracia) i `buduj_wielojezyczne_ui` maja WLASNYCH
+# klientow Anthropic, poza `cl.wywolaj_llm`, ale od v18.24 pytaja `core_llm`,
+# czy w ogole wysylac `temperature`. Bez tego kazdy chunk kazdego jezyka placil
+# jalowym round-tripem 400 - wszystkie szesc narzedzi jedzie domyslnie na
+# `claude-sonnet-5`, a tlumaczenie wysyla NIEDOMYSLNE `temperature=0.0`.
+ODP_TLUMACZENIA = (json.dumps({"translations": [{"id": 1, "target": "Talo"}]}), "end_turn")
+POZYCJE_FI = [(1, "pole", "Dom")]
+
+
+class _Blad429(Exception):
+    """Limit zapytan, ktorego tresc PRZYPADKIEM wspomina o temperaturze."""
+
+    status_code = 429
+
+
+def _wywolaj_rdzen(model, odpowiedzi):
+    """Jeden chunk przez `tlumacz_rdzen`; zwraca (mapa, wyslane_kwargs)."""
+    import tlumacz_rdzen as tr
+
+    wyslane = []
+    sdk = _MockSDK(odpowiedzi, wyslane)
+    mapa = tr.wywolaj_llm(
+        sdk, model=model, system="Translate.", nazwa_celu="Suomi", kod="fi",
+        pozycje=POZYCJE_FI, max_tokens=1000,
+    )
+    return mapa, wyslane
+
+
+def test_czy_odrzucono_temperature_rozdziela_przypadki():
+    assert cl.czy_odrzucono_temperature(_Blad400(BLAD_TEMPERATURY))
+    # Blad schematu to TEN SAM kod 400 - pomylenie ich kosztowaloby structured outputs.
+    assert not cl.czy_odrzucono_temperature(_Blad400(BLAD_SCHEMATU))
+    # Sam komunikat nie wystarcza: 429 nie jest bledem struktury payloadu.
+    assert not cl.czy_odrzucono_temperature(_Blad429(BLAD_TEMPERATURY))
+
+
+def test_rodzina_nie_placi_jalowym_round_tripem_na_domyslnym_modelu():
+    mapa, wyslane = _wywolaj_rdzen("claude-sonnet-5", [ODP_TLUMACZENIA])
+    assert mapa == {1: "Talo"}
+    assert len(wyslane) == 1, f"idle 400 round-trip was paid anyway: {len(wyslane)} calls"
+    assert "temperature" not in wyslane[0]
+
+
+def test_rodzina_nadal_wysyla_temperature_do_modelu_ktory_ja_honoruje():
+    _mapa, wyslane = _wywolaj_rdzen("claude-sonnet-4-6", [ODP_TLUMACZENIA])
+    import tlumacz_rdzen as tr
+
+    assert wyslane[0]["temperature"] == tr.TEMPERATURA_TLUMACZENIA
+
+
+def test_rodzina_uczy_sie_nieznanego_modelu_raz_a_nie_co_chunk():
+    cl._NAUCZONE_BEZ_TEMPERATURY.discard("egzotyczny-endpoint-9")
+    _mapa, pierwsze = _wywolaj_rdzen(
+        "egzotyczny-endpoint-9", [_Blad400(BLAD_TEMPERATURY), ODP_TLUMACZENIA])
+    assert len(pierwsze) == 2, "the reactive safety net did not retry"
+    assert "temperature" in pierwsze[0] and "temperature" not in pierwsze[1]
+    # Drugi chunk tego samego przebiegu juz NIE probuje - nauka jest trwala.
+    _mapa2, drugie = _wywolaj_rdzen("egzotyczny-endpoint-9", [ODP_TLUMACZENIA])
+    assert len(drugie) == 1, "the model rejection was not remembered"
+    assert "temperature" not in drugie[0]
+
+
+def test_blad_ktory_nie_dotyczy_temperatury_leci_wyzej_z_rodziny():
+    try:
+        _wywolaj_rdzen("claude-sonnet-4-6", [_Blad400(BLAD_SCHEMATU), ODP_TLUMACZENIA])
+    except _Blad400:
+        return
+    raise AssertionError("a schema error must not be swallowed by the temperature retry")
+
+
+def test_builder_ui_dostal_ten_sam_kontrakt_co_rdzen():
+    import buduj_wielojezyczne_ui as bu
+
+    wyslane = []
+    sdk = _MockSDK([ODP_TLUMACZENIA], wyslane)
+    mapa = bu.wywolaj_llm(sdk, "claude-sonnet-5", "Suomi", "fi", [(1, "Dom")])
+    assert mapa == {1: "Talo"}
+    assert len(wyslane) == 1 and "temperature" not in wyslane[0]
 
 
 # ---------------------------------------------------------------------------

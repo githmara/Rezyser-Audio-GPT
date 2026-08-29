@@ -74,6 +74,7 @@ from typing import Any
 
 from ruamel.yaml import YAML
 
+import core_llm as cl
 import przeglad_tlumaczen
 import tlumacz_bramki
 
@@ -109,6 +110,12 @@ KOD_ZRODLOWY = "pl"
 # zejdź jeszcze niżej z BATCH_SIZE), a nie tylko bieżący chunk/język.
 BATCH_SIZE = 80
 MAX_TOKENS_OUT = 16_000
+
+# Tłumaczenie to odwzorowanie, nie wyprowadzanie — sampling zerujemy (bliźniacza
+# stała `tlumacz_rdzen.TEMPERATURA_TLUMACZENIA`; scalenie należy do konsolidacji
+# `ui`/`docs` na rdzeń). Wartość jest NIEDOMYŚLNA, więc część modeli odrzuca ją
+# kodem 400 — kogo pominąć bez próby, rozstrzyga `core_llm.honoruje_temperature`.
+TEMPERATURA_TLUMACZENIA = 0.0
 
 # Schemat structured-outputs (Anthropic `output_config.format`). Gwarantuje kształt
 # odpowiedzi na poziomie API (mocniej niż OpenAI `json_object`). Ograniczenia JSON
@@ -548,7 +555,6 @@ def wywolaj_llm(
     kwargs: dict[str, Any] = dict(
         model=model,
         max_tokens=MAX_TOKENS_OUT,
-        temperature=0.0,
         thinking={"type": "disabled"},
         system=_PROMPT_SYSTEMOWY(nazwa_celu, kod, persona_hint=persona_hint),
         messages=[{
@@ -563,19 +569,24 @@ def wywolaj_llm(
             "format": {"type": "json_schema", "schema": SCHEMA_TLUMACZENIA},
         },
     )
+    # Od Claude Sonnet 5 (i Opus 4.7+/Fable 5) niedomyślna `temperature` zwraca 400
+    # zamiast być zignorowana — złapane żywo 2026-07-01 przy migracji domyślnego
+    # modelu. TEN skrypt ma WŁASNEGO klienta, poza `core_llm.wywolaj_llm`, ale od
+    # v18.24 dzieli z runtimem wiedzę o tym, KTO temperatury nie honoruje
+    # (`core_llm`: baseline + trwały autocache). Do v18.23 degradacja była czysto
+    # reaktywna, więc przy `claude-sonnet-5` — czyli domyślnie — każdy chunk każdego
+    # języka płacił jałowym round-tripem 400. Dla deterministycznego tłumaczenia i
+    # tak liczy się głównie structured output; `temperature=0` była dokładką.
+    if cl.honoruje_temperature(model, TEMPERATURA_TLUMACZENIA):
+        kwargs["temperature"] = TEMPERATURA_TLUMACZENIA
     try:
         resp = klient.messages.create(**kwargs)
     except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO odrzucenie `temperature`
-        # Od Claude Sonnet 5 (i Opus 4.7+/Fable 5) niedomyślna `temperature` zwraca
-        # 400 zamiast być zignorowana (patrz core_llm._wywolaj_anthropic — TEN
-        # skrypt ma WŁASNEGO klienta, poza core_llm, więc potrzebuje własnej
-        # degradacji). Złapane żywo 2026-07-01 przy migracji domyślnego modelu na
-        # claude-sonnet-5. Retry BEZ temperature; model wraca do samplingu domyślnego
-        # (dla deterministycznego tłumaczenia i tak liczy się głównie structured
-        # output + temperature=0 był tylko dodatkową gwarancją).
-        status = getattr(exc, "status_code", None)
-        if status != 400 or "temperature" not in str(exc):
+        # Siatka dla modelu spoza baseline'u (`--model`): zdejmij, zapamiętaj,
+        # ponów. Zapamiętanie sprawia, że płacimy za tę naukę RAZ, nie co chunk.
+        if "temperature" not in kwargs or not cl.czy_odrzucono_temperature(exc):
             raise
+        cl.zapamietaj_odrzucenie_temperatury(model)
         kwargs.pop("temperature")
         resp = klient.messages.create(**kwargs)
 

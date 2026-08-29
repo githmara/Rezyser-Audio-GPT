@@ -304,6 +304,16 @@ _POWODY_ODRZUCENIA = ("safety", "brak_informacji", "niejednoznacznosc", "inne")
 # ---------------------------------------------------------------------------
 # Sampling: modele, które odrzucają niedomyślną `temperature` (v18.23)
 # ---------------------------------------------------------------------------
+# PUBLICZNE API TEJ SEKCJI (v18.24): `honoruje_temperature`,
+# `czy_odrzucono_temperature`, `zapamietaj_odrzucenie_temperatury` — i tylko ta
+# trójka; `_co_odrzucono` ma jednego konsumenta (drabinę niżej) i zostaje
+# prywatne. Nie uprywatniać reszty z powrotem — poza
+# runtimem korzysta z nich RODZINA AUTOTŁUMACZY, która ma własnych klientów
+# Anthropic (`tlumacz_rdzen`, `buduj_wielojezyczne_ui`) i bez tego płaciła
+# jałowym round-tripem 400 przy KAŻDYM chunku: wszystkie sześć narzędzi jedzie
+# domyślnie na `claude-sonnet-5`, a tłumaczenie wysyła `temperature=0.0`
+# (determinizm), czyli wartość niedomyślną. Baseline + autocache poniżej są
+# więc wspólne dla runtime'u i dev-toolingu — jeden plik nauki, jedna prawda.
 # Do v18.22 degradacja `temperature` była REAKTYWNA: wysyłamy z przepisu →
 # 400 → ponawiamy bez. Na dziś domyślny model runtime'u (`claude-sonnet-5`)
 # NIE honoruje `temperature` w ogóle, więc ten scenariusz zachodził przy KAŻDYM
@@ -377,7 +387,7 @@ def _wczytaj_cache_samplingu() -> set[str]:
         return set()
 
 
-def _dopisz_do_cache_samplingu(mdl: str) -> None:
+def zapamietaj_odrzucenie_temperatury(mdl: str) -> None:
     """Dopisuje model do trwałego cache'u — PRZYROSTOWO (read-modify-write).
 
     Zapis atomowy (tmp + ``os.replace``), wzorem
@@ -415,7 +425,7 @@ def _dopisz_do_cache_samplingu(mdl: str) -> None:
 _NAUCZONE_BEZ_TEMPERATURY: set[str] = _wczytaj_cache_samplingu()
 
 
-def _honoruje_temperature(mdl: str, temperatura: float) -> bool:
+def honoruje_temperature(mdl: str, temperatura: float) -> bool:
     """Czy wysyłać ``temperature`` do tego modelu.
 
     ``temperatura`` równa domyślnej jest no-opem i przechodzi wszędzie, więc nie
@@ -426,6 +436,26 @@ def _honoruje_temperature(mdl: str, temperatura: float) -> bool:
     if mdl in _NAUCZONE_BEZ_TEMPERATURY:
         return False
     return not any(mdl.startswith(prefiks) for prefiks in _MODELE_BEZ_TEMPERATURY)
+
+
+def czy_odrzucono_temperature(exc: Exception) -> bool:
+    """Czy ten wyjątek to odrzucenie parametru ``temperature`` przez API.
+
+    Reaktywna połowa kontraktu samplingu — dla modelu SPOZA
+    :data:`_MODELE_BEZ_TEMPERATURY` (np. podanego przez reżysera w `--model`),
+    o którym baseline nic nie wie. Wołający ma po ``True`` zdjąć parametr,
+    ponowić i wywołać :func:`zapamietaj_odrzucenie_temperatury`.
+
+    Złożone z dwóch warunków celowo: sam komunikat nie wystarcza (429 albo błąd
+    sieci też może zawierać słowo „temperature" w cudzym tekście), a sam kod 400
+    tym bardziej nie — tym samym kodem API zgłasza zły schemat, a pomylenie tych
+    dwóch przypadków kosztowałoby structured outputs (patrz :func:`_co_odrzucono`).
+
+    Wystawione jako API, żeby rodzina autotłumaczy — która ma WŁASNYCH klientów
+    Anthropic, poza :func:`wywolaj_llm` — nie musiała ani składać tej decyzji
+    z prymitywów, ani sięgać po prywatne funkcje modułu.
+    """
+    return _czy_zla_struktura(exc) and _co_odrzucono(exc) == "temperature"
 
 
 def _co_odrzucono(exc: Exception) -> str | None:
@@ -1030,7 +1060,7 @@ def _wywolaj_anthropic(
     # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać (baseline +
     # autocache). Dla `claude-sonnet-5` i pokrewnych pomijamy ją od razu, więc
     # nie płacimy jałowym round-tripem przy każdej generacji.
-    if _honoruje_temperature(mdl, temperature):
+    if honoruje_temperature(mdl, temperature):
         kwargs["temperature"] = temperature
     else:
         _dev_log(
@@ -1073,7 +1103,7 @@ def _wywolaj_anthropic(
                     "i zapamiętuję model w cache."
                 )
                 kwargs.pop("temperature", None)
-                _dopisz_do_cache_samplingu(mdl)
+                zapamietaj_odrzucenie_temperatury(mdl)
             elif winowajca == "output_config":
                 _dev_log(
                     f"anthropic: model/endpoint '{mdl}' odrzucił 'output_config' "
