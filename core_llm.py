@@ -19,6 +19,7 @@ wciągany do `.exe` (lekki bundla single-provider — patrz CLAUDE.md pkt 7).
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from dataclasses import dataclass
@@ -263,6 +264,485 @@ def _dev_log(komunikat: str) -> None:
 _ROLE_DOZWOLONE = ("system", "assistant", "user")
 
 
+# ---------------------------------------------------------------------------
+# Structured outputs (v18.23) — schematy dla trybów, które WALIDUJĄ JSON
+# ---------------------------------------------------------------------------
+# Do v18.22 tryby JSON (Burza/Skrypt/tura Opowieści) wymuszały kształt WYŁĄCZNIE
+# promptem, a `wymusz_json` gałąź Anthropic ignorowała. Realny skutek (zgłoszenie
+# 2026-08-29, projekt `helsinki_story`): model wstawił PRZECINEK WISZĄCY po
+# ostatnim polu opcji, `json.loads` rzucił „Expecting property name enclosed in
+# double quotes", a self-correction odesłał modelowi ten komunikat — więc trzy
+# razy z rzędu „naprawiał" cudzysłowy, które były bezbłędne. Przy wymuszonym
+# schemacie takie wyjście nie może powstać: kształt egzekwuje API, nie perswazja.
+#
+# Wzorzec przyszedł z WŁASNEGO repo — `buduj_wielojezyczne_ui.py` używa
+# `output_config.format` od dawna. Runtime po prostu nigdy go nie dostał.
+#
+# Słowa kluczowe JSON Schema, których structured outputs NIE przyjmuje. UWAGA:
+# SDK czyści schematy, które GENERUJE (z Pydantic) — surowy dict podany w
+# `output_config` leci do API bez zmian, więc czyścimy sami. Zmierzone żywo
+# (2026-08-29): `SCHEMA_BURZA` as-is → 400 „property 'maxItems' is not supported".
+_KLUCZE_NIEWSPIERANE = frozenset({
+    "minItems", "maxItems", "minLength", "maxLength",
+    "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum",
+    "multipleOf", "pattern", "minProperties", "maxProperties", "uniqueItems",
+})
+
+# `stop_reason`, którym API sygnalizuje odmowę klasyfikatora bezpieczeństwa.
+# Do v18.22 nieobsługiwany NIGDZIE — wołający sprawdzali tylko "max_tokens",
+# więc odmowa (pusta treść) szła jako „błąd struktury" po wyczerpaniu retry.
+STOP_ODRZUCENIE = "refusal"
+
+# Wartości dyskryminatora `typ` w schemacie z gałęzią odrzucenia.
+TYP_TURA = "tura"
+TYP_ODRZUCENIE = "odrzucenie"
+
+_POWODY_ODRZUCENIA = ("safety", "brak_informacji", "niejednoznacznosc", "inne")
+
+
+# ---------------------------------------------------------------------------
+# Sampling: modele, które odrzucają niedomyślną `temperature` (v18.23)
+# ---------------------------------------------------------------------------
+# Do v18.22 degradacja `temperature` była REAKTYWNA: wysyłamy z przepisu →
+# 400 → ponawiamy bez. Na dziś domyślny model runtime'u (`claude-sonnet-5`)
+# NIE honoruje `temperature` w ogóle, więc ten scenariusz zachodził przy KAŻDYM
+# wywołaniu — czyli każda generacja płaciła dodatkowym round-tripem HTTP
+# (samo 400 to błąd walidacji przed inferencją, więc bez kosztu tokenów, ale
+# z kosztem latencji i limitu zapytań).
+#
+# Zmierzone żywo 2026-08-29 (`claude-sonnet-5`):
+#   temperature=0.85 → 400 „`temperature` is deprecated for this model."
+#   temperature=1.0  → OK   (wartość domyślna przechodzi jako no-op)
+#   bez parametru    → OK
+# Honorują: `claude-sonnet-4-6`, `claude-haiku-4-5`. Odrzucają: `claude-sonnet-5`,
+# `claude-opus-5`.
+#
+# Lista jest ZAHARDKODOWANA świadomie, zgodnie z regułą kciuka projektu
+# („hardkod, gdy lista = zewnętrzny rejestr" — jak `build_release.INNO_LANG_MAP`):
+# to lustro cudzej macierzy modeli, nie dane naszego projektu. Plik w `datas`
+# bundla nie dałby tu nic — zawartość bundla jest niezmienna bez rebuildu EXE,
+# więc rozszerzenie baseline'u i tak wymaga mikropatcha. Modele Anthropic
+# śledzi maintainer; nietypowe endpointy `openai_compat` domyka autocache niżej,
+# więc reżyser z egzotycznym providerem nie musi czekać na patch.
+_MODELE_BEZ_TEMPERATURY: tuple[str, ...] = (
+    "claude-fable-5",
+    "claude-mythos-5",
+    "claude-opus-5",
+    "claude-opus-4-8",
+    "claude-opus-4-7",
+    "claude-sonnet-5",
+)
+
+# Wartość, którą API przyjmuje nawet od modeli z listy wyżej (no-op samplingu).
+_TEMPERATURA_DOMYSLNA = 1.0
+
+_PLIK_CACHE_SAMPLINGU = "modele_bez_temperatury.json"
+
+
+def _sciezka_cache_samplingu() -> str:
+    """``runtime/modele_bez_temperatury.json`` — obok pozostałych metadanych.
+
+    Import lokalny: ``core_llm`` jest wx-free i nie może wciągać ``core_rezyser``
+    (cykl), a ``sciezki`` to czysty helper ścieżek.
+    """
+    import sciezki
+
+    return os.path.join(
+        sciezki.KATALOG_BAZOWY_STR, "runtime", _PLIK_CACHE_SAMPLINGU,
+    )
+
+
+def _wczytaj_cache_samplingu() -> set[str]:
+    """Modele, które JUŻ raz odrzuciły ``temperature`` (nauka poza baseline).
+
+    Trwały (przeżywa restart), bo jałowe 400 na każdym starcie aplikacji byłoby
+    dokładnie tym kosztem, który usuwamy. Unieważniany przy zmianie wersji
+    aplikacji — inaczej utrwalilibyśmy zachowanie modelu, które provider może
+    zmienić (a wtedy `temperature` z przepisu nigdy by nie wróciła do gry).
+
+    Nigdy nie rzuca — cache to optymalizacja, nie źródło prawdy.
+    """
+    try:
+        with open(_sciezka_cache_samplingu(), encoding="utf-8") as fh:
+            dane = json.load(fh)
+        if not isinstance(dane, dict):
+            return set()
+        import i18n
+
+        if str(dane.get("wersja_app", "")) != str(i18n.NUMER_WERSJI):
+            return set()
+        return {str(m) for m in dane.get("modele", [])}
+    except Exception:  # noqa: BLE001 — brak/uszkodzony/niedostępny cache = pusty
+        return set()
+
+
+def _dopisz_do_cache_samplingu(mdl: str) -> None:
+    """Dopisuje model do trwałego cache'u — PRZYROSTOWO (read-modify-write).
+
+    Zapis atomowy (tmp + ``os.replace``), wzorem
+    ``core_rezyser.zapisz_cache_iso``. Błąd I/O połykamy: brak zapisu oznacza
+    tylko jedno jałowe 400 przy następnym starcie, nie awarię generacji.
+
+    Modeli objętych już :data:`_MODELE_BEZ_TEMPERATURY` nie zapisujemy — plik ma
+    trzymać wyłącznie to, czego baseline NIE wie (w praktyce: cudze endpointy
+    ``openai_compat``). Dla modelu z baseline'u i tak nie wysyłamy
+    ``temperature``, więc 400 o nią nie ma skąd przyjść.
+    """
+    if any(mdl.startswith(prefiks) for prefiks in _MODELE_BEZ_TEMPERATURY):
+        return
+    _NAUCZONE_BEZ_TEMPERATURY.add(mdl)
+    try:
+        import i18n
+
+        sciezka = _sciezka_cache_samplingu()
+        os.makedirs(os.path.dirname(sciezka), exist_ok=True)
+        tmp = sciezka + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(
+                {
+                    "wersja_app": str(i18n.NUMER_WERSJI),
+                    "modele": sorted(_NAUCZONE_BEZ_TEMPERATURY),
+                },
+                fh, ensure_ascii=False, indent=2, sort_keys=True,
+            )
+        os.replace(tmp, sciezka)
+    except Exception:  # noqa: BLE001 — cache best-effort
+        pass
+
+
+# Nauczone w tej instalacji (baseline + to, co dopisał autocache).
+_NAUCZONE_BEZ_TEMPERATURY: set[str] = _wczytaj_cache_samplingu()
+
+
+def _honoruje_temperature(mdl: str, temperatura: float) -> bool:
+    """Czy wysyłać ``temperature`` do tego modelu.
+
+    ``temperatura`` równa domyślnej jest no-opem i przechodzi wszędzie, więc nie
+    ma po co jej wycinać (ani uczyć się o niej czegokolwiek).
+    """
+    if temperatura == _TEMPERATURA_DOMYSLNA:
+        return True
+    if mdl in _NAUCZONE_BEZ_TEMPERATURY:
+        return False
+    return not any(mdl.startswith(prefiks) for prefiks in _MODELE_BEZ_TEMPERATURY)
+
+
+def _co_odrzucono(exc: Exception) -> str | None:
+    """Który PARAMETR odrzuciło API — z treści komunikatu 400, nie ze zgadywania.
+
+    Bez tego degradacja jest ślepa i zdejmuje nie to, co trzeba. Konkretny
+    scenariusz, na którym to złapaliśmy (2026-08-29): przepisy mają
+    ``temperatura: 0.85``, a `claude-sonnet-5` jej nie honoruje, więc 400 dotyczy
+    TEMPERATURY — ale drabina „po kolei" zdejmowała najpierw ``output_config``.
+    Efekt: structured outputs nie zadziałałyby ANI RAZU w produkcji, a wyjście
+    wracałoby do wymuszania JSON promptem, czyli do stanu, który wywołał
+    zgłoszenie. Komunikaty API są rozłączne i stabilne:
+      * „`temperature` is deprecated for this model."
+      * „output_config.format.schema: For 'array' type, property 'maxItems' …"
+    Gdy wadliwe jest jedno i drugie, API zgłasza NAJPIERW schemat (zmierzone).
+    """
+    tresc = str(exc).lower()
+    if "temperature" in tresc:
+        return "temperature"
+    if "output_config" in tresc or "json_schema" in tresc:
+        return "output_config"
+    if "thinking" in tresc or "budget_tokens" in tresc:
+        return "thinking"
+    return None
+
+
+def schemat_do_api(schema: Any) -> Any:
+    """Zwraca KOPIĘ schematu okrojoną do podzbioru akceptowanego przez API.
+
+    Dwie transformacje, obie wymuszone przez structured outputs:
+      * zdjęcie :data:`_KLUCZE_NIEWSPIERANE` (rekurencyjnie — także w ``items``,
+        ``$defs``, ``properties`` i każdej gałęzi ``anyOf``/``allOf``);
+      * ``additionalProperties: false`` w KAŻDYM obiekcie — API odrzuca każdą inną
+        wartość, a ``SCHEMA_TURA`` miała tam świadomie ``True``.
+
+    Schemat KANONICZNY (ten w module wołającego) zostaje nietknięty i nadal służy
+    do ``jsonschema.validate`` po naszej stronie — czyli kardynalność (``minItems``)
+    i długości (``minLength``) są dalej pilnowane, tylko lokalnie, nie przez API.
+    """
+    if isinstance(schema, dict):
+        wynik = {
+            k: schemat_do_api(v)
+            for k, v in schema.items()
+            if k not in _KLUCZE_NIEWSPIERANE
+        }
+        if wynik.get("type") == "object":
+            wynik["additionalProperties"] = False
+        return wynik
+    if isinstance(schema, list):
+        return [schemat_do_api(v) for v in schema]
+    return schema
+
+
+def schemat_z_dyskryminatorem(schema: dict, tag_odrzucenia: str) -> dict:
+    """Schemat API: pola tury + jawna gałąź odmowy, rozdzielone polem ``typ``.
+
+    Problem, który to rozwiązuje: klauzula odrzucenia (``przepisy_rezysera``)
+    każe modelowi zwrócić sam tag jako „EXACTLY ONE LINE and NOTHING else" —
+    czego wymuszony schemat fizycznie nie dopuszcza. Zmierzone żywo (2026-08-29,
+    3 języki): bez tej gałęzi model **rozsmarowuje tag po wszystkich wymaganych
+    polach** (``{"opcje":[{"tytul":"[ODRZUCENIE_AI]","opis":"[ODRZUCENIE_AI]"…}]}``).
+    Wykrywanie odmowy to przeżywa (``wykryto_odrzucenie`` szuka tagu substringiem
+    w surowym tekście, PRZED ``json.loads``), ale zachowanie jest przypadkowe —
+    nic nie gwarantuje, że model nie wpisze tagu tylko w jedno pole albo nie
+    zacznie improwizować treści zamiast odmówić. Gałąź zamienia to na kontrakt.
+
+    Kształt: ``anyOf`` na ROOT (dwie gałęzie) + pole ``typ`` jako ``const``
+    w każdej z nich. To połączenie dwóch wariantów, które zmierzyliśmy osobno,
+    i każdy element ma powód:
+      * **``anyOf``** — bo tylko osobna gałąź może zachować ``required`` pól tury.
+        Wariant „jeden obiekt, ``required: [typ]``" wyglądał prościej, ale model
+        POMIJAŁ wtedy pola (tura Opowieści bez ``wybory``), skoro API ich nie
+        wymagało — każda taka odpowiedź kosztowałaby jałowe retry na walidacji
+        kanonicznej. ``anyOf`` jako rodzeństwo ``properties``/``type`` daje 400,
+        więc union MUSI być na root.
+      * **``typ`` (dyskryminator)** — bo błędy ``jsonschema`` przy samym ``anyOf``
+        raportują porażkę OBU gałęzi i log staje się nieczytelny. Mając ``typ``,
+        rozstrzygamy gałąź SAMI (:func:`rozpakuj_dyskryminator`) i walidujemy
+        tylko właściwą, schematem kanonicznym.
+      * **nietrywialny sentinel** (``typ`` + ``odrzucenie`` wymagane) — zmniejsza
+        bias modelu w stronę „tańszej gałęzi" przy długich promptach twórczych.
+      * ``powod`` wpada wprost do diagnostyki (model wypełnia go bez proszenia).
+
+    ``description`` pól NIE jest tłumaczone — to jedyny opis, jaki model widzi
+    poza promptem, więc trzyma też kardynalność zdjętą ze schematu API.
+    Kolejność kluczy jest deterministyczna i nic nie jest interpolowane
+    per-request: kompilacja schematu po stronie API jest cache'owana bajtowo
+    (24 h), a każda zmienna treść zabijałaby ten cache.
+
+    Args:
+        schema:          Schemat KANONICZNY tury (np. ``rezyser_ai.SCHEMA_BURZA``).
+        tag_odrzucenia:  ``przepisy_rezysera.TAG_ODRZUCENIA_AI`` — podawany
+                         parametrem, żeby ``core_llm`` nie importował warstwy
+                         przepisów (uniknięcie cyklu).
+
+    Returns:
+        Schemat gotowy do ``output_config.format`` — już przepuszczony przez
+        :func:`schemat_do_api`.
+    """
+    baza = schemat_do_api(schema)
+
+    # Gałąź TURY — pola i `required` DOKŁADNIE z kanonicznego schematu, plus
+    # `typ` jako const. Zmierzone 2026-08-29: wariant „jeden obiekt, required
+    # tylko dla `typ`" powodował, że model POMIJAŁ pola tury (tura Opowieści
+    # wróciła bez `wybory`), bo API ich nie wymagało — a walidacja kanoniczna
+    # wymaga, więc każda taka odpowiedź kosztowałaby jedno jałowe retry. Dwie
+    # gałęzie `anyOf` na ROOT rozwiązują to strukturalnie: wymagalność wraca
+    # do API, a odmowa nadal ma legalną drogę wyjścia.
+    galaz_tury = dict(baza)
+    galaz_tury["properties"] = {
+        "typ": {
+            "const": TYP_TURA,
+            "description": "Normalna odpowiedź — wypełnij WSZYSTKIE pola tury.",
+        },
+        **baza.get("properties", {}),
+    }
+    galaz_tury["required"] = ["typ", *baza.get("required", [])]
+    galaz_tury["additionalProperties"] = False
+
+    # Gałąź ODMOWY — sentinel jest NIEtrywialny (`typ` + `odrzucenie` wymagane,
+    # `powod` do diagnostyki), żeby model nie uciekał w nią jako „tańszą".
+    galaz_odmowy = {
+        "type": "object",
+        "required": ["typ", "odrzucenie"],
+        "additionalProperties": False,
+        "properties": {
+            "typ": {
+                "const": TYP_ODRZUCENIE,
+                "description": (
+                    "Odmowa wykonania polecenia — patrz SYSTEM RULE na końcu "
+                    "promptu systemowego."
+                ),
+            },
+            "odrzucenie": {
+                "type": "string",
+                "description": f"Wartość dosłownie: {tag_odrzucenia}",
+            },
+            "powod": {
+                "enum": list(_POWODY_ODRZUCENIA),
+                "description": "Kategoria odmowy (diagnostyka aplikacji).",
+            },
+        },
+    }
+    return {"anyOf": [galaz_tury, galaz_odmowy]}
+
+
+def rozpakuj_dyskryminator(dane: Any) -> tuple[bool, Any, str]:
+    """Normalizuje odpowiedź z dyskryminatorem → ``(czy_odmowa, dane, powod)``.
+
+    Granica parsowania: dalej w kodzie union NIE istnieje — mapowanie do dataclass
+    i ``jsonschema.validate`` widzą dokładnie ten kształt, co przed v18.23
+    (``typ``/``odrzucenie``/``powod`` są zdjęte). Dzięki temu włączenie schematu
+    nie dotknęło ani walidacji, ani GUI.
+
+    Odpowiedź BEZ pola ``typ`` (gałąź ``openai_compat``, która structured outputs
+    nie ma, albo model, który dyskryminator zignorował) przechodzi nietknięta —
+    czyli stare zachowanie zostaje wariantem domyślnym.
+    """
+    if not isinstance(dane, dict) or "typ" not in dane:
+        return False, dane, ""
+    typ = dane.get("typ")
+    powod = str(dane.get("powod") or "")
+    okrojone = {k: v for k, v in dane.items() if k not in ("typ", "odrzucenie", "powod")}
+    return typ == TYP_ODRZUCENIE, okrojone, powod
+
+
+# ---------------------------------------------------------------------------
+# Wskazówki self-correction (v18.23) — NIE cytujemy komunikatu parsera
+# ---------------------------------------------------------------------------
+# Zgłoszenie z 2026-08-29 pokazało, dlaczego to ma znaczenie. Model wstawił
+# przecinek wiszący; `json.loads` zwrócił „Expecting property name enclosed in
+# double quotes"; kod odesłał tę treść modelowi jako wskazówkę — a ona wskazuje
+# na CUDZYSŁOWY, które były bezbłędne. Model trzy razy „naprawiał" nie tę winę
+# i trzy razy powtórzył przecinek. Komunikat parsera opisuje POZYCJĘ w tekście,
+# którego model już nie widzi; wskazówka musi opisywać WYMAGANĄ STRUKTURĘ
+# i prosić o czystą re-emisję całości.
+#
+# Wspólne dla trzech trybów JSON (Burza, Skrypt, tura Opowieści) — do v18.22
+# każdy z nich miał własną kopię tego samego, wadliwego szablonu.
+RETRY_NIEPARSOWALNY = (
+    "YOUR PREVIOUS OUTPUT WAS NOT VALID JSON and could not be parsed at all. "
+    "Do not try to guess which character was wrong — simply emit the whole "
+    "response again, from scratch, as ONE valid JSON object. Most common causes: "
+    "a trailing comma after the last field or element, markdown code fences "
+    "(```json), comments (// or /* */), single quotes instead of double quotes, "
+    "or an unescaped double quote inside a string value. Return ONLY the JSON "
+    "object — no prose, no fences, no commentary."
+)
+
+
+def komunikat_retry_schema(exc: Exception) -> str:
+    """Wskazówka dla modelu przy porażce SCHEMY (nie składni).
+
+    Tu ścieżka pola jest bezpieczna i użyteczna — mówi o polach, nie o pozycji
+    w bajtach, więc nie wprowadza modelu w błąd (inaczej niż komunikat parsera).
+    """
+    sciezka = "/".join(str(krok) for krok in getattr(exc, "absolute_path", [])) or "(root)"
+    return (
+        "YOUR PREVIOUS OUTPUT WAS VALID JSON BUT DID NOT MATCH THE REQUIRED "
+        f"SCHEMA. Offending location: {sciezka}. Constraint violated: "
+        f"{getattr(exc, 'validator', '?')}. Regenerate the ENTIRE response so that "
+        "every required field is present and has the correct type. Return ONLY "
+        "the JSON object."
+    )
+
+
+def formatuj_slad(slad: list[dict]) -> str:
+    """Renderuje ślad wywołań do logu — WYŁĄCZNIE dane nietreściowe.
+
+    Trafia do ``error_log.txt``, czyli do pliku, który komunikat ``err_struktura``
+    każe użytkownikowi **dołączyć do publicznego zgłoszenia** — a payload zawiera
+    jego nieopublikowaną prozę. Dlatego tu nie ma ani znaku treści: tylko numer
+    próby, ``request_id``, ``stop_reason``, obecność schematu i liczniki tokenów.
+
+    ``request_id`` jest identyfikatorem KORELACYJNYM (Messages API nie ma odczytu
+    wiadomości po ID) — użyteczny tylko wtedy, gdy maintainer zgłasza problem do
+    Anthropic. Wypisujemy KAŻDĄ próbę, bo dopiero zestaw ID odróżnia „trzy razy
+    ta sama pętla" od „trzy różne halucynacje" — zwykły użytkownik załączy log po
+    pierwszym napotkanym błędzie, więc musi on wystarczyć do tej diagnozy.
+    """
+    if not slad:
+        return "Call trace: (empty)"
+    linie = ["Call trace (no content — safe for a public issue):"]
+    for wpis in slad:
+        linie.append(
+            f"  attempt {wpis.get('proba')}: "
+            f"request_id={wpis.get('request_id')} "
+            f"stop_reason={wpis.get('stop_reason')} "
+            f"schema={'yes' if wpis.get('schemat') else 'no'} "
+            f"tokens_in={wpis.get('wejscie_tok')} "
+            f"tokens_out={wpis.get('wyjscie_tok')}"
+        )
+    return "\n".join(linie)
+
+
+def opisz_porazke_json(exc: Exception) -> str:
+    """Opisuje porażkę parsowania/walidacji — bez cytowania treści użytkownika.
+
+    Rozróżnienie, które kosztowało zgłoszenie z 2026-08-29: komunikat parsera
+    jest bezpieczny i przydatny w LOGU (mówi o pozycji w bajtach, nie o fabule),
+    ale NIE WOLNO go wysyłać modelowi jako wskazówki — patrz
+    ``rezyser_ai._RETRY_NIEPARSOWALNY``.
+
+    Przy ``ValidationError`` świadomie pomijamy ``exc.message``: potrafi cytować
+    wartość, która zawiodła (``'…' is too short``), czyli prozę. Zostaje ścieżka
+    + naruszone słowo kluczowe + metryka KSZTAŁTU wartości (typ i długość) —
+    ta ostatnia diagnozuje „pusta lista opcji" czy „ucięty string" bez ujawniania,
+    co w nim było.
+    """
+    if isinstance(exc, json.JSONDecodeError):
+        return (
+            f"Parse failure: {exc.msg} at line {exc.lineno} column {exc.colno} "
+            f"(char {exc.pos})."
+        )
+    sciezka = "/".join(str(krok) for krok in getattr(exc, "absolute_path", [])) or "(root)"
+    instancja = getattr(exc, "instance", None)
+    ksztalt = type(instancja).__name__
+    try:
+        ksztalt += f", len={len(instancja)}"
+    except TypeError:
+        pass
+    return (
+        f"Schema failure at {sciezka}: constraint '{getattr(exc, 'validator', '?')}' "
+        f"violated; offending value shape: {ksztalt}."
+    )
+
+
+def napraw_luzny_json(tekst: str) -> str:
+    """Usuwa dwie kosmetyczne skazy, które psują ``json.loads``: fence i przecinek wiszący.
+
+    Pas i szelki dla gałęzi ``openai_compat``, która structured outputs NIE ma
+    (i dla modelu, który zignorował schemat). Na Anthropic ze schematem ta funkcja
+    nie ma czego naprawiać — API nie dopuszcza takiego wyjścia.
+
+    Naprawiamy WYŁĄCZNIE składnię, nigdy treść:
+      * ` ```json … ``` ` — owinięcie w blok kodu (``Expecting value: line 1``);
+      * przecinek przed ``}``/``]`` — dokładnie ta skaza, która wywróciła Burzę
+        w zgłoszeniu z 2026-08-29.
+
+    Przecinki zdejmuje SKANER, nie regex: naiwne ``,(\\s*[}\\]])`` → ``\\1``
+    zjadłoby też przecinek WEWNĄTRZ wartości (``"opis": "wyszli, a potem ]"``),
+    czyli cicho zmieniłoby prozę użytkownika. Skaner śledzi, czy jest w stringu,
+    i honoruje ``\\"`` — poza stringami zachowanie jest identyczne jak regex.
+    """
+    czysty = (tekst or "").strip()
+    if czysty.startswith("```"):
+        # Zdejmujemy pierwszą linię (``` albo ```json) i domykający fence.
+        bez_pierwszej = czysty.split("\n", 1)[1] if "\n" in czysty else ""
+        koniec = bez_pierwszej.rfind("```")
+        czysty = (bez_pierwszej[:koniec] if koniec != -1 else bez_pierwszej).strip()
+
+    wynik: list[str] = []
+    w_stringu = False
+    ucieczka = False
+    for znak in czysty:
+        if ucieczka:
+            wynik.append(znak)
+            ucieczka = False
+            continue
+        if znak == "\\" and w_stringu:
+            wynik.append(znak)
+            ucieczka = True
+            continue
+        if znak == '"':
+            w_stringu = not w_stringu
+            wynik.append(znak)
+            continue
+        if not w_stringu and znak in "}]":
+            # Cofamy się przez białe znaki; jeśli natrafimy na przecinek — znika.
+            i = len(wynik) - 1
+            while i >= 0 and wynik[i] in " \t\r\n":
+                i -= 1
+            if i >= 0 and wynik[i] == ",":
+                del wynik[i]
+        wynik.append(znak)
+    return "".join(wynik)
+
+
 def _openai_chat(
     klient: "KlientLLM",
     mdl: str,
@@ -404,6 +884,8 @@ def _wywolaj_anthropic(
     temperature: float,
     timeout: float,
     thinking_budget: int = 0,
+    schema_json: dict | None = None,
+    slad: list[dict] | None = None,
 ) -> tuple[str, str | None]:
     """Gałąź Anthropic z degradacją ``temperature`` dla modeli, które ją odrzucają.
 
@@ -427,42 +909,124 @@ def _wywolaj_anthropic(
     Odrzucenie konfiguracji thinking przez model/endpoint (400/422) → retry
     bez thinking i bez ``temperature`` (najbezpieczniejszy wariant — default
     sampling akceptują wszystkie modele Claude).
+
+    ``schema_json`` (v18.23) → ``output_config.format`` (structured outputs):
+    kształt odpowiedzi egzekwuje API. Schemat musi być już przepuszczony przez
+    :func:`schemat_do_api`. Zdejmujemy go WYŁĄCZNIE wtedy, gdy 400 dotyczy jego
+    samego (patrz :func:`_co_odrzucono`) — po zdjęciu wracamy do zachowania
+    ≤v18.22, czyli wymuszania JSON promptem + retry u wołającego.
+
+    **Degradacja jest CELOWANA, nie kolejnościowa.** Wcześniejszy wariant „zdejmij
+    następny element listy" wyglądał bezpiecznie, ale przy modelu nieprzyjmującym
+    ``temperature`` (dziś: domyślny `claude-sonnet-5`) zdejmowałby najpierw
+    ``output_config`` — czyli structured outputs nie zadziałałyby ANI RAZU
+    w produkcji, a wyjście wracałoby do stanu, który wywołał zgłoszenie
+    z 2026-08-29. Dodatkowo ``temperature`` nie jest już wysyłana do modeli
+    z :data:`_MODELE_BEZ_TEMPERATURY` ani z trwałego autocache'u, więc typowe
+    wywołanie nie płaci nawet jednym jałowym round-tripem.
+
+    ``slad`` (v18.23) → lista, do której dopisujemy metrykę KAŻDEGO wywołania
+    (numer próby, ``request_id``, ``stop_reason``, liczniki tokenów). Nie zmienia
+    zwracanej krotki, więc żaden z 19 istniejących wołających nie wymaga zmian;
+    korzysta z niej diagnostyka ``bledy_ai`` — po ID widać, czy trzy próby to
+    ta sama pętla, czy trzy różne halucynacje.
     """
     kwargs: dict[str, Any] = dict(
         model=mdl,
         system=system,
         messages=list(messages),
         max_tokens=max_tokens,
-        temperature=temperature,
         thinking={"type": "disabled"},
     )
+    # `temperature` wysyłamy TYLKO tam, gdzie ma szansę zadziałać (baseline +
+    # autocache). Dla `claude-sonnet-5` i pokrewnych pomijamy ją od razu, więc
+    # nie płacimy jałowym round-tripem przy każdej generacji.
+    if _honoruje_temperature(mdl, temperature):
+        kwargs["temperature"] = temperature
+    else:
+        _dev_log(
+            f"anthropic: model '{mdl}' nie honoruje niedomyślnej 'temperature' "
+            f"({temperature}) — pomijam parametr bez próby (baseline/cache)."
+        )
     if thinking_budget > 0:
-        kwargs.pop("temperature")
+        kwargs.pop("temperature", None)
         kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
         kwargs["max_tokens"] = max_tokens + thinking_budget
-    try:
-        resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
-    except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
-        if not _czy_zla_struktura(exc):
-            raise
-        if kwargs["thinking"]["type"] == "enabled":
-            _dev_log(
-                f"anthropic: model '{mdl}' odrzucił 'thinking' ({type(exc).__name__}) "
-                "— ponawiam bez trybu quality (i bez 'temperature')."
-            )
-            kwargs["thinking"] = {"type": "disabled"}
-            kwargs["max_tokens"] = max_tokens
-        else:
-            _dev_log(
-                f"anthropic: model '{mdl}' odrzucił 'temperature' ({type(exc).__name__}) "
-                "— ponawiam bez tego parametru."
-            )
-            kwargs.pop("temperature")
-        resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
+    if schema_json is not None:
+        kwargs["output_config"] = {
+            "format": {"type": "json_schema", "schema": schema_json},
+        }
+
+    # Degradacja CELOWANA: zdejmujemy to, co API wskazało w komunikacie 400
+    # (patrz `_co_odrzucono`), a nie kolejny element listy. Ślepa kolejność
+    # kosztowałaby structured outputs przy KAŻDYM modelu nieprzyjmującym
+    # `temperature`. Nierozpoznany komunikat → jedna próba awaryjna, w której
+    # zdejmujemy wszystko naraz (najbezpieczniejszy payload: default sampling,
+    # bez thinking, bez schematu = zachowanie ≤v18.22).
+    resp = None
+    zdjete: set[str] = set()
+    for _krok in range(4):
+        try:
+            resp = klient.sdk.with_options(timeout=timeout).messages.create(**kwargs)
+            break
+        except Exception as exc:  # noqa: BLE001 — degradujemy TYLKO błąd struktury
+            if not _czy_zla_struktura(exc):
+                raise
+            winowajca = _co_odrzucono(exc)
+            if winowajca in zdjete or (
+                winowajca is None and "awaryjnie" in zdjete
+            ):
+                raise   # już to zdjęliśmy, a błąd wraca — nie ma czego degradować
+            if winowajca == "temperature":
+                _dev_log(
+                    f"anthropic: model '{mdl}' odrzucił 'temperature' "
+                    f"({type(exc).__name__}) — ponawiam bez tego parametru "
+                    "i zapamiętuję model w cache."
+                )
+                kwargs.pop("temperature", None)
+                _dopisz_do_cache_samplingu(mdl)
+            elif winowajca == "output_config":
+                _dev_log(
+                    f"anthropic: model/endpoint '{mdl}' odrzucił 'output_config' "
+                    f"({type(exc).__name__}) — ponawiam bez structured outputs "
+                    "(JSON wymuszany samym promptem, jak ≤v18.22)."
+                )
+                kwargs.pop("output_config", None)
+            elif winowajca == "thinking":
+                _dev_log(
+                    f"anthropic: model '{mdl}' odrzucił 'thinking' "
+                    f"({type(exc).__name__}) — ponawiam bez trybu quality."
+                )
+                kwargs["thinking"] = {"type": "disabled"}
+                kwargs["max_tokens"] = max_tokens
+            else:
+                _dev_log(
+                    f"anthropic: model '{mdl}' odrzucił payload komunikatem, "
+                    f"którego nie rozpoznaję ({type(exc).__name__}: "
+                    f"{str(exc)[:120]}) — ponawiam z najprostszym payloadem."
+                )
+                kwargs.pop("temperature", None)
+                kwargs.pop("output_config", None)
+                kwargs["thinking"] = {"type": "disabled"}
+                kwargs["max_tokens"] = max_tokens
+                winowajca = "awaryjnie"
+            zdjete.add(winowajca)
+
     tekst = "".join(
         b.text for b in resp.content if getattr(b, "type", None) == "text"
     )
-    return tekst, getattr(resp, "stop_reason", None)
+    stop = getattr(resp, "stop_reason", None)
+    if slad is not None:
+        uzycie = getattr(resp, "usage", None)
+        slad.append({
+            "proba":      len(slad) + 1,
+            "request_id": getattr(resp, "_request_id", None),
+            "stop_reason": stop,
+            "schemat":    "output_config" in kwargs,
+            "wejscie_tok":  getattr(uzycie, "input_tokens", None),
+            "wyjscie_tok":  getattr(uzycie, "output_tokens", None),
+        })
+    return tekst, stop
 
 
 def wywolaj_llm(
@@ -477,6 +1041,8 @@ def wywolaj_llm(
     segmenty: list[dict] | None = None,
     wymusz_json: bool = False,
     thinking_budget: int = 0,
+    schema_json: dict | None = None,
+    slad: list[dict] | None = None,
 ) -> tuple[str, str | None]:
     """Wywołuje LLM i zwraca ``(tekst, stop_reason)`` — wspólnie dla obu providerów.
 
@@ -505,9 +1071,20 @@ def wywolaj_llm(
     ``wymusz_json`` (opcjonalne) — JAWNY sygnał, że wołający WALIDUJE JSON (Burza/
     Skrypt/tura Opowieści). W ``openai_compat`` przekłada się na
     ``response_format={"type": "json_object"}`` (z degradacją gdy endpoint go nie
-    obsłuży). Anthropic IGNORUJE — wymusza JSON promptem, nie parametrem. NIE używamy
-    heurystyki „json w prompcie": /visualize ma prompt „czysty tekst (nie JSON)",
-    więc substring dałby false-positive i zepsuł prozę.
+    obsłuży). NIE używamy heurystyki „json w prompcie": /visualize ma prompt
+    „czysty tekst (nie JSON)", więc substring dałby false-positive i zepsuł prozę.
+
+    ``schema_json`` (v18.23, TYLKO Anthropic) — schemat structured outputs
+    (``output_config.format``), już okrojony przez :func:`schemat_do_api`. To on
+    zastąpił dawne „Anthropic IGNORUJE ``wymusz_json`` — wymusza JSON promptem":
+    kształt egzekwuje teraz API. ``openai_compat`` go IGNORUJE i zostaje przy
+    ``response_format`` + tolerancyjnym parsowaniu (:func:`napraw_luzny_json`)
+    u wołającego — ten sam wzorzec cichej degradacji, co ``segmenty``.
+
+    ``slad`` (v18.23, TYLKO Anthropic) — lista, do której dopisujemy metrykę
+    każdego wywołania (próba, ``request_id``, ``stop_reason``, tokeny). Wyłącznie
+    dane NIE-treściowe: log trafia do publicznego zgłoszenia, a payload zawiera
+    nieopublikowaną prozę użytkownika.
 
     W trybie ``openai_compat`` nazwę modelu nadpisuje ``klient.model_override``
     (``LLM_MODEL``) — argument ``model`` (z przepisu YAML) jest wtedy ignorowany.
@@ -533,10 +1110,13 @@ def wywolaj_llm(
                 max_tokens, temperature, timeout,
             )
 
-        # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo nieużywane
+        # Anthropic (domyślny filar jakości) — `segmenty`/`wymusz_json` celowo
+        # nieużywane; kształt JSON wymusza `schema_json` (structured outputs).
         return _wywolaj_anthropic(
             klient, mdl, system, messages, max_tokens, temperature, timeout,
             thinking_budget=thinking_budget,
+            schema_json=schema_json,
+            slad=slad,
         )
 
     except Exception as exc:  # noqa: BLE001 — 429/timeout/kontekst opakowujemy; reszta leci dalej

@@ -191,6 +191,24 @@ SCHEMA_TURA: dict[str, Any] = {
     },
 }
 
+# Schemat wysyłany do API (v18.23) — structured outputs zamiast wymuszania JSON
+# samym promptem. Budowany RAZ przy imporcie (kompilacja schematu po stronie API
+# jest cache'owana bajtowo, więc treść nie może się różnić między wywołaniami).
+#
+# UWAGA na `stan`: kanoniczny `SCHEMA_TURA` ma tam świadomie
+# ``additionalProperties: True`` („silnik może rozszerzać; Python ignoruje
+# nieznane"), a structured outputs dopuszcza WYŁĄCZNIE ``false`` — 400 bez tego.
+# `schemat_do_api` domyka to w KOPII, więc rozkład odpowiedzialności jest taki:
+# model NIE MOŻE już wymyślać kluczy stanu (przy 9 językach dawałby
+# `stan.zdrowie`/`stan.health`/`stan.hp` zależnie od dryfu promptu — czego nic
+# w dole nie skonsumuje), a nasza walidacja i czytnik `.game.json` pozostają
+# tolerancyjne dla starych zapisów. Gdyby kiedyś potrzebny był otwarty slot,
+# modeluj go jako DANE (lista par `{klucz, wartosc}` + `wersja_stanu`), nie jako
+# otwarty schemat.
+SCHEMA_TURA_API: dict[str, Any] = cl.schemat_z_dyskryminatorem(
+    SCHEMA_TURA, TAG_ODRZUCENIA_AI,
+)
+
 
 # =============================================================================
 # Snapshot stanu i wynik tury (dataclasses — GIL-safe, niezmienne payloady
@@ -309,6 +327,8 @@ def _wywolaj_claude(
     timeout:     float,
     segmenty:    list[dict] | None = None,
     wymusz_json: bool = False,
+    schema_json: dict | None = None,
+    slad:        list[dict] | None = None,
 ) -> tuple[str, str | None]:
     """Wywołuje warstwę LLM (proza/JSON, BEZ reasoningu) → (tekst, stop_reason).
 
@@ -332,6 +352,8 @@ def _wywolaj_claude(
         timeout=timeout,
         segmenty=segmenty,
         wymusz_json=wymusz_json,
+        schema_json=schema_json,
+        slad=slad,
     )
 
 
@@ -691,21 +713,15 @@ def generuj_ture(
 
     ostatni_blad: str | None = None
     proby_struktury = 0
+    slad: list[dict] = []   # v18.23 — metryka nietreściowa, patrz `core_llm.formatuj_slad`
     while True:
-        # Self-correction: błąd poprzedniej walidacji dopinamy jako wiadomość
+        # Self-correction: wskazówkę o poprzedniej porażce dopinamy jako wiadomość
         # `user` (Anthropic nie przyjmuje dowolnych `system` w `messages`; kolejne
         # `user` API skleja w jedną turę). Wzorzec 1:1 z `rezyser_ai.generuj_burze`.
+        # v18.23: wskazówka opisuje STRUKTURĘ i NIE cytuje komunikatu parsera —
+        # patrz `core_llm.RETRY_NIEPARSOWALNY`.
         if ostatni_blad is not None:
-            komunikat = {
-                "role": "user",
-                "content": (
-                    f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
-                    "Regenerate the response STRICTLY conforming to the JSON schema "
-                    "defined in the system prompt. Every required field MUST be present "
-                    "and MUST have the correct type. Return ONLY a single valid JSON "
-                    "object — no prose, no markdown code fences, no commentary."
-                ),
-            }
+            komunikat = {"role": "user", "content": ostatni_blad}
             messages.append(komunikat)
             # Retry-walidacja = instrukcja meta → `system` w payloadzie z rolami (compat).
             segmenty.append({"rola": "system", "content": komunikat["content"]})
@@ -714,6 +730,7 @@ def generuj_ture(
             klient, efektywny_model, prompt_systemowy, messages,
             max_tokens=MAX_TOKENS_OUT, temperature=temperatura, timeout=TIMEOUT_S,
             segmenty=segmenty, wymusz_json=True,
+            schema_json=SCHEMA_TURA_API, slad=slad,
         )
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
@@ -724,11 +741,20 @@ def generuj_ture(
                 f"or raise MAX_TOKENS_OUT."
             )
 
+        # v18.23: odmowa KLASYFIKATORA (nie modelu) — treść bywa wtedy pusta, więc
+        # bez tej gałęzi `json.loads("")` zużywał retry i user widział „błąd
+        # struktury" tam, gdzie prawdą jest „model odmówił".
+        if stop_reason == cl.STOP_ODRZUCENIE:
+            return WynikTury(
+                narracja="", wybory=[], postacie_aktywne=[],
+                stan={}, meta={}, surowy_json=surowa, odrzucone=True,
+            )
+
         # v17.11.1: odmowa LLM ma pierwszeństwo PRZED parsowaniem JSON (wzorzec
-        # 1:1 z `rezyser_ai.generuj_burze/skrypt`). BEZ `output_config` model może
-        # zwrócić goły `[ODRZUCENIE_AI]` — substringowy `wykryto_odrzucenie` łapie
-        # tag tak czy inaczej. Tag = legalny wynik, NIE błąd retry; zwracamy pustą
-        # turę z flagą.
+        # 1:1 z `rezyser_ai.generuj_burze/skrypt`). Substringowy `wykryto_odrzucenie`
+        # łapie tag niezależnie od tego, czy przyszedł jako goła linia (bez
+        # schematu), czy jako wartość pola gałęzi `typ=odrzucenie` (v18.23). Tag =
+        # legalny wynik, NIE błąd retry; zwracamy pustą turę z flagą.
         if wykryto_odrzucenie(surowa):
             return WynikTury(
                 narracja="", wybory=[], postacie_aktywne=[],
@@ -736,19 +762,29 @@ def generuj_ture(
             )
 
         try:
-            dane = json.loads(surowa)
+            # `napraw_luzny_json` = pas i szelki dla `openai_compat` (structured
+            # outputs tam nie ma). Potem granica parsowania: zdejmujemy dyskryminator,
+            # żeby walidacja i mapowanie widziały kształt sprzed v18.23.
+            dane = json.loads(cl.napraw_luzny_json(surowa))
+            odmowa, dane, _powod = cl.rozpakuj_dyskryminator(dane)
+            if odmowa:
+                return WynikTury(
+                    narracja="", wybory=[], postacie_aktywne=[],
+                    stan={}, meta={}, surowy_json=surowa, odrzucone=True,
+                )
             jsonschema.validate(instance=dane, schema=SCHEMA_TURA)
         except (json.JSONDecodeError, jsonschema.ValidationError) as exc:
             proby_struktury += 1
             if proby_struktury > MAX_RETRIES:
                 raise BladStrukturyJSON(
                     f"The AI returned a malformed JSON structure {MAX_RETRIES + 1} "
-                    f"times in a row. Last error: {exc}"
+                    f"times in a row.\n{cl.opisz_porazke_json(exc)}\n"
+                    f"{cl.formatuj_slad(slad)}"
                 ) from exc
             ostatni_blad = (
-                f"JSONDecodeError: {exc.msg}"
+                cl.RETRY_NIEPARSOWALNY
                 if isinstance(exc, json.JSONDecodeError)
-                else f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+                else cl.komunikat_retry_schema(exc)
             )
             continue
 

@@ -256,13 +256,23 @@ _RE_PUNKTOR_LISTY = re.compile(r"^\s*(?:\d+[.)]\s*|[-*•]\s+)")
 
 def _wygeneruj_skrotowce_llm(
     klient: Any, kod: str, nazwa_natywna: str, model: str,
-) -> list[tuple[str, str]]:
+) -> list[tuple[str, str]] | None:
     """Generuje ≤5 typowych skrótowców języka docelowego (gdy brak `ABBREV_BY_LANG`).
 
-    Zwraca listę (skrót, rozwinięcie) — format identyczny z wpisem tabeli. Pusta
-    lista przy błędzie sieci / niezdatnym formacie → wołający pominie blok
-    ODWRACACZ (degradacja jak sprzed mini-promptu, nie crash). Prompt po angielsku
-    (spójnie z resztą promptów narzędzia); `temperature=0` dla determinizmu.
+    Zwraca listę (skrót, rozwinięcie) — format identyczny z wpisem tabeli.
+    Wołający pominie blok ODWRACACZ przy pustym wyniku (degradacja jak sprzed
+    mini-promptu, nie crash). Prompt po angielsku (spójnie z resztą promptów
+    narzędzia); `temperature=0` dla determinizmu.
+
+    **Rozróżnienie ``None`` vs ``[]`` (v18.23, kontrola cache'ów):** ``None``
+    oznacza „nie wiem, wywołanie się nie udało" (błąd sieci/API — stan
+    PRZEJŚCIOWY), a ``[]`` — „ten język faktycznie nie ma kropkowanych
+    skrótowców" (właściwość TRWAŁA, np. pismo logograficzne). Wcześniej oba
+    przypadki zwracały ``[]`` i wpadały do cache'u na równi, więc JEDEN
+    transient network error wyłączał blok ODWRACACZ dla danego języka
+    w KAŻDEJ kolejnej sekcji tego przebiegu — cicho, bez powtórnej próby.
+    A brak bloku w sekcji szyfru to leak polskiego przykładu do tłumaczenia,
+    czyli dokładnie ten false-negative, którego detektory mają unikać.
     """
     prompt = (
         f"List exactly 5 of the most common WRITTEN abbreviations in {nazwa_natywna} "
@@ -288,8 +298,8 @@ def _wygeneruj_skrotowce_llm(
         surowa = surowa_raw.strip()
     except Exception as exc:  # noqa: BLE001 — fail-soft: brak skrótowców → blok pominięty
         print(f"⚠️  {kod}: LLM abbreviation generation failed ({exc}); "
-              f"the Odwracacz block will be skipped.")
-        return []
+              f"the Odwracacz block will be skipped (will retry in this run).")
+        return None   # stan PRZEJŚCIOWY — nie wolno go zacementować w cache'u
 
     pary: list[tuple[str, str]] = []
     widziane: set[str] = set()
@@ -313,13 +323,21 @@ def _wygeneruj_skrotowce_llm(
 def _skrotowce_dla_jezyka(
     klient: Any, kod: str, nazwa_natywna: str, model: str,
 ) -> list[tuple[str, str]]:
-    """Skrótowce dla języka: ręczna tabela `ABBREV_BY_LANG`, a gdy brak — generacja LLM (cache)."""
+    """Skrótowce dla języka: ręczna tabela `ABBREV_BY_LANG`, a gdy brak — generacja LLM (cache).
+
+    Cache dopisuje się PRZYROSTOWO (per kod) i przyjmuje wyłącznie wynik
+    ROZSTRZYGNIĘTY — patrz `None` vs `[]` w :func:`_wygeneruj_skrotowce_llm`.
+    Nieudane wywołanie zostawia klucz nieobsadzony, więc następna sekcja tego
+    przebiegu spróbuje ponownie, zamiast dziedziczyć jednorazową awarię sieci.
+    """
     tabela = ABBREV_BY_LANG.get(kod)
     if tabela is not None:
         return tabela
     if kod in _CACHE_SKROTOWCE_LLM:
         return _CACHE_SKROTOWCE_LLM[kod]
     wynik = _wygeneruj_skrotowce_llm(klient, kod, nazwa_natywna, model)
+    if wynik is None:
+        return []   # przejściowa awaria — BEZ zapisu do cache'u (ponowimy)
     if wynik:
         podglad = ", ".join(f'{s}→{e}' for s, e in wynik)
         print(f"🔤 {kod}: brak tabeli ABBREV_BY_LANG — wygenerowano {len(wynik)} "

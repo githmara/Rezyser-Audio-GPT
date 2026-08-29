@@ -251,6 +251,15 @@ SCHEMA_BURZA: dict[str, Any] = {
 }
 
 
+# Schemat wysyłany do API (v18.23): kanoniczny `SCHEMA_BURZA` okrojony do podzbioru
+# structured outputs + gałąź odmowy pod dyskryminatorem `typ`. Budowany RAZ, przy
+# imporcie — kompilacja schematu po stronie API jest cache'owana bajtowo (24 h),
+# więc schemat nie może się różnić między wywołaniami.
+SCHEMA_BURZA_API: dict[str, Any] = cl.schemat_z_dyskryminatorem(
+    SCHEMA_BURZA, pr.TAG_ODRZUCENIA_AI,
+)
+
+
 @dataclass
 class OpcjaBurzy:
     """Pojedyncza opcja wygenerowana przez Burzę.
@@ -389,6 +398,8 @@ def _wywolaj_claude(
     timeout:  float,
     segmenty: list[dict] | None = None,
     wymusz_json: bool = False,
+    schema_json: dict | None = None,
+    slad: list[dict] | None = None,
 ) -> tuple[str, str | None]:
     """Wywołuje warstwę LLM (proza, BEZ reasoningu) → (tekst, stop_reason).
 
@@ -410,6 +421,8 @@ def _wywolaj_claude(
         timeout=timeout,
         segmenty=segmenty,
         wymusz_json=wymusz_json,
+        schema_json=schema_json,
+        slad=slad,
     )
 
 
@@ -613,26 +626,23 @@ def generuj_burze(
     # v17.11.1: osobne budżety prób struktury i języka (patrz generuj_skrypt).
     proby_struktury = 0
     jezyk_skorygowano = False
+    # v18.23: metryka KAŻDEGO wywołania (nietreściowa) — po `request_id` widać,
+    # czy trzy próby to ta sama pętla, czy trzy różne halucynacje.
+    slad: list[dict] = []
 
     while True:
-        # Self-correction: przy retry dodajemy info o poprzednim błędzie
-        # walidacji jako system message — model próbuje skorygować strukturę.
+        # Self-correction: przy retry dołączamy wskazówkę o POPRZEDNIEJ porażce.
+        # v18.23: wskazówka opisuje STRUKTURĘ, nie cytuje komunikatu parsera
+        # (patrz `core_llm.RETRY_NIEPARSOWALNY` — echo `JSONDecodeError.msg`
+        # wysyłało model w pogoń za nie tą winą).
         if ostatni_blad is not None:
-            komunikat = {
-                "role": "user",
-                "content": (
-                    f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
-                    "Regenerate the response STRICTLY conforming to the JSON schema "
-                    "defined in the system prompt. Every required field MUST be present "
-                    "and MUST have the correct type. Return ONLY a single valid JSON "
-                    "object — no prose, no markdown code fences, no commentary."
-                ),
-            }
+            komunikat = {"role": "user", "content": ostatni_blad}
             messages.append(komunikat)
             segmenty.append(_segment_systemowy(komunikat))
 
         surowy_text, stop_reason = _wywolaj_claude(
             klient, przepis, system, messages, timeout, segmenty, wymusz_json=True,
+            schema_json=SCHEMA_BURZA_API, slad=slad,
         )
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
 
@@ -643,9 +653,22 @@ def generuj_burze(
                 "raise max_tokens."
             )
 
+        # v18.23: odmowa KLASYFIKATORA (nie modelu) — treść bywa wtedy pusta,
+        # więc bez tej gałęzi `json.loads("")` zużywał retry i user widział
+        # „błąd struktury" tam, gdzie prawdą jest „model odmówił". Złapane żywo
+        # 2026-08-29 (`stop_reason='refusal'`, zero bloków tekstu).
+        if stop_reason == cl.STOP_ODRZUCENIE:
+            return WynikBurzy(
+                odrzucone=True,
+                uzyty_sufiks=sufiks_nazwa,
+                surowy_json=surowy_text,
+            )
+
         # Detekcja odrzucenia PRZED walidacją JSON — bo klauzula odrzucenia
         # wymusza ZWROT samego tagu, NIE JSON-a. JSONDecodeError w tej linii
-        # to legalny case „LLM odmówił, zwrócił tag, nie JSON".
+        # to legalny case „LLM odmówił, zwrócił tag, nie JSON". Działa też dla
+        # gałęzi `typ=odrzucenie` (tag jest wtedy wartością pola) — substring
+        # w surowym tekście jest tu celowo najszerszą siatką.
         if pr.wykryto_odrzucenie(surowy_text):
             return WynikBurzy(
                 odrzucone=True,
@@ -654,19 +677,31 @@ def generuj_burze(
             )
 
         try:
-            dane = json.loads(surowy_text)
+            # `napraw_luzny_json` to pas i szelki dla `openai_compat` (structured
+            # outputs tam nie ma). Na Anthropic ze schematem nie ma czego naprawiać.
+            dane = json.loads(cl.napraw_luzny_json(surowy_text))
+            # Granica parsowania: zdejmujemy dyskryminator, żeby walidacja i całe
+            # dalsze mapowanie widziały DOKŁADNIE kształt sprzed v18.23.
+            odmowa, dane, _powod = cl.rozpakuj_dyskryminator(dane)
+            if odmowa:
+                return WynikBurzy(
+                    odrzucone=True,
+                    uzyty_sufiks=sufiks_nazwa,
+                    surowy_json=surowy_text,
+                )
             jsonschema.validate(instance=dane, schema=SCHEMA_BURZA)
         except (json.JSONDecodeError, jsonschema.ValidationError) as exc:
             proby_struktury += 1
             if proby_struktury > max_retry:
                 raise BladStrukturyJSON(
                     f"The AI returned a malformed JSON structure {max_retry + 1} "
-                    f"times in a row for Brainstorm mode. Last error: {exc}"
+                    f"times in a row for Brainstorm mode.\n"
+                    f"{cl.opisz_porazke_json(exc)}\n{cl.formatuj_slad(slad)}"
                 ) from exc
             ostatni_blad = (
-                f"JSONDecodeError: {exc.msg}"
+                cl.RETRY_NIEPARSOWALNY
                 if isinstance(exc, json.JSONDecodeError)
-                else f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+                else cl.komunikat_retry_schema(exc)
             )
             continue
 
@@ -754,6 +789,12 @@ SCHEMA_SKRYPT: dict[str, Any] = {
         },
     },
 }
+
+
+# Schemat API dla Skryptu — patrz komentarz przy `SCHEMA_BURZA_API`.
+SCHEMA_SKRYPT_API: dict[str, Any] = cl.schemat_z_dyskryminatorem(
+    SCHEMA_SKRYPT, pr.TAG_ODRZUCENIA_AI,
+)
 
 
 @dataclass
@@ -869,23 +910,19 @@ def generuj_skrypt(
     jezyk_skorygowano = False
     wywolan = 0
 
+    slad: list[dict] = []   # v18.23 — patrz `generuj_burze`
+
     while True:
+        # v18.23: wskazówka opisuje STRUKTURĘ, nie cytuje parsera (patrz
+        # `core_llm.RETRY_NIEPARSOWALNY`).
         if ostatni_blad is not None:
-            komunikat = {
-                "role": "user",
-                "content": (
-                    f"YOUR PREVIOUS OUTPUT FAILED VALIDATION. Error: {ostatni_blad}. "
-                    "Regenerate the response STRICTLY conforming to the JSON schema "
-                    "defined in the system prompt. Every required field MUST be present "
-                    "and MUST have the correct type. Return ONLY a single valid JSON "
-                    "object — no prose, no markdown code fences, no commentary."
-                ),
-            }
+            komunikat = {"role": "user", "content": ostatni_blad}
             messages.append(komunikat)
             segmenty.append(_segment_systemowy(komunikat))
 
         surowy_text, stop_reason = _wywolaj_claude(
             klient, przepis, system, messages, timeout, segmenty, wymusz_json=True,
+            schema_json=SCHEMA_SKRYPT_API, slad=slad,
         )
         wywolan += 1
         ostatni_blad = None   # zużyty — wiadomość już doklejona (jeśli była)
@@ -895,6 +932,16 @@ def generuj_skrypt(
                 "The model hit its max_tokens limit — the Script response was cut "
                 "off before the JSON could be closed. Shorten the context or raise "
                 "max_tokens."
+            )
+
+        # v18.23: odmowa klasyfikatora (pusta treść) — bez tej gałęzi zużywała
+        # retry i kończyła się „błędem struktury". Patrz `generuj_burze`.
+        if stop_reason == cl.STOP_ODRZUCENIE:
+            return WynikSkryptu(
+                odrzucone=True,
+                uzyty_sufiks=sufiks_nazwa,
+                surowy_json=surowy_text,
+                liczba_prob=wywolan,
             )
 
         # Detekcja odrzucenia PRZED walidacją JSON — klauzula odrzucenia wymusza
@@ -909,19 +956,28 @@ def generuj_skrypt(
             )
 
         try:
-            dane = json.loads(surowy_text)
+            dane = json.loads(cl.napraw_luzny_json(surowy_text))
+            odmowa, dane, _powod = cl.rozpakuj_dyskryminator(dane)
+            if odmowa:
+                return WynikSkryptu(
+                    odrzucone=True,
+                    uzyty_sufiks=sufiks_nazwa,
+                    surowy_json=surowy_text,
+                    liczba_prob=wywolan,
+                )
             jsonschema.validate(instance=dane, schema=SCHEMA_SKRYPT)
         except (json.JSONDecodeError, jsonschema.ValidationError) as exc:
             proby_struktury += 1
             if proby_struktury > max_retry:
                 raise BladStrukturyJSON(
                     f"The AI returned a malformed JSON structure {max_retry + 1} "
-                    f"times in a row for Script mode. Last error: {exc}"
+                    f"times in a row for Script mode.\n"
+                    f"{cl.opisz_porazke_json(exc)}\n{cl.formatuj_slad(slad)}"
                 ) from exc
             ostatni_blad = (
-                f"JSONDecodeError: {exc.msg}"
+                cl.RETRY_NIEPARSOWALNY
                 if isinstance(exc, json.JSONDecodeError)
-                else f"ValidationError: {exc.message} (path: {list(exc.absolute_path)})"
+                else cl.komunikat_retry_schema(exc)
             )
             continue
 
