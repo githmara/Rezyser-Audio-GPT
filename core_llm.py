@@ -541,8 +541,14 @@ def schemat_z_dyskryminatorem(schema: dict, tag_odrzucenia: str) -> dict:
         bias modelu w stronę „tańszej gałęzi" przy długich promptach twórczych.
       * ``powod`` wpada wprost do diagnostyki (model wypełnia go bez proszenia).
 
-    ``description`` pól NIE jest tłumaczone — to jedyny opis, jaki model widzi
-    poza promptem, więc trzyma też kardynalność zdjętą ze schematu API.
+    ``description`` pól jest po ANGIELSKU i NIE jest tłumaczone — dokładnie jak
+    klucze payloadu w ``buduj_wielojezyczne_ui`` („kolejna kotwica PL usunięta",
+    audyt 2026-06-16). Schemat leci do modelu przy KAŻDYM wywołaniu w każdym
+    z 9 języków, więc polski opis byłby kotwicą ciągnącą fińską czy rosyjską
+    generację w stronę polszczyzny — ten sam rozjazd, którego pilnują bramki
+    językowe. Złapane bramką ``audyt_leakow --bramka-py``. Opis trzyma też
+    kardynalność zdjętą ze schematu API (patrz :func:`_notka_o_ograniczeniach`).
+
     Kolejność kluczy jest deterministyczna i nic nie jest interpolowane
     per-request: kompilacja schematu po stronie API jest cache'owana bajtowo
     (24 h), a każda zmienna treść zabijałaby ten cache.
@@ -570,7 +576,7 @@ def schemat_z_dyskryminatorem(schema: dict, tag_odrzucenia: str) -> dict:
     galaz_tury["properties"] = {
         "typ": {
             "const": TYP_TURA,
-            "description": "Normalna odpowiedź — wypełnij WSZYSTKIE pola tury.",
+            "description": "A normal answer — fill in ALL fields of this branch.",
         },
         **baza.get("properties", {}),
     }
@@ -587,17 +593,17 @@ def schemat_z_dyskryminatorem(schema: dict, tag_odrzucenia: str) -> dict:
             "typ": {
                 "const": TYP_ODRZUCENIE,
                 "description": (
-                    "Odmowa wykonania polecenia — patrz SYSTEM RULE na końcu "
-                    "promptu systemowego."
+                    "Refusal to carry out the request — see the SYSTEM RULE at "
+                    "the end of the system prompt."
                 ),
             },
             "odrzucenie": {
                 "type": "string",
-                "description": f"Wartość dosłownie: {tag_odrzucenia}",
+                "description": f"Verbatim value: {tag_odrzucenia}",
             },
             "powod": {
                 "enum": list(_POWODY_ODRZUCENIA),
-                "description": "Kategoria odmowy (diagnostyka aplikacji).",
+                "description": "Refusal category (application diagnostics).",
             },
         },
     }

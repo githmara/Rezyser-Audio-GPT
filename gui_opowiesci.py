@@ -2483,10 +2483,23 @@ class OpowiesciPanel(wx.Panel):
         )
 
     def _streszczenie_blad(self, exc: Exception) -> None:
-        """Streszczenie nie powiodło się — gra może iść dalej, ale alarm zostanie."""
+        """Streszczenie nie powiodło się — gra może iść dalej, ale alarm zostanie.
+
+        v18.23: typowane błędy generacji AI mapujemy na `klucz_i18n` (jak
+        :meth:`_obsluz_blad`) i logujemy diagnostykę. Wcześniej leciał tu goły
+        `str(exc)`, czyli ANGIELSKA treść techniczna prosto do dialogu —
+        w panelu, którego cała reszta jest natywna w 9 językach. Kluczowe od
+        v18.23, bo `streszczaj_kontekst` może teraz podnieść
+        :class:`bledy_ai.BladOdrzuceniaAI` (odmowa modelu), a to komunikat,
+        który gracz realnie zobaczy.
+        """
         self._meta_w_toku = False
         self._btn_wyslij.Enable()
         self._aktualizuj_pamiec_modelu()
+        if isinstance(exc, BladGeneracjiAI):
+            bledy_ai.zapisz_diagnostyke(exc, "opowiesci")
+            self._wyswietl_blad_ai(t(f"opowiesci.{exc.klucz_i18n}"))
+            return
         self._wyswietl_blad_ai(str(exc))
 
     # ==================================================================

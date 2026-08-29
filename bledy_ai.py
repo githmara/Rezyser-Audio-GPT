@@ -110,3 +110,32 @@ class BladDlugosciOdpowiedzi(BladGeneracjiAI):
     """Odpowiedź ucięta przed domknięciem JSON (`finish_reason='length'`)."""
 
     klucz_i18n = "err_dlugosc"
+
+
+class BladOdrzuceniaAI(BladGeneracjiAI):
+    """Model ODMÓWIŁ wykonania polecenia — tam, gdzie pusta treść jest szkodliwa.
+
+    Odmowa sama w sebie nie jest awarią: w trybach narracyjnych ma własną,
+    łagodną ścieżkę (tag ``[ODRZUCENIE_AI]`` albo flaga ``odrzucone``), po której
+    GUI pokazuje przyjazny komunikat i NIE rusza stanu. Ten wyjątek jest dla
+    wywołań POMOCNICZYCH, w których „cicha pustka" niszczy dane:
+
+    * ``opowiesci_ai.streszczaj_kontekst`` — pusty wynik zwijał całą historię
+      (np. sześć tur) do JEDNEGO wpisu z pustym skrótem, czyli gracz tracił
+      kontekst bezpowrotnie;
+    * ``opowiesci_ai.generuj_cinematic_warning`` — pusty wynik lądował
+      w ``.story.jsonl`` i ustawiał ``cinematic_pokazany``, więc ostrzeżenie
+      nigdy już nie wracało;
+    * ``tlumacz_ai._tlumacz_blok`` — pusty fragment wchodził do sklejki
+      tłumaczenia jako dziura.
+
+    Dlaczego wyjątek, a nie flaga: wołający (workery GUI) mają już
+    ``except Exception`` z sensowną, nieniszczącą ścieżką, więc podniesienie
+    błędu jest jedyną zmianą, która nie wymaga przebudowy trzech handlerów.
+
+    ``klucz_i18n`` celowo GENERYCZNY (``err_odmowa``) i obecny w obu
+    namespace'ach, których dotyczy (``opowiesci.``/``poliglota.``) — inaczej
+    ``i18n.t()`` zwróciłby placeholder ``[panel.klucz]``, jak w bugu z v18.9.
+    """
+
+    klucz_i18n = "err_odmowa"

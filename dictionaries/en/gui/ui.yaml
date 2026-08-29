@@ -498,11 +498,11 @@ rezyser:
 
     You can now safely clear the current memory.
   # Long-Term Memory file choice (v18.14) – when a project has several on disk
-  pamiec_wybor_tytul:    "Choose the Long-Term Memory file"
+  pamiec_wybor_tytul: "Choose the Long-Term Memory file"
   pamiec_wybor_lbl: |-
     This project has more than one memory file on disk.
     Point to the one that should become the Long-Term Memory – the others will be left untouched:
-  pamiec_wybor_pozycja:  "{plik} – saved {data}, {bajty} bytes"
+  pamiec_wybor_pozycja: "{plik} – saved {data}, {bajty} bytes"
   pamiec_wybor_anulowano_tytul: "Session without Long-Term Memory"
   pamiec_wybor_anulowano_tresc: |-
     You did not choose a memory file, so the "Long-Term Memory" field stays empty.
@@ -838,6 +838,7 @@ poliglota:
   chk_quality: Quality mode — deeper model reasoning (slower and more expensive; no effect on OpenAI-compatible endpoints)
   chk_quality_name: Translation quality mode
   chk_quality_tooltip: The model is given a budget for internal text analysis before translating (extended thinking). This improves difficult passages at the cost of time and tokens. Applies only to Anthropic Claude — has no effect on OpenAI-compatible endpoints.
+  err_odmowa: The model refused to carry out this command — its content may have violated the model's policies or been too ambiguous. Nothing was saved; rephrase the command and try again.
 konwerter:
   panel_name: "Audiobook Architect Panel"
   # 18.8: localized output-filename segment (single word, no spaces)
@@ -1406,6 +1407,7 @@ opowiesci:
   err_struktura: The AI model returned an invalid data structure several times and it could not be corrected. Please try again — if the error persists, attach the error_log.txt file to your report.
   pamiec_status_offline: '⚠️ No internet connection: the exact memory counter is unavailable, values are approximate (~{procent}% — {tokeny} tokens). Restart the application once your connection is restored.'
   err_kontekst: The game history didn't fit in the model's context window. End this game and start a new one, or choose a model with a larger window — Claude models have the most headroom here.
+  err_odmowa: The model refused to carry out this command — its content may have violated the model's policies or been too ambiguous. Nothing was saved; rephrase the command and try again.
 bot:
   closure:
     Lumi: "Hi!\n\nThe snow has settled and the fix has arrived! Everything you asked for just landed in the latest Audio Director GPT release.\n\nGrab the update here: {link}\n\nClosing the issue to keep the cold out. Stay frosty!\n— Lumi"

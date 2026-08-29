@@ -498,11 +498,11 @@ rezyser:
 
     Ahora puedes borrar la memoria actual de forma segura.
   # Elección del archivo de Memoria a Largo Plazo (v18.14) – si hay varios en disco
-  pamiec_wybor_tytul:    "Elige el archivo de Memoria a Largo Plazo"
+  pamiec_wybor_tytul: "Elige el archivo de Memoria a Largo Plazo"
   pamiec_wybor_lbl: |-
     Este proyecto tiene más de un archivo de memoria en el disco.
     Señala el que debe convertirse en la Memoria a Largo Plazo – los demás quedarán intactos:
-  pamiec_wybor_pozycja:  "{plik} – guardado {data}, {bajty} bytes"
+  pamiec_wybor_pozycja: "{plik} – guardado {data}, {bajty} bytes"
   pamiec_wybor_anulowano_tytul: "Sesión sin Memoria a Largo Plazo"
   pamiec_wybor_anulowano_tresc: |-
     No has elegido ningún archivo de memoria, así que el campo «Memoria a Largo Plazo» queda vacío.
@@ -839,6 +839,7 @@ poliglota:
   chk_quality: Modo calidad — el modelo reflexiona más a fondo (más lento y caro; sin efecto en endpoints compatibles con OpenAI)
   chk_quality_name: Modo de calidad de traducción
   chk_quality_tooltip: El modelo recibe un presupuesto para el análisis interno del texto antes de traducir (extended thinking). Mejora los fragmentos difíciles a costa de tiempo y tokens. Se aplica únicamente a Anthropic Claude; en los endpoints compatibles con OpenAI no tiene efecto.
+  err_odmowa: El modelo se negó a ejecutar esta instrucción; su contenido podría infringir las normas del modelo o ser demasiado ambiguo. No se guardó nada; formule la instrucción de otra manera e inténtelo de nuevo.
 konwerter:
   panel_name: "Panel del Arquitecto de Audiolibros"
   # 18.8: segmento localizado del nombre del archivo de salida (una palabra, sin espacios)
@@ -1404,6 +1405,7 @@ opowiesci:
   err_struktura: El modelo de IA devolvió una estructura de datos incorrecta varias veces y no fue posible corregirla. Inténtalo de nuevo; si el error persiste, adjunta el archivo error_log.txt al informe.
   pamiec_status_offline: '⚠️ Sin conexión a Internet: el contador exacto de memoria no está disponible, los valores son aproximados (~{procent}% — {tokeny} tokens). Cuando recuperes la conexión, reinicia la aplicación.'
   err_kontekst: El historial del juego no cupo en la ventana de contexto del modelo. Termina esta partida y comienza una nueva, o elige un modelo con una ventana más grande — los modelos Claude tienen aquí el mayor margen.
+  err_odmowa: El modelo se negó a ejecutar esta instrucción; su contenido podría infringir las normas del modelo o ser demasiado ambiguo. No se guardó nada; formule la instrucción de otra manera e inténtelo de nuevo.
 bot:
   closure:
     Lumi: "¡Hola!\n\n¡La nieve se ha asentado y la corrección ha llegado! Todo lo que pediste acaba de aterrizar en la última publicación del Director de Audio GPT.\n\nConsigue la actualización aquí: {link}\n\nCierro la incidencia para que no entre el frío. ¡Que la escarcha te acompañe!\n— Lumi"

@@ -39,7 +39,7 @@ from dotenv import load_dotenv
 import core_llm as cl
 import core_tokeny as ct
 import sciezki
-from bledy_ai import BladDlugosciOdpowiedzi, BladStrukturyJSON
+from bledy_ai import BladDlugosciOdpowiedzi, BladOdrzuceniaAI, BladStrukturyJSON
 
 # v17.11.1: klauzula odrzucenia współdzielona z Reżyserem (single source —
 # stała jest CELOWO po angielsku i trzymana w Pythonie, nie w YAML, żeby LLM
@@ -834,13 +834,19 @@ def wygeneruj_wizualizacje(
         "The game state is below. Generate a multisensory scene description.",
     )
     user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
-    tekst, _stop = _wywolaj_claude(
+    tekst, stop_reason = _wywolaj_claude(
         klient, efektywny_model, prompt_systemowy,
         [{"role": "user", "content": user_msg}],
         max_tokens=przepis.get("max_tokens", 1000),
         temperature=przepis.get("temperatura", TEMPERATURE_VIS),
         timeout=przepis.get("timeout_s", 60.0),
     )
+    # v18.23: odmowa KLASYFIKATORA nie zwraca tagu (bo nie zwraca treści), więc
+    # normalizujemy ją do tego samego sygnału, którego GUI już nasłuchuje
+    # (`_visualize_worker` → `wykryto_odrzucenie` → przyjazny komunikat). Zero
+    # zmian po stronie panelu; bez tego gracz dostawał PUSTY dialog opisu.
+    if stop_reason == cl.STOP_ODRZUCENIE:
+        return TAG_ODRZUCENIA_AI
     return tekst
 
 
@@ -928,13 +934,26 @@ def streszczaj_kontekst(
         "The list of turns to summarize is below.",
     )
     user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
-    tekst, _stop = _wywolaj_claude(
+    tekst, stop_reason = _wywolaj_claude(
         klient, efektywny_model, przepis["prompt_systemowy"],
         [{"role": "user", "content": user_msg}],
         max_tokens=przepis.get("max_tokens", 800),
         temperature=przepis.get("temperatura", 0.3),
         timeout=przepis.get("timeout_s", 60.0),
     )
+    # v18.23: tu pusta treść jest NISZCZĄCA — `_streszczenie_done` zwija całą
+    # historię (np. sześć tur) do JEDNEGO wpisu o treści streszczenia, więc
+    # odmowa oznaczałaby bezpowrotną utratę kontekstu gry. Podnosimy błąd:
+    # worker GUI ma `except Exception`, po którym gra zostaje nietknięta,
+    # a alarm pamięci wraca przy kolejnej turze.
+    if stop_reason == cl.STOP_ODRZUCENIE or (
+        not tekst.strip() and stop_reason != "max_tokens"
+    ):
+        raise BladOdrzuceniaAI(
+            "The model returned no summary (stop_reason="
+            f"{stop_reason!r}). Refusing to collapse the game history into an "
+            "empty entry — the turns would be lost irreversibly."
+        )
     return tekst.strip()
 
 
@@ -971,11 +990,20 @@ def generuj_cinematic_warning(
         "The game state is below. Generate the Cinematic Meta Warning.",
     )
     user_msg = instrukcja + "\n\n" + json.dumps(payload, ensure_ascii=False, indent=2)
-    tekst, _stop = _wywolaj_claude(
+    tekst, stop_reason = _wywolaj_claude(
         klient, efektywny_model, przepis["prompt_systemowy"],
         [{"role": "user", "content": user_msg}],
         max_tokens=przepis.get("max_tokens", 600),
         temperature=przepis.get("temperatura", 0.85),
         timeout=przepis.get("timeout_s", 60.0),
     )
+    # v18.23: pusty warning trafiał do `.story.jsonl` i ustawiał
+    # `cinematic_pokazany`, więc ostrzeżenie nie wracało już NIGDY. Błąd jest
+    # tu lepszy: `_cinematic_blad` zalicza to jako cichy fail (side-quest),
+    # ale nie zapisuje pustego wpisu do historii gry.
+    if stop_reason == cl.STOP_ODRZUCENIE or not tekst.strip():
+        raise BladOdrzuceniaAI(
+            "The model returned no Cinematic Meta Warning (stop_reason="
+            f"{stop_reason!r})."
+        )
     return tekst.strip()

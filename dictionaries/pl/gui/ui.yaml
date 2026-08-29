@@ -884,6 +884,10 @@ poliglota:
     Usuń ten plik ręcznie i spróbuj ponownie.
   ai_blad_uciety: |-
     Model uciął tłumaczenie bloku (przekroczono limit długości odpowiedzi) i nie udało się go dokończyć mimo wielokrotnego podziału na mniejsze części. Podziel plik źródłowy na mniejsze fragmenty i spróbuj ponownie.
+  # v18.23: odmowa modelu (a NIE ucięcie) — dzielenie pliku tu nie pomoże, bo
+  # odmowa dotyczy treści fragmentu. Ta sama treść co `opowiesci.err_odmowa`.
+  err_odmowa: |-
+    Model odmówił wykonania tego polecenia — jego treść mogła naruszać zasady modelu albo być zbyt niejednoznaczna. Nic nie zostało zapisane; sformułuj polecenie inaczej i spróbuj ponownie.
   ai_ostrzezenie_iso_tytul: "Ostrzeżenie tagu językowego"
   ai_ostrzezenie_iso: |-
     Nie udało się automatycznie pobrać kodu ISO z API. Użyto domyślnego tagu „pl". W razie problemów z czytnikiem ekranu użyj „Naprawiacza Tagów" w Trybie Reżysera.
@@ -1442,6 +1446,11 @@ opowiesci:
   err_kontekst:              "Historia gry nie zmieściła się w oknie kontekstowym modelu. Zakończ tę grę i zacznij nową albo wybierz model o większym oknie — modele Claude mają tu największy zapas."
   err_dlugosc:               "Odpowiedź modelu została ucięta, zanim zdążył ją domknąć (przekroczono limit długości). Skróć kontekst i spróbuj ponownie."
   err_struktura:             "Model AI kilkukrotnie zwrócił niepoprawną strukturę danych i nie udało się jej skorygować. Spróbuj ponownie — jeśli błąd się powtarza, dołącz plik error_log.txt do zgłoszenia."
+  # v18.23: odmowa przy wywołaniu POMOCNICZYM (streszczenie pamięci, ostrzeżenie
+  # kinowe) — inaczej niż `odrzucenie_tresc`, które dotyczy akcji gracza w turze.
+  # Ta sama treść co `poliglota.err_odmowa`.
+  err_odmowa: |-
+    Model odmówił wykonania tego polecenia — jego treść mogła naruszać zasady modelu albo być zbyt niejednoznaczna. Nic nie zostało zapisane; sformułuj polecenie inaczej i spróbuj ponownie.
   odrzucenie_tytul:          "Akcja nie do poprowadzenia"
   odrzucenie_tresc:          "Silnik narracyjny nie może poprowadzić tej akcji — mogła być nie na temat, niemożliwa w tym świecie albo niezgodna z zasadami treści. Tura nie została zapisana. Sformułuj akcję inaczej i spróbuj ponownie."
 

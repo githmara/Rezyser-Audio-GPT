@@ -498,11 +498,11 @@ rezyser:
 
     Sie können jetzt den aktuellen Speicher sicher löschen.
   # Wahl der Langzeitspeicher-Datei (v18.14) – wenn mehrere auf der Platte liegen
-  pamiec_wybor_tytul:    "Langzeitspeicher-Datei wählen"
+  pamiec_wybor_tytul: "Langzeitspeicher-Datei wählen"
   pamiec_wybor_lbl: |-
     Dieses Projekt hat mehr als eine Speicherdatei auf der Festplatte.
     Wählen Sie die Datei, die zum Langzeitspeicher werden soll – die übrigen bleiben unangetastet:
-  pamiec_wybor_pozycja:  "{plik} – gespeichert {data}, {bajty} Bytes"
+  pamiec_wybor_pozycja: "{plik} – gespeichert {data}, {bajty} Bytes"
   pamiec_wybor_anulowano_tytul: "Sitzung ohne Langzeitspeicher"
   pamiec_wybor_anulowano_tresc: |-
     Sie haben keine Speicherdatei gewählt, daher bleibt das Feld „Langzeitspeicher" leer.
@@ -839,6 +839,7 @@ poliglota:
   chk_quality: Qualitätsmodus – tiefere Überlegung des Modells (langsamer und teurer; ohne Effekt bei OpenAI-kompatiblen Endpunkten)
   chk_quality_name: Übersetzungsqualitätsmodus
   chk_quality_tooltip: Das Modell erhält ein Budget für die interne Textanalyse vor der Übersetzung (Extended Thinking). Dies verbessert schwierige Textstellen auf Kosten von Zeit und Tokens. Betrifft ausschließlich Anthropic Claude – bei OpenAI-kompatiblen Endpunkten hat dies keine Wirkung.
+  err_odmowa: Das Modell hat die Ausführung dieses Befehls verweigert — sein Inhalt verstieß möglicherweise gegen die Richtlinien des Modells oder war zu mehrdeutig. Es wurde nichts gespeichert; formulieren Sie den Befehl anders und versuchen Sie es erneut.
 konwerter:
   panel_name: "Panel des Hörbucharchitekten"
   # 18.8: lokalisierter Namensbaustein der Ergebnisdatei (ein Wort, ohne Leerzeichen)
@@ -1403,6 +1404,7 @@ opowiesci:
   err_struktura: Das KI-Modell hat mehrfach eine ungültige Datenstruktur zurückgegeben, die nicht korrigiert werden konnte. Versuchen Sie es erneut – wenn der Fehler weiterhin auftritt, fügen Sie der Meldung die Datei error_log.txt bei.
   pamiec_status_offline: '⚠️ Keine Internetverbindung: Der genaue Speicherzähler ist nicht verfügbar, die Werte sind Näherungswerte (~{procent}% — {tokeny} Token). Starten Sie die Anwendung nach Wiederherstellung der Verbindung neu.'
   err_kontekst: Der Spielverlauf hat nicht in das Kontextfenster des Modells gepasst. Beenden Sie dieses Spiel und beginnen Sie ein neues, oder wählen Sie ein Modell mit größerem Kontextfenster – die Claude-Modelle bieten hier den größten Spielraum.
+  err_odmowa: Das Modell hat die Ausführung dieses Befehls verweigert — sein Inhalt verstieß möglicherweise gegen die Richtlinien des Modells oder war zu mehrdeutig. Es wurde nichts gespeichert; formulieren Sie den Befehl anders und versuchen Sie es erneut.
 bot:
   closure:
     Lumi: "Hallo!\n\nDer Schnee hat sich gelegt und der Fix ist da! Alles, worum du gebeten hast, ist gerade in der neuesten Audio-GPT-Regisseur-Veröffentlichung gelandet.\n\nHol dir das Update hier: {link}\n\nIch schließe das Anliegen, damit es nicht kalt hereinzieht. Bleib frostig!\n— Lumi"

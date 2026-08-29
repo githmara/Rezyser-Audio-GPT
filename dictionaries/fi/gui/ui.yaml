@@ -498,11 +498,11 @@ rezyser:
 
     Voit nyt turvallisesti tyhjentää nykyisen muistin.
   # Muistitiedoston valinta (v18.14) – kun projektilla on levyllä useita
-  pamiec_wybor_tytul:    "Valitse Pitkäkestoisen Muistin tiedosto"
+  pamiec_wybor_tytul: "Valitse Pitkäkestoisen Muistin tiedosto"
   pamiec_wybor_lbl: |-
     Tällä projektilla on levyllä useampi kuin yksi muistitiedosto.
     Osoita se, josta tulee Pitkäkestoinen Muisti – muihin ei kosketa:
-  pamiec_wybor_pozycja:  "{plik} – tallennettu {data}, {bajty} tavua"
+  pamiec_wybor_pozycja: "{plik} – tallennettu {data}, {bajty} tavua"
   pamiec_wybor_anulowano_tytul: "Istunto ilman Pitkäkestoista Muistia"
   pamiec_wybor_anulowano_tresc: |-
     Et valinnut muistitiedostoa, joten kenttä ”Pitkäkestoinen Muisti” jää tyhjäksi.
@@ -837,6 +837,7 @@ poliglota:
   chk_quality: Laatutila — mallin syvempi harkinta (hitaampi ja kalliimpi; ei vaikutusta OpenAI-yhteensopivilla päätepisteillä)
   chk_quality_name: Käännöksen laatutila
   chk_quality_tooltip: Malli saa käyttöönsä budjetin tekstin sisäiseen analysointiin ennen kääntämistä (extended thinking). Parantaa vaikeiden kohtien käsittelyä ajan ja tokenien kustannuksella. Koskee vain Anthropic Claudea — OpenAI-yhteensopivilla päätepisteillä sillä ei ole vaikutusta.
+  err_odmowa: Malli kieltäytyi suorittamasta tätä komentoa — sen sisältö on voinut rikkoa mallin käytäntöjä tai olla liian moniselitteinen. Mitään ei tallennettu; muotoile komento toisin ja yritä uudelleen.
 konwerter:
   panel_name: "Äänikirja-arkkitehdin paneeli"
   # 18.8: tulostiedoston nimen lokalisoitu osa (yksi sana, ei välilyöntejä)
@@ -1400,6 +1401,7 @@ opowiesci:
   err_struktura: Tekoälymalli palautti useita kertoja virheellisen tietorakenteen, jota ei saatu korjattua. Yritä uudelleen — jos virhe toistuu, liitä error_log.txt-tiedosto ilmoitukseen.
   pamiec_status_offline: '⚠️ Ei internetyhteyttä: tarkka muistilaskuri ei ole käytettävissä, arvot ovat likimääräisiä (~{procent}% — {tokeny} tokenia). Käynnistä sovellus uudelleen, kun yhteys on palautunut.'
   err_kontekst: Pelin historia ei mahtunut mallin konteksti-ikkunaan. Lopeta tämä peli ja aloita uusi tai valitse malli, jolla on suurempi konteksti-ikkuna — Claude-malleilla tila on tässä suurin.
+  err_odmowa: Malli kieltäytyi suorittamasta tätä komentoa — sen sisältö on voinut rikkoa mallin käytäntöjä tai olla liian moniselitteinen. Mitään ei tallennettu; muotoile komento toisin ja yritä uudelleen.
 bot:
   closure:
     Lumi: "Hei!\n\nLumi on laskeutunut ja korjaus on saapunut! Kaikki mitä pyysit löytyy nyt uusimmasta Ääniohjaaja GPT -julkaisusta.\n\nNappaa päivitys täältä: {link}\n\nSuljen ilmoituksen, jottei kylmä pääse sisään. Pysy kylmänä!\n— Lumi"

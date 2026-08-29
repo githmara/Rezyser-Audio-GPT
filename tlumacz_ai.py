@@ -173,11 +173,11 @@ class BladOdmowyTlumaczenia(RuntimeError):
     Dlaczego osobna klasa, a nie :class:`BladUcietegoTlumaczenia` (v18.23):
     komunikat `ai_blad_uciety` radzi „podziel plik źródłowy na mniejsze
     fragmenty", co przy odmowie jest radą FAŁSZYWĄ — podział nic nie zmieni.
-    Dlatego ``klucz_i18n`` zostaje PUSTY: GUI pokaże wtedy ogólny „nieoczekiwany
-    błąd" wraz z sekcją szczegółów technicznych (angielska treść poniżej),
-    zamiast pewnej, ale mylnej instrukcji. Dedykowany komunikat wymagałby nowego
-    klucza w sekcji ``poliglota.`` we WSZYSTKICH 9 paczkach — to praca
-    tłumaczeniowa, więc świadomie poza tym wydaniem.
+    ``klucz_i18n`` wskazuje na ``poliglota.err_odmowa`` — ten sam, generyczny
+    komunikat, którego używa :class:`bledy_ai.BladOdrzuceniaAI` w Opowieściach
+    (tam jako ``opowiesci.err_odmowa``). Jedna treść na dwa panele, bo z punktu
+    widzenia użytkownika sytuacja jest identyczna: model odmówił, trzeba
+    sformułować rzecz inaczej.
 
     Bez tej klasy odmowa kończyła się CICHĄ DZIURĄ: ``_tlumacz_blok`` sprawdzał
     tylko ``stop_reason != "max_tokens"`` i zwracał pusty fragment, który
@@ -186,7 +186,7 @@ class BladOdmowyTlumaczenia(RuntimeError):
     dopóki nie przeczyta tłumaczenia w całości.
     """
 
-    klucz_i18n = ""
+    klucz_i18n = "err_odmowa"
 
 
 # =============================================================================

@@ -498,11 +498,11 @@ rezyser:
 
     Þú getur nú örugglega hreinsað núverandi minni.
   # Val á Langtímaminnis-skrá (v18.14) – þegar verkefnið hefur fleiri á diski
-  pamiec_wybor_tytul:    "Veldu Langtímaminnis-skrá"
+  pamiec_wybor_tytul: "Veldu Langtímaminnis-skrá"
   pamiec_wybor_lbl: |-
     Þetta verkefni hefur fleiri en eina minnisskrá á disknum.
     Veldu þá sem á að verða Langtímaminni – hinum verður ekki hreyft:
-  pamiec_wybor_pozycja:  "{plik} – vistað {data}, {bajty} bæti"
+  pamiec_wybor_pozycja: "{plik} – vistað {data}, {bajty} bæti"
   pamiec_wybor_anulowano_tytul: "Seta án Langtímaminnis"
   pamiec_wybor_anulowano_tresc: |-
     Þú valdir enga minnisskrá, svo reiturinn „Langtímaminni" er tómur.
@@ -839,6 +839,7 @@ poliglota:
   chk_quality: Gæðastilling — dýpri yfirvegun líkans (hægara og dýrara; hefur engin áhrif á OpenAI-samhæfð endapunkta)
   chk_quality_name: Gæðastilling þýðingar
   chk_quality_tooltip: Líkanið fær fjárveitingu fyrir innri greiningu textans áður en þýðing hefst (extended thinking). Þetta bætir erfiða hluta á kostnað tíma og tóka. Gildir aðeins um Anthropic Claude — hefur engin áhrif á OpenAI-samhæfð endapunkta.
+  err_odmowa: Líkanið hafnaði því að framkvæma þessa skipun — innihald hennar gæti hafa brotið gegn reglum líkansins eða verið of tvírætt. Engu var vistað; orðaðu skipunina á annan hátt og reyndu aftur.
 konwerter:
   panel_name: "Hljóðbókaarkitekt spjaldið"
   # 18.8: staðfærður hluti úttaksskráarnafns (eitt orð, engin bil)
@@ -1404,6 +1405,7 @@ opowiesci:
   err_struktura: Gervigreindarlíkanið skilaði nokkrum sinnum ógildri gagnauppbyggingu og ekki tókst að leiðrétta hana. Reyndu aftur — ef villan kemur ítrekað upp skaltu bæta skránni error_log.txt við tilkynninguna.
   pamiec_status_offline: '⚠️ Engin nettenging: nákvæmur minnisteljari er ekki tiltækur, gildin eru áætluð (~{procent}% — {tokeny} tákneiningar). Endurræstu forritið þegar tenging kemst á að nýju.'
   err_kontekst: Saga leiksins rúmaðist ekki í samhengisglugga líkansins. Ljúktu þessum leik og byrjaðu nýjan, eða veldu líkan með stærri samhengisglugga — Claude-líkön hafa mest svigrúm hér.
+  err_odmowa: Líkanið hafnaði því að framkvæma þessa skipun — innihald hennar gæti hafa brotið gegn reglum líkansins eða verið of tvírætt. Engu var vistað; orðaðu skipunina á annan hátt og reyndu aftur.
 bot:
   closure:
     Lumi: "Halló!\n\nSnjórinn hefur sest og lagfæringin er komin! Allt sem þú baðst um er nú komið í nýjustu útgáfu Hljóðstjóra GPT.\n\nNæðu uppfærslunni hér: {link}\n\nÉg loka málinu svo kuldinn læddist ekki inn. Frostkveðjur!\n— Lumi"

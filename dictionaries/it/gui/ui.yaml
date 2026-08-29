@@ -498,11 +498,11 @@ rezyser:
 
     Ora puoi cancellare in sicurezza la memoria corrente.
   # Scelta del file di Memoria a Lungo Termine (v18.14) – se su disco ce ne sono più
-  pamiec_wybor_tytul:    "Scegli il file di Memoria a Lungo Termine"
+  pamiec_wybor_tytul: "Scegli il file di Memoria a Lungo Termine"
   pamiec_wybor_lbl: |-
     Questo progetto ha più di un file di memoria su disco.
     Indica quello che deve diventare la Memoria a Lungo Termine – gli altri resteranno intatti:
-  pamiec_wybor_pozycja:  "{plik} – salvato {data}, {bajty} byte"
+  pamiec_wybor_pozycja: "{plik} – salvato {data}, {bajty} byte"
   pamiec_wybor_anulowano_tytul: "Sessione senza Memoria a Lungo Termine"
   pamiec_wybor_anulowano_tresc: |-
     Non hai scelto alcun file di memoria, quindi il campo «Memoria a Lungo Termine» resta vuoto.
@@ -839,6 +839,7 @@ poliglota:
   chk_quality: Modalità qualità — riflessione più approfondita del modello (più lenta e costosa; nessun effetto sugli endpoint compatibili con OpenAI)
   chk_quality_name: Modalità qualità di traduzione
   chk_quality_tooltip: Il modello riceve un budget per l'analisi interna del testo prima della traduzione (extended thinking). Migliora i passaggi difficili a costo di tempo e token. Riguarda esclusivamente Anthropic Claude — non ha effetto sugli endpoint compatibili con OpenAI.
+  err_odmowa: Il modello ha rifiutato di eseguire questo comando — il suo contenuto potrebbe violare le norme del modello o essere troppo ambiguo. Non è stato salvato nulla; riformula il comando e riprova.
 konwerter:
   panel_name: "Pannello Architetto Audiolibri"
   # 18.8: segmento localizzato del nome del file di output (una parola, senza spazi)
@@ -1402,6 +1403,7 @@ opowiesci:
   err_struktura: "Il modello AI ha restituito più volte una struttura dati non valida e non è stato possibile correggerla. Riprova: se l'errore persiste, allega il file error_log.txt alla segnalazione."
   pamiec_status_offline: "⚠️ Nessuna connessione a Internet: il conteggio esatto della memoria non è disponibile, i valori sono approssimativi (~{procent}% — {tokeny} token). Al ripristino della connessione, riavvia l'applicazione."
   err_kontekst: La cronologia della partita non è entrata nella finestra di contesto del modello. Termina questa partita e iniziane una nuova, oppure scegli un modello con una finestra più ampia — i modelli Claude offrono il margine maggiore in questo senso.
+  err_odmowa: Il modello ha rifiutato di eseguire questo comando — il suo contenuto potrebbe violare le norme del modello o essere troppo ambiguo. Non è stato salvato nulla; riformula il comando e riprova.
 bot:
   closure:
     Lumi: "Ciao!\n\nLa neve si è posata e la correzione è arrivata! Tutto ciò che hai chiesto è appena atterrato nell'ultima versione del Regista Audio GPT.\n\nPrendi l'aggiornamento qui: {link}\n\nChiudo la segnalazione perché non entri il freddo. Saluti gelidi!\n— Lumi"

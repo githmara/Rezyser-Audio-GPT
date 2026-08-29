@@ -1,5 +1,6 @@
 {
   "bledy_ai.py": [
+    "POSSIBLE|lingua:PL|{…} Panel: {…} Typ: {…} Data / Time: {…} Platforma / Platform: {…} Srodowisko / Environment: {…} {…} {…} {…}",
     "POSSIBLE|znak-PL:Ż|=== REŻYSER AUDIO GPT — AI DIAGNOSTIC LOG ==="
   ],
   "core_elevenlabs.py": [
@@ -116,5 +117,9 @@
     "POSSIBLE|znak-PL:Ń|[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
     "POSSIBLE|znak-PL:Ń|[STRESZCZENIE POPRZEDNICH WYDARZEŃ]:",
     "POSSIBLE|znak-PL:ń|You map a natural-language description of a language (often given in a locative or otherwise inflected form, in any lang"
+  ],
+  "test_json_structured.py": [
+    "POSSIBLE|lingua:PL|BladStrukturyJSON was not raised",
+    "POSSIBLE|lingua:PL|BladStrukturyJSON was not raised"
   ]
 }

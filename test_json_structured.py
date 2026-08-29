@@ -98,15 +98,18 @@ def klient_z(odpowiedzi):
     return cl.KlientLLM(provider=cl.PROVIDER_ANTHROPIC, sdk=sdk), wyslane
 
 
-PRZEPIS_BURZA = pr.zaladuj_przepis("burza", "pl")
+# Paczka `en`, bo fixture i komunikaty sa angielskie — inaczej bramka
+# jezykowa (`_wykryty_inny_jezyk`) slusznie wykrywa rozjazd i dokłada
+# jeden strzal korekty, co psuje liczniki prob w testach.
+PRZEPIS_BURZA = pr.zaladuj_przepis("burza", "en")
 SNAP = cr.SnapshotProjektu(
     nazwa="helsinki_story",
-    full_story="PROLOG: Aino wysiada z nocnego pociagu w Helsinkach.",
+    full_story="PROLOGUE: Aino steps off the night train in Helsinki.",
     summary_text="",
-    world_lore="Helsinki, luty, mroz.",
+    world_lore="Helsinki, February, frost.",
 )
 TRZY_OPCJE = [
-    {"tytul": f"Opcja {i}", "opis": f"Opis {i}", "cel_sceny": f"Cel {i}"}
+    {"tytul": f"Option {i}", "opis": f"Description {i}", "cel_sceny": f"Goal {i}"}
     for i in (1, 2, 3)
 ]
 
@@ -114,8 +117,8 @@ TRZY_OPCJE = [
 # dlugie `cel_sceny`. Bez naprawy: 3 proby -> BladStrukturyJSON.
 JSON_Z_LOGU = (
     '{\n  "opcje": [\n    {\n'
-    '      "tytul": "Nocny poscig",\n'
-    '      "opis": "Aino rusza za cieniem.",\n'
+    '      "tytul": "Night chase",\n'
+    '      "opis": "Aino follows the shadow.",\n'
     '      "cel_sceny": "' + "x" * 1100 + '",\n'
     "    }\n  ]\n}"
 )
@@ -130,14 +133,14 @@ def test_fixture_odtwarza_komunikat_z_logu():
     except json.JSONDecodeError as exc:
         assert exc.msg == "Expecting property name enclosed in double quotes", exc.msg
         return
-    raise AssertionError("fixture parsuje sie, a nie powinien")
+    raise AssertionError("fixture parses, but it must not")
 
 
 def test_schemat_api_bez_niewspieranych_slow_kluczowych():
     for schemat in (ra.SCHEMA_BURZA_API, ra.SCHEMA_SKRYPT_API, oa.SCHEMA_TURA_API):
         tekst = json.dumps(schemat)
         for klucz in cl._KLUCZE_NIEWSPIERANE:
-            assert f'"{klucz}"' not in tekst, f"{klucz} przeciekl do schematu API"
+            assert f'"{klucz}"' not in tekst, f"{klucz} leaked into the API schema"
 
 
 def test_schemat_kanoniczny_zostaje_nietkniety():
@@ -197,7 +200,7 @@ def test_rozpakuj_przepuszcza_odpowiedz_bez_typu():
 
 def test_naprawa_zdejmuje_przecinek_wiszacy():
     assert json.loads(cl.napraw_luzny_json(JSON_Z_LOGU))["opcje"][0][
-        "tytul"] == "Nocny poscig"
+        "tytul"] == "Night chase"
 
 
 def test_naprawa_zdejmuje_fence():
@@ -207,12 +210,12 @@ def test_naprawa_zdejmuje_fence():
 
 def test_naprawa_nie_rusza_prozy_uzytkownika():
     # Naiwny regex `,(\s*[}\]])` zjadlby przecinek WEWNATRZ wartosci.
-    proza = '{"opis": "Wyszli, a potem ] i , } zostalo.", "x": [1, 2]}'
+    proza = '{"opis": "They left, and then ] and , } remained.", "x": [1, 2]}'
     assert json.loads(cl.napraw_luzny_json(proza))["opis"] == (
-        "Wyszli, a potem ] i , } zostalo.")
-    esc = '{"opis": "Powiedziala \\"tak\\", potem wyszla,"}'
+        "They left, and then ] and , } remained.")
+    esc = '{"opis": "She said \\"yes\\", then left,"}'
     assert json.loads(cl.napraw_luzny_json(esc))["opis"] == (
-        'Powiedziala "tak", potem wyszla,')
+        'She said "yes", then left,')
 
 
 def test_naprawa_nie_zmienia_poprawnego_json():
@@ -249,11 +252,11 @@ def test_blad_temperatury_NIE_zdejmuje_schematu():
         _Blad400(BLAD_TEMPERATURY),
         (json.dumps({"typ": "tura", "opcje": TRZY_OPCJE}), "end_turn"),
     ])
-    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert len(wynik.opcje) == 3
     assert len(wyslane) == 2, f"prob={len(wyslane)}"
-    assert "temperature" not in wyslane[1], "temperatura nie zostala zdjeta"
-    assert "output_config" in wyslane[1], "SCHEMAT zostal zdjety bez powodu"
+    assert "temperature" not in wyslane[1], "temperature was not dropped"
+    assert "output_config" in wyslane[1], "the SCHEMA was dropped for no reason"
 
 
 def test_blad_schematu_zdejmuje_tylko_schemat():
@@ -261,7 +264,7 @@ def test_blad_schematu_zdejmuje_tylko_schemat():
         _Blad400(BLAD_SCHEMATU),
         (json.dumps({"opcje": TRZY_OPCJE}), "end_turn"),
     ])
-    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert len(wynik.opcje) == 3
     assert "output_config" not in wyslane[1]
 
@@ -271,7 +274,7 @@ def test_nierozpoznany_400_konczy_sie_najprostszym_payloadem():
         _Blad400("mysterious upstream complaint"),
         (json.dumps({"opcje": TRZY_OPCJE}), "end_turn"),
     ])
-    ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+    ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert "output_config" not in wyslane[1] and "temperature" not in wyslane[1]
 
 
@@ -293,10 +296,10 @@ def test_autocache_nie_dubluje_baseline():
 def test_powtarzajacy_sie_ten_sam_400_nie_petli():
     klient, _wyslane = klient_z([_Blad400(BLAD_SCHEMATU)] * 4)
     try:
-        ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+        ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     except _Blad400:
         return
-    raise AssertionError("blad powinien polecieic wyzej, a nie petlic degradacje")
+    raise AssertionError("the error must propagate instead of looping the degradation ladder")
 
 
 # ---------------------------------------------------------------------------
@@ -304,15 +307,15 @@ def test_powtarzajacy_sie_ten_sam_400_nie_petli():
 # ---------------------------------------------------------------------------
 def test_przypadek_z_logu_przechodzi_w_jednej_probie():
     klient, wyslane = klient_z([(JSON_Z_LOGU, "end_turn")])
-    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
-    assert wynik.opcje[0].tytul == "Nocny poscig"
+    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
+    assert wynik.opcje[0].tytul == "Night chase"
     assert not wynik.odrzucone
     assert len(wyslane) == 1, f"prob={len(wyslane)}"
 
 
 def test_stop_reason_refusal_to_odrzucenie_nie_blad_struktury():
     klient, wyslane = klient_z([("", cl.STOP_ODRZUCENIE)])
-    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert wynik.odrzucone and len(wyslane) == 1
 
 
@@ -320,20 +323,20 @@ def test_galaz_odrzucenia_rozpoznana():
     odm = json.dumps({"typ": "odrzucenie", "odrzucenie": pr.TAG_ODRZUCENIA_AI,
                       "powod": "inne"})
     klient, _wyslane = klient_z([(odm, "end_turn")])
-    assert ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.").odrzucone
+    assert ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.").odrzucone
 
 
 def test_tresc_bledu_nadaje_sie_do_publicznego_zgloszenia():
-    klient, wyslane = klient_z([("to nie jest json", "end_turn")] * 3)
+    klient, wyslane = klient_z([("this is not json", "end_turn")] * 3)
     try:
-        ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+        ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     except BladStrukturyJSON as exc:
         tresc = str(exc)
         assert all(f"req_TEST{i}" in tresc for i in (1, 2, 3)), tresc
         assert "tokens_in=1234" in tresc
         assert "no content" in tresc
         for poufne in ("Aino", "Helsinki", "helsinki_story"):
-            assert poufne not in tresc, f"proza uzytkownika w logu: {poufne}"
+            assert poufne not in tresc, f"user prose leaked into the log: {poufne}"
         # Wskazowka retry NIE moze cytowac parsera - to ona zapetlila zgloszenie.
         for kwargs in wyslane[1:]:
             wskazowka = kwargs["messages"][-1]["content"]
@@ -341,7 +344,7 @@ def test_tresc_bledu_nadaje_sie_do_publicznego_zgloszenia():
             assert "JSONDecodeError" not in wskazowka
             assert "trailing comma" in wskazowka
         return
-    raise AssertionError("BladStrukturyJSON nie zostal rzucony")
+    raise AssertionError("BladStrukturyJSON was not raised")
 
 
 def test_opcja_z_bialych_znakow_przechodzi_walidacje():
@@ -355,7 +358,7 @@ def test_opcja_z_bialych_znakow_przechodzi_walidacje():
     puste = [{"tytul": "   ", "opis": "   ", "cel_sceny": "   "}]
     klient, _wyslane = klient_z([
         (json.dumps({"typ": "tura", "opcje": puste}), "end_turn")])
-    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     assert not wynik.odrzucone
     assert len(wynik.opcje) == 1
     assert not wynik.opcje[0].tytul.strip()
@@ -372,9 +375,9 @@ def test_notka_o_kardynalnosci_trafia_do_description():
 
 
 def test_slad_niesie_model_i_odcisk_schematu():
-    klient, _wyslane = klient_z([("to nie jest json", "end_turn")] * 3)
+    klient, _wyslane = klient_z([("this is not json", "end_turn")] * 3)
     try:
-        ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+        ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Advance the plot.")
     except BladStrukturyJSON as exc:
         tresc = str(exc)
         assert "model=claude-sonnet-5" in tresc, tresc
@@ -384,7 +387,7 @@ def test_slad_niesie_model_i_odcisk_schematu():
         assert len(odciski) == 1, odciski
         assert odciski.pop() not in ("no", "unserializable")
         return
-    raise AssertionError("BladStrukturyJSON nie zostal rzucony")
+    raise AssertionError("BladStrukturyJSON was not raised")
 
 
 def test_opis_srodowiska_jest_nietresciowy():

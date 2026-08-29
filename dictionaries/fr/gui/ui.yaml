@@ -498,11 +498,11 @@ rezyser:
 
     Vous pouvez maintenant effacer la mémoire courante en toute sécurité.
   # Choix du fichier de Mémoire à Long Terme (v18.14) – si plusieurs sur le disque
-  pamiec_wybor_tytul:    "Choisissez le fichier de Mémoire à Long Terme"
+  pamiec_wybor_tytul: "Choisissez le fichier de Mémoire à Long Terme"
   pamiec_wybor_lbl: |-
     Ce projet possède plus d'un fichier de mémoire sur le disque.
     Indiquez celui qui doit devenir la Mémoire à Long Terme – les autres resteront intacts :
-  pamiec_wybor_pozycja:  "{plik} – sauvegardé {data}, {bajty} octets"
+  pamiec_wybor_pozycja: "{plik} – sauvegardé {data}, {bajty} octets"
   pamiec_wybor_anulowano_tytul: "Session sans Mémoire à Long Terme"
   pamiec_wybor_anulowano_tresc: |-
     Vous n'avez choisi aucun fichier de mémoire, le champ « Mémoire à Long Terme » reste donc vide.
@@ -837,6 +837,7 @@ poliglota:
   chk_quality: Mode qualité — réflexion plus approfondie du modèle (plus lent et plus coûteux ; sans effet sur les points de terminaison compatibles OpenAI)
   chk_quality_name: Mode qualité de traduction
   chk_quality_tooltip: Le modèle reçoit un budget pour une analyse interne du texte avant la traduction (extended thinking). Cela améliore les passages difficiles au prix du temps et des tokens. Concerne uniquement Anthropic Claude — sans effet sur les points de terminaison compatibles OpenAI.
+  err_odmowa: Le modèle a refusé d'exécuter cette instruction — son contenu enfreignait peut-être les règles du modèle ou était trop ambigu. Rien n'a été enregistré ; reformulez l'instruction et réessayez.
 konwerter:
   panel_name: "Panneau Architecte de Livres Audio"
   # 18.8 : segment localisé du nom du fichier de sortie (un mot, sans espaces)
@@ -1397,6 +1398,7 @@ opowiesci:
   err_struktura: Le modèle IA a renvoyé plusieurs fois une structure de données incorrecte et il n'a pas été possible de la corriger. Réessayez — si l'erreur persiste, joignez le fichier error_log.txt à votre signalement.
   pamiec_status_offline: "⚠️ Pas de connexion Internet : le compteur de mémoire exact n'est pas disponible, les valeurs affichées sont approximatives (~{procent} % — {tokeny} jetons). Redémarrez l'application une fois la connexion rétablie."
   err_kontekst: L'historique de la partie ne tient pas dans la fenêtre contextuelle du modèle. Terminez cette partie et commencez-en une nouvelle, ou choisissez un modèle avec une fenêtre plus grande — les modèles Claude offrent ici la plus grande marge.
+  err_odmowa: Le modèle a refusé d'exécuter cette instruction — son contenu enfreignait peut-être les règles du modèle ou était trop ambigu. Rien n'a été enregistré ; reformulez l'instruction et réessayez.
 bot:
   closure:
     Lumi: "Bonjour !\n\nLa neige s'est posée et le correctif est arrivé ! Tout ce que vous avez demandé vient d'atterrir dans la dernière version du Réalisateur Audio GPT.\n\nRécupérez la mise à jour ici : {link}\n\nJe clôture le ticket pour que le froid ne s'engouffre pas. Glaciales salutations !\n— Lumi"
