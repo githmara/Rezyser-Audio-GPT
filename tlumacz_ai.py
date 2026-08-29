@@ -167,6 +167,28 @@ class BladUcietegoTlumaczenia(RuntimeError):
     klucz_i18n = "ai_blad_uciety"
 
 
+class BladOdmowyTlumaczenia(RuntimeError):
+    """Model ODMÓWIŁ przetłumaczenia bloku (``stop_reason == "refusal"``).
+
+    Dlaczego osobna klasa, a nie :class:`BladUcietegoTlumaczenia` (v18.23):
+    komunikat `ai_blad_uciety` radzi „podziel plik źródłowy na mniejsze
+    fragmenty", co przy odmowie jest radą FAŁSZYWĄ — podział nic nie zmieni.
+    Dlatego ``klucz_i18n`` zostaje PUSTY: GUI pokaże wtedy ogólny „nieoczekiwany
+    błąd" wraz z sekcją szczegółów technicznych (angielska treść poniżej),
+    zamiast pewnej, ale mylnej instrukcji. Dedykowany komunikat wymagałby nowego
+    klucza w sekcji ``poliglota.`` we WSZYSTKICH 9 paczkach — to praca
+    tłumaczeniowa, więc świadomie poza tym wydaniem.
+
+    Bez tej klasy odmowa kończyła się CICHĄ DZIURĄ: ``_tlumacz_blok`` sprawdzał
+    tylko ``stop_reason != "max_tokens"`` i zwracał pusty fragment, który
+    wchodził do sklejki. To ta sama klasa defektu, którą repo naprawiało już raz
+    dla uciętych odpowiedzi (issue #16) — brakującego tekstu nikt nie zauważa,
+    dopóki nie przeczyta tłumaczenia w całości.
+    """
+
+    klucz_i18n = ""
+
+
 # =============================================================================
 # Callbacki
 # =============================================================================
@@ -486,6 +508,15 @@ def _tlumacz_blok(
         thinking_budget=thinking_budget,
     )
     fragment = fragment_raw.strip()
+    # v18.23: odmowa modelu MUSI być jawna. Wcześniej wpadała w gałąź „!=
+    # max_tokens" i wracała jako pusty fragment — czyli dziura w sklejce,
+    # niewidoczna aż do przeczytania całego tłumaczenia.
+    if stop_reason == cl.STOP_ODRZUCENIE:
+        raise BladOdmowyTlumaczenia(
+            "The model refused to translate this block (stop_reason='refusal'). "
+            "Splitting the file will not help — the refusal concerns the CONTENT "
+            "of this fragment, not its length."
+        )
     if stop_reason != "max_tokens":
         return fragment
 

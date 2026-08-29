@@ -344,6 +344,57 @@ def test_tresc_bledu_nadaje_sie_do_publicznego_zgloszenia():
     raise AssertionError("BladStrukturyJSON nie zostal rzucony")
 
 
+def test_opcja_z_bialych_znakow_przechodzi_walidacje():
+    """Dokumentuje LUKE, ktora musi zamknac GUI (`gui_rezyser`).
+
+    `minLength: 1` liczy znaki PRZED `strip()`, wiec opcja z samych spacji jest
+    dla schematu poprawna. Warstwa AI ja przepuszcza - i tak ma byc, bo to nie
+    ona decyduje o prezentacji. Gdyby ten test zaczal FAILOWAC (schema odrzuca),
+    filtr w `_on_wyslij_done_burza_json` mozna uproscic.
+    """
+    puste = [{"tytul": "   ", "opis": "   ", "cel_sceny": "   "}]
+    klient, _wyslane = klient_z([
+        (json.dumps({"typ": "tura", "opcje": puste}), "end_turn")])
+    wynik = ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+    assert not wynik.odrzucone
+    assert len(wynik.opcje) == 1
+    assert not wynik.opcje[0].tytul.strip()
+
+
+def test_notka_o_kardynalnosci_trafia_do_description():
+    # `minItems`/`maxItems` sa zdejmowane ze schematu API, wiec model
+    # dowiaduje sie o nich juz tylko z `description`.
+    opis = ra.SCHEMA_BURZA_API["anyOf"][0]["properties"]["opcje"]["description"]
+    assert "between 1 and 5" in opis, opis
+    tytul = (ra.SCHEMA_BURZA_API["anyOf"][0]["properties"]["opcje"]
+             ["items"]["properties"]["tytul"]["description"])
+    assert "200 characters" in tytul and "Must not be empty" in tytul
+
+
+def test_slad_niesie_model_i_odcisk_schematu():
+    klient, _wyslane = klient_z([("to nie jest json", "end_turn")] * 3)
+    try:
+        ra.generuj_burze(klient, PRZEPIS_BURZA, SNAP, "Rozwin fabule.")
+    except BladStrukturyJSON as exc:
+        tresc = str(exc)
+        assert "model=claude-sonnet-5" in tresc, tresc
+        # Odcisk schematu: 10 znakow hex, identyczny w kazdej probie.
+        odciski = {w.split("schema=")[1].split()[0]
+                   for w in tresc.splitlines() if "schema=" in w}
+        assert len(odciski) == 1, odciski
+        assert odciski.pop() not in ("no", "unserializable")
+        return
+    raise AssertionError("BladStrukturyJSON nie zostal rzucony")
+
+
+def test_opis_srodowiska_jest_nietresciowy():
+    opis = cl.opisz_srodowisko()
+    assert "Python:" in opis
+    assert "provider:" in opis
+    # Zadnych sciezek ani nazw projektow.
+    assert "helsinki" not in opis.lower() and "\\" not in opis
+
+
 if __name__ == "__main__":
     testy = [(nazwa, obiekt) for nazwa, obiekt in sorted(globals().items())
              if nazwa.startswith("test_") and callable(obiekt)]

@@ -51,16 +51,34 @@ def zapisz_diagnostyke(exc: "BladGeneracjiAI", panel: str) -> None:
 
     Nigdy nie rzuca — logowanie diagnostyki nie może wywrócić obsługi błędu,
     którą user i tak zaraz zobaczy w dialogu.
+
+    **Zawartość jest świadomie WYŁĄCZNIE nietreściowa (v18.23).** Komunikat
+    ``err_struktura`` prosi użytkownika o dołączenie tego pliku do zgłoszenia,
+    a payload zawiera jego nieopublikowaną prozę — więc nie ma tu ani fragmentu
+    tekstu, ani nazwy projektu. Diagnozę nosi za to warstwa techniczna:
+    środowisko w nagłówku (:func:`core_llm.opisz_srodowisko`) plus ślad wywołań
+    w treści wyjątku (model, ``request_id`` KAŻDEJ próby, ``stop_reason``, hash
+    schematu, liczniki tokenów, metryki kształtu). Rozważane okno ±120 znaków
+    wokół pozycji błędu zostało ODRZUCONE: po włączeniu structured outputs ta
+    ścieżka niemal nie odpala, a gdy odpala, to zwykle przez ucięcie odpowiedzi,
+    gdzie wycinek nie mówi nic, czego nie mówi licznik tokenów.
     """
     try:
         sciezka = os.path.join(sciezki.KATALOG_BAZOWY_STR, _PLIK_LOGU_BLEDOW)
         stempel = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            import core_llm
+
+            srodowisko = core_llm.opisz_srodowisko()
+        except Exception:  # noqa: BLE001 — nagłówek jest dodatkiem, nie warunkiem
+            srodowisko = "(unavailable)"
         wpis = (
             f"{AI_DIAG_MARKER}\n"
             f"Panel: {panel}\n"
             f"Typ: {type(exc).__name__}\n"
             f"Data / Time: {stempel}\n"
             f"Platforma / Platform: {platform.platform()}\n"
+            f"Srodowisko / Environment: {srodowisko}\n"
             f"{'-' * 60}\n"
             f"{exc}\n"
             f"{'=' * 60}\n\n"

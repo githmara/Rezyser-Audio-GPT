@@ -1112,6 +1112,7 @@ def _domknij_urwane_zdanie(
     if (
         not domkniete
         or stop_reason == "max_tokens"
+        or stop_reason == cl.STOP_ODRZUCENIE   # v18.23: odmowa klasyfikatora
         or pr.wykryto_odrzucenie(domkniete)
     ):
         return tekst, False
@@ -1164,7 +1165,9 @@ def generuj_fragment(
         # 1) Detekcja odrzucenia — przed wszystkim innym. Tag infrastruktury
         # jest wymuszany przez KLAUZULA_ODRZUCENIA_DOMYSLNA niezależnie od
         # jezyk_odpowiedzi, więc działa tak samo dla fińskiego i japońskiego.
-        if pr.wykryto_odrzucenie(tekst):
+        # v18.23: `stop_reason == "refusal"` to ta sama sytuacja z drugiej
+        # strony — odmawia KLASYFIKATOR, więc tagu nie ma, bo nie ma treści.
+        if stop_reason == cl.STOP_ODRZUCENIE or pr.wykryto_odrzucenie(tekst):
             return WynikGeneracji(
                 tekst_odpowiedzi=tekst,
                 odrzucone=True,
@@ -1309,8 +1312,9 @@ def nadaj_tytuly_rozdzialom(
             tytul_raw = tytul_raw.strip()
 
             # Nawet model tytułujący może odrzucić prompt (szczególnie przy
-            # brutalnych treściach w treści rozdziału). Honorujemy tag.
-            if pr.wykryto_odrzucenie(tytul_raw):
+            # brutalnych treściach w treści rozdziału). Honorujemy tag ORAZ
+            # (v18.23) odmowę klasyfikatora, która tagu nie zwraca.
+            if _stop == cl.STOP_ODRZUCENIE or pr.wykryto_odrzucenie(tytul_raw):
                 tytuly.append(
                     f"{naglowek}: "
                     f"{przepis_tytuly.etykieta_odrzucenie or '(Odrzucenie AI)'}"
@@ -1588,7 +1592,10 @@ def wykonaj_postprodukcje_calosc(
 
     tekst = (tekst or "").strip()
 
-    if pr.wykryto_odrzucenie(tekst):
+    # v18.23: `refusal` PRZED testem pustej treści — inaczej odmowa
+    # klasyfikatora (która nie zwraca tagu ani tekstu) trafiłaby w gałąź
+    # „pusta treść" i user zobaczyłby błąd zamiast informacji o odmowie.
+    if stop_reason == cl.STOP_ODRZUCENIE or pr.wykryto_odrzucenie(tekst):
         return WynikPostprodukcjiCalosc(odrzucone=True)
 
     if not tekst:

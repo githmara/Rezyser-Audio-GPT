@@ -2637,6 +2637,21 @@ class RezyserPanel(wx.Panel):
             for o in wynik.opcje
         ]
 
+        # v18.23: opcja z samymi białymi znakami PRZECHODZI walidację schematu
+        # (`minLength: 1` liczy znaki przed `strip()`), a `_przeladuj_opcje_burzy`
+        # pomija ją jako halucynację. Gdy takie są WSZYSTKIE, panel zostawał
+        # pusty, `wx.Bell()` sygnalizował sukces i NVDA nie miał czego przeczytać
+        # — reżyser nie wiedział, czy coś się stało. Traktujemy to jak błąd
+        # struktury (klucz istnieje w 9 paczkach) i nie budujemy panelu.
+        if not any(
+            (o["tytul"] or "").strip() and (o["cel_sceny"] or "").strip()
+            for o in opcje_dict
+        ):
+            self._wyswietl_blad_ai(t("rezyser.err_struktura"))
+            self._btn_wyslij.Enable()
+            self._refresh_ui_state()
+            return
+
         # Persystencja — tylko gdy mamy nazwę projektu. Burza bez nazwy
         # (gracz nie wpisał) nie jest blokowana, po prostu nie zapisujemy.
         if self._projekt.nazwa_pliku:

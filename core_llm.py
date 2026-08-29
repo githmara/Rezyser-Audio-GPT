@@ -19,6 +19,7 @@ wciągany do `.exe` (lekki bundla single-provider — patrz CLAUDE.md pkt 7).
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -472,10 +473,42 @@ def schemat_do_api(schema: Any) -> Any:
         }
         if wynik.get("type") == "object":
             wynik["additionalProperties"] = False
+        notka = _notka_o_ograniczeniach(schema)
+        if notka:
+            istniejacy = str(wynik.get("description", "")).strip()
+            wynik["description"] = f"{istniejacy} {notka}".strip()
         return wynik
     if isinstance(schema, list):
         return [schemat_do_api(v) for v in schema]
     return schema
+
+
+def _notka_o_ograniczeniach(wezel: dict) -> str:
+    """Przenosi zdejmowane limity do ``description`` — po angielsku, zwięźle.
+
+    Po co: API nie przyjmuje ``minItems``/``maxLength``, więc po oczyszczeniu
+    schematu model przestaje o nich WIEDZIEĆ (``jsonschema`` je nadal sprawdza,
+    ale dopiero po fakcie — czyli kosztem retry). ``description`` jest jedynym
+    kanałem, którym możemy mu tę informację podać, a modele te opisy czytają.
+    Prompt YAML mówi swoje („3 opcje"); to jest pas bezpieczeństwa na wypadek,
+    gdy prompt i schemat się rozjadą.
+    """
+    czesci: list[str] = []
+    dolny, gorny = wezel.get("minItems"), wezel.get("maxItems")
+    if dolny is not None and gorny is not None:
+        czesci.append(
+            f"Provide exactly {dolny} items." if dolny == gorny
+            else f"Provide between {dolny} and {gorny} items."
+        )
+    elif dolny is not None:
+        czesci.append(f"Provide at least {dolny} item(s).")
+    elif gorny is not None:
+        czesci.append(f"Provide at most {gorny} items.")
+    if wezel.get("minLength"):
+        czesci.append("Must not be empty.")
+    if wezel.get("maxLength") is not None:
+        czesci.append(f"Keep it under {wezel['maxLength']} characters.")
+    return " ".join(czesci)
 
 
 def schemat_z_dyskryminatorem(schema: dict, tag_odrzucenia: str) -> dict:
@@ -631,6 +664,55 @@ def komunikat_retry_schema(exc: Exception) -> str:
     )
 
 
+def _odcisk_schematu(output_config: dict | None) -> str:
+    """Krótki hash schematu wysłanego do API (albo ``"no"``, gdy go nie było).
+
+    Po co hash, a nie sama flaga: kompilacja schematu po stronie API jest
+    cache'owana bajtowo, więc przy diagnozie trzeba wiedzieć, czy dwie próby
+    poszły z DOKŁADNIE tym samym schematem. Hash jest też odporny na to, czego
+    do logu nie chcemy — nie ujawnia treści (schemat jej nie zawiera, ale
+    wypisywanie całości zaśmiecałoby zgłoszenie).
+    """
+    if not output_config:
+        return "no"
+    try:
+        surowy = json.dumps(output_config, sort_keys=True, ensure_ascii=False)
+    except (TypeError, ValueError):
+        return "unserializable"
+    return hashlib.sha256(surowy.encode("utf-8")).hexdigest()[:10]
+
+
+def opisz_srodowisko() -> str:
+    """Wersje i locale do nagłówka ``error_log.txt`` — wyłącznie nietreściowe.
+
+    Zbierane tutaj, a nie w ``bledy_ai``, bo tylko warstwa LLM zna wersję SDK
+    (``anthropic`` jest importowany leniwie — patrz :func:`zbuduj_klienta`).
+    Każdy element odpowiada na inne pytanie z realnej diagnozy: wersja aplikacji
+    („czy user ma już patch"), wersja SDK („czy to nie zmiana zachowania
+    klienta"), wersja Pythona (środowisko zamrożone vs źródło), locale („czy
+    rozjazd nie jest językowy"), provider („Anthropic czy cudzy endpoint").
+    """
+    czesci = [f"Python: {sys.version.split()[0]}"]
+    try:
+        import i18n
+
+        czesci.append(f"App: {i18n.NUMER_WERSJI}")
+        czesci.append(f"UI locale: {i18n.aktualny_jezyk()}")
+    except Exception:  # noqa: BLE001 — diagnostyka nie może wywrócić obsługi błędu
+        pass
+    try:
+        import anthropic
+
+        czesci.append(f"anthropic SDK: {anthropic.__version__}")
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        czesci.append(f"provider: {wczytaj_konfiguracje().provider}")
+    except Exception:  # noqa: BLE001
+        pass
+    return " | ".join(czesci)
+
+
 def formatuj_slad(slad: list[dict]) -> str:
     """Renderuje ślad wywołań do logu — WYŁĄCZNIE dane nietreściowe.
 
@@ -651,9 +733,10 @@ def formatuj_slad(slad: list[dict]) -> str:
     for wpis in slad:
         linie.append(
             f"  attempt {wpis.get('proba')}: "
+            f"model={wpis.get('model')} "
             f"request_id={wpis.get('request_id')} "
             f"stop_reason={wpis.get('stop_reason')} "
-            f"schema={'yes' if wpis.get('schemat') else 'no'} "
+            f"schema={wpis.get('schemat')} "
             f"tokens_in={wpis.get('wejscie_tok')} "
             f"tokens_out={wpis.get('wyjscie_tok')}"
         )
@@ -1020,9 +1103,10 @@ def _wywolaj_anthropic(
         uzycie = getattr(resp, "usage", None)
         slad.append({
             "proba":      len(slad) + 1,
+            "model":      mdl,
             "request_id": getattr(resp, "_request_id", None),
             "stop_reason": stop,
-            "schemat":    "output_config" in kwargs,
+            "schemat":    _odcisk_schematu(kwargs.get("output_config")),
             "wejscie_tok":  getattr(uzycie, "input_tokens", None),
             "wyjscie_tok":  getattr(uzycie, "output_tokens", None),
         })
