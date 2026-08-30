@@ -100,8 +100,8 @@ def _skanuj_lingua_z_podstaw() -> dict[str, str]:
             problemy.append(f"{p.name}: brak pola `lingua:` w podstawy.yaml")
     if problemy:
         raise SystemExit(
-            "❌ audyt_leakow: paczki językowe bez mapowania na lingua — "
-            "bramka leaków by je POMINĘŁA:\n  - " + "\n  - ".join(problemy)
+            "❌ audyt_leakow: language packs with no lingua mapping — the leak "
+            "gate would SKIP them:\n  - " + "\n  - ".join(problemy)
         )
     return wynik
 
@@ -295,8 +295,8 @@ def _wczytaj_sekcje_docelowe(kod: str, nazwa_pliku: str) -> dict[str, str]:
             dane = yaml.safe_load(fh)
     except (OSError, yaml.YAMLError) as exc:
         raise SystemExit(
-            f"❌ audyt_leakow: nie mogę odczytać {plik} ({exc}) — "
-            f"skan tego pliku byłby fałszywie „czysty”."
+            f"❌ audyt_leakow: cannot read {plik} ({exc}) — a scan of this file "
+            f"would be falsely \"clean\"."
         ) from exc
     if not isinstance(dane, dict):
         return {}
@@ -991,37 +991,37 @@ def _main_py() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Detektor PL-leaków w dictionaries/<kod>/gui/dokumentacja/*.yaml "
-                    "(lingua per-linia + kuratorskie PL-terminy + znaki PL).",
+        description="PL-leak detector for dictionaries/<code>/gui/dokumentacja/*.yaml "
+                    "(per-line lingua + curated PL terms + PL characters).",
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
     grupa.add_argument("-l", "--jezyki", type=str, default="",
-                       help=f"CSV kodów ISO (np. is,fi). Dozwolone: {', '.join(KODY_DOCELOWE)}.")
+                       help=f"CSV of ISO codes (e.g. is,fi). Allowed: {', '.join(KODY_DOCELOWE)}.")
     grupa.add_argument("-a", "--wszystkie", action="store_true",
-                       help="Skanuj wszystkie języki docelowe (docs YAML).")
+                       help="Scan every target language (docs YAML).")
     grupa.add_argument("--py", action="store_true",
-                       help="Skanuj źródła aplikacji `*.py` pod kątem PL hard-kodu "
-                            "(user-facing / LLM-facing), z pominięciem dev-tooli.")
+                       help="Scan the application sources `*.py` for PL hard-coding "
+                            "(user-facing / LLM-facing), dev tools excluded.")
     grupa.add_argument("--bramka", action="store_true",
-                       help="BRAMKA CI/build: skan wszystkich docs vs baseline "
-                            f"({BASELINE_PATH.name}). Exit 1 TYLKO przy leakach "
-                            "ponad baseline (nowy/przesunięty). Czyste FP w baseline "
-                            "nie blokują.")
+                       help="CI/build GATE: scans all docs against the baseline "
+                            f"({BASELINE_PATH.name}). Exit 1 ONLY on leaks above "
+                            "the baseline (new/shifted). Clean false positives "
+                            "already in the baseline do not block.")
     grupa.add_argument("--zapisz-baseline", dest="zapisz_baseline", action="store_true",
-                       help="Regeneruj baseline z bieżących trafień (po LEGALnej "
-                            "zmianie treści docs). Nadpisuje "
-                            f"{BASELINE_PATH.name} — zrób review diffa przed commitem.")
+                       help="Regenerate the baseline from the current hits (after a "
+                            "LEGITIMATE docs content change). Overwrites "
+                            f"{BASELINE_PATH.name} — review the diff before committing.")
     grupa.add_argument("--bramka-py", dest="bramka_py", action="store_true",
-                       help="BRAMKA CI/build dla źródeł `.py` vs baseline "
-                            f"({BASELINE_PY_PATH.name}). Exit 1 przy hard-kodzie "
-                            "ponad baseline (nowy / zwł. LIKELY).")
+                       help="CI/build GATE for the `.py` sources against the baseline "
+                            f"({BASELINE_PY_PATH.name}). Exit 1 on hard-coding "
+                            "above the baseline (new, LIKELY especially).")
     grupa.add_argument("--zapisz-baseline-py", dest="zapisz_baseline_py", action="store_true",
-                       help="Regeneruj baseline `.py` z bieżącego skanu źródeł. "
-                            f"Nadpisuje {BASELINE_PY_PATH.name} — review diffa przed commitem.")
+                       help="Regenerate the `.py` baseline from the current source scan. "
+                            f"Overwrites {BASELINE_PY_PATH.name} — review the diff before committing.")
     parser.add_argument("--szczegoly", action="store_true",
-                        help="Wypisz każdą linię-leak (domyślnie: licznik per sekcja).")
+                        help="Print every leaking line (default: a counter per section).")
     parser.add_argument("--prog", type=float, default=0.70,
-                        help="Próg pewności lingua dla klasy A (domyślnie 0.70).")
+                        help="Lingua confidence threshold for class A (default 0.70).")
     args = parser.parse_args()
 
     if args.py:
@@ -1031,67 +1031,67 @@ def main() -> int:
         try:
             aktualne = zbierz_leaki_py()
         except ImportError as exc:
-            print(f"❌ Nie można zbudować baseline `.py` — brak `lingua` ({exc}).")
+            print(f"❌ Cannot build the `.py` baseline — `lingua` is missing ({exc}).")
             return 2
         zapisz_baseline(aktualne, BASELINE_PY_PATH)
         ile = sum(len(v) for v in aktualne.values())
-        print(f"✅ Zapisano baseline `.py`: {ile} trafień w {len(aktualne)} plik(ach) → "
-              f"{BASELINE_PY_PATH.name}. Zrób review diffa przed commitem.")
+        print(f"✅ Saved the `.py` baseline: {ile} hit(s) in {len(aktualne)} file(s) → "
+              f"{BASELINE_PY_PATH.name}. Review the diff before committing.")
         return 0
 
     if args.bramka_py:
         wynik = bramka_py()
-        print("========== BRAMKA HARD-KODU `.py` (vs baseline) ==========")
+        print("========== HARD-CODED PL GATE `.py` (vs baseline) ==========")
         if wynik.pominieto:
-            print(f"⚠️  Bramka pominięta: {wynik.powod_pominiecia}. "
-                  "Instaluj `lingua`, by ją uruchomić (maintainer/CI).")
+            print(f"⚠️  Gate skipped: {wynik.powod_pominiecia}. "
+                  "Install `lingua` to run it (maintainer/CI).")
             return 0
         if wynik.czysto:
-            print(f"✅ Brak hard-kodów ponad baseline ({BASELINE_PY_PATH.name}).")
+            print(f"✅ No hard-coded strings above the baseline ({BASELINE_PY_PATH.name}).")
             return 0
         ile = sum(len(v) for v in wynik.nowe.values())
-        print(f"❌ {ile} hard-kod(ów) PONAD baseline w {len(wynik.nowe)} plik(ach) "
-              "(nowy lub przesunięty):")
+        print(f"❌ {ile} hard-coded string(s) ABOVE the baseline in {len(wynik.nowe)} "
+              "file(s) (new or shifted):")
         for klucz, powody in sorted(wynik.nowe.items()):
             for p in powody:
                 print(f"  • {klucz}: {p}")
-        print("Fix: przenieś string do i18n (`t()`) / przepisu YAML. Jeśli to ŚWIADOMY, "
-              f"by-design hard-kod — zregeneruj baseline: `python {Path(__file__).name} "
-              "--zapisz-baseline-py` i zcommituj diff.")
-        print("==========================================================")
+        print("Fix: move the string into i18n (`t()`) or a YAML recipe. If it is a "
+              "DELIBERATE, by-design hard-code — regenerate the baseline: "
+              f"`python {Path(__file__).name} --zapisz-baseline-py` and commit the diff.")
+        print("============================================================")
         return 1
 
     if args.zapisz_baseline:
         try:
             aktualne = zbierz_wszystkie_leaki(prog_lingua=args.prog)
         except ImportError as exc:
-            print(f"❌ Nie można zbudować baseline — brak `lingua` ({exc}).")
+            print(f"❌ Cannot build the baseline — `lingua` is missing ({exc}).")
             return 2
         zapisz_baseline(aktualne)
         ile = sum(len(v) for v in aktualne.values())
-        print(f"✅ Zapisano baseline: {ile} trafień w {len(aktualne)} sekcji → "
-              f"{BASELINE_PATH.name}. Zrób review diffa przed commitem.")
+        print(f"✅ Saved the baseline: {ile} hit(s) in {len(aktualne)} section(s) → "
+              f"{BASELINE_PATH.name}. Review the diff before committing.")
         return 0
 
     if args.bramka:
         wynik = bramka_docs(prog_lingua=args.prog)
-        print("========== BRAMKA LEAKÓW DOCS (vs baseline) ==========")
+        print("========== DOCS LEAK GATE (vs baseline) ==========")
         if wynik.pominieto:
-            print(f"⚠️  Bramka pominięta: {wynik.powod_pominiecia}. "
-                  "Instaluj `lingua`, by ją uruchomić (maintainer/CI).")
+            print(f"⚠️  Gate skipped: {wynik.powod_pominiecia}. "
+                  "Install `lingua` to run it (maintainer/CI).")
             return 0
         if wynik.czysto:
-            print(f"✅ Brak leaków ponad baseline ({BASELINE_PATH.name}).")
+            print(f"✅ No leaks above the baseline ({BASELINE_PATH.name}).")
             return 0
         ile = sum(len(v) for v in wynik.nowe.values())
-        print(f"❌ {ile} leak(ów) PONAD baseline w {len(wynik.nowe)} sekcji "
-              "(nowy lub przesunięty fragment):")
+        print(f"❌ {ile} leak(s) ABOVE the baseline in {len(wynik.nowe)} section(s) "
+              "(new or shifted fragment):")
         for klucz, powody in sorted(wynik.nowe.items()):
             print(f"  • {klucz}: {', '.join(powody)}")
-        print("Fix: przetłumacz leak w szablonie. Jeśli to ŚWIADOMA, legalna "
-              f"zmiana treści — zregeneruj baseline: `python {Path(__file__).name} "
-              "--zapisz-baseline` i zcommituj diff.")
-        print("======================================================")
+        print("Fix: translate the leak in the template. If this is a DELIBERATE, "
+              "legitimate content change — regenerate the baseline: "
+              f"`python {Path(__file__).name} --zapisz-baseline` and commit the diff.")
+        print("==================================================")
         return 1
 
     if args.wszystkie:
@@ -1100,7 +1100,7 @@ def main() -> int:
         kody = [k.strip() for k in args.jezyki.split(",") if k.strip()]
         nieznane = [k for k in kody if k not in KODY_DOCELOWE]
         if nieznane:
-            print(f"❌ Nieznane kody: {', '.join(nieznane)}. Dozwolone: {', '.join(KODY_DOCELOWE)}.")
+            print(f"❌ Unknown codes: {', '.join(nieznane)}. Allowed: {', '.join(KODY_DOCELOWE)}.")
             return 2
 
     suma_leakow = 0

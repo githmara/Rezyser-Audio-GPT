@@ -281,8 +281,8 @@ def _kotwice_z_silnika() -> tuple[str, ...]:
         import opowiesci_ai
         import przepisy_rezysera
     except Exception as exc:  # noqa: BLE001 — dev-tool ma działać też bez silnika
-        print(f"⚠️  Nie mogę zaimportować silnika Opowieści ({exc}) — kotwice "
-              f"kluczy JSON opieram tylko na heurystyce + orakule.")
+        print(f"⚠️  Cannot import the Tales engine ({exc}) — JSON-key anchors "
+              f"now rest on the heuristic + oracle alone.")
         return tuple(literaly)
 
     literaly.append(przepisy_rezysera.TAG_ODRZUCENIA_AI)
@@ -657,11 +657,11 @@ def zbierz_jednostki_pol(
     zejdz(drzewo, ())
     if nieznane:
         raise SystemExit(
-            f"❌ {sciezka_opisowa}: nieznane pola przepisu Opowieści: {nieznane}.\n"
-            f"   Dopisz każde do KLASY_SCIEZEK w buduj_wielojezyczne_opowiesci.py "
+            f"❌ {sciezka_opisowa}: unknown Tales recipe fields: {nieznane}.\n"
+            f"   Add each one to KLASY_SCIEZEK in buduj_wielojezyczne_opowiesci.py "
             f"(techniczne / etykieta / prompt / proza / skutek_fiolki / "
-            f"ziarno_swiata / kontener) — tłumacz nie zgaduje, czy pole się "
-            f"lokalizuje."
+            f"ziarno_swiata / kontener) — the translator does not guess whether "
+            f"a field gets localized."
         )
     return jednostki
 
@@ -1007,7 +1007,7 @@ def waliduj_silnikiem(
                 bledy.append(
                     f"crosscheck baz referencyjnych zerwany — dostępne bazowe: {bazowe}")
     except ImportError as exc:
-        print(f"⚠️  {kod}/{nazwa_pliku}: pomijam kontrolę kompletności paczki ({exc}).")
+        print(f"⚠️  {kod}/{nazwa_pliku}: skipping the pack completeness check ({exc}).")
 
     return bledy
 
@@ -1159,7 +1159,7 @@ def tlumacz_plik(
         tekst_zrodla = fh.read()
     drzewo_pl = yaml_io.load(tekst_zrodla)
     if not isinstance(drzewo_pl, dict):
-        print(f"❌ {zrodlo}: plik nie parsuje się do mapy YAML.")
+        print(f"❌ {zrodlo}: the file does not parse into a YAML mapping.")
         return False, []
     dane_pl = {str(k): drzewo_pl[k] for k in drzewo_pl.keys()}
     kanon = kanon_etapow_luku()
@@ -1210,10 +1210,10 @@ def tlumacz_plik(
     kotwice = wykryj_kotwice([j.zrodlo for j in jednostki], odniesienia, wymuszone)
     if not odniesienia:
         print(
-            f"⚠️  {kod}/{nazwa_pliku}: żadna inna paczka nie ma tego pliku — "
-            f"orakuł kotwic nieaktywny, zamrażam WSZYSTKICH {len(kotwice)} "
-            f"kandydatów. Recenzent musi sprawdzić, czy któryś nie powinien "
-            f"zostać przetłumaczony."
+            f"⚠️  {kod}/{nazwa_pliku}: no other pack has this file — the anchor "
+            f"oracle is inactive, freezing ALL {len(kotwice)} candidates. The "
+            f"reviewer must check whether any of them should have been "
+            f"translated instead."
         )
     else:
         print(f"🔎 {kod}/{nazwa_pliku}: orakuł kotwic = jednomyślność paczek "
@@ -1272,13 +1272,13 @@ def tlumacz_plik(
             mapa_tgt.update(_wywolaj(klient, model, nazwa_cel, kod, pozycje,
                                      tryb_fiolka=False, kontekst=kontekst))
         except RuntimeError as exc:
-            print(f"❌ {kod}/{nazwa_pliku}: błąd LLM w chunku {nr}/{len(chunki)} — {exc}")
+            print(f"❌ {kod}/{nazwa_pliku}: LLM error in chunk {nr}/{len(chunki)} — {exc}")
             return False, []
 
     brakujace = {j.id for j in jednostki} - set(mapa_tgt)
     if brakujace:
-        print(f"❌ {kod}/{nazwa_pliku}: model pominął id {sorted(brakujace)[:20]} "
-              f"(razem {len(brakujace)}). NIE zapisuję.")
+        print(f"❌ {kod}/{nazwa_pliku}: the model skipped id {sorted(brakujace)[:20]} "
+              f"(total {len(brakujace)}). NOT saving.")
         return False, []
 
     if not _bramki_z_powtorka(jednostki, mapa_tgt, kod, nazwa_pliku, klient,
@@ -1334,15 +1334,15 @@ def _tlumacz_fiolke(
     """
     cel = DICT_DIR / kod / FOLDER_OPOWIESCI / nazwa_pliku
     if not cel.is_file():
-        print(f"⚠️  {kod}/{nazwa_pliku}: brak pliku docelowego — tryb --fiolka "
-              f"dopisuje ziarna do ISTNIEJĄCEJ paczki. Najpierw pełne tłumaczenie.")
+        print(f"⚠️  {kod}/{nazwa_pliku}: no target file — the --fiolka mode appends "
+              f"seeds to an EXISTING pack. Do the full translation first.")
         return False, []
 
     with open(cel, "r", encoding="utf-8") as fh:
         tekst_celu = fh.read()
     drzewo_cel = yaml_io.load(tekst_celu)
     if not isinstance(drzewo_cel, dict):
-        print(f"❌ {cel}: plik nie parsuje się do mapy YAML.")
+        print(f"❌ {cel}: the file does not parse into a YAML mapping.")
         return False, []
 
     braki = _brakujace_ziarna_fiolki(drzewo_pl, drzewo_cel)
@@ -1387,13 +1387,13 @@ def _tlumacz_fiolke(
             [(j.id, j.rodzaj, j.zrodlo_tok) for j in jednostki],
             tryb_fiolka=True, kontekst=kontekst)
     except RuntimeError as exc:
-        print(f"❌ {kod}/{nazwa_pliku}: błąd LLM — {exc}")
+        print(f"❌ {kod}/{nazwa_pliku}: LLM error — {exc}")
         return False, []
 
     brakujace_id = {j.id for j in jednostki} - set(mapa_tgt)
     if brakujace_id:
-        print(f"❌ {kod}/{nazwa_pliku}: model pominął id {sorted(brakujace_id)}. "
-              f"NIE zapisuję.")
+        print(f"❌ {kod}/{nazwa_pliku}: the model skipped id {sorted(brakujace_id)}. "
+              f"NOT saving.")
         return False, []
 
     if not _bramki_z_powtorka(jednostki, mapa_tgt, kod, nazwa_pliku, klient,
@@ -1450,7 +1450,7 @@ def _bramki_z_powtorka(
     if not porazki:
         return True
 
-    print(f"⚠️  {kod}/{nazwa_pliku}: {len(porazki)} jednostek do powtórki…")
+    print(f"⚠️  {kod}/{nazwa_pliku}: {len(porazki)} units queued for a retry…")
     for j, problemy in porazki[:6]:
         print(f"     [{j.id}] {j.opis()}: {problemy[0]}")
     do_retry = [(j.id, j.rodzaj, j.zrodlo_tok) for j, _ in porazki]
@@ -1458,7 +1458,7 @@ def _bramki_z_powtorka(
         retry = _wywolaj(klient, model, nazwa_cel, kod, do_retry,
                          tryb_fiolka=tryb_fiolka, kontekst=kontekst)
     except RuntimeError as exc:
-        print(f"❌ {kod}/{nazwa_pliku}: powtórka nieudana — {exc}")
+        print(f"❌ {kod}/{nazwa_pliku}: the retry failed — {exc}")
         return False
     zamowione = {j.id for j, _ in porazki}
     porazki_v2: list[tuple[Jednostka, list[str]]] = []
@@ -1470,11 +1470,11 @@ def _bramki_z_powtorka(
             porazki_v2.append((j, problemy))
     nieproszone = set(retry) - zamowione
     if nieproszone:
-        print(f"⚠️  {kod}: powtórka zwróciła {len(nieproszone)} nieproszonych id "
-              f"— ignoruję: {sorted(nieproszone)[:10]}")
+        print(f"⚠️  {kod}: the retry returned {len(nieproszone)} unrequested id "
+              f"— ignoring: {sorted(nieproszone)[:10]}")
     if porazki_v2:
-        print(f"❌ {kod}/{nazwa_pliku}: po powtórce {len(porazki_v2)} jednostek "
-              f"wciąż nie przechodzi bramek. NIE zapisuję.")
+        print(f"❌ {kod}/{nazwa_pliku}: after the retry {len(porazki_v2)} units "
+              f"still fail the gates. NOT saving.")
         for j, problemy in porazki_v2[:10]:
             print(f"     [{j.id}] {j.opis()} ({j.rodzaj})")
             for diag in problemy[:4]:
@@ -1497,9 +1497,9 @@ def _podmien_komentarze(
     bloki_cel = tlumacz_rdzen.bloki_komentarzy(dump_cel, pomin_naglowek=False)
     koncowe_cel = tlumacz_rdzen.komentarze_koncowe(dump_cel)
     if len(bloki_cel) != len(bloki_pl) or len(koncowe_cel) != len(koncowe_pl):
-        print(f"❌ {kod}/{nazwa_pliku}: layout komentarzy rozjechał się między "
-              f"dumpem PL i celu ({len(bloki_pl)}→{len(bloki_cel)} bloków, "
-              f"{len(koncowe_pl)}→{len(koncowe_cel)} końcowych). NIE zapisuję.")
+        print(f"❌ {kod}/{nazwa_pliku}: the comment layout drifted between the PL "
+              f"and target dumps ({len(bloki_pl)}→{len(bloki_cel)} blocks, "
+              f"{len(koncowe_pl)}→{len(koncowe_cel)} trailing). NOT saving.")
         return None
 
     tlum_bloki = {j.adres[1]: j.cel for j in jednostki if j.adres[0] == "komentarz"}
@@ -1511,8 +1511,8 @@ def _podmien_komentarze(
     for idx in range(len(bloki_cel) - 1, -1, -1):
         blok_cel, blok_pl = bloki_cel[idx], bloki_pl[idx]
         if blok_cel["tresc"] != blok_pl["tresc"]:
-            print(f"❌ {kod}/{nazwa_pliku}: blok komentarza #{idx} w dumpie celu nie "
-                  f"jest identyczny z PL — przerywam (ryzyko wstawienia nie tam).")
+            print(f"❌ {kod}/{nazwa_pliku}: comment block #{idx} in the target dump is "
+                  f"not identical to PL — aborting (risk of inserting it in the wrong place).")
             return None
         if idx not in tlum_bloki:
             continue
@@ -1530,8 +1530,8 @@ def _podmien_komentarze(
             # Kolejność wpisów się rozjechała — zostawiamy komentarz PL zamiast
             # wstawić tłumaczenie w niewłaściwą linię (komentarz to dokumentacja,
             # nie kontrakt: degradacja jest tu tańsza niż utrata pliku).
-            print(f"⚠️  {kod}/{nazwa_pliku}: komentarz końcowy #{idx} nie zgadza się "
-                  f"z PL — zostawiam polski.")
+            print(f"⚠️  {kod}/{nazwa_pliku}: trailing comment #{idx} does not match "
+                  f"PL — leaving the Polish one in place.")
             continue
         linie[wpis["linia"]] = (
             f"{wpis['przed']}{wpis['odstep']}# {tlum_koncowe[idx].strip()}")
@@ -1551,8 +1551,8 @@ def _zapisz_z_walidacja(
     bledy = waliduj_silnikiem(kod, nazwa_pliku, dane_pl, kotwice)
     if not bledy:
         return True
-    print(f"❌ {kod}/{nazwa_pliku}: walidacja silnikiem odrzuciła plik "
-          f"({len(bledy)} błąd/y):")
+    print(f"❌ {kod}/{nazwa_pliku}: engine validation rejected the file "
+          f"({len(bledy)} error(s)):")
     for b in bledy[:12]:
         print(f"     • {b}")
     if kopia is None:
@@ -1581,13 +1581,13 @@ def _pliki_zrodlowe(*, z_jawnymi: bool = False) -> list[str]:
     """Nazwy plików przepisów w paczce PL, alfabetycznie."""
     folder = DICT_DIR / KOD_ZRODLOWY / FOLDER_OPOWIESCI
     if not folder.is_dir():
-        raise SystemExit(f"❌ Brak folderu źródłowego: {folder}")
+        raise SystemExit(f"❌ Missing source folder: {folder}")
     nazwy = [
         p.name for p in sorted(folder.glob("*.yaml"))
         if z_jawnymi or p.name not in PLIKI_TYLKO_JAWNIE
     ]
     if not nazwy:
-        raise SystemExit(f"❌ Folder {folder} nie zawiera żadnego przepisu.")
+        raise SystemExit(f"❌ Folder {folder} contains no recipe.")
     return nazwy
 
 
@@ -1607,83 +1607,83 @@ def _filtruj_pliki(wybor_csv: str) -> list[str]:
     nieznane = sorted(wybrane - set(wszystkie))
     if nieznane:
         raise SystemExit(
-            f"❌ Nieznane przepisy: {nieznane}.\n"
-            f"   Dostępne w dictionaries/{KOD_ZRODLOWY}/{FOLDER_OPOWIESCI}/: "
+            f"❌ Unknown recipes: {nieznane}.\n"
+            f"   Available in dictionaries/{KOD_ZRODLOWY}/{FOLDER_OPOWIESCI}/: "
             f"{wszystkie}"
         )
     jawne = sorted(wybrane & PLIKI_TYLKO_JAWNIE)
     if jawne:
-        print(f"⚠️  {', '.join(jawne)}: presety Quick Start są pisane RĘCZNIE per "
-              f"język (literatura z lokalnymi motywami, nie i18n techniczne). "
-              f"Maszynowy przekład traktuj jako PUNKT STARTOWY dla lingwisty "
-              f"nowej paczki, nie jako gotowy kanon.")
+        print(f"⚠️  {', '.join(jawne)}: the Quick Start presets are written BY HAND "
+              f"per language (literature with local motifs, not technical i18n). "
+              f"Treat a machine translation as a STARTING POINT for the linguist "
+              f"of a new pack, never as finished canon.")
     return [n for n in wszystkie if n in wybrane]
 
 
 def _parsuj_argumenty() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Batchowy autotłumacz przepisów Opowieści "
-            f"(dictionaries/<kod>/opowiesci/*.yaml) na języki: "
-            f"{', '.join(MAPA_JEZYKOW)}. Round-trip ruamel (komentarze i "
-            "block-scalary zachowane), zamrażanie placeholderów i kotwic, bramki "
-            "anty-meta-skip, kontrakt etykiety fiolki, walidacja silnikiem."
+            "Batch auto-translator for the Tales recipes "
+            f"(dictionaries/<code>/opowiesci/*.yaml) into: "
+            f"{', '.join(MAPA_JEZYKOW)}. ruamel round-trip (comments and block "
+            "scalars preserved), placeholder and anchor freezing, anti-meta-skip "
+            "gates, vial label contract, engine validation."
         ),
     )
     grupa = parser.add_mutually_exclusive_group(required=True)
     grupa.add_argument(
         "-l", "--jezyki", type=str, default="",
-        help=f"CSV kodów ISO (np. `de,fi`). Dozwolone: {', '.join(MAPA_JEZYKOW)}.")
+        help=f"CSV of ISO codes (e.g. `de,fi`). Allowed: {', '.join(MAPA_JEZYKOW)}.")
     grupa.add_argument(
         "-a", "--wszystkie", action="store_true",
-        help=f"Wszystkie języki docelowe ({', '.join(MAPA_JEZYKOW)}).")
+        help=f"All target languages ({', '.join(MAPA_JEZYKOW)}).")
     parser.add_argument(
         "-p", "--przepisy", type=str, default="",
-        help="CSV nazw plików (np. `tryb_mniejsze_zlo` albo `baza.yaml`). Puste = "
-             "wszystkie z paczki PL POZA `zaczatki.yaml` (presety Quick Start "
-             "pisze się ręcznie per język — trzeba je wskazać jawnie).")
+        help="CSV of file names (e.g. `tryb_mniejsze_zlo` or `baza.yaml`). Empty = "
+             "every file in the PL pack EXCEPT `zaczatki.yaml` (the Quick Start "
+             "presets are written by hand per language — name them explicitly).")
     parser.add_argument(
         "--slowniki", type=str, default="",
-        help="Ścieżka do katalogu `dictionaries` INNEGO niż repo — np. paczki "
-             "zainstalowanej aplikacji. Domyślnie katalog repo.")
+        help="Path to a `dictionaries` directory OTHER than the repo one — e.g. the "
+             "pack of an installed application. Defaults to the repo directory.")
     parser.add_argument(
         "--fiolka", action="store_true",
-        help="TRYB LEKKI: tłumaczy wyłącznie BRAKUJĄCE ziarna "
-             "`fiolka.opisy_skutkow.*` i dopisuje je na koniec puli w paczce "
-             "docelowej. Nie tyka prompta, komentarzy ani ziaren już "
-             "przetłumaczonych, nie zmienia nagłówka pliku. Właściwy tryb po "
-             "dodaniu nowych skutków do kanonu PL.")
+        help="LIGHT MODE: translates only the MISSING "
+             "`fiolka.opisy_skutkow.*` seeds and appends them to the end of the "
+             "pool in the target pack. Touches neither the prompt, nor the "
+             "comments, nor already translated seeds, and leaves the file header "
+             "alone. The right mode after new effects enter the PL canon.")
     parser.add_argument(
         "--skip-existing", action="store_true",
-        help="Pomiń pary (język, plik), dla których plik docelowy już istnieje.")
+        help="Skip (language, file) pairs whose target file already exists.")
     parser.add_argument(
         "--dry-run", action="store_true",
-        help="Sam podział na jednostki, kotwice i tokeny. Zero wywołań API.")
+        help="Only the split into units, anchors and tokens. No API calls.")
     parser.add_argument(
         "--model", default=MODEL_DOMYSLNY,
-        help=f"Model Anthropic do tłumaczenia (domyślnie: {MODEL_DOMYSLNY}).")
+        help=f"Anthropic model used for the translation (default: {MODEL_DOMYSLNY}).")
     parser.add_argument(
         "--kotwica", type=str, default="", metavar="LITERAL[,LITERAL...]",
-        help="Dodatkowe literały wymuszone jako kotwice (zamrażane bez pytania "
-             "orakułu). UWAGA: NIE wymuszaj terminu, który w JĘZYKU DOCELOWYM "
-             "jest wyrazem rodzimym — zamrożony mianownik blokuje odmianę. "
-             "Terminy kulturowe z ziaren fiolki mają własną, łagodniejszą bramkę "
-             "(rdzeń zamiast zamrożenia).")
+        help="Extra literals forced as anchors (frozen without asking the oracle). "
+             "CAUTION: do NOT force a term that is a native word in the TARGET "
+             "language — a frozen nominative blocks inflection. Cultural terms "
+             "from the vial seeds have their own, gentler gate (stem matching "
+             "instead of freezing).")
     parser.add_argument(
         "--orakul-drafty", action="store_true",
-        help="Dopuść paczki-DRAFTY jako orakuł kotwic (gdy plik właśnie "
-             "rozpropagowano na N języków i dostrajasz paczkę bazową).")
+        help="Allow DRAFT packs to act as the anchor oracle (use it when a file has "
+             "just been propagated to N languages and you are tuning the base pack).")
     parser.add_argument(
         "--tylko-walidacja", action="store_true",
-        help="Zero API: dla wybranych języków/plików uruchamia samą WALIDACJĘ "
-             "SILNIKIEM istniejących plików docelowych (pola techniczne, "
-             "placeholdery, kotwice, fiolka, kontrakt etykiety, zaczątki, "
-             "kompletność paczki). Jedyny audyt porównujący paczki między sobą.")
+        help="No API: for the chosen languages/files runs ENGINE VALIDATION alone "
+             "over the existing target files (technical fields, placeholders, "
+             "anchors, vial, label contract, starting points, pack completeness). "
+             "The only audit that compares the packs against each other.")
     parser.add_argument(
         "-f", "--finalizuj", action="store_true",
-        help="Zero API: zdejmuje baner DRAFTU z wybranych plików, zostawiając "
-             "treść (z ręcznymi poprawkami recenzenta) i przetłumaczony nagłówek "
-             "autorski. To właściwy krok po akceptacji przeglądu.")
+        help="No API: strips the DRAFT banner from the chosen files, keeping the "
+             "content (including the reviewer's manual fixes) and the translated "
+             "author header. This is the right step once the review is accepted.")
     args = parser.parse_args()
     tryby_lokalne = sum(bool(x) for x in (args.finalizuj, args.tylko_walidacja))
     if tryby_lokalne and (args.skip_existing or args.dry_run):
@@ -1704,8 +1704,8 @@ def _wybierz_jezyki(args: argparse.Namespace) -> list[str]:
     nieznane = [k for k in kody if k not in MAPA_JEZYKOW]
     if nieznane:
         raise SystemExit(
-            f"❌ Nieznane kody języków: {', '.join(nieznane)}.\n"
-            f"   Dozwolone: {', '.join(MAPA_JEZYKOW)}."
+            f"❌ Unknown language codes: {', '.join(nieznane)}.\n"
+            f"   Allowed: {', '.join(MAPA_JEZYKOW)}."
         )
     return kody
 
@@ -1717,7 +1717,7 @@ def main() -> int:
     if args.slowniki:
         DICT_DIR = Path(os.path.expandvars(args.slowniki)).expanduser().resolve()
         if not DICT_DIR.is_dir():
-            print(f"❌ --slowniki: {DICT_DIR} nie jest katalogiem.")
+            print(f"❌ --slowniki: {DICT_DIR} is not a directory.")
             return 2
         print(f"📁 Katalog słowników: {DICT_DIR} (poza repo — tryb user-data).")
 
@@ -1744,7 +1744,7 @@ def main() -> int:
                 cel = DICT_DIR / kod / FOLDER_OPOWIESCI / nazwa
                 if not cel.is_file():
                     braki += 1
-                    print(f"⚠️  {kod}/{nazwa}: plik nie istnieje — pomijam.")
+                    print(f"⚠️  {kod}/{nazwa}: the file does not exist — skipping.")
                     continue
                 tresc, zdjeto = zdejmij_baner_draftu(cel.read_text(encoding="utf-8"))
                 if not zdjeto:
@@ -1755,8 +1755,8 @@ def main() -> int:
                 zmienione += 1
                 print(f"✅ {kod}/{nazwa}: baner draftu zdjęty (treść nietknięta).")
         print("\n========== PODSUMOWANIE (--finalizuj) ==========")
-        print(f"✅ sfinalizowane: {zmienione} | ⏭️ już finalne: {nie_drafty} "
-              f"| ⚠️ brak pliku: {braki}")
+        print(f"✅ finalized: {zmienione} | ⏭️ already final: {nie_drafty} "
+              f"| ⚠️ file missing: {braki}")
         return 0
 
     if args.tylko_walidacja:
@@ -1781,14 +1781,14 @@ def main() -> int:
                 bledy = waliduj_silnikiem(kod, nazwa, dane_pl, kotwice)
                 wszystkie_bledy += len(bledy)
                 if bledy:
-                    print(f"❌ {kod}/{nazwa}: {len(bledy)} błąd/y")
+                    print(f"❌ {kod}/{nazwa}: {len(bledy)} error(s)")
                     for b in bledy[:12]:
                         print(f"     • {b}")
                 else:
                     print(f"✅ {kod}/{nazwa}: OK")
         print("\n========== PODSUMOWANIE (--tylko-walidacja) ==========")
         print("✅ Bez zastrzeżeń." if not wszystkie_bledy
-              else f"❌ Łącznie {wszystkie_bledy} błąd/ów.")
+              else f"❌ {wszystkie_bledy} error(s) in total.")
         return 1 if wszystkie_bledy else 0
 
     # --- Tłumaczenie ---------------------------------------------------------
@@ -1804,8 +1804,8 @@ def main() -> int:
     orakuly = wczytaj_orakuly(pliki, dopusc_drafty=args.orakul_drafty)
     braki_orakulow = [n for n, t in orakuly.items() if not t]
     if braki_orakulow:
-        print(f"⚠️  Żadna paczka odniesienia nie ma: {braki_orakulow} — dla tych "
-              f"plików orakuł kotwic jest nieaktywny (tryb zachowawczy).")
+        print(f"⚠️  No reference pack has: {braki_orakulow} — for those files the "
+              f"anchor oracle is inactive (conservative mode).")
 
     for kod in kody:
         print(f"\n========== {kod.upper()} "
@@ -1844,7 +1844,7 @@ def main() -> int:
     print("\n========== PODSUMOWANIE ==========")
     print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
     if porazki:
-        print(f"❌ Porażki (≥1 plik nieudany): {', '.join(porazki)}")
+        print(f"❌ Failures (≥1 file failed): {', '.join(porazki)}")
         return 1
     return 0
 

@@ -257,7 +257,7 @@ def zastosuj(cp: Any, tekst: str, paczka: str, akcent: str) -> str | None:
     try:
         return cp.zastosuj_reguly_fonetyczne(tekst, akcent, paczka)
     except Exception as exc:  # noqa: BLE001 — zła reguła = znalezisko, nie crash
-        print(f"⚠️  {paczka}/{akcent}: silnik rzucił {type(exc).__name__}: {exc}")
+        print(f"⚠️  {paczka}/{akcent}: the engine raised {type(exc).__name__}: {exc}")
         return None
 
 
@@ -955,7 +955,7 @@ def audytuj(
     """Uruchamia wszystkie bramki. Zwraca `(znaleziska, liczba_par)`."""
     pary = pary_akcentowe()
     if not pary:
-        raise SystemExit(f"❌ Brak par akcentowych w {DICT_DIR}")
+        raise SystemExit(f"❌ No accent pairs in {DICT_DIR}")
     iso_konsensus = konsensus_iso(pary)
     cp = ustaw_silnik()
 
@@ -1025,7 +1025,7 @@ def wypisz_podsumowanie(znaleziska: list[Znalezisko], ile_par: int) -> None:
     for bramka, lista in sorted(grupuj(znaleziska).items()):
         ile_b = sum(1 for z in lista if z.blad)
         print(f"  {bramka}: {len(lista)} trafień ({ile_b} błędów)")
-    print(f"{'✅ Bez zastrzeżeń.' if not bledy else f'❌ Błędów: {len(bledy)}'}"
+    print(f"{'✅ Bez zastrzeżeń.' if not bledy else f'❌ Errors: {len(bledy)}'}"
           f"  (uwag: {len(uwagi)})")
 
 
@@ -1415,9 +1415,9 @@ def generuj_pare(
     nazwa_zrodla = tlumacz_rdzen.natywna_nazwa(DICT_DIR, paczka)
     nazwa_celu = tlumacz_rdzen.natywna_nazwa(DICT_DIR, iso_celu)
     if not podstawy_zrodla.get("alfabet") or not podstawy_celu.get("alfabet"):
-        print(f"❌ {paczka}/{akcent}: brak `alfabet` w podstawach "
-              f"{'źródła' if not podstawy_zrodla.get('alfabet') else 'celu'} — "
-              f"nie mam z czego wyprowadzić reguły.")
+        print(f"❌ {paczka}/{akcent}: no `alfabet` in the "
+              f"{'source' if not podstawy_zrodla.get('alfabet') else 'target'} basics — "
+              f"nothing to derive the rule from.")
         return False
 
     zjadane = sorted({
@@ -1477,7 +1477,7 @@ def generuj_pare(
                 kontekst_paczki=kontekst or None, pola_payloadu=pola_proby,
                 myslenie=True)
         except RuntimeError as exc:
-            print(f"❌ {paczka}/{akcent}: błąd LLM — {exc}")
+            print(f"❌ {paczka}/{akcent}: LLM error — {exc}")
             return False
 
         wpisy, uwagi = _parsuj_reguly(odpowiedzi.get(0, ""))
@@ -1506,8 +1506,8 @@ def generuj_pare(
             return True
         zarzuty = [z.opis for z in bledy]
         if proba == 2:
-            print(f"❌ {paczka}/{akcent}: po powtórce wciąż {len(bledy)} "
-                  f"błędów — plik wycofany.")
+            print(f"❌ {paczka}/{akcent}: after the retry {len(bledy)} errors "
+                  f"remain — file rolled back.")
             return False
     return False
 
@@ -1519,9 +1519,9 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
     cp = ustaw_silnik()
     mapa = _mapa_akcentow(pary)          # ISO → nazwa pliku akcentu
     if not podstawy_paczki(kod).get("alfabet"):
-        print(f"❌ {kod}: `dictionaries/{kod}/podstawy.yaml` nie istnieje albo "
-              f"nie ma `alfabet`. Najpierw założ paczkę (podstawy + etykieta), "
-              f"potem wyprowadzaj akcenty.")
+        print(f"❌ {kod}: `dictionaries/{kod}/podstawy.yaml` does not exist or has "
+              f"no `alfabet`. Create the pack first (podstawy + etykieta), then "
+              f"derive the accents.")
         return 2
 
     mapa_jezykow = tlumacz_rdzen.wczytaj_mape_jezykow(ROOT, KOD_ZRODLOWY)
@@ -1535,9 +1535,9 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
                 zadania.append((kod, nazwa_akcentu, iso_celu))
     if args.kierunek in ("oba", "do-nowego"):
         if not plik_nowego:
-            print(f"⚠️  {kod}: brak wpisu w `jezyki_docelowe.yaml`, więc nie "
-                  f"znam polskiej nazwy tego języka — kierunek `do-nowego` "
-                  f"pomijam. Uruchom `refresh_languages.py` i powtórz.")
+            print(f"⚠️  {kod}: no entry in `jezyki_docelowe.yaml`, so the Polish "
+                  f"name of this language is unknown — skipping the `do-nowego` "
+                  f"direction. Run `refresh_languages.py` and try again.")
         else:
             for paczka in sorted({p for p, _ in pary} | {kod}):
                 if paczka != kod:
@@ -1569,7 +1569,7 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
         if sciezka is not None:
             print(f"📋 Checklista przeglądu → {sciezka.relative_to(ROOT)}")
     print("\n========== PODSUMOWANIE (--nowy-jezyk) ==========")
-    print(f"✅ Wyprowadzone: {len(wytworzone)} | ❌ Nieudane: {len(porazki)}")
+    print(f"✅ Derived: {len(wytworzone)} | ❌ Failed: {len(porazki)}")
     if porazki:
         print("   " + ", ".join(porazki))
         return 1
@@ -1588,13 +1588,13 @@ def replay_pary(args: argparse.Namespace) -> int:
     Wyprowadzony draft zostaje w `skrypty/` do recenzji — nigdy w `dictionaries/`.
     """
     if "/" not in args.replay:
-        print("❌ --replay oczekuje formatu PACZKA/AKCENT (np. `pl/finski`).")
+        print("❌ --replay expects the format PACK/ACCENT (e.g. `pl/finski`).")
         return 2
     paczka, akcent = args.replay.split("/", 1)
     cel = DICT_DIR / paczka / FOLDER / f"{akcent}.yaml"
     if not cel.is_file():
-        print(f"❌ {args.replay}: nie ma takiej pary (replay działa na "
-              f"istniejącym wzorcu).")
+        print(f"❌ {args.replay}: no such pair (replay works on an EXISTING "
+              f"reference pair).")
         return 2
 
     wzorzec_tekst = cel.read_text(encoding="utf-8")
@@ -1621,7 +1621,7 @@ def replay_pary(args: argparse.Namespace) -> int:
         print(f"↩ przywrócono wzorzec {paczka}/{akcent}.yaml")
 
     if not ok or not nowy:
-        print("❌ replay: wyprowadzenie nie przeszło bramek — nie ma czego porównać.")
+        print("❌ replay: the derivation did not pass the gates — nothing to compare.")
         return 1
 
     sciezka_draftu = ROOT / "skrypty" / f"replay_{paczka}_{akcent}.yaml"
@@ -1678,51 +1678,51 @@ def finalizuj(kody: list[str]) -> int:
 def _parsuj_argumenty() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Audytor i generator par akcentowych Poligloty "
-            "(dictionaries/<paczka>/akcenty/<akcent>.yaml). Domyślnie AUDYT: "
-            "zero API, siedem bramek, jedyna kontrola porównująca 72 pary "
-            "między sobą i z silnikiem."),
+            "Auditor and generator for the Polyglot accent pairs "
+            "(dictionaries/<pack>/akcenty/<accent>.yaml). AUDIT by default: "
+            "no API, seven gates, and the only check that compares all 72 pairs "
+            "against each other and against the engine."),
     )
     parser.add_argument(
         "--audyt", action="store_true",
-        help="Audyt istniejących par (zero API). Tryb domyślny.")
+        help="Audit the existing pairs (no API). This is the default mode.")
     parser.add_argument(
         "-l", "--jezyki", type=str, default="",
-        help="CSV kodów PACZEK do audytu (np. `de,fr`). Puste = wszystkie.")
+        help="CSV of PACK codes to audit (e.g. `de,fr`). Empty = all of them.")
     parser.add_argument(
         "-a", "--akcenty", type=str, default="",
-        help="CSV nazw akcentów (np. `finski,rosyjski`). Puste = wszystkie.")
+        help="CSV of accent names (e.g. `finski,rosyjski`). Empty = all of them.")
     parser.add_argument(
         "--slowniki", type=str, default="",
-        help="Ścieżka do katalogu `dictionaries` INNEGO niż repo (instalacja).")
+        help="Path to a `dictionaries` directory OTHER than the repo one (an installation).")
     parser.add_argument(
         "--raport", type=str, default="",
-        help="Zapisz pełny raport markdown do pliku (terminal dostaje "
-             "podsumowanie).")
+        help="Write the full markdown report to a file (the terminal gets the "
+             "summary).")
     parser.add_argument(
         "--nowy-jezyk", type=str, default="", metavar="CODE",
-        help="Wygeneruj brakujące pary akcentowe dla NOWEGO języka. Nigdy nie "
-             "nadpisuje pary, która już istnieje.")
+        help="Generate the accent pairs a NEW language is missing. Never "
+             "overwrites a pair that already exists.")
     parser.add_argument(
         "--kierunek", choices=("oba", "z-nowego", "do-nowego"), default="oba",
-        help="Które pary generować: `z-nowego` = <nowy>/akcenty/<obcy>.yaml, "
-             "`do-nowego` = <obcy>/akcenty/<nowy>.yaml, `oba` (domyślnie).")
+        help="Which pairs to generate: `z-nowego` = <new>/akcenty/<foreign>.yaml, "
+             "`do-nowego` = <foreign>/akcenty/<new>.yaml, `oba` (default).")
     parser.add_argument(
         "--model", default=MODEL_DOMYSLNY,
-        help=f"Model Anthropic dla ścieżki generującej (domyślnie: {MODEL_DOMYSLNY}).")
+        help=f"Anthropic model for the generating path (default: {MODEL_DOMYSLNY}).")
     parser.add_argument(
         "--dry-run", action="store_true",
-        help="Ścieżka generująca bez API: pokaż, co i z jakim payloadem poszłoby "
-             "do modelu.")
+        help="Generating path without API: show what would be sent to the model, "
+             "and with what payload.")
     parser.add_argument(
         "--replay", type=str, default="", metavar="PACK/ACCENT",
-        help="Test bojowy ścieżki generującej na ISTNIEJĄCEJ parze: wyprowadza "
-             "ją od nowa, porównuje ze wzorcem i PRZYWRACA wzorzec. Draft "
-             "zostaje w `skrypty/` (nigdy w `dictionaries/`).")
+        help="Live test of the generating path on an EXISTING pair: derives it "
+             "from scratch, compares it with the reference and RESTORES the "
+             "reference. The draft stays in `skrypty/` (never in `dictionaries/`).")
     parser.add_argument(
         "-f", "--finalizuj", action="store_true",
-        help="Zero API: zdejmuje baner DRAFTU z par akcentowych (po recenzji), "
-             "zostawiając treść z ręcznymi poprawkami. Zawęź `--jezyki`.")
+        help="No API: strips the DRAFT banner from accent pairs (after the review), "
+             "keeping the content with its manual fixes. Narrow it with `--jezyki`.")
     return parser.parse_args()
 
 
@@ -1733,7 +1733,7 @@ def main() -> int:
     if args.slowniki:
         DICT_DIR = Path(args.slowniki).expanduser().resolve()
         if not DICT_DIR.is_dir():
-            print(f"❌ --slowniki: {DICT_DIR} nie jest katalogiem.")
+            print(f"❌ --slowniki: {DICT_DIR} is not a directory.")
             return 2
         print(f"📁 Katalog słowników: {DICT_DIR} (poza repo — tryb user-data).")
 
