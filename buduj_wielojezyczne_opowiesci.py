@@ -1754,7 +1754,7 @@ def main() -> int:
                 cel.write_text(tresc, encoding="utf-8", newline="\n")
                 zmienione += 1
                 print(f"✅ {kod}/{nazwa}: baner draftu zdjęty (treść nietknięta).")
-        print("\n========== PODSUMOWANIE (--finalizuj) ==========")
+        print("\n========== SUMMARY (--finalizuj) ==========")
         print(f"✅ finalized: {zmienione} | ⏭️ already final: {nie_drafty} "
               f"| ⚠️ file missing: {braki}")
         return 0
@@ -1786,8 +1786,8 @@ def main() -> int:
                         print(f"     • {b}")
                 else:
                     print(f"✅ {kod}/{nazwa}: OK")
-        print("\n========== PODSUMOWANIE (--tylko-walidacja) ==========")
-        print("✅ Bez zastrzeżeń." if not wszystkie_bledy
+        print("\n========== SUMMARY (--tylko-walidacja) ==========")
+        print("✅ No findings." if not wszystkie_bledy
               else f"❌ {wszystkie_bledy} error(s) in total.")
         return 1 if wszystkie_bledy else 0
 
@@ -1841,8 +1841,8 @@ def main() -> int:
             print(f"📋 DRAFT: checklista przeglądu → {sciezka.relative_to(ROOT)} "
                   f"({len(wytworzone)} plik(ów) do recenzji, {ile} kandydat(ów) na leak).")
 
-    print("\n========== PODSUMOWANIE ==========")
-    print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
+    print("\n========== SUMMARY ==========")
+    print(f"✅ Success: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
     if porazki:
         print(f"❌ Failures (≥1 file failed): {', '.join(porazki)}")
         return 1

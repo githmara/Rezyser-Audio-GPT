@@ -2242,7 +2242,7 @@ def _tryb_finalizuj(kody: list[str], pliki: list[tuple[str, str]]) -> int:
             cel.write_text(tresc, encoding="utf-8", newline="\n")
             zmienione += 1
             print(f"✅ {kod}/{folder}/{nazwa}: baner draftu zdjęty.")
-    print("\n========== PODSUMOWANIE (--finalizuj) ==========")
+    print("\n========== SUMMARY (--finalizuj) ==========")
     print(f"✅ finalized: {zmienione} | ⏭️ already final: {nie_drafty} "
           f"| ⚠️ file missing: {braki}")
     return 0
@@ -2286,10 +2286,10 @@ def _tryb_walidacji(
                 print(f"✅ {kod}/{folder}/{nazwa}: OK")
             for u in uwagi[:6]:
                 print(f"     ~ {u}")
-    print("\n========== PODSUMOWANIE (--tylko-walidacja) ==========")
-    print(("✅ Bez zastrzeżeń." if not wszystkie_bledy
+    print("\n========== SUMMARY (--tylko-walidacja) ==========")
+    print(("✅ No findings." if not wszystkie_bledy
            else f"❌ {wszystkie_bledy} error(s) in total.")
-          + (f"  (uwag do przejrzenia: {wszystkie_uwagi})" if wszystkie_uwagi else ""))
+          + (f"  (notes to review: {wszystkie_uwagi})" if wszystkie_uwagi else ""))
     return 1 if wszystkie_bledy else 0
 
 
@@ -2384,8 +2384,8 @@ def main() -> int:
                   f"({len(wytworzone)} plik(ów) do recenzji, {ile} kandydat(ów) "
                   f"na leak).")
 
-    print("\n========== PODSUMOWANIE ==========")
-    print(f"✅ Sukces: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
+    print("\n========== SUMMARY ==========")
+    print(f"✅ Success: {len(sukcesy)}/{len(kody)}  ({', '.join(sukcesy) or '—'})")
     if porazki:
         print(f"❌ Failures (≥1 rule failed): {', '.join(porazki)}")
         return 1

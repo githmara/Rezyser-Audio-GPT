@@ -1021,12 +1021,12 @@ def raport_markdown(znaleziska: list[Znalezisko], ile_par: int) -> str:
 def wypisz_podsumowanie(znaleziska: list[Znalezisko], ile_par: int) -> None:
     bledy = [z for z in znaleziska if z.blad]
     uwagi = [z for z in znaleziska if not z.blad]
-    print(f"\n========== AUDYT AKCENTÓW ({ile_par} par) ==========")
+    print(f"\n========== ACCENT AUDIT ({ile_par} pairs) ==========")
     for bramka, lista in sorted(grupuj(znaleziska).items()):
         ile_b = sum(1 for z in lista if z.blad)
-        print(f"  {bramka}: {len(lista)} trafień ({ile_b} błędów)")
-    print(f"{'✅ Bez zastrzeżeń.' if not bledy else f'❌ Errors: {len(bledy)}'}"
-          f"  (uwag: {len(uwagi)})")
+        print(f"  {bramka}: {len(lista)} hit(s) ({ile_b} error(s))")
+    print(f"{'✅ No findings.' if not bledy else f'❌ Errors: {len(bledy)}'}"
+          f"  (notes: {len(uwagi)})")
 
 
 # ---------------------------------------------------------------------------
@@ -1568,7 +1568,7 @@ def generuj_nowy_jezyk(args: argparse.Namespace) -> int:
             "buduj_wielojezyczne_akcenty.py", sorted(wytworzone), ROOT)
         if sciezka is not None:
             print(f"📋 Checklista przeglądu → {sciezka.relative_to(ROOT)}")
-    print("\n========== PODSUMOWANIE (--nowy-jezyk) ==========")
+    print("\n========== SUMMARY (--nowy-jezyk) ==========")
     print(f"✅ Derived: {len(wytworzone)} | ❌ Failed: {len(porazki)}")
     if porazki:
         print("   " + ", ".join(porazki))
@@ -1634,21 +1634,21 @@ def replay_pary(args: argparse.Namespace) -> int:
                    for p in nowy.get("zamiany") or []]
     wspolne = set(reguly_wzorca) & set(reguly_nowe)
     print(f"\n========== REPLAY {paczka}/{akcent} ==========")
-    print(f"reguł: wzorzec {len(reguly_wzorca)}, wyprowadzenie {len(reguly_nowe)}, "
-          f"wspólnych {len(wspolne)}")
+    print(f"rules: reference {len(reguly_wzorca)}, derived {len(reguly_nowe)}, "
+          f"shared {len(wspolne)}")
     tylko_wzorzec = sorted(set(reguly_wzorca) - set(reguly_nowe))
     tylko_nowe = sorted(set(reguly_nowe) - set(reguly_wzorca))
     if tylko_wzorzec:
-        print(f"tylko we wzorcu ({len(tylko_wzorzec)}): {tylko_wzorzec[:12]}")
+        print(f"reference only ({len(tylko_wzorzec)}): {tylko_wzorzec[:12]}")
     if tylko_nowe:
-        print(f"tylko w wyprowadzeniu ({len(tylko_nowe)}): {tylko_nowe[:12]}")
+        print(f"derived only ({len(tylko_nowe)}): {tylko_nowe[:12]}")
     for pole in FLAGI_PIPELINE:
         if wzorzec.get(pole) != nowy.get(pole):
-            print(f"flaga `{pole}`: wzorzec {wzorzec.get(pole)!r} vs "
-                  f"wyprowadzenie {nowy.get(pole)!r}")
-    print(f"\nwyjście wzorca      : {(przed or '')[:160]!r}")
-    print(f"wyjście wyprowadzenia: {(po or '')[:160]!r}")
-    print(f"identyczne: {przed == po}")
+            print(f"flag `{pole}`: reference {wzorzec.get(pole)!r} vs "
+                  f"derived {nowy.get(pole)!r}")
+    print(f"\nreference output: {(przed or '')[:160]!r}")
+    print(f"derived output  : {(po or '')[:160]!r}")
+    print(f"identical: {przed == po}")
     print(f"📄 draft do recenzji → {sciezka_draftu.relative_to(ROOT)}")
     return 0
 

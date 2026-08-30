@@ -1620,13 +1620,13 @@ def wypisz_podsumowanie_audytu(znaleziska: list[Any], staty: dict[str, Any],
     bledy = [z for z in znaleziska if z.blad]
     uwagi = [z for z in znaleziska if not z.blad]
     poza = sum(staty["poza_zakresem"].values())
-    print(f"\n========== AUDYT PRZYKŁADÓW DOCS "
-          f"({staty['w_zakresie']} par w zakresie, {poza} poza) ==========")
+    print(f"\n========== DOCS EXAMPLES AUDIT "
+          f"({staty['w_zakresie']} pairs in scope, {poza} out) ==========")
     for bramka, lista in sorted(bwa.grupuj(znaleziska).items()):
         ile_b = sum(1 for z in lista if z.blad)
-        print(f"  {bramka}: {len(lista)} trafień ({ile_b} błędów)")
-    print(f"{'✅ Bez zastrzeżeń.' if not bledy else f'❌ Błędów: {len(bledy)}'}"
-          f"  (uwag: {len(uwagi)})")
+        print(f"  {bramka}: {len(lista)} hit(s) ({ile_b} error(s))")
+    print(f"{'✅ No findings.' if not bledy else f'❌ Errors: {len(bledy)}'}"
+          f"  (notes: {len(uwagi)})")
 
 
 # ---------------------------------------------------------------------------
